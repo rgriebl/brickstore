@@ -1,0 +1,18 @@
+TODO:
+-----
+ * wanted list mode: conditions+=n/a, colors+=n/a, price=maxprice, qty=minqty
+ 
+ * autosave?
+
+ * Edit-> Set Tiered Prices...
+
+ * Undo/Redo
+
+ * Lugnet "Set Lists" import
+
+
+STUFF FOR QT4.1:
+----------------
+
+ * export as PDF
+ * print-preview

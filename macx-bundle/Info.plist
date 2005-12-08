@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist SYSTEM "file://localhost/System/Library/DTDs/PropertyList.dtd">
+<plist version="0.9">
+	<dict>
+		<key>CFBundleIconFile</key>
+		<string>application.icns</string>
+
+		<key>CFBundlePackageType</key>
+		<string>APPL</string>
+
+		<key>CFBundleGetInfoString</key>
+		<string>Bundle for BrickStore</string>
+
+		<key>CFBundleSignature</key>
+		<string>ttxt</string>
+
+		<key>CFBundleExecutable</key>
+		<string>BrickStore</string>
+
+		<key>CFBundleName</key>
+		<string>BrickStore</string>
+
+		<key>CFBundleShortVersionString</key>
+		<string>%{version}</string>
+
+		<key>CFBundleVersion</key>
+		<string>%{version}</string>
+
+		<key>CFBundleDocumentTypes</key>
+		<array>
+			<dict>
+				<key>CFBundleTypeExtensions</key>
+				<array>
+					<string>bti</string>
+				</array>
+
+				<key>CFBundleTypeIconFile</key>
+				<string>document.icns</string>
+
+				<key>CFBundleTypeMIMETypes</key>
+				<array>
+					<string>application/x-brickstore</string>
+				</array>
+
+				<key>CFBundleTypeName</key>
+				<string>BrickStore Data File</string>
+
+				<key>CFBundleTypeRole</key>
+				<string>Editor</string>
+
+				<key>LSIsAppleDefaultForType</key>
+				<true/>
+			</dict>
+		</array>
+	</dict>
+</plist>

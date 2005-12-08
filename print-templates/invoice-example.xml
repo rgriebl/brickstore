@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<report name="Rechnung (Beispiel)" page-size="A4" margin-left="2cm" margin-top="1.5cm" margin-right="2cm" margin-bottom="1.5cm">
+	<default-style color="black" 
+	               font-family="Arial"
+	               font-size="8pt"
+	               vertical-align="middle"
+	               white-space="nowrap"
+	/>
+	<ui>
+		<getvar name="invoice-buyername"     type="string" description="Name:"><var name="order-buyeraddress" /></getvar>
+		<getvar name="invoice-buyeraddress"  type="multistring" description="Adresse:"><var name="order-buyeraddress" /></getvar>
+		<getvar name="invoice-date"          type="date"   description="Rechnungsdatum:"><var name="date" /></getvar>
+		<getvar name="invoice-id"            type="string" description="Rechnungsnummer:"></getvar>
+		<getvar name="invoice-customer-id"   type="string" description="Kundennummer:"></getvar>
+		<getvar name="invoice-shipping"      type="double" description="Versandkosten:"></getvar>
+		<getvar name="invoice-vat"           type="double" description="MwSt:">0.16</getvar>
+		<getvar name="invoice-exchange-rate" type="double" description="Wechselkurs:"><var name="currency-exchange-rate" /></getvar>
+	</ui>
+
+	<report-header height="7cm">
+		<text left="0cm"    top="1.8cm" width="10cm"  height="0.4cm"  text-align="left" font-size="7pt">www.vielesteine.de - Cheffe</text>
+		<text left="0cm"    top="2.2cm" width="10cm"  height="0.4cm"  text-align="left" font-size="7pt" text-decoration="underline">Irgendwo in Deutschland</text>
+		<text left="0cm"    top="2.8cm" width="10cm"  height="0.45cm" text-align="left" font-size="10pt"><var name="invoice-buyername" /></text>
+		<text left="0cm"    top="3.3cm" width="10cm"  height="2.2cm"  text-align="left" font-size="10pt" white-space="pre"><var name="invoice-buyeraddress" /></text>
+		<text left="11.0cm" top="4.3cm" width="3.5cm" height="0.45cm" text-align="left" font-size="10pt"><var name="invoice-date" format="date:local" /></text>
+		<text left="11.0cm" top="5.7cm" width="3.5cm" height="0.45cm" text-align="left" font-size="10pt">Rechnungsnummer:</text>
+		<text left="11.0cm" top="6.2cm" width="3.5cm" height="0.45cm" text-align="left" font-size="10pt">Kundennummer:</text>
+		<text left="14.5cm" top="5.7cm" width="2.5cm" height="0.45cm" text-align="left" font-size="10pt"><var name="invoice-id" /></text>
+		<text left="14.5cm" top="6.2cm" width="2.5cm" height="0.45cm" text-align="left" font-size="10pt"><var name="invoice-customer-id" /></text>
+		<text left="0cm"    top="6.0cm" width="10cm"  height="0.65cm" text-align="left" font-size="12pt" font-weight="bold">RECHNUNG</text>
+	</report-header>
+
+	<report-footer height="4.5cm">
+		<text left="7.5cm"  top="0.2cm"  width="7.3cm"  height="0.45cm" text-align="left" font-size="10pt">Gutschein</text>
+		<text left="14.2cm" top="0.2cm"  width="2.6cm"  height="0.6cm"  text-align="right">
+			<setvar name="invoice-credit">
+				<func name="*" format="double:2">
+					<arg><var name="invoice-exchange-rate" /></arg>
+					<arg><var name="order-credit" /></arg>
+				</func>
+			</setvar>
+			<setvar name="invoice-total">
+				<func name="-" format="double:2">
+					<arg><var name="invoice-total" /></arg>
+					<arg><var name="invoice-credit" /></arg>
+				</func>
+			</setvar>
+			<var name="currency-symbol" /> <var name="invoice-credit" format="double:2" />
+		</text>
+		<text left="7.5cm"  top="0.7cm"  width="7.3cm"  height="0.45cm" text-align="left" font-size="10pt">Versandkosten</text>
+		<text left="14.2cm" top="0.7cm"  width="2.6cm"  height="0.6cm"  text-align="right">
+			<setvar name="invoice-total">
+				<func name="+" format="double:2">
+					<arg><var name="invoice-total" /></arg>
+					<arg><var name="invoice-shipping" /></arg>
+				</func>
+			</setvar>
+			<var name="currency-symbol" /> <var name="invoice-shipping" format="double:2" />
+		</text>
+		<text left="7.5cm"  top="1.2cm"  width="7.3cm"  height="0.6cm"  text-align="left" font-size="10pt" font-weight="bold">Rechnungsendbetrag in Euro</text>
+		<text left="14.2cm" top="1.2cm"  width="2.6cm"  height="0.6cm"  text-align="right" font-size="10pt" font-weight="bold">
+			<var name="currency-symbol" /> <var name="invoice-total" format="double:2" />
+		</text>
+		<text left="0cm"    top="2.5cm"  width="10.5cm" height="0.45cm" text-align="right" font-size="10pt">Im Rechnungsendbetrag enthalten sind <func name="*"><arg>100</arg><arg><var name="invoice-vat" /></arg></func>% MwSt. =</text>
+		<text left="10.7cm" top="2.5cm"  width="2.5cm"  height="0.45cm" text-align="right" font-size="10pt">
+			<setvar name="invoice-total-net">
+				<func name="/" format="double:2">
+					<arg><var name="invoice-total" /></arg>
+					<arg>
+						<func name="+" format="double:2">
+							<arg>1.0</arg>
+							<arg><var name="invoice-vat" /></arg>
+						</func>
+					</arg>
+				</func>
+			</setvar>
+			<setvar name="invoice-total-vat">
+				<func name="-" format="double:2">
+					<arg><var name="invoice-total" /></arg>
+					<arg><var name="invoice-total-net" /></arg>
+				</func>
+			</setvar>
+			<var name="currency-symbol" /> <var name="invoice-total-vat" format="double:2" />
+		</text>
+		<text left="0cm"    top="3.0cm"  width="10.5cm" height="0.45cm" text-align="right" font-size="10pt">Nettobetrag =</text>
+		<text left="10.7cm" top="3.0cm"  width="2.5cm"  height="0.45cm" text-align="right" font-size="10pt" white-space="no-wrap">
+			<var name="currency-symbol" /> <var name="invoice-total-net" format="double:2" />
+		</text>
+		<text left="0cm"    top="3.5cm"  width="5cm"    height="0.45cm" font-size="10pt">Zahlen - marsch, marsch</text>
+		<text left="0cm"    top="4.0cm"  width="5cm"    height="0.45cm" font-size="10pt">Cheffe</text>
+		<text left="5cm"    top="4.0cm"  width="12cm"   height="0.45cm" font-size="10pt" font-style="italic" text-align="right">Die Ware bleibt bis zur vollständigen Bezahlung mein Eigentum.</text>
+
+		<line left="0cm"    top="0cm"    width="17cm"   height="0cm"    linetype="solid" linewidth="1pt" /> 
+		<line left="14cm"   top="0cm"    width="17cm"   height="0cm"    linetype="solid" linewidth="1pt" /> 
+		<line left="14cm"   top="0cm"    width="17cm"   height="0cm"    linetype="solid" linewidth="1pt" /> 
+		<line left="14cm"   top="0cm"    width="0cm"    height="1.9cm"  linetype="solid" linewidth="1pt" /> 
+	</report-footer>
+
+	<page-footer height="1.2cm">
+		<text left="0cm"   top="0cm"   width="3.5cm" height="0.4cm" text-align="left"  font-size="7pt">Bankverbindung:</text>
+		<text left="0cm"   top="0.4cm" width="3.5cm" height="0.4cm" text-align="left"  font-size="7pt">Inhaber: ...</text>
+		<text left="0cm"   top="0.8cm" width="3.5cm" height="0.4cm" text-align="left"  font-size="7pt">Kto: ...</text>
+		<text left="3.5cm" top="0.4cm" width="3.5cm" height="0.4cm" text-align="left"  font-size="7pt">BLZ: ...</text>
+		<text left="3.5cm" top="0.8cm" width="3.5cm" height="0.4cm" text-align="left"  font-size="7pt">Bank</text>
+		<text left="9cm"   top="0cm"   width="3cm"   height="0.4cm" text-align="left"  font-size="7pt">Steuernummer:</text>
+		<text left="9cm"   top="0.4cm" width="3cm"   height="0.4cm" text-align="left"  font-size="7pt">...</text>
+		<text left="14cm"  top="0.8cm" width="3cm"   height="0.4cm" text-align="right" font-size="7pt">Seite <var name="page" /> / <var name="pages" /></text>
+	</page-footer>
+
+	<list-header height="0.6cm">
+		<text left="2.2cm"  top="0cm" width="1cm"    height="0.6cm" font-weight="bold" text-align="right">Anzahl</text>
+		<text left="3.6cm"  top="0cm" width="10.2cm" height="0.6cm" font-weight="bold" text-align="left">Bezeichnung</text>
+		<text left="14.2cm" top="0cm" width="2.6cm"  height="0.6cm" font-weight="bold" text-align="right">Preis</text>
+
+		<line left="0cm"    top="0.59cm" width="17cm" height="0cm"   linetype="solid" linewidth="1pt" /> 
+		<line left="3.4cm"  top="0cm"    width="0cm"  height="0.6cm" linetype="solid" linewidth="1pt" /> 
+		<line left="14cm"   top="0cm"    width="0cm"  height="0.6cm" linetype="solid" linewidth="1pt" /> 
+	</list-header>
+
+	<item even-odd="even" height="0.9cm">
+		<part-image left="1cm"  top="0.05cm" width="0.8cm" height="0.8cm" text-align="center" />
+		<text left="2.2cm"  top="0cm" width="1cm"    height="0.6cm" text-align="right"><var name="item-qty" /></text>
+		<text left="3.6cm"  top="0cm" width="10.2cm" height="0.6cm" text-align="left" white-space="normal">[<var name="item-condition-long" />] <var name="item-color-name" /> <var name="item-name" /></text>
+		<text left="14.2cm" top="0cm" width="2.6cm"  height="0.6cm" text-align="right">
+			<setvar name="invoice-item-total">
+				<func name="*" format="double:2">
+					<arg><var name="invoice-exchange-rate" /></arg>
+					<arg><var name="item-price-total" /></arg>
+				</func>
+			</setvar>
+			<setvar name="invoice-total">
+				<func name="+" format="double:2">
+					<arg><var name="invoice-total" /></arg>
+					<arg><var name="invoice-item-total" /></arg>
+				</func>
+			</setvar>
+			<var name="currency-symbol" /> <var name="invoice-item-total" /></text>
+
+		<line left="3.4cm"  top="0cm"    width="0cm"  height="0.9cm" linetype="solid" linewidth="1pt" /> 
+		<line left="14cm"   top="0cm"    width="0cm"  height="0.9cm" linetype="solid" linewidth="1pt" /> 
+	</item>
+	<item even-odd="odd" height="0.9cm">
+		<part-image left="1cm"  top="0.05cm" width="0.8cm" height="0.8cm" text-align="center" />
+		<text left="2.2cm"  top="0cm" width="1cm"    height="0.6cm" text-align="right"><var name="item-qty" /></text>
+		<text left="3.6cm"  top="0cm" width="10.2cm" height="0.6cm" text-align="left" white-space="normal">[<var name="item-condition-long" />] <var name="item-color-name" /> <var name="item-name" /></text>
+		<text left="14.2cm" top="0cm" width="2.6cm"  height="0.6cm" text-align="right">
+			<setvar name="invoice-item-total">
+				<func name="*" format="double:2">
+					<arg><var name="invoice-exchange-rate" /></arg>
+					<arg><var name="item-price-total" /></arg>
+				</func>
+			</setvar>
+			<setvar name="invoice-total">
+				<func name="+" format="double:2">
+					<arg><var name="invoice-total" /></arg>
+					<arg><var name="invoice-item-total" /></arg>
+				</func>
+			</setvar>
+			<var name="currency-symbol" /> <var name="invoice-item-total" /></text>
+
+		<line left="3.4cm"  top="0cm"    width="0cm"  height="0.9cm" linetype="solid" linewidth="1pt" /> 
+		<line left="14cm"   top="0cm"    width="0cm"  height="0.9cm" linetype="solid" linewidth="1pt" /> 
+	</item>
+</report>

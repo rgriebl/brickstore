@@ -1,0 +1,249 @@
+<!DOCTYPE UI><UI version="3.3" stdsetdef="1">
+<class>DlgUpdate</class>
+<widget class="QDialog">
+    <property name="name">
+        <cstring>DlgUpdate</cstring>
+    </property>
+    <property name="geometry">
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>375</width>
+            <height>248</height>
+        </rect>
+    </property>
+    <property name="caption">
+        <string>Check for Program Updates</string>
+    </property>
+    <property name="sizeGripEnabled">
+        <bool>false</bool>
+    </property>
+    <vbox>
+        <property name="name">
+            <cstring>unnamed</cstring>
+        </property>
+        <property name="resizeMode">
+            <enum>Minimum</enum>
+        </property>
+        <widget class="CUrlLabel">
+            <property name="name">
+                <cstring>w_label</cstring>
+            </property>
+            <property name="sizePolicy">
+                <sizepolicy>
+                    <hsizetype>5</hsizetype>
+                    <vsizetype>3</vsizetype>
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                </sizepolicy>
+            </property>
+            <property name="text" stdset="0">
+                <string></string>
+            </property>
+        </widget>
+        <widget class="QFrame">
+            <property name="name">
+                <cstring>w_progress_container</cstring>
+            </property>
+            <property name="frameShape">
+                <enum>StyledPanel</enum>
+            </property>
+            <property name="frameShadow">
+                <enum>Raised</enum>
+            </property>
+            <hbox>
+                <property name="name">
+                    <cstring>unnamed</cstring>
+                </property>
+                <property name="margin">
+                    <number>0</number>
+                </property>
+                <spacer>
+                    <property name="name">
+                        <cstring>spacer5</cstring>
+                    </property>
+                    <property name="orientation">
+                        <enum>Horizontal</enum>
+                    </property>
+                    <property name="sizeType">
+                        <enum>Fixed</enum>
+                    </property>
+                    <property name="sizeHint">
+                        <size>
+                            <width>20</width>
+                            <height>20</height>
+                        </size>
+                    </property>
+                </spacer>
+                <widget class="QProgressBar">
+                    <property name="name">
+                        <cstring>w_progress</cstring>
+                    </property>
+                    <property name="totalSteps">
+                        <number>0</number>
+                    </property>
+                    <property name="progress">
+                        <number>-1</number>
+                    </property>
+                    <property name="percentageVisible">
+                        <bool>false</bool>
+                    </property>
+                </widget>
+                <spacer>
+                    <property name="name">
+                        <cstring>spacer5_2</cstring>
+                    </property>
+                    <property name="orientation">
+                        <enum>Horizontal</enum>
+                    </property>
+                    <property name="sizeType">
+                        <enum>Fixed</enum>
+                    </property>
+                    <property name="sizeHint">
+                        <size>
+                            <width>20</width>
+                            <height>20</height>
+                        </size>
+                    </property>
+                </spacer>
+            </hbox>
+        </widget>
+        <spacer>
+            <property name="name">
+                <cstring>spacer4</cstring>
+            </property>
+            <property name="orientation">
+                <enum>Vertical</enum>
+            </property>
+            <property name="sizeType">
+                <enum>MinimumExpanding</enum>
+            </property>
+            <property name="sizeHint">
+                <size>
+                    <width>21</width>
+                    <height>30</height>
+                </size>
+            </property>
+        </spacer>
+        <widget class="Line">
+            <property name="name">
+                <cstring>line2</cstring>
+            </property>
+            <property name="frameShape">
+                <enum>HLine</enum>
+            </property>
+            <property name="frameShadow">
+                <enum>Sunken</enum>
+            </property>
+            <property name="orientation">
+                <enum>Horizontal</enum>
+            </property>
+        </widget>
+        <widget class="QLayoutWidget">
+            <property name="name">
+                <cstring>layout7</cstring>
+            </property>
+            <hbox>
+                <property name="name">
+                    <cstring>unnamed</cstring>
+                </property>
+                <spacer>
+                    <property name="name">
+                        <cstring>Horizontal Spacing2</cstring>
+                    </property>
+                    <property name="orientation">
+                        <enum>Horizontal</enum>
+                    </property>
+                    <property name="sizeType">
+                        <enum>Expanding</enum>
+                    </property>
+                    <property name="sizeHint">
+                        <size>
+                            <width>50</width>
+                            <height>20</height>
+                        </size>
+                    </property>
+                </spacer>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>w_ok</cstring>
+                    </property>
+                    <property name="text">
+                        <string>&amp;OK</string>
+                    </property>
+                    <property name="autoDefault">
+                        <bool>true</bool>
+                    </property>
+                    <property name="default">
+                        <bool>true</bool>
+                    </property>
+                </widget>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>w_cancel</cstring>
+                    </property>
+                    <property name="text">
+                        <string>&amp;Cancel</string>
+                    </property>
+                    <property name="default">
+                        <bool>true</bool>
+                    </property>
+                </widget>
+                <spacer>
+                    <property name="name">
+                        <cstring>spacer2</cstring>
+                    </property>
+                    <property name="orientation">
+                        <enum>Horizontal</enum>
+                    </property>
+                    <property name="sizeType">
+                        <enum>Expanding</enum>
+                    </property>
+                    <property name="sizeHint">
+                        <size>
+                            <width>50</width>
+                            <height>20</height>
+                        </size>
+                    </property>
+                </spacer>
+            </hbox>
+        </widget>
+    </vbox>
+</widget>
+<customwidgets>
+    <customwidget>
+        <class>CUrlLabel</class>
+        <header location="local">curllabel.h</header>
+        <sizehint>
+            <width>30</width>
+            <height>30</height>
+        </sizehint>
+        <container>0</container>
+        <sizepolicy>
+            <hordata>5</hordata>
+            <verdata>5</verdata>
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+        </sizepolicy>
+        <pixmap>image0</pixmap>
+        <property type="String">text</property>
+    </customwidget>
+</customwidgets>
+<images>
+    <image name="image0">
+        <data format="PNG" length="814">89504e470d0a1a0a0000000d4948445200000016000000160806000000c4b46c3b000002f549444154789c9d954d68944718c77f33f37eec26bb359bc6367ec446ac44acc25eb4250a52a8f46029627bc9a91e45c543a1875e7a11bc0a1a412f1ebc88177b281ec4b6524ae38215da46528944139b1a295bcd6e7693ddf7639e1ed6ac2ebebb367960609899e737ff799e7966d49ddfa7446b45920561441884c4b1a554aeb2f38f11e8d9c7ecedbbdcbbf12bef5d1e4b76041cad15f91d9b5f99b022d4ea1151648922cb3f3f8cb261ff439c549e773e3dc7d0e705be3fb24f06cfff940877daed0860b4c26a85d19a9cbe8a93056e7d0b729dbee2567259d3d657b79d500a63348ed1a8bf7ea6a7bf00b34004cc853cbe33c9ec6c6de5e065530ae4c159bc75c0130d2828a679fae6fbbc7dbeb07ab0cccf90eaf90e8a063050f6a9942d37c93339799fb1db53b262b0d68ab070126fd083b914382ecc67192ff6f1c1e1a3ecddb39b27738f127d3b264f6af3b8de1558488328a83804814bf8e1517ca3b19228f6f5e0f0b733f8f95eb80f38162a19fe9c5e62ed17238805590dd88ac0b38bf05637d4630835d04d79fb41fa8d0103b1b52b0747772fe1edccc1bf80134235c3838715068e1c43fb1e22421cb78287870f08c0d8d83595086ea8bd805adb0b8b8b800fac61ce1b62cb1b39c22846a946c1894813f8f2064e0becb9d5c6af921ac840c9699c69a18be9f169368c9c462985630c611452a954585a5cea1c8a7a1035074df00b2a37008f9e8176811e2a7d9b58b771907a10502e95a9d782a6e28e60c58bb724967e58f0c0d4009fc71333845b4f502c1689a2b8115b05b643f2120b24aabbe01e82ec2704761b1313427a288f0828a59a4dabe4fa6a9bbc5229240b04d535fc383acac62f2fb455b69cc465e0723f117cb33083be779d4dd5bfd9f2cd6500e2b83596c61852dd29d25de9166047b02cd5f0aa53ac3f7e126b5b81aeeb92c9f8f8be8fb5d2a23811fcf275dbb5f7637a873f6a42c50a4118d3d595461b4d1c5944042bffa3f23cf7c56ff0ee81cf1ac7b71611b056b0569a7d458c20a8a8ed9787638ce6abaf4fb55db05afb0fef1444666a9c932c0000000049454e44ae426082</data>
+    </image>
+</images>
+<connections>
+    <connection>
+        <sender>w_ok</sender>
+        <signal>clicked()</signal>
+        <receiver>DlgUpdate</receiver>
+        <slot>accept()</slot>
+    </connection>
+</connections>
+<layoutdefaults spacing="6" margin="11"/>
+<includehints>
+    <includehint>curllabel.h</includehint>
+</includehints>
+</UI>

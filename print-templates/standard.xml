@@ -1,0 +1,63 @@
+<report name="Standard" page-size="A4" margin-left="2cm" margin-top="1cm" margin-right="2cm" margin-bottom="1cm">
+  <default-style color="black" 
+                 font-family="Arial"
+                 font-size="10pt"
+                 vertical-align="middle"
+                 white-space="normal"
+  />
+    <page-header height="1cm">
+      <text left="0cm"  top="0cm" width="12cm" height="1cm" text-align="left"  font-size="12pt" font-weight="bold">BrickStore</text>
+      <text left="12cm" top="0cm" width="5cm"  height="1cm" text-align="right" font-size="12pt"><var name="date" /></text>
+    </page-header>
+
+    <page-footer height="1cm">
+      <text left="0cm"  top="0cm" width="12cm" height="1cm" text-align="left"  font-style="italic"><var name="filename" /></text>
+      <text left="12cm" top="0cm" width="5cm"  height="1cm" text-align="right" font-style="italic">Page <var name="page" /> / <var name="pages" /></text>
+    </page-footer>
+
+	<list-header height="0.75cm">
+	  <text left="0cm"   top="0cm" width="17cm"  height="0.75cm" background-color="#666" />
+	  <text left="0cm"   top="0cm" width="2cm"   height="0.75cm" color="white" text-align="center">Image</text>
+	  <text left="2cm"   top="0cm" width="1.5cm" height="0.75cm" color="white" text-align="center">Cond.</text>
+	  <text left="3.5cm" top="0cm" width="7.5cm" height="0.75cm" color="white" text-align="center">Part</text>
+	  <text left="11cm"  top="0cm" width="1cm"   height="0.75cm" color="white" text-align="center">Lots</text>
+	  <text left="12cm"  top="0cm" width="1cm"   height="0.75cm" color="white" text-align="center">Qty</text>
+	  <text left="13cm"  top="0cm" width="2cm"   height="0.75cm" color="white" text-align="center">Price</text>
+	  <text left="15cm"  top="0cm" width="2cm"   height="0.75cm" color="white" text-align="center">Total</text>
+	</list-header>
+
+	<list-footer height="0.75cm">
+	  <text left="0cm"    top="0cm" width="17cm"  height="0.75cm" background-color="#666" />
+	  <text left="0.25cm" top="0cm" width="10cm"  height="0.75cm" color="white" font-weight="bold">Total</text>
+	  <text left="11cm"   top="0cm" width="1cm"   height="0.75cm" color="white" text-align="center"><var name="lot-page-total" /></text>
+	  <text left="12cm"   top="0cm" width="1cm"   height="0.75cm" color="white" text-align="center"><var name="qty-page-total" /></text>
+	  <text left="13cm"   top="0cm" width="3.9cm" height="0.75cm" color="white" text-align="right"><var name="price-page-total" /></text>
+	</list-footer>
+
+	<report-footer height="0.75cm">
+	  <text left="0cm"    top="0cm" width="17cm"  height="0.75cm" background-color="#333" />
+	  <text left="0.25cm" top="0cm" width="10cm"  height="0.75cm" color="white" font-weight="bold">Grand Total</text>
+	  <text left="11cm"   top="0cm" width="1cm"   height="0.75cm" color="white" text-align="center"><var name="lot-grand-total" /></text>
+	  <text left="12cm"   top="0cm" width="1cm"   height="0.75cm" color="white" text-align="center"><var name="qty-grand-total" /></text>
+	  <text left="13cm"   top="0cm" width="3.9cm" height="0.75cm" color="white" text-align="right"><var name="price-grand-total" /></text>
+	</report-footer>
+
+    <item even-odd="even" height="1.5cm">
+	  <part-image left="0.25cm"  top="0cm" width="1.5cm" height="1.5cm" text-align="center" />
+	  <text left="2cm"    top="0cm" width="1.5cm" height="1.5cm" text-align="center"><var name="item-condition-long" /></text>
+	  <text left="3.5cm"  top="0cm" width="7.5cm" height="1.5cm"                    ><var name="item-color-name" /> <var name="item-name" /> [<var name="item-id" />]</text>
+	  <text left="12cm"   top="0cm" width="1cm"   height="1.5cm" text-align="center"><var name="item-qty" /></text>
+	  <text left="13cm"   top="0cm" width="1.8cm" height="1.5cm" text-align="right" ><var name="item-price" /></text>
+	  <text left="14.9cm" top="0cm" width="2cm"   height="1.5cm" text-align="right" ><var name="item-price-total" /></text>
+    </item>
+    <item even-odd="odd" height="1.5cm">
+	  <text left="0cm"  top="0cm" width="17cm" height="1.5cm" background-color="#ddd" />
+
+	  <part-image left="0.25cm"  top="0cm" width="1.5cm" height="1.5cm" text-align="center" />
+	  <text left="2cm"    top="0cm" width="1.5cm" height="1.5cm" text-align="center"><var name="item-condition-long" /></text>
+	  <text left="3.5cm"  top="0cm" width="8.5cm" height="1.5cm"                    ><var name="item-color-name" /> <var name="item-name" /> [<var name="item-id" />]</text>
+	  <text left="12cm"   top="0cm" width="1cm"   height="1.5cm" text-align="center"><var name="item-qty" /></text>
+	  <text left="13cm"   top="0cm" width="1.8cm" height="1.5cm" text-align="right" ><var name="item-price" /></text>
+	  <text left="14.9cm" top="0cm" width="2cm"   height="1.5cm" text-align="right" ><var name="item-price-total" /></text>
+    </item>
+ </report>

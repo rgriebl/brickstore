@@ -1,0 +1,406 @@
+/* Copyright (C) 2004-2005 Robert Griebl.  All rights reserved.
+**
+** This file is part of BrickStore.
+**
+** This file may be distributed and/or modified under the terms of the GNU 
+** General Public License version 2 as published by the Free Software Foundation 
+** and appearing in the file LICENSE.GPL included in the packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
+*/
+#include <qfile.h>
+#include <qapplication.h>
+
+#include "ctransfer.h"
+#include "version.h"
+
+
+bool CTransfer::s_global_init = false;
+QMutex CTransfer::s_share_lock;
+CURLSH *CTransfer::s_curl_share = 0;
+uint CTransfer::s_instance_counter = 0;
+
+
+CTransfer::CTransfer ( )
+{
+	m_curl = 0;
+	m_total = m_progress = 0;
+	m_stop = false;
+
+	m_use_proxy = false;
+	m_proxy_port = 0;
+
+	m_active_job = 0;
+
+	s_instance_counter++;
+}
+
+CTransfer::~CTransfer ( )
+{
+	//qDebug ( "stopping CTransfer thread" );
+
+	cancelAllJobs ( );
+
+	m_stop = true;
+	m_queue_cond. wakeOne ( );
+	wait ( );
+
+	if ( m_curl )
+		::curl_easy_cleanup ( m_curl );
+
+	s_instance_counter--;
+
+	if ( s_instance_counter == 0 ) {
+		if ( s_curl_share ) {
+			::curl_share_cleanup ( s_curl_share );
+			s_curl_share = 0;
+		}
+
+		if ( s_global_init ) {
+			::curl_global_cleanup ( );
+			s_global_init = false;
+		}
+	}
+
+}
+
+void CTransfer::setProxy ( bool enable, const QString &name, int port )
+{
+	m_queue_lock. lock ( );
+
+	m_use_proxy = enable;
+	m_proxy_name = name. latin1 ( );
+	m_proxy_port = port;
+
+	m_queue_lock. unlock ( );
+}
+
+CTransfer::Job *CTransfer::get ( const QCString &url, const CKeyValueList &query, QFile *file, void *userobject, bool high_priority )
+{
+	return retrieve ( true, url, query, file, userobject, high_priority );
+}
+
+CTransfer::Job *CTransfer::post ( const QCString &url, const CKeyValueList &query, QFile *file, void *userobject, bool high_priority )
+{
+	return retrieve ( false, url, query, file, userobject, high_priority );
+}
+
+QCString CTransfer::buildQueryString ( const CKeyValueList &kvl )
+{
+	QCString query;
+
+	for ( CKeyValueList::ConstIterator it = kvl. begin ( ); it != kvl. end ( ); ++it ) {
+		const char *tmp1 = ( *it ). first. latin1 ( );
+		const char *tmp2 = ( *it ). second. latin1 ( );
+
+		char *etmp1 = curl_escape ( tmp1 ? tmp1 : "", 0 );
+		char *etmp2 = curl_escape ( tmp2 ? tmp2 : "", 0 );
+
+		if ( etmp1 && *etmp1 ) {
+			if ( !query. isEmpty ( ))
+				query += '&';
+			query += etmp1;
+			query += '=';
+
+			if ( etmp2 && *etmp2 )
+				query += etmp2;
+		}
+		curl_free ( etmp2 );
+		curl_free ( etmp1 );
+	}
+	return query;
+}
+
+CTransfer::Job *CTransfer::retrieve ( bool get, const QCString &url, const CKeyValueList &query, QFile *file, void *userobject, bool high_priority )
+{
+	if ( url. isEmpty ( )) //  || ( file && ( !file-> isOpen ( ) || !file-> isWritable ( ))))
+		return 0;
+
+	Job *j = new Job ( );
+	j-> m_url = url;
+	j-> m_query = buildQueryString ( query );
+
+	j-> m_data = file ? 0 : new QByteArray ( );
+	j-> m_file = file;
+	j-> m_userobject = userobject;
+	j-> m_get_or_post = get;
+
+	j-> m_trans = this;
+	j-> m_result = CURLE_OK;
+	j-> m_respcode = 0;
+	j-> m_finished = false;
+
+	m_queue_lock. lock ( );
+	if ( high_priority )
+		m_in_queue. prepend ( j );
+	else
+		m_in_queue. append ( j );
+	m_queue_cond. wakeOne ( );
+
+//	qDebug ( "waking up thread... (%d in list)", m_queue. count ( ));
+
+	m_queue_lock. unlock ( );
+
+	updateProgress ( +1 );
+
+	return j;
+}
+
+bool CTransfer::init ( )
+{
+	if ( !s_global_init ) {
+		if ( ::curl_global_init ( CURL_GLOBAL_WIN32 ) == CURLE_OK ) {
+			s_curl_share = ::curl_share_init ( );
+
+			if ( s_curl_share ) {
+				::curl_share_setopt ( s_curl_share, CURLSHOPT_LOCKFUNC,   lock_curl );
+				::curl_share_setopt ( s_curl_share, CURLSHOPT_UNLOCKFUNC, unlock_curl );
+				::curl_share_setopt ( s_curl_share, CURLSHOPT_USERDATA,   0 );
+				::curl_share_setopt ( s_curl_share, CURLSHOPT_SHARE,      CURL_LOCK_DATA_DNS );
+
+				s_global_init = true;
+			}
+		}
+	}
+
+	if ( s_global_init )
+		m_curl = ::curl_easy_init ( );
+
+	if ( m_curl ) {
+		::curl_easy_setopt ( m_curl, CURLOPT_SHARE, s_curl_share );
+
+		start ( IdlePriority );
+	}
+
+	return ( m_curl );
+}
+
+void CTransfer::run ( )
+{
+	::curl_easy_setopt ( m_curl, CURLOPT_VERBOSE, 0 );
+	::curl_easy_setopt ( m_curl, CURLOPT_NOPROGRESS, 1 );
+	::curl_easy_setopt ( m_curl, CURLOPT_NOSIGNAL, 1 );
+	::curl_easy_setopt ( m_curl, CURLOPT_FOLLOWLOCATION, 1);
+//	::curl_easy_setopt ( m_curl, CURLOPT_TIMEOUT, 120 );
+	::curl_easy_setopt ( m_curl, CURLOPT_DNS_CACHE_TIMEOUT, 5*60 );
+	::curl_easy_setopt ( m_curl, CURLOPT_WRITEFUNCTION, write_curl );
+	::curl_easy_setopt ( m_curl, CURLOPT_WRITEDATA, this );
+	::curl_easy_setopt ( m_curl, CURLOPT_USERAGENT, "BrickStore/" BRICKSTORE_VERSION " (http://" BRICKSTORE_URL "; " BRICKSTORE_MAIL ")" );
+	::curl_easy_setopt ( m_curl, CURLOPT_ENCODING, "" );
+
+	QCString url, query;
+
+	while ( !m_stop ) {
+		Job *j = 0;
+
+		m_queue_lock. lock ( );
+		m_active_job = 0;
+
+		if ( m_in_queue. isEmpty ( ))
+			m_queue_cond. wait ( &m_queue_lock );
+		if ( !m_in_queue. isEmpty ( ))
+			j = m_in_queue. take ( 0 );
+
+		if ( j ) {
+			m_active_job = j;
+
+			if ( m_use_proxy ) {
+				::curl_easy_setopt ( m_curl, CURLOPT_PROXY, m_proxy_name. data ( ));
+				::curl_easy_setopt ( m_curl, CURLOPT_PROXYPORT, m_proxy_port );
+			}
+			else
+				::curl_easy_setopt ( m_curl, CURLOPT_PROXY, 0 );
+
+			//qDebug ( "Running job: %p", j-> m_userobject );
+
+			if ( j-> m_get_or_post ) {
+				url = j-> m_url. copy ( );
+
+				if ( !j-> m_query. isEmpty ( )) {
+					url += '?';
+					url += j-> m_query;
+				}
+				query = "";
+				
+				::curl_easy_setopt ( m_curl, CURLOPT_HTTPGET, 1 );
+				::curl_easy_setopt ( m_curl, CURLOPT_URL, url. data ( ));
+
+				//qDebug ( "CTransfer::get [%s]", url. data ( ));
+			}
+			else {
+				url = j-> m_url. copy ( );
+				query = j-> m_query. copy ( );
+				
+				::curl_easy_setopt ( m_curl, CURLOPT_POST, 1 );
+				::curl_easy_setopt ( m_curl, CURLOPT_URL, url. data ( ));
+				::curl_easy_setopt ( m_curl, CURLOPT_POSTFIELDS, query. data ( ));
+				
+				//qDebug ( "CTransfer::post [%s] - form-data [%s]", url. data ( ), query. data ( ));
+			}
+		}
+
+		m_queue_lock. unlock ( );
+
+		if ( m_stop )
+			break;
+		if ( !j )
+			continue;
+
+		CURLcode res = ::curl_easy_perform ( m_curl );
+		long respcode = 0;
+		char *effurl = 0;
+
+		if ( res == CURLE_OK ) {
+			::curl_easy_getinfo ( m_curl, CURLINFO_RESPONSE_CODE, &respcode );
+			::curl_easy_getinfo ( m_curl, CURLINFO_EFFECTIVE_URL, &effurl );
+		}
+
+		m_queue_lock. lock ( );
+
+		if ( m_active_job == j ) {
+			j-> m_result   = res;
+			if ( res != CURLE_OK )
+				j-> m_error = ::curl_easy_strerror ( res );
+			j-> m_respcode = respcode;
+			j-> m_effective_url = effurl;
+		}
+		else if ( m_active_job == 0 ) {
+			j-> m_result = CURLE_ABORTED_BY_CALLBACK;
+			j-> m_error = "Aborted";
+			j-> m_respcode = 0;
+		}
+		j-> m_finished = true;
+		m_out_queue. append ( j );
+
+		m_active_job = 0;
+		m_queue_lock. unlock ( );
+
+		QApplication::postEvent ( this, new QCustomEvent ((QEvent::Type) TransferFinishedEvent, 0 ));
+	}
+}
+
+void CTransfer::customEvent ( QCustomEvent *ev )
+{
+	if ( int( ev-> type ( )) == TransferFinishedEvent ) {
+		// we have to copy the job list to avoid problems with
+		// recursive mutex locking (we emit signals, which 
+		// can lead to slots calling another CTransfer function)
+		QPtrList<Job> finish;
+
+		m_queue_lock. lock ( );
+
+		while ( !m_out_queue. isEmpty ( ))
+			finish. append ( m_out_queue. take ( 0 ));
+
+		m_queue_lock. unlock ( );
+
+		while ( !finish. isEmpty ( )) {
+			Job *j = finish. take ( 0 );
+		
+			emit finished ( j );
+			updateProgress ( -1 );
+
+			delete j-> file ( );
+			delete j-> data ( );
+			delete j;
+		}
+	}
+}
+
+void CTransfer::updateProgress ( int delta )
+{
+	if ( delta > 0 )
+		m_total += delta;
+	else
+		m_progress -= delta;
+
+	emit progress ( m_progress, m_total );
+
+	if ( m_total == m_progress ) {
+		m_total = m_progress = 0;
+
+		emit done ( );
+		emit progress ( 0, 0 );
+	}
+}
+
+void CTransfer::cancel ( Job *j )
+{
+	j-> m_result = CURLE_ABORTED_BY_CALLBACK;
+	j-> m_respcode = 0;
+	j-> m_finished = true;
+	emit finished ( j );
+	updateProgress ( -1 );
+
+	delete j-> file ( );
+	delete j-> data ( );
+	delete j;
+}
+
+void CTransfer::cancelAllJobs ( )
+{
+	// we have to copy the job list to avoid problems with
+	// recursive mutex locking (cancel emits signals, which 
+	// can lead to slots calling another CTransfer function)
+	QPtrList<Job> canceled;
+
+	m_queue_lock. lock ( );
+
+	while ( !m_out_queue. isEmpty ( ))
+		canceled. append ( m_out_queue. take ( 0 ));
+
+	if ( m_active_job ) {
+		// we can't delete the Job data right away, since curl_write may be accessing it at any time
+		//canceled. append ( m_active_job );
+
+		// just tell the worker thread, that the active job doesn't matter anymore...
+		m_active_job = 0;
+	}
+	
+	while ( !m_in_queue. isEmpty ( ))
+		canceled. prepend ( m_in_queue. take ( 0 ));
+	
+	m_queue_lock. unlock ( );
+
+	while ( !canceled. isEmpty ( ))
+		cancel ( canceled. take ( 0 ));
+}
+
+size_t CTransfer::write_curl ( void *ptr, size_t size, size_t nmemb, void *stream )
+{
+	CTransfer *that = static_cast <CTransfer *> ( stream );
+	Job *j = that-> m_active_job;
+
+	if ( j && j-> m_data ) {
+		uint oldsize = j-> m_data-> size ( );
+
+		j-> m_data-> resize ( oldsize + size * nmemb );
+		::memcpy ( j-> m_data-> data ( ) + oldsize, ptr, size * nmemb );
+
+		return size * nmemb;
+	}
+	else if ( j && j-> m_file ) {
+		Q_LONG res = j-> m_file-> writeBlock ((const char *) ptr, size * nmemb );
+
+		if ( res < 0 ) {
+			// set error code
+			res = 0;
+		}
+		return res;
+	}
+	else
+		return 0;
+}
+
+void CTransfer::lock_curl ( CURL * /*handle*/, curl_lock_data /*data*/, curl_lock_access /*access*/, void * /*userptr*/ )
+{
+	s_share_lock. lock ( );
+}
+
+void CTransfer::unlock_curl ( CURL * /*handle*/, curl_lock_data /*data*/, void * /*userptr*/ )
+{
+	s_share_lock. unlock ( );
+}

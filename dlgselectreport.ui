@@ -1,0 +1,183 @@
+<!DOCTYPE UI><UI version="3.3" stdsetdef="1">
+<class>DlgSelectReport</class>
+<widget class="QDialog">
+    <property name="name">
+        <cstring>DlgSelectReport</cstring>
+    </property>
+    <property name="geometry">
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>316</width>
+            <height>236</height>
+        </rect>
+    </property>
+    <property name="caption">
+        <string>Printing Template</string>
+    </property>
+    <vbox>
+        <property name="name">
+            <cstring>unnamed</cstring>
+        </property>
+        <property name="resizeMode">
+            <enum>Minimum</enum>
+        </property>
+        <widget class="QLayoutWidget">
+            <property name="name">
+                <cstring>layout2</cstring>
+            </property>
+            <hbox>
+                <property name="name">
+                    <cstring>unnamed</cstring>
+                </property>
+                <widget class="QLabel">
+                    <property name="name">
+                        <cstring>textLabel1</cstring>
+                    </property>
+                    <property name="sizePolicy">
+                        <sizepolicy>
+                            <hsizetype>3</hsizetype>
+                            <vsizetype>5</vsizetype>
+                            <horstretch>0</horstretch>
+                            <verstretch>0</verstretch>
+                        </sizepolicy>
+                    </property>
+                    <property name="text">
+                        <string>Select a template for printing</string>
+                    </property>
+                </widget>
+                <widget class="QToolButton">
+                    <property name="name">
+                        <cstring>w_update</cstring>
+                    </property>
+                    <property name="text">
+                        <string></string>
+                    </property>
+                    <property name="iconSet">
+                        <iconset>image0</iconset>
+                    </property>
+                    <property name="autoRaise">
+                        <bool>true</bool>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>Update list</string>
+                    </property>
+                </widget>
+            </hbox>
+        </widget>
+        <widget class="QListView">
+            <column>
+                <property name="text">
+                    <string>Page Size</string>
+                </property>
+                <property name="clickable">
+                    <bool>false</bool>
+                </property>
+                <property name="resizable">
+                    <bool>false</bool>
+                </property>
+            </column>
+            <column>
+                <property name="text">
+                    <string>Name</string>
+                </property>
+                <property name="clickable">
+                    <bool>false</bool>
+                </property>
+                <property name="resizable">
+                    <bool>false</bool>
+                </property>
+            </column>
+            <property name="name">
+                <cstring>w_list</cstring>
+            </property>
+            <property name="allColumnsShowFocus">
+                <bool>true</bool>
+            </property>
+            <property name="resizeMode">
+                <enum>LastColumn</enum>
+            </property>
+        </widget>
+        <widget class="Line">
+            <property name="name">
+                <cstring>line1</cstring>
+            </property>
+            <property name="frameShape">
+                <enum>HLine</enum>
+            </property>
+            <property name="frameShadow">
+                <enum>Sunken</enum>
+            </property>
+            <property name="orientation">
+                <enum>Horizontal</enum>
+            </property>
+        </widget>
+        <widget class="QLayoutWidget">
+            <property name="name">
+                <cstring>layout1</cstring>
+            </property>
+            <hbox>
+                <property name="name">
+                    <cstring>unnamed</cstring>
+                </property>
+                <spacer>
+                    <property name="name">
+                        <cstring>spacer1</cstring>
+                    </property>
+                    <property name="orientation">
+                        <enum>Horizontal</enum>
+                    </property>
+                    <property name="sizeType">
+                        <enum>Expanding</enum>
+                    </property>
+                    <property name="sizeHint">
+                        <size>
+                            <width>41</width>
+                            <height>20</height>
+                        </size>
+                    </property>
+                </spacer>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>w_ok</cstring>
+                    </property>
+                    <property name="text">
+                        <string>&amp;OK</string>
+                    </property>
+                    <property name="default">
+                        <bool>true</bool>
+                    </property>
+                </widget>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>pushButton2</cstring>
+                    </property>
+                    <property name="text">
+                        <string>&amp;Cancel</string>
+                    </property>
+                </widget>
+            </hbox>
+        </widget>
+    </vbox>
+</widget>
+<images>
+    <image name="image0">
+        <data format="PNG" length="859">89504e470d0a1a0a0000000d49484452000000100000001008060000001ff3ff610000032249444154789c6593df6b5b7518c63fdfef393939394d9336a9e90f58dcba62672953861bb80d9983562fd40bc52022a87851a137fe018203f11f084344d82eca1004ef86c82603cbaab2da6d16b15b7f8dbab6b34d96a439494e737e7ebda8143bdfebf7fdbc0f3ccf2394523c392f7fb866da09fb2404434a4502a156c3666d6e7e6abcf5e4aef82f6074722169aaf053a5c53e96462a7da8dbc78a052c964c22b75e9741eb5ba5ea5fdcfe7a6c5dfd7bb80f3835b9d01712fdd49bcb0ebf7f3ecdd9673552960680eb2beeac385cbed16479adf4d8529b6fcf7cf5fab4524a09a514a3930bc938e1dc899181e14f5e33e94ce8ecba1e8dc62e1d1d09cc780c4d0afc30e2d2b51ad766b72b0977f1f8cca5771e490003ff426fae67f88373315c0fb6cb553a8d90174672f475499c5d9fc7f5807a33e2cdd3298e1d792aebc6f29f150a05439bfeeb9ce919a96fde3a9b365316c469726a7480cea40940c234d87122362b2e8e1be2b423d28980dbab6a3826fc2bba9d489d34cc8e747722a45c69f1ca789e4829aecfedb05e76b1e292b6a7881b924ca7c6cfab1d4c2f7523e32a5977874eebc050262929db01cff4c701987fe0b0bcd9de53209b8c1c4af3e2681680ad5d985e02193391521bd2958a84176a3cac68f4676200ac57756e2c777166b0c97baf0e1ef03d8c1442080420849212a156eb8ee27ea5875f57f76c1b3bae3390d1b9b3d945b5de3e00d8ae7ae812c2c04584ce861e366b734276d4a5e84baf5492fc38ef32f65c9c2f3fd228556c32e9d40140b5e163ea3a76bbd6ca06f7eecaf9a9f11661f3b274b7c8a76cbefbc5e1fbdf1ab4bd885c36851f286efee9b059f1697b11bedb46ba5bc482d2d55c7ce3910e6089f2e7a56ded8dc19e9ea399b4c1ec22cc2e363134f0c2bdcf51a488e902028fd256796320bc75b166d72afb513e33f1c3515fcf5d7f7e283d782c9f44087140ba528afb0f9bfcbe54dbe80d6e4e1c49accd148b45fb40995e9ab8d2bf2b062f5896f5eee15e23d9d5b967eb4ec3656dcb6bb94ef56a6f78ebe2d3d6df7f148b45fb7f6d0428140a861d3f916f68f9f342b70e0bcdf044e86c64837b77536aa5ac94aa4c4d4dedd7fa1f4fa67ca33cec45a30000000049454e44ae426082</data>
+    </image>
+</images>
+<connections>
+    <connection>
+        <sender>w_ok</sender>
+        <signal>clicked()</signal>
+        <receiver>DlgSelectReport</receiver>
+        <slot>accept()</slot>
+    </connection>
+    <connection>
+        <sender>pushButton2</sender>
+        <signal>clicked()</signal>
+        <receiver>DlgSelectReport</receiver>
+        <slot>reject()</slot>
+    </connection>
+</connections>
+<layoutdefaults spacing="6" margin="11"/>
+</UI>

@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Copyright (C) 2004-2005 Robert Griebl.  All rights reserved.
+ !-
+ !- This file is part of BrickStore.
+ !-
+ !- This file may be distributed and/or modified under the terms of the GNU
+ !- General Public License version 2 as published by the Free Software Foundation
+ !- and appearing in the file LICENSE.GPL included in the packaging of this file.
+ !-
+ !- This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+ !- WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ !-
+ !- See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
+ !-->
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2003/01/wi">
+  <Product Name="BrickStore" Id="07EA0F88-8E8F-11D9-8BDE-F66BAD1E3F3A" Version="$(var.VERSION)" 
+           Manufacturer="softforge.de" Language="1033" UpgradeCode="FE06FEC9-2BAA-4100-88FE-40EB1316D14E">
+    <Package Id="????????-????-????-????-????????????" Comments="This MSI file installs BrickStore $(var.VERSION)" 
+             Manufacturer="softforge.de" InstallerVersion="200" Languages="1033" Compressed="yes" />
+    <Media Id="1" EmbedCab="yes" Cabinet="Setup.cab" CompressionLevel="none" />
+
+    <Upgrade Id="FE06FEC9-2BAA-4100-88FE-40EB1316D14E">
+      <UpgradeVersion Minimum="1.0.0" Maximum="$(var.VERSION)" IncludeMinimum="yes" Property="PREVIOUSVERSIONSINSTALLED" MigrateFeatures="yes" />
+      <UpgradeVersion Minimum="$(var.VERSION)" OnlyDetect="yes" IncludeMinimum="yes" Property="NEWERPRODUCTFOUND" />
+    </Upgrade>
+
+    <Condition Message="You need to be an administrator to install this product.">
+      Privileged
+    </Condition>
+
+    <CustomAction Id="ErrorNewerVersion" Return="check" Error="Unable to install because a newer version of this product is already installed." />
+    <CustomAction Id="FixReinstall" Property="REINSTALL" Value="" />
+    <CustomAction Id="LaunchFile" FileKey="brickstore.exe" ExeCommand="" Return="asyncNoWait" />
+
+    <AdminExecuteSequence />
+
+    <InstallExecuteSequence>
+      <FindRelatedProducts Sequence="1" Suppress="no" />
+      <Custom Action="ErrorNewerVersion" After="FindRelatedProducts"><![CDATA[NEWERPRODUCTFOUND AND NOT Installed]]></Custom>
+      <Custom Action="FixReinstall" Before="CostFinalize"><![CDATA[NOT Installed]]></Custom>
+      <RemoveExistingProducts After="InstallFinalize" />
+    </InstallExecuteSequence>
+
+    <InstallUISequence>
+      <Custom Action="ErrorNewerVersion" After="FindRelatedProducts"><![CDATA[NEWERPRODUCTFOUND AND NOT Installed]]></Custom>
+      <Custom Action="FixReinstall" Before="CostFinalize"><![CDATA[NOT Installed]]></Custom>
+    </InstallUISequence>
+
+    <Icon Id="icon_bs.exe" src="$(var.TARGET)\brickstore.ico" />
+
+    <Property Id="ARPPRODUCTICON">icon_bs.exe</Property>
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder" Name="PFiles">
+        <Directory Id="Softforge" Name="SOFTFO~1" LongName="SoftForge">
+          <Directory Id="INSTALLDIR" Name="BrkStore" LongName="BrickStore">
+            <Component Id="c_main" Guid="96E5E9DA-8E91-11D9-8BDE-F66BAD1E3F3A">
+              <File DiskId="1" Id="brickstore.exe"   Name="bricks~1.exe" LongName="brickstore.exe"   src="$(var.TARGET)\brickstore.exe" Checksum="yes" />
+              <Shortcut Id="sm_brickstore.exe"       Name="brkstore"     LongName="BrickStore"    Icon="icon_bs.exe" IconIndex="0" Directory="ProgramMenuDir" Target="Complete" WorkingDirectory="INSTALLDIR" />
+              <Shortcut Id="sd_brickstore.exe"       Name="brkstore"     LongName="BrickStore"    Icon="icon_bs.exe" IconIndex="0" Directory="DesktopFolder"  Target="Complete" WorkingDirectory="INSTALLDIR" />
+              <File DiskId="1" Id="LICENSE.GPL"      Name="licens~1.txt" LongName="LICENSE.GPL.txt"  src="$(var.TARGET)\LICENSE.GPL" />
+
+              <Registry Id="reg_installdir" Root="HKLM" Key="Software\Softforge\BrickStore" Name="InstallDir" Action="write" Type="string" Value="[INSTALLDIR]" />
+              <Registry Id="reg_installver" Root="HKLM" Key="Software\Softforge\BrickStore" Name="CurrentVersion" Action="write" Type="string" Value="$(var.VERSION)" />
+              <Registry Id="reg_clean"      Root="HKLM" Key="Software\Softforge\BrickStore" Action="removeKeyOnUninstall" />
+
+              <ProgId Id="BrickStore.btifile" Description="BrickStore data file" Advertise="no" Icon="[#brickstore.exe]" IconIndex="1">
+                <Extension Id="bti" ContentType="application/x-brickstore">
+                  <Verb Id="open" Sequence="10" Argument="&quot;%1&quot;" Target="[#brickstore.exe]" />
+                </Extension>
+              </ProgId>
+            </Component>
+            <Component Id="c_runtime" Guid="514ECE62-8EB1-11D9-8BDE-F66BAD1E3F3A">
+              <File DiskId="1" Id="msvcr71"          Name="msvcr71.dll" src="$(env.SystemRoot)/System32/msvcr71.dll" />
+              <RemoveFile      Id="msvcp71"          Name="msvcp71.dll" On="install" />
+            </Component>
+
+            <!-- the original MS msm's are broken (install to c:\)
+            <Merge Id="msvcr71" Language="1033" src="$(env.CommonProgramFiles)\Merge Modules\vc_user_crt71_rtl_x86_-#-#-.msm" DiskId="1" />
+            <Merge Id="msvcp71" Language="1033" src="$(env.CommonProgramFiles)\Merge Modules\vc_user_stl71_rtl_x86_-#-#-.msm" DiskId="1" />
+            -->
+
+            <Directory Id="translations" Name="TRANSL~1" LongName="translations">
+              <Component Id="c_translations" Guid="7F2A4CBF-90FB-43A1-AC34-FEA6BF6FE1FE">
+                <File DiskId="1" Id="brickstore_de.qm" Name="brkst_de.qm" LongName="brickstore_de.qm" src="$(var.TARGET)\translations\brickstore_de.qm" />
+                <File DiskId="1" Id="qt_de.qm"         Name="qt_de.qm"                                src="$(env.QTDIR)\translations\qt_de.qm" />
+              </Component>
+            </Directory>
+            <Directory Id="print_templates" Name="PRINTT~1" LongName="print-templates">
+              <Component Id="c_print_templates" Guid="ED89FB38-8C96-4405-BF13-9B724B50B53C">
+                <File DiskId="1" Id="standard.xml"        Name="standard.xml"                                src="$(var.TARGET)\print-templates\standard.xml" />
+                <File DiskId="1" Id="invoice_example.xml" Name="invoic~1.xml" LongName="invoice-example.xml" src="$(var.TARGET)\print-templates\invoice-example.xml" />
+              </Component>
+            </Directory>
+            <Directory Id="images" Name="images">
+              <Component Id="c_images" Guid="9FA21F08-8E91-11D9-8BDE-F66BAD1E3F3A">
+                <File DiskId="1" Id="icon.png"           Name="icon.png"                                   src="$(var.TARGET)\images\icon.png" />
+                <File DiskId="1" Id="status_exclude.png" Name="status~1.png" LongName="status_exclude.png" src="$(var.TARGET)\images\status_exclude.png" />
+                <File DiskId="1" Id="status_extra.png"   Name="status~2.png" LongName="status_extra.png"   src="$(var.TARGET)\images\status_extra.png" />
+                <File DiskId="1" Id="status_include.png" Name="status~3.png" LongName="status_include.png" src="$(var.TARGET)\images\status_include.png" />
+                <File DiskId="1" Id="status_unknown.png" Name="status~4.png" LongName="status_unknown.png" src="$(var.TARGET)\images\status_unknown.png" />
+                <File DiskId="1" Id="bg_infotext.jpg"    Name="bg_inf~1.jpg" LongName="bg_infotext.jpg"    src="$(var.TARGET)\images\bg_infotext.jpg" />
+              </Component>
+              <Directory Id="images_status" Name="status">
+                <Component Id="c_images_status" Guid="A780CC45-113C-47EC-9309-BEBFF6A396B6">
+                  <File DiskId="1" Id="istatus_modified.png" Name="modifi~1.png" LongName="modified.png" src="$(var.TARGET)\images\status\modified.png" />
+                  <File DiskId="1" Id="istatus_popup.png"    Name="popup.png"                            src="$(var.TARGET)\images\status\popup.png" />
+                  <File DiskId="1" Id="istatus_stop.png"     Name="stop.png"                             src="$(var.TARGET)\images\status\stop.png" />
+                </Component>
+              </Directory>
+              <Directory Id="images_16x16" Name="16x16">
+                <Component Id="c_images_16x16" Guid="A7EEE510-8E91-11D9-8BDE-F66BAD1E3F3A">
+                  <File DiskId="1" Id="i16x16_configure.png"                 Name="config~1.png" LongName="configure.png"                 src="$(var.TARGET)\images\16x16\configure.png" />
+                  <File DiskId="1" Id="i16x16_browser.png"                   Name="browser.png"                                           src="$(var.TARGET)\images\16x16\browser.png" />
+                  <File DiskId="1" Id="i16x16_edit.png"                      Name="edit.png"                                              src="$(var.TARGET)\images\16x16\edit.png" />
+                  <File DiskId="1" Id="i16x16_edit_additems.png"             Name="edit_a~1.png" LongName="edit_additems.png"             src="$(var.TARGET)\images\16x16\edit_additems.png" />
+                  <File DiskId="1" Id="i16x16_edit_mergeitems.png"           Name="edit_m~2.png" LongName="edit_mergeitems.png"           src="$(var.TARGET)\images\16x16\edit_mergeitems.png" />
+                  <File DiskId="1" Id="i16x16_edit_copy.png"                 Name="edit_c~1.png" LongName="edit_copy.png"                 src="$(var.TARGET)\images\16x16\edit_copy.png" />
+                  <File DiskId="1" Id="i16x16_edit_cut.png"                  Name="edit_c~2.png" LongName="edit_cut.png"                  src="$(var.TARGET)\images\16x16\edit_cut.png" />
+                  <File DiskId="1" Id="i16x16_edit_delete.png"               Name="edit_d~1.png" LongName="edit_delete.png"               src="$(var.TARGET)\images\16x16\edit_delete.png" />
+                  <File DiskId="1" Id="i16x16_edit_find.png"                 Name="edit_f~1.png" LongName="edit_find.png"                 src="$(var.TARGET)\images\16x16\edit_find.png" />
+                  <File DiskId="1" Id="i16x16_edit_find_again.png"           Name="edit_f~2.png" LongName="edit_find_again.png"           src="$(var.TARGET)\images\16x16\edit_find_again.png" />
+                  <File DiskId="1" Id="i16x16_edit_multiply_qty.png"         Name="edit_m~1.png" LongName="edit_multiply_qty.png"         src="$(var.TARGET)\images\16x16\edit_multiply_qty.png" />
+                  <File DiskId="1" Id="i16x16_edit_paste.png"                Name="edit_p~1.png" LongName="edit_paste.png"                src="$(var.TARGET)\images\16x16\edit_paste.png" />
+                  <File DiskId="1" Id="i16x16_edit_price_inc_dec.png"        Name="edit_p~2.png" LongName="edit_price_inc_dec.png"        src="$(var.TARGET)\images\16x16\edit_price_inc_dec.png" />
+                  <File DiskId="1" Id="i16x16_edit_price_to_priceguide.png"  Name="edit_p~3.png" LongName="edit_price_to_priceguide.png"  src="$(var.TARGET)\images\16x16\edit_price_to_priceguide.png" />
+                  <File DiskId="1" Id="i16x16_edit_redo.png"                 Name="edit_r~1.png" LongName="edit_redo.png"                 src="$(var.TARGET)\images\16x16\edit_redo.png" />
+                  <File DiskId="1" Id="i16x16_edit_set_sale.png"             Name="edit_s~1.png" LongName="edit_set_sale.png"             src="$(var.TARGET)\images\16x16\edit_set_sale.png" />
+                  <File DiskId="1" Id="i16x16_edit_undo.png"                 Name="edit_u~1.png" LongName="edit_undo.png"                 src="$(var.TARGET)\images\16x16\edit_undo.png" />
+                  <File DiskId="1" Id="i16x16_file_close.png"                Name="file_c~3.png" LongName="file_close.png"                src="$(var.TARGET)\images\16x16\file_close.png" />
+                  <File DiskId="1" Id="i16x16_file_exit.png"                 Name="file_e~1.png" LongName="file_exit.png"                 src="$(var.TARGET)\images\16x16\file_exit.png" />
+                  <File DiskId="1" Id="i16x16_file_new.png"                  Name="file_n~1.png" LongName="file_new.png"                  src="$(var.TARGET)\images\16x16\file_new.png" />
+                  <File DiskId="1" Id="i16x16_file_open.png"                 Name="file_o~1.png" LongName="file_open.png"                 src="$(var.TARGET)\images\16x16\file_open.png" />
+                  <File DiskId="1" Id="i16x16_file_print.png"                Name="file_p~4.png" LongName="file_print.png"                src="$(var.TARGET)\images\16x16\file_print.png" />
+                  <File DiskId="1" Id="i16x16_file_save.png"                 Name="file_s~2.png" LongName="file_save.png"                 src="$(var.TARGET)\images\16x16\file_save.png" />
+                  <File DiskId="1" Id="i16x16_file_save_all.png"             Name="file_s~3.png" LongName="file_save_all.png"             src="$(var.TARGET)\images\16x16\file_save_all.png" />
+                  <File DiskId="1" Id="i16x16_file_saveas.png"               Name="file_s~4.png" LongName="file_saveas.png"               src="$(var.TARGET)\images\16x16\file_saveas.png" />
+                  <File DiskId="1" Id="i16x16_filter_clear.png"              Name="filter~1.png" LongName="filter_clear.png"              src="$(var.TARGET)\images\16x16\filter_clear.png" />
+                  <File DiskId="1" Id="i16x16_filter_label.png"              Name="filter~2.png" LongName="filter_label.png"              src="$(var.TARGET)\images\16x16\filter_label.png" />
+                  <File DiskId="1" Id="i16x16_help_contents.png"             Name="help_c~1.png" LongName="help_contents.png"             src="$(var.TARGET)\images\16x16\help_contents.png" />
+                  <File DiskId="1" Id="i16x16_help_whatsthis.png"            Name="help_w~1.png" LongName="help_whatsthis.png"            src="$(var.TARGET)\images\16x16\help_whatsthis.png" />
+                  <File DiskId="1" Id="i16x16_net_offline.png"               Name="net_of~1.png" LongName="net_offline.png"               src="$(var.TARGET)\images\16x16\net_offline.png" />
+                  <File DiskId="1" Id="i16x16_net_online.png"                Name="net_on~1.png" LongName="net_online.png"                src="$(var.TARGET)\images\16x16\net_online.png" />
+                  <File DiskId="1" Id="i16x16_settings_refresh_database.png" Name="settin~1.png" LongName="settings_refresh_database.png" src="$(var.TARGET)\images\16x16\settings_refresh_database.png" />
+                  <File DiskId="1" Id="i16x16_view_compact.png"              Name="view_c~1.png" LongName="view_compact.png"              src="$(var.TARGET)\images\16x16\view_compact.png" />
+                  <File DiskId="1" Id="i16x16_view_hierarchic.png"           Name="view_h~1.png" LongName="view_hierarchic.png"           src="$(var.TARGET)\images\16x16\view_hierarchic.png" />
+                  <File DiskId="1" Id="i16x16_view_plain.png"                Name="view_p~1.png" LongName="view_plain.png"                src="$(var.TARGET)\images\16x16\view_plain.png" />
+                  <File DiskId="1" Id="i16x16_edit_bl_catalog.png"           Name="edit_b~1.png" LongName="edit_bl_catalog.png"           src="$(var.TARGET)\images\16x16\edit_bl_catalog.png" />
+                  <File DiskId="1" Id="i16x16_edit_bl_priceguide.png"        Name="edit_b~2.png" LongName="edit_bl_priceguide.png"        src="$(var.TARGET)\images\16x16\edit_bl_priceguide.png" />
+                  <File DiskId="1" Id="i16x16_edit_bl_lotsforsale.png"       Name="edit_b~3.png" LongName="edit_bl_lotsforsale.png"       src="$(var.TARGET)\images\16x16\edit_bl_lotsforsale.png" />
+                  <File DiskId="1" Id="i16x16_viewmode.png"                  Name="view_m~1.png" LongName="viewmode.png"                  src="$(var.TARGET)\images\16x16\viewmode.png" />
+                  <File DiskId="1" Id="i16x16_viewmode_list.png"             Name="view_m~2.png" LongName="viewmode_list.png"             src="$(var.TARGET)\images\16x16\viewmode_list.png" />
+                  <File DiskId="1" Id="i16x16_viewmode_images.png"           Name="view_m~3.png" LongName="viewmode_images.png"           src="$(var.TARGET)\images\16x16\viewmode_images.png" />
+                  <File DiskId="1" Id="i16x16_viewmode_thumbs.png"           Name="view_m~4.png" LongName="viewmode_thumbs.png"           src="$(var.TARGET)\images\16x16\viewmode_thumbs.png" />
+                </Component>
+              </Directory>
+              <Directory Id="images_22x22" Name="22x22">
+                <Component Id="c_images_22x22" Guid="AEE85EDC-8E91-11D9-8BDE-F66BAD1E3F3A">
+                  <File DiskId="1" Id="i22x22_configure.png"                 Name="config~1.png" LongName="configure.png"                 src="$(var.TARGET)\images\22x22\configure.png" />
+                  <File DiskId="1" Id="i22x22_browser.png"                   Name="browser.png"                                           src="$(var.TARGET)\images\22x22\browser.png" />
+                  <File DiskId="1" Id="i22x22_edit.png"                      Name="edit.png"                                              src="$(var.TARGET)\images\22x22\edit.png" />
+                  <File DiskId="1" Id="i22x22_edit_additems.png"             Name="edit_a~1.png" LongName="edit_additems.png"             src="$(var.TARGET)\images\22x22\edit_additems.png" />
+                  <File DiskId="1" Id="i22x22_edit_mergeitems.png"           Name="edit_m~2.png" LongName="edit_mergeitems.png"           src="$(var.TARGET)\images\22x22\edit_mergeitems.png" />
+                  <File DiskId="1" Id="i22x22_edit_copy.png"                 Name="edit_c~1.png" LongName="edit_copy.png"                 src="$(var.TARGET)\images\22x22\edit_copy.png" />
+                  <File DiskId="1" Id="i22x22_edit_cut.png"                  Name="edit_c~2.png" LongName="edit_cut.png"                  src="$(var.TARGET)\images\22x22\edit_cut.png" />
+                  <File DiskId="1" Id="i22x22_edit_delete.png"               Name="edit_d~1.png" LongName="edit_delete.png"               src="$(var.TARGET)\images\22x22\edit_delete.png" />
+                  <File DiskId="1" Id="i22x22_edit_find.png"                 Name="edit_f~1.png" LongName="edit_find.png"                 src="$(var.TARGET)\images\22x22\edit_find.png" />
+                  <File DiskId="1" Id="i22x22_edit_find_again.png"           Name="edit_f~2.png" LongName="edit_find_again.png"           src="$(var.TARGET)\images\22x22\edit_find_again.png" />
+                  <File DiskId="1" Id="i22x22_edit_multiply_qty.png"         Name="edit_m~1.png" LongName="edit_multiply_qty.png"         src="$(var.TARGET)\images\22x22\edit_multiply_qty.png" />
+                  <File DiskId="1" Id="i22x22_edit_paste.png"                Name="edit_p~1.png" LongName="edit_paste.png"                src="$(var.TARGET)\images\22x22\edit_paste.png" />
+                  <File DiskId="1" Id="i22x22_edit_price_inc_dec.png"        Name="edit_p~2.png" LongName="edit_price_inc_dec.png"        src="$(var.TARGET)\images\22x22\edit_price_inc_dec.png" />
+                  <File DiskId="1" Id="i22x22_edit_price_to_priceguide.png"  Name="edit_p~3.png" LongName="edit_price_to_priceguide.png"  src="$(var.TARGET)\images\22x22\edit_price_to_priceguide.png" />
+                  <File DiskId="1" Id="i22x22_edit_redo.png"                 Name="edit_r~1.png" LongName="edit_redo.png"                 src="$(var.TARGET)\images\22x22\edit_redo.png" />
+                  <File DiskId="1" Id="i22x22_edit_set_sale.png"             Name="edit_s~1.png" LongName="edit_set_sale.png"             src="$(var.TARGET)\images\22x22\edit_set_sale.png" />
+                  <File DiskId="1" Id="i22x22_edit_undo.png"                 Name="edit_u~1.png" LongName="edit_undo.png"                 src="$(var.TARGET)\images\22x22\edit_undo.png" />
+                  <File DiskId="1" Id="i22x22_file_close.png"                Name="file_c~3.png" LongName="file_close.png"                src="$(var.TARGET)\images\22x22\file_close.png" />
+                  <File DiskId="1" Id="i22x22_file_exit.png"                 Name="file_e~1.png" LongName="file_exit.png"                 src="$(var.TARGET)\images\22x22\file_exit.png" />
+                  <File DiskId="1" Id="i22x22_file_new.png"                  Name="file_n~1.png" LongName="file_new.png"                  src="$(var.TARGET)\images\22x22\file_new.png" />
+                  <File DiskId="1" Id="i22x22_file_open.png"                 Name="file_o~1.png" LongName="file_open.png"                 src="$(var.TARGET)\images\22x22\file_open.png" />
+                  <File DiskId="1" Id="i22x22_file_print.png"                Name="file_p~4.png" LongName="file_print.png"                src="$(var.TARGET)\images\22x22\file_print.png" />
+                  <File DiskId="1" Id="i22x22_file_save.png"                 Name="file_s~2.png" LongName="file_save.png"                 src="$(var.TARGET)\images\22x22\file_save.png" />
+                  <File DiskId="1" Id="i22x22_file_save_all.png"             Name="file_s~3.png" LongName="file_save_all.png"             src="$(var.TARGET)\images\22x22\file_save_all.png" />
+                  <File DiskId="1" Id="i22x22_file_saveas.png"               Name="file_s~4.png" LongName="file_saveas.png"               src="$(var.TARGET)\images\22x22\file_saveas.png" />
+                  <File DiskId="1" Id="i22x22_filter_clear.png"              Name="filter~1.png" LongName="filter_clear.png"              src="$(var.TARGET)\images\22x22\filter_clear.png" />
+                  <File DiskId="1" Id="i22x22_filter_label.png"              Name="filter~2.png" LongName="filter_label.png"              src="$(var.TARGET)\images\22x22\filter_label.png" />
+                  <File DiskId="1" Id="i22x22_help_contents.png"             Name="help_c~1.png" LongName="help_contents.png"             src="$(var.TARGET)\images\22x22\help_contents.png" />
+                  <File DiskId="1" Id="i22x22_help_whatsthis.png"            Name="help_w~1.png" LongName="help_whatsthis.png"            src="$(var.TARGET)\images\22x22\help_whatsthis.png" />
+                  <File DiskId="1" Id="i22x22_net_offline.png"               Name="net_of~1.png" LongName="net_offline.png"               src="$(var.TARGET)\images\22x22\net_offline.png" />
+                  <File DiskId="1" Id="i22x22_net_online.png"                Name="net_on~1.png" LongName="net_online.png"                src="$(var.TARGET)\images\22x22\net_online.png" />
+                  <File DiskId="1" Id="i22x22_settings_refresh_database.png" Name="settin~1.png" LongName="settings_refresh_database.png" src="$(var.TARGET)\images\22x22\settings_refresh_database.png" />
+                  <File DiskId="1" Id="i22x22_view_compact.png"              Name="view_c~1.png" LongName="view_compact.png"              src="$(var.TARGET)\images\22x22\view_compact.png" />
+                  <File DiskId="1" Id="i22x22_view_hierarchic.png"           Name="view_h~1.png" LongName="view_hierarchic.png"           src="$(var.TARGET)\images\22x22\view_hierarchic.png" />
+                  <File DiskId="1" Id="i22x22_view_plain.png"                Name="view_p~1.png" LongName="view_plain.png"                src="$(var.TARGET)\images\22x22\view_plain.png" />
+                  <File DiskId="1" Id="i22x22_edit_bl_catalog.png"           Name="edit_b~1.png" LongName="edit_bl_catalog.png"           src="$(var.TARGET)\images\22x22\edit_bl_catalog.png" />
+                  <File DiskId="1" Id="i22x22_edit_bl_priceguide.png"        Name="edit_b~2.png" LongName="edit_bl_priceguide.png"        src="$(var.TARGET)\images\22x22\edit_bl_priceguide.png" />
+                  <File DiskId="1" Id="i22x22_edit_bl_lotsforsale.png"       Name="edit_b~3.png" LongName="edit_bl_lotsforsale.png"       src="$(var.TARGET)\images\22x22\edit_bl_lotsforsale.png" />
+                  <File DiskId="1" Id="i22x22_viewmode.png"                  Name="view_m~1.png" LongName="viewmode.png"                  src="$(var.TARGET)\images\22x22\viewmode.png" />
+                  <File DiskId="1" Id="i22x22_viewmode_list.png"             Name="view_m~2.png" LongName="viewmode_list.png"             src="$(var.TARGET)\images\22x22\viewmode_list.png" />
+                  <File DiskId="1" Id="i22x22_viewmode_images.png"           Name="view_m~3.png" LongName="viewmode_images.png"           src="$(var.TARGET)\images\22x22\viewmode_images.png" />
+                  <File DiskId="1" Id="i22x22_viewmode_thumbs.png"           Name="view_m~4.png" LongName="viewmode_thumbs.png"           src="$(var.TARGET)\images\22x22\viewmode_thumbs.png" />
+                </Component>
+              </Directory>             
+            </Directory>
+          </Directory>
+        </Directory>
+      </Directory>
+        
+      <Directory Id="ProgramMenuFolder" Name="Programs">
+        <Directory Id="ProgramMenuDir" Name="BRKSTORE" LongName="BrickStore" />
+      </Directory>
+
+      <Directory Id="DesktopFolder" Name="Desktop" />
+    </Directory>
+
+    <Feature Id="Complete" Title="BrickStore" Description="The complete package."
+             TypicalDefault="install" Display="expand" Level="1" ConfigurableDirectory="INSTALLDIR">
+      <ComponentRef Id="c_main" />
+      <ComponentRef Id="c_runtime" />
+      <ComponentRef Id="c_translations" />
+      <!-- 
+      <MergeRef     Id="msvcr71" />
+      <MergeRef     Id="msvcp71" />
+      -->
+      <ComponentRef Id="c_print_templates" />
+      <ComponentRef Id="c_images" />
+      <ComponentRef Id="c_images_status" />
+      <ComponentRef Id="c_images_16x16" />
+      <ComponentRef Id="c_images_22x22" />
+    </Feature>
+
+  <?include ui.wxi ?>
+
+  </Product>
+</Wix>
