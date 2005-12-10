@@ -13,9 +13,17 @@
 ##
 ## See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 
-if ! which svn >/dev/null || [ "$#" != "3" ] || [ ! -d $1 ]; then
-  echo >&2 "Usage: $0 <path to WC> <source> <destination>"
+if [ ! -r _RELEASE_ ] && [ ! -r version.h.in ]; then
+  echo "Could not read _RELEASE_ and/or version.h.in"
   exit 1
 fi
 
-sed <"$2" >"$3" -e s,\\\$WCREV\\\$,`svn info -R "$1" | grep Revision: | awk '{ print $2; }' | sort -un | tail -n 1`,g
+OIFS="$IFS"
+IFS="."
+set -- `head -n1 _RELEASE_` 
+IFS="$OIFS"
+
+cat version.h.in | sed -e "s,\(^#define BRICKSTORE_MAJOR  *\)[^ ]*$,\1$1,g" \
+                       -e "s,\(^#define BRICKSTORE_MINOR  *\)[^ ]*$,\1$2,g" \
+                       -e "s,\(^#define BRICKSTORE_PATCH  *\)[^ ]*$,\1$3,g" \
+>version.h

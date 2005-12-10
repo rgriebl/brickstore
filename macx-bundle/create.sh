@@ -18,7 +18,7 @@ if [ ! -d brickstore.app ]; then
 	exit 1
 fi
 
-[ -r package-version ] && pkg_ver=`cat package-version | head -n1`
+[ -r _RELEASE_ ] && pkg_ver=`cat _RELEASE_ | head -n1`
 [ $# = 1 ] && pkg_ver="$1"
 
 if [ -z $pkg_ver ]; then
