@@ -26,7 +26,7 @@ res_images_status   = images/status/*.png
 res_translations    = $$TRANSLATIONS
 res_print_templates = print-templates/*.xml
 
-dist_extra          = version.h.in package-version.in icon.png
+dist_extra          = version.h.in _RELEASE_ icon.png
 dist_scripts        = scripts/*.sh scripts/*.bat scripts/*.pl
 dist_unix_rpm       = rpm/create.sh rpm/brickstore.spec
 dist_unix_deb       = debian/create.sh debian/rules
@@ -39,8 +39,7 @@ MOC_DIR   = .moc
 UI_DIR    = .uic
 
 win32 {
-  system( scripts\subwcrev.bat . version.h.in       version.h )
-  system( scripts\subwcrev.bat . package-version.in package-version )
+  system( scripts\update_version.js )
 
   LIBS += libcurl.lib
   DEFINES += CURL_STATICLIB
@@ -51,8 +50,7 @@ win32 {
 unix {
   OBJECTS_DIR = .obj  # grrr ... f***ing msvc.net doesn't link with this line present
 
-  system( scripts/subwcrev.sh  . version.h.in       version.h )
-  system( scripts/subwcrev.sh  . package-version.in package-version )
+  system( scripts/update_version.sh )
 }
 
 unix:!macx {

@@ -20,7 +20,7 @@ IF NOT EXIST win32-installer (
 
 SET PKG_VER=
 
-IF EXIST package-version (FOR /F %%V IN (package-version) DO SET PKG_VER=%%V)
+IF EXIST _RELEASE_ (FOR /F %%V IN (_RELEASE_) DO SET PKG_VER=%%V)
 IF NOT "x%1" == "x" SET PKG_VER=%1
 
 IF "x%PKG_VER%" == "x" (

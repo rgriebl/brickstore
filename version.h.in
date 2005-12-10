@@ -14,9 +14,9 @@
 #ifndef __BRICKSTORE__VERSION_H__
 #define __BRICKSTORE__VERSION_H__
 
-#define BRICKSTORE_MAJOR    1
-#define BRICKSTORE_MINOR    0
-#define BRICKSTORE_PATCH    $WCREV$
+#define BRICKSTORE_MAJOR    ?
+#define BRICKSTORE_MINOR    ?
+#define BRICKSTORE_PATCH    ?
 
 
 // stringification sucks :)
