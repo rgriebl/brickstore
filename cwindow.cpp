@@ -86,10 +86,26 @@ CWindow::CWindow ( QWidget *parent, const char *name )
 	setFocusProxy ( w_list );
 	w_list-> setShowSortIndicator ( true );
 	w_list-> setColumnsHideable ( true );
-	w_list-> loadSettings ( CConfig::inst ( ), "/ItemView/List" );
 	w_list-> setDifferenceMode ( false );
 	w_list-> setSimpleMode ( CConfig::inst ( )-> simpleMode ( ));
-	
+
+	{
+		QMap <QString, QString> map;
+		QStringList sl = CConfig::inst ( )-> entryList ( "/ItemView/List" );
+
+		for ( QStringList::const_iterator it = sl. begin ( ); it != sl. end ( ); ++it ){
+			QString val = CConfig::inst ( )-> readEntry ( "/ItemView/List/" + *it );
+
+			if ( val. contains ( "^e" ))
+				map [*it] = CConfig::inst ( )-> readListEntry ( "/ItemView/List/" + *it ). join ( "," );
+			else
+				map [*it] = val;
+		}
+
+		w_list-> loadSettings ( map );
+	}
+
+
 	connect ( w_list, SIGNAL( selectionChanged ( )), this, SLOT( updateSelection ( )));
 
 	for ( int i = 0; i < CItemView::FilterCountSpecial; i++ ) {
@@ -146,7 +162,7 @@ CWindow::CWindow ( QWidget *parent, const char *name )
 
 CWindow::~CWindow ( )
 {
-	w_list-> saveSettings ( CConfig::inst ( ), "/ItemView/List" );
+//	w_list-> saveSettings ( CConfig::inst ( ), "/ItemView/List" );
 
 	if ( m_inventory ) {
 		m_inventory-> release ( );
@@ -513,6 +529,66 @@ QPtrList <BrickLink::InvItem> CWindow::sortedItems ( )
 	return sorted_items;
 }
 
+QDomElement CWindow::createGuiStateXML ( QDomDocument doc )
+{
+	int version = 1;
+
+	QDomElement root = doc. createElement ( "GuiState" );
+	root. setAttribute ( "Application", "BrickStore" );
+	root. setAttribute ( "Version", version );
+
+	if ( isDifferenceMode ( ))
+		root. appendChild ( doc. createElement ( "DifferenceMode" ));
+
+	QMap <QString, QString> list_map = w_list->saveSettings ( );
+
+	if ( !list_map. isEmpty ( )) {
+		QDomElement e = doc. createElement ( "ItemView" );
+		root. appendChild ( e );
+
+		for ( QMap <QString, QString>::const_iterator it = list_map. begin ( ); it != list_map. end ( ); ++it ) 
+			e. appendChild ( doc. createElement ( it. key ( )). appendChild ( doc. createTextNode ( it. data ( ))). parentNode ( ));
+	}
+
+	return root;
+}
+
+
+bool CWindow::parseGuiStateXML ( QDomElement root )
+{
+	bool ok = true;
+
+	if (( root. nodeName ( ) == "GuiState" ) && 
+	    ( root. attribute ( "Application" ) == "BrickStore" ) && 
+		( root. attribute ( "Version" ). toInt ( ) == 1 )) {
+		for ( QDomNode n = root. firstChild ( ); !n. isNull ( ); n = n. nextSibling ( )) {
+			if ( !n. isElement ( ))
+				continue;
+			QString tag = n. toElement ( ). tagName ( );
+
+			if ( tag == "DifferenceMode" ) {
+				setDifferenceMode ( true );
+			}
+			else if ( tag == "ItemView" ) {
+				QMap <QString, QString> list_map;
+
+				for ( QDomNode niv = n. firstChild ( ); !niv. isNull ( ); niv = niv. nextSibling ( )) {
+					if ( !niv. isElement ( ))
+						continue;
+					list_map [niv. toElement ( ). tagName ( )] = niv. toElement ( ). text ( );
+				}
+
+				if ( !list_map. isEmpty ( ))
+					w_list-> loadSettings ( list_map );				
+			}
+		}
+
+	}
+
+	return ok;
+}
+
+
 void CWindow::filePrint ( )
 {
 	DlgSelectReportImpl d ( this );
@@ -570,7 +646,7 @@ void CWindow::filePrint ( )
 bool CWindow::fileOpen ( )
 {
 	QStringList filters;
-	filters << tr( "BrikTrak Inventory" ) + " (*.bti)";
+	filters << tr( "BrickStore XML Data" ) + " (*.bsx)";
 	filters << tr( "All Files" ) + "(*.*)";
 
 	return fileOpen ( QFileDialog::getOpenFileName ( CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ), this, "FileDialog", tr( "Open File" ), 0 ));
@@ -578,7 +654,7 @@ bool CWindow::fileOpen ( )
 
 bool CWindow::fileOpen ( const QString &s )
 {
-	return ( !s. isEmpty ( ) && fileLoadFrom ( s, 'B' ));
+	return ( !s. isEmpty ( ) && fileLoadFrom ( s, "bsx" ));
 }
 
 bool CWindow::fileImportBrickLinkInventory ( const BrickLink::Item *preselect )
@@ -687,12 +763,12 @@ bool CWindow::fileImportBrickLinkStore ( )
 bool CWindow::fileImportBrickLinkXML ( )
 {
 	QStringList filters;
-	filters << tr( "BrickLink XML Inventory" ) + " (*.xml)";
+	filters << tr( "BrickLink XML File" ) + " (*.xml)";
 	filters << tr( "All Files" ) + "(*.*)";
 
 	QString s = QFileDialog::getOpenFileName ( CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ), this, "FileDialog", tr( "Import File" ), 0 );
 
-	bool b = ( !s. isEmpty ( ) && fileLoadFrom ( s, 'X', true ));
+	bool b = ( !s. isEmpty ( ) && fileLoadFrom ( s, "xml", true ));
 
 	if ( b ) {
 		m_caption = tr( "Import of %1" ). arg ( QFileInfo ( s ). fileName ( ));
@@ -701,8 +777,37 @@ bool CWindow::fileImportBrickLinkXML ( )
 	return b;
 }
 
-bool CWindow::fileLoadFrom ( const QString &name, char type, bool import_only )
+bool CWindow::fileImportBrikTrakInventory ( )
 {
+	QStringList filters;
+	filters << tr( "BrikTrak Inventory" ) + " (*.bti)";
+	filters << tr( "All Files" ) + "(*.*)";
+
+	QString s = QFileDialog::getOpenFileName ( CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ), this, "FileDialog", tr( "Import File" ), 0 );
+
+	bool b = ( !s. isEmpty ( ) && fileLoadFrom ( s, "bti", true ));
+
+	if ( b ) {
+		m_caption = tr( "Import of %1" ). arg ( QFileInfo ( s ). fileName ( ));
+		updateCaption ( );
+	}
+	return b;
+}
+
+bool CWindow::fileLoadFrom ( const QString &name, const char *type, bool import_only )
+{
+	BrickLink::ItemListXMLHint hint;
+
+	if ( qstrcmp ( type, "bsx" ) == 0 )
+		hint = BrickLink::XMLHint_BrickStore;
+	else if ( qstrcmp ( type, "bti" ) == 0 )
+		hint = BrickLink::XMLHint_BrikTrak;
+	else if ( qstrcmp ( type, "xml" ) == 0 )
+		hint = BrickLink::XMLHint_MassUpload;
+	else
+		return false;
+
+
 	QFile f ( name );
 
 	if ( !f. open ( IO_ReadOnly )) {
@@ -721,8 +826,24 @@ bool CWindow::fileLoadFrom ( const QString &name, char type, bool import_only )
 
 	if ( doc. setContent ( &f, &emsg, &eline, &ecol )) {
 		QDomElement root = doc. documentElement ( );
+		QDomElement item_elem;
 
-		items = BrickLink::inst ( )-> parseItemListXML ( root, type == 'B' ? BrickLink::XMLHint_BrikTrak : BrickLink::XMLHint_MassUpload, &invalid_items );
+		if ( hint == BrickLink::XMLHint_BrickStore ) {
+			for ( QDomNode n = root. firstChild ( ); !n. isNull ( ); n = n. nextSibling ( )) {
+				if ( !n. isElement ( ))
+					continue;
+
+				if ( n. nodeName ( ) == "Inventory" )
+					item_elem = n. toElement ( );
+				else if ( n. nodeName ( ) == "GuiState" )
+					parseGuiStateXML ( n. toElement ( ));
+			}
+		}
+		else {
+			item_elem = root;
+		}
+
+		items = BrickLink::inst ( )-> parseItemListXML ( item_elem, hint, &invalid_items );		
 	}
 	else {
 		CMessageBox::warning ( this, tr( "Could not parse the XML data in file %1:<br /><i>Line %2, column %3: %4</i>" ). arg ( CMB_BOLD( name )). arg ( eline ). arg ( ecol ). arg ( emsg ));
@@ -810,13 +931,14 @@ void CWindow::fileSave ( )
 	if ( fileName ( ). isEmpty ( ))
 		fileSaveAs ( );
 	else if ( isModified ( ))
-		fileSaveTo ( fileName ( ), 'B' );
+		fileSaveTo ( fileName ( ), "bsx" );
 }
+
 
 void CWindow::fileSaveAs ( )
 {
 	QStringList filters;
-	filters << tr( "BrikTrak Inventory" ) + " (*.bti)";
+	filters << tr( "BrickStore XML Data" ) + " (*.bsx)";
 
 	QString fn = fileName ( );
 
@@ -826,32 +948,62 @@ void CWindow::fileSaveAs ( )
 		if ( d. exists ( ))
 			fn = d. filePath ( m_caption );
 	}
+	if (( fn. right ( 4 ) == ".xml" ) || ( fn. right ( 4 ) == ".bti" ))
+		fn. truncate ( fn.length ( ) - 4 );
 
 	fn = QFileDialog::getSaveFileName ( fn, filters. join ( ";;" ), this, "FileDialog", tr( "Save File as" ), 0 );
 
 	if ( !fn. isNull ( )) {
-		if ( fn. right ( 4 ) != ".bti" )
-			fn += ".bti";
+		if ( fn. right ( 4 ) != ".bsx" )
+			fn += ".bsx";
 
 		if ( QFile::exists ( fn ) &&
 		     CMessageBox::question ( this, tr( "A file named %1 already exists. Are you sure you want to overwrite it?" ). arg( CMB_BOLD( fn )), CMessageBox::Yes, CMessageBox::No ) != CMessageBox::Yes )
 		     return;
 
-		fileSaveTo ( fn, 'B' );
+		fileSaveTo ( fn, "bsx" );
 	}
 }
 
-bool CWindow::fileSaveTo ( const QString &s, char type, bool export_only )
+
+bool CWindow::fileSaveTo ( const QString &s, const char *type, bool export_only )
 {
+	BrickLink::ItemListXMLHint hint;
+
+	if ( qstrcmp ( type, "bsx" ) == 0 )
+		hint = BrickLink::XMLHint_BrickStore;
+	else if ( qstrcmp ( type, "bti" ) == 0 )
+		hint = BrickLink::XMLHint_BrikTrak;
+	else if ( qstrcmp ( type, "xml" ) == 0 )
+		hint = BrickLink::XMLHint_MassUpload;
+	else
+		return false;
+
+
 	QFile f ( s );
 	if ( f. open ( IO_WriteOnly )) {
 		QApplication::setOverrideCursor ( QCursor( Qt::WaitCursor ));
 
-		QDomDocument doc ( QString::null );
+		QDomDocument doc (( hint == BrickLink::XMLHint_BrickStore ) ? QString( "BrickStoreXML" ) : QString::null );
+		doc. appendChild ( doc. createProcessingInstruction ( "xml", "version=\"1.0\" encoding=\"UTF-8\"" ));
+
 		QPtrList <BrickLink::InvItem> si = export_only ? sortedItems ( ) : items ( );
+		QDomElement item_elem = BrickLink::inst ( )-> createItemListXML ( doc, hint, &si );
 
-		doc. appendChild ( BrickLink::inst ( )-> createItemListXML ( doc, type == 'B' ? BrickLink::XMLHint_BrikTrak : BrickLink::XMLHint_MassUpload, &si ));
+		if ( hint == BrickLink::XMLHint_BrickStore ) {
+			QDomElement root = doc. createElement ( "BrickStoreXML" );
 
+			root. appendChild ( item_elem );
+			root. appendChild ( createGuiStateXML ( doc ));
+
+			doc. appendChild ( root );
+		}
+		else {
+			doc. appendChild ( item_elem );
+		}
+
+		// directly writing to an QTextStream would be way more efficient,
+		// but we could not handle any error this way :(
 		QCString output = doc. toCString ( );
 		bool ok = ( f. writeBlock ( output. data ( ), output. size ( ) - 1 ) ==  int( output. size ( ) - 1 )); // no 0-byte
 
@@ -873,34 +1025,6 @@ bool CWindow::fileSaveTo ( const QString &s, char type, bool export_only )
 		CMessageBox::warning ( this, tr( "Failed to open file %1 for writing." ). arg ( CMB_BOLD( s )));
 
 	return false;
-}
-
-void CWindow::updateErrorMask ( )
-{
-	Q_UINT64 em = 0;
-
-	if ( CConfig::inst ( )-> showInputErrors ( )) {
-		if ( CConfig::inst ( )-> simpleMode ( )) {
-			em = 1ULL << CItemView::Status     | \
-				1ULL << CItemView::Picture     | \
-				1ULL << CItemView::PartNo      | \
-				1ULL << CItemView::Description | \
-				1ULL << CItemView::Condition   | \
-				1ULL << CItemView::Color       | \
-				1ULL << CItemView::Quantity    | \
-				1ULL << CItemView::Remarks     | \
-				1ULL << CItemView::Category    | \
-				1ULL << CItemView::ItemType    | \
-				1ULL << CItemView::Weight      | \
-				1ULL << CItemView::YearReleased;
-		}
-		else {
-			em = ( 1ULL << CItemView::FieldCount ) - 1;
-		}
-	}
-
-	w_list-> setErrorMask ( em );
-	triggerStatisticsUpdate ( );
 }
 
 void CWindow::fileExportBrickLinkInvReqClipboard ( )
@@ -985,7 +1109,7 @@ void CWindow::fileExportBrickLinkXML ( )
 		return;
 
 	QStringList filters;
-	filters << tr( "BrickLink XML Inventory" ) + " (*.xml)";
+	filters << tr( "BrickLink XML File" ) + " (*.xml)";
 
 	QString s = QFileDialog::getSaveFileName ( CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ), this, "FileDialog", tr( "Export File" ), 0 );
 
@@ -997,7 +1121,29 @@ void CWindow::fileExportBrickLinkXML ( )
 		     CMessageBox::question ( this, tr( "A file named %1 already exists. Are you sure you want to overwrite it?" ). arg( CMB_BOLD( s )), CMessageBox::Yes, CMessageBox::No ) != CMessageBox::Yes )
 		     return;
 
-		fileSaveTo ( s, 'X', true );
+		fileSaveTo ( s, "xml", true );
+	}
+}
+
+void CWindow::fileExportBrikTrakInventory ( )
+{
+	if ( w_list-> errorCount ( ) && CMessageBox::warning ( this, tr( "This list contains items with errors.<br /><br />Do you really want to export this list?" ), CMessageBox::Yes, CMessageBox::No ) != CMessageBox::Yes )
+		return;
+
+	QStringList filters;
+	filters << tr( "BrikTrak Inventory" ) + " (*.bti)";
+
+	QString s = QFileDialog::getSaveFileName ( CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ), this, "FileDialog", tr( "Export File" ), 0 );
+
+	if ( !s. isNull ( )) {
+		if ( s. right ( 4 ) != ".bti" )
+			s += ".bti";
+
+		if ( QFile::exists ( s ) &&
+		     CMessageBox::question ( this, tr( "A file named %1 already exists. Are you sure you want to overwrite it?" ). arg( CMB_BOLD( s )), CMessageBox::Yes, CMessageBox::No ) != CMessageBox::Yes )
+		     return;
+
+		fileSaveTo ( s, "bti", true );
 	}
 }
 
@@ -1475,6 +1621,35 @@ void CWindow::setFileName ( const QString &str )
 	}
 	updateCaption ( );
 }
+
+void CWindow::updateErrorMask ( )
+{
+	Q_UINT64 em = 0;
+
+	if ( CConfig::inst ( )-> showInputErrors ( )) {
+		if ( CConfig::inst ( )-> simpleMode ( )) {
+			em = 1ULL << CItemView::Status     | \
+				1ULL << CItemView::Picture     | \
+				1ULL << CItemView::PartNo      | \
+				1ULL << CItemView::Description | \
+				1ULL << CItemView::Condition   | \
+				1ULL << CItemView::Color       | \
+				1ULL << CItemView::Quantity    | \
+				1ULL << CItemView::Remarks     | \
+				1ULL << CItemView::Category    | \
+				1ULL << CItemView::ItemType    | \
+				1ULL << CItemView::Weight      | \
+				1ULL << CItemView::YearReleased;
+		}
+		else {
+			em = ( 1ULL << CItemView::FieldCount ) - 1;
+		}
+	}
+
+	w_list-> setErrorMask ( em );
+	triggerStatisticsUpdate ( );
+}
+
 
 void CWindow::triggerUpdate ( )
 {

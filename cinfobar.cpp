@@ -144,9 +144,9 @@ void CInfoBar::setLook ( int il )
 				boxLayout ( )-> remove ( d-> m_link_info );
 				boxLayout ( )-> addWidget ( d-> m_taskbar );
 
-				d-> m_taskbar-> addItem ( d-> m_info_stack, CResource::inst ( )-> pixmap ( "22x22/edit_bl_catalog" ), tr( "Info" ), true, false );
-				d-> m_taskbar-> addItem ( d-> m_pg_info, CResource::inst ( )-> pixmap ( "22x22/edit_bl_priceguide" ), tr( "Price Guide" ), true, false );
-				d-> m_taskbar-> addItem ( d-> m_link_info, CResource::inst ( )-> pixmap ( "22x22/browser" ), tr( "Links" ), true, false );
+				d-> m_taskbar-> addItem ( d-> m_info_stack, CResource::inst ( )-> pixmap ( "sidebar/info" ),       tr( "Info" ),        true, false );
+				d-> m_taskbar-> addItem ( d-> m_pg_info,    CResource::inst ( )-> pixmap ( "sidebar/priceguide" ), tr( "Price Guide" ), true, false );
+				d-> m_taskbar-> addItem ( d-> m_link_info,  CResource::inst ( )-> pixmap ( "sidebar/links" ),      tr( "Links" ),       true, false );
 
 				d-> m_taskbar-> show ( );
 			}

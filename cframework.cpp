@@ -40,6 +40,7 @@
 #include "dlgsettingsimpl.h"
 #include "dlgdbupdateimpl.h"
 #include "cutility.h"
+#include "cspinner.h"
 
 #include "cframework.h"
 
@@ -149,7 +150,7 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Menubar/Edit" );
 	if ( sl. isEmpty ( ))  sl << "edit_cut" << "edit_copy" << "edit_paste" << "edit_delete" << "-" << "edit_select_all" << "edit_select_none" << "-" 
 		                      << "edit_additems" << "edit_subtractitems" << "edit_mergeitems" << "edit_partoutitems" << "-" 
-							  << "edit_price_to_priceguide" << "edit_price_inc_dec" << "edit_multiply_qty" << "edit_divide_qty" << "edit_set_condition" << "edit_set_sale" << "edit_set_remark" << "edit_set_reserved" << "-" 
+							  << "edit_multiply_qty" << "edit_divide_qty" << "edit_price_to_priceguide" << "edit_price_inc_dec" << "edit_set_sale" << "edit_set_condition" << "edit_set_remark" << "edit_set_reserved" << "-" 
 							  << "edit_reset_diffs" << "-"
 							  << "edit_bl_catalog" << "edit_bl_priceguide" << "edit_bl_lotsforsale";
 	createMenu ( AC_Edit, sl );
@@ -159,10 +160,10 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 	createMenu ( AC_View, sl );
 
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Menubar/Extras" );
-	if ( sl. isEmpty ( ))  sl << "settings_net" << "-" << "settings_update_database" << "-" << "settings_configure";
+	if ( sl. isEmpty ( ))  sl << "extras_net" << "-" << "extras_update_database" << "-" << "extras_configure";
 	// Make sure there is a possibility to open the pref dialog!
-	if ( sl. find ( "settings_configure" ) == sl. end ( ))
-		sl << "-" << "settings_configure";
+	if ( sl. find ( "extras_configure" ) == sl. end ( ))
+		sl << "-" << "extras_configure";
 	createMenu ( AC_Extras, sl );
 
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Menubar/Window" );
@@ -174,15 +175,17 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 	createMenu ( AC_Help, sl );
 
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/ContextMenu/Item" );
-	if ( sl. isEmpty ( ))  sl << "edit_cut" << "edit_copy" << "edit_paste" << "edit_delete" << "-" << "edit_select_all" << "-" << "edit_mergeitems" << "edit_partoutitems" << "-" << "edit_price_to_priceguide" << "edit_price_inc_dec" << "edit_multiply_qty" << "edit_set_condition" << "edit_set_sale" << "edit_set_remark" << "-" << "edit_bl_catalog" << "edit_bl_priceguide" << "edit_bl_lotsforsale";
+	if ( sl. isEmpty ( ))  sl << "edit_cut" << "edit_copy" << "edit_paste" << "edit_delete" << "-" << "edit_select_all" << "-" << "edit_mergeitems" << "edit_partoutitems" << "-" << "edit_multiply_qty" << "edit_price_to_priceguide" << "edit_price_inc_dec" << "edit_set_sale" << "edit_set_condition" << "edit_set_remark" << "-" << "edit_bl_catalog" << "edit_bl_priceguide" << "edit_bl_lotsforsale";
 	createMenu ( AC_Context, sl );
 
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Toolbar/Buttons" );
-	if ( sl. isEmpty ( ))  sl << "file_new" << "file_open" << "file_save" << "-" << "edit_cut" << "edit_copy" << "edit_paste" << "-" << "edit_additems" << "edit_price_inc_dec" << "edit_price_to_priceguide" << "-" << "edit_bl_catalog" << "edit_bl_priceguide" << "edit_bl_lotsforsale" << "-" << "settings_net"; // << "-" << "help_whatsthis";
+	if ( sl. isEmpty ( ))  sl << "file_new" << "file_open" << "file_save" << "-" << "file_import" << "file_export" << "-" << "edit_cut" << "edit_copy" << "edit_paste" << "-" << "edit_additems" << "edit_subtractitems" << "edit_mergeitems" << "edit_partoutitems" << "-" << "edit_price_to_priceguide" << "edit_price_inc_dec" << "-" << "edit_bl_catalog" << "edit_bl_priceguide" << "edit_bl_lotsforsale" << "-" << "extras_net"; // << "-" << "help_whatsthis";
 	m_toolbar = createToolBar ( tr( "Toolbar" ), sl );
 	connect ( m_toolbar, SIGNAL( visibilityChanged ( bool )), findAction ( "settings_view_toolbar" ), SLOT( setOn ( bool )));
 
 	createStatusBar ( );
+
+	connect ( m_progress, SIGNAL( statusChange ( bool )), m_spinner, SLOT( setActive ( bool )));
 
 	m_infobar = new CInfoBar ( tr( "Infobar" ), this );
 	connect ( m_infobar, SIGNAL( visibilityChanged ( bool )), findAction ( "settings_view_infobar" ), SLOT( setOn ( bool )));
@@ -458,9 +461,21 @@ QToolBar *CFrameWork::createToolBar ( const QString &label, const QStringList &a
 				a-> addTo ( t );
 		}
 	}
-//	t-> setStretchableWidget ( new QWidget ( t ));
-//	t-> setHorizontallyStretchable ( true );
-//	t-> setVerticallyStretchable ( true );
+
+	t-> setStretchableWidget ( new QWidget ( t ));
+	t-> setHorizontallyStretchable ( true );
+	t-> setVerticallyStretchable ( true );
+
+	QWidget *sw1 = new QWidget ( t );
+	sw1-> setFixedSize ( 4, 4 );
+
+	m_spinner = new CSpinner ( t, "spinner" );
+	m_spinner-> setPixmap ( CResource::inst ( )-> pixmap ( "spinner" ));
+	m_spinner-> show ( );
+
+	QWidget *sw2 = new QWidget ( t );
+	sw2-> setFixedSize ( 4, 4 );
+
 	t-> hide ( );
 	return t;
 }
@@ -507,17 +522,18 @@ void CFrameWork::createActions ( )
 
 	g = new QActionGroup ( this, "file_import" );
 	g-> setText ( tr( "Import" ));
+	g-> setExclusive ( false );
 	g-> setUsesDropDown ( true );
 	m_actions [AC_File]. append ( g );
-
-	a = new QAction ( g, "file_import_bl_xml" );
-	a-> setText ( tr( "BrickLink XML..." ));
-	connect ( a, SIGNAL( activated ( )), this, SLOT( fileImportBrickLinkXML ( )));
-	m_actions [AC_File]. append ( a );
 
 	a = new QAction ( g, "file_import_bl_inventory" );
 	a-> setText ( tr( "BrickLink Inventory..." ));
 	connect ( a, SIGNAL( activated ( )), this, SLOT( fileImportBrickLinkInventory ( )));
+	m_actions [AC_File]. append ( a );
+
+	a = new QAction ( g, "file_import_bl_xml" );
+	a-> setText ( tr( "BrickLink XML..." ));
+	connect ( a, SIGNAL( activated ( )), this, SLOT( fileImportBrickLinkXML ( )));
 	m_actions [AC_File]. append ( a );
 
 	a = new QAction ( g, "file_import_bl_order" );
@@ -535,9 +551,14 @@ void CFrameWork::createActions ( )
 	connect ( a, SIGNAL( activated ( )), this, SLOT( fileImportLDrawModel ( )));
 	m_actions [AC_File]. append ( a );
 
+	a = new QAction ( g, "file_import_briktrak" );
+	a-> setText ( tr( "BrikTrak Inventory..." ));
+	connect ( a, SIGNAL( activated ( )), this, SLOT( fileImportBrikTrakInventory ( )));
+	m_actions [AC_File]. append ( a );
 
 	g = new QActionGroup ( this, "file_export" );
 	g-> setText ( tr( "Export" ));
+	g-> setExclusive ( false );
 	g-> setUsesDropDown ( true );
 	m_actions [AC_File]. append ( g );
 
@@ -561,6 +582,9 @@ void CFrameWork::createActions ( )
 	a-> setText ( tr( "BrickLink Wanted List XML to Clipboard" ));
 	m_actions [AC_File]. append ( a );
 
+	a = new QAction ( g, "file_export_briktrak" );
+	a-> setText ( tr( "BrikTrak Inventory..." ));
+	m_actions [AC_File]. append ( a );
 
 	a = new QAction ( this, "file_close" );
 	a-> setText ( tr( "Close" ));
@@ -671,17 +695,17 @@ void CFrameWork::createActions ( )
 	m_actions [AC_View]. append ( a );
 
 
-	a = new QAction ( this, "settings_update_database" );
+	a = new QAction ( this, "extras_update_database" );
 	a-> setText ( tr( "Update Database" ));
 	connect ( a, SIGNAL( activated ( )), this, SLOT( updateDatabase ( )));
 	m_actions [AC_Extras]. append ( a );
 
-	a = new QAction ( this, "settings_configure" );
+	a = new QAction ( this, "extras_configure" );
 	a-> setText ( tr( "Configure..." ));
 	connect ( a, SIGNAL( activated ( )), this, SLOT( configure ( )));
 	m_actions [AC_Extras]. append ( a );
 
-	g = new QActionGroup ( this, "settings_net" );
+	g = new QActionGroup ( this, "extras_net" );
 	g-> setExclusive ( true );
 	connect ( g, SIGNAL( selected ( QAction * )), this, SLOT( setOnlineStatus ( QAction * )));
 	m_actions [AC_Extras]. append ( g );
@@ -840,6 +864,12 @@ void CFrameWork::fileOpenRecent ( int i )
 	}
 }
 
+void CFrameWork::fileImportBrikTrakInventory ( )
+{
+	CWindow *w = createWindow ( );
+	showOrDeleteWindow ( w, w-> fileImportBrikTrakInventory ( ));
+}
+
 void CFrameWork::fileImportBrickLinkInventory ( )
 {
 	fileImportBrickLinkInventory ( 0 );
@@ -981,6 +1011,7 @@ void CFrameWork::connectAllActions ( bool do_connect, CWindow *window )
 	connectAction ( do_connect, "file_save", window, SLOT( fileSave ( )));
 	connectAction ( do_connect, "file_saveas", window, SLOT( fileSaveAs ( )));
 	connectAction ( do_connect, "file_print", window, SLOT( filePrint ( )));
+	connectAction ( do_connect, "file_export_briktrak", window, SLOT( fileExportBrikTrakInventory ( )));
 	connectAction ( do_connect, "file_export_bl_xml", window, SLOT( fileExportBrickLinkXML ( )));
 	connectAction ( do_connect, "file_export_bl_xml_clip", window, SLOT( fileExportBrickLinkXMLClipboard ( )));
 	connectAction ( do_connect, "file_export_bl_update_clip", window, SLOT( fileExportBrickLinkUpdateClipboard ( )));

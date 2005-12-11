@@ -989,20 +989,22 @@ bool BrickLink::readPeeronColors ( const QString &name )
 	return false;
 }
 
+
 QPtrList<BrickLink::InvItem> *BrickLink::parseItemListXML ( QDomElement root, ItemListXMLHint hint, uint *invalid_items )
 {
-	bool root_node_valid = false;
+	QString roottag, itemtag;
 
 	switch ( hint ) {
-		case XMLHint_BrikTrak  : root_node_valid =  ( root. nodeName ( ) == "GRID" ); break;
-		case XMLHint_Order     : root_node_valid =  ( root. nodeName ( ) == "ORDER" ); break;
+		case XMLHint_BrikTrak  : roottag = "GRID"; itemtag = "ITEM"; break;
+		case XMLHint_Order     : roottag = "ORDER"; itemtag = "ITEM"; break;
 		case XMLHint_MassUpload:
 		case XMLHint_MassUpdate:
 		case XMLHint_WantedList:
-		case XMLHint_Inventory : root_node_valid =  ( root. nodeName ( ) == "INVENTORY" ); break;
+		case XMLHint_Inventory : roottag = "INVENTORY"; itemtag = "ITEM"; break;
+		case XMLHint_BrickStore: roottag = "Inventory"; itemtag = "Item"; break;
 	}
 
-	if ( !root_node_valid )
+	if ( root. nodeName ( ) != roottag )
 		return 0;
 
 	QPtrList<BrickLink::InvItem> *inv = new QPtrList<InvItem> ( );
@@ -1011,7 +1013,7 @@ QPtrList<BrickLink::InvItem> *BrickLink::parseItemListXML ( QDomElement root, It
 	uint incomplete = 0;
 
 	for ( QDomNode itemn = root. firstChild ( ); !itemn. isNull ( ); itemn = itemn. nextSibling ( )) {
-		if ( itemn. nodeName ( ) != "ITEM" )
+		if ( itemn. nodeName ( ) != itemtag )
 			continue;
 
 		InvItem *ii = new InvItem ( 0, 0 );
@@ -1027,51 +1029,47 @@ QPtrList<BrickLink::InvItem> *BrickLink::parseItemListXML ( QDomElement root, It
 			QString tag = n. toElement ( ). tagName ( );
 			QString val = n. toElement ( ). text ( );
 
-			if ( tag == ( hint == XMLHint_BrikTrak ? "PART_NO" : "ITEMID" ))
-				itemid = val;
-			else if ( tag == ( hint == XMLHint_BrikTrak ? "COLOR_ID" : "COLOR" ))
-				colorid = val;
-			else if ( tag == ( hint == XMLHint_BrikTrak ? "CATEGORY_ID" : "CATEGORY" ))
-				categoryid = val;
-			else if ( tag == ( hint == XMLHint_BrikTrak ? "TYPE" : "ITEMTYPE" ))
-				itemtypeid = val;
-			else if ( tag == "IMAGE" )
-				ii-> setCustomPictureUrl ( val );
-			else if ( tag == "PRICE" )
-				ii-> setPrice ( money_t::fromCString ( val ));
-			else if ( tag == "BULK" )
-				ii-> setBulkQuantity ( val. toInt ( ));
-			else if ( tag == "QTY" )
-				ii-> setQuantity ( val. toInt ( ));
-			else if ( tag == "SALE" )
-				ii-> setSale ( val. toInt ( ));
-			else if ( tag == "CONDITION" )
-				ii-> setCondition ( val == "N" ? New : Used );
-			else if ( tag == ( hint == XMLHint_BrikTrak ? "NOTES" : "DESCRIPTION" ))
-				ii-> setComments ( val );
-			else if ( tag == "REMARKS" )
-				ii-> setRemarks ( val );
-			else if ( tag == "TQ1" )
-				ii-> setTierQuantity ( 0, val. toInt ( ));
-			else if ( tag == "TQ2" )
-				ii-> setTierQuantity ( 1, val. toInt ( ));
-			else if ( tag == "TQ3" )
-				ii-> setTierQuantity ( 2, val. toInt ( ));
-			else if ( tag == "TP1" )
-				ii-> setTierPrice ( 0, money_t::fromCString ( val ));
-			else if ( tag == "TP2" )
-				ii-> setTierPrice ( 1, money_t::fromCString ( val ));
-			else if ( tag == "TP3" )
-				ii-> setTierPrice ( 2, money_t::fromCString ( val ));
-			else if ( tag == "LOTID" )
-				ii-> setLotId ( val. toUInt ( ));
-			else if ( tag == "RETAIN" )
-				ii-> setRetain ( val == "Y" );
-			else if ( tag == "STOCKROOM" )
-				ii-> setStockroom ( val == "Y" );
-			else if ( tag == "BUYERUSERNAME" )
-				ii-> setReserved ( val );
+			// ### BrickLink XML & BrikTrak ###
+			if ( hint != XMLHint_BrickStore ) {
+				if ( tag == ( hint == XMLHint_BrikTrak ? "PART_NO" : "ITEMID" ))
+					itemid = val;
+				else if ( tag == ( hint == XMLHint_BrikTrak ? "COLOR_ID" : "COLOR" ))
+					colorid = val;
+				else if ( tag == ( hint == XMLHint_BrikTrak ? "CATEGORY_ID" : "CATEGORY" ))
+					categoryid = val;
+				else if ( tag == ( hint == XMLHint_BrikTrak ? "TYPE" : "ITEMTYPE" ))
+					itemtypeid = val;
+				else if ( tag == "IMAGE" )
+					ii-> setCustomPictureUrl ( val );
+				else if ( tag == "PRICE" )
+					ii-> setPrice ( money_t::fromCString ( val ));
+				else if ( tag == "BULK" )
+					ii-> setBulkQuantity ( val. toInt ( ));
+				else if ( tag == "QTY" )
+					ii-> setQuantity ( val. toInt ( ));
+				else if ( tag == "SALE" )
+					ii-> setSale ( val. toInt ( ));
+				else if ( tag == "CONDITION" )
+					ii-> setCondition ( val == "N" ? New : Used );
+				else if ( tag == ( hint == XMLHint_BrikTrak ? "NOTES" : "DESCRIPTION" ))
+					ii-> setComments ( val );
+				else if ( tag == "REMARKS" )
+					ii-> setRemarks ( val );
+				else if ( tag == "TQ1" )
+					ii-> setTierQuantity ( 0, val. toInt ( ));
+				else if ( tag == "TQ2" )
+					ii-> setTierQuantity ( 1, val. toInt ( ));
+				else if ( tag == "TQ3" )
+					ii-> setTierQuantity ( 2, val. toInt ( ));
+				else if ( tag == "TP1" )
+					ii-> setTierPrice ( 0, money_t::fromCString ( val ));
+				else if ( tag == "TP2" )
+					ii-> setTierPrice ( 1, money_t::fromCString ( val ));
+				else if ( tag == "TP3" )
+					ii-> setTierPrice ( 2, money_t::fromCString ( val ));
+			}
 
+			// ### BrikTrak import ###
 			if ( hint == XMLHint_BrikTrak ) {
 				if ( tag == "PART_DESCRIPTION" )
 					itemname = val;
@@ -1087,10 +1085,19 @@ QPtrList<BrickLink::InvItem> *BrickLink::parseItemListXML ( QDomElement root, It
 						case 5: ii-> setStatus ( InvItem::Unknown ); break;
 					}
 				}
-				else if ( tag == "TOTAL_WEIGHT" ) {
-					ii-> setWeight ( cLocale ( ). toDouble ( val ));
-				}
+
+				// the following tags are BrickStore extensions
+				else if ( tag == "LOTID" )
+					ii-> setLotId ( val. toUInt ( ));
+				else if ( tag == "RETAIN" )
+					ii-> setRetain ( val == "Y" );
+				else if ( tag == "STOCKROOM" )
+					ii-> setStockroom ( val == "Y" );
+				else if ( tag == "BUYERUSERNAME" )
+					ii-> setReserved ( val );
 			}
+
+			// ### Inventory Request ###
 			else if ( hint == XMLHint_Inventory ) {
 				if (( tag == "EXTRA" ) && ( val == "Y" ))
 					ii-> setStatus ( InvItem::Extra );
@@ -1098,6 +1105,82 @@ QPtrList<BrickLink::InvItem> *BrickLink::parseItemListXML ( QDomElement root, It
 					itemname = val;
 				else if ( tag == "COLORNAME" ) // BrickStore extension for Peeron inventories
 					colorname = val;
+			}
+
+			// ### BrickStore BSX ###
+			else if ( hint == XMLHint_BrickStore ) {
+				if ( tag == "ItemID" )
+					itemid = val;
+				else if ( tag == "ColorID" )
+					colorid = val;
+				else if ( tag == "CategoryID" )
+					categoryid = val;
+				else if ( tag == "ItemTypeID" )
+					itemtypeid = val;
+				else if ( tag == "ItemName" )
+					itemname = val;
+				else if ( tag == "ColorName" )
+					colorname = val;
+				else if ( tag == "CategoryName" )
+					categoryname = val;
+				else if ( tag == "ItemTypeName" )
+					itemtypename = val;
+				else if ( tag == "Image" )
+					ii-> setCustomPictureUrl ( val );
+				else if ( tag == "Price" )
+					ii-> setPrice ( money_t::fromCString ( val ));
+				else if ( tag == "Bulk" )
+					ii-> setBulkQuantity ( val. toInt ( ));
+				else if ( tag == "Qty" )
+					ii-> setQuantity ( val. toInt ( ));
+				else if ( tag == "Sale" )
+					ii-> setSale ( val. toInt ( ));
+				else if ( tag == "Condition" )
+					ii-> setCondition ( val == "N" ? New : Used );
+				else if ( tag == "Comments" )
+					ii-> setComments ( val );
+				else if ( tag == "Remarks" )
+					ii-> setRemarks ( val );
+				else if ( tag == "TQ1" )
+					ii-> setTierQuantity ( 0, val. toInt ( ));
+				else if ( tag == "TQ2" )
+					ii-> setTierQuantity ( 1, val. toInt ( ));
+				else if ( tag == "TQ3" )
+					ii-> setTierQuantity ( 2, val. toInt ( ));
+				else if ( tag == "TP1" )
+					ii-> setTierPrice ( 0, money_t::fromCString ( val ));
+				else if ( tag == "TP2" )
+					ii-> setTierPrice ( 1, money_t::fromCString ( val ));
+				else if ( tag == "TP3" )
+					ii-> setTierPrice ( 2, money_t::fromCString ( val ));
+				else if ( tag == "Status" ) {
+					InvItem::Status st = InvItem::Include;
+
+					if ( val == "X" )
+						st = InvItem::Exclude;
+					else if ( val == "I" )
+						st = InvItem::Include;
+					else if ( val == "E" )
+						st = InvItem::Extra;
+					else if ( val == "?" )
+						st = InvItem::Unknown;
+
+					ii-> setStatus ( st );
+				}
+				else if ( tag == "LotID" )
+					ii-> setLotId ( val. toUInt ( ));
+				else if ( tag == "Retain" )
+					ii-> setRetain ( true );
+				else if ( tag == "Stockroom" )
+					ii-> setStockroom ( true );
+				else if ( tag == "Reserved" )
+					ii-> setReserved ( val );
+				else if ( tag == "TotalWeight" )
+					ii-> setWeight ( cLocale ( ). toDouble ( val ));
+				else if ( tag == "OrigPrice" )
+					ii-> setOrigPrice ( money_t::fromCString ( val ));
+				else if ( tag == "OrigQty" )
+					ii-> setOrigQuantity ( val. toInt ( ));
 			}
 		}
 
@@ -1168,18 +1251,20 @@ QPtrList<BrickLink::InvItem> *BrickLink::parseItemListXML ( QDomElement root, It
 
 QDomElement BrickLink::createItemListXML ( QDomDocument doc, ItemListXMLHint hint, const QPtrList<InvItem> *items, QMap <QString, QString> *extra )
 {
-	QDomElement root;
+	QString roottag, itemtag;
 
 	switch ( hint ) {
-		case XMLHint_BrikTrak  : root = doc. createElement ( "GRID" ); break;
-		case XMLHint_Order     : root = doc. createElement ( "ORDER" ); break;
+		case XMLHint_BrikTrak  : roottag = "GRID"; itemtag = "ITEM"; break;
 		case XMLHint_MassUpload:
 		case XMLHint_MassUpdate:
 		case XMLHint_WantedList:
-		case XMLHint_Inventory : root = doc. createElement ( "INVENTORY" ); break;
+		case XMLHint_Inventory : roottag = "INVENTORY"; itemtag = "ITEM"; break;
+		case XMLHint_BrickStore: roottag = "Inventory"; itemtag = "Item"; break;
 	}
 
-	if ( root. isNull ( ) || !items )
+	QDomElement root = doc. createElement ( roottag );
+	
+	if ( root. isNull ( ) || roottag. isNull ( ) || itemtag. isEmpty ( ) || !items )
 		return root;
 
 	for ( QPtrListIterator<InvItem> it ( *items ); it. current ( ); ++it ) {
@@ -1188,7 +1273,7 @@ QDomElement BrickLink::createItemListXML ( QDomDocument doc, ItemListXMLHint hin
 		if ( ii-> isIncomplete ( ))
 			continue;
 		
-		if (( hint != XMLHint_BrikTrak ) && ( ii-> status ( ) == InvItem::Exclude ))
+		if (( ii-> status ( ) == InvItem::Exclude ) && ( hint != XMLHint_BrickStore && hint != XMLHint_BrikTrak ))
 			continue;
 
 		if ( hint == XMLHint_MassUpdate ) {
@@ -1198,11 +1283,12 @@ QDomElement BrickLink::createItemListXML ( QDomDocument doc, ItemListXMLHint hin
 				continue;
 		}
 
-		QDomElement item = doc. createElement ( "ITEM" );
+		QDomElement item = doc. createElement ( itemtag );
 		root. appendChild ( item );
 
+		// ### MASS UPDATE ###
 		if ( hint == XMLHint_MassUpdate ) {
-			item. appendChild ( doc. createElement ( "LOTID"      ). appendChild ( doc. createTextNode ( QString::number ( ii-> lotId ( )))). parentNode ( ));
+			item. appendChild ( doc. createElement ( "LOTID" )). appendChild ( doc. createTextNode ( QString::number ( ii-> lotId ( ))). parentNode ( ));
 
 			int qdiff = ii-> quantity ( ) - ii-> origQuantity ( );
 			money_t pdiff = ii-> price ( ) - ii-> origPrice ( );
@@ -1213,46 +1299,123 @@ QDomElement BrickLink::createItemListXML ( QDomDocument doc, ItemListXMLHint hin
 				item. appendChild ( doc. createElement ( "QTY"    ). appendChild ( doc. createTextNode (( qdiff > 0 ? "+" : "" ) + QString::number ( qdiff ))). parentNode ( ));
 			else if ( qdiff && ( ii-> quantity ( ) <= 0 ))
 				item. appendChild ( doc. createElement ( "DELETE" ));
-			
-			continue; // nothing left to do...
 		}
 
-		item. appendChild ( doc. createElement ( hint == XMLHint_BrikTrak ? "PART_NO" : "ITEMID"       ). appendChild ( doc. createTextNode ( QString ( ii-> item ( )-> id ( )))). parentNode ( ));
-		item. appendChild ( doc. createElement ( hint == XMLHint_BrikTrak ? "COLOR_ID" : "COLOR"       ). appendChild ( doc. createTextNode ( QString::number ( ii-> color ( )-> id ( )))). parentNode ( ));
-		item. appendChild ( doc. createElement ( hint == XMLHint_BrikTrak ? "CATEGORY_ID" : "CATEGORY" ). appendChild ( doc. createTextNode ( QString::number ( ii-> category ( )-> id ( )))). parentNode ( ));
-		item. appendChild ( doc. createElement ( hint == XMLHint_BrikTrak ? "TYPE" : "ITEMTYPE"        ). appendChild ( doc. createTextNode ( QChar ( ii-> itemType ( )-> id ( )))). parentNode ( ));
+		// ### BRIK TRAK EXPORT ###
+		else if ( hint == XMLHint_BrikTrak ) {
+			item. appendChild ( doc. createElement ( "PART_NO"     ). appendChild ( doc. createTextNode ( QString ( ii-> item ( )-> id ( )))). parentNode ( ));
+			item. appendChild ( doc. createElement ( "COLOR_ID"    ). appendChild ( doc. createTextNode ( QString::number ( ii-> color ( )-> id ( )))). parentNode ( ));
+			item. appendChild ( doc. createElement ( "CATEGORY_ID" ). appendChild ( doc. createTextNode ( QString::number ( ii-> category ( )-> id ( )))). parentNode ( ));
+			item. appendChild ( doc. createElement ( "TYPE"        ). appendChild ( doc. createTextNode ( QChar ( ii-> itemType ( )-> id ( )))). parentNode ( ));
 
-		if ( hint == XMLHint_BrikTrak ) {
-			// append some tags for BrikTrak compatibility
 			item. appendChild ( doc. createElement ( "CATEGORY"         ). appendChild ( doc. createTextNode ( ii-> category ( )-> name ( ))). parentNode ( ));
 			item. appendChild ( doc. createElement ( "PART_DESCRIPTION" ). appendChild ( doc. createTextNode ( ii-> item ( )-> name ( ))). parentNode ( ));
 			item. appendChild ( doc. createElement ( "COLOR"            ). appendChild ( doc. createTextNode ( ii-> color ( )-> name ( ))). parentNode ( ));
 			item. appendChild ( doc. createElement ( "TOTAL_VALUE"      ). appendChild ( doc. createTextNode (( ii-> price ( ) * ii-> quantity ( )). toCString ( ))). parentNode ( ));
 			
 			int cb = 1;
-
 			switch ( ii-> status ( )) {
 				case InvItem::Exclude: cb = 0; break;
 				case InvItem::Include: cb = 1; break;
 				case InvItem::Extra  : cb = 3; break;
 				case InvItem::Unknown: cb = 5; break;
 			}
-			item. appendChild ( doc. createElement ( "CHECKBOX" ). appendChild ( doc. createTextNode ( QString::number ( cb ))). parentNode ( ));
-			item. appendChild ( doc. createElement ( "LOTID" ). appendChild ( doc. createTextNode ( QString::number ( ii-> lotId ( )))). parentNode ( ));
-		}
-		else if ( hint == XMLHint_WantedList ) {
-			if ( ii-> quantity ( ))
-				item. appendChild ( doc. createElement ( "MINQTY" ). appendChild ( doc. createTextNode ( QString::number ( ii-> quantity ( )))). parentNode ( ));
-			if ( ii-> price ( ) != 0 )
-				item. appendChild ( doc. createElement ( "MAXPRICE" ). appendChild ( doc. createTextNode ( ii-> price ( ). toCString ( ))). parentNode ( ));
-		}
-		else if ( hint == XMLHint_Inventory ) {
-			item. appendChild ( doc. createElement ( "QTY" ). appendChild ( doc. createTextNode ( QString::number ( ii-> quantity ( )))). parentNode ( ));
-			if ( ii-> status ( ) == InvItem::Extra )
-				item. appendChild ( doc. createElement ( "EXTRA" ). appendChild ( doc. createTextNode ( "Y" )). parentNode ( ));
+			item. appendChild ( doc. createElement ( "CHECKBOX"  ). appendChild ( doc. createTextNode ( QString::number ( cb ))). parentNode ( ));
+			item. appendChild ( doc. createElement ( "QTY"       ). appendChild ( doc. createTextNode ( QString::number ( ii-> quantity ( )))). parentNode ( ));
+			item. appendChild ( doc. createElement ( "PRICE"     ). appendChild ( doc. createTextNode ( ii-> price ( ). toCString ( ))). parentNode ( ));
+			item. appendChild ( doc. createElement ( "CONDITION" ). appendChild ( doc. createTextNode (( ii-> condition ( ) == New ) ? "N" : "U" )). parentNode ( ));
+
+			if ( !ii-> customPictureUrl ( ). isEmpty ( ))
+				item. appendChild ( doc. createElement ( "IMAGE"   ). appendChild ( doc. createTextNode ( ii-> customPictureUrl ( ))). parentNode ( ));
+			if ( ii-> bulkQuantity ( ) != 1 )
+				item. appendChild ( doc. createElement ( "BULK"    ). appendChild ( doc. createTextNode ( QString::number ( ii-> bulkQuantity ( )))). parentNode ( ));
+			if ( ii-> sale ( ))
+				item. appendChild ( doc. createElement ( "SALE"    ). appendChild ( doc. createTextNode ( QString::number ( ii-> sale ( )))). parentNode ( ));
+			if ( !ii-> comments ( ). isEmpty ( ))
+				item. appendChild ( doc. createElement ( "NOTES"   ). appendChild ( doc. createTextNode ( ii-> comments ( ))). parentNode ( ));
+			if ( !ii-> remarks ( ). isEmpty ( ))
+				item. appendChild ( doc. createElement ( "REMARKS" ). appendChild ( doc. createTextNode ( ii-> remarks ( ))). parentNode ( ));
+
+			if ( ii-> tierQuantity ( 0 )) {
+				item. appendChild ( doc. createElement ( "TQ1"     ). appendChild ( doc. createTextNode ( QString::number ( ii-> tierQuantity ( 0 )))). parentNode ( ));
+				item. appendChild ( doc. createElement ( "TP1"     ). appendChild ( doc. createTextNode ( ii-> tierPrice ( 0 ). toCString ( ))). parentNode ( ));
+				item. appendChild ( doc. createElement ( "TQ2"     ). appendChild ( doc. createTextNode ( QString::number ( ii-> tierQuantity ( 1 )))). parentNode ( ));
+				item. appendChild ( doc. createElement ( "TP2"     ). appendChild ( doc. createTextNode ( ii-> tierPrice ( 1 ). toCString ( ))). parentNode ( ));
+				item. appendChild ( doc. createElement ( "TQ3"     ). appendChild ( doc. createTextNode ( QString::number ( ii-> tierQuantity ( 2 )))). parentNode ( ));
+				item. appendChild ( doc. createElement ( "TP3"     ). appendChild ( doc. createTextNode ( ii-> tierPrice ( 2 ). toCString ( ))). parentNode ( ));
+			}
 		}
 
-		if ( hint == XMLHint_BrikTrak || hint == XMLHint_MassUpload ) {
+		// ### BrickStore BSX ###
+		else if ( hint == XMLHint_BrickStore ) {
+			item. appendChild ( doc. createElement ( "ItemID"       ). appendChild ( doc. createTextNode ( QString ( ii-> item ( )-> id ( )))). parentNode ( ));
+			item. appendChild ( doc. createElement ( "ItemTypeID"   ). appendChild ( doc. createTextNode ( QChar ( ii-> itemType ( )-> id ( )))). parentNode ( ));
+			item. appendChild ( doc. createElement ( "ColorID"      ). appendChild ( doc. createTextNode ( QString::number ( ii-> color ( )-> id ( )))). parentNode ( ));
+
+			// this extra information is useful, if the e.g. the color- or item-id 
+			// are no longer available after a database update
+			item. appendChild ( doc. createElement ( "ItemName"     ). appendChild ( doc. createTextNode ( ii-> item ( )-> name ( ))). parentNode ( ));
+			item. appendChild ( doc. createElement ( "ItemTypeName" ). appendChild ( doc. createTextNode ( ii-> itemType ( )-> name ( ))). parentNode ( ));
+			item. appendChild ( doc. createElement ( "ColorName"    ). appendChild ( doc. createTextNode ( ii-> color ( )-> name ( ))). parentNode ( ));
+			item. appendChild ( doc. createElement ( "CategoryID"   ). appendChild ( doc. createTextNode ( QString::number ( ii-> category ( )-> id ( )))). parentNode ( ));
+			item. appendChild ( doc. createElement ( "CategoryName" ). appendChild ( doc. createTextNode ( ii-> category ( )-> name ( ))). parentNode ( ));
+			
+			const char *st;
+			switch ( ii-> status ( )) {
+				case InvItem::Unknown: st = "?"; break;
+				case InvItem::Extra  : st = "E"; break;
+				case InvItem::Exclude: st = "X"; break;
+				case InvItem::Include:
+				default              : st = "I"; break;
+			}
+			item. appendChild ( doc. createElement ( "Status"       ). appendChild ( doc. createTextNode ( st )). parentNode ( ));
+			item. appendChild ( doc. createElement ( "Qty"          ). appendChild ( doc. createTextNode ( QString::number ( ii-> quantity ( )))). parentNode ( ));
+			item. appendChild ( doc. createElement ( "Price"        ). appendChild ( doc. createTextNode ( ii-> price ( ). toCString ( ))). parentNode ( ));
+			item. appendChild ( doc. createElement ( "Condition"    ). appendChild ( doc. createTextNode (( ii-> condition ( ) == New ) ? "N" : "U" )). parentNode ( ));
+
+			if ( !ii-> customPictureUrl ( ). isEmpty ( ))
+				item. appendChild ( doc. createElement ( "Image"    ). appendChild ( doc. createTextNode ( ii-> customPictureUrl ( ))). parentNode ( ));
+			if ( ii-> bulkQuantity ( ) != 1 )
+				item. appendChild ( doc. createElement ( "Bulk"     ). appendChild ( doc. createTextNode ( QString::number ( ii-> bulkQuantity ( )))). parentNode ( ));
+			if ( ii-> sale ( ))
+				item. appendChild ( doc. createElement ( "Sale"     ). appendChild ( doc. createTextNode ( QString::number ( ii-> sale ( )))). parentNode ( ));
+			if ( !ii-> comments ( ). isEmpty ( ))
+				item. appendChild ( doc. createElement ( "Comments" ). appendChild ( doc. createTextNode ( ii-> comments ( ))). parentNode ( ));
+			if ( !ii-> remarks ( ). isEmpty ( ))
+				item. appendChild ( doc. createElement ( "Remarks"  ). appendChild ( doc. createTextNode ( ii-> remarks ( ))). parentNode ( ));
+			if ( ii-> retain ( ))
+				item. appendChild ( doc. createElement ( "Retain"   ));
+			if ( ii-> stockroom ( ))
+				item. appendChild ( doc. createElement ( "Stockroom" ));
+			if ( ii-> reserved ( ))
+				item. appendChild ( doc. createElement ( "Reserved" ). appendChild ( doc. createTextNode ( ii-> reserved ( ))). parentNode ( ));
+			if ( ii-> lotId ( ))
+				item. appendChild ( doc. createElement ( "LotID"    ). appendChild ( doc. createTextNode ( QString::number ( ii-> lotId ( )))). parentNode ( ));
+
+			if ( ii-> tierQuantity ( 0 )) {
+				item. appendChild ( doc. createElement ( "TQ1" ). appendChild ( doc. createTextNode ( QString::number ( ii-> tierQuantity ( 0 )))). parentNode ( ));
+				item. appendChild ( doc. createElement ( "TP1" ). appendChild ( doc. createTextNode ( ii-> tierPrice ( 0 ). toCString ( ))). parentNode ( ));
+				item. appendChild ( doc. createElement ( "TQ2" ). appendChild ( doc. createTextNode ( QString::number ( ii-> tierQuantity ( 1 )))). parentNode ( ));
+				item. appendChild ( doc. createElement ( "TP2" ). appendChild ( doc. createTextNode ( ii-> tierPrice ( 1 ). toCString ( ))). parentNode ( ));
+				item. appendChild ( doc. createElement ( "TQ3" ). appendChild ( doc. createTextNode ( QString::number ( ii-> tierQuantity ( 2 )))). parentNode ( ));
+				item. appendChild ( doc. createElement ( "TP3" ). appendChild ( doc. createTextNode ( ii-> tierPrice ( 2 ). toCString ( ))). parentNode ( ));
+			}
+
+			if ( ii-> m_weight > 0 )
+				item. appendChild ( doc. createElement ( "TotalWeight"  ). appendChild ( doc. createTextNode ( cLocale ( ). toString ( ii-> weight ( ), 'f', 4 ))). parentNode ( ));
+			if ( ii-> origPrice ( ) != ii-> price ( )) 
+				item. appendChild ( doc. createElement ( "OrigPrice"  ). appendChild ( doc. createTextNode ( cLocale ( ). toString ( ii-> weight ( ), 'f', 4 ))). parentNode ( ));
+			if ( ii-> origQuantity ( ) != ii-> quantity ( ))
+				item. appendChild ( doc. createElement ( "OrigQty"  ). appendChild ( doc. createTextNode ( cLocale ( ). toString ( ii-> weight ( ), 'f', 4 ))). parentNode ( ));
+		}
+
+		// ### MASS UPLOAD ###
+		else if ( hint == XMLHint_MassUpload ) {
+			item. appendChild ( doc. createElement ( "ITEMID"   ). appendChild ( doc. createTextNode ( QString ( ii-> item ( )-> id ( )))). parentNode ( ));
+			item. appendChild ( doc. createElement ( "COLOR"    ). appendChild ( doc. createTextNode ( QString::number ( ii-> color ( )-> id ( )))). parentNode ( ));
+			item. appendChild ( doc. createElement ( "CATEGORY" ). appendChild ( doc. createTextNode ( QString::number ( ii-> category ( )-> id ( )))). parentNode ( ));
+			item. appendChild ( doc. createElement ( "ITEMTYPE" ). appendChild ( doc. createTextNode ( QChar ( ii-> itemType ( )-> id ( )))). parentNode ( ));
+
 			item. appendChild ( doc. createElement ( "QTY"       ). appendChild ( doc. createTextNode ( QString::number ( ii-> quantity ( )))). parentNode ( ));
 			item. appendChild ( doc. createElement ( "PRICE"     ). appendChild ( doc. createTextNode ( ii-> price ( ). toCString ( ))). parentNode ( ));
 			item. appendChild ( doc. createElement ( "CONDITION" ). appendChild ( doc. createTextNode (( ii-> condition ( ) == New ) ? "N" : "U" )). parentNode ( ));
@@ -1264,7 +1427,7 @@ QDomElement BrickLink::createItemListXML ( QDomDocument doc, ItemListXMLHint hin
 			if ( ii-> sale ( ))
 				item. appendChild ( doc. createElement ( "SALE"      ). appendChild ( doc. createTextNode ( QString::number ( ii-> sale ( )))). parentNode ( ));
 			if ( !ii-> comments ( ). isEmpty ( ))
-				item. appendChild ( doc. createElement ( hint == XMLHint_BrikTrak ? "NOTES" : "DESCRIPTION" ). appendChild ( doc. createTextNode ( ii-> comments ( ))). parentNode ( ));
+				item. appendChild ( doc. createElement ( "DESCRIPTION" ). appendChild ( doc. createTextNode ( ii-> comments ( ))). parentNode ( ));
 			if ( !ii-> remarks ( ). isEmpty ( ))
 				item. appendChild ( doc. createElement ( "REMARKS"   ). appendChild ( doc. createTextNode ( ii-> remarks ( ))). parentNode ( ));
 			if ( ii-> retain ( ))
@@ -1275,17 +1438,39 @@ QDomElement BrickLink::createItemListXML ( QDomDocument doc, ItemListXMLHint hin
 				item. appendChild ( doc. createElement ( "BUYERUSERNAME" ). appendChild ( doc. createTextNode ( ii-> reserved ( ))). parentNode ( ));
 
 			if ( ii-> tierQuantity ( 0 )) {
-				item. appendChild ( doc. createElement ( "TQ1"       ). appendChild ( doc. createTextNode ( QString::number ( ii-> tierQuantity ( 0 )))). parentNode ( ));
-				item. appendChild ( doc. createElement ( "TQ2"       ). appendChild ( doc. createTextNode ( QString::number ( ii-> tierQuantity ( 1 )))). parentNode ( ));
-				item. appendChild ( doc. createElement ( "TQ3"       ). appendChild ( doc. createTextNode ( QString::number ( ii-> tierQuantity ( 2 )))). parentNode ( ));
-				item. appendChild ( doc. createElement ( "TP1"       ). appendChild ( doc. createTextNode ( ii-> tierPrice ( 0 ). toCString ( ))). parentNode ( ));
-				item. appendChild ( doc. createElement ( "TP2"       ). appendChild ( doc. createTextNode ( ii-> tierPrice ( 1 ). toCString ( ))). parentNode ( ));
-				item. appendChild ( doc. createElement ( "TP3"       ). appendChild ( doc. createTextNode ( ii-> tierPrice ( 2 ). toCString ( ))). parentNode ( ));
+				item. appendChild ( doc. createElement ( "TQ1"     ). appendChild ( doc. createTextNode ( QString::number ( ii-> tierQuantity ( 0 )))). parentNode ( ));
+				item. appendChild ( doc. createElement ( "TP1"     ). appendChild ( doc. createTextNode ( ii-> tierPrice ( 0 ). toCString ( ))). parentNode ( ));
+				item. appendChild ( doc. createElement ( "TQ2"     ). appendChild ( doc. createTextNode ( QString::number ( ii-> tierQuantity ( 1 )))). parentNode ( ));
+				item. appendChild ( doc. createElement ( "TP2"     ). appendChild ( doc. createTextNode ( ii-> tierPrice ( 1 ). toCString ( ))). parentNode ( ));
+				item. appendChild ( doc. createElement ( "TQ3"     ). appendChild ( doc. createTextNode ( QString::number ( ii-> tierQuantity ( 2 )))). parentNode ( ));
+				item. appendChild ( doc. createElement ( "TP3"     ). appendChild ( doc. createTextNode ( ii-> tierPrice ( 2 ). toCString ( ))). parentNode ( ));
 			}
 		}
-		if (( hint == XMLHint_BrikTrak ) && ( ii-> m_weight > 0 )) {
-			item. appendChild ( doc. createElement ( "TOTAL_WEIGHT"  ). appendChild ( doc. createTextNode ( cLocale ( ). toString ( ii-> weight ( ), 'f', 4 ))). parentNode ( ));
+
+		// ### WANTED LIST ###
+		else if ( hint == XMLHint_WantedList ) {
+			item. appendChild ( doc. createElement ( "ITEMID"       ). appendChild ( doc. createTextNode ( QString ( ii-> item ( )-> id ( )))). parentNode ( ));
+			item. appendChild ( doc. createElement ( "ITEMTYPE"     ). appendChild ( doc. createTextNode ( QChar ( ii-> itemType ( )-> id ( )))). parentNode ( ));
+			item. appendChild ( doc. createElement ( "COLOR"        ). appendChild ( doc. createTextNode ( QString::number ( ii-> color ( )-> id ( )))). parentNode ( ));
+
+			if ( ii-> quantity ( ))
+				item. appendChild ( doc. createElement ( "MINQTY"   ). appendChild ( doc. createTextNode ( QString::number ( ii-> quantity ( )))). parentNode ( ));
+			if ( ii-> price ( ) != 0 )
+				item. appendChild ( doc. createElement ( "MAXPRICE" ). appendChild ( doc. createTextNode ( ii-> price ( ). toCString ( ))). parentNode ( ));
 		}
+
+		// ### INVENTORY REQUEST ###
+		else if ( hint == XMLHint_Inventory ) {
+			item. appendChild ( doc. createElement ( "ITEMID"    ). appendChild ( doc. createTextNode ( QString ( ii-> item ( )-> id ( )))). parentNode ( ));
+			item. appendChild ( doc. createElement ( "ITEMTYPE"  ). appendChild ( doc. createTextNode ( QChar ( ii-> itemType ( )-> id ( )))). parentNode ( ));
+			item. appendChild ( doc. createElement ( "COLOR"     ). appendChild ( doc. createTextNode ( QString::number ( ii-> color ( )-> id ( )))). parentNode ( ));
+			item. appendChild ( doc. createElement ( "QTY"       ). appendChild ( doc. createTextNode ( QString::number ( ii-> quantity ( )))). parentNode ( ));
+			
+			if ( ii-> status ( ) == InvItem::Extra )
+				item. appendChild ( doc. createElement ( "EXTRA" ). appendChild ( doc. createTextNode ( "Y" )). parentNode ( ));
+		}
+
+		// optional: additonal tags
 		if ( extra ) {
 			for ( QMap <QString, QString>::Iterator it = extra-> begin ( ); it != extra-> end ( ); ++it )
 				item. appendChild ( doc. createElement ( it. key ( )). appendChild ( doc. createTextNode ( it. data ( ))). parentNode ( ));
@@ -1294,6 +1479,7 @@ QDomElement BrickLink::createItemListXML ( QDomDocument doc, ItemListXMLHint hin
 
 	return root;
 }
+
 
 
 bool BrickLink::parseLDrawModel ( QFile &f, QPtrList <InvItem> &items, uint *invalid_items )

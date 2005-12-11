@@ -24,9 +24,9 @@
 #define _BS_STR2(s)  #s
 
 #define BRICKSTORE_VERSION   _BS_STR( BRICKSTORE_MAJOR ) "." _BS_STR( BRICKSTORE_MINOR ) "." _BS_STR( BRICKSTORE_PATCH )
-#define BRICKSTORE_COPYRIGHT "2004,2005 R. Griebl"
-#define BRICKSTORE_URL       "www.softforge.de/brickstore"
-#define BRICKSTORE_MAIL      "brickstore@softforge.de"
+#define BRICKSTORE_COPYRIGHT "2004-2006 R. Griebl"
+#define BRICKSTORE_URL       "www.brickforge.de/software/brickstore"
+#define BRICKSTORE_MAIL      "brickstore@brickforge.de"
 
 
 // Win32 FILEVERSION resource

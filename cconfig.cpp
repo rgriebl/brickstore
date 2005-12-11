@@ -29,6 +29,15 @@
 #include "cconfig.h"
 
 
+namespace {
+
+static inline Q_INT32 mkver ( int a, int b, int c )
+{ 
+	return ( Q_INT32( a ) << 24 ) | ( Q_INT32( b ) << 16 ) | ( Q_INT32( c ));
+}
+
+} // namespace
+
 
 CConfig::CConfig ( )
 	: QObject ( ), QSettings ( )
@@ -64,6 +73,7 @@ CConfig *CConfig::inst ( )
 	return s_inst;
 }
 
+
 QString CConfig::obscure ( const QString &str )
 {
 	QString result;
@@ -83,6 +93,48 @@ bool CConfig::writePasswordEntry ( const QString &key, const QString &password )
 {
 	return writeEntry ( key, obscure ( password ));
 }
+
+
+void CConfig::upgrade ( int vmajor, int vminor, int vrev )
+{
+	QStringList sl;
+	QString s;
+	int i;
+	bool b;
+	bool ok;
+
+	int cfgver = readNumEntry ( "/ConfigVersion", 0 );
+	writeEntry ( "/ConfigVersion", mkver ( vmajor, vminor, vrev ));
+
+	if ( cfgver < mkver ( 1, 0, 125 )) {
+		// convert itemview column info (>= 1.0.25)
+		beginGroup ( "/ItemView/List" );
+
+		sl = readListEntry ( "/ColumnWidths", &ok );
+		if ( ok )  writeEntry ( "/ColumnWidths", sl. join ( "," ));
+
+		sl = readListEntry ( "/ColumnWidthsHidden", &ok );
+		if ( ok )  writeEntry ( "/ColumnWidthsHidden", sl. join ( "," ));
+
+		sl = readListEntry ( "/ColumnOrder", &ok );
+		if ( ok )  writeEntry ( "/ColumnOrder", sl. join ( "," ));
+
+		i = readNumEntry ( "/SortColumn", -1, &ok );
+		if ( ok )  writeEntry ( "/SortColumn", QString::number ( i ));
+
+		b = readBoolEntry ( "/SortAscending", true, &ok );
+		if ( ok )  writeEntry ( "/SortDirection", b ? "A" : "D" );
+		removeEntry ( "/SortAscending" );
+
+		endGroup ( );
+	
+		// fix a typo (>= 1.0.125)
+		s = readEntry ( "/Default/AddItems/Condition", QString::null, &ok );
+		if ( ok )  writeEntry ( "/Defaults/AddItems/Condition", s );
+		removeEntry ( "/Default/AddItems/Condition" );
+	}
+}
+
 
 bool CConfig::showInputErrors ( ) const
 {

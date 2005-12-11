@@ -372,11 +372,22 @@ CSelectItem::CSelectItem ( QWidget *parent, const char *name, WFlags fl )
 	w_categories-> addColumn ( tr( "Category" ));
 	w_categories-> setResizeMode ( QListView::LastColumn );
 
+	w_goto = new QToolButton ( this );
+	w_goto-> setAutoRaise ( true );
+	w_goto-> setAccel ( tr( "Ctrl+G", "Goto Item" ));
+	w_goto-> setTextLabel ( tr( "Goto Item" ) + " (" + w_goto-> accel ( ) + ")");
+
+	QIconSet is = CResource::inst ( )-> iconSet ( "edit_find" );
+	if ( is. isNull ( ))
+		w_goto-> setText ( w_filter_clear-> textLabel ( ));
+	else
+		w_goto-> setIconSet ( is );
+
 	w_filter_clear = new QToolButton ( this );
 	w_filter_clear-> setAutoRaise ( true );
 	w_filter_clear-> setTextLabel ( tr( "Clear" ));
 
-	QIconSet is = CResource::inst ( )-> iconSet ( "filter_clear" );
+	is = CResource::inst ( )-> iconSet ( "filter_clear" );
 	if ( is. isNull ( ))
 		w_filter_clear-> setText ( w_filter_clear-> textLabel ( ));
 	else
@@ -430,6 +441,7 @@ CSelectItem::CSelectItem ( QWidget *parent, const char *name, WFlags fl )
 
 	m_type_combo = new CItemTypeCombo ( w_item_types, m_inv_only );
 
+	connect ( w_goto, SIGNAL( clicked ( )), this, SLOT( findItem ( )));
 	connect ( w_filter_clear, SIGNAL( clicked ( )), w_filter_expression, SLOT( clearEdit ( )));
 	connect ( w_filter_expression, SIGNAL( textChanged ( const QString & )), this, SLOT( applyFilter ( )));
 
@@ -457,6 +469,8 @@ CSelectItem::CSelectItem ( QWidget *parent, const char *name, WFlags fl )
 	toplay-> addWidget ( w_categories, 1, 0 );
 
 	lay = new QHBoxLayout ( 6 );
+	lay-> addWidget ( w_goto, 0 );
+	lay-> addSpacing ( 6 );
 	lay-> addWidget ( w_filter_clear, 0 );
 	lay-> addWidget ( new QLabel ( tr( "Filter:" ), this ), 0 );
 	lay-> addWidget ( w_filter_expression, 15 );
@@ -523,6 +537,27 @@ void CSelectItem::viewModeChanged ( int ivm )
 
 	if ( itt && cat )
 		setViewMode ( checkViewMode ((ViewMode) ivm, itt, cat ), itt, cat );
+}
+
+void CSelectItem::findItem ( )
+{
+	const BrickLink::ItemType *itt = m_type_combo-> currentItemType ( );
+
+	if ( !itt )
+		return;
+
+	QString str;
+
+	if ( CMessageBox::getString ( this, tr( "Please enter the complete part number of the item:" ), str )) {
+		const BrickLink::Item *item = BrickLink::inst ( )-> item ( itt-> id ( ), str. latin1 ( ));
+
+		if ( item ) {
+			setItem ( item );
+			ensureSelectionVisible ( );
+		}
+		else
+			QApplication::beep ( );
+	}
 }
 
 bool CSelectItem::setItem ( const BrickLink::Item *item )
@@ -706,6 +741,11 @@ bool CSelectItem::setViewMode ( ViewMode ivm, const BrickLink::ItemType *itt, co
 }
 
 void CSelectItem::showEvent ( QShowEvent * )
+{
+	ensureSelectionVisible ( );
+}
+
+void CSelectItem::ensureSelectionVisible ( )
 {
 	w_categories-> centerItem ( w_categories-> selectedItem ( ));
 

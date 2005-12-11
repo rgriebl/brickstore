@@ -31,6 +31,7 @@ class QLabel;
 
 class CWindow;
 class CInfoBar;
+class CSpinner;
 
 
 class CFrameWork : public QMainWindow {
@@ -67,6 +68,7 @@ private slots:
 	void fileOpen ( );
 	void fileOpenRecent ( int );
 
+	void fileImportBrikTrakInventory ( );
 	void fileImportBrickLinkInventory ( );
 	void fileImportBrickLinkOrder ( );
 	void fileImportBrickLinkStore ( );
@@ -173,6 +175,7 @@ private:
 	CWindow *m_current_window;
 
 	CMultiProgressBar *m_progress;
+	CSpinner *m_spinner;
 	QLabel *m_statistics;
 	QLabel *m_errors;
 	QLabel *m_modified;

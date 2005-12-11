@@ -15,6 +15,10 @@
 #include <qevent.h>
 #include <qdir.h>
 
+#if defined( Q_OS_UNIX )
+#include <sys/utsname.h>
+#endif
+
 #include "cconfig.h"
 #include "cmoney.h"
 #include "cresource.h"
@@ -26,10 +30,9 @@
 #include "dlgmessageimpl.h"
 #include "dlgupdateimpl.h"
 
-//#define BS_DEMO  30 // demo time in minutes
-
-
 #include "capplication.h"
+
+//#define BS_DEMO  30 // demo time in minutes
 
 
 class COpenEvent : public QCustomEvent {
@@ -65,7 +68,7 @@ CApplication::CApplication ( int _argc, char **_argv )
 		m_files_to_open << argv ( ) [i];
 
 	// initialize config & resource
-	(void) CConfig::inst ( );
+	(void) CConfig::inst ( )-> upgrade ( BRICKSTORE_MAJOR, BRICKSTORE_MINOR, BRICKSTORE_PATCH );
 	(void) CMoney::inst ( );
 	(void) CResource::inst ( );
 	(void) CReportManager::inst ( );
@@ -82,10 +85,14 @@ CApplication::CApplication ( int _argc, char **_argv )
 
 	initStrings ( );
 
-	CMessageBox::setDefaultTitle ( m_appname );
+	CMessageBox::setDefaultTitle ( appName ( ));
 
-	QPixmap pix = CResource::inst ( )-> pixmap ( "icon" );
+	QPixmap pix;
+	
+	pix = CResource::inst ( )-> pixmap ( "icon" );
 	QMimeSourceFactory::defaultFactory ( )-> setImage ( "brickstore-icon", pix. convertToImage ( ));
+	pix = CResource::inst ( )-> pixmap ( "important" );
+	QMimeSourceFactory::defaultFactory ( )-> setImage ( "brickstore-important", pix. convertToImage ( ));
 
 	if ( !initBrickLink ( )) {
 		// we cannot call quit directly, since there is
@@ -131,9 +138,9 @@ void CApplication::demoVersion ( )
 			"<br />%4"
 		"</center</qt>";
 
-	QString text = QString ( layout_text ). arg ( m_appname, m_copyright, m_version, m_demo );
+	QString text = QString ( layout_text ). arg ( appName ( ), m_copyright, m_version, m_demo );
 
-	DlgMessageImpl d ( m_appname, text, mainWidget ( ));
+	DlgMessageImpl d ( appName ( ), text, mainWidget ( ));
 	d. exec ( );
 
 	QTimer::singleShot ( BS_DEMO * 60 * 1000, this, SLOT( demoVersion ( )));
@@ -142,12 +149,27 @@ void CApplication::demoVersion ( )
 
 QString CApplication::appName ( ) const
 {
-	return m_appname;
+	return "BrickStore";
 }
 
 QString CApplication::appVersion ( ) const
 {
-	return QString( BRICKSTORE_VERSION );
+	return BRICKSTORE_VERSION;
+}
+
+QString CApplication::appURL ( ) const
+{
+	return BRICKSTORE_URL;
+}
+
+QString CApplication::sysName ( ) const
+{
+	return m_sys_name;
+}
+
+QString CApplication::sysVersion ( ) const
+{
+	return m_sys_version;
 }
 
 void CApplication::enableEmitOpenDocument ( bool b )
@@ -266,12 +288,49 @@ void CApplication::initStrings ( )
 	QString url  = "<a href=\"http://" BRICKSTORE_URL "\">" BRICKSTORE_URL "</a>";
 	QString mail = "<a href=\"mailto:" BRICKSTORE_MAIL "\">" BRICKSTORE_MAIL "</a>";
 
-	m_appname   = tr( "BrickStore" );
-	m_copyright = tr( "Copyright &copy; %1" ). arg ( BRICKSTORE_COPYRIGHT );
-	m_version   = tr( "Version %1" ). arg ( BRICKSTORE_VERSION );
-	m_support   = tr( "Visit %1, or send an email to %2" ). arg ( url ). arg ( mail );
-	m_demo      = tr( demo_text ). arg ( url );
-	m_legal     = tr( legal_text );
+	m_copyright  = tr( "Copyright &copy; %1" ). arg ( BRICKSTORE_COPYRIGHT );
+	m_version    = tr( "Version %1" ). arg ( BRICKSTORE_VERSION );
+	m_support    = tr( "Visit %1, or send an email to %2" ). arg ( url ). arg ( mail );
+	m_demo       = tr( demo_text ). arg ( url );
+	m_legal      = tr( legal_text );
+
+	m_sys_name    = "(unknown)";
+	m_sys_version = "(unknown)";
+
+#if defined( Q_OS_MACX )
+	m_sys_name = "MacOS";
+
+	switch ( QApplication::macVersion ( )) {
+		case Qt::MV_10_DOT_0: m_sys_version = "10.0 (Cheetah)"; break;
+		case Qt::MV_10_DOT_1: m_sys_version = "10.1 (Puma)";    break;
+		case Qt::MV_10_DOT_2: m_sys_version = "10.2 (Jaguar)";  break;
+		case Qt::MV_10_DOT_3: m_sys_version = "10.3 (Panther)"; break;
+		case Qt::MV_10_DOT_4: m_sys_version = "10.4 (Tiger)";   break;
+		default             : break;
+	}
+
+#elif defined( Q_OS_WIN )
+	m_sys_name = "Windows";
+
+	switch ( QApplication::winVersion ( )) {
+		case Qt::WV_95  : m_sys_version = "95";   break;
+		case Qt::WV_98  : m_sys_version = "98";   break;
+		case Qt::WV_Me  : m_sys_version = "ME";   break;
+		case Qt::WV_NT  : m_sys_version = "NT";   break;
+		case Qt::WV_2000: m_sys_version = "2000"; break;
+		case Qt::WV_XP  : m_sys_version = "XP";   break;
+		case Qt::WV_2003: m_sys_version = "2003"; break;
+		default         : break;
+	}
+
+#elif defined( Q_OS_UNIX )
+	m_sys_name = "Unix";
+
+	struct ::utsname utsinfo;
+	if ( ::uname ( &utsinfo ) >= 0 )
+		m_sys_version = utsinfo. sysname + " " + utsinfo. machine;
+
+#endif
 }
 
 void CApplication::about ( )
@@ -289,9 +348,9 @@ void CApplication::about ( )
 			"<br />%4"
 		"</center>%5</qt>";
 
-	QString text = QString ( layout_text ). arg ( m_appname ). arg ( m_copyright, m_version, m_support, m_legal );
+	QString text = QString ( layout_text ). arg ( appName ( )). arg ( m_copyright, m_version, m_support, m_legal );
 
-	DlgMessageImpl d ( m_appname, text, mainWidget ( ));
+	DlgMessageImpl d ( appName ( ), text, mainWidget ( ));
 	d. exec ( );
 }
 

@@ -552,7 +552,8 @@ public:
 		XMLHint_Inventory, 
 		XMLHint_Order, 
 		XMLHint_WantedList, 
-		XMLHint_BrikTrak
+		XMLHint_BrikTrak,
+		XMLHint_BrickStore
 	};
 
 	QPtrList<InvItem> *parseItemListXML ( QDomElement root, ItemListXMLHint hint, uint *invalid_items = 0 );

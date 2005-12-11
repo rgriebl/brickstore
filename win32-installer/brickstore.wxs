@@ -102,6 +102,8 @@
                 <File DiskId="1" Id="status_include.png" Name="status~3.png" LongName="status_include.png" src="$(var.TARGET)\images\status_include.png" />
                 <File DiskId="1" Id="status_unknown.png" Name="status~4.png" LongName="status_unknown.png" src="$(var.TARGET)\images\status_unknown.png" />
                 <File DiskId="1" Id="bg_infotext.jpg"    Name="bg_inf~1.jpg" LongName="bg_infotext.jpg"    src="$(var.TARGET)\images\bg_infotext.jpg" />
+                <File DiskId="1" Id="important.png"      Name="import~1.png" LongName="important.png"      src="$(var.TARGET)\images\important.png" />
+                <File DiskId="1" Id="spinner.png"        Name="spinner.png"                                src="$(var.TARGET)\images\spinner.png" />
               </Component>
               <Directory Id="images_status" Name="status">
                 <Component Id="c_images_status" Guid="A780CC45-113C-47EC-9309-BEBFF6A396B6">
@@ -110,96 +112,131 @@
                   <File DiskId="1" Id="istatus_stop.png"     Name="stop.png"                             src="$(var.TARGET)\images\status\stop.png" />
                 </Component>
               </Directory>
+              <Directory Id="images_sidebar" Name="sidebar">
+                <Component Id="c_images_sidebar" Guid="C5826B59-A8E5-41BE-9099-7AD21FAB6427">
+                  <File DiskId="1" Id="isidebar_info.png"       Name="info.png"                               src="$(var.TARGET)\images\sidebar\info.png" />
+                  <File DiskId="1" Id="isidebar_priceguide.png" Name="priceg~1.png" LongName="priceguide.png" src="$(var.TARGET)\images\sidebar\priceguide.png" />
+                  <File DiskId="1" Id="isidebar_links.png"      Name="links.png"                              src="$(var.TARGET)\images\sidebar\links.png" />
+                </Component>
+              </Directory>
               <Directory Id="images_16x16" Name="16x16">
                 <Component Id="c_images_16x16" Guid="A7EEE510-8E91-11D9-8BDE-F66BAD1E3F3A">
-                  <File DiskId="1" Id="i16x16_configure.png"                 Name="config~1.png" LongName="configure.png"                 src="$(var.TARGET)\images\16x16\configure.png" />
-                  <File DiskId="1" Id="i16x16_browser.png"                   Name="browser.png"                                           src="$(var.TARGET)\images\16x16\browser.png" />
-                  <File DiskId="1" Id="i16x16_edit.png"                      Name="edit.png"                                              src="$(var.TARGET)\images\16x16\edit.png" />
-                  <File DiskId="1" Id="i16x16_edit_additems.png"             Name="edit_a~1.png" LongName="edit_additems.png"             src="$(var.TARGET)\images\16x16\edit_additems.png" />
-                  <File DiskId="1" Id="i16x16_edit_mergeitems.png"           Name="edit_m~2.png" LongName="edit_mergeitems.png"           src="$(var.TARGET)\images\16x16\edit_mergeitems.png" />
-                  <File DiskId="1" Id="i16x16_edit_copy.png"                 Name="edit_c~1.png" LongName="edit_copy.png"                 src="$(var.TARGET)\images\16x16\edit_copy.png" />
-                  <File DiskId="1" Id="i16x16_edit_cut.png"                  Name="edit_c~2.png" LongName="edit_cut.png"                  src="$(var.TARGET)\images\16x16\edit_cut.png" />
-                  <File DiskId="1" Id="i16x16_edit_delete.png"               Name="edit_d~1.png" LongName="edit_delete.png"               src="$(var.TARGET)\images\16x16\edit_delete.png" />
-                  <File DiskId="1" Id="i16x16_edit_find.png"                 Name="edit_f~1.png" LongName="edit_find.png"                 src="$(var.TARGET)\images\16x16\edit_find.png" />
-                  <File DiskId="1" Id="i16x16_edit_find_again.png"           Name="edit_f~2.png" LongName="edit_find_again.png"           src="$(var.TARGET)\images\16x16\edit_find_again.png" />
-                  <File DiskId="1" Id="i16x16_edit_multiply_qty.png"         Name="edit_m~1.png" LongName="edit_multiply_qty.png"         src="$(var.TARGET)\images\16x16\edit_multiply_qty.png" />
-                  <File DiskId="1" Id="i16x16_edit_paste.png"                Name="edit_p~1.png" LongName="edit_paste.png"                src="$(var.TARGET)\images\16x16\edit_paste.png" />
-                  <File DiskId="1" Id="i16x16_edit_price_inc_dec.png"        Name="edit_p~2.png" LongName="edit_price_inc_dec.png"        src="$(var.TARGET)\images\16x16\edit_price_inc_dec.png" />
-                  <File DiskId="1" Id="i16x16_edit_price_to_priceguide.png"  Name="edit_p~3.png" LongName="edit_price_to_priceguide.png"  src="$(var.TARGET)\images\16x16\edit_price_to_priceguide.png" />
-                  <File DiskId="1" Id="i16x16_edit_redo.png"                 Name="edit_r~1.png" LongName="edit_redo.png"                 src="$(var.TARGET)\images\16x16\edit_redo.png" />
-                  <File DiskId="1" Id="i16x16_edit_set_sale.png"             Name="edit_s~1.png" LongName="edit_set_sale.png"             src="$(var.TARGET)\images\16x16\edit_set_sale.png" />
-                  <File DiskId="1" Id="i16x16_edit_undo.png"                 Name="edit_u~1.png" LongName="edit_undo.png"                 src="$(var.TARGET)\images\16x16\edit_undo.png" />
-                  <File DiskId="1" Id="i16x16_file_close.png"                Name="file_c~3.png" LongName="file_close.png"                src="$(var.TARGET)\images\16x16\file_close.png" />
-                  <File DiskId="1" Id="i16x16_file_exit.png"                 Name="file_e~1.png" LongName="file_exit.png"                 src="$(var.TARGET)\images\16x16\file_exit.png" />
-                  <File DiskId="1" Id="i16x16_file_new.png"                  Name="file_n~1.png" LongName="file_new.png"                  src="$(var.TARGET)\images\16x16\file_new.png" />
-                  <File DiskId="1" Id="i16x16_file_open.png"                 Name="file_o~1.png" LongName="file_open.png"                 src="$(var.TARGET)\images\16x16\file_open.png" />
-                  <File DiskId="1" Id="i16x16_file_print.png"                Name="file_p~4.png" LongName="file_print.png"                src="$(var.TARGET)\images\16x16\file_print.png" />
-                  <File DiskId="1" Id="i16x16_file_save.png"                 Name="file_s~2.png" LongName="file_save.png"                 src="$(var.TARGET)\images\16x16\file_save.png" />
-                  <File DiskId="1" Id="i16x16_file_save_all.png"             Name="file_s~3.png" LongName="file_save_all.png"             src="$(var.TARGET)\images\16x16\file_save_all.png" />
-                  <File DiskId="1" Id="i16x16_file_saveas.png"               Name="file_s~4.png" LongName="file_saveas.png"               src="$(var.TARGET)\images\16x16\file_saveas.png" />
-                  <File DiskId="1" Id="i16x16_filter_clear.png"              Name="filter~1.png" LongName="filter_clear.png"              src="$(var.TARGET)\images\16x16\filter_clear.png" />
-                  <File DiskId="1" Id="i16x16_filter_label.png"              Name="filter~2.png" LongName="filter_label.png"              src="$(var.TARGET)\images\16x16\filter_label.png" />
-                  <File DiskId="1" Id="i16x16_help_contents.png"             Name="help_c~1.png" LongName="help_contents.png"             src="$(var.TARGET)\images\16x16\help_contents.png" />
-                  <File DiskId="1" Id="i16x16_help_whatsthis.png"            Name="help_w~1.png" LongName="help_whatsthis.png"            src="$(var.TARGET)\images\16x16\help_whatsthis.png" />
-                  <File DiskId="1" Id="i16x16_net_offline.png"               Name="net_of~1.png" LongName="net_offline.png"               src="$(var.TARGET)\images\16x16\net_offline.png" />
-                  <File DiskId="1" Id="i16x16_net_online.png"                Name="net_on~1.png" LongName="net_online.png"                src="$(var.TARGET)\images\16x16\net_online.png" />
-                  <File DiskId="1" Id="i16x16_settings_refresh_database.png" Name="settin~1.png" LongName="settings_refresh_database.png" src="$(var.TARGET)\images\16x16\settings_refresh_database.png" />
-                  <File DiskId="1" Id="i16x16_view_compact.png"              Name="view_c~1.png" LongName="view_compact.png"              src="$(var.TARGET)\images\16x16\view_compact.png" />
-                  <File DiskId="1" Id="i16x16_view_hierarchic.png"           Name="view_h~1.png" LongName="view_hierarchic.png"           src="$(var.TARGET)\images\16x16\view_hierarchic.png" />
-                  <File DiskId="1" Id="i16x16_view_plain.png"                Name="view_p~1.png" LongName="view_plain.png"                src="$(var.TARGET)\images\16x16\view_plain.png" />
-                  <File DiskId="1" Id="i16x16_edit_bl_catalog.png"           Name="edit_b~1.png" LongName="edit_bl_catalog.png"           src="$(var.TARGET)\images\16x16\edit_bl_catalog.png" />
-                  <File DiskId="1" Id="i16x16_edit_bl_priceguide.png"        Name="edit_b~2.png" LongName="edit_bl_priceguide.png"        src="$(var.TARGET)\images\16x16\edit_bl_priceguide.png" />
-                  <File DiskId="1" Id="i16x16_edit_bl_lotsforsale.png"       Name="edit_b~3.png" LongName="edit_bl_lotsforsale.png"       src="$(var.TARGET)\images\16x16\edit_bl_lotsforsale.png" />
-                  <File DiskId="1" Id="i16x16_viewmode.png"                  Name="view_m~1.png" LongName="viewmode.png"                  src="$(var.TARGET)\images\16x16\viewmode.png" />
-                  <File DiskId="1" Id="i16x16_viewmode_list.png"             Name="view_m~2.png" LongName="viewmode_list.png"             src="$(var.TARGET)\images\16x16\viewmode_list.png" />
-                  <File DiskId="1" Id="i16x16_viewmode_images.png"           Name="view_m~3.png" LongName="viewmode_images.png"           src="$(var.TARGET)\images\16x16\viewmode_images.png" />
-                  <File DiskId="1" Id="i16x16_viewmode_thumbs.png"           Name="view_m~4.png" LongName="viewmode_thumbs.png"           src="$(var.TARGET)\images\16x16\viewmode_thumbs.png" />
+                  <RemoveFile      Id="i16x16_browser.png"                   Name="browser.png"                                           On="install" />
+                  <RemoveFile      Id="i16x16_configure.png"                 Name="config~1.png" LongName="configure.png"                 On="install" />
+                  <RemoveFile      Id="i16x16_edit.png"                      Name="edit.png"                                              On="install" />
+                  <RemoveFile      Id="i16x16_edit_buy_bl.png"               Name="edit_b~1.png" LongName="edit_buy_bl.png"               On="install" />
+                  <RemoveFile      Id="i16x16_edit_open_bl.png"              Name="edit_b~2.png" LongName="edit_open_bl.png"              On="install" />
+                  <RemoveFile      Id="i16x16_settings_refresh_database.png" Name="settin~1.png" LongName="settings_refresh_database.png" On="install" />
+                 
+                  <File DiskId="1" Id="i16x16_edit_additems.png"             Name="imageaa0.png" LongName="edit_additems.png"             src="$(var.TARGET)\images\16x16\edit_additems.png" />
+                  <File DiskId="1" Id="i16x16_edit_bl_catalog.png"           Name="imageab0.png" LongName="edit_bl_catalog.png"           src="$(var.TARGET)\images\16x16\edit_bl_catalog.png" />
+                  <File DiskId="1" Id="i16x16_edit_bl_lotsforsale.png"       Name="imageac0.png" LongName="edit_bl_lotsforsale.png"       src="$(var.TARGET)\images\16x16\edit_bl_lotsforsale.png" />
+                  <File DiskId="1" Id="i16x16_edit_bl_priceguide.png"        Name="imagead0.png" LongName="edit_bl_priceguide.png"        src="$(var.TARGET)\images\16x16\edit_bl_priceguide.png" />
+                  <File DiskId="1" Id="i16x16_edit_copy.png"                 Name="imageae0.png" LongName="edit_copy.png"                 src="$(var.TARGET)\images\16x16\edit_copy.png" />
+                  <File DiskId="1" Id="i16x16_edit_cut.png"                  Name="imageaf0.png" LongName="edit_cut.png"                  src="$(var.TARGET)\images\16x16\edit_cut.png" />
+                  <File DiskId="1" Id="i16x16_edit_delete.png"               Name="imageag0.png" LongName="edit_delete.png"               src="$(var.TARGET)\images\16x16\edit_delete.png" />
+                  <File DiskId="1" Id="i16x16_edit_divide_qty.png"           Name="imageah0.png" LongName="edit_divide_qty.png"           src="$(var.TARGET)\images\16x16\edit_divide_qty.png" />
+                  <File DiskId="1" Id="i16x16_edit_find.png"                 Name="imageai0.png" LongName="edit_find.png"                 src="$(var.TARGET)\images\16x16\edit_find.png" />
+                  <File DiskId="1" Id="i16x16_edit_find_again.png"           Name="imageaj0.png" LongName="edit_find_again.png"           src="$(var.TARGET)\images\16x16\edit_find_again.png" />
+                  <File DiskId="1" Id="i16x16_edit_mergeitems.png"           Name="imageak0.png" LongName="edit_mergeitems.png"           src="$(var.TARGET)\images\16x16\edit_mergeitems.png" />
+                  <File DiskId="1" Id="i16x16_edit_multiply_qty.png"         Name="imageal0.png" LongName="edit_multiply_qty.png"         src="$(var.TARGET)\images\16x16\edit_multiply_qty.png" />
+                  <File DiskId="1" Id="i16x16_edit_partoutitems.png"         Name="imageam0.png" LongName="edit_partoutitems.png"         src="$(var.TARGET)\images\16x16\edit_partoutitems.png" />
+                  <File DiskId="1" Id="i16x16_edit_paste.png"                Name="imagean0.png" LongName="edit_paste.png"                src="$(var.TARGET)\images\16x16\edit_paste.png" />
+                  <File DiskId="1" Id="i16x16_edit_price_inc_dec.png"        Name="imageao0.png" LongName="edit_price_inc_dec.png"        src="$(var.TARGET)\images\16x16\edit_price_inc_dec.png" />
+                  <File DiskId="1" Id="i16x16_edit_price_to_priceguide.png"  Name="imageap0.png" LongName="edit_price_to_priceguide.png"  src="$(var.TARGET)\images\16x16\edit_price_to_priceguide.png" />
+                  <File DiskId="1" Id="i16x16_edit_redo.png"                 Name="imageaq0.png" LongName="edit_redo.png"                 src="$(var.TARGET)\images\16x16\edit_redo.png" />
+                  <File DiskId="1" Id="i16x16_edit_set_sale.png"             Name="imagear0.png" LongName="edit_set_sale.png"             src="$(var.TARGET)\images\16x16\edit_set_sale.png" />
+                  <File DiskId="1" Id="i16x16_edit_subtractitems.png"        Name="imageas0.png" LongName="edit_subtractitems.png"        src="$(var.TARGET)\images\16x16\edit_subtractitems.png" />
+                  <File DiskId="1" Id="i16x16_edit_undo.png"                 Name="imageat0.png" LongName="edit_undo.png"                 src="$(var.TARGET)\images\16x16\edit_undo.png" />
+                  <File DiskId="1" Id="i16x16_extras_configure.png"          Name="imageau0.png" LongName="extras_configure.png"          src="$(var.TARGET)\images\16x16\extras_configure.png" />
+                  <File DiskId="1" Id="i16x16_extras_update_database.png"    Name="imageav0.png" LongName="extras_update_database.png"    src="$(var.TARGET)\images\16x16\extras_update_database.png" />
+                  <File DiskId="1" Id="i16x16_file_close.png"                Name="imageaw0.png" LongName="file_close.png"                src="$(var.TARGET)\images\16x16\file_close.png" />
+                  <File DiskId="1" Id="i16x16_file_exit.png"                 Name="imageax0.png" LongName="file_exit.png"                 src="$(var.TARGET)\images\16x16\file_exit.png" />
+                  <File DiskId="1" Id="i16x16_file_export.png"               Name="imageay0.png" LongName="file_export.png"               src="$(var.TARGET)\images\16x16\file_export.png" />
+                  <File DiskId="1" Id="i16x16_file_export_briktrak.png"      Name="imageaz0.png" LongName="file_export_briktrak.png"      src="$(var.TARGET)\images\16x16\file_export_briktrak.png" />
+                  <File DiskId="1" Id="i16x16_file_import.png"               Name="imageba0.png" LongName="file_import.png"               src="$(var.TARGET)\images\16x16\file_import.png" />
+                  <File DiskId="1" Id="i16x16_file_import_briktrak.png"      Name="imagebb0.png" LongName="file_import_briktrak.png"      src="$(var.TARGET)\images\16x16\file_import_briktrak.png" />
+                  <File DiskId="1" Id="i16x16_file_import_ldraw_model.png"   Name="imagebc0.png" LongName="file_import_ldraw_model.png"   src="$(var.TARGET)\images\16x16\file_import_ldraw_model.png" />
+                  <File DiskId="1" Id="i16x16_file_new.png"                  Name="imagebd0.png" LongName="file_new.png"                  src="$(var.TARGET)\images\16x16\file_new.png" />
+                  <File DiskId="1" Id="i16x16_file_open.png"                 Name="imagebe0.png" LongName="file_open.png"                 src="$(var.TARGET)\images\16x16\file_open.png" />
+                  <File DiskId="1" Id="i16x16_file_print.png"                Name="imagebf0.png" LongName="file_print.png"                src="$(var.TARGET)\images\16x16\file_print.png" />
+                  <File DiskId="1" Id="i16x16_file_save.png"                 Name="imagebg0.png" LongName="file_save.png"                 src="$(var.TARGET)\images\16x16\file_save.png" />
+                  <File DiskId="1" Id="i16x16_file_save_all.png"             Name="imagebh0.png" LongName="file_save_all.png"             src="$(var.TARGET)\images\16x16\file_save_all.png" />
+                  <File DiskId="1" Id="i16x16_file_saveas.png"               Name="imagebi0.png" LongName="file_saveas.png"               src="$(var.TARGET)\images\16x16\file_saveas.png" />
+                  <File DiskId="1" Id="i16x16_filter_clear.png"              Name="imagebj0.png" LongName="filter_clear.png"              src="$(var.TARGET)\images\16x16\filter_clear.png" />
+                  <File DiskId="1" Id="i16x16_filter_label.png"              Name="imagebk0.png" LongName="filter_label.png"              src="$(var.TARGET)\images\16x16\filter_label.png" />
+                  <File DiskId="1" Id="i16x16_help_contents.png"             Name="imagebl0.png" LongName="help_contents.png"             src="$(var.TARGET)\images\16x16\help_contents.png" />
+                  <File DiskId="1" Id="i16x16_help_updates.png"              Name="imagebm0.png" LongName="help_updates.png"              src="$(var.TARGET)\images\16x16\help_updates.png" />
+                  <File DiskId="1" Id="i16x16_help_whatsthis.png"            Name="imagebn0.png" LongName="help_whatsthis.png"            src="$(var.TARGET)\images\16x16\help_whatsthis.png" />
+                  <File DiskId="1" Id="i16x16_net_offline.png"               Name="imagebo0.png" LongName="net_offline.png"               src="$(var.TARGET)\images\16x16\net_offline.png" />
+                  <File DiskId="1" Id="i16x16_net_online.png"                Name="imagebp0.png" LongName="net_online.png"                src="$(var.TARGET)\images\16x16\net_online.png" />
+                  <File DiskId="1" Id="i16x16_view_compact.png"              Name="imagebq0.png" LongName="view_compact.png"              src="$(var.TARGET)\images\16x16\view_compact.png" />
+                  <File DiskId="1" Id="i16x16_view_hierarchic.png"           Name="imagebr0.png" LongName="view_hierarchic.png"           src="$(var.TARGET)\images\16x16\view_hierarchic.png" />
+                  <File DiskId="1" Id="i16x16_view_plain.png"                Name="imagebs0.png" LongName="view_plain.png"                src="$(var.TARGET)\images\16x16\view_plain.png" />
+                  <File DiskId="1" Id="i16x16_viewmode.png"                  Name="imagebt0.png" LongName="viewmode.png"                  src="$(var.TARGET)\images\16x16\viewmode.png" />
+                  <File DiskId="1" Id="i16x16_viewmode_images.png"           Name="imagebu0.png" LongName="viewmode_images.png"           src="$(var.TARGET)\images\16x16\viewmode_images.png" />
+                  <File DiskId="1" Id="i16x16_viewmode_list.png"             Name="imagebv0.png" LongName="viewmode_list.png"             src="$(var.TARGET)\images\16x16\viewmode_list.png" />
+                  <File DiskId="1" Id="i16x16_viewmode_thumbs.png"           Name="imagebw0.png" LongName="viewmode_thumbs.png"           src="$(var.TARGET)\images\16x16\viewmode_thumbs.png" />
                 </Component>
               </Directory>
               <Directory Id="images_22x22" Name="22x22">
                 <Component Id="c_images_22x22" Guid="AEE85EDC-8E91-11D9-8BDE-F66BAD1E3F3A">
-                  <File DiskId="1" Id="i22x22_configure.png"                 Name="config~1.png" LongName="configure.png"                 src="$(var.TARGET)\images\22x22\configure.png" />
-                  <File DiskId="1" Id="i22x22_browser.png"                   Name="browser.png"                                           src="$(var.TARGET)\images\22x22\browser.png" />
-                  <File DiskId="1" Id="i22x22_edit.png"                      Name="edit.png"                                              src="$(var.TARGET)\images\22x22\edit.png" />
-                  <File DiskId="1" Id="i22x22_edit_additems.png"             Name="edit_a~1.png" LongName="edit_additems.png"             src="$(var.TARGET)\images\22x22\edit_additems.png" />
-                  <File DiskId="1" Id="i22x22_edit_mergeitems.png"           Name="edit_m~2.png" LongName="edit_mergeitems.png"           src="$(var.TARGET)\images\22x22\edit_mergeitems.png" />
-                  <File DiskId="1" Id="i22x22_edit_copy.png"                 Name="edit_c~1.png" LongName="edit_copy.png"                 src="$(var.TARGET)\images\22x22\edit_copy.png" />
-                  <File DiskId="1" Id="i22x22_edit_cut.png"                  Name="edit_c~2.png" LongName="edit_cut.png"                  src="$(var.TARGET)\images\22x22\edit_cut.png" />
-                  <File DiskId="1" Id="i22x22_edit_delete.png"               Name="edit_d~1.png" LongName="edit_delete.png"               src="$(var.TARGET)\images\22x22\edit_delete.png" />
-                  <File DiskId="1" Id="i22x22_edit_find.png"                 Name="edit_f~1.png" LongName="edit_find.png"                 src="$(var.TARGET)\images\22x22\edit_find.png" />
-                  <File DiskId="1" Id="i22x22_edit_find_again.png"           Name="edit_f~2.png" LongName="edit_find_again.png"           src="$(var.TARGET)\images\22x22\edit_find_again.png" />
-                  <File DiskId="1" Id="i22x22_edit_multiply_qty.png"         Name="edit_m~1.png" LongName="edit_multiply_qty.png"         src="$(var.TARGET)\images\22x22\edit_multiply_qty.png" />
-                  <File DiskId="1" Id="i22x22_edit_paste.png"                Name="edit_p~1.png" LongName="edit_paste.png"                src="$(var.TARGET)\images\22x22\edit_paste.png" />
-                  <File DiskId="1" Id="i22x22_edit_price_inc_dec.png"        Name="edit_p~2.png" LongName="edit_price_inc_dec.png"        src="$(var.TARGET)\images\22x22\edit_price_inc_dec.png" />
-                  <File DiskId="1" Id="i22x22_edit_price_to_priceguide.png"  Name="edit_p~3.png" LongName="edit_price_to_priceguide.png"  src="$(var.TARGET)\images\22x22\edit_price_to_priceguide.png" />
-                  <File DiskId="1" Id="i22x22_edit_redo.png"                 Name="edit_r~1.png" LongName="edit_redo.png"                 src="$(var.TARGET)\images\22x22\edit_redo.png" />
-                  <File DiskId="1" Id="i22x22_edit_set_sale.png"             Name="edit_s~1.png" LongName="edit_set_sale.png"             src="$(var.TARGET)\images\22x22\edit_set_sale.png" />
-                  <File DiskId="1" Id="i22x22_edit_undo.png"                 Name="edit_u~1.png" LongName="edit_undo.png"                 src="$(var.TARGET)\images\22x22\edit_undo.png" />
-                  <File DiskId="1" Id="i22x22_file_close.png"                Name="file_c~3.png" LongName="file_close.png"                src="$(var.TARGET)\images\22x22\file_close.png" />
-                  <File DiskId="1" Id="i22x22_file_exit.png"                 Name="file_e~1.png" LongName="file_exit.png"                 src="$(var.TARGET)\images\22x22\file_exit.png" />
-                  <File DiskId="1" Id="i22x22_file_new.png"                  Name="file_n~1.png" LongName="file_new.png"                  src="$(var.TARGET)\images\22x22\file_new.png" />
-                  <File DiskId="1" Id="i22x22_file_open.png"                 Name="file_o~1.png" LongName="file_open.png"                 src="$(var.TARGET)\images\22x22\file_open.png" />
-                  <File DiskId="1" Id="i22x22_file_print.png"                Name="file_p~4.png" LongName="file_print.png"                src="$(var.TARGET)\images\22x22\file_print.png" />
-                  <File DiskId="1" Id="i22x22_file_save.png"                 Name="file_s~2.png" LongName="file_save.png"                 src="$(var.TARGET)\images\22x22\file_save.png" />
-                  <File DiskId="1" Id="i22x22_file_save_all.png"             Name="file_s~3.png" LongName="file_save_all.png"             src="$(var.TARGET)\images\22x22\file_save_all.png" />
-                  <File DiskId="1" Id="i22x22_file_saveas.png"               Name="file_s~4.png" LongName="file_saveas.png"               src="$(var.TARGET)\images\22x22\file_saveas.png" />
-                  <File DiskId="1" Id="i22x22_filter_clear.png"              Name="filter~1.png" LongName="filter_clear.png"              src="$(var.TARGET)\images\22x22\filter_clear.png" />
-                  <File DiskId="1" Id="i22x22_filter_label.png"              Name="filter~2.png" LongName="filter_label.png"              src="$(var.TARGET)\images\22x22\filter_label.png" />
-                  <File DiskId="1" Id="i22x22_help_contents.png"             Name="help_c~1.png" LongName="help_contents.png"             src="$(var.TARGET)\images\22x22\help_contents.png" />
-                  <File DiskId="1" Id="i22x22_help_whatsthis.png"            Name="help_w~1.png" LongName="help_whatsthis.png"            src="$(var.TARGET)\images\22x22\help_whatsthis.png" />
-                  <File DiskId="1" Id="i22x22_net_offline.png"               Name="net_of~1.png" LongName="net_offline.png"               src="$(var.TARGET)\images\22x22\net_offline.png" />
-                  <File DiskId="1" Id="i22x22_net_online.png"                Name="net_on~1.png" LongName="net_online.png"                src="$(var.TARGET)\images\22x22\net_online.png" />
-                  <File DiskId="1" Id="i22x22_settings_refresh_database.png" Name="settin~1.png" LongName="settings_refresh_database.png" src="$(var.TARGET)\images\22x22\settings_refresh_database.png" />
-                  <File DiskId="1" Id="i22x22_view_compact.png"              Name="view_c~1.png" LongName="view_compact.png"              src="$(var.TARGET)\images\22x22\view_compact.png" />
-                  <File DiskId="1" Id="i22x22_view_hierarchic.png"           Name="view_h~1.png" LongName="view_hierarchic.png"           src="$(var.TARGET)\images\22x22\view_hierarchic.png" />
-                  <File DiskId="1" Id="i22x22_view_plain.png"                Name="view_p~1.png" LongName="view_plain.png"                src="$(var.TARGET)\images\22x22\view_plain.png" />
-                  <File DiskId="1" Id="i22x22_edit_bl_catalog.png"           Name="edit_b~1.png" LongName="edit_bl_catalog.png"           src="$(var.TARGET)\images\22x22\edit_bl_catalog.png" />
-                  <File DiskId="1" Id="i22x22_edit_bl_priceguide.png"        Name="edit_b~2.png" LongName="edit_bl_priceguide.png"        src="$(var.TARGET)\images\22x22\edit_bl_priceguide.png" />
-                  <File DiskId="1" Id="i22x22_edit_bl_lotsforsale.png"       Name="edit_b~3.png" LongName="edit_bl_lotsforsale.png"       src="$(var.TARGET)\images\22x22\edit_bl_lotsforsale.png" />
-                  <File DiskId="1" Id="i22x22_viewmode.png"                  Name="view_m~1.png" LongName="viewmode.png"                  src="$(var.TARGET)\images\22x22\viewmode.png" />
-                  <File DiskId="1" Id="i22x22_viewmode_list.png"             Name="view_m~2.png" LongName="viewmode_list.png"             src="$(var.TARGET)\images\22x22\viewmode_list.png" />
-                  <File DiskId="1" Id="i22x22_viewmode_images.png"           Name="view_m~3.png" LongName="viewmode_images.png"           src="$(var.TARGET)\images\22x22\viewmode_images.png" />
-                  <File DiskId="1" Id="i22x22_viewmode_thumbs.png"           Name="view_m~4.png" LongName="viewmode_thumbs.png"           src="$(var.TARGET)\images\22x22\viewmode_thumbs.png" />
+                  <RemoveFile      Id="i22x22_browser.png"                   Name="browser.png"                                           On="install" />
+                  <RemoveFile      Id="i22x22_configure.png"                 Name="config~1.png" LongName="configure.png"                 On="install" />
+                  <RemoveFile      Id="i22x22_edit.png"                      Name="edit.png"                                              On="install" />
+                  <RemoveFile      Id="i22x22_edit_buy_bl.png"               Name="edit_b~1.png" LongName="edit_buy_bl.png"               On="install" />
+                  <RemoveFile      Id="i22x22_edit_open_bl.png"              Name="edit_b~2.png" LongName="edit_open_bl.png"              On="install" />
+                  <RemoveFile      Id="i22x22_settings_refresh_database.png" Name="settin~1.png" LongName="settings_refresh_database.png" On="install" />
+
+                  <File DiskId="1" Id="i22x22_edit_additems.png"             Name="imageaa0.png" LongName="edit_additems.png"             src="$(var.TARGET)\images\22x22\edit_additems.png" />
+                  <File DiskId="1" Id="i22x22_edit_bl_catalog.png"           Name="imageab0.png" LongName="edit_bl_catalog.png"           src="$(var.TARGET)\images\22x22\edit_bl_catalog.png" />
+                  <File DiskId="1" Id="i22x22_edit_bl_lotsforsale.png"       Name="imageac0.png" LongName="edit_bl_lotsforsale.png"       src="$(var.TARGET)\images\22x22\edit_bl_lotsforsale.png" />
+                  <File DiskId="1" Id="i22x22_edit_bl_priceguide.png"        Name="imagead0.png" LongName="edit_bl_priceguide.png"        src="$(var.TARGET)\images\22x22\edit_bl_priceguide.png" />
+                  <File DiskId="1" Id="i22x22_edit_copy.png"                 Name="imageae0.png" LongName="edit_copy.png"                 src="$(var.TARGET)\images\22x22\edit_copy.png" />
+                  <File DiskId="1" Id="i22x22_edit_cut.png"                  Name="imageaf0.png" LongName="edit_cut.png"                  src="$(var.TARGET)\images\22x22\edit_cut.png" />
+                  <File DiskId="1" Id="i22x22_edit_delete.png"               Name="imageag0.png" LongName="edit_delete.png"               src="$(var.TARGET)\images\22x22\edit_delete.png" />
+                  <File DiskId="1" Id="i22x22_edit_divide_qty.png"           Name="imageah0.png" LongName="edit_divide_qty.png"           src="$(var.TARGET)\images\22x22\edit_divide_qty.png" />
+                  <File DiskId="1" Id="i22x22_edit_find.png"                 Name="imageai0.png" LongName="edit_find.png"                 src="$(var.TARGET)\images\22x22\edit_find.png" />
+                  <File DiskId="1" Id="i22x22_edit_find_again.png"           Name="imageaj0.png" LongName="edit_find_again.png"           src="$(var.TARGET)\images\22x22\edit_find_again.png" />
+                  <File DiskId="1" Id="i22x22_edit_mergeitems.png"           Name="imageak0.png" LongName="edit_mergeitems.png"           src="$(var.TARGET)\images\22x22\edit_mergeitems.png" />
+                  <File DiskId="1" Id="i22x22_edit_multiply_qty.png"         Name="imageal0.png" LongName="edit_multiply_qty.png"         src="$(var.TARGET)\images\22x22\edit_multiply_qty.png" />
+                  <File DiskId="1" Id="i22x22_edit_partoutitems.png"         Name="imageam0.png" LongName="edit_partoutitems.png"         src="$(var.TARGET)\images\22x22\edit_partoutitems.png" />
+                  <File DiskId="1" Id="i22x22_edit_paste.png"                Name="imagean0.png" LongName="edit_paste.png"                src="$(var.TARGET)\images\22x22\edit_paste.png" />
+                  <File DiskId="1" Id="i22x22_edit_price_inc_dec.png"        Name="imageao0.png" LongName="edit_price_inc_dec.png"        src="$(var.TARGET)\images\22x22\edit_price_inc_dec.png" />
+                  <File DiskId="1" Id="i22x22_edit_price_to_priceguide.png"  Name="imageap0.png" LongName="edit_price_to_priceguide.png"  src="$(var.TARGET)\images\22x22\edit_price_to_priceguide.png" />
+                  <File DiskId="1" Id="i22x22_edit_redo.png"                 Name="imageaq0.png" LongName="edit_redo.png"                 src="$(var.TARGET)\images\22x22\edit_redo.png" />
+                  <File DiskId="1" Id="i22x22_edit_set_sale.png"             Name="imagear0.png" LongName="edit_set_sale.png"             src="$(var.TARGET)\images\22x22\edit_set_sale.png" />
+                  <File DiskId="1" Id="i22x22_edit_subtractitems.png"        Name="imageas0.png" LongName="edit_subtractitems.png"        src="$(var.TARGET)\images\22x22\edit_subtractitems.png" />
+                  <File DiskId="1" Id="i22x22_edit_undo.png"                 Name="imageat0.png" LongName="edit_undo.png"                 src="$(var.TARGET)\images\22x22\edit_undo.png" />
+                  <File DiskId="1" Id="i22x22_extras_configure.png"          Name="imageau0.png" LongName="extras_configure.png"          src="$(var.TARGET)\images\22x22\extras_configure.png" />
+                  <File DiskId="1" Id="i22x22_extras_update_database.png"    Name="imageav0.png" LongName="extras_update_database.png"    src="$(var.TARGET)\images\22x22\extras_update_database.png" />
+                  <File DiskId="1" Id="i22x22_file_close.png"                Name="imageaw0.png" LongName="file_close.png"                src="$(var.TARGET)\images\22x22\file_close.png" />
+                  <File DiskId="1" Id="i22x22_file_exit.png"                 Name="imageax0.png" LongName="file_exit.png"                 src="$(var.TARGET)\images\22x22\file_exit.png" />
+                  <File DiskId="1" Id="i22x22_file_export.png"               Name="imageay0.png" LongName="file_export.png"               src="$(var.TARGET)\images\22x22\file_export.png" />
+                  <File DiskId="1" Id="i22x22_file_export_briktrak.png"      Name="imageaz0.png" LongName="file_export_briktrak.png"      src="$(var.TARGET)\images\22x22\file_export_briktrak.png" />
+                  <File DiskId="1" Id="i22x22_file_import.png"               Name="imageba0.png" LongName="file_import.png"               src="$(var.TARGET)\images\22x22\file_import.png" />
+                  <File DiskId="1" Id="i22x22_file_import_briktrak.png"      Name="imagebb0.png" LongName="file_import_briktrak.png"      src="$(var.TARGET)\images\22x22\file_import_briktrak.png" />
+                  <File DiskId="1" Id="i22x22_file_import_ldraw_model.png"   Name="imagebc0.png" LongName="file_import_ldraw_model.png"   src="$(var.TARGET)\images\22x22\file_import_ldraw_model.png" />
+                  <File DiskId="1" Id="i22x22_file_new.png"                  Name="imagebd0.png" LongName="file_new.png"                  src="$(var.TARGET)\images\22x22\file_new.png" />
+                  <File DiskId="1" Id="i22x22_file_open.png"                 Name="imagebe0.png" LongName="file_open.png"                 src="$(var.TARGET)\images\22x22\file_open.png" />
+                  <File DiskId="1" Id="i22x22_file_print.png"                Name="imagebf0.png" LongName="file_print.png"                src="$(var.TARGET)\images\22x22\file_print.png" />
+                  <File DiskId="1" Id="i22x22_file_save.png"                 Name="imagebg0.png" LongName="file_save.png"                 src="$(var.TARGET)\images\22x22\file_save.png" />
+                  <File DiskId="1" Id="i22x22_file_save_all.png"             Name="imagebh0.png" LongName="file_save_all.png"             src="$(var.TARGET)\images\22x22\file_save_all.png" />
+                  <File DiskId="1" Id="i22x22_file_saveas.png"               Name="imagebi0.png" LongName="file_saveas.png"               src="$(var.TARGET)\images\22x22\file_saveas.png" />
+                  <File DiskId="1" Id="i22x22_filter_clear.png"              Name="imagebj0.png" LongName="filter_clear.png"              src="$(var.TARGET)\images\22x22\filter_clear.png" />
+                  <File DiskId="1" Id="i22x22_filter_label.png"              Name="imagebk0.png" LongName="filter_label.png"              src="$(var.TARGET)\images\22x22\filter_label.png" />
+                  <File DiskId="1" Id="i22x22_help_contents.png"             Name="imagebl0.png" LongName="help_contents.png"             src="$(var.TARGET)\images\22x22\help_contents.png" />
+                  <File DiskId="1" Id="i22x22_help_updates.png"              Name="imagebm0.png" LongName="help_updates.png"              src="$(var.TARGET)\images\22x22\help_updates.png" />
+                  <File DiskId="1" Id="i22x22_help_whatsthis.png"            Name="imagebn0.png" LongName="help_whatsthis.png"            src="$(var.TARGET)\images\22x22\help_whatsthis.png" />
+                  <File DiskId="1" Id="i22x22_net_offline.png"               Name="imagebo0.png" LongName="net_offline.png"               src="$(var.TARGET)\images\22x22\net_offline.png" />
+                  <File DiskId="1" Id="i22x22_net_online.png"                Name="imagebp0.png" LongName="net_online.png"                src="$(var.TARGET)\images\22x22\net_online.png" />
+                  <File DiskId="1" Id="i22x22_view_compact.png"              Name="imagebq0.png" LongName="view_compact.png"              src="$(var.TARGET)\images\22x22\view_compact.png" />
+                  <File DiskId="1" Id="i22x22_view_hierarchic.png"           Name="imagebr0.png" LongName="view_hierarchic.png"           src="$(var.TARGET)\images\22x22\view_hierarchic.png" />
+                  <File DiskId="1" Id="i22x22_view_plain.png"                Name="imagebs0.png" LongName="view_plain.png"                src="$(var.TARGET)\images\22x22\view_plain.png" />
+                  <File DiskId="1" Id="i22x22_viewmode.png"                  Name="imagebt0.png" LongName="viewmode.png"                  src="$(var.TARGET)\images\22x22\viewmode.png" />
+                  <File DiskId="1" Id="i22x22_viewmode_images.png"           Name="imagebu0.png" LongName="viewmode_images.png"           src="$(var.TARGET)\images\22x22\viewmode_images.png" />
+                  <File DiskId="1" Id="i22x22_viewmode_list.png"             Name="imagebv0.png" LongName="viewmode_list.png"             src="$(var.TARGET)\images\22x22\viewmode_list.png" />
+                  <File DiskId="1" Id="i22x22_viewmode_thumbs.png"           Name="imagebw0.png" LongName="viewmode_thumbs.png"           src="$(var.TARGET)\images\22x22\viewmode_thumbs.png" />
                 </Component>
               </Directory>             
             </Directory>
@@ -228,6 +265,7 @@
       <ComponentRef Id="c_images_status" />
       <ComponentRef Id="c_images_16x16" />
       <ComponentRef Id="c_images_22x22" />
+	  <ComponentRef Id="c_images_sidebar" />
     </Feature>
 
   <?include ui.wxi ?>

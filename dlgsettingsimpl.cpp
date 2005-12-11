@@ -103,7 +103,7 @@ DlgSettingsImpl::DlgSettingsImpl( QWidget *parent, const char *name, bool modal,
 	m_def_add_itemtype = new CItemTypeCombo ( w_def_add_itemtype, false );
 	m_def_add_itemtype-> setCurrentItemType ( itype ? itype : BrickLink::inst ( )-> itemType ( 'P' ));
 
-	w_def_add_itemcond-> setButton ( CConfig::inst ( )-> readEntry ( "/Default/AddItems/Condition", "new" ) == "new" ? 0 : 1 );
+	w_def_add_itemcond-> setButton ( CConfig::inst ( )-> readEntry ( "/Defaults/AddItems/Condition", "new" ) == "new" ? 0 : 1 );
 
 	QStringList timel, pricel;
 
@@ -215,7 +215,7 @@ void DlgSettingsImpl::done ( int r )
 		itype = m_def_add_itemtype-> currentItemType ( );
 		if ( itype )
 			CConfig::inst ( )-> writeEntry ( "/Defaults/AddItems/ItemType", itype-> id ( ));
-		CConfig::inst ( )-> writeEntry ( "/Default/AddItems/Condition", w_def_add_itemcond-> selectedId ( ) == 0 ? "new" : "used" );
+		CConfig::inst ( )-> writeEntry ( "/Defaults/AddItems/Condition", w_def_add_itemcond-> selectedId ( ) == 0 ? "new" : "used" );
 
 		CConfig::inst ( )-> writeEntry ( "/Defaults/SetToPG/Time",  w_def_pg_type_time-> currentItem ( ));
 		CConfig::inst ( )-> writeEntry ( "/Defaults/SetToPG/Price", w_def_pg_type_price-> currentItem ( ));

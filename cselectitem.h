@@ -62,6 +62,7 @@ protected slots:
 	void applyFilter ( );
 	void viewModeChanged ( int );
 	void pictureUpdated ( BrickLink::Picture * );
+	void findItem ( );
 
 protected:
 	virtual void showEvent ( QShowEvent * );
@@ -76,6 +77,8 @@ private:
 	bool setViewMode ( ViewMode ivm, const BrickLink::ItemType *itt, const BrickLink::Category *cat, const BrickLink::Item *select = 0 );
 	ViewMode checkViewMode ( ViewMode ivm, const BrickLink::ItemType *itt, const BrickLink::Category *cat );
 
+	void ensureSelectionVisible ( );
+
 protected:
 	CItemTypeCombo *m_type_combo;
 
@@ -86,6 +89,7 @@ protected:
 	CListView *w_items;
 	QIconView *w_thumbs;
 
+	QToolButton *w_goto;
 	QToolButton *w_filter_clear;
 	QComboBox *w_filter_expression;
 

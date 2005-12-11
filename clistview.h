@@ -51,8 +51,8 @@ public:
 
 	bool isColumnVisible ( int ) const;
 
-	void loadSettings ( QSettings *set, const QString &grp );
-	void saveSettings ( QSettings *set, const QString &grp ) const;
+	void loadSettings ( const QMap <QString, QString> &map );
+	QMap <QString, QString> saveSettings ( ) const;
 
 	void centerItem ( const QListViewItem *item );
 

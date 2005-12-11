@@ -33,6 +33,9 @@ public:
 	
 	QString appName ( ) const;
 	QString appVersion ( ) const;
+	QString appURL ( ) const;
+	QString sysName ( ) const;
+	QString sysVersion ( ) const;
 
 public slots:
 	void about ( );
@@ -62,7 +65,8 @@ private:
 	QStringList m_files_to_open;
 	bool m_enable_emit;
 
-	QString m_appname;
+	QString m_sys_name;
+	QString m_sys_version;
 	QString m_copyright;
 	QString m_version;
 	QString m_support;

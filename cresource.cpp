@@ -88,7 +88,7 @@ CResource::CResource ( )
 	//  without a debugger, destroying the stack at the same time...)
 	
 	extern bool qt_use_native_dialogs;
-	qt_use_native_dialogs = (( wv & Qt::WV_NT_based ) >= Qt::WV_XP );
+	qt_use_native_dialogs = !(( wv & Qt::WV_DOS_based ) || (( wv & Qt::WV_NT_based ) < Qt::WV_XP ));
 
 #elif defined( Q_WS_X11 )
 	// default

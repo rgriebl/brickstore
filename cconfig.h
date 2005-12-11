@@ -31,6 +31,8 @@ public:
 	~CConfig ( );
 	static CConfig *inst ( );
 
+	void upgrade ( int vmajor, int vminor, int vrev );
+
 	enum WeightSystem {
 		WeightMetric,
 		WeightImperial

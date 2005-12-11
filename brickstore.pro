@@ -39,7 +39,7 @@ MOC_DIR   = .moc
 UI_DIR    = .uic
 
 win32 {
-  system( scripts\update_version.js )
+  system( cscript.exe //B scripts\update_version.js )
 
   LIBS += libcurl.lib
   DEFINES += CURL_STATICLIB
@@ -87,6 +87,7 @@ macx {
 HEADERS += bricklink.h \
            capplication.h \
            cconfig.h \
+           cfilteredit.h \
            cframework.h \
            ciconfactory.h \
            cinfobar.h \
@@ -105,6 +106,7 @@ HEADERS += bricklink.h \
            cresource.h \
            cselectcolor.h \
            cselectitem.h \
+           cspinner.h \
            ctaskbar.h \
            ctransfer.h \
            curllabel.h \
@@ -118,6 +120,7 @@ SOURCES += bricklink.cpp \
            bricklink_priceguide.cpp \
            capplication.cpp \
            cconfig.cpp \
+           cfilteredit.cpp \
            cframework.cpp \
            ciconfactory.cpp \
            cinfobar.cpp \
@@ -134,6 +137,7 @@ SOURCES += bricklink.cpp \
            cresource.cpp \
            cselectcolor.cpp \
            cselectitem.cpp \
+           cspinner.cpp \
            ctaskbar.cpp \
            ctransfer.cpp \
            curllabel.cpp \

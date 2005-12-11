@@ -12,10 +12,9 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 #include <qfile.h>
-#include <qapplication.h>
 
+#include "capplication.h"
 #include "ctransfer.h"
-#include "version.h"
 
 
 bool CTransfer::s_global_init = false;
@@ -180,6 +179,12 @@ bool CTransfer::init ( )
 
 void CTransfer::run ( )
 {
+	QString ua = cApp-> appName ( ) + "/" + 
+	             cApp-> appVersion ( ) + " (" + 
+	             cApp-> sysName ( ) + " " + 
+				 cApp-> sysVersion ( ) + "; http://" + 
+	             cApp-> appURL ( ) + ")";
+
 	::curl_easy_setopt ( m_curl, CURLOPT_VERBOSE, 0 );
 	::curl_easy_setopt ( m_curl, CURLOPT_NOPROGRESS, 1 );
 	::curl_easy_setopt ( m_curl, CURLOPT_NOSIGNAL, 1 );
@@ -188,7 +193,7 @@ void CTransfer::run ( )
 	::curl_easy_setopt ( m_curl, CURLOPT_DNS_CACHE_TIMEOUT, 5*60 );
 	::curl_easy_setopt ( m_curl, CURLOPT_WRITEFUNCTION, write_curl );
 	::curl_easy_setopt ( m_curl, CURLOPT_WRITEDATA, this );
-	::curl_easy_setopt ( m_curl, CURLOPT_USERAGENT, "BrickStore/" BRICKSTORE_VERSION " (http://" BRICKSTORE_URL "; " BRICKSTORE_MAIL ")" );
+	::curl_easy_setopt ( m_curl, CURLOPT_USERAGENT, ua. latin1 ( ));
 	::curl_easy_setopt ( m_curl, CURLOPT_ENCODING, "" );
 
 	QCString url, query;

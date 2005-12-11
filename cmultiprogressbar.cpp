@@ -40,8 +40,8 @@ CMultiProgressBar::CMultiProgressBar ( QWidget *parent, const char *name )
 
 	m_progress = new QProgressBar ( this );
 	m_progress-> setFrameStyle ( QFrame::NoFrame );
-    m_progress-> setIndicatorFollowsStyle ( false );
-    m_progress-> setCenterIndicator ( true );
+	m_progress-> setIndicatorFollowsStyle ( false );
+	m_progress-> setCenterIndicator ( true );
 	m_progress-> setPercentageVisible ( false );
 	lay-> addWidget ( m_progress );
 
@@ -135,6 +135,8 @@ void CMultiProgressBar::recalc ( )
 	}
 	m_arrow-> setEnabled ( ta > 0 );
 	m_stop-> setEnabled ( ta > 0 );
+
+	emit statusChange ( ta > 0 );
 }
 
 void CMultiProgressBar::togglePopup ( bool b )

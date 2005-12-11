@@ -24,8 +24,6 @@
 
 namespace {
 
-static const char releases_url [] = "http://www.brickforge.de/software/brickstore/RELEASES";
-
 struct VersionRecord {
 	VersionRecord ( )
 		: m_major ( 0 ), m_minor ( 0 ), m_revision ( 0 ), m_type ( Stable ), m_has_errors ( false ), m_is_newer ( false ), m_is_current ( false )
@@ -107,7 +105,8 @@ DlgUpdateImpl::DlgUpdateImpl ( QWidget *parent, const char *name, bool modal, in
 	if ( d-> m_trans-> init ( )) {
 		d-> m_trans-> setProxy ( CConfig::inst ( )-> useProxy ( ), CConfig::inst ( )-> proxyName ( ), CConfig::inst ( )-> proxyPort ( ));
 
-		d-> m_job = d-> m_trans-> get ( releases_url, CKeyValueList ( ));
+		QString url = "http://" + cApp-> appURL ( ) + "/RELEASES";
+		d-> m_job = d-> m_trans-> get ( url. latin1 ( ), CKeyValueList ( ));
 	}
 
     d-> m_progress_timer = new QTimer ( this );
@@ -217,18 +216,15 @@ void DlgUpdateImpl::transferJobFinished ( CTransfer::Job *job )
 							}
 						}
 						str += "</table><br />";
-						str += QString( "<a href=\"http://www.brickforge.de/software/brickstore/changes\">%1</a>" ). arg ( tr( "Detailed list of changes" ));
+						str += QString( "<a href=\"http://" + cApp-> appURL ( ) + "/changes\">%1</a>" ). arg ( tr( "Detailed list of changes" ));
 					}
 				
 					if ( d-> m_current_version. m_has_errors ) {
-						QString link = QString( "<a href=\"http://www.brickforge.de/software/brickstore\">%1</a>" ). arg ( tr( "the BrickStore homepage" ));
+						QString link = QString( "<a href=\"http://" + cApp-> appURL ( ) + "\">%1</a>" ). arg ( tr( "the BrickStore homepage" ));
 
-						str += "<br /><br /><br /><b><font color=\"red\">" + 
-							   tr( "Please note:" ) + 
-							   " </font>" + 
-							   tr( "Your currently installed version is flagged as defective." ) + 
-							   " </b>" + 
-							   tr( "Please visit %1 to find out the exact cause." ). arg ( link );
+						str += "<br /><br /><br /><br /><br /><br /><table><tr><td><img src=\"brickstore-important\" align=\"left\" /></td><td>" + 
+							   tr( "<b>Please note:</b> Your currently installed version is flagged as defective. Please visit %1 to find out the exact cause." ). arg ( link ) +
+							   "</td></tr></table>";
 					}
 				}
 					

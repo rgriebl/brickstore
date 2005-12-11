@@ -150,6 +150,8 @@ CItemView::CItemView ( QWidget *parent, const char *name )
 	setGridMode ( true );
 
 	d-> m_lineedit = new QLineEdit ( viewport ( ));
+    d-> m_lineedit-> setFrameStyle ( QFrame::Box | QFrame::Plain );
+    d-> m_lineedit-> setLineWidth ( 1 );
 	d-> m_lineedit-> hide ( );
 	d-> m_lineedit-> installEventFilter ( this );
 

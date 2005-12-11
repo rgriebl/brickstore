@@ -101,7 +101,7 @@ DlgAddItemImpl::DlgAddItemImpl ( QWidget *parent, const char *name, bool modal, 
 
 	updateMonetary ( );
 
-	w_condition-> setButton ( CConfig::inst ( )-> readEntry ( "/Default/AddItems/Condition", "new" ) == "new" ? 0 : 1 );
+	w_condition-> setButton ( CConfig::inst ( )-> readEntry ( "/Defaults/AddItems/Condition", "new" ) == "new" ? 0 : 1 );
 	w_tier_type-> setButton ( 0 );
 	setTierType ( 0 );
 

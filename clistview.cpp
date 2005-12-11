@@ -215,9 +215,9 @@ void CListView::keyPressEvent( QKeyEvent *e )
 	}
 }
 
-void CListView::saveSettings ( QSettings *set, const QString &grp ) const
+QMap <QString, QString> CListView::saveSettings ( ) const
 {
-	set-> beginGroup ( grp );
+	QMap <QString, QString> map;
 
 	QHeader *head = header ( );
 	QStringList wl, hl, ol;
@@ -228,41 +228,46 @@ void CListView::saveSettings ( QSettings *set, const QString &grp ) const
 		ol << QString::number ( head-> mapToIndex ( i ));
 	}
 
-	set-> writeEntry ( "/ColumnWidths",  wl );
-	set-> writeEntry ( "/ColumnWidthsHidden", hl );
-	set-> writeEntry ( "/ColumnOrder",   ol );
-	set-> writeEntry ( "/SortColumn",    sortColumn ( ));
-	set-> writeEntry ( "/SortAscending", ( sortOrder ( ) == Ascending ));
+	map ["ColumnWidths"]       = wl. join ( "," );
+	map ["ColumnWidthsHidden"] = hl. join ( "," );
+	map ["ColumnOrder"]        = ol. join ( "," );
+	map ["SortColumn"]         = QString::number ( sortColumn ( ));
+	map ["SortDirection"]      = ( sortOrder ( ) == Ascending ) ? "A" : "D";
 
-	set-> endGroup ( );
+	return map;
 }
 
-void CListView::loadSettings ( QSettings *set, const QString &grp )
+void CListView::loadSettings ( const QMap <QString, QString> &map )
 {
-	set-> beginGroup ( grp );
-
 	QHeader *head = header ( );
-	bool ok = false;
+	QMap <QString, QString>::const_iterator it;
+	QStringList sl;
 
-	QStringList sl = set-> readListEntry ( "ColumnWidths", &ok );
+	it = map. find ( "ColumnWidths" );
 
-	if ( ok ) {
+	if ( it != map. end ( )) {
+		sl = QStringList::split ( ',', *it, true );
+
 		int i = 0;
 		for ( QStringList::Iterator it = sl. begin ( ); it != sl. end ( ); ++it, i++ )
 			setColumnWidth ( i, ( *it ). toInt ( ));
 	}
 	
-	sl = set-> readListEntry ( "ColumnWidthsHidden", &ok );
+	it = map. find ( "ColumnWidthsHidden" );
 
-	if ( ok ) {
+	if ( it != map. end ( )) {
+		sl = QStringList::split ( ',', *it, true );
+
 		int i = 0;
 		for ( QStringList::Iterator it = sl. begin ( ); it != sl. end ( ); ++it, i++ )
 			m_col_width [i] = ( *it ). toInt ( );
 	}
 
-	sl = set-> readListEntry ( "ColumnOrder", &ok );
+	it = map. find ( "ColumnOrder" );
 
-	if ( ok ) {
+	if ( it != map. end ( )) {
+		sl = QStringList::split ( ',', *it, true );
+
 		for ( int i = 0; i < columns ( ); i++ ) {
 			int j = sl. findIndex ( QString::number ( i ));
 
@@ -271,12 +276,10 @@ void CListView::loadSettings ( QSettings *set, const QString &grp )
 		}
 	}
 
-	int sortcol = set-> readNumEntry ( "SortColumn", -1, &ok );
+	it = map. find ( "SortColumn" );
 
-	if ( ok )
-		setSorting ( sortcol, set-> readBoolEntry ( "SortAscending", true ));
-
-	set-> endGroup ( );
+	if ( it != map. end ( ))
+		setSorting (( *it ). toInt ( ), ( map ["SortDirection"] != "D" ));
 }
 
 void CListView::setColumnsHideable ( bool b )

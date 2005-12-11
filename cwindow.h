@@ -18,8 +18,8 @@
 #include <qregexp.h>
 #include <qptrlist.h>
 #include <qptrdict.h>
-#include <qlistview.h>
 #include <qguardedptr.h>
+#include <qdom.h>
 
 #include "citemview.h"
 #include "bricklink.h"
@@ -28,6 +28,7 @@
 
 class QToolButton;
 class QComboBox;
+class QListViewItem;
 class CItemView;
 class DlgAddItemImpl;
 class CFrameWork;
@@ -96,6 +97,7 @@ public:
 	bool fileImportBrickLinkOrder ( );
 	bool fileImportBrickLinkStore ( );
 	bool fileImportBrickLinkXML ( );
+	bool fileImportBrikTrakInventory ( );
 	bool fileImportLDrawModel ( );
 
 public slots:
@@ -108,6 +110,7 @@ public slots:
 	void fileExportBrickLinkUpdateClipboard ( );
 	void fileExportBrickLinkInvReqClipboard ( );
 	void fileExportBrickLinkWantedListClipboard ( );
+	void fileExportBrikTrakInventory ( );
 
 	void filePrint ( );
 
@@ -176,10 +179,13 @@ private slots:
 	void updateErrorMask ( );
 
 private:
-	bool fileLoadFrom ( const QString &s, char type, bool import_only = false );
-	bool fileSaveTo ( const QString &s, char type, bool export_only = false );
+	bool fileLoadFrom ( const QString &s, const char *type, bool import_only = false );
+	bool fileSaveTo ( const QString &s, const char *type, bool export_only = false );
 
 	void resetDifferences ( const QPtrList<BrickLink::InvItem> & );
+
+	QDomElement CWindow::createGuiStateXML ( QDomDocument doc );
+	bool parseGuiStateXML ( QDomElement root );
 
 private:
 	QRegExp        m_filter_expression;

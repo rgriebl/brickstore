@@ -53,6 +53,7 @@ public slots:
 
 signals:
 	void stop ( );
+	void statusChange ( bool );
 
 protected slots:
 	void togglePopup ( bool b );
