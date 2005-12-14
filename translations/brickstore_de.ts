@@ -85,10 +85,6 @@
 <context>
     <name>CApplication</name>
     <message>
-        <source>BrickStore</source>
-        <translation>BrickStore</translation>
-    </message>
-    <message>
         <source>Could not initialize the BrickLink kernel:&lt;br /&gt;&lt;br /&gt;%1</source>
         <translation>Konnte den BrickLink-Kernel nicht starten:&lt;br /&gt;&lt;br /&gt;%1</translation>
     </message>
@@ -558,6 +554,14 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
         <source>Check for Program Updates...</source>
         <translation>Nach Programm-Updates suchen...</translation>
     </message>
+    <message>
+        <source>BrikTrak Inventory...</source>
+        <translation>BrikTrak Teileliste...</translation>
+    </message>
+    <message>
+        <source>BrickStore has switched to a new file format (.bsx - BrickStore XML).&lt;br /&gt;&lt;br /&gt;Your document has been automatically imported and it will be converted as soon as you save it.</source>
+        <translation>Das Dateiformat von BrickStore hat sich geändert (.bsx - BrickStore XML).&lt;br /&gt;&lt;br /&gt;Das Dokument wurde automatisch importiert und es wird beim Abspeichern in das neue Format konvertiert.</translation>
+    </message>
 </context>
 <context>
     <name>CInfoBar</name>
@@ -1003,6 +1007,19 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
         <source>Viewing all items with images is a bandwidth- and memory-hungry operation.&lt;br /&gt;Are you sure you want to continue?</source>
         <translation>Alle Teile mit Bildern anzuzeigen ist ein sehr Bandbreiten- und Speicherfressender Vorgang.&lt;br /&gt;Wollen Sie wirklich fortfahren?</translation>
     </message>
+    <message>
+        <source>Please enter the complete part number of the item:</source>
+        <translation>Bitte geben Sie die vollständige Teilenummer ein:</translation>
+    </message>
+    <message>
+        <source>Ctrl+F</source>
+        <comment>Find Item</comment>
+        <translation>Ctrl+F</translation>
+    </message>
+    <message>
+        <source>Find Item...</source>
+        <translation>Teil Suchen...</translation>
+    </message>
 </context>
 <context>
     <name>CSelectItemDialog</name>
@@ -1068,10 +1085,6 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <message>
         <source>Export File</source>
         <translation>Datei exportieren</translation>
-    </message>
-    <message>
-        <source>BrickLink XML Inventory</source>
-        <translation>BrickLink XML Inventarliste</translation>
     </message>
     <message>
         <source>Overwrite the currently selected items?</source>
@@ -1240,6 +1253,14 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <message>
         <source>The quantities of %1 lots are not divisible without remainder by %2.&lt;br /&gt;&lt;br /&gt;Nothing has been modified.</source>
         <translation>Die Anzahl der Teile in %1 Posten ist nicht ohne Rest durch %2 teilbar.&lt;br /&gt;&lt;br /&gt;Es wurden keine Werte geändert.</translation>
+    </message>
+    <message>
+        <source>BrickStore XML Data</source>
+        <translation>BrickStore XML Daten</translation>
+    </message>
+    <message>
+        <source>BrickLink XML File</source>
+        <translation>BrickLink XML Datei</translation>
     </message>
 </context>
 <context>
@@ -1989,14 +2010,6 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
         <translation>die BrickStore Homepage</translation>
     </message>
     <message>
-        <source>Your currently installed version is flagged as defective.</source>
-        <translation>Ihre momentan installierte Version ist als defekt markiert.</translation>
-    </message>
-    <message>
-        <source>Please visit %1 to find out the exact cause.</source>
-        <translation>Bitte besuchen Sie %1, um den genauen Grund nachzulesen.</translation>
-    </message>
-    <message>
         <source>Stable release</source>
         <translation>Stabile Version</translation>
     </message>
@@ -2005,8 +2018,8 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
         <translation>Beta Version</translation>
     </message>
     <message>
-        <source>Please note:</source>
-        <translation>Achtung:</translation>
+        <source>&lt;b&gt;Please note:&lt;/b&gt; Your currently installed version is flagged as defective. Please visit %1 to find out the exact cause.</source>
+        <translation>&lt;b&gt;Achtung:&lt;/b&gt; Ihre momentan installierte Version ist als defekt markiert. Bitte besuchen Sie %1, um den genauen Grund nachzulesen.</translation>
     </message>
 </context>
 </TS>

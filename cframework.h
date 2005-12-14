@@ -164,7 +164,7 @@ private:
 	QToolBar *createToolBar ( const QString &label, const QStringList & );
 	void createStatusBar ( );
 	CWindow *createWindow ( );
-	void showOrDeleteWindow ( CWindow *w, bool b );
+	bool showOrDeleteWindow ( CWindow *w, bool b );
 
 
 	QPtrList<QAction> m_actions [AC_Count];

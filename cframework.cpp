@@ -330,12 +330,6 @@ void CFrameWork::initBrickLinkDelayed ( )
 		CMessageBox::warning ( this, tr( "Could not load the BrickLink database files.<br /><br />The program is not functional without these files." ));
 }
 
-void CFrameWork::openDocument ( const QString &file )
-{
-	CWindow *w = createWindow ( );
-	showOrDeleteWindow ( w, w-> fileOpen ( file ));
-}
-
 QAction *CFrameWork::findAction ( const char *name, ActionCategory cat )
 {
 	if ( cat < 0 || cat > AC_Count || !name )
@@ -840,6 +834,17 @@ void CFrameWork::viewInfoBar ( bool b )
 	m_infobar-> setShown ( b );
 }
 
+void CFrameWork::openDocument ( const QString &file )
+{
+	bool old_bti_file = ( file. right ( 4 ) == ".bti" );
+
+	CWindow *w = createWindow ( );
+	bool ok = showOrDeleteWindow ( w, old_bti_file ? w-> fileImportBrikTrakInventory ( file ) : w-> fileOpen ( file ));
+
+	if ( old_bti_file && ok )
+		CMessageBox::information ( this, tr( "BrickStore has switched to a new file format (.bsx - BrickStore XML).<br /><br />Your document has been automatically imported and it will be converted as soon as you save it." ));
+}
+
 void CFrameWork::fileNew ( )
 {
 	CWindow *w = createWindow ( );
@@ -856,11 +861,10 @@ void CFrameWork::fileOpenRecent ( int i )
 {
 	if ( i < int( m_recent_files. count ( ))) {
 		// we need to copy the string here, because we delete it later
-		// (this seems to work on Linux, but XP crashes int m_recent_files. remove ( ... )
+		// (this seems to work on Linux, but XP crashes in m_recent_files. remove ( ... )
 		QString tmp = m_recent_files [i];
 
-		CWindow *w = createWindow ( );
-		showOrDeleteWindow ( w, w-> fileOpen ( tmp ));
+		openDocument ( tmp );
 	}
 }
 
@@ -938,7 +942,7 @@ CWindow *CFrameWork::createWindow ( )
 	return w;
 }
 
-void CFrameWork::showOrDeleteWindow ( CWindow *w, bool b )
+bool CFrameWork::showOrDeleteWindow ( CWindow *w, bool b )
 {
 	if ( b ) {
 		if ( !m_mdi-> activeWindow ( ) || ( m_mdi-> activeWindow ( ) == w ))
@@ -951,6 +955,7 @@ void CFrameWork::showOrDeleteWindow ( CWindow *w, bool b )
 			connectWindow ( 0 );
 		delete w;
 	}
+	return b;
 }
 
 

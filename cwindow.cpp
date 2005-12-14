@@ -777,13 +777,17 @@ bool CWindow::fileImportBrickLinkXML ( )
 	return b;
 }
 
-bool CWindow::fileImportBrikTrakInventory ( )
+bool CWindow::fileImportBrikTrakInventory ( const QString &fn )
 {
-	QStringList filters;
-	filters << tr( "BrikTrak Inventory" ) + " (*.bti)";
-	filters << tr( "All Files" ) + "(*.*)";
+	QString s = fn;
 
-	QString s = QFileDialog::getOpenFileName ( CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ), this, "FileDialog", tr( "Import File" ), 0 );
+	if ( s. isNull ( )) {
+		QStringList filters;
+		filters << tr( "BrikTrak Inventory" ) + " (*.bti)";
+		filters << tr( "All Files" ) + "(*.*)";
+
+		s = QFileDialog::getOpenFileName ( CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ), this, "FileDialog", tr( "Import File" ), 0 );
+	}
 
 	bool b = ( !s. isEmpty ( ) && fileLoadFrom ( s, "bti", true ));
 

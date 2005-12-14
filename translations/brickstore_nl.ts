@@ -85,10 +85,6 @@
 <context>
     <name>CApplication</name>
     <message>
-        <source>BrickStore</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Could not initialize the BrickLink kernel:&lt;br /&gt;&lt;br /&gt;%1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -552,6 +548,14 @@
         <source>Check for Program Updates...</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>BrikTrak Inventory...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>BrickStore has switched to a new file format (.bsx - BrickStore XML).&lt;br /&gt;&lt;br /&gt;Your document has been automatically imported and it will be converted as soon as you save it.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>CInfoBar</name>
@@ -997,6 +1001,19 @@
         <source>Viewing all items with images is a bandwidth- and memory-hungry operation.&lt;br /&gt;Are you sure you want to continue?</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Please enter the complete part number of the item:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ctrl+F</source>
+        <comment>Find Item</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Find Item...</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>CSelectItemDialog</name>
@@ -1116,10 +1133,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>BrickLink XML Inventory</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Import File</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1233,6 +1246,14 @@
     </message>
     <message>
         <source>The quantities of %1 lots are not divisible without remainder by %2.&lt;br /&gt;&lt;br /&gt;Nothing has been modified.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>BrickStore XML Data</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>BrickLink XML File</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1983,14 +2004,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Your currently installed version is flagged as defective.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Please visit %1 to find out the exact cause.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Stable release</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1999,7 +2012,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Please note:</source>
+        <source>&lt;b&gt;Please note:&lt;/b&gt; Your currently installed version is flagged as defective. Please visit %1 to find out the exact cause.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

@@ -374,8 +374,8 @@ CSelectItem::CSelectItem ( QWidget *parent, const char *name, WFlags fl )
 
 	w_goto = new QToolButton ( this );
 	w_goto-> setAutoRaise ( true );
-	w_goto-> setAccel ( tr( "Ctrl+G", "Goto Item" ));
-	w_goto-> setTextLabel ( tr( "Goto Item" ) + " (" + w_goto-> accel ( ) + ")");
+	w_goto-> setAccel ( tr( "Ctrl+F", "Find Item" ));
+	w_goto-> setTextLabel ( tr( "Find Item..." ) + " (" + w_goto-> accel ( ) + ")");
 
 	QIconSet is = CResource::inst ( )-> iconSet ( "edit_find" );
 	if ( is. isNull ( ))

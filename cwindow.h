@@ -97,7 +97,7 @@ public:
 	bool fileImportBrickLinkOrder ( );
 	bool fileImportBrickLinkStore ( );
 	bool fileImportBrickLinkXML ( );
-	bool fileImportBrikTrakInventory ( );
+	bool fileImportBrikTrakInventory ( const QString &fn = QString::null );
 	bool fileImportLDrawModel ( );
 
 public slots:
