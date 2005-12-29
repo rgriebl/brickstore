@@ -18,7 +18,7 @@ if [ ! -d brickstore.app ]; then
 	exit 1
 fi
 
-[ -r _RELEASE_ ] && pkg_ver=`cat _RELEASE_ | head -n1`
+pkg_ver=`awk '/^RELEASE *=/ { print $3; }' <brickstore.pro `
 [ $# = 1 ] && pkg_ver="$1"
 
 if [ -z $pkg_ver ]; then

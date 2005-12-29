@@ -1016,6 +1016,7 @@ void CFrameWork::connectAllActions ( bool do_connect, CWindow *window )
 	connectAction ( do_connect, "file_save", window, SLOT( fileSave ( )));
 	connectAction ( do_connect, "file_saveas", window, SLOT( fileSaveAs ( )));
 	connectAction ( do_connect, "file_print", window, SLOT( filePrint ( )));
+	connectAction ( do_connect, "file_export", 0, 0 );
 	connectAction ( do_connect, "file_export_briktrak", window, SLOT( fileExportBrikTrakInventory ( )));
 	connectAction ( do_connect, "file_export_bl_xml", window, SLOT( fileExportBrickLinkXML ( )));
 	connectAction ( do_connect, "file_export_bl_xml_clip", window, SLOT( fileExportBrickLinkXMLClipboard ( )));

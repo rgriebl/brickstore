@@ -593,35 +593,31 @@
         </Control>
       </Dialog>
 
+      <RadioButtonGroup Property="InstallMode">
+        <RadioButton Text="{\DlgFontBold8}&amp;Standard" Value="Typical" X="0" Y="0"  Width="250" Height="15" />
+        <RadioButton Text="{\DlgFontBold8}&amp;Custom"   Value="Custom"  X="0" Y="55" Width="250" Height="15" />
+      </RadioButtonGroup>
+
       <Dialog Id="SetupTypeDlg" Width="370" Height="270" Title="[ProductName] [Setup]" NoMinimize="yes">
-        <Control Id="TypicalLabel" Type="Text" X="105" Y="65" Width="100" Height="10" TabSkip="no">
-          <Text>[DlgTitleFont]&amp;Typical</Text>
+        <Control Id="Text" Type="Text" X="25" Y="70" Width="320" Height="15">
+          <Text>Choose a setup type and click Next to continue.</Text>
         </Control>
-        <Control Id="TypicalButton" Type="PushButton" X="50" Y="65" Width="38" Height="38" ToolTip="Typical Installation" Default="yes" Icon="yes" FixedSize="yes" IconSize="32" Text="[InstallerIcon]">
-          <Publish Property="InstallMode" Value="Typical">1</Publish>
-          <Publish Event="SetInstallLevel" Value="3">1</Publish>
-          <Publish Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+        <Control Id="Buttons" Type="RadioButtonGroup" X="37" Y="90" Width="320" Height="100" Property="InstallMode" />
+        <Control Id="TypicalText" Type="Text" X="50" Y="105" Width="270" Height="20">
+          <Text>Installs the most common program features. Recommended for most users.</Text>
         </Control>
-        <Control Id="CustomLabel" Type="Text" X="105" Y="118" Width="100" Height="10" TabSkip="no">
-          <Text>[DlgTitleFont]C&amp;ustom</Text>
-        </Control>
-        <Control Id="CustomButton" Type="PushButton" X="50" Y="118" Width="38" Height="38" ToolTip="Custom Installation" Icon="yes" FixedSize="yes" IconSize="32" Text="[CustomSetupIcon]">
-          <Publish Property="InstallMode" Value="Custom">1</Publish>
-          <Publish Event="NewDialog" Value="CustomizeDlg">1</Publish>
-        </Control>
-        <Control Id="CompleteLabel" Type="Text" X="105" Y="171" Width="100" Height="10" TabSkip="no">
-          <Text>[DlgTitleFont]C&amp;omplete</Text>
-        </Control>
-        <Control Id="CompleteButton" Type="PushButton" X="50" Y="171" Width="38" Height="38" ToolTip="Complete Installation" Icon="yes" FixedSize="yes" IconSize="32" Text="[CompleteSetupIcon]">
-          <Publish Property="InstallMode" Value="Complete">1</Publish>
-          <Publish Event="SetInstallLevel" Value="1000">1</Publish>
-          <Publish Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+        <Control Id="CustomText" Type="Text" X="50" Y="160" Width="270" Height="30">
+          <Text>Allows users to choose which program features will be installed and where they will be installed. Recommended for advanced users.</Text>
         </Control>
         <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="[ButtonText_Back]">
           <Publish Event="NewDialog" Value="LicenseAgreementDlg"><![CDATA[ShowUserRegistrationDlg <> 1]]></Publish>
           <Publish Event="NewDialog" Value="UserRegistrationDlg">ShowUserRegistrationDlg = 1</Publish>
         </Control>
-        <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Disabled="yes" Text="[ButtonText_Next]" />
+        <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Text="[ButtonText_Next]">
+          <Publish Event="SetInstallLevel" Value="3"><![CDATA[InstallMode = "Typical"]]></Publish>
+          <Publish Event="NewDialog" Value="VerifyReadyDlg"><![CDATA[InstallMode = "Typical"]]></Publish>
+          <Publish Event="NewDialog" Value="CustomizeDlg"><![CDATA[InstallMode <> "Typical"]]></Publish>
+        </Control>
         <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="[ButtonText_Cancel]">
           <Publish Event="SpawnDialog" Value="CancelDlg">1</Publish>
         </Control>
@@ -634,15 +630,6 @@
           <Text>[DlgTitleFont]Choose Setup Type</Text>
         </Control>
         <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
-        <Control Id="CompleteText" Type="Text" X="105" Y="184" Width="230" Height="20">
-          <Text>All program features will be installed. (Requires most disk space)</Text>
-        </Control>
-        <Control Id="CustomText" Type="Text" X="105" Y="131" Width="230" Height="30">
-          <Text>Allows users to choose which program features will be installed and where they will be installed. Recommended for advanced users.</Text>
-        </Control>
-        <Control Id="TypicalText" Type="Text" X="105" Y="78" Width="230" Height="20">
-          <Text>Installs the most common program features. Recommended for most users.</Text>
-        </Control>
       </Dialog>
 
       <Dialog Id="UserRegistrationDlg" Width="370" Height="270" Title="[ProductName] [Setup]" NoMinimize="yes">
@@ -1116,7 +1103,7 @@
     <Property Id="ButtonText_Back">&lt; &amp;Back</Property>
     <Property Id="InstallMode">Typical</Property>
     <Property Id="Progress2">installs</Property>
-    <Property Id="IAgree">No</Property>
+    <Property Id="IAgree">Yes</Property>
     <Property Id="Wizard">Setup Wizard</Property>
     <Property Id="RemoveIcon">removico</Property>
     <Property Id="ExclamationIcon">exclamic</Property>
@@ -1153,8 +1140,6 @@
     <Binary Id="repairic" src="Binary\Repair.ico" />
     <Binary Id="exclamic" src="Binary\Exclam.ico" />
     <Binary Id="removico" src="Binary\Remove.ico" />
-    <Binary Id="completi" src="Binary\Complete.ico" />
-    <Binary Id="insticon" src="Binary\Typical.ico" />
     <Binary Id="info" src="Binary\Info.ico" />
     <Binary Id="bannrbmp" src="Binary\Banner.bmp" />
     <Binary Id="dlgbmp" src="Binary\Dialog.bmp" />

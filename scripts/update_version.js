@@ -12,6 +12,11 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 
+if ( WScript. Arguments. Count ( ) != 1 ) {
+	WScript. Echo ( "Usage: " + WScript. ScriptName + " <release>" );
+	WScript. Quit ( );
+}
+
 var ForReading = 1, ForWriting = 2, ForAppending = 8;
 var TristateUseDefault = -2, TristateTrue = -1, TristateFalse = 0;
 
@@ -26,11 +31,7 @@ catch ( e ) {
 }
 
 try {
-	var relstream = fso. OpenTextFile ( "_RELEASE_", ForReading, true, TristateFalse );
-	var relstr = relstream. readLine ( );
-	relstream. Close ( );
-
-	var release = relstr. split ( '.', 3 );
+	var release = WScript. Arguments. Item ( 0 ). split ( '.', 3 );
 
 	var istream = fso. OpenTextFile ( "version.h.in", ForReading, true, TristateFalse );
 	var ostream = fso. OpenTextFile ( "version.h", ForWriting, true, TristateFalse );

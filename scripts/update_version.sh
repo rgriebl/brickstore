@@ -13,14 +13,14 @@
 ##
 ## See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 
-if [ ! -r _RELEASE_ ] && [ ! -r version.h.in ]; then
-  echo "Could not read _RELEASE_ and/or version.h.in"
+if [ $# != 1 ]; then
+  echo "Usage: $0 <release>"
   exit 1
 fi
 
 OIFS="$IFS"
 IFS="."
-set -- `head -n1 _RELEASE_` 
+set -- `head -n1 $1` 
 IFS="$OIFS"
 
 cat version.h.in | sed -e "s,\(^#define BRICKSTORE_MAJOR  *\)[^ ]*$,\1$1,g" \

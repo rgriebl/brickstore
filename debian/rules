@@ -19,7 +19,7 @@ configure: configure-stamp
 configure-stamp:
 	dh_testdir
 	# Add here commands to configure the package.
-	qmake CONFIG+=$(CONFIG) PREFIX=/usr
+	qmake CONFIG+=$(CONFIG) RELEASE=$(BRICKSTORE_VERSION) PREFIX=/usr
 
 	touch configure-stamp
 

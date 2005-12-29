@@ -20,7 +20,7 @@ if [ ! -d rpm ]; then
 	exit 1
 fi
 
-[ -r _RELEASE_ ] && pkg_ver=`cat _RELEASE_ | head -n1`
+pkg_ver=`awk '/^RELEASE *=/ { print $3; }' <brickstore.pro `
 [ $# = 1 ] && pkg_ver="$1"
 
 if [ -z $pkg_ver ]; then
@@ -113,18 +113,8 @@ echo >debian/compat '4'
 
 echo " > Building package..."
 
-# create a dummy subwcrev script which does not try
-# to get the patchlevel from svn - we already know it
-cat >scripts/subwcrev.sh <<-EOF
-	#!/bin/sh
-	
-	patchlevel=`echo "$pkg_ver" | cut -d. -f3`
-	cd \$1 && sed <\$2 >\$3 -e "s,\\\\\\\$WCREV\\\\\\\$,\$patchlevel,g"
-EOF
-chmod +x scripts/subwcrev.sh
-
 chmod +x debian/rules
-fakeroot debian/rules -s binary
+fakeroot debian/rules -s BRICKSTORE_VERSION=$pkg_ver binary
 
 cd ../..
 rm -rf "$pkg_ver"

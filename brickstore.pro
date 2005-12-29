@@ -11,6 +11,10 @@
 ##
 ## See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 
+isEmpty( RELEASE ) {
+  RELEASE    = 1.1.0
+}
+
 TEMPLATE     = app
 CONFIG      *= warn_on thread qt link_prl
 
@@ -26,8 +30,8 @@ res_images_status   = images/status/*.png
 res_translations    = $$TRANSLATIONS
 res_print_templates = print-templates/*.xml
 
-dist_extra          = version.h.in _RELEASE_ icon.png
-dist_scripts        = scripts/*.sh scripts/*.bat scripts/*.pl
+dist_extra          = version.h.in icon.png
+dist_scripts        = scripts/*.sh scripts/*.bat scripts/*.pl scripts/*.js
 dist_unix_rpm       = rpm/create.sh rpm/brickstore.spec
 dist_unix_deb       = debian/create.sh debian/rules
 dist_macx           = macx-bundle/create.sh macx-bundle/install-table.txt macx-bundle/*.plist macx-bundle/Resources/*.icns macx-bundle/Resources/??.lproj/*.plist
@@ -39,7 +43,7 @@ MOC_DIR   = .moc
 UI_DIR    = .uic
 
 win32 {
-  system( cscript.exe //B scripts\update_version.js )
+  system( cscript.exe //B scripts\update_version.js $$RELEASE)
 
   LIBS += libcurl.lib
   DEFINES += CURL_STATICLIB
@@ -50,7 +54,7 @@ win32 {
 unix {
   OBJECTS_DIR = .obj  # grrr ... f***ing msvc.net doesn't link with this line present
 
-  system( scripts/update_version.sh )
+  system( scripts/update_version.sh $$RELEASE)
 }
 
 unix:!macx {

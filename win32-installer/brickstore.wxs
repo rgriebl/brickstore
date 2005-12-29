@@ -54,19 +54,25 @@
 
     <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="ProgramFilesFolder" Name="PFiles">
-        <Directory Id="Softforge" Name="SOFTFO~1" LongName="SoftForge">
-          <Directory Id="INSTALLDIR" Name="BrkStore" LongName="BrickStore">
+        <Directory Id="Softforge" Name="softforg" LongName="SoftForge">
+          <Directory Id="INSTALLDIR" Name="BrickSto" LongName="BrickStore">
             <Component Id="c_main" Guid="96E5E9DA-8E91-11D9-8BDE-F66BAD1E3F3A">
-              <File DiskId="1" Id="brickstore.exe"   Name="bricks~1.exe" LongName="brickstore.exe"   src="$(var.TARGET)\brickstore.exe" Checksum="yes" />
-              <Shortcut Id="sm_brickstore.exe"       Name="brkstore"     LongName="BrickStore"    Icon="icon_bs.exe" IconIndex="0" Directory="ProgramMenuDir" Target="Complete" WorkingDirectory="INSTALLDIR" />
-              <Shortcut Id="sd_brickstore.exe"       Name="brkstore"     LongName="BrickStore"    Icon="icon_bs.exe" IconIndex="0" Directory="DesktopFolder"  Target="Complete" WorkingDirectory="INSTALLDIR" />
-              <File DiskId="1" Id="LICENSE.GPL"      Name="licens~1.txt" LongName="LICENSE.GPL.txt"  src="$(var.TARGET)\LICENSE.GPL" />
+              <File DiskId="1" Id="brickstore.exe"   Name="BrickSto.exe" LongName="brickstore.exe"   src="$(var.TARGET)\brickstore.exe" Checksum="yes" />
+              <Shortcut Id="sm_brickstore.exe"       Name="BrickSto"     LongName="BrickStore"       Icon="icon_bs.exe" IconIndex="0" Directory="ProgramMenuDir" Target="Complete" WorkingDirectory="INSTALLDIR" />
+              <Shortcut Id="sd_brickstore.exe"       Name="BrickSto"     LongName="BrickStore"       Icon="icon_bs.exe" IconIndex="0" Directory="DesktopFolder"  Target="Complete" WorkingDirectory="INSTALLDIR" />
+              <File DiskId="1" Id="LICENSE.GPL"      Name="LICENSE.txt"  LongName="LICENSE.GPL.txt"  src="$(var.TARGET)\LICENSE.GPL" />
 
               <Registry Id="reg_installdir" Root="HKLM" Key="Software\Softforge\BrickStore" Name="InstallDir" Action="write" Type="string" Value="[INSTALLDIR]" />
               <Registry Id="reg_installver" Root="HKLM" Key="Software\Softforge\BrickStore" Name="CurrentVersion" Action="write" Type="string" Value="$(var.VERSION)" />
               <Registry Id="reg_clean"      Root="HKLM" Key="Software\Softforge\BrickStore" Action="removeKeyOnUninstall" />
 
-              <ProgId Id="BrickStore.btifile" Description="BrickStore data file" Advertise="no" Icon="[#brickstore.exe]" IconIndex="1">
+              <ProgId Id="BrickStore.bsxfile" Description="BrickStore XML" Advertise="no" Icon="[#brickstore.exe]" IconIndex="1">
+                <Extension Id="bsx" ContentType="application/x-brickstore-xml">
+                  <Verb Id="open" Sequence="10" Argument="&quot;%1&quot;" Target="[#brickstore.exe]" />
+                </Extension>
+              </ProgId>
+
+              <ProgId Id="BrickStore.btifile" Description="BrickStore Data File" Advertise="no" Icon="[#brickstore.exe]" IconIndex="1">
                 <Extension Id="bti" ContentType="application/x-brickstore">
                   <Verb Id="open" Sequence="10" Argument="&quot;%1&quot;" Target="[#brickstore.exe]" />
                 </Extension>
@@ -82,40 +88,40 @@
             <Merge Id="msvcp71" Language="1033" src="$(env.CommonProgramFiles)\Merge Modules\vc_user_stl71_rtl_x86_-#-#-.msm" DiskId="1" />
             -->
 
-            <Directory Id="translations" Name="TRANSL~1" LongName="translations">
+            <Directory Id="translations" Name="translat" LongName="translations">
               <Component Id="c_translations" Guid="7F2A4CBF-90FB-43A1-AC34-FEA6BF6FE1FE">
                 <File DiskId="1" Id="brickstore_de.qm" Name="brkst_de.qm" LongName="brickstore_de.qm" src="$(var.TARGET)\translations\brickstore_de.qm" />
                 <File DiskId="1" Id="qt_de.qm"         Name="qt_de.qm"                                src="$(env.QTDIR)\translations\qt_de.qm" />
               </Component>
             </Directory>
-            <Directory Id="print_templates" Name="PRINTT~1" LongName="print-templates">
+            <Directory Id="print_templates" Name="print-te" LongName="print-templates">
               <Component Id="c_print_templates" Guid="ED89FB38-8C96-4405-BF13-9B724B50B53C">
                 <File DiskId="1" Id="standard.xml"        Name="standard.xml"                                src="$(var.TARGET)\print-templates\standard.xml" />
-                <File DiskId="1" Id="invoice_example.xml" Name="invoic~1.xml" LongName="invoice-example.xml" src="$(var.TARGET)\print-templates\invoice-example.xml" />
+                <File DiskId="1" Id="invoice_example.xml" Name="invoice-.xml" LongName="invoice-example.xml" src="$(var.TARGET)\print-templates\invoice-example.xml" />
               </Component>
             </Directory>
             <Directory Id="images" Name="images">
               <Component Id="c_images" Guid="9FA21F08-8E91-11D9-8BDE-F66BAD1E3F3A">
                 <File DiskId="1" Id="icon.png"           Name="icon.png"                                   src="$(var.TARGET)\images\icon.png" />
-                <File DiskId="1" Id="status_exclude.png" Name="status~1.png" LongName="status_exclude.png" src="$(var.TARGET)\images\status_exclude.png" />
-                <File DiskId="1" Id="status_extra.png"   Name="status~2.png" LongName="status_extra.png"   src="$(var.TARGET)\images\status_extra.png" />
-                <File DiskId="1" Id="status_include.png" Name="status~3.png" LongName="status_include.png" src="$(var.TARGET)\images\status_include.png" />
-                <File DiskId="1" Id="status_unknown.png" Name="status~4.png" LongName="status_unknown.png" src="$(var.TARGET)\images\status_unknown.png" />
-                <File DiskId="1" Id="bg_infotext.jpg"    Name="bg_inf~1.jpg" LongName="bg_infotext.jpg"    src="$(var.TARGET)\images\bg_infotext.jpg" />
-                <File DiskId="1" Id="important.png"      Name="import~1.png" LongName="important.png"      src="$(var.TARGET)\images\important.png" />
+                <File DiskId="1" Id="status_exclude.png" Name="status_e.png" LongName="status_exclude.png" src="$(var.TARGET)\images\status_exclude.png" />
+                <File DiskId="1" Id="status_extra.png"   Name="status_x.png" LongName="status_extra.png"   src="$(var.TARGET)\images\status_extra.png" />
+                <File DiskId="1" Id="status_include.png" Name="status_i.png" LongName="status_include.png" src="$(var.TARGET)\images\status_include.png" />
+                <File DiskId="1" Id="status_unknown.png" Name="status_u.png" LongName="status_unknown.png" src="$(var.TARGET)\images\status_unknown.png" />
+                <File DiskId="1" Id="bg_infotext.jpg"    Name="bg_infot.jpg" LongName="bg_infotext.jpg"    src="$(var.TARGET)\images\bg_infotext.jpg" />
+                <File DiskId="1" Id="important.png"      Name="importan.png" LongName="important.png"      src="$(var.TARGET)\images\important.png" />
                 <File DiskId="1" Id="spinner.png"        Name="spinner.png"                                src="$(var.TARGET)\images\spinner.png" />
               </Component>
               <Directory Id="images_status" Name="status">
                 <Component Id="c_images_status" Guid="A780CC45-113C-47EC-9309-BEBFF6A396B6">
-                  <File DiskId="1" Id="istatus_modified.png" Name="modifi~1.png" LongName="modified.png" src="$(var.TARGET)\images\status\modified.png" />
-                  <File DiskId="1" Id="istatus_popup.png"    Name="popup.png"                            src="$(var.TARGET)\images\status\popup.png" />
-                  <File DiskId="1" Id="istatus_stop.png"     Name="stop.png"                             src="$(var.TARGET)\images\status\stop.png" />
+                  <File DiskId="1" Id="istatus_modified.png" Name="modified.png"  src="$(var.TARGET)\images\status\modified.png" />
+                  <File DiskId="1" Id="istatus_popup.png"    Name="popup.png"     src="$(var.TARGET)\images\status\popup.png" />
+                  <File DiskId="1" Id="istatus_stop.png"     Name="stop.png"      src="$(var.TARGET)\images\status\stop.png" />
                 </Component>
               </Directory>
               <Directory Id="images_sidebar" Name="sidebar">
                 <Component Id="c_images_sidebar" Guid="C5826B59-A8E5-41BE-9099-7AD21FAB6427">
                   <File DiskId="1" Id="isidebar_info.png"       Name="info.png"                               src="$(var.TARGET)\images\sidebar\info.png" />
-                  <File DiskId="1" Id="isidebar_priceguide.png" Name="priceg~1.png" LongName="priceguide.png" src="$(var.TARGET)\images\sidebar\priceguide.png" />
+                  <File DiskId="1" Id="isidebar_priceguide.png" Name="pricegui.png" LongName="priceguide.png" src="$(var.TARGET)\images\sidebar\priceguide.png" />
                   <File DiskId="1" Id="isidebar_links.png"      Name="links.png"                              src="$(var.TARGET)\images\sidebar\links.png" />
                 </Component>
               </Directory>
@@ -265,7 +271,7 @@
       <ComponentRef Id="c_images_status" />
       <ComponentRef Id="c_images_16x16" />
       <ComponentRef Id="c_images_22x22" />
-	  <ComponentRef Id="c_images_sidebar" />
+      <ComponentRef Id="c_images_sidebar" />
     </Feature>
 
   <?include ui.wxi ?>

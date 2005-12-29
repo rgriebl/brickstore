@@ -39,23 +39,13 @@ http://www.bricklink.com
 # unpack the source and cd into the source directory
 %setup -q
 
-# create a dummy subwcrev script which does not try
-# to get the patchlevel from svn - we already know it
-cat >scripts/subwcrev.sh <<-EOF
-	#!/bin/sh
-	
-	patchlevel=`echo %{_brickstore_version} | cut -d. -f3`
-	cd \$1 && sed <\$2 >\$3 -e "s,\\\\\\\$WCREV\\\\\\\$,\$patchlevel,g"
-EOF
-chmod +x scripts/subwcrev.sh
-
 # Build Stanza begins here
 #
 %build
 
 # run qmake to produce a Makefile
 export QTDIR=%{_brickstore_qtdir}
-qmake CONFIG+=release PREFIX=%{_prefix}
+qmake CONFIG+=release RELEASE=%{_brickstore_version} PREFIX=%{_prefix}
 
 # compile the software
 make

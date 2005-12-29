@@ -52,5 +52,31 @@
 				<true/>
 			</dict>
 		</array>
+
+		<array>
+			<dict>
+				<key>CFBundleTypeExtensions</key>
+				<array>
+					<string>bsx</string>
+				</array>
+
+				<key>CFBundleTypeIconFile</key>
+				<string>document.icns</string>
+
+				<key>CFBundleTypeMIMETypes</key>
+				<array>
+					<string>application/x-brickstore-xml</string>
+				</array>
+
+				<key>CFBundleTypeName</key>
+				<string>BrickStore XML</string>
+
+				<key>CFBundleTypeRole</key>
+				<string>Editor</string>
+
+				<key>LSIsAppleDefaultForType</key>
+				<true/>
+			</dict>
+		</array>
 	</dict>
 </plist>
