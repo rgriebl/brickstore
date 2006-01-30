@@ -183,7 +183,7 @@ void BrickLink::Picture::load_from_disk ( )
 		}
 		else {
 			if ( !large && m_item && m_item-> itemType ( ))
-				m_image = m_item-> itemType ( )-> noImage ( )-> convertToImage ( );
+				m_image = BrickLink::inst ( )-> noImage ( m_item-> itemType ( )-> imageSize ( ))-> convertToImage ( );
 			else
 				m_image. create ( 0, 0, 32 );
 

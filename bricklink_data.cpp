@@ -15,157 +15,111 @@
 
 #include "bricklink.h"
 
-// directly use C-library str* functions instead of Qt's qstr* function
-// to improve runtime performance
-
-#if defined( Q_OS_WIN32 )
-#define strdup _strdup
-#endif
-
 
 BrickLink::Color::Color ( ) : m_name ( 0 ), m_peeron_name ( 0 ) { }
-BrickLink::Color::~Color ( ) { free ( m_name ); free ( m_peeron_name ); }
+BrickLink::Color::~Color ( ) { delete [] m_name; delete [] m_peeron_name; }
 
-BrickLink::Color *BrickLink::Color::parse ( const BrickLink *, uint count, const char **strs, void * )
+QDataStream &operator << ( QDataStream &ds, const BrickLink::Color *col )
 {
-	if ( count < 2 )
-		return 0;
+	Q_UINT8 flags = 0;
+	flags |= ( col-> m_is_trans    ? 0x01 : 0 );
+	flags |= ( col-> m_is_glitter  ? 0x02 : 0 );
+	flags |= ( col-> m_is_speckle  ? 0x04 : 0 );
+	flags |= ( col-> m_is_metallic ? 0x08 : 0 );
+	flags |= ( col-> m_is_chrome   ? 0x10 : 0 );
 
-	Color *col = new Color ( );
-	col-> m_id   = strtol ( strs [0], 0, 10 );
-	col-> m_name = strdup ( strs [1] );
-	col-> m_ldraw_id    = -1;
-	col-> m_is_trans    = ( strstr ( strs [1], "Trans-"    ) != 0 );
-	col-> m_is_glitter  = ( strstr ( strs [1], "Glitter "  ) != 0 );
-	col-> m_is_speckle  = ( strstr ( strs [1], "Speckle "  ) != 0 );
-	col-> m_is_metallic = ( strstr ( strs [1], "Metallic " ) != 0 );
-	col-> m_is_chrome   = ( strstr ( strs [1], "Chrome "   ) != 0 );
-	return col;
+	return ds << col-> m_id << col-> m_name << col-> m_peeron_name << col-> m_ldraw_id << col-> m_color << flags;
 }
+
+QDataStream &operator >> ( QDataStream &ds, BrickLink::Color *col )
+{
+	delete [] col-> m_name; delete [] col-> m_peeron_name;
+
+	Q_UINT8 flags;
+	ds >> col-> m_id >> col-> m_name >> col-> m_peeron_name >> col-> m_ldraw_id >> col-> m_color >> flags;
+
+	col-> m_is_trans    = flags & 0x01;
+	col-> m_is_glitter  = flags & 0x02;
+	col-> m_is_speckle  = flags & 0x04;
+	col-> m_is_metallic = flags & 0x08;
+	col-> m_is_chrome   = flags & 0x10;
+
+	return ds;
+}
+
 
 BrickLink::ItemType::ItemType ( ) : m_name ( 0 ) { }
-BrickLink::ItemType::~ItemType ( ) { free ( m_name ); }
+BrickLink::ItemType::~ItemType ( ) { delete [] m_name; }
 
-BrickLink::ItemType *BrickLink::ItemType::parse ( const BrickLink *bl, uint count, const char **strs, void * )
+QSize BrickLink::ItemType::imageSize ( ) const
 {
-	if ( count < 2 )
-		return 0;
-
-	char c = strs [0][0];
-	ItemType *itt = new ItemType ( );
-	itt-> m_id = c;
-	itt-> m_picture_id = ( c == 'I' ) ? 'S' : c;
-	itt-> m_name = strdup ( strs [1] );
-	itt-> m_has_inventories = false;
-	itt-> m_has_colors = ( c == 'P' || c == 'G' );
-	itt-> m_has_weight = ( c == 'B' || c == 'P' || c == 'G' || c == 'S' );
-	itt-> m_has_year   = ( c == 'B' || c == 'C' || c == 'G' || c == 'S' );
-	itt-> m_noimage = ( c == 'M' ) ? bl-> noImageM ( ) : bl-> noImage ( );
-
-	return itt;
+	QSize s ( 80, 60 );
+	if ( m_id == 'M' ) 
+		s. transpose ( );
+	return s;
 }
+
+QDataStream &operator << ( QDataStream &ds, const BrickLink::ItemType *itt )
+{
+	Q_UINT8 flags = 0;
+	flags |= ( itt-> m_has_inventories ? 0x01 : 0 );
+	flags |= ( itt-> m_has_colors      ? 0x02 : 0 );
+	flags |= ( itt-> m_has_weight      ? 0x04 : 0 );
+	flags |= ( itt-> m_has_year        ? 0x08 : 0 );
+
+	ds << Q_UINT8( itt-> m_id ) << Q_UINT8( itt-> m_picture_id ) << itt-> m_name << flags << Q_UINT32( itt-> m_categories. count ( ));
+	for ( QPtrListIterator <BrickLink::Category> it ( itt-> m_categories ); it. current ( ); ++it )
+		ds << Q_INT32( it. current ( )-> id ( ));
+	return ds;
+}
+
+QDataStream &operator >> ( QDataStream &ds, BrickLink::ItemType *itt )
+{
+	delete [] itt-> m_name;
+	itt-> m_categories. clear ( );
+
+	Q_UINT8 flags = 0;
+	Q_UINT32 catcount = 0;
+	Q_UINT8 id = 0, picid = 0;
+	ds >> id >> picid >> itt-> m_name >> flags >> catcount;
+
+	itt-> m_id = id;
+	itt-> m_picture_id = id;
+
+	for ( Q_UINT32 i = 0; i < catcount; i++ ) {
+		Q_INT32 id = 0;
+		ds >> id;
+		const BrickLink::Category *cat = BrickLink::inst ( )-> category ( id );
+
+		if ( cat )
+			itt-> m_categories. append ( cat );
+	}
+
+	itt-> m_has_inventories = flags & 0x01;
+	itt-> m_has_colors      = flags & 0x02;
+	itt-> m_has_weight      = flags & 0x04;
+	itt-> m_has_year        = flags & 0x08;
+	return ds;
+}
+
 
 BrickLink::Category::Category ( ) : m_name ( 0 ) { }
-BrickLink::Category::~Category ( ) { free ( m_name ); }
+BrickLink::Category::~Category ( ) { delete [] m_name; }
 
-BrickLink::Category *BrickLink::Category::parse ( const BrickLink *, uint count, const char **strs, void * )
+QDataStream &operator << ( QDataStream &ds, const BrickLink::Category *cat )
 {
-	if ( count < 2 )
-		return 0;
-
-	Category *cat = new Category ( );
-	cat-> m_id   = strtol ( strs [0], 0, 10 );
-	cat-> m_name = strdup ( strs [1] );
-	return cat;
+	return ds << cat-> m_id << cat-> m_name;
 }
 
-BrickLink::Item::Item ( ) : m_categories ( 0 ) { }
-BrickLink::Item::~Item ( ) { free ( m_categories ); }
-
-BrickLink::Item *BrickLink::Item::parse ( const BrickLink *bl, uint count, const char **strs, void *itemtype )
+QDataStream &operator >> ( QDataStream &ds, BrickLink::Category *cat )
 {
-	if ( count < 4 )
-		return 0;
-
-	Item *item = new Item ( );
-	item-> m_item_type = (ItemType *) itemtype;
-		
-	// only allocate one block for name, id and category to speed up things
-
-	const char *pos = strs [1];
-	const Category *maincat = bl-> category ( strtol ( strs [0], 0, 10 ));
-	
-	if ( maincat && pos [0] ) {
-		pos += strlen ( maincat-> name ( ));
-	
-		if ( *pos )
-			pos += 3;
-	}
-	const char *auxcat = pos;
-
-	uint catcount = 1;
-	const Category *catlist [64] = { maincat };
-
-	while (( pos = strstr ( pos, " / " ))) {
-		if ( auxcat [0] ) {
-			const Category *cat = bl-> category ( auxcat, pos - auxcat );
-			if ( cat )
-				catlist [catcount++] = cat;
-			else {
-				// The field separator ' / ' also appears in category names !!!
-				pos += 3;
-				continue;
-			}
-		}
-		pos += 3;
-		auxcat = pos;
-	}
-	if ( auxcat [0] ) {
-		const Category *cat = bl-> category ( auxcat );
-		if ( cat )
-			catlist [catcount++] = cat;
-		else
-			qWarning ( "Invalid category name: %s", auxcat );
-	}
-	catlist [catcount++] = 0;
-
-	uint catsize  = catcount * sizeof( const Category * );
-	uint idsize   = strlen ( strs [2] ) + 1;
-	uint namesize = strlen ( strs [3] ) + 1;
-
-	void *ptr = malloc ( catsize + idsize + namesize );
-
-	item-> m_categories = (const Category **) ptr;
-	item-> m_id   = ((char *) ptr ) + catsize;
-	item-> m_name = ((char *) ptr ) + catsize + idsize;
-		
-	memcpy ( item-> m_categories, catlist,  catsize );
-	memcpy ( item-> m_id,         strs [2], idsize );
-	memcpy ( item-> m_name,       strs [3], namesize );
-
-	uint parsedfields = 4;
-
-	if (( parsedfields < count ) && ( item-> m_item_type-> hasYearReleased ( ))) {
-		item-> m_year = strtol ( strs [parsedfields], 0, 10 );
-		parsedfields++;
-	}
-	else
-		item-> m_year = 0;
-
-	if (( parsedfields < count ) && ( item-> m_item_type-> hasWeight ( ))) {
-		item-> m_weight = bl-> cLocale ( ). toFloat ( strs [parsedfields] );
-		parsedfields++;
-	}
-	else
-		item-> m_weight = 0;
-
-	if ( parsedfields < count )
-		item-> m_color = bl-> color ( strtol ( strs [parsedfields], 0, 10 ));
-	else
-		item-> m_color = 0;
-
-	return item;
+	delete [] cat-> m_name;
+	return ds >> cat-> m_id >> cat-> m_name;
 }
+
+
+BrickLink::Item::Item ( ) : m_id ( 0 ), m_name ( 0 ), m_categories ( 0 ), m_appears_in ( 0 ) { }
+BrickLink::Item::~Item ( ) { delete [] m_id; delete [] m_name; delete [] m_categories; delete [] m_appears_in; }
 
 bool BrickLink::Item::hasCategory ( const BrickLink::Category *cat ) const
 {
@@ -183,7 +137,159 @@ int BrickLink::Item::compare ( const BrickLink::Item **a, const BrickLink::Item 
 	return d ? d : qstrcmp ( (*a)-> m_id, (*b)-> m_id );
 }
 
+int global_s = 0;
 
+void BrickLink::Item::setAppearsIn ( const AppearsInMap &map ) const
+{
+	delete [] m_appears_in;
+
+	int s = 2;
+
+	for ( AppearsInMap::const_iterator it = map. begin ( ); it != map. end ( ); ++it )
+		s += ( 1 + it. data ( ). size ( ));
+
+	global_s += s;
+
+	Q_UINT32 *ptr = new Q_UINT32 [s];
+	m_appears_in = ptr;
+
+	*ptr++ = map. size ( ); // how many colors
+	*ptr++ = s;             // only useful in save/restore -> size in DWORDs
+
+	for ( AppearsInMap::const_iterator it = map. begin ( ); it != map. end ( ); ++it ) {
+		appears_in_record *color_header = reinterpret_cast <appears_in_record *> ( ptr );
+
+		color_header-> m12 = it. key ( )-> id ( );    // color id
+		color_header-> m20 = it. data ( ). size ( );  // # of entries
+
+		ptr++;
+
+		for ( AppearsInMapVector::const_iterator itvec = it. data ( ). begin ( ); itvec != it. data ( ). end ( ); ++itvec ) {
+			appears_in_record *color_entry = reinterpret_cast <appears_in_record *> ( ptr );
+
+			color_entry-> m12 = itvec-> first;            // qty
+			color_entry-> m20 = itvec-> second-> m_index; // item index
+
+			ptr++;
+		}
+	}
+}
+
+BrickLink::Item::AppearsInMap BrickLink::Item::appearsIn ( const Color *only_color ) const
+{
+	AppearsInMap map;
+
+	BrickLink::Item **items = BrickLink::inst ( )-> items ( ). data ( );
+	uint count = BrickLink::inst ( )-> items ( ). count ( );
+
+	if ( m_appears_in ) {
+		Q_UINT32 *ptr = m_appears_in + 2;
+
+		for ( Q_UINT32 i = 0; i < m_appears_in [0]; i++ ) {
+			appears_in_record *color_header = reinterpret_cast <appears_in_record *> ( ptr );
+			ptr++;
+
+			const BrickLink::Color *color = BrickLink::inst ( )-> color ( color_header-> m12 );
+
+			if ( color && ( !only_color || ( color == only_color ))) {
+				AppearsInMapVector &vec = map [color];
+
+				for ( Q_UINT32 j = 0; j < color_header-> m20; j++, ptr++ ) {
+					appears_in_record *color_entry = reinterpret_cast <appears_in_record *> ( ptr );
+
+					uint qty = color_entry-> m12;    // qty
+					uint index = color_entry-> m20;  // item index
+					
+					if ( qty && ( index < count ))
+						vec. append ( QPair <int, const Item *> ( qty, items [index] ));
+				}
+			}
+			else
+				ptr += color_header-> m20; // skip
+		}
+	}
+
+	return map;
+}
+
+QDataStream &operator << ( QDataStream &ds, const BrickLink::Item *item )
+{
+	ds << item-> m_id << item-> m_name << Q_UINT8( item-> m_item_type-> id ( ));
+	
+	Q_UINT32 catcount = 0;
+	for ( const BrickLink::Category **catp = item-> m_categories; *catp; catp++ )
+		catcount++;
+
+	ds << catcount;
+	for ( const BrickLink::Category **catp = item-> m_categories; *catp; catp++ )
+		ds << Q_INT32(( *catp )-> id ( ));
+
+	Q_INT32 colorid = item-> m_color ? item-> m_color-> id ( ) : -1;
+	ds << colorid << item-> m_inv_updated << item-> m_weight << Q_UINT32( item-> m_index ) << Q_UINT32( item-> m_year );
+
+	if ( item-> m_appears_in && item-> m_appears_in [0] && item-> m_appears_in [1] ) {
+		Q_UINT32 *ptr = item-> m_appears_in;
+
+		for ( Q_UINT32 i = 0; i < item-> m_appears_in [1]; i++ )
+			ds << *ptr++;
+	}
+	else
+		ds << Q_UINT32( 0 );
+
+	return ds;
+}
+
+QDataStream &operator >> ( QDataStream &ds, BrickLink::Item *item )
+{
+	delete [] item-> m_id;
+	delete [] item-> m_name;
+	delete [] item-> m_categories;
+	delete item-> m_appears_in;
+
+	Q_UINT8 ittid = 0;
+	Q_UINT32 catcount = 0;
+
+	ds >> item-> m_id >> item-> m_name >> ittid >> catcount;
+	item-> m_item_type = BrickLink::inst ( )-> itemType ( ittid ); 
+
+	item-> m_categories = new const BrickLink::Category * [catcount + 1];
+
+	for ( Q_UINT32 i = 0; i < catcount; i++ ) {
+		Q_INT32 id = 0;
+		ds >> id;
+		const BrickLink::Category *cat = BrickLink::inst ( )-> category ( id );
+
+		item-> m_categories [i] = cat;
+	}
+	item-> m_categories [catcount] = 0;
+
+	Q_INT32 colorid = 0;
+	Q_UINT32 index = 0, year = 0;
+	ds >> colorid >> item-> m_inv_updated >> item-> m_weight >> index >> year;
+	item-> m_color = colorid == -1 ? 0 : BrickLink::inst ( )-> color ( colorid );
+	item-> m_index = index;
+	item-> m_year = year;
+	
+	Q_UINT32 appears = 0, appears_size = 0;
+	ds >> appears;
+	if ( appears )
+		ds >> appears_size;
+
+	if ( appears && appears_size ) {
+		Q_UINT32 *ptr = new Q_UINT32 [appears_size];
+		item-> m_appears_in = ptr;
+
+		*ptr++ = appears;
+		*ptr++ = appears_size;
+
+		for ( Q_UINT32 i = 2; i < appears_size; i++ )
+			ds >> *ptr++;
+	}
+	else
+		item-> m_appears_in = 0;
+
+	return ds;
+}
 
 
 BrickLink::InvItem::InvItem ( const Color *color, const Item *item )

@@ -47,6 +47,7 @@ CConfig::CConfig ( )
 	m_show_input_errors = readBoolEntry ( "/General/ShowInputErrors", true );
 	m_weight_system = ( readEntry ( "/General/WeightSystem", "metric" ) == "metric" ) ? WeightMetric : WeightImperial;
 	m_simple_mode = readBoolEntry ( "/General/SimpleMode", false );
+	m_window_mode_tabbed = readBoolEntry ( "/MainWindow/WindowModeTabbed", true );
 }
 
 CConfig::~CConfig ( )
@@ -335,41 +336,51 @@ void CConfig::setSimpleMode ( bool sm  )
 }
 
 
-void CConfig::blUpdateIntervals ( int &db, int &inv, int &pic, int &pg ) const
+bool CConfig::windowModeTabbed ( ) const
 {
-	int dbd, invd, picd, pgd;
-	
-	blUpdateIntervalsDefaults ( dbd, invd, picd, pgd );
+	return m_window_mode_tabbed;
+}
 
-	db  = CConfig::inst ( )-> readNumEntry ( "/BrickLink/UpdateInterval/DataBases",   dbd  );
-	inv = CConfig::inst ( )-> readNumEntry ( "/BrickLink/UpdateInterval/Inventories", invd );
+void CConfig::setWindowModeTabbed ( bool wmt  )
+{
+	if ( wmt != m_window_mode_tabbed ) {
+		m_window_mode_tabbed = wmt;
+		writeEntry ( "/MainWindow/WindowModeTabbed", wmt );
+
+		emit windowModeTabbedChanged ( wmt );
+	}
+}
+
+
+void CConfig::blUpdateIntervals ( int &pic, int &pg ) const
+{
+	int picd, pgd;
+	
+	blUpdateIntervalsDefaults ( picd, pgd );
+
 	pic = CConfig::inst ( )-> readNumEntry ( "/BrickLink/UpdateInterval/Pictures",    picd );
 	pg  = CConfig::inst ( )-> readNumEntry ( "/BrickLink/UpdateInterval/PriceGuides", pgd  );
 }
 
-void CConfig::blUpdateIntervalsDefaults ( int &dbd, int &invd, int &picd, int &pgd ) const
+void CConfig::blUpdateIntervalsDefaults ( int &picd, int &pgd ) const
 {
 	int day2sec = 60*60*24;
 
-	dbd  =  30 * day2sec;
-	invd =  30 * day2sec;
 	picd = 180 * day2sec;
 	pgd  =  14 * day2sec;
 }
 
-void CConfig::setBlUpdateIntervals ( int db, int inv, int pic, int pg )
+void CConfig::setBlUpdateIntervals ( int pic, int pg )
 {
-	int odb, oinv, opic, opg;
+	int opic, opg;
 	
-	blUpdateIntervals ( odb, oinv, opic, opg );
+	blUpdateIntervals ( opic, opg );
 	
-	if (( odb != db ) || ( oinv != inv ) || ( opic != pic ) || ( opg != pg )) {
-		writeEntry ( "/BrickLink/UpdateInterval/DataBases",   db  );
-		writeEntry ( "/BrickLink/UpdateInterval/Inventories", inv );
+	if (( opic != pic ) || ( opg != pg )) {
 		writeEntry ( "/BrickLink/UpdateInterval/Pictures",    pic );
 		writeEntry ( "/BrickLink/UpdateInterval/PriceGuides", pg  );		
 
-		emit blUpdateIntervalsChanged ( db, inv, pic, pg );
+		emit blUpdateIntervalsChanged ( pic, pg );
 	}
 }
 

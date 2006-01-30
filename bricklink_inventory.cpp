@@ -124,7 +124,7 @@ BrickLink::Inventory *BrickLink::inventory ( const Item *item )
 		m_inventories. cache. insert ( key, inv );
 	}
 
-	if ( inv && ( !inv-> valid ( ) || updateNeeded ( inv-> lastUpdate ( ), m_inventories. update_iv ) || ( inv-> lastUpdate ( ) < item-> inventoryUpdated ( ))))
+	if ( inv && ( !inv-> valid ( ) || ( inv-> lastUpdate ( ) < item-> inventoryUpdated ( ))))
 		updateInventory ( inv );
 
 	return inv;
@@ -145,8 +145,7 @@ BrickLink::Inventory *BrickLink::inventoryFromPeeron ( const Item *item )
 		m_inventories. cache. insert ( key, inv );
 	}
 
-	if ( inv && ( !inv-> valid ( ) || updateNeeded ( inv-> lastUpdate ( ), m_inventories. update_iv )))
-		updateInventory ( inv );
+	updateInventory ( inv );
 
 	return inv;
 }
@@ -178,6 +177,7 @@ BrickLink::Inventory *BrickLink::storeInventory ( )
 
 BrickLink::Inventory::Inventory ( const Item *item, bool from_peeron )
 {
+	m_list. setAutoDelete ( true );
 	m_item = item;
 
 	m_valid = false;
@@ -196,6 +196,7 @@ BrickLink::Order::Order ( const QString &orderid, Type ordertype )
 
 BrickLink::Inventory::Inventory ( )
 {
+	m_list. setAutoDelete ( true );
 	m_item = 0;
 
 	m_valid = false;
@@ -231,7 +232,7 @@ void BrickLink::Inventory::load_from_disk ( )
 
 	QFile f ( path );
 	if ( f. open ( IO_ReadOnly )) {
-   		uint invalid_items = 0;
+//   		uint invalid_items = 0;
 		QPtrList <InvItem> *items = 0;
 
 		QString emsg;
@@ -241,7 +242,7 @@ void BrickLink::Inventory::load_from_disk ( )
 		if ( doc. setContent ( &f, &emsg, &eline, &ecol )) {
 			QDomElement root = doc. documentElement ( );
 
-			items = BrickLink::inst ( )-> parseItemListXML ( doc. documentElement ( ). toElement ( ), BrickLink::XMLHint_Inventory, &invalid_items );
+			items = BrickLink::inst ( )-> parseItemListXML ( doc. documentElement ( ). toElement ( ), BrickLink::XMLHint_Inventory /*, &invalid_items */);
 
 			if ( items ) {
 				while ( !items-> isEmpty ( ))
@@ -250,8 +251,8 @@ void BrickLink::Inventory::load_from_disk ( )
 				m_valid = true;
 				delete items;
 
-				if ( invalid_items )
-					CMessageBox::information ( 0, BrickLink::tr( "This inventory contains %1 invalid item(s)." ). arg ( CMB_BOLD( QString::number ( invalid_items ))));
+//				if ( invalid_items )
+//					CMessageBox::information ( 0, BrickLink::tr( "This inventory contains %1 invalid item(s)." ). arg ( CMB_BOLD( QString::number ( invalid_items ))));
 			}
 		}
 	}
@@ -381,7 +382,7 @@ void BrickLink::inventoryJobFinished ( CTransfer::Job *j )
 				QBuffer order_buffer ( *j-> data ( ));
 
 				if ( order_buffer. open ( IO_ReadOnly )) {
-	        		uint invalid_items = 0;
+//	        		uint invalid_items = 0;
 					QPtrList <InvItem> *items = 0;
 
 					QString emsg;
@@ -392,7 +393,7 @@ void BrickLink::inventoryJobFinished ( CTransfer::Job *j )
 						QDomElement root = doc. documentElement ( );
 
 						if (( root. nodeName ( ) == "ORDERS" ) && ( root. firstChild ( ). nodeName ( ) == "ORDER" ))
-							items = BrickLink::inst ( )-> parseItemListXML ( root. firstChild ( ). toElement ( ), BrickLink::XMLHint_Order, &invalid_items );
+							items = BrickLink::inst ( )-> parseItemListXML ( root. firstChild ( ). toElement ( ), BrickLink::XMLHint_Order /*, &invalid_items*/ );
 
 						for ( QDomNode node = root. firstChild ( ). firstChild ( ); !node. isNull ( ); node = node. nextSibling ( )) {
 							if ( !node. isElement ( ))
@@ -437,8 +438,8 @@ void BrickLink::inventoryJobFinished ( CTransfer::Job *j )
 						inv-> m_valid = true;
 						delete items;
 
-						if ( invalid_items )
-							CMessageBox::information ( 0, tr( "This order contains %1 invalid item(s)." ). arg ( CMB_BOLD( QString::number ( invalid_items ))));
+						//if ( invalid_items )
+						//	CMessageBox::information ( 0, tr( "This order contains %1 invalid item(s)." ). arg ( CMB_BOLD( QString::number ( invalid_items ))));
 					}
 					else
 						CMessageBox::warning ( 0, tr( "Could not parse the XML data for order #%1." ). arg ( CMB_BOLD( ord-> id ( ))));
@@ -479,7 +480,7 @@ void BrickLink::inventoryJobFinished ( CTransfer::Job *j )
 				QBuffer store_buffer ( *j-> data ( ));
 
 				if ( store_buffer. open ( IO_ReadOnly )) {
-	        		uint invalid_items = 0;
+	  //      		uint invalid_items = 0;
 					QPtrList <InvItem> *items = 0;
 
 					QString emsg;
@@ -490,7 +491,7 @@ void BrickLink::inventoryJobFinished ( CTransfer::Job *j )
 						QDomElement root = doc. documentElement ( );
 
 						if (( root. nodeName ( ) == "INVENTORY" ))
-							items = BrickLink::inst ( )-> parseItemListXML ( root, BrickLink::XMLHint_MassUpload, &invalid_items );
+							items = BrickLink::inst ( )-> parseItemListXML ( root, BrickLink::XMLHint_MassUpload /*, &invalid_items */);
 					}
 					else
 						CMessageBox::warning ( 0, tr( "Could not parse the XML data for the store inventory:<br /><i>Line %1, column %2: %3</i>" ). arg ( eline ). arg ( ecol ). arg ( emsg ));
@@ -502,8 +503,8 @@ void BrickLink::inventoryJobFinished ( CTransfer::Job *j )
 						inv-> m_valid = true;
 						delete items;
 
-						if ( invalid_items )
-							CMessageBox::information ( 0, tr( "This store inventory contains %1 invalid item(s)." ). arg ( CMB_BOLD( QString::number ( invalid_items ))));
+						//if ( invalid_items )
+						//	CMessageBox::information ( 0, tr( "This store inventory contains %1 invalid item(s)." ). arg ( CMB_BOLD( QString::number ( invalid_items ))));
 					}
 					else
 						CMessageBox::warning ( 0, tr( "Could not parse the XML data for the store inventory." ));

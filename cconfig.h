@@ -48,6 +48,7 @@ public:
 
 	bool showInputErrors ( ) const;
 	bool simpleMode ( ) const;
+	bool windowModeTabbed ( ) const;
 	bool onlineStatus ( ) const;
 	bool useProxy ( ) const;
 	QString proxyName ( ) const;
@@ -55,8 +56,8 @@ public:
 
 	QString blLoginUsername ( ) const;
 	QString blLoginPassword ( ) const;
-	void blUpdateIntervals ( int &db, int &inv, int &pic, int &pg ) const;
-	void blUpdateIntervalsDefaults ( int &dbd, int &invd, int &picd, int &pgd ) const;
+	void blUpdateIntervals ( int &pic, int &pg ) const;
+	void blUpdateIntervalsDefaults ( int &picd, int &pgd ) const;
 
 public slots:
 	void setInfoBarLook ( int look );
@@ -69,19 +70,21 @@ public slots:
 
 	void setShowInputErrors ( bool b );
 	void setSimpleMode ( bool sm );
+	void setWindowModeTabbed ( bool tabbed );
 	void setOnlineStatus ( bool b );
 	void setProxy ( bool b, const QString &name, int port );
 
 	void setBlLoginUsername ( const QString &name );
 	void setBlLoginPassword ( const QString &pass );
-	void setBlUpdateIntervals ( int db, int inv, int pic, int pg );
+	void setBlUpdateIntervals ( int pic, int pg );
 
 signals:
 	void infoBarLookChanged ( int look );
 	void simpleModeChanged ( bool );
+	void windowModeTabbedChanged ( bool );
 	void weightSystemChanged ( CConfig::WeightSystem ws );
 	void showInputErrorsChanged ( bool b );
-	void blUpdateIntervalsChanged ( int db, int inv, int pic, int pg );
+	void blUpdateIntervalsChanged ( int pic, int pg );
 	void onlineStatusChanged ( bool b );
 	void proxyChanged ( bool b, const QString &proxy, int port );
 
@@ -93,6 +96,7 @@ private:
 	bool         m_show_input_errors;
 	WeightSystem m_weight_system;
 	bool         m_simple_mode;
+	bool         m_window_mode_tabbed;
 };
 
 #endif

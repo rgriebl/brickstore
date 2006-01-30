@@ -129,6 +129,8 @@ public:
 
 	static money_t fromCString ( const QString & );
 	static money_t fromLocalizedString ( const QString & );
+	
+	Q_INT64 &internalValue ( ) { return val; }
 
 private:
 	double toDouble ( ) const;

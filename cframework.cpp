@@ -18,7 +18,6 @@
 #include <qtoolbar.h>
 #include <qstatusbar.h>
 #include <qwidgetlist.h>
-#include <qworkspace.h>
 #include <qtimer.h>
 #include <qlabel.h>
 #include <qbitmap.h>
@@ -35,12 +34,15 @@
 #include "cmoney.h"
 #include "cresource.h"
 #include "cmultiprogressbar.h"
-#include "cinfobar.h"
 #include "ciconfactory.h"
 #include "dlgsettingsimpl.h"
 #include "dlgdbupdateimpl.h"
 #include "cutility.h"
 #include "cspinner.h"
+#include "cundo.h"
+#include "cworkspace.h"
+#include "ctaskpanemanager.h"
+#include "ctaskwidgets.h"
 
 #include "cframework.h"
 
@@ -63,7 +65,7 @@ CFrameWork::RecentListProvider::RecentListProvider ( CFrameWork *fw )
 CFrameWork::RecentListProvider::~RecentListProvider ( )
 { }
 
-QStringList CFrameWork::RecentListProvider::list ( int & /*active*/ )
+QStringList CFrameWork::RecentListProvider::list ( int & /*active*/, QValueList <int> & )
 {
 	return m_fw-> m_recent_files;
 }
@@ -76,10 +78,10 @@ CFrameWork::WindowListProvider::WindowListProvider ( CFrameWork *fw )
 CFrameWork::WindowListProvider::~WindowListProvider ( )
 { }
 
-QStringList CFrameWork::WindowListProvider::list ( int &active )
+QStringList CFrameWork::WindowListProvider::list ( int &active, QValueList <int> & )
 {
 	QStringList sl;
-	QWidgetList l = m_fw-> m_mdi-> windowList ( QWorkspace::CreationOrder );
+	QWidgetList l = m_fw-> m_mdi-> windowList ( CWorkspace::CreationOrder );
 	QWidget *aw = m_fw-> m_mdi-> activeWindow ( );
 
 	for ( uint i = 0; i < l. count ( ); i++ ) {
@@ -93,12 +95,13 @@ QStringList CFrameWork::WindowListProvider::list ( int &active )
 	return sl;
 }
 
+
 CFrameWork *CFrameWork::s_inst = 0;
 
 CFrameWork *CFrameWork::inst ( )
 {
 	if ( !s_inst )
-		s_inst = new CFrameWork ( 0, "FrameWork", Qt::WDestructiveClose );
+		(void) new CFrameWork ( 0, "FrameWork", Qt::WDestructiveClose );
 
 	return s_inst;
 }
@@ -107,6 +110,8 @@ CFrameWork *CFrameWork::inst ( )
 CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 	: QMainWindow ( parent, name, fl )
 {
+	s_inst = this;
+
 	m_running = false;
 
 	qApp-> setMainWidget ( this );
@@ -133,12 +138,32 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 
 	m_current_window = 0;
 
-	m_mdi = new QWorkspace ( this );
+	m_mdi = new CWorkspace ( this );
 	connect ( m_mdi, SIGNAL( windowActivated ( QWidget * )), this, SLOT( connectWindow ( QWidget * )));
 
 	setCentralWidget ( m_mdi );
 
+	m_taskpanes = new CTaskPaneManager ( this, "taskpanemanager" );
+
+	m_task_info = new CTaskInfoWidget ( 0, "iteminfowidget" );
+	m_taskpanes-> addItem ( m_task_info, CResource::inst ( )-> pixmap ( "sidebar/info" ), tr( "Info" ));
+
+	m_task_priceguide = new CTaskPriceGuideWidget ( 0, "priceguidewidget" );
+	m_taskpanes-> addItem ( m_task_priceguide, CResource::inst ( )-> pixmap ( "sidebar/priceguide" ), tr( "Price Guide" ));
+
+	m_task_appears = new CTaskAppearsInWidget ( 0, "appearsinwidget" );
+	m_taskpanes-> addItem ( m_task_appears,  CResource::inst ( )-> pixmap ( "sidebar/appearsin" ), tr( "Appears In" ));
+
+	m_task_links = new CTaskLinksWidget ( 0, "linkswidget" );
+	m_taskpanes-> addItem ( m_task_links,  CResource::inst ( )-> pixmap ( "sidebar/links" ), tr( "Links" ));
+
 	createActions ( );
+
+	QPtrList <QAction> actions;
+
+	actions. append ( findAction ( "edit_bl_info_group" ));
+	m_task_info-> addActionsToContextMenu ( actions );
+	m_task_priceguide-> addActionsToContextMenu ( actions );
 
 	QString str;
 	QStringList sl;
@@ -148,11 +173,12 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 	createMenu ( AC_File, sl );
 
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Menubar/Edit" );
-	if ( sl. isEmpty ( ))  sl << "edit_cut" << "edit_copy" << "edit_paste" << "edit_delete" << "-" << "edit_select_all" << "edit_select_none" << "-" 
+	if ( sl. isEmpty ( ))  sl << "edit_undo" << "edit_redo" << "-"
+	                          << "edit_cut" << "edit_copy" << "edit_paste" << "edit_delete" << "-" << "edit_select_all" << "edit_select_none" << "-" 
 		                      << "edit_additems" << "edit_subtractitems" << "edit_mergeitems" << "edit_partoutitems" << "-" 
 							  << "edit_multiply_qty" << "edit_divide_qty" << "edit_price_to_priceguide" << "edit_price_inc_dec" << "edit_set_sale" << "edit_set_condition" << "edit_set_remark" << "edit_set_reserved" << "-" 
 							  << "edit_reset_diffs" << "-"
-							  << "edit_bl_catalog" << "edit_bl_priceguide" << "edit_bl_lotsforsale";
+							  << "edit_bl_info_group";
 	createMenu ( AC_Edit, sl );
 
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Menubar/View" );
@@ -167,7 +193,7 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 	createMenu ( AC_Extras, sl );
 
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Menubar/Window" );
-	if ( sl. isEmpty ( ))  sl << "window_cascade" << "window_tile" << "-" << "window_list";
+	if ( sl. isEmpty ( ))  sl << "window_mode" << "-" << "window_cascade" << "window_tile" << "-" << "window_list";
 	createMenu ( AC_Window, sl );
 
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Menubar/Help" );
@@ -175,11 +201,18 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 	createMenu ( AC_Help, sl );
 
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/ContextMenu/Item" );
-	if ( sl. isEmpty ( ))  sl << "edit_cut" << "edit_copy" << "edit_paste" << "edit_delete" << "-" << "edit_select_all" << "-" << "edit_mergeitems" << "edit_partoutitems" << "-" << "edit_multiply_qty" << "edit_price_to_priceguide" << "edit_price_inc_dec" << "edit_set_sale" << "edit_set_condition" << "edit_set_remark" << "-" << "edit_bl_catalog" << "edit_bl_priceguide" << "edit_bl_lotsforsale";
+	if ( sl. isEmpty ( ))  sl << "edit_cut" << "edit_copy" << "edit_paste" << "edit_delete" << "-" << "edit_select_all" << "-" << "edit_mergeitems" << "edit_partoutitems" << "-" << "edit_multiply_qty" << "edit_price_to_priceguide" << "edit_price_inc_dec" << "edit_set_sale" << "edit_set_condition" << "edit_set_remark" << "-" << "edit_bl_info_group";
 	createMenu ( AC_Context, sl );
 
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Toolbar/Buttons" );
-	if ( sl. isEmpty ( ))  sl << "file_new" << "file_open" << "file_save" << "-" << "file_import" << "file_export" << "-" << "edit_cut" << "edit_copy" << "edit_paste" << "-" << "edit_additems" << "edit_subtractitems" << "edit_mergeitems" << "edit_partoutitems" << "-" << "edit_price_to_priceguide" << "edit_price_inc_dec" << "-" << "edit_bl_catalog" << "edit_bl_priceguide" << "edit_bl_lotsforsale" << "-" << "extras_net"; // << "-" << "help_whatsthis";
+	if ( sl. isEmpty ( ))  sl << "file_new" << "file_open" << "file_save" << "-" 
+	                          << "file_import" << "file_export" << "-" 
+							  << "edit_undo_list" << "edit_redo_list" << "-"
+							  << "edit_cut" << "edit_copy" << "edit_paste" << "-" 
+							  << "edit_additems" << "edit_subtractitems" << "edit_mergeitems" << "edit_partoutitems" << "-" 
+							  << "edit_price_to_priceguide" << "edit_price_inc_dec" << "-" 
+							  << "edit_bl_info_group" << "-" 
+							  << "extras_net"; // << "-" << "help_whatsthis";
 	m_toolbar = createToolBar ( tr( "Toolbar" ), sl );
 	connect ( m_toolbar, SIGNAL( visibilityChanged ( bool )), findAction ( "settings_view_toolbar" ), SLOT( setOn ( bool )));
 
@@ -187,16 +220,15 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 
 	connect ( m_progress, SIGNAL( statusChange ( bool )), m_spinner, SLOT( setActive ( bool )));
 
-	m_infobar = new CInfoBar ( tr( "Infobar" ), this );
-	connect ( m_infobar, SIGNAL( visibilityChanged ( bool )), findAction ( "settings_view_infobar" ), SLOT( setOn ( bool )));
-	connect ( CConfig::inst ( ), SIGNAL( infoBarLookChanged ( int )), m_infobar, SLOT( setLook ( int )));
-	m_infobar-> hide ( );
+//	connect ( m_infobar, SIGNAL( visibilityChanged ( bool )), findAction ( "settings_view_infobar" ), SLOT( setOn ( bool )));
+//	connect ( CConfig::inst ( ), SIGNAL( infoBarLookChanged ( int )), m_infobar, SLOT( setLook ( int )));
+//	m_infobar-> hide ( );
 
 	str = CConfig::inst ( )-> readEntry ( "/MainWindow/Layout/DockWindows" );
 	{ QTextStream ts ( &str, IO_ReadOnly ); ts >> *this; }
 
-	moveDockWindow ( m_infobar, DockLeft );
-	m_infobar-> setLook ( CInfoBar::Look ( CConfig::inst ( )-> readNumEntry ( "/MainWindow/Infobar/Look", CInfoBar::ModernLeft )));
+//	moveDockWindow ( m_infobar, DockLeft );
+	m_taskpanes-> setMode (( CConfig::inst ( )-> readNumEntry ( "/MainWindow/Infobar/Look", CTaskPaneManager::Modern ) == CTaskPaneManager::Classic ) ? CTaskPaneManager::Classic : CTaskPaneManager::Modern );
 
 	QRect r ( CConfig::inst ( )-> readNumEntry ( "/MainWindow/Layout/Left",   -1 ),
 	          CConfig::inst ( )-> readNumEntry ( "/MainWindow/Layout/Top",    -1 ),
@@ -217,27 +249,30 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 
 
 	findAction ( "settings_view_toolbar"   )-> setOn ( CConfig::inst ( )-> readBoolEntry ( "/MainWindow/Toolbar/Visible",   true ));
-	findAction ( "settings_view_infobar"   )-> setOn ( CConfig::inst ( )-> readBoolEntry ( "/MainWindow/Infobar/Visible",   true ));
+//	findAction ( "settings_view_infobar"   )-> setOn ( CConfig::inst ( )-> readBoolEntry ( "/MainWindow/Infobar/Visible",   true ));
 	findAction ( "settings_view_statusbar" )-> setOn ( CConfig::inst ( )-> readBoolEntry ( "/MainWindow/Statusbar/Visible", true ));
 
 	findAction ( "view_show_input_errors"  )-> setOn ( CConfig::inst ( )-> showInputErrors ( ));
 	findAction ( "view_simple_mode"        )-> setOn ( CConfig::inst ( )-> simpleMode ( ));
 
 	findAction ( CConfig::inst ( )-> onlineStatus ( ) ? "net_online" : "net_offline" )-> setOn ( true );
-	
+	findAction ( CConfig::inst ( )-> windowModeTabbed ( ) ? "window_mode_tab" : "window_mode_mdi" )-> setOn ( true );
+
+	setWindowModeTabbed ( CConfig::inst ( )-> windowModeTabbed ( ));
 
 	BrickLink *bl = BrickLink::inst ( );
 
 	bl-> setOnlineStatus ( CConfig::inst ( )-> onlineStatus ( ));
 	bl-> setHttpProxy ( CConfig::inst ( )-> useProxy ( ), CConfig::inst ( )-> proxyName ( ), CConfig::inst ( )-> proxyPort ( ));
 	{
-		int db, inv, pic, pg;
-		CConfig::inst ( )-> blUpdateIntervals ( db, inv, pic, pg );
-		bl-> setUpdateIntervals ( db, inv, pic, pg );
+		int pic, pg;
+		CConfig::inst ( )-> blUpdateIntervals ( pic, pg );
+		bl-> setUpdateIntervals ( pic, pg );
 	}
 
+	connect ( CConfig::inst ( ), SIGNAL( windowModeTabbedChanged ( bool )), this, SLOT( setWindowModeTabbed ( bool )));
 	connect ( CConfig::inst ( ), SIGNAL( onlineStatusChanged ( bool )), bl, SLOT( setOnlineStatus ( bool )));
-	connect ( CConfig::inst ( ), SIGNAL( blUpdateIntervalsChanged ( int, int, int, int )), bl, SLOT( setUpdateIntervals ( int, int, int, int )));
+	connect ( CConfig::inst ( ), SIGNAL( blUpdateIntervalsChanged ( int, int )), bl, SLOT( setUpdateIntervals ( int, int )));
 	connect ( CConfig::inst ( ), SIGNAL( proxyChanged ( bool, const QString &, int )), bl, SLOT( setHttpProxy ( bool, const QString &, int )));
 
 	connect ( bl, SIGNAL( inventoryProgress ( int, int )),  this, SLOT( gotInventoryProgress ( int, int )));
@@ -246,6 +281,7 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 
 	QTimer::singleShot ( 0, this, SLOT( initBrickLinkDelayed ( )));
 
+	connect ( CUndoManager::inst ( ), SIGNAL( cleanChanged ( bool )), this, SLOT( showNotModified ( bool )));
 	connectAllActions ( false, 0 ); // init enabled/disabled status of document actions
 
 	setAcceptDrops ( true );
@@ -364,9 +400,6 @@ void CFrameWork::createStatusBar ( )
 	m_progress-> setFixedHeight ( fontMetrics ( ). height ( ));
 
 	QPixmap p;
-	p = CResource::inst ( )-> pixmap ( "status/popup" );
-	if ( !p. isNull ( ))
-		m_progress-> setPopupPixmap ( p );
 	p = CResource::inst ( )-> pixmap ( "status/stop" );
 	if ( !p. isNull ( ))
 		m_progress-> setStopPixmap ( p );
@@ -492,7 +525,7 @@ void CFrameWork::createActions ( )
 	connect ( a, SIGNAL( activated ( )), this, SLOT( fileOpen ( )));
 	m_actions [AC_File]. append ( a );
 
-	l = new CListAction ( this, "file_open_recent" );
+	l = new CListAction ( true, this, "file_open_recent" );
 	l-> setText ( tr( "Open Recent" ));
 	l-> setUsesDropDown ( true );
 	l-> setListProvider ( new RecentListProvider ( this ));
@@ -591,14 +624,18 @@ void CFrameWork::createActions ( )
 	connect ( a, SIGNAL( activated ( )), this, SLOT( close ( )));
 	m_actions [AC_File]. append ( a );
 
-	a = new QAction ( this, "edit_undo" );
-	a-> setText ( tr( "Undo" ));
+	a = CUndoManager::inst ( )-> createUndoAction ( this, "edit_undo" );
 	a-> setAccel ( QKeySequence ( tr( "Ctrl+Z", "Edit|Undo" )));
 	m_actions [AC_Edit]. append ( a );
 
-	a = new QAction ( this, "edit_redo" );
-	a-> setText ( tr( "Redo" ));
+	a = CUndoManager::inst ( )-> createRedoAction ( this, "edit_redo" );
 	a-> setAccel ( QKeySequence ( tr( "Ctrl+Y", "Edit|Redo" )));
+	m_actions [AC_Edit]. append ( a );
+
+	a = CUndoManager::inst ( )-> createUndoAction ( this, "edit_undo_list", true );
+	m_actions [AC_Edit]. append ( a );
+
+	a = CUndoManager::inst ( )-> createRedoAction ( this, "edit_redo_list", true );
 	m_actions [AC_Edit]. append ( a );
 
 	a = new QAction ( this, "edit_cut" );
@@ -664,11 +701,15 @@ void CFrameWork::createActions ( )
 	a-> setToggleAction ( true );
 	connect ( a, SIGNAL( toggled ( bool )), this, SLOT( viewToolBar ( bool )));
 	m_actions [AC_View]. append ( a );
-
+/*
 	a = new QAction ( this, "settings_view_infobar" );
 	a-> setText ( tr( "View Infobar" ));
 	a-> setToggleAction ( true );
 	connect ( a, SIGNAL( toggled ( bool )), this, SLOT( viewInfoBar ( bool )));
+	m_actions [AC_View]. append ( a );
+*/
+	a = m_taskpanes-> createItemAction ( this, "settings_view_infobar" );
+	a-> setText ( tr( "View Infobars" ));
 	m_actions [AC_View]. append ( a );
 
 	a = new QAction ( this, "settings_view_statusbar" );
@@ -715,6 +756,22 @@ void CFrameWork::createActions ( )
 	m_actions [AC_Extras]. append ( a );
 
 
+	g = new QActionGroup ( this, "window_mode" );
+	g-> setExclusive ( true );
+	connect ( g, SIGNAL( selected ( QAction * )), this, SLOT( setWindowMode ( QAction * )));
+	m_actions [AC_Window]. append ( g );
+
+	a = new QAction ( g, "window_mode_mdi" );
+	a-> setText ( tr( "MDI environment" ));
+	a-> setToggleAction ( true );
+	m_actions [AC_Window]. append ( a );
+
+	a = new QAction ( g, "window_mode_tab" );
+	a-> setText ( tr( "Tabbed documents" ));
+	a-> setToggleAction ( true );
+	m_actions [AC_Window]. append ( a );
+
+
 	a = new QAction ( this, "window_cascade" );
 	a-> setText ( tr( "Cascade" ));
 	connect ( a, SIGNAL( activated ( )), m_mdi, SLOT( cascade ( )));
@@ -725,7 +782,7 @@ void CFrameWork::createActions ( )
 	connect ( a, SIGNAL( activated ( )), m_mdi, SLOT( tile ( )));
 	m_actions [AC_Window]. append ( a );
 
-	l = new CListAction ( this, "window_list" );
+	l = new CListAction ( true, this, "window_list" );
 	l-> setListProvider ( new WindowListProvider ( this ));
 	connect ( l, SIGNAL( activated ( int )), this, SLOT( windowActivate ( int )));
 	m_actions [AC_Window]. append ( l );
@@ -789,15 +846,20 @@ void CFrameWork::createActions ( )
 	a-> setAccel ( QKeySequence ( tr( "Ctrl+/", "Edit|Divide Quantities" )));
 	m_actions [AC_Edit]. append ( a );
 
-	a = new QAction ( this, "edit_bl_catalog" );
+	g = new QActionGroup ( this, "edit_bl_info_group" );
+	g-> setExclusive ( false );
+	g-> setUsesDropDown ( false );
+	m_actions [AC_Edit]. append ( g );
+
+	a = new QAction ( g, "edit_bl_catalog" );
 	a-> setText ( tr( "Show BrickLink Catalog Info..." ));
 	m_actions [AC_Edit]. append ( a );
 
-	a = new QAction ( this, "edit_bl_priceguide" );
+	a = new QAction ( g, "edit_bl_priceguide" );
 	a-> setText ( tr( "Show BrickLink Price Guide Info..." ));
 	m_actions [AC_Edit]. append ( a );
 
-	a = new QAction ( this, "edit_bl_lotsforsale" );
+	a = new QAction ( g, "edit_bl_lotsforsale" );
 	a-> setText ( tr( "Lots for Sale on BrickLink..." ));
 	m_actions [AC_Edit]. append ( a );
 
@@ -818,6 +880,10 @@ void CFrameWork::createActions ( )
 	}
 }
 
+void CFrameWork::setWindowModeTabbed ( bool b )
+{
+	m_mdi-> setMode ( b ? CWorkspace::Tabbed : CWorkspace::MDI );
+}
 
 void CFrameWork::viewStatusBar ( bool b )
 {
@@ -829,9 +895,9 @@ void CFrameWork::viewToolBar ( bool b )
 	m_toolbar-> setShown ( b );
 }
 
-void CFrameWork::viewInfoBar ( bool b )
+void CFrameWork::viewInfoBarItem ( int id )
 {
-	m_infobar-> setShown ( b );
+	m_taskpanes-> setItemVisible ( id, m_taskpanes-> isItemVisible ( id ));
 }
 
 void CFrameWork::openDocument ( const QString &file )
@@ -928,7 +994,6 @@ void CFrameWork::fileImportLDrawModel ( )
 	showOrDeleteWindow ( w, w-> fileImportLDrawModel ( ));
 }
 
-
 CWindow *CFrameWork::createWindow ( )
 {
 	CWindow *w = new CWindow ( m_mdi );
@@ -945,7 +1010,9 @@ CWindow *CFrameWork::createWindow ( )
 bool CFrameWork::showOrDeleteWindow ( CWindow *w, bool b )
 {
 	if ( b ) {
-		if ( !m_mdi-> activeWindow ( ) || ( m_mdi-> activeWindow ( ) == w ))
+		QWidget *act = m_mdi-> activeWindow ( );
+
+		if ( !act || ( act == w ) || ( act-> isMaximized ( )))
 			w-> showMaximized ( );
 		else
 			w-> show ( );
@@ -953,7 +1020,7 @@ bool CFrameWork::showOrDeleteWindow ( CWindow *w, bool b )
 	else {
 		if ( w == m_current_window ) // Qt/X11 (Win?,Mac?) Bug: window is active without being shown...
 			connectWindow ( 0 );
-		delete w;
+		w-> close ( true );
 	}
 	return b;
 }
@@ -967,16 +1034,14 @@ void CFrameWork::updateDatabase ( )
 	}
 }
 
-
 void CFrameWork::windowActivate ( int i )
 {
-	QWidgetList l = m_mdi-> windowList ( QWorkspace/*CWindowManager*/::CreationOrder );
+	QWidgetList l = m_mdi-> windowList ( CWorkspace/*CWindowManager*/::CreationOrder );
 
 	if (( i >= 0 ) && ( i < int( l. count ( )))) {
-		QWidget * w = l. at ( i );
+		QWidget *w = l. at ( i );
 
-		w-> showNormal ( );
-		w-> setFocus ( );
+		m_mdi-> activateWindow ( w );
 	}
 }
 
@@ -1025,9 +1090,6 @@ void CFrameWork::connectAllActions ( bool do_connect, CWindow *window )
 	connectAction ( do_connect, "file_export_bl_wantedlist_clip", window, SLOT( fileExportBrickLinkWantedListClipboard ( )));
 	connectAction ( do_connect, "file_close", window, SLOT( close ( )));
 
-	connectAction ( do_connect, "edit_undo", window, SLOT( editUndo ( )));
-	connectAction ( do_connect, "edit_redo", window, SLOT( editRedo ( )));
-
 	connectAction ( do_connect, "edit_cut", window, SLOT( editCut ( )));
 	connectAction ( do_connect, "edit_copy", window, SLOT( editCopy ( )));
 	connectAction ( do_connect, "edit_paste", window, SLOT( editPaste ( )));
@@ -1068,17 +1130,13 @@ void CFrameWork::connectWindow ( QWidget *w )
 	if ( m_current_window ) {
 		connectAllActions ( false, m_current_window );
 
-		disconnect ( m_current_window, SIGNAL( statisticsChanged ( const QPtrList<BrickLink::InvItem> & )), this, SLOT( showStatistics ( const QPtrList<BrickLink::InvItem> & )));
-		disconnect ( m_current_window, SIGNAL( selectionChanged ( const QPtrList<BrickLink::InvItem> & )), this, SLOT( showInfoForSelection ( const QPtrList<BrickLink::InvItem> & )));
-		disconnect ( m_current_window, SIGNAL( modificationChanged ( bool )), this, SLOT( showModification ( bool )));
-
-		disconnect ( m_infobar, SIGNAL( priceDoubleClicked ( money_t )), m_current_window, SLOT( setPrice ( money_t )));
+		disconnect ( m_current_window, SIGNAL( statisticsChanged ( )), this, SLOT( statisticsUpdate ( )));
+		disconnect ( m_current_window, SIGNAL( selectionChanged ( const QPtrList<BrickLink::InvItem> & )), this, SLOT( selectionUpdate ( const QPtrList<BrickLink::InvItem> & )));
 
 		m_current_window = 0;
 
-		showInfoForSelection ( QPtrList<BrickLink::InvItem> ( ));
-		showStatistics ( QPtrList<BrickLink::InvItem> ( ));
-		showModification ( false );
+		selectionUpdate ( QPtrList<BrickLink::InvItem> ( ));
+		statisticsUpdate ( );
 	}
 
 	if ( w && ::qt_cast <CWindow *> ( w )) {
@@ -1086,21 +1144,19 @@ void CFrameWork::connectWindow ( QWidget *w )
 
 		connectAllActions ( true, window );
 
-		connect ( window, SIGNAL( selectionChanged ( const QPtrList<BrickLink::InvItem> & )), this, SLOT( showInfoForSelection ( const QPtrList<BrickLink::InvItem> & )));
-		connect ( window, SIGNAL( statisticsChanged ( const QPtrList<BrickLink::InvItem> & )), this, SLOT( showStatistics ( const QPtrList<BrickLink::InvItem> & )));
-		connect ( window, SIGNAL( modificationChanged ( bool )), this, SLOT( showModification ( bool )));
-
-		connect ( m_infobar, SIGNAL( priceDoubleClicked ( money_t )), window, SLOT( setPrice ( money_t )));
+		connect ( window, SIGNAL( selectionChanged ( const QPtrList<BrickLink::InvItem> & )), this, SLOT( selectionUpdate ( const QPtrList<BrickLink::InvItem> & )));
+		connect ( window, SIGNAL( statisticsChanged ( )), this, SLOT( statisticsUpdate ( )));
 
 		m_current_window = window;
 
 		window-> triggerStatisticsUpdate ( );
 		window-> triggerSelectionUpdate ( );
-		showModification ( window-> isModified ( ));
 	}
+
+	emit windowChanged ( m_current_window );
 }
 
-void CFrameWork::showInfoForSelection ( const QPtrList<BrickLink::InvItem> &selection )
+void CFrameWork::selectionUpdate ( const QPtrList<BrickLink::InvItem> &selection )
 {
 	struct {
 		const char *m_name;
@@ -1123,72 +1179,13 @@ void CFrameWork::showInfoForSelection ( const QPtrList<BrickLink::InvItem> &sele
 		{ "edit_bl_priceguide",       1, 1 },
 		{ "edit_bl_lotsforsale",      1, 1 },
 		{ "edit_mergeitems",          2, 0 },
-		{ "edit_partoutitems",        1, 1 },
+		{ "edit_partoutitems",        1, 0 },
 		{ "edit_reset_diffs",         1, 0 },
 
 		{ 0, 0, 0 }
 	}, *endisable_ptr;
 
 	uint cnt = selection. count ( );
-
-	if ( cnt == 1 ) {
-		const BrickLink::InvItem *item = selection. getFirst ( );
-
-		m_infobar-> setPriceGuide ( BrickLink::inst ( )-> priceGuide ( item, true ));
-		m_infobar-> setPicture ( BrickLink::inst ( )-> picture ( item, true ));
-	}
-	else if ( cnt > 1 ) {
-		int lots = -1, items = -1, errors = -1;
-		money_t value, minvalue;
-		double weight = 0.;
-
-		if ( m_current_window )
-			m_current_window-> calculateStatistics ( selection, lots, items, value, minvalue, weight, errors );
-
-		QString s;
-
-		if ( lots >= 0 ) {
-			QString valstr, wgtstr;
-
-			if ( value != minvalue ) {
-				valstr = QString ( "%1 (%2 %3)" ).
-							arg( value. toLocalizedString ( )).
-							arg( tr( "min." )).
-							arg( minvalue. toLocalizedString ( ));
-			}
-			else
-				valstr = value. toLocalizedString ( );
-
-			if ( weight == -DBL_MIN ) {
-				wgtstr = "-";
-			}
-			else {
-				if ( weight < 0 ) {
-					weight = -weight;
-					wgtstr = tr( "min." ) + " ";
-				}
-
-				wgtstr += CUtility::weightToString ( weight, ( CConfig::inst ( )-> weightSystem ( ) == CConfig::WeightImperial ), true, true );
-			}
-
-			s = QString ( "<h3>%1</h3>&nbsp;&nbsp;%2: %3<br />&nbsp;&nbsp;%4: %5<br /><br />&nbsp;&nbsp;%6: %7<br /><br />&nbsp;&nbsp;%8: %9" ). 
-			    arg ( tr( "Multiple lots selected" )). 
-			    arg ( tr( "Lots" )). arg ( lots ).
-			    arg ( tr( "Items" )). arg ( items ).
-			    arg ( tr( "Value" )). arg ( valstr ).
-			    arg ( tr( "Weight" )). arg ( wgtstr );
-
-			if (( errors > 0 ) && CConfig::inst ( )-> showInputErrors ( ))
-				s += QString ( "<br /><br />&nbsp;&nbsp;%1: %2" ). arg ( tr( "Errors" )). arg ( errors );
-		}
-
-		m_infobar-> setPriceGuide ( 0 );
-		m_infobar-> setInfoText ( s );
-	}
-	else {
-		m_infobar-> setPriceGuide ( 0 );
-		m_infobar-> setPicture ( 0 );
-	}
 
 	for ( endisable_ptr = endisable_actions; endisable_ptr-> m_name; endisable_ptr++ ) {
 		QAction *a = findAction ( endisable_ptr-> m_name );
@@ -1200,73 +1197,87 @@ void CFrameWork::showInfoForSelection ( const QPtrList<BrickLink::InvItem> &sele
 			a-> setEnabled (( mins ? ( cnt >= mins ) : true ) && ( maxs ? ( cnt <= maxs ) : true ));
 		}
 	}
+
+	for ( QPtrListIterator <BrickLink::InvItem> it ( selection ); it. current ( ); ++it ) {
+		//qWarning ( "Part %s (%s) appears in sets:", it. current ( )-> item ( )-> id ( ), it. current ( )-> item ( )-> name ( ));
+
+		BrickLink::Item::AppearsInMap map = it. current ( )-> item ( )-> appearsIn ( );
+
+		for ( BrickLink::Item::AppearsInMap::const_iterator itc = map. begin ( ); itc != map. end ( ); ++itc ) {
+			//qWarning ( "  > Color %d (%s)", itc.key()->id(), itc.key()->name());
+
+			for ( BrickLink::Item::AppearsInMapVector::const_iterator itv = itc. data ( ). begin ( ); itv != itc. data ( ). end ( ); ++itv ) {
+				//qWarning ( "    - %d in %s (%s)", itv->first,itv->second->id(),itv->second->name());
+			}
+		}
+	}
+
+	emit selectionChanged ( m_current_window, selection );
 }
 
-void CFrameWork::showStatistics ( const QPtrList <BrickLink::InvItem> &all_items )
+void CFrameWork::statisticsUpdate ( )
 {
-	int lots = -1, items = -1, errors = -1;
-	money_t value, minvalue;
-	double weight = 0.;
+	QString ss, es;
 
-	if ( m_current_window ) {
+	if ( m_current_window )
+	{
 		QPtrList <BrickLink::InvItem> not_exclude;
 
-		for ( QPtrListIterator <BrickLink::InvItem> it ( all_items ); it. current ( ); ++it ) {
+		for ( QPtrListIterator <BrickLink::InvItem> it ( m_current_window-> items ( )); it. current ( ); ++it ) {
 			if ( it. current ( )-> status ( ) != BrickLink::InvItem::Exclude )
 				not_exclude. append ( it. current ( ));
 		}
 
-		m_current_window-> calculateStatistics ( not_exclude, lots, items, value, minvalue, weight, errors );
-	}
+		CItemStatistics stat = m_current_window-> statistics ( not_exclude );
 
-	QString s;
+		if ( stat. lots ( ) >= 0 ) {
+			QString valstr, wgtstr;
 
-	if ( lots >= 0 ) {
-		QString valstr, wgtstr;
+			if ( stat. value ( ) != stat. minValue ( )) {
+				valstr = QString ( "%1 (%2 %3)" ).
+						arg( stat. value ( ). toLocalizedString ( )).
+						arg( tr( "min." )).
+						arg( stat. minValue ( ). toLocalizedString ( ));
+			}
+			else
+				valstr = stat. value ( ). toLocalizedString ( );
 
-		if ( value != minvalue ) {
-			valstr = QString ( "%1 (%2 %3)" ).
-			         arg( value. toLocalizedString ( )).
-			         arg( tr( "min." )).
-			         arg( minvalue. toLocalizedString ( ));
-		}
-		else
-			valstr = value. toLocalizedString ( );
+			if ( stat. weight ( ) == -DBL_MIN ) {
+				wgtstr = "-";
+			}
+			else {
+				double weight = stat. weight ( );
 
-		if ( weight == -DBL_MIN ) {
-			wgtstr = "-";
-		}
-		else {
-			if ( weight < 0 ) {
-				weight = -weight;
-				wgtstr = tr( "min." ) + " ";
+				if ( weight < 0 ) {
+					weight = -weight;
+					wgtstr = tr( "min." ) + " ";
+				}
+
+				wgtstr += CUtility::weightToString ( weight, ( CConfig::inst ( )-> weightSystem ( ) == CConfig::WeightImperial ), true, true );
 			}
 
-			wgtstr += CUtility::weightToString ( weight, ( CConfig::inst ( )-> weightSystem ( ) == CConfig::WeightImperial ), true, true );
+			ss = QString( "  %1: %2   %3: %4   %5: %6   %7: %8  " ).
+			     arg( tr( "Lots" )). arg ( stat. lots ( )).
+			     arg( tr( "Items" )). arg ( stat. items ( )).
+			     arg( tr( "Value" )). arg ( valstr ).
+			     arg( tr( "Weight" )). arg ( wgtstr );
 		}
 
-		s = QString( "  %1: %2   %3: %4   %5: %6   %7: %8  " ).
-		    arg( tr( "Lots" )). arg ( lots ).
-		    arg( tr( "Items" )). arg ( items ).
-		    arg( tr( "Value" )). arg ( valstr ).
-		    arg( tr( "Weight" )). arg ( wgtstr );
+		if (( stat. errors ( ) > 0 ) && CConfig::inst ( )-> showInputErrors ( ))
+			es = QString( "  %1: %2  " ). arg( tr( "Errors" )). arg( stat. errors ( ));
 	}
+	
+	m_statistics-> setText ( ss );
+	m_errors-> setText ( es );
 
-	m_statistics-> setText ( s );
-
-	s = QString::null;
-
-	if (( errors > 0 ) && CConfig::inst ( )-> showInputErrors ( ))
-		s = QString( "  %1: %2  " ). arg( tr( "Errors" )). arg( errors );
-
-	m_errors-> setText ( s );
+	emit statisticsChanged ( m_current_window );
 }
 
-void CFrameWork::showModification ( bool b )
+void CFrameWork::showNotModified ( bool b )
 {
 	QAction *a = findAction ( "file_save" );
 	if ( a )
-		a-> setEnabled ( b );
+		a-> setEnabled ( !b );
 
 	static QPixmap pnomod, pmod;
 
@@ -1283,12 +1294,12 @@ void CFrameWork::showModification ( bool b )
 		if ( !p. isNull ( ))
 			pmod. convertFromImage ( p. convertToImage ( ). smoothScale ( p. size ( ). boundedTo ( QSize ( h, h ))));
 	}
-	m_modified-> setPixmap ( b ? pmod : pnomod );
+	m_modified-> setPixmap ( b ? pnomod : pmod );
 
 	if ( b )
-		QToolTip::add ( m_modified, tr( "Unsaved modifications" ));
-	else
 		QToolTip::remove ( m_modified );
+	else
+		QToolTip::add ( m_modified, tr( "Unsaved modifications" ));
 }
 
 void CFrameWork::gotInventoryProgress ( int p, int t )
@@ -1319,6 +1330,13 @@ void CFrameWork::configure ( const char *page )
 		dlg. setCurrentPage ( page );
 
 	dlg. exec ( );
+}
+
+void CFrameWork::setWindowMode ( QAction *act )
+{
+	bool tabbed = ( act == findAction ( "window_mode_tab" ));
+
+	CConfig::inst ( )-> setWindowModeTabbed ( tabbed );
 }
 
 void CFrameWork::setOnlineStatus ( QAction *act )
@@ -1373,7 +1391,7 @@ QPtrList <CWindow> CFrameWork::allWindows ( ) const
 {
 	QPtrList <CWindow> list;
 
-	QWidgetList wl = m_mdi-> windowList ( QWorkspace::CreationOrder );
+	QWidgetList wl = m_mdi-> windowList ( CWorkspace::CreationOrder );
 
 	if ( !wl. isEmpty ( )) {
 		for ( uint i = 0; i < wl. count ( ); i++ ) {

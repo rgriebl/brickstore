@@ -12,10 +12,10 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 #include <qprogressbar.h>
-#include <qtimer.h>
 #include <qpushbutton.h>
 #include <qbuffer.h>
 #include <qvaluelist.h>
+#include <qcursor.h>
 
 #include "capplication.h"
 #include "cconfig.h"
@@ -78,13 +78,13 @@ struct VersionRecord {
 
 class DlgUpdateImplPrivate {
 public:
-	QTimer *        m_progress_timer;
 	QString         m_header;
 	QString         m_error;
 	CTransfer *     m_trans;
 	CTransfer::Job *m_job;
 	VersionRecord   m_current_version;
 	QValueList <VersionRecord> m_versions;
+	bool            m_override;
 };
 
 
@@ -101,6 +101,7 @@ DlgUpdateImpl::DlgUpdateImpl ( QWidget *parent, const char *name, bool modal, in
 	d-> m_job = 0;
 	d-> m_trans = new CTransfer ( );
 	connect ( d-> m_trans, SIGNAL( finished ( CTransfer::Job * )), this, SLOT( transferJobFinished ( CTransfer::Job * )));
+	connect ( d-> m_trans, SIGNAL( progress ( CTransfer::Job *, int, int )), this, SLOT( transferJobProgress ( CTransfer::Job *, int, int )));
 
 	if ( d-> m_trans-> init ( )) {
 		d-> m_trans-> setProxy ( CConfig::inst ( )-> useProxy ( ), CConfig::inst ( )-> proxyName ( ), CConfig::inst ( )-> proxyPort ( ));
@@ -109,18 +110,16 @@ DlgUpdateImpl::DlgUpdateImpl ( QWidget *parent, const char *name, bool modal, in
 		d-> m_job = d-> m_trans-> get ( url. latin1 ( ), CKeyValueList ( ));
 	}
 
-    d-> m_progress_timer = new QTimer ( this );
-	connect ( d-> m_progress_timer, SIGNAL( timeout ( )), this, SLOT( doProgress ( )));
-
 	if ( d-> m_trans && d-> m_job ) {
-		w_label-> setText ( d-> m_header + tr( "Searching for updates ... Please wait" ));
-
-		d-> m_progress_timer-> start ( 30 );
+		transferJobProgress ( d-> m_job, 0, 0 );
 		w_ok-> hide ( );
+		QApplication::setOverrideCursor ( QCursor( Qt::WaitCursor ));
+		d-> m_override = true;
 	}
 	else {
 		w_label-> setText ( d-> m_header + d-> m_error. arg ( tr( "Transfer job could not be started." )));
 		w_cancel-> hide ( );
+		d-> m_override = false;
 	}
 
 	setFixedSize ( sizeHint ( ));
@@ -128,20 +127,30 @@ DlgUpdateImpl::DlgUpdateImpl ( QWidget *parent, const char *name, bool modal, in
 
 DlgUpdateImpl::~DlgUpdateImpl ( )
 {
-	d-> m_trans-> cancelAllJobs ( );
 	delete d-> m_trans;
 	delete d;
 }
 
-void DlgUpdateImpl::doProgress ( )
+void DlgUpdateImpl::done ( int r )
 {
-	w_progress-> setProgress ( w_progress-> progress ( ) + 3 );
+	d-> m_trans-> cancelAllJobs ( );
+	DlgUpdate::done ( r );
+
+	if ( d-> m_override )
+		QApplication::restoreOverrideCursor ( );
+}
+
+void DlgUpdateImpl::transferJobProgress ( CTransfer::Job *job, int progress, int total )
+{
+	if ( job == d-> m_job ) {
+		w_progress-> setProgress ( progress, total );
+		w_label-> setText ( d-> m_header + tr( "Downloading version index... %1/%2 KB" ). arg( progress / 1024 ). arg( total / 1024 ));
+	}
 }
 
 void DlgUpdateImpl::transferJobFinished ( CTransfer::Job *job )
 {
 	if ( job == d-> m_job ) {
-		d-> m_progress_timer-> stop ( );
 		w_progress_container-> hide ( );
 		w_cancel-> hide ( );
 		w_ok-> show ( );
@@ -231,6 +240,9 @@ void DlgUpdateImpl::transferJobFinished ( CTransfer::Job *job )
 				w_label-> setText ( d-> m_header + str );
 			}
 		}
+		QApplication::restoreOverrideCursor ( );
+		d-> m_override = false;
+
+		setFixedSize ( sizeHint ( ));
 	}
-	setFixedSize ( sizeHint ( ));
 }

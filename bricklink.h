@@ -19,6 +19,7 @@
 #include <qcstring.h>
 #include <qptrvector.h>
 #include <qptrlist.h>
+#include <qdict.h>
 #include <qintdict.h>
 #include <qasciicache.h>
 #include <qcolor.h>
@@ -27,6 +28,9 @@
 #include <qdragobject.h>
 #include <qdom.h>
 #include <qlocale.h>
+#include <qvaluevector.h>
+#include <qmap.h>
+#include <qpair.h>
 
 #include "cref.h"
 #include "cmoney.h"
@@ -41,6 +45,7 @@ public:
 	class Picture;
 	class Category;
 	class Color;
+	class TextImport;
 
 	class ItemType {
 	public:
@@ -53,7 +58,7 @@ public:
 		bool hasYearReleased ( ) const    { return m_has_year; }
 		bool hasWeight ( ) const          { return m_has_weight; }
 		char pictureId ( ) const          { return m_picture_id; }
-		const QPixmap *noImage ( ) const  { return m_noimage; }
+		QSize imageSize ( ) const;
 
 		~ItemType ( );
 
@@ -68,17 +73,15 @@ public:
 
 		char  *  m_name;
 
-		const QPixmap *     m_noimage;
 		QPtrList <Category> m_categories;
 
 	private:
 		ItemType ( );
-		static ItemType *parse ( const BrickLink *bl, uint count, const char **strs, void * );
 
 		friend class BrickLink;
-
-		friend QDataStream &operator << ( QDataStream &ds, const BrickLink::ItemType &ii );
-		friend QDataStream &operator >> ( QDataStream &ds, BrickLink::ItemType &ii );
+		friend class BrickLink::TextImport;
+		friend QDataStream &operator << ( QDataStream &ds, const BrickLink::ItemType *itt );
+		friend QDataStream &operator >> ( QDataStream &ds, BrickLink::ItemType *itt );
 	};
 
 
@@ -95,51 +98,12 @@ public:
 
 	private:
 		Category ( );
-		static Category *parse ( const BrickLink *bl, uint count, const char **strs, void * );
 
 		friend class BrickLink;
-
-		friend QDataStream &operator << ( QDataStream &ds, const BrickLink::Category &ii );
-		friend QDataStream &operator >> ( QDataStream &ds, BrickLink::Category &ii );
+		friend class BrickLink::TextImport;
+		friend QDataStream &operator << ( QDataStream &ds, const BrickLink::Category *cat );
+		friend QDataStream &operator >> ( QDataStream &ds, BrickLink::Category *cat );
 	};
-
-	class Item {
-	public:
-		const char *id ( ) const                 { return m_id; }
-		const char *name ( ) const               { return m_name; }
-		const ItemType *itemType ( ) const       { return m_item_type; }
-		const Category *category ( ) const       { return m_categories [0]; }
-		const Category **allCategories ( ) const { return m_categories; }
-		bool hasCategory ( const Category *cat ) const;
-		QDateTime inventoryUpdated ( ) const     { return m_inv_updated; }
-		const Color *defaultColor ( ) const      { return m_color; }
-		double weight ( ) const                  { return m_weight; }
-		int yearReleased ( ) const               { return m_year; }
-
-		~Item ( );
-
-	private:
-		char *            m_id;
-		char *            m_name;
-		const ItemType *  m_item_type;
-		const Category ** m_categories;
-		const Color *     m_color;
-		QDateTime         m_inv_updated;
-		float             m_weight;
-		int               m_year;
-
-	private:
-		Item ( );
-		static Item *parse ( const BrickLink *bl, uint count, const char **strs, void *itemtype );
-
-		static int compare ( const BrickLink::Item **a, const BrickLink::Item **b );
-
-		friend class BrickLink;
-
-		friend QDataStream &operator << ( QDataStream &ds, const BrickLink::Item &ii );
-		friend QDataStream &operator >> ( QDataStream &ds, BrickLink::Item &ii );
-	};
-
 
 	class Color {
 	public:
@@ -173,13 +137,66 @@ public:
 
 	private:
 		Color ( );
-		static Color *parse ( const BrickLink *bl, uint count, const char **strs, void * );
 
 		friend class BrickLink;
-
-		friend QDataStream &operator << ( QDataStream &ds, const BrickLink::Color &ii );
-		friend QDataStream &operator >> ( QDataStream &ds, BrickLink::Color &ii );
+		friend class BrickLink::TextImport;
+		friend QDataStream &operator << ( QDataStream &ds, const BrickLink::Color *col );
+		friend QDataStream &operator >> ( QDataStream &ds, BrickLink::Color *col );
 	};
+
+	class Item {
+	public:
+		const char *id ( ) const                 { return m_id; }
+		const char *name ( ) const               { return m_name; }
+		const ItemType *itemType ( ) const       { return m_item_type; }
+		const Category *category ( ) const       { return m_categories [0]; }
+		const Category **allCategories ( ) const { return m_categories; }
+		bool hasCategory ( const Category *cat ) const;
+		QDateTime inventoryUpdated ( ) const     { return m_inv_updated; }
+		const Color *defaultColor ( ) const      { return m_color; }
+		double weight ( ) const                  { return m_weight; }
+		int yearReleased ( ) const               { return m_year ? m_year + 1900 : 0; }
+
+		~Item ( );
+
+		typedef QValueVector <QPair <int, const Item *> >   AppearsInMapVector ;
+		typedef QMap <const Color *, AppearsInMapVector>    AppearsInMap;
+
+		AppearsInMap appearsIn ( const Color *color = 0 ) const;
+
+	private:
+		char *            m_id;
+		char *            m_name;
+		const ItemType *  m_item_type;
+		const Category ** m_categories;
+		const Color *     m_color;
+		QDateTime         m_inv_updated;
+		float             m_weight;
+		Q_UINT32          m_index : 24;
+		Q_UINT32          m_year  : 8;
+
+		mutable Q_UINT32 *m_appears_in;
+
+	private:
+		Item ( );
+
+		void setAppearsIn ( const AppearsInMap &map ) const;
+
+		struct appears_in_record {
+			Q_UINT32  m12  : 12;
+			Q_UINT32  m20  : 20;
+		};
+
+		static Item *parse ( const BrickLink *bl, uint count, const char **strs, void *itemtype );
+
+		static int compare ( const BrickLink::Item **a, const BrickLink::Item **b );
+
+		friend class BrickLink;
+		friend class BrickLink::TextImport;
+		friend QDataStream &operator << ( QDataStream &ds, const BrickLink::Item *item );
+		friend QDataStream &operator >> ( QDataStream &ds, BrickLink::Item *item );
+	};
+
 
 	enum Condition { New, Used, ConditionCount };
 
@@ -301,6 +318,11 @@ public:
 		void setIncomplete ( Incomplete *inc )    { delete m_incomplete; m_incomplete = inc; }
 		
 		bool mergeFrom ( const InvItem *merge, bool prefer_from = false );
+
+		typedef void *Diff; // opaque handle
+
+		Diff *createDiff ( const InvItem *diffto ) const;
+		bool applyDiff ( Diff *diff );
 
 	private:
 		const Item *     m_item;
@@ -483,6 +505,47 @@ public:
 		friend class BrickLink;
 	};
 
+	class TextImport {
+	public:
+		TextImport ( );
+
+		bool import ( const QString &path );
+
+		const QIntDict<Color>    &colors ( ) const      { return m_colors; }
+		const QIntDict<Category> &categories ( ) const  { return m_categories; }
+		const QIntDict<ItemType> &itemTypes ( ) const   { return m_item_types; }
+		const QPtrVector<Item>   &items ( ) const       { return m_items; }
+		
+	private:
+		template <typename T> T *parse ( uint count, const char **strs );
+		template <> Category *parse<Category> ( uint count, const char **strs );
+		template <> Color *parse<Color> ( uint count, const char **strs );
+		template <> ItemType *parse<ItemType> ( uint count, const char **strs );
+		template <> Item *parse<Item> ( uint count, const char **strs );
+
+		template <typename C> bool readDB ( const QString &name, C &container );
+		template <typename T> bool readDB_processLine ( QIntDict<T> &d, uint tokencount, const char **tokens );
+		template <typename T> bool readDB_processLine ( QPtrVector<T> &v, uint tokencount, const char **tokens );
+
+		struct btinvlist_dummy { };
+		bool readDB_processLine ( btinvlist_dummy &, uint count, const char **strs );
+
+		bool readColorGuide ( const QString &name );
+		bool readPeeronColors ( const QString &name );
+
+		const BrickLink::Category *findCategoryByName ( const char *name, int len = -1 );
+		const BrickLink::Item *findItem ( char type, const char *id );
+
+
+	private:
+		QIntDict <Color>    m_colors;
+		QIntDict <ItemType> m_item_types;
+		QIntDict <Category> m_categories;
+		QPtrVector <Item>   m_items;
+
+		const ItemType *m_current_item_type;
+	};
+
 
 public:
 	virtual ~BrickLink ( );
@@ -517,8 +580,7 @@ public:
 	const QIntDict<ItemType> &itemTypes ( ) const;
 	const QPtrVector<Item>   &items ( ) const;
 
-	const QPixmap *noImage ( ) const   { return &m_databases. noimage; }
-	const QPixmap *noImageM ( ) const  { return &m_databases. noimageM; }
+	const QPixmap *noImage ( const QSize &s );
 
 	QImage colorImage ( const BrickLink::Color *col, int w, int h ) const;
 
@@ -563,16 +625,22 @@ public:
 
 	bool onlineStatus ( ) const;
 
+	void setDatabase_AppearsIn ( const QMap<const Item *, Item::AppearsInMap> &map );
+	void setDatabase_Basics ( const QIntDict<Color> &colors, 
+								const QIntDict<Category> &categories,
+								const QIntDict<ItemType> &item_types,
+								const QPtrVector<Item> &items );
+
 public slots:
-	bool readDatabase ( );
-	bool updateDatabase ( );
+	bool readDatabase ( const QString &fname = QString ( ));
+	bool writeDatabase ( const QString &fname = QString ( ));
 
 	void updatePriceGuide ( PriceGuide *pg, bool high_priority = false );
 	void updateInventory ( Inventory *inv );
 	void updatePicture ( Picture *pic, bool high_priority = false );
 
 	void setOnlineStatus ( bool on );
-	void setUpdateIntervals ( int db, int inv, int pic, int pg );
+	void setUpdateIntervals ( int pic, int pg );
 	void setHttpProxy ( bool enable, const QString &name, int port );
 
 	void cancelInventoryTransfers ( );
@@ -588,24 +656,11 @@ signals:
 	void inventoryProgress ( int, int );
 	void pictureProgress ( int, int );
 
-	void databaseProgress ( int, int, const QString &msg );
-	void databaseUpdated ( bool errors, const QString &msg );
-
 private:
 	BrickLink ( const QString &datadir );
 	static BrickLink *s_inst;
 
 	bool updateNeeded ( const QDateTime &last, int iv );
-
-	template <typename C> bool readDB ( const QString &name, C &container, void *userdata = 0 );
-	template <typename T> bool readDB_processLine ( QIntDict<T> &d, uint tokencount, const char **tokens, void *userdata );
-	template <typename T> bool readDB_processLine ( QPtrVector<T> &v, uint tokencount, const char **tokens, void *userdata );
-
-	struct btinvlist_dummy { };
-	bool readDB_processLine ( btinvlist_dummy &, uint count, const char **strs, void * );
-
-	bool readColorGuide ( const QString &name );
-	bool readPeeronColors ( const QString &name );
 
 	bool parseLDrawModelInternal ( QFile &file, const QString &model_name, QPtrList <InvItem> &items, uint *invalid_items, QDict <InvItem> &mergehash );
 
@@ -613,10 +668,6 @@ private:
 
 private slots:
 	void pictureIdleLoader ( );
-
-	void databaseJobFinished ( CTransfer::Job * );
-	void databaseDonePart1 ( );
-	void databaseDonePart2 ( );
 
 	void pictureJobFinished ( CTransfer::Job * );
 	void inventoryJobFinished ( CTransfer::Job * );
@@ -627,18 +678,9 @@ private:
 	bool     m_online;
 	QLocale  m_c_locale;
 
+	QDict <QPixmap>  m_noimages;
+
 	struct dummy1 {
-		CTransfer *               transfer;
-		int                       progress_max;
-		int                       progress_now;
-
-		bool                      updating;
-		int                       updatefail;
-		int                       update_iv;
-
-		QPixmap                   noimage;
-		QPixmap                   noimageM;
-
 		QIntDict<Color>           colors;      // id -> Color *
 		QIntDict<Category>        categories;  // id -> Category *
 		QIntDict<ItemType>        item_types;  // id -> ItemType *
@@ -672,17 +714,17 @@ private:
 QDataStream &operator << ( QDataStream &ds, const BrickLink::InvItem &ii );
 QDataStream &operator >> ( QDataStream &ds, BrickLink::InvItem &ii );
 
-QDataStream &operator << ( QDataStream &ds, const BrickLink::Item &ii );
-QDataStream &operator >> ( QDataStream &ds, BrickLink::Item &ii );
+QDataStream &operator << ( QDataStream &ds, const BrickLink::Item *item );
+QDataStream &operator >> ( QDataStream &ds, BrickLink::Item *item );
 
-QDataStream &operator << ( QDataStream &ds, const BrickLink::ItemType &ii );
-QDataStream &operator >> ( QDataStream &ds, BrickLink::ItemType &ii );
+QDataStream &operator << ( QDataStream &ds, const BrickLink::ItemType *itt );
+QDataStream &operator >> ( QDataStream &ds, BrickLink::ItemType *itt );
 
-QDataStream &operator << ( QDataStream &ds, const BrickLink::Category &ii );
-QDataStream &operator >> ( QDataStream &ds, BrickLink::Category &ii );
+QDataStream &operator << ( QDataStream &ds, const BrickLink::Category *cat );
+QDataStream &operator >> ( QDataStream &ds, BrickLink::Category *cat );
 
-QDataStream &operator << ( QDataStream &ds, const BrickLink::Color &ii );
-QDataStream &operator >> ( QDataStream &ds, BrickLink::Color &ii );
+QDataStream &operator << ( QDataStream &ds, const BrickLink::Color *col );
+QDataStream &operator >> ( QDataStream &ds, BrickLink::Color *col );
 
 
 //} // namespace BrickLink

@@ -21,6 +21,8 @@
 
 
 class CPictureWidgetPrivate;
+class QAction;
+
 
 class CPictureWidget : public QFrame {
 	Q_OBJECT
@@ -31,16 +33,14 @@ public:
 	void setPicture ( BrickLink::Picture *pic );
 	BrickLink::Picture *picture ( ) const;
 
+	void addActionsToContextMenu ( const QPtrList <QAction> &actions );
+
 protected slots:
 	void doUpdate ( );
 	void gotUpdate ( BrickLink::Picture * );
 
 	void redraw ( );
 	void viewLargeImage ( );
-	void showBLCatalogInfo ( );
-	void showBLPriceGuideInfo ( );
-	void showBLLotsForSale ( );
-	void idToClipboard ( );
 	
 protected:
 	virtual void contextMenuEvent ( QContextMenuEvent *e );

@@ -24,14 +24,18 @@
 #include "bricklink.h"
 
 
-class QWorkspace;
-class QWidgetStack;
 class CMultiProgressBar;
 class QLabel;
 
 class CWindow;
 class CInfoBar;
 class CSpinner;
+class CWorkspace;
+class CTaskPaneManager;
+class CTaskInfoWidget;
+class CTaskPriceGuideWidget;
+class CTaskLinksWidget;
+class CTaskAppearsInWidget;
 
 
 class CFrameWork : public QMainWindow {
@@ -54,12 +58,17 @@ public:
 	void updateAllToggleActions ( CWindow *window );
 
 public slots:
-	void showInfoForSelection ( const QPtrList<BrickLink::InvItem> &selection );
-	void showStatistics ( const QPtrList<BrickLink::InvItem> & );
-	void showModification ( bool b );
+	void selectionUpdate ( const QPtrList<BrickLink::InvItem> &selection );
+	void statisticsUpdate ( );
+	void showNotModified ( bool b );
 	void showContextMenu ( bool onitem, const QPoint &pos );
 
 	void fileImportBrickLinkInventory ( const BrickLink::Item *item );
+
+signals:
+	void windowChanged ( CWindow * );
+	void selectionChanged ( CWindow *, const QPtrList<BrickLink::InvItem> & );
+	void statisticsChanged ( CWindow * );
 
 private slots:
 	void openDocument ( const QString & );
@@ -76,13 +85,14 @@ private slots:
 	void fileImportLDrawModel ( );
 
 	void viewToolBar ( bool );
-	void viewInfoBar ( bool );
+	void viewInfoBarItem ( int );
 	void viewStatusBar ( bool );
+	void setWindowModeTabbed ( bool );
 
 	void windowActivate ( int );
 
 	void updateDatabase ( );
-
+	
 	void connectWindow ( QWidget *w );
 
 	void gotInventoryProgress ( int p, int t );
@@ -93,6 +103,7 @@ private slots:
 	void configure ( const char * );
 
 	void setOnlineStatus ( QAction * );
+	void setWindowMode ( QAction * );
 
 	void initBrickLinkDelayed ( );
 
@@ -134,7 +145,7 @@ private:
 	public:
 		RecentListProvider ( CFrameWork *fw );
 		virtual ~RecentListProvider ( );
-		virtual QStringList list ( int &active );
+		virtual QStringList list ( int &active, QValueList <int> & );
 
 	private:
 		CFrameWork *m_fw;
@@ -145,7 +156,7 @@ private:
 	public:
 		WindowListProvider ( CFrameWork *fw );
 		virtual ~WindowListProvider ( );
-		virtual QStringList list ( int &active );
+		virtual QStringList list ( int &active, QValueList <int> & );
 
 	private:
 		CFrameWork *m_fw;
@@ -170,7 +181,7 @@ private:
 	QPtrList<QAction> m_actions [AC_Count];
 	QMap<QAction *, bool ( CWindow::* ) ( ) const> m_toggle_updates;
 
-	QWorkspace * m_mdi;
+	CWorkspace * m_mdi;
 
 	CWindow *m_current_window;
 
@@ -180,7 +191,11 @@ private:
 	QLabel *m_errors;
 	QLabel *m_modified;
 	QToolBar *m_toolbar;
-	CInfoBar *m_infobar;
+	CTaskPaneManager *m_taskpanes;
+	CTaskInfoWidget *m_task_info;
+	CTaskPriceGuideWidget *m_task_priceguide;
+	CTaskLinksWidget *m_task_links;
+	CTaskAppearsInWidget *m_task_appears;
 	QPopupMenu *m_contextmenu;
 
 	QStringList m_recent_files;
@@ -189,6 +204,5 @@ private:
 	
 	bool m_running;
 };
-
 
 #endif

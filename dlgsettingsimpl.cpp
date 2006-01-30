@@ -61,25 +61,17 @@ DlgSettingsImpl::DlgSettingsImpl( QWidget *parent, const char *name, bool modal,
 	
 	w_weight-> setButton (( CConfig::inst ( )-> weightSystem ( ) == CConfig::WeightMetric ) ? 0 : 1 );
 
-	w_infobar_look-> setCurrentItem ( CConfig::inst ( )-> infoBarLook ( ));
-
 	w_doc_dir-> setText ( CConfig::inst ( )-> documentDir ( ));
 	connect ( w_doc_dir_select, SIGNAL( clicked ( )), this, SLOT( selectDocDir ( )));
 	w_doc_dir_select-> setIconSet ( CResource::inst ( )-> iconSet ( "file_open" ));
 
 	// ---------------------------------------------------------------------
 
-	int db, inv, pic, pg;
-	int dbd, invd, picd, pgd;
+	int pic, pg;
+	int picd, pgd;
 	
-	CConfig::inst ( )-> blUpdateIntervals ( db, inv, pic, pg );
-	CConfig::inst ( )-> blUpdateIntervalsDefaults ( dbd, invd, picd, pgd );
-
-	w_cache_databases-> setChecked (( db ));
-	w_days_databases-> setValue ( db ? sec2day( db ) : dbd );
-
-	w_cache_inventories-> setChecked (( inv ));
-	w_days_inventories-> setValue ( inv ? sec2day( inv ) : invd );
+	CConfig::inst ( )-> blUpdateIntervals ( pic, pg );
+	CConfig::inst ( )-> blUpdateIntervalsDefaults ( picd, pgd );
 
 	w_cache_pictures-> setChecked (( pic ));
 	w_days_pictures-> setValue ( pic ? sec2day( pic ) : picd );
@@ -177,8 +169,6 @@ void DlgSettingsImpl::done ( int r )
 		CMoney::inst ( )-> setLocalization ( w_local_currency-> isChecked ( ));
 		CMoney::inst ( )-> setFactor ( w_local_currency_factor-> text ( ). toDouble ( ));
 
-		CConfig::inst ( )-> setInfoBarLook ( w_infobar_look-> currentItem ( ));
-
 		CConfig::inst ( )-> setWeightSystem ( w_weight-> selectedId ( ) == 0 ? CConfig::WeightMetric : CConfig::WeightImperial );
 
 		QDir dd ( w_doc_dir-> text ( ));
@@ -189,14 +179,12 @@ void DlgSettingsImpl::done ( int r )
 
 		// ---------------------------------------------------------------------
 
-		int db, inv, pic, pg;
+		int pic, pg;
 
-		db  = day2sec( w_cache_databases->   isChecked ( ) ? w_days_databases->   value ( ) : 0 );
-		inv = day2sec( w_cache_inventories-> isChecked ( ) ? w_days_inventories-> value ( ) : 0 );
 		pic = day2sec( w_cache_pictures->    isChecked ( ) ? w_days_pictures->    value ( ) : 0 );
 		pg  = day2sec( w_cache_priceguides-> isChecked ( ) ? w_days_priceguides-> value ( ) : 0 );
 
-		CConfig::inst ( )-> setBlUpdateIntervals ( db, inv, pic, pg );
+		CConfig::inst ( )-> setBlUpdateIntervals ( pic, pg );
 
 		QDir cd ( w_cache_dir-> text ( ));
 		if ( cd. exists ( ) && cd. isReadable ( ))

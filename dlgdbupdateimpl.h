@@ -14,21 +14,31 @@
 #ifndef __DLGDBUPDATEIMPL_H__
 #define __DLGDBUPDATEIMPL_H__
 
+#include "ctransfer.h"
 #include "dlgdbupdate.h"
+
+class DlgDBUpdateImplPrivate;
 
 class DlgDBUpdateImpl : public DlgDBUpdate {
 	Q_OBJECT
 public:
 	DlgDBUpdateImpl ( QWidget *parent, const char *name = 0, bool modal = true, int fl = 0 );
+	~DlgDBUpdateImpl ( );
 	
 	bool errors ( ) const;
 
+protected slots:
+	virtual void done ( int r );
+
 private slots:
-	void progress ( int, int, const QString & );
-	void finished ( bool, const QString & );
+	void transferJobProgress ( CTransfer::Job *, int, int );
+	void transferJobFinished ( CTransfer::Job * );
 
 private:
-	bool m_errors;
+	void message ( bool error, const QString &msg );
+
+private:
+	DlgDBUpdateImplPrivate *d;
 };
 
 #endif

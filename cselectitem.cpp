@@ -296,7 +296,7 @@ public:
 			}
 
 		}
-		return const_cast <QPixmap *> ( m_item-> itemType ( )-> noImage ( ));
+		return const_cast <QPixmap *> ( BrickLink::inst ( )-> noImage ( m_item-> itemType ( )-> imageSize ( )));
 	}
 
 	virtual void paintItem ( QPainter *p, const QColorGroup &cg ) 

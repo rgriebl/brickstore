@@ -122,6 +122,47 @@ QCString BrickLink::url ( UrlList u, const void *opt, const void *opt2 )
 }
 
 
+const QPixmap *BrickLink::noImage ( const QSize &s )
+{
+	QString key = QString( "%1x%2" ). arg( s. width ( )). arg( s. height ( ));
+
+	QPixmap *pix = m_noimages [key];
+
+	if ( !pix ) {
+		pix = new QPixmap ( s * 2 );
+		pix-> fill ( Qt::white );
+		QPainter p ( pix );
+
+		int w = pix-> width ( );
+		int h = pix-> height ( );
+		bool high = ( w < h );
+
+		QRect r ( high ? 0 : ( w - h ) / 2, high ? ( w -h ) / 2 : 0, high ? w : h, high ? w : h );
+		int w4 = r. width ( ) / 4;
+		r. addCoords ( w4, w4, -w4, -w4 );
+		
+		QColor coltable [] = {
+			QColor ( 0x00, 0x00, 0x00 ),
+			QColor ( 0x3f, 0x3f, 0x3f ),
+			QColor ( 0xff, 0x7f, 0x7f )
+		};
+		
+		for ( int i = 0; i < 3; i++ ) {
+			r. addCoords ( -1, -1, -1, -1 );
+
+			p. setPen ( QPen( coltable [i], 12, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin ));
+			p. drawLine ( r. x ( ), r. y ( ), r. right ( ), r. bottom ( ));
+			p. drawLine ( r. right ( ), r. y ( ), r. x ( ), r. bottom ( ));
+		}
+		p. end ( );
+
+		pix-> convertFromImage ( pix-> convertToImage ( ). smoothScale ( s ));
+		m_noimages. insert ( key, pix );
+	}
+	return pix;
+}
+
+
 QImage BrickLink::colorImage ( const Color *col, int w, int h ) const
 {
 	if ( !col || w <= 0 || h <= 0 )
@@ -234,7 +275,7 @@ QString BrickLink::dataPath ( ) const
 QString BrickLink::dataPath ( const ItemType *item_type ) const
 {
 	QString p = dataPath ( );
-	p += item_type-> m_id;
+	p += item_type-> id ( );
 	p += '/';
 
 	if ( !check_and_create_path ( p ))
@@ -258,7 +299,7 @@ QString BrickLink::dataPath ( const Item *item ) const
 QString BrickLink::dataPath ( const Item *item, const Color *color ) const
 {
 	QString p = dataPath ( item );
-	p += QString::number ( color-> m_id );
+	p += QString::number ( color-> id ( ));
 	p += '/';
 
 	if ( !check_and_create_path ( p ))
@@ -290,8 +331,7 @@ BrickLink *BrickLink::inst ( const QString &datadir, QString *errstring )
 				*errstring = tr( "Data directory \'%1\' is not both read- and writable." ). arg ( datadir );
 		}
 		else {
-			if (!( s_inst-> m_databases. transfer-> init ( ) &&
-			       s_inst-> m_inventories. transfer-> init ( ) &&
+			if (!( s_inst-> m_inventories. transfer-> init ( ) &&
 			       s_inst-> m_pictures. transfer-> init ( ) &&
 			       s_inst-> m_price_guides. transfer-> init ( ))) {
 				delete s_inst;
@@ -319,6 +359,8 @@ BrickLink::BrickLink ( const QString &datadir )
 		
 	m_online = true;
 
+	m_noimages. setAutoDelete ( true );
+
 	m_databases. colors. resize ( 151 );
 	m_databases. categories. resize ( 503 );
 	m_databases. item_types. resize ( 13 );
@@ -328,23 +370,16 @@ BrickLink::BrickLink ( const QString &datadir )
 	m_databases. item_types. setAutoDelete ( true );
 	m_databases. items. setAutoDelete ( true );
 
-	m_databases. transfer = new CTransfer ( );
-	m_databases. updating = false;
-	m_databases. updatefail = 0;
-	m_databases. update_iv = 0;
-
 	m_price_guides. transfer = new CTransfer ( );
 	m_price_guides. update_iv = 0;
 
 	m_inventories. transfer = new CTransfer ( );
-	m_inventories. update_iv = 0;
 
 	m_pictures. transfer = new CTransfer ( );
 	m_pictures. update_iv = 0;
 
 	QPixmapCache::setCacheLimit ( 20 * 1024 * 1024 );  // 80 x 60 x 32 (w x h x bpp) == 20kB -> room for ~1000 pixmaps
 
-	connect ( m_databases.    transfer, SIGNAL( finished ( CTransfer::Job * )), this, SLOT( databaseJobFinished   ( CTransfer::Job * )));
 	connect ( m_price_guides. transfer, SIGNAL( finished ( CTransfer::Job * )), this, SLOT( priceGuideJobFinished ( CTransfer::Job * )));
 	connect ( m_inventories.  transfer, SIGNAL( finished ( CTransfer::Job * )), this, SLOT( inventoryJobFinished  ( CTransfer::Job * )));
 	connect ( m_pictures.     transfer, SIGNAL( finished ( CTransfer::Job * )), this, SLOT( pictureJobFinished    ( CTransfer::Job * )));
@@ -360,7 +395,6 @@ BrickLink::~BrickLink ( )
 	cancelPictureTransfers ( );
 	cancelPriceGuideTransfers ( );
 
-	delete m_databases. transfer;
 	delete m_inventories. transfer;
 	delete m_pictures. transfer;
 	delete m_price_guides. transfer;
@@ -372,16 +406,13 @@ void BrickLink::setHttpProxy ( bool enable, const QString &name, int port )
 {
 	QCString aname = name. latin1 ( );
 
-	m_databases.    transfer-> setProxy ( enable, aname, port );
 	m_inventories.  transfer-> setProxy ( enable, aname, port );
 	m_pictures.     transfer-> setProxy ( enable, aname, port );
 	m_price_guides. transfer-> setProxy ( enable, aname, port );
 }
 
-void BrickLink::setUpdateIntervals ( int db, int inv, int pic, int pg )
+void BrickLink::setUpdateIntervals ( int pic, int pg )
 {
-	m_databases.    update_iv = db;
-	m_inventories.  update_iv = inv;
 	m_pictures.     update_iv = pic;
 	m_price_guides. update_iv = pg;
 }
@@ -427,40 +458,10 @@ const BrickLink::Category *BrickLink::category ( uint id ) const
 	return m_databases. categories [id];
 }
 
-
-namespace {
-
-static bool modified_strncmp ( const char *s1, const char *s2, int len )
-{
-	while ( *s1 && ( len-- > 0 )) {
-		if ( *s1++ != *s2++ )
-			return false;
-	}
-	return ( len == 0 ) && ( *s1 == 0 );
-}
-
-} // namespace
-
-const BrickLink::Category *BrickLink::category ( const char *name, int len ) const
-{
-	if ( !name || !name [0] )
-		return 0;
-	if ( len < 0 )
-		len = strlen ( name );
-
-	for ( QIntDictIterator<Category> it ( m_databases. categories ); it. current ( ); ++it ) {
-		if ( modified_strncmp ( it. current ( )-> name ( ), name, len ))
-			return it. current ( );
-	}
-	return 0;
-}
-
-
 const BrickLink::Color *BrickLink::color ( uint id ) const
 {
 	return m_databases. colors [id];
 }
-
 
 const BrickLink::Color *BrickLink::colorFromPeeronName ( const char *peeron_name ) const
 {
@@ -523,211 +524,9 @@ void BrickLink::cancelPriceGuideTransfers ( )
 	m_price_guides. transfer-> cancelAllJobs ( );
 }
 
-void BrickLink::databaseJobFinished ( CTransfer::Job *j )
+bool BrickLink::readDatabase ( const QString &fname )
 {
-	if ( !j || !j-> file ( ))
-		return;
-
-	QString spath = static_cast <QFile *> ( j-> file ( ))-> name ( );
-
-	// itemtype U generates a 500 instead of an empty list .. sigh
-	if ( !j-> failed ( ) || ( j-> responseCode ( ) == 500 )) {
-		if ( spath. right ( 4 ) == ".new" ) {
-			QString dpath = spath;
-			dpath. truncate ( dpath. length ( ) - 4 );
-
-			if ( j-> file ( )-> isOpen ( ))
-				j-> file ( )-> close ( );
-
-			QFile::remove ( dpath );
-
-			if ( j-> responseCode ( ) == 500 ) {
-				QFile::remove ( spath );
-
-				QFile f ( dpath );
-				f. open ( IO_WriteOnly | IO_Truncate );
-				f. close ( );
-			}
-			else {
-				QDir d;
-				d. rename ( spath, dpath );
-			}
-		}
-	}
-	else {
-		qWarning ( "Database update failed for \"%s\" - error: %s", j-> url ( ). data ( ), j-> errorString ( ). latin1 ( ));
-
-		m_databases. updatefail++;
-	}
-	QString *msg = static_cast <QString *> ( j-> userObject ( ));
-
-	m_databases. progress_now++;
-	emit databaseProgress ( m_databases. progress_now, m_databases. progress_max, msg ? *msg : QString::null );
-
-	if ( msg )
-		delete msg;
-}
-
-
-void BrickLink::databaseDonePart1 ( )
-{
-	if ( m_databases. updatefail )
-		qWarning ( "Database update part 1 failed for some or all files" );
-
-	QString path = dataPath ( );
-
-	QIntDict <ItemType> temp_item_types;
-	if ( !readDB <> ( path + "itemtypes.txt", temp_item_types ))
-		m_databases. updatefail++;
-
-	disconnect ( m_databases. transfer, SIGNAL( done ( )), this, SLOT( databaseDonePart1 ( )));
-	connect    ( m_databases. transfer, SIGNAL( done ( )), this, SLOT( databaseDonePart2 ( )));
-
-	m_databases. progress_max /= 2; // we are only at 50% now
-
-	int request_count = 0;
-
-	for ( QIntDictIterator<ItemType> it ( temp_item_types ); it. current ( ); ++it ) {
-		char c = it. current ( )-> m_id;
-
-		QFile *f = new QFile ( path + "items_" + c + ".txt.new" );
-
-		if ( f-> open ( IO_WriteOnly )) {
-			CKeyValueList query;  //?a=a&viewType=0&itemType=" ) + c
-			query << CKeyValue ( "a", "a" )
-			      << CKeyValue ( "viewType", "0" )
-			      << CKeyValue ( "itemType", QChar ( c ))
-			      << CKeyValue ( "selItemColor", "Y" )  // special BrickStore flag to get default color - thanks Dan
-			      << CKeyValue ( "selWeight", "Y" )
-			      << CKeyValue ( "selYear", "Y" );
-
-
-			m_databases. transfer-> get ( "http://www.bricklink.com/catalogDownload.asp", query, f, new QString ( tr( "Items of type: %1" ). arg ( it. current ( )-> m_name )));
-			request_count++;
-
-			m_databases. progress_max++;
-		}
-		else {
-			qWarning ( "Database update failed for \"item_%c.txt.new\": %s", c, f-> errorString ( ). latin1 ( ));
-			delete f;
-
-			m_databases. updatefail++;
-		}
-	}
-	emit databaseProgress ( m_databases. progress_now, m_databases. progress_max, QString::null );
-
-	if ( !request_count )
-		databaseDonePart2 ( );
-}
-
-void BrickLink::databaseDonePart2 ( )
-{
-	if ( m_databases. updatefail )
-		qWarning ( "Database update part 2 failed for some or all files" );
-
-	disconnect ( m_databases. transfer, SIGNAL( done ( )), this, SLOT( databaseDonePart2 ( )));
-
-	qDebug ( "Database update finished" );
-
-	readDatabase ( );
-
-	m_databases. progress_max = m_databases. progress_now = 0;
-	emit databaseProgress ( 0, 0, QString::null );
-
-	m_databases. updating = false;
-	emit databaseUpdated (( m_databases. updatefail ), ( m_databases. updatefail ) ?
-	                       tr( "Not all BrickLink database were successfully updated (%1 failed)." ). arg ( m_databases. updatefail ) :
-	                       tr( "Updating the BrickLink database files was successfull." ));
-}
-
-bool BrickLink::updateDatabase ( )
-{
-	if ( !m_online )
-		return false;
-
-	if ( m_databases. updating )
-		return false;
-
-	QString path = dataPath ( );
-
-	m_databases. updating = true;
-	m_databases. updatefail = 0;
-	m_databases. progress_max = m_databases. progress_now = 0;
-
-	struct {
-		const char *m_url;
-		const CKeyValueList m_query;
-		const char *m_file;
-		const char *m_label;
-	} * tptr, table [] = {
-		{ "http://www.bricklink.com/catalogDownload.asp" /*?a=a&viewType=1"*/, CKeyValueList ( ) << CKeyValue ( "a", "a" )<< CKeyValue ( "viewType", "1" ), "itemtypes.txt",  QT_TR_NOOP( "Item types" )      },
-		{ "http://www.bricklink.com/catalogDownload.asp" /*?a=a&viewType=2"*/, CKeyValueList ( ) << CKeyValue ( "a", "a" )<< CKeyValue ( "viewType", "2" ), "categories.txt", QT_TR_NOOP( "Categories" )      },
-		{ "http://www.bricklink.com/catalogDownload.asp" /*?a=a&viewType=3"*/, CKeyValueList ( ) << CKeyValue ( "a", "a" )<< CKeyValue ( "viewType", "3" ), "colors.txt",     QT_TR_NOOP( "Colors" )          },
-		{ "http://www.bricklink.com/catalogColors.asp",   CKeyValueList ( ),  "colorguide.html",    QT_TR_NOOP( "Color guide" )     },
-//		{ "http://www.peeron.com/inv/colors",             CKeyValueList ( ),  "peeron_colors.html", QT_TR_NOOP( "Peeron color table" ) },
-		{ "http://brickforge.de/brickstore-data/peeron-colorchart.html", CKeyValueList ( ),  "peeron_colors.html", QT_TR_NOOP( "Peeron color table" ) },
-		{ "http://www.bricklink.com/btinvlist.asp",       CKeyValueList ( ),  "btinvlist.txt",      QT_TR_NOOP( "Inventory list" )  },
-		{ "http://www.bricklink.com/images/noImage.gif",  CKeyValueList ( ),  "noimage.gif",        QT_TR_NOOP( "Default image 1" ) },
-		{ "http://www.bricklink.com/images/noImageM.gif", CKeyValueList ( ),  "noimageM.gif",       QT_TR_NOOP( "Default Image 2" ) },
-		{ 0, CKeyValueList ( ), 0, 0 }
-	};
-
-	connect ( m_databases. transfer, SIGNAL( done ( )), this, SLOT( databaseDonePart1 ( )));
-
-	int request_count = 0;
-
-	for ( tptr = table; tptr-> m_url; tptr++ ) {
-		QFile *f = new QFile ( path + tptr-> m_file + ".new" );
-
-		if ( f-> open ( IO_WriteOnly )) {
-			m_databases. transfer-> get ( tptr-> m_url, tptr-> m_query, f, new QString ( tr( tptr-> m_label )));
-			request_count++;
-
-			m_databases. progress_max += 2; // we only want to achieve 50% in part 1
-			emit databaseProgress ( m_databases. progress_now, m_databases. progress_max, QString::null );
-		}
-		else {
-			qWarning ( "Database update failed for \"%s\": %s", tptr-> m_file, f-> errorString ( ). latin1 ( ));
-			delete f;
-
-			m_databases. updatefail++;
-		}
-	}
-
-	// done() will not be triggered in this case...
-	if ( !request_count )
-		QTimer::singleShot ( 0, this, SLOT( databaseDonePart2 ( )));
-
-	return true;
-}
-
-
-#if 0
-
-class stopwatch {
-public:
-	stopwatch ( const char *desc ) 
-	{ 
-		m_label = desc;
-		m_start = clock ( ); 
-	}
-	~stopwatch ( ) 
-	{
-		uint msec = uint( clock ( ) - m_start ) * 1000 / CLOCKS_PER_SEC;
-		qWarning ( "%s: %d'%d [sec]", m_label, msec / 1000, msec % 1000 );
-	}
-private:
-	const char *m_label;
-	clock_t m_start;
-};
-
-#endif
-
-
-bool BrickLink::readDatabase ( )
-{
-	QString path = dataPath ( );
-	bool ok = true;
+	QString filename = fname. isNull ( ) ? dataPath ( ) + "binary.cache" : fname;
 
 	cancelInventoryTransfers ( );
 	cancelPictureTransfers ( );
@@ -743,251 +542,86 @@ bool BrickLink::readDatabase ( )
 	m_databases. categories. clear ( );
 	m_databases. items. clear ( );
 
-	ok &= m_databases. noimage. load ( dataPath ( ) + "noimage.gif" );
-	ok &= m_databases. noimageM. load ( dataPath ( ) + "noimageM.gif" );
+	QFile f ( filename );
+	if ( f. open ( IO_ReadOnly )) {
+		Q_UINT32 filesize_real = f. size ( );
 
-	ok &= readDB <> ( path + "colors.txt",     m_databases. colors );
-	ok &= readDB <> ( path + "itemtypes.txt",  m_databases. item_types );
-	ok &= readDB <> ( path + "categories.txt", m_databases. categories );
+		QDataStream ds ( &f );
+		Q_UINT32 magic = 0, filesize = 0, version = 0;
+		ds >> magic >> filesize >> version;
+		
+		if (( magic != Q_UINT32( 0xb91c5703 )) || ( filesize != filesize_real ) || ( version != 0 ))
+			return false;
 
-	ok &= readColorGuide ( path + "colorguide.html" );
-	ok &= readPeeronColors ( path + "peeron_colors.html" );
+		// colors
+		Q_UINT32 colc = 0;
+		ds >> colc;
 
-	// hack to speed up loading (exactly 36759 items on 22.08.2005)
-	m_databases. items. resize ( 37000 );
-
-	for ( QIntDictIterator<ItemType> it ( m_databases. item_types ); it. current ( ); ++it )
-		ok &= readDB <> ( path + "items_" + char( it. current ( )-> m_id ) + ".txt", m_databases. items, it. current ( ));
-
-	qsort ( m_databases. items. data ( ), m_databases. items. count ( ), sizeof( Item * ), (int (*) ( const void *, const void * )) Item::compare );
-
-	Item **itp = m_databases. items. data ( );
-
-	for ( uint i = m_databases. items. count ( ); i; itp++, i-- ) {
-		ItemType *itt = const_cast <ItemType *> (( *itp )-> m_item_type );
-
-		if ( itt ) {
-			for ( const Category **catp = ( *itp )-> m_categories; *catp; catp++ ) {
-				if ( itt-> m_categories. findRef ( *catp ) < 0 )
-					itt-> m_categories. append ( *catp );
-			}
+		for ( Q_UINT32 i = colc; i; i-- ) {
+			Color *col = new Color ( );
+			ds >> col;
+			m_databases. colors. insert ( col-> id ( ), col );
 		}
-	}
 
-	btinvlist_dummy btinvlist_dummy;
-	ok &= readDB <> ( path + "btinvlist.txt", btinvlist_dummy );
+		// categories
+		Q_UINT32 catc = 0;
+		ds >> catc;
 
-	if ( !ok )
-		qWarning ( "Error reading databases !" );
+		for ( Q_UINT32 i = catc; i; i-- ) {
+			Category *cat = new Category ( );
+			ds >> cat;
+			m_databases. categories. insert ( cat-> id ( ), cat );
+		}
 
+		// types
+		Q_UINT32 ittc = 0;
+		ds >> ittc;
+
+		for ( Q_UINT32 i = ittc; i; i-- ) {
+			ItemType *itt = new ItemType ( );
+			ds >> itt;
+			m_databases. item_types. insert ( itt-> id ( ), itt );
+		}
+
+		// items
+		Q_UINT32 itc = 0;
+		ds >> itc;
+
+		m_databases. items. resize ( itc );
+		for ( Q_UINT32 i = 0; i < itc; i++ ) {
+			Item *item = new Item ( );
+			ds >> item;
+			m_databases. items. insert ( i, item );
+		}
+		Q_UINT32 allc = 0;
+		ds >> allc >> magic;
+
+		if (( allc == ( colc + ittc + catc + itc )) && ( magic == Q_UINT32( 0xb91c5703 ))) {
 #ifdef _MSC_VER
 #define PF_SIZE_T   "I"
 #else
 #define PF_SIZE_T   "z"
 #endif
-
-	qDebug ( "Color: %8u  (%11" PF_SIZE_T "u bytes)", m_databases. colors. count ( ),     m_databases. colors. count ( )     * ( sizeof( Color )    + 20 ));
-	qDebug ( "Types: %8u  (%11" PF_SIZE_T "u bytes)", m_databases. item_types. count ( ), m_databases. item_types. count ( ) * ( sizeof( ItemType ) + 20 ));
-	qDebug ( "Cats : %8u  (%11" PF_SIZE_T "u bytes)", m_databases. categories. count ( ), m_databases. categories. count ( ) * ( sizeof( Category ) + 20 ));
-	qDebug ( "Items: %8u  (%11" PF_SIZE_T "u bytes)", m_databases. items. count ( ),      m_databases. items. count ( )      * ( sizeof( Item )     + 20 ));
-
+			qDebug ( "Color: %8u  (%11" PF_SIZE_T "u bytes)", m_databases. colors. count ( ),     m_databases. colors. count ( )     * ( sizeof( Color )    + 20 ));
+			qDebug ( "Types: %8u  (%11" PF_SIZE_T "u bytes)", m_databases. item_types. count ( ), m_databases. item_types. count ( ) * ( sizeof( ItemType ) + 20 ));
+			qDebug ( "Cats : %8u  (%11" PF_SIZE_T "u bytes)", m_databases. categories. count ( ), m_databases. categories. count ( ) * ( sizeof( Category ) + 20 ));
+			qDebug ( "Items: %8u  (%11" PF_SIZE_T "u bytes)", m_databases. items. count ( ),      m_databases. items. count ( )      * ( sizeof( Item )     + 20 ));
 #undef PF_SIZE_T
 
-	return ok;
-}
-
-template <typename T> bool BrickLink::readDB_processLine ( QIntDict<T> &d, uint tokencount, const char **tokens, void *userdata )
-{
-	T *t = T::parse ( this, tokencount, (const char **) tokens, userdata );
-
-	if ( t ) {
-		d. insert ( t-> id ( ), t );
-		return true;
-	}
-	else
-		return false;
-}
-
-template <typename T> bool BrickLink::readDB_processLine ( QPtrVector<T> &v, uint tokencount, const char **tokens, void *userdata )
-{
-	T *t = T::parse ( this, tokencount, (const char **) tokens, userdata );
-
-	if ( t ) {
-		if ( v. size ( ) == v. count ( ))
- 			v. resize ( v. size ( ) + QMAX( 40, QMIN( 320, v. size ( ))));
-		v. insert ( v. count ( ), t );
-		return true;
-	}
-	else
-		return false;
-}
-
-bool BrickLink::readDB_processLine ( btinvlist_dummy & /*dummy*/, uint count, const char **strs, void * )
-{
-	if ( count < 2 || !strs [0][0] || !strs [1][0] )
-		return false;
-
-	const BrickLink::Item *itm = item ( strs [0][0], strs [1] );
-
-	if ( itm ) {
-		QDateTime dt;
-		dt. setTime_t ( 0 );
-
-		if ( strs [2][0] ) {
-			char ampm;
-			int d, m, y, hh, mm, ss;
-
-			if ( sscanf ( strs [2], "%d/%d/%d %d:%d:%d %cM", &m, &d, &y, &hh, &mm, &ss, &ampm ) == 7 ) {
-				dt. setDate ( QDate ( y, m, d ));
-				if ( ampm == 'P' )
-					hh += ( hh == 12 ) ? -12 : 12;
-				dt. setTime ( QTime ( hh, mm, ss ));
-			}
+			return true;
 		}
-
-		const_cast <Item *> ( itm )-> m_inv_updated = dt;
-		const_cast <ItemType *> ( itm-> m_item_type )-> m_has_inventories = true;
 	}
-	else
-		qWarning ( "WARNING: parsing btinvlist: item %s [%c] doesn't exist!", strs [1], strs [0][0] );
+	m_databases. colors. clear ( );
+	m_databases. item_types. clear ( );
+	m_databases. categories. clear ( );
+	m_databases. items. clear ( );
 
-	return true;
-}
+	qWarning ( "Error reading databases!" );
 
-
-template <typename C> bool BrickLink::readDB ( const QString &name, C &container, void *userdata )
-{
-	// plain C is way faster than Qt on top of C++
-	// and this routine has to be fast to reduce the startup time
-
-	FILE *f = fopen ( name, "r" );
-	if ( f ) {
-		char line [1000];
-		int lineno = 1;
-
-		(void) fgets ( line, 1000, f ); // skip header
-
-		while ( !feof ( f )) {
-			if ( !fgets ( line, 1000, f ))
-				break;
-
-			lineno++;
-
-			if ( !line [0] || line [0] == '#' || line [0] == '\r' || line [0] == '\n' )
-				continue;
-
-			char *tokens [20];
-			uint tokencount = 0;
-
-			for ( char *pos = line; tokencount < 20; ) {
-				char *newpos = pos;
-
-				while ( *newpos && ( *newpos != '\t' ) && ( *newpos != '\r' ) && ( *newpos != '\n' ))
-					newpos++;
-
-				bool stop = ( *newpos != '\t' );
-
-				tokens [tokencount++] = pos;
-
-				*newpos = 0;
-				pos = newpos + 1;
-
-				if ( stop )
-					break;
-			}
-
-			if ( !readDB_processLine ( container, tokencount, (const char **) tokens, userdata )) {
-				qWarning ( "ERROR: parse error in file \"%s\", line %d: \"%s\"", name. latin1 ( ), lineno, (const char *) line );
-				return false;
-			}
-		}
-
-		fclose ( f );
-		return true;
-	}
-	qWarning ( "ERROR: could not open file \"%s\"", name. latin1 ( ));
-	return false;
-}
-
-bool BrickLink::readColorGuide ( const QString &name )
-{
-	QFile f ( name );
-	if ( f. open ( IO_ReadOnly )) {
-		QTextStream ts ( &f );
-		QString s = ts. read ( );
-		f. close ( );
-
-		QRegExp rxp ( ">([0-9]+)&nbsp;</TD><TD[ ]+BGCOLOR=\"#?([a-fA-F0-9]{6,6})\">" );
-
-		int pos = 0;
-
-		while (( pos = rxp. search ( s, pos )) != -1 ) {
-			int id = rxp. cap ( 1 ). toInt ( );
-
-			Color *colp = m_databases. colors [id];
-			if ( colp )
-				colp-> m_color = QColor ( "#" + rxp. cap ( 2 ));
-
-			pos += rxp. matchedLength ( );
-		}
-		return true;
-	}
 	return false;
 }
 
 
-bool BrickLink::readPeeronColors ( const QString &name )
-{
-	QFile f ( name );
-	if ( f. open ( IO_ReadOnly )) {
-		QTextStream in ( &f );
-		
-		QString line;
-		int count = 0;
-
-		QRegExp namepattern ( "<a href=[^>]+>(.+)</a>" );
-		
-		while (( line = in. readLine ( ))) {
-			if ( line. startsWith ( "<td>" ) && line. endsWith ( "</td>" )) {
-				QString tmp = line. mid ( 4, line. length ( ) - 9 );
-				QStringList sl = QStringList::split ( "</td><td>", tmp, true );
-
-				bool line_ok = false;
-				
-				if ( sl. count ( ) >= 5 ) {
-					int ldraw_id = -1, id = -1;
-					QString peeron_name;
-				
-					if ( !sl [3]. isEmpty ( ))
-						id = sl [3]. toInt ( );
-					if ( !sl [4]. isEmpty ( ))
-						ldraw_id = sl [4]. toInt ( );
-					
-					if ( namepattern. exactMatch ( sl [0] ))
-						peeron_name = namepattern. cap ( 1 );
-
-					if ( id != -1 ) {
-						Color *colp = m_databases. colors [id];
-						if ( colp ) {
-							if ( !peeron_name. isEmpty ( ))
-								colp-> m_peeron_name = strdup ( peeron_name. latin1 ( ));
-							colp-> m_ldraw_id = ldraw_id;
-
-							count++;			
-						}
-					}					
-					line_ok = true;
-				}
-				
-				if ( !line_ok )
-					qWarning ( "Failed to parse item line: %s", line. latin1 ( ));
-			}
-		}
-
-		return ( count > 0 );
-	}
-	return false;
-}
 
 
 QPtrList<BrickLink::InvItem> *BrickLink::parseItemListXML ( QDomElement root, ItemListXMLHint hint, uint *invalid_items )
@@ -1622,4 +1256,109 @@ bool BrickLink::parseLDrawModelInternal ( QFile &f, const QString &model_name, Q
 		*invalid_items = invalid;
 		
 	return is_mpd ? is_mpd_model_found : true;
+}
+
+
+
+/*
+ * Support routines to rebuild the DB from txt files
+ */
+
+void BrickLink::setDatabase_AppearsIn ( const QMap<const Item *, Item::AppearsInMap> &map )
+{
+	for ( QMap<const Item *, Item::AppearsInMap>::const_iterator it = map. begin ( ); it != map. end ( ); ++it )
+		it. key ( )-> setAppearsIn ( it. data ( ));
+}
+
+void BrickLink::setDatabase_Basics ( const QIntDict<Color> &colors, 
+									 const QIntDict<Category> &categories,
+									 const QIntDict<ItemType> &item_types,
+									 const QPtrVector<Item> &items )
+{
+	cancelInventoryTransfers ( );
+	cancelPictureTransfers ( );
+	cancelPriceGuideTransfers ( );
+
+	m_price_guides. cache. clear ( );
+	m_inventories. cache. clear ( );
+	m_pictures. cache. clear ( );
+	QPixmapCache::clear ( );
+
+	m_databases. colors. clear ( );
+	m_databases. item_types. clear ( );
+	m_databases. categories. clear ( );
+	m_databases. items. clear ( );
+
+	m_databases. colors     = colors;
+	m_databases. item_types = item_types;
+	m_databases. categories = categories;
+	m_databases. items      = items;
+}
+
+bool BrickLink::writeDatabase ( const QString &fname )
+{
+	QString filename = fname. isNull ( ) ? dataPath ( ) + "binary.cache" : fname;
+
+	QFile f ( filename + ".new" );
+	if ( f. open ( IO_WriteOnly )) {
+		QDataStream ds ( &f );
+		ds << Q_UINT32( 0 /*magic*/ ) << Q_UINT32 ( 0 /*filesize*/ ) << Q_UINT32( 0 /*version*/ );
+
+		// colors
+		Q_UINT32 colc = m_databases. colors. count ( );
+		ds << colc;
+		
+		for ( QIntDictIterator<Color> it ( m_databases. colors ); it. current ( ); ++it )
+			ds << it. current ( );
+
+		// categories
+		Q_UINT32 catc = m_databases. categories. count ( );
+		ds << catc;
+
+		for ( QIntDictIterator<Category> it ( m_databases. categories ); it. current ( ); ++it )
+			ds << it. current ( );
+		
+		// types
+		Q_UINT32 ittc = m_databases. item_types. count ( );
+		ds << ittc;
+		
+		for ( QIntDictIterator<ItemType> it ( m_databases. item_types ); it. current ( ); ++it )
+			ds << it. current ( );
+
+		// items
+		Q_UINT32 itc = m_databases. items. count ( );
+		ds << itc;
+
+		Item **itp = m_databases. items. data ( );
+		for ( Q_UINT32 i = itc; i; itp++, i-- )
+			ds << *itp;
+
+		ds << ( colc + ittc + catc + itc );
+		ds << Q_UINT32( 0xb91c5703 );
+
+		Q_UINT32 filesize = f. at ( );
+
+		if ( f. status ( ) == IO_Ok ) {
+			f. close ( );
+
+			if ( f. open ( IO_ReadWrite )) {
+				QDataStream ds2 ( &f );
+				ds2 << Q_UINT32( 0xb91c5703 ) << filesize;
+
+				if ( f. status ( ) == IO_Ok ) {
+					f. close ( );
+
+					QString err = CUtility::safeRename ( filename );
+
+					if ( err. isNull ( ))
+						return true;
+				}
+			}
+		}
+	}
+	if ( f. isOpen ( ))
+		f. close ( );
+
+	QFile::remove ( filename + ".new" );
+	return false;
 }

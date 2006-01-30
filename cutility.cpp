@@ -320,3 +320,43 @@ double CUtility::stringToWeight ( const QString &s, bool imperial )
 
 	return w;
 }
+
+QString CUtility::safeOpen ( const QString &basepath )
+{
+	QDir cwd;
+	if ( cwd. exists ( basepath ))
+		return basepath;
+	else if ( cwd. exists ( basepath + ".old" ))
+		return basepath + ".old";
+	else
+		return basepath;
+}
+
+QString CUtility::safeRename ( const QString &basepath )
+{
+	QString error;
+	QString newpath = basepath + ".new";
+	QString oldpath = basepath + ".old";
+	
+	QDir cwd;
+
+	if ( cwd. exists ( newpath )) {
+		if ( !cwd. exists ( oldpath ) || cwd. remove ( oldpath )) {
+			if ( !cwd. exists ( basepath ) || cwd. rename ( basepath, oldpath )) {
+				if ( cwd. rename ( newpath, basepath ))
+					error = QString ( );
+				else
+					error = qApp-> translate ( "CUtility", "Could not rename %1 to %2." ). arg( newpath ). arg( basepath );
+			}
+			else
+				error = qApp-> translate ( "CUtility", "Could not backup %1 to %2." ). arg( basepath ). arg( oldpath );
+		}
+		else
+			error = qApp-> translate ( "CUtility", "Could not delete %1." ). arg( oldpath );
+	}
+	else
+		error = qApp-> translate ( "CUtility", "Could not find %1." ). arg( newpath );
+
+	return error;
+}
+

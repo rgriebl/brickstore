@@ -20,7 +20,9 @@
 #include "bricklink.h"
 
 
+class QAction;
 class CPriceGuideWidgetPrivate;
+
 
 class CPriceGuideWidget : public QFrame {
 	Q_OBJECT
@@ -29,6 +31,8 @@ public:
 	virtual ~CPriceGuideWidget ( );
 
 	virtual BrickLink::PriceGuide *priceGuide ( ) const;
+
+	void addActionsToContextMenu ( const QPtrList <QAction> &actions );
 
 	enum Layout {
 		Normal,

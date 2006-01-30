@@ -20,8 +20,7 @@
 
 class QProgressBar;
 class QToolButton;
-class QLabel;
-class QGrid;
+
 
 
 class CMultiProgressBar : public QWidget {
@@ -30,10 +29,6 @@ public:
 	CMultiProgressBar ( QWidget *parent = 0, const char *name = 0 );
 	virtual ~CMultiProgressBar ( );
 
-	void setPopupAlignment ( int align );
-	int popupAlignment ( ) const;
-
-	void setPopupPixmap ( const QPixmap & );
 	void setStopPixmap ( const QPixmap & );
 
 	int addItem ( const QString &label, int id = -1 );
@@ -55,11 +50,7 @@ signals:
 	void stop ( );
 	void statusChange ( bool );
 
-protected slots:
-	void togglePopup ( bool b );
-
 protected:
-	bool eventFilter ( QObject *o, QEvent *e );
 	void resizeEvent ( QResizeEvent *e );
 
 private:
@@ -67,24 +58,19 @@ private:
 	void recalcPixmap ( QToolButton *but, const QPixmap &pix );
 
 private:
-	int m_align;
 	int m_autoid;
 
 	QProgressBar *m_progress;
-	QToolButton *m_arrow;
 	QToolButton *m_stop;
 
-	QPixmap m_arrow_pix;
 	QPixmap m_stop_pix;
 
-	QGrid *m_popup;
-
 	struct ItemData {
-		ItemData ( QWidget *parent, const QString &label );
-		~ItemData ( );
+		ItemData ( const QString &label );
 
-		QProgressBar *m_progress;
-		QLabel       *m_label;
+		QString m_label;
+		int     m_progress;
+		int     m_total;
 	};
 
 	QIntDict <ItemData> m_items;

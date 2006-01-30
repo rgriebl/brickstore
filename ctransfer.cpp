@@ -27,6 +27,7 @@ CTransfer::CTransfer ( )
 {
 	m_curl = 0;
 	m_total = m_progress = 0;
+	m_file_total = m_file_progress = 0;
 	m_stop = false;
 
 	m_use_proxy = false;
@@ -186,7 +187,9 @@ void CTransfer::run ( )
 	             cApp-> appURL ( ) + ")";
 
 	::curl_easy_setopt ( m_curl, CURLOPT_VERBOSE, 0 );
-	::curl_easy_setopt ( m_curl, CURLOPT_NOPROGRESS, 1 );
+	::curl_easy_setopt ( m_curl, CURLOPT_NOPROGRESS, 0 );
+	::curl_easy_setopt ( m_curl, CURLOPT_PROGRESSFUNCTION, progress_curl );
+	::curl_easy_setopt ( m_curl, CURLOPT_PROGRESSDATA, this );
 	::curl_easy_setopt ( m_curl, CURLOPT_NOSIGNAL, 1 );
 	::curl_easy_setopt ( m_curl, CURLOPT_FOLLOWLOCATION, 1);
 //	::curl_easy_setopt ( m_curl, CURLOPT_TIMEOUT, 120 );
@@ -258,6 +261,9 @@ void CTransfer::run ( )
 		long respcode = 0;
 		char *effurl = 0;
 
+		m_file_total = m_file_progress = -1;
+		QApplication::postEvent ( this, new QCustomEvent ((QEvent::Type) TransferProgressEvent, 0 ));
+
 		if ( res == CURLE_OK ) {
 			::curl_easy_getinfo ( m_curl, CURLINFO_RESPONSE_CODE, &respcode );
 			::curl_easy_getinfo ( m_curl, CURLINFO_EFFECTIVE_URL, &effurl );
@@ -312,6 +318,12 @@ void CTransfer::customEvent ( QCustomEvent *ev )
 			delete j-> data ( );
 			delete j;
 		}
+	}
+	else if ( int( ev-> type ( )) == TransferProgressEvent ) {
+		Job *j = static_cast <Job *> ( ev-> data ( ));
+
+		if ( j )
+			emit progress ( j, m_file_progress, m_file_total );
 	}
 }
 
@@ -398,6 +410,17 @@ size_t CTransfer::write_curl ( void *ptr, size_t size, size_t nmemb, void *strea
 	}
 	else
 		return 0;
+}
+
+int CTransfer::progress_curl ( void *stream, double dltotal, double dlnow, double /*ultotal*/, double /*ulnow*/ )
+{
+	CTransfer *that = static_cast <CTransfer *> ( stream );
+	
+	that-> m_file_progress = int( dlnow );
+	that-> m_file_total    = int( dltotal );
+	QApplication::postEvent ( that, new QCustomEvent ((QEvent::Type) TransferProgressEvent, that-> m_active_job ));
+	
+	return 0;
 }
 
 void CTransfer::lock_curl ( CURL * /*handle*/, curl_lock_data /*data*/, curl_lock_access /*access*/, void * /*userptr*/ )

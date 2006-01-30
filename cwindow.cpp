@@ -35,6 +35,8 @@
 #include "cutility.h"
 #include "creport.h"
 #include "cmoney.h"
+#include "cundo.h"
+#include "command.h"
 
 #include "dlgincdecpriceimpl.h"
 #include "dlgsettopgimpl.h"
@@ -49,6 +51,40 @@
 
 #include "cwindow.h"
 
+CItemStatistics::CItemStatistics ( const QPtrList <BrickLink::InvItem> &list, int errors )
+{
+	m_lots = list. count ( );
+	m_items = 0;
+	m_val = m_minval = 0.;
+	m_weight = .0;
+	m_errors = errors;
+	bool weight_missing = false;
+
+	for ( QPtrListIterator<BrickLink::InvItem> it ( list ); it. current ( ); ++it ) {
+		BrickLink::InvItem *ii = it. current ( );
+
+		int qty = ii-> quantity ( );
+		money_t price = ii-> price ( );
+
+		m_val += ( qty * price );
+
+		for ( int i = 0; i < 3; i++ ) {
+			if ( ii-> tierQuantity ( i ) && ( ii-> tierPrice ( i ) != 0 ))
+				price = ii-> tierPrice ( i );
+		}
+		m_minval += ( qty * price * ( 1.0 - double( ii-> sale ( )) / 100.0 ));
+		m_items += qty;
+
+		if ( ii-> weight ( ) > 0 )
+			m_weight += ii-> weight ( );
+		else 
+			weight_missing = true;	
+	}
+	if ( weight_missing )
+		m_weight = ( m_weight == 0. ) ? -DBL_MIN : -m_weight;
+}
+
+
 
 CWindow::CWindow ( QWidget *parent, const char *name )
 	: QWidget ( parent, name, WDestructiveClose ), m_lvitems ( 503 )
@@ -56,15 +92,15 @@ CWindow::CWindow ( QWidget *parent, const char *name )
 	m_inventory = 0;
 	m_inventory_multiply = 1;
 	m_filter_field = CItemView::All;
-	m_viewmode = ViewPlain;
 
 	m_settopg_failcnt = 0;
 	m_settopg_list = 0;
 	m_settopg_time = BrickLink::PriceGuide::AllTime;
 	m_settopg_price = BrickLink::PriceGuide::Average;
 
-	m_items. setAutoDelete ( true );
-	m_modified = false;
+	// m_items. setAutoDelete ( true ); NOT ANYMORE -> UndoRedo
+
+	m_undo = new CUndoStack ( this );
 
 	w_filter_clear = new QToolButton ( this );
 	w_filter_clear-> setAutoRaise ( true );
@@ -134,7 +170,6 @@ CWindow::CWindow ( QWidget *parent, const char *name )
 	toplay-> addWidget ( w_list );
 
 	connect ( BrickLink::inst ( ), SIGNAL( priceGuideUpdated ( BrickLink::PriceGuide * )), this, SLOT( priceGuideUpdated ( BrickLink::PriceGuide * )));
-	connect ( BrickLink::inst ( ), SIGNAL( inventoryUpdated ( BrickLink::Inventory * )), this, SLOT( inventoryUpdated ( BrickLink::Inventory * )));
 	connect ( BrickLink::inst ( ), SIGNAL( pictureUpdated ( BrickLink::Picture * )), this, SLOT( pictureUpdated ( BrickLink::Picture * )));
 
 	connect ( w_list, SIGNAL( itemChanged ( CItemViewItem *, bool )), this, SLOT( itemModified ( CItemViewItem *, bool )));
@@ -143,7 +178,7 @@ CWindow::CWindow ( QWidget *parent, const char *name )
 	connect ( w_filter_expression, SIGNAL( textChanged ( const QString & )), this, SLOT( applyFilter ( )));
 	connect ( w_filter_field, SIGNAL( activated ( int )), this, SLOT( applyFilter ( )));
 
-	connect ( this, SIGNAL( modificationChanged ( bool )), this, SLOT( updateCaption ( )));
+	connect ( m_undo, SIGNAL( cleanChanged ( bool )), this, SLOT( updateCaption ( )));
 
 	connect ( CConfig::inst ( ), SIGNAL( simpleModeChanged ( bool )), w_list, SLOT( setSimpleMode ( bool )));
 	connect ( CConfig::inst ( ), SIGNAL( simpleModeChanged ( bool )), this, SLOT( updateErrorMask ( )));
@@ -224,13 +259,21 @@ uint CWindow::addItems ( const QPtrList<BrickLink::InvItem> &items, int multiply
 	bool was_empty = ( w_list-> childCount ( ) == 0 );
 	uint dropped = 0;
 	int merge_action_yes_no_to_all = MergeAction_Ask;
+	int addcount = 0, mergecount = 0;
 
+	CUndoCmd *macro = 0;
+	if ( items. count ( ) > 1 ) {
+		macro = new CUndoCmd ( CUndoCmd::MacroBegin );
+		m_undo-> push ( macro );
+	}
 
 	// disable sorting: new items should appear at the end of the list
 	if ( !dont_change_sorting )
 		w_list-> setSorting ( w_list-> columns ( ) + 1 ); // +1 because of Qt-bug !!
 
+#if 0
 	QListViewItem *last_item = w_list-> lastItem ( ); // cache the last added item, since QListView::lastItem() is very expensive
+#endif
 
 	if ( waitcursor )
 		QApplication::setOverrideCursor ( QCursor( Qt::WaitCursor ));
@@ -294,29 +337,40 @@ uint CWindow::addItems ( const QPtrList<BrickLink::InvItem> &items, int multiply
 		CItemViewItem *ivi = 0;
 
 		switch ( mergeflags & MergeAction_Mask ) {
-			case MergeAction_Force:
-				oldit-> mergeFrom ( newit, (( mergeflags & MergeKeep_Mask ) == MergeKeep_New ));
+			case MergeAction_Force: {
+				BrickLink::InvItem *ii = new BrickLink::InvItem ( *oldit );
 
+				ii-> mergeFrom ( newit, (( mergeflags & MergeKeep_Mask ) == MergeKeep_New ));
+
+				m_undo-> push ( new Command::EditItems ( this, oldit, ii, true ));
+				mergecount++;
+#if 0
 				ivi = m_lvitems [oldit];
 		
 				w_list-> centerItem ( ivi );
 				ivi-> checkForErrors ( );
 				ivi-> repaint ( );
+#endif
 				break;
-
+			}
 			case MergeAction_None:
-			default:
+			default: {
 				BrickLink::InvItem *ii = new BrickLink::InvItem ( *newit );
 
 				if ( multiply > 1 )
 					ii-> setQuantity ( ii-> quantity ( ) * multiply );
 
+				m_undo-> push ( new Command::AddItems ( this, ii, true ));
+				addcount++;
+#if 0
 				ivi = new CItemViewItem ( ii, w_list, last_item );
 
 				m_items. append ( ii );
 				m_lvitems. insert ( ii, ivi );
 				last_item = ivi;
+#endif
 				break;
+			}
 		}
 	}
 
@@ -324,15 +378,55 @@ uint CWindow::addItems ( const QPtrList<BrickLink::InvItem> &items, int multiply
 
 	if ( waitcursor )
 		QApplication::restoreOverrideCursor ( );
-
+#if 0
 	updateStatistics ( );
 	setModified ( true );
-
+#endif
 	if ( was_empty )
 		w_list-> setCurrentItem ( w_list-> firstChild ( ));
 
+	if ( macro ) {
+		macro-> setDescription ( tr( "Added %1, Merged %2 Items" ). arg( addcount ). arg( mergecount ));
+		m_undo-> push ( new CUndoCmd ( CUndoCmd::MacroEnd ));
+	}
+
 	return items. count ( ) - dropped;
 }
+
+
+void CWindow::appendItems ( const QPtrList<BrickLink::InvItem> &items ) 
+{ 
+	insertItems ( items, 0 );
+}
+
+void CWindow::insertItems ( const QPtrList<BrickLink::InvItem> &items, int *positions )
+{
+	QListViewItem *last_item = positions ? 0 : w_list-> lastItem ( ); // cache the last added item, since QListView::lastItem() is very expensive
+
+	for ( QPtrListIterator<BrickLink::InvItem> it ( items ); it. current ( ); ++it ) {
+		CItemViewItem *ivi;
+
+		if ( !positions ) {
+			ivi = new CItemViewItem ( *it, w_list, last_item );
+			last_item = ivi;
+		}
+		else {
+			last_item = 0; //TODO
+			ivi = new CItemViewItem ( *it, w_list, last_item );
+			positions++;
+		}
+
+		m_items. append ( *it );
+		m_lvitems. insert ( *it, ivi );
+	}
+
+	updateStatistics ( );
+}
+
+void CWindow::removeItems ( const QPtrList<BrickLink::InvItem> &items, int *positions ) 
+{ 
+}
+
 
 void CWindow::addItem ( const BrickLink::InvItem *item, uint mergeflags )
 {
@@ -346,6 +440,8 @@ void CWindow::addItem ( const BrickLink::InvItem *item, uint mergeflags )
 
 void CWindow::deleteItems ( const QPtrList<BrickLink::InvItem> &items )
 {
+	m_undo-> push ( new Command::RemoveItems ( this, items ));
+#if 0
 	// If we supply m_selection as 'items' then we would change the
 	// list while we are deleting items (since ~QListViewItem) updates
 	// the selection! (classic shoot-yourself-in-the-foot...)
@@ -354,13 +450,15 @@ void CWindow::deleteItems ( const QPtrList<BrickLink::InvItem> &items )
 
 	for ( QPtrListIterator <BrickLink::InvItem> it ( copylist ); it. current ( ); ++it ) {
 		delete m_lvitems. take ( it. current ( ));
-		m_items. removeRef ( it. current ( )); // triggers autoDelete
+		m_items. removeRef ( it. current ( )); // triggers autoDelete NOT ANYMORE -> UndoRedo
 	}
 	updateSelection ( );
 	updateStatistics ( );
 	setModified ( true );
+#endif
 }
 
+//TODO: Doesn't work with Undo/Redo
 void CWindow::mergeItems ( const QPtrList<BrickLink::InvItem> &const_items, int globalmergeflags )
 {
 	if (( const_items. count ( ) < 2 ) || ( globalmergeflags & MergeAction_Mask ) == MergeAction_None )
@@ -443,7 +541,7 @@ void CWindow::mergeItems ( const QPtrList<BrickLink::InvItem> &const_items, int 
 				--it;
 
 			delete m_lvitems. take ( from );
-			m_items. removeRef ( from ); // triggers autoDelete
+			m_items. removeRef ( from ); // triggers autoDelete  
 			items. removeRef ( from );
 
 			if ( from_is_first )
@@ -477,6 +575,7 @@ void CWindow::updateSelection ( )
 void CWindow::inventoryUpdated ( BrickLink::Inventory *inv )
 {
 	qWarning ( "got inv update %p, having %p", inv, m_inventory );
+	disconnect ( BrickLink::inst ( ), SIGNAL( inventoryUpdated ( BrickLink::Inventory * )), this, SLOT( inventoryUpdated ( BrickLink::Inventory * )));
 
 	if ( inv && ( inv == m_inventory )) {
 		setItems ( inv-> inventory ( ), m_inventory_multiply );
@@ -685,7 +784,9 @@ bool CWindow::fileImportBrickLinkInventory ( const BrickLink::Item *preselect )
 
 				setModified ( true );
 
-				if ( m_inventory-> updateStatus ( ) != BrickLink::Updating )
+				if ( m_inventory-> updateStatus ( ) == BrickLink::Updating )
+					connect ( BrickLink::inst ( ), SIGNAL( inventoryUpdated ( BrickLink::Inventory * )), this, SLOT( inventoryUpdated ( BrickLink::Inventory * )));
+				else
 					inventoryUpdated ( m_inventory );
 
 				m_caption = tr( "Inventory for %1" ). arg ( it-> id ( ));
@@ -720,7 +821,9 @@ bool CWindow::fileImportBrickLinkOrder ( )
 
 				setModified ( true );
 
-				if ( m_inventory-> updateStatus ( ) != BrickLink::Updating )
+				if ( m_inventory-> updateStatus ( ) == BrickLink::Updating )
+					connect ( BrickLink::inst ( ), SIGNAL( inventoryUpdated ( BrickLink::Inventory * )), this, SLOT( inventoryUpdated ( BrickLink::Inventory * )));
+				else
 					inventoryUpdated ( m_inventory );
 
 				m_caption = tr( "Order #%1" ). arg ( id );
@@ -748,7 +851,9 @@ bool CWindow::fileImportBrickLinkStore ( )
 
 		setModified ( true );
 
-		if ( m_inventory-> updateStatus ( ) != BrickLink::Updating )
+		if ( m_inventory-> updateStatus ( ) == BrickLink::Updating )
+			connect ( BrickLink::inst ( ), SIGNAL( inventoryUpdated ( BrickLink::Inventory * )), this, SLOT( inventoryUpdated ( BrickLink::Inventory * )));
+		else
 			inventoryUpdated ( m_inventory );
 
 		m_caption = tr( "Store %1" ). arg ( QDate::currentDate ( ). toString ( Qt::LocalDate ));
@@ -1015,7 +1120,7 @@ bool CWindow::fileSaveTo ( const QString &s, const char *type, bool export_only 
 
 		if ( ok ) {
 			if ( !export_only ) {
-				setModified ( false );
+				m_undo-> setClean ( );
 				setFileName ( s );
 
 				CFrameWork::inst ( )-> addToRecentFiles ( s );
@@ -1151,15 +1256,6 @@ void CWindow::fileExportBrikTrakInventory ( )
 	}
 }
 
-void CWindow::editUndo ( )
-{
-}
-
-void CWindow::editRedo ( )
-{
-}
-
-
 void CWindow::editCut ( )
 {
 	editCopy ( );
@@ -1175,7 +1271,7 @@ void CWindow::editCopy ( )
 void CWindow::editPaste ( )
 {
 	QPtrList<BrickLink::InvItem> ii;
-	ii. setAutoDelete ( true );
+	ii. setAutoDelete ( true ); //TODO: check for command handling
 
 	if ( BrickLink::InvItemDrag::decode ( QApplication::clipboard ( )-> data ( ), ii )) {
 		if ( ii. count ( )) {
@@ -1209,61 +1305,6 @@ void CWindow::editResetDifferences ( )
 	if ( !m_selection. isEmpty ( ))
 		resetDifferences ( m_selection );
 }
-
-void CWindow::viewPlain ( bool )
-{
-}
-
-void CWindow::viewHierarchic ( bool )
-{
-}
-
-void CWindow::viewCompact ( bool )
-{
-}
-
-
-#if 0
-class UndoBuffer {
-public:
-	enum Action {
-		Add,		// list of invitem
-		Remove,     // list of invitem, positions
-		Move,       // list if invitem, positions
-		Change      // list of invitem
-	};
-
-	UndoBuffer ( CWindow *v, const QString &title, Action act, const QPtrList<BrickLink::InvItem> *list = 0 );
-
-private:
-	QString m_title;
-
-	Action m_action;
-
-	QValueVector m_invitems;
-	QValueVector m_positions;
-};
-
-//                                        = QString::null          = 0
-UndoBuffer *execute ( Action act, const QString &title, const QPtrList<BrickLink::InvItem> *list )
-{
-	if ( !list )
-		list = &m_selection;
-
-	if ( list-> isEmpty ( ))
-		return 0;
-
-	if ( !title ) {
-		switch ( act ) {
-			case Add   : title = QString ( "Added %1 items" ). arg ( list-> count ( )); break;
-			case Remove: title = QString ( "Removed %1 items" ). arg ( list-> count ( )); break;
-			case Change:
-			case Move
-		}
-	}
-}
-
-#endif
 
 void CWindow::editSetPrice ( )
 {
@@ -1420,15 +1461,14 @@ void CWindow::editDivideQty ( )
 
 	int divisor = 1;
 
-	if ( CMessageBox::getInteger ( this, tr( "Divides the quantities of all selected items by this number.<br /><br />(A check is made if all quantites are exactly divisble without reminder, before this operation is performed.)" ), QString::null, divisor, new QIntValidator ( -1000, 1000, 0 ))) {
-		if (( divisor <= 1 ) || ( divisor > 1 )) {
+	if ( CMessageBox::getInteger ( this, tr( "Divides the quantities of all selected items by this number.<br /><br />(A check is made if all quantites are exactly divisble without reminder, before this operation is performed.)" ), QString::null, divisor, new QIntValidator ( 1, 1000, 0 ))) {
+		if ( divisor > 1 ) {
 			int lots_with_errors = 0;
-			int abs_divisor = QABS( divisor );
 			
 			for ( QPtrListIterator<BrickLink::InvItem> it ( m_selection ); it. current ( ); ++it ) {
 				BrickLink::InvItem *ii = it. current ( );
 
-				if ( QABS( ii-> quantity ( )) % abs_divisor )
+				if ( QABS( ii-> quantity ( )) % divisor )
 					lots_with_errors++;
 			}
 
@@ -1594,15 +1634,18 @@ void CWindow::editSetReserved ( )
 
 bool CWindow::isModified ( ) const
 {
-	return m_modified;
+	return !m_undo-> isClean ( );
 }
 
 void CWindow::setModified ( bool b )
 {
+	b = b;
+/*
 	if ( m_modified != b ) {
 		m_modified = b;
 		emit modificationChanged ( b );
 	}
+*/
 }
 
 QString CWindow::fileName ( ) const
@@ -1675,42 +1718,17 @@ void CWindow::triggerStatisticsUpdate ( )
 
 void CWindow::updateStatistics ( )
 {
-	emit statisticsChanged ( m_items );
+	emit statisticsChanged ( );
 }
 
-void CWindow::calculateStatistics ( const QPtrList <BrickLink::InvItem> &list, int &lots, int &items, money_t &val, money_t &minval, double &weight, int &errors )
+CItemStatistics CWindow::statistics ( const QPtrList <BrickLink::InvItem> &list )
 {
-	lots = list. count ( );
-	items = 0;
-	val = minval = 0.;
-	weight = .0;
-	errors = 0;
-	bool weight_missing = false;
+	int errors = 0;
 
-	for ( QPtrListIterator<BrickLink::InvItem> it ( list ); it. current ( ); ++it ) {
-		BrickLink::InvItem *ii = it. current ( );
+	for ( QPtrListIterator<BrickLink::InvItem> it ( list ); it. current ( ); ++it )
+		errors += static_cast <CItemViewItem *> ( m_lvitems [it. current ( )] )-> errorCount ( );
 
-		int qty = ii-> quantity ( );
-		money_t price = ii-> price ( );
-
-		val += ( qty * price );
-
-		for ( int i = 0; i < 3; i++ ) {
-			if ( ii-> tierQuantity ( i ) && ( ii-> tierPrice ( i ) != 0 ))
-				price = ii-> tierPrice ( i );
-		}
-		minval += ( qty * price * ( 1.0 - double( ii-> sale ( )) / 100.0 ));
-		items += qty;
-
-		if ( ii-> weight ( ) > 0 )
-			weight += ii-> weight ( );
-		else 
-			weight_missing = true;
-	
-		errors += static_cast <CItemViewItem *> ( m_lvitems [ii] )-> errorCount ( );
-	}
-	if ( weight_missing )
-		weight = ( weight == 0. ) ? -DBL_MIN : -weight;
+	return CItemStatistics ( list, errors );
 }
 
 void CWindow::editAddItems ( )
@@ -1812,8 +1830,10 @@ void CWindow::editMergeItems ( )
 
 void CWindow::editPartOutItems ( )
 {
-	if ( m_selection. count ( ) == 1 )
-		CFrameWork::inst ( )-> fileImportBrickLinkInventory ( m_selection. first ( )-> item ( ));
+	if ( m_selection. count ( ) >= 1 ) {
+		for ( QPtrListIterator<BrickLink::InvItem> it ( m_selection ); it. current ( ); ++it )
+			CFrameWork::inst ( )-> fileImportBrickLinkInventory ( it. current ( )-> item ( ));
+	}
 	else
 		QApplication::beep ( );
 }

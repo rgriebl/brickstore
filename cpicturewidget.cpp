@@ -15,8 +15,9 @@
 #include <qpopupmenu.h>
 #include <qlayout.h>
 #include <qapplication.h>
-#include <qclipboard.h>
+#include <qaction.h>
 
+#include "cresource.h"
 #include "cutility.h"
 
 #include "cpicturewidget.h"
@@ -27,6 +28,7 @@ public:
 	QLabel *            m_plabel;
 	QLabel *            m_tlabel;
 	QPopupMenu *        m_popup;
+	QPtrList <QAction>  m_add_actions;
 	bool                m_connected;
 };
 
@@ -78,49 +80,33 @@ CPictureWidget::~CPictureWidget ( )
 	delete d;
 }
 
+void CPictureWidget::addActionsToContextMenu ( const QPtrList <QAction> &actions )
+{
+	d-> m_add_actions = actions;
+	delete d-> m_popup;
+	d-> m_popup = 0;
+}
+
 void CPictureWidget::contextMenuEvent ( QContextMenuEvent *e )
 {
 	if ( d-> m_pic ) {
 		if ( !d-> m_popup ) {
 			d-> m_popup = new QPopupMenu ( this );
-			d-> m_popup-> insertItem ( tr( "Update" ), this, SLOT( doUpdate ( )));
+			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "reload" ), tr( "Update" ), this, SLOT( doUpdate ( )));
 			d-> m_popup-> insertSeparator ( );
-			d-> m_popup-> insertItem ( tr( "View large image..." ), this, SLOT( viewLargeImage ( )));
-			d-> m_popup-> insertSeparator ( );
-			d-> m_popup-> insertItem ( tr( "Copy Item Number to Clipboard" ), this, SLOT( idToClipboard ( )));
-			d-> m_popup-> insertSeparator ( );
-			d-> m_popup-> insertItem ( tr( "Show BrickLink Catalog Info..." ), this, SLOT( showBLCatalogInfo ( )));
-			d-> m_popup-> insertItem ( tr( "Show BrickLink Price Guide Info..." ), this, SLOT( showBLPriceGuideInfo ( )));
-			d-> m_popup-> insertItem ( tr( "Lots for Sale on BrickLink..." ), this, SLOT( showBLLotsForSale ( )));
+			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "viewmagp" ), tr( "View large image..." ), this, SLOT( viewLargeImage ( )));
+
+			if ( !d-> m_add_actions. isEmpty ( )) {
+				d-> m_popup-> insertSeparator ( );
+
+				for ( QPtrListIterator <QAction> it ( d-> m_add_actions ); it. current ( ); ++it )
+					it. current ( )-> addTo ( d-> m_popup );
+			}
 		}
 		d-> m_popup-> popup ( e-> globalPos ( ));
 	}
 
 	e-> accept ( );
-}
-
-void CPictureWidget::idToClipboard ( )
-{
-	if ( d-> m_pic && d-> m_pic-> item ( ))
-		QApplication::clipboard ( )-> setText ( QString ( d-> m_pic-> item ( )-> id ( )), QClipboard::Clipboard );
-}
-
-void CPictureWidget::showBLCatalogInfo ( )
-{
-	if ( d-> m_pic && d-> m_pic-> item ( ))
-		CUtility::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_CatalogInfo, d-> m_pic-> item ( )));
-}
-
-void CPictureWidget::showBLPriceGuideInfo ( )
-{
-	if ( d-> m_pic && d-> m_pic-> item ( ) && d-> m_pic-> color ( ))
-		CUtility::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_PriceGuideInfo, d-> m_pic-> item ( ), d-> m_pic-> color ( )));
-}
-
-void CPictureWidget::showBLLotsForSale ( )
-{
-	if ( d-> m_pic && d-> m_pic-> item ( ) && d-> m_pic-> color ( ))
-		CUtility::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_LotsForSale, d-> m_pic-> item ( ), d-> m_pic-> color ( )));
 }
 
 void CPictureWidget::doUpdate ( )

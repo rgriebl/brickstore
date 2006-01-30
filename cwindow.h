@@ -32,6 +32,28 @@ class QListViewItem;
 class CItemView;
 class DlgAddItemImpl;
 class CFrameWork;
+class CUndoStack;
+
+class CItemStatistics
+{
+public:
+	CItemStatistics ( const QPtrList<BrickLink::InvItem> &list, int errors = 0 );
+
+	int lots ( ) const          { return m_lots; }
+	int items ( ) const         { return m_items; }
+	money_t value ( ) const     { return m_val; }
+	money_t minValue ( ) const  { return m_minval; }
+	double weight ( ) const     { return m_weight; }
+	int errors ( ) const        { return m_errors; }
+
+private:
+	int m_lots;
+	int m_items;
+	money_t m_val;
+	money_t m_minval;
+	double m_weight;
+	int m_errors;
+};
 
 class CWindow : public QWidget {
 	Q_OBJECT
@@ -59,6 +81,12 @@ public:
 	const QPtrList<BrickLink::InvItem> &items ( ) const;
 	QPtrList <BrickLink::InvItem> sortedItems ( );
 
+	// vvvv  INTERFACE FOR COMMANDS  vvvv
+	void appendItems ( const QPtrList<BrickLink::InvItem> &items );
+	void insertItems ( const QPtrList<BrickLink::InvItem> &items, int *positions );
+	void removeItems ( const QPtrList<BrickLink::InvItem> &items, int *positions = 0 );
+	// ^^^^  INTERFACE FOR COMMANDS  ^^^^
+
 	uint setItems ( const QPtrList<BrickLink::InvItem> &items, int multiply = 1 );
 	uint addItems ( const QPtrList<BrickLink::InvItem> &items, int multiply = 1, uint mergeflags = MergeAction_None, bool dont_change_sorting = false );
 	void deleteItems ( const QPtrList<BrickLink::InvItem> &items );
@@ -67,16 +95,7 @@ public:
 
 	void subtractItems ( const QPtrList <BrickLink::InvItem> &items );
 
-	void calculateStatistics ( const QPtrList <BrickLink::InvItem> &list, int &lots, int &items, money_t &val, money_t &minval, double &weight, int &errors );
-
-	enum ViewMode {
-		ViewPlain,
-		ViewHierarchic,
-		ViewCompact
-	};
-
-//	void setViewMode ( ViewMode m );
-//	ViewMode viewMode ( ) const;
+	CItemStatistics statistics ( const QPtrList <BrickLink::InvItem> &list );
 
 //	bool hasFilter ( ) const;
 //	void setFilter ( const QRegExp &exp, Field f );
@@ -114,9 +133,6 @@ public slots:
 
 	void filePrint ( );
 
-	void editUndo ( );
-	void editRedo ( );
-
 	void editCut ( );
 	void editCopy ( );
 	void editPaste ( );
@@ -131,10 +147,6 @@ public slots:
 
 	void selectAll ( );
 	void selectNone ( );
-
-	void viewPlain ( bool );
-	void viewHierarchic ( bool );
-	void viewCompact ( bool );
 
 	void editSetPrice ( );
 	void editSetPriceToPG ( );
@@ -160,8 +172,7 @@ public slots:
 
 signals:
 	void selectionChanged ( const QPtrList<BrickLink::InvItem> & );
-	void modificationChanged ( bool m );
-	void statisticsChanged ( const QPtrList<BrickLink::InvItem> & );
+	void statisticsChanged ( );
 
 protected:
 	void closeEvent ( QCloseEvent *e );
@@ -191,8 +202,6 @@ private:
 	QRegExp        m_filter_expression;
 	int            m_filter_field;
 
-	ViewMode       m_viewmode;
-
 	QString        m_filename;
 	QString        m_caption;
 
@@ -211,7 +220,7 @@ private:
 
 	QGuardedPtr <DlgAddItemImpl> m_add_dialog;
 
-	bool           m_modified;
+	CUndoStack *   m_undo;
 
 	uint                           m_settopg_failcnt;
 	QPtrDict<BrickLink::InvItem> * m_settopg_list;

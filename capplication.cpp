@@ -29,8 +29,11 @@
 #include "version.h"
 #include "dlgmessageimpl.h"
 #include "dlgupdateimpl.h"
+#include "crebuilddatabase.h"
 
 #include "capplication.h"
+
+#include "commands.h"
 
 //#define BS_DEMO  30 // demo time in minutes
 
@@ -64,8 +67,24 @@ CApplication::CApplication ( int _argc, char **_argv )
 	AEInstallEventHandler( kCoreEventClass, kAEOpenDocuments, appleEventHandler, 0, false );
 #endif
 
-	for ( int i = 1; i < argc ( ); i++ )
-		m_files_to_open << argv ( ) [i];
+	if (( argc ( ) == 2 ) && ( !strcmp( argv ( ) [1], "-h" ) || !strcmp( argv ( ) [1], "--help" ))) {
+#if defined( Q_OS_WIN32 )
+		QMessageBox::information ( 0, "BrickStore", "<b>Usage:</b><br />brickstore.exe [&lt;files&gt;]<br /><br />brickstore.exe --rebuild-database &lt;dbname&gt;<br />", QMessageBox::Ok );
+#else
+		printf ( "Usage: %s [<files>]\n", _argv [0] );
+		printf ( "       %s --rebuild-database <dbname>\n", _argv [0] );
+#endif
+
+		postEvent ( this, new QEvent ( QEvent::Quit ));
+		return;
+	}
+	else if (( argc ( ) == 3 ) && ( !strcmp( argv ( ) [1], "--rebuild-database" ))) {
+		m_rebuild_db_only = argv ( ) [2];
+	}
+	else {
+		for ( int i = 1; i < argc ( ); i++ )
+			m_files_to_open << argv ( ) [i];
+	}
 
 	// initialize config & resource
 	(void) CConfig::inst ( )-> upgrade ( BRICKSTORE_MAJOR, BRICKSTORE_MINOR, BRICKSTORE_PATCH );
@@ -100,6 +119,9 @@ CApplication::CApplication ( int _argc, char **_argv )
 		postEvent ( this, new QEvent ( QEvent::Quit ));
 		return;
 	}
+	else if ( !m_rebuild_db_only. isEmpty ( )) {	
+		QTimer::singleShot ( 0, this, SLOT( rebuildDatabase ( )));
+	}
 	else {
 		CFrameWork::inst ( )-> show ( );
 	
@@ -121,6 +143,20 @@ CApplication::~CApplication ( )
 	delete CMoney::inst ( );
 	delete CConfig::inst ( );
 }
+
+void CApplication::exit ( int code )
+{
+	QApplication::exit ( code );
+}
+
+void CApplication::rebuildDatabase ( )
+{
+	CRebuildDatabase *rdb = new CRebuildDatabase ( m_rebuild_db_only );
+
+	connect ( rdb, SIGNAL( finished ( int )), cApp, SLOT( exit ( int )));
+	rdb-> exec ( );
+}
+
 
 void CApplication::demoVersion ( )
 {

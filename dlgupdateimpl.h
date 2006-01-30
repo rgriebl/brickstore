@@ -27,8 +27,11 @@ public:
 	DlgUpdateImpl ( QWidget *parent = 0, const char *name = 0, bool modal = true, int fl = 0 );	
 	virtual ~DlgUpdateImpl ( );
 
+protected slots:
+	virtual void done ( int r );
+
 private slots:
-	void doProgress ( );
+	void transferJobProgress ( CTransfer::Job *job, int progress, int total );
 	void transferJobFinished ( CTransfer::Job *job );
 
 private:

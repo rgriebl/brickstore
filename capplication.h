@@ -40,6 +40,7 @@ public:
 public slots:
 	void about ( );
 	void checkForUpdates ( );
+	void exit ( int );
 
 signals:
 	void openDocument ( const QString & );
@@ -50,6 +51,7 @@ protected:
 private slots:
 	void doEmitOpenDocument ( );
 	void demoVersion ( );
+	void rebuildDatabase ( );
 
 private:
 	bool initBrickLink ( );
@@ -64,6 +66,7 @@ private:
 private:
 	QStringList m_files_to_open;
 	bool m_enable_emit;
+	QString m_rebuild_db_only;
 
 	QString m_sys_name;
 	QString m_sys_version;

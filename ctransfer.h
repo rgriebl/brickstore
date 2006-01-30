@@ -80,6 +80,7 @@ public slots:
 
 signals:
 	void progress ( int total, int progress );
+	void progress ( CTransfer::Job *, int total, int progress );
 	void finished ( CTransfer::Job * );
 	void started ( CTransfer::Job * );
 
@@ -89,6 +90,7 @@ protected:
 	enum {
 		TransferStartedEvent  = QEvent::User + 0x42,
 		TransferFinishedEvent = QEvent::User + 0x43,
+		TransferProgressEvent = QEvent::User + 0x44
 	};
 
 	virtual void customEvent ( QCustomEvent * );
@@ -102,6 +104,7 @@ private:
 	static QCString buildQueryString ( const CKeyValueList &kvl );
 	
 	static size_t write_curl ( void *ptr, size_t size, size_t nmemb, void *stream );
+	static int progress_curl ( void *clientp, double dltotal, double dlnow, double ultotal, double ulnow );
 
 	static void lock_curl ( CURL * /*handle*/, curl_lock_data /*data*/, curl_lock_access /*access*/, void * /*userptr*/ );
 	static void unlock_curl ( CURL * /*handle*/, curl_lock_data /*data*/, void * /*userptr*/ );
@@ -110,6 +113,8 @@ private:
 	CURL *m_curl;
 	int   m_total;
 	int   m_progress;
+	int   m_file_total;
+	int   m_file_progress;
 	bool  m_stop;
 
 	bool     m_use_proxy;

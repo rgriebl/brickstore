@@ -16,7 +16,9 @@
 #include <qvaluelist.h>
 #include <qpopupmenu.h>
 #include <qcursor.h>
+#include <qaction.h>
 
+#include "cresource.h"
 #include "cutility.h"
 #include "cmoney.h"
 
@@ -57,13 +59,14 @@ struct cell : public QRect {
 
 class CPriceGuideWidgetPrivate {
 public:
-	BrickLink::PriceGuide *m_pg;
-	CPriceGuideWidget::Layout      m_layout;
-	QValueList<cell>       m_cells;
-	bool        m_connected;
-	QPopupMenu *m_popup;
-	bool m_on_price;
-	
+	BrickLink::PriceGuide *   m_pg;
+	CPriceGuideWidget::Layout m_layout;
+	QValueList<cell>          m_cells;
+	bool                      m_connected;
+	QPopupMenu *              m_popup;
+	bool                      m_on_price;
+	QPtrList <QAction>        m_add_actions;
+
 	QString m_str_qty;
 	QString m_str_cond [BrickLink::ConditionCount];
 	QString m_str_price [BrickLink::PriceGuide::PriceCount];
@@ -117,16 +120,27 @@ CPriceGuideWidget::~CPriceGuideWidget ( )
 	delete d;
 }
 
+void CPriceGuideWidget::addActionsToContextMenu ( const QPtrList <QAction> &actions )
+{
+	d-> m_add_actions = actions;
+	delete d-> m_popup;
+	d-> m_popup = 0;
+}
+
+
 void CPriceGuideWidget::contextMenuEvent ( QContextMenuEvent *e )
 {
 	if ( d-> m_pg ) {
 		if ( !d-> m_popup ) {
 			d-> m_popup = new QPopupMenu ( this );
-			d-> m_popup-> insertItem ( tr( "Update" ), this, SLOT( doUpdate ( )));
-			d-> m_popup-> insertSeparator ( );
-			d-> m_popup-> insertItem ( tr( "Show BrickLink Catalog Info..." ), this, SLOT( showBLCatalogInfo ( )));
-			d-> m_popup-> insertItem ( tr( "Show BrickLink Price Guide Info..." ), this, SLOT( showBLPriceGuideInfo ( )));
-			d-> m_popup-> insertItem ( tr( "Lots for Sale on BrickLink..." ), this, SLOT( showBLLotsForSale ( )));
+			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "reload" ), tr( "Update" ), this, SLOT( doUpdate ( )));
+
+			if ( !d-> m_add_actions. isEmpty ( )) {
+				d-> m_popup-> insertSeparator ( );
+
+				for ( QPtrListIterator <QAction> it ( d-> m_add_actions ); it. current ( ); ++it )
+					it. current ( )-> addTo ( d-> m_popup );
+			}
 		}
 		d-> m_popup-> popup ( e-> globalPos ( ));
 	}

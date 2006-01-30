@@ -17,9 +17,10 @@
 #include "clistaction.h"
 
 
-CListAction::CListAction ( QObject *parent, const char *name )
+CListAction::CListAction ( bool use_numbers, QObject *parent, const char *name )
 	: QActionGroup ( parent, name )
 {
+	m_use_numbers = use_numbers;
 	m_list = 0;
 	m_provider = 0;
 }
@@ -99,12 +100,23 @@ void CListAction::refreshMenu ( )
 		}
 
 		int active = -1;
-		QStringList sl = m_list ? *m_list : ( m_provider ? m_provider-> list ( active ) : QStringList ( ));
+		QValueList <int> custom_ids;
+		QStringList sl = m_list ? *m_list : ( m_provider ? m_provider-> list ( active, custom_ids ) : QStringList ( ));
 
 		if ( !sl. isEmpty ( )) {
 			int i = 0;
 			for ( QStringList::ConstIterator it = sl. begin ( ); it != sl. end ( ); ++it, i++ ) {
-				int id = sub-> insertItem ( QString ( "&%1 %2" ). arg ( i + 1 ). arg ( *it ), this, SLOT( doEmits ( int )), 0, i );
+				QString s;
+
+				if ( m_use_numbers )
+					s = QString ( "&%1   " ). arg ( i+1 );
+				s += *it;
+
+				int id = i;
+				if ( custom_ids. count ( ) == sl. count ( ))
+					id = custom_ids [i];
+
+				id = sub-> insertItem ( s, this, SIGNAL( activated ( int )), 0, id );
 
 				if ( i == active )
 					sub-> setItemChecked ( i, true );
@@ -115,15 +127,3 @@ void CListAction::refreshMenu ( )
 		}
 	}
 }
-
-void CListAction::doEmits ( int i )
-{
-	int dummy;
-	const QStringList &sl = m_list ? *m_list : ( m_provider ? m_provider-> list ( dummy ) : QStringList ( ));
-
-	if (( i >= 0 ) && ( i < int( sl. count ( )))) {
-		emit activated ( i );
-		emit activated ( sl [i] );
-	}
-}
-

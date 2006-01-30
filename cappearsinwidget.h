@@ -11,42 +11,36 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __CINFOBAR_H__
-#define __CINFOBAR_H__
+#ifndef __CAPPEARSINWIDGET_H__
+#define __CAPPEARSINWIDGET_H__
 
-#include <qdockwindow.h>
-
-#include "cmoney.h"
+#include "clistview.h"
 #include "bricklink.h"
 
-class CInfoBarPrivate;
 
+class CAppearsInWidgetPrivate;
+class QAction;
 
-class CInfoBar : public QDockWindow {
+class CAppearsInWidget : public CListView {
 	Q_OBJECT
+
 public:
-	CInfoBar ( const QString &title, QWidget *parent, const char *name = 0 );
-	virtual ~CInfoBar ( );
-
-	void setPriceGuide ( BrickLink::PriceGuide *pg );
-	void setPicture ( BrickLink::Picture *pic );
-	void setInfoText ( const QString &text );
-
-	virtual void setOrientation ( Orientation o );
+	CAppearsInWidget ( QWidget *parent = 0, const char *name = 0, WFlags fl = 0 );
+	virtual ~CAppearsInWidget ( );
 	
-	enum Look { Classic, ModernLeft, ModernRight };
+	void setItem ( const BrickLink::Item *item, const BrickLink::Color *color = 0 );
+	void setItem ( const BrickLink::InvItem *ii );
 
-public slots:
-	void setLook ( int look );
+	void addActionsToContextMenu ( const QPtrList <QAction> &actions );
 
-signals:
-	void priceDoubleClicked ( money_t p );
+	virtual QSize minimumSizeHint ( ) const;
+	virtual QSize sizeHint ( ) const;
 
 protected:
-	void paletteChange ( const QPalette &oldpal );
+	virtual void contextMenuEvent ( QContextMenuEvent *e );
 
 private:
-	CInfoBarPrivate *d;
+	CAppearsInWidgetPrivate *d;
 };
 
 #endif

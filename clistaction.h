@@ -29,10 +29,10 @@ public:
 		virtual ~Provider ( )
 		{ }
 		
-		virtual QStringList list ( int &active ) = 0;
+		virtual QStringList list ( int &active_index, QValueList <int> &custom_ids ) = 0;
 	};
 
-	CListAction ( QObject *parent, const char *name );
+	CListAction ( bool use_numbers, QObject *parent, const char *name );
 	virtual ~CListAction ( );
 
 	void setListProvider ( Provider * );
@@ -46,15 +46,15 @@ public:
 
 signals:
 	void activated ( int );
-	void activated ( const QString & );
 
 private slots:
 	void refreshMenu ( );
-	void doEmits ( int );
+//	void doEmits ( int );
 
 private:
 	const QStringList *m_list;
 	Provider *m_provider;
+	bool m_use_numbers;
 
 	QMap <QPopupMenu *, QValueVector<int> > m_id_map;
 };

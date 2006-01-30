@@ -89,12 +89,12 @@ macx {
 
 
 HEADERS += bricklink.h \
+           cappearsinwidget.h \
            capplication.h \
            cconfig.h \
            cfilteredit.h \
            cframework.h \
            ciconfactory.h \
-           cinfobar.h \
            citemtypecombo.h \
            citemview.h \
            clistaction.h \
@@ -102,8 +102,10 @@ HEADERS += bricklink.h \
            cmessagebox.h \
            cmoney.h \
            cmultiprogressbar.h \
+           command.h \
            cpicturewidget.h \
            cpriceguidewidget.h \
+           crebuilddatabase.h \
            cref.h \
            creport.h \
            creport_p.h \
@@ -111,42 +113,51 @@ HEADERS += bricklink.h \
            cselectcolor.h \
            cselectitem.h \
            cspinner.h \
-           ctaskbar.h \
+           ctaskpanemanager.h \
+		   ctaskwidgets.h \
            ctransfer.h \
+           cundo.h \
+           cundo_p.h \
            curllabel.h \
            cutility.h \
-           cwindow.h
+           cwindow.h \
+           cworkspace.h
 
 SOURCES += bricklink.cpp \
            bricklink_data.cpp \
            bricklink_picture.cpp \
            bricklink_inventory.cpp \
            bricklink_priceguide.cpp \
+		   bricklink_textimport.cpp \
            capplication.cpp \
+           cappearsinwidget.cpp \
            cconfig.cpp \
            cfilteredit.cpp \
            cframework.cpp \
            ciconfactory.cpp \
-           cinfobar.cpp \
            citemview.cpp \
            clistaction.cpp \
            clistview.cpp \
            cmessagebox.cpp \
            cmoney.cpp \
            cmultiprogressbar.cpp \
+           command.cpp \
            cpicturewidget.cpp \
            cpriceguidewidget.cpp \
+           crebuilddatabase.cpp \
            cref.cpp \
            creport.cpp \
            cresource.cpp \
            cselectcolor.cpp \
            cselectitem.cpp \
            cspinner.cpp \
-           ctaskbar.cpp \
+           ctaskpanemanager.cpp \
            ctransfer.cpp \
+           cundo.cpp \
            curllabel.cpp \
            cutility.cpp \
            cwindow.cpp \
+           cworkspace.cpp \
            main.cpp
 
 FORMS   += dlgadditem.ui \
