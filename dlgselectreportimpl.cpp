@@ -48,11 +48,11 @@ private:
 	{
 		switch ( ps ) {
 			case QPrinter::A4:
-				return DlgSelectReportImpl::tr ( "A4" );
+				return DlgSelectReportImpl::tr( "A4" );
 			case QPrinter::Letter:
-				return DlgSelectReportImpl::tr ( "Letter" );
+				return DlgSelectReportImpl::tr( "Letter" );
 			default:
-				return DlgSelectReportImpl::tr ( "Custom" );
+				return DlgSelectReportImpl::tr( "Custom" );
 		}
 	}
 

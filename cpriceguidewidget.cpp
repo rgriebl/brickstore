@@ -72,6 +72,7 @@ public:
 	QString m_str_price [BrickLink::PriceGuide::PriceCount];
 	QString m_str_vtime [BrickLink::PriceGuide::TimeCount];
 	QString m_str_htime [BrickLink::PriceGuide::TimeCount][2];
+	QString m_str_wait;
 };
 
 CPriceGuideWidget::CPriceGuideWidget ( QWidget *parent, const char *name, WFlags fl )
@@ -82,6 +83,23 @@ CPriceGuideWidget::CPriceGuideWidget ( QWidget *parent, const char *name, WFlags
 	d-> m_pg = 0;
 	d-> m_layout = Normal;
 	d-> m_on_price = false;
+
+	setBackgroundMode ( PaletteBase );
+	setMouseTracking ( true );
+	setSizePolicy ( QSizePolicy::Minimum, QSizePolicy::Minimum );
+
+	d-> m_connected = false;
+	d-> m_popup = 0;
+
+	connect ( CMoney::inst ( ), SIGNAL( monetarySettingsChanged ( )), this, SLOT( repaint ( )));
+
+	languageChange ( );
+}
+
+void CPriceGuideWidget::languageChange ( )
+{
+	delete d-> m_popup;
+	d-> m_popup = 0;
 
 	d-> m_str_qty                                       = tr( "Qty " );
 	d-> m_str_cond [BrickLink::New]                     = tr( "New" );
@@ -99,17 +117,10 @@ CPriceGuideWidget::CPriceGuideWidget ( QWidget *parent, const char *name, WFlags
 	d-> m_str_vtime [BrickLink::PriceGuide::AllTime]    = tr( "All Time Sales" );
 	d-> m_str_vtime [BrickLink::PriceGuide::PastSix]    = tr( "Last 6 Months Sales" );
 	d-> m_str_vtime [BrickLink::PriceGuide::Current]    = tr( "Current Inventory" );
-
-	setBackgroundMode ( PaletteBase );
-	setMouseTracking ( true );
-	setSizePolicy ( QSizePolicy::Minimum, QSizePolicy::Minimum );
-
-	d-> m_connected = false;
-	d-> m_popup = 0;
-
-	connect ( CMoney::inst ( ), SIGNAL( monetarySettingsChanged ( )), this, SLOT( repaint ( )));
+	d-> m_str_wait                                      = tr( "Please wait ... updating" );
 
 	recalcLayout ( );
+	update ( );
 }
 
 CPriceGuideWidget::~CPriceGuideWidget ( )
@@ -626,7 +637,7 @@ void CPriceGuideWidget::drawContents ( QPainter *p )
 
 			case cell::Update:
 				if ( is_updating )
-					paintCell ( &ppix, c, cg, c. m_text_flags, tr( "Please wait ... updating" ), c. m_flag );
+					paintCell ( &ppix, c, cg, c. m_text_flags, d-> m_str_wait, c. m_flag );
 				break;
 
 			case cell::Empty:

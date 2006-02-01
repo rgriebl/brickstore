@@ -122,6 +122,7 @@ protected:
 
 protected slots:
 	virtual void listItemDoubleClicked ( QListViewItem *, const QPoint &, int );
+	void languageChange ( );
 
 protected:
 	static QString statusLabel ( BrickLink::InvItem::Status status );

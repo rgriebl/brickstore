@@ -60,7 +60,9 @@ bool CListAction::addTo ( QWidget *w )
 
 		if ( usesDropDown ( )) {
 			sub = new QPopupMenu ( w );
-			static_cast <QPopupMenu *> ( w )-> insertItem ( menuText ( ), sub );
+			int id = static_cast <QPopupMenu *> ( w )-> insertItem ( menuText ( ), sub );
+
+			m_update_menutexts. insert ( static_cast <QPopupMenu *> ( w ), id );
 		}
 		else {
 			sub = static_cast <QPopupMenu *> ( w );
@@ -75,9 +77,21 @@ bool CListAction::addTo ( QWidget *w )
 
 bool CListAction::removeFrom ( QWidget *w )
 {
-	if ( w-> inherits ( "QPopupMenu" ))
-		m_id_map. erase ( static_cast <QPopupMenu *> ( w ));
+	if ( w-> inherits ( "QPopupMenu" )) {
+		if ( usesDropDown ( ))
+			m_update_menutexts. erase ( static_cast <QPopupMenu *> ( w ));
+		else
+			m_id_map. erase ( static_cast <QPopupMenu *> ( w ));
+	}
 	return true;
+}
+
+void CListAction::setText ( const QString &txt )
+{
+	QActionGroup::setText ( txt );
+
+	for ( QMap <QPopupMenu *, int>::const_iterator it = m_update_menutexts. begin ( ); it != m_update_menutexts. end ( ); ++it )
+		it. key ( )-> changeItem ( it. data ( ), menuText ( ));
 }
 
 void CListAction::refreshMenu ( )

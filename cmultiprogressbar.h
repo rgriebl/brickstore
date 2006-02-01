@@ -53,6 +53,9 @@ signals:
 protected:
 	void resizeEvent ( QResizeEvent *e );
 
+protected slots:
+	void languageChange ( );
+
 private:
 	void recalc ( );
 	void recalcPixmap ( QToolButton *but, const QPixmap &pix );

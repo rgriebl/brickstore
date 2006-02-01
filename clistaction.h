@@ -44,6 +44,8 @@ public:
 	virtual bool addTo ( QWidget *w );
 	virtual bool removeFrom ( QWidget *w );
 
+	virtual void setText ( const QString &txt );
+
 signals:
 	void activated ( int );
 
@@ -57,6 +59,7 @@ private:
 	bool m_use_numbers;
 
 	QMap <QPopupMenu *, QValueVector<int> > m_id_map;
+	QMap <QPopupMenu *, int> m_update_menutexts;
 };
 
 #endif

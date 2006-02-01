@@ -14,6 +14,8 @@
 #ifndef __DLGSETTINGSIMPL_H__
 #define __DLGSETTINGSIMPL_H__
 
+#include <qvaluelist.h>
+
 #include "dlgsettings.h"
 
 class CItemTypeCombo;
@@ -33,8 +35,14 @@ protected slots:
 	void done ( int );
 
 private:
+	bool readAvailableLanguages ( );
+
+private:
 	CItemTypeCombo *m_def_add_itemtype;
 	CItemTypeCombo *m_def_inv_itemtype;
+
+	typedef QValueList<QPair<QString, QString> >   LanguageList;
+	LanguageList m_languages;
 };
 
 #endif

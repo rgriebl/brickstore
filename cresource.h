@@ -20,6 +20,7 @@
 #include <qpixmap.h>
 
 class QTranslator;
+class QLocale;
 
 class CResource {
 private:
@@ -36,7 +37,7 @@ public:
 	
 	QString locate ( const QString &name, LocateType lt = LocateFile );
 
-	QTranslator *translation ( const char *name );
+	QTranslator *translation ( const char *name, const QLocale &locale );
 	QIconSet iconSet ( const char *name );
 	QPixmap pixmap ( const char *name );
 

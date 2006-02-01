@@ -34,6 +34,7 @@ private:
 	bool      m_reenabled   : 1;
 };
 
+ class CListViewColumnsDialog;
 
 class CListView : public QListView {
 	Q_OBJECT
@@ -75,6 +76,7 @@ protected slots:
 
 private slots:
 	void checkCurrentColumn ( int button, QListViewItem * item, const QPoint & pos, int c );
+	void configureColumns ( );
 
 private:
 	void recalc_alternate_background ( );
@@ -97,6 +99,7 @@ private:
 	QMap<int,bool> m_completly_hidden;
 
 	friend class CListViewItem;
+	friend class CListViewColumnsDialog;
 };
 
 class CListViewItem : public QListViewItem {

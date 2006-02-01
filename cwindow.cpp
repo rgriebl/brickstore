@@ -104,19 +104,12 @@ CWindow::CWindow ( QWidget *parent, const char *name )
 
 	w_filter_clear = new QToolButton ( this );
 	w_filter_clear-> setAutoRaise ( true );
-	QToolTip::add ( w_filter_clear, tr( "Reset an active filter" ));
-
-	QIconSet is = CResource::inst ( )-> iconSet ( "filter_clear" );
-	if ( is. isNull ( ))
-		w_filter_clear-> setTextLabel ( tr( "Clear" ));
-	else
-		w_filter_clear-> setIconSet ( is );
+	w_filter_clear-> setIconSet ( CResource::inst ( )-> iconSet ( "filter_clear" ));
+	w_filter_label = new QLabel ( this );
 
 	w_filter_expression = new QComboBox ( true, this );
-	QToolTip::add ( w_filter_expression, tr( "Filter the list using this pattern (wildcards allowed: * ? [])" ));
-
 	w_filter_field = new QComboBox ( false, this );
-	QToolTip::add ( w_filter_field, tr( "Restrict the filter to this/these field(s)" ));
+	w_filter_field_label = new QLabel ( this );
 
 	w_list = new CItemView ( this );
 	setFocusProxy ( w_list );
@@ -141,31 +134,18 @@ CWindow::CWindow ( QWidget *parent, const char *name )
 		w_list-> loadSettings ( map );
 	}
 
-
 	connect ( w_list, SIGNAL( selectionChanged ( )), this, SLOT( updateSelection ( )));
 
-	for ( int i = 0; i < CItemView::FilterCountSpecial; i++ ) {
-		QString s;
-		switch ( -i - 1 ) {
-			case CItemView::All       : s = tr( "All" ); break;
-			case CItemView::Prices    : s = tr( "All Prices" ); break;
-			case CItemView::Texts     : s = tr( "All Texts" ); break;
-			case CItemView::Quantities: s = tr( "All Quantities" ); break;
-		}
-		w_filter_field-> insertItem ( s );
-	}
-
-	for ( int i = 0; i < CItemView::FieldCount; i++ ) {
-		w_filter_field-> insertItem ( w_list-> header ( )-> label ( i ));
-	}
+	for ( int i = 0; i < ( CItemView::FilterCountSpecial + CItemView::FieldCount ); i++ )
+		w_filter_field-> insertItem ( QString ( ));
 
 	QBoxLayout *toplay = new QVBoxLayout ( this, 0, 0 );
 	QBoxLayout *barlay = new QHBoxLayout ( toplay, 4 );
 	barlay-> setMargin ( 4 );
 	barlay-> addWidget ( w_filter_clear, 0 );
-	barlay-> addWidget ( new QLabel ( tr( "Filter:" ), this ), 0 );
+	barlay-> addWidget ( w_filter_label, 0 );
 	barlay-> addWidget ( w_filter_expression, 15 );
-	barlay-> addWidget ( new QLabel ( tr( "Field:" ), this ), 0 );
+	barlay-> addWidget ( w_filter_field_label, 0 );
 	barlay-> addWidget ( w_filter_field, 5 );
 	toplay-> addWidget ( w_list );
 
@@ -188,12 +168,38 @@ CWindow::CWindow ( QWidget *parent, const char *name )
 	connect ( CMoney::inst ( ), SIGNAL( monetarySettingsChanged ( )), this, SLOT( triggerUpdate ( )));
 
 	updateErrorMask ( );
-	updateStatistics ( );
-	updateCaption ( );
+
+	languageChange ( );
 
 	w_list-> setFocus ( );
 }
 
+void CWindow::languageChange ( )
+{
+	w_filter_label-> setText ( tr( "Filter:" ));
+	w_filter_field_label-> setText ( tr( "Field:" ));
+
+	QToolTip::add ( w_filter_expression, tr( "Filter the list using this pattern (wildcards allowed: * ? [])" ));
+	QToolTip::add ( w_filter_clear, tr( "Reset an active filter" ));
+	QToolTip::add ( w_filter_field, tr( "Restrict the filter to this/these field(s)" ));
+
+	int i, j;
+	for ( i = 0; i < CItemView::FilterCountSpecial; i++ ) {
+		QString s;
+		switch ( -i - 1 ) {
+			case CItemView::All       : s = tr( "All" ); break;
+			case CItemView::Prices    : s = tr( "All Prices" ); break;
+			case CItemView::Texts     : s = tr( "All Texts" ); break;
+			case CItemView::Quantities: s = tr( "All Quantities" ); break;
+		}
+		w_filter_field-> changeItem ( s, i );
+	}
+	for ( j = 0; j < CItemView::FieldCount; j++ )
+		w_filter_field-> changeItem ( w_list-> header ( )-> label ( j ), i + j );
+
+	updateStatistics ( );
+	updateCaption ( );
+}
 
 CWindow::~CWindow ( )
 {

@@ -33,6 +33,7 @@ class CItemView;
 class DlgAddItemImpl;
 class CFrameWork;
 class CUndoStack;
+class QLabel;
 
 class CItemStatistics
 {
@@ -177,6 +178,9 @@ signals:
 protected:
 	void closeEvent ( QCloseEvent *e );
 
+protected slots:
+	void languageChange ( );
+
 private slots:
 	void applyFilter ( );
 	void updateSelection ( );
@@ -217,6 +221,8 @@ private:
 	QComboBox *    w_filter_expression;
 	QComboBox *    w_filter_field;
 	CItemView *	   w_list;
+	QLabel *       w_filter_label;
+	QLabel *       w_filter_field_label;
 
 	QGuardedPtr <DlgAddItemImpl> m_add_dialog;
 

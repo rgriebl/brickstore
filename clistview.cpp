@@ -17,10 +17,13 @@
 #include <qheader.h>
 #include <qpopupmenu.h>
 #include <qsettings.h>
+#include <qlayout.h>
+#include <qpushbutton.h>
+#include <qvaluevector.h>
 
 #include "cutility.h"
 #include "clistview.h"
-
+#include "clistview_p.h"
 
 CDisableUpdates::CDisableUpdates ( QWidget *w )
 	: m_reenabled ( false )
@@ -66,11 +69,7 @@ CListView::CListView ( QWidget *parent, const char *name )
 
 	recalc_alternate_background ( );
 
-	m_header_popup = new QPopupMenu ( this );
-	m_header_popup-> setCheckable ( true );
-	connect ( m_header_popup, SIGNAL( activated ( int )), this, SLOT( toggleColumn ( int )));
-
-	m_use_header_popup = false;
+	m_header_popup = 0;
 
 	header ( )-> installEventFilter ( this );
 
@@ -284,12 +283,18 @@ void CListView::loadSettings ( const QMap <QString, QString> &map )
 
 void CListView::setColumnsHideable ( bool b )
 {
-	m_use_header_popup = b;
+	if ( b && !m_header_popup ) {
+		m_header_popup = new QPopupMenu ( this );
+	}
+	else if ( !b && m_header_popup ) {
+		delete m_header_popup;
+		m_header_popup = 0;
+	}
 }
 
 bool CListView::columnsHideable ( ) const
 {
-	return m_use_header_popup;
+	return ( m_header_popup );
 }
 
 bool CListView::isColumnVisible ( int i ) const
@@ -350,24 +355,34 @@ void CListView::setColumnWidth ( int column, int w )
 	head-> setResizeEnabled (( w ), column );
 }
 
+
+void CListView::configureColumns ( )
+{
+	CListViewColumnsDialog cc ( this );
+	cc. exec ( );
+}
+
 bool CListView::eventFilter ( QObject *o, QEvent *e )
 {
 	bool res = false;
 
-	if ( o == header ( ) && m_use_header_popup ) {
-		if (( e-> type ( ) == QEvent::MouseButtonPress ) && ( static_cast <QMouseEvent *> ( e )-> button ( ) == RightButton )) {
-			m_header_popup-> clear ( );
+	if ( o == header ( ) && ( e-> type ( ) == QEvent::ContextMenu ) && m_header_popup ) {
+		m_header_popup-> clear ( );
+		m_header_popup-> setCheckable ( true );
 
-			for ( int i = 0; i < columns ( ); i++ ) {
-				if ( !m_completly_hidden. contains ( i )) {
-					m_header_popup-> insertItem ( columnText ( i ), i );
-					m_header_popup-> setItemChecked ( i, columnWidth ( i ) != 0 );
-				}
+		m_header_popup-> insertItem ( tr( "Configure..." ), this, SLOT( configureColumns ( )));
+		m_header_popup-> insertSeparator ( );
+
+		for ( int i = 0; i < columns ( ); i++ ) {
+			if ( !m_completly_hidden. contains ( i )) {
+				m_header_popup-> insertItem ( columnText ( i ), this, SLOT( toggleColumn ( int )), 0, i );
+				m_header_popup-> setItemParameter ( i, i );
+				m_header_popup-> setItemChecked ( i, columnWidth ( i ) != 0 );
 			}
-
-			m_header_popup-> popup ( static_cast<QMouseEvent *> ( e )-> globalPos ( ));
-			res = true;
 		}
+
+		m_header_popup-> popup ( static_cast<QContextMenuEvent *> ( e )-> globalPos ( ));
+		res = true;
 	}
 	return res ? true : QListView::eventFilter ( o, e );
 }
@@ -584,4 +599,184 @@ const QColor &CListViewItem::backgroundColor ( )
 	if ( isAlternate ( ))
 		return static_cast<CListView *> ( listView ( ))-> m_alternate_background;
 	return listView ( )-> viewport ( )-> colorGroup ( ). base ( );
+}
+
+// -------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------
+
+namespace {
+
+class ColListItem : public QCheckListItem {
+public:
+	ColListItem ( CListView *lv, int col, const QString &text, bool onoff )
+		: QCheckListItem ( lv, s_last, text, CheckBox ), m_col ( col )
+	{
+		setOn ( onoff );
+		s_last = this;
+	}
+	~ColListItem ( )
+	{
+		s_last = 0;
+	}
+
+	int column ( ) const
+	{
+		return m_col;
+	}
+
+private:
+	int m_col;
+	static ColListItem *s_last;
+};
+
+ColListItem *ColListItem::s_last = 0;
+
+} // namespace
+
+CListViewColumnsDialog::CListViewColumnsDialog ( CListView *parent )
+	: QDialog ( parent, "listview_configure_columns", true ), m_parent ( parent )
+{
+	setCaption ( tr( "Configure columns" ));
+
+	QPushButton *p;
+
+	QBoxLayout *toplay = new QVBoxLayout ( this, 11, 6 );
+	w_list = new CListView ( this );
+	w_list-> addColumn ( QString ( ));
+	w_list-> header ( )-> hide ( );
+	w_list-> setSorting ( -1 );
+	w_list-> setResizeMode ( QListView::LastColumn );
+
+
+	QValueVector <int> indices ( m_parent-> columns ( ));
+
+	for ( int i = 0; i < m_parent-> columns ( ); i++ )
+		indices [m_parent-> header ( )-> mapToIndex ( i )] = i;
+
+	for ( int i = 0; i < m_parent-> columns ( ); i++ ) {
+		int col = indices [i];
+
+		if ( !m_parent-> m_completly_hidden. contains ( col ))
+			(void) new ColListItem ( w_list, col, m_parent-> columnText ( col ), ( m_parent-> columnWidth ( col ) != 0 ));
+	}
+	QBoxLayout *horlay = new QHBoxLayout ( toplay );
+	horlay-> addWidget ( w_list, 10 );
+
+	QBoxLayout *rgtlay = new QVBoxLayout ( horlay );
+
+	w_up = new QPushButton ( tr( "Move up" ), this );
+	connect ( w_up, SIGNAL( clicked ( )), this, SLOT( upCol ( )));
+	rgtlay-> addWidget ( w_up );
+	w_down = new QPushButton ( tr( "Move down" ), this );
+	connect ( w_down, SIGNAL( clicked ( )), this, SLOT( downCol ( )));
+	rgtlay-> addWidget ( w_down );
+	w_show = new QPushButton ( tr( "Show" ), this );
+	connect ( w_show, SIGNAL( clicked ( )), this, SLOT( showCol ( )));
+	rgtlay-> addWidget ( w_show );
+	w_hide = new QPushButton ( tr( "Hide" ), this );
+	connect ( w_hide, SIGNAL( clicked ( )), this, SLOT( hideCol ( )));
+	rgtlay-> addWidget ( w_hide );
+
+	rgtlay-> addStretch ( 10 );
+
+	QFrame *line = new QFrame ( this );
+	line-> setFrameStyle ( QFrame::HLine | QFrame::Sunken );
+	toplay-> addWidget ( line );
+
+	QBoxLayout *botlay = new QHBoxLayout ( toplay );
+	botlay-> addSpacing ( QFontMetrics ( font ( )). width ( "Aa0" ) * 6 );
+	botlay-> addStretch ( 10 );
+	p = new QPushButton ( tr( "OK" ), this );
+	p-> setDefault ( true );
+	p-> setAutoDefault ( true );
+	connect ( p, SIGNAL( clicked ( )), this, SLOT( accept ( )));
+	botlay-> addWidget ( p );
+	p = new QPushButton ( tr( "Cancel" ), this );
+	p-> setAutoDefault ( true );
+	connect ( p, SIGNAL( clicked ( )), this, SLOT( reject ( )));
+	botlay-> addWidget ( p );
+
+	connect ( w_list, SIGNAL( currentChanged ( QListViewItem * )), this, SLOT( colSelected ( QListViewItem * )));
+	w_list-> setCurrentItem ( w_list-> firstChild ( ));
+	w_list-> setSelected ( w_list-> firstChild ( ), true );
+	colSelected ( w_list-> currentItem ( ));
+
+	setSizeGripEnabled ( true );
+	setMinimumSize ( minimumSizeHint ( ));
+}
+
+
+void CListViewColumnsDialog::accept ( )
+{
+	int index = 0;
+	QHeader *head = m_parent-> header ( );
+	QValueList <int> collist;
+
+	for ( QListViewItem *lvi = w_list-> firstChild ( ); lvi; lvi = lvi-> nextSibling ( ), index++ ) {
+		ColListItem *cli = static_cast <ColListItem *> ( lvi );
+		int col = cli-> column ( );
+
+		if ( cli-> isOn ( ) != m_parent-> isColumnVisible ( col ))
+			m_parent-> toggleColumn ( col );
+
+		collist << col;
+	}
+
+	for ( uint i = 0; i < collist. count ( ); i++ )
+		head-> moveSection ( collist [i], i );
+
+	m_parent-> triggerUpdate ( );
+	QDialog::accept ( );
+}
+
+void CListViewColumnsDialog::colSelected ( QListViewItem *lvi )
+{
+	ColListItem *cli = static_cast <ColListItem *> ( lvi );
+
+	w_show-> setEnabled ( cli && !cli-> isOn ( ));
+	w_hide-> setEnabled ( cli && cli-> isOn ( ));
+
+	w_up-> setEnabled ( cli && cli-> itemAbove ( ));
+	w_down-> setEnabled ( cli && cli-> itemBelow ( ));
+}
+
+void CListViewColumnsDialog::hideCol ( )
+{
+	ColListItem *cli = static_cast <ColListItem *> ( w_list->currentItem ( ));
+	cli-> setOn ( false );
+	colSelected ( cli );
+}
+
+void CListViewColumnsDialog::showCol ( )
+{
+	ColListItem *cli = static_cast <ColListItem *> ( w_list->currentItem ( ));
+	cli-> setOn ( true );
+	colSelected ( cli );
+}
+
+void CListViewColumnsDialog::upCol ( )
+{
+	ColListItem *cli = static_cast <ColListItem *> ( w_list->currentItem ( ));
+	
+	QListViewItem *above = cli-> itemAbove ( );
+	if ( above-> itemAbove ( )) {
+		cli-> moveItem ( above-> itemAbove ( ));
+	}
+	else { // moveItem ( 0 ); doesn't work !
+		w_list-> takeItem ( cli );
+		w_list-> insertItem ( cli );
+		w_list-> setCurrentItem ( cli );
+	}
+	colSelected ( cli );
+	w_list-> ensureItemVisible ( cli );
+}
+
+void CListViewColumnsDialog::downCol ( )
+{
+	ColListItem *cli = static_cast <ColListItem *> ( w_list->currentItem ( ));
+	cli-> moveItem ( cli-> itemBelow ( ));
+	colSelected ( cli );
+	w_list-> ensureItemVisible ( cli );
 }

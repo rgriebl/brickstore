@@ -22,6 +22,7 @@
 #endif
 
 class CFrameWork;
+class QTranslator;
 
 class CApplication : public QApplication {
 	Q_OBJECT
@@ -41,6 +42,7 @@ public slots:
 	void about ( );
 	void checkForUpdates ( );
 	void exit ( int );
+	void updateTranslations ( );
 
 signals:
 	void openDocument ( const QString & );
@@ -68,11 +70,13 @@ private:
 	bool m_enable_emit;
 	QString m_rebuild_db_only;
 
+	QTranslator *m_trans_qt;
+	QTranslator *m_trans_brickstore;
+
 	QString m_sys_name;
 	QString m_sys_version;
-	QString m_copyright;
-	QString m_version;
-	QString m_support;
+	QString m_url;
+	QString m_mail;
 	QString m_demo;
 	QString m_legal;
 };

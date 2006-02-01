@@ -46,6 +46,18 @@
 
 #include "cframework.h"
 
+// Qt's QT_TR_NOOP doesn't support the second 'comment' parameter
+// lupdate is pretty dumb, so we can get around this limitation easily :)
+#ifdef QT_TR_NOOP
+#undef QT_TR_NOOP
+
+inline static const char *QT_TR_NOOP(const char *x, const char * = 0)
+{
+	return x;
+}
+
+#endif
+
 
 namespace {
 
@@ -124,7 +136,7 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 	}
 #endif
 	
-	setCaption ( tr( "BrickStore" ));
+	setCaption ( cApp-> appName ( ));
 	setUsesBigPixmaps ( true );
 
 	(void) new CIconFactory ( );
@@ -170,7 +182,7 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Menubar/File" );
 	if ( sl. isEmpty ( ))  sl << "file_new" << "file_open" << "file_open_recent" << "-" << "file_save" << "file_saveas" << "-" << "file_import" << "file_export" << "-" << "file_print" << "-" << "file_close" << "-" << "file_exit";
-	createMenu ( AC_File, sl );
+	m_menuid_file = menuBar ( )-> insertItem ( QString ( ), createMenu ( sl ));
 
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Menubar/Edit" );
 	if ( sl. isEmpty ( ))  sl << "edit_undo" << "edit_redo" << "-"
@@ -179,30 +191,30 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 							  << "edit_multiply_qty" << "edit_divide_qty" << "edit_price_to_priceguide" << "edit_price_inc_dec" << "edit_set_sale" << "edit_set_condition" << "edit_set_remark" << "edit_set_reserved" << "-" 
 							  << "edit_reset_diffs" << "-"
 							  << "edit_bl_info_group";
-	createMenu ( AC_Edit, sl );
+	m_menuid_edit = menuBar ( )-> insertItem ( QString ( ), createMenu ( sl ));
 
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Menubar/View" );
 	if ( sl. isEmpty ( ))  sl << "settings_view_toolbar" << "settings_view_infobar" << "settings_view_statusbar" << "-" << "view_simple_mode" << "view_show_input_errors" << "-" << "view_difference_mode"; 
-	createMenu ( AC_View, sl );
+	m_menuid_view = menuBar ( )-> insertItem ( QString ( ), createMenu ( sl ));
 
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Menubar/Extras" );
 	if ( sl. isEmpty ( ))  sl << "extras_net" << "-" << "extras_update_database" << "-" << "extras_configure";
 	// Make sure there is a possibility to open the pref dialog!
 	if ( sl. find ( "extras_configure" ) == sl. end ( ))
 		sl << "-" << "extras_configure";
-	createMenu ( AC_Extras, sl );
+	m_menuid_extras = menuBar ( )-> insertItem ( QString ( ), createMenu ( sl ));
 
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Menubar/Window" );
 	if ( sl. isEmpty ( ))  sl << "window_mode" << "-" << "window_cascade" << "window_tile" << "-" << "window_list";
-	createMenu ( AC_Window, sl );
+	m_menuid_window = menuBar ( )-> insertItem ( QString ( ), createMenu ( sl ));
 
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Menubar/Help" );
 	if ( sl. isEmpty ( ))  sl << "help_updates" << "-" << "help_about";
-	createMenu ( AC_Help, sl );
+	m_menuid_help = menuBar ( )-> insertItem ( QString ( ), createMenu ( sl ));
 
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/ContextMenu/Item" );
 	if ( sl. isEmpty ( ))  sl << "edit_cut" << "edit_copy" << "edit_paste" << "edit_delete" << "-" << "edit_select_all" << "-" << "edit_mergeitems" << "edit_partoutitems" << "-" << "edit_multiply_qty" << "edit_price_to_priceguide" << "edit_price_inc_dec" << "edit_set_sale" << "edit_set_condition" << "edit_set_remark" << "-" << "edit_bl_info_group";
-	createMenu ( AC_Context, sl );
+	m_contextmenu = createMenu ( sl );
 
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Toolbar/Buttons" );
 	if ( sl. isEmpty ( ))  sl << "file_new" << "file_open" << "file_save" << "-" 
@@ -213,7 +225,7 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 							  << "edit_price_to_priceguide" << "edit_price_inc_dec" << "-" 
 							  << "edit_bl_info_group" << "-" 
 							  << "extras_net"; // << "-" << "help_whatsthis";
-	m_toolbar = createToolBar ( tr( "Toolbar" ), sl );
+	m_toolbar = createToolBar ( QString ( ), sl );
 	connect ( m_toolbar, SIGNAL( visibilityChanged ( bool )), findAction ( "settings_view_toolbar" ), SLOT( setOn ( bool )));
 
 	createStatusBar ( );
@@ -285,15 +297,115 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 	connectAllActions ( false, 0 ); // init enabled/disabled status of document actions
 
 	setAcceptDrops ( true );
-	
+	languageChange ( );
+
 	m_running = true;
+}
+
+void CFrameWork::languageChange ( )
+{
+	m_toolbar-> setLabel ( tr( "Toolbar" ));
+	m_progress-> setItemLabel ( PGI_PriceGuide, tr( "Priceguide updates" ));
+	m_progress-> setItemLabel ( PGI_Inventory,  tr( "Inventory updates" ));
+	m_progress-> setItemLabel ( PGI_Picture,    tr( "Picture updates" ));
+
+	menuBar ( )-> changeItem ( m_menuid_file,   tr( "&File" ));
+	menuBar ( )-> changeItem ( m_menuid_edit,   tr( "&Edit" ));
+	menuBar ( )-> changeItem ( m_menuid_view,   tr( "&View" ));
+	menuBar ( )-> changeItem ( m_menuid_extras, tr( "E&xtras" ));
+	menuBar ( )-> changeItem ( m_menuid_window, tr( "&Windows" ));
+	menuBar ( )-> changeItem ( m_menuid_help,   tr( "&Help" ));
+
+	static struct {
+		const char *action; 
+		const char *text; 
+		const char *accel;
+	} *atptr, actiontable [] = {
+		{ "file_new",                       QT_TR_NOOP( "New..." ),                             QT_TR_NOOP( "Ctrl+N", "File|New" ) },
+		{ "file_open",                      QT_TR_NOOP( "Open..." ),                            QT_TR_NOOP( "Ctrl+O", "File|Open" ) },
+		{ "file_open_recent",               QT_TR_NOOP( "Open Recent" ),                        0 },
+		{ "file_save",                      QT_TR_NOOP( "Save" ),                               QT_TR_NOOP( "Ctrl+S", "File|Save" ) },
+		{ "file_saveas",                    QT_TR_NOOP( "Save As..." ),                         0 },
+		{ "file_print",                     QT_TR_NOOP( "Print..." ),                           QT_TR_NOOP( "Ctrl+P", "File|Print" ) },
+		{ "file_import",                    QT_TR_NOOP( "Import" ),                             0 },
+		{ "file_import_bl_inventory",       QT_TR_NOOP( "BrickLink Inventory..." ),             0 },
+		{ "file_import_bl_xml",             QT_TR_NOOP( "BrickLink XML..." ),                   0 },
+		{ "file_import_bl_order",           QT_TR_NOOP( "BrickLink Order..." ),                 0 },
+		{ "file_import_bl_store_inventory", QT_TR_NOOP( "BrickLink Store Inventory..." ),       0 },
+		{ "file_import_ldraw_model",        QT_TR_NOOP( "LDraw Model..." ),                     0 },
+		{ "file_import_briktrak",           QT_TR_NOOP( "BrikTrak Inventory..." ),              0 },
+		{ "file_export",                    QT_TR_NOOP( "Export" ),                             0 },
+		{ "file_export_bl_xml",             QT_TR_NOOP( "BrickLink XML..." ),                   0 },
+		{ "file_export_bl_xml_clip",        QT_TR_NOOP( "BrickLink XML to Clipboard" ),         0 },
+		{ "file_export_bl_update_clip",     QT_TR_NOOP( "BrickLink Mass-Update XML to Clipboard" ), 0 },
+		{ "file_export_bl_invreq_clip",     QT_TR_NOOP( "BrickLink Inventory XML to Clipboard" ),   0 },
+		{ "file_export_bl_wantedlist_clip", QT_TR_NOOP( "BrickLink Wanted List XML to Clipboard" ), 0 },
+		{ "file_export_briktrak",           QT_TR_NOOP( "BrikTrak Inventory..." ),              0 },
+		{ "file_close",                     QT_TR_NOOP( "Close" ),                              QT_TR_NOOP( "Ctrl+W", "File|Close" ) },
+		{ "file_exit",                      QT_TR_NOOP( "Exit" ),                               QT_TR_NOOP( "Ctrl+Q", "File|Quit" ) },
+		{ "edit_undo",                      0,                                                  QT_TR_NOOP( "Ctrl+Z", "Edit|Undo" ) },
+		{ "edit_redo",                      0,                                                  QT_TR_NOOP( "Ctrl+Y", "Edit|Redo" ) },
+		{ "edit_cut",                       QT_TR_NOOP( "Cut" ),                                QT_TR_NOOP( "Ctrl+X", "Edit|Cut" ) },
+		{ "edit_copy",                      QT_TR_NOOP( "Copy" ),                               QT_TR_NOOP( "Ctrl+C", "Edit|Copy" ) },
+		{ "edit_paste",                     QT_TR_NOOP( "Paste" ),                              QT_TR_NOOP( "Ctrl+V", "Edit|Paste" ) },
+		{ "edit_delete",                    QT_TR_NOOP( "Delete" ),                             QT_TR_NOOP( "Delete", "Edit|Delete" ) },
+		{ "edit_additems",                  QT_TR_NOOP( "Add Items..." ),                       QT_TR_NOOP( "Ctrl+I", "Edit|AddItems" ) },
+		{ "edit_subtractitems",             QT_TR_NOOP( "Subtract Items..." ),                  0 },
+		{ "edit_mergeitems",                QT_TR_NOOP( "Consolidate Items..." ),               0 },
+		{ "edit_partoutitems",              QT_TR_NOOP( "Part out Item..." ),                   0 },
+		{ "edit_reset_diffs",               QT_TR_NOOP( "Reset Differences" ),                  0 }, 
+		{ "edit_select_all",                QT_TR_NOOP( "Select All" ),                         QT_TR_NOOP( "Ctrl+A", "Edit|SelectAll" ) },
+		{ "edit_select_none",               QT_TR_NOOP( "Select None" ),                        QT_TR_NOOP( "Ctrl+Shift+A", "Edit|SelectNone" ) },
+		{ "view_simple_mode",               QT_TR_NOOP( "Buyer/Collector View" ),               0 },
+		{ "settings_view_toolbar",          QT_TR_NOOP( "View Toolbar" ),                       0 },
+		{ "settings_view_infobar",          QT_TR_NOOP( "View Infobars" ),                      0 },
+		{ "settings_view_statusbar",        QT_TR_NOOP( "View Statusbar" ),                     0 },
+		{ "view_show_input_errors",         QT_TR_NOOP( "Show Input Errors" ),                  0 },
+		{ "view_difference_mode",           QT_TR_NOOP( "Difference Mode" ),                    0 },
+		{ "extras_update_database",         QT_TR_NOOP( "Update Database" ),                    0 },
+		{ "extras_configure",               QT_TR_NOOP( "Configure..." ),                       0 },
+		{ "net_online",                     QT_TR_NOOP( "Online Mode" ),                        0 },
+		{ "net_offline",                    QT_TR_NOOP( "Offline Mode" ),                       0 },
+		{ "window_mode_mdi",                QT_TR_NOOP( "MDI environment" ),                    0 },
+		{ "window_mode_tab",                QT_TR_NOOP( "Tabbed documents" ),                   0 },
+		{ "window_cascade",                 QT_TR_NOOP( "Cascade" ),                            0 },
+		{ "window_tile",                    QT_TR_NOOP( "Tile" ),                               0 },
+		{ "help_whatsthis",                 QT_TR_NOOP( "What's this?" ),                       QT_TR_NOOP( "Shift+F1", "Help|WhatsThis" ) },
+		{ "help_about",                     QT_TR_NOOP( "About" ),                              0 },
+		{ "help_updates",                   QT_TR_NOOP( "Check for Program Updates..." ),       0 },
+		{ "edit_price_to_fixed",            QT_TR_NOOP( "Set Prices..." ),                      0 },
+		{ "edit_price_to_priceguide",       QT_TR_NOOP( "Set Prices to Price-Guide..." ),       QT_TR_NOOP( "Ctrl+G", "Edit|Set to PriceGuide" ) },
+		{ "edit_price_inc_dec",             QT_TR_NOOP( "Inc- or Decrease Prices..." ),         QT_TR_NOOP( "Ctrl++", "Edit| Inc/Dec Prices" ) },
+		{ "edit_set_sale",                  QT_TR_NOOP( "Set Sale..." ),                        QT_TR_NOOP( "Ctrl+%", "Edit|Set Sale" ) },
+		{ "edit_set_remark",                QT_TR_NOOP( "Set Remark..." ),                      0 },
+		{ "edit_set_reserved",              QT_TR_NOOP( "Set Reserved for..." ),                0 },
+		{ "edit_set_condition",             QT_TR_NOOP( "Set Condition..." ),                   0 },
+		{ "edit_multiply_qty",              QT_TR_NOOP( "Multiply Quantities..." ),             QT_TR_NOOP( "Ctrl+*", "Edit|Multiply Quantities" ) },
+		{ "edit_divide_qty",                QT_TR_NOOP( "Divide Quantities..." ),               QT_TR_NOOP( "Ctrl+/", "Edit|Divide Quantities" ) },
+		{ "edit_bl_catalog",                QT_TR_NOOP( "Show BrickLink Catalog Info..." ),     0 },
+		{ "edit_bl_priceguide",             QT_TR_NOOP( "Show BrickLink Price Guide Info..." ), 0 },
+		{ "edit_bl_lotsforsale",            QT_TR_NOOP( "Lots for Sale on BrickLink..." ),      0 },
+
+		{ 0, 0, 0 }
+	};
+
+	for ( atptr = actiontable; atptr-> action; atptr++ ) {
+		QAction *a = findAction ( atptr-> action );
+
+		if ( a ) {
+			if ( atptr-> text )
+				a-> setText ( tr( atptr-> text ));
+			if ( atptr-> accel )
+				a-> setAccel ( QKeySequence ( tr( atptr-> accel )));
+		}
+	}
 }
 
 CFrameWork::~CFrameWork ( )
 {
 	CConfig::inst ( )-> writeEntry ( "/Files/Recent", m_recent_files );
 	CConfig::inst ( )-> writeEntry ( "/MainWindow/Toolbar/Visible", findAction ( "settings_view_toolbar" )-> isOn ( ));
-	CConfig::inst ( )-> writeEntry ( "/MainWindow/Infobar/Visible", findAction ( "settings_view_infobar" )-> isOn ( ));
+//	CConfig::inst ( )-> writeEntry ( "/MainWindow/Infobar/Visible", findAction ( "settings_view_infobar" )-> isOn ( ));
 	CConfig::inst ( )-> writeEntry ( "/MainWindow/Statusbar/Visible", findAction ( "settings_view_statusbar" )-> isOn ( ));
 
 	QString str;
@@ -366,22 +478,9 @@ void CFrameWork::initBrickLinkDelayed ( )
 		CMessageBox::warning ( this, tr( "Could not load the BrickLink database files.<br /><br />The program is not functional without these files." ));
 }
 
-QAction *CFrameWork::findAction ( const char *name, ActionCategory cat )
+QAction *CFrameWork::findAction ( const char *name )
 {
-	if ( cat < 0 || cat > AC_Count || !name )
-		return 0;
-
-	for ( int i = 0; i < AC_Count; i++ ) {
-		if (( cat == AC_Count ) || ( cat == i )) {
-			for ( QPtrListIterator<QAction> it ( m_actions [i] ); it. current ( ); ++it ) {
-				const char *a_name = it. current ( )-> name ( );
-
-				if ( a_name && ( qstrcmp ( name, a_name ) == 0 ))
-					return it. current ( );
-			}
-		}
-	}
-	return 0;
+	return name ? static_cast <QAction *> ( child ( name, "QAction", true )) : 0;
 }
 
 void CFrameWork::createStatusBar ( )
@@ -404,9 +503,9 @@ void CFrameWork::createStatusBar ( )
 	if ( !p. isNull ( ))
 		m_progress-> setStopPixmap ( p );
 
-	m_progress-> addItem ( tr( "Priceguide updates" ), PGI_PriceGuide );
-	m_progress-> addItem ( tr( "Inventory updates" ),  PGI_Inventory  );
-	m_progress-> addItem ( tr( "Picture updates" ),    PGI_Picture    );
+	m_progress-> addItem ( QString ( ), PGI_PriceGuide );
+	m_progress-> addItem ( QString ( ),  PGI_Inventory  );
+	m_progress-> addItem ( QString ( ),    PGI_Picture    );
 
 	//m_progress-> setProgress ( -1, 100 );
 
@@ -417,25 +516,9 @@ void CFrameWork::createStatusBar ( )
 	statusBar ( )-> hide ( );
 }
 
-QPopupMenu *CFrameWork::createMenu ( ActionCategory cat, const QStringList &a_names )
+QPopupMenu *CFrameWork::createMenu ( const QStringList &a_names )
 {
 	if ( a_names. isEmpty ( ))
-		return 0;
-
-	QString name;
-
-	switch ( cat ) {
-		case AC_File    : name = tr( "&File" ); break;
-		case AC_Edit    : name = tr( "&Edit" ); break;
-		case AC_View    : name = tr( "&View" ); break;
-		case AC_Extras  : name = tr( "E&xtras" ); break;
-		case AC_Window  : name = tr( "&Windows" ); break;
-		case AC_Help    : name = tr( "&Help" ); break;
-		case AC_Context : name = "dummy";
-		case AC_Count   : break;
-	}
-
-	if ( !name )
 		return 0;
 
 	QPopupMenu *p = new QPopupMenu ( this );
@@ -448,10 +531,7 @@ QPopupMenu *CFrameWork::createMenu ( ActionCategory cat, const QStringList &a_na
 			p-> insertSeparator ( );
 		}
 		else {
-			QAction *a = findAction ( a_name, cat );
-
-			if ( !a )
-				a = findAction ( a_name );
+			QAction *a = findAction ( a_name );
 
 			if ( a )
 				a-> addTo ( p );
@@ -459,13 +539,9 @@ QPopupMenu *CFrameWork::createMenu ( ActionCategory cat, const QStringList &a_na
 				qWarning ( "Couldn't find action '%s'", a_name );
 		}
 	}
-
-	if ( cat == AC_Context )
-		m_contextmenu = p;
-	else
-		menuBar ( )-> insertItem ( name, p, cat );
 	return p;
 }
+
 
 QToolBar *CFrameWork::createToolBar ( const QString &label, const QStringList &a_names )
 {
@@ -486,6 +562,8 @@ QToolBar *CFrameWork::createToolBar ( const QString &label, const QStringList &a
 
 			if ( a )
 				a-> addTo ( t );
+			else
+				qWarning ( "Couldn't find action '%s'", a_name );
 		}
 	}
 
@@ -514,370 +592,157 @@ void CFrameWork::createActions ( )
 	QActionGroup *g;
 
 	a = new QAction ( this, "file_new" );
-	a-> setText ( tr( "New..." ));
-	a-> setAccel ( QKeySequence ( tr( "Ctrl+N", "File|New" )));
 	connect ( a, SIGNAL( activated ( )), this, SLOT( fileNew ( )));
-	m_actions [AC_File]. append ( a );
 
 	a = new QAction ( this, "file_open" );
-	a-> setText ( tr( "Open..." ));
-	a-> setAccel ( QKeySequence ( tr( "Ctrl+O", "File|Open" )));
 	connect ( a, SIGNAL( activated ( )), this, SLOT( fileOpen ( )));
-	m_actions [AC_File]. append ( a );
 
 	l = new CListAction ( true, this, "file_open_recent" );
-	l-> setText ( tr( "Open Recent" ));
 	l-> setUsesDropDown ( true );
 	l-> setListProvider ( new RecentListProvider ( this ));
 	connect ( l, SIGNAL( activated ( int )), this, SLOT( fileOpenRecent ( int )));
-	m_actions [AC_File]. append ( l );
 
-	a = new QAction ( this, "file_save" );
-	a-> setText ( tr( "Save" ));
-	a-> setAccel ( QKeySequence ( tr( "Ctrl+S", "File|Save" )));
-	m_actions [AC_File]. append ( a );
+	(void) new QAction ( this, "file_save" );
+	(void) new QAction ( this, "file_saveas" );
+	(void) new QAction ( this, "file_print" );
 
-	a = new QAction ( this, "file_saveas" );
-	a-> setText ( tr( "Save As..." ));
-	m_actions [AC_File]. append ( a );
-
-	a = new QAction ( this, "file_print" );
-	a-> setText ( tr( "Print..." ));
-	a-> setAccel ( QKeySequence ( tr( "Ctrl+P", "File|Print" )));
-	m_actions [AC_File]. append ( a );
-
-
-	g = new QActionGroup ( this, "file_import" );
-	g-> setText ( tr( "Import" ));
-	g-> setExclusive ( false );
+	g = new QActionGroup ( this, "file_import", false );
 	g-> setUsesDropDown ( true );
-	m_actions [AC_File]. append ( g );
 
 	a = new QAction ( g, "file_import_bl_inventory" );
-	a-> setText ( tr( "BrickLink Inventory..." ));
 	connect ( a, SIGNAL( activated ( )), this, SLOT( fileImportBrickLinkInventory ( )));
-	m_actions [AC_File]. append ( a );
 
 	a = new QAction ( g, "file_import_bl_xml" );
-	a-> setText ( tr( "BrickLink XML..." ));
 	connect ( a, SIGNAL( activated ( )), this, SLOT( fileImportBrickLinkXML ( )));
-	m_actions [AC_File]. append ( a );
 
 	a = new QAction ( g, "file_import_bl_order" );
-	a-> setText ( tr( "BrickLink Order..." ));
 	connect ( a, SIGNAL( activated ( )), this, SLOT( fileImportBrickLinkOrder ( )));
-	m_actions [AC_File]. append ( a );
 
 	a = new QAction ( g, "file_import_bl_store_inventory" );
-	a-> setText ( tr( "BrickLink Store Inventory..." ));
 	connect ( a, SIGNAL( activated ( )), this, SLOT( fileImportBrickLinkStore ( )));
-	m_actions [AC_File]. append ( a );
 
 	a = new QAction ( g, "file_import_ldraw_model" );
-	a-> setText ( tr( "LDraw Model..." ));
 	connect ( a, SIGNAL( activated ( )), this, SLOT( fileImportLDrawModel ( )));
-	m_actions [AC_File]. append ( a );
 
 	a = new QAction ( g, "file_import_briktrak" );
-	a-> setText ( tr( "BrikTrak Inventory..." ));
 	connect ( a, SIGNAL( activated ( )), this, SLOT( fileImportBrikTrakInventory ( )));
-	m_actions [AC_File]. append ( a );
 
-	g = new QActionGroup ( this, "file_export" );
-	g-> setText ( tr( "Export" ));
-	g-> setExclusive ( false );
+	g = new QActionGroup ( this, "file_export", false );
 	g-> setUsesDropDown ( true );
-	m_actions [AC_File]. append ( g );
 
-	a = new QAction ( g, "file_export_bl_xml" );
-	a-> setText ( tr( "BrickLink XML..." ));
-	m_actions [AC_File]. append ( a );
+	(void) new QAction ( g, "file_export_bl_xml" );
+	(void) new QAction ( g, "file_export_bl_xml_clip" );
+	(void) new QAction ( g, "file_export_bl_update_clip" );
+	(void) new QAction ( g, "file_export_bl_invreq_clip" );
+	(void) new QAction ( g, "file_export_bl_wantedlist_clip" );
+	(void) new QAction ( g, "file_export_briktrak" );
 
-	a = new QAction ( g, "file_export_bl_xml_clip" );
-	a-> setText ( tr( "BrickLink XML to Clipboard" ));
-	m_actions [AC_File]. append ( a );
-
-	a = new QAction ( g, "file_export_bl_update_clip" );
-	a-> setText ( tr( "BrickLink Mass-Update XML to Clipboard" ));
-	m_actions [AC_File]. append ( a );
-
-	a = new QAction ( g, "file_export_bl_invreq_clip" );
-	a-> setText ( tr( "BrickLink Inventory XML to Clipboard" ));
-	m_actions [AC_File]. append ( a );
-
-	a = new QAction ( g, "file_export_bl_wantedlist_clip" );
-	a-> setText ( tr( "BrickLink Wanted List XML to Clipboard" ));
-	m_actions [AC_File]. append ( a );
-
-	a = new QAction ( g, "file_export_briktrak" );
-	a-> setText ( tr( "BrikTrak Inventory..." ));
-	m_actions [AC_File]. append ( a );
-
-	a = new QAction ( this, "file_close" );
-	a-> setText ( tr( "Close" ));
-	a-> setAccel ( QKeySequence ( tr( "Ctrl+W", "File|Close" )));
-	m_actions [AC_File]. append ( a );
+	(void) new QAction ( this, "file_close" );
 
 	a = new QAction ( this, "file_exit" );
-	a-> setText ( tr( "Exit" ));
-	a-> setAccel ( QKeySequence ( tr( "Ctrl+Q", "File|Quit" )));
 	connect ( a, SIGNAL( activated ( )), this, SLOT( close ( )));
-	m_actions [AC_File]. append ( a );
 
-	a = CUndoManager::inst ( )-> createUndoAction ( this, "edit_undo" );
-	a-> setAccel ( QKeySequence ( tr( "Ctrl+Z", "Edit|Undo" )));
-	m_actions [AC_Edit]. append ( a );
+	(void) CUndoManager::inst ( )-> createUndoAction ( this, "edit_undo" );
+	(void) CUndoManager::inst ( )-> createRedoAction ( this, "edit_redo" );
+	(void) CUndoManager::inst ( )-> createUndoAction ( this, "edit_undo_list", true );
+	(void) CUndoManager::inst ( )-> createRedoAction ( this, "edit_redo_list", true );
 
-	a = CUndoManager::inst ( )-> createRedoAction ( this, "edit_redo" );
-	a-> setAccel ( QKeySequence ( tr( "Ctrl+Y", "Edit|Redo" )));
-	m_actions [AC_Edit]. append ( a );
+	(void) new QAction ( this, "edit_cut" );
+	(void) new QAction ( this, "edit_copy" );
+	(void) new QAction ( this, "edit_paste" );
+	(void) new QAction ( this, "edit_delete" );
+	(void) new QAction ( this, "edit_additems" );
+	(void) new QAction ( this, "edit_subtractitems" );
+	(void) new QAction ( this, "edit_mergeitems" );
+	(void) new QAction ( this, "edit_partoutitems" );
+	(void) new QAction ( this, "edit_reset_diffs" );
+	(void) new QAction ( this, "edit_select_all" );
+	(void) new QAction ( this, "edit_select_none" );
 
-	a = CUndoManager::inst ( )-> createUndoAction ( this, "edit_undo_list", true );
-	m_actions [AC_Edit]. append ( a );
+	(void) new QAction ( this, "edit_price_to_fixed" );
+	(void) new QAction ( this, "edit_price_to_priceguide" );
+	(void) new QAction ( this, "edit_price_inc_dec" );
+	(void) new QAction ( this, "edit_set_sale" );
+	(void) new QAction ( this, "edit_set_remark" );
+	(void) new QAction ( this, "edit_set_reserved" );
+	(void) new QAction ( this, "edit_set_condition" );
+	(void) new QAction ( this, "edit_multiply_qty" );
+	(void) new QAction ( this, "edit_divide_qty" );
 
-	a = CUndoManager::inst ( )-> createRedoAction ( this, "edit_redo_list", true );
-	m_actions [AC_Edit]. append ( a );
+	g = new QActionGroup ( this, "edit_bl_info_group", false );
+	g-> setUsesDropDown ( false );
 
-	a = new QAction ( this, "edit_cut" );
-	a-> setText ( tr( "Cut" ));
-	a-> setAccel ( QKeySequence ( tr( "Ctrl+X", "Edit|Cut" )));
-	m_actions [AC_Edit]. append ( a );
+	(void) new QAction ( g, "edit_bl_catalog" );
+	(void) new QAction ( g, "edit_bl_priceguide" );
+	(void) new QAction ( g, "edit_bl_lotsforsale" );
 
-	a = new QAction ( this, "edit_copy" );
-	a-> setText ( tr( "Copy" ));
-	a-> setAccel ( QKeySequence ( tr( "Ctrl+C", "Edit|Copy" )));
-	m_actions [AC_Edit]. append ( a );
-
-	a = new QAction ( this, "edit_paste" );
-	a-> setText ( tr( "Paste" ));
-	a-> setAccel ( QKeySequence ( tr( "Ctrl+V", "Edit|Paste" )));
-	m_actions [AC_Edit]. append ( a );
-
-	a = new QAction ( this, "edit_delete" );
-	a-> setText ( tr( "Delete" ));
-	a-> setAccel ( QKeySequence ( tr( "Delete", "Edit|Delete" ))); //TODO: this is dangerous: implement an undo function
-	m_actions [AC_Edit]. append ( a );
-
-	a = new QAction ( this, "edit_additems" );
-	a-> setText ( tr( "Add Items..." ));
-	a-> setAccel ( QKeySequence ( tr( "Ctrl+I", "Edit|AddItems" )));
-	m_actions [AC_Edit]. append ( a );
-
-	a = new QAction ( this, "edit_subtractitems" );
-	a-> setText ( tr( "Subtract Items..." ));
-	m_actions [AC_Edit]. append ( a );
-
-	a = new QAction ( this, "edit_mergeitems" );
-	a-> setText ( tr( "Consolidate Items..." ));
-	m_actions [AC_Edit]. append ( a );
-
-	a = new QAction ( this, "edit_partoutitems" );
-	a-> setText ( tr( "Part out Item..." ));
-	m_actions [AC_Edit]. append ( a );
-
-	a = new QAction ( this, "edit_reset_diffs" );
-	a-> setText ( tr( "Reset Differences" ));
-	m_actions [AC_Edit]. append ( a );
-
-	a = new QAction ( this, "edit_select_all" );
-	a-> setText ( tr( "Select All" ));
-	a-> setAccel ( QKeySequence ( tr( "Ctrl+A", "Edit|SelectAll" )));
-	m_actions [AC_Edit]. append ( a );
-
-	a = new QAction ( this, "edit_select_none" );
-	a-> setText ( tr( "Select None" ));
-	a-> setAccel ( QKeySequence ( tr( "Ctrl+Shift+A", "Edit|SelectNone" )));
-	m_actions [AC_Edit]. append ( a );
-
-
-	a = new QAction ( this, "view_simple_mode" );
-	a-> setText ( tr( "Buyer/Collector View" ));
-	a-> setToggleAction ( true );
+	a = new QAction ( this, "view_simple_mode", true );
 	connect ( a, SIGNAL( toggled ( bool )), CConfig::inst ( ), SLOT( setSimpleMode ( bool )));
-	m_actions [AC_View]. append ( a );
 
-	a = new QAction ( this, "settings_view_toolbar" );
-	a-> setText ( tr( "View Toolbar" ));
-	a-> setToggleAction ( true );
+	a = new QAction ( this, "settings_view_toolbar", true );
 	connect ( a, SIGNAL( toggled ( bool )), this, SLOT( viewToolBar ( bool )));
-	m_actions [AC_View]. append ( a );
-/*
-	a = new QAction ( this, "settings_view_infobar" );
-	a-> setText ( tr( "View Infobar" ));
-	a-> setToggleAction ( true );
-	connect ( a, SIGNAL( toggled ( bool )), this, SLOT( viewInfoBar ( bool )));
-	m_actions [AC_View]. append ( a );
-*/
-	a = m_taskpanes-> createItemAction ( this, "settings_view_infobar" );
-	a-> setText ( tr( "View Infobars" ));
-	m_actions [AC_View]. append ( a );
 
-	a = new QAction ( this, "settings_view_statusbar" );
-	a-> setText ( tr( "View Statusbar" ));
-	a-> setToggleAction ( true );
+	(void) m_taskpanes-> createItemAction ( this, "settings_view_infobar" );
+
+	a = new QAction ( this, "settings_view_statusbar", true );
 	connect ( a, SIGNAL( toggled ( bool )), this, SLOT( viewStatusBar ( bool )));
-	m_actions [AC_View]. append ( a );
 
-	a = new QAction ( this, "view_show_input_errors" );
-	a-> setText ( tr( "Show Input Errors" ));
-	a-> setToggleAction ( true );
+	a = new QAction ( this, "view_show_input_errors", true );
 	connect ( a, SIGNAL( toggled ( bool )), CConfig::inst ( ), SLOT( setShowInputErrors ( bool )));
-	m_actions [AC_View]. append ( a );
 
-	a = new QAction ( this, "view_difference_mode" );
-	a-> setText ( tr( "Difference Mode" ));
-	a-> setToggleAction ( true );
-	m_actions [AC_View]. append ( a );
-
+	(void) new QAction ( this, "view_difference_mode", true );
 
 	a = new QAction ( this, "extras_update_database" );
-	a-> setText ( tr( "Update Database" ));
 	connect ( a, SIGNAL( activated ( )), this, SLOT( updateDatabase ( )));
-	m_actions [AC_Extras]. append ( a );
 
 	a = new QAction ( this, "extras_configure" );
-	a-> setText ( tr( "Configure..." ));
 	connect ( a, SIGNAL( activated ( )), this, SLOT( configure ( )));
-	m_actions [AC_Extras]. append ( a );
 
-	g = new QActionGroup ( this, "extras_net" );
-	g-> setExclusive ( true );
+	g = new QActionGroup ( this, "extras_net", true );
 	connect ( g, SIGNAL( selected ( QAction * )), this, SLOT( setOnlineStatus ( QAction * )));
-	m_actions [AC_Extras]. append ( g );
 
-	a = new QAction ( g, "net_online" );
-	a-> setText ( tr( "Online Mode" ));
-	a-> setToggleAction ( true );
-	m_actions [AC_Extras]. append ( a );
+	(void) new QAction ( g, "net_online", true );
+	(void) new QAction ( g, "net_offline", true );
 
-	a = new QAction ( g, "net_offline" );
-	a-> setText ( tr( "Offline Mode" ));
-	a-> setToggleAction ( true );
-	m_actions [AC_Extras]. append ( a );
-
-
-	g = new QActionGroup ( this, "window_mode" );
-	g-> setExclusive ( true );
+	g = new QActionGroup ( this, "window_mode", true );
 	connect ( g, SIGNAL( selected ( QAction * )), this, SLOT( setWindowMode ( QAction * )));
-	m_actions [AC_Window]. append ( g );
 
-	a = new QAction ( g, "window_mode_mdi" );
-	a-> setText ( tr( "MDI environment" ));
-	a-> setToggleAction ( true );
-	m_actions [AC_Window]. append ( a );
-
-	a = new QAction ( g, "window_mode_tab" );
-	a-> setText ( tr( "Tabbed documents" ));
-	a-> setToggleAction ( true );
-	m_actions [AC_Window]. append ( a );
-
+	(void) new QAction ( g, "window_mode_mdi", true );
+	(void) new QAction ( g, "window_mode_tab", true );
 
 	a = new QAction ( this, "window_cascade" );
-	a-> setText ( tr( "Cascade" ));
 	connect ( a, SIGNAL( activated ( )), m_mdi, SLOT( cascade ( )));
-	m_actions [AC_Window]. append ( a );
 
 	a = new QAction ( this, "window_tile" );
-	a-> setText ( tr( "Tile" ));
 	connect ( a, SIGNAL( activated ( )), m_mdi, SLOT( tile ( )));
-	m_actions [AC_Window]. append ( a );
 
 	l = new CListAction ( true, this, "window_list" );
 	l-> setListProvider ( new WindowListProvider ( this ));
 	connect ( l, SIGNAL( activated ( int )), this, SLOT( windowActivate ( int )));
-	m_actions [AC_Window]. append ( l );
-
 
 	a = new QAction ( this, "help_whatsthis" );
-	a-> setText ( tr( "What's this?" ));
-	a-> setAccel ( QKeySequence ( tr( "Shift+F1", "Help|WhatsThis" )));
 	connect ( a, SIGNAL( activated ( )), this, SLOT( whatsThis ( )));
-	m_actions [AC_Help]. append ( a );
 
 	a = new QAction ( this, "help_about" );
-	a-> setText ( tr( "About" ));
 	connect ( a, SIGNAL( activated ( )), cApp, SLOT( about ( )));
-	m_actions [AC_Help]. append ( a );
 
 	a = new QAction ( this, "help_updates" );
-	a-> setText ( tr( "Check for Program Updates..." ));
 	connect ( a, SIGNAL( activated ( )), cApp, SLOT( checkForUpdates ( )));
-	m_actions [AC_Help]. append ( a );
-
-
-	a = new QAction ( this, "edit_price_to_fixed" );
-	a-> setText ( tr( "Set Prices..." ));
-	m_actions [AC_Edit]. append ( a );
-
-	a = new QAction ( this, "edit_price_to_priceguide" );
-	a-> setText ( tr( "Set Prices to Price-Guide..." ));
-	a-> setAccel ( QKeySequence ( tr( "Ctrl+G", "Edit|Set to PriceGuide" )));
-	m_actions [AC_Edit]. append ( a );
-
-	a = new QAction ( this, "edit_price_inc_dec" );
-	a-> setText ( tr( "Inc- or Decrease Prices..." ));
-	a-> setAccel ( QKeySequence ( tr( "Ctrl++", "Edit| Inc/Dec Prices" )));
-	m_actions [AC_Edit]. append ( a );
-
-	a = new QAction ( this, "edit_set_sale" );
-	a-> setText ( tr( "Set Sale..." ));
-	a-> setAccel ( QKeySequence ( tr( "Ctrl+%", "Edit|Set Sale" )));
-	m_actions [AC_Edit]. append ( a );
-
-	a = new QAction ( this, "edit_set_remark" );
-	a-> setText ( tr( "Set Remark..." ));
-	m_actions [AC_Edit]. append ( a );
-
-	a = new QAction ( this, "edit_set_reserved" );
-	a-> setText ( tr( "Set Reserved for..." ));
-	m_actions [AC_Edit]. append ( a );
-
-	a = new QAction ( this, "edit_set_condition" );
-	a-> setText ( tr( "Set Condition..." ));
-	m_actions [AC_Edit]. append ( a );
-
-	a = new QAction ( this, "edit_multiply_qty" );
-	a-> setText ( tr( "Multiply Quantities..." ));
-	a-> setAccel ( QKeySequence ( tr( "Ctrl+*", "Edit|Multiply Quantities" )));
-	m_actions [AC_Edit]. append ( a );
-
-	a = new QAction ( this, "edit_divide_qty" );
-	a-> setText ( tr( "Divide Quantities..." ));
-	a-> setAccel ( QKeySequence ( tr( "Ctrl+/", "Edit|Divide Quantities" )));
-	m_actions [AC_Edit]. append ( a );
-
-	g = new QActionGroup ( this, "edit_bl_info_group" );
-	g-> setExclusive ( false );
-	g-> setUsesDropDown ( false );
-	m_actions [AC_Edit]. append ( g );
-
-	a = new QAction ( g, "edit_bl_catalog" );
-	a-> setText ( tr( "Show BrickLink Catalog Info..." ));
-	m_actions [AC_Edit]. append ( a );
-
-	a = new QAction ( g, "edit_bl_priceguide" );
-	a-> setText ( tr( "Show BrickLink Price Guide Info..." ));
-	m_actions [AC_Edit]. append ( a );
-
-	a = new QAction ( g, "edit_bl_lotsforsale" );
-	a-> setText ( tr( "Lots for Sale on BrickLink..." ));
-	m_actions [AC_Edit]. append ( a );
-
 
 	// set all icons that have a pixmap corresponding to name()
 
-	for ( int i = 0; i < AC_Count; i++ ) {
-		for ( QPtrListIterator<QAction> it ( m_actions [i] ); it. current ( ); ++it ) {
-			const char *name = it. current ( )-> name ( );
+    QObjectList *alist = queryList ( "QAction", 0, false, true );
+	for ( QObjectListIt it ( *alist ); it. current ( ); ++it ) {
+		const char *name = it. current ( )-> name ( );
 
-			if ( name && name [0] ) {
-				QIconSet set = CResource::inst ( )-> iconSet ( name );
+		if ( name && name [0] ) {
+			QIconSet set = CResource::inst ( )-> iconSet ( name );
 
-				if ( !set. isNull ( ))
-					it. current ( )-> setIconSet ( set );
-			}
+			if ( !set. isNull ( ))
+				static_cast <QAction *> ( it. current ( ))-> setIconSet ( set );
 		}
 	}
+	delete alist;
 }
 
 void CFrameWork::setWindowModeTabbed ( bool b )

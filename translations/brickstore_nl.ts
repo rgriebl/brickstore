@@ -6,47 +6,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Items of type: %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Not all BrickLink database were successfully updated (%1 failed).</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Updating the BrickLink database files was successfull.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Item types</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Categories</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Colors</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Color guide</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Default image 1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Default Image 2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Could not parse the XML data for order #%1:&lt;br /&gt;&lt;i&gt;Line %2, column %3: %4&lt;/i&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>This order contains %1 invalid item(s).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -58,27 +18,30 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>This store inventory contains %1 invalid item(s).</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Could not parse the XML data for the store inventory.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>This inventory contains %1 invalid item(s).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Data directory &apos;%1&apos; is not both read- and writable.</source>
         <translation type="unfinished"></translation>
     </message>
+</context>
+<context>
+    <name>CAppearsInWidget</name>
     <message>
-        <source>Inventory list</source>
+        <source>[Image is loading]</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Peeron color table</source>
+        <source>#</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Name</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -112,15 +75,7 @@
 <context>
     <name>CFrameWork</name>
     <message>
-        <source>BrickStore</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Toolbar</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Infobar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -250,16 +205,8 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Undo</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Ctrl+Z</source>
         <comment>Edit|Undo</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Redo</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -332,10 +279,6 @@
     </message>
     <message>
         <source>View Toolbar</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>View Infobar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -433,10 +376,6 @@
     </message>
     <message>
         <source>Lots for Sale on BrickLink...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Multiple lots selected</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -556,9 +495,6 @@
         <source>BrickStore has switched to a new file format (.bsx - BrickStore XML).&lt;br /&gt;&lt;br /&gt;Your document has been automatically imported and it will be converted as soon as you save it.</source>
         <translation type="unfinished"></translation>
     </message>
-</context>
-<context>
-    <name>CInfoBar</name>
     <message>
         <source>Info</source>
         <translation type="unfinished"></translation>
@@ -568,31 +504,23 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Appears In</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Links</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>BrickLink</source>
+        <source>View Infobars</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Catalog</source>
+        <source>MDI environment</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Lots for Sale</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Appears in Sets</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Peeron</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Infomation</source>
+        <source>Tabbed documents</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -775,6 +703,44 @@
     </message>
 </context>
 <context>
+    <name>CListView</name>
+    <message>
+        <source>Configure...</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>CListViewColumnsDialog</name>
+    <message>
+        <source>Configure columns</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Move up</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Move down</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Hide</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>OK</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>CMessageBox</name>
     <message>
         <source>&amp;Cancel</source>
@@ -787,10 +753,6 @@
 </context>
 <context>
     <name>CMultiProgressBar</name>
-    <message>
-        <source>View detailed progress information</source>
-        <translation type="unfinished"></translation>
-    </message>
     <message>
         <source>Cancel all active transfers</source>
         <translation type="unfinished"></translation>
@@ -807,23 +769,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Copy Item Number to Clipboard</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Show BrickLink Catalog Info...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Lots for Sale on BrickLink...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Please wait ... updating</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Show BrickLink Price Guide Info...</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -899,18 +845,6 @@
     </message>
     <message>
         <source>Please wait ... updating</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Show BrickLink Catalog Info...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Show BrickLink Price Guide Info...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Lots for Sale on BrickLink...</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1027,13 +961,128 @@
     </message>
 </context>
 <context>
-    <name>CWindow</name>
+    <name>CTaskInfoWidget</name>
     <message>
-        <source>Reset an active filter</source>
+        <source>min.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Clear</source>
+        <source>Multiple lots selected</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Lots</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Weight</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>CTaskLinksWidget</name>
+    <message>
+        <source>BrickLink</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Catalog</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Price Guide</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Lots for Sale</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Appears in Sets</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Peeron</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Infomation</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>CTaskPaneManager</name>
+    <message>
+        <source>All</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Modern (fixed)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Classic (moveable)</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>CUndoManager</name>
+    <message>
+        <source>Redo</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Undo</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Undo %1 Actions</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Undo 1 Action</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Redo %1 Actions</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Redo 1 Action</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>CUtility</name>
+    <message>
+        <source>Could not rename %1 to %2.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not backup %1 to %2.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not delete %1.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not find %1.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>CWindow</name>
+    <message>
+        <source>Reset an active filter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1256,6 +1305,47 @@
         <source>BrickLink XML File</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Added %1, Merged %2 Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>CWorkspace</name>
+    <message>
+        <source>Close current document</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>Command::AddRemoveItems</name>
+    <message>
+        <source>Added %1 Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Added Item</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Removed %1 Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Removed Item</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>Command::EditItems</name>
+    <message>
+        <source>Changed %1 Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Changed Item</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>DlgAddItem</name>
@@ -1338,11 +1428,39 @@
         <source>&amp;OK</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>&amp;Cancel</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>DlgDBUpdateImpl</name>
     <message>
-        <source>Update not possible</source>
+        <source>Transfer job could not be started.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Downloading binary database... %1/%2 KB</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Finished.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not load the new database.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Transfer job failed: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Version information is not available.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1732,23 +1850,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Use the &amp;local currency</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>$ 1 = %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Classic (moveable)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Modern (on left side)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Modern (on right side)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1764,10 +1866,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Data&amp;bases, if older than</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Price g&amp;uides, if older than</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1776,19 +1874,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>&amp;Inventories, if older than</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>&amp;Defaults</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Default values for &apos;Import BrickLink &amp;Inventory&apos;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Item type:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1840,10 +1930,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Weight</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Metric (g)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1852,15 +1938,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>&amp;Infobar style</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Cache Di&amp;rectory</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Condition:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1869,6 +1947,42 @@
     </message>
     <message>
         <source>Used</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Alt+W</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Use the &amp;local currency:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Alt+L</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Currency</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Language</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Weights</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Item type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Condition</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Alt+C</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1964,6 +2078,10 @@
         <source>Check for Program Updates</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Alt+O</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>DlgUpdateImpl</name>
@@ -1973,10 +2091,6 @@
     </message>
     <message>
         <source>Could not retrieve version information from server:&lt;br /&gt;&lt;br /&gt;%1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Searching for updates ... Please wait</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2013,6 +2127,10 @@
     </message>
     <message>
         <source>&lt;b&gt;Please note:&lt;/b&gt; Your currently installed version is flagged as defective. Please visit %1 to find out the exact cause.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Downloading version index... %1/%2 KB</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

@@ -38,9 +38,9 @@ public:
 protected slots:
 	void doUpdate ( );
 	void gotUpdate ( BrickLink::Picture * );
-
 	void redraw ( );
 	void viewLargeImage ( );
+	void languageChange ( );
 	
 protected:
 	virtual void contextMenuEvent ( QContextMenuEvent *e );
@@ -65,8 +65,8 @@ public:
 protected slots:
 	void doUpdate ( );
 	void gotUpdate ( BrickLink::Picture * );
-
 	void redraw ( );
+	void languageChange ( );
 
 protected:
 	virtual void contextMenuEvent ( QContextMenuEvent *e );

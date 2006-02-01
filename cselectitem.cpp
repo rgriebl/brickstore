@@ -683,7 +683,7 @@ CSelectItem::ViewMode CSelectItem::checkViewMode ( ViewMode ivm, const BrickLink
 	bool ok = true;
 
 	if (( cat == Cat_AllParts ) && ( ivm != ViewMode_List ))
-		ok = ( CMessageBox::question ( this, tr ( "Viewing all items with images is a bandwidth- and memory-hungry operation.<br />Are you sure you want to continue?" ), QMessageBox::Yes, QMessageBox::No ) == QMessageBox::Yes );
+		ok = ( CMessageBox::question ( this, tr( "Viewing all items with images is a bandwidth- and memory-hungry operation.<br />Are you sure you want to continue?" ), QMessageBox::Yes, QMessageBox::No ) == QMessageBox::Yes );
 
 	return ok ? ivm : ViewMode_List;
 }

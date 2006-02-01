@@ -38,7 +38,6 @@ CMultiProgressBar::CMultiProgressBar ( QWidget *parent, const char *name )
 	lay-> addWidget ( m_progress );
 
 	m_stop = new QToolButton ( this );
-	QToolTip::add ( m_stop, tr( "Cancel all active transfers" ));
 	m_stop-> setAutoRaise ( true );
 	m_stop-> setAutoRepeat ( false );
 	m_stop-> hide ( );
@@ -46,6 +45,13 @@ CMultiProgressBar::CMultiProgressBar ( QWidget *parent, const char *name )
 
 	connect ( m_stop, SIGNAL( clicked ( )), this, SIGNAL( stop ( )));
 	recalc ( );
+
+	languageChange ( );
+}
+
+void CMultiProgressBar::languageChange ( )
+{
+	QToolTip::add ( m_stop, tr( "Cancel all active transfers" ));
 }
 
 CMultiProgressBar::~CMultiProgressBar ( )

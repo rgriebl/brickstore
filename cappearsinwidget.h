@@ -39,6 +39,9 @@ public:
 protected:
 	virtual void contextMenuEvent ( QContextMenuEvent *e );
 
+protected slots:
+	void languageChange ( );
+
 private:
 	CAppearsInWidgetPrivate *d;
 };

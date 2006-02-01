@@ -40,6 +40,7 @@ public:
 
 	int infoBarLook ( ) const;
 
+	QString language ( ) const;
 	WeightSystem weightSystem ( ) const;
 
 	QString documentDir ( ) const;
@@ -62,6 +63,7 @@ public:
 public slots:
 	void setInfoBarLook ( int look );
 
+	void setLanguage ( const QString &lang );
 	void setWeightSystem ( WeightSystem ws );
 
 	void setDocumentDir ( const QString &dir );
@@ -82,6 +84,7 @@ signals:
 	void infoBarLookChanged ( int look );
 	void simpleModeChanged ( bool );
 	void windowModeTabbedChanged ( bool );
+	void languageChanged ( );
 	void weightSystemChanged ( CConfig::WeightSystem ws );
 	void showInputErrorsChanged ( bool b );
 	void blUpdateIntervalsChanged ( int pic, int pg );

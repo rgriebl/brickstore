@@ -167,37 +167,37 @@ CItemView::CItemView ( QWidget *parent, const char *name )
 		int hidden = 0;
 
 		switch ( i ) {
-			case Status      : t = tr( "Status" ); align = AlignCenter; width = -16; break;
-			case Picture     : t = tr( "Image" ); align = AlignCenter; width = -40; break;
-			case PartNo      : t = tr( "PartNo" ); width = 10; break;
-			case Description : t = tr( "Description" ); width = 28; break;
-			case Comments    : t = tr( "Comments" ); width = 8; break;
-			case Remarks     : t = tr( "Remarks" ); width = 8; break;
-			case QuantityOrig: t = tr( "Qty. Orig" ); width = 5; hidden = 2; break;
-			case QuantityDiff: t = tr( "Qty. Diff" ); width = 5; hidden = 2; break;
-			case Quantity    : t = tr( "Qty." ); width = 5; break;
-			case Bulk        : t = tr( "Bulk" ); width = 5; break;
-			case PriceOrig   : t = tr( "Pr. Orig" ); width = 8; align = AlignRight; hidden = 2; break;
-			case PriceDiff   : t = tr( "Pr. Diff" ); width = 8; align = AlignRight; hidden = 2; break;
-			case Price       : t = tr( "Price" ); width = 8; align = AlignRight; break;
-			case Total       : t = tr( "Total" ); width = 8; align = AlignRight; break;
-			case Sale        : t = tr( "Sale" ); width = 5; align = AlignRight; break;
-			case Condition   : t = tr( "Cond." ); width = 5; align = AlignHCenter; break;
-			case Color       : t = tr( "Color" ); width = 15; break;
-			case Category    : t = tr( "Category" ); width = 12; break;
-			case ItemType    : t = tr( "Item Type" ); width = 12; break;
-			case TierQ1      : t = tr( "Tier Q1" ); width = 5; break;
-			case TierP1      : t = tr( "Tier P1" ); width = 8; align = AlignRight; break;
-			case TierQ2      : t = tr( "Tier Q2" ); width = 5; break;
-			case TierP2      : t = tr( "Tier P2" ); width = 8; align = AlignRight; break;
-			case TierQ3      : t = tr( "Tier Q3" ); width = 5; break;
-			case TierP3      : t = tr( "Tier P3" ); width = 8; align = AlignRight; break;
-			case LotId       : t = tr( "Lot Id" ); align = AlignLeft; width = 8; hidden = 1; break;
-			case Retain      : t = tr( "Retain" ); align = AlignCenter; width = 8; hidden = 1; break;
-			case Stockroom   : t = tr( "Stockroom" ); align = AlignCenter; width = 8; hidden = 1; break;
-			case Reserved    : t = tr( "Reserved" ); width = 8; hidden = 1; break;
-			case Weight      : t = tr( "Weight" ); align = AlignRight; width = 6; hidden = 1; break;
-			case YearReleased: t = tr( "Year" ); width = 5; hidden = 1; break;
+			case Status      : align = AlignCenter; width = -16; break;
+			case Picture     : align = AlignCenter; width = -40; break;
+			case PartNo      : width = 10; break;
+			case Description : width = 28; break;
+			case Comments    : width = 8; break;
+			case Remarks     : width = 8; break;
+			case QuantityOrig: width = 5; hidden = 2; break;
+			case QuantityDiff: width = 5; hidden = 2; break;
+			case Quantity    : width = 5; break;
+			case Bulk        : width = 5; break;
+			case PriceOrig   : width = 8; align = AlignRight; hidden = 2; break;
+			case PriceDiff   : width = 8; align = AlignRight; hidden = 2; break;
+			case Price       : width = 8; align = AlignRight; break;
+			case Total       : width = 8; align = AlignRight; break;
+			case Sale        : width = 5; align = AlignRight; break;
+			case Condition   : width = 5; align = AlignHCenter; break;
+			case Color       : width = 15; break;
+			case Category    : width = 12; break;
+			case ItemType    : width = 12; break;
+			case TierQ1      : width = 5; break;
+			case TierP1      : width = 8; align = AlignRight; break;
+			case TierQ2      : width = 5; break;
+			case TierP2      : width = 8; align = AlignRight; break;
+			case TierQ3      : width = 5; break;
+			case TierP3      : width = 8; align = AlignRight; break;
+			case LotId       : align = AlignLeft; width = 8; hidden = 1; break;
+			case Retain      : align = AlignCenter; width = 8; hidden = 1; break;
+			case Stockroom   : align = AlignCenter; width = 8; hidden = 1; break;
+			case Reserved    : width = 8; hidden = 1; break;
+			case Weight      : align = AlignRight; width = 6; hidden = 1; break;
+			case YearReleased: width = 5; hidden = 1; break;
 		}
 		int cid = addColumn ( t );
 		setColumnAlignment ( cid, align );
@@ -213,6 +213,51 @@ CItemView::CItemView ( QWidget *parent, const char *name )
 	connect ( this, SIGNAL( contentsMoving ( int, int )), this, SLOT( cancelEdit ( )));
 	connect ( this, SIGNAL( horizontalSliderPressed ( )), this, SLOT( cancelEdit ( )));
 	connect ( this, SIGNAL( verticalSliderPressed ( )),   this, SLOT( cancelEdit ( )));
+
+	languageChange ( );
+}
+
+void CItemView::languageChange ( )
+{
+	for ( int i = 0; i < FieldCount; i++ ) {
+		QString t;
+
+		switch ( i ) {
+			case Status      : t = tr( "Status" ); break;
+			case Picture     : t = tr( "Image" ); break;
+			case PartNo      : t = tr( "PartNo" ); break;
+			case Description : t = tr( "Description" ); break;
+			case Comments    : t = tr( "Comments" ); break;
+			case Remarks     : t = tr( "Remarks" ); break;
+			case QuantityOrig: t = tr( "Qty. Orig" ); break;
+			case QuantityDiff: t = tr( "Qty. Diff" ); break;
+			case Quantity    : t = tr( "Qty." ); break;
+			case Bulk        : t = tr( "Bulk" ); break;
+			case PriceOrig   : t = tr( "Pr. Orig" ); break;
+			case PriceDiff   : t = tr( "Pr. Diff" ); break;
+			case Price       : t = tr( "Price" ); break;
+			case Total       : t = tr( "Total" ); break;
+			case Sale        : t = tr( "Sale" ); break;
+			case Condition   : t = tr( "Cond." ); break;
+			case Color       : t = tr( "Color" ); break;
+			case Category    : t = tr( "Category" ); break;
+			case ItemType    : t = tr( "Item Type" ); break;
+			case TierQ1      : t = tr( "Tier Q1" ); break;
+			case TierP1      : t = tr( "Tier P1" ); break;
+			case TierQ2      : t = tr( "Tier Q2" ); break;
+			case TierP2      : t = tr( "Tier P2" ); break;
+			case TierQ3      : t = tr( "Tier Q3" ); break;
+			case TierP3      : t = tr( "Tier P3" ); break;
+			case LotId       : t = tr( "Lot Id" ); break;
+			case Retain      : t = tr( "Retain" ); break;
+			case Stockroom   : t = tr( "Stockroom" ); break;
+			case Reserved    : t = tr( "Reserved" ); break;
+			case Weight      : t = tr( "Weight" ); break;
+			case YearReleased: t = tr( "Year" ); break;
+		}
+		setColumnText ( i, t );
+	}
+	triggerUpdate ( );
 }
 
 CItemView::~CItemView ( )

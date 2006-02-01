@@ -28,7 +28,6 @@
 #include "citemtypecombo.h"
 #include "cmoney.h"
 #include "cresource.h"
-#include "cinfobar.h"
 
 #include "dlgsettingsimpl.h"
 
@@ -52,7 +51,32 @@ DlgSettingsImpl::DlgSettingsImpl( QWidget *parent, const char *name, bool modal,
 {
 	// ---------------------------------------------------------------------
 
+	QLocale l_active;
+	bool found_best_match = false;
+
 	w_export_browser-> setChecked ( CConfig::inst ( )-> readBoolEntry ( "/General/Export/OpenBrowser", true ));
+
+	readAvailableLanguages ( );
+
+	if ( m_languages. isEmpty ( )) {
+		w_language-> setEnabled ( false );
+	}
+	else {
+		for ( LanguageList::const_iterator it = m_languages. begin ( ); it != m_languages. end ( ); ++it ) {
+			w_language-> insertItem ((*it). second );
+
+			QLocale l ((*it). first );
+
+			if ( !found_best_match ) {
+				if ( l. language ( ) == l_active. language ( )) {
+					if ( l. country ( ) == l_active. country ( )) {
+						found_best_match = true;
+					}
+					w_language-> setCurrentItem ( w_language-> count ( ) - 1 );
+				}
+			}
+		}
+	}
 
 	w_local_currency-> setChecked ( CMoney::inst ( )-> isLocalized ( ));
 	w_local_currency_label-> setText ( w_local_currency_label-> text ( ). arg ( CMoney::inst ( )-> localCurrencySymbol ( )));
@@ -166,6 +190,9 @@ void DlgSettingsImpl::done ( int r )
 
 		CConfig::inst ( )-> writeEntry ( "/General/Export/OpenBrowser",  w_export_browser-> isChecked ( ));
 
+		if ( w_language-> currentItem ( ) >= 0 )
+			CConfig::inst ( )-> setLanguage ( m_languages [w_language-> currentItem ( )]. first );
+
 		CMoney::inst ( )-> setLocalization ( w_local_currency-> isChecked ( ));
 		CMoney::inst ( )-> setFactor ( w_local_currency_factor-> text ( ). toDouble ( ));
 
@@ -217,5 +244,75 @@ void DlgSettingsImpl::done ( int r )
 	}
 
 	DlgSettings::done ( r );
+}
+
+
+bool DlgSettingsImpl::readAvailableLanguages ( )
+{
+	m_languages. clear ( );
+
+	QDomDocument doc;
+	QFile file ( CResource::inst ( )-> locate ( "translations/translations.xml" ));
+
+	if ( file. open ( IO_ReadOnly )) {
+		QString err_str;
+		int err_line = 0, err_col = 0;
+	
+		if ( doc. setContent ( &file, &err_str, &err_line, &err_col )) {
+			QDomElement root = doc. documentElement ( );
+
+			if ( root. isElement ( ) && root. nodeName ( ) == "translations" ) {
+				bool found_default = false;
+
+				for ( QDomNode trans = root. firstChild ( ); !trans. isNull ( ); trans = trans. nextSibling ( )) {
+					if ( !trans. isElement ( ) || ( trans. nodeName ( ) != "translation" ))
+						continue;
+					QDomNamedNodeMap map = trans. attributes ( );
+
+					QString lang_id = map. namedItem ( "lang" ). toAttr ( ). value ( );
+					bool lang_default = map.contains ( "default" );
+
+					if ( lang_default ) {
+						if ( found_default )
+							goto error;
+						found_default = true;
+					}
+
+					if ( lang_id. isEmpty ( ))
+						goto error;
+
+					QString defname, trname;
+
+					for ( QDomNode name = trans. firstChild ( ); !name. isNull ( ); name = name. nextSibling ( )) {
+						if ( !name. isElement ( ) || ( name. nodeName ( ) != "name" ))
+							continue;
+						QDomNamedNodeMap map = name. attributes ( );
+
+						QString tr_id = map. namedItem ( "lang" ). toAttr ( ). value ( );
+
+						if ( tr_id. isEmpty ( ))
+							defname = name. toElement ( ). text ( );
+						else if ( tr_id == lang_id )
+							trname = name. toElement ( ). text ( );
+					}
+
+					if ( defname. isEmpty ( ))
+						goto error;
+
+					QPair <QString, QString> lang_pair;
+					lang_pair. first = lang_id;
+					if ( trname. isEmpty ( ))
+						lang_pair. second = defname;
+					else
+						lang_pair. second = QString ( "%1 (%2)" ). arg( defname, trname );
+
+					m_languages << lang_pair;
+				}
+				return true;
+			}
+		}
+	}
+error:
+	return false;
 }
 

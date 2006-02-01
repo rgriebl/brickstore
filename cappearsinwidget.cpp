@@ -32,10 +32,6 @@ public:
 	AppearsInListItem ( CListView *lv, int qty, const BrickLink::Item *item )
 		: CListViewItem ( lv ), m_qty ( qty ), m_item ( item ), m_picture ( 0 )
 	{ 
-		m_picture = BrickLink::inst ( )-> picture ( m_item, m_item-> defaultColor ( ));
-
-		if ( m_picture )
-			m_picture-> addRef ( );
 	}
 
 	virtual ~AppearsInListItem ( )
@@ -59,13 +55,20 @@ public:
 		QString str = "<table><tr><td rowspan=\"2\">%1</td><td><b>%2</b></td></tr><tr><td>%3</td></tr></table>";
 		QString left_cell;
 
+		if ( !m_picture ) {
+			m_picture = BrickLink::inst ( )-> picture ( m_item, m_item-> defaultColor ( ), true );
+
+			if ( m_picture )
+				m_picture-> addRef ( );
+		}
+
 		if ( m_picture && m_picture-> valid ( )) {
 			QMimeSourceFactory::defaultFactory ( )-> setPixmap ( "appears_in_set_tooltip_picture", m_picture-> pixmap ( ));
 			
 			left_cell = "<img src=\"appears_in_set_tooltip_picture\" />";
 		}
 		else if ( m_picture && ( m_picture-> updateStatus ( ) == BrickLink::Updating )) {
-			left_cell = "<i>" + CAppearsInWidget::tr ( "[Image is loading]" ) + "</i>";
+			left_cell = "<i>" + CAppearsInWidget::tr( "[Image is loading]" ) + "</i>";
 		}
 
 		return str. arg( left_cell ). arg( m_item-> id ( )). arg( m_item-> name ( ));
@@ -100,20 +103,13 @@ public:
 
     void maybeTip ( const QPoint &pos )
 	{
-		if ( !parentWidget ( ) || !m_aiw /*|| !m_iv-> showToolTips ( )*/ )
+		if ( !parentWidget ( ) || !m_aiw /*|| !m_aiw-> showToolTips ( )*/ )
 			return;
 
 		AppearsInListItem *item = static_cast <AppearsInListItem *> ( m_aiw-> itemAt ( pos ));
-		QPoint contentpos = m_aiw-> viewportToContents ( pos );
 		
-		if ( !item )
-			return;
-
-		QString text = item-> toolTip ( );
-
-		QRect r = m_aiw-> itemRect ( item );
-		r. setTopLeft ( pos );
-		tip ( r, text );
+		if ( item )
+			tip ( m_aiw-> itemRect ( item ), item-> toolTip ( ));
 	}
 
 private:
@@ -146,12 +142,21 @@ CAppearsInWidget::CAppearsInWidget ( QWidget *parent, const char *name, WFlags /
 	setAlwaysShowSelection ( true );
 	header ( )-> setMovingEnabled ( false );
 	header ( )-> setResizeEnabled ( false );
-	addColumn ( tr( "#" ));
-	addColumn ( tr( "Set" ));
-	addColumn ( tr( "Name" ));
+	addColumn ( QString ( ));
+	addColumn ( QString ( ));
+	addColumn ( QString ( ));
 	setResizeMode ( QListView::LastColumn );
 
 	d-> m_tooltips = new AppearsInToolTip ( viewport ( ), this );
+
+	languageChange ( );
+}
+
+void CAppearsInWidget::languageChange ( )
+{
+	setColumnText ( 0, tr( "#" ));
+	setColumnText ( 1, tr( "Set" ));
+	setColumnText ( 2, tr( "Name" ));
 }
 
 CAppearsInWidget::~CAppearsInWidget ( )

@@ -17,7 +17,7 @@
 #include <qiconset.h>
 #include <qfile.h>
 #include <qdir.h>
-#include <qtextcodec.h>
+#include <qlocale.h>
 
 #if defined( Q_OS_MACX )
 #include <CoreFoundation/CFURL.h>
@@ -128,19 +128,17 @@ QString CResource::locate ( const QString &name, LocateType lt )
 	return QString::null;
 }
 
-QTranslator *CResource::translation ( const char *name )
+QTranslator *CResource::translation ( const char *name, const QLocale &locale )
 {
 	QTranslator *trans = new QTranslator ( qApp );
 
-	QString locale = CConfig::inst ( )-> readEntry ( "/General/Locale", QTextCodec::locale ( ));
-
 	if ( qSharedBuild ( ) && !qstrcmp ( name, "qt" )) {
-		if ( trans-> load ( QString( qInstallPathTranslations ( )) + "/" + name + "_" + locale ))
+		if ( trans-> load ( QString( qInstallPathTranslations ( )) + "/" + name + "_" + locale. name ( )))
 			return trans;
 	}
 	
 	for ( QStringList::const_iterator it = m_paths. begin ( ); it != m_paths. end ( ); ++it ) {
-		QString s = *it + "/translations/" + name + "_" + locale;
+		QString s = *it + "/translations/" + name + "_" + locale. name ( );
 
 		if ( trans-> load ( s ))
 			return trans;

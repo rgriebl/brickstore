@@ -304,6 +304,22 @@ void CConfig::setDataDir ( const QString &dir )
 	writeEntry ( "/BrickLink/DataDir", dir );
 }
 
+QString CConfig::language ( ) const
+{
+	return readEntry ( "/General/Locale" );
+}
+
+void CConfig::setLanguage ( const QString &lang )
+{
+	QString old = language ( );
+
+	if ( old != lang ) {
+		writeEntry ( "/General/Locale", lang );
+
+		emit languageChanged ( );
+	}
+}
+
 CConfig::WeightSystem CConfig::weightSystem ( ) const
 {
 	return m_weight_system;

@@ -8,7 +8,7 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>473</width>
+            <width>372</width>
             <height>304</height>
         </rect>
     </property>
@@ -53,48 +53,54 @@
                         <property name="text">
                             <string>Open a &amp;Web-Browser window when exporting to the Clipboard</string>
                         </property>
+                        <property name="accel">
+                            <string>Alt+W</string>
+                        </property>
                     </widget>
+                    <spacer>
+                        <property name="name">
+                            <cstring>spacer7</cstring>
+                        </property>
+                        <property name="orientation">
+                            <enum>Vertical</enum>
+                        </property>
+                        <property name="sizeType">
+                            <enum>Fixed</enum>
+                        </property>
+                        <property name="sizeHint">
+                            <size>
+                                <width>20</width>
+                                <height>6</height>
+                            </size>
+                        </property>
+                    </spacer>
                     <widget class="QLayoutWidget">
                         <property name="name">
-                            <cstring>layout4</cstring>
+                            <cstring>layout15</cstring>
                         </property>
-                        <vbox>
+                        <grid>
                             <property name="name">
                                 <cstring>unnamed</cstring>
                             </property>
-                            <widget class="QCheckBox">
+                            <widget class="QLayoutWidget" row="2" column="1">
                                 <property name="name">
-                                    <cstring>w_local_currency</cstring>
-                                </property>
-                                <property name="text">
-                                    <string>Use the &amp;local currency</string>
-                                </property>
-                            </widget>
-                            <widget class="QLayoutWidget">
-                                <property name="name">
-                                    <cstring>layout5</cstring>
+                                    <cstring>layout13</cstring>
                                 </property>
                                 <hbox>
                                     <property name="name">
                                         <cstring>unnamed</cstring>
                                     </property>
-                                    <spacer>
+                                    <widget class="QCheckBox">
                                         <property name="name">
-                                            <cstring>spacer9</cstring>
+                                            <cstring>w_local_currency</cstring>
                                         </property>
-                                        <property name="orientation">
-                                            <enum>Horizontal</enum>
+                                        <property name="text">
+                                            <string>Use the &amp;local currency:</string>
                                         </property>
-                                        <property name="sizeType">
-                                            <enum>Fixed</enum>
+                                        <property name="accel">
+                                            <string>Alt+L</string>
                                         </property>
-                                        <property name="sizeHint">
-                                            <size>
-                                                <width>20</width>
-                                                <height>10</height>
-                                            </size>
-                                        </property>
-                                    </spacer>
+                                    </widget>
                                     <widget class="QLabel">
                                         <property name="name">
                                             <cstring>w_local_currency_label</cstring>
@@ -133,7 +139,47 @@
                                     </widget>
                                     <spacer>
                                         <property name="name">
-                                            <cstring>spacer10</cstring>
+                                            <cstring>spacer9</cstring>
+                                        </property>
+                                        <property name="orientation">
+                                            <enum>Horizontal</enum>
+                                        </property>
+                                        <property name="sizeType">
+                                            <enum>Fixed</enum>
+                                        </property>
+                                        <property name="sizeHint">
+                                            <size>
+                                                <width>20</width>
+                                                <height>16</height>
+                                            </size>
+                                        </property>
+                                    </spacer>
+                                </hbox>
+                            </widget>
+                            <widget class="QLabel" row="2" column="0">
+                                <property name="name">
+                                    <cstring>textLabel1_2_2</cstring>
+                                </property>
+                                <property name="text">
+                                    <string>Currency</string>
+                                </property>
+                            </widget>
+                            <widget class="QLayoutWidget" row="0" column="1">
+                                <property name="name">
+                                    <cstring>layout14</cstring>
+                                </property>
+                                <hbox>
+                                    <property name="name">
+                                        <cstring>unnamed</cstring>
+                                    </property>
+                                    <widget class="QComboBox">
+                                        <property name="name">
+                                            <cstring>w_language</cstring>
+                                        </property>
+                                    </widget>
+                                    <spacer>
+                                        <property name="name">
+                                            <cstring>spacer13</cstring>
                                         </property>
                                         <property name="orientation">
                                             <enum>Horizontal</enum>
@@ -143,88 +189,113 @@
                                         </property>
                                         <property name="sizeHint">
                                             <size>
-                                                <width>161</width>
+                                                <width>131</width>
                                                 <height>20</height>
                                             </size>
                                         </property>
                                     </spacer>
                                 </hbox>
                             </widget>
-                        </vbox>
-                    </widget>
-                    <widget class="QLayoutWidget">
-                        <property name="name">
-                            <cstring>layout8</cstring>
-                        </property>
-                        <hbox>
-                            <property name="name">
-                                <cstring>unnamed</cstring>
-                            </property>
-                            <widget class="QLabel">
+                            <widget class="QLabel" row="0" column="0">
+                                <property name="name">
+                                    <cstring>textLabel1_2</cstring>
+                                </property>
+                                <property name="text">
+                                    <string>Language</string>
+                                </property>
+                            </widget>
+                            <widget class="QLabel" row="1" column="0">
                                 <property name="name">
                                     <cstring>textLabel1_4</cstring>
                                 </property>
                                 <property name="text">
-                                    <string>Weight</string>
+                                    <string>Weights</string>
                                 </property>
                             </widget>
-                            <widget class="QButtonGroup">
+                            <widget class="QLayoutWidget" row="1" column="1">
                                 <property name="name">
-                                    <cstring>w_weight</cstring>
-                                </property>
-                                <property name="frameShape">
-                                    <enum>NoFrame</enum>
-                                </property>
-                                <property name="title">
-                                    <string></string>
-                                </property>
-                                <property name="selectedId" stdset="0">
-                                    <number>-1</number>
+                                    <cstring>layout12</cstring>
                                 </property>
                                 <hbox>
                                     <property name="name">
                                         <cstring>unnamed</cstring>
                                     </property>
-                                    <property name="margin">
-                                        <number>0</number>
-                                    </property>
-                                    <widget class="QRadioButton">
+                                    <widget class="QButtonGroup">
                                         <property name="name">
-                                            <cstring>radioButton2</cstring>
+                                            <cstring>w_weight</cstring>
                                         </property>
-                                        <property name="text">
-                                            <string>Metric (g)</string>
+                                        <property name="frameShape">
+                                            <enum>NoFrame</enum>
                                         </property>
+                                        <property name="title">
+                                            <string></string>
+                                        </property>
+                                        <property name="selectedId" stdset="0">
+                                            <number>-1</number>
+                                        </property>
+                                        <hbox>
+                                            <property name="name">
+                                                <cstring>unnamed</cstring>
+                                            </property>
+                                            <property name="margin">
+                                                <number>0</number>
+                                            </property>
+                                            <widget class="QRadioButton">
+                                                <property name="name">
+                                                    <cstring>radioButton2</cstring>
+                                                </property>
+                                                <property name="text">
+                                                    <string>Metric (g)</string>
+                                                </property>
+                                            </widget>
+                                            <widget class="QRadioButton">
+                                                <property name="name">
+                                                    <cstring>radioButton3</cstring>
+                                                </property>
+                                                <property name="text">
+                                                    <string>Imperial (oz)</string>
+                                                </property>
+                                            </widget>
+                                        </hbox>
                                     </widget>
-                                    <widget class="QRadioButton">
+                                    <spacer>
                                         <property name="name">
-                                            <cstring>radioButton3</cstring>
+                                            <cstring>spacer12_2</cstring>
                                         </property>
-                                        <property name="text">
-                                            <string>Imperial (oz)</string>
+                                        <property name="orientation">
+                                            <enum>Horizontal</enum>
                                         </property>
-                                    </widget>
+                                        <property name="sizeType">
+                                            <enum>Expanding</enum>
+                                        </property>
+                                        <property name="sizeHint">
+                                            <size>
+                                                <width>140</width>
+                                                <height>20</height>
+                                            </size>
+                                        </property>
+                                    </spacer>
                                 </hbox>
                             </widget>
-                            <spacer>
-                                <property name="name">
-                                    <cstring>spacer12_2</cstring>
-                                </property>
-                                <property name="orientation">
-                                    <enum>Horizontal</enum>
-                                </property>
-                                <property name="sizeType">
-                                    <enum>Expanding</enum>
-                                </property>
-                                <property name="sizeHint">
-                                    <size>
-                                        <width>51</width>
-                                        <height>20</height>
-                                    </size>
-                                </property>
-                            </spacer>
-                        </hbox>
+                        </grid>
                     </widget>
+                    <spacer>
+                        <property name="name">
+                            <cstring>spacer7_3</cstring>
+                        </property>
+                        <property name="orientation">
+                            <enum>Vertical</enum>
+                        </property>
+                        <property name="sizeType">
+                            <enum>Fixed</enum>
+                        </property>
+                        <property name="sizeHint">
+                            <size>
+                                <width>20</width>
+                                <height>6</height>
+                            </size>
+                        </property>
+                    </spacer>
                     <widget class="QLayoutWidget">
                         <property name="name">
                             <cstring>layout11_2</cstring>
@@ -267,7 +338,7 @@
                     </widget>
                     <spacer>
                         <property name="name">
-                            <cstring>spacer7</cstring>
+                            <cstring>spacer15_2</cstring>
                         </property>
                         <property name="orientation">
                             <enum>Vertical</enum>
@@ -278,7 +349,7 @@
                         <property name="sizeHint">
                             <size>
                                 <width>20</width>
-                                <height>30</height>
+                                <height>21</height>
                             </size>
                         </property>
                     </spacer>
@@ -482,7 +553,7 @@
                                     </sizepolicy>
                                 </property>
                                 <property name="text">
-                                    <string>Item type:</string>
+                                    <string>Item type</string>
                                 </property>
                             </widget>
                             <widget class="QComboBox">
@@ -541,7 +612,7 @@
                                             </sizepolicy>
                                         </property>
                                         <property name="text">
-                                            <string>Item type:</string>
+                                            <string>Item type</string>
                                         </property>
                                     </widget>
                                     <widget class="QComboBox">
@@ -581,7 +652,7 @@
                                             <cstring>textLabel1_5</cstring>
                                         </property>
                                         <property name="text">
-                                            <string>Condition:</string>
+                                            <string>Condition</string>
                                         </property>
                                     </widget>
                                     <widget class="QButtonGroup">
@@ -901,6 +972,9 @@
                     </property>
                     <property name="text">
                         <string>&amp;Cancel</string>
+                    </property>
+                    <property name="accel">
+                        <string>Alt+C</string>
                     </property>
                     <property name="autoDefault">
                         <bool>true</bool>

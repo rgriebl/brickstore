@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<translations>
+
+	<translation lang="en" default="true">
+		<name>English</name>
+		<name lang="de">Englisch</name>
+		<name lang="fr">Anglais</name>
+	</translation>
+
+	<translation lang="de">
+		<name>German</name>
+		<name lang="de">Deutsch</name>
+		<name lang="fr">Allemand</name>
+	</translation>
+
+	<translation lang="fr">
+		<name>French</name>
+		<name lang="de">Französisch</name>
+		<name lang="fr">Français</name>
+	</translation>
+
+</translations>

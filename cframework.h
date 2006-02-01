@@ -70,6 +70,9 @@ signals:
 	void selectionChanged ( CWindow *, const QPtrList<BrickLink::InvItem> & );
 	void statisticsChanged ( CWindow * );
 
+protected slots:
+	void languageChange ( );
+
 private slots:
 	void openDocument ( const QString & );
 
@@ -127,19 +130,6 @@ private:
 private:
 	enum { MaxRecentFiles = 9 };
 
-	enum ActionCategory {
-		AC_File,
-		AC_Edit,
-		AC_View,
-		AC_Extras,
-		AC_Window,
-		AC_Help,
-
-		AC_Context,
-
-		AC_Count
-	};
-
 private:
 	class RecentListProvider : public CListAction::Provider {
 	public:
@@ -167,18 +157,16 @@ private:
 private:
 	QIconSet *iconSet ( const char *name );
 
-	QAction *findAction ( const char *name, ActionCategory cat = AC_Count );
+	QAction *findAction ( const char *name );
 	void connectAction ( bool do_connect, const char *name, CWindow *window, const char *slot, bool (CWindow::* is_on_func ) ( ) const = 0 );
 	void connectAllActions ( bool do_connect, CWindow *window );
 	void createActions ( );
-	QPopupMenu *createMenu ( ActionCategory cat, const QStringList & );
+	QPopupMenu *createMenu ( const QStringList & );
 	QToolBar *createToolBar ( const QString &label, const QStringList & );
 	void createStatusBar ( );
 	CWindow *createWindow ( );
 	bool showOrDeleteWindow ( CWindow *w, bool b );
 
-
-	QPtrList<QAction> m_actions [AC_Count];
 	QMap<QAction *, bool ( CWindow::* ) ( ) const> m_toggle_updates;
 
 	CWorkspace * m_mdi;
@@ -203,6 +191,13 @@ private:
 	QRect m_normal_geometry;
 	
 	bool m_running;
+
+	int m_menuid_file;
+	int m_menuid_edit;
+	int m_menuid_view;
+	int m_menuid_extras;
+	int m_menuid_window;
+	int m_menuid_help;
 };
 
 #endif

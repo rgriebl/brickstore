@@ -99,6 +99,7 @@ HEADERS += bricklink.h \
            citemview.h \
            clistaction.h \
            clistview.h \
+           clistview_p.h \
            cmessagebox.h \
            cmoney.h \
            cmultiprogressbar.h \
@@ -114,7 +115,7 @@ HEADERS += bricklink.h \
            cselectitem.h \
            cspinner.h \
            ctaskpanemanager.h \
-		   ctaskwidgets.h \
+           ctaskwidgets.h \
            ctransfer.h \
            cundo.h \
            cundo_p.h \
@@ -128,7 +129,7 @@ SOURCES += bricklink.cpp \
            bricklink_picture.cpp \
            bricklink_inventory.cpp \
            bricklink_priceguide.cpp \
-		   bricklink_textimport.cpp \
+           bricklink_textimport.cpp \
            capplication.cpp \
            cappearsinwidget.cpp \
            cconfig.cpp \

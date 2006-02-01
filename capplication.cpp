@@ -92,15 +92,12 @@ CApplication::CApplication ( int _argc, char **_argv )
 	(void) CResource::inst ( );
 	(void) CReportManager::inst ( );
 
-	QTranslator *trans;
+	m_trans_qt = 0;
+	m_trans_brickstore = 0;
 
-	trans = CResource::inst ( )-> translation ( "qt" );
-	if ( trans )
-		installTranslator ( trans );
+	updateTranslations ( );
 
-	trans = CResource::inst ( )-> translation ( "brickstore" );
-	if ( trans )
-		installTranslator ( trans );
+	connect ( CConfig::inst ( ), SIGNAL( languageChanged ( )), this, SLOT( updateTranslations ( )));
 
 	initStrings ( );
 
@@ -144,6 +141,27 @@ CApplication::~CApplication ( )
 	delete CConfig::inst ( );
 }
 
+void CApplication::updateTranslations ( )
+{
+	QString locale = CConfig::inst ( )-> language ( );
+	if ( locale. isEmpty ( ))
+		locale = QLocale::system ( ). name ( );
+	QLocale::setDefault ( QLocale ( locale ));
+
+	if ( m_trans_qt )
+		removeTranslator ( m_trans_qt );
+	if ( m_trans_brickstore )
+		removeTranslator ( m_trans_brickstore );
+
+	m_trans_qt = CResource::inst ( )-> translation ( "qt", locale );
+	if ( m_trans_qt )
+		installTranslator ( m_trans_qt );
+
+	m_trans_brickstore = CResource::inst ( )-> translation ( "brickstore", locale );
+	if ( m_trans_brickstore )
+		installTranslator ( m_trans_brickstore );
+}
+
 void CApplication::exit ( int code )
 {
 	QApplication::exit ( code );
@@ -157,31 +175,6 @@ void CApplication::rebuildDatabase ( )
 	rdb-> exec ( );
 }
 
-
-void CApplication::demoVersion ( )
-{
-#if defined( BS_DEMO )
-	static const char *layout_text =
-		"<qt><center>"
-			"<table border=\"0\"><tr>"
-				"<td valign=\"middle\" align=\"right\"><img src=\"brickstore-icon\" /></td>"
-				"<td align=\"left\"><big>"
-					"<big><strong>%1</strong></big>"
-					"<br />%2<br />"
-					"<strong>%3</strong>"
-				"</big></td>"
-			"</tr></table>"
-			"<br />%4"
-		"</center</qt>";
-
-	QString text = QString ( layout_text ). arg ( appName ( ), m_copyright, m_version, m_demo );
-
-	DlgMessageImpl d ( appName ( ), text, mainWidget ( ));
-	d. exec ( );
-
-	QTimer::singleShot ( BS_DEMO * 60 * 1000, this, SLOT( demoVersion ( )));
-#endif
-}
 
 QString CApplication::appName ( ) const
 {
@@ -289,7 +282,7 @@ void CApplication::exitBrickLink ( )
 
 void CApplication::initStrings ( )
 {
-	static const char *legal_text = QT_TRANSLATE_NOOP( "CApplication",
+	m_legal = QT_TR_NOOP(
 		"<p>"
 		"This program is free software; it may be distributed and/or modified "
 		"under the terms of the GNU General Public License version 2 as published "
@@ -313,7 +306,7 @@ void CApplication::initStrings ( )
 		"</p>"
 	);
 
-	static const char *demo_text = QT_TRANSLATE_NOOP( "CApplication",
+	m_demo = QT_TR_NOOP(
 		"This is an <b>unrestricted</b> demo version."
 		"<br /><br />"
 		"If you want to support the development of this program "
@@ -321,14 +314,8 @@ void CApplication::initStrings ( )
 		"check out %1 how to get the non-demo version." 
 	);
 
-	QString url  = "<a href=\"http://" BRICKSTORE_URL "\">" BRICKSTORE_URL "</a>";
-	QString mail = "<a href=\"mailto:" BRICKSTORE_MAIL "\">" BRICKSTORE_MAIL "</a>";
-
-	m_copyright  = tr( "Copyright &copy; %1" ). arg ( BRICKSTORE_COPYRIGHT );
-	m_version    = tr( "Version %1" ). arg ( BRICKSTORE_VERSION );
-	m_support    = tr( "Visit %1, or send an email to %2" ). arg ( url ). arg ( mail );
-	m_demo       = tr( demo_text ). arg ( url );
-	m_legal      = tr( legal_text );
+	m_url  = "<a href=\"http://" BRICKSTORE_URL "\">" BRICKSTORE_URL "</a>";
+	m_mail = "<a href=\"mailto:" BRICKSTORE_MAIL "\">" BRICKSTORE_MAIL "</a>";
 
 	m_sys_name    = "(unknown)";
 	m_sys_version = "(unknown)";
@@ -369,6 +356,7 @@ void CApplication::initStrings ( )
 #endif
 }
 
+
 void CApplication::about ( )
 {
 	static const char *layout_text =
@@ -384,10 +372,42 @@ void CApplication::about ( )
 			"<br />%4"
 		"</center>%5</qt>";
 
-	QString text = QString ( layout_text ). arg ( appName ( )). arg ( m_copyright, m_version, m_support, m_legal );
+	QString copyright = tr( "Copyright &copy; %1" ). arg ( BRICKSTORE_COPYRIGHT );
+	QString version   = tr( "Version %1" ). arg ( BRICKSTORE_VERSION );
+	QString support   = tr( "Visit %1, or send an email to %2" ). arg ( m_url ). arg ( m_mail );
+
+	QString text = QString ( layout_text ). arg ( appName ( )). arg ( copyright, version, support, tr( m_legal ));
 
 	DlgMessageImpl d ( appName ( ), text, mainWidget ( ));
 	d. exec ( );
+}
+
+void CApplication::demoVersion ( )
+{
+#if defined( BS_DEMO )
+	static const char *layout_text =
+		"<qt><center>"
+			"<table border=\"0\"><tr>"
+				"<td valign=\"middle\" align=\"right\"><img src=\"brickstore-icon\" /></td>"
+				"<td align=\"left\"><big>"
+					"<big><strong>%1</strong></big>"
+					"<br />%2<br />"
+					"<strong>%3</strong>"
+				"</big></td>"
+			"</tr></table>"
+			"<br />%4"
+		"</center</qt>";
+
+	QString copyright = tr( "Copyright &copy; %1" ). arg ( BRICKSTORE_COPYRIGHT );
+	QString version   = tr( "Version %1" ). arg ( BRICKSTORE_VERSION );
+
+	QString text = QString ( layout_text ). arg ( appName ( ), copyright, version, tr( m_demo ));
+
+	DlgMessageImpl d ( appName ( ), text, mainWidget ( ));
+	d. exec ( );
+
+	QTimer::singleShot ( BS_DEMO * 60 * 1000, this, SLOT( demoVersion ( )));
+#endif
 }
 
 void CApplication::checkForUpdates ( )

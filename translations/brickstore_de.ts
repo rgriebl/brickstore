@@ -7,39 +7,39 @@
     </message>
     <message>
         <source>Items of type: %1</source>
-        <translation>Teile vom Typ: %1</translation>
+        <translation type="obsolete">Teile vom Typ: %1</translation>
     </message>
     <message>
         <source>Not all BrickLink database were successfully updated (%1 failed).</source>
-        <translation>Nicht alle BrickLink Datenbanken wurden erfolgreich aktualisiert (%1 waren fehlerhaft).</translation>
+        <translation type="obsolete">Nicht alle BrickLink Datenbanken wurden erfolgreich aktualisiert (%1 waren fehlerhaft).</translation>
     </message>
     <message>
         <source>Updating the BrickLink database files was successfull.</source>
-        <translation>Alle BrickLink Datenbankdateien wurden erfolgreich aktualisiert.</translation>
+        <translation type="obsolete">Alle BrickLink Datenbankdateien wurden erfolgreich aktualisiert.</translation>
     </message>
     <message>
         <source>Item types</source>
-        <translation>Teiletypen</translation>
+        <translation type="obsolete">Teiletypen</translation>
     </message>
     <message>
         <source>Categories</source>
-        <translation>Kategorien</translation>
+        <translation type="obsolete">Kategorien</translation>
     </message>
     <message>
         <source>Colors</source>
-        <translation>Farben</translation>
+        <translation type="obsolete">Farben</translation>
     </message>
     <message>
         <source>Color guide</source>
-        <translation>Farbübersicht</translation>
+        <translation type="obsolete">Farbübersicht</translation>
     </message>
     <message>
         <source>Default image 1</source>
-        <translation>Standard Bild 1</translation>
+        <translation type="obsolete">Standard Bild 1</translation>
     </message>
     <message>
         <source>Default Image 2</source>
-        <translation>Standard Bild 2</translation>
+        <translation type="obsolete">Standard Bild 2</translation>
     </message>
     <message>
         <source>Could not parse the XML data for order #%1:&lt;br /&gt;&lt;i&gt;Line %2, column %3: %4&lt;/i&gt;</source>
@@ -51,7 +51,7 @@
     </message>
     <message>
         <source>This store inventory contains %1 invalid item(s).</source>
-        <translation>Dieser Shop-Bestand enhält %1 ungültige(s) Teil(e).</translation>
+        <translation type="obsolete">Dieser Shop-Bestand enhält %1 ungültige(s) Teil(e).</translation>
     </message>
     <message>
         <source>Could not parse the XML data for the store inventory.</source>
@@ -63,11 +63,11 @@
     </message>
     <message>
         <source>This order contains %1 invalid item(s).</source>
-        <translation>Diese Bestellung enhält %1 ungültige(s) Teil(e).</translation>
+        <translation type="obsolete">Diese Bestellung enhält %1 ungültige(s) Teil(e).</translation>
     </message>
     <message>
         <source>This inventory contains %1 invalid item(s).</source>
-        <translation>Diese Inventarliste enhält %1 ungültige(s) Teil(e).</translation>
+        <translation type="obsolete">Diese Inventarliste enhält %1 ungültige(s) Teil(e).</translation>
     </message>
     <message>
         <source>Data directory &apos;%1&apos; is not both read- and writable.</source>
@@ -75,11 +75,30 @@
     </message>
     <message>
         <source>Inventory list</source>
-        <translation>Inventarlisten</translation>
+        <translation type="obsolete">Inventarlisten</translation>
     </message>
     <message>
         <source>Peeron color table</source>
-        <translation>Peeron Farbtabelle</translation>
+        <translation type="obsolete">Peeron Farbtabelle</translation>
+    </message>
+</context>
+<context>
+    <name>CAppearsInWidget</name>
+    <message>
+        <source>[Image is loading]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>#</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation type="unfinished">Name</translation>
     </message>
 </context>
 <context>
@@ -123,11 +142,11 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>Infobar</source>
-        <translation>Infoleiste</translation>
+        <translation type="obsolete">Infoleiste</translation>
     </message>
     <message>
         <source>BrickStore</source>
-        <translation>BrickStore</translation>
+        <translation type="obsolete">BrickStore</translation>
     </message>
     <message>
         <source>Priceguide updates</source>
@@ -220,7 +239,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>Undo</source>
-        <translation>Rückgängig</translation>
+        <translation type="obsolete">Rückgängig</translation>
     </message>
     <message>
         <source>Ctrl+Z</source>
@@ -229,7 +248,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>Redo</source>
-        <translation>Wiederherstellen</translation>
+        <translation type="obsolete">Wiederherstellen</translation>
     </message>
     <message>
         <source>Ctrl+Y</source>
@@ -300,7 +319,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>View Infobar</source>
-        <translation>Infoleiste anzeigen</translation>
+        <translation type="obsolete">Infoleiste anzeigen</translation>
     </message>
     <message>
         <source>View Statusbar</source>
@@ -427,7 +446,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>Multiple lots selected</source>
-        <translation>Mehrere Posten ausgewählt</translation>
+        <translation type="obsolete">Mehrere Posten ausgewählt</translation>
     </message>
     <message>
         <source>Unsaved modifications</source>
@@ -562,44 +581,72 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
         <source>BrickStore has switched to a new file format (.bsx - BrickStore XML).&lt;br /&gt;&lt;br /&gt;Your document has been automatically imported and it will be converted as soon as you save it.</source>
         <translation>Das Dateiformat von BrickStore hat sich geändert (.bsx - BrickStore XML).&lt;br /&gt;&lt;br /&gt;Das Dokument wurde automatisch importiert und es wird beim Abspeichern in das neue Format konvertiert.</translation>
     </message>
+    <message>
+        <source>Info</source>
+        <translation type="unfinished">Info</translation>
+    </message>
+    <message>
+        <source>Price Guide</source>
+        <translation type="unfinished">Richtpreise</translation>
+    </message>
+    <message>
+        <source>Appears In</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Links</source>
+        <translation type="unfinished">Verweise</translation>
+    </message>
+    <message>
+        <source>View Infobars</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>MDI environment</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Tabbed documents</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>CInfoBar</name>
     <message>
         <source>Price Guide</source>
-        <translation>Richtpreise</translation>
+        <translation type="obsolete">Richtpreise</translation>
     </message>
     <message>
         <source>Info</source>
-        <translation>Info</translation>
+        <translation type="obsolete">Info</translation>
     </message>
     <message>
         <source>Links</source>
-        <translation>Verweise</translation>
+        <translation type="obsolete">Verweise</translation>
     </message>
     <message>
         <source>BrickLink</source>
-        <translation>BrickLink</translation>
+        <translation type="obsolete">BrickLink</translation>
     </message>
     <message>
         <source>Catalog</source>
-        <translation>Katalog</translation>
+        <translation type="obsolete">Katalog</translation>
     </message>
     <message>
         <source>Lots for Sale</source>
-        <translation>Verkaufsangebote</translation>
+        <translation type="obsolete">Verkaufsangebote</translation>
     </message>
     <message>
         <source>Appears in Sets</source>
-        <translation>Enthalten in Sets</translation>
+        <translation type="obsolete">Enthalten in Sets</translation>
     </message>
     <message>
         <source>Peeron</source>
-        <translation>Peeron</translation>
+        <translation type="obsolete">Peeron</translation>
     </message>
     <message>
         <source>Infomation</source>
-        <translation>Informationen</translation>
+        <translation type="obsolete">Informationen</translation>
     </message>
 </context>
 <context>
@@ -781,6 +828,44 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
 </context>
 <context>
+    <name>CListView</name>
+    <message>
+        <source>Configure...</source>
+        <translation type="unfinished">Einstellungen...</translation>
+    </message>
+</context>
+<context>
+    <name>CListViewColumnsDialog</name>
+    <message>
+        <source>Configure columns</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Move up</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Move down</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Hide</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>OK</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>CMessageBox</name>
     <message>
         <source>&amp;Cancel</source>
@@ -795,7 +880,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <name>CMultiProgressBar</name>
     <message>
         <source>View detailed progress information</source>
-        <translation>Zeige detailierte Informationen zum Fortschritt</translation>
+        <translation type="obsolete">Zeige detailierte Informationen zum Fortschritt</translation>
     </message>
     <message>
         <source>Cancel all active transfers</source>
@@ -818,19 +903,19 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>Copy Item Number to Clipboard</source>
-        <translation>Kopiere Teilenummer in die Zwischenablage</translation>
+        <translation type="obsolete">Kopiere Teilenummer in die Zwischenablage</translation>
     </message>
     <message>
         <source>Show BrickLink Catalog Info...</source>
-        <translation>BrickLink Kataloginformationen...</translation>
+        <translation type="obsolete">BrickLink Kataloginformationen...</translation>
     </message>
     <message>
         <source>Lots for Sale on BrickLink...</source>
-        <translation>Verkaufsangebote auf BrickLink...</translation>
+        <translation type="obsolete">Verkaufsangebote auf BrickLink...</translation>
     </message>
     <message>
         <source>Show BrickLink Price Guide Info...</source>
-        <translation>BrickLink Richtpreisinformationen...</translation>
+        <translation type="obsolete">BrickLink Richtpreisinformationen...</translation>
     </message>
 </context>
 <context>
@@ -909,15 +994,15 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>Show BrickLink Catalog Info...</source>
-        <translation>BrickLink Kataloginformationen...</translation>
+        <translation type="obsolete">BrickLink Kataloginformationen...</translation>
     </message>
     <message>
         <source>Show BrickLink Price Guide Info...</source>
-        <translation>BrickLink Richtpreisinformationen...</translation>
+        <translation type="obsolete">BrickLink Richtpreisinformationen...</translation>
     </message>
     <message>
         <source>Lots for Sale on BrickLink...</source>
-        <translation>Verkaufsangebote auf BrickLink...</translation>
+        <translation type="obsolete">Verkaufsangebote auf BrickLink...</translation>
     </message>
 </context>
 <context>
@@ -1033,10 +1118,129 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
 </context>
 <context>
+    <name>CTaskInfoWidget</name>
+    <message>
+        <source>min.</source>
+        <translation type="unfinished">min.</translation>
+    </message>
+    <message>
+        <source>Multiple lots selected</source>
+        <translation type="unfinished">Mehrere Posten ausgewählt</translation>
+    </message>
+    <message>
+        <source>Lots</source>
+        <translation type="unfinished">Posten</translation>
+    </message>
+    <message>
+        <source>Items</source>
+        <translation type="unfinished">Teile</translation>
+    </message>
+    <message>
+        <source>Value</source>
+        <translation type="unfinished">Wert</translation>
+    </message>
+    <message>
+        <source>Weight</source>
+        <translation type="unfinished">Gewicht</translation>
+    </message>
+</context>
+<context>
+    <name>CTaskLinksWidget</name>
+    <message>
+        <source>BrickLink</source>
+        <translation type="unfinished">BrickLink</translation>
+    </message>
+    <message>
+        <source>Catalog</source>
+        <translation type="unfinished">Katalog</translation>
+    </message>
+    <message>
+        <source>Price Guide</source>
+        <translation type="unfinished">Richtpreise</translation>
+    </message>
+    <message>
+        <source>Lots for Sale</source>
+        <translation type="unfinished">Verkaufsangebote</translation>
+    </message>
+    <message>
+        <source>Appears in Sets</source>
+        <translation type="unfinished">Enthalten in Sets</translation>
+    </message>
+    <message>
+        <source>Peeron</source>
+        <translation type="unfinished">Peeron</translation>
+    </message>
+    <message>
+        <source>Infomation</source>
+        <translation type="unfinished">Informationen</translation>
+    </message>
+</context>
+<context>
+    <name>CTaskPaneManager</name>
+    <message>
+        <source>All</source>
+        <translation type="unfinished">Alle</translation>
+    </message>
+    <message>
+        <source>Modern (fixed)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Classic (moveable)</source>
+        <translation type="unfinished">Klassisch (beweglich)</translation>
+    </message>
+</context>
+<context>
+    <name>CUndoManager</name>
+    <message>
+        <source>Redo</source>
+        <translation type="unfinished">Wiederherstellen</translation>
+    </message>
+    <message>
+        <source>Undo</source>
+        <translation type="unfinished">Rückgängig</translation>
+    </message>
+    <message>
+        <source>Undo %1 Actions</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Undo 1 Action</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Redo %1 Actions</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Redo 1 Action</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>CUtility</name>
+    <message>
+        <source>Could not rename %1 to %2.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not backup %1 to %2.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not delete %1.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not find %1.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>CWindow</name>
     <message>
         <source>Clear</source>
-        <translation>Löschen</translation>
+        <translation type="obsolete">Löschen</translation>
     </message>
     <message>
         <source>All</source>
@@ -1262,6 +1466,47 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
         <source>BrickLink XML File</source>
         <translation>BrickLink XML Datei</translation>
     </message>
+    <message>
+        <source>Added %1, Merged %2 Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>CWorkspace</name>
+    <message>
+        <source>Close current document</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>Command::AddRemoveItems</name>
+    <message>
+        <source>Added %1 Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Added Item</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Removed %1 Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Removed Item</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>Command::EditItems</name>
+    <message>
+        <source>Changed %1 Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Changed Item</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>DlgAddItem</name>
@@ -1344,12 +1589,44 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
         <source>&amp;OK</source>
         <translation>&amp;OK</translation>
     </message>
+    <message>
+        <source>&amp;Cancel</source>
+        <translation type="unfinished">&amp;Abbrechen</translation>
+    </message>
 </context>
 <context>
     <name>DlgDBUpdateImpl</name>
     <message>
         <source>Update not possible</source>
-        <translation>Aktualisierung nicht möglich</translation>
+        <translation type="obsolete">Aktualisierung nicht möglich</translation>
+    </message>
+    <message>
+        <source>Transfer job could not be started.</source>
+        <translation type="unfinished">Der Transferjob kommt nicht gestartet werden.</translation>
+    </message>
+    <message>
+        <source>Downloading binary database... %1/%2 KB</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Finished.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not load the new database.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Transfer job failed: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Version information is not available.</source>
+        <translation type="unfinished">Keine Versionsinformationen verfügbar.</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1743,7 +2020,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>Item type:</source>
-        <translation>Teiletyp:</translation>
+        <translation type="obsolete">Teiletyp:</translation>
     </message>
     <message>
         <source>Default values for &apos;&amp;Add Items&apos;</source>
@@ -1775,7 +2052,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>Data&amp;bases, if older than</source>
-        <translation>Daten&amp;banken, wenn älter als</translation>
+        <translation type="obsolete">Daten&amp;banken, wenn älter als</translation>
     </message>
     <message>
         <source>Price g&amp;uides, if older than</source>
@@ -1787,7 +2064,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>&amp;Inventories, if older than</source>
-        <translation>&amp;Inventarlisten, wenn älter als</translation>
+        <translation type="obsolete">&amp;Inventarlisten, wenn älter als</translation>
     </message>
     <message>
         <source>&amp;Password</source>
@@ -1807,19 +2084,19 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>Use the &amp;local currency</source>
-        <translation>Die örtliche Währung &amp;verwenden</translation>
+        <translation type="obsolete">Die örtliche Währung &amp;verwenden</translation>
     </message>
     <message>
         <source>Classic (moveable)</source>
-        <translation>Klassisch (beweglich)</translation>
+        <translation type="obsolete">Klassisch (beweglich)</translation>
     </message>
     <message>
         <source>Modern (on left side)</source>
-        <translation>Modern (linksseitig)</translation>
+        <translation type="obsolete">Modern (linksseitig)</translation>
     </message>
     <message>
         <source>Modern (on right side)</source>
-        <translation>Modern (rechtsseitig)</translation>
+        <translation type="obsolete">Modern (rechtsseitig)</translation>
     </message>
     <message>
         <source>&amp;Network</source>
@@ -1847,7 +2124,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>Weight</source>
-        <translation>Gewicht</translation>
+        <translation type="obsolete">Gewicht</translation>
     </message>
     <message>
         <source>Metric (g)</source>
@@ -1859,7 +2136,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>&amp;Infobar style</source>
-        <translation>&amp;Stil der Infoleiste</translation>
+        <translation type="obsolete">&amp;Stil der Infoleiste</translation>
     </message>
     <message>
         <source>Cache Di&amp;rectory</source>
@@ -1867,7 +2144,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>Condition:</source>
-        <translation>Zustand:</translation>
+        <translation type="obsolete">Zustand:</translation>
     </message>
     <message>
         <source>New</source>
@@ -1876,6 +2153,42 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <message>
         <source>Used</source>
         <translation>Gebraucht</translation>
+    </message>
+    <message>
+        <source>Alt+W</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Use the &amp;local currency:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Alt+L</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Currency</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Language</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Weights</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Item type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Condition</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Alt+C</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1970,6 +2283,10 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
         <source>Check for Program Updates</source>
         <translation>Nach Programm-Updates suchen</translation>
     </message>
+    <message>
+        <source>Alt+O</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>DlgUpdateImpl</name>
@@ -1983,7 +2300,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>Searching for updates ... Please wait</source>
-        <translation>Updates werden gesucht ... Bitte warten</translation>
+        <translation type="obsolete">Updates werden gesucht ... Bitte warten</translation>
     </message>
     <message>
         <source>Transfer job could not be started.</source>
@@ -2020,6 +2337,10 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <message>
         <source>&lt;b&gt;Please note:&lt;/b&gt; Your currently installed version is flagged as defective. Please visit %1 to find out the exact cause.</source>
         <translation>&lt;b&gt;Achtung:&lt;/b&gt; Ihre momentan installierte Version ist als defekt markiert. Bitte besuchen Sie %1, um den genauen Grund nachzulesen.</translation>
+    </message>
+    <message>
+        <source>Downloading version index... %1/%2 KB</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>

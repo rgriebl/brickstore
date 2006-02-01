@@ -406,14 +406,23 @@ public:
 	virtual bool addTo ( QWidget *w )
 	{
 		if ( w-> inherits ( "QPopupMenu" )) {
-			static_cast <QPopupMenu *> ( w )-> insertItem ( menuText ( ), m_tpm-> createItemMenu ( ));
+			int id = static_cast <QPopupMenu *> ( w )-> insertItem ( menuText ( ), m_tpm-> createItemMenu ( ));
+			m_update_menutexts. insert ( static_cast <QPopupMenu *> ( w ), id );
 			return true;
 		}
 		return false;
 	}
+	virtual void setText ( const QString &txt )
+	{
+		QActionGroup::setText ( txt );
+
+		for ( QMap <QPopupMenu *, int>::const_iterator it = m_update_menutexts. begin ( ); it != m_update_menutexts. end ( ); ++it )
+			it. key ( )-> changeItem ( it. data ( ), menuText ( ));
+	}
 
 private:
 	CTaskPaneManager *m_tpm;
+	QMap <QPopupMenu *, int> m_update_menutexts;
 };
 
 QAction *CTaskPaneManager::createItemAction ( QObject *parent, const char *name ) const

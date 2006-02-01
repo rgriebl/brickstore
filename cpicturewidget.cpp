@@ -72,6 +72,12 @@ CPictureWidget::CPictureWidget ( QWidget *parent, const char *name, WFlags fl )
 	redraw ( );
 }
 
+void CPictureWidget::languageChange ( )
+{
+	delete d-> m_popup;
+	d-> m_popup = 0;
+}
+
 CPictureWidget::~CPictureWidget ( )
 {
 	if ( d-> m_pic )
@@ -201,6 +207,12 @@ CLargePictureWidget::CLargePictureWidget ( BrickLink::Picture *lpic, QWidget *pa
 	connect ( BrickLink::inst ( ), SIGNAL( pictureUpdated ( BrickLink::Picture * )), this, SLOT( gotUpdate ( BrickLink::Picture * )));
 
 	redraw ( );
+}
+
+void CLargePictureWidget::languageChange ( )
+{
+	delete d-> m_popup;
+	d-> m_popup = 0;
 }
 
 CLargePictureWidget::~CLargePictureWidget ( )

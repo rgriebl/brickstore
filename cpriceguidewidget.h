@@ -67,6 +67,7 @@ protected slots:
 	void showBLCatalogInfo ( );
 	void showBLPriceGuideInfo ( );
 	void showBLLotsForSale ( );
+	void languageChange ( );
 	
 private:
 	void paintHeader ( QPainter *p, const QSize &s, const QRect &r, const QColorGroup &cg, int align, const QString &str, bool bold = false );
