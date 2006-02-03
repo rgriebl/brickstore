@@ -8,6 +8,7 @@
 #include <qwindowsstyle.h>
 #include <qtoolbutton.h>
 #include <qtooltip.h>
+#include <qmainwindow.h>
 
 #include "cresource.h"
 
@@ -68,102 +69,127 @@ protected:
 } // namespace
 #endif
 
-CWorkspace::CWorkspace ( QWidget *parent, const char *name )
-	: QWidget ( parent, name )
+CWorkspace::CWorkspace ( QMainWindow *parent, const char *name )
+	: QWorkspace ( parent, name )
 {
-	m_mode        = Tabbed;
-	m_block_close = false;
-	m_reparenting = false;
+	m_mainwindow = parent;
+	m_showtabs   = false;
+	m_exceltabs  = false;
 
-	m_tabbar    = new QTabBar ( this, "tabbar" );
-	m_stack     = new QWidgetStack ( this, "stack" );
-	m_workspace = new QWorkspace ( this, "workspace" );
-	m_close     = new QToolButton ( this );
-
-	m_close-> setAutoRaise ( true );
-	m_close-> setIconSet ( CResource::inst ( )-> iconSet ( "file_close" ));
-	m_close-> setFixedSize ( 0, 0 );
-	QObject::connect ( m_close, SIGNAL( clicked ( )), this, SLOT( closeTabClicked ( )));
-	QToolTip::add ( m_close, tr( "Close current document" ) );
-
-	/*
-	m_tabbar-> setShape ( QTabBar::TriangularBelow );
-
-	if ( m_tabbar-> style ( ). isA ( "QWindowsXPStyle" ))
-		m_tabbar-> setStyle ( new QWindowsStyle ( ));
-	*/
-
+	m_tabbar = new QTabBar ( parent, "tabbar" );
 	m_tabbar-> hide ( );
-	m_close-> hide ( );
 
-	if ( m_mode == MDI )
-		m_stack-> hide ( );
-	else
-		m_workspace-> hide ( );
-
-	QBoxLayout *lay = new QVBoxLayout ( this, 0, -1 );
-	lay-> addWidget ( m_workspace, 10 );
-
-	if (( m_tabbar-> shape ( ) == QTabBar::RoundedBelow ) ||
-		( m_tabbar-> shape ( ) == QTabBar::TriangularBelow )) {
-		lay-> addWidget ( m_stack, 10 );
-		lay-> addWidget ( m_tabbar );
-	}
-	else {
-		QHBoxLayout *tablay = new QHBoxLayout ( lay );
-		tablay-> addSpacing ( 4 );
-		tablay-> addWidget ( m_tabbar );
-		tablay-> addStretch ( 10 );
-		tablay-> addSpacing ( 4 );
-		tablay-> addWidget ( m_close );
-		tablay-> addSpacing ( 4 );
-		lay-> addWidget ( m_stack, 10 );
-	}
-
-	connect ( m_tabbar, SIGNAL( selected ( int )), this, SLOT( activateTabbed ( int )));
-	connect ( m_workspace, SIGNAL( windowActivated ( QWidget * )), this, SIGNAL( windowActivated ( QWidget * )));
+	connect ( m_tabbar, SIGNAL( selected ( int )), this, SLOT( tabClicked ( int )));
+	connect ( this, SIGNAL( windowActivated ( QWidget * )), this, SLOT( setActiveTab ( QWidget * )));
 }
 
-CWorkspace::Mode CWorkspace::mode ( ) const
+bool CWorkspace::showTabs ( ) const
 {
-	return m_mode;
+	return m_showtabs;
 }
 
-void CWorkspace::setMode ( Mode m )
+void CWorkspace::setShowTabs ( bool b )
 {
-	if ( m == m_mode )
-		return;
+	if ( b != m_showtabs ) {
+		if ( b ) {
+			QWidget *container = new QWidget ( m_mainwindow, "cworkspace_container" );
+			refillContainer ( container );
 
-	QWidget *active = activeWindow ( );
-	m_mode = m;
+			show ( );
+			if ( m_tabbar-> count ( ) > 1 )
+				m_tabbar-> show ( );
 
-	for ( QWidgetListIt it ( m_windows ); it. current ( ); ++it ) {
-		QWidget *w = it. current ( );
-
-		if ( m == MDI ) { // from Tabbed to MDI
-			m_stack-> removeWidget ( w );
-			w-> reparent ( m_workspace, QPoint ( 0, 0 ));
+			m_mainwindow-> setCentralWidget ( container );
+			container-> show ( );
 		}
-		else { // from MDI to Tabbed
-			m_stack-> addWidget ( w );
+		else {
+			QWidget *container = parentWidget ( );
+			m_tabbar-> hide ( );
+			m_tabbar-> reparent ( m_mainwindow, QPoint ( ), false );
+			reparent ( m_mainwindow, m_mainwindow-> centralWidget ( )-> pos ( ), false );
+			m_mainwindow-> setCentralWidget ( this );
+			show ( );
+			delete container;
 		}
+		m_showtabs = b;
 	}
-
-	if ( m == MDI ) {
-		m_tabbar-> hide ( ); 
-		m_stack-> hide ( );
-		m_close-> hide ( );
-		m_workspace-> show ( );
-	}
-	else {
-		m_workspace-> hide ( );
-		m_stack-> show ( );
-
-		checkTabBarVisible ( );
-	}
-	activateWindow ( active );
 }
 
+void CWorkspace::refillContainer ( QWidget *container )
+{
+	delete container-> layout ( );
+	QBoxLayout *lay = new QVBoxLayout ( container, 0, 0 );
+
+	for ( int i = 0; i < 2; i++ ) {
+		if ( i == ( m_exceltabs ? 0 : 1 )) {
+			if ( parentWidget ( ) != container )
+				reparent ( container, QPoint ( 0, 0 ), false );
+			lay-> addWidget ( this, 10 );
+		}
+		else {
+			QHBoxLayout *tablay = new QHBoxLayout ( lay );
+			tablay-> addSpacing ( 4 );
+			if ( m_tabbar-> parentWidget ( ) != container )
+				m_tabbar-> reparent ( container, QPoint ( 0, 0 ), false );
+			tablay-> addWidget ( m_tabbar );
+			tablay-> addSpacing ( 4 );
+		}
+	}
+	lay-> activate ( );
+}
+
+bool CWorkspace::spreadSheetTabs ( ) const
+{
+	return m_exceltabs;
+}
+
+void CWorkspace::setSpreadSheetTabs ( bool b )
+{
+	if ( b != m_exceltabs ) {
+		if ( b ) {
+			m_tabbar-> setShape ( QTabBar::TriangularBelow );
+
+			if ( m_tabbar-> style ( ). isA ( "QWindowsXPStyle" ))
+				m_tabbar-> setStyle ( new QWindowsStyle ( )); //TODO: Mem leak?
+		}
+		else {
+			m_tabbar-> setShape ( QTabBar::RoundedAbove );
+
+			if ( m_tabbar-> style ( ). isA ( "QWindowsStyle" ))
+				m_tabbar-> setStyle ( &style ( ));
+		}
+		m_exceltabs = b;
+
+		if ( m_showtabs )
+			refillContainer ( parentWidget ( ));
+	}
+}
+void CWorkspace::tabClicked ( int id )
+{
+	QTab *t = m_tabbar-> tab ( id );
+
+	for ( QPtrDictIterator<QTab> it ( m_widget2tab ); it. current ( ); ++it ) {
+		if ( t == it. current ( )) {
+			QWidget *w = static_cast <QWidget *> ( it. currentKey ( ));
+	
+			if ( w != activeWindow ( ))
+				w-> setFocus ( );
+			if ( !w-> isMaximized ( ))
+				w-> showMaximized ( );
+		}
+	}
+}
+
+void CWorkspace::setActiveTab ( QWidget * w )
+{
+	QTab *t = m_widget2tab [w];
+
+	if ( t && ( m_tabbar-> currentTab ( ) != t-> identifier ( ))) {
+		m_tabbar-> blockSignals ( true );
+		m_tabbar-> setCurrentTab ( t );
+		m_tabbar-> blockSignals ( false );
+	}
+}
 
 bool CWorkspace::eventFilter( QObject *o, QEvent *e )
 {
@@ -171,260 +197,57 @@ bool CWorkspace::eventFilter( QObject *o, QEvent *e )
 		return false;
 
 	QWidget *w = static_cast <QWidget *> ( o );
+
 	bool result = false;
 
 	switch ( e-> type ( )) {
 		case QEvent::CaptionChange: {
-			QTab *t = m_window2tab [w];
+			QTab *t = m_widget2tab [w];
 
 			if ( t ) 
 				t-> setText ( w-> caption ( ));
 			break;
 		}
-		case QEvent::Close: {
-			if ( m_block_close )
-				break;
-			m_block_close = true;
-
-			QApplication::sendEvent ( w, e );
-			result = true;
-
-			if ( static_cast <QCloseEvent *> ( e )-> isAccepted ( ))
-				removeAndActivateNext ( w );
-			m_block_close = false;
-			break;
-		}
 		default:
 			break;
 	}
-	return result ? result : QWidget::eventFilter ( o, e );
+	return result ? result : QWorkspace::eventFilter ( o, e );
 }
+
 
 void CWorkspace::childEvent( QChildEvent * e )
 {
-    if ( e-> inserted ( ) && e-> child ( )-> isWidgetType ( )) {
-		QWidget* w = static_cast <QWidget *> ( e-> child ( ));
-		
-		if ( !w || !w-> testWFlags ( WStyle_Title | WStyle_NormalBorder | WStyle_DialogBorder ) || 
-		   ( w == m_tabbar ) || ( w == m_stack ) || ( w == m_workspace ) || ( w == m_close ))
-		    return;
+	QWorkspace::childEvent ( e );
 
-		QTab *t = new QTab ( );
-		t-> setText ( w-> caption ( ));
-		m_tabbar-> addTab ( t );
-		m_windows. append ( w );
-		m_window2tab. insert ( w, t );
-		m_tab2window. insert ( t, w );
+	QWidgetList after = windowList ( CreationOrder );
 
-		checkTabBarVisible ( );
+	if ( e-> inserted ( )) {
+		for ( QWidgetListIt it ( after ); it. current ( ); ++it ) {
+			QWidget *w = it. current ( );
+			QTab *t = m_widget2tab [w];
 
-		w-> installEventFilter ( this );
-		connect ( w, SIGNAL( destroyed( )), this, SLOT( childDestroyed ( )));
-	
-		m_reparenting = true;
+			if ( w && !t ) { // new
+				w-> installEventFilter ( this );
 
-		if ( m_mode == MDI ) {
-			w-> reparent ( m_workspace, QPoint ( 0, 0 ));
-		}
-		else {
-			m_stack-> addWidget ( w );
-			m_stack-> raiseWidget ( w );
-			m_tabbar-> setCurrentTab ( m_window2tab [w] );
-			emit windowActivated ( w );
-		}
-		m_reparenting = false;
-
-		int s = m_tabbar-> sizeHint ( ). height ( );
-		m_close-> setFixedSize ( s, s );
-		m_close-> setEnabled ( true );
-    }
-}
-
-void CWorkspace::childDestroyed ( )
-{
-	removeAndActivateNext ( static_cast <QWidget *> ( const_cast <QObject *> ( sender ( ))));
-}
-
-void CWorkspace::closeTabClicked ( )
-{
-	if (( m_mode == Tabbed ) && ( m_stack-> visibleWidget ( )))
-		m_stack-> visibleWidget ( )-> close ( );
-}
-
-void CWorkspace::removeAndActivateNext ( QWidget *w )
-{
-	QTab *t = m_window2tab [w];
-
-	if ( w && t ) {
-		int oldpos = m_tabbar-> indexOf ( t-> identifier ( ));
-
-		m_windows. removeRef ( w );
-		m_window2tab. remove ( w );
-		m_tab2window. remove ( t );
-		m_tabbar-> removeTab ( t );
-
-		if ( m_mode == Tabbed )
-			m_stack-> removeWidget ( w );
-
-		int count = m_tabbar-> count ( );
-
-		t = ( count == 0 ) ? 0 : m_tabbar-> tabAt (( oldpos == count ) ? ( count - 1 ) : ( oldpos ));
-
-		checkTabBarVisible ( );
-
-		activateTabbed ( t ? t-> identifier ( ) : -1 );
-	}
-}
-
-void CWorkspace::activateTabbed ( int id )
-{
-	QTab *t = m_tabbar-> tab ( id );
-
-	if ( t && ( m_mode == Tabbed )) {
-		QWidget *w = m_tab2window [t];
-
-		if ( w ) {
-			m_stack-> raiseWidget ( w );
-			w-> setFocus ( );
-			emit windowActivated ( w );
-			m_close-> setEnabled ( true );
-			return;
-		}
-	}
-	emit windowActivated ( 0 );
-	m_close-> setEnabled ( false );
-	m_close-> setFixedSize ( 0, 0 );
-}
-
-QWidget *CWorkspace::activeWindow ( ) const
-{
-	if ( m_mode == MDI )
-		return m_workspace-> activeWindow ( );
-	else
-		return m_stack-> visibleWidget ( );
-}
-
-void CWorkspace::activateWindow ( QWidget *w )
-{
-	QTab *t = m_window2tab [w];
-
-	if ( w && t ) {
-		if ( m_mode == MDI ) {
-			w-> showNormal ( );
-		}
-		else {
-			if ( m_tabbar-> isVisible ( ))
-				m_tabbar-> setCurrentTab ( t );
-			else
-				activateTabbed ( t-> identifier ( ));
-		}
-		w-> setFocus ( );
-	}
-}
-
-QWidgetList CWorkspace::windowList ( WindowOrder order ) const
-{
-	if ( m_mode == MDI ) {
-		return m_workspace-> windowList ( order == CreationOrder ? QWorkspace::CreationOrder : QWorkspace::StackingOrder );
-	}
-	else {
-		if ( order == CreationOrder ) {
-			return m_windows;
-		}
-		else {
-			QWidgetList wlist = m_windows;
-
-			QWidget *top = m_stack-> visibleWidget ( );
-			wlist. removeRef ( top );
-			wlist. append ( top );
-
-			return wlist;
-		}
-	}
-}
-
-void CWorkspace::cascade ( )
-{
-	if ( m_mode == MDI )
-		m_workspace-> cascade ( );
-}
-
-void CWorkspace::tile ( )
-{
-	if ( m_mode == MDI )
-		m_workspace-> tile ( );
-}
-
-void CWorkspace::closeActiveWindow ( )
-{
-	if ( m_mode == MDI ) {
-		m_workspace-> closeActiveWindow ( );
-	}
-	else {
-		if ( m_stack-> visibleWidget ( ))
-			m_stack-> visibleWidget ( )-> close ( );
-	}
-}
-
-void CWorkspace::closeAllWindows ( )
-{
-	if ( m_mode == MDI ) {
-		m_workspace-> closeAllWindows ( );
-	}
-	else {
-		QWidgetList wl = m_windows;
-
-		while ( !wl. isEmpty ( )) {
-			if ( !wl. take ( 0 )-> close ( ))
-				return;
-		}
-	}
-}
-
-void CWorkspace::activateNextWindow ( )
-{
-	if ( m_mode == MDI ) {
-		m_workspace-> activateNextWindow ( );
-	}
-	else {
-		if ( activeWindow ( ) && ( m_windows. find ( activeWindow ( )) != -1 )) {
-			QWidget *w = m_windows. next ( );
-
-			if ( w ) {
-				m_stack-> raiseWidget ( w );
-				emit windowActivated ( w );
+				t = new QTab ( w-> caption ( ));
+				m_tabbar-> addTab ( t );
+				m_widget2tab.insert ( w, t );
 			}
 		}
 	}
-}
-
-void CWorkspace::activatePrevWindow ( )
-{
-	if ( m_mode == MDI ) {
-		m_workspace-> activatePrevWindow ( );
-	}
 	else {
-		if ( activeWindow ( ) && ( m_windows. find ( activeWindow ( )) != -1 )) {
-			QWidget *w = m_windows. prev ( );
+		QPtrDict <QTab> copy_of_widget2tab = m_widget2tab;
 
-			if ( w ) {
-				m_stack-> raiseWidget ( w );
-				emit windowActivated ( w );
+		for ( QPtrDictIterator<QTab> it ( copy_of_widget2tab ); it. current ( ); ++it ) {
+			QWidget *w = static_cast <QWidget *> ( it. currentKey ( ));
+			QTab *t = it. current ( );
+
+			if ( w && t && ( after. findRef ( w ) == -1 )) {
+				m_tabbar-> removeTab ( t );
+				m_widget2tab. remove ( w );
 			}
 		}
 	}
-}
-
-void CWorkspace::checkTabBarVisible ( )
-{
-	bool b = (( m_mode == Tabbed ) && ( m_windows. count ( ) > 1 ));
-
-	if ( b ) {
-		m_tabbar-> show ( );
-		m_close-> show ( );
-	}
-	else {
-		m_tabbar-> hide ( );
-		m_close-> hide ( );
-	}
+	if ( m_showtabs )
+		m_tabbar-> setShown ( m_tabbar-> count ( ) > 1 );
 }

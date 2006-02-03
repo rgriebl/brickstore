@@ -1,73 +1,44 @@
 #ifndef __CWORKSPACE_H__
 #define __CWORKSPACE_H__
 
-#include <qwidget.h>
+#include <qworkspace.h>
 #include <qwidgetlist.h>
 #include <qptrdict.h>
 #include <qtabbar.h>
 
 class QToolButton;
-class QWorkspace;
-class QWidgetStack;
+class QMainWindow;
 
 
-class CWorkspace : public QWidget {
+class CWorkspace : public QWorkspace {
 	Q_OBJECT
 
 public:
-	CWorkspace ( QWidget *parent = 0, const char *name = 0 );
+	CWorkspace ( QMainWindow *parent, const char *name = 0 );
 
-	enum Mode {
-		MDI,
-		Tabbed
-	};
+	bool showTabs ( ) const;
+	void setShowTabs ( bool b );
 
-	Mode mode ( ) const;
-	void setMode ( Mode m );
-
-	enum WindowOrder { 
-		CreationOrder, 
-		StackingOrder 
-	};
-
-	QWidget *activeWindow ( ) const;
-	QWidgetList windowList ( WindowOrder order ) const;
-
-	void activateWindow ( QWidget *w );
-
-public slots:
-	void cascade ( );
-	void tile ( );
-	void closeActiveWindow ( );
-	void closeAllWindows ( );
-	void activateNextWindow ( );
-	void activatePrevWindow ( );
-
-signals:
-	void windowActivated ( QWidget *w );
+	bool spreadSheetTabs ( ) const;
+	void setSpreadSheetTabs ( bool b );
 
 protected:
 	virtual bool eventFilter ( QObject *o, QEvent *e );
 	virtual void childEvent ( QChildEvent *e );
-	void removeAndActivateNext ( QWidget *w );
-	void checkTabBarVisible ( );
 
 private slots:
-	void activateTabbed ( int );
-	void childDestroyed ( );
-	void closeTabClicked ( );
+	void tabClicked ( int );
+	void setActiveTab ( QWidget * );
 
 private:
-	Mode               m_mode        : 2;
-	bool               m_block_close : 1;
-	bool               m_reparenting : 1;
-	QWorkspace *       m_workspace;
-	QWidgetStack *     m_stack;
+	void refillContainer ( QWidget *container );
+
+private:
+	bool               m_showtabs  : 1;
+	bool               m_exceltabs : 1;
+	QMainWindow *      m_mainwindow;
 	QTabBar *          m_tabbar;
-	QToolButton *      m_close;
-	QWidgetList        m_windows;
-	QPtrDict <QWidget> m_tab2window;
-	QPtrDict <QTab>    m_window2tab;
+	QPtrDict <QTab>    m_widget2tab;
 };
 
 #endif

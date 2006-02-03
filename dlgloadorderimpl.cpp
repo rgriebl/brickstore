@@ -26,6 +26,8 @@ DlgLoadOrderImpl::DlgLoadOrderImpl ( QWidget *parent, const char *name, bool mod
 	connect ( w_number, SIGNAL( textChanged ( const QString & )), this, SLOT( checkId ( )));
 
 	w_ok-> setEnabled ( false );
+
+	resize ( sizeHint ( ));
 }
 
 DlgLoadOrderImpl::~DlgLoadOrderImpl ( )

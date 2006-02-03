@@ -88,9 +88,8 @@ private slots:
 	void fileImportLDrawModel ( );
 
 	void viewToolBar ( bool );
-	void viewInfoBarItem ( int );
 	void viewStatusBar ( bool );
-	void setWindowModeTabbed ( bool );
+	void setWindowMode ( int );
 
 	void windowActivate ( int );
 

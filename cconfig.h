@@ -49,7 +49,7 @@ public:
 
 	bool showInputErrors ( ) const;
 	bool simpleMode ( ) const;
-	bool windowModeTabbed ( ) const;
+	int windowMode ( ) const;
 	bool onlineStatus ( ) const;
 	bool useProxy ( ) const;
 	QString proxyName ( ) const;
@@ -72,7 +72,7 @@ public slots:
 
 	void setShowInputErrors ( bool b );
 	void setSimpleMode ( bool sm );
-	void setWindowModeTabbed ( bool tabbed );
+	void setWindowMode ( int mode );
 	void setOnlineStatus ( bool b );
 	void setProxy ( bool b, const QString &name, int port );
 
@@ -83,7 +83,7 @@ public slots:
 signals:
 	void infoBarLookChanged ( int look );
 	void simpleModeChanged ( bool );
-	void windowModeTabbedChanged ( bool );
+	void windowModeChanged ( int );
 	void languageChanged ( );
 	void weightSystemChanged ( CConfig::WeightSystem ws );
 	void showInputErrorsChanged ( bool b );
@@ -99,7 +99,7 @@ private:
 	bool         m_show_input_errors;
 	WeightSystem m_weight_system;
 	bool         m_simple_mode;
-	bool         m_window_mode_tabbed;
+	int          m_window_mode;
 };
 
 #endif

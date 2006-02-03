@@ -311,7 +311,7 @@ QString CUndoStack::redoDescription ( ) const
 
 	QString str = CUndoManager::redoText ( );
 	if ( *it ) 
-		str = str + " " + ( *it )-> description ( );
+		str = str + ": " + ( *it )-> description ( );
 	return str;
 }
 
@@ -321,7 +321,7 @@ QString CUndoStack::undoDescription ( ) const
 
 	QString str = CUndoManager::undoText ( );
 	if ( *it ) 
-		str = str + " " + ( *it )-> description ( );
+		str = str + ": " + ( *it )-> description ( );
 	return str;
 }
 

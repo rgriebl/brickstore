@@ -115,10 +115,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>New...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Ctrl+N</source>
         <comment>File|New</comment>
         <translation type="unfinished"></translation>
@@ -319,10 +315,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>About</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Set Prices...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -504,10 +496,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Appears In</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Links</source>
         <translation type="unfinished"></translation>
     </message>
@@ -516,11 +504,27 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>MDI environment</source>
+        <source>Appears In Sets</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Tabbed documents</source>
+        <source>New</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>About...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Standard MDI Mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show Tabs at Top</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show Tabs at Bottom</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -712,31 +716,31 @@
 <context>
     <name>CListViewColumnsDialog</name>
     <message>
-        <source>Configure columns</source>
+        <source>Configure columns...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Move up</source>
+        <source>Move &amp;up</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Move down</source>
+        <source>Move &amp;down</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Show</source>
+        <source>&amp;Show</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Hide</source>
+        <source>&amp;Hide</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>OK</source>
+        <source>&amp;OK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Cancel</source>
+        <source>&amp;Cancel</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1307,13 +1311,6 @@
     </message>
     <message>
         <source>Added %1, Merged %2 Items</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>CWorkspace</name>
-    <message>
-        <source>Close current document</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1950,15 +1947,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Alt+W</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Use the &amp;local currency:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Alt+L</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1979,10 +1968,6 @@
     </message>
     <message>
         <source>Condition</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Alt+C</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2076,10 +2061,6 @@
     </message>
     <message>
         <source>Check for Program Updates</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Alt+O</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

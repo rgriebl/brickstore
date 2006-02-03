@@ -47,7 +47,7 @@ CConfig::CConfig ( )
 	m_show_input_errors = readBoolEntry ( "/General/ShowInputErrors", true );
 	m_weight_system = ( readEntry ( "/General/WeightSystem", "metric" ) == "metric" ) ? WeightMetric : WeightImperial;
 	m_simple_mode = readBoolEntry ( "/General/SimpleMode", false );
-	m_window_mode_tabbed = readBoolEntry ( "/MainWindow/WindowModeTabbed", true );
+	m_window_mode = readBoolEntry ( "/MainWindow/WindowMode", 0 );
 }
 
 CConfig::~CConfig ( )
@@ -352,18 +352,18 @@ void CConfig::setSimpleMode ( bool sm  )
 }
 
 
-bool CConfig::windowModeTabbed ( ) const
+int CConfig::windowMode ( ) const
 {
-	return m_window_mode_tabbed;
+	return m_window_mode;
 }
 
-void CConfig::setWindowModeTabbed ( bool wmt  )
+void CConfig::setWindowMode ( int wm )
 {
-	if ( wmt != m_window_mode_tabbed ) {
-		m_window_mode_tabbed = wmt;
-		writeEntry ( "/MainWindow/WindowModeTabbed", wmt );
+	if ( wm != m_window_mode ) {
+		m_window_mode = wm;
+		writeEntry ( "/MainWindow/WindowMode", wm );
 
-		emit windowModeTabbedChanged ( wmt );
+		emit windowModeChanged ( wm );
 	}
 }
 

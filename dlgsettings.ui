@@ -53,9 +53,6 @@
                         <property name="text">
                             <string>Open a &amp;Web-Browser window when exporting to the Clipboard</string>
                         </property>
-                        <property name="accel">
-                            <string>Alt+W</string>
-                        </property>
                     </widget>
                     <spacer>
                         <property name="name">
@@ -96,9 +93,6 @@
                                         </property>
                                         <property name="text">
                                             <string>Use the &amp;local currency:</string>
-                                        </property>
-                                        <property name="accel">
-                                            <string>Alt+L</string>
                                         </property>
                                     </widget>
                                     <widget class="QLabel">
@@ -163,6 +157,9 @@
                                 <property name="text">
                                     <string>Currency</string>
                                 </property>
+                                <property name="buddy" stdset="0">
+                                    <cstring>w_local_currency</cstring>
+                                </property>
                             </widget>
                             <widget class="QLayoutWidget" row="0" column="1">
                                 <property name="name">
@@ -203,6 +200,9 @@
                                 <property name="text">
                                     <string>Language</string>
                                 </property>
+                                <property name="buddy" stdset="0">
+                                    <cstring>w_language</cstring>
+                                </property>
                             </widget>
                             <widget class="QLabel" row="1" column="0">
                                 <property name="name">
@@ -210,6 +210,9 @@
                                 </property>
                                 <property name="text">
                                     <string>Weights</string>
+                                </property>
+                                <property name="buddy" stdset="0">
+                                    <cstring>radioButton2</cstring>
                                 </property>
                             </widget>
                             <widget class="QLayoutWidget" row="1" column="1">
@@ -973,9 +976,6 @@
                     <property name="text">
                         <string>&amp;Cancel</string>
                     </property>
-                    <property name="accel">
-                        <string>Alt+C</string>
-                    </property>
                     <property name="autoDefault">
                         <bool>true</bool>
                     </property>
@@ -1025,8 +1025,12 @@
 <tabstops>
     <tabstop>w_tab</tabstop>
     <tabstop>w_export_browser</tabstop>
+    <tabstop>w_language</tabstop>
+    <tabstop>radioButton2</tabstop>
+    <tabstop>radioButton3</tabstop>
     <tabstop>w_local_currency</tabstop>
     <tabstop>w_local_currency_factor</tabstop>
+    <tabstop>w_doc_dir</tabstop>
     <tabstop>w_cache_pictures</tabstop>
     <tabstop>w_days_pictures</tabstop>
     <tabstop>w_cache_priceguides</tabstop>
@@ -1034,6 +1038,8 @@
     <tabstop>w_cache_dir</tabstop>
     <tabstop>w_def_inv_itemtype</tabstop>
     <tabstop>w_def_add_itemtype</tabstop>
+    <tabstop>radioButton6</tabstop>
+    <tabstop>radioButton7</tabstop>
     <tabstop>w_def_pg_type_time</tabstop>
     <tabstop>w_def_pg_type_price</tabstop>
     <tabstop>w_bl_username</tabstop>

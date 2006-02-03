@@ -638,7 +638,7 @@ ColListItem *ColListItem::s_last = 0;
 CListViewColumnsDialog::CListViewColumnsDialog ( CListView *parent )
 	: QDialog ( parent, "listview_configure_columns", true ), m_parent ( parent )
 {
-	setCaption ( tr( "Configure columns" ));
+	setCaption ( tr( "Configure columns..." ));
 
 	QPushButton *p;
 
@@ -666,16 +666,16 @@ CListViewColumnsDialog::CListViewColumnsDialog ( CListView *parent )
 
 	QBoxLayout *rgtlay = new QVBoxLayout ( horlay );
 
-	w_up = new QPushButton ( tr( "Move up" ), this );
+	w_up = new QPushButton ( tr( "Move &up" ), this );
 	connect ( w_up, SIGNAL( clicked ( )), this, SLOT( upCol ( )));
 	rgtlay-> addWidget ( w_up );
-	w_down = new QPushButton ( tr( "Move down" ), this );
+	w_down = new QPushButton ( tr( "Move &down" ), this );
 	connect ( w_down, SIGNAL( clicked ( )), this, SLOT( downCol ( )));
 	rgtlay-> addWidget ( w_down );
-	w_show = new QPushButton ( tr( "Show" ), this );
+	w_show = new QPushButton ( tr( "&Show" ), this );
 	connect ( w_show, SIGNAL( clicked ( )), this, SLOT( showCol ( )));
 	rgtlay-> addWidget ( w_show );
-	w_hide = new QPushButton ( tr( "Hide" ), this );
+	w_hide = new QPushButton ( tr( "&Hide" ), this );
 	connect ( w_hide, SIGNAL( clicked ( )), this, SLOT( hideCol ( )));
 	rgtlay-> addWidget ( w_hide );
 
@@ -688,12 +688,12 @@ CListViewColumnsDialog::CListViewColumnsDialog ( CListView *parent )
 	QBoxLayout *botlay = new QHBoxLayout ( toplay );
 	botlay-> addSpacing ( QFontMetrics ( font ( )). width ( "Aa0" ) * 6 );
 	botlay-> addStretch ( 10 );
-	p = new QPushButton ( tr( "OK" ), this );
+	p = new QPushButton ( tr( "&OK" ), this );
 	p-> setDefault ( true );
 	p-> setAutoDefault ( true );
 	connect ( p, SIGNAL( clicked ( )), this, SLOT( accept ( )));
 	botlay-> addWidget ( p );
-	p = new QPushButton ( tr( "Cancel" ), this );
+	p = new QPushButton ( tr( "&Cancel" ), this );
 	p-> setAutoDefault ( true );
 	connect ( p, SIGNAL( clicked ( )), this, SLOT( reject ( )));
 	botlay-> addWidget ( p );

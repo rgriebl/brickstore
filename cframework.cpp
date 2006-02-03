@@ -164,7 +164,7 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 	m_taskpanes-> addItem ( m_task_priceguide, CResource::inst ( )-> pixmap ( "sidebar/priceguide" ), tr( "Price Guide" ));
 
 	m_task_appears = new CTaskAppearsInWidget ( 0, "appearsinwidget" );
-	m_taskpanes-> addItem ( m_task_appears,  CResource::inst ( )-> pixmap ( "sidebar/appearsin" ), tr( "Appears In" ));
+	m_taskpanes-> addItem ( m_task_appears,  CResource::inst ( )-> pixmap ( "sidebar/appearsin" ), tr( "Appears In Sets" ));
 
 	m_task_links = new CTaskLinksWidget ( 0, "linkswidget" );
 	m_taskpanes-> addItem ( m_task_links,  CResource::inst ( )-> pixmap ( "sidebar/links" ), tr( "Links" ));
@@ -268,9 +268,15 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 	findAction ( "view_simple_mode"        )-> setOn ( CConfig::inst ( )-> simpleMode ( ));
 
 	findAction ( CConfig::inst ( )-> onlineStatus ( ) ? "net_online" : "net_offline" )-> setOn ( true );
-	findAction ( CConfig::inst ( )-> windowModeTabbed ( ) ? "window_mode_tab" : "window_mode_mdi" )-> setOn ( true );
+	 
+	switch ( CConfig::inst ( )-> windowMode ( )) {
+		case  0: findAction ( "window_mode_mdi" )-> setOn ( true ); break;
+		case  1: findAction ( "window_mode_tab_above" )-> setOn ( true ); break;
+		case  2:
+		default: findAction ( "window_mode_tab_below" )-> setOn ( true ); break;
+	}
 
-	setWindowModeTabbed ( CConfig::inst ( )-> windowModeTabbed ( ));
+	setWindowMode ( CConfig::inst ( )-> windowMode ( ));
 
 	BrickLink *bl = BrickLink::inst ( );
 
@@ -282,7 +288,7 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 		bl-> setUpdateIntervals ( pic, pg );
 	}
 
-	connect ( CConfig::inst ( ), SIGNAL( windowModeTabbedChanged ( bool )), this, SLOT( setWindowModeTabbed ( bool )));
+	connect ( CConfig::inst ( ), SIGNAL( windowModeChanged ( int )), this, SLOT( setWindowMode ( int )));
 	connect ( CConfig::inst ( ), SIGNAL( onlineStatusChanged ( bool )), bl, SLOT( setOnlineStatus ( bool )));
 	connect ( CConfig::inst ( ), SIGNAL( blUpdateIntervalsChanged ( int, int )), bl, SLOT( setUpdateIntervals ( int, int )));
 	connect ( CConfig::inst ( ), SIGNAL( proxyChanged ( bool, const QString &, int )), bl, SLOT( setHttpProxy ( bool, const QString &, int )));
@@ -309,6 +315,11 @@ void CFrameWork::languageChange ( )
 	m_progress-> setItemLabel ( PGI_Inventory,  tr( "Inventory updates" ));
 	m_progress-> setItemLabel ( PGI_Picture,    tr( "Picture updates" ));
 
+	m_taskpanes-> setItemText ( m_task_info,       tr( "Info" ));
+	m_taskpanes-> setItemText ( m_task_priceguide, tr( "Price Guide" ));
+	m_taskpanes-> setItemText ( m_task_appears,    tr( "Appears In Sets" ));
+	m_taskpanes-> setItemText ( m_task_links,      tr( "Links" ));
+
 	menuBar ( )-> changeItem ( m_menuid_file,   tr( "&File" ));
 	menuBar ( )-> changeItem ( m_menuid_edit,   tr( "&Edit" ));
 	menuBar ( )-> changeItem ( m_menuid_view,   tr( "&View" ));
@@ -321,7 +332,7 @@ void CFrameWork::languageChange ( )
 		const char *text; 
 		const char *accel;
 	} *atptr, actiontable [] = {
-		{ "file_new",                       QT_TR_NOOP( "New..." ),                             QT_TR_NOOP( "Ctrl+N", "File|New" ) },
+		{ "file_new",                       QT_TR_NOOP( "New" ),                                QT_TR_NOOP( "Ctrl+N", "File|New" ) },
 		{ "file_open",                      QT_TR_NOOP( "Open..." ),                            QT_TR_NOOP( "Ctrl+O", "File|Open" ) },
 		{ "file_open_recent",               QT_TR_NOOP( "Open Recent" ),                        0 },
 		{ "file_save",                      QT_TR_NOOP( "Save" ),                               QT_TR_NOOP( "Ctrl+S", "File|Save" ) },
@@ -366,12 +377,13 @@ void CFrameWork::languageChange ( )
 		{ "extras_configure",               QT_TR_NOOP( "Configure..." ),                       0 },
 		{ "net_online",                     QT_TR_NOOP( "Online Mode" ),                        0 },
 		{ "net_offline",                    QT_TR_NOOP( "Offline Mode" ),                       0 },
-		{ "window_mode_mdi",                QT_TR_NOOP( "MDI environment" ),                    0 },
-		{ "window_mode_tab",                QT_TR_NOOP( "Tabbed documents" ),                   0 },
+		{ "window_mode_mdi",                QT_TR_NOOP( "Standard MDI Mode" ),                  0 },
+		{ "window_mode_tab_above",          QT_TR_NOOP( "Show Tabs at Top" ),                   0 },
+		{ "window_mode_tab_below",          QT_TR_NOOP( "Show Tabs at Bottom" ),                0 },
 		{ "window_cascade",                 QT_TR_NOOP( "Cascade" ),                            0 },
 		{ "window_tile",                    QT_TR_NOOP( "Tile" ),                               0 },
 		{ "help_whatsthis",                 QT_TR_NOOP( "What's this?" ),                       QT_TR_NOOP( "Shift+F1", "Help|WhatsThis" ) },
-		{ "help_about",                     QT_TR_NOOP( "About" ),                              0 },
+		{ "help_about",                     QT_TR_NOOP( "About..." ),                           0 },
 		{ "help_updates",                   QT_TR_NOOP( "Check for Program Updates..." ),       0 },
 		{ "edit_price_to_fixed",            QT_TR_NOOP( "Set Prices..." ),                      0 },
 		{ "edit_price_to_priceguide",       QT_TR_NOOP( "Set Prices to Price-Guide..." ),       QT_TR_NOOP( "Ctrl+G", "Edit|Set to PriceGuide" ) },
@@ -682,7 +694,7 @@ void CFrameWork::createActions ( )
 	a = new QAction ( this, "settings_view_toolbar", true );
 	connect ( a, SIGNAL( toggled ( bool )), this, SLOT( viewToolBar ( bool )));
 
-	(void) m_taskpanes-> createItemAction ( this, "settings_view_infobar" );
+	(void) m_taskpanes-> createItemVisibilityAction ( this, "settings_view_infobar" );
 
 	a = new QAction ( this, "settings_view_statusbar", true );
 	connect ( a, SIGNAL( toggled ( bool )), this, SLOT( viewStatusBar ( bool )));
@@ -708,7 +720,8 @@ void CFrameWork::createActions ( )
 	connect ( g, SIGNAL( selected ( QAction * )), this, SLOT( setWindowMode ( QAction * )));
 
 	(void) new QAction ( g, "window_mode_mdi", true );
-	(void) new QAction ( g, "window_mode_tab", true );
+	(void) new QAction ( g, "window_mode_tab_above", true );
+	(void) new QAction ( g, "window_mode_tab_below", true );
 
 	a = new QAction ( this, "window_cascade" );
 	connect ( a, SIGNAL( activated ( )), m_mdi, SLOT( cascade ( )));
@@ -745,9 +758,10 @@ void CFrameWork::createActions ( )
 	delete alist;
 }
 
-void CFrameWork::setWindowModeTabbed ( bool b )
+void CFrameWork::setWindowMode ( int m )
 {
-	m_mdi-> setMode ( b ? CWorkspace::Tabbed : CWorkspace::MDI );
+	m_mdi-> setShowTabs ( m > 0 );
+	m_mdi-> setSpreadSheetTabs ( m == 2 );
 }
 
 void CFrameWork::viewStatusBar ( bool b )
@@ -758,11 +772,6 @@ void CFrameWork::viewStatusBar ( bool b )
 void CFrameWork::viewToolBar ( bool b )
 {
 	m_toolbar-> setShown ( b );
-}
-
-void CFrameWork::viewInfoBarItem ( int id )
-{
-	m_taskpanes-> setItemVisible ( id, m_taskpanes-> isItemVisible ( id ));
 }
 
 void CFrameWork::openDocument ( const QString &file )
@@ -885,7 +894,8 @@ bool CFrameWork::showOrDeleteWindow ( CWindow *w, bool b )
 	else {
 		if ( w == m_current_window ) // Qt/X11 (Win?,Mac?) Bug: window is active without being shown...
 			connectWindow ( 0 );
-		w-> close ( true );
+		w-> hide ( );
+		w-> deleteLater ( );
 	}
 	return b;
 }
@@ -906,7 +916,7 @@ void CFrameWork::windowActivate ( int i )
 	if (( i >= 0 ) && ( i < int( l. count ( )))) {
 		QWidget *w = l. at ( i );
 
-		m_mdi-> activateWindow ( w );
+		w-> setFocus ( );
 	}
 }
 
@@ -1199,9 +1209,10 @@ void CFrameWork::configure ( const char *page )
 
 void CFrameWork::setWindowMode ( QAction *act )
 {
-	bool tabbed = ( act == findAction ( "window_mode_tab" ));
+	bool tabbed = ( act != findAction ( "window_mode_mdi" ));
+	bool execllike = ( act == findAction ( "window_mode_tab_below" ));
 
-	CConfig::inst ( )-> setWindowModeTabbed ( tabbed );
+	CConfig::inst ( )-> setWindowMode ( tabbed ? ( execllike ? 2 : 1 ) : 0 );
 }
 
 void CFrameWork::setOnlineStatus ( QAction *act )
