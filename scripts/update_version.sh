@@ -20,7 +20,7 @@ fi
 
 OIFS="$IFS"
 IFS="."
-set -- `head -n1 $1` 
+set -- $1 
 IFS="$OIFS"
 
 cat version.h.in | sed -e "s,\(^#define BRICKSTORE_MAJOR  *\)[^ ]*$,\1$1,g" \

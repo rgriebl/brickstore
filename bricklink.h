@@ -517,11 +517,11 @@ public:
 		const QPtrVector<Item>   &items ( ) const       { return m_items; }
 		
 	private:
-		template <typename T> T *parse ( uint count, const char **strs );
-		template <> Category *parse<Category> ( uint count, const char **strs );
-		template <> Color *parse<Color> ( uint count, const char **strs );
-		template <> ItemType *parse<ItemType> ( uint count, const char **strs );
-		template <> Item *parse<Item> ( uint count, const char **strs );
+		template <typename T> T *parse ( uint count, const char **strs, T *gcc_dummy );
+		Category *parse ( uint count, const char **strs, Category * );
+		Color *parse ( uint count, const char **strs, Color * );
+		ItemType *parse ( uint count, const char **strs, ItemType * );
+		Item *parse ( uint count, const char **strs, Item * );
 
 		template <typename C> bool readDB ( const QString &name, C &container );
 		template <typename T> bool readDB_processLine ( QIntDict<T> &d, uint tokencount, const char **tokens );

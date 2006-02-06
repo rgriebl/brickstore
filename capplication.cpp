@@ -33,8 +33,6 @@
 
 #include "capplication.h"
 
-#include "commands.h"
-
 //#define BS_DEMO  30 // demo time in minutes
 
 
@@ -87,7 +85,7 @@ CApplication::CApplication ( int _argc, char **_argv )
 	}
 
 	// initialize config & resource
-	(void) CConfig::inst ( )-> upgrade ( BRICKSTORE_MAJOR, BRICKSTORE_MINOR, BRICKSTORE_PATCH );
+//	(void) CConfig::inst ( )-> upgrade ( BRICKSTORE_MAJOR, BRICKSTORE_MINOR, BRICKSTORE_PATCH );
 	(void) CMoney::inst ( );
 	(void) CResource::inst ( );
 	(void) CReportManager::inst ( );
@@ -351,7 +349,7 @@ void CApplication::initStrings ( )
 
 	struct ::utsname utsinfo;
 	if ( ::uname ( &utsinfo ) >= 0 )
-		m_sys_version = utsinfo. sysname + " " + utsinfo. machine;
+		m_sys_version = QString( utsinfo. sysname ) + " " + utsinfo. machine;
 
 #endif
 }

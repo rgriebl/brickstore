@@ -894,6 +894,7 @@ QDomElement BrickLink::createItemListXML ( QDomDocument doc, ItemListXMLHint hin
 		case XMLHint_WantedList:
 		case XMLHint_Inventory : roottag = "INVENTORY"; itemtag = "ITEM"; break;
 		case XMLHint_BrickStore: roottag = "Inventory"; itemtag = "Item"; break;
+		case XMLHint_Order     : break;
 	}
 
 	QDomElement root = doc. createElement ( roottag );

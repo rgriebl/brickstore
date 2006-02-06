@@ -155,7 +155,6 @@ bool CRebuildDatabase::download ( )
 		const char *m_url;
 		const CKeyValueList m_query;
 		const char *m_file;
-		const char *m_label;
 	} * tptr, table [] = {
 		{ "http://www.bricklink.com/catalogDownload.asp", dbQuery ( 1 ),     "itemtypes.txt"   },
 		{ "http://www.bricklink.com/catalogDownload.asp", dbQuery ( 2 ),     "categories.txt"  },
@@ -174,7 +173,7 @@ bool CRebuildDatabase::download ( )
 
 		{ "http://www.peeron.com/inv/colors",             CKeyValueList ( ), "peeron_colors.html" },
 
-		{ 0, CKeyValueList ( ), 0, 0 }
+		{ 0, CKeyValueList ( ), 0 }
 	};
 
 	bool failed = false;

@@ -224,7 +224,7 @@ QDataStream &operator << ( QDataStream &ds, const BrickLink::Item *item )
 	for ( const BrickLink::Category **catp = item-> m_categories; *catp; catp++ )
 		ds << Q_INT32(( *catp )-> id ( ));
 
-	Q_INT32 colorid = item-> m_color ? item-> m_color-> id ( ) : -1;
+	Q_INT32 colorid = item-> m_color ? Q_INT32( item-> m_color-> id ( )) : -1;
 	ds << colorid << item-> m_inv_updated << item-> m_weight << Q_UINT32( item-> m_index ) << Q_UINT32( item-> m_year );
 
 	if ( item-> m_appears_in && item-> m_appears_in [0] && item-> m_appears_in [1] ) {

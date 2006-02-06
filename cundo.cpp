@@ -62,7 +62,7 @@ public:
 			doEmits ( mask, stack, CUndoManager::inst ( ));
 	}
 
-	template <typename T> doEmits ( int mask, CUndoStack *stack, T *sender )
+	template <typename T> void doEmits ( int mask, CUndoStack *stack, T *sender )
 	{
 		if ( mask & CanUndo )
 			emit sender-> canUndoChanged ( stack ? stack-> canUndo ( ) : false );

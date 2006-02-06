@@ -275,7 +275,7 @@ public:
 
 	virtual QSize minimumSizeHint ( ) const
 	{
-		QFontMetrics &fm = fontMetrics ( );
+		const QFontMetrics &fm = fontMetrics ( );
 		
 		return QSize ( fm. width ( 'm' ) * 20, fm.height ( ) * 6 );
 	}

@@ -71,7 +71,7 @@ const BrickLink::Item *BrickLink::TextImport::findItem ( char tid, const char *i
 }
 
 
-template <> BrickLink::Category *BrickLink::TextImport::parse<BrickLink::Category> ( uint count, const char **strs )
+template <> BrickLink::Category *BrickLink::TextImport::parse<BrickLink::Category> ( uint count, const char **strs, BrickLink::Category * )
 {
 	if ( count < 2 )
 		return 0;
@@ -82,7 +82,7 @@ template <> BrickLink::Category *BrickLink::TextImport::parse<BrickLink::Categor
 	return cat;
 }
 
-template <> BrickLink::Color *BrickLink::TextImport::parse<BrickLink::Color> ( uint count, const char **strs )
+template <> BrickLink::Color *BrickLink::TextImport::parse<BrickLink::Color> ( uint count, const char **strs, BrickLink::Color * )
 {
 	if ( count < 2 )
 		return 0;
@@ -99,7 +99,7 @@ template <> BrickLink::Color *BrickLink::TextImport::parse<BrickLink::Color> ( u
 	return col;
 }
 
-template <> BrickLink::ItemType *BrickLink::TextImport::parse<BrickLink::ItemType> ( uint count, const char **strs )
+template <> BrickLink::ItemType *BrickLink::TextImport::parse<BrickLink::ItemType> ( uint count, const char **strs, BrickLink::ItemType * )
 {
 	if ( count < 2 )
 		return 0;
@@ -117,7 +117,7 @@ template <> BrickLink::ItemType *BrickLink::TextImport::parse<BrickLink::ItemTyp
 	return itt;
 }
 
-template <> BrickLink::Item *BrickLink::TextImport::parse<BrickLink::Item> ( uint count, const char **strs )
+template <> BrickLink::Item *BrickLink::TextImport::parse<BrickLink::Item> ( uint count, const char **strs, BrickLink::Item * )
 {
 	if ( count < 4 )
 		return 0;
@@ -259,7 +259,8 @@ bool BrickLink::TextImport::import ( const QString &path )
 
 template <typename T> bool BrickLink::TextImport::readDB_processLine ( QIntDict<T> &d, uint tokencount, const char **tokens )
 {
-	T *t = parse<T> ( tokencount, (const char **) tokens );
+	T *t = 0;
+	t = parse<T> ( tokencount, (const char **) tokens, t );
 
 	if ( t ) {
 		d. insert ( t-> id ( ), t );
@@ -271,7 +272,8 @@ template <typename T> bool BrickLink::TextImport::readDB_processLine ( QIntDict<
 
 template <typename T> bool BrickLink::TextImport::readDB_processLine ( QPtrVector<T> &v, uint tokencount, const char **tokens )
 {
-	T *t = parse<T> ( tokencount, (const char **) tokens );
+	T *t = 0;
+	t = parse<T> ( tokencount, (const char **) tokens, t );
 
 	if ( t ) {
 		if ( v. size ( ) == v. count ( ))
