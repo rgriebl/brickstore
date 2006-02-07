@@ -233,43 +233,40 @@ protected slots:
 			CDocument::Statistics stat = m_doc-> statistics ( list );
 
 			QString s;
+			QString valstr, wgtstr;
 
-			if ( stat. lots ( ) >= 0 ) {
-				QString valstr, wgtstr;
-
-				if ( stat. value ( ) != stat. minValue ( )) {
-					valstr = QString ( "%1 (%2 %3)" ).
-								arg( stat. value ( ). toLocalizedString ( )).
-								arg( tr( "min." )).
-								arg( stat. minValue ( ). toLocalizedString ( ));
-				}
-				else
-					valstr = stat. value ( ). toLocalizedString ( );
-
-				if ( stat. weight ( ) == -DBL_MIN ) {
-					wgtstr = "-";
-				}
-				else {
-					double weight = stat. weight ( );
-
-					if ( weight < 0 ) {
-						weight = -weight;
-						wgtstr = tr( "min." ) + " ";
-					}
-
-					wgtstr += CUtility::weightToString ( weight, ( CConfig::inst ( )-> weightSystem ( ) == CConfig::WeightImperial ), true, true );
-				}
-
-				s = QString ( "<h3>%1</h3>&nbsp;&nbsp;%2: %3<br />&nbsp;&nbsp;%4: %5<br /><br />&nbsp;&nbsp;%6: %7<br /><br />&nbsp;&nbsp;%8: %9" ). 
-					arg ( tr( "Multiple lots selected" )). 
-					arg ( tr( "Lots" )). arg ( stat. lots ( )).
-					arg ( tr( "Items" )). arg ( stat. items ( )).
-					arg ( tr( "Value" )). arg ( valstr ).
-					arg ( tr( "Weight" )). arg ( wgtstr );
-
-	//			if (( stat. errors ( ) > 0 ) && CConfig::inst ( )-> showInputErrors ( ))
-	//				s += QString ( "<br /><br />&nbsp;&nbsp;%1: %2" ). arg ( tr( "Errors" )). arg ( stat. errors ( ));
+			if ( stat. value ( ) != stat. minValue ( )) {
+				valstr = QString ( "%1 (%2 %3)" ).
+							arg( stat. value ( ). toLocalizedString ( )).
+							arg( tr( "min." )).
+							arg( stat. minValue ( ). toLocalizedString ( ));
 			}
+			else
+				valstr = stat. value ( ). toLocalizedString ( );
+
+			if ( stat. weight ( ) == -DBL_MIN ) {
+				wgtstr = "-";
+			}
+			else {
+				double weight = stat. weight ( );
+
+				if ( weight < 0 ) {
+					weight = -weight;
+					wgtstr = tr( "min." ) + " ";
+				}
+
+				wgtstr += CUtility::weightToString ( weight, ( CConfig::inst ( )-> weightSystem ( ) == CConfig::WeightImperial ), true, true );
+			}
+
+			s = QString ( "<h3>%1</h3>&nbsp;&nbsp;%2: %3<br />&nbsp;&nbsp;%4: %5<br /><br />&nbsp;&nbsp;%6: %7<br /><br />&nbsp;&nbsp;%8: %9" ). 
+				arg ( tr( "Multiple lots selected" )). 
+				arg ( tr( "Lots" )). arg ( stat. lots ( )).
+				arg ( tr( "Items" )). arg ( stat. items ( )).
+				arg ( tr( "Value" )). arg ( valstr ).
+				arg ( tr( "Weight" )). arg ( wgtstr );
+
+//			if (( stat. errors ( ) > 0 ) && CConfig::inst ( )-> showInputErrors ( ))
+//				s += QString ( "<br /><br />&nbsp;&nbsp;%1: %2" ). arg ( tr( "Errors" )). arg ( stat. errors ( ));
 
 			m_pic-> setPicture ( 0 );
 			m_text-> setText ( s );

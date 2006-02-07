@@ -99,7 +99,7 @@ void DlgDBUpdateImpl::transferJobProgress ( CTransfer::Job *job, int progress, i
 {
 	if ( job == d-> m_job ) {
 		w_progress-> setProgress ( progress, total );
-		message ( false, tr( "Downloading binary database... %1/%2 KB" ). arg( progress / 1024 ). arg( total / 1024 ));
+		message ( false, tr( "Downloading: %1/%2 KB" ). arg( progress / 1024 ). arg( total / 1024 ));
 	}
 }
 

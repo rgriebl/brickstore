@@ -610,6 +610,19 @@ QString CItemViewItem::toolTip ( int column ) const
 		case CItemView::Status      : str = CItemView::statusLabel ( m_item-> status ( )); break;
 		case CItemView::Picture     : str = text ( CItemView::PartNo ) + " " + text ( CItemView::Description ); break;
 		case CItemView::Condition   : str = CItemView::conditionLabel ( m_item-> condition ( )); break;
+		case CItemView::Category    : {
+			const BrickLink::Category **catpp = m_item-> item ( )-> allCategories ( );
+			
+			if ( !catpp [1] ) {
+				str = catpp [0]-> name ( );
+			}
+			else {
+				str = QString( "<b>%1</b>" ). arg( catpp [0]-> name ( ));
+				while ( *++catpp )
+					str = str + QString( "<br />" ) + catpp [0]-> name ( );
+			}
+			break;
+		}
 
 		default                     : if ( m_truncated & (((Q_UINT64) 1ULL ) << column )) str = text ( column ); break;
 	}

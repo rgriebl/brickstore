@@ -1075,39 +1075,36 @@ void CFrameWork::statisticsUpdate ( )
 		}
 
 		CDocument::Statistics stat = m_current_window-> document ( )-> statistics ( not_exclude );
+		QString valstr, wgtstr;
 
-		if ( stat. lots ( ) >= 0 ) {
-			QString valstr, wgtstr;
-
-			if ( stat. value ( ) != stat. minValue ( )) {
-				valstr = QString ( "%1 (%2 %3)" ).
-						arg( stat. value ( ). toLocalizedString ( )).
-						arg( tr( "min." )).
-						arg( stat. minValue ( ). toLocalizedString ( ));
-			}
-			else
-				valstr = stat. value ( ). toLocalizedString ( );
-
-			if ( stat. weight ( ) == -DBL_MIN ) {
-				wgtstr = "-";
-			}
-			else {
-				double weight = stat. weight ( );
-
-				if ( weight < 0 ) {
-					weight = -weight;
-					wgtstr = tr( "min." ) + " ";
-				}
-
-				wgtstr += CUtility::weightToString ( weight, ( CConfig::inst ( )-> weightSystem ( ) == CConfig::WeightImperial ), true, true );
-			}
-
-			ss = QString( "  %1: %2   %3: %4   %5: %6   %7: %8  " ).
-			     arg( tr( "Lots" )). arg ( stat. lots ( )).
-			     arg( tr( "Items" )). arg ( stat. items ( )).
-			     arg( tr( "Value" )). arg ( valstr ).
-			     arg( tr( "Weight" )). arg ( wgtstr );
+		if ( stat. value ( ) != stat. minValue ( )) {
+			valstr = QString ( "%1 (%2 %3)" ).
+					arg( stat. value ( ). toLocalizedString ( )).
+					arg( tr( "min." )).
+					arg( stat. minValue ( ). toLocalizedString ( ));
 		}
+		else
+			valstr = stat. value ( ). toLocalizedString ( );
+
+		if ( stat. weight ( ) == -DBL_MIN ) {
+			wgtstr = "-";
+		}
+		else {
+			double weight = stat. weight ( );
+
+			if ( weight < 0 ) {
+				weight = -weight;
+				wgtstr = tr( "min." ) + " ";
+			}
+
+			wgtstr += CUtility::weightToString ( weight, ( CConfig::inst ( )-> weightSystem ( ) == CConfig::WeightImperial ), true, true );
+		}
+
+		ss = QString( "  %1: %2   %3: %4   %5: %6   %7: %8  " ).
+		     arg( tr( "Lots" )). arg ( stat. lots ( )).
+		     arg( tr( "Items" )). arg ( stat. items ( )).
+		     arg( tr( "Value" )). arg ( valstr ).
+		     arg( tr( "Weight" )). arg ( wgtstr );
 
 		if (( stat. errors ( ) > 0 ) && CConfig::inst ( )-> showInputErrors ( ))
 			es = QString( "  %1: %2  " ). arg( tr( "Errors" )). arg( stat. errors ( ));

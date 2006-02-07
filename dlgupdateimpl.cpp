@@ -144,7 +144,7 @@ void DlgUpdateImpl::transferJobProgress ( CTransfer::Job *job, int progress, int
 {
 	if ( job == d-> m_job ) {
 		w_progress-> setProgress ( progress, total );
-		w_label-> setText ( d-> m_header + tr( "Downloading version index... %1/%2 KB" ). arg( progress / 1024 ). arg( total / 1024 ));
+		w_label-> setText ( d-> m_header + tr( "Downloading: %1/%2 KB" ). arg( progress / 1024 ). arg( total / 1024 ));
 	}
 }
 

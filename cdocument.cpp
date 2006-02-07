@@ -762,14 +762,15 @@ void CDocument::inventoryUpdated ( BrickLink::Inventory *inv )
 
 void CDocument::setBrickLinkItems ( const BrickLink::InvItemList &bllist, uint multiply )
 {
-	ItemList list;
+	ItemList items;
+	ItemList positions;
 
 	foreach ( const BrickLink::InvItem *blitem, bllist ) {
 		Item *item = new Item ( *blitem );
 		item-> setQuantity ( item-> quantity ( ) * multiply );
-		list. append ( item );
+		items. append ( item );
 	}
-	insertItemsDirect ( list, ItemList ( ));	
+	insertItemsDirect ( items, positions );
 }
 
 QString CDocument::fileName ( ) const
