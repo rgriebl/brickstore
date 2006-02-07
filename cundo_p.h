@@ -57,6 +57,8 @@ private:
 	QPopupMenu *m_menu;
 	QListBox *  m_list;
 	QLabel *    m_label;
+
+	static const char *s_strings [];
 };
 
 #endif

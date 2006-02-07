@@ -624,7 +624,7 @@ bool BrickLink::readDatabase ( const QString &fname )
 
 
 
-QPtrList<BrickLink::InvItem> *BrickLink::parseItemListXML ( QDomElement root, ItemListXMLHint hint, uint *invalid_items )
+BrickLink::InvItemList *BrickLink::parseItemListXML ( QDomElement root, ItemListXMLHint hint, uint *invalid_items )
 {
 	QString roottag, itemtag;
 
@@ -641,8 +641,7 @@ QPtrList<BrickLink::InvItem> *BrickLink::parseItemListXML ( QDomElement root, It
 	if ( root. nodeName ( ) != roottag )
 		return 0;
 
-	QPtrList<BrickLink::InvItem> *inv = new QPtrList<InvItem> ( );
-	inv-> setAutoDelete ( true );
+	InvItemList *inv = new InvItemList ( );
 
 	uint incomplete = 0;
 
@@ -650,7 +649,7 @@ QPtrList<BrickLink::InvItem> *BrickLink::parseItemListXML ( QDomElement root, It
 		if ( itemn. nodeName ( ) != itemtag )
 			continue;
 
-		InvItem *ii = new InvItem ( 0, 0 );
+		InvItem *ii = new InvItem ( );
 
 		QString itemid, itemname;
 		QString itemtypeid, itemtypename;
@@ -883,7 +882,7 @@ QPtrList<BrickLink::InvItem> *BrickLink::parseItemListXML ( QDomElement root, It
 
 
 
-QDomElement BrickLink::createItemListXML ( QDomDocument doc, ItemListXMLHint hint, const QPtrList<InvItem> *items, QMap <QString, QString> *extra )
+QDomElement BrickLink::createItemListXML ( QDomDocument doc, ItemListXMLHint hint, const InvItemList *items, QMap <QString, QString> *extra )
 {
 	QString roottag, itemtag;
 
@@ -902,9 +901,7 @@ QDomElement BrickLink::createItemListXML ( QDomDocument doc, ItemListXMLHint hin
 	if ( root. isNull ( ) || roottag. isNull ( ) || itemtag. isEmpty ( ) || !items )
 		return root;
 
-	for ( QPtrListIterator<InvItem> it ( *items ); it. current ( ); ++it ) {
-		InvItem *ii = it. current ( );
-
+	foreach ( const InvItem *ii, *items ) {
 		if ( ii-> isIncomplete ( ))
 			continue;
 		
@@ -1117,14 +1114,14 @@ QDomElement BrickLink::createItemListXML ( QDomDocument doc, ItemListXMLHint hin
 
 
 
-bool BrickLink::parseLDrawModel ( QFile &f, QPtrList <InvItem> &items, uint *invalid_items )
+bool BrickLink::parseLDrawModel ( QFile &f, InvItemList &items, uint *invalid_items )
 {
 	QDict <InvItem> mergehash;
 	
 	return BrickLink::parseLDrawModelInternal ( f, QString::null, items, invalid_items, mergehash );
 }
 
-bool BrickLink::parseLDrawModelInternal ( QFile &f, const QString &model_name, QPtrList <InvItem> &items, uint *invalid_items, QDict <InvItem> &mergehash )
+bool BrickLink::parseLDrawModelInternal ( QFile &f, const QString &model_name, InvItemList &items, uint *invalid_items, QDict <InvItem> &mergehash )
 {
 	QStringList searchpath;
 	QString ldrawdir = CConfig::inst ( )-> lDrawDir ( );

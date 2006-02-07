@@ -36,7 +36,8 @@
 #include "creport.h"
 #include "cmoney.h"
 #include "cundo.h"
-#include "command.h"
+//#include "command.h"
+#include "cdocument.h"
 
 #include "dlgincdecpriceimpl.h"
 #include "dlgsettopgimpl.h"
@@ -51,46 +52,16 @@
 
 #include "cwindow.h"
 
-CItemStatistics::CItemStatistics ( const QPtrList <BrickLink::InvItem> &list, int errors )
-{
-	m_lots = list. count ( );
-	m_items = 0;
-	m_val = m_minval = 0.;
-	m_weight = .0;
-	m_errors = errors;
-	bool weight_missing = false;
-
-	for ( QPtrListIterator<BrickLink::InvItem> it ( list ); it. current ( ); ++it ) {
-		BrickLink::InvItem *ii = it. current ( );
-
-		int qty = ii-> quantity ( );
-		money_t price = ii-> price ( );
-
-		m_val += ( qty * price );
-
-		for ( int i = 0; i < 3; i++ ) {
-			if ( ii-> tierQuantity ( i ) && ( ii-> tierPrice ( i ) != 0 ))
-				price = ii-> tierPrice ( i );
-		}
-		m_minval += ( qty * price * ( 1.0 - double( ii-> sale ( )) / 100.0 ));
-		m_items += qty;
-
-		if ( ii-> weight ( ) > 0 )
-			m_weight += ii-> weight ( );
-		else 
-			weight_missing = true;	
-	}
-	if ( weight_missing )
-		m_weight = ( m_weight == 0. ) ? -DBL_MIN : -m_weight;
-}
 
 
-
-CWindow::CWindow ( QWidget *parent, const char *name )
+CWindow::CWindow ( CDocument *doc, QWidget *parent, const char *name )
 	: QWidget ( parent, name, WDestructiveClose ), m_lvitems ( 503 )
 {
-	m_inventory = 0;
-	m_inventory_multiply = 1;
+	m_doc = doc;
+	m_doc-> addView ( this );
+
+	m_ignore_selection_update = false;
+
 	m_filter_field = CItemView::All;
 
 	m_settopg_failcnt = 0;
@@ -99,8 +70,6 @@ CWindow::CWindow ( QWidget *parent, const char *name )
 	m_settopg_price = BrickLink::PriceGuide::Average;
 
 	// m_items. setAutoDelete ( true ); NOT ANYMORE -> UndoRedo
-
-	m_undo = new CUndoStack ( this );
 
 	w_filter_clear = new QToolButton ( this );
 	w_filter_clear-> setAutoRaise ( true );
@@ -111,7 +80,7 @@ CWindow::CWindow ( QWidget *parent, const char *name )
 	w_filter_field = new QComboBox ( false, this );
 	w_filter_field_label = new QLabel ( this );
 
-	w_list = new CItemView ( this );
+	w_list = new CItemView ( doc, this );
 	setFocusProxy ( w_list );
 	w_list-> setShowSortIndicator ( true );
 	w_list-> setColumnsHideable ( true );
@@ -134,7 +103,7 @@ CWindow::CWindow ( QWidget *parent, const char *name )
 		w_list-> loadSettings ( map );
 	}
 
-	connect ( w_list, SIGNAL( selectionChanged ( )), this, SLOT( updateSelection ( )));
+	connect ( w_list, SIGNAL( selectionChanged ( )), this, SLOT( updateSelectionFromView ( )));
 
 	for ( int i = 0; i < ( CItemView::FilterCountSpecial + CItemView::FieldCount ); i++ )
 		w_filter_field-> insertItem ( QString ( ));
@@ -158,14 +127,25 @@ CWindow::CWindow ( QWidget *parent, const char *name )
 	connect ( w_filter_expression, SIGNAL( textChanged ( const QString & )), this, SLOT( applyFilter ( )));
 	connect ( w_filter_field, SIGNAL( activated ( int )), this, SLOT( applyFilter ( )));
 
-	connect ( m_undo, SIGNAL( cleanChanged ( bool )), this, SLOT( updateCaption ( )));
+//	connect ( m_undo, SIGNAL( cleanChanged ( bool )), this, SLOT( updateCaption ( )));
 
 	connect ( CConfig::inst ( ), SIGNAL( simpleModeChanged ( bool )), w_list, SLOT( setSimpleMode ( bool )));
 	connect ( CConfig::inst ( ), SIGNAL( simpleModeChanged ( bool )), this, SLOT( updateErrorMask ( )));
 	connect ( CConfig::inst ( ), SIGNAL( showInputErrorsChanged ( bool )), this, SLOT( updateErrorMask ( )));
 
-	connect ( CConfig::inst ( ), SIGNAL( weightSystemChanged ( CConfig::WeightSystem )), this, SLOT( triggerUpdate ( )));
-	connect ( CMoney::inst ( ), SIGNAL( monetarySettingsChanged ( )), this, SLOT( triggerUpdate ( )));
+	connect ( CConfig::inst ( ), SIGNAL( weightSystemChanged ( CConfig::WeightSystem )), w_list, SLOT( triggerUpdate ( )));
+	connect ( CMoney::inst ( ), SIGNAL( monetarySettingsChanged ( )), w_list, SLOT( triggerUpdate ( )));
+
+////////////////////////////////////////////////////////////////////////////////
+
+	connect ( m_doc, SIGNAL( titleChanged ( const QString & )), this, SLOT( updateCaption ( )));
+	connect ( m_doc, SIGNAL( modificationChanged ( bool )), this, SLOT( updateCaption ( )));
+
+	connect ( m_doc, SIGNAL( itemsAdded( const CDocument::ItemList & )), this, SLOT( itemsAddedToDocument ( const CDocument::ItemList & )));
+	connect ( m_doc, SIGNAL( itemsRemoved( const CDocument::ItemList & )), this, SLOT( itemsRemovedFromDocument ( const CDocument::ItemList & )));
+	connect ( m_doc, SIGNAL( itemsChanged( const CDocument::ItemList &, bool )), this, SLOT( itemsChangedInDocument ( const CDocument::ItemList &, bool )));
+
+	itemsAddedToDocument ( m_doc-> items ( ));
 
 	updateErrorMask ( );
 
@@ -197,38 +177,64 @@ void CWindow::languageChange ( )
 	for ( j = 0; j < CItemView::FieldCount; j++ )
 		w_filter_field-> changeItem ( w_list-> header ( )-> label ( j ), i + j );
 
-	updateStatistics ( );
 	updateCaption ( );
+}
+
+void CWindow::updateCaption ( )
+{
+	QString cap = m_doc-> title ( );
+
+	if ( cap. isEmpty ( ))
+		cap = m_doc-> fileName ( );
+	if ( cap. isEmpty ( ))
+		cap = tr( "Untitled" );
+
+	//TODO: make this a bit more intelligent
+	if ( cap. length ( ) > 50 )
+		cap = cap. left ( 16 ) + "..." + cap. right ( 32 );
+
+	if ( m_doc-> isModified ( ))
+		cap += " *";
+
+	setCaption ( cap );
 }
 
 CWindow::~CWindow ( )
 {
 //	w_list-> saveSettings ( CConfig::inst ( ), "/ItemView/List" );
+}
 
-	if ( m_inventory ) {
-		m_inventory-> release ( );
-		m_inventory = 0;
+void CWindow::itemsAddedToDocument ( const CDocument::ItemList &items )
+{
+	QListViewItem *last_item = w_list-> lastItem ( );
+
+	foreach ( CDocument::Item *item, items ) {
+		CItemViewItem *ivi = new CItemViewItem ( item, w_list, last_item );
+		m_lvitems. insert ( item, ivi );
+		last_item = ivi;
 	}
 }
+
+void CWindow::itemsRemovedFromDocument ( const CDocument::ItemList &items )
+{
+	foreach ( CDocument::Item *item, items )
+		delete m_lvitems. take ( item );
+}
+
+void CWindow::itemsChangedInDocument ( const CDocument::ItemList &items, bool /*grave*/ )
+{
+	foreach ( CDocument::Item *item, items ) {
+		CItemViewItem *ivi = m_lvitems [item];
+		
+		if ( ivi )
+			ivi-> repaint ( );
+	}
+}
+
 
 void CWindow::applyFilter ( )
 {
 	w_list-> applyFilter ( w_filter_expression-> lineEdit ( )-> text ( ), w_filter_field-> currentItem ( ), true );
-}
-
-void CWindow::updateCaption ( )
-{
-	QString s = m_caption;
-
-	if ( s. isEmpty ( ))
-		s = m_filename;
-	if ( s. isEmpty ( ))
-		s = tr( "Untitled" );
-
-	if ( isModified ( ))
-		s += " *";
-
-	setCaption ( s );
 }
 
 
@@ -236,64 +242,42 @@ void CWindow::pictureUpdated ( BrickLink::Picture *pic )
 {
 	if ( !pic )
 		return;
-	for ( QPtrListIterator <BrickLink::InvItem> it ( m_items ); it. current ( ); ++it ) {
-		BrickLink::InvItem *ii = it. current ( );
 
-		if (( pic-> item ( ) == ii-> item ( )) && ( pic-> color ( ) == ii-> color ( )))
-			m_lvitems [ii]-> repaint ( );
+	foreach ( CDocument::Item *item, m_doc-> items ( )) {
+		if (( pic-> item ( ) == item-> item ( )) && ( pic-> color ( ) == item-> color ( )))
+			m_lvitems [item]-> repaint ( );
 	}
 }
 
-const QPtrList<BrickLink::InvItem> &CWindow::items ( ) const
-{
-	return m_items;
-}
-
-
-uint CWindow::setItems ( const QPtrList<BrickLink::InvItem> &items, int multiply )
-{
-	w_list-> clear ( );
-	m_lvitems. clear ( );
-	m_items. clear ( );
-
-	return addItems ( items, multiply, MergeAction_None, true );
-}
-
-uint CWindow::addItems ( const QPtrList<BrickLink::InvItem> &items, int multiply, uint globalmergeflags, bool dont_change_sorting )
+uint CWindow::addItems ( const BrickLink::InvItemList &items, int multiply, uint globalmergeflags, bool dont_change_sorting )
 {
 	bool waitcursor = ( items. count ( ) > 100 );
 	bool was_empty = ( w_list-> childCount ( ) == 0 );
 	uint dropped = 0;
 	int merge_action_yes_no_to_all = MergeAction_Ask;
-	int addcount = 0, mergecount = 0;
+	int mergecount = 0, addcount = 0;
 
 	CUndoCmd *macro = 0;
-	if ( items. count ( ) > 1 ) {
-		macro = new CUndoCmd ( CUndoCmd::MacroBegin );
-		m_undo-> push ( macro );
-	}
+	if ( items. count ( ) > 1 )
+		macro = m_doc-> macroBegin ( );
 
 	// disable sorting: new items should appear at the end of the list
 	if ( !dont_change_sorting )
 		w_list-> setSorting ( w_list-> columns ( ) + 1 ); // +1 because of Qt-bug !!
-
-#if 0
-	QListViewItem *last_item = w_list-> lastItem ( ); // cache the last added item, since QListView::lastItem() is very expensive
-#endif
 
 	if ( waitcursor )
 		QApplication::setOverrideCursor ( QCursor( Qt::WaitCursor ));
 
 	CDisableUpdates disupd ( w_list );
 
-	for ( QPtrListIterator<BrickLink::InvItem> it ( items ); it. current ( ); ++it ) {
-		BrickLink::InvItem *newit = it. current ( );
-		BrickLink::InvItem *oldit = 0;
 
+	foreach ( const BrickLink::InvItem *origitem, items ) {
 		uint mergeflags = globalmergeflags;
 
-		if ( newit-> isIncomplete ( )) {
-			DlgIncompleteItemImpl d ( newit, this );
+		CDocument::Item *newitem = new CDocument::Item ( *origitem );
+
+		if ( newitem-> isIncomplete ( )) {
+			DlgIncompleteItemImpl d ( newitem, this );
 
 			if ( waitcursor )
 				QApplication::restoreOverrideCursor ( );
@@ -309,15 +293,18 @@ uint CWindow::addItems ( const QPtrList<BrickLink::InvItem> &items, int multiply
 			}
 		}
 
+		CDocument::Item *olditem = 0;
+
 		if ( mergeflags != MergeAction_None ) {
-			for ( QPtrListIterator<BrickLink::InvItem> it2 ( m_items ); it2. current ( ); ++it2 ) {
-				if (( newit-> item ( ) == it2. current ( )-> item ( )) &&
-				    ( newit-> color ( ) == it2. current ( )-> color ( ))&& 
-				    ( newit-> condition ( ) == it2. current ( )-> condition ( ))) {
-					oldit = it2. current ( );
+			foreach ( CDocument::Item *item, m_doc-> items ( )) {
+				if (( newitem-> item ( ) == item-> item ( )) &&
+				    ( newitem-> color ( ) == item-> color ( ))&& 
+				    ( newitem-> condition ( ) == item-> condition ( ))) {
+					olditem = item;
+					break;
 				}
 			}
-			if ( !oldit )
+			if ( !olditem )
 				mergeflags = MergeAction_None;
 		}
 
@@ -326,7 +313,7 @@ uint CWindow::addItems ( const QPtrList<BrickLink::InvItem> &items, int multiply
 				mergeflags = merge_action_yes_no_to_all;
 			}
 			else {
-				DlgMergeImpl d ( oldit, newit, (( mergeflags & MergeKeep_Mask ) == MergeKeep_Old ), this );
+				DlgMergeImpl d ( olditem, newitem, (( mergeflags & MergeKeep_Mask ) == MergeKeep_Old ), this );
 
 				int res = d. exec ( );
 
@@ -340,132 +327,55 @@ uint CWindow::addItems ( const QPtrList<BrickLink::InvItem> &items, int multiply
 			}
 		}
 
-		CItemViewItem *ivi = 0;
-
 		switch ( mergeflags & MergeAction_Mask ) {
 			case MergeAction_Force: {
-				BrickLink::InvItem *ii = new BrickLink::InvItem ( *oldit );
+				newitem-> mergeFrom ( *olditem, (( mergeflags & MergeKeep_Mask ) == MergeKeep_New ));
 
-				ii-> mergeFrom ( newit, (( mergeflags & MergeKeep_Mask ) == MergeKeep_New ));
-
-				m_undo-> push ( new Command::EditItems ( this, oldit, ii, true ));
+				m_doc-> changeItem ( olditem, *newitem );
+				delete newitem;
 				mergecount++;
-#if 0
-				ivi = m_lvitems [oldit];
-		
-				w_list-> centerItem ( ivi );
-				ivi-> checkForErrors ( );
-				ivi-> repaint ( );
-#endif
 				break;
 			}
 			case MergeAction_None:
 			default: {
-				BrickLink::InvItem *ii = new BrickLink::InvItem ( *newit );
-
 				if ( multiply > 1 )
-					ii-> setQuantity ( ii-> quantity ( ) * multiply );
+					newitem-> setQuantity ( newitem-> quantity ( ) * multiply );
 
-				m_undo-> push ( new Command::AddItems ( this, ii, true ));
+				m_doc-> insertItem ( 0, newitem );
 				addcount++;
-#if 0
-				ivi = new CItemViewItem ( ii, w_list, last_item );
-
-				m_items. append ( ii );
-				m_lvitems. insert ( ii, ivi );
-				last_item = ivi;
-#endif
 				break;
 			}
 		}
 	}
-
 	disupd. reenable ( );
 
 	if ( waitcursor )
 		QApplication::restoreOverrideCursor ( );
-#if 0
-	updateStatistics ( );
-	setModified ( true );
-#endif
+
+	if ( macro )
+		m_doc-> macroEnd ( macro, tr( "Added %1, Merged %2 Items" ). arg( addcount ). arg( mergecount ));
+
 	if ( was_empty )
 		w_list-> setCurrentItem ( w_list-> firstChild ( ));
-
-	if ( macro ) {
-		macro-> setDescription ( tr( "Added %1, Merged %2 Items" ). arg( addcount ). arg( mergecount ));
-		m_undo-> push ( new CUndoCmd ( CUndoCmd::MacroEnd ));
-	}
 
 	return items. count ( ) - dropped;
 }
 
 
-void CWindow::appendItems ( const QPtrList<BrickLink::InvItem> &items ) 
-{ 
-	insertItems ( items, 0 );
-}
-
-void CWindow::insertItems ( const QPtrList<BrickLink::InvItem> &items, int *positions )
+void CWindow::addItem ( BrickLink::InvItem *item, uint mergeflags )
 {
-	QListViewItem *last_item = positions ? 0 : w_list-> lastItem ( ); // cache the last added item, since QListView::lastItem() is very expensive
-
-	for ( QPtrListIterator<BrickLink::InvItem> it ( items ); it. current ( ); ++it ) {
-		CItemViewItem *ivi;
-
-		if ( !positions ) {
-			ivi = new CItemViewItem ( *it, w_list, last_item );
-			last_item = ivi;
-		}
-		else {
-			last_item = 0; //TODO
-			ivi = new CItemViewItem ( *it, w_list, last_item );
-			positions++;
-		}
-
-		m_items. append ( *it );
-		m_lvitems. insert ( *it, ivi );
-	}
-
-	updateStatistics ( );
-}
-
-void CWindow::removeItems ( const QPtrList<BrickLink::InvItem> &items, int *positions ) 
-{ 
-}
-
-
-void CWindow::addItem ( const BrickLink::InvItem *item, uint mergeflags )
-{
-	QPtrList <BrickLink::InvItem> tmplist;
+	BrickLink::InvItemList tmplist;
 	tmplist. append ( item );
 
 	addItems ( tmplist, 1, mergeflags );
 
-	w_list-> ensureItemVisible ( m_lvitems [m_items. last ( )] );
-}
+	delete item;
 
-void CWindow::deleteItems ( const QPtrList<BrickLink::InvItem> &items )
-{
-	m_undo-> push ( new Command::RemoveItems ( this, items ));
-#if 0
-	// If we supply m_selection as 'items' then we would change the
-	// list while we are deleting items (since ~QListViewItem) updates
-	// the selection! (classic shoot-yourself-in-the-foot...)
-
-	QPtrList<BrickLink::InvItem> copylist ( items );
-
-	for ( QPtrListIterator <BrickLink::InvItem> it ( copylist ); it. current ( ); ++it ) {
-		delete m_lvitems. take ( it. current ( ));
-		m_items. removeRef ( it. current ( )); // triggers autoDelete NOT ANYMORE -> UndoRedo
-	}
-	updateSelection ( );
-	updateStatistics ( );
-	setModified ( true );
-#endif
+//##	w_list-> ensureItemVisible ( m_lvitems [] );
 }
 
 //TODO: Doesn't work with Undo/Redo
-void CWindow::mergeItems ( const QPtrList<BrickLink::InvItem> &const_items, int globalmergeflags )
+void CWindow::mergeItems ( const CDocument::ItemList &const_items, int globalmergeflags )
 {
 	if (( const_items. count ( ) < 2 ) || ( globalmergeflags & MergeAction_Mask ) == MergeAction_None )
 		return;
@@ -475,7 +385,8 @@ void CWindow::mergeItems ( const QPtrList<BrickLink::InvItem> &const_items, int 
 
 	CDisableUpdates disupd ( w_list );
 
-	QPtrList<BrickLink::InvItem> items ( const_items );
+#if 0
+	BrickLink::InvItemList items ( const_items );
 
 	for ( QPtrListIterator<BrickLink::InvItem> it ( items ); it. current ( ); ) {
 		BrickLink::InvItem *from = it. current ( );
@@ -559,80 +470,68 @@ void CWindow::mergeItems ( const QPtrList<BrickLink::InvItem> &const_items, int 
 
 	disupd. reenable ( );
 
-	updateSelection ( );
-	updateStatistics ( );
-	setModified ( true );
+#endif
 }
 
-
-void CWindow::updateSelection ( )
+void CWindow::updateSelectionFromView ( )
 {
-	m_selection. clear ( );
+	CDocument::ItemList itlist;
 
 	for ( QListViewItemIterator it ( w_list ); it. current ( ); ++it ) {
 		CItemViewItem *ivi = static_cast <CItemViewItem *> ( it. current ( ));
 
 		if ( ivi-> isSelected ( ) && ivi-> isVisible ( ))
-			m_selection. append ( ivi-> invItem ( ));
+			itlist. append ( ivi-> item ( ));
 	}
-	emit selectionChanged ( m_selection ) ;
+
+	m_ignore_selection_update = true;
+	m_doc-> setSelection ( itlist );
+	m_ignore_selection_update = false;
 }
 
-void CWindow::inventoryUpdated ( BrickLink::Inventory *inv )
+void CWindow::updateSelectionFromDoc ( const CDocument::ItemList &itlist )
 {
-	qWarning ( "got inv update %p, having %p", inv, m_inventory );
-	disconnect ( BrickLink::inst ( ), SIGNAL( inventoryUpdated ( BrickLink::Inventory * )), this, SLOT( inventoryUpdated ( BrickLink::Inventory * )));
+	if ( m_ignore_selection_update )
+		return;
 
-	if ( inv && ( inv == m_inventory )) {
-		setItems ( inv-> inventory ( ), m_inventory_multiply );
+	w_list-> clearSelection ( );
 
-		if ( m_items. isEmpty ( )) {
-			if ( inv-> isOrder ( ))
-				CMessageBox::information ( this, tr( "The order #%1 could not be retrieved." ). arg ( CMB_BOLD( static_cast <BrickLink::Order *> ( inv )-> id ( ))));
-			else
-				CMessageBox::information ( this, tr( "The inventory you requested could not be retrieved." ));
-		}
-		//m_inventory-> release ( );
-		//m_inventory = 0;
-
-		setModified ( true );
-
-		resetDifferences ( m_items );
+	foreach ( CDocument::Item *item, itlist ) {
+		m_lvitems [item]-> setSelected ( true );
 	}
-	QApplication::restoreOverrideCursor ( );
 }
 
-void CWindow::resetDifferences ( const QPtrList <BrickLink::InvItem> &items )
+void CWindow::resetDifferences ( const CDocument::ItemList &items )
 {
 	CDisableUpdates disupd ( w_list );
 
-	for ( QPtrListIterator <BrickLink::InvItem> it ( items ); it. current ( ); ++it ) {
-		BrickLink::InvItem *ii = it. current ( );
-		bool redraw = false;
+	CUndoCmd *macro = m_doc-> macroBegin ( tr( "Reset Differences" ));
 
-		if ( ii-> origQuantity ( ) != ii-> quantity ( )) {
-			ii-> setOrigQuantity ( ii-> quantity ( ));
-			redraw = true;
-		}
-		if ( ii-> origPrice ( ) != ii-> price ( )) {
-			ii-> setOrigPrice ( ii-> price ( ));
-			redraw = true;
-		}
+	foreach ( CDocument::Item *pos, items ) {
+		if (( pos-> origQuantity ( ) != pos-> quantity ( )) ||
+		    ( pos-> origPrice ( ) != pos-> price ( ))) 
+		{
+			CDocument::Item item = *pos;
 
-		if ( redraw )
-			m_lvitems [ii]-> repaint ( );
+			item. setOrigQuantity ( item. quantity ( ));
+			item. setOrigPrice ( item. price ( ));
+			m_doc-> changeItem ( pos, item );
+		}
 	}
+	m_doc-> macroEnd ( macro );
 }
 
-QPtrList <BrickLink::InvItem> CWindow::sortedItems ( )
+/*
+InvItemList CWindow::sortedItems ( )
 {
-	QPtrList <BrickLink::InvItem> sorted_items;
+	InvItemList sorted_items;
 
 	for ( QListViewItemIterator it ( w_list ); it. current ( ); ++it )
 		sorted_items. append ( static_cast <CItemViewItem *> ( it. current ( ))-> invItem ( ));
 
 	return sorted_items;
 }
+*/
 
 QDomElement CWindow::createGuiStateXML ( QDomDocument doc )
 {
@@ -694,574 +593,6 @@ bool CWindow::parseGuiStateXML ( QDomElement root )
 }
 
 
-void CWindow::filePrint ( )
-{
-	DlgSelectReportImpl d ( this );
-
-	if ( d. exec ( ) == QDialog::Accepted ) {
-		const CReport *rep = d. report ( );
-		uint pagecnt = rep-> pageCount ( m_items. count ( ));
-
-		QPrinter *prt = CReportManager::inst ( )-> printer ( );
-
-		if ( rep && prt && pagecnt ) {
-			//prt-> setOptionEnabled ( QPrinter::PrintToFile, false );
-			//prt-> setOptionEnabled ( QPrinter::PrintSelection, true );
-		
-			prt-> setPageSize ( rep-> pageSize ( ));
-			prt-> setFullPage ( true );
-
-			prt-> setMinMax ( 1, pagecnt );
-			prt-> setFromTo ( 1, prt-> maxPage ( ));
-			prt-> setOptionEnabled ( QPrinter::PrintPageRange, true );
-
-			if ( prt-> setup ( this )) {
-				QPainter p;
-
-				if ( !p. begin ( prt ))
-					return;
-			
-				CReportVariables add_vars;
-				add_vars ["filename"] = m_filename;
-
-				if ( m_inventory && m_inventory-> isOrder ( )) {
-					BrickLink::Order *order = static_cast <BrickLink::Order *> ( m_inventory );
-
-					add_vars ["order-id"]            = order-> id ( );
-					add_vars ["order-type"]          = ( order-> type ( ) == BrickLink::Order::Placed ? tr( "Placed" ) : tr( "Received" ));
-					add_vars ["order-date"]          = order-> date ( ). toString ( Qt::TextDate );
-					add_vars ["order-status-change"] = order-> statusChange ( ). toString ( Qt::TextDate );
-					add_vars ["order-buyer"]         = order-> buyer ( );
-					add_vars ["order-shipping"]      = order-> shipping ( ). toCString ( );
-					add_vars ["order-insurance"]     = order-> insurance ( ). toCString ( );
-					add_vars ["order-delivery"]      = order-> delivery ( ). toCString ( );
-					add_vars ["order-credit"]        = order-> credit ( ). toCString ( );
-					add_vars ["order-grand-total"]   = order-> grandTotal ( ). toCString ( );
-					add_vars ["order-status"]        = order-> status ( );
-					add_vars ["order-payment"]       = order-> payment ( );
-					add_vars ["order-remarks"]       = order-> remarks ( );
-				}
-			
-				rep-> render ( sortedItems ( ), add_vars, prt-> fromPage ( ), prt-> toPage ( ), &p );
-			}
-		}
-	}
-}
-
-bool CWindow::fileOpen ( )
-{
-	QStringList filters;
-	filters << tr( "BrickStore XML Data" ) + " (*.bsx)";
-	filters << tr( "All Files" ) + "(*.*)";
-
-	return fileOpen ( QFileDialog::getOpenFileName ( CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ), this, "FileDialog", tr( "Open File" ), 0 ));
-}
-
-bool CWindow::fileOpen ( const QString &s )
-{
-	return ( !s. isEmpty ( ) && fileLoadFrom ( s, "bsx" ));
-}
-
-bool CWindow::fileImportBrickLinkInventory ( const BrickLink::Item *preselect )
-{
-	DlgLoadInventoryImpl dlg ( this );
-
-	if ( preselect )
-		dlg. setItem ( preselect );
-
-	if ( dlg. exec ( ) == QDialog::Accepted ) {
-		const BrickLink::Item *it = dlg. item ( );
-		int qty = dlg. quantity ( );
-
-		if ( it && ( qty > 0 )) {
-			if ( dlg. importFromPeeron ( ))
-				m_inventory = BrickLink::inst ( )-> inventoryFromPeeron ( it );
-			else
-				m_inventory = BrickLink::inst ( )-> inventory ( it );
-
-			if ( m_inventory ) {
-				QApplication::setOverrideCursor ( QCursor ( Qt::BusyCursor ));
-
-				m_inventory-> addRef ( );
-				m_inventory_multiply = qty;
-
-				if ( m_inventory-> valid ( ) && dlg. updateAlways ( ))
-					m_inventory-> update ( );
-
-				setModified ( true );
-
-				if ( m_inventory-> updateStatus ( ) == BrickLink::Updating )
-					connect ( BrickLink::inst ( ), SIGNAL( inventoryUpdated ( BrickLink::Inventory * )), this, SLOT( inventoryUpdated ( BrickLink::Inventory * )));
-				else
-					inventoryUpdated ( m_inventory );
-
-				m_caption = tr( "Inventory for %1" ). arg ( it-> id ( ));
-				updateCaption ( );
-				return true;
-			}
-			else
-				CMessageBox::warning ( this, tr( "Internal error: Could not create an Inventory object for item %1" ). arg ( CMB_BOLD( it-> id ( ))));
-		}
-		else
-			CMessageBox::warning ( this, tr( "Requested item was not found in the database." ));
-	}
-	return false;
-}
-
-bool CWindow::fileImportBrickLinkOrder ( )
-{
-	DlgLoadOrderImpl dlg ( this );
-
-	if ( dlg. exec ( ) == QDialog::Accepted ) {
-		QString id = dlg. orderId ( );
-		BrickLink::Order::Type type = dlg. orderType ( );
-
-		if ( id. length ( ) == 6 ) {
-			m_inventory = BrickLink::inst ( )-> order ( id, type );
-
-			if ( m_inventory ) {
-				QApplication::setOverrideCursor ( QCursor ( Qt::BusyCursor ));
-
-				m_inventory-> addRef ( );
-				m_inventory_multiply = 1;
-
-				setModified ( true );
-
-				if ( m_inventory-> updateStatus ( ) == BrickLink::Updating )
-					connect ( BrickLink::inst ( ), SIGNAL( inventoryUpdated ( BrickLink::Inventory * )), this, SLOT( inventoryUpdated ( BrickLink::Inventory * )));
-				else
-					inventoryUpdated ( m_inventory );
-
-				m_caption = tr( "Order #%1" ). arg ( id );
-				updateCaption ( );
-				return true;
-			}
-			else
-				CMessageBox::warning ( this, tr( "Internal error: Could not create an Inventory object for oder #%1" ). arg ( CMB_BOLD( id )));
-		}
-		else
-			CMessageBox::warning ( this, tr( "Invalid order number." ));
-	}
-	return false;
-}
-
-bool CWindow::fileImportBrickLinkStore ( )
-{
-	m_inventory = BrickLink::inst ( )-> storeInventory ( );
-
-	if ( m_inventory ) {
-		QApplication::setOverrideCursor ( QCursor ( Qt::BusyCursor ));
-
-		m_inventory-> addRef ( );
-		m_inventory_multiply = 1;
-
-		setModified ( true );
-
-		if ( m_inventory-> updateStatus ( ) == BrickLink::Updating )
-			connect ( BrickLink::inst ( ), SIGNAL( inventoryUpdated ( BrickLink::Inventory * )), this, SLOT( inventoryUpdated ( BrickLink::Inventory * )));
-		else
-			inventoryUpdated ( m_inventory );
-
-		m_caption = tr( "Store %1" ). arg ( QDate::currentDate ( ). toString ( Qt::LocalDate ));
-		updateCaption ( );
-		return true;
-	}
-	else
-		CMessageBox::warning ( this, tr( "Internal error: Could not create an Inventory object for store inventory" ));
-	return false;
-}
-
-bool CWindow::fileImportBrickLinkXML ( )
-{
-	QStringList filters;
-	filters << tr( "BrickLink XML File" ) + " (*.xml)";
-	filters << tr( "All Files" ) + "(*.*)";
-
-	QString s = QFileDialog::getOpenFileName ( CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ), this, "FileDialog", tr( "Import File" ), 0 );
-
-	bool b = ( !s. isEmpty ( ) && fileLoadFrom ( s, "xml", true ));
-
-	if ( b ) {
-		m_caption = tr( "Import of %1" ). arg ( QFileInfo ( s ). fileName ( ));
-		updateCaption ( );
-	}
-	return b;
-}
-
-bool CWindow::fileImportBrikTrakInventory ( const QString &fn )
-{
-	QString s = fn;
-
-	if ( s. isNull ( )) {
-		QStringList filters;
-		filters << tr( "BrikTrak Inventory" ) + " (*.bti)";
-		filters << tr( "All Files" ) + "(*.*)";
-
-		s = QFileDialog::getOpenFileName ( CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ), this, "FileDialog", tr( "Import File" ), 0 );
-	}
-
-	bool b = ( !s. isEmpty ( ) && fileLoadFrom ( s, "bti", true ));
-
-	if ( b ) {
-		m_caption = tr( "Import of %1" ). arg ( QFileInfo ( s ). fileName ( ));
-		updateCaption ( );
-	}
-	return b;
-}
-
-bool CWindow::fileLoadFrom ( const QString &name, const char *type, bool import_only )
-{
-	BrickLink::ItemListXMLHint hint;
-
-	if ( qstrcmp ( type, "bsx" ) == 0 )
-		hint = BrickLink::XMLHint_BrickStore;
-	else if ( qstrcmp ( type, "bti" ) == 0 )
-		hint = BrickLink::XMLHint_BrikTrak;
-	else if ( qstrcmp ( type, "xml" ) == 0 )
-		hint = BrickLink::XMLHint_MassUpload;
-	else
-		return false;
-
-
-	QFile f ( name );
-
-	if ( !f. open ( IO_ReadOnly )) {
-		CMessageBox::warning ( this, tr( "Could not open file %1 for reading." ). arg ( CMB_BOLD( name )));
-		return false;
-	}
-
-	QApplication::setOverrideCursor ( QCursor( Qt::WaitCursor ));
-
-	uint invalid_items = 0;
-	QPtrList<BrickLink::InvItem> *items = 0;
-
-	QString emsg;
-	int eline = 0, ecol = 0;
-	QDomDocument doc;
-
-	if ( doc. setContent ( &f, &emsg, &eline, &ecol )) {
-		QDomElement root = doc. documentElement ( );
-		QDomElement item_elem;
-
-		if ( hint == BrickLink::XMLHint_BrickStore ) {
-			for ( QDomNode n = root. firstChild ( ); !n. isNull ( ); n = n. nextSibling ( )) {
-				if ( !n. isElement ( ))
-					continue;
-
-				if ( n. nodeName ( ) == "Inventory" )
-					item_elem = n. toElement ( );
-				else if ( n. nodeName ( ) == "GuiState" )
-					parseGuiStateXML ( n. toElement ( ));
-			}
-		}
-		else {
-			item_elem = root;
-		}
-
-		items = BrickLink::inst ( )-> parseItemListXML ( item_elem, hint, &invalid_items );		
-	}
-	else {
-		CMessageBox::warning ( this, tr( "Could not parse the XML data in file %1:<br /><i>Line %2, column %3: %4</i>" ). arg ( CMB_BOLD( name )). arg ( eline ). arg ( ecol ). arg ( emsg ));
-		QApplication::restoreOverrideCursor ( );
-		return false;
-	}
-
-	QApplication::restoreOverrideCursor ( );
-
-	if ( items ) {
-		if ( invalid_items )
-			CMessageBox::information ( this, tr( "This file contains %1 unknown item(s)." ). arg ( CMB_BOLD( QString::number ( invalid_items ))));
-
-		setItems ( *items );
-		delete items;
-
-		setFileName ( import_only ? QString::null : name );
-		setModified ( import_only );
-
-		if ( !import_only )
-			CFrameWork::inst ( )-> addToRecentFiles ( name );
-
-		resetDifferences ( m_items );
-
-		return true;
-	}
-	else {
-		CMessageBox::warning ( this, tr( "Could not parse the XML data in file %1." ). arg ( CMB_BOLD( name )));
-		return false;
-	}
-}
-
-bool CWindow::fileImportLDrawModel ( )
-{
-	QStringList filters;
-	filters << tr( "LDraw Models" ) + " (*.dat;*.ldr;*.mpd)";
-	filters << tr( "All Files" ) + "(*.*)";
-
-	QString s = QFileDialog::getOpenFileName ( CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ), this, "FileDialog", tr( "Import File" ), 0 );
-
-	if ( s. isEmpty ( ))
-		return false;
-
-	QFile f ( s );
-
-	if ( !f. open ( IO_ReadOnly )) {
-		CMessageBox::warning ( this, tr( "Could not open file %1 for reading." ). arg ( CMB_BOLD( s )));
-		return false;
-	}
-
-	QApplication::setOverrideCursor ( QCursor( Qt::WaitCursor ));
-
-    uint invalid_items = 0;
-    QPtrList <BrickLink::InvItem> items;
-    items. setAutoDelete ( true );
-
-	bool b = BrickLink::inst ( )-> parseLDrawModel ( f, items, &invalid_items );
-
-	QApplication::restoreOverrideCursor ( );
-
-	if ( b && !items. isEmpty ( )) {
-		if ( invalid_items )
-			CMessageBox::information ( this, tr( "This file contains %1 unknown item(s)." ). arg ( CMB_BOLD( QString::number ( invalid_items ))));
-
-		setItems ( items );
-
-		setFileName ( QString::null );
-		setModified ( true );
-		m_caption = tr( "Import of %1" ). arg ( QFileInfo ( s ). fileName ( ));
-		updateCaption ( );
-
-		resetDifferences ( m_items );
-
-		return true;
-	}
-	else {
-		CMessageBox::warning ( this, tr( "Could not parse the LDraw model in file %1." ). arg ( CMB_BOLD( s )));
-		return false;
-	}
-}
-
-
-void CWindow::fileSave ( )
-{
-	if ( fileName ( ). isEmpty ( ))
-		fileSaveAs ( );
-	else if ( isModified ( ))
-		fileSaveTo ( fileName ( ), "bsx" );
-}
-
-
-void CWindow::fileSaveAs ( )
-{
-	QStringList filters;
-	filters << tr( "BrickStore XML Data" ) + " (*.bsx)";
-
-	QString fn = fileName ( );
-
-	if ( fn. isEmpty ( )) {
-		QDir d ( CConfig::inst ( )-> documentDir ( ));
-
-		if ( d. exists ( ))
-			fn = d. filePath ( m_caption );
-	}
-	if (( fn. right ( 4 ) == ".xml" ) || ( fn. right ( 4 ) == ".bti" ))
-		fn. truncate ( fn.length ( ) - 4 );
-
-	fn = QFileDialog::getSaveFileName ( fn, filters. join ( ";;" ), this, "FileDialog", tr( "Save File as" ), 0 );
-
-	if ( !fn. isNull ( )) {
-		if ( fn. right ( 4 ) != ".bsx" )
-			fn += ".bsx";
-
-		if ( QFile::exists ( fn ) &&
-		     CMessageBox::question ( this, tr( "A file named %1 already exists. Are you sure you want to overwrite it?" ). arg( CMB_BOLD( fn )), CMessageBox::Yes, CMessageBox::No ) != CMessageBox::Yes )
-		     return;
-
-		fileSaveTo ( fn, "bsx" );
-	}
-}
-
-
-bool CWindow::fileSaveTo ( const QString &s, const char *type, bool export_only )
-{
-	BrickLink::ItemListXMLHint hint;
-
-	if ( qstrcmp ( type, "bsx" ) == 0 )
-		hint = BrickLink::XMLHint_BrickStore;
-	else if ( qstrcmp ( type, "bti" ) == 0 )
-		hint = BrickLink::XMLHint_BrikTrak;
-	else if ( qstrcmp ( type, "xml" ) == 0 )
-		hint = BrickLink::XMLHint_MassUpload;
-	else
-		return false;
-
-
-	QFile f ( s );
-	if ( f. open ( IO_WriteOnly )) {
-		QApplication::setOverrideCursor ( QCursor( Qt::WaitCursor ));
-
-		QDomDocument doc (( hint == BrickLink::XMLHint_BrickStore ) ? QString( "BrickStoreXML" ) : QString::null );
-		doc. appendChild ( doc. createProcessingInstruction ( "xml", "version=\"1.0\" encoding=\"UTF-8\"" ));
-
-		QPtrList <BrickLink::InvItem> si = export_only ? sortedItems ( ) : items ( );
-		QDomElement item_elem = BrickLink::inst ( )-> createItemListXML ( doc, hint, &si );
-
-		if ( hint == BrickLink::XMLHint_BrickStore ) {
-			QDomElement root = doc. createElement ( "BrickStoreXML" );
-
-			root. appendChild ( item_elem );
-			root. appendChild ( createGuiStateXML ( doc ));
-
-			doc. appendChild ( root );
-		}
-		else {
-			doc. appendChild ( item_elem );
-		}
-
-		// directly writing to an QTextStream would be way more efficient,
-		// but we could not handle any error this way :(
-		QCString output = doc. toCString ( );
-		bool ok = ( f. writeBlock ( output. data ( ), output. size ( ) - 1 ) ==  int( output. size ( ) - 1 )); // no 0-byte
-
-		QApplication::restoreOverrideCursor ( );
-
-		if ( ok ) {
-			if ( !export_only ) {
-				m_undo-> setClean ( );
-				setFileName ( s );
-
-				CFrameWork::inst ( )-> addToRecentFiles ( s );
-			}
-			return true;
-		}
-		else
-			CMessageBox::warning ( this, tr( "Failed to save data in file %1." ). arg ( CMB_BOLD( s )));
-	}
-	else
-		CMessageBox::warning ( this, tr( "Failed to open file %1 for writing." ). arg ( CMB_BOLD( s )));
-
-	return false;
-}
-
-void CWindow::fileExportBrickLinkInvReqClipboard ( )
-{
-	if ( w_list-> errorCount ( ) && CMessageBox::warning ( this, tr( "This list contains items with errors.<br /><br />Do you really want to export this list?" ), CMessageBox::Yes, CMessageBox::No ) != CMessageBox::Yes )
-		return;
-
-	QDomDocument doc ( QString::null );
-	QPtrList <BrickLink::InvItem> si = sortedItems ( );
-	doc. appendChild ( BrickLink::inst ( )-> createItemListXML ( doc, BrickLink::XMLHint_Inventory, &si ));
-
-	QApplication::clipboard ( )-> setText ( doc. toString ( ), QClipboard::Clipboard );
-
-	if ( CConfig::inst ( )-> readBoolEntry ( "/General/Export/OpenBrowser", true ))
-		CUtility::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_InventoryRequest ));
-}
-
-void CWindow::fileExportBrickLinkWantedListClipboard ( )
-{
-	if ( w_list-> errorCount ( ) && CMessageBox::warning ( this, tr( "This list contains items with errors.<br /><br />Do you really want to export this list?" ), CMessageBox::Yes, CMessageBox::No ) != CMessageBox::Yes )
-		return;
-
-	QString wantedlist;
-
-	if ( CMessageBox::getString ( this, tr( "Enter the ID number of Wanted List (leave blank for the default Wanted List)" ), wantedlist )) {
-		QMap <QString, QString> extra;
-		extra. insert ( "WANTEDLISTID", wantedlist );
-
-		QDomDocument doc ( QString::null );
-		QPtrList <BrickLink::InvItem> si = sortedItems ( );
-		doc. appendChild ( BrickLink::inst ( )-> createItemListXML ( doc, BrickLink::XMLHint_WantedList, &si ));
-
-		QApplication::clipboard ( )-> setText ( doc. toString ( ), QClipboard::Clipboard );
-
-		if ( CConfig::inst ( )-> readBoolEntry ( "/General/Export/OpenBrowser", true ))
-			CUtility::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_WantedListUpload ));
-	}
-}
-
-void CWindow::fileExportBrickLinkXMLClipboard ( )
-{
-	if ( w_list-> errorCount ( ) && CMessageBox::warning ( this, tr( "This list contains items with errors.<br /><br />Do you really want to export this list?" ), CMessageBox::Yes, CMessageBox::No ) != CMessageBox::Yes )
-		return;
-
-	QDomDocument doc ( QString::null );
-	QPtrList <BrickLink::InvItem> si = sortedItems ( );
-	doc. appendChild ( BrickLink::inst ( )-> createItemListXML ( doc, BrickLink::XMLHint_MassUpload, &si ));
-
-	QApplication::clipboard ( )-> setText ( doc. toString ( ), QClipboard::Clipboard );
-
-	if ( CConfig::inst ( )-> readBoolEntry ( "/General/Export/OpenBrowser", true ))
-			CUtility::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_InventoryUpload ));
-}
-
-void CWindow::fileExportBrickLinkUpdateClipboard ( )
-{
-	if ( w_list-> errorCount ( ) && CMessageBox::warning ( this, tr( "This list contains items with errors.<br /><br />Do you really want to export this list?" ), CMessageBox::Yes, CMessageBox::No ) != CMessageBox::Yes )
-		return;
-
-	for ( QPtrListIterator <BrickLink::InvItem> it ( m_items ); it. current ( ); ++it ) {
-		if ( !it. current ( )-> lotId ( )) {
-			if ( CMessageBox::warning ( this, tr( "This list contains items without a BrickLink Lot-ID.<br /><br />Do you really want to export this list?" ), CMessageBox::Yes, CMessageBox::No ) != CMessageBox::Yes )
-				return;
-			else
-				break;
-		}
-	}
-
-	QDomDocument doc ( QString::null );
-	QPtrList <BrickLink::InvItem> si = sortedItems ( );
-	doc. appendChild ( BrickLink::inst ( )-> createItemListXML ( doc, BrickLink::XMLHint_MassUpdate, &si ));
-
-	QApplication::clipboard ( )-> setText ( doc. toString ( ), QClipboard::Clipboard );
-
-	if ( CConfig::inst ( )-> readBoolEntry ( "/General/Export/OpenBrowser", true ))
-			CUtility::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_InventoryUpdate ));
-}
-
-void CWindow::fileExportBrickLinkXML ( )
-{
-	if ( w_list-> errorCount ( ) && CMessageBox::warning ( this, tr( "This list contains items with errors.<br /><br />Do you really want to export this list?" ), CMessageBox::Yes, CMessageBox::No ) != CMessageBox::Yes )
-		return;
-
-	QStringList filters;
-	filters << tr( "BrickLink XML File" ) + " (*.xml)";
-
-	QString s = QFileDialog::getSaveFileName ( CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ), this, "FileDialog", tr( "Export File" ), 0 );
-
-	if ( !s. isNull ( )) {
-		if ( s. right ( 4 ) != ".xml" )
-			s += ".xml";
-
-		if ( QFile::exists ( s ) &&
-		     CMessageBox::question ( this, tr( "A file named %1 already exists. Are you sure you want to overwrite it?" ). arg( CMB_BOLD( s )), CMessageBox::Yes, CMessageBox::No ) != CMessageBox::Yes )
-		     return;
-
-		fileSaveTo ( s, "xml", true );
-	}
-}
-
-void CWindow::fileExportBrikTrakInventory ( )
-{
-	if ( w_list-> errorCount ( ) && CMessageBox::warning ( this, tr( "This list contains items with errors.<br /><br />Do you really want to export this list?" ), CMessageBox::Yes, CMessageBox::No ) != CMessageBox::Yes )
-		return;
-
-	QStringList filters;
-	filters << tr( "BrikTrak Inventory" ) + " (*.bti)";
-
-	QString s = QFileDialog::getSaveFileName ( CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ), this, "FileDialog", tr( "Export File" ), 0 );
-
-	if ( !s. isNull ( )) {
-		if ( s. right ( 4 ) != ".bti" )
-			s += ".bti";
-
-		if ( QFile::exists ( s ) &&
-		     CMessageBox::question ( this, tr( "A file named %1 already exists. Are you sure you want to overwrite it?" ). arg( CMB_BOLD( s )), CMessageBox::Yes, CMessageBox::No ) != CMessageBox::Yes )
-		     return;
-
-		fileSaveTo ( s, "bti", true );
-	}
-}
-
 void CWindow::editCut ( )
 {
 	editCopy ( );
@@ -1270,30 +601,36 @@ void CWindow::editCut ( )
 
 void CWindow::editCopy ( )
 {
-	if ( !m_selection. isEmpty ( ))
-		QApplication::clipboard ( )-> setData ( new BrickLink::InvItemDrag ( m_selection ));
+	if ( !m_doc-> selection ( ). isEmpty ( )) {
+		BrickLink::InvItemList bllist;
+
+		foreach ( CDocument::Item *item, m_doc-> selection ( ))
+			bllist. append ( item );
+
+		QApplication::clipboard ( )-> setData ( new BrickLink::InvItemDrag ( bllist ));
+	}
 }
 
 void CWindow::editPaste ( )
 {
-	QPtrList<BrickLink::InvItem> ii;
-	ii. setAutoDelete ( true ); //TODO: check for command handling
+	BrickLink::InvItemList bllist;
 
-	if ( BrickLink::InvItemDrag::decode ( QApplication::clipboard ( )-> data ( ), ii )) {
-		if ( ii. count ( )) {
-			if ( !m_selection. isEmpty ( )) {
+	if ( BrickLink::InvItemDrag::decode ( QApplication::clipboard ( )-> data ( ), bllist )) {
+		if ( bllist. count ( )) {
+			if ( !m_doc-> selection ( ). isEmpty ( )) {
 				if ( CMessageBox::question ( this, tr( "Overwrite the currently selected items?" ), QMessageBox::Yes | QMessageBox::Default, QMessageBox::No | QMessageBox::Escape ) == QMessageBox::Yes )
-					deleteItems ( m_selection );
+					m_doc-> removeItems ( m_doc-> selection ( ));
 			}
-			addItems ( ii, 1, MergeAction_Ask | MergeKeep_New );
+			addItems ( bllist, 1, MergeAction_Ask | MergeKeep_New );
+			qDeleteAll ( bllist );
 		}
 	}
 }
 
 void CWindow::editDelete ( )
 {
-	if ( !m_selection. isEmpty ( ))
-		deleteItems ( m_selection );
+	if ( !m_doc-> selection ( ). isEmpty ( ))
+		m_doc-> removeItems ( m_doc-> selection ( ));
 }
 
 void CWindow::selectAll ( )
@@ -1308,8 +645,7 @@ void CWindow::selectNone ( )
 
 void CWindow::editResetDifferences ( )
 {
-	if ( !m_selection. isEmpty ( ))
-		resetDifferences ( m_selection );
+	resetDifferences ( m_doc-> selection ( ));
 }
 
 void CWindow::editSetPrice ( )
@@ -1318,9 +654,9 @@ void CWindow::editSetPrice ( )
 
 void CWindow::editSetPriceToPG ( )
 {
-	if ( m_selection. isEmpty ( ))
+	if ( m_doc-> selection ( ). isEmpty ( ))
 		return;
-
+#if 0
 	if ( m_settopg_list ) {
 		CMessageBox::information ( this, tr( "Prices are currently updated to price guide values.<br /><br />Please wait until this operation has finished." ));
 		return;
@@ -1368,9 +704,9 @@ void CWindow::editSetPriceToPG ( )
 		if ( m_settopg_list-> isEmpty ( ))
 			priceGuideUpdated ( 0 );
 
-		updateStatistics ( );
 		setModified ( true );
 	}
+#endif
 }
 
 void CWindow::priceGuideUpdated ( BrickLink::PriceGuide *pg )
@@ -1388,10 +724,7 @@ void CWindow::priceGuideUpdated ( BrickLink::PriceGuide *pg )
 					if ( p != ii-> price ( )) {
 						ii-> setPrice ( p );
 
-						ivi-> checkForErrors ( );
 						ivi-> repaint ( );
-
-						updateStatistics ( );
 					}
 				}
 			}
@@ -1412,14 +745,14 @@ void CWindow::priceGuideUpdated ( BrickLink::PriceGuide *pg )
 		delete m_settopg_list;
 		m_settopg_list = 0;
 
-		setModified ( true );
+		//setModified ( true );
 	}
 }
 
 
 void CWindow::editPriceIncDec ( )
 {
-	if ( m_selection. isEmpty ( ))
+	if ( m_doc-> selection ( ). isEmpty ( ))
 		return;
 
 	DlgIncDecPriceImpl dlg ( this, "", true );
@@ -1432,37 +765,34 @@ void CWindow::editPriceIncDec ( )
 
 		CDisableUpdates disupd ( w_list );
 
-		for ( QPtrListIterator<BrickLink::InvItem> it ( m_selection ); it. current ( ); ++it ) {
-			BrickLink::InvItem *ii = it. current ( );
+		foreach ( CDocument::Item *pos, m_doc-> selection ( )) {
+			CDocument::Item item = *pos;
 
-			money_t p = ii-> price ( );
+			money_t p = item. price ( );
 
 			if ( percent != 0 )     p *= factor;
 			else if ( fixed != 0 )  p += fixed;
 
-			ii-> setPrice ( p );
+			item. setPrice ( p );
 
 			if ( tiers ) {
-				for ( int i = 0; i < 3; i++ ) {
-					p = ii-> tierPrice ( i );
+				for ( uint i = 0; i < 3; i++ ) {
+					p = item. tierPrice ( i );
 
 					if ( percent != 0 )     p *= factor;
 					else if ( fixed != 0 )  p += fixed;
 
-					ii-> setPrice ( p );
+					item. setTierPrice ( i, p );
 				}
 			}
-			m_lvitems [ii]-> checkForErrors ( );
-			m_lvitems [ii]-> repaint ( );
+			m_doc-> changeItem ( pos, item );
 		}
-		updateStatistics ( );
-		setModified ( true );
 	}
 }
 
 void CWindow::editDivideQty ( )
 {
-	if ( m_selection. isEmpty ( ))
+	if ( m_doc-> selection ( ). isEmpty ( ))
 		return;
 
 	int divisor = 1;
@@ -1471,10 +801,8 @@ void CWindow::editDivideQty ( )
 		if ( divisor > 1 ) {
 			int lots_with_errors = 0;
 			
-			for ( QPtrListIterator<BrickLink::InvItem> it ( m_selection ); it. current ( ); ++it ) {
-				BrickLink::InvItem *ii = it. current ( );
-
-				if ( QABS( ii-> quantity ( )) % divisor )
+			foreach ( CDocument::Item *item, m_doc-> selection ( )) {
+				if ( QABS( item-> quantity ( )) % divisor )
 					lots_with_errors++;
 			}
 
@@ -1484,18 +812,12 @@ void CWindow::editDivideQty ( )
 			else {
 				CDisableUpdates disupd ( w_list );
 
-				for ( QPtrListIterator<BrickLink::InvItem> it ( m_selection ); it. current ( ); ++it ) {
-					BrickLink::InvItem *ii = it. current ( );
-		
-					ii-> setQuantity ( ii-> quantity ( ) / divisor );
+				foreach ( CDocument::Item *pos, m_doc-> selection ( )) {
+					CDocument::Item item = *pos;
 
-					CItemViewItem *ivi = m_lvitems [ii];
-					ivi-> checkForErrors ( );
-					ivi-> repaint ( );
+					item. setQuantity ( item. quantity ( ) / divisor );
+					m_doc-> changeItem ( pos, item );
 				}
-				updateStatistics ( );
-				updateSelection ( );
-				setModified ( true );
 			}
 		}
 	}
@@ -1503,7 +825,7 @@ void CWindow::editDivideQty ( )
 
 void CWindow::editMultiplyQty ( )
 {
-	if ( m_selection. isEmpty ( ))
+	if ( m_doc-> selection ( ). isEmpty ( ))
 		return;
 
 	int factor = 1;
@@ -1512,25 +834,19 @@ void CWindow::editMultiplyQty ( )
 		if (( factor <= 1 ) || ( factor > 1 )) {
 			CDisableUpdates disupd ( w_list );
 
-			for ( QPtrListIterator<BrickLink::InvItem> it ( m_selection ); it. current ( ); ++it ) {
-				BrickLink::InvItem *ii = it. current ( );
-	
-				ii-> setQuantity ( ii-> quantity ( ) * factor );
+			foreach ( CDocument::Item *pos, m_doc-> selection ( )) {
+				CDocument::Item item = *pos;
 
-				CItemViewItem *ivi = m_lvitems [ii];
-				ivi-> checkForErrors ( );
-				ivi-> repaint ( );
+				item. setQuantity ( item. quantity ( ) * factor );
+				m_doc-> changeItem ( pos, item );
 			}
-			updateStatistics ( );
-			updateSelection ( );
-			setModified ( true );
 		}
 	}
 }
 
 void CWindow::editSetSale ( )
 {
-	if ( m_selection. isEmpty ( ))
+	if ( m_doc-> selection ( ). isEmpty ( ))
 		return;
 
 	int sale = 0;
@@ -1538,26 +854,20 @@ void CWindow::editSetSale ( )
 	if ( CMessageBox::getInteger ( this, tr( "Set sale in percent for the selected items (this will <u>not</u> change any prices).<br />Negative values are also allowed." ), tr( "%" ), sale, new QIntValidator ( -1000, 99, 0 ))) {
 		CDisableUpdates disupd ( w_list );
 
-		for ( QPtrListIterator<BrickLink::InvItem> it ( m_selection ); it. current ( ); ++it ) {
-			BrickLink::InvItem *ii = it. current ( );
+		foreach ( CDocument::Item *pos, m_doc-> selection ( )) {
+			if ( pos-> sale ( ) != sale ) {
+				CDocument::Item item = *pos;
 
-			if ( ii-> sale ( ) != sale ) {
-				ii-> setSale ( sale );
-
-				CItemViewItem *ivi = m_lvitems [ii];
-				ivi-> checkForErrors ( );
-				ivi-> repaint ( );
+				item. setSale ( sale );
+				m_doc-> changeItem ( pos, item );
 			}
 		}
-		updateStatistics ( );
-		updateSelection ( );
-		setModified ( true );
 	}
 }
 
 void CWindow::editSetCondition ( )
 {
-	if ( m_selection. isEmpty ( ))
+	if ( m_doc-> selection ( ). isEmpty ( ))
 		return;
 
 	DlgSetConditionImpl d ( this );
@@ -1567,54 +877,43 @@ void CWindow::editSetCondition ( )
 
 		BrickLink::Condition nc = d. newCondition ( );
 
-		for ( QPtrListIterator<BrickLink::InvItem> it ( m_selection ); it. current ( ); ++it ) {
-			BrickLink::InvItem *ii = it. current ( );
-
-			BrickLink::Condition oc = ii-> condition ( );
+		foreach ( CDocument::Item *pos, m_doc-> selection ( )) {
+			BrickLink::Condition oc = pos-> condition ( );
 
 			if ( oc != nc ) {
-				ii-> setCondition ( nc != BrickLink::ConditionCount ? nc : ( oc == BrickLink::New ? BrickLink::Used : BrickLink::New ));
+				CDocument::Item item = *pos;
 
-				CItemViewItem *ivi = m_lvitems [ii];
-				ivi-> checkForErrors ( );
-				ivi-> repaint ( );
+				item. setCondition ( nc != BrickLink::ConditionCount ? nc : ( oc == BrickLink::New ? BrickLink::Used : BrickLink::New ));
+				m_doc-> changeItem ( pos, item );
 			}
 		}
-		updateStatistics ( );
-		updateSelection ( );
-		setModified ( true );
 	}
 }
 
 void CWindow::editSetRemark ( )
 {
-	if ( m_selection. isEmpty ( ))
+	if ( m_doc-> selection ( ). isEmpty ( ))
 		return;
 
-	QString remark;
+	QString remarks;
 	
-	if ( CMessageBox::getString ( this, tr( "Enter the new remark for all selected items:" ), remark )) {
+	if ( CMessageBox::getString ( this, tr( "Enter the new remark for all selected items:" ), remarks )) {
 		CDisableUpdates disupd ( w_list );
 
-		for ( QPtrListIterator<BrickLink::InvItem> it ( m_selection ); it. current ( ); ++it ) {
-			BrickLink::InvItem *ii = it. current ( );
+		foreach ( CDocument::Item *pos, m_doc-> selection ( )) {
+			if ( pos-> remarks ( ) != remarks ) {
+				CDocument::Item item = *pos;
 
-			if ( ii-> remarks ( ) != remark ) {
-				ii-> setRemarks ( remark );
-
-				CItemViewItem *ivi = m_lvitems [ii];
-				ivi-> checkForErrors ( );
-				ivi-> repaint ( );
+				item. setRemarks ( remarks );
+				m_doc-> changeItem ( pos, item );
 			}
 		}
-		updateStatistics ( );
-		setModified ( true );
 	}
 }
 
 void CWindow::editSetReserved ( )
 {
-	if ( m_selection. isEmpty ( ))
+	if ( m_doc-> selection ( ). isEmpty ( ))
 		return;
 
 	QString reserved;
@@ -1622,57 +921,15 @@ void CWindow::editSetReserved ( )
 	if ( CMessageBox::getString ( this, tr( "Reserve this item for a specific member:" ), reserved )) {
 		CDisableUpdates disupd ( w_list );
 
-		for ( QPtrListIterator<BrickLink::InvItem> it ( m_selection ); it. current ( ); ++it ) {
-			BrickLink::InvItem *ii = it. current ( );
+		foreach ( CDocument::Item *pos, m_doc-> selection ( )) {
+			if ( pos-> reserved ( ) != reserved ) {
+				CDocument::Item item = *pos;
 
-			if ( ii-> reserved ( ) != reserved ) {
-				ii-> setReserved ( reserved );
-
-				CItemViewItem *ivi = m_lvitems [ii];
-				ivi-> checkForErrors ( );
-				ivi-> repaint ( );
+				item. setReserved ( reserved );
+				m_doc-> changeItem ( pos, item );
 			}
 		}
-		updateStatistics ( );
-		setModified ( true );
 	}
-}
-
-bool CWindow::isModified ( ) const
-{
-	return !m_undo-> isClean ( );
-}
-
-void CWindow::setModified ( bool b )
-{
-	b = b;
-/*
-	if ( m_modified != b ) {
-		m_modified = b;
-		emit modificationChanged ( b );
-	}
-*/
-}
-
-QString CWindow::fileName ( ) const
-{
-	return m_filename;
-}
-
-void CWindow::setFileName ( const QString &str )
-{
-	m_filename = str;
-
-	QFileInfo fi ( str );
-
-	if ( fi. exists ( )) {
-		m_caption = QDir::convertSeparators ( fi. absFilePath ( ));
-
-		//TODO: make this a bit more intelligent
-		if ( m_caption. length ( ) > 50 )
-			m_caption = str. left ( 16 ) + "..." + str. right ( 32 );
-	}
-	updateCaption ( );
 }
 
 void CWindow::updateErrorMask ( )
@@ -1681,61 +938,27 @@ void CWindow::updateErrorMask ( )
 
 	if ( CConfig::inst ( )-> showInputErrors ( )) {
 		if ( CConfig::inst ( )-> simpleMode ( )) {
-			em = 1ULL << CItemView::Status     | \
-				1ULL << CItemView::Picture     | \
-				1ULL << CItemView::PartNo      | \
-				1ULL << CItemView::Description | \
-				1ULL << CItemView::Condition   | \
-				1ULL << CItemView::Color       | \
-				1ULL << CItemView::Quantity    | \
-				1ULL << CItemView::Remarks     | \
-				1ULL << CItemView::Category    | \
-				1ULL << CItemView::ItemType    | \
-				1ULL << CItemView::Weight      | \
-				1ULL << CItemView::YearReleased;
+			em = 1ULL << CDocument::Status     | \
+				1ULL << CDocument::Picture     | \
+				1ULL << CDocument::PartNo      | \
+				1ULL << CDocument::Description | \
+				1ULL << CDocument::Condition   | \
+				1ULL << CDocument::Color       | \
+				1ULL << CDocument::Quantity    | \
+				1ULL << CDocument::Remarks     | \
+				1ULL << CDocument::Category    | \
+				1ULL << CDocument::ItemType    | \
+				1ULL << CDocument::Weight      | \
+				1ULL << CDocument::YearReleased;
 		}
 		else {
-			em = ( 1ULL << CItemView::FieldCount ) - 1;
+			em = ( 1ULL << CDocument::FieldCount ) - 1;
 		}
 	}
 
-	w_list-> setErrorMask ( em );
-	triggerStatisticsUpdate ( );
+	m_doc-> setErrorMask ( em );
 }
 
-
-void CWindow::triggerUpdate ( )
-{
-	w_list-> triggerUpdate ( );
-
-	triggerSelectionUpdate ( );
-	triggerStatisticsUpdate ( );
-}
-
-void CWindow::triggerSelectionUpdate ( )
-{
-	updateSelection ( );
-}
-
-void CWindow::triggerStatisticsUpdate ( )
-{
-	updateStatistics ( );
-}
-
-void CWindow::updateStatistics ( )
-{
-	emit statisticsChanged ( );
-}
-
-CItemStatistics CWindow::statistics ( const QPtrList <BrickLink::InvItem> &list )
-{
-	int errors = 0;
-
-	for ( QPtrListIterator<BrickLink::InvItem> it ( list ); it. current ( ); ++it )
-		errors += static_cast <CItemViewItem *> ( m_lvitems [it. current ( )] )-> errorCount ( );
-
-	return CItemStatistics ( list, errors );
-}
 
 void CWindow::editAddItems ( )
 {
@@ -1745,7 +968,7 @@ void CWindow::editAddItems ( )
 	else {
 		m_add_dialog = new DlgAddItemImpl ( this, "AddItemDlg", false, Qt::WDestructiveClose );
 
-		connect ( m_add_dialog, SIGNAL( addItem ( const BrickLink::InvItem *, uint )), this, SLOT( addItem ( const BrickLink::InvItem *, uint )));
+		connect ( m_add_dialog, SIGNAL( addItem ( BrickLink::InvItem *, uint )), this, SLOT( addItem ( BrickLink::InvItem *, uint )));
 
 		m_add_dialog-> show ( );
 	}
@@ -1753,19 +976,22 @@ void CWindow::editAddItems ( )
 
 void CWindow::editSubtractItems ( )
 {
+#if 0
 	DlgSubtractItemImpl d ( this, "SubtractItemDlg" );
 
 	if ( d. exec ( ) == QDialog::Accepted ) {
-		QPtrList <BrickLink::InvItem> *list = d. items ( );
+		InvItemList *list = d. items ( );
 
 		if ( list && !list-> isEmpty ( ))
 			subtractItems ( *list );
 
 		delete list;
 	}
+#endif
 }
 
-void CWindow::subtractItems ( const QPtrList <BrickLink::InvItem> &items )
+#if 0
+void CWindow::subtractItems ( const InvItemList &items )
 {
 	if ( items. isEmpty ( ))
 		return;
@@ -1821,24 +1047,24 @@ void CWindow::subtractItems ( const QPtrList <BrickLink::InvItem> &items )
 			}
 		}
 	}
-	updateStatistics ( );
 	updateSelection ( );
 	setModified ( true );
 }
+#endif
 
 void CWindow::editMergeItems ( )
 {
-	if ( !m_selection. isEmpty ( ))
-		mergeItems ( m_selection );
+	if ( !m_doc-> selection ( ). isEmpty ( ))
+		mergeItems ( m_doc-> selection ( ));
 	else
-		mergeItems ( m_items );
+		mergeItems ( m_doc-> items ( ));
 }
 
 void CWindow::editPartOutItems ( )
 {
-	if ( m_selection. count ( ) >= 1 ) {
-		for ( QPtrListIterator<BrickLink::InvItem> it ( m_selection ); it. current ( ); ++it )
-			CFrameWork::inst ( )-> fileImportBrickLinkInventory ( it. current ( )-> item ( ));
+	if ( m_doc-> selection ( ). count ( ) >= 1 ) {
+		foreach ( CDocument::Item *item, m_doc-> items ( ))
+			CFrameWork::inst ( )-> fileImportBrickLinkInventory ( item-> item ( ));
 	}
 	else
 		QApplication::beep ( );
@@ -1846,16 +1072,12 @@ void CWindow::editPartOutItems ( )
 
 void CWindow::setPrice ( money_t d )
 {
-	if ( m_selection. count ( ) == 1 ) {
-		m_selection. first ( )-> setPrice ( d );
+	if ( m_doc-> selection ( ). count ( ) == 1 ) {
+		CDocument::Item *pos = m_doc-> selection ( ). front ( );
+		CDocument::Item item = *pos;
 
-		CItemViewItem *ivi = m_lvitems [m_selection. first ( )];
-		
-		ivi-> checkForErrors ( );
-		ivi-> repaint ( );
-
-		updateStatistics ( );
-		setModified ( true );
+		item. setPrice ( d );
+		m_doc-> changeItem ( pos, item );
 	}
 	else
 		QApplication::beep ( );
@@ -1868,21 +1090,22 @@ void CWindow::contextMenu ( QListViewItem *it, const QPoint &p )
 
 void CWindow::itemModified ( CItemViewItem * /*item*/, bool grave )
 {
+#if 0
 	setModified ( true );
-	updateStatistics ( );
 
 	if ( grave )
 		updateSelection ( );
+#endif
 }
 
 void CWindow::closeEvent ( QCloseEvent *e )
 {
-	if ( isModified ( )) {
+	if ( m_doc-> isModified ( )) {
 		switch ( CMessageBox::warning ( this, tr( "Save changes to %1?" ). arg ( CMB_BOLD( caption ( ). left ( caption ( ). length ( ) - 2 ))), CMessageBox::Yes | CMessageBox::Default, CMessageBox::No, CMessageBox::Cancel | CMessageBox::Escape )) {
 		case CMessageBox::Yes:
-			fileSave ( );
+			m_doc-> fileSave ( );
 
-			if ( !isModified ( ))
+			if ( !m_doc-> isModified ( ))
 				e-> accept ( );
 			else
 				e-> ignore ( );
@@ -1905,20 +1128,20 @@ void CWindow::closeEvent ( QCloseEvent *e )
 
 void CWindow::showBLCatalog ( )
 {
-	if ( !m_selection. isEmpty ( ))
-		CUtility::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_CatalogInfo, m_selection. first ( )-> item ( )));
+	if ( !m_doc-> selection ( ). isEmpty ( ))
+		CUtility::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_CatalogInfo, (*m_doc-> selection ( ). front ( )). item ( )));
 }
 
 void CWindow::showBLPriceGuide ( )
 {
-	if ( !m_selection. isEmpty ( ))
-		CUtility::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_PriceGuideInfo, m_selection. first ( )-> item ( ), m_selection. first ( )-> color ( )));
+	if ( !m_doc-> selection ( ). isEmpty ( ))
+		CUtility::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_PriceGuideInfo, (*m_doc-> selection ( ). front ( )). item ( ), (*m_doc-> selection ( ). front ( )). color ( )));
 }
 
 void CWindow::showBLLotsForSale ( )
 {
-	if ( !m_selection. isEmpty ( ))
-		CUtility::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_LotsForSale, m_selection. first ( )-> item ( ), m_selection. first ( )-> color ( )));
+	if ( !m_doc-> selection ( ). isEmpty ( ))
+		CUtility::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_LotsForSale, (*m_doc-> selection ( ). front ( )). item ( ), (*m_doc-> selection ( ). front ( )). color ( )));
 }
 
 void CWindow::setDifferenceMode ( bool b )
@@ -1929,5 +1152,112 @@ void CWindow::setDifferenceMode ( bool b )
 bool CWindow::isDifferenceMode ( ) const
 {
 	return w_list-> isDifferenceMode ( );
+}
+
+void CWindow::filePrint ( )
+{
+	DlgSelectReportImpl d ( this );
+
+	if ( d. exec ( ) == QDialog::Accepted ) {
+		const CReport *rep = d. report ( );
+		uint pagecnt = rep-> pageCount ( m_doc-> items ( ). count ( ));
+
+		QPrinter *prt = CReportManager::inst ( )-> printer ( );
+
+		if ( rep && prt && pagecnt ) {
+			//prt-> setOptionEnabled ( QPrinter::PrintToFile, false );
+			//prt-> setOptionEnabled ( QPrinter::PrintSelection, true );
+		
+			prt-> setPageSize ( rep-> pageSize ( ));
+			prt-> setFullPage ( true );
+
+			prt-> setMinMax ( 1, pagecnt );
+			prt-> setFromTo ( 1, prt-> maxPage ( ));
+			prt-> setOptionEnabled ( QPrinter::PrintPageRange, true );
+
+			if ( prt-> setup ( CFrameWork::inst ( ))) {
+				QPainter p;
+
+				if ( !p. begin ( prt ))
+					return;
+			
+				CReportVariables add_vars;
+				add_vars ["filename"] = m_doc-> fileName ( );
+#if 0
+				if ( m_inventory && m_inventory-> isOrder ( )) {
+					BrickLink::Order *order = static_cast <BrickLink::Order *> ( m_inventory );
+
+					add_vars ["order-id"]            = order-> id ( );
+					add_vars ["order-type"]          = ( order-> type ( ) == BrickLink::Order::Placed ? tr( "Placed" ) : tr( "Received" ));
+					add_vars ["order-date"]          = order-> date ( ). toString ( Qt::TextDate );
+					add_vars ["order-status-change"] = order-> statusChange ( ). toString ( Qt::TextDate );
+					add_vars ["order-buyer"]         = order-> buyer ( );
+					add_vars ["order-shipping"]      = order-> shipping ( ). toCString ( );
+					add_vars ["order-insurance"]     = order-> insurance ( ). toCString ( );
+					add_vars ["order-delivery"]      = order-> delivery ( ). toCString ( );
+					add_vars ["order-credit"]        = order-> credit ( ). toCString ( );
+					add_vars ["order-grand-total"]   = order-> grandTotal ( ). toCString ( );
+					add_vars ["order-status"]        = order-> status ( );
+					add_vars ["order-payment"]       = order-> payment ( );
+					add_vars ["order-remarks"]       = order-> remarks ( );
+				}
+				rep-> render ( sortedItems ( ), add_vars, prt-> fromPage ( ), prt-> toPage ( ), &p );
+#endif			
+			}
+		}
+	}
+}
+
+void CWindow::fileSave ( )
+{
+	m_doc-> fileSave ( sortedItems ( ));
+}
+
+void CWindow::fileSaveAs ( )
+{
+	m_doc-> fileSaveAs ( sortedItems ( ));
+}
+
+void CWindow::fileExportBrickLinkXML ( )
+{
+	m_doc-> fileExportBrickLinkXML ( sortedItems ( ));
+}
+
+void CWindow::fileExportBrickLinkXMLClipboard ( )
+{
+	m_doc-> fileExportBrickLinkXMLClipboard ( sortedItems ( ));
+}
+
+void CWindow::fileExportBrickLinkUpdateClipboard ( )
+{
+	m_doc-> fileExportBrickLinkUpdateClipboard ( sortedItems ( ));
+}
+
+void CWindow::fileExportBrickLinkInvReqClipboard ( )
+{
+	m_doc-> fileExportBrickLinkInvReqClipboard ( sortedItems ( ));
+}
+
+void CWindow::fileExportBrickLinkWantedListClipboard ( )
+{
+	m_doc-> fileExportBrickLinkWantedListClipboard ( sortedItems ( ));
+}
+
+void CWindow::fileExportBrikTrakInventory ( )
+{
+	m_doc-> fileExportBrikTrakInventory ( sortedItems ( ));
+}
+
+CDocument::ItemList CWindow::sortedItems ( )
+{
+	CDocument::ItemList sorted;
+
+	for ( QListViewItemIterator it ( w_list ); it. current ( ); ++it ) {
+		CItemViewItem *ivi = static_cast <CItemViewItem *> ( it. current ( ));
+
+		sorted. append ( ivi-> item ( ));
+	}
+
+	return sorted;
 }
 

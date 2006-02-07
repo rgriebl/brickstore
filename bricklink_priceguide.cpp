@@ -78,14 +78,6 @@ static int find_keywords ( const char *str, int start, int stop, struct keyword 
 
 // ---------------------------------------------------------------------------
 
-BrickLink::PriceGuide *BrickLink::priceGuide ( const BrickLink::InvItem *invitem, bool high_priority )
-{
-	if ( !invitem )
-		return 0;
-	return priceGuide ( invitem-> item ( ), invitem-> color ( ), high_priority );
-}
-
-
 BrickLink::PriceGuide *BrickLink::priceGuide ( const BrickLink::Item *item, const BrickLink::Color *color, bool high_priority )
 {
 	if ( !item || !color )

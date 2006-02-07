@@ -18,6 +18,7 @@
 #include <qregexp.h>
 #include <qdatetime.h>
 
+#include "cutility.h"
 #include "bricklink.h"
 #include "cmessagebox.h"
 #include "cconfig.h"
@@ -177,7 +178,6 @@ BrickLink::Inventory *BrickLink::storeInventory ( )
 
 BrickLink::Inventory::Inventory ( const Item *item, bool from_peeron )
 {
-	m_list. setAutoDelete ( true );
 	m_item = item;
 
 	m_valid = false;
@@ -196,7 +196,6 @@ BrickLink::Order::Order ( const QString &orderid, Type ordertype )
 
 BrickLink::Inventory::Inventory ( )
 {
-	m_list. setAutoDelete ( true );
 	m_item = 0;
 
 	m_valid = false;
@@ -206,6 +205,7 @@ BrickLink::Inventory::Inventory ( )
 
 BrickLink::Inventory::~Inventory ( )
 {
+	qDeleteAll ( m_list );
 }
 
 BrickLink::Order::~Order ( )
@@ -233,7 +233,7 @@ void BrickLink::Inventory::load_from_disk ( )
 	QFile f ( path );
 	if ( f. open ( IO_ReadOnly )) {
 //   		uint invalid_items = 0;
-		QPtrList <InvItem> *items = 0;
+		InvItemList *items = 0;
 
 		QString emsg;
 		int eline = 0, ecol = 0;
@@ -245,9 +245,7 @@ void BrickLink::Inventory::load_from_disk ( )
 			items = BrickLink::inst ( )-> parseItemListXML ( doc. documentElement ( ). toElement ( ), BrickLink::XMLHint_Inventory /*, &invalid_items */);
 
 			if ( items ) {
-				while ( !items-> isEmpty ( ))
-					m_list. append ( items-> take ( 0 ));
-
+				m_list += *items;
 				m_valid = true;
 				delete items;
 
@@ -383,7 +381,7 @@ void BrickLink::inventoryJobFinished ( CTransfer::Job *j )
 
 				if ( order_buffer. open ( IO_ReadOnly )) {
 //	        		uint invalid_items = 0;
-					QPtrList <InvItem> *items = 0;
+					InvItemList *items = 0;
 
 					QString emsg;
 					int eline = 0, ecol = 0;
@@ -432,9 +430,7 @@ void BrickLink::inventoryJobFinished ( CTransfer::Job *j )
 						CMessageBox::warning ( 0, tr( "Could not parse the XML data for order #%1:<br /><i>Line %2, column %3: %4</i>" ). arg ( CMB_BOLD( ord-> id ( ))). arg ( eline ). arg ( ecol ). arg ( emsg ));
 
 					if ( items ) {
-						while ( !items-> isEmpty ( ))
-							inv-> m_list. append ( items-> take ( 0 ));
-
+						inv-> m_list += *items;
 						inv-> m_valid = true;
 						delete items;
 
@@ -481,7 +477,7 @@ void BrickLink::inventoryJobFinished ( CTransfer::Job *j )
 
 				if ( store_buffer. open ( IO_ReadOnly )) {
 	  //      		uint invalid_items = 0;
-					QPtrList <InvItem> *items = 0;
+					InvItemList *items = 0;
 
 					QString emsg;
 					int eline = 0, ecol = 0;
@@ -497,9 +493,7 @@ void BrickLink::inventoryJobFinished ( CTransfer::Job *j )
 						CMessageBox::warning ( 0, tr( "Could not parse the XML data for the store inventory:<br /><i>Line %1, column %2: %3</i>" ). arg ( eline ). arg ( ecol ). arg ( emsg ));
 
 					if ( items ) {
-						while ( !items-> isEmpty ( ))
-							inv-> m_list. append ( items-> take ( 0 ));
-
+						inv-> m_list += *items;
 						inv-> m_valid = true;
 						delete items;
 

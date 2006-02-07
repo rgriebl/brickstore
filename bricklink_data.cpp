@@ -13,6 +13,7 @@
 */
 #include <stdlib.h>
 
+#include "cutility.h"
 #include "bricklink.h"
 
 
@@ -319,50 +320,115 @@ BrickLink::InvItem::InvItem ( const Color *color, const Item *item )
 	m_lot_id = 0;
 }
 
+BrickLink::InvItem::InvItem ( const BrickLink::InvItem &copy )
+{
+	m_incomplete = 0;
+	m_custom_picture = 0;
+
+	*this = copy;
+}
+
+BrickLink::InvItem &BrickLink::InvItem::operator = ( const InvItem &copy )
+{
+	delete m_incomplete;
+	m_incomplete = 0;
+
+	if ( m_custom_picture ) {
+		m_custom_picture-> release ( );
+		m_custom_picture = 0;
+	}
+
+	m_item           = copy. m_item;
+	m_color          = copy. m_color;
+	m_status         = copy. m_status;
+	m_condition      = copy. m_condition;
+	m_retain         = copy. m_retain;
+	m_stockroom      = copy. m_stockroom;
+	m_comments       = copy. m_comments;
+	m_remarks        = copy. m_remarks;
+	m_reserved       = copy. m_reserved;
+	m_custom_picture_url = copy. m_custom_picture_url;
+	m_quantity       = copy. m_quantity;
+	m_bulk_quantity  = copy. m_bulk_quantity;
+	m_tier_quantity [0] = copy. m_tier_quantity [0];
+	m_tier_quantity [1] = copy. m_tier_quantity [1];
+	m_tier_quantity [2] = copy. m_tier_quantity [2];
+	m_sale           = copy. m_sale;
+	m_price          = copy. m_price;
+	m_tier_price [0] = copy. m_tier_price [0];
+	m_tier_price [1] = copy. m_tier_price [1];
+	m_tier_price [2] = copy. m_tier_price [2];
+	m_weight         = copy. m_weight;
+	m_lot_id         = copy. m_lot_id;
+	m_orig_price     = copy. m_orig_price;
+	m_orig_quantity  = copy. m_orig_quantity;
+
+	if ( copy. m_incomplete ) {
+		m_incomplete = new Incomplete;
+
+		m_incomplete-> m_item_id       = copy. m_incomplete-> m_item_id;
+		m_incomplete-> m_item_name     = copy. m_incomplete-> m_item_name;
+		m_incomplete-> m_itemtype_id   = copy. m_incomplete-> m_itemtype_id;
+		m_incomplete-> m_itemtype_name = copy. m_incomplete-> m_itemtype_name;
+		m_incomplete-> m_category_id   = copy. m_incomplete-> m_category_id;
+		m_incomplete-> m_category_name = copy. m_incomplete-> m_category_name;
+		m_incomplete-> m_color_id      = copy. m_incomplete-> m_color_id;
+		m_incomplete-> m_color_name    = copy. m_incomplete-> m_color_name;
+	}
+
+	if ( m_custom_picture )
+		m_custom_picture-> addRef ( );
+
+	return *this;
+}
+
 BrickLink::InvItem::~InvItem ( )
 {
 	delete m_incomplete;
+
+	if ( m_custom_picture )
+		m_custom_picture-> release ( );
 }
 
-bool BrickLink::InvItem::mergeFrom ( const InvItem *from, bool prefer_from )
+bool BrickLink::InvItem::mergeFrom ( const InvItem &from, bool prefer_from )
 {
-	if (( from == this ) ||
-	    ( from-> item ( ) != item ( )) ||
-	    ( from-> color ( ) != color ( )) ||
-	    ( from-> condition ( ) != condition ( )))
+	if (( &from == this ) ||
+	    ( from. item ( ) != item ( )) ||
+	    ( from. color ( ) != color ( )) ||
+	    ( from. condition ( ) != condition ( )))
 		return false;
 
-	if (( from-> price ( ) != 0 ) && (( price ( ) == 0 ) || prefer_from ))
-		setPrice ( from-> price ( ));
-	if (( from-> bulkQuantity ( ) != 1 ) && (( bulkQuantity ( ) == 1 ) || prefer_from ))
-		setBulkQuantity ( from-> bulkQuantity ( ));
-	if (( from-> sale ( )) && ( !( sale ( )) || prefer_from ))
-		setSale ( from-> sale ( ));
+	if (( from. price ( ) != 0 ) && (( price ( ) == 0 ) || prefer_from ))
+		setPrice ( from. price ( ));
+	if (( from. bulkQuantity ( ) != 1 ) && (( bulkQuantity ( ) == 1 ) || prefer_from ))
+		setBulkQuantity ( from. bulkQuantity ( ));
+	if (( from. sale ( )) && ( !( sale ( )) || prefer_from ))
+		setSale ( from. sale ( ));
 
 	for ( int i = 0; i < 3; i++ ) {
-		if (( from-> tierPrice ( i ) != 0 ) && (( tierPrice ( i ) == 0 ) || prefer_from ))
-			setTierPrice ( i, from-> tierPrice ( i ));
-		if (( from-> tierQuantity ( i )) && ( !( tierQuantity ( i )) || prefer_from ))
-			setTierQuantity ( i, from-> tierQuantity ( i ));
+		if (( from. tierPrice ( i ) != 0 ) && (( tierPrice ( i ) == 0 ) || prefer_from ))
+			setTierPrice ( i, from. tierPrice ( i ));
+		if (( from. tierQuantity ( i )) && ( !( tierQuantity ( i )) || prefer_from ))
+			setTierQuantity ( i, from. tierQuantity ( i ));
 	}
 	
-	if ( !from-> remarks ( ). isEmpty ( ) && ( remarks ( ). isEmpty ( ) || prefer_from ))
-		setRemarks ( from-> remarks ( ));
-	if ( !from-> comments ( ). isEmpty ( ) && ( comments ( ). isEmpty ( ) || prefer_from ))
-		setComments ( from-> comments ( ));
-	if ( !from-> reserved ( ). isEmpty ( ) && ( reserved ( ). isEmpty ( ) || prefer_from ))
-		setReserved ( from-> reserved ( ));	
-	if ( !from-> customPictureUrl ( ). isEmpty ( ) && ( customPictureUrl ( ). isEmpty ( ) || prefer_from ))
-		setCustomPictureUrl ( from-> customPictureUrl ( ));
+	if ( !from. remarks ( ). isEmpty ( ) && ( remarks ( ). isEmpty ( ) || prefer_from ))
+		setRemarks ( from. remarks ( ));
+	if ( !from. comments ( ). isEmpty ( ) && ( comments ( ). isEmpty ( ) || prefer_from ))
+		setComments ( from. comments ( ));
+	if ( !from. reserved ( ). isEmpty ( ) && ( reserved ( ). isEmpty ( ) || prefer_from ))
+		setReserved ( from. reserved ( ));	
+	if ( !from. customPictureUrl ( ). isEmpty ( ) && ( customPictureUrl ( ). isEmpty ( ) || prefer_from ))
+		setCustomPictureUrl ( from. customPictureUrl ( ));
 	
 	if ( prefer_from ) {
-		setStatus ( from-> status ( ));
-		setRetain ( from-> retain ( ));
-		setStockroom ( from-> stockroom ( ));
+		setStatus ( from. status ( ));
+		setRetain ( from. retain ( ));
+		setStockroom ( from. stockroom ( ));
 	}
 
-	setQuantity ( quantity ( ) + from-> quantity ( ));
-	setOrigQuantity ( origQuantity ( ) + from-> origQuantity ( ));
+	setQuantity ( quantity ( ) + from. quantity ( ));
+	setOrigQuantity ( origQuantity ( ) + from. origQuantity ( ));
 
 	return true;
 }
@@ -421,7 +487,7 @@ QDataStream &operator >> ( QDataStream &ds, BrickLink::InvItem &ii )
 
 const char *BrickLink::InvItemDrag::s_mimetype = "application/x-bricklink-invitems";
 
-BrickLink::InvItemDrag::InvItemDrag( const QPtrList <BrickLink::InvItem> &items, QWidget *dragsource, const char *name )
+BrickLink::InvItemDrag::InvItemDrag( const InvItemList &items, QWidget *dragsource, const char *name )
     : QDragObject( dragsource, name )
 {
     setItems ( items );
@@ -430,7 +496,7 @@ BrickLink::InvItemDrag::InvItemDrag( const QPtrList <BrickLink::InvItem> &items,
 BrickLink::InvItemDrag::InvItemDrag( QWidget *dragsource, const char *name )
     : QDragObject( dragsource, name )
 {
-	setItems ( QPtrList <BrickLink::InvItem> ( ));
+	setItems ( InvItemList ( ));
 }
 
 const char *BrickLink::InvItemDrag::format ( int n ) const
@@ -442,18 +508,18 @@ const char *BrickLink::InvItemDrag::format ( int n ) const
 	}
 }
 
-void BrickLink::InvItemDrag::setItems ( const QPtrList <BrickLink::InvItem> &items )
+void BrickLink::InvItemDrag::setItems ( const InvItemList &items )
 {
 	m_text. truncate ( 0 );
 	m_data. truncate ( 0 );
 	QDataStream ds ( m_data, IO_WriteOnly );
 	
 	ds << items. count ( );
-	for ( QPtrListIterator <BrickLink::InvItem> it ( items ); it. current ( ); ++it ) {
-		ds << *it. current ( );
+	foreach ( const InvItem *ii, items ) {
+		ds << *ii;
 		if ( !m_text. isEmpty ( ))
 			m_text. append ( "\n" );
-		m_text. append ( it. current ( )-> item ( )-> id ( ));
+		m_text. append ( ii-> item ( )-> id ( ));
 	}
 }
 
@@ -472,7 +538,7 @@ bool BrickLink::InvItemDrag::canDecode ( QMimeSource *e )
     return e-> provides ( s_mimetype );
 }
 
-bool BrickLink::InvItemDrag::decode ( QMimeSource *e, QPtrList <BrickLink::InvItem> &items )
+bool BrickLink::InvItemDrag::decode ( QMimeSource *e, InvItemList &items )
 {
     QByteArray data = e-> encodedData ( s_mimetype );
     QDataStream ds ( data, IO_ReadOnly );
@@ -486,7 +552,7 @@ bool BrickLink::InvItemDrag::decode ( QMimeSource *e, QPtrList <BrickLink::InvIt
 	items. clear ( );
 	
 	for ( ; count && !ds. atEnd ( ); count-- ) {
-		BrickLink::InvItem *ii = new BrickLink::InvItem ( 0, 0 );
+		InvItem *ii = new InvItem ( );
 	    ds >> *ii;
 	    items. append ( ii );
 	}

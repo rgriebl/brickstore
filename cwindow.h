@@ -34,39 +34,16 @@ class DlgAddItemImpl;
 class CFrameWork;
 class CUndoStack;
 class QLabel;
+class CDocument;
 
-class CItemStatistics
-{
-public:
-	CItemStatistics ( const QPtrList<BrickLink::InvItem> &list, int errors = 0 );
-
-	int lots ( ) const          { return m_lots; }
-	int items ( ) const         { return m_items; }
-	money_t value ( ) const     { return m_val; }
-	money_t minValue ( ) const  { return m_minval; }
-	double weight ( ) const     { return m_weight; }
-	int errors ( ) const        { return m_errors; }
-
-private:
-	int m_lots;
-	int m_items;
-	money_t m_val;
-	money_t m_minval;
-	double m_weight;
-	int m_errors;
-};
 
 class CWindow : public QWidget {
 	Q_OBJECT
 public:
-	CWindow ( QWidget *parent = 0, const char *name = 0 );
+	CWindow ( CDocument *doc, QWidget *parent = 0, const char *name = 0 );
 	~CWindow ( );
 
-	bool isModified ( ) const;
-	void setModified ( bool b );
-
-	QString fileName ( ) const;
-	void setFileName ( const QString &str );
+	CDocument *document ( ) { return m_doc; }
 
 	enum MergeFlags {
 		MergeAction_None         = 0x00000000,
@@ -79,24 +56,15 @@ public:
 		MergeKeep_Mask           = 0xffff0000
 	};
 
-	const QPtrList<BrickLink::InvItem> &items ( ) const;
-	QPtrList <BrickLink::InvItem> sortedItems ( );
+	CDocument::ItemList sortedItems ( );
 
-	// vvvv  INTERFACE FOR COMMANDS  vvvv
-	void appendItems ( const QPtrList<BrickLink::InvItem> &items );
-	void insertItems ( const QPtrList<BrickLink::InvItem> &items, int *positions );
-	void removeItems ( const QPtrList<BrickLink::InvItem> &items, int *positions = 0 );
-	// ^^^^  INTERFACE FOR COMMANDS  ^^^^
+	uint setItems ( const BrickLink::InvItemList &items, int multiply = 1 );
+	uint addItems ( const BrickLink::InvItemList &items, int multiply = 1, uint mergeflags = MergeAction_None, bool dont_change_sorting = false );
+	void deleteItems ( const BrickLink::InvItemList &items );
 
-	uint setItems ( const QPtrList<BrickLink::InvItem> &items, int multiply = 1 );
-	uint addItems ( const QPtrList<BrickLink::InvItem> &items, int multiply = 1, uint mergeflags = MergeAction_None, bool dont_change_sorting = false );
-	void deleteItems ( const QPtrList<BrickLink::InvItem> &items );
+	void mergeItems ( const CDocument::ItemList &items, int globalmergeflags = MergeAction_Ask );
 
-	void mergeItems ( const QPtrList<BrickLink::InvItem> &items, int globalmergeflags = MergeAction_Ask );
-
-	void subtractItems ( const QPtrList <BrickLink::InvItem> &items );
-
-	CItemStatistics statistics ( const QPtrList <BrickLink::InvItem> &list );
+	void subtractItems ( const BrickLink::InvItemList &items );
 
 //	bool hasFilter ( ) const;
 //	void setFilter ( const QRegExp &exp, Field f );
@@ -105,20 +73,10 @@ public:
 //	QRegExp filterExpression ( ) const;
 //	Field filterField ( ) const;
 
-//	QPtrList<BrickLink::InvItem> &selectedItems ( );
-//	void setSelectedItems ( const QPtrList<BrickLink::InvItem> &items );
+//	InvItemList &selectedItems ( );
+//	void setSelectedItems ( const InvItemList &items );
 
 	bool isDifferenceMode ( ) const;
-
-public:
-	bool fileOpen ( );
-	bool fileOpen ( const QString &name );
-	bool fileImportBrickLinkInventory ( const BrickLink::Item *preselect = 0 );
-	bool fileImportBrickLinkOrder ( );
-	bool fileImportBrickLinkStore ( );
-	bool fileImportBrickLinkXML ( );
-	bool fileImportBrikTrakInventory ( const QString &fn = QString::null );
-	bool fileImportLDrawModel ( );
 
 public slots:
 	void setDifferenceMode ( bool );
@@ -159,11 +117,7 @@ public slots:
 	void editMultiplyQty ( );
 	void editDivideQty ( );
 
-	void triggerUpdate ( );
-	void triggerSelectionUpdate ( );
-	void triggerStatisticsUpdate ( );
-
-	void addItem ( const BrickLink::InvItem *, uint );
+	void addItem ( BrickLink::InvItem *, uint );
 
 	void setPrice ( money_t );
 
@@ -172,7 +126,7 @@ public slots:
 	void showBLLotsForSale ( );
 
 signals:
-	void selectionChanged ( const QPtrList<BrickLink::InvItem> & );
+	void selectionChanged ( const BrickLink::InvItemList & );
 	void statisticsChanged ( );
 
 protected:
@@ -183,37 +137,31 @@ protected slots:
 
 private slots:
 	void applyFilter ( );
-	void updateSelection ( );
+	void updateSelectionFromView ( );
+	void updateSelectionFromDoc ( const CDocument::ItemList &itlist );
 	void updateCaption ( );
-	void updateStatistics ( );
+
 	void contextMenu ( QListViewItem *, const QPoint & );
-	void inventoryUpdated ( BrickLink::Inventory * );
 	void priceGuideUpdated ( BrickLink::PriceGuide * );
 	void pictureUpdated ( BrickLink::Picture * );
 	void itemModified ( CItemViewItem *item, bool grave );
 	void updateErrorMask ( );
 
-private:
-	bool fileLoadFrom ( const QString &s, const char *type, bool import_only = false );
-	bool fileSaveTo ( const QString &s, const char *type, bool export_only = false );
+	void resetDifferences ( const CDocument::ItemList & );
 
-	void resetDifferences ( const QPtrList<BrickLink::InvItem> & );
-
-	QDomElement CWindow::createGuiStateXML ( QDomDocument doc );
+	QDomElement createGuiStateXML ( QDomDocument doc );
 	bool parseGuiStateXML ( QDomElement root );
 
+	void itemsAddedToDocument ( const CDocument::ItemList & );
+	void itemsRemovedFromDocument ( const CDocument::ItemList & );
+	void itemsChangedInDocument ( const CDocument::ItemList &, bool );
+
 private:
+	CDocument * m_doc;
 	QRegExp        m_filter_expression;
 	int            m_filter_field;
 
-	QString        m_filename;
-	QString        m_caption;
-
-	BrickLink::Inventory *m_inventory;
-	int                   m_inventory_multiply;
-
-	QPtrList<BrickLink::InvItem>  m_items;
-	QPtrList<BrickLink::InvItem>  m_selection;
+	bool m_ignore_selection_update;
 
 	QPtrDict<CItemViewItem>  m_lvitems;
 
@@ -225,8 +173,6 @@ private:
 	QLabel *       w_filter_field_label;
 
 	QGuardedPtr <DlgAddItemImpl> m_add_dialog;
-
-	CUndoStack *   m_undo;
 
 	uint                           m_settopg_failcnt;
 	QPtrDict<BrickLink::InvItem> * m_settopg_list;

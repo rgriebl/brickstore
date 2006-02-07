@@ -47,7 +47,7 @@ CConfig::CConfig ( )
 	m_show_input_errors = readBoolEntry ( "/General/ShowInputErrors", true );
 	m_weight_system = ( readEntry ( "/General/WeightSystem", "metric" ) == "metric" ) ? WeightMetric : WeightImperial;
 	m_simple_mode = readBoolEntry ( "/General/SimpleMode", false );
-	m_window_mode = readBoolEntry ( "/MainWindow/WindowMode", 0 );
+	m_window_mode = readNumEntry ( "/MainWindow/WindowMode", 0 );
 }
 
 CConfig::~CConfig ( )

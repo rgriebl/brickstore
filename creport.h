@@ -53,7 +53,7 @@ public:
 	QSize pageSizePt ( ) const;
 
 	uint pageCount ( uint itemcount ) const;
-	void render ( const QPtrList <BrickLink::InvItem> &items, const CReportVariables &add_vars, int from, int to, QPainter *p ) const;
+	void render ( const BrickLink::InvItemList &items, const CReportVariables &add_vars, int from, int to, QPainter *p ) const;
 
 	bool hasUI ( ) const;
 	QWidget *createUI ( CReportVariables &vars ) const;

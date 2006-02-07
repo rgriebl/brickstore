@@ -30,6 +30,7 @@
 #include <qvalidator.h>
 #include <qtextedit.h>
 
+#include "cutility.h"
 #include "cresource.h"
 #include "cmoney.h"
 #include "creport.h"
@@ -281,7 +282,7 @@ uint CReport::pageCount ( uint itemcount ) const
 
 #define PRINT_THIS_PAGE         (( page >= from ) && ( page <= to ))
 
-void CReport::render ( const QPtrList <BrickLink::InvItem> &items, const CReportVariables &add_vars, int from, int to, QPainter *p ) const
+void CReport::render ( const BrickLink::InvItemList &items, const CReportVariables &add_vars, int from, int to, QPainter *p ) const
 {
 	if ( items. isEmpty ( ) || !p )
 		return;
@@ -317,9 +318,9 @@ void CReport::render ( const QPtrList <BrickLink::InvItem> &items, const CReport
 
 	vars ["pages"] = QString::number ( pagecount );
 
-	for ( QPtrListIterator<BrickLink::InvItem> it ( items ); it. current ( ); ++it ) {
-		qty_total += it. current ( )-> quantity ( );
-		price_total += ( it. current ( )-> price ( ) * it. current ( )-> quantity ( ));
+	foreach ( const BrickLink::InvItem *ii, items ) {
+		qty_total += ii-> quantity ( );
+		price_total += ( ii-> price ( ) * ii-> quantity ( ));
 		lot_total++;
 	}
 	
@@ -340,8 +341,6 @@ void CReport::render ( const QPtrList <BrickLink::InvItem> &items, const CReport
 		insertVarsInto ( ui_vars, vars );
 	}
 
-	QPtrListIterator<BrickLink::InvItem> itemit ( items );
-
 	// scale for pt -> px conversions
 	QPaintDeviceMetrics pdm ( p-> device ( ));
 	
@@ -357,6 +356,8 @@ void CReport::render ( const QPtrList <BrickLink::InvItem> &items, const CReport
 	s [1] =	( float( ds_pt. height ( )) / float( ps_pt. height ( ))) * float( pdm. logicalDpiY ( )) / 72.f;
 
 	
+	BrickLink::InvItemList::const_iterator itemit = items. begin ( );
+
 	while ( items_left || !rfooter ) {
 		page++;
 
@@ -400,8 +401,8 @@ void CReport::render ( const QPtrList <BrickLink::InvItem> &items, const CReport
 			if (( r. height ( ) - fh - ih ) < 0 )
 				break;
 
-			if ( PRINT_THIS_PAGE && itemit. current ( )) {
-				const BrickLink::InvItem *blitem = itemit. current ( );
+			if ( PRINT_THIS_PAGE && ( itemit != items. end ( ))) {
+				const BrickLink::InvItem *blitem = *itemit;
 
 				// fill vars according to blitem
 
@@ -442,7 +443,7 @@ void CReport::render ( const QPtrList <BrickLink::InvItem> &items, const CReport
 				
 				QString image_key = "item-image-";
 
-				const BrickLink::Picture *pic = BrickLink::inst ( )-> picture ( blitem, true );
+				const BrickLink::Picture *pic = BrickLink::inst ( )-> picture ( blitem-> item ( ), blitem-> color ( ), true );
 
 				if ( pic && pic-> valid ( )) {
 					image_key += pic-> key ( );

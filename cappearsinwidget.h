@@ -29,7 +29,6 @@ public:
 	virtual ~CAppearsInWidget ( );
 	
 	void setItem ( const BrickLink::Item *item, const BrickLink::Color *color = 0 );
-	void setItem ( const BrickLink::InvItem *ii );
 
 	void addActionsToContextMenu ( const QPtrList <QAction> &actions );
 

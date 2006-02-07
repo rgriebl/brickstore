@@ -20,6 +20,7 @@
 #include <qaction.h>
 #include <qstringlist.h>
 
+#include "cdocument.h"
 #include "clistaction.h"
 #include "bricklink.h"
 
@@ -36,6 +37,7 @@ class CTaskInfoWidget;
 class CTaskPriceGuideWidget;
 class CTaskLinksWidget;
 class CTaskAppearsInWidget;
+class CDocument;
 
 
 class CFrameWork : public QMainWindow {
@@ -58,7 +60,7 @@ public:
 	void updateAllToggleActions ( CWindow *window );
 
 public slots:
-	void selectionUpdate ( const QPtrList<BrickLink::InvItem> &selection );
+	void selectionUpdate ( const CDocument::ItemList &selection );
 	void statisticsUpdate ( );
 	void showNotModified ( bool b );
 	void showContextMenu ( bool onitem, const QPoint &pos );
@@ -66,8 +68,9 @@ public slots:
 	void fileImportBrickLinkInventory ( const BrickLink::Item *item );
 
 signals:
-	void windowChanged ( CWindow * );
-	void selectionChanged ( CWindow *, const QPtrList<BrickLink::InvItem> & );
+	void windowActivated ( CWindow * );
+	void documentActivated ( CDocument * );
+	void selectionChanged ( CWindow *, const BrickLink::InvItemList & );
 	void statisticsChanged ( CWindow * );
 
 protected slots:
@@ -163,8 +166,7 @@ private:
 	QPopupMenu *createMenu ( const QStringList & );
 	QToolBar *createToolBar ( const QString &label, const QStringList & );
 	void createStatusBar ( );
-	CWindow *createWindow ( );
-	bool showOrDeleteWindow ( CWindow *w, bool b );
+	bool createWindow ( CDocument *doc );
 
 	QMap<QAction *, bool ( CWindow::* ) ( ) const> m_toggle_updates;
 

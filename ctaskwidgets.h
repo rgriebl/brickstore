@@ -27,6 +27,7 @@
 #include "cutility.h"
 #include "curllabel.h"
 #include "cwindow.h"
+#include "cdocument.h"
 #include "cframework.h"
 
 
@@ -35,11 +36,11 @@ class CTaskLinksWidget : public CUrlLabel {
 
 public:
 	CTaskLinksWidget ( QWidget *parent, const char *name = 0 )
-		: CUrlLabel ( parent, name )
+		: CUrlLabel ( parent, name ), m_doc ( 0 )
 	{
 		setFrameStyle ( QFrame::StyledPanel | QFrame::Sunken );
 
-		connect ( CFrameWork::inst ( ), SIGNAL( selectionChanged ( CWindow *, const QPtrList <BrickLink::InvItem> & )), this, SLOT( selectionUpdate ( CWindow *, const QPtrList <BrickLink::InvItem> & )));
+		connect ( CFrameWork::inst ( ), SIGNAL( documentActivated ( CDocument * )), this, SLOT( documentUpdate ( CDocument * )));
 
 		unsetPalette ( );
 		setText ( "<b>B</b><br />1<br />2<br />3<br />4<br /><br/><b>P</b><br />1<br />" );
@@ -48,13 +49,24 @@ public:
 	}
 
 protected slots:
-	void selectionUpdate ( CWindow *win, const QPtrList <BrickLink::InvItem> &list )
+	void documentUpdate ( CDocument *doc )
+	{
+		if ( m_doc )
+			disconnect ( m_doc, SIGNAL( selectionChanged ( const CDocument::ItemList & )), this, SLOT( selectionUpdate ( const CDocument::ItemList & )));
+		m_doc = doc;
+		if ( m_doc )
+			connect ( m_doc, SIGNAL( selectionChanged ( const CDocument::ItemList & )), this, SLOT( selectionUpdate ( const CDocument::ItemList & )));
+		
+		selectionUpdate ( m_doc ? m_doc-> selection ( ) : CDocument::ItemList ( ));
+	}
+
+	void selectionUpdate ( const CDocument::ItemList &list )
 	{
 		QString str;
 
-		if ( win && ( list. count ( ) == 1 )) {
-			const BrickLink::Item *item = list. getFirst ( )-> item ( );
-			const BrickLink::Color *color = list. getFirst ( )-> color ( );
+		if ( m_doc && ( list. count ( ) == 1 )) {
+			const BrickLink::Item *item = (*list. front ( )). item ( );
+			const BrickLink::Color *color = (*list. front ( )). color ( );
 
 			if ( item && color ) {
 				QString fmt1 = "&nbsp;&nbsp;<b>%1</b><br />";
@@ -74,10 +86,9 @@ protected slots:
 		setText ( str );
 	}
 
-	virtual void setItems ( QPtrList <BrickLink::InvItem> * /*itemlist*/ )
-	{
-		setText ( QString ( ));
-	}
+private:
+	CDocument * m_doc;
+
 };
 
 
@@ -91,28 +102,43 @@ class CTaskPriceGuideWidget : public CPriceGuideWidget {
 
 public:
 	CTaskPriceGuideWidget ( QWidget *parent, const char *name = 0 )
-		: CPriceGuideWidget ( parent, name ), m_active_window ( 0 )
+		: CPriceGuideWidget ( parent, name ), m_doc ( 0 )
 	{
 		setFrameStyle ( QFrame::StyledPanel | QFrame::Sunken );
 
-		connect ( CFrameWork::inst ( ), SIGNAL( selectionChanged ( CWindow *, const QPtrList <BrickLink::InvItem> & )), this, SLOT( selectionUpdate ( CWindow *, const QPtrList <BrickLink::InvItem> & )));
-		connect ( CFrameWork::inst ( ), SIGNAL( windowChanged ( CWindow * )), this, SLOT( windowUpdate ( CWindow * )));
+		connect ( CFrameWork::inst ( ), SIGNAL( documentActivated ( CDocument * )), this, SLOT( documentUpdate ( CDocument * )));
+		connect ( this, SIGNAL( priceDoubleClicked ( money_t )), this, SLOT( setPrice ( money_t )));
 		fixParentDockWindow ( );
 	}
 
 protected slots:
-	void selectionUpdate ( CWindow *win, const QPtrList <BrickLink::InvItem> &list )
+	void documentUpdate ( CDocument *doc )
 	{
-		bool ok = ( win && ( list. count ( ) == 1 ));
-
-		setPriceGuide ( ok ? BrickLink::inst ( )-> priceGuide ( list. getFirst ( ), true ) : 0 );
+		if ( m_doc )
+			disconnect ( m_doc, SIGNAL( selectionChanged ( const CDocument::ItemList & )), this, SLOT( selectionUpdate ( const CDocument::ItemList & )));
+		m_doc = doc;
+		if ( m_doc )
+			connect ( m_doc, SIGNAL( selectionChanged ( const CDocument::ItemList & )), this, SLOT( selectionUpdate ( const CDocument::ItemList & )));
+		
+		selectionUpdate ( m_doc ? m_doc-> selection ( ) : CDocument::ItemList ( ));
 	}
 
-	void windowUpdate ( CWindow *win )
+	void selectionUpdate ( const CDocument::ItemList &list )
 	{
-		disconnect ( SIGNAL( priceDoubleClicked ( money_t )));
-		if ( win )
-			connect ( this, SIGNAL( priceDoubleClicked ( money_t )), win, SLOT( setPrice ( money_t )));
+		bool ok = ( m_doc && ( list. count ( ) == 1 ));
+
+		setPriceGuide ( ok ? BrickLink::inst ( )-> priceGuide ( list. front ( )-> item ( ), list. front ( )-> color ( ), true ) : 0 );
+	}
+
+	void setPrice ( money_t p )
+	{
+		if ( m_doc && ( m_doc-> selection ( ). count ( ) == 1 )) {
+			CDocument::Item *pos = m_doc-> selection ( ). front ( );
+			CDocument::Item item = *pos;
+
+			item. setPrice ( p );
+			m_doc-> changeItem ( pos, item );
+		}
 	}
 
 protected:
@@ -144,7 +170,7 @@ private slots:
 	}
 
 private:
-	CWindow *m_active_window;
+	CDocument *m_doc;
 };
 
 
@@ -158,7 +184,7 @@ class CTaskInfoWidget : public QWidgetStack {
 
 public:
 	CTaskInfoWidget ( QWidget *parent, const char *name = 0 )
-		: QWidgetStack ( parent, name )
+		: QWidgetStack ( parent, name ), m_doc ( 0 )
 	{
 		setFrameStyle ( QFrame::StyledPanel | QFrame::Sunken );
 
@@ -172,7 +198,7 @@ public:
 
 		paletteChange ( palette ( ));
 
-		connect ( CFrameWork::inst ( ), SIGNAL( selectionChanged ( CWindow *, const QPtrList <BrickLink::InvItem> & )), this, SLOT( selectionUpdate ( CWindow *, const QPtrList <BrickLink::InvItem> & )));
+		connect ( CFrameWork::inst ( ), SIGNAL( documentActivated ( CDocument * )), this, SLOT( documentUpdate ( CDocument * )));
 	}
 
 	void addActionsToContextMenu ( const QPtrList <QAction> &actions )
@@ -182,18 +208,29 @@ public:
 
 
 protected slots:
-	void selectionUpdate ( CWindow *win, const QPtrList <BrickLink::InvItem> &list )
+	void documentUpdate ( CDocument *doc )
 	{
-		if ( !win || ( list. count ( ) == 0 )) {
+		if ( m_doc )
+			disconnect ( m_doc, SIGNAL( selectionChanged ( const CDocument::ItemList & )), this, SLOT( selectionUpdate ( const CDocument::ItemList & )));
+		m_doc = doc;
+		if ( m_doc )
+			connect ( m_doc, SIGNAL( selectionChanged ( const CDocument::ItemList & )), this, SLOT( selectionUpdate ( const CDocument::ItemList & )));
+		
+		selectionUpdate ( m_doc ? m_doc-> selection ( ) : CDocument::ItemList ( ));
+	}
+
+	void selectionUpdate ( const CDocument::ItemList &list )
+	{
+		if ( !m_doc || ( list. count ( ) == 0 )) {
 			m_pic-> setPicture ( 0 );
 			raiseWidget ( m_pic );			
 		}
 		else if ( list. count ( ) == 1 ) {
-			m_pic-> setPicture ( BrickLink::inst ( )-> picture ( list. getFirst ( ), true ));
+			m_pic-> setPicture ( BrickLink::inst ( )-> picture ( list. front ( )-> item ( ), list. front ( )-> color ( ), true ));
 			raiseWidget ( m_pic );
 		}
 		else {
-			CItemStatistics stat = win-> statistics ( list );
+			CDocument::Statistics stat = m_doc-> statistics ( list );
 
 			QString s;
 
@@ -253,6 +290,7 @@ protected slots:
 private:
 	QLabel *        m_text;
 	CPictureWidget *m_pic;
+	CDocument *     m_doc;
 };
 
 
@@ -265,12 +303,11 @@ class CTaskAppearsInWidget : public CAppearsInWidget {
 
 public:
 	CTaskAppearsInWidget ( QWidget *parent, const char *name = 0 )
-		: CAppearsInWidget ( parent, name )
+		: CAppearsInWidget ( parent, name ), m_doc ( 0 )
 	{
-
 //		m_menu = new QPopupMenu ( this );
 		
-		connect ( CFrameWork::inst ( ), SIGNAL( selectionChanged ( CWindow *, const QPtrList <BrickLink::InvItem> & )), this, SLOT( selectionUpdate ( CWindow *, const QPtrList <BrickLink::InvItem> & )));
+		connect ( CFrameWork::inst ( ), SIGNAL( documentActivated ( CDocument * )), this, SLOT( documentUpdate ( CDocument * )));
 	}
 
 	virtual QSize minimumSizeHint ( ) const
@@ -286,15 +323,27 @@ public:
 	}
 
 protected slots:
-	void selectionUpdate ( CWindow *win, const QPtrList <BrickLink::InvItem> &list )
+	void documentUpdate ( CDocument *doc )
 	{
-		bool ok = ( win && ( list. count ( ) == 1 ));
+		if ( m_doc )
+			disconnect ( m_doc, SIGNAL( selectionChanged ( const CDocument::ItemList & )), this, SLOT( selectionUpdate ( const CDocument::ItemList & )));
+		m_doc = doc;
+		if ( m_doc )
+			connect ( m_doc, SIGNAL( selectionChanged ( const CDocument::ItemList & )), this, SLOT( selectionUpdate ( const CDocument::ItemList & )));
+		
+		selectionUpdate ( m_doc ? m_doc-> selection ( ) : CDocument::ItemList ( ));
+	}
 
-		setItem ( ok ? list. getFirst ( ) : 0 );
+	void selectionUpdate ( const CDocument::ItemList &list )
+	{
+		bool ok = ( m_doc && ( list. count ( ) == 1 ));
+
+		setItem ( ok ? (*list. front ( )). item ( ) : 0, ok ? (*list. front ( )). color ( ) : 0 );
 	}
 
 private:
 	QPopupMenu *m_menu;
+	CDocument * m_doc;
 };
 
 #endif

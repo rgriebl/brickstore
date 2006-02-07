@@ -15,6 +15,7 @@
 #define __CITEMVIEW_H__
 
 #include "clistview.h"
+#include "cdocument.h"
 #include "bricklink.h"
 
 
@@ -27,7 +28,7 @@ class CItemViewPrivate;
 class CItemView : public CListView {
 	Q_OBJECT
 public:
-	CItemView ( QWidget *parent = 0, const char *name = 0 );
+	CItemView ( CDocument *doc, QWidget *parent = 0, const char *name = 0 );
 	virtual ~CItemView ( );
 
 	enum Field {
@@ -96,9 +97,6 @@ public:
 
 	void editWithLineEdit ( CItemViewItem *ivi, int col, const QString &text, const QString &mask = QString::null, QValidator *valid = 0 );
 
-	void setErrorMask ( Q_UINT64 mask = (( 1ULL << CItemView::FieldCount ) - 1 ));
-	uint errorCount ( );
-
 	bool isDifferenceMode ( ) const;
 	bool isSimpleMode ( ) const;
 
@@ -137,8 +135,8 @@ private:
 
 class CItemViewItem : public CListViewItem {
 public:
-	CItemViewItem ( BrickLink::InvItem *item, QListViewItem *parent, QListViewItem *after );
-	CItemViewItem ( BrickLink::InvItem *item, QListView *parent, QListViewItem *after );
+	CItemViewItem ( CDocument::Item *item, QListViewItem *parent, QListViewItem *after );
+	CItemViewItem ( CDocument::Item *item, QListView *parent, QListViewItem *after );
 
 	virtual ~CItemViewItem ( );
 
@@ -154,7 +152,7 @@ public:
 	virtual int rtti () const;
 	virtual QString toolTip ( int column ) const;
 
-	BrickLink::InvItem *invItem ( ) const;
+	CDocument::Item *item ( ) const;
 	BrickLink::Picture *picture ( ) const;
 
 	virtual void doubleClicked ( const QPoint &p, int col );
@@ -163,22 +161,17 @@ public:
 
 	virtual void editDone ( int col, const QString &result, bool valid );
 
-	uint errorCount ( ) const;
-
 	QRect globalRect ( int col ) const;
-
-	bool checkForErrors ( );
 
 protected:
 	QColor shadeColor ( int index ) const;
 
 private:
-	void init ( BrickLink::InvItem *item );
+	void init ( CDocument::Item *item );
 
-	BrickLink::InvItem *        m_ii;
+	CDocument::Item *           m_item;
 	mutable BrickLink::Picture *m_picture;
 	Q_UINT64                    m_truncated;
-	Q_UINT64                    m_errors;
 
 	friend class CItemViewToolTip;
 };

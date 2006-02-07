@@ -282,8 +282,6 @@ void DlgAddItemImpl::addClicked ( )
 	}
 
 	emit addItem ( ii, w_merge-> isChecked ( ) ? CWindow::MergeAction_Force | CWindow::MergeKeep_Old : CWindow::MergeAction_None );
-
-	delete ii;
 }
 
 void DlgAddItemImpl::setPrice ( money_t d )

@@ -29,6 +29,7 @@
 #include <qdom.h>
 #include <qlocale.h>
 #include <qvaluevector.h>
+#include <qvaluelist.h>
 #include <qmap.h>
 #include <qpair.h>
 
@@ -52,7 +53,7 @@ public:
 		char id ( ) const                 { return m_id; }
 		const char *name ( ) const        { return m_name; }
 
-		const QPtrList<BrickLink::Category> &categories ( ) const { return m_categories; }
+		const QPtrList<BrickLink::Category> &categories ( ) const { return m_categories; } //TODO list-> vector
 		bool hasInventories ( ) const     { return m_has_inventories; }
 		bool hasColors ( ) const          { return m_has_colors; }
 		bool hasYearReleased ( ) const    { return m_has_year; }
@@ -168,7 +169,7 @@ public:
 		char *            m_id;
 		char *            m_name;
 		const ItemType *  m_item_type;
-		const Category ** m_categories;
+		const Category ** m_categories; //TODO -> vector
 		const Color *     m_color;
 		QDateTime         m_inv_updated;
 		float             m_weight;
@@ -245,8 +246,11 @@ public:
 
 	class InvItem {
 	public:
-		InvItem ( const Color *color, const Item *item );
+		InvItem ( const Color *color = 0, const Item *item = 0 );
+		InvItem ( const InvItem &copy );
 		~InvItem ( );
+
+		InvItem &operator = ( const InvItem &copy );
 
 		const Item *item ( ) const          { return m_item; }
 		void setItem ( const Item *i )      { /*can be 0*/ m_item = i; }
@@ -317,11 +321,11 @@ public:
 		const Incomplete *isIncomplete ( ) const  { return m_incomplete; }
 		void setIncomplete ( Incomplete *inc )    { delete m_incomplete; m_incomplete = inc; }
 		
-		bool mergeFrom ( const InvItem *merge, bool prefer_from = false );
+		bool mergeFrom ( const InvItem &merge, bool prefer_from = false );
 
 		typedef void *Diff; // opaque handle
 
-		Diff *createDiff ( const InvItem *diffto ) const;
+		Diff *createDiff ( const InvItem &diffto ) const;
 		bool applyDiff ( Diff *diff );
 
 	private:
@@ -362,18 +366,20 @@ public:
 		friend class BrickLink;
 	};
 
+	typedef QValueList<InvItem *> InvItemList;
+
 	class InvItemDrag : public QDragObject {
 	public:
-		InvItemDrag ( const QPtrList<BrickLink::InvItem> &items, QWidget *dragsource = 0, const char *name = 0 );
+		InvItemDrag ( const InvItemList &items, QWidget *dragsource = 0, const char *name = 0 );
 		InvItemDrag ( QWidget *dragSource = 0, const char *name = 0 );
 
-		void setItems ( const QPtrList<BrickLink::InvItem> &items );
+		void setItems ( const InvItemList &items );
 		
 		virtual const char *format ( int i ) const;
 		virtual QByteArray encodedData ( const char * ) const;
 
 		static bool canDecode ( QMimeSource * );
-		static bool decode( QMimeSource *, QPtrList <BrickLink::InvItem> &items );
+		static bool decode( QMimeSource *, InvItemList &items );
 
 	private:
 		static const char *s_mimetype;
@@ -392,21 +398,21 @@ public:
 		bool valid ( ) const                { return m_valid; }
 		int updateStatus ( ) const          { return m_update_status; }
 
-		QPtrList<InvItem> &inventory ( )    { return m_list; }
+		InvItemList &inventory ( )          { return m_list; }
 
 		virtual bool isOrder ( ) const      { return false; }
 
 		virtual ~Inventory ( );
 		
 	private:
-		const Item *      m_item;
-		QDateTime         m_fetched;
+		const Item *m_item;
+		QDateTime   m_fetched;
 
-		bool              m_valid         : 1;
-		int               m_update_status : 7;
-		bool              m_from_peeron   : 1;
+		bool        m_valid         : 1;
+		int         m_update_status : 7;
+		bool        m_from_peeron   : 1;
 
-		QPtrList<InvItem> m_list;
+		InvItemList m_list;
 
 	protected:
 		Inventory ( );
@@ -592,19 +598,17 @@ public:
 	const ItemType *itemType ( char id ) const;
 	const Item *item ( char tid, const char *id ) const;
 
-	PriceGuide *priceGuide ( const InvItem *invitem, bool high_priority = false );
 	PriceGuide *priceGuide ( const Item *item, const Color *color, bool high_priority = false );
 
-	QPtrList<InvItem> *load ( QIODevice *f, uint *invalid_items = 0 );
-	QPtrList<InvItem> *loadXML ( QIODevice *f, uint *invalid_items = 0 );
-	QPtrList<InvItem> *loadBTI ( QIODevice *f, uint *invalid_items = 0 );
+	InvItemList *load ( QIODevice *f, uint *invalid_items = 0 );
+	InvItemList *loadXML ( QIODevice *f, uint *invalid_items = 0 );
+	InvItemList *loadBTI ( QIODevice *f, uint *invalid_items = 0 );
 
 	Inventory *inventory ( const Item *item );
 	Inventory *inventoryFromPeeron ( const Item *item );
 	Order *order ( const QString &orderid, Order::Type ordertype );
 	Inventory *storeInventory ( );
 
-	Picture *picture ( const InvItem *invitem, bool high_priority = false );
 	Picture *picture ( const Item *item, const Color *color, bool high_priority = false );
 	Picture *largePicture ( const Item *item, bool high_priority = false );
 
@@ -618,10 +622,10 @@ public:
 		XMLHint_BrickStore
 	};
 
-	QPtrList<InvItem> *parseItemListXML ( QDomElement root, ItemListXMLHint hint, uint *invalid_items = 0 );
-	QDomElement createItemListXML ( QDomDocument doc, ItemListXMLHint hint, const QPtrList<InvItem> *items, QMap <QString, QString> *extra = 0 );
+	InvItemList *parseItemListXML ( QDomElement root, ItemListXMLHint hint, uint *invalid_items = 0 );
+	QDomElement createItemListXML ( QDomDocument doc, ItemListXMLHint hint, const InvItemList *items, QMap <QString, QString> *extra = 0 );
 
-	bool parseLDrawModel ( QFile &file, QPtrList <InvItem> &items, uint *invalid_items = 0 );
+	bool parseLDrawModel ( QFile &file, InvItemList &items, uint *invalid_items = 0 );
 
 	bool onlineStatus ( ) const;
 
@@ -662,7 +666,7 @@ private:
 
 	bool updateNeeded ( const QDateTime &last, int iv );
 
-	bool parseLDrawModelInternal ( QFile &file, const QString &model_name, QPtrList <InvItem> &items, uint *invalid_items, QDict <InvItem> &mergehash );
+	bool parseLDrawModelInternal ( QFile &file, const QString &model_name, InvItemList &items, uint *invalid_items, QDict <InvItem> &mergehash );
 
 	void pictureIdleLoader2 ( );
 

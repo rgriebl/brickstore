@@ -27,7 +27,7 @@ public:
 	virtual ~DlgAddItemImpl ( );
 
 signals:
-	void addItem ( const BrickLink::InvItem *, uint );
+	void addItem ( BrickLink::InvItem *, uint );
 
 private slots:
 	void updateItemAndColor ( );

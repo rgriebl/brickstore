@@ -42,6 +42,7 @@ public:
 	bool isMacroBegin ( ) const;
 	bool isMacroEnd ( ) const;
 
+	virtual void initdo ( );
 	virtual void redo ( );
 	virtual void undo ( );
 

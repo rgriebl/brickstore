@@ -92,6 +92,7 @@ HEADERS += bricklink.h \
            cappearsinwidget.h \
            capplication.h \
            cconfig.h \
+           cdocument.h \
            cfilteredit.h \
            cframework.h \
            ciconfactory.h \
@@ -103,7 +104,6 @@ HEADERS += bricklink.h \
            cmessagebox.h \
            cmoney.h \
            cmultiprogressbar.h \
-           command.h \
            cpicturewidget.h \
            cpriceguidewidget.h \
            crebuilddatabase.h \
@@ -133,6 +133,7 @@ SOURCES += bricklink.cpp \
            capplication.cpp \
            cappearsinwidget.cpp \
            cconfig.cpp \
+           cdocument.cpp \
            cfilteredit.cpp \
            cframework.cpp \
            ciconfactory.cpp \
@@ -142,7 +143,6 @@ SOURCES += bricklink.cpp \
            cmessagebox.cpp \
            cmoney.cpp \
            cmultiprogressbar.cpp \
-           command.cpp \
            cpicturewidget.cpp \
            cpriceguidewidget.cpp \
            crebuilddatabase.cpp \

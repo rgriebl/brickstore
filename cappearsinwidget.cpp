@@ -204,14 +204,6 @@ QSize CAppearsInWidget::sizeHint ( ) const
 	return minimumSizeHint ( ) * 2;
 }
 
-void CAppearsInWidget::setItem ( const BrickLink::InvItem *ii )
-{
-	clear ( );
-
-	if ( ii )
-		setItem ( ii-> item ( ), ii-> color ( ));
-}
-
 void CAppearsInWidget::setItem ( const BrickLink::Item *item, const BrickLink::Color *color )
 {
 	clear ( );

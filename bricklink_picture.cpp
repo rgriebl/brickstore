@@ -40,14 +40,6 @@ const QPixmap BrickLink::Picture::pixmap ( ) const
 }
         
 
-BrickLink::Picture *BrickLink::picture ( const InvItem *invitem, bool high_priority )
-{
-	if ( !invitem )
-		return 0;
-	return picture ( invitem-> item ( ), invitem-> color ( ), high_priority );
-}
-
-
 BrickLink::Picture *BrickLink::picture ( const Item *item, const BrickLink::Color *color, bool high_priority )
 {
 	if ( !item )

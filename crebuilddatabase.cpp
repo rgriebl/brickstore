@@ -304,9 +304,7 @@ void CRebuildDatabase::inventoryUpdated ( BrickLink::Inventory *inv )
 	}
 	else {
 		if ( inv-> item ( )) {
-			for ( QPtrListIterator<BrickLink::InvItem> it ( inv-> inventory ( )); it. current ( ); ++it ) {
-				BrickLink::InvItem *ii = it. current ( );
-
+			foreach ( const BrickLink::InvItem *ii, inv-> inventory ( )) {
 				if ( !ii-> item ( ) || !ii-> color ( ) || !ii-> quantity ( ))
 					continue;
 

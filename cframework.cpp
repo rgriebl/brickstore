@@ -30,6 +30,7 @@
 #include "capplication.h"
 #include "cmessagebox.h"
 #include "cwindow.h"
+#include "cdocument.h"
 #include "cconfig.h"
 #include "cmoney.h"
 #include "cresource.h"
@@ -778,8 +779,7 @@ void CFrameWork::openDocument ( const QString &file )
 {
 	bool old_bti_file = ( file. right ( 4 ) == ".bti" );
 
-	CWindow *w = createWindow ( );
-	bool ok = showOrDeleteWindow ( w, old_bti_file ? w-> fileImportBrikTrakInventory ( file ) : w-> fileOpen ( file ));
+	bool ok = createWindow ( old_bti_file ? CDocument::fileImportBrikTrakInventory ( file ) : CDocument::fileOpen ( file ));
 
 	if ( old_bti_file && ok )
 		CMessageBox::information ( this, tr( "BrickStore has switched to a new file format (.bsx - BrickStore XML).<br /><br />Your document has been automatically imported and it will be converted as soon as you save it." ));
@@ -787,14 +787,12 @@ void CFrameWork::openDocument ( const QString &file )
 
 void CFrameWork::fileNew ( )
 {
-	CWindow *w = createWindow ( );
-	showOrDeleteWindow ( w, true );
+	createWindow ( CDocument::fileNew ( ));
 }
 
 void CFrameWork::fileOpen ( )
 {
-	CWindow *w = createWindow ( );
-	showOrDeleteWindow ( w, w-> fileOpen ( ));
+	createWindow ( CDocument::fileOpen ( ));
 }
 
 void CFrameWork::fileOpenRecent ( int i )
@@ -810,8 +808,7 @@ void CFrameWork::fileOpenRecent ( int i )
 
 void CFrameWork::fileImportBrikTrakInventory ( )
 {
-	CWindow *w = createWindow ( );
-	showOrDeleteWindow ( w, w-> fileImportBrikTrakInventory ( ));
+	createWindow ( CDocument::fileImportBrikTrakInventory ( ));
 }
 
 void CFrameWork::fileImportBrickLinkInventory ( )
@@ -822,8 +819,7 @@ void CFrameWork::fileImportBrickLinkInventory ( )
 
 void CFrameWork::fileImportBrickLinkInventory ( const BrickLink::Item *item )
 {
-	CWindow *w = createWindow ( );
-	showOrDeleteWindow ( w, w-> fileImportBrickLinkInventory ( item ));
+	createWindow ( CDocument::fileImportBrickLinkInventory ( item ));
 }
 
 bool CFrameWork::checkBrickLinkLogin ( )
@@ -843,8 +839,7 @@ void CFrameWork::fileImportBrickLinkOrder ( )
 	if ( !checkBrickLinkLogin ( ))
 		return;
 
-	CWindow *w = createWindow ( );
-	showOrDeleteWindow ( w, w-> fileImportBrickLinkOrder ( ));
+	createWindow ( CDocument::fileImportBrickLinkOrder ( ));
 }
 
 void CFrameWork::fileImportBrickLinkStore ( )
@@ -852,25 +847,25 @@ void CFrameWork::fileImportBrickLinkStore ( )
 	if ( !checkBrickLinkLogin ( ))
 		return;
 
-	CWindow *w = createWindow ( );
-	showOrDeleteWindow ( w, w-> fileImportBrickLinkStore ( ));
+	createWindow ( CDocument::fileImportBrickLinkStore ( ));
 }
 
 void CFrameWork::fileImportBrickLinkXML ( )
 {
-	CWindow *w = createWindow ( );
-	showOrDeleteWindow ( w, w-> fileImportBrickLinkXML ( ));
+	createWindow ( CDocument::fileImportBrickLinkXML ( ));
 }
 
 void CFrameWork::fileImportLDrawModel ( )
 {
-	CWindow *w = createWindow ( );
-	showOrDeleteWindow ( w, w-> fileImportLDrawModel ( ));
+	createWindow ( CDocument::fileImportLDrawModel ( ));
 }
 
-CWindow *CFrameWork::createWindow ( )
+bool CFrameWork::createWindow ( CDocument *doc )
 {
-	CWindow *w = new CWindow ( m_mdi );
+	if ( !doc )
+		return false;
+
+	CWindow *w = new CWindow ( doc, m_mdi, "window" );
 
 	QPixmap pix = CResource::inst ( )-> pixmap ( "icon" );
 	// Qt/Win32 bug: MDI child window icon()s have to be 16x16 or smaller...
@@ -878,26 +873,14 @@ CWindow *CFrameWork::createWindow ( )
 	if ( !pix. isNull ( ))
 		w-> setIcon ( pix );
 
-	return w;
-}
+	QWidget *act = m_mdi-> activeWindow ( );
 
-bool CFrameWork::showOrDeleteWindow ( CWindow *w, bool b )
-{
-	if ( b ) {
-		QWidget *act = m_mdi-> activeWindow ( );
+	if ( !act || ( act == w ) || ( act-> isMaximized ( )))
+		w-> showMaximized ( );
+	else
+		w-> show ( );
 
-		if ( !act || ( act == w ) || ( act-> isMaximized ( )))
-			w-> showMaximized ( );
-		else
-			w-> show ( );
-	}
-	else {
-		if ( w == m_current_window ) // Qt/X11 (Win?,Mac?) Bug: window is active without being shown...
-			connectWindow ( 0 );
-		w-> hide ( );
-		w-> deleteLater ( );
-	}
-	return b;
+	return true;
 }
 
 
@@ -1003,35 +986,39 @@ void CFrameWork::connectWindow ( QWidget *w )
 		return;
 
 	if ( m_current_window ) {
+		CDocument *doc = m_current_window-> document ( );
+
 		connectAllActions ( false, m_current_window );
 
-		disconnect ( m_current_window, SIGNAL( statisticsChanged ( )), this, SLOT( statisticsUpdate ( )));
-		disconnect ( m_current_window, SIGNAL( selectionChanged ( const QPtrList<BrickLink::InvItem> & )), this, SLOT( selectionUpdate ( const QPtrList<BrickLink::InvItem> & )));
+		disconnect ( doc, SIGNAL( statisticsChanged ( )), this, SLOT( statisticsUpdate ( )));
+		disconnect ( doc, SIGNAL( selectionChanged ( const CDocument::ItemList & )), this, SLOT( selectionUpdate ( const CDocument::ItemList & )));
 
 		m_current_window = 0;
 
-		selectionUpdate ( QPtrList<BrickLink::InvItem> ( ));
+		selectionUpdate ( CDocument::ItemList ( ));
 		statisticsUpdate ( );
 	}
 
 	if ( w && ::qt_cast <CWindow *> ( w )) {
 		CWindow *window = static_cast <CWindow *> ( w );
+		CDocument *doc = window-> document ( );
 
 		connectAllActions ( true, window );
 
-		connect ( window, SIGNAL( selectionChanged ( const QPtrList<BrickLink::InvItem> & )), this, SLOT( selectionUpdate ( const QPtrList<BrickLink::InvItem> & )));
-		connect ( window, SIGNAL( statisticsChanged ( )), this, SLOT( statisticsUpdate ( )));
+		connect ( doc, SIGNAL( statisticsChanged ( )), this, SLOT( statisticsUpdate ( )));
+		connect ( doc, SIGNAL( selectionChanged ( const CDocument::ItemList & )), this, SLOT( selectionUpdate ( const CDocument::ItemList & )));
 
 		m_current_window = window;
 
-		window-> triggerStatisticsUpdate ( );
-		window-> triggerSelectionUpdate ( );
+		selectionUpdate ( doc-> selection ( ));
+		statisticsUpdate ( );
 	}
 
-	emit windowChanged ( m_current_window );
+	emit windowActivated ( m_current_window );
+	emit documentActivated ( m_current_window ? m_current_window-> document ( ) : 0 );
 }
 
-void CFrameWork::selectionUpdate ( const QPtrList<BrickLink::InvItem> &selection )
+void CFrameWork::selectionUpdate ( const CDocument::ItemList &selection )
 {
 	struct {
 		const char *m_name;
@@ -1072,22 +1059,6 @@ void CFrameWork::selectionUpdate ( const QPtrList<BrickLink::InvItem> &selection
 			a-> setEnabled (( mins ? ( cnt >= mins ) : true ) && ( maxs ? ( cnt <= maxs ) : true ));
 		}
 	}
-
-	for ( QPtrListIterator <BrickLink::InvItem> it ( selection ); it. current ( ); ++it ) {
-		//qWarning ( "Part %s (%s) appears in sets:", it. current ( )-> item ( )-> id ( ), it. current ( )-> item ( )-> name ( ));
-
-		BrickLink::Item::AppearsInMap map = it. current ( )-> item ( )-> appearsIn ( );
-
-		for ( BrickLink::Item::AppearsInMap::const_iterator itc = map. begin ( ); itc != map. end ( ); ++itc ) {
-			//qWarning ( "  > Color %d (%s)", itc.key()->id(), itc.key()->name());
-
-			for ( BrickLink::Item::AppearsInMapVector::const_iterator itv = itc. data ( ). begin ( ); itv != itc. data ( ). end ( ); ++itv ) {
-				//qWarning ( "    - %d in %s (%s)", itv->first,itv->second->id(),itv->second->name());
-			}
-		}
-	}
-
-	emit selectionChanged ( m_current_window, selection );
 }
 
 void CFrameWork::statisticsUpdate ( )
@@ -1096,14 +1067,14 @@ void CFrameWork::statisticsUpdate ( )
 
 	if ( m_current_window )
 	{
-		QPtrList <BrickLink::InvItem> not_exclude;
+		CDocument::ItemList not_exclude;
 
-		for ( QPtrListIterator <BrickLink::InvItem> it ( m_current_window-> items ( )); it. current ( ); ++it ) {
-			if ( it. current ( )-> status ( ) != BrickLink::InvItem::Exclude )
-				not_exclude. append ( it. current ( ));
+		foreach ( CDocument::Item *item, m_current_window-> document ( )-> items ( )) {
+			if ( item-> status ( ) != BrickLink::InvItem::Exclude )
+				not_exclude. append ( item );
 		}
 
-		CItemStatistics stat = m_current_window-> statistics ( not_exclude );
+		CDocument::Statistics stat = m_current_window-> document ( )-> statistics ( not_exclude );
 
 		if ( stat. lots ( ) >= 0 ) {
 			QString valstr, wgtstr;

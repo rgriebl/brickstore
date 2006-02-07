@@ -31,8 +31,9 @@ public:
 		m_stack     = stack ? stack : CUndoManager::inst ( )-> currentStack ( );
 		m_can_undo  = m_stack ? m_stack-> canUndo ( ) : false;
 		m_can_redo  = m_stack ? m_stack-> canRedo ( ) : false;
-		m_undo_desc = m_stack ? m_stack-> undoDescription ( ) : QString ( );
-		m_redo_desc = m_stack ? m_stack-> redoDescription ( ) : QString ( );
+//		m_undo_desc = m_stack ? m_stack-> undoDescription ( ) : QString ( );
+//		m_redo_desc = m_stack ? m_stack-> redoDescription ( ) : QString ( );
+		m_current   = m_stack ? m_stack-> m_current. current ( ) : 0;
 		m_clean     = m_stack ? m_stack-> isClean ( ) : false;
 	}
 
@@ -49,10 +50,12 @@ public:
 				mask |= CanUndo;
 			if ( m_can_redo != stack-> canRedo ( ))
 				mask |= CanRedo;
-			if ( m_undo_desc != stack-> undoDescription ( ))
-				mask |= UndoDesc;
-			if ( m_redo_desc !=  stack-> redoDescription ( ))
-				mask |= RedoDesc;
+//			if ( m_undo_desc != stack-> undoDescription ( ))
+//				mask |= UndoDesc;
+//			if ( m_redo_desc != stack-> redoDescription ( ))
+//				mask |= RedoDesc;
+			if ( m_current != stack-> m_current. current ( ))
+				mask |= ( UndoDesc | RedoDesc );
 			if ( m_clean != stack-> isClean ( ))
 				mask |= Clean;
 		}
@@ -94,8 +97,9 @@ private:
 	bool        m_clean;
 	bool        m_can_undo;
 	bool        m_can_redo;
-	QString     m_undo_desc;
-	QString     m_redo_desc;
+//	QString     m_undo_desc;
+//	QString     m_redo_desc;
+	CUndoCmd *  m_current;
 };
 
 
@@ -141,6 +145,11 @@ bool CUndoCmd::isMacroBegin ( ) const
 bool CUndoCmd::isMacroEnd ( ) const
 {
 	return ( type ( ) == MacroEnd );
+}
+
+void CUndoCmd::initdo ( )
+{
+	redo ( );
 }
 
 void CUndoCmd::redo ( )
@@ -252,7 +261,7 @@ void CUndoStack::push ( CUndoCmd *cmd )
 		return;
 	
 	if ( cmd-> isCommand ( ))
-		cmd-> redo ( );
+		cmd-> initdo ( );
 
 	CUndoEmitter e ( this );
 
@@ -494,14 +503,20 @@ bool CUndoManager::canUndo ( ) const
 
 void CUndoManager::redo ( int count )
 {
-	if ( m_current )
+	if ( m_current ) {
+		CUndoEmitter e ( 0 );
+
 		m_current-> redo ( count );
+	}
 }
 
 void CUndoManager::undo ( int count )
 {
-	if ( m_current )
+	if ( m_current ) {
+		CUndoEmitter e ( 0 );
+
 		m_current-> undo ( count );
+	}
 }
 
 QAction *CUndoManager::createRedoAction ( QObject *parent, const char *name, bool dropdown ) const
@@ -727,7 +742,42 @@ public:
 	}
 };
 
+class MyLabel : public QLabel {
+public:
+	MyLabel ( QWidget *parent, const char **strings ) : QLabel ( parent ), m_strings ( strings ) { }
+
+	virtual QSize sizeHint ( ) const
+	{
+		QSize s = QLabel::sizeHint ( );
+
+		int fw = 2 * style ( ). pixelMetric ( QStyle::PM_DefaultFrameWidth );
+		int w = s. width ( ) - 2 * fw;
+
+		const QFontMetrics &fm = fontMetrics ( );
+
+		for ( int i = 0; i < 4; i++ ) {
+			QString s = CUndoManager::tr( m_strings [i] );
+			if (!( i & 1 ))
+				s = s. arg ( 1000 );
+			int w2 = fm. width ( s );
+			w = QMAX( w, w2 );
+		}
+		s. setWidth ( w + 2 * fw + 8 );
+		return s;
+	}
+private:
+	const char **m_strings;
+};
+
 }
+
+
+const char *CUndoListAction::s_strings [] = {
+	QT_TRANSLATE_NOOP( "CUndoManager", "Undo %1 Actions" ),
+	QT_TRANSLATE_NOOP( "CUndoManager", "Undo Action" ),
+	QT_TRANSLATE_NOOP( "CUndoManager", "Redo %1 Actions" ),
+	QT_TRANSLATE_NOOP( "CUndoManager", "Redo Action" )
+};
 
 CUndoListAction::CUndoListAction ( Type t, QObject *parent, const char *name )
 	: QAction ( parent, name ) 
@@ -754,7 +804,7 @@ void CUndoListAction::addedTo ( QWidget *w, QWidget *cont )
 		m_list-> setMouseTracking ( true );
 		m_menu-> insertItem ( m_list );
 
-		m_label = new QLabel ( m_menu );
+		m_label = new MyLabel ( m_menu, s_strings );
 		m_label-> setAlignment ( Qt::AlignCenter );
 		m_label-> installEventFilter ( this );
 		m_label-> setPalette ( QApplication::palette ( m_menu ));
@@ -796,14 +846,7 @@ void CUndoListAction::selectRange ( QListBoxItem *item )
 		for ( int i = 0; i < int( m_list-> count ( )); i++ )
 			m_list-> setSelected ( i, i <= hl );
 
-		const char *strs [] = {
-			QT_TRANSLATE_NOOP( "CUndoManager", "Undo %1 Actions" ),
-			QT_TRANSLATE_NOOP( "CUndoManager", "Undo 1 Action" ),
-			QT_TRANSLATE_NOOP( "CUndoManager", "Redo %1 Actions" ),
-			QT_TRANSLATE_NOOP( "CUndoManager", "Redo 1 Action" )
-		};
-
-		QString s = CUndoManager::tr( strs [(( m_type == Undo ) ? 0 : 2 ) + (( hl > 0 ) ? 0 : 1 )] );
+		QString s = CUndoManager::tr( s_strings [(( m_type == Undo ) ? 0 : 2 ) + (( hl > 0 ) ? 0 : 1 )] );
 		if ( hl > 0 )
 			s = s. arg( hl+1 );
 		m_label-> setText ( s );
