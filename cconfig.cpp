@@ -104,8 +104,8 @@ void CConfig::upgrade ( int vmajor, int vminor, int vrev )
 	bool b;
 	bool ok;
 
-	int cfgver = readNumEntry ( "/ConfigVersion", 0 );
-	writeEntry ( "/ConfigVersion", mkver ( vmajor, vminor, vrev ));
+	int cfgver = readNumEntry ( "/General/ConfigVersion", 0 );
+	writeEntry ( "/General/ConfigVersion", mkver ( vmajor, vminor, vrev ));
 
 	if ( cfgver < mkver ( 1, 0, 125 )) {
 		// convert itemview column info (>= 1.0.25)

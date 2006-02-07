@@ -50,7 +50,7 @@ void CRebuildDatabase::exec ( )
 {
 	BrickLink *bl = BrickLink::inst ( );
 
-	bl-> setOnlineStatus ( CConfig::inst ( )-> onlineStatus ( ));
+	bl-> setOnlineStatus ( true );
 	bl-> setHttpProxy ( CConfig::inst ( )-> useProxy ( ), CConfig::inst ( )-> proxyName ( ), CConfig::inst ( )-> proxyPort ( ));
 	bl-> setUpdateIntervals ( 0, 0 );
 	
@@ -99,6 +99,11 @@ bool CRebuildDatabase::parseInv ( )
 	BrickLink::inst ( )-> setDatabase_AppearsIn ( m_map );
 	m_map. clear ( );
 
+	extern uint _dwords_for_appears, _qwords_for_consists;
+                        
+	printf ( "  > appears-in : %11u bytes\n", _dwords_for_appears * 4 );
+	printf ( "  > consists-of: %11u bytes\n", _qwords_for_consists * 8 );
+                                                                        
 	return true;
 }
 
@@ -230,7 +235,7 @@ void CRebuildDatabase::downloadJobFinished ( CTransfer::Job *job )
 			QString err = CUtility::safeRename ( basepath );
 
 			if ( err. isNull ( )) {
-				printf ( "  > %s", basepath. ascii ( ));
+				printf ( "  > %s\n", basepath. ascii ( ));
 			}
 			else {
 				m_error = err;
@@ -238,7 +243,7 @@ void CRebuildDatabase::downloadJobFinished ( CTransfer::Job *job )
 			}
 		}
 		else {
-			m_error = QString( "failed to download file: %s" ). arg( job-> url ( ));
+			m_error = QString( "failed to download file: %1" ). arg( job-> url ( ));
 			m_downloads_failed++;
 		}
 	}
@@ -300,7 +305,7 @@ void CRebuildDatabase::inventoryUpdated ( BrickLink::Inventory *inv )
 	if ( inv-> updateStatus ( ) == BrickLink::UpdateFailed ) {
 		m_downloads_failed++;
 
-		printf ( "  > inventory failed: %s", inv-> item ( )-> id ( ));
+		printf ( "  > inventory failed: %s\n", inv-> item ( )-> id ( ));
 	}
 	else {
 		if ( inv-> item ( )) {
@@ -311,6 +316,7 @@ void CRebuildDatabase::inventoryUpdated ( BrickLink::Inventory *inv )
 				BrickLink::Item::AppearsInMapVector &vec = m_map [ii-> item ( )][ii-> color ( )];
 				vec. append ( QPair<int, const BrickLink::Item *> ( ii-> quantity ( ), inv-> item ( )));
 			}
+			BrickLink::inst ( )-> setDatabase_ConsistsOf ( inv-> item ( ), inv-> inventory ( ));
 		}
 	}
 

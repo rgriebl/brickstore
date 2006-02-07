@@ -54,38 +54,20 @@ private:
 
 CApplication *cApp = 0;                
 
-CApplication::CApplication ( int _argc, char **_argv ) 
-	: QApplication ( _argc, _argv )
+CApplication::CApplication ( const char *rebuild_db_only, int _argc, char **_argv ) 
+	: QApplication ( _argc, _argv, !rebuild_db_only )
 {
 	cApp = this;
 
 	m_enable_emit = false;
+	m_rebuild_db_only = rebuild_db_only;
 
 #if defined( Q_WS_MACX )
 	AEInstallEventHandler( kCoreEventClass, kAEOpenDocuments, appleEventHandler, 0, false );
 #endif
 
-	if (( argc ( ) == 2 ) && ( !strcmp( argv ( ) [1], "-h" ) || !strcmp( argv ( ) [1], "--help" ))) {
-#if defined( Q_OS_WIN32 )
-		QMessageBox::information ( 0, "BrickStore", "<b>Usage:</b><br />brickstore.exe [&lt;files&gt;]<br /><br />brickstore.exe --rebuild-database &lt;dbname&gt;<br />", QMessageBox::Ok );
-#else
-		printf ( "Usage: %s [<files>]\n", _argv [0] );
-		printf ( "       %s --rebuild-database <dbname>\n", _argv [0] );
-#endif
-
-		postEvent ( this, new QEvent ( QEvent::Quit ));
-		return;
-	}
-	else if (( argc ( ) == 3 ) && ( !strcmp( argv ( ) [1], "--rebuild-database" ))) {
-		m_rebuild_db_only = argv ( ) [2];
-	}
-	else {
-		for ( int i = 1; i < argc ( ); i++ )
-			m_files_to_open << argv ( ) [i];
-	}
-
 	// initialize config & resource
-//	(void) CConfig::inst ( )-> upgrade ( BRICKSTORE_MAJOR, BRICKSTORE_MINOR, BRICKSTORE_PATCH );
+	(void) CConfig::inst ( )-> upgrade ( BRICKSTORE_MAJOR, BRICKSTORE_MINOR, BRICKSTORE_PATCH );
 	(void) CMoney::inst ( );
 	(void) CResource::inst ( );
 	(void) CReportManager::inst ( );
@@ -93,20 +75,7 @@ CApplication::CApplication ( int _argc, char **_argv )
 	m_trans_qt = 0;
 	m_trans_brickstore = 0;
 
-	updateTranslations ( );
-
-	connect ( CConfig::inst ( ), SIGNAL( languageChanged ( )), this, SLOT( updateTranslations ( )));
-
 	initStrings ( );
-
-	CMessageBox::setDefaultTitle ( appName ( ));
-
-	QPixmap pix;
-	
-	pix = CResource::inst ( )-> pixmap ( "icon" );
-	QMimeSourceFactory::defaultFactory ( )-> setImage ( "brickstore-icon", pix. convertToImage ( ));
-	pix = CResource::inst ( )-> pixmap ( "important" );
-	QMimeSourceFactory::defaultFactory ( )-> setImage ( "brickstore-important", pix. convertToImage ( ));
 
 	if ( !initBrickLink ( )) {
 		// we cannot call quit directly, since there is
@@ -118,8 +87,22 @@ CApplication::CApplication ( int _argc, char **_argv )
 		QTimer::singleShot ( 0, this, SLOT( rebuildDatabase ( )));
 	}
 	else {
-		CFrameWork::inst ( )-> show ( );
+		updateTranslations ( );
+		connect ( CConfig::inst ( ), SIGNAL( languageChanged ( )), this, SLOT( updateTranslations ( )));
+		
+		CMessageBox::setDefaultTitle ( appName ( ));
+
+		QPixmap pix;
 	
+		pix = CResource::inst ( )-> pixmap ( "icon" );
+		QMimeSourceFactory::defaultFactory ( )-> setImage ( "brickstore-icon", pix. convertToImage ( ));
+		pix = CResource::inst ( )-> pixmap ( "important" );
+		QMimeSourceFactory::defaultFactory ( )-> setImage ( "brickstore-important", pix. convertToImage ( ));
+
+		for ( int i = 1; i < argc ( ); i++ )
+			m_files_to_open << argv ( ) [i];
+	
+		CFrameWork::inst ( )-> show ( );	
 		demoVersion ( );
 	}
 }

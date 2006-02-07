@@ -307,7 +307,7 @@ void BrickLink::updateInventory ( BrickLink::Inventory *inv )
 
 		query << CKeyValue ( "action",        "save" )
 		      << CKeyValue ( "orderID",       ord-> id ( ))
-			  << CKeyValue ( "orderType",     ord-> type ( ) == Order::Placed ? "placed" : "received" )
+		      << CKeyValue ( "orderType",     ord-> type ( ) == Order::Placed ? "placed" : "received" )
 		      << CKeyValue ( "viewType",      "X" )    // XML
 		      << CKeyValue ( "getDateFormat", "1" )    // YYYY/MM/DD
 		      << CKeyValue ( "getOrders",     "" )     // regardless of date
@@ -470,6 +470,8 @@ void BrickLink::inventoryJobFinished ( CTransfer::Job *j )
 						inv-> load_from_disk ( );
 				}
 			}
+			inv-> m_fetched = QDateTime ( );
+			inv-> m_update_status = Ok;
 		}
 		else {
 			if ( j-> data ( )-> size ( )) {

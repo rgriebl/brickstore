@@ -65,7 +65,6 @@ bool CDocument::ChangeCmd::mergeMeWith ( CUndoCmd *other )
 	if (( m_doc == that-> m_doc ) &&
 		( m_position == that-> m_position )) 
 	{
-		m_item = that-> m_item;
 		return true;
 	}
 	return false;
@@ -318,13 +317,13 @@ bool CDocument::clear ( )
 
 bool CDocument::insertItems ( const ItemList &positions, const ItemList &items )
 {
-	m_undo-> push ( new AddRemoveCmd ( AddRemoveCmd::Add, this, positions, items ));
+	m_undo-> push ( new AddRemoveCmd ( AddRemoveCmd::Add, this, positions, items, true ));
 	return true;
 }
 
 bool CDocument::removeItems ( const ItemList &positions )
 {
-	m_undo-> push ( new AddRemoveCmd ( AddRemoveCmd::Remove, this, positions, ItemList ( )));
+	m_undo-> push ( new AddRemoveCmd ( AddRemoveCmd::Remove, this, positions, ItemList ( ), true ));
 	return true;
 }
 
@@ -340,7 +339,7 @@ bool CDocument::removeItem ( Item *position )
 
 bool CDocument::changeItem ( Item *position, const Item &item )
 {
-	m_undo-> push ( new ChangeCmd ( this, position, item ));
+	m_undo-> push ( new ChangeCmd ( this, position, item, true ));
 	return true;
 }
 

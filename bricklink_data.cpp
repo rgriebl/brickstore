@@ -119,8 +119,8 @@ QDataStream &operator >> ( QDataStream &ds, BrickLink::Category *cat )
 }
 
 
-BrickLink::Item::Item ( ) : m_id ( 0 ), m_name ( 0 ), m_categories ( 0 ), m_appears_in ( 0 ) { }
-BrickLink::Item::~Item ( ) { delete [] m_id; delete [] m_name; delete [] m_categories; delete [] m_appears_in; }
+BrickLink::Item::Item ( ) : m_id ( 0 ), m_name ( 0 ), m_categories ( 0 ), m_appears_in ( 0 ), m_consists_of ( 0 ) { }
+BrickLink::Item::~Item ( ) { delete [] m_id; delete [] m_name; delete [] m_categories; delete [] m_appears_in; delete [] m_consists_of; }
 
 bool BrickLink::Item::hasCategory ( const BrickLink::Category *cat ) const
 {
@@ -138,7 +138,8 @@ int BrickLink::Item::compare ( const BrickLink::Item **a, const BrickLink::Item 
 	return d ? d : qstrcmp ( (*a)-> m_id, (*b)-> m_id );
 }
 
-int global_s = 0;
+uint _dwords_for_appears  = 0;
+uint _qwords_for_consists = 0;
 
 void BrickLink::Item::setAppearsIn ( const AppearsInMap &map ) const
 {
@@ -149,7 +150,7 @@ void BrickLink::Item::setAppearsIn ( const AppearsInMap &map ) const
 	for ( AppearsInMap::const_iterator it = map. begin ( ); it != map. end ( ); ++it )
 		s += ( 1 + it. data ( ). size ( ));
 
-	global_s += s;
+	_dwords_for_appears += s;
 
 	Q_UINT32 *ptr = new Q_UINT32 [s];
 	m_appears_in = ptr;
@@ -213,6 +214,66 @@ BrickLink::Item::AppearsInMap BrickLink::Item::appearsIn ( const Color *only_col
 	return map;
 }
 
+void BrickLink::Item::setConsistsOf ( const InvItemList &items ) const
+{
+	delete [] m_consists_of;
+
+	_qwords_for_consists += ( items. count ( ) + 1 );
+
+	Q_UINT64 *ptr = new Q_UINT64 [items. count ( ) + 1];
+	m_consists_of = ptr;
+
+	*ptr++ = items. count ( );   // how many entries
+
+	foreach ( const InvItem *item, items ) {
+		consists_of_record *entry = reinterpret_cast <consists_of_record *> ( ptr );
+
+		if ( item-> item ( ) && item-> color ( ) && item-> quantity ( )) {
+			entry-> m_qty      = item-> quantity ( );
+			entry-> m_index    = item-> item ( )-> m_index;
+			entry-> m_color    = item-> color ( )-> id ( );
+			entry-> m_extra    = ( item-> status ( ) == BrickLink::InvItem::Extra ) ? 1 : 0;
+			entry-> m_isalt    = 0;
+			entry-> m_altid    = 0;
+			entry-> m_reserved = 0;
+			ptr++;
+		}
+		else
+			m_consists_of [0]--;
+	}
+}
+
+BrickLink::InvItemList BrickLink::Item::consistsOf ( ) const
+{
+	InvItemList list;
+
+	BrickLink::Item **items = BrickLink::inst ( )-> items ( ). data ( );
+	uint count = BrickLink::inst ( )-> items ( ). count ( );
+
+	if ( m_consists_of ) {
+		Q_UINT64 *ptr = m_consists_of + 1;
+
+		for ( uint i = 0; i < uint( m_consists_of [0] ); i++ ) {
+			consists_of_record *entry = reinterpret_cast <consists_of_record *> ( ptr );
+			ptr++;
+
+			const BrickLink::Color *color = BrickLink::inst ( )-> color ( entry-> m_color );
+			const BrickLink::Item *item = ( entry-> m_index < count ) ? items [entry-> m_index] : 0;
+
+			if ( color && item ) {
+				InvItem *ii = new InvItem ( color, item );
+				ii-> setQuantity ( entry-> m_qty );
+				if ( entry-> m_extra )
+					ii-> setStatus ( BrickLink::InvItem::Extra );
+
+				list. append ( ii );
+			}
+		}
+	}
+
+	return list;
+}
+
 QDataStream &operator << ( QDataStream &ds, const BrickLink::Item *item )
 {
 	ds << item-> m_id << item-> m_name << Q_UINT8( item-> m_item_type-> id ( ));
@@ -232,6 +293,17 @@ QDataStream &operator << ( QDataStream &ds, const BrickLink::Item *item )
 		Q_UINT32 *ptr = item-> m_appears_in;
 
 		for ( Q_UINT32 i = 0; i < item-> m_appears_in [1]; i++ )
+			ds << *ptr++;
+	}
+	else
+		ds << Q_UINT32( 0 );
+
+	if ( item-> m_consists_of && item-> m_consists_of [0] ) {
+		ds << Q_UINT32( item-> m_consists_of [0] );
+
+		Q_UINT64 *ptr = item-> m_consists_of + 1;
+
+		for ( Q_UINT32 i = 0; i < Q_UINT32( item-> m_consists_of [0] ); i++ )
 			ds << *ptr++;
 	}
 	else
@@ -288,6 +360,21 @@ QDataStream &operator >> ( QDataStream &ds, BrickLink::Item *item )
 	}
 	else
 		item-> m_appears_in = 0;
+
+	Q_UINT32 consists = 0;
+	ds >> consists;
+
+	if ( consists ) {
+		Q_UINT64 *ptr = new Q_UINT64 [consists + 1];
+		item-> m_consists_of = ptr;
+
+		*ptr++ = consists;
+
+		for ( Q_UINT32 i = 0; i < consists; i++ )
+			ds >> *ptr++;
+	}
+	else
+		item-> m_consists_of = 0;
 
 	return ds;
 }

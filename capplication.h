@@ -27,7 +27,7 @@ class QTranslator;
 class CApplication : public QApplication {
 	Q_OBJECT
 public:
-	CApplication ( int argc, char **argv );
+	CApplication ( const char *rebuild_db_only, int argc, char **argv );
 	virtual ~CApplication ( );
 
 	void enableEmitOpenDocument ( bool b = true );

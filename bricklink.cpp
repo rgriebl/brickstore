@@ -1261,6 +1261,11 @@ bool BrickLink::parseLDrawModelInternal ( QFile &f, const QString &model_name, I
 /*
  * Support routines to rebuild the DB from txt files
  */
+void BrickLink::setDatabase_ConsistsOf ( const Item *item, const InvItemList &inv )
+{
+	if ( item && !inv. isEmpty ( ))
+		item-> setConsistsOf ( inv );
+}
 
 void BrickLink::setDatabase_AppearsIn ( const QMap<const Item *, Item::AppearsInMap> &map )
 {

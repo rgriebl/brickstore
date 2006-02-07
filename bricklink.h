@@ -47,6 +47,10 @@ public:
 	class Category;
 	class Color;
 	class TextImport;
+	class InvItem;
+
+	typedef QValueList<InvItem *> InvItemList;
+
 
 	class ItemType {
 	public:
@@ -164,6 +168,7 @@ public:
 		typedef QMap <const Color *, AppearsInMapVector>    AppearsInMap;
 
 		AppearsInMap appearsIn ( const Color *color = 0 ) const;
+		InvItemList  consistsOf ( ) const;
 
 	private:
 		char *            m_id;
@@ -177,15 +182,27 @@ public:
 		Q_UINT32          m_year  : 8;
 
 		mutable Q_UINT32 *m_appears_in;
+		mutable Q_UINT64 *m_consists_of;
 
 	private:
 		Item ( );
 
 		void setAppearsIn ( const AppearsInMap &map ) const;
+		void setConsistsOf ( const InvItemList &items ) const;
 
 		struct appears_in_record {
 			Q_UINT32  m12  : 12;
 			Q_UINT32  m20  : 20;
+		};
+
+		struct consists_of_record {
+			Q_UINT64  m_qty      : 12;
+			Q_UINT64  m_index    : 20;
+			Q_UINT64  m_color    : 12;
+			Q_UINT64  m_extra    : 1;
+			Q_UINT64  m_isalt    : 1;
+			Q_UINT64  m_altid    : 6;
+			Q_UINT64  m_reserved : 12;
 		};
 
 		static Item *parse ( const BrickLink *bl, uint count, const char **strs, void *itemtype );
@@ -365,8 +382,6 @@ public:
 
 		friend class BrickLink;
 	};
-
-	typedef QValueList<InvItem *> InvItemList;
 
 	class InvItemDrag : public QDragObject {
 	public:
@@ -629,6 +644,7 @@ public:
 
 	bool onlineStatus ( ) const;
 
+	void setDatabase_ConsistsOf ( const Item *, const InvItemList & );
 	void setDatabase_AppearsIn ( const QMap<const Item *, Item::AppearsInMap> &map );
 	void setDatabase_Basics ( const QIntDict<Color> &colors, 
 								const QIntDict<Category> &categories,
