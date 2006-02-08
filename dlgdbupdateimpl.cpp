@@ -19,6 +19,8 @@
 #include <qfile.h>
 #include <qdir.h>
 
+#include "liblzmadec/lzmadec.h"
+
 
 #include "cutility.h"
 #include "cconfig.h"
@@ -34,7 +36,7 @@ public:
 	bool            m_override;
 };
 
-#define DATABASE_URL   "http://softforge.de/binary.cache.gz"
+#define DATABASE_URL   "http://softforge.de/binary.cache.lzma"
 
 
 DlgDBUpdateImpl::DlgDBUpdateImpl ( QWidget *parent, const char *name, bool modal, int fl )
@@ -52,7 +54,7 @@ DlgDBUpdateImpl::DlgDBUpdateImpl ( QWidget *parent, const char *name, bool modal
 	if ( d-> m_trans-> init ( )) {
 		d-> m_trans-> setProxy ( CConfig::inst ( )-> useProxy ( ), CConfig::inst ( )-> proxyName ( ), CConfig::inst ( )-> proxyPort ( ));
 
-		d-> m_file = new QFile ( BrickLink::inst ( )-> dataPath ( ) + "binary.cache.new" );
+		d-> m_file = new QFile ( BrickLink::inst ( )-> dataPath ( ) + "binary.cache.lzma" );
 
 		if ( d-> m_file-> open ( IO_WriteOnly )) {
 			QString url = DATABASE_URL;
@@ -114,9 +116,9 @@ void DlgDBUpdateImpl::transferJobFinished ( CTransfer::Job *job )
 
 		if ( !job-> failed ( ) && d-> m_file-> size ( )) {
 			QString basepath = d-> m_file-> name ( );
-			basepath. truncate ( basepath. length ( ) - 4 );
+			basepath. truncate ( basepath. length ( ) - 5 ); // strip '.lzma'
 
-			QString error = CUtility::safeRename ( basepath );
+			QString error = decompress ( d-> m_file-> name ( ), basepath );
 
 			if ( error. isNull ( )) {
 				if ( BrickLink::inst ( )-> readDatabase ( ))
@@ -136,6 +138,70 @@ void DlgDBUpdateImpl::transferJobFinished ( CTransfer::Job *job )
 
 		setFixedSize ( sizeHint ( ));
 	}
+}
+
+QString DlgDBUpdateImpl::decompress ( const QString &src, const QString &dst )
+{
+	QFile sf ( src );
+	QFile df ( dst );
+	
+	if ( !sf. open ( IO_ReadOnly ))
+		return tr( "Could not read downloaded file: %1" ). arg( src );
+	if ( !df. open ( IO_WriteOnly ))
+		return tr( "Could not write to database file: %1" ). arg( dst );
+	
+	static const int CHUNKSIZE_IN = 4096;
+	static const int CHUNKSIZE_OUT = 512 * 1024;
+	
+	char *buffer_in  = new char [CHUNKSIZE_IN];
+	char *buffer_out = new char [CHUNKSIZE_OUT];
+
+	lzmadec_stream strm;
+	strm. lzma_alloc = 0;
+	strm. lzma_free = 0;
+	strm. opaque = 0;
+	strm. avail_in = 0;
+	strm. next_in = 0;
+	
+	if ( lzmadec_init ( &strm ) != LZMADEC_OK )
+		return tr( "Could not initialize the LZMA decompressor" );
+
+
+	QString loop_error;
+	
+	message ( false, tr( "Decompressing database" ));
+	w_progress-> setProgress ( 0, 0 );
+
+	while ( true ) {
+		if ( strm. avail_in == 0 ) {
+			strm. next_in  = (unsigned char *) buffer_in;
+			strm. avail_in = sf. readBlock ( buffer_in, CHUNKSIZE_IN );
+		}
+		strm. next_out  = (unsigned char *) buffer_out;
+		strm. avail_out = CHUNKSIZE_OUT;
+		
+		int ret = lzmadec_decode ( &strm, strm.avail_in == 0 );
+		if ( ret != LZMADEC_OK && ret != LZMADEC_STREAM_END ) {
+			loop_error = tr( "Error while decompressing %1" ). arg( src );
+			break;
+		}
+			
+		Q_LONG write_size = CHUNKSIZE_OUT - strm.avail_out;
+		if ( write_size != df. writeBlock ( buffer_out, write_size )) {
+			loop_error = tr( "Error writing to file %1: %2" ). arg( dst, df. errorString ( ));
+			break;
+		}
+		if ( ret == LZMADEC_STREAM_END ) {
+			lzmadec_end ( &strm );
+			break;
+		}
+		w_progress-> setProgress ( sf. at ( ), sf. size ( ));
+	}
+	
+	delete [] buffer_in;
+	delete [] buffer_out;
+	
+	return loop_error;
 }
 
 void DlgDBUpdateImpl::message ( bool error, const QString &msg )

@@ -16,7 +16,7 @@ isEmpty( RELEASE ) {
 }
 
 TEMPLATE     = app
-CONFIG      *= warn_on thread qt link_prl
+CONFIG      *= warn_on thread qt link_prl lzma
 
 TARGET       = brickstore
 
@@ -85,6 +85,11 @@ unix:!macx {
 macx {
   # HACK, but we need the abs. path, since MacOS X already has an old 2.0.2 version in /usr/lib
   LIBS += /usr/local/lib/libcurl.a
+}
+
+lzma {
+  DEFINES += LZMADEC_NO_STDIO
+  SOURCES += liblzmadec/buffer.c liblzmadec/io.c liblzmadec/lzma_main.c
 }
 
 

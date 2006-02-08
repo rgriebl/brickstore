@@ -36,6 +36,7 @@ private slots:
 
 private:
 	void message ( bool error, const QString &msg );
+	QString decompress ( const QString &src, const QString &dst );
 
 private:
 	DlgDBUpdateImplPrivate *d;
