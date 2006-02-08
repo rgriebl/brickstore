@@ -36,7 +36,7 @@ public:
 	bool            m_override;
 };
 
-#define DATABASE_URL   "http://softforge.de/binary.cache.lzma"
+#define DATABASE_URL   "http://brickforge.de/brickstore-data/binary.cache.lzma"
 
 
 DlgDBUpdateImpl::DlgDBUpdateImpl ( QWidget *parent, const char *name, bool modal, int fl )
@@ -207,6 +207,7 @@ QString DlgDBUpdateImpl::decompress ( const QString &src, const QString &dst )
 void DlgDBUpdateImpl::message ( bool error, const QString &msg )
 {
 	w_message-> setText ( error ? QString( "<b>%1:</b> %2" ). arg( tr( "Error" )). arg( msg ) : msg );
+	w_message-> repaint ( );
 	d-> m_has_errors |= error;
 }
 

@@ -25,7 +25,7 @@ int main ( int argc, char **argv )
 	if (( argc == 2 ) && ( !strcmp( argv [1], "-h" ) || !strcmp( argv [1], "--help" ))) {
 		show_usage = true;
 	}
-	else if ( !strcmp( argv [1], "--rebuild-database" )) {
+	else if (( argc >= 2 ) && !strcmp( argv [1], "--rebuild-database" )) {
 		if (( argc != 3 ) || !argv [2][0] )
 			show_usage = true;
 		else
