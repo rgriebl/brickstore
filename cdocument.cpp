@@ -459,31 +459,12 @@ CDocument *CDocument::fileImportBrickLinkInventory ( const BrickLink::Item *pres
 		int qty = dlg. quantity ( );
 
 		if ( it && ( qty > 0 )) {
-			BrickLink::Inventory *inv = 0;
+			BrickLink::InvItemList items = it-> consistsOf ( );
 
-			if ( dlg. importFromPeeron ( ))
-				inv = BrickLink::inst ( )-> inventoryFromPeeron ( it );
-			else
-				inv = BrickLink::inst ( )-> inventory ( it );
-
-			if ( inv ) {
+			if ( !items. isEmpty ( )) {
 				CDocument *doc = new CDocument ( );
 
-				QApplication::setOverrideCursor ( QCursor ( Qt::BusyCursor ));
-
-				doc-> m_inventory = inv;
-				doc-> m_inventory-> addRef ( );
-				doc-> m_inventory_multiply = qty;
-
-				if ( inv-> valid ( ) && dlg. updateAlways ( ))
-					inv-> update ( );
-
-				//setModified ( true );
-
-				if ( inv-> updateStatus ( ) == BrickLink::Updating )
-					connect ( BrickLink::inst ( ), SIGNAL( inventoryUpdated ( BrickLink::Inventory * )), doc, SLOT( inventoryUpdated ( BrickLink::Inventory * )));
-				else
-					doc-> inventoryUpdated ( inv );
+				doc-> setBrickLinkItems ( items, qty );
 
 				doc-> setTitle ( tr( "Inventory for %1" ). arg ( it-> id ( )));
 				return doc;

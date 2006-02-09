@@ -65,39 +65,6 @@
                         <number>1</number>
                     </property>
                 </widget>
-                <spacer row="0" column="4" rowspan="2" colspan="1">
-                    <property name="name">
-                        <cstring>spacer5</cstring>
-                    </property>
-                    <property name="orientation">
-                        <enum>Horizontal</enum>
-                    </property>
-                    <property name="sizeType">
-                        <enum>Expanding</enum>
-                    </property>
-                    <property name="sizeHint">
-                        <size>
-                            <width>207</width>
-                            <height>20</height>
-                        </size>
-                    </property>
-                </spacer>
-                <widget class="QCheckBox" row="1" column="3">
-                    <property name="name">
-                        <cstring>w_update</cstring>
-                    </property>
-                    <property name="text">
-                        <string>&amp;Download even if cached</string>
-                    </property>
-                </widget>
-                <widget class="QCheckBox" row="0" column="3">
-                    <property name="name">
-                        <cstring>w_peeron</cstring>
-                    </property>
-                    <property name="text">
-                        <string>Import from &amp;peeron.com (currently a hack that may or may not work)</string>
-                    </property>
-                </widget>
                 <spacer row="0" column="2" rowspan="2" colspan="1">
                     <property name="name">
                         <cstring>spacer4</cstring>
@@ -215,13 +182,13 @@
         <class>CSelectItem</class>
         <header location="local">cselectitem.h</header>
         <sizehint>
-            <width>-1</width>
-            <height>-1</height>
+            <width>100</width>
+            <height>100</height>
         </sizehint>
         <container>0</container>
         <sizepolicy>
-            <hordata>5</hordata>
-            <verdata>5</verdata>
+            <hordata>3</hordata>
+            <verdata>3</verdata>
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
         </sizepolicy>

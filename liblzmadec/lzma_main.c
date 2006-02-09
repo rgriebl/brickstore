@@ -26,7 +26,6 @@
 #include <stdio.h>
 
 #include <stdlib.h>
-#include <inttypes.h>
 #include <string.h>
 #include <assert.h>
 #include "lzmadec.h"
@@ -42,7 +41,7 @@
 static void *lzmadec_alloc (void *opaque, size_t nmemb, size_t size);
 static void lzmadec_free (void *opaque, void *addr);
 static int_fast8_t lzmadec_internal_init (lzmadec_stream *strm);
-static inline int_fast8_t lzmadec_decode_main (
+static /*inline*/ int_fast8_t lzmadec_decode_main (
 		lzmadec_stream *strm,
 		const int_fast8_t finish_decoding);
 static int_fast8_t lzmadec_header_properties (
@@ -225,11 +224,11 @@ static void
 lzmadec_header_uncompressed (uint_fast64_t *size, int_fast8_t *is_streamed,
 	const uint8_t *buffer)
 {
+	uint_fast32_t i;
 	/* Streamed files have all 64 bits set in the size field.
 	   We don't know the uncompressed size beforehand. */
 	*is_streamed = 1; /* Assume streamed. */
 	*size = 0;
-	uint_fast32_t i;
 	for (i = 0; i < 8; i++) {
 		*size += (uint_fast64_t)buffer[i] << (i * 8);
 		if (buffer[i] != 255)
@@ -253,6 +252,7 @@ lzmadec_internal_init (lzmadec_stream *strm)
 {
 	uint_fast32_t i;
 	uint32_t num_probs;
+	size_t lzmadec_num_probs;
 
 	/* Make sure we have been called sanely */
 	if (STATE->probs != NULL || STATE->dictionary != NULL
@@ -285,7 +285,7 @@ lzmadec_internal_init (lzmadec_stream *strm)
 	strm->avail_in -= 8;
 
 	/* Allocate memory for internal data */
-	const size_t lzmadec_num_probs = (LZMA_BASE_SIZE
+	lzmadec_num_probs = (LZMA_BASE_SIZE
 			+ (LZMA_LIT_SIZE << (STATE->lc + STATE->lp)));
 	STATE->probs = (CProb *)((strm->lzma_alloc)(strm->opaque, 1,
 			lzmadec_num_probs * sizeof(CProb)));
@@ -392,7 +392,7 @@ lzmadec_internal_init (lzmadec_stream *strm)
 			res -= (1 << numLevels); \
 		}
 
-static inline int_fast8_t
+static int_fast8_t
 lzmadec_decode_main (lzmadec_stream *strm, const int_fast8_t finish_decoding)
 {
 	/* Split the *strm structure to separate _local_ variables.
@@ -668,8 +668,8 @@ assert (state >= 0);
 						numDirectBits = LZMA_NUM_ALIGN_BITS;
 					}
 					{
-						i = 1;
 						int_fast32_t mi = 1;
+						i = 1;
 						do {
 							CProb *prob3 = prob + mi;
 							RC_GET_BIT2(prob3, mi, ; , rep0 |= i);

@@ -55,12 +55,12 @@ int DlgLoadInventoryImpl::quantity ( )
 
 bool DlgLoadInventoryImpl::updateAlways ( )
 {
-	return w_update-> isChecked ( );
+	return false; //w_update-> isChecked ( );
 }
 
 bool DlgLoadInventoryImpl::importFromPeeron ( )
 {
-	return w_peeron-> isChecked ( );
+	return false; //w_peeron-> isChecked ( );
 }
 
 void DlgLoadInventoryImpl::checkItem ( const BrickLink::Item *it, bool ok )
