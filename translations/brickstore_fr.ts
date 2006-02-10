@@ -2,6 +2,10 @@
 <context>
     <name>BrickLink</name>
     <message>
+        <source>Data directory &apos;%1&apos; is not both read- and writable.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>HTTP transfer threads could not be started.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -19,10 +23,6 @@
     </message>
     <message>
         <source>Could not parse the XML data for the store inventory.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Data directory &apos;%1&apos; is not both read- and writable.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -232,6 +232,22 @@
 <context>
     <name>CFrameWork</name>
     <message>
+        <source>Info</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Price Guide</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Appears In Sets</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Links</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Toolbar</source>
         <translation type="unfinished"></translation>
     </message>
@@ -269,6 +285,10 @@
     </message>
     <message>
         <source>&amp;Help</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>New</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -316,11 +336,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>BrickLink XML...</source>
+        <source>BrickLink Inventory...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>BrickLink Inventory...</source>
+        <source>BrickLink XML...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -332,11 +352,31 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>LDraw Model...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>BrikTrak Inventory...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Export</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>BrickLink XML to Clipboard</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>BrickLink Mass-Update XML to Clipboard</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>BrickLink Inventory XML to Clipboard</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>BrickLink Wanted List XML to Clipboard</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -413,6 +453,22 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Subtract Items...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Consolidate Items...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Part out Item...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reset Differences</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Select All</source>
         <translation type="unfinished"></translation>
     </message>
@@ -431,11 +487,27 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Buyer/Collector View</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>View Toolbar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>View Infobars</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>View Statusbar</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show Input Errors</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Difference Mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -455,6 +527,18 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Standard MDI Mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show Tabs at Top</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show Tabs at Bottom</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Cascade</source>
         <translation type="unfinished"></translation>
     </message>
@@ -469,6 +553,14 @@
     <message>
         <source>Shift+F1</source>
         <comment>Help|WhatsThis</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>About...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Check for Program Updates...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -511,6 +603,10 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Set Condition...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Multiply Quantities...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -520,11 +616,44 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Divide Quantities...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ctrl+/</source>
+        <comment>Edit|Divide Quantities</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Show BrickLink Catalog Info...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Show BrickLink Price Guide Info...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Lots for Sale on BrickLink...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not load the BrickLink database files.&lt;br /&gt;&lt;br /&gt;Should these files be updated now?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not load the BrickLink database files.&lt;br /&gt;&lt;br /&gt;The program is not functional without these files.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>BrickStore has switched to a new file format (.bsx - BrickStore XML).&lt;br /&gt;&lt;br /&gt;Your document has been automatically imported and it will be converted as soon as you save it.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No valid BrickLink login settings found.&lt;br /&gt;&lt;br /&gt;Do you want to change the settings now?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>min.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -540,11 +669,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Unsaved modifications</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Do you want to cancel all outstanding inventory, picture and price guide transfers?</source>
+        <source>Weight</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -552,136 +677,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Show Input Errors</source>
+        <source>Unsaved modifications</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Show BrickLink Price Guide Info...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>min.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Could not load the BrickLink database files.&lt;br /&gt;&lt;br /&gt;Should these files be updated now?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Could not load the BrickLink database files.&lt;br /&gt;&lt;br /&gt;The program is not functional without these files.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>No valid BrickLink login settings found.&lt;br /&gt;&lt;br /&gt;Do you want to change the settings now?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Weight</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>LDraw Model...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Consolidate Items...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Part out Item...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Buyer/Collector View</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Subtract Items...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>BrickLink Mass-Update XML to Clipboard</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>BrickLink Inventory XML to Clipboard</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>BrickLink Wanted List XML to Clipboard</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Reset Differences</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Difference Mode</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Set Condition...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Divide Quantities...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Ctrl+/</source>
-        <comment>Edit|Divide Quantities</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Check for Program Updates...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>BrikTrak Inventory...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>BrickStore has switched to a new file format (.bsx - BrickStore XML).&lt;br /&gt;&lt;br /&gt;Your document has been automatically imported and it will be converted as soon as you save it.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Info</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Price Guide</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Links</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>View Infobars</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Appears In Sets</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>New</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>About...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Standard MDI Mode</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Show Tabs at Top</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Show Tabs at Bottom</source>
+        <source>Do you want to cancel all outstanding inventory, picture and price guide transfers?</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -704,7 +704,19 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Comments</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Remarks</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Qty. Orig</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Qty. Diff</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -713,6 +725,14 @@
     </message>
     <message>
         <source>Bulk</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Pr. Orig</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Pr. Diff</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -784,6 +804,14 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Weight</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Year</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Exclude</source>
         <translation type="unfinished"></translation>
     </message>
@@ -804,11 +832,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>The value you entered was not valid and will not be changed.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Comments</source>
+        <source>Inv</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -820,31 +844,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Weight</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Year</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Inv</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Qty. Orig</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Qty. Diff</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Pr. Orig</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Pr. Diff</source>
+        <source>The value you entered was not valid and will not be changed.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -904,11 +904,11 @@
 <context>
     <name>CMessageBox</name>
     <message>
-        <source>&amp;Cancel</source>
+        <source>&amp;OK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>&amp;OK</source>
+        <source>&amp;Cancel</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1001,11 +1001,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Update</source>
+        <source>Please wait ... updating</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Please wait ... updating</source>
+        <source>Update</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1057,6 +1057,15 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Ctrl+F</source>
+        <comment>Find Item</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Find Item...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Clear</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1093,20 +1102,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Viewing all items with images is a bandwidth- and memory-hungry operation.&lt;br /&gt;Are you sure you want to continue?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Please enter the complete part number of the item:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Ctrl+F</source>
-        <comment>Find Item</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Find Item...</source>
+        <source>Viewing all items with images is a bandwidth- and memory-hungry operation.&lt;br /&gt;Are you sure you want to continue?</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1209,11 +1209,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Redo %1 Actions</source>
+        <source>Undo Action</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Undo Action</source>
+        <source>Redo %1 Actions</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1243,11 +1243,19 @@
 <context>
     <name>CWindow</name>
     <message>
-        <source>Reset an active filter</source>
+        <source>Filter:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Field:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Filter the list using this pattern (wildcards allowed: * ? [])</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reset an active filter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1271,27 +1279,23 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Filter:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Field:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Untitled</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Placed</source>
+        <source>Added %1, Merged %2 Items</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Received</source>
+        <source>Reset Differences</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Overwrite the currently selected items?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Prices are currently updated to price guide values.&lt;br /&gt;&lt;br /&gt;Please wait until this operation has finished.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1300,6 +1304,30 @@
     </message>
     <message>
         <source>%1 have been skipped, because of missing price guide records and/or network errors.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Divides the quantities of all selected items by this number.&lt;br /&gt;&lt;br /&gt;(A check is made if all quantites are exactly divisble without reminder, before this operation is performed.)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The quantities of %1 lots are not divisible without remainder by %2.&lt;br /&gt;&lt;br /&gt;Nothing has been modified.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Multiplies the quantities of all selected items with this factor.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>x</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set sale in percent for the selected items (this will &lt;u&gt;not&lt;/u&gt; change any prices).&lt;br /&gt;Negative values are also allowed.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1315,39 +1343,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>%</source>
+        <source>Placed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Multiplies the quantities of all selected items with this factor.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>x</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Prices are currently updated to price guide values.&lt;br /&gt;&lt;br /&gt;Please wait until this operation has finished.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Set sale in percent for the selected items (this will &lt;u&gt;not&lt;/u&gt; change any prices).&lt;br /&gt;Negative values are also allowed.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Divides the quantities of all selected items by this number.&lt;br /&gt;&lt;br /&gt;(A check is made if all quantites are exactly divisble without reminder, before this operation is performed.)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>The quantities of %1 lots are not divisible without remainder by %2.&lt;br /&gt;&lt;br /&gt;Nothing has been modified.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Added %1, Merged %2 Items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Reset Differences</source>
+        <source>Received</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1355,6 +1355,14 @@
     <name>DlgAddItem</name>
     <message>
         <source>Add Item to %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;Price (%1)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;Quantity</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1367,22 +1375,6 @@
     </message>
     <message>
         <source>Total</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&amp;Add</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&amp;Close</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&amp;Price (%1)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&amp;Quantity</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1417,6 +1409,14 @@
         <source>Consolidate with &amp;list</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>&amp;Add</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;Close</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>DlgDBUpdate</name>
@@ -1444,6 +1444,14 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Downloading: %1/%2 KB</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Already up-to-date.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Finished.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1456,11 +1464,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Error</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Downloading: %1/%2 KB</source>
+        <source>The database is not available.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1488,11 +1492,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Already up-to-date.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>The database is not available.</source>
+        <source>Error</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1546,6 +1546,10 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Either fix the missing or wrong information and press &lt;b&gt;OK&lt;/b&gt; or skip the item by pressing &lt;b&gt;Delete&lt;/b&gt;.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Item and Item Type are now valid</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1571,10 +1575,6 @@
     </message>
     <message>
         <source>&amp;Delete</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Either fix the missing or wrong information and press &lt;b&gt;OK&lt;/b&gt; or skip the item by pressing &lt;b&gt;Delete&lt;/b&gt;.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1816,15 +1816,15 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>The prices of all selected items will be set to Price Guide values.&lt;br /&gt;&lt;br /&gt;Select which part of the price guide should be used:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>&amp;OK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>The prices of all selected items will be set to Price Guide values.&lt;br /&gt;&lt;br /&gt;Select which part of the price guide should be used:</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1874,7 +1874,35 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Use the &amp;local currency:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>$ 1 = %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Currency</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Language</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Weights</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Metric (g)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Imperial (oz)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;Document directory</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1898,6 +1926,10 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Cache Di&amp;rectory</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>&amp;Defaults</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1906,7 +1938,23 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Item type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Default values for &apos;&amp;Add Items&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Condition</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>New</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Used</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1949,54 +1997,6 @@
         <source>&amp;Cancel</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
-        <source>&amp;Document directory</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Metric (g)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Imperial (oz)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Cache Di&amp;rectory</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>New</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Used</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Use the &amp;local currency:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Currency</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Language</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Weights</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Item type</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Condition</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>DlgSettingsImpl</name>
@@ -2037,11 +2037,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>The specified cache directory does not exist or is not read- and writeable.&lt;br /&gt;The cache directory setting will not be changed.</source>
+        <source>The specified document directory does not exist or is not read- and writeable.&lt;br /&gt;The document directory setting will not be changed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>The specified document directory does not exist or is not read- and writeable.&lt;br /&gt;The document directory setting will not be changed.</source>
+        <source>The specified cache directory does not exist or is not read- and writeable.&lt;br /&gt;The cache directory setting will not be changed.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2079,7 +2079,7 @@
 <context>
     <name>DlgUpdate</name>
     <message>
-        <source>&amp;Cancel</source>
+        <source>Check for Program Updates</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2087,7 +2087,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Check for Program Updates</source>
+        <source>&amp;Cancel</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2106,6 +2106,10 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Downloading: %1/%2 KB</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Version information is not available.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2118,14 +2122,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Detailed list of changes</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>the BrickStore homepage</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Stable release</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2134,11 +2130,15 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>&lt;b&gt;Please note:&lt;/b&gt; Your currently installed version is flagged as defective. Please visit %1 to find out the exact cause.</source>
+        <source>Detailed list of changes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Downloading: %1/%2 KB</source>
+        <source>the BrickStore homepage</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Please note:&lt;/b&gt; Your currently installed version is flagged as defective. Please visit %1 to find out the exact cause.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

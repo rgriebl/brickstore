@@ -11,10 +11,12 @@ macx-bundle/Resources/de.lproj/locversion.plist	Contents/Resources/de.lproj
 images/*.png			Contents/Resources/images
 images/*.jpg			Contents/Resources/images
 images/status/*.png		Contents/Resources/images/status
+images/sidebar/*.png		Contents/Resources/images/sidebar
 images/16x16/*.png		Contents/Resources/images/16x16
 images/22x22/*.png		Contents/Resources/images/22x22
 
-translations/*_de.qm		Contents/Resources/translations
+translations/translations.xml	Contents/Resources/translations
+translations/*.qm		Contents/Resources/translations
 $QTDIR/translations/qt_de.qm	Contents/Resources/translations
 
 print-templates/*.xml		Contents/Resources/print-templates

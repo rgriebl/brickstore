@@ -21,23 +21,24 @@ CONFIG      *= warn_on thread qt link_prl lzma
 TARGET       = brickstore
 
 TRANSLATIONS = translations/brickstore_de.ts \
-               translations/brickstore_nl.ts
+               translations/brickstore_fr.ts
 
 res_images          = images/*.png images/*.jpg 
 res_images_16       = images/16x16/*.png
 res_images_22       = images/22x22/*.png
 res_images_status   = images/status/*.png
-res_translations    = $$TRANSLATIONS
+res_images_sidebar  = images/sidebar/*.png
+res_translations    = translations/translations.xml $$TRANSLATIONS
 res_print_templates = print-templates/*.xml
 
 dist_extra          = version.h.in icon.png
-dist_scripts        = scripts/*.sh scripts/*.bat scripts/*.pl scripts/*.js
+dist_scripts        = scripts/*.sh scripts/*.pl scripts/*.js
 dist_unix_rpm       = rpm/create.sh rpm/brickstore.spec
 dist_unix_deb       = debian/create.sh debian/rules
 dist_macx           = macx-bundle/create.sh macx-bundle/install-table.txt macx-bundle/*.plist macx-bundle/Resources/*.icns macx-bundle/Resources/??.lproj/*.plist
 dist_win32          = win32-installer/*.wx?
 
-DISTFILES += $$res_images $$res_images_16 $$res_images_22 $$res_images_status $$res_translations $$res_print_templates $$dist_extra $$dist_scripts $$dist_unix_rpm $$dist_unix_deb $$dist_macx $$dist_win32
+DISTFILES += $$res_images $$res_images_16 $$res_images_22 $$res_images_status $$res_images_sidebar $$res_translations $$res_print_templates $$dist_extra $$dist_scripts $$dist_unix_rpm $$dist_unix_deb $$dist_macx $$dist_win32
 
 MOC_DIR   = .moc
 UI_DIR    = .uic
@@ -63,23 +64,30 @@ unix:!macx {
   isEmpty( PREFIX ):PREFIX = /usr/local
   
   target.path = $$PREFIX/bin
-  resources1.path = $$PREFIX/share/brickstore/images
-  resources1.files = $$res_images
-  resources2.path = $$PREFIX/share/brickstore/images/16x16
-  resources2.files = $$res_images_16
-  resources3.path = $$PREFIX/share/brickstore/images/22x22
-  resources3.files = $$res_images_22
-  resources4.path = $$PREFIX/share/brickstore/images/status
-  resources4.files = $$res_images_status
-  resources5.path = $$PREFIX/share/brickstore/translations
-  resources5.files = $$res_translations
-  resources6.path = $$PREFIX/share/brickstore/print-templates
-  resources6.files = $$res_print_templates
+  resources_i1.path  = $$PREFIX/share/brickstore/images
+  resources_i1.files = $$res_images
+  resources_i2.path  = $$PREFIX/share/brickstore/images/16x16
+  resources_i2.files = $$res_images_16
+  resources_i3.path  = $$PREFIX/share/brickstore/images/22x22
+  resources_i3.files = $$res_images_22
+  resources_i4.path  = $$PREFIX/share/brickstore/images/status
+  resources_i4.files = $$res_images_status
+  resources_i5.path  = $$PREFIX/share/brickstore/images/sidebar
+  resources_i5.files = $$res_images_sidebar
+
+  res_qm = $$res_translations
+  res_qm ~= s/.ts/.qm/g
+
+  resources_t1.path  = $$PREFIX/share/brickstore/translations
+  resources_t1.files = $$res_qm
+
+  resources_p1.path  = $$PREFIX/share/brickstore/print-templates
+  resources_p1.files = $$res_print_templates
 
   # this does not work, since qmake loads the qt prl after processing this file...
   #!contains( CONFIG, shared ):resources5.extra = cp $(QTDIR)/translations/qt_de.qm translations
 
-  INSTALLS += target resources1 resources2 resources3 resources4 resources5 resources6
+  INSTALLS += target resources_i1 resources_i2 resources_i3 resources_i4 resources_i5 resources_t1 resources_p1
 }
 
 macx {
@@ -89,6 +97,7 @@ macx {
 
 lzma {
   DEFINES += LZMADEC_NO_STDIO
+  HEADERS += liblzmadec/lzmadec.h liblzmadec/private.h
   SOURCES += liblzmadec/buffer.c liblzmadec/io.c liblzmadec/lzma_main.c
 }
 

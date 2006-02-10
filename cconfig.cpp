@@ -150,7 +150,7 @@ QDateTime CConfig::lastDatabaseUpdate ( ) const
 void CConfig::setLastDatabaseUpdate ( const QDateTime &dt )
 {
 	time_t tt = dt. isValid ( ) ? dt. toTime_t ( ) : 0;
-	writeEntry ( "/BrickLink/LastDBUpdate", tt );
+	writeEntry ( "/BrickLink/LastDBUpdate", int( tt ));
 }
 
 bool CConfig::showInputErrors ( ) const
