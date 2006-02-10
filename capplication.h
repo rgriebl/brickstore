@@ -41,7 +41,6 @@ public:
 public slots:
 	void about ( );
 	void checkForUpdates ( );
-	void exit ( int );
 	void updateTranslations ( );
 
 signals:

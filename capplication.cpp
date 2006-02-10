@@ -143,17 +143,10 @@ void CApplication::updateTranslations ( )
 		installTranslator ( m_trans_brickstore );
 }
 
-void CApplication::exit ( int code )
-{
-	QApplication::exit ( code );
-}
-
 void CApplication::rebuildDatabase ( )
 {
-	CRebuildDatabase *rdb = new CRebuildDatabase ( m_rebuild_db_only );
-
-	connect ( rdb, SIGNAL( finished ( int )), cApp, SLOT( exit ( int )));
-	rdb-> exec ( );
+	CRebuildDatabase rdb ( m_rebuild_db_only );
+	exit ( rdb. exec ( ));
 }
 
 

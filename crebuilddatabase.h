@@ -20,23 +20,22 @@
 #include "bricklink.h"
 #include "ctransfer.h"
 
+
 class CRebuildDatabase : public QObject {
 	Q_OBJECT
 
 public:
 	CRebuildDatabase ( const QString &output );
+	~CRebuildDatabase ( );
 
-	void exec ( );
-
-signals:
-	void finished ( int );
+	int exec ( );
 
 private slots:
 	void downloadJobFinished ( CTransfer::Job *job );
 	void inventoryUpdated ( BrickLink::Inventory *inv );
 
 private:
-	void error ( );
+	int error ( );
 
 	bool parse ( );
 	bool parseInv ( );

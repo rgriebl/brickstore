@@ -19,34 +19,41 @@
 
 #include "crebuilddatabase.h"
 
-#if defined( Q_OS_WIN32 )
-#define printf   qWarning
-#else
-#include <stdio.h>
-#endif
 
 CRebuildDatabase::CRebuildDatabase ( const QString &output )
 	: QObject ( 0, "rebuild_database" )
 {
 	m_output = output;
+	
+#if defined( Q_OS_WIN32 )
+	AllocConsole ( );
+	const char *title = "BrickStore - Rebuilding Database";
+	QT_WA({ SetConsoleTitleW ( QString( title ). ucs2 ( )); }, 
+	      { SetConsoleTitleA ( title ); })
+	freopen ( "CONIN$", "r", stdin );
+	freopen ( "CONOUT$", "w", stdout );
+#endif
 }
 
+CRebuildDatabase::~CRebuildDatabase ( )
+{
+#if defined( Q_OS_WIN32 )
+	printf ( "\n\nPress RETURN to quit...\n\n" );
+	getchar ( );
+#endif
+}
 
-void CRebuildDatabase::error ( )
+int CRebuildDatabase::error ( )
 {
 	if ( m_error. isEmpty ( ))
 		printf ( " FAILED.\n" );
 	else
 		printf ( " FAILED: %s\n", m_error. ascii ( ));
 
-	emit finished ( 2 );
-
-	// wait for our death...
-	while ( true )
-		qApp-> processEvents ( );
+	return 2;
 }
 
-void CRebuildDatabase::exec ( )
+int CRebuildDatabase::exec ( )
 {
 	BrickLink *bl = BrickLink::inst ( );
 
@@ -58,27 +65,28 @@ void CRebuildDatabase::exec ( )
 	printf ( "\n=====================\n" );
 
 	printf ( "\nSTEP 1: Downloading (text) database files...\n" );
+
 	if ( !download ( ))
-		error ( );
+		return error ( );
 	
 	printf ( "\nSTEP 2: Parsing downloaded files...\n" );
 	if ( !parse ( ))
-		error ( );
+		return error ( );
 
-	printf ( "\nSTEP 3: Retrieving missing/updated inventories...\n" );
+	printf ( "\nSTEP 3: Downloading missing/updated inventories...\n" );
 	if ( !downloadInv ( ))
-		error ( );
+		return error ( );
 
 	printf ( "\nSTEP 4: Parsing inventories...\n" );
 	if ( !parseInv ( ))
-		error ( );
+		return error ( );
 
 	printf ( "\nSTEP 5: Writing the new database to disk...\n" );
 	if ( !writeDB ( ))
-		error ( );
+		return error ( );
 
 	printf ( "\nFINISHED.\n\n" );
-	emit finished ( 0 );
+	return 0;
 }
 
 bool CRebuildDatabase::parse ( )
@@ -278,6 +286,8 @@ bool CRebuildDatabase::downloadInv ( )
 
 				if ( inv-> updateStatus ( ) != BrickLink::Updating )
 					inventoryUpdated ( inv );
+				else
+					printf( "  > %s [%s]\n", item-> id ( ), item-> name ( ));
 			}
 			else
 				m_ptotal -= 2;
@@ -305,7 +315,7 @@ void CRebuildDatabase::inventoryUpdated ( BrickLink::Inventory *inv )
 	if ( inv-> updateStatus ( ) == BrickLink::UpdateFailed ) {
 		m_downloads_failed++;
 
-		printf ( "  > inventory failed: %s\n", inv-> item ( )-> id ( ));
+		printf ( "* > inventory failed: %s\n", inv-> item ( )-> id ( ));
 	}
 	else {
 		if ( inv-> item ( )) {
