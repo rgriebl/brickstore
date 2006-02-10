@@ -50,6 +50,7 @@ private:
 	int m_downloads_failed;
 	int m_processed;
 	int m_ptotal;
+	QDateTime m_date;
 
 	QMap<const BrickLink::Item *, BrickLink::Item::AppearsInMap> m_map;
 };

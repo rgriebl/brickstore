@@ -596,6 +596,8 @@ public:
 	QString dataPath ( const Item * ) const;
 	QString dataPath ( const Item *, const Color * ) const;
 
+	QString defaultDatabaseName ( ) const;
+
 	const QIntDict<Color>    &colors ( ) const;
 	const QIntDict<Category> &categories ( ) const;
 	const QIntDict<ItemType> &itemTypes ( ) const;

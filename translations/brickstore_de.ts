@@ -82,131 +82,131 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <name>CDocument</name>
     <message>
         <source>Untitled</source>
-        <translation type="unfinished">Unbenannt</translation>
+        <translation>Unbenannt</translation>
     </message>
     <message>
         <source>BrickStore XML Data</source>
-        <translation type="unfinished">BrickStore XML Daten</translation>
+        <translation>BrickStore XML Daten</translation>
     </message>
     <message>
         <source>All Files</source>
-        <translation type="unfinished">Alle Dateien</translation>
+        <translation>Alle Dateien</translation>
     </message>
     <message>
         <source>Open File</source>
-        <translation type="unfinished">Datei öffnen</translation>
+        <translation>Datei öffnen</translation>
     </message>
     <message>
         <source>Inventory for %1</source>
-        <translation type="unfinished">Inventarliste von %1</translation>
+        <translation>Inventarliste von %1</translation>
     </message>
     <message>
         <source>Internal error: Could not create an Inventory object for item %1</source>
-        <translation type="unfinished">Interner Fehler: Konnte kein Inventory Objekt für das Teil %1 erstellen</translation>
+        <translation>Interner Fehler: Konnte kein Inventory Objekt für das Teil %1 erstellen</translation>
     </message>
     <message>
         <source>Requested item was not found in the database.</source>
-        <translation type="unfinished">Gewünschtes Teil wurde nicht in der Datenbank gefunden.</translation>
+        <translation>Gewünschtes Teil wurde nicht in der Datenbank gefunden.</translation>
     </message>
     <message>
         <source>Order #%1</source>
-        <translation type="unfinished">Bestellung #%1</translation>
+        <translation>Bestellung #%1</translation>
     </message>
     <message>
         <source>Internal error: Could not create an Inventory object for oder #%1</source>
-        <translation type="unfinished">InteInterner Fehler: Konnte kein Inventory Objekt für die Bestellung %1 erstellen</translation>
+        <translation>InteInterner Fehler: Konnte kein Inventory Objekt für die Bestellung %1 erstellen</translation>
     </message>
     <message>
         <source>Invalid order number.</source>
-        <translation type="unfinished">Ungültige Bestellnummer.</translation>
+        <translation>Ungültige Bestellnummer.</translation>
     </message>
     <message>
         <source>Store %1</source>
-        <translation type="unfinished">Shop-Bestand %1</translation>
+        <translation>Shop-Bestand %1</translation>
     </message>
     <message>
         <source>Internal error: Could not create an Inventory object for store inventory</source>
-        <translation type="unfinished">Interner Fehler: Konnte kein Inventory Objekt für den Shop-Bestand erstellen</translation>
+        <translation>Interner Fehler: Konnte kein Inventory Objekt für den Shop-Bestand erstellen</translation>
     </message>
     <message>
         <source>BrickLink XML File</source>
-        <translation type="unfinished">BrickLink XML Datei</translation>
+        <translation>BrickLink XML Datei</translation>
     </message>
     <message>
         <source>Import File</source>
-        <translation type="unfinished">Datei importieren</translation>
+        <translation>Datei importieren</translation>
     </message>
     <message>
         <source>Import of %1</source>
-        <translation type="unfinished">Import von %1</translation>
+        <translation>Import von %1</translation>
     </message>
     <message>
         <source>BrikTrak Inventory</source>
-        <translation type="unfinished">BrikTrak Inventarliste</translation>
+        <translation>BrikTrak Inventarliste</translation>
     </message>
     <message>
         <source>Could not open file %1 for reading.</source>
-        <translation type="unfinished">Konnte Datei %1 nicht zum Lesen öffnen.</translation>
+        <translation>Konnte Datei %1 nicht zum Lesen öffnen.</translation>
     </message>
     <message>
         <source>Could not parse the XML data in file %1:&lt;br /&gt;&lt;i&gt;Line %2, column %3: %4&lt;/i&gt;</source>
-        <translation type="unfinished">Fehler beim Lesen der XML Daten von Datei %1:&lt;br /&gt;&lt;i&gt;Zeile %2, Spalte %3: %4&lt;/i&gt;</translation>
+        <translation>Fehler beim Lesen der XML Daten von Datei %1:&lt;br /&gt;&lt;i&gt;Zeile %2, Spalte %3: %4&lt;/i&gt;</translation>
     </message>
     <message>
         <source>This file contains %1 unknown item(s).</source>
-        <translation type="unfinished">Diese Datei enhält %1 ungültige(s) Teil(e).</translation>
+        <translation>Diese Datei enhält %1 ungültige(s) Teil(e).</translation>
     </message>
     <message>
         <source>Could not parse the XML data in file %1.</source>
-        <translation type="unfinished">Fehler beim Lesen der XML Daten von Datei %1.</translation>
+        <translation>Fehler beim Lesen der XML Daten von Datei %1.</translation>
     </message>
     <message>
         <source>LDraw Models</source>
-        <translation type="unfinished">LDraw Modelle</translation>
+        <translation>LDraw Modelle</translation>
     </message>
     <message>
         <source>Could not parse the LDraw model in file %1.</source>
-        <translation type="unfinished">Fehler beim Lesen der LDraw Modelldaten von Datei %1.</translation>
+        <translation>Fehler beim Lesen der LDraw Modelldaten von Datei %1.</translation>
     </message>
     <message>
         <source>The order #%1 could not be retrieved.</source>
-        <translation type="unfinished">Die Bestellung #%1 konnte nicht geholt werden.</translation>
+        <translation>Die Bestellung #%1 konnte nicht geholt werden.</translation>
     </message>
     <message>
         <source>The inventory you requested could not be retrieved.</source>
-        <translation type="unfinished">Die angeforderte Inventarliste konnte nicht geholt werden.</translation>
+        <translation>Die angeforderte Inventarliste konnte nicht geholt werden.</translation>
     </message>
     <message>
         <source>Save File as</source>
-        <translation type="unfinished">Datei speichern</translation>
+        <translation>Datei speichern</translation>
     </message>
     <message>
         <source>A file named %1 already exists. Are you sure you want to overwrite it?</source>
-        <translation type="unfinished">Eine Datei namens %1 existiert bereits. Sind Sie sicher, daß die Datei überschrieben werden soll?</translation>
+        <translation>Eine Datei namens %1 existiert bereits. Sind Sie sicher, daß die Datei überschrieben werden soll?</translation>
     </message>
     <message>
         <source>Failed to save data in file %1.</source>
-        <translation type="unfinished">Datenspeicherung in Datei %1 ist fehlgeschlagen.</translation>
+        <translation>Datenspeicherung in Datei %1 ist fehlgeschlagen.</translation>
     </message>
     <message>
         <source>Failed to open file %1 for writing.</source>
-        <translation type="unfinished">Datei %1 konnte nicht zum Schreiben geöffnet werden.</translation>
+        <translation>Datei %1 konnte nicht zum Schreiben geöffnet werden.</translation>
     </message>
     <message>
         <source>Enter the ID number of Wanted List (leave blank for the default Wanted List)</source>
-        <translation type="unfinished">Geben Sie die ID-Nummer der Suchliste ein (für die Standardsuchliste das Feld einfach leer lassen)</translation>
+        <translation>Geben Sie die ID-Nummer der Suchliste ein (für die Standardsuchliste das Feld einfach leer lassen)</translation>
     </message>
     <message>
         <source>This list contains items without a BrickLink Lot-ID.&lt;br /&gt;&lt;br /&gt;Do you really want to export this list?</source>
-        <translation type="unfinished">Diese Liste enthält Teile ohne BrickLink Posten-ID (Lot-ID).&lt;br /&gt;&lt;br /&gt;Wollen Sie diese Liste trotzdem exportieren?</translation>
+        <translation>Diese Liste enthält Teile ohne BrickLink Posten-ID (Lot-ID).&lt;br /&gt;&lt;br /&gt;Wollen Sie diese Liste trotzdem exportieren?</translation>
     </message>
     <message>
         <source>Export File</source>
-        <translation type="unfinished">Datei exportieren</translation>
+        <translation>Datei exportieren</translation>
     </message>
     <message>
         <source>This list contains items with errors.&lt;br /&gt;&lt;br /&gt;Do you really want to export this list?</source>
-        <translation type="unfinished">Diese Liste enthält Teile mit Eingabefehlern.&lt;br /&gt;&lt;br /&gt;Wollen Sie diese Liste trotzdem exportieren?</translation>
+        <translation>Diese Liste enthält Teile mit Eingabefehlern.&lt;br /&gt;&lt;br /&gt;Wollen Sie diese Liste trotzdem exportieren?</translation>
     </message>
 </context>
 <context>
@@ -1215,24 +1215,16 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
         <translation>%1 Aktionen rückgängig machen</translation>
     </message>
     <message>
-        <source>Undo 1 Action</source>
-        <translation type="obsolete">1 Aktion rückgängig machen</translation>
-    </message>
-    <message>
         <source>Redo %1 Actions</source>
         <translation>%1 Aktionen wiederholen</translation>
     </message>
     <message>
-        <source>Redo 1 Action</source>
-        <translation type="obsolete">1 Aktion wiederholen</translation>
-    </message>
-    <message>
         <source>Undo Action</source>
-        <translation type="unfinished"></translation>
+        <translation>Aktion rückgängig machen</translation>
     </message>
     <message>
         <source>Redo Action</source>
-        <translation type="unfinished"></translation>
+        <translation>Aktion wiederholen</translation>
     </message>
 </context>
 <context>
@@ -1281,30 +1273,6 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
         <translation>Feld:</translation>
     </message>
     <message>
-        <source>The inventory you requested could not be retrieved.</source>
-        <translation type="obsolete">Die angeforderte Inventarliste konnte nicht geholt werden.</translation>
-    </message>
-    <message>
-        <source>Failed to save data in file %1.</source>
-        <translation type="obsolete">Datenspeicherung in Datei %1 ist fehlgeschlagen.</translation>
-    </message>
-    <message>
-        <source>Failed to open file %1 for writing.</source>
-        <translation type="obsolete">Datei %1 konnte nicht zum Schreiben geöffnet werden.</translation>
-    </message>
-    <message>
-        <source>BrikTrak Inventory</source>
-        <translation type="obsolete">BrikTrak Inventarliste</translation>
-    </message>
-    <message>
-        <source>Save File as</source>
-        <translation type="obsolete">Datei speichern</translation>
-    </message>
-    <message>
-        <source>Export File</source>
-        <translation type="obsolete">Datei exportieren</translation>
-    </message>
-    <message>
         <source>Overwrite the currently selected items?</source>
         <translation>Sollen die ausgewählten Teile überschrieben werden?</translation>
     </message>
@@ -1321,68 +1289,8 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
         <translation>Unbenannt</translation>
     </message>
     <message>
-        <source>All Files</source>
-        <translation type="obsolete">Alle Dateien</translation>
-    </message>
-    <message>
-        <source>Open File</source>
-        <translation type="obsolete">Datei öffnen</translation>
-    </message>
-    <message>
-        <source>Import File</source>
-        <translation type="obsolete">Datei importieren</translation>
-    </message>
-    <message>
-        <source>Import of %1</source>
-        <translation type="obsolete">Import von %1</translation>
-    </message>
-    <message>
-        <source>Inventory for %1</source>
-        <translation type="obsolete">Inventarliste von %1</translation>
-    </message>
-    <message>
-        <source>Internal error: Could not create an Inventory object for item %1</source>
-        <translation type="obsolete">Interner Fehler: Konnte kein Inventory Objekt für das Teil %1 erstellen</translation>
-    </message>
-    <message>
-        <source>Requested item was not found in the database.</source>
-        <translation type="obsolete">Gewünschtes Teil wurde nicht in der Datenbank gefunden.</translation>
-    </message>
-    <message>
-        <source>Could not open file %1 for reading.</source>
-        <translation type="obsolete">Konnte Datei %1 nicht zum Lesen öffnen.</translation>
-    </message>
-    <message>
-        <source>Enter the ID number of Wanted List (leave blank for the default Wanted List)</source>
-        <translation type="obsolete">Geben Sie die ID-Nummer der Suchliste ein (für die Standardsuchliste das Feld einfach leer lassen)</translation>
-    </message>
-    <message>
         <source>Save changes to %1?</source>
         <translation>Sollen die Änderungen in %1 gespeichert werden?</translation>
-    </message>
-    <message>
-        <source>Order #%1</source>
-        <translation type="obsolete">Bestellung #%1</translation>
-    </message>
-    <message>
-        <source>Internal error: Could not create an Inventory object for oder #%1</source>
-        <translation type="obsolete">InteInterner Fehler: Konnte kein Inventory Objekt für die Bestellung %1 erstellen</translation>
-    </message>
-    <message>
-        <source>Invalid order number.</source>
-        <translation type="obsolete">Ungültige Bestellnummer.</translation>
-    </message>
-    <message>
-        <source>Store %1</source>
-        <translation type="obsolete">Shop-Bestand %1</translation>
-    </message>
-    <message>
-        <source>Internal error: Could not create an Inventory object for store inventory</source>
-        <translation type="obsolete">Interner Fehler: Konnte kein Inventory Objekt für den Shop-Bestand erstellen</translation>
-    </message>
-    <message>
-        <source>The order #%1 could not be retrieved.</source>
-        <translation type="obsolete">Die Bestellung #%1 konnte nicht geholt werden.</translation>
     </message>
     <message>
         <source>Reset an active filter</source>
@@ -1405,18 +1313,6 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
         <translation>Erhalten</translation>
     </message>
     <message>
-        <source>Could not parse the XML data in file %1:&lt;br /&gt;&lt;i&gt;Line %2, column %3: %4&lt;/i&gt;</source>
-        <translation type="obsolete">Fehler beim Lesen der XML Daten von Datei %1:&lt;br /&gt;&lt;i&gt;Zeile %2, Spalte %3: %4&lt;/i&gt;</translation>
-    </message>
-    <message>
-        <source>This file contains %1 unknown item(s).</source>
-        <translation type="obsolete">Diese Datei enhält %1 ungültige(s) Teil(e).</translation>
-    </message>
-    <message>
-        <source>Could not parse the XML data in file %1.</source>
-        <translation type="obsolete">Fehler beim Lesen der XML Daten von Datei %1.</translation>
-    </message>
-    <message>
         <source>Enter the new remark for all selected items:</source>
         <translation>Geben Sie eine neue Anmerkung für alle ausgewählten Teile ein:</translation>
     </message>
@@ -1437,32 +1333,12 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
         <translation>x</translation>
     </message>
     <message>
-        <source>A file named %1 already exists. Are you sure you want to overwrite it?</source>
-        <translation type="obsolete">Eine Datei namens %1 existiert bereits. Sind Sie sicher, daß die Datei überschrieben werden soll?</translation>
-    </message>
-    <message>
-        <source>This list contains items with errors.&lt;br /&gt;&lt;br /&gt;Do you really want to export this list?</source>
-        <translation type="obsolete">Diese Liste enthält Teile mit Eingabefehlern.&lt;br /&gt;&lt;br /&gt;Wollen Sie diese Liste trotzdem exportieren?</translation>
-    </message>
-    <message>
         <source>Prices are currently updated to price guide values.&lt;br /&gt;&lt;br /&gt;Please wait until this operation has finished.</source>
         <translation>Die Preise werden momentan auf Richtpreise gesetzt.&lt;br /&gt;&lt;br /&gt;Bitte warten Sie bis dies erledigt ist.</translation>
     </message>
     <message>
         <source>Set sale in percent for the selected items (this will &lt;u&gt;not&lt;/u&gt; change any prices).&lt;br /&gt;Negative values are also allowed.</source>
         <translation>Sonderangebotsprozente für alle ausgewählten Teile setzen  (die Preise selbst werden &lt;u&gt;nicht&lt;/u&gt; geändert).&lt;br /&gt;Negative Werte sind ebenfalls möglich.</translation>
-    </message>
-    <message>
-        <source>LDraw Models</source>
-        <translation type="obsolete">LDraw Modelle</translation>
-    </message>
-    <message>
-        <source>Could not parse the LDraw model in file %1.</source>
-        <translation type="obsolete">Fehler beim Lesen der LDraw Modelldaten von Datei %1.</translation>
-    </message>
-    <message>
-        <source>This list contains items without a BrickLink Lot-ID.&lt;br /&gt;&lt;br /&gt;Do you really want to export this list?</source>
-        <translation type="obsolete">Diese Liste enthält Teile ohne BrickLink Posten-ID (Lot-ID).&lt;br /&gt;&lt;br /&gt;Wollen Sie diese Liste trotzdem exportieren?</translation>
     </message>
     <message>
         <source>Divides the quantities of all selected items by this number.&lt;br /&gt;&lt;br /&gt;(A check is made if all quantites are exactly divisble without reminder, before this operation is performed.)</source>
@@ -1473,27 +1349,13 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
         <translation>Die Anzahl der Teile in %1 Posten ist nicht ohne Rest durch %2 teilbar.&lt;br /&gt;&lt;br /&gt;Es wurden keine Werte geändert.</translation>
     </message>
     <message>
-        <source>BrickStore XML Data</source>
-        <translation type="obsolete">BrickStore XML Daten</translation>
-    </message>
-    <message>
-        <source>BrickLink XML File</source>
-        <translation type="obsolete">BrickLink XML Datei</translation>
-    </message>
-    <message>
         <source>Added %1, Merged %2 Items</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Reset Differences</source>
-        <translation type="unfinished">Differenzen zurücksetzen</translation>
+        <translation>Differenzen zurücksetzen</translation>
     </message>
-</context>
-<context>
-    <name>Command::AddRemoveItems</name>
-</context>
-<context>
-    <name>Command::EditItems</name>
 </context>
 <context>
     <name>DlgAddItem</name>
@@ -1588,10 +1450,6 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
         <translation>Der Transferjob kommt nicht gestartet werden.</translation>
     </message>
     <message>
-        <source>Downloading binary database... %1/%2 KB</source>
-        <translation type="obsolete">Binäre Datenbank wird gedownloadet... %1/%2 KB</translation>
-    </message>
-    <message>
         <source>Finished.</source>
         <translation>Beendet.</translation>
     </message>
@@ -1604,40 +1462,44 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
         <translation>Der Transferjob schlug fehl: %1</translation>
     </message>
     <message>
-        <source>Version information is not available.</source>
-        <translation>Keine Versionsinformationen verfügbar.</translation>
-    </message>
-    <message>
         <source>Error</source>
         <translation>Fehler</translation>
     </message>
     <message>
         <source>Downloading: %1/%2 KB</source>
-        <translation type="unfinished"></translation>
+        <translation>Download: %1/%2 KB</translation>
     </message>
     <message>
         <source>Could not read downloaded file: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Konnte gedownloadete Datei nicht lesen: %1</translation>
     </message>
     <message>
         <source>Could not write to database file: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Konnte nicht in Datenbankdatei schreiben: %1</translation>
     </message>
     <message>
         <source>Could not initialize the LZMA decompressor</source>
-        <translation type="unfinished"></translation>
+        <translation>Konnte den LZMA Entpacker nicht initialisieren</translation>
     </message>
     <message>
         <source>Decompressing database</source>
-        <translation type="unfinished"></translation>
+        <translation>Entpacke Datenbank</translation>
     </message>
     <message>
         <source>Error while decompressing %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Fehler beim Entpacken: %1</translation>
     </message>
     <message>
         <source>Error writing to file %1: %2</source>
-        <translation type="unfinished"></translation>
+        <translation>Fehler beim Schreiben in Datei %1: %2</translation>
+    </message>
+    <message>
+        <source>Already up-to-date.</source>
+        <translation>Bereits auf dem aktuellen Stand.</translation>
+    </message>
+    <message>
+        <source>The database is not available.</source>
+        <translation>Die Datenbank ist nicht verfügbar.</translation>
     </message>
 </context>
 <context>
@@ -1784,20 +1646,12 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
         <translation>&amp;Menge:</translation>
     </message>
     <message>
-        <source>&amp;Download even if cached</source>
-        <translation>Neu &amp;laden, selbst wenn eine Kopie vorhanden ist</translation>
-    </message>
-    <message>
         <source>&amp;OK</source>
         <translation>&amp;OK</translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
         <translation>&amp;Abbrechen</translation>
-    </message>
-    <message>
-        <source>Import from &amp;peeron.com (currently a hack that may or may not work)</source>
-        <translation>Von &amp;peeron.com importieren (momentan ein Hack der evtl. nicht funktioniert)</translation>
     </message>
 </context>
 <context>
@@ -2290,12 +2144,8 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
         <translation>&lt;b&gt;Achtung:&lt;/b&gt; Ihre momentan installierte Version ist als defekt markiert. Bitte besuchen Sie %1, um den genauen Grund nachzulesen.</translation>
     </message>
     <message>
-        <source>Downloading version index... %1/%2 KB</source>
-        <translation type="obsolete">Versionstabelle wird gedownloadet... %1/%2 KB</translation>
-    </message>
-    <message>
         <source>Downloading: %1/%2 KB</source>
-        <translation type="unfinished"></translation>
+        <translation>Download: %1/%2 KB</translation>
     </message>
 </context>
 </TS>

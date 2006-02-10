@@ -14,6 +14,8 @@
 #ifndef __CTRANSFER_H__
 #define __CTRANSFER_H__
 
+#include <time.h>
+
 #include <qobject.h>
 #include <qthread.h>
 #include <qptrlist.h>
@@ -21,6 +23,7 @@
 #include <qwaitcondition.h>
 #include <qvaluelist.h>
 #include <qpair.h>
+#include <qdatetime.h>
 
 #include <curl/curl.h>
 
@@ -34,15 +37,17 @@ class CTransfer : public QObject, public QThread {
 public:
 	class Job {
 	public:
-		QCString url ( ) const          { return m_url; }
-		QCString effectiveUrl ( ) const { return m_effective_url; }
-		QString errorString ( ) const   { return failed ( ) ? m_error : QString::null; }
-		bool failed ( ) const           { return m_finished && (( m_result != CURLE_OK ) || ( m_respcode != 200 )); }
-		int responseCode ( ) const      { return m_respcode; }
-		bool finished ( ) const         { return m_finished; }
-		QFile *file ( ) const           { return m_file; }
-		QByteArray *data ( ) const      { return m_data; }
-		void *userObject ( ) const      { return m_userobject; }
+		QCString url ( ) const           { return m_url; }
+		QCString effectiveUrl ( ) const  { return m_effective_url; }
+		QString errorString ( ) const    { return failed ( ) ? m_error : QString::null; }
+		bool failed ( ) const            { return m_finished && (( m_result != CURLE_OK ) || ( m_respcode != 200 )); }
+		int responseCode ( ) const       { return m_respcode; }
+		bool finished ( ) const          { return m_finished; }
+		QFile *file ( ) const            { return m_file; }
+		QByteArray *data ( ) const       { return m_data; }
+		void *userObject ( ) const       { return m_userobject; }
+		QDateTime lastModified ( ) const { QDateTime d; d.setTime_t ( m_filetime ); return d; }
+		bool notModifiedSince ( ) const  { return m_too_old; }
 
 	private:
 		friend class CTransfer;
@@ -59,11 +64,14 @@ public:
 		QFile *      m_file;
 		QString      m_error;
 		void *       m_userobject;
+		time_t       m_ifnewer;
+		time_t       m_filetime;
 
 		CURLcode     m_result;
-		int          m_respcode;
-		bool         m_finished;
-		bool         m_get_or_post;
+		int          m_respcode     : 16;
+		bool         m_finished     : 1;
+		bool         m_get_or_post  : 1;
+		bool         m_too_old      : 1;
 	};
 
 	CTransfer ( );
@@ -72,6 +80,7 @@ public:
 	bool init ( );
 
 	Job *get ( const QCString &url, const CKeyValueList &query, QFile *file = 0, void *userobject = 0, bool high_priority = false );
+	Job *getIfNewer ( const QCString &url, const CKeyValueList &query, const QDateTime &ifnewer, QFile *file = 0, void *userobject = 0, bool high_priority = false );
 	Job *post ( const QCString &url, const CKeyValueList &query, QFile *file = 0, void *userobject = 0, bool high_priority = false );
 
 public slots:
@@ -97,7 +106,7 @@ protected:
 
 private:
 	virtual void run ( );
-	Job *retrieve ( bool get, const QCString &url, const CKeyValueList &query, QFile *file = 0, void *userobject = 0, bool high_priority = false );
+	Job *retrieve ( bool get, const QCString &url, const CKeyValueList &query, time_t ifnewer = 0, QFile *file = 0, void *userobject = 0, bool high_priority = false );
 	void cancel ( Job *j );
 	void updateProgress ( int delta );
 

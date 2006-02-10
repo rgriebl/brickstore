@@ -29,6 +29,8 @@
 #include "cutility.h"
 #include "bricklink.h"
 
+#define DEFAULT_DATABASE_NAME   "database.bin"
+
 
 QCString BrickLink::url ( UrlList u, const void *opt, const void *opt2 )
 {
@@ -524,9 +526,14 @@ void BrickLink::cancelPriceGuideTransfers ( )
 	m_price_guides. transfer-> cancelAllJobs ( );
 }
 
+QString BrickLink::defaultDatabaseName ( ) const
+{
+	return QString( DEFAULT_DATABASE_NAME );
+}
+
 bool BrickLink::readDatabase ( const QString &fname )
 {
-	QString filename = fname. isNull ( ) ? dataPath ( ) + "binary.cache" : fname;
+	QString filename = fname. isNull ( ) ? dataPath ( ) + defaultDatabaseName ( ) : fname;
 
 	cancelInventoryTransfers ( );
 	cancelPictureTransfers ( );
@@ -1300,13 +1307,13 @@ void BrickLink::setDatabase_Basics ( const QIntDict<Color> &colors,
 
 bool BrickLink::writeDatabase ( const QString &fname )
 {
-	QString filename = fname. isNull ( ) ? dataPath ( ) + "binary.cache" : fname;
+	QString filename = fname. isNull ( ) ? dataPath ( ) + defaultDatabaseName ( ) : fname;
 
 	QFile f ( filename + ".new" );
 	if ( f. open ( IO_WriteOnly )) {
 		QDataStream ds ( &f );
 		ds << Q_UINT32( 0 /*magic*/ ) << Q_UINT32 ( 0 /*filesize*/ ) << Q_UINT32( 0 /*version*/ );
-
+		
 		// colors
 		Q_UINT32 colc = m_databases. colors. count ( );
 		ds << colc;

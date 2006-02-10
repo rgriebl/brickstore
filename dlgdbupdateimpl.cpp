@@ -36,7 +36,7 @@ public:
 	bool            m_override;
 };
 
-#define DATABASE_URL   "http://brickforge.de/brickstore-data/binary.cache.lzma"
+#define DATABASE_URL   "http://brickforge.de/brickstore-data/"
 
 
 DlgDBUpdateImpl::DlgDBUpdateImpl ( QWidget *parent, const char *name, bool modal, int fl )
@@ -47,18 +47,27 @@ DlgDBUpdateImpl::DlgDBUpdateImpl ( QWidget *parent, const char *name, bool modal
 	d-> m_has_errors = false;
 	d-> m_file = 0;
 	d-> m_job = 0;
+
 	d-> m_trans = new CTransfer ( );
 	connect ( d-> m_trans, SIGNAL( finished ( CTransfer::Job * )), this, SLOT( transferJobFinished ( CTransfer::Job * )));
 	connect ( d-> m_trans, SIGNAL( progress ( CTransfer::Job *, int, int )), this, SLOT( transferJobProgress ( CTransfer::Job *, int, int )));
 
+	QString remotefile = DATABASE_URL + BrickLink::inst ( )-> defaultDatabaseName ( );
+	QString localfile = BrickLink::inst ( )-> dataPath ( ) + BrickLink::inst ( )-> defaultDatabaseName ( );
+
 	if ( d-> m_trans-> init ( )) {
 		d-> m_trans-> setProxy ( CConfig::inst ( )-> useProxy ( ), CConfig::inst ( )-> proxyName ( ), CConfig::inst ( )-> proxyPort ( ));
 
-		d-> m_file = new QFile ( BrickLink::inst ( )-> dataPath ( ) + "binary.cache.lzma" );
+		QDateTime dt;
+		if ( QFile::exists ( localfile ))
+			dt = CConfig::inst ( )-> lastDatabaseUpdate ( );
+
+		d-> m_file = new QFile ( localfile + ".lzma" );
 
 		if ( d-> m_file-> open ( IO_WriteOnly )) {
-			QString url = DATABASE_URL;
-			d-> m_job = d-> m_trans-> get ( url. latin1 ( ), CKeyValueList ( ), d-> m_file );
+			QString url = remotefile + ".lzma";
+
+			d-> m_job = d-> m_trans-> getIfNewer ( url. latin1 ( ), CKeyValueList ( ), dt, d-> m_file );
 		}
 	}
 
@@ -114,15 +123,22 @@ void DlgDBUpdateImpl::transferJobFinished ( CTransfer::Job *job )
 		if ( d-> m_file-> isOpen ( ))
 			d-> m_file-> close ( );
 
-		if ( !job-> failed ( ) && d-> m_file-> size ( )) {
+		if ( d-> m_job-> notModifiedSince ( )) {
+			d-> m_file-> remove ( );
+			message ( false, tr( "Already up-to-date." ));
+		}
+		else if ( !job-> failed ( ) && d-> m_file-> size ( )) {
 			QString basepath = d-> m_file-> name ( );
 			basepath. truncate ( basepath. length ( ) - 5 ); // strip '.lzma'
 
 			QString error = decompress ( d-> m_file-> name ( ), basepath );
 
 			if ( error. isNull ( )) {
-				if ( BrickLink::inst ( )-> readDatabase ( ))
+				if ( BrickLink::inst ( )-> readDatabase ( )) {
+					CConfig::inst ( )-> setLastDatabaseUpdate ( QDateTime::currentDateTime ( ));
+
 					message ( false, tr( "Finished." ));
+				}
 				else
 					message ( true, tr( "Could not load the new database." ));
 			}
@@ -130,7 +146,7 @@ void DlgDBUpdateImpl::transferJobFinished ( CTransfer::Job *job )
 				message ( true, error );
 		}
 		else
-			message ( true, tr( "Transfer job failed: %1" ). arg ( !job-> responseCode ( ) ? job-> errorString ( ) :  tr( "Version information is not available." )));
+			message ( true, tr( "Transfer job failed: %1" ). arg ( !job-> responseCode ( ) ? job-> errorString ( ) :  tr( "The database is not available." )));
 
 		w_progress-> setProgress ( -1, -1 );
 		QApplication::restoreOverrideCursor ( );

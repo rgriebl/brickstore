@@ -12,6 +12,7 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 #include <stdlib.h>
+#include <time.h>
 
 #include <qglobal.h>
 #include <qdir.h>
@@ -136,6 +137,21 @@ void CConfig::upgrade ( int vmajor, int vminor, int vrev )
 	}
 }
 
+QDateTime CConfig::lastDatabaseUpdate ( ) const
+{
+	QDateTime dt;
+
+	time_t tt = readNumEntry ( "/BrickLink/LastDBUpdate", 0 );
+	if ( tt )
+		dt. setTime_t ( tt );
+	return dt;
+}
+
+void CConfig::setLastDatabaseUpdate ( const QDateTime &dt )
+{
+	time_t tt = dt. isValid ( ) ? dt. toTime_t ( ) : 0;
+	writeEntry ( "/BrickLink/LastDBUpdate", tt );
+}
 
 bool CConfig::showInputErrors ( ) const
 {

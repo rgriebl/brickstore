@@ -80,12 +80,17 @@ void CTransfer::setProxy ( bool enable, const QString &name, int port )
 
 CTransfer::Job *CTransfer::get ( const QCString &url, const CKeyValueList &query, QFile *file, void *userobject, bool high_priority )
 {
-	return retrieve ( true, url, query, file, userobject, high_priority );
+	return retrieve ( true, url, query, 0, file, userobject, high_priority );
+}
+
+CTransfer::Job *CTransfer::getIfNewer ( const QCString &url, const CKeyValueList &query, const QDateTime &dt, QFile *file, void *userobject, bool high_priority )
+{
+	return retrieve ( true, url, query, dt. isValid ( ) ? dt. toTime_t ( ) : 0, file, userobject, high_priority );
 }
 
 CTransfer::Job *CTransfer::post ( const QCString &url, const CKeyValueList &query, QFile *file, void *userobject, bool high_priority )
 {
-	return retrieve ( false, url, query, file, userobject, high_priority );
+	return retrieve ( false, url, query, 0, file, userobject, high_priority );
 }
 
 QCString CTransfer::buildQueryString ( const CKeyValueList &kvl )
@@ -114,7 +119,7 @@ QCString CTransfer::buildQueryString ( const CKeyValueList &kvl )
 	return query;
 }
 
-CTransfer::Job *CTransfer::retrieve ( bool get, const QCString &url, const CKeyValueList &query, QFile *file, void *userobject, bool high_priority )
+CTransfer::Job *CTransfer::retrieve ( bool get, const QCString &url, const CKeyValueList &query, time_t ifnewer, QFile *file, void *userobject, bool high_priority )
 {
 	if ( url. isEmpty ( )) //  || ( file && ( !file-> isOpen ( ) || !file-> isWritable ( ))))
 		return 0;
@@ -122,6 +127,7 @@ CTransfer::Job *CTransfer::retrieve ( bool get, const QCString &url, const CKeyV
 	Job *j = new Job ( );
 	j-> m_url = url;
 	j-> m_query = buildQueryString ( query );
+	j-> m_ifnewer = ifnewer;
 
 	j-> m_data = file ? 0 : new QByteArray ( );
 	j-> m_file = file;
@@ -132,6 +138,8 @@ CTransfer::Job *CTransfer::retrieve ( bool get, const QCString &url, const CKeyV
 	j-> m_result = CURLE_OK;
 	j-> m_respcode = 0;
 	j-> m_finished = false;
+	j-> m_filetime = 0;
+	j-> m_too_old = false;
 
 	m_queue_lock. lock ( );
 	if ( high_priority )
@@ -198,6 +206,7 @@ void CTransfer::run ( )
 	::curl_easy_setopt ( m_curl, CURLOPT_WRITEDATA, this );
 	::curl_easy_setopt ( m_curl, CURLOPT_USERAGENT, ua. latin1 ( ));
 	::curl_easy_setopt ( m_curl, CURLOPT_ENCODING, "" );
+	::curl_easy_setopt ( m_curl, CURLOPT_FILETIME, 1 ); 
 
 	QCString url, query;
 
@@ -235,7 +244,9 @@ void CTransfer::run ( )
 				
 				::curl_easy_setopt ( m_curl, CURLOPT_HTTPGET, 1 );
 				::curl_easy_setopt ( m_curl, CURLOPT_URL, url. data ( ));
-
+				::curl_easy_setopt ( m_curl, CURLOPT_TIMEVALUE, j-> m_ifnewer );
+				::curl_easy_setopt ( m_curl, CURLOPT_TIMECONDITION, j-> m_ifnewer ? CURL_TIMECOND_IFMODSINCE : CURL_TIMECOND_NONE );
+				
 				//qDebug ( "CTransfer::get [%s]", url. data ( ));
 			}
 			else {
@@ -260,6 +271,7 @@ void CTransfer::run ( )
 		CURLcode res = ::curl_easy_perform ( m_curl );
 		long respcode = 0;
 		char *effurl = 0;
+		long filetime = -1;
 
 		m_file_total = m_file_progress = -1;
 		QApplication::postEvent ( this, new QCustomEvent ((QEvent::Type) TransferProgressEvent, 0 ));
@@ -267,6 +279,7 @@ void CTransfer::run ( )
 		if ( res == CURLE_OK ) {
 			::curl_easy_getinfo ( m_curl, CURLINFO_RESPONSE_CODE, &respcode );
 			::curl_easy_getinfo ( m_curl, CURLINFO_EFFECTIVE_URL, &effurl );
+			::curl_easy_getinfo ( m_curl, CURLINFO_FILETIME, &filetime );
 		}
 
 		m_queue_lock. lock ( );
@@ -277,6 +290,10 @@ void CTransfer::run ( )
 				j-> m_error = ::curl_easy_strerror ( res );
 			j-> m_respcode = respcode;
 			j-> m_effective_url = effurl;
+			j-> m_filetime = time_t(( filetime != -1 ) ? filetime : 0 );
+
+			if ( j-> m_ifnewer && (( respcode == 304 ) || ( filetime != -1 && filetime < j-> m_ifnewer ))) 
+				j-> m_too_old = true;
 		}
 		else if ( m_active_job == 0 ) {
 			j-> m_result = CURLE_ABORTED_BY_CALLBACK;

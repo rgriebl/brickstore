@@ -1352,12 +1352,6 @@
     </message>
 </context>
 <context>
-    <name>Command::AddRemoveItems</name>
-</context>
-<context>
-    <name>Command::EditItems</name>
-</context>
-<context>
     <name>DlgAddItem</name>
     <message>
         <source>Add Item to %1</source>
@@ -1462,10 +1456,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Version information is not available.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Error</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1495,6 +1485,14 @@
     </message>
     <message>
         <source>Error writing to file %1: %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Already up-to-date.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The database is not available.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1638,10 +1636,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>&amp;Download even if cached</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>&amp;Quantity:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1651,10 +1645,6 @@
     </message>
     <message>
         <source>&amp;Cancel</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Import from &amp;peeron.com (currently a hack that may or may not work)</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

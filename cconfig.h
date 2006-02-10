@@ -55,6 +55,8 @@ public:
 	QString proxyName ( ) const;
 	int proxyPort ( ) const;
 
+	QDateTime lastDatabaseUpdate ( ) const;
+
 	QString blLoginUsername ( ) const;
 	QString blLoginPassword ( ) const;
 	void blUpdateIntervals ( int &pic, int &pg ) const;
@@ -75,6 +77,8 @@ public slots:
 	void setWindowMode ( int mode );
 	void setOnlineStatus ( bool b );
 	void setProxy ( bool b, const QString &name, int port );
+
+	void setLastDatabaseUpdate ( const QDateTime &dt );
 
 	void setBlLoginUsername ( const QString &name );
 	void setBlLoginPassword ( const QString &pass );
