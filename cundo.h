@@ -105,7 +105,7 @@ private:
 	CUndoCmd *m_clean;
 	bool m_clean_valid;
 	int m_macro_level;
-	QString m_last_macro_begin;
+	CUndoCmd *m_last_macro_begin;
 };
 
 

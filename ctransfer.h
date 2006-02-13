@@ -40,14 +40,14 @@ public:
 		QCString url ( ) const           { return m_url; }
 		QCString effectiveUrl ( ) const  { return m_effective_url; }
 		QString errorString ( ) const    { return failed ( ) ? m_error : QString::null; }
-		bool failed ( ) const            { return m_finished && (( m_result != CURLE_OK ) || ( m_respcode != 200 )); }
+		bool failed ( ) const            { return m_finished && m_failed; }
 		int responseCode ( ) const       { return m_respcode; }
 		bool finished ( ) const          { return m_finished; }
 		QFile *file ( ) const            { return m_file; }
 		QByteArray *data ( ) const       { return m_data; }
 		void *userObject ( ) const       { return m_userobject; }
 		QDateTime lastModified ( ) const { QDateTime d; d.setTime_t ( m_filetime ); return d; }
-		bool notModifiedSince ( ) const  { return m_too_old; }
+		bool notModifiedSince ( ) const  { return m_not_modified; }
 
 	private:
 		friend class CTransfer;
@@ -71,7 +71,8 @@ public:
 		int          m_respcode     : 16;
 		bool         m_finished     : 1;
 		bool         m_get_or_post  : 1;
-		bool         m_too_old      : 1;
+		bool         m_not_modified : 1;
+		bool         m_failed       : 1;
 	};
 
 	CTransfer ( );

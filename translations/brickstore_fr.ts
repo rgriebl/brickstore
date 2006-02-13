@@ -9,20 +9,23 @@
         <source>HTTP transfer threads could not be started.</source>
         <translation type="unfinished"></translation>
     </message>
+</context>
+<context>
+    <name>CAddRemoveCmd</name>
     <message>
-        <source>Could not parse the XML data for order #%1:&lt;br /&gt;&lt;i&gt;Line %2, column %3: %4&lt;/i&gt;</source>
+        <source>Added %1 Items</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Could not parse the XML data for order #%1.</source>
+        <source>Added an Item</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Could not parse the XML data for the store inventory:&lt;br /&gt;&lt;i&gt;Line %1, column %2: %3&lt;/i&gt;</source>
+        <source>Removed %1 Items</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Could not parse the XML data for the store inventory.</source>
+        <source>Removed an Item</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -42,6 +45,10 @@
     </message>
     <message>
         <source>Name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Part out Item...</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -69,6 +76,56 @@
     </message>
     <message>
         <source>Visit %1, or send an email to %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>CChangeCmd</name>
+    <message>
+        <source>Modified Item</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>CCheckForUpdates</name>
+    <message>
+        <source>Checking for program updates</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>You are currently running %1 %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Version information is not available.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Your currently installed version is up-to-date.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>A newer version than the one currently installed is available:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Stable release</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Beta release</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Detailed list of changes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>the BrickStore homepage</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Please note:&lt;/b&gt; Your currently installed version is flagged as defective. Please visit %1 to find out the exact cause.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -107,19 +164,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Internal error: Could not create an Inventory object for oder #%1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Invalid order number.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Store %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Internal error: Could not create an Inventory object for store inventory</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -163,14 +212,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>The order #%1 could not be retrieved.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>The inventory you requested could not be retrieved.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Save File as</source>
         <translation type="unfinished"></translation>
     </message>
@@ -202,30 +243,16 @@
         <source>This list contains items with errors.&lt;br /&gt;&lt;br /&gt;Do you really want to export this list?</source>
         <translation type="unfinished"></translation>
     </message>
-</context>
-<context>
-    <name>CDocument::AddRemoveCmd</name>
     <message>
-        <source>Added %1 Items</source>
+        <source>Enter the set ID of the Peeron inventory:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Added an Item</source>
+        <source>Peeron Inventory for %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Removed %1 Items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Removed an Item</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>CDocument::ChangeCmd</name>
-    <message>
-        <source>Modified Item</source>
+        <source>Reset Differences</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -684,6 +711,63 @@
         <source>Do you want to cancel all outstanding inventory, picture and price guide transfers?</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Peeron Inventory...</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>CImportBLOrder</name>
+    <message>
+        <source>Importing BrickLink Order</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Download: %1/%2 KB</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not parse the XML data for order #%1.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not parse the XML data for order #%1:&lt;br /&gt;&lt;i&gt;Line %2, column %3: %4&lt;/i&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>CImportBLStore</name>
+    <message>
+        <source>Importing BrickLink Store</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Download: %1/%2 KB</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not parse the XML data for the store inventory:&lt;br /&gt;&lt;i&gt;Line %1, column %2: %3&lt;/i&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not parse the XML data for the store inventory.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>CImportPeeronInventory</name>
+    <message>
+        <source>Importing Peeron Inventory</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Download: %1/%2 KB</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not parse the Peeron inventory.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>CItemView</name>
@@ -1008,6 +1092,29 @@
         <source>Update</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Double-click to set the price of the current item.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>CProgressDialog</name>
+    <message>
+        <source>&amp;OK</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;Cancel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Download failed: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>CReport</name>
@@ -1222,6 +1329,61 @@
     </message>
 </context>
 <context>
+    <name>CUpdateDatabase</name>
+    <message>
+        <source>Updating BrickLink Database</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Download: %1/%2 KB</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not write to file: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Already up-to-date.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Finished.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not load the new database.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Downloaded file is empty.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not read downloaded file: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not write to database file: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not initialize the LZMA decompressor</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Decompressing database</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error while decompressing %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error writing to file %1: %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>CUtility</name>
     <message>
         <source>Could not rename %1 to %2.</source>
@@ -1287,10 +1449,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Reset Differences</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Overwrite the currently selected items?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1348,6 +1506,14 @@
     </message>
     <message>
         <source>Received</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Merged %1 Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Subtracted %1 Items</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1415,84 +1581,6 @@
     </message>
     <message>
         <source>&amp;Close</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>DlgDBUpdate</name>
-    <message>
-        <source>BrickStore</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Updating BrickLink Database files:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&amp;OK</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&amp;Cancel</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>DlgDBUpdateImpl</name>
-    <message>
-        <source>Transfer job could not be started.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Downloading: %1/%2 KB</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Already up-to-date.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Finished.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Could not load the new database.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Transfer job failed: %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>The database is not available.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Could not read downloaded file: %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Could not write to database file: %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Could not initialize the LZMA decompressor</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Decompressing database</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error while decompressing %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error writing to file %1: %2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2073,72 +2161,6 @@
     </message>
     <message>
         <source>&amp;Cancel</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>DlgUpdate</name>
-    <message>
-        <source>Check for Program Updates</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&amp;OK</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&amp;Cancel</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>DlgUpdateImpl</name>
-    <message>
-        <source>You are currently running %1 %2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Could not retrieve version information from server:&lt;br /&gt;&lt;br /&gt;%1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Transfer job could not be started.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Downloading: %1/%2 KB</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Version information is not available.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Your currently installed version is up-to-date.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>A newer version than the one currently installed is available:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Stable release</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Beta release</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Detailed list of changes</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>the BrickStore homepage</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&lt;b&gt;Please note:&lt;/b&gt; Your currently installed version is flagged as defective. Please visit %1 to find out the exact cause.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

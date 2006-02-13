@@ -160,44 +160,44 @@ CItemView::CItemView ( CDocument *doc, QWidget *parent, const char *name )
 	setShowToolTips ( false );
 	d-> m_tooltips = new CItemViewToolTip ( viewport ( ), this );
 
-	for ( int i = 0; i < FieldCount; i++ ) {
+	for ( int i = 0; i < CDocument::FieldCount; i++ ) {
 		int align = AlignLeft;
 		QString t;
 		int width = 0;
 		int hidden = 0;
 
 		switch ( i ) {
-			case Status      : align = AlignCenter; width = -16; break;
-			case Picture     : align = AlignCenter; width = -40; break;
-			case PartNo      : width = 10; break;
-			case Description : width = 28; break;
-			case Comments    : width = 8; break;
-			case Remarks     : width = 8; break;
-			case QuantityOrig: width = 5; hidden = 2; break;
-			case QuantityDiff: width = 5; hidden = 2; break;
-			case Quantity    : width = 5; break;
-			case Bulk        : width = 5; break;
-			case PriceOrig   : width = 8; align = AlignRight; hidden = 2; break;
-			case PriceDiff   : width = 8; align = AlignRight; hidden = 2; break;
-			case Price       : width = 8; align = AlignRight; break;
-			case Total       : width = 8; align = AlignRight; break;
-			case Sale        : width = 5; align = AlignRight; break;
-			case Condition   : width = 5; align = AlignHCenter; break;
-			case Color       : width = 15; break;
-			case Category    : width = 12; break;
-			case ItemType    : width = 12; break;
-			case TierQ1      : width = 5; break;
-			case TierP1      : width = 8; align = AlignRight; break;
-			case TierQ2      : width = 5; break;
-			case TierP2      : width = 8; align = AlignRight; break;
-			case TierQ3      : width = 5; break;
-			case TierP3      : width = 8; align = AlignRight; break;
-			case LotId       : align = AlignLeft; width = 8; hidden = 1; break;
-			case Retain      : align = AlignCenter; width = 8; hidden = 1; break;
-			case Stockroom   : align = AlignCenter; width = 8; hidden = 1; break;
-			case Reserved    : width = 8; hidden = 1; break;
-			case Weight      : align = AlignRight; width = 6; hidden = 1; break;
-			case YearReleased: width = 5; hidden = 1; break;
+			case CDocument::Status      : align = AlignCenter; width = -16; break;
+			case CDocument::Picture     : align = AlignCenter; width = -40; break;
+			case CDocument::PartNo      : width = 10; break;
+			case CDocument::Description : width = 28; break;
+			case CDocument::Comments    : width = 8; break;
+			case CDocument::Remarks     : width = 8; break;
+			case CDocument::QuantityOrig: width = 5; hidden = 2; break;
+			case CDocument::QuantityDiff: width = 5; hidden = 2; break;
+			case CDocument::Quantity    : width = 5; break;
+			case CDocument::Bulk        : width = 5; break;
+			case CDocument::PriceOrig   : width = 8; align = AlignRight; hidden = 2; break;
+			case CDocument::PriceDiff   : width = 8; align = AlignRight; hidden = 2; break;
+			case CDocument::Price       : width = 8; align = AlignRight; break;
+			case CDocument::Total       : width = 8; align = AlignRight; break;
+			case CDocument::Sale        : width = 5; align = AlignRight; break;
+			case CDocument::Condition   : width = 5; align = AlignHCenter; break;
+			case CDocument::Color       : width = 15; break;
+			case CDocument::Category    : width = 12; break;
+			case CDocument::ItemType    : width = 12; break;
+			case CDocument::TierQ1      : width = 5; break;
+			case CDocument::TierP1      : width = 8; align = AlignRight; break;
+			case CDocument::TierQ2      : width = 5; break;
+			case CDocument::TierP2      : width = 8; align = AlignRight; break;
+			case CDocument::TierQ3      : width = 5; break;
+			case CDocument::TierP3      : width = 8; align = AlignRight; break;
+			case CDocument::LotId       : align = AlignLeft; width = 8; hidden = 1; break;
+			case CDocument::Retain      : align = AlignCenter; width = 8; hidden = 1; break;
+			case CDocument::Stockroom   : align = AlignCenter; width = 8; hidden = 1; break;
+			case CDocument::Reserved    : width = 8; hidden = 1; break;
+			case CDocument::Weight      : align = AlignRight; width = 6; hidden = 1; break;
+			case CDocument::YearReleased: width = 5; hidden = 1; break;
 		}
 		int cid = addColumn ( t );
 		setColumnAlignment ( cid, align );
@@ -219,41 +219,41 @@ CItemView::CItemView ( CDocument *doc, QWidget *parent, const char *name )
 
 void CItemView::languageChange ( )
 {
-	for ( int i = 0; i < FieldCount; i++ ) {
+	for ( int i = 0; i < CDocument::FieldCount; i++ ) {
 		QString t;
 
 		switch ( i ) {
-			case Status      : t = tr( "Status" ); break;
-			case Picture     : t = tr( "Image" ); break;
-			case PartNo      : t = tr( "PartNo" ); break;
-			case Description : t = tr( "Description" ); break;
-			case Comments    : t = tr( "Comments" ); break;
-			case Remarks     : t = tr( "Remarks" ); break;
-			case QuantityOrig: t = tr( "Qty. Orig" ); break;
-			case QuantityDiff: t = tr( "Qty. Diff" ); break;
-			case Quantity    : t = tr( "Qty." ); break;
-			case Bulk        : t = tr( "Bulk" ); break;
-			case PriceOrig   : t = tr( "Pr. Orig" ); break;
-			case PriceDiff   : t = tr( "Pr. Diff" ); break;
-			case Price       : t = tr( "Price" ); break;
-			case Total       : t = tr( "Total" ); break;
-			case Sale        : t = tr( "Sale" ); break;
-			case Condition   : t = tr( "Cond." ); break;
-			case Color       : t = tr( "Color" ); break;
-			case Category    : t = tr( "Category" ); break;
-			case ItemType    : t = tr( "Item Type" ); break;
-			case TierQ1      : t = tr( "Tier Q1" ); break;
-			case TierP1      : t = tr( "Tier P1" ); break;
-			case TierQ2      : t = tr( "Tier Q2" ); break;
-			case TierP2      : t = tr( "Tier P2" ); break;
-			case TierQ3      : t = tr( "Tier Q3" ); break;
-			case TierP3      : t = tr( "Tier P3" ); break;
-			case LotId       : t = tr( "Lot Id" ); break;
-			case Retain      : t = tr( "Retain" ); break;
-			case Stockroom   : t = tr( "Stockroom" ); break;
-			case Reserved    : t = tr( "Reserved" ); break;
-			case Weight      : t = tr( "Weight" ); break;
-			case YearReleased: t = tr( "Year" ); break;
+			case CDocument::Status      : t = tr( "Status" ); break;
+			case CDocument::Picture     : t = tr( "Image" ); break;
+			case CDocument::PartNo      : t = tr( "PartNo" ); break;
+			case CDocument::Description : t = tr( "Description" ); break;
+			case CDocument::Comments    : t = tr( "Comments" ); break;
+			case CDocument::Remarks     : t = tr( "Remarks" ); break;
+			case CDocument::QuantityOrig: t = tr( "Qty. Orig" ); break;
+			case CDocument::QuantityDiff: t = tr( "Qty. Diff" ); break;
+			case CDocument::Quantity    : t = tr( "Qty." ); break;
+			case CDocument::Bulk        : t = tr( "Bulk" ); break;
+			case CDocument::PriceOrig   : t = tr( "Pr. Orig" ); break;
+			case CDocument::PriceDiff   : t = tr( "Pr. Diff" ); break;
+			case CDocument::Price       : t = tr( "Price" ); break;
+			case CDocument::Total       : t = tr( "Total" ); break;
+			case CDocument::Sale        : t = tr( "Sale" ); break;
+			case CDocument::Condition   : t = tr( "Cond." ); break;
+			case CDocument::Color       : t = tr( "Color" ); break;
+			case CDocument::Category    : t = tr( "Category" ); break;
+			case CDocument::ItemType    : t = tr( "Item Type" ); break;
+			case CDocument::TierQ1      : t = tr( "Tier Q1" ); break;
+			case CDocument::TierP1      : t = tr( "Tier P1" ); break;
+			case CDocument::TierQ2      : t = tr( "Tier Q2" ); break;
+			case CDocument::TierP2      : t = tr( "Tier P2" ); break;
+			case CDocument::TierQ3      : t = tr( "Tier Q3" ); break;
+			case CDocument::TierP3      : t = tr( "Tier P3" ); break;
+			case CDocument::LotId       : t = tr( "Lot Id" ); break;
+			case CDocument::Retain      : t = tr( "Retain" ); break;
+			case CDocument::Stockroom   : t = tr( "Stockroom" ); break;
+			case CDocument::Reserved    : t = tr( "Reserved" ); break;
+			case CDocument::Weight      : t = tr( "Weight" ); break;
+			case CDocument::YearReleased: t = tr( "Year" ); break;
 		}
 		setColumnText ( i, t );
 	}
@@ -264,6 +264,11 @@ CItemView::~CItemView ( )
 {
 	delete d-> m_tooltips;
 	delete d;
+}
+
+CDocument *CItemView::document ( ) const
+{
+	return d-> m_doc;
 }
 
 QString CItemView::statusLabel ( BrickLink::InvItem::Status status )
@@ -301,34 +306,34 @@ void CItemView::setSimpleMode ( bool b )
 	d-> m_simple_mode = b;
 
 	if ( b ) {
-		hideColumn ( Bulk, true );
-		hideColumn ( Sale, true );
-		hideColumn ( TierQ1, true );
-		hideColumn ( TierQ2, true );
-		hideColumn ( TierQ3, true );
-		hideColumn ( TierP1, true );
-		hideColumn ( TierP2, true );
-		hideColumn ( TierP3, true );
-		hideColumn ( Reserved, true );
-		hideColumn ( Stockroom, true );
-		hideColumn ( Retain, true );
-		hideColumn ( LotId, true );
-		hideColumn ( Remarks, true );
+		hideColumn ( CDocument::Bulk, true );
+		hideColumn ( CDocument::Sale, true );
+		hideColumn ( CDocument::TierQ1, true );
+		hideColumn ( CDocument::TierQ2, true );
+		hideColumn ( CDocument::TierQ3, true );
+		hideColumn ( CDocument::TierP1, true );
+		hideColumn ( CDocument::TierP2, true );
+		hideColumn ( CDocument::TierP3, true );
+		hideColumn ( CDocument::Reserved, true );
+		hideColumn ( CDocument::Stockroom, true );
+		hideColumn ( CDocument::Retain, true );
+		hideColumn ( CDocument::LotId, true );
+		hideColumn ( CDocument::Remarks, true );
 	}
 	else {
-		showColumn ( Bulk );
-		showColumn ( Sale );
-		showColumn ( TierQ1 );
-		showColumn ( TierQ2 );
-		showColumn ( TierQ3 );
-		showColumn ( TierP1 );
-		showColumn ( TierP2 );
-		showColumn ( TierP3 );
-		showColumn ( Reserved );
-		showColumn ( Stockroom );
-		showColumn ( Retain );
-		showColumn ( LotId );
-		showColumn ( Remarks );
+		showColumn ( CDocument::Bulk );
+		showColumn ( CDocument::Sale );
+		showColumn ( CDocument::TierQ1 );
+		showColumn ( CDocument::TierQ2 );
+		showColumn ( CDocument::TierQ3 );
+		showColumn ( CDocument::TierP1 );
+		showColumn ( CDocument::TierP2 );
+		showColumn ( CDocument::TierP3 );
+		showColumn ( CDocument::Reserved );
+		showColumn ( CDocument::Stockroom );
+		showColumn ( CDocument::Retain );
+		showColumn ( CDocument::LotId );
+		showColumn ( CDocument::Remarks );
 	}
 }
 
@@ -342,27 +347,27 @@ void CItemView::setDifferenceMode ( bool b )
 	d-> m_diff_mode = b;
 
 	if ( b ) {
-		showColumn ( QuantityDiff );
-		showColumn ( QuantityOrig );
+		showColumn ( CDocument::QuantityDiff );
+		showColumn ( CDocument::QuantityOrig );
 
-		if ( isColumnVisible ( Quantity )) {
-			header ( )-> moveSection ( QuantityDiff, header ( )-> mapToIndex ( Quantity ));
-			header ( )-> moveSection ( QuantityOrig, header ( )-> mapToIndex ( QuantityDiff ));
+		if ( isColumnVisible ( CDocument::Quantity )) {
+			header ( )-> moveSection ( CDocument::QuantityDiff, header ( )-> mapToIndex ( CDocument::Quantity ));
+			header ( )-> moveSection ( CDocument::QuantityOrig, header ( )-> mapToIndex ( CDocument::QuantityDiff ));
 		}
 
-		showColumn ( PriceDiff );
-		showColumn ( PriceOrig );
+		showColumn ( CDocument::PriceDiff );
+		showColumn ( CDocument::PriceOrig );
 		
-		if ( isColumnVisible ( Price )) {
-			header ( )-> moveSection ( PriceDiff, header ( )-> mapToIndex ( Price ));
-			header ( )-> moveSection ( PriceOrig, header ( )-> mapToIndex ( PriceDiff ));
+		if ( isColumnVisible ( CDocument::Price )) {
+			header ( )-> moveSection ( CDocument::PriceDiff, header ( )-> mapToIndex ( CDocument::Price ));
+			header ( )-> moveSection ( CDocument::PriceOrig, header ( )-> mapToIndex ( CDocument::PriceDiff ));
 		}
 	}
 	else {
-		hideColumn ( PriceOrig, true );
-		hideColumn ( PriceDiff, true );
-		hideColumn ( QuantityOrig, true );
-		hideColumn ( QuantityDiff, true );
+		hideColumn ( CDocument::PriceOrig, true );
+		hideColumn ( CDocument::PriceDiff, true );
+		hideColumn ( CDocument::QuantityOrig, true );
+		hideColumn ( CDocument::QuantityDiff, true );
 	}
 }
 
@@ -384,17 +389,17 @@ void CItemView::applyFilter ( const QString &filter, int field, bool is_regex )
 
 		bool b = regexp. isEmpty ( ) || !regexp. isValid ( );
 
-		if ( !b && ( field >= 0 ) && ( field < CItemView::FieldCount )) { // normal field
+		if ( !b && ( field >= 0 ) && ( field < CDocument::FieldCount )) { // normal field
 			b = ( regexp. search ( ivi-> text ( field )) >= 0 );
 		}
 		else if ( !b && ( field < 0 )) { // special field
 			int fieldindex = -field - 1;
 
-			static int matchfields [FilterCountSpecial][CItemView::FieldCount + 1] = {
-				{ /*All       */ CItemView::PartNo, CItemView::Description, CItemView::Comments, CItemView::Remarks, CItemView::Quantity, CItemView::Price, CItemView::Color, CItemView::Category, CItemView::ItemType, CItemView::TierQ1, CItemView::TierP1, CItemView::TierQ2, CItemView::TierP2, CItemView::TierQ3, CItemView::TierP3, CItemView::Weight, CItemView::YearReleased, -1 },
-				{ /*Prices    */ CItemView::Price, CItemView::TierP1, CItemView::TierP2, CItemView::TierP3, CItemView::Total, -1 },
-				{ /*Texts     */ CItemView::Description, CItemView::Comments, CItemView::Remarks, -1 },
-				{ /*Quantities*/ CItemView::Quantity, CItemView::TierQ1, CItemView::TierQ2, CItemView::TierQ3, -1 },
+			static int matchfields [FilterCountSpecial][CDocument::FieldCount + 1] = {
+				{ /*All       */ CDocument::PartNo, CDocument::Description, CDocument::Comments, CDocument::Remarks, CDocument::Quantity, CDocument::Price, CDocument::Color, CDocument::Category, CDocument::ItemType, CDocument::TierQ1, CDocument::TierP1, CDocument::TierQ2, CDocument::TierP2, CDocument::TierQ3, CDocument::TierP3, CDocument::Weight, CDocument::YearReleased, -1 },
+				{ /*Prices    */ CDocument::Price, CDocument::TierP1, CDocument::TierP2, CDocument::TierP3, CDocument::Total, -1 },
+				{ /*Texts     */ CDocument::Description, CDocument::Comments, CDocument::Remarks, -1 },
+				{ /*Quantities*/ CDocument::Quantity, CDocument::TierQ1, CDocument::TierQ2, CDocument::TierQ3, -1 },
 			};
 
 			for ( int i = 0; matchfields [fieldindex][i] != -1; i++ ) {
@@ -593,10 +598,10 @@ int CItemViewItem::width ( const QFontMetrics &fm, const QListView *lv, int colu
 	int w = 0;
 
 	switch ( column ) {
-		case CItemView::Status      : w = pixmap ( column )-> width ( ); break;
-		case CItemView::Picture     : w = 40; break;
-		case CItemView::Retain      :
-		case CItemView::Stockroom   : w = lv-> style ( ). pixelMetric ( QStyle::PM_IndicatorWidth ); break;
+		case CDocument::Status      : w = pixmap ( column )-> width ( ); break;
+		case CDocument::Picture     : w = 40; break;
+		case CDocument::Retain      :
+		case CDocument::Stockroom   : w = lv-> style ( ). pixelMetric ( QStyle::PM_IndicatorWidth ); break;
 		default                     : w = CListViewItem::width ( fm, lv, column ); break;
 	}
 	return w + 3;
@@ -607,10 +612,10 @@ QString CItemViewItem::toolTip ( int column ) const
 	QString str;
 
 	switch ( column ) {
-		case CItemView::Status      : str = CItemView::statusLabel ( m_item-> status ( )); break;
-		case CItemView::Picture     : str = text ( CItemView::PartNo ) + " " + text ( CItemView::Description ); break;
-		case CItemView::Condition   : str = CItemView::conditionLabel ( m_item-> condition ( )); break;
-		case CItemView::Category    : {
+		case CDocument::Status      : str = CItemView::statusLabel ( m_item-> status ( )); break;
+		case CDocument::Picture     : str = text ( CDocument::PartNo ) + " " + text ( CDocument::Description ); break;
+		case CDocument::Condition   : str = CItemView::conditionLabel ( m_item-> condition ( )); break;
+		case CDocument::Category    : {
 			const BrickLink::Category **catpp = m_item-> item ( )-> allCategories ( );
 			
 			if ( !catpp [1] ) {
@@ -635,48 +640,48 @@ QString CItemViewItem::text ( int col ) const
 	QString str;
 
 	switch ( col ) {
-		case CItemView::Status      :
-		case CItemView::Picture     :
-		case CItemView::Retain      :
-		case CItemView::Stockroom   : break;
-		case CItemView::LotId       : str = ( m_item-> lotId ( ) == 0 ? dash : QString::number ( m_item-> lotId ( ))); break;
-		case CItemView::PartNo      : str = m_item-> item ( )-> id ( ); break;
-		case CItemView::Description : str = m_item-> item ( )-> name ( ); break;
-		case CItemView::Comments    : str = m_item-> comments ( ); break;
-		case CItemView::Remarks     : str = m_item-> remarks ( ); break;
-		case CItemView::Quantity    : str = QString::number ( m_item-> quantity ( )); break;
-		case CItemView::Bulk        : str = ( m_item-> bulkQuantity ( ) == 1 ? dash : QString::number ( m_item-> bulkQuantity ( ))); break;
-		case CItemView::Price       : str = m_item-> price ( ). toLocalizedString ( ); break;
-		case CItemView::Total       : str = m_item-> total ( ). toLocalizedString ( ); break;
-		case CItemView::Sale        : str = ( m_item-> sale ( ) == 0 ? dash : QString::number ( m_item-> sale ( )) + "%" ); break;
-		case CItemView::Condition   : str = ( m_item-> condition ( ) == BrickLink::New ? "N" : "U" ); break;
-		case CItemView::Color       : str = m_item-> color ( )-> name ( ); break;
-		case CItemView::Category    : str = m_item-> category ( )-> name ( ); break;
-		case CItemView::ItemType    : str = m_item-> itemType ( )-> name ( ); break;
-		case CItemView::TierQ1      : str = ( m_item-> tierQuantity ( 0 ) == 0 ? dash : QString::number ( m_item-> tierQuantity ( 0 ))); break;
-		case CItemView::TierQ2      : str = ( m_item-> tierQuantity ( 1 ) == 0 ? dash : QString::number ( m_item-> tierQuantity ( 1 ))); break;
-		case CItemView::TierQ3      : str = ( m_item-> tierQuantity ( 2 ) == 0 ? dash : QString::number ( m_item-> tierQuantity ( 2 ))); break;
-		case CItemView::TierP1      : str = m_item-> tierPrice ( 0 ). toLocalizedString ( ); break;
-		case CItemView::TierP2      : str = m_item-> tierPrice ( 1 ). toLocalizedString ( ); break;
-		case CItemView::TierP3      : str = m_item-> tierPrice ( 2 ). toLocalizedString ( ); break;
-		case CItemView::Reserved    : str = m_item-> reserved ( ); break;
-		case CItemView::Weight      : str = ( m_item-> weight ( ) == 0 ? dash : CUtility::weightToString ( m_item-> weight ( ), ( CConfig::inst ( )-> weightSystem ( ) == CConfig::WeightImperial ), true, true )); break;
-		case CItemView::YearReleased: str = ( m_item-> item ( )-> yearReleased ( ) == 0 ? dash : QString::number ( m_item-> item ( )-> yearReleased ( ))); break;
+		case CDocument::Status      :
+		case CDocument::Picture     :
+		case CDocument::Retain      :
+		case CDocument::Stockroom   : break;
+		case CDocument::LotId       : str = ( m_item-> lotId ( ) == 0 ? dash : QString::number ( m_item-> lotId ( ))); break;
+		case CDocument::PartNo      : str = m_item-> item ( )-> id ( ); break;
+		case CDocument::Description : str = m_item-> item ( )-> name ( ); break;
+		case CDocument::Comments    : str = m_item-> comments ( ); break;
+		case CDocument::Remarks     : str = m_item-> remarks ( ); break;
+		case CDocument::Quantity    : str = QString::number ( m_item-> quantity ( )); break;
+		case CDocument::Bulk        : str = ( m_item-> bulkQuantity ( ) == 1 ? dash : QString::number ( m_item-> bulkQuantity ( ))); break;
+		case CDocument::Price       : str = m_item-> price ( ). toLocalizedString ( ); break;
+		case CDocument::Total       : str = m_item-> total ( ). toLocalizedString ( ); break;
+		case CDocument::Sale        : str = ( m_item-> sale ( ) == 0 ? dash : QString::number ( m_item-> sale ( )) + "%" ); break;
+		case CDocument::Condition   : str = ( m_item-> condition ( ) == BrickLink::New ? "N" : "U" ); break;
+		case CDocument::Color       : str = m_item-> color ( )-> name ( ); break;
+		case CDocument::Category    : str = m_item-> category ( )-> name ( ); break;
+		case CDocument::ItemType    : str = m_item-> itemType ( )-> name ( ); break;
+		case CDocument::TierQ1      : str = ( m_item-> tierQuantity ( 0 ) == 0 ? dash : QString::number ( m_item-> tierQuantity ( 0 ))); break;
+		case CDocument::TierQ2      : str = ( m_item-> tierQuantity ( 1 ) == 0 ? dash : QString::number ( m_item-> tierQuantity ( 1 ))); break;
+		case CDocument::TierQ3      : str = ( m_item-> tierQuantity ( 2 ) == 0 ? dash : QString::number ( m_item-> tierQuantity ( 2 ))); break;
+		case CDocument::TierP1      : str = m_item-> tierPrice ( 0 ). toLocalizedString ( ); break;
+		case CDocument::TierP2      : str = m_item-> tierPrice ( 1 ). toLocalizedString ( ); break;
+		case CDocument::TierP3      : str = m_item-> tierPrice ( 2 ). toLocalizedString ( ); break;
+		case CDocument::Reserved    : str = m_item-> reserved ( ); break;
+		case CDocument::Weight      : str = ( m_item-> weight ( ) == 0 ? dash : CUtility::weightToString ( m_item-> weight ( ), ( CConfig::inst ( )-> weightSystem ( ) == CConfig::WeightImperial ), true, true )); break;
+		case CDocument::YearReleased: str = ( m_item-> item ( )-> yearReleased ( ) == 0 ? dash : QString::number ( m_item-> item ( )-> yearReleased ( ))); break;
 
-		case CItemView::PriceOrig   : str = m_item-> origPrice ( ). toLocalizedString ( ); break;
-		case CItemView::PriceDiff   : str = ( m_item-> price ( ) - m_item-> origPrice ( )). toLocalizedString ( ); break;
-		case CItemView::QuantityOrig: str = QString::number ( m_item-> origQuantity ( )); break;
-		case CItemView::QuantityDiff: str = QString::number ( m_item-> quantity ( ) - m_item-> origQuantity ( )); break;
+		case CDocument::PriceOrig   : str = m_item-> origPrice ( ). toLocalizedString ( ); break;
+		case CDocument::PriceDiff   : str = ( m_item-> price ( ) - m_item-> origPrice ( )). toLocalizedString ( ); break;
+		case CDocument::QuantityOrig: str = QString::number ( m_item-> origQuantity ( )); break;
+		case CDocument::QuantityDiff: str = QString::number ( m_item-> quantity ( ) - m_item-> origQuantity ( )); break;
 	}
 	return str;
 }
 
 const QPixmap *CItemViewItem::pixmap ( int column ) const
 {
-	if ( column == CItemView::Status ) {
+	if ( column == CDocument::Status ) {
 		return &listView ( )-> d-> m_pixmap_status [QMAX( 0, QMIN( m_item-> status ( ), BrickLink::InvItem::Unknown ))];
 	}
-	else if ( column == CItemView::Picture ) {
+	else if ( column == CDocument::Picture ) {
 		if ( m_picture && (( m_picture-> item ( ) != m_item-> item ( )) || ( m_picture-> color ( ) != m_item-> color ( )))) {
 			m_picture-> release ( );
 			m_picture = 0;
@@ -700,7 +705,7 @@ const QPixmap *CItemViewItem::pixmap ( int column ) const
 		else
 			return &listView ( )-> d-> m_pixmap_nopicture;
 	}
-	else if ( column == CItemView::Color ) {
+	else if ( column == CDocument::Color ) {
 		return listView ( )-> d-> m_pixmap_color [m_item-> color ( )-> id ( )];
 	}
 	else
@@ -733,38 +738,38 @@ int CItemViewItem::compare ( QListViewItem *i, int col, bool /*ascending*/ ) con
 	CItemViewItem *ci = static_cast <CItemViewItem *> ( i );
 
 	switch ( col ) {
-		case CItemView::Status      : return cmp( m_item-> status ( ), (*ci-> m_item). status ( ));
-		case CItemView::Picture     :
-		case CItemView::PartNo      : return qstrcmp ( m_item-> item ( )-> id ( ),       (*ci-> m_item). item ( )-> id ( ));
-		case CItemView::LotId       : return m_item-> lotId ( )                        - (*ci-> m_item). lotId ( );
-		case CItemView::Description : return qstrcmp ( m_item-> item ( )-> name ( ),     (*ci-> m_item). item ( )-> name ( ));
-		case CItemView::Comments    : return m_item-> comments ( ).            compare ( (*ci-> m_item). comments ( ));
-		case CItemView::Remarks     : return m_item-> remarks ( ).             compare ( (*ci-> m_item). remarks ( ));
-		case CItemView::Quantity    : return m_item-> quantity ( )                     - (*ci-> m_item). quantity ( );
-		case CItemView::Bulk        : return m_item-> bulkQuantity ( )                 - (*ci-> m_item). bulkQuantity ( );
-		case CItemView::Price       : return cmp( m_item-> price ( ),                    (*ci-> m_item). price ( ));
-		case CItemView::Total       : return cmp( m_item-> total ( ),                    (*ci-> m_item). total ( ));
-		case CItemView::Sale        : return m_item-> sale ( )                         - (*ci-> m_item). sale ( );
-		case CItemView::Condition   : return cmp( m_item-> condition ( ),                (*ci-> m_item). condition ( ));
-		case CItemView::Color       : return qstrcmp ( m_item-> color ( )-> name ( ),    (*ci-> m_item). color ( )-> name ( ));
-		case CItemView::Category    : return qstrcmp ( m_item-> category ( )-> name ( ), (*ci-> m_item). category ( )-> name ( ));
-		case CItemView::ItemType    : return qstrcmp ( m_item-> itemType ( )-> name ( ), (*ci-> m_item). itemType ( )-> name ( ));
-		case CItemView::TierQ1      : return m_item-> tierQuantity ( 0 )               - (*ci-> m_item). tierQuantity ( 0 );
-		case CItemView::TierQ2      : return m_item-> tierQuantity ( 1 )               - (*ci-> m_item). tierQuantity ( 1 );
-		case CItemView::TierQ3      : return m_item-> tierQuantity ( 2 )               - (*ci-> m_item). tierQuantity ( 2 );
-		case CItemView::TierP1      : return cmp( m_item-> tierPrice ( 0 ),              (*ci-> m_item). tierPrice ( 0 ));
-		case CItemView::TierP2      : return cmp( m_item-> tierPrice ( 1 ),              (*ci-> m_item). tierPrice ( 1 ));
-		case CItemView::TierP3      : return cmp( m_item-> tierPrice ( 2 ),              (*ci-> m_item). tierPrice ( 2 ));
-		case CItemView::Retain      : return cmp( m_item-> retain ( ) ? 1 : 0,           (*ci-> m_item). retain ( ) ? 1 : 0 );
-		case CItemView::Stockroom   : return cmp( m_item-> stockroom ( ) ? 1 : 0,        (*ci-> m_item). stockroom ( ) ? 1 : 0 );
-		case CItemView::Reserved    : return m_item-> reserved ( ).            compare ( (*ci-> m_item). reserved ( ));
-		case CItemView::Weight      : return cmp( m_item-> weight ( ),                   (*ci-> m_item). weight ( ));
-		case CItemView::YearReleased: return cmp( m_item-> item ( )-> yearReleased ( ),  (*ci-> m_item). item ( )-> yearReleased ( ));
+		case CDocument::Status      : return cmp( m_item-> status ( ), (*ci-> m_item). status ( ));
+		case CDocument::Picture     :
+		case CDocument::PartNo      : return qstrcmp ( m_item-> item ( )-> id ( ),       (*ci-> m_item). item ( )-> id ( ));
+		case CDocument::LotId       : return m_item-> lotId ( )                        - (*ci-> m_item). lotId ( );
+		case CDocument::Description : return qstrcmp ( m_item-> item ( )-> name ( ),     (*ci-> m_item). item ( )-> name ( ));
+		case CDocument::Comments    : return m_item-> comments ( ).            compare ( (*ci-> m_item). comments ( ));
+		case CDocument::Remarks     : return m_item-> remarks ( ).             compare ( (*ci-> m_item). remarks ( ));
+		case CDocument::Quantity    : return m_item-> quantity ( )                     - (*ci-> m_item). quantity ( );
+		case CDocument::Bulk        : return m_item-> bulkQuantity ( )                 - (*ci-> m_item). bulkQuantity ( );
+		case CDocument::Price       : return cmp( m_item-> price ( ),                    (*ci-> m_item). price ( ));
+		case CDocument::Total       : return cmp( m_item-> total ( ),                    (*ci-> m_item). total ( ));
+		case CDocument::Sale        : return m_item-> sale ( )                         - (*ci-> m_item). sale ( );
+		case CDocument::Condition   : return cmp( m_item-> condition ( ),                (*ci-> m_item). condition ( ));
+		case CDocument::Color       : return qstrcmp ( m_item-> color ( )-> name ( ),    (*ci-> m_item). color ( )-> name ( ));
+		case CDocument::Category    : return qstrcmp ( m_item-> category ( )-> name ( ), (*ci-> m_item). category ( )-> name ( ));
+		case CDocument::ItemType    : return qstrcmp ( m_item-> itemType ( )-> name ( ), (*ci-> m_item). itemType ( )-> name ( ));
+		case CDocument::TierQ1      : return m_item-> tierQuantity ( 0 )               - (*ci-> m_item). tierQuantity ( 0 );
+		case CDocument::TierQ2      : return m_item-> tierQuantity ( 1 )               - (*ci-> m_item). tierQuantity ( 1 );
+		case CDocument::TierQ3      : return m_item-> tierQuantity ( 2 )               - (*ci-> m_item). tierQuantity ( 2 );
+		case CDocument::TierP1      : return cmp( m_item-> tierPrice ( 0 ),              (*ci-> m_item). tierPrice ( 0 ));
+		case CDocument::TierP2      : return cmp( m_item-> tierPrice ( 1 ),              (*ci-> m_item). tierPrice ( 1 ));
+		case CDocument::TierP3      : return cmp( m_item-> tierPrice ( 2 ),              (*ci-> m_item). tierPrice ( 2 ));
+		case CDocument::Retain      : return cmp( m_item-> retain ( ) ? 1 : 0,           (*ci-> m_item). retain ( ) ? 1 : 0 );
+		case CDocument::Stockroom   : return cmp( m_item-> stockroom ( ) ? 1 : 0,        (*ci-> m_item). stockroom ( ) ? 1 : 0 );
+		case CDocument::Reserved    : return m_item-> reserved ( ).            compare ( (*ci-> m_item). reserved ( ));
+		case CDocument::Weight      : return cmp( m_item-> weight ( ),                   (*ci-> m_item). weight ( ));
+		case CDocument::YearReleased: return cmp( m_item-> item ( )-> yearReleased ( ),  (*ci-> m_item). item ( )-> yearReleased ( ));
 
-		case CItemView::PriceOrig   : return cmp( m_item-> origPrice ( ),                (*ci-> m_item). origPrice ( ));
-		case CItemView::PriceDiff   : return cmp(( m_item-> price ( ) - m_item-> origPrice ( )), ( (*ci-> m_item). price ( ) - (*ci-> m_item). origPrice ( )));
-		case CItemView::QuantityOrig: return m_item-> origQuantity ( )                 - (*ci-> m_item). origQuantity ( );
-		case CItemView::QuantityDiff: return ( m_item-> quantity ( ) - m_item-> origQuantity ( )) - ( (*ci-> m_item). quantity ( ) - (*ci-> m_item). origQuantity ( ));
+		case CDocument::PriceOrig   : return cmp( m_item-> origPrice ( ),                (*ci-> m_item). origPrice ( ));
+		case CDocument::PriceDiff   : return cmp(( m_item-> price ( ) - m_item-> origPrice ( )), ( (*ci-> m_item). price ( ) - (*ci-> m_item). origPrice ( )));
+		case CDocument::QuantityOrig: return m_item-> origQuantity ( )                 - (*ci-> m_item). origQuantity ( );
+		case CDocument::QuantityDiff: return ( m_item-> quantity ( ) - m_item-> origQuantity ( )) - ( (*ci-> m_item). quantity ( ) - (*ci-> m_item). origQuantity ( ));
 	}
 	return 0;
 }
@@ -806,7 +811,7 @@ void CItemViewItem::paintCell ( QPainter *p, const QColorGroup &cg, int col, int
 	fg = cg. text ( );
 
 	switch ( col ) {
-		case CItemView::Description:
+		case CDocument::Description:
 			if ( m_item-> item ( )-> inventoryUpdated ( ). isValid ( )) {
 				QString invstr = CItemView::tr( "Inv" );
 				str = str + " [" + invstr + "]";
@@ -814,69 +819,69 @@ void CItemViewItem::paintCell ( QPainter *p, const QColorGroup &cg, int col, int
 			}
 			break;
 
-		case CItemView::ItemType:
+		case CDocument::ItemType:
 			bg = CUtility::gradientColor ( bg, shadeColor ( m_item-> itemType ( )-> id ( )), 0.1f );
 			break;
 
-		case CItemView::Category:
+		case CDocument::Category:
 			bg = CUtility::gradientColor ( bg, shadeColor ( m_item-> category ( )-> id ( )), 0.2f );
 			break;
 
-		case CItemView::Quantity:
+		case CDocument::Quantity:
 			if ( m_item-> quantity ( ) <= 0 ) {
 				bg = CUtility::gradientColor ( bg, m_item-> quantity ( ) == 0 ? Qt::yellow : Qt::red, 0.5f );
 				fg = CUtility::contrastColor ( fg, -0.2f );
 			}
 			break;
 
-		case CItemView::QuantityDiff:
+		case CDocument::QuantityDiff:
 			if ( m_item-> origQuantity ( ) < m_item-> quantity ( ))
 				bg = CUtility::gradientColor ( bg, Qt::green, 0.3f );
 			else if ( m_item-> origQuantity ( ) > m_item-> quantity ( ))
 				bg = CUtility::gradientColor ( bg, Qt::red, 0.3f );
 			break;
 
-		case CItemView::PriceOrig:
-		case CItemView::QuantityOrig:
+		case CDocument::PriceOrig:
+		case CDocument::QuantityOrig:
 			fg = CUtility::gradientColor ( bg, fg, 0.5f );
 			break;
 
-		case CItemView::PriceDiff:
+		case CDocument::PriceDiff:
 			if ( m_item-> origPrice ( ) < m_item-> price ( ))
 				bg = CUtility::gradientColor ( bg, Qt::green, 0.3f );
 			else if ( m_item-> origPrice ( ) > m_item-> price ( ))
 				bg = CUtility::gradientColor ( bg, Qt::red, 0.3f );
 			break;
 
-		case CItemView::Total:
+		case CDocument::Total:
 			bg = CUtility::gradientColor ( bg, yellow, 0.1f );
 			break;
 
-		case CItemView::Condition:
+		case CDocument::Condition:
 			if ( m_item-> condition ( ) == BrickLink::Used )
 				bg = CUtility::contrastColor ( bg, 0.3f );
 			break;
 
-		case CItemView::TierP1: 
-		case CItemView::TierQ1: 
+		case CDocument::TierP1: 
+		case CDocument::TierQ1: 
 			bg = CUtility::contrastColor ( bg, 0.06f );
 			break;
 
-		case CItemView::TierP2:
-		case CItemView::TierQ2: 
+		case CDocument::TierP2:
+		case CDocument::TierQ2: 
 			bg = CUtility::contrastColor ( bg, 0.12f );
 			break;
 
-		case CItemView::TierP3:
-		case CItemView::TierQ3: 
+		case CDocument::TierP3:
+		case CDocument::TierQ3: 
 			bg = CUtility::contrastColor ( bg, 0.18f );
 			break;
 
-		case CItemView::Retain:
+		case CDocument::Retain:
 			checkmark = m_item-> retain ( ) ? 1 : -1;
 			break;
 
-		case CItemView::Stockroom:
+		case CDocument::Stockroom:
 			checkmark = m_item-> stockroom ( ) ? 1 : -1;
 			break;
 	}
@@ -1027,42 +1032,45 @@ void CItemViewItem::doubleClicked ( const QPoint &/*p*/, int col )
 	lv-> terminateEdit ( true );
 
 	switch ( col ) {
-		case CItemView::LotId       : break;
-		case CItemView::PartNo      : lv-> editWithLineEdit ( this, col, m_item-> item ( )-> id ( )); break;
-		case CItemView::Comments    : lv-> editWithLineEdit ( this, col, m_item-> comments ( )); break;
-		case CItemView::Remarks     : lv-> editWithLineEdit ( this, col, m_item-> remarks ( )); break;
-		case CItemView::Reserved    : lv-> editWithLineEdit ( this, col, m_item-> reserved ( )); break;
-		case CItemView::Sale        : lv-> editWithLineEdit ( this, col, QString::number ( m_item-> sale ( )),           "", new QIntValidator ( -1000, 99, 0 )); break;
-		case CItemView::Quantity    : lv-> editWithLineEdit ( this, col, QString::number ( m_item-> quantity ( )),       "", new QIntValidator ( -99999, 99999, 0 )); break;
-		case CItemView::QuantityDiff: lv-> editWithLineEdit ( this, col, QString::number ( m_item-> quantity ( ) - m_item-> origQuantity ( )), "", new QIntValidator ( -99999, 99999, 0 )); break;
-		case CItemView::Bulk        : lv-> editWithLineEdit ( this, col, QString::number ( m_item-> bulkQuantity ( )),   "", new QIntValidator ( 1, 99999, 0 )); break;
-		case CItemView::TierQ1      : lv-> editWithLineEdit ( this, col, QString::number ( m_item-> tierQuantity ( 0 )), "", new QIntValidator ( 0, 99999, 0 )); break;
-		case CItemView::TierQ2      : lv-> editWithLineEdit ( this, col, QString::number ( m_item-> tierQuantity ( 1 )), "", new QIntValidator ( 0, 99999, 0 )); break;
-		case CItemView::TierQ3      : lv-> editWithLineEdit ( this, col, QString::number ( m_item-> tierQuantity ( 2 )), "", new QIntValidator ( 0, 99999, 0 )); break;
-		case CItemView::Price       : lv-> editWithLineEdit ( this, col, m_item-> price ( ). toLocalizedString ( true ), "", new CMoneyValidator ( 0, 10000, 3, 0 )); break;
-		case CItemView::PriceDiff   : lv-> editWithLineEdit ( this, col, ( m_item-> price ( ) - m_item-> origPrice ( )). toLocalizedString ( true ), "", new CMoneyValidator ( -10000, 10000, 3, 0 )); break;
-		case CItemView::Total       : break;
-		case CItemView::TierP1      : lv-> editWithLineEdit ( this, col, ( m_item-> tierPrice ( 0 ) != 0 ? m_item-> tierPrice ( 0 ) : m_item-> price ( )      ). toLocalizedString ( true ), "", new CMoneyValidator ( 0, 10000, 3, 0 )); break;
-		case CItemView::TierP2      : lv-> editWithLineEdit ( this, col, ( m_item-> tierPrice ( 1 ) != 0 ? m_item-> tierPrice ( 1 ) : m_item-> tierPrice ( 0 )). toLocalizedString ( true ), "", new CMoneyValidator ( 0, 10000, 3, 0 )); break;
-		case CItemView::TierP3      : lv-> editWithLineEdit ( this, col, ( m_item-> tierPrice ( 2 ) != 0 ? m_item-> tierPrice ( 2 ) : m_item-> tierPrice ( 1 )). toLocalizedString ( true ), "", new CMoneyValidator ( 0, 10000, 3, 0 )); break;
-		case CItemView::Weight      : lv-> editWithLineEdit ( this, col, CUtility::weightToString ( m_item-> weight ( ), ( CConfig::inst ( )-> weightSystem ( ) == CConfig::WeightImperial ), false, false ), "", new QDoubleValidator ( 0., 100000., 4, 0 )); break;
+		case CDocument::LotId       : break;
+		case CDocument::PartNo      : lv-> editWithLineEdit ( this, col, m_item-> item ( )-> id ( )); break;
+		case CDocument::Comments    : lv-> editWithLineEdit ( this, col, m_item-> comments ( )); break;
+		case CDocument::Remarks     : lv-> editWithLineEdit ( this, col, m_item-> remarks ( )); break;
+		case CDocument::Reserved    : lv-> editWithLineEdit ( this, col, m_item-> reserved ( )); break;
+		case CDocument::Sale        : lv-> editWithLineEdit ( this, col, QString::number ( m_item-> sale ( )),           "", new QIntValidator ( -1000, 99, 0 )); break;
+		case CDocument::Quantity    : lv-> editWithLineEdit ( this, col, QString::number ( m_item-> quantity ( )),       "", new QIntValidator ( -99999, 99999, 0 )); break;
+		case CDocument::QuantityDiff: lv-> editWithLineEdit ( this, col, QString::number ( m_item-> quantity ( ) - m_item-> origQuantity ( )), "", new QIntValidator ( -99999, 99999, 0 )); break;
+		case CDocument::Bulk        : lv-> editWithLineEdit ( this, col, QString::number ( m_item-> bulkQuantity ( )),   "", new QIntValidator ( 1, 99999, 0 )); break;
+		case CDocument::TierQ1      : lv-> editWithLineEdit ( this, col, QString::number ( m_item-> tierQuantity ( 0 )), "", new QIntValidator ( 0, 99999, 0 )); break;
+		case CDocument::TierQ2      : lv-> editWithLineEdit ( this, col, QString::number ( m_item-> tierQuantity ( 1 )), "", new QIntValidator ( 0, 99999, 0 )); break;
+		case CDocument::TierQ3      : lv-> editWithLineEdit ( this, col, QString::number ( m_item-> tierQuantity ( 2 )), "", new QIntValidator ( 0, 99999, 0 )); break;
+		case CDocument::Price       : lv-> editWithLineEdit ( this, col, m_item-> price ( ). toLocalizedString ( true ), "", new CMoneyValidator ( 0, 10000, 3, 0 )); break;
+		case CDocument::PriceDiff   : lv-> editWithLineEdit ( this, col, ( m_item-> price ( ) - m_item-> origPrice ( )). toLocalizedString ( true ), "", new CMoneyValidator ( -10000, 10000, 3, 0 )); break;
+		case CDocument::Total       : break;
+		case CDocument::TierP1      : lv-> editWithLineEdit ( this, col, ( m_item-> tierPrice ( 0 ) != 0 ? m_item-> tierPrice ( 0 ) : m_item-> price ( )      ). toLocalizedString ( true ), "", new CMoneyValidator ( 0, 10000, 3, 0 )); break;
+		case CDocument::TierP2      : lv-> editWithLineEdit ( this, col, ( m_item-> tierPrice ( 1 ) != 0 ? m_item-> tierPrice ( 1 ) : m_item-> tierPrice ( 0 )). toLocalizedString ( true ), "", new CMoneyValidator ( 0, 10000, 3, 0 )); break;
+		case CDocument::TierP3      : lv-> editWithLineEdit ( this, col, ( m_item-> tierPrice ( 2 ) != 0 ? m_item-> tierPrice ( 2 ) : m_item-> tierPrice ( 1 )). toLocalizedString ( true ), "", new CMoneyValidator ( 0, 10000, 3, 0 )); break;
+		case CDocument::Weight      : lv-> editWithLineEdit ( this, col, CUtility::weightToString ( m_item-> weight ( ), ( CConfig::inst ( )-> weightSystem ( ) == CConfig::WeightImperial ), false, false ), "", new QDoubleValidator ( 0., 100000., 4, 0 )); break;
 
-		case CItemView::Retain      : m_item-> setRetain ( !m_item-> retain ( ));
-		                              repaint ( );
-		                              emit lv-> itemChanged ( this, false );
-		                              break;
-
-		case CItemView::Stockroom   : m_item-> setStockroom ( !m_item-> stockroom ( ));
-		                              repaint ( );
-		                              emit lv-> itemChanged ( this, false );
-		                              break;
-
-		case CItemView::Condition   : m_item-> setCondition ( m_item-> condition ( ) == BrickLink::New ? BrickLink::Used : BrickLink::New );
-		                              repaint ( );
-		                              emit lv-> itemChanged ( this, false );
-		                              break;
-
-		case CItemView::Status      : {
+		case CDocument::Retain      : {
+			CDocument::Item item = *m_item;
+			item. setRetain ( !m_item-> retain ( ));
+			lv-> document ( )-> changeItem ( m_item, item );
+			break;
+		}
+		case CDocument::Stockroom   : {
+			CDocument::Item item = *m_item;
+			item. setStockroom ( !m_item-> stockroom ( ));
+			lv-> document ( )-> changeItem ( m_item, item );
+			break;
+		}
+		case CDocument::Condition   : {
+			CDocument::Item item = *m_item;
+			item. setCondition ( m_item-> condition ( ) == BrickLink::New ? BrickLink::Used : BrickLink::New );
+			lv-> document ( )-> changeItem ( m_item, item );
+			break;
+		}
+		case CDocument::Status      : {
 			BrickLink::InvItem::Status st = m_item-> status ( );
 
 			switch ( st ) {
@@ -1071,43 +1079,35 @@ void CItemViewItem::doubleClicked ( const QPoint &/*p*/, int col )
 				case BrickLink::InvItem::Extra  :
 				default                         : st = BrickLink::InvItem::Include; break;
 			}
-			m_item-> setStatus ( st );
-
-			repaint ( );
-
-			emit lv-> itemChanged ( this, false );
+			CDocument::Item item = *m_item;
+			item. setStatus ( st );
+			lv-> document ( )-> changeItem ( m_item, item );
 			break;
 		}
 
-		case CItemView::Picture     :
-		case CItemView::Description : {
+		case CDocument::Picture     :
+		case CDocument::Description : {
 			CSelectItemDialog d ( false, lv);
 			d. setCaption ( CItemView::tr( "Modify Item" ));
 			d. setItem ( m_item-> item ( ));
 
 			if ( d. exec ( globalRect ( col )) == QDialog::Accepted ) {
-				m_item-> setItem ( d. item ( ));
-
-				widthChanged ( );
-				repaint ( );
-
-				emit lv-> itemChanged ( this, true );
+				CDocument::Item item = *m_item;
+				item. setItem ( d. item ( ));
+				lv-> document ( )-> changeItem ( m_item, item );
 			}
 			break;
 		}
 
-		case CItemView::Color       : {
+		case CDocument::Color       : {
 			CSelectColorDialog d ( lv);
 			d. setCaption ( CItemView::tr( "Modify Color" ));
 			d. setColor ( m_item-> color ( ));
 
 			if ( d. exec ( globalRect ( col )) == QDialog::Accepted ) {
-				m_item-> setColor ( d. color ( ));
-
-				widthChanged ( );
-				repaint ( );
-
-				emit lv-> itemChanged ( this, true );
+				CDocument::Item item = *m_item;
+				item. setColor ( d. color ( ));
+				lv-> document ( )-> changeItem ( m_item, item );
 			}
 			break;
 		}
@@ -1124,15 +1124,13 @@ void CItemViewItem::editDone ( int col, const QString &result, bool valid )
 		return;
 	}
 
-	bool no_repaint = false;
-	bool grave_change = false;
+	CDocument::Item item = *m_item;
 
 	switch ( col ) {
-		case CItemView::PartNo      : {
+		case CDocument::PartNo      : {
 			const BrickLink::Item *newitem = BrickLink::inst ( )-> item ( m_item-> itemType ( )-> id ( ), result. latin1 ( ));
 			if ( newitem ) {
-				m_item-> setItem ( newitem );
-				grave_change = true;
+				item. setItem ( newitem );
 			}
 			else {
 				CMessageBox::information ( listView ( ), not_valid );
@@ -1141,40 +1139,35 @@ void CItemViewItem::editDone ( int col, const QString &result, bool valid )
 			break;
 		}
 
-		case CItemView::Comments    : m_item-> setComments ( result ); break;
-		case CItemView::Remarks     : m_item-> setRemarks ( result ); break;
-		case CItemView::Reserved    : m_item-> setReserved ( result ); break;
+		case CDocument::Comments    : item. setComments ( result ); break;
+		case CDocument::Remarks     : item. setRemarks ( result ); break;
+		case CDocument::Reserved    : item. setReserved ( result ); break;
 
-		case CItemView::Sale        : m_item-> setSale ( result. toInt ( )); break;
+		case CDocument::Sale        : item. setSale ( result. toInt ( )); break;
 
-		case CItemView::Bulk        : m_item-> setBulkQuantity ( result. toInt ( )); break;
-		case CItemView::TierQ1      : m_item-> setTierQuantity ( 0, result. toInt ( )); break;
-		case CItemView::TierQ2      : m_item-> setTierQuantity ( 1, result. toInt ( )); break;
-		case CItemView::TierQ3      : m_item-> setTierQuantity ( 2, result. toInt ( )); break;
+		case CDocument::Bulk        : item. setBulkQuantity ( result. toInt ( )); break;
+		case CDocument::TierQ1      : item. setTierQuantity ( 0, result. toInt ( )); break;
+		case CDocument::TierQ2      : item. setTierQuantity ( 1, result. toInt ( )); break;
+		case CDocument::TierQ3      : item. setTierQuantity ( 2, result. toInt ( )); break;
 
-		case CItemView::TierP1      : m_item-> setTierPrice ( 0, money_t::fromLocalizedString ( result )); break;
-		case CItemView::TierP2      : m_item-> setTierPrice ( 1, money_t::fromLocalizedString ( result )); break;
-		case CItemView::TierP3      : m_item-> setTierPrice ( 2, money_t::fromLocalizedString ( result )); break;
+		case CDocument::TierP1      : item. setTierPrice ( 0, money_t::fromLocalizedString ( result )); break;
+		case CDocument::TierP2      : item. setTierPrice ( 1, money_t::fromLocalizedString ( result )); break;
+		case CDocument::TierP3      : item. setTierPrice ( 2, money_t::fromLocalizedString ( result )); break;
 
-		case CItemView::Weight      : m_item-> setWeight ( CUtility::stringToWeight ( result, ( CConfig::inst ( )-> weightSystem ( ) == CConfig::WeightImperial ))); break;
+		case CDocument::Weight      : item. setWeight ( CUtility::stringToWeight ( result, ( CConfig::inst ( )-> weightSystem ( ) == CConfig::WeightImperial ))); break;
 
-		case CItemView::Quantity    : m_item-> setQuantity ( result. toInt ( )); break;
-		case CItemView::QuantityDiff: m_item-> setQuantity ( m_item-> origQuantity ( ) + result. toInt ( )); break;
+		case CDocument::Quantity    : item. setQuantity ( result. toInt ( )); break;
+		case CDocument::QuantityDiff: item. setQuantity ( m_item-> origQuantity ( ) + result. toInt ( )); break;
 
-		case CItemView::Price       : m_item-> setPrice ( money_t::fromLocalizedString ( result )); break;
-		case CItemView::PriceDiff   : m_item-> setPrice ( m_item-> origPrice ( ) + money_t::fromLocalizedString ( result )); break;
+		case CDocument::Price       : item. setPrice ( money_t::fromLocalizedString ( result )); break;
+		case CDocument::PriceDiff   : item. setPrice ( m_item-> origPrice ( ) + money_t::fromLocalizedString ( result )); break;
 
-		default                     : no_repaint = true; break;
+		default                     : return;
 	}
 
-//	if ( checkForErrors ( ))
-//		no_repaint = false;
+	if ( item == *m_item )
+		return;
 
-	widthChanged ( col );
-
-	if ( !no_repaint )
-		repaint ( );
-
-	emit listView ( )-> itemChanged ( this, grave_change );
+	listView ( )-> document ( )-> changeItem ( m_item, item );
 }
 

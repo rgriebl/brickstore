@@ -69,6 +69,27 @@ protected:
 } // namespace
 #endif
 
+namespace {
+
+static QWindowsStyle *windowsstyle = 0;
+
+static void free_win_style ( )
+{
+	delete windowsstyle;
+}
+
+static QWindowsStyle *get_win_style ( )
+{
+	if ( !windowsstyle ) {
+		windowsstyle = new QWindowsStyle ( );
+
+		atexit ( free_win_style );
+	}
+	return windowsstyle;
+}
+
+} // namespace
+
 CWorkspace::CWorkspace ( QMainWindow *parent, const char *name )
 	: QWorkspace ( parent, name )
 {
@@ -150,7 +171,7 @@ void CWorkspace::setSpreadSheetTabs ( bool b )
 			m_tabbar-> setShape ( QTabBar::TriangularBelow );
 
 			if ( m_tabbar-> style ( ). isA ( "QWindowsXPStyle" ))
-				m_tabbar-> setStyle ( new QWindowsStyle ( )); //TODO: Mem leak?
+				m_tabbar-> setStyle ( get_win_style ( ));
 		}
 		else {
 			m_tabbar-> setShape ( QTabBar::RoundedAbove );

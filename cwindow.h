@@ -23,6 +23,7 @@
 
 #include "citemview.h"
 #include "bricklink.h"
+#include "cdocument.h"
 #include "cconfig.h"
 #include "cmoney.h"
 
@@ -34,11 +35,11 @@ class DlgAddItemImpl;
 class CFrameWork;
 class CUndoStack;
 class QLabel;
-class CDocument;
 
 
-class CWindow : public QWidget {
+class CWindow : public QWidget, public IDocumentView {
 	Q_OBJECT
+
 public:
 	CWindow ( CDocument *doc, QWidget *parent = 0, const char *name = 0 );
 	~CWindow ( );
@@ -75,6 +76,9 @@ public:
 
 //	InvItemList &selectedItems ( );
 //	void setSelectedItems ( const InvItemList &items );
+
+	virtual QDomElement createGuiStateXML ( QDomDocument doc );
+	virtual bool parseGuiStateXML ( QDomElement root );
 
 	bool isDifferenceMode ( ) const;
 
@@ -144,13 +148,7 @@ private slots:
 	void contextMenu ( QListViewItem *, const QPoint & );
 	void priceGuideUpdated ( BrickLink::PriceGuide * );
 	void pictureUpdated ( BrickLink::Picture * );
-	void itemModified ( CItemViewItem *item, bool grave );
 	void updateErrorMask ( );
-
-	void resetDifferences ( const CDocument::ItemList & );
-
-	QDomElement createGuiStateXML ( QDomDocument doc );
-	bool parseGuiStateXML ( QDomElement root );
 
 	void itemsAddedToDocument ( const CDocument::ItemList & );
 	void itemsRemovedFromDocument ( const CDocument::ItemList & );
@@ -175,7 +173,7 @@ private:
 	QGuardedPtr <DlgAddItemImpl> m_add_dialog;
 
 	uint                           m_settopg_failcnt;
-	QPtrDict<BrickLink::InvItem> * m_settopg_list;
+	QPtrDict<CDocument::Item> *    m_settopg_list;
 	BrickLink::PriceGuide::Time    m_settopg_time;
 	BrickLink::PriceGuide::Price   m_settopg_price;
 };

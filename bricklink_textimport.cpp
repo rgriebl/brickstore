@@ -70,6 +70,29 @@ const BrickLink::Item *BrickLink::TextImport::findItem ( char tid, const char *i
 	return itp ? *itp : 0;
 }
 
+void BrickLink::TextImport::appendCategoryToItemType ( const Category *cat, ItemType *itt )
+{
+	bool found = false;
+	Q_UINT32 catcount = 0;
+	for ( const BrickLink::Category **catp = itt-> m_categories; catp && *catp; catp++ ) {
+		if ( *catp == cat ) {
+			found = true;
+			break;
+		}
+		catcount++;
+	}
+
+	if ( found )
+		return;
+
+	const Category **catarr = new const Category * [catcount + 2];
+	memcpy ( catarr, itt-> m_categories, catcount * sizeof( const Category * ));
+	catarr [catcount] = cat;
+	catarr [catcount + 1] = 0;
+
+	delete [] itt-> m_categories;
+    itt-> m_categories = catarr;
+}
 
 template <> BrickLink::Category *BrickLink::TextImport::parse<BrickLink::Category> ( uint count, const char **strs, BrickLink::Category * )
 {
@@ -238,21 +261,16 @@ bool BrickLink::TextImport::import ( const QString &path )
 		ItemType *itt = const_cast <ItemType *> (( *itp )-> m_item_type );
 
 		if ( itt ) {
-			for ( const Category **catp = ( *itp )-> m_categories; *catp; catp++ ) {
-				if ( itt-> m_categories. findRef ( *catp ) < 0 )
-					itt-> m_categories. append ( *catp );
-			}
+			for ( const Category **catp = ( *itp )-> m_categories; *catp; catp++ )
+				appendCategoryToItemType ( *catp, itt );
 		}
 	}
 
 	btinvlist_dummy btinvlist_dummy;
 	ok &= readDB <> ( path + "btinvlist.txt", btinvlist_dummy );
 
-
 	if ( !ok )
 		qWarning ( "Error importing databases!" );
-
-	//BrickLink::inst ( )-> setDatabase_Basics ( m_colors, m_categories, m_item_types, m_items );
 
 	return ok;
 }

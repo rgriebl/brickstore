@@ -30,8 +30,12 @@
 #include "dlgloadorderimpl.h"
 #include "dlgloadinventoryimpl.h"
 #include "dlgselectreportimpl.h"
+#include "dlgincompleteitemimpl.h"
+
+#include "cimport.h"
 
 #include "cdocument.h"
+#include "cdocument_p.h"
 
 namespace {
 
@@ -44,23 +48,23 @@ template <typename T> static inline T pack ( typename T::const_reference item )
 
 };
 
-CDocument::ChangeCmd::ChangeCmd ( CDocument *doc, Item *pos, const Item &item, bool can_merge )
+CChangeCmd::CChangeCmd ( CDocument *doc, CDocument::Item *pos, const CDocument::Item &item, bool can_merge )
 	: CUndoCmd ( tr( "Modified Item" ), can_merge ), m_doc ( doc ), m_position ( pos ), m_item ( item )
 { }
 
-void CDocument::ChangeCmd::redo ( )
+void CChangeCmd::redo ( )
 {
 	m_doc-> changeItemDirect ( m_position, m_item );
 }
 
-void CDocument::ChangeCmd::undo ( )
+void CChangeCmd::undo ( )
 {
 	redo ( );
 }
 
-bool CDocument::ChangeCmd::mergeMeWith ( CUndoCmd *other )
+bool CChangeCmd::mergeMeWith ( CUndoCmd *other )
 {
-	ChangeCmd *that = ::qt_cast <ChangeCmd *> ( other );
+	CChangeCmd *that = ::qt_cast <CChangeCmd *> ( other );
 
 	if (( m_doc == that-> m_doc ) &&
 		( m_position == that-> m_position )) 
@@ -71,18 +75,18 @@ bool CDocument::ChangeCmd::mergeMeWith ( CUndoCmd *other )
 }
 
 
-CDocument::AddRemoveCmd::AddRemoveCmd ( Type t, CDocument *doc, const ItemList &positions, const ItemList &items, bool can_merge )
-	: CUndoCmd ( genDesc ( t, QMAX( items. count ( ), positions. count ( ))), can_merge ), 
+CAddRemoveCmd::CAddRemoveCmd ( Type t, CDocument *doc, const CDocument::ItemList &positions, const CDocument::ItemList &items, bool can_merge )
+	: CUndoCmd ( genDesc ( t == Add, QMAX( items. count ( ), positions. count ( ))), can_merge ), 
 	  m_doc ( doc ), m_positions ( positions ), m_items ( items ), m_type ( t )
 { }
 
-CDocument::AddRemoveCmd::~AddRemoveCmd ( )
+CAddRemoveCmd::~CAddRemoveCmd ( )
 {
 	if ( m_type == Add )
 		qDeleteAll ( m_items );
 }
 
-void CDocument::AddRemoveCmd::redo ( )
+void CAddRemoveCmd::redo ( )
 {
 	if ( m_type == Add ) {
 		// CDocument::insertItemsDirect() needs to update the itlist iterators to point directly to the items!
@@ -98,29 +102,30 @@ void CDocument::AddRemoveCmd::redo ( )
 	}
 }
 
-void CDocument::AddRemoveCmd::undo ( )
+void CAddRemoveCmd::undo ( )
 {
 	redo ( );
 }
 
-bool CDocument::AddRemoveCmd::mergeMeWith ( CUndoCmd *other )
+bool CAddRemoveCmd::mergeMeWith ( CUndoCmd *other )
 {
-	AddRemoveCmd *that = ::qt_cast <AddRemoveCmd *> ( other );
+	CAddRemoveCmd *that = ::qt_cast <CAddRemoveCmd *> ( other );
 
-	if ( this-> m_type == that-> m_type ) {
-		this-> m_items     += that-> m_items;
-		this-> m_positions += that-> m_positions;
+	if ( m_type == that-> m_type ) {
+		m_items     += that-> m_items;
+		m_positions += that-> m_positions;
+		setDescription ( genDesc ( m_type == Remove, QMAX( m_items. count ( ), m_positions. count ( ))));
+
 		that-> m_items. clear ( );
 		that-> m_positions. clear ( );
-		this-> setDescription ( genDesc ( that-> m_type, that-> m_positions. count ( )));
 		return true;
 	}
 	return false;
 }
 
-QString CDocument::AddRemoveCmd::genDesc ( Type t, uint count )
+QString CAddRemoveCmd::genDesc ( bool is_add, uint count )
 {
-	if ( t == Add )
+	if ( is_add )
 		return ( count > 1 ) ? tr( "Added %1 Items" ). arg( count ) : tr( "Added an Item" );
 	else
 		return ( count > 1 ) ? tr( "Removed %1 Items" ). arg( count ) : tr( "Removed an Item" );
@@ -199,46 +204,17 @@ CDocument::Item &CDocument::Item::operator = ( const Item &copy )
 {
 	BrickLink::InvItem::operator = ( copy );
 
-	m_errors = copy.m_errors;
-
-	return *this;
-}
-/*
-CDocument::ItemList::ItemList ( )
-	: QValueList <Item> ( ) 
-{ }
-
-CDocument::ItemList::ItemList ( const BrickLink::InvItemList &copy )
-	: QValueList <Item> ( ) 
-{ 
-	*this = copy;
-}
-
-CDocument::ItemList::ItemList ( const ItemList &copy )
-	: QValueList <Item> ( copy ) 
-{ }
-
-CDocument::ItemList &CDocument::ItemList::operator = ( const BrickLink::InvItemList &copy )
-{
-	clear ( );
-
-	foreach ( const BrickLink::InvItem *item, copy )
-		append ( Item ( item ));
+	m_errors = copy. m_errors;
 
 	return *this;
 }
 
-CDocument::ItemList::operator BrickLink::InvItemList ( ) const
+bool CDocument::Item::operator == ( const Item &cmp ) const
 {
-	BrickLink::InvItemList bllist;
-
-	foreach ( const Item &item, *this ) {
-		bllist. append ( item );
-	}
-
-	return bllist;
+	// ignore errors for now!
+	return BrickLink::InvItem::operator == ( cmp );
 }
-*/
+
 // *****************************************************************************************
 // *****************************************************************************************
 // *****************************************************************************************
@@ -250,8 +226,7 @@ CDocument::ItemList::operator BrickLink::InvItemList ( ) const
 CDocument::CDocument ( )
 {
 	m_undo = new CUndoStack ( this );
-	m_inventory = 0;
-	m_inventory_multiply = 0;
+	m_order = 0;
 	m_error_mask = 0;
 
 	connect ( m_undo, SIGNAL( cleanChanged ( bool )), this, SLOT( clean2Modified ( bool )));
@@ -259,9 +234,7 @@ CDocument::CDocument ( )
 
 CDocument::~CDocument ( )
 { 
-	if ( m_inventory )
-		m_inventory-> release ( );
-
+	delete m_order;
 	qDeleteAll ( m_items );
 }
 
@@ -297,33 +270,36 @@ CUndoCmd *CDocument::macroBegin ( const QString &label )
 	
 void CDocument::macroEnd ( CUndoCmd *cmd, const QString &label )
 {
-	if ( cmd && ( cmd-> type ( ) == CUndoCmd::MacroBegin )) {
-		if ( !label. isNull ( ))
-			cmd-> setDescription ( label );
-		m_undo-> push ( new CUndoCmd ( CUndoCmd::MacroEnd ));
-	}
+	if ( cmd && ( cmd-> type ( ) == CUndoCmd::MacroBegin ))
+		m_undo-> push ( new CUndoCmd ( CUndoCmd::MacroEnd, label ));
 }
 
-void CDocument::addView ( QWidget *view )
+void CDocument::addView ( QWidget *view, IDocumentView *docview )
 { 
 	CUndoManager::inst ( )-> associateView ( view, m_undo ); 
+
+	if ( docview ) {
+		m_views. append ( docview );
+
+		docview-> parseGuiStateXML ( m_gui_state );
+	}
 }
 
 bool CDocument::clear ( )
 {
-	m_undo-> push ( new AddRemoveCmd ( AddRemoveCmd::Remove, this, m_items, ItemList ( )));
+	m_undo-> push ( new CAddRemoveCmd ( CAddRemoveCmd::Remove, this, ItemList ( ), m_items ));
 	return true;
 }
 
 bool CDocument::insertItems ( const ItemList &positions, const ItemList &items )
 {
-	m_undo-> push ( new AddRemoveCmd ( AddRemoveCmd::Add, this, positions, items, true ));
+	m_undo-> push ( new CAddRemoveCmd ( CAddRemoveCmd::Add, this, positions, items /*, true*/ ));
 	return true;
 }
 
 bool CDocument::removeItems ( const ItemList &positions )
 {
-	m_undo-> push ( new AddRemoveCmd ( AddRemoveCmd::Remove, this, positions, ItemList ( ), true ));
+	m_undo-> push ( new CAddRemoveCmd ( CAddRemoveCmd::Remove, this, ItemList ( ), positions /*, true*/ ));
 	return true;
 }
 
@@ -339,7 +315,8 @@ bool CDocument::removeItem ( Item *position )
 
 bool CDocument::changeItem ( Item *position, const Item &item )
 {
-	m_undo-> push ( new ChangeCmd ( this, position, item, true ));
+	if (!( item == *position ))
+		m_undo-> push ( new CChangeCmd ( this, position, item /*, true*/ ));
 	return true;
 }
 
@@ -385,6 +362,11 @@ void CDocument::changeItemDirect ( Item *position, Item &item )
 	bool grave = ( position-> item ( ) != item. item ( )) || ( position->color ( ) != item. color ( ));
 
 	emit itemsChanged ( pack<ItemList> ( position ), grave );
+	emit statisticsChanged ( );
+
+	if ( m_selection. find ( position ) != m_selection. end ( ))
+		emit selectionChanged ( m_selection );
+
 }
 
 void CDocument::updateErrors ( Item *item )
@@ -465,7 +447,6 @@ CDocument *CDocument::fileImportBrickLinkInventory ( const BrickLink::Item *pres
 				CDocument *doc = new CDocument ( );
 
 				doc-> setBrickLinkItems ( items, qty );
-
 				doc-> setTitle ( tr( "Inventory for %1" ). arg ( it-> id ( )));
 				return doc;
 			}
@@ -487,27 +468,17 @@ CDocument *CDocument::fileImportBrickLinkOrder ( )
 		BrickLink::Order::Type type = dlg. orderType ( );
 
 		if ( id. length ( ) == 6 ) {
-			BrickLink::Inventory *inv = BrickLink::inst ( )-> order ( id, type );
+			CProgressDialog d ( CFrameWork::inst ( ));
+			CImportBLOrder import ( id, type, &d );
 
-			if ( inv ) {
+			if ( d. exec ( ) == QDialog::Accepted ) {
 				CDocument *doc = new CDocument ( );
 
-				QApplication::setOverrideCursor ( QCursor ( Qt::BusyCursor ));
-
-				doc-> m_inventory = inv;
-				doc-> m_inventory-> addRef ( );
-				doc-> m_inventory_multiply = 1;
-
-				if ( inv-> updateStatus ( ) == BrickLink::Updating )
-					connect ( BrickLink::inst ( ), SIGNAL( inventoryUpdated ( BrickLink::Inventory * )), doc, SLOT( inventoryUpdated ( BrickLink::Inventory * )));
-				else
-					doc-> inventoryUpdated ( inv );
-
 				doc-> setTitle ( tr( "Order #%1" ). arg ( id ));
+				doc-> setBrickLinkItems ( import. items ( ));	
+				doc-> m_order = import. order ( );
 				return doc;
 			}
-			else
-				CMessageBox::warning ( CFrameWork::inst ( ), tr( "Internal error: Could not create an Inventory object for oder #%1" ). arg ( CMB_BOLD( id )));
 		}
 		else
 			CMessageBox::warning ( CFrameWork::inst ( ), tr( "Invalid order number." ));
@@ -517,27 +488,16 @@ CDocument *CDocument::fileImportBrickLinkOrder ( )
 
 CDocument *CDocument::fileImportBrickLinkStore ( )
 {
-	BrickLink::Inventory *inv = BrickLink::inst ( )-> storeInventory ( );
+	CProgressDialog d ( CFrameWork::inst ( ));
+	CImportBLStore import ( &d );
 
-	if ( inv ) {
+	if ( d. exec ( ) == QDialog::Accepted ) {
 		CDocument *doc = new CDocument ( );
 
-		QApplication::setOverrideCursor ( QCursor ( Qt::BusyCursor ));
-
-		doc-> m_inventory = inv;
-		doc-> m_inventory-> addRef ( );
-		doc-> m_inventory_multiply = 1;
-
-		if ( inv-> updateStatus ( ) == BrickLink::Updating )
-			connect ( BrickLink::inst ( ), SIGNAL( inventoryUpdated ( BrickLink::Inventory * )), doc, SLOT( inventoryUpdated ( BrickLink::Inventory * )));
-		else
-			doc-> inventoryUpdated ( inv );
-
 		doc-> setTitle ( tr( "Store %1" ). arg ( QDate::currentDate ( ). toString ( Qt::LocalDate )));
+		doc-> setBrickLinkItems ( import. items ( ));	
 		return doc;
 	}
-	else
-		CMessageBox::warning ( CFrameWork::inst ( ), tr( "Internal error: Could not create an Inventory object for store inventory" ));
 	return 0;
 }
 
@@ -558,6 +518,25 @@ CDocument *CDocument::fileImportBrickLinkXML ( )
 	}
 	else
 		return 0;
+}
+
+CDocument *CDocument::fileImportPeeronInventory ( )
+{
+	QString peeronid;
+
+	if ( CMessageBox::getString ( CFrameWork::inst ( ), tr( "Enter the set ID of the Peeron inventory:" ), peeronid )) {
+		CProgressDialog d ( CFrameWork::inst ( ));
+		CImportPeeronInventory import ( peeronid, &d );
+
+		if ( d. exec ( ) == QDialog::Accepted ) {
+			CDocument *doc = new CDocument ( );
+
+			doc-> setBrickLinkItems ( import. items ( ));	
+			doc-> setTitle ( tr( "Peeron Inventory for %1" ). arg ( peeronid ));
+			return doc;
+		}
+	}
+	return 0;
 }
 
 CDocument *CDocument::fileImportBrikTrakInventory ( const QString &fn )
@@ -612,7 +591,7 @@ CDocument *CDocument::fileLoadFrom ( const QString &name, const char *type, bool
 	QString emsg;
 	int eline = 0, ecol = 0;
 	QDomDocument doc;
-	QDomNode gui_state;
+	QDomElement gui_state;
 
 	if ( doc. setContent ( &f, &emsg, &eline, &ecol )) {
 		QDomElement root = doc. documentElement ( );
@@ -626,7 +605,7 @@ CDocument *CDocument::fileLoadFrom ( const QString &name, const char *type, bool
 				if ( n. nodeName ( ) == "Inventory" )
 					item_elem = n. toElement ( );
 				else if ( n. nodeName ( ) == "GuiState" )
-					gui_state = n. cloneNode ( true );
+					gui_state = n. cloneNode ( true ). toElement ( );
 			}
 		}
 		else {
@@ -653,12 +632,9 @@ CDocument *CDocument::fileLoadFrom ( const QString &name, const char *type, bool
 		delete items;
 
 		doc-> setFileName ( import_only ? QString::null : name );
-//		setModified ( import_only );
 
 		if ( !import_only )
 			CFrameWork::inst ( )-> addToRecentFiles ( name );
-
-//		resetDifferences ( m_items );
 
 		doc-> m_gui_state = gui_state;
 		return doc;
@@ -703,41 +679,13 @@ CDocument *CDocument::fileImportLDrawModel ( )
 			CMessageBox::information ( CFrameWork::inst ( ), tr( "This file contains %1 unknown item(s)." ). arg ( CMB_BOLD( QString::number ( invalid_items ))));
 
 		doc-> setBrickLinkItems ( items );
-
 		doc-> setTitle ( tr( "Import of %1" ). arg ( QFileInfo ( s ). fileName ( )));
-
-//		resetDifferences ( m_items );
-
 		return doc;
 	}
 	else
 		CMessageBox::warning ( CFrameWork::inst ( ), tr( "Could not parse the LDraw model in file %1." ). arg ( CMB_BOLD( s )));
 
 	return 0;
-}
-
-void CDocument::inventoryUpdated ( BrickLink::Inventory *inv )
-{
-	qWarning ( "got inv update %p, having %p", inv, m_inventory );
-	disconnect ( BrickLink::inst ( ), SIGNAL( inventoryUpdated ( BrickLink::Inventory * )), this, SLOT( inventoryUpdated ( BrickLink::Inventory * )));
-
-	if ( inv && ( inv == m_inventory )) {
-		setBrickLinkItems ( inv-> inventory ( ), m_inventory_multiply );
-
-		if ( m_items. isEmpty ( )) {
-			if ( inv-> isOrder ( ))
-				CMessageBox::information ( CFrameWork::inst ( ), tr( "The order #%1 could not be retrieved." ). arg ( CMB_BOLD( static_cast <BrickLink::Order *> ( inv )-> id ( ))));
-			else
-				CMessageBox::information ( CFrameWork::inst ( ), tr( "The inventory you requested could not be retrieved." ));
-		}
-		//m_inventory-> release ( );
-		//m_inventory = 0;
-
-//		setModified ( true );
-
-//		resetDifferences ( m_items );
-	}
-	QApplication::restoreOverrideCursor ( );
 }
 
 void CDocument::setBrickLinkItems ( const BrickLink::InvItemList &bllist, uint multiply )
@@ -747,10 +695,37 @@ void CDocument::setBrickLinkItems ( const BrickLink::InvItemList &bllist, uint m
 
 	foreach ( const BrickLink::InvItem *blitem, bllist ) {
 		Item *item = new Item ( *blitem );
+
+		if ( item-> isIncomplete ( )) {
+			DlgIncompleteItemImpl d ( item, CFrameWork::inst ( ));
+
+//			if ( waitcursor )
+//				QApplication::restoreOverrideCursor ( );
+
+			bool drop_this = ( d. exec ( ) != QDialog::Accepted );
+
+//			if ( waitcursor )
+//				QApplication::setOverrideCursor ( QCursor( Qt::WaitCursor ));
+				
+			if ( drop_this )
+				continue;
+		}
+
 		item-> setQuantity ( item-> quantity ( ) * multiply );
 		items. append ( item );
 	}
 	insertItemsDirect ( items, positions );
+
+	// reset difference WITHOUT a command
+
+	foreach ( Item *pos, m_items ) {
+		if (( pos-> origQuantity ( ) != pos-> quantity ( )) ||
+		    ( pos-> origPrice ( ) != pos-> price ( ))) 
+		{
+			pos-> setOrigQuantity ( pos-> quantity ( ));
+			pos-> setOrigPrice ( pos-> price ( ));
+		}
+	}
 }
 
 QString CDocument::fileName ( ) const
@@ -856,8 +831,11 @@ bool CDocument::fileSaveTo ( const QString &s, const char *type, bool export_onl
 
 			root. appendChild ( item_elem );
 
-			if ( !m_gui_state. isNull ( ))
-				root. appendChild ( m_gui_state );
+			foreach ( IDocumentView *docview, m_views ) {
+				QDomNode guinode = docview-> createGuiStateXML ( doc );
+				if ( !guinode. isNull ( ))
+					root. appendChild ( guinode );
+			}
 
 			doc. appendChild ( root );
 		}
@@ -1034,5 +1012,28 @@ void CDocument::setErrorMask ( Q_UINT64 em )
 	m_error_mask = em;
 	emit statisticsChanged ( );
 	emit itemsChanged ( items ( ), false );
+}
+
+const BrickLink::Order *CDocument::order ( ) const
+{
+	return m_order;
+}
+
+void CDocument::resetDifferences ( const ItemList &items )
+{
+	CUndoCmd *macro = macroBegin ( tr( "Reset Differences" ));
+
+	foreach ( Item *pos, items ) {
+		if (( pos-> origQuantity ( ) != pos-> quantity ( )) ||
+		    ( pos-> origPrice ( ) != pos-> price ( ))) 
+		{
+			Item item = *pos;
+
+			item. setOrigQuantity ( item. quantity ( ));
+			item. setOrigPrice ( item. price ( ));
+			changeItem ( pos, item );
+		}
+	}
+	macroEnd ( macro );
 }
 

@@ -19,6 +19,7 @@
 #include <qtooltip.h>
 #include <qheader.h>
 
+#include "cframework.h"
 #include "cresource.h"
 #include "cutility.h"
 
@@ -149,6 +150,8 @@ CAppearsInWidget::CAppearsInWidget ( QWidget *parent, const char *name, WFlags /
 
 	d-> m_tooltips = new AppearsInToolTip ( viewport ( ), this );
 
+	connect ( this, SIGNAL( contextMenuRequested ( QListViewItem *, const QPoint &, int )), this, SLOT( showContextMenu ( QListViewItem *, const QPoint & )));
+
 	languageChange ( );
 }
 
@@ -172,12 +175,15 @@ void CAppearsInWidget::addActionsToContextMenu ( const QPtrList <QAction> &actio
 	d-> m_popup = 0;
 }
 
-void CAppearsInWidget::contextMenuEvent ( QContextMenuEvent *e )
+void CAppearsInWidget::showContextMenu ( QListViewItem *lvitem, const QPoint &pos )
 {
-	if ( d-> m_item ) {
+	if ( d-> m_item && lvitem ) {
+		if ( lvitem != currentItem ( ))
+			setCurrentItem ( lvitem );
+
 		if ( !d-> m_popup ) {
 			d-> m_popup = new QPopupMenu ( this );
-	//		d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "reload" ), tr( "Update" ), this, SLOT( doUpdate ( )));
+			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "edit_partoutitems" ), tr( "Part out Item..." ), this, SLOT( partOut ( )));
 
 			if ( !d-> m_add_actions. isEmpty ( )) {
 				d-> m_popup-> insertSeparator ( );
@@ -186,10 +192,16 @@ void CAppearsInWidget::contextMenuEvent ( QContextMenuEvent *e )
 					it. current ( )-> addTo ( d-> m_popup );
 			}
 		}
-		d-> m_popup-> popup ( e-> globalPos ( ));
+		d-> m_popup-> popup ( pos );
 	}
+}
 
-	e-> accept ( );
+void CAppearsInWidget::partOut ( )
+{
+	AppearsInListItem *item = static_cast <AppearsInListItem *> ( currentItem ( ));
+
+	if ( item && item-> item ( ))
+		CFrameWork::inst ( )-> fileImportBrickLinkInventory ( item-> item ( ));
 }
 
 QSize CAppearsInWidget::minimumSizeHint ( ) const

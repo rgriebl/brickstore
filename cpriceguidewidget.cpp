@@ -17,6 +17,7 @@
 #include <qpopupmenu.h>
 #include <qcursor.h>
 #include <qaction.h>
+#include <qtooltip.h>
 
 #include "cresource.h"
 #include "cutility.h"
@@ -57,8 +58,37 @@ struct cell : public QRect {
 
 } // namespace
 
-class CPriceGuideWidgetPrivate {
+class CPriceGuideWidgetPrivate : public QToolTip {
 public:
+	CPriceGuideWidgetPrivate ( CPriceGuideWidget *parent )
+		: QToolTip ( parent ), m_widget ( parent )
+	{ }
+
+	QValueList<cell>::const_iterator cellAtPos ( const QPoint &fpos ) 
+	{
+		QPoint pos = fpos - QPoint ( m_widget-> frameWidth ( ), m_widget-> frameWidth ( ));
+		QValueList<cell>::const_iterator it = m_cells. begin ( );
+
+		for ( ; it != m_cells. end ( ); ++it ) {
+			if (( *it ). contains ( pos ) && (( *it ). m_type != cell::Update ))
+				break;
+		}
+		return it;
+	}
+
+protected:
+	virtual void maybeTip ( const QPoint &pos )
+	{
+		QValueList<cell>::const_iterator it = cellAtPos ( pos );
+
+		if (( it != m_cells. end ( )) && (( *it ). m_type == cell::Price ))
+			tip ( *it, CPriceGuideWidget::tr( "Double-click to set the price of the current item." ));
+	}
+
+private:
+	friend class CPriceGuideWidget;
+
+	CPriceGuideWidget *       m_widget;
 	BrickLink::PriceGuide *   m_pg;
 	CPriceGuideWidget::Layout m_layout;
 	QValueList<cell>          m_cells;
@@ -78,7 +108,7 @@ public:
 CPriceGuideWidget::CPriceGuideWidget ( QWidget *parent, const char *name, WFlags fl )
 	: QFrame ( parent, name, fl | WNoAutoErase)
 {
-	d = new CPriceGuideWidgetPrivate ( );
+	d = new CPriceGuideWidgetPrivate ( this );
 
 	d-> m_pg = 0;
 	d-> m_layout = Normal;
@@ -664,16 +694,10 @@ void CPriceGuideWidget::mouseDoubleClickEvent ( QMouseEvent *me )
 	if ( !d-> m_pg )
 		return;
 
-	QPoint pos = me-> pos ( ) - QPoint ( frameWidth ( ), frameWidth ( ));
-	
-	for ( QValueList<cell>::const_iterator it = d-> m_cells. begin ( ); it != d-> m_cells. end ( ); ++it ) {
-		const cell &c = *it;
+	QValueList<cell>::const_iterator it = d-> cellAtPos ( me-> pos ( ));
 
-		if (( c. m_type == cell::Price ) && c. contains ( pos )) {
-			emit priceDoubleClicked ( d-> m_pg-> price ( c. m_time, c. m_condition, c. m_price ));
-			break;
-		}
-	}
+	if (( it != d-> m_cells. end ( )) && ((*it). m_type == cell::Price ))
+		emit priceDoubleClicked ( d-> m_pg-> price ((*it). m_time, (*it). m_condition, (*it). m_price ));
 }
 
 void CPriceGuideWidget::mouseMoveEvent ( QMouseEvent *me )
@@ -681,18 +705,10 @@ void CPriceGuideWidget::mouseMoveEvent ( QMouseEvent *me )
 	if ( !d-> m_pg )
 		return;
 
-	d-> m_on_price = false;
+	QValueList<cell>::const_iterator it = d-> cellAtPos ( me-> pos ( ));
 
-	QPoint pos = me-> pos ( ) - QPoint ( frameWidth ( ), frameWidth ( ));
-	
-	for ( QValueList<cell>::const_iterator it = d-> m_cells. begin ( ); it != d-> m_cells. end ( ); ++it ) {
-		const cell &c = *it;
+	d-> m_on_price = (( it != d-> m_cells. end ( )) && ((*it). m_type == cell::Price ));
 
-		if (( c. m_type == cell::Price ) && c. contains ( pos )) {
-			d-> m_on_price = true;
-			break;
-		}
-	}
 	if ( d-> m_on_price )
 		setCursor ( Qt::PointingHandCursor );
 	else

@@ -57,7 +57,7 @@ public:
 		char id ( ) const                 { return m_id; }
 		const char *name ( ) const        { return m_name; }
 
-		const QPtrList<BrickLink::Category> &categories ( ) const { return m_categories; } //TODO list-> vector
+		const Category **categories ( ) const { return m_categories; }
 		bool hasInventories ( ) const     { return m_has_inventories; }
 		bool hasColors ( ) const          { return m_has_colors; }
 		bool hasYearReleased ( ) const    { return m_has_year; }
@@ -78,7 +78,7 @@ public:
 
 		char  *  m_name;
 
-		QPtrList <Category> m_categories;
+		const Category **m_categories;
 
 	private:
 		ItemType ( );
@@ -174,7 +174,7 @@ public:
 		char *            m_id;
 		char *            m_name;
 		const ItemType *  m_item_type;
-		const Category ** m_categories; //TODO -> vector
+		const Category ** m_categories;
 		const Color *     m_color;
 		QDateTime         m_inv_updated;
 		float             m_weight;
@@ -268,6 +268,7 @@ public:
 		~InvItem ( );
 
 		InvItem &operator = ( const InvItem &copy );
+		bool operator == ( const InvItem &cmp ) const;
 
 		const Item *item ( ) const          { return m_item; }
 		void setItem ( const Item *i )      { /*can be 0*/ m_item = i; }
@@ -415,8 +416,6 @@ public:
 
 		InvItemList &inventory ( )          { return m_list; }
 
-		virtual bool isOrder ( ) const      { return false; }
-
 		virtual ~Inventory ( );
 		
 	private:
@@ -425,7 +424,6 @@ public:
 
 		bool        m_valid         : 1;
 		int         m_update_status : 7;
-		bool        m_from_peeron   : 1;
 
 		InvItemList m_list;
 
@@ -433,22 +431,22 @@ public:
 		Inventory ( );
 
 	private:
-		Inventory ( const Item *item, bool from_peeron = false );
+		Inventory ( const Item *item );
 		void load_from_disk ( );
 
 		friend class BrickLink;
 	};
 
-	class Order : public Inventory {
+	class Order {
 	public:
 		enum Type { Received, Placed };
 
-		virtual bool isOrder ( ) const  { return true; }
+		Order ( const QString &id, Type type );
 
 		QString id ( ) const        { return m_id; }
 		Type type ( ) const         { return m_type; }
 		QDateTime date ( ) const    { return m_date; }
-		QDateTime statusChange ( )  { return m_status_change; }
+		QDateTime statusChange ( ) const  { return m_status_change; }
 		QString buyer ( ) const     { return m_buyer; }
 		money_t shipping ( ) const  { return m_shipping; }
 		money_t insurance ( ) const { return m_insurance; }
@@ -459,7 +457,17 @@ public:
 		QString payment ( ) const   { return m_payment; }
 		QString remarks ( ) const   { return m_remarks; }
 
-		virtual ~Order ( );
+		void setDate ( const QDateTime &dt )         { m_date = dt; }
+		void setStatusChange ( const QDateTime &dt ) { m_status_change = dt; }
+		void setBuyer ( const QString &str )         { m_buyer = str; }
+		void setShipping ( const money_t &m )        { m_shipping = m; }
+		void setInsurance ( const money_t &m )       { m_insurance = m; }
+		void setDelivery ( const money_t &m )        { m_delivery = m; }
+		void setCredit ( const money_t &m )          { m_credit = m; }
+		void setGrandTotal ( const money_t &m )      { m_grand_total = m; }
+		void setStatus ( const QString &str )        { m_status = str; }
+		void setPayment ( const QString &str )       { m_payment = str; }
+		void setRemarks ( const QString &str )      { m_remarks = str; }
 
 	private:
 		QString   m_id;
@@ -475,11 +483,6 @@ public:
 		QString   m_status;
 		QString   m_payment;
 		QString   m_remarks;
-
-	private:
-		Order ( const QString &id, Type type );
-
-		friend class BrickLink;
 	};
 
 	class PriceGuide : public CRef {
@@ -556,7 +559,7 @@ public:
 
 		const BrickLink::Category *findCategoryByName ( const char *name, int len = -1 );
 		const BrickLink::Item *findItem ( char type, const char *id );
-
+		void appendCategoryToItemType ( const Category *cat, ItemType *itt );
 
 	private:
 		QIntDict <Color>    m_colors;
@@ -622,9 +625,6 @@ public:
 	InvItemList *loadBTI ( QIODevice *f, uint *invalid_items = 0 );
 
 	Inventory *inventory ( const Item *item );
-	Inventory *inventoryFromPeeron ( const Item *item );
-	Order *order ( const QString &orderid, Order::Type ordertype );
-	Inventory *storeInventory ( );
 
 	Picture *picture ( const Item *item, const Color *color, bool high_priority = false );
 	Picture *largePicture ( const Item *item, bool high_priority = false );

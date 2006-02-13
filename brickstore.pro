@@ -105,11 +105,14 @@ lzma {
 HEADERS += bricklink.h \
            cappearsinwidget.h \
            capplication.h \
+           ccheckforupdates.h \
            cconfig.h \
            cdocument.h \
+           cdocument_p.h \
            cfilteredit.h \
            cframework.h \
            ciconfactory.h \
+           cimport.h \
            citemtypecombo.h \
            citemview.h \
            clistaction.h \
@@ -120,6 +123,7 @@ HEADERS += bricklink.h \
            cmultiprogressbar.h \
            cpicturewidget.h \
            cpriceguidewidget.h \
+           cprogressdialog.h \
            crebuilddatabase.h \
            cref.h \
            creport.h \
@@ -133,6 +137,7 @@ HEADERS += bricklink.h \
            ctransfer.h \
            cundo.h \
            cundo_p.h \
+           cupdatedatabase.h \
            curllabel.h \
            cutility.h \
            cwindow.h \
@@ -159,6 +164,7 @@ SOURCES += bricklink.cpp \
            cmultiprogressbar.cpp \
            cpicturewidget.cpp \
            cpriceguidewidget.cpp \
+           cprogressdialog.cpp \
            crebuilddatabase.cpp \
            cref.cpp \
            creport.cpp \
@@ -176,7 +182,6 @@ SOURCES += bricklink.cpp \
            main.cpp
 
 FORMS   += dlgadditem.ui \
-           dlgdbupdate.ui \
            dlgincdecprice.ui \
            dlgincompleteitem.ui \
            dlgloadinventory.ui \
@@ -188,11 +193,9 @@ FORMS   += dlgadditem.ui \
            dlgsetcondition.ui \
            dlgsettings.ui \
            dlgsettopg.ui \
-           dlgsubtractitem.ui \
-           dlgupdate.ui
+           dlgsubtractitem.ui
 
 HEADERS += dlgadditemimpl.h \
-           dlgdbupdateimpl.h \
            dlgincdecpriceimpl.h \
            dlgincompleteitemimpl.h \
            dlgloadinventoryimpl.h \
@@ -204,11 +207,9 @@ HEADERS += dlgadditemimpl.h \
            dlgsetconditionimpl.h \
            dlgsettingsimpl.h \
            dlgsettopgimpl.h \
-           dlgsubtractitemimpl.h \
-           dlgupdateimpl.h
+           dlgsubtractitemimpl.h
 
 SOURCES += dlgadditemimpl.cpp \
-           dlgdbupdateimpl.cpp \
            dlgincdecpriceimpl.cpp \
            dlgincompleteitemimpl.cpp \
            dlgloadinventoryimpl.cpp \
@@ -220,5 +221,4 @@ SOURCES += dlgadditemimpl.cpp \
            dlgsetconditionimpl.cpp \
            dlgsettingsimpl.cpp \
            dlgsettopgimpl.cpp \
-           dlgsubtractitemimpl.cpp \
-           dlgupdateimpl.cpp
+           dlgsubtractitemimpl.cpp

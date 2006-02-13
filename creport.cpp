@@ -282,7 +282,7 @@ uint CReport::pageCount ( uint itemcount ) const
 
 #define PRINT_THIS_PAGE         (( page >= from ) && ( page <= to ))
 
-void CReport::render ( const BrickLink::InvItemList &items, const CReportVariables &add_vars, int from, int to, QPainter *p ) const
+void CReport::render ( const CDocument::ItemList &items, const CReportVariables &add_vars, int from, int to, QPainter *p ) const
 {
 	if ( items. isEmpty ( ) || !p )
 		return;
@@ -356,7 +356,7 @@ void CReport::render ( const BrickLink::InvItemList &items, const CReportVariabl
 	s [1] =	( float( ds_pt. height ( )) / float( ps_pt. height ( ))) * float( pdm. logicalDpiY ( )) / 72.f;
 
 	
-	BrickLink::InvItemList::const_iterator itemit = items. begin ( );
+	CDocument::ItemList::const_iterator itemit = items. begin ( );
 
 	while ( items_left || !rfooter ) {
 		page++;

@@ -644,10 +644,10 @@ bool CSelectItem::fillCategoryView ( const BrickLink::ItemType *itype, const Bri
 	if ( select == Cat_AllParts )
 		cat-> setSelected ( found = true );
 
-	for ( QPtrListIterator<BrickLink::Category> it ( itype-> categories ( )); it. current ( ); ++it ) {
-		cat = new CatListItem ( w_categories, it. current ( ));
+	for ( const BrickLink::Category **catp = itype-> categories ( ); *catp; catp++ ) {
+		cat = new CatListItem ( w_categories, *catp );
 		
-		if ( it. current ( ) == select )
+		if ( *catp == select )
 			w_categories-> setSelected ( cat, found = true );
 	}
 

@@ -22,10 +22,11 @@
 
 #include "cconfig.h"
 #include "cframework.h"
-#include "bricklink.h"
 #include "cwindow.h"
 #include "cdocument.h"
 #include "cresource.h"
+#include "cutility.h"
+
 #include "dlgsubtractitemimpl.h"
 
 
@@ -98,19 +99,20 @@ void DlgSubtractItemImpl::docSelected ( QListViewItem *item )
 		w_ok-> animateClick ( );
 }
 
-BrickLink::InvItemList *DlgSubtractItemImpl::items ( ) const
+BrickLink::InvItemList DlgSubtractItemImpl::items ( ) const
 {
-	BrickLink::InvItemList *list = new BrickLink::InvItemList;
+	BrickLink::InvItemList list;
 
 	switch ( w_type-> selectedId ( )) {
 		case 0: // clipboard
-			BrickLink::InvItemDrag::decode ( QApplication::clipboard ( )-> data ( ), *list );
-			//## list-> setAutoDelete ( true );
+			BrickLink::InvItemDrag::decode ( QApplication::clipboard ( )-> data ( ), list );
 			break;
 
 		case 1: // document
-		//##	if ( w_doc_list-> selectedItem ( ))
-		//##		*list = static_cast <DocListItem *> ( w_doc_list-> selectedItem ( ))-> window ( )-> document ( )-> items ( );
+			if ( w_doc_list-> selectedItem ( )) {
+				foreach ( CDocument::Item *item, static_cast <DocListItem *> ( w_doc_list-> selectedItem ( ))-> window ( )-> document ( )-> items ( ))
+					list. append ( new BrickLink::InvItem ( *item ));
+			}
 			break;
 	}
 	return list;

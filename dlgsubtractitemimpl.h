@@ -14,13 +14,12 @@
 #ifndef __DLGSUBTRACTITEMIMPL_H__
 #define __DLGSUBTRACTITEMIMPL_H__
 
-#include <qptrlist.h>
-
 #include "bricklink.h"
 #include "dlgsubtractitem.h"
 
 class QListViewItem;
 class CWindow;
+
 
 class DlgSubtractItemImpl : public DlgSubtractItem {
 	Q_OBJECT
@@ -28,7 +27,7 @@ class DlgSubtractItemImpl : public DlgSubtractItem {
 public:
 	DlgSubtractItemImpl ( CWindow *parent, const char *name = 0, bool modal = true, int fl = 0 );
 	
-	BrickLink::InvItemList *items ( ) const;
+	BrickLink::InvItemList items ( ) const;
 
 private slots:
 	void docSelected ( QListViewItem *item );

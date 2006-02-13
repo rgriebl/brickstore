@@ -28,8 +28,9 @@
 #include "bricklink.h"
 #include "version.h"
 #include "dlgmessageimpl.h"
-#include "dlgupdateimpl.h"
 #include "crebuilddatabase.h"
+#include "cprogressdialog.h"
+#include "ccheckforupdates.h"
 
 #include "capplication.h"
 
@@ -386,6 +387,7 @@ void CApplication::demoVersion ( )
 
 void CApplication::checkForUpdates ( )
 {
-	DlgUpdateImpl d ( mainWidget ( ));
+	CProgressDialog d ( mainWidget ( ));
+	CCheckForUpdates cfu ( &d );
 	d. exec ( );
 }

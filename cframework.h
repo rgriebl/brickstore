@@ -89,6 +89,7 @@ private slots:
 	void fileImportBrickLinkStore ( );
 	void fileImportBrickLinkXML ( );
 	void fileImportLDrawModel ( );
+	void fileImportPeeronInventory ( );
 
 	void viewToolBar ( bool );
 	void viewStatusBar ( bool );
@@ -96,7 +97,7 @@ private slots:
 
 	void windowActivate ( int );
 
-	void updateDatabase ( );
+	bool updateDatabase ( );
 	
 	void connectWindow ( QWidget *w );
 

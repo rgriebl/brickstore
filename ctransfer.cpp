@@ -139,7 +139,8 @@ CTransfer::Job *CTransfer::retrieve ( bool get, const QCString &url, const CKeyV
 	j-> m_respcode = 0;
 	j-> m_finished = false;
 	j-> m_filetime = 0;
-	j-> m_too_old = false;
+	j-> m_not_modified = false;
+	j-> m_failed = true;
 
 	m_queue_lock. lock ( );
 	if ( high_priority )
@@ -293,12 +294,15 @@ void CTransfer::run ( )
 			j-> m_filetime = time_t(( filetime != -1 ) ? filetime : 0 );
 
 			if ( j-> m_ifnewer && (( respcode == 304 ) || ( filetime != -1 && filetime < j-> m_ifnewer ))) 
-				j-> m_too_old = true;
+				j-> m_not_modified = true;
+
+			j-> m_failed = ( res != CURLE_OK ) || !(( respcode == 200 ) || ( respcode == 304 ));
 		}
 		else if ( m_active_job == 0 ) {
 			j-> m_result = CURLE_ABORTED_BY_CALLBACK;
 			j-> m_error = "Aborted";
 			j-> m_respcode = 0;
+			j-> m_failed = true;
 		}
 		j-> m_finished = true;
 		m_out_queue. append ( j );

@@ -35,11 +35,12 @@ public:
 	virtual QSize minimumSizeHint ( ) const;
 	virtual QSize sizeHint ( ) const;
 
-protected:
-	virtual void contextMenuEvent ( QContextMenuEvent *e );
-
 protected slots:
 	void languageChange ( );
+
+private slots:
+	void showContextMenu ( QListViewItem *, const QPoint & );
+	void partOut ( );
 
 private:
 	CAppearsInWidgetPrivate *d;

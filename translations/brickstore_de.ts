@@ -6,24 +6,27 @@
         <translation>HTTP Übertragungs-Threads konnten nicht gestartet werden.</translation>
     </message>
     <message>
-        <source>Could not parse the XML data for order #%1:&lt;br /&gt;&lt;i&gt;Line %2, column %3: %4&lt;/i&gt;</source>
-        <translation>Fehler beim Lesen der XML Daten von Bestellung #%1:&lt;br /&gt;&lt;i&gt;Zeile %2, Spalte %3: %4&lt;/i&gt;</translation>
-    </message>
-    <message>
-        <source>Could not parse the XML data for order #%1.</source>
-        <translation>Fehler beim Lesen der XML Daten von Bestellung #%1.</translation>
-    </message>
-    <message>
-        <source>Could not parse the XML data for the store inventory.</source>
-        <translation>Fehler beim Lesen der XML Daten des Shop-Bestandes.</translation>
-    </message>
-    <message>
-        <source>Could not parse the XML data for the store inventory:&lt;br /&gt;&lt;i&gt;Line %1, column %2: %3&lt;/i&gt;</source>
-        <translation>Fehler beim Lesen der XML Daten des Shop-Bestandes:&lt;br /&gt;&lt;i&gt;Zeile %2, Spalte %3: %4&lt;/i&gt;</translation>
-    </message>
-    <message>
         <source>Data directory &apos;%1&apos; is not both read- and writable.</source>
         <translation>Das Datenverzeichnis &apos;%1&apos; ist nicht sowohl les- als auch beschreibbar.</translation>
+    </message>
+</context>
+<context>
+    <name>CAddRemoveCmd</name>
+    <message>
+        <source>Added %1 Items</source>
+        <translation>%1 Teile hinzugefügt</translation>
+    </message>
+    <message>
+        <source>Added an Item</source>
+        <translation>Ein Teil hinzugefügt</translation>
+    </message>
+    <message>
+        <source>Removed %1 Items</source>
+        <translation>%1 Teile gelöscht</translation>
+    </message>
+    <message>
+        <source>Removed an Item</source>
+        <translation>Ein Teil gelöscht</translation>
     </message>
 </context>
 <context>
@@ -43,6 +46,10 @@
     <message>
         <source>Name</source>
         <translation>Name</translation>
+    </message>
+    <message>
+        <source>Part out Item...</source>
+        <translation>Teil zerlegen...</translation>
     </message>
 </context>
 <context>
@@ -76,6 +83,56 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <message>
         <source>This is an &lt;b&gt;unrestricted&lt;/b&gt; demo version.&lt;br /&gt;&lt;br /&gt;If you want to support the development of this program (or if you just want to get rid of this dialog...), check out %1 how to get the non-demo version.</source>
         <translation>Dies ist eine Demoversion &lt;b&gt;ohne Einschränkungen&lt;/b&gt;.&lt;br /&gt;&lt;br /&gt;Wenn Sie die Weiterentwicklung dieses Programmes unterstützen wollen (oder einfach nur dieses Fenster loswerden wollen...), dann sehen Sie auf %1 nach, wie Sie zu einer Nicht-Demoversion kommen.</translation>
+    </message>
+</context>
+<context>
+    <name>CChangeCmd</name>
+    <message>
+        <source>Modified Item</source>
+        <translation>Ein Teil modifiziert</translation>
+    </message>
+</context>
+<context>
+    <name>CCheckForUpdates</name>
+    <message>
+        <source>Checking for program updates</source>
+        <translation>Es wird nach Programm-Updates gesucht</translation>
+    </message>
+    <message>
+        <source>You are currently running %1 %2</source>
+        <translation>Sie benutzen momentan %1 %2</translation>
+    </message>
+    <message>
+        <source>Version information is not available.</source>
+        <translation>Keine Versionsinformationen verfügbar.</translation>
+    </message>
+    <message>
+        <source>Your currently installed version is up-to-date.</source>
+        <translation>Ihre momentan installierte Version ist bereits auf dem neuesten Stand.</translation>
+    </message>
+    <message>
+        <source>A newer version than the one currently installed is available:</source>
+        <translation>Es ist eine neuere Version als die momentan installierte verfügbar:</translation>
+    </message>
+    <message>
+        <source>Stable release</source>
+        <translation>Stabile Version</translation>
+    </message>
+    <message>
+        <source>Beta release</source>
+        <translation>Beta Version</translation>
+    </message>
+    <message>
+        <source>Detailed list of changes</source>
+        <translation>Ausführliche Liste der Änderungen</translation>
+    </message>
+    <message>
+        <source>the BrickStore homepage</source>
+        <translation>die BrickStore Homepage</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Please note:&lt;/b&gt; Your currently installed version is flagged as defective. Please visit %1 to find out the exact cause.</source>
+        <translation>&lt;b&gt;Achtung:&lt;/b&gt; Ihre momentan installierte Version ist als defekt markiert. Bitte besuchen Sie %1, um den genauen Grund nachzulesen.</translation>
     </message>
 </context>
 <context>
@@ -113,20 +170,12 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
         <translation>Bestellung #%1</translation>
     </message>
     <message>
-        <source>Internal error: Could not create an Inventory object for oder #%1</source>
-        <translation>InteInterner Fehler: Konnte kein Inventory Objekt für die Bestellung %1 erstellen</translation>
-    </message>
-    <message>
         <source>Invalid order number.</source>
         <translation>Ungültige Bestellnummer.</translation>
     </message>
     <message>
         <source>Store %1</source>
         <translation>Shop-Bestand %1</translation>
-    </message>
-    <message>
-        <source>Internal error: Could not create an Inventory object for store inventory</source>
-        <translation>Interner Fehler: Konnte kein Inventory Objekt für den Shop-Bestand erstellen</translation>
     </message>
     <message>
         <source>BrickLink XML File</source>
@@ -150,7 +199,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>Could not parse the XML data in file %1:&lt;br /&gt;&lt;i&gt;Line %2, column %3: %4&lt;/i&gt;</source>
-        <translation>Fehler beim Lesen der XML Daten von Datei %1:&lt;br /&gt;&lt;i&gt;Zeile %2, Spalte %3: %4&lt;/i&gt;</translation>
+        <translation>Konnte XML Daten in Datei %1  nicht verarbeiten:&lt;br /&gt;&lt;i&gt;Zeile %2, Spalte %3: %4&lt;/i&gt;</translation>
     </message>
     <message>
         <source>This file contains %1 unknown item(s).</source>
@@ -158,7 +207,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>Could not parse the XML data in file %1.</source>
-        <translation>Fehler beim Lesen der XML Daten von Datei %1.</translation>
+        <translation>Konnte XML Daten in Datei %1 nicht verarbeiten.</translation>
     </message>
     <message>
         <source>LDraw Models</source>
@@ -166,15 +215,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>Could not parse the LDraw model in file %1.</source>
-        <translation>Fehler beim Lesen der LDraw Modelldaten von Datei %1.</translation>
-    </message>
-    <message>
-        <source>The order #%1 could not be retrieved.</source>
-        <translation>Die Bestellung #%1 konnte nicht geholt werden.</translation>
-    </message>
-    <message>
-        <source>The inventory you requested could not be retrieved.</source>
-        <translation>Die angeforderte Inventarliste konnte nicht geholt werden.</translation>
+        <translation>Konnte LDraw Modelldaten in Datei %1 nicht verarbeiten.</translation>
     </message>
     <message>
         <source>Save File as</source>
@@ -208,31 +249,17 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
         <source>This list contains items with errors.&lt;br /&gt;&lt;br /&gt;Do you really want to export this list?</source>
         <translation>Diese Liste enthält Teile mit Eingabefehlern.&lt;br /&gt;&lt;br /&gt;Wollen Sie diese Liste trotzdem exportieren?</translation>
     </message>
-</context>
-<context>
-    <name>CDocument::AddRemoveCmd</name>
     <message>
-        <source>Added %1 Items</source>
-        <translation type="unfinished"></translation>
+        <source>Enter the set ID of the Peeron inventory:</source>
+        <translation>Geben Sie die Set-Nummer des Peeron Inventars ein:</translation>
     </message>
     <message>
-        <source>Added an Item</source>
-        <translation type="unfinished"></translation>
+        <source>Peeron Inventory for %1</source>
+        <translation>Peeron Inventarliste von %1</translation>
     </message>
     <message>
-        <source>Removed %1 Items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Removed an Item</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>CDocument::ChangeCmd</name>
-    <message>
-        <source>Modified Item</source>
-        <translation type="unfinished"></translation>
+        <source>Reset Differences</source>
+        <translation>Differenzen zurücksetzen</translation>
     </message>
 </context>
 <context>
@@ -690,6 +717,63 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
         <source>Show Tabs at Bottom</source>
         <translation>Tabs anzeigen (unten)</translation>
     </message>
+    <message>
+        <source>Peeron Inventory...</source>
+        <translation>Peeron Inventarliste...</translation>
+    </message>
+</context>
+<context>
+    <name>CImportBLOrder</name>
+    <message>
+        <source>Importing BrickLink Order</source>
+        <translation>BrickLink Bestellung wir importiert</translation>
+    </message>
+    <message>
+        <source>Download: %1/%2 KB</source>
+        <translation>Download: %1/%2 KB</translation>
+    </message>
+    <message>
+        <source>Could not parse the XML data for order #%1.</source>
+        <translation>Konnte XML Daten von Bestellung #%1 nicht verarbeiten.</translation>
+    </message>
+    <message>
+        <source>Could not parse the XML data for order #%1:&lt;br /&gt;&lt;i&gt;Line %2, column %3: %4&lt;/i&gt;</source>
+        <translation>Konnte XML Daten von Bestellung #%1  nicht verarbeiten:&lt;br /&gt;&lt;i&gt;Zeile %2, Spalte %3: %4&lt;/i&gt;</translation>
+    </message>
+</context>
+<context>
+    <name>CImportBLStore</name>
+    <message>
+        <source>Importing BrickLink Store</source>
+        <translation>BrickLink Shopbestand wird importiert</translation>
+    </message>
+    <message>
+        <source>Download: %1/%2 KB</source>
+        <translation>Download: %1/%2 KB</translation>
+    </message>
+    <message>
+        <source>Could not parse the XML data for the store inventory:&lt;br /&gt;&lt;i&gt;Line %1, column %2: %3&lt;/i&gt;</source>
+        <translation>Konnte XML Daten des Shop-Bestandes nicht verarbeiten:&lt;br /&gt;&lt;i&gt;Zeile %2, Spalte %3: %4&lt;/i&gt;</translation>
+    </message>
+    <message>
+        <source>Could not parse the XML data for the store inventory.</source>
+        <translation>Konnte XML Daten des Shop-Bestandes nicht verarbeiten.</translation>
+    </message>
+</context>
+<context>
+    <name>CImportPeeronInventory</name>
+    <message>
+        <source>Importing Peeron Inventory</source>
+        <translation>Peeron Inventarliste wird importiert</translation>
+    </message>
+    <message>
+        <source>Download: %1/%2 KB</source>
+        <translation>Download: %1/%2 KB</translation>
+    </message>
+    <message>
+        <source>Could not parse the Peeron inventory.</source>
+        <translation>Konnte Daten der Peeron Inventarliste nicht verarbeiten.</translation>
+    </message>
 </context>
 <context>
     <name>CItemView</name>
@@ -1014,6 +1098,29 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
         <source>Please wait ... updating</source>
         <translation>Bitte warten ... Aktualisierung läuft</translation>
     </message>
+    <message>
+        <source>Double-click to set the price of the current item.</source>
+        <translation>Doppelklicken, um den Preis des aktuellen Teils zu setzen.</translation>
+    </message>
+</context>
+<context>
+    <name>CProgressDialog</name>
+    <message>
+        <source>&amp;OK</source>
+        <translation>&amp;OK</translation>
+    </message>
+    <message>
+        <source>&amp;Cancel</source>
+        <translation>&amp;Abbrechen</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Fehler</translation>
+    </message>
+    <message>
+        <source>Download failed: %1</source>
+        <translation>Download schlug fehl: %1</translation>
+    </message>
 </context>
 <context>
     <name>CReport</name>
@@ -1228,6 +1335,61 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
 </context>
 <context>
+    <name>CUpdateDatabase</name>
+    <message>
+        <source>Updating BrickLink Database</source>
+        <translation>BrickLink Datenbank wird aktualisiert</translation>
+    </message>
+    <message>
+        <source>Download: %1/%2 KB</source>
+        <translation>Download: %1/%2 KB</translation>
+    </message>
+    <message>
+        <source>Could not write to file: %1</source>
+        <translation>Konnte nicht in Datei schreiben: %1</translation>
+    </message>
+    <message>
+        <source>Already up-to-date.</source>
+        <translation>Bereits auf dem aktuellen Stand.</translation>
+    </message>
+    <message>
+        <source>Finished.</source>
+        <translation>Beendet.</translation>
+    </message>
+    <message>
+        <source>Could not load the new database.</source>
+        <translation>Konnte die neue Datenbank nicht laden.</translation>
+    </message>
+    <message>
+        <source>Downloaded file is empty.</source>
+        <translation>Gedownloadete Datei ist leer.</translation>
+    </message>
+    <message>
+        <source>Could not read downloaded file: %1</source>
+        <translation>Konnte gedownloadete Datei nicht lesen: %1</translation>
+    </message>
+    <message>
+        <source>Could not write to database file: %1</source>
+        <translation>Konnte nicht in Datenbankdatei schreiben: %1</translation>
+    </message>
+    <message>
+        <source>Could not initialize the LZMA decompressor</source>
+        <translation>Konnte den LZMA Entpacker nicht initialisieren</translation>
+    </message>
+    <message>
+        <source>Decompressing database</source>
+        <translation>Entpacke Datenbank</translation>
+    </message>
+    <message>
+        <source>Error while decompressing %1</source>
+        <translation>Fehler beim Entpacken: %1</translation>
+    </message>
+    <message>
+        <source>Error writing to file %1: %2</source>
+        <translation>Fehler beim Schreiben in Datei %1: %2</translation>
+    </message>
+</context>
+<context>
     <name>CUtility</name>
     <message>
         <source>Could not rename %1 to %2.</source>
@@ -1350,11 +1512,15 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>Added %1, Merged %2 Items</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 Teile hinzugefügt, %2 zusammengeführt</translation>
     </message>
     <message>
-        <source>Reset Differences</source>
-        <translation>Differenzen zurücksetzen</translation>
+        <source>Merged %1 Items</source>
+        <translation>%1 Teile zusammengeführt</translation>
+    </message>
+    <message>
+        <source>Subtracted %1 Items</source>
+        <translation>%1 Teile abgezogen</translation>
     </message>
 </context>
 <context>
@@ -1422,84 +1588,6 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <message>
         <source>Consolidate with &amp;list</source>
         <translation>Mit &amp;Liste zusammenführen</translation>
-    </message>
-</context>
-<context>
-    <name>DlgDBUpdate</name>
-    <message>
-        <source>BrickStore</source>
-        <translation>BrickStore</translation>
-    </message>
-    <message>
-        <source>Updating BrickLink Database files:</source>
-        <translation>BrickLink Datenbanken werden aktualisiert:</translation>
-    </message>
-    <message>
-        <source>&amp;OK</source>
-        <translation>&amp;OK</translation>
-    </message>
-    <message>
-        <source>&amp;Cancel</source>
-        <translation>&amp;Abbrechen</translation>
-    </message>
-</context>
-<context>
-    <name>DlgDBUpdateImpl</name>
-    <message>
-        <source>Transfer job could not be started.</source>
-        <translation>Der Transferjob kommt nicht gestartet werden.</translation>
-    </message>
-    <message>
-        <source>Finished.</source>
-        <translation>Beendet.</translation>
-    </message>
-    <message>
-        <source>Could not load the new database.</source>
-        <translation>Konnte die neue Datenbank nicht laden.</translation>
-    </message>
-    <message>
-        <source>Transfer job failed: %1</source>
-        <translation>Der Transferjob schlug fehl: %1</translation>
-    </message>
-    <message>
-        <source>Error</source>
-        <translation>Fehler</translation>
-    </message>
-    <message>
-        <source>Downloading: %1/%2 KB</source>
-        <translation>Download: %1/%2 KB</translation>
-    </message>
-    <message>
-        <source>Could not read downloaded file: %1</source>
-        <translation>Konnte gedownloadete Datei nicht lesen: %1</translation>
-    </message>
-    <message>
-        <source>Could not write to database file: %1</source>
-        <translation>Konnte nicht in Datenbankdatei schreiben: %1</translation>
-    </message>
-    <message>
-        <source>Could not initialize the LZMA decompressor</source>
-        <translation>Konnte den LZMA Entpacker nicht initialisieren</translation>
-    </message>
-    <message>
-        <source>Decompressing database</source>
-        <translation>Entpacke Datenbank</translation>
-    </message>
-    <message>
-        <source>Error while decompressing %1</source>
-        <translation>Fehler beim Entpacken: %1</translation>
-    </message>
-    <message>
-        <source>Error writing to file %1: %2</source>
-        <translation>Fehler beim Schreiben in Datei %1: %2</translation>
-    </message>
-    <message>
-        <source>Already up-to-date.</source>
-        <translation>Bereits auf dem aktuellen Stand.</translation>
-    </message>
-    <message>
-        <source>The database is not available.</source>
-        <translation>Die Datenbank ist nicht verfügbar.</translation>
     </message>
 </context>
 <context>
@@ -2080,72 +2168,6 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <message>
         <source>&amp;Cancel</source>
         <translation>&amp;Abbrechen</translation>
-    </message>
-</context>
-<context>
-    <name>DlgUpdate</name>
-    <message>
-        <source>&amp;Cancel</source>
-        <translation>&amp;Abbrechen</translation>
-    </message>
-    <message>
-        <source>&amp;OK</source>
-        <translation>&amp;OK</translation>
-    </message>
-    <message>
-        <source>Check for Program Updates</source>
-        <translation>Nach Programm-Updates suchen</translation>
-    </message>
-</context>
-<context>
-    <name>DlgUpdateImpl</name>
-    <message>
-        <source>You are currently running %1 %2</source>
-        <translation>Sie benutzen momentan %1 %2</translation>
-    </message>
-    <message>
-        <source>Could not retrieve version information from server:&lt;br /&gt;&lt;br /&gt;%1</source>
-        <translation>Es konnten keine Versionsinformationen vom Server geholt werden:&lt;br /&gt;&lt;br /&gt;%1</translation>
-    </message>
-    <message>
-        <source>Transfer job could not be started.</source>
-        <translation>Der Transferjob kommt nicht gestartet werden.</translation>
-    </message>
-    <message>
-        <source>Version information is not available.</source>
-        <translation>Keine Versionsinformationen verfügbar.</translation>
-    </message>
-    <message>
-        <source>Your currently installed version is up-to-date.</source>
-        <translation>Ihre momentan installierte Version ist bereits auf dem neuesten Stand.</translation>
-    </message>
-    <message>
-        <source>A newer version than the one currently installed is available:</source>
-        <translation>Es ist eine neuere Version als die momentan installierte verfügbar:</translation>
-    </message>
-    <message>
-        <source>Detailed list of changes</source>
-        <translation>Ausführliche Liste der Änderungen</translation>
-    </message>
-    <message>
-        <source>the BrickStore homepage</source>
-        <translation>die BrickStore Homepage</translation>
-    </message>
-    <message>
-        <source>Stable release</source>
-        <translation>Stabile Version</translation>
-    </message>
-    <message>
-        <source>Beta release</source>
-        <translation>Beta Version</translation>
-    </message>
-    <message>
-        <source>&lt;b&gt;Please note:&lt;/b&gt; Your currently installed version is flagged as defective. Please visit %1 to find out the exact cause.</source>
-        <translation>&lt;b&gt;Achtung:&lt;/b&gt; Ihre momentan installierte Version ist als defekt markiert. Bitte besuchen Sie %1, um den genauen Grund nachzulesen.</translation>
-    </message>
-    <message>
-        <source>Downloading: %1/%2 KB</source>
-        <translation>Download: %1/%2 KB</translation>
     </message>
 </context>
 </TS>

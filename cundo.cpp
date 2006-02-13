@@ -31,8 +31,8 @@ public:
 		m_stack     = stack ? stack : CUndoManager::inst ( )-> currentStack ( );
 		m_can_undo  = m_stack ? m_stack-> canUndo ( ) : false;
 		m_can_redo  = m_stack ? m_stack-> canRedo ( ) : false;
-//		m_undo_desc = m_stack ? m_stack-> undoDescription ( ) : QString ( );
-//		m_redo_desc = m_stack ? m_stack-> redoDescription ( ) : QString ( );
+		m_undo_desc = m_stack ? m_stack-> undoDescription ( ) : QString ( );
+		m_redo_desc = m_stack ? m_stack-> redoDescription ( ) : QString ( );
 		m_current   = m_stack ? m_stack-> m_current. current ( ) : 0;
 		m_clean     = m_stack ? m_stack-> isClean ( ) : false;
 	}
@@ -50,10 +50,10 @@ public:
 				mask |= CanUndo;
 			if ( m_can_redo != stack-> canRedo ( ))
 				mask |= CanRedo;
-//			if ( m_undo_desc != stack-> undoDescription ( ))
-//				mask |= UndoDesc;
-//			if ( m_redo_desc != stack-> redoDescription ( ))
-//				mask |= RedoDesc;
+			if ( m_undo_desc != stack-> undoDescription ( ))
+				mask |= UndoDesc;
+			if ( m_redo_desc != stack-> redoDescription ( ))
+				mask |= RedoDesc;
 			if ( m_current != stack-> m_current. current ( ))
 				mask |= ( UndoDesc | RedoDesc );
 			if ( m_clean != stack-> isClean ( ))
@@ -97,8 +97,8 @@ private:
 	bool        m_clean;
 	bool        m_can_undo;
 	bool        m_can_redo;
-//	QString     m_undo_desc;
-//	QString     m_redo_desc;
+	QString     m_undo_desc;
+	QString     m_redo_desc;
 	CUndoCmd *  m_current;
 };
 
@@ -182,6 +182,7 @@ CUndoStack::CUndoStack ( QObject *parent )
 	m_clean_valid = true;
 	m_clean = 0;
 	m_macro_level = 0;
+	m_last_macro_begin = 0;
 
 	CUndoManager::inst ( )-> associateView ( parent, this );
 }
@@ -207,10 +208,9 @@ QAction *CUndoStack::createRedoAction ( QObject *parent, const char *name, bool 
 		connect ( a, SIGNAL( activated ( int )), this, SLOT( redo ( int )));
 	}
 	else {
-		a = new CUndoAction ( parent, name );
-		connect ( this, SIGNAL( redoDescriptionChanged ( const QString & )), a, SLOT( setTextSlot ( const QString & )));
+		a = new CUndoAction ( CUndoManager::redoText ( ), parent, name );
+		connect ( this, SIGNAL( redoDescriptionChanged ( const QString & )), a, SLOT( setDescription ( const QString & )));
 	}
-	a-> setText ( CUndoManager::redoText ( ));
 	a-> setEnabled ( canRedo ( ));
 
 	connect ( this, SIGNAL( canRedoChanged ( bool )), a, SLOT( setEnabled ( bool )));
@@ -230,10 +230,9 @@ QAction *CUndoStack::createUndoAction ( QObject *parent, const char *name, bool 
 		connect ( a, SIGNAL( activated ( int )), this, SLOT( undo ( int )));
 	}
 	else {
-		a = new CUndoAction ( parent, name );
-		connect ( this, SIGNAL( undoDescriptionChanged ( const QString & )), a, SLOT( setTextSlot ( const QString & )));
+		a = new CUndoAction ( CUndoManager::undoText ( ), parent, name );
+		connect ( this, SIGNAL( undoDescriptionChanged ( const QString & )), a, SLOT( setDescription ( const QString & )));
 	}
-	a-> setText ( CUndoManager::undoText ( ));
 	a-> setEnabled ( canUndo ( ));
 
 	connect ( this, SIGNAL( canUndoChanged ( bool )), a, SLOT( setEnabled ( bool )));
@@ -288,16 +287,31 @@ void CUndoStack::push ( CUndoCmd *cmd )
 		cmd = *m_current;
 	}
 	else {
+		bool last_was_macro_begin = (( *m_current ) && ( *m_current )-> isMacroBegin ( ));
+
 		m_stack. append ( cmd );
 		m_current. toLast ( );
 
 		if ( cmd-> isMacroBegin ( )) {
-			m_last_macro_begin = cmd-> description ( );
+			m_last_macro_begin = cmd;
 			m_macro_level++;
 		}
 		else if ( cmd-> isMacroEnd ( )) {
-			cmd-> setDescription ( m_last_macro_begin );
+			if ( m_last_macro_begin ) {
+				if ( !cmd-> description ( ). isNull ( ))
+					m_last_macro_begin-> setDescription ( cmd-> description ( ));
+				else
+					cmd-> setDescription ( m_last_macro_begin-> description ( ));
+				m_last_macro_begin = 0;
+			}
 			m_macro_level--;
+
+			// yank out empty macros
+			if ( last_was_macro_begin ) {
+				m_current -= 2;
+				m_stack. removeLast ( );
+				m_stack. removeLast ( );
+			}
 		}
 		
 		if ( !m_macro_level )
@@ -318,20 +332,14 @@ QString CUndoStack::redoDescription ( ) const
 	else
 		it. toFirst ( );
 
-	QString str = CUndoManager::redoText ( );
-	if ( *it ) 
-		str = str + ": " + ( *it )-> description ( );
-	return str;
+	return ( *it ) ? ( *it )-> description ( ) : QString ( );
 }
 
 QString CUndoStack::undoDescription ( ) const
 {
 	QPtrListIterator <CUndoCmd> it = m_current;
 
-	QString str = CUndoManager::undoText ( );
-	if ( *it ) 
-		str = str + ": " + ( *it )-> description ( );
-	return str;
+	return ( *it ) ? ( *it )-> description ( ) : QString ( );
 }
 
 QStringList CUndoStack::redoList ( ) const
@@ -343,8 +351,16 @@ QStringList CUndoStack::redoList ( ) const
 	else
 		it. toFirst ( );
 
+	int macrolevel = 0;
+
 	while ( *it ) {
-		sl << ( *it )-> description ( );
+		if (( *it )-> type ( ) == CUndoCmd::MacroBegin )
+			macrolevel++;
+		else if (( *it )-> type ( ) == CUndoCmd::MacroEnd )
+			macrolevel--;
+
+		if ( !macrolevel )
+			sl << ( *it )-> description ( );
 		++it;
 	}
 	return sl;
@@ -355,8 +371,16 @@ QStringList CUndoStack::undoList ( ) const
 	QStringList sl;
 	QPtrListIterator <CUndoCmd> it = m_current;
 
+	int macrolevel = 0;
+
 	while ( *it ) {
-		sl << ( *it )-> description ( );
+		if (( *it )-> type ( ) == CUndoCmd::MacroBegin )
+			macrolevel--;
+		else if (( *it )-> type ( ) == CUndoCmd::MacroEnd )
+			macrolevel++;
+
+		if ( !macrolevel )
+			sl << ( *it )-> description ( );
 		--it;
 	}
 	return sl;
@@ -377,7 +401,7 @@ void CUndoStack::redo ( int count )
 {
 	CUndoEmitter e ( this );
 
-	while ( canRedo ( ) && ( count > 0 )) {
+	while ( !m_current. atLast ( ) && ( count > 0 )) {
 		QPtrListIterator <CUndoCmd> it = m_current;
 		if ( *it )
 			++it;
@@ -417,7 +441,7 @@ void CUndoStack::undo ( int count )
 {
 	CUndoEmitter e ( this );
 
-	while ( canUndo ( ) && ( count > 0 )) {
+	while (( m_current != 0 ) && ( count > 0 )) {
 		switch (( *m_current )-> type ( )) {
 			case CUndoCmd::MacroEnd:
 				m_macro_level++;
@@ -530,10 +554,9 @@ QAction *CUndoManager::createRedoAction ( QObject *parent, const char *name, boo
 		connect ( a, SIGNAL( activated ( int )), this, SLOT( redo ( int )));
 	}
 	else {
-		a = new CUndoAction ( parent, name );
-		connect ( this, SIGNAL( redoDescriptionChanged ( const QString & )), a, SLOT( setTextSlot ( const QString & )));
+		a = new CUndoAction ( CUndoManager::redoText ( ), parent, name );
+		connect ( this, SIGNAL( redoDescriptionChanged ( const QString & )), a, SLOT( setDescription ( const QString & )));
 	}
-	a-> setText ( CUndoManager::redoText ( ));
 	a-> setEnabled ( canRedo ( ));
 
 	connect ( this, SIGNAL( canRedoChanged ( bool )), a, SLOT( setEnabled ( bool )));
@@ -553,10 +576,9 @@ QAction *CUndoManager::createUndoAction ( QObject *parent, const char *name, boo
 		connect ( a, SIGNAL( activated ( int )), this, SLOT( undo ( int )));
 	}
 	else {
-		a = new CUndoAction ( parent, name );
-		connect ( this, SIGNAL( undoDescriptionChanged ( const QString & )), a, SLOT( setTextSlot ( const QString & )));
+		a = new CUndoAction ( CUndoManager::undoText ( ), parent, name );
+		connect ( this, SIGNAL( undoDescriptionChanged ( const QString & )), a, SLOT( setDescription ( const QString & )));
 	}
-	a-> setText ( CUndoManager::undoText ( ));
 	a-> setEnabled ( canUndo ( ));
 
 	connect ( this, SIGNAL( canUndoChanged ( bool )), a, SLOT( setEnabled ( bool )));
@@ -572,7 +594,7 @@ CUndoStack *CUndoManager::currentStack ( ) const
 
 QString CUndoManager::redoDescription ( ) const
 {
-	return m_current ? m_current-> redoDescription ( ) : redoText ( );
+	return m_current ? m_current-> redoDescription ( ) : QString ( );
 }
 
 QString CUndoManager::redoText ( )
@@ -587,7 +609,7 @@ QStringList CUndoManager::redoList ( ) const
 
 QString CUndoManager::undoDescription ( ) const
 {
-	return m_current ? m_current-> undoDescription ( ) : undoText ( );
+	return m_current ? m_current-> undoDescription ( ) : QString ( );
 }
 
 QString CUndoManager::undoText ( )
@@ -711,12 +733,18 @@ void CUndoManager::stackDestroyed ( QObject *stack )
 
 // --------------------------------------------------------------------------
 
-CUndoAction::CUndoAction ( QObject *parent, const char *name )
-	: QAction ( parent, name ) 
-{ }
+CUndoAction::CUndoAction ( const QString &label, QObject *parent, const char *name )
+	: QAction ( parent, name ) , m_label ( label )
+{ 
+	setText ( m_label );
+}
 
-void CUndoAction::setTextSlot ( const QString &str )
+void CUndoAction::setDescription ( const QString &desc )
 {
+	QString str = m_label;
+	if ( !desc. isEmpty ( ))
+		str = QString( "%1  (%2)" ). arg( str, desc );
+	
 	setText ( str ); 
 }
 

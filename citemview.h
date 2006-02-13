@@ -31,42 +31,7 @@ public:
 	CItemView ( CDocument *doc, QWidget *parent = 0, const char *name = 0 );
 	virtual ~CItemView ( );
 
-	enum Field {
-		Status = 0,
-		Picture,
-		PartNo,
-		Description,
-		Condition,
-		Color,
-		Quantity,
-		Price,
-		Total,
-		Bulk,
-		Sale,
-		Comments,
-		Remarks,
-		Category,
-		ItemType,
-		TierQ1,
-		TierP1,
-		TierQ2,
-		TierP2,
-		TierQ3,
-		TierP3,
-		LotId,
-		Retain,
-		Stockroom,
-		Reserved,
-		Weight,
-		YearReleased,
-
-		QuantityOrig,
-		QuantityDiff,
-		PriceOrig,
-		PriceDiff,
-
-		FieldCount,
-	};
+	CDocument *document ( ) const;
 
 	enum Filter {
 		All        = -1,
@@ -111,8 +76,6 @@ public slots:
 signals:
 	void editDone ( CItemViewItem *ivi, int col, const QString &text, bool valid );
 	void editCanceled ( CItemViewItem *ivi, int col );
-
-	void itemChanged ( CItemViewItem *, bool grave );
 
 protected:
 	void edit ( CItemViewItem *ivi, int col, QWidget *editor );

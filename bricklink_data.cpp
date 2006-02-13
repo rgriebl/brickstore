@@ -49,8 +49,8 @@ QDataStream &operator >> ( QDataStream &ds, BrickLink::Color *col )
 }
 
 
-BrickLink::ItemType::ItemType ( ) : m_name ( 0 ) { }
-BrickLink::ItemType::~ItemType ( ) { delete [] m_name; }
+BrickLink::ItemType::ItemType ( ) : m_name ( 0 ), m_categories ( 0 ) { }
+BrickLink::ItemType::~ItemType ( ) { delete [] m_name; delete [] m_categories; }
 
 QSize BrickLink::ItemType::imageSize ( ) const
 {
@@ -68,16 +68,23 @@ QDataStream &operator << ( QDataStream &ds, const BrickLink::ItemType *itt )
 	flags |= ( itt-> m_has_weight      ? 0x04 : 0 );
 	flags |= ( itt-> m_has_year        ? 0x08 : 0 );
 
-	ds << Q_UINT8( itt-> m_id ) << Q_UINT8( itt-> m_picture_id ) << itt-> m_name << flags << Q_UINT32( itt-> m_categories. count ( ));
-	for ( QPtrListIterator <BrickLink::Category> it ( itt-> m_categories ); it. current ( ); ++it )
-		ds << Q_INT32( it. current ( )-> id ( ));
+	ds << Q_UINT8( itt-> m_id ) << Q_UINT8( itt-> m_picture_id ) << itt-> m_name << flags;
+	
+	Q_UINT32 catcount = 0;
+	for ( const BrickLink::Category **catp = itt-> m_categories; *catp; catp++ )
+		catcount++;
+
+	ds << catcount;
+	for ( const BrickLink::Category **catp = itt-> m_categories; *catp; catp++ )
+		ds << Q_INT32(( *catp )-> id ( ));
+	
 	return ds;
 }
 
 QDataStream &operator >> ( QDataStream &ds, BrickLink::ItemType *itt )
 {
 	delete [] itt-> m_name;
-	itt-> m_categories. clear ( );
+	delete [] itt-> m_categories;
 
 	Q_UINT8 flags = 0;
 	Q_UINT32 catcount = 0;
@@ -87,14 +94,14 @@ QDataStream &operator >> ( QDataStream &ds, BrickLink::ItemType *itt )
 	itt-> m_id = id;
 	itt-> m_picture_id = id;
 
+	itt-> m_categories = new const BrickLink::Category * [catcount + 1];
+
 	for ( Q_UINT32 i = 0; i < catcount; i++ ) {
 		Q_INT32 id = 0;
 		ds >> id;
-		const BrickLink::Category *cat = BrickLink::inst ( )-> category ( id );
-
-		if ( cat )
-			itt-> m_categories. append ( cat );
+		itt-> m_categories [i] = BrickLink::inst ( )-> category ( id );
 	}
+	itt-> m_categories [catcount] = 0;
 
 	itt-> m_has_inventories = flags & 0x01;
 	itt-> m_has_colors      = flags & 0x02;
@@ -330,9 +337,7 @@ QDataStream &operator >> ( QDataStream &ds, BrickLink::Item *item )
 	for ( Q_UINT32 i = 0; i < catcount; i++ ) {
 		Q_INT32 id = 0;
 		ds >> id;
-		const BrickLink::Category *cat = BrickLink::inst ( )-> category ( id );
-
-		item-> m_categories [i] = cat;
+		item-> m_categories [i] = BrickLink::inst ( )-> category ( id );
 	}
 	item-> m_categories [catcount] = 0;
 
@@ -467,6 +472,40 @@ BrickLink::InvItem &BrickLink::InvItem::operator = ( const InvItem &copy )
 		m_custom_picture-> addRef ( );
 
 	return *this;
+}
+
+bool BrickLink::InvItem::operator == ( const InvItem &cmp ) const
+{
+	bool same = true;
+
+	same &= ( m_incomplete         == cmp. m_incomplete );
+	same &= ( m_custom_picture     == cmp. m_custom_picture );
+	same &= ( m_item               == cmp. m_item );
+	same &= ( m_color              == cmp. m_color );
+	same &= ( m_status             == cmp. m_status );
+	same &= ( m_condition          == cmp. m_condition );
+	same &= ( m_retain             == cmp. m_retain );
+	same &= ( m_stockroom          == cmp. m_stockroom );
+	same &= ( m_comments           == cmp. m_comments );
+	same &= ( m_remarks            == cmp. m_remarks );
+	same &= ( m_reserved           == cmp. m_reserved );
+	same &= ( m_custom_picture_url == cmp. m_custom_picture_url );
+	same &= ( m_quantity           == cmp. m_quantity );
+	same &= ( m_bulk_quantity      == cmp. m_bulk_quantity );
+	same &= ( m_tier_quantity [0]  == cmp. m_tier_quantity [0] );
+	same &= ( m_tier_quantity [1]  == cmp. m_tier_quantity [1] );
+	same &= ( m_tier_quantity [2]  == cmp. m_tier_quantity [2] );
+	same &= ( m_sale               == cmp. m_sale );
+	same &= ( m_price              == cmp. m_price );
+	same &= ( m_tier_price [0]     == cmp. m_tier_price [0] );
+	same &= ( m_tier_price [1]     == cmp. m_tier_price [1] );
+	same &= ( m_tier_price [2]     == cmp. m_tier_price [2] );
+	same &= ( m_weight             == cmp. m_weight );
+	same &= ( m_lot_id             == cmp. m_lot_id );
+	same &= ( m_orig_price         == cmp. m_orig_price );
+	same &= ( m_orig_quantity      == cmp. m_orig_quantity );
+
+	return same;
 }
 
 BrickLink::InvItem::~InvItem ( )
@@ -646,3 +685,7 @@ bool BrickLink::InvItemDrag::decode ( QMimeSource *e, InvItemList &items )
 	
     return true;
 }
+
+BrickLink::Order::Order ( const QString &id, Type type )
+	: m_id ( id ), m_type ( type )
+{ }

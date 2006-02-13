@@ -17,10 +17,19 @@
 #include <qobject.h>
 #include <qdom.h>
 
-#include "cundo.h"
 #include "bricklink.h"
 
 class CUndoStack;
+class CUndoCmd;
+class CAddRemoveCmd;
+class CChangeCmd;
+
+
+class IDocumentView {
+public:
+	virtual QDomElement createGuiStateXML ( QDomDocument doc ) = 0;
+	virtual bool parseGuiStateXML ( QDomElement root ) = 0;
+};
 
 class CDocument : public QObject {
 	Q_OBJECT
@@ -70,6 +79,7 @@ public:
 		Item ( const Item & );
 
 		Item &operator = ( const Item & );
+		bool operator == ( const Item & ) const;
 
 		Q_UINT64 errors ( ) const          { return m_errors; }
 		void setErrors ( Q_UINT64 errors ) { m_errors = errors; }
@@ -77,21 +87,9 @@ public:
 		Q_UINT64 m_errors;
 	};
 
-	typedef QValueList<Item *>  ItemList;
-/*
-	class ItemList : public QValueList<Item *> {
-	public:
-		ItemList ( );
-		ItemList ( const BrickLink::InvItemList & );
-		ItemList ( const ItemList & );
-
-		ItemList &operator = ( const BrickLink::InvItemList & );
-
-		operator BrickLink::InvItemList ( ) const;
-	};
-*/
-	typedef int                       Position;
-	typedef QValueVector<Position>    PositionVector;
+	typedef QValueList<Item *>      ItemList;
+	typedef int                     Position;
+	typedef QValueVector<Position>  PositionVector;
 
 	class Statistics {
 	public:
@@ -120,13 +118,12 @@ public:
 	CDocument ( );
 	virtual ~CDocument ( );
 
-	void addView ( QWidget *view );
-
-//	const QPtrList <QWidget> &views ( ) const;
-//	QWidget *activeView ( ) { return m_active_view; }
+	void addView ( QWidget *view, IDocumentView *docview = 0 );
 
 	QString fileName ( ) const;
 	QString title ( ) const;
+
+	const BrickLink::Order *order ( ) const;
 
 	bool isModified ( ) const;
 
@@ -143,6 +140,8 @@ public:
 
 	bool changeItem ( Item *position, const Item &item );
 
+	void resetDifferences ( const ItemList &items );
+
 	Statistics statistics ( const ItemList &list ) const;
 
 	Q_UINT64 errorMask ( ) const;
@@ -155,14 +154,11 @@ public:
 	static CDocument *fileImportBrickLinkOrder ( );
 	static CDocument *fileImportBrickLinkStore ( );
 	static CDocument *fileImportBrickLinkXML ( );
+	static CDocument *fileImportPeeronInventory ( ); 
 	static CDocument *fileImportBrikTrakInventory ( const QString &fn = QString::null );
 	static CDocument *fileImportLDrawModel ( );
 
 public slots:
-//	void setActiveView ( QWidget *v ) { m_active_view = v; }
-//	void attachView ( QWidget * );
-//	void detachView ( QWidget * );
-
 	void setFileName ( const QString &str );
 	void setTitle ( const QString &str );
 
@@ -177,7 +173,7 @@ public slots:
 	void fileExportBrickLinkWantedListClipboard ( const ItemList & = ItemList ( ));
 	void fileExportBrikTrakInventory ( const ItemList & = ItemList ( ));
 
-public: // -> controller object?
+public:
 	CUndoCmd *macroBegin ( const QString &label = QString ( ));
 	void      macroEnd ( CUndoCmd *, const QString &label = QString ( ));
 
@@ -195,7 +191,6 @@ signals:
 	void selectionChanged ( const CDocument::ItemList & );
 
 private slots:
-	void inventoryUpdated ( BrickLink::Inventory * );
 	void clean2Modified ( bool );
 
 private:
@@ -208,41 +203,8 @@ private:
 	void removeItemsDirect ( ItemList &items, ItemList &positions );
 	void changeItemDirect ( Item *position, Item &item );
 
-	class AddRemoveCmd : public CUndoCmd {
-	public:
-		enum Type { Add, Remove };
-
-		AddRemoveCmd ( Type t, CDocument *doc, const ItemList &positions, const ItemList &items, bool can_merge = false );
-		~AddRemoveCmd ( );
-
-		virtual void redo ( );
-		virtual void undo ( );
-		virtual bool mergeMeWith ( CUndoCmd *other );
-
-		static QString genDesc ( Type t, uint count );
-
-	private:
-		CDocument *    m_doc;
-		ItemList       m_positions;
-		ItemList       m_items;
-		Type           m_type         : 1;
-	};
-
-	class ChangeCmd : public CUndoCmd {
-	public:
-		ChangeCmd ( CDocument *doc, Item *position, const Item &item, bool can_merge = false );
-
-		virtual void redo ( );
-		virtual void undo ( );
-		virtual bool mergeMeWith ( CUndoCmd *other );
-
-	private:
-		CDocument    *m_doc;
-		Item *        m_position;
-		Item          m_item;
-	};
-
-	friend class AddRemoveCmd;
+	friend class CAddRemoveCmd;
+	friend class CChangeCmd;
 
 	void updateErrors ( Item * );
 
@@ -256,13 +218,10 @@ private:
 
 	CUndoStack *     m_undo;
 
-	BrickLink::Inventory *m_inventory;
-	int                   m_inventory_multiply;
+	BrickLink::Order *m_order;
 
-//	QPtrList<QWidget> m_views;
-//	QWidget         *m_active_view;
-
-	QDomNode         m_gui_state;
+	QValueList<IDocumentView *> m_views;
+	QDomElement  m_gui_state;
 };
 
 #endif

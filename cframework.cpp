@@ -37,13 +37,14 @@
 #include "cmultiprogressbar.h"
 #include "ciconfactory.h"
 #include "dlgsettingsimpl.h"
-#include "dlgdbupdateimpl.h"
 #include "cutility.h"
 #include "cspinner.h"
 #include "cundo.h"
 #include "cworkspace.h"
 #include "ctaskpanemanager.h"
 #include "ctaskwidgets.h"
+#include "cprogressdialog.h"
+#include "cupdatedatabase.h"
 
 #include "cframework.h"
 
@@ -293,6 +294,8 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 	connect ( CConfig::inst ( ), SIGNAL( onlineStatusChanged ( bool )), bl, SLOT( setOnlineStatus ( bool )));
 	connect ( CConfig::inst ( ), SIGNAL( blUpdateIntervalsChanged ( int, int )), bl, SLOT( setUpdateIntervals ( int, int )));
 	connect ( CConfig::inst ( ), SIGNAL( proxyChanged ( bool, const QString &, int )), bl, SLOT( setHttpProxy ( bool, const QString &, int )));
+	connect ( CMoney::inst ( ), SIGNAL( monetarySettingsChanged ( )), this, SLOT( statisticsUpdate ( )));
+	connect ( CConfig::inst ( ), SIGNAL( weightSystemChanged ( CConfig::WeightSystem )), this, SLOT( statisticsUpdate ( )));
 
 	connect ( bl, SIGNAL( inventoryProgress ( int, int )),  this, SLOT( gotInventoryProgress ( int, int )));
 	connect ( bl, SIGNAL( priceGuideProgress ( int, int )), this, SLOT( gotPriceGuideProgress ( int, int )));
@@ -340,10 +343,11 @@ void CFrameWork::languageChange ( )
 		{ "file_saveas",                    QT_TR_NOOP( "Save As..." ),                         0 },
 		{ "file_print",                     QT_TR_NOOP( "Print..." ),                           QT_TR_NOOP( "Ctrl+P", "File|Print" ) },
 		{ "file_import",                    QT_TR_NOOP( "Import" ),                             0 },
-		{ "file_import_bl_inventory",       QT_TR_NOOP( "BrickLink Inventory..." ),             0 },
+		{ "file_import_bl_inv",             QT_TR_NOOP( "BrickLink Inventory..." ),             0 },
 		{ "file_import_bl_xml",             QT_TR_NOOP( "BrickLink XML..." ),                   0 },
 		{ "file_import_bl_order",           QT_TR_NOOP( "BrickLink Order..." ),                 0 },
-		{ "file_import_bl_store_inventory", QT_TR_NOOP( "BrickLink Store Inventory..." ),       0 },
+		{ "file_import_bl_store_inv",       QT_TR_NOOP( "BrickLink Store Inventory..." ),       0 },
+		{ "file_import_peeron_inv",         QT_TR_NOOP( "Peeron Inventory..." ),                0 },
 		{ "file_import_ldraw_model",        QT_TR_NOOP( "LDraw Model..." ),                     0 },
 		{ "file_import_briktrak",           QT_TR_NOOP( "BrikTrak Inventory..." ),              0 },
 		{ "file_export",                    QT_TR_NOOP( "Export" ),                             0 },
@@ -478,11 +482,8 @@ void CFrameWork::initBrickLinkDelayed ( )
 	QApplication::restoreOverrideCursor ( );		
 
 	if ( !dbok ) {
-		if ( CMessageBox::warning ( this, tr( "Could not load the BrickLink database files.<br /><br />Should these files be updated now?" ), CMessageBox::Yes, CMessageBox::No ) == CMessageBox::Yes ) {
-			DlgDBUpdateImpl dbu ( this );
-			dbu. exec ( );
-			dbok = !dbu. errors ( );
-		}
+		if ( CMessageBox::warning ( this, tr( "Could not load the BrickLink database files.<br /><br />Should these files be updated now?" ), CMessageBox::Yes, CMessageBox::No ) == CMessageBox::Yes )
+			dbok = updateDatabase ( );
 	}
 
 	if ( dbok )
@@ -622,7 +623,7 @@ void CFrameWork::createActions ( )
 	g = new QActionGroup ( this, "file_import", false );
 	g-> setUsesDropDown ( true );
 
-	a = new QAction ( g, "file_import_bl_inventory" );
+	a = new QAction ( g, "file_import_bl_inv" );
 	connect ( a, SIGNAL( activated ( )), this, SLOT( fileImportBrickLinkInventory ( )));
 
 	a = new QAction ( g, "file_import_bl_xml" );
@@ -631,8 +632,11 @@ void CFrameWork::createActions ( )
 	a = new QAction ( g, "file_import_bl_order" );
 	connect ( a, SIGNAL( activated ( )), this, SLOT( fileImportBrickLinkOrder ( )));
 
-	a = new QAction ( g, "file_import_bl_store_inventory" );
+	a = new QAction ( g, "file_import_bl_store_inv" );
 	connect ( a, SIGNAL( activated ( )), this, SLOT( fileImportBrickLinkStore ( )));
+
+	a = new QAction ( g, "file_import_peeron_inv" );
+	connect ( a, SIGNAL( activated ( )), this, SLOT( fileImportPeeronInventory ( )));
 
 	a = new QAction ( g, "file_import_ldraw_model" );
 	connect ( a, SIGNAL( activated ( )), this, SLOT( fileImportLDrawModel ( )));
@@ -806,6 +810,11 @@ void CFrameWork::fileOpenRecent ( int i )
 	}
 }
 
+void CFrameWork::fileImportPeeronInventory ( )
+{
+	createWindow ( CDocument::fileImportPeeronInventory ( ));
+}
+
 void CFrameWork::fileImportBrikTrakInventory ( )
 {
 	createWindow ( CDocument::fileImportBrikTrakInventory ( ));
@@ -884,12 +893,15 @@ bool CFrameWork::createWindow ( CDocument *doc )
 }
 
 
-void CFrameWork::updateDatabase ( )
+bool CFrameWork::updateDatabase ( )
 {
 	if ( closeAllWindows ( )) {
-		DlgDBUpdateImpl d ( this );
-		d. exec ( );
+		CProgressDialog d ( this );
+		CUpdateDatabase update ( &d );
+
+		return d. exec ( );
 	}
+	return false;
 }
 
 void CFrameWork::windowActivate ( int i )

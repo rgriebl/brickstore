@@ -22,6 +22,10 @@
 #include <config.h>
 #endif
 
+#ifdef _WIN32
+#pragma warning( disable: 4100 )
+#endif
+
 /* FIXME DEBUG */
 #include <stdio.h>
 

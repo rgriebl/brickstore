@@ -21,7 +21,7 @@
 #include <qptrlist.h>
 #include <qprinter.h>
 
-#include "bricklink.h"
+#include "cdocument.h"
 
 class CReportFunction {
 public:
@@ -53,7 +53,7 @@ public:
 	QSize pageSizePt ( ) const;
 
 	uint pageCount ( uint itemcount ) const;
-	void render ( const BrickLink::InvItemList &items, const CReportVariables &add_vars, int from, int to, QPainter *p ) const;
+	void render ( const CDocument::ItemList &items, const CReportVariables &add_vars, int from, int to, QPainter *p ) const;
 
 	bool hasUI ( ) const;
 	QWidget *createUI ( CReportVariables &vars ) const;

@@ -15,13 +15,16 @@ class CUndoAction : public QAction {
 	Q_OBJECT
 
 public slots:
-	virtual void setTextSlot ( const QString &str ); // why isn't QAction::setText() a slot?
+	virtual void setDescription ( const QString &str );
 
 private:
 	friend class CUndoManager;
 	friend class CUndoStack;
 	
-	CUndoAction ( QObject *parent, const char *name = 0 );
+	CUndoAction ( const QString &label, QObject *parent, const char *name = 0 );
+
+private:
+	QString m_label;
 };
 
 class CUndoListAction : public QAction {

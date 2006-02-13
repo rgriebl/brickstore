@@ -199,6 +199,8 @@ public:
 		paletteChange ( palette ( ));
 
 		connect ( CFrameWork::inst ( ), SIGNAL( documentActivated ( CDocument * )), this, SLOT( documentUpdate ( CDocument * )));
+		connect ( CMoney::inst ( ), SIGNAL( monetarySettingsChanged ( )), this, SLOT( refresh ( )));
+		connect ( CConfig::inst ( ), SIGNAL( weightSystemChanged ( CConfig::WeightSystem )), this, SLOT( refresh ( )));
 	}
 
 	void addActionsToContextMenu ( const QPtrList <QAction> &actions )
@@ -274,6 +276,12 @@ protected slots:
 		}
 	}
 
+	void refresh ( )
+	{
+		if ( m_doc )
+			selectionUpdate ( m_doc-> selection ( ));
+	}
+
 	virtual void paletteChange ( const QPalette &oldpal )
 	{
 		QPixmap pix;
@@ -302,8 +310,6 @@ public:
 	CTaskAppearsInWidget ( QWidget *parent, const char *name = 0 )
 		: CAppearsInWidget ( parent, name ), m_doc ( 0 )
 	{
-//		m_menu = new QPopupMenu ( this );
-		
 		connect ( CFrameWork::inst ( ), SIGNAL( documentActivated ( CDocument * )), this, SLOT( documentUpdate ( CDocument * )));
 	}
 
@@ -311,7 +317,7 @@ public:
 	{
 		const QFontMetrics &fm = fontMetrics ( );
 		
-		return QSize ( fm. width ( 'm' ) * 20, fm.height ( ) * 6 );
+		return QSize ( fm. width ( 'm' ) * 20, fm.height ( ) * 10 );
 	}
 
 	virtual QSize sizeHint ( ) const
@@ -339,7 +345,6 @@ protected slots:
 	}
 
 private:
-	QPopupMenu *m_menu;
 	CDocument * m_doc;
 };
 
