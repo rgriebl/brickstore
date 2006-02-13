@@ -778,10 +778,6 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
 <context>
     <name>CItemView</name>
     <message>
-        <source>PartNo</source>
-        <translation>Teile Nr.</translation>
-    </message>
-    <message>
         <source>Description</source>
         <translation>Beschreibung</translation>
     </message>
@@ -936,6 +932,10 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <message>
         <source>Pr. Diff</source>
         <translation>Pr. Diff</translation>
+    </message>
+    <message>
+        <source>Part #</source>
+        <translation>Teile #</translation>
     </message>
 </context>
 <context>
@@ -1174,10 +1174,6 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
         <translation>Löschen</translation>
     </message>
     <message>
-        <source>Part No.</source>
-        <translation>Teile Nr.</translation>
-    </message>
-    <message>
         <source>Item Name</source>
         <translation>Teilename</translation>
     </message>
@@ -1221,6 +1217,10 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <message>
         <source>Find Item...</source>
         <translation>Teil Suchen...</translation>
+    </message>
+    <message>
+        <source>Part #</source>
+        <translation>Teile #</translation>
     </message>
 </context>
 <context>
@@ -1726,10 +1726,6 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
 <context>
     <name>DlgLoadInventory</name>
     <message>
-        <source>Open an Inventory</source>
-        <translation>Inventarliste laden</translation>
-    </message>
-    <message>
         <source>&amp;Quantity:</source>
         <translation>&amp;Menge:</translation>
     </message>
@@ -1741,13 +1737,13 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
         <source>&amp;Cancel</source>
         <translation>&amp;Abbrechen</translation>
     </message>
+    <message>
+        <source>Import BrickLink Inventory</source>
+        <translation>BrickLink Inventarliste importieren</translation>
+    </message>
 </context>
 <context>
     <name>DlgLoadOrder</name>
-    <message>
-        <source>Load Order</source>
-        <translation>Bestellung laden</translation>
-    </message>
     <message>
         <source>Received</source>
         <translation>Erhalten</translation>
@@ -1771,6 +1767,10 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <message>
         <source>&amp;Cancel</source>
         <translation>&amp;Abbrechen</translation>
+    </message>
+    <message>
+        <source>Import BrickLink Order</source>
+        <translation>BrickLink Bestellung importieren</translation>
     </message>
 </context>
 <context>
@@ -1937,10 +1937,6 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
         <translation>Momentaner Bestand</translation>
     </message>
     <message>
-        <source>Lowest</source>
-        <translation>Niedrigster</translation>
-    </message>
-    <message>
         <source>Average</source>
         <translation>Durchschnitt</translation>
     </message>
@@ -1949,8 +1945,12 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
         <translation>Gewichteter Durchschnitt</translation>
     </message>
     <message>
-        <source>Highest</source>
-        <translation>Höchster</translation>
+        <source>Minimum</source>
+        <translation>Minimum</translation>
+    </message>
+    <message>
+        <source>Maximum</source>
+        <translation>Maximum</translation>
     </message>
 </context>
 <context>

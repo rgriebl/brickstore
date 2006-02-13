@@ -780,10 +780,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>PartNo</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Description</source>
         <translation type="unfinished"></translation>
     </message>
@@ -929,6 +925,10 @@
     </message>
     <message>
         <source>The value you entered was not valid and will not be changed.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Part #</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1193,10 +1193,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Part No.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Item Name</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1214,6 +1210,10 @@
     </message>
     <message>
         <source>Viewing all items with images is a bandwidth- and memory-hungry operation.&lt;br /&gt;Are you sure you want to continue?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Part #</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1720,10 +1720,6 @@
 <context>
     <name>DlgLoadInventory</name>
     <message>
-        <source>Open an Inventory</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>&amp;Quantity:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1735,13 +1731,13 @@
         <source>&amp;Cancel</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Import BrickLink Inventory</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>DlgLoadOrder</name>
-    <message>
-        <source>Load Order</source>
-        <translation type="unfinished"></translation>
-    </message>
     <message>
         <source>Received</source>
         <translation type="unfinished"></translation>
@@ -1764,6 +1760,10 @@
     </message>
     <message>
         <source>&amp;Cancel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Import BrickLink Order</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1931,10 +1931,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Lowest</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Average</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1943,7 +1939,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Highest</source>
+        <source>Minimum</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Maximum</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

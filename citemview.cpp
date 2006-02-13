@@ -225,7 +225,7 @@ void CItemView::languageChange ( )
 		switch ( i ) {
 			case CDocument::Status      : t = tr( "Status" ); break;
 			case CDocument::Picture     : t = tr( "Image" ); break;
-			case CDocument::PartNo      : t = tr( "PartNo" ); break;
+			case CDocument::PartNo      : t = tr( "Part #" ); break;
 			case CDocument::Description : t = tr( "Description" ); break;
 			case CDocument::Comments    : t = tr( "Comments" ); break;
 			case CDocument::Remarks     : t = tr( "Remarks" ); break;

@@ -13,7 +13,7 @@
         </rect>
     </property>
     <property name="caption">
-        <string>Load Order</string>
+        <string>Import BrickLink Order</string>
     </property>
     <property name="sizeGripEnabled">
         <bool>false</bool>

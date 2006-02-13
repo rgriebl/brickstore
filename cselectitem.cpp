@@ -425,7 +425,7 @@ CSelectItem::CSelectItem ( QWidget *parent, const char *name, WFlags fl )
 	w_items-> header ( )-> setResizeEnabled ( false );
 
 	w_items-> addColumn ( "" );
-	w_items-> addColumn ( tr( "Part No." ));
+	w_items-> addColumn ( tr( "Part #" ));
 	w_items-> addColumn ( tr( "Item Name" ));
 	w_items-> setResizeMode ( QListView::LastColumn );
 	w_items-> setSortColumn ( 2 );
