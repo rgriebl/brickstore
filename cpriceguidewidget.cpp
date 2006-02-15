@@ -63,6 +63,9 @@ public:
 	CPriceGuideWidgetPrivate ( CPriceGuideWidget *parent )
 		: QToolTip ( parent ), m_widget ( parent )
 	{ }
+	
+	virtual ~CPriceGuideWidgetPrivate ( )
+	{ }
 
 	QValueList<cell>::const_iterator cellAtPos ( const QPoint &fpos ) 
 	{

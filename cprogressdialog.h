@@ -60,6 +60,7 @@ private slots:
 
 private:
 	bool initTransfer ( );
+	void syncRepaint ( QWidget *w );
 
 private:
 	QLabel *m_header;

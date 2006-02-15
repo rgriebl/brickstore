@@ -16,6 +16,7 @@
 #include <qlabel.h>
 #include <qprogressbar.h>
 #include <qapplication.h>
+#include <qeventloop.h>
 #include <qcursor.h>
 #include <qfile.h>
 
@@ -103,9 +104,7 @@ void CProgressDialog::done ( int r )
 void CProgressDialog::setHeaderText ( const QString &str )
 {
 	m_header-> setText ( QString( "<b>%1</b>" ). arg( str ));
-	
-	layout ( );
-	m_header-> repaint ( );
+	syncRepaint ( m_header );;
 }
 
 void CProgressDialog::setMessageText ( const QString &str )
@@ -118,8 +117,7 @@ void CProgressDialog::setMessageText ( const QString &str )
 	else
 		m_message-> setText ( str );
 	
-	layout ( );
-	m_message-> repaint ( );
+	syncRepaint ( m_message );
 }
 
 void CProgressDialog::setErrorText ( const QString &str )
@@ -127,8 +125,7 @@ void CProgressDialog::setErrorText ( const QString &str )
 	m_message-> setText ( QString( "<b>%1</b>: %2" ). arg( tr( "Error" )). arg( str ));
 	setFinished ( false );
 
-	layout ( );
-	m_message-> repaint ( );
+	syncRepaint ( m_message );
 }
 
 void CProgressDialog::setFinished ( bool ok )
@@ -163,6 +160,13 @@ void CProgressDialog::setProgressVisible ( bool b )
 		m_progress_container-> show ( );
 	else
 		m_progress_container-> hide ( );
+}
+
+void CProgressDialog::syncRepaint ( QWidget *w )
+{
+	layout ( );
+	w-> repaint ( );
+	qApp-> eventLoop ( )-> processEvents ( QEventLoop::ExcludeUserInput );
 }
 
 CTransfer::Job *CProgressDialog::job ( ) const

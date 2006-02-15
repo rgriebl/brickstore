@@ -77,6 +77,16 @@ QCString BrickLink::url ( UrlList u, const void *opt, const void *opt2 )
 			if ( opt && opt2 ) {
 				url. sprintf ( "http://www.bricklink.com/search.asp?viewFrom=sa&itemType=%c&q=%s", static_cast <const Item *> ( opt )-> itemType ( )-> id ( ),
 				                                                                                   static_cast <const Item *> ( opt )-> id ( ));
+				
+				// workaround for BL not accepting the -X suffix for sets, instructions and boxes
+				char itt = static_cast <const Item *> ( opt )-> itemType ( )-> id ( );
+				
+				if ( itt == 'S' || itt == 'I' || itt == 'O' ) {
+					int pos = url. findRev ( '-' );
+					if ( pos >= 0 )
+						url. truncate ( pos );
+				}
+				
 				if ( static_cast <const Item *> ( opt )-> itemType ( )-> hasColors ( )) {
 					QCString col;
 					

@@ -93,6 +93,11 @@ void CPictureWidget::addActionsToContextMenu ( const QPtrList <QAction> &actions
 	d-> m_popup = 0;
 }
 
+void CPictureWidget::mouseDoubleClickEvent ( QMouseEvent * )
+{
+	viewLargeImage ( );
+}
+
 void CPictureWidget::contextMenuEvent ( QContextMenuEvent *e )
 {
 	if ( d-> m_pic ) {
@@ -242,14 +247,19 @@ void CLargePictureWidget::redraw ( )
 	}
 }
 
+void CLargePictureWidget::mouseDoubleClickEvent ( QMouseEvent * )
+{
+	close ( );
+}
+
 void CLargePictureWidget::contextMenuEvent ( QContextMenuEvent *e )
 {
 	if ( d-> m_pic ) {
 		if ( !d-> m_popup ) {
 			d-> m_popup = new QPopupMenu ( this );
-			d-> m_popup-> insertItem ( tr( "Update" ), this, SLOT( doUpdate ( )));
+			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "reload" ), tr( "Update" ), this, SLOT( doUpdate ( )));
 			d-> m_popup-> insertSeparator ( );
-			d-> m_popup-> insertItem ( tr( "Close" ), this, SLOT( close ( )));
+			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "file_close" ), tr( "Close" ), this, SLOT( close ( )));
 		}
 		d-> m_popup-> popup ( e-> globalPos ( ));
 	}

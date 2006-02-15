@@ -5,7 +5,8 @@
 #include <qlayout.h>
 #include <qapplication.h>
 #include <qpainter.h>
-#include <qwindowsstyle.h>
+#include <qstylefactory.h>
+#include <qstyle.h>
 #include <qtoolbutton.h>
 #include <qtooltip.h>
 #include <qmainwindow.h>
@@ -14,76 +15,23 @@
 
 #include "cworkspace.h"
 
-#if 0
-namespace {
-
-class MyTabBar : public QTabBar {
-public:
-	MyTabBar ( QWidget *parent, const char *name = 0 )
-		: QTabBar ( parent, name )
-	{ }
-
-	virtual void layoutTabs ( )
-	{
-		static bool lock = false;
-
-		if ( lock )
-			return;
-		else
-			lock = true;
-
-		QFont f = font ( );
-		QFont fb = f;
-		fb. setBold ( true );
-		setFont ( fb );
-
-		QTabBar::layoutTabs ( );
-
-		setFont ( f );
-
-		lock = false;
-	}
-	
-protected:
-	virtual void paintLabel( QPainter *p, const QRect &br, QTab *t, bool has_focus ) const
-	{
-		bool draw_bold = false;
-
-		if ( t && ( t == tab ( currentTab ( ))))
-			draw_bold = true;
-
-		if ( draw_bold ) {
-			p-> save ( );
-			QFont f = p-> font ( );
-			f. setBold ( true );
-			p-> setFont ( f );
-		}
-
-		QTabBar::paintLabel ( p, br, t, has_focus );
-
-		if ( draw_bold )
-			p-> restore ( );
-	}
-};
-
-} // namespace
-#endif
 
 namespace {
 
-static QWindowsStyle *windowsstyle = 0;
+static QStyle *windowsstyle = 0;
 
 static void free_win_style ( )
 {
 	delete windowsstyle;
 }
 
-static QWindowsStyle *get_win_style ( )
+static QStyle *get_win_style ( )
 {
 	if ( !windowsstyle ) {
-		windowsstyle = new QWindowsStyle ( );
+		windowsstyle = QStyleFactory::create ( "windows" );
 
-		atexit ( free_win_style );
+		if ( windowsstyle )
+			atexit ( free_win_style );
 	}
 	return windowsstyle;
 }

@@ -68,7 +68,7 @@ public:
 };
 
 
-
+class CTaskGroup;
 
 
 class CTaskPane : public QWidget {

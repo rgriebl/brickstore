@@ -27,6 +27,8 @@ class CChangeCmd;
 
 class IDocumentView {
 public:
+	virtual ~IDocumentView() { }
+
 	virtual QDomElement createGuiStateXML ( QDomDocument doc ) = 0;
 	virtual bool parseGuiStateXML ( QDomElement root ) = 0;
 };

@@ -44,7 +44,8 @@ protected slots:
 	
 protected:
 	virtual void contextMenuEvent ( QContextMenuEvent *e );
-
+	virtual void mouseDoubleClickEvent ( QMouseEvent *e );
+	
 private:
 	CPictureWidgetPrivate *d;
 };
@@ -70,6 +71,7 @@ protected slots:
 
 protected:
 	virtual void contextMenuEvent ( QContextMenuEvent *e );
+	virtual void mouseDoubleClickEvent ( QMouseEvent *e );
 
 private:
 	CLargePictureWidgetPrivate *d;
