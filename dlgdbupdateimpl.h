@@ -23,6 +23,9 @@ public:
 	
 	bool errors ( ) const;
 
+protected slots:
+	virtual void reject ( );
+
 private slots:
 	void progress ( int, int, const QString & );
 	void finished ( bool, const QString & );

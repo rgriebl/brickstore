@@ -1135,7 +1135,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>Internal error: Could not create an Inventory object for oder #%1</source>
-        <translation>InteInterner Fehler: Konnte kein Inventory Objekt für die Bestellung %1 erstellen</translation>
+        <translation type="obsolete">InteInterner Fehler: Konnte kein Inventory Objekt für die Bestellung %1 erstellen</translation>
     </message>
     <message>
         <source>Invalid order number.</source>
@@ -1240,6 +1240,10 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <message>
         <source>The quantities of %1 lots are not divisible without remainder by %2.&lt;br /&gt;&lt;br /&gt;Nothing has been modified.</source>
         <translation>Die Anzahl der Teile in %1 Posten ist nicht ohne Rest durch %2 teilbar.&lt;br /&gt;&lt;br /&gt;Es wurden keine Werte geändert.</translation>
+    </message>
+    <message>
+        <source>Internal error: Could not create an Inventory object for order #%1</source>
+        <translation>Interner Fehler: Konnte kein Inventory Objekt für die Bestellung %1 erstellen</translation>
     </message>
 </context>
 <context>

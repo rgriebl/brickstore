@@ -183,6 +183,7 @@ BrickLink::Inventory::Inventory ( const Item *item, bool from_peeron )
 	m_valid = false;
 	m_update_status = Ok;
 	m_from_peeron = from_peeron;
+	m_list. setAutoDelete ( true );
 
 	load_from_disk ( );
 }
@@ -201,6 +202,7 @@ BrickLink::Inventory::Inventory ( )
 	m_valid = false;
 	m_update_status = Ok;
 	m_from_peeron = false;
+	m_list. setAutoDelete ( true );
 }
 
 BrickLink::Inventory::~Inventory ( )

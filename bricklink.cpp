@@ -75,6 +75,16 @@ QCString BrickLink::url ( UrlList u, const void *opt, const void *opt2 )
 			if ( opt && opt2 ) {
 				url. sprintf ( "http://www.bricklink.com/search.asp?viewFrom=sa&itemType=%c&q=%s", static_cast <const Item *> ( opt )-> itemType ( )-> id ( ),
 				                                                                                   static_cast <const Item *> ( opt )-> id ( ));
+                                 
+				// workaround for BL not accepting the -X suffix for sets, instructions and boxes 
+				char itt = static_cast <const Item *> ( opt )-> itemType ( )-> id ( ); 
+
+				if ( itt == 'S' || itt == 'I' || itt == 'O' ) {
+					int pos = url. findRev ( '-' );
+					if ( pos >= 0 )
+						url. truncate ( pos );
+				}
+
 				if ( static_cast <const Item *> ( opt )-> itemType ( )-> hasColors ( )) {
 					QCString col;
 					
@@ -1035,14 +1045,16 @@ QPtrList<BrickLink::InvItem> *BrickLink::parseItemListXML ( QDomElement root, It
 				categoryid = val;
 			else if ( tag == ( hint == XMLHint_BrikTrak ? "TYPE" : "ITEMTYPE" ))
 				itemtypeid = val;
-			else if ( tag == "IMAGE" )
+			else if (( tag == "IMAGE" ) && ( hint != XMLHint_Order ))
 				ii-> setCustomPictureUrl ( val );
 			else if ( tag == "PRICE" )
 				ii-> setPrice ( money_t::fromCString ( val ));
 			else if ( tag == "BULK" )
 				ii-> setBulkQuantity ( val. toInt ( ));
 			else if ( tag == "QTY" )
-				ii-> setQuantity ( val. toInt ( ));
+				ii-> setQuantity (( hint != XMLHint_Order ) ? val. toInt ( ) : QString ( val ). remove ( ',' ). toInt ( ));
+				// workaround for broken Order XML (XML contains , as thousands-separator: 1,752 instead of 1752)
+				// [remove as soon as Dan has fixed the BL XML export interface]
 			else if ( tag == "SALE" )
 				ii-> setSale ( val. toInt ( ));
 			else if ( tag == "CONDITION" )

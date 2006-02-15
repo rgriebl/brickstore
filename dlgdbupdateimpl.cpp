@@ -22,7 +22,7 @@
 
 
 DlgDBUpdateImpl::DlgDBUpdateImpl ( QWidget *parent, const char *name, bool modal, int fl )
-	: DlgDBUpdate ( parent, name, modal, fl )
+	: DlgDBUpdate ( parent, name, modal, fl | WStyle_Customize | WStyle_DialogBorder | WStyle_DialogBorder | WStyle_Title )
 {
 	connect ( BrickLink::inst ( ), SIGNAL( databaseUpdated ( bool, const QString & )), this, SLOT( finished ( bool, const QString & )));
 
@@ -36,6 +36,10 @@ DlgDBUpdateImpl::DlgDBUpdateImpl ( QWidget *parent, const char *name, bool modal
 
 	if ( !BrickLink::inst ( )-> updateDatabase ( ))
 		finished ( false, tr( "Update not possible" ));
+}
+
+void DlgDBUpdateImpl::reject ( )
+{
 }
 
 void DlgDBUpdateImpl::progress ( int t, int p, const QString &msg )

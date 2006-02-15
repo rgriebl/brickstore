@@ -652,7 +652,7 @@ bool CWindow::fileImportBrickLinkOrder ( )
 				return true;
 			}
 			else
-				CMessageBox::warning ( this, tr( "Internal error: Could not create an Inventory object for oder #%1" ). arg ( CMB_BOLD( id )));
+				CMessageBox::warning ( this, tr( "Internal error: Could not create an Inventory object for order #%1" ). arg ( CMB_BOLD( id )));
 		}
 		else
 			CMessageBox::warning ( this, tr( "Invalid order number." ));
@@ -1271,7 +1271,7 @@ void CWindow::editDivideQty ( )
 	int divisor = 1;
 
 	if ( CMessageBox::getInteger ( this, tr( "Divides the quantities of all selected items by this number.<br /><br />(A check is made if all quantites are exactly divisble without reminder, before this operation is performed.)" ), QString::null, divisor, new QIntValidator ( -1000, 1000, 0 ))) {
-		if (( divisor <= 1 ) || ( divisor > 1 )) {
+		if (( divisor <= -1 ) || ( divisor > 1 )) {
 			int lots_with_errors = 0;
 			int abs_divisor = QABS( divisor );
 			
