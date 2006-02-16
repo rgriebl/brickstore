@@ -153,6 +153,16 @@ void CConfig::setLastDatabaseUpdate ( const QDateTime &dt )
 	writeEntry ( "/BrickLink/LastDBUpdate", int( tt ));
 }
 
+bool CConfig::closeEmptyDocuments ( ) const
+{
+	return readBoolEntry ( "/General/CloseEmptyDocs", false );
+}
+
+void CConfig::setCloseEmptyDocuments ( bool b )
+{
+	writeEntry ( "/General/CloseEmptyDocs", b  );
+}
+
 bool CConfig::showInputErrors ( ) const
 {
 	return m_show_input_errors;

@@ -38,8 +38,6 @@
 DlgAddItemImpl::DlgAddItemImpl ( QWidget *parent, const char *name, bool modal, int fl )
 	: DlgAddItem ( parent, name, modal, fl | WStyle_Customize | WStyle_Title | WStyle_ContextHelp | WStyle_NormalBorder | WStyle_SysMenu | WStyle_Maximize )
 {
-	setCaption ( caption ( ). arg ( parent-> caption ( )));
-
 	m_price_label_fmt    = w_label_currency-> text ( );
 	m_currency_label_fmt = w_radio_currency-> text ( );
 
@@ -109,6 +107,16 @@ DlgAddItemImpl::DlgAddItemImpl ( QWidget *parent, const char *name, bool modal, 
 	checkTieredPrices ( );
 
 	setSimpleMode ( CConfig::inst ( )-> simpleMode ( ));
+
+	languageChange ( );
+}
+
+void DlgAddItemImpl::languageChange ( )
+{
+	DlgAddItem::languageChange ( );
+	updateMonetary ( );
+
+	setCaption ( caption ( ). arg ( parentWidget ( )-> caption ( )));
 }
 
 DlgAddItemImpl::~DlgAddItemImpl ( )

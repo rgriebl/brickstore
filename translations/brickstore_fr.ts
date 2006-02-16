@@ -1034,31 +1034,11 @@
 <context>
     <name>CPriceGuideWidget</name>
     <message>
-        <source>Qty </source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>New</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Used</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Min</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Avg</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>W-Avg</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Max</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1107,6 +1087,26 @@
     </message>
     <message>
         <source>Double-click to set the price of the current item.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Qty.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Min.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Avg.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Q.Avg.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Max.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1206,10 +1206,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Item Name</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Item type:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1227,6 +1223,10 @@
     </message>
     <message>
         <source>Part #</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Description</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1482,15 +1482,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Divides the quantities of all selected items by this number.&lt;br /&gt;&lt;br /&gt;(A check is made if all quantites are exactly divisble without reminder, before this operation is performed.)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>The quantities of %1 lots are not divisible without remainder by %2.&lt;br /&gt;&lt;br /&gt;Nothing has been modified.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Multiplies the quantities of all selected items with this factor.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1507,10 +1499,6 @@
     </message>
     <message>
         <source>Enter the new remark for all selected items:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Reserve this item for a specific member:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1531,6 +1519,18 @@
     </message>
     <message>
         <source>Subtracted %1 Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reserve all selected items for this specific member:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Divide the quantities of all selected items by this number.&lt;br /&gt;&lt;br /&gt;(A check is made if all quantites are exactly divisble without reminder, before this operation is performed.)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Multiply the quantities of all selected items with this factor.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1940,10 +1940,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Past 6 Months Sales</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Current Inventory</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1952,15 +1948,19 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Weighted Average</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Minimum</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Maximum</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Last 6 Months Sales</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Quantity Average</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2102,6 +2102,10 @@
         <source>&amp;Cancel</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Close empty documents without confirmation</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>DlgSettingsImpl</name>
@@ -2110,27 +2114,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Past 6 Months Sales</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Current Inventory</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Lowest</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Average</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Weighted Average</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Highest</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2147,6 +2135,22 @@
     </message>
     <message>
         <source>The specified cache directory does not exist or is not read- and writeable.&lt;br /&gt;The cache directory setting will not be changed.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Last 6 Months Sales</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Minimum</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Quantity Average</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Maximum</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

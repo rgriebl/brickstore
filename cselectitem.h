@@ -21,6 +21,7 @@
 class CListView;
 class CItemTypeCombo;
 
+class QLabel;
 class QComboBox;
 class QToolButton;
 class QPushButton;
@@ -63,6 +64,7 @@ protected slots:
 	void viewModeChanged ( int );
 	void pictureUpdated ( BrickLink::Picture * );
 	void findItem ( );
+	void languageChange ( );
 
 protected:
 	virtual void showEvent ( QShowEvent * );
@@ -82,6 +84,7 @@ private:
 protected:
 	CItemTypeCombo *m_type_combo;
 
+	QLabel *w_item_types_label;
 	QComboBox *w_item_types;
 	CListView *w_categories;
 
@@ -90,6 +93,7 @@ protected:
 	QIconView *w_thumbs;
 
 	QToolButton *w_goto;
+	QLabel *w_filter_label;
 	QToolButton *w_filter_clear;
 	QComboBox *w_filter_expression;
 

@@ -35,6 +35,7 @@ signals:
 protected slots:
 	void colorChanged ( );
 	void colorConfirmed ( );
+	void languageChange ( );
 
 protected:
 	virtual void enabledChange ( bool old );

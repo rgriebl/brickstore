@@ -155,7 +155,7 @@
                   <File DiskId="1" Id="i16x16_edit_price_inc_dec.png"        Name="imageao0.png" LongName="edit_price_inc_dec.png"        src="$(var.TARGET)\images\16x16\edit_price_inc_dec.png" />
                   <File DiskId="1" Id="i16x16_edit_price_to_priceguide.png"  Name="imageap0.png" LongName="edit_price_to_priceguide.png"  src="$(var.TARGET)\images\16x16\edit_price_to_priceguide.png" />
                   <File DiskId="1" Id="i16x16_edit_redo.png"                 Name="imageaq0.png" LongName="edit_redo.png"                 src="$(var.TARGET)\images\16x16\edit_redo.png" />
-                  <File DiskId="1" Id="i16x16_edit_redo_list.png"            Name="imageaq1.png" LongName="edit_redo.png"                 src="$(var.TARGET)\images\16x16\edit_redo_list.png" />
+                  <File DiskId="1" Id="i16x16_edit_redo_list.png"            Name="imageaq1.png" LongName="edit_redo_list.png"            src="$(var.TARGET)\images\16x16\edit_redo_list.png" />
                   <File DiskId="1" Id="i16x16_edit_set_sale.png"             Name="imagear0.png" LongName="edit_set_sale.png"             src="$(var.TARGET)\images\16x16\edit_set_sale.png" />
                   <File DiskId="1" Id="i16x16_edit_subtractitems.png"        Name="imageas0.png" LongName="edit_subtractitems.png"        src="$(var.TARGET)\images\16x16\edit_subtractitems.png" />
                   <File DiskId="1" Id="i16x16_edit_undo.png"                 Name="imageat0.png" LongName="edit_undo.png"                 src="$(var.TARGET)\images\16x16\edit_undo.png" />

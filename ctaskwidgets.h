@@ -92,6 +92,12 @@ protected slots:
 		setText ( str );
 	}
 
+	void languageChange ( )
+	{
+		if ( m_doc )
+			selectionUpdate ( m_doc-> selection ( ));
+	}
+
 private:
 	CDocument * m_doc;
 
@@ -280,6 +286,11 @@ protected slots:
 			m_text-> setText ( s );
 			raiseWidget ( m_text );
 		}
+	}
+
+	void languageChange ( )
+	{
+		refresh ( );
 	}
 
 	void refresh ( )

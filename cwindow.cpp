@@ -719,7 +719,7 @@ void CWindow::editDivideQty ( )
 
 	int divisor = 1;
 
-	if ( CMessageBox::getInteger ( this, tr( "Divides the quantities of all selected items by this number.<br /><br />(A check is made if all quantites are exactly divisble without reminder, before this operation is performed.)" ), QString::null, divisor, new QIntValidator ( 1, 1000, 0 ))) {
+	if ( CMessageBox::getInteger ( this, tr( "Divide the quantities of all selected items by this number.<br /><br />(A check is made if all quantites are exactly divisble without reminder, before this operation is performed.)" ), QString::null, divisor, new QIntValidator ( 1, 1000, 0 ))) {
 		if ( divisor > 1 ) {
 			int lots_with_errors = 0;
 			
@@ -752,7 +752,7 @@ void CWindow::editMultiplyQty ( )
 
 	int factor = 1;
 
-	if ( CMessageBox::getInteger ( this, tr( "Multiplies the quantities of all selected items with this factor." ), tr( "x" ), factor, new QIntValidator ( -1000, 1000, 0 ))) {
+	if ( CMessageBox::getInteger ( this, tr( "Multiply the quantities of all selected items with this factor." ), tr( "x" ), factor, new QIntValidator ( -1000, 1000, 0 ))) {
 		if (( factor <= 1 ) || ( factor > 1 )) {
 			CDisableUpdates disupd ( w_list );
 
@@ -840,7 +840,7 @@ void CWindow::editSetReserved ( )
 
 	QString reserved;
 	
-	if ( CMessageBox::getString ( this, tr( "Reserve this item for a specific member:" ), reserved )) {
+	if ( CMessageBox::getString ( this, tr( "Reserve all selected items for this specific member:" ), reserved )) {
 		CDisableUpdates disupd ( w_list );
 
 		foreach ( CDocument::Item *pos, m_doc-> selection ( )) {
@@ -1006,7 +1006,9 @@ void CWindow::contextMenu ( QListViewItem *it, const QPoint &p )
 
 void CWindow::closeEvent ( QCloseEvent *e )
 {
-	if ( m_doc-> isModified ( )) {
+	bool close_empty = ( m_doc-> items ( ). isEmpty ( ) && CConfig::inst ( )-> closeEmptyDocuments ( ));
+
+	if ( m_doc-> isModified ( ) && !close_empty ) {
 		switch ( CMessageBox::warning ( this, tr( "Save changes to %1?" ). arg ( CMB_BOLD( caption ( ). left ( caption ( ). length ( ) - 2 ))), CMessageBox::Yes | CMessageBox::Default, CMessageBox::No, CMessageBox::Cancel | CMessageBox::Escape )) {
 		case CMessageBox::Yes:
 			m_doc-> fileSave ( );

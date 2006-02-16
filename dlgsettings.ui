@@ -8,7 +8,7 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>372</width>
+            <width>366</width>
             <height>304</height>
         </rect>
     </property>
@@ -339,6 +339,14 @@
                             </widget>
                         </hbox>
                     </widget>
+                    <widget class="QCheckBox">
+                        <property name="name">
+                            <cstring>w_doc_close_empty</cstring>
+                        </property>
+                        <property name="text">
+                            <string>Close empty documents without confirmation</string>
+                        </property>
+                    </widget>
                     <spacer>
                         <property name="name">
                             <cstring>spacer15_2</cstring>
@@ -352,7 +360,7 @@
                         <property name="sizeHint">
                             <size>
                                 <width>20</width>
-                                <height>21</height>
+                                <height>20</height>
                             </size>
                         </property>
                     </spacer>
@@ -1031,6 +1039,7 @@
     <tabstop>w_local_currency</tabstop>
     <tabstop>w_local_currency_factor</tabstop>
     <tabstop>w_doc_dir</tabstop>
+    <tabstop>w_doc_close_empty</tabstop>
     <tabstop>w_cache_pictures</tabstop>
     <tabstop>w_days_pictures</tabstop>
     <tabstop>w_cache_priceguides</tabstop>

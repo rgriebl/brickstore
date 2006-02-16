@@ -1046,7 +1046,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <name>CPriceGuideWidget</name>
     <message>
         <source>Qty </source>
-        <translation>Anz.</translation>
+        <translation type="obsolete">Anz.</translation>
     </message>
     <message>
         <source>New</source>
@@ -1058,19 +1058,19 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>Min</source>
-        <translation>Min</translation>
+        <translation type="obsolete">Min</translation>
     </message>
     <message>
         <source>Avg</source>
-        <translation>Ø</translation>
+        <translation type="obsolete">Ø</translation>
     </message>
     <message>
         <source>W-Avg</source>
-        <translation>Gew.-Ø</translation>
+        <translation type="obsolete">Gew.-Ø</translation>
     </message>
     <message>
         <source>Max</source>
-        <translation>Max</translation>
+        <translation type="obsolete">Max</translation>
     </message>
     <message>
         <source>All Time</source>
@@ -1119,6 +1119,26 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <message>
         <source>Double-click to set the price of the current item.</source>
         <translation>Doppelklicken, um den Preis des aktuellen Teils zu setzen.</translation>
+    </message>
+    <message>
+        <source>Qty.</source>
+        <translation>Anz.</translation>
+    </message>
+    <message>
+        <source>Min.</source>
+        <translation>Min.</translation>
+    </message>
+    <message>
+        <source>Avg.</source>
+        <translation>Ø</translation>
+    </message>
+    <message>
+        <source>Q.Avg.</source>
+        <translation>Gew.Ø</translation>
+    </message>
+    <message>
+        <source>Max.</source>
+        <translation>Max.</translation>
     </message>
 </context>
 <context>
@@ -1193,7 +1213,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>Item Name</source>
-        <translation>Teilename</translation>
+        <translation type="obsolete">Teilename</translation>
     </message>
     <message>
         <source>Item type:</source>
@@ -1239,6 +1259,10 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <message>
         <source>Part #</source>
         <translation>Teile #</translation>
+    </message>
+    <message>
+        <source>Description</source>
+        <translation>Beschreibung</translation>
     </message>
 </context>
 <context>
@@ -1502,7 +1526,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>Reserve this item for a specific member:</source>
-        <translation>Reserviere dieses Teil für einen bestimmten Benutzer:</translation>
+        <translation type="obsolete">Reserviere dieses Teil für einen bestimmten Benutzer:</translation>
     </message>
     <message>
         <source>%</source>
@@ -1510,7 +1534,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>Multiplies the quantities of all selected items with this factor.</source>
-        <translation>Multipliziere die Anzahl aller ausgewählten Teile mit diesem Faktor.</translation>
+        <translation type="obsolete">Multipliziere die Anzahl aller ausgewählten Teile mit diesem Faktor.</translation>
     </message>
     <message>
         <source>x</source>
@@ -1526,7 +1550,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>Divides the quantities of all selected items by this number.&lt;br /&gt;&lt;br /&gt;(A check is made if all quantites are exactly divisble without reminder, before this operation is performed.)</source>
-        <translation>Teile die Anzahl aller ausgewählten Teile durch diese Zahl.&lt;br /&gt;&lt;br /&gt;(Es wird vor etwaigen Änderungen geprüft, ob alle Teileanzahlen ohne Rest teilbar sind.)</translation>
+        <translation type="obsolete">Teile die Anzahl aller ausgewählten Teile durch diese Zahl.&lt;br /&gt;&lt;br /&gt;(Es wird vor etwaigen Änderungen geprüft, ob alle Teileanzahlen ohne Rest teilbar sind.)</translation>
     </message>
     <message>
         <source>The quantities of %1 lots are not divisible without remainder by %2.&lt;br /&gt;&lt;br /&gt;Nothing has been modified.</source>
@@ -1543,6 +1567,18 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <message>
         <source>Subtracted %1 Items</source>
         <translation>%1 Teile abgezogen</translation>
+    </message>
+    <message>
+        <source>Reserve all selected items for this specific member:</source>
+        <translation>Reserviere alle ausgewählten Teile für einen bestimmten Benutzer:</translation>
+    </message>
+    <message>
+        <source>Divide the quantities of all selected items by this number.&lt;br /&gt;&lt;br /&gt;(A check is made if all quantites are exactly divisble without reminder, before this operation is performed.)</source>
+        <translation>Teile die Anzahl aller ausgewählten Teile durch diese Zahl.&lt;br /&gt;&lt;br /&gt;(Es wird vor etwaigen Änderungen geprüft, ob alle Teileanzahlen ohne Rest teilbar sind.)</translation>
+    </message>
+    <message>
+        <source>Multiply the quantities of all selected items with this factor.</source>
+        <translation>Multipliziere die Anzahl aller ausgewählten Teile mit diesem Faktor.</translation>
     </message>
 </context>
 <context>
@@ -1952,7 +1988,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>Past 6 Months Sales</source>
-        <translation>Verkäufe der letzten 6 Monate</translation>
+        <translation type="obsolete">Verkäufe der letzten 6 Monate</translation>
     </message>
     <message>
         <source>Current Inventory</source>
@@ -1964,7 +2000,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>Weighted Average</source>
-        <translation>Gewichteter Durchschnitt</translation>
+        <translation type="obsolete">Gewichteter Durchschnitt</translation>
     </message>
     <message>
         <source>Minimum</source>
@@ -1973,6 +2009,14 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <message>
         <source>Maximum</source>
         <translation>Maximum</translation>
+    </message>
+    <message>
+        <source>Last 6 Months Sales</source>
+        <translation>Verkäufe der letzten 6 Monate</translation>
+    </message>
+    <message>
+        <source>Quantity Average</source>
+        <translation>Gewichteter Durchschnitt</translation>
     </message>
 </context>
 <context>
@@ -2113,6 +2157,10 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
         <source>Condition</source>
         <translation>Zustand</translation>
     </message>
+    <message>
+        <source>Close empty documents without confirmation</source>
+        <translation>Leere Dokumente ohne Rückfrage schliessen</translation>
+    </message>
 </context>
 <context>
     <name>DlgSettingsImpl</name>
@@ -2122,7 +2170,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>Past 6 Months Sales</source>
-        <translation>Verkäufe der letzten 6 Monate</translation>
+        <translation type="obsolete">Verkäufe der letzten 6 Monate</translation>
     </message>
     <message>
         <source>Current Inventory</source>
@@ -2130,7 +2178,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>Lowest</source>
-        <translation>Niedrigster</translation>
+        <translation type="obsolete">Niedrigster</translation>
     </message>
     <message>
         <source>Average</source>
@@ -2138,11 +2186,11 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>Weighted Average</source>
-        <translation>Gewichteter Durchschnitt</translation>
+        <translation type="obsolete">Gewichteter Durchschnitt</translation>
     </message>
     <message>
         <source>Highest</source>
-        <translation>Höchster</translation>
+        <translation type="obsolete">Höchster</translation>
     </message>
     <message>
         <source>Cache directory location</source>
@@ -2159,6 +2207,22 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <message>
         <source>The specified document directory does not exist or is not read- and writeable.&lt;br /&gt;The document directory setting will not be changed.</source>
         <translation>Das angegebene Dokumentenverzeichnis existiert nicht (oder es ist nicht les- und beschreibbar).&lt;br /&gt;Die Einstellung für das Dokumentenverzeichnis wird nicht geändert.</translation>
+    </message>
+    <message>
+        <source>Last 6 Months Sales</source>
+        <translation>Verkäufe der letzten 6 Monate</translation>
+    </message>
+    <message>
+        <source>Minimum</source>
+        <translation>Minimum</translation>
+    </message>
+    <message>
+        <source>Quantity Average</source>
+        <translation>Gewichteter Durchschnitt</translation>
+    </message>
+    <message>
+        <source>Maximum</source>
+        <translation>Maximum</translation>
     </message>
 </context>
 <context>

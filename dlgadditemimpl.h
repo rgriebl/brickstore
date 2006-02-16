@@ -29,6 +29,9 @@ public:
 signals:
 	void addItem ( BrickLink::InvItem *, uint );
 
+protected slots:
+	virtual void languageChange ( );
+
 private slots:
 	void updateItemAndColor ( );
 	void showTotal ( );

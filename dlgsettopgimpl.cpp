@@ -23,8 +23,8 @@ DlgSetToPGImpl::DlgSetToPGImpl( QWidget *parent, const char *name, bool modal, W
 {
 	QStringList timel, pricel;
 
-	timel << tr( "All Time Sales" ) << tr( "Past 6 Months Sales" ) << tr( "Current Inventory" );
-	pricel << tr( "Minimum" ) << tr( "Average" ) << tr( "Weighted Average" ) << tr( "Maximum" );
+	timel << tr( "All Time Sales" ) << tr( "Last 6 Months Sales" ) << tr( "Current Inventory" );
+	pricel << tr( "Minimum" ) << tr( "Average" ) << tr( "Quantity Average" ) << tr( "Maximum" );
 
 	w_type_time-> insertStringList ( timel );
 	w_type_price-> insertStringList ( pricel );

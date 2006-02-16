@@ -864,6 +864,7 @@ void CUndoListAction::setCurrentItemSlot ( QListBoxItem *item )
 void CUndoListAction::fixMenu ( )
 {
 	m_list-> setCurrentItem ( m_list-> firstItem ( ));
+	selectRange ( m_list-> firstItem ( ));
 }
 
 void CUndoListAction::selectRange ( QListBoxItem *item )

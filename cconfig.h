@@ -43,6 +43,7 @@ public:
 	QString language ( ) const;
 	WeightSystem weightSystem ( ) const;
 
+	bool closeEmptyDocuments ( ) const;
 	QString documentDir ( ) const;
 	QString lDrawDir ( ) const;
 	QString dataDir ( ) const;
@@ -68,6 +69,7 @@ public slots:
 	void setLanguage ( const QString &lang );
 	void setWeightSystem ( WeightSystem ws );
 
+	void setCloseEmptyDocuments ( bool b );
 	void setDocumentDir ( const QString &dir );
 	void setLDrawDir ( const QString &dir );
 	void setDataDir ( const QString &dir );

@@ -361,6 +361,7 @@ CSelectItem::CSelectItem ( QWidget *parent, const char *name, WFlags fl )
 {
 	m_inv_only = false;
 
+	w_item_types_label = new QLabel ( this );
 	w_item_types = new QComboBox ( false, this );
 	setFocusProxy ( w_item_types );
 
@@ -369,51 +370,32 @@ CSelectItem::CSelectItem ( QWidget *parent, const char *name, WFlags fl )
 	w_categories-> setAlwaysShowSelection ( true );
 	w_categories-> header ( )-> setMovingEnabled ( false );
 	w_categories-> header ( )-> setResizeEnabled ( false );
-	w_categories-> addColumn ( tr( "Category" ));
+	w_categories-> addColumn ( QString ( ));
 	w_categories-> setResizeMode ( QListView::LastColumn );
 
 	w_goto = new QToolButton ( this );
 	w_goto-> setAutoRaise ( true );
-	w_goto-> setAccel ( tr( "Ctrl+F", "Find Item" ));
-	w_goto-> setTextLabel ( tr( "Find Item..." ) + " (" + QString( w_goto-> accel ( )) + ")");
+	w_goto-> setIconSet ( CResource::inst ( )-> iconSet ( "edit_find" ));
 
-	QIconSet is = CResource::inst ( )-> iconSet ( "edit_find" );
-	if ( is. isNull ( ))
-		w_goto-> setText ( w_filter_clear-> textLabel ( ));
-	else
-		w_goto-> setIconSet ( is );
-
+	w_filter_label = new QLabel ( this );
 	w_filter_clear = new QToolButton ( this );
 	w_filter_clear-> setAutoRaise ( true );
-	w_filter_clear-> setTextLabel ( tr( "Clear" ));
-
-	is = CResource::inst ( )-> iconSet ( "filter_clear" );
-	if ( is. isNull ( ))
-		w_filter_clear-> setText ( w_filter_clear-> textLabel ( ));
-	else
-		w_filter_clear-> setIconSet ( is );
+	w_filter_clear-> setIconSet ( CResource::inst ( )-> iconSet ( "filter_clear" ));
 
 	w_filter_expression = new QComboBox ( true, this );
 
 	w_viewpopup = new QPopupMenu ( this );
-	w_viewpopup-> insertItem ( CResource::inst ( )-> iconSet ( "viewmode_list" ), tr( "List" ), ViewMode_List );
-	w_viewpopup-> insertItem ( CResource::inst ( )-> iconSet ( "viewmode_images" ), tr( "List with images" ), ViewMode_ListWithImages );
-	w_viewpopup-> insertItem ( CResource::inst ( )-> iconSet ( "viewmode_thumbs" ), tr( "Thumbnails" ), ViewMode_Thumbnails );
 	w_viewpopup-> setCheckable ( true );
+	w_viewpopup-> insertItem ( CResource::inst ( )-> iconSet ( "viewmode_list" ),   QString ( ), ViewMode_List );
+	w_viewpopup-> insertItem ( CResource::inst ( )-> iconSet ( "viewmode_images" ), QString ( ), ViewMode_ListWithImages );
+	w_viewpopup-> insertItem ( CResource::inst ( )-> iconSet ( "viewmode_thumbs" ), QString ( ), ViewMode_Thumbnails );
 	w_viewpopup-> setItemChecked ( ViewMode_List, true );
 
 	w_viewmode = new QToolButton ( this );
-	w_viewmode-> setTextLabel ( tr( "View" ));
-
-	is = CResource::inst ( )-> iconSet ( "viewmode" );
-	if ( is. isNull ( ))
-		w_viewmode-> setText ( w_viewmode-> textLabel ( ));
-	else
-		w_viewmode-> setIconSet ( is );
-
 	w_viewmode-> setAutoRaise ( true );
 	w_viewmode-> setPopupDelay ( 1 );
 	w_viewmode-> setPopup ( w_viewpopup );
+	w_viewmode-> setIconSet ( CResource::inst ( )-> iconSet ( "viewmode" ));
 
 	w_stack = new QWidgetStack ( this );
 
@@ -424,9 +406,9 @@ CSelectItem::CSelectItem ( QWidget *parent, const char *name, WFlags fl )
 	w_items-> header ( )-> setMovingEnabled ( false );
 	w_items-> header ( )-> setResizeEnabled ( false );
 
-	w_items-> addColumn ( "" );
-	w_items-> addColumn ( tr( "Part #" ));
-	w_items-> addColumn ( tr( "Item Name" ));
+	w_items-> addColumn ( QString ( ));
+	w_items-> addColumn ( QString ( ));
+	w_items-> addColumn ( QString ( ));
 	w_items-> setResizeMode ( QListView::LastColumn );
 	w_items-> setSortColumn ( 2 );
 	w_items-> setColumnWidthMode ( 0, QListView::Manual );
@@ -462,7 +444,7 @@ CSelectItem::CSelectItem ( QWidget *parent, const char *name, WFlags fl )
 	toplay-> setRowStretch ( 1, 100 );
 	
 	QBoxLayout *lay = new QHBoxLayout ( 6 );
-	lay-> addWidget ( new QLabel ( tr( "Item type:" ), this ), 0 );
+	lay-> addWidget ( w_item_types_label, 0 );
 	lay-> addWidget ( w_item_types, 1 );
 
 	toplay-> addLayout ( lay, 0, 0 );
@@ -472,7 +454,7 @@ CSelectItem::CSelectItem ( QWidget *parent, const char *name, WFlags fl )
 	lay-> addWidget ( w_goto, 0 );
 	lay-> addSpacing ( 6 );
 	lay-> addWidget ( w_filter_clear, 0 );
-	lay-> addWidget ( new QLabel ( tr( "Filter:" ), this ), 0 );
+	lay-> addWidget ( w_filter_label, 0 );
 	lay-> addWidget ( w_filter_expression, 15 );
 	lay-> addSpacing ( 6 );
 	lay-> addWidget ( w_viewmode );
@@ -489,8 +471,34 @@ CSelectItem::CSelectItem ( QWidget *parent, const char *name, WFlags fl )
 
 	connect ( BrickLink::inst ( ), SIGNAL( pictureUpdated ( BrickLink::Picture * )), this, SLOT( pictureUpdated ( BrickLink::Picture * )));
 
+	languageChange ( );
+
 //	activating the [All Items] category takes too long
 //	w_categories-> setSelected ( w_categories-> firstChild ( ), true );
+}
+
+void CSelectItem::languageChange ( )
+{
+	w_item_types_label-> setText ( tr( "Item type:" ));
+	w_filter_label-> setText ( tr( "Filter:" )); 
+
+	w_goto-> setAccel ( tr( "Ctrl+F", "Find Item" ));
+	QToolTip::add ( w_goto, tr( "Find Item..." ) + " (" + QString( w_goto-> accel ( )) + ")");
+
+	QToolTip::add ( w_filter_expression, tr( "Filter the list using this pattern (wildcards allowed: * ? [])" ));
+	QToolTip::add ( w_filter_clear, tr( "Reset an active filter" ));
+	QToolTip::add ( w_viewmode, tr( "View" ));
+
+	w_categories-> setColumnText ( 0, tr( "Category" ));
+	w_categories-> firstChild ( )-> repaint ( );
+	w_categories-> lastItem ( )-> repaint ( );
+
+	w_items-> setColumnText ( 1, tr( "Part #" ));
+	w_items-> setColumnText ( 2, tr( "Description" ));
+
+	w_viewpopup-> changeItem ( ViewMode_List,           tr( "List" ));
+	w_viewpopup-> changeItem ( ViewMode_ListWithImages, tr( "List with images" ));
+	w_viewpopup-> changeItem ( ViewMode_Thumbnails,     tr( "Thumbnails" ));
 }
 
 void CSelectItem::setOnlyWithInventory ( bool b )

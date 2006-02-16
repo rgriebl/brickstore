@@ -66,7 +66,7 @@ CSelectColor::CSelectColor ( QWidget *parent, const char *name, WFlags fl )
 	w_colors = new CListView ( this );
 	setFocusProxy ( w_colors );
 	w_colors-> setAlwaysShowSelection ( true );
-	w_colors-> addColumn ( tr( "Color" ));
+	w_colors-> addColumn ( QString ( ));
 	w_colors-> header ( )-> setMovingEnabled ( false );
 	w_colors-> header ( )-> setResizeEnabled ( false );
 
@@ -85,7 +85,14 @@ CSelectColor::CSelectColor ( QWidget *parent, const char *name, WFlags fl )
 	w_colors-> setResizeMode ( QListView::LastColumn );
 
 	QBoxLayout *lay = new QVBoxLayout ( this, 0, 0 );
-	lay-> addWidget ( w_colors ); 
+	lay-> addWidget ( w_colors );
+
+	languageChange ( );
+}
+
+void CSelectColor::languageChange ( )
+{
+	w_colors-> setColumnText ( 0, tr( "Color" ));
 }
 
 const BrickLink::Color *CSelectColor::color ( ) const

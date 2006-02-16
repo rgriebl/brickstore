@@ -148,16 +148,16 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 	m_taskpanes = new CTaskPaneManager ( this, "taskpanemanager" );
 
 	m_task_info = new CTaskInfoWidget ( 0, "iteminfowidget" );
-	m_taskpanes-> addItem ( m_task_info, CResource::inst ( )-> pixmap ( "sidebar/info" ), tr( "Info" ));
+	m_taskpanes-> addItem ( m_task_info, CResource::inst ( )-> pixmap ( "sidebar/info" ), QString( ));
 
 	m_task_priceguide = new CTaskPriceGuideWidget ( 0, "priceguidewidget" );
-	m_taskpanes-> addItem ( m_task_priceguide, CResource::inst ( )-> pixmap ( "sidebar/priceguide" ), tr( "Price Guide" ));
+	m_taskpanes-> addItem ( m_task_priceguide, CResource::inst ( )-> pixmap ( "sidebar/priceguide" ), QString( ));
 
 	m_task_appears = new CTaskAppearsInWidget ( 0, "appearsinwidget" );
-	m_taskpanes-> addItem ( m_task_appears,  CResource::inst ( )-> pixmap ( "sidebar/appearsin" ), tr( "Appears In Sets" ));
+	m_taskpanes-> addItem ( m_task_appears,  CResource::inst ( )-> pixmap ( "sidebar/appearsin" ), QString( ));
 
 	m_task_links = new CTaskLinksWidget ( 0, "linkswidget" );
-	m_taskpanes-> addItem ( m_task_links,  CResource::inst ( )-> pixmap ( "sidebar/links" ), tr( "Links" ));
+	m_taskpanes-> addItem ( m_task_links,  CResource::inst ( )-> pixmap ( "sidebar/links" ), QString( ));
 
 	createActions ( );
 
@@ -402,6 +402,8 @@ void CFrameWork::languageChange ( )
 				a-> setAccel ( QKeySequence ( atptr-> accel ));
 		}
 	}
+
+	statisticsUpdate ( );
 }
 
 CFrameWork::~CFrameWork ( )

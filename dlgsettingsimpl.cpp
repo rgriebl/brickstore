@@ -89,6 +89,8 @@ DlgSettingsImpl::DlgSettingsImpl( QWidget *parent, const char *name, bool modal,
 	connect ( w_doc_dir_select, SIGNAL( clicked ( )), this, SLOT( selectDocDir ( )));
 	w_doc_dir_select-> setIconSet ( CResource::inst ( )-> iconSet ( "file_open" ));
 
+	w_doc_close_empty-> setChecked ( CConfig::inst ( )-> closeEmptyDocuments ( ));
+
 	// ---------------------------------------------------------------------
 
 	int pic, pg;
@@ -123,8 +125,8 @@ DlgSettingsImpl::DlgSettingsImpl( QWidget *parent, const char *name, bool modal,
 
 	QStringList timel, pricel;
 
-	timel << tr( "All Time Sales" ) << tr( "Past 6 Months Sales" ) << tr( "Current Inventory" );
-	pricel << tr( "Lowest" ) << tr( "Average" ) << tr( "Weighted Average" ) << tr( "Highest" );
+	timel << tr( "All Time Sales" ) << tr( "Last 6 Months Sales" ) << tr( "Current Inventory" );
+	pricel << tr( "Minimum" ) << tr( "Average" ) << tr( "Quantity Average" ) << tr( "Maximum" );
 
 	w_def_pg_type_time-> insertStringList ( timel );
 	w_def_pg_type_price-> insertStringList ( pricel );
@@ -203,6 +205,8 @@ void DlgSettingsImpl::done ( int r )
 			CConfig::inst ( )-> setDocumentDir ( w_doc_dir-> text ( ));
 		else
 			CMessageBox::warning ( this, tr( "The specified document directory does not exist or is not read- and writeable.<br />The document directory setting will not be changed." ));
+
+		CConfig::inst ( )-> setCloseEmptyDocuments ( w_doc_close_empty-> isChecked  ( ));
 
 		// ---------------------------------------------------------------------
 

@@ -345,11 +345,23 @@ void CDocument::removeItemsDirect ( ItemList &items, ItemList &positions )
 
 	emit itemsAboutToBeRemoved ( items );
 
+	bool selection_changed = false;
+
 	foreach ( Item *item, items ) {
 		ItemList::iterator next = m_items. erase ( m_items. find ( item ));
 
 		positions. append (( next != m_items. end ( )) ? *next : 0 );
+
+		ItemList::iterator selit = m_selection. find ( item );
+		
+		if ( selit != m_selection. end ( )) {
+			m_selection.erase ( selit );
+			selection_changed = true;
+		}
 	}
+
+	if ( selection_changed )
+		emit selectionChanged ( m_selection );
 
 	emit itemsRemoved ( items );
 	emit statisticsChanged ( );

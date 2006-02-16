@@ -134,13 +134,13 @@ void CPriceGuideWidget::languageChange ( )
 	delete d-> m_popup;
 	d-> m_popup = 0;
 
-	d-> m_str_qty                                       = tr( "Qty " );
+	d-> m_str_qty                                       = tr( "Qty." );
 	d-> m_str_cond [BrickLink::New]                     = tr( "New" );
 	d-> m_str_cond [BrickLink::Used]                    = tr( "Used" );
-	d-> m_str_price [BrickLink::PriceGuide::Lowest]     = tr( "Min" );
-	d-> m_str_price [BrickLink::PriceGuide::Average]    = tr( "Avg" );
-	d-> m_str_price [BrickLink::PriceGuide::WAverage]   = tr( "W-Avg" );
-	d-> m_str_price [BrickLink::PriceGuide::Highest]    = tr( "Max" );
+	d-> m_str_price [BrickLink::PriceGuide::Lowest]     = tr( "Min." );
+	d-> m_str_price [BrickLink::PriceGuide::Average]    = tr( "Avg." );
+	d-> m_str_price [BrickLink::PriceGuide::WAverage]   = tr( "Q.Avg." );
+	d-> m_str_price [BrickLink::PriceGuide::Highest]    = tr( "Max." );
 	d-> m_str_htime [BrickLink::PriceGuide::AllTime][0] = tr( "All Time" );
 	d-> m_str_htime [BrickLink::PriceGuide::AllTime][1] = tr( "Sales" );
 	d-> m_str_htime [BrickLink::PriceGuide::PastSix][0] = tr( "Last 6" );
