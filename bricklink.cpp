@@ -127,6 +127,11 @@ QCString BrickLink::url ( UrlList u, const void *opt, const void *opt2 )
 				url. sprintf ( "http://peeron.com/cgi-bin/invcgis/psearch?query=%s&limit=none", static_cast <const Item *> ( opt )-> id ( ));
 			break;
 
+		case URL_StoreItemDetail:
+			if ( opt )
+				url. sprintf ( "http://www.bricklink.com/inventory_detail.asp?itemID=%u", *static_cast <const unsigned int *> ( opt ));
+			break;
+
 		default:
 			break;
 	}
@@ -717,6 +722,8 @@ BrickLink::InvItemList *BrickLink::parseItemListXML ( QDomElement root, ItemList
 					ii-> setTierPrice ( 1, money_t::fromCString ( val ));
 				else if ( tag == "TP3" )
 					ii-> setTierPrice ( 2, money_t::fromCString ( val ));
+				else if ( tag == "LOTID" )
+					ii-> setLotId ( val. toUInt ( ));
 			}
 
 			// ### BrikTrak import ###
@@ -737,8 +744,6 @@ BrickLink::InvItemList *BrickLink::parseItemListXML ( QDomElement root, ItemList
 				}
 
 				// the following tags are BrickStore extensions
-				else if ( tag == "LOTID" )
-					ii-> setLotId ( val. toUInt ( ));
 				else if ( tag == "RETAIN" )
 					ii-> setRetain ( val == "Y" );
 				else if ( tag == "STOCKROOM" )

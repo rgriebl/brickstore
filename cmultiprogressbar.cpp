@@ -35,13 +35,14 @@ CMultiProgressBar::CMultiProgressBar ( QWidget *parent, const char *name )
 	m_progress-> setIndicatorFollowsStyle ( false );
 	m_progress-> setCenterIndicator ( true );
 	m_progress-> setPercentageVisible ( false );
-	lay-> addWidget ( m_progress );
+	lay-> addWidget ( m_progress, 1 );
+	lay-> addStretch ( 0 );
 
 	m_stop = new QToolButton ( this );
 	m_stop-> setAutoRaise ( true );
 	m_stop-> setAutoRepeat ( false );
 	m_stop-> hide ( );
-	lay-> addWidget ( m_stop );
+	lay-> addWidget ( m_stop, 0 );
 
 	connect ( m_stop, SIGNAL( clicked ( )), this, SIGNAL( stop ( )));
 	recalc ( );
@@ -107,13 +108,18 @@ void CMultiProgressBar::recalc ( )
 	if ( ta > 0 ) {
 		m_progress-> setProgress ( pa, ta );
 		str = "<table>" + sl. join ( "" ) + "</table>";
+
+		if ( !m_progress-> isVisible ( ))
+			m_progress-> show ( );
+
+		QToolTip::add ( m_progress, str );
 	}
-	else
+	else {
+		m_progress-> hide ( );
 		m_progress-> reset ( );
+	}
 
 	m_stop-> setEnabled ( ta > 0 );
-	QToolTip::add ( m_progress, str );
-
 	emit statusChange ( ta > 0 );
 }
 

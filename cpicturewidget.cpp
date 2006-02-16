@@ -16,6 +16,7 @@
 #include <qlayout.h>
 #include <qapplication.h>
 #include <qaction.h>
+#include <qtooltip.h>
 
 #include "cresource.h"
 #include "cutility.h"
@@ -68,7 +69,7 @@ CPictureWidget::CPictureWidget ( QWidget *parent, const char *name, WFlags fl )
 	lay-> addWidget ( d-> m_plabel, 0, Qt::AlignCenter /*, AlignTop | AlignHCenter*/ );
 
 	lay-> addWidget ( d-> m_tlabel, 1, Qt::AlignCenter /*, Qt::AlignBottom | Qt::AlignHCenter*/ );
-
+	
 	redraw ( );
 }
 
@@ -158,6 +159,11 @@ void CPictureWidget::setPicture ( BrickLink::Picture *pic )
 	if ( !d-> m_connected && pic )
 		d-> m_connected = connect ( BrickLink::inst ( ), SIGNAL( pictureUpdated ( BrickLink::Picture * )), this, SLOT( gotUpdate ( BrickLink::Picture * )));
 
+	if ( pic )
+		QToolTip::add ( this, tr( "Double-click to view the large image." ));
+	else
+		QToolTip::remove ( this );
+
 	redraw ( );
 }
 
@@ -211,6 +217,7 @@ CLargePictureWidget::CLargePictureWidget ( BrickLink::Picture *lpic, QWidget *pa
 
 	connect ( BrickLink::inst ( ), SIGNAL( pictureUpdated ( BrickLink::Picture * )), this, SLOT( gotUpdate ( BrickLink::Picture * )));
 
+	QToolTip::add ( this, tr( "Double-click to close this window." ));
 	redraw ( );
 }
 

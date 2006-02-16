@@ -401,7 +401,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <message>
         <source>Ctrl+I</source>
         <comment>Edit|AddItems</comment>
-        <translation>Ctrl+I</translation>
+        <translation type="obsolete">Ctrl+I</translation>
     </message>
     <message>
         <source>Select All</source>
@@ -517,7 +517,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <message>
         <source>Delete</source>
         <comment>Edit|Delete</comment>
-        <translation>Löschen</translation>
+        <translation>Delete</translation>
     </message>
     <message>
         <source>Ctrl+S</source>
@@ -720,6 +720,16 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <message>
         <source>Peeron Inventory...</source>
         <translation>Peeron Inventarliste...</translation>
+    </message>
+    <message>
+        <source>Ctrl+I</source>
+        <comment>File|Import BrickLink Inventory</comment>
+        <translation>Ctrl+I</translation>
+    </message>
+    <message>
+        <source>Insert</source>
+        <comment>Edit|AddItems</comment>
+        <translation>Insert</translation>
     </message>
 </context>
 <context>
@@ -952,6 +962,10 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
         <source>Close</source>
         <translation>Schliessen</translation>
     </message>
+    <message>
+        <source>Double-click to close this window.</source>
+        <translation>Doppelklicken, um das Fenster zu schliessen.</translation>
+    </message>
 </context>
 <context>
     <name>CListView</name>
@@ -1022,6 +1036,10 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <message>
         <source>Please wait ... updating</source>
         <translation>Bitte warten ... Aktualisierung läuft</translation>
+    </message>
+    <message>
+        <source>Double-click to view the large image.</source>
+        <translation>Doppelklicken, um das grosse Bild anzuzeigen.</translation>
     </message>
 </context>
 <context>
@@ -1290,6 +1308,10 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <message>
         <source>Infomation</source>
         <translation>Informationen</translation>
+    </message>
+    <message>
+        <source>My Inventory</source>
+        <translation>Mein Shopbestand</translation>
     </message>
 </context>
 <context>

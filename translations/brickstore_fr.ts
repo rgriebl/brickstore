@@ -475,11 +475,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Ctrl+I</source>
-        <comment>Edit|AddItems</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Subtract Items...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -715,6 +710,16 @@
         <source>Peeron Inventory...</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Ctrl+I</source>
+        <comment>File|Import BrickLink Inventory</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Insert</source>
+        <comment>Edit|AddItems</comment>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>CImportBLOrder</name>
@@ -946,6 +951,10 @@
         <source>Close</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Double-click to close this window.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>CListView</name>
@@ -1015,6 +1024,10 @@
     </message>
     <message>
         <source>Please wait ... updating</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Double-click to view the large image.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1283,6 +1296,10 @@
     </message>
     <message>
         <source>Infomation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>My Inventory</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

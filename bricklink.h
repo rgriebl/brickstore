@@ -589,7 +589,8 @@ public:
 		URL_ItemChangeLog,
 		URL_LotsForSale,
 		URL_AppearsInSets,
-		URL_PeeronInfo
+		URL_PeeronInfo,
+		URL_StoreItemDetail
 	};
 
 	QCString url ( UrlList u, const void *opt = 0, const void *opt2 = 0 );

@@ -48,18 +48,6 @@
 
 #include "cframework.h"
 
-// Qt's QT_TR_NOOP doesn't support the second 'comment' parameter
-// lupdate is pretty dumb, so we can get around this limitation easily :)
-#ifdef QT_TR_NOOP
-#undef QT_TR_NOOP
-
-inline static const char *QT_TR_NOOP(const char *x, const char * = 0)
-{
-	return x;
-}
-
-#endif
-
 
 namespace {
 
@@ -331,77 +319,75 @@ void CFrameWork::languageChange ( )
 	menuBar ( )-> changeItem ( m_menuid_window, tr( "&Windows" ));
 	menuBar ( )-> changeItem ( m_menuid_help,   tr( "&Help" ));
 
-	static struct {
-		const char *action; 
-		const char *text; 
-		const char *accel;
+	struct {
+		const char *action; QString text; QString accel;
 	} *atptr, actiontable [] = {
-		{ "file_new",                       QT_TR_NOOP( "New" ),                                QT_TR_NOOP( "Ctrl+N", "File|New" ) },
-		{ "file_open",                      QT_TR_NOOP( "Open..." ),                            QT_TR_NOOP( "Ctrl+O", "File|Open" ) },
-		{ "file_open_recent",               QT_TR_NOOP( "Open Recent" ),                        0 },
-		{ "file_save",                      QT_TR_NOOP( "Save" ),                               QT_TR_NOOP( "Ctrl+S", "File|Save" ) },
-		{ "file_saveas",                    QT_TR_NOOP( "Save As..." ),                         0 },
-		{ "file_print",                     QT_TR_NOOP( "Print..." ),                           QT_TR_NOOP( "Ctrl+P", "File|Print" ) },
-		{ "file_import",                    QT_TR_NOOP( "Import" ),                             0 },
-		{ "file_import_bl_inv",             QT_TR_NOOP( "BrickLink Inventory..." ),             0 },
-		{ "file_import_bl_xml",             QT_TR_NOOP( "BrickLink XML..." ),                   0 },
-		{ "file_import_bl_order",           QT_TR_NOOP( "BrickLink Order..." ),                 0 },
-		{ "file_import_bl_store_inv",       QT_TR_NOOP( "BrickLink Store Inventory..." ),       0 },
-		{ "file_import_peeron_inv",         QT_TR_NOOP( "Peeron Inventory..." ),                0 },
-		{ "file_import_ldraw_model",        QT_TR_NOOP( "LDraw Model..." ),                     0 },
-		{ "file_import_briktrak",           QT_TR_NOOP( "BrikTrak Inventory..." ),              0 },
-		{ "file_export",                    QT_TR_NOOP( "Export" ),                             0 },
-		{ "file_export_bl_xml",             QT_TR_NOOP( "BrickLink XML..." ),                   0 },
-		{ "file_export_bl_xml_clip",        QT_TR_NOOP( "BrickLink XML to Clipboard" ),         0 },
-		{ "file_export_bl_update_clip",     QT_TR_NOOP( "BrickLink Mass-Update XML to Clipboard" ), 0 },
-		{ "file_export_bl_invreq_clip",     QT_TR_NOOP( "BrickLink Inventory XML to Clipboard" ),   0 },
-		{ "file_export_bl_wantedlist_clip", QT_TR_NOOP( "BrickLink Wanted List XML to Clipboard" ), 0 },
-		{ "file_export_briktrak",           QT_TR_NOOP( "BrikTrak Inventory..." ),              0 },
-		{ "file_close",                     QT_TR_NOOP( "Close" ),                              QT_TR_NOOP( "Ctrl+W", "File|Close" ) },
-		{ "file_exit",                      QT_TR_NOOP( "Exit" ),                               QT_TR_NOOP( "Ctrl+Q", "File|Quit" ) },
-		{ "edit_undo",                      0,                                                  QT_TR_NOOP( "Ctrl+Z", "Edit|Undo" ) },
-		{ "edit_redo",                      0,                                                  QT_TR_NOOP( "Ctrl+Y", "Edit|Redo" ) },
-		{ "edit_cut",                       QT_TR_NOOP( "Cut" ),                                QT_TR_NOOP( "Ctrl+X", "Edit|Cut" ) },
-		{ "edit_copy",                      QT_TR_NOOP( "Copy" ),                               QT_TR_NOOP( "Ctrl+C", "Edit|Copy" ) },
-		{ "edit_paste",                     QT_TR_NOOP( "Paste" ),                              QT_TR_NOOP( "Ctrl+V", "Edit|Paste" ) },
-		{ "edit_delete",                    QT_TR_NOOP( "Delete" ),                             QT_TR_NOOP( "Delete", "Edit|Delete" ) },
-		{ "edit_additems",                  QT_TR_NOOP( "Add Items..." ),                       QT_TR_NOOP( "Ctrl+I", "Edit|AddItems" ) },
-		{ "edit_subtractitems",             QT_TR_NOOP( "Subtract Items..." ),                  0 },
-		{ "edit_mergeitems",                QT_TR_NOOP( "Consolidate Items..." ),               0 },
-		{ "edit_partoutitems",              QT_TR_NOOP( "Part out Item..." ),                   0 },
-		{ "edit_reset_diffs",               QT_TR_NOOP( "Reset Differences" ),                  0 }, 
-		{ "edit_select_all",                QT_TR_NOOP( "Select All" ),                         QT_TR_NOOP( "Ctrl+A", "Edit|SelectAll" ) },
-		{ "edit_select_none",               QT_TR_NOOP( "Select None" ),                        QT_TR_NOOP( "Ctrl+Shift+A", "Edit|SelectNone" ) },
-		{ "view_simple_mode",               QT_TR_NOOP( "Buyer/Collector View" ),               0 },
-		{ "settings_view_toolbar",          QT_TR_NOOP( "View Toolbar" ),                       0 },
-		{ "settings_view_infobar",          QT_TR_NOOP( "View Infobars" ),                      0 },
-		{ "settings_view_statusbar",        QT_TR_NOOP( "View Statusbar" ),                     0 },
-		{ "view_show_input_errors",         QT_TR_NOOP( "Show Input Errors" ),                  0 },
-		{ "view_difference_mode",           QT_TR_NOOP( "Difference Mode" ),                    0 },
-		{ "extras_update_database",         QT_TR_NOOP( "Update Database" ),                    0 },
-		{ "extras_configure",               QT_TR_NOOP( "Configure..." ),                       0 },
-		{ "net_online",                     QT_TR_NOOP( "Online Mode" ),                        0 },
-		{ "net_offline",                    QT_TR_NOOP( "Offline Mode" ),                       0 },
-		{ "window_mode_mdi",                QT_TR_NOOP( "Standard MDI Mode" ),                  0 },
-		{ "window_mode_tab_above",          QT_TR_NOOP( "Show Tabs at Top" ),                   0 },
-		{ "window_mode_tab_below",          QT_TR_NOOP( "Show Tabs at Bottom" ),                0 },
-		{ "window_cascade",                 QT_TR_NOOP( "Cascade" ),                            0 },
-		{ "window_tile",                    QT_TR_NOOP( "Tile" ),                               0 },
-		{ "help_whatsthis",                 QT_TR_NOOP( "What's this?" ),                       QT_TR_NOOP( "Shift+F1", "Help|WhatsThis" ) },
-		{ "help_about",                     QT_TR_NOOP( "About..." ),                           0 },
-		{ "help_updates",                   QT_TR_NOOP( "Check for Program Updates..." ),       0 },
-		{ "edit_price_to_fixed",            QT_TR_NOOP( "Set Prices..." ),                      0 },
-		{ "edit_price_to_priceguide",       QT_TR_NOOP( "Set Prices to Price-Guide..." ),       QT_TR_NOOP( "Ctrl+G", "Edit|Set to PriceGuide" ) },
-		{ "edit_price_inc_dec",             QT_TR_NOOP( "Inc- or Decrease Prices..." ),         QT_TR_NOOP( "Ctrl++", "Edit| Inc/Dec Prices" ) },
-		{ "edit_set_sale",                  QT_TR_NOOP( "Set Sale..." ),                        QT_TR_NOOP( "Ctrl+%", "Edit|Set Sale" ) },
-		{ "edit_set_remark",                QT_TR_NOOP( "Set Remark..." ),                      0 },
-		{ "edit_set_reserved",              QT_TR_NOOP( "Set Reserved for..." ),                0 },
-		{ "edit_set_condition",             QT_TR_NOOP( "Set Condition..." ),                   0 },
-		{ "edit_multiply_qty",              QT_TR_NOOP( "Multiply Quantities..." ),             QT_TR_NOOP( "Ctrl+*", "Edit|Multiply Quantities" ) },
-		{ "edit_divide_qty",                QT_TR_NOOP( "Divide Quantities..." ),               QT_TR_NOOP( "Ctrl+/", "Edit|Divide Quantities" ) },
-		{ "edit_bl_catalog",                QT_TR_NOOP( "Show BrickLink Catalog Info..." ),     0 },
-		{ "edit_bl_priceguide",             QT_TR_NOOP( "Show BrickLink Price Guide Info..." ), 0 },
-		{ "edit_bl_lotsforsale",            QT_TR_NOOP( "Lots for Sale on BrickLink..." ),      0 },
+		{ "file_new",                       tr( "New" ),                                tr( "Ctrl+N", "File|New" ) },
+		{ "file_open",                      tr( "Open..." ),                            tr( "Ctrl+O", "File|Open" ) },
+		{ "file_open_recent",               tr( "Open Recent" ),                        0 },
+		{ "file_save",                      tr( "Save" ),                               tr( "Ctrl+S", "File|Save" ) },
+		{ "file_saveas",                    tr( "Save As..." ),                         0 },
+		{ "file_print",                     tr( "Print..." ),                           tr( "Ctrl+P", "File|Print" ) },
+		{ "file_import",                    tr( "Import" ),                             0 },
+		{ "file_import_bl_inv",             tr( "BrickLink Inventory..." ),             tr( "Ctrl+I", "File|Import BrickLink Inventory" ) },
+		{ "file_import_bl_xml",             tr( "BrickLink XML..." ),                   0 },
+		{ "file_import_bl_order",           tr( "BrickLink Order..." ),                 0 },
+		{ "file_import_bl_store_inv",       tr( "BrickLink Store Inventory..." ),       0 },
+		{ "file_import_peeron_inv",         tr( "Peeron Inventory..." ),                0 },
+		{ "file_import_ldraw_model",        tr( "LDraw Model..." ),                     0 },
+		{ "file_import_briktrak",           tr( "BrikTrak Inventory..." ),              0 },
+		{ "file_export",                    tr( "Export" ),                             0 },
+		{ "file_export_bl_xml",             tr( "BrickLink XML..." ),                   0 },
+		{ "file_export_bl_xml_clip",        tr( "BrickLink XML to Clipboard" ),         0 },
+		{ "file_export_bl_update_clip",     tr( "BrickLink Mass-Update XML to Clipboard" ), 0 },
+		{ "file_export_bl_invreq_clip",     tr( "BrickLink Inventory XML to Clipboard" ),   0 },
+		{ "file_export_bl_wantedlist_clip", tr( "BrickLink Wanted List XML to Clipboard" ), 0 },
+		{ "file_export_briktrak",           tr( "BrikTrak Inventory..." ),              0 },
+		{ "file_close",                     tr( "Close" ),                              tr( "Ctrl+W", "File|Close" ) },
+		{ "file_exit",                      tr( "Exit" ),                               tr( "Ctrl+Q", "File|Quit" ) },
+		{ "edit_undo",                      0,                                          tr( "Ctrl+Z", "Edit|Undo" ) },
+		{ "edit_redo",                      0,                                          tr( "Ctrl+Y", "Edit|Redo" ) },
+		{ "edit_cut",                       tr( "Cut" ),                                tr( "Ctrl+X", "Edit|Cut" ) },
+		{ "edit_copy",                      tr( "Copy" ),                               tr( "Ctrl+C", "Edit|Copy" ) },
+		{ "edit_paste",                     tr( "Paste" ),                              tr( "Ctrl+V", "Edit|Paste" ) },
+		{ "edit_delete",                    tr( "Delete" ),                             tr( "Delete", "Edit|Delete" ) },
+		{ "edit_additems",                  tr( "Add Items..." ),                       tr( "Insert", "Edit|AddItems" ) },
+		{ "edit_subtractitems",             tr( "Subtract Items..." ),                  0 },
+		{ "edit_mergeitems",                tr( "Consolidate Items..." ),               0 },
+		{ "edit_partoutitems",              tr( "Part out Item..." ),                   0 },
+		{ "edit_reset_diffs",               tr( "Reset Differences" ),                  0 }, 
+		{ "edit_select_all",                tr( "Select All" ),                         tr( "Ctrl+A", "Edit|SelectAll" ) },
+		{ "edit_select_none",               tr( "Select None" ),                        tr( "Ctrl+Shift+A", "Edit|SelectNone" ) },
+		{ "view_simple_mode",               tr( "Buyer/Collector View" ),               0 },
+		{ "settings_view_toolbar",          tr( "View Toolbar" ),                       0 },
+		{ "settings_view_infobar",          tr( "View Infobars" ),                      0 },
+		{ "settings_view_statusbar",        tr( "View Statusbar" ),                     0 },
+		{ "view_show_input_errors",         tr( "Show Input Errors" ),                  0 },
+		{ "view_difference_mode",           tr( "Difference Mode" ),                    0 },
+		{ "extras_update_database",         tr( "Update Database" ),                    0 },
+		{ "extras_configure",               tr( "Configure..." ),                       0 },
+		{ "net_online",                     tr( "Online Mode" ),                        0 },
+		{ "net_offline",                    tr( "Offline Mode" ),                       0 },
+		{ "window_mode_mdi",                tr( "Standard MDI Mode" ),                  0 },
+		{ "window_mode_tab_above",          tr( "Show Tabs at Top" ),                   0 },
+		{ "window_mode_tab_below",          tr( "Show Tabs at Bottom" ),                0 },
+		{ "window_cascade",                 tr( "Cascade" ),                            0 },
+		{ "window_tile",                    tr( "Tile" ),                               0 },
+		{ "help_whatsthis",                 tr( "What's this?" ),                       tr( "Shift+F1", "Help|WhatsThis" ) },
+		{ "help_about",                     tr( "About..." ),                           0 },
+		{ "help_updates",                   tr( "Check for Program Updates..." ),       0 },
+		{ "edit_price_to_fixed",            tr( "Set Prices..." ),                      0 },
+		{ "edit_price_to_priceguide",       tr( "Set Prices to Price-Guide..." ),       tr( "Ctrl+G", "Edit|Set to PriceGuide" ) },
+		{ "edit_price_inc_dec",             tr( "Inc- or Decrease Prices..." ),         tr( "Ctrl++", "Edit| Inc/Dec Prices" ) },
+		{ "edit_set_sale",                  tr( "Set Sale..." ),                        tr( "Ctrl+%", "Edit|Set Sale" ) },
+		{ "edit_set_remark",                tr( "Set Remark..." ),                      0 },
+		{ "edit_set_reserved",              tr( "Set Reserved for..." ),                0 },
+		{ "edit_set_condition",             tr( "Set Condition..." ),                   0 },
+		{ "edit_multiply_qty",              tr( "Multiply Quantities..." ),             tr( "Ctrl+*", "Edit|Multiply Quantities" ) },
+		{ "edit_divide_qty",                tr( "Divide Quantities..." ),               tr( "Ctrl+/", "Edit|Divide Quantities" ) },
+		{ "edit_bl_catalog",                tr( "Show BrickLink Catalog Info..." ),     0 },
+		{ "edit_bl_priceguide",             tr( "Show BrickLink Price Guide Info..." ), 0 },
+		{ "edit_bl_lotsforsale",            tr( "Lots for Sale on BrickLink..." ),      0 },
 
 		{ 0, 0, 0 }
 	};
@@ -410,10 +396,10 @@ void CFrameWork::languageChange ( )
 		QAction *a = findAction ( atptr-> action );
 
 		if ( a ) {
-			if ( atptr-> text )
-				a-> setText ( tr( atptr-> text ));
-			if ( atptr-> accel )
-				a-> setAccel ( QKeySequence ( tr( atptr-> accel )));
+			if ( !atptr-> text. isNull ( ))
+				a-> setText ( atptr-> text );
+			if ( !atptr-> accel. isNull ( ))
+				a-> setAccel ( QKeySequence ( atptr-> accel ));
 		}
 	}
 }
@@ -518,8 +504,8 @@ void CFrameWork::createStatusBar ( )
 		m_progress-> setStopPixmap ( p );
 
 	m_progress-> addItem ( QString ( ), PGI_PriceGuide );
-	m_progress-> addItem ( QString ( ),  PGI_Inventory  );
-	m_progress-> addItem ( QString ( ),    PGI_Picture    );
+	m_progress-> addItem ( QString ( ), PGI_Inventory  );
+	m_progress-> addItem ( QString ( ), PGI_Picture    );
 
 	//m_progress-> setProgress ( -1, 100 );
 

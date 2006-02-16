@@ -43,7 +43,7 @@ public:
 		connect ( CFrameWork::inst ( ), SIGNAL( documentActivated ( CDocument * )), this, SLOT( documentUpdate ( CDocument * )));
 
 		unsetPalette ( );
-		setText ( "<b>B</b><br />1<br />2<br />3<br />4<br /><br/><b>P</b><br />1<br />" );
+		setText ( "<b>B</b><br />1<br />2<br />3<br />4<br />5<br /><br/><b>P</b><br />1<br />" );
 		setMinimumHeight ( sizeHint ( ). height ( ));
 		setText ( QString ( ));
 	}
@@ -65,18 +65,24 @@ protected slots:
 		QString str;
 
 		if ( m_doc && ( list. count ( ) == 1 )) {
-			const BrickLink::Item *item = (*list. front ( )). item ( );
-			const BrickLink::Color *color = (*list. front ( )). color ( );
+			const BrickLink::Item *item   = list. front ( )-> item ( );
+			const BrickLink::Color *color = list. front ( )-> color ( );
 
 			if ( item && color ) {
 				QString fmt1 = "&nbsp;&nbsp;<b>%1</b><br />";
 				QString fmt2 = "&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"%2\">%1...</a><br />";
 				
 				str += fmt1. arg( tr( "BrickLink" ));
+				if ( list. front ( )-> lotId ( )) {
+					uint lotid = list. front ( )-> lotId ( );
+					str += fmt2. arg( tr( "My Inventory" )). arg( BrickLink::inst ( )-> url ( BrickLink::URL_StoreItemDetail, &lotid ));
+				}
+
 				str += fmt2. arg( tr( "Catalog" )).         arg( BrickLink::inst ( )-> url ( BrickLink::URL_CatalogInfo,    item, color ));
 				str += fmt2. arg( tr( "Price Guide" )).     arg( BrickLink::inst ( )-> url ( BrickLink::URL_PriceGuideInfo, item, color ));
 				str += fmt2. arg( tr( "Lots for Sale" )).   arg( BrickLink::inst ( )-> url ( BrickLink::URL_LotsForSale,    item, color ));
 				str += fmt2. arg( tr( "Appears in Sets" )). arg( BrickLink::inst ( )-> url ( BrickLink::URL_AppearsInSets,  item, color ));
+
 				str += "<br />";
 
 				str += fmt1. arg( tr( "Peeron" ));
