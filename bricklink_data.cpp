@@ -271,7 +271,7 @@ QDataStream &operator << ( QDataStream &ds, const BrickLink::InvItem &ii )
 	ds << Q_INT32( ii. status ( )) << Q_INT32( ii. condition ( )) << ii. comments ( ) << ii. remarks ( ) << ii. customPictureUrl ( )
 	   << ii. quantity ( ) << ii. bulkQuantity ( ) << ii. tierQuantity ( 0 ) << ii. tierQuantity ( 1 ) << ii. tierQuantity ( 2 )
 	   << ii. price ( ) << ii. tierPrice ( 0 ) << ii. tierPrice ( 1 ) << ii. tierPrice ( 2 ) << ii. sale ( )
-	   << Q_INT8( ii. retain ( ) ? 1 : 0 ) << Q_INT8( ii. stockroom ( ) ? 1 : 0 ) << ii. m_reserved
+	   << Q_INT8( ii. retain ( ) ? 1 : 0 ) << Q_INT8( ii. stockroom ( ) ? 1 : 0 ) << ii. m_reserved << ii. m_lot_id
 	   << ii. origQuantity ( ) << ii. origPrice ( );
 	return ds;
 }
@@ -297,7 +297,7 @@ QDataStream &operator >> ( QDataStream &ds, BrickLink::InvItem &ii )
 	ds >> status >> cond >> ii. m_comments >> ii. m_remarks >> ii. m_custom_picture_url
 	   >> ii. m_quantity >> ii. m_bulk_quantity >> ii. m_tier_quantity [0] >> ii. m_tier_quantity [1] >> ii. m_tier_quantity [2]
 	   >> ii. m_price >> ii. m_tier_price [0] >> ii. m_tier_price [1] >> ii. m_tier_price [2] >> ii. m_sale
-	   >> retain >> stockroom >> ii. m_reserved
+	   >> retain >> stockroom >> ii. m_reserved >> ii. m_lot_id
 	   >> ii. m_orig_quantity >> ii. m_orig_price;
 
 	ii. m_status = (BrickLink::InvItem::Status) status;

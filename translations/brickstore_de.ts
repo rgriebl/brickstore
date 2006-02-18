@@ -402,7 +402,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <message>
         <source>Delete</source>
         <comment>Edit|Delete</comment>
-        <translation>Löschen</translation>
+        <translation>Delete</translation>
     </message>
     <message>
         <source>Ctrl+S</source>

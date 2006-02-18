@@ -86,9 +86,9 @@ CWindow::CWindow ( QWidget *parent, const char *name )
 	setFocusProxy ( w_list );
 	w_list-> setShowSortIndicator ( true );
 	w_list-> setColumnsHideable ( true );
-	w_list-> loadSettings ( CConfig::inst ( ), "/ItemView/List" );
 	w_list-> setDifferenceMode ( false );
 	w_list-> setSimpleMode ( CConfig::inst ( )-> simpleMode ( ));
+	w_list-> loadSettings ( CConfig::inst ( ), "/ItemView/List" );
 	
 	connect ( w_list, SIGNAL( selectionChanged ( )), this, SLOT( updateSelection ( )));
 
@@ -789,7 +789,6 @@ bool CWindow::fileImportLDrawModel ( )
 
 		setItems ( items );
 
-		setFileName ( QString::null );
 		setModified ( true );
 		m_caption = tr( "Import of %1" ). arg ( QFileInfo ( s ). fileName ( ));
 		updateCaption ( );
