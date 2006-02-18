@@ -222,6 +222,7 @@ bool CDocument::Item::operator == ( const Item &cmp ) const
 // *****************************************************************************************
 // *****************************************************************************************
 
+QValueList<CDocument *> CDocument::s_documents;
 
 CDocument::CDocument ( )
 {
@@ -230,12 +231,21 @@ CDocument::CDocument ( )
 	m_error_mask = 0;
 
 	connect ( m_undo, SIGNAL( cleanChanged ( bool )), this, SLOT( clean2Modified ( bool )));
+
+	s_documents. append ( this );
 }
 
 CDocument::~CDocument ( )
 { 
 	delete m_order;
 	qDeleteAll ( m_items );
+
+	s_documents. remove ( this );
+}
+
+const QValueList<CDocument *> &CDocument::allDocuments ( )
+{
+	return s_documents;
 }
 
 const CDocument::ItemList &CDocument::items ( ) const
@@ -435,8 +445,13 @@ CDocument *CDocument::fileOpen ( )
 
 CDocument *CDocument::fileOpen ( const QString &s )
 {
-	if ( !s. isEmpty ( ))
+	if ( !s. isEmpty ( )) {
+		foreach ( CDocument *doc, s_documents ) {
+			if ( doc-> fileName ( ) == s )
+				return doc;
+		}
 		return fileLoadFrom ( s, "bsx" );
+	}
 	else
 		return 0;
 }

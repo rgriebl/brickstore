@@ -888,7 +888,7 @@ void CWindow::editAddItems ( )
 		m_add_dialog-> setActiveWindow ( );
 	}
 	else {
-		m_add_dialog = new DlgAddItemImpl ( this, "AddItemDlg", false, Qt::WDestructiveClose );
+		m_add_dialog = new DlgAddItemImpl ( this, document( ), "AddItemDlg", false, Qt::WDestructiveClose );
 
 		connect ( m_add_dialog, SIGNAL( addItem ( BrickLink::InvItem *, uint )), this, SLOT( addItem ( BrickLink::InvItem *, uint )));
 

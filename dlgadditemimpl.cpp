@@ -27,6 +27,7 @@
 #include "cmoney.h"
 #include "bricklink.h"
 #include "cwindow.h"
+#include "cdocument.h"
 #include "cpicturewidget.h"
 #include "cpriceguidewidget.h"
 #include "cselectitem.h"
@@ -35,9 +36,11 @@
 
 
 
-DlgAddItemImpl::DlgAddItemImpl ( QWidget *parent, const char *name, bool modal, int fl )
+DlgAddItemImpl::DlgAddItemImpl ( QWidget *parent, CDocument *doc, const char *name, bool modal, int fl )
 	: DlgAddItem ( parent, name, modal, fl | WStyle_Customize | WStyle_Title | WStyle_ContextHelp | WStyle_NormalBorder | WStyle_SysMenu | WStyle_Maximize )
 {
+	m_document = doc;
+	m_caption_fmt        = caption ( );
 	m_price_label_fmt    = w_label_currency-> text ( );
 	m_currency_label_fmt = w_radio_currency-> text ( );
 
@@ -96,6 +99,7 @@ DlgAddItemImpl::DlgAddItemImpl ( QWidget *parent, const char *name, bool modal, 
 
 	connect ( CConfig::inst ( ), SIGNAL( simpleModeChanged ( bool )), this, SLOT( setSimpleMode ( bool )));
 	connect ( CMoney::inst ( ), SIGNAL( monetarySettingsChanged ( )), this, SLOT( updateMonetary ( )));
+	connect ( m_document, SIGNAL( titleChanged ( const QString & )), this, SLOT( updateCaption ( )));
 
 	updateMonetary ( );
 
@@ -115,14 +119,18 @@ void DlgAddItemImpl::languageChange ( )
 {
 	DlgAddItem::languageChange ( );
 	updateMonetary ( );
-
-	setCaption ( caption ( ). arg ( parentWidget ( )-> caption ( )));
+	updateCaption ( );
 }
 
 DlgAddItemImpl::~DlgAddItemImpl ( )
 {
 	w_picture-> setPicture ( 0 );
 	w_price_guide-> setPriceGuide ( 0 );
+}
+
+void DlgAddItemImpl::updateCaption ( )
+{
+	setCaption ( m_caption_fmt. arg ( m_document-> title ( )));
 }
 
 void DlgAddItemImpl::setSimpleMode ( bool b )

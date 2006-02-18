@@ -120,6 +120,8 @@ public:
 	CDocument ( );
 	virtual ~CDocument ( );
 
+	static const QValueList<CDocument *> &allDocuments ( );
+
 	void addView ( QWidget *view, IDocumentView *docview = 0 );
 
 	QString fileName ( ) const;
@@ -224,6 +226,8 @@ private:
 
 	QValueList<IDocumentView *> m_views;
 	QDomElement  m_gui_state;
+
+	static QValueList<CDocument *> s_documents;
 };
 
 #endif

@@ -1186,10 +1186,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Clear</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>List</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1227,6 +1223,14 @@
     </message>
     <message>
         <source>Description</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Filter the list using this pattern (wildcards allowed: * ? [])</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reset an active filter</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

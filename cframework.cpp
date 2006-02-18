@@ -291,7 +291,7 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 
 	QTimer::singleShot ( 0, this, SLOT( initBrickLinkDelayed ( )));
 
-	connect ( CUndoManager::inst ( ), SIGNAL( cleanChanged ( bool )), this, SLOT( showNotModified ( bool )));
+	connect ( CUndoManager::inst ( ), SIGNAL( cleanChanged ( bool )), this, SLOT( modificationUpdate ( )));
 	connectAllActions ( false, 0 ); // init enabled/disabled status of document actions
 
 	setAcceptDrops ( true );
@@ -862,6 +862,15 @@ bool CFrameWork::createWindow ( CDocument *doc )
 	if ( !doc )
 		return false;
 
+	QPtrList <CWindow> list = allWindows ( );
+
+	for ( QPtrListIterator <CWindow> it ( list ); it. current ( ); ++it ) {
+		if ( it. current ( )-> document ( ) == doc ) {
+			it. current ( )-> setFocus ( );
+			return true;
+		}
+	}
+
 	CWindow *w = new CWindow ( doc, m_mdi, "window" );
 
 	QPixmap pix = CResource::inst ( )-> pixmap ( "icon" );
@@ -997,6 +1006,7 @@ void CFrameWork::connectWindow ( QWidget *w )
 
 		selectionUpdate ( CDocument::ItemList ( ));
 		statisticsUpdate ( );
+		modificationUpdate ( );
 	}
 
 	if ( w && ::qt_cast <CWindow *> ( w )) {
@@ -1012,6 +1022,7 @@ void CFrameWork::connectWindow ( QWidget *w )
 
 		selectionUpdate ( doc-> selection ( ));
 		statisticsUpdate ( );
+		modificationUpdate ( );
 	}
 
 	emit windowActivated ( m_current_window );
@@ -1116,8 +1127,10 @@ void CFrameWork::statisticsUpdate ( )
 	emit statisticsChanged ( m_current_window );
 }
 
-void CFrameWork::showNotModified ( bool b )
+void CFrameWork::modificationUpdate ( )
 {
+	bool b = CUndoManager::inst ( )-> currentStack ( ) ? CUndoManager::inst ( )-> currentStack ( )-> isClean ( ) : false;
+
 	QAction *a = findAction ( "file_save" );
 	if ( a )
 		a-> setEnabled ( !b );

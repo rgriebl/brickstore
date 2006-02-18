@@ -639,6 +639,9 @@ uint CUndoManager::undoLimit ( ) const
 
 void CUndoManager::activateStack ( CUndoStack *stack )
 {
+	if ( stack == m_current )
+		return;
+
 	CUndoEmitter e;
 
 	if ( m_current ) {

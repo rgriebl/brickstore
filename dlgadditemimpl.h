@@ -19,11 +19,12 @@
 #include "bricklink.h"
 
 class QValidator;
+class CDocument;
 
 class DlgAddItemImpl : public DlgAddItem {
 	Q_OBJECT
 public:
-	DlgAddItemImpl ( QWidget *parent, const char *name = 0, bool modal = false, int fl = 0 );
+	DlgAddItemImpl ( QWidget *parent, CDocument *doc, const char *name = 0, bool modal = false, int fl = 0 );
 	virtual ~DlgAddItemImpl ( );
 
 signals:
@@ -33,6 +34,7 @@ protected slots:
 	virtual void languageChange ( );
 
 private slots:
+	void updateCaption ( );
 	void updateItemAndColor ( );
 	void showTotal ( );
 	bool checkAddPossible ( );
@@ -48,12 +50,15 @@ private:
 	money_t tierPriceValue ( int i );
 
 private:
+	CDocument *m_document;
+
 	QLineEdit *w_tier_qty [3];
 	QLineEdit *w_tier_price [3];
 
 	QValidator *m_money_validator;
 	QValidator *m_percent_validator;
 
+	QString m_caption_fmt;
 	QString m_price_label_fmt;
 	QString m_currency_label_fmt;
 };

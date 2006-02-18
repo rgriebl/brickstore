@@ -62,7 +62,7 @@ public:
 public slots:
 	void selectionUpdate ( const CDocument::ItemList &selection );
 	void statisticsUpdate ( );
-	void showNotModified ( bool b );
+	void modificationUpdate ( );
 	void showContextMenu ( bool onitem, const QPoint &pos );
 
 	void fileImportBrickLinkInventory ( const BrickLink::Item *item );

@@ -1209,7 +1209,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>Clear</source>
-        <translation>Löschen</translation>
+        <translation type="obsolete">Löschen</translation>
     </message>
     <message>
         <source>Item Name</source>
@@ -1263,6 +1263,14 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <message>
         <source>Description</source>
         <translation>Beschreibung</translation>
+    </message>
+    <message>
+        <source>Filter the list using this pattern (wildcards allowed: * ? [])</source>
+        <translation>Liste anhand dieses Musters filtern (Platzhalter sind erlaubt: * ? [])</translation>
+    </message>
+    <message>
+        <source>Reset an active filter</source>
+        <translation>Setze den aktiven Filter zurück</translation>
     </message>
 </context>
 <context>
