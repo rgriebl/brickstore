@@ -117,11 +117,11 @@
     </message>
     <message>
         <source>Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Nom</translation>
     </message>
     <message>
         <source>Part out Item...</source>
-        <translation type="unfinished"></translation>
+        <translation>Séparer les pièces de cet item...</translation>
     </message>
 </context>
 <context>
@@ -148,7 +148,7 @@
     </message>
     <message>
         <source>&lt;p&gt;This program is free software; it may be distributed and/or modified under the terms of the GNU General Public License version 2 as published by the Free Software Foundation and appearing in the file LICENSE.GPL included in this software package.&lt;br /&gt;This program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.&lt;br /&gt;See &lt;a href=&quot;http://fsf.org/licensing/licenses/gpl.html&quot;&gt;www.fsf.org/licensing/licenses/gpl.html&lt;/a&gt; for GPL licensing information.&lt;/p&gt;&lt;p&gt;All data from &lt;a href=&quot;http://www.bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; is owned by BrickLink&lt;sup&gt;TM&lt;/sup&gt;, which is a trademark of Dan Jezek.&lt;/p&gt;&lt;p&gt;Peeron Inventories from &lt;a href=&quot;http://www.peeron.com&quot;&gt;www.peeron.com&lt;/a&gt; are owned by Dan and Jennifer Boger.&lt;/p&gt;&lt;p&gt;LEGO&lt;sup&gt;&amp;reg;&lt;/sup&gt; is a trademark of the LEGO group of companies, which does not sponsor, authorize or endorse this software.&lt;/p&gt;&lt;p&gt;All other trademarks recognised.&lt;/p&gt;&lt;p&gt;French translation by Sylvain Perez (&lt;a href=&quot;mailto:bricklink@1001bricks.com&quot;&gt;1001bricks&lt;/a&gt;)&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;This program is free software; it may be distributed and/or modified under the terms of the GNU General Public License version 2 as published by the Free Software Foundation and appearing in the file LICENSE.GPL included in this software package.&lt;br /&gt;This program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.&lt;br /&gt;See &lt;a href=&quot;http://fsf.org/licensing/licenses/gpl.html&quot;&gt;www.fsf.org/licensing/licenses/gpl.html&lt;/a&gt; for GPL licensing information.&lt;/p&gt;&lt;p&gt;All data from &lt;a href=&quot;http://www.bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; is owned by BrickLink&lt;sup&gt;TM&lt;/sup&gt;, which is a trademark of Dan Jezek.&lt;/p&gt;&lt;p&gt;Peeron Inventories from &lt;a href=&quot;http://www.peeron.com&quot;&gt;www.peeron.com&lt;/a&gt; are owned by Dan and Jennifer Boger.&lt;/p&gt;&lt;p&gt;LEGO&lt;sup&gt;&amp;reg;&lt;/sup&gt; is a trademark of the LEGO group of companies, which does not sponsor, authorize or endorse this software.&lt;/p&gt;&lt;p&gt;All other trademarks recognised.&lt;/p&gt;&lt;p&gt;French translation by Sylvain Perez (&lt;a href=&quot;mailto:bricklink@1001bricks.com&quot;&gt;1001bricks&lt;/a&gt;)&lt;/p&gt;</translation>
     </message>
 </context>
 <context>
@@ -166,35 +166,35 @@
     </message>
     <message>
         <source>You are currently running %1 %2</source>
-        <translation type="unfinished">Vous utilisez actuellement %1 %2</translation>
+        <translation>Vous utilisez actuellement %1 %2</translation>
     </message>
     <message>
         <source>Version information is not available.</source>
-        <translation type="unfinished">L&apos;information sur la version n&apos;est pas disponible.</translation>
+        <translation>L&apos;information sur la version n&apos;est pas disponible.</translation>
     </message>
     <message>
         <source>Your currently installed version is up-to-date.</source>
-        <translation type="unfinished">Votre version actuellement installée est à jour.</translation>
+        <translation>Votre version actuellement installée est à jour.</translation>
     </message>
     <message>
         <source>A newer version than the one currently installed is available:</source>
-        <translation type="unfinished">Une version plus récente que celle actuellement installée est disponible :</translation>
+        <translation>Une version plus récente que celle actuellement installée est disponible :</translation>
     </message>
     <message>
         <source>Stable release</source>
-        <translation type="unfinished">Version publique</translation>
+        <translation>Version publique</translation>
     </message>
     <message>
         <source>Beta release</source>
-        <translation type="unfinished">Version beta</translation>
+        <translation>Version beta</translation>
     </message>
     <message>
         <source>Detailed list of changes</source>
-        <translation type="unfinished">Liste détaillée des changements</translation>
+        <translation>Liste détaillée des changements</translation>
     </message>
     <message>
         <source>the BrickStore homepage</source>
-        <translation type="unfinished">la page d&apos;accueil de BrickStore</translation>
+        <translation>la page d&apos;accueil de BrickStore</translation>
     </message>
     <message>
         <source>&lt;b&gt;Please note:&lt;/b&gt; Your currently installed version is flagged as defective. Please visit %1 to find out the exact cause.</source>
@@ -205,7 +205,7 @@
     <name>CDocument</name>
     <message>
         <source>Untitled</source>
-        <translation type="unfinished">Sans titre</translation>
+        <translation>Sans titre</translation>
     </message>
     <message>
         <source>BrickStore XML Data</source>
@@ -213,35 +213,35 @@
     </message>
     <message>
         <source>All Files</source>
-        <translation type="unfinished">Tous les fichiers</translation>
+        <translation>Tous les fichiers</translation>
     </message>
     <message>
         <source>Open File</source>
-        <translation type="unfinished">Ouvrir un fichier</translation>
+        <translation>Ouvrir un fichier</translation>
     </message>
     <message>
         <source>Inventory for %1</source>
-        <translation type="unfinished">Inventaire pour %1</translation>
+        <translation>Inventaire pour %1</translation>
     </message>
     <message>
         <source>Internal error: Could not create an Inventory object for item %1</source>
-        <translation type="unfinished">Erreur interne : n&apos;est pas arrivé à créer un objet inventaire pour l&apos;item %1</translation>
+        <translation>Erreur interne : n&apos;est pas arrivé à créer un objet inventaire pour l&apos;item %1</translation>
     </message>
     <message>
         <source>Requested item was not found in the database.</source>
-        <translation type="unfinished">L&apos;item requis n&apos;a pas été trouvé dans la base de données.</translation>
+        <translation>L&apos;item requis n&apos;a pas été trouvé dans la base de données.</translation>
     </message>
     <message>
         <source>Order #%1</source>
-        <translation type="unfinished">Commande #%1</translation>
+        <translation>Commande #%1</translation>
     </message>
     <message>
         <source>Invalid order number.</source>
-        <translation type="unfinished">Numéro de commande non valide.</translation>
+        <translation>Numéro de commande non valide.</translation>
     </message>
     <message>
         <source>Store %1</source>
-        <translation type="unfinished">Boutique %1</translation>
+        <translation>Boutique %1</translation>
     </message>
     <message>
         <source>BrickLink XML File</source>
@@ -249,11 +249,11 @@
     </message>
     <message>
         <source>Import File</source>
-        <translation type="unfinished">Importer un fichier</translation>
+        <translation>Importer un fichier</translation>
     </message>
     <message>
         <source>Import of %1</source>
-        <translation type="unfinished">Import de %1</translation>
+        <translation>Import de %1</translation>
     </message>
     <message>
         <source>Enter the set ID of the Peeron inventory:</source>
@@ -265,67 +265,67 @@
     </message>
     <message>
         <source>BrikTrak Inventory</source>
-        <translation type="unfinished">Inventaire BrikTrak</translation>
+        <translation>Inventaire BrikTrak</translation>
     </message>
     <message>
         <source>Could not open file %1 for reading.</source>
-        <translation type="unfinished">N&apos;est pas arrivé à ouvrir en lecture le fichier %1.</translation>
+        <translation>N&apos;est pas arrivé à ouvrir en lecture le fichier %1.</translation>
     </message>
     <message>
         <source>Could not parse the XML data in file %1:&lt;br /&gt;&lt;i&gt;Line %2, column %3: %4&lt;/i&gt;</source>
-        <translation type="unfinished">N&apos;est pas arrivé à interpréter les données XML dans le fichier %1 :&lt;br /&gt;&lt;i&gt;Ligne %2, colonne %3 : %4&lt;/i&gt;</translation>
+        <translation>N&apos;est pas arrivé à interpréter les données XML dans le fichier %1 :&lt;br /&gt;&lt;i&gt;Ligne %2, colonne %3 : %4&lt;/i&gt;</translation>
     </message>
     <message>
         <source>This file contains %1 unknown item(s).</source>
-        <translation type="unfinished">Ce fichier contient %1 item(s) inconnu(s).</translation>
+        <translation>Ce fichier contient %1 item(s) inconnu(s).</translation>
     </message>
     <message>
         <source>Could not parse the XML data in file %1.</source>
-        <translation type="unfinished">N&apos;est pas arrivé à interpréter les données XML du fichier %1.</translation>
+        <translation>N&apos;est pas arrivé à interpréter les données XML du fichier %1.</translation>
     </message>
     <message>
         <source>LDraw Models</source>
-        <translation type="unfinished">Modèles LDraw</translation>
+        <translation>Modèles LDraw</translation>
     </message>
     <message>
         <source>Could not parse the LDraw model in file %1.</source>
-        <translation type="unfinished">N&apos;est pas arrivé à interpréter le modèle LDraw du fichier %1.</translation>
+        <translation>N&apos;est pas arrivé à interpréter le modèle LDraw du fichier %1.</translation>
     </message>
     <message>
         <source>Save File as</source>
-        <translation type="unfinished">Enregistrer le fichier sous</translation>
+        <translation>Enregistrer le fichier sous</translation>
     </message>
     <message>
         <source>A file named %1 already exists. Are you sure you want to overwrite it?</source>
-        <translation type="unfinished">Un fichier nommé %1 existe déjà. Etes-vous sûr de vouloir l&apos;écraser ?</translation>
+        <translation>Un fichier nommé %1 existe déjà. Etes-vous sûr de vouloir l&apos;écraser ?</translation>
     </message>
     <message>
         <source>Failed to save data in file %1.</source>
-        <translation type="unfinished">Echec lors de la sauvegarde des données dans le fichier %1.</translation>
+        <translation>Echec lors de la sauvegarde des données dans le fichier %1.</translation>
     </message>
     <message>
         <source>Failed to open file %1 for writing.</source>
-        <translation type="unfinished">Echec à l&apos;ouverture pour écriture du fichier %1.</translation>
+        <translation>Echec à l&apos;ouverture pour écriture du fichier %1.</translation>
     </message>
     <message>
         <source>Enter the ID number of Wanted List (leave blank for the default Wanted List)</source>
-        <translation type="unfinished">Entrez le numéro d&apos;ID de la liste des pièces désirées (laisser vide pour la liste par défaut)</translation>
+        <translation>Entrez le numéro d&apos;ID de la liste des pièces désirées (laisser vide pour la liste par défaut)</translation>
     </message>
     <message>
         <source>This list contains items without a BrickLink Lot-ID.&lt;br /&gt;&lt;br /&gt;Do you really want to export this list?</source>
-        <translation type="unfinished">Cette liste contient des items sans leur ID de lot BrickLink.&lt;br /&gt;&lt;br /&gt;Voulez-vous réellement exporter cette liste ?</translation>
+        <translation>Cette liste contient des items sans leur ID de lot BrickLink.&lt;br /&gt;&lt;br /&gt;Voulez-vous réellement exporter cette liste ?</translation>
     </message>
     <message>
         <source>Export File</source>
-        <translation type="unfinished">Exporter un fichier</translation>
+        <translation>Exporter un fichier</translation>
     </message>
     <message>
         <source>This list contains items with errors.&lt;br /&gt;&lt;br /&gt;Do you really want to export this list?</source>
-        <translation type="unfinished">Cette liste contient des items avec des erreurs.&lt;br /&gt;&lt;br /&gt;Voulez-vous réellement exporter cette liste ?</translation>
+        <translation>Cette liste contient des items avec des erreurs.&lt;br /&gt;&lt;br /&gt;Voulez-vous réellement exporter cette liste ?</translation>
     </message>
     <message>
         <source>Reset Differences</source>
-        <translation type="unfinished"></translation>
+        <translation>Réinitialiser les différences</translation>
     </message>
 </context>
 <context>
@@ -556,11 +556,11 @@
     </message>
     <message>
         <source>Part out Item...</source>
-        <translation type="unfinished"></translation>
+        <translation>Séparer les pièces de cet item...</translation>
     </message>
     <message>
         <source>Reset Differences</source>
-        <translation type="unfinished"></translation>
+        <translation>Réinitialiser les différences</translation>
     </message>
     <message>
         <source>Select All</source>
@@ -582,7 +582,7 @@
     </message>
     <message>
         <source>Buyer/Collector View</source>
-        <translation type="unfinished"></translation>
+        <translation>Mode acheteur/collectionneur</translation>
     </message>
     <message>
         <source>View Toolbar</source>
@@ -598,11 +598,11 @@
     </message>
     <message>
         <source>Show Input Errors</source>
-        <translation type="unfinished"></translation>
+        <translation>Montrer les erreurs d&apos;entrée</translation>
     </message>
     <message>
         <source>Difference Mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Mode différence</translation>
     </message>
     <message>
         <source>Update Database</source>
@@ -760,11 +760,11 @@
     </message>
     <message>
         <source>Info</source>
-        <translation type="unfinished">Info</translation>
+        <translation>Info</translation>
     </message>
     <message>
         <source>Price Guide</source>
-        <translation type="unfinished">Guide de prix</translation>
+        <translation>Guide de prix</translation>
     </message>
     <message>
         <source>Appears In Sets</source>
@@ -772,11 +772,11 @@
     </message>
     <message>
         <source>Links</source>
-        <translation type="unfinished">Liens</translation>
+        <translation>Liens</translation>
     </message>
     <message>
         <source>New</source>
-        <translation type="unfinished">Neuf</translation>
+        <translation>Neuf</translation>
     </message>
     <message>
         <source>Ctrl+I</source>
@@ -822,7 +822,7 @@
     </message>
     <message>
         <source>About...</source>
-        <translation type="unfinished"></translation>
+        <translation>A propos de...</translation>
     </message>
     <message>
         <source>BrickStore has switched to a new file format (.bsx - BrickStore XML).&lt;br /&gt;&lt;br /&gt;Your document has been automatically imported and it will be converted as soon as you save it.</source>
@@ -841,11 +841,11 @@
     </message>
     <message>
         <source>Could not parse the XML data for order #%1.</source>
-        <translation type="unfinished">N&apos;est pas arrivé à interpréter les données XML de la commande #%1.</translation>
+        <translation>N&apos;est pas arrivé à interpréter les données XML de la commande #%1.</translation>
     </message>
     <message>
         <source>Could not parse the XML data for order #%1:&lt;br /&gt;&lt;i&gt;Line %2, column %3: %4&lt;/i&gt;</source>
-        <translation type="unfinished">N&apos;est pas arrivé à interpréter les données XML pour la commande #%1 :&lt;br /&gt;&lt;i&gt;Ligne %2, colonne %3 : %4&lt;/i&gt;</translation>
+        <translation>N&apos;est pas arrivé à interpréter les données XML pour la commande #%1 :&lt;br /&gt;&lt;i&gt;Ligne %2, colonne %3 : %4&lt;/i&gt;</translation>
     </message>
 </context>
 <context>
@@ -860,11 +860,11 @@
     </message>
     <message>
         <source>Could not parse the XML data for the store inventory:&lt;br /&gt;&lt;i&gt;Line %1, column %2: %3&lt;/i&gt;</source>
-        <translation type="unfinished">N&apos;est pas arrivé à interpréter les données XML de l&apos;inventaire de la boutique :&lt;br /&gt;&lt;i&gt;Ligne %1, colonne %2 : %3&lt;/i&gt;</translation>
+        <translation>N&apos;est pas arrivé à interpréter les données XML de l&apos;inventaire de la boutique :&lt;br /&gt;&lt;i&gt;Ligne %1, colonne %2 : %3&lt;/i&gt;</translation>
     </message>
     <message>
         <source>Could not parse the XML data for the store inventory.</source>
-        <translation type="unfinished">N&apos;est pas arrivé à interpréter les données XML de l&apos;inventaire de la boutique.</translation>
+        <translation>N&apos;est pas arrivé à interpréter les données XML de l&apos;inventaire de la boutique.</translation>
     </message>
 </context>
 <context>
@@ -1077,7 +1077,7 @@
     </message>
     <message>
         <source>Part #</source>
-        <translation type="unfinished"></translation>
+        <translation>Num. pièce</translation>
     </message>
 </context>
 <context>
@@ -1103,7 +1103,7 @@
     <name>CListView</name>
     <message>
         <source>Configure...</source>
-        <translation type="unfinished">Configurer...</translation>
+        <translation>Configurer...</translation>
     </message>
 </context>
 <context>
@@ -1130,11 +1130,11 @@
     </message>
     <message>
         <source>&amp;OK</source>
-        <translation type="unfinished">&amp;OK</translation>
+        <translation>&amp;OK</translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
-        <translation type="unfinished">&amp;Annuler</translation>
+        <translation>&amp;Annuler</translation>
     </message>
 </context>
 <context>
@@ -1218,7 +1218,7 @@
     </message>
     <message>
         <source>W-Avg</source>
-        <translation type="obsolete">Moy./qté.</translation>
+        <translation type="obsolete">Moy.Q.</translation>
     </message>
     <message>
         <source>Max</source>
@@ -1286,34 +1286,34 @@
     </message>
     <message>
         <source>Qty.</source>
-        <translation type="unfinished">Qté.</translation>
+        <translation>Qté.</translation>
     </message>
     <message>
         <source>Min.</source>
-        <translation type="unfinished"></translation>
+        <translation>Min.</translation>
     </message>
     <message>
         <source>Avg.</source>
-        <translation type="unfinished"></translation>
+        <translation>Moy.</translation>
     </message>
     <message>
         <source>Q.Avg.</source>
-        <translation type="unfinished"></translation>
+        <translation>Moy.Q.</translation>
     </message>
     <message>
         <source>Max.</source>
-        <translation type="unfinished"></translation>
+        <translation>Max.</translation>
     </message>
 </context>
 <context>
     <name>CProgressDialog</name>
     <message>
         <source>&amp;OK</source>
-        <translation type="unfinished">&amp;OK</translation>
+        <translation>&amp;OK</translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
-        <translation type="unfinished">&amp;Annuler</translation>
+        <translation>&amp;Annuler</translation>
     </message>
     <message>
         <source>Error</source>
@@ -1373,7 +1373,7 @@
     </message>
     <message>
         <source>Clear</source>
-        <translation type="obsolete">Effacer</translation>
+        <translation type="obsolete">Réinitialiser le filtre</translation>
     </message>
     <message>
         <source>List</source>
@@ -1422,19 +1422,19 @@
     </message>
     <message>
         <source>Filter the list using this pattern (wildcards allowed: * ? [])</source>
-        <translation type="unfinished">Filtrer la liste en utilisant ce motif (mots-clés autorisés : * ? [])</translation>
+        <translation>Filtrer la liste en utilisant ce motif (mots-clés autorisés : * ? [])</translation>
     </message>
     <message>
         <source>Reset an active filter</source>
-        <translation type="unfinished">Effacer un filtre actif</translation>
+        <translation>Réinitialiser le filtre</translation>
     </message>
     <message>
         <source>Part #</source>
-        <translation type="unfinished"></translation>
+        <translation>Num. pièce</translation>
     </message>
     <message>
         <source>Description</source>
-        <translation type="unfinished">Description</translation>
+        <translation>Description</translation>
     </message>
     <message>
         <source>Please enter the complete part number of the item:</source>
@@ -1456,27 +1456,27 @@
     <name>CTaskInfoWidget</name>
     <message>
         <source>min.</source>
-        <translation type="unfinished">min.</translation>
+        <translation>min.</translation>
     </message>
     <message>
         <source>Multiple lots selected</source>
-        <translation type="unfinished">Lots multiples sélectionnés</translation>
+        <translation>Lots multiples sélectionnés</translation>
     </message>
     <message>
         <source>Lots</source>
-        <translation type="unfinished">Lots</translation>
+        <translation>Lots</translation>
     </message>
     <message>
         <source>Items</source>
-        <translation type="unfinished">Items</translation>
+        <translation>Items</translation>
     </message>
     <message>
         <source>Value</source>
-        <translation type="unfinished">Valeur</translation>
+        <translation>Valeur</translation>
     </message>
     <message>
         <source>Weight</source>
-        <translation type="unfinished">Poids</translation>
+        <translation>Poids</translation>
     </message>
 </context>
 <context>
@@ -1491,19 +1491,19 @@
     </message>
     <message>
         <source>Catalog</source>
-        <translation type="unfinished">Catalogue</translation>
+        <translation>Catalogue</translation>
     </message>
     <message>
         <source>Price Guide</source>
-        <translation type="unfinished">Guide de prix</translation>
+        <translation>Guide de prix</translation>
     </message>
     <message>
         <source>Lots for Sale</source>
-        <translation type="unfinished">Lots en vente</translation>
+        <translation>Lots en vente</translation>
     </message>
     <message>
         <source>Appears in Sets</source>
-        <translation type="unfinished">Apparaît dans les kits</translation>
+        <translation>Apparaît dans les kits</translation>
     </message>
     <message>
         <source>Peeron</source>
@@ -1511,14 +1511,14 @@
     </message>
     <message>
         <source>Information</source>
-        <translation type="unfinished">Information</translation>
+        <translation>Information</translation>
     </message>
 </context>
 <context>
     <name>CTaskPaneManager</name>
     <message>
         <source>All</source>
-        <translation type="unfinished">Tous</translation>
+        <translation>Tous</translation>
     </message>
     <message>
         <source>Modern (fixed)</source>
@@ -1526,18 +1526,18 @@
     </message>
     <message>
         <source>Classic (moveable)</source>
-        <translation type="unfinished">Classique (déplaçable)</translation>
+        <translation>Classique (déplaçable)</translation>
     </message>
 </context>
 <context>
     <name>CUndoManager</name>
     <message>
         <source>Redo</source>
-        <translation type="unfinished">Refaire</translation>
+        <translation>Refaire</translation>
     </message>
     <message>
         <source>Undo</source>
-        <translation type="unfinished">Annuler</translation>
+        <translation>Annuler</translation>
     </message>
     <message>
         <source>Undo %1 Actions</source>
@@ -1634,7 +1634,7 @@
     <name>CWindow</name>
     <message>
         <source>Reset an active filter</source>
-        <translation>Effacer un filtre actif</translation>
+        <translation>Réinitialiser le filtre</translation>
     </message>
     <message>
         <source>Clear</source>
@@ -1866,15 +1866,15 @@
     </message>
     <message>
         <source>Divide the quantities of all selected items by this number.&lt;br /&gt;&lt;br /&gt;(A check is made if all quantites are exactly divisble without reminder, before this operation is performed.)</source>
-        <translation type="unfinished"></translation>
+        <translation>Diviser la quantité de tous les items sélectionnés par ce nombre.&lt;br /&gt;&lt;br /&gt;(Il est vérifié que toutes les quantités soient exactement divisibles sans reste, avant que cette opération ne soit lancée.)</translation>
     </message>
     <message>
         <source>Multiply the quantities of all selected items with this factor.</source>
-        <translation type="unfinished"></translation>
+        <translation>Multiplier les quantités de tous les items sélectionnés par ce facteur.</translation>
     </message>
     <message>
         <source>Reserve all selected items for this specific member:</source>
-        <translation type="unfinished"></translation>
+        <translation>Réserver tous les items sélectionnés à ce membre:</translation>
     </message>
     <message>
         <source>Subtracted %1 Items</source>
@@ -2111,7 +2111,7 @@
     </message>
     <message>
         <source>Import from &amp;peeron.com (currently a hack that may or may not work)</source>
-        <translation type="obsolete">Importer de &amp;peeron.com (actuellement un bricolage qui peut ne pas marcher)</translation>
+        <translation type="obsolete">Importer de &amp;peeron.com (actuellement fonctionnalité prototype qui peut ne pas marcher)</translation>
     </message>
     <message>
         <source>&amp;Quantity:</source>
@@ -2211,7 +2211,7 @@
     <name>DlgReportUI</name>
     <message>
         <source>This print template requires some additional informations:</source>
-        <translation type="unfinished"></translation>
+        <translation>Ce modèle d&apos;impression requiert des informations supplémentaires :</translation>
     </message>
     <message>
         <source>&amp;OK</source>
@@ -2222,11 +2222,11 @@
     <name>DlgSelectReport</name>
     <message>
         <source>Printing Template</source>
-        <translation type="unfinished"></translation>
+        <translation>Modèle d&apos;impression</translation>
     </message>
     <message>
         <source>Select a template for printing</source>
-        <translation type="unfinished"></translation>
+        <translation>Sélectionnez un modèle d&apos;impression</translation>
     </message>
     <message>
         <source>Update list</source>
@@ -2234,11 +2234,11 @@
     </message>
     <message>
         <source>Page Size</source>
-        <translation type="unfinished"></translation>
+        <translation>Taille de la page</translation>
     </message>
     <message>
         <source>Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Nom</translation>
     </message>
     <message>
         <source>&amp;OK</source>
@@ -2329,24 +2329,36 @@
         <translation>Inventaire courant</translation>
     </message>
     <message>
+        <source>Lowest</source>
+        <translation type="obsolete">Minimum</translation>
+    </message>
+    <message>
         <source>Average</source>
-        <translation type="unfinished"></translation>
+        <translation>Moyenne</translation>
+    </message>
+    <message>
+        <source>Weighted Average</source>
+        <translation type="obsolete">Moyenne par quantité</translation>
+    </message>
+    <message>
+        <source>Highest</source>
+        <translation type="obsolete">Maximum</translation>
     </message>
     <message>
         <source>Last 6 Months Sales</source>
-        <translation type="unfinished">Ventes des 6 derniers mois</translation>
+        <translation>Ventes des 6 derniers mois</translation>
     </message>
     <message>
         <source>Minimum</source>
-        <translation type="unfinished"></translation>
+        <translation>Minimum</translation>
     </message>
     <message>
         <source>Quantity Average</source>
-        <translation type="unfinished"></translation>
+        <translation>Moyenne par quantité</translation>
     </message>
     <message>
         <source>Maximum</source>
-        <translation type="unfinished"></translation>
+        <translation>Maximum</translation>
     </message>
 </context>
 <context>
@@ -2505,7 +2517,7 @@
     </message>
     <message>
         <source>Use the &amp;local currency:</source>
-        <translation type="unfinished"></translation>
+        <translation>Utiliser la monnaie &amp;locale:</translation>
     </message>
     <message>
         <source>Currency</source>
@@ -2525,11 +2537,11 @@
     </message>
     <message>
         <source>Item type</source>
-        <translation type="unfinished"></translation>
+        <translation>Type d&apos;item</translation>
     </message>
     <message>
         <source>Condition</source>
-        <translation type="unfinished"></translation>
+        <translation>Etat</translation>
     </message>
 </context>
 <context>
@@ -2547,8 +2559,20 @@
         <translation>Inventaire courant</translation>
     </message>
     <message>
+        <source>Lowest</source>
+        <translation type="obsolete">Minimum</translation>
+    </message>
+    <message>
         <source>Average</source>
-        <translation type="unfinished"></translation>
+        <translation>Moyenne</translation>
+    </message>
+    <message>
+        <source>Weighted Average</source>
+        <translation type="obsolete">Moyenne par quantité</translation>
+    </message>
+    <message>
+        <source>Highest</source>
+        <translation type="obsolete">Maximum</translation>
     </message>
     <message>
         <source>Cache directory location</source>
@@ -2568,19 +2592,19 @@
     </message>
     <message>
         <source>Last 6 Months Sales</source>
-        <translation type="unfinished">Ventes des 6 derniers mois</translation>
+        <translation>Ventes des 6 derniers mois</translation>
     </message>
     <message>
         <source>Minimum</source>
-        <translation type="unfinished"></translation>
+        <translation>Minimum</translation>
     </message>
     <message>
         <source>Quantity Average</source>
-        <translation type="unfinished"></translation>
+        <translation>Moyenne par quantité</translation>
     </message>
     <message>
         <source>Maximum</source>
-        <translation type="unfinished"></translation>
+        <translation>Maximum</translation>
     </message>
 </context>
 <context>
