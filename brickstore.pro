@@ -173,6 +173,7 @@ SOURCES += bricklink.cpp \
            cselectitem.cpp \
            cspinner.cpp \
            ctaskpanemanager.cpp \
+           ctaskwidgets.cpp \
            ctransfer.cpp \
            cundo.cpp \
            curllabel.cpp \

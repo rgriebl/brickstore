@@ -7,6 +7,7 @@ brickstore.app/Contents/MacOS/brickstore	Contents/MacOS		BrickStore
 macx-bundle/Info.plist				Contents
 macx-bundle/Resources/*.icns			Contents/Resources
 macx-bundle/Resources/de.lproj/locversion.plist	Contents/Resources/de.lproj
+macx-bundle/Resources/fr.lproj/locversion.plist	Contents/Resources/fr.lproj
 
 images/*.png			Contents/Resources/images
 images/*.jpg			Contents/Resources/images
@@ -16,7 +17,9 @@ images/16x16/*.png		Contents/Resources/images/16x16
 images/22x22/*.png		Contents/Resources/images/22x22
 
 translations/translations.xml	Contents/Resources/translations
-translations/*.qm		Contents/Resources/translations
-$QTDIR/translations/qt_de.qm	Contents/Resources/translations
+translations/*_de.qm		Contents/Resources/translations
+translations/*_fr.qm		Contents/Resources/translations
+$QTDIR/translations/*_de.qm	Contents/Resources/translations
+$QTDIR/translations/*_fr.qm	Contents/Resources/translations
 
 print-templates/*.xml		Contents/Resources/print-templates
