@@ -253,7 +253,7 @@ void CApplication::initStrings ( )
 		"</p><p>"
 		"All other trademarks recognised."
 		"</p><p>"
-		"French translation by Sylvain (<a href=\"mailto:bricklink@1001bricks.com\">1001bricks</a>)"
+		"French translation by Sylvain Perez (<a href=\"mailto:bricklink@1001bricks.com\">1001bricks</a>)"
 		"</p>"
 	);
 

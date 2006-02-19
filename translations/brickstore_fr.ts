@@ -109,8 +109,8 @@
         <translation>Consultez %1, ou envoyez un e-mail à %2</translation>
     </message>
     <message>
-        <source>&lt;p&gt;This program is free software; it may be distributed and/or modified under the terms of the GNU General Public License version 2 as published by the Free Software Foundation and appearing in the file LICENSE.GPL included in this software package.&lt;br /&gt;This program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.&lt;br /&gt;See &lt;a href=&quot;http://fsf.org/licensing/licenses/gpl.html&quot;&gt;www.fsf.org/licensing/licenses/gpl.html&lt;/a&gt; for GPL licensing information.&lt;/p&gt;&lt;p&gt;All data from &lt;a href=&quot;http://www.bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; is owned by BrickLink&lt;sup&gt;TM&lt;/sup&gt;, which is a trademark of Dan Jezek.&lt;/p&gt;&lt;p&gt;Peeron Inventories from &lt;a href=&quot;http://www.peeron.com&quot;&gt;www.peeron.com&lt;/a&gt; are owned by Dan and Jennifer Boger.&lt;/p&gt;&lt;p&gt;LEGO&lt;sup&gt;&amp;reg;&lt;/sup&gt; is a trademark of the LEGO group of companies, which does not sponsor, authorize or endorse this software.&lt;/p&gt;&lt;p&gt;All other trademarks recognised.&lt;/p&gt;&lt;p&gt;French translation by Sylvain (&lt;a href=&quot;mailto:bricklink@1001bricks.com&quot;&gt;1001bricks&lt;/a&gt;)&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <source>&lt;p&gt;This program is free software; it may be distributed and/or modified under the terms of the GNU General Public License version 2 as published by the Free Software Foundation and appearing in the file LICENSE.GPL included in this software package.&lt;br /&gt;This program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.&lt;br /&gt;See &lt;a href=&quot;http://fsf.org/licensing/licenses/gpl.html&quot;&gt;www.fsf.org/licensing/licenses/gpl.html&lt;/a&gt; for GPL licensing information.&lt;/p&gt;&lt;p&gt;All data from &lt;a href=&quot;http://www.bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; is owned by BrickLink&lt;sup&gt;TM&lt;/sup&gt;, which is a trademark of Dan Jezek.&lt;/p&gt;&lt;p&gt;Peeron Inventories from &lt;a href=&quot;http://www.peeron.com&quot;&gt;www.peeron.com&lt;/a&gt; are owned by Dan and Jennifer Boger.&lt;/p&gt;&lt;p&gt;LEGO&lt;sup&gt;&amp;reg;&lt;/sup&gt; is a trademark of the LEGO group of companies, which does not sponsor, authorize or endorse this software.&lt;/p&gt;&lt;p&gt;All other trademarks recognised.&lt;/p&gt;&lt;p&gt;French translation by Sylvain Perez (&lt;a href=&quot;mailto:bricklink@1001bricks.com&quot;&gt;1001bricks&lt;/a&gt;)&lt;/p&gt;</source>
+        <translation>&lt;p&gt;This program is free software; it may be distributed and/or modified under the terms of the GNU General Public License version 2 as published by the Free Software Foundation and appearing in the file LICENSE.GPL included in this software package.&lt;br /&gt;This program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.&lt;br /&gt;See &lt;a href=&quot;http://fsf.org/licensing/licenses/gpl.html&quot;&gt;www.fsf.org/licensing/licenses/gpl.html&lt;/a&gt; for GPL licensing information.&lt;/p&gt;&lt;p&gt;All data from &lt;a href=&quot;http://www.bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; is owned by BrickLink&lt;sup&gt;TM&lt;/sup&gt;, which is a trademark of Dan Jezek.&lt;/p&gt;&lt;p&gt;Peeron Inventories from &lt;a href=&quot;http://www.peeron.com&quot;&gt;www.peeron.com&lt;/a&gt; are owned by Dan and Jennifer Boger.&lt;/p&gt;&lt;p&gt;LEGO&lt;sup&gt;&amp;reg;&lt;/sup&gt; is a trademark of the LEGO group of companies, which does not sponsor, authorize or endorse this software.&lt;/p&gt;&lt;p&gt;All other trademarks recognised.&lt;/p&gt;&lt;p&gt;French translation by Sylvain Perez (&lt;a href=&quot;mailto:bricklink@1001bricks.com&quot;&gt;1001bricks&lt;/a&gt;)&lt;/p&gt;</translation>
     </message>
 </context>
 <context>
@@ -350,11 +350,11 @@
     </message>
     <message>
         <source>Part out Item...</source>
-        <translation type="unfinished"></translation>
+        <translation>Séparer les pièces de cet item...</translation>
     </message>
     <message>
         <source>Reset Differences</source>
-        <translation type="unfinished"></translation>
+        <translation>Réinitialiser les différences</translation>
     </message>
     <message>
         <source>Select All</source>
@@ -376,7 +376,7 @@
     </message>
     <message>
         <source>Buyer/Collector View</source>
-        <translation type="unfinished"></translation>
+        <translation>Mode acheteur/collectionneur</translation>
     </message>
     <message>
         <source>View Toolbar</source>
@@ -392,11 +392,11 @@
     </message>
     <message>
         <source>Show Input Errors</source>
-        <translation type="unfinished"></translation>
+        <translation>Montrer les erreurs d&apos;entrée</translation>
     </message>
     <message>
         <source>Difference Mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Mode différence</translation>
     </message>
     <message>
         <source>Update Database</source>
@@ -847,7 +847,7 @@
     </message>
     <message>
         <source>W-Avg</source>
-        <translation>Moy./qté.</translation>
+        <translation>Moy.Q.</translation>
     </message>
     <message>
         <source>Max</source>
@@ -959,7 +959,7 @@
     </message>
     <message>
         <source>Clear</source>
-        <translation>Effacer</translation>
+        <translation>Réinitialiser le filtre</translation>
     </message>
     <message>
         <source>List</source>
@@ -1013,7 +1013,7 @@
     <name>CWindow</name>
     <message>
         <source>Reset an active filter</source>
-        <translation>Effacer un filtre actif</translation>
+        <translation>Réinitialiser le filtre</translation>
     </message>
     <message>
         <source>Clear</source>
@@ -1470,7 +1470,7 @@
     </message>
     <message>
         <source>Import from &amp;peeron.com (currently a hack that may or may not work)</source>
-        <translation>Importer de &amp;peeron.com (actuellement un bricolage qui peut ne pas marcher)</translation>
+        <translation>Importer de &amp;peeron.com (actuellement fonctionnalité prototype qui peut ne pas marcher)</translation>
     </message>
     <message>
         <source>&amp;Quantity:</source>
@@ -1562,7 +1562,7 @@
     <name>DlgReportUI</name>
     <message>
         <source>This print template requires some additional informations:</source>
-        <translation type="unfinished"></translation>
+        <translation>Ce modèle d&apos;impression requiert des informations supplémentaires :</translation>
     </message>
     <message>
         <source>&amp;OK</source>
@@ -1573,11 +1573,11 @@
     <name>DlgSelectReport</name>
     <message>
         <source>Printing Template</source>
-        <translation type="unfinished"></translation>
+        <translation>Modèle d&apos;impression</translation>
     </message>
     <message>
         <source>Select a template for printing</source>
-        <translation type="unfinished"></translation>
+        <translation>Sélectionnez un modèle d&apos;impression</translation>
     </message>
     <message>
         <source>Update list</source>
@@ -1585,11 +1585,11 @@
     </message>
     <message>
         <source>Page Size</source>
-        <translation type="unfinished"></translation>
+        <translation>Taille de la page</translation>
     </message>
     <message>
         <source>Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Nom</translation>
     </message>
     <message>
         <source>&amp;OK</source>
@@ -1681,19 +1681,19 @@
     </message>
     <message>
         <source>Lowest</source>
-        <translation type="unfinished"></translation>
+        <translation>Minimum</translation>
     </message>
     <message>
         <source>Average</source>
-        <translation type="unfinished"></translation>
+        <translation>Moyenne</translation>
     </message>
     <message>
         <source>Weighted Average</source>
-        <translation type="unfinished"></translation>
+        <translation>Moyenne par quantité</translation>
     </message>
     <message>
         <source>Highest</source>
-        <translation type="unfinished"></translation>
+        <translation>Maximum</translation>
     </message>
 </context>
 <context>
@@ -1867,19 +1867,19 @@
     </message>
     <message>
         <source>Lowest</source>
-        <translation type="unfinished"></translation>
+        <translation>Minimum</translation>
     </message>
     <message>
         <source>Average</source>
-        <translation type="unfinished"></translation>
+        <translation>Moyenne</translation>
     </message>
     <message>
         <source>Weighted Average</source>
-        <translation type="unfinished"></translation>
+        <translation>Moyenne par quantité</translation>
     </message>
     <message>
         <source>Highest</source>
-        <translation type="unfinished"></translation>
+        <translation>Maximum</translation>
     </message>
     <message>
         <source>Cache directory location</source>
