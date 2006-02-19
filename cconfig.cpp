@@ -48,7 +48,6 @@ CConfig::CConfig ( )
 	m_show_input_errors = readBoolEntry ( "/General/ShowInputErrors", true );
 	m_weight_system = ( readEntry ( "/General/WeightSystem", "metric" ) == "metric" ) ? WeightMetric : WeightImperial;
 	m_simple_mode = readBoolEntry ( "/General/SimpleMode", false );
-	m_window_mode = readNumEntry ( "/MainWindow/WindowMode", 0 );
 }
 
 CConfig::~CConfig ( )
@@ -378,22 +377,6 @@ void CConfig::setSimpleMode ( bool sm  )
 }
 
 
-int CConfig::windowMode ( ) const
-{
-	return m_window_mode;
-}
-
-void CConfig::setWindowMode ( int wm )
-{
-	if ( wm != m_window_mode ) {
-		m_window_mode = wm;
-		writeEntry ( "/MainWindow/WindowMode", wm );
-
-		emit windowModeChanged ( wm );
-	}
-}
-
-
 void CConfig::blUpdateIntervals ( int &pic, int &pg ) const
 {
 	int picd, pgd;
@@ -462,23 +445,6 @@ void CConfig::setOnlineStatus ( bool b )
 		writeEntry ( "/Internet/Online", b );
 	
 		emit onlineStatusChanged ( b );
-	}
-}
-
-
-int CConfig::infoBarLook ( ) const
-{
-	return readNumEntry ( "/MainWindow/Infobar/Look", 1 ); // HACK: CInfoBar::ModernLeft
-}
-
-void CConfig::setInfoBarLook ( int look )
-{
-	int olook = infoBarLook ( );
-
-	if ( look != olook ) {
-		writeEntry ( "/MainWindow/Infobar/Look", look );
-		
-		emit infoBarLookChanged ( look );
 	}
 }
 

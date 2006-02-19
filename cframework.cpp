@@ -146,18 +146,23 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 	setCentralWidget ( m_mdi );
 
 	m_taskpanes = new CTaskPaneManager ( this, "taskpanemanager" );
+	m_taskpanes-> setMode ( CConfig::inst ( )-> readNumEntry ( "/MainWindow/Infobar/Mode" ) != CTaskPaneManager::Classic ? CTaskPaneManager::Modern : CTaskPaneManager::Classic );
 
 	m_task_info = new CTaskInfoWidget ( 0, "iteminfowidget" );
-	m_taskpanes-> addItem ( m_task_info, CResource::inst ( )-> pixmap ( "sidebar/info" ), QString( ));
+	m_taskpanes-> addItem ( m_task_info, CResource::inst ( )-> pixmap ( "sidebar/info" ));
+	m_taskpanes-> setItemVisible ( m_task_info, CConfig::inst ( )-> readBoolEntry ( "/MainWindow/Infobar/InfoVisible", true ));
 
 	m_task_priceguide = new CTaskPriceGuideWidget ( 0, "priceguidewidget" );
-	m_taskpanes-> addItem ( m_task_priceguide, CResource::inst ( )-> pixmap ( "sidebar/priceguide" ), QString( ));
+	m_taskpanes-> addItem ( m_task_priceguide, CResource::inst ( )-> pixmap ( "sidebar/priceguide" ));
+	m_taskpanes-> setItemVisible ( m_task_priceguide, CConfig::inst ( )-> readBoolEntry ( "/MainWindow/Infobar/PriceguideVisible", true ));
 
 	m_task_appears = new CTaskAppearsInWidget ( 0, "appearsinwidget" );
-	m_taskpanes-> addItem ( m_task_appears,  CResource::inst ( )-> pixmap ( "sidebar/appearsin" ), QString( ));
+	m_taskpanes-> addItem ( m_task_appears,  CResource::inst ( )-> pixmap ( "sidebar/appearsin" ));
+	m_taskpanes-> setItemVisible ( m_task_appears, CConfig::inst ( )-> readBoolEntry ( "/MainWindow/Infobar/AppearsinVisible", true ));
 
 	m_task_links = new CTaskLinksWidget ( 0, "linkswidget" );
-	m_taskpanes-> addItem ( m_task_links,  CResource::inst ( )-> pixmap ( "sidebar/links" ), QString( ));
+	m_taskpanes-> addItem ( m_task_links,  CResource::inst ( )-> pixmap ( "sidebar/links" ));
+	m_taskpanes-> setItemVisible ( m_task_links, CConfig::inst ( )-> readBoolEntry ( "/MainWindow/Infobar/LinksVisible", true ));
 
 	createActions ( );
 
@@ -184,7 +189,7 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 	m_menuid_edit = menuBar ( )-> insertItem ( QString ( ), createMenu ( sl ));
 
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Menubar/View" );
-	if ( sl. isEmpty ( ))  sl << "settings_view_toolbar" << "settings_view_infobar" << "settings_view_statusbar" << "-" << "view_simple_mode" << "view_show_input_errors" << "-" << "view_difference_mode"; 
+	if ( sl. isEmpty ( ))  sl << "view_toolbar" << "view_infobar" << "view_statusbar" << "-" << "view_fullscreen" << "-" << "view_simple_mode" << "view_show_input_errors" << "-" << "view_difference_mode"; 
 	m_menuid_view = menuBar ( )-> insertItem ( QString ( ), createMenu ( sl ));
 
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Menubar/Extras" );
@@ -216,21 +221,15 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 							  << "edit_bl_info_group" << "-" 
 							  << "extras_net"; // << "-" << "help_whatsthis";
 	m_toolbar = createToolBar ( QString ( ), sl );
-	connect ( m_toolbar, SIGNAL( visibilityChanged ( bool )), findAction ( "settings_view_toolbar" ), SLOT( setOn ( bool )));
+	connect ( m_toolbar, SIGNAL( visibilityChanged ( bool )), findAction ( "view_toolbar" ), SLOT( setOn ( bool )));
 
 	createStatusBar ( );
+	findAction ( "view_statusbar" )-> setOn ( CConfig::inst ( )-> readBoolEntry ( "/MainWindow/Statusbar/Visible", true ));
 
-	connect ( m_progress, SIGNAL( statusChange ( bool )), m_spinner, SLOT( setActive ( bool )));
-
-//	connect ( m_infobar, SIGNAL( visibilityChanged ( bool )), findAction ( "settings_view_infobar" ), SLOT( setOn ( bool )));
-//	connect ( CConfig::inst ( ), SIGNAL( infoBarLookChanged ( int )), m_infobar, SLOT( setLook ( int )));
-//	m_infobar-> hide ( );
+	languageChange ( );
 
 	str = CConfig::inst ( )-> readEntry ( "/MainWindow/Layout/DockWindows" );
 	{ QTextStream ts ( &str, IO_ReadOnly ); ts >> *this; }
-
-//	moveDockWindow ( m_infobar, DockLeft );
-	m_taskpanes-> setMode (( CConfig::inst ( )-> readNumEntry ( "/MainWindow/Infobar/Look", CTaskPaneManager::Modern ) == CTaskPaneManager::Classic ) ? CTaskPaneManager::Classic : CTaskPaneManager::Modern );
 
 	QRect r ( CConfig::inst ( )-> readNumEntry ( "/MainWindow/Layout/Left",   -1 ),
 	          CConfig::inst ( )-> readNumEntry ( "/MainWindow/Layout/Top",    -1 ),
@@ -248,28 +247,28 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 	m_normal_geometry = QRect ( pos ( ), size ( ));
 
 	setWindowState ( wstate & ( WindowMinimized | WindowMaximized | WindowFullScreen ));
+	findAction ( "view_fullscreen" )-> setOn ( wstate & WindowFullScreen );
 
-
-	findAction ( "settings_view_toolbar"   )-> setOn ( CConfig::inst ( )-> readBoolEntry ( "/MainWindow/Toolbar/Visible",   true ));
-//	findAction ( "settings_view_infobar"   )-> setOn ( CConfig::inst ( )-> readBoolEntry ( "/MainWindow/Infobar/Visible",   true ));
-	findAction ( "settings_view_statusbar" )-> setOn ( CConfig::inst ( )-> readBoolEntry ( "/MainWindow/Statusbar/Visible", true ));
-
-	findAction ( "view_show_input_errors"  )-> setOn ( CConfig::inst ( )-> showInputErrors ( ));
-	findAction ( "view_simple_mode"        )-> setOn ( CConfig::inst ( )-> simpleMode ( ));
-
-	findAction ( CConfig::inst ( )-> onlineStatus ( ) ? "net_online" : "net_offline" )-> setOn ( true );
-	 
-	switch ( CConfig::inst ( )-> windowMode ( )) {
+	switch ( CConfig::inst ( )-> readNumEntry ( "/MainWindow/Layout/WindowMode", 1 )) {
 		case  0: findAction ( "window_mode_mdi" )-> setOn ( true ); break;
 		case  1: findAction ( "window_mode_tab_above" )-> setOn ( true ); break;
 		case  2:
 		default: findAction ( "window_mode_tab_below" )-> setOn ( true ); break;
 	}
 
-	setWindowMode ( CConfig::inst ( )-> windowMode ( ));
-
 	BrickLink *bl = BrickLink::inst ( );
 
+	connect ( CConfig::inst ( ), SIGNAL( onlineStatusChanged ( bool )), bl, SLOT( setOnlineStatus ( bool )));
+	connect ( CConfig::inst ( ), SIGNAL( blUpdateIntervalsChanged ( int, int )), bl, SLOT( setUpdateIntervals ( int, int )));
+	connect ( CConfig::inst ( ), SIGNAL( proxyChanged ( bool, const QString &, int )), bl, SLOT( setHttpProxy ( bool, const QString &, int )));
+	connect ( CMoney::inst ( ), SIGNAL( monetarySettingsChanged ( )), this, SLOT( statisticsUpdate ( )));
+	connect ( CConfig::inst ( ), SIGNAL( weightSystemChanged ( CConfig::WeightSystem )), this, SLOT( statisticsUpdate ( )));
+
+	findAction ( "view_show_input_errors" )-> setOn ( CConfig::inst ( )-> showInputErrors ( ));
+	findAction ( "view_simple_mode"       )-> setOn ( CConfig::inst ( )-> simpleMode ( ));
+
+	findAction ( CConfig::inst ( )-> onlineStatus ( ) ? "extras_net_online" : "extras_net_offline" )-> setOn ( true );
+	 
 	bl-> setOnlineStatus ( CConfig::inst ( )-> onlineStatus ( ));
 	bl-> setHttpProxy ( CConfig::inst ( )-> useProxy ( ), CConfig::inst ( )-> proxyName ( ), CConfig::inst ( )-> proxyPort ( ));
 	{
@@ -278,24 +277,17 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 		bl-> setUpdateIntervals ( pic, pg );
 	}
 
-	connect ( CConfig::inst ( ), SIGNAL( windowModeChanged ( int )), this, SLOT( setWindowMode ( int )));
-	connect ( CConfig::inst ( ), SIGNAL( onlineStatusChanged ( bool )), bl, SLOT( setOnlineStatus ( bool )));
-	connect ( CConfig::inst ( ), SIGNAL( blUpdateIntervalsChanged ( int, int )), bl, SLOT( setUpdateIntervals ( int, int )));
-	connect ( CConfig::inst ( ), SIGNAL( proxyChanged ( bool, const QString &, int )), bl, SLOT( setHttpProxy ( bool, const QString &, int )));
-	connect ( CMoney::inst ( ), SIGNAL( monetarySettingsChanged ( )), this, SLOT( statisticsUpdate ( )));
-	connect ( CConfig::inst ( ), SIGNAL( weightSystemChanged ( CConfig::WeightSystem )), this, SLOT( statisticsUpdate ( )));
-
 	connect ( bl, SIGNAL( inventoryProgress ( int, int )),  this, SLOT( gotInventoryProgress ( int, int )));
 	connect ( bl, SIGNAL( priceGuideProgress ( int, int )), this, SLOT( gotPriceGuideProgress ( int, int )));
 	connect ( bl, SIGNAL( pictureProgress ( int, int )),    this, SLOT( gotPictureProgress ( int, int )));
 
 	QTimer::singleShot ( 0, this, SLOT( initBrickLinkDelayed ( )));
 
+	connect ( m_progress, SIGNAL( statusChange ( bool )), m_spinner, SLOT( setActive ( bool )));
 	connect ( CUndoManager::inst ( ), SIGNAL( cleanChanged ( bool )), this, SLOT( modificationUpdate ( )));
 	connectAllActions ( false, 0 ); // init enabled/disabled status of document actions
 
 	setAcceptDrops ( true );
-	languageChange ( );
 
 	m_running = true;
 }
@@ -359,15 +351,16 @@ void CFrameWork::languageChange ( )
 		{ "edit_select_all",                tr( "Select All" ),                         tr( "Ctrl+A", "Edit|SelectAll" ) },
 		{ "edit_select_none",               tr( "Select None" ),                        tr( "Ctrl+Shift+A", "Edit|SelectNone" ) },
 		{ "view_simple_mode",               tr( "Buyer/Collector View" ),               0 },
-		{ "settings_view_toolbar",          tr( "View Toolbar" ),                       0 },
-		{ "settings_view_infobar",          tr( "View Infobars" ),                      0 },
-		{ "settings_view_statusbar",        tr( "View Statusbar" ),                     0 },
+		{ "view_toolbar",                   tr( "View Toolbar" ),                       0 },
+		{ "view_infobar",                   tr( "View Infobars" ),                      0 },
+		{ "view_statusbar",                 tr( "View Statusbar" ),                     0 },
+		{ "view_fullscreen",                tr( "Full Screen" ),                        tr( "F11" ) },
 		{ "view_show_input_errors",         tr( "Show Input Errors" ),                  0 },
 		{ "view_difference_mode",           tr( "Difference Mode" ),                    0 },
 		{ "extras_update_database",         tr( "Update Database" ),                    0 },
 		{ "extras_configure",               tr( "Configure..." ),                       0 },
-		{ "net_online",                     tr( "Online Mode" ),                        0 },
-		{ "net_offline",                    tr( "Offline Mode" ),                       0 },
+		{ "extras_net_online",              tr( "Online Mode" ),                        0 },
+		{ "extras_net_offline",             tr( "Offline Mode" ),                       0 },
 		{ "window_mode_mdi",                tr( "Standard MDI Mode" ),                  0 },
 		{ "window_mode_tab_above",          tr( "Show Tabs at Top" ),                   0 },
 		{ "window_mode_tab_below",          tr( "Show Tabs at Bottom" ),                0 },
@@ -409,9 +402,13 @@ void CFrameWork::languageChange ( )
 CFrameWork::~CFrameWork ( )
 {
 	CConfig::inst ( )-> writeEntry ( "/Files/Recent", m_recent_files );
-	CConfig::inst ( )-> writeEntry ( "/MainWindow/Toolbar/Visible", findAction ( "settings_view_toolbar" )-> isOn ( ));
-//	CConfig::inst ( )-> writeEntry ( "/MainWindow/Infobar/Visible", findAction ( "settings_view_infobar" )-> isOn ( ));
-	CConfig::inst ( )-> writeEntry ( "/MainWindow/Statusbar/Visible", findAction ( "settings_view_statusbar" )-> isOn ( ));
+
+	CConfig::inst ( )-> writeEntry ( "/MainWindow/Statusbar/Visible",         statusBar ( )-> isVisibleTo ( this ));
+	CConfig::inst ( )-> writeEntry ( "/MainWindow/Infobar/Mode",              m_taskpanes-> mode ( ));
+	CConfig::inst ( )-> writeEntry ( "/MainWindow/Infobar/InfoVisible",       m_taskpanes-> isItemVisible ( m_task_info ));
+	CConfig::inst ( )-> writeEntry ( "/MainWindow/Infobar/PriceguideVisible", m_taskpanes-> isItemVisible ( m_task_priceguide ));
+	CConfig::inst ( )-> writeEntry ( "/MainWindow/Infobar/AppearsinVisible",  m_taskpanes-> isItemVisible ( m_task_appears ));
+	CConfig::inst ( )-> writeEntry ( "/MainWindow/Infobar/LinksVisible",      m_taskpanes-> isItemVisible ( m_task_links ));
 
 	QString str;
 	{ QTextStream ts ( &str, IO_WriteOnly ); ts << *this; }
@@ -423,6 +420,8 @@ CFrameWork::~CFrameWork ( )
 	CConfig::inst ( )-> writeEntry ( "/MainWindow/Layout/Width",  m_normal_geometry. width ( ));
 	CConfig::inst ( )-> writeEntry ( "/MainWindow/Layout/Height", m_normal_geometry. height ( ));
 	CConfig::inst ( )-> writeEntry ( "/MainWindow/Layout/State",  (int) windowState ( ));
+
+	CConfig::inst ( )-> writeEntry ( "/MainWindow/Layout/WindowMode", m_mdi-> showTabs ( ) ? ( m_mdi-> spreadSheetTabs ( ) ? 2 : 1 ) : 0 );
 
 	s_inst = 0;
 }
@@ -681,15 +680,18 @@ void CFrameWork::createActions ( )
 	(void) new QAction ( g, "edit_bl_priceguide" );
 	(void) new QAction ( g, "edit_bl_lotsforsale" );
 
+	a = new QAction ( this, "view_fullscreen", true );
+	connect ( a, SIGNAL( toggled ( bool )), this, SLOT( viewFullScreen ( bool )));	
+
 	a = new QAction ( this, "view_simple_mode", true );
 	connect ( a, SIGNAL( toggled ( bool )), CConfig::inst ( ), SLOT( setSimpleMode ( bool )));
 
-	a = new QAction ( this, "settings_view_toolbar", true );
+	a = new QAction ( this, "view_toolbar", true );
 	connect ( a, SIGNAL( toggled ( bool )), this, SLOT( viewToolBar ( bool )));
 
-	(void) m_taskpanes-> createItemVisibilityAction ( this, "settings_view_infobar" );
+	(void) m_taskpanes-> createItemVisibilityAction ( this, "view_infobar" );
 
-	a = new QAction ( this, "settings_view_statusbar", true );
+	a = new QAction ( this, "view_statusbar", true );
 	connect ( a, SIGNAL( toggled ( bool )), this, SLOT( viewStatusBar ( bool )));
 
 	a = new QAction ( this, "view_show_input_errors", true );
@@ -706,8 +708,8 @@ void CFrameWork::createActions ( )
 	g = new QActionGroup ( this, "extras_net", true );
 	connect ( g, SIGNAL( selected ( QAction * )), this, SLOT( setOnlineStatus ( QAction * )));
 
-	(void) new QAction ( g, "net_online", true );
-	(void) new QAction ( g, "net_offline", true );
+	(void) new QAction ( g, "extras_net_online", true );
+	(void) new QAction ( g, "extras_net_offline", true );
 
 	g = new QActionGroup ( this, "window_mode", true );
 	connect ( g, SIGNAL( selected ( QAction * )), this, SLOT( setWindowMode ( QAction * )));
@@ -751,12 +753,6 @@ void CFrameWork::createActions ( )
 	delete alist;
 }
 
-void CFrameWork::setWindowMode ( int m )
-{
-	m_mdi-> setShowTabs ( m > 0 );
-	m_mdi-> setSpreadSheetTabs ( m == 2 );
-}
-
 void CFrameWork::viewStatusBar ( bool b )
 {
 	statusBar ( )-> setShown ( b );
@@ -765,6 +761,12 @@ void CFrameWork::viewStatusBar ( bool b )
 void CFrameWork::viewToolBar ( bool b )
 {
 	m_toolbar-> setShown ( b );
+}
+
+void CFrameWork::viewFullScreen ( bool b )
+{
+	int ws = windowState ( );
+	setWindowState ( b ? ws | Qt::WindowFullScreen : ws & ~Qt::WindowFullScreen ); 
 }
 
 void CFrameWork::openDocument ( const QString &file )
@@ -1193,12 +1195,13 @@ void CFrameWork::setWindowMode ( QAction *act )
 	bool tabbed = ( act != findAction ( "window_mode_mdi" ));
 	bool execllike = ( act == findAction ( "window_mode_tab_below" ));
 
-	CConfig::inst ( )-> setWindowMode ( tabbed ? ( execllike ? 2 : 1 ) : 0 );
+	m_mdi-> setShowTabs ( tabbed );
+	m_mdi-> setSpreadSheetTabs ( execllike );
 }
 
 void CFrameWork::setOnlineStatus ( QAction *act )
 {
-	bool b = ( act == findAction ( "net_online" ));
+	bool b = ( act == findAction ( "extras_net_online" ));
 
 	if ( !b && m_running )
 		cancelAllTransfers ( );

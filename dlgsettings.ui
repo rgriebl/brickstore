@@ -139,7 +139,7 @@
                                             <enum>Horizontal</enum>
                                         </property>
                                         <property name="sizeType">
-                                            <enum>Fixed</enum>
+                                            <enum>MinimumExpanding</enum>
                                         </property>
                                         <property name="sizeHint">
                                             <size>

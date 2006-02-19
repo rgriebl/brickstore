@@ -92,7 +92,7 @@
               <Component Id="c_translations" Guid="7F2A4CBF-90FB-43A1-AC34-FEA6BF6FE1FE">
                 <File DiskId="1" Id="translations.xml" Name="translat.xml" LongName="translations.xml" src="$(var.TARGET)\translations\translations.xml" />
                 <File DiskId="1" Id="brickstore_de.qm" Name="brkst_de.qm"  LongName="brickstore_de.qm" src="$(var.TARGET)\translations\brickstore_de.qm" />
-         <!--   <File DiskId="1" Id="brickstore_fr.qm" Name="brkst_fr.qm"  LongName="brickstore_fr.qm" src="$(var.TARGET)\translations\brickstore_fr.qm" />   -->
+                <File DiskId="1" Id="brickstore_fr.qm" Name="brkst_fr.qm"  LongName="brickstore_fr.qm" src="$(var.TARGET)\translations\brickstore_fr.qm" />
                 <File DiskId="1" Id="qt_de.qm"         Name="qt_de.qm"                                 src="$(env.QTDIR)\translations\qt_de.qm" />
                 <File DiskId="1" Id="qt_fr.qm"         Name="qt_fr.qm"                                 src="$(env.QTDIR)\translations\qt_fr.qm" />
               </Component>
@@ -137,6 +137,8 @@
                   <RemoveFile      Id="i16x16_edit_buy_bl.png"               Name="edit_b~1.png" LongName="edit_buy_bl.png"               On="install" />
                   <RemoveFile      Id="i16x16_edit_open_bl.png"              Name="edit_b~2.png" LongName="edit_open_bl.png"              On="install" />
                   <RemoveFile      Id="i16x16_settings_refresh_database.png" Name="settin~1.png" LongName="settings_refresh_database.png" On="install" />
+                  <RemoveFile      Id="i16x16_net_offline.png"               Name="net_of~1.png" LongName="net_offline.png"               On="install" />
+                  <RemoveFile      Id="i16x16_net_online.png"                Name="net_on~1.png" LongName="net_online.png"                On="install" />
                  
                   <File DiskId="1" Id="i16x16_edit_additems.png"             Name="imageaa0.png" LongName="edit_additems.png"             src="$(var.TARGET)\images\16x16\edit_additems.png" />
                   <File DiskId="1" Id="i16x16_edit_bl_catalog.png"           Name="imageab0.png" LongName="edit_bl_catalog.png"           src="$(var.TARGET)\images\16x16\edit_bl_catalog.png" />
@@ -181,8 +183,8 @@
                   <File DiskId="1" Id="i16x16_help_contents.png"             Name="imagebl0.png" LongName="help_contents.png"             src="$(var.TARGET)\images\16x16\help_contents.png" />
                   <File DiskId="1" Id="i16x16_help_updates.png"              Name="imagebm0.png" LongName="help_updates.png"              src="$(var.TARGET)\images\16x16\help_updates.png" />
                   <File DiskId="1" Id="i16x16_help_whatsthis.png"            Name="imagebn0.png" LongName="help_whatsthis.png"            src="$(var.TARGET)\images\16x16\help_whatsthis.png" />
-                  <File DiskId="1" Id="i16x16_net_offline.png"               Name="imagebo0.png" LongName="net_offline.png"               src="$(var.TARGET)\images\16x16\net_offline.png" />
-                  <File DiskId="1" Id="i16x16_net_online.png"                Name="imagebp0.png" LongName="net_online.png"                src="$(var.TARGET)\images\16x16\net_online.png" />
+                  <File DiskId="1" Id="i16x16_extras_net_offline.png"        Name="imagebo0.png" LongName="extras_net_offline.png"        src="$(var.TARGET)\images\16x16\extras_net_offline.png" />
+                  <File DiskId="1" Id="i16x16_extras_net_online.png"         Name="imagebp0.png" LongName="extras_net_online.png"         src="$(var.TARGET)\images\16x16\extras_net_online.png" />
                   <File DiskId="1" Id="i16x16_reload.png"                    Name="imagebp1.png" LongName="reload.png"                    src="$(var.TARGET)\images\16x16\reload.png" />
                   <File DiskId="1" Id="i16x16_view_compact.png"              Name="imagebq0.png" LongName="view_compact.png"              src="$(var.TARGET)\images\16x16\view_compact.png" />
                   <File DiskId="1" Id="i16x16_view_hierarchic.png"           Name="imagebr0.png" LongName="view_hierarchic.png"           src="$(var.TARGET)\images\16x16\view_hierarchic.png" />
@@ -202,6 +204,8 @@
                   <RemoveFile      Id="i22x22_edit_buy_bl.png"               Name="edit_b~1.png" LongName="edit_buy_bl.png"               On="install" />
                   <RemoveFile      Id="i22x22_edit_open_bl.png"              Name="edit_b~2.png" LongName="edit_open_bl.png"              On="install" />
                   <RemoveFile      Id="i22x22_settings_refresh_database.png" Name="settin~1.png" LongName="settings_refresh_database.png" On="install" />
+                  <RemoveFile      Id="i22x22_net_offline.png"               Name="net_of~1.png" LongName="net_offline.png"               On="install" />
+                  <RemoveFile      Id="i22x22_net_online.png"                Name="net_on~1.png" LongName="net_online.png"                On="install" />
 
                   <File DiskId="1" Id="i22x22_edit_additems.png"             Name="imageaa0.png" LongName="edit_additems.png"             src="$(var.TARGET)\images\22x22\edit_additems.png" />
                   <File DiskId="1" Id="i22x22_edit_bl_catalog.png"           Name="imageab0.png" LongName="edit_bl_catalog.png"           src="$(var.TARGET)\images\22x22\edit_bl_catalog.png" />
@@ -246,8 +250,8 @@
                   <File DiskId="1" Id="i22x22_help_contents.png"             Name="imagebl0.png" LongName="help_contents.png"             src="$(var.TARGET)\images\22x22\help_contents.png" />
                   <File DiskId="1" Id="i22x22_help_updates.png"              Name="imagebm0.png" LongName="help_updates.png"              src="$(var.TARGET)\images\22x22\help_updates.png" />
                   <File DiskId="1" Id="i22x22_help_whatsthis.png"            Name="imagebn0.png" LongName="help_whatsthis.png"            src="$(var.TARGET)\images\22x22\help_whatsthis.png" />
-                  <File DiskId="1" Id="i22x22_net_offline.png"               Name="imagebo0.png" LongName="net_offline.png"               src="$(var.TARGET)\images\22x22\net_offline.png" />
-                  <File DiskId="1" Id="i22x22_net_online.png"                Name="imagebp0.png" LongName="net_online.png"                src="$(var.TARGET)\images\22x22\net_online.png" />
+                  <File DiskId="1" Id="i22x22_extras_net_offline.png"        Name="imagebo0.png" LongName="extras_net_offline.png"        src="$(var.TARGET)\images\22x22\extras_net_offline.png" />
+                  <File DiskId="1" Id="i22x22_extras_net_online.png"         Name="imagebp0.png" LongName="extras_net_online.png"         src="$(var.TARGET)\images\22x22\extras_net_online.png" />
                   <File DiskId="1" Id="i22x22_reload.png"                    Name="imagebp1.png" LongName="reload.png"                    src="$(var.TARGET)\images\22x22\reload.png" />
                   <File DiskId="1" Id="i22x22_view_compact.png"              Name="imagebq0.png" LongName="view_compact.png"              src="$(var.TARGET)\images\22x22\view_compact.png" />
                   <File DiskId="1" Id="i22x22_view_hierarchic.png"           Name="imagebr0.png" LongName="view_hierarchic.png"           src="$(var.TARGET)\images\22x22\view_hierarchic.png" />

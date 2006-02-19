@@ -446,8 +446,10 @@ CDocument *CDocument::fileOpen ( )
 CDocument *CDocument::fileOpen ( const QString &s )
 {
 	if ( !s. isEmpty ( )) {
+		QString abs_s  = QFileInfo ( s ). absFilePath ( );
+
 		foreach ( CDocument *doc, s_documents ) {
-			if ( doc-> fileName ( ) == s )
+			if ( QFileInfo ( doc-> fileName ( )). absFilePath ( ) == abs_s )
 				return doc;
 		}
 		return fileLoadFrom ( s, "bsx" );

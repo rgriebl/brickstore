@@ -43,8 +43,8 @@ public:
 		connect ( CFrameWork::inst ( ), SIGNAL( documentActivated ( CDocument * )), this, SLOT( documentUpdate ( CDocument * )));
 
 		unsetPalette ( );
-		setText ( "<b>B</b><br />1<br />2<br />3<br />4<br />5<br /><br/><b>P</b><br />1<br />" );
-		setMinimumHeight ( sizeHint ( ). height ( ));
+		setText ( "<b>ABCDEFGHIJKLM</b><br />1<br />2<br />3<br />4<br />5<br /><br/><b>X</b><br />1<br />" );
+		setMinimumSize ( sizeHint ( ));
 		setText ( QString ( ));
 	}
 
@@ -86,7 +86,7 @@ protected slots:
 				str += "<br />";
 
 				str += fmt1. arg( tr( "Peeron" ));
-				str += fmt2. arg( tr( "Infomation" )). arg( BrickLink::inst ( )-> url ( BrickLink::URL_PeeronInfo, item, color ));
+				str += fmt2. arg( tr( "Information" )). arg( BrickLink::inst ( )-> url ( BrickLink::URL_PeeronInfo, item, color ));
 			}
 		}
 		setText ( str );

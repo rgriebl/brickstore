@@ -43,21 +43,20 @@ public:
 		QString      m_label;
 		int          m_orig_framestyle;
 		bool         m_expandible       : 1;
-		bool         m_expanded         : 1;
 		bool         m_special          : 1;
 		bool         m_visible          : 1;
 
 		Item ( )
 			: m_itemdock ( 0 ), m_taskpaneid ( 0 ),
 			m_widget ( 0 ), m_orig_framestyle ( QFrame::NoFrame ), m_expandible ( false ),
-			m_expanded ( false ), m_special ( false ), m_visible ( false )
+			m_special ( false ), m_visible ( true )
 		{ }
 
 		Item ( const Item &copy )
 			: m_itemdock ( copy. m_itemdock ), m_taskpaneid ( copy. m_taskpaneid ),
 			m_widget ( copy. m_widget ), m_iconset ( copy. m_iconset ), m_label ( copy. m_label ),
 			m_orig_framestyle ( copy. m_orig_framestyle ), m_expandible ( copy. m_expandible ),
-			m_expanded ( copy. m_expanded ), m_special ( copy. m_special ), m_visible ( copy. m_visible )
+			m_special ( copy. m_special ), m_visible ( copy. m_visible )
 		{ }
 	};
 
@@ -72,6 +71,8 @@ class CTaskGroup;
 
 
 class CTaskPane : public QWidget {
+	Q_OBJECT
+
 public:
 	CTaskPane ( QWidget *parent, const char *name = 0 );
 	virtual ~CTaskPane ( );
@@ -83,6 +84,9 @@ public:
 	void setExpanded ( QWidget *w, bool exp );
 
 	virtual QSize sizeHint ( ) const;
+
+signals:
+	void itemVisibilityChanged ( QWidget *, bool );
 
 protected:
 	friend class CTaskGroup;
@@ -156,7 +160,6 @@ void CTaskPaneManager::addItem ( QWidget *w, const QIconSet &is, const QString &
 		item. m_label      = text;
 		item. m_expandible = true;
 		item. m_special    = false;
-		item. m_expanded   = false;
 		item. m_orig_framestyle  = QFrame::NoFrame;
 
 		kill ( );
@@ -207,16 +210,12 @@ QString CTaskPaneManager::itemText ( QWidget *w ) const
 
 bool CTaskPaneManager::isItemVisible ( QWidget *w ) const
 {
-	bool vis = false;
 	QValueList<CTaskPaneManagerPrivate::Item>::iterator it = d-> findItem ( w );
 	
-	if ( it != d-> noItem ( )) {
-		if ( d-> m_mode == Modern )
-			vis = d-> m_taskpane-> isExpanded ((*it). m_widget );
-		else
-			vis = (*it). m_itemdock-> isVisible ( );
-	}
-	return vis;
+	if ( it != d-> noItem ( ))
+		return (*it). m_visible;
+	
+	return false;
 }
 
 void CTaskPaneManager::setItemVisible ( QWidget *w, bool visible )
@@ -235,6 +234,10 @@ void CTaskPaneManager::setItemVisible ( QWidget *w, bool visible )
 	}
 }
 
+CTaskPaneManager::Mode CTaskPaneManager::mode ( ) const
+{
+	return d-> m_mode;
+}
 
 void CTaskPaneManager::setMode ( Mode m )
 {
@@ -267,6 +270,8 @@ void CTaskPaneManager::kill ( )
 	else {
 		for ( QValueList<CTaskPaneManagerPrivate::Item>::iterator it = d-> m_items. begin ( ); it != d-> m_items. end ( ); ++it ) {
 			CTaskPaneManagerPrivate::Item &item = *it;
+
+			disconnect ( item. m_itemdock, SIGNAL( visibilityChanged ( bool )), this, SLOT( dockVisibilityChanged ( bool )));
 
 			item. m_widget-> hide ( );
 			item. m_widget-> reparent ( 0, QPoint ( 0, 0 ));
@@ -305,11 +310,12 @@ void CTaskPaneManager::create ( )
 
 			d-> m_taskpane-> addItem ( item. m_widget, item. m_iconset, item. m_label, item. m_expandible, item. m_special );
 			item. m_widget-> show ( );
-		//	if ( !item-> m_expanded )
-		//		m_taskpane-> setExpanded ( item-> m_taskpaneid, false );
+			d-> m_taskpane-> setExpanded ( item. m_widget, item. m_visible );
 		}
 		d-> m_taskpane-> show ( );
 		d-> m_panedock-> show ( );
+
+		connect ( d-> m_taskpane, SIGNAL( itemVisibilityChanged ( QWidget *, bool )), this, SLOT( itemVisibilityChanged ( QWidget *, bool )));
 	}
 	else {
 		for ( QValueList<CTaskPaneManagerPrivate::Item>::iterator it = d-> m_items. begin ( ); it != d-> m_items. end ( ); ++it ) {
@@ -328,9 +334,41 @@ void CTaskPaneManager::create ( )
 			item. m_itemdock-> boxLayout ( )-> addWidget ( item. m_widget );
 
 			item. m_widget-> show ( );
-			item. m_itemdock-> show ( );			
+
+			if ( item. m_visible )
+				item. m_itemdock-> show ( );
+			else
+				item. m_itemdock-> hide ( );
+
+			connect ( item. m_itemdock, SIGNAL( visibilityChanged ( bool )), this, SLOT( dockVisibilityChanged ( bool )));
 		}
 	}
+}
+
+void CTaskPaneManager::dockVisibilityChanged ( bool b )
+{
+	QDockWindow *dock = ::qt_cast <QDockWindow *> ( sender ( ));
+
+	for ( QValueList<CTaskPaneManagerPrivate::Item>::iterator it = d-> m_items. begin ( ); it != d-> m_items. end ( ); ++it ) {
+		CTaskPaneManagerPrivate::Item &item = *it;
+
+		if ( item. m_itemdock == dock ) {
+			item. m_visible = b;
+			break;
+		}
+	}	
+}
+
+void CTaskPaneManager::itemVisibilityChanged ( QWidget *w, bool b )
+{
+	for ( QValueList<CTaskPaneManagerPrivate::Item>::iterator it = d-> m_items. begin ( ); it != d-> m_items. end ( ); ++it ) {
+		CTaskPaneManagerPrivate::Item &item = *it;
+
+		if ( item. m_widget == w ) {
+			item. m_visible = b;
+			break;
+		}
+	}	
 }
 
 QPopupMenu *CTaskPaneManager::createItemVisibilityMenu ( ) const
@@ -401,22 +439,17 @@ void CTaskPaneManager::itemMenuActivated ( int id )
 		for ( QValueList<CTaskPaneManagerPrivate::Item>::iterator it = d-> m_items. begin ( ); it != d-> m_items. end ( ); ++it, index++ ) {
 			CTaskPaneManagerPrivate::Item &item = *it;
 
-			if (( id == index ) || ( id < 0 )) {
-				if ( d-> m_mode == Modern ) {
-					d-> m_taskpane-> setExpanded ( item. m_widget, !d-> m_taskpane-> isExpanded ( item. m_widget ));
-				}
-				else {
-					bool onoff;
 
+			if (( id == index ) || ( id < 0 )) {
+				bool onoff = !isItemVisible ( item. m_widget );
+
+				if ( d-> m_mode == Classic ) {
 					if ( id == -1 )
 						onoff = true;
 					else if ( id == -2 )
 						onoff = false;
-					else
-						onoff = !item. m_itemdock-> isVisible ( );
-
-					item. m_itemdock-> setShown ( onoff );
 				}
+				setItemVisible ( item. m_widget, onoff );
 			}
 		}
 	}
@@ -550,6 +583,7 @@ public:
 			m_bar-> recalcLayout ( );
 			update ( );
 			m_bar-> update ( );
+			emit m_bar-> itemVisibilityChanged ( m_widget, b );
 		}
 	}
 
@@ -584,9 +618,12 @@ protected:
 		update ( );
 	}
 
-	void mouseReleaseEvent ( QMouseEvent * /*e*/ )
+	void mouseReleaseEvent ( QMouseEvent *e )
 	{
-		setExpanded ( !isExpanded ( ));
+		if ( e-> button ( ) == Qt::LeftButton ) {
+			setExpanded ( !isExpanded ( ));
+			e-> accept ( );
+		}
 	}
 
 protected:
@@ -985,3 +1022,5 @@ void CTaskPane::paintEvent ( QPaintEvent *e )
 	p. end ( );
 }
 
+
+#include "ctaskpanemanager.moc"

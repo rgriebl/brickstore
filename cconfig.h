@@ -38,8 +38,6 @@ public:
 		WeightImperial
 	};
 
-	int infoBarLook ( ) const;
-
 	QString language ( ) const;
 	WeightSystem weightSystem ( ) const;
 
@@ -50,7 +48,6 @@ public:
 
 	bool showInputErrors ( ) const;
 	bool simpleMode ( ) const;
-	int windowMode ( ) const;
 	bool onlineStatus ( ) const;
 	bool useProxy ( ) const;
 	QString proxyName ( ) const;
@@ -64,8 +61,6 @@ public:
 	void blUpdateIntervalsDefaults ( int &picd, int &pgd ) const;
 
 public slots:
-	void setInfoBarLook ( int look );
-
 	void setLanguage ( const QString &lang );
 	void setWeightSystem ( WeightSystem ws );
 
@@ -76,7 +71,6 @@ public slots:
 
 	void setShowInputErrors ( bool b );
 	void setSimpleMode ( bool sm );
-	void setWindowMode ( int mode );
 	void setOnlineStatus ( bool b );
 	void setProxy ( bool b, const QString &name, int port );
 
@@ -87,9 +81,7 @@ public slots:
 	void setBlUpdateIntervals ( int pic, int pg );
 
 signals:
-	void infoBarLookChanged ( int look );
 	void simpleModeChanged ( bool );
-	void windowModeChanged ( int );
 	void languageChanged ( );
 	void weightSystemChanged ( CConfig::WeightSystem ws );
 	void showInputErrorsChanged ( bool b );
@@ -105,7 +97,6 @@ private:
 	bool         m_show_input_errors;
 	WeightSystem m_weight_system;
 	bool         m_simple_mode;
-	int          m_window_mode;
 };
 
 #endif

@@ -40,10 +40,10 @@ public:
 		Modern
 	};
 
-	Mode *mode ( ) const;
+	Mode mode ( ) const;
 	void setMode ( Mode m );
 
-	void addItem ( QWidget *w, const QIconSet &is, const QString &txt );
+	void addItem ( QWidget *w, const QIconSet &is, const QString &txt = QString ( ));
 	void removeItem ( QWidget *w, bool delete_widget = true );
 
 	QString itemText ( QWidget *w ) const;
@@ -59,6 +59,8 @@ public:
 private slots:
 	void itemMenuAboutToShow ( );
 	void itemMenuActivated ( int );
+	void dockVisibilityChanged ( bool b );
+	void itemVisibilityChanged ( QWidget *w, bool b );
 
 private:
 	void kill ( );

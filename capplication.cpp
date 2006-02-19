@@ -34,7 +34,7 @@
 
 #include "capplication.h"
 
-//#define BS_DEMO  30 // demo time in minutes
+//#define BS_DEMO
 
 
 class COpenEvent : public QCustomEvent {
@@ -278,6 +278,8 @@ void CApplication::initStrings ( )
 		"which does not sponsor, authorize or endorse this software."
 		"</p><p>"
 		"All other trademarks recognised."
+		"</p><p>"
+		"French translation by Sylvain Perez (<a href=\"mailto:bricklink@1001bricks.com\">1001bricks</a>)"
 		"</p>"
 	);
 
@@ -376,12 +378,10 @@ void CApplication::demoVersion ( )
 	QString copyright = tr( "Copyright &copy; %1" ). arg ( BRICKSTORE_COPYRIGHT );
 	QString version   = tr( "Version %1" ). arg ( BRICKSTORE_VERSION );
 
-	QString text = QString ( layout_text ). arg ( appName ( ), copyright, version, tr( m_demo ));
+	QString text = QString ( layout_text ). arg ( appName ( ), copyright, version, tr( m_demo ). arg ( m_url ));
 
 	DlgMessageImpl d ( appName ( ), text, mainWidget ( ));
 	d. exec ( );
-
-	QTimer::singleShot ( BS_DEMO * 60 * 1000, this, SLOT( demoVersion ( )));
 #endif
 }
 

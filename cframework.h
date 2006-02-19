@@ -93,7 +93,7 @@ private slots:
 
 	void viewToolBar ( bool );
 	void viewStatusBar ( bool );
-	void setWindowMode ( int );
+	void viewFullScreen ( bool );
 
 	void windowActivate ( int );
 
