@@ -27,7 +27,7 @@ res_translations    = $$TRANSLATIONS
 res_print_templates = print-templates/*.xml
 
 dist_extra          = version.h.in _RELEASE_ icon.png
-dist_scripts        = scripts/*.sh scripts/*.bat scripts/*.pl
+dist_scripts        = scripts/*.sh scripts/*.js scripts/*.pl
 dist_unix_rpm       = rpm/create.sh rpm/brickstore.spec
 dist_unix_deb       = debian/create.sh debian/rules
 dist_macx           = macx-bundle/create.sh macx-bundle/install-table.txt macx-bundle/*.plist macx-bundle/Resources/*.icns macx-bundle/Resources/??.lproj/*.plist
