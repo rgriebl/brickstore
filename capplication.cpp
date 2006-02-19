@@ -252,6 +252,8 @@ void CApplication::initStrings ( )
 		"which does not sponsor, authorize or endorse this software."
 		"</p><p>"
 		"All other trademarks recognised."
+		"</p><p>"
+		"French translation by Sylvain (<a href=\"mailto:bricklink@1001bricks.com\">1001bricks</a>)"
 		"</p>"
 	);
 

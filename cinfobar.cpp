@@ -198,7 +198,7 @@ void CInfoBar::setPicture ( BrickLink::Picture *pic )
 		str += "<br />";
 
 		str += fmt1. arg( tr( "Peeron" ));
-		str += fmt2. arg( tr( "Infomation" )). arg( BrickLink::inst ( )-> url ( BrickLink::URL_PeeronInfo, item, color ));
+		str += fmt2. arg( tr( "Information" )). arg( BrickLink::inst ( )-> url ( BrickLink::URL_PeeronInfo, item, color ));
 	}
 	d-> m_link_info-> setText ( str );
 }

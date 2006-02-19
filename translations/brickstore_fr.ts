@@ -89,10 +89,6 @@
         <translation>N&apos;est pas arrivé à intitialiser le noyau BrickLink : &lt;br /&gt;&lt;br /&gt;%1</translation>
     </message>
     <message>
-        <source>&lt;p&gt;This program is free software; it may be distributed and/or modified under the terms of the GNU General Public License version 2 as published by the Free Software Foundation and appearing in the file LICENSE.GPL included in this software package.&lt;br /&gt;This program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.&lt;br /&gt;See &lt;a href=&quot;http://fsf.org/licensing/licenses/gpl.html&quot;&gt;www.fsf.org/licensing/licenses/gpl.html&lt;/a&gt; for GPL licensing information.&lt;/p&gt;&lt;p&gt;All data from &lt;a href=&quot;http://www.bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; is owned by BrickLink&lt;sup&gt;TM&lt;/sup&gt;, which is a trademark of Dan Jezek.&lt;/p&gt;&lt;p&gt;Peeron Inventories from &lt;a href=&quot;http://www.peeron.com&quot;&gt;www.peeron.com&lt;/a&gt; are owned by Dan and Jennifer Boger.&lt;/p&gt;&lt;p&gt;LEGO&lt;sup&gt;&amp;reg;&lt;/sup&gt; is a trademark of the LEGO group of companies, which does not sponsor, authorize or endorse this software.&lt;/p&gt;&lt;p&gt;All other trademarks recognised.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>This is an &lt;b&gt;unrestricted&lt;/b&gt; demo version.&lt;br /&gt;&lt;br /&gt;If you want to support the development of this program (or if you just want to get rid of this dialog...), check out %1 how to get the non-demo version.</source>
         <translation>Ceci est une version de démonstration aux fonctionnalités &lt;b&gt;non limitées&lt;/b&gt;.&lt;br /&gt;&lt;br /&gt;Mais si vous souhaitez aider au développement de ce programme (ou pour juste éviter cette boîte de dialogue...), alors consultez %1 afin de savoir comment obtenir la version non-démonstration.</translation>
     </message>
@@ -111,6 +107,10 @@
     <message>
         <source>Visit %1, or send an email to %2</source>
         <translation>Consultez %1, ou envoyez un e-mail à %2</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;This program is free software; it may be distributed and/or modified under the terms of the GNU General Public License version 2 as published by the Free Software Foundation and appearing in the file LICENSE.GPL included in this software package.&lt;br /&gt;This program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.&lt;br /&gt;See &lt;a href=&quot;http://fsf.org/licensing/licenses/gpl.html&quot;&gt;www.fsf.org/licensing/licenses/gpl.html&lt;/a&gt; for GPL licensing information.&lt;/p&gt;&lt;p&gt;All data from &lt;a href=&quot;http://www.bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; is owned by BrickLink&lt;sup&gt;TM&lt;/sup&gt;, which is a trademark of Dan Jezek.&lt;/p&gt;&lt;p&gt;Peeron Inventories from &lt;a href=&quot;http://www.peeron.com&quot;&gt;www.peeron.com&lt;/a&gt; are owned by Dan and Jennifer Boger.&lt;/p&gt;&lt;p&gt;LEGO&lt;sup&gt;&amp;reg;&lt;/sup&gt; is a trademark of the LEGO group of companies, which does not sponsor, authorize or endorse this software.&lt;/p&gt;&lt;p&gt;All other trademarks recognised.&lt;/p&gt;&lt;p&gt;French translation by Sylvain (&lt;a href=&quot;mailto:bricklink@1001bricks.com&quot;&gt;1001bricks&lt;/a&gt;)&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -384,7 +384,7 @@
     </message>
     <message>
         <source>View Infobar</source>
-        <translation>Afficher la barre d&apos;outils</translation>
+        <translation>Afficher la barre d&apos;infos</translation>
     </message>
     <message>
         <source>View Statusbar</source>
@@ -463,7 +463,7 @@
     </message>
     <message>
         <source>Set Sale...</source>
-        <translation type="unfinished"></translation>
+        <translation>Fixer la remise...</translation>
     </message>
     <message>
         <source>Ctrl+%</source>
@@ -480,11 +480,11 @@
     </message>
     <message>
         <source>Set Condition...</source>
-        <translation>Fixer l&apos;état...</translation>
+        <translation>Fixer la condition...</translation>
     </message>
     <message>
         <source>Multiply Quantities...</source>
-        <translation type="unfinished"></translation>
+        <translation>Multiplier les quantités...</translation>
     </message>
     <message>
         <source>Ctrl+*</source>
@@ -493,7 +493,7 @@
     </message>
     <message>
         <source>Divide Quantities...</source>
-        <translation type="unfinished"></translation>
+        <translation>Diviser les quantités...</translation>
     </message>
     <message>
         <source>Ctrl+/</source>
@@ -502,7 +502,7 @@
     </message>
     <message>
         <source>Show BrickLink Catalog Info...</source>
-        <translation type="unfinished">Montrer le catalogue BrickLink...</translation>
+        <translation>Montrer le catalogue BrickLink...</translation>
     </message>
     <message>
         <source>Show BrickLink Price Guide Info...</source>
@@ -510,54 +510,54 @@
     </message>
     <message>
         <source>Lots for Sale on BrickLink...</source>
-        <translation type="unfinished">Lots en vente sur BrickLink...</translation>
+        <translation>Lots en vente sur BrickLink...</translation>
     </message>
     <message>
         <source>No valid BrickLink login settings found.&lt;br /&gt;&lt;br /&gt;Do you want to change the settings now?</source>
-        <translation type="unfinished"></translation>
+        <translation>Pas de configuration d&apos;identification BrickLink valide trouvée.&lt;br /&gt;&lt;br /&gt;Voulez-vous changer cette configuration maintenant ?</translation>
     </message>
     <message>
         <source>min.</source>
-        <translation type="unfinished"></translation>
+        <translation>min.</translation>
     </message>
     <message>
         <source>Multiple lots selected</source>
-        <translation type="unfinished"></translation>
+        <translation>Lots multiples sélectionnés</translation>
     </message>
     <message>
         <source>Lots</source>
-        <translation type="unfinished"></translation>
+        <translation>Lots</translation>
     </message>
     <message>
         <source>Items</source>
-        <translation type="unfinished"></translation>
+        <translation>Items</translation>
     </message>
     <message>
         <source>Value</source>
-        <translation type="unfinished"></translation>
+        <translation>Valeur</translation>
     </message>
     <message>
         <source>Weight</source>
-        <translation type="unfinished">Poids</translation>
+        <translation>Poids</translation>
     </message>
     <message>
         <source>Errors</source>
-        <translation type="unfinished"></translation>
+        <translation>Erreurs</translation>
     </message>
     <message>
         <source>Unsaved modifications</source>
-        <translation type="unfinished"></translation>
+        <translation>Modifications non sauvegardées</translation>
     </message>
     <message>
         <source>Do you want to cancel all outstanding inventory, picture and price guide transfers?</source>
-        <translation type="unfinished"></translation>
+        <translation>Voulez-vous annuler tous les transferts en cours d&apos;inventaire, images et guide de prix ?</translation>
     </message>
 </context>
 <context>
     <name>CInfoBar</name>
     <message>
         <source>Info</source>
-        <translation type="unfinished"></translation>
+        <translation>Info</translation>
     </message>
     <message>
         <source>Price Guide</source>
@@ -588,15 +588,15 @@
         <translation></translation>
     </message>
     <message>
-        <source>Infomation</source>
-        <translation type="unfinished"></translation>
+        <source>Information</source>
+        <translation>Information</translation>
     </message>
 </context>
 <context>
     <name>CItemView</name>
     <message>
         <source>Status</source>
-        <translation type="unfinished"></translation>
+        <translation>Etat</translation>
     </message>
     <message>
         <source>Image</source>
@@ -608,7 +608,7 @@
     </message>
     <message>
         <source>Description</source>
-        <translation></translation>
+        <translation>Description</translation>
     </message>
     <message>
         <source>Comments</source>
@@ -620,43 +620,43 @@
     </message>
     <message>
         <source>Qty. Orig</source>
-        <translation type="unfinished"></translation>
+        <translation>Qté. orig.</translation>
     </message>
     <message>
         <source>Qty. Diff</source>
-        <translation type="unfinished"></translation>
+        <translation>Diff. qté.</translation>
     </message>
     <message>
         <source>Qty.</source>
-        <translation type="unfinished">Qté </translation>
+        <translation>Qté.</translation>
     </message>
     <message>
         <source>Bulk</source>
-        <translation type="unfinished"></translation>
+        <translation>Par lots</translation>
     </message>
     <message>
         <source>Pr. Orig</source>
-        <translation type="unfinished"></translation>
+        <translation>Prix orig.</translation>
     </message>
     <message>
         <source>Pr. Diff</source>
-        <translation type="unfinished"></translation>
+        <translation>Diff. prix</translation>
     </message>
     <message>
         <source>Price</source>
-        <translation type="unfinished">Prix</translation>
+        <translation>Prix</translation>
     </message>
     <message>
         <source>Total</source>
-        <translation></translation>
+        <translation>Total</translation>
     </message>
     <message>
         <source>Sale</source>
-        <translation type="unfinished"></translation>
+        <translation>Remise</translation>
     </message>
     <message>
         <source>Cond.</source>
-        <translation type="unfinished"></translation>
+        <translation>Cond.</translation>
     </message>
     <message>
         <source>Color</source>
@@ -672,39 +672,39 @@
     </message>
     <message>
         <source>Tier Q1</source>
-        <translation type="unfinished"></translation>
+        <translation>Palier Q1</translation>
     </message>
     <message>
         <source>Tier P1</source>
-        <translation type="unfinished"></translation>
+        <translation>Palier P1</translation>
     </message>
     <message>
         <source>Tier Q2</source>
-        <translation type="unfinished"></translation>
+        <translation>Palier Q2</translation>
     </message>
     <message>
         <source>Tier P2</source>
-        <translation type="unfinished"></translation>
+        <translation>Palier P2</translation>
     </message>
     <message>
         <source>Tier Q3</source>
-        <translation type="unfinished"></translation>
+        <translation>Palier Q3</translation>
     </message>
     <message>
         <source>Tier P3</source>
-        <translation type="unfinished"></translation>
+        <translation>Palier P3</translation>
     </message>
     <message>
         <source>Lot Id</source>
-        <translation type="unfinished"></translation>
+        <translation>ID de lot</translation>
     </message>
     <message>
         <source>Retain</source>
-        <translation type="unfinished"></translation>
+        <translation>Conservé</translation>
     </message>
     <message>
         <source>Stockroom</source>
-        <translation type="unfinished"></translation>
+        <translation>Entrepôt</translation>
     </message>
     <message>
         <source>Reserved</source>
@@ -720,15 +720,15 @@
     </message>
     <message>
         <source>Exclude</source>
-        <translation type="unfinished"></translation>
+        <translation>Exclure</translation>
     </message>
     <message>
         <source>Extra</source>
-        <translation type="unfinished"></translation>
+        <translation>Extra</translation>
     </message>
     <message>
         <source>Include</source>
-        <translation type="unfinished"></translation>
+        <translation>Inclure</translation>
     </message>
     <message>
         <source>New</source>
@@ -744,15 +744,15 @@
     </message>
     <message>
         <source>Modify Item</source>
-        <translation type="unfinished"></translation>
+        <translation>Changer l&apos;item</translation>
     </message>
     <message>
         <source>Modify Color</source>
-        <translation type="unfinished"></translation>
+        <translation>Changer la couleur</translation>
     </message>
     <message>
         <source>The value you entered was not valid and will not be changed.</source>
-        <translation type="unfinished"></translation>
+        <translation>La valeur entrée n&apos;est pas valide et ne sera pas changée.</translation>
     </message>
 </context>
 <context>
@@ -827,7 +827,7 @@
     <name>CPriceGuideWidget</name>
     <message>
         <source>Qty </source>
-        <translation>Qté </translation>
+        <translation>Qté. </translation>
     </message>
     <message>
         <source>New</source>
@@ -839,23 +839,23 @@
     </message>
     <message>
         <source>Min</source>
-        <translation></translation>
+        <translation>Min.</translation>
     </message>
     <message>
         <source>Avg</source>
-        <translation>Moy</translation>
+        <translation>Moy.</translation>
     </message>
     <message>
         <source>W-Avg</source>
-        <translation type="unfinished"></translation>
+        <translation>Moy./qté.</translation>
     </message>
     <message>
         <source>Max</source>
-        <translation></translation>
+        <translation>Max.</translation>
     </message>
     <message>
         <source>All Time</source>
-        <translation type="unfinished">De tous les temps</translation>
+        <translation>De tous les temps</translation>
     </message>
     <message>
         <source>Sales</source>
@@ -863,19 +863,19 @@
     </message>
     <message>
         <source>Last 6</source>
-        <translation type="unfinished">Derniers 6</translation>
+        <translation>Derniers 6</translation>
     </message>
     <message>
         <source>Months Sales</source>
-        <translation type="unfinished">Mois de ventes</translation>
+        <translation>Mois de ventes</translation>
     </message>
     <message>
         <source>Current</source>
-        <translation type="unfinished">Courant</translation>
+        <translation>Courant</translation>
     </message>
     <message>
         <source>Inventory</source>
-        <translation type="unfinished">Inventaire</translation>
+        <translation>Inventaire</translation>
     </message>
     <message>
         <source>All Time Sales</source>
@@ -979,11 +979,11 @@
     </message>
     <message>
         <source>Part No.</source>
-        <translation type="unfinished">Num. pièce</translation>
+        <translation>Num. pièce</translation>
     </message>
     <message>
         <source>Item Name</source>
-        <translation>Nom de l&apos;item</translation>
+        <translation>Description</translation>
     </message>
     <message>
         <source>Item type:</source>
@@ -1013,7 +1013,7 @@
     <name>CWindow</name>
     <message>
         <source>Reset an active filter</source>
-        <translation type="unfinished"></translation>
+        <translation>Effacer un filtre actif</translation>
     </message>
     <message>
         <source>Clear</source>
@@ -1021,27 +1021,27 @@
     </message>
     <message>
         <source>Filter the list using this pattern (wildcards allowed: * ? [])</source>
-        <translation type="unfinished"></translation>
+        <translation>Filtrer la liste en utilisant ce motif (mots-clés autorisés : * ? [])</translation>
     </message>
     <message>
         <source>Restrict the filter to this/these field(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>Limiter le filtre à ce/ces champ(s)</translation>
     </message>
     <message>
         <source>All</source>
-        <translation type="unfinished"></translation>
+        <translation>Tous</translation>
     </message>
     <message>
         <source>All Prices</source>
-        <translation type="unfinished">Tous les prix</translation>
+        <translation>Tous les prix</translation>
     </message>
     <message>
         <source>All Texts</source>
-        <translation type="unfinished"></translation>
+        <translation>Tous les textes</translation>
     </message>
     <message>
         <source>All Quantities</source>
-        <translation type="unfinished">Toutes les quantités</translation>
+        <translation>Toutes les quantités</translation>
     </message>
     <message>
         <source>Filter:</source>
@@ -1077,7 +1077,7 @@
     </message>
     <message>
         <source>All Files</source>
-        <translation type="unfinished">Tous les fichiers</translation>
+        <translation>Tous les fichiers</translation>
     </message>
     <message>
         <source>Open File</source>
@@ -1085,7 +1085,7 @@
     </message>
     <message>
         <source>Inventory for %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Inventaire pour %1</translation>
     </message>
     <message>
         <source>Internal error: Could not create an Inventory object for item %1</source>
@@ -1098,10 +1098,6 @@
     <message>
         <source>Order #%1</source>
         <translation>Commande #%1</translation>
-    </message>
-    <message>
-        <source>Internal error: Could not create an Inventory object for oder #%1</source>
-        <translation type="obsolete">Erreur interne : n&apos;est pas arrivé à créer un objet inventaire pour la commande %1</translation>
     </message>
     <message>
         <source>Invalid order number.</source>
@@ -1121,11 +1117,11 @@
     </message>
     <message>
         <source>Import File</source>
-        <translation type="unfinished"></translation>
+        <translation>Importer un fichier</translation>
     </message>
     <message>
         <source>Import of %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Import de %1</translation>
     </message>
     <message>
         <source>Could not open file %1 for reading.</source>
@@ -1137,7 +1133,7 @@
     </message>
     <message>
         <source>This file contains %1 unknown item(s).</source>
-        <translation type="unfinished"></translation>
+        <translation>Ce fichier contient %1 item(s) inconnu(s).</translation>
     </message>
     <message>
         <source>Could not parse the XML data in file %1.</source>
@@ -1145,7 +1141,7 @@
     </message>
     <message>
         <source>LDraw Models</source>
-        <translation type="unfinished"></translation>
+        <translation>Modèles LDraw</translation>
     </message>
     <message>
         <source>Could not parse the LDraw model in file %1.</source>
@@ -1157,59 +1153,59 @@
     </message>
     <message>
         <source>A file named %1 already exists. Are you sure you want to overwrite it?</source>
-        <translation type="unfinished"></translation>
+        <translation>Un fichier nommé %1 existe déjà. Etes-vous sûr de vouloir l&apos;écraser ?</translation>
     </message>
     <message>
         <source>Failed to save data in file %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>Echec lors de la sauvegarde des données dans le fichier %1.</translation>
     </message>
     <message>
         <source>Failed to open file %1 for writing.</source>
-        <translation type="unfinished"></translation>
+        <translation>Echec à l&apos;ouverture pour écriture du fichier %1.</translation>
     </message>
     <message>
         <source>This list contains items with errors.&lt;br /&gt;&lt;br /&gt;Do you really want to export this list?</source>
-        <translation type="unfinished"></translation>
+        <translation>Cette liste contient des items avec des erreurs.&lt;br /&gt;&lt;br /&gt;Voulez-vous réellement exporter cette liste ?</translation>
     </message>
     <message>
         <source>Enter the ID number of Wanted List (leave blank for the default Wanted List)</source>
-        <translation type="unfinished"></translation>
+        <translation>Entrez le numéro d&apos;ID de la liste des pièces désirées (laisser vide pour la liste par défaut)</translation>
     </message>
     <message>
         <source>This list contains items without a BrickLink Lot-ID.&lt;br /&gt;&lt;br /&gt;Do you really want to export this list?</source>
-        <translation type="unfinished"></translation>
+        <translation>Cette liste contient des items sans leur ID de lot BrickLink.&lt;br /&gt;&lt;br /&gt;Voulez-vous réellement exporter cette liste ?</translation>
     </message>
     <message>
         <source>Export File</source>
-        <translation type="unfinished"></translation>
+        <translation>Exporter un fichier</translation>
     </message>
     <message>
         <source>Overwrite the currently selected items?</source>
-        <translation type="unfinished"></translation>
+        <translation>Ecraser les items actuellement sélectionnés ?</translation>
     </message>
     <message>
         <source>Prices are currently updated to price guide values.&lt;br /&gt;&lt;br /&gt;Please wait until this operation has finished.</source>
-        <translation type="unfinished"></translation>
+        <translation>Les prix sont en train d&apos;être fixés aux valeurs du guide de prix.&lt;br /&gt;&lt;br /&gt;Merci de patienter jusqu&apos;à ce que cette opération soit terminée.</translation>
     </message>
     <message>
         <source>Prices of the selected items have been updated to price guide values.</source>
-        <translation type="unfinished"></translation>
+        <translation>Les prix des items sélectionnés ont été fixés aux valeurs du guide de prix.</translation>
     </message>
     <message>
         <source>%1 have been skipped, because of missing price guide records and/or network errors.</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 n&apos;a pas été traité, à cause du manque d&apos;une valeur au guide de prix et/ou d&apos;erreurs réseau.</translation>
     </message>
     <message>
         <source>Divides the quantities of all selected items by this number.&lt;br /&gt;&lt;br /&gt;(A check is made if all quantites are exactly divisble without reminder, before this operation is performed.)</source>
-        <translation type="unfinished"></translation>
+        <translation>Diviser la quantité de tous les items sélectionnés par ce nombre.&lt;br /&gt;&lt;br /&gt;(Il est vérifié que toutes les quantités soient exactement divisibles sans reste, avant que cette opération ne soit lancée.)</translation>
     </message>
     <message>
         <source>The quantities of %1 lots are not divisible without remainder by %2.&lt;br /&gt;&lt;br /&gt;Nothing has been modified.</source>
-        <translation type="unfinished"></translation>
+        <translation>Les quantités de %1 lots ne sont pas divisibles par %2 sans reste.&lt;br /&gt;&lt;br /&gt;Rien n&apos;a été changé.</translation>
     </message>
     <message>
         <source>Multiplies the quantities of all selected items with this factor.</source>
-        <translation type="unfinished"></translation>
+        <translation>Multiplier les quantités de tous les items sélectionnés par ce facteur.</translation>
     </message>
     <message>
         <source>x</source>
@@ -1217,7 +1213,7 @@
     </message>
     <message>
         <source>Set sale in percent for the selected items (this will &lt;u&gt;not&lt;/u&gt; change any prices).&lt;br /&gt;Negative values are also allowed.</source>
-        <translation type="unfinished"></translation>
+        <translation>Fixez la remise en pour cents pour les items sélectionnés (ceci ne va &lt;u&gt;pas&lt;/u&gt; changer les prix).&lt;br /&gt;Les valeurs négatives sont autorisées.</translation>
     </message>
     <message>
         <source>%</source>
@@ -1225,11 +1221,11 @@
     </message>
     <message>
         <source>Enter the new remark for all selected items:</source>
-        <translation type="unfinished"></translation>
+        <translation>Entrer la nouvelle remarque pour tous les items sélectionnés :</translation>
     </message>
     <message>
         <source>Reserve this item for a specific member:</source>
-        <translation type="unfinished"></translation>
+        <translation>Réserver tous les items sélectionnés à ce membre :</translation>
     </message>
     <message>
         <source>Save changes to %1?</source>
@@ -1237,7 +1233,7 @@
     </message>
     <message>
         <source>Internal error: Could not create an Inventory object for order #%1</source>
-        <translation type="unfinished"></translation>
+        <translation>Erreur interne : n&apos;est pas arrivé à créer un objet inventaire pour la commande #%1</translation>
     </message>
 </context>
 <context>
@@ -1268,7 +1264,7 @@
     </message>
     <message>
         <source>&amp;Bulk</source>
-        <translation type="unfinished"></translation>
+        <translation>Par &amp;lots</translation>
     </message>
     <message>
         <source>&amp;New</source>
@@ -1292,7 +1288,7 @@
     </message>
     <message>
         <source>&amp;Tiered prices</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Paliers de prix</translation>
     </message>
     <message>
         <source>Consolidate with &amp;list</source>
@@ -1357,7 +1353,7 @@
     </message>
     <message>
         <source>Also apply this change to tier prices.</source>
-        <translation type="unfinished"></translation>
+        <translation>Appliquer aussi aux prix par paliers.</translation>
     </message>
     <message>
         <source>&amp;OK</source>
@@ -1380,27 +1376,27 @@
     </message>
     <message>
         <source>Either fix the missing or wrong information and press &lt;b&gt;OK&lt;/b&gt; or skip the item by pressing &lt;b&gt;Delete&lt;/b&gt;.</source>
-        <translation type="unfinished"></translation>
+        <translation>Soit corrigez l&apos;information manquante ou erronée et appuyez sur &lt;b&gt;OK&lt;/b&gt;, ou bien passez à l&apos;item suivant en appuyant sur &lt;b&gt;Suppr&lt;/b&gt;.</translation>
     </message>
     <message>
         <source>Item and Item Type are now valid</source>
-        <translation type="unfinished"></translation>
+        <translation>L&apos;item et le type d&apos;item sont valides maintenant</translation>
     </message>
     <message>
         <source>Fix</source>
-        <translation type="unfinished"></translation>
+        <translation>Corriger</translation>
     </message>
     <message>
         <source>Item and/or Item Type are invalid</source>
-        <translation type="unfinished"></translation>
+        <translation>L&apos;item et/ou le type d&apos;item ne sont pas valides</translation>
     </message>
     <message>
         <source>Color is now valid</source>
-        <translation>Couleur maintenant valide</translation>
+        <translation>La couleur est valide maintenant</translation>
     </message>
     <message>
         <source>Color is invalid</source>
-        <translation>Couleur n&apos;est pas valide</translation>
+        <translation>La couleur n&apos;est pas valide</translation>
     </message>
     <message>
         <source>&amp;OK</source>
@@ -1415,27 +1411,27 @@
     <name>DlgIncompleteItemImpl</name>
     <message>
         <source>BrickLink Item Change Log</source>
-        <translation type="unfinished"></translation>
+        <translation>Journal BrickLink des changements d&apos;items</translation>
     </message>
     <message>
         <source>BrickLink Color Change Log</source>
-        <translation type="unfinished"></translation>
+        <translation>Journal BrickLink des changements de couleurs</translation>
     </message>
     <message>
         <source>Fix Item</source>
-        <translation type="unfinished"></translation>
+        <translation>Corriger l&apos;item</translation>
     </message>
     <message>
         <source>New Item is: %1, %2 %3</source>
-        <translation type="unfinished"></translation>
+        <translation>Le nouvel item est : %1, %2, %3</translation>
     </message>
     <message>
         <source>Fix Color</source>
-        <translation type="unfinished"></translation>
+        <translation>Corriger la couleur</translation>
     </message>
     <message>
         <source>New color is: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>La nouvelle couleur est : %1</translation>
     </message>
     <message>
         <source>Item</source>
@@ -1459,22 +1455,22 @@
     </message>
     <message>
         <source>Unknown</source>
-        <translation type="unfinished"></translation>
+        <translation>Inconnu</translation>
     </message>
 </context>
 <context>
     <name>DlgLoadInventory</name>
     <message>
         <source>Open an Inventory</source>
-        <translation>Charger un inventaire</translation>
+        <translation>Import inventaire</translation>
     </message>
     <message>
         <source>&amp;Download even if cached</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Télécharger même si existe en cache</translation>
     </message>
     <message>
         <source>Import from &amp;peeron.com (currently a hack that may or may not work)</source>
-        <translation>Importer de &amp;peeron.com (c&apos;est actuellement un bricolage qui peut ne pas marcher)</translation>
+        <translation>Importer de &amp;peeron.com (actuellement un bricolage qui peut ne pas marcher)</translation>
     </message>
     <message>
         <source>&amp;Quantity:</source>
@@ -1493,7 +1489,7 @@
     <name>DlgLoadOrder</name>
     <message>
         <source>Load Order</source>
-        <translation>Charger une commande</translation>
+        <translation>Import commande</translation>
     </message>
     <message>
         <source>Received</source>
@@ -1532,11 +1528,11 @@
     </message>
     <message>
         <source>Preserve the attributes (e.g. remarks, tiered prices, ...) of the</source>
-        <translation type="unfinished"></translation>
+        <translation>Conserver les attributs (comme remarques, prix paliers, ...) du</translation>
     </message>
     <message>
         <source>&amp;existing lot or the</source>
-        <translation>du lot &amp;existant ou du</translation>
+        <translation>lot &amp;existant ou du</translation>
     </message>
     <message>
         <source>ne&amp;w lot</source>
@@ -1597,11 +1593,11 @@
     </message>
     <message>
         <source>&amp;OK</source>
-        <translation type="unfinished">&amp;OK</translation>
+        <translation>&amp;OK</translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
-        <translation type="unfinished">&amp;Annuler</translation>
+        <translation>&amp;Annuler</translation>
     </message>
 </context>
 <context>
@@ -1623,23 +1619,23 @@
     <name>DlgSetCondition</name>
     <message>
         <source>Set Condition</source>
-        <translation>Fixer l&apos;état</translation>
+        <translation>Fixer la condition</translation>
     </message>
     <message>
         <source>Please select how the conditon of the selected items should be modified:</source>
-        <translation>Précisez comment fixer l&apos;état des items sélectionnés :</translation>
+        <translation>Précisez comment fixer la condition des items sélectionnés :</translation>
     </message>
     <message>
         <source>Set condition to: &amp;New</source>
-        <translation>Fixer l&apos;état à : &amp;Neuf</translation>
+        <translation>Fixer la condition à : &amp;Neuf</translation>
     </message>
     <message>
         <source>Set condition to: &amp;Used</source>
-        <translation>Fixer l&apos;état à : &amp;Usagé</translation>
+        <translation>Fixer la condition à : &amp;Usagé</translation>
     </message>
     <message>
         <source>Toggle current condition</source>
-        <translation>Inverser l&apos;état courant</translation>
+        <translation>Inverser la condition courante</translation>
     </message>
     <message>
         <source>&amp;OK</source>
@@ -1673,15 +1669,15 @@
     <name>DlgSetToPGImpl</name>
     <message>
         <source>All Time Sales</source>
-        <translation type="unfinished">Ventes de tous les temps</translation>
+        <translation>Ventes de tous les temps</translation>
     </message>
     <message>
         <source>Past 6 Months Sales</source>
-        <translation type="unfinished">Ventes des 6 derniers mois</translation>
+        <translation>Ventes des 6 derniers mois</translation>
     </message>
     <message>
         <source>Current Inventory</source>
-        <translation type="unfinished">Inventaire courant</translation>
+        <translation>Inventaire courant</translation>
     </message>
     <message>
         <source>Lowest</source>
