@@ -129,7 +129,7 @@ QDataStream &operator >> ( QDataStream &ds, BrickLink::Category *cat )
 }
 
 
-BrickLink::Item::Item ( ) : m_id ( 0 ), m_name ( 0 ), m_categories ( 0 ), m_appears_in ( 0 ), m_consists_of ( 0 ) { }
+BrickLink::Item::Item ( ) : m_id ( 0 ), m_name ( 0 ), m_categories ( 0 ), m_last_inv_update ( -1 ), m_appears_in ( 0 ), m_consists_of ( 0 ) { }
 BrickLink::Item::~Item ( ) { delete [] m_id; delete [] m_name; delete [] m_categories; delete [] m_appears_in; delete [] m_consists_of; }
 
 bool BrickLink::Item::hasCategory ( const BrickLink::Category *cat ) const

@@ -55,6 +55,18 @@ int CRebuildDatabase::error ( const QString &error )
 	return 2;
 }
 
+
+namespace {
+
+static void nirvanaMsgHandler ( QtMsgType type, const char *msg )
+{
+	if ( type == QtFatalMsg )
+		abort ( );
+}
+
+} // namespace
+
+
 int CRebuildDatabase::exec ( )
 {
 	m_trans = new CTransfer ( );
@@ -70,8 +82,8 @@ int CRebuildDatabase::exec ( )
 
 	BrickLink::TextImport blti;
 
-
-
+	qInstallMsgHandler ( nirvanaMsgHandler );
+	 
 	printf ( "\n Rebuilding database " );
 	printf ( "\n=====================\n" );
 
@@ -126,6 +138,9 @@ int CRebuildDatabase::exec ( )
 		return error ( "failed to write the database file." );
 
 	printf ( "\nFINISHED.\n\n" );
+
+
+	qInstallMsgHandler ( 0 );
 	return 0;
 }
 
