@@ -157,7 +157,7 @@ public:
 		const Category *category ( ) const       { return m_categories [0]; }
 		const Category **allCategories ( ) const { return m_categories; }
 		bool hasCategory ( const Category *cat ) const;
-		QDateTime inventoryUpdated ( ) const     { return m_inv_updated; }
+		QDateTime inventoryUpdated ( ) const     { QDateTime dt; if ( m_last_inv_update >= 0 ) dt.setTime_t ( m_last_inv_update ); return dt; }
 		const Color *defaultColor ( ) const      { return m_color; }
 		double weight ( ) const                  { return m_weight; }
 		int yearReleased ( ) const               { return m_year ? m_year + 1900 : 0; }
@@ -176,7 +176,7 @@ public:
 		const ItemType *  m_item_type;
 		const Category ** m_categories;
 		const Color *     m_color;
-		QDateTime         m_inv_updated;
+		time_t            m_last_inv_update;
 		float             m_weight;
 		Q_UINT32          m_index : 24;
 		Q_UINT32          m_year  : 8;
@@ -404,39 +404,6 @@ public:
 		QCString   m_text;
 	};
 
-	class Inventory : public CRef {
-	public:
-		const Item *item ( ) const          { return m_item; }
-
-		void update ( );
-		QDateTime lastUpdate ( ) const      { return m_fetched; }
-
-		bool valid ( ) const                { return m_valid; }
-		int updateStatus ( ) const          { return m_update_status; }
-
-		InvItemList &inventory ( )          { return m_list; }
-
-		virtual ~Inventory ( );
-		
-	private:
-		const Item *m_item;
-		QDateTime   m_fetched;
-
-		bool        m_valid         : 1;
-		int         m_update_status : 7;
-
-		InvItemList m_list;
-
-	protected:
-		Inventory ( );
-
-	private:
-		Inventory ( const Item *item );
-		void load_from_disk ( );
-
-		friend class BrickLink;
-	};
-
 	class Order {
 	public:
 		enum Type { Received, Placed };
@@ -534,6 +501,10 @@ public:
 		TextImport ( );
 
 		bool import ( const QString &path );
+		void exportTo ( BrickLink * );
+
+		bool importInventories ( const QString &path, QPtrVector<Item> &items );
+		void exportInventoriesTo ( BrickLink * );
 
 		const QIntDict<Color>    &colors ( ) const      { return m_colors; }
 		const QIntDict<Category> &categories ( ) const  { return m_categories; }
@@ -557,6 +528,8 @@ public:
 		bool readColorGuide ( const QString &name );
 		bool readPeeronColors ( const QString &name );
 
+		bool readInventory ( const QString &path, Item *item );
+
 		const BrickLink::Category *findCategoryByName ( const char *name, int len = -1 );
 		const BrickLink::Item *findItem ( char type, const char *id );
 		void appendCategoryToItemType ( const Category *cat, ItemType *itt );
@@ -567,9 +540,13 @@ public:
 		QIntDict <Category> m_categories;
 		QPtrVector <Item>   m_items;
 
+		QMap<const BrickLink::Item *, BrickLink::Item::AppearsInMap> m_appears_in_map;
+		QMap<const BrickLink::Item *, BrickLink::InvItemList>        m_consists_of_map;
+
 		const ItemType *m_current_item_type;
 	};
 
+	friend class TextImporter;
 
 public:
 	virtual ~BrickLink ( );
@@ -625,8 +602,6 @@ public:
 	InvItemList *loadXML ( QIODevice *f, uint *invalid_items = 0 );
 	InvItemList *loadBTI ( QIODevice *f, uint *invalid_items = 0 );
 
-	Inventory *inventory ( const Item *item );
-
 	Picture *picture ( const Item *item, const Color *color, bool high_priority = false );
 	Picture *largePicture ( const Item *item, bool high_priority = false );
 
@@ -647,36 +622,25 @@ public:
 
 	bool onlineStatus ( ) const;
 
-	void setDatabase_ConsistsOf ( const Item *, const InvItemList & );
-	void setDatabase_AppearsIn ( const QMap<const Item *, Item::AppearsInMap> &map );
-	void setDatabase_Basics ( const QIntDict<Color> &colors, 
-								const QIntDict<Category> &categories,
-								const QIntDict<ItemType> &item_types,
-								const QPtrVector<Item> &items );
-
 public slots:
 	bool readDatabase ( const QString &fname = QString ( ));
 	bool writeDatabase ( const QString &fname = QString ( ));
 
 	void updatePriceGuide ( PriceGuide *pg, bool high_priority = false );
-	void updateInventory ( Inventory *inv );
 	void updatePicture ( Picture *pic, bool high_priority = false );
 
 	void setOnlineStatus ( bool on );
 	void setUpdateIntervals ( int pic, int pg );
 	void setHttpProxy ( bool enable, const QString &name, int port );
 
-	void cancelInventoryTransfers ( );
 	void cancelPictureTransfers ( );
 	void cancelPriceGuideTransfers ( );
 
 signals:
 	void priceGuideUpdated ( BrickLink::PriceGuide *pg );
-	void inventoryUpdated ( BrickLink::Inventory *inv );
 	void pictureUpdated ( BrickLink::Picture *inv );
 
 	void priceGuideProgress ( int, int );
-	void inventoryProgress ( int, int );
 	void pictureProgress ( int, int );
 
 private:
@@ -684,16 +648,20 @@ private:
 	static BrickLink *s_inst;
 
 	bool updateNeeded ( const QDateTime &last, int iv );
-
 	bool parseLDrawModelInternal ( QFile &file, const QString &model_name, InvItemList &items, uint *invalid_items, QDict <InvItem> &mergehash );
-
 	void pictureIdleLoader2 ( );
+
+	void setDatabase_ConsistsOf ( const QMap<const Item *, InvItemList> &map );
+	void setDatabase_AppearsIn ( const QMap<const Item *, Item::AppearsInMap> &map );
+	void setDatabase_Basics ( const QIntDict<Color> &colors, 
+								const QIntDict<Category> &categories,
+								const QIntDict<ItemType> &item_types,
+								const QPtrVector<Item> &items );
 
 private slots:
 	void pictureIdleLoader ( );
 
 	void pictureJobFinished ( CTransfer::Job * );
-	void inventoryJobFinished ( CTransfer::Job * );
 	void priceGuideJobFinished ( CTransfer::Job * );
 
 private:
@@ -725,13 +693,6 @@ private:
 
 		CAsciiRefCache<Picture, 503, 500>    cache;
 	} m_pictures;
-
-	struct dummy4 {
-		CTransfer *               transfer;
-		int                       update_iv;
-
-		CAsciiRefCache<Inventory, 29, 30>  cache;
-	} m_inventories;
 };
 
 QDataStream &operator << ( QDataStream &ds, const BrickLink::InvItem &ii );

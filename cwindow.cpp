@@ -44,7 +44,6 @@
 #include "dlgloadorderimpl.h"
 #include "dlgselectreportimpl.h"
 #include "dlgincompleteitemimpl.h"
-#include "dlgadditemimpl.h"
 #include "dlgmergeimpl.h"
 #include "dlgsubtractitemimpl.h"
 #include "dlgsetconditionimpl.h"
@@ -879,21 +878,6 @@ void CWindow::updateErrorMask ( )
 	}
 
 	m_doc-> setErrorMask ( em );
-}
-
-
-void CWindow::editAddItems ( )
-{
-	if ( m_add_dialog ) {
-		m_add_dialog-> setActiveWindow ( );
-	}
-	else {
-		m_add_dialog = new DlgAddItemImpl ( this, document( ), "AddItemDlg", false, Qt::WDestructiveClose );
-
-		connect ( m_add_dialog, SIGNAL( addItem ( BrickLink::InvItem *, uint )), this, SLOT( addItem ( BrickLink::InvItem *, uint )));
-
-		m_add_dialog-> show ( );
-	}
 }
 
 void CWindow::editSubtractItems ( )

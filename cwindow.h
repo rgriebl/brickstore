@@ -18,7 +18,6 @@
 #include <qregexp.h>
 #include <qptrlist.h>
 #include <qptrdict.h>
-#include <qguardedptr.h>
 #include <qdom.h>
 
 #include "citemview.h"
@@ -31,7 +30,6 @@ class QToolButton;
 class QComboBox;
 class QListViewItem;
 class CItemView;
-class DlgAddItemImpl;
 class CFrameWork;
 class CUndoStack;
 class QLabel;
@@ -101,7 +99,6 @@ public slots:
 	void editPaste ( );
 	void editDelete ( );
 
-	void editAddItems ( );
 	void editSubtractItems ( );
 	void editMergeItems ( );
 	void editPartOutItems ( );
@@ -169,8 +166,6 @@ private:
 	CItemView *	   w_list;
 	QLabel *       w_filter_label;
 	QLabel *       w_filter_field_label;
-
-	QGuardedPtr <DlgAddItemImpl> m_add_dialog;
 
 	uint                           m_settopg_failcnt;
 	QPtrDict<CDocument::Item> *    m_settopg_list;

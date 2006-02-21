@@ -24,6 +24,7 @@ CRebuildDatabase::CRebuildDatabase ( const QString &output )
 	: QObject ( 0, "rebuild_database" )
 {
 	m_output = output;
+	m_trans = 0;
 	
 #if defined( Q_OS_WIN32 )
 	AllocConsole ( );
@@ -41,89 +42,91 @@ CRebuildDatabase::~CRebuildDatabase ( )
 	printf ( "\n\nPress RETURN to quit...\n\n" );
 	getchar ( );
 #endif
+	delete m_trans;
 }
 
-int CRebuildDatabase::error ( )
+int CRebuildDatabase::error ( const QString &error )
 {
-	if ( m_error. isEmpty ( ))
+	if ( error. isEmpty ( ))
 		printf ( " FAILED.\n" );
 	else
-		printf ( " FAILED: %s\n", m_error. ascii ( ));
+		printf ( " FAILED: %s\n", error. ascii ( ));
 
 	return 2;
 }
 
 int CRebuildDatabase::exec ( )
 {
-	BrickLink *bl = BrickLink::inst ( );
+	m_trans = new CTransfer ( );
+	if ( !m_trans-> init ( )) {
+		delete m_trans;
+		return error ( "failed to init HTTP transfer." );
+	}
+	m_trans-> setProxy ( CConfig::inst ( )-> useProxy ( ), CConfig::inst ( )-> proxyName ( ), CConfig::inst ( )-> proxyPort ( ));
+	connect ( m_trans, SIGNAL( finished ( CTransfer::Job * )), this, SLOT( downloadJobFinished ( CTransfer::Job * )));
 
-	bl-> setOnlineStatus ( true );
-	bl-> setHttpProxy ( CConfig::inst ( )-> useProxy ( ), CConfig::inst ( )-> proxyName ( ), CConfig::inst ( )-> proxyPort ( ));
-	bl-> setUpdateIntervals ( 0, 0 );
-	
+	BrickLink *bl = BrickLink::inst ( );
+	bl-> setOnlineStatus ( false );
+
+	BrickLink::TextImport blti;
+
+
+
 	printf ( "\n Rebuilding database " );
 	printf ( "\n=====================\n" );
 
+	/////////////////////////////////////////////////////////////////////////////////
 	printf ( "\nSTEP 1: Downloading (text) database files...\n" );
 
 	if ( !download ( ))
-		return error ( );
+		return error ( m_error );
 	
+	/////////////////////////////////////////////////////////////////////////////////
 	printf ( "\nSTEP 2: Parsing downloaded files...\n" );
-	if ( !parse ( ))
-		return error ( );
 
-	printf ( "\nSTEP 3: Downloading missing/updated inventories...\n" );
-	if ( !downloadInv ( ))
-		return error ( );
+	if ( !blti. import ( bl-> dataPath ( )))
+		return error ( "failed to parse database files." );
 
-	printf ( "\nSTEP 4: Parsing inventories...\n" );
-	if ( !parseInv ( ))
-		return error ( );
+	blti. exportTo ( bl );
 
-	printf ( "\nSTEP 5: Writing the new database to disk...\n" );
-	if ( !writeDB ( ))
-		return error ( );
+	/////////////////////////////////////////////////////////////////////////////////
+	printf ( "\nSTEP 3: Parsing inventories (part I)...\n" );
 
-	printf ( "\nFINISHED.\n\n" );
-	return 0;
-}
+	QPtrVector<BrickLink::Item> invs = blti. items ( );
+	blti. importInventories ( bl-> dataPath ( ), invs );
 
-bool CRebuildDatabase::parse ( )
-{
-	BrickLink::TextImport blti;
+	/////////////////////////////////////////////////////////////////////////////////
+	printf ( "\nSTEP 4: Downloading missing/updated inventories...\n" );
+	
+	downloadInventories ( invs );
+	
+	/////////////////////////////////////////////////////////////////////////////////
+	printf ( "\nSTEP 5: Parsing inventories (part II)...\n" );
 
-	if ( !blti. import ( BrickLink::inst ( )-> dataPath ( ))) {
-		m_error = "failed to parse database files.";
-		return false;
-	}
+	blti. importInventories ( bl-> dataPath ( ), invs );
+	
+	if (( invs. size ( ) - invs. containsRef ( 0 )) > ( blti. items ( ). count ( ) / 50 )) // more than 2% have failed
+		return error ( "more than 2% of all inventories had errors." );
 
-	BrickLink::inst ( )-> setDatabase_Basics ( blti. colors ( ), blti. categories ( ), blti. itemTypes ( ), blti. items ( ));
-	return true;
-}
-
-bool CRebuildDatabase::parseInv ( )
-{
-	BrickLink::inst ( )-> setDatabase_AppearsIn ( m_map );
-	m_map. clear ( );
+	/////////////////////////////////////////////////////////////////////////////////
+	printf ( "\nSTEP 6: Computing the database...\n" );
+	
+	blti. exportInventoriesTo ( bl );
 
 	extern uint _dwords_for_appears, _qwords_for_consists;
                         
 	printf ( "  > appears-in : %11u bytes\n", _dwords_for_appears * 4 );
 	printf ( "  > consists-of: %11u bytes\n", _qwords_for_consists * 8 );
                                                                         
-	return true;
-}
 
-bool CRebuildDatabase::writeDB ( )
-{
-	if ( !BrickLink::inst ( )-> writeDatabase ( m_output )) {
-		m_error = "failed to write the database file.";
-		return false;
-	}
-	return true;
-}
+	/////////////////////////////////////////////////////////////////////////////////
+	printf ( "\nSTEP 7: Writing the new database to disk...\n" );
+	if ( !bl-> writeDatabase ( m_output ))
+		return error ( "failed to write the database file." );
 
+	printf ( "\nFINISHED.\n\n" );
+	return 0;
+}
 
 namespace {
 
@@ -153,15 +156,6 @@ CKeyValueList dbQuery ( int which )
 
 bool CRebuildDatabase::download ( )
 {
-	CTransfer *trans = new CTransfer ( );
-	if ( !trans-> init ( )) {
-		delete trans;
-		m_error = "failed to init HTTP transfer.";
-		return false;
-	}
-	trans-> setProxy ( CConfig::inst ( )-> useProxy ( ), CConfig::inst ( )-> proxyName ( ), CConfig::inst ( )-> proxyPort ( ));
-	connect ( trans, SIGNAL( finished ( CTransfer::Job * )), this, SLOT( downloadJobFinished ( CTransfer::Job * )));
-
 	QString path = BrickLink::inst ( )-> dataPath ( );
 
 	struct {
@@ -208,12 +202,12 @@ bool CRebuildDatabase::download ( )
 			break;
 		}
 
-		trans-> get ( tptr-> m_url, tptr-> m_query, f );
+		m_trans-> get ( tptr-> m_url, tptr-> m_query, f );
 		m_downloads_in_progress++;
 	}
 
 	if ( failed ) {
-		trans-> cancelAllJobs ( );
+		m_trans-> cancelAllJobs ( );
 		return false;
 	}
 
@@ -223,7 +217,6 @@ bool CRebuildDatabase::download ( )
 	if ( m_downloads_failed )
 		return false;
 
-	delete trans;
 	return true;
 }
 
@@ -257,80 +250,50 @@ void CRebuildDatabase::downloadJobFinished ( CTransfer::Job *job )
 	}
 }
 
-bool CRebuildDatabase::downloadInv ( )
+
+bool CRebuildDatabase::downloadInventories ( QPtrVector<BrickLink::Item> &invs )
 {
-	const BrickLink::Item * const *itemp = BrickLink::inst ( )-> items ( ). data ( );
-	uint count = BrickLink::inst ( )-> items ( ). count ( );
+	QString path = BrickLink::inst ( )-> dataPath ( );
 
-	connect ( BrickLink::inst ( ), SIGNAL( inventoryUpdated ( BrickLink::Inventory * )), this, SLOT( inventoryUpdated ( BrickLink::Inventory * )));
-
-	m_processed = 0;
-	m_ptotal = 2 * count;
+	bool failed = false;
+	m_downloads_in_progress = 0;
 	m_downloads_failed = 0;
 
-	uint next_event_loop = count / 500;
+	QCString url = "http://www.bricklink.com/catalogDownload.asp";
 
-	for ( uint i = 0; i < count; i++, itemp++ ) {
-		const BrickLink::Item *item = *itemp;
+	BrickLink::Item **itemp = invs. data ( );
+	for ( uint i = 0; i < invs. count ( ); i++ ) {
+		BrickLink::Item *&item = itemp [i];
 
-		if (( i % next_event_loop ) == 0 )
-			qApp-> processEvents ( );
+		if ( item ) {
+			QFile *f = new QFile ( BrickLink::inst ( )-> dataPath ( item ) + "inventory.xml.new" );
 
-		if ( item-> inventoryUpdated ( ). isValid ( )) {
-			BrickLink::Inventory *inv = BrickLink::inst ( )-> inventory ( item );
-
-			if ( inv ) {
-				inv-> addRef ( );
-
-				m_processed++;
-
-				if ( inv-> updateStatus ( ) != BrickLink::Updating )
-					inventoryUpdated ( inv );
-				else
-					printf( "  > %s [%s]\n", item-> id ( ), item-> name ( ));
+			if ( !f-> open ( IO_WriteOnly )) {
+				m_error = QString ( "failed to write %1: %2" ). arg( f-> name ( )). arg( f-> errorString ( ));
+				delete f;
+				failed = true;
+				break;
 			}
-			else
-				m_ptotal -= 2;
+
+			CKeyValueList query;
+			query << CKeyValue ( "a",            "a" )
+			      << CKeyValue ( "viewType",     "4" )
+			      << CKeyValue ( "itemTypeInv",  QChar ( item-> itemType ( )-> id ( )))
+			      << CKeyValue ( "itemNo",       item-> id ( ))
+			      << CKeyValue ( "downloadType", "X" );
+
+			m_trans-> get ( url, query, f );
+			m_downloads_in_progress++;
 		}
-		else
-			m_ptotal -= 2;
 	}
 
-	while ( m_processed < m_ptotal )
-		qApp-> processEvents ( );
-
-	if ( m_downloads_failed > ( m_ptotal / 2 ) / 20 ) { // more than 5% errors
-		m_error = "too many errors while download inventories";
+	if ( failed ) {
+		m_trans-> cancelAllJobs ( );
 		return false;
 	}
 
+	while ( m_downloads_in_progress )
+		qApp-> processEvents ( );
+
 	return true;
 }
-
-void CRebuildDatabase::inventoryUpdated ( BrickLink::Inventory *inv )
-{
-	if ( !inv )
-		return;
-
-	if ( inv-> updateStatus ( ) == BrickLink::UpdateFailed ) {
-		m_downloads_failed++;
-
-		printf ( "* > inventory failed: %s\n", inv-> item ( )-> id ( ));
-	}
-	else {
-		if ( inv-> item ( )) {
-			foreach ( const BrickLink::InvItem *ii, inv-> inventory ( )) {
-				if ( !ii-> item ( ) || !ii-> color ( ) || !ii-> quantity ( ))
-					continue;
-
-				BrickLink::Item::AppearsInMapVector &vec = m_map [ii-> item ( )][ii-> color ( )];
-				vec. append ( QPair<int, const BrickLink::Item *> ( ii-> quantity ( ), inv-> item ( )));
-			}
-			BrickLink::inst ( )-> setDatabase_ConsistsOf ( inv-> item ( ), inv-> inventory ( ));
-		}
-	}
-
-	inv-> release ( );
-	m_processed++;
-}
-

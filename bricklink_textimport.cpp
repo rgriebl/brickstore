@@ -1,5 +1,7 @@
 #include <qfile.h>
+#include <qfileinfo.h>
 
+#include "cutility.h"
 #include "bricklink.h"
 
 
@@ -303,6 +305,7 @@ template <typename T> bool BrickLink::TextImport::readDB_processLine ( QPtrVecto
 		return false;
 }
 
+
 bool BrickLink::TextImport::readDB_processLine ( btinvlist_dummy & /*dummy*/, uint count, const char **strs )
 {
 	if ( count < 2 || !strs [0][0] || !strs [1][0] )
@@ -311,22 +314,25 @@ bool BrickLink::TextImport::readDB_processLine ( btinvlist_dummy & /*dummy*/, ui
 	const BrickLink::Item *itm = findItem ( strs [0][0], strs [1] );
 
 	if ( itm ) {
-		QDateTime dt;
-		dt. setTime_t ( 0 );
+		time_t t = time_t ( -1 );
 
 		if ( strs [2][0] ) {
 			char ampm;
 			int d, m, y, hh, mm, ss;
 
 			if ( sscanf ( strs [2], "%d/%d/%d %d:%d:%d %cM", &m, &d, &y, &hh, &mm, &ss, &ampm ) == 7 ) {
+				QDateTime dt;
 				dt. setDate ( QDate ( y, m, d ));
 				if ( ampm == 'P' )
 					hh += ( hh == 12 ) ? -12 : 12;
 				dt. setTime ( QTime ( hh, mm, ss ));
+
+				// !!! These dates are in EST (-0500), not UTC !!!
+				t = CUtility::toUTC ( dt, "EST5EDT" );
 			}
 		}
 
-		const_cast <Item *> ( itm )-> m_inv_updated = dt;
+		const_cast <Item *> ( itm )-> m_last_inv_update = t;
 		const_cast <ItemType *> ( itm-> m_item_type )-> m_has_inventories = true;
 	}
 	else
@@ -470,3 +476,80 @@ bool BrickLink::TextImport::readPeeronColors ( const QString &name )
 	return false;
 }
 
+bool BrickLink::TextImport::importInventories ( const QString &path, QPtrVector<Item> &invs )
+{
+	BrickLink::Item **itemp = invs. data ( );
+	for ( uint i = 0; i < invs. count ( ); i++ ) {
+		BrickLink::Item *&item = itemp [i];
+
+		if ( !item ) // already yanked
+			continue;
+
+		if ( !item-> inventoryUpdated ( ). isValid ( )) {
+			item = 0;  // no inv at all -> yank it
+			continue;
+		}
+
+		if ( readInventory ( path, item )) {
+			item = 0;
+		}
+	}
+	return true;
+}
+
+bool BrickLink::TextImport::readInventory ( const QString &path, Item *item )
+{
+	QString filename = QString ( "%1/%2/%3/inventory.xml" ). arg ( path ). arg ( QChar( item-> itemType ( )-> id ( ))). arg ( item-> id ( ));
+
+	QFileInfo fi ( filename );
+	if ( fi. exists ( ) && ( fi. lastModified ( ) < item-> inventoryUpdated ( )))
+		return false;
+
+	bool ok = false;
+
+	QFile f ( filename );
+	if ( f. open ( IO_ReadOnly )) {
+   		uint invalid_items = 0;
+		InvItemList *items = 0;
+
+		QString emsg;
+		int eline = 0, ecol = 0;
+		QDomDocument doc;
+
+		if ( doc. setContent ( &f, &emsg, &eline, &ecol )) {
+			QDomElement root = doc. documentElement ( );
+
+			items = BrickLink::inst ( )-> parseItemListXML ( doc. documentElement ( ). toElement ( ), BrickLink::XMLHint_Inventory , &invalid_items );
+
+			if ( items ) {
+				if ( !invalid_items ) {
+					foreach ( const BrickLink::InvItem *ii, *items ) {
+						if ( !ii-> item ( ) || !ii-> color ( ) || !ii-> quantity ( ))
+							continue;
+
+						BrickLink::Item::AppearsInMapVector &vec = m_appears_in_map [ii-> item ( )][ii-> color ( )];
+						vec. append ( QPair<int, const BrickLink::Item *> ( ii-> quantity ( ), item ));
+					}
+					m_consists_of_map. insert ( item, *items );
+					ok = true;
+				}
+				else {
+					printf ( "* > inventory is not valid: %s\n", item-> id ( ));
+				}
+				delete items;
+			}
+		}
+	}
+	return ok;
+}
+
+void BrickLink::TextImport::exportTo ( BrickLink *bl )
+{
+	bl-> setDatabase_Basics ( m_colors, m_categories, m_item_types, m_items );
+}
+
+void BrickLink::TextImport::exportInventoriesTo ( BrickLink *bl )
+{
+	bl-> setDatabase_ConsistsOf ( m_consists_of_map );
+	bl-> setDatabase_AppearsIn ( m_appears_in_map );
+}

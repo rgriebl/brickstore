@@ -14,10 +14,13 @@
 #ifndef __CUTILITY_H__
 #define __CUTILITY_H__
 
+#include <time.h>
+
 #include <qstring.h>
 #include <qcolor.h>
 
 class QFontMetrics;
+class QDateTime;
 
 // foreach from Qt4
 #undef QT_NO_KEYWORDS
@@ -117,6 +120,7 @@ public:
 	static QString safeOpen ( const QString &basepath );
 	static QString safeRename ( const QString &basepath );
 
+	static time_t toUTC ( const QDateTime &dt, const char *settz = 0 );
 };
 
 #endif

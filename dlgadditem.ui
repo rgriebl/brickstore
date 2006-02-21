@@ -550,7 +550,7 @@
         <sender>w_close</sender>
         <signal>clicked()</signal>
         <receiver>DlgAddItem</receiver>
-        <slot>reject()</slot>
+        <slot>close()</slot>
     </connection>
 </connections>
 <tabstops>

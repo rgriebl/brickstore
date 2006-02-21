@@ -348,8 +348,7 @@ BrickLink *BrickLink::inst ( const QString &datadir, QString *errstring )
 				*errstring = tr( "Data directory \'%1\' is not both read- and writable." ). arg ( datadir );
 		}
 		else {
-			if (!( s_inst-> m_inventories. transfer-> init ( ) &&
-			       s_inst-> m_pictures. transfer-> init ( ) &&
+			if (!( s_inst-> m_pictures. transfer-> init ( ) &&
 			       s_inst-> m_price_guides. transfer-> init ( ))) {
 				delete s_inst;
 				s_inst = 0;
@@ -390,29 +389,23 @@ BrickLink::BrickLink ( const QString &datadir )
 	m_price_guides. transfer = new CTransfer ( );
 	m_price_guides. update_iv = 0;
 
-	m_inventories. transfer = new CTransfer ( );
-
 	m_pictures. transfer = new CTransfer ( );
 	m_pictures. update_iv = 0;
 
 	QPixmapCache::setCacheLimit ( 20 * 1024 * 1024 );  // 80 x 60 x 32 (w x h x bpp) == 20kB -> room for ~1000 pixmaps
 
 	connect ( m_price_guides. transfer, SIGNAL( finished ( CTransfer::Job * )), this, SLOT( priceGuideJobFinished ( CTransfer::Job * )));
-	connect ( m_inventories.  transfer, SIGNAL( finished ( CTransfer::Job * )), this, SLOT( inventoryJobFinished  ( CTransfer::Job * )));
 	connect ( m_pictures.     transfer, SIGNAL( finished ( CTransfer::Job * )), this, SLOT( pictureJobFinished    ( CTransfer::Job * )));
 
-	connect ( m_inventories.  transfer, SIGNAL( progress ( int, int )), this, SIGNAL( inventoryProgress ( int, int )));
 	connect ( m_pictures.     transfer, SIGNAL( progress ( int, int )), this, SIGNAL( pictureProgress ( int, int )));
 	connect ( m_price_guides. transfer, SIGNAL( progress ( int, int )), this, SIGNAL( priceGuideProgress ( int, int )));
 }
 
 BrickLink::~BrickLink ( )
 {
-	cancelInventoryTransfers ( );
 	cancelPictureTransfers ( );
 	cancelPriceGuideTransfers ( );
 
-	delete m_inventories. transfer;
 	delete m_pictures. transfer;
 	delete m_price_guides. transfer;
 
@@ -423,7 +416,6 @@ void BrickLink::setHttpProxy ( bool enable, const QString &name, int port )
 {
 	QCString aname = name. latin1 ( );
 
-	m_inventories.  transfer-> setProxy ( enable, aname, port );
 	m_pictures.     transfer-> setProxy ( enable, aname, port );
 	m_price_guides. transfer-> setProxy ( enable, aname, port );
 }
@@ -524,11 +516,6 @@ const BrickLink::Item *BrickLink::item ( char tid, const char *id ) const
 	return itp ? *itp : 0;
 }
 
-void BrickLink::cancelInventoryTransfers ( )
-{
-	m_inventories. transfer-> cancelAllJobs ( );
-}
-
 void BrickLink::cancelPictureTransfers ( )
 {
 	while ( !m_pictures. diskload. isEmpty ( ))
@@ -550,12 +537,10 @@ bool BrickLink::readDatabase ( const QString &fname )
 {
 	QString filename = fname. isNull ( ) ? dataPath ( ) + defaultDatabaseName ( ) : fname;
 
-	cancelInventoryTransfers ( );
 	cancelPictureTransfers ( );
 	cancelPriceGuideTransfers ( );
 
 	m_price_guides. cache. clear ( );
-	m_inventories. cache. clear ( );
 	m_pictures. cache. clear ( );
 	QPixmapCache::clear ( );
 
@@ -1283,10 +1268,10 @@ bool BrickLink::parseLDrawModelInternal ( QFile &f, const QString &model_name, I
 /*
  * Support routines to rebuild the DB from txt files
  */
-void BrickLink::setDatabase_ConsistsOf ( const Item *item, const InvItemList &inv )
+void BrickLink::setDatabase_ConsistsOf ( const QMap<const Item *, InvItemList> &map )
 {
-	if ( item && !inv. isEmpty ( ))
-		item-> setConsistsOf ( inv );
+	for ( QMap<const Item *, InvItemList>::const_iterator it = map. begin ( ); it != map. end ( ); ++it )
+		it. key ( )-> setConsistsOf ( it. data ( ));
 }
 
 void BrickLink::setDatabase_AppearsIn ( const QMap<const Item *, Item::AppearsInMap> &map )
@@ -1300,12 +1285,10 @@ void BrickLink::setDatabase_Basics ( const QIntDict<Color> &colors,
 									 const QIntDict<ItemType> &item_types,
 									 const QPtrVector<Item> &items )
 {
-	cancelInventoryTransfers ( );
 	cancelPictureTransfers ( );
 	cancelPriceGuideTransfers ( );
 
 	m_price_guides. cache. clear ( );
-	m_inventories. cache. clear ( );
 	m_pictures. cache. clear ( );
 	QPixmapCache::clear ( );
 

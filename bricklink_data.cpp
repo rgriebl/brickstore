@@ -71,13 +71,16 @@ QDataStream &operator << ( QDataStream &ds, const BrickLink::ItemType *itt )
 	ds << Q_UINT8( itt-> m_id ) << Q_UINT8( itt-> m_picture_id ) << itt-> m_name << flags;
 	
 	Q_UINT32 catcount = 0;
-	for ( const BrickLink::Category **catp = itt-> m_categories; *catp; catp++ )
-		catcount++;
-
+	if ( itt-> m_categories ) {
+		for ( const BrickLink::Category **catp = itt-> m_categories; *catp; catp++ )
+			catcount++;
+	}
 	ds << catcount;
-	for ( const BrickLink::Category **catp = itt-> m_categories; *catp; catp++ )
-		ds << Q_INT32(( *catp )-> id ( ));
-	
+	if ( catcount ) {
+		for ( const BrickLink::Category **catp = itt-> m_categories; *catp; catp++ )
+			ds << Q_INT32(( *catp )-> id ( ));
+	}
+
 	return ds;
 }
 
@@ -286,15 +289,18 @@ QDataStream &operator << ( QDataStream &ds, const BrickLink::Item *item )
 	ds << item-> m_id << item-> m_name << Q_UINT8( item-> m_item_type-> id ( ));
 	
 	Q_UINT32 catcount = 0;
-	for ( const BrickLink::Category **catp = item-> m_categories; *catp; catp++ )
-		catcount++;
-
+	if ( item-> m_categories ) {
+		for ( const BrickLink::Category **catp = item-> m_categories; *catp; catp++ )
+			catcount++;
+	}
 	ds << catcount;
-	for ( const BrickLink::Category **catp = item-> m_categories; *catp; catp++ )
-		ds << Q_INT32(( *catp )-> id ( ));
+	if ( catcount ) {
+		for ( const BrickLink::Category **catp = item-> m_categories; *catp; catp++ )
+			ds << Q_INT32(( *catp )-> id ( ));
+	}
 
 	Q_INT32 colorid = item-> m_color ? Q_INT32( item-> m_color-> id ( )) : -1;
-	ds << colorid << item-> m_inv_updated << item-> m_weight << Q_UINT32( item-> m_index ) << Q_UINT32( item-> m_year );
+	ds << colorid << Q_INT64( item-> m_last_inv_update ) << item-> m_weight << Q_UINT32( item-> m_index ) << Q_UINT32( item-> m_year );
 
 	if ( item-> m_appears_in && item-> m_appears_in [0] && item-> m_appears_in [1] ) {
 		Q_UINT32 *ptr = item-> m_appears_in;
@@ -343,10 +349,12 @@ QDataStream &operator >> ( QDataStream &ds, BrickLink::Item *item )
 
 	Q_INT32 colorid = 0;
 	Q_UINT32 index = 0, year = 0;
-	ds >> colorid >> item-> m_inv_updated >> item-> m_weight >> index >> year;
+	Q_INT64 invupd = 0;
+	ds >> colorid >> invupd >> item-> m_weight >> index >> year;
 	item-> m_color = colorid == -1 ? 0 : BrickLink::inst ( )-> color ( colorid );
 	item-> m_index = index;
 	item-> m_year = year;
+	item-> m_last_inv_update = invupd;
 	
 	Q_UINT32 appears = 0, appears_size = 0;
 	ds >> appears;
@@ -538,10 +546,32 @@ bool BrickLink::InvItem::mergeFrom ( const InvItem &from, bool prefer_from )
 			setTierQuantity ( i, from. tierQuantity ( i ));
 	}
 	
-	if ( !from. remarks ( ). isEmpty ( ) && ( remarks ( ). isEmpty ( ) || prefer_from ))
+	if ( !from. remarks ( ). isEmpty ( ) && !remarks ( ). isEmpty ( )) {
+		if ( from. remarks ( ) == remarks ( )) 
+			;
+		else if ( remarks ( ). find ( QRegExp( "\\b" + QRegExp::escape ( from. remarks ( )) + "\\b" )) != -1 )
+			;
+		else if ( from. remarks ( ). find ( QRegExp( "\\b" + QRegExp::escape ( remarks ( )) + "\\b" )) != -1 )
+			setRemarks ( from. remarks ( ));
+		else
+			setRemarks ( QString ( prefer_from  ? "%1 %2" : "%2 %1" ). arg( from. remarks ( ), remarks ( )));
+	}
+	else if ( !from. remarks ( ). isEmpty ( ))
 		setRemarks ( from. remarks ( ));
-	if ( !from. comments ( ). isEmpty ( ) && ( comments ( ). isEmpty ( ) || prefer_from ))
+
+	if ( !from. comments ( ). isEmpty ( ) && !comments ( ). isEmpty ( )) {
+		if ( from. comments ( ) == comments ( )) 
+			;
+		else if ( comments ( ). find ( QRegExp( "\\b" + QRegExp::escape ( from. comments ( )) + "\\b" )) != -1 )
+			;
+		else if ( from. comments ( ). find ( QRegExp( "\\b" + QRegExp::escape ( comments ( )) + "\\b" )) != -1 )
+			setComments ( from. comments ( ));
+		else
+			setComments ( QString ( prefer_from  ? "%1 %2" : "%2 %1" ). arg( from. comments ( ), comments ( )));
+	}
+	else if ( !from. comments ( ). isEmpty ( ))
 		setComments ( from. comments ( ));
+
 	if ( !from. reserved ( ). isEmpty ( ) && ( reserved ( ). isEmpty ( ) || prefer_from ))
 		setReserved ( from. reserved ( ));	
 	if ( !from. customPictureUrl ( ). isEmpty ( ) && ( customPictureUrl ( ). isEmpty ( ) || prefer_from ))

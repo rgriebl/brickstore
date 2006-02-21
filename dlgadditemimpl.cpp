@@ -36,10 +36,10 @@
 
 
 
-DlgAddItemImpl::DlgAddItemImpl ( QWidget *parent, CDocument *doc, const char *name, bool modal, int fl )
+DlgAddItemImpl::DlgAddItemImpl ( QWidget *parent, const char *name, bool modal, int fl )
 	: DlgAddItem ( parent, name, modal, fl | WStyle_Customize | WStyle_Title | WStyle_ContextHelp | WStyle_NormalBorder | WStyle_SysMenu | WStyle_Maximize )
 {
-	m_document = doc;
+	m_window = 0;
 	m_caption_fmt        = caption ( );
 	m_price_label_fmt    = w_label_currency-> text ( );
 	m_currency_label_fmt = w_radio_currency-> text ( );
@@ -99,7 +99,6 @@ DlgAddItemImpl::DlgAddItemImpl ( QWidget *parent, CDocument *doc, const char *na
 
 	connect ( CConfig::inst ( ), SIGNAL( simpleModeChanged ( bool )), this, SLOT( setSimpleMode ( bool )));
 	connect ( CMoney::inst ( ), SIGNAL( monetarySettingsChanged ( )), this, SLOT( updateMonetary ( )));
-	connect ( m_document, SIGNAL( titleChanged ( const QString & )), this, SLOT( updateCaption ( )));
 
 	updateMonetary ( );
 
@@ -130,7 +129,38 @@ DlgAddItemImpl::~DlgAddItemImpl ( )
 
 void DlgAddItemImpl::updateCaption ( )
 {
-	setCaption ( m_caption_fmt. arg ( m_document-> title ( )));
+	setCaption ( m_caption_fmt. arg ( m_window ? m_window-> document ( )-> title ( ) : QString ( )));
+}
+
+void DlgAddItemImpl::attach ( CWindow *w )
+{
+	if ( m_window )
+		disconnect ( m_window-> document ( ), SIGNAL( titleChanged ( const QString & )), this, SLOT( updateCaption ( )));
+	m_window = w;
+	if ( m_window )
+		connect ( m_window-> document ( ), SIGNAL( titleChanged ( const QString & )), this, SLOT( updateCaption ( )));
+
+	setEnabled ( m_window );
+
+	updateCaption ( );
+}
+
+void DlgAddItemImpl::wheelEvent ( QWheelEvent *e )
+{
+	if ( e-> state ( ) == Qt::ControlButton ) {
+		double o = windowOpacity ( ) + double( e-> delta ( )) / 1200.0;
+		setWindowOpacity ( double( QMIN( QMAX( o, 0.2 ), 1.0 ))); 
+
+		e-> accept ( );
+	}
+}
+
+void DlgAddItemImpl::closeEvent ( QCloseEvent *e )
+{
+	DlgAddItem::closeEvent ( e );
+
+	if ( e-> isAccepted ( ))
+		emit closed ( );
 }
 
 void DlgAddItemImpl::setSimpleMode ( bool b )
@@ -277,7 +307,7 @@ bool DlgAddItemImpl::checkAddPossible ( )
 
 void DlgAddItemImpl::addClicked ( )
 {
-	if ( !checkAddPossible ( ))
+	if ( !checkAddPossible ( ) || !m_window )
 		return;
 
 	BrickLink::InvItem *ii = new BrickLink::InvItem ( w_select_color-> color ( ), w_select_item-> item ( ));
@@ -297,7 +327,7 @@ void DlgAddItemImpl::addClicked ( )
 		ii-> setTierPrice ( i, tierPriceValue ( i ));
 	}
 
-	emit addItem ( ii, w_merge-> isChecked ( ) ? CWindow::MergeAction_Force | CWindow::MergeKeep_Old : CWindow::MergeAction_None );
+	m_window-> addItem ( ii, w_merge-> isChecked ( ) ? CWindow::MergeAction_Force | CWindow::MergeKeep_Old : CWindow::MergeAction_None );
 }
 
 void DlgAddItemImpl::setPrice ( money_t d )

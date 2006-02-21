@@ -32,18 +32,15 @@ public:
 
 private slots:
 	void downloadJobFinished ( CTransfer::Job *job );
-	void inventoryUpdated ( BrickLink::Inventory *inv );
 
 private:
-	int error ( );
+	int error ( const QString & );
 
-	bool parse ( );
-	bool parseInv ( );
 	bool download ( );
-	bool downloadInv ( );
-	bool writeDB ( );
+	bool downloadInventories ( QPtrVector<BrickLink::Item> &invs );
 
 private:
+	CTransfer *m_trans;
 	QString m_output;
 	QString m_error;
 	int m_downloads_in_progress;
@@ -51,8 +48,6 @@ private:
 	int m_processed;
 	int m_ptotal;
 	QDateTime m_date;
-
-	QMap<const BrickLink::Item *, BrickLink::Item::AppearsInMap> m_map;
 };
 
 #endif

@@ -146,7 +146,6 @@ HEADERS += bricklink.h \
 SOURCES += bricklink.cpp \
            bricklink_data.cpp \
            bricklink_picture.cpp \
-           bricklink_inventory.cpp \
            bricklink_priceguide.cpp \
            bricklink_textimport.cpp \
            capplication.cpp \

@@ -19,6 +19,7 @@
 #include <qmap.h>
 #include <qaction.h>
 #include <qstringlist.h>
+#include <qguardedptr.h>
 
 #include "cdocument.h"
 #include "clistaction.h"
@@ -38,6 +39,7 @@ class CTaskPriceGuideWidget;
 class CTaskLinksWidget;
 class CTaskAppearsInWidget;
 class CDocument;
+class DlgAddItemImpl;
 
 
 class CFrameWork : public QMainWindow {
@@ -110,10 +112,9 @@ private slots:
 
 	void setOnlineStatus ( QAction * );
 	void setWindowMode ( QAction * );
-
-	void initBrickLinkDelayed ( );
-
 	void cancelAllTransfers ( );
+	void toggleAddItemDialog ( bool b );
+	void closedAddItemDialog ( );
 
 protected:
 	virtual void dragMoveEvent ( QDragMoveEvent *e );
@@ -187,6 +188,7 @@ private:
 	CTaskLinksWidget *m_task_links;
 	CTaskAppearsInWidget *m_task_appears;
 	QPopupMenu *m_contextmenu;
+	QGuardedPtr <DlgAddItemImpl> m_add_dialog;
 
 	QStringList m_recent_files;
 

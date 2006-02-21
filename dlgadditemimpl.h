@@ -19,19 +19,25 @@
 #include "bricklink.h"
 
 class QValidator;
-class CDocument;
+class CWindow;
 
 class DlgAddItemImpl : public DlgAddItem {
 	Q_OBJECT
 public:
-	DlgAddItemImpl ( QWidget *parent, CDocument *doc, const char *name = 0, bool modal = false, int fl = 0 );
+	DlgAddItemImpl ( QWidget *parent, const char *name = 0, bool modal = false, int fl = 0 );
 	virtual ~DlgAddItemImpl ( );
 
+	void attach ( CWindow *window );
+
 signals:
-	void addItem ( BrickLink::InvItem *, uint );
+	void closed ( );
 
 protected slots:
 	virtual void languageChange ( );
+
+protected:
+	virtual void wheelEvent ( QWheelEvent *e );
+	virtual void closeEvent ( QCloseEvent *e );
 
 private slots:
 	void updateCaption ( );
@@ -50,7 +56,7 @@ private:
 	money_t tierPriceValue ( int i );
 
 private:
-	CDocument *m_document;
+	CWindow *m_window;
 
 	QLineEdit *w_tier_qty [3];
 	QLineEdit *w_tier_price [3];

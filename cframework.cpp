@@ -36,7 +36,6 @@
 #include "cresource.h"
 #include "cmultiprogressbar.h"
 #include "ciconfactory.h"
-#include "dlgsettingsimpl.h"
 #include "cutility.h"
 #include "cspinner.h"
 #include "cundo.h"
@@ -45,6 +44,9 @@
 #include "ctaskwidgets.h"
 #include "cprogressdialog.h"
 #include "cupdatedatabase.h"
+
+#include "dlgadditemimpl.h"
+#include "dlgsettingsimpl.h"
 
 #include "cframework.h"
 
@@ -281,15 +283,28 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 	connect ( bl, SIGNAL( priceGuideProgress ( int, int )), this, SLOT( gotPriceGuideProgress ( int, int )));
 	connect ( bl, SIGNAL( pictureProgress ( int, int )),    this, SLOT( gotPictureProgress ( int, int )));
 
-	QTimer::singleShot ( 0, this, SLOT( initBrickLinkDelayed ( )));
-
 	connect ( m_progress, SIGNAL( statusChange ( bool )), m_spinner, SLOT( setActive ( bool )));
 	connect ( CUndoManager::inst ( ), SIGNAL( cleanChanged ( bool )), this, SLOT( modificationUpdate ( )));
-	connectAllActions ( false, 0 ); // init enabled/disabled status of document actions
+
+	bool dbok = BrickLink::inst ( )-> readDatabase ( );
+
+	if ( !dbok ) {
+		if ( CMessageBox::warning ( this, tr( "Could not load the BrickLink database files.<br /><br />Should these files be updated now?" ), CMessageBox::Yes, CMessageBox::No ) == CMessageBox::Yes )
+			dbok = updateDatabase ( );
+	}
+
+	if ( dbok )
+		cApp-> enableEmitOpenDocument ( );
+	else
+		CMessageBox::warning ( this, tr( "Could not load the BrickLink database files.<br /><br />The program is not functional without these files." ));
 
 	setAcceptDrops ( true );
 
+	m_add_dialog = 0;
 	m_running = true;
+
+	connectAllActions ( false, 0 ); // init enabled/disabled status of document actions
+	connectWindow ( 0 );
 }
 
 void CFrameWork::languageChange ( )
@@ -458,25 +473,6 @@ void CFrameWork::resizeEvent ( QResizeEvent * )
 {
 	if (!( windowState ( ) & ( WindowMinimized | WindowMaximized | WindowFullScreen )))
 		m_normal_geometry. setSize ( size ( ));
-}
-
-void CFrameWork::initBrickLinkDelayed ( )
-{
-	QApplication::setOverrideCursor ( QCursor( Qt::WaitCursor ));
-
-	bool dbok = BrickLink::inst ( )-> readDatabase ( );
-
-	QApplication::restoreOverrideCursor ( );		
-
-	if ( !dbok ) {
-		if ( CMessageBox::warning ( this, tr( "Could not load the BrickLink database files.<br /><br />Should these files be updated now?" ), CMessageBox::Yes, CMessageBox::No ) == CMessageBox::Yes )
-			dbok = updateDatabase ( );
-	}
-
-	if ( dbok )
-		cApp-> enableEmitOpenDocument ( );
-	else
-		CMessageBox::warning ( this, tr( "Could not load the BrickLink database files.<br /><br />The program is not functional without these files." ));
 }
 
 QAction *CFrameWork::findAction ( const char *name )
@@ -655,7 +651,9 @@ void CFrameWork::createActions ( )
 	(void) new QAction ( this, "edit_copy" );
 	(void) new QAction ( this, "edit_paste" );
 	(void) new QAction ( this, "edit_delete" );
-	(void) new QAction ( this, "edit_additems" );
+	a = new QAction ( this, "edit_additems", true );
+	connect ( a, SIGNAL( toggled ( bool )), this, SLOT( toggleAddItemDialog ( bool )));
+
 	(void) new QAction ( this, "edit_subtractitems" );
 	(void) new QAction ( this, "edit_mergeitems" );
 	(void) new QAction ( this, "edit_partoutitems" );
@@ -895,6 +893,8 @@ bool CFrameWork::createWindow ( CDocument *doc )
 bool CFrameWork::updateDatabase ( )
 {
 	if ( closeAllWindows ( )) {
+		delete m_add_dialog;
+
 		CProgressDialog d ( this );
 		CUpdateDatabase update ( &d );
 
@@ -967,7 +967,6 @@ void CFrameWork::connectAllActions ( bool do_connect, CWindow *window )
 	connectAction ( do_connect, "edit_select_all", window, SLOT( selectAll ( )));
 	connectAction ( do_connect, "edit_select_none", window, SLOT( selectNone ( )));
 
-	connectAction ( do_connect, "edit_additems", window, SLOT( editAddItems ( )));
 	connectAction ( do_connect, "edit_subtractitems", window, SLOT( editSubtractItems ( )));
 	connectAction ( do_connect, "edit_mergeitems", window, SLOT( editMergeItems ( )));
 	connectAction ( do_connect, "edit_partoutitems", window, SLOT( editPartOutItems ( )));
@@ -993,7 +992,7 @@ void CFrameWork::connectAllActions ( bool do_connect, CWindow *window )
 
 void CFrameWork::connectWindow ( QWidget *w )
 {
-	if ( w == m_current_window )
+	if ( w && ( w == m_current_window ))
 		return;
 
 	if ( m_current_window ) {
@@ -1005,10 +1004,6 @@ void CFrameWork::connectWindow ( QWidget *w )
 		disconnect ( doc, SIGNAL( selectionChanged ( const CDocument::ItemList & )), this, SLOT( selectionUpdate ( const CDocument::ItemList & )));
 
 		m_current_window = 0;
-
-		selectionUpdate ( CDocument::ItemList ( ));
-		statisticsUpdate ( );
-		modificationUpdate ( );
 	}
 
 	if ( w && ::qt_cast <CWindow *> ( w )) {
@@ -1021,11 +1016,18 @@ void CFrameWork::connectWindow ( QWidget *w )
 		connect ( doc, SIGNAL( selectionChanged ( const CDocument::ItemList & )), this, SLOT( selectionUpdate ( const CDocument::ItemList & )));
 
 		m_current_window = window;
-
-		selectionUpdate ( doc-> selection ( ));
-		statisticsUpdate ( );
-		modificationUpdate ( );
 	}
+
+	if ( m_add_dialog ) {
+		m_add_dialog-> attach ( m_current_window );
+		if ( !m_current_window )
+			m_add_dialog-> close ( );
+	}
+	findAction ( "edit_additems" )-> setEnabled (( m_current_window ));
+
+	selectionUpdate ( m_current_window ? m_current_window-> document ( )-> selection ( ) : CDocument::ItemList ( ));
+	statisticsUpdate ( );
+	modificationUpdate ( );
 
 	emit windowActivated ( m_current_window );
 	emit documentActivated ( m_current_window ? m_current_window-> document ( ) : 0 );
@@ -1266,8 +1268,34 @@ QPtrList <CWindow> CFrameWork::allWindows ( ) const
 void CFrameWork::cancelAllTransfers ( )
 {
 	if ( CMessageBox::question ( this, tr( "Do you want to cancel all outstanding inventory, picture and price guide transfers?" ), CMessageBox::Yes | CMessageBox::Default, CMessageBox::No | CMessageBox::Escape ) == CMessageBox::Yes ) {
-		BrickLink::inst ( )-> cancelInventoryTransfers ( );
 		BrickLink::inst ( )-> cancelPictureTransfers ( );
 		BrickLink::inst ( )-> cancelPriceGuideTransfers ( );
 	}
+}
+
+void CFrameWork::toggleAddItemDialog ( bool b )
+{
+	if ( !m_add_dialog ) {
+		m_add_dialog = new DlgAddItemImpl ( this, "additems", false );
+		connect ( m_add_dialog, SIGNAL( closed ( )), this, SLOT( closedAddItemDialog ( )));
+
+		m_add_dialog-> attach ( m_current_window );
+	}
+
+	if ( b ) {
+		if ( m_add_dialog-> isVisible ( )) {
+			m_add_dialog-> raise ( );
+			m_add_dialog-> setActiveWindow ( );
+		}
+		else {
+			m_add_dialog-> show ( );
+		}
+	}
+	else
+		m_add_dialog-> close ( );
+}
+
+void CFrameWork::closedAddItemDialog ( )
+{
+	findAction ( "edit_additems" )-> setOn ( m_add_dialog && m_add_dialog-> isVisible ( ));
 }

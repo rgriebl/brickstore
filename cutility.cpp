@@ -360,3 +360,53 @@ QString CUtility::safeRename ( const QString &basepath )
 	return error;
 }
 
+namespace {
+
+void set_tz ( const char *tz )
+{
+	char pebuf [256] = "TZ=";
+	if ( tz )
+		strcat ( pebuf, tz );
+	putenv ( pebuf );
+#if defined( Q_OS_WIN32 )
+	_tzset ( );
+#else
+	tzset ( );
+#endif
+}
+
+}
+
+time_t CUtility::toUTC ( const QDateTime &dt, const char *settz )
+{
+    QCString oldtz;
+	
+	if ( settz ) {
+		oldtz = getenv ( "TZ" );
+		set_tz ( settz );
+	}
+
+	// get a tm structure from the system to get the correct tz_name
+	time_t t = time ( 0 );
+	struct tm *lt = localtime ( &t );
+
+	lt-> tm_sec   = dt. time ( ). second ( );
+	lt-> tm_min   = dt. time ( ). minute ( );
+	lt-> tm_hour  = dt. time ( ). hour ( );
+	lt-> tm_mday  = dt. date ( ). day ( );
+	lt-> tm_mon   = dt. date ( ). month ( ) - 1;   // 0-11 instead of 1-12
+	lt-> tm_year  = dt. date ( ). year ( ) - 1900; // year - 1900
+	lt-> tm_wday  = -1;
+	lt-> tm_yday  = -1;
+	lt-> tm_isdst = -1;	// tm_isdst negative -> mktime will find out about DST
+
+	// keep tm_zone and tm_gmtoff
+	t = mktime ( lt );
+
+	if ( settz )
+		set_tz ( oldtz. data ( ));
+
+	time_t t2 = dt.toTime_t();
+
+	return t;
+}
