@@ -1349,6 +1349,10 @@
         <source>Color</source>
         <translation>Couleur</translation>
     </message>
+    <message>
+        <source>RGB</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>CSelectColorDialog</name>

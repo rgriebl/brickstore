@@ -533,9 +533,6 @@ bool BrickLink::TextImport::readInventory ( const QString &path, Item *item )
 					m_consists_of_map. insert ( item, *items );
 					ok = true;
 				}
-				else {
-					printf ( "* > inventory is not valid: %s\n", item-> id ( ));
-				}
 				delete items;
 			}
 		}

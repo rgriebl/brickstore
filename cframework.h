@@ -103,7 +103,6 @@ private slots:
 	
 	void connectWindow ( QWidget *w );
 
-	void gotInventoryProgress ( int p, int t );
 	void gotPictureProgress ( int p, int t );
 	void gotPriceGuideProgress ( int p, int t );
 

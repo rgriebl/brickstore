@@ -98,7 +98,8 @@ int CRebuildDatabase::exec ( )
 	/////////////////////////////////////////////////////////////////////////////////
 	printf ( "\nSTEP 4: Downloading missing/updated inventories...\n" );
 	
-	downloadInventories ( invs );
+	if ( !downloadInventories ( invs ))
+		return error ( m_error );
 	
 	/////////////////////////////////////////////////////////////////////////////////
 	printf ( "\nSTEP 5: Parsing inventories (part II)...\n" );
@@ -226,6 +227,7 @@ void CRebuildDatabase::downloadJobFinished ( CTransfer::Job *job )
 		QFile *f = job-> file ( );
 
 		m_downloads_in_progress--;
+		bool ok = false;
 
 		if ( !job-> failed ( ) && f ) {
 			f-> close ( );
@@ -235,18 +237,24 @@ void CRebuildDatabase::downloadJobFinished ( CTransfer::Job *job )
 
 			QString err = CUtility::safeRename ( basepath );
 
-			if ( err. isNull ( )) {
-				printf ( "  > %s\n", basepath. ascii ( ));
-			}
-			else {
+			if ( err. isNull ( ))
+				ok = true;
+			else
 				m_error = err;
-				m_downloads_failed++;
-			}
 		}
-		else {
-			m_error = QString( "failed to download file: %1" ). arg( job-> url ( ));
+		else
+			m_error = "failed to download file.";
+
+		if ( !ok )
 			m_downloads_failed++;
-		}
+
+		QString fname = f-> name ( );
+		fname. remove ( 0, BrickLink::inst ( )-> dataPath ( ). length ( ));
+		printf ( "%c > %s", ok ? ' ' : '*', fname. ascii ( ));
+		if ( ok )
+			printf ( "\n" );
+		else
+			printf ( " (%s)\n", m_error. ascii ( ));
 	}
 }
 

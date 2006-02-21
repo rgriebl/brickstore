@@ -54,7 +54,6 @@
 namespace {
 
 enum ProgressItem {
-	PGI_Inventory,
 	PGI_PriceGuide,
 	PGI_Picture
 };
@@ -248,7 +247,7 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 	}
 	m_normal_geometry = QRect ( pos ( ), size ( ));
 
-	setWindowState ( wstate & ( WindowMinimized | WindowMaximized | WindowFullScreen ));
+	setWindowState ( wstate & ( /*WindowMinimized |*/ WindowMaximized | WindowFullScreen ));
 	findAction ( "view_fullscreen" )-> setOn ( wstate & WindowFullScreen );
 
 	switch ( CConfig::inst ( )-> readNumEntry ( "/MainWindow/Layout/WindowMode", 1 )) {
@@ -279,7 +278,6 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 		bl-> setUpdateIntervals ( pic, pg );
 	}
 
-	connect ( bl, SIGNAL( inventoryProgress ( int, int )),  this, SLOT( gotInventoryProgress ( int, int )));
 	connect ( bl, SIGNAL( priceGuideProgress ( int, int )), this, SLOT( gotPriceGuideProgress ( int, int )));
 	connect ( bl, SIGNAL( pictureProgress ( int, int )),    this, SLOT( gotPictureProgress ( int, int )));
 
@@ -311,7 +309,6 @@ void CFrameWork::languageChange ( )
 {
 	m_toolbar-> setLabel ( tr( "Toolbar" ));
 	m_progress-> setItemLabel ( PGI_PriceGuide, tr( "Priceguide updates" ));
-	m_progress-> setItemLabel ( PGI_Inventory,  tr( "Inventory updates" ));
 	m_progress-> setItemLabel ( PGI_Picture,    tr( "Picture updates" ));
 
 	m_taskpanes-> setItemText ( m_task_info,       tr( "Info" ));
@@ -506,7 +503,6 @@ void CFrameWork::createStatusBar ( )
 		m_progress-> setStopPixmap ( p );
 
 	m_progress-> addItem ( QString ( ), PGI_PriceGuide );
-	m_progress-> addItem ( QString ( ), PGI_Inventory  );
 	m_progress-> addItem ( QString ( ), PGI_Picture    );
 
 	//m_progress-> setProgress ( -1, 100 );
@@ -1165,11 +1161,6 @@ void CFrameWork::modificationUpdate ( )
 		QToolTip::remove ( m_modified );
 	else
 		QToolTip::add ( m_modified, tr( "Unsaved modifications" ));
-}
-
-void CFrameWork::gotInventoryProgress ( int p, int t )
-{
-	m_progress-> setItemProgress ( PGI_Inventory, p, t );
 }
 
 void CFrameWork::gotPictureProgress ( int p, int t )

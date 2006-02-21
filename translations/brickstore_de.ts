@@ -1204,6 +1204,10 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
         <source>Color</source>
         <translation>Farbe</translation>
     </message>
+    <message>
+        <source>RGB</source>
+        <translation>RGB</translation>
+    </message>
 </context>
 <context>
     <name>CSelectColorDialog</name>
