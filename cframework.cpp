@@ -430,11 +430,14 @@ CFrameWork::~CFrameWork ( )
 
 	CConfig::inst ( )-> writeEntry ( "/MainWindow/Layout/DockWindows", str );
 
-	CConfig::inst ( )-> writeEntry ( "/MainWindow/Layout/Left",   m_normal_geometry. x ( ));
-	CConfig::inst ( )-> writeEntry ( "/MainWindow/Layout/Top",    m_normal_geometry. y ( ));
-	CConfig::inst ( )-> writeEntry ( "/MainWindow/Layout/Width",  m_normal_geometry. width ( ));
-	CConfig::inst ( )-> writeEntry ( "/MainWindow/Layout/Height", m_normal_geometry. height ( ));
-	CConfig::inst ( )-> writeEntry ( "/MainWindow/Layout/State",  (int) windowState ( ));
+	int wstate = windowState ( ) & ( WindowMinimized | WindowMaximized | WindowFullScreen );
+	QRect wgeo = wstate ? m_normal_geometry : QRect ( pos ( ), size ( ));
+
+	CConfig::inst ( )-> writeEntry ( "/MainWindow/Layout/State",  wstate );
+	CConfig::inst ( )-> writeEntry ( "/MainWindow/Layout/Left",   wgeo. x ( ));
+	CConfig::inst ( )-> writeEntry ( "/MainWindow/Layout/Top",    wgeo. y ( ));
+	CConfig::inst ( )-> writeEntry ( "/MainWindow/Layout/Width",  wgeo. width ( ));
+	CConfig::inst ( )-> writeEntry ( "/MainWindow/Layout/Height", wgeo. height ( ));
 
 	CConfig::inst ( )-> writeEntry ( "/MainWindow/Layout/WindowMode", m_mdi-> showTabs ( ) ? ( m_mdi-> spreadSheetTabs ( ) ? 2 : 1 ) : 0 );
 
@@ -463,16 +466,18 @@ void CFrameWork::dropEvent ( QDropEvent *e )
 	}
 }
 
-void CFrameWork::moveEvent ( QMoveEvent * )
+void CFrameWork::moveEvent ( QMoveEvent *e )
 {
 	if (!( windowState ( ) & ( WindowMinimized | WindowMaximized | WindowFullScreen )))
 		m_normal_geometry. setTopLeft ( pos ( ));
+	QMainWindow::moveEvent ( e );
 }
 
-void CFrameWork::resizeEvent ( QResizeEvent * )
+void CFrameWork::resizeEvent ( QResizeEvent *e )
 {
 	if (!( windowState ( ) & ( WindowMinimized | WindowMaximized | WindowFullScreen )))
 		m_normal_geometry. setSize ( size ( ));
+	QMainWindow::resizeEvent ( e );
 }
 
 QAction *CFrameWork::findAction ( const char *name )

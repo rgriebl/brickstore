@@ -16,6 +16,7 @@
 #include <qpushbutton.h>
 #include <qstyle.h>
 #include <qpainter.h>
+#include <qtooltip.h>
 
 #include "cutility.h"
 #include "clistview.h"
@@ -38,7 +39,21 @@ public:
 
 	virtual QString text ( int /*col*/ ) const
 	{ return m_col-> name ( ); }
+	
+	virtual QString toolTip ( ) const
+	{ 
+		if ( color ( )-> color ( ). isValid ( )) {
+			QFontMetrics fm = listView ( )-> fontMetrics ( );
+			QPixmap bigpix;
+			bigpix. convertFromImage ( BrickLink::inst ( )-> colorImage ( color ( ), fm. height ( ) * 8, fm. height ( ) * 4 ));
+		
+			QMimeSourceFactory::defaultFactory ( )-> setPixmap ( "select_color_tooltip_picture", bigpix );
 
+			return QString( "<img src=\"select_color_tooltip_picture\"><br />%1: %2" ). arg ( CSelectColor::tr( "RGB" ), color ( )-> color ( ). name ( ));
+		}
+		return QString ( );
+	}
+	
 	virtual int compare ( QListViewItem *i, int /*col*/, bool ascending ) const
 	{
 		ColListItem *cli = static_cast <ColListItem *> ( i );
@@ -57,6 +72,31 @@ private:
 	QPixmap m_pix;
 };
 
+class ColToolTip : public QToolTip {
+public:
+	ColToolTip ( QWidget *parent, CListView *clv )
+		: QToolTip( parent ), m_clv ( clv )
+	{ }
+	
+	virtual ~ColToolTip ( )
+	{ }
+
+	void maybeTip ( const QPoint &pos )
+	{
+		if ( !parentWidget ( ) || !m_clv /*|| !m_clv-> showToolTips ( )*/ )
+			return;
+
+		ColListItem *item = static_cast <ColListItem *> ( m_clv-> itemAt ( pos ));
+		
+		if ( item )
+			tip ( m_clv-> itemRect ( item ), item-> toolTip ( ));
+	}
+
+private:
+    CListView *m_clv;
+};
+
+
 } // namespace
 
 
@@ -69,6 +109,7 @@ CSelectColor::CSelectColor ( QWidget *parent, const char *name, WFlags fl )
 	w_colors-> addColumn ( QString ( ));
 	w_colors-> header ( )-> setMovingEnabled ( false );
 	w_colors-> header ( )-> setResizeEnabled ( false );
+	new ColToolTip ( w_colors-> viewport ( ), w_colors );
 
 	const QIntDict<BrickLink::Color> &coldict = BrickLink::inst ( )-> colors ( );
 

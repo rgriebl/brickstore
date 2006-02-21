@@ -102,7 +102,7 @@ public:
 	virtual ~AppearsInToolTip ( )
 	{ }
 
-    void maybeTip ( const QPoint &pos )
+	void maybeTip ( const QPoint &pos )
 	{
 		if ( !parentWidget ( ) || !m_aiw /*|| !m_aiw-> showToolTips ( )*/ )
 			return;
