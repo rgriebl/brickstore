@@ -26,6 +26,7 @@
 #include <qobjectlist.h>
 #include <qtooltip.h>
 #include <qcursor.h>
+#include <qaccel.h>
 
 #include "capplication.h"
 #include "cmessagebox.h"
@@ -1273,6 +1274,11 @@ void CFrameWork::toggleAddItemDialog ( bool b )
 {
 	if ( !m_add_dialog ) {
 		m_add_dialog = new DlgAddItemImpl ( this, "additems", false );
+		
+		QAccel *acc = new QAccel ( m_add_dialog );
+		QAction *action = findAction ( "edit_additems" );
+		acc-> connectItem ( acc-> insertItem ( action-> accel ( )), action, SLOT( toggle ( )));
+		
 		connect ( m_add_dialog, SIGNAL( closed ( )), this, SLOT( closedAddItemDialog ( )));
 
 		m_add_dialog-> attach ( m_current_window );
