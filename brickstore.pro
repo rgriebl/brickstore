@@ -12,7 +12,7 @@
 ## See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 
 isEmpty( RELEASE ) {
-  RELEASE    = 1.1.0
+  RELEASE    = 1.1.1
 }
 
 TEMPLATE     = app
@@ -46,6 +46,7 @@ UI_DIR    = .uic
 win32 {
   system( cscript.exe //B scripts\update_version.js $$RELEASE)
 
+  CONFIG -= shared
   LIBS += libcurl.lib
   DEFINES += CURL_STATICLIB
   RC_FILE = brickstore.rc
@@ -91,6 +92,7 @@ unix:!macx {
 }
 
 macx {
+  CONFIG -= shared
   # HACK, but we need the abs. path, since MacOS X already has an old 2.0.2 version in /usr/lib
   LIBS += /usr/local/lib/libcurl.a
 }
@@ -188,7 +190,6 @@ FORMS   += dlgadditem.ui \
            dlgloadorder.ui \
            dlgmerge.ui \
            dlgmessage.ui \
-           dlgreportui.ui \
            dlgselectreport.ui \
            dlgsetcondition.ui \
            dlgsettings.ui \
@@ -202,7 +203,6 @@ HEADERS += dlgadditemimpl.h \
            dlgloadorderimpl.h \
            dlgmergeimpl.h \
            dlgmessageimpl.h \
-           dlgreportuiimpl.h \
            dlgselectreportimpl.h \
            dlgsetconditionimpl.h \
            dlgsettingsimpl.h \
@@ -216,9 +216,10 @@ SOURCES += dlgadditemimpl.cpp \
            dlgloadorderimpl.cpp \
            dlgmergeimpl.cpp \
            dlgmessageimpl.cpp \
-           dlgreportuiimpl.cpp \
            dlgselectreportimpl.cpp \
            dlgsetconditionimpl.cpp \
            dlgsettingsimpl.cpp \
            dlgsettopgimpl.cpp \
            dlgsubtractitemimpl.cpp
+
+load( qsa )

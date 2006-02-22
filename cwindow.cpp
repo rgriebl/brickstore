@@ -1048,55 +1048,61 @@ bool CWindow::isDifferenceMode ( ) const
 
 void CWindow::filePrint ( )
 {
+	if ( m_doc-> items ( ). isEmpty ( ))
+		return;
+
+	if ( CReportManager::inst ( )-> reports ( ). isEmpty ( )) {
+		CReportManager::inst ( )->reload ( );
+
+		if ( CReportManager::inst ( )-> reports ( ). isEmpty ( ))
+			return;
+	}
+
+	QPrinter *prt = CReportManager::inst ( )-> printer ( );
+
+	if ( !prt )
+		return;
+
+	//prt-> setOptionEnabled ( QPrinter::PrintToFile, false );
+	prt-> setOptionEnabled ( QPrinter::PrintSelection, !m_doc->selection ( ). isEmpty ( ));
+	prt-> setOptionEnabled ( QPrinter::PrintPageRange, false );
+	prt-> setPrintRange ( m_doc-> selection ( ). isEmpty ( ) ? QPrinter::AllPages : QPrinter::Selection );
+
+	prt-> setFullPage ( true );
+	
+
+	if ( !prt-> setup ( CFrameWork::inst ( )))
+		return;
+
 	DlgSelectReportImpl d ( this );
 
-	if ( d. exec ( ) == QDialog::Accepted ) {
-		const CReport *rep = d. report ( );
-		uint pagecnt = rep-> pageCount ( m_doc-> items ( ). count ( ));
+	if ( d. exec ( ) != QDialog::Accepted )
+		return;
 
-		QPrinter *prt = CReportManager::inst ( )-> printer ( );
+	QPainter p;
 
-		if ( rep && prt && pagecnt ) {
-			//prt-> setOptionEnabled ( QPrinter::PrintToFile, false );
-			//prt-> setOptionEnabled ( QPrinter::PrintSelection, true );
-		
-			prt-> setPageSize ( rep-> pageSize ( ));
-			prt-> setFullPage ( true );
+	if ( !p. begin ( prt ))
+		return;
+	
+	const CReport *rep = d. report ( );
 
-			prt-> setMinMax ( 1, pagecnt );
-			prt-> setFromTo ( 1, prt-> maxPage ( ));
-			prt-> setOptionEnabled ( QPrinter::PrintPageRange, true );
+	if ( !rep )
+		return;
 
-			if ( prt-> setup ( CFrameWork::inst ( ))) {
-				QPainter p;
+	CDocument::ItemList items = sortedItems ( );
 
-				if ( !p. begin ( prt ))
-					return;
-			
-				CReportVariables add_vars;
-				add_vars ["filename"] = m_doc-> fileName ( );
+	if ( prt-> printRange ( ) == QPrinter::Selection ) {
+		const CDocument::ItemList &selection = m_doc-> selection ( );
+		CDocument::ItemList sorted_selection;
 
-                if ( m_doc-> order ( )) {
-					const BrickLink::Order *order = m_doc-> order ( );
-
-					add_vars ["order-id"]            = order-> id ( );
-					add_vars ["order-type"]          = ( order-> type ( ) == BrickLink::Order::Placed ? tr( "Placed" ) : tr( "Received" ));
-					add_vars ["order-date"]          = order-> date ( ). toString ( Qt::TextDate );
-					add_vars ["order-status-change"] = order-> statusChange ( ). toString ( Qt::TextDate );
-					add_vars ["order-buyer"]         = order-> buyer ( );
-					add_vars ["order-shipping"]      = order-> shipping ( ). toCString ( );
-					add_vars ["order-insurance"]     = order-> insurance ( ). toCString ( );
-					add_vars ["order-delivery"]      = order-> delivery ( ). toCString ( );
-					add_vars ["order-credit"]        = order-> credit ( ). toCString ( );
-					add_vars ["order-grand-total"]   = order-> grandTotal ( ). toCString ( );
-					add_vars ["order-status"]        = order-> status ( );
-					add_vars ["order-payment"]       = order-> payment ( );
-					add_vars ["order-remarks"]       = order-> remarks ( );
-				}
-				rep-> render ( sortedItems ( ), add_vars, prt-> fromPage ( ), prt-> toPage ( ), &p );		
-			}
+		foreach ( CDocument::Item *item, items ) {
+			if ( selection. find ( item ) != selection. end ( ))
+				sorted_selection. append ( item );
 		}
+		items = sorted_selection;
 	}
+
+	rep-> print ( &p, m_doc, items );
 }
 
 void CWindow::fileSave ( )

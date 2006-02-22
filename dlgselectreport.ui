@@ -68,17 +68,6 @@
         <widget class="QListView">
             <column>
                 <property name="text">
-                    <string>Page Size</string>
-                </property>
-                <property name="clickable">
-                    <bool>false</bool>
-                </property>
-                <property name="resizable">
-                    <bool>false</bool>
-                </property>
-            </column>
-            <column>
-                <property name="text">
                     <string>Name</string>
                 </property>
                 <property name="clickable">

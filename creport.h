@@ -15,26 +15,13 @@
 #define __CREPORT_H__
 
 #include <qobject.h>
-#include <qmap.h>
-#include <qdict.h>
 #include <qstring.h>
 #include <qptrlist.h>
 #include <qprinter.h>
 
 #include "cdocument.h"
 
-class CReportFunction {
-public:
-	virtual QString name ( ) const = 0;
-	virtual int argc ( ) const = 0;
-
-	virtual QString operator ( ) ( const QStringList &argv ) = 0;
-	
-	virtual ~CReportFunction ( ) { }
-};
-
-typedef QMap <QString, QString>  CReportVariables;
-typedef QDict <CReportFunction>  CReportFunctions;
+//typedef QMap <QString, QString>  CReportVariables;
 
 class CReportPrivate;
 class QPainter;
@@ -46,18 +33,9 @@ public:
 	virtual ~CReport ( );
 
 	bool load ( const QString &file );
-
 	QString name ( ) const;
 	
-	QPrinter::PageSize pageSize ( ) const;
-	QSize pageSizePt ( ) const;
-
-	uint pageCount ( uint itemcount ) const;
-	void render ( const CDocument::ItemList &items, const CReportVariables &add_vars, int from, int to, QPainter *p ) const;
-
-	bool hasUI ( ) const;
-	QWidget *createUI ( CReportVariables &vars ) const;
-	CReportVariables getValuesFromUI ( QWidget *ui ) const;
+	void print ( QPainter *p, const CDocument *doc, const CDocument::ItemList &items ) const;
 
 private:
 	CReportPrivate *d;
@@ -78,11 +56,8 @@ public:
 	
 	const QPtrList <CReport> &reports ( ) const;
 
-	const CReportFunctions &functions ( ) const;
-	
 private:
 	QPtrList <CReport> m_reports;
-	CReportFunctions m_functions;
 
 	mutable QPrinter *m_printer; // mutable for delayed initialization
 };

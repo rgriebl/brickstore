@@ -28,14 +28,9 @@ public:
 		: QListViewItem ( list ), m_report ( rep )
 	{ }
 
-	QString text ( int index ) const
+	QString text ( int /*col*/ ) const
 	{
-		if ( m_report && ( index == 0 ))
-			return ps2str ( m_report-> pageSize ( ));
-		else if ( m_report && ( index == 1 ))
-			return m_report-> name ( );
-		else
-			return QString::null;
+		return m_report-> name ( );
 	}
 
 	const CReport *report ( ) const
@@ -43,19 +38,6 @@ public:
 		return m_report;
 	}
 	
-private:
-	static QString ps2str ( QPrinter::PageSize ps )
-	{
-		switch ( ps ) {
-			case QPrinter::A4:
-				return DlgSelectReportImpl::tr( "A4" );
-			case QPrinter::Letter:
-				return DlgSelectReportImpl::tr( "Letter" );
-			default:
-				return DlgSelectReportImpl::tr( "Custom" );
-		}
-	}
-
 private:
 	const CReport *m_report;
 };
@@ -73,12 +55,6 @@ DlgSelectReportImpl::DlgSelectReportImpl ( QWidget *parent, const char *name, bo
 
 	w_ok-> setEnabled ( false );
 
-	static bool first_time = true;
-
-	if ( first_time ) {
-		CReportManager::inst ( )-> reload ( );
-		first_time = false;
-	}
 	setReports ( CReportManager::inst ( )-> reports ( ));
 }
 
