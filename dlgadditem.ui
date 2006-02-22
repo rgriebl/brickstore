@@ -50,7 +50,7 @@
         </widget>
         <widget class="QLayoutWidget">
             <property name="name">
-                <cstring>layout24</cstring>
+                <cstring>layout6</cstring>
             </property>
             <hbox>
                 <property name="name">
@@ -66,318 +66,334 @@
                         <cstring>w_price_guide</cstring>
                     </property>
                 </widget>
-                <widget class="QLayoutWidget">
+                <widget class="QSplitter">
                     <property name="name">
-                        <cstring>l_grid</cstring>
+                        <cstring>splitter1</cstring>
                     </property>
-                    <grid>
+                    <property name="orientation">
+                        <enum>Horizontal</enum>
+                    </property>
+                    <property name="childrenCollapsible">
+                        <bool>false</bool>
+                    </property>
+                    <widget class="CAppearsInWidget">
                         <property name="name">
-                            <cstring>unnamed</cstring>
+                            <cstring>w_appears_in</cstring>
                         </property>
-                        <widget class="QLineEdit" row="1" column="3">
+                    </widget>
+                    <widget class="QLayoutWidget">
+                        <property name="name">
+                            <cstring>l_grid</cstring>
+                        </property>
+                        <grid>
                             <property name="name">
-                                <cstring>w_total</cstring>
+                                <cstring>unnamed</cstring>
                             </property>
-                            <property name="focusPolicy">
-                                <enum>NoFocus</enum>
-                            </property>
-                            <property name="frameShape">
-                                <enum>LineEditPanel</enum>
-                            </property>
-                            <property name="frameShadow">
-                                <enum>Sunken</enum>
-                            </property>
-                            <property name="readOnly">
-                                <bool>true</bool>
-                            </property>
-                        </widget>
-                        <widget class="QLabel" row="1" column="0">
-                            <property name="name">
-                                <cstring>w_label_currency</cstring>
-                            </property>
-                            <property name="text">
-                                <string>&amp;Price (%1)</string>
-                            </property>
-                            <property name="buddy" stdset="0">
-                                <cstring>w_price</cstring>
-                            </property>
-                        </widget>
-                        <widget class="QLabel" row="0" column="0">
-                            <property name="name">
-                                <cstring>textLabel2</cstring>
-                            </property>
-                            <property name="text">
-                                <string>&amp;Quantity</string>
-                            </property>
-                            <property name="buddy" stdset="0">
-                                <cstring>w_qty</cstring>
-                            </property>
-                        </widget>
-                        <widget class="QLineEdit" row="0" column="1">
-                            <property name="name">
-                                <cstring>w_qty</cstring>
-                            </property>
-                            <property name="frameShape">
-                                <enum>LineEditPanel</enum>
-                            </property>
-                            <property name="frameShadow">
-                                <enum>Sunken</enum>
-                            </property>
-                        </widget>
-                        <widget class="QLineEdit" row="0" column="3">
-                            <property name="name">
-                                <cstring>w_bulk</cstring>
-                            </property>
-                        </widget>
-                        <widget class="QLineEdit" row="6" column="1" rowspan="1" colspan="3">
-                            <property name="name">
-                                <cstring>w_remarks</cstring>
-                            </property>
-                        </widget>
-                        <widget class="QButtonGroup" row="3" column="0">
-                            <property name="name">
-                                <cstring>w_tier_type</cstring>
-                            </property>
-                            <property name="frameShape">
-                                <enum>NoFrame</enum>
-                            </property>
-                            <property name="title">
-                                <string></string>
-                            </property>
-                            <property name="checkable">
-                                <bool>false</bool>
-                            </property>
-                            <property name="selectedId" stdset="0">
-                                <number>-1</number>
-                            </property>
-                            <hbox>
+                            <widget class="QLineEdit" row="1" column="3">
                                 <property name="name">
-                                    <cstring>unnamed</cstring>
+                                    <cstring>w_total</cstring>
                                 </property>
-                                <property name="margin">
-                                    <number>0</number>
+                                <property name="focusPolicy">
+                                    <enum>NoFocus</enum>
                                 </property>
-                                <widget class="QRadioButton">
-                                    <property name="name">
-                                        <cstring>w_radio_percent</cstring>
-                                    </property>
-                                    <property name="text">
-                                        <string>%</string>
-                                    </property>
-                                </widget>
-                                <widget class="QRadioButton">
-                                    <property name="name">
-                                        <cstring>w_radio_currency</cstring>
-                                    </property>
-                                    <property name="text">
-                                        <string>%1</string>
-                                    </property>
-                                </widget>
-                                <spacer>
-                                    <property name="name">
-                                        <cstring>spacer7</cstring>
-                                    </property>
-                                    <property name="orientation">
-                                        <enum>Horizontal</enum>
-                                    </property>
-                                    <property name="sizeType">
-                                        <enum>Expanding</enum>
-                                    </property>
-                                    <property name="sizeHint">
-                                        <size>
-                                            <width>0</width>
-                                            <height>20</height>
-                                        </size>
-                                    </property>
-                                </spacer>
-                            </hbox>
-                        </widget>
-                        <widget class="QLabel" row="1" column="2">
-                            <property name="name">
-                                <cstring>textLabel5</cstring>
-                            </property>
-                            <property name="text">
-                                <string>Total</string>
-                            </property>
-                        </widget>
-                        <widget class="QLabel" row="0" column="2">
-                            <property name="name">
-                                <cstring>w_bulk_label</cstring>
-                            </property>
-                            <property name="text">
-                                <string>&amp;Bulk</string>
-                            </property>
-                            <property name="buddy" stdset="0">
-                                <cstring>w_bulk</cstring>
-                            </property>
-                        </widget>
-                        <widget class="QButtonGroup" row="4" column="1" rowspan="1" colspan="3">
-                            <property name="name">
-                                <cstring>w_condition</cstring>
-                            </property>
-                            <property name="frameShape">
-                                <enum>NoFrame</enum>
-                            </property>
-                            <property name="title">
-                                <string></string>
-                            </property>
-                            <property name="selectedId" stdset="0">
-                                <number>-1</number>
-                            </property>
-                            <hbox>
+                                <property name="frameShape">
+                                    <enum>LineEditPanel</enum>
+                                </property>
+                                <property name="frameShadow">
+                                    <enum>Sunken</enum>
+                                </property>
+                                <property name="readOnly">
+                                    <bool>true</bool>
+                                </property>
+                            </widget>
+                            <widget class="QLabel" row="1" column="0">
                                 <property name="name">
-                                    <cstring>unnamed</cstring>
+                                    <cstring>w_label_currency</cstring>
                                 </property>
-                                <property name="margin">
-                                    <number>0</number>
+                                <property name="text">
+                                    <string>&amp;Price (%1)</string>
                                 </property>
-                                <widget class="QRadioButton">
-                                    <property name="name">
-                                        <cstring>w_radio_new</cstring>
-                                    </property>
-                                    <property name="text">
-                                        <string>&amp;New</string>
-                                    </property>
-                                </widget>
-                                <widget class="QRadioButton">
-                                    <property name="name">
-                                        <cstring>w_radio_used</cstring>
-                                    </property>
-                                    <property name="text">
-                                        <string>&amp;Used</string>
-                                    </property>
-                                </widget>
-                                <spacer>
-                                    <property name="name">
-                                        <cstring>spacer3</cstring>
-                                    </property>
-                                    <property name="orientation">
-                                        <enum>Horizontal</enum>
-                                    </property>
-                                    <property name="sizeType">
-                                        <enum>Expanding</enum>
-                                    </property>
-                                    <property name="sizeHint">
-                                        <size>
-                                            <width>41</width>
-                                            <height>20</height>
-                                        </size>
-                                    </property>
-                                </spacer>
-                            </hbox>
-                        </widget>
-                        <widget class="QLineEdit" row="1" column="1">
-                            <property name="name">
-                                <cstring>w_price</cstring>
-                            </property>
-                        </widget>
-                        <widget class="QLineEdit" row="5" column="1" rowspan="1" colspan="3">
-                            <property name="name">
-                                <cstring>w_comments</cstring>
-                            </property>
-                        </widget>
-                        <widget class="QLabel" row="4" column="0">
-                            <property name="name">
-                                <cstring>textLabel7</cstring>
-                            </property>
-                            <property name="text">
-                                <string>C&amp;ondition</string>
-                            </property>
-                            <property name="buddy" stdset="0">
-                                <cstring>w_radio_new</cstring>
-                            </property>
-                        </widget>
-                        <widget class="QLabel" row="5" column="0">
-                            <property name="name">
-                                <cstring>w_comments_label</cstring>
-                            </property>
-                            <property name="text">
-                                <string>Co&amp;mments</string>
-                            </property>
-                            <property name="buddy" stdset="0">
-                                <cstring>w_comments</cstring>
-                            </property>
-                        </widget>
-                        <widget class="QLayoutWidget" row="2" column="1" rowspan="2" colspan="3">
-                            <property name="name">
-                                <cstring>layout4</cstring>
-                            </property>
-                            <grid>
+                                <property name="buddy" stdset="0">
+                                    <cstring>w_price</cstring>
+                                </property>
+                            </widget>
+                            <widget class="QLabel" row="0" column="0">
                                 <property name="name">
-                                    <cstring>unnamed</cstring>
+                                    <cstring>textLabel2</cstring>
                                 </property>
-                                <widget class="QLineEdit" row="1" column="1">
+                                <property name="text">
+                                    <string>&amp;Quantity</string>
+                                </property>
+                                <property name="buddy" stdset="0">
+                                    <cstring>w_qty</cstring>
+                                </property>
+                            </widget>
+                            <widget class="QLineEdit" row="0" column="1">
+                                <property name="name">
+                                    <cstring>w_qty</cstring>
+                                </property>
+                                <property name="frameShape">
+                                    <enum>LineEditPanel</enum>
+                                </property>
+                                <property name="frameShadow">
+                                    <enum>Sunken</enum>
+                                </property>
+                            </widget>
+                            <widget class="QLineEdit" row="0" column="3">
+                                <property name="name">
+                                    <cstring>w_bulk</cstring>
+                                </property>
+                            </widget>
+                            <widget class="QLineEdit" row="6" column="1" rowspan="1" colspan="3">
+                                <property name="name">
+                                    <cstring>w_remarks</cstring>
+                                </property>
+                            </widget>
+                            <widget class="QButtonGroup" row="3" column="0">
+                                <property name="name">
+                                    <cstring>w_tier_type</cstring>
+                                </property>
+                                <property name="frameShape">
+                                    <enum>NoFrame</enum>
+                                </property>
+                                <property name="title">
+                                    <string></string>
+                                </property>
+                                <property name="checkable">
+                                    <bool>false</bool>
+                                </property>
+                                <property name="selectedId" stdset="0">
+                                    <number>-1</number>
+                                </property>
+                                <hbox>
                                     <property name="name">
-                                        <cstring>w_tier_price_1</cstring>
+                                        <cstring>unnamed</cstring>
                                     </property>
-                                </widget>
-                                <widget class="QLineEdit" row="1" column="0">
+                                    <property name="margin">
+                                        <number>0</number>
+                                    </property>
+                                    <widget class="QRadioButton">
+                                        <property name="name">
+                                            <cstring>w_radio_percent</cstring>
+                                        </property>
+                                        <property name="text">
+                                            <string>%</string>
+                                        </property>
+                                    </widget>
+                                    <widget class="QRadioButton">
+                                        <property name="name">
+                                            <cstring>w_radio_currency</cstring>
+                                        </property>
+                                        <property name="text">
+                                            <string>%1</string>
+                                        </property>
+                                    </widget>
+                                    <spacer>
+                                        <property name="name">
+                                            <cstring>spacer7</cstring>
+                                        </property>
+                                        <property name="orientation">
+                                            <enum>Horizontal</enum>
+                                        </property>
+                                        <property name="sizeType">
+                                            <enum>Expanding</enum>
+                                        </property>
+                                        <property name="sizeHint">
+                                            <size>
+                                                <width>0</width>
+                                                <height>20</height>
+                                            </size>
+                                        </property>
+                                    </spacer>
+                                </hbox>
+                            </widget>
+                            <widget class="QLabel" row="1" column="2">
+                                <property name="name">
+                                    <cstring>textLabel5</cstring>
+                                </property>
+                                <property name="text">
+                                    <string>Total</string>
+                                </property>
+                            </widget>
+                            <widget class="QLabel" row="0" column="2">
+                                <property name="name">
+                                    <cstring>w_bulk_label</cstring>
+                                </property>
+                                <property name="text">
+                                    <string>&amp;Bulk</string>
+                                </property>
+                                <property name="buddy" stdset="0">
+                                    <cstring>w_bulk</cstring>
+                                </property>
+                            </widget>
+                            <widget class="QButtonGroup" row="4" column="1" rowspan="1" colspan="3">
+                                <property name="name">
+                                    <cstring>w_condition</cstring>
+                                </property>
+                                <property name="frameShape">
+                                    <enum>NoFrame</enum>
+                                </property>
+                                <property name="title">
+                                    <string></string>
+                                </property>
+                                <property name="selectedId" stdset="0">
+                                    <number>-1</number>
+                                </property>
+                                <hbox>
                                     <property name="name">
-                                        <cstring>w_tier_price_0</cstring>
+                                        <cstring>unnamed</cstring>
                                     </property>
-                                </widget>
-                                <widget class="QLineEdit" row="0" column="1">
+                                    <property name="margin">
+                                        <number>0</number>
+                                    </property>
+                                    <widget class="QRadioButton">
+                                        <property name="name">
+                                            <cstring>w_radio_new</cstring>
+                                        </property>
+                                        <property name="text">
+                                            <string>&amp;New</string>
+                                        </property>
+                                    </widget>
+                                    <widget class="QRadioButton">
+                                        <property name="name">
+                                            <cstring>w_radio_used</cstring>
+                                        </property>
+                                        <property name="text">
+                                            <string>&amp;Used</string>
+                                        </property>
+                                    </widget>
+                                    <spacer>
+                                        <property name="name">
+                                            <cstring>spacer3</cstring>
+                                        </property>
+                                        <property name="orientation">
+                                            <enum>Horizontal</enum>
+                                        </property>
+                                        <property name="sizeType">
+                                            <enum>Expanding</enum>
+                                        </property>
+                                        <property name="sizeHint">
+                                            <size>
+                                                <width>41</width>
+                                                <height>20</height>
+                                            </size>
+                                        </property>
+                                    </spacer>
+                                </hbox>
+                            </widget>
+                            <widget class="QLineEdit" row="1" column="1">
+                                <property name="name">
+                                    <cstring>w_price</cstring>
+                                </property>
+                            </widget>
+                            <widget class="QLineEdit" row="5" column="1" rowspan="1" colspan="3">
+                                <property name="name">
+                                    <cstring>w_comments</cstring>
+                                </property>
+                            </widget>
+                            <widget class="QLabel" row="4" column="0">
+                                <property name="name">
+                                    <cstring>textLabel7</cstring>
+                                </property>
+                                <property name="text">
+                                    <string>C&amp;ondition</string>
+                                </property>
+                                <property name="buddy" stdset="0">
+                                    <cstring>w_radio_new</cstring>
+                                </property>
+                            </widget>
+                            <widget class="QLabel" row="5" column="0">
+                                <property name="name">
+                                    <cstring>w_comments_label</cstring>
+                                </property>
+                                <property name="text">
+                                    <string>Co&amp;mments</string>
+                                </property>
+                                <property name="buddy" stdset="0">
+                                    <cstring>w_comments</cstring>
+                                </property>
+                            </widget>
+                            <widget class="QLayoutWidget" row="2" column="1" rowspan="2" colspan="3">
+                                <property name="name">
+                                    <cstring>layout4</cstring>
+                                </property>
+                                <grid>
                                     <property name="name">
-                                        <cstring>w_tier_qty_1</cstring>
+                                        <cstring>unnamed</cstring>
                                     </property>
-                                </widget>
-                                <widget class="QLineEdit" row="0" column="0">
-                                    <property name="name">
-                                        <cstring>w_tier_qty_0</cstring>
-                                    </property>
-                                </widget>
-                                <widget class="QLineEdit" row="1" column="2">
-                                    <property name="name">
-                                        <cstring>w_tier_price_2</cstring>
-                                    </property>
-                                </widget>
-                                <widget class="QLineEdit" row="0" column="2">
-                                    <property name="name">
-                                        <cstring>w_tier_qty_2</cstring>
-                                    </property>
-                                </widget>
-                            </grid>
-                        </widget>
-                        <widget class="QLabel" row="6" column="0">
-                            <property name="name">
-                                <cstring>w_remarks_label</cstring>
-                            </property>
-                            <property name="text">
-                                <string>&amp;Remarks</string>
-                            </property>
-                            <property name="buddy" stdset="0">
-                                <cstring>w_remarks</cstring>
-                            </property>
-                        </widget>
-                        <spacer row="7" column="0">
-                            <property name="name">
-                                <cstring>spacer9</cstring>
-                            </property>
-                            <property name="orientation">
-                                <enum>Vertical</enum>
-                            </property>
-                            <property name="sizeType">
-                                <enum>Expanding</enum>
-                            </property>
-                            <property name="sizeHint">
-                                <size>
-                                    <width>20</width>
-                                    <height>0</height>
-                                </size>
-                            </property>
-                        </spacer>
-                        <widget class="QLabel" row="2" column="0">
-                            <property name="name">
-                                <cstring>w_tier_label</cstring>
-                            </property>
-                            <property name="text">
-                                <string>&amp;Tiered prices</string>
-                            </property>
-                            <property name="buddy" stdset="0">
-                                <cstring>w_radio_percent</cstring>
-                            </property>
-                        </widget>
-                    </grid>
+                                    <widget class="QLineEdit" row="1" column="1">
+                                        <property name="name">
+                                            <cstring>w_tier_price_1</cstring>
+                                        </property>
+                                    </widget>
+                                    <widget class="QLineEdit" row="1" column="0">
+                                        <property name="name">
+                                            <cstring>w_tier_price_0</cstring>
+                                        </property>
+                                    </widget>
+                                    <widget class="QLineEdit" row="0" column="1">
+                                        <property name="name">
+                                            <cstring>w_tier_qty_1</cstring>
+                                        </property>
+                                    </widget>
+                                    <widget class="QLineEdit" row="0" column="0">
+                                        <property name="name">
+                                            <cstring>w_tier_qty_0</cstring>
+                                        </property>
+                                    </widget>
+                                    <widget class="QLineEdit" row="1" column="2">
+                                        <property name="name">
+                                            <cstring>w_tier_price_2</cstring>
+                                        </property>
+                                    </widget>
+                                    <widget class="QLineEdit" row="0" column="2">
+                                        <property name="name">
+                                            <cstring>w_tier_qty_2</cstring>
+                                        </property>
+                                    </widget>
+                                </grid>
+                            </widget>
+                            <widget class="QLabel" row="6" column="0">
+                                <property name="name">
+                                    <cstring>w_remarks_label</cstring>
+                                </property>
+                                <property name="text">
+                                    <string>&amp;Remarks</string>
+                                </property>
+                                <property name="buddy" stdset="0">
+                                    <cstring>w_remarks</cstring>
+                                </property>
+                            </widget>
+                            <spacer row="7" column="0">
+                                <property name="name">
+                                    <cstring>spacer9</cstring>
+                                </property>
+                                <property name="orientation">
+                                    <enum>Vertical</enum>
+                                </property>
+                                <property name="sizeType">
+                                    <enum>Expanding</enum>
+                                </property>
+                                <property name="sizeHint">
+                                    <size>
+                                        <width>20</width>
+                                        <height>0</height>
+                                    </size>
+                                </property>
+                            </spacer>
+                            <widget class="QLabel" row="2" column="0">
+                                <property name="name">
+                                    <cstring>w_tier_label</cstring>
+                                </property>
+                                <property name="text">
+                                    <string>&amp;Tiered prices</string>
+                                </property>
+                                <property name="buddy" stdset="0">
+                                    <cstring>w_radio_percent</cstring>
+                                </property>
+                            </widget>
+                        </grid>
+                    </widget>
                 </widget>
             </hbox>
         </widget>
@@ -397,12 +413,63 @@
         </widget>
         <widget class="QLayoutWidget">
             <property name="name">
-                <cstring>layout16</cstring>
+                <cstring>layout7</cstring>
             </property>
             <hbox>
                 <property name="name">
                     <cstring>unnamed</cstring>
                 </property>
+                <widget class="QToolButton">
+                    <property name="name">
+                        <cstring>w_toggle_picture</cstring>
+                    </property>
+                    <property name="text">
+                        <string></string>
+                    </property>
+                    <property name="toggleButton">
+                        <bool>true</bool>
+                    </property>
+                    <property name="on">
+                        <bool>true</bool>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>Show or hide the picture area.</string>
+                    </property>
+                </widget>
+                <widget class="QToolButton">
+                    <property name="name">
+                        <cstring>w_toggle_price_guide</cstring>
+                    </property>
+                    <property name="text">
+                        <string></string>
+                    </property>
+                    <property name="toggleButton">
+                        <bool>true</bool>
+                    </property>
+                    <property name="on">
+                        <bool>true</bool>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>Show or hide the price guide area.</string>
+                    </property>
+                </widget>
+                <widget class="QToolButton">
+                    <property name="name">
+                        <cstring>w_toggle_appears_in</cstring>
+                    </property>
+                    <property name="text">
+                        <string></string>
+                    </property>
+                    <property name="toggleButton">
+                        <bool>true</bool>
+                    </property>
+                    <property name="on">
+                        <bool>true</bool>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>Show or hide the part-appears-in-set area.</string>
+                    </property>
+                </widget>
                 <spacer>
                     <property name="name">
                         <cstring>spacer6</cstring>
@@ -415,7 +482,7 @@
                     </property>
                     <property name="sizeHint">
                         <size>
-                            <width>521</width>
+                            <width>290</width>
                             <height>21</height>
                         </size>
                     </property>
@@ -440,8 +507,8 @@
                     </property>
                     <property name="sizeHint">
                         <size>
-                            <width>11</width>
-                            <height>11</height>
+                            <width>16</width>
+                            <height>16</height>
                         </size>
                     </property>
                 </spacer>
@@ -539,10 +606,26 @@
         </sizepolicy>
         <pixmap>image0</pixmap>
     </customwidget>
+    <customwidget>
+        <class>CAppearsInWidget</class>
+        <header location="local">cappearsinwidget.h</header>
+        <sizehint>
+            <width>100</width>
+            <height>100</height>
+        </sizehint>
+        <container>0</container>
+        <sizepolicy>
+            <hordata>5</hordata>
+            <verdata>5</verdata>
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+        </sizepolicy>
+        <pixmap>image0</pixmap>
+    </customwidget>
 </customwidgets>
 <images>
     <image name="image0">
-        <data format="PNG" length="1002">89504e470d0a1a0a0000000d4948445200000016000000160806000000c4b46c3b000003b149444154789cad94514c5b5518c77fe7dc4b7b4b6150bb96324418ca32358bee6192609c51d883892ce083f1718b3ebb185f8dc91e972cf39d2d6a78d0b027b3cd07d9e68c81c625a6c139408a4384f416100aed6d4b7bdb7b8e0fc0921a70c6ed7b3ae7e43bbff3fffedfc927e2f138bbd1dbdbab7902118fc785d8058f8d8de9aeae2e72b91cb66de338ce7f82e47239666767492412b8aefbf0dcdc553a323242f4501d918e2d3a8f15a9784584100809a609526eafd1a0f54e6142e029c5c21f3ef41583bb77a805efbe1ce9d86279e32619678eaab7853fa0f02a16abb64166ad0cdac75307eb3874b84cb0a14aa5a24108cc0688c48c9a4a1e826ddbe6f0b12219678e8ace610502ccdfafe3f68d3c33bf6c01c59dcc209d472c4e0d35d2f3ba81d205d06005e4de60c77170bd2255af80150870f70e8c0eaf009260a349577714e913a4175d16925b5cbe50607931cc3b677c68ca28a5f7066f5b26f00760febec9e8f032a0e81b68a17fc0201415989647a9d8c4c498cbe8f05f5cff3a4d4bac8bfe210b290b35e01afd428257b1b875cd01aaf4bd1de5dd0fea688e1530ad1c1bab16b7af17393558cf997311c0e49bafd670d6258621f6576c9ab09a3248fe5ae6c08103f49f36517213d33070369bf8e2529ee9c90ceb2b2eef7f14617c2c48722a4b7226845143fa87622905ebeb6514253a9eb5084504a66950c88618bee0303d99217cb09e9ed71a09369538fa523d00e9a50a42eed3bc6d8f41281fa0903e8561796cac86f8f2b33c33930ea0f0fb4d5adbeb30ad22866ffbbad226d2a805d7ee0484220208925aaa50deaa67e27b97e9c90ccdcdf5c462cdd8a94d2e7e62f3603244ea410989a4ed191f52a8fd156b056d9d553a9e0bf0e7ef45c6bf7339fd5e90ec7a88575e6d20d6e6e7e2a755ec854dce7fb8885b2cd014f6f3c2714d3a550bae55ac35c1068fb7061b00b87a7995899b25ce9e0b73e24d8fae97b37c7cbe9370b499fce6066eb54adf6098f6ee2a9a7ff9c70841a5023d270deca510d746537c7e29cdf8ad20475fb4307c82d4fc324ec6859d66fdfc6381e44014b36e9fe6e572393ca54068aa22cfd0598b686b3737aeae90bc9725796f0350802414b6e81b7c9a9f7e70708a2e6e5991cfeee3f1ecec2c0b0b3e8c068142a2a8d23728397132c6dc6f2e2b8b0a8da4b5ddc7f3c735ed47146f0cb4502983693a4c25ca7b83138904fa8a412466e00f48b4271086c2901263676c4a6990b615b6ade15b85694af239984a94585bf6f606bbae5b334f1f37e4a3531e031c8fc7c5a312ff17f849c3e3f1b8f81b8be6900aca9b61c90000000049454e44ae426082</data>
+        <data format="XBM.GZ" length="79">789c534e494dcbcc4b554829cdcdad8c2fcf4c29c95030e0524611cd48cd4ccf28010a1797249664262b2467241641a592324b8aa363156c15aab914146aadb90067111b1f</data>
     </image>
 </images>
 <connections>
@@ -551,6 +634,24 @@
         <signal>clicked()</signal>
         <receiver>DlgAddItem</receiver>
         <slot>close()</slot>
+    </connection>
+    <connection>
+        <sender>w_toggle_picture</sender>
+        <signal>toggled(bool)</signal>
+        <receiver>w_picture</receiver>
+        <slot>setShown(bool)</slot>
+    </connection>
+    <connection>
+        <sender>w_toggle_price_guide</sender>
+        <signal>toggled(bool)</signal>
+        <receiver>w_price_guide</receiver>
+        <slot>setShown(bool)</slot>
+    </connection>
+    <connection>
+        <sender>w_toggle_appears_in</sender>
+        <signal>toggled(bool)</signal>
+        <receiver>w_appears_in</receiver>
+        <slot>setShown(bool)</slot>
     </connection>
 </connections>
 <tabstops>
@@ -582,5 +683,6 @@
     <includehint>cselectcolor.h</includehint>
     <includehint>cpicturewidget.h</includehint>
     <includehint>cpriceguidewidget.h</includehint>
+    <includehint>cappearsinwidget.h</includehint>
 </includehints>
 </UI>

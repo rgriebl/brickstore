@@ -22,14 +22,17 @@
 #include <qpushbutton.h>
 #include <qcursor.h>
 #include <qcheckbox.h>
+#include <qtoolbutton.h>
 
 #include "cconfig.h"
+#include "cresource.h"
 #include "cmoney.h"
 #include "bricklink.h"
 #include "cwindow.h"
 #include "cdocument.h"
 #include "cpicturewidget.h"
 #include "cpriceguidewidget.h"
+#include "cappearsinwidget.h"
 #include "cselectitem.h"
 #include "cselectcolor.h"
 #include "dlgadditemimpl.h"
@@ -55,9 +58,18 @@ DlgAddItemImpl::DlgAddItemImpl ( QWidget *parent, const char *name, bool modal, 
 	w_picture-> setFrameStyle ( QFrame::StyledPanel | QFrame::Sunken );
 	w_picture-> setLineWidth ( 2 );
 
+	w_toggle_picture-> setIconSet ( CResource::inst ( )-> pixmap ( "sidebar/info" ));
+
 	w_price_guide-> setFrameStyle ( QFrame::StyledPanel | QFrame::Sunken );
 	w_price_guide-> setLineWidth ( 2 );
 
+	w_toggle_price_guide-> setIconSet ( CResource::inst ( )-> pixmap ( "sidebar/priceguide" ));
+
+	w_appears_in-> setFrameStyle ( QFrame::StyledPanel | QFrame::Sunken );
+	w_appears_in-> setLineWidth ( 2 );
+
+	w_toggle_appears_in-> setIconSet ( CResource::inst ( )-> pixmap ( "sidebar/appearsin" ));
+	
 	w_qty-> setValidator ( new QIntValidator ( 1, 99999, w_qty ));
 	w_qty-> setText ( "1" );
 
@@ -125,6 +137,7 @@ DlgAddItemImpl::~DlgAddItemImpl ( )
 {
 	w_picture-> setPicture ( 0 );
 	w_price_guide-> setPriceGuide ( 0 );
+	w_appears_in-> setItem ( 0, 0 );
 }
 
 void DlgAddItemImpl::updateCaption ( )
@@ -216,10 +229,12 @@ void DlgAddItemImpl::showItemInColor ( const BrickLink::Item *it, const BrickLin
 	if ( it && col ) {
 		w_picture-> setPicture ( BrickLink::inst ( )-> picture ( it, col, true ));
 		w_price_guide-> setPriceGuide ( BrickLink::inst ( )-> priceGuide ( it, col, true ));
+		w_appears_in-> setItem ( it, col );
 	}
 	else {
 		w_picture-> setPicture ( 0 );
 		w_price_guide-> setPriceGuide ( 0 );
+		w_appears_in-> setItem ( 0, 0 );
 	}
 	checkAddPossible ( );
 }
