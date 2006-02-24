@@ -18,6 +18,7 @@
 #include <qaction.h>
 #include <qtooltip.h>
 #include <qheader.h>
+#include <qcursor.h>
 
 #include "cframework.h"
 #include "cresource.h"
@@ -86,6 +87,9 @@ public:
 	const BrickLink::Item *item ( ) const
 	{ return m_item; }
 
+	BrickLink::Picture *picture ( ) const
+	{ return m_picture; }
+
 private:
 	int                         m_qty;
 	const BrickLink::Item *     m_item;
@@ -93,11 +97,18 @@ private:
 };
 
 
-class AppearsInToolTip : public QToolTip {
+class AppearsInToolTip : public QObject, public QToolTip {
+	Q_OBJECT
+	
 public:
 	AppearsInToolTip ( QWidget *parent, CAppearsInWidget *aiw )
-		: QToolTip( parent ), m_aiw ( aiw )
-	{ }
+		: QObject ( parent), QToolTip ( parent, new QToolTipGroup ( parent )), 
+		  m_aiw ( aiw ), m_tip_item ( 0 )
+	{ 
+		connect ( group ( ), SIGNAL( removeTip ( )), this, SLOT( tipHidden ( )));
+		
+		connect ( BrickLink::inst ( ), SIGNAL( pictureUpdated ( BrickLink::Picture * )), this, SLOT( pictureUpdated ( BrickLink::Picture * )));
+	}
 	
 	virtual ~AppearsInToolTip ( )
 	{ }
@@ -108,13 +119,28 @@ public:
 			return;
 
 		AppearsInListItem *item = static_cast <AppearsInListItem *> ( m_aiw-> itemAt ( pos ));
-		
-		if ( item )
+	
+		if ( item ) {
+			m_tip_item = item;
 			tip ( m_aiw-> itemRect ( item ), item-> toolTip ( ));
+		}
+	}
+
+private slots:
+	void tipHidden ( )
+	{
+		m_tip_item = 0;
+	}
+	
+	void pictureUpdated ( BrickLink::Picture *pic )
+	{
+		if ( m_tip_item && m_tip_item-> picture ( ) == pic )
+			maybeTip ( parentWidget ( )-> mapFromGlobal ( QCursor::pos ( )));
 	}
 
 private:
-    CAppearsInWidget *m_aiw;
+	CAppearsInWidget *m_aiw;
+	AppearsInListItem *m_tip_item;
 };
 
 
@@ -151,13 +177,15 @@ CAppearsInWidget::CAppearsInWidget ( QWidget *parent, const char *name, WFlags /
 	d-> m_tooltips = new AppearsInToolTip ( viewport ( ), this );
 
 	connect ( this, SIGNAL( contextMenuRequested ( QListViewItem *, const QPoint &, int )), this, SLOT( showContextMenu ( QListViewItem *, const QPoint & )));
+	connect ( this, SIGNAL( returnPressed ( QListViewItem * )), this, SLOT( partOut ( )));
+	connect ( this, SIGNAL( doubleClicked ( QListViewItem *, const QPoint &, int )), this, SLOT( partOut ( )));
 
 	languageChange ( );
 }
 
 void CAppearsInWidget::languageChange ( )
 {
-	setColumnText ( 0, tr( "#" ));
+	setColumnText ( 0, tr( "Qty." ));
 	setColumnText ( 1, tr( "Set" ));
 	setColumnText ( 2, tr( "Name" ));
 }
@@ -233,3 +261,4 @@ void CAppearsInWidget::setItem ( const BrickLink::Item *item, const BrickLink::C
 	}
 }
 
+#include "cappearsinwidget.moc"
