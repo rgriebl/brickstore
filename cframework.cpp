@@ -361,7 +361,7 @@ void CFrameWork::languageChange ( )
 		{ "edit_reset_diffs",               tr( "Reset Differences" ),                  0 }, 
 		{ "edit_select_all",                tr( "Select All" ),                         tr( "Ctrl+A", "Edit|SelectAll" ) },
 		{ "edit_select_none",               tr( "Select None" ),                        tr( "Ctrl+Shift+A", "Edit|SelectNone" ) },
-		{ "view_simple_mode",               tr( "Buyer/Collector View" ),               0 },
+		{ "view_simple_mode",               tr( "Buyer/Collector Mode" ),               0 },
 		{ "view_toolbar",                   tr( "View Toolbar" ),                       0 },
 		{ "view_infobar",                   tr( "View Infobars" ),                      0 },
 		{ "view_statusbar",                 tr( "View Statusbar" ),                     0 },
@@ -439,6 +439,16 @@ CFrameWork::~CFrameWork ( )
 
 	CConfig::inst ( )-> writeEntry ( "/MainWindow/Layout/WindowMode", m_mdi-> showTabs ( ) ? ( m_mdi-> spreadSheetTabs ( ) ? 2 : 1 ) : 0 );
 
+	if ( m_add_dialog ) {
+		int wstate = m_add_dialog-> windowState ( ) & WindowMaximized;
+		QRect wgeo = wstate ? m_normal_geometry_adddlg : QRect ( m_add_dialog-> pos ( ), m_add_dialog-> size ( ));
+
+		CConfig::inst ( )-> writeEntry ( "/MainWindow/AddItemDialog/State",  wstate );
+		CConfig::inst ( )-> writeEntry ( "/MainWindow/AddItemDialog/Left",   wgeo. x ( ));
+		CConfig::inst ( )-> writeEntry ( "/MainWindow/AddItemDialog/Top",    wgeo. y ( ));
+		CConfig::inst ( )-> writeEntry ( "/MainWindow/AddItemDialog/Width",  wgeo. width ( ));
+		CConfig::inst ( )-> writeEntry ( "/MainWindow/AddItemDialog/Height", wgeo. height ( ));
+	}
 	s_inst = 0;
 }
 
@@ -476,6 +486,21 @@ void CFrameWork::resizeEvent ( QResizeEvent *e )
 	if (!( windowState ( ) & ( WindowMinimized | WindowMaximized | WindowFullScreen )))
 		m_normal_geometry. setSize ( size ( ));
 	QMainWindow::resizeEvent ( e );
+}
+
+bool CFrameWork::eventFilter ( QObject *o, QEvent *e )
+{
+	if ( o && ( o == m_add_dialog )) {
+		if ( e-> type ( ) == QEvent::Resize ) {
+			if (!( m_add_dialog-> windowState ( ) & ( WindowMinimized | WindowMaximized | WindowFullScreen )))
+				m_normal_geometry_adddlg. setSize ( m_add_dialog-> size ( ));
+		}
+		else if ( e-> type ( ) == QEvent::Move ) {
+			if (!( m_add_dialog-> windowState ( ) & ( WindowMinimized | WindowMaximized | WindowFullScreen )))
+				m_normal_geometry_adddlg. setTopLeft ( m_add_dialog-> pos ( ));
+		}
+	}
+	return QMainWindow::eventFilter ( o, e );
 }
 
 QAction *CFrameWork::findAction ( const char *name )
@@ -1301,7 +1326,24 @@ void CFrameWork::toggleAddItemDialog ( bool b )
 	if ( !m_add_dialog ) {
 		m_add_dialog = new DlgAddItemImpl ( this, "additems", false );
 		
+		QRect r ( CConfig::inst ( )-> readNumEntry ( "/MainWindow/AddItemDialog/Left",   -1 ),
+		          CConfig::inst ( )-> readNumEntry ( "/MainWindow/AddItemDialog/Top",    -1 ),
+		          CConfig::inst ( )-> readNumEntry ( "/MainWindow/AddItemDialog/Width",  -1 ),
+		          CConfig::inst ( )-> readNumEntry ( "/MainWindow/AddItemDialog/Height", -1 ));
+
+		int wstate = CConfig::inst ( )-> readNumEntry ( "/MainWindow/AddItemDialog/State", WindowNoState );
+
+		// make sure at least SOME part of the window ends up on the screen
+		if ( r. isValid ( ) && !r. isEmpty ( ) && !( r & qApp-> desktop ( )-> rect ( )). isEmpty ( )) {
+			m_add_dialog-> resize ( r. size ( ));  // X11 compat. mode -- KDE 3.x doesn't seem to like this though...
+			m_add_dialog-> move ( r. topLeft ( ));
+			//m_add_dialog-> setGeometry ( r );  // simple code (which shouldn't work on X11, but does on KDE 3.x...)
+		}
+		m_normal_geometry_adddlg = QRect ( m_add_dialog-> pos ( ), m_add_dialog-> size ( ));
+		m_add_dialog-> setWindowState ( wstate & WindowMaximized );
+
 		QAccel *acc = new QAccel ( m_add_dialog );
+
 		QAction *action = findAction ( "edit_additems" );
 		acc-> connectItem ( acc-> insertItem ( action-> accel ( )), action, SLOT( toggle ( )));
 		

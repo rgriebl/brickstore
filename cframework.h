@@ -124,6 +124,8 @@ protected:
 	virtual void moveEvent ( QMoveEvent *e );
 	virtual void resizeEvent ( QResizeEvent *e );
 
+	virtual bool eventFilter ( QObject *o, QEvent *e );
+
 private:
 	void setBrickLinkUpdateIntervals ( );
 	void setBrickLinkHTTPProxy ( );
@@ -192,6 +194,7 @@ private:
 	QStringList m_recent_files;
 
 	QRect m_normal_geometry;
+	QRect m_normal_geometry_adddlg;
 	
 	bool m_running;
 
