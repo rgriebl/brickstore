@@ -191,7 +191,6 @@ FORMS   += dlgadditem.ui \
            dlgmerge.ui \
            dlgmessage.ui \
            dlgselectreport.ui \
-           dlgsetcondition.ui \
            dlgsettings.ui \
            dlgsettopg.ui \
            dlgsubtractitem.ui
@@ -204,7 +203,6 @@ HEADERS += dlgadditemimpl.h \
            dlgmergeimpl.h \
            dlgmessageimpl.h \
            dlgselectreportimpl.h \
-           dlgsetconditionimpl.h \
            dlgsettingsimpl.h \
            dlgsettopgimpl.h \
            dlgsubtractitemimpl.h
@@ -217,7 +215,6 @@ SOURCES += dlgadditemimpl.cpp \
            dlgmergeimpl.cpp \
            dlgmessageimpl.cpp \
            dlgselectreportimpl.cpp \
-           dlgsetconditionimpl.cpp \
            dlgsettingsimpl.cpp \
            dlgsettopgimpl.cpp \
            dlgsubtractitemimpl.cpp

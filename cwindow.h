@@ -108,17 +108,30 @@ public slots:
 	void selectAll ( );
 	void selectNone ( );
 
-	void editSetPriceToPG ( );
+	void editStatusInclude ( );
+	void editStatusExclude ( );
+	void editStatusExtra ( );
+	void editStatusToggle ( );
+	void editConditionNew ( );
+	void editConditionUsed ( );
+	void editConditionToggle ( );
+	void editColor ( );
+	void editQtyMultiply ( );
+	void editQtyDivide( );
+	void editPriceToPG ( );
 	void editPriceIncDec ( );
-	void editSetSale ( );
-	void editSetStatus ( );
-	void editSetColor ( );
-	void editSetRemark ( );
-	void editSetReserved ( );
-	void editSetCondition ( );
-	void editMultiplyQty ( );
-	void editDivideQty ( );
-
+	void editBulk ( );
+	void editSale ( );
+	void editComment ( );
+	void editRemark ( );
+	void editRetainYes ( );
+	void editRetainNo ( );
+	void editRetainToggle ( );
+	void editStockroomYes ( );
+	void editStockroomNo ( );
+	void editStockroomToggle ( );	
+	void editReserved ( );
+	
 	void addItem ( BrickLink::InvItem *, uint );
 
 	void setPrice ( money_t );
@@ -126,6 +139,7 @@ public slots:
 	void showBLCatalog ( );
 	void showBLPriceGuide ( );
 	void showBLLotsForSale ( );
+	void showBLMyInventory ( );
 
 signals:
 	void selectionChanged ( const BrickLink::InvItemList & );

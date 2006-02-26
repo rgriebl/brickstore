@@ -47,11 +47,67 @@
 #include "dlgincompleteitemimpl.h"
 #include "dlgmergeimpl.h"
 #include "dlgsubtractitemimpl.h"
-#include "dlgsetconditionimpl.h"
 
 #include "cwindow.h"
 
+namespace {
 
+// should be a function, but MSVC.Net doesn't accept default 
+// template arguments for template functions...
+
+template <typename TG, typename TS = TG> class setOrToggle {
+public:
+	static void toggle ( CWindow *w, const QString &actiontext, TG (CDocument::Item::* getter ) ( ) const, void (CDocument::Item::* setter ) ( TS t ), TS val1, TS val2 )
+	{ set_or_toggle ( w, true, actiontext, getter, setter, val1, val2 ); }
+	static void set ( CWindow *w, const QString &actiontext, TG (CDocument::Item::* getter ) ( ) const, void (CDocument::Item::* setter ) ( TS t ), TS val )
+	{ set_or_toggle ( w, false, actiontext, getter, setter, val, TG ( )); }
+
+private:
+	static void set_or_toggle ( CWindow *w, bool toggle, const QString &actiontext, TG (CDocument::Item::* getter ) ( ) const, void (CDocument::Item::* setter ) ( TS t ), TS val1, TS val2 = TG ( ))
+	{
+		CDocument *doc = w-> document ( );
+
+		if ( w-> document ( )-> selection ( ). isEmpty ( ))
+			return;
+
+		//CDisableUpdates disupd ( w_list );
+		CUndoCmd *macro = doc-> macroBegin ( );
+		uint count = 0;
+
+		foreach ( CDocument::Item *pos, doc-> selection ( )) {
+			if ( toggle ) {
+				TG val = ( pos->* getter ) ( );
+
+				if ( val == val1 )
+					val = val2;
+				else if ( val == val2 )
+					val = val1;
+
+				if ( val != ( pos->* getter ) ( )) {
+					CDocument::Item item = *pos;
+
+					( item.* setter ) ( val );
+					doc-> changeItem ( pos, item );
+
+					count++;
+				}
+			}
+			else {
+				if (( pos->* getter ) ( ) != val1 ) {
+					CDocument::Item item = *pos;
+
+					( item.* setter ) ( val1 );
+					doc-> changeItem ( pos, item );
+
+					count++;
+				}
+			}
+		}
+		doc-> macroEnd ( macro, actiontext. arg( count ));
+	}
+};
+
+} // namespace
 
 CWindow::CWindow ( CDocument *doc, QWidget *parent, const char *name )
 	: QWidget ( parent, name, WDestructiveClose ), m_lvitems ( 503 )
@@ -579,7 +635,74 @@ void CWindow::editResetDifferences ( )
 	m_doc-> resetDifferences ( m_doc-> selection ( ));
 }
 
-void CWindow::editSetPriceToPG ( )
+
+void CWindow::editStatusInclude ( )
+{
+	setOrToggle<BrickLink::InvItem::Status>::set ( this, tr( "Set Include Status on %1 Items" ), &CDocument::Item::status, &CDocument::Item::setStatus, BrickLink::InvItem::Include );
+}
+
+void CWindow::editStatusExclude ( )
+{
+	setOrToggle<BrickLink::InvItem::Status>::set ( this, tr( "Set Exclude Status on %1 Items" ), &CDocument::Item::status, &CDocument::Item::setStatus, BrickLink::InvItem::Exclude );
+}
+
+void CWindow::editStatusExtra ( )
+{
+	setOrToggle<BrickLink::InvItem::Status>::set ( this, tr( "Set Extra Status on %1 Items" ), &CDocument::Item::status, &CDocument::Item::setStatus, BrickLink::InvItem::Extra );
+}
+
+void CWindow::editStatusToggle ( )
+{
+	setOrToggle<BrickLink::InvItem::Status>::toggle ( this, tr( "Toggled Status on %1 Items" ), &CDocument::Item::status, &CDocument::Item::setStatus, BrickLink::InvItem::Include, BrickLink::InvItem::Exclude );
+}
+
+void CWindow::editConditionNew ( )
+{
+	setOrToggle<BrickLink::Condition>::set ( this, tr( "Set New Condition on %1 Items" ), &CDocument::Item::condition, &CDocument::Item::setCondition, BrickLink::New );
+}
+
+void CWindow::editConditionUsed ( )
+{
+	setOrToggle<BrickLink::Condition>::set ( this, tr( "Set Used Condition on %1 Items" ), &CDocument::Item::condition, &CDocument::Item::setCondition, BrickLink::Used );
+}
+
+void CWindow::editConditionToggle ( )
+{
+	setOrToggle<BrickLink::Condition>::toggle ( this, tr( "Toggled Condition on %1 Items" ), &CDocument::Item::condition, &CDocument::Item::setCondition, BrickLink::New, BrickLink::Used );
+}
+
+void CWindow::editRetainYes ( )
+{
+	setOrToggle<bool>::set ( this, tr( "Set Retain Flag on %1 Items" ), &CDocument::Item::retain, &CDocument::Item::setRetain, true );
+}
+
+void CWindow::editRetainNo ( )
+{
+	setOrToggle<bool>::set ( this, tr( "Cleared Retain Flag on %1 Items" ), &CDocument::Item::retain, &CDocument::Item::setRetain, false );
+}
+
+void CWindow::editRetainToggle ( )
+{
+	setOrToggle<bool>::toggle ( this, tr( "Toggled Retain Flag on %1 Items" ), &CDocument::Item::retain, &CDocument::Item::setRetain, true, false );
+}
+
+void CWindow::editStockroomYes ( )
+{
+	setOrToggle<bool>::set ( this, tr( "Set Stockroom Flag on %1 Items" ), &CDocument::Item::stockroom, &CDocument::Item::setStockroom, true );
+}
+
+void CWindow::editStockroomNo ( )
+{
+	setOrToggle<bool>::set ( this, tr( "Cleared Stockroom Flag on %1 Items" ), &CDocument::Item::stockroom, &CDocument::Item::setStockroom, false );
+}
+
+void CWindow::editStockroomToggle ( )
+{
+	setOrToggle<bool>::toggle ( this, tr( "Toggled Stockroom Flag on %1 Items" ), &CDocument::Item::stockroom, &CDocument::Item::setStockroom, true, false );
+}
+
+
+void CWindow::editPriceToPG ( )
 {
 	if ( m_doc-> selection ( ). isEmpty ( ))
 		return;
@@ -712,7 +835,7 @@ void CWindow::editPriceIncDec ( )
 	}
 }
 
-void CWindow::editDivideQty ( )
+void CWindow::editQtyDivide ( )
 {
 	if ( m_doc-> selection ( ). isEmpty ( ))
 		return;
@@ -745,7 +868,7 @@ void CWindow::editDivideQty ( )
 	}
 }
 
-void CWindow::editMultiplyQty ( )
+void CWindow::editQtyMultiply ( )
 {
 	if ( m_doc-> selection ( ). isEmpty ( ))
 		return;
@@ -766,38 +889,29 @@ void CWindow::editMultiplyQty ( )
 	}
 }
 
-void CWindow::editSetSale ( )
+void CWindow::editSale ( )
 {
 	if ( m_doc-> selection ( ). isEmpty ( ))
 		return;
 
-	int sale = 0;
+	int sale = m_doc-> selection ( ). front ( )-> sale ( );
 
-	if ( CMessageBox::getInteger ( this, tr( "Set sale in percent for the selected items (this will <u>not</u> change any prices).<br />Negative values are also allowed." ), tr( "%" ), sale, new QIntValidator ( -1000, 99, 0 ))) {
-		CDisableUpdates disupd ( w_list );
-
-		CUndoCmd *macro = m_doc-> macroBegin ( );
-		uint count = 0;
-
-		foreach ( CDocument::Item *pos, m_doc-> selection ( )) {
-			if ( pos-> sale ( ) != sale ) {
-				CDocument::Item item = *pos;
-
-				item. setSale ( sale );
-				m_doc-> changeItem ( pos, item );
-
-				count++;
-			}
-		}
-		m_doc-> macroEnd ( macro, tr( "Set Sale on %1 Items" ). arg( count ));
-	}
+	if ( CMessageBox::getInteger ( this, tr( "Set sale in percent for the selected items (this will <u>not</u> change any prices).<br />Negative values are also allowed." ), tr( "%" ), sale, new QIntValidator ( -1000, 99, 0 ))) 
+		setOrToggle<int>::set ( this, tr( "Set Sale on %1 Items" ), &CDocument::Item::sale, &CDocument::Item::setSale, sale );
 }
 
-void CWindow::editSetStatus ( )
+void CWindow::editBulk ( )
 {
+	if ( m_doc-> selection ( ). isEmpty ( ))
+		return;
+
+	int bulk = m_doc-> selection ( ). front ( )-> bulkQuantity ( );
+
+	if ( CMessageBox::getInteger ( this, tr( "Set bulk quantity for the selected items:"), QString ( ), bulk, new QIntValidator ( 1, 99999, 0 ))) 
+		setOrToggle<int>::set ( this, tr( "Set Bulk Quantity on %1 Items" ), &CDocument::Item::bulkQuantity, &CDocument::Item::setBulkQuantity, bulk );
 }
 
-void CWindow::editSetColor ( )
+void CWindow::editColor ( )
 {
 	if ( m_doc-> selection ( ). isEmpty ( ))
 		return;
@@ -806,109 +920,41 @@ void CWindow::editSetColor ( )
 	d. setCaption ( CItemView::tr( "Modify Color" ));
 	d. setColor ( m_doc-> selection ( ). front ( )-> color ( ));
 
-	if ( d. exec ( ) == QDialog::Accepted ) {
-		const BrickLink::Color *col = d. color ( );
-
-		CUndoCmd *macro = m_doc-> macroBegin ( );
-		uint count = 0;
-
-		foreach ( CDocument::Item *pos, m_doc-> selection ( )) {
-			if ( pos-> color ( ) != col ) {
-				CDocument::Item item = *pos;
-
-				item. setColor ( col );
-				m_doc-> changeItem ( pos, item );
-
-				count++;
-			}
-		}
-		m_doc-> macroEnd ( macro, tr( "Set Color on %1 Items" ). arg( count ));
-	}
+	if ( d. exec ( ) == QDialog::Accepted )
+		setOrToggle<const BrickLink::Color *>::set ( this, tr( "Set Color on %1 Items" ), &CDocument::Item::color, &CDocument::Item::setColor, d. color ( ));
 }
 
-void CWindow::editSetCondition ( )
+void CWindow::editRemark ( )
 {
 	if ( m_doc-> selection ( ). isEmpty ( ))
 		return;
 
-	DlgSetConditionImpl d ( this );
-
-	if ( d. exec ( ) == QDialog::Accepted ) {
-		CDisableUpdates disupd ( w_list );
-
-		BrickLink::Condition nc = d. newCondition ( );
-
-		CUndoCmd *macro = m_doc-> macroBegin ( );
-		uint count = 0;
-
-		foreach ( CDocument::Item *pos, m_doc-> selection ( )) {
-			BrickLink::Condition oc = pos-> condition ( );
-
-			if ( oc != nc ) {
-				CDocument::Item item = *pos;
-
-				item. setCondition ( nc != BrickLink::ConditionCount ? nc : ( oc == BrickLink::New ? BrickLink::Used : BrickLink::New ));
-				m_doc-> changeItem ( pos, item );
-
-				count++;
-			}
-		}
-		m_doc-> macroEnd ( macro, tr( "Set Condition on %1 Items" ). arg( count ));
-	}
-}
-
-void CWindow::editSetRemark ( )
-{
-	if ( m_doc-> selection ( ). isEmpty ( ))
-		return;
-
-	QString remarks;
+	QString remarks = m_doc-> selection ( ). front ( )-> remarks ( );
 	
-	if ( CMessageBox::getString ( this, tr( "Enter the new remark for all selected items:" ), remarks )) {
-		CDisableUpdates disupd ( w_list );
-
-		CUndoCmd *macro = m_doc-> macroBegin ( );
-		uint count = 0;
-
-		foreach ( CDocument::Item *pos, m_doc-> selection ( )) {
-			if ( pos-> remarks ( ) != remarks ) {
-				CDocument::Item item = *pos;
-
-				item. setRemarks ( remarks );
-				m_doc-> changeItem ( pos, item );
-
-				count++;
-			}
-		}
-		m_doc-> macroEnd ( macro, tr( "Set Remarks on %1 Items" ). arg( count ));
-	}
+	if ( CMessageBox::getString ( this, tr( "Enter the new remark for all selected items:" ), remarks ))
+		setOrToggle<QString, const QString &>::set ( this, tr( "Set Remark on %1 Items" ), &CDocument::Item::remarks, &CDocument::Item::setRemarks, remarks );
 }
 
-void CWindow::editSetReserved ( )
+void CWindow::editComment ( )
 {
 	if ( m_doc-> selection ( ). isEmpty ( ))
 		return;
 
-	QString reserved;
+	QString comments = m_doc-> selection ( ). front ( )-> comments ( );
 	
-	if ( CMessageBox::getString ( this, tr( "Reserve all selected items for this specific member:" ), reserved )) {
-		CDisableUpdates disupd ( w_list );
+	if ( CMessageBox::getString ( this, tr( "Enter the new comment for all selected items:" ), comments ))
+		setOrToggle<QString, const QString &>::set ( this, tr( "Set Comment on %1 Items" ), &CDocument::Item::comments, &CDocument::Item::setComments, comments );
+}
 
-		CUndoCmd *macro = m_doc-> macroBegin ( );
-		uint count = 0;
+void CWindow::editReserved ( )
+{
+	if ( m_doc-> selection ( ). isEmpty ( ))
+		return;
 
-		foreach ( CDocument::Item *pos, m_doc-> selection ( )) {
-			if ( pos-> reserved ( ) != reserved ) {
-				CDocument::Item item = *pos;
-
-				item. setReserved ( reserved );
-				m_doc-> changeItem ( pos, item );
-
-				count++;
-			}
-		}
-		m_doc-> macroEnd ( macro, tr( "Set Reservation on %1 Items" ). arg( count ));
-	}
+	QString reserved = m_doc-> selection ( ). front ( )-> reserved ( );
+	
+	if ( CMessageBox::getString ( this, tr( "Reserve all selected items for this specific member:" ), reserved ))
+		setOrToggle<QString, const QString &>::set ( this, tr( "Set Reservation on %1 Items" ), &CDocument::Item::reserved, &CDocument::Item::setReserved, reserved );
 }
 
 void CWindow::updateErrorMask ( )
@@ -1092,6 +1138,14 @@ void CWindow::showBLLotsForSale ( )
 {
 	if ( !m_doc-> selection ( ). isEmpty ( ))
 		CUtility::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_LotsForSale, (*m_doc-> selection ( ). front ( )). item ( ), (*m_doc-> selection ( ). front ( )). color ( )));
+}
+
+void CWindow::showBLMyInventory ( )
+{
+	if ( !m_doc-> selection ( ). isEmpty ( )) {
+		uint lotid = (*m_doc-> selection ( ). front ( )). lotId ( );
+		CUtility::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_StoreItemDetail, &lotid ));
+	}
 }
 
 void CWindow::setDifferenceMode ( bool b )

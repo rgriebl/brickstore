@@ -185,7 +185,7 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 	if ( sl. isEmpty ( ))  sl << "edit_undo" << "edit_redo" << "-"
 	                          << "edit_cut" << "edit_copy" << "edit_paste" << "edit_delete" << "-" << "edit_select_all" << "edit_select_none" << "-" 
 		                      << "edit_additems" << "edit_subtractitems" << "edit_mergeitems" << "edit_partoutitems" << "-" 
-							  << "edit_set_attr" << "-" << "edit_reset_diffs" << "-" << "edit_bl_info_group";
+							  << "edit_modify" << "-" << "edit_reset_diffs" << "-" << "edit_bl_info_group";
 	m_menuid_edit = menuBar ( )-> insertItem ( QString ( ), createMenu ( sl ));
 
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Menubar/View" );
@@ -208,7 +208,7 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 	m_menuid_help = menuBar ( )-> insertItem ( QString ( ), createMenu ( sl ));
 
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/ContextMenu/Item" );
-	if ( sl. isEmpty ( ))  sl << "edit_cut" << "edit_copy" << "edit_paste" << "edit_delete" << "-" << "edit_select_all" << "-" << "edit_mergeitems" << "edit_partoutitems" << "-" << "edit_set_attr" << "-" << "edit_bl_info_group";
+	if ( sl. isEmpty ( ))  sl << "edit_cut" << "edit_copy" << "edit_paste" << "edit_delete" << "-" << "edit_select_all" << "-" << "edit_mergeitems" << "edit_partoutitems" << "-" << "edit_modify" << "-" << "edit_bl_info_group";
 	m_contextmenu = createMenu ( sl );
 
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Toolbar/Buttons" );
@@ -218,7 +218,8 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 							  << "edit_cut" << "edit_copy" << "edit_paste" << "-" 
 							  << "edit_additems" << "edit_subtractitems" << "edit_mergeitems" << "edit_partoutitems" << "-" 
 							  << "edit_price_to_priceguide" << "edit_price_inc_dec" << "-" 
-							  << "edit_bl_info_group" << "-" 
+							  << "edit_bl_catalog" << "edit_bl_priceguide" << "edit_bl_lotsforsale" << "-"
+							 // << "edit_bl_info_group" << "-" 
 							  << "extras_net"; // << "-" << "help_whatsthis";
 	m_toolbar = createToolBar ( QString ( ), sl );
 	connect ( m_toolbar, SIGNAL( visibilityChanged ( bool )), findAction ( "view_toolbar" ), SLOT( setOn ( bool )));
@@ -380,19 +381,38 @@ void CFrameWork::languageChange ( )
 		{ "help_whatsthis",                 tr( "What's this?" ),                       tr( "Shift+F1", "Help|WhatsThis" ) },
 		{ "help_about",                     tr( "About..." ),                           0 },
 		{ "help_updates",                   tr( "Check for Program Updates..." ),       0 },
-		{ "edit_price_to_priceguide",       tr( "Set Prices to Price-Guide..." ),       tr( "Ctrl+G", "Edit|Set to PriceGuide" ) },
-		{ "edit_price_inc_dec",             tr( "Inc- or Decrease Prices..." ),         tr( "Ctrl++", "Edit| Inc/Dec Prices" ) },
-		{ "edit_set_sale",                  tr( "Set Sale..." ),                        tr( "Ctrl+%", "Edit|Set Sale" ) },
-		{ "edit_set_color",                 tr( "Set Color..." ),                       0 },
-		{ "edit_set_status",                tr( "Set Status..." ),                      0 },
-		{ "edit_set_remark",                tr( "Set Remark..." ),                      0 },
-		{ "edit_set_reserved",              tr( "Set Reserved for..." ),                0 },
-		{ "edit_set_condition",             tr( "Set Condition..." ),                   0 },
-		{ "edit_multiply_qty",              tr( "Multiply Quantities..." ),             tr( "Ctrl+*", "Edit|Multiply Quantities" ) },
-		{ "edit_divide_qty",                tr( "Divide Quantities..." ),               tr( "Ctrl+/", "Edit|Divide Quantities" ) },
+		{ "edit_status",                    tr( "Status" ),                             0 },
+		{ "edit_status_include",            tr( "Include" ),                            0 },
+		{ "edit_status_exclude",            tr( "Exclude" ),                            0 },
+		{ "edit_status_extra",              tr( "Extra" ),                              0 },
+		{ "edit_status_toggle",             tr( "Toggle Include/Exclude" ),             0 },
+		{ "edit_cond",                      tr( "Condition" ),                          0 },
+		{ "edit_cond_new",                  tr( "New" ),                                0 },
+		{ "edit_cond_used",                 tr( "Used" ),                               0 },
+		{ "edit_cond_toggle",               tr( "Toggle New/Used" ),                    0 },
+		{ "edit_color",                     tr( "Color..." ),                           0 },
+		{ "edit_qty",                       tr( "Quantity" ),                           0 },
+		{ "edit_qty_multiply",              tr( "Multiply..." ),                        tr( "Ctrl+*", "Edit|Quantity|Multiply" ) },
+		{ "edit_qty_divide",                tr( "Divide..." ),                          tr( "Ctrl+/", "Edit|Quantity|Divide" ) },
+		{ "edit_price",                     tr( "Price" ),                              0 },
+		{ "edit_price_to_priceguide",       tr( "Set to Price-Guide..." ),              tr( "Ctrl+G", "Edit|Price|Set to PriceGuide" ) },
+		{ "edit_price_inc_dec",             tr( "Inc- or Decrease..." ),                tr( "Ctrl++", "Edit|Price|Inc/Dec" ) },
+		{ "edit_bulk",                      tr( "Bulk..." ),                            0 },
+		{ "edit_sale",                      tr( "Sale..." ),                            tr( "Ctrl+%", "Edit|Sale" ) },
+		{ "edit_comment",                   tr( "Comment..." ),                         0 },
+		{ "edit_remark",                    tr( "Remark..." ),                          0 },
+		{ "edit_retain",                    tr( "Retain in Inventory" ),                0 },
+		{ "edit_retain_yes",                tr( "Yes" ),                                0 },
+		{ "edit_retain_no",                 tr( "No" ),                                 0 },
+		{ "edit_retain_toggle",             tr( "Toggle Yes/No" ),                      0 },
+		{ "edit_stockroom",                 tr( "Stockroom Item" ),                     0 },
+		{ "edit_stockroom_yes",             tr( "Yes" ),                                0 },
+		{ "edit_stockroom_no",              tr( "No" ),                                 0 },
+		{ "edit_stockroom_toggle",          tr( "Toggle Yes/No" ),                      0 },
+		{ "edit_reserved",                  tr( "Reserved for..." ),                    0 },
 		{ "edit_bl_catalog",                tr( "Show BrickLink Catalog Info..." ),     0 },
 		{ "edit_bl_priceguide",             tr( "Show BrickLink Price Guide Info..." ), 0 },
-		{ "edit_bl_lotsforsale",            tr( "Lots for Sale on BrickLink..." ),      0 },
+		{ "edit_bl_lotsforsale",            tr( "Show Lots for Sale on BrickLink..." ), 0 },
 		{ "edit_bl_myinventory",            tr( "Show in my Store on BrickLink..." ),   0 },
 
 		{ 0, 0, 0 }
@@ -613,7 +633,7 @@ void CFrameWork::createActions ( )
 {
 	QAction *a;
 	CListAction *l;
-	QActionGroup *g;
+	QActionGroup *g, *g2;
 
 	a = new QAction ( this, "file_new" );
 	connect ( a, SIGNAL( activated ( )), this, SLOT( fileNew ( )));
@@ -688,22 +708,58 @@ void CFrameWork::createActions ( )
 	(void) new QAction ( this, "edit_select_all" );
 	(void) new QAction ( this, "edit_select_none" );
 
-	g = new QActionGroup ( this, "edit_set_attr", false );
-	g-> setUsesDropDown ( false );
+	g = new QActionGroup ( this, "edit_modify", false );
 
-	(void) new QAction ( g, "edit_set_status" );
-	(void) new QAction ( g, "edit_set_color" );
-	(void) new QAction ( g, "edit_multiply_qty" );
-	(void) new QAction ( g, "edit_divide_qty" );
-	(void) new QAction ( g, "edit_price_inc_dec" );
-	(void) new QAction ( g, "edit_price_to_priceguide" );
-	(void) new QAction ( g, "edit_set_condition" );
-	(void) new QAction ( g, "edit_set_sale" );
-	(void) new QAction ( g, "edit_set_remark" );
-	(void) new QAction ( g, "edit_set_reserved" );
+	g2 = new QActionGroup ( g, "edit_status", false );
+	g2-> setUsesDropDown ( true );
+	( new QAction ( g2, "edit_status_include", true ))-> setIconSet ( CResource::inst ( )-> pixmap ( "status_include" ));
+	( new QAction ( g2, "edit_status_exclude", true ))-> setIconSet ( CResource::inst ( )-> pixmap ( "status_exclude" ));
+	( new QAction ( g2, "edit_status_extra",   true ))-> setIconSet ( CResource::inst ( )-> pixmap ( "status_extra" ));
+	g2-> addSeparator ( );
+	(void) new QAction ( g2, "edit_status_toggle" );
+
+	g2 = new QActionGroup ( g, "edit_cond", false );
+	g2-> setUsesDropDown ( true );
+	(void) new QAction ( g2, "edit_cond_new", true );
+	(void) new QAction ( g2, "edit_cond_used", true );
+	g2-> addSeparator ( );
+	(void) new QAction ( g2, "edit_cond_toggle" );
+
+	(void) new QAction ( g, "edit_color" );
+
+	g2 = new QActionGroup ( g, "edit_qty", false );
+	g2-> setUsesDropDown ( true );
+	(void) new QAction ( g2, "edit_qty_multiply" );
+	(void) new QAction ( g2, "edit_qty_divide" );
+
+	g2 = new QActionGroup ( g, "edit_price", false );
+	g2-> setUsesDropDown ( true );
+	(void) new QAction ( g2, "edit_price_inc_dec" );
+	(void) new QAction ( g2, "edit_price_to_priceguide" );
+
+	(void) new QAction ( g, "edit_bulk" );
+	(void) new QAction ( g, "edit_sale" );
+	(void) new QAction ( g, "edit_comment" );
+	(void) new QAction ( g, "edit_remark" );
+	//tier
+
+	g2 = new QActionGroup ( g, "edit_retain", false );
+	g2-> setUsesDropDown ( true );
+	(void) new QAction ( g2, "edit_retain_yes", true );
+	(void) new QAction ( g2, "edit_retain_no", true );
+	g2-> addSeparator ( );
+	(void) new QAction ( g2, "edit_retain_toggle" );
+
+	g2 = new QActionGroup ( g, "edit_stockroom", false );
+	g2-> setUsesDropDown ( true );
+	(void) new QAction ( g2, "edit_stockroom_yes", true );
+	(void) new QAction ( g2, "edit_stockroom_no", true );
+	g2-> addSeparator ( );
+	(void) new QAction ( g2, "edit_stockroom_toggle" );
+
+	(void) new QAction ( g, "edit_reserved" );
 
 	g = new QActionGroup ( this, "edit_bl_info_group", false );
-	g-> setUsesDropDown ( false );
 
 	(void) new QAction ( g, "edit_bl_catalog" );
 	(void) new QAction ( g, "edit_bl_priceguide" );
@@ -1004,19 +1060,42 @@ void CFrameWork::connectAllActions ( bool do_connect, CWindow *window )
 	connectAction ( do_connect, "edit_partoutitems", window, SLOT( editPartOutItems ( )));
 	connectAction ( do_connect, "edit_reset_diffs", window, SLOT( editResetDifferences ( )));
 
-	connectAction ( do_connect, "edit_price_to_priceguide", window, SLOT( editSetPriceToPG ( )));
+	connectAction ( do_connect, "edit_status_include", window, SLOT( editStatusInclude ( )));
+	connectAction ( do_connect, "edit_status_exclude", window, SLOT( editStatusExclude ( )));
+	connectAction ( do_connect, "edit_status_extra", window, SLOT( editStatusExtra ( )));
+	connectAction ( do_connect, "edit_status_toggle", window, SLOT( editStatusToggle ( )));
+	
+	connectAction ( do_connect, "edit_cond_new", window, SLOT( editConditionNew ( )));
+	connectAction ( do_connect, "edit_cond_used", window, SLOT( editConditionUsed ( )));
+	connectAction ( do_connect, "edit_cond_toggle", window, SLOT( editConditionToggle ( )));
+
+	connectAction ( do_connect, "edit_color", window, SLOT( editColor ( )));
+
+	connectAction ( do_connect, "edit_qty_multiply", window, SLOT( editQtyMultiply ( )));
+	connectAction ( do_connect, "edit_qty_divide", window, SLOT( editQtyDivide ( )));
+
+	connectAction ( do_connect, "edit_price_to_priceguide", window, SLOT( editPriceToPG ( )));
 	connectAction ( do_connect, "edit_price_inc_dec", window, SLOT( editPriceIncDec ( )));
-	connectAction ( do_connect, "edit_set_sale", window, SLOT( editSetSale ( )));
-	connectAction ( do_connect, "edit_set_color", window, SLOT( editSetColor ( )));
-	connectAction ( do_connect, "edit_set_status", window, SLOT( editSetStatus ( )));
-	connectAction ( do_connect, "edit_set_remark", window, SLOT( editSetRemark ( )));
-	connectAction ( do_connect, "edit_set_reserved", window, SLOT( editSetReserved ( )));
-	connectAction ( do_connect, "edit_set_condition", window, SLOT( editSetCondition ( )));
-	connectAction ( do_connect, "edit_multiply_qty", window, SLOT( editMultiplyQty ( )));
-	connectAction ( do_connect, "edit_divide_qty", window, SLOT( editDivideQty ( )));
+
+	connectAction ( do_connect, "edit_bulk", window, SLOT( editBulk ( )));
+	connectAction ( do_connect, "edit_sale", window, SLOT( editSale ( )));
+	connectAction ( do_connect, "edit_comment", window, SLOT( editComment ( )));
+	connectAction ( do_connect, "edit_remark", window, SLOT( editRemark ( )));
+
+	connectAction ( do_connect, "edit_retain_yes", window, SLOT( editRetainYes ( )));
+	connectAction ( do_connect, "edit_retain_no", window, SLOT( editRetainNo ( )));
+	connectAction ( do_connect, "edit_retain_toggle", window, SLOT( editRetainToggle ( )));
+
+	connectAction ( do_connect, "edit_stockroom_yes", window, SLOT( editStockroomYes ( )));
+	connectAction ( do_connect, "edit_stockroom_no", window, SLOT( editStockroomNo ( )));
+	connectAction ( do_connect, "edit_stockroom_toggle", window, SLOT( editStockroomToggle ( )));
+
+	connectAction ( do_connect, "edit_reserved", window, SLOT( editReserved ( )));
+
 	connectAction ( do_connect, "edit_bl_catalog", window, SLOT( showBLCatalog ( )));
 	connectAction ( do_connect, "edit_bl_priceguide", window, SLOT( showBLPriceGuide ( )));
 	connectAction ( do_connect, "edit_bl_lotsforsale", window, SLOT( showBLLotsForSale ( )));
+	connectAction ( do_connect, "edit_bl_myinventory", window, SLOT( showBLMyInventory ( )));
 
 	connectAction ( do_connect, "view_difference_mode", window, SLOT( setDifferenceMode ( bool )), &CWindow::isDifferenceMode );
 
@@ -1080,16 +1159,7 @@ void CFrameWork::selectionUpdate ( const CDocument::ItemList &selection )
 		{ "edit_cut",                 1, 0, 0 },
 		{ "edit_copy",                1, 0, 0 },
 		{ "edit_delete",              1, 0, 0 },
-		{ "edit_set_sale",            1, 0, 0 },
-		{ "edit_set_status",          1, 0, 0 },
-		{ "edit_set_color",           1, 0, 0 },
-		{ "edit_set_remark",          1, 0, 0 },
-		{ "edit_set_reserved",        1, 0, 0 },
-		{ "edit_set_condition",       1, 0, 0 },
-		{ "edit_price_inc_dec",       1, 0, 0 },
-		{ "edit_price_to_priceguide", 1, 0, 0 },
-		{ "edit_multiply_qty",        1, 0, 0 },
-		{ "edit_divide_qty",          1, 0, 0 },
+		{ "edit_modify",              1, 0, 0 },
 		{ "edit_bl_catalog",          1, 1, 0 },
 		{ "edit_bl_priceguide",       1, 1, 0 },
 		{ "edit_bl_lotsforsale",      1, 1, 0 },
@@ -1127,6 +1197,41 @@ void CFrameWork::selectionUpdate ( const CDocument::ItemList &selection )
 			a-> setEnabled ( b && ( mins ? ( cnt >= mins ) : true ) && ( maxs ? ( cnt <= maxs ) : true ));
 		}
 	}
+
+	int status    = -1;
+	int condition = -1;
+	int retain    = -1;
+	int stockroom = -1;
+
+	if ( cnt ) {
+		status    = selection. front ( )-> status ( );
+		condition = selection. front ( )-> condition ( );
+		retain    = selection. front ( )-> retain ( )    ? 1 : 0;
+		stockroom = selection. front ( )-> stockroom ( ) ? 1 : 0;
+
+		foreach ( CDocument::Item *item, selection ) {
+			if (( status >= 0 ) && ( status != item-> status ( )))
+				status = -1;
+			if (( condition >= 0 ) && ( condition != item-> condition ( )))
+				condition = -1;
+			if (( retain >= 0 ) && ( retain != ( item-> retain ( ) ? 1 : 0 )))
+				retain = -1;
+			if (( stockroom >= 0 ) && ( stockroom != ( item-> stockroom ( ) ? 1 : 0 )))
+				stockroom = -1;
+		}
+	}
+	findAction ( "edit_status_include" )-> setOn ( status == BrickLink::InvItem::Include );
+	findAction ( "edit_status_exclude" )-> setOn ( status == BrickLink::InvItem::Exclude );
+	findAction ( "edit_status_extra" )-> setOn ( status == BrickLink::InvItem::Extra );
+
+	findAction ( "edit_cond_new" )-> setOn ( condition == BrickLink::New );
+	findAction ( "edit_cond_used" )-> setOn ( condition == BrickLink::Used );
+
+	findAction ( "edit_retain_yes" )-> setOn ( retain == 1 );
+	findAction ( "edit_retain_no" )-> setOn ( retain == 0 );
+
+	findAction ( "edit_stockroom_yes" )-> setOn ( stockroom == 1 );
+	findAction ( "edit_stockroom_no" )-> setOn ( stockroom == 0 );
 }
 
 void CFrameWork::statisticsUpdate ( )

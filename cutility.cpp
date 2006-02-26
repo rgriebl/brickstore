@@ -406,7 +406,7 @@ time_t CUtility::toUTC ( const QDateTime &dt, const char *settz )
 	if ( settz )
 		set_tz ( oldtz. data ( ));
 
-	time_t t2 = dt.toTime_t();
+	//time_t t2 = dt.toTime_t();
 
 	return t;
 }
