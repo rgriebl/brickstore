@@ -108,10 +108,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>#</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Set</source>
         <translation type="unfinished"></translation>
     </message>
@@ -122,6 +118,10 @@
     <message>
         <source>Part out Item...</source>
         <translation>Séparer les pièces de cet item...</translation>
+    </message>
+    <message>
+        <source>Qty.</source>
+        <translation type="unfinished">Qté.</translation>
     </message>
 </context>
 <context>
@@ -327,6 +327,10 @@
         <source>Reset Differences</source>
         <translation>Réinitialiser les différences</translation>
     </message>
+    <message>
+        <source>Inventory Files</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>CFrameWork</name>
@@ -352,7 +356,7 @@
     </message>
     <message>
         <source>Inventory updates</source>
-        <translation>Mise à jour de l&apos;inventaire</translation>
+        <translation type="obsolete">Mise à jour de l&apos;inventaire</translation>
     </message>
     <message>
         <source>Picture updates</source>
@@ -582,7 +586,7 @@
     </message>
     <message>
         <source>Buyer/Collector View</source>
-        <translation>Mode acheteur/collectionneur</translation>
+        <translation type="obsolete">Mode acheteur/collectionneur</translation>
     </message>
     <message>
         <source>View Toolbar</source>
@@ -647,64 +651,39 @@
     </message>
     <message>
         <source>Set Prices...</source>
-        <translation>Fixer les prix...</translation>
+        <translation type="obsolete">Fixer les prix...</translation>
     </message>
     <message>
         <source>Set Prices to Price-Guide...</source>
-        <translation>Fixer au guide de prix...</translation>
-    </message>
-    <message>
-        <source>Ctrl+G</source>
-        <comment>Edit|Set to PriceGuide</comment>
-        <translation></translation>
+        <translation type="obsolete">Fixer au guide de prix...</translation>
     </message>
     <message>
         <source>Inc- or Decrease Prices...</source>
-        <translation>Aug. / Diminuer les prix...</translation>
-    </message>
-    <message>
-        <source>Ctrl++</source>
-        <comment>Edit| Inc/Dec Prices</comment>
-        <translation></translation>
+        <translation type="obsolete">Aug. / Diminuer les prix...</translation>
     </message>
     <message>
         <source>Set Sale...</source>
-        <translation>Fixer la remise...</translation>
-    </message>
-    <message>
-        <source>Ctrl+%</source>
-        <comment>Edit|Set Sale</comment>
-        <translation></translation>
+        <translation type="obsolete">Fixer la remise...</translation>
     </message>
     <message>
         <source>Set Remark...</source>
-        <translation>Fixer la remarque...</translation>
+        <translation type="obsolete">Fixer la remarque...</translation>
     </message>
     <message>
         <source>Set Reserved for...</source>
-        <translation>Fixer la réservation...</translation>
+        <translation type="obsolete">Fixer la réservation...</translation>
     </message>
     <message>
         <source>Set Condition...</source>
-        <translation>Fixer la condition...</translation>
+        <translation type="obsolete">Fixer la condition...</translation>
     </message>
     <message>
         <source>Multiply Quantities...</source>
-        <translation>Multiplier les quantités...</translation>
-    </message>
-    <message>
-        <source>Ctrl+*</source>
-        <comment>Edit|Multiply Quantities</comment>
-        <translation></translation>
+        <translation type="obsolete">Multiplier les quantités...</translation>
     </message>
     <message>
         <source>Divide Quantities...</source>
-        <translation>Diviser les quantités...</translation>
-    </message>
-    <message>
-        <source>Ctrl+/</source>
-        <comment>Edit|Divide Quantities</comment>
-        <translation></translation>
+        <translation type="obsolete">Diviser les quantités...</translation>
     </message>
     <message>
         <source>Show BrickLink Catalog Info...</source>
@@ -716,7 +695,7 @@
     </message>
     <message>
         <source>Lots for Sale on BrickLink...</source>
-        <translation>Lots en vente sur BrickLink...</translation>
+        <translation type="obsolete">Lots en vente sur BrickLink...</translation>
     </message>
     <message>
         <source>No valid BrickLink login settings found.&lt;br /&gt;&lt;br /&gt;Do you want to change the settings now?</source>
@@ -826,6 +805,143 @@
     </message>
     <message>
         <source>BrickStore has switched to a new file format (.bsx - BrickStore XML).&lt;br /&gt;&lt;br /&gt;Your document has been automatically imported and it will be converted as soon as you save it.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Buyer/Collector Mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Status</source>
+        <translation type="unfinished">Etat</translation>
+    </message>
+    <message>
+        <source>Include</source>
+        <translation type="unfinished">Inclure</translation>
+    </message>
+    <message>
+        <source>Exclude</source>
+        <translation type="unfinished">Exclure</translation>
+    </message>
+    <message>
+        <source>Extra</source>
+        <translation type="unfinished">Extra</translation>
+    </message>
+    <message>
+        <source>Toggle Include/Exclude</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Condition</source>
+        <translation type="unfinished">Etat</translation>
+    </message>
+    <message>
+        <source>Used</source>
+        <translation type="unfinished">Usagé</translation>
+    </message>
+    <message>
+        <source>Toggle New/Used</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Color...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Quantity</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Multiply...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ctrl+*</source>
+        <comment>Edit|Quantity|Multiply</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Divide...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ctrl+/</source>
+        <comment>Edit|Quantity|Divide</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Price</source>
+        <translation type="unfinished">Prix</translation>
+    </message>
+    <message>
+        <source>Set to Price-Guide...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ctrl+G</source>
+        <comment>Edit|Price|Set to PriceGuide</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Inc- or Decrease...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ctrl++</source>
+        <comment>Edit|Price|Inc/Dec</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Bulk Quantity...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Sale...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ctrl+%</source>
+        <comment>Edit|Sale</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Comment...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Remark...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Retain in Inventory</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Yes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Toggle Yes/No</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Stockroom Item</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reserved for...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show Lots for Sale on BrickLink...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show in my Store on BrickLink...</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1327,20 +1443,12 @@
 <context>
     <name>CReport</name>
     <message>
-        <source>N</source>
-        <translation></translation>
-    </message>
-    <message>
         <source>New</source>
-        <translation>Neuf</translation>
-    </message>
-    <message>
-        <source>U</source>
-        <translation></translation>
+        <translation type="obsolete">Neuf</translation>
     </message>
     <message>
         <source>Used</source>
-        <translation>Usagé</translation>
+        <translation type="obsolete">Usagé</translation>
     </message>
 </context>
 <context>
@@ -1507,7 +1615,7 @@
     </message>
     <message>
         <source>Appears in Sets</source>
-        <translation>Apparaît dans les kits</translation>
+        <translation type="obsolete">Apparaît dans les kits</translation>
     </message>
     <message>
         <source>Peeron</source>
@@ -1690,11 +1798,11 @@
     </message>
     <message>
         <source>Placed</source>
-        <translation>Placée</translation>
+        <translation type="obsolete">Placée</translation>
     </message>
     <message>
         <source>Received</source>
-        <translation>Reçue</translation>
+        <translation type="obsolete">Reçue</translation>
     </message>
     <message>
         <source>BrikTrak Inventory</source>
@@ -1882,6 +1990,90 @@
     </message>
     <message>
         <source>Subtracted %1 Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set Include Status on %1 Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set Exclude Status on %1 Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set Extra Status on %1 Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Toggled Status on %1 Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set New Condition on %1 Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set Used Condition on %1 Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Toggled Condition on %1 Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set Retain Flag on %1 Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cleared Retain Flag on %1 Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Toggled Retain Flag on %1 Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set Stockroom Flag on %1 Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cleared Stockroom Flag on %1 Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Toggled Stockroom Flag on %1 Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set Sale on %1 Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set bulk quantity for the selected items:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set Bulk Quantity on %1 Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set Color on %1 Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set Remark on %1 Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enter the new comment for all selected items:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set Comment on %1 Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set Reservation on %1 Items</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2215,11 +2407,11 @@
     <name>DlgReportUI</name>
     <message>
         <source>This print template requires some additional informations:</source>
-        <translation>Ce modèle d&apos;impression requiert des informations supplémentaires :</translation>
+        <translation type="obsolete">Ce modèle d&apos;impression requiert des informations supplémentaires :</translation>
     </message>
     <message>
         <source>&amp;OK</source>
-        <translation>&amp;OK</translation>
+        <translation type="obsolete">&amp;OK</translation>
     </message>
 </context>
 <context>
@@ -2238,7 +2430,7 @@
     </message>
     <message>
         <source>Page Size</source>
-        <translation>Taille de la page</translation>
+        <translation type="obsolete">Taille de la page</translation>
     </message>
     <message>
         <source>Name</source>
@@ -2256,47 +2448,43 @@
 <context>
     <name>DlgSelectReportImpl</name>
     <message>
-        <source>A4</source>
-        <translation></translation>
-    </message>
-    <message>
         <source>Letter</source>
-        <translation>Lettre</translation>
+        <translation type="obsolete">Lettre</translation>
     </message>
     <message>
         <source>Custom</source>
-        <translation>Personnalisé</translation>
+        <translation type="obsolete">Personnalisé</translation>
     </message>
 </context>
 <context>
     <name>DlgSetCondition</name>
     <message>
         <source>Set Condition</source>
-        <translation>Fixer la condition</translation>
+        <translation type="obsolete">Fixer la condition</translation>
     </message>
     <message>
         <source>Please select how the conditon of the selected items should be modified:</source>
-        <translation>Précisez comment fixer la condition des items sélectionnés :</translation>
+        <translation type="obsolete">Précisez comment fixer la condition des items sélectionnés :</translation>
     </message>
     <message>
         <source>Set condition to: &amp;New</source>
-        <translation>Fixer la condition à : &amp;Neuf</translation>
+        <translation type="obsolete">Fixer la condition à : &amp;Neuf</translation>
     </message>
     <message>
         <source>Set condition to: &amp;Used</source>
-        <translation>Fixer la condition à : &amp;Usagé</translation>
+        <translation type="obsolete">Fixer la condition à : &amp;Usagé</translation>
     </message>
     <message>
         <source>Toggle current condition</source>
-        <translation>Inverser la condition courante</translation>
+        <translation type="obsolete">Inverser la condition courante</translation>
     </message>
     <message>
         <source>&amp;OK</source>
-        <translation>&amp;OK</translation>
+        <translation type="obsolete">&amp;OK</translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
-        <translation>&amp;Annuler</translation>
+        <translation type="obsolete">&amp;Annuler</translation>
     </message>
 </context>
 <context>
@@ -2316,6 +2504,10 @@
     <message>
         <source>&amp;Cancel</source>
         <translation>&amp;Annuler</translation>
+    </message>
+    <message>
+        <source>Download even if already in cache</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

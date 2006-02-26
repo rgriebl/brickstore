@@ -397,7 +397,7 @@ void CFrameWork::languageChange ( )
 		{ "edit_price",                     tr( "Price" ),                              0 },
 		{ "edit_price_to_priceguide",       tr( "Set to Price-Guide..." ),              tr( "Ctrl+G", "Edit|Price|Set to PriceGuide" ) },
 		{ "edit_price_inc_dec",             tr( "Inc- or Decrease..." ),                tr( "Ctrl++", "Edit|Price|Inc/Dec" ) },
-		{ "edit_bulk",                      tr( "Bulk..." ),                            0 },
+		{ "edit_bulk",                      tr( "Bulk Quantity..." ),                   0 },
 		{ "edit_sale",                      tr( "Sale..." ),                            tr( "Ctrl+%", "Edit|Sale" ) },
 		{ "edit_comment",                   tr( "Comment..." ),                         0 },
 		{ "edit_remark",                    tr( "Remark..." ),                          0 },

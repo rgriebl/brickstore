@@ -37,7 +37,7 @@
     </message>
     <message>
         <source>#</source>
-        <translation>#</translation>
+        <translation type="obsolete">#</translation>
     </message>
     <message>
         <source>Set</source>
@@ -50,6 +50,10 @@
     <message>
         <source>Part out Item...</source>
         <translation>Teil zerlegen...</translation>
+    </message>
+    <message>
+        <source>Qty.</source>
+        <translation>Anz.</translation>
     </message>
 </context>
 <context>
@@ -272,6 +276,10 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
         <source>Reset Differences</source>
         <translation>Differenzen zurücksetzen</translation>
     </message>
+    <message>
+        <source>Inventory Files</source>
+        <translation>Inventarlisten</translation>
+    </message>
 </context>
 <context>
     <name>CFrameWork</name>
@@ -285,7 +293,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>Inventory updates</source>
-        <translation>Inventarlistenaktualisierungen</translation>
+        <translation type="obsolete">Inventarlistenaktualisierungen</translation>
     </message>
     <message>
         <source>Picture updates</source>
@@ -471,23 +479,23 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>Set Prices...</source>
-        <translation>Preise ändern...</translation>
+        <translation type="obsolete">Preise ändern...</translation>
     </message>
     <message>
         <source>Set Prices to Price-Guide...</source>
-        <translation>Preise auf Richtpreise setzen...</translation>
+        <translation type="obsolete">Preise auf Richtpreise setzen...</translation>
     </message>
     <message>
         <source>Inc- or Decrease Prices...</source>
-        <translation>Preise erhöhen oder erniedrigen...</translation>
+        <translation type="obsolete">Preise erhöhen oder erniedrigen...</translation>
     </message>
     <message>
         <source>Set Sale...</source>
-        <translation>Sonderangebot erstellen...</translation>
+        <translation type="obsolete">Sonderangebot erstellen...</translation>
     </message>
     <message>
         <source>Multiply Quantities...</source>
-        <translation>Mengen multiplizieren...</translation>
+        <translation type="obsolete">Mengen multiplizieren...</translation>
     </message>
     <message>
         <source>Lots</source>
@@ -508,22 +516,22 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <message>
         <source>Ctrl+G</source>
         <comment>Edit|Set to PriceGuide</comment>
-        <translation>Ctrl+G</translation>
+        <translation type="obsolete">Ctrl+G</translation>
     </message>
     <message>
         <source>Ctrl++</source>
         <comment>Edit| Inc/Dec Prices</comment>
-        <translation>Ctrl++</translation>
+        <translation type="obsolete">Ctrl++</translation>
     </message>
     <message>
         <source>Ctrl+%</source>
         <comment>Edit|Set Sale</comment>
-        <translation>Ctrl+%</translation>
+        <translation type="obsolete">Ctrl+%</translation>
     </message>
     <message>
         <source>Ctrl+*</source>
         <comment>Edit|Multiply Quantities</comment>
-        <translation>Ctrl+*</translation>
+        <translation type="obsolete">Ctrl+*</translation>
     </message>
     <message>
         <source>Delete</source>
@@ -553,7 +561,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>Lots for Sale on BrickLink...</source>
-        <translation>Verkaufsangebote auf BrickLink...</translation>
+        <translation type="obsolete">Verkaufsangebote auf BrickLink...</translation>
     </message>
     <message>
         <source>Unsaved modifications</source>
@@ -561,11 +569,11 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>Set Remark...</source>
-        <translation>Anmerkung ändern...</translation>
+        <translation type="obsolete">Anmerkung ändern...</translation>
     </message>
     <message>
         <source>Set Reserved for...</source>
-        <translation>Reservierung ändern...</translation>
+        <translation type="obsolete">Reservierung ändern...</translation>
     </message>
     <message>
         <source>&amp;File</source>
@@ -637,7 +645,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>Buyer/Collector View</source>
-        <translation>Käufer/Sammler Ansicht</translation>
+        <translation type="obsolete">Käufer/Sammler Ansicht</translation>
     </message>
     <message>
         <source>Subtract Items...</source>
@@ -665,16 +673,16 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>Set Condition...</source>
-        <translation>Zustand ändern...</translation>
+        <translation type="obsolete">Zustand ändern...</translation>
     </message>
     <message>
         <source>Divide Quantities...</source>
-        <translation>Mengen dividieren...</translation>
+        <translation type="obsolete">Mengen dividieren...</translation>
     </message>
     <message>
         <source>Ctrl+/</source>
         <comment>Edit|Divide Quantities</comment>
-        <translation>Ctrl+/</translation>
+        <translation type="obsolete">Ctrl+/</translation>
     </message>
     <message>
         <source>Check for Program Updates...</source>
@@ -749,6 +757,143 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <message>
         <source>F11</source>
         <translation>F11</translation>
+    </message>
+    <message>
+        <source>Buyer/Collector Mode</source>
+        <translation>Käufer/Sammler Modus</translation>
+    </message>
+    <message>
+        <source>Status</source>
+        <translation>Status</translation>
+    </message>
+    <message>
+        <source>Include</source>
+        <translation>Einschliessen</translation>
+    </message>
+    <message>
+        <source>Exclude</source>
+        <translation>Ausschliessen</translation>
+    </message>
+    <message>
+        <source>Extra</source>
+        <translation>Extra</translation>
+    </message>
+    <message>
+        <source>Toggle Include/Exclude</source>
+        <translation>Zwischen Ein- und Ausschliessen umschalten</translation>
+    </message>
+    <message>
+        <source>Condition</source>
+        <translation>Zustand</translation>
+    </message>
+    <message>
+        <source>Used</source>
+        <translation>Gebraucht</translation>
+    </message>
+    <message>
+        <source>Toggle New/Used</source>
+        <translation>Zwischen Neu und Gebraucht umschalten</translation>
+    </message>
+    <message>
+        <source>Color...</source>
+        <translation>Farbe...</translation>
+    </message>
+    <message>
+        <source>Quantity</source>
+        <translation>Anzahl</translation>
+    </message>
+    <message>
+        <source>Multiply...</source>
+        <translation>Multiplizieren...</translation>
+    </message>
+    <message>
+        <source>Ctrl+*</source>
+        <comment>Edit|Quantity|Multiply</comment>
+        <translation>Ctrl+*</translation>
+    </message>
+    <message>
+        <source>Divide...</source>
+        <translation>Dividieren...</translation>
+    </message>
+    <message>
+        <source>Ctrl+/</source>
+        <comment>Edit|Quantity|Divide</comment>
+        <translation>Ctrl+/</translation>
+    </message>
+    <message>
+        <source>Price</source>
+        <translation>Preis</translation>
+    </message>
+    <message>
+        <source>Set to Price-Guide...</source>
+        <translation>Auf Richtpreise setzen...</translation>
+    </message>
+    <message>
+        <source>Ctrl+G</source>
+        <comment>Edit|Price|Set to PriceGuide</comment>
+        <translation>Ctrl+G</translation>
+    </message>
+    <message>
+        <source>Inc- or Decrease...</source>
+        <translation>Erhöhen/erniedrigen...</translation>
+    </message>
+    <message>
+        <source>Ctrl++</source>
+        <comment>Edit|Price|Inc/Dec</comment>
+        <translation>Ctrl++</translation>
+    </message>
+    <message>
+        <source>Bulk Quantity...</source>
+        <translation>Gebindegrösse...</translation>
+    </message>
+    <message>
+        <source>Sale...</source>
+        <translation>Ausverkauf...</translation>
+    </message>
+    <message>
+        <source>Ctrl+%</source>
+        <comment>Edit|Sale</comment>
+        <translation>Ctrl+%</translation>
+    </message>
+    <message>
+        <source>Comment...</source>
+        <translation>Kommentar...</translation>
+    </message>
+    <message>
+        <source>Remark...</source>
+        <translation>Anmerkung...</translation>
+    </message>
+    <message>
+        <source>Retain in Inventory</source>
+        <translation>Im Bestand halten</translation>
+    </message>
+    <message>
+        <source>Yes</source>
+        <translation>Ja</translation>
+    </message>
+    <message>
+        <source>No</source>
+        <translation>Nein</translation>
+    </message>
+    <message>
+        <source>Toggle Yes/No</source>
+        <translation>Zwischen Ja und Nein umschalten</translation>
+    </message>
+    <message>
+        <source>Stockroom Item</source>
+        <translation>Teil ist auf Lager</translation>
+    </message>
+    <message>
+        <source>Reserved for...</source>
+        <translation>Reservierung...</translation>
+    </message>
+    <message>
+        <source>Show Lots for Sale on BrickLink...</source>
+        <translation>Verkaufsangebote auf BrickLink...</translation>
+    </message>
+    <message>
+        <source>Show in my Store on BrickLink...</source>
+        <translation>Diese Teil in meinem BrickLink Shop...</translation>
     </message>
 </context>
 <context>
@@ -1183,19 +1328,19 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <name>CReport</name>
     <message>
         <source>N</source>
-        <translation>N</translation>
+        <translation type="obsolete">N</translation>
     </message>
     <message>
         <source>New</source>
-        <translation>Neu</translation>
+        <translation type="obsolete">Neu</translation>
     </message>
     <message>
         <source>U</source>
-        <translation>G</translation>
+        <translation type="obsolete">G</translation>
     </message>
     <message>
         <source>Used</source>
-        <translation>Gebr.</translation>
+        <translation type="obsolete">Gebr.</translation>
     </message>
 </context>
 <context>
@@ -1354,7 +1499,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>Appears in Sets</source>
-        <translation>Enthalten in Sets</translation>
+        <translation type="obsolete">Enthalten in Sets</translation>
     </message>
     <message>
         <source>Peeron</source>
@@ -1549,11 +1694,11 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>Placed</source>
-        <translation>Getätigt</translation>
+        <translation type="obsolete">Getätigt</translation>
     </message>
     <message>
         <source>Received</source>
-        <translation>Erhalten</translation>
+        <translation type="obsolete">Erhalten</translation>
     </message>
     <message>
         <source>Enter the new remark for all selected items:</source>
@@ -1614,6 +1759,90 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <message>
         <source>Multiply the quantities of all selected items with this factor.</source>
         <translation>Multipliziere die Anzahl aller ausgewählten Teile mit diesem Faktor.</translation>
+    </message>
+    <message>
+        <source>Set Include Status on %1 Items</source>
+        <translation>Status für %1 Teile auf Einschliessen gesetzt</translation>
+    </message>
+    <message>
+        <source>Set Exclude Status on %1 Items</source>
+        <translation>Status für %1 Teile auf Ausschliessen gesetzt</translation>
+    </message>
+    <message>
+        <source>Set Extra Status on %1 Items</source>
+        <translation>Status für %1 Teile auf Extra gesetzt</translation>
+    </message>
+    <message>
+        <source>Toggled Status on %1 Items</source>
+        <translation>Status für %1 Teile umgeschalten</translation>
+    </message>
+    <message>
+        <source>Set New Condition on %1 Items</source>
+        <translation>Zustand für %1 Teile auf Neu gesetzt</translation>
+    </message>
+    <message>
+        <source>Set Used Condition on %1 Items</source>
+        <translation>Zustand für %1 Teile auf Gebraucht gesetzt</translation>
+    </message>
+    <message>
+        <source>Toggled Condition on %1 Items</source>
+        <translation>Zustand für %1 Teile umgeschalten</translation>
+    </message>
+    <message>
+        <source>Set Retain Flag on %1 Items</source>
+        <translation>Halten Status für %1 Teile gesetzt</translation>
+    </message>
+    <message>
+        <source>Cleared Retain Flag on %1 Items</source>
+        <translation>Halten Status für %1 Teile gelöscht</translation>
+    </message>
+    <message>
+        <source>Toggled Retain Flag on %1 Items</source>
+        <translation>Halten Status für %1 Teile umgeschalten</translation>
+    </message>
+    <message>
+        <source>Set Stockroom Flag on %1 Items</source>
+        <translation>Auf-Lager Status für %1 Teile gesetzt</translation>
+    </message>
+    <message>
+        <source>Cleared Stockroom Flag on %1 Items</source>
+        <translation>Auf-Lager Status für %1 Teile gelöscht</translation>
+    </message>
+    <message>
+        <source>Toggled Stockroom Flag on %1 Items</source>
+        <translation>Auf-Lager Status für %1 Teile umgeschalten</translation>
+    </message>
+    <message>
+        <source>Set Sale on %1 Items</source>
+        <translation>Sonderangebot für %1 Teile gesetzt</translation>
+    </message>
+    <message>
+        <source>Set bulk quantity for the selected items:</source>
+        <translation>Gebindegrösse für alle ausgewählten Teile setzen:</translation>
+    </message>
+    <message>
+        <source>Set Bulk Quantity on %1 Items</source>
+        <translation>Gebindegrösse für %1 Teile gesetzt</translation>
+    </message>
+    <message>
+        <source>Set Color on %1 Items</source>
+        <translation>Farbe für %1 Teile gesetzt</translation>
+    </message>
+    <message>
+        <source>Set Remark on %1 Items</source>
+        <translation>Anmerkung für %1 Teile gesetzt</translation>
+    </message>
+    <message>
+        <source>Enter the new comment for all selected items:</source>
+        <translation>Geben Sie einen neuen Kommentar für alle ausgewählten Teile ein:</translation>
+    </message>
+    <message>
+        <source>Set Comment on %1 Items</source>
+        <translation>Kommentar für %1 Teile gesetzt</translation>
+    </message>
+    <message>
+        <source>Set Reservation on %1 Items</source>
+        <translation>Reservierung für %1 Teile gesetzt</translation>
     </message>
 </context>
 <context>
@@ -1912,11 +2141,11 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <name>DlgReportUI</name>
     <message>
         <source>This print template requires some additional informations:</source>
-        <translation>Diese Dokumentenvorlage erfordert zusätzliche Informationen:</translation>
+        <translation type="obsolete">Diese Dokumentenvorlage erfordert zusätzliche Informationen:</translation>
     </message>
     <message>
         <source>&amp;OK</source>
-        <translation>&amp;OK</translation>
+        <translation type="obsolete">&amp;OK</translation>
     </message>
 </context>
 <context>
@@ -1931,7 +2160,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>Page Size</source>
-        <translation>Seitengröße</translation>
+        <translation type="obsolete">Seitengröße</translation>
     </message>
     <message>
         <source>Name</source>
@@ -1954,46 +2183,46 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <name>DlgSelectReportImpl</name>
     <message>
         <source>A4</source>
-        <translation>A4</translation>
+        <translation type="obsolete">A4</translation>
     </message>
     <message>
         <source>Letter</source>
-        <translation>Letter</translation>
+        <translation type="obsolete">Letter</translation>
     </message>
     <message>
         <source>Custom</source>
-        <translation>Individuell</translation>
+        <translation type="obsolete">Individuell</translation>
     </message>
 </context>
 <context>
     <name>DlgSetCondition</name>
     <message>
         <source>Set Condition</source>
-        <translation>Zustand ändern</translation>
+        <translation type="obsolete">Zustand ändern</translation>
     </message>
     <message>
         <source>Please select how the conditon of the selected items should be modified:</source>
-        <translation>Wie soll der Zustand der ausgewählten Teile geändert werden:</translation>
+        <translation type="obsolete">Wie soll der Zustand der ausgewählten Teile geändert werden:</translation>
     </message>
     <message>
         <source>Set condition to: &amp;New</source>
-        <translation>Setze den Zustand auf: &amp;Neu</translation>
+        <translation type="obsolete">Setze den Zustand auf: &amp;Neu</translation>
     </message>
     <message>
         <source>Set condition to: &amp;Used</source>
-        <translation>Setzte den Zustand auf: &amp;Gebraucht</translation>
+        <translation type="obsolete">Setzte den Zustand auf: &amp;Gebraucht</translation>
     </message>
     <message>
         <source>Toggle current condition</source>
-        <translation>Schalte den aktuellen Zustand um</translation>
+        <translation type="obsolete">Schalte den aktuellen Zustand um</translation>
     </message>
     <message>
         <source>&amp;OK</source>
-        <translation>&amp;OK</translation>
+        <translation type="obsolete">&amp;OK</translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
-        <translation>&amp;Abbrechen</translation>
+        <translation type="obsolete">&amp;Abbrechen</translation>
     </message>
 </context>
 <context>
@@ -2013,6 +2242,10 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <message>
         <source>The prices of all selected items will be set to Price Guide values.&lt;br /&gt;&lt;br /&gt;Select which part of the price guide should be used:</source>
         <translation>Die Preise aller ausgewählten Teile werden auf Richtpreise gesetzt.&lt;br /&gt;&lt;br /&gt;Wählen Sie aus, welcher Teil der Richtpreise dazu verwendet werden soll:</translation>
+    </message>
+    <message>
+        <source>Download even if already in cache</source>
+        <translation>Neu downloaden, selbst wenn schon Zwischengespeichert</translation>
     </message>
 </context>
 <context>
