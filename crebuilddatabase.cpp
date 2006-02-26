@@ -58,7 +58,7 @@ int CRebuildDatabase::error ( const QString &error )
 
 namespace {
 
-static void nirvanaMsgHandler ( QtMsgType type, const char *msg )
+static void nirvanaMsgHandler ( QtMsgType type, const char * )
 {
 	if ( type == QtFatalMsg )
 		abort ( );

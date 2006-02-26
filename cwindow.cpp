@@ -27,6 +27,7 @@
 #include <qcursor.h>
 #include <qtooltip.h>
 
+#include "cselectcolor.h"
 #include "cmessagebox.h"
 #include "citemview.h"
 #include "cresource.h"
@@ -578,10 +579,6 @@ void CWindow::editResetDifferences ( )
 	m_doc-> resetDifferences ( m_doc-> selection ( ));
 }
 
-void CWindow::editSetPrice ( )
-{
-}
-
 void CWindow::editSetPriceToPG ( )
 {
 	if ( m_doc-> selection ( ). isEmpty ( ))
@@ -601,9 +598,13 @@ void CWindow::editSetPriceToPG ( )
 		m_settopg_failcnt = 0;
 		m_settopg_time    = dlg. time ( );
 		m_settopg_price   = dlg. price ( );
+		bool force_update = dlg. forceUpdate ( );
 
 		foreach ( CDocument::Item *item, m_doc-> selection ( )) {
 			BrickLink::PriceGuide *pg = BrickLink::inst ( )-> priceGuide ( item-> item ( ), item-> color ( ));
+
+			if ( force_update && pg && ( pg-> updateStatus ( ) != BrickLink::Updating ))
+				pg-> update ( );
 
 			if ( pg && ( pg-> updateStatus ( ) == BrickLink::Updating )) {
 				m_settopg_list-> insert ( pg, item );
@@ -775,14 +776,53 @@ void CWindow::editSetSale ( )
 	if ( CMessageBox::getInteger ( this, tr( "Set sale in percent for the selected items (this will <u>not</u> change any prices).<br />Negative values are also allowed." ), tr( "%" ), sale, new QIntValidator ( -1000, 99, 0 ))) {
 		CDisableUpdates disupd ( w_list );
 
+		CUndoCmd *macro = m_doc-> macroBegin ( );
+		uint count = 0;
+
 		foreach ( CDocument::Item *pos, m_doc-> selection ( )) {
 			if ( pos-> sale ( ) != sale ) {
 				CDocument::Item item = *pos;
 
 				item. setSale ( sale );
 				m_doc-> changeItem ( pos, item );
+
+				count++;
 			}
 		}
+		m_doc-> macroEnd ( macro, tr( "Set Sale on %1 Items" ). arg( count ));
+	}
+}
+
+void CWindow::editSetStatus ( )
+{
+}
+
+void CWindow::editSetColor ( )
+{
+	if ( m_doc-> selection ( ). isEmpty ( ))
+		return;
+
+	CSelectColorDialog d ( this );
+	d. setCaption ( CItemView::tr( "Modify Color" ));
+	d. setColor ( m_doc-> selection ( ). front ( )-> color ( ));
+
+	if ( d. exec ( ) == QDialog::Accepted ) {
+		const BrickLink::Color *col = d. color ( );
+
+		CUndoCmd *macro = m_doc-> macroBegin ( );
+		uint count = 0;
+
+		foreach ( CDocument::Item *pos, m_doc-> selection ( )) {
+			if ( pos-> color ( ) != col ) {
+				CDocument::Item item = *pos;
+
+				item. setColor ( col );
+				m_doc-> changeItem ( pos, item );
+
+				count++;
+			}
+		}
+		m_doc-> macroEnd ( macro, tr( "Set Color on %1 Items" ). arg( count ));
 	}
 }
 
@@ -798,6 +838,9 @@ void CWindow::editSetCondition ( )
 
 		BrickLink::Condition nc = d. newCondition ( );
 
+		CUndoCmd *macro = m_doc-> macroBegin ( );
+		uint count = 0;
+
 		foreach ( CDocument::Item *pos, m_doc-> selection ( )) {
 			BrickLink::Condition oc = pos-> condition ( );
 
@@ -806,8 +849,11 @@ void CWindow::editSetCondition ( )
 
 				item. setCondition ( nc != BrickLink::ConditionCount ? nc : ( oc == BrickLink::New ? BrickLink::Used : BrickLink::New ));
 				m_doc-> changeItem ( pos, item );
+
+				count++;
 			}
 		}
+		m_doc-> macroEnd ( macro, tr( "Set Condition on %1 Items" ). arg( count ));
 	}
 }
 
@@ -821,14 +867,20 @@ void CWindow::editSetRemark ( )
 	if ( CMessageBox::getString ( this, tr( "Enter the new remark for all selected items:" ), remarks )) {
 		CDisableUpdates disupd ( w_list );
 
+		CUndoCmd *macro = m_doc-> macroBegin ( );
+		uint count = 0;
+
 		foreach ( CDocument::Item *pos, m_doc-> selection ( )) {
 			if ( pos-> remarks ( ) != remarks ) {
 				CDocument::Item item = *pos;
 
 				item. setRemarks ( remarks );
 				m_doc-> changeItem ( pos, item );
+
+				count++;
 			}
 		}
+		m_doc-> macroEnd ( macro, tr( "Set Remarks on %1 Items" ). arg( count ));
 	}
 }
 
@@ -842,14 +894,20 @@ void CWindow::editSetReserved ( )
 	if ( CMessageBox::getString ( this, tr( "Reserve all selected items for this specific member:" ), reserved )) {
 		CDisableUpdates disupd ( w_list );
 
+		CUndoCmd *macro = m_doc-> macroBegin ( );
+		uint count = 0;
+
 		foreach ( CDocument::Item *pos, m_doc-> selection ( )) {
 			if ( pos-> reserved ( ) != reserved ) {
 				CDocument::Item item = *pos;
 
 				item. setReserved ( reserved );
 				m_doc-> changeItem ( pos, item );
+
+				count++;
 			}
 		}
+		m_doc-> macroEnd ( macro, tr( "Set Reservation on %1 Items" ). arg( count ));
 	}
 }
 
@@ -963,7 +1021,7 @@ void CWindow::editMergeItems ( )
 void CWindow::editPartOutItems ( )
 {
 	if ( m_doc-> selection ( ). count ( ) >= 1 ) {
-		foreach ( CDocument::Item *item, m_doc-> items ( ))
+		foreach ( CDocument::Item *item, m_doc-> selection ( ))
 			CFrameWork::inst ( )-> fileImportBrickLinkInventory ( item-> item ( ));
 	}
 	else

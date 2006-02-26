@@ -27,6 +27,7 @@ public:
 
 	BrickLink::PriceGuide::Time  time ( ) const;
     BrickLink::PriceGuide::Price price ( ) const;
+	bool forceUpdate ( ) const;
 };
 
 #endif

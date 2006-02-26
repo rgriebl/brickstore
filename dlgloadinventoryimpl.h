@@ -30,9 +30,6 @@ public:
 	const BrickLink::Item *item ( );
 	int quantity ( );
 
-	bool updateAlways ( );
-	bool importFromPeeron ( );
-
 private slots:
 	void checkItem ( const BrickLink::Item *, bool );
 };

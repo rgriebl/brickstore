@@ -192,7 +192,7 @@ void CAppearsInWidget::languageChange ( )
 
 CAppearsInWidget::~CAppearsInWidget ( )
 {
-	delete d-> m_tooltips;
+//	delete d-> m_tooltips;
 	delete d;
 }
 

@@ -58,17 +58,17 @@ DlgAddItemImpl::DlgAddItemImpl ( QWidget *parent, const char *name, bool modal, 
 	w_picture-> setFrameStyle ( QFrame::StyledPanel | QFrame::Sunken );
 	w_picture-> setLineWidth ( 2 );
 
-	w_toggle_picture-> setIconSet ( CResource::inst ( )-> pixmap ( "sidebar/info" ));
+	w_toggle_picture-> setPixmap ( CResource::inst ( )-> pixmap ( "sidebar/info" ));
 
 	w_price_guide-> setFrameStyle ( QFrame::StyledPanel | QFrame::Sunken );
 	w_price_guide-> setLineWidth ( 2 );
 
-	w_toggle_price_guide-> setIconSet ( CResource::inst ( )-> pixmap ( "sidebar/priceguide" ));
+	w_toggle_price_guide-> setPixmap ( CResource::inst ( )-> pixmap ( "sidebar/priceguide" ));
 
 	w_appears_in-> setFrameStyle ( QFrame::StyledPanel | QFrame::Sunken );
 	w_appears_in-> setLineWidth ( 2 );
 
-	w_toggle_appears_in-> setIconSet ( CResource::inst ( )-> pixmap ( "sidebar/appearsin" ));
+	w_toggle_appears_in-> setPixmap ( CResource::inst ( )-> pixmap ( "sidebar/appearsin" ));
 	
 	w_qty-> setValidator ( new QIntValidator ( 1, 99999, w_qty ));
 	w_qty-> setText ( "1" );

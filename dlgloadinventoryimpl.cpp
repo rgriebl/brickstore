@@ -53,20 +53,12 @@ int DlgLoadInventoryImpl::quantity ( )
 	return QMAX( 1, w_quantity-> value ( ));
 }
 
-bool DlgLoadInventoryImpl::updateAlways ( )
-{
-	return false; //w_update-> isChecked ( );
-}
-
-bool DlgLoadInventoryImpl::importFromPeeron ( )
-{
-	return false; //w_peeron-> isChecked ( );
-}
-
 void DlgLoadInventoryImpl::checkItem ( const BrickLink::Item *it, bool ok )
 {
-	w_ok-> setEnabled (( it ));
+	bool b = w_select-> isOnlyWithInventory ( ) ? it-> hasInventory ( ) : true;
 
-	if ( it && ok )
+	w_ok-> setEnabled (( it ) && b );
+
+	if ( it && b && ok )
 		w_ok-> animateClick ( );
 }

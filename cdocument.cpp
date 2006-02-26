@@ -384,6 +384,7 @@ void CDocument::changeItemDirect ( Item *position, Item &item )
 	bool grave = ( position-> item ( ) != item. item ( )) || ( position->color ( ) != item. color ( ));
 
 	emit itemsChanged ( pack<ItemList> ( position ), grave );
+	updateErrors ( position );
 	emit statisticsChanged ( );
 
 	if ( m_selection. find ( position ) != m_selection. end ( ))
@@ -437,7 +438,9 @@ CDocument *CDocument::fileNew ( )
 CDocument *CDocument::fileOpen ( )
 {
 	QStringList filters;
+	filters << tr( "Inventory Files" ) + " (*.bsx *.bti)";
 	filters << tr( "BrickStore XML Data" ) + " (*.bsx)";
+	filters << tr( "BrikTrak Inventory" ) + " (*.bti)";
 	filters << tr( "All Files" ) + "(*.*)";
 
 	return fileOpen ( QFileDialog::getOpenFileName ( CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ), CFrameWork::inst ( ), "FileDialog", tr( "Open File" ), 0 ));

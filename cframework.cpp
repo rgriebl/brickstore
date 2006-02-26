@@ -185,9 +185,7 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 	if ( sl. isEmpty ( ))  sl << "edit_undo" << "edit_redo" << "-"
 	                          << "edit_cut" << "edit_copy" << "edit_paste" << "edit_delete" << "-" << "edit_select_all" << "edit_select_none" << "-" 
 		                      << "edit_additems" << "edit_subtractitems" << "edit_mergeitems" << "edit_partoutitems" << "-" 
-							  << "edit_multiply_qty" << "edit_divide_qty" << "edit_price_to_priceguide" << "edit_price_inc_dec" << "edit_set_sale" << "edit_set_condition" << "edit_set_remark" << "edit_set_reserved" << "-" 
-							  << "edit_reset_diffs" << "-"
-							  << "edit_bl_info_group";
+							  << "edit_set_attr" << "-" << "edit_reset_diffs" << "-" << "edit_bl_info_group";
 	m_menuid_edit = menuBar ( )-> insertItem ( QString ( ), createMenu ( sl ));
 
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Menubar/View" );
@@ -210,7 +208,7 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 	m_menuid_help = menuBar ( )-> insertItem ( QString ( ), createMenu ( sl ));
 
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/ContextMenu/Item" );
-	if ( sl. isEmpty ( ))  sl << "edit_cut" << "edit_copy" << "edit_paste" << "edit_delete" << "-" << "edit_select_all" << "-" << "edit_mergeitems" << "edit_partoutitems" << "-" << "edit_multiply_qty" << "edit_price_to_priceguide" << "edit_price_inc_dec" << "edit_set_sale" << "edit_set_condition" << "edit_set_remark" << "-" << "edit_bl_info_group";
+	if ( sl. isEmpty ( ))  sl << "edit_cut" << "edit_copy" << "edit_paste" << "edit_delete" << "-" << "edit_select_all" << "-" << "edit_mergeitems" << "edit_partoutitems" << "-" << "edit_set_attr" << "-" << "edit_bl_info_group";
 	m_contextmenu = createMenu ( sl );
 
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Toolbar/Buttons" );
@@ -382,10 +380,11 @@ void CFrameWork::languageChange ( )
 		{ "help_whatsthis",                 tr( "What's this?" ),                       tr( "Shift+F1", "Help|WhatsThis" ) },
 		{ "help_about",                     tr( "About..." ),                           0 },
 		{ "help_updates",                   tr( "Check for Program Updates..." ),       0 },
-		{ "edit_price_to_fixed",            tr( "Set Prices..." ),                      0 },
 		{ "edit_price_to_priceguide",       tr( "Set Prices to Price-Guide..." ),       tr( "Ctrl+G", "Edit|Set to PriceGuide" ) },
 		{ "edit_price_inc_dec",             tr( "Inc- or Decrease Prices..." ),         tr( "Ctrl++", "Edit| Inc/Dec Prices" ) },
 		{ "edit_set_sale",                  tr( "Set Sale..." ),                        tr( "Ctrl+%", "Edit|Set Sale" ) },
+		{ "edit_set_color",                 tr( "Set Color..." ),                       0 },
+		{ "edit_set_status",                tr( "Set Status..." ),                      0 },
 		{ "edit_set_remark",                tr( "Set Remark..." ),                      0 },
 		{ "edit_set_reserved",              tr( "Set Reserved for..." ),                0 },
 		{ "edit_set_condition",             tr( "Set Condition..." ),                   0 },
@@ -394,6 +393,7 @@ void CFrameWork::languageChange ( )
 		{ "edit_bl_catalog",                tr( "Show BrickLink Catalog Info..." ),     0 },
 		{ "edit_bl_priceguide",             tr( "Show BrickLink Price Guide Info..." ), 0 },
 		{ "edit_bl_lotsforsale",            tr( "Lots for Sale on BrickLink..." ),      0 },
+		{ "edit_bl_myinventory",            tr( "Show in my Store on BrickLink..." ),   0 },
 
 		{ 0, 0, 0 }
 	};
@@ -663,15 +663,19 @@ void CFrameWork::createActions ( )
 	(void) new QAction ( this, "edit_select_all" );
 	(void) new QAction ( this, "edit_select_none" );
 
-	(void) new QAction ( this, "edit_price_to_fixed" );
-	(void) new QAction ( this, "edit_price_to_priceguide" );
-	(void) new QAction ( this, "edit_price_inc_dec" );
-	(void) new QAction ( this, "edit_set_sale" );
-	(void) new QAction ( this, "edit_set_remark" );
-	(void) new QAction ( this, "edit_set_reserved" );
-	(void) new QAction ( this, "edit_set_condition" );
-	(void) new QAction ( this, "edit_multiply_qty" );
-	(void) new QAction ( this, "edit_divide_qty" );
+	g = new QActionGroup ( this, "edit_set_attr", false );
+	g-> setUsesDropDown ( false );
+
+	(void) new QAction ( g, "edit_set_status" );
+	(void) new QAction ( g, "edit_set_color" );
+	(void) new QAction ( g, "edit_multiply_qty" );
+	(void) new QAction ( g, "edit_divide_qty" );
+	(void) new QAction ( g, "edit_price_inc_dec" );
+	(void) new QAction ( g, "edit_price_to_priceguide" );
+	(void) new QAction ( g, "edit_set_condition" );
+	(void) new QAction ( g, "edit_set_sale" );
+	(void) new QAction ( g, "edit_set_remark" );
+	(void) new QAction ( g, "edit_set_reserved" );
 
 	g = new QActionGroup ( this, "edit_bl_info_group", false );
 	g-> setUsesDropDown ( false );
@@ -679,6 +683,7 @@ void CFrameWork::createActions ( )
 	(void) new QAction ( g, "edit_bl_catalog" );
 	(void) new QAction ( g, "edit_bl_priceguide" );
 	(void) new QAction ( g, "edit_bl_lotsforsale" );
+	(void) new QAction ( g, "edit_bl_myinventory" );
 
 	a = new QAction ( this, "view_fullscreen", true );
 	connect ( a, SIGNAL( toggled ( bool )), this, SLOT( viewFullScreen ( bool )));	
@@ -974,10 +979,11 @@ void CFrameWork::connectAllActions ( bool do_connect, CWindow *window )
 	connectAction ( do_connect, "edit_partoutitems", window, SLOT( editPartOutItems ( )));
 	connectAction ( do_connect, "edit_reset_diffs", window, SLOT( editResetDifferences ( )));
 
-	connectAction ( do_connect, "edit_price_to_fixed", window, SLOT( editSetPrice ( )));
 	connectAction ( do_connect, "edit_price_to_priceguide", window, SLOT( editSetPriceToPG ( )));
 	connectAction ( do_connect, "edit_price_inc_dec", window, SLOT( editPriceIncDec ( )));
 	connectAction ( do_connect, "edit_set_sale", window, SLOT( editSetSale ( )));
+	connectAction ( do_connect, "edit_set_color", window, SLOT( editSetColor ( )));
+	connectAction ( do_connect, "edit_set_status", window, SLOT( editSetStatus ( )));
 	connectAction ( do_connect, "edit_set_remark", window, SLOT( editSetRemark ( )));
 	connectAction ( do_connect, "edit_set_reserved", window, SLOT( editSetReserved ( )));
 	connectAction ( do_connect, "edit_set_condition", window, SLOT( editSetCondition ( )));
@@ -1037,29 +1043,35 @@ void CFrameWork::connectWindow ( QWidget *w )
 
 void CFrameWork::selectionUpdate ( const CDocument::ItemList &selection )
 {
+	static const int NeedLotId = 1;
+	static const int NeedInventory = 2;
+
 	struct {
 		const char *m_name;
 		uint m_minsel;
 		uint m_maxsel;
+		int  m_flags;
 	} endisable_actions [] = {
-		{ "edit_cut",                 1, 0 },
-		{ "edit_copy",                1, 0 },
-		{ "edit_delete",              1, 0 },
-		{ "edit_set_sale",            1, 0 },
-		{ "edit_set_remark",          1, 0 },
-		{ "edit_set_reserved",        1, 0 },
-		{ "edit_set_condition",       1, 0 },
-		{ "edit_price_to_fixes",      1, 0 },
-		{ "edit_price_inc_dec",       1, 0 },
-		{ "edit_price_to_priceguide", 1, 0 },
-		{ "edit_multiply_qty",        1, 0 },
-		{ "edit_divide_qty",          1, 0 },
-		{ "edit_bl_catalog",          1, 1 },
-		{ "edit_bl_priceguide",       1, 1 },
-		{ "edit_bl_lotsforsale",      1, 1 },
-		{ "edit_mergeitems",          2, 0 },
-		{ "edit_partoutitems",        1, 0 },
-		{ "edit_reset_diffs",         1, 0 },
+		{ "edit_cut",                 1, 0, 0 },
+		{ "edit_copy",                1, 0, 0 },
+		{ "edit_delete",              1, 0, 0 },
+		{ "edit_set_sale",            1, 0, 0 },
+		{ "edit_set_status",          1, 0, 0 },
+		{ "edit_set_color",           1, 0, 0 },
+		{ "edit_set_remark",          1, 0, 0 },
+		{ "edit_set_reserved",        1, 0, 0 },
+		{ "edit_set_condition",       1, 0, 0 },
+		{ "edit_price_inc_dec",       1, 0, 0 },
+		{ "edit_price_to_priceguide", 1, 0, 0 },
+		{ "edit_multiply_qty",        1, 0, 0 },
+		{ "edit_divide_qty",          1, 0, 0 },
+		{ "edit_bl_catalog",          1, 1, 0 },
+		{ "edit_bl_priceguide",       1, 1, 0 },
+		{ "edit_bl_lotsforsale",      1, 1, 0 },
+		{ "edit_bl_myinventory",      1, 1, NeedLotId },
+		{ "edit_mergeitems",          2, 0, 0 },
+		{ "edit_partoutitems",        1, 0, NeedInventory },
+		{ "edit_reset_diffs",         1, 0, 0 },
 
 		{ 0, 0, 0 }
 	}, *endisable_ptr;
@@ -1073,7 +1085,21 @@ void CFrameWork::selectionUpdate ( const CDocument::ItemList &selection )
 			uint &mins = endisable_ptr-> m_minsel;
 			uint &maxs = endisable_ptr-> m_maxsel;
 
-			a-> setEnabled (( mins ? ( cnt >= mins ) : true ) && ( maxs ? ( cnt <= maxs ) : true ));
+			bool b = true;
+
+			if ( endisable_ptr-> m_flags )
+			{
+				int f = endisable_ptr-> m_flags;
+
+				foreach ( CDocument::Item *item, selection ) {
+					if ( f & NeedLotId )
+						b &= ( item-> lotId ( ) != 0 );
+					if ( f & NeedInventory )
+						b &= ( item-> item ( ) && item-> item ( )-> hasInventory ( ));
+				}
+			}
+
+			a-> setEnabled ( b && ( mins ? ( cnt >= mins ) : true ) && ( maxs ? ( cnt <= maxs ) : true ));
 		}
 	}
 }

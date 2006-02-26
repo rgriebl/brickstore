@@ -35,7 +35,7 @@ CTaskLinksWidget::CTaskLinksWidget ( QWidget *parent, const char *name )
 	connect ( CFrameWork::inst ( ), SIGNAL( documentActivated ( CDocument * )), this, SLOT( documentUpdate ( CDocument * )));
 
 	unsetPalette ( );
-	setText ( "<b>ABCDEFGHIJKLM</b><br />1<br />2<br />3<br />4<br />5<br /><br/><b>X</b><br />1<br />" );
+	setText ( "<b>ABCDEFGHIJKLM</b><br />1<br />2<br />3<br />4<br /><br /><b>X</b><br />1<br />" );
 	setMinimumSize ( sizeHint ( ));
 	setText ( QString ( ));
 }
@@ -72,7 +72,6 @@ void CTaskLinksWidget::selectionUpdate ( const CDocument::ItemList &list )
 			str += fmt2. arg( tr( "Catalog" )).         arg( BrickLink::inst ( )-> url ( BrickLink::URL_CatalogInfo,    item, color ));
 			str += fmt2. arg( tr( "Price Guide" )).     arg( BrickLink::inst ( )-> url ( BrickLink::URL_PriceGuideInfo, item, color ));
 			str += fmt2. arg( tr( "Lots for Sale" )).   arg( BrickLink::inst ( )-> url ( BrickLink::URL_LotsForSale,    item, color ));
-			str += fmt2. arg( tr( "Appears in Sets" )). arg( BrickLink::inst ( )-> url ( BrickLink::URL_AppearsInSets,  item, color ));
 
 			str += "<br />";
 

@@ -8,8 +8,8 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>439</width>
-            <height>145</height>
+            <width>373</width>
+            <height>160</height>
         </rect>
     </property>
     <property name="caption">
@@ -63,6 +63,14 @@
                     </property>
                 </widget>
             </hbox>
+        </widget>
+        <widget class="QCheckBox">
+            <property name="name">
+                <cstring>w_force_update</cstring>
+            </property>
+            <property name="text">
+                <string>Download even if already in cache</string>
+            </property>
         </widget>
         <widget class="Line">
             <property name="name">

@@ -12,6 +12,7 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 #include <qcombobox.h>
+#include <qcheckbox.h>
 
 #include "cconfig.h"
 
@@ -46,6 +47,11 @@ BrickLink::PriceGuide::Time DlgSetToPGImpl::time ( ) const
 BrickLink::PriceGuide::Price DlgSetToPGImpl::price ( ) const
 {
 	return (BrickLink::PriceGuide::Price) w_type_price-> currentItem ( );
+}
+
+bool DlgSetToPGImpl::forceUpdate ( ) const
+{
+	return w_force_update-> isChecked ( );
 }
 
 

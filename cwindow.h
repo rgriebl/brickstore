@@ -108,10 +108,11 @@ public slots:
 	void selectAll ( );
 	void selectNone ( );
 
-	void editSetPrice ( );
 	void editSetPriceToPG ( );
 	void editPriceIncDec ( );
 	void editSetSale ( );
+	void editSetStatus ( );
+	void editSetColor ( );
 	void editSetRemark ( );
 	void editSetReserved ( );
 	void editSetCondition ( );

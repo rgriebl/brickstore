@@ -485,7 +485,7 @@ bool BrickLink::TextImport::importInventories ( const QString &path, QPtrVector<
 		if ( !item ) // already yanked
 			continue;
 
-		if ( !item-> inventoryUpdated ( ). isValid ( )) {
+		if ( !item-> hasInventory ( )) {
 			item = 0;  // no inv at all -> yank it
 			continue;
 		}

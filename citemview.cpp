@@ -812,7 +812,7 @@ void CItemViewItem::paintCell ( QPainter *p, const QColorGroup &cg, int col, int
 
 	switch ( col ) {
 		case CDocument::Description:
-			if ( m_item-> item ( )-> inventoryUpdated ( ). isValid ( )) {
+			if ( m_item-> item ( )-> hasInventory ( )) {
 				QString invstr = CItemView::tr( "Inv" );
 				str = str + " [" + invstr + "]";
 				grayout_right_chars = invstr. length ( ) + 2;

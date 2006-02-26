@@ -157,7 +157,7 @@ public:
 	virtual void paintCell ( QPainter *p, const QColorGroup &cg, int col, int w, int align )
 	{
 		if ( m_viewmode != CSelectItem::ViewMode_ListWithImages ) {
-			if ( !isSelected ( ) && m_invonly && m_item && !m_item-> inventoryUpdated ( ). isValid ( )) {
+			if ( !isSelected ( ) && m_invonly && m_item && !m_item-> hasInventory ( )) {
 				QColorGroup _cg ( cg );
 				_cg. setColor ( QColorGroup::Text, CUtility::gradientColor ( cg. base ( ), cg. text ( ), 0.5f ));
 
@@ -185,7 +185,7 @@ public:
 			bg = backgroundColor ( );
 			fg = cg. text ( );
 			
-			if ( m_invonly && m_item && !m_item-> inventoryUpdated ( ). isValid ( ))
+			if ( m_invonly && m_item && !m_item-> hasInventory ( ))
 				fg = CUtility::gradientColor ( fg, bg, 0.5f );
 		}
 
@@ -302,7 +302,7 @@ public:
 	virtual void paintItem ( QPainter *p, const QColorGroup &cg ) 
 	{
 		if ( m_viewmode == CSelectItem::ViewMode_Thumbnails ) {
-			if ( !isSelected ( ) && m_invonly && m_item && !m_item-> inventoryUpdated ( ). isValid ( )) {
+			if ( !isSelected ( ) && m_invonly && m_item && !m_item-> hasInventory ( )) {
 				QColorGroup _cg ( cg );
 				_cg. setColor ( QColorGroup::Text, CUtility::gradientColor ( cg. base ( ), cg. text ( ), 0.5f ));
 
@@ -961,9 +961,11 @@ const BrickLink::Item *CSelectItemDialog::item ( ) const
 
 void CSelectItemDialog::checkItem ( const BrickLink::Item *it, bool ok )
 {
-	w_ok-> setEnabled (( it ));
+	bool b = w_si-> isOnlyWithInventory ( ) ? it-> hasInventory ( ) : true;
 
-	if ( it && ok )
+	w_ok-> setEnabled (( it ) && b );
+
+	if ( it && b && ok )
 		w_ok-> animateClick ( );
 }
 
