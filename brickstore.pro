@@ -134,6 +134,7 @@ HEADERS += bricklink.h \
            cselectcolor.h \
            cselectitem.h \
            cspinner.h \
+           csplash.h \
            ctaskpanemanager.h \
            ctaskwidgets.h \
            ctransfer.h \
@@ -173,6 +174,7 @@ SOURCES += bricklink.cpp \
            cselectcolor.cpp \
            cselectitem.cpp \
            cspinner.cpp \
+           csplash.cpp \
            ctaskpanemanager.cpp \
            ctaskwidgets.cpp \
            ctransfer.cpp \

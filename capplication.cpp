@@ -31,6 +31,7 @@
 #include "crebuilddatabase.h"
 #include "cprogressdialog.h"
 #include "ccheckforupdates.h"
+#include "csplash.h"
 
 #include "capplication.h"
 
@@ -88,6 +89,8 @@ CApplication::CApplication ( const char *rebuild_db_only, int _argc, char **_arg
 		QTimer::singleShot ( 0, this, SLOT( rebuildDatabase ( )));
 	}
 	else {
+		CSplash::inst ( );
+
 		updateTranslations ( );
 		connect ( CConfig::inst ( ), SIGNAL( languageChanged ( )), this, SLOT( updateTranslations ( )));
 		
@@ -103,6 +106,7 @@ CApplication::CApplication ( const char *rebuild_db_only, int _argc, char **_arg
 		for ( int i = 1; i < argc ( ); i++ )
 			m_files_to_open << argv ( ) [i];
 	
+		CSplash::inst ( )-> finish ( CFrameWork::inst ( ));
 		CFrameWork::inst ( )-> show ( );	
 		demoVersion ( );
 	}

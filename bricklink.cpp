@@ -554,6 +554,8 @@ bool BrickLink::readDatabase ( const QString &fname )
 		Q_UINT32 filesize_real = f. size ( );
 
 		QDataStream ds ( &f );
+		ds. setByteOrder ( QDataStream::LittleEndian );
+
 		Q_UINT32 magic = 0, filesize = 0, version = 0;
 		ds >> magic >> filesize >> version;
 		
@@ -1310,6 +1312,8 @@ bool BrickLink::writeDatabase ( const QString &fname )
 	QFile f ( filename + ".new" );
 	if ( f. open ( IO_WriteOnly )) {
 		QDataStream ds ( &f );
+		ds. setByteOrder ( QDataStream::LittleEndian );
+
 		ds << Q_UINT32( 0 /*magic*/ ) << Q_UINT32 ( 0 /*filesize*/ ) << Q_UINT32( 0 /*version*/ );
 		
 		// colors
@@ -1351,6 +1355,8 @@ bool BrickLink::writeDatabase ( const QString &fname )
 
 			if ( f. open ( IO_ReadWrite )) {
 				QDataStream ds2 ( &f );
+				ds2. setByteOrder ( QDataStream::LittleEndian );
+
 				ds2 << Q_UINT32( 0xb91c5703 ) << filesize;
 
 				if ( f. status ( ) == IO_Ok ) {

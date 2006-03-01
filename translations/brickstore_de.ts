@@ -1453,6 +1453,13 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
 </context>
 <context>
+    <name>CSplash</name>
+    <message>
+        <source>Loading Database...</source>
+        <translation>Datenbank wird geladen...</translation>
+    </message>
+</context>
+<context>
     <name>CTaskInfoWidget</name>
     <message>
         <source>min.</source>

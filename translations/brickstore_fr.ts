@@ -121,7 +121,7 @@
     </message>
     <message>
         <source>Qty.</source>
-        <translation type="unfinished">Qté.</translation>
+        <translation>Qté.</translation>
     </message>
 </context>
 <context>
@@ -813,19 +813,19 @@
     </message>
     <message>
         <source>Status</source>
-        <translation type="unfinished">Etat</translation>
+        <translation>Etat</translation>
     </message>
     <message>
         <source>Include</source>
-        <translation type="unfinished">Inclure</translation>
+        <translation>Inclure</translation>
     </message>
     <message>
         <source>Exclude</source>
-        <translation type="unfinished">Exclure</translation>
+        <translation>Exclure</translation>
     </message>
     <message>
         <source>Extra</source>
-        <translation type="unfinished">Extra</translation>
+        <translation>Extra</translation>
     </message>
     <message>
         <source>Toggle Include/Exclude</source>
@@ -833,11 +833,11 @@
     </message>
     <message>
         <source>Condition</source>
-        <translation type="unfinished">Etat</translation>
+        <translation>Etat</translation>
     </message>
     <message>
         <source>Used</source>
-        <translation type="unfinished">Usagé</translation>
+        <translation>Usagé</translation>
     </message>
     <message>
         <source>Toggle New/Used</source>
@@ -871,7 +871,7 @@
     </message>
     <message>
         <source>Price</source>
-        <translation type="unfinished">Prix</translation>
+        <translation>Prix</translation>
     </message>
     <message>
         <source>Set to Price-Guide...</source>
@@ -1565,6 +1565,13 @@
     </message>
 </context>
 <context>
+    <name>CSplash</name>
+    <message>
+        <source>Loading Database...</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>CTaskInfoWidget</name>
     <message>
         <source>min.</source>
@@ -1595,7 +1602,7 @@
     <name>CTaskLinksWidget</name>
     <message>
         <source>BrickLink</source>
-        <translation type="unfinished"></translation>
+        <translation>BrickLink</translation>
     </message>
     <message>
         <source>My Inventory</source>
@@ -2725,7 +2732,7 @@
     </message>
     <message>
         <source>Weights</source>
-        <translation type="unfinished"></translation>
+        <translation>Poids</translation>
     </message>
     <message>
         <source>Close empty documents without confirmation</source>
