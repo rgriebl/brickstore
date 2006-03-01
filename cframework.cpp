@@ -1352,6 +1352,9 @@ void CFrameWork::setWindowMode ( QAction *act )
 
 	m_mdi-> setShowTabs ( tabbed );
 	m_mdi-> setSpreadSheetTabs ( execllike );
+	
+	findAction ( "window_cascade" )-> setEnabled ( !tabbed );
+	findAction ( "window_tile" )-> setEnabled ( !tabbed );
 }
 
 void CFrameWork::setOnlineStatus ( QAction *act )
