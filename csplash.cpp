@@ -34,30 +34,32 @@ CSplash *CSplash::inst ( )
 }
 
 CSplash::CSplash ( )
-	: QSplashScreen ( QPixmap ( ), WDestructiveClose )
+	: QSplashScreen ( QPixmap ( 1, 1 ), WDestructiveClose )
 {
-	QFontMetrics fm = QApplication::fontMetrics ( );
+	QFont f = QApplication::font ( );
+	f. setBold ( true );
+	setFont ( f );
+	QFontMetrics fm ( f );
 	QSize s ( 20 + fm. width ( "x" ) * 50, 10 + fm. height ( ) * 10 );
 
 	QPixmap pixt, pixb;
-	pixb. convertFromImage ( CUtility::createGradient ( QSize ( s. width ( ), s. height ( ) / 2 ), Qt::Vertical, QColor ( 255, 255, 255 ), QColor ( 192, 192, 192 ), -150.0f ));
-	pixt. convertFromImage ( CUtility::createGradient ( QSize ( s. width ( ), s. height ( ) / 2 ), Qt::Vertical, QColor ( 255, 255, 255 ), QColor ( 192, 192, 192 ),  150.0f ));
+	pixb. convertFromImage ( CUtility::createGradient ( QSize ( s. width ( ), s. height ( ) / 2 ), Qt::Vertical, QColor ( 255, 255, 255 ), QColor ( 160, 160, 160 ), -150.0f ));
+	pixt. convertFromImage ( CUtility::createGradient ( QSize ( s. width ( ), s. height ( ) / 2 ), Qt::Vertical, QColor ( 255, 255, 255 ), QColor ( 160, 160, 160 ),  150.0f ));
 
 	QPixmap pix ( s );
-
 	QPainter p ( &pix, this );
 	p. drawPixmap ( 0, 0, pixt);
 	p. drawPixmap ( 0, s. height ( ) / 2, pixb );
 
-	p. setPen ( QColor ( 248, 248, 248 ));
+	p. setPen ( QColor ( 232, 232, 232 ));
 	for ( int i = s. height ( ) / 5; i < ( s. height ( ) - s. height ( ) / 5 + 5 ); i += s. height ( ) / 20 )
 		p. drawLine ( 0, i, s. width ( ) - 1, i );
 	p. setPen ( QColor ( 0, 0, 0 ));
 
-	QFont f = QApplication::font ( );
-	f. setPointSize ( f. pointSize ( ) * 2 );
-	f. setBold ( true );
-	p. setFont ( f );
+	QFont f2 = f;
+	f2. setPointSize ( f2. pointSize ( ) * 2 );
+	f2. setBold ( true );
+	p. setFont ( f2 );
 
 	QPixmap logo = CResource::inst ( )-> pixmap ( "icon" );
 	QString logo_text = cApp-> appName ( );
