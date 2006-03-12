@@ -930,7 +930,7 @@ void CDocument::fileExportBrickLinkWantedListClipboard ( const ItemList &sorted 
 		const ItemList *itemlist = ( sorted. count ( ) == m_items. count ( )) ? &sorted : &m_items;
 
 		QDomDocument doc ( QString::null );
-		doc. appendChild ( BrickLink::inst ( )-> createItemListXML ( doc, BrickLink::XMLHint_WantedList, reinterpret_cast<const BrickLink::InvItemList *> ( itemlist )));
+		doc. appendChild ( BrickLink::inst ( )-> createItemListXML ( doc, BrickLink::XMLHint_WantedList, reinterpret_cast<const BrickLink::InvItemList *> ( itemlist ), &extra ));
 
 		QApplication::clipboard ( )-> setText ( doc. toString ( ), QClipboard::Clipboard );
 
