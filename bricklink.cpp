@@ -533,6 +533,123 @@ QString BrickLink::defaultDatabaseName ( ) const
 	return QString( DEFAULT_DATABASE_NAME );
 }
 
+namespace {
+
+class stopwatch {
+public:
+	stopwatch ( const char *desc ) 
+	{ 
+		m_label = desc;
+		m_start = clock ( ); 
+	}
+	~stopwatch ( ) 
+	{
+		uint msec = uint( clock ( ) - m_start ) * 1000 / CLOCKS_PER_SEC;
+		qWarning ( "%s: %d'%d [sec]", m_label, msec / 1000, msec % 1000 );
+	}
+private:
+	const char *m_label;
+	clock_t m_start;
+};
+
+} // namespace
+
+
+#if defined( Q_OS_WIN32 )
+#include <io.h>
+
+#else
+#include <sys/mman.h>
+
+#endif
+
+namespace {
+
+class CMappedFile {
+public:
+	CMappedFile ( const QString &filename )
+		: m_file ( filename ), m_memptr ( 0 ), m_ds ( 0 )
+	{ 
+#if defined( Q_OS_WIN32 )
+		m_maphandle = 0;
+#endif
+	}
+
+	~CMappedFile ( )
+	{ close ( ); }
+
+	QDataStream *open ( )
+	{
+		if ( m_file. isOpen ( ))
+			close ( );
+
+		if ( m_file. open ( IO_ReadOnly | IO_Raw )) {
+			m_filesize = m_file. size ( );
+
+			if ( m_filesize ) {
+#if defined( Q_OS_WIN32 )
+				m_maphandle = CreateFileMapping ((HANDLE) _get_osfhandle ( m_file. handle ( )), 0, PAGE_READONLY, 0, 0, 0 );
+				if ( m_maphandle ) {		
+					m_memptr = (const char *) MapViewOfFile ( m_maphandle, FILE_MAP_READ, 0, 0, 0 );
+#else
+				if ( true ) {
+					m_memptr = (const char *) mmap ( 0, m_filesize, PROT_READ, MAP_SHARED, m_file. handle ( ), 0 );
+
+#endif
+					if ( m_memptr ) {
+						m_mem. setRawData ( m_memptr, m_filesize );
+
+						m_ds = new QDataStream ( m_mem, IO_ReadOnly );
+						return m_ds;
+					}
+				}
+			}
+		}
+		close ( );
+		return 0;
+	}
+
+	void close ( )
+	{
+		delete m_ds;
+		m_ds = 0;
+		if ( m_memptr ) {
+			m_mem. resetRawData ( m_memptr, m_filesize );
+#if defined( Q_OS_WIN32 )
+			UnmapViewOfFile ( m_memptr );
+#else
+			munmap ( m_memptr, m_filesize );
+#endif
+			m_memptr = 0;
+		}
+#if defined( Q_OS_WIN32 )
+		if ( m_maphandle ) {
+			CloseHandle ( m_maphandle );
+			m_maphandle = 0;
+		}
+#endif
+		m_file. close ( );
+	}
+
+	Q_UINT32 size ( ) const
+	{
+		return m_filesize;
+	}
+
+private:
+	QFile        m_file;
+	Q_UINT32     m_filesize;
+	const char * m_memptr;
+	QByteArray   m_mem;
+	QDataStream *m_ds;
+
+#if defined( Q_OS_WIN32 )
+	HANDLE       m_maphandle;
+#endif
+};
+
+}
+
 bool BrickLink::readDatabase ( const QString &fname )
 {
 	QString filename = fname. isNull ( ) ? dataPath ( ) + defaultDatabaseName ( ) : fname;
@@ -549,17 +666,20 @@ bool BrickLink::readDatabase ( const QString &fname )
 	m_databases. categories. clear ( );
 	m_databases. items. clear ( );
 
-	QFile f ( filename );
-	if ( f. open ( IO_ReadOnly )) {
-		Q_UINT32 filesize_real = f. size ( );
+	bool result = false;
+	stopwatch *sw = new stopwatch( "readDatabase" );
 
-		QDataStream ds ( &f );
+	CMappedFile f ( filename );
+	QDataStream *pds = f. open ( );
+
+	if ( pds ) {
+		QDataStream &ds = *pds;
 		ds. setByteOrder ( QDataStream::LittleEndian );
 
 		Q_UINT32 magic = 0, filesize = 0, version = 0;
 		ds >> magic >> filesize >> version;
 		
-		if (( magic != Q_UINT32( 0xb91c5703 )) || ( filesize != filesize_real ) || ( version != 0 ))
+		if (( magic != Q_UINT32( 0xb91c5703 )) || ( filesize != f. size ( )) || ( version != 0 ))
 			return false;
 
 		// colors
@@ -606,6 +726,7 @@ bool BrickLink::readDatabase ( const QString &fname )
 		ds >> allc >> magic;
 
 		if (( allc == ( colc + ittc + catc + itc )) && ( magic == Q_UINT32( 0xb91c5703 ))) {
+			delete sw;
 #ifdef _MSC_VER
 #define PF_SIZE_T   "I"
 #else
@@ -617,17 +738,18 @@ bool BrickLink::readDatabase ( const QString &fname )
 			qDebug ( "Items: %8u  (%11" PF_SIZE_T "u bytes)", m_databases. items. count ( ),      m_databases. items. count ( )      * ( sizeof( Item )     + 20 ));
 #undef PF_SIZE_T
 
-			return true;
+			result = true;
 		}
 	}
-	m_databases. colors. clear ( );
-	m_databases. item_types. clear ( );
-	m_databases. categories. clear ( );
-	m_databases. items. clear ( );
+	if ( !result ) {
+		m_databases. colors. clear ( );
+		m_databases. item_types. clear ( );
+		m_databases. categories. clear ( );
+		m_databases. items. clear ( );
 
-	qWarning ( "Error reading databases!" );
-
-	return false;
+		qWarning ( "Error reading databases!" );
+	}
+	return result;
 }
 
 
