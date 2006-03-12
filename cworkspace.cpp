@@ -11,6 +11,8 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
+#include <stdlib.h>
+
 #include <qlayout.h>
 #include <qworkspace.h>
 #include <qwidgetstack.h>

@@ -51,9 +51,6 @@
 				<key>LSIsAppleDefaultForType</key>
 				<true/>
 			</dict>
-		</array>
-
-		<array>
 			<dict>
 				<key>CFBundleTypeExtensions</key>
 				<array>

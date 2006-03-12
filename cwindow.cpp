@@ -74,7 +74,10 @@ private:
 		CUndoCmd *macro = doc-> macroBegin ( );
 		uint count = 0;
 
-		foreach ( CDocument::Item *pos, doc-> selection ( )) {
+		// Apples gcc4 has problems compiling this line (internal error)
+		//foreach ( CDocument::Item *pos, doc-> selection ( )) {
+		for ( CDocument::ItemList::const_iterator it = doc-> selection ( ). begin  () ; it != doc-> selection ( ). end ( ); ++it ) {
+			CDocument::Item *pos = *it;
 			if ( toggle ) {
 				TG val = ( pos->* getter ) ( );
 
