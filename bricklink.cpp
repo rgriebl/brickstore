@@ -618,7 +618,7 @@ public:
 #if defined( Q_OS_WIN32 )
 			UnmapViewOfFile ( m_memptr );
 #else
-			munmap ( m_memptr, m_filesize );
+			munmap ((void *) m_memptr, m_filesize );
 #endif
 			m_memptr = 0;
 		}
