@@ -60,6 +60,19 @@ public:
 	void blUpdateIntervals ( int &pic, int &pg ) const;
 	void blUpdateIntervalsDefaults ( int &picd, int &pgd ) const;
 
+	enum Registration {
+		None,
+		Personal,
+		Demo,
+		Full
+	};
+
+	Registration registration ( ) const;
+	Registration setRegistration ( const QString &name, Q_UINT32 key );
+	QString registrationName ( ) const;
+	Q_UINT32 registrationKey ( ) const;
+	bool checkRegistrationKey ( const QString &name, Q_UINT32 key );
+
 public slots:
 	void setLanguage ( const QString &lang );
 	void setWeightSystem ( WeightSystem ws );
@@ -88,6 +101,7 @@ signals:
 	void blUpdateIntervalsChanged ( int pic, int pg );
 	void onlineStatusChanged ( bool b );
 	void proxyChanged ( bool b, const QString &proxy, int port );
+	void registrationChanged ( CConfig::Registration r );
 
 protected:
 	QString readPasswordEntry ( const QString &key ) const;
@@ -97,6 +111,7 @@ private:
 	bool         m_show_input_errors;
 	WeightSystem m_weight_system;
 	bool         m_simple_mode;
+	Registration m_registration;
 };
 
 #endif

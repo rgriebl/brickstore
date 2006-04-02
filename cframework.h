@@ -111,9 +111,12 @@ private slots:
 
 	void setOnlineStatus ( QAction * );
 	void setWindowMode ( QAction * );
+	void setSimpleMode ( bool );
 	void cancelAllTransfers ( );
 	void toggleAddItemDialog ( bool b );
 	void closedAddItemDialog ( );
+
+	void registrationUpdate ( );
 
 protected:
 	virtual void dragMoveEvent ( QDragMoveEvent *e );

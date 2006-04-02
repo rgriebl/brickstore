@@ -28,14 +28,13 @@
 #include "bricklink.h"
 #include "version.h"
 #include "dlgmessageimpl.h"
+#include "dlgregistrationimpl.h"
 #include "crebuilddatabase.h"
 #include "cprogressdialog.h"
 #include "ccheckforupdates.h"
 #include "csplash.h"
 
 #include "capplication.h"
-
-//#define BS_DEMO
 
 
 class COpenEvent : public QCustomEvent {
@@ -89,11 +88,11 @@ CApplication::CApplication ( const char *rebuild_db_only, int _argc, char **_arg
 		QTimer::singleShot ( 0, this, SLOT( rebuildDatabase ( )));
 	}
 	else {
-		CSplash::inst ( );
-
 		updateTranslations ( );
 		connect ( CConfig::inst ( ), SIGNAL( languageChanged ( )), this, SLOT( updateTranslations ( )));
 		
+		CSplash::inst ( );
+
 		CMessageBox::setDefaultTitle ( appName ( ));
 
 		QPixmap pix;
@@ -107,8 +106,14 @@ CApplication::CApplication ( const char *rebuild_db_only, int _argc, char **_arg
 			m_files_to_open << argv ( ) [i];
 	
 		CSplash::inst ( )-> finish ( CFrameWork::inst ( ));
-		CFrameWork::inst ( )-> show ( );	
+		CFrameWork::inst ( )-> show ( );
+
+		while ( CConfig::inst ( )-> registration ( ) == CConfig::None ) {
+			DlgRegistrationImpl d ( true, mainWidget ( ));
+			d. exec ( );			
+		}
 		demoVersion ( );
+		connect ( CConfig::inst ( ), SIGNAL( registrationChanged ( CConfig::Registration )), this, SLOT( demoVersion ( )));
 	}
 }
 	
@@ -359,13 +364,15 @@ void CApplication::about ( )
 
 	QString text = QString ( layout_text ). arg ( appName ( )). arg ( copyright, version, support, tr( m_legal ));
 
-	DlgMessageImpl d ( appName ( ), text, mainWidget ( ));
+	DlgMessageImpl d ( appName ( ), text, false, mainWidget ( ));
 	d. exec ( );
 }
 
 void CApplication::demoVersion ( )
 {
-#if defined( BS_DEMO )
+	if ( CConfig::inst ( )-> registration ( ) != CConfig::Demo )
+		return;
+
 	static const char *layout_text =
 		"<qt><center>"
 			"<table border=\"0\"><tr>"
@@ -384,14 +391,21 @@ void CApplication::demoVersion ( )
 
 	QString text = QString ( layout_text ). arg ( appName ( ), copyright, version, tr( m_demo ). arg ( m_url ));
 
-	DlgMessageImpl d ( appName ( ), text, mainWidget ( ));
+	DlgMessageImpl d ( appName ( ), text, true, mainWidget ( ));
 	d. exec ( );
-#endif
+
+	QTimer::singleShot ( 20*60*1000, this, SLOT( demoVersion ( )));
 }
 
 void CApplication::checkForUpdates ( )
 {
 	CProgressDialog d ( mainWidget ( ));
 	CCheckForUpdates cfu ( &d );
+	d. exec ( );
+}
+
+void CApplication::registration ( )
+{
+	DlgRegistrationImpl d ( false, mainWidget ( ));
 	d. exec ( );
 }

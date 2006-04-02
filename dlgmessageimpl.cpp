@@ -11,15 +11,33 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <curllabel.h>
+#include <qpushbutton.h>
+#include <qtimer.h>
 
+#include "curllabel.h"
 #include "dlgmessageimpl.h"
 
-DlgMessageImpl::DlgMessageImpl ( const QString &title, const QString &text, QWidget *parent, const char *name, bool modal, int fl )
+DlgMessageImpl::DlgMessageImpl ( const QString &title, const QString &text, bool delayok, QWidget *parent, const char *name, bool modal, int fl )
 	: DlgMessage ( parent, name, modal, fl )
 {
 	setCaption ( title );
 	w_label-> setText ( text );
 
+	if ( delayok ) {
+		w_ok-> setEnabled ( false );
+		QTimer::singleShot ( 3 * 1000, this, SLOT( enableOk ( )));
+	}
+
 	setFixedSize ( sizeHint ( ));
+}
+
+void DlgMessageImpl::enableOk ( )
+{
+	w_ok-> setEnabled ( true );
+}
+
+void DlgMessageImpl::reject ( )
+{
+	if ( w_ok-> isEnabled ( ))
+		DlgMessage::reject ( );
 }

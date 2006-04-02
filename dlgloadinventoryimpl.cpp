@@ -55,10 +55,10 @@ int DlgLoadInventoryImpl::quantity ( )
 
 void DlgLoadInventoryImpl::checkItem ( const BrickLink::Item *it, bool ok )
 {
-	bool b = w_select-> isOnlyWithInventory ( ) ? it-> hasInventory ( ) : true;
+	bool b = ( it ) && ( w_select-> isOnlyWithInventory ( ) ? it-> hasInventory ( ) : true );
 
-	w_ok-> setEnabled (( it ) && b );
+	w_ok-> setEnabled ( b );
 
-	if ( it && b && ok )
+	if ( b && ok )
 		w_ok-> animateClick ( );
 }

@@ -944,6 +944,10 @@
         <source>Show in my Store on BrickLink...</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Registration...</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>CImportBLOrder</name>
@@ -2408,6 +2412,76 @@
     <message>
         <source>&amp;OK</source>
         <translation>&amp;OK</translation>
+    </message>
+</context>
+<context>
+    <name>DlgRegistration</name>
+    <message>
+        <source>Registration</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;BrickStore&lt;/b&gt; supports three modes of operation:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;PERSONAL</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>I do not need all the BrickLink Seller features (no reminders and no registration required).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;DEMO</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>I want to use the unrestricted demo version (a reminder will popup every 20 minutes).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;FULL</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>-</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&gt;NNNN-NNNN;0</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation type="unfinished">Nom</translation>
+    </message>
+    <message>
+        <source>Key</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>I want to use the full version (no reminders, but you need a &lt;a href=&quot;http://brickforge.de/software/brickstore&quot;&gt;valid registration key&lt;/a&gt;).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>You can change the mode of operation at anytime via &lt;b&gt;Help &gt; Registration...&lt;/b&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;OK</source>
+        <translation type="unfinished">&amp;OK</translation>
+    </message>
+    <message>
+        <source>&amp;Cancel</source>
+        <translation type="unfinished">&amp;Annuler</translation>
+    </message>
+</context>
+<context>
+    <name>DlgRegistrationImpl</name>
+    <message>
+        <source>Sorry - the registration key you entered is not valid!</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

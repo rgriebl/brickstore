@@ -204,7 +204,7 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 	m_menuid_window = menuBar ( )-> insertItem ( QString ( ), createMenu ( sl ));
 
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Menubar/Help" );
-	if ( sl. isEmpty ( ))  sl << "help_updates" << "-" << "help_about";
+	if ( sl. isEmpty ( ))  sl << "help_updates" << "-" << "help_registration" << "-" << "help_about";
 	m_menuid_help = menuBar ( )-> insertItem ( QString ( ), createMenu ( sl ));
 
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/ContextMenu/Item" );
@@ -264,9 +264,12 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 	connect ( CConfig::inst ( ), SIGNAL( proxyChanged ( bool, const QString &, int )), bl, SLOT( setHttpProxy ( bool, const QString &, int )));
 	connect ( CMoney::inst ( ), SIGNAL( monetarySettingsChanged ( )), this, SLOT( statisticsUpdate ( )));
 	connect ( CConfig::inst ( ), SIGNAL( weightSystemChanged ( CConfig::WeightSystem )), this, SLOT( statisticsUpdate ( )));
+	connect ( CConfig::inst ( ), SIGNAL( simpleModeChanged ( bool )), this, SLOT( setSimpleMode ( bool )));
+	connect ( CConfig::inst ( ), SIGNAL( registrationChanged ( CConfig::Registration )), this, SLOT( registrationUpdate ( )));
 
 	findAction ( "view_show_input_errors" )-> setOn ( CConfig::inst ( )-> showInputErrors ( ));
-	findAction ( "view_simple_mode"       )-> setOn ( CConfig::inst ( )-> simpleMode ( ));
+
+	registrationUpdate ( );
 
 	findAction ( CConfig::inst ( )-> onlineStatus ( ) ? "extras_net_online" : "extras_net_offline" )-> setOn ( true );
 	 
@@ -381,6 +384,7 @@ void CFrameWork::languageChange ( )
 		{ "help_whatsthis",                 tr( "What's this?" ),                       tr( "Shift+F1", "Help|WhatsThis" ) },
 		{ "help_about",                     tr( "About..." ),                           0 },
 		{ "help_updates",                   tr( "Check for Program Updates..." ),       0 },
+		{ "help_registration",              tr( "Registration..." ),                    0 },
 		{ "edit_status",                    tr( "Status" ),                             0 },
 		{ "edit_status_include",            tr( "Include" ),                            0 },
 		{ "edit_status_exclude",            tr( "Exclude" ),                            0 },
@@ -823,6 +827,9 @@ void CFrameWork::createActions ( )
 	a = new QAction ( this, "help_updates" );
 	connect ( a, SIGNAL( activated ( )), cApp, SLOT( checkForUpdates ( )));
 
+	a = new QAction ( this, "help_registration" );
+	connect ( a, SIGNAL( activated ( )), cApp, SLOT( registration ( )));
+
 	// set all icons that have a pixmap corresponding to name()
 
     QObjectList *alist = queryList ( "QAction", 0, false, true );
@@ -1006,8 +1013,14 @@ void CFrameWork::connectAction ( bool do_connect, const char *name, CWindow *win
 {
 	QAction *a = findAction ( name );
 
-	if ( a )
-		a-> setEnabled ( do_connect );
+	if ( a ) {
+		QAction *a2 = a;
+
+		while ( a2 && ::qt_cast<QActionGroup *> ( a2-> parent ( )))
+			a2 = static_cast<QAction *> ( a2-> parent ( ));
+
+		a2-> setEnabled ( do_connect );
+	}
 
 	if ( a && window ) {
 		bool is_toggle = ( ::strstr ( windowslot, "bool" ));
@@ -1291,7 +1304,7 @@ void CFrameWork::statisticsUpdate ( )
 
 void CFrameWork::modificationUpdate ( )
 {
-	bool b = CUndoManager::inst ( )-> currentStack ( ) ? CUndoManager::inst ( )-> currentStack ( )-> isClean ( ) : false;
+	bool b = CUndoManager::inst ( )-> currentStack ( ) ? CUndoManager::inst ( )-> currentStack ( )-> isClean ( ) : true;
 
 	QAction *a = findAction ( "file_save" );
 	if ( a )
@@ -1365,6 +1378,48 @@ void CFrameWork::setOnlineStatus ( QAction *act )
 		cancelAllTransfers ( );
 		
 	CConfig::inst ( )-> setOnlineStatus ( b );
+}
+
+void CFrameWork::registrationUpdate ( )
+{
+	bool personal = ( CConfig::inst ( )-> registration ( ) == CConfig::Personal );
+	bool demo = ( CConfig::inst ( )-> registration ( ) == CConfig::Demo );
+
+	QAction *a = findAction ( "view_simple_mode" );
+	
+	// personal -> always on
+	// demo -> always off
+	a-> setOn (( CConfig::inst ( )-> simpleMode ( ) || personal ) && !demo );
+	a-> setEnabled (!( demo || personal ));
+
+	setSimpleMode ( a-> isOn ( ));
+}
+
+void CFrameWork::setSimpleMode ( bool b )
+{
+	static const char *actions [] = {
+		"file_import_bl_xml",
+		"file_import_bl_store_inv",
+		"file_export_bl_xml",
+		"file_export_bl_xml_clip",
+		"file_export_bl_update_clip",
+		"edit_bulk",
+		"edit_sale",
+		"edit_reserved",
+		"edit_retain",
+		"edit_stockroom",
+		"edit_remark",
+		"edit_bl_myinventory",
+
+		0
+	};
+
+	for ( const char **action_ptr = actions; *action_ptr; action_ptr++ ) {
+		QAction *a = findAction ( *action_ptr );
+
+		if ( a )
+			a-> setVisible ( !b );
+	}
 }
 
 void CFrameWork::showContextMenu ( bool /*onitem*/, const QPoint &pos )
@@ -1477,3 +1532,4 @@ void CFrameWork::closedAddItemDialog ( )
 {
 	findAction ( "edit_additems" )-> setOn ( m_add_dialog && m_add_dialog-> isVisible ( ));
 }
+

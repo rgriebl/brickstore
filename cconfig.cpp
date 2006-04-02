@@ -40,6 +40,11 @@ static inline Q_INT32 mkver ( int a, int b, int c )
 } // namespace
 
 
+#if !defined( BS_REGISTRATION_KEYBASE )
+#define BS_REGISTRATION_KEYBASE 0
+#endif
+
+
 CConfig::CConfig ( )
 	: QObject ( ), QSettings ( )
 {
@@ -48,6 +53,9 @@ CConfig::CConfig ( )
 	m_show_input_errors = readBoolEntry ( "/General/ShowInputErrors", true );
 	m_weight_system = ( readEntry ( "/General/WeightSystem", "metric" ) == "metric" ) ? WeightMetric : WeightImperial;
 	m_simple_mode = readBoolEntry ( "/General/SimpleMode", false );
+
+	m_registration = None;
+	setRegistration ( registrationName ( ), registrationKey ( ));
 }
 
 CConfig::~CConfig ( )
@@ -74,6 +82,48 @@ CConfig *CConfig::inst ( )
 	return s_inst;
 }
 
+QString CConfig::registrationName ( ) const
+{
+	return readEntry ( "/General/Registration/Name" );
+}
+
+Q_UINT32 CConfig::registrationKey ( ) const
+{
+	return readEntry ( "/General/Registration/Key", "0" ). toUInt ( );
+}
+
+bool CConfig::checkRegistrationKey ( const QString &name, Q_UINT32 key )
+{
+	Q_UINT32 check = Q_UINT32(( Q_UINT64( BS_REGISTRATION_KEYBASE ) * Q_UINT64( qChecksum ((const char*) name. ucs2 ( ), name. length ( ) * 2 ))) % ( Q_UINT64( 1 ) << 32 ));
+	return key && ( key == check );
+}
+
+CConfig::Registration CConfig::registration ( ) const
+{
+	return m_registration;
+}
+
+CConfig::Registration CConfig::setRegistration ( const QString &name, Q_UINT32 key )
+{
+	Registration old = m_registration;
+
+	if ( name.isEmpty ( ) && !key )
+		m_registration = None;
+	else if ( name == "FREE" )
+		m_registration = Personal;
+	else if ( name == "DEMO" )
+		m_registration = Demo;
+	else
+		m_registration = checkRegistrationKey ( name, key ) ? Full : Personal;
+
+	writeEntry ( "/General/Registration/Name", name );
+	writeEntry ( "/General/Registration/Key", QString::number( key ));
+
+	if ( old != m_registration )
+		emit registrationChanged ( m_registration );
+
+	return m_registration;
+}
 
 QString CConfig::obscure ( const QString &str )
 {

@@ -895,6 +895,10 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
         <source>Show in my Store on BrickLink...</source>
         <translation>Diese Teil in meinem BrickLink Shop...</translation>
     </message>
+    <message>
+        <source>Registration...</source>
+        <translation>Registrierung...</translation>
+    </message>
 </context>
 <context>
     <name>CImportBLOrder</name>
@@ -2142,6 +2146,76 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <message>
         <source>&amp;OK</source>
         <translation>&amp;OK</translation>
+    </message>
+</context>
+<context>
+    <name>DlgRegistration</name>
+    <message>
+        <source>Registration</source>
+        <translation>Registrierung</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;BrickStore&lt;/b&gt; supports three modes of operation:</source>
+        <translation>&lt;b&gt;BrickStore&lt;/b&gt; unterstützt drei Betriebsmodi:</translation>
+    </message>
+    <message>
+        <source>&amp;PERSONAL</source>
+        <translation>&amp;PRIVAT</translation>
+    </message>
+    <message>
+        <source>I do not need all the BrickLink Seller features (no reminders and no registration required).</source>
+        <translation>Ich benötige nicht alle BrickLink Verkäuferfunktionen (keine Erinnerungen und keine Registrierung).</translation>
+    </message>
+    <message>
+        <source>&amp;DEMO</source>
+        <translation>&amp;DEMO</translation>
+    </message>
+    <message>
+        <source>I want to use the unrestricted demo version (a reminder will popup every 20 minutes).</source>
+        <translation>Ich will die uneingeschränkte Demoversion nutzen (es erscheint eine Erinnerung alle 20 Minuten).</translation>
+    </message>
+    <message>
+        <source>&amp;FULL</source>
+        <translation>&amp;VOLL</translation>
+    </message>
+    <message>
+        <source>-</source>
+        <translation>-</translation>
+    </message>
+    <message>
+        <source>&gt;NNNN-NNNN;0</source>
+        <translation>&gt;NNNN-NNNN;0</translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation>Name</translation>
+    </message>
+    <message>
+        <source>Key</source>
+        <translation>Schlüssel</translation>
+    </message>
+    <message>
+        <source>I want to use the full version (no reminders, but you need a &lt;a href=&quot;http://brickforge.de/software/brickstore&quot;&gt;valid registration key&lt;/a&gt;).</source>
+        <translation>Ich will die Vollversion nutzen (keine Erinnerungen, aber ein &lt;a href=&quot;http://brickforge.de/software/brickstore&quot;&gt;gültiger Registrierungsschlüssel&lt;/a&gt; wird benötigt).</translation>
+    </message>
+    <message>
+        <source>You can change the mode of operation at anytime via &lt;b&gt;Help &gt; Registration...&lt;/b&gt;</source>
+        <translation>Der Betriebsmodus kann jederzeit geändert werden: &lt;b&gt;Hilfe &gt; Registrierung...&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>&amp;OK</source>
+        <translation>&amp;OK</translation>
+    </message>
+    <message>
+        <source>&amp;Cancel</source>
+        <translation>&amp;Abbrechen</translation>
+    </message>
+</context>
+<context>
+    <name>DlgRegistrationImpl</name>
+    <message>
+        <source>Sorry - the registration key you entered is not valid!</source>
+        <translation>Der eingegebene Registrierungsschlüssel ist leider nicht gültig!</translation>
     </message>
 </context>
 <context>

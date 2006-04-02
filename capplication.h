@@ -42,6 +42,7 @@ public slots:
 	void about ( );
 	void checkForUpdates ( );
 	void updateTranslations ( );
+	void registration ( );
 
 signals:
 	void openDocument ( const QString & );

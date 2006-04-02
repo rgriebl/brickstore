@@ -11,22 +11,25 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __DLGMESSAGEIMPL_H__
-#define __DLGMESSAGEIMPL_H__
+#ifndef __DLGREGISTRATIONIMPL_H__
+#define __DLGREGISTRATIONIMPL_H__
 
-#include "dlgmessage.h"
+#include "bricklink.h"
 
-class DlgMessageImpl : public DlgMessage {
-	Q_OBJECT
+#include "dlgregistration.h"
+
+class DlgRegistrationImpl : public DlgRegistration {
+    Q_OBJECT
 
 public:
-	DlgMessageImpl ( const QString &title, const QString &text, bool delayok = false, QWidget *parent = 0, const char *name = 0, bool modal = true, int fl = 0 );	
+    DlgRegistrationImpl ( bool initial, QWidget *parent = 0, const char * name = 0, bool modal = true );
+    ~DlgRegistrationImpl ( );
 
 protected:
+	virtual void resizeEvent ( QResizeEvent *e );
+	
+	virtual void accept ( );
 	virtual void reject ( );
-
-private slots:	
-	void enableOk ( );
 };
 
 #endif

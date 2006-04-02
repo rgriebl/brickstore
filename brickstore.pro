@@ -192,6 +192,7 @@ FORMS   += dlgadditem.ui \
            dlgloadorder.ui \
            dlgmerge.ui \
            dlgmessage.ui \
+           dlgregistration.ui \
            dlgselectreport.ui \
            dlgsettings.ui \
            dlgsettopg.ui \
@@ -204,6 +205,7 @@ HEADERS += dlgadditemimpl.h \
            dlgloadorderimpl.h \
            dlgmergeimpl.h \
            dlgmessageimpl.h \
+           dlgregistrationimpl.h \
            dlgselectreportimpl.h \
            dlgsettingsimpl.h \
            dlgsettopgimpl.h \
@@ -216,6 +218,7 @@ SOURCES += dlgadditemimpl.cpp \
            dlgloadorderimpl.cpp \
            dlgmergeimpl.cpp \
            dlgmessageimpl.cpp \
+           dlgregistrationimpl.cpp \
            dlgselectreportimpl.cpp \
            dlgsettingsimpl.cpp \
            dlgsettopgimpl.cpp \
