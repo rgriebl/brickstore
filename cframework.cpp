@@ -828,11 +828,12 @@ void CFrameWork::createActions ( )
 	connect ( a, SIGNAL( activated ( )), cApp, SLOT( checkForUpdates ( )));
 
 	a = new QAction ( this, "help_registration" );
+	a-> setEnabled ( CConfig::inst ( )-> registration ( ) != CConfig::OpenSource );
 	connect ( a, SIGNAL( activated ( )), cApp, SLOT( registration ( )));
 
 	// set all icons that have a pixmap corresponding to name()
 
-    QObjectList *alist = queryList ( "QAction", 0, false, true );
+	QObjectList *alist = queryList ( "QAction", 0, false, true );
 	for ( QObjectListIt it ( *alist ); it. current ( ); ++it ) {
 		const char *name = it. current ( )-> name ( );
 
@@ -1181,7 +1182,7 @@ void CFrameWork::selectionUpdate ( const CDocument::ItemList &selection )
 		{ "edit_partoutitems",        1, 0, NeedInventory },
 		{ "edit_reset_diffs",         1, 0, 0 },
 
-		{ 0, 0, 0 }
+		{ 0, 0, 0, 0 }
 	}, *endisable_ptr;
 
 	uint cnt = selection. count ( );

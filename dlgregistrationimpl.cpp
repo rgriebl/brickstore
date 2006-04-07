@@ -40,15 +40,20 @@ DlgRegistrationImpl::DlgRegistrationImpl ( bool initial, QWidget *parent, const 
 			w_demo-> setChecked ( true );
 			break;
 
-		case CConfig::Full:
+		case CConfig::Full: {
 			w_full-> setChecked ( true );
 			w_full_name-> setText ( CConfig::inst ( )-> registrationName ( ));
-			QString s;
-			s. sprintf ( "%08X", CConfig::inst ( )-> registrationKey ( )). insert ( 4, '-' );
+			QString s = CConfig::inst ( )-> registrationKey ( );
+			if ( s. isEmpty ( ))
+				s = "1234-5678-9ABC";
 			w_full_key-> setText ( s );
 
 			w_demo-> setEnabled ( false );
 			w_personal-> setEnabled ( false );
+			break;
+		}
+		case CConfig::OpenSource:
+			// we shouldn't be here at all
 			break;
 	}
 
@@ -83,7 +88,7 @@ void DlgRegistrationImpl::resizeEvent ( QResizeEvent *e )
 void DlgRegistrationImpl::accept ( )
 {
 	QString name;
-	Q_UINT32 key = 0;
+	QString key = 0;
 	bool ok = true;
 
 	if ( w_personal-> isChecked ( )) {
@@ -94,7 +99,7 @@ void DlgRegistrationImpl::accept ( )
 	}
 	else if ( w_full-> isChecked ( )) {
 		name = w_full_name-> text ( );
-		key = w_full_key-> text ( ). remove ( 4, 1 ). toUInt ( 0, 16 );
+		key = w_full_key-> text ( );
 		ok = CConfig::inst ( )-> checkRegistrationKey ( name, key );
 	}
 

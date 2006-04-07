@@ -43,9 +43,16 @@ DISTFILES += $$res_images $$res_images_16 $$res_images_22 $$res_images_status $$
 MOC_DIR   = .moc
 UI_DIR    = .uic
 
+exists( .private-key ) {
+  win32:DEFINES += BS_REGKEY="\"$$system( type .private-key )\""
+  unix:DEFINES += BS_REGKEY="\"$$system( cat .private-key )\""
+} else {
+  message( Building an OpenSource version )
+}
+
 win32 {
   system( cscript.exe //B scripts\update_version.js $$RELEASE)
-
+  
   CONFIG -= shared
   LIBS += libcurl.lib
   DEFINES += CURL_STATICLIB
@@ -54,9 +61,9 @@ win32 {
 }
 
 unix {
-  OBJECTS_DIR = .obj  # grrr ... f***ing msvc.net doesn't link with this line present
-
   system( scripts/update_version.sh $$RELEASE)
+
+  OBJECTS_DIR = .obj  # grrr ... f***ing msvc.net doesn't link with this line present
 }
 
 unix:!macx {
@@ -129,6 +136,7 @@ HEADERS += bricklink.h \
            crebuilddatabase.h \
            cref.h \
            creport.h \
+           reportobjects.h \
            creport_p.h \
            cresource.h \
            cselectcolor.h \
@@ -144,7 +152,8 @@ HEADERS += bricklink.h \
            curllabel.h \
            cutility.h \
            cwindow.h \
-           cworkspace.h
+           cworkspace.h \
+           sha1.h
 
 SOURCES += bricklink.cpp \
            bricklink_data.cpp \
@@ -170,6 +179,7 @@ SOURCES += bricklink.cpp \
            crebuilddatabase.cpp \
            cref.cpp \
            creport.cpp \
+           reportobjects.cpp \
            cresource.cpp \
            cselectcolor.cpp \
            cselectitem.cpp \
@@ -183,7 +193,8 @@ SOURCES += bricklink.cpp \
            cutility.cpp \
            cwindow.cpp \
            cworkspace.cpp \
-           main.cpp
+           main.cpp \
+           sha1.cpp
 
 FORMS   += dlgadditem.ui \
            dlgincdecprice.ui \

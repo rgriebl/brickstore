@@ -5,10 +5,14 @@ function load ( )
 	res.name = "Standard";
 
 	return res;
+
+	System.print("load" );
 }
 
-function print ( )
+function print ( items )
 {
-//	Page *page = Printer.newPage();
-//	page.drawText ( 10, 10, 100, 50, "HelloWorld" );
+	var page = ReportPage.addPage();
+	page.drawText ( 10, 10, 100, 50, "HelloWorld" );
+
+	System.print("XXXX");
 }

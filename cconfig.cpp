@@ -27,6 +27,7 @@
 #include <Carbon/Carbon.h>
 #endif
 
+#include "sha1.h"
 #include "cconfig.h"
 
 
@@ -40,11 +41,6 @@ static inline Q_INT32 mkver ( int a, int b, int c )
 } // namespace
 
 
-#if !defined( BS_REGISTRATION_KEYBASE )
-#define BS_REGISTRATION_KEYBASE 0
-#endif
-
-
 CConfig::CConfig ( )
 	: QObject ( ), QSettings ( )
 {
@@ -54,7 +50,7 @@ CConfig::CConfig ( )
 	m_weight_system = ( readEntry ( "/General/WeightSystem", "metric" ) == "metric" ) ? WeightMetric : WeightImperial;
 	m_simple_mode = readBoolEntry ( "/General/SimpleMode", false );
 
-	m_registration = None;
+	m_registration = OpenSource;
 	setRegistration ( registrationName ( ), registrationKey ( ));
 }
 
@@ -87,15 +83,47 @@ QString CConfig::registrationName ( ) const
 	return readEntry ( "/General/Registration/Name" );
 }
 
-Q_UINT32 CConfig::registrationKey ( ) const
+QString CConfig::registrationKey ( ) const
 {
-	return readEntry ( "/General/Registration/Key", "0" ). toUInt ( );
+	return readEntry ( "/General/Registration/Key" );
 }
 
-bool CConfig::checkRegistrationKey ( const QString &name, Q_UINT32 key )
+bool CConfig::checkRegistrationKey ( const QString &name, const QString &key )
 {
-	Q_UINT32 check = Q_UINT32(( Q_UINT64( BS_REGISTRATION_KEYBASE ) * Q_UINT64( qChecksum ((const char*) name. ucs2 ( ), name. length ( ) * 2 ))) % ( Q_UINT64( 1 ) << 32 ));
-	return key && ( key == check );
+#if !defined( BS_REGKEY )
+	Q_UNUSED( name )
+	Q_UNUSED( key )
+
+	return true;
+
+#else
+	if ( name. isEmpty ( ) || key. isEmpty ( ))
+		return false;
+		
+	QString tmp = QString( BS_REGKEY ) + name;
+	QByteArray sha1 = sha1::calc ((const char *) tmp. ucs2 ( ), tmp. length ( ) * 2 );
+	
+	if ( sha1. count ( ) < 8 )
+		return false;
+	
+	QString result;
+	Q_UINT64 serial = 0;
+	QDataStream ds ( sha1, IO_ReadOnly );
+	ds >> serial;
+	
+	// 32bit without 0/O and 5/S
+	const char *mapping = "12346789ABCDEFGHIJKLMNPQRTUVWXYZ";
+	
+	// get 12*5 = 60 bits
+	for ( int i = 12; i; i-- ) {
+		result. append ( mapping [serial & 0x1f] );
+		serial >>= 5;
+	}
+	result. insert ( 8, '-' );
+	result. insert ( 4, '-' );
+	
+	return ( result == key );
+#endif	
 }
 
 CConfig::Registration CConfig::registration ( ) const
@@ -103,11 +131,12 @@ CConfig::Registration CConfig::registration ( ) const
 	return m_registration;
 }
 
-CConfig::Registration CConfig::setRegistration ( const QString &name, Q_UINT32 key )
+CConfig::Registration CConfig::setRegistration ( const QString &name, const QString &key )
 {
+#if defined( BS_REGKEY )
 	Registration old = m_registration;
 
-	if ( name.isEmpty ( ) && !key )
+	if ( name.isEmpty ( ) && key. isEmpty ( ))
 		m_registration = None;
 	else if ( name == "FREE" )
 		m_registration = Personal;
@@ -117,11 +146,14 @@ CConfig::Registration CConfig::setRegistration ( const QString &name, Q_UINT32 k
 		m_registration = checkRegistrationKey ( name, key ) ? Full : Personal;
 
 	writeEntry ( "/General/Registration/Name", name );
-	writeEntry ( "/General/Registration/Key", QString::number( key ));
+	writeEntry ( "/General/Registration/Key", key );
 
 	if ( old != m_registration )
 		emit registrationChanged ( m_registration );
-
+#else
+	Q_UNUSED( name )
+	Q_UNUSED( key )
+#endif
 	return m_registration;
 }
 

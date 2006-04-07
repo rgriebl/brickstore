@@ -64,14 +64,15 @@ public:
 		None,
 		Personal,
 		Demo,
-		Full
+		Full,
+		OpenSource
 	};
 
 	Registration registration ( ) const;
-	Registration setRegistration ( const QString &name, Q_UINT32 key );
+	Registration setRegistration ( const QString &name, const QString &key );
 	QString registrationName ( ) const;
-	Q_UINT32 registrationKey ( ) const;
-	bool checkRegistrationKey ( const QString &name, Q_UINT32 key );
+	QString registrationKey ( ) const;
+	bool checkRegistrationKey ( const QString &name, const QString &key );
 
 public slots:
 	void setLanguage ( const QString &lang );

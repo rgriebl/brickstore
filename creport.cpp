@@ -17,6 +17,7 @@
 #include <qapplication.h>
 #include <qfile.h>
 #include <qdir.h>
+#include <qpainter.h>
 
 #include <qsinterpreter.h>
 #include <qsargument.h>
@@ -27,6 +28,8 @@
 #include "cmoney.h"
 #include "creport.h"
 #include "creport_p.h"
+
+#include "reportobjects.h"
 
 
 namespace {
@@ -201,13 +204,16 @@ void CReport::print ( QPainter *p, const CDocument *doc, const CDocument::ItemLi
 		imap ["quantity"] = item-> quantity ( );
 
 		QMap<QString, QVariant> colormap;
-		colormap ["id"]   = item-> color ( ) ? item-> color ( )-> id ( ) : -1;
+		colormap ["id"]   = item-> color ( ) ? (int) item-> color ( )-> id ( ) : -1;
 		colormap ["name"] = item-> color ( ) ? item-> color ( )-> name ( ) : "";
 		colormap ["rgb"]  = item-> color ( ) ? item-> color ( )-> color ( ) : QColor ( );
 		imap ["color"] = colormap;
 
 		itemslist << imap;
 	}
+
+	ReportJob *job = new ReportJob ( p-> device ( ));
+	d-> m_interpreter-> addTransientObject ( job );
 
 	QSArgumentList args;
 	args << QSArgument( docmap ) << QSArgument( itemslist );
@@ -218,6 +224,10 @@ void CReport::print ( QPainter *p, const CDocument *doc, const CDocument::ItemLi
 
 
 	}
+	d-> m_interpreter-> clear ( );
+	d-> m_interpreter-> evaluate ( d-> m_code, 0, d-> m_name );
+	
+	delete job;
 }
 
 
