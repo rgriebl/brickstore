@@ -570,13 +570,14 @@ void CPriceGuideWidget::paintHeader ( QPainter *p, const QSize &s, const QRect &
 	//style ( ). drawPrimitive ( QStyle::PE_HeaderSection, p, r, cg );
 
 	// vvv Official Qt3 hack to paint disabled headers (see qheader.cpp) vvv
+	p-> setBrushOrigin ( r. topLeft ( ));	
 	p-> save ( );
 	p-> setClipRect ( r );
 	
 	QRect r1 ( r );
 	r1. addCoords ( -2, -2, 2, 2 );
 
-	style ( ). drawPrimitive ( QStyle::PE_HeaderSection, p, r1, cg );
+	style ( ). drawPrimitive ( QStyle::PE_HeaderSection, p, r1, cg, QStyle::Style_Horizontal | QStyle::Style_Off | QStyle::Style_Enabled | QStyle::Style_Raised, QStyleOption ( this ));
 		
 	p-> setPen ( cg. color ( QColorGroup::Mid ));
 	if ( r. y ( ) + r. height ( ) < s. height ( ))
