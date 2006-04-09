@@ -28,6 +28,7 @@
 #include "ctaskpanemanager.h"
 #include "cutility.h"
 
+
 class CTaskPaneManagerPrivate {
 public:
 	CTaskPaneManager::Mode  m_mode;
@@ -64,7 +65,10 @@ public:
 	QValueList<Item>::iterator noItem ( );
 
 	QValueList<Item> m_items;
+
+	static QWidget *s_nullwidget;
 };
+
 
 
 class CTaskGroup;
@@ -116,6 +120,10 @@ private:
 	QPtrList <CTaskGroup> *m_groups;
 };
 
+
+QWidget *CTaskPaneManagerPrivate::s_nullwidget = 0;
+
+
 CTaskPaneManager::CTaskPaneManager ( QMainWindow *parent, const char *name )
 	: QObject ( parent, name )
 {
@@ -123,6 +131,13 @@ CTaskPaneManager::CTaskPaneManager ( QMainWindow *parent, const char *name )
 	d-> m_mainwindow = parent;
 	d-> m_panedock = 0;
 	d-> m_taskpane = 0;
+
+#if defined( Q_WS_MACX )
+	// MacOSX 10.4 Intel/Qt 3.3.6 crashes when reparenting to 0
+	
+	if ( !d-> s_nullwidget )
+		d-> s_nullwidget = new QWidget ( 0 );
+#endif
 
 	d-> m_mode = Classic;
 	setMode ( Modern );
@@ -274,7 +289,7 @@ void CTaskPaneManager::kill ( )
 			disconnect ( item. m_itemdock, SIGNAL( visibilityChanged ( bool )), this, SLOT( dockVisibilityChanged ( bool )));
 
 			item. m_widget-> hide ( );
-			item. m_widget-> reparent ( 0, QPoint ( 0, 0 ));
+			item. m_widget-> reparent ( d-> s_nullwidget, QPoint ( 0, 0 ));
 
 			delete item. m_itemdock;
 			item. m_itemdock = 0;
@@ -699,7 +714,7 @@ void CTaskPane::removeItem ( QWidget *w, bool delete_widget )
 			if ( delete_widget )
 				delete w;
 			else
-				w-> reparent ( 0, QPoint ( 0, 0 ));
+				w-> reparent ( CTaskPaneManagerPrivate::s_nullwidget, QPoint ( 0, 0 ));
 		}
 	}
 }
