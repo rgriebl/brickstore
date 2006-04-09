@@ -26,13 +26,14 @@
 #include <qdict.h>
 
 #include "cconfig.h"
+#include "cresource.h"
 #include "cutility.h"
 #include "bricklink.h"
 
 #define STRINGIFY(x)  #x
 
 #define DEFAULT_DATABASE_VERSION  0
-#define DEFAULT_DATABASE_NAME     "database-v" STRINGIFY( DEFAULT_DATABASE_VERSION )
+#define DEFAULT_DATABASE_NAME     "database-v%1"
 
 
 QCString BrickLink::url ( UrlList u, const void *opt, const void *opt2 )
@@ -247,7 +248,7 @@ QImage BrickLink::colorImage ( const Color *col, int w, int h ) const
 	p. end ( );
 	QImage img = pix. convertToImage ( );
 	
-	if ( col-> isTransparent ( )) {
+	if ( col-> isTransparent ( ) && CResource::inst ( )-> pixmapAlphaSupported ( )) {
 		img. setAlphaBuffer ( true );
 		
 		float e = float( w ) / float( h );
@@ -533,7 +534,7 @@ void BrickLink::cancelPriceGuideTransfers ( )
 
 QString BrickLink::defaultDatabaseName ( ) const
 {
-	return QString( DEFAULT_DATABASE_NAME );
+	return QString( DEFAULT_DATABASE_NAME ). arg ( DEFAULT_DATABASE_VERSION );
 }
 
 namespace {

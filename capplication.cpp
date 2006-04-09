@@ -185,6 +185,10 @@ QString CApplication::sysName ( ) const
 	sys_name = "Windows";
 #elif defined( Q_OS_UNIX )
 	sys_name = "Unix";
+
+	struct ::utsname utsinfo;
+	if ( ::uname ( &utsinfo ) >= 0 )
+		sys_name = utsinfo. sysname;
 #endif
 
 	return sys_name;
@@ -218,7 +222,7 @@ QString CApplication::sysVersion ( ) const
 #elif defined( Q_OS_UNIX )
 	struct ::utsname utsinfo;
 	if ( ::uname ( &utsinfo ) >= 0 )
-		sys_version = QString( utsinfo. sysname ) + " " + utsinfo. machine;
+		sys_version = QString( "%2 (%3)" ). arg ( utsinfo. release, utsinfo. machine );
 #endif
 
 	return sys_version;

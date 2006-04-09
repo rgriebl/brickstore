@@ -70,7 +70,7 @@ unix {
 
   OBJECTS_DIR = .obj  # grrr ... f***ing msvc.net doesn't link with this line present
 
-  DEFINES += __USER__="\"$$(USER)\"" __HOST__="\"$$system( hostname -s )\""
+  DEFINES += __USER__="\"$$(USER)\"" __HOST__="\"$$system( hostname )\""
 }
 
 unix:!macx {
@@ -242,4 +242,10 @@ SOURCES += dlgadditemimpl.cpp \
            dlgsettopgimpl.cpp \
            dlgsubtractitemimpl.cpp
 
-load( qsa )
+unix {
+  INCLUDEPATH += qsa/src/qsa
+  LIBS += qsa/src/qsa/libqsa.a
+}
+else {
+  load( qsa )
+}

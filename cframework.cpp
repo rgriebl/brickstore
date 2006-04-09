@@ -148,7 +148,7 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 	setCentralWidget ( m_mdi );
 
 	m_taskpanes = new CTaskPaneManager ( this, "taskpanemanager" );
-	m_taskpanes-> setMode ( CConfig::inst ( )-> readNumEntry ( "/MainWindow/Infobar/Mode" ) != CTaskPaneManager::Classic ? CTaskPaneManager::Modern : CTaskPaneManager::Classic );
+	m_taskpanes-> setMode ( CConfig::inst ( )-> readNumEntry ( "/MainWindow/Infobar/Mode", CTaskPaneManager::Modern ) != CTaskPaneManager::Classic ? CTaskPaneManager::Modern : CTaskPaneManager::Classic );
 
 	m_task_info = new CTaskInfoWidget ( 0, "iteminfowidget" );
 	m_taskpanes-> addItem ( m_task_info, CResource::inst ( )-> pixmap ( "sidebar/info" ));
@@ -230,7 +230,13 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 	languageChange ( );
 
 	str = CConfig::inst ( )-> readEntry ( "/MainWindow/Layout/DockWindows" );
-	{ QTextStream ts ( &str, IO_ReadOnly ); ts >> *this; }
+	if ( str. isEmpty ( )) {
+		findAction ( "view_toolbar" )-> setOn ( true );
+	}
+	else {
+		QTextStream ts ( &str, IO_ReadOnly ); 
+		ts >> *this; 
+	}
 
 	QRect r ( CConfig::inst ( )-> readNumEntry ( "/MainWindow/Layout/Left",   -1 ),
 	          CConfig::inst ( )-> readNumEntry ( "/MainWindow/Layout/Top",    -1 ),
@@ -240,11 +246,18 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 	int wstate = CConfig::inst ( )-> readNumEntry ( "/MainWindow/Layout/State", WindowNoState );
 
 	// make sure at least SOME part of the window ends up on the screen
-	if ( r. isValid ( ) && !r. isEmpty ( ) && !( r & qApp-> desktop ( )-> rect ( )). isEmpty ( )) {
-		resize ( r. size ( ));  // X11 compat. mode -- KDE 3.x doesn't seem to like this though...
-		move ( r. topLeft ( ));
-		//setGeometry ( r );  // simple code (which shouldn't work on X11, but does on KDE 3.x...)
+	if ( !r. isValid ( ) || r. isEmpty ( ) || ( r & qApp-> desktop ( )-> rect ( )). isEmpty ( )) {
+		float dw = qApp-> desktop ( )-> width ( ) / 10.f;
+		float dh = qApp-> desktop ( )-> height ( ) / 10.f;
+
+		r = QRect ( int( dw ), int( dh ), int ( 8 * dw ), int( 8 * dh )); 
+		wstate = WindowMaximized;
 	}
+
+	resize ( r. size ( ));  // X11 compat. mode -- KDE 3.x doesn't seem to like this though...
+	move ( r. topLeft ( ));
+	//setGeometry ( r );  // simple code (which shouldn't work on X11, but does on KDE 3.x...)
+
 	m_normal_geometry = QRect ( pos ( ), size ( ));
 
 	setWindowState ( wstate & ( /*WindowMinimized |*/ WindowMaximized | WindowFullScreen ));
