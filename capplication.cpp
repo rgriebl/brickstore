@@ -15,6 +15,8 @@
 #include <qevent.h>
 #include <qdir.h>
 
+#include <qsaglobal.h>
+
 #if defined( Q_OS_UNIX )
 #include <sys/utsname.h>
 #endif
@@ -352,20 +354,58 @@ void CApplication::about ( )
 				"<td align=\"left\"><big>"
 					"<big><strong>%1</strong></big>"
 					"<br />%2<br />"
-					"<strong>%3</strong>"
+					"<strong>%3</strong> (<a href=\"brickstore-versioninfo\">%4</a>)"
 				"</big></td>"
 			"</tr></table>"
-			"<br />%4"
-		"</center>%5</qt>";
+			"<br />%5"
+		"</center>%6</qt>";
 
 	QString copyright = tr( "Copyright &copy; %1" ). arg ( BRICKSTORE_COPYRIGHT );
 	QString version   = tr( "Version %1" ). arg ( BRICKSTORE_VERSION );
 	QString support   = tr( "Visit %1, or send an email to %2" ). arg ( m_url ). arg ( m_mail );
 
-	QString text = QString ( layout_text ). arg ( appName ( )). arg ( copyright, version, support, tr( m_legal ));
+	QString text = QString ( layout_text ). arg ( appName ( )). arg ( copyright, version, tr( "More..." ), support ). arg ( tr( m_legal ));
+
+
+	// version-info popup
+
+	static const char *layout_text2 = 
+		"<qt type=\"detail\">"
+			"<strong>%1 %2</strong><br /><br />%3<br /><br /><br />"
+			"<table>"	
+				"<tr><td>libqt  </td><td>%4</td></tr>"
+				"<tr><td>libqsa </td><td>%5</td></tr>"
+				"<tr><td>libcurl</td><td>%6</td></tr>"
+				"<tr><td>libz   </td><td>%7</td></tr>"
+			"</table>"
+		"</qt>";
+
+	QString header = tr( "Built by user %1 on host %2 (%3 %4), using %5" ). arg ( __USER__, __HOST__, __DATE__, __TIME__ ). arg (
+#if defined( _MSC_VER )
+		"Microsoft Visual-C++ " + QString( _MSC_VER < 1200 ? "???" : 
+		                                 ( _MSC_VER < 1300 ? "6.0" : 
+										 ( _MSC_VER < 1310 ? ".NET" : 
+										 ( _MSC_VER < 1400 ? ".NET 2003" : "2005" ))))
+#elif defined( __GNUC__ )
+		"GCC " __VERSION__
+#else
+		"???"
+#endif
+		);
+
+	::curl_version_info_data *curlver = curl_version_info ( CURLVERSION_FIRST );
+	QString curl = curlver-> version;
+	QString z    = curlver-> libz_version;
+	QString qt   = qVersion ( );
+	QString qsa  = QSA_VERSION_STRING;
+
+	QString popup_text = QString ( layout_text2 ). arg ( appName ( ), version, header ). arg ( qt, qsa, curl, z );
+	QMimeSourceFactory::defaultFactory ( )-> setText ( "brickstore-versioninfo", popup_text );
 
 	DlgMessageImpl d ( appName ( ), text, false, mainWidget ( ));
 	d. exec ( );
+
+	QMimeSourceFactory::defaultFactory ( )-> setData ( "brickstore-versioninfo", 0 );
 }
 
 void CApplication::demoVersion ( )

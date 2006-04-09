@@ -44,9 +44,12 @@ MOC_DIR   = .moc
 UI_DIR    = .uic
 
 exists( .private-key ) {
-  win32:DEFINES += BS_REGKEY="\"$$system( type .private-key )\""
-  unix:DEFINES += BS_REGKEY="\"$$system( cat .private-key )\""
-} else {
+  win32:cat_cmd = type
+  unix:cat_cmd = cat
+
+  DEFINES += BS_REGKEY="\"$$system( $$cat_cmd .private-key )\""
+} 
+else {
   message( Building an OpenSource version )
 }
 
@@ -58,12 +61,16 @@ win32 {
   DEFINES += CURL_STATICLIB
   RC_FILE = brickstore.rc
   QMAKE_CXXFLAGS_DEBUG += /Od
+
+  DEFINES += __USER__="\"$$(USERNAME)\"" __HOST__="\"$$(COMPUTERNAME)\""
 }
 
 unix {
   system( scripts/update_version.sh $$RELEASE)
 
   OBJECTS_DIR = .obj  # grrr ... f***ing msvc.net doesn't link with this line present
+
+  DEFINES += __USER__="\"$$(USER)\"" __HOST__="\"$$system( hostname -s )\""
 }
 
 unix:!macx {

@@ -17,9 +17,9 @@
  */
 
 #ifdef _WINDOWS
-typedef uint32_t       unsigned int;  // unsigned 32 bit integer
-typedef uint8_t        unsigned char; // unsigned 8 bit integer (i.e., unsigned char)
-typedef int_least16_t  int;           // integer of >= 16 bits
+typedef unsigned int  uint32_t;      // unsigned 32 bit integer
+typedef unsigned char uint8_t;       // unsigned 8 bit integer (i.e., unsigned char)
+typedef int           int_least16_t; // integer of >= 16 bits
 
 #else
 #include <stdint.h>

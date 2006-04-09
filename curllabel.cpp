@@ -24,8 +24,8 @@ CUrlLabel::CUrlLabel ( QWidget *parent, const char *name )
 	: QTextBrowser ( parent, name )
 {
 	QPalette pal = palette ( );
-	pal. setColor ( QColorGroup::Text, pal. color ( QPalette::Inactive, QColorGroup::Foreground ));
-	pal. setBrush ( QColorGroup::Base, pal. brush ( QPalette::Inactive, QColorGroup::Background ));
+	pal. setColor ( QColorGroup::Text, pal. color ( QPalette::Active, QColorGroup::Foreground ));
+	pal. setBrush ( QColorGroup::Base, pal. brush ( QPalette::Active, QColorGroup::Background ));
 	setPalette ( pal );
 
 	setFocusPolicy( NoFocus );
@@ -45,7 +45,10 @@ CUrlLabel::~CUrlLabel ( )
 
 void CUrlLabel::setSource ( const QString &src )
 {
-	CUtility::openUrl ( src );
+	if ( src. find ( ':' ) > 0 )
+		CUtility::openUrl ( src );
+	else
+		QTextBrowser::setSource ( src );
 }
 
 QSize CUrlLabel::sizeHint ( ) const
