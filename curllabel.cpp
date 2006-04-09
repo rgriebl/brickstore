@@ -24,8 +24,12 @@ CUrlLabel::CUrlLabel ( QWidget *parent, const char *name )
 	: QTextBrowser ( parent, name )
 {
 	QPalette pal = palette ( );
-	pal. setColor ( QColorGroup::Text, pal. color ( QPalette::Active, QColorGroup::Foreground ));
-	pal. setBrush ( QColorGroup::Base, pal. brush ( QPalette::Active, QColorGroup::Background ));
+	pal. setColor ( QPalette::Active,   QColorGroup::Text, pal. color ( QPalette::Active,   QColorGroup::Foreground ));
+	pal. setBrush ( QPalette::Active,   QColorGroup::Base, pal. brush ( QPalette::Active,   QColorGroup::Background ));
+	pal. setColor ( QPalette::Inactive, QColorGroup::Text, pal. color ( QPalette::Inactive, QColorGroup::Foreground ));
+	pal. setBrush ( QPalette::Inactive, QColorGroup::Base, pal. brush ( QPalette::Inactive, QColorGroup::Background ));
+	pal. setColor ( QPalette::Disabled, QColorGroup::Text, pal. color ( QPalette::Disabled, QColorGroup::Foreground ));
+	pal. setBrush ( QPalette::Disabled, QColorGroup::Base, pal. brush ( QPalette::Disabled, QColorGroup::Background ));
 	setPalette ( pal );
 
 	setFocusPolicy( NoFocus );

@@ -59,8 +59,6 @@ private:
 	bool initBrickLink ( );
 	void exitBrickLink ( );
 
-	void initStrings ( );
-
 #if defined( Q_WS_MACX )
 	static OSErr appleEventHandler ( const AppleEvent *event, AppleEvent *, long );
 #endif
@@ -72,13 +70,6 @@ private:
 
 	QTranslator *m_trans_qt;
 	QTranslator *m_trans_brickstore;
-
-	QString m_sys_name;
-	QString m_sys_version;
-	QString m_url;
-	QString m_mail;
-	QString m_demo;
-	QString m_legal;
 };
 
 extern CApplication *cApp;

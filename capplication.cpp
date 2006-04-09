@@ -78,8 +78,6 @@ CApplication::CApplication ( const char *rebuild_db_only, int _argc, char **_arg
 	m_trans_qt = 0;
 	m_trans_brickstore = 0;
 
-	initStrings ( );
-
 	if ( !initBrickLink ( )) {
 		// we cannot call quit directly, since there is
 		// no event loop to quit from...
@@ -179,12 +177,51 @@ QString CApplication::appURL ( ) const
 
 QString CApplication::sysName ( ) const
 {
-	return m_sys_name;
+	QString sys_name = "(unknown)";
+
+#if defined( Q_OS_MACX )
+	sys_name = "MacOS";
+#elif defined( Q_OS_WIN )
+	sys_name = "Windows";
+#elif defined( Q_OS_UNIX )
+	sys_name = "Unix";
+#endif
+
+	return sys_name;
 }
 
 QString CApplication::sysVersion ( ) const
 {
-	return m_sys_version;
+	QString sys_version = "(unknown)";
+
+#if defined( Q_OS_MACX )
+	switch ( QApplication::macVersion ( )) {
+		case Qt::MV_10_DOT_0: sys_version = "10.0 (Cheetah)"; break;
+		case Qt::MV_10_DOT_1: sys_version = "10.1 (Puma)";    break;
+		case Qt::MV_10_DOT_2: sys_version = "10.2 (Jaguar)";  break;
+		case Qt::MV_10_DOT_3: sys_version = "10.3 (Panther)"; break;
+		case Qt::MV_10_DOT_4: sys_version = "10.4 (Tiger)";   break;
+		default             : break;
+	}
+#elif defined( Q_OS_WIN )
+	switch ( QApplication::winVersion ( )) {
+		case Qt::WV_95   : sys_version = "95";   break;
+		case Qt::WV_98   : sys_version = "98";   break;
+		case Qt::WV_Me   : sys_version = "ME";   break;
+		case Qt::WV_NT   : sys_version = "NT";   break;
+		case Qt::WV_2000 : sys_version = "2000"; break;
+		case Qt::WV_XP   : sys_version = "XP";   break;
+		case Qt::WV_2003 : sys_version = "2003"; break;
+		case Qt::WV_VISTA: sys_version = "VISTA"; break;
+		default          : break;
+	}
+#elif defined( Q_OS_UNIX )
+	struct ::utsname utsinfo;
+	if ( ::uname ( &utsinfo ) >= 0 )
+		sys_version = QString( utsinfo. sysname ) + " " + utsinfo. machine;
+#endif
+
+	return sys_version;
 }
 
 void CApplication::enableEmitOpenDocument ( bool b )
@@ -266,9 +303,42 @@ void CApplication::exitBrickLink ( )
 }
 
 
-void CApplication::initStrings ( )
+void CApplication::about ( )
 {
-	m_legal = QT_TR_NOOP(
+	static const char *layout =
+		"<qt>"
+			"<center>"
+				"<table border=\"0\"><tr>"
+					"<td valign=\"middle\" align=\"right\"><img src=\"brickstore-icon\" /></td>"
+					"<td align=\"left\"><big>"
+						"<big><strong>%1</strong></big>"
+						"<br />%2<br />"
+						"<strong>%3</strong>"
+					"</big></td>"
+				"</tr></table>"
+				"<br />%4<br /><br />"
+			"</center>"
+			"<table width=\"100%\">"
+				"<tr><td><hr /></td><td><nobr>%5</nobr></td><td><hr /></td></tr>"
+				"<tr><td colspan=\"3\" align=\"left\" valign=\"top\">%6</td></tr>"
+			"</table>"
+		"</qt>";
+
+
+	QString page1_link = QString( "<strong>%1</strong> - <a href=\"brickstore-info-page2\">%2</a>" ). arg( tr( "Legal Info" ), tr( "System Info" ));
+	QString page2_link = QString( "<a href=\"brickstore-info-page1\">%1</a> - <strong>%2</strong>" ). arg( tr( "Legal Info" ), tr( "System Info" ));
+
+	QString copyright = tr( "Copyright &copy; %1" ). arg ( BRICKSTORE_COPYRIGHT );
+	QString version   = tr( "Version %1" ). arg ( BRICKSTORE_VERSION );
+	QString support   = tr( "Visit %1, or send an email to %2" ). arg ( "<a href=\"http://" BRICKSTORE_URL "\">" BRICKSTORE_URL "</a>", "<a href=\"mailto:" BRICKSTORE_MAIL "\">" BRICKSTORE_MAIL "</a>" );
+
+	::curl_version_info_data *curlver = curl_version_info ( CURLVERSION_FIRST );
+	QString curl = curlver-> version;
+	QString z    = curlver-> libz_version;
+	QString qt   = qVersion ( );
+	QString qsa  = QSA_VERSION_STRING;
+
+	static const char *legal_src = QT_TR_NOOP(
 		"<p>"
 		"This program is free software; it may be distributed and/or modified "
 		"under the terms of the GNU General Public License version 2 as published "
@@ -294,93 +364,26 @@ void CApplication::initStrings ( )
 		"</p>"
 	);
 
-	m_demo = QT_TR_NOOP(
-		"This is an <b>unrestricted</b> demo version."
-		"<br /><br />"
-		"If you want to support the development of this program "
-		"(or if you just want to get rid of this dialog...), "
-		"check out %1 how to get the non-demo version." 
-	);
-
-	m_url  = "<a href=\"http://" BRICKSTORE_URL "\">" BRICKSTORE_URL "</a>";
-	m_mail = "<a href=\"mailto:" BRICKSTORE_MAIL "\">" BRICKSTORE_MAIL "</a>";
-
-	m_sys_name    = "(unknown)";
-	m_sys_version = "(unknown)";
-
-#if defined( Q_OS_MACX )
-	m_sys_name = "MacOS";
-
-	switch ( QApplication::macVersion ( )) {
-		case Qt::MV_10_DOT_0: m_sys_version = "10.0 (Cheetah)"; break;
-		case Qt::MV_10_DOT_1: m_sys_version = "10.1 (Puma)";    break;
-		case Qt::MV_10_DOT_2: m_sys_version = "10.2 (Jaguar)";  break;
-		case Qt::MV_10_DOT_3: m_sys_version = "10.3 (Panther)"; break;
-		case Qt::MV_10_DOT_4: m_sys_version = "10.4 (Tiger)";   break;
-		default             : break;
-	}
-
-#elif defined( Q_OS_WIN )
-	m_sys_name = "Windows";
-
-	switch ( QApplication::winVersion ( )) {
-		case Qt::WV_95  : m_sys_version = "95";   break;
-		case Qt::WV_98  : m_sys_version = "98";   break;
-		case Qt::WV_Me  : m_sys_version = "ME";   break;
-		case Qt::WV_NT  : m_sys_version = "NT";   break;
-		case Qt::WV_2000: m_sys_version = "2000"; break;
-		case Qt::WV_XP  : m_sys_version = "XP";   break;
-		case Qt::WV_2003: m_sys_version = "2003"; break;
-		default         : break;
-	}
-
-#elif defined( Q_OS_UNIX )
-	m_sys_name = "Unix";
-
-	struct ::utsname utsinfo;
-	if ( ::uname ( &utsinfo ) >= 0 )
-		m_sys_version = QString( utsinfo. sysname ) + " " + utsinfo. machine;
-
-#endif
-}
-
-
-void CApplication::about ( )
-{
-	static const char *layout_text =
-		"<qt><center>"
-			"<table border=\"0\"><tr>"
-				"<td valign=\"middle\" align=\"right\"><img src=\"brickstore-icon\" /></td>"
-				"<td align=\"left\"><big>"
-					"<big><strong>%1</strong></big>"
-					"<br />%2<br />"
-					"<strong>%3</strong> (<a href=\"brickstore-versioninfo\">%4</a>)"
-				"</big></td>"
-			"</tr></table>"
-			"<br />%5"
-		"</center>%6</qt>";
-
-	QString copyright = tr( "Copyright &copy; %1" ). arg ( BRICKSTORE_COPYRIGHT );
-	QString version   = tr( "Version %1" ). arg ( BRICKSTORE_VERSION );
-	QString support   = tr( "Visit %1, or send an email to %2" ). arg ( m_url ). arg ( m_mail );
-
-	QString text = QString ( layout_text ). arg ( appName ( )). arg ( copyright, version, tr( "More..." ), support ). arg ( tr( m_legal ));
-
-
-	// version-info popup
-
-	static const char *layout_text2 = 
-		"<qt type=\"detail\">"
-			"<strong>%1 %2</strong><br /><br />%3<br /><br /><br />"
+	static const char *technical_src = 
+		"<p>"
+			"<strong>Build Info</strong><br /><br />"
 			"<table>"	
-				"<tr><td>libqt  </td><td>%4</td></tr>"
-				"<tr><td>libqsa </td><td>%5</td></tr>"
-				"<tr><td>libcurl</td><td>%6</td></tr>"
-				"<tr><td>libz   </td><td>%7</td></tr>"
+				"<tr><td>User     </td><td>%1</td></tr>"
+				"<tr><td>Host     </td><td>%2</td></tr>"
+				"<tr><td>Date     </td><td>%3</td></tr>"
+				"<tr><td>Compiler </td><td>%4</td></tr>"
+			"</table><br />"
+			"<strong>Runtime Info</strong><br /><br />"
+			"<table>"	
+				"<tr><td>OS     </td><td>%5</td></tr>"
+				"<tr><td>libqt  </td><td>%6</td></tr>"
+				"<tr><td>libqsa </td><td>%7</td></tr>"
+				"<tr><td>libcurl</td><td>%8</td></tr>"
+				"<tr><td>libz   </td><td>%9</td></tr>"
 			"</table>"
-		"</qt>";
+		"</p>";
 
-	QString header = tr( "Built by user %1 on host %2 (%3 %4), using %5" ). arg ( __USER__, __HOST__, __DATE__, __TIME__ ). arg (
+	QString technical = QString ( technical_src ). arg ( __USER__, __HOST__, __DATE__ " " __TIME__ ). arg (
 #if defined( _MSC_VER )
 		"Microsoft Visual-C++ " + QString( _MSC_VER < 1200 ? "???" : 
 		                                 ( _MSC_VER < 1300 ? "6.0" : 
@@ -391,21 +394,21 @@ void CApplication::about ( )
 #else
 		"???"
 #endif
-		);
+		). arg ( sysName ( ) + " " + sysVersion ( )). arg ( qt, qsa, curl, z );
 
-	::curl_version_info_data *curlver = curl_version_info ( CURLVERSION_FIRST );
-	QString curl = curlver-> version;
-	QString z    = curlver-> libz_version;
-	QString qt   = qVersion ( );
-	QString qsa  = QSA_VERSION_STRING;
+	QString legal = tr( legal_src );
 
-	QString popup_text = QString ( layout_text2 ). arg ( appName ( ), version, header ). arg ( qt, qsa, curl, z );
-	QMimeSourceFactory::defaultFactory ( )-> setText ( "brickstore-versioninfo", popup_text );
+	QString page1 = QString ( layout ). arg ( appName ( ), copyright, version, support ). arg ( page1_link, legal );
+	QString page2 = QString ( layout ). arg ( appName ( ), copyright, version, support ). arg ( page2_link, technical );
 
-	DlgMessageImpl d ( appName ( ), text, false, mainWidget ( ));
+	QMimeSourceFactory::defaultFactory ( )-> setText ( "brickstore-info-page1", page1 );
+	QMimeSourceFactory::defaultFactory ( )-> setText ( "brickstore-info-page2", page2 );
+
+	DlgMessageImpl d ( appName ( ), page1, false, mainWidget ( ));
 	d. exec ( );
 
-	QMimeSourceFactory::defaultFactory ( )-> setData ( "brickstore-versioninfo", 0 );
+	QMimeSourceFactory::defaultFactory ( )-> setData ( "brickstore-info-page1", 0 );
+	QMimeSourceFactory::defaultFactory ( )-> setData ( "brickstore-info-page2", 0 );
 }
 
 void CApplication::demoVersion ( )
@@ -413,7 +416,7 @@ void CApplication::demoVersion ( )
 	if ( CConfig::inst ( )-> registration ( ) != CConfig::Demo )
 		return;
 
-	static const char *layout_text =
+	static const char *layout =
 		"<qt><center>"
 			"<table border=\"0\"><tr>"
 				"<td valign=\"middle\" align=\"right\"><img src=\"brickstore-icon\" /></td>"
@@ -426,10 +429,18 @@ void CApplication::demoVersion ( )
 			"<br />%4"
 		"</center</qt>";
 
+	static const char *demo_src = QT_TR_NOOP(
+		"This is an <b>unrestricted</b> demo version."
+		"<br /><br />"
+		"If you want to support the development of this program "
+		"(or if you just want to get rid of this dialog...), "
+		"check out %1 how to get the non-demo version." 
+	);
+
 	QString copyright = tr( "Copyright &copy; %1" ). arg ( BRICKSTORE_COPYRIGHT );
 	QString version   = tr( "Version %1" ). arg ( BRICKSTORE_VERSION );
-
-	QString text = QString ( layout_text ). arg ( appName ( ), copyright, version, tr( m_demo ). arg ( m_url ));
+	QString demo      = tr( demo_src ). arg ( "<a href=\"http://" BRICKSTORE_URL "\">" BRICKSTORE_URL "</a>" );
+	QString text      = QString ( layout ). arg ( appName ( ), copyright, version, demo );
 
 	DlgMessageImpl d ( appName ( ), text, true, mainWidget ( ));
 	d. exec ( );

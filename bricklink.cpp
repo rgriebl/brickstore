@@ -29,7 +29,10 @@
 #include "cutility.h"
 #include "bricklink.h"
 
-#define DEFAULT_DATABASE_NAME   "database.bin"
+#define STRINGIFY(x)  #x
+
+#define DEFAULT_DATABASE_VERSION  0
+#define DEFAULT_DATABASE_NAME     "database-v" STRINGIFY( DEFAULT_DATABASE_VERSION )
 
 
 QCString BrickLink::url ( UrlList u, const void *opt, const void *opt2 )
@@ -667,20 +670,21 @@ bool BrickLink::readDatabase ( const QString &fname )
 	m_databases. items. clear ( );
 
 	bool result = false;
-	stopwatch *sw = new stopwatch( "readDatabase" );
+	stopwatch *sw = 0; //new stopwatch( "readDatabase" );
 
 	CMappedFile f ( filename );
 	QDataStream *pds = f. open ( );
 
 	if ( pds ) {
 		QDataStream &ds = *pds;
-		ds. setByteOrder ( QDataStream::LittleEndian );
-
 		Q_UINT32 magic = 0, filesize = 0, version = 0;
+
 		ds >> magic >> filesize >> version;
 		
-		if (( magic != Q_UINT32( 0xb91c5703 )) || ( filesize != f. size ( )) || ( version != 0 ))
+		if (( magic != Q_UINT32( 0xb91c5703 )) || ( filesize != f. size ( )) || ( version != DEFAULT_DATABASE_VERSION ))
 			return false;
+
+		ds. setByteOrder ( QDataStream::LittleEndian );
 
 		// colors
 		Q_UINT32 colc = 0;
@@ -1434,10 +1438,11 @@ bool BrickLink::writeDatabase ( const QString &fname )
 	QFile f ( filename + ".new" );
 	if ( f. open ( IO_WriteOnly )) {
 		QDataStream ds ( &f );
+
+		ds << Q_UINT32( 0 /*magic*/ ) << Q_UINT32 ( 0 /*filesize*/ ) << Q_UINT32( DEFAULT_DATABASE_VERSION /*version*/ );
+		
 		ds. setByteOrder ( QDataStream::LittleEndian );
 
-		ds << Q_UINT32( 0 /*magic*/ ) << Q_UINT32 ( 0 /*filesize*/ ) << Q_UINT32( 0 /*version*/ );
-		
 		// colors
 		Q_UINT32 colc = m_databases. colors. count ( );
 		ds << colc;
@@ -1477,8 +1482,6 @@ bool BrickLink::writeDatabase ( const QString &fname )
 
 			if ( f. open ( IO_ReadWrite )) {
 				QDataStream ds2 ( &f );
-				ds2. setByteOrder ( QDataStream::LittleEndian );
-
 				ds2 << Q_UINT32( 0xb91c5703 ) << filesize;
 
 				if ( f. status ( ) == IO_Ok ) {
