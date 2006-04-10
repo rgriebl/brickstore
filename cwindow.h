@@ -140,6 +140,8 @@ public slots:
 	void showBLPriceGuide ( );
 	void showBLLotsForSale ( );
 	void showBLMyInventory ( );
+	
+	void saveDefaultColumnLayout ( );
 
 signals:
 	void selectionChanged ( const BrickLink::InvItemList & );

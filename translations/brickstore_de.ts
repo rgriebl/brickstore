@@ -99,6 +99,14 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
 &lt;p&gt;Alle anderen Warenzeichen, auch wenn nicht explizit erwähnt, werden als solche betrachtet.&lt;/p&gt;
 &lt;p&gt;Französische Übersetzung von Sylvain Perez (&lt;a href=&quot;mailto:bricklink@1001bricks.com&quot;&gt;1001bricks&lt;/a&gt;)&lt;/p&gt;</translation>
     </message>
+    <message>
+        <source>Legal Info</source>
+        <translation>Rechtliche Informationen</translation>
+    </message>
+    <message>
+        <source>System Info</source>
+        <translation>Systeminformationen</translation>
+    </message>
 </context>
 <context>
     <name>CChangeCmd</name>
@@ -899,6 +907,14 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
         <source>Registration...</source>
         <translation>Registrierung...</translation>
     </message>
+    <message>
+        <source>Save Column Layout as Default</source>
+        <translation>Spaltenlayout als Standard speichern</translation>
+    </message>
+    <message>
+        <source>Download activity indicator</source>
+        <translation>Anzeige der Downloadaktivität</translation>
+    </message>
 </context>
 <context>
     <name>CImportBLOrder</name>
@@ -1443,6 +1459,10 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <message>
         <source>Reset an active filter</source>
         <translation>Setze den aktiven Filter zurück</translation>
+    </message>
+    <message>
+        <source>[Image is loading]</source>
+        <translation>[Bild wird geladen]</translation>
     </message>
 </context>
 <context>
@@ -2180,11 +2200,11 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>-</source>
-        <translation>-</translation>
+        <translation type="obsolete">-</translation>
     </message>
     <message>
         <source>&gt;NNNN-NNNN;0</source>
-        <translation>&gt;NNNN-NNNN;0</translation>
+        <translation type="obsolete">&gt;NNNN-NNNN;0</translation>
     </message>
     <message>
         <source>Name</source>
@@ -2209,6 +2229,14 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <message>
         <source>&amp;Cancel</source>
         <translation>&amp;Abbrechen</translation>
+    </message>
+    <message>
+        <source>--</source>
+        <translation>--</translation>
+    </message>
+    <message>
+        <source>&gt;NNNN-NNNN-NNNN;0</source>
+        <translation>&gt;NNNN-NNNN-NNNN;0</translation>
     </message>
 </context>
 <context>

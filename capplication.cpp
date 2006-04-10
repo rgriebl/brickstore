@@ -320,17 +320,13 @@ void CApplication::about ( )
 						"<strong>%3</strong>"
 					"</big></td>"
 				"</tr></table>"
-				"<br />%4<br /><br />"
-			"</center>"
-			"<table width=\"100%\">"
-				"<tr><td><hr /></td><td><nobr>%5</nobr></td><td><hr /></td></tr>"
-				"<tr><td colspan=\"3\" align=\"left\" valign=\"top\">%6</td></tr>"
-			"</table>"
+				"<br />%4<br /><br />%5"
+			"</center>%6"
 		"</qt>";
 
 
-	QString page1_link = QString( "<strong>%1</strong> - <a href=\"brickstore-info-page2\">%2</a>" ). arg( tr( "Legal Info" ), tr( "System Info" ));
-	QString page2_link = QString( "<a href=\"brickstore-info-page1\">%1</a> - <strong>%2</strong>" ). arg( tr( "Legal Info" ), tr( "System Info" ));
+	QString page1_link = QString( "<strong>%1</strong> | <a href=\"brickstore-info-page2\">%2</a>" ). arg( tr( "Legal Info" ), tr( "System Info" ));
+	QString page2_link = QString( "<a href=\"brickstore-info-page1\">%1</a> | <strong>%2</strong>" ). arg( tr( "Legal Info" ), tr( "System Info" ));
 
 	QString copyright = tr( "Copyright &copy; %1" ). arg ( BRICKSTORE_COPYRIGHT );
 	QString version   = tr( "Version %1" ). arg ( BRICKSTORE_VERSION );

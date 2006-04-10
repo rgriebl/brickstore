@@ -150,8 +150,8 @@ CItemView::CItemView ( CDocument *doc, QWidget *parent, const char *name )
 	setGridMode ( true );
 
 	d-> m_lineedit = new QLineEdit ( viewport ( ));
-    d-> m_lineedit-> setFrameStyle ( QFrame::Box | QFrame::Plain );
-    d-> m_lineedit-> setLineWidth ( 1 );
+	d-> m_lineedit-> setFrameStyle ( QFrame::Box | QFrame::Plain );
+	d-> m_lineedit-> setLineWidth ( 1 );
 	d-> m_lineedit-> hide ( );
 	d-> m_lineedit-> installEventFilter ( this );
 
@@ -207,6 +207,8 @@ CItemView::CItemView ( CDocument *doc, QWidget *parent, const char *name )
 		if ( hidden )
 			hideColumn ( cid, ( hidden == 2 ));
 	}
+
+	loadDefaultLayout ( );
 
 	connect ( this, SIGNAL( doubleClicked ( QListViewItem *, const QPoint &, int )), this, SLOT( listItemDoubleClicked ( QListViewItem *, const QPoint &, int )));
 
@@ -269,6 +271,30 @@ CItemView::~CItemView ( )
 CDocument *CItemView::document ( ) const
 {
 	return d-> m_doc;
+}
+
+void CItemView::loadDefaultLayout ( )
+{
+	QMap <QString, QString> map;
+	QStringList sl = CConfig::inst ( )-> entryList ( "/ItemView/List" );
+
+	for ( QStringList::const_iterator it = sl. begin ( ); it != sl. end ( ); ++it ) {
+		QString val = CConfig::inst ( )-> readEntry ( "/ItemView/List/" + *it );
+
+		if ( val. contains ( "^e" ))
+			map [*it] = CConfig::inst ( )-> readListEntry ( "/ItemView/List/" + *it ). join ( "," );
+		else
+			map [*it] = val;
+	}
+	loadSettings ( map );
+}
+
+void CItemView::saveDefaultLayout ( )
+{
+	QMap<QString, QString> map = saveSettings ( );
+
+	for ( QMap<QString, QString>::const_iterator it = map. begin ( ); it != map. end ( ); ++it )
+		CConfig::inst ( )-> writeEntry ( "/ItemView/List/" + it. key ( ), it. data ( ));
 }
 
 QString CItemView::statusLabel ( BrickLink::InvItem::Status status )

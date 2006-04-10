@@ -189,7 +189,7 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 	m_menuid_edit = menuBar ( )-> insertItem ( QString ( ), createMenu ( sl ));
 
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Menubar/View" );
-	if ( sl. isEmpty ( ))  sl << "view_toolbar" << "view_infobar" << "view_statusbar" << "-" << "view_fullscreen" << "-" << "view_simple_mode" << "view_show_input_errors" << "-" << "view_difference_mode"; 
+	if ( sl. isEmpty ( ))  sl << "view_toolbar" << "view_infobar" << "view_statusbar" << "-" << "view_fullscreen" << "-" << "view_simple_mode" << "view_show_input_errors" << "view_difference_mode" << "-" << "view_save_default_col"; 
 	m_menuid_view = menuBar ( )-> insertItem ( QString ( ), createMenu ( sl ));
 
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Menubar/Extras" );
@@ -385,6 +385,7 @@ void CFrameWork::languageChange ( )
 		{ "view_fullscreen",                tr( "Full Screen" ),                        tr( "F11" ) },
 		{ "view_show_input_errors",         tr( "Show Input Errors" ),                  0 },
 		{ "view_difference_mode",           tr( "Difference Mode" ),                    0 },
+		{ "view_save_default_col",          tr( "Save Column Layout as Default" ),      0 },
 		{ "extras_update_database",         tr( "Update Database" ),                    0 },
 		{ "extras_configure",               tr( "Configure..." ),                       0 },
 		{ "extras_net_online",              tr( "Online Mode" ),                        0 },
@@ -636,6 +637,7 @@ QToolBar *CFrameWork::createToolBar ( const QString &label, const QStringList &a
 	sw1-> setFixedSize ( 4, 4 );
 
 	m_spinner = new CSpinner ( t, "spinner" );
+	QToolTip::add ( m_spinner, tr( "Download activity indicator" ));
 	m_spinner-> setPixmap ( CResource::inst ( )-> pixmap ( "spinner" ));
 	m_spinner-> show ( );
 
@@ -801,6 +803,8 @@ void CFrameWork::createActions ( )
 	connect ( a, SIGNAL( toggled ( bool )), CConfig::inst ( ), SLOT( setShowInputErrors ( bool )));
 
 	(void) new QAction ( this, "view_difference_mode", true );
+	
+	(void) new QAction ( this, "view_save_default_col" );
 
 	a = new QAction ( this, "extras_update_database" );
 	connect ( a, SIGNAL( activated ( )), this, SLOT( updateDatabase ( )));
@@ -1125,6 +1129,7 @@ void CFrameWork::connectAllActions ( bool do_connect, CWindow *window )
 	connectAction ( do_connect, "edit_bl_myinventory", window, SLOT( showBLMyInventory ( )));
 
 	connectAction ( do_connect, "view_difference_mode", window, SLOT( setDifferenceMode ( bool )), &CWindow::isDifferenceMode );
+	connectAction ( do_connect, "view_save_default_col", window, SLOT ( saveDefaultColumnLayout ( )));
 
 	updateAllToggleActions ( window );
 }

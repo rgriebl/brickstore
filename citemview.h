@@ -72,6 +72,9 @@ public slots:
 	void cancelEdit ( );
 	void terminateEdit ( bool commit );
 	void applyFilter ( const QString &filter, int field, bool is_regex );
+	
+	void loadDefaultLayout ( );
+	void saveDefaultLayout ( );
 
 signals:
 	void editDone ( CItemViewItem *ivi, int col, const QString &text, bool valid );
