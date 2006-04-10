@@ -119,26 +119,34 @@ public:
 	virtual const QPixmap *pixmap ( int col ) const
 	{
 		if (( col == 0 ) && ( m_viewmode == CSelectItem::ViewMode_ListWithImages )) {
-			if ( m_picture && (( m_picture-> item ( ) != m_item ) || ( m_picture-> color ( ) != m_item-> defaultColor ( )))) {
-				m_picture-> release ( );
-				m_picture = 0;
-			}
+			BrickLink::Picture *pic = picture ( );
 
-			if ( !m_picture && m_item && m_item-> defaultColor ( )) {
-				m_picture = BrickLink::inst ( )-> picture ( m_item, m_item-> defaultColor ( ));
-
-				if ( m_picture )
-					m_picture-> addRef ( );
-			}
-			if ( m_picture && m_picture-> valid ( )) {
+			if ( pic && pic-> valid ( )) {
 				static QPixmap val2ptr;
 			
-				val2ptr = m_picture-> pixmap ( );
+				val2ptr = pic-> pixmap ( );
 				return &val2ptr;
 			}
 		}
 		return 0;
 	}
+
+	BrickLink::Picture *picture ( ) const
+	{ 
+		if ( m_picture && (( m_picture-> item ( ) != m_item ) || ( m_picture-> color ( ) != m_item-> defaultColor ( )))) {
+			m_picture-> release ( );
+			m_picture = 0;
+		}
+
+		if ( !m_picture && m_item && m_item-> defaultColor ( )) {
+			m_picture = BrickLink::inst ( )-> picture ( m_item, m_item-> defaultColor ( ), true );
+
+			if ( m_picture )
+				m_picture-> addRef ( );
+		}
+		return m_picture; 
+	}
+
 
 	void setup ( )
 	{
@@ -234,6 +242,25 @@ public:
 		}
 	}
 
+	QString toolTip ( ) const
+	{
+		QString str = "<table><tr><td rowspan=\"2\">%1</td><td><b>%2</b></td></tr><tr><td>%3</td></tr></table>";
+		QString left_cell;
+
+		BrickLink::Picture *pic = picture ( );
+
+		if ( pic && pic-> valid ( )) {
+			QMimeSourceFactory::defaultFactory ( )-> setPixmap ( "add_item_tooltip_picture", pic-> pixmap ( ));
+			
+			left_cell = "<img src=\"add_item_tooltip_picture\" />";
+		}
+		else if ( pic && ( pic-> updateStatus ( ) == BrickLink::Updating )) {
+			left_cell = "<i>" + CSelectItem::tr( "[Image is loading]" ) + "</i>";
+		}
+
+		return str. arg( left_cell ). arg( m_item-> id ( )). arg( m_item-> name ( ));
+	}
+
 	const BrickLink::Item *item ( ) const
 	{ 
 		return m_item; 
@@ -245,6 +272,54 @@ private:
 	const bool &                  m_invonly;
 	mutable BrickLink::Picture *  m_picture;
 };
+
+
+class ItemListToolTip : public QObject, public QToolTip {
+	Q_OBJECT
+	
+public:
+	ItemListToolTip ( CListView *list )
+		: QObject ( list-> viewport ( )), QToolTip ( list-> viewport ( ), new QToolTipGroup ( list-> viewport ( ))), 
+		  m_list ( list ), m_tip_item ( 0 )
+	{ 
+		connect ( group ( ), SIGNAL( removeTip ( )), this, SLOT( tipHidden ( )));
+		
+		connect ( BrickLink::inst ( ), SIGNAL( pictureUpdated ( BrickLink::Picture * )), this, SLOT( pictureUpdated ( BrickLink::Picture * )));
+	}
+	
+	virtual ~ItemListToolTip ( )
+	{ }
+
+	void maybeTip ( const QPoint &pos )
+	{
+		if ( !parentWidget ( ) || !m_list )
+			return;
+
+		ItemListItem *item = static_cast <ItemListItem *> ( m_list-> itemAt ( pos ));
+	
+		if ( item ) {
+			m_tip_item = item;
+			tip ( m_list-> itemRect ( item ), item-> toolTip ( ));
+		}
+	}
+
+private slots:
+	void tipHidden ( )
+	{
+		m_tip_item = 0;
+	}
+	
+	void pictureUpdated ( BrickLink::Picture *pic )
+	{
+		if ( m_tip_item && m_tip_item-> picture ( ) == pic )
+			maybeTip ( parentWidget ( )-> mapFromGlobal ( QCursor::pos ( )));
+	}
+
+private:
+	CListView *m_list;
+	ItemListItem *m_tip_item;
+};
+
 
 
 class ItemIconItem : public QIconViewItem {
@@ -413,6 +488,7 @@ CSelectItem::CSelectItem ( QWidget *parent, const char *name, WFlags fl )
 	w_items-> setSortColumn ( 2 );
 	w_items-> setColumnWidthMode ( 0, QListView::Manual );
 	w_items-> setColumnWidth ( 0, 0 );
+	(void) new ItemListToolTip ( w_items );
 
 	w_thumbs = new QIconView ( w_stack );
 	w_stack-> addWidget ( w_thumbs );
@@ -977,3 +1053,4 @@ int CSelectItemDialog::exec ( const QRect &pos )
 	return QDialog::exec ( );
 }
 
+#include "cselectitem.moc"

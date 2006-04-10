@@ -30,8 +30,6 @@
 #include "cutility.h"
 #include "bricklink.h"
 
-#define STRINGIFY(x)  #x
-
 #define DEFAULT_DATABASE_VERSION  0
 #define DEFAULT_DATABASE_NAME     "database-v%1"
 
@@ -1498,7 +1496,7 @@ bool BrickLink::writeDatabase ( const QString &fname )
 	}
 	if ( f. isOpen ( ))
 		f. close ( );
-
+	
 	QFile::remove ( filename + ".new" );
 	return false;
 }

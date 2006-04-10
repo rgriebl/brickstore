@@ -57,19 +57,14 @@ public:
 		QString str = "<table><tr><td rowspan=\"2\">%1</td><td><b>%2</b></td></tr><tr><td>%3</td></tr></table>";
 		QString left_cell;
 
-		if ( !m_picture ) {
-			m_picture = BrickLink::inst ( )-> picture ( m_item, m_item-> defaultColor ( ), true );
+		BrickLink::Picture *pic = picture ( );
 
-			if ( m_picture )
-				m_picture-> addRef ( );
-		}
-
-		if ( m_picture && m_picture-> valid ( )) {
-			QMimeSourceFactory::defaultFactory ( )-> setPixmap ( "appears_in_set_tooltip_picture", m_picture-> pixmap ( ));
+		if ( pic && pic-> valid ( )) {
+			QMimeSourceFactory::defaultFactory ( )-> setPixmap ( "appears_in_set_tooltip_picture", pic-> pixmap ( ));
 			
 			left_cell = "<img src=\"appears_in_set_tooltip_picture\" />";
 		}
-		else if ( m_picture && ( m_picture-> updateStatus ( ) == BrickLink::Updating )) {
+		else if ( pic && ( pic-> updateStatus ( ) == BrickLink::Updating )) {
 			left_cell = "<i>" + CAppearsInWidget::tr( "[Image is loading]" ) + "</i>";
 		}
 
@@ -88,7 +83,15 @@ public:
 	{ return m_item; }
 
 	BrickLink::Picture *picture ( ) const
-	{ return m_picture; }
+	{ 
+		if ( !m_picture ) {
+			m_picture = BrickLink::inst ( )-> picture ( m_item, m_item-> defaultColor ( ), true );
+
+			if ( m_picture )
+				m_picture-> addRef ( );
+		}
+		return m_picture; 
+	}
 
 private:
 	int                         m_qty;
@@ -153,7 +156,6 @@ public:
 	const BrickLink::Color *m_color;
 	QPopupMenu *            m_popup;
 	QPtrList <QAction>      m_add_actions;
-	QToolTip *              m_tooltips;
 };
 
 CAppearsInWidget::CAppearsInWidget ( QWidget *parent, const char *name, WFlags /*fl*/ )
@@ -165,16 +167,15 @@ CAppearsInWidget::CAppearsInWidget ( QWidget *parent, const char *name, WFlags /
 	d-> m_color = 0;
 	d-> m_popup = 0;
 
-	setShowSortIndicator ( true );
+	setShowSortIndicator ( false );
 	setAlwaysShowSelection ( true );
-	header ( )-> setMovingEnabled ( false );
-	header ( )-> setResizeEnabled ( false );
 	addColumn ( QString ( ));
 	addColumn ( QString ( ));
 	addColumn ( QString ( ));
 	setResizeMode ( QListView::LastColumn );
+	header ( )-> setMovingEnabled ( false );
 
-	d-> m_tooltips = new AppearsInToolTip ( viewport ( ), this );
+	(void) new AppearsInToolTip ( viewport ( ), this );
 
 	connect ( this, SIGNAL( contextMenuRequested ( QListViewItem *, const QPoint &, int )), this, SLOT( showContextMenu ( QListViewItem *, const QPoint & )));
 	connect ( this, SIGNAL( returnPressed ( QListViewItem * )), this, SLOT( partOut ( )));
@@ -192,7 +193,6 @@ void CAppearsInWidget::languageChange ( )
 
 CAppearsInWidget::~CAppearsInWidget ( )
 {
-//	delete d-> m_tooltips;
 	delete d;
 }
 

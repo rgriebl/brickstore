@@ -26,8 +26,6 @@ public:
     ~DlgRegistrationImpl ( );
 
 protected:
-	virtual void resizeEvent ( QResizeEvent *e );
-	
 	virtual void accept ( );
 	virtual void reject ( );
 };

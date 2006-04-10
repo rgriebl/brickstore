@@ -71,20 +71,6 @@ DlgRegistrationImpl::DlgRegistrationImpl ( bool initial, QWidget *parent, const 
 DlgRegistrationImpl::~DlgRegistrationImpl ( )
 { }
 
-void DlgRegistrationImpl::resizeEvent ( QResizeEvent *e )
-{
-	DlgRegistration::resizeEvent ( e );
-
-	QPixmap p;
-	QSize s ( width ( ), w_personal-> height ( ));
-
-	p. convertFromImage ( CUtility::createGradient ( s, Qt::Horizontal, w_personal-> colorGroup ( ). base ( ), w_personal-> colorGroup ( ). background ( ), -30.f ));
-
-	w_personal-> setBackgroundPixmap ( p );
-	w_demo-> setBackgroundPixmap ( p );
-	w_full-> setBackgroundPixmap ( p );
-}
-
 void DlgRegistrationImpl::accept ( )
 {
 	QString name;
