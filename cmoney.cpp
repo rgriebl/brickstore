@@ -23,8 +23,6 @@
 #include <qdatastream.h>
 
 #if defined( Q_OS_MACX )
-// CFLocale support only started in 10.3
-#define MAC_OS_X_VERSION_MAX_ALLOWED  MAC_OS_X_VERSION_10_3
 
 #include <CoreFoundation/CFLocale.h>
 
@@ -131,14 +129,17 @@ CMoney::CMoney ( )
 #if defined( Q_OS_MACX )
 	// BSD and MACOSX don't have support for LC_MONETARY !!!
 
-	CFLocaleRef loc = CFLocaleCopyCurrent ( );
-	CFStringRef ds = (CFStringRef) CFLocaleGetValue ( loc, kCFLocaleDecimalSeparator );
-	CFStringRef cs = (CFStringRef) CFLocaleGetValue ( loc, kCFLocaleCurrencySymbol );
-	CFStringRef cc = (CFStringRef) CFLocaleGetValue ( loc, kCFLocaleCurrencyCode );
+	// we need at least 10.3 for CFLocale... stuff (weak import)
+	if ( CFLocaleCopyCurrent != 0  && CFLocaleGetValue != 0 ) {
+		CFLocaleRef loc = CFLocaleCopyCurrent ( );
+		CFStringRef ds = (CFStringRef) CFLocaleGetValue ( loc, kCFLocaleDecimalSeparator );
+		CFStringRef cs = (CFStringRef) CFLocaleGetValue ( loc, kCFLocaleCurrencySymbol );
+		CFStringRef cc = (CFStringRef) CFLocaleGetValue ( loc, kCFLocaleCurrencyCode );
 
-	decpoint = cfstring2qstring ( ds );
-	csymbol = cfstring2qstring ( cs );
-	csymbolint = cfstring2qstring ( cc );
+		decpoint = cfstring2qstring ( ds );
+		csymbol = cfstring2qstring ( cs );
+		csymbolint = cfstring2qstring ( cc );
+	}
 
 #else
 	::setlocale ( LC_ALL, "" );  // initialize C-locale to OS supplied values

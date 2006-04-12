@@ -242,7 +242,7 @@ SOURCES += dlgadditemimpl.cpp \
            dlgsettopgimpl.cpp \
            dlgsubtractitemimpl.cpp
 
-unix {
+unix:!macx {
   INCLUDEPATH += qsa/src/qsa
   LIBS += qsa/src/qsa/libqsa.a
 }
