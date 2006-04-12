@@ -18,7 +18,7 @@ if [ ! -d brickstore.app ]; then
 	exit 1
 fi
 
-pkg_ver=`awk '/^RELEASE *=/ { print $3; }' <brickstore.pro `
+pkg_ver=`awk '/^ *RELEASE *=/ { print $3; }' <brickstore.pro `
 [ $# = 1 ] && pkg_ver="$1"
 
 if [ -z $pkg_ver ]; then
@@ -27,7 +27,7 @@ if [ -z $pkg_ver ]; then
 fi
 
 bundle="BrickStore.app"
-archive="brickstore-$pkg_ver"
+archive="brickstore-`uname -m`-$pkg_ver"
 
 tmpdir="macx-bundle/$pkg_ver/tmp"
 
@@ -57,10 +57,18 @@ echo " > Fixing version information..."
 perl -pi -e "s/%\{version\}/$pkg_ver/g" "$tmpdir/$bundle/Contents/Info.plist"
 
 echo " > Stripping binaries in bundle..."
-strip $tmpdir/$bundle/Contents/MacOS/*
+strip -Sx $tmpdir/$bundle/Contents/MacOS/*
 
-echo " > Creating disk image $archive..."
-hdiutil create "macx-bundle/$pkg_ver/$archive.dmg" -volname "archive" -fs "HFS+" -srcdir "$tmpdir" -format UDZO -imagekey zlib-devel=9 -quiet
+if [ `uname -m` = i386 ]; then
+  compression="-format UDBZ"
+  comptype="BZ"
+else
+  compression="-format UDZO -imagekey zlib-level=9"
+  comptype="GZ"
+fi
+
+echo " > Creating disk image $archive ($comptype)..."
+hdiutil create "macx-bundle/$pkg_ver/$archive.dmg" -volname "archive" -fs "HFS+" -srcdir "$tmpdir" -quiet $compression
 rm -rf "$tmpdir"
 
 echo

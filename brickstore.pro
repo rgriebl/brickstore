@@ -106,9 +106,16 @@ unix:!macx {
 }
 
 macx {
-  CONFIG -= shared
-  # HACK, but we need the abs. path, since MacOS X already has an old 2.0.2 version in /usr/lib
-  LIBS += /usr/local/lib/libcurl.a
+  osx_minor = $$system( sw_vers -productVersion | awk -F. '{ print $2; }' )
+
+  system( test $$osx_minor -ge 4 ) {
+    LIBS += -lcurl
+  }
+  else {
+    # HACK, but we need the abs. path, since MacOS X <10.4 already has 
+    # an old 2.x version in /usr/lib ...
+    LIBS += /usr/local/lib/libcurl.a
+  }
 }
 
 lzma {
