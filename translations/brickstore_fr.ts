@@ -913,14 +913,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Comment...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Remark...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Retain in Inventory</source>
         <translation type="unfinished"></translation>
     </message>
@@ -962,6 +954,26 @@
     </message>
     <message>
         <source>Download activity indicator</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Comment</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Add to...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Remove from...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Remark</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2105,6 +2117,42 @@
     </message>
     <message>
         <source>Set Reservation on %1 Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Price Change on %1 Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Quantity Divide by %1 on %2 Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Quantity Multiply by %1 on %2 Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enter the text, that should be added to the remarks of all selected items:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Modified Remark on %1 Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enter the text, that should be removed from the remarks of all selected items:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enter the text, that should be added to the comments of all selected items:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Modified Comment on %1 Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enter the text, that should be removed from the comments of all selected items:</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

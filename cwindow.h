@@ -131,6 +131,10 @@ public slots:
 	void editStockroomNo ( );
 	void editStockroomToggle ( );	
 	void editReserved ( );
+	void addRemark ( );
+	void removeRemark ( );
+	void addComment ( );
+	void removeComment ( );
 	
 	void addItem ( BrickLink::InvItem *, uint );
 

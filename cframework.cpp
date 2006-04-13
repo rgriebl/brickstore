@@ -417,8 +417,14 @@ void CFrameWork::languageChange ( )
 		{ "edit_price_inc_dec",             tr( "Inc- or Decrease..." ),                tr( "Ctrl++", "Edit|Price|Inc/Dec" ) },
 		{ "edit_bulk",                      tr( "Bulk Quantity..." ),                   0 },
 		{ "edit_sale",                      tr( "Sale..." ),                            tr( "Ctrl+%", "Edit|Sale" ) },
-		{ "edit_comment",                   tr( "Comment..." ),                         0 },
-		{ "edit_remark",                    tr( "Remark..." ),                          0 },
+		{ "edit_comment",                   tr( "Comment" ),                            0 },
+		{ "edit_comment_set",               tr( "Set..." ),                             0 },
+		{ "edit_comment_add",               tr( "Add to..." ),                          0 },
+		{ "edit_comment_rem",               tr( "Remove from..." ),                     0 },
+		{ "edit_remark",                    tr( "Remark" ),                             0 },
+		{ "edit_remark_set",                tr( "Set..." ),                             0 },
+		{ "edit_remark_add",                tr( "Add to..." ),                          0 },
+		{ "edit_remark_rem",                tr( "Remove from..." ),                     0 },
 		{ "edit_retain",                    tr( "Retain in Inventory" ),                0 },
 		{ "edit_retain_yes",                tr( "Yes" ),                                0 },
 		{ "edit_retain_no",                 tr( "No" ),                                 0 },
@@ -758,8 +764,20 @@ void CFrameWork::createActions ( )
 
 	(void) new QAction ( g, "edit_bulk" );
 	(void) new QAction ( g, "edit_sale" );
-	(void) new QAction ( g, "edit_comment" );
-	(void) new QAction ( g, "edit_remark" );
+		
+	g2 = new QActionGroup ( g, "edit_comment", false );
+	g2-> setUsesDropDown ( true );
+	(void) new QAction ( g2, "edit_comment_set" );
+	g2-> addSeparator ( );
+	(void) new QAction ( g2, "edit_comment_add" );
+	(void) new QAction ( g2, "edit_comment_rem" );
+	
+	g2 = new QActionGroup ( g, "edit_remark", false );
+	g2-> setUsesDropDown ( true );
+	(void) new QAction ( g, "edit_remark_set" );
+	g2-> addSeparator ( );
+	(void) new QAction ( g, "edit_remark_add" );
+	(void) new QAction ( g, "edit_remark_rem" );
 	//tier
 
 	g2 = new QActionGroup ( g, "edit_retain", false );
@@ -1110,8 +1128,12 @@ void CFrameWork::connectAllActions ( bool do_connect, CWindow *window )
 
 	connectAction ( do_connect, "edit_bulk", window, SLOT( editBulk ( )));
 	connectAction ( do_connect, "edit_sale", window, SLOT( editSale ( )));
-	connectAction ( do_connect, "edit_comment", window, SLOT( editComment ( )));
-	connectAction ( do_connect, "edit_remark", window, SLOT( editRemark ( )));
+	connectAction ( do_connect, "edit_comment_set", window, SLOT( editComment ( )));
+	connectAction ( do_connect, "edit_comment_add", window, SLOT( addComment ( )));
+	connectAction ( do_connect, "edit_comment_rem", window, SLOT( removeComment ( )));
+	connectAction ( do_connect, "edit_remark_set", window, SLOT( editRemark ( )));
+	connectAction ( do_connect, "edit_remark_add", window, SLOT( addRemark ( )));
+	connectAction ( do_connect, "edit_remark_rem", window, SLOT( removeRemark ( )));
 
 	connectAction ( do_connect, "edit_retain_yes", window, SLOT( editRetainYes ( )));
 	connectAction ( do_connect, "edit_retain_no", window, SLOT( editRetainNo ( )));

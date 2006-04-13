@@ -798,6 +798,9 @@ void CWindow::editPriceIncDec ( )
 		double percent = dlg. percent ( );
 		double factor  = ( 1. + percent / 100. );
 		bool tiers     = dlg. applyToTiers ( );
+		uint incdeccount = 0;
+
+		CUndoCmd *macro = m_doc-> macroBegin ( );
 
 		CDisableUpdates disupd ( w_list );
 
@@ -822,7 +825,10 @@ void CWindow::editPriceIncDec ( )
 				}
 			}
 			m_doc-> changeItem ( pos, item );
+			incdeccount++;
 		}
+
+		m_doc-> macroEnd ( macro, tr( "Price Change on %1 Items" ). arg ( incdeccount ));
 	}
 }
 
@@ -846,6 +852,9 @@ void CWindow::editQtyDivide ( )
 				CMessageBox::information ( this, tr( "The quantities of %1 lots are not divisible without remainder by %2.<br /><br />Nothing has been modified." ). arg( lots_with_errors ). arg( divisor ));
 			}
 			else {
+				uint divcount = 0;
+				CUndoCmd *macro = m_doc-> macroBegin ( );
+				
 				CDisableUpdates disupd ( w_list );
 
 				foreach ( CDocument::Item *pos, m_doc-> selection ( )) {
@@ -853,7 +862,10 @@ void CWindow::editQtyDivide ( )
 
 					item. setQuantity ( item. quantity ( ) / divisor );
 					m_doc-> changeItem ( pos, item );
+					
+					divcount++;
 				}
+				m_doc-> macroEnd ( macro, tr( "Quantity Divide by %1 on %2 Items" ). arg ( divisor ). arg ( divcount ));
 			}
 		}
 	}
@@ -868,6 +880,9 @@ void CWindow::editQtyMultiply ( )
 
 	if ( CMessageBox::getInteger ( this, tr( "Multiply the quantities of all selected items with this factor." ), tr( "x" ), factor, new QIntValidator ( -1000, 1000, 0 ))) {
 		if (( factor <= 1 ) || ( factor > 1 )) {
+			uint mulcount = 0;
+			CUndoCmd *macro = m_doc-> macroBegin ( );
+			
 			CDisableUpdates disupd ( w_list );
 
 			foreach ( CDocument::Item *pos, m_doc-> selection ( )) {
@@ -875,7 +890,10 @@ void CWindow::editQtyMultiply ( )
 
 				item. setQuantity ( item. quantity ( ) * factor );
 				m_doc-> changeItem ( pos, item );
+				
+				mulcount++;
 			}
+			m_doc-> macroEnd ( macro, tr( "Quantity Multiply by %1 on %2 Items" ). arg ( factor ). arg ( mulcount ));
 		}
 	}
 }
@@ -926,6 +944,76 @@ void CWindow::editRemark ( )
 		setOrToggle<QString, const QString &>::set ( this, tr( "Set Remark on %1 Items" ), &CDocument::Item::remarks, &CDocument::Item::setRemarks, remarks );
 }
 
+void CWindow::addRemark ( )
+{
+	if ( m_doc-> selection ( ). isEmpty ( ))
+		return;
+
+	QString addremarks;
+	
+	if ( CMessageBox::getString ( this, tr( "Enter the text, that should be added to the remarks of all selected items:" ), addremarks )) {
+		uint remarkcount = 0;
+		CUndoCmd *macro = m_doc-> macroBegin ( );	                             
+	                             
+		CDisableUpdates disupd ( w_list );
+
+		foreach ( CDocument::Item *pos, m_doc-> selection ( )) {
+			QString str = pos-> remarks ( );
+			
+			if ( str. isEmpty ( ))
+				str = addremarks;
+			else if ( str. find ( QRegExp( "\\b" + QRegExp::escape ( addremarks ) + "\\b" )) != -1 )
+				;
+			else if ( addremarks. find ( QRegExp( "\\b" + QRegExp::escape ( str ) + "\\b" )) != -1 )
+				str = addremarks;
+			else			
+				str = str + " " + addremarks;
+			
+			if ( str != pos-> remarks ( )) {
+				CDocument::Item item = *pos;
+
+				item. setRemarks ( str );
+				m_doc-> changeItem ( pos, item );
+			
+				remarkcount++;
+			}
+		}
+		m_doc-> macroEnd ( macro, tr( "Modified Remark on %1 Items" ). arg ( remarkcount ));
+	}
+}
+
+void CWindow::removeRemark ( )
+{
+	if ( m_doc-> selection ( ). isEmpty ( ))
+		return;
+
+	QString remremarks;
+	
+	if ( CMessageBox::getString ( this, tr( "Enter the text, that should be removed from the remarks of all selected items:" ), remremarks )) {
+		uint remarkcount = 0;
+		CUndoCmd *macro = m_doc-> macroBegin ( );	                             
+	                             
+		CDisableUpdates disupd ( w_list );
+
+		foreach ( CDocument::Item *pos, m_doc-> selection ( )) {
+			QString str = pos-> remarks ( );
+			str. remove ( QRegExp( "\\b" + QRegExp::escape ( remremarks ) + "\\b" ));
+			str = str. simplifyWhiteSpace ( );
+			
+			if ( str != pos-> remarks ( )) {
+				CDocument::Item item = *pos;
+
+				item. setRemarks ( str );
+				m_doc-> changeItem ( pos, item );
+				
+				remarkcount++;
+			}
+		}
+		m_doc-> macroEnd ( macro, tr( "Modified Remark on %1 Items" ). arg ( remarkcount ));
+	}
+}
+
+
 void CWindow::editComment ( )
 {
 	if ( m_doc-> selection ( ). isEmpty ( ))
@@ -936,6 +1024,76 @@ void CWindow::editComment ( )
 	if ( CMessageBox::getString ( this, tr( "Enter the new comment for all selected items:" ), comments ))
 		setOrToggle<QString, const QString &>::set ( this, tr( "Set Comment on %1 Items" ), &CDocument::Item::comments, &CDocument::Item::setComments, comments );
 }
+
+void CWindow::addComment ( )
+{
+	if ( m_doc-> selection ( ). isEmpty ( ))
+		return;
+
+	QString addcomments;
+	
+	if ( CMessageBox::getString ( this, tr( "Enter the text, that should be added to the comments of all selected items:" ), addcomments )) {
+		uint commentcount = 0;
+		CUndoCmd *macro = m_doc-> macroBegin ( );	                             
+	                             
+		CDisableUpdates disupd ( w_list );
+
+		foreach ( CDocument::Item *pos, m_doc-> selection ( )) {
+			QString str = pos-> comments ( );
+			
+			if ( str. isEmpty ( ))
+				str = addcomments;
+			else if ( str. find ( QRegExp( "\\b" + QRegExp::escape ( addcomments ) + "\\b" )) != -1 )
+				;
+			else if ( addcomments. find ( QRegExp( "\\b" + QRegExp::escape ( str ) + "\\b" )) != -1 )
+				str = addcomments;
+			else			
+				str = str + " " + addcomments;
+			
+			if ( str != pos-> comments ( )) {
+				CDocument::Item item = *pos;
+
+				item. setComments ( str );
+				m_doc-> changeItem ( pos, item );
+			
+				commentcount++;
+			}
+		}
+		m_doc-> macroEnd ( macro, tr( "Modified Comment on %1 Items" ). arg ( commentcount ));
+	}
+}
+
+void CWindow::removeComment ( )
+{
+	if ( m_doc-> selection ( ). isEmpty ( ))
+		return;
+
+	QString remcomments;
+	
+	if ( CMessageBox::getString ( this, tr( "Enter the text, that should be removed from the comments of all selected items:" ), remcomments )) {
+		uint commentcount = 0;
+		CUndoCmd *macro = m_doc-> macroBegin ( );	                             
+	                             
+		CDisableUpdates disupd ( w_list );
+
+		foreach ( CDocument::Item *pos, m_doc-> selection ( )) {
+			QString str = pos-> comments ( );
+			str. remove ( QRegExp( "\\b" + QRegExp::escape ( remcomments ) + "\\b" ));
+			str = str. simplifyWhiteSpace ( );
+			
+			if ( str != pos-> comments ( )) {
+				CDocument::Item item = *pos;
+
+				item. setComments ( str );
+				m_doc-> changeItem ( pos, item );
+				
+				commentcount++;
+			}
+		}
+		m_doc-> macroEnd ( macro, tr( "Modified Comment on %1 Items" ). arg ( commentcount ));
+	}
+}
+
 
 void CWindow::editReserved ( )
 {

@@ -865,11 +865,11 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>Comment...</source>
-        <translation>Kommentar...</translation>
+        <translation type="obsolete">Kommentar...</translation>
     </message>
     <message>
         <source>Remark...</source>
-        <translation>Anmerkung...</translation>
+        <translation type="obsolete">Anmerkung...</translation>
     </message>
     <message>
         <source>Retain in Inventory</source>
@@ -914,6 +914,26 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <message>
         <source>Download activity indicator</source>
         <translation>Anzeige der Downloadaktivität</translation>
+    </message>
+    <message>
+        <source>Comment</source>
+        <translation>Kommentar</translation>
+    </message>
+    <message>
+        <source>Set...</source>
+        <translation>Setzen...</translation>
+    </message>
+    <message>
+        <source>Add to...</source>
+        <translation>Hinzufügen...</translation>
+    </message>
+    <message>
+        <source>Remove from...</source>
+        <translation>Entfernen...</translation>
+    </message>
+    <message>
+        <source>Remark</source>
+        <translation>Anmerkung</translation>
     </message>
 </context>
 <context>
@@ -1874,6 +1894,42 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <message>
         <source>Set Reservation on %1 Items</source>
         <translation>Reservierung für %1 Teile gesetzt</translation>
+    </message>
+    <message>
+        <source>Price Change on %1 Items</source>
+        <translation>Preisänderungen bei %1 Teilen</translation>
+    </message>
+    <message>
+        <source>Quantity Divide by %1 on %2 Items</source>
+        <translation>Mengen durch %1 bei %2 Teilen dividiert </translation>
+    </message>
+    <message>
+        <source>Quantity Multiply by %1 on %2 Items</source>
+        <translation>Mengen mit %1 bei %2 Teilen multipliziert</translation>
+    </message>
+    <message>
+        <source>Enter the text, that should be added to the remarks of all selected items:</source>
+        <translation>Geben Sie an, was zu den Anmerkungen aller ausgewählten Teile hinzugefügt werden soll:</translation>
+    </message>
+    <message>
+        <source>Modified Remark on %1 Items</source>
+        <translation>Anmerkung bei %1 Teilen geändert</translation>
+    </message>
+    <message>
+        <source>Enter the text, that should be removed from the remarks of all selected items:</source>
+        <translation>Geben Sie an, was von den Anmerkungen aller ausgewählten Teile entfernt werden soll:</translation>
+    </message>
+    <message>
+        <source>Enter the text, that should be added to the comments of all selected items:</source>
+        <translation>Geben Sie an, was zu den Kommentaren aller ausgewählten Teile hinzugefügt werden soll:</translation>
+    </message>
+    <message>
+        <source>Modified Comment on %1 Items</source>
+        <translation>Kommentar bei %1 Teilen geändert</translation>
+    </message>
+    <message>
+        <source>Enter the text, that should be removed from the comments of all selected items:</source>
+        <translation>Geben Sie an, was von den Kommentaren aller ausgewählten Teile entfernt werden soll:</translation>
     </message>
 </context>
 <context>
