@@ -27,7 +27,7 @@ if [ -z $pkg_ver ]; then
 fi
 
 bundle="BrickStore.app"
-archive="brickstore-`uname -m`-$pkg_ver"
+archive="BrickStore-`uname -m`-$pkg_ver"
 
 tmpdir="macx-bundle/$pkg_ver/tmp"
 

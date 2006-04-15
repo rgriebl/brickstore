@@ -21,7 +21,7 @@ IF NOT EXIST win32-installer (
 SET PKG_VER=
 
 
-IF EXIST brickstore.pro (FOR /F "usebackq tokens=3" %%V IN (`FINDSTR "^ *RELEASE *=" brickstore.pro`) DO SET PKG_VER=%%V)
+IF EXIST brickstore.pro (FOR /F "usebackq tokens=3" %%V IN (`FINDSTR /R /C:"^ *RELEASE *=" brickstore.pro`) DO SET PKG_VER=%%V)
 IF NOT "x%1" == "x" SET PKG_VER=%1
 
 IF "x%PKG_VER%" == "x" (

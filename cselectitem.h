@@ -18,18 +18,8 @@
 
 #include "bricklink.h"
 
-class CListView;
-class CItemTypeCombo;
 
-class QLabel;
-class QComboBox;
-class QToolButton;
-class QPushButton;
-class QPopupMenu;
-class QIconView;
-class QIconViewItem;
-class QListViewItem;
-class QWidgetStack;
+class CSelectItemPrivate;
 
 
 class CSelectItem : public QWidget {
@@ -82,28 +72,7 @@ private:
 	void ensureSelectionVisible ( );
 
 protected:
-	CItemTypeCombo *m_type_combo;
-
-	QLabel *w_item_types_label;
-	QComboBox *w_item_types;
-	CListView *w_categories;
-
-	QWidgetStack *w_stack;
-	CListView *w_items;
-	QIconView *w_thumbs;
-
-	QToolButton *w_goto;
-	QLabel *w_filter_label;
-	QToolButton *w_filter_clear;
-	QComboBox *w_filter_expression;
-
-	QToolButton *w_viewmode;
-	QPopupMenu *w_viewpopup;
-
-	ViewMode m_viewmode;
-	bool m_filter_active;
-	bool m_inv_only;
-	const BrickLink::Item *m_selected;
+	CSelectItemPrivate *d;
 };
 
 class CSelectItemDialog : public QDialog {

@@ -129,10 +129,17 @@ public:
 		}
 	}
 
+	void hideTip ( )
+	{
+		QToolTip::hide ( );
+		m_tip_item = 0; // tipHidden() doesn't get called immediatly
+	}
+
 private slots:
 	void tipHidden ( )
 	{
 		m_tip_item = 0;
+		qWarning("HIDDEN");
 	}
 	
 	void pictureUpdated ( BrickLink::Picture *pic )
@@ -156,6 +163,7 @@ public:
 	const BrickLink::Color *m_color;
 	QPopupMenu *            m_popup;
 	QPtrList <QAction>      m_add_actions;
+	AppearsInToolTip *      m_tip;
 };
 
 CAppearsInWidget::CAppearsInWidget ( QWidget *parent, const char *name, WFlags /*fl*/ )
@@ -175,7 +183,7 @@ CAppearsInWidget::CAppearsInWidget ( QWidget *parent, const char *name, WFlags /
 	setResizeMode ( QListView::LastColumn );
 	header ( )-> setMovingEnabled ( false );
 
-	(void) new AppearsInToolTip ( viewport ( ), this );
+	d-> m_tip = new AppearsInToolTip ( viewport ( ), this );
 
 	connect ( this, SIGNAL( contextMenuRequested ( QListViewItem *, const QPoint &, int )), this, SLOT( showContextMenu ( QListViewItem *, const QPoint & )));
 	connect ( this, SIGNAL( returnPressed ( QListViewItem * )), this, SLOT( partOut ( )));
@@ -246,6 +254,7 @@ QSize CAppearsInWidget::sizeHint ( ) const
 
 void CAppearsInWidget::setItem ( const BrickLink::Item *item, const BrickLink::Color *color )
 {
+	d-> m_tip-> hideTip ( );
 	clear ( );
 	d-> m_item = item;
 	d-> m_color = color;
