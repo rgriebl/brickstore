@@ -430,16 +430,15 @@ void CApplication::demoVersion ( )
 		"</center</qt>";
 
 	static const char *demo_src = QT_TR_NOOP(
-		"This is an <b>unrestricted</b> demo version."
+		"BrickStore is currently running in <b>Demo</b> mode.<br /><br />"
+		"The complete functionality is accessible, but this reminder will pop up every 20 minutes."
 		"<br /><br />"
-		"If you want to support the development of this program "
-		"(or if you just want to get rid of this dialog...), "
-		"check out %1 how to get the non-demo version." 
+		"You can change the mode of operation at anytime via <b>Help > Registration...</b>"
 	);
 
 	QString copyright = tr( "Copyright &copy; %1" ). arg ( BRICKSTORE_COPYRIGHT );
 	QString version   = tr( "Version %1" ). arg ( BRICKSTORE_VERSION );
-	QString demo      = tr( demo_src ). arg ( "<a href=\"http://" BRICKSTORE_URL "\">" BRICKSTORE_URL "</a>" );
+	QString demo      = tr( demo_src );
 	QString text      = QString ( layout ). arg ( appName ( ), copyright, version, demo );
 
 	DlgMessageImpl d ( appName ( ), text, true, mainWidget ( ));
@@ -457,6 +456,15 @@ void CApplication::checkForUpdates ( )
 
 void CApplication::registration ( )
 {
+	CConfig::Registration oldreg = CConfig::inst ( )-> registration ( );
+
 	DlgRegistrationImpl d ( false, mainWidget ( ));
-	d. exec ( );
+	if (( d. exec ( ) == QDialog::Accepted ) &&
+	    ( CConfig::inst ( )-> registration ( ) == CConfig::Demo ) &&
+		( CConfig::inst ( )-> registration ( ) != oldreg )) 
+	{
+		CMessageBox::information ( mainWidget ( ), tr( "The program has to be restarted to activate the Demo mode." ));
+		mainWidget ( )-> close ( );
+		quit ( );
+	}
 }

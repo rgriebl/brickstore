@@ -132,7 +132,7 @@
     </message>
     <message>
         <source>This is an &lt;b&gt;unrestricted&lt;/b&gt; demo version.&lt;br /&gt;&lt;br /&gt;If you want to support the development of this program (or if you just want to get rid of this dialog...), check out %1 how to get the non-demo version.</source>
-        <translation>Ceci est une version de démonstration aux fonctionnalités &lt;b&gt;non limitées&lt;/b&gt;.&lt;br /&gt;&lt;br /&gt;Mais si vous souhaitez aider au développement de ce programme (ou pour juste éviter cette boîte de dialogue...), alors consultez %1 afin de savoir comment obtenir la version non-démonstration.</translation>
+        <translation type="obsolete">Ceci est une version de démonstration aux fonctionnalités &lt;b&gt;non limitées&lt;/b&gt;.&lt;br /&gt;&lt;br /&gt;Mais si vous souhaitez aider au développement de ce programme (ou pour juste éviter cette boîte de dialogue...), alors consultez %1 afin de savoir comment obtenir la version non-démonstration.</translation>
     </message>
     <message>
         <source>Copyright &amp;copy; %1</source>
@@ -156,6 +156,14 @@
     </message>
     <message>
         <source>System Info</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>BrickStore is currently running in &lt;b&gt;Demo&lt;/b&gt; mode.&lt;br /&gt;&lt;br /&gt;The complete functionality is accessible, but this reminder will pop up every 20 minutes.&lt;br /&gt;&lt;br /&gt;You can change the mode of operation at anytime via &lt;b&gt;Help &gt; Registration...&lt;/b&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The program has to be restarted to activate the Demo mode.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

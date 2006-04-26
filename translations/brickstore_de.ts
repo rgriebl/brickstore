@@ -86,7 +86,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>This is an &lt;b&gt;unrestricted&lt;/b&gt; demo version.&lt;br /&gt;&lt;br /&gt;If you want to support the development of this program (or if you just want to get rid of this dialog...), check out %1 how to get the non-demo version.</source>
-        <translation>Dies ist eine Demoversion &lt;b&gt;ohne Einschränkungen&lt;/b&gt;.&lt;br /&gt;&lt;br /&gt;Wenn Sie die Weiterentwicklung dieses Programmes unterstützen wollen (oder einfach nur dieses Fenster loswerden wollen...), dann sehen Sie auf %1 nach, wie Sie zu einer Nicht-Demoversion kommen.</translation>
+        <translation type="obsolete">Dies ist eine Demoversion &lt;b&gt;ohne Einschränkungen&lt;/b&gt;.&lt;br /&gt;&lt;br /&gt;Wenn Sie die Weiterentwicklung dieses Programmes unterstützen wollen (oder einfach nur dieses Fenster loswerden wollen...), dann sehen Sie auf %1 nach, wie Sie zu einer Nicht-Demoversion kommen.</translation>
     </message>
     <message>
         <source>&lt;p&gt;This program is free software; it may be distributed and/or modified under the terms of the GNU General Public License version 2 as published by the Free Software Foundation and appearing in the file LICENSE.GPL included in this software package.&lt;br /&gt;This program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.&lt;br /&gt;See &lt;a href=&quot;http://fsf.org/licensing/licenses/gpl.html&quot;&gt;www.fsf.org/licensing/licenses/gpl.html&lt;/a&gt; for GPL licensing information.&lt;/p&gt;&lt;p&gt;All data from &lt;a href=&quot;http://www.bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; is owned by BrickLink&lt;sup&gt;TM&lt;/sup&gt;, which is a trademark of Dan Jezek.&lt;/p&gt;&lt;p&gt;Peeron Inventories from &lt;a href=&quot;http://www.peeron.com&quot;&gt;www.peeron.com&lt;/a&gt; are owned by Dan and Jennifer Boger.&lt;/p&gt;&lt;p&gt;LEGO&lt;sup&gt;&amp;reg;&lt;/sup&gt; is a trademark of the LEGO group of companies, which does not sponsor, authorize or endorse this software.&lt;/p&gt;&lt;p&gt;All other trademarks recognised.&lt;/p&gt;&lt;p&gt;French translation by Sylvain Perez (&lt;a href=&quot;mailto:bricklink@1001bricks.com&quot;&gt;1001bricks&lt;/a&gt;)&lt;/p&gt;</source>
@@ -106,6 +106,14 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <message>
         <source>System Info</source>
         <translation>Systeminformationen</translation>
+    </message>
+    <message>
+        <source>BrickStore is currently running in &lt;b&gt;Demo&lt;/b&gt; mode.&lt;br /&gt;&lt;br /&gt;The complete functionality is accessible, but this reminder will pop up every 20 minutes.&lt;br /&gt;&lt;br /&gt;You can change the mode of operation at anytime via &lt;b&gt;Help &gt; Registration...&lt;/b&gt;</source>
+        <translation>BrickStore läuft momentan im &lt;b&gt;Demo&lt;/b&gt; Modus.&lt;br /&gt;&lt;br /&gt;Die gesamte Funktionalität steht zur Verfügung - es erscheint jedoch diese Erinnerung alle 20 Minuten.&lt;br /&gt;&lt;br /&gt;Der Betriebsmodus kann jederzeit geändert werden: &lt;b&gt;Hilfe &gt; Registrierung...&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>The program has to be restarted to activate the Demo mode.</source>
+        <translation>Das Programm muß neu gestartet werden, um den Demo Modus zu aktivieren.</translation>
     </message>
 </context>
 <context>

@@ -109,8 +109,8 @@ QSize CReportJob::paperSize ( ) const
 void CReportJob::dump ( )
 {
 	qDebug( "Print Job Dump" );
-	qDebug( " # of pages: %d", m_pages. count ( ));
-	qDebug( "" );
+	qDebug( " # of pages: %d", int( m_pages. count ( )));
+	qDebug( " " );
 
 	for ( uint i = 0; i < m_pages. count ( ); i++ ) {
 		qDebug ( "Page #%d", i );
@@ -178,15 +178,15 @@ int CReportPage::pageNumber ( ) const
 
 void CReportPage::dump ( )
 {
-	qDebug( " # of commands: %d", m_cmds. count ( ));
-	qDebug( "" );
+	qDebug( " # of commands: %d", int( m_cmds. count ( )));
+	qDebug( " " );
 
 	for ( uint i = 0; i < m_cmds. count ( ); i++ ) {
 		switch ( m_cmds. at ( i )-> m_cmd ) {
 			case Cmd::Attributes: {
 				AttrCmd *ac = static_cast<AttrCmd *> ( m_cmds. at ( i ));
 
-				qDebug ( " [%d] Attributes (Font: %s | Color: %s | BgColor: %s | Line: %f | LineStyle: %d", i, ac-> m_font.toString().latin1(), ac-> m_color.name(), ac-> m_bgcolor.name(), ac-> m_linewidth, ac-> m_linestyle );
+				qDebug ( " [%d] Attributes (Font: %s | Color: %s | BgColor: %s | Line: %f | LineStyle: %d", i, ac-> m_font. toString ( ). latin1 ( ), ac-> m_color. name ( ). latin1 ( ), ac-> m_bgcolor. name ( ). latin1 ( ), ac-> m_linewidth, ac-> m_linestyle );
 				break;
 			}
 			case Cmd::Text:  {
@@ -195,32 +195,32 @@ void CReportPage::dump ( )
 				if ( dc-> m_w == -1 && dc-> m_h == -1 )
 					qDebug ( " [%d] Text (%f,%f), \"%s\"", i, dc-> m_x, dc-> m_y, dc-> m_p2. toString ( ). latin1 ( ));
 				else
-					qDebug ( " [%d] Text (%f,%f - %fx%f), align: %d, \"%s\"", i, dc->m_x, dc->m_y,dc->m_w,dc->m_h, dc->m_p1.toInt(), dc-> m_p2. toString ( ). latin1 ( ));
+					qDebug ( " [%d] Text (%f,%f - %fx%f), align: %d, \"%s\"", i, dc-> m_x, dc-> m_y, dc-> m_w, dc-> m_h, dc-> m_p1. toInt ( ), dc-> m_p2. toString ( ). latin1 ( ));
 
 				break;
 			}
 			case Cmd::Line: {
 				DrawCmd *dc = static_cast<DrawCmd *> ( m_cmds. at ( i ));
 
-				qDebug ( " [%d] Line (%f,%f - %f,%f)", i, dc->m_x, dc->m_y,dc->m_w,dc->m_h );
+				qDebug ( " [%d] Line (%f,%f - %f,%f)", i, dc-> m_x, dc-> m_y, dc-> m_w, dc-> m_h );
 				break;
 			}
 			case Cmd::Rect: {
 				DrawCmd *dc = static_cast<DrawCmd *> ( m_cmds. at ( i ));
 
-				qDebug ( " [%d] Rectangle (%f,%f - %fx%f)", i, dc->m_x, dc->m_y,dc->m_w,dc->m_h );
+				qDebug ( " [%d] Rectangle (%f,%f - %fx%f)", i, dc-> m_x, dc-> m_y, dc-> m_w, dc-> m_h );
 				break;
 			}
 			case Cmd::Ellipse: {
 				DrawCmd *dc = static_cast<DrawCmd *> ( m_cmds. at ( i ));
 
-				qDebug ( " [%d] Ellipse (%f,%f - %fx%f)", i, dc->m_x, dc->m_y,dc->m_w,dc->m_h );
+				qDebug ( " [%d] Ellipse (%f,%f - %fx%f)", i, dc-> m_x, dc-> m_y, dc-> m_w, dc-> m_h );
 				break;
 			}
 			case Cmd::Pixmap: {
 				DrawCmd *dc = static_cast<DrawCmd *> ( m_cmds. at ( i ));
 
-				qDebug ( " [%d] Pixmap (%f,%f - %fx%f)", i, dc->m_x, dc->m_y,dc->m_w,dc->m_h );
+				qDebug ( " [%d] Pixmap (%f,%f - %fx%f)", i, dc-> m_x, dc-> m_y, dc-> m_w, dc-> m_h );
 				break;
 			}
 		}
@@ -290,6 +290,9 @@ void CReportPage::print ( QPainter *p, double scale [2] )
 					p-> drawPixmap ( dr, pix );
 					break;
 				}
+
+				case Cmd::Attributes:
+					break;
 			}
 		}
 	}

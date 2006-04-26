@@ -83,7 +83,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>This is an &lt;b&gt;unrestricted&lt;/b&gt; demo version.&lt;br /&gt;&lt;br /&gt;If you want to support the development of this program (or if you just want to get rid of this dialog...), check out %1 how to get the non-demo version.</source>
+        <source>BrickStore is currently running in &lt;b&gt;Demo&lt;/b&gt; mode.&lt;br /&gt;&lt;br /&gt;The complete functionality is accessible, but this reminder will pop up every 20 minutes.&lt;br /&gt;&lt;br /&gt;You can change the mode of operation at anytime via &lt;b&gt;Help &gt; Registration...&lt;/b&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The program has to be restarted to activate the Demo mode.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

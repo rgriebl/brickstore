@@ -67,6 +67,7 @@ DlgAddItemImpl::DlgAddItemImpl ( QWidget *parent, const char *name, bool modal, 
 
 	w_appears_in-> setFrameStyle ( QFrame::StyledPanel | QFrame::Sunken );
 	w_appears_in-> setLineWidth ( 2 );
+	w_appears_in-> hide ( );
 
 	w_toggle_appears_in-> setPixmap ( CResource::inst ( )-> pixmap ( "sidebar/appearsin" ));
 	

@@ -139,7 +139,6 @@ private slots:
 	void tipHidden ( )
 	{
 		m_tip_item = 0;
-		qWarning("HIDDEN");
 	}
 	
 	void pictureUpdated ( BrickLink::Picture *pic )
