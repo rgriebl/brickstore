@@ -9,6 +9,7 @@ macx-bundle/Resources/*.icns			Contents/Resources
 macx-bundle/Resources/en.lproj/locversion.plist	Contents/Resources/en.lproj
 macx-bundle/Resources/de.lproj/locversion.plist	Contents/Resources/de.lproj
 macx-bundle/Resources/fr.lproj/locversion.plist	Contents/Resources/fr.lproj
+macx-bundle/Resources/nl.lproj/locversion.plist	Contents/Resources/nl.lproj
 
 images/*.png			Contents/Resources/images
 images/*.jpg			Contents/Resources/images
@@ -20,7 +21,9 @@ images/22x22/*.png		Contents/Resources/images/22x22
 translations/translations.xml	Contents/Resources/translations
 translations/*_de.qm		Contents/Resources/translations
 translations/*_fr.qm		Contents/Resources/translations
+translations/*_nl.qm		Contents/Resources/translations
 $QTDIR/translations/*_de.qm	Contents/Resources/translations
 $QTDIR/translations/*_fr.qm	Contents/Resources/translations
+$QTDIR/translations/*_nl.qm	Contents/Resources/translations
 
 print-templates/*.xml		Contents/Resources/print-templates

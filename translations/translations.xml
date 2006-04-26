@@ -5,18 +5,28 @@
 		<name>English</name>
 		<name lang="de">Englisch</name>
 		<name lang="fr">Anglais</name>
+		<name lang="nl">Engels</name>
 	</translation>
 
 	<translation lang="de">
 		<name>German</name>
 		<name lang="de">Deutsch</name>
 		<name lang="fr">Allemand</name>
+		<name lang="nl">Duits</name>
 	</translation>
 
 	<translation lang="fr">
 		<name>French</name>
 		<name lang="de">Französisch</name>
 		<name lang="fr">Français</name>
+		<name lang="nl">Frans</name>
+	</translation>
+
+	<translation lang="nl">
+		<name>Dutch</name>
+		<name lang="de">Holländisch</name>
+		<name lang="fr">Hollandais</name>
+		<name lang="nl">Nederlands</name>
 	</translation>
 
 </translations>
