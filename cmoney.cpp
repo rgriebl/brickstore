@@ -69,6 +69,17 @@ money_t money_t::fromLocalizedString ( const QString &str )
 	return CMoney::inst ( )-> toMoney ( str );
 }
 
+QMap<QString, QVariant> money_t::toScriptObject ( ) const
+{
+	QMap<QString, QVariant> so;
+	so ["dollar"]     = toDouble ( );
+	so ["local"]      = toDouble ( ) * CMoney::inst ( )-> factor ( );
+	so ["formatted"]  = toLocalizedString ( false );
+	so ["formatted2"] = toLocalizedString ( true );
+	return so;
+}
+	
+
 
 class CMoneyData : public QObject {
 public:

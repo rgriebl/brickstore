@@ -13,6 +13,7 @@
 */
 #include <stdlib.h>
 #include <limits.h>
+#include <locale.h>
 
 #include <qapplication.h>
 #include <qfile.h>
@@ -31,65 +32,18 @@
 
 #include "reportobjects.h"
 
-
 namespace {
 
-static int mm2pt ( int mm )
+static inline QSArgument evaluate ( QSInterpreter *interp, const QString &code, QObject *context = 0, const QString &scriptName = QString::null )
 {
-	return int( mm * 72.0 / 25.4 );
+	QCString oldloc = ::setlocale ( LC_ALL, 0 );
+	::setlocale ( LC_ALL, "C" );
+	QSArgument res = interp-> evaluate ( code, context, scriptName );
+	::setlocale ( LC_ALL, oldloc );
+	return res;
 }
 
-static int parseUnit ( const QString &str )
-{
-	float scale = 1.f;
-
-	QString unit = str. right ( 2 );
-	bool use_unit = true;
-
-	if ( unit == "pt" )
-		scale = 1.f;
-	else if ( unit == "cm" )
-		scale = 72.f * 1.f / 2.54f;
-	else if ( unit == "mm" )
-		scale = 72.f * .1f * ( 1.f / 2.54f );
-	else if ( unit == "in" )
-		scale = 72.f;
-	else
-		use_unit = false;
-
-	return int( scale * ( use_unit ? str. left ( str. length ( ) - 2 ) : str ). toFloat ( ));
 }
-
-static QRect pt2px ( const QRect &r, const float s [2] )
-{
-	return QRect ( int( r. x ( ) * s [0] ), int( r. y ( ) * s [1] ), int( r. width ( ) * s [0] ), int( r. height ( ) * s [1] ));
-}
-
-static int pt2px ( int p, float s )
-{
-	return int( p * s );
-}
-
-static int px2pt ( int p, float s )
-{
-	return int( p / s );
-}
-
-#if 0
-QSize CReport::pageSizePt ( ) const
-{
-	if ( d-> m_pagesize == QPrinter::A4 )
-		return QSize ( mm2pt ( 210 ), mm2pt ( 297 ));
-	else if ( d-> m_pagesize == QPrinter::Letter )
-		return QSize ( mm2pt ( 216 ), mm2pt ( 279 ));
-	else
-		return QSize ( );
-}
-#endif
-
-
-} // namespace
-
 
 CReport::CReport ( )
 {
@@ -131,7 +85,9 @@ bool CReport::load ( const QString &filename )
 		d-> m_code = ts. read ( );
 
 		d-> m_interpreter = new QSInterpreter ( this, "report_interpreter" );
-		d-> m_interpreter-> evaluate ( d-> m_code, 0, filename );
+		d-> m_interpreter-> addObjectFactory ( new QSInputDialogFactory ( ));
+
+		evaluate ( d-> m_interpreter, d-> m_code, 0, fi. baseName ( ));
 
 		if ( !d-> m_interpreter-> hadError ( )) {
 			d-> m_name = fi. baseName ( );
@@ -140,8 +96,6 @@ bool CReport::load ( const QString &filename )
 				QSArgument res = d-> m_interpreter-> call ( "load" );
 
 				if ( !d-> m_interpreter-> hadError ( )) {	
-					d-> m_interpreter-> addObjectFactory ( new QSInputDialogFactory ( ));
-
 					d-> m_loaded = fi. lastModified ( ). toTime_t ( );
 				}
 			}
@@ -153,25 +107,23 @@ bool CReport::load ( const QString &filename )
 	return ( d-> m_loaded >= 0 );
 }
 
-void CReport::print ( QPainter *p, const CDocument *doc, const CDocument::ItemList &items ) const
+void CReport::print ( QPaintDevice *pd, const CDocument *doc, const CDocument::ItemList &items ) const
 {
 	CDocument::Statistics stat = doc-> statistics ( items );
 
 	QMap<QString, QVariant> docmap;
-	docmap ["filename"] = doc-> fileName ( );
+	docmap ["fileName"] = doc-> fileName ( );
 	docmap ["title"]    = doc-> title ( );
 
 	QMap<QString, QVariant> statmap;
 	statmap ["errors"]   = stat. errors ( );
 	statmap ["items"]    = stat. items ( );
 	statmap ["lots"]     = stat. lots ( );
-	statmap ["minvalue"] = stat. minValue ( ). toCString ( );
-	statmap ["value"]    = stat. value ( ). toCString ( );
+	statmap ["minValue"] = stat. minValue ( ). toScriptObject ( );
+	statmap ["value"]    = stat. value ( ). toScriptObject ( );
 	statmap ["weight"]   = stat. weight ( );
 
 	docmap ["statistics"] = statmap;
-
-
 
 	if ( doc-> order ( )) {
 		const BrickLink::Order *order = doc-> order ( );
@@ -180,13 +132,13 @@ void CReport::print ( QPainter *p, const CDocument *doc, const CDocument::ItemLi
 		ordermap ["id"]           = order-> id ( );
 		ordermap ["type"]         = ( order-> type ( ) == BrickLink::Order::Placed ? "P" : "R" );
 		ordermap ["date"]         = order-> date ( ). toString ( Qt::TextDate );
-		ordermap ["statuschange"] = order-> statusChange ( );
+		ordermap ["statusChange"] = order-> statusChange ( );
 		ordermap ["buyer"]        = order-> buyer ( );
-		ordermap ["shipping"]     = order-> shipping ( ). toCString ( );
-		ordermap ["insurance"]    = order-> insurance ( ). toCString ( );
-		ordermap ["delivery"]     = order-> delivery ( ). toCString ( );
-		ordermap ["credit"]       = order-> credit ( ). toCString ( );
-		ordermap ["grandtotal"]   = order-> grandTotal ( ). toCString ( );
+		ordermap ["shipping"]     = order-> shipping ( ). toScriptObject ( );
+		ordermap ["insurance"]    = order-> insurance ( ). toScriptObject ( );
+		ordermap ["delivery"]     = order-> delivery ( ). toScriptObject ( );
+		ordermap ["credit"]       = order-> credit ( ). toScriptObject ( );
+		ordermap ["grandTotal"]   = order-> grandTotal ( ). toScriptObject ( );
 		ordermap ["status"]       = order-> status ( );
 		ordermap ["payment"]      = order-> payment ( );
 		ordermap ["remarks"]      = order-> remarks ( );
@@ -199,33 +151,85 @@ void CReport::print ( QPainter *p, const CDocument *doc, const CDocument::ItemLi
 	foreach ( CDocument::Item *item, items ) {
 		QMap<QString, QVariant> imap;
 
-		imap ["id"]       = item-> item ( )-> id ( );
-		imap ["name"]     = item-> item ( )-> name ( );
-		imap ["quantity"] = item-> quantity ( );
+		imap ["id"]        = item-> item ( )-> id ( );
+		imap ["name"]      = item-> item ( )-> name ( );
 
-		QMap<QString, QVariant> colormap;
-		colormap ["id"]   = item-> color ( ) ? (int) item-> color ( )-> id ( ) : -1;
-		colormap ["name"] = item-> color ( ) ? item-> color ( )-> name ( ) : "";
-		colormap ["rgb"]  = item-> color ( ) ? item-> color ( )-> color ( ) : QColor ( );
-		imap ["color"] = colormap;
+		BrickLink::Picture *pic = BrickLink::inst ( )-> picture ( item-> item ( ), item-> color ( ), true );
+		imap ["picture"]   = pic ? pic-> pixmap ( ) : QPixmap ( );
+
+		QMap<QString, QVariant> status;
+		status ["include"] = ( item-> status ( ) == BrickLink::InvItem::Include );
+		status ["exclude"] = ( item-> status ( ) == BrickLink::InvItem::Exclude );
+		status ["extra"]   = ( item-> status ( ) == BrickLink::InvItem::Extra );
+		imap ["status"]    = status;
+
+		imap ["quantity"]  = item-> quantity ( );
+
+		QMap<QString, QVariant> color;
+		color ["id"]       = item-> color ( ) ? (int) item-> color ( )-> id ( ) : -1;
+		color ["name"]     = item-> color ( ) ? item-> color ( )-> name ( ) : "";
+		color ["rgb"]      = item-> color ( ) ? item-> color ( )-> color ( ) : QColor ( );
+		QPixmap colorpix;
+		colorpix. convertFromImage ( BrickLink::inst ( )-> colorImage ( item-> color ( ), 20, 20 ));
+		color ["picture"]  = colorpix;
+		imap ["color"]     = color;
+
+		QMap<QString, QVariant> cond;
+		cond ["new"]       = ( item-> condition ( ) == BrickLink::New );
+		cond ["used"]      = ( item-> condition ( ) == BrickLink::Used );
+		imap ["condition"] = cond;
+
+		imap ["price"]     = item-> price ( ). toScriptObject ( );
+		imap ["total"]     = item-> total ( ). toScriptObject ( );
+		imap ["bulkQuantity"] = item-> bulkQuantity ( );
+		imap ["sale"]      = item-> sale ( );
+		imap ["remarks"]   = item-> remarks ( );
+		imap ["comments"]  = item-> comments ( );
+
+		QMap<QString, QVariant> category;
+		category ["id"]    = item-> category ( )-> id ( );
+		category ["name"]  = item-> category ( )-> name ( );
+		imap ["category"]  = category;
+
+		QMap<QString, QVariant> itemtype;
+		itemtype ["id"]    = item-> itemType ( )-> id ( );
+		itemtype ["name"]  = item-> itemType ( )-> name ( );
+		imap ["itemType"]  = itemtype;
+
+		QValueList<QVariant> tq;
+		tq << item-> tierQuantity ( 0 ) << item-> tierQuantity ( 1 ) << item-> tierQuantity ( 2 );
+		imap ["tierQuantity"] = tq;
+
+		QValueList<QVariant> tp;
+		tp << item-> tierPrice ( 0 ). toScriptObject ( ) << item-> tierPrice ( 1 ). toScriptObject ( ) << item-> tierPrice ( 2 ). toScriptObject ( );
+		imap ["tierPrice"] = tp;
+
+		imap ["lotId"]     = item-> lotId ( );
+		imap ["retain"]    = item-> retain ( );
+		imap ["stockroom"] = item-> stockroom ( );
+		imap ["reserved"]  = item-> reserved ( );
 
 		itemslist << imap;
 	}
+	docmap ["items"] = itemslist;
 
-	ReportJob *job = new ReportJob ( p-> device ( ));
+
+	CReportJob *job = new CReportJob ( pd );
+	d-> m_interpreter-> addTransientObject ( new CReportUtility ( ));
 	d-> m_interpreter-> addTransientObject ( job );
+	d-> m_interpreter-> addTransientVariable ( "Document", QSArgument (  docmap ));
 
-	QSArgumentList args;
-	args << QSArgument( docmap ) << QSArgument( itemslist );
-	d-> m_interpreter-> call ( "print", args );
+	d-> m_interpreter-> call ( "print" );
 
 	if ( !d-> m_interpreter-> hadError ( )) {
-		// check abort 
+		if ( !job-> isAborted ( )) {
+			job-> dump ( );
 
-
+			job-> print ( 0, job-> pageCount ( ) - 1 );
+		}
 	}
 	d-> m_interpreter-> clear ( );
-	d-> m_interpreter-> evaluate ( d-> m_code, 0, d-> m_name );
+	evaluate ( d-> m_interpreter, d-> m_code, 0, d-> m_name );
 	
 	delete job;
 }

@@ -1,5 +1,5 @@
-#ifndef __REPORT_OBJECTS_H__
-#define __REPORT_OBJECTS_H__
+#ifndef __CREPORTOBJECTS_H__
+#define __CREPORTOBJECTS_H__
 
 #include <qobject.h>
 #include <qfont.h>
@@ -9,119 +9,160 @@
 
 class QPaintDevice;
 class QPixmap;
-class ReportPage;
+class CReportPage;
+class QPainter;
 
 
-class ReportJob : public QObject {
-  Q_OBJECT
-  Q_OVERRIDE( QCString name         SCRIPTABLE false)
-  
-  Q_PROPERTY( uint     pageCount    READ pageCount)
-//  Q_PROPERTY( int      paperFormat  READ paperFormat)
-  Q_PROPERTY( QSize    paperSize    READ paperSize)
-  
+class CReportUtility : public QObject {
+	Q_OBJECT
+	Q_OVERRIDE( QCString name         SCRIPTABLE false)
+
 public slots:
-  ReportPage *addPage ( );
-  ReportPage *getPage ( uint i ) const;
-  void abort ( );
+	QString translate ( const QString &context, const QString &text ) const;
+
+	QMap<QString, QVariant> moneyFromDollar ( double d ) const;
+	QMap<QString, QVariant> moneyFromLocal ( double d ) const;
+
+	QString localDateString ( const QDateTime &dt ) const;
+	QString localTimeString ( const QDateTime &dt ) const;
 
 public:
-  uint pageCount ( ) const;
-  QSize paperSize ( ) const;
-
-public:
-  ReportJob ( QPaintDevice *pd );
-  
-  QPaintDevice *paintDevice ( ) const;
-  
-private:
-  QValueList <ReportPage *> m_pages;
-  QPaintDevice *m_pd;
-  bool m_aborted;
+	CReportUtility ( );
 };
 
-class ReportPage : public QObject {
-  Q_OBJECT 
-  Q_OVERRIDE( QCString name SCRIPTABLE false)
-  
-  Q_ENUMS( LineStyle )
-  
-  Q_PROPERTY( QFont   font             READ font       WRITE setFont)
-  Q_PROPERTY( QColor  color            READ color      WRITE setColor)
-  Q_PROPERTY( QColor  backgroundColor  READ bgColor    WRITE setBgColor)
-  Q_PROPERTY( int     lineStyle        READ lineStyle  WRITE setLineStyle)
-  Q_PROPERTY( uint    lineWidth        READ lineWidth  WRITE setLineWidth)
- 
-public:
-  enum LineStyle {
-    NoLine,
-    SolidLine,
-    DashLine,
-    DotLine,
-    DashDotLine,
-    DashDotDotLine,
-  };
- 
+class CReportJob : public QObject {
+	Q_OBJECT
+	Q_OVERRIDE( QCString name         SCRIPTABLE false)
+	
+	Q_PROPERTY( uint     pageCount    READ pageCount)
+//	Q_PROPERTY( int      paperFormat  READ paperFormat)
+	Q_PROPERTY( QSize    paperSize    READ paperSize)
+	Q_PROPERTY( double   scaling      READ scaling WRITE setScaling)
+	
 public slots:
-  QSize textSize ( const QString &text );
-  
-  void drawText ( int x, int y, const QString &text);
-  void drawText ( int left, int top, int width, int height, int align, const QString &text);
-  void drawLine ( int x1, int y1, int x2, int y2 );
-  void drawRect ( int left, int top, int width, int height );
-  void fillRect ( int left, int top, int width, int height, const QColor &fillcolor );
-  void drawEllipse ( int left, int top, int width, int height );
-  void fillEllipse ( int left, int top, int width, int height, const QColor &fillcolor );
-  void drawPixmap ( int left, int top, int width, int height, const QPixmap &pixmap );  
-  
-public:
-  QFont font ( ) const;
-  QColor color ( ) const;
-  QColor bgColor ( ) const;
-  int lineStyle ( ) const;
-  uint lineWidth ( ) const;
+	CReportPage *addPage ( );
+	CReportPage *getPage ( uint i ) const;
+	void abort ( );
 
-  void setFont ( const QFont &f );
-  void setColor ( const QColor &c );
-  void setBgColor ( const QColor &c );
-  void setLineStyle ( int linestyle );
-  void setLineWidth ( uint linewidth );
-  
 public:
-  ReportPage ( const ReportJob *job );
- 
-private: 
-  struct Cmd {
-    enum {
-      Attributes,
-      Text,
-      Line,
-      Rect,
-      Ellipse,
-      Pixmap
-    } m_cmd;    
-  };
-  
-  struct AttrCmd : public Cmd {
-    QFont  m_font;
-    QColor m_color;
-    QColor m_bgcolor;
-    int    m_linestyle;
-    uint   m_linewidth;
-  };
-  
-  struct DrawCmd : public Cmd {
-    int m_x, m_y, m_w, m_h;
-    QVariant m_p1;
-    QVariant m_p2;
-  };
-  
-  void attr_cmd ( );
-  
+	uint pageCount ( ) const;
+	QSize paperSize ( ) const;
+	bool isAborted ( ) const;
+	double scaling ( ) const;
+	void setScaling ( double s );
+
+public:
+	CReportJob ( QPaintDevice *pd );
+	~CReportJob ( );
+
+	QPaintDevice *paintDevice ( ) const;
+	
+	bool print ( uint from, uint to );
+	void dump ( );
+
 private:
-  QValueList <Cmd> m_cmds;
-  const ReportJob *m_job;
-  AttrCmd m_attr;
+	QValueList <CReportPage *> m_pages;
+	QPaintDevice *m_pd;
+	bool m_aborted;
+	double m_scaling;
+};
+
+class CReportPage : public QObject {
+	Q_OBJECT 
+	Q_OVERRIDE( QCString name SCRIPTABLE false)
+	
+	Q_ENUMS( LineStyle )
+	Q_SETS( Alignment )
+	
+	Q_PROPERTY( int     number           READ pageNumber)
+	Q_PROPERTY( QFont   font             READ font       WRITE setFont)
+	Q_PROPERTY( QColor  color            READ color      WRITE setColor)
+	Q_PROPERTY( QColor  backgroundColor  READ bgColor    WRITE setBgColor)
+	Q_PROPERTY( int     lineStyle        READ lineStyle  WRITE setLineStyle)
+	Q_PROPERTY( double  lineWidth        READ lineWidth  WRITE setLineWidth)
+ 
+public:
+	enum LineStyle {
+		NoLine,
+		SolidLine,
+		DashLine,
+		DotLine,
+		DashDotLine,
+		DashDotDotLine,
+	};
+
+	enum Alignment {
+		AlignLeft     = Qt::AlignLeft,
+		AlignHCenter  = Qt::AlignHCenter,
+		AlignRight    = Qt::AlignRight,
+		AlignTop      = Qt::AlignTop,
+		AlignVCenter  = Qt::AlignVCenter,
+		AlignBottom   = Qt::AlignBottom,
+		AlignCenter   = Qt::AlignCenter
+	};
+
+public slots:
+	QSize textSize ( const QString &text );
+	
+	void drawText ( double x, double y, const QString &text);
+	void drawText ( double left, double top, double width, double height, Alignment align, const QString &text);
+	void drawLine ( double x1, double y1, double x2, double y2 );
+	void drawRect ( double left, double top, double width, double height );
+	void drawEllipse ( double left, double top, double width, double height );
+	void drawPixmap ( double left, double top, double width, double height, const QPixmap &pixmap );
+	
+public:
+	int pageNumber ( ) const;
+	QFont font ( ) const;
+	QColor color ( ) const;
+	QColor bgColor ( ) const;
+	int lineStyle ( ) const;
+	double lineWidth ( ) const;
+
+	void setFont ( const QFont &f );
+	void setColor ( const QColor &c );
+	void setBgColor ( const QColor &c );
+	void setLineStyle ( int linestyle );
+	void setLineWidth ( double linewidth );
+	
+public:
+	CReportPage ( const CReportJob *job );
+ 
+	void dump ( );
+	void print ( QPainter *p, double scale [2] );
+
+private: 
+	struct Cmd {
+		enum {
+			Attributes,
+			Text,
+			Line,
+			Rect,
+			Ellipse,
+			Pixmap
+		} m_cmd;		
+	};
+	
+	struct AttrCmd : public Cmd {
+		QFont  m_font;
+		QColor m_color;
+		QColor m_bgcolor;
+		int    m_linestyle;
+		double  m_linewidth;
+	};
+	
+	struct DrawCmd : public Cmd {
+		double    m_x, m_y, m_w, m_h;
+		QVariant  m_p1;
+		QVariant  m_p2;
+	};
+	
+	void attr_cmd ( );
+	
+private:
+	QPtrList <Cmd> m_cmds;
+	const CReportJob *m_job;
+	AttrCmd m_attr;
 };
 
 #endif

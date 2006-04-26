@@ -16,6 +16,8 @@
 
 #include <qstring.h>
 #include <qvalidator.h>
+#include <qmap.h>
+#include <qvariant.h>
 
 class CMoneyData;
 class QKeyEvent;
@@ -129,6 +131,8 @@ public:
 
 	static money_t fromCString ( const QString & );
 	static money_t fromLocalizedString ( const QString & );
+
+	QMap<QString, QVariant> toScriptObject ( ) const;
 	
 	Q_INT64 &internalValue ( ) { return val; }
 

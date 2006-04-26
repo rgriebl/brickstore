@@ -1340,11 +1340,6 @@ void CWindow::filePrint ( )
 	if ( d. exec ( ) != QDialog::Accepted )
 		return;
 
-	QPainter p;
-
-	if ( !p. begin ( prt ))
-		return;
-	
 	const CReport *rep = d. report ( );
 
 	if ( !rep )
@@ -1363,7 +1358,7 @@ void CWindow::filePrint ( )
 		items = sorted_selection;
 	}
 
-	rep-> print ( &p, m_doc, items );
+	rep-> print ( prt, m_doc, items );
 }
 
 void CWindow::fileSave ( )

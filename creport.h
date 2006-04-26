@@ -24,7 +24,6 @@
 //typedef QMap <QString, QString>  CReportVariables;
 
 class CReportPrivate;
-class QPainter;
 
 class CReport : public QObject {
 	Q_OBJECT
@@ -35,7 +34,7 @@ public:
 	bool load ( const QString &file );
 	QString name ( ) const;
 	
-	void print ( QPainter *p, const CDocument *doc, const CDocument::ItemList &items ) const;
+	void print ( QPaintDevice *pd, const CDocument *doc, const CDocument::ItemList &items ) const;
 
 private:
 	CReportPrivate *d;
