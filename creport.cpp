@@ -30,7 +30,7 @@
 #include "creport.h"
 #include "creport_p.h"
 
-#include "reportobjects.h"
+#include "creportobjects.h"
 
 namespace {
 

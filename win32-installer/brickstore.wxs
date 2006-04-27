@@ -101,8 +101,10 @@
             </Directory>
             <Directory Id="print_templates" Name="print-te" LongName="print-templates">
               <Component Id="c_print_templates" Guid="ED89FB38-8C96-4405-BF13-9B724B50B53C">
-                <File DiskId="1" Id="standard.xml"        Name="standard.xml"                                src="$(var.TARGET)\print-templates\standard.xml" />
-                <File DiskId="1" Id="invoice_example.xml" Name="invoice-.xml" LongName="invoice-example.xml" src="$(var.TARGET)\print-templates\invoice-example.xml" />
+                <RemoveFile      Id="standard.xml"        Name="standard.xml"                                On="install" />
+                <RemoveFile      Id="invoice_example.xml" Name="invoice-.xml" LongName="invoice-example.xml" On="install" />
+
+                <File DiskId="1" Id="standard.qs"         Name="standard.qs"                                 src="$(var.TARGET)\print-templates\standard.qs" />
               </Component>
             </Directory>
             <Directory Id="images" Name="images">

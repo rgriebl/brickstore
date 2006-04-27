@@ -9,7 +9,7 @@
 #include "cmoney.h"
 #include "cutility.h"
 
-#include "reportobjects.h"
+#include "creportobjects.h"
 
 
 CReportUtility::CReportUtility ( )
