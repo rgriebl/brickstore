@@ -55,7 +55,7 @@ public:
 		MergeKeep_Mask           = 0xffff0000
 	};
 
-	CDocument::ItemList sortedItems ( );
+	CDocument::ItemList sortedItems ( bool selection_only = false ) const;
 
 	uint setItems ( const BrickLink::InvItemList &items, int multiply = 1 );
 	uint addItems ( const BrickLink::InvItemList &items, int multiply = 1, uint mergeflags = MergeAction_None, bool dont_change_sorting = false );
@@ -171,6 +171,9 @@ private slots:
 	void itemsAddedToDocument ( const CDocument::ItemList & );
 	void itemsRemovedFromDocument ( const CDocument::ItemList & );
 	void itemsChangedInDocument ( const CDocument::ItemList &, bool );
+
+private:
+	CDocument::ItemList exportCheck ( ) const;
 
 private:
 	CDocument * m_doc;

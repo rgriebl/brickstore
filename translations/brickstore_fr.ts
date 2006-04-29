@@ -337,7 +337,7 @@
     </message>
     <message>
         <source>This list contains items with errors.&lt;br /&gt;&lt;br /&gt;Do you really want to export this list?</source>
-        <translation>Cette liste contient des items avec des erreurs.&lt;br /&gt;&lt;br /&gt;Voulez-vous réellement exporter cette liste ?</translation>
+        <translation type="obsolete">Cette liste contient des items avec des erreurs.&lt;br /&gt;&lt;br /&gt;Voulez-vous réellement exporter cette liste ?</translation>
     </message>
     <message>
         <source>Reset Differences</source>
@@ -345,6 +345,10 @@
     </message>
     <message>
         <source>Inventory Files</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>BrickStore has switched to a new file format (.bsx - BrickStore XML).&lt;br /&gt;&lt;br /&gt;Your document has been automatically imported and it will be converted as soon as you save it.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -818,10 +822,6 @@
     <message>
         <source>About...</source>
         <translation>A propos de...</translation>
-    </message>
-    <message>
-        <source>BrickStore has switched to a new file format (.bsx - BrickStore XML).&lt;br /&gt;&lt;br /&gt;Your document has been automatically imported and it will be converted as soon as you save it.</source>
-        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Buyer/Collector Mode</source>
@@ -1949,7 +1949,7 @@
     </message>
     <message>
         <source>This list contains items with errors.&lt;br /&gt;&lt;br /&gt;Do you really want to export this list?</source>
-        <translation type="obsolete">Cette liste contient des items avec des erreurs.&lt;br /&gt;&lt;br /&gt;Voulez-vous réellement exporter cette liste ?</translation>
+        <translation type="unfinished">Cette liste contient des items avec des erreurs.&lt;br /&gt;&lt;br /&gt;Voulez-vous réellement exporter cette liste ?</translation>
     </message>
     <message>
         <source>Enter the ID number of Wanted List (leave blank for the default Wanted List)</source>
@@ -2161,6 +2161,10 @@
     </message>
     <message>
         <source>Enter the text, that should be removed from the comments of all selected items:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>There are %1 items selected.&lt;br /&gt;&lt;br /&gt;Do you want to export only these items?</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

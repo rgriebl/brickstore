@@ -278,7 +278,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>This list contains items with errors.&lt;br /&gt;&lt;br /&gt;Do you really want to export this list?</source>
-        <translation>Diese Liste enthält Teile mit Eingabefehlern.&lt;br /&gt;&lt;br /&gt;Wollen Sie diese Liste trotzdem exportieren?</translation>
+        <translation type="obsolete">Diese Liste enthält Teile mit Eingabefehlern.&lt;br /&gt;&lt;br /&gt;Wollen Sie diese Liste trotzdem exportieren?</translation>
     </message>
     <message>
         <source>Enter the set ID of the Peeron inventory:</source>
@@ -295,6 +295,10 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <message>
         <source>Inventory Files</source>
         <translation>Inventarlisten</translation>
+    </message>
+    <message>
+        <source>BrickStore has switched to a new file format (.bsx - BrickStore XML).&lt;br /&gt;&lt;br /&gt;Your document has been automatically imported and it will be converted as soon as you save it.</source>
+        <translation>Das Dateiformat von BrickStore hat sich geändert (.bsx - BrickStore XML).&lt;br /&gt;&lt;br /&gt;Das Dokument wurde automatisch importiert und es wird beim Abspeichern in das neue Format konvertiert.</translation>
     </message>
 </context>
 <context>
@@ -710,7 +714,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>BrickStore has switched to a new file format (.bsx - BrickStore XML).&lt;br /&gt;&lt;br /&gt;Your document has been automatically imported and it will be converted as soon as you save it.</source>
-        <translation>Das Dateiformat von BrickStore hat sich geändert (.bsx - BrickStore XML).&lt;br /&gt;&lt;br /&gt;Das Dokument wurde automatisch importiert und es wird beim Abspeichern in das neue Format konvertiert.</translation>
+        <translation type="obsolete">Das Dateiformat von BrickStore hat sich geändert (.bsx - BrickStore XML).&lt;br /&gt;&lt;br /&gt;Das Dokument wurde automatisch importiert und es wird beim Abspeichern in das neue Format konvertiert.</translation>
     </message>
     <message>
         <source>Info</source>
@@ -1938,6 +1942,14 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <message>
         <source>Enter the text, that should be removed from the comments of all selected items:</source>
         <translation>Geben Sie an, was von den Kommentaren aller ausgewählten Teile entfernt werden soll:</translation>
+    </message>
+    <message>
+        <source>There are %1 items selected.&lt;br /&gt;&lt;br /&gt;Do you want to export only these items?</source>
+        <translation>Es sind momentan %1 Teile ausgewählt.&lt;br /&gt;&lt;br /&gt;Wollen Sie nur diese Teile exportieren?</translation>
+    </message>
+    <message>
+        <source>This list contains items with errors.&lt;br /&gt;&lt;br /&gt;Do you really want to export this list?</source>
+        <translation>Diese Liste enthält Teile mit Eingabefehlern.&lt;br /&gt;&lt;br /&gt;Wollen Sie diese Liste trotzdem exportieren?</translation>
     </message>
 </context>
 <context>

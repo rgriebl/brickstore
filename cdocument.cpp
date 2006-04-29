@@ -448,17 +448,28 @@ CDocument *CDocument::fileOpen ( )
 
 CDocument *CDocument::fileOpen ( const QString &s )
 {
-	if ( !s. isEmpty ( )) {
-		QString abs_s  = QFileInfo ( s ). absFilePath ( );
+	if ( s. isEmpty ( ))
+		return 0;
 
-		foreach ( CDocument *doc, s_documents ) {
-			if ( QFileInfo ( doc-> fileName ( )). absFilePath ( ) == abs_s )
-				return doc;
-		}
-		return fileLoadFrom ( s, "bsx" );
+	QString abs_s  = QFileInfo ( s ). absFilePath ( );
+
+	foreach ( CDocument *doc, s_documents ) {
+		if ( QFileInfo ( doc-> fileName ( )). absFilePath ( ) == abs_s )
+			return doc;
+	}
+
+	CDocument *doc = 0;
+
+	if ( s. right ( 4 ) == ".bti" ) {
+		doc = fileImportBrikTrakInventory ( s );
+
+		if ( doc )
+			CMessageBox::information ( CFrameWork::inst ( ), tr( "BrickStore has switched to a new file format (.bsx - BrickStore XML).<br /><br />Your document has been automatically imported and it will be converted as soon as you save it." ));
 	}
 	else
-		return 0;
+		doc = fileLoadFrom ( s, "bsx" );
+
+	return doc;
 }
 
 CDocument *CDocument::fileImportBrickLinkInventory ( const BrickLink::Item *preselect )
@@ -793,16 +804,16 @@ bool CDocument::isModified ( ) const
 	return !m_undo-> isClean ( );
 }
 
-void CDocument::fileSave ( const ItemList &sorted )
+void CDocument::fileSave ( const ItemList &itemlist )
 {
 	if ( fileName ( ). isEmpty ( ))
-		fileSaveAs ( sorted );
+		fileSaveAs ( itemlist );
 	else if ( isModified ( ))
-		fileSaveTo ( fileName ( ), "bsx", false, sorted );
+		fileSaveTo ( fileName ( ), "bsx", false, itemlist );
 }
 
 
-void CDocument::fileSaveAs ( const ItemList &sorted )
+void CDocument::fileSaveAs ( const ItemList &itemlist )
 {
 	QStringList filters;
 	filters << tr( "BrickStore XML Data" ) + " (*.bsx)";
@@ -828,12 +839,12 @@ void CDocument::fileSaveAs ( const ItemList &sorted )
 		     CMessageBox::question ( CFrameWork::inst ( ), tr( "A file named %1 already exists. Are you sure you want to overwrite it?" ). arg( CMB_BOLD( fn )), CMessageBox::Yes, CMessageBox::No ) != CMessageBox::Yes )
 		     return;
 
-		fileSaveTo ( fn, "bsx", false, sorted );
+		fileSaveTo ( fn, "bsx", false, itemlist );
 	}
 }
 
 
-bool CDocument::fileSaveTo ( const QString &s, const char *type, bool export_only, const ItemList &sorted )
+bool CDocument::fileSaveTo ( const QString &s, const char *type, bool export_only, const ItemList &itemlist )
 {
 	BrickLink::ItemListXMLHint hint;
 
@@ -851,12 +862,10 @@ bool CDocument::fileSaveTo ( const QString &s, const char *type, bool export_onl
 	if ( f. open ( IO_WriteOnly )) {
 		QApplication::setOverrideCursor ( QCursor( Qt::WaitCursor ));
 
-		const ItemList *itemlist = ( sorted. count ( ) == m_items. count ( )) ? &sorted : &m_items;
-
 		QDomDocument doc (( hint == BrickLink::XMLHint_BrickStore ) ? QString( "BrickStoreXML" ) : QString::null );
 		doc. appendChild ( doc. createProcessingInstruction ( "xml", "version=\"1.0\" encoding=\"UTF-8\"" ));
 
-		QDomElement item_elem = BrickLink::inst ( )-> createItemListXML ( doc, hint, reinterpret_cast<const BrickLink::InvItemList *> ( itemlist ));
+		QDomElement item_elem = BrickLink::inst ( )-> createItemListXML ( doc, hint, reinterpret_cast<const BrickLink::InvItemList *> ( &itemlist ));
 
 		if ( hint == BrickLink::XMLHint_BrickStore ) {
 			QDomElement root = doc. createElement ( "BrickStoreXML" );
@@ -900,15 +909,10 @@ bool CDocument::fileSaveTo ( const QString &s, const char *type, bool export_onl
 	return false;
 }
 
-void CDocument::fileExportBrickLinkInvReqClipboard ( const ItemList &sorted )
+void CDocument::fileExportBrickLinkInvReqClipboard ( const ItemList &itemlist )
 {
-	if ( !exportCheck ( ))
-		return;
-
-	const ItemList *itemlist = ( sorted. count ( ) == m_items. count ( )) ? &sorted : &m_items;
-
 	QDomDocument doc ( QString::null );
-	doc. appendChild ( BrickLink::inst ( )-> createItemListXML ( doc, BrickLink::XMLHint_Inventory, reinterpret_cast<const BrickLink::InvItemList *> ( itemlist )));
+	doc. appendChild ( BrickLink::inst ( )-> createItemListXML ( doc, BrickLink::XMLHint_Inventory, reinterpret_cast<const BrickLink::InvItemList *> ( &itemlist )));
 
 	QApplication::clipboard ( )-> setText ( doc. toString ( ), QClipboard::Clipboard );
 
@@ -916,21 +920,16 @@ void CDocument::fileExportBrickLinkInvReqClipboard ( const ItemList &sorted )
 		CUtility::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_InventoryRequest ));
 }
 
-void CDocument::fileExportBrickLinkWantedListClipboard ( const ItemList &sorted )
+void CDocument::fileExportBrickLinkWantedListClipboard ( const ItemList &itemlist )
 {
-	if ( !exportCheck ( ))
-		return;
-
 	QString wantedlist;
 
 	if ( CMessageBox::getString ( CFrameWork::inst ( ), tr( "Enter the ID number of Wanted List (leave blank for the default Wanted List)" ), wantedlist )) {
 		QMap <QString, QString> extra;
 		extra. insert ( "WANTEDLISTID", wantedlist );
 
-		const ItemList *itemlist = ( sorted. count ( ) == m_items. count ( )) ? &sorted : &m_items;
-
 		QDomDocument doc ( QString::null );
-		doc. appendChild ( BrickLink::inst ( )-> createItemListXML ( doc, BrickLink::XMLHint_WantedList, reinterpret_cast<const BrickLink::InvItemList *> ( itemlist ), &extra ));
+		doc. appendChild ( BrickLink::inst ( )-> createItemListXML ( doc, BrickLink::XMLHint_WantedList, reinterpret_cast<const BrickLink::InvItemList *> ( &itemlist ), &extra ));
 
 		QApplication::clipboard ( )-> setText ( doc. toString ( ), QClipboard::Clipboard );
 
@@ -939,15 +938,10 @@ void CDocument::fileExportBrickLinkWantedListClipboard ( const ItemList &sorted 
 	}
 }
 
-void CDocument::fileExportBrickLinkXMLClipboard ( const ItemList &sorted )
+void CDocument::fileExportBrickLinkXMLClipboard ( const ItemList &itemlist )
 {
-	if ( !exportCheck ( ))
-		return;
-
-	const ItemList *itemlist = ( sorted. count ( ) == m_items. count ( )) ? &sorted : &m_items;
-
 	QDomDocument doc ( QString::null );
-	doc. appendChild ( BrickLink::inst ( )-> createItemListXML ( doc, BrickLink::XMLHint_MassUpload, reinterpret_cast<const BrickLink::InvItemList *> ( itemlist )));
+	doc. appendChild ( BrickLink::inst ( )-> createItemListXML ( doc, BrickLink::XMLHint_MassUpload, reinterpret_cast<const BrickLink::InvItemList *> ( &itemlist )));
 
 	QApplication::clipboard ( )-> setText ( doc. toString ( ), QClipboard::Clipboard );
 
@@ -955,12 +949,9 @@ void CDocument::fileExportBrickLinkXMLClipboard ( const ItemList &sorted )
 			CUtility::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_InventoryUpload ));
 }
 
-void CDocument::fileExportBrickLinkUpdateClipboard ( const ItemList &sorted )
+void CDocument::fileExportBrickLinkUpdateClipboard ( const ItemList &itemlist )
 {
-	if ( !exportCheck ( ))
-		return;
-
-	foreach ( const Item *item, m_items ) {
+	foreach ( const Item *item, itemlist ) {
 		if ( !item-> lotId ( )) {
 			if ( CMessageBox::warning ( CFrameWork::inst ( ), tr( "This list contains items without a BrickLink Lot-ID.<br /><br />Do you really want to export this list?" ), CMessageBox::Yes, CMessageBox::No ) != CMessageBox::Yes )
 				return;
@@ -969,10 +960,8 @@ void CDocument::fileExportBrickLinkUpdateClipboard ( const ItemList &sorted )
 		}
 	}
 
-	const ItemList *itemlist = ( sorted. count ( ) == m_items. count ( )) ? &sorted : &m_items;
-
 	QDomDocument doc ( QString::null );
-	doc. appendChild ( BrickLink::inst ( )-> createItemListXML ( doc, BrickLink::XMLHint_MassUpdate, reinterpret_cast<const BrickLink::InvItemList *> ( itemlist )));
+	doc. appendChild ( BrickLink::inst ( )-> createItemListXML ( doc, BrickLink::XMLHint_MassUpdate, reinterpret_cast<const BrickLink::InvItemList *> ( &itemlist )));
 
 	QApplication::clipboard ( )-> setText ( doc. toString ( ), QClipboard::Clipboard );
 
@@ -980,11 +969,8 @@ void CDocument::fileExportBrickLinkUpdateClipboard ( const ItemList &sorted )
 			CUtility::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_InventoryUpdate ));
 }
 
-void CDocument::fileExportBrickLinkXML ( const ItemList &sorted )
+void CDocument::fileExportBrickLinkXML ( const ItemList &itemlist )
 {
-	if ( !exportCheck ( ))
-		return;
-
 	QStringList filters;
 	filters << tr( "BrickLink XML File" ) + " (*.xml)";
 
@@ -998,15 +984,12 @@ void CDocument::fileExportBrickLinkXML ( const ItemList &sorted )
 		     CMessageBox::question ( CFrameWork::inst ( ), tr( "A file named %1 already exists. Are you sure you want to overwrite it?" ). arg( CMB_BOLD( s )), CMessageBox::Yes, CMessageBox::No ) != CMessageBox::Yes )
 		     return;
 
-		fileSaveTo ( s, "xml", true, sorted );
+		fileSaveTo ( s, "xml", true, itemlist );
 	}
 }
 
-void CDocument::fileExportBrikTrakInventory ( const ItemList &sorted )
+void CDocument::fileExportBrikTrakInventory ( const ItemList &itemlist )
 {
-	if ( !exportCheck ( ))
-		return;
-
 	QStringList filters;
 	filters << tr( "BrikTrak Inventory" ) + " (*.bti)";
 
@@ -1020,13 +1003,8 @@ void CDocument::fileExportBrikTrakInventory ( const ItemList &sorted )
 		     CMessageBox::question ( CFrameWork::inst ( ), tr( "A file named %1 already exists. Are you sure you want to overwrite it?" ). arg( CMB_BOLD( s )), CMessageBox::Yes, CMessageBox::No ) != CMessageBox::Yes )
 		     return;
 
-		fileSaveTo ( s, "bti", true, sorted );
+		fileSaveTo ( s, "bti", true, itemlist );
 	}
-}
-
-bool CDocument::exportCheck ( ) const
-{
-	return !( statistics ( items ( )). errors ( ) && CMessageBox::warning ( CFrameWork::inst ( ), tr( "This list contains items with errors.<br /><br />Do you really want to export this list?" ), CMessageBox::Yes, CMessageBox::No ) != CMessageBox::Yes );
 }
 
 void CDocument::clean2Modified ( bool b )

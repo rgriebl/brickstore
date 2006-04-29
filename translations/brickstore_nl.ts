@@ -264,11 +264,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>This list contains items with errors.&lt;br /&gt;&lt;br /&gt;Do you really want to export this list?</source>
+        <source>Reset Differences</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Reset Differences</source>
+        <source>BrickStore has switched to a new file format (.bsx - BrickStore XML).&lt;br /&gt;&lt;br /&gt;Your document has been automatically imported and it will be converted as soon as you save it.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -790,10 +790,6 @@
     </message>
     <message>
         <source>Download activity indicator</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>BrickStore has switched to a new file format (.bsx - BrickStore XML).&lt;br /&gt;&lt;br /&gt;Your document has been automatically imported and it will be converted as soon as you save it.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1751,6 +1747,14 @@
     </message>
     <message>
         <source>Save changes to %1?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>There are %1 items selected.&lt;br /&gt;&lt;br /&gt;Do you want to export only these items?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This list contains items with errors.&lt;br /&gt;&lt;br /&gt;Do you really want to export this list?</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

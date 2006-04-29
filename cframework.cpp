@@ -900,12 +900,7 @@ void CFrameWork::viewFullScreen ( bool b )
 
 void CFrameWork::openDocument ( const QString &file )
 {
-	bool old_bti_file = ( file. right ( 4 ) == ".bti" );
-
-	bool ok = createWindow ( old_bti_file ? CDocument::fileImportBrikTrakInventory ( file ) : CDocument::fileOpen ( file ));
-
-	if ( old_bti_file && ok )
-		CMessageBox::information ( this, tr( "BrickStore has switched to a new file format (.bsx - BrickStore XML).<br /><br />Your document has been automatically imported and it will be converted as soon as you save it." ));
+	createWindow ( CDocument::fileOpen ( file ));
 }
 
 void CFrameWork::fileNew ( )

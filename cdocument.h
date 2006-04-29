@@ -168,14 +168,14 @@ public slots:
 
 	void setSelection ( const ItemList & );
 
-	void fileSave ( const ItemList & = ItemList ( ));
-	void fileSaveAs ( const ItemList & = ItemList ( ));
-	void fileExportBrickLinkXML ( const ItemList & = ItemList ( ));
-	void fileExportBrickLinkXMLClipboard ( const ItemList & = ItemList ( ));
-	void fileExportBrickLinkUpdateClipboard ( const ItemList & = ItemList ( ));
-	void fileExportBrickLinkInvReqClipboard ( const ItemList & = ItemList ( ));
-	void fileExportBrickLinkWantedListClipboard ( const ItemList & = ItemList ( ));
-	void fileExportBrikTrakInventory ( const ItemList & = ItemList ( ));
+	void fileSave ( const ItemList &itemlist );
+	void fileSaveAs ( const ItemList &itemlist );
+	void fileExportBrickLinkXML ( const ItemList &itemlist );
+	void fileExportBrickLinkXMLClipboard ( const ItemList &itemlist );
+	void fileExportBrickLinkUpdateClipboard ( const ItemList &itemlist );
+	void fileExportBrickLinkInvReqClipboard ( const ItemList &itemlist );
+	void fileExportBrickLinkWantedListClipboard ( const ItemList &itemlist );
+	void fileExportBrikTrakInventory ( const ItemList &itemlist );
 
 public:
 	CUndoCmd *macroBegin ( const QString &label = QString ( ));
@@ -199,8 +199,7 @@ private slots:
 
 private:
 	static CDocument *fileLoadFrom ( const QString &s, const char *type, bool import_only = false );
-	bool fileSaveTo ( const QString &s, const char *type, bool export_only, const ItemList &sorted );
-	bool exportCheck ( ) const;
+	bool fileSaveTo ( const QString &s, const char *type, bool export_only, const ItemList &itemlist );
 	void setBrickLinkItems ( const BrickLink::InvItemList &bllist, uint multiply = 1 );
 
 	void insertItemsDirect ( ItemList &items, ItemList &positions );

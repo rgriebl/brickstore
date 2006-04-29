@@ -1248,7 +1248,7 @@ void CWindow::closeEvent ( QCloseEvent *e )
 	if ( m_doc-> isModified ( ) && !close_empty ) {
 		switch ( CMessageBox::warning ( this, tr( "Save changes to %1?" ). arg ( CMB_BOLD( caption ( ). left ( caption ( ). length ( ) - 2 ))), CMessageBox::Yes | CMessageBox::Default, CMessageBox::No, CMessageBox::Cancel | CMessageBox::Escape )) {
 		case CMessageBox::Yes:
-			m_doc-> fileSave ( );
+			m_doc-> fileSave ( sortedItems ( ));
 
 			if ( !m_doc-> isModified ( ))
 				e-> accept ( );
@@ -1373,40 +1373,80 @@ void CWindow::fileSaveAs ( )
 
 void CWindow::fileExportBrickLinkXML ( )
 {
-	m_doc-> fileExportBrickLinkXML ( sortedItems ( ));
+	CDocument::ItemList items = exportCheck ( );
+
+	if ( !items. isEmpty ( ))
+		m_doc-> fileExportBrickLinkXML ( items );
 }
 
 void CWindow::fileExportBrickLinkXMLClipboard ( )
 {
-	m_doc-> fileExportBrickLinkXMLClipboard ( sortedItems ( ));
+	CDocument::ItemList items = exportCheck ( );
+
+	if ( !items. isEmpty ( ))
+		m_doc-> fileExportBrickLinkXMLClipboard ( items );
 }
 
 void CWindow::fileExportBrickLinkUpdateClipboard ( )
 {
-	m_doc-> fileExportBrickLinkUpdateClipboard ( sortedItems ( ));
+	CDocument::ItemList items = exportCheck ( );
+
+	if ( !items. isEmpty ( ))
+		m_doc-> fileExportBrickLinkUpdateClipboard ( items );
 }
 
 void CWindow::fileExportBrickLinkInvReqClipboard ( )
 {
-	m_doc-> fileExportBrickLinkInvReqClipboard ( sortedItems ( ));
+	CDocument::ItemList items = exportCheck ( );
+
+	if ( !items. isEmpty ( ))
+		m_doc-> fileExportBrickLinkInvReqClipboard ( items );
 }
 
 void CWindow::fileExportBrickLinkWantedListClipboard ( )
 {
-	m_doc-> fileExportBrickLinkWantedListClipboard ( sortedItems ( ));
+	CDocument::ItemList items = exportCheck ( );
+
+	if ( !items. isEmpty ( ))
+		m_doc-> fileExportBrickLinkWantedListClipboard ( items );
 }
 
 void CWindow::fileExportBrikTrakInventory ( )
 {
-	m_doc-> fileExportBrikTrakInventory ( sortedItems ( ));
+	CDocument::ItemList items = exportCheck ( );
+
+	if ( !items. isEmpty ( ))
+		m_doc-> fileExportBrikTrakInventory ( items );
 }
 
-CDocument::ItemList CWindow::sortedItems ( )
+CDocument::ItemList CWindow::exportCheck ( ) const
+{
+	CDocument::ItemList items;
+	bool selection_only = false;
+
+	if ( !m_doc-> selection ( ). isEmpty ( ) && ( m_doc-> selection ( ). count ( ) != m_doc-> items ( ). count ( ))) {
+		if ( CMessageBox::question ( CFrameWork::inst ( ), tr( "There are %1 items selected.<br /><br />Do you want to export only these items?" ). arg ( m_doc-> selection ( ). count ( )), CMessageBox::Yes, CMessageBox::No ) == CMessageBox::Yes ) {
+			selection_only = true;
+		}
+	}
+
+	if ( m_doc-> statistics ( selection_only ? m_doc-> selection ( ) : m_doc-> items ( )). errors ( )) {
+		if ( CMessageBox::warning ( CFrameWork::inst ( ), tr( "This list contains items with errors.<br /><br />Do you really want to export this list?" ), CMessageBox::Yes, CMessageBox::No ) != CMessageBox::Yes )
+			return CDocument::ItemList ( );
+	}	
+
+	return sortedItems ( selection_only );
+}
+
+CDocument::ItemList CWindow::sortedItems ( bool selection_only ) const
 {
 	CDocument::ItemList sorted;
 
 	for ( QListViewItemIterator it ( w_list ); it. current ( ); ++it ) {
 		CItemViewItem *ivi = static_cast <CItemViewItem *> ( it. current ( ));
+
+		if ( selection_only && ( m_doc-> selection ( ). find ( ivi-> item ( )) == m_doc-> selection ( ). end ( )))
+			continue;
 
 		sorted. append ( ivi-> item ( ));
 	}
