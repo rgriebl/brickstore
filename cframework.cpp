@@ -774,10 +774,10 @@ void CFrameWork::createActions ( )
 	
 	g2 = new QActionGroup ( g, "edit_remark", false );
 	g2-> setUsesDropDown ( true );
-	(void) new QAction ( g, "edit_remark_set" );
+	(void) new QAction ( g2, "edit_remark_set" );
 	g2-> addSeparator ( );
-	(void) new QAction ( g, "edit_remark_add" );
-	(void) new QAction ( g, "edit_remark_rem" );
+	(void) new QAction ( g2, "edit_remark_add" );
+	(void) new QAction ( g2, "edit_remark_rem" );
 	//tier
 
 	g2 = new QActionGroup ( g, "edit_retain", false );
