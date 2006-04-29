@@ -177,6 +177,12 @@ void DlgAddItemImpl::closeEvent ( QCloseEvent *e )
 		emit closed ( );
 }
 
+void DlgAddItemImpl::reject ( )
+{
+	DlgAddItem::reject ( );
+	close ( );
+}
+
 void DlgAddItemImpl::setSimpleMode ( bool b )
 {
 	QWidget *wl [] = {

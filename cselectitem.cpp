@@ -541,9 +541,11 @@ CSelectItem::CSelectItem ( QWidget *parent, const char *name, WFlags fl )
 	connect ( d-> w_items, SIGNAL( selectionChanged ( )), this, SLOT( itemChangedList ( )));
 	connect ( d-> w_items, SIGNAL( doubleClicked ( QListViewItem *, const QPoint &, int )), this, SLOT( itemConfirmed ( )));
 	connect ( d-> w_items, SIGNAL( returnPressed ( QListViewItem * )), this, SLOT( itemConfirmed ( )));
+	connect ( d-> w_items, SIGNAL( contextMenuRequested ( QListViewItem *, const QPoint &, int )), this, SLOT( itemContextList ( QListViewItem *, const QPoint & )));
 	connect ( d-> w_thumbs, SIGNAL( selectionChanged ( )), this, SLOT( itemChangedIcon ( )));
 	connect ( d-> w_thumbs, SIGNAL( doubleClicked ( QIconViewItem * )), this, SLOT( itemConfirmed ( )));
 	connect ( d-> w_thumbs, SIGNAL( returnPressed ( QIconViewItem * )), this, SLOT( itemConfirmed ( )));
+	connect ( d-> w_thumbs, SIGNAL( contextMenuRequested ( QIconViewItem *, const QPoint & )), this, SLOT( itemContextIcon ( QIconViewItem *, const QPoint & )));
 	connect ( d-> w_viewpopup, SIGNAL( activated ( int )), this, SLOT( viewModeChanged ( int )));
 
 	QGridLayout *toplay = new QGridLayout ( this, 1, 1, 0, 6 );
@@ -1009,6 +1011,36 @@ QSize CSelectItem::sizeHint ( ) const
 	return QSize ( 120 * fm. width ( 'x' ), 20 * fm. height ( ));
 }
 
+void CSelectItem::itemContextList ( QListViewItem *lvi, const QPoint &pos )
+{
+	const BrickLink::Item *item = lvi ? static_cast <ItemListItem *> ( lvi )-> item ( ) : 0;
+
+	itemContext ( item, pos );
+}
+
+void CSelectItem::itemContextIcon ( QIconViewItem *ivi, const QPoint &pos )
+{
+	const BrickLink::Item *item = ivi ? static_cast <ItemIconItem *> ( ivi )-> item ( ) : 0;
+
+	itemContext ( item, pos );
+}
+
+void CSelectItem::itemContext ( const BrickLink::Item *item, const QPoint &pos )
+{
+	CatListItem *cli = static_cast <CatListItem *> ( d-> w_categories-> selectedItem ( ));
+	const BrickLink::Category *cat = cli ? cli-> category ( ) : 0;
+
+	if ( !item-> category ( ) || ( item-> category ( ) == cat ))
+		return;
+
+	QPopupMenu pop ( this );
+	pop.insertItem ( tr( "View item's category" ), 0 );
+
+	if ( pop. exec ( pos ) == 0 ) {
+		setItem ( item );
+		ensureSelectionVisible ( );
+	}
+}
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////

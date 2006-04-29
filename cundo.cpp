@@ -18,6 +18,7 @@
 #include <qlabel.h>
 #include <qpopupmenu.h>
 #include <qstyle.h>
+#include <qpainter.h>
 
 #include "cundo.h"
 #include "cundo_p.h"
@@ -755,7 +756,7 @@ namespace {
 
 class MyListBox : public QListBox {
 public:
-	MyListBox ( QWidget *parent ) : QListBox ( parent ) { }
+	MyListBox ( QWidget *parent ) : QListBox ( parent ), m_highlight ( -1 ){ }
 
 	virtual QSize sizeHint ( ) const
 	{
@@ -771,7 +772,35 @@ public:
 
 		return s2. expandedTo ( QSize ( 60, 60 )) + QSize ( fw, fw );
 	}
+
+public:
+	int m_highlight;
 };
+
+
+class MyListBoxItem : public QListBoxText {
+public:
+	MyListBoxItem ( QListBox *parent, const QString & text = QString::null )
+		: QListBoxText ( parent, text )
+	{
+		setCustomHighlighting ( true ); 
+	}
+
+protected:
+	virtual void paint ( QPainter *p )
+	{
+		MyListBox *mlb = static_cast <MyListBox *> ( listBox ( ));
+		int i = mlb-> index ( this );
+
+		if ( i <= mlb-> m_highlight ) {
+			p-> fillRect ( 0, 0, width ( mlb ), height ( mlb ), mlb-> colorGroup ( ). brush ( QColorGroup::Highlight ));
+		    p-> setPen ( mlb-> colorGroup ( ). highlightedText ( ));
+		}
+
+		QListBoxText::paint ( p );
+	}
+};
+
 
 class MyLabel : public QLabel {
 public:
@@ -875,6 +904,8 @@ void CUndoListAction::selectRange ( QListBoxItem *item )
 	if ( item ) {
 		int hl = m_list-> index ( item );
 
+		static_cast <MyListBox *> ( m_list )-> m_highlight = hl;
+
 		for ( int i = 0; i < int( m_list-> count ( )); i++ )
 			m_list-> setSelected ( i, i <= hl );
 
@@ -911,7 +942,8 @@ void CUndoListAction::updateDescriptions ( )
 		else if ( stack )
 			sl = (( m_type == Undo ) ? stack-> undoList ( ) : stack-> redoList ( ));
 	}
-	if ( !sl. isEmpty ( ))
-		m_list-> insertStringList ( sl );
+
+	for ( QStringList::const_iterator it = sl. begin ( ); it != sl. end ( ); ++it )
+		(void) new MyListBoxItem ( m_list, *it );
 }
 

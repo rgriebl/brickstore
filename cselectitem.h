@@ -18,6 +18,8 @@
 
 #include "bricklink.h"
 
+class QListViewItem;
+class QIconViewItem;
 
 class CSelectItemPrivate;
 
@@ -55,6 +57,8 @@ protected slots:
 	void pictureUpdated ( BrickLink::Picture * );
 	void findItem ( );
 	void languageChange ( );
+	void itemContextList ( QListViewItem *, const QPoint & );
+	void itemContextIcon ( QIconViewItem *, const QPoint & );
 
 protected:
 	virtual void showEvent ( QShowEvent * );
@@ -70,6 +74,8 @@ private:
 	ViewMode checkViewMode ( ViewMode ivm, const BrickLink::ItemType *itt, const BrickLink::Category *cat );
 
 	void ensureSelectionVisible ( );
+
+	void itemContext ( const BrickLink::Item *item, const QPoint &pos );
 
 protected:
 	CSelectItemPrivate *d;

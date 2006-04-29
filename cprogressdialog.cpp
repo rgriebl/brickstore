@@ -134,6 +134,7 @@ void CProgressDialog::setFinished ( bool ok )
 	m_override = false;
 
 	m_has_errors = !ok;
+	m_progress-> setProgress ( 100, 100 );
 
 	if ( m_autoclose && ok ) {
 		accept ( );

@@ -34,6 +34,7 @@ signals:
 
 protected slots:
 	virtual void languageChange ( );
+	virtual void reject ( );
 
 protected:
 	virtual void wheelEvent ( QWheelEvent *e );
