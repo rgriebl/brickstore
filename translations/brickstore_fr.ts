@@ -775,7 +775,7 @@
     </message>
     <message>
         <source>New</source>
-        <translation>Neuf</translation>
+        <translation type="obsolete">Neuf</translation>
     </message>
     <message>
         <source>Ctrl+I</source>
@@ -983,6 +983,16 @@
     <message>
         <source>Remark</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>New</source>
+        <comment>File|New</comment>
+        <translation type="unfinished">Neuf</translation>
+    </message>
+    <message>
+        <source>New</source>
+        <comment>Cond|New</comment>
+        <translation type="unfinished">Neuf</translation>
     </message>
 </context>
 <context>

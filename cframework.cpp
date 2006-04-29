@@ -342,7 +342,7 @@ void CFrameWork::languageChange ( )
 	struct {
 		const char *action; QString text; QString accel;
 	} *atptr, actiontable [] = {
-		{ "file_new",                       tr( "New" ),                                tr( "Ctrl+N", "File|New" ) },
+		{ "file_new",                       tr( "New", "File|New" ),                    tr( "Ctrl+N", "File|New" ) },
 		{ "file_open",                      tr( "Open..." ),                            tr( "Ctrl+O", "File|Open" ) },
 		{ "file_open_recent",               tr( "Open Recent" ),                        0 },
 		{ "file_save",                      tr( "Save" ),                               tr( "Ctrl+S", "File|Save" ) },
@@ -405,7 +405,7 @@ void CFrameWork::languageChange ( )
 		{ "edit_status_extra",              tr( "Extra" ),                              0 },
 		{ "edit_status_toggle",             tr( "Toggle Include/Exclude" ),             0 },
 		{ "edit_cond",                      tr( "Condition" ),                          0 },
-		{ "edit_cond_new",                  tr( "New" ),                                0 },
+		{ "edit_cond_new",                  tr( "New", "Cond|New" ),                    0 },
 		{ "edit_cond_used",                 tr( "Used" ),                               0 },
 		{ "edit_cond_toggle",               tr( "Toggle New/Used" ),                    0 },
 		{ "edit_color",                     tr( "Color..." ),                           0 },

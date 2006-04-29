@@ -335,10 +335,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>New</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Ctrl+N</source>
         <comment>File|New</comment>
         <translation type="unfinished"></translation>
@@ -826,6 +822,16 @@
     </message>
     <message>
         <source>Do you want to cancel all outstanding inventory, picture and price guide transfers?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>New</source>
+        <comment>File|New</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>New</source>
+        <comment>Cond|New</comment>
         <translation type="unfinished"></translation>
     </message>
 </context>

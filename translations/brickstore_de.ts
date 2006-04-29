@@ -738,7 +738,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>New</source>
-        <translation>Neu</translation>
+        <translation type="obsolete">Neu</translation>
     </message>
     <message>
         <source>About...</source>
@@ -946,6 +946,16 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <message>
         <source>Remark</source>
         <translation>Anmerkung</translation>
+    </message>
+    <message>
+        <source>New</source>
+        <comment>File|New</comment>
+        <translation>Neu</translation>
+    </message>
+    <message>
+        <source>New</source>
+        <comment>Cond|New</comment>
+        <translation>Neu</translation>
     </message>
 </context>
 <context>
