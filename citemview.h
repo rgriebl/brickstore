@@ -60,7 +60,7 @@ public:
 		friend class CItemView;
 	};
 
-	void editWithLineEdit ( CItemViewItem *ivi, int col, const QString &text, const QString &mask = QString::null, QValidator *valid = 0 );
+	void editWithLineEdit ( CItemViewItem *ivi, int col, const QString &text, const QString &mask = QString::null, QValidator *valid = 0, const QString &empty_value = QString ( ));
 
 	bool isDifferenceMode ( ) const;
 	bool isSimpleMode ( ) const;

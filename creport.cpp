@@ -260,7 +260,7 @@ bool CReportManager::reload ( )
 {
 	m_reports. clear ( );
 
-	QString dir = CResource::inst ( )-> locate ( "reports", CResource::LocateDir );
+	QString dir = CResource::inst ( )-> locate ( "print-templates", CResource::LocateDir );
 
 	if ( !dir. isNull ( )) {
 		QDir d ( dir );

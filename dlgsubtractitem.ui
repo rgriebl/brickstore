@@ -215,6 +215,8 @@
 </connections>
 <tabstops>
     <tabstop>w_clipboard</tabstop>
+    <tabstop>w_document</tabstop>
+    <tabstop>w_doc_list</tabstop>
     <tabstop>w_ok</tabstop>
     <tabstop>buttonCancel</tabstop>
 </tabstops>

@@ -69,8 +69,8 @@ public:
 
 	bool canRedo ( ) const;
 	bool canUndo ( ) const;
-	QAction *createRedoAction ( QObject *parent, const char *name, bool dropdown ) const;
-	QAction *createUndoAction ( QObject *parent, const char *name, bool dropdown ) const;
+	QAction *createRedoAction ( QObject *parent, const char *name ) const;
+	QAction *createUndoAction ( QObject *parent, const char *name ) const;
 	bool isClean ( ) const;
 	void push ( CUndoCmd *command );
 	QString redoDescription ( ) const;
@@ -118,8 +118,8 @@ public:
 	bool canRedo ( ) const;
 	bool canUndo ( ) const;
 
-	QAction *createRedoAction ( QObject *parent, const char *name = 0, bool dropdown = false ) const;
-	QAction *createUndoAction ( QObject *parent, const char *name = 0, bool dropdown = false ) const;
+	QAction *createRedoAction ( QObject *parent, const char *name = 0 ) const;
+	QAction *createUndoAction ( QObject *parent, const char *name = 0 ) const;
 
 	CUndoStack *currentStack ( ) const;
 	void setCurrentStack ( CUndoStack *stack );
@@ -162,6 +162,7 @@ private:
 
 	friend class CUndoStack;
 	friend class CUndoEmitter;
+	friend class CUndoAction;
 
 private:
 	CUndoStack *          m_current;

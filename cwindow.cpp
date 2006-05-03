@@ -1345,20 +1345,7 @@ void CWindow::filePrint ( )
 	if ( !rep )
 		return;
 
-	CDocument::ItemList items = sortedItems ( );
-
-	if ( prt-> printRange ( ) == QPrinter::Selection ) {
-		const CDocument::ItemList &selection = m_doc-> selection ( );
-		CDocument::ItemList sorted_selection;
-
-		foreach ( CDocument::Item *item, items ) {
-			if ( selection. find ( item ) != selection. end ( ))
-				sorted_selection. append ( item );
-		}
-		items = sorted_selection;
-	}
-
-	rep-> print ( prt, m_doc, items );
+	rep-> print ( prt, m_doc, sortedItems ( prt-> printRange ( ) == QPrinter::Selection ));
 }
 
 void CWindow::fileSave ( )

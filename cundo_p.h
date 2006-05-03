@@ -27,28 +27,16 @@ class CUndoStack;
 class CUndoAction : public QAction {
 	Q_OBJECT
 
-public slots:
-	virtual void setDescription ( const QString &str );
-
-private:
-	friend class CUndoManager;
-	friend class CUndoStack;
-	
-	CUndoAction ( const QString &label, QObject *parent, const char *name = 0 );
-
-private:
-	QString m_label;
-};
-
-class CUndoListAction : public QAction {
-	Q_OBJECT
-
 signals:
 	void activated ( int );
+
+public slots:
+	virtual void setDescription ( const QString &str );
 
 protected:
 	virtual void addedTo ( QWidget *w, QWidget *cont );
 	virtual bool eventFilter ( QObject *o, QEvent *e );
+	virtual bool event ( QEvent * );
 
 protected slots:
 	void updateDescriptions ( );
@@ -56,6 +44,7 @@ protected slots:
 	void itemSelected ( QListBoxItem * );
 	void selectRange ( QListBoxItem * );
 	void setCurrentItemSlot ( QListBoxItem *item );
+	void languageChange ( );
 
 private:
 	friend class CUndoManager;
@@ -66,13 +55,14 @@ private:
 		Redo
 	};
 
-	CUndoListAction ( Type t, QObject *parent, const char *name = 0 );
+	CUndoAction ( Type t, QObject *parent, const char *name = 0 );
 	
 private:
 	Type        m_type;
 	QPopupMenu *m_menu;
 	QListBox *  m_list;
 	QLabel *    m_label;
+	QString     m_desc;
 
 	static const char *s_strings [];
 };

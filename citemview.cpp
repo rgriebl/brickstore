@@ -57,6 +57,8 @@ public:
 	bool               m_diff_mode;
 	bool               m_simple_mode;
 
+	QString            m_empty_value;
+
 
 	CItemViewPrivate ( CItemView *view, CDocument *doc )
 	{
@@ -441,7 +443,7 @@ void CItemView::applyFilter ( const QString &filter, int field, bool is_regex )
 	QApplication::restoreOverrideCursor ( );
 }
 
-void CItemView::editWithLineEdit ( CItemViewItem *ivi, int col, const QString &text, const QString &mask, QValidator *valid )
+void CItemView::editWithLineEdit ( CItemViewItem *ivi, int col, const QString &text, const QString &mask, QValidator *valid, const QString &empty_value )
 {
 	if ( !ivi || ( ivi-> listView ( ) != this ) || ( col < 0 ) || ( col >= columns ( )))
 		return;
@@ -453,6 +455,8 @@ void CItemView::editWithLineEdit ( CItemViewItem *ivi, int col, const QString &t
 	d-> m_lineedit-> setInputMask ( mask );
 	d-> m_lineedit-> setText ( text );
 	d-> m_lineedit-> selectAll ( );
+
+	d-> m_empty_value = empty_value;
 
 	edit ( ivi, col, d-> m_lineedit );
 }
@@ -475,6 +479,9 @@ void CItemView::terminateEdit ( bool commit )
 
 		if ( commit ) {
 			if ( w == d-> m_lineedit ) {
+				if ( d-> m_lineedit-> text ( ). isEmpty ( ) && !d-> m_empty_value. isEmpty ( ))
+					d-> m_lineedit-> setText ( d-> m_empty_value );
+
 				emit editDone ( d-> m_active_item, d-> m_active_column, d-> m_lineedit-> text ( ), d-> m_lineedit-> hasAcceptableInput ( ));
 
 				d-> m_active_item-> editDone ( d-> m_active_column, d-> m_lineedit-> text ( ), d-> m_lineedit-> hasAcceptableInput ( ));
@@ -1063,20 +1070,20 @@ void CItemViewItem::doubleClicked ( const QPoint &/*p*/, int col )
 		case CDocument::Comments    : lv-> editWithLineEdit ( this, col, m_item-> comments ( )); break;
 		case CDocument::Remarks     : lv-> editWithLineEdit ( this, col, m_item-> remarks ( )); break;
 		case CDocument::Reserved    : lv-> editWithLineEdit ( this, col, m_item-> reserved ( )); break;
-		case CDocument::Sale        : lv-> editWithLineEdit ( this, col, QString::number ( m_item-> sale ( )),           "", new QIntValidator ( -1000, 99, 0 )); break;
-		case CDocument::Quantity    : lv-> editWithLineEdit ( this, col, QString::number ( m_item-> quantity ( )),       "", new QIntValidator ( -99999, 99999, 0 )); break;
-		case CDocument::QuantityDiff: lv-> editWithLineEdit ( this, col, QString::number ( m_item-> quantity ( ) - m_item-> origQuantity ( )), "", new QIntValidator ( -99999, 99999, 0 )); break;
-		case CDocument::Bulk        : lv-> editWithLineEdit ( this, col, QString::number ( m_item-> bulkQuantity ( )),   "", new QIntValidator ( 1, 99999, 0 )); break;
-		case CDocument::TierQ1      : lv-> editWithLineEdit ( this, col, QString::number ( m_item-> tierQuantity ( 0 )), "", new QIntValidator ( 0, 99999, 0 )); break;
-		case CDocument::TierQ2      : lv-> editWithLineEdit ( this, col, QString::number ( m_item-> tierQuantity ( 1 )), "", new QIntValidator ( 0, 99999, 0 )); break;
-		case CDocument::TierQ3      : lv-> editWithLineEdit ( this, col, QString::number ( m_item-> tierQuantity ( 2 )), "", new QIntValidator ( 0, 99999, 0 )); break;
-		case CDocument::Price       : lv-> editWithLineEdit ( this, col, m_item-> price ( ). toLocalizedString ( true ), "", new CMoneyValidator ( 0, 10000, 3, 0 )); break;
-		case CDocument::PriceDiff   : lv-> editWithLineEdit ( this, col, ( m_item-> price ( ) - m_item-> origPrice ( )). toLocalizedString ( true ), "", new CMoneyValidator ( -10000, 10000, 3, 0 )); break;
+		case CDocument::Sale        : lv-> editWithLineEdit ( this, col, QString::number ( m_item-> sale ( )),           "", new QIntValidator ( -1000, 99, 0 ), "0" ); break;
+		case CDocument::Quantity    : lv-> editWithLineEdit ( this, col, QString::number ( m_item-> quantity ( )),       "", new QIntValidator ( -99999, 99999, 0 ), "0" ); break;
+		case CDocument::QuantityDiff: lv-> editWithLineEdit ( this, col, QString::number ( m_item-> quantity ( ) - m_item-> origQuantity ( )), "", new QIntValidator ( -99999, 99999, 0 ), "0" ); break;
+		case CDocument::Bulk        : lv-> editWithLineEdit ( this, col, QString::number ( m_item-> bulkQuantity ( )),   "", new QIntValidator ( 1, 99999, 0 ), "1" ); break;
+		case CDocument::TierQ1      : lv-> editWithLineEdit ( this, col, QString::number ( m_item-> tierQuantity ( 0 )), "", new QIntValidator ( 0, 99999, 0 ), "0" ); break;
+		case CDocument::TierQ2      : lv-> editWithLineEdit ( this, col, QString::number ( m_item-> tierQuantity ( 1 )), "", new QIntValidator ( 0, 99999, 0 ), "0" ); break;
+		case CDocument::TierQ3      : lv-> editWithLineEdit ( this, col, QString::number ( m_item-> tierQuantity ( 2 )), "", new QIntValidator ( 0, 99999, 0 ), "0" ); break;
+		case CDocument::Price       : lv-> editWithLineEdit ( this, col, m_item-> price ( ). toLocalizedString ( true ), "", new CMoneyValidator ( 0, 10000, 3, 0 ), "0" ); break;
+		case CDocument::PriceDiff   : lv-> editWithLineEdit ( this, col, ( m_item-> price ( ) - m_item-> origPrice ( )). toLocalizedString ( true ), "", new CMoneyValidator ( -10000, 10000, 3, 0 ), "0" ); break;
 		case CDocument::Total       : break;
-		case CDocument::TierP1      : lv-> editWithLineEdit ( this, col, ( m_item-> tierPrice ( 0 ) != 0 ? m_item-> tierPrice ( 0 ) : m_item-> price ( )      ). toLocalizedString ( true ), "", new CMoneyValidator ( 0, 10000, 3, 0 )); break;
-		case CDocument::TierP2      : lv-> editWithLineEdit ( this, col, ( m_item-> tierPrice ( 1 ) != 0 ? m_item-> tierPrice ( 1 ) : m_item-> tierPrice ( 0 )). toLocalizedString ( true ), "", new CMoneyValidator ( 0, 10000, 3, 0 )); break;
-		case CDocument::TierP3      : lv-> editWithLineEdit ( this, col, ( m_item-> tierPrice ( 2 ) != 0 ? m_item-> tierPrice ( 2 ) : m_item-> tierPrice ( 1 )). toLocalizedString ( true ), "", new CMoneyValidator ( 0, 10000, 3, 0 )); break;
-		case CDocument::Weight      : lv-> editWithLineEdit ( this, col, CUtility::weightToString ( m_item-> weight ( ), ( CConfig::inst ( )-> weightSystem ( ) == CConfig::WeightImperial ), false, false ), "", new QDoubleValidator ( 0., 100000., 4, 0 )); break;
+		case CDocument::TierP1      : lv-> editWithLineEdit ( this, col, ( m_item-> tierPrice ( 0 ) != 0 ? m_item-> tierPrice ( 0 ) : m_item-> price ( )      ). toLocalizedString ( true ), "", new CMoneyValidator ( 0, 10000, 3, 0 ), "0" ); break;
+		case CDocument::TierP2      : lv-> editWithLineEdit ( this, col, ( m_item-> tierPrice ( 1 ) != 0 ? m_item-> tierPrice ( 1 ) : m_item-> tierPrice ( 0 )). toLocalizedString ( true ), "", new CMoneyValidator ( 0, 10000, 3, 0 ), "0" ); break;
+		case CDocument::TierP3      : lv-> editWithLineEdit ( this, col, ( m_item-> tierPrice ( 2 ) != 0 ? m_item-> tierPrice ( 2 ) : m_item-> tierPrice ( 1 )). toLocalizedString ( true ), "", new CMoneyValidator ( 0, 10000, 3, 0 ), "0" ); break;
+		case CDocument::Weight      : lv-> editWithLineEdit ( this, col, CUtility::weightToString ( m_item-> weight ( ), ( CConfig::inst ( )-> weightSystem ( ) == CConfig::WeightImperial ), false, false ), "", new QDoubleValidator ( 0., 100000., 4, 0 ), "0" ); break;
 
 		case CDocument::Retain      : {
 			CDocument::Item item = *m_item;

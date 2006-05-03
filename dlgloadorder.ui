@@ -211,5 +211,11 @@
         <slot>reject()</slot>
     </connection>
 </connections>
+<tabstops>
+    <tabstop>w_number</tabstop>
+    <tabstop>radioButton5</tabstop>
+    <tabstop>w_ok</tabstop>
+    <tabstop>buttonCancel</tabstop>
+</tabstops>
 <layoutdefaults spacing="6" margin="11"/>
 </UI>

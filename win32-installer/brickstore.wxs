@@ -164,11 +164,9 @@
                   <File DiskId="1" Id="i16x16_edit_price_inc_dec.png"        Name="imageao0.png" LongName="edit_price_inc_dec.png"        src="$(var.TARGET)\images\16x16\edit_price_inc_dec.png" />
                   <File DiskId="1" Id="i16x16_edit_price_to_priceguide.png"  Name="imageap0.png" LongName="edit_price_to_priceguide.png"  src="$(var.TARGET)\images\16x16\edit_price_to_priceguide.png" />
                   <File DiskId="1" Id="i16x16_edit_redo.png"                 Name="imageaq0.png" LongName="edit_redo.png"                 src="$(var.TARGET)\images\16x16\edit_redo.png" />
-                  <File DiskId="1" Id="i16x16_edit_redo_list.png"            Name="imageaq1.png" LongName="edit_redo_list.png"            src="$(var.TARGET)\images\16x16\edit_redo_list.png" />
                   <File DiskId="1" Id="i16x16_edit_sale.png"                 Name="imagear0.png" LongName="edit_sale.png"                 src="$(var.TARGET)\images\16x16\edit_sale.png" />
                   <File DiskId="1" Id="i16x16_edit_subtractitems.png"        Name="imageas0.png" LongName="edit_subtractitems.png"        src="$(var.TARGET)\images\16x16\edit_subtractitems.png" />
                   <File DiskId="1" Id="i16x16_edit_undo.png"                 Name="imageat0.png" LongName="edit_undo.png"                 src="$(var.TARGET)\images\16x16\edit_undo.png" />
-                  <File DiskId="1" Id="i16x16_edit_undo_list.png"            Name="imageat1.png" LongName="edit_undo_list.png"            src="$(var.TARGET)\images\16x16\edit_undo_list.png" />
                   <File DiskId="1" Id="i16x16_extras_configure.png"          Name="imageau0.png" LongName="extras_configure.png"          src="$(var.TARGET)\images\16x16\extras_configure.png" />
                   <File DiskId="1" Id="i16x16_extras_update_database.png"    Name="imageav0.png" LongName="extras_update_database.png"    src="$(var.TARGET)\images\16x16\extras_update_database.png" />
                   <File DiskId="1" Id="i16x16_file_close.png"                Name="imageaw0.png" LongName="file_close.png"                src="$(var.TARGET)\images\16x16\file_close.png" />
@@ -234,11 +232,9 @@
                   <File DiskId="1" Id="i22x22_edit_price_inc_dec.png"        Name="imageao0.png" LongName="edit_price_inc_dec.png"        src="$(var.TARGET)\images\22x22\edit_price_inc_dec.png" />
                   <File DiskId="1" Id="i22x22_edit_price_to_priceguide.png"  Name="imageap0.png" LongName="edit_price_to_priceguide.png"  src="$(var.TARGET)\images\22x22\edit_price_to_priceguide.png" />
                   <File DiskId="1" Id="i22x22_edit_redo.png"                 Name="imageaq0.png" LongName="edit_redo.png"                 src="$(var.TARGET)\images\22x22\edit_redo.png" />
-                  <File DiskId="1" Id="i22x22_edit_redo_list.png"            Name="imageaq1.png" LongName="edit_redo_list.png"            src="$(var.TARGET)\images\22x22\edit_redo_list.png" />
                   <File DiskId="1" Id="i22x22_edit_sale.png"                 Name="imagear0.png" LongName="edit_sale.png"                 src="$(var.TARGET)\images\22x22\edit_sale.png" />
                   <File DiskId="1" Id="i22x22_edit_subtractitems.png"        Name="imageas0.png" LongName="edit_subtractitems.png"        src="$(var.TARGET)\images\22x22\edit_subtractitems.png" />
                   <File DiskId="1" Id="i22x22_edit_undo.png"                 Name="imageat0.png" LongName="edit_undo.png"                 src="$(var.TARGET)\images\22x22\edit_undo.png" />
-                  <File DiskId="1" Id="i22x22_edit_undo_list.png"            Name="imageat1.png" LongName="edit_undo_list.png"            src="$(var.TARGET)\images\22x22\edit_undo_list.png" />
                   <File DiskId="1" Id="i22x22_extras_configure.png"          Name="imageau0.png" LongName="extras_configure.png"          src="$(var.TARGET)\images\22x22\extras_configure.png" />
                   <File DiskId="1" Id="i22x22_extras_update_database.png"    Name="imageav0.png" LongName="extras_update_database.png"    src="$(var.TARGET)\images\22x22\extras_update_database.png" />
                   <File DiskId="1" Id="i22x22_file_close.png"                Name="imageaw0.png" LongName="file_close.png"                src="$(var.TARGET)\images\22x22\file_close.png" />

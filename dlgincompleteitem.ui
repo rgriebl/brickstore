@@ -512,6 +512,12 @@
         <slot>reject()</slot>
     </connection>
 </connections>
+<tabstops>
+    <tabstop>w_fix_item</tabstop>
+    <tabstop>w_fix_color</tabstop>
+    <tabstop>w_ok</tabstop>
+    <tabstop>w_delete</tabstop>
+</tabstops>
 <layoutdefaults spacing="6" margin="11"/>
 <includehints>
     <includehint>curllabel.h</includehint>

@@ -198,45 +198,27 @@ bool CUndoStack::canUndo ( ) const
 	return ( m_current != 0 ) && !m_macro_level;
 }
 
-QAction *CUndoStack::createRedoAction ( QObject *parent, const char *name, bool dropdown ) const
+QAction *CUndoStack::createRedoAction ( QObject *parent, const char *name ) const
 {
-	QAction *a;
-
-	if ( dropdown ) {
-		a = new CUndoListAction ( CUndoListAction::Redo, parent, name );
-
-		connect ( this, SIGNAL( redoDescriptionChanged ( const QString & )), a, SLOT( updateDescriptions ( )));
-		connect ( a, SIGNAL( activated ( int )), this, SLOT( redo ( int )));
-	}
-	else {
-		a = new CUndoAction ( CUndoManager::redoText ( ), parent, name );
-		connect ( this, SIGNAL( redoDescriptionChanged ( const QString & )), a, SLOT( setDescription ( const QString & )));
-	}
+	QAction *a = new CUndoAction ( CUndoAction::Redo, parent, name );
 	a-> setEnabled ( canRedo ( ));
 
+	connect ( this, SIGNAL( redoDescriptionChanged ( const QString & )), a, SLOT( updateDescriptions ( )));
 	connect ( this, SIGNAL( canRedoChanged ( bool )), a, SLOT( setEnabled ( bool )));
+	connect ( a, SIGNAL( activated ( int )), this, SLOT( redo ( int )));
 	connect ( a, SIGNAL( activated ( )), this, SLOT( redo ( )));
 
 	return a;
 }
 
-QAction *CUndoStack::createUndoAction ( QObject *parent, const char *name, bool dropdown ) const
+QAction *CUndoStack::createUndoAction ( QObject *parent, const char *name ) const
 {
-	QAction *a;
-
-	if ( dropdown ) {
-		a = new CUndoListAction ( CUndoListAction::Undo, parent, name );
-
-		connect ( this, SIGNAL( undoDescriptionChanged ( const QString & )), a, SLOT( updateDescriptions ( )));
-		connect ( a, SIGNAL( activated ( int )), this, SLOT( undo ( int )));
-	}
-	else {
-		a = new CUndoAction ( CUndoManager::undoText ( ), parent, name );
-		connect ( this, SIGNAL( undoDescriptionChanged ( const QString & )), a, SLOT( setDescription ( const QString & )));
-	}
+	QAction *a = new CUndoAction ( CUndoAction::Undo, parent, name );
 	a-> setEnabled ( canUndo ( ));
 
+	connect ( this, SIGNAL( undoDescriptionChanged ( const QString & )), a, SLOT( updateDescriptions ( )));
 	connect ( this, SIGNAL( canUndoChanged ( bool )), a, SLOT( setEnabled ( bool )));
+	connect ( a, SIGNAL( activated ( int )), this, SLOT( undo ( int )));
 	connect ( a, SIGNAL( activated ( )), this, SLOT( undo ( )));
 
 	return a;
@@ -544,45 +526,27 @@ void CUndoManager::undo ( int count )
 	}
 }
 
-QAction *CUndoManager::createRedoAction ( QObject *parent, const char *name, bool dropdown ) const
+QAction *CUndoManager::createRedoAction ( QObject *parent, const char *name ) const
 {
-	QAction *a;
-
-	if ( dropdown ) {
-		a = new CUndoListAction ( CUndoListAction::Redo, parent, name );
-
-		connect ( this, SIGNAL( redoDescriptionChanged ( const QString & )), a, SLOT( updateDescriptions ( )));
-		connect ( a, SIGNAL( activated ( int )), this, SLOT( redo ( int )));
-	}
-	else {
-		a = new CUndoAction ( CUndoManager::redoText ( ), parent, name );
-		connect ( this, SIGNAL( redoDescriptionChanged ( const QString & )), a, SLOT( setDescription ( const QString & )));
-	}
+	QAction *a = new CUndoAction ( CUndoAction::Redo, parent, name );
 	a-> setEnabled ( canRedo ( ));
 
+	connect ( this, SIGNAL( redoDescriptionChanged ( const QString & )), a, SLOT( updateDescriptions ( )));
 	connect ( this, SIGNAL( canRedoChanged ( bool )), a, SLOT( setEnabled ( bool )));
+	connect ( a, SIGNAL( activated ( int )), this, SLOT( redo ( int )));
 	connect ( a, SIGNAL( activated ( )), this, SLOT( redo ( )));
 
 	return a;
 }
 
-QAction *CUndoManager::createUndoAction ( QObject *parent, const char *name, bool dropdown ) const
+QAction *CUndoManager::createUndoAction ( QObject *parent, const char *name ) const
 {
-	QAction *a;
-
-	if ( dropdown ) {
-		a = new CUndoListAction ( CUndoListAction::Undo, parent, name );
-
-		connect ( this, SIGNAL( undoDescriptionChanged ( const QString & )), a, SLOT( updateDescriptions ( )));
-		connect ( a, SIGNAL( activated ( int )), this, SLOT( undo ( int )));
-	}
-	else {
-		a = new CUndoAction ( CUndoManager::undoText ( ), parent, name );
-		connect ( this, SIGNAL( undoDescriptionChanged ( const QString & )), a, SLOT( setDescription ( const QString & )));
-	}
+	QAction *a = new CUndoAction ( CUndoAction::Undo, parent, name );
 	a-> setEnabled ( canUndo ( ));
 
+	connect ( this, SIGNAL( undoDescriptionChanged ( const QString & )), a, SLOT( updateDescriptions ( )));
 	connect ( this, SIGNAL( canUndoChanged ( bool )), a, SLOT( setEnabled ( bool )));
+	connect ( a, SIGNAL( activated ( int )), this, SLOT( undo ( int )));
 	connect ( a, SIGNAL( activated ( )), this, SLOT( undo ( )));
 
 	return a;
@@ -737,21 +701,6 @@ void CUndoManager::stackDestroyed ( QObject *stack )
 
 // --------------------------------------------------------------------------
 
-CUndoAction::CUndoAction ( const QString &label, QObject *parent, const char *name )
-	: QAction ( parent, name ) , m_label ( label )
-{ 
-	setText ( m_label );
-}
-
-void CUndoAction::setDescription ( const QString &desc )
-{
-	QString str = m_label;
-	if ( !desc. isEmpty ( ))
-		str = QString( "%1  (%2)" ). arg( str, desc );
-	
-	setText ( str ); 
-}
-
 namespace {
 
 class MyListBox : public QListBox {
@@ -793,7 +742,7 @@ protected:
 		int i = mlb-> index ( this );
 
 		if ( i <= mlb-> m_highlight ) {
-			p-> fillRect ( 0, 0, width ( mlb ), height ( mlb ), mlb-> colorGroup ( ). brush ( QColorGroup::Highlight ));
+			p-> fillRect ( 0, 0, mlb-> contentsWidth ( ), height ( mlb ), mlb-> colorGroup ( ). brush ( QColorGroup::Highlight ));
 		    p-> setPen ( mlb-> colorGroup ( ). highlightedText ( ));
 		}
 
@@ -832,24 +781,52 @@ private:
 }
 
 
-const char *CUndoListAction::s_strings [] = {
+const char *CUndoAction::s_strings [] = {
 	QT_TRANSLATE_NOOP( "CUndoManager", "Undo %1 Actions" ),
 	QT_TRANSLATE_NOOP( "CUndoManager", "Undo Action" ),
 	QT_TRANSLATE_NOOP( "CUndoManager", "Redo %1 Actions" ),
 	QT_TRANSLATE_NOOP( "CUndoManager", "Redo Action" )
 };
 
-CUndoListAction::CUndoListAction ( Type t, QObject *parent, const char *name )
+CUndoAction::CUndoAction ( Type t, QObject *parent, const char *name )
 	: QAction ( parent, name ) 
 { 
 	m_type = t;
 	m_menu = 0;
 	m_list = 0;
 	m_label = 0;
+
+	languageChange ( );
+}
+
+void CUndoAction::setDescription ( const QString &desc )
+{
+	m_desc = desc;
+	QString str = ( m_type == Undo ) ? CUndoManager::undoText ( ) : CUndoManager::redoText ( );
+	if ( !desc. isEmpty ( ))
+		str = str +  "  (" + desc + ")";
+	
+	setText ( str ); 
+}
+
+bool CUndoAction::event ( QEvent *e )
+{
+	if ( e-> type ( ) == QEvent::LanguageChange )
+		languageChange ( );
+
+	return QAction::event ( e );
+}
+
+void CUndoAction::languageChange ( )
+{
+	setDescription ( m_desc );
+
+	if ( m_menu )
+		m_menu-> resize ( m_menu-> sizeHint ( ));
 }
 
 
-void CUndoListAction::addedTo ( QWidget *w, QWidget *cont )
+void CUndoAction::addedTo ( QWidget *w, QWidget *cont )
 {
 	if ( cont-> inherits ( "QToolBar" ) && w-> inherits ( "QToolButton" )) {
 		QToolButton *tb = static_cast <QToolButton *> ( w );
@@ -859,6 +836,7 @@ void CUndoListAction::addedTo ( QWidget *w, QWidget *cont )
 		tb-> setPopupDelay ( 0 );
 
 		m_list = new MyListBox ( m_menu );
+		m_list-> setFrameStyle ( QFrame::NoFrame );
 		m_list-> setSelectionMode ( QListBox::Multi );
 		m_list-> setHScrollBarMode ( QScrollView::AlwaysOff );
 		m_list-> setMouseTracking ( true );
@@ -868,6 +846,7 @@ void CUndoListAction::addedTo ( QWidget *w, QWidget *cont )
 		m_label-> setAlignment ( Qt::AlignCenter );
 		m_label-> installEventFilter ( this );
 		m_label-> setPalette ( QApplication::palette ( m_menu ));
+		m_label-> setBackgroundMode ( m_menu-> backgroundMode ( ));
 		m_menu-> insertItem ( m_label );
 
 		connect ( m_list, SIGNAL( onItem ( QListBoxItem * )),         this, SLOT( setCurrentItemSlot ( QListBoxItem * )));
@@ -880,7 +859,7 @@ void CUndoListAction::addedTo ( QWidget *w, QWidget *cont )
 	QAction::addedTo ( w, cont );
 }
 
-bool CUndoListAction::eventFilter ( QObject *o, QEvent *e )
+bool CUndoAction::eventFilter ( QObject *o, QEvent *e )
 {
 	if (( o == m_label ) && ( e-> type ( ) == QEvent::MouseButtonPress ) && ( static_cast <QMouseEvent *> ( e )-> button ( ) == Qt::LeftButton ))
 		m_menu-> close ( );
@@ -888,18 +867,18 @@ bool CUndoListAction::eventFilter ( QObject *o, QEvent *e )
 	return QAction::eventFilter ( o, e );
 }
 
-void CUndoListAction::setCurrentItemSlot ( QListBoxItem *item )
+void CUndoAction::setCurrentItemSlot ( QListBoxItem *item )
 {
 	m_list-> setCurrentItem ( item );
 }
 
-void CUndoListAction::fixMenu ( )
+void CUndoAction::fixMenu ( )
 {
 	m_list-> setCurrentItem ( m_list-> firstItem ( ));
 	selectRange ( m_list-> firstItem ( ));
 }
 
-void CUndoListAction::selectRange ( QListBoxItem *item )
+void CUndoAction::selectRange ( QListBoxItem *item )
 {
 	if ( item ) {
 		int hl = m_list-> index ( item );
@@ -917,7 +896,7 @@ void CUndoListAction::selectRange ( QListBoxItem *item )
 }
 
 
-void CUndoListAction::itemSelected ( QListBoxItem *item )
+void CUndoAction::itemSelected ( QListBoxItem *item )
 {
 	if ( item ) {
 		m_menu-> close ( );
@@ -926,11 +905,10 @@ void CUndoListAction::itemSelected ( QListBoxItem *item )
 }
 
 
-void CUndoListAction::updateDescriptions ( )
+void CUndoAction::updateDescriptions ( )
 {
 	const QObject *s = sender ( );
 
-	m_list-> clear ( );
 	QStringList sl;
 
 	if ( s ) {
@@ -943,7 +921,12 @@ void CUndoListAction::updateDescriptions ( )
 			sl = (( m_type == Undo ) ? stack-> undoList ( ) : stack-> redoList ( ));
 	}
 
-	for ( QStringList::const_iterator it = sl. begin ( ); it != sl. end ( ); ++it )
-		(void) new MyListBoxItem ( m_list, *it );
+	if ( m_list ) {
+		m_list-> clear ( );
+		for ( QStringList::const_iterator it = sl. begin ( ); it != sl. end ( ); ++it )
+			(void) new MyListBoxItem ( m_list, *it );
+	}
+
+	setDescription ( sl. isEmpty ( ) ? QString ( ) : sl. front ( ));
 }
 

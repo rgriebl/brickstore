@@ -214,7 +214,7 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Toolbar/Buttons" );
 	if ( sl. isEmpty ( ))  sl << "file_new" << "file_open" << "file_save" << "-" 
 	                          << "file_import" << "file_export" << "-" 
-							  << "edit_undo_list" << "edit_redo_list" << "-"
+							  << "edit_undo" << "edit_redo" << "-"
 							  << "edit_cut" << "edit_copy" << "edit_paste" << "-" 
 							  << "edit_additems" << "edit_subtractitems" << "edit_mergeitems" << "edit_partoutitems" << "-" 
 							  << "edit_price_to_priceguide" << "edit_price_inc_dec" << "-" 
@@ -716,8 +716,6 @@ void CFrameWork::createActions ( )
 
 	(void) CUndoManager::inst ( )-> createUndoAction ( this, "edit_undo" );
 	(void) CUndoManager::inst ( )-> createRedoAction ( this, "edit_redo" );
-	(void) CUndoManager::inst ( )-> createUndoAction ( this, "edit_undo_list", true );
-	(void) CUndoManager::inst ( )-> createRedoAction ( this, "edit_redo_list", true );
 
 	(void) new QAction ( this, "edit_cut" );
 	(void) new QAction ( this, "edit_copy" );
