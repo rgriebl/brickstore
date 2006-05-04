@@ -27,6 +27,8 @@ private:
 public:
 	virtual ~CSplash ( );
 	static CSplash *inst ( );
+
+	void message ( const QString &msg );
 };
 
 #endif

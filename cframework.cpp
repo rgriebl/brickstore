@@ -45,6 +45,7 @@
 #include "ctaskwidgets.h"
 #include "cprogressdialog.h"
 #include "cupdatedatabase.h"
+#include "csplash.h"
 
 #include "dlgadditemimpl.h"
 #include "dlgsettingsimpl.h"
@@ -208,7 +209,7 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 	m_menuid_help = menuBar ( )-> insertItem ( QString ( ), createMenu ( sl ));
 
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/ContextMenu/Item" );
-	if ( sl. isEmpty ( ))  sl << "edit_cut" << "edit_copy" << "edit_paste" << "edit_delete" << "-" << "edit_select_all" << "-" << "edit_mergeitems" << "edit_partoutitems" << "-" << "edit_modify" << "-" << "edit_bl_info_group";
+	if ( sl. isEmpty ( ))  sl << "edit_cut" << "edit_copy" << "edit_paste" << "edit_delete" << "-" << "edit_select_all" << "-" << "edit_mergeitems" << "edit_partoutitems" << "-" << "edit_modify_context" << "-" << "edit_bl_info_group";
 	m_contextmenu = createMenu ( sl );
 
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Toolbar/Buttons" );
@@ -299,6 +300,8 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 
 	connect ( m_progress, SIGNAL( statusChange ( bool )), m_spinner, SLOT( setActive ( bool )));
 	connect ( CUndoManager::inst ( ), SIGNAL( cleanChanged ( bool )), this, SLOT( modificationUpdate ( )));
+
+	CSplash::inst ( )-> message ( qApp-> translate ( "CSplash", "Loading Database..." ));
 
 	bool dbok = BrickLink::inst ( )-> readDatabase ( );
 
@@ -658,7 +661,7 @@ void CFrameWork::createActions ( )
 {
 	QAction *a;
 	CListAction *l;
-	QActionGroup *g, *g2;
+	QActionGroup *g, *g2, *g3;
 
 	a = new QAction ( this, "file_new" );
 	connect ( a, SIGNAL( activated ( )), this, SLOT( fileNew ( )));
@@ -732,6 +735,7 @@ void CFrameWork::createActions ( )
 	(void) new QAction ( this, "edit_select_none" );
 
 	g = new QActionGroup ( this, "edit_modify", false );
+	g3 = new QActionGroup ( this, "edit_modify_context", false );
 
 	g2 = new QActionGroup ( g, "edit_status", false );
 	g2-> setUsesDropDown ( true );
@@ -740,6 +744,7 @@ void CFrameWork::createActions ( )
 	( new QAction ( g2, "edit_status_extra",   true ))-> setIconSet ( CResource::inst ( )-> pixmap ( "status_extra" ));
 	g2-> addSeparator ( );
 	(void) new QAction ( g2, "edit_status_toggle" );
+	g3-> add ( g2 );
 
 	g2 = new QActionGroup ( g, "edit_cond", false );
 	g2-> setUsesDropDown ( true );
@@ -747,18 +752,21 @@ void CFrameWork::createActions ( )
 	(void) new QAction ( g2, "edit_cond_used", true );
 	g2-> addSeparator ( );
 	(void) new QAction ( g2, "edit_cond_toggle" );
+	g3-> add ( g2 );
 
-	(void) new QAction ( g, "edit_color" );
+	g3-> add ( new QAction ( g, "edit_color" ));
 
 	g2 = new QActionGroup ( g, "edit_qty", false );
 	g2-> setUsesDropDown ( true );
 	(void) new QAction ( g2, "edit_qty_multiply" );
 	(void) new QAction ( g2, "edit_qty_divide" );
+	g3-> add ( g2 );
 
 	g2 = new QActionGroup ( g, "edit_price", false );
 	g2-> setUsesDropDown ( true );
 	(void) new QAction ( g2, "edit_price_inc_dec" );
 	(void) new QAction ( g2, "edit_price_to_priceguide" );
+	g3-> add ( g2 );
 
 	(void) new QAction ( g, "edit_bulk" );
 	(void) new QAction ( g, "edit_sale" );
@@ -776,6 +784,8 @@ void CFrameWork::createActions ( )
 	g2-> addSeparator ( );
 	(void) new QAction ( g2, "edit_remark_add" );
 	(void) new QAction ( g2, "edit_remark_rem" );
+	g3-> add ( g2 );
+
 	//tier
 
 	g2 = new QActionGroup ( g, "edit_retain", false );

@@ -36,20 +36,21 @@ CSplash *CSplash::inst ( )
 CSplash::CSplash ( )
 	: QSplashScreen ( QPixmap ( 1, 1 ), WDestructiveClose )
 {
+	float d = qApp-> desktop ( )-> height ( ) / 1200.f;
+
 	QFont f = QApplication::font ( );
-	f. setBold ( true );
+	f. setPixelSizeFloat ( QMAX( 14.f * d, 10.f ));
 	setFont ( f );
 	QFontMetrics fm ( f );
-	QSize s ( 20 + fm. width ( "x" ) * 50, 10 + fm. height ( ) * 10 );
 
-	QPixmap pixt, pixb;
-	pixb. convertFromImage ( CUtility::createGradient ( QSize ( s. width ( ), s. height ( ) / 2 ), Qt::Vertical, QColor ( 255, 255, 255 ), QColor ( 160, 160, 160 ), -150.0f ));
-	pixt. convertFromImage ( CUtility::createGradient ( QSize ( s. width ( ), s. height ( ) / 2 ), Qt::Vertical, QColor ( 255, 255, 255 ), QColor ( 160, 160, 160 ),  150.0f ));
+	QSize s ( 20 + fm. width ( "x" ) * 50, 10 + fm. height ( ) * 8 );
+
+	QImage gradient = CUtility::createGradient ( QSize ( s. width ( ), s. height ( ) / 2 ), Qt::Vertical, QColor ( 255, 255, 255 ), QColor ( 160, 160, 160 ),  150.0f );
 
 	QPixmap pix ( s );
 	QPainter p ( &pix, this );
-	p. drawPixmap ( 0, 0, pixt);
-	p. drawPixmap ( 0, s. height ( ) / 2, pixb );
+	p. drawImage ( 0, 0, gradient );
+	p. drawImage ( 0, s. height ( ) / 2, gradient. mirror ( false, true ));
 
 	p. setPen ( QColor ( 232, 232, 232 ));
 	for ( int i = s. height ( ) / 5; i < ( s. height ( ) - s. height ( ) / 5 + 5 ); i += s. height ( ) / 20 )
@@ -57,7 +58,7 @@ CSplash::CSplash ( )
 	p. setPen ( QColor ( 0, 0, 0 ));
 
 	QFont f2 = f;
-	f2. setPointSize ( f2. pointSize ( ) * 2 );
+	f2. setPixelSize ( f2.pixelSize ( ) * 2 );
 	f2. setBold ( true );
 	p. setFont ( f2 );
 
@@ -75,11 +76,15 @@ CSplash::CSplash ( )
 	p. end ( );
 
 	setPixmap ( pix );
-	message ( tr( "Loading Database..." ), Qt::AlignHCenter | Qt::AlignBottom );
 }
 
 CSplash::~CSplash ( )
 {
 	s_inst = 0;
 	s_dont_show = true;
+}
+
+void CSplash::message ( const QString &msg )
+{
+	QSplashScreen::message ( msg, Qt::AlignHCenter | Qt::AlignBottom );
 }

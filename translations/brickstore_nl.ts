@@ -3,92 +3,96 @@
     <name>BrickLink</name>
     <message>
         <source>Data directory &apos;%1&apos; is not both read- and writable.</source>
-        <translation type="unfinished"></translation>
+        <translation>De bestanden map &apos;%1&apos; is niet zowel lees- als schrijfbaar.</translation>
     </message>
     <message>
         <source>HTTP transfer threads could not be started.</source>
-        <translation type="unfinished"></translation>
+        <translation>HTTP transport threads konden niet worden gestart.</translation>
     </message>
 </context>
 <context>
     <name>CAddRemoveCmd</name>
     <message>
         <source>Added %1 Items</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 items toegevoegd</translation>
     </message>
     <message>
         <source>Added an Item</source>
-        <translation type="unfinished"></translation>
+        <translation>Item toegevoegd</translation>
     </message>
     <message>
         <source>Removed %1 Items</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 items verwijderd</translation>
     </message>
     <message>
         <source>Removed an Item</source>
-        <translation type="unfinished"></translation>
+        <translation>Item verwijderd</translation>
     </message>
 </context>
 <context>
     <name>CAppearsInWidget</name>
     <message>
         <source>[Image is loading]</source>
-        <translation type="unfinished"></translation>
+        <translation>[Afbeelding wordt geladen]</translation>
     </message>
     <message>
         <source>Qty.</source>
-        <translation type="unfinished"></translation>
+        <translation>Aantal</translation>
     </message>
     <message>
         <source>Set</source>
-        <translation type="unfinished"></translation>
+        <translation>Set</translation>
     </message>
     <message>
         <source>Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Naam</translation>
     </message>
     <message>
         <source>Part out Item...</source>
-        <translation type="unfinished"></translation>
+        <translation>Item opsplitsen...</translation>
     </message>
 </context>
 <context>
     <name>CApplication</name>
     <message>
         <source>Could not initialize the BrickLink kernel:&lt;br /&gt;&lt;br /&gt;%1</source>
-        <translation type="unfinished"></translation>
+        <translation>De BrickLink kernel kon niet worden gestart:&lt;br /&gt;&lt;br /&gt;%1</translation>
     </message>
     <message>
         <source>Legal Info</source>
-        <translation type="unfinished"></translation>
+        <translation>Juridische Info</translation>
     </message>
     <message>
         <source>System Info</source>
-        <translation type="unfinished"></translation>
+        <translation>Systeem Info</translation>
     </message>
     <message>
         <source>Copyright &amp;copy; %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Copyright &amp;copy; %1</translation>
     </message>
     <message>
         <source>Version %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Versie %1</translation>
     </message>
     <message>
         <source>Visit %1, or send an email to %2</source>
-        <translation type="unfinished"></translation>
+        <translation>Bezoek %1, of stuur een email naar %2</translation>
     </message>
     <message>
         <source>&lt;p&gt;This program is free software; it may be distributed and/or modified under the terms of the GNU General Public License version 2 as published by the Free Software Foundation and appearing in the file LICENSE.GPL included in this software package.&lt;br /&gt;This program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.&lt;br /&gt;See &lt;a href=&quot;http://fsf.org/licensing/licenses/gpl.html&quot;&gt;www.fsf.org/licensing/licenses/gpl.html&lt;/a&gt; for GPL licensing information.&lt;/p&gt;&lt;p&gt;All data from &lt;a href=&quot;http://www.bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; is owned by BrickLink&lt;sup&gt;TM&lt;/sup&gt;, which is a trademark of Dan Jezek.&lt;/p&gt;&lt;p&gt;Peeron Inventories from &lt;a href=&quot;http://www.peeron.com&quot;&gt;www.peeron.com&lt;/a&gt; are owned by Dan and Jennifer Boger.&lt;/p&gt;&lt;p&gt;LEGO&lt;sup&gt;&amp;reg;&lt;/sup&gt; is a trademark of the LEGO group of companies, which does not sponsor, authorize or endorse this software.&lt;/p&gt;&lt;p&gt;All other trademarks recognised.&lt;/p&gt;&lt;p&gt;French translation by Sylvain Perez (&lt;a href=&quot;mailto:bricklink@1001bricks.com&quot;&gt;1001bricks&lt;/a&gt;)&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">&lt;p&gt;Dit programma is vrije software. U kunt het onder de voorwaarden van de GNU General Public License Version 2, zoals gepubliceerd door de Free Software Foundation en in het bestand LICENSE.GPL van dit software pakket te lezen, doorgeven en/of aanpassen.&lt;br /&gt;De openbaarmaking van dit programma gebeurd in de hoop dat het U van nut kan zijn, maar ZONDER ENIGE GARANTIE, zelfs zonder de impliciete garantie dat het programma MARKTRIJP is, of de BRUIKBAARHEID VOOR EEN BEPAALD DOEL.&lt;br /&gt;Gedetailleerde GPL License informatie vind U hier: &lt;a href=&quot;http://fsf.org/licensing/licenses/gpl.html&quot;&gt;www.fsf.org/licensing/licenses/gpl.html&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Alle gegevens van &lt;a href=&quot;http://www.bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; zijn eigendom van BrickLink&lt;sup&gt;TM&lt;/sup&gt;, hetgeen een handelsmerk is van Dan Jezek.&lt;/p&gt;&lt;p&gt;Peeron inventarissen van &lt;a href=&quot;http://www.peeron.com&quot;&gt;www.peeron.com&lt;/a&gt; zijn eigendom van Dan en Jennifer Boger.&lt;/p&gt;&lt;p&gt;LEGO&lt;sup&gt;&amp;reg;&lt;/sup&gt; is een  handelsmerk van de LEGO groep, welke deze software niet gesponsored of erkend heeft.&lt;/p&gt;&lt;p&gt;Alle andere handelsmerken worden, ook wanneer niet expliciet vermeld, erkend .&lt;/p&gt;&lt;p&gt;Franse vertaling door Sylvain Perez (&lt;a href=&quot;mailto:bricklink@1001bricks.com&quot;&gt;1001bricks&lt;/a&gt;)&lt;/p&gt;</translation>
     </message>
     <message>
         <source>BrickStore is currently running in &lt;b&gt;Demo&lt;/b&gt; mode.&lt;br /&gt;&lt;br /&gt;The complete functionality is accessible, but this reminder will pop up every 20 minutes.&lt;br /&gt;&lt;br /&gt;You can change the mode of operation at anytime via &lt;b&gt;Help &gt; Registration...&lt;/b&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>BrickStore draait momenteel in &lt;b&gt;Demo&lt;/b&gt; mode.&lt;br /&gt;&lt;br /&gt;De complete functionaliteit is beschikbaar, maar deze herinnering zal elke 20 minuten terugkomen.&lt;br /&gt;&lt;br /&gt;U kunt op elk moment wisselen tussen de verschillende modes via &lt;b&gt;Help &gt; Registratie...&lt;/b&gt;</translation>
     </message>
     <message>
         <source>The program has to be restarted to activate the Demo mode.</source>
-        <translation type="unfinished"></translation>
+        <translation>Het programma moet opnieuw worden gestart om de Demo mode te activeren.</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;This program is free software; it may be distributed and/or modified under the terms of the GNU General Public License version 2 as published by the Free Software Foundation and appearing in the file LICENSE.GPL included in this software package.&lt;br /&gt;This program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.&lt;br /&gt;See &lt;a href=&quot;http://fsf.org/licensing/licenses/gpl.html&quot;&gt;www.fsf.org/licensing/licenses/gpl.html&lt;/a&gt; for GPL licensing information.&lt;/p&gt;&lt;p&gt;All data from &lt;a href=&quot;http://www.bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; is owned by BrickLink&lt;sup&gt;TM&lt;/sup&gt;, which is a trademark of Dan Jezek.&lt;/p&gt;&lt;p&gt;Peeron Inventories from &lt;a href=&quot;http://www.peeron.com&quot;&gt;www.peeron.com&lt;/a&gt; are owned by Dan and Jennifer Boger.&lt;/p&gt;&lt;p&gt;LEGO&lt;sup&gt;&amp;reg;&lt;/sup&gt; is a trademark of the LEGO group of companies, which does not sponsor, authorize or endorse this software.&lt;/p&gt;&lt;p&gt;All other trademarks recognised.&lt;/p&gt;&lt;p&gt;French translation by Sylvain Perez (&lt;a href=&quot;mailto:bricklink@1001bricks.com&quot;&gt;bricklink@1001bricks.com&lt;/a&gt;)&lt;br /&gt;Dutch translation by Eric van Horssen (&lt;a href=&quot;mailto:horzel@hacktic.nl&quot;&gt;horzel@hacktic.nl&lt;/a&gt;)&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Dit programma is vrije software. U kunt het onder de voorwaarden van de GNU General Public License Version 2, zoals gepubliceerd door de Free Software Foundation en in het bestand LICENSE.GPL van dit software pakket te lezen, doorgeven en/of aanpassen.&lt;br /&gt;De openbaarmaking van dit programma gebeurd in de hoop dat het U van nut kan zijn, maar ZONDER ENIGE GARANTIE, zelfs zonder de impliciete garantie dat het programma MARKTRIJP is, of de BRUIKBAARHEID VOOR EEN BEPAALD DOEL.&lt;br /&gt;Gedetailleerde GPL License informatie vind U hier: &lt;a href=&quot;http://fsf.org/licensing/licenses/gpl.html&quot;&gt;www.fsf.org/licensing/licenses/gpl.html&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Alle gegevens van &lt;a href=&quot;http://www.bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; zijn eigendom van BrickLink&lt;sup&gt;TM&lt;/sup&gt;, hetgeen een handelsmerk is van Dan Jezek.&lt;/p&gt;&lt;p&gt;Peeron inventarissen van &lt;a href=&quot;http://www.peeron.com&quot;&gt;www.peeron.com&lt;/a&gt; zijn eigendom van Dan en Jennifer Boger.&lt;/p&gt;&lt;p&gt;LEGO&lt;sup&gt;&amp;reg;&lt;/sup&gt; is een  handelsmerk van de LEGO groep, welke deze software niet gesponsored of erkend heeft.&lt;/p&gt;&lt;p&gt;Alle andere handelsmerken worden, ook wanneer niet expliciet vermeld, erkend .&lt;/p&gt;&lt;p&gt;Franse vertaling door Sylvain Perez (&lt;a href=&quot;mailto:bricklink@1001bricks.com&quot;&gt;bricklink@1001bricks.com&lt;/a&gt;)&lt;br /&gt;Nederlandse vertaling door Eric van Horssen (&lt;a href=&quot;mailto:horzel@hacktic.nl&quot;&gt;horzel@hacktic.nl&lt;/a&gt;)&lt;/p&gt;</translation>
     </message>
 </context>
 <context>
@@ -102,50 +106,50 @@
     <name>CCheckForUpdates</name>
     <message>
         <source>Checking for program updates</source>
-        <translation type="unfinished"></translation>
+        <translation>Aan het controleren op programma updates</translation>
     </message>
     <message>
         <source>You are currently running %1 %2</source>
-        <translation type="unfinished"></translation>
+        <translation>Momenteel draait U %1 %2</translation>
     </message>
     <message>
         <source>Version information is not available.</source>
-        <translation type="unfinished"></translation>
+        <translation>Versie informatie is niet beschikbaar.</translation>
     </message>
     <message>
         <source>Your currently installed version is up-to-date.</source>
-        <translation type="unfinished"></translation>
+        <translation>U huidige geïnstalleerde versie is up-to-date.</translation>
     </message>
     <message>
         <source>A newer version than the one currently installed is available:</source>
-        <translation type="unfinished"></translation>
+        <translation>Een nieuwere versie dan de huidige is beschikbaar:</translation>
     </message>
     <message>
         <source>Stable release</source>
-        <translation type="unfinished"></translation>
+        <translation>Stabiele release</translation>
     </message>
     <message>
         <source>Beta release</source>
-        <translation type="unfinished"></translation>
+        <translation>Beta release</translation>
     </message>
     <message>
         <source>Detailed list of changes</source>
-        <translation type="unfinished"></translation>
+        <translation>Gedetailleerde lijst van aanpassingen</translation>
     </message>
     <message>
         <source>the BrickStore homepage</source>
-        <translation type="unfinished"></translation>
+        <translation>de BrickStore homepage</translation>
     </message>
     <message>
         <source>&lt;b&gt;Please note:&lt;/b&gt; Your currently installed version is flagged as defective. Please visit %1 to find out the exact cause.</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;b&gt;Attentie:&lt;/b&gt; Uw huidige geïnstalleerde versie word vermeld als defect. Bezoek alstublieft %1 om de exacte reden te vinden.</translation>
     </message>
 </context>
 <context>
     <name>CDocument</name>
     <message>
         <source>Untitled</source>
-        <translation type="unfinished"></translation>
+        <translation>Naamloos</translation>
     </message>
     <message>
         <source>Inventory Files</source>
@@ -265,22 +269,22 @@
     </message>
     <message>
         <source>Reset Differences</source>
-        <translation type="unfinished"></translation>
+        <translation>Reset wijzigingen</translation>
     </message>
     <message>
         <source>BrickStore has switched to a new file format (.bsx - BrickStore XML).&lt;br /&gt;&lt;br /&gt;Your document has been automatically imported and it will be converted as soon as you save it.</source>
-        <translation type="unfinished"></translation>
+        <translation>BrickStore is overgestapt op een nieuw bestandsformaat (.bsx - BrickStore XML).&lt;br /&gt;&lt;br /&gt;Uw document is automatisch geïmporteerd en zal worden geconverteerd zodra U het opslaat.</translation>
     </message>
 </context>
 <context>
     <name>CFrameWork</name>
     <message>
         <source>Could not load the BrickLink database files.&lt;br /&gt;&lt;br /&gt;Should these files be updated now?</source>
-        <translation type="unfinished"></translation>
+        <translation>De BrickLink database bestanden konden niet worden geladen.&lt;br /&gt;&lt;br /&gt;Deze bestanden nu bijwerken?</translation>
     </message>
     <message>
         <source>Could not load the BrickLink database files.&lt;br /&gt;&lt;br /&gt;The program is not functional without these files.</source>
-        <translation type="unfinished"></translation>
+        <translation>De BrickLink database bestanden konden niet worden geladen..&lt;br /&gt;&lt;br /&gt;Het programma functioneert niet zonder deze bestanden.</translation>
     </message>
     <message>
         <source>Toolbar</source>
@@ -296,251 +300,255 @@
     </message>
     <message>
         <source>Info</source>
-        <translation type="unfinished"></translation>
+        <translation>Info</translation>
     </message>
     <message>
         <source>Price Guide</source>
-        <translation type="unfinished"></translation>
+        <translation>Richtprijzen</translation>
     </message>
     <message>
         <source>Appears In Sets</source>
-        <translation type="unfinished"></translation>
+        <translation>Komt voor in sets</translation>
     </message>
     <message>
         <source>Links</source>
-        <translation type="unfinished"></translation>
+        <translation>Koppelingen</translation>
     </message>
     <message>
         <source>&amp;File</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Bestand</translation>
     </message>
     <message>
         <source>&amp;Edit</source>
-        <translation type="unfinished"></translation>
+        <translation>Be&amp;werken</translation>
     </message>
     <message>
         <source>&amp;View</source>
-        <translation type="unfinished"></translation>
+        <translation>Bee&amp;ld</translation>
     </message>
     <message>
         <source>E&amp;xtras</source>
-        <translation type="unfinished"></translation>
+        <translation>E&amp;xtras</translation>
     </message>
     <message>
         <source>&amp;Windows</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Venster</translation>
     </message>
     <message>
         <source>&amp;Help</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Help</translation>
+    </message>
+    <message>
+        <source>New</source>
+        <translation type="obsolete">Nieuw</translation>
     </message>
     <message>
         <source>Ctrl+N</source>
         <comment>File|New</comment>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+N</translation>
     </message>
     <message>
         <source>Open...</source>
-        <translation type="unfinished"></translation>
+        <translation>Openen...</translation>
     </message>
     <message>
         <source>Ctrl+O</source>
         <comment>File|Open</comment>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+O</translation>
     </message>
     <message>
         <source>Open Recent</source>
-        <translation type="unfinished"></translation>
+        <translation>Laatst geopende bestanden</translation>
     </message>
     <message>
         <source>Save</source>
-        <translation type="unfinished"></translation>
+        <translation>Opslaan</translation>
     </message>
     <message>
         <source>Ctrl+S</source>
         <comment>File|Save</comment>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+S</translation>
     </message>
     <message>
         <source>Save As...</source>
-        <translation type="unfinished"></translation>
+        <translation>Opslaan als...</translation>
     </message>
     <message>
         <source>Print...</source>
-        <translation type="unfinished"></translation>
+        <translation>Afdrukken...</translation>
     </message>
     <message>
         <source>Ctrl+P</source>
         <comment>File|Print</comment>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+P</translation>
     </message>
     <message>
         <source>Import</source>
-        <translation type="unfinished"></translation>
+        <translation>Importeren</translation>
     </message>
     <message>
         <source>BrickLink Inventory...</source>
-        <translation type="unfinished"></translation>
+        <translation>BrickLink inventaris...</translation>
     </message>
     <message>
         <source>Ctrl+I</source>
         <comment>File|Import BrickLink Inventory</comment>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+I</translation>
     </message>
     <message>
         <source>BrickLink XML...</source>
-        <translation type="unfinished"></translation>
+        <translation>BrickLink XML...</translation>
     </message>
     <message>
         <source>BrickLink Order...</source>
-        <translation type="unfinished"></translation>
+        <translation>BrickLink bestelling...</translation>
     </message>
     <message>
         <source>BrickLink Store Inventory...</source>
-        <translation type="unfinished"></translation>
+        <translation>BrickLink winkelinventaris...</translation>
     </message>
     <message>
         <source>Peeron Inventory...</source>
-        <translation type="unfinished"></translation>
+        <translation>Peeron inventaris...</translation>
     </message>
     <message>
         <source>LDraw Model...</source>
-        <translation type="unfinished"></translation>
+        <translation>LDraw model...</translation>
     </message>
     <message>
         <source>BrikTrak Inventory...</source>
-        <translation type="unfinished"></translation>
+        <translation>BrikTrak inventaris...</translation>
     </message>
     <message>
         <source>Export</source>
-        <translation type="unfinished"></translation>
+        <translation>Exporteren</translation>
     </message>
     <message>
         <source>BrickLink XML to Clipboard</source>
-        <translation type="unfinished"></translation>
+        <translation>BrickLink XML naar klembord</translation>
     </message>
     <message>
         <source>BrickLink Mass-Update XML to Clipboard</source>
-        <translation type="unfinished"></translation>
+        <translation>BrickLink Mass-Update XML naar klembord</translation>
     </message>
     <message>
         <source>BrickLink Inventory XML to Clipboard</source>
-        <translation type="unfinished"></translation>
+        <translation>BrickLink Inventaris XML naar klembord</translation>
     </message>
     <message>
         <source>BrickLink Wanted List XML to Clipboard</source>
-        <translation type="unfinished"></translation>
+        <translation>BrickLink Wanted List XML naar klembord</translation>
     </message>
     <message>
         <source>Close</source>
-        <translation type="unfinished"></translation>
+        <translation>Sluiten</translation>
     </message>
     <message>
         <source>Ctrl+W</source>
         <comment>File|Close</comment>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+W</translation>
     </message>
     <message>
         <source>Exit</source>
-        <translation type="unfinished"></translation>
+        <translation>Afsluiten</translation>
     </message>
     <message>
         <source>Ctrl+Q</source>
         <comment>File|Quit</comment>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+Q</translation>
     </message>
     <message>
         <source>Ctrl+Z</source>
         <comment>Edit|Undo</comment>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+Z</translation>
     </message>
     <message>
         <source>Ctrl+Y</source>
         <comment>Edit|Redo</comment>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+Y</translation>
     </message>
     <message>
         <source>Cut</source>
-        <translation type="unfinished"></translation>
+        <translation>Knippen</translation>
     </message>
     <message>
         <source>Ctrl+X</source>
         <comment>Edit|Cut</comment>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+X</translation>
     </message>
     <message>
         <source>Copy</source>
-        <translation type="unfinished"></translation>
+        <translation>Kopiëren</translation>
     </message>
     <message>
         <source>Ctrl+C</source>
         <comment>Edit|Copy</comment>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+C</translation>
     </message>
     <message>
         <source>Paste</source>
-        <translation type="unfinished"></translation>
+        <translation>Plakken</translation>
     </message>
     <message>
         <source>Ctrl+V</source>
         <comment>Edit|Paste</comment>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+V</translation>
     </message>
     <message>
         <source>Delete</source>
-        <translation type="unfinished"></translation>
+        <translation>Verwijderen</translation>
     </message>
     <message>
         <source>Delete</source>
         <comment>Edit|Delete</comment>
-        <translation type="unfinished"></translation>
+        <translation>Delete</translation>
     </message>
     <message>
         <source>Add Items...</source>
-        <translation type="unfinished"></translation>
+        <translation>Items toevoegen...</translation>
     </message>
     <message>
         <source>Insert</source>
         <comment>Edit|AddItems</comment>
-        <translation type="unfinished"></translation>
+        <translation>Insert</translation>
     </message>
     <message>
         <source>Subtract Items...</source>
-        <translation type="unfinished"></translation>
+        <translation>Items aftrekken...</translation>
     </message>
     <message>
         <source>Consolidate Items...</source>
-        <translation type="unfinished"></translation>
+        <translation>Items samenvoegen...</translation>
     </message>
     <message>
         <source>Part out Item...</source>
-        <translation type="unfinished"></translation>
+        <translation>Item opsplitsen...</translation>
     </message>
     <message>
         <source>Reset Differences</source>
-        <translation type="unfinished"></translation>
+        <translation>Reset wijzigingen</translation>
     </message>
     <message>
         <source>Select All</source>
-        <translation type="unfinished"></translation>
+        <translation>Alles selecteren</translation>
     </message>
     <message>
         <source>Ctrl+A</source>
         <comment>Edit|SelectAll</comment>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+A</translation>
     </message>
     <message>
         <source>Select None</source>
-        <translation type="unfinished"></translation>
+        <translation>Selectie opheffen</translation>
     </message>
     <message>
         <source>Ctrl+Shift+A</source>
         <comment>Edit|SelectNone</comment>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+Shift+A</translation>
     </message>
     <message>
         <source>Buyer/Collector Mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Koper/Verzamelaar mode</translation>
     </message>
     <message>
         <source>View Toolbar</source>
@@ -556,237 +564,241 @@
     </message>
     <message>
         <source>Full Screen</source>
-        <translation type="unfinished"></translation>
+        <translation>Volledig scherm</translation>
     </message>
     <message>
         <source>F11</source>
-        <translation type="unfinished"></translation>
+        <translation>F11</translation>
     </message>
     <message>
         <source>Show Input Errors</source>
-        <translation type="unfinished"></translation>
+        <translation>Toon invoer fouten</translation>
     </message>
     <message>
         <source>Difference Mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Wijzigingen mode</translation>
     </message>
     <message>
         <source>Save Column Layout as Default</source>
-        <translation type="unfinished"></translation>
+        <translation>Kolom indeling opslaan als standaard</translation>
     </message>
     <message>
         <source>Update Database</source>
-        <translation type="unfinished"></translation>
+        <translation>Databse bijwerken</translation>
     </message>
     <message>
         <source>Configure...</source>
-        <translation type="unfinished"></translation>
+        <translation>Configureer...</translation>
     </message>
     <message>
         <source>Online Mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Online werken</translation>
     </message>
     <message>
         <source>Offline Mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Offline werken</translation>
     </message>
     <message>
         <source>Standard MDI Mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Standaard MDI mode</translation>
     </message>
     <message>
         <source>Show Tabs at Top</source>
-        <translation type="unfinished"></translation>
+        <translation>Toon tabs bovenaan</translation>
     </message>
     <message>
         <source>Show Tabs at Bottom</source>
-        <translation type="unfinished"></translation>
+        <translation>Toon tabs onderaan</translation>
     </message>
     <message>
         <source>Cascade</source>
-        <translation type="unfinished"></translation>
+        <translation>Vensters trapsgewijs schikken</translation>
     </message>
     <message>
         <source>Tile</source>
-        <translation type="unfinished"></translation>
+        <translation>Vensters verdeeld schikken</translation>
     </message>
     <message>
         <source>What&apos;s this?</source>
-        <translation type="unfinished"></translation>
+        <translation>Wat is dit?</translation>
     </message>
     <message>
         <source>Shift+F1</source>
         <comment>Help|WhatsThis</comment>
-        <translation type="unfinished"></translation>
+        <translation>Shift+F1</translation>
     </message>
     <message>
         <source>About...</source>
-        <translation type="unfinished"></translation>
+        <translation>Info...</translation>
     </message>
     <message>
         <source>Check for Program Updates...</source>
-        <translation type="unfinished"></translation>
+        <translation>Controleer op programma updates...</translation>
     </message>
     <message>
         <source>Registration...</source>
-        <translation type="unfinished"></translation>
+        <translation>Registratie...</translation>
     </message>
     <message>
         <source>Status</source>
-        <translation type="unfinished"></translation>
+        <translation>Status</translation>
     </message>
     <message>
         <source>Include</source>
-        <translation type="unfinished"></translation>
+        <translation>Inclusief</translation>
     </message>
     <message>
         <source>Exclude</source>
-        <translation type="unfinished"></translation>
+        <translation>Exclusief</translation>
     </message>
     <message>
         <source>Extra</source>
-        <translation type="unfinished"></translation>
+        <translation>Extra</translation>
     </message>
     <message>
         <source>Toggle Include/Exclude</source>
-        <translation type="unfinished"></translation>
+        <translation>Tussen in- en exclusief omschakelen</translation>
     </message>
     <message>
         <source>Condition</source>
-        <translation type="unfinished"></translation>
+        <translation>Conditie</translation>
     </message>
     <message>
         <source>Used</source>
-        <translation type="unfinished"></translation>
+        <translation>Gebruikt</translation>
     </message>
     <message>
         <source>Toggle New/Used</source>
-        <translation type="unfinished"></translation>
+        <translation>Tussen nieuw en gebruikt omschakelen</translation>
     </message>
     <message>
         <source>Color...</source>
-        <translation type="unfinished"></translation>
+        <translation>Kleur...</translation>
     </message>
     <message>
         <source>Quantity</source>
-        <translation type="unfinished"></translation>
+        <translation>Aantal</translation>
     </message>
     <message>
         <source>Multiply...</source>
-        <translation type="unfinished"></translation>
+        <translation>Vermenigvuldigen...</translation>
     </message>
     <message>
         <source>Ctrl+*</source>
         <comment>Edit|Quantity|Multiply</comment>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+*</translation>
     </message>
     <message>
         <source>Divide...</source>
-        <translation type="unfinished"></translation>
+        <translation>Delen...</translation>
     </message>
     <message>
         <source>Ctrl+/</source>
         <comment>Edit|Quantity|Divide</comment>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+/</translation>
     </message>
     <message>
         <source>Price</source>
-        <translation type="unfinished"></translation>
+        <translation>Prijs</translation>
     </message>
     <message>
         <source>Set to Price-Guide...</source>
-        <translation type="unfinished"></translation>
+        <translation>Instellen tot richtprijzen...</translation>
     </message>
     <message>
         <source>Ctrl+G</source>
         <comment>Edit|Price|Set to PriceGuide</comment>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+G</translation>
     </message>
     <message>
         <source>Inc- or Decrease...</source>
-        <translation type="unfinished"></translation>
+        <translation>Verhogen / verlagen...</translation>
     </message>
     <message>
         <source>Ctrl++</source>
         <comment>Edit|Price|Inc/Dec</comment>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl++</translation>
     </message>
     <message>
         <source>Bulk Quantity...</source>
-        <translation type="unfinished"></translation>
+        <translation>Bulk aantal...</translation>
     </message>
     <message>
         <source>Sale...</source>
-        <translation type="unfinished"></translation>
+        <translation>Uitverkoop...</translation>
     </message>
     <message>
         <source>Ctrl+%</source>
         <comment>Edit|Sale</comment>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+%</translation>
     </message>
     <message>
         <source>Comment</source>
-        <translation type="unfinished"></translation>
+        <translation>Commentaar</translation>
     </message>
     <message>
         <source>Set...</source>
-        <translation type="unfinished"></translation>
+        <translation>Instellen...</translation>
     </message>
     <message>
         <source>Add to...</source>
-        <translation type="unfinished"></translation>
+        <translation>Toevoegen...</translation>
     </message>
     <message>
         <source>Remove from...</source>
-        <translation type="unfinished"></translation>
+        <translation>Verwijder van...</translation>
     </message>
     <message>
         <source>Remark</source>
-        <translation type="unfinished"></translation>
+        <translation>Opmerking</translation>
     </message>
     <message>
         <source>Retain in Inventory</source>
-        <translation type="unfinished"></translation>
+        <translation>Behouden in inventaries</translation>
     </message>
     <message>
         <source>Yes</source>
-        <translation type="unfinished"></translation>
+        <translation>Ja</translation>
     </message>
     <message>
         <source>No</source>
-        <translation type="unfinished"></translation>
+        <translation>Nee</translation>
     </message>
     <message>
         <source>Toggle Yes/No</source>
-        <translation type="unfinished"></translation>
+        <translation>Tussen ja en nee omschakelen</translation>
     </message>
     <message>
         <source>Stockroom Item</source>
-        <translation type="unfinished"></translation>
+        <translation>Magazijn item</translation>
     </message>
     <message>
         <source>Reserved for...</source>
-        <translation type="unfinished"></translation>
+        <translation>Gereserveerd voor...</translation>
     </message>
     <message>
         <source>Show BrickLink Catalog Info...</source>
-        <translation type="unfinished"></translation>
+        <translation>Toon BrickLink catalogus info...</translation>
     </message>
     <message>
         <source>Show BrickLink Price Guide Info...</source>
-        <translation type="unfinished"></translation>
+        <translation>Toon BrickLink richtprijs info...</translation>
     </message>
     <message>
         <source>Show Lots for Sale on BrickLink...</source>
-        <translation type="unfinished"></translation>
+        <translation>Toon lots te koop op BrickLink...</translation>
     </message>
     <message>
         <source>Show in my Store on BrickLink...</source>
-        <translation type="unfinished"></translation>
+        <translation>Toon in mijn winkel op BrickLink...</translation>
     </message>
     <message>
         <source>Download activity indicator</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>BrickStore has switched to a new file format (.bsx - BrickStore XML).&lt;br /&gt;&lt;br /&gt;Your document has been automatically imported and it will be converted as soon as you save it.</source>
+        <translation type="obsolete">BrickStore is overgestapt op een nieuw bestandsformaat (.bsx - BrickStore XML).&lt;br /&gt;&lt;br /&gt;Uw document is automatisch geïmporteerd en zal worden geconverteerd zodra U het opslaat.</translation>
     </message>
     <message>
         <source>No valid BrickLink login settings found.&lt;br /&gt;&lt;br /&gt;Do you want to change the settings now?</source>
@@ -794,15 +806,15 @@
     </message>
     <message>
         <source>min.</source>
-        <translation type="unfinished"></translation>
+        <translation>min.</translation>
     </message>
     <message>
         <source>Lots</source>
-        <translation type="unfinished"></translation>
+        <translation>Lots</translation>
     </message>
     <message>
         <source>Items</source>
-        <translation type="unfinished"></translation>
+        <translation>Items</translation>
     </message>
     <message>
         <source>Value</source>
@@ -810,11 +822,11 @@
     </message>
     <message>
         <source>Weight</source>
-        <translation type="unfinished"></translation>
+        <translation>Gewicht</translation>
     </message>
     <message>
         <source>Errors</source>
-        <translation type="unfinished"></translation>
+        <translation>Fouten</translation>
     </message>
     <message>
         <source>Unsaved modifications</source>
@@ -827,23 +839,23 @@
     <message>
         <source>New</source>
         <comment>File|New</comment>
-        <translation type="unfinished"></translation>
+        <translation>Nieuw</translation>
     </message>
     <message>
         <source>New</source>
         <comment>Cond|New</comment>
-        <translation type="unfinished"></translation>
+        <translation>Nieuw</translation>
     </message>
 </context>
 <context>
     <name>CImportBLOrder</name>
     <message>
         <source>Importing BrickLink Order</source>
-        <translation type="unfinished"></translation>
+        <translation>BrickLink bestelling word geïmporteerd</translation>
     </message>
     <message>
         <source>Download: %1/%2 KB</source>
-        <translation type="unfinished"></translation>
+        <translation>Download: %1/%2 KB</translation>
     </message>
     <message>
         <source>Could not parse the XML data for order #%1.</source>
@@ -858,11 +870,11 @@
     <name>CImportBLStore</name>
     <message>
         <source>Importing BrickLink Store</source>
-        <translation type="unfinished"></translation>
+        <translation>BrickLink winkel word geïmporteerd</translation>
     </message>
     <message>
         <source>Download: %1/%2 KB</source>
-        <translation type="unfinished"></translation>
+        <translation>Download: %1/%2 KB</translation>
     </message>
     <message>
         <source>Could not parse the XML data for the store inventory:&lt;br /&gt;&lt;i&gt;Line %1, column %2: %3&lt;/i&gt;</source>
@@ -881,7 +893,7 @@
     </message>
     <message>
         <source>Download: %1/%2 KB</source>
-        <translation type="unfinished"></translation>
+        <translation>Download: %1/%2 KB</translation>
     </message>
     <message>
         <source>Could not parse the Peeron inventory.</source>
@@ -892,79 +904,79 @@
     <name>CItemView</name>
     <message>
         <source>Status</source>
-        <translation type="unfinished"></translation>
+        <translation>Status</translation>
     </message>
     <message>
         <source>Image</source>
-        <translation type="unfinished"></translation>
+        <translation>Afbeelding</translation>
     </message>
     <message>
         <source>Part #</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <source>Description</source>
-        <translation type="unfinished"></translation>
+        <translation>Omschrijving</translation>
     </message>
     <message>
         <source>Comments</source>
-        <translation type="unfinished"></translation>
+        <translation>Commentaren</translation>
     </message>
     <message>
         <source>Remarks</source>
-        <translation type="unfinished"></translation>
+        <translation>Opmerkingen</translation>
     </message>
     <message>
         <source>Qty. Orig</source>
-        <translation type="unfinished"></translation>
+        <translation>Aant. orig</translation>
     </message>
     <message>
         <source>Qty. Diff</source>
-        <translation type="unfinished"></translation>
+        <translation>Aant. gew</translation>
     </message>
     <message>
         <source>Qty.</source>
-        <translation type="unfinished"></translation>
+        <translation>Aant.</translation>
     </message>
     <message>
         <source>Bulk</source>
-        <translation type="unfinished"></translation>
+        <translation>Bulk</translation>
     </message>
     <message>
         <source>Pr. Orig</source>
-        <translation type="unfinished"></translation>
+        <translation>Pr. orig</translation>
     </message>
     <message>
         <source>Pr. Diff</source>
-        <translation type="unfinished"></translation>
+        <translation>Pr. gew</translation>
     </message>
     <message>
         <source>Price</source>
-        <translation type="unfinished"></translation>
+        <translation>Prijs</translation>
     </message>
     <message>
         <source>Total</source>
-        <translation type="unfinished"></translation>
+        <translation>Totaal</translation>
     </message>
     <message>
         <source>Sale</source>
-        <translation type="unfinished"></translation>
+        <translation>Uitverkoop</translation>
     </message>
     <message>
         <source>Cond.</source>
-        <translation type="unfinished"></translation>
+        <translation>Cond.</translation>
     </message>
     <message>
         <source>Color</source>
-        <translation type="unfinished"></translation>
+        <translation>Kleur</translation>
     </message>
     <message>
         <source>Category</source>
-        <translation type="unfinished"></translation>
+        <translation>Categorie</translation>
     </message>
     <message>
         <source>Item Type</source>
-        <translation type="unfinished"></translation>
+        <translation>Item type</translation>
     </message>
     <message>
         <source>Tier Q1</source>
@@ -992,63 +1004,63 @@
     </message>
     <message>
         <source>Lot Id</source>
-        <translation type="unfinished"></translation>
+        <translation>Lot id</translation>
     </message>
     <message>
         <source>Retain</source>
-        <translation type="unfinished"></translation>
+        <translation>Vasthouden</translation>
     </message>
     <message>
         <source>Stockroom</source>
-        <translation type="unfinished"></translation>
+        <translation>Magazijn</translation>
     </message>
     <message>
         <source>Reserved</source>
-        <translation type="unfinished"></translation>
+        <translation>Gereserveerd</translation>
     </message>
     <message>
         <source>Weight</source>
-        <translation type="unfinished"></translation>
+        <translation>Gewicht</translation>
     </message>
     <message>
         <source>Year</source>
-        <translation type="unfinished"></translation>
+        <translation>Jaar</translation>
     </message>
     <message>
         <source>Exclude</source>
-        <translation type="unfinished"></translation>
+        <translation>Exclusief</translation>
     </message>
     <message>
         <source>Extra</source>
-        <translation type="unfinished"></translation>
+        <translation>Extra</translation>
     </message>
     <message>
         <source>Include</source>
-        <translation type="unfinished"></translation>
+        <translation>Inclusief</translation>
     </message>
     <message>
         <source>New</source>
-        <translation type="unfinished"></translation>
+        <translation>Nieuw</translation>
     </message>
     <message>
         <source>Used</source>
-        <translation type="unfinished"></translation>
+        <translation>Gebruikt</translation>
     </message>
     <message>
         <source>Inv</source>
-        <translation type="unfinished"></translation>
+        <translation>Inv</translation>
     </message>
     <message>
         <source>Modify Item</source>
-        <translation type="unfinished"></translation>
+        <translation>Item wijzigen</translation>
     </message>
     <message>
         <source>Modify Color</source>
-        <translation type="unfinished"></translation>
+        <translation>Kleur wijzigen</translation>
     </message>
     <message>
         <source>The value you entered was not valid and will not be changed.</source>
-        <translation type="unfinished"></translation>
+        <translation>De ingegeven waarde is niet geldig en zal niet worden gewijzigd.</translation>
     </message>
 </context>
 <context>
@@ -1067,63 +1079,63 @@
     </message>
     <message>
         <source>Close</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>
     <name>CListView</name>
     <message>
         <source>Configure...</source>
-        <translation type="unfinished"></translation>
+        <translation>Configureer...</translation>
     </message>
 </context>
 <context>
     <name>CListViewColumnsDialog</name>
     <message>
         <source>Configure columns...</source>
-        <translation type="unfinished"></translation>
+        <translation>Kolommen aanpassen...</translation>
     </message>
     <message>
         <source>Move &amp;up</source>
-        <translation type="unfinished"></translation>
+        <translation>Verplaats om&amp;hoog</translation>
     </message>
     <message>
         <source>Move &amp;down</source>
-        <translation type="unfinished"></translation>
+        <translation>Verplaats om&amp;laag</translation>
     </message>
     <message>
         <source>&amp;Show</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Toon</translation>
     </message>
     <message>
         <source>&amp;Hide</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Verberg</translation>
     </message>
     <message>
         <source>&amp;OK</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;OK</translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Annuleer</translation>
     </message>
 </context>
 <context>
     <name>CMessageBox</name>
     <message>
         <source>&amp;OK</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;OK</translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Annuleren</translation>
     </message>
 </context>
 <context>
     <name>CMultiProgressBar</name>
     <message>
         <source>Cancel all active transfers</source>
-        <translation type="unfinished"></translation>
+        <translation>Annuleer alle actieve transfers</translation>
     </message>
 </context>
 <context>
@@ -1205,15 +1217,15 @@
     </message>
     <message>
         <source>All Time Sales</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">All Time Sales</translation>
     </message>
     <message>
         <source>Last 6 Months Sales</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Last 6 Months Sales</translation>
     </message>
     <message>
         <source>Current Inventory</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Current Inventory</translation>
     </message>
     <message>
         <source>Please wait ... updating</source>
@@ -1228,11 +1240,11 @@
     <name>CProgressDialog</name>
     <message>
         <source>&amp;OK</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;OK</translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Annuleren</translation>
     </message>
     <message>
         <source>Error</source>
@@ -1247,22 +1259,22 @@
     <name>CSelectColor</name>
     <message>
         <source>RGB</source>
-        <translation type="unfinished"></translation>
+        <translation>RGB</translation>
     </message>
     <message>
         <source>Color</source>
-        <translation type="unfinished"></translation>
+        <translation>Kleur</translation>
     </message>
 </context>
 <context>
     <name>CSelectColorDialog</name>
     <message>
         <source>&amp;OK</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;OK</translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Annuleren</translation>
     </message>
 </context>
 <context>
@@ -1273,7 +1285,7 @@
     </message>
     <message>
         <source>[Image is loading]</source>
-        <translation type="unfinished"></translation>
+        <translation>[Afbeelding wordt geladen]</translation>
     </message>
     <message>
         <source>Item type:</source>
@@ -1281,7 +1293,7 @@
     </message>
     <message>
         <source>Filter:</source>
-        <translation type="unfinished"></translation>
+        <translation>Filter:</translation>
     </message>
     <message>
         <source>Ctrl+F</source>
@@ -1294,11 +1306,11 @@
     </message>
     <message>
         <source>Filter the list using this pattern (wildcards allowed: * ? [])</source>
-        <translation type="unfinished"></translation>
+        <translation>Filter de lijst mbv dit patroon (jokers toegestaan: * ? [])</translation>
     </message>
     <message>
         <source>Reset an active filter</source>
-        <translation type="unfinished"></translation>
+        <translation>Reset het actieve filter</translation>
     </message>
     <message>
         <source>View</source>
@@ -1306,7 +1318,7 @@
     </message>
     <message>
         <source>Category</source>
-        <translation type="unfinished"></translation>
+        <translation>Categorie</translation>
     </message>
     <message>
         <source>Part #</source>
@@ -1314,7 +1326,7 @@
     </message>
     <message>
         <source>Description</source>
-        <translation type="unfinished"></translation>
+        <translation>Omschrijving</translation>
     </message>
     <message>
         <source>List</source>
@@ -1336,22 +1348,30 @@
         <source>Viewing all items with images is a bandwidth- and memory-hungry operation.&lt;br /&gt;Are you sure you want to continue?</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>View item&apos;s category</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>CSelectItemDialog</name>
     <message>
         <source>&amp;OK</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;OK</translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Annuleren</translation>
     </message>
 </context>
 <context>
     <name>CSplash</name>
     <message>
         <source>Loading Database...</source>
+        <translation>Database word geladen...</translation>
+    </message>
+    <message>
+        <source>Initializing...</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1359,7 +1379,7 @@
     <name>CTaskInfoWidget</name>
     <message>
         <source>min.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">min.</translation>
     </message>
     <message>
         <source>Multiple lots selected</source>
@@ -1367,11 +1387,11 @@
     </message>
     <message>
         <source>Lots</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Lots</translation>
     </message>
     <message>
         <source>Items</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Items</translation>
     </message>
     <message>
         <source>Value</source>
@@ -1379,45 +1399,45 @@
     </message>
     <message>
         <source>Weight</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Gewicht</translation>
     </message>
 </context>
 <context>
     <name>CTaskLinksWidget</name>
     <message>
         <source>BrickLink</source>
-        <translation type="unfinished"></translation>
+        <translation>BrickLink</translation>
     </message>
     <message>
         <source>My Inventory</source>
-        <translation type="unfinished"></translation>
+        <translation>Mijn inventaris</translation>
     </message>
     <message>
         <source>Catalog</source>
-        <translation type="unfinished"></translation>
+        <translation>Catalogus</translation>
     </message>
     <message>
         <source>Price Guide</source>
-        <translation type="unfinished"></translation>
+        <translation>Richtprijzen</translation>
     </message>
     <message>
         <source>Lots for Sale</source>
-        <translation type="unfinished"></translation>
+        <translation>Lots te koop</translation>
     </message>
     <message>
         <source>Peeron</source>
-        <translation type="unfinished"></translation>
+        <translation>Peeron</translation>
     </message>
     <message>
         <source>Information</source>
-        <translation type="unfinished"></translation>
+        <translation>Informatie</translation>
     </message>
 </context>
 <context>
     <name>CTaskPaneManager</name>
     <message>
         <source>All</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Alles</translation>
     </message>
     <message>
         <source>Modern (fixed)</source>
@@ -1432,38 +1452,38 @@
     <name>CUndoManager</name>
     <message>
         <source>Redo</source>
-        <translation type="unfinished"></translation>
+        <translation>Herhalen</translation>
     </message>
     <message>
         <source>Undo</source>
-        <translation type="unfinished"></translation>
+        <translation>Ongedaan maken</translation>
     </message>
     <message>
         <source>Undo %1 Actions</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 actie ongedaan maken</translation>
     </message>
     <message>
         <source>Undo Action</source>
-        <translation type="unfinished"></translation>
+        <translation>Actie ongedaan maken</translation>
     </message>
     <message>
         <source>Redo %1 Actions</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 actie herhalen</translation>
     </message>
     <message>
         <source>Redo Action</source>
-        <translation type="unfinished"></translation>
+        <translation>Actie herhalen</translation>
     </message>
 </context>
 <context>
     <name>CUpdateDatabase</name>
     <message>
         <source>Updating BrickLink Database</source>
-        <translation type="unfinished"></translation>
+        <translation>BrickLink database aan het bijwerken</translation>
     </message>
     <message>
         <source>Download: %1/%2 KB</source>
-        <translation type="unfinished"></translation>
+        <translation>Download: %1/%2 KB</translation>
     </message>
     <message>
         <source>Could not write to file: %1</source>
@@ -1533,127 +1553,127 @@
     <name>CWindow</name>
     <message>
         <source>Filter:</source>
-        <translation type="unfinished"></translation>
+        <translation>Filter:</translation>
     </message>
     <message>
         <source>Field:</source>
-        <translation type="unfinished"></translation>
+        <translation>Veld:</translation>
     </message>
     <message>
         <source>Filter the list using this pattern (wildcards allowed: * ? [])</source>
-        <translation type="unfinished"></translation>
+        <translation>Filter de lijst mbv dit patroon (jokers toegestaan: * ? [])</translation>
     </message>
     <message>
         <source>Reset an active filter</source>
-        <translation type="unfinished"></translation>
+        <translation>Reset het actieve filter</translation>
     </message>
     <message>
         <source>Restrict the filter to this/these field(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>Begrens het filter tot dit/deze veld(en)</translation>
     </message>
     <message>
         <source>All</source>
-        <translation type="unfinished"></translation>
+        <translation>Alles</translation>
     </message>
     <message>
         <source>All Prices</source>
-        <translation type="unfinished"></translation>
+        <translation>Alle prijzen</translation>
     </message>
     <message>
         <source>All Texts</source>
-        <translation type="unfinished"></translation>
+        <translation>Alle teksten</translation>
     </message>
     <message>
         <source>All Quantities</source>
-        <translation type="unfinished"></translation>
+        <translation>Alle aantallen</translation>
     </message>
     <message>
         <source>Untitled</source>
-        <translation type="unfinished"></translation>
+        <translation>naamloos</translation>
     </message>
     <message>
         <source>Added %1, Merged %2 Items</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 toegevoegde, %2 samengevoegde items</translation>
     </message>
     <message>
         <source>Merged %1 Items</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 items samengevoegd</translation>
     </message>
     <message>
         <source>Overwrite the currently selected items?</source>
-        <translation type="unfinished"></translation>
+        <translation>De reeds geslecteerde items overschrijven?</translation>
     </message>
     <message>
         <source>Set Include Status on %1 Items</source>
-        <translation type="unfinished"></translation>
+        <translation>Inclusief status voor %1 items ingesteld</translation>
     </message>
     <message>
         <source>Set Exclude Status on %1 Items</source>
-        <translation type="unfinished"></translation>
+        <translation>Exclusief status voor %1 items ingesteld</translation>
     </message>
     <message>
         <source>Set Extra Status on %1 Items</source>
-        <translation type="unfinished"></translation>
+        <translation>Extra status voor %1 items ingesteld</translation>
     </message>
     <message>
         <source>Toggled Status on %1 Items</source>
-        <translation type="unfinished"></translation>
+        <translation>Status voor %1 items omgeschakeld</translation>
     </message>
     <message>
         <source>Set New Condition on %1 Items</source>
-        <translation type="unfinished"></translation>
+        <translation>Conditie nieuw voor %1 items ingesteld</translation>
     </message>
     <message>
         <source>Set Used Condition on %1 Items</source>
-        <translation type="unfinished"></translation>
+        <translation>Conditie gebruikt voor %1 items ingesteld</translation>
     </message>
     <message>
         <source>Toggled Condition on %1 Items</source>
-        <translation type="unfinished"></translation>
+        <translation>Conditie voor %1 items omgeschakeld</translation>
     </message>
     <message>
         <source>Set Retain Flag on %1 Items</source>
-        <translation type="unfinished"></translation>
+        <translation>Houden vlag voor %1 items ingesteld</translation>
     </message>
     <message>
         <source>Cleared Retain Flag on %1 Items</source>
-        <translation type="unfinished"></translation>
+        <translation>Houden vlag voor %1 items gewist</translation>
     </message>
     <message>
         <source>Toggled Retain Flag on %1 Items</source>
-        <translation type="unfinished"></translation>
+        <translation>Houden vlag voor %1 items omgeschakeld</translation>
     </message>
     <message>
         <source>Set Stockroom Flag on %1 Items</source>
-        <translation type="unfinished"></translation>
+        <translation>Magazijn vlag voor %1 items ingesteld</translation>
     </message>
     <message>
         <source>Cleared Stockroom Flag on %1 Items</source>
-        <translation type="unfinished"></translation>
+        <translation>Magazijn vlag voor %1 items gewist</translation>
     </message>
     <message>
         <source>Toggled Stockroom Flag on %1 Items</source>
-        <translation type="unfinished"></translation>
+        <translation>Magazijn vlag voor %1 items omgeschakeld</translation>
     </message>
     <message>
         <source>Prices are currently updated to price guide values.&lt;br /&gt;&lt;br /&gt;Please wait until this operation has finished.</source>
-        <translation type="unfinished"></translation>
+        <translation>Prijzen worden op dit moment bijgewerkt met richtprijzen.&lt;br /&gt;&lt;br /&gt;Wacht U alstublieft tot deze taak klaar is.</translation>
     </message>
     <message>
         <source>Prices of the selected items have been updated to price guide values.</source>
-        <translation type="unfinished"></translation>
+        <translation>Prijzen van de geselecteerde items zijn bijgewerkt tot de richtprijzen.</translation>
     </message>
     <message>
         <source>%1 have been skipped, because of missing price guide records and/or network errors.</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 zijn overgeslagen, omdat de gegevens in de richtprijzen ontbraken en/of door netwerk fouten.</translation>
     </message>
     <message>
         <source>Price Change on %1 Items</source>
-        <translation type="unfinished"></translation>
+        <translation>Prijs van %1 items gewijzigd</translation>
     </message>
     <message>
         <source>Divide the quantities of all selected items by this number.&lt;br /&gt;&lt;br /&gt;(A check is made if all quantites are exactly divisble without reminder, before this operation is performed.)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Deel de aantallen van alle geselecteerde items door dit getal..&lt;br /&gt;&lt;br /&gt;</translation>
     </message>
     <message>
         <source>The quantities of %1 lots are not divisible without remainder by %2.&lt;br /&gt;&lt;br /&gt;Nothing has been modified.</source>
@@ -1669,7 +1689,7 @@
     </message>
     <message>
         <source>x</source>
-        <translation type="unfinished"></translation>
+        <translation>x</translation>
     </message>
     <message>
         <source>Quantity Multiply by %1 on %2 Items</source>
@@ -1681,11 +1701,11 @@
     </message>
     <message>
         <source>%</source>
-        <translation type="unfinished"></translation>
+        <translation>%</translation>
     </message>
     <message>
         <source>Set Sale on %1 Items</source>
-        <translation type="unfinished"></translation>
+        <translation>Uitverkoop op %1 items ingesteld</translation>
     </message>
     <message>
         <source>Set bulk quantity for the selected items:</source>
@@ -1693,19 +1713,19 @@
     </message>
     <message>
         <source>Set Bulk Quantity on %1 Items</source>
-        <translation type="unfinished"></translation>
+        <translation>Bulk aantal voor %1 items ingesteld</translation>
     </message>
     <message>
         <source>Set Color on %1 Items</source>
-        <translation type="unfinished"></translation>
+        <translation>Kleur voor %1 item ingesteld</translation>
     </message>
     <message>
         <source>Enter the new remark for all selected items:</source>
-        <translation type="unfinished"></translation>
+        <translation>Geef de nieuwe opmerking voor alle geslecteerde items:</translation>
     </message>
     <message>
         <source>Set Remark on %1 Items</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Opmerking voor %1 items ingesteld</translation>
     </message>
     <message>
         <source>Enter the text, that should be added to the remarks of all selected items:</source>
@@ -1780,7 +1800,7 @@
     </message>
     <message>
         <source>%</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">%</translation>
     </message>
     <message>
         <source>%1</source>
@@ -1788,7 +1808,7 @@
     </message>
     <message>
         <source>Total</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Totaal</translation>
     </message>
     <message>
         <source>&amp;Bulk</source>
@@ -1835,46 +1855,46 @@
     <name>DlgIncDecPrice</name>
     <message>
         <source>Inc- / Decrease Prices</source>
-        <translation type="unfinished"></translation>
+        <translation>Verhoog /Verlaag Prijzen</translation>
     </message>
     <message>
         <source>Increase</source>
-        <translation type="unfinished"></translation>
+        <translation>Verhoog</translation>
     </message>
     <message>
         <source>Decrease</source>
-        <translation type="unfinished"></translation>
+        <translation>Verlaag</translation>
     </message>
     <message>
         <source>prices of the selected items by</source>
-        <translation type="unfinished"></translation>
+        <translation>prijzen van de geselecteerde items met</translation>
     </message>
     <message>
         <source>%</source>
-        <translation type="unfinished"></translation>
+        <translation>%</translation>
     </message>
     <message>
         <source>$</source>
-        <translation type="unfinished"></translation>
+        <translation>$</translation>
     </message>
     <message>
         <source>Also apply this change to tier prices.</source>
-        <translation type="unfinished"></translation>
+        <translation>Pas deze prijs ook toe op ???? prijzen.</translation>
     </message>
     <message>
         <source>&amp;OK</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;OK</translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Annuleren</translation>
     </message>
 </context>
 <context>
     <name>DlgIncompleteItem</name>
     <message>
         <source>Incomplete Item</source>
-        <translation type="unfinished"></translation>
+        <translation>Incompleet item</translation>
     </message>
     <message>
         <source>There was a problem importing the following item:</source>
@@ -1906,7 +1926,7 @@
     </message>
     <message>
         <source>&amp;OK</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;OK</translation>
     </message>
     <message>
         <source>&amp;Delete</source>
@@ -1917,51 +1937,51 @@
     <name>DlgIncompleteItemImpl</name>
     <message>
         <source>BrickLink Item Change Log</source>
-        <translation type="unfinished"></translation>
+        <translation>BrickLink item change log</translation>
     </message>
     <message>
         <source>BrickLink Color Change Log</source>
-        <translation type="unfinished"></translation>
+        <translation>BrickLink color change log</translation>
     </message>
     <message>
         <source>Fix Item</source>
-        <translation type="unfinished"></translation>
+        <translation>Repareer item</translation>
     </message>
     <message>
         <source>New Item is: %1, %2 %3</source>
-        <translation type="unfinished"></translation>
+        <translation>Nieuw item is: %1, %2 %3</translation>
     </message>
     <message>
         <source>Fix Color</source>
-        <translation type="unfinished"></translation>
+        <translation>Repareer kleur</translation>
     </message>
     <message>
         <source>New color is: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Nieuwe kleur is: %1</translation>
     </message>
     <message>
         <source>Item</source>
-        <translation type="unfinished"></translation>
+        <translation>Item</translation>
     </message>
     <message>
         <source>Type</source>
-        <translation type="unfinished"></translation>
+        <translation>Type</translation>
     </message>
     <message>
         <source>Category</source>
-        <translation type="unfinished"></translation>
+        <translation>Categorie</translation>
     </message>
     <message>
         <source>Color</source>
-        <translation type="unfinished"></translation>
+        <translation>Kleur</translation>
     </message>
     <message>
         <source>[%1]</source>
-        <translation type="unfinished"></translation>
+        <translation>[%1]</translation>
     </message>
     <message>
         <source>Unknown</source>
-        <translation type="unfinished"></translation>
+        <translation>Onbekend</translation>
     </message>
 </context>
 <context>
@@ -1976,11 +1996,11 @@
     </message>
     <message>
         <source>&amp;OK</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;OK</translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Annuleren</translation>
     </message>
 </context>
 <context>
@@ -2007,104 +2027,104 @@
     </message>
     <message>
         <source>&amp;OK</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;OK</translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Annuleren</translation>
     </message>
 </context>
 <context>
     <name>DlgMerge</name>
     <message>
         <source>Consolidate Items</source>
-        <translation type="unfinished"></translation>
+        <translation>Items samenvoegen</translation>
     </message>
     <message>
         <source>Would you like to consolidate %1 %2 with the already existing lot, containing %3 items?</source>
-        <translation type="unfinished"></translation>
+        <translation>Wilt U %1 %2 samenvoegen met het bestaande lot, dat %3 items bevat?</translation>
     </message>
     <message>
         <source>Preserve the attributes (e.g. remarks, tiered prices, ...) of the</source>
-        <translation type="unfinished"></translation>
+        <translation>Behoud de attributen (bijv. opmerkingen, staffelprijzen, ...) van het</translation>
     </message>
     <message>
         <source>&amp;existing lot or the</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;bestaande lot of het</translation>
     </message>
     <message>
         <source>ne&amp;w lot</source>
-        <translation type="unfinished"></translation>
+        <translation>Nieu&amp;we lot</translation>
     </message>
     <message>
         <source>&amp;Do the same for the remaining lots</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Doe hetzelfde voor de overige lots</translation>
     </message>
     <message>
         <source>&amp;Yes</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Ja</translation>
     </message>
     <message>
         <source>&amp;No</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Nee</translation>
     </message>
 </context>
 <context>
     <name>DlgMessage</name>
     <message>
         <source>&amp;OK</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;OK</translation>
     </message>
 </context>
 <context>
     <name>DlgRegistration</name>
     <message>
         <source>Registration</source>
-        <translation type="unfinished"></translation>
+        <translation>Registratie</translation>
     </message>
     <message>
         <source>&lt;b&gt;BrickStore&lt;/b&gt; supports three modes of operation:</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;b&gt;BrickStore&lt;/b&gt; ondersteunt drie verschillende modes:</translation>
     </message>
     <message>
         <source>&amp;PERSONAL</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;PERSOONLIJK</translation>
     </message>
     <message>
         <source>I do not need all the BrickLink Seller features (no reminders and no registration required).</source>
-        <translation type="unfinished"></translation>
+        <translation>Ik heb geen behoefte aan de features voor BrickLink verkopers (geen herinneringen en geen registratie benodigd).</translation>
     </message>
     <message>
         <source>&amp;DEMO</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;DEMO</translation>
     </message>
     <message>
         <source>I want to use the unrestricted demo version (a reminder will popup every 20 minutes).</source>
-        <translation type="unfinished"></translation>
+        <translation>Ik wil de onbeperkte demo versie gebruiken (een herinnering zal elke 20 minuten verschijnen).</translation>
     </message>
     <message>
         <source>&amp;FULL</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Volledig</translation>
     </message>
     <message>
         <source>--</source>
-        <translation type="unfinished"></translation>
+        <translation>--</translation>
     </message>
     <message>
         <source>&gt;NNNN-NNNN-NNNN;0</source>
-        <translation type="unfinished"></translation>
+        <translation>&gt;NNNN-NNNN-NNNN;0</translation>
     </message>
     <message>
         <source>Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Naam</translation>
     </message>
     <message>
         <source>Key</source>
-        <translation type="unfinished"></translation>
+        <translation>Sleutel</translation>
     </message>
     <message>
         <source>I want to use the full version (no reminders, but you need a &lt;a href=&quot;http://brickforge.de/software/brickstore&quot;&gt;valid registration key&lt;/a&gt;).</source>
-        <translation type="unfinished"></translation>
+        <translation>Ik wil de volledige versie gebruiken (geen herinneringen, maar U heeft een &lt;a href=&quot;http://brickforge.de/software/brickstore&quot;&gt;geldige registratie sleutel&lt;/a&gt; nodig).</translation>
     </message>
     <message>
         <source>You can change the mode of operation at anytime via &lt;b&gt;Help &gt; Registration...&lt;/b&gt;</source>
@@ -2112,18 +2132,18 @@
     </message>
     <message>
         <source>&amp;OK</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;OK</translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Annuleren</translation>
     </message>
 </context>
 <context>
     <name>DlgRegistrationImpl</name>
     <message>
         <source>Sorry - the registration key you entered is not valid!</source>
-        <translation type="unfinished"></translation>
+        <translation>Sorry - de ingevoerde registratie sleutel is niet geldig!</translation>
     </message>
 </context>
 <context>
@@ -2142,15 +2162,15 @@
     </message>
     <message>
         <source>Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Naam</translation>
     </message>
     <message>
         <source>&amp;OK</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;OK</translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Annuleren</translation>
     </message>
 </context>
 <context>
@@ -2169,42 +2189,42 @@
     </message>
     <message>
         <source>&amp;OK</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;OK</translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Annuleren</translation>
     </message>
 </context>
 <context>
     <name>DlgSetToPGImpl</name>
     <message>
         <source>All Time Sales</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">All Time Sales</translation>
     </message>
     <message>
         <source>Last 6 Months Sales</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Last 6 Months Sales</translation>
     </message>
     <message>
         <source>Current Inventory</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Current Inventory</translation>
     </message>
     <message>
         <source>Minimum</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Minimum</translation>
     </message>
     <message>
         <source>Average</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Average</translation>
     </message>
     <message>
         <source>Quantity Average</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Quantity Average</translation>
     </message>
     <message>
         <source>Maximum</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Maximum</translation>
     </message>
 </context>
 <context>
@@ -2299,15 +2319,15 @@
     </message>
     <message>
         <source>Condition</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Conditie</translation>
     </message>
     <message>
         <source>New</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Nieuw</translation>
     </message>
     <message>
         <source>Used</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Gebruikt</translation>
     </message>
     <message>
         <source>Default values for &apos;&amp;Set To Price Guide&apos;</source>
@@ -2343,50 +2363,50 @@
     </message>
     <message>
         <source>&amp;OK</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;OK</translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Annuleren</translation>
     </message>
 </context>
 <context>
     <name>DlgSettingsImpl</name>
     <message>
         <source>All Time Sales</source>
-        <translation type="unfinished"></translation>
+        <translation>All Time Sales</translation>
     </message>
     <message>
         <source>Last 6 Months Sales</source>
-        <translation type="unfinished"></translation>
+        <translation>Last 6 Months Sales</translation>
     </message>
     <message>
         <source>Current Inventory</source>
-        <translation type="unfinished"></translation>
+        <translation>Current Inventory</translation>
     </message>
     <message>
         <source>Minimum</source>
-        <translation type="unfinished"></translation>
+        <translation>Minimum</translation>
     </message>
     <message>
         <source>Average</source>
-        <translation type="unfinished"></translation>
+        <translation>Average</translation>
     </message>
     <message>
         <source>Quantity Average</source>
-        <translation type="unfinished"></translation>
+        <translation>Quantity Average</translation>
     </message>
     <message>
         <source>Maximum</source>
-        <translation type="unfinished"></translation>
+        <translation>Maximum</translation>
     </message>
     <message>
         <source>Cache directory location</source>
-        <translation type="unfinished"></translation>
+        <translation>Locatie van de Cache map</translation>
     </message>
     <message>
         <source>Document directory location</source>
-        <translation type="unfinished"></translation>
+        <translation>Locatie van de documenten</translation>
     </message>
     <message>
         <source>The specified document directory does not exist or is not read- and writeable.&lt;br /&gt;The document directory setting will not be changed.</source>
@@ -2417,15 +2437,15 @@
     </message>
     <message>
         <source>Column 1</source>
-        <translation type="unfinished"></translation>
+        <translation>Kolom 1</translation>
     </message>
     <message>
         <source>&amp;OK</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;OK</translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Annuleren</translation>
     </message>
 </context>
 </TS>

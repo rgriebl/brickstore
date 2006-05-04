@@ -65,6 +65,9 @@ CApplication::CApplication ( const char *rebuild_db_only, int _argc, char **_arg
 	m_enable_emit = false;
 	m_rebuild_db_only = rebuild_db_only;
 
+	if ( m_rebuild_db_only. isEmpty ( ))
+		CSplash::inst ( );
+
 #if defined( Q_WS_MACX )
 	AEInstallEventHandler( kCoreEventClass, kAEOpenDocuments, appleEventHandler, 0, false );
 #endif
@@ -91,7 +94,7 @@ CApplication::CApplication ( const char *rebuild_db_only, int _argc, char **_arg
 		updateTranslations ( );
 		connect ( CConfig::inst ( ), SIGNAL( languageChanged ( )), this, SLOT( updateTranslations ( )));
 		
-		CSplash::inst ( );
+		CSplash::inst ( )-> message ( qApp-> translate ( "CSplash", "Initializing..." ));
 
 		CMessageBox::setDefaultTitle ( appName ( ));
 
@@ -360,7 +363,9 @@ void CApplication::about ( )
 		"</p><p>"
 		"All other trademarks recognised."
 		"</p><p>"
-		"French translation by Sylvain Perez (<a href=\"mailto:bricklink@1001bricks.com\">1001bricks</a>)"
+		"French translation by Sylvain Perez (<a href=\"mailto:bricklink@1001bricks.com\">bricklink@1001bricks.com</a>)"
+		"<br />"
+		"Dutch translation by Eric van Horssen (<a href=\"mailto:horzel@hacktic.nl\">horzel@hacktic.nl</a>)"
 		"</p>"
 	);
 
