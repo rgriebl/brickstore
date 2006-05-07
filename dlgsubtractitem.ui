@@ -92,7 +92,7 @@
                 <widget class="QListView" row="2" column="1">
                     <column>
                         <property name="text">
-                            <string>Column 1</string>
+                            <string></string>
                         </property>
                         <property name="clickable">
                             <bool>true</bool>

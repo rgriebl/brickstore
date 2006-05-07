@@ -429,7 +429,7 @@
                                     <cstring>w_cache_priceguides</cstring>
                                 </property>
                                 <property name="text">
-                                    <string>Price g&amp;uides, if older than</string>
+                                    <string>Price G&amp;uides, if older than</string>
                                 </property>
                                 <property name="checked">
                                     <bool>true</bool>
@@ -440,7 +440,7 @@
                                     <cstring>w_cache_pictures</cstring>
                                 </property>
                                 <property name="text">
-                                    <string>&amp;Pictures, if older than</string>
+                                    <string>&amp;Images, if older than</string>
                                 </property>
                                 <property name="checked">
                                     <bool>true</bool>

@@ -49,7 +49,7 @@ template <typename T> static inline T pack ( typename T::const_reference item )
 };
 
 CChangeCmd::CChangeCmd ( CDocument *doc, CDocument::Item *pos, const CDocument::Item &item, bool can_merge )
-	: CUndoCmd ( tr( "Modified Item" ), can_merge ), m_doc ( doc ), m_position ( pos ), m_item ( item )
+	: CUndoCmd ( tr( "Modified item" ), can_merge ), m_doc ( doc ), m_position ( pos ), m_item ( item )
 { }
 
 void CChangeCmd::redo ( )
@@ -126,9 +126,9 @@ bool CAddRemoveCmd::mergeMeWith ( CUndoCmd *other )
 QString CAddRemoveCmd::genDesc ( bool is_add, uint count )
 {
 	if ( is_add )
-		return ( count > 1 ) ? tr( "Added %1 Items" ). arg( count ) : tr( "Added an Item" );
+		return ( count > 1 ) ? tr( "Added %1 items" ). arg( count ) : tr( "Added an item" );
 	else
-		return ( count > 1 ) ? tr( "Removed %1 Items" ). arg( count ) : tr( "Removed an Item" );
+		return ( count > 1 ) ? tr( "Removed %1 items" ). arg( count ) : tr( "Removed an item" );
 }
 
 
@@ -1031,7 +1031,7 @@ const BrickLink::Order *CDocument::order ( ) const
 
 void CDocument::resetDifferences ( const ItemList &items )
 {
-	CUndoCmd *macro = macroBegin ( tr( "Reset Differences" ));
+	CUndoCmd *macro = macroBegin ( tr( "Reset differences" ));
 
 	foreach ( Item *pos, items ) {
 		if (( pos-> origQuantity ( ) != pos-> quantity ( )) ||

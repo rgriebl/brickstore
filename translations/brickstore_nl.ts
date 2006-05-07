@@ -7,25 +7,41 @@
     </message>
     <message>
         <source>HTTP transfer threads could not be started.</source>
-        <translation>HTTP transport threads konden niet worden gestart.</translation>
+        <translation>HTTP overdracht threads konden niet worden gestart.</translation>
     </message>
 </context>
 <context>
     <name>CAddRemoveCmd</name>
     <message>
         <source>Added %1 Items</source>
-        <translation>%1 items toegevoegd</translation>
+        <translation type="obsolete">%1 items toegevoegd</translation>
     </message>
     <message>
         <source>Added an Item</source>
-        <translation>Item toegevoegd</translation>
+        <translation type="obsolete">Item toegevoegd</translation>
     </message>
     <message>
         <source>Removed %1 Items</source>
-        <translation>%1 items verwijderd</translation>
+        <translation type="obsolete">%1 items verwijderd</translation>
     </message>
     <message>
         <source>Removed an Item</source>
+        <translation type="obsolete">Item verwijderd</translation>
+    </message>
+    <message>
+        <source>Added %1 items</source>
+        <translation>%1 items toegevoegd</translation>
+    </message>
+    <message>
+        <source>Added an item</source>
+        <translation>Item toegevoegd</translation>
+    </message>
+    <message>
+        <source>Removed %1 items</source>
+        <translation>%1 items verwijderd</translation>
+    </message>
+    <message>
+        <source>Removed an item</source>
         <translation>Item verwijderd</translation>
     </message>
 </context>
@@ -99,7 +115,11 @@
     <name>CChangeCmd</name>
     <message>
         <source>Modified Item</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">Een item aangepast</translation>
+    </message>
+    <message>
+        <source>Modified item</source>
+        <translation>Een item aangepast</translation>
     </message>
 </context>
 <context>
@@ -142,7 +162,7 @@
     </message>
     <message>
         <source>&lt;b&gt;Please note:&lt;/b&gt; Your currently installed version is flagged as defective. Please visit %1 to find out the exact cause.</source>
-        <translation>&lt;b&gt;Attentie:&lt;/b&gt; Uw huidige geïnstalleerde versie word vermeld als defect. Bezoek alstublieft %1 om de exacte reden te vinden.</translation>
+        <translation>&lt;b&gt;Attentie:&lt;/b&gt; Uw huidige geïnstalleerde versie is gemarkeerd als defect. Bezoek alstublieft %1 om de exacte oorzaak te vinden.</translation>
     </message>
 </context>
 <context>
@@ -153,127 +173,131 @@
     </message>
     <message>
         <source>Inventory Files</source>
-        <translation type="unfinished"></translation>
+        <translation>Inventaris bestanden</translation>
     </message>
     <message>
         <source>BrickStore XML Data</source>
-        <translation type="unfinished"></translation>
+        <translation>BrickStore XML gegevens</translation>
     </message>
     <message>
         <source>BrikTrak Inventory</source>
-        <translation type="unfinished"></translation>
+        <translation>BrikTrak inventaris</translation>
     </message>
     <message>
         <source>All Files</source>
-        <translation type="unfinished"></translation>
+        <translation>Alle bestanden</translation>
     </message>
     <message>
         <source>Open File</source>
-        <translation type="unfinished"></translation>
+        <translation>Open bestand</translation>
     </message>
     <message>
         <source>Inventory for %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Inventaris van %1</translation>
     </message>
     <message>
         <source>Internal error: Could not create an Inventory object for item %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Interne fout: Inventaris object kon niet worden gemaakt voor item %1</translation>
     </message>
     <message>
         <source>Requested item was not found in the database.</source>
-        <translation type="unfinished"></translation>
+        <translation>Het gevraagde item kon niet worden gevonden in de database.</translation>
     </message>
     <message>
         <source>Order #%1</source>
-        <translation type="unfinished"></translation>
+        <translation>Bestelling # %1</translation>
     </message>
     <message>
         <source>Invalid order number.</source>
-        <translation type="unfinished"></translation>
+        <translation>Ongeldig bestelling nummer.</translation>
     </message>
     <message>
         <source>Store %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Winkel bestand %1</translation>
     </message>
     <message>
         <source>BrickLink XML File</source>
-        <translation type="unfinished"></translation>
+        <translation>BrickLink XML bestand</translation>
     </message>
     <message>
         <source>Import File</source>
-        <translation type="unfinished"></translation>
+        <translation>Bestand importeren</translation>
     </message>
     <message>
         <source>Import of %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Importeren van %1</translation>
     </message>
     <message>
         <source>Enter the set ID of the Peeron inventory:</source>
-        <translation type="unfinished"></translation>
+        <translation>Geef het set nummer van de Peeron inventaris:</translation>
     </message>
     <message>
         <source>Peeron Inventory for %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Peeron inventaris van %1</translation>
     </message>
     <message>
         <source>Could not open file %1 for reading.</source>
-        <translation type="unfinished"></translation>
+        <translation>Het bestand %1 kon niet geopend worden om te lezen.</translation>
     </message>
     <message>
         <source>Could not parse the XML data in file %1:&lt;br /&gt;&lt;i&gt;Line %2, column %3: %4&lt;/i&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>De XML gegevens in bestand %1 konden niet worden verwerkt:&lt;br /&gt;&lt;i&gt;Regel %2, kolom %3: %4&lt;/i&gt;</translation>
     </message>
     <message>
         <source>This file contains %1 unknown item(s).</source>
-        <translation type="unfinished"></translation>
+        <translation>Dit bestand bevat %1 ongeldig(e) item(s).</translation>
     </message>
     <message>
         <source>Could not parse the XML data in file %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>De XML gegevens in bestand %1 konden niet worden verwerkt.</translation>
     </message>
     <message>
         <source>LDraw Models</source>
-        <translation type="unfinished"></translation>
+        <translation>LDraw modellen</translation>
     </message>
     <message>
         <source>Could not parse the LDraw model in file %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>Het LDraw model in bestand %1 kon niet worden verwerkt.</translation>
     </message>
     <message>
         <source>Save File as</source>
-        <translation type="unfinished"></translation>
+        <translation>Bestand opslaan als</translation>
     </message>
     <message>
         <source>A file named %1 already exists. Are you sure you want to overwrite it?</source>
-        <translation type="unfinished"></translation>
+        <translation>Een bestand met de naam %1 bestaat al. Weet U zeker dat U het wil overschrijven?</translation>
     </message>
     <message>
         <source>Failed to save data in file %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>Gegevens konden niet in bestand %1 worden opgeslagen.</translation>
     </message>
     <message>
         <source>Failed to open file %1 for writing.</source>
-        <translation type="unfinished"></translation>
+        <translation>Bestand %1 kon niet worden geopend om naar te schrijven.</translation>
     </message>
     <message>
         <source>Enter the ID number of Wanted List (leave blank for the default Wanted List)</source>
-        <translation type="unfinished"></translation>
+        <translation>Geef het ID-nummer van de Gezochte Onderdelen Lijst (voor de standaard lijst het veld simpelweg leeg laten)</translation>
     </message>
     <message>
         <source>This list contains items without a BrickLink Lot-ID.&lt;br /&gt;&lt;br /&gt;Do you really want to export this list?</source>
-        <translation type="unfinished"></translation>
+        <translation>Deze lijst bevat items zonder een BrickLink lot-ID.&lt;br /&gt;&lt;br /&gt;Weet U zeker dat U deze lijst wilt exporteren?</translation>
     </message>
     <message>
         <source>Export File</source>
-        <translation type="unfinished"></translation>
+        <translation>Bestand exporteren</translation>
     </message>
     <message>
         <source>Reset Differences</source>
-        <translation>Reset wijzigingen</translation>
+        <translation type="obsolete">Reset wijzigingen</translation>
     </message>
     <message>
         <source>BrickStore has switched to a new file format (.bsx - BrickStore XML).&lt;br /&gt;&lt;br /&gt;Your document has been automatically imported and it will be converted as soon as you save it.</source>
         <translation>BrickStore is overgestapt op een nieuw bestandsformaat (.bsx - BrickStore XML).&lt;br /&gt;&lt;br /&gt;Uw document is automatisch geïmporteerd en zal worden geconverteerd zodra U het opslaat.</translation>
+    </message>
+    <message>
+        <source>Reset differences</source>
+        <translation>Reset wijzigingen</translation>
     </message>
 </context>
 <context>
@@ -288,15 +312,15 @@
     </message>
     <message>
         <source>Toolbar</source>
-        <translation type="unfinished"></translation>
+        <translation>Werkbalk</translation>
     </message>
     <message>
         <source>Priceguide updates</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">Richtprijslijst updates</translation>
     </message>
     <message>
         <source>Picture updates</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">Afbeeldingen updates</translation>
     </message>
     <message>
         <source>Info</source>
@@ -304,7 +328,7 @@
     </message>
     <message>
         <source>Price Guide</source>
-        <translation>Richtprijzen</translation>
+        <translation>Richtprijslijst</translation>
     </message>
     <message>
         <source>Appears In Sets</source>
@@ -433,11 +457,11 @@
     </message>
     <message>
         <source>BrickLink Inventory XML to Clipboard</source>
-        <translation>BrickLink Inventaris XML naar klembord</translation>
+        <translation>BrickLink inventaris XML naar klembord</translation>
     </message>
     <message>
         <source>BrickLink Wanted List XML to Clipboard</source>
-        <translation>BrickLink Wanted List XML naar klembord</translation>
+        <translation>BrickLink Gezochte Onderdelen Lijst XML naar klembord</translation>
     </message>
     <message>
         <source>Close</source>
@@ -552,15 +576,15 @@
     </message>
     <message>
         <source>View Toolbar</source>
-        <translation type="unfinished"></translation>
+        <translation>Toon Werkbalk</translation>
     </message>
     <message>
         <source>View Infobars</source>
-        <translation type="unfinished"></translation>
+        <translation>Toon Infobalk</translation>
     </message>
     <message>
         <source>View Statusbar</source>
-        <translation type="unfinished"></translation>
+        <translation>Toon Statusbalk</translation>
     </message>
     <message>
         <source>Full Screen</source>
@@ -584,7 +608,7 @@
     </message>
     <message>
         <source>Update Database</source>
-        <translation>Databse bijwerken</translation>
+        <translation>Database bijwerken</translation>
     </message>
     <message>
         <source>Configure...</source>
@@ -703,7 +727,7 @@
     </message>
     <message>
         <source>Set to Price-Guide...</source>
-        <translation>Instellen tot richtprijzen...</translation>
+        <translation type="obsolete">Instellen met de richtprijslijst...</translation>
     </message>
     <message>
         <source>Ctrl+G</source>
@@ -746,7 +770,7 @@
     </message>
     <message>
         <source>Remove from...</source>
-        <translation>Verwijder van...</translation>
+        <translation>Verwijderen van...</translation>
     </message>
     <message>
         <source>Remark</source>
@@ -782,7 +806,7 @@
     </message>
     <message>
         <source>Show BrickLink Price Guide Info...</source>
-        <translation>Toon BrickLink richtprijs info...</translation>
+        <translation>Toon BrickLink richtprijslijst info...</translation>
     </message>
     <message>
         <source>Show Lots for Sale on BrickLink...</source>
@@ -794,7 +818,7 @@
     </message>
     <message>
         <source>Download activity indicator</source>
-        <translation type="unfinished"></translation>
+        <translation>Download activiteit indicator</translation>
     </message>
     <message>
         <source>BrickStore has switched to a new file format (.bsx - BrickStore XML).&lt;br /&gt;&lt;br /&gt;Your document has been automatically imported and it will be converted as soon as you save it.</source>
@@ -802,7 +826,7 @@
     </message>
     <message>
         <source>No valid BrickLink login settings found.&lt;br /&gt;&lt;br /&gt;Do you want to change the settings now?</source>
-        <translation type="unfinished"></translation>
+        <translation>Geen geldige BrickLink login instellingen gevonden.&lt;br /&gt;&lt;br /&gt;Wilt U de instellingen nu wijzigen?</translation>
     </message>
     <message>
         <source>min.</source>
@@ -818,7 +842,7 @@
     </message>
     <message>
         <source>Value</source>
-        <translation type="unfinished"></translation>
+        <translation>Waarde</translation>
     </message>
     <message>
         <source>Weight</source>
@@ -830,11 +854,11 @@
     </message>
     <message>
         <source>Unsaved modifications</source>
-        <translation type="unfinished"></translation>
+        <translation>Niet opgeslagen aanpassingen</translation>
     </message>
     <message>
         <source>Do you want to cancel all outstanding inventory, picture and price guide transfers?</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">Wilt U alle openstaande inventaris-, afbeeldingen- en richtprijslijstoverdrachten afbreken?</translation>
     </message>
     <message>
         <source>New</source>
@@ -845,6 +869,22 @@
         <source>New</source>
         <comment>Cond|New</comment>
         <translation>Nieuw</translation>
+    </message>
+    <message>
+        <source>Price Guide updates</source>
+        <translation>Richtprijslijst updates</translation>
+    </message>
+    <message>
+        <source>Image updates</source>
+        <translation>Afbeeldingen updates</translation>
+    </message>
+    <message>
+        <source>Set to Price Guide...</source>
+        <translation>Instellen met de richtprijslijst...</translation>
+    </message>
+    <message>
+        <source>Do you want to cancel all outstanding inventory, image and Price Guide transfers?</source>
+        <translation>Wilt U alle openstaande inventaris-, afbeeldingen- en richtprijslijstoverdrachten afbreken?</translation>
     </message>
 </context>
 <context>
@@ -859,11 +899,11 @@
     </message>
     <message>
         <source>Could not parse the XML data for order #%1.</source>
-        <translation type="unfinished"></translation>
+        <translation>De XML gegevens voor bestelling #%1 konden niet worden verwerkt.</translation>
     </message>
     <message>
         <source>Could not parse the XML data for order #%1:&lt;br /&gt;&lt;i&gt;Line %2, column %3: %4&lt;/i&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>De XML gegevens voor bestelling #%1 konden niet worden verwerkt:&lt;br /&gt;&lt;i&gt;Regel %2, kolom %3: %4&lt;/i&gt;</translation>
     </message>
 </context>
 <context>
@@ -878,18 +918,18 @@
     </message>
     <message>
         <source>Could not parse the XML data for the store inventory:&lt;br /&gt;&lt;i&gt;Line %1, column %2: %3&lt;/i&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>De XML gegevens voor de winkel inventaris konden niet worden verwerkt:&lt;br /&gt;&lt;i&gt;Regel %1, kolom %2: %3&lt;/i&gt;</translation>
     </message>
     <message>
         <source>Could not parse the XML data for the store inventory.</source>
-        <translation type="unfinished"></translation>
+        <translation>De XML gegevens voor de winkel inventaris konden niet worden verwerkt.</translation>
     </message>
 </context>
 <context>
     <name>CImportPeeronInventory</name>
     <message>
         <source>Importing Peeron Inventory</source>
-        <translation type="unfinished"></translation>
+        <translation>Peeron inventaris word geimporteerd</translation>
     </message>
     <message>
         <source>Download: %1/%2 KB</source>
@@ -897,7 +937,7 @@
     </message>
     <message>
         <source>Could not parse the Peeron inventory.</source>
-        <translation type="unfinished"></translation>
+        <translation>De Peeron inventaris kon niet worden verwerkt.</translation>
     </message>
 </context>
 <context>
@@ -980,27 +1020,27 @@
     </message>
     <message>
         <source>Tier Q1</source>
-        <translation type="unfinished"></translation>
+        <translation>Staffel A1</translation>
     </message>
     <message>
         <source>Tier P1</source>
-        <translation type="unfinished"></translation>
+        <translation>Staffel P1</translation>
     </message>
     <message>
         <source>Tier Q2</source>
-        <translation type="unfinished"></translation>
+        <translation>Staffel A2</translation>
     </message>
     <message>
         <source>Tier P2</source>
-        <translation type="unfinished"></translation>
+        <translation>Staffel P2</translation>
     </message>
     <message>
         <source>Tier Q3</source>
-        <translation type="unfinished"></translation>
+        <translation>Staffel A3</translation>
     </message>
     <message>
         <source>Tier P3</source>
-        <translation type="unfinished"></translation>
+        <translation>Staffel P3</translation>
     </message>
     <message>
         <source>Lot Id</source>
@@ -1067,15 +1107,15 @@
     <name>CLargePictureWidget</name>
     <message>
         <source>Double-click to close this window.</source>
-        <translation type="unfinished"></translation>
+        <translation>Dubbelklik om dit venster te sluiten.</translation>
     </message>
     <message>
         <source>Please wait ... updating</source>
-        <translation type="unfinished"></translation>
+        <translation>Moment alstublieft ... aan het bijwerken</translation>
     </message>
     <message>
         <source>Update</source>
-        <translation type="unfinished"></translation>
+        <translation>Bijwerken</translation>
     </message>
     <message>
         <source>Close</source>
@@ -1135,105 +1175,105 @@
     <name>CMultiProgressBar</name>
     <message>
         <source>Cancel all active transfers</source>
-        <translation>Annuleer alle actieve transfers</translation>
+        <translation>Annuleer alle actieve overdrachten</translation>
     </message>
 </context>
 <context>
     <name>CPictureWidget</name>
     <message>
         <source>Update</source>
-        <translation type="unfinished"></translation>
+        <translation>Bijwerken</translation>
     </message>
     <message>
         <source>View large image...</source>
-        <translation type="unfinished"></translation>
+        <translation>Toon grote afbeelding...</translation>
     </message>
     <message>
         <source>Double-click to view the large image.</source>
-        <translation type="unfinished"></translation>
+        <translation>Dubbelklikken om de grote afbeelding te bekijken.</translation>
     </message>
     <message>
         <source>Please wait ... updating</source>
-        <translation type="unfinished"></translation>
+        <translation>Moment alstublieft ... aan het bijwerken</translation>
     </message>
 </context>
 <context>
     <name>CPriceGuideWidget</name>
     <message>
         <source>Double-click to set the price of the current item.</source>
-        <translation type="unfinished"></translation>
+        <translation>Dubbelklik om een prijs aan het huidige item te geven.</translation>
     </message>
     <message>
         <source>Qty.</source>
-        <translation type="unfinished"></translation>
+        <translation>Aant.</translation>
     </message>
     <message>
         <source>New</source>
-        <translation type="unfinished"></translation>
+        <translation>Nieuw</translation>
     </message>
     <message>
         <source>Used</source>
-        <translation type="unfinished"></translation>
+        <translation>Gebruikt</translation>
     </message>
     <message>
         <source>Min.</source>
-        <translation type="unfinished"></translation>
+        <translation>Min.</translation>
     </message>
     <message>
         <source>Avg.</source>
-        <translation type="unfinished"></translation>
+        <translation>Gem.</translation>
     </message>
     <message>
         <source>Q.Avg.</source>
-        <translation type="unfinished"></translation>
+        <translation>Gew.Gem.</translation>
     </message>
     <message>
         <source>Max.</source>
-        <translation type="unfinished"></translation>
+        <translation>Max.</translation>
     </message>
     <message>
         <source>All Time</source>
-        <translation type="unfinished"></translation>
+        <translation>All Verk</translation>
     </message>
     <message>
         <source>Sales</source>
-        <translation type="unfinished"></translation>
+        <translation>Verkopen</translation>
     </message>
     <message>
         <source>Last 6</source>
-        <translation type="unfinished"></translation>
+        <translation>Laatste 6</translation>
     </message>
     <message>
         <source>Months Sales</source>
-        <translation type="unfinished"></translation>
+        <translation>laatste 6 maanden</translation>
     </message>
     <message>
         <source>Current</source>
-        <translation type="unfinished"></translation>
+        <translation>Huidig</translation>
     </message>
     <message>
         <source>Inventory</source>
-        <translation type="unfinished"></translation>
+        <translation>Inventaris</translation>
     </message>
     <message>
         <source>All Time Sales</source>
-        <translation type="unfinished">All Time Sales</translation>
+        <translation>Alle verkopen tot nu</translation>
     </message>
     <message>
         <source>Last 6 Months Sales</source>
-        <translation type="unfinished">Last 6 Months Sales</translation>
+        <translation>Laatste 6 maanden verkoop</translation>
     </message>
     <message>
         <source>Current Inventory</source>
-        <translation type="unfinished">Current Inventory</translation>
+        <translation>Huidige inventaris</translation>
     </message>
     <message>
         <source>Please wait ... updating</source>
-        <translation type="unfinished"></translation>
+        <translation>Moment alstublieft ... aan het bijwerken</translation>
     </message>
     <message>
         <source>Update</source>
-        <translation type="unfinished"></translation>
+        <translation>Bijwerken</translation>
     </message>
 </context>
 <context>
@@ -1248,11 +1288,11 @@
     </message>
     <message>
         <source>Error</source>
-        <translation type="unfinished"></translation>
+        <translation>Fout</translation>
     </message>
     <message>
         <source>Download failed: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Download mislukt: %1</translation>
     </message>
 </context>
 <context>
@@ -1281,7 +1321,7 @@
     <name>CSelectItem</name>
     <message>
         <source>All Items</source>
-        <translation type="unfinished"></translation>
+        <translation>Alle items</translation>
     </message>
     <message>
         <source>[Image is loading]</source>
@@ -1289,7 +1329,7 @@
     </message>
     <message>
         <source>Item type:</source>
-        <translation type="unfinished"></translation>
+        <translation>Item type:</translation>
     </message>
     <message>
         <source>Filter:</source>
@@ -1298,11 +1338,11 @@
     <message>
         <source>Ctrl+F</source>
         <comment>Find Item</comment>
-        <translation type="unfinished"></translation>
+        <translation>Ctrl+F</translation>
     </message>
     <message>
         <source>Find Item...</source>
-        <translation type="unfinished"></translation>
+        <translation>Item zoeken...</translation>
     </message>
     <message>
         <source>Filter the list using this pattern (wildcards allowed: * ? [])</source>
@@ -1314,7 +1354,7 @@
     </message>
     <message>
         <source>View</source>
-        <translation type="unfinished"></translation>
+        <translation>Beeld</translation>
     </message>
     <message>
         <source>Category</source>
@@ -1322,7 +1362,7 @@
     </message>
     <message>
         <source>Part #</source>
-        <translation type="unfinished"></translation>
+        <translation>Onderdeel #</translation>
     </message>
     <message>
         <source>Description</source>
@@ -1330,27 +1370,31 @@
     </message>
     <message>
         <source>List</source>
-        <translation type="unfinished"></translation>
+        <translation>Lijst</translation>
     </message>
     <message>
         <source>List with images</source>
-        <translation type="unfinished"></translation>
+        <translation>Lijst met afbeeldingen</translation>
     </message>
     <message>
         <source>Thumbnails</source>
-        <translation type="unfinished"></translation>
+        <translation>Thumbnails</translation>
     </message>
     <message>
         <source>Please enter the complete part number of the item:</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">Geef alstublieft het gehele onderdeel nummer in:</translation>
     </message>
     <message>
         <source>Viewing all items with images is a bandwidth- and memory-hungry operation.&lt;br /&gt;Are you sure you want to continue?</source>
-        <translation type="unfinished"></translation>
+        <translation>Alle items met afbeeldingen tonen is een bandbreedte- en geheugen-vretende procedure.&lt;br /&gt;Weet U zeker dat U door wilt gaan?</translation>
     </message>
     <message>
         <source>View item&apos;s category</source>
-        <translation type="unfinished"></translation>
+        <translation>Toon item&apos;s categorie</translation>
+    </message>
+    <message>
+        <source>Please enter the complete item number:</source>
+        <translation>Geef alstublieft het gehele onderdeel nummer in:</translation>
     </message>
 </context>
 <context>
@@ -1372,34 +1416,34 @@
     </message>
     <message>
         <source>Initializing...</source>
-        <translation type="unfinished"></translation>
+        <translation>Initialisatie...</translation>
     </message>
 </context>
 <context>
     <name>CTaskInfoWidget</name>
     <message>
         <source>min.</source>
-        <translation type="unfinished">min.</translation>
+        <translation>min.</translation>
     </message>
     <message>
         <source>Multiple lots selected</source>
-        <translation type="unfinished"></translation>
+        <translation>Meerdere lots geselecteerd</translation>
     </message>
     <message>
         <source>Lots</source>
-        <translation type="unfinished">Lots</translation>
+        <translation>Lots</translation>
     </message>
     <message>
         <source>Items</source>
-        <translation type="unfinished">Items</translation>
+        <translation>Items</translation>
     </message>
     <message>
         <source>Value</source>
-        <translation type="unfinished"></translation>
+        <translation>Waarde</translation>
     </message>
     <message>
         <source>Weight</source>
-        <translation type="unfinished">Gewicht</translation>
+        <translation>Gewicht</translation>
     </message>
 </context>
 <context>
@@ -1418,7 +1462,7 @@
     </message>
     <message>
         <source>Price Guide</source>
-        <translation>Richtprijzen</translation>
+        <translation>Richtprijslijst</translation>
     </message>
     <message>
         <source>Lots for Sale</source>
@@ -1437,15 +1481,15 @@
     <name>CTaskPaneManager</name>
     <message>
         <source>All</source>
-        <translation type="unfinished">Alles</translation>
+        <translation>Alles</translation>
     </message>
     <message>
         <source>Modern (fixed)</source>
-        <translation type="unfinished"></translation>
+        <translation>Modern (vaste plaats)</translation>
     </message>
     <message>
         <source>Classic (moveable)</source>
-        <translation type="unfinished"></translation>
+        <translation>Klassiek (verplaatsbaar)</translation>
     </message>
 </context>
 <context>
@@ -1487,66 +1531,66 @@
     </message>
     <message>
         <source>Could not write to file: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Bestand kon niet worden geschreven: %1</translation>
     </message>
     <message>
         <source>Already up-to-date.</source>
-        <translation type="unfinished"></translation>
+        <translation>Reeds bijgewerkt.</translation>
     </message>
     <message>
         <source>Finished.</source>
-        <translation type="unfinished"></translation>
+        <translation>Klaar.</translation>
     </message>
     <message>
         <source>Could not load the new database.</source>
-        <translation type="unfinished"></translation>
+        <translation>De nieuwe database kon niet worden geladen.</translation>
     </message>
     <message>
         <source>Downloaded file is empty.</source>
-        <translation type="unfinished"></translation>
+        <translation>Het gedownloade bestand is leeg.</translation>
     </message>
     <message>
         <source>Could not read downloaded file: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Het gedownloade bestand kon niet worden gelezen: %1</translation>
     </message>
     <message>
         <source>Could not write to database file: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Gegevens bestand kon niet worden geschreven: %1</translation>
     </message>
     <message>
         <source>Could not initialize the LZMA decompressor</source>
-        <translation type="unfinished"></translation>
+        <translation>De LZMA uitpakker kon niet worden geinitialiseerd</translation>
     </message>
     <message>
         <source>Decompressing database</source>
-        <translation type="unfinished"></translation>
+        <translation>Database aan het decomprimeren</translation>
     </message>
     <message>
         <source>Error while decompressing %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Fout bij het uitpakken: %1</translation>
     </message>
     <message>
         <source>Error writing to file %1: %2</source>
-        <translation type="unfinished"></translation>
+        <translation>Fout bij het schrijven naar bestand %1:  %2</translation>
     </message>
 </context>
 <context>
     <name>CUtility</name>
     <message>
         <source>Could not rename %1 to %2.</source>
-        <translation type="unfinished"></translation>
+        <translation>Naam kon niet van %1 naar %2 worden gewijzigd.</translation>
     </message>
     <message>
         <source>Could not backup %1 to %2.</source>
-        <translation type="unfinished"></translation>
+        <translation>Backup kon niet worden gemaakt van %1 naar %2.</translation>
     </message>
     <message>
         <source>Could not delete %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 kon niet verwijderd worden.</translation>
     </message>
     <message>
         <source>Could not find %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 kon niet gevonden worden.</translation>
     </message>
 </context>
 <context>
@@ -1593,11 +1637,11 @@
     </message>
     <message>
         <source>Added %1, Merged %2 Items</source>
-        <translation>%1 toegevoegde, %2 samengevoegde items</translation>
+        <translation type="obsolete">%1 toegevoegde, %2 samengevoegde items</translation>
     </message>
     <message>
         <source>Merged %1 Items</source>
-        <translation>%1 items samengevoegd</translation>
+        <translation type="obsolete">%1 items samengevoegd</translation>
     </message>
     <message>
         <source>Overwrite the currently selected items?</source>
@@ -1605,75 +1649,75 @@
     </message>
     <message>
         <source>Set Include Status on %1 Items</source>
-        <translation>Inclusief status voor %1 items ingesteld</translation>
+        <translation type="obsolete">Inclusief status voor %1 items ingesteld</translation>
     </message>
     <message>
         <source>Set Exclude Status on %1 Items</source>
-        <translation>Exclusief status voor %1 items ingesteld</translation>
+        <translation type="obsolete">Exclusief status voor %1 items ingesteld</translation>
     </message>
     <message>
         <source>Set Extra Status on %1 Items</source>
-        <translation>Extra status voor %1 items ingesteld</translation>
+        <translation type="obsolete">Extra status voor %1 items ingesteld</translation>
     </message>
     <message>
         <source>Toggled Status on %1 Items</source>
-        <translation>Status voor %1 items omgeschakeld</translation>
+        <translation type="obsolete">Status voor %1 items omgeschakeld</translation>
     </message>
     <message>
         <source>Set New Condition on %1 Items</source>
-        <translation>Conditie nieuw voor %1 items ingesteld</translation>
+        <translation type="obsolete">Conditie nieuw voor %1 items ingesteld</translation>
     </message>
     <message>
         <source>Set Used Condition on %1 Items</source>
-        <translation>Conditie gebruikt voor %1 items ingesteld</translation>
+        <translation type="obsolete">Conditie gebruikt voor %1 items ingesteld</translation>
     </message>
     <message>
         <source>Toggled Condition on %1 Items</source>
-        <translation>Conditie voor %1 items omgeschakeld</translation>
+        <translation type="obsolete">Conditie voor %1 items omgeschakeld</translation>
     </message>
     <message>
         <source>Set Retain Flag on %1 Items</source>
-        <translation>Houden vlag voor %1 items ingesteld</translation>
+        <translation type="obsolete">Houden vlag voor %1 items ingesteld</translation>
     </message>
     <message>
         <source>Cleared Retain Flag on %1 Items</source>
-        <translation>Houden vlag voor %1 items gewist</translation>
+        <translation type="obsolete">Houden vlag voor %1 items gewist</translation>
     </message>
     <message>
         <source>Toggled Retain Flag on %1 Items</source>
-        <translation>Houden vlag voor %1 items omgeschakeld</translation>
+        <translation type="obsolete">Houden vlag voor %1 items omgeschakeld</translation>
     </message>
     <message>
         <source>Set Stockroom Flag on %1 Items</source>
-        <translation>Magazijn vlag voor %1 items ingesteld</translation>
+        <translation type="obsolete">Magazijn vlag voor %1 items ingesteld</translation>
     </message>
     <message>
         <source>Cleared Stockroom Flag on %1 Items</source>
-        <translation>Magazijn vlag voor %1 items gewist</translation>
+        <translation type="obsolete">Magazijn vlag voor %1 items gewist</translation>
     </message>
     <message>
         <source>Toggled Stockroom Flag on %1 Items</source>
-        <translation>Magazijn vlag voor %1 items omgeschakeld</translation>
+        <translation type="obsolete">Magazijn vlag voor %1 items omgeschakeld</translation>
     </message>
     <message>
         <source>Prices are currently updated to price guide values.&lt;br /&gt;&lt;br /&gt;Please wait until this operation has finished.</source>
-        <translation>Prijzen worden op dit moment bijgewerkt met richtprijzen.&lt;br /&gt;&lt;br /&gt;Wacht U alstublieft tot deze taak klaar is.</translation>
+        <translation type="obsolete">Prijzen worden op dit moment bijgewerkt met de richtprijslijst.&lt;br /&gt;&lt;br /&gt;Wacht U alstublieft tot deze taak klaar is.</translation>
     </message>
     <message>
         <source>Prices of the selected items have been updated to price guide values.</source>
-        <translation>Prijzen van de geselecteerde items zijn bijgewerkt tot de richtprijzen.</translation>
+        <translation type="obsolete">Prijzen van de geselecteerde items zijn bijgewerkt met de richtprijslijst.</translation>
     </message>
     <message>
         <source>%1 have been skipped, because of missing price guide records and/or network errors.</source>
-        <translation>%1 zijn overgeslagen, omdat de gegevens in de richtprijzen ontbraken en/of door netwerk fouten.</translation>
+        <translation type="obsolete">%1 zijn overgeslagen, omdat de gegevens in de richtprijslijst ontbraken en/of door netwerk fouten.</translation>
     </message>
     <message>
         <source>Price Change on %1 Items</source>
-        <translation>Prijs van %1 items gewijzigd</translation>
+        <translation type="obsolete">Prijs van %1 items gewijzigd</translation>
     </message>
     <message>
         <source>Divide the quantities of all selected items by this number.&lt;br /&gt;&lt;br /&gt;(A check is made if all quantites are exactly divisble without reminder, before this operation is performed.)</source>
-        <translation type="unfinished">Deel de aantallen van alle geselecteerde items door dit getal..&lt;br /&gt;&lt;br /&gt;</translation>
+        <translation type="obsolete">Deel de aantallen van alle geselecteerde items door dit getal..&lt;br /&gt;&lt;br /&gt;(Eerst word gecontroleerd of alle aantallen zonder rest deelbaar zijn.)</translation>
     </message>
     <message>
         <source>The quantities of %1 lots are not divisible without remainder by %2.&lt;br /&gt;&lt;br /&gt;Nothing has been modified.</source>
@@ -1681,11 +1725,11 @@
     </message>
     <message>
         <source>Quantity Divide by %1 on %2 Items</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">Aantallen door %1 gedeeld bij %2 items</translation>
     </message>
     <message>
         <source>Multiply the quantities of all selected items with this factor.</source>
-        <translation type="unfinished"></translation>
+        <translation>Vermenigvuldig de aantallen van alle geslecteerde items met deze factor.</translation>
     </message>
     <message>
         <source>x</source>
@@ -1693,11 +1737,11 @@
     </message>
     <message>
         <source>Quantity Multiply by %1 on %2 Items</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">Aantallen met %1 vermenigvuldigd bij %2 items</translation>
     </message>
     <message>
         <source>Set sale in percent for the selected items (this will &lt;u&gt;not&lt;/u&gt; change any prices).&lt;br /&gt;Negative values are also allowed.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Stel uitverkoop</translation>
     </message>
     <message>
         <source>%</source>
@@ -1705,67 +1749,67 @@
     </message>
     <message>
         <source>Set Sale on %1 Items</source>
-        <translation>Uitverkoop op %1 items ingesteld</translation>
+        <translation type="obsolete">Uitverkoop op %1 items ingesteld</translation>
     </message>
     <message>
         <source>Set bulk quantity for the selected items:</source>
-        <translation type="unfinished"></translation>
+        <translation>Bulk hoeveelheid voor de geselecteerde items instellen:</translation>
     </message>
     <message>
         <source>Set Bulk Quantity on %1 Items</source>
-        <translation>Bulk aantal voor %1 items ingesteld</translation>
+        <translation type="obsolete">Bulk hoeveelheid voor %1 items ingesteld</translation>
     </message>
     <message>
         <source>Set Color on %1 Items</source>
-        <translation>Kleur voor %1 item ingesteld</translation>
+        <translation type="obsolete">Kleur voor %1 item ingesteld</translation>
     </message>
     <message>
         <source>Enter the new remark for all selected items:</source>
-        <translation>Geef de nieuwe opmerking voor alle geslecteerde items:</translation>
+        <translation>Geef de nieuwe opmerking voor alle geselecteerde items:</translation>
     </message>
     <message>
         <source>Set Remark on %1 Items</source>
-        <translation type="unfinished">Opmerking voor %1 items ingesteld</translation>
+        <translation type="obsolete">Opmerking voor %1 items ingesteld</translation>
     </message>
     <message>
         <source>Enter the text, that should be added to the remarks of all selected items:</source>
-        <translation type="unfinished"></translation>
+        <translation>Geef de tekst, die toegevoegd dient te worden aan de opmerkingen van alle geselecteerde items:</translation>
     </message>
     <message>
         <source>Modified Remark on %1 Items</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">Opmerkingen van %1 items aangepast</translation>
     </message>
     <message>
         <source>Enter the text, that should be removed from the remarks of all selected items:</source>
-        <translation type="unfinished"></translation>
+        <translation>Geef de tekst, die verwijderd dient te worden van de opmerkingen van alle geselecteerde items:</translation>
     </message>
     <message>
         <source>Enter the new comment for all selected items:</source>
-        <translation type="unfinished"></translation>
+        <translation>Geef het nieuwe commentaar voor alle geselecteerde items:</translation>
     </message>
     <message>
         <source>Set Comment on %1 Items</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">Commentaar bij %1 items ingesteld</translation>
     </message>
     <message>
         <source>Enter the text, that should be added to the comments of all selected items:</source>
-        <translation type="unfinished"></translation>
+        <translation>Geef de tekst, die toegevoegd dient te worden aan het commentaar van alle geselecteerde items:</translation>
     </message>
     <message>
         <source>Modified Comment on %1 Items</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">Commentaar van %1 items aangepast</translation>
     </message>
     <message>
         <source>Enter the text, that should be removed from the comments of all selected items:</source>
-        <translation type="unfinished"></translation>
+        <translation>Geef de tekst, die verwijderd dient te worden van het commentaar van alle geselecteerde items:</translation>
     </message>
     <message>
         <source>Reserve all selected items for this specific member:</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">Reserveer alle geselecteerde items voor deze specifieke koper:</translation>
     </message>
     <message>
         <source>Set Reservation on %1 Items</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">Reservering voor %1 items ingesteld</translation>
     </message>
     <message>
         <source>Subtracted %1 Items</source>
@@ -1773,7 +1817,7 @@
     </message>
     <message>
         <source>Save changes to %1?</source>
-        <translation type="unfinished"></translation>
+        <translation>Wijzigingen opslaan in %1?</translation>
     </message>
     <message>
         <source>There are %1 items selected.&lt;br /&gt;&lt;br /&gt;Do you want to export only these items?</source>
@@ -1781,6 +1825,130 @@
     </message>
     <message>
         <source>This list contains items with errors.&lt;br /&gt;&lt;br /&gt;Do you really want to export this list?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Added %1, merged %2 items</source>
+        <translation>%1 toegevoegde, %2 samengevoegde items</translation>
+    </message>
+    <message>
+        <source>Merged %1 items</source>
+        <translation>%1 items samengevoegd</translation>
+    </message>
+    <message>
+        <source>Set &apos;include&apos; status on %1 items</source>
+        <translation>&apos;Inclusief&apos; status voor %1 items ingesteld</translation>
+    </message>
+    <message>
+        <source>Set &apos;exclude&apos; status on %1 items</source>
+        <translation>&apos;Exclusief&apos; status voor %1 items ingesteld</translation>
+    </message>
+    <message>
+        <source>Set &apos;extra&apos; status on %1 items</source>
+        <translation>&apos;Extra&apos; status voor %1 items ingesteld</translation>
+    </message>
+    <message>
+        <source>Toggled status on %1 items</source>
+        <translation>Status voor %1 items omgeschakeld</translation>
+    </message>
+    <message>
+        <source>Set &apos;new&apos; condition on %1 items</source>
+        <translation>Conditie &apos;nieuw&apos; voor %1 items ingesteld</translation>
+    </message>
+    <message>
+        <source>Set &apos;used&apos; condition on %1 items</source>
+        <translation>Conditie &apos;gebruikt&apos; voor %1 items ingesteld</translation>
+    </message>
+    <message>
+        <source>Toggled condition on %1 items</source>
+        <translation>Conditie voor %1 items omgeschakeld</translation>
+    </message>
+    <message>
+        <source>Set &apos;retain&apos; flag on %1 items</source>
+        <translation>&apos;Houden&apos; vlag voor %1 items ingesteld</translation>
+    </message>
+    <message>
+        <source>Cleared &apos;retain&apos; flag on %1 items</source>
+        <translation>&apos;Houden&apos; vlag voor %1 items gewist</translation>
+    </message>
+    <message>
+        <source>Toggled &apos;retain&apos; flag on %1 items</source>
+        <translation>&apos;Houden&apos; vlag voor %1 items omgeschakeld</translation>
+    </message>
+    <message>
+        <source>Set &apos;stockroom&apos; flag on %1 items</source>
+        <translation>&apos;Magazijn&apos; vlag voor %1 items ingesteld</translation>
+    </message>
+    <message>
+        <source>Cleared &apos;stockroom&apos; flag on %1 items</source>
+        <translation>&apos;Magazijn&apos; vlag voor %1 items gewist</translation>
+    </message>
+    <message>
+        <source>Toggled &apos;stockroom&apos; flag on %1 items</source>
+        <translation>&apos;Magazijn&apos; vlag voor %1 items omgeschakeld</translation>
+    </message>
+    <message>
+        <source>Prices are currently updated to Price Guide values.&lt;br /&gt;&lt;br /&gt;Please wait until this operation has finished.</source>
+        <translation>Prijzen worden op dit moment bijgewerkt met de richtprijslijst.&lt;br /&gt;&lt;br /&gt;Wacht U alstublieft tot deze taak klaar is.</translation>
+    </message>
+    <message>
+        <source>Prices of the selected items have been updated to Price Guide values.</source>
+        <translation>Prijzen van de geselecteerde items zijn bijgewerkt met de richtprijslijst.</translation>
+    </message>
+    <message>
+        <source>%1 have been skipped, because of missing Price Guide records and/or network errors.</source>
+        <translation>%1 zijn overgeslagen, omdat de gegevens in de richtprijslijst ontbraken en/of door netwerk fouten.</translation>
+    </message>
+    <message>
+        <source>Price change on %1 items</source>
+        <translation>Prijs van %1 items gewijzigd</translation>
+    </message>
+    <message>
+        <source>Divide the quantities of all selected items by this number.&lt;br /&gt;&lt;br /&gt;(A check is made if all quantites are exactly divisible without reminder, before this operation is performed.)</source>
+        <translation>Deel de aantallen van alle geselecteerde items door dit getal..&lt;br /&gt;&lt;br /&gt;(Eerst word gecontroleerd of alle aantallen zonder rest deelbaar zijn.)</translation>
+    </message>
+    <message>
+        <source>Quantity divide by %1 on %2 Items</source>
+        <translation>Aantallen door %1 gedeeld bij %2 items</translation>
+    </message>
+    <message>
+        <source>Quantity multiply by %1 on %2 Items</source>
+        <translation>Aantallen met %1 vermenigvuldigd bij %2 items</translation>
+    </message>
+    <message>
+        <source>Set sale on %1 items</source>
+        <translation>Uitverkoop op %1 items ingesteld</translation>
+    </message>
+    <message>
+        <source>Set bulk quantity on %1 items</source>
+        <translation>Bulk hoeveelheid voor %1 items ingesteld</translation>
+    </message>
+    <message>
+        <source>Set color on %1 items</source>
+        <translation>Kleur voor %1 item ingesteld</translation>
+    </message>
+    <message>
+        <source>Set remark on %1 items</source>
+        <translation>Opmerking voor %1 items ingesteld</translation>
+    </message>
+    <message>
+        <source>Modified remark on %1 items</source>
+        <translation>Opmerkingen van %1 items aangepast</translation>
+    </message>
+    <message>
+        <source>Set comment on %1 items</source>
+        <translation>Commentaar bij %1 items ingesteld</translation>
+    </message>
+    <message>
+        <source>Modified comment on %1 items</source>
+        <translation>Commentaar van %1 items aangepast</translation>
+    </message>
+    <message>
+        <source>Set reservation on %1 items</source>
+        <translation>Reservering voor %1 items ingesteld</translation>
+    </message>
+    <message>
+        <source>Reserve all selected items for this specific buyer (BrickLink username):</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1792,47 +1960,47 @@
     </message>
     <message>
         <source>&amp;Price (%1)</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Prijs (%1)</translation>
     </message>
     <message>
         <source>&amp;Quantity</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Aantal</translation>
     </message>
     <message>
         <source>%</source>
-        <translation type="unfinished">%</translation>
+        <translation>%</translation>
     </message>
     <message>
         <source>%1</source>
-        <translation type="unfinished"></translation>
+        <translation>%1</translation>
     </message>
     <message>
         <source>Total</source>
-        <translation type="unfinished">Totaal</translation>
+        <translation>Totaal</translation>
     </message>
     <message>
         <source>&amp;Bulk</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Bulk</translation>
     </message>
     <message>
         <source>&amp;New</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Nieuw</translation>
     </message>
     <message>
         <source>&amp;Used</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Gebruikt</translation>
     </message>
     <message>
         <source>C&amp;ondition</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Conditie</translation>
     </message>
     <message>
         <source>Co&amp;mments</source>
-        <translation type="unfinished"></translation>
+        <translation>Co&amp;mmentaren</translation>
     </message>
     <message>
         <source>&amp;Remarks</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Opmerkingen</translation>
     </message>
     <message>
         <source>&amp;Tiered prices</source>
@@ -1848,7 +2016,7 @@
     </message>
     <message>
         <source>&amp;Close</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Sluiten</translation>
     </message>
 </context>
 <context>
@@ -1992,7 +2160,7 @@
     </message>
     <message>
         <source>&amp;Quantity:</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Aantal:</translation>
     </message>
     <message>
         <source>&amp;OK</source>
@@ -2290,14 +2458,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Price g&amp;uides, if older than</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&amp;Pictures, if older than</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Cache Di&amp;rectory</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2319,15 +2479,15 @@
     </message>
     <message>
         <source>Condition</source>
-        <translation type="unfinished">Conditie</translation>
+        <translation>Conditie</translation>
     </message>
     <message>
         <source>New</source>
-        <translation type="unfinished">Nieuw</translation>
+        <translation>Nieuw</translation>
     </message>
     <message>
         <source>Used</source>
-        <translation type="unfinished">Gebruikt</translation>
+        <translation>Gebruikt</translation>
     </message>
     <message>
         <source>Default values for &apos;&amp;Set To Price Guide&apos;</source>
@@ -2369,36 +2529,44 @@
         <source>&amp;Cancel</source>
         <translation>&amp;Annuleren</translation>
     </message>
+    <message>
+        <source>Price G&amp;uides, if older than</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;Images, if older than</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>DlgSettingsImpl</name>
     <message>
         <source>All Time Sales</source>
-        <translation>All Time Sales</translation>
+        <translation type="unfinished">All Time Sales</translation>
     </message>
     <message>
         <source>Last 6 Months Sales</source>
-        <translation>Last 6 Months Sales</translation>
+        <translation type="unfinished">Last 6 Months Sales</translation>
     </message>
     <message>
         <source>Current Inventory</source>
-        <translation>Current Inventory</translation>
+        <translation type="unfinished">Current Inventory</translation>
     </message>
     <message>
         <source>Minimum</source>
-        <translation>Minimum</translation>
+        <translation type="unfinished">Minimum</translation>
     </message>
     <message>
         <source>Average</source>
-        <translation>Average</translation>
+        <translation type="unfinished">Average</translation>
     </message>
     <message>
         <source>Quantity Average</source>
-        <translation>Quantity Average</translation>
+        <translation type="unfinished">Quantity Average</translation>
     </message>
     <message>
         <source>Maximum</source>
-        <translation>Maximum</translation>
+        <translation type="unfinished">Maximum</translation>
     </message>
     <message>
         <source>Cache directory location</source>
@@ -2437,7 +2605,7 @@
     </message>
     <message>
         <source>Column 1</source>
-        <translation>Kolom 1</translation>
+        <translation type="obsolete">Kolom 1</translation>
     </message>
     <message>
         <source>&amp;OK</source>

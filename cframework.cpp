@@ -179,49 +179,150 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 	QStringList sl;
 
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Menubar/File" );
-	if ( sl. isEmpty ( ))  sl << "file_new" << "file_open" << "file_open_recent" << "-" << "file_save" << "file_saveas" << "-" << "file_import" << "file_export" << "-" << "file_print" << "-" << "file_close" << "-" << "file_exit";
+	if ( sl. isEmpty ( ))
+		sl << "file_new"
+		   << "file_open"
+		   << "file_open_recent"
+		   << "-"
+		   << "file_save"
+		   << "file_saveas"
+		   << "-"
+		   << "file_import"
+		   << "file_export"
+		   << "-"
+		   << "file_print"
+		   << "-"
+		   << "file_close"
+		   << "-"
+		   << "file_exit";
+
 	m_menuid_file = menuBar ( )-> insertItem ( QString ( ), createMenu ( sl ));
 
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Menubar/Edit" );
-	if ( sl. isEmpty ( ))  sl << "edit_undo" << "edit_redo" << "-"
-	                          << "edit_cut" << "edit_copy" << "edit_paste" << "edit_delete" << "-" << "edit_select_all" << "edit_select_none" << "-" 
-		                      << "edit_additems" << "edit_subtractitems" << "edit_mergeitems" << "edit_partoutitems" << "-" 
-							  << "edit_modify" << "-" << "edit_reset_diffs" << "-" << "edit_bl_info_group";
+	if ( sl. isEmpty ( ))
+		sl << "edit_undo"
+		   << "edit_redo"
+		   << "-"
+		   << "edit_cut"
+		   << "edit_copy"
+		   << "edit_paste"
+		   << "edit_delete"
+		   << "-"
+		   << "edit_select_all"
+		   << "edit_select_none"
+		   << "-"
+		   << "edit_additems"
+		   << "edit_subtractitems"
+		   << "edit_mergeitems"
+		   << "edit_partoutitems"
+		   << "-"
+		   << "edit_modify"
+		   << "-"
+		   << "edit_reset_diffs"
+		   << "-"
+		   << "edit_bl_info_group";
+
 	m_menuid_edit = menuBar ( )-> insertItem ( QString ( ), createMenu ( sl ));
 
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Menubar/View" );
-	if ( sl. isEmpty ( ))  sl << "view_toolbar" << "view_infobar" << "view_statusbar" << "-" << "view_fullscreen" << "-" << "view_simple_mode" << "view_show_input_errors" << "view_difference_mode" << "-" << "view_save_default_col"; 
+	if ( sl. isEmpty ( ))
+		sl << "view_toolbar"
+		   << "view_infobar"
+		   << "view_statusbar"
+		   << "-"
+		   << "view_fullscreen"
+		   << "-"
+		   << "view_simple_mode"
+		   << "view_show_input_errors"
+		   << "view_difference_mode"
+		   << "-"
+		   << "view_save_default_col"; 
+
 	m_menuid_view = menuBar ( )-> insertItem ( QString ( ), createMenu ( sl ));
 
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Menubar/Extras" );
-	if ( sl. isEmpty ( ))  sl << "extras_net" << "-" << "extras_update_database" << "-" << "extras_configure";
+	if ( sl. isEmpty ( ))
+		sl << "extras_net"
+		   << "-"
+		   << "extras_update_database"
+		   << "-"
+		   << "extras_configure";
+
 	// Make sure there is a possibility to open the pref dialog!
 	if ( sl. find ( "extras_configure" ) == sl. end ( ))
 		sl << "-" << "extras_configure";
+
 	m_menuid_extras = menuBar ( )-> insertItem ( QString ( ), createMenu ( sl ));
 
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Menubar/Window" );
-	if ( sl. isEmpty ( ))  sl << "window_mode" << "-" << "window_cascade" << "window_tile" << "-" << "window_list";
+	if ( sl. isEmpty ( ))
+		sl << "window_mode"
+		   << "-"
+		   << "window_cascade"
+		   << "window_tile"
+		   << "-"
+		   << "window_list";
+
 	m_menuid_window = menuBar ( )-> insertItem ( QString ( ), createMenu ( sl ));
 
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Menubar/Help" );
-	if ( sl. isEmpty ( ))  sl << "help_updates" << "-" << "help_registration" << "-" << "help_about";
+	if ( sl. isEmpty ( ))
+		sl << "help_updates"
+		   << "-"
+		   << "help_registration"
+		   << "-"
+		   << "help_about";
+
 	m_menuid_help = menuBar ( )-> insertItem ( QString ( ), createMenu ( sl ));
 
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/ContextMenu/Item" );
-	if ( sl. isEmpty ( ))  sl << "edit_cut" << "edit_copy" << "edit_paste" << "edit_delete" << "-" << "edit_select_all" << "-" << "edit_mergeitems" << "edit_partoutitems" << "-" << "edit_modify_context" << "-" << "edit_bl_info_group";
+	if ( sl. isEmpty ( ))
+		sl << "edit_cut"
+		   << "edit_copy"
+		   << "edit_paste"
+		   << "edit_delete"
+		   << "-"
+		   << "edit_select_all"
+		   << "-"
+		   << "edit_mergeitems"
+		   << "edit_partoutitems"
+		   << "-"
+		   << "edit_modify_context"
+		   << "-"
+		   << "edit_bl_info_group";
+
 	m_contextmenu = createMenu ( sl );
 
 	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Toolbar/Buttons" );
-	if ( sl. isEmpty ( ))  sl << "file_new" << "file_open" << "file_save" << "-" 
-	                          << "file_import" << "file_export" << "-" 
-							  << "edit_undo" << "edit_redo" << "-"
-							  << "edit_cut" << "edit_copy" << "edit_paste" << "-" 
-							  << "edit_additems" << "edit_subtractitems" << "edit_mergeitems" << "edit_partoutitems" << "-" 
-							  << "edit_price_to_priceguide" << "edit_price_inc_dec" << "-" 
-							  << "edit_bl_catalog" << "edit_bl_priceguide" << "edit_bl_lotsforsale" << "-"
-							 // << "edit_bl_info_group" << "-" 
-							  << "extras_net"; // << "-" << "help_whatsthis";
+	if ( sl. isEmpty ( ))
+		sl << "file_new"
+		   << "file_open"
+		   << "file_save"
+		   << "-"
+		   << "file_import"
+		   << "file_export"
+		   << "-"
+		   << "edit_undo"
+		   << "edit_redo"
+		   << "-"
+		   << "edit_cut"
+		   << "edit_copy"
+		   << "edit_paste"
+		   << "-"
+		   << "edit_additems"
+		   << "edit_subtractitems"
+		   << "edit_mergeitems"
+		   << "edit_partoutitems"
+		   << "-"
+		   << "edit_price_to_priceguide"
+		   << "edit_price_inc_dec"
+		   << "-"
+		   << "edit_bl_catalog"
+		   << "edit_bl_priceguide"
+		   << "edit_bl_lotsforsale"
+		   << "-"             // << "edit_bl_info_group" << "-"
+		   << "extras_net";   // << "-" << "help_whatsthis";
+
 	m_toolbar = createToolBar ( QString ( ), sl );
 	connect ( m_toolbar, SIGNAL( visibilityChanged ( bool )), findAction ( "view_toolbar" ), SLOT( setOn ( bool )));
 
@@ -327,8 +428,8 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 void CFrameWork::languageChange ( )
 {
 	m_toolbar-> setLabel ( tr( "Toolbar" ));
-	m_progress-> setItemLabel ( PGI_PriceGuide, tr( "Priceguide updates" ));
-	m_progress-> setItemLabel ( PGI_Picture,    tr( "Picture updates" ));
+	m_progress-> setItemLabel ( PGI_PriceGuide, tr( "Price Guide updates" ));
+	m_progress-> setItemLabel ( PGI_Picture,    tr( "Image updates" ));
 
 	m_taskpanes-> setItemText ( m_task_info,       tr( "Info" ));
 	m_taskpanes-> setItemText ( m_task_priceguide, tr( "Price Guide" ));
@@ -416,7 +517,7 @@ void CFrameWork::languageChange ( )
 		{ "edit_qty_multiply",              tr( "Multiply..." ),                        tr( "Ctrl+*", "Edit|Quantity|Multiply" ) },
 		{ "edit_qty_divide",                tr( "Divide..." ),                          tr( "Ctrl+/", "Edit|Quantity|Divide" ) },
 		{ "edit_price",                     tr( "Price" ),                              0 },
-		{ "edit_price_to_priceguide",       tr( "Set to Price-Guide..." ),              tr( "Ctrl+G", "Edit|Price|Set to PriceGuide" ) },
+		{ "edit_price_to_priceguide",       tr( "Set to Price Guide..." ),              tr( "Ctrl+G", "Edit|Price|Set to PriceGuide" ) },
 		{ "edit_price_inc_dec",             tr( "Inc- or Decrease..." ),                tr( "Ctrl++", "Edit|Price|Inc/Dec" ) },
 		{ "edit_bulk",                      tr( "Bulk Quantity..." ),                   0 },
 		{ "edit_sale",                      tr( "Sale..." ),                            tr( "Ctrl+%", "Edit|Sale" ) },
@@ -1522,7 +1623,7 @@ QPtrList <CWindow> CFrameWork::allWindows ( ) const
 
 void CFrameWork::cancelAllTransfers ( )
 {
-	if ( CMessageBox::question ( this, tr( "Do you want to cancel all outstanding inventory, picture and price guide transfers?" ), CMessageBox::Yes | CMessageBox::Default, CMessageBox::No | CMessageBox::Escape ) == CMessageBox::Yes ) {
+	if ( CMessageBox::question ( this, tr( "Do you want to cancel all outstanding inventory, image and Price Guide transfers?" ), CMessageBox::Yes | CMessageBox::Default, CMessageBox::No | CMessageBox::Escape ) == CMessageBox::Yes ) {
 		BrickLink::inst ( )-> cancelPictureTransfers ( );
 		BrickLink::inst ( )-> cancelPriceGuideTransfers ( );
 	}

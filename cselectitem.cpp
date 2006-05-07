@@ -667,7 +667,7 @@ void CSelectItem::findItem ( )
 
 	QString str;
 
-	if ( CMessageBox::getString ( this, tr( "Please enter the complete part number of the item:" ), str )) {
+	if ( CMessageBox::getString ( this, tr( "Please enter the complete item number:" ), str )) {
 		const BrickLink::Item *item = BrickLink::inst ( )-> item ( itt-> id ( ), str. latin1 ( ));
 
 		if ( item ) {

@@ -14,18 +14,34 @@
     <name>CAddRemoveCmd</name>
     <message>
         <source>Added %1 Items</source>
-        <translation>%1 Teile hinzugefügt</translation>
+        <translation type="obsolete">%1 Teile hinzugefügt</translation>
     </message>
     <message>
         <source>Added an Item</source>
-        <translation>Ein Teil hinzugefügt</translation>
+        <translation type="obsolete">Ein Teil hinzugefügt</translation>
     </message>
     <message>
         <source>Removed %1 Items</source>
-        <translation>%1 Teile gelöscht</translation>
+        <translation type="obsolete">%1 Teile gelöscht</translation>
     </message>
     <message>
         <source>Removed an Item</source>
+        <translation type="obsolete">Ein Teil gelöscht</translation>
+    </message>
+    <message>
+        <source>Added %1 items</source>
+        <translation>%1 Teile hinzugefügt</translation>
+    </message>
+    <message>
+        <source>Added an item</source>
+        <translation>Ein Teil hinzugefügt</translation>
+    </message>
+    <message>
+        <source>Removed %1 items</source>
+        <translation>%1 Teile gelöscht</translation>
+    </message>
+    <message>
+        <source>Removed an item</source>
         <translation>Ein Teil gelöscht</translation>
     </message>
 </context>
@@ -132,6 +148,10 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     <name>CChangeCmd</name>
     <message>
         <source>Modified Item</source>
+        <translation type="obsolete">Ein Teil modifiziert</translation>
+    </message>
+    <message>
+        <source>Modified item</source>
         <translation>Ein Teil modifiziert</translation>
     </message>
 </context>
@@ -302,7 +322,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
     <message>
         <source>Reset Differences</source>
-        <translation>Differenzen zurücksetzen</translation>
+        <translation type="obsolete">Differenzen zurücksetzen</translation>
     </message>
     <message>
         <source>Inventory Files</source>
@@ -311,6 +331,10 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     <message>
         <source>BrickStore has switched to a new file format (.bsx - BrickStore XML).&lt;br /&gt;&lt;br /&gt;Your document has been automatically imported and it will be converted as soon as you save it.</source>
         <translation>Das Dateiformat von BrickStore hat sich geändert (.bsx - BrickStore XML).&lt;br /&gt;&lt;br /&gt;Das Dokument wurde automatisch importiert und es wird beim Abspeichern in das neue Format konvertiert.</translation>
+    </message>
+    <message>
+        <source>Reset differences</source>
+        <translation>Differenzen zurücksetzen</translation>
     </message>
 </context>
 <context>
@@ -321,7 +345,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
     <message>
         <source>Priceguide updates</source>
-        <translation>Richtpreisaktualisierungen</translation>
+        <translation type="obsolete">Richtpreisaktualisierungen</translation>
     </message>
     <message>
         <source>Inventory updates</source>
@@ -329,7 +353,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
     <message>
         <source>Picture updates</source>
-        <translation>Bildaktualisierungen</translation>
+        <translation type="obsolete">Bildaktualisierungen</translation>
     </message>
     <message>
         <source>Ctrl+N</source>
@@ -581,7 +605,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
     <message>
         <source>Do you want to cancel all outstanding inventory, picture and price guide transfers?</source>
-        <translation>Wollen Sie wirklich alle ausstehenden Inventarlisten-, Bilder- und Richtpreisübertragungen abbrechen?</translation>
+        <translation type="obsolete">Wollen Sie wirklich alle ausstehenden Inventarlisten-, Bilder- und Richtpreisübertragungen abbrechen?</translation>
     </message>
     <message>
         <source>BrickLink Order...</source>
@@ -858,7 +882,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
     <message>
         <source>Set to Price-Guide...</source>
-        <translation>Auf Richtpreise setzen...</translation>
+        <translation type="obsolete">Auf Richtpreise setzen...</translation>
     </message>
     <message>
         <source>Ctrl+G</source>
@@ -968,6 +992,22 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
         <source>New</source>
         <comment>Cond|New</comment>
         <translation>Neu</translation>
+    </message>
+    <message>
+        <source>Price Guide updates</source>
+        <translation>Richtpreisaktualisierungen</translation>
+    </message>
+    <message>
+        <source>Image updates</source>
+        <translation>Bildaktualisierungen</translation>
+    </message>
+    <message>
+        <source>Set to Price Guide...</source>
+        <translation>Auf Richtpreise setzen...</translation>
+    </message>
+    <message>
+        <source>Do you want to cancel all outstanding inventory, image and Price Guide transfers?</source>
+        <translation>Wollen Sie wirklich alle ausstehenden Inventarlisten-, Bilder- und Richtpreisübertragungen abbrechen?</translation>
     </message>
 </context>
 <context>
@@ -1487,7 +1527,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
     <message>
         <source>Please enter the complete part number of the item:</source>
-        <translation>Bitte geben Sie die vollständige Teilenummer ein:</translation>
+        <translation type="obsolete">Bitte geben Sie die vollständige Teilenummer ein:</translation>
     </message>
     <message>
         <source>Ctrl+F</source>
@@ -1521,6 +1561,10 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     <message>
         <source>View item&apos;s category</source>
         <translation>Zur Kategorie des Teils</translation>
+    </message>
+    <message>
+        <source>Please enter the complete item number:</source>
+        <translation>Bitte geben Sie die vollständige Teilenummer ein:</translation>
     </message>
 </context>
 <context>
@@ -1759,11 +1803,11 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
     <message>
         <source>Prices of the selected items have been updated to price guide values.</source>
-        <translation>Die Preise der ausgewählten Teile wurden auf Richtpreise gesetzt.</translation>
+        <translation type="obsolete">Die Preise der ausgewählten Teile wurden auf Richtpreise gesetzt.</translation>
     </message>
     <message>
         <source>%1 have been skipped, because of missing price guide records and/or network errors.</source>
-        <translation>%1 wurden ausgelassen, da entweder keine Daten vorlagen und/oder Fehler auftraten.</translation>
+        <translation type="obsolete">%1 wurden ausgelassen, da entweder keine Daten vorlagen und/oder Fehler auftraten.</translation>
     </message>
     <message>
         <source>Untitled</source>
@@ -1815,7 +1859,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
     <message>
         <source>Prices are currently updated to price guide values.&lt;br /&gt;&lt;br /&gt;Please wait until this operation has finished.</source>
-        <translation>Die Preise werden momentan auf Richtpreise gesetzt.&lt;br /&gt;&lt;br /&gt;Bitte warten Sie bis dies erledigt ist.</translation>
+        <translation type="obsolete">Die Preise werden momentan auf Richtpreise gesetzt.&lt;br /&gt;&lt;br /&gt;Bitte warten Sie bis dies erledigt ist.</translation>
     </message>
     <message>
         <source>Set sale in percent for the selected items (this will &lt;u&gt;not&lt;/u&gt; change any prices).&lt;br /&gt;Negative values are also allowed.</source>
@@ -1831,11 +1875,11 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
     <message>
         <source>Added %1, Merged %2 Items</source>
-        <translation>%1 Teile hinzugefügt, %2 zusammengeführt</translation>
+        <translation type="obsolete">%1 Teile hinzugefügt, %2 zusammengeführt</translation>
     </message>
     <message>
         <source>Merged %1 Items</source>
-        <translation>%1 Teile zusammengeführt</translation>
+        <translation type="obsolete">%1 Teile zusammengeführt</translation>
     </message>
     <message>
         <source>Subtracted %1 Items</source>
@@ -1843,11 +1887,11 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
     <message>
         <source>Reserve all selected items for this specific member:</source>
-        <translation>Reserviere alle ausgewählten Teile für einen bestimmten Benutzer:</translation>
+        <translation type="obsolete">Reserviere alle ausgewählten Teile für einen bestimmten Benutzer:</translation>
     </message>
     <message>
         <source>Divide the quantities of all selected items by this number.&lt;br /&gt;&lt;br /&gt;(A check is made if all quantites are exactly divisble without reminder, before this operation is performed.)</source>
-        <translation>Teile die Anzahl aller ausgewählten Teile durch diese Zahl.&lt;br /&gt;&lt;br /&gt;(Es wird vor etwaigen Änderungen geprüft, ob alle Teileanzahlen ohne Rest teilbar sind.)</translation>
+        <translation type="obsolete">Teile die Anzahl aller ausgewählten Teile durch diese Zahl.&lt;br /&gt;&lt;br /&gt;(Es wird vor etwaigen Änderungen geprüft, ob alle Teileanzahlen ohne Rest teilbar sind.)</translation>
     </message>
     <message>
         <source>Multiply the quantities of all selected items with this factor.</source>
@@ -1855,59 +1899,59 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
     <message>
         <source>Set Include Status on %1 Items</source>
-        <translation>Status für %1 Teile auf Einschliessen gesetzt</translation>
+        <translation type="obsolete">Status für %1 Teile auf Einschliessen gesetzt</translation>
     </message>
     <message>
         <source>Set Exclude Status on %1 Items</source>
-        <translation>Status für %1 Teile auf Ausschliessen gesetzt</translation>
+        <translation type="obsolete">Status für %1 Teile auf Ausschliessen gesetzt</translation>
     </message>
     <message>
         <source>Set Extra Status on %1 Items</source>
-        <translation>Status für %1 Teile auf Extra gesetzt</translation>
+        <translation type="obsolete">Status für %1 Teile auf Extra gesetzt</translation>
     </message>
     <message>
         <source>Toggled Status on %1 Items</source>
-        <translation>Status für %1 Teile umgeschalten</translation>
+        <translation type="obsolete">Status für %1 Teile umgeschalten</translation>
     </message>
     <message>
         <source>Set New Condition on %1 Items</source>
-        <translation>Zustand für %1 Teile auf Neu gesetzt</translation>
+        <translation type="obsolete">Zustand für %1 Teile auf Neu gesetzt</translation>
     </message>
     <message>
         <source>Set Used Condition on %1 Items</source>
-        <translation>Zustand für %1 Teile auf Gebraucht gesetzt</translation>
+        <translation type="obsolete">Zustand für %1 Teile auf Gebraucht gesetzt</translation>
     </message>
     <message>
         <source>Toggled Condition on %1 Items</source>
-        <translation>Zustand für %1 Teile umgeschalten</translation>
+        <translation type="obsolete">Zustand für %1 Teile umgeschalten</translation>
     </message>
     <message>
         <source>Set Retain Flag on %1 Items</source>
-        <translation>Halten Status für %1 Teile gesetzt</translation>
+        <translation type="obsolete">Halten Status für %1 Teile gesetzt</translation>
     </message>
     <message>
         <source>Cleared Retain Flag on %1 Items</source>
-        <translation>Halten Status für %1 Teile gelöscht</translation>
+        <translation type="obsolete">Halten Status für %1 Teile gelöscht</translation>
     </message>
     <message>
         <source>Toggled Retain Flag on %1 Items</source>
-        <translation>Halten Status für %1 Teile umgeschalten</translation>
+        <translation type="obsolete">Halten Status für %1 Teile umgeschalten</translation>
     </message>
     <message>
         <source>Set Stockroom Flag on %1 Items</source>
-        <translation>Auf-Lager Status für %1 Teile gesetzt</translation>
+        <translation type="obsolete">Auf-Lager Status für %1 Teile gesetzt</translation>
     </message>
     <message>
         <source>Cleared Stockroom Flag on %1 Items</source>
-        <translation>Auf-Lager Status für %1 Teile gelöscht</translation>
+        <translation type="obsolete">Auf-Lager Status für %1 Teile gelöscht</translation>
     </message>
     <message>
         <source>Toggled Stockroom Flag on %1 Items</source>
-        <translation>Auf-Lager Status für %1 Teile umgeschalten</translation>
+        <translation type="obsolete">Auf-Lager Status für %1 Teile umgeschalten</translation>
     </message>
     <message>
         <source>Set Sale on %1 Items</source>
-        <translation>Sonderangebot für %1 Teile gesetzt</translation>
+        <translation type="obsolete">Sonderangebot für %1 Teile gesetzt</translation>
     </message>
     <message>
         <source>Set bulk quantity for the selected items:</source>
@@ -1915,15 +1959,15 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
     <message>
         <source>Set Bulk Quantity on %1 Items</source>
-        <translation>Gebindegrösse für %1 Teile gesetzt</translation>
+        <translation type="obsolete">Gebindegrösse für %1 Teile gesetzt</translation>
     </message>
     <message>
         <source>Set Color on %1 Items</source>
-        <translation>Farbe für %1 Teile gesetzt</translation>
+        <translation type="obsolete">Farbe für %1 Teile gesetzt</translation>
     </message>
     <message>
         <source>Set Remark on %1 Items</source>
-        <translation>Anmerkung für %1 Teile gesetzt</translation>
+        <translation type="obsolete">Anmerkung für %1 Teile gesetzt</translation>
     </message>
     <message>
         <source>Enter the new comment for all selected items:</source>
@@ -1931,23 +1975,23 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
     <message>
         <source>Set Comment on %1 Items</source>
-        <translation>Kommentar für %1 Teile gesetzt</translation>
+        <translation type="obsolete">Kommentar für %1 Teile gesetzt</translation>
     </message>
     <message>
         <source>Set Reservation on %1 Items</source>
-        <translation>Reservierung für %1 Teile gesetzt</translation>
+        <translation type="obsolete">Reservierung für %1 Teile gesetzt</translation>
     </message>
     <message>
         <source>Price Change on %1 Items</source>
-        <translation>Preisänderungen bei %1 Teilen</translation>
+        <translation type="obsolete">Preisänderungen bei %1 Teilen</translation>
     </message>
     <message>
         <source>Quantity Divide by %1 on %2 Items</source>
-        <translation>Mengen durch %1 bei %2 Teilen dividiert </translation>
+        <translation type="obsolete">Mengen durch %1 bei %2 Teilen dividiert </translation>
     </message>
     <message>
         <source>Quantity Multiply by %1 on %2 Items</source>
-        <translation>Mengen mit %1 bei %2 Teilen multipliziert</translation>
+        <translation type="obsolete">Mengen mit %1 bei %2 Teilen multipliziert</translation>
     </message>
     <message>
         <source>Enter the text, that should be added to the remarks of all selected items:</source>
@@ -1955,7 +1999,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
     <message>
         <source>Modified Remark on %1 Items</source>
-        <translation>Anmerkung bei %1 Teilen geändert</translation>
+        <translation type="obsolete">Anmerkung bei %1 Teilen geändert</translation>
     </message>
     <message>
         <source>Enter the text, that should be removed from the remarks of all selected items:</source>
@@ -1967,7 +2011,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
     <message>
         <source>Modified Comment on %1 Items</source>
-        <translation>Kommentar bei %1 Teilen geändert</translation>
+        <translation type="obsolete">Kommentar bei %1 Teilen geändert</translation>
     </message>
     <message>
         <source>Enter the text, that should be removed from the comments of all selected items:</source>
@@ -1980,6 +2024,142 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     <message>
         <source>This list contains items with errors.&lt;br /&gt;&lt;br /&gt;Do you really want to export this list?</source>
         <translation>Diese Liste enthält Teile mit Eingabefehlern.&lt;br /&gt;&lt;br /&gt;Wollen Sie diese Liste trotzdem exportieren?</translation>
+    </message>
+    <message>
+        <source>Added %1, merged %2 items</source>
+        <translation>%1 Teile hinzugefügt, %2 zusammengeführt</translation>
+    </message>
+    <message>
+        <source>Merged %1 items</source>
+        <translation>%1 Teile zusammengeführt</translation>
+    </message>
+    <message>
+        <source>Toggled status on %1 items</source>
+        <translation>Status für %1 Teile umgeschalten</translation>
+    </message>
+    <message>
+        <source>Toggled condition on %1 items</source>
+        <translation>Zustand für %1 Teile umgeschalten</translation>
+    </message>
+    <message>
+        <source>Cleared retain flag on %1 items</source>
+        <translation type="obsolete">Halten Status für %1 Teile gelöscht</translation>
+    </message>
+    <message>
+        <source>Toggled retain flag on %1 items</source>
+        <translation type="obsolete">Halten Status für %1 Teile umgeschalten</translation>
+    </message>
+    <message>
+        <source>Toggled stockroom flag on %1 items</source>
+        <translation type="obsolete">Auf-Lager Status für %1 Teile umgeschalten</translation>
+    </message>
+    <message>
+        <source>Prices are currently updated to Price Guide values.&lt;br /&gt;&lt;br /&gt;Please wait until this operation has finished.</source>
+        <translation>Die Preise der ausgewählten Teile wurden auf Richtpreise gesetzt.</translation>
+    </message>
+    <message>
+        <source>Prices of the selected items have been updated to Price Guide values.</source>
+        <translation>Die Preise der ausgewählten Teile wurden auf Richtpreise gesetzt.</translation>
+    </message>
+    <message>
+        <source>%1 have been skipped, because of missing Price Guide records and/or network errors.</source>
+        <translation>%1 wurden ausgelassen, da entweder keine Daten vorlagen und/oder Fehler auftraten.</translation>
+    </message>
+    <message>
+        <source>Price change on %1 items</source>
+        <translation>Preisänderungen bei %1 Teilen</translation>
+    </message>
+    <message>
+        <source>Divide the quantities of all selected items by this number.&lt;br /&gt;&lt;br /&gt;(A check is made if all quantites are exactly divisible without reminder, before this operation is performed.)</source>
+        <translation>Teile die Anzahl aller ausgewählten Teile durch diese Zahl.&lt;br /&gt;&lt;br /&gt;(Es wird vor etwaigen Änderungen geprüft, ob alle Teileanzahlen ohne Rest teilbar sind.)</translation>
+    </message>
+    <message>
+        <source>Quantity divide by %1 on %2 Items</source>
+        <translation>Mengen durch %1 bei %2 Teilen dividiert </translation>
+    </message>
+    <message>
+        <source>Quantity multiply by %1 on %2 Items</source>
+        <translation>Mengen mit %1 bei %2 Teilen multipliziert</translation>
+    </message>
+    <message>
+        <source>Set sale on %1 items</source>
+        <translation>Sonderangebot für %1 Teile gesetzt</translation>
+    </message>
+    <message>
+        <source>Set bulk quantity on %1 items</source>
+        <translation>Gebindegrösse für %1 Teile gesetzt</translation>
+    </message>
+    <message>
+        <source>Set color on %1 items</source>
+        <translation>Farbe für %1 Teile gesetzt</translation>
+    </message>
+    <message>
+        <source>Set remark on %1 items</source>
+        <translation>Anmerkung für %1 Teile gesetzt</translation>
+    </message>
+    <message>
+        <source>Modified remark on %1 items</source>
+        <translation>Anmerkung bei %1 Teilen geändert</translation>
+    </message>
+    <message>
+        <source>Set comment on %1 items</source>
+        <translation>Kommentar für %1 Teile gesetzt</translation>
+    </message>
+    <message>
+        <source>Modified comment on %1 items</source>
+        <translation>Kommentar bei %1 Teilen geändert</translation>
+    </message>
+    <message>
+        <source>Set reservation on %1 items</source>
+        <translation>Reservierung für %1 Teile gesetzt</translation>
+    </message>
+    <message>
+        <source>Set &apos;include&apos; status on %1 items</source>
+        <translation>Status für %1 Teile auf &apos;Einschliessen&apos; gesetzt</translation>
+    </message>
+    <message>
+        <source>Set &apos;exclude&apos; status on %1 items</source>
+        <translation>Status für %1 Teile auf &apos;Ausschliessen&apos; gesetzt</translation>
+    </message>
+    <message>
+        <source>Set &apos;extra&apos; status on %1 items</source>
+        <translation>Status für %1 Teile auf &apos;Extra&apos; gesetzt</translation>
+    </message>
+    <message>
+        <source>Set &apos;new&apos; condition on %1 items</source>
+        <translation>Zustand für %1 Teile auf &apos;Neu&apos; gesetzt</translation>
+    </message>
+    <message>
+        <source>Set &apos;used&apos; condition on %1 items</source>
+        <translation>Zustand für %1 Teile auf &apos;Gebraucht&apos; gesetzt</translation>
+    </message>
+    <message>
+        <source>Set &apos;retain&apos; flag on %1 items</source>
+        <translation>&apos;Halten&apos; Status für %1 Teile gesetzt</translation>
+    </message>
+    <message>
+        <source>Cleared &apos;retain&apos; flag on %1 items</source>
+        <translation>&apos;Halten&apos; Status für %1 Teile gelöscht</translation>
+    </message>
+    <message>
+        <source>Toggled &apos;retain&apos; flag on %1 items</source>
+        <translation>&apos;Halten&apos; Status für %1 Teile umgeschalten</translation>
+    </message>
+    <message>
+        <source>Set &apos;stockroom&apos; flag on %1 items</source>
+        <translation>&apos;Auf-Lager&apos; Status für %1 Teile gesetzt</translation>
+    </message>
+    <message>
+        <source>Cleared &apos;stockroom&apos; flag on %1 items</source>
+        <translation>&apos;Auf-Lager&apos; Status für %1 Teile gelöscht</translation>
+    </message>
+    <message>
+        <source>Toggled &apos;stockroom&apos; flag on %1 items</source>
+        <translation>&apos;Auf-Lager&apos; Status für %1 Teile umgeschalten</translation>
+    </message>
+    <message>
+        <source>Reserve all selected items for this specific buyer (BrickLink username):</source>
+        <translation>Reserviere alle ausgewählten Teile für einen bestimmten Käufer (BrickLink Benutzername):</translation>
     </message>
 </context>
 <context>
@@ -2550,11 +2730,11 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
     <message>
         <source>Price g&amp;uides, if older than</source>
-        <translation>&amp;Richtpreise, wenn älter als</translation>
+        <translation type="obsolete">&amp;Richtpreise, wenn älter als</translation>
     </message>
     <message>
         <source>&amp;Pictures, if older than</source>
-        <translation>&amp;Bilder, wenn älter als</translation>
+        <translation type="obsolete">&amp;Bilder, wenn älter als</translation>
     </message>
     <message>
         <source>&amp;Password</source>
@@ -2644,6 +2824,14 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
         <source>Close empty documents without confirmation</source>
         <translation>Leere Dokumente ohne Rückfrage schliessen</translation>
     </message>
+    <message>
+        <source>Price G&amp;uides, if older than</source>
+        <translation>&amp;Richtpreise, wenn älter als</translation>
+    </message>
+    <message>
+        <source>&amp;Images, if older than</source>
+        <translation>&amp;Bilder, wenn älter als</translation>
+    </message>
 </context>
 <context>
     <name>DlgSettingsImpl</name>
@@ -2728,7 +2916,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
     <message>
         <source>Column 1</source>
-        <translation>Spalte 1</translation>
+        <translation type="obsolete">Spalte 1</translation>
     </message>
     <message>
         <source>&amp;OK</source>

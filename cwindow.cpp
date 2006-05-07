@@ -399,7 +399,7 @@ uint CWindow::addItems ( const BrickLink::InvItemList &items, int multiply, uint
 		QApplication::restoreOverrideCursor ( );
 
 	if ( macro )
-		m_doc-> macroEnd ( macro, tr( "Added %1, Merged %2 Items" ). arg( addcount ). arg( mergecount ));
+		m_doc-> macroEnd ( macro, tr( "Added %1, merged %2 items" ). arg( addcount ). arg( mergecount ));
 
 	if ( was_empty )
 		w_list-> setCurrentItem ( w_list-> firstChild ( ));
@@ -479,7 +479,7 @@ void CWindow::mergeItems ( const CDocument::ItemList &items, int globalmergeflag
 			mergecount++;
 		}
 	} 
-	m_doc-> macroEnd ( macro, tr( "Merged %1 Items" ). arg ( mergecount ));
+	m_doc-> macroEnd ( macro, tr( "Merged %1 items" ). arg ( mergecount ));
 }
 
 void CWindow::updateSelectionFromView ( )
@@ -629,67 +629,67 @@ void CWindow::editResetDifferences ( )
 
 void CWindow::editStatusInclude ( )
 {
-	setOrToggle<BrickLink::InvItem::Status>::set ( this, tr( "Set Include Status on %1 Items" ), &CDocument::Item::status, &CDocument::Item::setStatus, BrickLink::InvItem::Include );
+	setOrToggle<BrickLink::InvItem::Status>::set ( this, tr( "Set 'include' status on %1 items" ), &CDocument::Item::status, &CDocument::Item::setStatus, BrickLink::InvItem::Include );
 }
 
 void CWindow::editStatusExclude ( )
 {
-	setOrToggle<BrickLink::InvItem::Status>::set ( this, tr( "Set Exclude Status on %1 Items" ), &CDocument::Item::status, &CDocument::Item::setStatus, BrickLink::InvItem::Exclude );
+	setOrToggle<BrickLink::InvItem::Status>::set ( this, tr( "Set 'exclude' status on %1 items" ), &CDocument::Item::status, &CDocument::Item::setStatus, BrickLink::InvItem::Exclude );
 }
 
 void CWindow::editStatusExtra ( )
 {
-	setOrToggle<BrickLink::InvItem::Status>::set ( this, tr( "Set Extra Status on %1 Items" ), &CDocument::Item::status, &CDocument::Item::setStatus, BrickLink::InvItem::Extra );
+	setOrToggle<BrickLink::InvItem::Status>::set ( this, tr( "Set 'extra' status on %1 items" ), &CDocument::Item::status, &CDocument::Item::setStatus, BrickLink::InvItem::Extra );
 }
 
 void CWindow::editStatusToggle ( )
 {
-	setOrToggle<BrickLink::InvItem::Status>::toggle ( this, tr( "Toggled Status on %1 Items" ), &CDocument::Item::status, &CDocument::Item::setStatus, BrickLink::InvItem::Include, BrickLink::InvItem::Exclude );
+	setOrToggle<BrickLink::InvItem::Status>::toggle ( this, tr( "Toggled status on %1 items" ), &CDocument::Item::status, &CDocument::Item::setStatus, BrickLink::InvItem::Include, BrickLink::InvItem::Exclude );
 }
 
 void CWindow::editConditionNew ( )
 {
-	setOrToggle<BrickLink::Condition>::set ( this, tr( "Set New Condition on %1 Items" ), &CDocument::Item::condition, &CDocument::Item::setCondition, BrickLink::New );
+	setOrToggle<BrickLink::Condition>::set ( this, tr( "Set 'new' condition on %1 items" ), &CDocument::Item::condition, &CDocument::Item::setCondition, BrickLink::New );
 }
 
 void CWindow::editConditionUsed ( )
 {
-	setOrToggle<BrickLink::Condition>::set ( this, tr( "Set Used Condition on %1 Items" ), &CDocument::Item::condition, &CDocument::Item::setCondition, BrickLink::Used );
+	setOrToggle<BrickLink::Condition>::set ( this, tr( "Set 'used' condition on %1 items" ), &CDocument::Item::condition, &CDocument::Item::setCondition, BrickLink::Used );
 }
 
 void CWindow::editConditionToggle ( )
 {
-	setOrToggle<BrickLink::Condition>::toggle ( this, tr( "Toggled Condition on %1 Items" ), &CDocument::Item::condition, &CDocument::Item::setCondition, BrickLink::New, BrickLink::Used );
+	setOrToggle<BrickLink::Condition>::toggle ( this, tr( "Toggled condition on %1 items" ), &CDocument::Item::condition, &CDocument::Item::setCondition, BrickLink::New, BrickLink::Used );
 }
 
 void CWindow::editRetainYes ( )
 {
-	setOrToggle<bool>::set ( this, tr( "Set Retain Flag on %1 Items" ), &CDocument::Item::retain, &CDocument::Item::setRetain, true );
+	setOrToggle<bool>::set ( this, tr( "Set 'retain' flag on %1 items" ), &CDocument::Item::retain, &CDocument::Item::setRetain, true );
 }
 
 void CWindow::editRetainNo ( )
 {
-	setOrToggle<bool>::set ( this, tr( "Cleared Retain Flag on %1 Items" ), &CDocument::Item::retain, &CDocument::Item::setRetain, false );
+	setOrToggle<bool>::set ( this, tr( "Cleared 'retain' flag on %1 items" ), &CDocument::Item::retain, &CDocument::Item::setRetain, false );
 }
 
 void CWindow::editRetainToggle ( )
 {
-	setOrToggle<bool>::toggle ( this, tr( "Toggled Retain Flag on %1 Items" ), &CDocument::Item::retain, &CDocument::Item::setRetain, true, false );
+	setOrToggle<bool>::toggle ( this, tr( "Toggled 'retain' flag on %1 items" ), &CDocument::Item::retain, &CDocument::Item::setRetain, true, false );
 }
 
 void CWindow::editStockroomYes ( )
 {
-	setOrToggle<bool>::set ( this, tr( "Set Stockroom Flag on %1 Items" ), &CDocument::Item::stockroom, &CDocument::Item::setStockroom, true );
+	setOrToggle<bool>::set ( this, tr( "Set 'stockroom' flag on %1 items" ), &CDocument::Item::stockroom, &CDocument::Item::setStockroom, true );
 }
 
 void CWindow::editStockroomNo ( )
 {
-	setOrToggle<bool>::set ( this, tr( "Cleared Stockroom Flag on %1 Items" ), &CDocument::Item::stockroom, &CDocument::Item::setStockroom, false );
+	setOrToggle<bool>::set ( this, tr( "Cleared 'stockroom' flag on %1 items" ), &CDocument::Item::stockroom, &CDocument::Item::setStockroom, false );
 }
 
 void CWindow::editStockroomToggle ( )
 {
-	setOrToggle<bool>::toggle ( this, tr( "Toggled Stockroom Flag on %1 Items" ), &CDocument::Item::stockroom, &CDocument::Item::setStockroom, true, false );
+	setOrToggle<bool>::toggle ( this, tr( "Toggled 'stockroom' flag on %1 items" ), &CDocument::Item::stockroom, &CDocument::Item::setStockroom, true, false );
 }
 
 
@@ -699,7 +699,7 @@ void CWindow::editPriceToPG ( )
 		return;
 
 	if ( m_settopg_list ) {
-		CMessageBox::information ( this, tr( "Prices are currently updated to price guide values.<br /><br />Please wait until this operation has finished." ));
+		CMessageBox::information ( this, tr( "Prices are currently updated to Price Guide values.<br /><br />Please wait until this operation has finished." ));
 		return;
 	}
 
@@ -772,10 +772,10 @@ void CWindow::priceGuideUpdated ( BrickLink::PriceGuide *pg )
 	}
 
 	if ( m_settopg_list && m_settopg_list-> isEmpty ( )) {
-		QString s = tr( "Prices of the selected items have been updated to price guide values." );
+		QString s = tr( "Prices of the selected items have been updated to Price Guide values." );
 
 		if ( m_settopg_failcnt )
-			s += "<br /><br />" + tr( "%1 have been skipped, because of missing price guide records and/or network errors." ). arg ( CMB_BOLD( QString::number ( m_settopg_failcnt )));
+			s += "<br /><br />" + tr( "%1 have been skipped, because of missing Price Guide records and/or network errors." ). arg ( CMB_BOLD( QString::number ( m_settopg_failcnt )));
 
 		CMessageBox::information ( this, s );
 
@@ -828,7 +828,7 @@ void CWindow::editPriceIncDec ( )
 			incdeccount++;
 		}
 
-		m_doc-> macroEnd ( macro, tr( "Price Change on %1 Items" ). arg ( incdeccount ));
+		m_doc-> macroEnd ( macro, tr( "Price change on %1 items" ). arg ( incdeccount ));
 	}
 }
 
@@ -839,7 +839,7 @@ void CWindow::editQtyDivide ( )
 
 	int divisor = 1;
 
-	if ( CMessageBox::getInteger ( this, tr( "Divide the quantities of all selected items by this number.<br /><br />(A check is made if all quantites are exactly divisble without reminder, before this operation is performed.)" ), QString::null, divisor, new QIntValidator ( 1, 1000, 0 ))) {
+	if ( CMessageBox::getInteger ( this, tr( "Divide the quantities of all selected items by this number.<br /><br />(A check is made if all quantites are exactly divisible without reminder, before this operation is performed.)" ), QString::null, divisor, new QIntValidator ( 1, 1000, 0 ))) {
 		if ( divisor > 1 ) {
 			int lots_with_errors = 0;
 			
@@ -865,7 +865,7 @@ void CWindow::editQtyDivide ( )
 					
 					divcount++;
 				}
-				m_doc-> macroEnd ( macro, tr( "Quantity Divide by %1 on %2 Items" ). arg ( divisor ). arg ( divcount ));
+				m_doc-> macroEnd ( macro, tr( "Quantity divide by %1 on %2 Items" ). arg ( divisor ). arg ( divcount ));
 			}
 		}
 	}
@@ -893,7 +893,7 @@ void CWindow::editQtyMultiply ( )
 				
 				mulcount++;
 			}
-			m_doc-> macroEnd ( macro, tr( "Quantity Multiply by %1 on %2 Items" ). arg ( factor ). arg ( mulcount ));
+			m_doc-> macroEnd ( macro, tr( "Quantity multiply by %1 on %2 Items" ). arg ( factor ). arg ( mulcount ));
 		}
 	}
 }
@@ -906,7 +906,7 @@ void CWindow::editSale ( )
 	int sale = m_doc-> selection ( ). front ( )-> sale ( );
 
 	if ( CMessageBox::getInteger ( this, tr( "Set sale in percent for the selected items (this will <u>not</u> change any prices).<br />Negative values are also allowed." ), tr( "%" ), sale, new QIntValidator ( -1000, 99, 0 ))) 
-		setOrToggle<int>::set ( this, tr( "Set Sale on %1 Items" ), &CDocument::Item::sale, &CDocument::Item::setSale, sale );
+		setOrToggle<int>::set ( this, tr( "Set sale on %1 items" ), &CDocument::Item::sale, &CDocument::Item::setSale, sale );
 }
 
 void CWindow::editBulk ( )
@@ -917,7 +917,7 @@ void CWindow::editBulk ( )
 	int bulk = m_doc-> selection ( ). front ( )-> bulkQuantity ( );
 
 	if ( CMessageBox::getInteger ( this, tr( "Set bulk quantity for the selected items:"), QString ( ), bulk, new QIntValidator ( 1, 99999, 0 ))) 
-		setOrToggle<int>::set ( this, tr( "Set Bulk Quantity on %1 Items" ), &CDocument::Item::bulkQuantity, &CDocument::Item::setBulkQuantity, bulk );
+		setOrToggle<int>::set ( this, tr( "Set bulk quantity on %1 items" ), &CDocument::Item::bulkQuantity, &CDocument::Item::setBulkQuantity, bulk );
 }
 
 void CWindow::editColor ( )
@@ -930,7 +930,7 @@ void CWindow::editColor ( )
 	d. setColor ( m_doc-> selection ( ). front ( )-> color ( ));
 
 	if ( d. exec ( ) == QDialog::Accepted )
-		setOrToggle<const BrickLink::Color *>::set ( this, tr( "Set Color on %1 Items" ), &CDocument::Item::color, &CDocument::Item::setColor, d. color ( ));
+		setOrToggle<const BrickLink::Color *>::set ( this, tr( "Set color on %1 items" ), &CDocument::Item::color, &CDocument::Item::setColor, d. color ( ));
 }
 
 void CWindow::editRemark ( )
@@ -941,7 +941,7 @@ void CWindow::editRemark ( )
 	QString remarks = m_doc-> selection ( ). front ( )-> remarks ( );
 	
 	if ( CMessageBox::getString ( this, tr( "Enter the new remark for all selected items:" ), remarks ))
-		setOrToggle<QString, const QString &>::set ( this, tr( "Set Remark on %1 Items" ), &CDocument::Item::remarks, &CDocument::Item::setRemarks, remarks );
+		setOrToggle<QString, const QString &>::set ( this, tr( "Set remark on %1 items" ), &CDocument::Item::remarks, &CDocument::Item::setRemarks, remarks );
 }
 
 void CWindow::addRemark ( )
@@ -978,7 +978,7 @@ void CWindow::addRemark ( )
 				remarkcount++;
 			}
 		}
-		m_doc-> macroEnd ( macro, tr( "Modified Remark on %1 Items" ). arg ( remarkcount ));
+		m_doc-> macroEnd ( macro, tr( "Modified remark on %1 items" ). arg ( remarkcount ));
 	}
 }
 
@@ -1009,7 +1009,7 @@ void CWindow::removeRemark ( )
 				remarkcount++;
 			}
 		}
-		m_doc-> macroEnd ( macro, tr( "Modified Remark on %1 Items" ). arg ( remarkcount ));
+		m_doc-> macroEnd ( macro, tr( "Modified remark on %1 items" ). arg ( remarkcount ));
 	}
 }
 
@@ -1022,7 +1022,7 @@ void CWindow::editComment ( )
 	QString comments = m_doc-> selection ( ). front ( )-> comments ( );
 	
 	if ( CMessageBox::getString ( this, tr( "Enter the new comment for all selected items:" ), comments ))
-		setOrToggle<QString, const QString &>::set ( this, tr( "Set Comment on %1 Items" ), &CDocument::Item::comments, &CDocument::Item::setComments, comments );
+		setOrToggle<QString, const QString &>::set ( this, tr( "Set comment on %1 items" ), &CDocument::Item::comments, &CDocument::Item::setComments, comments );
 }
 
 void CWindow::addComment ( )
@@ -1059,7 +1059,7 @@ void CWindow::addComment ( )
 				commentcount++;
 			}
 		}
-		m_doc-> macroEnd ( macro, tr( "Modified Comment on %1 Items" ). arg ( commentcount ));
+		m_doc-> macroEnd ( macro, tr( "Modified comment on %1 items" ). arg ( commentcount ));
 	}
 }
 
@@ -1090,7 +1090,7 @@ void CWindow::removeComment ( )
 				commentcount++;
 			}
 		}
-		m_doc-> macroEnd ( macro, tr( "Modified Comment on %1 Items" ). arg ( commentcount ));
+		m_doc-> macroEnd ( macro, tr( "Modified comment on %1 items" ). arg ( commentcount ));
 	}
 }
 
@@ -1102,8 +1102,8 @@ void CWindow::editReserved ( )
 
 	QString reserved = m_doc-> selection ( ). front ( )-> reserved ( );
 	
-	if ( CMessageBox::getString ( this, tr( "Reserve all selected items for this specific member:" ), reserved ))
-		setOrToggle<QString, const QString &>::set ( this, tr( "Set Reservation on %1 Items" ), &CDocument::Item::reserved, &CDocument::Item::setReserved, reserved );
+	if ( CMessageBox::getString ( this, tr( "Reserve all selected items for this specific buyer (BrickLink username):" ), reserved ))
+		setOrToggle<QString, const QString &>::set ( this, tr( "Set reservation on %1 items" ), &CDocument::Item::reserved, &CDocument::Item::setReserved, reserved );
 }
 
 void CWindow::updateErrorMask ( )

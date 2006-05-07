@@ -85,19 +85,19 @@
 <context>
     <name>CAddRemoveCmd</name>
     <message>
-        <source>Added %1 Items</source>
+        <source>Added %1 items</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Added an Item</source>
+        <source>Added an item</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Removed %1 Items</source>
+        <source>Removed %1 items</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Removed an Item</source>
+        <source>Removed an item</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -174,7 +174,7 @@
 <context>
     <name>CChangeCmd</name>
     <message>
-        <source>Modified Item</source>
+        <source>Modified item</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -345,7 +345,7 @@
     </message>
     <message>
         <source>Reset Differences</source>
-        <translation>Réinitialiser les différences</translation>
+        <translation type="obsolete">Réinitialiser les différences</translation>
     </message>
     <message>
         <source>Inventory Files</source>
@@ -353,6 +353,10 @@
     </message>
     <message>
         <source>BrickStore has switched to a new file format (.bsx - BrickStore XML).&lt;br /&gt;&lt;br /&gt;Your document has been automatically imported and it will be converted as soon as you save it.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reset differences</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -376,7 +380,7 @@
     </message>
     <message>
         <source>Priceguide updates</source>
-        <translation>Mise à jour du guide de prix</translation>
+        <translation type="obsolete">Mise à jour du guide de prix</translation>
     </message>
     <message>
         <source>Inventory updates</source>
@@ -384,7 +388,7 @@
     </message>
     <message>
         <source>Picture updates</source>
-        <translation>Mise à jour des images</translation>
+        <translation type="obsolete">Mise à jour des images</translation>
     </message>
     <message>
         <source>&amp;File</source>
@@ -759,7 +763,7 @@
     </message>
     <message>
         <source>Do you want to cancel all outstanding inventory, picture and price guide transfers?</source>
-        <translation>Voulez-vous annuler tous les transferts en cours d&apos;inventaire, images et guide de prix ?</translation>
+        <translation type="obsolete">Voulez-vous annuler tous les transferts en cours d&apos;inventaire, images et guide de prix ?</translation>
     </message>
     <message>
         <source>Info</source>
@@ -894,10 +898,6 @@
         <translation>Prix</translation>
     </message>
     <message>
-        <source>Set to Price-Guide...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Ctrl+G</source>
         <comment>Edit|Price|Set to PriceGuide</comment>
         <translation type="unfinished"></translation>
@@ -997,6 +997,22 @@
         <source>New</source>
         <comment>Cond|New</comment>
         <translation>Neuf</translation>
+    </message>
+    <message>
+        <source>Price Guide updates</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Image updates</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set to Price Guide...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Do you want to cancel all outstanding inventory, image and Price Guide transfers?</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1603,15 +1619,15 @@
         <translation>Description</translation>
     </message>
     <message>
-        <source>Please enter the complete part number of the item:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>[Image is loading]</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>View item&apos;s category</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Please enter the complete item number:</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1991,15 +2007,15 @@
     </message>
     <message>
         <source>Prices are currently updated to price guide values.&lt;br /&gt;&lt;br /&gt;Please wait until this operation has finished.</source>
-        <translation>Les prix sont en train d&apos;être fixés aux valeurs du guide de prix.&lt;br /&gt;&lt;br /&gt;Merci de patienter jusqu&apos;à ce que cette opération soit terminée.</translation>
+        <translation type="obsolete">Les prix sont en train d&apos;être fixés aux valeurs du guide de prix.&lt;br /&gt;&lt;br /&gt;Merci de patienter jusqu&apos;à ce que cette opération soit terminée.</translation>
     </message>
     <message>
         <source>Prices of the selected items have been updated to price guide values.</source>
-        <translation>Les prix des items sélectionnés ont été fixés aux valeurs du guide de prix.</translation>
+        <translation type="obsolete">Les prix des items sélectionnés ont été fixés aux valeurs du guide de prix.</translation>
     </message>
     <message>
         <source>%1 have been skipped, because of missing price guide records and/or network errors.</source>
-        <translation>%1 n&apos;a pas été traité, à cause du manque d&apos;une valeur au guide de prix et/ou d&apos;erreurs réseau.</translation>
+        <translation type="obsolete">%1 n&apos;a pas été traité, à cause du manque d&apos;une valeur au guide de prix et/ou d&apos;erreurs réseau.</translation>
     </message>
     <message>
         <source>Divides the quantities of all selected items by this number.&lt;br /&gt;&lt;br /&gt;(A check is made if all quantites are exactly divisble without reminder, before this operation is performed.)</source>
@@ -2042,16 +2058,8 @@
         <translation type="obsolete">Erreur interne : n&apos;est pas arrivé à créer un objet inventaire pour la commande #%1</translation>
     </message>
     <message>
-        <source>Added %1, Merged %2 Items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Merged %1 Items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Divide the quantities of all selected items by this number.&lt;br /&gt;&lt;br /&gt;(A check is made if all quantites are exactly divisble without reminder, before this operation is performed.)</source>
-        <translation>Diviser la quantité de tous les items sélectionnés par ce nombre.&lt;br /&gt;&lt;br /&gt;(Il est vérifié que toutes les quantités soient exactement divisibles sans reste, avant que cette opération ne soit lancée.)</translation>
+        <translation type="obsolete">Diviser la quantité de tous les items sélectionnés par ce nombre.&lt;br /&gt;&lt;br /&gt;(Il est vérifié que toutes les quantités soient exactement divisibles sans reste, avant que cette opération ne soit lancée.)</translation>
     </message>
     <message>
         <source>Multiply the quantities of all selected items with this factor.</source>
@@ -2059,66 +2067,10 @@
     </message>
     <message>
         <source>Reserve all selected items for this specific member:</source>
-        <translation>Réserver tous les items sélectionnés à ce membre:</translation>
+        <translation type="obsolete">Réserver tous les items sélectionnés à ce membre:</translation>
     </message>
     <message>
         <source>Subtracted %1 Items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Set Include Status on %1 Items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Set Exclude Status on %1 Items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Set Extra Status on %1 Items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Toggled Status on %1 Items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Set New Condition on %1 Items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Set Used Condition on %1 Items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Toggled Condition on %1 Items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Set Retain Flag on %1 Items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Cleared Retain Flag on %1 Items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Toggled Retain Flag on %1 Items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Set Stockroom Flag on %1 Items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Cleared Stockroom Flag on %1 Items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Toggled Stockroom Flag on %1 Items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Set Sale on %1 Items</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2126,47 +2078,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Set Bulk Quantity on %1 Items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Set Color on %1 Items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Set Remark on %1 Items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Enter the new comment for all selected items:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Set Comment on %1 Items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Set Reservation on %1 Items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Price Change on %1 Items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Quantity Divide by %1 on %2 Items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Quantity Multiply by %1 on %2 Items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Enter the text, that should be added to the remarks of all selected items:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Modified Remark on %1 Items</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2178,15 +2094,135 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Modified Comment on %1 Items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Enter the text, that should be removed from the comments of all selected items:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>There are %1 items selected.&lt;br /&gt;&lt;br /&gt;Do you want to export only these items?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Added %1, merged %2 items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Merged %1 items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Toggled status on %1 items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Toggled condition on %1 items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Prices are currently updated to Price Guide values.&lt;br /&gt;&lt;br /&gt;Please wait until this operation has finished.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Prices of the selected items have been updated to Price Guide values.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1 have been skipped, because of missing Price Guide records and/or network errors.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Price change on %1 items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Divide the quantities of all selected items by this number.&lt;br /&gt;&lt;br /&gt;(A check is made if all quantites are exactly divisible without reminder, before this operation is performed.)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Quantity divide by %1 on %2 Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Quantity multiply by %1 on %2 Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set sale on %1 items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set bulk quantity on %1 items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set color on %1 items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set remark on %1 items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Modified remark on %1 items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set comment on %1 items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Modified comment on %1 items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set reservation on %1 items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set &apos;include&apos; status on %1 items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set &apos;exclude&apos; status on %1 items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set &apos;extra&apos; status on %1 items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set &apos;new&apos; condition on %1 items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set &apos;used&apos; condition on %1 items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set &apos;retain&apos; flag on %1 items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cleared &apos;retain&apos; flag on %1 items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Toggled &apos;retain&apos; flag on %1 items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set &apos;stockroom&apos; flag on %1 items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cleared &apos;stockroom&apos; flag on %1 items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Toggled &apos;stockroom&apos; flag on %1 items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reserve all selected items for this specific buyer (BrickLink username):</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2812,11 +2848,11 @@
     </message>
     <message>
         <source>Price g&amp;uides, if older than</source>
-        <translation>G&amp;uide de prix, si plus anciens que</translation>
+        <translation type="obsolete">G&amp;uide de prix, si plus anciens que</translation>
     </message>
     <message>
         <source>&amp;Pictures, if older than</source>
-        <translation>I&amp;mages, si plus anciennes que</translation>
+        <translation type="obsolete">I&amp;mages, si plus anciennes que</translation>
     </message>
     <message>
         <source>&amp;Inventories, if older than</source>
@@ -2922,6 +2958,14 @@
         <source>Condition</source>
         <translation>Etat</translation>
     </message>
+    <message>
+        <source>Price G&amp;uides, if older than</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;Images, if older than</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>DlgSettingsImpl</name>
@@ -3006,7 +3050,7 @@
     </message>
     <message>
         <source>Column 1</source>
-        <translation>Colonne 1</translation>
+        <translation type="obsolete">Colonne 1</translation>
     </message>
     <message>
         <source>&amp;OK</source>
