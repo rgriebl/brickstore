@@ -2563,23 +2563,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>&amp;PERSONAL</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>I do not need all the BrickLink Seller features (no reminders and no registration required).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>&amp;DEMO</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>I want to use the unrestricted demo version (a reminder will popup every 20 minutes).</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&amp;FULL</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2613,6 +2601,18 @@
     <message>
         <source>&gt;NNNN-NNNN-NNNN;0</source>
         <translation>&gt;NNNN-NNNN-NNNN;0</translation>
+    </message>
+    <message>
+        <source>&amp;PRIVATE USE</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;DEMO MODE</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>CO&amp;MMERCIAL USE</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

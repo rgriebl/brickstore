@@ -2466,7 +2466,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
     <message>
         <source>&amp;PERSONAL</source>
-        <translation>&amp;PRIVAT</translation>
+        <translation type="obsolete">&amp;PRIVAT</translation>
     </message>
     <message>
         <source>I do not need all the BrickLink Seller features (no reminders and no registration required).</source>
@@ -2474,7 +2474,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
     <message>
         <source>&amp;DEMO</source>
-        <translation>&amp;DEMO</translation>
+        <translation type="obsolete">&amp;DEMO</translation>
     </message>
     <message>
         <source>I want to use the unrestricted demo version (a reminder will popup every 20 minutes).</source>
@@ -2482,7 +2482,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
     <message>
         <source>&amp;FULL</source>
-        <translation>&amp;VOLL</translation>
+        <translation type="obsolete">&amp;VOLL</translation>
     </message>
     <message>
         <source>-</source>
@@ -2523,6 +2523,18 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     <message>
         <source>&gt;NNNN-NNNN-NNNN;0</source>
         <translation>&gt;NNNN-NNNN-NNNN;0</translation>
+    </message>
+    <message>
+        <source>&amp;PRIVATE USE</source>
+        <translation>&amp;PRIVATGEBRAUCH</translation>
+    </message>
+    <message>
+        <source>&amp;DEMO MODE</source>
+        <translation>&amp;DEMO MODUS</translation>
+    </message>
+    <message>
+        <source>CO&amp;MMERCIAL USE</source>
+        <translation>&amp;GEWERBLICHER GEBRAUCH</translation>
     </message>
 </context>
 <context>
