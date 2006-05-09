@@ -1054,7 +1054,7 @@ QDomElement BrickLink::createItemListXML ( QDomDocument doc, ItemListXMLHint hin
 
 		// ### MASS UPDATE ###
 		if ( hint == XMLHint_MassUpdate ) {
-			item. appendChild ( doc. createElement ( "LOTID" )). appendChild ( doc. createTextNode ( QString::number ( ii-> lotId ( ))). parentNode ( ));
+			item. appendChild ( doc. createElement ( "LOTID" ). appendChild ( doc. createTextNode ( QString::number ( ii-> lotId ( )))). parentNode ( ));
 
 			int qdiff = ii-> quantity ( ) - ii-> origQuantity ( );
 			money_t pdiff = ii-> price ( ) - ii-> origPrice ( );
