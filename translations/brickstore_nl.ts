@@ -2348,15 +2348,15 @@
     </message>
     <message>
         <source>&amp;PRIVATE USE</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;PRIVÉ GEBRUIK</translation>
     </message>
     <message>
         <source>&amp;DEMO MODE</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;DEMO MODUS</translation>
     </message>
     <message>
         <source>CO&amp;MMERCIAL USE</source>
-        <translation type="unfinished"></translation>
+        <translation>CO&amp;MMERCIEEL GEBRUIK </translation>
     </message>
 </context>
 <context>
