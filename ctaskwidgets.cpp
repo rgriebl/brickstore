@@ -181,11 +181,6 @@ CTaskInfoWidget::CTaskInfoWidget ( QWidget *parent, const char *name )
 	connect ( CConfig::inst ( ), SIGNAL( weightSystemChanged ( CConfig::WeightSystem )), this, SLOT( refresh ( )));
 }
 
-void CTaskInfoWidget::addActionsToContextMenu ( const QPtrList <QAction> &actions )
-{
-	m_pic-> addActionsToContextMenu ( actions );
-}
-
 void CTaskInfoWidget::documentUpdate ( CDocument *doc )
 {
 	if ( m_doc )

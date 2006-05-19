@@ -346,7 +346,7 @@ void CItemView::setSimpleMode ( bool b )
 		hideColumn ( CDocument::Stockroom, true );
 		hideColumn ( CDocument::Retain, true );
 		hideColumn ( CDocument::LotId, true );
-		hideColumn ( CDocument::Remarks, true );
+		hideColumn ( CDocument::Comments, true );
 	}
 	else {
 		showColumn ( CDocument::Bulk );
@@ -361,7 +361,7 @@ void CItemView::setSimpleMode ( bool b )
 		showColumn ( CDocument::Stockroom );
 		showColumn ( CDocument::Retain );
 		showColumn ( CDocument::LotId );
-		showColumn ( CDocument::Remarks );
+		showColumn ( CDocument::Comments );
 	}
 }
 

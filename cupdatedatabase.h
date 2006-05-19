@@ -17,7 +17,7 @@
 #include <qfile.h>
 #include <qdatetime.h>
 
-#include "liblzmadec/lzmadec.h"
+#include "lzmadec.h"
 
 #include "cconfig.h"
 #include "bricklink.h"

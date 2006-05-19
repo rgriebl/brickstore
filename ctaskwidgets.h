@@ -83,8 +83,6 @@ class CTaskInfoWidget : public QWidgetStack {
 public:
 	CTaskInfoWidget ( QWidget *parent, const char *name = 0 );
 
-	void addActionsToContextMenu ( const QPtrList <QAction> &actions );
-
 protected slots:
 	void documentUpdate ( CDocument *doc );
 	void selectionUpdate ( const CDocument::ItemList &list );

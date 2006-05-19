@@ -12,11 +12,11 @@
 ## See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 
 isEmpty( RELEASE ) {
-  RELEASE    = 1.1.2
+  RELEASE    = 1.1.3
 }
 
 TEMPLATE     = app
-CONFIG      *= warn_on thread qt link_prl lzma
+CONFIG      *= warn_on thread qt link_prl
 
 TARGET       = brickstore
 
@@ -119,13 +119,6 @@ macx {
   }
 }
 
-lzma {
-  DEFINES += LZMADEC_NO_STDIO
-  HEADERS += liblzmadec/lzmadec.h liblzmadec/private.h
-  SOURCES += liblzmadec/buffer.c liblzmadec/io.c liblzmadec/lzma_main.c
-}
-
-
 HEADERS += bricklink.h \
            cappearsinwidget.h \
            capplication.h \
@@ -168,6 +161,7 @@ HEADERS += bricklink.h \
            cutility.h \
            cwindow.h \
            cworkspace.h \
+           lzmadec.h \
            sha1.h
 
 SOURCES += bricklink.cpp \
@@ -208,6 +202,7 @@ SOURCES += bricklink.cpp \
            cutility.cpp \
            cwindow.cpp \
            cworkspace.cpp \
+           lzmadec.c \
            main.cpp \
            sha1.cpp
 

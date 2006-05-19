@@ -32,8 +32,6 @@ public:
 
 	virtual BrickLink::PriceGuide *priceGuide ( ) const;
 
-	void addActionsToContextMenu ( const QPtrList <QAction> &actions );
-
 	enum Layout {
 		Normal,
 		Horizontal,

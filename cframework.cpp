@@ -169,12 +169,6 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 
 	createActions ( );
 
-	QPtrList <QAction> actions;
-
-	actions. append ( findAction ( "edit_bl_info_group" ));
-	m_task_info-> addActionsToContextMenu ( actions );
-	m_task_priceguide-> addActionsToContextMenu ( actions );
-
 	QString str;
 	QStringList sl;
 
@@ -1553,7 +1547,7 @@ void CFrameWork::setSimpleMode ( bool b )
 		"edit_reserved",
 		"edit_retain",
 		"edit_stockroom",
-		"edit_remark",
+		"edit_comment",
 		"edit_bl_myinventory",
 
 		0

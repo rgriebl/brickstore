@@ -756,8 +756,6 @@ bool BrickLink::readDatabase ( const QString &fname )
 }
 
 
-
-
 BrickLink::InvItemList *BrickLink::parseItemListXML ( QDomElement root, ItemListXMLHint hint, uint *invalid_items )
 {
 	QString roottag, itemtag;
@@ -836,6 +834,16 @@ BrickLink::InvItemList *BrickLink::parseItemListXML ( QDomElement root, ItemList
 					ii-> setTierPrice ( 2, money_t::fromCString ( val ));
 				else if ( tag == "LOTID" )
 					ii-> setLotId ( val. toUInt ( ));
+			}
+
+			// ### BrickLink Order (workaround for broken BL script) ###
+			if ( hint == XMLHint_Order ) {
+				// The remove(',') stuff is a workaround for the 
+				// broken Order XML generator: the XML contains , as 
+				// thousands-separator: 1,752 instead of 1752
+
+				if ( tag == "QTY" )
+					ii-> setQuantity ( val. remove ( ',' ). toInt ( ));
 			}
 
 			// ### BrikTrak import ###
@@ -1223,6 +1231,10 @@ QDomElement BrickLink::createItemListXML ( QDomDocument doc, ItemListXMLHint hin
 				item. appendChild ( doc. createElement ( "MINQTY"   ). appendChild ( doc. createTextNode ( QString::number ( ii-> quantity ( )))). parentNode ( ));
 			if ( ii-> price ( ) != 0 )
 				item. appendChild ( doc. createElement ( "MAXPRICE" ). appendChild ( doc. createTextNode ( ii-> price ( ). toCString ( ))). parentNode ( ));
+			if ( !ii-> remarks ( ). isEmpty ( ))
+				item. appendChild ( doc. createElement ( "REMARKS"  ). appendChild ( doc. createTextNode ( ii-> remarks ( ))). parentNode ( ));
+			if ( ii-> condition ( ) == New )
+				item. appendChild ( doc. createElement ( "CONDITION"). appendChild ( doc. createTextNode ( "N" )). parentNode ( ));
 		}
 
 		// ### INVENTORY REQUEST ###

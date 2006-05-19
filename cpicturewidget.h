@@ -33,13 +33,14 @@ public:
 	void setPicture ( BrickLink::Picture *pic );
 	BrickLink::Picture *picture ( ) const;
 
-	void addActionsToContextMenu ( const QPtrList <QAction> &actions );
-
 protected slots:
 	void doUpdate ( );
 	void gotUpdate ( BrickLink::Picture * );
 	void redraw ( );
 	void viewLargeImage ( );
+	void showBLCatalogInfo ( );
+	void showBLPriceGuideInfo ( );
+	void showBLLotsForSale ( );
 	void languageChange ( );
 	
 protected:
@@ -55,12 +56,9 @@ class CLargePictureWidgetPrivate;
 
 class CLargePictureWidget : public QLabel {
 	Q_OBJECT
-private:
-	CLargePictureWidget ( BrickLink::Picture *lpic, QWidget *parent );
-	
-	friend class CPictureWidget;
 	
 public:
+	CLargePictureWidget ( BrickLink::Picture *lpic, QWidget *parent );
 	virtual ~CLargePictureWidget ( );
 
 protected slots:

@@ -123,6 +123,26 @@
         <source>Qty.</source>
         <translation>Qté.</translation>
     </message>
+    <message>
+        <source>View large image...</source>
+        <translation>Afficher la grande image...</translation>
+    </message>
+    <message>
+        <source>Show BrickLink Catalog Info...</source>
+        <translation>Montrer le catalogue BrickLink...</translation>
+    </message>
+    <message>
+        <source>Show BrickLink Price Guide Info...</source>
+        <translation>Montrer le guide de prix BrickLink...</translation>
+    </message>
+    <message>
+        <source>Lots for Sale on BrickLink...</source>
+        <translation type="obsolete">Lots en vente sur BrickLink...</translation>
+    </message>
+    <message>
+        <source>Show Lots for Sale on BrickLink...</source>
+        <translation>Lots en vente sur BrickLink...</translation>
+    </message>
 </context>
 <context>
     <name>CApplication</name>
@@ -950,7 +970,7 @@
     </message>
     <message>
         <source>Show Lots for Sale on BrickLink...</source>
-        <translation type="unfinished"></translation>
+        <translation>Lots en vente sur BrickLink...</translation>
     </message>
     <message>
         <source>Show in my Store on BrickLink...</source>
@@ -1361,11 +1381,11 @@
     </message>
     <message>
         <source>Show BrickLink Catalog Info...</source>
-        <translation type="obsolete">Montrer le catalogue BrickLink...</translation>
+        <translation>Montrer le catalogue BrickLink...</translation>
     </message>
     <message>
         <source>Show BrickLink Price Guide Info...</source>
-        <translation type="obsolete">Montrer le guide de prix BrickLink...</translation>
+        <translation>Montrer le guide de prix BrickLink...</translation>
     </message>
     <message>
         <source>Lots for Sale on BrickLink...</source>
@@ -1378,6 +1398,10 @@
     <message>
         <source>Double-click to view the large image.</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show Lots for Sale on BrickLink...</source>
+        <translation>Lots en vente sur BrickLink...</translation>
     </message>
 </context>
 <context>
@@ -1452,11 +1476,11 @@
     </message>
     <message>
         <source>Show BrickLink Catalog Info...</source>
-        <translation type="obsolete">Montrer le catalogue BrickLink...</translation>
+        <translation>Montrer le catalogue BrickLink...</translation>
     </message>
     <message>
         <source>Show BrickLink Price Guide Info...</source>
-        <translation type="obsolete">Montrer le guide de prix BrickLink...</translation>
+        <translation>Montrer le guide de prix BrickLink...</translation>
     </message>
     <message>
         <source>Lots for Sale on BrickLink...</source>
@@ -1489,6 +1513,10 @@
     <message>
         <source>Max.</source>
         <translation>Max.</translation>
+    </message>
+    <message>
+        <source>Show Lots for Sale on BrickLink...</source>
+        <translation>Lots en vente sur BrickLink...</translation>
     </message>
 </context>
 <context>

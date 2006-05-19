@@ -926,10 +926,11 @@ void CDocument::fileExportBrickLinkWantedListClipboard ( const ItemList &itemlis
 
 	if ( CMessageBox::getString ( CFrameWork::inst ( ), tr( "Enter the ID number of Wanted List (leave blank for the default Wanted List)" ), wantedlist )) {
 		QMap <QString, QString> extra;
-		extra. insert ( "WANTEDLISTID", wantedlist );
+		if ( !wantedlist. isEmpty ( ))
+			extra. insert ( "WANTEDLISTID", wantedlist );
 
 		QDomDocument doc ( QString::null );
-		doc. appendChild ( BrickLink::inst ( )-> createItemListXML ( doc, BrickLink::XMLHint_WantedList, reinterpret_cast<const BrickLink::InvItemList *> ( &itemlist ), &extra ));
+		doc. appendChild ( BrickLink::inst ( )-> createItemListXML ( doc, BrickLink::XMLHint_WantedList, reinterpret_cast<const BrickLink::InvItemList *> ( &itemlist ), extra. isEmpty ( ) ? 0 : &extra ));
 
 		QApplication::clipboard ( )-> setText ( doc. toString ( ), QClipboard::Clipboard );
 

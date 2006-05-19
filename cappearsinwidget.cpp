@@ -23,6 +23,7 @@
 #include "cframework.h"
 #include "cresource.h"
 #include "cutility.h"
+#include "cpicturewidget.h"
 
 #include "cappearsinwidget.h"
 
@@ -161,7 +162,6 @@ public:
 	const BrickLink::Item * m_item;
 	const BrickLink::Color *m_color;
 	QPopupMenu *            m_popup;
-	QPtrList <QAction>      m_add_actions;
 	AppearsInToolTip *      m_tip;
 };
 
@@ -203,13 +203,6 @@ CAppearsInWidget::~CAppearsInWidget ( )
 	delete d;
 }
 
-void CAppearsInWidget::addActionsToContextMenu ( const QPtrList <QAction> &actions )
-{
-	d-> m_add_actions = actions;
-	delete d-> m_popup;
-	d-> m_popup = 0;
-}
-
 void CAppearsInWidget::showContextMenu ( QListViewItem *lvitem, const QPoint &pos )
 {
 	if ( d-> m_item && lvitem ) {
@@ -219,13 +212,12 @@ void CAppearsInWidget::showContextMenu ( QListViewItem *lvitem, const QPoint &po
 		if ( !d-> m_popup ) {
 			d-> m_popup = new QPopupMenu ( this );
 			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "edit_partoutitems" ), tr( "Part out Item..." ), this, SLOT( partOut ( )));
-
-			if ( !d-> m_add_actions. isEmpty ( )) {
-				d-> m_popup-> insertSeparator ( );
-
-				for ( QPtrListIterator <QAction> it ( d-> m_add_actions ); it. current ( ); ++it )
-					it. current ( )-> addTo ( d-> m_popup );
-			}
+			d-> m_popup-> insertSeparator ( );
+			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "viewmagp" ), tr( "View large image..." ), this, SLOT( viewLargeImage ( )));
+			d-> m_popup-> insertSeparator ( );
+			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "edit_bl_catalog" ), tr( "Show BrickLink Catalog Info..." ), this, SLOT( showBLCatalogInfo ( )));
+			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "edit_bl_priceguide" ), tr( "Show BrickLink Price Guide Info..." ), this, SLOT( showBLPriceGuideInfo ( )));
+			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "edit_bl_lotsforsale" ), tr( "Show Lots for Sale on BrickLink..." ), this, SLOT( showBLLotsForSale ( )));
 		}
 		d-> m_popup-> popup ( pos );
 	}
@@ -267,6 +259,48 @@ void CAppearsInWidget::setItem ( const BrickLink::Item *item, const BrickLink::C
 			}
 		}
 	}
+}
+
+void CAppearsInWidget::viewLargeImage ( )
+{
+	AppearsInListItem *item = static_cast <AppearsInListItem *> ( currentItem ( ));
+
+	if ( !item || !item-> item ( ))
+		return;
+
+	BrickLink::Picture *lpic = BrickLink::inst ( )-> largePicture ( item-> item ( ), true );
+
+	if ( lpic ) {
+		CLargePictureWidget *l = new CLargePictureWidget ( lpic, qApp-> mainWidget ( ));
+		l-> show ( );
+		l-> raise ( );
+		l-> setActiveWindow ( );
+		l-> setFocus ( );
+	}
+}
+
+void CAppearsInWidget::showBLCatalogInfo ( )
+{
+	AppearsInListItem *item = static_cast <AppearsInListItem *> ( currentItem ( ));
+
+	if ( item && item-> item ( ))
+		CUtility::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_CatalogInfo, item-> item ( )));
+}
+
+void CAppearsInWidget::showBLPriceGuideInfo ( )
+{
+	AppearsInListItem *item = static_cast <AppearsInListItem *> ( currentItem ( ));
+
+	if ( item && item-> item ( ))
+		CUtility::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_PriceGuideInfo, item-> item ( ), BrickLink::inst ( )-> color ( 0 )));
+}
+
+void CAppearsInWidget::showBLLotsForSale ( )
+{
+	AppearsInListItem *item = static_cast <AppearsInListItem *> ( currentItem ( ));
+
+	if ( item && item-> item ( ))
+		CUtility::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_LotsForSale, item-> item ( ), BrickLink::inst ( )-> color ( 0 )));
 }
 
 #include "cappearsinwidget.moc"

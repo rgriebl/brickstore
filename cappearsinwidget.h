@@ -30,12 +30,14 @@ public:
 	
 	void setItem ( const BrickLink::Item *item, const BrickLink::Color *color = 0 );
 
-	void addActionsToContextMenu ( const QPtrList <QAction> &actions );
-
 	virtual QSize minimumSizeHint ( ) const;
 	virtual QSize sizeHint ( ) const;
 
 protected slots:
+	void viewLargeImage ( );
+	void showBLCatalogInfo ( );
+	void showBLPriceGuideInfo ( );
+	void showBLLotsForSale ( );
 	void languageChange ( );
 
 private slots:

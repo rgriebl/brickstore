@@ -29,7 +29,6 @@ public:
 	QLabel *            m_plabel;
 	QLabel *            m_tlabel;
 	QPopupMenu *        m_popup;
-	QPtrList <QAction>  m_add_actions;
 	bool                m_connected;
 };
 
@@ -87,13 +86,6 @@ CPictureWidget::~CPictureWidget ( )
 	delete d;
 }
 
-void CPictureWidget::addActionsToContextMenu ( const QPtrList <QAction> &actions )
-{
-	d-> m_add_actions = actions;
-	delete d-> m_popup;
-	d-> m_popup = 0;
-}
-
 void CPictureWidget::mouseDoubleClickEvent ( QMouseEvent * )
 {
 	viewLargeImage ( );
@@ -107,13 +99,10 @@ void CPictureWidget::contextMenuEvent ( QContextMenuEvent *e )
 			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "reload" ), tr( "Update" ), this, SLOT( doUpdate ( )));
 			d-> m_popup-> insertSeparator ( );
 			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "viewmagp" ), tr( "View large image..." ), this, SLOT( viewLargeImage ( )));
-
-			if ( !d-> m_add_actions. isEmpty ( )) {
-				d-> m_popup-> insertSeparator ( );
-
-				for ( QPtrListIterator <QAction> it ( d-> m_add_actions ); it. current ( ); ++it )
-					it. current ( )-> addTo ( d-> m_popup );
-			}
+			d-> m_popup-> insertSeparator ( );
+			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "edit_bl_catalog" ), tr( "Show BrickLink Catalog Info..." ), this, SLOT( showBLCatalogInfo ( )));
+			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "edit_bl_priceguide" ), tr( "Show BrickLink Price Guide Info..." ), this, SLOT( showBLPriceGuideInfo ( )));
+			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "edit_bl_lotsforsale" ), tr( "Show Lots for Sale on BrickLink..." ), this, SLOT( showBLLotsForSale ( )));
 		}
 		d-> m_popup-> popup ( e-> globalPos ( ));
 	}
@@ -143,6 +132,24 @@ void CPictureWidget::viewLargeImage ( )
 		l-> setActiveWindow ( );
 		l-> setFocus ( );
 	}
+}
+
+void CPictureWidget::showBLCatalogInfo ( )
+{
+	if ( d-> m_pic && d-> m_pic-> item ( ))
+		CUtility::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_CatalogInfo, d-> m_pic-> item ( )));
+}
+
+void CPictureWidget::showBLPriceGuideInfo ( )
+{
+	if ( d-> m_pic && d-> m_pic-> item ( ) && d-> m_pic-> color ( ))
+		CUtility::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_PriceGuideInfo, d-> m_pic-> item ( ), d-> m_pic-> color ( )));
+}
+
+void CPictureWidget::showBLLotsForSale ( )
+{
+	if ( d-> m_pic && d-> m_pic-> item ( ) && d-> m_pic-> color ( ))
+		CUtility::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_LotsForSale, d-> m_pic-> item ( ), d-> m_pic-> color ( )));
 }
 
 void CPictureWidget::setPicture ( BrickLink::Picture *pic )

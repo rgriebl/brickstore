@@ -98,7 +98,6 @@ private:
 	bool                      m_connected;
 	QPopupMenu *              m_popup;
 	bool                      m_on_price;
-	QPtrList <QAction>        m_add_actions;
 
 	QString m_str_qty;
 	QString m_str_cond [BrickLink::ConditionCount];
@@ -164,13 +163,6 @@ CPriceGuideWidget::~CPriceGuideWidget ( )
 	delete d;
 }
 
-void CPriceGuideWidget::addActionsToContextMenu ( const QPtrList <QAction> &actions )
-{
-	d-> m_add_actions = actions;
-	delete d-> m_popup;
-	d-> m_popup = 0;
-}
-
 
 void CPriceGuideWidget::contextMenuEvent ( QContextMenuEvent *e )
 {
@@ -178,13 +170,10 @@ void CPriceGuideWidget::contextMenuEvent ( QContextMenuEvent *e )
 		if ( !d-> m_popup ) {
 			d-> m_popup = new QPopupMenu ( this );
 			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "reload" ), tr( "Update" ), this, SLOT( doUpdate ( )));
-
-			if ( !d-> m_add_actions. isEmpty ( )) {
-				d-> m_popup-> insertSeparator ( );
-
-				for ( QPtrListIterator <QAction> it ( d-> m_add_actions ); it. current ( ); ++it )
-					it. current ( )-> addTo ( d-> m_popup );
-			}
+			d-> m_popup-> insertSeparator ( );
+			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "edit_bl_catalog" ), tr( "Show BrickLink Catalog Info..." ), this, SLOT( showBLCatalogInfo ( )));
+			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "edit_bl_priceguide" ), tr( "Show BrickLink Price Guide Info..." ), this, SLOT( showBLPriceGuideInfo ( )));
+			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "edit_bl_lotsforsale" ), tr( "Show Lots for Sale on BrickLink..." ), this, SLOT( showBLLotsForSale ( )));
 		}
 		d-> m_popup-> popup ( e-> globalPos ( ));
 	}

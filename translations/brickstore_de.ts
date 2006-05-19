@@ -71,6 +71,26 @@
         <source>Qty.</source>
         <translation>Anz.</translation>
     </message>
+    <message>
+        <source>View large image...</source>
+        <translation>Zeige grosses Bild...</translation>
+    </message>
+    <message>
+        <source>Show BrickLink Catalog Info...</source>
+        <translation>BrickLink Kataloginformationen...</translation>
+    </message>
+    <message>
+        <source>Show BrickLink Price Guide Info...</source>
+        <translation>BrickLink Richtpreisinformationen...</translation>
+    </message>
+    <message>
+        <source>Lots for Sale on BrickLink...</source>
+        <translation type="obsolete">Verkaufsangebote auf BrickLink...</translation>
+    </message>
+    <message>
+        <source>Show Lots for Sale on BrickLink...</source>
+        <translation>Verkaufsangebote auf BrickLink...</translation>
+    </message>
 </context>
 <context>
     <name>CApplication</name>
@@ -1319,6 +1339,22 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
         <source>Double-click to view the large image.</source>
         <translation>Doppelklicken, um das grosse Bild anzuzeigen.</translation>
     </message>
+    <message>
+        <source>Show BrickLink Catalog Info...</source>
+        <translation>BrickLink Kataloginformationen...</translation>
+    </message>
+    <message>
+        <source>Show BrickLink Price Guide Info...</source>
+        <translation>BrickLink Richtpreisinformationen...</translation>
+    </message>
+    <message>
+        <source>Lots for Sale on BrickLink...</source>
+        <translation type="obsolete">Verkaufsangebote auf BrickLink...</translation>
+    </message>
+    <message>
+        <source>Show Lots for Sale on BrickLink...</source>
+        <translation>Verkaufsangebote auf BrickLink...</translation>
+    </message>
 </context>
 <context>
     <name>CPriceGuideWidget</name>
@@ -1417,6 +1453,22 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     <message>
         <source>Max.</source>
         <translation>Max.</translation>
+    </message>
+    <message>
+        <source>Show BrickLink Catalog Info...</source>
+        <translation>BrickLink Kataloginformationen...</translation>
+    </message>
+    <message>
+        <source>Show BrickLink Price Guide Info...</source>
+        <translation>BrickLink Richtpreisinformationen...</translation>
+    </message>
+    <message>
+        <source>Lots for Sale on BrickLink...</source>
+        <translation type="obsolete">Verkaufsangebote auf BrickLink...</translation>
+    </message>
+    <message>
+        <source>Show Lots for Sale on BrickLink...</source>
+        <translation>Verkaufsangebote auf BrickLink...</translation>
     </message>
 </context>
 <context>

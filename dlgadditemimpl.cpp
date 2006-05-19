@@ -198,8 +198,8 @@ void DlgAddItemImpl::setSimpleMode ( bool b )
 		w_tier_qty_0,
 		w_tier_qty_1,
 		w_tier_qty_2,
-		w_remarks,
-		w_remarks_label,
+		w_comments,
+		w_comments_label,
 
 		0
 	};
@@ -214,6 +214,7 @@ void DlgAddItemImpl::setSimpleMode ( bool b )
 	if ( b ) {
 		w_bulk-> setText ( "1" );
 		w_tier_qty [0]-> setText ( "0" );
+		w_comments-> setText ( QString ( )); 
 		checkTieredPrices ( );
 	}
 }
