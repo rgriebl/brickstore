@@ -206,8 +206,10 @@ CItemView::CItemView ( CDocument *doc, QWidget *parent, const char *name )
 		setColumnWidthMode ( cid, QListView::Manual );
 		setColumnWidth ( cid, 2 * itemMargin ( ) + 3 + ( width <= 0 ? -width : width * fontMetrics ( ). width ( "0" )));
 
-		if ( hidden )
-			hideColumn ( cid, ( hidden == 2 ));
+		if ( hidden == 1 )
+			setColumnVisible ( cid, false );
+		else if ( hidden == 2 )
+			setColumnAvailable ( cid, false );
 	}
 
 	loadDefaultLayout ( );
@@ -333,36 +335,19 @@ void CItemView::setSimpleMode ( bool b )
 {
 	d-> m_simple_mode = b;
 
-	if ( b ) {
-		hideColumn ( CDocument::Bulk, true );
-		hideColumn ( CDocument::Sale, true );
-		hideColumn ( CDocument::TierQ1, true );
-		hideColumn ( CDocument::TierQ2, true );
-		hideColumn ( CDocument::TierQ3, true );
-		hideColumn ( CDocument::TierP1, true );
-		hideColumn ( CDocument::TierP2, true );
-		hideColumn ( CDocument::TierP3, true );
-		hideColumn ( CDocument::Reserved, true );
-		hideColumn ( CDocument::Stockroom, true );
-		hideColumn ( CDocument::Retain, true );
-		hideColumn ( CDocument::LotId, true );
-		hideColumn ( CDocument::Comments, true );
-	}
-	else {
-		showColumn ( CDocument::Bulk );
-		showColumn ( CDocument::Sale );
-		showColumn ( CDocument::TierQ1 );
-		showColumn ( CDocument::TierQ2 );
-		showColumn ( CDocument::TierQ3 );
-		showColumn ( CDocument::TierP1 );
-		showColumn ( CDocument::TierP2 );
-		showColumn ( CDocument::TierP3 );
-		showColumn ( CDocument::Reserved );
-		showColumn ( CDocument::Stockroom );
-		showColumn ( CDocument::Retain );
-		showColumn ( CDocument::LotId );
-		showColumn ( CDocument::Comments );
-	}
+	setColumnAvailable ( CDocument::Bulk, !b );
+	setColumnAvailable ( CDocument::Sale, !b );
+	setColumnAvailable ( CDocument::TierQ1, !b );
+	setColumnAvailable ( CDocument::TierQ2, !b );
+	setColumnAvailable ( CDocument::TierQ3, !b );
+	setColumnAvailable ( CDocument::TierP1, !b );
+	setColumnAvailable ( CDocument::TierP2, !b );
+	setColumnAvailable ( CDocument::TierP3, !b );
+	setColumnAvailable ( CDocument::Reserved, !b );
+	setColumnAvailable ( CDocument::Stockroom, !b );
+	setColumnAvailable ( CDocument::Retain, !b );
+	setColumnAvailable ( CDocument::LotId, !b );
+	setColumnAvailable ( CDocument::Comments, !b );
 }
 
 bool CItemView::isDifferenceMode ( ) const
@@ -374,28 +359,27 @@ void CItemView::setDifferenceMode ( bool b )
 {
 	d-> m_diff_mode = b;
 
-	if ( b ) {
-		showColumn ( CDocument::QuantityDiff );
-		showColumn ( CDocument::QuantityOrig );
+	setColumnAvailable ( CDocument::PriceOrig, b );
+	setColumnAvailable ( CDocument::PriceDiff, b );
+	setColumnAvailable ( CDocument::QuantityOrig, b );
+	setColumnAvailable ( CDocument::QuantityDiff, b );
 
+	if ( b ) {
 		if ( isColumnVisible ( CDocument::Quantity )) {
+			showColumn ( CDocument::QuantityDiff );
+			showColumn ( CDocument::QuantityOrig );
+
 			header ( )-> moveSection ( CDocument::QuantityDiff, header ( )-> mapToIndex ( CDocument::Quantity ));
 			header ( )-> moveSection ( CDocument::QuantityOrig, header ( )-> mapToIndex ( CDocument::QuantityDiff ));
 		}
 
-		showColumn ( CDocument::PriceDiff );
-		showColumn ( CDocument::PriceOrig );
-		
 		if ( isColumnVisible ( CDocument::Price )) {
+			showColumn ( CDocument::PriceDiff );
+			showColumn ( CDocument::PriceOrig );
+		
 			header ( )-> moveSection ( CDocument::PriceDiff, header ( )-> mapToIndex ( CDocument::Price ));
 			header ( )-> moveSection ( CDocument::PriceOrig, header ( )-> mapToIndex ( CDocument::PriceDiff ));
 		}
-	}
-	else {
-		hideColumn ( CDocument::PriceOrig, true );
-		hideColumn ( CDocument::PriceDiff, true );
-		hideColumn ( CDocument::QuantityOrig, true );
-		hideColumn ( CDocument::QuantityDiff, true );
 	}
 }
 

@@ -222,8 +222,10 @@ QMap <QString, QString> CListView::saveSettings ( ) const
 	QStringList wl, hl, ol;
 
 	for ( int i = 0; i < columns ( ); i++ ) {
-		wl << QString::number ( columnWidth ( i ));
-		hl << QString::number ( m_col_width [i] );
+		const colinfo &ci = m_columns [i];
+		
+		wl << QString::number ( !ci. m_available && ci. m_visible ? ci. m_width : columnWidth ( i ));
+		hl << QString::number ( ci. m_width );
 		ol << QString::number ( head-> mapToIndex ( i ));
 	}
 
@@ -248,8 +250,11 @@ void CListView::loadSettings ( const QMap <QString, QString> &map )
 		sl = QStringList::split ( ',', *it, true );
 
 		int i = 0;
-		for ( QStringList::Iterator it = sl. begin ( ); it != sl. end ( ); ++it, i++ )
-			setColumnWidth ( i, ( *it ). toInt ( ));
+		for ( QStringList::Iterator it = sl. begin ( ); it != sl. end ( ); ++it, i++ ) {
+			int w = ( *it ). toInt ( );
+			setColumnWidth ( i, w );
+			m_columns [i]. m_visible = ( w != 0 );
+		}
 	}
 	
 	it = map. find ( "ColumnWidthsHidden" );
@@ -259,7 +264,7 @@ void CListView::loadSettings ( const QMap <QString, QString> &map )
 
 		int i = 0;
 		for ( QStringList::Iterator it = sl. begin ( ); it != sl. end ( ); ++it, i++ )
-			m_col_width [i] = ( *it ). toInt ( );
+			m_columns [i]. m_width = ( *it ). toInt ( );
 	}
 
 	it = map. find ( "ColumnOrder" );
@@ -304,44 +309,73 @@ bool CListView::isColumnVisible ( int i ) const
 
 void CListView::hideColumn ( int i )
 {
-	hideColumn ( i, false );
-}
-
-void CListView::hideColumn ( int i, bool completly )
-{
-	if ( i < columns ( )) {
-		if ( columnWidth ( i ) != 0 )
-			toggleColumn ( i );
-
-		if ( completly )
-			m_completly_hidden [i] = true;
-	}
+	setColumnVisible ( i, false );
 }
 
 void CListView::showColumn ( int i )
 {
-	if ( i < columns ( )) {
-		m_completly_hidden. remove ( i );
-
-		if ( columnWidth ( i ) == 0 )
-			toggleColumn ( i );
-	}
+	setColumnVisible ( i, true );
 }
 
 void CListView::toggleColumn ( int i )
 {
-	//qDebug ( "TC: %d (w: %d)", i, columnWidth ( i ));
-
+	setColumnVisible ( i, !isColumnVisible ( i ));
+}
+	
+void CListView::setColumnVisible ( int i, bool v )
+{
 	if ( i < columns ( )) {
-		if ( columnWidth ( i ) == 0 ) {
-			int w = m_col_width [i];
-			setColumnWidth ( i, w == 0 ? 30 : w );
+		if ( v != m_columns [i]. m_visible )
+			update_column ( i, true, false );
+	}
+}
+
+void CListView::setColumnAvailable ( int i, bool avail )
+{
+	if ( i < columns ( )) {
+		if ( avail != m_columns [i]. m_available )
+			update_column ( i, false, true );
+	}
+}
+
+void CListView::update_column ( int i, bool toggle_visible, bool toggle_available )
+{
+	if ( !toggle_visible && !toggle_available ) {
+		return;
+	}
+	else if ( toggle_visible && toggle_available ) {
+		update_column ( i, true, false );
+		update_column ( i, false, true );
+	}
+	else if ( i < columns ( )) {
+		colinfo &ci = m_columns [i];
+		int status = 0;
+
+		if ( toggle_available ) {
+			ci. m_available = !ci. m_available;
+
+			if ( ci. m_visible )
+				status = ci. m_available ? 1 : -1;
 		}
-		else {
-			m_col_width [i] = columnWidth ( i );
+		else if ( toggle_visible ) {
+			ci. m_visible = !ci. m_visible;
+
+			if ( ci. m_available )
+				status = ci. m_visible ? 1 : -1;
+		}
+
+		if (( status < 0 ) && columnWidth ( i )) { // hide
+			ci. m_width = columnWidth ( i );
 			setColumnWidth ( i, 0 );
 		}
-		triggerUpdate ( );
+		else if (( status > 0 ) && !columnWidth ( i )) { // show
+			int w = ci. m_width;
+			ci. m_width = 0;
+			setColumnWidth ( i, w == 0 ? 30 : w );
+		}
+
+		if ( status )
+			triggerUpdate ( );
 	}
 }
 
@@ -374,10 +408,10 @@ bool CListView::eventFilter ( QObject *o, QEvent *e )
 		m_header_popup-> insertSeparator ( );
 
 		for ( int i = 0; i < columns ( ); i++ ) {
-			if ( !m_completly_hidden. contains ( i )) {
+			if ( m_columns [i]. m_available ) {
 				m_header_popup-> insertItem ( columnText ( i ), this, SLOT( toggleColumn ( int )), 0, i );
 				m_header_popup-> setItemParameter ( i, i );
-				m_header_popup-> setItemChecked ( i, columnWidth ( i ) != 0 );
+				m_header_popup-> setItemChecked ( i, m_columns [i]. m_visible );
 			}
 		}
 
@@ -658,7 +692,7 @@ CListViewColumnsDialog::CListViewColumnsDialog ( CListView *parent )
 	for ( int i = 0; i < m_parent-> columns ( ); i++ ) {
 		int col = indices [i];
 
-		if ( !m_parent-> m_completly_hidden. contains ( col ))
+		if ( m_parent-> m_columns [col]. m_available )
 			(void) new ColListItem ( w_list, col, m_parent-> columnText ( col ), ( m_parent-> columnWidth ( col ) != 0 ));
 	}
 	QBoxLayout *horlay = new QHBoxLayout ( toplay );

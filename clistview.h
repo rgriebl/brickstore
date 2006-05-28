@@ -62,6 +62,8 @@ public:
 	int currentColumn ( ) const;
 	void setCurrentColumn ( int col );
 
+	void setColumnAvailable ( int, bool avail );
+
 protected:
 	virtual bool event ( QEvent *e );
 	virtual bool eventFilter ( QObject *o, QEvent *e );
@@ -70,9 +72,9 @@ protected:
 
 protected slots:
 	void hideColumn ( int );
-	void hideColumn ( int, bool completly );
 	void showColumn ( int );
 	void toggleColumn ( int );
+	void setColumnVisible ( int, bool visible );
 
 private slots:
 	void checkCurrentColumn ( int button, QListViewItem * item, const QPoint & pos, int c );
@@ -81,7 +83,8 @@ private slots:
 private:
 	void recalc_alternate_background ( );
 	void recalc_highlight_palette ( );
-
+	void update_column ( int, bool toggle_visible, bool toggle_available );
+	
 	QListViewItem *m_paint_above;
 	QListViewItem *m_paint_current;
 	QListViewItem *m_paint_below;
@@ -95,8 +98,16 @@ private:
 	int            m_current_column;
 
 	QPopupMenu *   m_header_popup;
-	QMap<int,int>  m_col_width;
-	QMap<int,bool> m_completly_hidden;
+	
+	struct colinfo {
+		bool m_visible   : 1;
+		bool m_available : 1;
+		uint m_width     : 30;
+
+		inline colinfo ( ) : m_visible ( true ), m_available ( true ), m_width ( 0 ) { }
+	};
+	
+	QMap<int, colinfo>  m_columns;
 
 	friend class CListViewItem;
 	friend class CListViewColumnsDialog;
