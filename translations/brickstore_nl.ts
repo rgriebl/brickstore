@@ -81,7 +81,7 @@
     </message>
     <message>
         <source>Show Lots for Sale on BrickLink...</source>
-        <translation>Toon lots te koop op BrickLink...</translation>
+        <translation>Toon kavels te koop op BrickLink...</translation>
     </message>
 </context>
 <context>
@@ -225,7 +225,7 @@
     </message>
     <message>
         <source>Invalid order number.</source>
-        <translation>Ongeldig bestelling nummer.</translation>
+        <translation type="obsolete">Ongeldig bestelling nummer.</translation>
     </message>
     <message>
         <source>Store %1</source>
@@ -297,7 +297,7 @@
     </message>
     <message>
         <source>This list contains items without a BrickLink Lot-ID.&lt;br /&gt;&lt;br /&gt;Do you really want to export this list?</source>
-        <translation>Deze lijst bevat items zonder een BrickLink lot-ID.&lt;br /&gt;&lt;br /&gt;Weet U zeker dat U deze lijst wilt exporteren?</translation>
+        <translation>Deze lijst bevat items zonder een BrickLink kavel-ID.&lt;br /&gt;&lt;br /&gt;Weet U zeker dat U deze lijst wilt exporteren?</translation>
     </message>
     <message>
         <source>Export File</source>
@@ -826,7 +826,7 @@
     </message>
     <message>
         <source>Show Lots for Sale on BrickLink...</source>
-        <translation>Toon lots te koop op BrickLink...</translation>
+        <translation>Toon kavels te koop op BrickLink...</translation>
     </message>
     <message>
         <source>Show in my Store on BrickLink...</source>
@@ -850,7 +850,7 @@
     </message>
     <message>
         <source>Lots</source>
-        <translation>Lots</translation>
+        <translation>Kavels</translation>
     </message>
     <message>
         <source>Items</source>
@@ -915,11 +915,11 @@
     </message>
     <message>
         <source>Could not parse the XML data for order #%1.</source>
-        <translation>De XML gegevens voor bestelling #%1 konden niet worden verwerkt.</translation>
+        <translation type="obsolete">De XML gegevens voor bestelling #%1 konden niet worden verwerkt.</translation>
     </message>
     <message>
         <source>Could not parse the XML data for order #%1:&lt;br /&gt;&lt;i&gt;Line %2, column %3: %4&lt;/i&gt;</source>
-        <translation>De XML gegevens voor bestelling #%1 konden niet worden verwerkt:&lt;br /&gt;&lt;i&gt;Regel %2, kolom %3: %4&lt;/i&gt;</translation>
+        <translation type="obsolete">De XML gegevens voor bestelling #%1 konden niet worden verwerkt:&lt;br /&gt;&lt;i&gt;Regel %2, kolom %3: %4&lt;/i&gt;</translation>
     </message>
 </context>
 <context>
@@ -1060,7 +1060,7 @@
     </message>
     <message>
         <source>Lot Id</source>
-        <translation>Lot id</translation>
+        <translation>Kavel id</translation>
     </message>
     <message>
         <source>Retain</source>
@@ -1222,7 +1222,7 @@
     </message>
     <message>
         <source>Show Lots for Sale on BrickLink...</source>
-        <translation>Toon lots te koop op BrickLink...</translation>
+        <translation>Toon kavels te koop op BrickLink...</translation>
     </message>
 </context>
 <context>
@@ -1313,7 +1313,7 @@
     </message>
     <message>
         <source>Show Lots for Sale on BrickLink...</source>
-        <translation>Toon lots te koop op BrickLink...</translation>
+        <translation>Toon kavels te koop op BrickLink...</translation>
     </message>
 </context>
 <context>
@@ -1467,11 +1467,11 @@
     </message>
     <message>
         <source>Multiple lots selected</source>
-        <translation>Meerdere lots geselecteerd</translation>
+        <translation>Meerdere kavels geselecteerd</translation>
     </message>
     <message>
         <source>Lots</source>
-        <translation>Lots</translation>
+        <translation>Kavels</translation>
     </message>
     <message>
         <source>Items</source>
@@ -1506,7 +1506,7 @@
     </message>
     <message>
         <source>Lots for Sale</source>
-        <translation>Lots te koop</translation>
+        <translation>Kavels te koop</translation>
     </message>
     <message>
         <source>Peeron</source>
@@ -1761,7 +1761,7 @@
     </message>
     <message>
         <source>The quantities of %1 lots are not divisible without remainder by %2.&lt;br /&gt;&lt;br /&gt;Nothing has been modified.</source>
-        <translation>De aantallen van %1 lots zijn niet deelbaar, zonder rest, door %2.&lt;br /&gt;&lt;br /&gt;Er is niets aangepast.</translation>
+        <translation>De aantallen van %1 kavels zijn niet deelbaar, zonder rest, door %2.&lt;br /&gt;&lt;br /&gt;Er is niets aangepast.</translation>
     </message>
     <message>
         <source>Quantity Divide by %1 on %2 Items</source>
@@ -2227,7 +2227,7 @@
     </message>
     <message>
         <source>Order &amp;number</source>
-        <translation>Bestelling &amp;nummer</translation>
+        <translation type="obsolete">Bestelling &amp;nummer</translation>
     </message>
     <message>
         <source>Order &amp;type</source>
@@ -2241,6 +2241,73 @@
         <source>&amp;Cancel</source>
         <translation>&amp;Annuleren</translation>
     </message>
+    <message>
+        <source>Order number</source>
+        <translation>Bestelling nummer</translation>
+    </message>
+    <message>
+        <source>Download o&amp;rder #</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Download an order bet&amp;ween</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>and</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Any</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Select the order you want to import</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt; &amp;Back</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;Next &gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>DlgLoadOrderImpl</name>
+    <message>
+        <source>Received</source>
+        <translation>Ontvangen</translation>
+    </message>
+    <message>
+        <source>Placed</source>
+        <translation>Geplaatst</translation>
+    </message>
+    <message>
+        <source>Type</source>
+        <translation>Type</translation>
+    </message>
+    <message>
+        <source>Order #</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Date</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Buyer/Seller</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Total</source>
+        <translation>Totaal</translation>
+    </message>
+    <message>
+        <source>There was a problem downloading the data for the specified order(s). This could have been caused by three things:&lt;ul&gt;&lt;li&gt;a network error occured.&lt;/li&gt;&lt;li&gt;the order number and/or type you entered is invalid.&lt;/li&gt;&lt;li&gt;there are no orders of the specified type in the given time period.&lt;/li&gt;&lt;/ul&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>DlgMerge</name>
@@ -2250,7 +2317,7 @@
     </message>
     <message>
         <source>Would you like to consolidate %1 %2 with the already existing lot, containing %3 items?</source>
-        <translation>Wilt U %1 %2 samenvoegen met het bestaande lot, dat %3 items bevat?</translation>
+        <translation>Wilt U %1 %2 samenvoegen met het bestaande kavel, dat %3 items bevat?</translation>
     </message>
     <message>
         <source>Preserve the attributes (e.g. remarks, tiered prices, ...) of the</source>
@@ -2258,15 +2325,15 @@
     </message>
     <message>
         <source>&amp;existing lot or the</source>
-        <translation>&amp;bestaande lot of het</translation>
+        <translation>&amp;bestaande kavel of het</translation>
     </message>
     <message>
         <source>ne&amp;w lot</source>
-        <translation>Nieu&amp;we lot</translation>
+        <translation>Nieu&amp;we kavel</translation>
     </message>
     <message>
         <source>&amp;Do the same for the remaining lots</source>
-        <translation>&amp;Doe hetzelfde voor de overige lots</translation>
+        <translation>&amp;Doe hetzelfde voor de overige kavels</translation>
     </message>
     <message>
         <source>&amp;Yes</source>

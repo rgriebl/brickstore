@@ -151,8 +151,16 @@ void CProgressDialog::setProgress ( int s, int t )
 {
 	m_progress-> setProgress ( s, t );
 
-	if ( m_message_progress )
-		m_message-> setText ( m_message_text. arg( s ). arg( t ));
+	if ( m_message_progress ) {
+		QString str = m_message_text. arg ( s );
+
+		if ( t )
+			str = str. arg ( t );
+		else
+			str = str. arg ( "?" );
+
+		m_message-> setText ( str );
+	}
 }
 
 void CProgressDialog::setProgressVisible ( bool b )

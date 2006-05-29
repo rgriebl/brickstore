@@ -277,7 +277,7 @@
     </message>
     <message>
         <source>Invalid order number.</source>
-        <translation>Numéro de commande non valide.</translation>
+        <translation type="obsolete">Numéro de commande non valide.</translation>
     </message>
     <message>
         <source>Store %1</source>
@@ -1047,11 +1047,11 @@
     </message>
     <message>
         <source>Could not parse the XML data for order #%1.</source>
-        <translation>N&apos;est pas arrivé à interpréter les données XML de la commande #%1.</translation>
+        <translation type="obsolete">N&apos;est pas arrivé à interpréter les données XML de la commande #%1.</translation>
     </message>
     <message>
         <source>Could not parse the XML data for order #%1:&lt;br /&gt;&lt;i&gt;Line %2, column %3: %4&lt;/i&gt;</source>
-        <translation>N&apos;est pas arrivé à interpréter les données XML pour la commande #%1 :&lt;br /&gt;&lt;i&gt;Ligne %2, colonne %3 : %4&lt;/i&gt;</translation>
+        <translation type="obsolete">N&apos;est pas arrivé à interpréter les données XML pour la commande #%1 :&lt;br /&gt;&lt;i&gt;Ligne %2, colonne %3 : %4&lt;/i&gt;</translation>
     </message>
 </context>
 <context>
@@ -2519,7 +2519,7 @@
     </message>
     <message>
         <source>Order &amp;number</source>
-        <translation>Commande &amp;numéro</translation>
+        <translation type="obsolete">Commande &amp;numéro</translation>
     </message>
     <message>
         <source>Order &amp;type</source>
@@ -2535,6 +2535,73 @@
     </message>
     <message>
         <source>Import BrickLink Order</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Order number</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Download o&amp;rder #</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Download an order bet&amp;ween</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>and</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Any</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Select the order you want to import</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt; &amp;Back</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;Next &gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>DlgLoadOrderImpl</name>
+    <message>
+        <source>Received</source>
+        <translation type="unfinished">Reçue</translation>
+    </message>
+    <message>
+        <source>Placed</source>
+        <translation type="unfinished">Placée</translation>
+    </message>
+    <message>
+        <source>Type</source>
+        <translation type="unfinished">Type</translation>
+    </message>
+    <message>
+        <source>Order #</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Date</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Buyer/Seller</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Total</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>There was a problem downloading the data for the specified order(s). This could have been caused by three things:&lt;ul&gt;&lt;li&gt;a network error occured.&lt;/li&gt;&lt;li&gt;the order number and/or type you entered is invalid.&lt;/li&gt;&lt;li&gt;there are no orders of the specified type in the given time period.&lt;/li&gt;&lt;/ul&gt;</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

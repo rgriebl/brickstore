@@ -25,11 +25,18 @@ public:
     DlgLoadOrderImpl ( QWidget *parent = 0, const char * name = 0, bool modal = true );
     ~DlgLoadOrderImpl ( );
 
-	QString orderId ( ) const;
-	BrickLink::Order::Type orderType ( ) const;
+	QPair<BrickLink::Order *, BrickLink::InvItemList *> order ( ) const;
 
 protected slots:
 	void checkId ( );
+	void checkSelected ( );
+	void activateItem ( QListViewItem * );
+
+	void start ( );
+	void download ( );
+
+private:
+	BrickLink::Order::Type DlgLoadOrderImpl::orderType ( ) const;
 };
 
 #endif

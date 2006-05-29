@@ -254,7 +254,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
     <message>
         <source>Invalid order number.</source>
-        <translation>Ungültige Bestellnummer.</translation>
+        <translation type="obsolete">Ungültige Bestellnummer.</translation>
     </message>
     <message>
         <source>Store %1</source>
@@ -1034,7 +1034,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     <name>CImportBLOrder</name>
     <message>
         <source>Importing BrickLink Order</source>
-        <translation>BrickLink Bestellung wir importiert</translation>
+        <translation>BrickLink Bestellung wird importiert</translation>
     </message>
     <message>
         <source>Download: %1/%2 KB</source>
@@ -1042,11 +1042,11 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
     <message>
         <source>Could not parse the XML data for order #%1.</source>
-        <translation>Konnte XML Daten von Bestellung #%1 nicht verarbeiten.</translation>
+        <translation type="obsolete">Konnte XML Daten von Bestellung #%1 nicht verarbeiten.</translation>
     </message>
     <message>
         <source>Could not parse the XML data for order #%1:&lt;br /&gt;&lt;i&gt;Line %2, column %3: %4&lt;/i&gt;</source>
-        <translation>Konnte XML Daten von Bestellung #%1  nicht verarbeiten:&lt;br /&gt;&lt;i&gt;Zeile %2, Spalte %3: %4&lt;/i&gt;</translation>
+        <translation type="obsolete">Konnte XML Daten von Bestellung #%1  nicht verarbeiten:&lt;br /&gt;&lt;i&gt;Zeile %2, Spalte %3: %4&lt;/i&gt;</translation>
     </message>
 </context>
 <context>
@@ -2445,7 +2445,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
     <message>
         <source>Order &amp;number</source>
-        <translation>Bestell&amp;nummer</translation>
+        <translation type="obsolete">Bestell&amp;nummer</translation>
     </message>
     <message>
         <source>Order &amp;type</source>
@@ -2462,6 +2462,73 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     <message>
         <source>Import BrickLink Order</source>
         <translation>BrickLink Bestellung importieren</translation>
+    </message>
+    <message>
+        <source>Order number</source>
+        <translation>Bestellnummer</translation>
+    </message>
+    <message>
+        <source>Download o&amp;rder #</source>
+        <translation>Download der &amp;Bestellnummer</translation>
+    </message>
+    <message>
+        <source>Download an order bet&amp;ween</source>
+        <translation>Download &amp;einer Bestellung zwischen dem</translation>
+    </message>
+    <message>
+        <source>and</source>
+        <translation>und dem</translation>
+    </message>
+    <message>
+        <source>Any</source>
+        <translation>Beliebig</translation>
+    </message>
+    <message>
+        <source>Select the order you want to import</source>
+        <translation>Wählen Sie die zu importierende Bestellung</translation>
+    </message>
+    <message>
+        <source>&lt; &amp;Back</source>
+        <translation>&lt; &amp;Zurück</translation>
+    </message>
+    <message>
+        <source>&amp;Next &gt;</source>
+        <translation>&amp;Weiter &gt;</translation>
+    </message>
+</context>
+<context>
+    <name>DlgLoadOrderImpl</name>
+    <message>
+        <source>Received</source>
+        <translation>Erhalten</translation>
+    </message>
+    <message>
+        <source>Placed</source>
+        <translation>Getätigt</translation>
+    </message>
+    <message>
+        <source>Type</source>
+        <translation>Typ</translation>
+    </message>
+    <message>
+        <source>Order #</source>
+        <translation>Bestellnr.</translation>
+    </message>
+    <message>
+        <source>Date</source>
+        <translation>Datum</translation>
+    </message>
+    <message>
+        <source>Buyer/Seller</source>
+        <translation>Käufer/Verkäufer</translation>
+    </message>
+    <message>
+        <source>Total</source>
+        <translation>Betrag</translation>
+    </message>
+    <message>
+        <source>There was a problem downloading the data for the specified order(s). This could have been caused by three things:&lt;ul&gt;&lt;li&gt;a network error occured.&lt;/li&gt;&lt;li&gt;the order number and/or type you entered is invalid.&lt;/li&gt;&lt;li&gt;there are no orders of the specified type in the given time period.&lt;/li&gt;&lt;/ul&gt;</source>
+        <translation>Es gab ein Problem beim Download der Bestelldaten. Dafür gibt es drei Gründe:&lt;ul&gt;&lt;li&gt;Es gab ein Netzwerkproblem.&lt;/li&gt;&lt;li&gt;Die eingegebene Bestellnummer und/oder Bestelltyp sind ungültig.&lt;/li&gt;&lt;li&gt;Es gibt keine Bestellungen des gewählten Typs im angegebenen Zeitraum.&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
 </context>
 <context>

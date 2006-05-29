@@ -407,7 +407,7 @@ public:
 
 	class Order {
 	public:
-		enum Type { Received, Placed };
+		enum Type { Received, Placed, Any };
 
 		Order ( const QString &id, Type type );
 
@@ -415,7 +415,8 @@ public:
 		Type type ( ) const         { return m_type; }
 		QDateTime date ( ) const    { return m_date; }
 		QDateTime statusChange ( ) const  { return m_status_change; }
-		QString buyer ( ) const     { return m_buyer; }
+		QString buyer ( ) const     { return m_type == Received ? m_other : QString ( ); }
+		QString seller ( ) const    { return m_type == Placed ? m_other : QString ( ); }
 		money_t shipping ( ) const  { return m_shipping; }
 		money_t insurance ( ) const { return m_insurance; }
 		money_t delivery ( ) const  { return m_delivery; }
@@ -425,9 +426,11 @@ public:
 		QString payment ( ) const   { return m_payment; }
 		QString remarks ( ) const   { return m_remarks; }
 
+		void setId ( const QString &id )             { m_id = id; }
 		void setDate ( const QDateTime &dt )         { m_date = dt; }
 		void setStatusChange ( const QDateTime &dt ) { m_status_change = dt; }
-		void setBuyer ( const QString &str )         { m_buyer = str; }
+		void setBuyer ( const QString &str )         { m_other = str; m_type = Received; }
+		void setSeller ( const QString &str )        { m_other = str; m_type = Placed; }
 		void setShipping ( const money_t &m )        { m_shipping = m; }
 		void setInsurance ( const money_t &m )       { m_insurance = m; }
 		void setDelivery ( const money_t &m )        { m_delivery = m; }
@@ -442,7 +445,7 @@ public:
 		Type      m_type;
 		QDateTime m_date;
 		QDateTime m_status_change;
-		QString   m_buyer;
+		QString   m_other;
 		money_t   m_shipping;
 		money_t   m_insurance;
 		money_t   m_delivery;

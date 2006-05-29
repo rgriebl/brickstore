@@ -507,24 +507,16 @@ CDocument *CDocument::fileImportBrickLinkOrder ( )
 	DlgLoadOrderImpl dlg ( CFrameWork::inst ( ));
 
 	if ( dlg. exec ( ) == QDialog::Accepted ) {
-		QString id = dlg. orderId ( );
-		BrickLink::Order::Type type = dlg. orderType ( );
+		QPair<BrickLink::Order *, BrickLink::InvItemList *> order = dlg. order ( );
 
-		if ( id. length ( ) == 6 ) {
-			CProgressDialog d ( CFrameWork::inst ( ));
-			CImportBLOrder import ( id, type, &d );
+		if ( order. first && order. second ) {
+			CDocument *doc = new CDocument ( );
 
-			if ( d. exec ( ) == QDialog::Accepted ) {
-				CDocument *doc = new CDocument ( );
-
-				doc-> setTitle ( tr( "Order #%1" ). arg ( id ));
-				doc-> setBrickLinkItems ( import. items ( ));	
-				doc-> m_order = import. order ( );
-				return doc;
-			}
+			doc-> setTitle ( tr( "Order #%1" ). arg ( order. first-> id ( )));
+			doc-> setBrickLinkItems ( *order. second );	
+			doc-> m_order = new BrickLink::Order ( *order. first );
+			return doc;
 		}
-		else
-			CMessageBox::warning ( CFrameWork::inst ( ), tr( "Invalid order number." ));
 	}
 	return 0;
 }

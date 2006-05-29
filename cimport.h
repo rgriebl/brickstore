@@ -16,6 +16,7 @@
 
 #include <qfile.h>
 #include <qbuffer.h>
+#include <qdatetime.h>
 
 #include "lzmadec.h"
 
@@ -47,7 +48,7 @@ public:
 		      << CKeyValue ( "viewType",      "x" )    // XML 
 		      << CKeyValue ( "invStock",      "Y" )   
 		      << CKeyValue ( "invStockOnly",  "" )
-			  << CKeyValue ( "invQty",        "" )
+		      << CKeyValue ( "invQty",        "" )
 		      << CKeyValue ( "invQtyMin",     "0" )
 		      << CKeyValue ( "invQtyMax",     "0" )
 		      << CKeyValue ( "invBrikTrak",   "" )
@@ -118,49 +119,60 @@ class CImportBLOrder : public QObject {
 	Q_OBJECT
 
 public:
+	CImportBLOrder ( const QDate &from, const QDate &to, BrickLink::Order::Type type, CProgressDialog *pd )
+		: m_progress ( pd ), m_order_from ( from ), m_order_to ( to ), m_order_type ( type )
+	{
+		init ( );
+	}
+
 	CImportBLOrder ( const QString &order, BrickLink::Order::Type type, CProgressDialog *pd )
-		: m_progress ( pd ), m_order_id ( order ), m_order_type ( type ), m_order ( 0 )
+		: m_progress ( pd ), m_order_id ( order ), m_order_type ( type )
 	{
-		connect ( pd, SIGNAL( transferFinished ( )), this, SLOT( gotten ( )));
-
-		pd-> setHeaderText ( tr( "Importing BrickLink Order" ));
-		pd-> setMessageText ( tr( "Download: %1/%2 KB" ));
-		
-		const char *url = "http://www.bricklink.com/orderExcelFinal.asp";
-
-		CKeyValueList query;
-		query << CKeyValue ( "action",        "save" )
-		      << CKeyValue ( "orderID",       order )
-			  << CKeyValue ( "orderType",     type == BrickLink::Order::Placed ? "placed" : "received" )
-		      << CKeyValue ( "viewType",      "X" )    // XML
-		      << CKeyValue ( "getDateFormat", "1" )    // YYYY/MM/DD
-		      << CKeyValue ( "getOrders",     "" )     // regardless of date
-		      << CKeyValue ( "fDD",           "1" )
-		      << CKeyValue ( "fMM",           "1" )
-		      << CKeyValue ( "fYY",           "2005" )
-		      << CKeyValue ( "tDD",           "2" )
-		      << CKeyValue ( "tMM",           "1" )
-		      << CKeyValue ( "tYY",           "2005" )
-		      << CKeyValue ( "getDetail",     "y" )    // get items (that's why we do this in the first place...)
-		      << CKeyValue ( "getFiled",      "Y" )    // regardless of filed state
-		      << CKeyValue ( "getStatus",     "" )     // regardless of status
-		      << CKeyValue ( "statusID",      "" )
-		      << CKeyValue ( "frmUsername",   CConfig::inst ( )-> blLoginUsername ( ))
-		      << CKeyValue ( "frmPassword",   CConfig::inst ( )-> blLoginPassword ( ));
-		
-		pd-> post ( url, query, 0 );
-
-		pd-> layout ( );
+		init ( );
 	}
 
-	const BrickLink::InvItemList &items ( ) const 
+	void CImportBLOrder::init ( )
 	{
-		return m_items;
+		m_retry_placed = ( m_order_type == BrickLink::Order::Any );
+
+		if ( !m_order_id. isEmpty ( )) {
+			m_order_to = QDate::currentDate ( );
+			m_order_from = m_order_to. addDays ( -1 );
+		}
+
+		connect ( m_progress, SIGNAL( transferFinished ( )), this, SLOT( gotten ( )));
+
+		m_progress-> setHeaderText ( tr( "Importing BrickLink Order" ));
+		m_progress-> setMessageText ( tr( "Download: %1/%2 KB" ));
+		
+		m_url = "http://www.bricklink.com/orderExcelFinal.asp";
+
+		m_query << CKeyValue ( "orderType",     m_order_type == BrickLink::Order::Placed ? "placed" : "received" )
+		        << CKeyValue ( "action",        "save" )
+		        << CKeyValue ( "orderID",       m_order_id )
+		        << CKeyValue ( "viewType",      "X" )    // XML
+		        << CKeyValue ( "getDateFormat", "1" )    // YYYY/MM/DD
+		        << CKeyValue ( "getOrders",     m_order_id. isEmpty ( ) ? "date" : "" )
+		        << CKeyValue ( "fDD",           QString::number ( m_order_from. day ( )))
+		        << CKeyValue ( "fMM",           QString::number ( m_order_from. month ( )))
+		        << CKeyValue ( "fYY",           QString::number ( m_order_from. year ( )))
+		        << CKeyValue ( "tDD",           QString::number ( m_order_to. day ( )))
+		        << CKeyValue ( "tMM",           QString::number ( m_order_to. month ( )))
+		        << CKeyValue ( "tYY",           QString::number ( m_order_to. year ( )))
+		        << CKeyValue ( "getDetail",     "y" )    // get items (that's why we do this in the first place...)
+		        << CKeyValue ( "getFiled",      "Y" )    // regardless of filed state
+		        << CKeyValue ( "getStatus",     "" )     // regardless of status
+		        << CKeyValue ( "statusID",      "" )
+		        << CKeyValue ( "frmUsername",   CConfig::inst ( )-> blLoginUsername ( ))
+		        << CKeyValue ( "frmPassword",   CConfig::inst ( )-> blLoginPassword ( ));
+
+		m_progress-> post ( m_url, m_query, 0 );
+		m_progress-> layout ( );
 	}
 
-	BrickLink::Order *order ( ) const
+	const QValueList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > &orders ( ) const 
 	{
-		return m_order;
+		return m_orders;
 	}
 
 
@@ -170,6 +182,8 @@ private slots:
 		CTransfer::Job *j = m_progress-> job ( );
 		QByteArray *data = j-> data ( );
 		bool ok = false;
+		QString error;
+
 
 		if ( data && data-> size ( )) {
 			QBuffer order_buffer ( *data );
@@ -184,55 +198,77 @@ private slots:
 
 					BrickLink::InvItemList *items = 0;
 
-					if (( root. nodeName ( ) == "ORDERS" ) && ( root. firstChild ( ). nodeName ( ) == "ORDER" ))
-						items = BrickLink::inst ( )-> parseItemListXML ( root. firstChild ( ). toElement ( ), BrickLink::XMLHint_Order /*, &invalid_items*/ );
-
-					if ( items ) {
-						m_items += *items;
-						delete items;
-						ok = true;
-
-						m_order = new BrickLink::Order ( m_order_id, m_order_type );
-
-						for ( QDomNode node = root. firstChild ( ). firstChild ( ); !node. isNull ( ); node = node. nextSibling ( )) {
-							if ( !node. isElement ( ))
+					if (( root. nodeName ( ) == "ORDERS" ) && ( root. firstChild ( ). nodeName ( ) == "ORDER" )) {
+						for ( QDomNode ordernode = root. firstChild ( ); !ordernode. isNull ( ); ordernode = ordernode. nextSibling ( )) {
+							if ( !ordernode. isElement ( ))
 								continue;
 
-							QString tag = node. toElement ( ). tagName ( );
-							QString val = node. toElement ( ). text ( );
+							items = BrickLink::inst ( )-> parseItemListXML ( ordernode. toElement ( ), BrickLink::XMLHint_Order /*, &invalid_items*/ );
 
-							if ( tag == "ORDERDATE" )
-								m_order-> setDate ( ymd2date ( val ));
-							else if ( tag == "ORDERSTATUSCHANGED" )
-								m_order-> setStatusChange ( ymd2date ( val ));
-							else if ( tag == "BUYER" )
-								m_order-> setBuyer ( val );
-							else if ( tag == "ORDERSHIPPING" )
-								m_order-> setShipping ( money_t::fromCString ( val ));
-							else if ( tag == "ORDERINSURANCE" )
-								m_order-> setInsurance ( money_t::fromCString ( val ));
-							else if ( tag == "ORDERDELIVERY" )
-								m_order-> setDelivery ( money_t::fromCString ( val ));
-							else if ( tag == "ORDERCREDIT" )
-								m_order-> setCredit ( money_t::fromCString ( val ));
-							else if ( tag == "GRANDTOTAL" )
-								m_order-> setGrandTotal ( money_t::fromCString ( val ));
-							else if ( tag == "ORDERSTATUS" )
-								m_order-> setStatus ( val );
-							else if ( tag == "PAYMENTTYPE" )
-								m_order-> setPayment ( val );
-							else if ( tag == "ORDERREMARKS" )
-								m_order-> setRemarks ( val );
+							if ( items ) {
+								BrickLink::Order *order = new BrickLink::Order ( "", BrickLink::Order::Placed );
+
+								for ( QDomNode node = ordernode. firstChild ( ); !node. isNull ( ); node = node. nextSibling ( )) {
+									if ( !node. isElement ( ))
+										continue;
+
+									QString tag = node. toElement ( ). tagName ( );
+									QString val = node. toElement ( ). text ( );
+
+									if ( tag == "BUYER" )
+										order-> setBuyer ( val );
+									else if ( tag == "SELLER" )
+										order-> setSeller ( val );
+									else if ( tag == "ORDERID" )
+										order-> setId ( val );
+									else if ( tag == "ORDERDATE" )
+										order-> setDate ( ymd2date ( val ));
+									else if ( tag == "ORDERSTATUSCHANGED" )
+										order-> setStatusChange ( ymd2date ( val ));
+									else if ( tag == "ORDERSHIPPING" )
+										order-> setShipping ( money_t::fromCString ( val ));
+									else if ( tag == "ORDERINSURANCE" )
+										order-> setInsurance ( money_t::fromCString ( val ));
+									else if ( tag == "ORDERDELIVERY" )
+										order-> setDelivery ( money_t::fromCString ( val ));
+									else if ( tag == "ORDERCREDIT" )
+										order-> setCredit ( money_t::fromCString ( val ));
+									else if ( tag == "GRANDTOTAL" )
+										order-> setGrandTotal ( money_t::fromCString ( val ));
+									else if ( tag == "ORDERSTATUS" )
+										order-> setStatus ( val );
+									else if ( tag == "PAYMENTTYPE" )
+										order-> setPayment ( val );
+									else if ( tag == "ORDERREMARKS" )
+										order-> setRemarks ( val );
+								}
+
+								if ( !order-> id ( ). isEmpty ( )) {
+									m_orders << qMakePair ( order, items );
+									ok = true;
+								}
+								else {
+									delete items;
+								}
+							}
 						}
 					}
-					else
-						m_progress-> setErrorText ( tr( "Could not parse the XML data for order #%1." ). arg ( m_order_id ));
 				}
-				else
-					m_progress-> setErrorText ( tr( "Could not parse the XML data for order #%1:<br /><i>Line %2, column %3: %4</i>" ). arg ( m_order_id ). arg ( eline ). arg ( ecol ). arg ( emsg ));
 			}
 		}
-		m_progress-> setFinished ( ok );
+
+
+		if ( m_retry_placed ) {
+			m_query [0]. second = "placed";
+
+			m_progress-> post ( m_url, m_query, 0 );
+			m_progress-> layout ( );
+
+			m_retry_placed = false;
+		}
+		else {
+			m_progress-> setFinished ( true );
+		}
 	}
 
 private:
@@ -245,16 +281,16 @@ private:
 	}
 
 private:
-	CProgressDialog *m_progress;
-	QString m_order_id;
+	CProgressDialog *      m_progress;
+	QString                m_order_id;
 	BrickLink::Order::Type m_order_type;
-	BrickLink::InvItemList m_items;
-	BrickLink::Order *m_order;
+	QDate                  m_order_from;
+	QDate                  m_order_to;
+	QCString               m_url;
+	CKeyValueList          m_query;
+	bool                   m_retry_placed;
+	QValueList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > m_orders;
 };
-
-
-
-
 
 
 
