@@ -283,9 +283,9 @@ private:
 private:
 	CProgressDialog *      m_progress;
 	QString                m_order_id;
-	BrickLink::Order::Type m_order_type;
 	QDate                  m_order_from;
 	QDate                  m_order_to;
+	BrickLink::Order::Type m_order_type;
 	QCString               m_url;
 	CKeyValueList          m_query;
 	bool                   m_retry_placed;
