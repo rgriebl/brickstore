@@ -99,10 +99,14 @@ bool CConfig::checkRegistrationKey ( const QString &name, const QString &key )
 #else
 	if ( name. isEmpty ( ) || key. isEmpty ( ))
 		return false;
-		
-	QString tmp = QString( BS_REGKEY ) + name;
-	QByteArray sha1 = sha1::calc ((const char *) tmp. ucs2 ( ), tmp. length ( ) * 2 );
-	
+
+	QByteArray src;
+	QDataStream ss ( src, IO_WriteOnly );
+	ss. setByteOrder ( QDataStream::LittleEndian );
+	ss << ( QString( BS_REGKEY ) + name );
+
+	QByteArray sha1 = sha1::calc ( src. data ( ) + 4, src. size ( ) - 4 );
+
 	if ( sha1. count ( ) < 8 )
 		return false;
 	

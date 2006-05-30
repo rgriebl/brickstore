@@ -27,7 +27,9 @@ if [ -z $pkg_ver ]; then
 fi
 
 bundle="BrickStore.app"
-archive="BrickStore-`uname -m`-$pkg_ver"
+arch=`uname -p`
+[ "$arch" = "i386" ] && arch="intel" 
+archive="BrickStore-$arch-$pkg_ver"
 
 tmpdir="macx-bundle/$pkg_ver/tmp"
 
@@ -59,7 +61,7 @@ perl -pi -e "s/%\{version\}/$pkg_ver/g" "$tmpdir/$bundle/Contents/Info.plist"
 echo " > Stripping binaries in bundle..."
 strip -Sx $tmpdir/$bundle/Contents/MacOS/*
 
-if [ `uname -m` = i386 ]; then
+if [ "$arch" = "intel" ]; then
   compression="-format UDBZ"
   comptype="BZ"
 else

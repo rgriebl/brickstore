@@ -11,9 +11,13 @@ QString generateKey ( const QString &name, const QString &privkey )
 	if ( name. isEmpty ( ))
 		return QString ( );
 		
-	QString tmp = privkey + name;
-	QByteArray sha1 = sha1::calc ((const char *) tmp. ucs2 ( ), tmp. length ( ) * 2 );
-	
+	QByteArray src;
+	QDataStream ss ( src, IO_WriteOnly );
+	ss. setByteOrder ( QDataStream::LittleEndian );
+	ss << ( privkey + name );
+
+	QByteArray sha1 = sha1::calc ( src. data ( ) + 4, src. size ( ) - 4 );
+
 	if ( sha1. count ( ) < 8 )
 		return QString ( );
 	
