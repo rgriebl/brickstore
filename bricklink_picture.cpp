@@ -47,9 +47,9 @@ BrickLink::Picture *BrickLink::picture ( const Item *item, const BrickLink::Colo
 
 	QCString key;
 	if ( color )
-		key. sprintf ( "%c@%s@%d", item-> itemType ( )-> pictureId ( ), item-> id ( ), color-> id ( ));
+		key. sprintf ( "%c@%d@%d", item-> itemType ( )-> pictureId ( ), item-> index ( ), color-> id ( ));
 	else
-		key. sprintf ( "%c@%s", item-> itemType ( )-> pictureId ( ), item-> id ( ));
+		key. sprintf ( "%c@%d", item-> itemType ( )-> pictureId ( ), item-> index ( ));
 		
 	Picture *pic = m_pictures. cache [key];
 	bool need_to_load = false;

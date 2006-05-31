@@ -171,6 +171,8 @@ public:
 		AppearsInMap appearsIn ( const Color *color = 0 ) const;
 		InvItemList  consistsOf ( ) const;
 
+		uint index ( ) const { return m_index; } // only for internal use (picture/priceguide hashes)
+
 	private:
 		char *            m_id;
 		char *            m_name;

@@ -84,7 +84,7 @@ BrickLink::PriceGuide *BrickLink::priceGuide ( const BrickLink::Item *item, cons
 		return 0;
 
 	QCString key;
-	key. sprintf ( "%c@%s@%d", item-> itemType ( )-> id ( ), item-> id ( ), color-> id ( ));
+	key. sprintf ( "%c@%d@%d", item-> itemType ( )-> id ( ), item-> index ( ), color-> id ( ));
 
 	//qDebug ( "PG requested for %s", key. data ( ));
 
