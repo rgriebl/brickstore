@@ -58,6 +58,9 @@ tar -xjf "../brickstore-$pkg_ver.tar.bz2" -C tmp
 tmpdir="tmp/brickstore-$pkg_ver"
 cd "$tmpdir"
 
+cp -a ../../../qsa .
+[ -f ../../../.private-key ] && cp ../../../.private-key .
+
 
 ## -----------------------------------------------------
 
