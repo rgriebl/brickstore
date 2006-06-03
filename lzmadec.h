@@ -138,7 +138,7 @@ typedef struct {
 	uint_fast64_t uncompressed_size;
 	uint_fast32_t dictionary_size;
 	uint_fast32_t internal_data_size;
-	uint_fast8_t is_streamed;
+	int_fast8_t  is_streamed;
 	uint_fast8_t pb;
 	uint_fast8_t lp;
 	uint_fast8_t lc;
