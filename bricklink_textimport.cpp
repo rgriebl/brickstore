@@ -329,7 +329,7 @@ bool BrickLink::TextImport::readDB_processLine ( btinvlist_dummy & /*dummy*/, ui
 	const BrickLink::Item *itm = findItem ( strs [0][0], strs [1] );
 
 	if ( itm ) {
-		time_t t = time_t ( -1 );
+		time_t t = time_t ( 0 ); // 1.1.1970 00:00
 
 		if ( strs [2][0] ) {
 			char ampm;
