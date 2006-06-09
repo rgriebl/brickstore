@@ -379,6 +379,14 @@
         <source>Reset differences</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Enter the URL of your current BrickLink shopping cart:&lt;br /&gt;&lt;br /&gt;Right-click on the &lt;b&gt;View Cart&lt;/b&gt; button in your browser and copy the URL to the clipboard by choosing &lt;b&gt;Copy Link Location&lt;/b&gt; (Firefox), &lt;b&gt;Copy Link&lt;/b&gt; (Safari) or &lt;b&gt;Copy Shortcut&lt;/b&gt; (Internet Explorer).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Your Shopping Cart</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>CFrameWork</name>
@@ -1032,6 +1040,29 @@
     </message>
     <message>
         <source>Do you want to cancel all outstanding inventory, image and Price Guide transfers?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>BrickLink Shopping Cart...</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>CImportBLCart</name>
+    <message>
+        <source>Importing BrickLink Shopping Cart</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Download: %1/%2 KB</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1 lots of your Shopping Cart could not be imported.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not parse the Shopping Cart contents.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

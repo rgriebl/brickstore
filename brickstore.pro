@@ -1,4 +1,4 @@
-## Copyright (C) 2004-2005 Robert Griebl.  All rights reserved.
+## Copyright (C) 2004-2006 Robert Griebl.  All rights reserved.
 ##
 ## This file is part of BrickStore.
 ##
@@ -12,7 +12,7 @@
 ## See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 
 isEmpty( RELEASE ) {
-  RELEASE    = 1.1.3
+  RELEASE    = 1.1.4
 }
 
 TEMPLATE     = app

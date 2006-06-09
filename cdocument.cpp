@@ -19,6 +19,7 @@
 #include <qclipboard.h>
 #include <qprinter.h>
 #include <qpainter.h>
+#include <qregexp.h>
 
 #include "cundo.h"
 #include "cutility.h"
@@ -532,6 +533,36 @@ CDocument *CDocument::fileImportBrickLinkStore ( )
 		doc-> setTitle ( tr( "Store %1" ). arg ( QDate::currentDate ( ). toString ( Qt::LocalDate )));
 		doc-> setBrickLinkItems ( import. items ( ));	
 		return doc;
+	}
+	return 0;
+}
+
+CDocument *CDocument::fileImportBrickLinkCart ( )
+{
+	QString url = "http://www.bricklink.com/storeCart.asp?h=______&b=______";
+	
+	if ( CMessageBox::getString ( CFrameWork::inst ( ), tr( "Enter the URL of your current BrickLink shopping cart:"
+		                                                    "<br /><br />Right-click on the <b>View Cart</b> button "
+														    "in your browser and copy the URL to the clipboard by choosing "
+															"<b>Copy Link Location</b> (Firefox), <b>Copy Link</b> (Safari) "
+															"or <b>Copy Shortcut</b> (Internet Explorer)." ), url )) {
+		QRegExp rx ( "\\?h=([0-9]+)&b=([0-9]+)" );
+		rx. search ( url );
+		int hparam = rx. cap ( 1 ). toInt ( );
+		int bparam = rx. cap ( 2 ). toInt ( );
+
+		if ( bparam && hparam ) {
+			CProgressDialog d ( CFrameWork::inst ( ));
+			CImportBLCart import ( hparam, bparam, &d );
+
+			if ( d. exec ( ) == QDialog::Accepted ) {
+				CDocument *doc = new CDocument ( );
+
+				doc-> setBrickLinkItems ( import. items ( ));	
+				doc-> setTitle ( tr( "Your Shopping Cart" ));
+				return doc;
+			}
+		}
 	}
 	return 0;
 }

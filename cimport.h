@@ -17,12 +17,15 @@
 #include <qfile.h>
 #include <qbuffer.h>
 #include <qdatetime.h>
+#include <qtextstream.h>
+#include <qregexp.h>
 
 #include "lzmadec.h"
 
 #include "cconfig.h"
 #include "bricklink.h"
 #include "cprogressdialog.h"
+#include "cutility.h"
 
 
 class CImportBLStore : public QObject {
@@ -56,7 +59,7 @@ public:
 		      << CKeyValue ( "frmUsername",   CConfig::inst ( )-> blLoginUsername ( ))
 		      << CKeyValue ( "frmPassword",   CConfig::inst ( )-> blLoginPassword ( ));
 		
-		pd-> post ( url, query, 0 );
+		pd-> post ( url, query );
 
 		pd-> layout ( );
 	}
@@ -166,7 +169,7 @@ public:
 		        << CKeyValue ( "frmUsername",   CConfig::inst ( )-> blLoginUsername ( ))
 		        << CKeyValue ( "frmPassword",   CConfig::inst ( )-> blLoginPassword ( ));
 
-		m_progress-> post ( m_url, m_query, 0 );
+		m_progress-> post ( m_url, m_query );
 		m_progress-> layout ( );
 	}
 
@@ -294,6 +297,180 @@ private:
 
 
 
+
+class CImportBLCart : public QObject {
+	Q_OBJECT
+
+public:
+	CImportBLCart ( int hparam, int bparam, CProgressDialog *pd )
+		: m_progress ( pd )
+	{
+		connect ( pd, SIGNAL( transferFinished ( )), this, SLOT( gotten ( )));
+
+		pd-> setHeaderText ( tr( "Importing BrickLink Shopping Cart" ));
+		pd-> setMessageText ( tr( "Download: %1/%2 KB" ));
+		
+		const char *url = "http://www.bricklink.com/storeCart.asp"; 
+
+		CKeyValueList query;
+		query << CKeyValue ( "h", QString::number ( hparam ))
+		      << CKeyValue ( "b", QString::number ( bparam ));
+		
+		pd-> get ( url, query );
+		pd-> layout ( );
+	}
+
+	const BrickLink::InvItemList &items ( ) const 
+	{
+		return m_items;
+	}
+
+private slots:
+	virtual void gotten ( )
+	{
+		CTransfer::Job *j = m_progress-> job ( );
+		QByteArray *data = j-> data ( );
+		bool ok = false;
+
+		if ( data && data-> size ( )) {
+			QBuffer cart_buffer ( *data );
+
+			if ( cart_buffer. open ( IO_ReadOnly )) {
+				QTextStream ts ( &cart_buffer );
+				QString line;
+				QString sep = "<TR><TD HEIGHT=\"65\" ALIGN=\"CENTER\">";
+				int invalid_items = 0;
+
+				while ( true ) { 
+					line = ts. readLine ( );
+					if ( line. isNull ( ))
+						break;
+					else if ( !line. startsWith ( sep ))
+						continue;
+
+					QStringList strlist = QStringList::split ( sep, line, false );
+
+					foreach ( const QString &str, strlist ) {
+						BrickLink::InvItem *ii = 0;
+
+						QRegExp rx_type ( " ([A-Z])-No: " );
+						QRegExp rx_ids ( "HEIGHT='60' SRC='/([A-Z])/([^ ]+).gif' NAME=" );
+						QRegExp rx_qty_price ( " VALUE=\"([0-9]+)\">(&nbsp;\\(x[0-9]+\\))?<BR>Each:&nbsp;<B>\\$([0-9.]+)</B>" );
+						QRegExp rx_names ( "<TD><FONT FACE=\"MS Sans Serif,Geneva\" SIZE=\"1\">(.+)</FONT></TD><TD VALIGN=\"TOP\" NOWRAP>" );
+						QString str_cond ( "<B>New</B>" );
+
+						rx_type. search ( str );
+						rx_ids. search ( str );
+						rx_names. search ( str );
+
+						const BrickLink::Item *item = 0;
+						const BrickLink::Color *col = 0;
+
+						if ( rx_type. cap ( 1 ). length ( ) == 1 ) {
+							int slash = rx_ids. cap ( 2 ). find ( '/' );
+							
+							if ( slash >= 0 ) { // with color
+								item = BrickLink::inst ( )-> item ( rx_type. cap ( 1 ) [0]. latin1 ( ), rx_ids. cap ( 2 ). mid ( slash + 1 ). latin1 ( ));
+								col = BrickLink::inst ( )-> color ( rx_ids. cap ( 2 ). left ( slash ). toInt ( ));
+							}
+							else {
+								item = BrickLink::inst ( )-> item ( rx_type. cap ( 1 ) [0]. latin1 ( ), rx_ids. cap ( 2 ). latin1 ( ));
+								col = BrickLink::inst ( )-> color ( 0 );
+							}
+						}
+
+						QString color_and_item = rx_names. cap ( 1 ). stripWhiteSpace ( );
+
+						if ( !col || !color_and_item. startsWith ( col-> name ( ))) {
+							uint longest_match = 0;
+
+							for ( QIntDictIterator<BrickLink::Color> it ( BrickLink::inst ( )-> colors ( )); it. current ( ); ++it )  {
+								QString n ( it. current ( )-> name ( ));
+
+								if (( n. length ( ) > longest_match ) &&
+									( color_and_item. startsWith ( n ))) {
+									longest_match = n. length ( );
+									col = it. current ( );
+								}
+							}
+
+							if ( !longest_match )
+								col = BrickLink::inst ( )-> color ( 0 );
+						}
+
+						if ( !item /*|| !color_and_item. endsWith ( item-> name ( ))*/ ) {
+							uint longest_match = 0;
+
+							const QPtrVector<BrickLink::Item> &all_items = BrickLink::inst ( )-> items ( );
+							for ( uint i = 0; i < all_items. count ( ); i++ ) {
+								const BrickLink::Item *it = all_items [i];
+								QString n ( it-> name ( ));
+
+								if (( n. length ( ) > longest_match ) &&
+									( color_and_item. find ( n )) >= 0 ) {
+									longest_match = n. length ( );
+									item = it;
+								}
+							}
+
+							if ( !longest_match )
+								item = 0;
+						}
+
+						if ( item && col ) {
+							rx_qty_price. search ( str );
+
+							int qty = rx_qty_price. cap ( 1 ). toInt ( );
+							money_t price = QLocale::c ( ). toDouble ( rx_qty_price. cap ( 3 ));
+
+							BrickLink::Condition cond = ( str. find ( str_cond ) >= 0 ? BrickLink::New : BrickLink::Used );
+
+							QString comment;
+							int comment_pos = color_and_item. find ( item-> name ( ));
+
+							if ( comment_pos >= 0 )
+								comment = color_and_item. mid ( comment_pos + QString ( item-> name ( )). length ( ) + 1 );
+
+							if ( qty && ( price != 0 )) {
+								ii = new BrickLink::InvItem ( col, item );
+								ii-> setCondition ( cond );
+								ii-> setQuantity ( qty );
+								ii-> setPrice ( price );
+								ii-> setComments ( comment );
+							}
+						}
+
+						if ( ii )
+							m_items << ii;
+						else
+							invalid_items++;
+					}
+				}
+
+				if ( !m_items. isEmpty ( )) {
+					ok = true;
+
+					if ( invalid_items ) {
+						m_progress-> setMessageText ( tr( "%1 lots of your Shopping Cart could not be imported." ). arg ( invalid_items ));
+						m_progress-> setAutoClose ( false );
+					}
+				}
+				else {
+					m_progress-> setErrorText ( tr( "Could not parse the Shopping Cart contents." ));
+				}
+			}
+		}
+		m_progress-> setFinished ( ok );
+	}
+
+private:
+	CProgressDialog *m_progress;
+	BrickLink::InvItemList m_items;
+};
+
+
+
+
 class CImportPeeronInventory : public QObject {
 	Q_OBJECT
 
@@ -309,7 +486,7 @@ public:
 		QCString url;
 		url. sprintf ( "http://www.peeron.com/inv/sets/%s", peeronid. latin1 ( ));
 
-		pd-> get ( url, CKeyValueList ( ), QDateTime ( ), 0 );
+		pd-> get ( url );
 
 		pd-> layout ( );
 	}

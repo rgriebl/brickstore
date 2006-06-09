@@ -451,6 +451,7 @@ void CFrameWork::languageChange ( )
 		{ "file_import_bl_xml",             tr( "BrickLink XML..." ),                   0 },
 		{ "file_import_bl_order",           tr( "BrickLink Order..." ),                 0 },
 		{ "file_import_bl_store_inv",       tr( "BrickLink Store Inventory..." ),       0 },
+		{ "file_import_bl_cart",            tr( "BrickLink Shopping Cart..." ),         0 },
 		{ "file_import_peeron_inv",         tr( "Peeron Inventory..." ),                0 },
 		{ "file_import_ldraw_model",        tr( "LDraw Model..." ),                     0 },
 		{ "file_import_briktrak",           tr( "BrikTrak Inventory..." ),              0 },
@@ -788,6 +789,9 @@ void CFrameWork::createActions ( )
 	a = new QAction ( g, "file_import_bl_store_inv" );
 	connect ( a, SIGNAL( activated ( )), this, SLOT( fileImportBrickLinkStore ( )));
 
+	a = new QAction ( g, "file_import_bl_cart" );
+	connect ( a, SIGNAL( activated ( )), this, SLOT( fileImportBrickLinkCart ( )));
+
 	a = new QAction ( g, "file_import_peeron_inv" );
 	connect ( a, SIGNAL( activated ( )), this, SLOT( fileImportPeeronInventory ( )));
 
@@ -1079,6 +1083,11 @@ void CFrameWork::fileImportBrickLinkStore ( )
 void CFrameWork::fileImportBrickLinkXML ( )
 {
 	createWindow ( CDocument::fileImportBrickLinkXML ( ));
+}
+
+void CFrameWork::fileImportBrickLinkCart ( )
+{
+	createWindow ( CDocument::fileImportBrickLinkCart ( ));
 }
 
 void CFrameWork::fileImportLDrawModel ( )

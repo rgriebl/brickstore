@@ -157,6 +157,7 @@ public:
 	static CDocument *fileImportBrickLinkInventory ( const BrickLink::Item *preselect = 0 );
 	static CDocument *fileImportBrickLinkOrder ( );
 	static CDocument *fileImportBrickLinkStore ( );
+	static CDocument *fileImportBrickLinkCart ( );
 	static CDocument *fileImportBrickLinkXML ( );
 	static CDocument *fileImportPeeronInventory ( ); 
 	static CDocument *fileImportBrikTrakInventory ( const QString &fn = QString::null );

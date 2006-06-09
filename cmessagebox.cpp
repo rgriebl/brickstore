@@ -110,7 +110,9 @@ bool CMessageBox::getbox ( QWidget *parent, const QString &text, const QString &
 
 	QLineEdit *wedit = new QLineEdit ( value, d );
 	wedit-> setValidator ( validate );
-	wedit-> setMinimumWidth ( QFontMetrics ( wedit-> font ( )). width ( "Aa0" ) * 3  );
+
+	QFontMetrics wefm ( wedit-> font ( ));
+	wedit-> setMinimumWidth ( 20 + QMAX( wefm. width ( "Aa0" ) * 3, wefm. width ( value )));
 	wedit-> setSizePolicy ( QSizePolicy ( QSizePolicy::Preferred, QSizePolicy::Fixed ));
 
 	QPushButton *wok = new QPushButton ( tr( "&OK" ), d );
@@ -147,6 +149,7 @@ bool CMessageBox::getbox ( QWidget *parent, const QString &text, const QString &
 
 	d-> setSizeGripEnabled ( true );
 	d-> setMinimumSize ( d-> minimumSizeHint ( ));
+	d-> resize ( d-> sizeHint ( ));
 
 	if ( d-> exec ( ) == QDialog::Accepted ) {
 		b = true;

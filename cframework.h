@@ -89,6 +89,7 @@ private slots:
 	void fileImportBrickLinkInventory ( );
 	void fileImportBrickLinkOrder ( );
 	void fileImportBrickLinkStore ( );
+	void fileImportBrickLinkCart ( );
 	void fileImportBrickLinkXML ( );
 	void fileImportLDrawModel ( );
 	void fileImportPeeronInventory ( );

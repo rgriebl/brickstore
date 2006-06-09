@@ -356,6 +356,14 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
         <source>Reset differences</source>
         <translation>Differenzen zurücksetzen</translation>
     </message>
+    <message>
+        <source>Enter the URL of your current BrickLink shopping cart:&lt;br /&gt;&lt;br /&gt;Right-click on the &lt;b&gt;View Cart&lt;/b&gt; button in your browser and copy the URL to the clipboard by choosing &lt;b&gt;Copy Link Location&lt;/b&gt; (Firefox), &lt;b&gt;Copy Link&lt;/b&gt; (Safari) or &lt;b&gt;Copy Shortcut&lt;/b&gt; (Internet Explorer).</source>
+        <translation>Geben Sie die URL Ihres aktuellen BrickLink Warenkorbes ein:&lt;br /&gt;&lt;br /&gt;Machen Sie einen Rechts-Klick auf dem &lt;b&gt;View Cart&lt;/b&gt; Schalter in Ihrem Web-Browser und kopieren Sie die URL in die Zwischenablage: &lt;b&gt;Link-Adresse kopieren&lt;/b&gt; (Firefox), &lt;b&gt;Link kopieren&lt;/b&gt; (Safari) oder &lt;b&gt;Verknüpfung kopieren&lt;/b&gt; (Internet Explorer).</translation>
+    </message>
+    <message>
+        <source>Your Shopping Cart</source>
+        <translation>Warenkorb</translation>
+    </message>
 </context>
 <context>
     <name>CFrameWork</name>
@@ -1028,6 +1036,29 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     <message>
         <source>Do you want to cancel all outstanding inventory, image and Price Guide transfers?</source>
         <translation>Wollen Sie wirklich alle ausstehenden Inventarlisten-, Bilder- und Richtpreisübertragungen abbrechen?</translation>
+    </message>
+    <message>
+        <source>BrickLink Shopping Cart...</source>
+        <translation>BrickLink Warenkorb...</translation>
+    </message>
+</context>
+<context>
+    <name>CImportBLCart</name>
+    <message>
+        <source>Importing BrickLink Shopping Cart</source>
+        <translation>BrickLink Warenkorb wird importiert</translation>
+    </message>
+    <message>
+        <source>Download: %1/%2 KB</source>
+        <translation>Download: %1/%2 KB</translation>
+    </message>
+    <message>
+        <source>%1 lots of your Shopping Cart could not be imported.</source>
+        <translation>%1 Posten des Warenkorbs konnten nicht importiert werden.</translation>
+    </message>
+    <message>
+        <source>Could not parse the Shopping Cart contents.</source>
+        <translation>Der Inhalt des Warenkorbs konnte nicht verarbeitet werden.</translation>
     </message>
 </context>
 <context>
