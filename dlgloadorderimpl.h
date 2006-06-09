@@ -27,6 +27,9 @@ public:
 
 	QPair<BrickLink::Order *, BrickLink::InvItemList *> order ( ) const;
 
+protected:
+	virtual void accept ( );
+
 protected slots:
 	void checkId ( );
 	void checkSelected ( );
@@ -37,6 +40,11 @@ protected slots:
 
 private:
 	BrickLink::Order::Type DlgLoadOrderImpl::orderType ( ) const;
+
+	static int   s_last_select;
+	static QDate s_last_from;
+	static QDate s_last_to;
+	static int   s_last_type;
 };
 
 #endif

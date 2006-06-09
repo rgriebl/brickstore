@@ -114,6 +114,13 @@ private:
 } // namespace
 
 
+
+int   DlgLoadOrderImpl::s_last_select   = 0;
+QDate DlgLoadOrderImpl::s_last_from     = QDate::currentDate ( ). addMonths ( -1 );
+QDate DlgLoadOrderImpl::s_last_to       = QDate::currentDate ( );
+int   DlgLoadOrderImpl::s_last_type     = 0;
+
+
 DlgLoadOrderImpl::DlgLoadOrderImpl ( QWidget *parent, const char *name, bool modal )
 	: DlgLoadOrder ( parent, name, modal )
 {
@@ -128,9 +135,6 @@ DlgLoadOrderImpl::DlgLoadOrderImpl ( QWidget *parent, const char *name, bool mod
 	connect ( w_order_list, SIGNAL( doubleClicked ( QListViewItem *, const QPoint &, int )), this, SLOT( activateItem ( QListViewItem * )));
 	connect ( w_order_list, SIGNAL( returnPressed ( QListViewItem * )), this, SLOT( activateItem ( QListViewItem * )));
 
-	w_order_from-> setDate ( QDate::currentDate ( ). addMonths ( -1 ));
-	w_order_to-> setDate ( QDate::currentDate ( ));
-
 	w_order_list-> addColumn ( tr( "Type" ));
 	w_order_list-> addColumn ( tr( "Order #" ));
 	w_order_list-> addColumn ( tr( "Date" ));
@@ -142,6 +146,11 @@ DlgLoadOrderImpl::DlgLoadOrderImpl ( QWidget *parent, const char *name, bool mod
 	connect ( w_next, SIGNAL( clicked ( )), this, SLOT( download ( )));
 	connect ( w_back, SIGNAL( clicked ( )), this, SLOT( start ( )));
 
+	w_order_from-> setDate ( s_last_from );
+	w_order_to-> setDate ( s_last_to );
+	w_order_type-> setCurrentItem ( s_last_type );
+	w_select_by-> setButton ( s_last_select );
+
 	start ( );
 	resize ( sizeHint ( ));
 }
@@ -149,12 +158,24 @@ DlgLoadOrderImpl::DlgLoadOrderImpl ( QWidget *parent, const char *name, bool mod
 DlgLoadOrderImpl::~DlgLoadOrderImpl ( )
 { }
 
+void DlgLoadOrderImpl::accept ( )
+{
+	s_last_select = w_select_by-> selectedId ( );
+	s_last_from   = w_order_from-> date ( );
+	s_last_to     = w_order_to-> date ( );
+	s_last_type   = w_order_type-> currentItem ( );
+
+	DlgLoadOrder::accept ( );
+}
 
 void DlgLoadOrderImpl::start ( )
 {
 	w_stack-> raiseWidget ( 0 );
 
-	w_order_number-> setFocus ( );
+	if ( w_select_by-> selectedId ( ) == 0 )
+		w_order_number-> setFocus ( );
+	else
+		w_order_from-> setFocus ( );
 
 	w_ok-> hide ( );
 	w_back-> hide ( );
