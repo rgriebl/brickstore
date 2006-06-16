@@ -54,6 +54,8 @@ CResource::CResource ( )
 	m_iconset_dict. setAutoDelete ( true );
 	m_pixmap_dict. setAutoDelete ( true );
 
+	m_has_alpha = ( QPixmap::defaultDepth ( ) >= 15 );
+
 #if defined( Q_WS_MACX )
 	CFURLRef bundlepath = CFBundleCopyBundleURL ( CFBundleGetMainBundle ( ));
 	CFStringRef macpath = CFURLCopyFileSystemPath ( bundlepath, kCFURLPOSIXPathStyle );
@@ -66,8 +68,6 @@ CResource::CResource ( )
 	CFRelease ( macpath );
 	CFRelease ( bundlepath );
 
-	m_has_alpha = true;
-
 #elif defined( Q_WS_WIN )
 	// default
 	m_paths << qApp-> applicationDirPath ( ) + "/";
@@ -78,7 +78,7 @@ CResource::CResource ( )
 		
 	int wv = QApplication::winVersion ( );
 
-	m_has_alpha = (( wv != Qt::WV_95 ) && ( wv != Qt::WV_NT ));
+	m_has_alpha &= (( wv != Qt::WV_95 ) && ( wv != Qt::WV_NT ));
 	
 	if ( wv & Qt::WV_DOS_based )
 		QPixmap::setDefaultOptimization ( QPixmap::MemoryOptim );
@@ -99,7 +99,7 @@ CResource::CResource ( )
 	m_paths << qApp-> applicationDirPath ( ) + "/";
 
 	extern bool qt_use_xrender;
-	m_has_alpha = qt_use_xrender;
+	m_has_alpha &= qt_use_xrender;
 
 #endif
 }

@@ -85,7 +85,7 @@ DlgSettingsImpl::DlgSettingsImpl( QWidget *parent, const char *name, bool modal,
 	
 	w_weight-> setButton (( CConfig::inst ( )-> weightSystem ( ) == CConfig::WeightMetric ) ? 0 : 1 );
 
-	w_doc_dir-> setText ( CConfig::inst ( )-> documentDir ( ));
+	w_doc_dir-> setText ( QDir::convertSeparators ( CConfig::inst ( )-> documentDir ( )));
 	connect ( w_doc_dir_select, SIGNAL( clicked ( )), this, SLOT( selectDocDir ( )));
 	w_doc_dir_select-> setIconSet ( CResource::inst ( )-> iconSet ( "file_open" ));
 
@@ -105,7 +105,7 @@ DlgSettingsImpl::DlgSettingsImpl( QWidget *parent, const char *name, bool modal,
 	w_cache_priceguides-> setChecked (( pg ));
 	w_days_priceguides-> setValue ( pg ? sec2day( pg ) : pgd );
 
-	w_cache_dir-> setText ( BrickLink::inst ( )-> dataPath ( ));
+	w_cache_dir-> setText ( QDir::convertSeparators ( BrickLink::inst ( )-> dataPath ( )));
 	connect ( w_cache_dir_select, SIGNAL( clicked ( )), this, SLOT( selectCacheDir ( )));
 	w_cache_dir_select-> setIconSet ( CResource::inst ( )-> iconSet ( "file_open" ));
 
@@ -173,7 +173,7 @@ void DlgSettingsImpl::selectCacheDir ( )
 	QString newdir = QFileDialog::getExistingDirectory ( w_cache_dir-> text ( ), this, 0, tr( "Cache directory location" ));
 
 	if ( !newdir. isNull ( ))
-		w_cache_dir-> setText ( newdir );
+		w_cache_dir-> setText ( QDir::convertSeparators ( newdir ));
 }
 
 void DlgSettingsImpl::selectDocDir ( )
@@ -181,7 +181,7 @@ void DlgSettingsImpl::selectDocDir ( )
 	QString newdir = QFileDialog::getExistingDirectory ( w_doc_dir-> text ( ), this, 0, tr( "Document directory location" ));
 
 	if ( !newdir. isNull ( ))
-		w_doc_dir-> setText ( newdir );
+		w_doc_dir-> setText ( QDir::convertSeparators ( newdir ));
 }
 
 void DlgSettingsImpl::done ( int r )

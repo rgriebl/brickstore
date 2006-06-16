@@ -590,7 +590,12 @@ public:
 
 			if ( m_filesize ) {
 #if defined( Q_OS_WIN32 )
-				m_maphandle = CreateFileMapping ((HANDLE) _get_osfhandle ( m_file. handle ( )), 0, PAGE_READONLY, 0, 0, 0 );
+				QT_WA( {
+					m_maphandle = CreateFileMappingW ((HANDLE) _get_osfhandle ( m_file. handle ( )), 0, PAGE_READONLY, 0, 0, 0 );
+				}, {
+					m_maphandle = CreateFileMappingA ((HANDLE) _get_osfhandle ( m_file. handle ( )), 0, PAGE_READONLY, 0, 0, 0 );
+				} )
+
 				if ( m_maphandle ) {		
 					m_memptr = (const char *) MapViewOfFile ( m_maphandle, FILE_MAP_READ, 0, 0, 0 );
 #else
