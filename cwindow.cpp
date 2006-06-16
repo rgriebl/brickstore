@@ -143,6 +143,9 @@ CWindow::CWindow ( CDocument *doc, QWidget *parent, const char *name )
 	w_list-> setDifferenceMode ( false );
 	w_list-> setSimpleMode ( CConfig::inst ( )-> simpleMode ( ));
 
+	if ( doc-> doNotSortItems ( ))
+		w_list-> setSorting ( w_list-> columns ( ) + 1 );
+
 	connect ( w_list, SIGNAL( selectionChanged ( )), this, SLOT( updateSelectionFromView ( )));
 
 	for ( int i = 0; i < ( CItemView::FilterCountSpecial + CDocument::FieldCount ); i++ )

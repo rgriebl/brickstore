@@ -302,7 +302,7 @@ class CImportBLCart : public QObject {
 	Q_OBJECT
 
 public:
-	CImportBLCart ( int hparam, int bparam, CProgressDialog *pd )
+	CImportBLCart ( int shopid, int cartid, CProgressDialog *pd )
 		: m_progress ( pd )
 	{
 		connect ( pd, SIGNAL( transferFinished ( )), this, SLOT( gotten ( )));
@@ -313,8 +313,8 @@ public:
 		const char *url = "http://www.bricklink.com/storeCart.asp"; 
 
 		CKeyValueList query;
-		query << CKeyValue ( "h", QString::number ( hparam ))
-		      << CKeyValue ( "b", QString::number ( bparam ));
+		query << CKeyValue ( "h", QString::number ( shopid ))
+		      << CKeyValue ( "b", QString::number ( cartid ));
 		
 		pd-> get ( url, query );
 		pd-> layout ( );

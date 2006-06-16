@@ -225,11 +225,12 @@ bool CDocument::Item::operator == ( const Item &cmp ) const
 
 QValueList<CDocument *> CDocument::s_documents;
 
-CDocument::CDocument ( )
+CDocument::CDocument ( bool dont_sort )
 {
 	m_undo = new CUndoStack ( this );
 	m_order = 0;
 	m_error_mask = 0;
+	m_dont_sort = dont_sort;
 
 	connect ( m_undo, SIGNAL( cleanChanged ( bool )), this, SLOT( clean2Modified ( bool )));
 
@@ -247,6 +248,11 @@ CDocument::~CDocument ( )
 const QValueList<CDocument *> &CDocument::allDocuments ( )
 {
 	return s_documents;
+}
+
+bool CDocument::doNotSortItems ( ) const
+{
+	return m_dont_sort;
 }
 
 const CDocument::ItemList &CDocument::items ( ) const
@@ -488,7 +494,7 @@ CDocument *CDocument::fileImportBrickLinkInventory ( const BrickLink::Item *pres
 			BrickLink::InvItemList items = it-> consistsOf ( );
 
 			if ( !items. isEmpty ( )) {
-				CDocument *doc = new CDocument ( );
+				CDocument *doc = new CDocument ( true );
 
 				doc-> setBrickLinkItems ( items, qty );
 				doc-> setTitle ( tr( "Inventory for %1" ). arg ( it-> id ( )));
@@ -511,7 +517,7 @@ CDocument *CDocument::fileImportBrickLinkOrder ( )
 		QPair<BrickLink::Order *, BrickLink::InvItemList *> order = dlg. order ( );
 
 		if ( order. first && order. second ) {
-			CDocument *doc = new CDocument ( );
+			CDocument *doc = new CDocument ( true );
 
 			doc-> setTitle ( tr( "Order #%1" ). arg ( order. first-> id ( )));
 			doc-> setBrickLinkItems ( *order. second );	
@@ -539,30 +545,37 @@ CDocument *CDocument::fileImportBrickLinkStore ( )
 
 CDocument *CDocument::fileImportBrickLinkCart ( )
 {
-	QString url = "http://www.bricklink.com/storeCart.asp?h=______&b=______";
+	QString url = QApplication::clipboard ( )-> text ( QClipboard::Clipboard );
+	QRegExp rx_valid ( "http://www\\.bricklink\\.com/storeCart\\.asp\\?h=[0-9]+&b=[0-9]+" );
+		
+	if ( !rx_valid. exactMatch ( url ))
+		url = "http://www.bricklink.com/storeCart.asp?h=______&b=______";
 	
 	if ( CMessageBox::getString ( CFrameWork::inst ( ), tr( "Enter the URL of your current BrickLink shopping cart:"
 		                                                    "<br /><br />Right-click on the <b>View Cart</b> button "
 														    "in your browser and copy the URL to the clipboard by choosing "
 															"<b>Copy Link Location</b> (Firefox), <b>Copy Link</b> (Safari) "
-															"or <b>Copy Shortcut</b> (Internet Explorer)." ), url )) {
+															"or <b>Copy Shortcut</b> (Internet Explorer).<br /><br />"
+															"<em>Super-lots and custom items are <b>not</b> supported</em>." ), url )) {
 		QRegExp rx ( "\\?h=([0-9]+)&b=([0-9]+)" );
 		rx. search ( url );
-		int hparam = rx. cap ( 1 ). toInt ( );
-		int bparam = rx. cap ( 2 ). toInt ( );
+		int shopid = rx. cap ( 1 ). toInt ( );
+		int cartid = rx. cap ( 2 ). toInt ( );
 
-		if ( bparam && hparam ) {
+		if ( shopid && cartid ) {
 			CProgressDialog d ( CFrameWork::inst ( ));
-			CImportBLCart import ( hparam, bparam, &d );
+			CImportBLCart import ( shopid, cartid, &d );
 
 			if ( d. exec ( ) == QDialog::Accepted ) {
-				CDocument *doc = new CDocument ( );
+				CDocument *doc = new CDocument ( true );
 
 				doc-> setBrickLinkItems ( import. items ( ));	
-				doc-> setTitle ( tr( "Your Shopping Cart" ));
+				doc-> setTitle ( tr( "Cart in Shop %1" ). arg ( shopid ));
 				return doc;
 			}
 		}
+		else
+			QApplication::beep ( );
 	}
 	return 0;
 }
@@ -595,7 +608,7 @@ CDocument *CDocument::fileImportPeeronInventory ( )
 		CImportPeeronInventory import ( peeronid, &d );
 
 		if ( d. exec ( ) == QDialog::Accepted ) {
-			CDocument *doc = new CDocument ( );
+			CDocument *doc = new CDocument ( true );
 
 			doc-> setBrickLinkItems ( import. items ( ));	
 			doc-> setTitle ( tr( "Peeron Inventory for %1" ). arg ( peeronid ));
@@ -689,7 +702,7 @@ CDocument *CDocument::fileLoadFrom ( const QString &name, const char *type, bool
 	QApplication::restoreOverrideCursor ( );
 
 	if ( items ) {
-		CDocument *doc = new CDocument ( );
+		CDocument *doc = new CDocument ( import_only );
 
 		if ( invalid_items )
 			CMessageBox::information ( CFrameWork::inst ( ), tr( "This file contains %1 unknown item(s)." ). arg ( CMB_BOLD( QString::number ( invalid_items ))));
@@ -739,7 +752,7 @@ CDocument *CDocument::fileImportLDrawModel ( )
 	QApplication::restoreOverrideCursor ( );
 
 	if ( b && !items. isEmpty ( )) {
-		CDocument *doc = new CDocument ( );
+		CDocument *doc = new CDocument ( true );
 
 		if ( invalid_items )
 			CMessageBox::information ( CFrameWork::inst ( ), tr( "This file contains %1 unknown item(s)." ). arg ( CMB_BOLD( QString::number ( invalid_items ))));

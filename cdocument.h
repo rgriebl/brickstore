@@ -117,7 +117,7 @@ public:
 
 
 public:
-	CDocument ( );
+	CDocument ( bool dont_sort = false );
 	virtual ~CDocument ( );
 
 	static const QValueList<CDocument *> &allDocuments ( );
@@ -126,6 +126,7 @@ public:
 
 	QString fileName ( ) const;
 	QString title ( ) const;
+	bool doNotSortItems ( ) const;
 
 	const BrickLink::Order *order ( ) const;
 
@@ -219,6 +220,7 @@ private:
 	Q_UINT64         m_error_mask;
 	QString          m_filename;
 	QString          m_title;
+	bool             m_dont_sort;
 
 	CUndoStack *     m_undo;
 
