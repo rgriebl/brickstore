@@ -72,13 +72,13 @@ int CMessageBox::critical ( QWidget *parent, const QString &text, int button0, i
 
 bool CMessageBox::getString ( QWidget *parent, const QString &text, QString &value )
 {
-	return getbox ( parent, text, QString::null, value, 0 );
+	return getString ( parent, text, QString::null, value, 0 );
 }
 
 bool CMessageBox::getDouble ( QWidget *parent, const QString &text, const QString &unit, double &value, QValidator *validate )
 {
 	QString str_value = QString::number ( value );
-	bool b = getbox ( parent, text, unit, str_value, validate ? validate : new QDoubleValidator ( -DBL_MAX, DBL_MAX, 3, 0 ));
+	bool b = getString ( parent, text, unit, str_value, validate ? validate : new QDoubleValidator ( -DBL_MAX, DBL_MAX, 3, 0 ));
 
 	if ( b )
 		value = str_value. toDouble ( );
@@ -88,14 +88,14 @@ bool CMessageBox::getDouble ( QWidget *parent, const QString &text, const QStrin
 bool CMessageBox::getInteger ( QWidget *parent, const QString &text, const QString &unit, int &value, QValidator *validate )
 {
 	QString str_value = QString::number ( value );
-	bool b = getbox ( parent, text, unit, str_value, validate ? validate : new QIntValidator ( INT_MIN, INT_MAX, 0 ));
+	bool b = getString ( parent, text, unit, str_value, validate ? validate : new QIntValidator ( INT_MIN, INT_MAX, 0 ));
 
 	if ( b )
 		value = str_value. toInt ( );
 	return b;
 }
 
-bool CMessageBox::getbox ( QWidget *parent, const QString &text, const QString &unit, QString &value, QValidator *validate )
+bool CMessageBox::getString ( QWidget *parent, const QString &text, const QString &unit, QString &value, QValidator *validate )
 {
 	bool b = false;
 

@@ -512,6 +512,7 @@ void CFrameWork::languageChange ( )
 		{ "edit_qty_multiply",              tr( "Multiply..." ),                        tr( "Ctrl+*", "Edit|Quantity|Multiply" ) },
 		{ "edit_qty_divide",                tr( "Divide..." ),                          tr( "Ctrl+/", "Edit|Quantity|Divide" ) },
 		{ "edit_price",                     tr( "Price" ),                              0 },
+		{ "edit_price_set",                 tr( "Set..." ),                             0 },
 		{ "edit_price_to_priceguide",       tr( "Set to Price Guide..." ),              tr( "Ctrl+G", "Edit|Price|Set to PriceGuide" ) },
 		{ "edit_price_inc_dec",             tr( "Inc- or Decrease..." ),                tr( "Ctrl++", "Edit|Price|Inc/Dec" ) },
 		{ "edit_bulk",                      tr( "Bulk Quantity..." ),                   0 },
@@ -863,6 +864,7 @@ void CFrameWork::createActions ( )
 
 	g2 = new QActionGroup ( g, "edit_price", false );
 	g2-> setUsesDropDown ( true );
+	(void) new QAction ( g2, "edit_price_set" );
 	(void) new QAction ( g2, "edit_price_inc_dec" );
 	(void) new QAction ( g2, "edit_price_to_priceguide" );
 	g3-> add ( g2 );
@@ -1230,6 +1232,7 @@ void CFrameWork::connectAllActions ( bool do_connect, CWindow *window )
 	connectAction ( do_connect, "edit_qty_multiply", window, SLOT( editQtyMultiply ( )));
 	connectAction ( do_connect, "edit_qty_divide", window, SLOT( editQtyDivide ( )));
 
+	connectAction ( do_connect, "edit_price_set", window, SLOT( editPrice ( )));
 	connectAction ( do_connect, "edit_price_to_priceguide", window, SLOT( editPriceToPG ( )));
 	connectAction ( do_connect, "edit_price_inc_dec", window, SLOT( editPriceIncDec ( )));
 

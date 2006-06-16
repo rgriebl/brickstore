@@ -35,6 +35,7 @@ public:
 	static int warning ( QWidget *parent, const QString & text, int button0 = QMessageBox::Ok, int button1 = 0, int button2 = 0 );
 	static int critical ( QWidget *parent, const QString & text, int button0 = QMessageBox::Ok, int button1 = 0, int button2 = 0 );
 
+	static bool getString ( QWidget *parent, const QString &text, const QString &unit, QString &value, QValidator *validate = 0 );
 	static bool getString ( QWidget *parent, const QString &text, QString &value );
 	static bool getDouble ( QWidget *parent, const QString &text, const QString &unit, double &value, QValidator *validate = 0 );
 	static bool getInteger ( QWidget *parent, const QString &text, const QString &unit, int &value, QValidator *validate = 0 );
@@ -44,7 +45,6 @@ private:
 	CMessageBox ( );
 
 	static int msgbox ( QWidget *parent, const QString &msg, QMessageBox::Icon icon, int but0, int but1, int but2 );
-	static bool getbox ( QWidget *parent, const QString &text, const QString &unit, QString &value, QValidator *validate );
 
 private:
 	static QString s_deftitle;

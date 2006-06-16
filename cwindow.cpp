@@ -693,6 +693,18 @@ void CWindow::editStockroomToggle ( )
 }
 
 
+void CWindow::editPrice ( )
+{
+	if ( m_doc-> selection ( ). isEmpty ( ))
+		return;
+
+	QString price = m_doc-> selection ( ). front ( )-> price ( ). toLocalizedString ( true );
+
+	if ( CMessageBox::getString ( this, tr( "Enter the new price for all selected items:" ), CMoney::inst ( )-> currencySymbol ( ), price, new CMoneyValidator ( 0, 10000, 3, 0 ))) {
+		setOrToggle<money_t>::set ( this, tr( "Set price on %1 items" ), &CDocument::Item::price, &CDocument::Item::setPrice, money_t::fromLocalizedString ( price ));
+	}
+}
+
 void CWindow::editPriceToPG ( )
 {
 	if ( m_doc-> selection ( ). isEmpty ( ))

@@ -118,6 +118,7 @@ public slots:
 	void editColor ( );
 	void editQtyMultiply ( );
 	void editQtyDivide( );
+	void editPrice ( );
 	void editPriceToPG ( );
 	void editPriceIncDec ( );
 	void editBulk ( );
