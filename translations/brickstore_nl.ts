@@ -317,11 +317,19 @@
     </message>
     <message>
         <source>Enter the URL of your current BrickLink shopping cart:&lt;br /&gt;&lt;br /&gt;Right-click on the &lt;b&gt;View Cart&lt;/b&gt; button in your browser and copy the URL to the clipboard by choosing &lt;b&gt;Copy Link Location&lt;/b&gt; (Firefox), &lt;b&gt;Copy Link&lt;/b&gt; (Safari) or &lt;b&gt;Copy Shortcut&lt;/b&gt; (Internet Explorer).</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">Geef de URL van Uw huidige BrickLink winkelwagen:&lt;br /&gt;&lt;br /&gt;Rechtsklik op de &lt;b&gt;View Cart&lt;/b&gt; knop in Uw browser en kopieer de URL naar het klembord door te kiezen voor &lt;b&gt;Koppelingslocatie kopiëren&lt;/b&gt; (Firefox), &lt;b&gt;Kopieer Koppeling&lt;/b&gt; (Safari) of &lt;b&gt;Snelkoppeling kopiëren&lt;/b&gt; (Internet Explorer).</translation>
     </message>
     <message>
         <source>Your Shopping Cart</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">Uw winkelwagen</translation>
+    </message>
+    <message>
+        <source>Enter the URL of your current BrickLink shopping cart:&lt;br /&gt;&lt;br /&gt;Right-click on the &lt;b&gt;View Cart&lt;/b&gt; button in your browser and copy the URL to the clipboard by choosing &lt;b&gt;Copy Link Location&lt;/b&gt; (Firefox), &lt;b&gt;Copy Link&lt;/b&gt; (Safari) or &lt;b&gt;Copy Shortcut&lt;/b&gt; (Internet Explorer).&lt;br /&gt;&lt;br /&gt;&lt;em&gt;Super-lots and custom items are &lt;b&gt;not&lt;/b&gt; supported&lt;/em&gt;.</source>
+        <translation>Geef de URL van Uw huidige BrickLink winkelwagen:&lt;br /&gt;&lt;br /&gt;Rechtsklik op de &lt;b&gt;View Cart&lt;/b&gt; knop in Uw browser en kopieer de URL naar het klembord door te kiezen voor &lt;b&gt;Koppelingslocatie kopiëren&lt;/b&gt; (Firefox), &lt;b&gt;Kopieer Koppeling&lt;/b&gt; (Safari) of &lt;b&gt;Snelkoppeling kopiëren&lt;/b&gt; (Internet Explorer).&lt;br /&gt;&lt;br /&gt;&lt;em&gt;Super-kavels en &quot;custom&quot;-items worden &lt;b&gt;niet&lt;/b&gt; ondersteund&lt;/em&gt;.</translation>
+    </message>
+    <message>
+        <source>Cart in Shop %1</source>
+        <translation>Winkelwagen in winkel %1</translation>
     </message>
 </context>
 <context>
@@ -912,26 +920,26 @@
     </message>
     <message>
         <source>BrickLink Shopping Cart...</source>
-        <translation type="unfinished"></translation>
+        <translation>BrickLink winkelwagen...</translation>
     </message>
 </context>
 <context>
     <name>CImportBLCart</name>
     <message>
         <source>Importing BrickLink Shopping Cart</source>
-        <translation type="unfinished"></translation>
+        <translation>BrickLink winkelwagen word geïmporteerd</translation>
     </message>
     <message>
         <source>Download: %1/%2 KB</source>
-        <translation type="unfinished">Download: %1/%2 KB</translation>
+        <translation>Download: %1/%2 KB</translation>
     </message>
     <message>
         <source>%1 lots of your Shopping Cart could not be imported.</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 kavels van Uw winkelwagen konden niet worden geïmporteerd.</translation>
     </message>
     <message>
         <source>Could not parse the Shopping Cart contents.</source>
-        <translation type="unfinished"></translation>
+        <translation>De winkelwagen inhoud kon niet worden verwerkt.</translation>
     </message>
 </context>
 <context>
@@ -2022,6 +2030,14 @@
         <source>Reserve all selected items for this specific buyer (BrickLink username):</source>
         <translation>Reserveer alle geselecteerde items voor deze specifieke koper (BrickLink gebruikersnaam):</translation>
     </message>
+    <message>
+        <source>Enter the new price for all selected items:</source>
+        <translation>Geef de nieuwe prijs voor alle geselecteerde items:</translation>
+    </message>
+    <message>
+        <source>Set price on %1 items</source>
+        <translation>Prijs voor %1 items ingesteld</translation>
+    </message>
 </context>
 <context>
     <name>DlgAddItem</name>
@@ -2118,7 +2134,7 @@
     </message>
     <message>
         <source>Also apply this change to tier prices.</source>
-        <translation>Pas deze prijs ook toe op ???? prijzen.</translation>
+        <translation>Pas deze prijs ook toe op staffel prijzen.</translation>
     </message>
     <message>
         <source>&amp;OK</source>

@@ -358,11 +358,19 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
     <message>
         <source>Enter the URL of your current BrickLink shopping cart:&lt;br /&gt;&lt;br /&gt;Right-click on the &lt;b&gt;View Cart&lt;/b&gt; button in your browser and copy the URL to the clipboard by choosing &lt;b&gt;Copy Link Location&lt;/b&gt; (Firefox), &lt;b&gt;Copy Link&lt;/b&gt; (Safari) or &lt;b&gt;Copy Shortcut&lt;/b&gt; (Internet Explorer).</source>
-        <translation>Geben Sie die URL Ihres aktuellen BrickLink Warenkorbes ein:&lt;br /&gt;&lt;br /&gt;Machen Sie einen Rechts-Klick auf dem &lt;b&gt;View Cart&lt;/b&gt; Schalter in Ihrem Web-Browser und kopieren Sie die URL in die Zwischenablage: &lt;b&gt;Link-Adresse kopieren&lt;/b&gt; (Firefox), &lt;b&gt;Link kopieren&lt;/b&gt; (Safari) oder &lt;b&gt;Verknüpfung kopieren&lt;/b&gt; (Internet Explorer).</translation>
+        <translation type="obsolete">Geben Sie die URL Ihres aktuellen BrickLink Warenkorbes ein:&lt;br /&gt;&lt;br /&gt;Machen Sie einen Rechts-Klick auf dem &lt;b&gt;View Cart&lt;/b&gt; Schalter in Ihrem Web-Browser und kopieren Sie die URL in die Zwischenablage: &lt;b&gt;Link-Adresse kopieren&lt;/b&gt; (Firefox), &lt;b&gt;Link kopieren&lt;/b&gt; (Safari) oder &lt;b&gt;Verknüpfung kopieren&lt;/b&gt; (Internet Explorer).</translation>
     </message>
     <message>
         <source>Your Shopping Cart</source>
-        <translation>Warenkorb</translation>
+        <translation type="obsolete">Warenkorb</translation>
+    </message>
+    <message>
+        <source>Enter the URL of your current BrickLink shopping cart:&lt;br /&gt;&lt;br /&gt;Right-click on the &lt;b&gt;View Cart&lt;/b&gt; button in your browser and copy the URL to the clipboard by choosing &lt;b&gt;Copy Link Location&lt;/b&gt; (Firefox), &lt;b&gt;Copy Link&lt;/b&gt; (Safari) or &lt;b&gt;Copy Shortcut&lt;/b&gt; (Internet Explorer).&lt;br /&gt;&lt;br /&gt;&lt;em&gt;Super-lots and custom items are &lt;b&gt;not&lt;/b&gt; supported&lt;/em&gt;.</source>
+        <translation>Geben Sie die URL Ihres aktuellen BrickLink Warenkorbes ein:&lt;br /&gt;&lt;br /&gt;Machen Sie einen Rechts-Klick auf dem &lt;b&gt;View Cart&lt;/b&gt; Schalter in Ihrem Web-Browser und kopieren Sie die URL in die Zwischenablage: &lt;b&gt;Link-Adresse kopieren&lt;/b&gt; (Firefox), &lt;b&gt;Link kopieren&lt;/b&gt; (Safari) oder &lt;b&gt;Verknüpfung kopieren&lt;/b&gt; (Internet Explorer).&lt;br /&gt;&lt;br /&gt;&lt;em&gt;Sog. Super-Lots und Custom Teile werden &lt;b&gt;nicht&lt;/b&gt; unterstützt&lt;/em&gt;.</translation>
+    </message>
+    <message>
+        <source>Cart in Shop %1</source>
+        <translation>Warenkorb in Shop %1</translation>
     </message>
 </context>
 <context>
@@ -2243,6 +2251,14 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     <message>
         <source>Reserve all selected items for this specific buyer (BrickLink username):</source>
         <translation>Reserviere alle ausgewählten Teile für einen bestimmten Käufer (BrickLink Benutzername):</translation>
+    </message>
+    <message>
+        <source>Enter the new price for all selected items:</source>
+        <translation>Geben Sie einen neuen Preis für alle ausgewählten Teile ein:</translation>
+    </message>
+    <message>
+        <source>Set price on %1 items</source>
+        <translation>Preis für %1 Teile gesetzt</translation>
     </message>
 </context>
 <context>

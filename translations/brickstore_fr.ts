@@ -380,11 +380,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Enter the URL of your current BrickLink shopping cart:&lt;br /&gt;&lt;br /&gt;Right-click on the &lt;b&gt;View Cart&lt;/b&gt; button in your browser and copy the URL to the clipboard by choosing &lt;b&gt;Copy Link Location&lt;/b&gt; (Firefox), &lt;b&gt;Copy Link&lt;/b&gt; (Safari) or &lt;b&gt;Copy Shortcut&lt;/b&gt; (Internet Explorer).</source>
+        <source>Enter the URL of your current BrickLink shopping cart:&lt;br /&gt;&lt;br /&gt;Right-click on the &lt;b&gt;View Cart&lt;/b&gt; button in your browser and copy the URL to the clipboard by choosing &lt;b&gt;Copy Link Location&lt;/b&gt; (Firefox), &lt;b&gt;Copy Link&lt;/b&gt; (Safari) or &lt;b&gt;Copy Shortcut&lt;/b&gt; (Internet Explorer).&lt;br /&gt;&lt;br /&gt;&lt;em&gt;Super-lots and custom items are &lt;b&gt;not&lt;/b&gt; supported&lt;/em&gt;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Your Shopping Cart</source>
+        <source>Cart in Shop %1</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2282,6 +2282,14 @@
     </message>
     <message>
         <source>Reserve all selected items for this specific buyer (BrickLink username):</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enter the new price for all selected items:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set price on %1 items</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
