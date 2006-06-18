@@ -277,17 +277,20 @@ void CReportPage::print ( QPainter *p, double scale [2] )
 
 				case Cmd::Pixmap: {
 					QPixmap pix = dc-> m_p1. toPixmap ( );
-					QRect dr = QRect ( x, y, w, h );
+					
+					if ( !pix. isNull ( )) {
+						QRect dr = QRect ( x, y, w, h );
 
-					QSize oldsize = dr. size ( );
-					QSize newsize = pix. size ( );
-					newsize. scale ( oldsize, QSize::ScaleMin );
+						QSize oldsize = dr. size ( );
+						QSize newsize = pix. size ( );
+						newsize. scale ( oldsize, QSize::ScaleMin );
 
-					dr. setSize ( newsize );
-					dr. moveBy (( oldsize. width ( ) - newsize. width ( )) / 2,
- 								( oldsize. height ( ) - newsize. height ( )) / 2 );
+						dr. setSize ( newsize );
+						dr. moveBy (( oldsize. width ( ) - newsize. width ( )) / 2,
+						            ( oldsize. height ( ) - newsize. height ( )) / 2 );
 
-					p-> drawPixmap ( dr, pix );
+						p-> drawPixmap ( dr, pix );
+					}
 					break;
 				}
 
