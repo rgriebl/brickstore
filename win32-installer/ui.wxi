@@ -122,8 +122,12 @@
           <Text>{\VerdanaBold13}Completing the [ProductName] [Wizard]</Text>
         </Control>
 
-        <Control Id="LaunchCheckBox" Type="CheckBox" X="135" Y="170" Width="10" Height="10" Property="LAUNCHPRODUCT" CheckBoxValue="1" TabSkip="yes" />
-        <Control Id="LaunchText" Type="Text" X="148" Y="170" Width="220" Height="20" Transparent="yes" Text="Launch [ProductName]" />
+        <Control Id="LaunchCheckBox" Type="CheckBox" X="135" Y="170" Width="10" Height="10" Property="LAUNCHPRODUCT" CheckBoxValue="1" TabSkip="yes">
+          <Condition Action="hide"><![CDATA[InstallMode = "Remove"]]></Condition>
+        </Control>
+        <Control Id="LaunchText" Type="Text" X="148" Y="170" Width="220" Height="20" Transparent="yes" Text="Launch [ProductName]">
+          <Condition Action="hide"><![CDATA[InstallMode = "Remove"]]></Condition>
+        </Control>
       </Dialog>
 
       <Dialog Id="AdminBrowseDlg" Width="370" Height="270" Title="[ProductName] [Setup]" NoMinimize="yes">
