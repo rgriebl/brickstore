@@ -381,7 +381,8 @@ void BrickLink::updatePriceGuide ( BrickLink::PriceGuide *pg, bool high_priority
 	query << CKeyValue ( "a",        QChar ( pg-> item ( )-> itemType ( )-> id ( )). lower ( ))
 	      << CKeyValue ( "viewType", "N" )
 	      << CKeyValue ( "colorID",  QString::number ( pg-> color ( )-> id ( )))
-	      << CKeyValue ( "itemID",   pg-> item ( )-> id ( ));
+	      << CKeyValue ( "itemID",   pg-> item ( )-> id ( ))
+	      << CKeyValue ( "viewDec",  "3" );
 
 	//qDebug ( "PG request started for %s", (const char *) url );
 	m_price_guides. transfer-> get ( url, query, 0, pg, high_priority );

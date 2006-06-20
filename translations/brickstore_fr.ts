@@ -1046,6 +1046,10 @@
         <source>BrickLink Shopping Cart...</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Round to 2 Decimal Places</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>CImportBLCart</name>

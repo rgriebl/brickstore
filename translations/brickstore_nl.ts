@@ -922,6 +922,10 @@
         <source>BrickLink Shopping Cart...</source>
         <translation>BrickLink winkelwagen...</translation>
     </message>
+    <message>
+        <source>Round to 2 Decimal Places</source>
+        <translation>Op 2 decimalen afronden</translation>
+    </message>
 </context>
 <context>
     <name>CImportBLCart</name>

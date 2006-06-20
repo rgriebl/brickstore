@@ -1049,6 +1049,10 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
         <source>BrickLink Shopping Cart...</source>
         <translation>BrickLink Warenkorb...</translation>
     </message>
+    <message>
+        <source>Round to 2 Decimal Places</source>
+        <translation>Auf 2 Nachkommastellen runden</translation>
+    </message>
 </context>
 <context>
     <name>CImportBLCart</name>

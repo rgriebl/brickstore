@@ -708,6 +708,32 @@ void CWindow::editPrice ( )
 	}
 }
 
+void CWindow::editPriceRound ( )
+{
+	if ( m_doc-> selection ( ). isEmpty ( ))
+		return;
+
+	uint roundcount = 0;
+	CUndoCmd *macro = m_doc-> macroBegin ( );
+
+	CDisableUpdates disupd ( w_list );
+
+	foreach ( CDocument::Item *pos, m_doc-> selection ( )) {
+		money_t p = (( pos-> price ( ) + money_t ( 0.005 )) / 10 ) * 10;
+
+		if ( p != pos-> price ( )) {
+			CDocument::Item item = *pos;
+
+			item. setPrice ( p );
+			m_doc-> changeItem ( pos, item );
+		
+			roundcount++;
+		}
+	}
+	m_doc-> macroEnd ( macro, tr( "Price change on %1 items" ). arg ( roundcount ));
+}
+
+
 void CWindow::editPriceToPG ( )
 {
 	if ( m_doc-> selection ( ). isEmpty ( ))
