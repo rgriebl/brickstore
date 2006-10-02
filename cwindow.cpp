@@ -783,7 +783,7 @@ void CWindow::editPriceToPG ( )
 			}
 		}
 
-		if ( m_settopg_list-> isEmpty ( ))
+		if ( m_settopg_list && m_settopg_list-> isEmpty ( ))
 			priceGuideUpdated ( 0 );
 	}
 }
