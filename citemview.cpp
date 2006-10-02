@@ -198,7 +198,7 @@ CItemView::CItemView ( CDocument *doc, QWidget *parent, const char *name )
 			case CDocument::Retain      : align = AlignCenter; width = 8; hidden = 1; break;
 			case CDocument::Stockroom   : align = AlignCenter; width = 8; hidden = 1; break;
 			case CDocument::Reserved    : width = 8; hidden = 1; break;
-			case CDocument::Weight      : align = AlignRight; width = 6; hidden = 1; break;
+			case CDocument::Weight      : align = AlignRight; width = 10; hidden = 1; break;
 			case CDocument::YearReleased: width = 5; hidden = 1; break;
 		}
 		int cid = addColumn ( t );
@@ -541,7 +541,7 @@ bool CItemView::eventFilter ( QObject *o, QEvent *e )
 			case QEvent::KeyPress: {
 				QKeyEvent *ke = static_cast <QKeyEvent *> ( e );
 
-				if ( ke-> key ( ) == Qt::Key_Return || ke-> key ( ) == Qt::Key_Enter ) {
+				if ( ke-> key ( ) == Qt::Key_Return || ke-> key ( ) == Qt::Key_Enter || ke-> key ( ) == Qt::Key_F2 ) {
 					ke-> accept ( );
 					terminateEdit ( true );
 					setFocus ( );

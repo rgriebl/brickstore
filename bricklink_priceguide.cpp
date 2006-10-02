@@ -146,7 +146,7 @@ static money_t safe_strtomoney ( const char *data, uint start, uint stop )
 {
 	uint i = start;
 
-	while (( i <= stop ) && ( data [i] == '.' || ( data [i] >= '0' && data [i] <= '9' )))
+	while (( i <= stop ) && ( data [i] == '.' || data [i] == ',' || ( data [i] >= '0' && data [i] <= '9' )))
 		i++;
 
 	if ( i == start )

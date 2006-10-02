@@ -151,8 +151,8 @@ template <> BrickLink::ItemType *BrickLink::TextImport::parse<BrickLink::ItemTyp
 	itt-> m_name            = my_strdup ( strs [1] );
 	itt-> m_has_inventories = false;
 	itt-> m_has_colors      = ( c == 'P' || c == 'G' );
-	itt-> m_has_weight      = ( c == 'B' || c == 'P' || c == 'G' || c == 'S' );
-	itt-> m_has_year        = ( c == 'B' || c == 'C' || c == 'G' || c == 'S' );
+	itt-> m_has_weight      = ( c == 'B' || c == 'P' || c == 'G' || c == 'S' || c == 'I' );
+	itt-> m_has_year        = ( c == 'B' || c == 'C' || c == 'G' || c == 'S' || c == 'I' );
 
 	return itt;
 }
