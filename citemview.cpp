@@ -914,7 +914,7 @@ void CItemViewItem::paintCell ( QPainter *p, const QColorGroup &cg, int col, int
 	p-> drawLine ( w - 1, y, x + w - 1, y + h - 1 );
 	w--;
 
-	if (( m_item-> errors ( ) & iv-> d-> m_doc-> errorMask ( ) & ( 1 << col ))) {
+	if (( m_item-> errors ( ) & iv-> d-> m_doc-> errorMask ( ) & ( 1ULL << col ))) {
 		p-> setPen ( CUtility::gradientColor ( backgroundColor ( ), Qt::red, 0.75f ));
 		p-> drawRect ( x, y, w, h );
 		p-> setPen ( CUtility::gradientColor ( backgroundColor ( ), Qt::red, 0.50f ));

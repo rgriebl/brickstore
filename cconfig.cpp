@@ -283,7 +283,7 @@ QString CConfig::lDrawDir ( ) const
 			DWORD l = GetPrivateProfileStringW ( L"LDraw", L"BaseDirectory", L"", inidir, MAX_PATH, L"ldraw.ini" );
 			if ( l >= 0 ) {
 				inidir [l] = 0;
-				dir = QString::fromUcs2 ( inidir );
+				dir = QString::fromUcs2 ((ushort *) inidir );
 			}
 		}, {
 			char inidir [MAX_PATH];
@@ -307,7 +307,7 @@ QString CConfig::lDrawDir ( ) const
 
 					if ( RegQueryValueExW ( lkey, L"InstallDir", 0, 0, (LPBYTE) &regdir, &regdirsize ) == ERROR_SUCCESS ) {
 						regdir [regdirsize / sizeof( WCHAR )] = 0;
-						dir = QString::fromUcs2 ( regdir );
+						dir = QString::fromUcs2 ((ushort *) regdir );
 					}
 					RegCloseKey ( lkey );
 				}
@@ -345,7 +345,7 @@ QString CConfig::documentDir ( ) const
 			WCHAR wpath [MAX_PATH];
 
 			if ( SHGetSpecialFolderPathW ( NULL, wpath, CSIDL_PERSONAL, TRUE )) 
-				dir = QString::fromUcs2 ( wpath );
+				dir = QString::fromUcs2 ((ushort *) wpath );
 		}, {
 			char apath [MAX_PATH];
 			

@@ -221,9 +221,9 @@ bool CUtility::openUrl ( const QString &url )
 #elif defined( Q_WS_WIN )
 	if ( qApp-> mainWidget ( )) {
 		QT_WA( {
-			retval = ( DWORD_PTR( ::ShellExecuteW ( qApp-> mainWidget ( )-> winId ( ), L"open", url. ucs2 ( ), 0, 0, SW_SHOW )) > 32 );
+			retval = (((DWORD_PTR) ::ShellExecuteW ( qApp-> mainWidget ( )-> winId ( ), L"open", (LPCWSTR) url. ucs2 ( ), 0, 0, SW_SHOW )) > 32 );
 		}, {
-			retval = ( DWORD_PTR( ::ShellExecuteA ( qApp-> mainWidget ( )-> winId ( ), "open", url. local8Bit ( ), 0, 0, SW_SHOW )) > 32 );
+			retval = (((DWORD_PTR) ::ShellExecuteA ( qApp-> mainWidget ( )-> winId ( ), "open", url. local8Bit ( ), 0, 0, SW_SHOW )) > 32 );
 		} )
 	}
 

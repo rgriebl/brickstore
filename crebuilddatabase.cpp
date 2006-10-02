@@ -31,7 +31,7 @@ CRebuildDatabase::CRebuildDatabase ( const QString &output )
 #if defined( Q_OS_WIN32 )
 	AllocConsole ( );
 	const char *title = "BrickStore - Rebuilding Database";
-	QT_WA({ SetConsoleTitleW ( QString( title ). ucs2 ( )); }, 
+	QT_WA({ SetConsoleTitleW ((LPCWSTR) QString( title ). ucs2 ( )); }, 
 	      { SetConsoleTitleA ( title ); })
 	freopen ( "CONIN$", "r", stdin );
 	freopen ( "CONOUT$", "w", stdout );
