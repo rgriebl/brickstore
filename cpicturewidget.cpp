@@ -261,9 +261,18 @@ void CLargePictureWidget::redraw ( )
 	}
 }
 
-void CLargePictureWidget::mouseDoubleClickEvent ( QMouseEvent * )
+void CLargePictureWidget::mouseDoubleClickEvent ( QMouseEvent *e )
 {
+	e-> accept ( );
 	close ( );
+}
+
+void CLargePictureWidget::keyPressEvent ( QKeyEvent *e )
+{
+	if ( e-> key ( ) == Qt::Key_Escape || e-> key ( ) == Qt::Key_Return ) {
+		e-> accept ( );
+		close ( );
+	}
 }
 
 void CLargePictureWidget::contextMenuEvent ( QContextMenuEvent *e )

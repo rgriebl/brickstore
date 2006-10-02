@@ -70,6 +70,7 @@ protected slots:
 protected:
 	virtual void contextMenuEvent ( QContextMenuEvent *e );
 	virtual void mouseDoubleClickEvent ( QMouseEvent *e );
+	virtual void keyPressEvent ( QKeyEvent *e );
 
 private:
 	CLargePictureWidgetPrivate *d;

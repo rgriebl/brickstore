@@ -1183,9 +1183,9 @@ QDomElement BrickLink::createItemListXML ( QDomDocument doc, ItemListXMLHint hin
 			if ( ii-> m_weight > 0 )
 				item. appendChild ( doc. createElement ( "TotalWeight"  ). appendChild ( doc. createTextNode ( cLocale ( ). toString ( ii-> weight ( ), 'f', 4 ))). parentNode ( ));
 			if ( ii-> origPrice ( ) != ii-> price ( )) 
-				item. appendChild ( doc. createElement ( "OrigPrice"  ). appendChild ( doc. createTextNode ( cLocale ( ). toString ( ii-> weight ( ), 'f', 4 ))). parentNode ( ));
+				item. appendChild ( doc. createElement ( "OrigPrice"  ). appendChild ( doc. createTextNode ( ii-> origPrice ( ). toCString ( ))). parentNode ( ));
 			if ( ii-> origQuantity ( ) != ii-> quantity ( ))
-				item. appendChild ( doc. createElement ( "OrigQty"  ). appendChild ( doc. createTextNode ( cLocale ( ). toString ( ii-> weight ( ), 'f', 4 ))). parentNode ( ));
+				item. appendChild ( doc. createElement ( "OrigQty"  ). appendChild ( doc. createTextNode ( QString::number ( ii-> origQuantity ( )))). parentNode ( ));
 		}
 
 		// ### MASS UPLOAD ###
@@ -1297,8 +1297,10 @@ bool BrickLink::parseLDrawModelInternal ( QFile &f, const QString &model_name, I
 		while (( line = in. readLine ( ))) {
 			linecount++;
 
+			line = line. simplifyWhiteSpace ( );
+
 			if ( !line. isEmpty ( ) && line [0] == '0' ) {
-				QStringList sl = QStringList::split ( ' ', line. simplifyWhiteSpace ( ));
+				QStringList sl = QStringList::split ( ' ', line );
 
 				if (( sl. count ( ) >= 2 ) && ( sl [1] == "FILE" )) {
 					is_mpd = true;
@@ -1319,7 +1321,7 @@ bool BrickLink::parseLDrawModelInternal ( QFile &f, const QString &model_name, I
 				if ( is_mpd && !is_mpd_model_found )
 					continue;
 
-				QStringList sl = QStringList::split ( ' ', line. simplifyWhiteSpace ( ));
+				QStringList sl = QStringList::split ( ' ', line );
 				
 				if ( sl. count ( ) >= 15 ) {
 					int colid = sl [1]. toInt ( );

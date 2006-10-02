@@ -271,6 +271,8 @@ private:
 	const CSelectItem::ViewMode & m_viewmode;
 	const bool &                  m_invonly;
 	mutable BrickLink::Picture *  m_picture;
+
+	friend class ItemListToolTip;
 };
 
 
@@ -317,7 +319,7 @@ private slots:
 	
 	void pictureUpdated ( BrickLink::Picture *pic )
 	{
-		if ( m_tip_item && m_tip_item-> picture ( ) == pic )
+		if ( m_tip_item && m_tip_item-> m_picture == pic )
 			maybeTip ( parentWidget ( )-> mapFromGlobal ( QCursor::pos ( )));
 	}
 
