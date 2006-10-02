@@ -338,113 +338,121 @@ private slots:
 			if ( cart_buffer. open ( IO_ReadOnly )) {
 				QTextStream ts ( &cart_buffer );
 				QString line;
+				QString items_line;
 				QString sep = "<TR><TD HEIGHT=\"65\" ALIGN=\"CENTER\">";
 				int invalid_items = 0;
+				bool parsing_items = false;
 
 				while ( true ) { 
 					line = ts. readLine ( );
 					if ( line. isNull ( ))
 						break;
-					else if ( !line. startsWith ( sep ))
-						continue;
+					if ( line. startsWith ( sep ) && !parsing_items )
+						parsing_items = true;
 
-					QStringList strlist = QStringList::split ( sep, line, false );
+					if ( parsing_items )
+						items_line += line;
 
-					foreach ( const QString &str, strlist ) {
-						BrickLink::InvItem *ii = 0;
+					if (( line == "</TABLE>" ) && parsing_items )
+						break;					
+				}
 
-						QRegExp rx_type ( " ([A-Z])-No: " );
-						QRegExp rx_ids ( "HEIGHT='60' SRC='/([A-Z])/([^ ]+).gif' NAME=" );
-						QRegExp rx_qty_price ( " VALUE=\"([0-9]+)\">(&nbsp;\\(x[0-9]+\\))?<BR>Each:&nbsp;<B>\\$([0-9.]+)</B>" );
-						QRegExp rx_names ( "<TD><FONT FACE=\"MS Sans Serif,Geneva\" SIZE=\"1\">(.+)</FONT></TD><TD VALIGN=\"TOP\" NOWRAP>" );
-						QString str_cond ( "<B>New</B>" );
+				QStringList strlist = QStringList::split ( sep, items_line, false );
 
-						rx_type. search ( str );
-						rx_ids. search ( str );
-						rx_names. search ( str );
+				foreach ( const QString &str, strlist ) {
+					BrickLink::InvItem *ii = 0;
 
-						const BrickLink::Item *item = 0;
-						const BrickLink::Color *col = 0;
+					QRegExp rx_type ( " ([A-Z])-No: " );
+					QRegExp rx_ids ( "HEIGHT='60' SRC='/([A-Z])/([^ ]+).gif' NAME=" );
+					QRegExp rx_qty_price ( " VALUE=\"([0-9]+)\">(&nbsp;\\(x[0-9]+\\))?<BR>Each:&nbsp;<B>\\$([0-9.]+)</B>" );
+					QRegExp rx_names ( "<TD><FONT FACE=\"MS Sans Serif,Geneva\" SIZE=\"1\">(.+)</FONT></TD><TD VALIGN=\"TOP\" NOWRAP>" );
+					QString str_cond ( "<B>New</B>" );
 
-						if ( rx_type. cap ( 1 ). length ( ) == 1 ) {
-							int slash = rx_ids. cap ( 2 ). find ( '/' );
-							
-							if ( slash >= 0 ) { // with color
-								item = BrickLink::inst ( )-> item ( rx_type. cap ( 1 ) [0]. latin1 ( ), rx_ids. cap ( 2 ). mid ( slash + 1 ). latin1 ( ));
-								col = BrickLink::inst ( )-> color ( rx_ids. cap ( 2 ). left ( slash ). toInt ( ));
-							}
-							else {
-								item = BrickLink::inst ( )-> item ( rx_type. cap ( 1 ) [0]. latin1 ( ), rx_ids. cap ( 2 ). latin1 ( ));
-								col = BrickLink::inst ( )-> color ( 0 );
-							}
+					rx_type. search ( str );
+					rx_ids. search ( str );
+					rx_names. search ( str );
+
+					const BrickLink::Item *item = 0;
+					const BrickLink::Color *col = 0;
+
+					if ( rx_type. cap ( 1 ). length ( ) == 1 ) {
+						int slash = rx_ids. cap ( 2 ). find ( '/' );
+						
+						if ( slash >= 0 ) { // with color
+							item = BrickLink::inst ( )-> item ( rx_type. cap ( 1 ) [0]. latin1 ( ), rx_ids. cap ( 2 ). mid ( slash + 1 ). latin1 ( ));
+							col = BrickLink::inst ( )-> color ( rx_ids. cap ( 2 ). left ( slash ). toInt ( ));
 						}
-
-						QString color_and_item = rx_names. cap ( 1 ). stripWhiteSpace ( );
-
-						if ( !col || !color_and_item. startsWith ( col-> name ( ))) {
-							uint longest_match = 0;
-
-							for ( QIntDictIterator<BrickLink::Color> it ( BrickLink::inst ( )-> colors ( )); it. current ( ); ++it )  {
-								QString n ( it. current ( )-> name ( ));
-
-								if (( n. length ( ) > longest_match ) &&
-									( color_and_item. startsWith ( n ))) {
-									longest_match = n. length ( );
-									col = it. current ( );
-								}
-							}
-
-							if ( !longest_match )
-								col = BrickLink::inst ( )-> color ( 0 );
+						else {
+							item = BrickLink::inst ( )-> item ( rx_type. cap ( 1 ) [0]. latin1 ( ), rx_ids. cap ( 2 ). latin1 ( ));
+							col = BrickLink::inst ( )-> color ( 0 );
 						}
-
-						if ( !item /*|| !color_and_item. endsWith ( item-> name ( ))*/ ) {
-							uint longest_match = 0;
-
-							const QPtrVector<BrickLink::Item> &all_items = BrickLink::inst ( )-> items ( );
-							for ( uint i = 0; i < all_items. count ( ); i++ ) {
-								const BrickLink::Item *it = all_items [i];
-								QString n ( it-> name ( ));
-
-								if (( n. length ( ) > longest_match ) &&
-									( color_and_item. find ( n )) >= 0 ) {
-									longest_match = n. length ( );
-									item = it;
-								}
-							}
-
-							if ( !longest_match )
-								item = 0;
-						}
-
-						if ( item && col ) {
-							rx_qty_price. search ( str );
-
-							int qty = rx_qty_price. cap ( 1 ). toInt ( );
-							money_t price = QLocale::c ( ). toDouble ( rx_qty_price. cap ( 3 ));
-
-							BrickLink::Condition cond = ( str. find ( str_cond ) >= 0 ? BrickLink::New : BrickLink::Used );
-
-							QString comment;
-							int comment_pos = color_and_item. find ( item-> name ( ));
-
-							if ( comment_pos >= 0 )
-								comment = color_and_item. mid ( comment_pos + QString ( item-> name ( )). length ( ) + 1 );
-
-							if ( qty && ( price != 0 )) {
-								ii = new BrickLink::InvItem ( col, item );
-								ii-> setCondition ( cond );
-								ii-> setQuantity ( qty );
-								ii-> setPrice ( price );
-								ii-> setComments ( comment );
-							}
-						}
-
-						if ( ii )
-							m_items << ii;
-						else
-							invalid_items++;
 					}
+
+					QString color_and_item = rx_names. cap ( 1 ). stripWhiteSpace ( );
+
+					if ( !col || !color_and_item. startsWith ( col-> name ( ))) {
+						uint longest_match = 0;
+
+						for ( QIntDictIterator<BrickLink::Color> it ( BrickLink::inst ( )-> colors ( )); it. current ( ); ++it )  {
+							QString n ( it. current ( )-> name ( ));
+
+							if (( n. length ( ) > longest_match ) &&
+								( color_and_item. startsWith ( n ))) {
+								longest_match = n. length ( );
+								col = it. current ( );
+							}
+						}
+
+						if ( !longest_match )
+							col = BrickLink::inst ( )-> color ( 0 );
+					}
+
+					if ( !item /*|| !color_and_item. endsWith ( item-> name ( ))*/ ) {
+						uint longest_match = 0;
+
+						const QPtrVector<BrickLink::Item> &all_items = BrickLink::inst ( )-> items ( );
+						for ( uint i = 0; i < all_items. count ( ); i++ ) {
+							const BrickLink::Item *it = all_items [i];
+							QString n ( it-> name ( ));
+
+							if (( n. length ( ) > longest_match ) &&
+								( color_and_item. find ( n )) >= 0 ) {
+								longest_match = n. length ( );
+								item = it;
+							}
+						}
+
+						if ( !longest_match )
+							item = 0;
+					}
+
+					if ( item && col ) {
+						rx_qty_price. search ( str );
+
+						int qty = rx_qty_price. cap ( 1 ). toInt ( );
+						money_t price = QLocale::c ( ). toDouble ( rx_qty_price. cap ( 3 ));
+
+						BrickLink::Condition cond = ( str. find ( str_cond ) >= 0 ? BrickLink::New : BrickLink::Used );
+
+						QString comment;
+						int comment_pos = color_and_item. find ( item-> name ( ));
+
+						if ( comment_pos >= 0 )
+							comment = color_and_item. mid ( comment_pos + QString ( item-> name ( )). length ( ) + 1 );
+
+						if ( qty && ( price != 0 )) {
+							ii = new BrickLink::InvItem ( col, item );
+							ii-> setCondition ( cond );
+							ii-> setQuantity ( qty );
+							ii-> setPrice ( price );
+							ii-> setComments ( comment );
+						}
+					}
+
+					if ( ii )
+						m_items << ii;
+					else
+						invalid_items++;
 				}
 
 				if ( !m_items. isEmpty ( )) {
@@ -549,6 +557,7 @@ private:
 				if ( sl. count ( ) >= 3 ) {
 					int qty, colorid;
 					QString itemid, itemname, colorname;
+					char itemtype = 'P';
 					
 					qty = sl [0]. toInt ( );
 
@@ -565,6 +574,9 @@ private:
 					if ( pos > 0 )
 						itemname. truncate ( pos );
 
+					if ( itemid. find ( QRegExp ( "-\\d+$" )) > 0 )
+						itemtype = 'S';
+
 					if ( qty > 0 ) {
 						QDomElement item = doc. createElement ( "ITEM" );
 						root. appendChild ( item );
@@ -572,7 +584,7 @@ private:
 						// <ITEMNAME> and <COLORNAME> are inofficial extension 
 						// to help with incomplete items in Peeron inventories.
 
-						item. appendChild ( doc. createElement ( "ITEMTYPE"  ). appendChild ( doc. createTextNode ( "P" )). parentNode ( ));
+						item. appendChild ( doc. createElement ( "ITEMTYPE"  ). appendChild ( doc. createTextNode ( QChar ( itemtype ))). parentNode ( ));
 						item. appendChild ( doc. createElement ( "ITEMID"    ). appendChild ( doc. createTextNode ( itemid )). parentNode ( ));
 						item. appendChild ( doc. createElement ( "ITEMNAME"  ). appendChild ( doc. createTextNode ( itemname )). parentNode ( ));
 						item. appendChild ( doc. createElement ( "COLOR"     ). appendChild ( doc. createTextNode ( QString::number ( colorid ))). parentNode ( ));
