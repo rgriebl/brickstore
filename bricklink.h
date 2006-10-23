@@ -14,6 +14,7 @@
 #ifndef __BL_DATABASE_H__
 #define __BL_DATABASE_H__
 
+#include <qglobal.h>
 #include <qdatetime.h>
 #include <qstring.h>
 #include <qcstring.h>
@@ -37,8 +38,30 @@
 #include "cmoney.h"
 #include "ctransfer.h"
 
+#if defined( Q_OS_WIN )
+#define __LITTLE_ENDIAN	0
+#define __BIG_ENDIAN	1
+#define __BYTE_ORDER	__LITTLE_ENDIAN
+
+#else
+#include <sys/param.h>
+
+#endif
+
+#if !defined( __BYTE_ORDER ) && defined( BYTE_ORDER )
+#define __BYTE_ORDER	BYTE_ORDER
+#define __BIG_ENDIAN	BIG_ENDIAN
+#define __LITTLE_ENDIAN	LITTLE_ENDIAN
+
+#elif !defined( __BYTE_ORDER ) && !defined( BYTE_ORDER )
+#error "Could not detect endianess of your platform!"
+
+#endif
+
+
 class QIODevice;
 template <typename T> class QDict;
+
 
 class BrickLink : public QObject {
 	Q_OBJECT
@@ -194,11 +217,17 @@ public:
 		void setConsistsOf ( const InvItemList &items ) const;
 
 		struct appears_in_record {
+#if __BYTE_ORDER == __LITTLE_ENDIAN
 			Q_UINT32  m12  : 12;
 			Q_UINT32  m20  : 20;
+#else
+			Q_UINT32  m20  : 20;
+			Q_UINT32  m12  : 12;
+#endif
 		};
 
 		struct consists_of_record {
+#if __BYTE_ORDER == __LITTLE_ENDIAN
 			Q_UINT64  m_qty      : 12;
 			Q_UINT64  m_index    : 20;
 			Q_UINT64  m_color    : 12;
@@ -206,6 +235,15 @@ public:
 			Q_UINT64  m_isalt    : 1;
 			Q_UINT64  m_altid    : 6;
 			Q_UINT64  m_reserved : 12;
+#else
+			Q_UINT64  m_reserved : 12;
+			Q_UINT64  m_altid    : 6;
+			Q_UINT64  m_isalt    : 1;
+			Q_UINT64  m_extra    : 1;
+			Q_UINT64  m_color    : 12;
+			Q_UINT64  m_index    : 20;
+			Q_UINT64  m_qty      : 12;
+#endif
 		};
 
 		static Item *parse ( const BrickLink *bl, uint count, const char **strs, void *itemtype );

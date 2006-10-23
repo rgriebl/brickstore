@@ -12,7 +12,7 @@
 ## See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 
 isEmpty( RELEASE ) {
-  RELEASE    = 1.1.5
+  RELEASE    = 1.1.6
 }
 
 TEMPLATE     = app
@@ -58,8 +58,9 @@ win32 {
   system( cscript.exe //B scripts\update_version.js $$RELEASE)
   
   CONFIG -= shared
-  LIBS += libcurl.lib
-  DEFINES += CURL_STATICLIB
+  INCLUDEPATH += $$(CURLDIR)\include
+  LIBS += $$(CURLDIR)\lib\libcurl.lib
+  DEFINES += CURL_STATICLIB _CRT_SECURE_NO_DEPRECATE
   RC_FILE = brickstore.rc
   QMAKE_CXXFLAGS_DEBUG += /Od
 
