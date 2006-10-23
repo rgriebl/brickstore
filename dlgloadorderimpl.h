@@ -39,7 +39,7 @@ protected slots:
 	void download ( );
 
 private:
-	BrickLink::Order::Type DlgLoadOrderImpl::orderType ( ) const;
+	BrickLink::Order::Type orderType ( ) const;
 
 	static int   s_last_select;
 	static QDate s_last_from;

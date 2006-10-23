@@ -74,7 +74,7 @@ Standards-Version: 3.6.1
 
 Package: brickstore
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: \${shlibs:Depends}, \${misc:Depends}
 Description: Offline tool for BrickLink
  BrickStore is an offline tool to manage your online store on
  http://www.bricklink.com

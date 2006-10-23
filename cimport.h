@@ -134,7 +134,7 @@ public:
 		init ( );
 	}
 
-	void CImportBLOrder::init ( )
+	void init ( )
 	{
 		m_retry_placed = ( m_order_type == BrickLink::Order::Any );
 
