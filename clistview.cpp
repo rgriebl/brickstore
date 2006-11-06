@@ -202,7 +202,8 @@ void CListView::keyPressEvent( QKeyEvent *e )
 			break;
 		}
 		case Qt::Key_Enter :
-		case Qt::Key_Return: {
+		case Qt::Key_Return: 
+		case Qt::Key_F2    : {
 			e-> accept ( );
 
 			emit doubleClicked ( currentItem ( ), QPoint ( ), currentColumn ( )); 

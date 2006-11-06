@@ -347,7 +347,8 @@ uint CWindow::addItems ( const BrickLink::InvItemList &items, int multiply, uint
 		if ( mergeflags != MergeAction_None ) {
 			foreach ( CDocument::Item *item, m_doc-> items ( )) {
 				if (( newitem-> item ( ) == item-> item ( )) &&
-				    ( newitem-> color ( ) == item-> color ( ))&& 
+				    ( newitem-> color ( ) == item-> color ( )) && 
+				    ( newitem-> status ( ) == item-> status ( )) &&
 				    ( newitem-> condition ( ) == item-> condition ( ))) {
 					olditem = item;
 					break;
@@ -442,6 +443,7 @@ void CWindow::mergeItems ( const CDocument::ItemList &items, int globalmergeflag
 			    ( from-> item ( ) == find_to-> item ( )) &&
 			    ( from-> color ( ) == find_to-> color ( ))&& 
 			    ( from-> condition ( ) == find_to-> condition ( )) &&
+				(( from-> status ( ) == BrickLink::InvItem::Exclude ) == ( find_to-> status ( ) == BrickLink::InvItem::Exclude )) &&
 			    ( m_doc-> items ( ). find ( find_to ) != m_doc-> items ( ). end ( ))) {
 				to = find_to;
 				break;
