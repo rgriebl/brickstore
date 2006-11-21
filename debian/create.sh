@@ -41,6 +41,8 @@ elif [ -e /etc/debian_version ]; then
 			;;
 		3.1) dist=sarge
 			;;
+		4.0) dist=etch
+			;;
 	esac
 fi
 
@@ -117,7 +119,7 @@ echo >debian/compat '4'
 echo " > Building package..."
 
 chmod +x debian/rules
-fakeroot debian/rules -s BRICKSTORE_VERSION=$pkg_ver binary
+BRICKSTORE_VERSION=$pkg_ver dpkg-buildpackage -b -D -rfakeroot
 
 cd ../..
 rm -rf "$pkg_ver"

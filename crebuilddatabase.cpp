@@ -260,7 +260,7 @@ void CRebuildDatabase::downloadJobFinished ( CTransfer::Job *job )
 				m_error = err;
 		}
 		else
-			m_error = "failed to download file.";
+			m_error = QString( "failed to download file: " ) + job-> errorString ( );
 
 		if ( !ok )
 			m_downloads_failed++;
@@ -310,10 +310,20 @@ bool CRebuildDatabase::downloadInventories ( QPtrVector<BrickLink::Item> &invs )
 			m_trans-> get ( url, query, f );
 			m_downloads_in_progress++;
 		}
+		
+		// avoid "too many open files" errors 
+		if ( m_downloads_in_progress > 100 ) {
+			while ( m_downloads_in_progress > 50 )
+				qApp-> processEvents ( );
+		}
 	}
 
 	if ( failed ) {
+		QString err = m_error;
+	
 		m_trans-> cancelAllJobs ( );
+		
+		m_error = err;
 		return false;
 	}
 
