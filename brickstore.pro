@@ -2,8 +2,8 @@
 ##
 ## This file is part of BrickStore.
 ##
-## This file may be distributed and/or modified under the terms of the GNU 
-## General Public License version 2 as published by the Free Software Foundation 
+## This file may be distributed and/or modified under the terms of the GNU
+## General Public License version 2 as published by the Free Software Foundation
 ## and appearing in the file LICENSE.GPL included in the packaging of this file.
 ##
 ## This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
@@ -12,7 +12,7 @@
 ## See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 
 isEmpty( RELEASE ) {
-  RELEASE    = 1.1.6
+  RELEASE    = 1.1.7
 }
 
 TEMPLATE     = app

@@ -80,6 +80,7 @@
             </Component>
             <Component Id="c_runtime" Guid="514ECE62-8EB1-11D9-8BDE-F66BAD1E3F3A">
               <File DiskId="1" Id="msvcr80"          Name="msvcr80.dll" src="C:/Programme/Microsoft Visual Studio 8/VC/redist/x86/Microsoft.VC80.CRT/msvcr80.dll" />
+              <File DiskId="1" Id="msvcr80.mf"       Name="msvcr80.man" LongName="Microsoft.VC80.CRT.manifest" src="C:/Programme/Microsoft Visual Studio 8/VC/redist/x86/Microsoft.VC80.CRT/Microsoft.VC80.CRT.manifest" />
               <RemoveFile      Id="msvcr71"          Name="msvcr71.dll" On="install" />
               <RemoveFile      Id="msvcp71"          Name="msvcp71.dll" On="install" />
             </Component>
