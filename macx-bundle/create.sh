@@ -70,7 +70,7 @@ else
 fi
 
 echo " > Creating disk image $archive ($comptype)..."
-hdiutil create "macx-bundle/$pkg_ver/$archive.dmg" -volname "archive" -fs "HFS+" -srcdir "$tmpdir" -quiet $compression
+hdiutil create "macx-bundle/$pkg_ver/$archive.dmg" -volname "BrickStore $pkg_ver" -fs "HFS+" -srcdir "$tmpdir" -quiet $compression
 rm -rf "$tmpdir"
 
 echo
