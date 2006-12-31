@@ -796,7 +796,7 @@ void CDocument::setBrickLinkItems ( const BrickLink::InvItemList &bllist, uint m
 	insertItemsDirect ( items, positions );
 
 	// reset difference WITHOUT a command
-
+/*
 	foreach ( Item *pos, m_items ) {
 		if (( pos-> origQuantity ( ) != pos-> quantity ( )) ||
 		    ( pos-> origPrice ( ) != pos-> price ( ))) 
@@ -805,6 +805,7 @@ void CDocument::setBrickLinkItems ( const BrickLink::InvItemList &bllist, uint m
 			pos-> setOrigPrice ( pos-> price ( ));
 		}
 	}
+*/
 }
 
 QString CDocument::fileName ( ) const

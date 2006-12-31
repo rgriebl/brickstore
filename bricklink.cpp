@@ -793,6 +793,9 @@ BrickLink::InvItemList *BrickLink::parseItemListXML ( QDomElement root, ItemList
 		QString colorid, colorname;
 		QString categoryid, categoryname;
 
+		bool has_orig_price = false;
+		bool has_orig_qty = false;
+
 		for ( QDomNode n = itemn. firstChild ( ); !n. isNull ( ); n = n. nextSibling ( )) {
 			if ( !n. isElement ( ))
 				continue;
@@ -957,16 +960,25 @@ BrickLink::InvItemList *BrickLink::parseItemListXML ( QDomElement root, ItemList
 					ii-> setReserved ( val );
 				else if ( tag == "TotalWeight" )
 					ii-> setWeight ( cLocale ( ). toDouble ( val ));
-				else if ( tag == "OrigPrice" )
+				else if ( tag == "OrigPrice" ) {
 					ii-> setOrigPrice ( money_t::fromCString ( val ));
-				else if ( tag == "OrigQty" )
+					has_orig_price = true;
+				}
+				else if ( tag == "OrigQty" ) {
 					ii-> setOrigQuantity ( val. toInt ( ));
+					has_orig_qty = true;
+				}
 			}
 		}
 
 		bool ok = true;
 
 		//qDebug ( "item (id=%s, color=%s, type=%s, cat=%s", itemid. latin1 ( ), colorid. latin1 ( ), itemtypeid. latin1 ( ), categoryid. latin1 ( ));
+
+		if ( !has_orig_price )
+			ii-> setOrigPrice ( ii-> price ( ));
+		if ( !has_orig_qty )
+			ii-> setOrigQuantity ( ii-> quantity ( ));
 
 		if ( !colorid. isEmpty ( ) && !itemid. isEmpty ( ) && !itemtypeid. isEmpty ( )) {
 			ii-> setItem ( item ( itemtypeid [0]. latin1 ( ), itemid. latin1 ( )));
