@@ -289,7 +289,7 @@ void CPriceGuideWidget::recalcLayoutNormal ( const QSize &s, const QFontMetrics 
 	for ( int i = 0; i < BrickLink::ConditionCount; i++ )
 		cw [1] = QMAX( cw [1], fm. width ( d-> m_str_cond [i] ));
 	cw [2] = QMAX( fm. width ( d-> m_str_qty ), fm. width ( "0000 (000000)" ));
-	cw [3] = fm. width ( money_t ( 9000 ). toLocalizedString ( true ));
+	cw [3] = fm. width ( money_t ( 9000 ). toLocalizedString ( false ));
 	for ( int i = 0; i < BrickLink::PriceGuide::PriceCount; i++ )
 		cw [3] = QMAX( cw [3], fm. width ( d-> m_str_price [i] ));
 
@@ -383,7 +383,7 @@ void CPriceGuideWidget::recalcLayoutHorizontal ( const QSize &s, const QFontMetr
 	for ( int i = 0; i < BrickLink::ConditionCount; i++ )
 		cw [1] = QMAX( cw [1], fm. width ( d-> m_str_cond [i] ));
 	cw [2] = QMAX( fm. width ( d-> m_str_qty ), fm. width ( "0000 (000000)" ));
-	cw [3] = fm. width ( money_t ( 9000 ). toLocalizedString ( true ));
+	cw [3] = fm. width ( money_t ( 9000 ). toLocalizedString ( false ));
 	for ( int i = 0; i < BrickLink::PriceGuide::PriceCount; i++ )
 		cw [3] = QMAX( cw [3], fm. width ( d-> m_str_price [i] ));
 
@@ -465,7 +465,7 @@ void CPriceGuideWidget::recalcLayoutVertical ( const QSize &s, const QFontMetric
 		cw [0] = QMAX( cw [0], fm. width ( d-> m_str_price [i] ));
 	cw [0] += 2 * hborder;
 
-	cw [1] = QMAX( fm. width ( money_t ( 9000 ). toLocalizedString ( true )), fm. width ( "0000 (000000)" ));
+	cw [1] = QMAX( fm. width ( money_t ( 9000 ). toLocalizedString ( false )), fm. width ( "0000 (000000)" ));
 	for ( int i = 0; i < BrickLink::ConditionCount; i++ )
 		cw [1] = QMAX( cw [1], fm. width ( d-> m_str_cond [i] ));
 	cw [1] += 2 * hborder;
@@ -652,7 +652,7 @@ void CPriceGuideWidget::drawContents ( QPainter *p )
 			case cell::Price:
 				if ( !is_updating ) {
 					if ( valid )
-						str = d-> m_pg-> price ( c. m_time, c. m_condition, c. m_price ). toLocalizedString ( true );
+						str = d-> m_pg-> price ( c. m_time, c. m_condition, c. m_price ). toLocalizedString ( false );
 						
 					paintCell ( &ppix, c, cg, c. m_text_flags, str, c. m_flag );
 				}

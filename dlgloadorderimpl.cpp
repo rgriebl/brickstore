@@ -61,7 +61,7 @@ public:
 			case 1: return m_order. first-> id ( );
 			case 2: return m_order. first-> date ( ). date ( ). toString ( Qt::LocalDate );
 			case 3: return isReceived ( ) ? m_order. first-> buyer ( ) : m_order. first-> seller ( );
-			case 4: return m_order. first-> grandTotal ( ). toLocalizedString ( );
+			case 4: return m_order. first-> grandTotal ( ). toLocalizedString ( true );
 			default: return QString ( );
 		}
 	}

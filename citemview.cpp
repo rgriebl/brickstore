@@ -668,8 +668,8 @@ QString CItemViewItem::text ( int col ) const
 		case CDocument::Remarks     : str = m_item-> remarks ( ); break;
 		case CDocument::Quantity    : str = QString::number ( m_item-> quantity ( )); break;
 		case CDocument::Bulk        : str = ( m_item-> bulkQuantity ( ) == 1 ? dash : QString::number ( m_item-> bulkQuantity ( ))); break;
-		case CDocument::Price       : str = m_item-> price ( ). toLocalizedString ( ); break;
-		case CDocument::Total       : str = m_item-> total ( ). toLocalizedString ( ); break;
+		case CDocument::Price       : str = m_item-> price ( ). toLocalizedString ( true ); break;
+		case CDocument::Total       : str = m_item-> total ( ). toLocalizedString ( true ); break;
 		case CDocument::Sale        : str = ( m_item-> sale ( ) == 0 ? dash : QString::number ( m_item-> sale ( )) + "%" ); break;
 		case CDocument::Condition   : str = ( m_item-> condition ( ) == BrickLink::New ? "N" : "U" ); break;
 		case CDocument::Color       : str = m_item-> color ( )-> name ( ); break;
@@ -678,15 +678,15 @@ QString CItemViewItem::text ( int col ) const
 		case CDocument::TierQ1      : str = ( m_item-> tierQuantity ( 0 ) == 0 ? dash : QString::number ( m_item-> tierQuantity ( 0 ))); break;
 		case CDocument::TierQ2      : str = ( m_item-> tierQuantity ( 1 ) == 0 ? dash : QString::number ( m_item-> tierQuantity ( 1 ))); break;
 		case CDocument::TierQ3      : str = ( m_item-> tierQuantity ( 2 ) == 0 ? dash : QString::number ( m_item-> tierQuantity ( 2 ))); break;
-		case CDocument::TierP1      : str = m_item-> tierPrice ( 0 ). toLocalizedString ( ); break;
-		case CDocument::TierP2      : str = m_item-> tierPrice ( 1 ). toLocalizedString ( ); break;
-		case CDocument::TierP3      : str = m_item-> tierPrice ( 2 ). toLocalizedString ( ); break;
+		case CDocument::TierP1      : str = m_item-> tierPrice ( 0 ). toLocalizedString ( true ); break;
+		case CDocument::TierP2      : str = m_item-> tierPrice ( 1 ). toLocalizedString ( true ); break;
+		case CDocument::TierP3      : str = m_item-> tierPrice ( 2 ). toLocalizedString ( true ); break;
 		case CDocument::Reserved    : str = m_item-> reserved ( ); break;
 		case CDocument::Weight      : str = ( m_item-> weight ( ) == 0 ? dash : CUtility::weightToString ( m_item-> weight ( ), ( CConfig::inst ( )-> weightSystem ( ) == CConfig::WeightImperial ), true, true )); break;
 		case CDocument::YearReleased: str = ( m_item-> item ( )-> yearReleased ( ) == 0 ? dash : QString::number ( m_item-> item ( )-> yearReleased ( ))); break;
 
-		case CDocument::PriceOrig   : str = m_item-> origPrice ( ). toLocalizedString ( ); break;
-		case CDocument::PriceDiff   : str = ( m_item-> price ( ) - m_item-> origPrice ( )). toLocalizedString ( ); break;
+		case CDocument::PriceOrig   : str = m_item-> origPrice ( ). toLocalizedString ( true ); break;
+		case CDocument::PriceDiff   : str = ( m_item-> price ( ) - m_item-> origPrice ( )). toLocalizedString ( true ); break;
 		case CDocument::QuantityOrig: str = QString::number ( m_item-> origQuantity ( )); break;
 		case CDocument::QuantityDiff: str = QString::number ( m_item-> quantity ( ) - m_item-> origQuantity ( )); break;
 	}
@@ -1061,12 +1061,12 @@ void CItemViewItem::doubleClicked ( const QPoint &/*p*/, int col )
 		case CDocument::TierQ1      : lv-> editWithLineEdit ( this, col, QString::number ( m_item-> tierQuantity ( 0 )), "", new QIntValidator ( 0, 99999, 0 ), "0" ); break;
 		case CDocument::TierQ2      : lv-> editWithLineEdit ( this, col, QString::number ( m_item-> tierQuantity ( 1 )), "", new QIntValidator ( 0, 99999, 0 ), "0" ); break;
 		case CDocument::TierQ3      : lv-> editWithLineEdit ( this, col, QString::number ( m_item-> tierQuantity ( 2 )), "", new QIntValidator ( 0, 99999, 0 ), "0" ); break;
-		case CDocument::Price       : lv-> editWithLineEdit ( this, col, m_item-> price ( ). toLocalizedString ( true ), "", new CMoneyValidator ( 0, 10000, 3, 0 ), "0" ); break;
-		case CDocument::PriceDiff   : lv-> editWithLineEdit ( this, col, ( m_item-> price ( ) - m_item-> origPrice ( )). toLocalizedString ( true ), "", new CMoneyValidator ( -10000, 10000, 3, 0 ), "0" ); break;
+		case CDocument::Price       : lv-> editWithLineEdit ( this, col, m_item-> price ( ). toLocalizedString ( false ), "", new CMoneyValidator ( 0, 10000, 3, 0 ), "0" ); break;
+		case CDocument::PriceDiff   : lv-> editWithLineEdit ( this, col, ( m_item-> price ( ) - m_item-> origPrice ( )). toLocalizedString ( false ), "", new CMoneyValidator ( -10000, 10000, 3, 0 ), "0" ); break;
 		case CDocument::Total       : break;
-		case CDocument::TierP1      : lv-> editWithLineEdit ( this, col, ( m_item-> tierPrice ( 0 ) != 0 ? m_item-> tierPrice ( 0 ) : m_item-> price ( )      ). toLocalizedString ( true ), "", new CMoneyValidator ( 0, 10000, 3, 0 ), "0" ); break;
-		case CDocument::TierP2      : lv-> editWithLineEdit ( this, col, ( m_item-> tierPrice ( 1 ) != 0 ? m_item-> tierPrice ( 1 ) : m_item-> tierPrice ( 0 )). toLocalizedString ( true ), "", new CMoneyValidator ( 0, 10000, 3, 0 ), "0" ); break;
-		case CDocument::TierP3      : lv-> editWithLineEdit ( this, col, ( m_item-> tierPrice ( 2 ) != 0 ? m_item-> tierPrice ( 2 ) : m_item-> tierPrice ( 1 )). toLocalizedString ( true ), "", new CMoneyValidator ( 0, 10000, 3, 0 ), "0" ); break;
+		case CDocument::TierP1      : lv-> editWithLineEdit ( this, col, ( m_item-> tierPrice ( 0 ) != 0 ? m_item-> tierPrice ( 0 ) : m_item-> price ( )      ). toLocalizedString ( false ), "", new CMoneyValidator ( 0, 10000, 3, 0 ), "0" ); break;
+		case CDocument::TierP2      : lv-> editWithLineEdit ( this, col, ( m_item-> tierPrice ( 1 ) != 0 ? m_item-> tierPrice ( 1 ) : m_item-> tierPrice ( 0 )). toLocalizedString ( false ), "", new CMoneyValidator ( 0, 10000, 3, 0 ), "0" ); break;
+		case CDocument::TierP3      : lv-> editWithLineEdit ( this, col, ( m_item-> tierPrice ( 2 ) != 0 ? m_item-> tierPrice ( 2 ) : m_item-> tierPrice ( 1 )). toLocalizedString ( false ), "", new CMoneyValidator ( 0, 10000, 3, 0 ), "0" ); break;
 		case CDocument::Weight      : lv-> editWithLineEdit ( this, col, CUtility::weightToString ( m_item-> weight ( ), ( CConfig::inst ( )-> weightSystem ( ) == CConfig::WeightImperial ), false, false ), "", new QDoubleValidator ( 0., 100000., 4, 0 ), "0" ); break;
 
 		case CDocument::Retain      : {

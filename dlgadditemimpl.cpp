@@ -223,7 +223,7 @@ void DlgAddItemImpl::updateMonetary ( )
 {
 	w_label_currency-> setText ( m_price_label_fmt. arg( CMoney::inst ( )-> currencySymbol ( )));
 	w_radio_currency-> setText ( m_currency_label_fmt. arg( CMoney::inst ( )-> currencySymbol ( )));
-	w_price-> setText ( money_t( 0 ). toLocalizedString ( true ));
+	w_price-> setText ( money_t( 0 ). toLocalizedString ( false ));
 }
 
 
@@ -254,7 +254,7 @@ void DlgAddItemImpl::showTotal ( )
 	if ( w_price-> hasAcceptableInput ( ) && w_qty-> hasAcceptableInput ( ))
 		tot = money_t::fromLocalizedString ( w_price-> text ( )) * w_qty-> text ( ). toInt ( );
 
-	w_total-> setText ( tot. toLocalizedString ( true ));
+	w_total-> setText ( tot. toLocalizedString ( false ));
 
 	checkAddPossible ( );
 }
@@ -262,7 +262,7 @@ void DlgAddItemImpl::showTotal ( )
 void DlgAddItemImpl::setTierType ( int id )
 {
 	QValidator *valid = ( id == 0 ) ? m_percent_validator : m_money_validator;
-	QString text = ( id == 0 ) ? QString( "0" ) : money_t ( 0 ). toLocalizedString ( true );
+	QString text = ( id == 0 ) ? QString( "0" ) : money_t ( 0 ). toLocalizedString ( false );
 	
 	for ( int i = 0; i < 3; i++ ) {
 		w_tier_price [i]-> setValidator ( valid );
@@ -355,6 +355,6 @@ void DlgAddItemImpl::addClicked ( )
 
 void DlgAddItemImpl::setPrice ( money_t d )
 {
-	w_price-> setText ( d. toLocalizedString ( true ));
+	w_price-> setText ( d. toLocalizedString ( false ));
 	checkAddPossible ( );
 }

@@ -210,12 +210,12 @@ void CTaskInfoWidget::selectionUpdate ( const CDocument::ItemList &list )
 
 		if ( stat. value ( ) != stat. minValue ( )) {
 			valstr = QString ( "%1 (%2 %3)" ).
-						arg( stat. value ( ). toLocalizedString ( )).
+						arg( stat. value ( ). toLocalizedString ( true )).
 						arg( tr( "min." )).
-						arg( stat. minValue ( ). toLocalizedString ( ));
+						arg( stat. minValue ( ). toLocalizedString ( true ));
 		}
 		else
-			valstr = stat. value ( ). toLocalizedString ( );
+			valstr = stat. value ( ). toLocalizedString ( true );
 
 		if ( stat. weight ( ) == -DBL_MIN ) {
 			wgtstr = "-";

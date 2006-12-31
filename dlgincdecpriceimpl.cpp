@@ -64,7 +64,7 @@ void DlgIncDecPriceImpl::slotPercentFixed ( int i )
 	}
 	else {
 		w_value-> setValidator ( m_fixed_validator );
-		w_value-> setText ( money_t ( 0 ). toLocalizedString ( true ));
+		w_value-> setText ( money_t ( 0 ). toLocalizedString ( false ));
 	}
 	checkValue ( );
 }

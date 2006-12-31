@@ -23,6 +23,7 @@
 #include <qsinterpreter.h>
 #include <qsargument.h>
 #include <qsinputdialogfactory.h>
+#include <qsobjectfactory.h>
 
 #include "cutility.h"
 #include "cresource.h"
@@ -43,7 +44,22 @@ static inline QSArgument evaluate ( QSInterpreter *interp, const QString &code, 
 	return res;
 }
 
+
+class CReportFactory : public QSObjectFactory {
+public:
+    CReportFactory ( )
+	{
+		registerClass ( "Money", new CReportMoneyStatic ( interpreter ( )));
+	}
+
+    QObject *create ( const QString &, const QSArgumentList &, QObject * )
+	{
+		return 0;
+	}
+};
+
 }
+
 
 CReport::CReport ( )
 {
@@ -60,7 +76,7 @@ CReport::~CReport ( )
 
 QString CReport::name ( ) const
 {
-	return d-> m_name;
+	return d-> m_label. isEmpty ( ) ? d-> m_name : d-> m_label;
 }
 
 bool CReport::load ( const QString &filename )
@@ -86,6 +102,7 @@ bool CReport::load ( const QString &filename )
 
 		d-> m_interpreter = new QSInterpreter ( this, "report_interpreter" );
 		d-> m_interpreter-> addObjectFactory ( new QSInputDialogFactory ( ));
+		d-> m_interpreter-> addObjectFactory ( new CReportFactory ( ));
 
 		evaluate ( d-> m_interpreter, d-> m_code, 0, fi. baseName ( ));
 
@@ -97,6 +114,9 @@ bool CReport::load ( const QString &filename )
 
 				if ( !d-> m_interpreter-> hadError ( )) {	
 					d-> m_loaded = fi. lastModified ( ). toTime_t ( );
+
+					if ( res. type ( ) == QSArgument::Variant && res. variant ( ). type ( ) == QVariant::Map )
+						d-> m_label = res. variant ( ). asMap ( ) ["name"]. toString ( );
 				}
 			}
 		}
@@ -119,8 +139,8 @@ void CReport::print ( QPaintDevice *pd, const CDocument *doc, const CDocument::I
 	statmap ["errors"]   = stat. errors ( );
 	statmap ["items"]    = stat. items ( );
 	statmap ["lots"]     = stat. lots ( );
-	statmap ["minValue"] = stat. minValue ( ). toScriptObject ( );
-	statmap ["value"]    = stat. value ( ). toScriptObject ( );
+	statmap ["minValue"] = stat. minValue ( ). toDouble ( );
+	statmap ["value"]    = stat. value ( ). toDouble ( );
 	statmap ["weight"]   = stat. weight ( );
 
 	docmap ["statistics"] = statmap;
@@ -134,11 +154,11 @@ void CReport::print ( QPaintDevice *pd, const CDocument *doc, const CDocument::I
 		ordermap ["date"]         = order-> date ( ). toString ( Qt::TextDate );
 		ordermap ["statusChange"] = order-> statusChange ( );
 		ordermap ["buyer"]        = order-> buyer ( );
-		ordermap ["shipping"]     = order-> shipping ( ). toScriptObject ( );
-		ordermap ["insurance"]    = order-> insurance ( ). toScriptObject ( );
-		ordermap ["delivery"]     = order-> delivery ( ). toScriptObject ( );
-		ordermap ["credit"]       = order-> credit ( ). toScriptObject ( );
-		ordermap ["grandTotal"]   = order-> grandTotal ( ). toScriptObject ( );
+		ordermap ["shipping"]     = order-> shipping ( ). toDouble ( );
+		ordermap ["insurance"]    = order-> insurance ( ). toDouble ( );
+		ordermap ["delivery"]     = order-> delivery ( ). toDouble ( );
+		ordermap ["credit"]       = order-> credit ( ). toDouble ( );
+		ordermap ["grandTotal"]   = order-> grandTotal ( ). toDouble ( );
 		ordermap ["status"]       = order-> status ( );
 		ordermap ["payment"]      = order-> payment ( );
 		ordermap ["remarks"]      = order-> remarks ( );
@@ -179,8 +199,8 @@ void CReport::print ( QPaintDevice *pd, const CDocument *doc, const CDocument::I
 		cond ["used"]      = ( item-> condition ( ) == BrickLink::Used );
 		imap ["condition"] = cond;
 
-		imap ["price"]     = item-> price ( ). toScriptObject ( );
-		imap ["total"]     = item-> total ( ). toScriptObject ( );
+		imap ["price"]     = item-> price ( ). toDouble ( );
+		imap ["total"]     = item-> total ( ). toDouble ( );
 		imap ["bulkQuantity"] = item-> bulkQuantity ( );
 		imap ["sale"]      = item-> sale ( );
 		imap ["remarks"]   = item-> remarks ( );
@@ -201,7 +221,7 @@ void CReport::print ( QPaintDevice *pd, const CDocument *doc, const CDocument::I
 		imap ["tierQuantity"] = tq;
 
 		QValueList<QVariant> tp;
-		tp << item-> tierPrice ( 0 ). toScriptObject ( ) << item-> tierPrice ( 1 ). toScriptObject ( ) << item-> tierPrice ( 2 ). toScriptObject ( );
+		tp << item-> tierPrice ( 0 ). toDouble ( ) << item-> tierPrice ( 1 ). toDouble ( ) << item-> tierPrice ( 2 ). toDouble ( );
 		imap ["tierPrice"] = tp;
 
 		imap ["lotId"]     = item-> lotId ( );

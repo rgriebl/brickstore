@@ -6,6 +6,9 @@
 #include <qpainter.h>
 #include <qdatetime.h>
 
+#include <qsinterpreter.h> 
+
+
 #include "cmoney.h"
 #include "cutility.h"
 
@@ -19,19 +22,6 @@ CReportUtility::CReportUtility ( )
 QString CReportUtility::translate ( const QString &context, const QString &text ) const
 {
 	return qApp-> translate ( context. latin1 ( ), text. latin1 ( ));
-}
-
-QMap<QString, QVariant> CReportUtility::moneyFromDollar ( double d ) const
-{
-	money_t m ( d );
-	return m. toScriptObject ( );
-}
-
-QMap<QString, QVariant> CReportUtility::moneyFromLocal ( double d ) const
-{
-	money_t m ( d );
-	m /= CMoney::inst ( )-> factor ( );
-	return m. toScriptObject ( );
 }
 
 QString CReportUtility::localDateString ( const QDateTime &dt ) const
@@ -447,3 +437,52 @@ void CReportPage::drawPixmap ( double left, double top, double width, double hei
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+
+CReportMoneyStatic::CReportMoneyStatic ( QSInterpreter *ip )
+	: m_ip ( ip ) 
+{ }
+
+double CReportMoneyStatic::fromValue ( double d )
+{
+	return d;
+}
+
+double CReportMoneyStatic::fromLocalValue ( double d )
+{
+	return d / CMoney::inst ( )-> factor ( );
+}
+
+double CReportMoneyStatic::value ( double d ) const
+{
+	return d;
+}
+double CReportMoneyStatic::localValue ( double d ) const
+{
+	return d * CMoney::inst ( )-> factor ( );
+}
+
+QString CReportMoneyStatic::localCurrencySymbol ( ) const
+{
+	return CMoney::inst ( )-> localCurrencySymbol ( );
+}
+
+QString CReportMoneyStatic::toString ( double d, bool with_currency_symbol, int precision )
+{
+	if ( precision > 3 || precision < 0 ) {
+		m_ip-> throwError ( "Money.toString(): precision has to be in the range [0 .. 3]" );
+		return QString ( );
+	}
+	return money_t ( d ). toCString ( with_currency_symbol, precision );
+}
+
+QString CReportMoneyStatic::toLocalString ( double d, bool with_currency_symbol, int precision )
+{
+	if ( precision > 3 || precision < 0 ) {
+		m_ip-> throwError ( "Money.toLocalString(): precision has to be in the range [0 .. 3]" );
+		return QString ( );
+	}
+	return money_t ( d ). toLocalizedString ( with_currency_symbol, precision );
+}

@@ -54,7 +54,7 @@ public:
 	QChar decimalPoint ( ) const;
 	
 private:
-	QString toString ( double dv, bool no_currency_symbol = false ) const;
+	QString toString ( double dv, bool with_currency_symbol, int precision ) const;
 	money_t toMoney ( const QString &s, bool *ok = 0 ) const;
 
 	friend class money_t;
@@ -126,20 +126,15 @@ public:
 	friend QDataStream &operator << ( QDataStream &s, const money_t &m );
 	friend QDataStream &operator >> ( QDataStream &s, money_t &m );
 
-	QString toCString ( ) const;
-	QString toLocalizedString ( bool no_currency_symbol = false ) const;
+	QString toCString ( bool with_currency_symbol = false, int precision = 3 ) const;
+	QString toLocalizedString ( bool with_currency_symbol = false, int precision = 3 ) const;
 
 	static money_t fromCString ( const QString & );
 	static money_t fromLocalizedString ( const QString & );
 
-	QMap<QString, QVariant> toScriptObject ( ) const;
+	double toDouble ( ) const;
 	
 	Q_INT64 &internalValue ( ) { return val; }
-
-private:
-	double toDouble ( ) const;
-
-	friend class CMoneyValidator;
 
 private:
 	Q_INT64 val;

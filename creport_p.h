@@ -23,6 +23,7 @@ public:
 	time_t              m_loaded;
 	QString             m_name;
 	QString             m_code;
+	QString             m_label;
 	QSInterpreter *     m_interpreter;
 };
 

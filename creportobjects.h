@@ -11,6 +11,7 @@ class QPaintDevice;
 class QPixmap;
 class CReportPage;
 class QPainter;
+class QSInterpreter;
 
 
 class CReportUtility : public QObject {
@@ -20,15 +21,37 @@ class CReportUtility : public QObject {
 public slots:
 	QString translate ( const QString &context, const QString &text ) const;
 
-	QMap<QString, QVariant> moneyFromDollar ( double d ) const;
-	QMap<QString, QVariant> moneyFromLocal ( double d ) const;
-
 	QString localDateString ( const QDateTime &dt ) const;
 	QString localTimeString ( const QDateTime &dt ) const;
 
 public:
 	CReportUtility ( );
 };
+
+
+class CReportMoneyStatic : public QObject {
+    Q_OBJECT
+    Q_OVERRIDE( QCString name SCRIPTABLE false)
+
+public:
+	CReportMoneyStatic ( QSInterpreter *ip );
+
+public slots:
+	double fromValue ( double d );
+	double fromLocalValue ( double d );
+
+	double value ( double d ) const;
+	double localValue ( double d ) const;
+
+	QString localCurrencySymbol ( ) const;
+
+	QString toString ( double d, bool with_currency_symbol = false, int precision = 3 );
+	QString toLocalString ( double d, bool with_currency_symbol = false, int precision = 3 );
+
+private:
+	QSInterpreter *m_ip;
+};
+
 
 class CReportJob : public QObject {
 	Q_OBJECT

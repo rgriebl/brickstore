@@ -49,14 +49,17 @@ double money_t::toDouble ( ) const
 	return double( val ) / 1000.;
 }
 
-QString money_t::toCString ( ) const
+QString money_t::toCString ( bool with_currency_symbol, int precision ) const
 {
-	return QLocale::c ( ). toString ( toDouble ( ), 'f', 3 );
+	QString s = QLocale::c ( ). toString ( toDouble ( ), 'f', precision );
+	if ( with_currency_symbol )
+		s. prepend ( "$ " );
+	return s;
 }
 
-QString money_t::toLocalizedString ( bool no_currency_symbol ) const
+QString money_t::toLocalizedString ( bool with_currency_symbol, int precision ) const
 {
-	return CMoney::inst ( )-> toString ( toDouble ( ), no_currency_symbol );
+	return CMoney::inst ( )-> toString ( toDouble ( ), with_currency_symbol, precision );
 }
 
 money_t money_t::fromCString ( const QString &str )
@@ -69,16 +72,6 @@ money_t money_t::fromLocalizedString ( const QString &str )
 	return CMoney::inst ( )-> toMoney ( str );
 }
 
-QMap<QString, QVariant> money_t::toScriptObject ( ) const
-{
-	QMap<QString, QVariant> so;
-	so ["dollar"]     = toDouble ( );
-	so ["local"]      = toDouble ( ) * CMoney::inst ( )-> factor ( );
-	so ["formatted"]  = toLocalizedString ( false );
-	so ["formatted2"] = toLocalizedString ( true );
-	return so;
-}
-	
 
 
 class CMoneyData : public QObject {
@@ -245,20 +238,20 @@ int CMoney::precision ( ) const
 	return d-> m_precision;
 }
 
-QString CMoney::toString ( double v, bool no_currency_symbol ) const
+QString CMoney::toString ( double v, bool with_currency_symbol, int precision ) const
 {
 	if ( d-> m_localized )
 		v *= d-> m_factor;
 
-	QString s = QString::number ( v, 'f', d-> m_precision );
+	QString s = QString::number ( v, 'f', precision );
 
 	if ( d-> m_localized )
 		s. replace ( QChar( '.' ), d-> m_decpoint );
 
-	if ( no_currency_symbol )
-		return s;
-	else
+	if ( with_currency_symbol )
 		return currencySymbol ( ) + " " + s;
+	else
+		return s;
 }
 
 money_t CMoney::toMoney ( const QString &str, bool *ok ) const
