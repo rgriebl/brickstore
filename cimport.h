@@ -91,17 +91,21 @@ private slots:
 
 					if (( root. nodeName ( ) == "INVENTORY" ))
 						items = BrickLink::inst ( )-> parseItemListXML ( root, BrickLink::XMLHint_MassUpload /*, &invalid_items */);
-				}
-				else
-					m_progress-> setErrorText ( tr( "Could not parse the XML data for the store inventory:<br /><i>Line %1, column %2: %3</i>" ). arg ( eline ). arg ( ecol ). arg ( emsg ));
 
-				if ( items ) {
-					m_items += *items;
-					delete items;
-					ok = true;
+					if ( items ) {
+						m_items += *items;
+						delete items;
+						ok = true;
+					}
+					else
+						m_progress-> setErrorText ( tr( "Could not parse the XML data for the store inventory." ));
 				}
-				else
-					m_progress-> setErrorText ( tr( "Could not parse the XML data for the store inventory." ));
+				else {
+					if (( QCString ( data-> data ( ), 7 ) == "<HTML>" ) && ( QCString ( data-> data ( ), data-> size ( )). find ( "Invalid password", 0, false ) != -1 ))
+						m_progress-> setErrorText ( tr( "Either your username or password are incorrect." ));
+					else
+						m_progress-> setErrorText ( tr( "Could not parse the XML data for the store inventory:<br /><i>Line %1, column %2: %3</i>" ). arg ( eline ). arg ( ecol ). arg ( emsg ));
+				}
 			}
 		}
 		m_progress-> setFinished ( ok );
@@ -257,6 +261,9 @@ private slots:
 						}
 					}
 				}
+				// find a better way - we shouldn't display widgets here
+				//else
+				//	CMessageBox::warning ( 0, tr( "Could not parse the XML data for your orders:<br /><i>Line %1, column %2: %3</i>" ). arg ( eline ). arg ( ecol ). arg ( emsg ));
 			}
 		}
 

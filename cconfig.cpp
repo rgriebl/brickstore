@@ -21,6 +21,8 @@
 #include <windows.h>
 #include <tchar.h>
 #include <shlobj.h>
+
+#include <qapplication.h>
 #endif
 
 #if defined ( Q_WS_MACX )
@@ -163,6 +165,12 @@ CConfig::Registration CConfig::setRegistration ( const QString &name, const QStr
 
 QString CConfig::obscure ( const QString &str )
 {
+#if defined( Q_WS_WIN )
+	// win9x registries cannot store unicode values
+	if ( QApplication::winVersion ( ) & Qt::WV_DOS_based )
+		return str;
+#endif
+
 	QString result;
 	const QChar *unicode = str. unicode ( );
 	for ( uint i = 0; i < str. length ( ); i++ )
