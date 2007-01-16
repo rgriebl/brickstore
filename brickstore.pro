@@ -12,7 +12,7 @@
 ## See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 
 isEmpty( RELEASE ) {
-  RELEASE    = 1.1.7
+  RELEASE    = 1.1.8
 }
 
 TEMPLATE     = app
@@ -30,7 +30,7 @@ res_images_22       = images/22x22/*.png
 res_images_status   = images/status/*.png
 res_images_sidebar  = images/sidebar/*.png
 res_translations    = translations/translations.xml $$TRANSLATIONS
-res_print_templates = print-templates/*.qs
+res_print_templates = print-templates/standard.qs
 
 dist_extra          = version.h.in icon.png
 dist_scripts        = scripts/*.sh scripts/*.pl scripts/*.js

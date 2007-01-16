@@ -26,4 +26,4 @@ $QTDIR/translations/*_de.qm	Contents/Resources/translations
 $QTDIR/translations/*_fr.qm	Contents/Resources/translations
 $QTDIR/translations/*_nl.qm	Contents/Resources/translations
 
-print-templates/*.qs		Contents/Resources/print-templates
+print-templates/standard.qs	Contents/Resources/print-templates
