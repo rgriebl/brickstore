@@ -119,7 +119,7 @@ echo >debian/compat '4'
 echo " > Building package..."
 
 chmod +x debian/rules
-BRICKSTORE_VERSION=$pkg_ver dpkg-buildpackage -b -D -rfakeroot
+BRICKSTORE_VERSION=$pkg_ver dpkg-buildpackage -b -D -rfakeroot -us -uc
 
 cd ../..
 rm -rf "$pkg_ver"
