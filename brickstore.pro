@@ -22,7 +22,8 @@ TARGET       = brickstore
 
 TRANSLATIONS = translations/brickstore_de.ts \
                translations/brickstore_fr.ts \
-               translations/brickstore_nl.ts
+               translations/brickstore_nl.ts \
+               translations/brickstore_si.ts
 
 res_images          = images/*.png images/*.jpg 
 res_images_16       = images/16x16/*.png
