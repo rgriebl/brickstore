@@ -371,7 +371,7 @@ private slots:
 
 					QRegExp rx_type ( " ([A-Z])-No: " );
 					QRegExp rx_ids ( "HEIGHT='60' SRC='/([A-Z])/([^ ]+).gif' NAME=" );
-					QRegExp rx_qty_price ( " VALUE=\"([0-9]+)\">(&nbsp;\\(x[0-9]+\\))?<BR>Each:&nbsp;<B>\\$([0-9.]+)</B>" );
+					QRegExp rx_qty_price ( " VALUE=\"([0-9]+)\">(&nbsp;\\(x[0-9]+\\))?<BR>Qty Available: <B>[0-9]+</B><BR>Each:&nbsp;<B>\\$([0-9.]+)</B>" );
 					QRegExp rx_names ( "<TD><FONT FACE=\"MS Sans Serif,Geneva\" SIZE=\"1\">(.+)</FONT></TD><TD VALIGN=\"TOP\" NOWRAP>" );
 					QString str_cond ( "<B>New</B>" );
 

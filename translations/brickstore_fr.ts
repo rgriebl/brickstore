@@ -9,78 +9,6 @@
         <source>HTTP transfer threads could not be started.</source>
         <translation>N&apos;est pas arrivé à lancer les processus de transfert HTTP.</translation>
     </message>
-    <message>
-        <source>Items of type: %1</source>
-        <translation type="obsolete">Items du type : %1</translation>
-    </message>
-    <message>
-        <source>Not all BrickLink database were successfully updated (%1 failed).</source>
-        <translation type="obsolete">Tous les fichiers de bases de données BrickLink n&apos;ont pas été mis à jour avec succès (%1 ont échoué).</translation>
-    </message>
-    <message>
-        <source>Updating the BrickLink database files was successfull.</source>
-        <translation type="obsolete">La mise à jour des fichiers de la base de données BrickLink a réussi.</translation>
-    </message>
-    <message>
-        <source>Item types</source>
-        <translation type="obsolete">Types d&apos;item</translation>
-    </message>
-    <message>
-        <source>Categories</source>
-        <translation type="obsolete">Catégories</translation>
-    </message>
-    <message>
-        <source>Colors</source>
-        <translation type="obsolete">Couleurs</translation>
-    </message>
-    <message>
-        <source>Color guide</source>
-        <translation type="obsolete">Guide des couleurs</translation>
-    </message>
-    <message>
-        <source>Peeron color table</source>
-        <translation type="obsolete">Table des couleurs Peeron</translation>
-    </message>
-    <message>
-        <source>Inventory list</source>
-        <translation type="obsolete">Liste des inventaires</translation>
-    </message>
-    <message>
-        <source>Default image 1</source>
-        <translation type="obsolete">Image défaut 1</translation>
-    </message>
-    <message>
-        <source>Default Image 2</source>
-        <translation type="obsolete">Image défaut 2</translation>
-    </message>
-    <message>
-        <source>This inventory contains %1 invalid item(s).</source>
-        <translation type="obsolete">Cet inventaire comprend %1 item(s) non valide(s).</translation>
-    </message>
-    <message>
-        <source>Could not parse the XML data for order #%1:&lt;br /&gt;&lt;i&gt;Line %2, column %3: %4&lt;/i&gt;</source>
-        <translation type="obsolete">N&apos;est pas arrivé à interpréter les données XML pour la commande #%1 :&lt;br /&gt;&lt;i&gt;Ligne %2, colonne %3 : %4&lt;/i&gt;</translation>
-    </message>
-    <message>
-        <source>This order contains %1 invalid item(s).</source>
-        <translation type="obsolete">Cette commande comprend %1 item(s) non valides.</translation>
-    </message>
-    <message>
-        <source>Could not parse the XML data for order #%1.</source>
-        <translation type="obsolete">N&apos;est pas arrivé à interpréter les données XML de la commande #%1.</translation>
-    </message>
-    <message>
-        <source>Could not parse the XML data for the store inventory:&lt;br /&gt;&lt;i&gt;Line %1, column %2: %3&lt;/i&gt;</source>
-        <translation type="obsolete">N&apos;est pas arrivé à interpréter les données XML de l&apos;inventaire de la boutique :&lt;br /&gt;&lt;i&gt;Ligne %1, colonne %2 : %3&lt;/i&gt;</translation>
-    </message>
-    <message>
-        <source>This store inventory contains %1 invalid item(s).</source>
-        <translation type="obsolete">Cet inventaire de la boutique comprend %1 item(s) non valide(s).</translation>
-    </message>
-    <message>
-        <source>Could not parse the XML data for the store inventory.</source>
-        <translation type="obsolete">N&apos;est pas arrivé à interpréter les données XML de l&apos;inventaire de la boutique.</translation>
-    </message>
 </context>
 <context>
     <name>CAddRemoveCmd</name>
@@ -136,10 +64,6 @@
         <translation>Montrer le guide de prix BrickLink...</translation>
     </message>
     <message>
-        <source>Lots for Sale on BrickLink...</source>
-        <translation type="obsolete">Lots en vente sur BrickLink...</translation>
-    </message>
-    <message>
         <source>Show Lots for Sale on BrickLink...</source>
         <translation>Lots en vente sur BrickLink...</translation>
     </message>
@@ -149,10 +73,6 @@
     <message>
         <source>Could not initialize the BrickLink kernel:&lt;br /&gt;&lt;br /&gt;%1</source>
         <translation>N&apos;est pas arrivé à intitialiser le noyau BrickLink : &lt;br /&gt;&lt;br /&gt;%1</translation>
-    </message>
-    <message>
-        <source>This is an &lt;b&gt;unrestricted&lt;/b&gt; demo version.&lt;br /&gt;&lt;br /&gt;If you want to support the development of this program (or if you just want to get rid of this dialog...), check out %1 how to get the non-demo version.</source>
-        <translation type="obsolete">Ceci est une version de démonstration aux fonctionnalités &lt;b&gt;non limitées&lt;/b&gt;.&lt;br /&gt;&lt;br /&gt;Mais si vous souhaitez aider au développement de ce programme (ou pour juste éviter cette boîte de dialogue...), alors consultez %1 afin de savoir comment obtenir la version non-démonstration.</translation>
     </message>
     <message>
         <source>Copyright &amp;copy; %1</source>
@@ -165,10 +85,6 @@
     <message>
         <source>Visit %1, or send an email to %2</source>
         <translation>Consultez %1, ou envoyez un e-mail à %2</translation>
-    </message>
-    <message>
-        <source>&lt;p&gt;This program is free software; it may be distributed and/or modified under the terms of the GNU General Public License version 2 as published by the Free Software Foundation and appearing in the file LICENSE.GPL included in this software package.&lt;br /&gt;This program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.&lt;br /&gt;See &lt;a href=&quot;http://fsf.org/licensing/licenses/gpl.html&quot;&gt;www.fsf.org/licensing/licenses/gpl.html&lt;/a&gt; for GPL licensing information.&lt;/p&gt;&lt;p&gt;All data from &lt;a href=&quot;http://www.bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; is owned by BrickLink&lt;sup&gt;TM&lt;/sup&gt;, which is a trademark of Dan Jezek.&lt;/p&gt;&lt;p&gt;Peeron Inventories from &lt;a href=&quot;http://www.peeron.com&quot;&gt;www.peeron.com&lt;/a&gt; are owned by Dan and Jennifer Boger.&lt;/p&gt;&lt;p&gt;LEGO&lt;sup&gt;&amp;reg;&lt;/sup&gt; is a trademark of the LEGO group of companies, which does not sponsor, authorize or endorse this software.&lt;/p&gt;&lt;p&gt;All other trademarks recognised.&lt;/p&gt;&lt;p&gt;French translation by Sylvain Perez (&lt;a href=&quot;mailto:bricklink@1001bricks.com&quot;&gt;1001bricks&lt;/a&gt;)&lt;/p&gt;</source>
-        <translation type="obsolete">&lt;p&gt;This program is free software; it may be distributed and/or modified under the terms of the GNU General Public License version 2 as published by the Free Software Foundation and appearing in the file LICENSE.GPL included in this software package.&lt;br /&gt;This program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.&lt;br /&gt;See &lt;a href=&quot;http://fsf.org/licensing/licenses/gpl.html&quot;&gt;www.fsf.org/licensing/licenses/gpl.html&lt;/a&gt; for GPL licensing information.&lt;/p&gt;&lt;p&gt;All data from &lt;a href=&quot;http://www.bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; is owned by BrickLink&lt;sup&gt;TM&lt;/sup&gt;, which is a trademark of Dan Jezek.&lt;/p&gt;&lt;p&gt;Peeron Inventories from &lt;a href=&quot;http://www.peeron.com&quot;&gt;www.peeron.com&lt;/a&gt; are owned by Dan and Jennifer Boger.&lt;/p&gt;&lt;p&gt;LEGO&lt;sup&gt;&amp;reg;&lt;/sup&gt; is a trademark of the LEGO group of companies, which does not sponsor, authorize or endorse this software.&lt;/p&gt;&lt;p&gt;All other trademarks recognised.&lt;/p&gt;&lt;p&gt;French translation by Sylvain Perez (&lt;a href=&quot;mailto:bricklink@1001bricks.com&quot;&gt;1001bricks&lt;/a&gt;)&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Legal Info</source>
@@ -276,10 +192,6 @@
         <translation>Commande #%1</translation>
     </message>
     <message>
-        <source>Invalid order number.</source>
-        <translation type="obsolete">Numéro de commande non valide.</translation>
-    </message>
-    <message>
         <source>Store %1</source>
         <translation>Boutique %1</translation>
     </message>
@@ -360,14 +272,6 @@
         <translation>Exporter un fichier</translation>
     </message>
     <message>
-        <source>This list contains items with errors.&lt;br /&gt;&lt;br /&gt;Do you really want to export this list?</source>
-        <translation type="obsolete">Cette liste contient des items avec des erreurs.&lt;br /&gt;&lt;br /&gt;Voulez-vous réellement exporter cette liste ?</translation>
-    </message>
-    <message>
-        <source>Reset Differences</source>
-        <translation type="obsolete">Réinitialiser les différences</translation>
-    </message>
-    <message>
         <source>Inventory Files</source>
         <translation type="unfinished"></translation>
     </message>
@@ -395,28 +299,12 @@
         <translation>Barre d&apos;outils</translation>
     </message>
     <message>
-        <source>Infobar</source>
-        <translation type="obsolete">Barre d&apos;infos</translation>
-    </message>
-    <message>
         <source>Could not load the BrickLink database files.&lt;br /&gt;&lt;br /&gt;Should these files be updated now?</source>
         <translation>N&apos;est pas arrivé à charger les fichiers de la base de données BrickLink.&lt;br /&gt;&lt;br /&gt;Mettre à jour ces fichiers maintenant ?</translation>
     </message>
     <message>
         <source>Could not load the BrickLink database files.&lt;br /&gt;&lt;br /&gt;The program is not functional without these files.</source>
         <translation>N&apos;est pas arrivé à charger les fichiers de la base de données BrickLink.&lt;br /&gt;&lt;br /&gt;Ce programme ne peut pas fonctionner sans ces fichiers.</translation>
-    </message>
-    <message>
-        <source>Priceguide updates</source>
-        <translation type="obsolete">Mise à jour du guide de prix</translation>
-    </message>
-    <message>
-        <source>Inventory updates</source>
-        <translation type="obsolete">Mise à jour de l&apos;inventaire</translation>
-    </message>
-    <message>
-        <source>Picture updates</source>
-        <translation type="obsolete">Mise à jour des images</translation>
     </message>
     <message>
         <source>&amp;File</source>
@@ -441,10 +329,6 @@
     <message>
         <source>&amp;Help</source>
         <translation>A&amp;ide</translation>
-    </message>
-    <message>
-        <source>New...</source>
-        <translation type="obsolete">Nouveau...</translation>
     </message>
     <message>
         <source>Ctrl+N</source>
@@ -549,17 +433,9 @@
         <translation></translation>
     </message>
     <message>
-        <source>Undo</source>
-        <translation type="obsolete">Annuler</translation>
-    </message>
-    <message>
         <source>Ctrl+Z</source>
         <comment>Edit|Undo</comment>
         <translation></translation>
-    </message>
-    <message>
-        <source>Redo</source>
-        <translation type="obsolete">Refaire</translation>
     </message>
     <message>
         <source>Ctrl+Y</source>
@@ -641,16 +517,8 @@
         <translation></translation>
     </message>
     <message>
-        <source>Buyer/Collector View</source>
-        <translation type="obsolete">Mode acheteur/collectionneur</translation>
-    </message>
-    <message>
         <source>View Toolbar</source>
         <translation>Afficher la barre d&apos;outils</translation>
-    </message>
-    <message>
-        <source>View Infobar</source>
-        <translation type="obsolete">Afficher la barre d&apos;infos</translation>
     </message>
     <message>
         <source>View Statusbar</source>
@@ -698,48 +566,8 @@
         <translation></translation>
     </message>
     <message>
-        <source>About</source>
-        <translation type="obsolete">A propos de</translation>
-    </message>
-    <message>
         <source>Check for Program Updates...</source>
         <translation>Vérifier la mise à jour du programme...</translation>
-    </message>
-    <message>
-        <source>Set Prices...</source>
-        <translation type="obsolete">Fixer les prix...</translation>
-    </message>
-    <message>
-        <source>Set Prices to Price-Guide...</source>
-        <translation type="obsolete">Fixer au guide de prix...</translation>
-    </message>
-    <message>
-        <source>Inc- or Decrease Prices...</source>
-        <translation type="obsolete">Aug. / Diminuer les prix...</translation>
-    </message>
-    <message>
-        <source>Set Sale...</source>
-        <translation type="obsolete">Fixer la remise...</translation>
-    </message>
-    <message>
-        <source>Set Remark...</source>
-        <translation type="obsolete">Fixer la remarque...</translation>
-    </message>
-    <message>
-        <source>Set Reserved for...</source>
-        <translation type="obsolete">Fixer la réservation...</translation>
-    </message>
-    <message>
-        <source>Set Condition...</source>
-        <translation type="obsolete">Fixer la condition...</translation>
-    </message>
-    <message>
-        <source>Multiply Quantities...</source>
-        <translation type="obsolete">Multiplier les quantités...</translation>
-    </message>
-    <message>
-        <source>Divide Quantities...</source>
-        <translation type="obsolete">Diviser les quantités...</translation>
     </message>
     <message>
         <source>Show BrickLink Catalog Info...</source>
@@ -750,20 +578,12 @@
         <translation>Montrer le guide de prix BrickLink...</translation>
     </message>
     <message>
-        <source>Lots for Sale on BrickLink...</source>
-        <translation type="obsolete">Lots en vente sur BrickLink...</translation>
-    </message>
-    <message>
         <source>No valid BrickLink login settings found.&lt;br /&gt;&lt;br /&gt;Do you want to change the settings now?</source>
         <translation>Pas de configuration d&apos;identification BrickLink valide trouvée.&lt;br /&gt;&lt;br /&gt;Voulez-vous changer cette configuration maintenant ?</translation>
     </message>
     <message>
         <source>min.</source>
         <translation>min.</translation>
-    </message>
-    <message>
-        <source>Multiple lots selected</source>
-        <translation type="obsolete">Lots multiples sélectionnés</translation>
     </message>
     <message>
         <source>Lots</source>
@@ -790,10 +610,6 @@
         <translation>Modifications non sauvegardées</translation>
     </message>
     <message>
-        <source>Do you want to cancel all outstanding inventory, picture and price guide transfers?</source>
-        <translation type="obsolete">Voulez-vous annuler tous les transferts en cours d&apos;inventaire, images et guide de prix ?</translation>
-    </message>
-    <message>
         <source>Info</source>
         <translation>Info</translation>
     </message>
@@ -808,10 +624,6 @@
     <message>
         <source>Links</source>
         <translation>Liens</translation>
-    </message>
-    <message>
-        <source>New</source>
-        <translation type="obsolete">Neuf</translation>
     </message>
     <message>
         <source>Ctrl+I</source>
@@ -1080,14 +892,6 @@
         <source>Download: %1/%2 KB</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
-        <source>Could not parse the XML data for order #%1.</source>
-        <translation type="obsolete">N&apos;est pas arrivé à interpréter les données XML de la commande #%1.</translation>
-    </message>
-    <message>
-        <source>Could not parse the XML data for order #%1:&lt;br /&gt;&lt;i&gt;Line %2, column %3: %4&lt;/i&gt;</source>
-        <translation type="obsolete">N&apos;est pas arrivé à interpréter les données XML pour la commande #%1 :&lt;br /&gt;&lt;i&gt;Ligne %2, colonne %3 : %4&lt;/i&gt;</translation>
-    </message>
 </context>
 <context>
     <name>CImportBLStore</name>
@@ -1107,6 +911,10 @@
         <source>Could not parse the XML data for the store inventory.</source>
         <translation>N&apos;est pas arrivé à interpréter les données XML de l&apos;inventaire de la boutique.</translation>
     </message>
+    <message>
+        <source>Either your username or password are incorrect.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>CImportPeeronInventory</name>
@@ -1124,37 +932,6 @@
     </message>
 </context>
 <context>
-    <name>CInfoBar</name>
-    <message>
-        <source>Info</source>
-        <translation type="obsolete">Info</translation>
-    </message>
-    <message>
-        <source>Price Guide</source>
-        <translation type="obsolete">Guide de prix</translation>
-    </message>
-    <message>
-        <source>Links</source>
-        <translation type="obsolete">Liens</translation>
-    </message>
-    <message>
-        <source>Catalog</source>
-        <translation type="obsolete">Catalogue</translation>
-    </message>
-    <message>
-        <source>Lots for Sale</source>
-        <translation type="obsolete">Lots en vente</translation>
-    </message>
-    <message>
-        <source>Appears in Sets</source>
-        <translation type="obsolete">Apparaît dans les kits</translation>
-    </message>
-    <message>
-        <source>Information</source>
-        <translation type="obsolete">Information</translation>
-    </message>
-</context>
-<context>
     <name>CItemView</name>
     <message>
         <source>Status</source>
@@ -1163,10 +940,6 @@
     <message>
         <source>Image</source>
         <translation>Image</translation>
-    </message>
-    <message>
-        <source>PartNo</source>
-        <translation type="obsolete">Num. pièce</translation>
     </message>
     <message>
         <source>Description</source>
@@ -1392,10 +1165,6 @@
 <context>
     <name>CMultiProgressBar</name>
     <message>
-        <source>View detailed progress information</source>
-        <translation type="obsolete">Afficher les informations détaillées de progression</translation>
-    </message>
-    <message>
         <source>Cancel all active transfers</source>
         <translation>Annuler tous les transferts actifs</translation>
     </message>
@@ -1411,20 +1180,12 @@
         <translation>Afficher la grande image...</translation>
     </message>
     <message>
-        <source>Copy Item Number to Clipboard</source>
-        <translation type="obsolete">Copier le numéro de la pièce vers le presse-papiers</translation>
-    </message>
-    <message>
         <source>Show BrickLink Catalog Info...</source>
         <translation>Montrer le catalogue BrickLink...</translation>
     </message>
     <message>
         <source>Show BrickLink Price Guide Info...</source>
         <translation>Montrer le guide de prix BrickLink...</translation>
-    </message>
-    <message>
-        <source>Lots for Sale on BrickLink...</source>
-        <translation type="obsolete">Lots en vente sur BrickLink...</translation>
     </message>
     <message>
         <source>Please wait ... updating</source>
@@ -1442,32 +1203,12 @@
 <context>
     <name>CPriceGuideWidget</name>
     <message>
-        <source>Qty </source>
-        <translation type="obsolete">Qté. </translation>
-    </message>
-    <message>
         <source>New</source>
         <translation>Neuf</translation>
     </message>
     <message>
         <source>Used</source>
         <translation>Usagé</translation>
-    </message>
-    <message>
-        <source>Min</source>
-        <translation type="obsolete">Min.</translation>
-    </message>
-    <message>
-        <source>Avg</source>
-        <translation type="obsolete">Moy.</translation>
-    </message>
-    <message>
-        <source>W-Avg</source>
-        <translation type="obsolete">Moy.Q.</translation>
-    </message>
-    <message>
-        <source>Max</source>
-        <translation type="obsolete">Max.</translation>
     </message>
     <message>
         <source>All Time</source>
@@ -1516,10 +1257,6 @@
     <message>
         <source>Show BrickLink Price Guide Info...</source>
         <translation>Montrer le guide de prix BrickLink...</translation>
-    </message>
-    <message>
-        <source>Lots for Sale on BrickLink...</source>
-        <translation type="obsolete">Lots en vente sur BrickLink...</translation>
     </message>
     <message>
         <source>Please wait ... updating</source>
@@ -1574,17 +1311,6 @@
     </message>
 </context>
 <context>
-    <name>CReport</name>
-    <message>
-        <source>New</source>
-        <translation type="obsolete">Neuf</translation>
-    </message>
-    <message>
-        <source>Used</source>
-        <translation type="obsolete">Usagé</translation>
-    </message>
-</context>
-<context>
     <name>CSelectColor</name>
     <message>
         <source>Color</source>
@@ -1617,10 +1343,6 @@
         <translation>Catégorie</translation>
     </message>
     <message>
-        <source>Clear</source>
-        <translation type="obsolete">Réinitialiser le filtre</translation>
-    </message>
-    <message>
         <source>List</source>
         <translation>Liste</translation>
     </message>
@@ -1635,14 +1357,6 @@
     <message>
         <source>View</source>
         <translation>Affichage</translation>
-    </message>
-    <message>
-        <source>Part No.</source>
-        <translation type="obsolete">Num. pièce</translation>
-    </message>
-    <message>
-        <source>Item Name</source>
-        <translation type="obsolete">Description</translation>
     </message>
     <message>
         <source>Item type:</source>
@@ -1764,10 +1478,6 @@
     <message>
         <source>Lots for Sale</source>
         <translation>Lots en vente</translation>
-    </message>
-    <message>
-        <source>Appears in Sets</source>
-        <translation type="obsolete">Apparaît dans les kits</translation>
     </message>
     <message>
         <source>Peeron</source>
@@ -1901,10 +1611,6 @@
         <translation>Réinitialiser le filtre</translation>
     </message>
     <message>
-        <source>Clear</source>
-        <translation type="obsolete">Effacer</translation>
-    </message>
-    <message>
         <source>Filter the list using this pattern (wildcards allowed: * ? [])</source>
         <translation>Filtrer la liste en utilisant ce motif (mots-clés autorisés : * ? [])</translation>
     </message>
@@ -1941,156 +1647,16 @@
         <translation>Sans titre</translation>
     </message>
     <message>
-        <source>The order #%1 could not be retrieved.</source>
-        <translation type="obsolete">N&apos;est pas arrivé à récupérer la commande #%1.</translation>
-    </message>
-    <message>
-        <source>The inventory you requested could not be retrieved.</source>
-        <translation type="obsolete">N&apos;est pas arrivé à récupérer l&apos;inventaire demandé.</translation>
-    </message>
-    <message>
-        <source>Placed</source>
-        <translation type="obsolete">Placée</translation>
-    </message>
-    <message>
-        <source>Received</source>
-        <translation type="obsolete">Reçue</translation>
-    </message>
-    <message>
-        <source>BrikTrak Inventory</source>
-        <translation type="obsolete">Inventaire BrikTrak</translation>
-    </message>
-    <message>
-        <source>All Files</source>
-        <translation type="obsolete">Tous les fichiers</translation>
-    </message>
-    <message>
-        <source>Open File</source>
-        <translation type="obsolete">Ouvrir un fichier</translation>
-    </message>
-    <message>
-        <source>Inventory for %1</source>
-        <translation type="obsolete">Inventaire pour %1</translation>
-    </message>
-    <message>
-        <source>Internal error: Could not create an Inventory object for item %1</source>
-        <translation type="obsolete">Erreur interne : n&apos;est pas arrivé à créer un objet inventaire pour l&apos;item %1</translation>
-    </message>
-    <message>
-        <source>Requested item was not found in the database.</source>
-        <translation type="obsolete">L&apos;item requis n&apos;a pas été trouvé dans la base de données.</translation>
-    </message>
-    <message>
-        <source>Order #%1</source>
-        <translation type="obsolete">Commande #%1</translation>
-    </message>
-    <message>
-        <source>Invalid order number.</source>
-        <translation type="obsolete">Numéro de commande non valide.</translation>
-    </message>
-    <message>
-        <source>Store %1</source>
-        <translation type="obsolete">Boutique %1</translation>
-    </message>
-    <message>
-        <source>Internal error: Could not create an Inventory object for store inventory</source>
-        <translation type="obsolete">Erreur interne : n&apos;est pas arrivé à créer un objet inventaire pour l&apos;inventaire de la boutique</translation>
-    </message>
-    <message>
-        <source>BrickLink XML Inventory</source>
-        <translation type="obsolete">BrickLink inventaire XML</translation>
-    </message>
-    <message>
-        <source>Import File</source>
-        <translation type="obsolete">Importer un fichier</translation>
-    </message>
-    <message>
-        <source>Import of %1</source>
-        <translation type="obsolete">Import de %1</translation>
-    </message>
-    <message>
-        <source>Could not open file %1 for reading.</source>
-        <translation type="obsolete">N&apos;est pas arrivé à ouvrir en lecture le fichier %1.</translation>
-    </message>
-    <message>
-        <source>Could not parse the XML data in file %1:&lt;br /&gt;&lt;i&gt;Line %2, column %3: %4&lt;/i&gt;</source>
-        <translation type="obsolete">N&apos;est pas arrivé à interpréter les données XML dans le fichier %1 :&lt;br /&gt;&lt;i&gt;Ligne %2, colonne %3 : %4&lt;/i&gt;</translation>
-    </message>
-    <message>
-        <source>This file contains %1 unknown item(s).</source>
-        <translation type="obsolete">Ce fichier contient %1 item(s) inconnu(s).</translation>
-    </message>
-    <message>
-        <source>Could not parse the XML data in file %1.</source>
-        <translation type="obsolete">N&apos;est pas arrivé à interpréter les données XML du fichier %1.</translation>
-    </message>
-    <message>
-        <source>LDraw Models</source>
-        <translation type="obsolete">Modèles LDraw</translation>
-    </message>
-    <message>
-        <source>Could not parse the LDraw model in file %1.</source>
-        <translation type="obsolete">N&apos;est pas arrivé à interpréter le modèle LDraw du fichier %1.</translation>
-    </message>
-    <message>
-        <source>Save File as</source>
-        <translation type="obsolete">Enregistrer le fichier sous</translation>
-    </message>
-    <message>
-        <source>A file named %1 already exists. Are you sure you want to overwrite it?</source>
-        <translation type="obsolete">Un fichier nommé %1 existe déjà. Etes-vous sûr de vouloir l&apos;écraser ?</translation>
-    </message>
-    <message>
-        <source>Failed to save data in file %1.</source>
-        <translation type="obsolete">Echec lors de la sauvegarde des données dans le fichier %1.</translation>
-    </message>
-    <message>
-        <source>Failed to open file %1 for writing.</source>
-        <translation type="obsolete">Echec à l&apos;ouverture pour écriture du fichier %1.</translation>
-    </message>
-    <message>
         <source>This list contains items with errors.&lt;br /&gt;&lt;br /&gt;Do you really want to export this list?</source>
         <translation>Cette liste contient des items avec des erreurs.&lt;br /&gt;&lt;br /&gt;Voulez-vous réellement exporter cette liste ?</translation>
-    </message>
-    <message>
-        <source>Enter the ID number of Wanted List (leave blank for the default Wanted List)</source>
-        <translation type="obsolete">Entrez le numéro d&apos;ID de la liste des pièces désirées (laisser vide pour la liste par défaut)</translation>
-    </message>
-    <message>
-        <source>This list contains items without a BrickLink Lot-ID.&lt;br /&gt;&lt;br /&gt;Do you really want to export this list?</source>
-        <translation type="obsolete">Cette liste contient des items sans leur ID de lot BrickLink.&lt;br /&gt;&lt;br /&gt;Voulez-vous réellement exporter cette liste ?</translation>
-    </message>
-    <message>
-        <source>Export File</source>
-        <translation type="obsolete">Exporter un fichier</translation>
     </message>
     <message>
         <source>Overwrite the currently selected items?</source>
         <translation>Ecraser les items actuellement sélectionnés ?</translation>
     </message>
     <message>
-        <source>Prices are currently updated to price guide values.&lt;br /&gt;&lt;br /&gt;Please wait until this operation has finished.</source>
-        <translation type="obsolete">Les prix sont en train d&apos;être fixés aux valeurs du guide de prix.&lt;br /&gt;&lt;br /&gt;Merci de patienter jusqu&apos;à ce que cette opération soit terminée.</translation>
-    </message>
-    <message>
-        <source>Prices of the selected items have been updated to price guide values.</source>
-        <translation type="obsolete">Les prix des items sélectionnés ont été fixés aux valeurs du guide de prix.</translation>
-    </message>
-    <message>
-        <source>%1 have been skipped, because of missing price guide records and/or network errors.</source>
-        <translation type="obsolete">%1 n&apos;a pas été traité, à cause du manque d&apos;une valeur au guide de prix et/ou d&apos;erreurs réseau.</translation>
-    </message>
-    <message>
-        <source>Divides the quantities of all selected items by this number.&lt;br /&gt;&lt;br /&gt;(A check is made if all quantites are exactly divisble without reminder, before this operation is performed.)</source>
-        <translation type="obsolete">Diviser la quantité de tous les items sélectionnés par ce nombre.&lt;br /&gt;&lt;br /&gt;(Il est vérifié que toutes les quantités soient exactement divisibles sans reste, avant que cette opération ne soit lancée.)</translation>
-    </message>
-    <message>
         <source>The quantities of %1 lots are not divisible without remainder by %2.&lt;br /&gt;&lt;br /&gt;Nothing has been modified.</source>
         <translation>Les quantités de %1 lots ne sont pas divisibles par %2 sans reste.&lt;br /&gt;&lt;br /&gt;Rien n&apos;a été changé.</translation>
-    </message>
-    <message>
-        <source>Multiplies the quantities of all selected items with this factor.</source>
-        <translation type="obsolete">Multiplier les quantités de tous les items sélectionnés par ce facteur.</translation>
     </message>
     <message>
         <source>x</source>
@@ -2109,28 +1675,12 @@
         <translation>Entrer la nouvelle remarque pour tous les items sélectionnés :</translation>
     </message>
     <message>
-        <source>Reserve this item for a specific member:</source>
-        <translation type="obsolete">Réserver tous les items sélectionnés à ce membre :</translation>
-    </message>
-    <message>
         <source>Save changes to %1?</source>
         <translation>Enregistrer les changements de %1 ?</translation>
     </message>
     <message>
-        <source>Internal error: Could not create an Inventory object for order #%1</source>
-        <translation type="obsolete">Erreur interne : n&apos;est pas arrivé à créer un objet inventaire pour la commande #%1</translation>
-    </message>
-    <message>
-        <source>Divide the quantities of all selected items by this number.&lt;br /&gt;&lt;br /&gt;(A check is made if all quantites are exactly divisble without reminder, before this operation is performed.)</source>
-        <translation type="obsolete">Diviser la quantité de tous les items sélectionnés par ce nombre.&lt;br /&gt;&lt;br /&gt;(Il est vérifié que toutes les quantités soient exactement divisibles sans reste, avant que cette opération ne soit lancée.)</translation>
-    </message>
-    <message>
         <source>Multiply the quantities of all selected items with this factor.</source>
         <translation>Multiplier les quantités de tous les items sélectionnés par ce facteur.</translation>
-    </message>
-    <message>
-        <source>Reserve all selected items for this specific member:</source>
-        <translation type="obsolete">Réserver tous les items sélectionnés à ce membre:</translation>
     </message>
     <message>
         <source>Subtracted %1 Items</source>
@@ -2365,24 +1915,6 @@
     </message>
 </context>
 <context>
-    <name>DlgDBUpdate</name>
-    <message>
-        <source>Updating BrickLink Database files:</source>
-        <translation type="obsolete">Mise à jour des fichiers de la base de données BrickLink :</translation>
-    </message>
-    <message>
-        <source>&amp;OK</source>
-        <translation type="obsolete">&amp;OK</translation>
-    </message>
-</context>
-<context>
-    <name>DlgDBUpdateImpl</name>
-    <message>
-        <source>Update not possible</source>
-        <translation type="obsolete">Mise à jour impossible</translation>
-    </message>
-</context>
-<context>
     <name>DlgIncDecPrice</name>
     <message>
         <source>Inc- / Decrease Prices</source>
@@ -2518,18 +2050,6 @@
 <context>
     <name>DlgLoadInventory</name>
     <message>
-        <source>Open an Inventory</source>
-        <translation type="obsolete">Import inventaire</translation>
-    </message>
-    <message>
-        <source>&amp;Download even if cached</source>
-        <translation type="obsolete">&amp;Télécharger même si existe en cache</translation>
-    </message>
-    <message>
-        <source>Import from &amp;peeron.com (currently a hack that may or may not work)</source>
-        <translation type="obsolete">Importer de &amp;peeron.com (actuellement fonctionnalité prototype qui peut ne pas marcher)</translation>
-    </message>
-    <message>
         <source>&amp;Quantity:</source>
         <translation>&amp;Quantité :</translation>
     </message>
@@ -2549,20 +2069,12 @@
 <context>
     <name>DlgLoadOrder</name>
     <message>
-        <source>Load Order</source>
-        <translation type="obsolete">Import commande</translation>
-    </message>
-    <message>
         <source>Received</source>
         <translation>Reçue</translation>
     </message>
     <message>
         <source>Placed</source>
         <translation>Placée</translation>
-    </message>
-    <message>
-        <source>Order &amp;number</source>
-        <translation type="obsolete">Commande &amp;numéro</translation>
     </message>
     <message>
         <source>Order &amp;type</source>
@@ -2761,17 +2273,6 @@
     </message>
 </context>
 <context>
-    <name>DlgReportUI</name>
-    <message>
-        <source>This print template requires some additional informations:</source>
-        <translation type="obsolete">Ce modèle d&apos;impression requiert des informations supplémentaires :</translation>
-    </message>
-    <message>
-        <source>&amp;OK</source>
-        <translation type="obsolete">&amp;OK</translation>
-    </message>
-</context>
-<context>
     <name>DlgSelectReport</name>
     <message>
         <source>Printing Template</source>
@@ -2786,10 +2287,6 @@
         <translation>Mettre à jour la liste</translation>
     </message>
     <message>
-        <source>Page Size</source>
-        <translation type="obsolete">Taille de la page</translation>
-    </message>
-    <message>
         <source>Name</source>
         <translation>Nom</translation>
     </message>
@@ -2800,48 +2297,6 @@
     <message>
         <source>&amp;Cancel</source>
         <translation>&amp;Annuler</translation>
-    </message>
-</context>
-<context>
-    <name>DlgSelectReportImpl</name>
-    <message>
-        <source>Letter</source>
-        <translation type="obsolete">Lettre</translation>
-    </message>
-    <message>
-        <source>Custom</source>
-        <translation type="obsolete">Personnalisé</translation>
-    </message>
-</context>
-<context>
-    <name>DlgSetCondition</name>
-    <message>
-        <source>Set Condition</source>
-        <translation type="obsolete">Fixer la condition</translation>
-    </message>
-    <message>
-        <source>Please select how the conditon of the selected items should be modified:</source>
-        <translation type="obsolete">Précisez comment fixer la condition des items sélectionnés :</translation>
-    </message>
-    <message>
-        <source>Set condition to: &amp;New</source>
-        <translation type="obsolete">Fixer la condition à : &amp;Neuf</translation>
-    </message>
-    <message>
-        <source>Set condition to: &amp;Used</source>
-        <translation type="obsolete">Fixer la condition à : &amp;Usagé</translation>
-    </message>
-    <message>
-        <source>Toggle current condition</source>
-        <translation type="obsolete">Inverser la condition courante</translation>
-    </message>
-    <message>
-        <source>&amp;OK</source>
-        <translation type="obsolete">&amp;OK</translation>
-    </message>
-    <message>
-        <source>&amp;Cancel</source>
-        <translation type="obsolete">&amp;Annuler</translation>
     </message>
 </context>
 <context>
@@ -2874,28 +2329,12 @@
         <translation>Ventes de tous les temps</translation>
     </message>
     <message>
-        <source>Past 6 Months Sales</source>
-        <translation type="obsolete">Ventes des 6 derniers mois</translation>
-    </message>
-    <message>
         <source>Current Inventory</source>
         <translation>Inventaire courant</translation>
     </message>
     <message>
-        <source>Lowest</source>
-        <translation type="obsolete">Minimum</translation>
-    </message>
-    <message>
         <source>Average</source>
         <translation>Moyenne</translation>
-    </message>
-    <message>
-        <source>Weighted Average</source>
-        <translation type="obsolete">Moyenne par quantité</translation>
-    </message>
-    <message>
-        <source>Highest</source>
-        <translation type="obsolete">Maximum</translation>
     </message>
     <message>
         <source>Last 6 Months Sales</source>
@@ -2929,16 +2368,8 @@
         <translation>Ouvrir une fenêtre de navigateur &amp;Internet lors de l&apos;export vers le presse-papiers</translation>
     </message>
     <message>
-        <source>Use the &amp;local currency</source>
-        <translation type="obsolete">Utiliser la monnaie &amp;locale</translation>
-    </message>
-    <message>
         <source>$ 1 = %1</source>
         <translation></translation>
-    </message>
-    <message>
-        <source>Weight</source>
-        <translation type="obsolete">Poids</translation>
     </message>
     <message>
         <source>Metric (g)</source>
@@ -2947,22 +2378,6 @@
     <message>
         <source>Imperial (oz)</source>
         <translation>Impérial (oz)</translation>
-    </message>
-    <message>
-        <source>&amp;Infobar style</source>
-        <translation type="obsolete">Style de la barre d&apos;in&amp;fos</translation>
-    </message>
-    <message>
-        <source>Classic (moveable)</source>
-        <translation type="obsolete">Classique (déplaçable)</translation>
-    </message>
-    <message>
-        <source>Modern (on left side)</source>
-        <translation type="obsolete">Moderne (sur le côté gauche)</translation>
-    </message>
-    <message>
-        <source>Modern (on right side)</source>
-        <translation type="obsolete">Moderne (sur le côté droit)</translation>
     </message>
     <message>
         <source>&amp;Document directory</source>
@@ -2981,22 +2396,6 @@
         <translation>jours</translation>
     </message>
     <message>
-        <source>Data&amp;bases, if older than</source>
-        <translation type="obsolete">&amp;Bases de données, si plus anciennes que</translation>
-    </message>
-    <message>
-        <source>Price g&amp;uides, if older than</source>
-        <translation type="obsolete">G&amp;uide de prix, si plus anciens que</translation>
-    </message>
-    <message>
-        <source>&amp;Pictures, if older than</source>
-        <translation type="obsolete">I&amp;mages, si plus anciennes que</translation>
-    </message>
-    <message>
-        <source>&amp;Inventories, if older than</source>
-        <translation type="obsolete">In&amp;ventaires, si plus anciens que</translation>
-    </message>
-    <message>
         <source>Cache Di&amp;rectory</source>
         <translation>Dossier du cac&amp;he</translation>
     </message>
@@ -3009,16 +2408,8 @@
         <translation>Valeurs par défaut pour &apos;Importer &amp;inventaire BrickLink&apos;</translation>
     </message>
     <message>
-        <source>Item type:</source>
-        <translation type="obsolete">Type d&apos;item :</translation>
-    </message>
-    <message>
         <source>Default values for &apos;&amp;Add Items&apos;</source>
         <translation>Valeurs par défaut pour &apos;&amp;Ajouter des items&apos;</translation>
-    </message>
-    <message>
-        <source>Condition:</source>
-        <translation type="obsolete">Etat :</translation>
     </message>
     <message>
         <source>New</source>
@@ -3112,28 +2503,12 @@
         <translation>Ventes de tous les temps</translation>
     </message>
     <message>
-        <source>Past 6 Months Sales</source>
-        <translation type="obsolete">Ventes des 6 derniers mois</translation>
-    </message>
-    <message>
         <source>Current Inventory</source>
         <translation>Inventaire courant</translation>
     </message>
     <message>
-        <source>Lowest</source>
-        <translation type="obsolete">Minimum</translation>
-    </message>
-    <message>
         <source>Average</source>
         <translation>Moyenne</translation>
-    </message>
-    <message>
-        <source>Weighted Average</source>
-        <translation type="obsolete">Moyenne par quantité</translation>
-    </message>
-    <message>
-        <source>Highest</source>
-        <translation type="obsolete">Maximum</translation>
     </message>
     <message>
         <source>Cache directory location</source>
@@ -3187,90 +2562,12 @@
         <translation>Items d&apos;un document déjà ouvert :</translation>
     </message>
     <message>
-        <source>Column 1</source>
-        <translation type="obsolete">Colonne 1</translation>
-    </message>
-    <message>
         <source>&amp;OK</source>
         <translation>&amp;OK</translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
         <translation>&amp;Annuler</translation>
-    </message>
-</context>
-<context>
-    <name>DlgUpdate</name>
-    <message>
-        <source>Check for Program Updates</source>
-        <translation type="obsolete">Vérifier la mise à jour du programme</translation>
-    </message>
-    <message>
-        <source>&amp;OK</source>
-        <translation type="obsolete">&amp;OK</translation>
-    </message>
-    <message>
-        <source>&amp;Cancel</source>
-        <translation type="obsolete">&amp;Annuler</translation>
-    </message>
-</context>
-<context>
-    <name>DlgUpdateImpl</name>
-    <message>
-        <source>You are currently running %1 %2</source>
-        <translation type="obsolete">Vous utilisez actuellement %1 %2</translation>
-    </message>
-    <message>
-        <source>Could not retrieve version information from server:&lt;br /&gt;&lt;br /&gt;%1</source>
-        <translation type="obsolete">N&apos;est pas arrivé à récupérer l&apos;information sur la version depuis le serveur :&lt;br /&gt;&lt;br /&gt;%1</translation>
-    </message>
-    <message>
-        <source>Searching for updates ... Please wait</source>
-        <translation type="obsolete">Recherche des mises à jour ... merci de patienter</translation>
-    </message>
-    <message>
-        <source>Transfer job could not be started.</source>
-        <translation type="obsolete">N&apos;est pas arrivé à démarrer la tâche de transfert.</translation>
-    </message>
-    <message>
-        <source>Version information is not available.</source>
-        <translation type="obsolete">L&apos;information sur la version n&apos;est pas disponible.</translation>
-    </message>
-    <message>
-        <source>Your currently installed version is up-to-date.</source>
-        <translation type="obsolete">Votre version actuellement installée est à jour.</translation>
-    </message>
-    <message>
-        <source>A newer version than the one currently installed is available:</source>
-        <translation type="obsolete">Une version plus récente que celle actuellement installée est disponible :</translation>
-    </message>
-    <message>
-        <source>Stable release</source>
-        <translation type="obsolete">Version publique</translation>
-    </message>
-    <message>
-        <source>Beta release</source>
-        <translation type="obsolete">Version beta</translation>
-    </message>
-    <message>
-        <source>Detailed list of changes</source>
-        <translation type="obsolete">Liste détaillée des changements</translation>
-    </message>
-    <message>
-        <source>the BrickStore homepage</source>
-        <translation type="obsolete">la page d&apos;accueil de BrickStore</translation>
-    </message>
-    <message>
-        <source>Please note:</source>
-        <translation type="obsolete">Notez bien :</translation>
-    </message>
-    <message>
-        <source>Your currently installed version is flagged as defective.</source>
-        <translation type="obsolete">La version actuellement installée est marquée comme défectueuse.</translation>
-    </message>
-    <message>
-        <source>Please visit %1 to find out the exact cause.</source>
-        <translation type="obsolete">Merci de consulter %1 pour en trouver la raison précise.</translation>
     </message>
 </context>
 </TS>

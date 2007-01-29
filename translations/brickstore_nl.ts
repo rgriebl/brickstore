@@ -13,22 +13,6 @@
 <context>
     <name>CAddRemoveCmd</name>
     <message>
-        <source>Added %1 Items</source>
-        <translation type="obsolete">%1 items toegevoegd</translation>
-    </message>
-    <message>
-        <source>Added an Item</source>
-        <translation type="obsolete">Item toegevoegd</translation>
-    </message>
-    <message>
-        <source>Removed %1 Items</source>
-        <translation type="obsolete">%1 items verwijderd</translation>
-    </message>
-    <message>
-        <source>Removed an Item</source>
-        <translation type="obsolete">Item verwijderd</translation>
-    </message>
-    <message>
         <source>Added %1 items</source>
         <translation>%1 items toegevoegd</translation>
     </message>
@@ -111,10 +95,6 @@
         <translation>Bezoek %1, of stuur een email naar %2</translation>
     </message>
     <message>
-        <source>&lt;p&gt;This program is free software; it may be distributed and/or modified under the terms of the GNU General Public License version 2 as published by the Free Software Foundation and appearing in the file LICENSE.GPL included in this software package.&lt;br /&gt;This program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.&lt;br /&gt;See &lt;a href=&quot;http://fsf.org/licensing/licenses/gpl.html&quot;&gt;www.fsf.org/licensing/licenses/gpl.html&lt;/a&gt; for GPL licensing information.&lt;/p&gt;&lt;p&gt;All data from &lt;a href=&quot;http://www.bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; is owned by BrickLink&lt;sup&gt;TM&lt;/sup&gt;, which is a trademark of Dan Jezek.&lt;/p&gt;&lt;p&gt;Peeron Inventories from &lt;a href=&quot;http://www.peeron.com&quot;&gt;www.peeron.com&lt;/a&gt; are owned by Dan and Jennifer Boger.&lt;/p&gt;&lt;p&gt;LEGO&lt;sup&gt;&amp;reg;&lt;/sup&gt; is a trademark of the LEGO group of companies, which does not sponsor, authorize or endorse this software.&lt;/p&gt;&lt;p&gt;All other trademarks recognised.&lt;/p&gt;&lt;p&gt;French translation by Sylvain Perez (&lt;a href=&quot;mailto:bricklink@1001bricks.com&quot;&gt;1001bricks&lt;/a&gt;)&lt;/p&gt;</source>
-        <translation type="obsolete">&lt;p&gt;Dit programma is vrije software. U kunt het onder de voorwaarden van de GNU General Public License Version 2, zoals gepubliceerd door de Free Software Foundation en in het bestand LICENSE.GPL van dit software pakket te lezen, doorgeven en/of aanpassen.&lt;br /&gt;De openbaarmaking van dit programma gebeurd in de hoop dat het U van nut kan zijn, maar ZONDER ENIGE GARANTIE, zelfs zonder de impliciete garantie dat het programma MARKTRIJP is, of de BRUIKBAARHEID VOOR EEN BEPAALD DOEL.&lt;br /&gt;Gedetailleerde GPL License informatie vind U hier: &lt;a href=&quot;http://fsf.org/licensing/licenses/gpl.html&quot;&gt;www.fsf.org/licensing/licenses/gpl.html&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Alle gegevens van &lt;a href=&quot;http://www.bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; zijn eigendom van BrickLink&lt;sup&gt;TM&lt;/sup&gt;, hetgeen een handelsmerk is van Dan Jezek.&lt;/p&gt;&lt;p&gt;Peeron inventarissen van &lt;a href=&quot;http://www.peeron.com&quot;&gt;www.peeron.com&lt;/a&gt; zijn eigendom van Dan en Jennifer Boger.&lt;/p&gt;&lt;p&gt;LEGO&lt;sup&gt;&amp;reg;&lt;/sup&gt; is een  handelsmerk van de LEGO groep, welke deze software niet gesponsored of erkend heeft.&lt;/p&gt;&lt;p&gt;Alle andere handelsmerken worden, ook wanneer niet expliciet vermeld, erkend .&lt;/p&gt;&lt;p&gt;Franse vertaling door Sylvain Perez (&lt;a href=&quot;mailto:bricklink@1001bricks.com&quot;&gt;1001bricks&lt;/a&gt;)&lt;/p&gt;</translation>
-    </message>
-    <message>
         <source>BrickStore is currently running in &lt;b&gt;Demo&lt;/b&gt; mode.&lt;br /&gt;&lt;br /&gt;The complete functionality is accessible, but this reminder will pop up every 20 minutes.&lt;br /&gt;&lt;br /&gt;You can change the mode of operation at anytime via &lt;b&gt;Help &gt; Registration...&lt;/b&gt;</source>
         <translation>BrickStore draait momenteel in &lt;b&gt;Demo&lt;/b&gt; modus.&lt;br /&gt;&lt;br /&gt;De complete functionaliteit is beschikbaar, maar deze herinnering zal elke 20 minuten terugkomen.&lt;br /&gt;&lt;br /&gt;U kunt op elk moment wisselen tussen de verschillende modi via &lt;b&gt;Help &gt; Registratie...&lt;/b&gt;</translation>
     </message>
@@ -129,10 +109,6 @@
 </context>
 <context>
     <name>CChangeCmd</name>
-    <message>
-        <source>Modified Item</source>
-        <translation type="obsolete">Een item aangepast</translation>
-    </message>
     <message>
         <source>Modified item</source>
         <translation>Een item aangepast</translation>
@@ -224,10 +200,6 @@
         <translation>Bestelling # %1</translation>
     </message>
     <message>
-        <source>Invalid order number.</source>
-        <translation type="obsolete">Ongeldig bestelling nummer.</translation>
-    </message>
-    <message>
         <source>Store %1</source>
         <translation>Winkel bestand %1</translation>
     </message>
@@ -304,24 +276,12 @@
         <translation>Bestand exporteren</translation>
     </message>
     <message>
-        <source>Reset Differences</source>
-        <translation type="obsolete">Reset wijzigingen</translation>
-    </message>
-    <message>
         <source>BrickStore has switched to a new file format (.bsx - BrickStore XML).&lt;br /&gt;&lt;br /&gt;Your document has been automatically imported and it will be converted as soon as you save it.</source>
         <translation>BrickStore is overgestapt op een nieuw bestandsformaat (.bsx - BrickStore XML).&lt;br /&gt;&lt;br /&gt;Uw document is automatisch geïmporteerd en zal worden geconverteerd zodra U het opslaat.</translation>
     </message>
     <message>
         <source>Reset differences</source>
         <translation>Reset wijzigingen</translation>
-    </message>
-    <message>
-        <source>Enter the URL of your current BrickLink shopping cart:&lt;br /&gt;&lt;br /&gt;Right-click on the &lt;b&gt;View Cart&lt;/b&gt; button in your browser and copy the URL to the clipboard by choosing &lt;b&gt;Copy Link Location&lt;/b&gt; (Firefox), &lt;b&gt;Copy Link&lt;/b&gt; (Safari) or &lt;b&gt;Copy Shortcut&lt;/b&gt; (Internet Explorer).</source>
-        <translation type="obsolete">Geef de URL van Uw huidige BrickLink winkelwagen:&lt;br /&gt;&lt;br /&gt;Rechtsklik op de &lt;b&gt;View Cart&lt;/b&gt; knop in Uw browser en kopieer de URL naar het klembord door te kiezen voor &lt;b&gt;Koppelingslocatie kopiëren&lt;/b&gt; (Firefox), &lt;b&gt;Kopieer Koppeling&lt;/b&gt; (Safari) of &lt;b&gt;Snelkoppeling kopiëren&lt;/b&gt; (Internet Explorer).</translation>
-    </message>
-    <message>
-        <source>Your Shopping Cart</source>
-        <translation type="obsolete">Uw winkelwagen</translation>
     </message>
     <message>
         <source>Enter the URL of your current BrickLink shopping cart:&lt;br /&gt;&lt;br /&gt;Right-click on the &lt;b&gt;View Cart&lt;/b&gt; button in your browser and copy the URL to the clipboard by choosing &lt;b&gt;Copy Link Location&lt;/b&gt; (Firefox), &lt;b&gt;Copy Link&lt;/b&gt; (Safari) or &lt;b&gt;Copy Shortcut&lt;/b&gt; (Internet Explorer).&lt;br /&gt;&lt;br /&gt;&lt;em&gt;Super-lots and custom items are &lt;b&gt;not&lt;/b&gt; supported&lt;/em&gt;.</source>
@@ -345,14 +305,6 @@
     <message>
         <source>Toolbar</source>
         <translation>Werkbalk</translation>
-    </message>
-    <message>
-        <source>Priceguide updates</source>
-        <translation type="obsolete">Richtprijslijst updates</translation>
-    </message>
-    <message>
-        <source>Picture updates</source>
-        <translation type="obsolete">Afbeeldingen updates</translation>
     </message>
     <message>
         <source>Info</source>
@@ -393,10 +345,6 @@
     <message>
         <source>&amp;Help</source>
         <translation>&amp;Help</translation>
-    </message>
-    <message>
-        <source>New</source>
-        <translation type="obsolete">Nieuw</translation>
     </message>
     <message>
         <source>Ctrl+N</source>
@@ -758,10 +706,6 @@
         <translation>Prijs</translation>
     </message>
     <message>
-        <source>Set to Price-Guide...</source>
-        <translation type="obsolete">Instellen met de richtprijslijst...</translation>
-    </message>
-    <message>
         <source>Ctrl+G</source>
         <comment>Edit|Price|Set to PriceGuide</comment>
         <translation>Ctrl+G</translation>
@@ -853,10 +797,6 @@
         <translation>Download activiteit indicator</translation>
     </message>
     <message>
-        <source>BrickStore has switched to a new file format (.bsx - BrickStore XML).&lt;br /&gt;&lt;br /&gt;Your document has been automatically imported and it will be converted as soon as you save it.</source>
-        <translation type="obsolete">BrickStore is overgestapt op een nieuw bestandsformaat (.bsx - BrickStore XML).&lt;br /&gt;&lt;br /&gt;Uw document is automatisch geïmporteerd en zal worden geconverteerd zodra U het opslaat.</translation>
-    </message>
-    <message>
         <source>No valid BrickLink login settings found.&lt;br /&gt;&lt;br /&gt;Do you want to change the settings now?</source>
         <translation>Geen geldige BrickLink login instellingen gevonden.&lt;br /&gt;&lt;br /&gt;Wilt U de instellingen nu wijzigen?</translation>
     </message>
@@ -887,10 +827,6 @@
     <message>
         <source>Unsaved modifications</source>
         <translation>Niet opgeslagen aanpassingen</translation>
-    </message>
-    <message>
-        <source>Do you want to cancel all outstanding inventory, picture and price guide transfers?</source>
-        <translation type="obsolete">Wilt U alle openstaande inventaris-, afbeeldingen- en richtprijslijstoverdrachten afbreken?</translation>
     </message>
     <message>
         <source>New</source>
@@ -956,14 +892,6 @@
         <source>Download: %1/%2 KB</source>
         <translation>Download: %1/%2 KB</translation>
     </message>
-    <message>
-        <source>Could not parse the XML data for order #%1.</source>
-        <translation type="obsolete">De XML gegevens voor bestelling #%1 konden niet worden verwerkt.</translation>
-    </message>
-    <message>
-        <source>Could not parse the XML data for order #%1:&lt;br /&gt;&lt;i&gt;Line %2, column %3: %4&lt;/i&gt;</source>
-        <translation type="obsolete">De XML gegevens voor bestelling #%1 konden niet worden verwerkt:&lt;br /&gt;&lt;i&gt;Regel %2, kolom %3: %4&lt;/i&gt;</translation>
-    </message>
 </context>
 <context>
     <name>CImportBLStore</name>
@@ -982,6 +910,10 @@
     <message>
         <source>Could not parse the XML data for the store inventory.</source>
         <translation>De XML gegevens voor de winkel inventaris konden niet worden verwerkt.</translation>
+    </message>
+    <message>
+        <source>Either your username or password are incorrect.</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1464,10 +1396,6 @@
         <translation>Thumbnails</translation>
     </message>
     <message>
-        <source>Please enter the complete part number of the item:</source>
-        <translation type="obsolete">Geef alstublieft het gehele onderdeel nummer in:</translation>
-    </message>
-    <message>
         <source>Viewing all items with images is a bandwidth- and memory-hungry operation.&lt;br /&gt;Are you sure you want to continue?</source>
         <translation>Alle items met afbeeldingen tonen is een bandbreedte- en geheugen-vretende procedure.&lt;br /&gt;Weet U zeker dat U door wilt gaan?</translation>
     </message>
@@ -1719,96 +1647,12 @@
         <translation>naamloos</translation>
     </message>
     <message>
-        <source>Added %1, Merged %2 Items</source>
-        <translation type="obsolete">%1 toegevoegde, %2 samengevoegde items</translation>
-    </message>
-    <message>
-        <source>Merged %1 Items</source>
-        <translation type="obsolete">%1 items samengevoegd</translation>
-    </message>
-    <message>
         <source>Overwrite the currently selected items?</source>
         <translation>De reeds geslecteerde items overschrijven?</translation>
     </message>
     <message>
-        <source>Set Include Status on %1 Items</source>
-        <translation type="obsolete">Inclusief status voor %1 items ingesteld</translation>
-    </message>
-    <message>
-        <source>Set Exclude Status on %1 Items</source>
-        <translation type="obsolete">Exclusief status voor %1 items ingesteld</translation>
-    </message>
-    <message>
-        <source>Set Extra Status on %1 Items</source>
-        <translation type="obsolete">Extra status voor %1 items ingesteld</translation>
-    </message>
-    <message>
-        <source>Toggled Status on %1 Items</source>
-        <translation type="obsolete">Status voor %1 items omgeschakeld</translation>
-    </message>
-    <message>
-        <source>Set New Condition on %1 Items</source>
-        <translation type="obsolete">Conditie nieuw voor %1 items ingesteld</translation>
-    </message>
-    <message>
-        <source>Set Used Condition on %1 Items</source>
-        <translation type="obsolete">Conditie gebruikt voor %1 items ingesteld</translation>
-    </message>
-    <message>
-        <source>Toggled Condition on %1 Items</source>
-        <translation type="obsolete">Conditie voor %1 items omgeschakeld</translation>
-    </message>
-    <message>
-        <source>Set Retain Flag on %1 Items</source>
-        <translation type="obsolete">Houden vlag voor %1 items ingesteld</translation>
-    </message>
-    <message>
-        <source>Cleared Retain Flag on %1 Items</source>
-        <translation type="obsolete">Houden vlag voor %1 items gewist</translation>
-    </message>
-    <message>
-        <source>Toggled Retain Flag on %1 Items</source>
-        <translation type="obsolete">Houden vlag voor %1 items omgeschakeld</translation>
-    </message>
-    <message>
-        <source>Set Stockroom Flag on %1 Items</source>
-        <translation type="obsolete">Magazijn vlag voor %1 items ingesteld</translation>
-    </message>
-    <message>
-        <source>Cleared Stockroom Flag on %1 Items</source>
-        <translation type="obsolete">Magazijn vlag voor %1 items gewist</translation>
-    </message>
-    <message>
-        <source>Toggled Stockroom Flag on %1 Items</source>
-        <translation type="obsolete">Magazijn vlag voor %1 items omgeschakeld</translation>
-    </message>
-    <message>
-        <source>Prices are currently updated to price guide values.&lt;br /&gt;&lt;br /&gt;Please wait until this operation has finished.</source>
-        <translation type="obsolete">Prijzen worden op dit moment bijgewerkt met de richtprijslijst.&lt;br /&gt;&lt;br /&gt;Wacht U alstublieft tot deze taak klaar is.</translation>
-    </message>
-    <message>
-        <source>Prices of the selected items have been updated to price guide values.</source>
-        <translation type="obsolete">Prijzen van de geselecteerde items zijn bijgewerkt met de richtprijslijst.</translation>
-    </message>
-    <message>
-        <source>%1 have been skipped, because of missing price guide records and/or network errors.</source>
-        <translation type="obsolete">%1 zijn overgeslagen, omdat de gegevens in de richtprijslijst ontbraken en/of door netwerk fouten.</translation>
-    </message>
-    <message>
-        <source>Price Change on %1 Items</source>
-        <translation type="obsolete">Prijs van %1 items gewijzigd</translation>
-    </message>
-    <message>
-        <source>Divide the quantities of all selected items by this number.&lt;br /&gt;&lt;br /&gt;(A check is made if all quantites are exactly divisble without reminder, before this operation is performed.)</source>
-        <translation type="obsolete">Deel de aantallen van alle geselecteerde items door dit getal..&lt;br /&gt;&lt;br /&gt;(Eerst word gecontroleerd of alle aantallen zonder rest deelbaar zijn.)</translation>
-    </message>
-    <message>
         <source>The quantities of %1 lots are not divisible without remainder by %2.&lt;br /&gt;&lt;br /&gt;Nothing has been modified.</source>
         <translation>De aantallen van %1 kavels zijn niet deelbaar, zonder rest, door %2.&lt;br /&gt;&lt;br /&gt;Er is niets aangepast.</translation>
-    </message>
-    <message>
-        <source>Quantity Divide by %1 on %2 Items</source>
-        <translation type="obsolete">Aantallen door %1 gedeeld bij %2 items</translation>
     </message>
     <message>
         <source>Multiply the quantities of all selected items with this factor.</source>
@@ -1819,10 +1663,6 @@
         <translation>x</translation>
     </message>
     <message>
-        <source>Quantity Multiply by %1 on %2 Items</source>
-        <translation type="obsolete">Aantallen met %1 vermenigvuldigd bij %2 items</translation>
-    </message>
-    <message>
         <source>Set sale in percent for the selected items (this will &lt;u&gt;not&lt;/u&gt; change any prices).&lt;br /&gt;Negative values are also allowed.</source>
         <translation>Stel uitverkoop, in procenten, voor de geselecteerde items in. (de prijzen zelf worden &lt;u&gt;niet&lt;/u&gt; veranderd).&lt;br /&gt;Negatieve waardes zijn ook mogelijk.</translation>
     </message>
@@ -1831,36 +1671,16 @@
         <translation>%</translation>
     </message>
     <message>
-        <source>Set Sale on %1 Items</source>
-        <translation type="obsolete">Uitverkoop op %1 items ingesteld</translation>
-    </message>
-    <message>
         <source>Set bulk quantity for the selected items:</source>
         <translation>Bulk hoeveelheid voor de geselecteerde items instellen:</translation>
-    </message>
-    <message>
-        <source>Set Bulk Quantity on %1 Items</source>
-        <translation type="obsolete">Bulk hoeveelheid voor %1 items ingesteld</translation>
-    </message>
-    <message>
-        <source>Set Color on %1 Items</source>
-        <translation type="obsolete">Kleur voor %1 item ingesteld</translation>
     </message>
     <message>
         <source>Enter the new remark for all selected items:</source>
         <translation>Geef de nieuwe opmerking voor alle geselecteerde items:</translation>
     </message>
     <message>
-        <source>Set Remark on %1 Items</source>
-        <translation type="obsolete">Opmerking voor %1 items ingesteld</translation>
-    </message>
-    <message>
         <source>Enter the text, that should be added to the remarks of all selected items:</source>
         <translation>Geef de tekst, die toegevoegd dient te worden aan de opmerkingen van alle geselecteerde items:</translation>
-    </message>
-    <message>
-        <source>Modified Remark on %1 Items</source>
-        <translation type="obsolete">Opmerkingen van %1 items aangepast</translation>
     </message>
     <message>
         <source>Enter the text, that should be removed from the remarks of all selected items:</source>
@@ -1871,28 +1691,12 @@
         <translation>Geef het nieuwe commentaar voor alle geselecteerde items:</translation>
     </message>
     <message>
-        <source>Set Comment on %1 Items</source>
-        <translation type="obsolete">Commentaar bij %1 items ingesteld</translation>
-    </message>
-    <message>
         <source>Enter the text, that should be added to the comments of all selected items:</source>
         <translation>Geef de tekst, die toegevoegd dient te worden aan het commentaar van alle geselecteerde items:</translation>
     </message>
     <message>
-        <source>Modified Comment on %1 Items</source>
-        <translation type="obsolete">Commentaar van %1 items aangepast</translation>
-    </message>
-    <message>
         <source>Enter the text, that should be removed from the comments of all selected items:</source>
         <translation>Geef de tekst, die verwijderd dient te worden van het commentaar van alle geselecteerde items:</translation>
-    </message>
-    <message>
-        <source>Reserve all selected items for this specific member:</source>
-        <translation type="obsolete">Reserveer alle geselecteerde items voor deze specifieke koper:</translation>
-    </message>
-    <message>
-        <source>Set Reservation on %1 Items</source>
-        <translation type="obsolete">Reservering voor %1 items ingesteld</translation>
     </message>
     <message>
         <source>Subtracted %1 Items</source>
@@ -2277,10 +2081,6 @@
         <translation>Geplaatst</translation>
     </message>
     <message>
-        <source>Order &amp;number</source>
-        <translation type="obsolete">Bestelling &amp;nummer</translation>
-    </message>
-    <message>
         <source>Order &amp;type</source>
         <translation>Bestelling &amp;type</translation>
     </message>
@@ -2413,24 +2213,12 @@
         <translation>&lt;b&gt;BrickStore&lt;/b&gt; ondersteunt drie verschillende werkingsmodi:</translation>
     </message>
     <message>
-        <source>&amp;PERSONAL</source>
-        <translation type="obsolete">&amp;PERSOONLIJK</translation>
-    </message>
-    <message>
         <source>I do not need all the BrickLink Seller features (no reminders and no registration required).</source>
         <translation>Ik heb geen behoefte aan de features voor BrickLink verkopers (geen herinneringen en geen registratie benodigd).</translation>
     </message>
     <message>
-        <source>&amp;DEMO</source>
-        <translation type="obsolete">&amp;DEMO</translation>
-    </message>
-    <message>
         <source>I want to use the unrestricted demo version (a reminder will popup every 20 minutes).</source>
         <translation>Ik wil de onbeperkte demo versie gebruiken (een herinnering zal elke 20 minuten verschijnen).</translation>
-    </message>
-    <message>
-        <source>&amp;FULL</source>
-        <translation type="obsolete">&amp;Volledig</translation>
     </message>
     <message>
         <source>--</source>
@@ -2772,10 +2560,6 @@
     <message>
         <source>Items from an already open document:</source>
         <translation>Items uit een al geopend document:</translation>
-    </message>
-    <message>
-        <source>Column 1</source>
-        <translation type="obsolete">Kolom 1</translation>
     </message>
     <message>
         <source>&amp;OK</source>
