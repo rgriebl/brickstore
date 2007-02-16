@@ -6,7 +6,7 @@
 		<name lang="de">Englisch</name>
 		<name lang="fr">Anglais</name>
 		<name lang="nl">Engels</name>
-		<name lang="si">Angleščina</name>
+		<name lang="sl">Angleščina</name>
 	</translation>
 
 	<translation lang="de">
@@ -14,7 +14,7 @@
 		<name lang="de">Deutsch</name>
 		<name lang="fr">Allemand</name>
 		<name lang="nl">Duits</name>
-		<name lang="si">Nemščina</name>
+		<name lang="sl">Nemščina</name>
 	</translation>
 
 	<translation lang="fr">
@@ -22,7 +22,7 @@
 		<name lang="de">Französisch</name>
 		<name lang="fr">Français</name>
 		<name lang="nl">Frans</name>
-		<name lang="si">Francoščina</name>
+		<name lang="sl">Francoščina</name>
 	</translation>
 
 	<translation lang="nl">
@@ -30,15 +30,15 @@
 		<name lang="de">Holländisch</name>
 		<name lang="fr">Hollandais</name>
 		<name lang="nl">Nederlands</name>
-		<name lang="si">Nizozemščina</name>
+		<name lang="sl">Nizozemščina</name>
 	</translation>
 
-	<translation lang="si">
+	<translation lang="sl">
 		<name>Slovene</name>
 		<name lang="de">Slowenisch</name>
 		<name lang="fr">Slovène</name>
 		<name lang="nl">Sloveens</name>
-		<name lang="si">Slovenščina</name>
+		<name lang="sl">Slovenščina</name>
 	</translation>
 
 </translations>

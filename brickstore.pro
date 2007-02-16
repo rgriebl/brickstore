@@ -12,7 +12,7 @@
 ## See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 
 isEmpty( RELEASE ) {
-  RELEASE    = 1.1.8
+  RELEASE    = 1.1.9
 }
 
 TEMPLATE     = app
@@ -23,7 +23,7 @@ TARGET       = brickstore
 TRANSLATIONS = translations/brickstore_de.ts \
                translations/brickstore_fr.ts \
                translations/brickstore_nl.ts \
-               translations/brickstore_si.ts
+               translations/brickstore_sl.ts
 
 res_images          = images/*.png images/*.jpg 
 res_images_16       = images/16x16/*.png
@@ -57,22 +57,33 @@ else {
 
 win32 {
   system( cscript.exe //B scripts\update_version.js $$RELEASE)
-  
-  CONFIG -= shared
+
   INCLUDEPATH += $$(CURLDIR)\include
   LIBS += $$(CURLDIR)\lib\libcurl.lib
-  DEFINES += CURL_STATICLIB _CRT_SECURE_NO_DEPRECATE
+  DEFINES += CURL_STATICLIB
   RC_FILE = brickstore.rc
-  QMAKE_CXXFLAGS_DEBUG += /Od
 
   DEFINES += __USER__="\"$$(USERNAME)\"" __HOST__="\"$$(COMPUTERNAME)\""
+
+  QMAKE_CXXFLAGS_DEBUG   += /Od /GL-
+  QMAKE_CXXFLAGS_RELEASE += /O2 /GL
+
+  win32-msvc2005 {
+     DEFINES += _CRT_SECURE_NO_DEPRECATE
+
+#    QMAKE_LFLAGS_WINDOWS += "/MANIFEST:NO"
+#    QMAKE_LFLAGS_WINDOWS += "/LTCG"
+
+     QMAKE_CXXFLAGS_DEBUG   += /EHc- /EHs- /GR-
+     QMAKE_CXXFLAGS_RELEASE += /EHc- /EHs- /GR-
+  }
 }
 
 unix {
   system( scripts/update_version.sh $$RELEASE)
 
-  OBJECTS_DIR = .obj  # grrr ... f***ing msvc.net doesn't link with this line present
-
+  OBJECTS_DIR = .obj
+  
   DEFINES += __USER__="\"$$(USER)\"" __HOST__="\"$$system( hostname )\""
 }
 
@@ -80,7 +91,7 @@ unix:!macx {
   LIBS += -lcurl
 
   isEmpty( PREFIX ):PREFIX = /usr/local
-  
+
   target.path = $$PREFIX/bin
   resources_i1.path  = $$PREFIX/share/brickstore/images
   resources_i1.files = $$res_images

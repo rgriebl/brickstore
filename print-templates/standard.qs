@@ -42,7 +42,7 @@ function print ( )
 
 		pagestat. lots = 0;
 		pagestat. items = 0;
-		pagestat. total = Utility. moneyFromDollar ( 0 );
+		pagestat. total = 0;
 
 		if ( Job. pageCount == 1 ) {
 			reportHeader ( page, ps );
@@ -64,7 +64,7 @@ function print ( )
 
 			pagestat. lots++;
 			pagestat. items += item. quantity;
-			pagestat. total = Utility. moneyFromDollar ( pagestat. total. dollar + item. total. dollar );
+			pagestat. total += item. total;
 
 			itemflip = itemflip ? false : true;
 			items_left--;
@@ -159,7 +159,7 @@ function reportFooter ( page, ps )
 	page. color = new Color ( "#fff" );
 	page. drawText ( ps. x + xs( ps. w, 110 ), y, xs( ps. w, 10 )    , h, page.AlignHCenter | page.AlignVCenter, Document. statistics. lots );
 	page. drawText ( ps. x + xs( ps. w, 120 ), y, xs( ps. w, 10 )    , h, page.AlignHCenter | page.AlignVCenter, Document. statistics. items );
-	page. drawText ( ps. x + xs( ps. w, 130 ), y, xs( ps. w, 40 ) - 2, h, page.AlignRight   | page.AlignVCenter, Document. statistics. value. formatted );
+	page. drawText ( ps. x + xs( ps. w, 130 ), y, xs( ps. w, 40 ) - 2, h, page.AlignRight   | page.AlignVCenter, Money. toLocalString ( Document. statistics. value, true ));
 
 	var fb = oldfont;
 	fb. bold = true;
@@ -216,7 +216,7 @@ function listFooter ( page, ps, pagestat )
 	page. color = new Color ( "#fff" );
 	page. drawText ( ps. x + xs( ps. w, 110 ), y, xs( ps. w, 10 ),     h, page.AlignHCenter | page.AlignVCenter, pagestat. lots );
 	page. drawText ( ps. x + xs( ps. w, 120 ), y, xs( ps. w, 10 ),     h, page.AlignHCenter | page.AlignVCenter, pagestat. items );
-	page. drawText ( ps. x + xs( ps. w, 130 ), y, xs( ps. w, 40 ) - 2, h, page.AlignRight   | page.AlignVCenter,   pagestat. total. formatted );
+	page. drawText ( ps. x + xs( ps. w, 130 ), y, xs( ps. w, 40 ) - 2, h, page.AlignRight   | page.AlignVCenter, Money. toLocalString ( pagestat. total, true ));
 
 	var fb = oldfont;
 	fb. bold = true;
@@ -248,8 +248,8 @@ function listItem ( page, ps, item, odd )
 	page. drawText ( ps. x + xs( ps. w,  20 ), y, xs( ps. w, 15 ), h, page.AlignHCenter | page.AlignVCenter, item. condition. used ? "Used" : "New" );
 	page. drawText ( ps. x + xs( ps. w,  35 ), y, xs( ps. w, 85 ), h, page.AlignLeft    | page.AlignVCenter, item. color. name + " " + item. name + " [" + item. id + "]" );
 	page. drawText ( ps. x + xs( ps. w, 120 ), y, xs( ps. w, 10 ), h, page.AlignHCenter | page.AlignVCenter, item. quantity );
-	page. drawText ( ps. x + xs( ps. w, 130 ), y, xs( ps. w, 18 ), h, page.AlignRight   | page.AlignVCenter, item. price. formatted );
-	page. drawText ( ps. x + xs( ps. w, 149 ), y, xs( ps. w, 20 ), h, page.AlignRight   | page.AlignVCenter, item. total. formatted );
+	page. drawText ( ps. x + xs( ps. w, 130 ), y, xs( ps. w, 18 ), h, page.AlignRight   | page.AlignVCenter, Money. toLocalString ( item. price, true ));
+	page. drawText ( ps. x + xs( ps. w, 149 ), y, xs( ps. w, 20 ), h, page.AlignRight   | page.AlignVCenter, Money. toLocalString ( item. total, true ));
 
 	page. color = oldfg;
 	page. backgroundColor = oldbg;

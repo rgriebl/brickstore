@@ -96,11 +96,11 @@
                 <File DiskId="1" Id="brickstore_de.qm" Name="brkst_de.qm"  LongName="brickstore_de.qm" src="$(var.TARGET)\translations\brickstore_de.qm" />
                 <File DiskId="1" Id="brickstore_fr.qm" Name="brkst_fr.qm"  LongName="brickstore_fr.qm" src="$(var.TARGET)\translations\brickstore_fr.qm" />
                 <File DiskId="1" Id="brickstore_nl.qm" Name="brkst_nl.qm"  LongName="brickstore_nl.qm" src="$(var.TARGET)\translations\brickstore_nl.qm" />
-                <File DiskId="1" Id="brickstore_si.qm" Name="brkst_si.qm"  LongName="brickstore_si.qm" src="$(var.TARGET)\translations\brickstore_si.qm" />
+                <File DiskId="1" Id="brickstore_sl.qm" Name="brkst_sl.qm"  LongName="brickstore_sl.qm" src="$(var.TARGET)\translations\brickstore_sl.qm" />
                 <File DiskId="1" Id="qt_de.qm"         Name="qt_de.qm"                                 src="$(env.QTDIR)\translations\qt_de.qm" />
                 <File DiskId="1" Id="qt_fr.qm"         Name="qt_fr.qm"                                 src="$(env.QTDIR)\translations\qt_fr.qm" />
                 <File DiskId="1" Id="qt_nl.qm"         Name="qt_nl.qm"                                 src="$(env.QTDIR)\translations\qt_nl.qm" />
-          <!--  <File DiskId="1" Id="qt_si.qm"         Name="qt_si.qm"                                 src="$(env.QTDIR)\translations\qt_si.qm" /> -->
+                <File DiskId="1" Id="qt_sl.qm"         Name="qt_sl.qm"                                 src="$(env.QTDIR)\translations\qt_sl.qm" />
               </Component>
             </Directory>
             <Directory Id="print_templates" Name="print-te" LongName="print-templates">
