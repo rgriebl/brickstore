@@ -213,6 +213,7 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 		   << "edit_modify"
 		   << "-"
 		   << "edit_reset_diffs"
+		   << "edit_copyremarks"
 		   << "-"
 		   << "edit_bl_info_group";
 
@@ -475,6 +476,7 @@ void CFrameWork::languageChange ( )
 		{ "edit_mergeitems",                tr( "Consolidate Items..." ),               0 },
 		{ "edit_partoutitems",              tr( "Part out Item..." ),                   0 },
 		{ "edit_reset_diffs",               tr( "Reset Differences" ),                  0 }, 
+		{ "edit_copyremarks",               tr( "Copy Remarks from Document..." ),      0 },
 		{ "edit_select_all",                tr( "Select All" ),                         tr( "Ctrl+A", "Edit|SelectAll" ) },
 		{ "edit_select_none",               tr( "Select None" ),                        tr( "Ctrl+Shift+A", "Edit|SelectNone" ) },
 		{ "view_simple_mode",               tr( "Buyer/Collector Mode" ),               0 },
@@ -832,6 +834,7 @@ void CFrameWork::createActions ( )
 	(void) new QAction ( this, "edit_mergeitems" );
 	(void) new QAction ( this, "edit_partoutitems" );
 	(void) new QAction ( this, "edit_reset_diffs" );
+	(void) new QAction ( this, "edit_copyremarks" );
 	(void) new QAction ( this, "edit_select_all" );
 	(void) new QAction ( this, "edit_select_none" );
 
@@ -1219,6 +1222,7 @@ void CFrameWork::connectAllActions ( bool do_connect, CWindow *window )
 	connectAction ( do_connect, "edit_mergeitems", window, SLOT( editMergeItems ( )));
 	connectAction ( do_connect, "edit_partoutitems", window, SLOT( editPartOutItems ( )));
 	connectAction ( do_connect, "edit_reset_diffs", window, SLOT( editResetDifferences ( )));
+	connectAction ( do_connect, "edit_copyremarks", window, SLOT( editCopyRemarks ( )));
 
 	connectAction ( do_connect, "edit_status_include", window, SLOT( editStatusInclude ( )));
 	connectAction ( do_connect, "edit_status_exclude", window, SLOT( editStatusExclude ( )));

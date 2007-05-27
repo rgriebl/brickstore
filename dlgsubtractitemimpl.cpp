@@ -19,6 +19,7 @@
 #include <qapplication.h>
 #include <qheader.h>
 #include <qlistview.h>
+#include <qlayout.h>
 
 #include "cconfig.h"
 #include "cframework.h"
@@ -55,11 +56,12 @@ private:
 	CWindow *m_window;
 };
 
-DlgSubtractItemImpl::DlgSubtractItemImpl ( CWindow *parent, const char *name, bool modal, int fl )
+DlgSubtractItemImpl::DlgSubtractItemImpl ( const QString &headertext, CWindow *parent, const char *name, bool modal, int fl )
 	: DlgSubtractItem ( parent, name, modal, fl )
 {
 	m_window = parent;
-	setCaption ( caption ( ). arg ( parent-> caption ( )));
+	//setCaption ( caption ( ). arg ( parent-> caption ( )));
+	w_header-> setText ( headertext );
 
 	connect ( w_doc_list, SIGNAL( doubleClicked ( QListViewItem *, const QPoint &, int )), this, SLOT( docSelected ( QListViewItem * )));
 	

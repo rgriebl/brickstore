@@ -64,6 +64,7 @@ public:
 	void mergeItems ( const CDocument::ItemList &items, int globalmergeflags = MergeAction_Ask );
 
 	void subtractItems ( const BrickLink::InvItemList &items );
+	void copyRemarks ( const BrickLink::InvItemList &items );
 
 //	bool hasFilter ( ) const;
 //	void setFilter ( const QRegExp &exp, Field f );
@@ -100,6 +101,7 @@ public slots:
 	void editDelete ( );
 
 	void editSubtractItems ( );
+	void editCopyRemarks ( );
 	void editMergeItems ( );
 	void editPartOutItems ( );
 

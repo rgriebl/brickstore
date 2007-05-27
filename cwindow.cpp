@@ -1176,9 +1176,65 @@ void CWindow::updateErrorMask ( )
 	m_doc-> setErrorMask ( em );
 }
 
+void CWindow::editCopyRemarks ( )
+{
+	DlgSubtractItemImpl d ( tr( "Please choose the document that should serve as a source to fill in the remarks fields of the current document:" ), this, "CopyRemarkDlg" );
+
+	if ( d. exec ( ) == QDialog::Accepted ) {
+		BrickLink::InvItemList list = d. items ( );
+
+		if ( !list. isEmpty ( ))
+			copyRemarks ( list );
+
+		qDeleteAll ( list );
+	}
+}
+
+void CWindow::copyRemarks ( const BrickLink::InvItemList &items )
+{
+	if ( items. isEmpty ( ))
+		return;
+
+	CUndoCmd *macro = m_doc-> macroBegin ( );
+
+	CDisableUpdates disupd ( w_list );
+
+	int copy_count = 0;
+
+	foreach ( CDocument::Item *pos, m_doc-> items ( )) {
+		BrickLink::InvItem *match = 0;
+
+		foreach ( BrickLink::InvItem *ii, items ) {
+			const BrickLink::Item *item   = ii-> item ( );
+			const BrickLink::Color *color = ii-> color ( );
+			BrickLink::Condition cond     = ii-> condition ( );
+			int qty                       = ii-> quantity ( );
+
+			if ( !item || !color || !qty )
+				continue;
+
+			if (( pos-> item ( ) == item ) && ( pos-> condition ( ) == cond )) {
+				if ( pos-> color ( ) == color )
+					match = ii;
+				else if ( !match )
+					match = ii;
+			}
+		}
+
+		if ( match && !match-> remarks ( ). isEmpty ( )) {
+			CDocument::Item newitem = *pos;
+			newitem. setRemarks ( match-> remarks ( ));
+			m_doc-> changeItem ( pos, newitem );
+
+			copy_count++;
+		}
+	}
+	m_doc-> macroEnd ( macro, tr( "Copied Remarks for %1 Items" ). arg( copy_count ));
+}
+
 void CWindow::editSubtractItems ( )
 {
-	DlgSubtractItemImpl d ( this, "SubtractItemDlg" );
+	DlgSubtractItemImpl d ( tr( "Which items should be subtracted from the current document:" ), this, "SubtractItemDlg" );
 
 	if ( d. exec ( ) == QDialog::Accepted ) {
 		BrickLink::InvItemList list = d. items ( );

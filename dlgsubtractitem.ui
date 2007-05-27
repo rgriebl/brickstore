@@ -8,12 +8,12 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>390</width>
-            <height>217</height>
+            <width>423</width>
+            <height>218</height>
         </rect>
     </property>
     <property name="caption">
-        <string>Subtract Items from %1</string>
+        <string>Document Selector</string>
     </property>
     <property name="sizeGripEnabled">
         <bool>true</bool>
@@ -27,10 +27,21 @@
         </property>
         <widget class="QLabel">
             <property name="name">
-                <cstring>textLabel1</cstring>
+                <cstring>w_header</cstring>
+            </property>
+            <property name="sizePolicy">
+                <sizepolicy>
+                    <hsizetype>5</hsizetype>
+                    <vsizetype>3</vsizetype>
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                </sizepolicy>
             </property>
             <property name="text">
-                <string>&amp;Which items should be subtracted from the current document:</string>
+                <string>%1</string>
+            </property>
+            <property name="alignment">
+                <set>WordBreak|AlignVCenter</set>
             </property>
             <property name="buddy" stdset="0">
                 <cstring>w_clipboard</cstring>

@@ -25,7 +25,7 @@ class DlgSubtractItemImpl : public DlgSubtractItem {
 	Q_OBJECT
 
 public:
-	DlgSubtractItemImpl ( CWindow *parent, const char *name = 0, bool modal = true, int fl = 0 );
+	DlgSubtractItemImpl ( const QString &headertext, CWindow *parent, const char *name = 0, bool modal = true, int fl = 0 );
 	
 	BrickLink::InvItemList items ( ) const;
 
