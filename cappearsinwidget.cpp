@@ -11,18 +11,13 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <qlabel.h>
-#include <qpopupmenu.h>
-#include <qlayout.h>
-#include <qapplication.h>
-#include <qaction.h>
-#include <qtooltip.h>
-#include <qheader.h>
-#include <qcursor.h>
+#include <QMenu>
+#include <QVariant>
+#include <QAction>
+#include <QHeaderView>
+#include <QDesktopServices>
 
 #include "cframework.h"
-#include "cresource.h"
-#include "cutility.h"
 #include "cpicturewidget.h"
 
 #include "cappearsinwidget.h"
@@ -30,6 +25,137 @@
 
 namespace {
 
+
+class AppearsInModel : public QAbstractTableModel {
+public:
+	AppearsInModel ( const BrickLink::Item *item, const BrickLink::Color *color )
+	{
+		m_item = item;
+		m_color = color;
+
+		if ( item )
+			m_appearsin= item-> appearsIn ( color );
+
+		m_rows = 0;
+		foreach ( const BrickLink::Item::AppearsInColor &vec, m_appearsin )
+			m_rows += vec. count ( );
+
+		m_pictures. fill ( 0, m_rows );
+	}
+
+	~AppearsInModel ( )
+	{
+		foreach ( BrickLink::Picture *pic, m_pictures ) {
+			if ( pic )
+				pic-> release ( );
+		}
+	}
+
+	const BrickLink::Item::AppearsInItem *appearsIn ( const QModelIndex &index ) const
+	{ 
+		int row = index. row ( );
+		if ( row >= 0 && row <= m_rows ) {
+			foreach ( const BrickLink::Item::AppearsInColor &vec, m_appearsin ) {
+				foreach ( const BrickLink::Item::AppearsInItem &item, vec ) {
+					if ( row-- == 0 )
+						return &item;
+				}
+			}
+		}
+		return 0;
+	}
+
+	BrickLink::Picture *picture ( const QModelIndex &index ) const
+	{ 
+		int row = index. row ( );
+		BrickLink::Picture *pic = 0;
+
+		if ( row >= 0 || row <= m_rows ) {
+			pic = m_pictures [row];
+
+			if ( !pic ) {
+				pic = BrickLink::inst ( )-> picture ( m_item, m_item-> defaultColor ( ), true );
+
+				if ( pic ) {
+					pic-> addRef ( );
+					m_pictures [row] = pic;
+				}
+			}
+		}
+		return pic; 
+	}
+
+/*	QModelIndex index ( const BrickLink::Color *color ) const
+	{ return color ? createIndex ( m_colors. indexOf ( color ), 0, 0 ) : QModelIndex ( ); }
+*/
+	virtual int rowCount ( const QModelIndex & /*parent*/ ) const
+	{ return m_rows; }
+
+	virtual int columnCount ( const QModelIndex & /*parent*/ ) const
+	{ return 3;	}
+
+	virtual QVariant data ( const QModelIndex &index, int role ) const
+	{
+		QVariant res;
+		const BrickLink::Item::AppearsInItem *appears = appearsIn ( index );
+		int col = index. column ( );
+
+		if ( !appears )
+			return res;
+
+		switch ( role ) {
+			case Qt::DisplayRole:
+				switch ( col ) {
+					case 0: res = QString::number ( appears-> first ); break;
+					case 1: res = appears-> second-> id ( ); break;
+					case 2: res = appears-> second-> name ( ); break;
+				}
+				break;
+		
+			case Qt::ToolTipRole: {
+				QString str = "<table><tr><td rowspan=\"2\">%1</td><td><b>%2</b></td></tr><tr><td>%3</td></tr></table>";
+				QString left_cell;
+
+				BrickLink::Picture *pic = picture ( index );
+
+				if ( pic && pic-> valid ( )) {
+					//QMimeSourceFactory::defaultFactory ( )-> setPixmap ( "appears_in_set_tooltip_picture", pic-> pixmap ( ));
+			
+					left_cell = "<img src=\"#/appears_in_set_tooltip_picture\" />";
+				}
+				else if ( pic && ( pic-> updateStatus ( ) == BrickLink::Updating )) {
+					left_cell = "<i>" + CAppearsInWidget::tr( "[Image is loading]" ) + "</i>";
+				}
+
+				res = str. arg( left_cell ). arg( m_item-> id ( )). arg( m_item-> name ( ));
+				break;
+			}
+		}
+
+		return res;
+	}
+
+	virtual QVariant headerData ( int section, Qt::Orientation orient, int role ) const
+    {
+		if (( orient == Qt::Horizontal ) && ( role == Qt::DisplayRole )) {
+			switch ( section ) {
+				case 0: return tr( "Qty." );
+				case 1: return tr( "Set" );
+				case 2: return tr( "Name" );
+			}
+		}
+		return QVariant ( );
+    }
+
+private:
+	const BrickLink::Item *       m_item;
+	const BrickLink::Color *      m_color;
+	int                           m_rows;
+	BrickLink::Item::AppearsIn    m_appearsin;
+	mutable QVector<BrickLink::Picture *> m_pictures;
+};
+
+#if 0
 class AppearsInListItem : public CListViewItem {
 public:
 	AppearsInListItem ( CListView *lv, int qty, const BrickLink::Item *item )
@@ -152,6 +278,7 @@ private:
 	CAppearsInWidget *m_aiw;
 	AppearsInListItem *m_tip_item;
 };
+#endif
 
 
 } // namespace
@@ -161,41 +288,72 @@ class CAppearsInWidgetPrivate {
 public:
 	const BrickLink::Item * m_item;
 	const BrickLink::Color *m_color;
-	QPopupMenu *            m_popup;
-	AppearsInToolTip *      m_tip;
 };
 
-CAppearsInWidget::CAppearsInWidget ( QWidget *parent, const char *name, WFlags /*fl*/ )
-	: CListView ( parent, name )
+CAppearsInWidget::CAppearsInWidget ( QWidget *parent )
+	: QTableView ( parent )
 {
 	d = new CAppearsInWidgetPrivate ( );
 
-	d-> m_item = 0;
-	d-> m_color = 0;
-	d-> m_popup = 0;
+	//setItemDelegate ( new ColorDelegate ( ));
+	horizontalHeader ( )-> setResizeMode ( QHeaderView::ResizeToContents );
+	horizontalHeader ( )-> setStretchLastSection ( true );
+	horizontalHeader ( )-> setMovable ( false );
+	horizontalHeader ( )-> setSortIndicatorShown ( false );
+	verticalHeader ( )-> setResizeMode ( QHeaderView::ResizeToContents );
+	verticalHeader ( )-> hide ( );
+	setShowGrid ( false );
+	setAlternatingRowColors ( true );
+	setSortingEnabled ( true );
+	sortByColumn ( 0 );
+	setContextMenuPolicy ( Qt::CustomContextMenu );
 
-	setShowSortIndicator ( false );
-	setAlwaysShowSelection ( true );
-	addColumn ( QString ( ));
-	addColumn ( QString ( ));
-	addColumn ( QString ( ));
-	setResizeMode ( QListView::LastColumn );
-	header ( )-> setMovingEnabled ( false );
+	setItem ( 0, 0 );
 
-	d-> m_tip = new AppearsInToolTip ( viewport ( ), this );
+	QAction *a;
+	a = new QAction ( this ); 
+	a-> setObjectName ( "edit_partoutitems" );
+	a-> setIcon ( QIcon( ":/edit_partoutitems" ));
+	connect ( a, SIGNAL( activated ( )), this, SLOT( partOut ( )));
 
-	connect ( this, SIGNAL( contextMenuRequested ( QListViewItem *, const QPoint &, int )), this, SLOT( showContextMenu ( QListViewItem *, const QPoint & )));
-	connect ( this, SIGNAL( returnPressed ( QListViewItem * )), this, SLOT( partOut ( )));
-	connect ( this, SIGNAL( doubleClicked ( QListViewItem *, const QPoint &, int )), this, SLOT( partOut ( )));
+	a = new QAction ( this );
+	a-> setSeparator ( true );
+
+	a = new QAction ( this );
+	a-> setObjectName ( "viewmagp" );
+	a-> setIcon ( QIcon( ":/viewmagp" ));
+	connect ( a, SIGNAL( activated ( )), this, SLOT( viewLargeImage ( )));
+
+	a = new QAction ( this );
+	a-> setSeparator ( true );
+
+	a = new QAction ( this );
+	a-> setObjectName ( "edit_bl_catalog" );
+	a-> setIcon ( QIcon( ":/edit_bl_catalog" ));
+	connect ( a, SIGNAL( activated ( )), this, SLOT( showBLCatalogInfo ( )));
+	a = new QAction ( this );
+	a-> setObjectName ( "edit_bl_priceguide" );
+	a-> setIcon ( QIcon( ":/edit_bl_priceguide" ));
+	connect ( a, SIGNAL( activated ( )), this, SLOT( showBLPriceGuideInfo ( )));
+	a = new QAction ( this );
+	a-> setObjectName ( "edit_bl_lotsforsale" );
+	a-> setIcon ( QIcon( ":/edit_bl_lotsforsale" ));
+	connect ( a, SIGNAL( activated ( )), this, SLOT( showBLLotsForSale ( )));
+
+	connect ( this, SIGNAL( customContextMenuRequested ( const QPoint & )), this, SLOT( showContextMenu ( const QPoint & )));
+//	connect ( this, SIGNAL( returnPressed ( QListViewItem * )), this, SLOT( partOut ( )));
+//	connect ( this, SIGNAL( doubleClicked ( QListViewItem *, const QPoint &, int )), this, SLOT( partOut ( )));
 
 	languageChange ( );
 }
 
 void CAppearsInWidget::languageChange ( )
 {
-	setColumnText ( 0, tr( "Qty." ));
-	setColumnText ( 1, tr( "Set" ));
-	setColumnText ( 2, tr( "Name" ));
+	findChild<QAction *> ( "edit_partoutitems" )-> setText ( tr( "Part out Item..." ));
+	findChild<QAction *> ( "viewmagp" )-> setText ( tr( "View large image..." ));
+	findChild<QAction *> ( "edit_bl_catalog" )-> setText ( tr( "Show BrickLink Catalog Info..." ));
+	findChild<QAction *> ( "edit_bl_priceguide" )-> setText ( tr( "Show BrickLink Price Guide Info..." ));
+	findChild<QAction *> ( "edit_bl_lotsforsale" )-> setText ( tr( "Show Lots for Sale on BrickLink..." ));
 }
 
 CAppearsInWidget::~CAppearsInWidget ( )
@@ -203,32 +361,29 @@ CAppearsInWidget::~CAppearsInWidget ( )
 	delete d;
 }
 
-void CAppearsInWidget::showContextMenu ( QListViewItem *lvitem, const QPoint &pos )
+void CAppearsInWidget::showContextMenu ( const QPoint &pos )
 {
-	if ( d-> m_item && lvitem ) {
-		if ( lvitem != currentItem ( ))
-			setCurrentItem ( lvitem );
+	if ( appearsIn ( ))
+		QMenu::exec ( actions ( ), viewport ( )-> mapToGlobal ( pos ));
+}
 
-		if ( !d-> m_popup ) {
-			d-> m_popup = new QPopupMenu ( this );
-			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "edit_partoutitems" ), tr( "Part out Item..." ), this, SLOT( partOut ( )));
-			d-> m_popup-> insertSeparator ( );
-			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "viewmagp" ), tr( "View large image..." ), this, SLOT( viewLargeImage ( )));
-			d-> m_popup-> insertSeparator ( );
-			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "edit_bl_catalog" ), tr( "Show BrickLink Catalog Info..." ), this, SLOT( showBLCatalogInfo ( )));
-			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "edit_bl_priceguide" ), tr( "Show BrickLink Price Guide Info..." ), this, SLOT( showBLPriceGuideInfo ( )));
-			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "edit_bl_lotsforsale" ), tr( "Show Lots for Sale on BrickLink..." ), this, SLOT( showBLLotsForSale ( )));
-		}
-		d-> m_popup-> popup ( pos );
-	}
+
+const BrickLink::Item::AppearsInItem *CAppearsInWidget::appearsIn ( ) const
+{
+	AppearsInModel *m = static_cast<AppearsInModel *>( model ( ));
+
+	if ( !selectionModel ( )-> selectedIndexes ( ). isEmpty ( ))
+		return m-> appearsIn ( selectionModel ( )-> selectedIndexes ( ). front ( ));
+	else
+		return 0;
 }
 
 void CAppearsInWidget::partOut ( )
 {
-	AppearsInListItem *item = static_cast <AppearsInListItem *> ( currentItem ( ));
+	const BrickLink::Item::AppearsInItem *ai = appearsIn ( );
 
-	if ( item && item-> item ( ))
-		CFrameWork::inst ( )-> fileImportBrickLinkInventory ( item-> item ( ));
+	if ( ai && ai-> second )
+		CFrameWork::inst ( )-> fileImportBrickLinkInventory ( ai-> second );
 }
 
 QSize CAppearsInWidget::minimumSizeHint ( ) const
@@ -245,62 +400,51 @@ QSize CAppearsInWidget::sizeHint ( ) const
 
 void CAppearsInWidget::setItem ( const BrickLink::Item *item, const BrickLink::Color *color )
 {
-	d-> m_tip-> hideTip ( );
-	clear ( );
 	d-> m_item = item;
 	d-> m_color = color;
 
-	if ( item ) {
-		BrickLink::Item::AppearsInMap map = item-> appearsIn ( color );
-
-		for ( BrickLink::Item::AppearsInMap::const_iterator itc = map. begin ( ); itc != map. end ( ); ++itc ) {
-			for ( BrickLink::Item::AppearsInMapVector::const_iterator itv = itc. data ( ). begin ( ); itv != itc. data ( ). end ( ); ++itv ) {
-				(void) new AppearsInListItem ( this, itv-> first, itv-> second );
-			}
-		}
-	}
+	setModel ( new AppearsInModel ( d-> m_item , d-> m_color ));
 }
 
 void CAppearsInWidget::viewLargeImage ( )
 {
-	AppearsInListItem *item = static_cast <AppearsInListItem *> ( currentItem ( ));
+	const BrickLink::Item::AppearsInItem *ai = appearsIn ( );
 
-	if ( !item || !item-> item ( ))
-		return;
+	if ( ai && ai-> second ) {
+		BrickLink::Picture *lpic = BrickLink::inst ( )-> largePicture ( ai-> second, true );
 
-	BrickLink::Picture *lpic = BrickLink::inst ( )-> largePicture ( item-> item ( ), true );
-
-	if ( lpic ) {
-		CLargePictureWidget *l = new CLargePictureWidget ( lpic, qApp-> mainWidget ( ));
-		l-> show ( );
-		l-> raise ( );
-		l-> setActiveWindow ( );
-		l-> setFocus ( );
+		if ( lpic ) {
+			CLargePictureWidget *l = new CLargePictureWidget ( lpic, this );
+			l-> show ( );
+			l-> raise ( );
+			l-> activateWindow ( );
+			l-> setFocus ( );
+		}
 	}
 }
 
 void CAppearsInWidget::showBLCatalogInfo ( )
 {
-	AppearsInListItem *item = static_cast <AppearsInListItem *> ( currentItem ( ));
+	const BrickLink::Item::AppearsInItem *ai = appearsIn ( );
 
-	if ( item && item-> item ( ))
-		CUtility::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_CatalogInfo, item-> item ( )));
+	if ( ai && ai-> second )
+		QDesktopServices::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_CatalogInfo, ai-> second ));
 }
 
 void CAppearsInWidget::showBLPriceGuideInfo ( )
 {
-	AppearsInListItem *item = static_cast <AppearsInListItem *> ( currentItem ( ));
+	const BrickLink::Item::AppearsInItem *ai = appearsIn ( );
 
-	if ( item && item-> item ( ))
-		CUtility::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_PriceGuideInfo, item-> item ( ), BrickLink::inst ( )-> color ( 0 )));
+	if ( ai && ai-> second )
+		QDesktopServices::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_PriceGuideInfo, ai-> second, BrickLink::inst ( )-> color ( 0 )));
 }
 
 void CAppearsInWidget::showBLLotsForSale ( )
 {
-	AppearsInListItem *item = static_cast <AppearsInListItem *> ( currentItem ( ));
+	const BrickLink::Item::AppearsInItem *ai = appearsIn ( );
 
-	if ( item && item-> item ( ))
-		CUtility::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_LotsForSale, item-> item ( ), BrickLink::inst ( )-> color ( 0 )));
+	if ( ai && ai-> second )
+		QDesktopServices::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_LotsForSale, ai-> second, BrickLink::inst ( )-> color ( 0 )));
 }
 
 #include "cappearsinwidget.moc"

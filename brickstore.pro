@@ -1,3 +1,4 @@
+
 ## Copyright (C) 2004-2006 Robert Griebl.  All rights reserved.
 ##
 ## This file is part of BrickStore.
@@ -12,18 +13,20 @@
 ## See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 
 isEmpty( RELEASE ) {
-  RELEASE    = 1.1.10
+  RELEASE    = 2.0.0
 }
 
 TEMPLATE     = app
-CONFIG      *= warn_on thread qt link_prl
+CONFIG      *= warn_on thread qt 
+QT           = core gui xml
 
 TARGET       = brickstore
 
-TRANSLATIONS = translations/brickstore_de.ts \
-               translations/brickstore_fr.ts \
-               translations/brickstore_nl.ts \
-               translations/brickstore_sl.ts
+#TRANSLATIONS = translations/brickstore_de.ts \
+#               translations/brickstore_fr.ts \
+#               translations/brickstore_nl.ts
+
+RESOURCES     = brickstore.qrc
 
 res_images          = images/*.png images/*.jpg 
 res_images_16       = images/16x16/*.png
@@ -31,7 +34,7 @@ res_images_22       = images/22x22/*.png
 res_images_status   = images/status/*.png
 res_images_sidebar  = images/sidebar/*.png
 res_translations    = translations/translations.xml $$TRANSLATIONS
-res_print_templates = print-templates/standard.qs
+res_print_templates = print-templates/*.qs
 
 dist_extra          = version.h.in icon.png
 dist_scripts        = scripts/*.sh scripts/*.pl scripts/*.js
@@ -49,7 +52,7 @@ exists( .private-key ) {
   win32:cat_cmd = type
   unix:cat_cmd = cat
 
-  DEFINES += BS_REGKEY="\"$$system( $$cat_cmd .private-key )\""
+  DEFINES += BS_REGKEY=\"$$system( $$cat_cmd .private-key )\"
 } 
 else {
   message( Building an OpenSource version )
@@ -57,13 +60,19 @@ else {
 
 win32 {
   system( cscript.exe //B scripts\update_version.js $$RELEASE)
+  
+  CURLDIR=$$(CURLDIR)
 
-  INCLUDEPATH += $$(CURLDIR)\include
-  LIBS += $$(CURLDIR)\lib\libcurl.lib
+  isEmpty( $CURLDIR ):CURLDIR="C:/Projekte/Curl/Curl-7.15.3"
+  CONFIG += windows
+  CONFIG -= shared
+
+  INCLUDEPATH += $$CURLDIR\include
+  LIBS += $$CURLDIR\lib\libcurl.lib
   DEFINES += CURL_STATICLIB
   RC_FILE = brickstore.rc
 
-  DEFINES += __USER__="\"$$(USERNAME)\"" __HOST__="\"$$(COMPUTERNAME)\""
+  DEFINES += __USER__=\"$$(USERNAME)\" __HOST__=\"$$(COMPUTERNAME)\"
 
   QMAKE_CXXFLAGS_DEBUG   += /Od /GL-
   QMAKE_CXXFLAGS_RELEASE += /O2 /GL
@@ -83,11 +92,13 @@ unix {
   system( scripts/update_version.sh $$RELEASE)
 
   OBJECTS_DIR = .obj
-  
-  DEFINES += __USER__="\"$$(USER)\"" __HOST__="\"$$system( hostname )\""
+
+  DEFINES += __USER__=\"$$(USER)\" __HOST__=\"$$system( hostname )\"
 }
 
 unix:!macx {
+  CONFIG += x11
+
   LIBS += -lcurl
 
   isEmpty( PREFIX ):PREFIX = /usr/local
@@ -120,7 +131,9 @@ unix:!macx {
 }
 
 macx {
-  osx_minor = $$system( sw_vers -productVersion | awk -F. '{ print $2; }' )
+  CONFIG += ppc x86
+
+  osx_minor = $$system( sw_vers -productVersion | awk -F. \'{ print $2; }\' )
 
   system( test $$osx_minor -ge 4 ) {
     LIBS += -lcurl
@@ -132,136 +145,79 @@ macx {
   }
 }
 
+
+XFORMS  += registration \
+           information \
+           importorder \
+           additem
+
+
+SOURCES += main.cpp \
+           bricklink.cpp \
+           bricklink_data.cpp \
+           bricklink_textimport.cpp \
+           bricklink_priceguide.cpp \
+           bricklink_picture.cpp \
+           lzmadec.c
+
 HEADERS += bricklink.h \
-           cappearsinwidget.h \
-           capplication.h \
+           lzmadec.h \
            ccheckforupdates.h \
+           cimport.h \
+           cupdatedatabase.h \
+           ctooltiphelper.h \
+	   
+
+HEADERS += capplication.h \
+           cmessagebox.h \
+           csplash.h \
+           cmoney.h \
+           cref.h \
+           ctransfer.h \
+           cmappedfile.h \
            cconfig.h \
+           crebuilddatabase.h \
+           cprogressdialog.h \
            cdocument.h \
            cdocument_p.h \
-           cfilteredit.h \
-           cframework.h \
-           ciconfactory.h \
-           cimport.h \
-           citemtypecombo.h \
-           citemview.h \
-           clistaction.h \
-           clistview.h \
-           clistview_p.h \
-           cmessagebox.h \
-           cmoney.h \
-           cmultiprogressbar.h \
-           cpicturewidget.h \
-           cpriceguidewidget.h \
-           cprogressdialog.h \
-           crebuilddatabase.h \
-           cref.h \
-           creport.h \
-           creportobjects.h \
-           creport_p.h \
-           cresource.h \
            cselectcolor.h \
+           cworkspace.h \
+           cframework.h \
+           cpicturewidget.h \
+           cappearsinwidget.h \
+           cpriceguidewidget.h \
+           ctaskwidgets.h \
+           ctaskpanemanager.h \
            cselectitem.h \
            cspinner.h \
-           csplash.h \
-           ctaskpanemanager.h \
-           ctaskwidgets.h \
-           ctransfer.h \
-           cundo.h \
-           cundo_p.h \
-           cupdatedatabase.h \
-           curllabel.h \
            cutility.h \
-           cwindow.h \
-           cworkspace.h \
-           lzmadec.h \
-           sha1.h
 
-SOURCES += bricklink.cpp \
-           bricklink_data.cpp \
-           bricklink_picture.cpp \
-           bricklink_priceguide.cpp \
-           bricklink_textimport.cpp \
-           capplication.cpp \
-           cappearsinwidget.cpp \
-           cconfig.cpp \
-           cdocument.cpp \
-           cfilteredit.cpp \
-           cframework.cpp \
-           ciconfactory.cpp \
-           citemview.cpp \
-           clistaction.cpp \
-           clistview.cpp \
+SOURCES += capplication.cpp \
            cmessagebox.cpp \
-           cmoney.cpp \
-           cmultiprogressbar.cpp \
-           cpicturewidget.cpp \
-           cpriceguidewidget.cpp \
-           cprogressdialog.cpp \
-           crebuilddatabase.cpp \
-           cref.cpp \
-           creport.cpp \
-           creportobjects.cpp \
-           cresource.cpp \
-           cselectcolor.cpp \
-           cselectitem.cpp \
-           cspinner.cpp \
            csplash.cpp \
-           ctaskpanemanager.cpp \
-           ctaskwidgets.cpp \
+           cmoney.cpp \
+           cref.cpp \
            ctransfer.cpp \
-           cundo.cpp \
-           curllabel.cpp \
-           cutility.cpp \
-           cwindow.cpp \
+           cmappedfile.cpp \
+           cconfig.cpp \
+           crebuilddatabase.cpp \
+           cprogressdialog.cpp \
+           cdocument.cpp \
+           cselectcolor.cpp \
            cworkspace.cpp \
-           lzmadec.c \
-           main.cpp \
-           sha1.cpp
+           cframework.cpp \
+           cpicturewidget.cpp \
+           cappearsinwidget.cpp \
+           cpriceguidewidget.cpp \
+           ctaskwidgets.cpp \
+           ctaskpanemanager.cpp \
+           cspinner.cpp \
+           cutility.cpp \
 
-FORMS   += dlgadditem.ui \
-           dlgincdecprice.ui \
-           dlgincompleteitem.ui \
-           dlgloadinventory.ui \
-           dlgloadorder.ui \
-           dlgmerge.ui \
-           dlgmessage.ui \
-           dlgregistration.ui \
-           dlgselectreport.ui \
-           dlgsettings.ui \
-           dlgsettopg.ui \
-           dlgsubtractitem.ui
+#           cselectitem.cpp \
 
-HEADERS += dlgadditemimpl.h \
-           dlgincdecpriceimpl.h \
-           dlgincompleteitemimpl.h \
-           dlgloadinventoryimpl.h \
-           dlgloadorderimpl.h \
-           dlgmergeimpl.h \
-           dlgmessageimpl.h \
-           dlgregistrationimpl.h \
-           dlgselectreportimpl.h \
-           dlgsettingsimpl.h \
-           dlgsettopgimpl.h \
-           dlgsubtractitemimpl.h
-
-SOURCES += dlgadditemimpl.cpp \
-           dlgincdecpriceimpl.cpp \
-           dlgincompleteitemimpl.cpp \
-           dlgloadinventoryimpl.cpp \
-           dlgloadorderimpl.cpp \
-           dlgmergeimpl.cpp \
-           dlgmessageimpl.cpp \
-           dlgregistrationimpl.cpp \
-           dlgselectreportimpl.cpp \
-           dlgsettingsimpl.cpp \
-           dlgsettopgimpl.cpp \
-           dlgsubtractitemimpl.cpp
-
-unix:!macx {
-  INCLUDEPATH += qsa/src/qsa
-  LIBS += qsa/src/qsa/libqsa.a
-}
-else {
-  load( qsa )
+for( form, XFORMS ) {
+  FORMS += dialogs/$${form}.ui
+  HEADERS += d$${form}.h
+  SOURCES += d$${form}.cpp
 }

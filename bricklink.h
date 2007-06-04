@@ -14,25 +14,20 @@
 #ifndef __BL_DATABASE_H__
 #define __BL_DATABASE_H__
 
-#include <qglobal.h>
-#include <qdatetime.h>
-#include <qstring.h>
-#include <qcstring.h>
-#include <qptrvector.h>
-#include <qptrlist.h>
-#include <qdict.h>
-#include <qintdict.h>
-#include <qasciicache.h>
+#include <QDateTime>
+#include <QString>
 #include <qcolor.h>
 #include <qobject.h>
 #include <qimage.h>
-#include <qdragobject.h>
-#include <qdom.h>
+//#include <qdragobject.h>
+#include <QtXml/QDomDocument>
 #include <qlocale.h>
-#include <qvaluevector.h>
-#include <qvaluelist.h>
-#include <qmap.h>
-#include <qpair.h>
+#include <QHash>
+#include <QVector>
+#include <QList>
+#include <QMap>
+#include <QPair>
+#include <QUrl>
 
 #include "cref.h"
 #include "cmoney.h"
@@ -62,7 +57,6 @@
 class QIODevice;
 template <typename T> class QDict;
 
-
 class BrickLink : public QObject {
 	Q_OBJECT
 public:
@@ -72,7 +66,7 @@ public:
 	class TextImport;
 	class InvItem;
 
-	typedef QValueList<InvItem *> InvItemList;
+	typedef QList<InvItem *> InvItemList;
 
 
 	class ItemType {
@@ -142,26 +136,32 @@ public:
 		const char *peeronName ( ) const { return m_peeron_name; }
 		int ldrawId ( ) const            { return m_ldraw_id; }
 
+		QString categoryName ( ) const   { return m_category_name; }
+
 		bool isTransparent ( ) const { return m_is_trans; }
 		bool isGlitter ( ) const     { return m_is_glitter; }
 		bool isSpeckle ( ) const     { return m_is_speckle; }
 		bool isMetallic ( ) const    { return m_is_metallic; }
 		bool isChrome ( ) const      { return m_is_chrome; }
-
+		bool isPearl ( ) const       { return m_is_pearl; }
+		bool isMilky ( ) const       { return m_is_milky; }
 		~Color ( );
 
 	private:
-		uint   m_id;
-		char * m_name;
-		char * m_peeron_name;
-		int    m_ldraw_id;
-		QColor m_color;
+		uint    m_id;
+		char *  m_name;
+		char *  m_peeron_name;
+		int     m_ldraw_id;
+		QColor  m_color;
+		QString m_category_name;
 		
 		bool   m_is_trans    : 1;
 		bool   m_is_glitter  : 1;
 		bool   m_is_speckle  : 1;
 		bool   m_is_metallic : 1;
 		bool   m_is_chrome   : 1;
+		bool   m_is_milky    : 1;
+		bool   m_is_pearl    : 1;
 
 	private:
 		Color ( );
@@ -188,10 +188,11 @@ public:
 
 		~Item ( );
 
-		typedef QValueVector <QPair <int, const Item *> >   AppearsInMapVector ;
-		typedef QMap <const Color *, AppearsInMapVector>    AppearsInMap;
+		typedef QPair <int, const Item *>              AppearsInItem;
+		typedef QVector <AppearsInItem>                AppearsInColor;
+		typedef QHash <const Color *, AppearsInColor>  AppearsIn;
 
-		AppearsInMap appearsIn ( const Color *color = 0 ) const;
+		AppearsIn appearsIn ( const Color *color = 0 ) const;
 		InvItemList  consistsOf ( ) const;
 
 		uint index ( ) const { return m_index; } // only for internal use (picture/priceguide hashes)
@@ -204,45 +205,45 @@ public:
 		const Color *     m_color;
 		time_t            m_last_inv_update;
 		float             m_weight;
-		Q_UINT32          m_index : 24;
-		Q_UINT32          m_year  : 8;
+		quint32           m_index : 24;
+		quint32           m_year  : 8;
 
-		mutable Q_UINT32 *m_appears_in;
-		mutable Q_UINT64 *m_consists_of;
+		mutable quint32 * m_appears_in;
+		mutable quint64 * m_consists_of;
 
 	private:
 		Item ( );
 
-		void setAppearsIn ( const AppearsInMap &map ) const;
+		void setAppearsIn ( const AppearsIn &hash ) const;
 		void setConsistsOf ( const InvItemList &items ) const;
 
 		struct appears_in_record {
 #if __BYTE_ORDER == __LITTLE_ENDIAN
-			Q_UINT32  m12  : 12;
-			Q_UINT32  m20  : 20;
+			quint32  m12  : 12;
+			quint32  m20  : 20;
 #else
-			Q_UINT32  m20  : 20;
-			Q_UINT32  m12  : 12;
+			quint32  m20  : 20;
+			quint32  m12  : 12;
 #endif
 		};
 
 		struct consists_of_record {
 #if __BYTE_ORDER == __LITTLE_ENDIAN
-			Q_UINT64  m_qty      : 12;
-			Q_UINT64  m_index    : 20;
-			Q_UINT64  m_color    : 12;
-			Q_UINT64  m_extra    : 1;
-			Q_UINT64  m_isalt    : 1;
-			Q_UINT64  m_altid    : 6;
-			Q_UINT64  m_reserved : 12;
+			quint64  m_qty      : 12;
+			quint64  m_index    : 20;
+			quint64  m_color    : 12;
+			quint64  m_extra    : 1;
+			quint64  m_isalt    : 1;
+			quint64  m_altid    : 6;
+			quint64  m_reserved : 12;
 #else
-			Q_UINT64  m_reserved : 12;
-			Q_UINT64  m_altid    : 6;
-			Q_UINT64  m_isalt    : 1;
-			Q_UINT64  m_extra    : 1;
-			Q_UINT64  m_color    : 12;
-			Q_UINT64  m_index    : 20;
-			Q_UINT64  m_qty      : 12;
+			quint64  m_reserved : 12;
+			quint64  m_altid    : 6;
+			quint64  m_isalt    : 1;
+			quint64  m_extra    : 1;
+			quint64  m_color    : 12;
+			quint64  m_index    : 20;
+			quint64  m_qty      : 12;
 #endif
 		};
 
@@ -329,15 +330,15 @@ public:
 		QString remarks ( ) const           { return m_remarks; }
 		void setRemarks ( const QString &r ){ m_remarks = r; }
 
-		QCString customPictureUrl ( ) const { return m_custom_picture_url; }
-		void setCustomPictureUrl ( const char *url ) { m_custom_picture_url = url; }
+		QString customPictureUrl ( ) const  { return m_custom_picture_url; }
+		void setCustomPictureUrl ( const QString &url ) { m_custom_picture_url = url; }
 
 		int quantity ( ) const              { return m_quantity; }
 		void setQuantity ( int q )          { m_quantity = q; }
 		int origQuantity ( ) const          { return m_orig_quantity; }
 		void setOrigQuantity ( int q )      { m_orig_quantity = q; }
 		int bulkQuantity ( ) const          { return m_bulk_quantity; }
-		void setBulkQuantity ( int q )      { m_bulk_quantity = QMAX( 1, q ); }
+		void setBulkQuantity ( int q )      { m_bulk_quantity = qMax( 1, q ); }
 		int tierQuantity ( uint i ) const   { return m_tier_quantity [i < 3 ? i : 0]; }
 		void setTierQuantity ( uint i, int q ) { m_tier_quantity [i < 3 ? i : 0] = q; }
 		money_t price ( ) const             { return m_price; }
@@ -347,7 +348,7 @@ public:
 		money_t tierPrice ( uint i ) const  { return m_tier_price [i < 3 ? i : 0]; }
 		bool setTierPrice ( uint i, money_t p ) { if ( p < 0 ) return false; m_tier_price [i < 3 ? i : 0] = p; return true; }
 		int sale ( ) const                  { return m_sale; }
-		void setSale ( int s )              { m_sale = QMAX( -99, QMIN( 100, s )); }
+		void setSale ( int s )              { m_sale = qMax( -99, qMin( 100, s )); }
 		money_t total ( ) const             { return m_price * m_quantity; }
 
 		uint lotId ( ) const                { return m_lot_id; }
@@ -402,7 +403,7 @@ public:
 		QString          m_remarks;
 		QString          m_reserved;
 
-		QCString         m_custom_picture_url;
+		QString          m_custom_picture_url;
 		Picture  *       m_custom_picture;
 
 		int              m_quantity;
@@ -425,7 +426,7 @@ public:
 		friend class BrickLink;
 	};
 
-	class InvItemDrag : public QDragObject {
+/*	class InvItemDrag : public QDragObject {
 	public:
 		InvItemDrag ( const InvItemList &items, QWidget *dragsource = 0, const char *name = 0 );
 		InvItemDrag ( QWidget *dragSource = 0, const char *name = 0 );
@@ -437,14 +438,14 @@ public:
 
 		static bool canDecode ( QMimeSource * );
 		static bool decode( QMimeSource *, InvItemList &items );
-
+ 
 	private:
 		static const char *s_mimetype;
 
 		QByteArray m_data;
 		QCString   m_text;
 	};
-
+*/
 	class Order {
 	public:
 		enum Type { Received, Placed, Any };
@@ -547,24 +548,24 @@ public:
 		bool import ( const QString &path );
 		void exportTo ( BrickLink * );
 
-		bool importInventories ( const QString &path, QPtrVector<Item> &items );
+		bool importInventories ( const QString &path, QVector<const Item *> &items );
 		void exportInventoriesTo ( BrickLink * );
 
-		const QIntDict<Color>    &colors ( ) const      { return m_colors; }
-		const QIntDict<Category> &categories ( ) const  { return m_categories; }
-		const QIntDict<ItemType> &itemTypes ( ) const   { return m_item_types; }
-		const QPtrVector<Item>   &items ( ) const       { return m_items; }
+		const QHash<int, const Color *>    &colors ( ) const      { return m_colors; }
+		const QHash<int, const Category *> &categories ( ) const  { return m_categories; }
+		const QHash<int, const ItemType *> &itemTypes ( ) const   { return m_item_types; }
+		const QVector<const Item *>        &items ( ) const       { return m_items; }
 		
 	private:
-		template <typename T> T *parse ( uint count, const char **strs, T *gcc_dummy );
-		Category *parse ( uint count, const char **strs, Category * );
-		Color *parse ( uint count, const char **strs, Color * );
-		ItemType *parse ( uint count, const char **strs, ItemType * );
-		Item *parse ( uint count, const char **strs, Item * );
+		template <typename T> T *parse ( uint count, const char **strs ); // , T *gcc_dummy );
+//		Category *parse ( uint count, const char **strs, Category * );
+//		Color *parse ( uint count, const char **strs, Color * );
+//		ItemType *parse ( uint count, const char **strs, ItemType * );
+//		Item *parse ( uint count, const char **strs, Item * );
 
 		template <typename C> bool readDB ( const QString &name, C &container );
-		template <typename T> bool readDB_processLine ( QIntDict<T> &d, uint tokencount, const char **tokens );
-		template <typename T> bool readDB_processLine ( QPtrVector<T> &v, uint tokencount, const char **tokens );
+		template <typename T> bool readDB_processLine ( QHash<int, const T *> &d, uint tokencount, const char **tokens );
+		template <typename T> bool readDB_processLine ( QVector<const T *> &v, uint tokencount, const char **tokens );
 
 		struct btinvlist_dummy { };
 		bool readDB_processLine ( btinvlist_dummy &, uint count, const char **strs );
@@ -572,20 +573,20 @@ public:
 		bool readColorGuide ( const QString &name );
 		bool readPeeronColors ( const QString &name );
 
-		bool readInventory ( const QString &path, Item *item );
+		bool readInventory ( const QString &path, const Item *item );
 
 		const BrickLink::Category *findCategoryByName ( const char *name, int len = -1 );
 		const BrickLink::Item *findItem ( char type, const char *id );
 		void appendCategoryToItemType ( const Category *cat, ItemType *itt );
 
 	private:
-		QIntDict <Color>    m_colors;
-		QIntDict <ItemType> m_item_types;
-		QIntDict <Category> m_categories;
-		QPtrVector <Item>   m_items;
+		QHash<int, const Color *>    m_colors;
+		QHash<int, const ItemType *> m_item_types;
+		QHash<int, const Category *> m_categories;
+		QVector<const Item *>        m_items;
 
-		QMap<const BrickLink::Item *, BrickLink::Item::AppearsInMap> m_appears_in_map;
-		QMap<const BrickLink::Item *, BrickLink::InvItemList>        m_consists_of_map;
+		QHash<const BrickLink::Item *, BrickLink::Item::AppearsIn> m_appears_in_hash;
+		QHash<const BrickLink::Item *, BrickLink::InvItemList>     m_consists_of_hash;
 
 		const ItemType *m_current_item_type;
 	};
@@ -614,7 +615,7 @@ public:
 		URL_StoreItemDetail
 	};
 
-	QCString url ( UrlList u, const void *opt = 0, const void *opt2 = 0 );
+	QUrl url ( UrlList u, const void *opt = 0, const void *opt2 = 0 );
 
 	QString dataPath ( ) const;
 	QString dataPath ( const ItemType * ) const;
@@ -623,10 +624,10 @@ public:
 
 	QString defaultDatabaseName ( ) const;
 
-	const QIntDict<Color>    &colors ( ) const;
-	const QIntDict<Category> &categories ( ) const;
-	const QIntDict<ItemType> &itemTypes ( ) const;
-	const QPtrVector<Item>   &items ( ) const;
+	const QHash<int, const Color *>    &colors ( ) const;
+	const QHash<int, const Category *> &categories ( ) const;
+	const QHash<int, const ItemType *> &itemTypes ( ) const;
+	const QVector<const Item *>        &items ( ) const;
 
 	const QPixmap *noImage ( const QSize &s );
 
@@ -692,15 +693,15 @@ private:
 	static BrickLink *s_inst;
 
 	bool updateNeeded ( const QDateTime &last, int iv );
-	bool parseLDrawModelInternal ( QFile &file, const QString &model_name, InvItemList &items, uint *invalid_items, QDict <InvItem> &mergehash );
+	bool parseLDrawModelInternal ( QFile &file, const QString &model_name, InvItemList &items, uint *invalid_items, QHash<QString, InvItem *> &mergehash );
 	void pictureIdleLoader2 ( );
 
-	void setDatabase_ConsistsOf ( const QMap<const Item *, InvItemList> &map );
-	void setDatabase_AppearsIn ( const QMap<const Item *, Item::AppearsInMap> &map );
-	void setDatabase_Basics ( const QIntDict<Color> &colors, 
-								const QIntDict<Category> &categories,
-								const QIntDict<ItemType> &item_types,
-								const QPtrVector<Item> &items );
+	void setDatabase_ConsistsOf ( const QHash<const Item *, InvItemList> &hash );
+	void setDatabase_AppearsIn ( const QHash<const Item *, Item::AppearsIn> &hash );
+	void setDatabase_Basics ( const QHash<int, const Color *> &colors, 
+	                          const QHash<int, const Category *> &categories,
+	                          const QHash<int, const ItemType *> &item_types,
+	                          const QVector<const Item *> &items );
 
 private slots:
 	void pictureIdleLoader ( );
@@ -713,29 +714,29 @@ private:
 	bool     m_online;
 	QLocale  m_c_locale;
 
-	QDict <QPixmap>  m_noimages;
+	QHash<QString, QPixmap *>  m_noimages;
 
 	struct dummy1 {
-		QIntDict<Color>           colors;      // id -> Color *
-		QIntDict<Category>        categories;  // id -> Category *
-		QIntDict<ItemType>        item_types;  // id -> ItemType *
-		QPtrVector<Item>          items;       // sorted array of Item *
+		QHash<int, const Color *>       colors;      // id -> Color *
+		QHash<int, const Category *>    categories;  // id -> Category *
+		QHash<int, const ItemType *>    item_types;  // id -> ItemType *
+		QVector<const Item *>           items;       // sorted array of Item *
 	} m_databases;
 
 	struct dummy2 {
 		CTransfer *               transfer;
 		int                       update_iv;
 
-		CAsciiRefCache<PriceGuide, 503, 500> cache;
+		CAsciiRefCache<PriceGuide, 500> cache;
 	} m_price_guides;
 
 	struct dummy3 {
 		CTransfer *               transfer;
 		int                       update_iv;
 
-		QPtrList <Picture>        diskload;
+		QList <Picture *>         diskload;
 
-		CAsciiRefCache<Picture, 503, 500>    cache;
+		CAsciiRefCache<Picture, 500>    cache;
 	} m_pictures;
 };
 

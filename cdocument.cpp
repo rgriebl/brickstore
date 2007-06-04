@@ -20,18 +20,18 @@
 #include <qprinter.h>
 #include <qpainter.h>
 #include <qregexp.h>
+#include <QDesktopServices>
 
-#include "cundo.h"
 #include "cutility.h"
 #include "cconfig.h"
 #include "cframework.h"
 #include "cmessagebox.h"
-#include "creport.h"
+//#include "creport.h"
 
-#include "dlgloadorderimpl.h"
-#include "dlgloadinventoryimpl.h"
-#include "dlgselectreportimpl.h"
-#include "dlgincompleteitemimpl.h"
+#include "dimportorder.h"
+//#include "dimportinventory.h"
+//#include "dlgselectreportimpl.h"
+//#include "dlgincompleteitemimpl.h"
 
 #include "cimport.h"
 
@@ -47,11 +47,25 @@ template <typename T> static inline T pack ( typename T::const_reference item )
 	return list;
 }
 
+enum {
+	CID_Change,
+	CID_AddRemove
 };
 
-CChangeCmd::CChangeCmd ( CDocument *doc, CDocument::Item *pos, const CDocument::Item &item, bool can_merge )
-	: CUndoCmd ( tr( "Modified item" ), can_merge ), m_doc ( doc ), m_position ( pos ), m_item ( item )
+}
+
+
+CChangeCmd::CChangeCmd ( CDocument *doc, CDocument::Item *pos, const CDocument::Item &item, bool merge_allowed )
+	: QUndoCommand ( qApp-> translate ( "CChangeCmd", "Modified item" )), m_doc ( doc ), m_position ( pos ), m_item ( item ), m_merge_allowed ( merge_allowed )
 { }
+
+CChangeCmd::~CChangeCmd ( )
+{ }
+
+int CChangeCmd::id ( ) const
+{
+	return CID_Change;
+}
 
 void CChangeCmd::redo ( )
 {
@@ -63,11 +77,12 @@ void CChangeCmd::undo ( )
 	redo ( );
 }
 
-bool CChangeCmd::mergeMeWith ( CUndoCmd *other )
+bool CChangeCmd::mergeWith ( const QUndoCommand *other )
 {
-	CChangeCmd *that = ::qt_cast <CChangeCmd *> ( other );
+	const CChangeCmd *that = static_cast <const CChangeCmd *> ( other );
 
-	if (( m_doc == that-> m_doc ) &&
+	if (( m_merge_allowed && that-> m_merge_allowed ) &&
+		( m_doc == that-> m_doc ) &&
 		( m_position == that-> m_position )) 
 	{
 		return true;
@@ -76,15 +91,20 @@ bool CChangeCmd::mergeMeWith ( CUndoCmd *other )
 }
 
 
-CAddRemoveCmd::CAddRemoveCmd ( Type t, CDocument *doc, const CDocument::ItemList &positions, const CDocument::ItemList &items, bool can_merge )
-	: CUndoCmd ( genDesc ( t == Add, QMAX( items. count ( ), positions. count ( ))), can_merge ), 
-	  m_doc ( doc ), m_positions ( positions ), m_items ( items ), m_type ( t )
+CAddRemoveCmd::CAddRemoveCmd ( Type t, CDocument *doc, const CDocument::ItemList &positions, const CDocument::ItemList &items, bool merge_allowed )
+	: QUndoCommand ( genDesc ( t == Add, qMax( items. count ( ), positions. count ( )))), 
+	  m_doc ( doc ), m_positions ( positions ), m_items ( items ), m_type ( t ), m_merge_allowed ( merge_allowed )
 { }
 
 CAddRemoveCmd::~CAddRemoveCmd ( )
 {
 	if ( m_type == Add )
 		qDeleteAll ( m_items );
+}
+
+int CAddRemoveCmd::id ( ) const
+{
+	return CID_AddRemove;
 }
 
 void CAddRemoveCmd::redo ( )
@@ -108,17 +128,19 @@ void CAddRemoveCmd::undo ( )
 	redo ( );
 }
 
-bool CAddRemoveCmd::mergeMeWith ( CUndoCmd *other )
+bool CAddRemoveCmd::mergeWith ( const QUndoCommand *other )
 {
-	CAddRemoveCmd *that = ::qt_cast <CAddRemoveCmd *> ( other );
+	const CAddRemoveCmd *that = static_cast <const CAddRemoveCmd *> ( other );
 
-	if ( m_type == that-> m_type ) {
+	if (( m_merge_allowed && that-> m_merge_allowed ) &&
+		( m_doc == that-> m_doc ) &&
+		( m_type == that-> m_type )) {
 		m_items     += that-> m_items;
 		m_positions += that-> m_positions;
-		setDescription ( genDesc ( m_type == Remove, QMAX( m_items. count ( ), m_positions. count ( ))));
+		setText ( genDesc ( m_type == Remove, qMax( m_items. count ( ), m_positions. count ( ))));
 
-		that-> m_items. clear ( );
-		that-> m_positions. clear ( );
+		const_cast<CAddRemoveCmd *> ( that )-> m_items. clear ( );
+		const_cast<CAddRemoveCmd *> ( that )-> m_positions. clear ( );
 		return true;
 	}
 	return false;
@@ -127,9 +149,9 @@ bool CAddRemoveCmd::mergeMeWith ( CUndoCmd *other )
 QString CAddRemoveCmd::genDesc ( bool is_add, uint count )
 {
 	if ( is_add )
-		return ( count > 1 ) ? tr( "Added %1 items" ). arg( count ) : tr( "Added an item" );
+		return CDocument::tr( "Added %n item(s)" ). arg( count );
 	else
-		return ( count > 1 ) ? tr( "Removed %1 items" ). arg( count ) : tr( "Removed an item" );
+		return CDocument::tr( "Removed %n item(s)" ). arg( count );
 }
 
 
@@ -168,7 +190,7 @@ CDocument::Statistics::Statistics ( const CDocument *doc, const ItemList &list )
 			weight_missing = true;	
 
 		if ( item-> errors ( )) {
-			Q_UINT64 errors = item-> errors ( ) & doc-> m_error_mask;
+			quint64 errors = item-> errors ( ) & doc-> m_error_mask;
 
 			for ( uint i = 1ULL << ( FieldCount - 1 ); i;  i >>= 1 ) {
 				if ( errors & i )
@@ -223,11 +245,11 @@ bool CDocument::Item::operator == ( const Item &cmp ) const
 // *****************************************************************************************
 // *****************************************************************************************
 
-QValueList<CDocument *> CDocument::s_documents;
+QList<CDocument *> CDocument::s_documents;
 
 CDocument::CDocument ( bool dont_sort )
 {
-	m_undo = new CUndoStack ( this );
+	m_undo = new QUndoStack ( this );
 	m_order = 0;
 	m_error_mask = 0;
 	m_dont_sort = dont_sort;
@@ -242,10 +264,10 @@ CDocument::~CDocument ( )
 	delete m_order;
 	qDeleteAll ( m_items );
 
-	s_documents. remove ( this );
+	s_documents. removeAll ( this );
 }
 
-const QValueList<CDocument *> &CDocument::allDocuments ( )
+const QList<CDocument *> &CDocument::allDocuments ( )
 {
 	return s_documents;
 }
@@ -277,23 +299,21 @@ CDocument::Statistics CDocument::statistics ( const ItemList &list ) const
 	return Statistics ( this, list );
 }
 
-CUndoCmd *CDocument::macroBegin ( const QString &label )
+void CDocument::beginMacro ( const QString &label )
 {
-	CUndoCmd *cmd = new CUndoCmd ( CUndoCmd::MacroBegin, label );
-
-	m_undo-> push ( cmd );
-	return cmd;
+	m_undo-> beginMacro ( label );
 }
 	
-void CDocument::macroEnd ( CUndoCmd *cmd, const QString &label )
+void CDocument::endMacro ( const QString &label )
 {
-	if ( cmd && ( cmd-> type ( ) == CUndoCmd::MacroBegin ))
-		m_undo-> push ( new CUndoCmd ( CUndoCmd::MacroEnd, label ));
+	//TODO: Fix Qt to accept a label in QUndoStack::endMacro()
+
+	m_undo-> endMacro ( /*label*/ );
 }
 
 void CDocument::addView ( QWidget *view, IDocumentView *docview )
 { 
-	CUndoManager::inst ( )-> associateView ( view, m_undo ); 
+//	CUndoManager::inst ( )-> associateView ( view, m_undo ); 
 
 	if ( docview ) {
 		m_views. append ( docview );
@@ -343,7 +363,7 @@ void CDocument::insertItemsDirect ( ItemList &items, ItemList &positions )
 
 	foreach ( Item *item, items ) {
 		if ( pos != positions. end ( )) {
-			m_items. insert ( m_items. find ( *pos ), item );
+			m_items. insert ( qFind ( m_items. begin ( ), m_items. end ( ), *pos ), item );
 			++pos;
 		}
 		else {
@@ -365,11 +385,11 @@ void CDocument::removeItemsDirect ( ItemList &items, ItemList &positions )
 	bool selection_changed = false;
 
 	foreach ( Item *item, items ) {
-		ItemList::iterator next = m_items. erase ( m_items. find ( item ));
+		ItemList::iterator next = m_items. erase ( qFind ( m_items. begin ( ), m_items. end ( ), item ));
 
 		positions. append (( next != m_items. end ( )) ? *next : 0 );
 
-		ItemList::iterator selit = m_selection. find ( item );
+		ItemList::iterator selit = qFind ( m_selection. begin ( ), m_selection. end ( ), item );
 		
 		if ( selit != m_selection. end ( )) {
 			m_selection.erase ( selit );
@@ -394,14 +414,14 @@ void CDocument::changeItemDirect ( Item *position, Item &item )
 	updateErrors ( position );
 	emit statisticsChanged ( );
 
-	if ( m_selection. find ( position ) != m_selection. end ( ))
+	if ( qFind ( m_selection. begin ( ), m_selection. end ( ), position ) != m_selection. end ( ))
 		emit selectionChanged ( m_selection );
 
 }
 
 void CDocument::updateErrors ( Item *item )
 {
-	Q_UINT64 errors = 0;
+	quint64 errors = 0;
 
 	if ( item-> price ( ) <= 0 )
 		errors |= ( 1ULL << Price );
@@ -450,7 +470,7 @@ CDocument *CDocument::fileOpen ( )
 	filters << tr( "BrikTrak Inventory" ) + " (*.bti)";
 	filters << tr( "All Files" ) + "(*.*)";
 
-	return fileOpen ( QFileDialog::getOpenFileName ( CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ), CFrameWork::inst ( ), "FileDialog", tr( "Open File" ), 0 ));
+	return fileOpen ( QFileDialog::getOpenFileName ( CFrameWork::inst ( ), tr( "Open File" ), CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" )));
 }
 
 CDocument *CDocument::fileOpen ( const QString &s )
@@ -458,10 +478,10 @@ CDocument *CDocument::fileOpen ( const QString &s )
 	if ( s. isEmpty ( ))
 		return 0;
 
-	QString abs_s  = QFileInfo ( s ). absFilePath ( );
+	QString abs_s  = QFileInfo ( s ). absoluteFilePath ( );
 
 	foreach ( CDocument *doc, s_documents ) {
-		if ( QFileInfo ( doc-> fileName ( )). absFilePath ( ) == abs_s )
+		if ( QFileInfo ( doc-> fileName ( )). absoluteFilePath ( ) == abs_s )
 			return doc;
 	}
 
@@ -481,7 +501,8 @@ CDocument *CDocument::fileOpen ( const QString &s )
 
 CDocument *CDocument::fileImportBrickLinkInventory ( const BrickLink::Item *preselect )
 {
-	DlgLoadInventoryImpl dlg ( CFrameWork::inst ( ));
+#if 0
+	DImportInventory dlg ( CFrameWork::inst ( ));
 
 	if ( preselect )
 		dlg. setItem ( preselect );
@@ -506,12 +527,13 @@ CDocument *CDocument::fileImportBrickLinkInventory ( const BrickLink::Item *pres
 		else
 			CMessageBox::warning ( CFrameWork::inst ( ), tr( "Requested item was not found in the database." ));
 	}
+#endif
 	return 0;
 }
 
 CDocument *CDocument::fileImportBrickLinkOrder ( )
 {
-	DlgLoadOrderImpl dlg ( CFrameWork::inst ( ));
+	DImportOrder dlg ( CFrameWork::inst ( ));
 
 	if ( dlg. exec ( ) == QDialog::Accepted ) {
 		QPair<BrickLink::Order *, BrickLink::InvItemList *> order = dlg. order ( );
@@ -558,7 +580,7 @@ CDocument *CDocument::fileImportBrickLinkCart ( )
 															"or <b>Copy Shortcut</b> (Internet Explorer).<br /><br />"
 															"<em>Super-lots and custom items are <b>not</b> supported</em>." ), url )) {
 		QRegExp rx ( "\\?h=([0-9]+)&b=([0-9]+)" );
-		rx. search ( url );
+		rx. indexIn ( url );
 		int shopid = rx. cap ( 1 ). toInt ( );
 		int cartid = rx. cap ( 2 ). toInt ( );
 
@@ -586,7 +608,7 @@ CDocument *CDocument::fileImportBrickLinkXML ( )
 	filters << tr( "BrickLink XML File" ) + " (*.xml)";
 	filters << tr( "All Files" ) + "(*.*)";
 
-	QString s = QFileDialog::getOpenFileName ( CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ), CFrameWork::inst ( ), "FileDialog", tr( "Import File" ), 0 );
+	QString s = QFileDialog::getOpenFileName ( CFrameWork::inst ( ), tr( "Import File" ), CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ));
 
 	if ( !s. isEmpty ( )) {
 		CDocument *doc = fileLoadFrom ( s, "xml", true );
@@ -627,7 +649,7 @@ CDocument *CDocument::fileImportBrikTrakInventory ( const QString &fn )
 		filters << tr( "BrikTrak Inventory" ) + " (*.bti)";
 		filters << tr( "All Files" ) + "(*.*)";
 
-		s = QFileDialog::getOpenFileName ( CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ), CFrameWork::inst ( ), "FileDialog", tr( "Import File" ), 0 );
+		s = QFileDialog::getOpenFileName ( CFrameWork::inst ( ), tr( "Import File" ), CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ));
 	}
 
 	if ( !s. isEmpty ( )) {
@@ -657,7 +679,7 @@ CDocument *CDocument::fileLoadFrom ( const QString &name, const char *type, bool
 
 	QFile f ( name );
 
-	if ( !f. open ( IO_ReadOnly )) {
+	if ( !f. open ( QIODevice::ReadOnly )) {
 		CMessageBox::warning ( CFrameWork::inst ( ), tr( "Could not open file %1 for reading." ). arg ( CMB_BOLD( name )));
 		return false;
 	}
@@ -730,14 +752,14 @@ CDocument *CDocument::fileImportLDrawModel ( )
 	filters << tr( "LDraw Models" ) + " (*.dat;*.ldr;*.mpd)";
 	filters << tr( "All Files" ) + "(*.*)";
 
-	QString s = QFileDialog::getOpenFileName ( CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ), CFrameWork::inst ( ), "FileDialog", tr( "Import File" ), 0 );
+	QString s = QFileDialog::getOpenFileName ( CFrameWork::inst ( ), tr( "Import File" ), CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ));
 
 	if ( s. isEmpty ( ))
 		return false;
 
 	QFile f ( s );
 
-	if ( !f. open ( IO_ReadOnly )) {
+	if ( !f. open ( QIODevice::ReadOnly )) {
 		CMessageBox::warning ( CFrameWork::inst ( ), tr( "Could not open file %1 for reading." ). arg ( CMB_BOLD( s )));
 		return false;
 	}
@@ -776,15 +798,15 @@ void CDocument::setBrickLinkItems ( const BrickLink::InvItemList &bllist, uint m
 		Item *item = new Item ( *blitem );
 
 		if ( item-> isIncomplete ( )) {
-			DlgIncompleteItemImpl d ( item, CFrameWork::inst ( ));
+//			DlgIncompleteItemImpl d ( item, /*CFrameWork::inst ( )*/ 0);
 
-//			if ( waitcursor )
-//				QApplication::restoreOverrideCursor ( );
+//-			if ( waitcursor )
+//-				QApplication::restoreOverrideCursor ( );
 
-			bool drop_this = ( d. exec ( ) != QDialog::Accepted );
+			bool drop_this = true; //( d. exec ( ) != QDialog::Accepted );
 
-//			if ( waitcursor )
-//				QApplication::setOverrideCursor ( QCursor( Qt::WaitCursor ));
+//-			if ( waitcursor )
+//-				QApplication::setOverrideCursor ( QCursor( Qt::WaitCursor ));
 				
 			if ( drop_this )
 				continue;
@@ -796,7 +818,7 @@ void CDocument::setBrickLinkItems ( const BrickLink::InvItemList &bllist, uint m
 	insertItemsDirect ( items, positions );
 
 	// reset difference WITHOUT a command
-/*
+
 	foreach ( Item *pos, m_items ) {
 		if (( pos-> origQuantity ( ) != pos-> quantity ( )) ||
 		    ( pos-> origPrice ( ) != pos-> price ( ))) 
@@ -805,7 +827,6 @@ void CDocument::setBrickLinkItems ( const BrickLink::InvItemList &bllist, uint m
 			pos-> setOrigPrice ( pos-> price ( ));
 		}
 	}
-*/
 }
 
 QString CDocument::fileName ( ) const
@@ -820,7 +841,7 @@ void CDocument::setFileName ( const QString &str )
 	QFileInfo fi ( str );
 
 	if ( fi. exists ( ))
-		setTitle ( QDir::convertSeparators ( fi. absFilePath ( )));
+		setTitle ( QDir::convertSeparators ( fi. absoluteFilePath ( )));
 
 	emit fileNameChanged ( m_filename );
 }
@@ -866,7 +887,7 @@ void CDocument::fileSaveAs ( const ItemList &itemlist )
 	if (( fn. right ( 4 ) == ".xml" ) || ( fn. right ( 4 ) == ".bti" ))
 		fn. truncate ( fn.length ( ) - 4 );
 
-	fn = QFileDialog::getSaveFileName ( fn, filters. join ( ";;" ), CFrameWork::inst ( ), "FileDialog", tr( "Save File as" ), 0 );
+	fn = QFileDialog::getSaveFileName ( CFrameWork::inst ( ), tr( "Save File as" ), fn, filters. join ( ";;" ));
 
 	if ( !fn. isNull ( )) {
 		if ( fn. right ( 4 ) != ".bsx" )
@@ -896,7 +917,7 @@ bool CDocument::fileSaveTo ( const QString &s, const char *type, bool export_onl
 
 
 	QFile f ( s );
-	if ( f. open ( IO_WriteOnly )) {
+	if ( f. open ( QIODevice::WriteOnly )) {
 		QApplication::setOverrideCursor ( QCursor( Qt::WaitCursor ));
 
 		QDomDocument doc (( hint == BrickLink::XMLHint_BrickStore ) ? QString( "BrickStoreXML" ) : QString::null );
@@ -923,8 +944,8 @@ bool CDocument::fileSaveTo ( const QString &s, const char *type, bool export_onl
 
 		// directly writing to an QTextStream would be way more efficient,
 		// but we could not handle any error this way :(
-		QCString output = doc. toCString ( );
-		bool ok = ( f. writeBlock ( output. data ( ), output. size ( ) - 1 ) ==  int( output. size ( ) - 1 )); // no 0-byte
+		QByteArray output = doc. toByteArray ( );
+		bool ok = ( f. write ( output. data ( ), output. size ( ) - 1 ) ==  qint64( output. size ( ) - 1 )); // no 0-byte
 
 		QApplication::restoreOverrideCursor ( );
 
@@ -953,8 +974,8 @@ void CDocument::fileExportBrickLinkInvReqClipboard ( const ItemList &itemlist )
 
 	QApplication::clipboard ( )-> setText ( doc. toString ( ), QClipboard::Clipboard );
 
-	if ( CConfig::inst ( )-> readBoolEntry ( "/General/Export/OpenBrowser", true ))
-		CUtility::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_InventoryRequest ));
+	if ( CConfig::inst ( )-> value ( "/General/Export/OpenBrowser", true ). toBool ( ))
+		QDesktopServices::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_InventoryRequest ));
 }
 
 void CDocument::fileExportBrickLinkWantedListClipboard ( const ItemList &itemlist )
@@ -971,8 +992,8 @@ void CDocument::fileExportBrickLinkWantedListClipboard ( const ItemList &itemlis
 
 		QApplication::clipboard ( )-> setText ( doc. toString ( ), QClipboard::Clipboard );
 
-		if ( CConfig::inst ( )-> readBoolEntry ( "/General/Export/OpenBrowser", true ))
-			CUtility::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_WantedListUpload ));
+	if ( CConfig::inst ( )-> value ( "/General/Export/OpenBrowser", true ). toBool ( ))
+			QDesktopServices::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_WantedListUpload ));
 	}
 }
 
@@ -983,8 +1004,8 @@ void CDocument::fileExportBrickLinkXMLClipboard ( const ItemList &itemlist )
 
 	QApplication::clipboard ( )-> setText ( doc. toString ( ), QClipboard::Clipboard );
 
-	if ( CConfig::inst ( )-> readBoolEntry ( "/General/Export/OpenBrowser", true ))
-			CUtility::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_InventoryUpload ));
+	if ( CConfig::inst ( )-> value ( "/General/Export/OpenBrowser", true ). toBool ( ))
+			QDesktopServices::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_InventoryUpload ));
 }
 
 void CDocument::fileExportBrickLinkUpdateClipboard ( const ItemList &itemlist )
@@ -1003,8 +1024,8 @@ void CDocument::fileExportBrickLinkUpdateClipboard ( const ItemList &itemlist )
 
 	QApplication::clipboard ( )-> setText ( doc. toString ( ), QClipboard::Clipboard );
 
-	if ( CConfig::inst ( )-> readBoolEntry ( "/General/Export/OpenBrowser", true ))
-			CUtility::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_InventoryUpdate ));
+	if ( CConfig::inst ( )-> value ( "/General/Export/OpenBrowser", true ). toBool ( ))
+		QDesktopServices::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_InventoryUpdate ));
 }
 
 void CDocument::fileExportBrickLinkXML ( const ItemList &itemlist )
@@ -1012,7 +1033,7 @@ void CDocument::fileExportBrickLinkXML ( const ItemList &itemlist )
 	QStringList filters;
 	filters << tr( "BrickLink XML File" ) + " (*.xml)";
 
-	QString s = QFileDialog::getSaveFileName ( CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ), CFrameWork::inst ( ), "FileDialog", tr( "Export File" ), 0 );
+	QString s = QFileDialog::getSaveFileName ( CFrameWork::inst ( ), tr( "Export File" ), CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ));
 
 	if ( !s. isNull ( )) {
 		if ( s. right ( 4 ) != ".xml" )
@@ -1031,7 +1052,7 @@ void CDocument::fileExportBrikTrakInventory ( const ItemList &itemlist )
 	QStringList filters;
 	filters << tr( "BrikTrak Inventory" ) + " (*.bti)";
 
-	QString s = QFileDialog::getSaveFileName ( CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ), CFrameWork::inst ( ), "FileDialog", tr( "Export File" ), 0 );
+	QString s = QFileDialog::getSaveFileName ( CFrameWork::inst ( ), tr( "Export File" ), CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ));
 
 	if ( !s. isNull ( )) {
 		if ( s. right ( 4 ) != ".bti" )
@@ -1050,12 +1071,12 @@ void CDocument::clean2Modified ( bool b )
 	emit modificationChanged ( !b );
 }
 
-Q_UINT64 CDocument::errorMask ( ) const
+quint64 CDocument::errorMask ( ) const
 {
 	return m_error_mask;
 }
 
-void CDocument::setErrorMask ( Q_UINT64 em )
+void CDocument::setErrorMask ( quint64 em )
 {
 	m_error_mask = em;
 	emit statisticsChanged ( );
@@ -1069,7 +1090,7 @@ const BrickLink::Order *CDocument::order ( ) const
 
 void CDocument::resetDifferences ( const ItemList &items )
 {
-	CUndoCmd *macro = macroBegin ( tr( "Reset differences" ));
+	beginMacro ( tr( "Reset differences" ));
 
 	foreach ( Item *pos, items ) {
 		if (( pos-> origQuantity ( ) != pos-> quantity ( )) ||
@@ -1082,6 +1103,6 @@ void CDocument::resetDifferences ( const ItemList &items )
 			changeItem ( pos, item );
 		}
 	}
-	macroEnd ( macro );
+	endMacro ( );
 }
 

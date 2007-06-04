@@ -11,23 +11,23 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <qlayout.h>
-#include <qpushbutton.h>
-#include <qlabel.h>
-#include <qprogressbar.h>
-#include <qapplication.h>
-#include <qeventloop.h>
-#include <qcursor.h>
-#include <qfile.h>
+#include <QPushbutton>
+#include <QLabel>
+#include <QProgressBar>
+#include <QApplication>
+#include <QEventLoop>
+//#include <qcursor.h>
+#include <QFile>
+#include <QDialogButtonBox>
+#include <QLayout>
 
 #include "capplication.h"
-#include "curllabel.h"
 #include "cconfig.h"
 
 #include "cprogressdialog.h"
 
-CProgressDialog::CProgressDialog ( QWidget *parent, const char *name )
-	: QDialog ( parent, name, true )
+CProgressDialog::CProgressDialog ( QWidget *parent, Qt::WindowFlags f )
+	: QDialog ( parent, f )
 {
 	m_has_errors = false;
 	m_autoclose = true;
@@ -36,50 +36,49 @@ CProgressDialog::CProgressDialog ( QWidget *parent, const char *name )
 
 	m_message_progress = false;
 
-	setCaption ( cApp-> appName ( ));
+	setWindowTitle ( cApp-> appName ( ));
 
 	int minwidth = fontMetrics ( ). width ( 'm' ) * 40;
 
-	QVBoxLayout *lay = new QVBoxLayout ( this, 11, 6 );
+	QVBoxLayout *lay = new QVBoxLayout ( this );
 
 	m_header = new QLabel ( this );
 	m_header-> setAlignment ( Qt::AlignLeft | Qt::AlignVCenter );
-	m_header->setMinimumWidth ( minwidth );
+	m_header-> setMinimumWidth ( minwidth );
+	m_header-> setSizePolicy ( QSizePolicy::MinimumExpanding, QSizePolicy::Fixed );
 	lay-> addWidget ( m_header );
 
 	QFrame *frame = new QFrame ( this );
 	frame-> setFrameStyle ( QFrame::HLine | QFrame::Sunken );
+	frame-> setSizePolicy ( QSizePolicy::MinimumExpanding, QSizePolicy::Fixed );
 	lay-> addWidget ( frame );
 
-	m_message = new CUrlLabel ( this );
-	m_message-> setAlignment ( Qt::AlignCenter );
+	m_message = new QLabel ( this );
+	m_message-> setAlignment ( Qt::AlignLeft );
+	m_message-> setSizePolicy ( QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding );
+	m_message-> setOpenExternalLinks ( true );
+	m_message-> setTextInteractionFlags ( Qt::TextBrowserInteraction );
 	lay-> addWidget ( m_message );
 
 	m_progress_container = new QWidget ( this );
 	lay-> addWidget ( m_progress_container );
-	QHBoxLayout *play = new QHBoxLayout ( m_progress_container, 0, 6 );
+	QHBoxLayout *play = new QHBoxLayout ( m_progress_container );
 
 	m_progress = new QProgressBar ( m_progress_container );
-	m_progress-> setPercentageVisible ( false );
+	m_progress-> setTextVisible ( false );
 	play-> addSpacing ( 20 );
 	play-> addWidget ( m_progress );
 	play-> addSpacing ( 20 );
 
 	frame = new QFrame ( this );
 	frame-> setFrameStyle ( QFrame::HLine | QFrame::Sunken );
+	frame-> setSizePolicy ( QSizePolicy::MinimumExpanding, QSizePolicy::Fixed );
 	lay-> addWidget ( frame );
 
-	QHBoxLayout *blay = new QHBoxLayout ( lay );
-	blay-> addSpacing ( 11 );
-	blay-> addStretch ( 10 );
-	m_ok = new QPushButton ( tr( "&OK" ), this );
-	blay-> addWidget ( m_ok );
-	m_ok-> hide ( );
-	m_cancel = new QPushButton ( tr( "&Cancel" ), this );
-	blay-> addWidget ( m_cancel );
-	blay-> addStretch ( 10 );
-	blay-> addSpacing ( 11 );
-	connect ( m_cancel, SIGNAL( clicked ( )), this, SLOT( reject ( )));
+	m_buttons = new QDialogButtonBox ( QDialogButtonBox::Cancel, Qt::Horizontal, this );
+	m_buttons-> setSizePolicy ( QSizePolicy::MinimumExpanding, QSizePolicy::Fixed );
+	lay-> addWidget ( m_buttons );
+	connect ( m_buttons, SIGNAL( rejected ( )), this, SLOT( reject ( )));
 
 	QApplication::setOverrideCursor ( QCursor( Qt::WaitCursor ));
 	m_override = true;
@@ -134,22 +133,23 @@ void CProgressDialog::setFinished ( bool ok )
 	m_override = false;
 
 	m_has_errors = !ok;
-	m_progress-> setProgress ( 100, 100 );
+	m_progress-> setMaximum ( 100 );
+	m_progress-> setValue ( 100 );
 
 	if ( m_autoclose && ok ) {
 		accept ( );
 	}
 	else {
-		m_cancel-> hide ( );
-		m_ok-> show ( );
-		connect ( m_ok, SIGNAL( clicked ( )), this, ok ? SLOT( accept ( )) : SLOT( reject ( )));
+		m_buttons-> setStandardButtons ( QDialogButtonBox::Ok );
+		connect ( m_buttons, SIGNAL( accepted ( )), this, ok ? SLOT( accept ( )) : SLOT( reject ( )));
 		layout ( );
 	}
 }
 
 void CProgressDialog::setProgress ( int s, int t )
 {
-	m_progress-> setProgress ( s, t );
+	m_progress-> setMaximum ( t );
+	m_progress-> setValue ( s );
 
 	if ( m_message_progress ) {
 		QString str = m_message_text. arg ( s );
@@ -175,7 +175,7 @@ void CProgressDialog::syncRepaint ( QWidget *w )
 {
 	layout ( );
 	w-> repaint ( );
-	qApp-> eventLoop ( )-> processEvents ( QEventLoop::ExcludeUserInput );
+	qApp-> processEvents ( QEventLoop::ExcludeUserInputEvents );
 }
 
 CTransfer::Job *CProgressDialog::job ( ) const
@@ -229,7 +229,7 @@ bool CProgressDialog::hasErrors ( ) const
 bool CProgressDialog::post ( const QString &url, const CKeyValueList &query, QFile *file )
 {
 	if ( initTransfer ( )) {
-		m_job = m_trans-> post ( url. latin1 ( ), query, file );
+		m_job = m_trans-> post ( url, query, file );
 		return ( m_job != 0 );
 	}
 	return false;
@@ -238,7 +238,7 @@ bool CProgressDialog::post ( const QString &url, const CKeyValueList &query, QFi
 bool CProgressDialog::get ( const QString &url, const CKeyValueList &query, const QDateTime &ifnewer, QFile *file )
 {
 	if ( initTransfer ( )) {
-		m_job = m_trans-> getIfNewer ( url. latin1 ( ), query, ifnewer, file );
+		m_job = m_trans-> getIfNewer ( url, query, ifnewer, file );
 		return ( m_job != 0 );
 	}
 	return false;
@@ -247,13 +247,16 @@ bool CProgressDialog::get ( const QString &url, const CKeyValueList &query, cons
 
 void CProgressDialog::layout ( )
 {
+	QDialog::layout()->activate();
+
 #if 0
 	QSize now = size ( );
 	QSize then = sizeHint ( );
 
-	setFixedSize ( QSize ( QMAX( now. width ( ), then. height ( )), QMAX( now. height ( ), then. height ( ))));
-#endif
+	setFixedSize ( QSize ( qMax( now. width ( ), then. height ( )), qMax( now. height ( ), then. height ( ))));
+#else
 	setFixedSize ( sizeHint ( ));
+#endif
 }
 
 void CProgressDialog::setAutoClose ( bool ac )

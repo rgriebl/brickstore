@@ -14,44 +14,55 @@
 #ifndef __CWORKSPACE_H__
 #define __CWORKSPACE_H__
 
-#include <qworkspace.h>
-#include <qwidgetlist.h>
-#include <qptrdict.h>
-#include <qtabbar.h>
+#include <QWidget>
+#include <QHash>
 
-class QToolButton;
-class QMainWindow;
+class QStackedLayout;
+class QTabBar;
+class QBoxLayout;
 
 
-class CWorkspace : public QWorkspace {
+class CWorkspace : public QWidget {
 	Q_OBJECT
 
 public:
-	CWorkspace ( QMainWindow *parent, const char *name = 0 );
+	CWorkspace ( QWidget *parent = 0, Qt::WindowFlags f = 0 );
 
-	bool showTabs ( ) const;
-	void setShowTabs ( bool b );
+	enum TabMode {
+		TopTabs,
+		BottomTabs
+	};
 
-	bool spreadSheetTabs ( ) const;
-	void setSpreadSheetTabs ( bool b );
+	TabMode tabMode ( ) const;
+	void setTabMode ( TabMode tm );
+
+	void addWindow ( QWidget *w );
+
+	QWidget *activeWindow ( );
+	QList <QWidget *> allWindows ( );
+
+signals:
+	void currentChanged ( QWidget * );
+
+public slots:
+	void setCurrentWidget ( QWidget * );
 
 protected:
 	virtual bool eventFilter ( QObject *o, QEvent *e );
-	virtual void childEvent ( QChildEvent *e );
 
 private slots:
-	void tabClicked ( int );
-	void setActiveTab ( QWidget * );
+	void removeWindow ( int );
+	void currentChangedHelper ( int );
 
 private:
-	void refillContainer ( QWidget *container );
+	void relayout ( );
 
 private:
-	bool               m_showtabs  : 1;
-	bool               m_exceltabs : 1;
-	QMainWindow *      m_mainwindow;
-	QTabBar *          m_tabbar;
-	QPtrDict <QTab>    m_widget2tab;
+	TabMode               m_tabmode;
+	QTabBar *             m_tabbar;
+	QStackedLayout *      m_stacklayout;
+	QBoxLayout *          m_verticallayout;
+	QBoxLayout *          m_tablayout;
 };
 
 #endif

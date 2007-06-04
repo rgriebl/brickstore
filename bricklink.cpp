@@ -14,29 +14,30 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <qfile.h>
-#include <qfileinfo.h>
-#include <qdir.h>
-#include <qtextstream.h>
-#include <qdom.h>
-#include <qregexp.h>
-#include <qtimer.h>
-#include <qpixmapcache.h>
-#include <qpainter.h>
-#include <qdict.h>
+#include <QFile>
+#include <QFileInfo>
+#include <QDir>
+#include <QTextStream>
+#include <QtXml/QDomDocument>
+#include <QRegExp>
+#include <QPixmap>
+#include <QPainter>
+#include <QPainterPath>
+#include <QPixmapCache>
+#include <QDebug>
 
 #include "cconfig.h"
-#include "cresource.h"
 #include "cutility.h"
+#include "cmappedfile.h"
 #include "bricklink.h"
 
 #define DEFAULT_DATABASE_VERSION  0
 #define DEFAULT_DATABASE_NAME     "database-v%1"
 
 
-QCString BrickLink::url ( UrlList u, const void *opt, const void *opt2 )
+QUrl BrickLink::url ( UrlList u, const void *opt, const void *opt2 )
 {
-	QCString url;
+	QUrl url;
 
 	switch ( u ) {
 		case URL_InventoryRequest:
@@ -56,58 +57,60 @@ QCString BrickLink::url ( UrlList u, const void *opt, const void *opt2 )
 			break;
 			
 		case URL_CatalogInfo:
-			if ( opt )
-				url. sprintf ( "http://www.bricklink.com/catalogItem.asp?%c=%s", static_cast <const Item *> ( opt )-> itemType ( )-> id ( ),
-				                                                                 static_cast <const Item *> ( opt )-> id ( ));
+			if ( opt ) {
+				const Item *item = static_cast <const Item *> ( opt );
+
+				url = "http://www.bricklink.com/catalogItem.asp";
+				url. addQueryItem ( QChar( item-> itemType ( )-> id ( )), item-> id ( ));
+			}
 			break;
 		
 		case URL_PriceGuideInfo:
 			if ( opt && opt2 ) {
-				url. sprintf ( "http://www.bricklink.com/catalogPriceGuide.asp?%c=%s", static_cast <const Item *> ( opt )-> itemType ( )-> id ( ),
-				                                                                       static_cast <const Item *> ( opt )-> id ( ));
+				const Item *item = static_cast <const Item *> ( opt );
 
-				if ( static_cast <const Item *> ( opt )-> itemType ( )-> hasColors ( )) {
-					QCString col;
-					
-					col. sprintf ( "&colorID=%d", static_cast <const Color *> ( opt2 )-> id ( ));
-					url += col;
-				}
+				url = "http://www.bricklink.com/catalogPriceGuide.asp";
+				url. addQueryItem ( QChar( item-> itemType ( )-> id ( )), item-> id ( ));
+
+				if ( item-> itemType ( )-> hasColors ( ))
+					url. addQueryItem ( "colorID", QString::number ( static_cast <const Color *> ( opt2 )-> id ( )));
 			}
 			break;
 
 		case URL_LotsForSale:
 			if ( opt && opt2 ) {
-				url. sprintf ( "http://www.bricklink.com/search.asp?viewFrom=sa&itemType=%c&q=%s", static_cast <const Item *> ( opt )-> itemType ( )-> id ( ),
-				                                                                                   static_cast <const Item *> ( opt )-> id ( ));
+				const Item *item = static_cast <const Item *> ( opt );
+
+				url = "http://www.bricklink.com/search.asp";
+				url. addQueryItem ( "viewFrom", "sa" );
+				url. addQueryItem ( "itemType", QChar( item-> itemType ( )-> id ( )));
 				
 				// workaround for BL not accepting the -X suffix for sets, instructions and boxes
-				char itt = static_cast <const Item *> ( opt )-> itemType ( )-> id ( );
+				QString id = item-> id ( );
+				char itt = item-> itemType ( )-> id ( );
 				
 				if ( itt == 'S' || itt == 'I' || itt == 'O' ) {
-					int pos = url. findRev ( '-' );
+					int pos = id. lastIndexOf ( '-' );
 					if ( pos >= 0 )
-						url. truncate ( pos );
+						id. truncate ( pos );
 				}
+				url. addQueryItem ( "q", id );
 				
-				if ( static_cast <const Item *> ( opt )-> itemType ( )-> hasColors ( )) {
-					QCString col;
-					
-					col. sprintf ( "&colorID=%d", static_cast <const Color *> ( opt2 )-> id ( ));
-					url += col;
-				}
+				if ( item-> itemType ( )-> hasColors ( ))
+					url. addQueryItem ( "colorID", QString::number ( static_cast <const Color *> ( opt2 )-> id ( )));
 			}
 			break;
 			
 		case URL_AppearsInSets:
 			if ( opt && opt2 ) {
-				url. sprintf ( "http://www.bricklink.com/catalogItemIn.asp?%c=%s&in=S", static_cast <const Item *> ( opt )-> itemType ( )-> id ( ),
-				                                                                        static_cast <const Item *> ( opt )-> id ( ));
-				if ( static_cast <const Item *> ( opt )-> itemType ( )-> hasColors ( )) {
-					QCString col;
-					
-					col. sprintf ( "&colorID=%d", static_cast <const Color *> ( opt2 )-> id ( ));
-					url += col;
-				}
+				const Item *item = static_cast <const Item *> ( opt );
+
+				url = "http://www.bricklink.com/catalogItemIn.asp";
+				url. addQueryItem ( QChar( item-> itemType ( )-> id ( )), item-> id ( ));
+				url. addQueryItem ( "in", "S" );
+				                                                                        
+				if ( item-> itemType ( )-> hasColors ( ))
+					url. addQueryItem ( "colorID", QString::number ( static_cast <const Color *> ( opt2 )-> id ( )));
 			}
 			break;
 
@@ -118,20 +121,23 @@ QCString BrickLink::url ( UrlList u, const void *opt, const void *opt2 )
 		case URL_ItemChangeLog:
 			url = "http://www.bricklink.com/catalogReqList.asp?pg=1&chgUserID=&viewActionType=I";
 
-			if ( opt ) {
-				url. append ( "&q=" );
-				url. append ( static_cast <const char *> ( opt ));
-			}
+			if ( opt )
+				url. addQueryItem ( "q", static_cast <const char *> ( opt ));
 			break;
 
 		case URL_PeeronInfo:
-			if ( opt )
-				url. sprintf ( "http://peeron.com/cgi-bin/invcgis/psearch?query=%s&limit=none", static_cast <const Item *> ( opt )-> id ( ));
+			if ( opt ) {
+				url = "http://peeron.com/cgi-bin/invcgis/psearch";
+				url. addQueryItem ( "query", static_cast <const Item *> ( opt )-> id ( ));
+				url. addQueryItem ( "limit", "none" );
+			}
 			break;
 
 		case URL_StoreItemDetail:
-			if ( opt )
-				url. sprintf ( "http://www.bricklink.com/inventory_detail.asp?itemID=%u", *static_cast <const unsigned int *> ( opt ));
+			if ( opt ) {
+				url = "http://www.bricklink.com/inventory_detail.asp";
+				url. addQueryItem ( "itemID", QString::number ( *static_cast <const unsigned int *> ( opt )));
+			}
 			break;
 
 		default:
@@ -148,17 +154,18 @@ const QPixmap *BrickLink::noImage ( const QSize &s )
 	QPixmap *pix = m_noimages [key];
 
 	if ( !pix ) {
-		pix = new QPixmap ( s * 2 );
-		pix-> fill ( Qt::white );
-		QPainter p ( pix );
+		QImage img ( s, QImage::Format_ARGB32_Premultiplied );
+		QPainter p ( &img );
 
 		int w = pix-> width ( );
 		int h = pix-> height ( );
 		bool high = ( w < h );
 
+		p. fillRect ( 0, 0, w, h, Qt::white );
+
 		QRect r ( high ? 0 : ( w - h ) / 2, high ? ( w -h ) / 2 : 0, high ? w : h, high ? w : h );
 		int w4 = r. width ( ) / 4;
-		r. addCoords ( w4, w4, -w4, -w4 );
+		r. adjust ( w4, w4, -w4, -w4 );
 		
 		QColor coltable [] = {
 			QColor ( 0x00, 0x00, 0x00 ),
@@ -167,7 +174,7 @@ const QPixmap *BrickLink::noImage ( const QSize &s )
 		};
 		
 		for ( int i = 0; i < 3; i++ ) {
-			r. addCoords ( -1, -1, -1, -1 );
+			r. adjust ( -1, -1, -1, -1 );
 
 			p. setPen ( QPen( coltable [i], 12, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin ));
 			p. drawLine ( r. x ( ), r. y ( ), r. right ( ), r. bottom ( ));
@@ -175,8 +182,7 @@ const QPixmap *BrickLink::noImage ( const QSize &s )
 		}
 		p. end ( );
 
-		pix-> convertFromImage ( pix-> convertToImage ( ). smoothScale ( s ));
-		m_noimages. insert ( key, pix );
+		m_noimages. insert ( key, new QPixmap ( QPixmap::fromImage ( img )));
 	}
 	return pix;
 }
@@ -190,80 +196,72 @@ QImage BrickLink::colorImage ( const Color *col, int w, int h ) const
 	QColor c = col-> color ( );
 	bool is_valid = c. isValid ( );
 	
-	QPixmap pix ( w, h );
-	
-	QPainter p ( &pix );
-	QRect r = pix. rect ( );
+	QImage img ( w, h, QImage::Format_ARGB32_Premultiplied );
+	QRect r ( 0, 0, w, h );	
+	QPainter p;
+
+	p. begin ( &img );
 	
 	if ( is_valid ) {
-		p. fillRect ( r, c );
+		QBrush brush;
 		
 		if ( col-> isGlitter ( )) {
-			p. setPen ( Qt::NoPen );
-			p. setBackgroundColor ( c );
-			p. setBrush ( QBrush( CUtility::contrastColor ( c, 0.25f ), Qt::Dense6Pattern ));
-			p. drawRect ( r );
+			brush = QBrush( CUtility::contrastColor ( c, 0.25f ), Qt::Dense6Pattern );
 		}
 		else if ( col-> isSpeckle ( )) {
-			p. setPen ( Qt::NoPen );
-			p. setBackgroundColor ( c );
-			p. setBrush ( QBrush( CUtility::contrastColor ( c, 0.20f ), Qt::Dense7Pattern ));
-			p. drawRect ( r );
+			brush = QBrush( CUtility::contrastColor ( c, 0.20f ), Qt::Dense7Pattern );
 		}
 		else if ( col-> isMetallic ( )) {
-			if ( h >= 7 ) {
-				int mid = ( h & 1 ) ? 3 : 4;
-				QColor c2 = CUtility::gradientColor ( c, Qt::black );
-				QImage tgrad = CUtility::createGradient ( QSize ( w, ( h - mid ) / 2 ), Qt::Vertical, c, c2,  110.f );
-				QImage bgrad = tgrad. mirror ( false, true );
-				
-				p. drawImage ( 0, 0, tgrad );
-				p. drawImage ( 0, tgrad. height ( ) + mid, bgrad );
-			}
+			QColor c2 = CUtility::gradientColor ( c, Qt::black );
+
+			QLinearGradient gradient ( 0, 0, 0, r. height ( ));
+			gradient. setColorAt ( 0,   c2 );
+			gradient. setColorAt ( 0.3, c  );
+			gradient. setColorAt ( 0.7, c  );
+			gradient. setColorAt ( 1,   c2 );
+			brush = gradient;
 		}
 		else if ( col-> isChrome ( )) {
-			if ( w >= 7 ) {
-				int mid = ( w & 1 ) ? 3 : 4;
-				QColor c2 = CUtility::gradientColor ( c, Qt::black );
-				QImage lgrad = CUtility::createGradient ( QSize (( w - mid ) / 2, h ), Qt::Horizontal, c, c2,  115.f );
-				QImage rgrad = lgrad. mirror ( true, false );
+			QColor c2 = CUtility::gradientColor ( c, Qt::black );
 
-				p. drawImage ( 0, 0, lgrad );
-				p. drawImage ( lgrad. width ( ) + mid, 0, rgrad );
-			}
+			QLinearGradient gradient ( 0, 0, r. width ( ), 0 );
+			gradient. setColorAt ( 0,   c2 );
+			gradient. setColorAt ( 0.3, c  );
+			gradient. setColorAt ( 0.7, c  );
+			gradient. setColorAt ( 1,   c2 );
+			brush = gradient;
 		}
+
+		p. fillRect ( r, c );
+		p. fillRect ( r, brush );
+
 	}
 	else {
-		p. fillRect ( r, Qt::white );
+		p. setRenderHint ( QPainter::Antialiasing );
 		p. setPen ( Qt::darkGray );
-		p. setBackgroundColor ( Qt::white );
-		p. setBrush ( Qt::NoBrush );
+		p. setBrush ( QColor ( 255, 255, 255, 128 ));
 		p. drawRect ( r );
-		p. drawLine ( 0, 0,   w-1, h-1 );
-		p. drawLine ( 0, h-1, w-1, 0   );
+		p. drawLine ( 0, 0, w, h );
+		p. drawLine ( 0, h, w, 0 );
 	}
 	
 	p. end ( );
-	QImage img = pix. convertToImage ( );
 	
-	if ( col-> isTransparent ( ) && CResource::inst ( )-> pixmapAlphaSupported ( )) {
-		img. setAlphaBuffer ( true );
+	if ( col-> isTransparent ( ) /*&& CResource::inst ( )-> pixmapAlphaSupported ( )*/) {
+		QImage alpha ( w, h, QImage::Format_ARGB32_Premultiplied );
 		
-		float e = float( w ) / float( h );
-		float f = e;
+		QLinearGradient gradient ( 0, 0, r. width ( ), r. height ( ));
+		gradient. setColorAt ( 0,   Qt::white );
+		gradient. setColorAt ( 0.4, Qt::white );
+		gradient. setColorAt ( 0.6, Qt::darkGray );
+		gradient. setColorAt ( 1,   Qt::darkGray );
 		
-		for ( int y = 0; y < h; y++ ) {
-			QRgb *line = (QRgb *) img. scanLine ( y );
+		QPainter ap;
+		ap. begin ( &alpha );
+		ap. fillRect ( r, gradient );
+		ap. end ( );
 
-			for ( int x = 0; x < w; x++ ) {
-				int a = ( x > ( w - 1 - int( f ))) ? 128 : 255;
-
-				*line = qRgba ( qRed ( *line ), qGreen ( *line ), qBlue ( *line ), a );
-				line++;
-			}
-			f += e;
-		}
-		
+		img. setAlphaChannel ( alpha );
 	}
 	
 	return img;
@@ -342,7 +340,7 @@ BrickLink *BrickLink::inst ( const QString &datadir, QString *errstring )
 		s_inst = new BrickLink ( datadir );
 
 		QString test = s_inst-> dataPath ( );
-		if ( !test || !check_and_create_path ( test )) {
+		if ( test. isNull ( ) || !check_and_create_path ( test )) {
 			delete s_inst;
 			s_inst = 0;
 
@@ -370,23 +368,19 @@ BrickLink::BrickLink ( const QString &datadir )
 	if ( m_datadir. isEmpty ( ))
 		m_datadir = "./";
 
-	m_datadir = QDir::cleanDirPath ( datadir );
+	m_datadir = QDir::cleanPath ( datadir );
 
 	if ( m_datadir. right ( 1 ) != "/" )
 		m_datadir += "/";
 		
 	m_online = true;
 
-	m_noimages. setAutoDelete ( true );
-
-	m_databases. colors. resize ( 151 );
-	m_databases. categories. resize ( 503 );
-	m_databases. item_types. resize ( 13 );
-
+	/*
 	m_databases. colors. setAutoDelete ( true );
 	m_databases. categories. setAutoDelete ( true );
 	m_databases. item_types. setAutoDelete ( true );
 	m_databases. items. setAutoDelete ( true );
+	*/
 
 	m_price_guides. transfer = new CTransfer ( );
 	m_price_guides. update_iv = 0;
@@ -394,7 +388,7 @@ BrickLink::BrickLink ( const QString &datadir )
 	m_pictures. transfer = new CTransfer ( );
 	m_pictures. update_iv = 0;
 
-	QPixmapCache::setCacheLimit ( 20 * 1024 * 1024 );  // 80 x 60 x 32 (w x h x bpp) == 20kB -> room for ~1000 pixmaps
+	QPixmapCache::setCacheLimit ( 20 * 1024 );  // 80 x 60 x 32 (w x h x bpp) == 20kB -> room for ~1000 pixmaps
 
 	connect ( m_price_guides. transfer, SIGNAL( finished ( CTransfer::Job * )), this, SLOT( priceGuideJobFinished ( CTransfer::Job * )));
 	connect ( m_pictures.     transfer, SIGNAL( finished ( CTransfer::Job * )), this, SLOT( pictureJobFinished    ( CTransfer::Job * )));
@@ -411,15 +405,15 @@ BrickLink::~BrickLink ( )
 	delete m_pictures. transfer;
 	delete m_price_guides. transfer;
 
+	qDeleteAll ( m_noimages );
+
 	s_inst = 0;
 }
 
 void BrickLink::setHttpProxy ( bool enable, const QString &name, int port )
 {
-	QCString aname = name. latin1 ( );
-
-	m_pictures.     transfer-> setProxy ( enable, aname, port );
-	m_price_guides. transfer-> setProxy ( enable, aname, port );
+	m_pictures.     transfer-> setProxy ( enable, name, port );
+	m_price_guides. transfer-> setProxy ( enable, name, port );
 }
 
 void BrickLink::setUpdateIntervals ( int pic, int pg )
@@ -444,22 +438,22 @@ bool BrickLink::onlineStatus ( ) const
 }
 
 
-const QIntDict<BrickLink::Color> &BrickLink::colors ( ) const
+const QHash<int, const BrickLink::Color *> &BrickLink::colors ( ) const
 {
 	return m_databases. colors;
 }
 
-const QIntDict<BrickLink::Category> &BrickLink::categories ( ) const
+const QHash<int, const BrickLink::Category *> &BrickLink::categories ( ) const
 {
 	return m_databases. categories;
 }
 
-const QIntDict<BrickLink::ItemType> &BrickLink::itemTypes ( ) const
+const QHash<int, const BrickLink::ItemType *> &BrickLink::itemTypes ( ) const
 {
 	return m_databases. item_types;
 }
 
-const QPtrVector<BrickLink::Item> &BrickLink::items ( ) const
+const QVector<const BrickLink::Item *> &BrickLink::items ( ) const
 {
 	return m_databases. items;
 }
@@ -479,9 +473,9 @@ const BrickLink::Color *BrickLink::colorFromPeeronName ( const char *peeron_name
 	if ( !peeron_name || !peeron_name [0] )
 		return 0;
 
-	for ( QIntDictIterator <Color> it ( m_databases. colors ); it. current ( ); ++it ) {
-		if ( qstricmp ( it. current ( )-> peeronName ( ), peeron_name ) == 0 )
-			return it. current ( );
+	for ( QHash<int, const Color *>::const_iterator it = m_databases. colors. begin ( ); it != m_databases. colors. end ( ); ++it ) {
+		if ( qstricmp ( it. value ( )-> peeronName ( ), peeron_name ) == 0 )
+			return it. value ( );
 	}
 	return 0;
 }
@@ -489,9 +483,9 @@ const BrickLink::Color *BrickLink::colorFromPeeronName ( const char *peeron_name
 
 const BrickLink::Color *BrickLink::colorFromLDrawId ( int ldraw_id ) const
 {
-	for ( QIntDictIterator <Color> it ( m_databases. colors ); it. current ( ); ++it ) {
-		if ( it. current ( )-> ldrawId ( ) == ldraw_id )
-			return it. current ( );
+	for ( QHash<int, const Color *>::const_iterator it = m_databases. colors. begin ( ); it != m_databases. colors. end ( ); ++it ) {
+		if ( it. value ( )-> ldrawId ( ) == ldraw_id )
+			return it. value ( );
 	}
 	return 0;
 }
@@ -521,7 +515,7 @@ const BrickLink::Item *BrickLink::item ( char tid, const char *id ) const
 void BrickLink::cancelPictureTransfers ( )
 {
 	while ( !m_pictures. diskload. isEmpty ( ))
-		m_pictures. diskload. take ( 0 )-> release ( );
+		m_pictures. diskload. takeFirst ( )-> release ( );
 	m_pictures. transfer-> cancelAllJobs ( );
 }
 
@@ -557,106 +551,6 @@ private:
 } // namespace
 
 
-#if defined( Q_OS_WIN32 )
-#include <io.h>
-
-#else
-#include <sys/mman.h>
-
-#endif
-
-namespace {
-
-class CMappedFile {
-public:
-	CMappedFile ( const QString &filename )
-		: m_file ( filename ), m_memptr ( 0 ), m_ds ( 0 )
-	{ 
-#if defined( Q_OS_WIN32 )
-		m_maphandle = 0;
-#endif
-	}
-
-	~CMappedFile ( )
-	{ close ( ); }
-
-	QDataStream *open ( )
-	{
-		if ( m_file. isOpen ( ))
-			close ( );
-
-		if ( m_file. open ( IO_ReadOnly | IO_Raw )) {
-			m_filesize = m_file. size ( );
-
-			if ( m_filesize ) {
-#if defined( Q_OS_WIN32 )
-				QT_WA( {
-					m_maphandle = CreateFileMappingW ((HANDLE) _get_osfhandle ( m_file. handle ( )), 0, PAGE_READONLY, 0, 0, 0 );
-				}, {
-					m_maphandle = CreateFileMappingA ((HANDLE) _get_osfhandle ( m_file. handle ( )), 0, PAGE_READONLY, 0, 0, 0 );
-				} )
-
-				if ( m_maphandle ) {		
-					m_memptr = (const char *) MapViewOfFile ( m_maphandle, FILE_MAP_READ, 0, 0, 0 );
-#else
-				if ( true ) {
-					m_memptr = (const char *) mmap ( 0, m_filesize, PROT_READ, MAP_SHARED, m_file. handle ( ), 0 );
-
-#endif
-					if ( m_memptr ) {
-						m_mem. setRawData ( m_memptr, m_filesize );
-
-						m_ds = new QDataStream ( m_mem, IO_ReadOnly );
-						return m_ds;
-					}
-				}
-			}
-		}
-		close ( );
-		return 0;
-	}
-
-	void close ( )
-	{
-		delete m_ds;
-		m_ds = 0;
-		if ( m_memptr ) {
-			m_mem. resetRawData ( m_memptr, m_filesize );
-#if defined( Q_OS_WIN32 )
-			UnmapViewOfFile ( m_memptr );
-#else
-			munmap ((void *) m_memptr, m_filesize );
-#endif
-			m_memptr = 0;
-		}
-#if defined( Q_OS_WIN32 )
-		if ( m_maphandle ) {
-			CloseHandle ( m_maphandle );
-			m_maphandle = 0;
-		}
-#endif
-		m_file. close ( );
-	}
-
-	Q_UINT32 size ( ) const
-	{
-		return m_filesize;
-	}
-
-private:
-	QFile        m_file;
-	Q_UINT32     m_filesize;
-	const char * m_memptr;
-	QByteArray   m_mem;
-	QDataStream *m_ds;
-
-#if defined( Q_OS_WIN32 )
-	HANDLE       m_maphandle;
-#endif
-};
-
-}
-
 bool BrickLink::readDatabase ( const QString &fname )
 {
 	QString filename = fname. isNull ( ) ? dataPath ( ) + defaultDatabaseName ( ) : fname;
@@ -668,10 +562,16 @@ bool BrickLink::readDatabase ( const QString &fname )
 	m_pictures. cache. clear ( );
 	QPixmapCache::clear ( );
 
+	qDeleteAll ( m_databases. colors );
+	qDeleteAll ( m_databases. item_types );
+	qDeleteAll ( m_databases. categories );
+	qDeleteAll ( m_databases. items );
+
 	m_databases. colors. clear ( );
 	m_databases. item_types. clear ( );
 	m_databases. categories. clear ( );
 	m_databases. items. clear ( );
+
 
 	bool result = false;
 	stopwatch *sw = 0; //new stopwatch( "readDatabase" );
@@ -681,59 +581,60 @@ bool BrickLink::readDatabase ( const QString &fname )
 
 	if ( pds ) {
 		QDataStream &ds = *pds;
-		Q_UINT32 magic = 0, filesize = 0, version = 0;
+		quint32 magic = 0, filesize = 0, version = 0;
 
 		ds >> magic >> filesize >> version;
 		
-		if (( magic != Q_UINT32( 0xb91c5703 )) || ( filesize != f. size ( )) || ( version != DEFAULT_DATABASE_VERSION ))
+		if (( magic != quint32( 0xb91c5703 )) || ( filesize != f. size ( )) || ( version != DEFAULT_DATABASE_VERSION ))
 			return false;
 
 		ds. setByteOrder ( QDataStream::LittleEndian );
+		ds. setVersion ( QDataStream::Qt_3_3 );
 
 		// colors
-		Q_UINT32 colc = 0;
+		quint32 colc = 0;
 		ds >> colc;
 
-		for ( Q_UINT32 i = colc; i; i-- ) {
+		for ( quint32 i = colc; i; i-- ) {
 			Color *col = new Color ( );
 			ds >> col;
 			m_databases. colors. insert ( col-> id ( ), col );
 		}
 
 		// categories
-		Q_UINT32 catc = 0;
+		quint32 catc = 0;
 		ds >> catc;
 
-		for ( Q_UINT32 i = catc; i; i-- ) {
+		for ( quint32 i = catc; i; i-- ) {
 			Category *cat = new Category ( );
 			ds >> cat;
 			m_databases. categories. insert ( cat-> id ( ), cat );
 		}
 
 		// types
-		Q_UINT32 ittc = 0;
+		quint32 ittc = 0;
 		ds >> ittc;
 
-		for ( Q_UINT32 i = ittc; i; i-- ) {
+		for ( quint32 i = ittc; i; i-- ) {
 			ItemType *itt = new ItemType ( );
 			ds >> itt;
 			m_databases. item_types. insert ( itt-> id ( ), itt );
 		}
 
 		// items
-		Q_UINT32 itc = 0;
+		quint32 itc = 0;
 		ds >> itc;
 
 		m_databases. items. resize ( itc );
-		for ( Q_UINT32 i = 0; i < itc; i++ ) {
+		for ( quint32 i = 0; i < itc; i++ ) {
 			Item *item = new Item ( );
 			ds >> item;
-			m_databases. items. insert ( i, item );
+			m_databases. items. replace ( i, item );
 		}
-		Q_UINT32 allc = 0;
+		quint32 allc = 0;
 		ds >> allc >> magic;
 
-		if (( allc == ( colc + ittc + catc + itc )) && ( magic == Q_UINT32( 0xb91c5703 ))) {
+		if (( allc == ( colc + ittc + catc + itc )) && ( magic == quint32( 0xb91c5703 ))) {
 			delete sw;
 #ifdef _MSC_VER
 #define PF_SIZE_T   "I"
@@ -981,17 +882,17 @@ BrickLink::InvItemList *BrickLink::parseItemListXML ( QDomElement root, ItemList
 			ii-> setOrigQuantity ( ii-> quantity ( ));
 
 		if ( !colorid. isEmpty ( ) && !itemid. isEmpty ( ) && !itemtypeid. isEmpty ( )) {
-			ii-> setItem ( item ( itemtypeid [0]. latin1 ( ), itemid. latin1 ( )));
+			ii-> setItem ( item ( itemtypeid [0]. toLatin1 ( ), itemid. toLatin1 ( )));
 
 			if ( !ii-> item ( )) {
-				qWarning ( "failed: invalid itemid (%s) and/or itemtypeid (%c)", itemid. latin1 ( ), itemtypeid [0]. latin1 ( ));
+				qWarning ( ) << "failed: invalid itemid (" << itemid << ") and/or itemtypeid (" << itemtypeid [0] << ")";
 				ok = false;
 			}
 			
 			ii-> setColor ( color ( colorid. toInt ( )));
 
 			if ( !ii-> color ( )) {
-				qWarning ( "failed: invalid color (%d)", colorid. toInt ( ));
+				qWarning ( ) << "failed: invalid color (" << colorid << ")";
 				ok = false;
 			}
 		}
@@ -999,7 +900,7 @@ BrickLink::InvItemList *BrickLink::parseItemListXML ( QDomElement root, ItemList
 			ok = false;
 
 		if ( !ok ) {
-			qWarning ( "failed: insufficient data (item=%s, itemtype=%c, category=%d, color=%d", itemid. latin1 ( ), itemtypeid [0]. latin1 ( ), categoryid. toInt ( ), colorid. toInt ( ));
+			qWarning ( ) << "failed: insufficient data (item=" << itemid << ", itemtype=" << itemtypeid [0] << ", category=" << categoryid << ", color=" << colorid << ")";
 
 			InvItem::Incomplete *inc = new InvItem::Incomplete;
 			
@@ -1034,7 +935,7 @@ BrickLink::InvItemList *BrickLink::parseItemListXML ( QDomElement root, ItemList
 	if ( invalid_items )
 		*invalid_items = incomplete;
 	if ( incomplete )
-		qWarning ( "Parse XML (hint=%d): %d items have incomplete records", int( hint ), incomplete );
+		qWarning ( ) << "Parse XML (hint=" << int( hint ) << "): " << incomplete << " items have incomplete records";
 
 	return inv;
 }
@@ -1178,7 +1079,7 @@ QDomElement BrickLink::createItemListXML ( QDomDocument doc, ItemListXMLHint hin
 				item. appendChild ( doc. createElement ( "Retain"   ));
 			if ( ii-> stockroom ( ))
 				item. appendChild ( doc. createElement ( "Stockroom" ));
-			if ( ii-> reserved ( ))
+			if ( !ii-> reserved ( ). isEmpty ( ))
 				item. appendChild ( doc. createElement ( "Reserved" ). appendChild ( doc. createTextNode ( ii-> reserved ( ))). parentNode ( ));
 			if ( ii-> lotId ( ))
 				item. appendChild ( doc. createElement ( "LotID"    ). appendChild ( doc. createTextNode ( QString::number ( ii-> lotId ( )))). parentNode ( ));
@@ -1225,7 +1126,7 @@ QDomElement BrickLink::createItemListXML ( QDomDocument doc, ItemListXMLHint hin
 				item. appendChild ( doc. createElement ( "RETAIN"    ). appendChild ( doc. createTextNode ( "Y" )). parentNode ( ));
 			if ( ii-> stockroom ( ))
 				item. appendChild ( doc. createElement ( "STOCKROOM" ). appendChild ( doc. createTextNode ( "Y" )). parentNode ( ));
-			if ( ii-> reserved ( ))
+			if ( !ii-> reserved ( ). isEmpty ( ))
 				item. appendChild ( doc. createElement ( "BUYERUSERNAME" ). appendChild ( doc. createTextNode ( ii-> reserved ( ))). parentNode ( ));
 
 			if ( ii-> tierQuantity ( 0 )) {
@@ -1267,8 +1168,8 @@ QDomElement BrickLink::createItemListXML ( QDomDocument doc, ItemListXMLHint hin
 
 		// optional: additonal tags
 		if ( extra ) {
-			for ( QMap <QString, QString>::Iterator it = extra-> begin ( ); it != extra-> end ( ); ++it )
-				item. appendChild ( doc. createElement ( it. key ( )). appendChild ( doc. createTextNode ( it. data ( ))). parentNode ( ));
+			for ( QMap <QString, QString>::iterator it = extra-> begin ( ); it != extra-> end ( ); ++it )
+				item. appendChild ( doc. createElement ( it. key ( )). appendChild ( doc. createTextNode ( it. value ( ))). parentNode ( ));
 		}
 	}
 
@@ -1279,12 +1180,12 @@ QDomElement BrickLink::createItemListXML ( QDomDocument doc, ItemListXMLHint hin
 
 bool BrickLink::parseLDrawModel ( QFile &f, InvItemList &items, uint *invalid_items )
 {
-	QDict <InvItem> mergehash;
+	QHash<QString, InvItem *> mergehash;
 	
 	return BrickLink::parseLDrawModelInternal ( f, QString::null, items, invalid_items, mergehash );
 }
 
-bool BrickLink::parseLDrawModelInternal ( QFile &f, const QString &model_name, InvItemList &items, uint *invalid_items, QDict <InvItem> &mergehash )
+bool BrickLink::parseLDrawModelInternal ( QFile &f, const QString &model_name, InvItemList &items, uint *invalid_items, QHash<QString, InvItem *> &mergehash )
 {
 	QStringList searchpath;
 	QString ldrawdir = CConfig::inst ( )-> lDrawDir ( );
@@ -1297,7 +1198,7 @@ bool BrickLink::parseLDrawModelInternal ( QFile &f, const QString &model_name, I
 	bool is_mpd_model_found = false;
 
 
-	searchpath. append ( QFileInfo ( f ). dirPath ( true ));
+	searchpath. append ( QFileInfo ( f ). dir ( ). absolutePath ( ));
 	if ( !ldrawdir. isEmpty ( )) {
 		searchpath. append ( ldrawdir + "/models" );
 	}
@@ -1306,26 +1207,24 @@ bool BrickLink::parseLDrawModelInternal ( QFile &f, const QString &model_name, I
 		QTextStream in ( &f );
 		QString line;
 		
-		while (( line = in. readLine ( ))) {
+		while (!( line = in. readLine ( )). isNull ( )) {
 			linecount++;
 
-			line = line. simplifyWhiteSpace ( );
-
 			if ( !line. isEmpty ( ) && line [0] == '0' ) {
-				QStringList sl = QStringList::split ( ' ', line );
+				QStringList sl = line. simplified ( ). split( ' ' );
 
 				if (( sl. count ( ) >= 2 ) && ( sl [1] == "FILE" )) {
 					is_mpd = true;
-					current_mpd_model = sl [2]. lower ( );
+					current_mpd_model = sl [2]. toLower ( );
 					current_mpd_index++;
 
 					if ( is_mpd_model_found )
 						break;
 
-					if (( current_mpd_model == model_name. lower ( )) || ( model_name. isEmpty ( ) && ( current_mpd_index == 0 )))
+					if (( current_mpd_model == model_name. toLower ( )) || ( model_name. isEmpty ( ) && ( current_mpd_index == 0 )))
 						is_mpd_model_found = true;
 
-					if ( !f. isDirectAccess ( ))
+					if ( f. isSequential ( ))
 						return false; // we need to seek!
 				}
 			}
@@ -1333,17 +1232,17 @@ bool BrickLink::parseLDrawModelInternal ( QFile &f, const QString &model_name, I
 				if ( is_mpd && !is_mpd_model_found )
 					continue;
 
-				QStringList sl = QStringList::split ( ' ', line );
+				QStringList sl = line. simplified ( ). split ( ' ' );
 				
 				if ( sl. count ( ) >= 15 ) {
 					int colid = sl [1]. toInt ( );
-					QString partname = sl [14]. lower ( );
+					QString partname = sl [14]. toLower ( );
 					
 					QString partid = partname;
-					partid. truncate ( partid. findRev ( '.' ));
+					partid. truncate ( partid. lastIndexOf ( '.' ));
 										
 					const Color *colp = colorFromLDrawId ( colid );
-					const Item *itemp = item ( 'P', partid );
+					const Item *itemp = item ( 'P', partid. toLatin1 ( ));
 
 					
 					if ( !itemp ) {
@@ -1352,20 +1251,20 @@ bool BrickLink::parseLDrawModelInternal ( QFile &f, const QString &model_name, I
 						if ( is_mpd ) {
 							uint sub_invalid_items = 0;
 
-							QFile::Offset oldpos = f. at ( );
-							f. at ( 0 );
+							qint64 oldpos = f. pos ( );
+							f. seek ( 0 );
 
 							got_subfile = parseLDrawModelInternal ( f, partname, items, &sub_invalid_items, mergehash );
 
 							invalid += sub_invalid_items;
-							f. at ( oldpos );
+							f. seek ( oldpos );
 						}
 
 						if ( !got_subfile ) {
 							for ( QStringList::iterator it = searchpath. begin ( ); it != searchpath. end ( ); ++it ) {
 								QFile subf ( *it + "/" + partname );
 								
-								if ( subf. open ( IO_ReadOnly )) {
+								if ( subf. open ( QIODevice::ReadOnly )) {
 									uint sub_invalid_items = 0;
 									
 									(void) parseLDrawModelInternal ( subf, partname, items, &sub_invalid_items, mergehash );
@@ -1426,22 +1325,22 @@ bool BrickLink::parseLDrawModelInternal ( QFile &f, const QString &model_name, I
 /*
  * Support routines to rebuild the DB from txt files
  */
-void BrickLink::setDatabase_ConsistsOf ( const QMap<const Item *, InvItemList> &map )
+void BrickLink::setDatabase_ConsistsOf ( const QHash<const Item *, InvItemList> &hash )
 {
-	for ( QMap<const Item *, InvItemList>::const_iterator it = map. begin ( ); it != map. end ( ); ++it )
-		it. key ( )-> setConsistsOf ( it. data ( ));
+	for ( QHash<const Item *, InvItemList>::const_iterator it = hash. begin ( ); it != hash. end ( ); ++it )
+		it. key ( )-> setConsistsOf ( it. value ( ));
 }
 
-void BrickLink::setDatabase_AppearsIn ( const QMap<const Item *, Item::AppearsInMap> &map )
+void BrickLink::setDatabase_AppearsIn ( const QHash<const Item *, Item::AppearsIn> &hash )
 {
-	for ( QMap<const Item *, Item::AppearsInMap>::const_iterator it = map. begin ( ); it != map. end ( ); ++it )
-		it. key ( )-> setAppearsIn ( it. data ( ));
+	for ( QHash<const Item *, Item::AppearsIn>::const_iterator it = hash. begin ( ); it != hash. end ( ); ++it )
+		it. key ( )-> setAppearsIn ( it. value ( ));
 }
 
-void BrickLink::setDatabase_Basics ( const QIntDict<Color> &colors, 
-									 const QIntDict<Category> &categories,
-									 const QIntDict<ItemType> &item_types,
-									 const QPtrVector<Item> &items )
+void BrickLink::setDatabase_Basics ( const QHash<int, const Color *> &colors, 
+									 const QHash<int, const Category *> &categories,
+									 const QHash<int, const ItemType *> &item_types,
+									 const QVector<const Item *> &items )
 {
 	cancelPictureTransfers ( );
 	cancelPriceGuideTransfers ( );
@@ -1466,55 +1365,55 @@ bool BrickLink::writeDatabase ( const QString &fname )
 	QString filename = fname. isNull ( ) ? dataPath ( ) + defaultDatabaseName ( ) : fname;
 
 	QFile f ( filename + ".new" );
-	if ( f. open ( IO_WriteOnly )) {
+	if ( f. open ( QIODevice::WriteOnly )) {
 		QDataStream ds ( &f );
 
-		ds << Q_UINT32( 0 /*magic*/ ) << Q_UINT32 ( 0 /*filesize*/ ) << Q_UINT32( DEFAULT_DATABASE_VERSION /*version*/ );
+		ds << quint32( 0 /*magic*/ ) << quint32 ( 0 /*filesize*/ ) << quint32( DEFAULT_DATABASE_VERSION /*version*/ );
 		
 		ds. setByteOrder ( QDataStream::LittleEndian );
 
 		// colors
-		Q_UINT32 colc = m_databases. colors. count ( );
+		quint32 colc = m_databases. colors. count ( );
 		ds << colc;
 		
-		for ( QIntDictIterator<Color> it ( m_databases. colors ); it. current ( ); ++it )
-			ds << it. current ( );
+		foreach ( const Color *col, m_databases. colors )
+			ds << col;
 
 		// categories
-		Q_UINT32 catc = m_databases. categories. count ( );
+		quint32 catc = m_databases. categories. count ( );
 		ds << catc;
 
-		for ( QIntDictIterator<Category> it ( m_databases. categories ); it. current ( ); ++it )
-			ds << it. current ( );
+		foreach ( const Category *cat, m_databases. categories )
+			ds << cat;
 		
 		// types
-		Q_UINT32 ittc = m_databases. item_types. count ( );
+		quint32 ittc = m_databases. item_types. count ( );
 		ds << ittc;
 		
-		for ( QIntDictIterator<ItemType> it ( m_databases. item_types ); it. current ( ); ++it )
-			ds << it. current ( );
+		foreach ( const ItemType *itt, m_databases. item_types )
+			ds << itt;
 
 		// items
-		Q_UINT32 itc = m_databases. items. count ( );
+		quint32 itc = m_databases. items. count ( );
 		ds << itc;
 
-		Item **itp = m_databases. items. data ( );
-		for ( Q_UINT32 i = itc; i; itp++, i-- )
+		const Item **itp = m_databases. items. data ( );
+		for ( quint32 i = itc; i; itp++, i-- )
 			ds << *itp;
 
 		ds << ( colc + ittc + catc + itc );
-		ds << Q_UINT32( 0xb91c5703 );
+		ds << quint32( 0xb91c5703 );
 
-		Q_UINT32 filesize = f. at ( );
+		quint32 filesize = quint32( f. pos ( ));
 
-		if ( f. status ( ) == IO_Ok ) {
+		if ( f. error ( ) == QFile::NoError ) {
 			f. close ( );
 
-			if ( f. open ( IO_ReadWrite )) {
+			if ( f. open ( QIODevice::ReadWrite )) {
 				QDataStream ds2 ( &f );
-				ds2 << Q_UINT32( 0xb91c5703 ) << filesize;
+				ds2 << quint32( 0xb91c5703 ) << filesize;
 
-				if ( f. status ( ) == IO_Ok ) {
+				if ( f. error ( ) == QFile::NoError ) {
 					f. close ( );
 
 					QString err = CUtility::safeRename ( filename );

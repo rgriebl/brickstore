@@ -14,8 +14,8 @@
 #ifndef __CAPPLICATION_H__
 #define __CAPPLICATION_H__
 
-#include <qapplication.h>
-#include <qstringlist.h>
+#include <QApplication>
+#include <QStringList>
 
 #if defined( Q_WS_MACX )
 #include <Carbon/Carbon.h>
@@ -38,6 +38,8 @@ public:
 	QString sysName ( ) const;
 	QString sysVersion ( ) const;
 
+	bool pixmapAlphaSupported ( ) const;
+
 public slots:
 	void about ( );
 	void checkForUpdates ( );
@@ -48,7 +50,7 @@ signals:
 	void openDocument ( const QString & );
 
 protected:
-	virtual void customEvent ( QCustomEvent *e );
+	virtual void customEvent ( QEvent *e );
    	
 private slots:
 	void doEmitOpenDocument ( );
@@ -66,6 +68,7 @@ private:
 private:
 	QStringList m_files_to_open;
 	bool m_enable_emit;
+	bool m_has_alpha;
 	QString m_rebuild_db_only;
 
 	QTranslator *m_trans_qt;

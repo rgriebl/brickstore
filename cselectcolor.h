@@ -14,17 +14,17 @@
 #ifndef __CSELECTCOLOR_H__
 #define __CSELECTCOLOR_H__
 
-#include <qdialog.h>
+#include <QDialog>
 
 #include "bricklink.h"
 
-class CListView;
+class QTableView;
 
 
 class CSelectColor : public QWidget {
 	Q_OBJECT
 public:
-	CSelectColor ( QWidget *parent, const char *name = 0, WFlags fl = 0 );
+	CSelectColor ( QWidget *parent = 0, Qt::WindowFlags f = 0 );
 	
 	void setColor ( const BrickLink::Color * );
 	const BrickLink::Color *color ( ) const;
@@ -35,22 +35,21 @@ signals:
 protected slots:
 	void colorChanged ( );
 	void colorConfirmed ( );
-	void languageChange ( );
 
 protected:
 	virtual void enabledChange ( bool old );
 	virtual void showEvent ( QShowEvent * );
 
 protected:
-	CListView *w_colors;
+	QTableView *w_colors;
 
-	friend class CSelectColorDialog;
+	friend class DSelectColor;
 };
 
-class CSelectColorDialog : public QDialog {
+class DSelectColor : public QDialog {
 	Q_OBJECT
 public:
-	CSelectColorDialog ( QWidget *parent = 0, const char *name = 0, bool modal = true, WFlags fl = 0 );
+	DSelectColor ( QWidget *parent = 0, Qt::WindowFlags f = 0 );
 
 	void setColor ( const BrickLink::Color * );
 	const BrickLink::Color *color ( ) const;

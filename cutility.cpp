@@ -14,13 +14,16 @@
 
 #include <math.h>
 
-#include <qcolor.h>
-#include <qfontmetrics.h>
-#include <qapplication.h>
-#include <qcursor.h>
-#include <qimage.h>
-#include <qdir.h>
-#include <qlocale.h>
+#include <QColor>
+#include <QDesktopWidget>
+//qfontmetrics.h>
+#include <QApplication>
+//#include <qcursor.h>
+//#include <qimage.h>
+#include <QDir>
+#include <QDateTime>
+#include <QLocale>
+#include <QWidget>
 
 #if defined ( Q_WS_X11 ) || defined ( Q_WS_MACX )
 #include <stdlib.h>
@@ -66,47 +69,32 @@ QString CUtility::ellipsisText ( const QString &org, const QFontMetrics &fm, int
 }
 
 
-
-int CUtility::compareColors ( const QColor &c1, const QColor &c2 )
+QColor CUtility::gradientColor ( const QColor &c1, const QColor &c2, qreal f )
 {
-	int lh, rh, ls, rs, lv, rv;
+	qreal r1, g1, b1, a1, r2, g2, b2, a2;
+	c1. getRgbF ( &r1, &g1, &b1, &a1 );
+	c2. getRgbF ( &r2, &g2, &b2, &a2 );
 
-	c1. getHsv ( &lh, &ls, &lv );
-	c2. getHsv ( &rh, &rs, &rv );
+	f = qMin( qMax ( f, 0.0 ), 1.0 );
+	qreal e = 1.0 - f;
 
-	if ( lh != rh )
-		return lh - rh;
-	else if ( ls != rs )
-		return ls - rs;
-	else
-		return lv - rv;
+	return QColor::fromRgbF ( r1 * e + r2 * f, g1 * e + g2 * f, b1 * e + b2 * f, a1 * e + a2 * f );
 }
 
-QColor CUtility::gradientColor ( const QColor &c1, const QColor &c2, float f )
+QColor CUtility::contrastColor ( const QColor &c, qreal f )
 {
-	int r1, g1, b1, r2, g2, b2;
-	c1. getRgb ( &r1, &g1, &b1 );
-	c2. getRgb ( &r2, &g2, &b2 );
+	qreal h, s, v, a;
+	c. getHsvF ( &h, &s, &v, &a );
 
-	f = QMIN( QMAX ( f, 0.0 ), 1.0 );
-	float e = 1.0 - f;
+	f = qMin( qMax ( f, 0.0 ), 1.0 );
 
-	return QColor ( int( r1 * e + r2 * f ), int( g1 * e + g2 * f ), int( b1 * e + b2 * f ), QColor::Rgb );
+	v += f * (( v < 0.5 ) ? 1.0 : -1.0 );
+	v = qMin( qMax( v, 0.0 ), 1.0 );
+
+	return QColor::fromHsvF ( h, s, v, a );
 }
 
-QColor CUtility::contrastColor ( const QColor &c, float f )
-{
-	int h, s, v;
-	c. getHsv ( &h, &s, &v );
-
-	f = QMIN( QMAX ( f, 0.0 ), 1.0 );
-
-	v += int( f * (( v < 128 ) ? 255.0 : -255.0 ));
-	v = QMIN( QMAX( v, 0 ), 255 );
-
-	return QColor ( h, s, v, QColor::Hsv );
-}
-
+#if 0
 QImage CUtility::createGradient ( const QSize &size, Qt::Orientation orient, const QColor &c1, const QColor &c2, float f )
 {
 	if ( size. isEmpty ( ))
@@ -127,7 +115,7 @@ QImage CUtility::createGradient ( const QSize &size, Qt::Orientation orient, con
 
 	bool invert = ( f < 0. );
 
-	f = QMIN( QMAX( QABS( f ), 1. ), 200. );
+	f = qMin( qMax( QABS( f ), 1. ), 200. );
 
 	if ( orient == Qt::Horizontal ) {
 		f /= ( w * -30. );
@@ -162,7 +150,9 @@ QImage CUtility::createGradient ( const QSize &size, Qt::Orientation orient, con
 	}
 	return img;
 }
+#endif
 
+#if 0
 QImage CUtility::shadeImage ( const QImage &oimg, const QColor &col )
 {
 	if ( oimg. isNull ( ))
@@ -190,7 +180,9 @@ QImage CUtility::shadeImage ( const QImage &oimg, const QColor &col )
 	}
 	return img;
 }
+#endif
 
+#if 0
 bool CUtility::openUrl ( const QString &url )
 {
 	bool retval = false;
@@ -238,6 +230,7 @@ bool CUtility::openUrl ( const QString &url )
 	QApplication::restoreOverrideCursor ( );
 	return retval;
 }
+#endif
 
 
 void CUtility::setPopupPos ( QWidget *w, const QRect &pos )
@@ -321,6 +314,7 @@ double CUtility::stringToWeight ( const QString &s, bool imperial )
 	return w;
 }
 
+#if 0
 QString CUtility::safeOpen ( const QString &basepath )
 {
 	QDir cwd;
@@ -331,6 +325,7 @@ QString CUtility::safeOpen ( const QString &basepath )
 	else
 		return basepath;
 }
+#endif
 
 QString CUtility::safeRename ( const QString &basepath )
 {
@@ -379,7 +374,7 @@ void set_tz ( const char *tz )
 
 time_t CUtility::toUTC ( const QDateTime &dt, const char *settz )
 {
-    QCString oldtz;
+    QByteArray oldtz;
 	
 	if ( settz ) {
 		oldtz = getenv ( "TZ" );

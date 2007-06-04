@@ -14,13 +14,12 @@
 #ifndef __CWINDOW_H__
 #define __CWINDOW_H__
 
-#include <qwidget.h>
-#include <qregexp.h>
-#include <qptrlist.h>
-#include <qptrdict.h>
+#include <QWidget>
+#include <QRegExp>
+#include <QHash>
 #include <qdom.h>
 
-#include "citemview.h"
+//#include "citemview.h"
 #include "bricklink.h"
 #include "cdocument.h"
 #include "cconfig.h"
@@ -30,6 +29,7 @@ class QToolButton;
 class QComboBox;
 class QListViewItem;
 class CItemView;
+class CItemViewItem;
 class CFrameWork;
 class CUndoStack;
 class QLabel;
@@ -39,7 +39,7 @@ class CWindow : public QWidget, public IDocumentView {
 	Q_OBJECT
 
 public:
-	CWindow ( CDocument *doc, QWidget *parent = 0, const char *name = 0 );
+	CWindow ( CDocument *doc, QWidget *parent = 0 );
 	~CWindow ( );
 
 	CDocument *document ( ) { return m_doc; }
@@ -186,7 +186,7 @@ private:
 
 	bool m_ignore_selection_update;
 
-	QPtrDict<CItemViewItem>  m_lvitems;
+	QHash<int, CItemViewItem *>  m_lvitems;
 
 	QToolButton *  w_filter_clear;
 	QComboBox *    w_filter_expression;
@@ -196,7 +196,7 @@ private:
 	QLabel *       w_filter_field_label;
 
 	uint                           m_settopg_failcnt;
-	QPtrDict<CDocument::Item> *    m_settopg_list;
+	QHash<int, CDocument::Item *> *    m_settopg_list;
 	BrickLink::PriceGuide::Time    m_settopg_time;
 	BrickLink::PriceGuide::Price   m_settopg_price;
 };

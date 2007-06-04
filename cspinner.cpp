@@ -11,14 +11,15 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <qpixmap.h>
-#include <qpainter.h>
+#include <QPixmap>
+#include <QPainter>
+#include <QTimerEvent>
 
 #include "cspinner.h"
 
 
-CSpinner::CSpinner ( QWidget *parent, const char *name, WFlags fl )
-	: QWidget ( parent, name, fl )
+CSpinner::CSpinner ( QWidget *parent, Qt::WindowFlags f )
+	: QWidget ( parent, f )
 {
 	m_step = 0;
 	m_width = 0;

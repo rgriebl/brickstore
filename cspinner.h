@@ -14,7 +14,7 @@
 #ifndef __CSPINNER_H__
 #define __CSPINNER_H__
 
-#include <qwidget.h>
+#include <QWidget>
 
 class QPixmap;
 
@@ -22,7 +22,7 @@ class QPixmap;
 class CSpinner : public QWidget {
 	Q_OBJECT
 public:
-	CSpinner ( QWidget *parent, const char *name = 0, WFlags fl = 0 );
+	CSpinner ( QWidget *parent = 0, Qt::WindowFlags f = 0 );
 	virtual ~CSpinner ( );
 
 	void setPixmap ( const QPixmap &p );

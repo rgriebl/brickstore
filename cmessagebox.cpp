@@ -41,33 +41,36 @@ QString CMessageBox::defaultTitle ( )
 	return s_deftitle;
 }
 
-int CMessageBox::msgbox ( QWidget *parent, const QString &msg, QMessageBox::Icon icon, int but0, int but1, int but2 )
+QMessageBox::StandardButton CMessageBox::msgbox ( QWidget *parent, const QString &msg, QMessageBox::Icon icon, StandardButtons buttons, StandardButton defaultButton )
 {
-	QMessageBox *mb = new QMessageBox ( s_deftitle, msg, icon, but0, but1, but2, parent ? parent : qApp-> mainWidget ( ), "brickstore_msgbox", true, WDestructiveClose );
+	QMessageBox *mb = new QMessageBox ( icon, s_deftitle, msg, NoButton, parent );
+	mb-> setAttribute ( Qt::WA_DeleteOnClose );
+	mb-> setObjectName ( "messagebox" );
+	mb-> setStandardButtons ( buttons );
+	mb-> setDefaultButton ( defaultButton );
+	mb-> setTextFormat ( Qt::RichText );
 
-	mb-> setTextFormat ( RichText );
-
-	return mb-> exec ( );
+	return static_cast<StandardButton> ( mb-> exec ( ));
 }
 
-int CMessageBox::information ( QWidget *parent, const QString &text, int button0, int button1, int button2 )
+QMessageBox::StandardButton CMessageBox::information ( QWidget *parent, const QString &text, StandardButtons buttons, StandardButton defaultButton )
 {
-	return msgbox ( parent, text, QMessageBox::Information, button0, button1, button2 );
+	return msgbox ( parent, text, QMessageBox::Information, buttons, defaultButton );
 }
 
-int CMessageBox::question ( QWidget *parent, const QString &text, int button0, int button1, int button2 )
+QMessageBox::StandardButton CMessageBox::question ( QWidget *parent, const QString &text, StandardButtons buttons, StandardButton defaultButton )
 {
-	return msgbox ( parent, text, QMessageBox::Question, button0, button1, button2 );
+	return msgbox ( parent, text, QMessageBox::Question, buttons, defaultButton );
 }
 
-int CMessageBox::warning ( QWidget *parent, const QString &text, int button0, int button1, int button2 )
+QMessageBox::StandardButton CMessageBox::warning ( QWidget *parent, const QString &text, StandardButtons buttons, StandardButton defaultButton )
 {
-	return msgbox ( parent, text, QMessageBox::Warning, button0, button1, button2 );
+	return msgbox ( parent, text, QMessageBox::Warning, buttons, defaultButton );
 }
 
-int CMessageBox::critical ( QWidget *parent, const QString &text, int button0, int button1, int button2 )
+QMessageBox::StandardButton CMessageBox::critical ( QWidget *parent, const QString &text, StandardButtons buttons, StandardButton defaultButton )
 {
-	return msgbox ( parent, text, QMessageBox::Critical, button0, button1, button2 );
+	return msgbox ( parent, text, QMessageBox::Critical, buttons, defaultButton );
 }
 
 bool CMessageBox::getString ( QWidget *parent, const QString &text, QString &value )
@@ -99,11 +102,12 @@ bool CMessageBox::getString ( QWidget *parent, const QString &text, const QStrin
 {
 	bool b = false;
 
-	QDialog *d = new QDialog ( parent, "getbox", true );
-	d-> setCaption ( s_deftitle );
+	QDialog *d = new QDialog ( parent );
+	d-> setObjectName ( "getbox" );
+	d-> setWindowTitle ( s_deftitle );
 
 	QLabel *wlabel = new QLabel ( text, d );
-	wlabel-> setTextFormat( QLabel::RichText );
+	wlabel-> setTextFormat( Qt::RichText );
 	QLabel *wunit = unit. isEmpty ( ) ? 0 : new QLabel ( unit, d );
 	QFrame *wline = new QFrame ( d );
 	wline-> setFrameStyle ( QFrame::HLine | QFrame::Sunken );
@@ -112,7 +116,7 @@ bool CMessageBox::getString ( QWidget *parent, const QString &text, const QStrin
 	wedit-> setValidator ( validate );
 
 	QFontMetrics wefm ( wedit-> font ( ));
-	wedit-> setMinimumWidth ( 20 + QMAX( wefm. width ( "Aa0" ) * 3, wefm. width ( value )));
+	wedit-> setMinimumWidth ( 20 + qMax( wefm. width ( "Aa0" ) * 3, wefm. width ( value )));
 	wedit-> setSizePolicy ( QSizePolicy ( QSizePolicy::Preferred, QSizePolicy::Fixed ));
 
 	QPushButton *wok = new QPushButton ( tr( "&OK" ), d );
@@ -122,7 +126,7 @@ bool CMessageBox::getString ( QWidget *parent, const QString &text, const QStrin
 	QPushButton *wcancel = new QPushButton ( tr( "&Cancel" ), d );
 	wcancel-> setAutoDefault ( true );
 
-	QBoxLayout *toplay = new QVBoxLayout ( d, 11, 6 );
+	QBoxLayout *toplay = new QVBoxLayout ( d ); //, 11, 6 );
 	toplay-> addWidget ( wlabel );
 
 	QBoxLayout *midlay = new QHBoxLayout ( );

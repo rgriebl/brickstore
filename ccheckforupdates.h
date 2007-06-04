@@ -14,8 +14,9 @@
 #ifndef __CCHECKFORUPDATES_H__
 #define __CCHECKFORUPDATES_H__
 
-#include <qbuffer.h>
-#include <qvaluelist.h>
+#include <QBuffer>
+#include <QTextStream>
+#include <QList>
 
 #include "capplication.h"
 #include "cconfig.h"
@@ -57,9 +58,9 @@ private slots:
 		bool ok = false;
 
 		if ( data && data-> size ( )) {
-			QBuffer buf ( *data );
+			QBuffer buf ( data );
 
-			if ( buf. open ( IO_ReadOnly )) {
+			if ( buf. open ( QIODevice::ReadOnly )) {
 				QTextStream ts ( &buf );
 				QString line;
 
@@ -67,14 +68,14 @@ private slots:
 
 
 				while ( !( line = ts. readLine ( )). isNull ( )) {
-					QStringList sl = QStringList::split ( '\t', line, true );
+					QStringList sl = line. split ( '\t', QString::KeepEmptyParts );
 
 					if (( sl. count ( ) < 2 ) || ( sl [0]. length ( ) != 1 ) || sl [1]. isEmpty ( )) 
 						continue;
 
 					VersionRecord vr;
 
-					switch ( sl [0][0]. latin1 ( )) {
+					switch ( sl [0][0]. toLatin1 ( )) {
 						case 'S': vr. m_type = VersionRecord::Stable; break;
 						case 'B': vr. m_type = VersionRecord::Beta; break;
 						default : continue;
@@ -113,7 +114,7 @@ private slots:
 						str = tr( "A newer version than the one currently installed is available:" );
 						str += "<br /><br /><br /><table>";
 
-						for ( QValueList <VersionRecord>::iterator it = m_versions. begin ( ); it != m_versions. end ( ); ++it ) {
+						for ( QList <VersionRecord>::iterator it = m_versions. begin ( ); it != m_versions. end ( ); ++it ) {
 							const VersionRecord &vrr = *it;
 
 							if ( vrr. m_is_newer && !vrr. m_has_errors ) {
@@ -129,7 +130,7 @@ private slots:
 					if ( m_current_version. m_has_errors ) {
 						QString link = QString( "<a href=\"http://" + cApp-> appURL ( ) + "\">%1</a>" ). arg ( tr( "the BrickStore homepage" ));
 
-						str += "<br /><br /><br /><br /><br /><br /><table><tr><td><img src=\"brickstore-important\" align=\"left\" /></td><td>" + 
+						str += "<br /><br /><br /><br /><br /><br /><table><tr><td><img src=\":/images/important.png\" align=\"left\" /></td><td>" + 
 							   tr( "<b>Please note:</b> Your currently installed version is flagged as defective. Please visit %1 to find out the exact cause." ). arg ( link ) +
 							   "</td></tr></table>";
 					}
@@ -156,7 +157,7 @@ private:
 		bool fromString ( const QString &str )
 		{
 			if ( !str. isEmpty ( )) {
-				QStringList vl = QStringList::split ( '.', str );
+				QStringList vl = str. split ( '.' );
 
 				if ( vl. count ( ) == 3 ) {
 					m_major    = vl [0]. toInt ( );
@@ -200,7 +201,7 @@ private:
 private:
 	CProgressDialog *m_progress;
 	VersionRecord   m_current_version;
-	QValueList <VersionRecord> m_versions;
+	QList <VersionRecord> m_versions;
 };
 
 #endif

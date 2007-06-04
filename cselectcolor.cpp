@@ -11,135 +11,163 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <qlayout.h>
-#include <qheader.h>
-#include <qpushbutton.h>
-#include <qstyle.h>
-#include <qpainter.h>
-#include <qtooltip.h>
+#include <QLayout>
+#include <QList>
+#include <QPushButton>
+#include <QHash>
+#include <QApplication>
+#include <QHeaderView>
+#include <QTableView>
+#include <QItemDelegate>
 
 #include "cutility.h"
-#include "clistview.h"
+//#include "clistview.h"
 #include "cselectcolor.h"
 
 
 namespace {
 
-class ColListItem : public CListViewItem {
+class ColorModel : public QAbstractTableModel {
 public:
-	ColListItem ( CListView *lv, const BrickLink::Color *col )
-		: CListViewItem ( lv ), m_col ( col )
+	enum Role { BrickLinkColorRole = Qt::UserRole + 1 };
+
+	ColorModel ( )
+	{ m_colors = BrickLink::inst ( )-> colors ( ). values ( ); }
+
+	const BrickLink::Color *color ( const QModelIndex &index ) const
+	{ return m_colors [index. row ( )]; }
+
+	QModelIndex index ( const BrickLink::Color *color ) const
+	{ return color ? createIndex ( m_colors. indexOf ( color ), 0, 0 ) : QModelIndex ( ); }
+
+	virtual int rowCount ( const QModelIndex & /*parent*/ ) const
+	{ return m_colors. count ( ); }
+
+	virtual int columnCount ( const QModelIndex & /*parent*/ ) const
+	{ return 1;	}
+
+	virtual QVariant data ( const QModelIndex &index, int role ) const
 	{
-		QFontMetrics fm = lv-> fontMetrics ( );
-		m_pix. convertFromImage ( BrickLink::inst ( )-> colorImage ( col, fm. height ( ) + 2, fm. height ( ) + 2 ));
-	}
+		QVariant res;
+		const BrickLink::Color *color = this-> color ( index );
+		int col = index. column ( );
 
-	virtual const QPixmap *pixmap ( int /*col*/ ) const
-	{ return &m_pix; }
-
-	virtual QString text ( int /*col*/ ) const
-	{ return m_col-> name ( ); }
-	
-	virtual QString toolTip ( ) const
-	{ 
-		if ( color ( )-> color ( ). isValid ( )) {
-			QFontMetrics fm = listView ( )-> fontMetrics ( );
-			QPixmap bigpix;
-			bigpix. convertFromImage ( BrickLink::inst ( )-> colorImage ( color ( ), fm. height ( ) * 8, fm. height ( ) * 4 ));
-		
-			QMimeSourceFactory::defaultFactory ( )-> setPixmap ( "select_color_tooltip_picture", bigpix );
-
-			return QString( "<img src=\"select_color_tooltip_picture\"><br />%1: %2" ). arg ( CSelectColor::tr( "RGB" ), color ( )-> color ( ). name ( ));
+		if ( col == 0 ) {
+			if ( role == Qt:: DisplayRole ) {
+				res = color-> name ( );
+			}
+			else if ( role == Qt::DecorationRole ) {
+				QFontMetrics fm = QApplication::fontMetrics ( );
+				QPixmap pix = QPixmap::fromImage ( BrickLink::inst ( )-> colorImage ( color, fm. height ( ), fm. height ( )));
+				res = pix;
+			}
+			else if ( role == Qt::ToolTipRole ) {
+				res = QString( "<img src=\"#/select_color_tooltip_picture\"><br />%1: %2" ). arg ( CSelectColor::tr( "RGB" ), color-> color ( ). name ( ));
+			}
+			else if ( role == BrickLinkColorRole ) {
+				res = color;
+			}
 		}
-		return QString ( );
-	}
-	
-	virtual int compare ( QListViewItem *i, int /*col*/, bool ascending ) const
-	{
-		ColListItem *cli = static_cast <ColListItem *> ( i );
-
-		if ( ascending )
-			return text ( 0 ). compare ( cli-> text ( 0 ));
-		else
-			return -CUtility::compareColors ( m_col-> color ( ), cli-> m_col-> color ( ));
-	}
-
-	const BrickLink::Color *color ( ) const
-	{ return m_col; }
-
-private:
-	const BrickLink::Color *m_col;
-	QPixmap m_pix;
-};
-
-class ColToolTip : public QToolTip {
-public:
-	ColToolTip ( QWidget *parent, CListView *clv )
-		: QToolTip( parent ), m_clv ( clv )
-	{ }
-	
-	virtual ~ColToolTip ( )
-	{ }
-
-	void maybeTip ( const QPoint &pos )
-	{
-		if ( !parentWidget ( ) || !m_clv /*|| !m_clv-> showToolTips ( )*/ )
-			return;
-
-		ColListItem *item = static_cast <ColListItem *> ( m_clv-> itemAt ( pos ));
 		
-		if ( item )
-			tip ( m_clv-> itemRect ( item ), item-> toolTip ( ));
+		return res;
+	}
+
+	virtual QVariant headerData ( int section, Qt::Orientation orient, int role ) const
+    {
+		if (( orient == Qt::Horizontal ) && ( role == Qt::DisplayRole ) && ( section == 0 ))
+			return CSelectColor::tr( "Color" );
+		return QVariant ( );
+    }
+
+	virtual void sort ( int column, Qt::SortOrder so )
+	{
+		if ( column == 0 ) {
+		    emit layoutAboutToBeChanged ( );
+			qStableSort ( m_colors. begin ( ), m_colors. end ( ), so == Qt::DescendingOrder ? colorNameCompare : colorHsvCompare );
+			emit layoutChanged ( );
+		}
+	}
+
+	static bool colorNameCompare ( const BrickLink::Color *c1, const BrickLink::Color *c2 )
+	{
+		return qstrcmp ( c1-> name ( ), c2-> name ( )) < 0;
+	}
+
+	static bool colorHsvCompare ( const BrickLink::Color *c1, const BrickLink::Color *c2 )
+	{
+		int lh, rh, ls, rs, lv, rv, d;
+
+		c1-> color ( ). getHsv ( &lh, &ls, &lv );
+		c2-> color ( ). getHsv ( &rh, &rs, &rv );
+
+		if ( lh != rh )
+			d = lh - rh;
+		else if ( ls != rs )
+			d = ls - rs;
+		else
+			d = lv - rv;
+
+		return d < 0;
 	}
 
 private:
-    CListView *m_clv;
+	QList<const BrickLink::Color *> m_colors;
 };
 
 
-} // namespace
+class ColorDelegate : public QItemDelegate {
+public:
+    ColorDelegate ( QObject *parent = 0 )
+		: QItemDelegate ( parent )
+	{ }
+
+	virtual void drawDecoration ( QPainter *painter, const QStyleOptionViewItem &option, const QRect &rect, const QPixmap &pixmap) const
+	{
+		QStyleOptionViewItem myoption ( option );
+		myoption. state &= ~QStyle::State_Selected;
+
+		QItemDelegate::drawDecoration ( painter, myoption, rect, pixmap );
+	}
+};
 
 
-CSelectColor::CSelectColor ( QWidget *parent, const char *name, WFlags fl )
-	: QWidget ( parent, name, fl )
-{
-	w_colors = new CListView ( this );
-	setFocusProxy ( w_colors );
-	w_colors-> setAlwaysShowSelection ( true );
-	w_colors-> addColumn ( QString ( ));
-	w_colors-> header ( )-> setMovingEnabled ( false );
-	w_colors-> header ( )-> setResizeEnabled ( false );
-	new ColToolTip ( w_colors-> viewport ( ), w_colors );
-
-	const QIntDict<BrickLink::Color> &coldict = BrickLink::inst ( )-> colors ( );
-
-	for ( QIntDictIterator<BrickLink::Color> it ( coldict ); it. current ( ); ++it )
-		(void) new ColListItem ( w_colors, it. current ( ));
-
-	w_colors-> sort ( );
-
-	connect ( w_colors, SIGNAL( selectionChanged ( )), this, SLOT( colorChanged ( )));
-	connect ( w_colors, SIGNAL( doubleClicked ( QListViewItem *, const QPoint &, int )), this, SLOT( colorConfirmed ( )));
-	connect ( w_colors, SIGNAL( returnPressed ( QListViewItem * )), this, SLOT( colorConfirmed ( ))); 
-
-	w_colors-> setFixedWidth ( w_colors-> sizeHint ( ). width ( ) + w_colors-> style ( ). pixelMetric ( QStyle::PM_ScrollBarExtent ));
-	w_colors-> setResizeMode ( QListView::LastColumn );
-
-	QBoxLayout *lay = new QVBoxLayout ( this, 0, 0 );
-	lay-> addWidget ( w_colors );
-
-	languageChange ( );
 }
 
-void CSelectColor::languageChange ( )
+CSelectColor::CSelectColor ( QWidget *parent, Qt::WindowFlags f )
+	: QWidget ( parent, f )
 {
-	w_colors-> setColumnText ( 0, tr( "Color" ));
+	w_colors = new QTableView ( this );
+	w_colors-> setModel ( new ColorModel ( ));
+	w_colors-> setItemDelegate ( new ColorDelegate ( ));
+	w_colors-> horizontalHeader ( )-> setResizeMode ( QHeaderView::Fixed );
+	w_colors-> horizontalHeader ( )-> setStretchLastSection ( true );
+	w_colors-> horizontalHeader ( )-> setMovable ( false );
+	w_colors-> verticalHeader ( )-> setResizeMode ( QHeaderView::ResizeToContents );
+	w_colors-> verticalHeader ( )-> hide ( );
+	w_colors-> setShowGrid ( false );
+	w_colors-> setAlternatingRowColors ( true );
+	w_colors-> setSortingEnabled ( true );
+	w_colors-> setFixedWidth ( w_colors-> sizeHint ( ). width ( ) + w_colors-> style ( )-> pixelMetric ( QStyle::PM_ScrollBarExtent ));
+	w_colors-> sortByColumn ( 0 );
+
+	setFocusProxy ( w_colors );
+
+	connect ( w_colors-> selectionModel ( ), SIGNAL( selectionChanged ( const QItemSelection &, const QItemSelection & )), this, SLOT( colorChanged ( )));
+	connect ( w_colors, SIGNAL( activated ( const QModelIndex & )), this, SLOT( colorConfirmed ( )));
+
+	QBoxLayout *lay = new QVBoxLayout ( this );
+	lay-> setMargin ( 0 );
+	lay-> addWidget ( w_colors );
 }
 
 const BrickLink::Color *CSelectColor::color ( ) const
 {
-	ColListItem *cli = static_cast <ColListItem *> ( w_colors-> selectedItem ( ));
-	return cli ? cli-> color ( ) : 0;
+	ColorModel *model = static_cast<ColorModel *>( w_colors-> model ( ));
+
+	if ( !w_colors-> selectionModel ( )-> selectedIndexes ( ). isEmpty ( ))
+		return model-> color ( w_colors-> selectionModel ( )-> selectedIndexes ( ). front ( ));
+	else
+		return 0;
 }
 
 void CSelectColor::enabledChange ( bool old )
@@ -150,14 +178,11 @@ void CSelectColor::enabledChange ( bool old )
 	QWidget::enabledChange ( old );
 }
 
-void CSelectColor::setColor ( const BrickLink::Color *col )
+void CSelectColor::setColor ( const BrickLink::Color *color )
 {
-	for ( QListViewItemIterator it ( w_colors ); *it; ++it ) {
-		if ( static_cast <ColListItem *> ( *it )-> color ( ) == col ) {
-			w_colors-> setSelected ( *it, true );
-			break;
-		}
-	}
+	ColorModel *model = static_cast<ColorModel *>( w_colors-> model ( ));
+
+	w_colors-> selectionModel ( )-> select ( model-> index ( color ), QItemSelectionModel::SelectCurrent );
 }
 
 void CSelectColor::colorChanged ( )
@@ -172,7 +197,8 @@ void CSelectColor::colorConfirmed ( )
 
 void CSelectColor::showEvent ( QShowEvent * )
 {
-	w_colors-> centerItem ( w_colors-> selectedItem ( ));
+	if ( !w_colors-> selectionModel ( )-> selectedIndexes ( ). isEmpty ( ))
+		w_colors-> scrollTo ( w_colors-> selectionModel ( )-> selectedIndexes ( ). front ( ), QAbstractItemView::PositionAtCenter );
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -181,8 +207,8 @@ void CSelectColor::showEvent ( QShowEvent * )
 ////////////////////////////////////////////////////////////////////////////
 
 
-CSelectColorDialog::CSelectColorDialog ( QWidget *parent, const char *name, bool modal, WFlags fl )
-	: QDialog ( parent, name, modal, fl )
+DSelectColor::DSelectColor ( QWidget *parent, Qt::WindowFlags f )
+	: QDialog ( parent, f )
 {
 	w_sc = new CSelectColor ( this );
 	w_sc-> w_colors-> setMaximumSize ( 32767, 32767 ); // fixed width -> minimum width in this case
@@ -197,11 +223,12 @@ CSelectColorDialog::CSelectColorDialog ( QWidget *parent, const char *name, bool
 	QFrame *hline = new QFrame ( this );
 	hline-> setFrameStyle ( QFrame::HLine | QFrame::Sunken );
 	
-	QBoxLayout *toplay = new QVBoxLayout ( this, 11, 6 );
+	QBoxLayout *toplay = new QVBoxLayout ( this );
 	toplay-> addWidget ( w_sc );
 	toplay-> addWidget ( hline );
 
-	QBoxLayout *butlay = new QHBoxLayout ( toplay );
+	QBoxLayout *butlay = new QHBoxLayout ( );
+	toplay-> addLayout ( butlay );
 	butlay-> addStretch ( 60 );
 	butlay-> addWidget ( w_ok, 15 );
 	butlay-> addWidget ( w_cancel, 15 );
@@ -217,17 +244,17 @@ CSelectColorDialog::CSelectColorDialog ( QWidget *parent, const char *name, bool
 	w_sc-> setFocus ( );
 }
 
-void CSelectColorDialog::setColor ( const BrickLink::Color *col )
+void DSelectColor::setColor ( const BrickLink::Color *col )
 {
 	w_sc-> setColor ( col );
 }
 
-const BrickLink::Color *CSelectColorDialog::color ( ) const
+const BrickLink::Color *DSelectColor::color ( ) const
 {
 	return w_sc-> color ( );
 }
 
-void CSelectColorDialog::checkColor ( const BrickLink::Color *col, bool ok )
+void DSelectColor::checkColor ( const BrickLink::Color *col, bool ok )
 {
 	w_ok-> setEnabled (( col ));
 
@@ -235,7 +262,7 @@ void CSelectColorDialog::checkColor ( const BrickLink::Color *col, bool ok )
 		w_ok-> animateClick ( );
 }
 
-int CSelectColorDialog::exec ( const QRect &pos )
+int DSelectColor::exec ( const QRect &pos )
 {
 	if ( pos. isValid ( ))
 		CUtility::setPopupPos ( this, pos );

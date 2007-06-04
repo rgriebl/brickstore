@@ -1,0 +1,416 @@
+<ui version="4.0" >
+ <class>AddItem</class>
+ <widget class="QDialog" name="AddItem" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>693</width>
+    <height>768</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Add Items to %1</string>
+  </property>
+  <layout class="QVBoxLayout" >
+   <item>
+    <layout class="QHBoxLayout" >
+     <item>
+      <widget class="CSelectItem" native="1" name="w_select_item" >
+       <property name="sizePolicy" >
+        <sizepolicy vsizetype="Expanding" hsizetype="MinimumExpanding" >
+         <horstretch>100</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize" >
+        <size>
+         <width>50</width>
+         <height>50</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="CSelectColor" native="1" name="w_select_color" >
+       <property name="sizePolicy" >
+        <sizepolicy vsizetype="MinimumExpanding" hsizetype="MinimumExpanding" >
+         <horstretch>10</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" >
+     <item>
+      <widget class="CPictureWidget" name="w_picture" >
+       <property name="frameShape" >
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow" >
+        <enum>QFrame::Raised</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="CPriceGuideWidget" name="w_price_guide" >
+       <property name="frameShape" >
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow" >
+        <enum>QFrame::Raised</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSplitter" name="splitter" >
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <widget class="CAppearsInWidget" native="1" name="w_appears_in" />
+       <widget class="QWidget" name="" >
+        <layout class="QGridLayout" >
+         <item row="0" column="0" >
+          <widget class="QLabel" name="label" >
+           <property name="text" >
+            <string>&amp;Quantity</string>
+           </property>
+           <property name="buddy" >
+            <cstring>w_qty</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1" >
+          <widget class="QSpinBox" name="w_qty" >
+           <property name="minimum" >
+            <number>-2000000000</number>
+           </property>
+           <property name="maximum" >
+            <number>2000000000</number>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2" >
+          <widget class="QLabel" name="w_bulk_label" >
+           <property name="text" >
+            <string>&amp;Bulk</string>
+           </property>
+           <property name="buddy" >
+            <cstring>w_bulk</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="3" >
+          <widget class="QSpinBox" name="w_bulk" >
+           <property name="minimum" >
+            <number>0</number>
+           </property>
+           <property name="maximum" >
+            <number>2000000000</number>
+           </property>
+           <property name="value" >
+            <number>1</number>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0" >
+          <widget class="QLabel" name="w_label_currency" >
+           <property name="text" >
+            <string>&amp;Price (%1)</string>
+           </property>
+           <property name="buddy" >
+            <cstring>w_price</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1" >
+          <widget class="QLineEdit" name="w_price" />
+         </item>
+         <item row="1" column="2" >
+          <widget class="QLabel" name="label_4" >
+           <property name="text" >
+            <string>Total</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="3" >
+          <widget class="QLineEdit" name="w_total" />
+         </item>
+         <item row="2" column="0" >
+          <widget class="QLabel" name="w_tier_label" >
+           <property name="text" >
+            <string>&amp;Tiered prices</string>
+           </property>
+           <property name="buddy" >
+            <cstring>w_radio_percent</cstring>
+           </property>
+          </widget>
+         </item>
+         <item rowspan="2" row="2" column="1" colspan="3" >
+          <layout class="QGridLayout" >
+           <item row="0" column="0" >
+            <widget class="QSpinBox" name="w_tier_qty_0" />
+           </item>
+           <item row="0" column="1" >
+            <widget class="QSpinBox" name="w_tier_qty_1" />
+           </item>
+           <item row="0" column="2" >
+            <widget class="QSpinBox" name="w_tier_qty_2" />
+           </item>
+           <item row="1" column="0" >
+            <widget class="QLineEdit" name="w_tier_price_0" />
+           </item>
+           <item row="1" column="1" >
+            <widget class="QLineEdit" name="w_tier_price_1" />
+           </item>
+           <item row="1" column="2" >
+            <widget class="QLineEdit" name="w_tier_price_2" />
+           </item>
+          </layout>
+         </item>
+         <item row="3" column="0" >
+          <layout class="QHBoxLayout" >
+           <item>
+            <widget class="QRadioButton" name="w_radio_percent" >
+             <property name="text" >
+              <string>%</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="w_radio_currency" >
+             <property name="text" >
+              <string>%1</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="4" column="0" >
+          <widget class="QLabel" name="label_2" >
+           <property name="text" >
+            <string>C&amp;ondition</string>
+           </property>
+           <property name="buddy" >
+            <cstring>w_radio_new</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1" colspan="3" >
+          <layout class="QHBoxLayout" >
+           <item>
+            <widget class="QRadioButton" name="w_radio_new" >
+             <property name="text" >
+              <string>&amp;New</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="w_radio_used" >
+             <property name="text" >
+              <string>&amp;Used</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer>
+             <property name="orientation" >
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" >
+              <size>
+               <width>271</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+         <item row="5" column="0" >
+          <widget class="QLabel" name="w_comments_label" >
+           <property name="text" >
+            <string>Co&amp;mments</string>
+           </property>
+           <property name="buddy" >
+            <cstring>w_comments</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="1" colspan="3" >
+          <widget class="QLineEdit" name="w_comments" />
+         </item>
+         <item row="6" column="0" >
+          <widget class="QLabel" name="w_remarks_label" >
+           <property name="text" >
+            <string>&amp;Remarks</string>
+           </property>
+           <property name="buddy" >
+            <cstring>w_remarks</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="1" colspan="3" >
+          <widget class="QLineEdit" name="w_remarks" />
+         </item>
+         <item row="7" column="1" >
+          <spacer>
+           <property name="orientation" >
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" >
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" >
+     <item>
+      <widget class="QCheckBox" name="w_toggle_picture" >
+       <property name="icon" >
+        <iconset resource="../brickstore.qrc" >:/images/sidebar/info.png</iconset>
+       </property>
+       <property name="checked" >
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="w_toggle_price_guide" >
+       <property name="icon" >
+        <iconset resource="../brickstore.qrc" >:/images/sidebar/priceguide.png</iconset>
+       </property>
+       <property name="checked" >
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="w_toggle_appears_in" >
+       <property name="icon" >
+        <iconset resource="../brickstore.qrc" >:/images/sidebar/appearsin.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" >
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="w_merge" >
+       <property name="text" >
+        <string>&amp;Consolidate with &amp;list</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType" >
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" >
+        <size>
+         <width>11</width>
+         <height>10</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QDialogButtonBox" name="w_buttons" >
+       <property name="sizePolicy" >
+        <sizepolicy vsizetype="Fixed" hsizetype="MinimumExpanding" >
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="standardButtons" >
+        <set>QDialogButtonBox::Close</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CSelectItem</class>
+   <extends>QWidget</extends>
+   <header>cselectitem.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>CPriceGuideWidget</class>
+   <extends>QFrame</extends>
+   <header>cpriceguidewidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>CPictureWidget</class>
+   <extends>QFrame</extends>
+   <header>cpicturewidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>CAppearsInWidget</class>
+   <extends>QWidget</extends>
+   <header>cappearsinwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>CSelectColor</class>
+   <extends>QWidget</extends>
+   <header>cselectcolor.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="../brickstore.qrc" />
+ </resources>
+ <connections>
+  <connection>
+   <sender>w_buttons</sender>
+   <signal>rejected()</signal>
+   <receiver>AddItem</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>682</x>
+     <y>757</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

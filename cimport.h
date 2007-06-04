@@ -14,11 +14,12 @@
 #ifndef __CIMPORT_H__
 #define __CIMPORT_H__
 
-#include <qfile.h>
-#include <qbuffer.h>
-#include <qdatetime.h>
-#include <qtextstream.h>
-#include <qregexp.h>
+#include <QDateTime>
+#include <QDate>
+#include <QFile>
+#include <QBuffer>
+#include <QTextStream>
+#include <QRegExp>
 
 #include "lzmadec.h"
 
@@ -77,9 +78,9 @@ private slots:
 		bool ok = false;
 
 		if ( data && data-> size ( )) {
-			QBuffer store_buffer ( *data );
+			QBuffer store_buffer ( data );
 
-			if ( store_buffer. open ( IO_ReadOnly )) {
+			if ( store_buffer. open ( QIODevice::ReadOnly )) {
 				BrickLink::InvItemList *items = 0;
 
 				QString emsg;
@@ -101,7 +102,7 @@ private slots:
 						m_progress-> setErrorText ( tr( "Could not parse the XML data for the store inventory." ));
 				}
 				else {
-					if (( QCString ( data-> data ( ), 7 ) == "<HTML>" ) && ( QCString ( data-> data ( ), data-> size ( )). find ( "Invalid password", 0, false ) != -1 ))
+					if ( data-> startsWith ( "<HTML>" ) && data-> contains ( "Invalid password" ))
 						m_progress-> setErrorText ( tr( "Either your username or password are incorrect." ));
 					else
 						m_progress-> setErrorText ( tr( "Could not parse the XML data for the store inventory:<br /><i>Line %1, column %2: %3</i>" ). arg ( eline ). arg ( ecol ). arg ( emsg ));
@@ -177,7 +178,7 @@ public:
 		m_progress-> layout ( );
 	}
 
-	const QValueList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > &orders ( ) const 
+	const QList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > &orders ( ) const 
 	{
 		return m_orders;
 	}
@@ -193,9 +194,9 @@ private slots:
 
 
 		if ( data && data-> size ( )) {
-			QBuffer order_buffer ( *data );
+			QBuffer order_buffer ( data );
 
-			if ( order_buffer. open ( IO_ReadOnly )) {
+			if ( order_buffer. open ( QIODevice::ReadOnly )) {
 				QString emsg;
 				int eline = 0, ecol = 0;
 				QDomDocument doc;
@@ -229,9 +230,9 @@ private slots:
 									else if ( tag == "ORDERID" )
 										order-> setId ( val );
 									else if ( tag == "ORDERDATE" )
-										order-> setDate ( ymd2date ( val ));
+										order-> setDate ( QDateTime( ymd2date ( val )));
 									else if ( tag == "ORDERSTATUSCHANGED" )
-										order-> setStatusChange ( ymd2date ( val ));
+										order-> setStatusChange ( QDateTime( ymd2date ( val )));
 									else if ( tag == "ORDERSHIPPING" )
 										order-> setShipping ( money_t::fromCString ( val ));
 									else if ( tag == "ORDERINSURANCE" )
@@ -285,7 +286,7 @@ private:
 	static QDate ymd2date ( const QString &ymd )
 	{
 		QDate d;
-		QStringList sl = QStringList::split ( QChar ( '/' ), ymd, false );
+		QStringList sl = ymd. split ( QChar ( '/' ));
 		d. setYMD ( sl [0]. toInt ( ), sl [1]. toInt ( ), sl [2]. toInt ( ));
 		return d;
 	}
@@ -296,10 +297,10 @@ private:
 	QDate                  m_order_from;
 	QDate                  m_order_to;
 	BrickLink::Order::Type m_order_type;
-	QCString               m_url;
+	QString                m_url;
 	CKeyValueList          m_query;
 	bool                   m_retry_placed;
-	QValueList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > m_orders;
+	QList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > m_orders;
 };
 
 
@@ -340,9 +341,9 @@ private slots:
 		bool ok = false;
 
 		if ( data && data-> size ( )) {
-			QBuffer cart_buffer ( *data );
+			QBuffer cart_buffer ( data );
 
-			if ( cart_buffer. open ( IO_ReadOnly )) {
+			if ( cart_buffer. open ( QIODevice::ReadOnly )) {
 				QTextStream ts ( &cart_buffer );
 				QString line;
 				QString items_line;
@@ -364,7 +365,7 @@ private slots:
 						break;					
 				}
 
-				QStringList strlist = QStringList::split ( sep, items_line, false );
+				QStringList strlist = line. split ( sep );
 
 				foreach ( const QString &str, strlist ) {
 					BrickLink::InvItem *ii = 0;
@@ -375,38 +376,38 @@ private slots:
 					QRegExp rx_names ( "<TD><FONT FACE=\"MS Sans Serif,Geneva\" SIZE=\"1\">(.+)</FONT></TD><TD VALIGN=\"TOP\" NOWRAP>" );
 					QString str_cond ( "<B>New</B>" );
 
-					rx_type. search ( str );
-					rx_ids. search ( str );
-					rx_names. search ( str );
+					rx_type. indexIn ( str );
+					rx_ids. indexIn ( str );
+					rx_names. indexIn ( str );
 
 					const BrickLink::Item *item = 0;
 					const BrickLink::Color *col = 0;
 
 					if ( rx_type. cap ( 1 ). length ( ) == 1 ) {
-						int slash = rx_ids. cap ( 2 ). find ( '/' );
+						int slash = rx_ids. cap ( 2 ). indexOf ( '/' );
 						
 						if ( slash >= 0 ) { // with color
-							item = BrickLink::inst ( )-> item ( rx_type. cap ( 1 ) [0]. latin1 ( ), rx_ids. cap ( 2 ). mid ( slash + 1 ). latin1 ( ));
+							item = BrickLink::inst ( )-> item ( rx_type. cap ( 1 ) [0]. toLatin1 ( ), rx_ids. cap ( 2 ). mid ( slash + 1 ). toLatin1 ( ));
 							col = BrickLink::inst ( )-> color ( rx_ids. cap ( 2 ). left ( slash ). toInt ( ));
 						}
 						else {
-							item = BrickLink::inst ( )-> item ( rx_type. cap ( 1 ) [0]. latin1 ( ), rx_ids. cap ( 2 ). latin1 ( ));
+							item = BrickLink::inst ( )-> item ( rx_type. cap ( 1 ) [0]. toLatin1 ( ), rx_ids. cap ( 2 ). toLatin1 ( ). constData ( ));
 							col = BrickLink::inst ( )-> color ( 0 );
 						}
 					}
 
-					QString color_and_item = rx_names. cap ( 1 ). stripWhiteSpace ( );
+					QString color_and_item = rx_names. cap ( 1 ). trimmed ( );
 
 					if ( !col || !color_and_item. startsWith ( col-> name ( ))) {
-						uint longest_match = 0;
+						int longest_match = 0;
 
-						for ( QIntDictIterator<BrickLink::Color> it ( BrickLink::inst ( )-> colors ( )); it. current ( ); ++it )  {
-							QString n ( it. current ( )-> name ( ));
+						foreach ( const BrickLink::Color *blcolor, BrickLink::inst ( )-> colors ( )) {
+							QString n ( blcolor-> name ( ));
 
 							if (( n. length ( ) > longest_match ) &&
 								( color_and_item. startsWith ( n ))) {
 								longest_match = n. length ( );
-								col = it. current ( );
+								col = blcolor;
 							}
 						}
 
@@ -415,15 +416,15 @@ private slots:
 					}
 
 					if ( !item /*|| !color_and_item. endsWith ( item-> name ( ))*/ ) {
-						uint longest_match = 0;
+						int longest_match = 0;
 
-						const QPtrVector<BrickLink::Item> &all_items = BrickLink::inst ( )-> items ( );
-						for ( uint i = 0; i < all_items. count ( ); i++ ) {
+						const QVector<const BrickLink::Item *> &all_items = BrickLink::inst ( )-> items ( );
+						for ( int i = 0; i < all_items. count ( ); i++ ) {
 							const BrickLink::Item *it = all_items [i];
 							QString n ( it-> name ( ));
 
 							if (( n. length ( ) > longest_match ) &&
-								( color_and_item. find ( n )) >= 0 ) {
+								( color_and_item. indexOf ( n )) >= 0 ) {
 								longest_match = n. length ( );
 								item = it;
 							}
@@ -434,15 +435,15 @@ private slots:
 					}
 
 					if ( item && col ) {
-						rx_qty_price. search ( str );
+						rx_qty_price. indexIn ( str );
 
 						int qty = rx_qty_price. cap ( 1 ). toInt ( );
 						money_t price = QLocale::c ( ). toDouble ( rx_qty_price. cap ( 3 ));
 
-						BrickLink::Condition cond = ( str. find ( str_cond ) >= 0 ? BrickLink::New : BrickLink::Used );
+						BrickLink::Condition cond = ( str. indexOf ( str_cond ) >= 0 ? BrickLink::New : BrickLink::Used );
 
 						QString comment;
-						int comment_pos = color_and_item. find ( item-> name ( ));
+						int comment_pos = color_and_item. indexOf ( item-> name ( ));
 
 						if ( comment_pos >= 0 )
 							comment = color_and_item. mid ( comment_pos + QString ( item-> name ( )). length ( ) + 1 );
@@ -498,8 +499,8 @@ public:
 		pd-> setHeaderText ( tr( "Importing Peeron Inventory" ));
 		pd-> setMessageText ( tr( "Download: %1/%2 KB" ));
 
-		QCString url;
-		url. sprintf ( "http://www.peeron.com/inv/sets/%s", peeronid. latin1 ( ));
+		QString url;
+		url. sprintf ( "http://www.peeron.com/inv/sets/%s", peeronid. toLatin1 ( ). constData ( ));
 
 		pd-> get ( url );
 
@@ -519,9 +520,9 @@ private slots:
 		bool ok = false;
 
 		if ( data && data-> size ( )) {
-			QBuffer peeron_buffer ( *data );
+			QBuffer peeron_buffer ( data );
 
-			if ( peeron_buffer. open ( IO_ReadOnly )) {
+			if ( peeron_buffer. open ( QIODevice::ReadOnly )) {
 				BrickLink::InvItemList *items = fromPeeron ( &peeron_buffer );
 
 				if ( items ) {
@@ -554,10 +555,10 @@ private:
 
 		QRegExp itempattern ( "<a href=[^>]+>(.+)</a>" );
 
-		while (( line = in. readLine ( ))) {
+		while (!( line = in. readLine ( )). isNull ( )) {
 			if ( next_is_item && line. startsWith ( "<td>" ) && line. endsWith ( "</td>" )) {
 				QString tmp = line. mid ( 4, line. length ( ) - 9 );
-				QStringList sl = QStringList::split ( "</td><td>", tmp, true );
+				QStringList sl = tmp. split ( "</td><td>", QString::KeepEmptyParts );
 
 				bool line_ok = false;
 
@@ -572,16 +573,16 @@ private:
 						itemid = itempattern. cap ( 1 );
 
 					colorname = sl [2];
-					const BrickLink::Color *color = BrickLink::inst ( )-> colorFromPeeronName ( colorname );
+					const BrickLink::Color *color = BrickLink::inst ( )-> colorFromPeeronName ( colorname. toLatin1 ( ). constData ( ));
 					colorid = color ? int( color-> id ( )) : -1;
 
 					itemname = sl [3];
 
-					int pos = itemname. find ( " <" );
+					int pos = itemname. indexOf ( " <" );
 					if ( pos > 0 )
 						itemname. truncate ( pos );
 
-					if ( itemid. find ( QRegExp ( "-\\d+$" )) > 0 )
+					if ( itemid. indexOf ( QRegExp ( "-\\d+$" )) > 0 )
 						itemtype = 'S';
 
 					if ( qty > 0 ) {
@@ -603,7 +604,7 @@ private:
 					}
 				}
 				if ( !line_ok )
-					qWarning ( "Failed to parse item line: %s", line. latin1 ( ));
+					qWarning ( "Failed to parse item line: %s", qPrintable ( line ));
 
 				next_is_item = false;
 			}

@@ -13,8 +13,10 @@
 */
 #include <stdlib.h>
 
-#include <qfile.h>
-#include <qfileinfo.h>
+#include <QFile>
+#include <QFileInfo>
+#include <QTextStream>
+#include <QtDebug>
 
 #include "cutility.h"
 #include "bricklink.h"
@@ -46,7 +48,7 @@ public:
 	~stopwatch ( ) 
 	{
 		uint msec = uint( clock ( ) - m_start ) * 1000 / CLOCKS_PER_SEC;
-		qWarning ( "%s: %d'%d [sec]", m_label, msec / 1000, msec % 1000 );
+		qWarning ( ). nospace ( ) << m_label << ": " << msec / 1000 << "'" << msec % 1000 << " [sec]";
 	}
 private:
 	const char *m_label;
@@ -64,9 +66,9 @@ const BrickLink::Category *BrickLink::TextImport::findCategoryByName ( const cha
 	if ( len < 0 )
 		len = strlen ( name );
 
-	for ( QIntDictIterator<Category> it ( m_categories ); it. current ( ); ++it ) {
-		if ( my_strncmp ( it. current ( )-> name ( ), name, len ))
-			return it. current ( );
+	foreach ( const Category *cat, m_categories ) {
+		if ( my_strncmp ( cat-> name ( ), name, len ))
+			return cat;
 	}
 	return 0;
 }
@@ -90,7 +92,7 @@ const BrickLink::Item *BrickLink::TextImport::findItem ( char tid, const char *i
 void BrickLink::TextImport::appendCategoryToItemType ( const Category *cat, ItemType *itt )
 {
 	bool found = false;
-	Q_UINT32 catcount = 0;
+	quint32 catcount = 0;
 	for ( const BrickLink::Category **catp = itt-> m_categories; catp && *catp; catp++ ) {
 		if ( *catp == cat ) {
 			found = true;
@@ -111,7 +113,7 @@ void BrickLink::TextImport::appendCategoryToItemType ( const Category *cat, Item
     itt-> m_categories = catarr;
 }
 
-template <> BrickLink::Category *BrickLink::TextImport::parse<BrickLink::Category> ( uint count, const char **strs, BrickLink::Category * )
+template <> BrickLink::Category *BrickLink::TextImport::parse<BrickLink::Category> ( uint count, const char **strs )
 {
 	if ( count < 2 )
 		return 0;
@@ -122,7 +124,7 @@ template <> BrickLink::Category *BrickLink::TextImport::parse<BrickLink::Categor
 	return cat;
 }
 
-template <> BrickLink::Color *BrickLink::TextImport::parse<BrickLink::Color> ( uint count, const char **strs, BrickLink::Color * )
+template <> BrickLink::Color *BrickLink::TextImport::parse<BrickLink::Color> ( uint count, const char **strs )
 {
 	if ( count < 2 )
 		return 0;
@@ -139,7 +141,7 @@ template <> BrickLink::Color *BrickLink::TextImport::parse<BrickLink::Color> ( u
 	return col;
 }
 
-template <> BrickLink::ItemType *BrickLink::TextImport::parse<BrickLink::ItemType> ( uint count, const char **strs, BrickLink::ItemType * )
+template <> BrickLink::ItemType *BrickLink::TextImport::parse<BrickLink::ItemType> ( uint count, const char **strs )
 {
 	if ( count < 2 )
 		return 0;
@@ -157,7 +159,7 @@ template <> BrickLink::ItemType *BrickLink::TextImport::parse<BrickLink::ItemTyp
 	return itt;
 }
 
-template <> BrickLink::Item *BrickLink::TextImport::parse<BrickLink::Item> ( uint count, const char **strs, BrickLink::Item * )
+template <> BrickLink::Item *BrickLink::TextImport::parse<BrickLink::Item> ( uint count, const char **strs )
 {
 	if ( count < 4 )
 		return 0;
@@ -202,7 +204,7 @@ template <> BrickLink::Item *BrickLink::TextImport::parse<BrickLink::Item> ( uin
 		if ( cat )
 			catlist [catcount++] = cat;
 		else
-			qWarning ( "Invalid category name: %s", auxcat );
+			qWarning ( ) << "Invalid category name:" << auxcat;
 	}
 
 	item-> m_categories = new const BrickLink::Category * [catcount + 1];
@@ -241,10 +243,6 @@ template <> BrickLink::Item *BrickLink::TextImport::parse<BrickLink::Item> ( uin
 
 BrickLink::TextImport::TextImport ( )
 {
-	m_colors. resize ( 151 );
-	m_categories. resize ( 503 );
-	m_item_types. resize ( 13 );
-
 	m_current_item_type = 0;
 }
 
@@ -262,20 +260,20 @@ bool BrickLink::TextImport::import ( const QString &path )
 	// hack to speed up loading (exactly 36759 items on 22.08.2005)
 	m_items. resize ( 37000 );
 
-	for ( QIntDictIterator<ItemType> it ( m_item_types ); it. current ( ); ++it ) {
-		m_current_item_type = it. current ( );
-		ok &= readDB <> ( path + "items_" + char( it. current ( )-> m_id ) + ".txt", m_items );
+	foreach ( const ItemType *itt, m_item_types ) {
+		m_current_item_type = itt;
+		ok &= readDB <> ( path + "items_" + char( itt-> m_id ) + ".txt", m_items );
 	}
 	m_current_item_type = 0;
 
 	qsort ( m_items. data ( ), m_items. count ( ), sizeof( Item * ), (int (*) ( const void *, const void * )) Item::compare );
 
-	Item **itp = m_items. data ( );
+	Item **itp = const_cast<Item **> ( m_items. data ( ));
 
-	for ( uint i = 0; i < m_items. count ( ); itp++, i++ ) {
+	for ( int i = 0; i < m_items. count ( ); itp++, i++ ) {
 		( *itp )-> m_index = i;
 
-		ItemType *itt = const_cast <ItemType *> (( *itp )-> m_item_type );
+		ItemType *itt = const_cast<ItemType *> (( *itp )-> m_item_type );
 
 		if ( itt ) {
 			for ( const Category **catp = ( *itp )-> m_categories; *catp; catp++ )
@@ -287,32 +285,30 @@ bool BrickLink::TextImport::import ( const QString &path )
 	ok &= readDB <> ( path + "btinvlist.txt", btinvlist_dummy );
 
 	if ( !ok )
-		qWarning ( "Error importing databases!" );
+		qWarning ( ) << "Error importing databases!";
 
 	return ok;
 }
 
-template <typename T> bool BrickLink::TextImport::readDB_processLine ( QIntDict<T> &d, uint tokencount, const char **tokens )
+template <typename T> bool BrickLink::TextImport::readDB_processLine ( QHash<int, const T *> &h, uint tokencount, const char **tokens )
 {
-	T *t = 0;
-	t = parse<T> ( tokencount, (const char **) tokens, t );
+	T *t = parse<T> ( tokencount, (const char **) tokens );
 
 	if ( t ) {
-		d. insert ( t-> id ( ), t );
+		h. insert ( t-> id ( ), t );
 		return true;
 	}
 	else
 		return false;
 }
 
-template <typename T> bool BrickLink::TextImport::readDB_processLine ( QPtrVector<T> &v, uint tokencount, const char **tokens )
+template <typename T> bool BrickLink::TextImport::readDB_processLine ( QVector<const T *> &v, uint tokencount, const char **tokens )
 {
-	T *t = 0;
-	t = parse<T> ( tokencount, (const char **) tokens, t );
+	T *t = parse<T> ( tokencount, (const char **) tokens );
 
 	if ( t ) {
 		if ( v. size ( ) == v. count ( ))
- 			v. resize ( v. size ( ) + QMAX( 40, QMIN( 320, v. size ( ))));
+ 			v. resize ( v. size ( ) + qMax( 40, qMin( 320, v. size ( ))));
 		v. insert ( v. count ( ), t );
 		return true;
 	}
@@ -351,7 +347,7 @@ bool BrickLink::TextImport::readDB_processLine ( btinvlist_dummy & /*dummy*/, ui
 		const_cast <ItemType *> ( itm-> m_item_type )-> m_has_inventories = true;
 	}
 	else
-		qWarning ( "WARNING: parsing btinvlist: item %s [%c] doesn't exist!", strs [1], strs [0][0] );
+		qWarning ( ) << "WARNING: parsing btinvlist: item " << strs [1] << " [" << strs [0][0] << "] doesn't exist!";
 
 	return true;
 }
@@ -362,7 +358,7 @@ template <typename C> bool BrickLink::TextImport::readDB ( const QString &name, 
 	// plain C is way faster than Qt on top of C++
 	// and this routine has to be fast to reduce the startup time
 
-	FILE *f = fopen ( name, "r" );
+	FILE *f = fopen ( name. toLatin1 ( ), "r" );
 	if ( f ) {
 		char line [1000];
 		int lineno = 1;
@@ -399,7 +395,7 @@ template <typename C> bool BrickLink::TextImport::readDB ( const QString &name, 
 			}
 
 			if ( !readDB_processLine ( container, tokencount, (const char **) tokens )) {
-				qWarning ( "ERROR: parse error in file \"%s\", line %d: \"%s\"", name. latin1 ( ), lineno, (const char *) line );
+				qWarning ( ). nospace ( ) << "ERROR: parse error in file \"" << name << "\", line " << lineno << ": \"" << line << "\"";
 				return false;
 			}
 		}
@@ -407,26 +403,26 @@ template <typename C> bool BrickLink::TextImport::readDB ( const QString &name, 
 		fclose ( f );
 		return true;
 	}
-	qWarning ( "ERROR: could not open file \"%s\"", name. latin1 ( ));
+	qWarning ( ). nospace ( ) <<  "ERROR: could not open file \"" << name << "\"";
 	return false;
 }
 
 bool BrickLink::TextImport::readColorGuide ( const QString &name )
 {
 	QFile f ( name );
-	if ( f. open ( IO_ReadOnly )) {
+	if ( f. open ( QIODevice::ReadOnly )) {
 		QTextStream ts ( &f );
-		QString s = ts. read ( );
+		QString s = ts. readAll ( );
 		f. close ( );
 
 		QRegExp rxp ( ">([0-9]+)&nbsp;</TD><TD[ ]+BGCOLOR=\"#?([a-fA-F0-9]{6,6})\">" );
 
 		int pos = 0;
 
-		while (( pos = rxp. search ( s, pos )) != -1 ) {
+		while (( pos = rxp. indexIn ( s, pos )) != -1 ) {
 			int id = rxp. cap ( 1 ). toInt ( );
 
-			Color *colp = m_colors [id];
+			Color *colp = const_cast<Color *> ( m_colors [id] );
 			if ( colp )
 				colp-> m_color = QColor ( "#" + rxp. cap ( 2 ));
 
@@ -441,7 +437,7 @@ bool BrickLink::TextImport::readColorGuide ( const QString &name )
 bool BrickLink::TextImport::readPeeronColors ( const QString &name )
 {
 	QFile f ( name );
-	if ( f. open ( IO_ReadOnly )) {
+	if ( f. open ( QIODevice::ReadOnly )) {
 		QTextStream in ( &f );
 		
 		QString line;
@@ -449,10 +445,10 @@ bool BrickLink::TextImport::readPeeronColors ( const QString &name )
 
 		QRegExp namepattern ( "<a href=[^>]+>(.+)</a>" );
 		
-		while (( line = in. readLine ( ))) {
+		while (( line = in. readLine ( )). isNull ( )) {
 			if ( line. startsWith ( "<td>" ) && line. endsWith ( "</td>" )) {
 				QString tmp = line. mid ( 4, line. length ( ) - 9 );
-				QStringList sl = QStringList::split ( "</td><td>", tmp, true );
+				QStringList sl = tmp. split ( "</td><td>", QString::KeepEmptyParts );
 
 				bool line_ok = false;
 				
@@ -469,10 +465,10 @@ bool BrickLink::TextImport::readPeeronColors ( const QString &name )
 						peeron_name = namepattern. cap ( 1 );
 
 					if ( id != -1 ) {
-						Color *colp = m_colors [id];
+						Color *colp = const_cast<Color *> ( m_colors [id] );
 						if ( colp ) {
 							if ( !peeron_name. isEmpty ( ))
-								colp-> m_peeron_name = strdup ( peeron_name. latin1 ( ));
+								colp-> m_peeron_name = my_strdup ( peeron_name. toLatin1 ( ));
 							colp-> m_ldraw_id = ldraw_id;
 
 							count++;			
@@ -482,7 +478,7 @@ bool BrickLink::TextImport::readPeeronColors ( const QString &name )
 				}
 				
 				if ( !line_ok )
-					qWarning ( "Failed to parse item line: %s", line. latin1 ( ));
+					qWarning ( ) << "Failed to parse item line: " << line;
 			}
 		}
 
@@ -491,11 +487,11 @@ bool BrickLink::TextImport::readPeeronColors ( const QString &name )
 	return false;
 }
 
-bool BrickLink::TextImport::importInventories ( const QString &path, QPtrVector<Item> &invs )
+bool BrickLink::TextImport::importInventories ( const QString &path, QVector<const Item *> &invs )
 {
-	BrickLink::Item **itemp = invs. data ( );
-	for ( uint i = 0; i < invs. count ( ); i++ ) {
-		BrickLink::Item *&item = itemp [i];
+	const Item **itemp = invs. data ( );
+	for ( int i = 0; i < invs. count ( ); i++ ) {
+		const Item *&item = itemp [i];
 
 		if ( !item ) // already yanked
 			continue;
@@ -512,7 +508,7 @@ bool BrickLink::TextImport::importInventories ( const QString &path, QPtrVector<
 	return true;
 }
 
-bool BrickLink::TextImport::readInventory ( const QString &path, Item *item )
+bool BrickLink::TextImport::readInventory ( const QString &path, const Item *item )
 {
 	QString filename = QString ( "%1/%2/%3/inventory.xml" ). arg ( path ). arg ( QChar( item-> itemType ( )-> id ( ))). arg ( item-> id ( ));
 
@@ -523,7 +519,7 @@ bool BrickLink::TextImport::readInventory ( const QString &path, Item *item )
 	bool ok = false;
 
 	QFile f ( filename );
-	if ( f. open ( IO_ReadOnly )) {
+	if ( f. open ( QIODevice::ReadOnly )) {
    		uint invalid_items = 0;
 		InvItemList *items = 0;
 
@@ -542,10 +538,10 @@ bool BrickLink::TextImport::readInventory ( const QString &path, Item *item )
 						if ( !ii-> item ( ) || !ii-> color ( ) || !ii-> quantity ( ))
 							continue;
 
-						BrickLink::Item::AppearsInMapVector &vec = m_appears_in_map [ii-> item ( )][ii-> color ( )];
+						BrickLink::Item::AppearsInColor &vec = m_appears_in_hash [ii-> item ( )][ii-> color ( )];
 						vec. append ( QPair<int, const BrickLink::Item *> ( ii-> quantity ( ), item ));
 					}
-					m_consists_of_map. insert ( item, *items );
+					m_consists_of_hash. insert ( item, *items );
 					ok = true;
 				}
 				delete items;
@@ -562,6 +558,6 @@ void BrickLink::TextImport::exportTo ( BrickLink *bl )
 
 void BrickLink::TextImport::exportInventoriesTo ( BrickLink *bl )
 {
-	bl-> setDatabase_ConsistsOf ( m_consists_of_map );
-	bl-> setDatabase_AppearsIn ( m_appears_in_map );
+	bl-> setDatabase_ConsistsOf ( m_consists_of_hash );
+	bl-> setDatabase_AppearsIn ( m_appears_in_hash );
 }

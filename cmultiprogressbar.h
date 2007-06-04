@@ -14,9 +14,9 @@
 #ifndef __CMULTIPROGRESSBAR_H__
 #define __CMULTIPROGRESSBAR_H__
 
-#include <qwidget.h>
-#include <qintdict.h>
-#include <qpixmap.h>
+#include <QWidget>
+#include <QHash>
+#include <QPixmap>
 
 class QProgressBar;
 class QToolButton;
@@ -76,7 +76,7 @@ private:
 		int     m_total;
 	};
 
-	QIntDict <ItemData> m_items;
+	QHash<int, ItemData *> m_items;
 };
 
 #endif

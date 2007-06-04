@@ -14,30 +14,26 @@
 
 #include <float.h>
 
-#include <qdockwindow.h>
-#include <qlabel.h>
+#include <QDockWidget>
+#include <QMainWindow>
+#include <QEvent>
 
 #include "bricklink.h"
 #include "cconfig.h"
-#include "cresource.h"
 #include "cutility.h"
-#include "curllabel.h"
 #include "cframework.h"
 
 #include "ctaskwidgets.h"
 
 
-CTaskLinksWidget::CTaskLinksWidget ( QWidget *parent, const char *name )
-	: CUrlLabel ( parent, name ), m_doc ( 0 )
+CTaskLinksWidget::CTaskLinksWidget ( QWidget *parent )
+	: QTextBrowser ( parent ), m_doc ( 0 )
 {
-	setFrameStyle ( QFrame::StyledPanel | QFrame::Sunken );
-
 	connect ( CFrameWork::inst ( ), SIGNAL( documentActivated ( CDocument * )), this, SLOT( documentUpdate ( CDocument * )));
 
-	unsetPalette ( );
-	setText ( "<b>ABCDEFGHIJKLM</b><br />1<br />2<br />3<br />4<br /><br /><b>X</b><br />1<br />" );
+	setHtml ( "<b>ABCDEFGHIJKLM</b><br />1<br />2<br />3<br />4<br /><br /><b>X</b><br />1<br />" );
 	setMinimumSize ( sizeHint ( ));
-	setText ( QString ( ));
+	setHtml ( QString ( ));
 }
 
 void CTaskLinksWidget::documentUpdate ( CDocument *doc )
@@ -66,20 +62,20 @@ void CTaskLinksWidget::selectionUpdate ( const CDocument::ItemList &list )
 			str += fmt1. arg( tr( "BrickLink" ));
 			if ( list. front ( )-> lotId ( )) {
 				uint lotid = list. front ( )-> lotId ( );
-				str += fmt2. arg( tr( "My Inventory" )). arg( BrickLink::inst ( )-> url ( BrickLink::URL_StoreItemDetail, &lotid ));
+				str += fmt2. arg( tr( "My Inventory" )). arg( BrickLink::inst ( )-> url ( BrickLink::URL_StoreItemDetail, &lotid ). toString ( ));
 			}
 
-			str += fmt2. arg( tr( "Catalog" )).         arg( BrickLink::inst ( )-> url ( BrickLink::URL_CatalogInfo,    item, color ));
-			str += fmt2. arg( tr( "Price Guide" )).     arg( BrickLink::inst ( )-> url ( BrickLink::URL_PriceGuideInfo, item, color ));
-			str += fmt2. arg( tr( "Lots for Sale" )).   arg( BrickLink::inst ( )-> url ( BrickLink::URL_LotsForSale,    item, color ));
+			str += fmt2. arg( tr( "Catalog" )).         arg( BrickLink::inst ( )-> url ( BrickLink::URL_CatalogInfo,    item, color ). toString ( ));
+			str += fmt2. arg( tr( "Price Guide" )).     arg( BrickLink::inst ( )-> url ( BrickLink::URL_PriceGuideInfo, item, color ). toString ( ));
+			str += fmt2. arg( tr( "Lots for Sale" )).   arg( BrickLink::inst ( )-> url ( BrickLink::URL_LotsForSale,    item, color ). toString ( ));
 
 			str += "<br />";
 
 			str += fmt1. arg( tr( "Peeron" ));
-			str += fmt2. arg( tr( "Information" )). arg( BrickLink::inst ( )-> url ( BrickLink::URL_PeeronInfo, item, color ));
+			str += fmt2. arg( tr( "Information" )). arg( BrickLink::inst ( )-> url ( BrickLink::URL_PeeronInfo, item, color ). toString ( ));
 		}
 	}
-	setText ( str );
+	setHtml ( str );
 }
 
 void CTaskLinksWidget::languageChange ( )
@@ -92,8 +88,8 @@ void CTaskLinksWidget::languageChange ( )
 // ----------------------------------------------------------------------
 // ----------------------------------------------------------------------
 
-CTaskPriceGuideWidget::CTaskPriceGuideWidget ( QWidget *parent, const char *name )
-	: CPriceGuideWidget ( parent, name ), m_doc ( 0 )
+CTaskPriceGuideWidget::CTaskPriceGuideWidget ( QWidget *parent )
+	: CPriceGuideWidget ( parent ), m_doc ( 0 ), m_dock ( 0 )
 {
 	setFrameStyle ( QFrame::StyledPanel | QFrame::Sunken );
 
@@ -133,7 +129,7 @@ void CTaskPriceGuideWidget::setPrice ( money_t p )
 
 bool CTaskPriceGuideWidget::event ( QEvent *e )
 {
-	if ( e-> type ( ) == QEvent::Reparent )
+	if ( e-> type ( ) == QEvent::ParentChange )
 		fixParentDockWindow ( );
 
 	return CPriceGuideWidget::event ( e );
@@ -141,28 +137,45 @@ bool CTaskPriceGuideWidget::event ( QEvent *e )
 
 void CTaskPriceGuideWidget::fixParentDockWindow ( )
 {
-	disconnect ( this, SLOT( setOrientation ( Orientation )));
+	if ( m_dock )
+		m_dock-> removeEventFilter ( this );
+
+	m_dock = 0;
 
 	for ( QObject *p = parent( ); p; p = p-> parent ( )) {
-		if ( p-> inherits ( "QDockWindow" )) {
-			connect ( p, SIGNAL( orientationChanged ( Orientation )), this, SLOT( setOrientation ( Orientation )));
-			setOrientation ( static_cast <QDockWindow *> ( p )-> orientation ( ));
+		if ( qobject_cast<QDockWidget *>( p )) {
+			m_dock = static_cast<QDockWidget *> ( p );
 			break;
 		}
 	}
+
+	if ( m_dock ) {
+		m_dock-> installEventFilter ( this );
+
+		QMainWindow *mw = qobject_cast<QMainWindow *>( m_dock-> parentWidget ( ));
+		bool horz = !mw || ( mw-> dockWidgetArea ( m_dock ) == Qt::LeftDockWidgetArea ) || ( mw-> dockWidgetArea ( m_dock ) == Qt::RightDockWidgetArea );
+
+		setLayout ( horz ? CPriceGuideWidget::Horizontal : CPriceGuideWidget::Vertical );
+	}
 }
 
-void CTaskPriceGuideWidget::setOrientation ( Orientation o )
+bool CTaskPriceGuideWidget::eventFilter ( QObject *o, QEvent *e )
 {
-	setLayout ( o == Qt::Horizontal ? CPriceGuideWidget::Horizontal : CPriceGuideWidget::Vertical );
+	if ( o && ( o == m_dock ) && ( e-> type ( ) == QEvent::ParentChange )) {
+		QMainWindow *mw = qobject_cast<QMainWindow *>( m_dock-> parentWidget ( ));
+		bool horz = !mw || ( mw-> dockWidgetArea ( m_dock ) == Qt::LeftDockWidgetArea ) || ( mw-> dockWidgetArea ( m_dock ) == Qt::RightDockWidgetArea );
+
+		setLayout ( horz ? CPriceGuideWidget::Horizontal : CPriceGuideWidget::Vertical );
+	}
+	return QWidget::eventFilter ( o, e );
 }
 
 // ----------------------------------------------------------------------
 // ----------------------------------------------------------------------
 // ----------------------------------------------------------------------
 
-CTaskInfoWidget::CTaskInfoWidget ( QWidget *parent, const char *name )
-	: QWidgetStack ( parent, name ), m_doc ( 0 )
+CTaskInfoWidget::CTaskInfoWidget ( QWidget *parent )
+	: QStackedWidget ( parent ), m_doc ( 0 )
 {
 	setFrameStyle ( QFrame::StyledPanel | QFrame::Sunken );
 
@@ -196,11 +209,11 @@ void CTaskInfoWidget::selectionUpdate ( const CDocument::ItemList &list )
 {
 	if ( !m_doc || ( list. count ( ) == 0 )) {
 		m_pic-> setPicture ( 0 );
-		raiseWidget ( m_pic );
+		setCurrentWidget ( m_pic );
 	}
 	else if ( list. count ( ) == 1 ) {
 		m_pic-> setPicture ( BrickLink::inst ( )-> picture ( list. front ( )-> item ( ), list. front ( )-> color ( ), true ));
-		raiseWidget ( m_pic );
+		setCurrentWidget ( m_pic );
 	}
 	else {
 		CDocument::Statistics stat = m_doc-> statistics ( list );
@@ -243,7 +256,7 @@ void CTaskInfoWidget::selectionUpdate ( const CDocument::ItemList &list )
 
 		m_pic-> setPicture ( 0 );
 		m_text-> setText ( s );
-		raiseWidget ( m_text );
+		setCurrentWidget ( m_text );
 	}
 }
 
@@ -258,22 +271,13 @@ void CTaskInfoWidget::refresh ( )
 		selectionUpdate ( m_doc-> selection ( ));
 }
 
-void CTaskInfoWidget::paletteChange ( const QPalette &oldpal )
-{
-	QPixmap pix;
-	pix. convertFromImage ( CUtility::shadeImage ( CResource::inst ( )-> pixmap( "bg_infotext" ). convertToImage ( ),
-													palette ( ). active ( ). base ( )));
-
-	m_text-> setBackgroundPixmap ( pix );
-	QWidgetStack::paletteChange ( oldpal );
-}
 
 // ----------------------------------------------------------------------
 // ----------------------------------------------------------------------
 // ----------------------------------------------------------------------
 
-CTaskAppearsInWidget::CTaskAppearsInWidget ( QWidget *parent, const char *name )
-	: CAppearsInWidget ( parent, name ), m_doc ( 0 )
+CTaskAppearsInWidget::CTaskAppearsInWidget ( QWidget *parent )
+	: CAppearsInWidget ( parent ), m_doc ( 0 )
 {
 	connect ( CFrameWork::inst ( ), SIGNAL( documentActivated ( CDocument * )), this, SLOT( documentUpdate ( CDocument * )));
 }

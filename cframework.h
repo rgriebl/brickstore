@@ -14,20 +14,20 @@
 #ifndef __CFRAMEWORK_H__
 #define __CFRAMEWORK_H__
 
-#include <qmainwindow.h>
-#include <qptrlist.h>
-#include <qmap.h>
-#include <qaction.h>
-#include <qstringlist.h>
-#include <qguardedptr.h>
+#include <QMainWindow>
+#include <QMap>
+#include <QAction>
+#include <QStringList>
+#include <QPointer>
 
 #include "cdocument.h"
-#include "clistaction.h"
+//#include "clistaction.h"
 #include "bricklink.h"
 
 
 class CMultiProgressBar;
 class QLabel;
+class QUndoGroup;
 
 class CWindow;
 class CInfoBar;
@@ -39,14 +39,14 @@ class CTaskPriceGuideWidget;
 class CTaskLinksWidget;
 class CTaskAppearsInWidget;
 class CDocument;
-class DlgAddItemImpl;
+class DAddItem;
 
 
 class CFrameWork : public QMainWindow {
 	Q_OBJECT
 
 private:
-	CFrameWork ( QWidget *parent = 0, const char *name = 0, WFlags fl = 0 );
+	CFrameWork ( QWidget *parent = 0, Qt::WindowFlags f = 0 );
 	static CFrameWork *s_inst;
 
 public:
@@ -57,7 +57,7 @@ public:
 
 	bool closeAllWindows ( );
 
-	QPtrList <CWindow> allWindows ( ) const;
+	QList <CWindow *> allWindows ( ) const;
 
 	void updateAllToggleActions ( CWindow *window );
 
@@ -120,15 +120,11 @@ private slots:
 	void registrationUpdate ( );
 
 protected:
-	virtual void dragMoveEvent ( QDragMoveEvent *e );
-	virtual void dragEnterEvent ( QDragEnterEvent *e );
-	virtual void dropEvent ( QDropEvent *e );
+//	virtual void dragMoveEvent ( QDragMoveEvent *e );
+//	virtual void dragEnterEvent ( QDragEnterEvent *e );
+//	virtual void dropEvent ( QDropEvent *e );
 
 	virtual void closeEvent ( QCloseEvent *e );
-	virtual void moveEvent ( QMoveEvent *e );
-	virtual void resizeEvent ( QResizeEvent *e );
-
-	virtual bool eventFilter ( QObject *o, QEvent *e );
 
 private:
 	void setBrickLinkUpdateIntervals ( );
@@ -140,6 +136,7 @@ private:
 	enum { MaxRecentFiles = 9 };
 
 private:
+#if 0
 	class RecentListProvider : public CListAction::Provider {
 	public:
 		RecentListProvider ( CFrameWork *fw );
@@ -161,17 +158,18 @@ private:
 		CFrameWork *m_fw;
 	};
 	friend class WindowListProvider;
-
+#endif
 
 private:
-	QIconSet *iconSet ( const char *name );
+	QIcon *icon ( const char *name );
 
-	QAction *findAction ( const char *name );
+	QAction *findAction ( const QString & );
 	void connectAction ( bool do_connect, const char *name, CWindow *window, const char *slot, bool (CWindow::* is_on_func ) ( ) const = 0 );
 	void connectAllActions ( bool do_connect, CWindow *window );
 	void createActions ( );
-	QPopupMenu *createMenu ( const QStringList & );
-	QToolBar *createToolBar ( const QString &label, const QStringList & );
+	void translateActions ( );
+	QMenu *createMenu ( const QString &, const QStringList & );
+	QToolBar *createToolBar ( const QString &, const QStringList & );
 	void createStatusBar ( );
 	bool createWindow ( CDocument *doc );
 
@@ -192,14 +190,11 @@ private:
 	CTaskPriceGuideWidget *m_task_priceguide;
 	CTaskLinksWidget *m_task_links;
 	CTaskAppearsInWidget *m_task_appears;
-	QPopupMenu *m_contextmenu;
-	QGuardedPtr <DlgAddItemImpl> m_add_dialog;
+	QMenu *m_contextmenu;
+	QPointer <DAddItem> m_add_dialog;
 
 	QStringList m_recent_files;
 
-	QRect m_normal_geometry;
-	QRect m_normal_geometry_adddlg;
-	
 	bool m_running;
 
 	int m_menuid_file;
@@ -208,6 +203,9 @@ private:
 	int m_menuid_extras;
 	int m_menuid_window;
 	int m_menuid_help;
+	
+	
+	QUndoGroup *m_undogroup;
 };
 
 #endif

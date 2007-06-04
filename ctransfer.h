@@ -16,29 +16,28 @@
 
 #include <time.h>
 
-#include <qobject.h>
-#include <qthread.h>
-#include <qptrlist.h>
-#include <qmutex.h>
-#include <qwaitcondition.h>
-#include <qvaluelist.h>
-#include <qpair.h>
-#include <qdatetime.h>
+#include <QObject>
+#include <QThread>
+#include <QList>
+#include <QMutex>
+#include <QWaitCondition>
+#include <QPair>
+#include <QDateTime>
 
 #include <curl/curl.h>
 
 class QFile;
 
 typedef QPair<QString, QString>  CKeyValue;
-typedef QValueList <CKeyValue>   CKeyValueList;
+typedef QList<CKeyValue>         CKeyValueList;
 
-class CTransfer : public QObject, public QThread {
+class CTransfer : public QThread {
 	Q_OBJECT
 public:
 	class Job {
 	public:
-		QCString url ( ) const           { return m_url; }
-		QCString effectiveUrl ( ) const  { return m_effective_url; }
+		QString url ( ) const            { return m_url; }
+		QString effectiveUrl ( ) const   { return m_effective_url; }
 		QString errorString ( ) const    { return failed ( ) ? m_error : QString::null; }
 		bool failed ( ) const            { return m_finished && m_failed; }
 		int responseCode ( ) const       { return m_respcode; }
@@ -57,9 +56,9 @@ public:
 	private:
 		CTransfer *  m_trans;
 
-		QCString     m_url;
-		QCString     m_query;
-		QCString     m_effective_url;
+		QByteArray   m_url;
+		QByteArray   m_query;
+		QByteArray   m_effective_url;
 		QByteArray * m_data;
 		QFile *      m_file;
 		QString      m_error;
@@ -80,9 +79,9 @@ public:
 
 	bool init ( );
 
-	Job *get ( const QCString &url, const CKeyValueList &query, QFile *file = 0, void *userobject = 0, bool high_priority = false );
-	Job *getIfNewer ( const QCString &url, const CKeyValueList &query, const QDateTime &ifnewer, QFile *file = 0, void *userobject = 0, bool high_priority = false );
-	Job *post ( const QCString &url, const CKeyValueList &query, QFile *file = 0, void *userobject = 0, bool high_priority = false );
+	Job *get ( const QString &url, const CKeyValueList &query, QFile *file = 0, void *userobject = 0, bool high_priority = false );
+	Job *getIfNewer ( const QString &url, const CKeyValueList &query, const QDateTime &ifnewer, QFile *file = 0, void *userobject = 0, bool high_priority = false );
+	Job *post ( const QString &url, const CKeyValueList &query, QFile *file = 0, void *userobject = 0, bool high_priority = false );
 
 public slots:
 	void cancelAllJobs ( );
@@ -97,21 +96,15 @@ signals:
 	void done ( );
 
 protected:
-	enum {
-		TransferStartedEvent  = QEvent::User + 0x42,
-		TransferFinishedEvent = QEvent::User + 0x43,
-		TransferProgressEvent = QEvent::User + 0x44
-	};
-
-	virtual void customEvent ( QCustomEvent * );
+	virtual void customEvent ( QEvent * );
 
 private:
 	virtual void run ( );
-	Job *retrieve ( bool get, const QCString &url, const CKeyValueList &query, time_t ifnewer = 0, QFile *file = 0, void *userobject = 0, bool high_priority = false );
+	Job *retrieve ( bool get, const QString &url, const CKeyValueList &query, time_t ifnewer = 0, QFile *file = 0, void *userobject = 0, bool high_priority = false );
 	void cancel ( Job *j );
 	void updateProgress ( int delta );
 
-	static QCString buildQueryString ( const CKeyValueList &kvl );
+	static QByteArray buildQueryString ( const CKeyValueList &kvl );
 	
 	static size_t write_curl ( void *ptr, size_t size, size_t nmemb, void *stream );
 	static int progress_curl ( void *clientp, double dltotal, double dlnow, double ultotal, double ulnow );
@@ -128,12 +121,12 @@ private:
 	bool  m_stop;
 
 	bool     m_use_proxy;
-	QCString m_proxy_name;
+	QString  m_proxy_name;
 	int      m_proxy_port;
 
 	Job *          m_active_job;
-	QPtrList<Job>  m_in_queue;
-	QPtrList<Job>  m_out_queue;
+	QList<Job *>   m_in_queue;
+	QList<Job *>   m_out_queue;
 	QMutex         m_queue_lock;
 	QWaitCondition m_queue_cond;
 

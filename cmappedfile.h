@@ -11,35 +11,43 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __DLGINCDECPRICEIMPL_H__
-#define __DLGINCDECPRICEIMPL_H__
+#ifndef __CMAPPEDFILE_H__
+#define __CMAPPEDFILE_H__
 
-#include "cmoney.h"
-#include "dlgincdecprice.h"
+#include <QGlobalStatic>
+#include <QFile>
+#include <QByteArray>
 
-class QDoubleValidator;
+#if defined( Q_OS_WIN32 )
+#include <windows.h>
+#include <io.h>
+#else
+#include <sys/mman.h>
+#endif
 
-class DlgIncDecPriceImpl : public DlgIncDecPrice {
-	Q_OBJECT
+class QDataStream;
 
+
+class CMappedFile {
 public:
-	DlgIncDecPriceImpl ( QWidget* parent = 0, const char* name = 0, bool modal = FALSE, WFlags fl = 0 );
-	~DlgIncDecPriceImpl ( );
+	CMappedFile ( const QString &filename );
+	~CMappedFile ( );
 
-	money_t fixed ( );
-	double  percent ( );
-	bool    applyToTiers ( );
+	QDataStream *open ( );
+	void close ( );
 
-private slots:
-	void slotIncDec ( int );
-	void slotPercentFixed ( int );
-	void checkValue ( );
+	quint32 size ( ) const;
 
 private:
-	QDoubleValidator *m_pos_percent_validator;
-	QDoubleValidator *m_neg_percent_validator;
-	QDoubleValidator *m_fixed_validator;
+	QFile        m_file;
+	quint32      m_filesize;
+	const char * m_memptr;
+	QByteArray   m_mem;
+	QDataStream *m_ds;
 
+#if defined( Q_OS_WIN32 )
+	HANDLE       m_maphandle;
+#endif
 };
 
 #endif

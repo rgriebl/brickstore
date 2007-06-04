@@ -14,13 +14,13 @@
 #include <stdlib.h>
 #include <locale.h>
 
-#include <qapplication.h>
-#include <qlocale.h>
-#include <qvalidator.h>
-#include <qregexp.h>
-#include <qlineedit.h>
-#include <qevent.h>
-#include <qdatastream.h>
+#include <QApplication>
+#include <QLocale>
+#include <QValidator>
+#include <QRegexp>
+#include <QLineedit>
+#include <QKeyEvent>
+#include <QDatastream>
 
 #if defined( Q_OS_MACX )
 
@@ -91,10 +91,10 @@ public:
 	{
 		bool res = false;
 
-		if ((( e-> type ( ) == QEvent::KeyPress ) || ( e-> type ( ) == QEvent::KeyRelease )) && o-> isA ( "QLineEdit" )) {
+		if ((( e-> type ( ) == QEvent::KeyPress ) || ( e-> type ( ) == QEvent::KeyRelease )) && qobject_cast<QLineEdit *> ( o )) {
 			const QValidator *val = static_cast <QLineEdit *> ( o )-> validator ( );
 
-			if ( val && val-> isA ( "CMoneyValidator" ))
+			if ( val && qobject_cast<const CMoneyValidator *> ( val ))
 				res = static_cast <const CMoneyValidator *> ( val )-> filterInput ( static_cast <QLineEdit *> ( o ), static_cast <QKeyEvent *> ( e ));
 		}
 		return res;
@@ -123,9 +123,9 @@ CMoney::CMoney ( )
 {
 	d = new CMoneyData;
 	
-	d-> m_factor    = CConfig::inst ( )-> readDoubleEntry ( "/General/Money/Factor",    1. );
-	d-> m_localized = CConfig::inst ( )-> readBoolEntry   ( "/General/Money/Localized", false );
-	d-> m_precision = CConfig::inst ( )-> readNumEntry    ( "/General/Money/Precision", 3 );
+	d-> m_factor    = CConfig::inst ( )-> value ( "/General/Money/Factor",    1. ). toDouble ( );
+	d-> m_localized = CConfig::inst ( )-> value ( "/General/Money/Localized", false ). toBool ( );
+	d-> m_precision = CConfig::inst ( )-> value ( "/General/Money/Precision", 3 ). toInt ( );
 
 	QString decpoint;
 	QString csymbol, csymbolint;
@@ -197,7 +197,7 @@ void CMoney::setLocalization ( bool loc )
 {
 	if ( loc != d-> m_localized ) {
 		d-> m_localized = loc;
-		CConfig::inst ( )-> writeEntry ( "/General/Money/Localized", loc );
+		CConfig::inst ( )-> setValue ( "/General/Money/Localized", loc );
 
 		emit monetarySettingsChanged ( );
 	}
@@ -212,7 +212,7 @@ void CMoney::setFactor ( double f )
 {
 	if ( f != d-> m_factor ) {
 		d-> m_factor = f;
-		CConfig::inst ( )-> writeEntry ( "/General/Money/Factor", f );
+		CConfig::inst ( )-> setValue ( "/General/Money/Factor", f );
 
 		emit monetarySettingsChanged ( );
 	}
@@ -227,7 +227,7 @@ void CMoney::setPrecision ( int prec )
 {
 	if ( prec != d-> m_precision ) {
 		d-> m_precision = prec;
-		CConfig::inst ( )-> writeEntry ( "/General/Money/Precision", prec );
+		CConfig::inst ( )-> setValue ( "/General/Money/Precision", prec );
 
 		emit monetarySettingsChanged ( );
 	}
@@ -256,10 +256,10 @@ QString CMoney::toString ( double v, bool with_currency_symbol, int precision ) 
 
 money_t CMoney::toMoney ( const QString &str, bool *ok ) const
 {
-	QString s = str. stripWhiteSpace ( );
+	QString s = str. simplified ( );
 		
 	if ( !s. isEmpty ( ) && s. startsWith ( currencySymbol ( )))
-		s = s. mid ( currencySymbol ( ). length ( )). stripWhiteSpace ( );
+		s = s. mid ( currencySymbol ( ). length ( )). simplified ( );
 
 	if ( d-> m_localized )
 		s. replace ( d-> m_decpoint, QChar( '.' ));
@@ -274,12 +274,12 @@ money_t CMoney::toMoney ( const QString &str, bool *ok ) const
 
 
 
-CMoneyValidator::CMoneyValidator ( QObject *parent, const char *name )
-	: QDoubleValidator ( parent, name )
+CMoneyValidator::CMoneyValidator ( QObject *parent )
+	: QDoubleValidator ( parent )
 { }
 
-CMoneyValidator::CMoneyValidator ( money_t bottom, money_t top, int decimals, QObject *parent, const char *name )
-	: QDoubleValidator ( bottom. toDouble ( ), top. toDouble ( ), decimals, parent, name )
+CMoneyValidator::CMoneyValidator ( money_t bottom, money_t top, int decimals, QObject *parent )
+	: QDoubleValidator ( bottom. toDouble ( ), top. toDouble ( ), decimals, parent )
 { }
 
 QValidator::State CMoneyValidator::validate ( QString &input, int &pos ) const
@@ -298,14 +298,14 @@ QValidator::State CMoneyValidator::validate ( QString &input, int &pos ) const
 
 	QRegExp r ( QString ( " *-?\\d*\\%1?\\d* *" ). arg ( dp ));
 
-	if ( b >= 0 && input. stripWhiteSpace ( ). startsWith ( QString::fromLatin1 ( "-" )))
+	if ( b >= 0 && input. simplified ( ). startsWith ( QString::fromLatin1 ( "-" )))
 		return Invalid;
 	
 	if ( r. exactMatch ( input )) {
 		QString s = input;
 		s. replace ( dp, QChar( '.' ));
 
-		int i = s. find ( '.' );
+		int i = s. indexOf ( '.' );
 		if ( i >= 0 ) {
 			// has decimal point, now count digits after that
 			i++;                                                        
@@ -352,6 +352,6 @@ bool CMoneyValidator::filterInput ( QLineEdit * /*edit*/, QKeyEvent *ke ) const
 	}
 
 	if ( fixed )
-		*ke = QKeyEvent ( ke-> type ( ), ke-> key ( ), ke-> ascii ( ), ke-> state ( ), text, ke-> isAutoRepeat ( ), ke-> count ( ));
+		*ke = QKeyEvent ( ke-> type ( ), ke-> key ( ), ke-> modifiers ( ), text, ke-> isAutoRepeat ( ), ke-> count ( ));
 	return false;
 }

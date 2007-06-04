@@ -11,43 +11,39 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <qlabel.h>
-#include <qpopupmenu.h>
-#include <qlayout.h>
-#include <qapplication.h>
-#include <qaction.h>
-#include <qtooltip.h>
-
-#include "cresource.h"
-#include "cutility.h"
+#include <QLabel>
+#include <QMenu>
+#include <QLayout>
+#include <QApplication>
+#include <QAction>
+#include <QDesktopServices>
+#include <QMouseEvent>
 
 #include "cpicturewidget.h"
+
 
 class CPictureWidgetPrivate {
 public:
 	BrickLink::Picture *m_pic;
 	QLabel *            m_plabel;
 	QLabel *            m_tlabel;
-	QPopupMenu *        m_popup;
 	bool                m_connected;
 };
 
 class CLargePictureWidgetPrivate {
 public:
 	BrickLink::Picture *m_pic;
-	QPopupMenu *        m_popup;
 };
 
-CPictureWidget::CPictureWidget ( QWidget *parent, const char *name, WFlags fl )
-	: QFrame ( parent, name, fl )
+CPictureWidget::CPictureWidget ( QWidget *parent, Qt::WindowFlags f )
+	: QFrame ( parent, f )
 {
 	d = new CPictureWidgetPrivate ( );
 
 	d-> m_pic = 0;
 	d-> m_connected = false;
-	d-> m_popup = 0;
 
-	setBackgroundMode ( Qt::PaletteBase );
+	setBackgroundRole ( QPalette::Base );
 	setSizePolicy ( QSizePolicy::Minimum, QSizePolicy::Minimum );
 
 	int fw = frameWidth ( ) * 2;
@@ -55,27 +51,47 @@ CPictureWidget::CPictureWidget ( QWidget *parent, const char *name, WFlags fl )
 	d-> m_plabel = new QLabel ( this );
 	d-> m_plabel-> setFrameStyle ( QFrame::NoFrame );
 	d-> m_plabel-> setAlignment ( Qt::AlignCenter );
-	d-> m_plabel-> setBackgroundMode ( Qt::PaletteBase );
+	d-> m_plabel-> setBackgroundRole ( QPalette::Base );
 	d-> m_plabel-> setFixedSize ( 80, 80 );
 
 	d-> m_tlabel = new QLabel ( "Ay<br />Ay<br />Ay<br />Ay<br />Ay", this );
-	d-> m_tlabel-> setAlignment ( Qt::AlignCenter | Qt::WordBreak );
-	d-> m_tlabel-> setBackgroundMode ( Qt::PaletteBase );
+	d-> m_tlabel-> setAlignment ( Qt::AlignCenter );
+	d-> m_tlabel-> setBackgroundRole ( QPalette::Base );
 	d-> m_tlabel-> setFixedSize ( 2 * d-> m_plabel-> width ( ), d-> m_tlabel-> sizeHint ( ). height ( ));
-	d-> m_tlabel-> setText ( "" );
+	d-> m_tlabel-> setText ( QString ( ));
 
-	QBoxLayout *lay = new QVBoxLayout ( this, fw + 4, 4 );
+	QBoxLayout *lay = new QVBoxLayout ( this );
+	lay-> setMargin ( fw + 4 );
+	lay-> setSpacing ( 4 );
 	lay-> addWidget ( d-> m_plabel, 0, Qt::AlignCenter /*, AlignTop | AlignHCenter*/ );
 
 	lay-> addWidget ( d-> m_tlabel, 1, Qt::AlignCenter /*, Qt::AlignBottom | Qt::AlignHCenter*/ );
-	
+
+	QAction *a;
+	a = new QAction( QIcon( ":/reload" ), tr( "Update" ), this );
+	connect ( a, SIGNAL( activated ( )), this, SLOT( doUpdate ( )));
+
+	a = new QAction ( this );
+	a->setSeparator ( true );
+
+	a = new QAction ( QIcon( ":/viewmagp" ), tr( "View large image..." ), this );
+	connect ( a, SIGNAL( activated ( )), this, SLOT( viewLargeImage ( )));
+
+	a = new QAction ( this );
+	a->setSeparator ( true );
+
+	a = new QAction ( QIcon( ":/edit_bl_catalog" ), tr( "Show BrickLink Catalog Info..." ), this );
+	connect ( a, SIGNAL( activated ( )), this, SLOT( showBLCatalogInfo ( )));
+	a = new QAction ( QIcon( ":/edit_bl_priceguide" ), tr( "Show BrickLink Price Guide Info..." ), this );
+	connect ( a, SIGNAL( activated ( )), this, SLOT( showBLPriceGuideInfo ( )));
+	a = new QAction ( QIcon( ":/edit_bl_lotsforsale" ), tr( "Show Lots for Sale on BrickLink..." ), this );
+	connect ( a, SIGNAL( activated ( )), this, SLOT( showBLLotsForSale ( )));
+
 	redraw ( );
 }
 
 void CPictureWidget::languageChange ( )
 {
-	delete d-> m_popup;
-	d-> m_popup = 0;
 }
 
 CPictureWidget::~CPictureWidget ( )
@@ -89,25 +105,6 @@ CPictureWidget::~CPictureWidget ( )
 void CPictureWidget::mouseDoubleClickEvent ( QMouseEvent * )
 {
 	viewLargeImage ( );
-}
-
-void CPictureWidget::contextMenuEvent ( QContextMenuEvent *e )
-{
-	if ( d-> m_pic ) {
-		if ( !d-> m_popup ) {
-			d-> m_popup = new QPopupMenu ( this );
-			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "reload" ), tr( "Update" ), this, SLOT( doUpdate ( )));
-			d-> m_popup-> insertSeparator ( );
-			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "viewmagp" ), tr( "View large image..." ), this, SLOT( viewLargeImage ( )));
-			d-> m_popup-> insertSeparator ( );
-			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "edit_bl_catalog" ), tr( "Show BrickLink Catalog Info..." ), this, SLOT( showBLCatalogInfo ( )));
-			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "edit_bl_priceguide" ), tr( "Show BrickLink Price Guide Info..." ), this, SLOT( showBLPriceGuideInfo ( )));
-			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "edit_bl_lotsforsale" ), tr( "Show Lots for Sale on BrickLink..." ), this, SLOT( showBLLotsForSale ( )));
-		}
-		d-> m_popup-> popup ( e-> globalPos ( ));
-	}
-
-	e-> accept ( );
 }
 
 void CPictureWidget::doUpdate ( )
@@ -126,10 +123,10 @@ void CPictureWidget::viewLargeImage ( )
 	BrickLink::Picture *lpic = BrickLink::inst ( )-> largePicture ( d-> m_pic-> item ( ), true );
 
 	if ( lpic ) {
-		CLargePictureWidget *l = new CLargePictureWidget ( lpic, qApp-> mainWidget ( ));
+		CLargePictureWidget *l = new CLargePictureWidget ( lpic, this );
 		l-> show ( );
 		l-> raise ( );
-		l-> setActiveWindow ( );
+		l-> activateWindow ( );
 		l-> setFocus ( );
 	}
 }
@@ -137,19 +134,19 @@ void CPictureWidget::viewLargeImage ( )
 void CPictureWidget::showBLCatalogInfo ( )
 {
 	if ( d-> m_pic && d-> m_pic-> item ( ))
-		CUtility::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_CatalogInfo, d-> m_pic-> item ( )));
+		QDesktopServices::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_CatalogInfo, d-> m_pic-> item ( )));
 }
 
 void CPictureWidget::showBLPriceGuideInfo ( )
 {
 	if ( d-> m_pic && d-> m_pic-> item ( ) && d-> m_pic-> color ( ))
-		CUtility::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_PriceGuideInfo, d-> m_pic-> item ( ), d-> m_pic-> color ( )));
+		QDesktopServices::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_PriceGuideInfo, d-> m_pic-> item ( ), d-> m_pic-> color ( )));
 }
 
 void CPictureWidget::showBLLotsForSale ( )
 {
 	if ( d-> m_pic && d-> m_pic-> item ( ) && d-> m_pic-> color ( ))
-		CUtility::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_LotsForSale, d-> m_pic-> item ( ), d-> m_pic-> color ( )));
+		QDesktopServices::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_LotsForSale, d-> m_pic-> item ( ), d-> m_pic-> color ( )));
 }
 
 void CPictureWidget::setPicture ( BrickLink::Picture *pic )
@@ -166,10 +163,7 @@ void CPictureWidget::setPicture ( BrickLink::Picture *pic )
 	if ( !d-> m_connected && pic )
 		d-> m_connected = connect ( BrickLink::inst ( ), SIGNAL( pictureUpdated ( BrickLink::Picture * )), this, SLOT( gotUpdate ( BrickLink::Picture * )));
 
-	if ( pic )
-		QToolTip::add ( this, tr( "Double-click to view the large image." ));
-	else
-		QToolTip::remove ( this );
+	setToolTip ( pic ? tr( "Double-click to view the large image." ) : QString ( ));
 
 	redraw ( );
 }
@@ -206,32 +200,44 @@ void CPictureWidget::redraw ( )
 
 
 CLargePictureWidget::CLargePictureWidget ( BrickLink::Picture *lpic, QWidget *parent )
-	: QLabel ( parent, "LargeImage", WType_Dialog | WShowModal | WStyle_Customize | WStyle_Dialog | WStyle_SysMenu | WStyle_Title | WStyle_Tool | WStyle_StaysOnTop | WDestructiveClose )
+	: QLabel ( parent )
 {
 	d = new CLargePictureWidgetPrivate ( );
 
-	setBackgroundMode ( Qt::PaletteBase );
+	setWindowFlags ( Qt::Tool | Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowStaysOnTopHint );
+	setWindowModality ( Qt::ApplicationModal );
+	setAttribute ( Qt::WA_DeleteOnClose );
+
+
+	setBackgroundRole ( QPalette::Base );
 	setFrameStyle ( QFrame::NoFrame );
 	setAlignment ( Qt::AlignCenter );
 //	setScaledContents ( true );
 	setFixedSize ( 640, 480 );
+	setContextMenuPolicy ( Qt::ActionsContextMenu );
 
 	d-> m_pic = lpic;
 	if ( d-> m_pic )
 		d-> m_pic-> addRef ( );
 
-	d-> m_popup = 0;
-
 	connect ( BrickLink::inst ( ), SIGNAL( pictureUpdated ( BrickLink::Picture * )), this, SLOT( gotUpdate ( BrickLink::Picture * )));
 
-	QToolTip::add ( this, tr( "Double-click to close this window." ));
+	QAction *a;
+	a = new QAction( QIcon( ":/reload" ), tr( "Update" ), this );
+	connect ( a, SIGNAL( activated ( )), this, SLOT( doUpdate ( )));
+
+	a = new QAction ( this );
+	a->setSeparator ( true );
+
+	a = new QAction( QIcon( ":/file_close" ), tr( "Close" ), this );
+	connect ( a, SIGNAL( activated ( )), this, SLOT( close ( )));
+
+	setToolTip ( tr( "Double-click to close this window." ));
 	redraw ( );
 }
 
 void CLargePictureWidget::languageChange ( )
 {
-	delete d-> m_popup;
-	d-> m_popup = 0;
 }
 
 CLargePictureWidget::~CLargePictureWidget ( )
@@ -250,7 +256,7 @@ void CLargePictureWidget::gotUpdate ( BrickLink::Picture *pic )
 void CLargePictureWidget::redraw ( )
 {
 	if ( d-> m_pic ) {
-		setCaption ( QString ( d-> m_pic-> item ( )-> id ( )) + " " + d-> m_pic-> item ( )-> name ( ));
+		setWindowTitle ( QString ( d-> m_pic-> item ( )-> id ( )) + " " + d-> m_pic-> item ( )-> name ( ));
 
 		if ( d-> m_pic-> updateStatus ( ) == BrickLink::Updating )
 			setText ( tr( "Please wait ... updating" ));
@@ -273,20 +279,6 @@ void CLargePictureWidget::keyPressEvent ( QKeyEvent *e )
 		e-> accept ( );
 		close ( );
 	}
-}
-
-void CLargePictureWidget::contextMenuEvent ( QContextMenuEvent *e )
-{
-	if ( d-> m_pic ) {
-		if ( !d-> m_popup ) {
-			d-> m_popup = new QPopupMenu ( this );
-			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "reload" ), tr( "Update" ), this, SLOT( doUpdate ( )));
-			d-> m_popup-> insertSeparator ( );
-			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "file_close" ), tr( "Close" ), this, SLOT( close ( )));
-		}
-		d-> m_popup-> popup ( e-> globalPos ( ));
-	}
-	e-> accept ( );
 }
 
 void CLargePictureWidget::doUpdate ( )

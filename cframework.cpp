@@ -13,20 +13,24 @@
 */
 #include <float.h>
 
-#include <qaction.h>
+#include <QUndoGroup>
+#include <QUndoStack>
+#include <QAction>
+#include <QDesktopWidget>
+#include <QCloseEvent>
 #include <qmenubar.h>
 #include <qtoolbar.h>
 #include <qstatusbar.h>
-#include <qwidgetlist.h>
+//#include <qwidgetlist.h>
 #include <qtimer.h>
 #include <qlabel.h>
 #include <qbitmap.h>
 #include <qdir.h>
 #include <qfileinfo.h>
-#include <qobjectlist.h>
+//#include <qobjectlist.h>
 #include <qtooltip.h>
 #include <qcursor.h>
-#include <qaccel.h>
+//#include <qaccel.h>
 
 #include "capplication.h"
 #include "cmessagebox.h"
@@ -34,12 +38,11 @@
 #include "cdocument.h"
 #include "cconfig.h"
 #include "cmoney.h"
-#include "cresource.h"
 #include "cmultiprogressbar.h"
-#include "ciconfactory.h"
+//#include "ciconfactory.h"
 #include "cutility.h"
 #include "cspinner.h"
-#include "cundo.h"
+//#include "cundo.h"
 #include "cworkspace.h"
 #include "ctaskpanemanager.h"
 #include "ctaskwidgets.h"
@@ -47,8 +50,8 @@
 #include "cupdatedatabase.h"
 #include "csplash.h"
 
-#include "dlgadditemimpl.h"
-#include "dlgsettingsimpl.h"
+#include "dadditem.h"
+//#include "dlgsettingsimpl.h"
 
 #include "cframework.h"
 
@@ -63,80 +66,45 @@ enum ProgressItem {
 } // namespace
 
 
-CFrameWork::RecentListProvider::RecentListProvider ( CFrameWork *fw )
-	: CListAction::Provider ( ), m_fw ( fw )
-{ }
-
-CFrameWork::RecentListProvider::~RecentListProvider ( )
-{ }
-
-QStringList CFrameWork::RecentListProvider::list ( int & /*active*/, QValueList <int> & )
-{
-	return m_fw-> m_recent_files;
-}
-
-
-CFrameWork::WindowListProvider::WindowListProvider ( CFrameWork *fw )
-	: CListAction::Provider ( ), m_fw ( fw )
-{ }
-
-CFrameWork::WindowListProvider::~WindowListProvider ( )
-{ }
-
-QStringList CFrameWork::WindowListProvider::list ( int &active, QValueList <int> & )
-{
-	QStringList sl;
-	QWidgetList l = m_fw-> m_mdi-> windowList ( CWorkspace::CreationOrder );
-	QWidget *aw = m_fw-> m_mdi-> activeWindow ( );
-
-	for ( uint i = 0; i < l. count ( ); i++ ) {
-		QWidget *w = l. at ( i );
-
-		sl << w-> caption ( );
-
-		if ( w == aw )
-			active = i;
-	}
-	return sl;
-}
-
-
 CFrameWork *CFrameWork::s_inst = 0;
 
 CFrameWork *CFrameWork::inst ( )
 {
 	if ( !s_inst )
-		(void) new CFrameWork ( 0, "FrameWork", Qt::WDestructiveClose );
+		( new CFrameWork ( ))-> setAttribute ( Qt::WA_DeleteOnClose );
 
 	return s_inst;
 }
 
 
-CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
-	: QMainWindow ( parent, name, fl )
+CFrameWork::CFrameWork ( QWidget *parent, Qt::WindowFlags f )
+	: QMainWindow ( parent, f )
 {
 	s_inst = this;
 
 	m_running = false;
 
-	qApp-> setMainWidget ( this );
+//	qApp-> setMainWidget ( this );
 
 #if defined( Q_WS_X11 )
  	if ( !icon ( ) || icon ( )-> isNull ( )) {
-		QPixmap pix = CResource::inst ( )-> pixmap ( "icon" );
+		QPixmap pix ( ":/icon" );
 		if ( !pix. isNull ( ))
 			setIcon ( pix );
 	}
 #endif
 	
-	setCaption ( cApp-> appName ( ));
-	setUsesBigPixmaps ( true );
+	setWindowTitle ( cApp-> appName ( ));
+	setUnifiedTitleAndToolBarOnMac ( true );
+//	setUsesBigPixmaps ( true );
 
-	(void) new CIconFactory ( );
+//	(void) new CIconFactory ( );
+
+	m_undogroup = new QUndoGroup ( this );
 
 	connect ( cApp, SIGNAL( openDocument ( const QString & )), this, SLOT( openDocument ( const QString & )));
 
-	m_recent_files = CConfig::inst ( )-> readListEntry ( "/Files/Recent" );
+	m_recent_files = CConfig::inst ( )-> value ( "/Files/Recent" ). toStringList ( );
 
 	while ( m_recent_files. count ( ) > MaxRecentFiles )
 		m_recent_files. pop_back ( );
@@ -144,35 +112,35 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 	m_current_window = 0;
 
 	m_mdi = new CWorkspace ( this );
-	connect ( m_mdi, SIGNAL( windowActivated ( QWidget * )), this, SLOT( connectWindow ( QWidget * )));
+	connect ( m_mdi, SIGNAL( currentChanged ( QWidget * )), this, SLOT( connectWindow ( QWidget * )));
 
 	setCentralWidget ( m_mdi );
 
-	m_taskpanes = new CTaskPaneManager ( this, "taskpanemanager" );
-	m_taskpanes-> setMode ( CConfig::inst ( )-> readNumEntry ( "/MainWindow/Infobar/Mode", CTaskPaneManager::Modern ) != CTaskPaneManager::Classic ? CTaskPaneManager::Modern : CTaskPaneManager::Classic );
+	m_taskpanes = new CTaskPaneManager ( this );
+	m_taskpanes-> setMode ( CConfig::inst ( )-> value ( "/MainWindow/Infobar/Mode", CTaskPaneManager::Modern ). toInt ( ) != CTaskPaneManager::Classic ? CTaskPaneManager::Modern : CTaskPaneManager::Classic );
 
-	m_task_info = new CTaskInfoWidget ( 0, "iteminfowidget" );
-	m_taskpanes-> addItem ( m_task_info, CResource::inst ( )-> pixmap ( "sidebar/info" ));
-	m_taskpanes-> setItemVisible ( m_task_info, CConfig::inst ( )-> readBoolEntry ( "/MainWindow/Infobar/InfoVisible", true ));
+	m_task_info = new CTaskInfoWidget ( 0 );
+	m_taskpanes-> addItem ( m_task_info, QIcon( ":/sidebar/info" ));
+	m_taskpanes-> setItemVisible ( m_task_info, CConfig::inst ( )-> value ( "/MainWindow/Infobar/InfoVisible", true ). toBool ( ));
 
-	m_task_priceguide = new CTaskPriceGuideWidget ( 0, "priceguidewidget" );
-	m_taskpanes-> addItem ( m_task_priceguide, CResource::inst ( )-> pixmap ( "sidebar/priceguide" ));
-	m_taskpanes-> setItemVisible ( m_task_priceguide, CConfig::inst ( )-> readBoolEntry ( "/MainWindow/Infobar/PriceguideVisible", true ));
+	m_task_priceguide = new CTaskPriceGuideWidget ( 0 );
+	m_taskpanes-> addItem ( m_task_priceguide, QIcon( ":/sidebar/priceguide" ));
+	m_taskpanes-> setItemVisible ( m_task_priceguide, CConfig::inst ( )-> value ( "/MainWindow/Infobar/PriceguideVisible", true ). toBool ( ));
 
-	m_task_appears = new CTaskAppearsInWidget ( 0, "appearsinwidget" );
-	m_taskpanes-> addItem ( m_task_appears,  CResource::inst ( )-> pixmap ( "sidebar/appearsin" ));
-	m_taskpanes-> setItemVisible ( m_task_appears, CConfig::inst ( )-> readBoolEntry ( "/MainWindow/Infobar/AppearsinVisible", true ));
+	m_task_appears = new CTaskAppearsInWidget ( 0 );
+	m_taskpanes-> addItem ( m_task_appears,  QIcon( ":/sidebar/appearsin" ));
+	m_taskpanes-> setItemVisible ( m_task_appears, CConfig::inst ( )-> value ( "/MainWindow/Infobar/AppearsinVisible", true ). toBool ( ));
 
-	m_task_links = new CTaskLinksWidget ( 0, "linkswidget" );
-	m_taskpanes-> addItem ( m_task_links,  CResource::inst ( )-> pixmap ( "sidebar/links" ));
-	m_taskpanes-> setItemVisible ( m_task_links, CConfig::inst ( )-> readBoolEntry ( "/MainWindow/Infobar/LinksVisible", true ));
+	m_task_links = new CTaskLinksWidget ( 0 );
+	m_taskpanes-> addItem ( m_task_links,  QIcon( ":/sidebar/links" ));
+	m_taskpanes-> setItemVisible ( m_task_links, CConfig::inst ( )-> value ( "/MainWindow/Infobar/LinksVisible", true ). toBool ( ));
 
 	createActions ( );
 
 	QString str;
 	QStringList sl;
 
-	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Menubar/File" );
+	sl = CConfig::inst ( )-> value ( "/MainWindow/Menubar/File" ). toStringList ( );
 	if ( sl. isEmpty ( ))
 		sl << "file_new"
 		   << "file_open"
@@ -190,9 +158,9 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 		   << "-"
 		   << "file_exit";
 
-	m_menuid_file = menuBar ( )-> insertItem ( QString ( ), createMenu ( sl ));
+	menuBar ( )-> addMenu ( createMenu ( "file", sl ));
 
-	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Menubar/Edit" );
+	sl = CConfig::inst ( )-> value ( "/MainWindow/Menubar/Edit" ). toStringList ( );
 	if ( sl. isEmpty ( ))
 		sl << "edit_undo"
 		   << "edit_redo"
@@ -217,9 +185,9 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 		   << "-"
 		   << "edit_bl_info_group";
 
-	m_menuid_edit = menuBar ( )-> insertItem ( QString ( ), createMenu ( sl ));
+	menuBar ( )-> addMenu ( createMenu ( "edit", sl ));
 
-	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Menubar/View" );
+	sl = CConfig::inst ( )-> value ( "/MainWindow/Menubar/View" ). toStringList ( );
 	if ( sl. isEmpty ( ))
 		sl << "view_toolbar"
 		   << "view_infobar"
@@ -233,9 +201,9 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 		   << "-"
 		   << "view_save_default_col"; 
 
-	m_menuid_view = menuBar ( )-> insertItem ( QString ( ), createMenu ( sl ));
+	menuBar ( )-> addMenu ( createMenu ( "view", sl ));
 
-	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Menubar/Extras" );
+	sl = CConfig::inst ( )-> value ( "/MainWindow/Menubar/Extras" ). toStringList ( );
 	if ( sl. isEmpty ( ))
 		sl << "extras_net"
 		   << "-"
@@ -244,12 +212,12 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 		   << "extras_configure";
 
 	// Make sure there is a possibility to open the pref dialog!
-	if ( sl. find ( "extras_configure" ) == sl. end ( ))
+	if ( sl. indexOf ( "extras_configure" ) == -1 )
 		sl << "-" << "extras_configure";
 
-	m_menuid_extras = menuBar ( )-> insertItem ( QString ( ), createMenu ( sl ));
+	menuBar ( )-> addMenu ( createMenu ( "extras", sl ));
 
-	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Menubar/Window" );
+	sl = CConfig::inst ( )-> value ( "/MainWindow/Menubar/Window" ). toStringList ( );
 	if ( sl. isEmpty ( ))
 		sl << "window_mode"
 		   << "-"
@@ -258,9 +226,9 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 		   << "-"
 		   << "window_list";
 
-	m_menuid_window = menuBar ( )-> insertItem ( QString ( ), createMenu ( sl ));
+	menuBar ( )-> addMenu ( createMenu ( "window", sl ));
 
-	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Menubar/Help" );
+	sl = CConfig::inst ( )-> value ( "/MainWindow/Menubar/Help" ). toStringList ( );
 	if ( sl. isEmpty ( ))
 		sl << "help_updates"
 		   << "-"
@@ -268,9 +236,9 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 		   << "-"
 		   << "help_about";
 
-	m_menuid_help = menuBar ( )-> insertItem ( QString ( ), createMenu ( sl ));
+	menuBar ( )-> addMenu ( createMenu ( "help", sl ));
 
-	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/ContextMenu/Item" );
+	sl = CConfig::inst ( )-> value ( "/MainWindow/ContextMenu/Item" ). toStringList ( );
 	if ( sl. isEmpty ( ))
 		sl << "edit_cut"
 		   << "edit_copy"
@@ -286,9 +254,9 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 		   << "-"
 		   << "edit_bl_info_group";
 
-	m_contextmenu = createMenu ( sl );
+	m_contextmenu = createMenu ( "context", sl );
 
-	sl = CConfig::inst ( )-> readListEntry ( "/MainWindow/Toolbar/Buttons" );
+	sl = CConfig::inst ( )-> value ( "/MainWindow/Toolbar/Buttons" ). toStringList ( );
 	if ( sl. isEmpty ( ))
 		sl << "file_new"
 		   << "file_open"
@@ -318,53 +286,34 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 		   << "-"             // << "edit_bl_info_group" << "-"
 		   << "extras_net";   // << "-" << "help_whatsthis";
 
-	m_toolbar = createToolBar ( QString ( ), sl );
-	connect ( m_toolbar, SIGNAL( visibilityChanged ( bool )), findAction ( "view_toolbar" ), SLOT( setOn ( bool )));
+	m_toolbar = createToolBar ( "toolbar", sl );
+	connect ( m_toolbar, SIGNAL( visibilityChanged ( bool )), findAction ( "view_toolbar" ), SLOT( setChecked ( bool )));
 
 	createStatusBar ( );
-	findAction ( "view_statusbar" )-> setOn ( CConfig::inst ( )-> readBoolEntry ( "/MainWindow/Statusbar/Visible", true ));
+	findAction ( "view_statusbar" )-> setChecked ( CConfig::inst ( )-> value ( "/MainWindow/Statusbar/Visible", true ). toBool ( ));
 
 	languageChange ( );
 
-	str = CConfig::inst ( )-> readEntry ( "/MainWindow/Layout/DockWindows" );
-	if ( str. isEmpty ( )) {
-		findAction ( "view_toolbar" )-> setOn ( true );
-	}
-	else {
-		QTextStream ts ( &str, IO_ReadOnly ); 
-		ts >> *this; 
-	}
-
-	QRect r ( CConfig::inst ( )-> readNumEntry ( "/MainWindow/Layout/Left",   -1 ),
-	          CConfig::inst ( )-> readNumEntry ( "/MainWindow/Layout/Top",    -1 ),
-	          CConfig::inst ( )-> readNumEntry ( "/MainWindow/Layout/Width",  -1 ),
-	          CConfig::inst ( )-> readNumEntry ( "/MainWindow/Layout/Height", -1 ));
-
-	int wstate = CConfig::inst ( )-> readNumEntry ( "/MainWindow/Layout/State", WindowNoState );
-
-	// make sure at least SOME part of the window ends up on the screen
-	if ( !r. isValid ( ) || r. isEmpty ( ) || ( r & qApp-> desktop ( )-> rect ( )). isEmpty ( )) {
+	QByteArray ba;
+	
+	ba = CConfig::inst ( )-> value ( "/MainWindow/Layout/Geometry" ). toByteArray ( );
+	if ( ba. isEmpty ( ) || !restoreGeometry ( ba )) {
 		float dw = qApp-> desktop ( )-> width ( ) / 10.f;
 		float dh = qApp-> desktop ( )-> height ( ) / 10.f;
 
-		r = QRect ( int( dw ), int( dh ), int ( 8 * dw ), int( 8 * dh )); 
-		wstate = WindowMaximized;
+		setGeometry ( int( dw ), int( dh ), int ( 8 * dw ), int( 8 * dh )); 
+		setWindowState ( Qt::WindowMaximized );
 	}
+	findAction ( "view_fullscreen" )-> setChecked ( windowState ( ) & Qt::WindowFullScreen );
 
-	resize ( r. size ( ));  // X11 compat. mode -- KDE 3.x doesn't seem to like this though...
-	move ( r. topLeft ( ));
-	//setGeometry ( r );  // simple code (which shouldn't work on X11, but does on KDE 3.x...)
+	ba = CConfig::inst ( )-> value ( "/MainWindow/Layout/DockWindows" ). toByteArray ( );
+	if ( ba. isEmpty ( ) || !restoreState ( ba ))
+		findAction ( "view_toolbar" )-> setChecked ( true );
 
-	m_normal_geometry = QRect ( pos ( ), size ( ));
-
-	setWindowState ( wstate & ( /*WindowMinimized |*/ WindowMaximized | WindowFullScreen ));
-	findAction ( "view_fullscreen" )-> setOn ( wstate & WindowFullScreen );
-
-	switch ( CConfig::inst ( )-> readNumEntry ( "/MainWindow/Layout/WindowMode", 1 )) {
-		case  0: findAction ( "window_mode_mdi" )-> setOn ( true ); break;
-		case  1: findAction ( "window_mode_tab_above" )-> setOn ( true ); break;
-		case  2:
-		default: findAction ( "window_mode_tab_below" )-> setOn ( true ); break;
+	switch ( CConfig::inst ( )-> value ( "/MainWindow/Layout/WindowMode", 1 ). toInt ( )) {
+		default: 
+		case  1: findAction ( "window_mode_tab_above" )-> setChecked ( true ); break;
+		case  2: findAction ( "window_mode_tab_below" )-> setChecked ( true ); break;
 	}
 
 	BrickLink *bl = BrickLink::inst ( );
@@ -377,11 +326,11 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 	connect ( CConfig::inst ( ), SIGNAL( simpleModeChanged ( bool )), this, SLOT( setSimpleMode ( bool )));
 	connect ( CConfig::inst ( ), SIGNAL( registrationChanged ( CConfig::Registration )), this, SLOT( registrationUpdate ( )));
 
-	findAction ( "view_show_input_errors" )-> setOn ( CConfig::inst ( )-> showInputErrors ( ));
+	findAction ( "view_show_input_errors" )-> setChecked ( CConfig::inst ( )-> showInputErrors ( ));
 
 	registrationUpdate ( );
 
-	findAction ( CConfig::inst ( )-> onlineStatus ( ) ? "extras_net_online" : "extras_net_offline" )-> setOn ( true );
+	findAction ( CConfig::inst ( )-> onlineStatus ( ) ? "extras_net_online" : "extras_net_offline" )-> setChecked ( true );
 	 
 	bl-> setOnlineStatus ( CConfig::inst ( )-> onlineStatus ( ));
 	bl-> setHttpProxy ( CConfig::inst ( )-> useProxy ( ), CConfig::inst ( )-> proxyName ( ), CConfig::inst ( )-> proxyPort ( ));
@@ -395,7 +344,7 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 	connect ( bl, SIGNAL( pictureProgress ( int, int )),    this, SLOT( gotPictureProgress ( int, int )));
 
 	connect ( m_progress, SIGNAL( statusChange ( bool )), m_spinner, SLOT( setActive ( bool )));
-	connect ( CUndoManager::inst ( ), SIGNAL( cleanChanged ( bool )), this, SLOT( modificationUpdate ( )));
+	connect ( m_undogroup, SIGNAL( cleanChanged ( bool )), this, SLOT( modificationUpdate ( )));
 
 	CSplash::inst ( )-> message ( qApp-> translate ( "CSplash", "Loading Database..." ));
 
@@ -422,7 +371,7 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, WFlags fl )
 
 void CFrameWork::languageChange ( )
 {
-	m_toolbar-> setLabel ( tr( "Toolbar" ));
+	m_toolbar-> setWindowTitle( tr( "Toolbar" ));
 	m_progress-> setItemLabel ( PGI_PriceGuide, tr( "Price Guide updates" ));
 	m_progress-> setItemLabel ( PGI_Picture,    tr( "Image updates" ));
 
@@ -431,16 +380,20 @@ void CFrameWork::languageChange ( )
 	m_taskpanes-> setItemText ( m_task_appears,    tr( "Appears In Sets" ));
 	m_taskpanes-> setItemText ( m_task_links,      tr( "Links" ));
 
-	menuBar ( )-> changeItem ( m_menuid_file,   tr( "&File" ));
-	menuBar ( )-> changeItem ( m_menuid_edit,   tr( "&Edit" ));
-	menuBar ( )-> changeItem ( m_menuid_view,   tr( "&View" ));
-	menuBar ( )-> changeItem ( m_menuid_extras, tr( "E&xtras" ));
-	menuBar ( )-> changeItem ( m_menuid_window, tr( "&Windows" ));
-	menuBar ( )-> changeItem ( m_menuid_help,   tr( "&Help" ));
+	translateActions ( );
 
+	statisticsUpdate ( );
+}
+
+
+void CFrameWork::translateActions ( )
+{
 	struct {
-		const char *action; QString text; QString accel;
+		const char *m_name;
+		QString     m_text;
+		QString     m_shortcut;
 	} *atptr, actiontable [] = {
+		{ "file",                           tr( "&File" ),                              0 },
 		{ "file_new",                       tr( "New", "File|New" ),                    tr( "Ctrl+N", "File|New" ) },
 		{ "file_open",                      tr( "Open..." ),                            tr( "Ctrl+O", "File|Open" ) },
 		{ "file_open_recent",               tr( "Open Recent" ),                        0 },
@@ -465,6 +418,7 @@ void CFrameWork::languageChange ( )
 		{ "file_export_briktrak",           tr( "BrikTrak Inventory..." ),              0 },
 		{ "file_close",                     tr( "Close" ),                              tr( "Ctrl+W", "File|Close" ) },
 		{ "file_exit",                      tr( "Exit" ),                               tr( "Ctrl+Q", "File|Quit" ) },
+		{ "edit",                           tr( "&Edit" ),                              0 },
 		{ "edit_undo",                      0,                                          tr( "Ctrl+Z", "Edit|Undo" ) },
 		{ "edit_redo",                      0,                                          tr( "Ctrl+Y", "Edit|Redo" ) },
 		{ "edit_cut",                       tr( "Cut" ),                                tr( "Ctrl+X", "Edit|Cut" ) },
@@ -479,6 +433,7 @@ void CFrameWork::languageChange ( )
 		{ "edit_copyremarks",               tr( "Copy Remarks from Document..." ),      0 },
 		{ "edit_select_all",                tr( "Select All" ),                         tr( "Ctrl+A", "Edit|SelectAll" ) },
 		{ "edit_select_none",               tr( "Select None" ),                        tr( "Ctrl+Shift+A", "Edit|SelectNone" ) },
+		{ "view",                           tr( "&View" ),                              0 },
 		{ "view_simple_mode",               tr( "Buyer/Collector Mode" ),               0 },
 		{ "view_toolbar",                   tr( "View Toolbar" ),                       0 },
 		{ "view_infobar",                   tr( "View Infobars" ),                      0 },
@@ -487,15 +442,18 @@ void CFrameWork::languageChange ( )
 		{ "view_show_input_errors",         tr( "Show Input Errors" ),                  0 },
 		{ "view_difference_mode",           tr( "Difference Mode" ),                    0 },
 		{ "view_save_default_col",          tr( "Save Column Layout as Default" ),      0 },
+		{ "extras",                         tr( "E&xtras" ),                            0 },
 		{ "extras_update_database",         tr( "Update Database" ),                    0 },
 		{ "extras_configure",               tr( "Configure..." ),                       0 },
 		{ "extras_net_online",              tr( "Online Mode" ),                        0 },
 		{ "extras_net_offline",             tr( "Offline Mode" ),                       0 },
+		{ "window",                         tr( "&Windows" ),                           0 },
 		{ "window_mode_mdi",                tr( "Standard MDI Mode" ),                  0 },
 		{ "window_mode_tab_above",          tr( "Show Tabs at Top" ),                   0 },
 		{ "window_mode_tab_below",          tr( "Show Tabs at Bottom" ),                0 },
 		{ "window_cascade",                 tr( "Cascade" ),                            0 },
 		{ "window_tile",                    tr( "Tile" ),                               0 },
+		{ "help",                           tr( "&Help" ),                              0 },
 		{ "help_whatsthis",                 tr( "What's this?" ),                       tr( "Shift+F1", "Help|WhatsThis" ) },
 		{ "help_about",                     tr( "About..." ),                           0 },
 		{ "help_updates",                   tr( "Check for Program Updates..." ),       0 },
@@ -545,60 +503,40 @@ void CFrameWork::languageChange ( )
 		{ 0, 0, 0 }
 	};
 
-	for ( atptr = actiontable; atptr-> action; atptr++ ) {
-		QAction *a = findAction ( atptr-> action );
+	for ( atptr = actiontable; atptr-> m_name; atptr++ ) {
+		QAction *a = findAction ( atptr-> m_name );
 
 		if ( a ) {
-			if ( !atptr-> text. isNull ( ))
-				a-> setText ( atptr-> text );
-			if ( !atptr-> accel. isNull ( ))
-				a-> setAccel ( QKeySequence ( atptr-> accel ));
+			if ( !atptr-> m_text. isNull ( ))
+				a-> setText ( atptr-> m_text );
+			if ( !atptr-> m_shortcut. isNull ( ))
+				a-> setShortcut ( QKeySequence ( atptr-> m_shortcut ));
 		}
 	}
-
-	statisticsUpdate ( );
 }
 
 CFrameWork::~CFrameWork ( )
 {
-	CConfig::inst ( )-> writeEntry ( "/Files/Recent", m_recent_files );
+	CConfig::inst ( )-> setValue ( "/Files/Recent", m_recent_files );
 
-	CConfig::inst ( )-> writeEntry ( "/MainWindow/Statusbar/Visible",         statusBar ( )-> isVisibleTo ( this ));
-	CConfig::inst ( )-> writeEntry ( "/MainWindow/Infobar/Mode",              m_taskpanes-> mode ( ));
-	CConfig::inst ( )-> writeEntry ( "/MainWindow/Infobar/InfoVisible",       m_taskpanes-> isItemVisible ( m_task_info ));
-	CConfig::inst ( )-> writeEntry ( "/MainWindow/Infobar/PriceguideVisible", m_taskpanes-> isItemVisible ( m_task_priceguide ));
-	CConfig::inst ( )-> writeEntry ( "/MainWindow/Infobar/AppearsinVisible",  m_taskpanes-> isItemVisible ( m_task_appears ));
-	CConfig::inst ( )-> writeEntry ( "/MainWindow/Infobar/LinksVisible",      m_taskpanes-> isItemVisible ( m_task_links ));
+	CConfig::inst ( )-> setValue ( "/MainWindow/Statusbar/Visible",         statusBar ( )-> isVisibleTo ( this ));
+	CConfig::inst ( )-> setValue ( "/MainWindow/Infobar/Mode",              m_taskpanes-> mode ( ));
+	CConfig::inst ( )-> setValue ( "/MainWindow/Infobar/InfoVisible",       m_taskpanes-> isItemVisible ( m_task_info ));
+	CConfig::inst ( )-> setValue ( "/MainWindow/Infobar/PriceguideVisible", m_taskpanes-> isItemVisible ( m_task_priceguide ));
+	CConfig::inst ( )-> setValue ( "/MainWindow/Infobar/AppearsinVisible",  m_taskpanes-> isItemVisible ( m_task_appears ));
+	CConfig::inst ( )-> setValue ( "/MainWindow/Infobar/LinksVisible",      m_taskpanes-> isItemVisible ( m_task_links ));
 
-	QString str;
-	{ QTextStream ts ( &str, IO_WriteOnly ); ts << *this; }
+	CConfig::inst ( )-> setValue ( "/MainWindow/Layout/DockWindows", saveState ( ));
+	CConfig::inst ( )-> setValue ( "/MainWindow/Layout/Geometry", saveGeometry ( ));
+	CConfig::inst ( )-> setValue ( "/MainWindow/Layout/WindowMode", m_mdi-> tabMode ( ));
+		
+	if ( m_add_dialog )
+		CConfig::inst ( )-> setValue ( "/MainWindow/AddItemDialog/Geometry", m_add_dialog-> saveGeometry ( ));
 
-	CConfig::inst ( )-> writeEntry ( "/MainWindow/Layout/DockWindows", str );
-
-	int wstate = windowState ( ) & ( WindowMinimized | WindowMaximized | WindowFullScreen );
-	QRect wgeo = wstate ? m_normal_geometry : QRect ( pos ( ), size ( ));
-
-	CConfig::inst ( )-> writeEntry ( "/MainWindow/Layout/State",  wstate );
-	CConfig::inst ( )-> writeEntry ( "/MainWindow/Layout/Left",   wgeo. x ( ));
-	CConfig::inst ( )-> writeEntry ( "/MainWindow/Layout/Top",    wgeo. y ( ));
-	CConfig::inst ( )-> writeEntry ( "/MainWindow/Layout/Width",  wgeo. width ( ));
-	CConfig::inst ( )-> writeEntry ( "/MainWindow/Layout/Height", wgeo. height ( ));
-
-	CConfig::inst ( )-> writeEntry ( "/MainWindow/Layout/WindowMode", m_mdi-> showTabs ( ) ? ( m_mdi-> spreadSheetTabs ( ) ? 2 : 1 ) : 0 );
-
-	if ( m_add_dialog ) {
-		int wstate = m_add_dialog-> windowState ( ) & WindowMaximized;
-		QRect wgeo = wstate ? m_normal_geometry_adddlg : QRect ( m_add_dialog-> pos ( ), m_add_dialog-> size ( ));
-
-		CConfig::inst ( )-> writeEntry ( "/MainWindow/AddItemDialog/State",  wstate );
-		CConfig::inst ( )-> writeEntry ( "/MainWindow/AddItemDialog/Left",   wgeo. x ( ));
-		CConfig::inst ( )-> writeEntry ( "/MainWindow/AddItemDialog/Top",    wgeo. y ( ));
-		CConfig::inst ( )-> writeEntry ( "/MainWindow/AddItemDialog/Width",  wgeo. width ( ));
-		CConfig::inst ( )-> writeEntry ( "/MainWindow/AddItemDialog/Height", wgeo. height ( ));
-	}
 	s_inst = 0;
 }
 
+#if 0
 void CFrameWork::dragMoveEvent ( QDragMoveEvent *e )
 {
 	e-> acceptAction ( e-> action ( ) == QDropEvent::Copy );
@@ -620,58 +558,29 @@ void CFrameWork::dropEvent ( QDropEvent *e )
 		}
 	}
 }
+#endif
 
-void CFrameWork::moveEvent ( QMoveEvent *e )
+QAction *CFrameWork::findAction ( const QString &name )
 {
-	if (!( windowState ( ) & ( WindowMinimized | WindowMaximized | WindowFullScreen )))
-		m_normal_geometry. setTopLeft ( pos ( ));
-	QMainWindow::moveEvent ( e );
-}
-
-void CFrameWork::resizeEvent ( QResizeEvent *e )
-{
-	if (!( windowState ( ) & ( WindowMinimized | WindowMaximized | WindowFullScreen )))
-		m_normal_geometry. setSize ( size ( ));
-	QMainWindow::resizeEvent ( e );
-}
-
-bool CFrameWork::eventFilter ( QObject *o, QEvent *e )
-{
-	if ( o && ( o == m_add_dialog )) {
-		if ( e-> type ( ) == QEvent::Resize ) {
-			if (!( m_add_dialog-> windowState ( ) & ( WindowMinimized | WindowMaximized | WindowFullScreen )))
-				m_normal_geometry_adddlg. setSize ( m_add_dialog-> size ( ));
-		}
-		else if ( e-> type ( ) == QEvent::Move ) {
-			if (!( m_add_dialog-> windowState ( ) & ( WindowMinimized | WindowMaximized | WindowFullScreen )))
-				m_normal_geometry_adddlg. setTopLeft ( m_add_dialog-> pos ( ));
-		}
-	}
-	return QMainWindow::eventFilter ( o, e );
-}
-
-QAction *CFrameWork::findAction ( const char *name )
-{
-	return name ? static_cast <QAction *> ( child ( name, "QAction", true )) : 0;
+	return name. isEmpty ( ) ? 0 : static_cast <QAction *> ( findChild<QAction *> ( name ));
 }
 
 void CFrameWork::createStatusBar ( )
 {
 	m_errors = new QLabel ( statusBar ( ));
-	statusBar ( )-> addWidget ( m_errors, 0, true );
+	statusBar ( )-> addPermanentWidget ( m_errors, 0 );
 
 	m_statistics = new QLabel ( statusBar ( ));
-	statusBar ( )-> addWidget ( m_statistics, 0, true );
+	statusBar ( )-> addPermanentWidget ( m_statistics, 0 );
 
 	m_modified = new QLabel ( statusBar ( ));
-	statusBar ( )-> addWidget ( m_modified, 0, true );
+	statusBar ( )-> addPermanentWidget ( m_modified, 0 );
 
 	m_progress = new CMultiProgressBar ( statusBar ( ));
 	m_progress-> setFixedWidth ( fontMetrics ( ). height ( ) * 10 );
 	m_progress-> setFixedHeight ( fontMetrics ( ). height ( ));
 
-	QPixmap p;
-	p = CResource::inst ( )-> pixmap ( "status/stop" );
+	QPixmap p ( ":/status/stop" );
 	if ( !p. isNull ( ))
 		m_progress-> setStopPixmap ( p );
 
@@ -680,320 +589,286 @@ void CFrameWork::createStatusBar ( )
 
 	//m_progress-> setProgress ( -1, 100 );
 
-	statusBar ( )-> addWidget ( m_progress, 0, true );
+	statusBar ( )-> addPermanentWidget ( m_progress, 0 );
 
 	connect ( m_progress, SIGNAL( stop ( )), this, SLOT( cancelAllTransfers ( )));
 
 	statusBar ( )-> hide ( );
 }
 
-QPopupMenu *CFrameWork::createMenu ( const QStringList &a_names )
+QMenu *CFrameWork::createMenu ( const QString &name, const QStringList &a_names )
 {
 	if ( a_names. isEmpty ( ))
 		return 0;
 
-	QPopupMenu *p = new QPopupMenu ( this );
-	p-> setCheckable ( true );
+	QMenu *m = new QMenu ( this );
+	m-> menuAction ( )-> setObjectName ( name );
 
-	for ( QStringList::ConstIterator it = a_names. begin ( ); it != a_names. end ( ); ++it ) {
-		const char *a_name = ( *it ). latin1 ( );
-
-		if ( a_name [0] == '-' && a_name [1] == 0 ) {
-			p-> insertSeparator ( );
+	foreach ( const QString &an, a_names ) {
+		if ( an == "-" ) {
+			m-> addSeparator ( );
 		}
 		else {
-			QAction *a = findAction ( a_name );
+			QAction *a = findAction ( an );
 
 			if ( a )
-				a-> addTo ( p );
+				m-> addAction( a );
 			else
-				qWarning ( "Couldn't find action '%s'", a_name );
+				qWarning ( "Couldn't find action '%s'", qPrintable( an ));
 		}
 	}
-	return p;
+	return m;
 }
 
 
-QToolBar *CFrameWork::createToolBar ( const QString &label, const QStringList &a_names )
+QToolBar *CFrameWork::createToolBar ( const QString &name, const QStringList &a_names )
 {
 	if ( a_names. isEmpty ( ))
 		return 0;
 
 	QToolBar *t = new QToolBar ( this );
-	t-> setLabel ( label );
+	t-> setObjectName ( name );
 
-	for ( QStringList::ConstIterator it = a_names. begin ( ); it != a_names. end ( ); ++it ) {
-		const char *a_name = ( *it ). latin1 ( );
-
-		if ( a_name [0] == '-' && a_name [1] == 0 ) {
+	foreach ( const QString &an, a_names ) {
+		if ( an == "-" ) {
 			t-> addSeparator ( );
 		}
 		else {
-			QAction *a = findAction ( a_name );
+			QAction *a = findAction ( an );
 
 			if ( a )
-				a-> addTo ( t );
+				t-> addAction( a );
 			else
-				qWarning ( "Couldn't find action '%s'", a_name );
+				qWarning ( "Couldn't find action '%s'", qPrintable( an ));
 		}
 	}
 
-	t-> setStretchableWidget ( new QWidget ( t ));
-	t-> setHorizontallyStretchable ( true );
-	t-> setVerticallyStretchable ( true );
+	t-> addWidget ( new QWidget ( ));
 
-	QWidget *sw1 = new QWidget ( t );
+	QWidget *sw1 = new QWidget ( );
 	sw1-> setFixedSize ( 4, 4 );
+	t-> addWidget ( sw1 );
 
-	m_spinner = new CSpinner ( t, "spinner" );
-	QToolTip::add ( m_spinner, tr( "Download activity indicator" ));
-	m_spinner-> setPixmap ( CResource::inst ( )-> pixmap ( "spinner" ));
-	m_spinner-> show ( );
+	m_spinner = new CSpinner ( 0 );
+	m_spinner-> setToolTip ( tr( "Download activity indicator" ));
+	m_spinner-> setPixmap ( QPixmap ( ":/spinner" ));
+	t-> addWidget ( m_spinner );
 
-	QWidget *sw2 = new QWidget ( t );
+	QWidget *sw2 = new QWidget ( );
 	sw2-> setFixedSize ( 4, 4 );
+	t-> addWidget ( sw2 );
 
 	t-> hide ( );
 	return t;
 }
 
+inline QAction *newQAction ( QObject *parent, const char *name, bool toggle = false, QObject *receiver = 0, const char *slot = 0 )
+{
+	QAction *a = new QAction ( parent );
+	a-> setObjectName ( name );
+	if ( toggle )
+		a-> setCheckable ( true );
+	if ( receiver && slot )
+		QObject::connect ( a, toggle ? SIGNAL( toggled ( bool )) : SIGNAL( triggered ( )), receiver, slot );
+	return a;
+}
+
+inline QAction *newQActionSeparator ( QObject *parent )
+{
+	QAction *a = new QAction ( parent );
+	a-> setSeparator ( true );
+	return a;
+}
+
+inline QActionGroup *newQActionGroup ( QObject *parent, const char *name, bool exclusive = false )
+{
+	QActionGroup *g = new QActionGroup ( parent );
+	g-> setObjectName ( name );
+	g-> setExclusive ( exclusive );
+	return g;
+}
+
 void CFrameWork::createActions ( )
 {
 	QAction *a;
-	CListAction *l;
 	QActionGroup *g, *g2, *g3;
 
-	a = new QAction ( this, "file_new" );
-	connect ( a, SIGNAL( activated ( )), this, SLOT( fileNew ( )));
 
-	a = new QAction ( this, "file_open" );
-	connect ( a, SIGNAL( activated ( )), this, SLOT( fileOpen ( )));
+	a = newQAction ( this, "file_new", false, this, SLOT( fileNew ( )));
 
-	l = new CListAction ( true, this, "file_open_recent" );
-	l-> setUsesDropDown ( true );
-	l-> setListProvider ( new RecentListProvider ( this ));
-	connect ( l, SIGNAL( activated ( int )), this, SLOT( fileOpenRecent ( int )));
+	a = newQAction ( this, "file_open", false, this, SLOT( fileOpen ( )));
 
-	(void) new QAction ( this, "file_save" );
-	(void) new QAction ( this, "file_saveas" );
-	(void) new QAction ( this, "file_print" );
+	g = newQActionGroup ( this, "file_open_recent" );
+	for ( int i = 0; i < MaxRecentFiles; i++ ) {
+		a = newQAction ( this, "file_open_recent_%1", false, this, SLOT( fileOpenRecent ( )));
+		a-> setActionGroup ( g );
+	}
 
-	g = new QActionGroup ( this, "file_import", false );
-	g-> setUsesDropDown ( true );
+	(void) newQAction ( this, "file_save" );
+	(void) newQAction ( this, "file_saveas" );
+	(void) newQAction ( this, "file_print" );
 
-	a = new QAction ( g, "file_import_bl_inv" );
-	connect ( a, SIGNAL( activated ( )), this, SLOT( fileImportBrickLinkInventory ( )));
+	g = newQActionGroup ( this, "file_import", false );
+	(void) newQAction ( g, "file_import_bl_inv", false, this, SLOT( fileImportBrickLinkInventory ( )));
+	(void) newQAction ( g, "file_import_bl_xml", false, this, SLOT( fileImportBrickLinkXML ( )));
+	(void) newQAction ( g, "file_import_bl_order", false, this, SLOT( fileImportBrickLinkOrder ( )));
+	(void) newQAction ( g, "file_import_bl_store_inv", false, this, SLOT( fileImportBrickLinkStore ( )));
+	(void) newQAction ( g, "file_import_bl_cart", false, this, SLOT( fileImportBrickLinkCart ( )));
+	(void) newQAction ( g, "file_import_peeron_inv", false, this, SLOT( fileImportPeeronInventory ( )));
+	(void) newQAction ( g, "file_import_ldraw_model", false, this, SLOT( fileImportLDrawModel ( )));
+	(void) newQAction ( g, "file_import_briktrak", false, this, SLOT( fileImportBrikTrakInventory ( )));
 
-	a = new QAction ( g, "file_import_bl_xml" );
-	connect ( a, SIGNAL( activated ( )), this, SLOT( fileImportBrickLinkXML ( )));
+	g = newQActionGroup ( this, "file_export", false );
 
-	a = new QAction ( g, "file_import_bl_order" );
-	connect ( a, SIGNAL( activated ( )), this, SLOT( fileImportBrickLinkOrder ( )));
+	(void) newQAction ( g, "file_export_bl_xml" );
+	(void) newQAction ( g, "file_export_bl_xml_clip" );
+	(void) newQAction ( g, "file_export_bl_update_clip" );
+	(void) newQAction ( g, "file_export_bl_invreq_clip" );
+	(void) newQAction ( g, "file_export_bl_wantedlist_clip" );
+	(void) newQAction ( g, "file_export_briktrak" );
 
-	a = new QAction ( g, "file_import_bl_store_inv" );
-	connect ( a, SIGNAL( activated ( )), this, SLOT( fileImportBrickLinkStore ( )));
+	(void) newQAction ( this, "file_close" );
 
-	a = new QAction ( g, "file_import_bl_cart" );
-	connect ( a, SIGNAL( activated ( )), this, SLOT( fileImportBrickLinkCart ( )));
+	a = newQAction ( this, "file_exit", false, this, SLOT( close ( )));
+	a-> setMenuRole ( QAction::QuitRole );
 
-	a = new QAction ( g, "file_import_peeron_inv" );
-	connect ( a, SIGNAL( activated ( )), this, SLOT( fileImportPeeronInventory ( )));
+	m_undogroup-> createUndoAction ( this )-> setObjectName ( "edit_undo" );
+	m_undogroup-> createRedoAction ( this )-> setObjectName ( "edit_redo" );
 
-	a = new QAction ( g, "file_import_ldraw_model" );
-	connect ( a, SIGNAL( activated ( )), this, SLOT( fileImportLDrawModel ( )));
+	(void) newQAction ( this, "edit_cut" );
+	(void) newQAction ( this, "edit_copy" );
+	(void) newQAction ( this, "edit_paste" );
+	(void) newQAction ( this, "edit_delete" );
+	a = newQAction ( this, "edit_additems", true, this, SLOT( toggleAddItemDialog ( bool )));
+	a-> setShortcutContext ( Qt::ApplicationShortcut );
 
-	a = new QAction ( g, "file_import_briktrak" );
-	connect ( a, SIGNAL( activated ( )), this, SLOT( fileImportBrikTrakInventory ( )));
+	(void) newQAction ( this, "edit_subtractitems" );
+	(void) newQAction ( this, "edit_mergeitems" );
+	(void) newQAction ( this, "edit_partoutitems" );
+	(void) newQAction ( this, "edit_reset_diffs" );
+	(void) newQAction ( this, "edit_select_all" );
+	(void) newQAction ( this, "edit_select_none" );
 
-	g = new QActionGroup ( this, "file_export", false );
-	g-> setUsesDropDown ( true );
+	g2 = newQActionGroup ( this, "edit_modify", false );
+	g3 = newQActionGroup ( this, "edit_modify_context", false );
 
-	(void) new QAction ( g, "file_export_bl_xml" );
-	(void) new QAction ( g, "file_export_bl_xml_clip" );
-	(void) new QAction ( g, "file_export_bl_update_clip" );
-	(void) new QAction ( g, "file_export_bl_invreq_clip" );
-	(void) new QAction ( g, "file_export_bl_wantedlist_clip" );
-	(void) new QAction ( g, "file_export_briktrak" );
+	g = newQActionGroup ( this, "edit_status", false );
+	( newQAction ( g, "edit_status_include", true ))-> setIcon ( QIcon ( ":images/status_include" ));
+	( newQAction ( g, "edit_status_exclude", true ))-> setIcon ( QIcon ( ":images/status_exclude" ));
+	( newQAction ( g, "edit_status_extra",   true ))-> setIcon ( QIcon ( ":images/status_extra" ));
+	(void) newQActionSeparator ( g );
+	(void) newQAction ( g, "edit_status_toggle" );
 
-	(void) new QAction ( this, "file_close" );
+	g = newQActionGroup ( this, "edit_cond", false );
+	(void) newQAction ( g, "edit_cond_new", true );
+	(void) newQAction ( g, "edit_cond_used", true );
+	(void) newQActionSeparator ( g );
+	(void) newQAction ( g, "edit_cond_toggle" );
 
-	a = new QAction ( this, "file_exit" );
-	connect ( a, SIGNAL( activated ( )), this, SLOT( close ( )));
+	(void) newQAction ( this, "edit_color" );
 
-	(void) CUndoManager::inst ( )-> createUndoAction ( this, "edit_undo" );
-	(void) CUndoManager::inst ( )-> createRedoAction ( this, "edit_redo" );
+	g = newQActionGroup ( this, "edit_qty", false );
+	(void) newQAction ( g, "edit_qty_multiply" );
+	(void) newQAction ( g, "edit_qty_divide" );
 
-	(void) new QAction ( this, "edit_cut" );
-	(void) new QAction ( this, "edit_copy" );
-	(void) new QAction ( this, "edit_paste" );
-	(void) new QAction ( this, "edit_delete" );
-	a = new QAction ( this, "edit_additems", true );
-	connect ( a, SIGNAL( toggled ( bool )), this, SLOT( toggleAddItemDialog ( bool )));
+	g = newQActionGroup ( this, "edit_price", false );
+	(void) newQAction ( g, "edit_price_set" );
+	(void) newQAction ( g, "edit_price_inc_dec" );
+	(void) newQAction ( g, "edit_price_to_priceguide" );
+	(void) newQAction ( g, "edit_price_round" );
 
-	(void) new QAction ( this, "edit_subtractitems" );
-	(void) new QAction ( this, "edit_mergeitems" );
-	(void) new QAction ( this, "edit_partoutitems" );
-	(void) new QAction ( this, "edit_reset_diffs" );
-	(void) new QAction ( this, "edit_copyremarks" );
-	(void) new QAction ( this, "edit_select_all" );
-	(void) new QAction ( this, "edit_select_none" );
-
-	g = new QActionGroup ( this, "edit_modify", false );
-	g3 = new QActionGroup ( this, "edit_modify_context", false );
-
-	g2 = new QActionGroup ( g, "edit_status", false );
-	g2-> setUsesDropDown ( true );
-	( new QAction ( g2, "edit_status_include", true ))-> setIconSet ( CResource::inst ( )-> pixmap ( "status_include" ));
-	( new QAction ( g2, "edit_status_exclude", true ))-> setIconSet ( CResource::inst ( )-> pixmap ( "status_exclude" ));
-	( new QAction ( g2, "edit_status_extra",   true ))-> setIconSet ( CResource::inst ( )-> pixmap ( "status_extra" ));
-	g2-> addSeparator ( );
-	(void) new QAction ( g2, "edit_status_toggle" );
-	g3-> add ( g2 );
-
-	g2 = new QActionGroup ( g, "edit_cond", false );
-	g2-> setUsesDropDown ( true );
-	(void) new QAction ( g2, "edit_cond_new", true );
-	(void) new QAction ( g2, "edit_cond_used", true );
-	g2-> addSeparator ( );
-	(void) new QAction ( g2, "edit_cond_toggle" );
-	g3-> add ( g2 );
-
-	g3-> add ( new QAction ( g, "edit_color" ));
-
-	g2 = new QActionGroup ( g, "edit_qty", false );
-	g2-> setUsesDropDown ( true );
-	(void) new QAction ( g2, "edit_qty_multiply" );
-	(void) new QAction ( g2, "edit_qty_divide" );
-	g3-> add ( g2 );
-
-	g2 = new QActionGroup ( g, "edit_price", false );
-	g2-> setUsesDropDown ( true );
-	(void) new QAction ( g2, "edit_price_set" );
-	(void) new QAction ( g2, "edit_price_inc_dec" );
-	(void) new QAction ( g2, "edit_price_to_priceguide" );
-	(void) new QAction ( g2, "edit_price_round" );
-	g3-> add ( g2 );
-
-	(void) new QAction ( g, "edit_bulk" );
-	(void) new QAction ( g, "edit_sale" );
+	(void) newQAction ( this, "edit_bulk" );
+	(void) newQAction ( this, "edit_sale" );
 		
-	g2 = new QActionGroup ( g, "edit_comment", false );
-	g2-> setUsesDropDown ( true );
-	(void) new QAction ( g2, "edit_comment_set" );
-	g2-> addSeparator ( );
-	(void) new QAction ( g2, "edit_comment_add" );
-	(void) new QAction ( g2, "edit_comment_rem" );
+	g = newQActionGroup ( this, "edit_comment", false );
+	(void) newQAction ( g, "edit_comment_set" );
+	(void) newQActionSeparator ( g );
+	(void) newQAction ( g, "edit_comment_add" );
+	(void) newQAction ( g, "edit_comment_rem" );
 	
-	g2 = new QActionGroup ( g, "edit_remark", false );
-	g2-> setUsesDropDown ( true );
-	(void) new QAction ( g2, "edit_remark_set" );
-	g2-> addSeparator ( );
-	(void) new QAction ( g2, "edit_remark_add" );
-	(void) new QAction ( g2, "edit_remark_rem" );
-	g3-> add ( g2 );
+	g = newQActionGroup ( this, "edit_remark", false );
+	(void) newQAction ( g, "edit_remark_set" );
+	(void) newQActionSeparator ( g );
+	(void) newQAction ( g, "edit_remark_add" );
+	(void) newQAction ( g, "edit_remark_rem" );
 
 	//tier
 
-	g2 = new QActionGroup ( g, "edit_retain", false );
-	g2-> setUsesDropDown ( true );
-	(void) new QAction ( g2, "edit_retain_yes", true );
-	(void) new QAction ( g2, "edit_retain_no", true );
-	g2-> addSeparator ( );
-	(void) new QAction ( g2, "edit_retain_toggle" );
+	g = newQActionGroup ( this, "edit_retain", false );
+	(void) newQAction ( g, "edit_retain_yes", true );
+	(void) newQAction ( g, "edit_retain_no", true );
+	(void) newQActionSeparator ( g );
+	(void) newQAction ( g, "edit_retain_toggle" );
 
-	g2 = new QActionGroup ( g, "edit_stockroom", false );
-	g2-> setUsesDropDown ( true );
-	(void) new QAction ( g2, "edit_stockroom_yes", true );
-	(void) new QAction ( g2, "edit_stockroom_no", true );
-	g2-> addSeparator ( );
-	(void) new QAction ( g2, "edit_stockroom_toggle" );
+	g = newQActionGroup ( this, "edit_stockroom", false );
+	(void) newQAction ( g, "edit_stockroom_yes", true );
+	(void) newQAction ( g, "edit_stockroom_no", true );
+	(void) newQActionSeparator ( g );
+	(void) newQAction ( g2, "edit_stockroom_toggle" );
 
-	(void) new QAction ( g, "edit_reserved" );
+	(void) newQAction ( g, "edit_reserved" );
 
-	g = new QActionGroup ( this, "edit_bl_info_group", false );
+	g = newQActionGroup ( this, "edit_bl_info_group", false );
+	(void) newQAction ( g, "edit_bl_catalog" );
+	(void) newQAction ( g, "edit_bl_priceguide" );
+	(void) newQAction ( g, "edit_bl_lotsforsale" );
+	(void) newQAction ( g, "edit_bl_myinventory" );
 
-	(void) new QAction ( g, "edit_bl_catalog" );
-	(void) new QAction ( g, "edit_bl_priceguide" );
-	(void) new QAction ( g, "edit_bl_lotsforsale" );
-	(void) new QAction ( g, "edit_bl_myinventory" );
+	(void) newQAction ( this, "view_fullscreen", true, this, SLOT( viewFullScreen ( bool )));	
 
-	a = new QAction ( this, "view_fullscreen", true );
-	connect ( a, SIGNAL( toggled ( bool )), this, SLOT( viewFullScreen ( bool )));	
+	(void) newQAction ( this, "view_simple_mode", true, CConfig::inst ( ), SLOT( setSimpleMode ( bool )));
 
-	a = new QAction ( this, "view_simple_mode", true );
-	connect ( a, SIGNAL( toggled ( bool )), CConfig::inst ( ), SLOT( setSimpleMode ( bool )));
-
-	a = new QAction ( this, "view_toolbar", true );
-	connect ( a, SIGNAL( toggled ( bool )), this, SLOT( viewToolBar ( bool )));
+	(void) newQAction ( this, "view_toolbar", true, this, SLOT( viewToolBar ( bool )));
 
 	(void) m_taskpanes-> createItemVisibilityAction ( this, "view_infobar" );
 
-	a = new QAction ( this, "view_statusbar", true );
-	connect ( a, SIGNAL( toggled ( bool )), this, SLOT( viewStatusBar ( bool )));
+	(void) newQAction ( this, "view_statusbar", true, this, SLOT( viewStatusBar ( bool )));
 
-	a = new QAction ( this, "view_show_input_errors", true );
-	connect ( a, SIGNAL( toggled ( bool )), CConfig::inst ( ), SLOT( setShowInputErrors ( bool )));
+	(void) newQAction ( this, "view_show_input_errors", true, CConfig::inst ( ), SLOT( setShowInputErrors ( bool )));
 
-	(void) new QAction ( this, "view_difference_mode", true );
+	(void) newQAction ( this, "view_difference_mode", true );
 	
-	(void) new QAction ( this, "view_save_default_col" );
+	(void) newQAction ( this, "view_save_default_col" );
 
-	a = new QAction ( this, "extras_update_database" );
-	connect ( a, SIGNAL( activated ( )), this, SLOT( updateDatabase ( )));
+	(void) newQAction ( this, "extras_update_database", false, this, SLOT( updateDatabase ( )));
 
-	a = new QAction ( this, "extras_configure" );
-	connect ( a, SIGNAL( activated ( )), this, SLOT( configure ( )));
+	a = newQAction ( this, "extras_configure", false, this, SLOT( configure ( )));
+	a-> setMenuRole ( QAction::PreferencesRole );
 
-	g = new QActionGroup ( this, "extras_net", true );
-	connect ( g, SIGNAL( selected ( QAction * )), this, SLOT( setOnlineStatus ( QAction * )));
+	g = newQActionGroup ( this, "extras_net", true );
+	connect ( g, SIGNAL( triggered ( QAction * )), this, SLOT( setOnlineStatus ( QAction * )));
+	(void) newQAction ( g, "extras_net_online", true );
+	(void) newQAction ( g, "extras_net_offline", true );
 
-	(void) new QAction ( g, "extras_net_online", true );
-	(void) new QAction ( g, "extras_net_offline", true );
-
-	g = new QActionGroup ( this, "window_mode", true );
-	connect ( g, SIGNAL( selected ( QAction * )), this, SLOT( setWindowMode ( QAction * )));
-
-	(void) new QAction ( g, "window_mode_mdi", true );
-	(void) new QAction ( g, "window_mode_tab_above", true );
-	(void) new QAction ( g, "window_mode_tab_below", true );
-
-	a = new QAction ( this, "window_cascade" );
-	connect ( a, SIGNAL( activated ( )), m_mdi, SLOT( cascade ( )));
-
-	a = new QAction ( this, "window_tile" );
-	connect ( a, SIGNAL( activated ( )), m_mdi, SLOT( tile ( )));
-
+/*
 	l = new CListAction ( true, this, "window_list" );
 	l-> setListProvider ( new WindowListProvider ( this ));
 	connect ( l, SIGNAL( activated ( int )), this, SLOT( windowActivate ( int )));
+*/
 
-	a = new QAction ( this, "help_whatsthis" );
-	connect ( a, SIGNAL( activated ( )), this, SLOT( whatsThis ( )));
+	(void) newQAction ( this, "help_whatsthis", false, this, SLOT( whatsThis ( )));
 
-	a = new QAction ( this, "help_about" );
-	connect ( a, SIGNAL( activated ( )), cApp, SLOT( about ( )));
+	a = newQAction ( this, "help_about", false, cApp, SLOT( about ( )));
+	a-> setMenuRole ( QAction::AboutRole );
 
-	a = new QAction ( this, "help_updates" );
-	connect ( a, SIGNAL( activated ( )), cApp, SLOT( checkForUpdates ( )));
+	a = newQAction ( this, "help_updates", false, cApp, SLOT( checkForUpdates ( )));
+	a-> setMenuRole ( QAction::ApplicationSpecificRole );
 
-	a = new QAction ( this, "help_registration" );
-	a-> setEnabled ( CConfig::inst ( )-> registration ( ) != CConfig::OpenSource );
-	connect ( a, SIGNAL( activated ( )), cApp, SLOT( registration ( )));
+	a = newQAction ( this, "help_registration", false, cApp, SLOT( registration ( )));
+	a-> setMenuRole ( QAction::ApplicationSpecificRole );
+	a-> setVisible ( CConfig::inst ( )-> registration ( ) != CConfig::OpenSource );
 
 	// set all icons that have a pixmap corresponding to name()
 
-	QObjectList *alist = queryList ( "QAction", 0, false, true );
-	for ( QObjectListIt it ( *alist ); it. current ( ); ++it ) {
-		const char *name = it. current ( )-> name ( );
+	QList<QAction *> alist = findChildren<QAction *> ();
+	foreach ( QAction *a, alist ) {
+		if ( !a-> objectName ( ). isEmpty ( )) {
+			QIcon ico ( QLatin1String ( ":/images/" ) + a-> objectName ( ));
 
-		if ( name && name [0] ) {
-			QIconSet set = CResource::inst ( )-> iconSet ( name );
-
-			if ( !set. isNull ( ))
-				static_cast <QAction *> ( it. current ( ))-> setIconSet ( set );
+			if ( !ico. isNull ( ))
+				a-> setIcon ( ico );
 		}
 	}
-	delete alist;
 }
 
 void CFrameWork::viewStatusBar ( bool b )
@@ -1008,7 +883,7 @@ void CFrameWork::viewToolBar ( bool b )
 
 void CFrameWork::viewFullScreen ( bool b )
 {
-	int ws = windowState ( );
+	QFlags<Qt::WindowState> ws = windowState ( );
 	setWindowState ( b ? ws | Qt::WindowFullScreen : ws & ~Qt::WindowFullScreen ); 
 }
 
@@ -1107,30 +982,17 @@ bool CFrameWork::createWindow ( CDocument *doc )
 	if ( !doc )
 		return false;
 
-	QPtrList <CWindow> list = allWindows ( );
+	QList <CWindow *> l = allWindows ( );
 
-	for ( QPtrListIterator <CWindow> it ( list ); it. current ( ); ++it ) {
-		if ( it. current ( )-> document ( ) == doc ) {
-			it. current ( )-> setFocus ( );
+	foreach ( CWindow *w, l ) {
+		if ( w-> document ( ) == doc ) {
+			m_mdi-> setCurrentWidget ( w );
+			w-> setFocus ( );
 			return true;
 		}
 	}
 
-	CWindow *w = new CWindow ( doc, m_mdi, "window" );
-
-	QPixmap pix = CResource::inst ( )-> pixmap ( "icon" );
-	// Qt/Win32 bug: MDI child window icon()s have to be 16x16 or smaller...
-	pix. convertFromImage ( pix. convertToImage ( ). smoothScale ( pix. size ( ). boundedTo ( QSize ( 16, 16 ))));
-	if ( !pix. isNull ( ))
-		w-> setIcon ( pix );
-
-	QWidget *act = m_mdi-> activeWindow ( );
-
-	if ( !act || ( act == w ) || ( act-> isMaximized ( )))
-		w-> showMaximized ( );
-	else
-		w-> show ( );
-
+	m_mdi-> addWindow ( new CWindow ( doc, m_mdi ));
 	return true;
 }
 
@@ -1150,11 +1012,11 @@ bool CFrameWork::updateDatabase ( )
 
 void CFrameWork::windowActivate ( int i )
 {
-	QWidgetList l = m_mdi-> windowList ( CWorkspace/*CWindowManager*/::CreationOrder );
+	QList <CWindow *> l = allWindows ( );
 
-	if (( i >= 0 ) && ( i < int( l. count ( )))) {
+	if (( i >= 0 ) && ( i < l. count ( ))) {
 		QWidget *w = l. at ( i );
-
+		m_mdi-> setCurrentWidget ( w );
 		w-> setFocus ( );
 	}
 }
@@ -1166,7 +1028,7 @@ void CFrameWork::connectAction ( bool do_connect, const char *name, CWindow *win
 	if ( a ) {
 		QAction *a2 = a;
 
-		while ( a2 && ::qt_cast<QActionGroup *> ( a2-> parent ( )))
+		while ( a2 && qobject_cast<QActionGroup *> ( a2-> parent ( )))
 			a2 = static_cast<QAction *> ( a2-> parent ( ));
 
 		a2-> setEnabled ( do_connect );
@@ -1190,7 +1052,7 @@ void CFrameWork::connectAction ( bool do_connect, const char *name, CWindow *win
 void CFrameWork::updateAllToggleActions ( CWindow *window )
 {
 	for ( QMap <QAction *, bool ( CWindow::* ) ( ) const>::iterator it = m_toggle_updates. begin ( ); it != m_toggle_updates. end ( ); ++it ) {
-		it. key ( )-> setOn (( window->* it. data ( )) ( ));
+		it. key ( )-> setChecked (( window->* it. value ( )) ( ));
 	}
 }
 
@@ -1289,7 +1151,7 @@ void CFrameWork::connectWindow ( QWidget *w )
 		m_current_window = 0;
 	}
 
-	if ( w && ::qt_cast <CWindow *> ( w )) {
+	if ( w && qobject_cast <CWindow *> ( w )) {
 		CWindow *window = static_cast <CWindow *> ( w );
 		CDocument *doc = window-> document ( );
 
@@ -1391,18 +1253,18 @@ void CFrameWork::selectionUpdate ( const CDocument::ItemList &selection )
 				stockroom = -1;
 		}
 	}
-	findAction ( "edit_status_include" )-> setOn ( status == BrickLink::InvItem::Include );
-	findAction ( "edit_status_exclude" )-> setOn ( status == BrickLink::InvItem::Exclude );
-	findAction ( "edit_status_extra" )-> setOn ( status == BrickLink::InvItem::Extra );
+	findAction ( "edit_status_include" )-> setChecked ( status == BrickLink::InvItem::Include );
+	findAction ( "edit_status_exclude" )-> setChecked ( status == BrickLink::InvItem::Exclude );
+	findAction ( "edit_status_extra" )-> setChecked ( status == BrickLink::InvItem::Extra );
 
-	findAction ( "edit_cond_new" )-> setOn ( condition == BrickLink::New );
-	findAction ( "edit_cond_used" )-> setOn ( condition == BrickLink::Used );
+	findAction ( "edit_cond_new" )-> setChecked ( condition == BrickLink::New );
+	findAction ( "edit_cond_used" )-> setChecked ( condition == BrickLink::Used );
 
-	findAction ( "edit_retain_yes" )-> setOn ( retain == 1 );
-	findAction ( "edit_retain_no" )-> setOn ( retain == 0 );
+	findAction ( "edit_retain_yes" )-> setChecked ( retain == 1 );
+	findAction ( "edit_retain_no" )-> setChecked ( retain == 0 );
 
-	findAction ( "edit_stockroom_yes" )-> setOn ( stockroom == 1 );
-	findAction ( "edit_stockroom_no" )-> setOn ( stockroom == 0 );
+	findAction ( "edit_stockroom_yes" )-> setChecked ( stockroom == 1 );
+	findAction ( "edit_stockroom_no" )-> setChecked ( stockroom == 0 );
 }
 
 void CFrameWork::statisticsUpdate ( )
@@ -1462,7 +1324,7 @@ void CFrameWork::statisticsUpdate ( )
 
 void CFrameWork::modificationUpdate ( )
 {
-	bool b = CUndoManager::inst ( )-> currentStack ( ) ? CUndoManager::inst ( )-> currentStack ( )-> isClean ( ) : true;
+	bool b = m_undogroup-> activeStack ( ) ? m_undogroup-> activeStack ( )-> isClean ( ) : true;
 
 	QAction *a = findAction ( "file_save" );
 	if ( a )
@@ -1473,22 +1335,22 @@ void CFrameWork::modificationUpdate ( )
 	if ( pmod. isNull ( )) {
 		int h = m_modified-> height ( ) - 2;
 
-		pmod. resize ( h, h );
-		pmod. fill ( black );
+		pmod = QPixmap ( h, h );
+		pmod. fill ( Qt::black );
 
 		pnomod = pmod;
 		pnomod. setMask ( pnomod. createHeuristicMask ( ));
 
-		QPixmap p = CResource::inst ( )-> pixmap ( "status/modified" );
+		QPixmap p ( ":/images/status/modified" );
 		if ( !p. isNull ( ))
-			pmod. convertFromImage ( p. convertToImage ( ). smoothScale ( p. size ( ). boundedTo ( QSize ( h, h ))));
+			pmod = p. scaled ( h, h, Qt::KeepAspectRatio, Qt::SmoothTransformation );
 	}
 	m_modified-> setPixmap ( b ? pnomod : pmod );
 
 	if ( b )
-		QToolTip::remove ( m_modified );
+		m_modified-> setToolTip ( QString ( ));
 	else
-		QToolTip::add ( m_modified, tr( "Unsaved modifications" ));
+		m_modified-> setToolTip ( tr( "Unsaved modifications" ));
 }
 
 void CFrameWork::gotPictureProgress ( int p, int t )
@@ -1508,24 +1370,20 @@ void CFrameWork::configure ( )
 
 void CFrameWork::configure ( const char *page )
 {
-	DlgSettingsImpl dlg ( this );
+/*	DlgSettingsImpl dlg ( this );
 
 	if ( page )
 		dlg. setCurrentPage ( page );
 
-	dlg. exec ( );
+	dlg. exec ( );*/
 }
 
 void CFrameWork::setWindowMode ( QAction *act )
 {
-	bool tabbed = ( act != findAction ( "window_mode_mdi" ));
-	bool execllike = ( act == findAction ( "window_mode_tab_below" ));
+	bool below = ( act == findAction ( "window_mode_tab_below" ));
 
-	m_mdi-> setShowTabs ( tabbed );
-	m_mdi-> setSpreadSheetTabs ( execllike );
-	
-	findAction ( "window_cascade" )-> setEnabled ( !tabbed );
-	findAction ( "window_tile" )-> setEnabled ( !tabbed );
+	m_mdi-> setTabMode ( below ? CWorkspace::BottomTabs : CWorkspace::TopTabs );
+
 }
 
 void CFrameWork::setOnlineStatus ( QAction *act )
@@ -1547,10 +1405,10 @@ void CFrameWork::registrationUpdate ( )
 	
 	// personal -> always on
 	// demo -> always off
-	a-> setOn (( CConfig::inst ( )-> simpleMode ( ) || personal ) && !demo );
+	a-> setChecked (( CConfig::inst ( )-> simpleMode ( ) || personal ) && !demo );
 	a-> setEnabled (!( demo || personal ));
 
-	setSimpleMode ( a-> isOn ( ));
+	setSimpleMode ( a-> isChecked ( ));
 }
 
 void CFrameWork::setSimpleMode ( bool b )
@@ -1587,10 +1445,10 @@ void CFrameWork::showContextMenu ( bool /*onitem*/, const QPoint &pos )
 
 void CFrameWork::addToRecentFiles ( const QString &s )
 {
-	QString name = QDir::convertSeparators ( QFileInfo ( s ). absFilePath ( ));
+	QString name = QDir::convertSeparators ( QFileInfo ( s ). absoluteFilePath ( ));
 
-	m_recent_files. remove ( name );
-	m_recent_files. push_front ( name );
+	m_recent_files. removeAll ( name );
+	m_recent_files. prepend ( name );
 
 	while ( m_recent_files. count ( ) > MaxRecentFiles )
 		m_recent_files. pop_back ( );
@@ -1609,34 +1467,30 @@ void CFrameWork::closeEvent ( QCloseEvent *e )
 
 bool CFrameWork::closeAllWindows ( )
 {
-	QPtrList <CWindow> list = allWindows ( );
+	QList <CWindow *> list = allWindows ( );
 
-	for ( uint i = 0; i < list. count ( ); i++ ) {
-		if ( !list. at ( i )-> close ( ))
+	foreach ( CWindow *w, list ) {
+		if ( !w-> close ( ))
 			return false;
 	}
 	return true;
 }
 
-QPtrList <CWindow> CFrameWork::allWindows ( ) const
+QList <CWindow *> CFrameWork::allWindows ( ) const
 {
-	QPtrList <CWindow> list;
+	QList <CWindow *> res;
 
-	QWidgetList wl = m_mdi-> windowList ( CWorkspace::CreationOrder );
-
-	if ( !wl. isEmpty ( )) {
-		for ( uint i = 0; i < wl. count ( ); i++ ) {
-			CWindow *w = ::qt_cast <CWindow *> ( wl. at ( i ));
-			if ( w )
-				list. append ( w );
-		}
+	foreach ( QWidget *w, m_mdi-> allWindows ( )) {
+		CWindow *win = qobject_cast<CWindow *> ( w );
+		if ( win )
+			res << win;
 	}
-	return list;
+	return res;
 }
 
 void CFrameWork::cancelAllTransfers ( )
 {
-	if ( CMessageBox::question ( this, tr( "Do you want to cancel all outstanding inventory, image and Price Guide transfers?" ), CMessageBox::Yes | CMessageBox::Default, CMessageBox::No | CMessageBox::Escape ) == CMessageBox::Yes ) {
+	if ( CMessageBox::question ( this, tr( "Do you want to cancel all outstanding inventory, image and Price Guide transfers?" ), CMessageBox::Yes | CMessageBox::No ) == CMessageBox::Yes ) {
 		BrickLink::inst ( )-> cancelPictureTransfers ( );
 		BrickLink::inst ( )-> cancelPriceGuideTransfers ( );
 	}
@@ -1645,28 +1499,18 @@ void CFrameWork::cancelAllTransfers ( )
 void CFrameWork::toggleAddItemDialog ( bool b )
 {
 	if ( !m_add_dialog ) {
-		m_add_dialog = new DlgAddItemImpl ( this, "additems", false );
+		m_add_dialog = new DAddItem ( this );
+		m_add_dialog-> setObjectName ( "additems" );
 		
-		QRect r ( CConfig::inst ( )-> readNumEntry ( "/MainWindow/AddItemDialog/Left",   -1 ),
-		          CConfig::inst ( )-> readNumEntry ( "/MainWindow/AddItemDialog/Top",    -1 ),
-		          CConfig::inst ( )-> readNumEntry ( "/MainWindow/AddItemDialog/Width",  -1 ),
-		          CConfig::inst ( )-> readNumEntry ( "/MainWindow/AddItemDialog/Height", -1 ));
+		QByteArray ba = CConfig::inst ( )-> value ( "/MainWindow/AddItemDialog/Geometry" ). toByteArray ( );
 
-		int wstate = CConfig::inst ( )-> readNumEntry ( "/MainWindow/AddItemDialog/State", WindowNoState );
+		if ( ba. isEmpty ( ) || !m_add_dialog-> restoreGeometry ( ba ))
+			; // should the dialog be centered??
 
-		// make sure at least SOME part of the window ends up on the screen
-		if ( r. isValid ( ) && !r. isEmpty ( ) && !( r & qApp-> desktop ( )-> rect ( )). isEmpty ( )) {
-			m_add_dialog-> resize ( r. size ( ));  // X11 compat. mode -- KDE 3.x doesn't seem to like this though...
-			m_add_dialog-> move ( r. topLeft ( ));
-			//m_add_dialog-> setGeometry ( r );  // simple code (which shouldn't work on X11, but does on KDE 3.x...)
-		}
-		m_normal_geometry_adddlg = QRect ( m_add_dialog-> pos ( ), m_add_dialog-> size ( ));
-		m_add_dialog-> setWindowState ( wstate & WindowMaximized );
+//		QShortcut *sc = new QShortcut ( m_add_dialog );
 
-		QAccel *acc = new QAccel ( m_add_dialog );
-
-		QAction *action = findAction ( "edit_additems" );
-		acc-> connectItem ( acc-> insertItem ( action-> accel ( )), action, SLOT( toggle ( )));
+//		QAction *action = findAction ( "edit_additems" );
+//		sc-> connectItem ( acc-> insertItem ( action-> shortcut ( )), action, SLOT( toggle ( )));
 		
 		connect ( m_add_dialog, SIGNAL( closed ( )), this, SLOT( closedAddItemDialog ( )));
 
@@ -1676,7 +1520,7 @@ void CFrameWork::toggleAddItemDialog ( bool b )
 	if ( b ) {
 		if ( m_add_dialog-> isVisible ( )) {
 			m_add_dialog-> raise ( );
-			m_add_dialog-> setActiveWindow ( );
+			m_add_dialog-> activateWindow ( );
 		}
 		else {
 			m_add_dialog-> show ( );
@@ -1688,6 +1532,6 @@ void CFrameWork::toggleAddItemDialog ( bool b )
 
 void CFrameWork::closedAddItemDialog ( )
 {
-	findAction ( "edit_additems" )-> setOn ( m_add_dialog && m_add_dialog-> isVisible ( ));
+	findAction ( "edit_additems" )-> setChecked ( m_add_dialog && m_add_dialog-> isVisible ( ));
 }
 

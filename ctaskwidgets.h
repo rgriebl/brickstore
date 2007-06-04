@@ -14,22 +14,23 @@
 #ifndef __CTASKWIDGETS_H__
 #define __CTASKWIDGETS_H__
 
-#include <qwidgetstack.h>
+#include <QStackedWidget>
+#include <QTextBrowser>
 
 #include "cdocument.h"
 #include "cappearsinwidget.h"
 #include "cpriceguidewidget.h"
 #include "cpicturewidget.h"
-#include "curllabel.h"
 
 class QLabel;
+class QDockWidget;
 
 
-class CTaskLinksWidget : public CUrlLabel {
+class CTaskLinksWidget : public QTextBrowser {
 	Q_OBJECT
 
 public:
-	CTaskLinksWidget ( QWidget *parent, const char *name = 0 );
+	CTaskLinksWidget ( QWidget *parent );
 
 protected slots:
 	void documentUpdate ( CDocument *doc );
@@ -52,7 +53,7 @@ class CTaskPriceGuideWidget : public CPriceGuideWidget {
 	Q_OBJECT
 
 public:
-	CTaskPriceGuideWidget ( QWidget *parent, const char *name = 0 );
+	CTaskPriceGuideWidget ( QWidget *parent );
 
 protected slots:
 	void documentUpdate ( CDocument *doc );
@@ -63,12 +64,11 @@ protected slots:
 protected:
 	virtual bool event ( QEvent *e );
 	void fixParentDockWindow ( );
-
-private slots:
-	void setOrientation ( Orientation o );
+	virtual bool eventFilter ( QObject *o, QEvent *e );
 
 private:
 	CDocument *m_doc;
+	QDockWidget *m_dock;
 };
 
 
@@ -77,11 +77,11 @@ private:
 // ----------------------------------------------------------------------
 
 
-class CTaskInfoWidget : public QWidgetStack {
+class CTaskInfoWidget : public QStackedWidget {
 	Q_OBJECT
 
 public:
-	CTaskInfoWidget ( QWidget *parent, const char *name = 0 );
+	CTaskInfoWidget ( QWidget *parent );
 
 protected slots:
 	void documentUpdate ( CDocument *doc );
@@ -89,8 +89,6 @@ protected slots:
 
 	void languageChange ( );
 	void refresh ( );
-
-	virtual void paletteChange ( const QPalette &oldpal );
 
 private:
 	QLabel *        m_text;
@@ -107,7 +105,7 @@ class CTaskAppearsInWidget : public CAppearsInWidget {
 	Q_OBJECT
 
 public:
-	CTaskAppearsInWidget ( QWidget *parent, const char *name = 0 );
+	CTaskAppearsInWidget ( QWidget *parent );
 
 	virtual QSize minimumSizeHint ( ) const;
 	virtual QSize sizeHint ( ) const;

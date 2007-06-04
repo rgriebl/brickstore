@@ -23,6 +23,25 @@ CURLSH *CTransfer::s_curl_share = 0;
 uint CTransfer::s_instance_counter = 0;
 
 
+class CTransferEvent : public QEvent {
+public:
+	enum Type {
+		Started  = QEvent::User + 0x42,
+		Finished = QEvent::User + 0x43,
+		Progress = QEvent::User + 0x44
+	};
+
+	CTransferEvent ( Type t, CTransfer::Job *job )
+		: QEvent ( static_cast<QEvent::Type> ( t )), m_job ( job )
+	{ }
+
+	CTransfer::Job *job ( ) const
+	{ return m_job; }
+
+private:
+	CTransfer::Job *m_job;
+};
+
 CTransfer::CTransfer ( )
 {
 	m_curl = 0;
@@ -72,37 +91,37 @@ void CTransfer::setProxy ( bool enable, const QString &name, int port )
 	m_queue_lock. lock ( );
 
 	m_use_proxy = enable;
-	m_proxy_name = name. latin1 ( );
+	m_proxy_name = name;
 	m_proxy_port = port;
 
 	m_queue_lock. unlock ( );
 }
 
-CTransfer::Job *CTransfer::get ( const QCString &url, const CKeyValueList &query, QFile *file, void *userobject, bool high_priority )
+CTransfer::Job *CTransfer::get ( const QString &url, const CKeyValueList &query, QFile *file, void *userobject, bool high_priority )
 {
 	return retrieve ( true, url, query, 0, file, userobject, high_priority );
 }
 
-CTransfer::Job *CTransfer::getIfNewer ( const QCString &url, const CKeyValueList &query, const QDateTime &dt, QFile *file, void *userobject, bool high_priority )
+CTransfer::Job *CTransfer::getIfNewer ( const QString &url, const CKeyValueList &query, const QDateTime &dt, QFile *file, void *userobject, bool high_priority )
 {
 	return retrieve ( true, url, query, dt. isValid ( ) ? dt. toTime_t ( ) : 0, file, userobject, high_priority );
 }
 
-CTransfer::Job *CTransfer::post ( const QCString &url, const CKeyValueList &query, QFile *file, void *userobject, bool high_priority )
+CTransfer::Job *CTransfer::post ( const QString &url, const CKeyValueList &query, QFile *file, void *userobject, bool high_priority )
 {
 	return retrieve ( false, url, query, 0, file, userobject, high_priority );
 }
 
-QCString CTransfer::buildQueryString ( const CKeyValueList &kvl )
+QByteArray CTransfer::buildQueryString ( const CKeyValueList &kvl )
 {
-	QCString query;
+	QByteArray query;
 
-	for ( CKeyValueList::ConstIterator it = kvl. begin ( ); it != kvl. end ( ); ++it ) {
-		const char *tmp1 = ( *it ). first. latin1 ( );
-		const char *tmp2 = ( *it ). second. latin1 ( );
+	for ( CKeyValueList::const_iterator it = kvl. begin ( ); it != kvl. end ( ); ++it ) {
+		QByteArray tmp1 = (*it). first. toLatin1 ( );
+		QByteArray tmp2 = (*it). second. toLatin1 ( );
 
-		char *etmp1 = curl_escape ( tmp1 ? tmp1 : "", 0 );
-		char *etmp2 = curl_escape ( tmp2 ? tmp2 : "", 0 );
+		char *etmp1 = curl_escape ( tmp1. data ( ), 0 );
+		char *etmp2 = curl_escape ( tmp2. data ( ), 0 );
 
 		if ( etmp1 && *etmp1 ) {
 			if ( !query. isEmpty ( ))
@@ -119,13 +138,13 @@ QCString CTransfer::buildQueryString ( const CKeyValueList &kvl )
 	return query;
 }
 
-CTransfer::Job *CTransfer::retrieve ( bool get, const QCString &url, const CKeyValueList &query, time_t ifnewer, QFile *file, void *userobject, bool high_priority )
+CTransfer::Job *CTransfer::retrieve ( bool get, const QString &url, const CKeyValueList &query, time_t ifnewer, QFile *file, void *userobject, bool high_priority )
 {
 	if ( url. isEmpty ( )) //  || ( file && ( !file-> isOpen ( ) || !file-> isWritable ( ))))
 		return 0;
 
 	Job *j = new Job ( );
-	j-> m_url = url;
+	j-> m_url = url. toLatin1 ( );
 	j-> m_query = buildQueryString ( query );
 	j-> m_ifnewer = ifnewer;
 
@@ -189,11 +208,11 @@ bool CTransfer::init ( )
 
 void CTransfer::run ( )
 {
-	QString ua = cApp-> appName ( ) + "/" + 
-	             cApp-> appVersion ( ) + " (" + 
-	             cApp-> sysName ( ) + " " + 
-				 cApp-> sysVersion ( ) + "; http://" + 
-	             cApp-> appURL ( ) + ")";
+	QByteArray ua = ( cApp-> appName ( ) + "/" + 
+	                  cApp-> appVersion ( ) + " (" + 
+	                  cApp-> sysName ( ) + " " + 
+	                  cApp-> sysVersion ( ) + "; http://" + 
+	                  cApp-> appURL ( ) + ")" ). toLatin1 ( );
 
 	::curl_easy_setopt ( m_curl, CURLOPT_VERBOSE, 0 );
 	::curl_easy_setopt ( m_curl, CURLOPT_NOPROGRESS, 0 );
@@ -205,11 +224,11 @@ void CTransfer::run ( )
 	::curl_easy_setopt ( m_curl, CURLOPT_DNS_CACHE_TIMEOUT, 5*60 );
 	::curl_easy_setopt ( m_curl, CURLOPT_WRITEFUNCTION, write_curl );
 	::curl_easy_setopt ( m_curl, CURLOPT_WRITEDATA, this );
-	::curl_easy_setopt ( m_curl, CURLOPT_USERAGENT, ua. latin1 ( ));
+	::curl_easy_setopt ( m_curl, CURLOPT_USERAGENT, ua. constData ( ));
 	::curl_easy_setopt ( m_curl, CURLOPT_ENCODING, "" );
 	::curl_easy_setopt ( m_curl, CURLOPT_FILETIME, 1 ); 
 
-	QCString url, query;
+	QByteArray url, query;
 
 	while ( !m_stop ) {
 		Job *j = 0;
@@ -220,13 +239,13 @@ void CTransfer::run ( )
 		if ( m_in_queue. isEmpty ( ))
 			m_queue_cond. wait ( &m_queue_lock );
 		if ( !m_in_queue. isEmpty ( ))
-			j = m_in_queue. take ( 0 );
+			j = m_in_queue. takeFirst ( );
 
 		if ( j ) {
 			m_active_job = j;
 
 			if ( m_use_proxy ) {
-				::curl_easy_setopt ( m_curl, CURLOPT_PROXY, m_proxy_name. data ( ));
+				::curl_easy_setopt ( m_curl, CURLOPT_PROXY, m_proxy_name. toLatin1 ( ). data ( ));
 				::curl_easy_setopt ( m_curl, CURLOPT_PROXYPORT, m_proxy_port );
 			}
 			else
@@ -235,7 +254,7 @@ void CTransfer::run ( )
 			//qDebug ( "Running job: %p", j-> m_userobject );
 
 			if ( j-> m_get_or_post ) {
-				url = j-> m_url. copy ( );
+				url = j-> m_url;
 
 				if ( !j-> m_query. isEmpty ( )) {
 					url += '?';
@@ -244,19 +263,19 @@ void CTransfer::run ( )
 				query = "";
 				
 				::curl_easy_setopt ( m_curl, CURLOPT_HTTPGET, 1 );
-				::curl_easy_setopt ( m_curl, CURLOPT_URL, url. data ( ));
+				::curl_easy_setopt ( m_curl, CURLOPT_URL, url. constData ( ));
 				::curl_easy_setopt ( m_curl, CURLOPT_TIMEVALUE, j-> m_ifnewer );
 				::curl_easy_setopt ( m_curl, CURLOPT_TIMECONDITION, j-> m_ifnewer ? CURL_TIMECOND_IFMODSINCE : CURL_TIMECOND_NONE );
 				
 				//qDebug ( "CTransfer::get [%s]", url. data ( ));
 			}
 			else {
-				url = j-> m_url. copy ( );
-				query = j-> m_query. copy ( );
+				url = j-> m_url;
+				query = j-> m_query;
 				
 				::curl_easy_setopt ( m_curl, CURLOPT_POST, 1 );
-				::curl_easy_setopt ( m_curl, CURLOPT_URL, url. data ( ));
-				::curl_easy_setopt ( m_curl, CURLOPT_POSTFIELDS, query. data ( ));
+				::curl_easy_setopt ( m_curl, CURLOPT_URL, url. constData ( ));
+				::curl_easy_setopt ( m_curl, CURLOPT_POSTFIELDS, query. constData ( ));
 				
 				//qDebug ( "CTransfer::post [%s] - form-data [%s]", url. data ( ), query. data ( ));
 			}
@@ -275,7 +294,7 @@ void CTransfer::run ( )
 		long filetime = -1;
 
 		m_file_total = m_file_progress = -1;
-		QApplication::postEvent ( this, new QCustomEvent ((QEvent::Type) TransferProgressEvent, 0 ));
+		QApplication::postEvent ( this, new CTransferEvent ( CTransferEvent::Progress, 0 ));
 
 		if ( res == CURLE_OK ) {
 			::curl_easy_getinfo ( m_curl, CURLINFO_RESPONSE_CODE, &respcode );
@@ -310,27 +329,27 @@ void CTransfer::run ( )
 		m_active_job = 0;
 		m_queue_lock. unlock ( );
 
-		QApplication::postEvent ( this, new QCustomEvent ((QEvent::Type) TransferFinishedEvent, 0 ));
+		QApplication::postEvent ( this, new CTransferEvent ( CTransferEvent::Finished, 0 ));
 	}
 }
 
-void CTransfer::customEvent ( QCustomEvent *ev )
+void CTransfer::customEvent ( QEvent *ev )
 {
-	if ( int( ev-> type ( )) == TransferFinishedEvent ) {
+	if ( int( ev-> type ( )) == CTransferEvent::Finished ) {
 		// we have to copy the job list to avoid problems with
 		// recursive mutex locking (we emit signals, which 
 		// can lead to slots calling another CTransfer function)
-		QPtrList<Job> finish;
+		QList<Job *> finish;
 
 		m_queue_lock. lock ( );
 
 		while ( !m_out_queue. isEmpty ( ))
-			finish. append ( m_out_queue. take ( 0 ));
+			finish. append ( m_out_queue. takeFirst ( ));
 
 		m_queue_lock. unlock ( );
 
 		while ( !finish. isEmpty ( )) {
-			Job *j = finish. take ( 0 );
+			Job *j = finish. takeFirst ( );
 		
 			emit finished ( j );
 			updateProgress ( -1 );
@@ -340,8 +359,8 @@ void CTransfer::customEvent ( QCustomEvent *ev )
 			delete j;
 		}
 	}
-	else if ( int( ev-> type ( )) == TransferProgressEvent ) {
-		Job *j = static_cast <Job *> ( ev-> data ( ));
+	else if ( int( ev-> type ( )) == CTransferEvent::Progress ) {
+		Job *j = static_cast <CTransferEvent *> ( ev )-> job ( );
 
 		if ( j )
 			emit progress ( j, m_file_progress, m_file_total );
@@ -383,12 +402,12 @@ void CTransfer::cancelAllJobs ( )
 	// we have to copy the job list to avoid problems with
 	// recursive mutex locking (cancel emits signals, which 
 	// can lead to slots calling another CTransfer function)
-	QPtrList<Job> canceled;
+	QList<Job *> canceled;
 
 	m_queue_lock. lock ( );
 
 	while ( !m_out_queue. isEmpty ( ))
-		canceled. append ( m_out_queue. take ( 0 ));
+		canceled. append ( m_out_queue. takeFirst ( ));
 
 	if ( m_active_job ) {
 		// we can't delete the Job data right away, since curl_write may be accessing it at any time
@@ -399,12 +418,12 @@ void CTransfer::cancelAllJobs ( )
 	}
 	
 	while ( !m_in_queue. isEmpty ( ))
-		canceled. prepend ( m_in_queue. take ( 0 ));
+		canceled. prepend ( m_in_queue. takeFirst ( ));
 	
 	m_queue_lock. unlock ( );
 
 	while ( !canceled. isEmpty ( ))
-		cancel ( canceled. take ( 0 ));
+		cancel ( canceled. takeFirst ( ));
 }
 
 size_t CTransfer::write_curl ( void *ptr, size_t size, size_t nmemb, void *stream )
@@ -421,7 +440,7 @@ size_t CTransfer::write_curl ( void *ptr, size_t size, size_t nmemb, void *strea
 		return size * nmemb;
 	}
 	else if ( j && j-> m_file ) {
-		Q_LONG res = j-> m_file-> writeBlock ((const char *) ptr, size * nmemb );
+		qint64 res = j-> m_file-> write ((const char *) ptr, size * nmemb );
 
 		if ( res < 0 ) {
 			// set error code
@@ -439,7 +458,7 @@ int CTransfer::progress_curl ( void *stream, double dltotal, double dlnow, doubl
 	
 	that-> m_file_progress = int( dlnow );
 	that-> m_file_total    = int( dltotal );
-	QApplication::postEvent ( that, new QCustomEvent ((QEvent::Type) TransferProgressEvent, that-> m_active_job ));
+	QApplication::postEvent ( that, new CTransferEvent ( CTransferEvent::Progress, that-> m_active_job ));
 	
 	return 0;
 }

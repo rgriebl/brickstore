@@ -14,25 +14,24 @@
 #ifndef __CTASKPANEMANAGER_H__
 #define __CTASKPANEMANAGER_H__
 
-#include <qobject.h>
-#include <qiconset.h>
-#include <qvaluelist.h>
-#include <qframe.h>
+#include <QObject>
+#include <QIcon>
+#include <QList>
+#include <QFrame>
 
 class CTaskPane;
 class CTaskPaneManagerPrivate;
 class QMainWindow;
-class QDockWindow;
 class QWidget;
 class QAction;
-class QPopupMenu;
+class QMenu;
 
 
 class CTaskPaneManager : public QObject {
 	Q_OBJECT
 
 public:
-	CTaskPaneManager ( QMainWindow *parent, const char *name = 0 );
+	CTaskPaneManager ( QMainWindow *parent );
 	~CTaskPaneManager ( );
 
 	enum Mode {
@@ -43,7 +42,7 @@ public:
 	Mode mode ( ) const;
 	void setMode ( Mode m );
 
-	void addItem ( QWidget *w, const QIconSet &is, const QString &txt = QString ( ));
+	void addItem ( QWidget *w, const QIcon &is, const QString &txt = QString ( ));
 	void removeItem ( QWidget *w, bool delete_widget = true );
 
 	QString itemText ( QWidget *w ) const;
@@ -54,7 +53,7 @@ public:
 
 
 	QAction *createItemVisibilityAction ( QObject *parent = 0, const char *name = 0 ) const;
-	QPopupMenu *createItemVisibilityMenu ( ) const;
+	QMenu *createItemVisibilityMenu ( ) const;
 
 private slots:
 	void itemMenuAboutToShow ( );

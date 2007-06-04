@@ -14,7 +14,7 @@
 #ifndef __CSPLASH__
 #define __CSPLASH__
 
-#include <qsplashscreen.h>
+#include <QSplashScreen>
 
 class CSplash : public QSplashScreen {
 	Q_OBJECT

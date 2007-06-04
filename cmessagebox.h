@@ -14,7 +14,7 @@
 #ifndef __CMESSAGEBOX_H__
 #define __CMESSAGEBOX_H__
 
-#include <qmessagebox.h>
+#include <QMessageBox>
 
 inline QString CMB_BOLD ( const QString &str )
 {
@@ -30,10 +30,10 @@ public:
 	static void setDefaultTitle ( const QString &s );
 	static QString defaultTitle ( );
 
-	static int information ( QWidget *parent, const QString & text, int button0 = QMessageBox::Ok, int button1 = 0, int button2 = 0 );
-	static int question ( QWidget *parent, const QString & text, int button0 = QMessageBox::Ok, int button1 = 0, int button2 = 0 );
-	static int warning ( QWidget *parent, const QString & text, int button0 = QMessageBox::Ok, int button1 = 0, int button2 = 0 );
-	static int critical ( QWidget *parent, const QString & text, int button0 = QMessageBox::Ok, int button1 = 0, int button2 = 0 );
+	static StandardButton information ( QWidget *parent, const QString & text, StandardButtons buttons = Ok, StandardButton defaultButton = NoButton );
+	static StandardButton question ( QWidget *parent, const QString &text, StandardButtons buttons = Ok, StandardButton defaultButton = NoButton );
+	static StandardButton warning ( QWidget *parent, const QString & text, StandardButtons buttons = Ok, StandardButton defaultButton = NoButton );
+	static StandardButton critical ( QWidget *parent, const QString & text, StandardButtons buttons = Ok, StandardButton defaultButton = NoButton );
 
 	static bool getString ( QWidget *parent, const QString &text, const QString &unit, QString &value, QValidator *validate = 0 );
 	static bool getString ( QWidget *parent, const QString &text, QString &value );
@@ -44,7 +44,7 @@ public:
 private:
 	CMessageBox ( );
 
-	static int msgbox ( QWidget *parent, const QString &msg, QMessageBox::Icon icon, int but0, int but1, int but2 );
+	static StandardButton msgbox ( QWidget *parent, const QString &msg, QMessageBox::Icon icon, StandardButtons buttons, StandardButton defaultButton );
 
 private:
 	static QString s_deftitle;

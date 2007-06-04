@@ -14,18 +14,19 @@
 #ifndef __CREF_H__
 #define __CREF_H__
 
-#include <qptrlist.h>
-#include <qasciidict.h>
+#include <QList>
+#include <QHash>
+#include <QString>
 
 class CRef;
 
 class CAsciiRefCacheBase {
 protected:
-	CAsciiRefCacheBase ( uint dictsize, uint cachesize );
+	CAsciiRefCacheBase ( int cachesize );
 	virtual ~CAsciiRefCacheBase ( );
 
-	bool put ( const char *key, CRef *ref );
-	CRef *get ( const char *key );
+	bool put ( const QString &key, CRef *ref );
+	CRef *get ( const QString &key );
 
 public:
 	virtual void clear ( );
@@ -37,17 +38,17 @@ private:
 	friend class CRef;
 
 private:
-	QAsciiDict<CRef>      m_dict;
-	QPtrList<const CRef>  m_no_ref;
-	uint                  m_cache_size;
+	QHash<QString, CRef *>  m_dict;
+	QList<const CRef *>     m_no_ref;
+	int                     m_cache_size;
 };
 
-template <typename T, uint DICTSIZE, uint CACHESIZE> class CAsciiRefCache : public CAsciiRefCacheBase {
+template <typename T, uint CACHESIZE> class CAsciiRefCache : public CAsciiRefCacheBase {
 public:
-	CAsciiRefCache ( ) : CAsciiRefCacheBase ( DICTSIZE, CACHESIZE ) { }
+	CAsciiRefCache ( ) : CAsciiRefCacheBase ( CACHESIZE ) { }
 
-	bool insert ( const char *key, T *ref )  { return put ( key, ref ); }
-	T *operator [] ( const char *key )       { return (T *) get ( key ); }
+	bool insert ( const QString &key, T *ref )  { return put ( key, ref ); }
+	T *operator [] ( const QString &key )       { return (T *) get ( key ); }
 };
 
 

@@ -83,11 +83,10 @@ BrickLink::PriceGuide *BrickLink::priceGuide ( const BrickLink::Item *item, cons
 	if ( !item || !color )
 		return 0;
 
-	QCString key;
+	QString key;
 	key. sprintf ( "%c@%d@%d", item-> itemType ( )-> id ( ), item-> index ( ), color-> id ( ));
 
 	//qDebug ( "PG requested for %s", key. data ( ));
-
 	PriceGuide *pg = m_price_guides. cache [key];
 
 	if ( !pg ) {
@@ -137,9 +136,7 @@ static int safe_strtol ( const char *data, uint start, uint stop )
 		return 0;
 	
 	// data [i] may NOT be writable
-	QString qstr;
-	qstr. setAscii ( data + start, i - start );
-	return qstr. toInt ( );
+	return QString::fromAscii ( data + start, i - start ). toInt ( );
 }
 
 static money_t safe_strtomoney ( const char *data, uint start, uint stop )
@@ -153,10 +150,7 @@ static money_t safe_strtomoney ( const char *data, uint start, uint stop )
 		return .0;
 
 	// data [i] may NOT be writable
-	
-	QString qstr;
-	qstr. setAscii ( data + start, i - start );
-	return money_t::fromCString ( qstr );
+	return money_t::fromCString ( QString::fromAscii ( data + start, i - start ));
 }
 
 } // namespace
@@ -254,7 +248,7 @@ void BrickLink::PriceGuide::save_to_disk ( )
 	//qDebug ( "PG saving data to \"%s\"",  path. latin1 ( ));
 
 	QFile f ( path );
-	if ( f. open ( IO_WriteOnly )) {
+	if ( f. open ( QIODevice::WriteOnly )) {
 		QTextStream ts ( &f );
 
 		ts << "# Price Guide for part #" << m_item-> id ( ) << " (" << m_item-> name ( ) << "), color #" << m_color-> id ( ) << " (" << m_color-> name ( ) << ")\n";
@@ -292,7 +286,7 @@ void BrickLink::PriceGuide::load_from_disk ( )
 	//qDebug ( "PG loading data from \"%s\"", path. latin1 ( ));
 
 	QFile f ( path );
-	if ( f. open ( IO_ReadOnly )) {
+	if ( f. open ( QIODevice::ReadOnly )) {
 		QTextStream ts ( &f );
 		QString line;
 
@@ -300,7 +294,7 @@ void BrickLink::PriceGuide::load_from_disk ( )
 			if ( !line. length ( ) || ( line [0] == '#' ) || ( line [0] == '\r' ))  // skip comments fast
 				continue;
 
-			QStringList sl = QStringList::split ( '\t', line, true );
+			QStringList sl = line. split ( '\t', QString::KeepEmptyParts );
 
 			if (( sl. count ( ) != 8 ) || ( sl [0]. length ( ) != 1 ) || ( sl [1]. length ( ) != 1 )) { // sanity check
 				continue;
@@ -309,13 +303,13 @@ void BrickLink::PriceGuide::load_from_disk ( )
 			int t = -1;
 			int c = -1;
 
-			switch ( sl [0][0]. latin1 ( )) {
+			switch ( sl [0][0]. toLatin1 ( )) {
 				case 'A': t = AllTime; break;
 				case 'P': t = PastSix; break;
 				case 'C': t = Current; break;
 			}
 
-			switch ( sl [1][0]. latin1 ( )) {
+			switch ( sl [1][0]. toLatin1 ( )) {
 				case 'N': c = New;  break;
 				case 'U': c = Used; break;
 			}
@@ -373,12 +367,12 @@ void BrickLink::updatePriceGuide ( BrickLink::PriceGuide *pg, bool high_priority
 	pg-> m_update_status = Updating;
 	pg-> addRef ( );
 
-	QCString url;
+	QString url;
 	CKeyValueList query;
 	
 	url = "http://www.bricklink.com/priceGuide.asp"; // ?a=%c&viewType=N&colorID=%d&itemID=%s", tolower ( pg-> item ( )-> itemType ( )-> id ( )), pg-> color ( )-> id ( ), pg-> item ( )-> id ( ));
 
-	query << CKeyValue ( "a",        QChar ( pg-> item ( )-> itemType ( )-> id ( )). lower ( ))
+	query << CKeyValue ( "a",        QChar ( pg-> item ( )-> itemType ( )-> id ( )). toLower ( ))
 	      << CKeyValue ( "viewType", "N" )
 	      << CKeyValue ( "colorID",  QString::number ( pg-> color ( )-> id ( )))
 	      << CKeyValue ( "itemID",   pg-> item ( )-> id ( ))

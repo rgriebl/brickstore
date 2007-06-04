@@ -13,8 +13,8 @@
 */
 #include <stdlib.h>
 
-#include <qfile.h>
-#include <qapplication.h>
+#include <QFile>
+#include <QApplication>
 
 #include "cconfig.h"
 #include "cutility.h"
@@ -23,7 +23,7 @@
 
 
 CRebuildDatabase::CRebuildDatabase ( const QString &output )
-	: QObject ( 0, "rebuild_database" )
+	: QObject ( 0 )
 {
 	m_output = output;
 	m_trans = 0;
@@ -31,7 +31,7 @@ CRebuildDatabase::CRebuildDatabase ( const QString &output )
 #if defined( Q_OS_WIN32 )
 	AllocConsole ( );
 	const char *title = "BrickStore - Rebuilding Database";
-	QT_WA({ SetConsoleTitleW ((LPCWSTR) QString( title ). ucs2 ( )); }, 
+	QT_WA({ SetConsoleTitleW ( QString( title ). utf16 ( )); }, 
 	      { SetConsoleTitleA ( title ); })
 	freopen ( "CONIN$", "r", stdin );
 	freopen ( "CONOUT$", "w", stdout );
@@ -52,7 +52,7 @@ int CRebuildDatabase::error ( const QString &error )
 	if ( error. isEmpty ( ))
 		printf ( " FAILED.\n" );
 	else
-		printf ( " FAILED: %s\n", error. ascii ( ));
+		printf ( " FAILED: %s\n", qPrintable( error ));
 
 	return 2;
 }
@@ -106,7 +106,7 @@ int CRebuildDatabase::exec ( )
 	/////////////////////////////////////////////////////////////////////////////////
 	printf ( "\nSTEP 3: Parsing inventories (part I)...\n" );
 
-	QPtrVector<BrickLink::Item> invs = blti. items ( );
+	QVector<const BrickLink::Item *> invs = blti. items ( );
 	blti. importInventories ( bl-> dataPath ( ), invs );
 
 	/////////////////////////////////////////////////////////////////////////////////
@@ -120,7 +120,7 @@ int CRebuildDatabase::exec ( )
 
 	blti. importInventories ( bl-> dataPath ( ), invs );
 	
-	if (( invs. size ( ) - invs. containsRef ( 0 )) > ( blti. items ( ). count ( ) / 50 )) // more than 2% have failed
+	if (( invs. size ( ) - invs. count ( 0 )) > ( blti. items ( ). count ( ) / 50 )) // more than 2% have failed
 		return error ( "more than 2% of all inventories had errors." );
 
 	/////////////////////////////////////////////////////////////////////////////////
@@ -207,13 +207,13 @@ bool CRebuildDatabase::download ( )
 
 	{ // workaround for U type
 		QFile uf ( path + "items_U.txt" );
-		uf. open ( IO_WriteOnly );
+		uf. open ( QIODevice::WriteOnly );
 	}
 
 	for ( tptr = table; tptr-> m_url; tptr++ ) {
 		QFile *f = new QFile ( path + tptr-> m_file + ".new" );
 
-		if ( !f-> open ( IO_WriteOnly )) {
+		if ( !f-> open ( QIODevice::WriteOnly )) {
 			m_error = QString ( "failed to write %1: %2" ). arg( tptr-> m_file ). arg( f-> errorString ( ));
 			delete f;
 			failed = true;
@@ -249,7 +249,7 @@ void CRebuildDatabase::downloadJobFinished ( CTransfer::Job *job )
 		if ( !job-> failed ( ) && f ) {
 			f-> close ( );
 
-			QString basepath = f-> name ( );
+			QString basepath = f-> fileName ( );
 			basepath. truncate ( basepath. length ( ) - 4 );
 
 			QString err = CUtility::safeRename ( basepath );
@@ -265,18 +265,18 @@ void CRebuildDatabase::downloadJobFinished ( CTransfer::Job *job )
 		if ( !ok )
 			m_downloads_failed++;
 
-		QString fname = f-> name ( );
+		QString fname = f-> fileName ( );
 		fname. remove ( 0, BrickLink::inst ( )-> dataPath ( ). length ( ));
-		printf ( "%c > %s", ok ? ' ' : '*', fname. ascii ( ));
+		printf ( "%c > %s", ok ? ' ' : '*', qPrintable( fname ));
 		if ( ok )
 			printf ( "\n" );
 		else
-			printf ( " (%s)\n", m_error. ascii ( ));
+			printf ( " (%s)\n", qPrintable( m_error ));
 	}
 }
 
 
-bool CRebuildDatabase::downloadInventories ( QPtrVector<BrickLink::Item> &invs )
+bool CRebuildDatabase::downloadInventories ( QVector<const BrickLink::Item *> &invs )
 {
 	QString path = BrickLink::inst ( )-> dataPath ( );
 
@@ -284,17 +284,17 @@ bool CRebuildDatabase::downloadInventories ( QPtrVector<BrickLink::Item> &invs )
 	m_downloads_in_progress = 0;
 	m_downloads_failed = 0;
 
-	QCString url = "http://www.bricklink.com/catalogDownload.asp";
+	QString url = "http://www.bricklink.com/catalogDownload.asp";
 
-	BrickLink::Item **itemp = invs. data ( );
-	for ( uint i = 0; i < invs. count ( ); i++ ) {
-		BrickLink::Item *&item = itemp [i];
+	const BrickLink::Item **itemp = invs. data ( );
+	for ( int i = 0; i < invs. count ( ); i++ ) {
+		const BrickLink::Item *&item = itemp [i];
 
 		if ( item ) {
 			QFile *f = new QFile ( BrickLink::inst ( )-> dataPath ( item ) + "inventory.xml.new" );
 
-			if ( !f-> open ( IO_WriteOnly )) {
-				m_error = QString ( "failed to write %1: %2" ). arg( f-> name ( )). arg( f-> errorString ( ));
+			if ( !f-> open ( QIODevice::WriteOnly )) {
+				m_error = QString ( "failed to write %1: %2" ). arg( f-> fileName ( )). arg( f-> errorString ( ));
 				delete f;
 				failed = true;
 				break;

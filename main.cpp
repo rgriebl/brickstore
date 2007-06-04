@@ -11,8 +11,10 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <string.h>
-#include <qmessagebox.h>
+#include <clocale>
+#include <cstring>
+
+#include <QMessageBox>
 
 #include "capplication.h"
 
@@ -34,7 +36,7 @@ int main ( int argc, char **argv )
 	
 	if ( show_usage ) {
 #if defined( Q_OS_WIN32 )
-		QMessageBox::information ( 0, "BrickStore", "<b>Usage:</b><br />brickstore.exe [&lt;files&gt;]<br /><br />brickstore.exe --rebuild-database &lt;dbname&gt;<br />", QMessageBox::Ok );
+		QMessageBox::information ( 0, "BrickStore", "<b>Usage:</b><br />brickstore.exe [&lt;files&gt;]<br /><br />brickstore.exe --rebuild-database &lt;dbname&gt;<br />" );
 #else
 		printf ( "Usage: %s [<files>]\n", argv [0] );
 		printf ( "       %s --rebuild-database <dbname>\n", argv [0] );

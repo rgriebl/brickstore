@@ -14,8 +14,8 @@
 #ifndef __CPICTUREWIDGET_H__
 #define __CPICTUREWIDGET_H__
 
-#include <qframe.h>
-#include <qlabel.h>
+#include <QFrame>
+#include <QLabel>
 
 #include "bricklink.h"
 
@@ -27,7 +27,7 @@ class QAction;
 class CPictureWidget : public QFrame {
 	Q_OBJECT
 public:
-	CPictureWidget ( QWidget *parent = 0, const char *name = 0, WFlags fl = 0 );
+	CPictureWidget ( QWidget *parent = 0, Qt::WindowFlags f = 0 );
 	virtual ~CPictureWidget ( );
 	
 	void setPicture ( BrickLink::Picture *pic );
@@ -44,7 +44,6 @@ protected slots:
 	void languageChange ( );
 	
 protected:
-	virtual void contextMenuEvent ( QContextMenuEvent *e );
 	virtual void mouseDoubleClickEvent ( QMouseEvent *e );
 	
 private:
@@ -68,7 +67,6 @@ protected slots:
 	void languageChange ( );
 
 protected:
-	virtual void contextMenuEvent ( QContextMenuEvent *e );
 	virtual void mouseDoubleClickEvent ( QMouseEvent *e );
 	virtual void keyPressEvent ( QKeyEvent *e );
 

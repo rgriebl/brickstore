@@ -49,11 +49,11 @@ public:
 
 		QFile *file = new QFile ( localfile + ".lzma" );
 
-		if ( file-> open ( IO_WriteOnly )) {
+		if ( file-> open ( QIODevice::WriteOnly )) {
 			pd-> get ( remotefile + ".lzma", CKeyValueList ( ), dt, file );
 		}
 		else {
-			pd-> setErrorText ( tr( "Could not write to file: %1" ). arg( file-> name ( )));
+			pd-> setErrorText ( tr( "Could not write to file: %1" ). arg( file-> fileName ( )));
 			delete file;
 		}
 	}
@@ -70,10 +70,10 @@ private slots:
 			m_progress-> setFinished ( true );
 		}
 		else if ( file-> size ( )) {
-			QString basepath = file-> name ( );
+			QString basepath = file-> fileName ( );
 			basepath. truncate ( basepath. length ( ) - 5 ); // strip '.lzma'
 
-			QString error = decompress ( file-> name ( ), basepath );
+			QString error = decompress ( file-> fileName ( ), basepath );
 
 			if ( error. isNull ( )) {
 				if ( BrickLink::inst ( )-> readDatabase ( )) {
@@ -98,9 +98,9 @@ private:
 		QFile sf ( src );
 		QFile df ( dst );
 		
-		if ( !sf. open ( IO_ReadOnly ))
+		if ( !sf. open ( QIODevice::ReadOnly ))
 			return tr( "Could not read downloaded file: %1" ). arg( src );
-		if ( !df. open ( IO_WriteOnly ))
+		if ( !df. open ( QIODevice::WriteOnly ))
 			return tr( "Could not write to database file: %1" ). arg( dst );
 		
 		static const int CHUNKSIZE_IN = 4096;
@@ -128,7 +128,7 @@ private:
 		while ( true ) {
 			if ( strm. avail_in == 0 ) {
 				strm. next_in  = (unsigned char *) buffer_in;
-				strm. avail_in = sf. readBlock ( buffer_in, CHUNKSIZE_IN );
+				strm. avail_in = sf. read ( buffer_in, CHUNKSIZE_IN );
 			}
 			strm. next_out  = (unsigned char *) buffer_out;
 			strm. avail_out = CHUNKSIZE_OUT;
@@ -139,8 +139,8 @@ private:
 				break;
 			}
 				
-			Q_LONG write_size = CHUNKSIZE_OUT - strm.avail_out;
-			if ( write_size != df. writeBlock ( buffer_out, write_size )) {
+			qint64 write_size = CHUNKSIZE_OUT - strm.avail_out;
+			if ( write_size != df. write ( buffer_out, write_size )) {
 				loop_error = tr( "Error writing to file %1: %2" ). arg( dst, df. errorString ( ));
 				break;
 			}
@@ -148,7 +148,7 @@ private:
 				lzmadec_end ( &strm );
 				break;
 			}
-			m_progress-> setProgress ( sf. at ( ), sf. size ( ));
+			m_progress-> setProgress ( sf. pos ( ), sf. size ( ));
 		}
 		
 		delete [] buffer_in;

@@ -14,8 +14,8 @@
 #ifndef __CREBUILDDATABASE_H__
 #define __CREBUILDDATABASE_H__
 
-#include <qobject.h>
-#include <qmap.h>
+#include <QObject>
+#include <QDateTime>
 
 #include "bricklink.h"
 #include "ctransfer.h"
@@ -37,7 +37,7 @@ private:
 	int error ( const QString & );
 
 	bool download ( );
-	bool downloadInventories ( QPtrVector<BrickLink::Item> &invs );
+	bool downloadInventories ( QVector<const BrickLink::Item *> &invs );
 
 private:
 	CTransfer *m_trans;

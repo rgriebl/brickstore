@@ -14,11 +14,11 @@
 #ifndef __CCONFIG_H__
 #define __CCONFIG_H__
 
-#include <qsettings.h>
-#include <qobject.h>
+#include <QSettings>
+#include <QDateTime>
 
 
-class CConfig : public QObject, public QSettings {
+class CConfig : public QSettings {
 	Q_OBJECT
 
 private:
@@ -106,7 +106,7 @@ signals:
 
 protected:
 	QString readPasswordEntry ( const QString &key ) const;
-	bool writePasswordEntry ( const QString &key, const QString &password );
+	void writePasswordEntry ( const QString &key, const QString &password );
 
 private:
 	bool         m_show_input_errors;

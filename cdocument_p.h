@@ -14,22 +14,22 @@
 #ifndef __CDOCUMENT_P_H__
 #define __CDOCUMENT_P_H__
 
-#include "cundo.h"
+#include <QUndoCommand>
 #include "cdocument.h"
 
 
-class CAddRemoveCmd : public CUndoCmd {
-	Q_OBJECT
-
+class CAddRemoveCmd : public QUndoCommand {
 public:
 	enum Type { Add, Remove };
 
-	CAddRemoveCmd ( Type t, CDocument *doc, const CDocument::ItemList &positions, const CDocument::ItemList &items, bool can_merge = false );
+	CAddRemoveCmd ( Type t, CDocument *doc, const CDocument::ItemList &positions, const CDocument::ItemList &items, bool merge_allowed = false );
 	~CAddRemoveCmd ( );
+
+	virtual int id ( ) const;
 
 	virtual void redo ( );
 	virtual void undo ( );
-	virtual bool mergeMeWith ( CUndoCmd *other );
+	virtual bool mergeWith ( const QUndoCommand *other );
 
 	static QString genDesc ( bool is_add, uint count );
 
@@ -38,22 +38,25 @@ private:
 	CDocument::ItemList m_positions;
 	CDocument::ItemList m_items;
 	Type                m_type;
+	bool                m_merge_allowed;
 };
 
-class CChangeCmd : public CUndoCmd {
-	Q_OBJECT
-
+class CChangeCmd : public QUndoCommand {
 public:
-	CChangeCmd ( CDocument *doc, CDocument::Item *position, const CDocument::Item &item, bool can_merge = false );
+	CChangeCmd ( CDocument *doc, CDocument::Item *position, const CDocument::Item &item, bool merge_allowed = false );
+	virtual ~CChangeCmd ( );
+
+	virtual int id ( ) const;
 
 	virtual void redo ( );
 	virtual void undo ( );
-	virtual bool mergeMeWith ( CUndoCmd *other );
+	virtual bool mergeWith ( const QUndoCommand *other );
 
 private:
 	CDocument *      m_doc;
 	CDocument::Item *m_position;
 	CDocument::Item  m_item;
+	bool             m_merge_allowed;
 };
 
 #endif

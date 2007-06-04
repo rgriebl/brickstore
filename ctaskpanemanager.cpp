@@ -11,19 +11,21 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <qiconset.h>
-#include <qpixmap.h>
-#include <qimage.h>
-#include <qpixmapcache.h>
-#include <qstyle.h>
-#include <qpainter.h>
-#include <qcolor.h>
-#include <qfont.h>
-#include <qcursor.h>
-#include <qmainwindow.h>
-#include <qdockarea.h>
-#include <qpopupmenu.h>
-#include <qaction.h>
+#include <QIcon>
+#include <QPixmap>
+#include <QImage>
+#include <QPixmapCache>
+#include <QStyle>
+#include <QPainter>
+#include <QColor>
+#include <QFont>
+#include <QCursor>
+#include <QMainwindow>
+#include <QMenu>
+#include <QAction>
+#include <QDockWidget>
+#include <QMouseEvent>
+#include <QStyleOptionFocusRect>
 
 #include "ctaskpanemanager.h"
 #include "cutility.h"
@@ -33,14 +35,14 @@ class CTaskPaneManagerPrivate {
 public:
 	CTaskPaneManager::Mode  m_mode;
 	QMainWindow *m_mainwindow;
-	QDockWindow *m_panedock;
+	QDockWidget *m_panedock;
 	CTaskPane   *m_taskpane;
 
 	struct Item {
-		QDockWindow *m_itemdock;
+		QDockWidget *m_itemdock;
 		uint         m_taskpaneid;
 		QWidget *    m_widget;
-		QIconSet     m_iconset;
+		QIcon        m_iconset;
 		QString      m_label;
 		int          m_orig_framestyle;
 		bool         m_expandible       : 1;
@@ -61,12 +63,10 @@ public:
 		{ }
 	};
 
-	QValueList<Item>::iterator findItem ( QWidget *w );
-	QValueList<Item>::iterator noItem ( );
+	QList<Item>::iterator findItem ( QWidget *w );
+	QList<Item>::iterator noItem ( );
 
-	QValueList<Item> m_items;
-
-	static QWidget *s_nullwidget;
+	QList<Item> m_items;
 };
 
 
@@ -78,10 +78,10 @@ class CTaskPane : public QWidget {
 	Q_OBJECT
 
 public:
-	CTaskPane ( QWidget *parent, const char *name = 0 );
+	CTaskPane ( QWidget *parent );
 	virtual ~CTaskPane ( );
 
-	void addItem ( QWidget *w, const QIconSet &is, const QString &txt, bool expandible = true, bool special = false );
+	void addItem ( QWidget *w, const QIcon &is, const QString &txt, bool expandible = true, bool special = false );
 	void removeItem ( QWidget *w, bool delete_widget = true );
 
 	bool isExpanded ( QWidget *w ) const;
@@ -102,9 +102,7 @@ protected:
 
 	virtual void resizeEvent ( QResizeEvent *re );
 	virtual void paintEvent ( QPaintEvent *pe );
-	virtual void contextMenuEvent( QContextMenuEvent *cme );
-	virtual void paletteChange ( const QPalette &oldpal );
-	virtual void fontChange ( const QFont &oldfont );
+	virtual void changeEvent ( QEvent *e );
 
 private:
 	QPixmap            m_lgrad;
@@ -117,28 +115,18 @@ private:
 	int m_vspace, m_hspace;
 	int m_arrow;
 	bool m_condensed : 1;
-	QPtrList <CTaskGroup> *m_groups;
+	QList <CTaskGroup *> *m_groups;
 };
 
 
-QWidget *CTaskPaneManagerPrivate::s_nullwidget = 0;
 
-
-CTaskPaneManager::CTaskPaneManager ( QMainWindow *parent, const char *name )
-	: QObject ( parent, name )
+CTaskPaneManager::CTaskPaneManager ( QMainWindow *parent )
+	: QObject ( parent )
 {
 	d = new CTaskPaneManagerPrivate;
 	d-> m_mainwindow = parent;
 	d-> m_panedock = 0;
 	d-> m_taskpane = 0;
-
-#if defined( Q_WS_MACX )
-	// MacOSX 10.4 Intel/Qt 3.3.6 crashes when reparenting to 0
-	
-	if ( !d-> s_nullwidget )
-		d-> s_nullwidget = new QWidget ( 0 );
-#endif
-
 	d-> m_mode = Classic;
 	setMode ( Modern );
 }
@@ -148,9 +136,9 @@ CTaskPaneManager::~CTaskPaneManager ( )
 	delete d;
 }
 
-QValueList<CTaskPaneManagerPrivate::Item>::iterator CTaskPaneManagerPrivate::findItem ( QWidget *w )
+QList<CTaskPaneManagerPrivate::Item>::iterator CTaskPaneManagerPrivate::findItem ( QWidget *w )
 {
-	QValueList<Item>::iterator it = m_items. begin ( );
+	QList<Item>::iterator it = m_items. begin ( );
 
 	while ( it != m_items. end ( )) {
 		if ((*it). m_widget == w )
@@ -160,12 +148,12 @@ QValueList<CTaskPaneManagerPrivate::Item>::iterator CTaskPaneManagerPrivate::fin
 	return it;
 }
 
-QValueList<CTaskPaneManagerPrivate::Item>::iterator CTaskPaneManagerPrivate::noItem ( )
+QList<CTaskPaneManagerPrivate::Item>::iterator CTaskPaneManagerPrivate::noItem ( )
 {
 	return m_items. end ( );
 }
 
-void CTaskPaneManager::addItem ( QWidget *w, const QIconSet &is, const QString &text )
+void CTaskPaneManager::addItem ( QWidget *w, const QIcon &is, const QString &text )
 {
 	if ( w && ( d-> findItem ( w ) == d-> noItem ( ))) {
 		CTaskPaneManagerPrivate::Item item;
@@ -185,12 +173,12 @@ void CTaskPaneManager::addItem ( QWidget *w, const QIconSet &is, const QString &
 
 void CTaskPaneManager::removeItem ( QWidget *w, bool delete_widget )
 {
-	QValueList<CTaskPaneManagerPrivate::Item>::iterator it = d-> findItem ( w );
+	QList<CTaskPaneManagerPrivate::Item>::iterator it = d-> findItem ( w );
 	
 	if ( it != d-> noItem ( )) {
 		kill ( );
 
-		d-> m_items. remove ( it );
+		d-> m_items. erase ( it );
 		if ( delete_widget )
 			delete w;
 
@@ -200,7 +188,7 @@ void CTaskPaneManager::removeItem ( QWidget *w, bool delete_widget )
 
 void CTaskPaneManager::setItemText ( QWidget *w, const QString &txt )
 {
-	QValueList<CTaskPaneManagerPrivate::Item>::iterator it = d-> findItem ( w );
+	QList<CTaskPaneManagerPrivate::Item>::iterator it = d-> findItem ( w );
 	
 	if ( it != d-> noItem ( )) {
 		(*it). m_label = txt;
@@ -214,7 +202,7 @@ void CTaskPaneManager::setItemText ( QWidget *w, const QString &txt )
 QString CTaskPaneManager::itemText ( QWidget *w ) const
 {
 	QString txt;
-	QValueList<CTaskPaneManagerPrivate::Item>::iterator it = d-> findItem ( w );
+	QList<CTaskPaneManagerPrivate::Item>::iterator it = d-> findItem ( w );
 	
 	if ( it != d-> noItem ( ))
 		txt = (*it). m_label;
@@ -225,7 +213,7 @@ QString CTaskPaneManager::itemText ( QWidget *w ) const
 
 bool CTaskPaneManager::isItemVisible ( QWidget *w ) const
 {
-	QValueList<CTaskPaneManagerPrivate::Item>::iterator it = d-> findItem ( w );
+	QList<CTaskPaneManagerPrivate::Item>::iterator it = d-> findItem ( w );
 	
 	if ( it != d-> noItem ( ))
 		return (*it). m_visible;
@@ -235,7 +223,7 @@ bool CTaskPaneManager::isItemVisible ( QWidget *w ) const
 
 void CTaskPaneManager::setItemVisible ( QWidget *w, bool visible )
 {
-	QValueList<CTaskPaneManagerPrivate::Item>::iterator it = d-> findItem ( w );
+	QList<CTaskPaneManagerPrivate::Item>::iterator it = d-> findItem ( w );
 	
 	if ( it != d-> noItem ( )) {
 		if ( visible != (*it). m_visible ) {
@@ -268,10 +256,10 @@ void CTaskPaneManager::kill ( )
 {
 	// kill existing window
 	if ( d-> m_mode == Modern ) {
-		for ( QValueList<CTaskPaneManagerPrivate::Item>::iterator it = d-> m_items. begin ( ); it != d-> m_items. end ( ); ++it ) {
+		for ( QList<CTaskPaneManagerPrivate::Item>::iterator it = d-> m_items. begin ( ); it != d-> m_items. end ( ); ++it ) {
 			CTaskPaneManagerPrivate::Item &item = *it;
 
-			if ( ::qt_cast <QFrame *> ( item. m_widget )) {
+			if ( qobject_cast <QFrame *> ( item. m_widget )) {
 				QFrame *f = static_cast <QFrame *> ( item. m_widget );
 				f-> setFrameStyle ( item. m_orig_framestyle );
 			}
@@ -283,13 +271,13 @@ void CTaskPaneManager::kill ( )
 		d-> m_taskpane = 0;
 	}
 	else {
-		for ( QValueList<CTaskPaneManagerPrivate::Item>::iterator it = d-> m_items. begin ( ); it != d-> m_items. end ( ); ++it ) {
+		for ( QList<CTaskPaneManagerPrivate::Item>::iterator it = d-> m_items. begin ( ); it != d-> m_items. end ( ); ++it ) {
 			CTaskPaneManagerPrivate::Item &item = *it;
 
 			disconnect ( item. m_itemdock, SIGNAL( visibilityChanged ( bool )), this, SLOT( dockVisibilityChanged ( bool )));
 
 			item. m_widget-> hide ( );
-			item. m_widget-> reparent ( d-> s_nullwidget, QPoint ( 0, 0 ));
+			item. m_widget-> setParent ( 0 );
 
 			delete item. m_itemdock;
 			item. m_itemdock = 0;
@@ -301,22 +289,18 @@ void CTaskPaneManager::create ( )
 {
 	// create new window
 	if ( d-> m_mode == Modern ) {
-		d-> m_panedock = new QDockWindow ( QDockWindow::InDock, d-> m_mainwindow-> leftDock ( ), "panedock" );
+		d-> m_panedock = new QDockWidget ( d-> m_mainwindow );
+		d-> m_mainwindow-> addDockWidget ( Qt::LeftDockWidgetArea, d-> m_panedock );
 
-		d-> m_panedock-> setMovingEnabled ( false );
-		d-> m_panedock-> setCloseMode ( QDockWindow::Never );
-		d-> m_panedock-> setVerticallyStretchable ( true );
+		d-> m_panedock->setFeatures ( QDockWidget::NoDockWidgetFeatures );
 		
-		d-> m_taskpane = new CTaskPane ( d-> m_panedock, "taskpane" );
+		d-> m_taskpane = new CTaskPane ( 0 );
+		d-> m_panedock-> setWidget ( d-> m_taskpane );
 
-		d-> m_panedock-> boxLayout ( )-> setMargin ( 0 );
-		d-> m_panedock-> boxLayout ( )-> setSpacing ( 0 );
-		d-> m_panedock-> boxLayout ( )-> addWidget ( d-> m_taskpane );
-
-		for ( QValueList<CTaskPaneManagerPrivate::Item>::iterator it = d-> m_items. begin ( ); it != d-> m_items. end ( ); ++it ) {
+		for ( QList<CTaskPaneManagerPrivate::Item>::iterator it = d-> m_items. begin ( ); it != d-> m_items. end ( ); ++it ) {
 			CTaskPaneManagerPrivate::Item &item = *it;
 
-			if ( ::qt_cast <QFrame *> ( item. m_widget )) {
+			if ( qobject_cast <QFrame *> ( item. m_widget )) {
 				QFrame *f = static_cast <QFrame *> ( item. m_widget );
 				
 				item. m_orig_framestyle = f-> frameStyle ( );
@@ -333,20 +317,14 @@ void CTaskPaneManager::create ( )
 		connect ( d-> m_taskpane, SIGNAL( itemVisibilityChanged ( QWidget *, bool )), this, SLOT( itemVisibilityChanged ( QWidget *, bool )));
 	}
 	else {
-		for ( QValueList<CTaskPaneManagerPrivate::Item>::iterator it = d-> m_items. begin ( ); it != d-> m_items. end ( ); ++it ) {
+		for ( QList<CTaskPaneManagerPrivate::Item>::iterator it = d-> m_items. begin ( ); it != d-> m_items. end ( ); ++it ) {
 			CTaskPaneManagerPrivate::Item &item = *it;
 
-			item. m_itemdock = new QDockWindow ( QDockWindow::InDock, d-> m_mainwindow-> leftDock ( ), "itemdock" );
-			item. m_itemdock-> setMovingEnabled ( true );
-			item. m_itemdock-> setResizeEnabled ( true );
-			item. m_itemdock-> setVerticallyStretchable ( false );
-			item. m_itemdock-> setHorizontallyStretchable ( false );
-			item. m_itemdock-> setCloseMode ( QDockWindow::Always );
-			item. m_itemdock-> setCaption ( item. m_label );
+			item. m_itemdock = new QDockWidget ( item. m_label, d-> m_mainwindow );
+			d-> m_mainwindow-> addDockWidget ( Qt::LeftDockWidgetArea, item. m_itemdock );
 
-			item. m_widget-> reparent ( item. m_itemdock, QPoint ( 0, 0 ));
-			item. m_itemdock-> boxLayout ( )-> setMargin ( 1 );
-			item. m_itemdock-> boxLayout ( )-> addWidget ( item. m_widget );
+			item. m_itemdock-> setFeatures ( QDockWidget::AllDockWidgetFeatures );
+			item. m_itemdock-> setWidget ( item. m_widget );
 
 			item. m_widget-> show ( );
 
@@ -362,9 +340,9 @@ void CTaskPaneManager::create ( )
 
 void CTaskPaneManager::dockVisibilityChanged ( bool b )
 {
-	QDockWindow *dock = ::qt_cast <QDockWindow *> ( sender ( ));
+	QDockWidget *dock = qobject_cast <QDockWidget *> ( sender ( ));
 
-	for ( QValueList<CTaskPaneManagerPrivate::Item>::iterator it = d-> m_items. begin ( ); it != d-> m_items. end ( ); ++it ) {
+	for ( QList<CTaskPaneManagerPrivate::Item>::iterator it = d-> m_items. begin ( ); it != d-> m_items. end ( ); ++it ) {
 		CTaskPaneManagerPrivate::Item &item = *it;
 
 		if ( item. m_itemdock == dock ) {
@@ -376,7 +354,7 @@ void CTaskPaneManager::dockVisibilityChanged ( bool b )
 
 void CTaskPaneManager::itemVisibilityChanged ( QWidget *w, bool b )
 {
-	for ( QValueList<CTaskPaneManagerPrivate::Item>::iterator it = d-> m_items. begin ( ); it != d-> m_items. end ( ); ++it ) {
+	for ( QList<CTaskPaneManagerPrivate::Item>::iterator it = d-> m_items. begin ( ); it != d-> m_items. end ( ); ++it ) {
 		CTaskPaneManagerPrivate::Item &item = *it;
 
 		if ( item. m_widget == w ) {
@@ -386,16 +364,17 @@ void CTaskPaneManager::itemVisibilityChanged ( QWidget *w, bool b )
 	}	
 }
 
-QPopupMenu *CTaskPaneManager::createItemVisibilityMenu ( ) const
+QMenu *CTaskPaneManager::createItemVisibilityMenu ( ) const
 {
-	QPopupMenu *m = new QPopupMenu ( d-> m_mainwindow, "taskpanemanager_itemmenu" );
-	m-> setCheckable ( true );
+	QMenu *m = new QMenu ( d-> m_mainwindow );
+//	m-> setCheckable ( true );
 	connect ( m, SIGNAL( aboutToShow ( )), this, SLOT( itemMenuAboutToShow ( )));
 	return m;
 }
 
 void CTaskPaneManager::itemMenuAboutToShow ( )
 {
+#if 0
 	QPopupMenu *m = ::qt_cast <QPopupMenu *> ( sender ( ));
 
 	if ( m ) {
@@ -404,7 +383,7 @@ void CTaskPaneManager::itemMenuAboutToShow ( )
 		bool allon = true;
 
 		int index = 0;
-		for ( QValueList<CTaskPaneManagerPrivate::Item>::iterator it = d-> m_items. begin ( ); it != d-> m_items. end ( ); ++it, index++ ) {
+		for ( QList<CTaskPaneManagerPrivate::Item>::iterator it = d-> m_items. begin ( ); it != d-> m_items. end ( ); ++it, index++ ) {
 			int id = m-> insertItem ((*it). m_label, this, SLOT( itemMenuActivated ( int )));
 			m-> setItemParameter ( id, index );
 
@@ -436,10 +415,12 @@ void CTaskPaneManager::itemMenuAboutToShow ( )
 		m-> setItemChecked ( classicid, d-> m_mode != Modern );
 		m-> setItemParameter ( classicid, -4 );
 	}
+#endif
 }
 
 void CTaskPaneManager::itemMenuActivated ( int id )
 {
+#if 0
 	if ( id == -4 ) {
 		setMode ( Classic );
 	}
@@ -451,7 +432,7 @@ void CTaskPaneManager::itemMenuActivated ( int id )
 	}
 	else {
 		int index = 0;
-		for ( QValueList<CTaskPaneManagerPrivate::Item>::iterator it = d-> m_items. begin ( ); it != d-> m_items. end ( ); ++it, index++ ) {
+		for ( QList<CTaskPaneManagerPrivate::Item>::iterator it = d-> m_items. begin ( ); it != d-> m_items. end ( ); ++it, index++ ) {
 			CTaskPaneManagerPrivate::Item &item = *it;
 
 
@@ -468,14 +449,18 @@ void CTaskPaneManager::itemMenuActivated ( int id )
 			}
 		}
 	}
+#endif
 }
 
-class TaskPaneAction : public QActionGroup {
+
+class TaskPaneAction : public QAction {
 public:
 	TaskPaneAction ( CTaskPaneManager *tpm, QObject *parent, const char *name = 0 )
-		: QActionGroup ( parent, name, false ), m_tpm ( tpm )
-	{ }
-
+		: QAction ( parent ), m_tpm ( tpm )
+	{ 
+		setObjectName ( name );
+	}
+/*
 	virtual bool addTo ( QWidget *w )
 	{
 		if ( w-> inherits ( "QPopupMenu" )) {
@@ -492,17 +477,16 @@ public:
 		for ( QMap <QPopupMenu *, int>::const_iterator it = m_update_menutexts. begin ( ); it != m_update_menutexts. end ( ); ++it )
 			it. key ( )-> changeItem ( it. data ( ), menuText ( ));
 	}
-
+*/
 private:
 	CTaskPaneManager *m_tpm;
-	QMap <QPopupMenu *, int> m_update_menutexts;
+//	QMap <QPopupMenu *, int> m_update_menutexts;
 };
 
 QAction *CTaskPaneManager::createItemVisibilityAction ( QObject *parent, const char *name ) const
 {
 	return new TaskPaneAction ( const_cast<CTaskPaneManager *> ( this ), parent, name );
 }
-
 
 // vvv PRIVATE vvv
 
@@ -519,7 +503,6 @@ private:
 		m_special = m_hot = false;
 		m_widget = 0;
 
-		setBackgroundOrigin ( QWidget::AncestorOrigin );
 		setSizePolicy ( QSizePolicy::MinimumExpanding, QSizePolicy::Fixed );
 		setCursor ( Qt::PointingHandCursor );
 	}
@@ -528,7 +511,7 @@ public:
 	void setWidget ( QWidget *w )
 	{
 		m_widget = w;
-		w-> reparent ( m_bar, 0, QPoint ( 0, 0 ), false );
+		w-> setParent ( m_bar );
 		m_bar-> recalcLayout ( );
 	}
 
@@ -551,14 +534,14 @@ public:
 		return m_text;
 	}
 
-	void setIconSet ( const QIconSet &is )
+	void setIcon ( const QIcon &is )
 	{
 		m_is = is;
 		m_bar-> recalcLayout ( );
 		update ( );
 	}
 
-	QIconSet iconSet ( ) const
+	QIcon icon ( ) const
 	{
 		return m_is;
 	}
@@ -650,9 +633,9 @@ protected:
 	int m_leadin;
 	int m_leadout;
 
-	QWidget *m_widget;
-	QIconSet m_is;
-	QString m_text;
+	QWidget *  m_widget;
+	QIcon      m_is;
+	QString    m_text;
 
 	CTaskPane *m_bar;
 };
@@ -671,19 +654,17 @@ protected:
 //###########################################################################################
 
 
-CTaskPane::CTaskPane ( QWidget *parent, const char *name )
-	: QWidget ( parent, name )
+CTaskPane::CTaskPane ( QWidget *parent )
+	: QWidget ( parent )
 {
 	m_margins = QRect ( 6, 6, 1, 1 );
 	m_condensed = false;
-	m_groups = new QPtrList <CTaskGroup>;
+	m_groups = new QList <CTaskGroup *>;
 	//m_groups-> setAutoDelete ( true );
 
 	fontChange ( font ( ));
 	paletteChange ( palette ( ));
 
-	setWFlags ( Qt::WNoAutoErase );
-	setBackgroundMode ( Qt::NoBackground );
 	setSizePolicy ( QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding );
 }
 
@@ -691,10 +672,10 @@ CTaskPane::~CTaskPane ( )
 {
 }
 
-void CTaskPane::addItem ( QWidget *w, const QIconSet &is, const QString &txt, bool expandible, bool special )
+void CTaskPane::addItem ( QWidget *w, const QIcon &is, const QString &txt, bool expandible, bool special )
 {
 	CTaskGroup *g = new CTaskGroup ( this );
-	g-> setIconSet ( is );
+	g-> setIcon ( is );
 	g-> setText ( txt );
 	g-> setSpecial ( special );
 	g-> setExpandible ( expandible );
@@ -707,14 +688,14 @@ void CTaskPane::addItem ( QWidget *w, const QIconSet &is, const QString &txt, bo
 
 void CTaskPane::removeItem ( QWidget *w, bool delete_widget )
 {
-	for ( uint i = 0; i < m_groups-> count ( ); i++ ) {
+	for ( int i = 0; i < m_groups-> count ( ); i++ ) {
 		if ( w == m_groups-> at ( i )-> widget ( )) {
-			m_groups-> remove ( i );
+			m_groups-> removeAt ( i );
 
 			if ( delete_widget )
 				delete w;
 			else
-				w-> reparent ( CTaskPaneManagerPrivate::s_nullwidget, QPoint ( 0, 0 ));
+				w-> setParent ( 0 );
 		}
 	}
 }
@@ -723,9 +704,9 @@ bool CTaskPane::isExpanded ( QWidget *w ) const
 {
 	bool exp = false;
 
-	for ( QPtrListIterator <CTaskGroup> it ( *m_groups ); it. current ( ); ++it ) {
-		if ( w == it. current ( )-> widget ( )) {
-			exp = it. current ( )-> isExpanded ( );
+	foreach ( CTaskGroup *g, *m_groups ) {
+		if ( w == g-> widget ( )) {
+			exp = g-> isExpanded ( );
 			break;
 		}
 	}
@@ -734,9 +715,9 @@ bool CTaskPane::isExpanded ( QWidget *w ) const
 
 void CTaskPane::setExpanded ( QWidget *w, bool exp )
 {
-	for ( QPtrListIterator <CTaskGroup> it ( *m_groups ); it. current ( ); ++it ) {
-		if ( w == it. current ( )-> widget ( )) {
-			it. current ( )-> setExpanded ( exp );
+	foreach ( CTaskGroup *g, *m_groups ) {
+		if ( w == g-> widget ( )) {
+			g-> setExpanded ( exp );
 			break;
 		}
 	}
@@ -744,7 +725,7 @@ void CTaskPane::setExpanded ( QWidget *w, bool exp )
 
 void CTaskPane::drawHeaderBackground ( QPainter *p, CTaskGroup *g, bool /*hot*/ )
 {
-	const QColorGroup &cg = palette ( ). active ( );
+	const QPalette pal = palette ( );
 	QRect r = g-> rect ( );
 
 	int offy = r. height ( ) - ( m_vspace + m_xh + m_vspace );
@@ -753,23 +734,14 @@ void CTaskPane::drawHeaderBackground ( QPainter *p, CTaskGroup *g, bool /*hot*/ 
 		p-> fillRect ( r. x ( ), r. y ( ), r. width ( ), offy, m_mcol );
 
 	if ( g-> isSpecial ( )) {
-		p-> fillRect ( r. x ( ), r. y ( ) + offy, r. width ( ), r. height ( ) - offy, cg. highlight ( ). dark ( 150 ));
+		p-> fillRect ( r. x ( ), r. y ( ) + offy, r. width ( ), r. height ( ) - offy, pal. color ( QPalette::Highlight ). dark ( 150 ));
 	}
 	else {
-		QPixmap gradient;
-		QString key;
+		QLinearGradient gradient ( 0, 0, r. width ( ), 0 );
+		gradient. setColorAt ( 0, pal. color ( QPalette::Base ));
+		gradient. setColorAt ( 1, pal. color ( QPalette::Highlight ));
 
-		key. sprintf ( "ctg#%d", r. width ( ));
-
-		if ( !QPixmapCache::find ( key, gradient )) {
-			gradient. resize ( r. width ( ), 8 );
-
-			gradient. convertFromImage ( CUtility::createGradient ( gradient. size ( ), Qt::Horizontal, cg. base ( ), cg. highlight ( ), -100 ));
-
-			QPixmapCache::insert ( key, gradient );
-		}
-
-		p-> drawTiledPixmap ( r. x ( ), r. y ( ) + offy, r. width ( ), r. height ( ) - offy, gradient );
+		p-> fillRect ( r. x ( ), r. y ( ) + offy, r. width ( ), r. height ( ) - offy, gradient );
 	}
 	p-> setPen ( m_mcol );
 	p-> drawPoint ( r. x ( ), r. y ( ) + offy );
@@ -778,15 +750,15 @@ void CTaskPane::drawHeaderBackground ( QPainter *p, CTaskGroup *g, bool /*hot*/ 
 
 void CTaskPane::drawHeaderContents ( QPainter *p, CTaskGroup *g, bool hot )
 {
-	const QColorGroup &cg = palette ( ). active ( );
+	const QPalette pal = palette ( );
 
 	int x, y, w, h;
-	g-> rect ( ). rect ( &x, &y, &w, &h );
+	g-> rect ( ). getRect( &x, &y, &w, &h );
 
 	int offx = m_hspace;
 
-	if ( !g-> iconSet ( ). isNull ( )) {
-		QPixmap pix = g-> iconSet ( ). pixmap ( QIconSet::Large, hot ? QIconSet::Active : QIconSet::Normal, QIconSet::On );
+	if ( !g-> icon ( ). isNull ( )) {
+		QPixmap pix = g-> icon ( ). pixmap ( 32, hot ? QIcon::Active : QIcon::Normal, QIcon::On );
 
 		if ( !pix. isNull ( )) {
 			p-> drawPixmap ( x + offx, y + ( h > pix. height ( ) ? ( h - pix. height ( )) / 2 : 0 ), pix );
@@ -794,10 +766,10 @@ void CTaskPane::drawHeaderContents ( QPainter *p, CTaskGroup *g, bool hot )
 		}
 	}
 
-	QColor stc = cg. highlightedText ( );
-	QColor sbc = cg. highlight ( );
-	QColor tc = cg. highlight ( );
-	QColor bc = cg. base ( );
+	QColor stc = pal. color ( QPalette::HighlightedText );
+	QColor sbc = pal. color ( QPalette::Highlight );
+	QColor tc = pal. color ( QPalette::Highlight );
+	QColor bc = pal. color ( QPalette::Base );
 	if ( hot ) {
 		stc = CUtility::gradientColor ( stc, sbc, .5f );
 		tc = CUtility::gradientColor ( tc, bc, .5f );
@@ -822,9 +794,13 @@ void CTaskPane::drawHeaderContents ( QPainter *p, CTaskGroup *g, bool hot )
 				p-> drawLine ( ar. left ( ) + i, ar. top ( ) + off, ar. left ( ) + i, ar. bottom ( ) - off );
 		}
 	}
-	if ( hasFocus ( ))
-		style ( ). drawPrimitive ( QStyle::PE_FocusRect, p, tr, cg, QStyle::Style_Default );
+	if ( hasFocus ( )) {
+        QStyleOptionFocusRect opt;
+        opt. initFrom ( this );
+		opt. rect = tr;
 
+        style ( )-> drawPrimitive ( QStyle::PE_FrameFocusRect, &opt, p, this );
+	}
 }
 
 QSize CTaskPane::sizeHint ( ) const
@@ -843,7 +819,7 @@ QSize CTaskPane::sizeHint ( ) const
 
 	bool first = true;
 
-	for ( CTaskGroup *g = m_groups-> first ( ); g; g = m_groups-> next ( )) {
+	foreach ( CTaskGroup *g, *m_groups ) {
 		if ( !first && !m_condensed )
 			h += m_xh / 2;
 		first = false;
@@ -895,7 +871,7 @@ void CTaskPane::recalcLayout ( )
 
 	bool first = true;
 
-	for ( CTaskGroup *g = m_groups-> first ( ); g; g = m_groups-> next ( )) {
+	foreach ( CTaskGroup *g, *m_groups ) {
 		if ( !first && !m_condensed )
 			offy += m_xh / 2;
 		first = false;
@@ -934,13 +910,13 @@ QSize CTaskPane::sizeForGroup ( const CTaskGroup *g ) const
 	QFontMetrics fm ( m_font );
 	
 	QSize icons ( 0, 0 );
-	if ( !g-> iconSet ( ). isNull ( ))
-		icons = g-> iconSet ( ). pixmap ( ). size ( );
+	if ( !g-> icon ( ). isNull ( ))
+		icons = g-> icon ( ). pixmap ( 32 ). size ( );
 	int tw = fm. width ( g-> text ( ));
 	int th = 2 * m_vspace + m_xh;
 
 	s. setWidth ( m_hspace + icons. width ( ) + ( icons. width ( ) ? m_hspace : 0 ) + tw + ( tw ? m_hspace : 0 ) + ( g-> isExpandible ( ) ? m_arrow + m_hspace : 0 ));
-	s. setHeight ( QMAX( icons. height ( ), th ));
+	s. setHeight ( qMax( icons. height ( ), th ));
 
 	return s;
 }
@@ -951,52 +927,39 @@ void CTaskPane::resizeEvent ( QResizeEvent *re )
 	recalcLayout ( );
 }
 
-void CTaskPane::contextMenuEvent( QContextMenuEvent *cme )
+
+void CTaskPane::changeEvent ( QEvent *e )
 {
-	cme-> accept ( );
-}
+	if ( e-> type ( ) == QEvent::FontChange ) {
+		m_font = font ( );
+		m_font. setBold ( true );
 
-void CTaskPane::paletteChange ( const QPalette &oldpal )
-{
-	const QColorGroup &cg = palette ( ). active ( );
-	const QColor &colh = cg. highlight ( );
-	const QColor &colb = cg. background ( );
-	QSize ls ( m_margins. left ( ), 8 );
-	QSize rs ( m_margins. right ( ), 8 );
+		QFontMetrics fm ( m_font );
 
-	QColor colx = CUtility::gradientColor ( colh, colb, .2f  );
+		m_xw = fm. width ( "x" );
+		m_xh = fm. height ( );
 
-	m_lgrad. convertFromImage ( CUtility::createGradient ( ls, Qt::Horizontal, colx, colb, 130 ));
-	m_rgrad. convertFromImage ( CUtility::createGradient ( rs, Qt::Horizontal, colx, colb, -130 ));
-	m_mcol = colx;
+		m_arrow = ( m_xh / 2 ) | 1;
+		m_hspace = m_xw;
+		m_vspace = m_xh / 6;
 
-	QPixmapCache::clear ( );
-	QWidget::paletteChange ( oldpal );
-	update ( );
-}
-
-void CTaskPane::fontChange ( const QFont &oldfont )
-{
-	m_font = font ( );
-	m_font. setBold ( true );
-
-	QFontMetrics fm ( m_font );
-
-	m_xw = fm. width ( "x" );
-	m_xh = fm. height ( );
-
-	m_arrow = ( m_xh / 2 ) | 1;
-	m_hspace = m_xw;
-	m_vspace = m_xh / 6;
-
-	QWidget::fontChange ( oldfont );
-	recalcLayout ( );
-	update ( );
+		recalcLayout ( );
+		update ( );
+	}
+	else if ( e-> type ( ) == QEvent::PaletteChange ) {
+		const QColor &colh = palette ( ). color ( QPalette::Active, QPalette::Highlight );
+		const QColor &colb = palette ( ). color ( QPalette::Active, QPalette::Background );
+		m_mcol = CUtility::gradientColor ( colh, colb, .2f  );
+		update ( );
+	}
+	else {
+		QWidget::changeEvent ( e );
+	}
 }
 
 void CTaskPane::paintEvent ( QPaintEvent *e )
 {
-	const QColorGroup &cg = palette ( ). active ( );
+	QPalette pal = palette ( );
 	QPainter p ( this );
 
 	int w = width ( );
@@ -1014,19 +977,19 @@ void CTaskPane::paintEvent ( QPaintEvent *e )
 	QRect rm = QRect ( ml, 0, w - ml - mr, h ) & e-> rect ( );
 
 	if ( !rl. isEmpty ( ))
-		p. drawTiledPixmap ( rl, m_lgrad, pl );
+		p. fillRect        ( rl, m_mcol  );
+//		p. drawTiledPixmap ( rl, m_lgrad, pl );
 	if ( !rr. isEmpty ( ))
-		p. drawTiledPixmap ( rr, m_rgrad, pr );
+		p. fillRect        ( rr, m_mcol  );
+//		p. drawTiledPixmap ( rr, m_rgrad, pr );
 	if ( !rm. isEmpty ( ))
 		p. fillRect        ( rm, m_mcol  );
 
-	p. setPen ( CUtility::gradientColor ( cg. base ( ), cg. highlight ( ), .2f ));
+	p. setPen ( CUtility::gradientColor ( pal. color ( QPalette::Base ), pal. color ( QPalette::Highlight ), .2f ));
 
-	for ( CTaskGroup *g = m_groups-> first ( ); g; g = m_groups-> next ( )) {
+	foreach ( CTaskGroup *g, *m_groups ) {
 		if ( g-> widget ( ) && g-> isExpanded ( )) {
-			QRect wr = g-> widget ( )-> geometry ( );
-			wr. addCoords ( -1, -1, 1, 1 );
-			p. drawRect ( wr );
+			p. drawRect ( g-> widget ( )-> geometry ( ). adjusted ( -1, -1, 1, 1 ));
 		}
 		else {
 			QRect gr = g-> geometry ( );

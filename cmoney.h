@@ -70,8 +70,8 @@ class CMoneyValidator : public QDoubleValidator {
 	Q_OBJECT
 
 public:
-	CMoneyValidator ( QObject *parent, const char *name = 0 );
-	CMoneyValidator ( money_t bottom, money_t top, int decimals, QObject *parent, const char *name = 0 );
+	CMoneyValidator ( QObject *parent );
+	CMoneyValidator ( money_t bottom, money_t top, int decimals, QObject *parent );
 
 	virtual QValidator::State validate ( QString &input, int & ) const;
 
@@ -83,12 +83,12 @@ protected:
 
 class money_t {
 public:
-	money_t ( int v = 0 )          : val ( Q_INT64( v ) * 1000 ) { }
-	money_t ( double v )           : val ( Q_INT64( v * 1000 )) { }
+	money_t ( int v = 0 )          : val ( qint64( v ) * 1000 ) { }
+	money_t ( double v )           : val ( qint64( v * 1000 )) { }
 	money_t ( const money_t &m )   : val ( m. val ) { }
 
-	money_t &operator = ( int v )              { val = Q_INT64( v ) * 1000; return *this; }
-	money_t &operator = ( double v )           { val = Q_INT64( v * 1000 ); return *this; }
+	money_t &operator = ( int v )              { val = qint64( v ) * 1000; return *this; }
+	money_t &operator = ( double v )           { val = qint64( v * 1000 ); return *this; }
 	money_t &operator = ( const money_t &m )   { val = m. val; return *this; }
 	money_t &operator = ( const QString &str ) { bool ok = false; money_t m = CMoney::inst ( )-> toMoney ( str, &ok ); if ( ok ) *this = m; return *this; }
 
@@ -97,9 +97,9 @@ public:
 	money_t &operator += ( const money_t &m )  { val += m. val; return *this; }
 	money_t &operator -= ( const money_t &m )  { val -= m. val; return *this; }
 
-	money_t &operator *= ( double d )  { val = Q_INT64( val * d ); return *this; }
+	money_t &operator *= ( double d )  { val = qint64( val * d ); return *this; }
 	money_t &operator *= ( int i )     { val *= i; return *this; }
-	money_t &operator /= ( double d )  { val = Q_INT64( val / d ); return *this; }
+	money_t &operator /= ( double d )  { val = qint64( val / d ); return *this; }
 	money_t &operator /= ( int i )     { val /= i; return *this; }
 
 	friend bool operator <  ( const money_t &m1, const money_t &m2 )  { return m1. val <  m2. val; }
@@ -134,10 +134,10 @@ public:
 
 	double toDouble ( ) const;
 	
-	Q_INT64 &internalValue ( ) { return val; }
+	qint64 &internalValue ( ) { return val; }
 
 private:
-	Q_INT64 val;
+	qint64 val;
 };
 
 

@@ -13,9 +13,10 @@
 */
 #include <stdlib.h>
 
-#include <qfileinfo.h>
-#include <qtimer.h>
-#include <qpixmapcache.h>
+#include <QFileinfo>
+#include <QTimer>
+#include <QPixmapCache>
+#include <QImage>
 
 #include "bricklink.h"
 
@@ -33,7 +34,7 @@ const QPixmap BrickLink::Picture::pixmap ( ) const
 	QPixmap p;
 
 	if ( !QPixmapCache::find ( m_key, p )) {
-		p. convertFromImage ( m_image );
+		p = QPixmap::fromImage ( m_image );
 		QPixmapCache::insert ( m_key, p );
 	}
 	return p;
@@ -45,7 +46,7 @@ BrickLink::Picture *BrickLink::picture ( const Item *item, const BrickLink::Colo
 	if ( !item )
 		return 0;
 
-	QCString key;
+	QString key;
 	if ( color )
 		key. sprintf ( "%c@%d@%d", item-> itemType ( )-> pictureId ( ), item-> index ( ), color-> id ( ));
 	else
@@ -55,7 +56,7 @@ BrickLink::Picture *BrickLink::picture ( const Item *item, const BrickLink::Colo
 	bool need_to_load = false;
 
 	if ( !pic ) {
-		pic = new Picture ( item, color, key );
+		pic = new Picture ( item, color, key. toLatin1 ( ));
 		if ( color )
 			m_pictures. cache. insert ( key, pic );
 		need_to_load = true;
@@ -105,7 +106,7 @@ void BrickLink::pictureIdleLoader2 ( )
 	Picture *pic = 0;
 
 	while ( !m_pictures. diskload. isEmpty ( )) {
-		pic = m_pictures. diskload. take ( 0 );
+		pic = m_pictures. diskload. takeFirst ( );
 	
 		if ( !pic ) {
 			continue;
@@ -175,9 +176,9 @@ void BrickLink::Picture::load_from_disk ( )
 		}
 		else {
 			if ( !large && m_item && m_item-> itemType ( ))
-				m_image = BrickLink::inst ( )-> noImage ( m_item-> itemType ( )-> imageSize ( ))-> convertToImage ( );
+				m_image = BrickLink::inst ( )-> noImage ( m_item-> itemType ( )-> imageSize ( ))-> toImage ( );
 			else
-				m_image. create ( 0, 0, 32 );
+				m_image = QImage ( );
 
 			m_valid = true;
 		}
@@ -188,7 +189,7 @@ void BrickLink::Picture::load_from_disk ( )
 		m_valid = false;
 
 	if ( m_valid && !large && m_image. depth ( ) > 8 ) {
-		m_image = m_image. convertDepth ( 8 );
+		m_image = m_image. convertToFormat ( QImage::Format_Indexed8 );
 	}
 
 	QPixmapCache::remove ( m_key );
@@ -216,7 +217,7 @@ void BrickLink::updatePicture ( BrickLink::Picture *pic, bool high_priority )
 
 	bool large = ( !pic-> color ( ));
 
-	QCString url;
+	QString url;
 	CKeyValueList query;
 	
 	if ( large ) {
@@ -260,14 +261,14 @@ void BrickLink::pictureJobFinished ( CTransfer::Job *j )
 
 			pic-> m_update_status = Ok;
 
-			if (( j-> effectiveUrl ( ). find ( "noimage", 0, false ) == -1 ) && j-> data ( )-> size ( ) && img. loadFromData ( *j-> data ( ))) {
+			if (( j-> effectiveUrl ( ). indexOf ( "noimage", 0, Qt::CaseInsensitive ) == -1 ) && j-> data ( )-> size ( ) && img. loadFromData ( *j-> data ( ))) {
 				if ( !large )
-					img = img. convertDepth ( 8 );
+					img = img. convertToFormat ( QImage::Format_Indexed8 );
 				img. save ( path, "PNG" );
 			}
 			else {
 				QFile f ( path );
-				f. open ( IO_WriteOnly | IO_Truncate );
+				f. open ( QIODevice::WriteOnly | QIODevice::Truncate );
 				f. close ( );
 
 				qWarning ( "No image !" );
@@ -284,7 +285,7 @@ void BrickLink::pictureJobFinished ( CTransfer::Job *j )
 
 		pic-> m_update_status = Updating;
 
-	    QCString url = j-> url ( );
+	    QString url = j-> url ( );
 	    url. replace ( url. length ( ) - 3, 3, "gif" );
 
 	    //qDebug ( "PIC request started for %s", (const char *) url );

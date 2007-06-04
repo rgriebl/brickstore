@@ -11,40 +11,57 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <qtimer.h>
-#include <qevent.h>
-#include <qdir.h>
-
-#include <qsaglobal.h>
+#include <QTimer>
+#include <QEvent>
+#include <QDir>
+#include <QLocale>
+#include <QTranslator>
+#include <QLibraryInfo>
+#include <QSysInfo>
 
 #if defined( Q_OS_UNIX )
 #include <sys/utsname.h>
 #endif
 
-#include "cconfig.h"
-#include "cmoney.h"
-#include "cresource.h"
+#include <curl/curl.h>
+
+
 #include "cframework.h"
-#include "cmessagebox.h"
+#if 0
 #include "creport.h"
-#include "bricklink.h"
-#include "version.h"
-#include "dlgmessageimpl.h"
-#include "dlgregistrationimpl.h"
-#include "crebuilddatabase.h"
+#endif
+
+
+#include "dimportorder.h"
+#include "cselectcolor.h"
+
+
+#include "dinformation.h"
+#include "dregistration.h"
 #include "cprogressdialog.h"
 #include "ccheckforupdates.h"
+#include "cconfig.h"
+#include "cmoney.h"
+#include "crebuilddatabase.h"
+#include "bricklink.h"
 #include "csplash.h"
+#include "cmessagebox.h"
+
+#include "version.h"
 
 #include "capplication.h"
 
 
-class COpenEvent : public QCustomEvent {
+#define XSTR(a)	#a
+#define STR(a)	XSTR(a)
+
+
+class COpenEvent : public QEvent {
 public:
 	enum { Type = QEvent::User + 142 };
 
 	COpenEvent ( const QString &file ) 
-		: QCustomEvent ( Type ), m_file ( file ) 
+		: QEvent ( static_cast<QEvent::Type> ( Type )), m_file ( file ) 
 	{ }
 	
 	QString fileName ( ) const 
@@ -64,19 +81,40 @@ CApplication::CApplication ( const char *rebuild_db_only, int _argc, char **_arg
 
 	m_enable_emit = false;
 	m_rebuild_db_only = rebuild_db_only;
+	m_has_alpha = ( QPixmap::defaultDepth ( ) >= 15 );
+
+	setOrganizationName ( "Softforge" );
+	setOrganizationDomain ( "softforge.de" );
+	setApplicationName ( appName ( ));
 
 	if ( m_rebuild_db_only. isEmpty ( ))
 		CSplash::inst ( );
 
 #if defined( Q_WS_MACX )
 	AEInstallEventHandler( kCoreEventClass, kAEOpenDocuments, appleEventHandler, 0, false );
+
+#elif defined( Q_WS_WIN )
+	int wv = QSysInfo::WindowsVersion;
+
+	m_has_alpha &= (( wv != QSysInfo::WV_95 ) && ( wv != QSysInfo::WV_NT ));
+	
+	// using the native dialog causes the app to crash under W2K (comdlg32.dll)
+	// (both the release and the debug versions will crash ONLY when run
+	//  without a debugger, destroying the stack at the same time...)
+	
+	extern bool Q_GUI_EXPORT qt_use_native_dialogs;
+	qt_use_native_dialogs = !(( wv & QSysInfo::WV_DOS_based ) || (( wv & QSysInfo::WV_NT_based ) < QSysInfo::WV_XP ));
+
+#elif defined( Q_WS_X11 )
+	extern bool qt_use_xrender;
+	m_has_alpha &= qt_use_xrender;
+
 #endif
 
 	// initialize config & resource
 	(void) CConfig::inst ( )-> upgrade ( BRICKSTORE_MAJOR, BRICKSTORE_MINOR, BRICKSTORE_PATCH );
 	(void) CMoney::inst ( );
-	(void) CResource::inst ( );
-	(void) CReportManager::inst ( );
+//	(void) CReportManager::inst ( );
 
 	m_trans_qt = 0;
 	m_trans_brickstore = 0;
@@ -98,13 +136,6 @@ CApplication::CApplication ( const char *rebuild_db_only, int _argc, char **_arg
 
 		CMessageBox::setDefaultTitle ( appName ( ));
 
-		QPixmap pix;
-	
-		pix = CResource::inst ( )-> pixmap ( "icon" );
-		QMimeSourceFactory::defaultFactory ( )-> setImage ( "brickstore-icon", pix. convertToImage ( ));
-		pix = CResource::inst ( )-> pixmap ( "important" );
-		QMimeSourceFactory::defaultFactory ( )-> setImage ( "brickstore-important", pix. convertToImage ( ));
-
 		for ( int i = 1; i < argc ( ); i++ )
 			m_files_to_open << argv ( ) [i];
 	
@@ -112,11 +143,28 @@ CApplication::CApplication ( const char *rebuild_db_only, int _argc, char **_arg
 		CFrameWork::inst ( )-> show ( );
 
 		while ( CConfig::inst ( )-> registration ( ) == CConfig::None ) {
-			DlgRegistrationImpl d ( true, mainWidget ( ));
+			DRegistration d ( true, CFrameWork::inst ( ));
 			d. exec ( );			
 		}
 		demoVersion ( );
 		connect ( CConfig::inst ( ), SIGNAL( registrationChanged ( CConfig::Registration )), this, SLOT( demoVersion ( )));
+
+
+#if 0
+	bool dbok = BrickLink::inst ( )-> readDatabase ( );
+
+	if ( !dbok ) {
+		CMessageBox::warning ( 0, tr( "Could not load the BrickLink database files.<br /><br />Should these files be updated now?" ), CMessageBox::Yes, CMessageBox::No );
+			//dbok = updateDatabase ( );
+	}
+
+	DImportOrder d;
+	d.exec();
+
+	DSelectColor d1;
+	d1.exec();
+#endif
+
 	}
 }
 	
@@ -127,12 +175,14 @@ CApplication::~CApplication ( )
 #endif
 	exitBrickLink ( );
 
-	QMimeSourceFactory::defaultFactory ( )-> setData ( "brickstore-icon", 0 );
-
-	delete CReportManager::inst ( );
-	delete CResource::inst ( );
+//	delete CReportManager::inst ( );
 	delete CMoney::inst ( );
 	delete CConfig::inst ( );
+}
+
+bool CApplication::pixmapAlphaSupported ( ) const
+{
+	return m_has_alpha;
 }
 
 void CApplication::updateTranslations ( )
@@ -147,12 +197,19 @@ void CApplication::updateTranslations ( )
 	if ( m_trans_brickstore )
 		removeTranslator ( m_trans_brickstore );
 
-	m_trans_qt = CResource::inst ( )-> translation ( "qt", locale );
-	if ( m_trans_qt )
-		installTranslator ( m_trans_qt );
+	m_trans_qt = new QTranslator ( this );
+	m_trans_brickstore = new QTranslator ( this );
 
-	m_trans_brickstore = CResource::inst ( )-> translation ( "brickstore", locale );
-	if ( m_trans_brickstore )
+	if ( qSharedBuild ( ))
+		m_trans_qt-> load ( QLibraryInfo::location ( QLibraryInfo::TranslationsPath ) + "/qt_" + locale );
+	else
+		m_trans_qt-> load ( ":/translations/qt_" + locale );
+
+	m_trans_brickstore-> load ( ":/translations/brickstore_" + locale );
+
+	if ( !m_trans_qt-> isEmpty ( ))
+		installTranslator ( m_trans_qt );
+	if ( !m_trans_brickstore-> isEmpty ( ))
 		installTranslator ( m_trans_brickstore );
 }
 
@@ -202,25 +259,25 @@ QString CApplication::sysVersion ( ) const
 	QString sys_version = "(unknown)";
 
 #if defined( Q_OS_MACX )
-	switch ( QApplication::macVersion ( )) {
-		case Qt::MV_10_DOT_0: sys_version = "10.0 (Cheetah)"; break;
-		case Qt::MV_10_DOT_1: sys_version = "10.1 (Puma)";    break;
-		case Qt::MV_10_DOT_2: sys_version = "10.2 (Jaguar)";  break;
-		case Qt::MV_10_DOT_3: sys_version = "10.3 (Panther)"; break;
-		case Qt::MV_10_DOT_4: sys_version = "10.4 (Tiger)";   break;
-		default             : break;
+	switch ( QSysInfo::MacintoshVersion ) {
+		case QSysInfo::MV_10_0: sys_version = "10.0 (Cheetah)"; break;
+		case QSysInfo::MV_10_1: sys_version = "10.1 (Puma)";    break;
+		case QSysInfo::MV_10_2: sys_version = "10.2 (Jaguar)";  break;
+		case QSysInfo::MV_10_3: sys_version = "10.3 (Panther)"; break;
+		case QSysInfo::MV_10_4: sys_version = "10.4 (Tiger)";   break;
+		default               : break;
 	}
 #elif defined( Q_OS_WIN )
-	switch ( QApplication::winVersion ( )) {
-		case Qt::WV_95   : sys_version = "95";   break;
-		case Qt::WV_98   : sys_version = "98";   break;
-		case Qt::WV_Me   : sys_version = "ME";   break;
-		case Qt::WV_NT   : sys_version = "NT";   break;
-		case Qt::WV_2000 : sys_version = "2000"; break;
-		case Qt::WV_XP   : sys_version = "XP";   break;
-		case Qt::WV_2003 : sys_version = "2003"; break;
-		case Qt::WV_VISTA: sys_version = "VISTA"; break;
-		default          : break;
+	switch ( QSysInfo::WindowsVersion ) {
+		case QSysInfo::WV_95   : sys_version = "95";   break;
+		case QSysInfo::WV_98   : sys_version = "98";   break;
+		case QSysInfo::WV_Me   : sys_version = "ME";   break;
+		case QSysInfo::WV_NT   : sys_version = "NT";   break;
+		case QSysInfo::WV_2000 : sys_version = "2000"; break;
+		case QSysInfo::WV_XP   : sys_version = "XP";   break;
+		case QSysInfo::WV_2003 : sys_version = "2003"; break;
+		case QSysInfo::WV_VISTA: sys_version = "VISTA"; break;
+		default                : break;
 	}
 #elif defined( Q_OS_UNIX )
 	struct ::utsname utsinfo;
@@ -251,7 +308,7 @@ void CApplication::doEmitOpenDocument ( )
 	}
 }
 
-void CApplication::customEvent ( QCustomEvent *e )
+void CApplication::customEvent ( QEvent *e )
 {
 	if ( int( e-> type ( )) == int( COpenEvent::Type )) {
 		m_files_to_open. append ( static_cast <COpenEvent *> ( e )-> fileName ( ));
@@ -287,7 +344,7 @@ OSErr CApplication::appleEventHandler ( const AppleEvent *event, AppleEvent *, l
 bool CApplication::initBrickLink ( )
 {
 	QString errstring;
-	QString defdatadir = QDir::homeDirPath ( );
+	QString defdatadir = QDir::homePath ( );
 
 #if defined( Q_OS_WIN32 )
 	defdatadir += "/brickstore-cache/";
@@ -295,7 +352,7 @@ bool CApplication::initBrickLink ( )
 	defdatadir += "/.brickstore-cache/";
 #endif
 
-	BrickLink *bl = BrickLink::inst ( CConfig::inst ( )-> readEntry ( "/BrickLink/DataDir", defdatadir ), &errstring );
+	BrickLink *bl = BrickLink::inst ( CConfig::inst ( )-> value ( "/BrickLink/DataDir", defdatadir ). toString ( ), &errstring );
 
 	if ( !bl )
 		CMessageBox::critical ( 0, tr( "Could not initialize the BrickLink kernel:<br /><br />%1" ). arg ( errstring ));
@@ -316,7 +373,7 @@ void CApplication::about ( )
 		"<qt>"
 			"<center>"
 				"<table border=\"0\"><tr>"
-					"<td valign=\"middle\" align=\"right\"><img src=\"brickstore-icon\" /></td>"
+					"<td valign=\"middle\" align=\"right\"><img src=\":/images/icon.png\" /></td>"
 					"<td align=\"left\"><big>"
 						"<big><strong>%1</strong></big>"
 						"<br />%2<br />"
@@ -328,8 +385,8 @@ void CApplication::about ( )
 		"</qt>";
 
 
-	QString page1_link = QString( "<strong>%1</strong> | <a href=\"brickstore-info-page2\">%2</a>" ). arg( tr( "Legal Info" ), tr( "System Info" ));
-	QString page2_link = QString( "<a href=\"brickstore-info-page1\">%1</a> | <strong>%2</strong>" ). arg( tr( "Legal Info" ), tr( "System Info" ));
+	QString page1_link = QString( "<strong>%1</strong> | <a href=\"system\">%2</a>" ). arg( tr( "Legal Info" ), tr( "System Info" ));
+	QString page2_link = QString( "<a href=\"index\">%1</a> | <strong>%2</strong>" ). arg( tr( "Legal Info" ), tr( "System Info" ));
 
 	QString copyright = tr( "Copyright &copy; %1" ). arg ( BRICKSTORE_COPYRIGHT );
 	QString version   = tr( "Version %1" ). arg ( BRICKSTORE_VERSION );
@@ -339,7 +396,6 @@ void CApplication::about ( )
 	QString curl = curlver-> version;
 	QString z    = curlver-> libz_version;
 	QString qt   = qVersion ( );
-	QString qsa  = QSA_VERSION_STRING;
 
 	static const char *legal_src = QT_TR_NOOP(
 		"<p>"
@@ -382,13 +438,12 @@ void CApplication::about ( )
 			"<table>"	
 				"<tr><td>OS     </td><td>%5</td></tr>"
 				"<tr><td>libqt  </td><td>%6</td></tr>"
-				"<tr><td>libqsa </td><td>%7</td></tr>"
 				"<tr><td>libcurl</td><td>%8</td></tr>"
 				"<tr><td>libz   </td><td>%9</td></tr>"
 			"</table>"
 		"</p>";
 
-	QString technical = QString ( technical_src ). arg ( __USER__, __HOST__, __DATE__ " " __TIME__ ). arg (
+	QString technical = QString ( technical_src ). arg ( STR( __USER__ ), STR( __HOST__ ), __DATE__ " " __TIME__ ). arg (
 #if defined( _MSC_VER )
 		"Microsoft Visual-C++ " + QString( _MSC_VER < 1200 ? "???" : 
 		                                 ( _MSC_VER < 1300 ? "6.0" : 
@@ -399,21 +454,19 @@ void CApplication::about ( )
 #else
 		"???"
 #endif
-		). arg ( sysName ( ) + " " + sysVersion ( )). arg ( qt, qsa, curl, z );
+		). arg ( sysName ( ) + " " + sysVersion ( )). arg ( qt, curl, z );
 
 	QString legal = tr( legal_src );
 
 	QString page1 = QString ( layout ). arg ( appName ( ), copyright, version, support ). arg ( page1_link, legal );
 	QString page2 = QString ( layout ). arg ( appName ( ), copyright, version, support ). arg ( page2_link, technical );
 
-	QMimeSourceFactory::defaultFactory ( )-> setText ( "brickstore-info-page1", page1 );
-	QMimeSourceFactory::defaultFactory ( )-> setText ( "brickstore-info-page2", page2 );
+	QMap<QString, QString> pages;
+	pages ["index"]  = page1;
+	pages ["system"] = page2;
 
-	DlgMessageImpl d ( appName ( ), page1, false, mainWidget ( ));
+	DInformation d ( appName ( ), pages, false, CFrameWork::inst ( ));
 	d. exec ( );
-
-	QMimeSourceFactory::defaultFactory ( )-> setData ( "brickstore-info-page1", 0 );
-	QMimeSourceFactory::defaultFactory ( )-> setData ( "brickstore-info-page2", 0 );
 }
 
 void CApplication::demoVersion ( )
@@ -424,7 +477,7 @@ void CApplication::demoVersion ( )
 	static const char *layout =
 		"<qt><center>"
 			"<table border=\"0\"><tr>"
-				"<td valign=\"middle\" align=\"right\"><img src=\"brickstore-icon\" /></td>"
+				"<td valign=\"middle\" align=\"right\"><img src=\":/images/icon.png\" /></td>"
 				"<td align=\"left\"><big>"
 					"<big><strong>%1</strong></big>"
 					"<br />%2<br />"
@@ -446,7 +499,10 @@ void CApplication::demoVersion ( )
 	QString demo      = tr( demo_src );
 	QString text      = QString ( layout ). arg ( appName ( ), copyright, version, demo );
 
-	DlgMessageImpl d ( appName ( ), text, true, mainWidget ( ));
+	QMap<QString, QString> pages;
+	pages ["index"] = text;
+
+	DInformation d ( appName ( ), pages, true, CFrameWork::inst ( ));
 	d. exec ( );
 
 	QTimer::singleShot ( 20*60*1000, this, SLOT( demoVersion ( )));
@@ -454,7 +510,7 @@ void CApplication::demoVersion ( )
 
 void CApplication::checkForUpdates ( )
 {
-	CProgressDialog d ( mainWidget ( ));
+	CProgressDialog d ( CFrameWork::inst ( ));
 	CCheckForUpdates cfu ( &d );
 	d. exec ( );
 }
@@ -463,13 +519,13 @@ void CApplication::registration ( )
 {
 	CConfig::Registration oldreg = CConfig::inst ( )-> registration ( );
 
-	DlgRegistrationImpl d ( false, mainWidget ( ));
+	DRegistration d ( false, CFrameWork::inst ( ));
 	if (( d. exec ( ) == QDialog::Accepted ) &&
 	    ( CConfig::inst ( )-> registration ( ) == CConfig::Demo ) &&
 		( CConfig::inst ( )-> registration ( ) != oldreg )) 
 	{
-		CMessageBox::information ( mainWidget ( ), tr( "The program has to be restarted to activate the Demo mode." ));
-		mainWidget ( )-> close ( );
+		CMessageBox::information ( CFrameWork::inst ( ), tr( "The program has to be restarted to activate the Demo mode." ));
+		CFrameWork::inst ( )-> close ( );
 		quit ( );
 	}
 }

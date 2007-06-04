@@ -14,18 +14,18 @@
 #ifndef __CAPPEARSINWIDGET_H__
 #define __CAPPEARSINWIDGET_H__
 
-#include "clistview.h"
+#include <QTableView>
 #include "bricklink.h"
 
 
 class CAppearsInWidgetPrivate;
 class QAction;
 
-class CAppearsInWidget : public CListView {
+class CAppearsInWidget : public QTableView {
 	Q_OBJECT
 
 public:
-	CAppearsInWidget ( QWidget *parent = 0, const char *name = 0, WFlags fl = 0 );
+	CAppearsInWidget ( QWidget *parent = 0 );
 	virtual ~CAppearsInWidget ( );
 	
 	void setItem ( const BrickLink::Item *item, const BrickLink::Color *color = 0 );
@@ -41,8 +41,11 @@ protected slots:
 	void languageChange ( );
 
 private slots:
-	void showContextMenu ( QListViewItem *, const QPoint & );
+	void showContextMenu ( const QPoint & );
 	void partOut ( );
+
+private:
+	const BrickLink::Item::AppearsInItem *appearsIn ( ) const;
 
 private:
 	CAppearsInWidgetPrivate *d;

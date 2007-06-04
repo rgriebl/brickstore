@@ -14,13 +14,13 @@
 #ifndef __CDOCUMENT_H__
 #define __CDOCUMENT_H__
 
-#include <qobject.h>
-#include <qdom.h>
+#include <QObject>
+#include <QDomDocument>
 
 #include "bricklink.h"
 
-class CUndoStack;
-class CUndoCmd;
+class QUndoStack;
+class QUndoCommand;
 class CAddRemoveCmd;
 class CChangeCmd;
 
@@ -83,15 +83,15 @@ public:
 		Item &operator = ( const Item & );
 		bool operator == ( const Item & ) const;
 
-		Q_UINT64 errors ( ) const          { return m_errors; }
-		void setErrors ( Q_UINT64 errors ) { m_errors = errors; }
+		quint64 errors ( ) const          { return m_errors; }
+		void setErrors ( quint64 errors ) { m_errors = errors; }
 	private:
-		Q_UINT64 m_errors;
+		quint64 m_errors;
 	};
 
-	typedef QValueList<Item *>      ItemList;
-	typedef int                     Position;
-	typedef QValueVector<Position>  PositionVector;
+	typedef QList<Item *>      ItemList;
+	typedef int                Position;
+	typedef QVector<Position>  PositionVector;
 
 	class Statistics {
 	public:
@@ -120,7 +120,7 @@ public:
 	CDocument ( bool dont_sort = false );
 	virtual ~CDocument ( );
 
-	static const QValueList<CDocument *> &allDocuments ( );
+	static const QList<CDocument *> &allDocuments ( );
 
 	void addView ( QWidget *view, IDocumentView *docview = 0 );
 
@@ -149,8 +149,8 @@ public:
 
 	Statistics statistics ( const ItemList &list ) const;
 
-	Q_UINT64 errorMask ( ) const;
-	void setErrorMask ( Q_UINT64 );
+	quint64 errorMask ( ) const;
+	void setErrorMask ( quint64 );
 
 	static CDocument *fileNew ( );
 	static CDocument *fileOpen ( );
@@ -180,8 +180,8 @@ public slots:
 	void fileExportBrikTrakInventory ( const ItemList &itemlist );
 
 public:
-	CUndoCmd *macroBegin ( const QString &label = QString ( ));
-	void      macroEnd ( CUndoCmd *, const QString &label = QString ( ));
+	void beginMacro ( const QString &label = QString ( ));
+	void endMacro ( const QString &label = QString ( ));
 
 signals:
 	void itemsAdded ( const CDocument::ItemList & );
@@ -217,19 +217,19 @@ private:
 	ItemList         m_items;
 	ItemList         m_selection;
 
-	Q_UINT64         m_error_mask;
+	quint64          m_error_mask;
 	QString          m_filename;
 	QString          m_title;
 	bool             m_dont_sort;
 
-	CUndoStack *     m_undo;
+	QUndoStack *     m_undo;
 
 	BrickLink::Order *m_order;
 
-	QValueList<IDocumentView *> m_views;
+	QList<IDocumentView *> m_views;
 	QDomElement  m_gui_state;
 
-	static QValueList<CDocument *> s_documents;
+	static QList<CDocument *> s_documents;
 };
 
 #endif

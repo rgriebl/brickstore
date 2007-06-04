@@ -14,22 +14,21 @@
 #ifndef __CPROGRESSDIALOG_H__
 #define __CPROGRESSDIALOG_H__
 
-#include <qdialog.h>
+#include <QDialog>
 
 #include "ctransfer.h"
 
 class QLabel;
-class CUrlLabel;
 class QProgressBar;
 class QWidget;
-class QPushButton;
+class QDialogButtonBox;
 
 
 class CProgressDialog : public QDialog {
 	Q_OBJECT
 
 public:
-	CProgressDialog ( QWidget *parent, const char *name = 0 );
+	CProgressDialog ( QWidget *parent = 0, Qt::WindowFlags f = 0 );
 	virtual ~CProgressDialog ( );
 
 	void setAutoClose ( bool ac );
@@ -64,11 +63,10 @@ private:
 
 private:
 	QLabel *m_header;
-	CUrlLabel *m_message;
+	QLabel *m_message;
 	QProgressBar *m_progress;
 	QWidget *m_progress_container;
-	QPushButton *m_ok;
-	QPushButton *m_cancel;
+	QDialogButtonBox *m_buttons;
 
 	QString m_message_text;
 	bool m_message_progress : 1;

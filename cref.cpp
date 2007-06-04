@@ -14,10 +14,9 @@
 
 #include "cref.h"
 
-CAsciiRefCacheBase::CAsciiRefCacheBase ( uint dictsize, uint cachesize )
-	: m_dict ( dictsize ), m_cache_size ( cachesize )
+CAsciiRefCacheBase::CAsciiRefCacheBase ( int cachesize )
+	: m_cache_size ( cachesize )
 {
-	m_dict. setAutoDelete ( true );
 }
 
 CAsciiRefCacheBase::~CAsciiRefCacheBase ( )
@@ -25,7 +24,7 @@ CAsciiRefCacheBase::~CAsciiRefCacheBase ( )
 	clear ( );
 }
 
-bool CAsciiRefCacheBase::put ( const char *key, CRef *ref )
+bool CAsciiRefCacheBase::put ( const QString &key, CRef *ref )
 {
 	if ( ref-> m_cache )
 		return false;
@@ -36,7 +35,7 @@ bool CAsciiRefCacheBase::put ( const char *key, CRef *ref )
 	return true;
 }
 
-CRef *CAsciiRefCacheBase::get ( const char *key )
+CRef *CAsciiRefCacheBase::get ( const QString &key )
 {
 	return m_dict [key];
 }
@@ -44,6 +43,7 @@ CRef *CAsciiRefCacheBase::get ( const char *key )
 void CAsciiRefCacheBase::clear ( )
 {
 	m_no_ref. clear ( );
+	qDeleteAll ( m_dict );
 	m_dict. clear ( );
 }
 
@@ -53,7 +53,7 @@ void CAsciiRefCacheBase::addRefFor ( const CRef *ref )
 
 	if ( ref && ( ref-> m_cache == this ) && ( ref-> m_refcnt == 1 )) {
 		//qDebug ( "Moving item [%p] to in-use dict...", (void *) ref );
-		m_no_ref. removeRef ( ref );
+		m_no_ref. removeAll ( ref );
 	}
 }
 
@@ -64,12 +64,12 @@ void CAsciiRefCacheBase::releaseFor ( const CRef *ref )
 		m_no_ref. append ( ref );
 
 		while ( m_no_ref. count ( ) > m_cache_size ) {
-			const CRef *del = m_no_ref. take ( 0 );
+			const CRef *del = m_no_ref. takeFirst ( );
 
-			for ( QAsciiDictIterator<CRef> it ( m_dict ); it. current ( ); ++it ) {
-				if ( it. current ( ) == del ) {
+			for ( QHash<QString, CRef *>::iterator it = m_dict. begin ( ); it != m_dict. end ( ); ++it ) {
+				if ( it. value ( ) == del ) {
 					//qDebug ( "Purging item \"%s\" from cache...", it. currentKey ( ));
-					m_dict. remove ( it. currentKey ( ));
+					m_dict. remove ( it. key ( ));
 					break;
 				}
 			}

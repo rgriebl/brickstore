@@ -14,7 +14,7 @@
 #ifndef __CPRICEGUIDEWIDGET_H__
 #define __CPRICEGUIDEWIDGET_H__
 
-#include <qframe.h>
+#include <QFrame>
 
 #include "cmoney.h"
 #include "bricklink.h"
@@ -27,7 +27,7 @@ class CPriceGuideWidgetPrivate;
 class CPriceGuideWidget : public QFrame {
 	Q_OBJECT
 public:
-	CPriceGuideWidget ( QWidget *parent = 0, const char *name = 0, WFlags fl = 0 );
+	CPriceGuideWidget ( QWidget *parent = 0, Qt::WindowFlags f = 0 );
 	virtual ~CPriceGuideWidget ( );
 
 	virtual BrickLink::PriceGuide *priceGuide ( ) const;
@@ -51,13 +51,12 @@ protected:
 	void recalcLayoutHorizontal ( const QSize &s, const QFontMetrics &fm, const QFontMetrics &fmb );
 	void recalcLayoutVertical ( const QSize &s, const QFontMetrics &fm, const QFontMetrics &fmb );
 
-	virtual void drawContents ( QPainter *p );
-	virtual void frameChanged ( );
 	virtual void resizeEvent ( QResizeEvent * );
 	virtual void mouseDoubleClickEvent ( QMouseEvent * );
 	virtual void mouseMoveEvent ( QMouseEvent * );
 	virtual void leaveEvent ( QEvent * );
-	virtual void contextMenuEvent ( QContextMenuEvent * );
+	virtual void paintEvent ( QPaintEvent * );
+	virtual bool event ( QEvent * );
 
 protected slots:
 	void doUpdate ( );
@@ -68,8 +67,8 @@ protected slots:
 	void languageChange ( );
 	
 private:
-	void paintHeader ( QPainter *p, const QSize &s, const QRect &r, const QColorGroup &cg, int align, const QString &str, bool bold = false );
-	void paintCell ( QPainter *p, const QRect &r, const QColorGroup &cg, int align, const QString &str, bool alternate = false );
+	void paintHeader ( QPainter *p, const QRect &r, Qt::Alignment align, const QString &str, bool bold = false );
+	void paintCell ( QPainter *p, const QRect &r, Qt::Alignment align, const QString &str, bool alternate = false );
 
 private:
 	CPriceGuideWidgetPrivate *d;

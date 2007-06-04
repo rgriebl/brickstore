@@ -14,7 +14,7 @@
 #ifndef __CSELECTITEM_H__
 #define __CSELECTITEM_H__
 
-#include <qdialog.h>
+#include <QDialog>
 
 #include "bricklink.h"
 
@@ -27,7 +27,7 @@ class CSelectItemPrivate;
 class CSelectItem : public QWidget {
 	Q_OBJECT
 public:
-	CSelectItem ( QWidget *parent, const char *name = 0, WFlags fl = 0 );
+	CSelectItem ( QWidget *parent = 0, Qt::WindowFlags f = 0 );
 
 	bool setItemType ( const BrickLink::ItemType * );
 	bool setItem ( const BrickLink::Item * );
@@ -84,7 +84,7 @@ protected:
 class CSelectItemDialog : public QDialog {
 	Q_OBJECT
 public:
-	explicit CSelectItemDialog ( bool only_with_inventory, QWidget *parent = 0, const char *name = 0, bool modal = true, WFlags fl = 0 );
+	explicit CSelectItemDialog ( bool only_with_inventory, QWidget *parent = 0, Qt::WindowFlags f = 0 );
 
 	bool setItemType ( const BrickLink::ItemType * );
 	bool setItem ( const BrickLink::Item * );

@@ -13,225 +13,136 @@
 */
 #include <stdlib.h>
 
-#include <qlayout.h>
-#include <qworkspace.h>
-#include <qwidgetstack.h>
-#include <qtabbar.h>
-#include <qlayout.h>
-#include <qapplication.h>
-#include <qpainter.h>
-#include <qstylefactory.h>
-#include <qstyle.h>
-#include <qtoolbutton.h>
-#include <qtooltip.h>
-#include <qmainwindow.h>
+#include <QLayout>
+#include <QStackedLayout>
+#include <QTabBar>
+#include <QEvent>
 
-#include "cresource.h"
+//#include "cresource.h"
 
 #include "cworkspace.h"
 
 
-namespace {
+#if defined( Q_WS_WIN )
+#include <QWindowsXPStyle>
+#include <QWindowsStyle>
+#endif
 
-static QStyle *windowsstyle = 0;
 
-static void free_win_style ( )
+CWorkspace::CWorkspace ( QWidget *parent, Qt::WindowFlags f )
+	: QWidget ( parent, f )
 {
-	delete windowsstyle;
-}
+	m_tabmode = TopTabs;
 
-static QStyle *get_win_style ( )
-{
-	if ( !windowsstyle ) {
-		windowsstyle = QStyleFactory::create ( "windows" );
+	m_verticallayout = new QVBoxLayout ( this );
+	m_verticallayout-> setMargin ( 0 );
+	m_verticallayout-> setSpacing ( 0 );
 
-		if ( windowsstyle )
-			atexit ( free_win_style );
-	}
-	return windowsstyle;
-}
-
-} // namespace
-
-CWorkspace::CWorkspace ( QMainWindow *parent, const char *name )
-	: QWorkspace ( parent, name )
-{
-	m_mainwindow = parent;
-	m_showtabs   = false;
-	m_exceltabs  = false;
-
-	m_tabbar = new QTabBar ( parent, "tabbar" );
+	m_tabbar = new QTabBar ( this );
+	m_tabbar-> setElideMode ( Qt::ElideMiddle );
 	m_tabbar-> hide ( );
 
-	connect ( m_tabbar, SIGNAL( selected ( int )), this, SLOT( tabClicked ( int )));
-	connect ( this, SIGNAL( windowActivated ( QWidget * )), this, SLOT( setActiveTab ( QWidget * )));
-}
-
-bool CWorkspace::showTabs ( ) const
-{
-	return m_showtabs;
-}
-
-void CWorkspace::setShowTabs ( bool b )
-{
-	if ( b != m_showtabs ) {
-		if ( b ) {
-			QWidget *container = new QWidget ( m_mainwindow, "cworkspace_container" );
-			refillContainer ( container );
-
-			show ( );
-			if ( m_tabbar-> count ( ) > 1 )
-				m_tabbar-> show ( );
-
-			m_mainwindow-> setCentralWidget ( container );
-			container-> show ( );
-		}
-		else {
-			QWidget *container = parentWidget ( );
-			m_tabbar-> hide ( );
-			m_tabbar-> reparent ( m_mainwindow, QPoint ( ), false );
-			reparent ( m_mainwindow, m_mainwindow-> centralWidget ( )-> pos ( ), false );
-			m_mainwindow-> setCentralWidget ( this );
-			show ( );
-			delete container;
-		}
-		m_showtabs = b;
-	}
-}
-
-void CWorkspace::refillContainer ( QWidget *container )
-{
-	delete container-> layout ( );
-	QBoxLayout *lay = new QVBoxLayout ( container, 0, 0 );
-
-	for ( int i = 0; i < 2; i++ ) {
-		if ( i == ( m_exceltabs ? 0 : 1 )) {
-			if ( parentWidget ( ) != container )
-				reparent ( container, QPoint ( 0, 0 ), false );
-			lay-> addWidget ( this, 10 );
-		}
-		else {
-			QHBoxLayout *tablay = new QHBoxLayout ( lay );
-			tablay-> addSpacing ( 4 );
-			if ( m_tabbar-> parentWidget ( ) != container )
-				m_tabbar-> reparent ( container, QPoint ( 0, 0 ), false );
-			tablay-> addWidget ( m_tabbar );
-			tablay-> addSpacing ( 4 );
-		}
-	}
-	lay-> activate ( );
-}
-
-bool CWorkspace::spreadSheetTabs ( ) const
-{
-	return m_exceltabs;
-}
-
-void CWorkspace::setSpreadSheetTabs ( bool b )
-{
-	if ( b != m_exceltabs ) {
-		if ( b ) {
-			m_tabbar-> setShape ( QTabBar::TriangularBelow );
-
-			if ( m_tabbar-> style ( ). isA ( "QWindowsXPStyle" ))
-				m_tabbar-> setStyle ( get_win_style ( ));
-		}
-		else {
-			m_tabbar-> setShape ( QTabBar::RoundedAbove );
-
-			if ( m_tabbar-> style ( ). isA ( "QWindowsStyle" ))
-				m_tabbar-> setStyle ( &style ( ));
-		}
-		m_exceltabs = b;
-
-		if ( m_showtabs )
-			refillContainer ( parentWidget ( ));
-	}
-}
-void CWorkspace::tabClicked ( int id )
-{
-	QTab *t = m_tabbar-> tab ( id );
-
-	for ( QPtrDictIterator<QTab> it ( m_widget2tab ); it. current ( ); ++it ) {
-		if ( t == it. current ( )) {
-			QWidget *w = static_cast <QWidget *> ( it. currentKey ( ));
+	m_tablayout = new QHBoxLayout ( );
+	m_tablayout-> addSpacing ( 4 );
+	m_tablayout-> addWidget ( m_tabbar );
+	m_tablayout-> addSpacing ( 4 );
+	m_verticallayout-> addLayout ( m_tablayout );
 	
-			if ( w != activeWindow ( ))
-				w-> setFocus ( );
-			if ( !w-> isMaximized ( ))
-				w-> showMaximized ( );
-		}
-	}
+	m_stacklayout = new QStackedLayout ( m_verticallayout );
+
+	relayout ( );
+
+	connect ( m_tabbar, SIGNAL( currentChanged ( int )), m_stacklayout, SLOT( setCurrentIndex ( int )));
+	connect ( m_stacklayout, SIGNAL( currentChanged ( int )), this, SLOT( currentChangedHelper ( int )));
+	connect ( m_stacklayout, SIGNAL( widgetRemoved ( int )), this, SLOT( removeWindow ( int )));
 }
 
-void CWorkspace::setActiveTab ( QWidget * w )
-{
-	QTab *t = m_widget2tab [w];
 
-	if ( t && ( m_tabbar-> currentTab ( ) != t-> identifier ( ))) {
-		m_tabbar-> blockSignals ( true );
-		m_tabbar-> setCurrentTab ( t );
-		m_tabbar-> blockSignals ( false );
+void CWorkspace::relayout ( )
+{
+	switch ( m_tabmode ) {
+	case BottomTabs:
+		m_verticallayout-> removeItem ( m_tablayout );
+		m_tabbar-> setShape ( QTabBar::TriangularSouth );
+		m_verticallayout-> addLayout ( m_tablayout );
+		break;
+	
+	default:	
+	case TopTabs:
+		m_verticallayout-> removeItem ( m_stacklayout );
+		m_tabbar-> setShape ( QTabBar::RoundedNorth );
+		m_verticallayout-> addLayout ( m_stacklayout );
+		break;
+	}	
+
+	if ( m_stacklayout-> count ( ) > 1 )
+		m_tabbar-> show ( );
+}
+
+
+void CWorkspace::addWindow ( QWidget *w )
+{
+	if ( !w )
+		return;
+
+	m_tabbar-> addTab ( w-> windowTitle ( ));
+	m_stacklayout-> addWidget ( w );
+
+	w-> installEventFilter ( this );
+
+	m_tabbar-> setShown ( m_stacklayout-> count ( ) > 1 );
+}
+
+void CWorkspace::currentChangedHelper ( int id )
+{
+	emit currentChanged ( m_stacklayout-> widget ( id ));
+}
+
+void CWorkspace::setCurrentWidget ( QWidget *w )
+{
+	m_tabbar-> setCurrentIndex ( m_stacklayout-> indexOf ( w ));
+}
+
+void CWorkspace::removeWindow ( int id )
+{
+	m_tabbar-> removeTab ( id );
+	m_tabbar-> setShown ( m_stacklayout-> count ( ) > 1 );
+}
+
+CWorkspace::TabMode CWorkspace::tabMode ( ) const
+{
+	return m_tabmode;
+}
+
+void CWorkspace::setTabMode ( TabMode tm )
+{
+	if ( tm != m_tabmode ) {
+		m_tabmode = tm;
+		relayout ( );
 	}
 }
 
 bool CWorkspace::eventFilter( QObject *o, QEvent *e )
 {
-	if ( !o || !o-> isWidgetType ( ))
-		return false;
+	QWidget *w = qobject_cast <QWidget *> ( o );
 
-	QWidget *w = static_cast <QWidget *> ( o );
+	if ( w && ( e-> type ( ) == QEvent::WindowTitleChange ))
+		m_tabbar-> setTabText ( m_stacklayout-> indexOf ( w ), w-> windowTitle ( ));
 
-	bool result = false;
-
-	switch ( e-> type ( )) {
-		case QEvent::CaptionChange: {
-			QTab *t = m_widget2tab [w];
-
-			if ( t ) 
-				t-> setText ( w-> caption ( ));
-			break;
-		}
-		default:
-			break;
-	}
-	return result ? result : QWorkspace::eventFilter ( o, e );
+	return QWidget::eventFilter ( o, e );
 }
 
-
-void CWorkspace::childEvent( QChildEvent * e )
+QList <QWidget *> CWorkspace::allWindows ( )
 {
-	QWorkspace::childEvent ( e );
+	QList <QWidget *> res;
 
-	QWidgetList after = windowList ( CreationOrder );
+	for ( int i = 0; i < m_stacklayout-> count ( ); i++ )
+		res << m_stacklayout-> widget ( i );
+	
+	return res;
+}
 
-	if ( e-> inserted ( )) {
-		for ( QWidgetListIt it ( after ); it. current ( ); ++it ) {
-			QWidget *w = it. current ( );
-			QTab *t = m_widget2tab [w];
-
-			if ( w && !t ) { // new
-				w-> installEventFilter ( this );
-
-				t = new QTab ( w-> caption ( ));
-				m_tabbar-> addTab ( t );
-				m_widget2tab.insert ( w, t );
-			}
-		}
-	}
-	else {
-		QPtrDict <QTab> copy_of_widget2tab = m_widget2tab;
-
-		for ( QPtrDictIterator<QTab> it ( copy_of_widget2tab ); it. current ( ); ++it ) {
-			QWidget *w = static_cast <QWidget *> ( it. currentKey ( ));
-			QTab *t = it. current ( );
-
-			if ( w && t && ( after. findRef ( w ) == -1 )) {
-				m_tabbar-> removeTab ( t );
-				m_widget2tab. remove ( w );
-			}
-		}
-	}
-	if ( m_showtabs )
-		m_tabbar-> setShown ( m_tabbar-> count ( ) > 1 );
+QWidget *CWorkspace::activeWindow ( )
+{
+	return m_stacklayout-> currentWidget ( );
 }
