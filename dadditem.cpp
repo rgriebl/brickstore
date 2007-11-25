@@ -49,6 +49,8 @@ public:
 DAddItem::DAddItem ( QWidget *parent, Qt::WindowFlags f )
 	: QDialog ( parent, f | Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowContextHelpButtonHint | Qt::WindowSystemMenuHint | Qt::WindowMaximizeButtonHint	 )
 {
+	setupUi(this);
+
 	m_window = 0;
 	m_caption_fmt        = windowTitle ( );
 	m_price_label_fmt    = w_label_currency-> text ( );
@@ -68,7 +70,7 @@ DAddItem::DAddItem ( QWidget *parent, Qt::WindowFlags f )
 	w_add = new QPushButton ( );
 	w_buttons-> addButton ( w_add, QDialogButtonBox::ActionRole );
 
-	w_select_item-> setItemType ( BrickLink::inst ( )-> itemType ( CConfig::inst ( )-> value ( "/Defaults/AddItems/ItemType", 'P' ). toInt ( )));
+	w_select_item-> setCurrentItemType ( BrickLink::inst ( )-> itemType ( CConfig::inst ( )-> value ( "/Defaults/AddItems/ItemType", 'P' ). toInt ( )));
 
 	w_picture-> setFrameStyle ( QFrame::StyledPanel | QFrame::Sunken );
 	w_picture-> setLineWidth ( 2 );
@@ -246,7 +248,7 @@ void DAddItem::updateMonetary ( )
 
 void DAddItem::updateItemAndColor ( )
 {
-	showItemInColor ( w_select_item-> item ( ), w_select_color-> color ( ));
+	showItemInColor ( w_select_item-> currentItem ( ), w_select_color-> currentColor ( ));
 }
 
 void DAddItem::showItemInColor ( const BrickLink::Item *it, const BrickLink::Color *col )
@@ -318,8 +320,8 @@ money_t DAddItem::tierPriceValue ( int i )
 
 bool DAddItem::checkAddPossible ( )
 {
-	bool acceptable = w_select_item-> item ( ) &&
-	                  w_select_color-> color ( ) &&
+	bool acceptable = w_select_item-> currentItem ( ) &&
+	                  w_select_color-> currentColor ( ) &&
 	                  w_price-> hasAcceptableInput ( ) &&
 	                  w_qty-> hasAcceptableInput ( ) &&
 	                  w_bulk-> hasAcceptableInput ( );
@@ -350,7 +352,7 @@ void DAddItem::addClicked ( )
 	if ( !checkAddPossible ( ) || !m_window )
 		return;
 
-	BrickLink::InvItem *ii = new BrickLink::InvItem ( w_select_color-> color ( ), w_select_item-> item ( ));
+	BrickLink::InvItem *ii = new BrickLink::InvItem ( w_select_color-> currentColor ( ), w_select_item-> currentItem ( ));
 
 	ii-> setQuantity ( w_qty-> text ( ). toInt ( ));
 	ii-> setPrice ( money_t::fromLocalizedString ( w_price-> text ( )));

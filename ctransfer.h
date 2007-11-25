@@ -24,7 +24,8 @@
 #include <QPair>
 #include <QDateTime>
 
-#include <curl/curl.h>
+typedef void CURL;
+typedef void CURLSH;
 
 class QFile;
 
@@ -66,7 +67,7 @@ public:
 		time_t       m_ifnewer;
 		time_t       m_filetime;
 
-		CURLcode     m_result;
+		int          m_result;
 		int          m_respcode     : 16;
 		bool         m_finished     : 1;
 		bool         m_get_or_post  : 1;
@@ -109,8 +110,8 @@ private:
 	static size_t write_curl ( void *ptr, size_t size, size_t nmemb, void *stream );
 	static int progress_curl ( void *clientp, double dltotal, double dlnow, double ultotal, double ulnow );
 
-	static void lock_curl ( CURL * /*handle*/, curl_lock_data /*data*/, curl_lock_access /*access*/, void * /*userptr*/ );
-	static void unlock_curl ( CURL * /*handle*/, curl_lock_data /*data*/, void * /*userptr*/ );
+	static void lock_curl (); // CURL * /*handle*/, curl_lock_data /*data*/, curl_lock_access /*access*/, void * /*userptr*/ );
+	static void unlock_curl (); // CURL * /*handle*/, curl_lock_data /*data*/, void * /*userptr*/ );
 
 private:
 	CURL *m_curl;

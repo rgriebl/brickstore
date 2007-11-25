@@ -179,7 +179,7 @@ private:
 
 	CWindow *m_current_window;
 
-	CMultiProgressBar *m_progress;
+	//CMultiProgressBar *m_progress;
 	CSpinner *m_spinner;
 	QLabel *m_statistics;
 	QLabel *m_errors;

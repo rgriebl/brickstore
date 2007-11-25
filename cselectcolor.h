@@ -26,8 +26,8 @@ class CSelectColor : public QWidget {
 public:
 	CSelectColor ( QWidget *parent = 0, Qt::WindowFlags f = 0 );
 	
-	void setColor ( const BrickLink::Color * );
-	const BrickLink::Color *color ( ) const;
+	void setCurrentColor ( const BrickLink::Color * );
+	const BrickLink::Color *currentColor ( ) const;
 
 signals:
 	void colorSelected ( const BrickLink::Color *, bool );
@@ -37,8 +37,8 @@ protected slots:
 	void colorConfirmed ( );
 
 protected:
-	virtual void enabledChange ( bool old );
-	virtual void showEvent ( QShowEvent * );
+	virtual void changeEvent(QEvent *);
+	virtual void showEvent(QShowEvent *);
 
 protected:
 	QTableView *w_colors;

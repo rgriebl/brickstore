@@ -16,6 +16,10 @@
 #include <QFile>
 #include <QApplication>
 
+#if defined(Q_OS_WIN)
+#include <windows.h>
+#endif
+
 #include "cconfig.h"
 #include "cutility.h"
 
@@ -79,7 +83,7 @@ int CRebuildDatabase::exec ( )
 	m_trans-> setProxy ( CConfig::inst ( )-> useProxy ( ), CConfig::inst ( )-> proxyName ( ), CConfig::inst ( )-> proxyPort ( ));
 	connect ( m_trans, SIGNAL( finished ( CTransfer::Job * )), this, SLOT( downloadJobFinished ( CTransfer::Job * )));
 
-	BrickLink *bl = BrickLink::inst ( );
+	BrickLink::Core *bl = BrickLink::inst ( );
 	bl-> setOnlineStatus ( false );
 
 	BrickLink::TextImport blti;

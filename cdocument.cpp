@@ -38,6 +38,8 @@
 #include "cdocument.h"
 #include "cdocument_p.h"
 
+#include "clocalemeasurement.h"
+
 namespace {
 
 template <typename T> static inline T pack ( typename T::const_reference item )
@@ -212,16 +214,19 @@ CDocument::Statistics::Statistics ( const CDocument *doc, const ItemList &list )
 
 
 CDocument::Item::Item ( )
-	: BrickLink::InvItem ( 0, 0 ), m_errors ( 0 )
+	: BrickLink::InvItem ( 0, 0 ), m_errors ( 0 ), m_picture(0)
 { }
 
 CDocument::Item::Item ( const BrickLink::InvItem &copy )
-	: BrickLink::InvItem ( copy ), m_errors ( 0 )
+	: BrickLink::InvItem ( copy ), m_errors ( 0 ), m_picture(0)
 { }
 
 CDocument::Item::Item ( const Item &copy )
-	: BrickLink::InvItem ( copy ), m_errors ( copy. m_errors )
-{ }
+: BrickLink::InvItem ( copy ), m_errors ( copy. m_errors ), m_picture(copy.m_picture)
+{ 
+	if (m_picture)
+		m_picture->addRef();
+}
 
 CDocument::Item &CDocument::Item::operator = ( const Item &copy )
 {
@@ -229,7 +234,21 @@ CDocument::Item &CDocument::Item::operator = ( const Item &copy )
 
 	m_errors = copy. m_errors;
 
+	if (m_picture)
+		m_picture->release();
+	m_picture = copy.m_picture;
+	if (m_picture)
+		m_picture->addRef();
+
 	return *this;
+}
+
+CDocument::Item::~Item ( )
+{
+	if (m_picture) {
+		m_picture->release();
+		m_picture = 0;
+	}
 }
 
 bool CDocument::Item::operator == ( const Item &cmp ) const
@@ -253,6 +272,10 @@ CDocument::CDocument ( bool dont_sort )
 	m_order = 0;
 	m_error_mask = 0;
 	m_dont_sort = dont_sort;
+
+
+
+	connect ( BrickLink::inst ( ), SIGNAL( pictureUpdated ( BrickLink::Picture * )), this, SLOT( pictureUpdated ( BrickLink::Picture * )));
 
 	connect ( m_undo, SIGNAL( cleanChanged ( bool )), this, SLOT( clean2Modified ( bool )));
 
@@ -1106,3 +1129,248 @@ void CDocument::resetDifferences ( const ItemList &items )
 	endMacro ( );
 }
 
+
+
+
+
+
+
+
+////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
+// Itemviews API
+////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
+
+
+int CDocument::rowCount(const QModelIndex &parent) const
+{ 
+	return parent.isValid() ? 0 : items().size(); 
+}
+
+int CDocument::columnCount(const QModelIndex &parent) const
+{ 
+	return parent.isValid() ? 0 : FieldCount; 
+}
+
+QVariant CDocument::data(const QModelIndex &index, int role) const
+{
+	if (index.isValid()) {
+		Item *it = items().at(index.row());
+		Field f = static_cast<Field>(index.column());
+
+		switch (role) {
+			case Qt::DisplayRole      : return dataForDisplayRole(it, f);
+			case Qt::DecorationRole   : return dataForDecorationRole(it, f);
+			case Qt::ToolTipRole      : return dataForToolTipRole(it, f);
+			case Qt::TextAlignmentRole: return dataForTextAlignmentRole(it, f);
+		}
+	}
+	return QVariant();
+}
+
+QVariant CDocument::headerData(int section, Qt::Orientation orientation, int role) const
+{
+	if (orientation == Qt::Horizontal) {
+		Field f = static_cast<Field>(section);
+
+		switch (role) {
+			case Qt::DisplayRole: return headerDataForDisplayRole(f);
+			case Qt::TextAlignmentRole: return headerDataForTextAlignmentRole(f);
+		}
+	}
+	return QVariant();
+}
+
+QString CDocument::dataForDisplayRole(Item *it, Field f) const
+{
+	QString dash = QChar('-');
+
+	switch (f) {
+		case LotId       : return (it->lotId() == 0 ? dash : QString::number(it->lotId()));
+		case PartNo      : return it->item()->id();
+		case Description : return it->item()->name();
+		case Comments    : return it->comments();
+		case Remarks     : return it->remarks();
+		case Quantity    : return QString::number(it->quantity());
+		case Bulk        : return (it->bulkQuantity() == 1 ? dash : QString::number(it->bulkQuantity()));
+		case Price       : return it->price().toLocalizedString();
+		case Total       : return it->total().toLocalizedString();
+		case Sale        : return (it->sale() == 0 ? dash : QString::number(it->sale()) + "%");
+		case Condition   : return (it->condition() == BrickLink::New ? QChar('N') : QChar('U'));
+		case Color       : return it->color()->name();
+		case Category    : return it->category()->name();
+		case ItemType    : return it->itemType()->name();
+		case TierQ1      : return (it->tierQuantity(0) == 0 ? dash : QString::number(it->tierQuantity(0)));
+		case TierQ2      : return (it->tierQuantity(1) == 0 ? dash : QString::number(it->tierQuantity(1)));
+		case TierQ3      : return (it->tierQuantity(2) == 0 ? dash : QString::number(it->tierQuantity(2)));
+		case TierP1      : return it->tierPrice(0).toLocalizedString();
+		case TierP2      : return it->tierPrice(1).toLocalizedString();
+		case TierP3      : return it->tierPrice(2).toLocalizedString();
+		case Reserved    : return it->reserved();
+		case Weight      : return (it->weight() == 0 ? dash : CLocaleMeasurement().weightToString(it->weight(), true, true));
+		case YearReleased: return (it->item()->yearReleased() == 0 ? dash : QString::number(it->item()->yearReleased()));
+
+		case PriceOrig   : return it->origPrice().toLocalizedString();
+		case PriceDiff   : return (it->price() - it->origPrice()).toLocalizedString();
+		case QuantityOrig: return QString::number(it->origQuantity());
+		case QuantityDiff: return QString::number(it->quantity() - it->origQuantity());
+	}
+	return QString();
+}
+
+QPixmap CDocument::dataForDecorationRole(Item *it, Field f) const
+{
+	switch (f) {
+		case Picture: {
+			if (it->m_picture && ((it->m_picture->item() != it->item()) || (it->m_picture->color() != it-> color()))) {
+				it->m_picture->release();
+				it->m_picture = 0;
+			}
+
+			if (!it->m_picture) {
+				if (it->customPicture())
+					it->m_picture = it->customPicture();
+				else
+					it->m_picture = BrickLink::inst()->picture(it->item(), it->color());
+
+				if (it->m_picture)
+					it->m_picture->addRef();
+			}
+
+			if (it->m_picture && it->m_picture->valid())
+				return it->m_picture->pixmap();
+			else
+				return QPixmap(BrickLink::inst()->pictureSize(it->itemType()));
+		}
+	}
+	return QPixmap();
+}
+
+int CDocument::dataForTextAlignmentRole(Item *it, Field f) const
+{
+	switch (f) {
+		case Retain      :
+		case Stockroom   :
+		case Status      :
+		case Picture     :
+		case Condition   : return Qt::AlignVCenter | Qt::AlignHCenter;
+		case PriceOrig   :
+		case PriceDiff   :
+		case Price       :
+		case Total       :
+		case Sale        :
+		case TierP1      :
+		case TierP2      :
+		case TierP3      :
+		case Weight      : return Qt::AlignRight | Qt::AlignHCenter;
+		default          : return Qt::AlignLeft | Qt::AlignHCenter;
+	}
+}
+
+QString CDocument::dataForToolTipRole(Item *it, Field f) const
+{
+	switch (f) {
+		case Status: {
+			switch (it->status()) {
+				case BrickLink::Exclude: return tr( "Exclude" );
+				case BrickLink::Extra  : return tr( "Extra" );
+				case BrickLink::Include: return tr( "Include" );
+				default                : break;
+			}
+			break;
+		}
+		case Picture: { 
+			return dataForDisplayRole(it, PartNo) + " " + dataForDisplayRole(it, Description);
+		}
+		case Condition: {
+			switch (it->condition()) {
+				case BrickLink::New : return tr( "New" );
+				case BrickLink::Used: return tr( "Used" );
+				default             : break;
+			}
+			break;
+		}
+		case Category: {
+			const BrickLink::Category **catpp = it->item()->allCategories();
+		
+			if (!catpp[1]) {
+				return catpp[0]->name();
+			}
+			else {
+				QString str = QString( "<b>%1</b>" ). arg( catpp [0]->name());
+				while ( *++catpp )
+					str = str + QString( "<br />" ) + catpp [0]->name();
+				return str;
+			}					
+			break;
+		}
+		default: {
+			// if (truncated)
+			//      return dataForDisplayRole(it, f);
+			break;
+		}
+	}
+	return QString();
+}
+
+
+QString CDocument::headerDataForDisplayRole(Field f) const
+{
+	switch (f) {
+		case Status      : return tr( "Status" );
+		case Picture     : return tr( "Image" );
+		case PartNo      : return tr( "Part #" );
+		case Description : return tr( "Description" );
+		case Comments    : return tr( "Comments" );
+		case Remarks     : return tr( "Remarks" );
+		case QuantityOrig: return tr( "Qty. Orig" );
+		case QuantityDiff: return tr( "Qty. Diff" );
+		case Quantity    : return tr( "Qty." );
+		case Bulk        : return tr( "Bulk" );
+		case PriceOrig   : return tr( "Pr. Orig" );
+		case PriceDiff   : return tr( "Pr. Diff" );
+		case Price       : return tr( "Price" );
+		case Total       : return tr( "Total" );
+		case Sale        : return tr( "Sale" );
+		case Condition   : return tr( "Cond." );
+		case Color       : return tr( "Color" );
+		case Category    : return tr( "Category" );
+		case ItemType    : return tr( "Item Type" );
+		case TierQ1      : return tr( "Tier Q1" );
+		case TierP1      : return tr( "Tier P1" );
+		case TierQ2      : return tr( "Tier Q2" );
+		case TierP2      : return tr( "Tier P2" );
+		case TierQ3      : return tr( "Tier Q3" );
+		case TierP3      : return tr( "Tier P3" );
+		case LotId       : return tr( "Lot Id" );
+		case Retain      : return tr( "Retain" );
+		case Stockroom   : return tr( "Stockroom" );
+		case Reserved    : return tr( "Reserved" );
+		case Weight      : return tr( "Weight" );
+		case YearReleased: return tr( "Year" );
+	}
+	return QString();
+}
+
+int CDocument::headerDataForTextAlignmentRole(Field f) const
+{
+	return dataForTextAlignmentRole(0, f);
+}
+
+void CDocument::pictureUpdated(BrickLink::Picture *pic)
+{
+	if ( !pic )
+		return;
+
+	int row = 0;
+	foreach (Item *it, items()) {
+		if ((pic->item() == it->item()) && (pic->color() == it-> color())) {
+			QModelIndex idx = index(row, Picture);
+			emit dataChanged(idx, idx);
+		}
+		row++;
+	}
+}

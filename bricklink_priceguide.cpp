@@ -78,7 +78,7 @@ static int find_keywords ( const char *str, int start, int stop, struct keyword 
 
 // ---------------------------------------------------------------------------
 
-BrickLink::PriceGuide *BrickLink::priceGuide ( const BrickLink::Item *item, const BrickLink::Color *color, bool high_priority )
+BrickLink::PriceGuide *BrickLink::Core::priceGuide ( const BrickLink::Item *item, const BrickLink::Color *color, bool high_priority )
 {
 	if ( !item || !color )
 		return 0;
@@ -353,7 +353,7 @@ void BrickLink::PriceGuide::update ( bool high_priority )
 }
 
 
-void BrickLink::updatePriceGuide ( BrickLink::PriceGuide *pg, bool high_priority )
+void BrickLink::Core::updatePriceGuide ( BrickLink::PriceGuide *pg, bool high_priority )
 {
 	if ( !pg || ( pg-> m_update_status == Updating ))
 		return;
@@ -383,7 +383,7 @@ void BrickLink::updatePriceGuide ( BrickLink::PriceGuide *pg, bool high_priority
 }
 
 
-void BrickLink::priceGuideJobFinished ( CTransfer::Job *j )
+void BrickLink::Core::priceGuideJobFinished ( CTransfer::Job *j )
 {
 	if ( !j || !j-> data ( ) || !j-> userObject ( ))
 		return;

@@ -36,8 +36,8 @@ public:
 
 	static void setPopupPos ( QWidget *w, const QRect &pos );
 
-	static QString weightToString ( double w, bool imperial = false, bool optimize = false, bool show_unit = false );
-	static double stringToWeight ( const QString &s, bool imperial = false );
+//	static QString weightToString ( double w, bool imperial = false, bool optimize = false, bool show_unit = false );
+//	static double stringToWeight ( const QString &s, bool imperial = false );
 
 	//static QString safeOpen ( const QString &basepath );
 	static QString safeRename ( const QString &basepath );

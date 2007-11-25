@@ -23,7 +23,7 @@
 #include <sys/utsname.h>
 #endif
 
-#include <curl/curl.h>
+//#include <curl/curl.h>
 
 
 #include "cframework.h"
@@ -352,7 +352,7 @@ bool CApplication::initBrickLink ( )
 	defdatadir += "/.brickstore-cache/";
 #endif
 
-	BrickLink *bl = BrickLink::inst ( CConfig::inst ( )-> value ( "/BrickLink/DataDir", defdatadir ). toString ( ), &errstring );
+	BrickLink::Core *bl = BrickLink::create ( CConfig::inst ( )-> value ( "/BrickLink/DataDir", defdatadir ). toString ( ), &errstring );
 
 	if ( !bl )
 		CMessageBox::critical ( 0, tr( "Could not initialize the BrickLink kernel:<br /><br />%1" ). arg ( errstring ));
@@ -392,9 +392,9 @@ void CApplication::about ( )
 	QString version   = tr( "Version %1" ). arg ( BRICKSTORE_VERSION );
 	QString support   = tr( "Visit %1, or send an email to %2" ). arg ( "<a href=\"http://" BRICKSTORE_URL "\">" BRICKSTORE_URL "</a>", "<a href=\"mailto:" BRICKSTORE_MAIL "\">" BRICKSTORE_MAIL "</a>" );
 
-	::curl_version_info_data *curlver = curl_version_info ( CURLVERSION_FIRST );
-	QString curl = curlver-> version;
-	QString z    = curlver-> libz_version;
+//	::curl_version_info_data *curlver = curl_version_info ( CURLVERSION_FIRST );
+	QString curl = ""; //curlver-> version;
+	QString z    = ""; //curlver-> libz_version;
 	QString qt   = qVersion ( );
 
 	static const char *legal_src = QT_TR_NOOP(

@@ -35,7 +35,7 @@ CWorkspace::CWorkspace ( QWidget *parent, Qt::WindowFlags f )
 	m_tabmode = TopTabs;
 
 	m_verticallayout = new QVBoxLayout ( this );
-	m_verticallayout-> setMargin ( 0 );
+	m_verticallayout-> setContentsMargins(0, 0, 0 , 0);
 	m_verticallayout-> setSpacing ( 0 );
 
 	m_tabbar = new QTabBar ( this );
@@ -48,7 +48,11 @@ CWorkspace::CWorkspace ( QWidget *parent, Qt::WindowFlags f )
 	m_tablayout-> addSpacing ( 4 );
 	m_verticallayout-> addLayout ( m_tablayout );
 	
-	m_stacklayout = new QStackedLayout ( m_verticallayout );
+	m_stacklayout = new QStackedLayout ( );
+	m_stacklayout-> setContentsMargins(0, 0, 0 , 0);
+	m_stacklayout-> setSpacing ( 0 );
+	m_verticallayout-> addLayout ( m_stacklayout );
+
 
 	relayout ( );
 

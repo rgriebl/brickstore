@@ -17,6 +17,13 @@
 #include "ctransfer.h"
 
 
+#ifdef Q_OS_WIN
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#endif
+
+#include <curl/curl.h>
+
 bool CTransfer::s_global_init = false;
 QMutex CTransfer::s_share_lock;
 CURLSH *CTransfer::s_curl_share = 0;
@@ -463,12 +470,12 @@ int CTransfer::progress_curl ( void *stream, double dltotal, double dlnow, doubl
 	return 0;
 }
 
-void CTransfer::lock_curl ( CURL * /*handle*/, curl_lock_data /*data*/, curl_lock_access /*access*/, void * /*userptr*/ )
+void CTransfer::lock_curl () // CURL * /*handle*/, curl_lock_data /*data*/, curl_lock_access /*access*/, void * /*userptr*/ )
 {
 	s_share_lock. lock ( );
 }
 
-void CTransfer::unlock_curl ( CURL * /*handle*/, curl_lock_data /*data*/, void * /*userptr*/ )
+void CTransfer::unlock_curl () // CURL * /*handle*/, curl_lock_data /*data*/, void * /*userptr*/ )
 {
 	s_share_lock. unlock ( );
 }

@@ -20,8 +20,9 @@
 
 #include "bricklink.h"
 #include "cconfig.h"
-#include "cutility.h"
+//#include "cutility.h"
 #include "cframework.h"
+#include "clocalemeasurement.h"
 
 #include "ctaskwidgets.h"
 
@@ -137,8 +138,10 @@ bool CTaskPriceGuideWidget::event ( QEvent *e )
 
 void CTaskPriceGuideWidget::fixParentDockWindow ( )
 {
-	if ( m_dock )
-		m_dock-> removeEventFilter ( this );
+	if ( m_dock ) {
+		disconnect(m_dock, SIGNAL(dockLocationChanged(Qt::DockWidgetArea)), this, SLOT(dockChanged()));
+		disconnect(m_dock, SIGNAL(topLevelChanged(bool)), this, SLOT(dockChanged()));
+	}
 
 	m_dock = 0;
 
@@ -150,24 +153,27 @@ void CTaskPriceGuideWidget::fixParentDockWindow ( )
 	}
 
 	if ( m_dock ) {
-		m_dock-> installEventFilter ( this );
-
-		QMainWindow *mw = qobject_cast<QMainWindow *>( m_dock-> parentWidget ( ));
-		bool horz = !mw || ( mw-> dockWidgetArea ( m_dock ) == Qt::LeftDockWidgetArea ) || ( mw-> dockWidgetArea ( m_dock ) == Qt::RightDockWidgetArea );
-
-		setLayout ( horz ? CPriceGuideWidget::Horizontal : CPriceGuideWidget::Vertical );
+		connect(m_dock, SIGNAL(dockLocationChanged(Qt::DockWidgetArea)), this, SLOT(dockChanged()));
+		connect(m_dock, SIGNAL(topLevelChanged(bool)), this, SLOT(dockChanged()));
 	}
+	dockChanged();
 }
 
-bool CTaskPriceGuideWidget::eventFilter ( QObject *o, QEvent *e )
+void CTaskPriceGuideWidget::dockChanged()
 {
-	if ( o && ( o == m_dock ) && ( e-> type ( ) == QEvent::ParentChange )) {
-		QMainWindow *mw = qobject_cast<QMainWindow *>( m_dock-> parentWidget ( ));
-		bool horz = !mw || ( mw-> dockWidgetArea ( m_dock ) == Qt::LeftDockWidgetArea ) || ( mw-> dockWidgetArea ( m_dock ) == Qt::RightDockWidgetArea );
+	CPriceGuideWidget::Layout lay = CPriceGuideWidget::Normal;
 
-		setLayout ( horz ? CPriceGuideWidget::Horizontal : CPriceGuideWidget::Vertical );
+	if (m_dock) {
+		if (QMainWindow *mw = qobject_cast<QMainWindow *>(m_dock->parentWidget())) {
+			if (m_dock->isFloating())
+				lay = CPriceGuideWidget::Normal;
+			else if ((mw->dockWidgetArea(m_dock) == Qt::LeftDockWidgetArea) || (mw->dockWidgetArea(m_dock) == Qt::RightDockWidgetArea))
+				lay = CPriceGuideWidget::Vertical;
+			else
+				lay = CPriceGuideWidget::Horizontal;
+		}
 	}
-	return QWidget::eventFilter ( o, e );
+	setLayout(lay);
 }
 
 // ----------------------------------------------------------------------
@@ -241,7 +247,7 @@ void CTaskInfoWidget::selectionUpdate ( const CDocument::ItemList &list )
 				wgtstr = tr( "min." ) + " ";
 			}
 
-			wgtstr += CUtility::weightToString ( weight, ( CConfig::inst ( )-> weightSystem ( ) == CConfig::WeightImperial ), true, true );
+			wgtstr += CLocaleMeasurement::weightToString ( weight, true, true );
 		}
 
 		s = QString ( "<h3>%1</h3>&nbsp;&nbsp;%2: %3<br />&nbsp;&nbsp;%4: %5<br /><br />&nbsp;&nbsp;%6: %7<br /><br />&nbsp;&nbsp;%8: %9" ).

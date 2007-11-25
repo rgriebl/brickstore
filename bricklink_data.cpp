@@ -20,7 +20,9 @@
 BrickLink::Color::Color ( ) : m_name ( 0 ), m_peeron_name ( 0 ) { }
 BrickLink::Color::~Color ( ) { delete [] m_name; delete [] m_peeron_name; }
 
-QDataStream &operator << ( QDataStream &ds, const BrickLink::Color *col )
+namespace BrickLink {
+
+QDataStream &operator << ( QDataStream &ds, const Color *col )
 {
 	quint8 flags = 0;
 	flags |= ( col-> m_is_trans    ? 0x01 : 0 );
@@ -48,11 +50,12 @@ QDataStream &operator >> ( QDataStream &ds, BrickLink::Color *col )
 	return ds;
 }
 
+} // namespace BrickLink
 
 BrickLink::ItemType::ItemType ( ) : m_name ( 0 ), m_categories ( 0 ) { }
 BrickLink::ItemType::~ItemType ( ) { delete [] m_name; delete [] m_categories; }
 
-QSize BrickLink::ItemType::imageSize ( ) const
+QSize BrickLink::ItemType::pictureSize ( ) const
 {
 	QSize s ( 80, 60 );
 	if ( m_id == 'M' ) 
@@ -60,7 +63,9 @@ QSize BrickLink::ItemType::imageSize ( ) const
 	return s;
 }
 
-QDataStream &operator << ( QDataStream &ds, const BrickLink::ItemType *itt )
+namespace BrickLink {
+
+QDataStream &operator << ( QDataStream &ds, const ItemType *itt )
 {
 	quint8 flags = 0;
 	flags |= ( itt-> m_has_inventories ? 0x01 : 0 );
@@ -113,9 +118,12 @@ QDataStream &operator >> ( QDataStream &ds, BrickLink::ItemType *itt )
 	return ds;
 }
 
+} // namespace BrickLink
 
 BrickLink::Category::Category ( ) : m_name ( 0 ) { }
 BrickLink::Category::~Category ( ) { delete [] m_name; }
+
+namespace BrickLink {
 
 QDataStream &operator << ( QDataStream &ds, const BrickLink::Category *cat )
 {
@@ -128,6 +136,7 @@ QDataStream &operator >> ( QDataStream &ds, BrickLink::Category *cat )
 	return ds >> cat-> m_id >> cat-> m_name;
 }
 
+} // namespace BrickLink
 
 BrickLink::Item::Item ( ) : m_id ( 0 ), m_name ( 0 ), m_categories ( 0 ), m_last_inv_update ( -1 ), m_appears_in ( 0 ), m_consists_of ( 0 ) { }
 BrickLink::Item::~Item ( ) { delete [] m_id; delete [] m_name; delete [] m_categories; delete [] m_appears_in; delete [] m_consists_of; }
@@ -242,7 +251,7 @@ void BrickLink::Item::setConsistsOf ( const InvItemList &items ) const
 			entry-> m_qty      = item-> quantity ( );
 			entry-> m_index    = item-> item ( )-> m_index;
 			entry-> m_color    = item-> color ( )-> id ( );
-			entry-> m_extra    = ( item-> status ( ) == BrickLink::InvItem::Extra ) ? 1 : 0;
+			entry-> m_extra    = ( item-> status ( ) == BrickLink::Extra ) ? 1 : 0;
 			entry-> m_isalt    = 0;
 			entry-> m_altid    = 0;
 			entry-> m_reserved = 0;
@@ -274,7 +283,7 @@ BrickLink::InvItemList BrickLink::Item::consistsOf ( ) const
 				InvItem *ii = new InvItem ( color, item );
 				ii-> setQuantity ( entry-> m_qty );
 				if ( entry-> m_extra )
-					ii-> setStatus ( BrickLink::InvItem::Extra );
+					ii-> setStatus ( BrickLink::Extra );
 
 				list. append ( ii );
 			}
@@ -283,6 +292,8 @@ BrickLink::InvItemList BrickLink::Item::consistsOf ( ) const
 
 	return list;
 }
+
+namespace BrickLink {
 
 QDataStream &operator << ( QDataStream &ds, const BrickLink::Item *item )
 {
@@ -392,6 +403,7 @@ QDataStream &operator >> ( QDataStream &ds, BrickLink::Item *item )
 	return ds;
 }
 
+} // namespace BrickLink
 
 BrickLink::InvItem::InvItem ( const Color *color, const Item *item )
 {
@@ -590,6 +602,8 @@ bool BrickLink::InvItem::mergeFrom ( const InvItem &from, bool prefer_from )
 }
 
 
+namespace BrickLink {
+
 QDataStream &operator << ( QDataStream &ds, const BrickLink::InvItem &ii )
 {
 	ds << QByteArray( ii. item ( ) ? ii. item ( )-> id ( ) : "" );
@@ -628,7 +642,7 @@ QDataStream &operator >> ( QDataStream &ds, BrickLink::InvItem &ii )
 	   >> retain >> stockroom >> ii. m_reserved >> ii. m_lot_id
 	   >> ii. m_orig_quantity >> ii. m_orig_price;
 
-	ii. m_status = (BrickLink::InvItem::Status) status;
+	ii. m_status = (BrickLink::Status) status;
 	ii. m_condition = (BrickLink::Condition) cond; 
 	ii. m_retain = ( retain );
 	ii. m_stockroom = ( stockroom );
@@ -640,83 +654,480 @@ QDataStream &operator >> ( QDataStream &ds, BrickLink::InvItem &ii )
 	   
 	return ds;
 }
-#if 0
-const char *BrickLink::InvItemDrag::s_mimetype = "application/x-bricklink-invitems";
 
-BrickLink::InvItemDrag::InvItemDrag( const InvItemList &items, QWidget *dragsource, const char *name )
-    : QDragObject( dragsource, name )
+} // namespace BrickLink
+
+const char *BrickLink::InvItemMimeData::s_mimetype = "application/x-bricklink-invitems";
+
+BrickLink::InvItemMimeData::InvItemMimeData(const InvItemList &items)
+    : QMimeData()
 {
-    setItems ( items );
+	setItems(items);
 }
 
-BrickLink::InvItemDrag::InvItemDrag( QWidget *dragsource, const char *name )
-    : QDragObject( dragsource, name )
+void BrickLink::InvItemMimeData::setItems(const InvItemList &items)
 {
-	setItems ( InvItemList ( ));
-}
+	QByteArray data;
+	QString text;
 
-const char *BrickLink::InvItemDrag::format ( int n ) const
-{
-	switch ( n ) {
-		case  0: return s_mimetype;
-		case  1: return "text/plain";
-		default: return 0;
-	}
-}
-
-void BrickLink::InvItemDrag::setItems ( const InvItemList &items )
-{
-	m_text. truncate ( 0 );
-	m_data. truncate ( 0 );
-	QDataStream ds ( m_data, IO_WriteOnly );
+	QDataStream ds(&data, QIODevice::WriteOnly);
 	
-	ds << items. count ( );
-	foreach ( const InvItem *ii, items ) {
+	ds << items.count();
+	foreach (const InvItem *ii, items) {
 		ds << *ii;
-		if ( !m_text. isEmpty ( ))
-			m_text. append ( "\n" );
-		m_text. append ( ii-> item ( )-> id ( ));
+		if (!text.isEmpty())
+			text.append("\n");
+		text.append(ii->item()->id());
 	}
+	setText(text);
+	setData(s_mimetype, data);
 }
 
-QByteArray BrickLink::InvItemDrag::encodedData ( const char *mime ) const
+BrickLink::InvItemList BrickLink::InvItemMimeData::items(const QMimeData *md)
 {
-	if ( !qstricmp ( mime, format ( 0 )))      // normal data		
-		return m_data;
-	else if ( !qstricmp ( mime, format ( 1 ))) // text/plain
-		return m_text;
-	else
-		return QByteArray ( );
-}
+	InvItemList items;
 
-bool BrickLink::InvItemDrag::canDecode ( QMimeSource *e )
-{
-    return e-> provides ( s_mimetype );
-}
+	if (md) {
+		QByteArray data = md->data(s_mimetype);
+		QDataStream ds(data);
 
-bool BrickLink::InvItemDrag::decode ( QMimeSource *e, InvItemList &items )
-{
-    QByteArray data = e-> encodedData ( s_mimetype );
-    QDataStream ds ( data, IO_ReadOnly );
+		if (data. size()) {
+			quint32 count = 0;
+			ds >> count;
 
-    if ( !data. size ( ))
-    	return false;
-
-    quint32 count = 0;
-    ds >> count;
-
-	items. clear ( );
-	
-	for ( ; count && !ds. atEnd ( ); count-- ) {
-		InvItem *ii = new InvItem ( );
-	    ds >> *ii;
-	    items. append ( ii );
+			for ( ; count && !ds.atEnd(); count--) {
+				InvItem *ii = new InvItem();
+				ds >> *ii;
+				items.append(ii);
+			}
+		}
 	}
-	
-    return true;
+    return items;
 }
-#endif
+
+QStringList BrickLink::InvItemMimeData::formats() const
+{
+	static QStringList sl;
+
+	if (sl.isEmpty())
+		sl << s_mimetype << "text/plain";
+
+	return sl;
+}
+
+bool BrickLink::InvItemMimeData::hasFormat(const QString & mimeType) const
+{
+	return mimeType.compare(s_mimetype) || mimeType.compare("text/plain");
+}
 
 BrickLink::Order::Order ( const QString &id, Type type )
 	: m_id ( id ), m_type ( type )
 { }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#include <QFontMetrics>
+#include <QApplication>
+#include <QPixmap>
+#include <QImage>
+
+BrickLink::ColorModel::ColorModel(const Core *core) 
+{ 
+	m_sorted = Qt::AscendingOrder;
+	m_filter = 0;
+
+	rebuildColorList();
+}
+
+QModelIndex BrickLink::ColorModel::index(int row, int column, const QModelIndex &parent) const
+{
+	if (hasIndex(row, column, parent))
+		return parent.isValid() ? QModelIndex() : createIndex(row, column, const_cast<Color *>(m_colors.at(row)));
+	return QModelIndex();
+}
+
+const BrickLink::Color *BrickLink::ColorModel::color(const QModelIndex &index) const
+{ 
+	return index.isValid() ? static_cast<const BrickLink::Color *>(index.internalPointer()) : 0;
+}
+
+QModelIndex BrickLink::ColorModel::index(const BrickLink::Color *color) const
+{ 
+	return color ? createIndex(m_colors.indexOf(color), 0, const_cast<Color *>(color)) : QModelIndex();
+}
+
+int BrickLink::ColorModel::rowCount(const QModelIndex &parent) const
+{
+	return parent.isValid() ? 0 : m_colors.count();
+}
+
+int BrickLink::ColorModel::columnCount(const QModelIndex &parent) const
+{ 
+	return parent.isValid() ? 0 : 1;	
+}
+
+QVariant BrickLink::ColorModel::data(const QModelIndex &index, int role) const
+{
+	if (!index.isValid() || index.column() != 0 || !color(index))
+		return QVariant();
+
+	QVariant res;
+	const Color *c = color(index);
+
+	if (role == Qt:: DisplayRole) {
+		res = c-> name();
+	}
+	else if (role == Qt::DecorationRole) {
+		QFontMetrics fm = QApplication::fontMetrics ( );
+		QPixmap pix = QPixmap::fromImage(BrickLink::inst()->colorImage(c, fm.height(), fm.height()));
+		res = pix;
+	}
+	else if (role == Qt::ToolTipRole) {
+		res = QString( "<table width=\"100%\" border=\"0\" bgcolor=\"%3\"><tr><td><br><br></td></tr></table><br />%1: %2").arg (tr("RGB"), c->color().name(), c->color().name());
+	}
+	else if (role == ColorPointerRole) {
+		res = c;
+	}
+	return res;
+}
+
+QVariant BrickLink::ColorModel::headerData(int section, Qt::Orientation orient, int role) const
+{
+	if ((orient == Qt::Horizontal) && (role == Qt::DisplayRole) && (section == 0))
+		return tr( "Color" );
+	return QVariant ( );
+}
+
+void BrickLink::ColorModel::sort(int column, Qt::SortOrder so)
+{
+	if (column == 0) {
+		m_sorted = so;
+	    emit layoutAboutToBeChanged();
+		qStableSort(m_colors.begin(), m_colors.end(), Compare(so == Qt::AscendingOrder));
+		emit layoutChanged();
+	}
+}
+
+BrickLink::ColorModel::Compare::Compare(bool asc) : m_asc(asc) { }
+
+bool BrickLink::ColorModel::Compare::operator()(const Color *c1, const Color *c2)
+{
+	if (m_asc) {
+		return (qstrcmp(c1->name(), c2->name()) < 0);
+	}
+	else {
+		int lh, rh, ls, rs, lv, rv, d;
+
+		c1-> color ( ). getHsv ( &lh, &ls, &lv );
+		c2-> color ( ). getHsv ( &rh, &rs, &rv );
+
+		if ( lh != rh )
+			d = lh - rh;
+		else if ( ls != rs )
+			d = ls - rs;
+		else
+			d = lv - rv;
+
+		return d < 0;
+	}
+}
+
+void BrickLink::ColorModel::rebuildColorList()
+{
+	if (!m_filter || m_filter->hasColors()) {
+		m_colors = BrickLink::core()->colors().values();
+		qStableSort(m_colors.begin(), m_colors.end(), Compare(m_sorted == Qt::AscendingOrder));
+	}
+	else
+		m_colors.clear();
+}
+
+void BrickLink::ColorModel::setItemTypeFilter(const ItemType *it)
+{
+	if (it == m_filter)
+			return;
+
+	emit layoutAboutToBeChanged();
+
+	m_filter = it;
+	rebuildColorList();
+
+	emit layoutChanged();
+}
+
+void BrickLink::ColorModel::clearItemTypeFilter()
+{
+	setItemTypeFilter(0);
+}
+
+BrickLink::ColorModel *BrickLink::Core::colorModel() const
+{
+	return new ColorModel(this);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// this hack is needed since 0 means 'no selection at all'
+const BrickLink::Category *BrickLink::CategoryModel::AllCategories = reinterpret_cast <const BrickLink::Category *>(-1);
+
+BrickLink::CategoryModel::CategoryModel(Features f, const Core *core)
+{
+	m_sorted = Qt::AscendingOrder;
+	m_filter = 0;
+	m_hasall = (f == IncludeAllCategoriesItem);
+
+	rebuildCategoryList();
+}
+
+QModelIndex BrickLink::CategoryModel::index(int row, int column, const QModelIndex &parent) const
+{
+	bool isall = (row == 0) && m_hasall;
+
+	if (hasIndex(row, column, parent))
+		return parent.isValid() ? QModelIndex() : createIndex(row, column, const_cast<Category *>(isall ? AllCategories : m_categories.at(row - (m_hasall ? 1 : 0))));
+	return QModelIndex();
+}
+
+const BrickLink::Category *BrickLink::CategoryModel::category(const QModelIndex &index) const
+{ 
+	return index.isValid() ? static_cast<const Category *>(index.internalPointer()) : 0;
+}
+
+QModelIndex BrickLink::CategoryModel::index(const Category *category) const
+{ 
+	bool isall = (category == AllCategories) && m_hasall;
+
+	return category ? createIndex(isall ? 0 : m_categories.indexOf(category) + (m_hasall ? 1 : 0), 0, const_cast<Category *>(category)) : QModelIndex();
+}
+
+int BrickLink::CategoryModel::rowCount(const QModelIndex &parent) const
+{
+	return parent.isValid() ? 0 : m_categories.count() + (m_hasall ? 1 : 0);
+}
+
+int BrickLink::CategoryModel::columnCount(const QModelIndex &parent) const
+{ 
+	return parent.isValid() ? 0 : 1;
+}
+
+QVariant BrickLink::CategoryModel::data(const QModelIndex &index, int role) const
+{
+	if (!index.isValid() || index.column() != 0 || !category(index))
+		return QVariant();
+
+	QVariant res;
+	const Category *c = category(index);
+
+	if (role == Qt::DisplayRole) {
+		res = c != AllCategories ? c->name() : QString("[%1]").arg(tr("All Items"));
+	}
+	else if (role == CategoryPointerRole) {
+		res = c;
+	}
+	return res;
+}
+
+QVariant BrickLink::CategoryModel::headerData(int section, Qt::Orientation orient, int role) const
+{
+	if ((orient == Qt::Horizontal) && (role == Qt::DisplayRole) && (section == 0))
+		return tr("Category");
+	return QVariant ( );
+}
+
+void BrickLink::CategoryModel::sort(int column, Qt::SortOrder so)
+{
+	if (column == 0) {
+	    emit layoutAboutToBeChanged();
+		m_sorted = so;
+		qStableSort(m_categories.begin(), m_categories.end(), Compare(m_sorted == Qt::AscendingOrder));
+		emit layoutChanged();
+	}
+}
+
+BrickLink::CategoryModel::Compare::Compare(bool asc) : m_asc(asc) { }
+
+bool BrickLink::CategoryModel::Compare::operator()(const Category *c1, const Category *c2)
+{
+	bool b;
+
+	if (c1 == AllCategories)
+		b = true;
+	else if (c2 == AllCategories)
+		b = false;
+	else
+		b = (qstrcmp(c1->name(), c2->name()) >= 0);
+
+	return m_asc ^ b;
+}
+
+void BrickLink::CategoryModel::rebuildCategoryList()
+{
+	if (!m_filter) {
+		m_categories = BrickLink::core()->categories().values();
+	}
+	else {
+		m_categories.clear();
+		for (const Category **cp = m_filter->categories(); *cp; cp++ )
+			m_categories << *cp;
+	}
+	qStableSort(m_categories.begin(), m_categories.end(), Compare(m_sorted == Qt::AscendingOrder));
+}
+
+void BrickLink::CategoryModel::setItemTypeFilter(const ItemType *it)
+{
+	if (it == m_filter)
+			return;
+
+	emit layoutAboutToBeChanged();
+
+	m_filter = it;
+	rebuildCategoryList();
+
+	emit layoutChanged();
+}
+
+void BrickLink::CategoryModel::clearItemTypeFilter()
+{
+	setItemTypeFilter(0);
+}
+
+
+BrickLink::CategoryModel *BrickLink::Core::categoryModel(CategoryModel::Features f) const
+{
+	return new CategoryModel(f, this);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+BrickLink::ItemTypeModel::ItemTypeModel(Features f, const Core *core)
+{
+	QList<const ItemType *> list = core->itemTypes().values();
+
+	if (f == ExcludeWithoutInventory) {
+		foreach (const ItemType *it, list) {
+			if (it->hasInventories())
+				m_itemtypes.append(it);
+		}
+	}
+	else {
+		m_itemtypes = list;
+	}
+}
+
+QModelIndex BrickLink::ItemTypeModel::index(int row, int column, const QModelIndex &parent) const
+{
+	if (hasIndex(row, column, parent))
+		return parent.isValid() ? QModelIndex() : createIndex(row, column, const_cast<ItemType *>(m_itemtypes.at(row)));
+	return QModelIndex();
+}
+
+const BrickLink::ItemType *BrickLink::ItemTypeModel::itemType(const QModelIndex &index) const
+{ 
+	return index.isValid() ? static_cast<const ItemType *>(index.internalPointer()) : 0;
+}
+
+QModelIndex BrickLink::ItemTypeModel::index(const ItemType *itemtype) const
+{ 
+	return itemtype ? createIndex(m_itemtypes.indexOf(itemtype), 0, const_cast<ItemType *>(itemtype)) : QModelIndex();
+}
+
+int BrickLink::ItemTypeModel::rowCount(const QModelIndex &parent) const
+{
+	return parent.isValid() ? 0 : m_itemtypes.count();
+}
+
+int BrickLink::ItemTypeModel::columnCount(const QModelIndex &parent) const
+{ 
+	return parent.isValid() ? 0 : 1;
+}
+
+QVariant BrickLink::ItemTypeModel::data(const QModelIndex &index, int role) const
+{
+	if (!index.isValid() || index.column() != 0 || !itemType(index))
+		return QVariant();
+
+	QVariant res;
+	const ItemType *i = itemType(index);
+
+	if (role == Qt::DisplayRole) {
+		res = i->name();
+	}
+	else if (role == ItemTypePointerRole) {
+		res = i;
+	}
+	return res;
+}
+
+QVariant BrickLink::ItemTypeModel::headerData(int section, Qt::Orientation orient, int role) const
+{
+	if ((orient == Qt::Horizontal) && (role == Qt::DisplayRole) && (section == 0))
+		return tr("Name");
+	return QVariant ( );
+}
+
+void BrickLink::ItemTypeModel::sort(int column, Qt::SortOrder so)
+{
+	if (column == 0) {
+	    emit layoutAboutToBeChanged();
+		Compare cmp(so == Qt::AscendingOrder);
+		qStableSort(m_itemtypes.begin(), m_itemtypes.end(), cmp);
+		emit layoutChanged();
+	}
+}
+
+BrickLink::ItemTypeModel::Compare::Compare(bool asc) : m_asc(asc) { }
+
+bool BrickLink::ItemTypeModel::Compare::operator()(const ItemType *c1, const ItemType *c2)
+{
+	bool b = (qstrcmp(c1->name(), c2->name()) >= 0);
+	return m_asc ^ b;
+}
+
+
+BrickLink::ItemTypeModel *BrickLink::Core::itemTypeModel(ItemTypeModel::Features f) const
+{
+	return new ItemTypeModel(f, this);
+}
+

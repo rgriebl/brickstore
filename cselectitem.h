@@ -27,68 +27,67 @@ class CSelectItemPrivate;
 class CSelectItem : public QWidget {
 	Q_OBJECT
 public:
-	CSelectItem ( QWidget *parent = 0, Qt::WindowFlags f = 0 );
+	CSelectItem(bool inv_only, QWidget *parent = 0);
 
-	bool setItemType ( const BrickLink::ItemType * );
-	bool setItem ( const BrickLink::Item * );
-	bool setItemTypeCategoryAndFilter ( const BrickLink::ItemType *itt, const BrickLink::Category *cat, const QString &filter );
-
-	const BrickLink::Item *item ( ) const;
-
-	void setOnlyWithInventory ( bool b );
 	bool isOnlyWithInventory ( ) const;
 	
-	enum ViewMode { ViewMode_List, ViewMode_ListWithImages, ViewMode_Thumbnails };
+	enum ViewMode { 
+		ListMode = 0,
+		TableMode,
+		ThumbsMode
+	};
 
 	virtual QSize sizeHint ( ) const;
 
+	const BrickLink::Category *currentCategory() const;
+	const BrickLink::ItemType *currentItemType() const;
+	const BrickLink::Item *currentItem() const;
+
+	void setCurrentCategory(const BrickLink::Category *cat);
+	void setCurrentItemType(const BrickLink::ItemType *it);
+	bool setCurrentItem(const BrickLink::Item *item);
+
+
 signals:
-	void hasColors ( bool );
-	void itemSelected ( const BrickLink::Item *, bool );
+	//void hasColors ( bool );
+	//void itemSelected ( const BrickLink::Item *, bool );
+
+public slots:
+	void itemTypeChanged();
+	void categoryChanged();
+//	void itemChanged();
+
+	void showAsList();
+	void showAsTable();
+	void showAsThumbs();
+
+//	void itemConfirmed();
+
+	void findItem();
 
 protected slots:
-	void itemConfirmed ( );
-	void itemChangedList ( );
-	void itemChangedIcon ( );
-	void itemTypeChanged ( );
-	void categoryChanged ( );
 	void applyFilter ( );
-	void viewModeChanged ( int );
-	void pictureUpdated ( BrickLink::Picture * );
-	void findItem ( );
 	void languageChange ( );
-	void itemContextList ( QListViewItem *, const QPoint & );
-	void itemContextIcon ( QIconViewItem *, const QPoint & );
 
 protected:
-	virtual void showEvent ( QShowEvent * );
+	virtual void showEvent(QShowEvent *);
 
 private:
-	bool fillCategoryView ( const BrickLink::ItemType *itt, const BrickLink::Category *cat = 0 );
-	bool fillItemView ( const BrickLink::ItemType *itt, const BrickLink::Category *cat, const BrickLink::Item *select = 0 );
-
-	const BrickLink::Item *fillItemListView ( const BrickLink::ItemType *itt, const BrickLink::Category *cat, const BrickLink::Item *select = 0 );
-	const BrickLink::Item *fillItemIconView ( const BrickLink::ItemType *itt, const BrickLink::Category *cat, const BrickLink::Item *select = 0 );
-
-	bool setViewMode ( ViewMode ivm, const BrickLink::ItemType *itt, const BrickLink::Category *cat, const BrickLink::Item *select = 0 );
-	ViewMode checkViewMode ( ViewMode ivm, const BrickLink::ItemType *itt, const BrickLink::Category *cat );
-
+	bool checkViewMode(ViewMode vm);
 	void ensureSelectionVisible ( );
-
-	void itemContext ( const BrickLink::Item *item, const QPoint &pos );
 
 protected:
 	CSelectItemPrivate *d;
 };
 
-class CSelectItemDialog : public QDialog {
+class DSelectItem : public QDialog {
 	Q_OBJECT
 public:
-	explicit CSelectItemDialog ( bool only_with_inventory, QWidget *parent = 0, Qt::WindowFlags f = 0 );
+	explicit DSelectItem(bool only_with_inventory, QWidget *parent = 0);
 
-	bool setItemType ( const BrickLink::ItemType * );
-	bool setItem ( const BrickLink::Item * );
-	bool setItemTypeCategoryAndFilter ( const BrickLink::ItemType *itt, const BrickLink::Category *cat, const QString &filter );
+	void setItemType ( const BrickLink::ItemType * );
+	void setItem ( const BrickLink::Item * );
+	//bool setItemTypeCategoryAndFilter ( const BrickLink::ItemType *itt, const BrickLink::Category *cat, const QString &filter );
 
 	const BrickLink::Item *item ( ) const;
 

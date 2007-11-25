@@ -58,13 +58,13 @@ public:
 protected slots:
 	void documentUpdate ( CDocument *doc );
 	void selectionUpdate ( const CDocument::ItemList &list );
+	virtual void dockChanged();
 
 	void setPrice ( money_t p );
 
 protected:
 	virtual bool event ( QEvent *e );
 	void fixParentDockWindow ( );
-	virtual bool eventFilter ( QObject *o, QEvent *e );
 
 private:
 	CDocument *m_doc;

@@ -11,9 +11,10 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __BL_DATABASE_H__
-#define __BL_DATABASE_H__
+#ifndef __BRICKLINK_H__
+#define __BRICKLINK_H__
 
+#include <QtGlobal>
 #include <QDateTime>
 #include <QString>
 #include <qcolor.h>
@@ -28,46 +29,78 @@
 #include <QMap>
 #include <QPair>
 #include <QUrl>
+#include <QMimeData>
+#include <QAbstractListModel>
 
 #include "cref.h"
 #include "cmoney.h"
 #include "ctransfer.h"
 
-#if defined( Q_OS_WIN )
-#define __LITTLE_ENDIAN	0
-#define __BIG_ENDIAN	1
-#define __BYTE_ORDER	__LITTLE_ENDIAN
-
-#else
-#include <sys/param.h>
-
-#endif
-
-#if !defined( __BYTE_ORDER ) && defined( BYTE_ORDER )
-#define __BYTE_ORDER	BYTE_ORDER
-#define __BIG_ENDIAN	BIG_ENDIAN
-#define __LITTLE_ENDIAN	LITTLE_ENDIAN
-
-#elif !defined( __BYTE_ORDER ) && !defined( BYTE_ORDER )
-#error "Could not detect endianess of your platform!"
-
-#endif
-
 
 class QIODevice;
-template <typename T> class QDict;
+class QAbstractItemModel;
+//template <typename T> class QDict;
 
-class BrickLink : public QObject {
-	Q_OBJECT
-public:
+
+namespace BrickLink {
 	class Picture;
 	class Category;
 	class Color;
 	class TextImport;
 	class InvItem;
+	class Item;
+	class ItemType;
+
+	
+	QDataStream &operator << ( QDataStream &ds, const InvItem &ii );
+	QDataStream &operator >> ( QDataStream &ds, InvItem &ii );
+
+	QDataStream &operator << ( QDataStream &ds, const Item *item );
+	QDataStream &operator >> ( QDataStream &ds, Item *item );
+
+	QDataStream &operator << ( QDataStream &ds, const ItemType *itt );
+	QDataStream &operator >> ( QDataStream &ds, ItemType *itt );
+
+	QDataStream &operator << ( QDataStream &ds, const Category *cat );
+	QDataStream &operator >> ( QDataStream &ds, Category *cat );
+
+	QDataStream &operator << ( QDataStream &ds, const Color *col );
+	QDataStream &operator >> ( QDataStream &ds, Color *col );
 
 	typedef QList<InvItem *> InvItemList;
 
+	enum Time      { AllTime, PastSix, Current, TimeCount };
+	enum Price     { Lowest, Average, WAverage, Highest, PriceCount };
+	enum Condition { New, Used, ConditionCount };
+
+	enum Status    { Include, Exclude, Extra, Unknown };
+
+	enum UpdateStatus { Ok, Updating, UpdateFailed };
+
+	enum UrlList {
+		URL_InventoryRequest,
+		URL_WantedListUpload,
+		URL_InventoryUpload,
+		URL_InventoryUpdate,
+		URL_CatalogInfo,
+		URL_PriceGuideInfo,
+		URL_ColorChangeLog,
+		URL_ItemChangeLog,
+		URL_LotsForSale,
+		URL_AppearsInSets,
+		URL_PeeronInfo,
+		URL_StoreItemDetail
+	};
+
+	enum ItemListXMLHint { 
+		XMLHint_MassUpload, 
+		XMLHint_MassUpdate, 
+		XMLHint_Inventory, 
+		XMLHint_Order, 
+		XMLHint_WantedList, 
+		XMLHint_BrikTrak,
+		XMLHint_BrickStore
+	};
 
 	class ItemType {
 	public:
@@ -80,7 +113,7 @@ public:
 		bool hasYearReleased ( ) const    { return m_has_year; }
 		bool hasWeight ( ) const          { return m_has_weight; }
 		char pictureId ( ) const          { return m_picture_id; }
-		QSize imageSize ( ) const;
+		QSize pictureSize ( ) const;
 
 		~ItemType ( );
 
@@ -100,10 +133,10 @@ public:
 	private:
 		ItemType ( );
 
-		friend class BrickLink;
-		friend class BrickLink::TextImport;
-		friend QDataStream &operator << ( QDataStream &ds, const BrickLink::ItemType *itt );
-		friend QDataStream &operator >> ( QDataStream &ds, BrickLink::ItemType *itt );
+		friend class Core;
+		friend class TextImport;
+		friend QDataStream &operator << ( QDataStream &ds, const ItemType *itt );
+		friend QDataStream &operator >> ( QDataStream &ds, ItemType *itt );
 	};
 
 
@@ -121,10 +154,10 @@ public:
 	private:
 		Category ( );
 
-		friend class BrickLink;
-		friend class BrickLink::TextImport;
-		friend QDataStream &operator << ( QDataStream &ds, const BrickLink::Category *cat );
-		friend QDataStream &operator >> ( QDataStream &ds, BrickLink::Category *cat );
+		friend class Core;
+		friend class TextImport;
+		friend QDataStream &operator << ( QDataStream &ds, const Category *cat );
+		friend QDataStream &operator >> ( QDataStream &ds, Category *cat );
 	};
 
 	class Color {
@@ -166,10 +199,10 @@ public:
 	private:
 		Color ( );
 
-		friend class BrickLink;
-		friend class BrickLink::TextImport;
-		friend QDataStream &operator << ( QDataStream &ds, const BrickLink::Color *col );
-		friend QDataStream &operator >> ( QDataStream &ds, BrickLink::Color *col );
+		friend class Core;
+		friend class TextImport;
+		friend QDataStream &operator << ( QDataStream &ds, const Color *col );
+		friend QDataStream &operator >> ( QDataStream &ds, Color *col );
 	};
 
 	class Item {
@@ -218,7 +251,7 @@ public:
 		void setConsistsOf ( const InvItemList &items ) const;
 
 		struct appears_in_record {
-#if __BYTE_ORDER == __LITTLE_ENDIAN
+#if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
 			quint32  m12  : 12;
 			quint32  m20  : 20;
 #else
@@ -228,7 +261,7 @@ public:
 		};
 
 		struct consists_of_record {
-#if __BYTE_ORDER == __LITTLE_ENDIAN
+#if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
 			quint64  m_qty      : 12;
 			quint64  m_index    : 20;
 			quint64  m_color    : 12;
@@ -247,20 +280,16 @@ public:
 #endif
 		};
 
-		static Item *parse ( const BrickLink *bl, uint count, const char **strs, void *itemtype );
+		static Item *parse ( const Core *bl, uint count, const char **strs, void *itemtype );
 
-		static int compare ( const BrickLink::Item **a, const BrickLink::Item **b );
+		static int compare ( const Item **a, const Item **b );
 
-		friend class BrickLink;
-		friend class BrickLink::TextImport;
-		friend QDataStream &operator << ( QDataStream &ds, const BrickLink::Item *item );
-		friend QDataStream &operator >> ( QDataStream &ds, BrickLink::Item *item );
+		friend class Core;
+		friend class TextImport;
+		friend QDataStream &operator << ( QDataStream &ds, const Item *item );
+		friend QDataStream &operator >> ( QDataStream &ds, Item *item );
 	};
 
-
-	enum Condition { New, Used, ConditionCount };
-
-	enum UpdateStatus { Ok, Updating, UpdateFailed };
 
 	class Picture : public CRef {
 	public:
@@ -300,7 +329,7 @@ public:
 
 		void parse ( const char *data, uint size );
 
-		friend class BrickLink;
+		friend class Core;
 	};
 
 	class InvItem {
@@ -318,8 +347,6 @@ public:
 		const ItemType *itemType ( ) const  { return m_item ? m_item-> itemType ( ) : 0; }
 		const Color *color ( ) const        { return m_color; }
 		void setColor ( const Color *c )    { m_color = c; }
-
-		enum Status    { Include, Exclude, Extra, Unknown };
 
 		Status status ( ) const             { return m_status; }
 		void setStatus ( Status s )         { m_status = s; }
@@ -420,32 +447,26 @@ public:
 		money_t          m_orig_price;
 		int              m_orig_quantity;
 
-		friend QDataStream &operator << ( QDataStream &ds, const BrickLink::InvItem &ii );
-		friend QDataStream &operator >> ( QDataStream &ds, BrickLink::InvItem &ii );
+		friend QDataStream &operator << ( QDataStream &ds, const InvItem &ii );
+		friend QDataStream &operator >> ( QDataStream &ds, InvItem &ii );
 
-		friend class BrickLink;
+		friend class Core;
 	};
 
-/*	class InvItemDrag : public QDragObject {
+	class InvItemMimeData : public QMimeData {
 	public:
-		InvItemDrag ( const InvItemList &items, QWidget *dragsource = 0, const char *name = 0 );
-		InvItemDrag ( QWidget *dragSource = 0, const char *name = 0 );
+		InvItemMimeData(const InvItemList &items);
 
-		void setItems ( const InvItemList &items );
-		
-		virtual const char *format ( int i ) const;
-		virtual QByteArray encodedData ( const char * ) const;
+		virtual QStringList formats() const;
+		virtual bool hasFormat(const QString & mimeType) const;
 
-		static bool canDecode ( QMimeSource * );
-		static bool decode( QMimeSource *, InvItemList &items );
- 
+		void setItems(const InvItemList &items);
+		static InvItemList items(const QMimeData *md);
+
 	private:
 		static const char *s_mimetype;
-
-		QByteArray m_data;
-		QCString   m_text;
 	};
-*/
+
 	class Order {
 	public:
 		enum Type { Received, Placed, Any };
@@ -505,9 +526,6 @@ public:
 		void update ( bool high_priority = false );
 		QDateTime lastUpdate ( ) const      { return m_fetched; }
 
-		enum Time      { AllTime, PastSix, Current, TimeCount };
-		enum Price     { Lowest, Average, WAverage, Highest, PriceCount };
-
 		bool valid ( ) const                { return m_valid; }
 		int updateStatus ( ) const          { return m_update_status; }
 
@@ -538,7 +556,7 @@ public:
 
 		bool parse ( const char *data, uint size );
 
-		friend class BrickLink;
+		friend class Core;
 	};
 
 	class TextImport {
@@ -546,10 +564,10 @@ public:
 		TextImport ( );
 
 		bool import ( const QString &path );
-		void exportTo ( BrickLink * );
+		void exportTo ( Core * );
 
 		bool importInventories ( const QString &path, QVector<const Item *> &items );
-		void exportInventoriesTo ( BrickLink * );
+		void exportInventoriesTo ( Core * );
 
 		const QHash<int, const Color *>    &colors ( ) const      { return m_colors; }
 		const QHash<int, const Category *> &categories ( ) const  { return m_categories; }
@@ -575,8 +593,8 @@ public:
 
 		bool readInventory ( const QString &path, const Item *item );
 
-		const BrickLink::Category *findCategoryByName ( const char *name, int len = -1 );
-		const BrickLink::Item *findItem ( char type, const char *id );
+		const Category *findCategoryByName ( const char *name, int len = -1 );
+		const Item *findItem ( char type, const char *id );
 		void appendCategoryToItemType ( const Category *cat, ItemType *itt );
 
 	private:
@@ -585,178 +603,302 @@ public:
 		QHash<int, const Category *> m_categories;
 		QVector<const Item *>        m_items;
 
-		QHash<const BrickLink::Item *, BrickLink::Item::AppearsIn> m_appears_in_hash;
-		QHash<const BrickLink::Item *, BrickLink::InvItemList>     m_consists_of_hash;
+		QHash<const Item *, Item::AppearsIn> m_appears_in_hash;
+		QHash<const Item *, InvItemList>     m_consists_of_hash;
 
 		const ItemType *m_current_item_type;
 	};
 
-	friend class TextImporter;
 
-public:
-	virtual ~BrickLink ( );
-	static BrickLink *inst ( const QString &datadir, QString *errstring );
-	static BrickLink *inst ( );
+	enum ModelRoles {
+		RoleBase = 0x05c136c8,  // printf "0x%08x\n" $(($RANDOM*$RANDOM))
 
-	const QLocale &cLocale ( ) const   { return m_c_locale; }
+		ColorPointerRole,
+		CategoryPointerRole,
+		ItemTypePointerRole,
+		ItemPointerRole,
 
-	enum UrlList {
-		URL_InventoryRequest,
-		URL_WantedListUpload,
-		URL_InventoryUpload,
-		URL_InventoryUpdate,
-		URL_CatalogInfo,
-		URL_PriceGuideInfo,
-		URL_ColorChangeLog,
-		URL_ItemChangeLog,
-		URL_LotsForSale,
-		URL_AppearsInSets,
-		URL_PeeronInfo,
-		URL_StoreItemDetail
+		RoleMax
 	};
 
-	QUrl url ( UrlList u, const void *opt = 0, const void *opt2 = 0 );
+	class ColorModel : public QAbstractListModel {
+		Q_OBJECT
 
-	QString dataPath ( ) const;
-	QString dataPath ( const ItemType * ) const;
-	QString dataPath ( const Item * ) const;
-	QString dataPath ( const Item *, const Color * ) const;
+	public:
+		ColorModel(const Core *core);
 
-	QString defaultDatabaseName ( ) const;
+		QModelIndex index(int row, int column, const QModelIndex &parent) const;
+		QModelIndex index(const Color *color) const;
+		const Color *color(const QModelIndex &index) const;
 
-	const QHash<int, const Color *>    &colors ( ) const;
-	const QHash<int, const Category *> &categories ( ) const;
-	const QHash<int, const ItemType *> &itemTypes ( ) const;
-	const QVector<const Item *>        &items ( ) const;
+		virtual int rowCount(const QModelIndex &parent) const;
+		virtual int columnCount(const QModelIndex &parent) const;
 
-	const QPixmap *noImage ( const QSize &s );
+		virtual QVariant data(const QModelIndex &index, int role) const;
+		virtual QVariant headerData(int section, Qt::Orientation orient, int role) const;
+		virtual void sort(int column, Qt::SortOrder so);
 
-	QImage colorImage ( const BrickLink::Color *col, int w, int h ) const;
+		void setItemTypeFilter(const ItemType *it);
+		void clearItemTypeFilter();
 
-	const Color *color ( uint id ) const;
-	const Color *colorFromPeeronName ( const char *peeron_name ) const;
-	const Color *colorFromLDrawId ( int ldraw_id ) const;
-	const Category *category ( uint id ) const;
-	const Category *category ( const char *name, int len = -1 ) const;
-	const ItemType *itemType ( char id ) const;
-	const Item *item ( char tid, const char *id ) const;
+	protected:
+		void rebuildColorList();
 
-	PriceGuide *priceGuide ( const Item *item, const Color *color, bool high_priority = false );
+		class Compare {
+		public:
+			Compare(bool asc);
+			bool operator()(const Color *c1, const Color *c2);
 
-	InvItemList *load ( QIODevice *f, uint *invalid_items = 0 );
-	InvItemList *loadXML ( QIODevice *f, uint *invalid_items = 0 );
-	InvItemList *loadBTI ( QIODevice *f, uint *invalid_items = 0 );
+		protected:
+			bool m_asc;
+		};
 
-	Picture *picture ( const Item *item, const Color *color, bool high_priority = false );
-	Picture *largePicture ( const Item *item, bool high_priority = false );
-
-	enum ItemListXMLHint { 
-		XMLHint_MassUpload, 
-		XMLHint_MassUpdate, 
-		XMLHint_Inventory, 
-		XMLHint_Order, 
-		XMLHint_WantedList, 
-		XMLHint_BrikTrak,
-		XMLHint_BrickStore
+		QList<const Color *> m_colors;
+		const ItemType *m_filter;
+		Qt::SortOrder m_sorted;
 	};
 
-	InvItemList *parseItemListXML ( QDomElement root, ItemListXMLHint hint, uint *invalid_items = 0 );
-	QDomElement createItemListXML ( QDomDocument doc, ItemListXMLHint hint, const InvItemList *items, QMap <QString, QString> *extra = 0 );
 
-	bool parseLDrawModel ( QFile &file, InvItemList &items, uint *invalid_items = 0 );
+	class CategoryModel : public QAbstractListModel {
+		Q_OBJECT
 
-	bool onlineStatus ( ) const;
+	public:
+		enum Feature {
+			Default = 0,
 
-public slots:
-	bool readDatabase ( const QString &fname = QString ( ));
-	bool writeDatabase ( const QString &fname = QString ( ));
+			IncludeAllCategoriesItem,
+		};
+	    Q_DECLARE_FLAGS(Features, Feature)
 
-	void updatePriceGuide ( PriceGuide *pg, bool high_priority = false );
-	void updatePicture ( Picture *pic, bool high_priority = false );
+		static const Category *AllCategories;
 
-	void setOnlineStatus ( bool on );
-	void setUpdateIntervals ( int pic, int pg );
-	void setHttpProxy ( bool enable, const QString &name, int port );
+		CategoryModel(Features f, const Core *core);
 
-	void cancelPictureTransfers ( );
-	void cancelPriceGuideTransfers ( );
+		QModelIndex index(int row, int column, const QModelIndex &parent) const;
+		QModelIndex index(const Category *category) const;
+		const Category *category(const QModelIndex &index) const;
 
-signals:
-	void priceGuideUpdated ( BrickLink::PriceGuide *pg );
-	void pictureUpdated ( BrickLink::Picture *inv );
+		virtual int rowCount(const QModelIndex &parent) const;
+		virtual int columnCount(const QModelIndex &parent) const;
 
-	void priceGuideProgress ( int, int );
-	void pictureProgress ( int, int );
+		virtual QVariant data(const QModelIndex &index, int role) const;
+		virtual QVariant headerData(int section, Qt::Orientation orient, int role) const;
+		virtual void sort(int column, Qt::SortOrder so);
 
-private:
-	BrickLink ( const QString &datadir );
-	static BrickLink *s_inst;
+		void setItemTypeFilter(const ItemType *it);
+		void clearItemTypeFilter();
 
-	bool updateNeeded ( const QDateTime &last, int iv );
-	bool parseLDrawModelInternal ( QFile &file, const QString &model_name, InvItemList &items, uint *invalid_items, QHash<QString, InvItem *> &mergehash );
-	void pictureIdleLoader2 ( );
+	protected:
+		void rebuildCategoryList();
 
-	void setDatabase_ConsistsOf ( const QHash<const Item *, InvItemList> &hash );
-	void setDatabase_AppearsIn ( const QHash<const Item *, Item::AppearsIn> &hash );
-	void setDatabase_Basics ( const QHash<int, const Color *> &colors, 
-	                          const QHash<int, const Category *> &categories,
-	                          const QHash<int, const ItemType *> &item_types,
-	                          const QVector<const Item *> &items );
+		class Compare {
+		public:
+			Compare(bool asc);
+			bool operator()(const Category *c1, const Category *c2);
 
-private slots:
-	void pictureIdleLoader ( );
+		protected:
+			bool m_asc;
+		};
 
-	void pictureJobFinished ( CTransfer::Job * );
-	void priceGuideJobFinished ( CTransfer::Job * );
-
-private:
-	QString  m_datadir;
-	bool     m_online;
-	QLocale  m_c_locale;
-
-	QHash<QString, QPixmap *>  m_noimages;
-
-	struct dummy1 {
-		QHash<int, const Color *>       colors;      // id -> Color *
-		QHash<int, const Category *>    categories;  // id -> Category *
-		QHash<int, const ItemType *>    item_types;  // id -> ItemType *
-		QVector<const Item *>           items;       // sorted array of Item *
-	} m_databases;
-
-	struct dummy2 {
-		CTransfer *               transfer;
-		int                       update_iv;
-
-		CAsciiRefCache<PriceGuide, 500> cache;
-	} m_price_guides;
-
-	struct dummy3 {
-		CTransfer *               transfer;
-		int                       update_iv;
-
-		QList <Picture *>         diskload;
-
-		CAsciiRefCache<Picture, 500>    cache;
-	} m_pictures;
-};
-
-QDataStream &operator << ( QDataStream &ds, const BrickLink::InvItem &ii );
-QDataStream &operator >> ( QDataStream &ds, BrickLink::InvItem &ii );
-
-QDataStream &operator << ( QDataStream &ds, const BrickLink::Item *item );
-QDataStream &operator >> ( QDataStream &ds, BrickLink::Item *item );
-
-QDataStream &operator << ( QDataStream &ds, const BrickLink::ItemType *itt );
-QDataStream &operator >> ( QDataStream &ds, BrickLink::ItemType *itt );
-
-QDataStream &operator << ( QDataStream &ds, const BrickLink::Category *cat );
-QDataStream &operator >> ( QDataStream &ds, BrickLink::Category *cat );
-
-QDataStream &operator << ( QDataStream &ds, const BrickLink::Color *col );
-QDataStream &operator >> ( QDataStream &ds, BrickLink::Color *col );
+		QList<const Category *> m_categories;
+		const ItemType *m_filter;
+		Qt::SortOrder   m_sorted : 8;
+		bool            m_hasall : 1;
+	};
 
 
-//} // namespace BrickLink
+	class ItemTypeModel : public QAbstractListModel {
+		Q_OBJECT
+
+	public:
+		enum Feature { 
+			Default = 0,
+
+			ExcludeWithoutInventory
+		};
+	    Q_DECLARE_FLAGS(Features, Feature)
+
+		ItemTypeModel(Features sub, const Core *core);
+
+		QModelIndex index(int row, int column, const QModelIndex &parent) const;
+		QModelIndex index(const ItemType *itemtype) const;
+		const ItemType *itemType(const QModelIndex &index) const;
+
+		virtual int rowCount(const QModelIndex &parent) const;
+		virtual int columnCount(const QModelIndex &parent) const;
+
+		virtual QVariant data(const QModelIndex &index, int role) const;
+		virtual QVariant headerData(int section, Qt::Orientation orient, int role) const;
+		virtual void sort(int column, Qt::SortOrder so);
+
+	protected:
+		class Compare {
+		public:
+			Compare(bool asc);
+			bool operator()(const ItemType *c1, const ItemType *c2);
+
+		protected:
+			bool m_asc;
+		};
+
+		QList<const ItemType *> m_itemtypes;
+	};
+
+
+	class Core : public QObject {
+		Q_OBJECT
+	public:
+		virtual ~Core ( );
+
+		const QLocale &cLocale ( ) const   { return m_c_locale; }
+
+		QUrl url ( UrlList u, const void *opt = 0, const void *opt2 = 0 );
+
+		QString dataPath ( ) const;
+		QString dataPath ( const ItemType * ) const;
+		QString dataPath ( const Item * ) const;
+		QString dataPath ( const Item *, const Color * ) const;
+
+		QString defaultDatabaseName ( ) const;
+
+		const QHash<int, const Color *>    &colors ( ) const;
+		const QHash<int, const Category *> &categories ( ) const;
+		const QHash<int, const ItemType *> &itemTypes ( ) const;
+		const QVector<const Item *>        &items ( ) const;
+
+
+
+		ColorModel *colorModel() const;
+		CategoryModel *categoryModel(CategoryModel::Features f) const;
+		ItemTypeModel *itemTypeModel(ItemTypeModel::Features f) const;
+		//const QAbstractItemModel *itemModel() const;
+
+		const QPixmap *noImage ( const QSize &s );
+
+		QImage colorImage ( const Color *col, int w, int h ) const;
+
+		const Color *color ( uint id ) const;
+		const Color *colorFromPeeronName ( const char *peeron_name ) const;
+		const Color *colorFromLDrawId ( int ldraw_id ) const;
+		const Category *category ( uint id ) const;
+		const Category *category ( const char *name, int len = -1 ) const;
+		const ItemType *itemType ( char id ) const;
+		const Item *item ( char tid, const char *id ) const;
+
+		PriceGuide *priceGuide ( const Item *item, const Color *color, bool high_priority = false );
+
+		InvItemList *load ( QIODevice *f, uint *invalid_items = 0 );
+		InvItemList *loadXML ( QIODevice *f, uint *invalid_items = 0 );
+		InvItemList *loadBTI ( QIODevice *f, uint *invalid_items = 0 );
+
+		QSize pictureSize(const ItemType *itt) const;
+		Picture *picture ( const Item *item, const Color *color, bool high_priority = false );
+		Picture *largePicture ( const Item *item, bool high_priority = false );
+
+		InvItemList *parseItemListXML ( QDomElement root, ItemListXMLHint hint, uint *invalid_items = 0 );
+		QDomElement createItemListXML ( QDomDocument doc, ItemListXMLHint hint, const InvItemList *items, QMap <QString, QString> *extra = 0 );
+
+		bool parseLDrawModel ( QFile &file, InvItemList &items, uint *invalid_items = 0 );
+
+		bool onlineStatus ( ) const;
+
+	public slots:
+		bool readDatabase ( const QString &fname = QString ( ));
+		bool writeDatabase ( const QString &fname = QString ( ));
+
+		void updatePriceGuide ( PriceGuide *pg, bool high_priority = false );
+		void updatePicture ( Picture *pic, bool high_priority = false );
+
+		void setOnlineStatus ( bool on );
+		void setUpdateIntervals ( int pic, int pg );
+		void setHttpProxy ( bool enable, const QString &name, int port );
+
+		void cancelPictureTransfers ( );
+		void cancelPriceGuideTransfers ( );
+
+	signals:
+		void priceGuideUpdated ( PriceGuide *pg );
+		void pictureUpdated ( Picture *inv );
+
+		void priceGuideProgress ( int, int );
+		void pictureProgress ( int, int );
+
+	private:
+		Core ( const QString &datadir );
+
+		static Core *create ( const QString &datadir, QString *errstring );
+		static inline Core *inst ( ) { return s_inst; }
+		static Core *s_inst;
+
+		friend Core *core();
+		friend Core *create(const QString &, QString *);
+
+	private:
+		bool updateNeeded ( const QDateTime &last, int iv );
+		bool parseLDrawModelInternal ( QFile &file, const QString &model_name, InvItemList &items, uint *invalid_items, QHash<QString, InvItem *> &mergehash );
+		void pictureIdleLoader2 ( );
+
+		void setDatabase_ConsistsOf ( const QHash<const Item *, InvItemList> &hash );
+		void setDatabase_AppearsIn ( const QHash<const Item *, Item::AppearsIn> &hash );
+		void setDatabase_Basics ( const QHash<int, const Color *> &colors, 
+								  const QHash<int, const Category *> &categories,
+								  const QHash<int, const ItemType *> &item_types,
+								  const QVector<const Item *> &items );
+
+		friend class TextImport;
+
+	private slots:
+		void pictureIdleLoader ( );
+
+		void pictureJobFinished ( CTransfer::Job * );
+		void priceGuideJobFinished ( CTransfer::Job * );
+
+	private:
+		QString  m_datadir;
+		bool     m_online;
+		QLocale  m_c_locale;
+
+		QHash<QString, QPixmap *>  m_noimages;
+
+		struct dummy1 {
+			QHash<int, const Color *>       colors;      // id -> Color *
+			QHash<int, const Category *>    categories;  // id -> Category *
+			QHash<int, const ItemType *>    item_types;  // id -> ItemType *
+			QVector<const Item *>           items;       // sorted array of Item *
+		} m_databases;
+
+		struct dummy2 {
+			CTransfer *               transfer;
+			int                       update_iv;
+
+			CAsciiRefCache<PriceGuide, 500> cache;
+		} m_price_guides;
+
+		struct dummy3 {
+			CTransfer *               transfer;
+			int                       update_iv;
+
+			QList <Picture *>         diskload;
+
+			CAsciiRefCache<Picture, 500>    cache;
+		} m_pictures;
+	};
+
+	inline Core *core() { return Core::inst(); }
+	inline Core *inst() { return core(); }
+
+	inline Core *create(const QString &datadir, QString *errstring) { return Core::create(datadir, errstring); }
+
+} // namespace BrickLink
+
+
+Q_DECLARE_METATYPE(const BrickLink::Color *)
+Q_DECLARE_METATYPE(const BrickLink::Category *)
+Q_DECLARE_METATYPE(const BrickLink::ItemType *)
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(BrickLink::CategoryModel::Features)
+Q_DECLARE_OPERATORS_FOR_FLAGS(BrickLink::ItemTypeModel::Features)
+
 
 #endif
 

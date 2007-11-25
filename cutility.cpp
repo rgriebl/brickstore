@@ -261,58 +261,7 @@ void CUtility::setPopupPos ( QWidget *w, const QRect &pos )
 	w-> resize ( sh );
 }
 
-QString CUtility::weightToString ( double w, bool imperial, bool optimize, bool show_unit )
-{
-	static QLocale loc ( QLocale::system ( ));
 
-	int prec = 0;
-	const char *unit = 0;
-
-	if ( imperial ) {
-		w *= 0.035273961949580412915675808215204;
-
-		prec = 4;
-		unit = "oz";
-
-		if ( optimize && ( w >= 32 )) {
-			unit = "lb";
-			w /= 16;
-		}
-	}
-	else {
-		prec = 3;
-		unit = "g";
-
-		if ( optimize && ( w >= 1000. )) {
-			unit = "kg";
-			w /= 1000.;
-
-			if ( w >= 1000. ) {
-				unit = "t";
-				w /= 1000.;
-			}
-		}
-	}
-	QString s = loc. toString ( w, 'f', prec );
-
-	if ( show_unit ) {
-		s += " ";
-		s += unit;
-	}
-	return s;
-}
-
-double CUtility::stringToWeight ( const QString &s, bool imperial )
-{
-	static QLocale loc ( QLocale::system ( ));
-
-	double w = loc. toDouble ( s );
-
-	if ( imperial )
-		w *= 28.349523125000000000000000000164;
-
-	return w;
-}
 
 #if 0
 QString CUtility::safeOpen ( const QString &basepath )
@@ -362,10 +311,12 @@ void set_tz ( const char *tz )
 	char pebuf [256] = "TZ=";
 	if ( tz )
 		strcat ( pebuf, tz );
-	putenv ( pebuf );
+
 #if defined( Q_OS_WIN32 )
+	_putenv ( pebuf );
 	_tzset ( );
 #else
+	putenv ( pebuf );
 	tzset ( );
 #endif
 }

@@ -75,11 +75,11 @@ const BrickLink::Category *BrickLink::TextImport::findCategoryByName ( const cha
 
 const BrickLink::Item *BrickLink::TextImport::findItem ( char tid, const char *id )
 {
-	BrickLink::Item key;
+	Item key;
 	key. m_item_type = m_item_types [tid];
 	key. m_id = const_cast <char *> ( id );
 
-	BrickLink::Item *keyp = &key;
+	Item *keyp = &key;
 
 	Item **itp = (Item **) bsearch ( &keyp, m_items. data ( ), m_items. count ( ), sizeof( Item * ), (int (*) ( const void *, const void * )) Item::compare );
 
@@ -93,7 +93,7 @@ void BrickLink::TextImport::appendCategoryToItemType ( const Category *cat, Item
 {
 	bool found = false;
 	quint32 catcount = 0;
-	for ( const BrickLink::Category **catp = itt-> m_categories; catp && *catp; catp++ ) {
+	for ( const Category **catp = itt-> m_categories; catp && *catp; catp++ ) {
 		if ( *catp == cat ) {
 			found = true;
 			break;
@@ -207,8 +207,8 @@ template <> BrickLink::Item *BrickLink::TextImport::parse<BrickLink::Item> ( uin
 			qWarning ( ) << "Invalid category name:" << auxcat;
 	}
 
-	item-> m_categories = new const BrickLink::Category * [catcount + 1];
-	memcpy ( item-> m_categories, catlist, catcount * sizeof( const BrickLink::Category * ));
+	item-> m_categories = new const Category * [catcount + 1];
+	memcpy ( item-> m_categories, catlist, catcount * sizeof( const Category * ));
 	item-> m_categories [catcount] = 0;
 
 	uint parsedfields = 4;
@@ -322,7 +322,7 @@ bool BrickLink::TextImport::readDB_processLine ( btinvlist_dummy & /*dummy*/, ui
 	if ( count < 2 || !strs [0][0] || !strs [1][0] )
 		return false;
 
-	const BrickLink::Item *itm = findItem ( strs [0][0], strs [1] );
+	const Item *itm = findItem ( strs [0][0], strs [1] );
 
 	if ( itm ) {
 		time_t t = time_t ( 0 ); // 1.1.1970 00:00
@@ -551,12 +551,12 @@ bool BrickLink::TextImport::readInventory ( const QString &path, const Item *ite
 	return ok;
 }
 
-void BrickLink::TextImport::exportTo ( BrickLink *bl )
+void BrickLink::TextImport::exportTo ( Core *bl )
 {
 	bl-> setDatabase_Basics ( m_colors, m_categories, m_item_types, m_items );
 }
 
-void BrickLink::TextImport::exportInventoriesTo ( BrickLink *bl )
+void BrickLink::TextImport::exportInventoriesTo ( Core *bl )
 {
 	bl-> setDatabase_ConsistsOf ( m_consists_of_hash );
 	bl-> setDatabase_AppearsIn ( m_appears_in_hash );

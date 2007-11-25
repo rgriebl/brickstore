@@ -27,6 +27,7 @@
 #include <qtooltip.h>
 #include <QTableView>
 #include <QListView>
+#include <QHeaderView>
 #include <QStackedLayout>
 #include <QMenu>
 
@@ -38,159 +39,562 @@
 #include "cmessagebox.h"
 
 
-namespace {
 
-// this hack is needed since 0 means 'no selection at all'
-static const BrickLink::Category *Cat_AllParts = reinterpret_cast <const BrickLink::Category *> ( 1 );
 
-class CategoryModel : public QAbstractListModel {
+
+
+
+
+class CSelectItemPrivate {
 public:
-	CategoryModel ( )
-	{
-		m_categories = BrickLink::inst ( )-> categories ( ). values ( );
-	}
+	QLabel *      w_item_types_label;
+	QComboBox *   w_item_types;
+	QTableView *  w_categories;
+	QStackedLayout *m_stack;
+	QTableView *  w_items;
+	QListView *   w_thumbs;
+	QToolButton * w_goto;
+	QLabel *      w_filter_label;
+	QToolButton * w_filter_clear;
+	QComboBox *   w_filter_expression;
+	QToolButton * w_viewbutton;
+	QAction *     m_viewaction[3];
+	QMenu *       w_viewmenu;
+	CSelectItem::ViewMode m_viewmode;
 
-	virtual int rowCount ( const QModelIndex & /*parent*/ ) const
-	{
-		return m_categories. count ( ) + 1;
-	}
-
-	virtual QVariant data ( const QModelIndex &index, int role ) const
-	{
-		QVariant res;
-		const BrickLink::Category *category = index. row ( ) ? m_categories [index. row ( ) - 1] : 0;
-		int col = index. column ( );
-
-		if ( col == 0 ) {
-			if ( role == Qt:: DisplayRole ) {
-				res = category ? category-> name ( ) : QString ( "[%1]" ). arg ( CSelectItem::tr( "All Items" ));
-			}
-			else if ( role == Qt::FontRole ) {
-				if ( !category ) {
-					QFont f = qApp-> font ( );
-					f. setBold ( !f. bold ( ));
-					res = f;
-				}
-			}
-		}
-		
-		return res;
-	}
-
-	virtual QVariant headerData ( int section, Qt::Orientation orient, int role ) const
-    {
-		QVariant res;
-
-		if ( orient == Qt::Horizontal ) {
-			if ( role == Qt::DisplayRole ) {
-				switch ( section ) {
-					case  0: res = CSelectItem::tr( "Category" ); break;
-				}
-			}
-		}
-		return res;
-    }
-private:
-	QList<const BrickLink::Category *> m_categories;
-};
-
-class ItemModel : public QAbstractTableModel {
-public:
-	ItemModel ( )
-	{
-		m_items = BrickLink::inst ( )-> items ( );
-	}
-
-	virtual int rowCount ( const QModelIndex & /*parent*/ ) const
-	{
-		return m_items. count ( );
-	}
-
-	virtual int columnCount ( const QModelIndex & /*parent*/ ) const
-	{
-		return 3;
-	}
-
-	virtual QVariant data ( const QModelIndex &index, int role ) const
-	{
-		QVariant res;
-		const BrickLink::Item *item = m_items [index. row ( )];
-		int col = index. column ( );
-
-		if ( col == 0 ) {
-			if ( role == Qt:: DisplayRole ) {
-				res = item-> name ( );
-			}
-		}
-		
-		return res;
-	}
-
-	virtual QVariant headerData ( int section, Qt::Orientation orient, int role ) const
-    {
-		QVariant res;
-
-		if ( orient == Qt::Horizontal ) {
-			if ( role == Qt::DisplayRole ) {
-				switch ( section ) {
-					case  0: res = CSelectItem::tr( "Name" ); break;
-				}
-			}
-		}
-		return res;
-    }
-
-private:
-	QVector<const BrickLink::Item *> m_items;
+	bool                   m_filter_active;
+	bool                   m_inv_only;
+	const BrickLink::Item *m_selected;
+//	ItemListToolTip *      m_items_tip;
 };
 
 
-#if 0
-static QIconViewItem *QIconView__selectedItem ( QIconView *iv )
+CSelectItem::CSelectItem(bool inv_only, QWidget *parent)
+	: QWidget(parent)
 {
-	QIconViewItem *ivi = 0;
-	for ( ivi = iv-> firstItem ( ); ivi; ivi = ivi-> nextItem ( )) {
-		if ( ivi-> isSelected ( ))
-			break;
+	d = new CSelectItemPrivate ( );
+
+	d-> m_inv_only = inv_only;
+
+	d->w_item_types_label = new QLabel(this);
+	d->w_item_types = new QComboBox(this);
+	d->w_item_types->setEditable(false);
+
+	d->w_categories = new QTableView(this);
+	d->w_categories->setSortingEnabled(true);
+	d->w_categories->setAlternatingRowColors(true);
+	d->w_categories->setSelectionBehavior(QAbstractItemView::SelectRows);
+	d->w_categories->setSelectionMode(QAbstractItemView::SingleSelection);
+	d->w_categories->setTextElideMode(Qt::ElideRight);
+	d->w_categories->horizontalHeader()->setResizeMode(QHeaderView::Fixed);
+	d->w_categories->horizontalHeader()->setStretchLastSection(true);
+	d->w_categories->horizontalHeader()->setMovable(false);
+	d->w_categories->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+	d->w_categories->verticalHeader()->hide();
+	d->w_categories->setShowGrid(false);
+	d->w_categories->setWordWrap(false);
+
+	d->w_goto = new QToolButton(this);
+	d->w_goto->setAutoRaise(true);
+	d->w_goto->setIcon(QIcon(":/images/22x22/edit_find"));
+
+	d->w_filter_label = new QLabel(this);
+	d->w_filter_clear = new QToolButton(this);
+	d->w_filter_clear->setAutoRaise(true);
+	d->w_filter_clear->setIcon(QIcon(":/images/22x22/filter_clear"));
+
+	d->w_filter_expression = new QComboBox(this);
+	d->w_filter_expression->setEditable(true);
+
+	d->w_viewmenu = new QMenu(this);
+	QActionGroup *ag = new QActionGroup(this);
+	ag->setExclusive(true);
+
+	d->m_viewaction[ListMode] = new QAction(ag);
+	d->m_viewaction[ListMode]->setIcon(QIcon(":/images/22x22/viewmode_list"));
+	d->m_viewaction[ListMode]->setCheckable(true);
+	connect(d->m_viewaction[ListMode], SIGNAL(activated()), this, SLOT(showAsList()));
+	d->m_viewaction[TableMode] = new QAction(ag);
+	d->m_viewaction[TableMode]->setIcon(QIcon(":/images/22x22/viewmode_images"));
+	d->m_viewaction[TableMode]->setCheckable(true);
+	connect(d->m_viewaction[TableMode], SIGNAL(activated()), this, SLOT(showAsTable()));
+	d->m_viewaction[ThumbsMode] = new QAction(ag);
+	d->m_viewaction[ThumbsMode]->setIcon(QIcon(":/images/22x22/viewmode_thumbs"));
+	d->m_viewaction[ThumbsMode]->setCheckable(true);
+	connect(d->m_viewaction[ThumbsMode], SIGNAL(activated()), this, SLOT(showAsThumbs()));
+
+	d->w_viewmenu->addActions(ag->actions());
+
+	d->w_viewbutton = new QToolButton(this);
+	d->w_viewbutton->setAutoRaise(true);
+	d->w_viewbutton->setPopupMode(QToolButton::MenuButtonPopup);
+	d->w_viewbutton->setMenu(d->w_viewmenu);
+	d->w_viewbutton->setIcon(QIcon(":/images/22x22/viewmode"));
+
+	d->w_items = new QTableView(this);
+	d->w_items->setSortingEnabled(true);
+	d->w_items->setAlternatingRowColors(true);
+	d->w_items->setSelectionBehavior(QAbstractItemView::SelectRows);
+	d->w_items->setSelectionMode(QAbstractItemView::SingleSelection);
+	d->w_items->setTextElideMode(Qt::ElideRight);
+	d->w_items->horizontalHeader()-> setResizeMode(QHeaderView::Fixed);
+	d->w_items->horizontalHeader()-> setStretchLastSection(true);
+	d->w_items->horizontalHeader()-> setMovable(false);
+	d->w_items->verticalHeader()-> setResizeMode(QHeaderView::ResizeToContents);
+	d->w_items->verticalHeader()-> hide();
+	d->w_items->setShowGrid(false);
+
+//	d-> w_items-> setSortColumn ( 2 );
+//	d-> w_items-> setColumnWidthMode ( 0, QListView::Manual );
+//	d-> w_items-> setColumnWidth ( 0, 0 );
+//	d-> m_items_tip = new ItemListToolTip ( d-> w_items );
+
+	d->w_thumbs = new QListView(this);
+	d->w_thumbs->setMovement(QListView::Static);
+	d->w_thumbs->setViewMode(QListView::IconMode);
+	d->w_thumbs->setSelectionMode(QAbstractItemView::SingleSelection);
+	d->w_thumbs->setTextElideMode(Qt::ElideRight);
+
+//	d-> w_thumbs-> setShowToolTips ( false );
+//	(void) new ItemIconToolTip ( d-> w_thumbs );
+
+	d->w_item_types->setModel(BrickLink::core()->itemTypeModel(d->m_inv_only ? BrickLink::ItemTypeModel::ExcludeWithoutInventory : BrickLink::ItemTypeModel::Default));
+	d->w_categories->setModel(BrickLink::core()->categoryModel(BrickLink::CategoryModel::IncludeAllCategoriesItem));
+
+	connect(d->w_goto, SIGNAL(clicked()), this, SLOT(findItem()));
+	connect(d->w_filter_clear, SIGNAL(clicked()), d->w_filter_expression, SLOT(clearEdit()));
+	connect(d->w_filter_expression, SIGNAL(textChanged(const QString &)), this, SLOT(applyFilter()));
+
+	connect(d->w_item_types, SIGNAL(currentIndexChanged(int)), this, SLOT(itemTypeChanged()));
+	connect(d->w_categories->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(categoryChanged()));
+
+//	connect ( d-> w_item_types, SIGNAL( itemTypeActivated ( const BrickLink::ItemType * )), this, SLOT( itemTypeChanged ( )));
+//	connect ( d-> w_categories, SIGNAL( selectionChanged ( )), this, SLOT( categoryChanged ( )));
+	connect ( d-> w_items, SIGNAL( selectionChanged ( )), this, SLOT( itemChangedList ( )));
+	connect ( d-> w_items, SIGNAL( doubleClicked ( QListViewItem *, const QPoint &, int )), this, SLOT( itemConfirmed ( )));
+	connect ( d-> w_items, SIGNAL( returnPressed ( QListViewItem * )), this, SLOT( itemConfirmed ( )));
+	connect ( d-> w_items, SIGNAL( contextMenuRequested ( QListViewItem *, const QPoint &, int )), this, SLOT( itemContextList ( QListViewItem *, const QPoint & )));
+	connect ( d-> w_thumbs, SIGNAL( selectionChanged ( )), this, SLOT( itemChangedIcon ( )));
+	connect ( d-> w_thumbs, SIGNAL( doubleClicked ( QIconViewItem * )), this, SLOT( itemConfirmed ( )));
+	connect ( d-> w_thumbs, SIGNAL( returnPressed ( QIconViewItem * )), this, SLOT( itemConfirmed ( )));
+	connect ( d-> w_thumbs, SIGNAL( contextMenuRequested ( QIconViewItem *, const QPoint & )), this, SLOT( itemContextIcon ( QIconViewItem *, const QPoint & )));
+//	connect ( d-> w_viewpopup, SIGNAL( activated ( int )), this, SLOT( viewModeChanged ( int )));
+
+	QGridLayout *toplay = new QGridLayout(this);
+	toplay->setContentsMargins(0, 0, 0, 0);
+	toplay->setColumnStretch(0, 25);
+	toplay->setColumnStretch(1, 75);
+	toplay->setRowStretch(0, 0);
+	toplay->setRowStretch(1, 100);
+	
+	QBoxLayout *lay = new QHBoxLayout();
+	lay->addWidget(d->w_item_types_label, 0);
+	lay->addWidget(d->w_item_types, 1);
+
+	toplay->addLayout(lay, 0, 0);
+	toplay->addWidget(d->w_categories, 1, 0);
+
+	lay = new QHBoxLayout();
+	lay->addWidget(d-> w_goto, 0);
+	lay->addSpacing(6);
+	lay->addWidget(d->w_filter_clear, 0);
+	lay->addWidget(d->w_filter_label, 0);
+	lay->addWidget(d->w_filter_expression, 15);
+	lay->addSpacing(6);
+	lay->addWidget(d->w_viewbutton);
+
+	toplay->addLayout(lay, 0, 1);
+	d->m_stack = new QStackedLayout();
+	d->m_stack->addWidget(d->w_items);
+	d->m_stack->addWidget(d->w_thumbs);
+	toplay->addLayout(d->m_stack, 1, 1);
+	
+	d-> m_filter_active = false;
+
+	d->m_stack->setCurrentWidget(d->w_items);
+	d->m_viewmode = ListMode;
+
+	d->m_selected = 0;
+
+	languageChange();
+
+//	activating the [All Items] category takes too long
+//	d-> w_categories-> setSelected ( d-> w_categories-> firstChild ( ), true );
+	setFocusProxy(d->w_item_types);
+}
+
+void CSelectItem::languageChange()
+{
+	d->w_item_types_label->setText(tr("Item type:"));
+	d->w_filter_label->setText(tr("Filter:")); 
+
+	d->w_goto->setShortcut(tr( "Ctrl+F", "Find Item" ));
+	d->w_goto->setToolTip(tr( "Find Item..." ) + " (" + QString(d->w_goto->shortcut()) + ")");
+
+	d->w_filter_expression->setToolTip(tr( "Filter the list using this pattern (wildcards allowed: * ? [])" ));
+	d->w_filter_clear->setToolTip(tr( "Reset an active filter" ));
+	d->w_viewbutton->setToolTip(tr( "View" ));
+
+//	d-> w_categories-> setColumnText ( 0, tr( "Category" ));
+//	d-> w_categories-> firstChild ( )-> repaint ( );
+//	d-> w_categories-> lastItem ( )-> repaint ( );
+
+//	d-> w_items-> setColumnText ( 1, tr( "Part #" ));
+//	d-> w_items-> setColumnText ( 2, tr( "Description" ));
+
+	d->m_viewaction[ListMode]->setText(tr("List"));
+	d->m_viewaction[TableMode]->setText(tr("List with images"));
+	d->m_viewaction[ThumbsMode]->setText(tr("Thumbnails"));
+}
+
+bool CSelectItem::isOnlyWithInventory ( ) const
+{
+	return d-> m_inv_only;
+}
+
+void CSelectItem::categoryChanged()
+{
+}
+
+const BrickLink::Category *CSelectItem::currentCategory() const
+{
+	BrickLink::CategoryModel *model = qobject_cast<BrickLink::CategoryModel *>(d->w_categories->model());
+
+	if (model && d->w_categories->selectionModel()->hasSelection()) {
+		QModelIndex idx = d->w_categories->selectionModel()->selectedIndexes().front();
+		return model->category(idx);
 	}
-	return ivi;
+	else
+		return 0;
+}
+
+void CSelectItem::setCurrentCategory(const BrickLink::Category *cat)
+{
+	BrickLink::CategoryModel *model = qobject_cast<BrickLink::CategoryModel *>(d->w_categories->model());
+
+	if (model)
+		d->w_categories->selectionModel()->select(model->index(cat), QItemSelectionModel::SelectCurrent);
+}
+
+void CSelectItem::itemTypeChanged()
+{
+	const BrickLink::Category *oldcat = currentCategory();
+
+	BrickLink::CategoryModel *model = qobject_cast<BrickLink::CategoryModel *>(d->w_categories->model());
+	model->setItemTypeFilter(currentItemType());
+	setCurrentCategory(oldcat);
+}
+
+const BrickLink::ItemType *CSelectItem::currentItemType() const
+{
+	BrickLink::ItemTypeModel *model = qobject_cast<BrickLink::ItemTypeModel *>(d->w_item_types->model());
+
+	if (model && d->w_item_types->currentIndex() >= 0) {
+		QModelIndex idx = model->index(d->w_item_types->currentIndex(), 0, QModelIndex());
+		return model->itemType(idx);
+	}
+	else
+		return 0;
+}
+
+void CSelectItem::setCurrentItemType(const BrickLink::ItemType *it)
+{
+	BrickLink::ItemTypeModel *model = qobject_cast<BrickLink::ItemTypeModel *>(d->w_item_types->model());
+
+	if (model)
+		d->w_item_types->setCurrentIndex(model->index(it).row());
 }
 
 
-class CatListItem : public CListViewItem {
-public:
-	CatListItem ( CListView *lv, const BrickLink::Category *cat )
-		: CListViewItem ( lv ), m_cat ( cat )
-	{ }
+bool CSelectItem::checkViewMode(CSelectItem::ViewMode vm)
+{
+	if (vm == d->m_viewmode)
+		return false;
 
-	virtual QString text ( int /*col*/ ) const
-	{ return ( m_cat != Cat_AllParts ) ? QString ( m_cat-> name ( )) : QString ( "[%1]" ). arg ( CSelectItem::tr( "All Items" )); }
-
-	const BrickLink::Category *category ( ) const
-	{ return m_cat; }
-
-	virtual int compare ( QListViewItem * i, int /*col*/, bool /*ascending*/ ) const
-	{
-		if (( m_cat != Cat_AllParts ) && ( static_cast<CatListItem *> ( i )-> m_cat != Cat_AllParts ))
-			return ::qstrcmp ( m_cat-> name ( ), static_cast <CatListItem *> ( i )-> m_cat-> name ( ));
-		else
-			return ( m_cat != Cat_AllParts ) ? +1 : -1;
+	if ((vm != ListMode) && (currentCategory() == BrickLink::CategoryModel::AllCategories)) {
+		if (CMessageBox::question(this, tr("Viewing all items with images is a bandwidth- and memory-hungry operation.<br />Are you sure you want to continue?"), QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
+			return false;
 	}
+	return true;
+}
 
-	virtual void paintCell ( QPainter *p, const QColorGroup &cg, int column, int width, int align )
-	{
-		if ( m_cat == Cat_AllParts ) {
-			QFont f = p-> font ( );
-			f. setBold ( !f. bold ( ));
-			p-> setFont ( f );
+void CSelectItem::showAsList()
+{
+	if (checkViewMode(ListMode)) {
+		if (d->m_viewmode == ThumbsMode)
+			d->m_stack->setCurrentWidget(d->w_items);
+
+		d->w_items->hideColumn(1);
+		d->m_viewmode = ListMode;
+	}
+}
+
+void CSelectItem::showAsTable()
+{
+	if (checkViewMode(TableMode)) {
+		if (d->m_viewmode == ThumbsMode)
+			d->m_stack->setCurrentWidget(d->w_items);
+
+		d->w_items->showColumn(1);
+		d->m_viewmode = TableMode;
+	}
+}
+
+void CSelectItem::showAsThumbs()
+{
+	if (checkViewMode(ThumbsMode)) {
+		if (currentCategory() == BrickLink::CategoryModel::AllCategories) {
+			if (CMessageBox::question(this, tr("Viewing all items with images is a bandwidth- and memory-hungry operation.<br />Are you sure you want to continue?"), QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
+				return;
 		}
+		d->m_stack->setCurrentWidget(d->w_thumbs);
+		d->m_viewmode = ThumbsMode;
+	}
+}
 
-		CListViewItem::paintCell ( p, cg, column, width, align );
+
+void CSelectItem::findItem()
+{
+	const BrickLink::ItemType *itt = currentItemType();
+
+	if (!itt)
+		return;
+
+	QString str;
+
+	if (CMessageBox::getString(this, tr("Please enter the complete item number:"), str)) {
+		const BrickLink::Item *item = BrickLink::core()->item(itt->id(), str.toAscii().constData());
+
+		if (item) {
+			setCurrentItem(item);
+			ensureSelectionVisible();
+		}
+		else
+			QApplication::beep ( );
+	}
+}
+
+const BrickLink::Item *CSelectItem::currentItem() const
+{
+	return 0;
+}
+
+bool CSelectItem::setCurrentItem(const BrickLink::Item *item)
+{
+	if (!item)
+		return false;
+
+	bool found = false;
+	const BrickLink::ItemType *itt = item ? item->itemType() : 0;
+	const BrickLink::Category *cat = item ? item->category() : 0;
+
+	setCurrentItemType(itt ? itt : BrickLink::core()->itemType('P'));
+	setCurrentCategory(cat ? cat : BrickLink::CategoryModel::AllCategories);
+
+	//TODO: set current item, if filter permits -> return true/false (found)
+	return found;
+}
+
+
+
+void CSelectItem::showEvent(QShowEvent *)
+{
+	ensureSelectionVisible();
+}
+
+void CSelectItem::ensureSelectionVisible ( )
+{
+	const BrickLink::Category *cat = currentCategory();
+	const BrickLink::Item *item = currentItem();
+
+	if (cat) {
+		BrickLink::CategoryModel *model = qobject_cast<BrickLink::CategoryModel *>(d->w_categories->model());
+
+		d->w_categories->scrollTo(model->index(cat));
 	}
 
-private:
-	const BrickLink::Category *m_cat;
-};
+	if (item) {
+/*		BrickLink::ItemModel *model = qobject_cast<BrickLink::ItemModel *>(d->w_items->model());
+
+		d->w_items->scrollTo(model->index(item));
+		d->w_thumbs->scrollTo(model->index(item));*/
+	}
+}
+
+
+void CSelectItem::applyFilter()
+{
+	QRegExp regexp(d->w_filter_expression->lineEdit()->text(), Qt::CaseInsensitive, QRegExp::Wildcard);
+
+	bool regexp_ok = !regexp.isEmpty() && regexp.isValid();
+
+	if (!regexp_ok && !d->m_filter_active) {
+		//qDebug ( "ignoring filter...." );
+		return;
+	}
+/*
+	QApplication::setOverrideCursor ( QCursor( Qt::WaitCursor ));
+
+//	CDisableUpdates disupd ( d-> w_items );
+
+	for ( QListViewItemIterator it ( d-> w_items ); it. current ( ); ++it ) {
+		QListViewItem *ivi = it. current ( );
+
+		bool b = !regexp_ok || ( regexp. search ( ivi-> text ( 1 )) >= 0 ) || ( regexp. search ( ivi-> text ( 2 )) >= 0 );
+
+		if ( !b && ivi-> isSelected ( ))
+			d-> w_items-> setSelected ( ivi, false );
+
+		ivi-> setVisible ( b );
+	}
+
+	QApplication::restoreOverrideCursor ( );
+*/
+	d->m_filter_active = regexp_ok;
+}
+
+
+QSize CSelectItem::sizeHint ( ) const
+{
+	QFontMetrics fm = fontMetrics ( );
+
+	return QSize ( 120 * fm. width ( 'x' ), 20 * fm. height ( ));
+}
+
+/*
+void CSelectItem::itemContextList ( QListViewItem *lvi, const QPoint &pos )
+{
+	const BrickLink::Item *item = lvi ? static_cast <ItemListItem *> ( lvi )-> item ( ) : 0;
+
+	itemContext ( item, pos );
+}
+
+void CSelectItem::itemContextIcon ( QIconViewItem *ivi, const QPoint &pos )
+{
+	const BrickLink::Item *item = ivi ? static_cast <ItemIconItem *> ( ivi )-> item ( ) : 0;
+
+	itemContext ( item, pos );
+}
+
+void CSelectItem::itemContext ( const BrickLink::Item *item, const QPoint &pos )
+{
+	CatListItem *cli = static_cast <CatListItem *> ( d-> w_categories-> selectedItem ( ));
+	const BrickLink::Category *cat = cli ? cli-> category ( ) : 0;
+
+	if ( !item || !item-> category ( ) || ( item-> category ( ) == cat ))
+		return;
+
+	QPopupMenu pop ( this );
+	pop.insertItem ( tr( "View item's category" ), 0 );
+
+	if ( pop. exec ( pos ) == 0 ) {
+		setItem ( item );
+		ensureSelectionVisible ( );
+	}
+}
+*/
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+
+DSelectItem::DSelectItem(bool only_with_inventory, QWidget *parent)
+	: QDialog(parent)
+{
+	w_si = new CSelectItem(only_with_inventory, this);
+
+	w_ok = new QPushButton ( tr( "&OK" ), this );
+	w_ok-> setAutoDefault ( true );
+	w_ok-> setDefault ( true );
+
+	w_cancel = new QPushButton ( tr( "&Cancel" ), this );
+	w_cancel-> setAutoDefault ( true );
+
+	QFrame *hline = new QFrame ( this );
+	hline-> setFrameStyle ( QFrame::HLine | QFrame::Sunken );
+	
+	QBoxLayout *toplay = new QVBoxLayout(this);
+	toplay-> addWidget ( w_si );
+	toplay-> addWidget ( hline );
+
+	QBoxLayout *butlay = new QHBoxLayout();
+	butlay-> addStretch ( 60 );
+	butlay-> addWidget ( w_ok, 15 );
+	butlay-> addWidget ( w_cancel, 15 );
+	toplay->addLayout(butlay);
+
+	setSizeGripEnabled ( true );
+	setMinimumSize ( minimumSizeHint ( ));
+
+	connect ( w_ok, SIGNAL( clicked ( )), this, SLOT( accept ( )));
+	connect ( w_cancel, SIGNAL( clicked ( )), this, SLOT( reject ( )));
+	connect ( w_si, SIGNAL( itemSelected ( const BrickLink::Item *, bool )), this, SLOT( checkItem ( const BrickLink::Item *, bool )));
+
+	w_ok-> setEnabled ( false );
+}
+
+void DSelectItem::setItemType ( const BrickLink::ItemType *itt )
+{
+	w_si-> setCurrentItemType ( itt );
+}
+
+void DSelectItem::setItem ( const BrickLink::Item *item )
+{
+	w_si-> setCurrentItem ( item );
+}
+/*
+bool DSelectItem::setItemTypeCategoryAndFilter ( const BrickLink::ItemType *itt, const BrickLink::Category *cat, const QString &filter )
+{
+	return w_si-> setItemTypeCategoryAndFilter ( itt, cat, filter );
+}
+*/
+const BrickLink::Item *DSelectItem::item ( ) const
+{
+	return w_si->currentItem ( );
+}
+
+void DSelectItem::checkItem ( const BrickLink::Item *it, bool ok )
+{
+	bool b = w_si-> isOnlyWithInventory ( ) ? it-> hasInventory ( ) : true;
+
+	w_ok-> setEnabled (( it ) && b );
+
+	if ( it && b && ok )
+		 w_ok-> animateClick ( );
+}
+
+int DSelectItem::exec ( const QRect &pos )
+{
+	if ( pos. isValid ( ))
+		CUtility::setPopupPos ( this, pos );
+
+	return QDialog::exec ( );
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#if 0
 
 
 class ItemListItem : public CListViewItem {
@@ -539,718 +943,5 @@ private:
 };
 #endif
 
-} // namespace
 
 
-class CSelectItemPrivate {
-public:
-//	CItemTypeCombo *m_type_combo;
-
-	QLabel *        w_item_types_label;
-	QComboBox *     w_item_types;
-	QListView *     w_categories;
-
-	QStackedLayout *m_stack;
-	QTableView *    w_items;
-	QListView *     w_thumbs;
-	
-	QToolButton *   w_goto;
-	QLabel *        w_filter_label;
-	QToolButton *   w_filter_clear;
-	QComboBox *     w_filter_expression;
-	QToolButton *   w_view_list;
-	QToolButton *   w_view_images;
-	QToolButton *   w_view_thumbs;
-
-	CSelectItem::ViewMode  m_viewmode;
-	bool                   m_filter_active;
-	bool                   m_inv_only;
-	const BrickLink::Item *m_selected;
-//	ItemListToolTip *      m_items_tip;
-};
-
-
-CSelectItem::CSelectItem ( QWidget *parent, Qt::WindowFlags f )
-	: QWidget ( parent, f )
-{
-	d = new CSelectItemPrivate ( );
-
-	d-> m_inv_only = false;
-
-	QGridLayout *lay = new QGridLayout ( this );
-	lay-> setColumnStretch ( 0, 25 );
-	lay-> setColumnStretch ( 1, 75 );
-	lay-> setRowStretch ( 0, 0 );
-	lay-> setRowStretch ( 1, 100 );
-
-	QHBoxLayout *typelay = new QHBoxLayout ( );
-
-	d-> w_item_types_label = new QLabel ( this );
-	d-> w_item_types = new QComboBox ( this );
-	d-> w_item_types-> setEditable ( false );
-
-	typelay-> addWidget ( d-> w_item_types_label, 0 );
-	typelay-> addWidget ( d-> w_item_types, 1 );
-	
-	lay-> addLayout ( typelay, 0, 0 );
-
-	d-> w_categories = new QListView ( this );
-//	d-> w_categories-> setShowSortIndicator ( true );
-//	d-> w_categories-> setAlwaysShowSelection ( true );
-//	d-> w_categories-> header ( )-> setMovingEnabled ( false );
-//	d-> w_categories-> header ( )-> setResizeEnabled ( false );
-//	d-> w_categories-> addColumn ( QString ( ));
-//	d-> w_categories-> setResizeMode ( QListView::LastColumn );
-
-	lay-> addWidget ( d-> w_categories, 1, 0 );
-
-	QHBoxLayout *toollay = new QHBoxLayout ( );
-
-	d-> w_goto = new QToolButton ( this );
-	d-> w_goto-> setAutoRaise ( true );
-	d-> w_goto-> setIcon ( QIcon ( ":/images/edit_find" ));
-	connect ( d-> w_goto, SIGNAL( clicked ( )), this, SLOT( findItem ( )));
-
-	toollay-> addWidget ( d-> w_goto, 0 );
-	toollay-> addSpacing ( 6 );
-
-	d-> w_filter_clear = new QToolButton ( this );
-	d-> w_filter_clear-> setAutoRaise ( true );
-	d-> w_filter_clear-> setIcon ( QIcon ( ":/images/filter_clear" ));
-
-	d-> w_filter_label = new QLabel ( this );
-
-	d-> w_filter_expression = new QComboBox ( this );
-	d-> w_filter_expression-> setEditable ( true );
-	connect ( d-> w_filter_clear, SIGNAL( clicked ( )), d-> w_filter_expression, SLOT( clearEdit ( )));
-	connect ( d-> w_filter_expression, SIGNAL( textChanged ( const QString & )), this, SLOT( applyFilter ( )));
-
-	toollay-> addWidget ( d-> w_filter_clear, 0 );
-	toollay-> addWidget ( d-> w_filter_label, 0 );
-	toollay-> addWidget ( d-> w_filter_expression, 15 );
-	toollay-> addSpacing ( 6 );
-
-	QHBoxLayout *viewlay = new QHBoxLayout ( );
-	viewlay-> setMargin ( 0 );
-	viewlay-> setSpacing ( 0 );
-	
-	d-> w_view_list = new QToolButton ( this );
-	d-> w_view_list-> setAutoRaise ( true );
-	d-> w_view_list-> setCheckable ( true );
-	d-> w_view_list-> setIcon ( QIcon ( ":/images/viewmode_list" ));
-	viewlay-> addWidget ( d-> w_view_list );
-	
-	d-> w_view_images = new QToolButton ( this );
-	d-> w_view_images-> setAutoRaise ( true );
-	d-> w_view_images-> setCheckable ( true );
-	d-> w_view_images-> setIcon ( QIcon ( ":/images/viewmode_list" ));
-	connect ( d-> w_view_images, SIGNAL( clicked ( )), this, SLOT( setViewModeListWithImages ( )));
-	viewlay-> addWidget ( d-> w_view_images );
-
-	d-> w_view_thumbs = new QToolButton ( this );
-	d-> w_view_thumbs-> setAutoRaise ( true );
-	d-> w_view_thumbs-> setCheckable ( true );
-	d-> w_view_thumbs-> setIcon ( QIcon ( ":/images/viewmode_list" ));
-	viewlay-> addWidget ( d-> w_view_thumbs );
-
-	QButtonGroup *bg = new QButtonGroup ( this );
-	bg-> addButton ( d-> w_view_list,   ViewMode_List );
-	bg-> addButton ( d-> w_view_images, ViewMode_ListWithImages );
-	bg-> addButton ( d-> w_view_thumbs, ViewMode_Thumbnails );
-	connect ( bg, SIGNAL( buttonClicked ( int )), this, SLOT( viewModeChanged ( int )));
-
-	toollay-> addLayout ( viewlay );
-	lay-> addLayout ( toollay, 0, 1 );
-
-	d-> m_stack = new QStackedLayout ( );
-	
-	d-> w_items = new QTableView ( this );
-	d-> m_stack-> addWidget ( d-> w_items );
-
-//	d-> w_items-> setShowSortIndicator ( true );
-//	d-> w_items-> setAlwaysShowSelection ( true );
-//	d-> w_items-> header ( )-> setMovingEnabled ( false );
-//	d-> w_items-> header ( )-> setResizeEnabled ( false );
-
-//	d-> w_items-> addColumn ( QString ( ));
-//	d-> w_items-> addColumn ( QString ( ));
-//	d-> w_items-> addColumn ( QString ( ));
-//	d-> w_items-> setResizeMode ( QListView::LastColumn );
-//	d-> w_items-> setSortColumn ( 2 );
-//	d-> w_items-> setColumnWidthMode ( 0, QListView::Manual );
-//	d-> w_items-> setColumnWidth ( 0, 0 );
-//	d-> m_items_tip = new ItemListToolTip ( d-> w_items );
-
-	d-> w_thumbs = new QListView ( this );
-	d-> m_stack-> addWidget ( d-> w_thumbs );
-//	d-> w_thumbs-> setResizeMode ( QIconView::Adjust );
-//	d-> w_thumbs-> setItemsMovable ( false );
-//	d-> w_thumbs-> setShowToolTips ( false );
-//	(void) new ItemIconToolTip ( d-> w_thumbs );
-
-	lay-> addLayout ( d-> m_stack, 1, 1 );
-
-//	d-> m_type_combo = new CItemTypeCombo ( d-> w_item_types, d-> m_inv_only );
-//	w_item_types-> setModel ( new ItemTypeModel ( d-> m_inv_only ));
-
-
-//	connect ( d-> m_type_combo, SIGNAL( itemTypeActivated ( const BrickLink::ItemType * )), this, SLOT( itemTypeChanged ( )));
-	connect ( d-> w_item_types, SIGNAL( currentIndexChanged ( )), this, SLOT( itemTypeChanged ( )));
-	connect ( d-> w_categories, SIGNAL( selectionChanged ( )), this, SLOT( categoryChanged ( )));
-	connect ( d-> w_items, SIGNAL( selectionChanged ( )), this, SLOT( itemChangedList ( )));
-	connect ( d-> w_items, SIGNAL( doubleClicked ( QListViewItem *, const QPoint &, int )), this, SLOT( itemConfirmed ( )));
-	connect ( d-> w_items, SIGNAL( returnPressed ( QListViewItem * )), this, SLOT( itemConfirmed ( )));
-	connect ( d-> w_items, SIGNAL( contextMenuRequested ( QListViewItem *, const QPoint &, int )), this, SLOT( itemContextList ( QListViewItem *, const QPoint & )));
-	connect ( d-> w_thumbs, SIGNAL( selectionChanged ( )), this, SLOT( itemChangedIcon ( )));
-	connect ( d-> w_thumbs, SIGNAL( doubleClicked ( QIconViewItem * )), this, SLOT( itemConfirmed ( )));
-	connect ( d-> w_thumbs, SIGNAL( returnPressed ( QIconViewItem * )), this, SLOT( itemConfirmed ( )));
-	connect ( d-> w_thumbs, SIGNAL( contextMenuRequested ( QIconViewItem *, const QPoint & )), this, SLOT( itemContextIcon ( QIconViewItem *, const QPoint & )));
-
-	d-> m_filter_active = false;
-
-	d-> m_stack-> setCurrentWidget ( d-> w_items );
-	d-> m_viewmode = ViewMode_List;
-
-	d-> m_selected = 0;
-
-	connect ( BrickLink::inst ( ), SIGNAL( pictureUpdated ( BrickLink::Picture * )), this, SLOT( pictureUpdated ( BrickLink::Picture * )));
-
-	languageChange ( );
-
-//	activating the [All Items] category takes too long
-//	d-> w_categories-> setSelected ( d-> w_categories-> firstChild ( ), true );
-
-	setFocusProxy ( d-> w_item_types );
-}
-
-void CSelectItem::languageChange ( )
-{
-	d-> w_item_types_label-> setText ( tr( "Item type:" ));
-	d-> w_filter_label-> setText ( tr( "Filter:" )); 
-
-	d-> w_goto-> setShortcut ( tr( "Ctrl+F", "Find Item" ));
-	d-> w_goto-> setToolTip ( tr( "Find Item..." ) + " (" + QString( d-> w_goto-> shortcut ( )) + ")");
-
-	d-> w_filter_expression-> setToolTip ( tr( "Filter the list using this pattern (wildcards allowed: * ? [])" ));
-	d-> w_filter_clear-> setToolTip ( tr( "Reset an active filter" ));
-
-//	d-> w_categories-> setColumnText ( 0, tr( "Category" ));
-//	d-> w_categories-> firstChild ( )-> repaint ( );
-//	d-> w_categories-> lastItem ( )-> repaint ( );
-
-//	d-> w_items-> setColumnText ( 1, tr( "Part #" ));
-//	d-> w_items-> setColumnText ( 2, tr( "Description" ));
-
-	d-> w_view_list-> setToolTip ( tr( "View as plain list" ));
-	d-> w_view_images-> setToolTip ( tr( "View as list with images" ));
-	d-> w_view_thumbs-> setToolTip ( tr( "View as thumbnails" ));
-}
-
-void CSelectItem::setOnlyWithInventory ( bool b )
-{
-	if ( b != d-> m_inv_only ) {
-//		d-> m_type_combo-> reset ( b );
-		d-> w_item_types-> setModel ( new ItemTypeModel ( b ));
-		d-> m_inv_only = b;
-	}
-}
-
-bool CSelectItem::isOnlyWithInventory ( ) const
-{
-	return d-> m_inv_only;
-}
-
-void CSelectItem::pictureUpdated ( BrickLink::Picture *pic )
-{
-	if ( !pic )
-		return;
-
-	for ( QListViewItemIterator it ( d-> w_items ); it. current ( ); ++it ) {
-		ItemListItem *ii = static_cast <ItemListItem *> ( it. current ( ));
-
-		if (( pic-> item ( ) == ii-> item ( )) && ( pic-> color ( ) == ii-> item ( )-> defaultColor ( )))
-			ii-> pictureChanged ( );
-	}
-	for ( QIconViewItem *it = d-> w_thumbs-> firstItem ( ); it; it = it-> nextItem ( )) {
-		ItemIconItem *ii = static_cast <ItemIconItem *> ( it );
-
-		if (( pic-> item ( ) == ii-> item ( )) && ( pic-> color ( ) == ii-> item ( )-> defaultColor ( )))
-			ii-> pictureChanged ( );
-	}
-}
-
-
-void CSelectItem::viewModeChanged ( int ivm )
-{
-	if ( ivm == d-> m_viewmode )
-		return;
-
-	const BrickLink::ItemType *itt = d-> m_type_combo-> currentItemType ( );
-	CatListItem *cli = static_cast <CatListItem *> ( d-> w_categories-> selectedItem ( ));
-	const BrickLink::Category *cat = cli ? cli-> category ( ) : 0;
-
-	if ( itt && cat )
-		setViewMode ( checkViewMode ((ViewMode) ivm, itt, cat ), itt, cat );
-}
-
-void CSelectItem::findItem ( )
-{
-	const BrickLink::ItemType *itt = d-> m_type_combo-> currentItemType ( );
-
-	if ( !itt )
-		return;
-
-	QString str;
-
-	if ( CMessageBox::getString ( this, tr( "Please enter the complete item number:" ), str )) {
-		const BrickLink::Item *item = BrickLink::inst ( )-> item ( itt-> id ( ), str. latin1 ( ));
-
-		if ( item ) {
-			setItem ( item );
-			ensureSelectionVisible ( );
-		}
-		else
-			QApplication::beep ( );
-	}
-}
-
-bool CSelectItem::setItem ( const BrickLink::Item *item )
-{
-	if ( !item )
-		return false;
-
-	bool found = false;
-	const BrickLink::ItemType *itt = item ? item-> itemType ( ) : 0;
-	const BrickLink::Category *cat = item ? item-> category ( ) : 0;
-
-	d-> m_type_combo-> setCurrentItemType ( itt ? itt : BrickLink::inst ( )-> itemType ( 'P' ));
-	if ( fillCategoryView ( itt, cat )) {
-		found = fillItemView ( itt, cat, item );
-	}
-	return found;
-}
-
-bool CSelectItem::setItemTypeCategoryAndFilter ( const BrickLink::ItemType *itt, const BrickLink::Category *cat, const QString &filter )
-{
-	if ( setItemType ( itt )) {
-		if ( !cat )
-			cat = Cat_AllParts;
-
-		if ( fillCategoryView ( itt, cat ))
-			fillItemView ( itt, cat, 0 );
-
-		d-> w_filter_expression-> setEditText ( filter );
-		applyFilter ( );
-		return true;
-	}
-	return false;
-}
-
-bool CSelectItem::setItemType ( const BrickLink::ItemType *itt )
-{
-	if ( !itt )
-		return false;
-
-	d-> m_type_combo-> setCurrentItemType ( itt ? itt : BrickLink::inst ( )-> itemType ( 'P' ));
-	itemTypeChanged ( );
-	return true;
-}
-
-// needed for a syncronous update:
-// updateContents is protected and triggerUpdate is asyncronous
-class HackListView : public CListView {
-public:
-	HackListView ( ) : CListView ( 0 ) { }
-	void hackUpdateContents ( ) { updateContents ( ); }
-};
-
-
-
-void CSelectItem::itemTypeChanged ( )
-{
-	fillCategoryView ( d-> m_type_combo-> currentItemType ( ));
-}
-
-void CSelectItem::categoryChanged ( )
-{
-	const BrickLink::ItemType *itt = d-> m_type_combo-> currentItemType ( );
-	CatListItem *cli = static_cast <CatListItem *> ( d-> w_categories-> selectedItem ( ));
-	const BrickLink::Category *cat = cli ? cli-> category ( ) : 0;
-
-	fillItemView ( itt, cat );
-}
-
-bool CSelectItem::fillCategoryView ( const BrickLink::ItemType *itype, const BrickLink::Category *select )
-{
-	d-> w_categories-> clearSelection ( );
-	d-> w_categories-> clear ( );
-
-	if ( !itype ) {
-		// SPERREN
-		return false;
-	}
-	QApplication::setOverrideCursor ( QCursor( Qt::WaitCursor ));
-
-	CatListItem *cat;
-	bool found = false;
-
-	cat = new CatListItem ( d-> w_categories, Cat_AllParts );
-	if ( select == Cat_AllParts )
-		cat-> setSelected ( found = true );
-
-	for ( const BrickLink::Category **catp = itype-> categories ( ); *catp; catp++ ) {
-		cat = new CatListItem ( d-> w_categories, *catp );
-		
-		if ( *catp == select )
-			d-> w_categories-> setSelected ( cat, found = true );
-	}
-
-	d-> w_categories-> sort ( );
-
-	emit hasColors ( itype-> hasColors ( ));
-	
-	QApplication::restoreOverrideCursor ( );
-
-	return select ? found : true;
-}
-
-bool CSelectItem::fillItemView ( const BrickLink::ItemType *itt, const BrickLink::Category *cat, const BrickLink::Item *select )
-{
-	d-> m_items_tip-> hideTip ( );
-
-	d-> w_thumbs-> clearSelection ( );
-	d-> w_items-> clearSelection ( );
-	d-> w_thumbs-> clear ( );
-	d-> w_items-> clear ( );
-	d-> w_items-> setColumnWidthMode ( 1, QListView::Manual );
-	d-> w_items-> setColumnWidth ( 1, 0 );
-	d-> w_items-> setColumnWidthMode ( 1, QListView::Maximum );
-
-	bool found = false;
-
-	if ( itt && cat )
-		found = setViewMode ( checkViewMode ( d-> m_viewmode, itt, cat ), itt, cat, select );
-
-	return select ? found : true;
-}
-
-CSelectItem::ViewMode CSelectItem::checkViewMode ( ViewMode ivm, const BrickLink::ItemType *, const BrickLink::Category *cat )
-{
-	bool ok = true;
-
-	if (( cat == Cat_AllParts ) && ( ivm != ViewMode_List ))
-		ok = ( CMessageBox::question ( this, tr( "Viewing all items with images is a bandwidth- and memory-hungry operation.<br />Are you sure you want to continue?" ), QMessageBox::Yes, QMessageBox::No ) == QMessageBox::Yes );
-
-	return ok ? ivm : ViewMode_List;
-}
-
-bool CSelectItem::setViewMode ( ViewMode ivm, const BrickLink::ItemType *itt, const BrickLink::Category *cat, const BrickLink::Item *select )
-{
-	const BrickLink::Item *found = 0;
-	bool same_vm = ( ivm == d-> m_viewmode );
-	ViewMode oldvm = d-> m_viewmode;
-
-	d-> m_viewmode = ivm;
-
-	QApplication::setOverrideCursor ( QCursor( Qt::WaitCursor ));
-
-	switch ( ivm ) {
-		case ViewMode_Thumbnails:
-			if ( d-> w_thumbs-> count ( ) == 0 )
-				found = fillItemIconView ( itt, cat, select );
-
-			if ( !same_vm )
-				d-> w_stack-> raiseWidget ( d-> w_thumbs );
-			break;
-
-		case ViewMode_ListWithImages:
-		case ViewMode_List:
-			d-> w_items-> setColumnWidth ( 0, ( ivm == ViewMode_ListWithImages ) ? 40 + 2 * d-> w_items-> itemMargin ( ) : 0 );
-			d-> w_items-> header ( )-> adjustHeaderSize ( );
-
-			if ( d-> w_items-> childCount ( ) == 0 )
-				found = fillItemListView ( itt, cat, select );
-
-			if ( !same_vm ) {
-				if ( oldvm != ViewMode_Thumbnails ) {
-					for ( QListViewItemIterator it ( d-> w_items ); it. current ( ); ++it )
-						it. current ( )-> setup ( );
-				}
-				d-> w_stack-> raiseWidget ( d-> w_items );
-			}
-			break;
-	}
-	d-> w_filter_expression-> setEnabled ( ivm != ViewMode_Thumbnails );
-	d-> w_filter_clear-> setEnabled ( ivm != ViewMode_Thumbnails );
-
-	applyFilter ( );
-
-	QApplication::restoreOverrideCursor ( );
-
-	if ( !same_vm ) {
-		d-> w_viewpopup-> setItemChecked ( ViewMode_List, false );
-		d-> w_viewpopup-> setItemChecked ( ViewMode_ListWithImages, false );
-		d-> w_viewpopup-> setItemChecked ( ViewMode_Thumbnails, false );
-		d-> w_viewpopup-> setItemChecked ( ivm, true );
-	}
-	return select ? ( found != 0 ) : true;
-}
-
-void CSelectItem::showEvent ( QShowEvent * )
-{
-	ensureSelectionVisible ( );
-}
-
-void CSelectItem::ensureSelectionVisible ( )
-{
-	d-> w_categories-> centerItem ( d-> w_categories-> selectedItem ( ));
-
-	if ( d-> m_viewmode == ViewMode_Thumbnails ) {
-		QIconViewItem *ivi = QIconView__selectedItem ( d-> w_thumbs );
-
-		if ( ivi ) {
-			QPoint p = ivi-> rect ( ). center ( );
-			d-> w_thumbs-> center ( p. x ( ), p. y ( ), 1.f, 1.f );
-		}
-	}
-	else
-		d-> w_items-> centerItem ( d-> w_items-> selectedItem ( ));
-}
-
-const BrickLink::Item *CSelectItem::fillItemIconView ( const BrickLink::ItemType *itt, const BrickLink::Category *cat, const BrickLink::Item *select )
-{
-	const BrickLink::Item *found = 0;
-	const BrickLink::Item * const *itemp = BrickLink::inst ( )-> items ( ). data ( );
-	uint count = BrickLink::inst ( )-> items ( ). count ( );
-
-	CDisableUpdates disupd ( this );
-
-	for ( uint i = 0; i < count; i++, itemp++ ) {
-		const BrickLink::Item *item = *itemp;
-
-		if (( item-> itemType ( ) == itt ) && (( cat == Cat_AllParts ) || ( item-> hasCategory ( cat )))) {
-			ItemIconItem *iii = new ItemIconItem ( d-> w_thumbs, item, d-> m_viewmode, d-> m_inv_only );
-			if ( item == select ) {
-				found = item;
-				d-> w_thumbs-> setSelected ( iii, true );
-			}
-		}
-	}
-	d-> w_thumbs-> arrangeItemsInGrid ( );
-
-	return found;
-}
-
-const BrickLink::Item *CSelectItem::fillItemListView ( const BrickLink::ItemType *itt, const BrickLink::Category *cat, const BrickLink::Item *select )
-{
-	const BrickLink::Item *found = 0;
-	const BrickLink::Item * const *itemp = BrickLink::inst ( )-> items ( ). data ( );
-	uint count = BrickLink::inst ( )-> items ( ). count ( );
-
-	CDisableUpdates disupd ( d-> w_items );
-
-	for ( uint i = 0; i < count; i++, itemp++ ) {
-		const BrickLink::Item *item = *itemp;
-
-		if (( item-> itemType ( ) == itt ) && (( cat == Cat_AllParts ) || ( item-> hasCategory ( cat )))) {
-			ItemListItem *ili = new ItemListItem ( d-> w_items, item, d-> m_viewmode, d-> m_inv_only );
-			if ( item == select ) {
-				found = item;
-				d-> w_items-> setSelected ( ili, true );
-			}
-		}
-	}
-	disupd. reenable ( );
-	static_cast <HackListView *> ( d-> w_items )-> hackUpdateContents ( );
-
-	return found;
-}
-
-
-void CSelectItem::applyFilter ( )
-{
-	if ( d-> m_viewmode == ViewMode_Thumbnails )
-		return;
-
-	QRegExp regexp ( d-> w_filter_expression-> lineEdit ( )-> text ( ), false, true );
-
-	bool regexp_ok = !regexp. isEmpty ( ) && regexp. isValid ( );
-
-	if ( !regexp_ok && !d-> m_filter_active ) {
-		//qDebug ( "ignoring filter...." );
-		return;
-	}
-
-	QApplication::setOverrideCursor ( QCursor( Qt::WaitCursor ));
-
-	CDisableUpdates disupd ( d-> w_items );
-
-	for ( QListViewItemIterator it ( d-> w_items ); it. current ( ); ++it ) {
-		QListViewItem *ivi = it. current ( );
-
-		bool b = !regexp_ok || ( regexp. search ( ivi-> text ( 1 )) >= 0 ) || ( regexp. search ( ivi-> text ( 2 )) >= 0 );
-
-		if ( !b && ivi-> isSelected ( ))
-			d-> w_items-> setSelected ( ivi, false );
-
-		ivi-> setVisible ( b );
-	}
-	d-> m_filter_active = regexp_ok;
-
-	QApplication::restoreOverrideCursor ( );
-}
-
-const BrickLink::Item *CSelectItem::item ( ) const
-{
-	return d-> m_selected;
-}
-
-void CSelectItem::itemChangedList ( )
-{
-	QListViewItem *lvi = d-> w_items-> selectedItem ( );
-	const BrickLink::Item *newitem = lvi ? static_cast <ItemListItem *> ( lvi )-> item ( ) : 0;
-
-	if ( lvi )
-		d-> w_items-> ensureItemVisible ( lvi );
-
-	if ( newitem != d-> m_selected ) {
-		d-> m_selected = newitem;
-		emit itemSelected ( d-> m_selected, false );
-	}
-}
-
-void CSelectItem::itemChangedIcon ( )
-{
-	QIconViewItem *ivi = QIconView__selectedItem ( d-> w_thumbs );
-	const BrickLink::Item *newitem = ivi ? static_cast <ItemIconItem *> ( ivi )-> item ( ) : 0;
-
-	if ( ivi )
-		d-> w_thumbs-> ensureItemVisible ( ivi );
-
-	if ( newitem != d-> m_selected ) {
-		d-> m_selected = newitem;
-		emit itemSelected ( d-> m_selected, false );
-	}
-}
-
-void CSelectItem::itemConfirmed ( )
-{
-	if ( d-> m_selected )
-		emit itemSelected ( d-> m_selected, true );
-}
-
-QSize CSelectItem::sizeHint ( ) const
-{
-	QFontMetrics fm = fontMetrics ( );
-
-	return QSize ( 120 * fm. width ( 'x' ), 20 * fm. height ( ));
-}
-
-void CSelectItem::itemContextList ( QListViewItem *lvi, const QPoint &pos )
-{
-	const BrickLink::Item *item = lvi ? static_cast <ItemListItem *> ( lvi )-> item ( ) : 0;
-
-	itemContext ( item, pos );
-}
-
-void CSelectItem::itemContextIcon ( QIconViewItem *ivi, const QPoint &pos )
-{
-	const BrickLink::Item *item = ivi ? static_cast <ItemIconItem *> ( ivi )-> item ( ) : 0;
-
-	itemContext ( item, pos );
-}
-
-void CSelectItem::itemContext ( const BrickLink::Item *item, const QPoint &pos )
-{
-	CatListItem *cli = static_cast <CatListItem *> ( d-> w_categories-> selectedItem ( ));
-	const BrickLink::Category *cat = cli ? cli-> category ( ) : 0;
-
-	if ( !item-> category ( ) || ( item-> category ( ) == cat ))
-		return;
-
-	QPopupMenu pop ( this );
-	pop.insertItem ( tr( "View item's category" ), 0 );
-
-	if ( pop. exec ( pos ) == 0 ) {
-		setItem ( item );
-		ensureSelectionVisible ( );
-	}
-}
-
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-
-CSelectItemDialog::CSelectItemDialog ( bool only_with_inventory, QWidget *parent, const char *name, bool modal, WFlags fl )
-	: QDialog ( parent, name, modal, fl )
-{
-	w_si = new CSelectItem ( this );
-	w_si-> setOnlyWithInventory ( only_with_inventory );
-
-	w_ok = new QPushButton ( tr( "&OK" ), this );
-	w_ok-> setAutoDefault ( true );
-	w_ok-> setDefault ( true );
-
-	w_cancel = new QPushButton ( tr( "&Cancel" ), this );
-	w_cancel-> setAutoDefault ( true );
-
-	QFrame *hline = new QFrame ( this );
-	hline-> setFrameStyle ( QFrame::HLine | QFrame::Sunken );
-	
-	QBoxLayout *toplay = new QVBoxLayout ( this, 11, 6 );
-	toplay-> addWidget ( w_si );
-	toplay-> addWidget ( hline );
-
-	QBoxLayout *butlay = new QHBoxLayout ( toplay );
-	butlay-> addStretch ( 60 );
-	butlay-> addWidget ( w_ok, 15 );
-	butlay-> addWidget ( w_cancel, 15 );
-
-	setSizeGripEnabled ( true );
-	setMinimumSize ( minimumSizeHint ( ));
-
-	connect ( w_ok, SIGNAL( clicked ( )), this, SLOT( accept ( )));
-	connect ( w_cancel, SIGNAL( clicked ( )), this, SLOT( reject ( )));
-	connect ( w_si, SIGNAL( itemSelected ( const BrickLink::Item *, bool )), this, SLOT( checkItem ( const BrickLink::Item *, bool )));
-
-	w_ok-> setEnabled ( false );
-}
-
-bool CSelectItemDialog::setItemType ( const BrickLink::ItemType *itt )
-{
-	return w_si-> setItemType ( itt );
-}
-
-bool CSelectItemDialog::setItem ( const BrickLink::Item *item )
-{
-	return w_si-> setItem ( item );
-}
-
-bool CSelectItemDialog::setItemTypeCategoryAndFilter ( const BrickLink::ItemType *itt, const BrickLink::Category *cat, const QString &filter )
-{
-	return w_si-> setItemTypeCategoryAndFilter ( itt, cat, filter );
-}
-
-const BrickLink::Item *CSelectItemDialog::item ( ) const
-{
-	return w_si-> item ( );
-}
-
-void CSelectItemDialog::checkItem ( const BrickLink::Item *it, bool ok )
-{
-	bool b = w_si-> isOnlyWithInventory ( ) ? it-> hasInventory ( ) : true;
-
-	w_ok-> setEnabled (( it ) && b );
-
-	if ( it && b && ok )
-		 w_ok-> animateClick ( );
-}
-
-int CSelectItemDialog::exec ( const QRect &pos )
-{
-	if ( pos. isValid ( ))
-		CUtility::setPopupPos ( this, pos );
-
-	return QDialog::exec ( );
-}

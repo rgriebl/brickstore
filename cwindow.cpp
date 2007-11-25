@@ -21,24 +21,28 @@
 #include <qapplication.h>
 #include <qfiledialog.h>
 #include <qlineedit.h>
-#include <qheader.h>
+//#include <qheader.h>
 #include <qvalidator.h>
 #include <qclipboard.h>
 #include <qcursor.h>
 #include <qtooltip.h>
+#include <QTableView>
+#include <QCloseEvent>
+#include <QDesktopServices>
 
 #include "cselectcolor.h"
 #include "cmessagebox.h"
-#include "citemview.h"
-#include "cresource.h"
+//#include "citemview.h"
+//#include "cresource.h"
 #include "cconfig.h"
 #include "cframework.h"
 #include "cutility.h"
-#include "creport.h"
+//#include "creport.h"
 #include "cmoney.h"
-#include "cundo.h"
+//#include "cundo.h"
 #include "cdocument.h"
-
+#include "cdisableupdates.h"
+/*
 #include "dlgincdecpriceimpl.h"
 #include "dlgsettopgimpl.h"
 #include "dlgloadinventoryimpl.h"
@@ -47,7 +51,7 @@
 #include "dlgincompleteitemimpl.h"
 #include "dlgmergeimpl.h"
 #include "dlgsubtractitemimpl.h"
-
+*/
 #include "cwindow.h"
 
 namespace {
@@ -71,7 +75,7 @@ private:
 			return;
 
 		//CDisableUpdates disupd ( w_list );
-		CUndoCmd *macro = doc-> macroBegin ( );
+		doc-> beginMacro ( );
 		uint count = 0;
 
 		// Apples gcc4 has problems compiling this line (internal error)
@@ -106,38 +110,53 @@ private:
 				}
 			}
 		}
-		doc-> macroEnd ( macro, actiontext. arg( count ));
+		doc-> endMacro ( actiontext. arg( count ));
 	}
 };
 
 } // namespace
 
-CWindow::CWindow ( CDocument *doc, QWidget *parent, const char *name )
-	: QWidget ( parent, name, WDestructiveClose ), m_lvitems ( 503 )
+CWindow::CWindow ( CDocument *doc, QWidget *parent)
+	: QWidget(parent)
 {
-	m_doc = doc;
-	m_ignore_selection_update = false;
+	setAttribute(Qt::WA_DeleteOnClose);
 
-	m_filter_field = CItemView::All;
+	m_doc = doc;
+//	m_ignore_selection_update = false;
+
+	m_filter_field = All;
 
 	m_settopg_failcnt = 0;
 	m_settopg_list = 0;
-	m_settopg_time = BrickLink::PriceGuide::AllTime;
-	m_settopg_price = BrickLink::PriceGuide::Average;
+	m_settopg_time = BrickLink::AllTime;
+	m_settopg_price = BrickLink::Average;
 
 	// m_items. setAutoDelete ( true ); NOT ANYMORE -> UndoRedo
 
 	w_filter_clear = new QToolButton ( this );
 	w_filter_clear-> setAutoRaise ( true );
-	w_filter_clear-> setIconSet ( CResource::inst ( )-> iconSet ( "filter_clear" ));
+	w_filter_clear->setIcon(QIcon(":images/filter_clear"));
 	w_filter_label = new QLabel ( this );
 
-	w_filter_expression = new QComboBox ( true, this );
-	w_filter_field = new QComboBox ( false, this );
+	w_filter_expression = new QComboBox(this);
+	w_filter_expression->setEditable(true);
+	w_filter_field = new QComboBox (this);
+	w_filter_expression->setEditable(false);
 	w_filter_field_label = new QLabel ( this );
 
-	w_list = new CItemView ( doc, this );
-	setFocusProxy ( w_list );
+	w_list = new QTableView(this );
+    w_list->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    w_list->setSelectionBehavior(QAbstractItemView::SelectRows);
+	w_list->setAlternatingRowColors(true);
+	w_list->setTabKeyNavigation (true);
+	w_list->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+	w_list->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
+	w_list->setContextMenuPolicy(Qt::CustomContextMenu);
+	setFocusProxy(w_list);
+
+	w_list->setModel(doc);
+
+	/*
 	w_list-> setShowSortIndicator ( true );
 	w_list-> setColumnsHideable ( true );
 	w_list-> setDifferenceMode ( false );
@@ -147,12 +166,18 @@ CWindow::CWindow ( CDocument *doc, QWidget *parent, const char *name )
 		w_list-> setSorting ( w_list-> columns ( ) + 1 );
 
 	connect ( w_list, SIGNAL( selectionChanged ( )), this, SLOT( updateSelectionFromView ( )));
+*/
 
-	for ( int i = 0; i < ( CItemView::FilterCountSpecial + CDocument::FieldCount ); i++ )
-		w_filter_field-> insertItem ( QString ( ));
+	for ( int i = 0; i < ( FilterCountSpecial + CDocument::FieldCount ); i++ )
+		w_filter_field->addItem(QString());
 
-	QBoxLayout *toplay = new QVBoxLayout ( this, 0, 0 );
-	QBoxLayout *barlay = new QHBoxLayout ( toplay, 4 );
+	QBoxLayout *toplay = new QVBoxLayout(this);
+	toplay->setSpacing(0);
+	toplay->setMargin(0);
+	QBoxLayout *barlay = new QHBoxLayout();
+	barlay->setSpacing(4);
+	toplay->addLayout(barlay);
+
 	barlay-> setMargin ( 4 );
 	barlay-> addWidget ( w_filter_clear, 0 );
 	barlay-> addWidget ( w_filter_label, 0 );
@@ -162,9 +187,8 @@ CWindow::CWindow ( CDocument *doc, QWidget *parent, const char *name )
 	toplay-> addWidget ( w_list );
 
 	connect ( BrickLink::inst ( ), SIGNAL( priceGuideUpdated ( BrickLink::PriceGuide * )), this, SLOT( priceGuideUpdated ( BrickLink::PriceGuide * )));
-	connect ( BrickLink::inst ( ), SIGNAL( pictureUpdated ( BrickLink::Picture * )), this, SLOT( pictureUpdated ( BrickLink::Picture * )));
 
-	connect ( w_list, SIGNAL( contextMenuRequested ( QListViewItem *, const QPoint &, int )), this, SLOT( contextMenu ( QListViewItem *, const QPoint & )));
+	connect ( w_list, SIGNAL( customContextMenuRequested ( const QPoint & )), this, SLOT( contextMenu ( const QPoint & )));
 	connect ( w_filter_clear, SIGNAL( clicked ( )), w_filter_expression, SLOT( clearEdit ( )));
 	connect ( w_filter_expression, SIGNAL( textChanged ( const QString & )), this, SLOT( applyFilter ( )));
 	connect ( w_filter_field, SIGNAL( activated ( int )), this, SLOT( applyFilter ( )));
@@ -199,23 +223,23 @@ void CWindow::languageChange ( )
 	w_filter_label-> setText ( tr( "Filter:" ));
 	w_filter_field_label-> setText ( tr( "Field:" ));
 
-	QToolTip::add ( w_filter_expression, tr( "Filter the list using this pattern (wildcards allowed: * ? [])" ));
-	QToolTip::add ( w_filter_clear, tr( "Reset an active filter" ));
-	QToolTip::add ( w_filter_field, tr( "Restrict the filter to this/these field(s)" ));
+	w_filter_expression->setToolTip(tr( "Filter the list using this pattern (wildcards allowed: * ? [])" ));
+	w_filter_clear->setToolTip(tr( "Reset an active filter" ));
+	w_filter_field->setToolTip(tr( "Restrict the filter to this/these field(s)" ));
 
 	int i, j;
-	for ( i = 0; i < CItemView::FilterCountSpecial; i++ ) {
+	for ( i = 0; i < FilterCountSpecial; i++ ) {
 		QString s;
 		switch ( -i - 1 ) {
-			case CItemView::All       : s = tr( "All" ); break;
-			case CItemView::Prices    : s = tr( "All Prices" ); break;
-			case CItemView::Texts     : s = tr( "All Texts" ); break;
-			case CItemView::Quantities: s = tr( "All Quantities" ); break;
+			case All       : s = tr( "All" ); break;
+			case Prices    : s = tr( "All Prices" ); break;
+			case Texts     : s = tr( "All Texts" ); break;
+			case Quantities: s = tr( "All Quantities" ); break;
 		}
-		w_filter_field-> changeItem ( s, i );
+		w_filter_field->setItemText(i, s);
 	}
 	for ( j = 0; j < CDocument::FieldCount; j++ )
-		w_filter_field-> changeItem ( w_list-> header ( )-> label ( j ), i + j );
+		w_filter_field->setItemText(i + j, w_list->model()->headerData(j, Qt::Horizontal, Qt::DisplayRole).toString());
 
 	updateCaption ( );
 }
@@ -236,7 +260,7 @@ void CWindow::updateCaption ( )
 	if ( m_doc-> isModified ( ))
 		cap += " *";
 
-	setCaption ( cap );
+	setWindowTitle(cap);
 }
 
 CWindow::~CWindow ( )
@@ -246,11 +270,12 @@ CWindow::~CWindow ( )
 
 void CWindow::saveDefaultColumnLayout ( )
 {
-	w_list-> saveDefaultLayout ( );
+	//TODO w_list-> saveDefaultLayout ( );
 }
 
 void CWindow::itemsAddedToDocument ( const CDocument::ItemList &items )
 {
+	/*
 	QListViewItem *last_item = w_list-> lastItem ( );
 
 	foreach ( CDocument::Item *item, items ) {
@@ -259,17 +284,22 @@ void CWindow::itemsAddedToDocument ( const CDocument::ItemList &items )
 		last_item = ivi;
 	}
 
-	w_list-> ensureItemVisible ( m_lvitems [items. front ( )] );
+	//TODO w_list-> ensureItemVisible ( m_lvitems [items. front ( )] );
+	*/
+
 }
 
 void CWindow::itemsRemovedFromDocument ( const CDocument::ItemList &items )
 {
+	/*
 	foreach ( CDocument::Item *item, items )
 		delete m_lvitems. take ( item );
+		*/
 }
 
 void CWindow::itemsChangedInDocument ( const CDocument::ItemList &items, bool /*grave*/ )
 {
+	/*
 	foreach ( CDocument::Item *item, items ) {
 		CItemViewItem *ivi = m_lvitems [item];
 		
@@ -278,42 +308,32 @@ void CWindow::itemsChangedInDocument ( const CDocument::ItemList &items, bool /*
 			ivi-> repaint ( );
 		}
 	}
+	*/
 }
 
 
 void CWindow::applyFilter ( )
 {
-	w_list-> applyFilter ( w_filter_expression-> lineEdit ( )-> text ( ), w_filter_field-> currentItem ( ), true );
+	//TODO w_list-> applyFilter ( w_filter_expression-> lineEdit ( )-> text ( ), w_filter_field-> currentItem ( ), true );
 }
 
-
-void CWindow::pictureUpdated ( BrickLink::Picture *pic )
-{
-	if ( !pic )
-		return;
-
-	foreach ( CDocument::Item *item, m_doc-> items ( )) {
-		if (( pic-> item ( ) == item-> item ( )) && ( pic-> color ( ) == item-> color ( )))
-			m_lvitems [item]-> repaint ( );
-	}
-}
 
 uint CWindow::addItems ( const BrickLink::InvItemList &items, int multiply, uint globalmergeflags, bool dont_change_sorting )
 {
 	bool waitcursor = ( items. count ( ) > 100 );
-	bool was_empty = ( w_list-> childCount ( ) == 0 );
+	bool was_empty = ( w_list->model()->rowCount ( ) == 0 );
 	uint dropped = 0;
 	int merge_action_yes_no_to_all = MergeAction_Ask;
 	int mergecount = 0, addcount = 0;
 
-	CUndoCmd *macro = 0;
 	if ( items. count ( ) > 1 )
-		macro = m_doc-> macroBegin ( );
+		m_doc-> beginMacro ( );
 
 	// disable sorting: new items should appear at the end of the list
+/*
 	if ( !dont_change_sorting )
-		w_list-> setSorting ( w_list-> columns ( ) + 1 ); // +1 because of Qt-bug !!
-
+//TODO		w_list-> setSorting ( w_list-> columns ( ) + 1 ); // +1 because of Qt-bug !!
+*/
 	if ( waitcursor )
 		QApplication::setOverrideCursor ( QCursor( Qt::WaitCursor ));
 
@@ -326,12 +346,12 @@ uint CWindow::addItems ( const BrickLink::InvItemList &items, int multiply, uint
 		CDocument::Item *newitem = new CDocument::Item ( *origitem );
 
 		if ( newitem-> isIncomplete ( )) {
-			DlgIncompleteItemImpl d ( newitem, this );
+//			DlgIncompleteItemImpl d ( newitem, this );
 
 			if ( waitcursor )
 				QApplication::restoreOverrideCursor ( );
 
-			bool drop_this = ( d. exec ( ) != QDialog::Accepted );
+			bool drop_this = true; //TODO: ( d. exec ( ) != QDialog::Accepted );
 
 			if ( waitcursor )
 				QApplication::setOverrideCursor ( QCursor( Qt::WaitCursor ));
@@ -363,16 +383,16 @@ uint CWindow::addItems ( const BrickLink::InvItemList &items, int multiply, uint
 				mergeflags = merge_action_yes_no_to_all;
 			}
 			else {
-				DlgMergeImpl d ( olditem, newitem, (( mergeflags & MergeKeep_Mask ) == MergeKeep_Old ), this );
+				//DlgMergeImpl d ( olditem, newitem, (( mergeflags & MergeKeep_Mask ) == MergeKeep_Old ), this );
 
-				int res = d. exec ( );
+				int res = MergeAction_None; //TODO: d. exec ( );
 
 				mergeflags = ( res ? MergeAction_Force : MergeAction_None );
 
 				if ( mergeflags != MergeAction_None )
-					mergeflags |= ( d. attributesFromExisting ( ) ? MergeKeep_Old : MergeKeep_New );
+					mergeflags |= MergeKeep_Old; //TODO:( d. attributesFromExisting ( ) ? MergeKeep_Old : MergeKeep_New );
 
-				if ( d. yesNoToAll ( ))
+				if (true) //TODO: d. yesNoToAll ( ))
 					merge_action_yes_no_to_all = mergeflags;
 			}
 		}
@@ -402,11 +422,11 @@ uint CWindow::addItems ( const BrickLink::InvItemList &items, int multiply, uint
 	if ( waitcursor )
 		QApplication::restoreOverrideCursor ( );
 
-	if ( macro )
-		m_doc-> macroEnd ( macro, tr( "Added %1, merged %2 items" ). arg( addcount ). arg( mergecount ));
+	if (items.count() > 1)
+		m_doc->endMacro(tr( "Added %1, merged %2 items").arg(addcount).arg(mergecount));
 
-	if ( was_empty )
-		w_list-> setCurrentItem ( w_list-> firstChild ( ));
+	if (was_empty)
+		w_list->selectRow(0);
 
 	return items. count ( ) - dropped;
 }
@@ -431,7 +451,7 @@ void CWindow::mergeItems ( const CDocument::ItemList &items, int globalmergeflag
 	int merge_action_yes_no_to_all = MergeAction_Ask;
 	uint mergecount = 0;
 
-	CUndoCmd *macro = m_doc-> macroBegin ( );
+	m_doc->beginMacro();
 
 	CDisableUpdates disupd ( w_list );
 
@@ -443,8 +463,8 @@ void CWindow::mergeItems ( const CDocument::ItemList &items, int globalmergeflag
 			    ( from-> item ( ) == find_to-> item ( )) &&
 			    ( from-> color ( ) == find_to-> color ( ))&& 
 			    ( from-> condition ( ) == find_to-> condition ( )) &&
-				(( from-> status ( ) == BrickLink::InvItem::Exclude ) == ( find_to-> status ( ) == BrickLink::InvItem::Exclude )) &&
-			    ( m_doc-> items ( ). find ( find_to ) != m_doc-> items ( ). end ( ))) {
+				(( from-> status ( ) == BrickLink::Exclude ) == ( find_to-> status ( ) == BrickLink::Exclude )) &&
+				( m_doc-> items ( ). indexOf ( find_to ) != -1)) {
 				to = find_to;
 				break;
 			}
@@ -459,16 +479,16 @@ void CWindow::mergeItems ( const CDocument::ItemList &items, int globalmergeflag
 				mergeflags = merge_action_yes_no_to_all;
 			}
 			else {
-				DlgMergeImpl d ( to, from, (( mergeflags & MergeKeep_Mask ) == MergeKeep_Old ), this );
+				//TODO: DlgMergeImpl d ( to, from, (( mergeflags & MergeKeep_Mask ) == MergeKeep_Old ), this );
 
-				int res = d. exec ( );
+				int res = MergeAction_None; //d. exec ( );
 
 				mergeflags = ( res ? MergeAction_Force : MergeAction_None );
 
 				if ( mergeflags != MergeAction_None )
-					mergeflags |= ( d. attributesFromExisting ( ) ? MergeKeep_Old : MergeKeep_New );
+					mergeflags |= MergeKeep_Old; //TODO:( d. attributesFromExisting ( ) ? MergeKeep_Old : MergeKeep_New );
 
-				if ( d. yesNoToAll ( ))
+				if (true) //TODO: d. yesNoToAll ( ))
 					merge_action_yes_no_to_all = mergeflags;
 			}
 		}
@@ -484,35 +504,7 @@ void CWindow::mergeItems ( const CDocument::ItemList &items, int globalmergeflag
 			mergecount++;
 		}
 	} 
-	m_doc-> macroEnd ( macro, tr( "Merged %1 items" ). arg ( mergecount ));
-}
-
-void CWindow::updateSelectionFromView ( )
-{
-	CDocument::ItemList itlist;
-
-	for ( QListViewItemIterator it ( w_list ); it. current ( ); ++it ) {
-		CItemViewItem *ivi = static_cast <CItemViewItem *> ( it. current ( ));
-
-		if ( ivi-> isSelected ( ) && ivi-> isVisible ( ))
-			itlist. append ( ivi-> item ( ));
-	}
-
-	m_ignore_selection_update = true;
-	m_doc-> setSelection ( itlist );
-	m_ignore_selection_update = false;
-}
-
-void CWindow::updateSelectionFromDoc ( const CDocument::ItemList &itlist )
-{
-	if ( m_ignore_selection_update )
-		return;
-
-	w_list-> clearSelection ( );
-
-	foreach ( CDocument::Item *item, itlist ) {
-		m_lvitems [item]-> setSelected ( true );
-	}
+	m_doc->endMacro(tr("Merged %1 items").arg(mergecount));
 }
 
 QDomElement CWindow::createGuiStateXML ( QDomDocument doc )
@@ -526,14 +518,14 @@ QDomElement CWindow::createGuiStateXML ( QDomDocument doc )
 	if ( isDifferenceMode ( ))
 		root. appendChild ( doc. createElement ( "DifferenceMode" ));
 
-	QMap <QString, QString> list_map = w_list->saveSettings ( );
+	QMap <QString, QString> list_map; //TODO: = w_list->saveSettings ( );
 
 	if ( !list_map. isEmpty ( )) {
 		QDomElement e = doc. createElement ( "ItemView" );
 		root. appendChild ( e );
 
 		for ( QMap <QString, QString>::const_iterator it = list_map. begin ( ); it != list_map. end ( ); ++it ) 
-			e. appendChild ( doc. createElement ( it. key ( )). appendChild ( doc. createTextNode ( it. data ( ))). parentNode ( ));
+			e. appendChild ( doc. createElement ( it. key ( )). appendChild ( doc. createTextNode ( it. value ( ))). parentNode ( ));
 	}
 
 	return root;
@@ -564,7 +556,7 @@ bool CWindow::parseGuiStateXML ( QDomElement root )
 				}
 
 				if ( !list_map. isEmpty ( ))
-					w_list-> loadSettings ( list_map );				
+					; //TODO: w_list-> loadSettings ( list_map );				
 			}
 		}
 
@@ -588,23 +580,21 @@ void CWindow::editCopy ( )
 		foreach ( CDocument::Item *item, m_doc-> selection ( ))
 			bllist. append ( item );
 
-		QApplication::clipboard ( )-> setData ( new BrickLink::InvItemDrag ( bllist ));
+		QApplication::clipboard()->setMimeData(new BrickLink::InvItemMimeData(bllist));
 	}
 }
 
-void CWindow::editPaste ( )
+void CWindow::editPaste()
 {
-	BrickLink::InvItemList bllist;
+	BrickLink::InvItemList bllist = BrickLink::InvItemMimeData::items(QApplication::clipboard()->mimeData());
 
-	if ( BrickLink::InvItemDrag::decode ( QApplication::clipboard ( )-> data ( ), bllist )) {
-		if ( bllist. count ( )) {
-			if ( !m_doc-> selection ( ). isEmpty ( )) {
-				if ( CMessageBox::question ( this, tr( "Overwrite the currently selected items?" ), QMessageBox::Yes | QMessageBox::Default, QMessageBox::No | QMessageBox::Escape ) == QMessageBox::Yes )
-					m_doc-> removeItems ( m_doc-> selection ( ));
-			}
-			addItems ( bllist, 1, MergeAction_Ask | MergeKeep_New );
-			qDeleteAll ( bllist );
+	if ( bllist. count ( )) {
+		if ( !m_doc-> selection ( ). isEmpty ( )) {
+			if ( CMessageBox::question ( this, tr( "Overwrite the currently selected items?" ), QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes) == QMessageBox::Yes )
+				m_doc-> removeItems ( m_doc-> selection ( ));
 		}
+		addItems ( bllist, 1, MergeAction_Ask | MergeKeep_New );
+		qDeleteAll ( bllist );
 	}
 }
 
@@ -614,14 +604,14 @@ void CWindow::editDelete ( )
 		m_doc-> removeItems ( m_doc-> selection ( ));
 }
 
-void CWindow::selectAll ( )
+void CWindow::selectAll()
 {
-	w_list-> selectAll ( true );
+	w_list->selectAll();
 }
 
-void CWindow::selectNone ( )
+void CWindow::selectNone()
 {
-	w_list-> selectAll ( false );
+	w_list->clearSelection();
 }
 
 void CWindow::editResetDifferences ( )
@@ -634,22 +624,22 @@ void CWindow::editResetDifferences ( )
 
 void CWindow::editStatusInclude ( )
 {
-	setOrToggle<BrickLink::InvItem::Status>::set ( this, tr( "Set 'include' status on %1 items" ), &CDocument::Item::status, &CDocument::Item::setStatus, BrickLink::InvItem::Include );
+	setOrToggle<BrickLink::Status>::set ( this, tr( "Set 'include' status on %1 items" ), &CDocument::Item::status, &CDocument::Item::setStatus, BrickLink::Include );
 }
 
 void CWindow::editStatusExclude ( )
 {
-	setOrToggle<BrickLink::InvItem::Status>::set ( this, tr( "Set 'exclude' status on %1 items" ), &CDocument::Item::status, &CDocument::Item::setStatus, BrickLink::InvItem::Exclude );
+	setOrToggle<BrickLink::Status>::set ( this, tr( "Set 'exclude' status on %1 items" ), &CDocument::Item::status, &CDocument::Item::setStatus, BrickLink::Exclude );
 }
 
 void CWindow::editStatusExtra ( )
 {
-	setOrToggle<BrickLink::InvItem::Status>::set ( this, tr( "Set 'extra' status on %1 items" ), &CDocument::Item::status, &CDocument::Item::setStatus, BrickLink::InvItem::Extra );
+	setOrToggle<BrickLink::Status>::set ( this, tr( "Set 'extra' status on %1 items" ), &CDocument::Item::status, &CDocument::Item::setStatus, BrickLink::Extra );
 }
 
 void CWindow::editStatusToggle ( )
 {
-	setOrToggle<BrickLink::InvItem::Status>::toggle ( this, tr( "Toggled status on %1 items" ), &CDocument::Item::status, &CDocument::Item::setStatus, BrickLink::InvItem::Include, BrickLink::InvItem::Exclude );
+	setOrToggle<BrickLink::Status>::toggle ( this, tr( "Toggled status on %1 items" ), &CDocument::Item::status, &CDocument::Item::setStatus, BrickLink::Include, BrickLink::Exclude );
 }
 
 void CWindow::editConditionNew ( )
@@ -716,7 +706,7 @@ void CWindow::editPriceRound ( )
 		return;
 
 	uint roundcount = 0;
-	CUndoCmd *macro = m_doc-> macroBegin ( );
+	m_doc-> beginMacro ( );
 
 	CDisableUpdates disupd ( w_list );
 
@@ -732,7 +722,7 @@ void CWindow::editPriceRound ( )
 			roundcount++;
 		}
 	}
-	m_doc-> macroEnd ( macro, tr( "Price change on %1 items" ). arg ( roundcount ));
+	m_doc->endMacro(tr( "Price change on %1 items" ). arg ( roundcount ));
 }
 
 
@@ -746,16 +736,16 @@ void CWindow::editPriceToPG ( )
 		return;
 	}
 
-	DlgSetToPGImpl dlg ( this );
+	//DlgSetToPGImpl dlg ( this );
 
-	if ( dlg. exec ( ) == QDialog::Accepted ) {
+	if (true) { //TODO: dlg. exec ( ) == QDialog::Accepted ) {
 		CDisableUpdates disupd ( w_list );
 
-		m_settopg_list    = new QPtrDict<CDocument::Item> ( 251 );
+		m_settopg_list    = new QMultiHash<BrickLink::PriceGuide *, CDocument::Item *>();
 		m_settopg_failcnt = 0;
-		m_settopg_time    = dlg. time ( );
-		m_settopg_price   = dlg. price ( );
-		bool force_update = dlg. forceUpdate ( );
+		m_settopg_time    = BrickLink::PastSix; //dlg. time ( );
+		m_settopg_price   = BrickLink::Average; //dlg. price ( );
+		bool force_update = false; //dlg. forceUpdate ( );
 
 		foreach ( CDocument::Item *item, m_doc-> selection ( )) {
 			BrickLink::PriceGuide *pg = BrickLink::inst ( )-> priceGuide ( item-> item ( ), item-> color ( ));
@@ -793,25 +783,20 @@ void CWindow::editPriceToPG ( )
 void CWindow::priceGuideUpdated ( BrickLink::PriceGuide *pg )
 {
 	if ( m_settopg_list && pg ) {
-		CDocument::Item *item;
-
-		while (( item = m_settopg_list-> find ( pg ))) {
+		foreach (CDocument::Item *item, m_settopg_list->values(pg)) {
 			if ( pg-> valid ( )) {
-				CItemViewItem *ivi = m_lvitems [item];
 
-				if ( ivi ) { // still valid
-					money_t p = pg-> price ( m_settopg_time, item-> condition ( ), m_settopg_price );
+				money_t p = pg->price(m_settopg_time, item->condition(), m_settopg_price);
 
-					if ( p != item-> price ( )) {
-						CDocument::Item newitem = *item;
-						newitem. setPrice ( p );
-						m_doc-> changeItem ( item, newitem );
-					}
+				if (p != item->price()) {
+					CDocument::Item newitem = *item;
+					newitem.setPrice(p);
+					m_doc->changeItem(item, newitem);
 				}
 			}
-			m_settopg_list-> remove ( pg );
-			pg-> release ( );
+			pg->release();
 		}
+		m_settopg_list->remove(pg);
 	}
 
 	if ( m_settopg_list && m_settopg_list-> isEmpty ( )) {
@@ -834,16 +819,16 @@ void CWindow::editPriceIncDec ( )
 	if ( m_doc-> selection ( ). isEmpty ( ))
 		return;
 
-	DlgIncDecPriceImpl dlg ( this, "", true );
+	//DlgIncDecPriceImpl dlg ( this, "", true );
 
-	if ( dlg. exec ( ) == QDialog::Accepted ) {
-		money_t fixed   = dlg. fixed ( );
-		double percent = dlg. percent ( );
+	if (true) { //TODO: dlg. exec ( ) == QDialog::Accepted ) {
+		money_t fixed   = money_t(1); //dlg. fixed ( );
+		double percent = 0; //dlg. percent ( );
 		double factor  = ( 1. + percent / 100. );
-		bool tiers     = dlg. applyToTiers ( );
+		bool tiers     = true; //dlg. applyToTiers ( );
 		uint incdeccount = 0;
 
-		CUndoCmd *macro = m_doc-> macroBegin ( );
+		m_doc-> beginMacro ( );
 
 		CDisableUpdates disupd ( w_list );
 
@@ -871,7 +856,7 @@ void CWindow::editPriceIncDec ( )
 			incdeccount++;
 		}
 
-		m_doc-> macroEnd ( macro, tr( "Price change on %1 items" ). arg ( incdeccount ));
+		m_doc-> endMacro (tr( "Price change on %1 items" ). arg ( incdeccount ));
 	}
 }
 
@@ -887,7 +872,7 @@ void CWindow::editQtyDivide ( )
 			int lots_with_errors = 0;
 			
 			foreach ( CDocument::Item *item, m_doc-> selection ( )) {
-				if ( QABS( item-> quantity ( )) % divisor )
+				if ( qAbs( item-> quantity ( )) % divisor )
 					lots_with_errors++;
 			}
 
@@ -896,7 +881,7 @@ void CWindow::editQtyDivide ( )
 			}
 			else {
 				uint divcount = 0;
-				CUndoCmd *macro = m_doc-> macroBegin ( );
+				m_doc-> beginMacro ( );
 				
 				CDisableUpdates disupd ( w_list );
 
@@ -908,7 +893,7 @@ void CWindow::editQtyDivide ( )
 					
 					divcount++;
 				}
-				m_doc-> macroEnd ( macro, tr( "Quantity divide by %1 on %2 Items" ). arg ( divisor ). arg ( divcount ));
+				m_doc-> endMacro (tr( "Quantity divide by %1 on %2 Items" ). arg ( divisor ). arg ( divcount ));
 			}
 		}
 	}
@@ -924,7 +909,7 @@ void CWindow::editQtyMultiply ( )
 	if ( CMessageBox::getInteger ( this, tr( "Multiply the quantities of all selected items with this factor." ), tr( "x" ), factor, new QIntValidator ( -1000, 1000, 0 ))) {
 		if (( factor <= 1 ) || ( factor > 1 )) {
 			uint mulcount = 0;
-			CUndoCmd *macro = m_doc-> macroBegin ( );
+			m_doc-> beginMacro ( );
 			
 			CDisableUpdates disupd ( w_list );
 
@@ -936,7 +921,7 @@ void CWindow::editQtyMultiply ( )
 				
 				mulcount++;
 			}
-			m_doc-> macroEnd ( macro, tr( "Quantity multiply by %1 on %2 Items" ). arg ( factor ). arg ( mulcount ));
+			m_doc-> endMacro (tr( "Quantity multiply by %1 on %2 Items" ). arg ( factor ). arg ( mulcount ));
 		}
 	}
 }
@@ -968,12 +953,12 @@ void CWindow::editColor ( )
 	if ( m_doc-> selection ( ). isEmpty ( ))
 		return;
 
-	CSelectColorDialog d ( this );
-	d. setCaption ( CItemView::tr( "Modify Color" ));
-	d. setColor ( m_doc-> selection ( ). front ( )-> color ( ));
+//	CSelectColorDialog d ( this );
+//	d. setCaption ( CItemView::tr( "Modify Color" ));
+//	d. setColor ( m_doc-> selection ( ). front ( )-> color ( ));
 
-	if ( d. exec ( ) == QDialog::Accepted )
-		setOrToggle<const BrickLink::Color *>::set ( this, tr( "Set color on %1 items" ), &CDocument::Item::color, &CDocument::Item::setColor, d. color ( ));
+//	if ( d. exec ( ) == QDialog::Accepted )
+//		setOrToggle<const BrickLink::Color *>::set ( this, tr( "Set color on %1 items" ), &CDocument::Item::color, &CDocument::Item::setColor, d. color ( ));
 }
 
 void CWindow::editRemark ( )
@@ -996,7 +981,7 @@ void CWindow::addRemark ( )
 	
 	if ( CMessageBox::getString ( this, tr( "Enter the text, that should be added to the remarks of all selected items:" ), addremarks )) {
 		uint remarkcount = 0;
-		CUndoCmd *macro = m_doc-> macroBegin ( );	                             
+		m_doc-> beginMacro ( );	                             
 	                             
 		CDisableUpdates disupd ( w_list );
 
@@ -1005,9 +990,9 @@ void CWindow::addRemark ( )
 			
 			if ( str. isEmpty ( ))
 				str = addremarks;
-			else if ( str. find ( QRegExp( "\\b" + QRegExp::escape ( addremarks ) + "\\b" )) != -1 )
+			else if ( str.indexOf ( QRegExp( "\\b" + QRegExp::escape ( addremarks ) + "\\b" )) != -1 )
 				;
-			else if ( addremarks. find ( QRegExp( "\\b" + QRegExp::escape ( str ) + "\\b" )) != -1 )
+			else if ( addremarks.indexOf ( QRegExp( "\\b" + QRegExp::escape ( str ) + "\\b" )) != -1 )
 				str = addremarks;
 			else			
 				str = str + " " + addremarks;
@@ -1021,7 +1006,7 @@ void CWindow::addRemark ( )
 				remarkcount++;
 			}
 		}
-		m_doc-> macroEnd ( macro, tr( "Modified remark on %1 items" ). arg ( remarkcount ));
+		m_doc-> endMacro (tr( "Modified remark on %1 items" ). arg ( remarkcount ));
 	}
 }
 
@@ -1034,14 +1019,14 @@ void CWindow::removeRemark ( )
 	
 	if ( CMessageBox::getString ( this, tr( "Enter the text, that should be removed from the remarks of all selected items:" ), remremarks )) {
 		uint remarkcount = 0;
-		CUndoCmd *macro = m_doc-> macroBegin ( );	                             
+		m_doc-> beginMacro ( );	                             
 	                             
 		CDisableUpdates disupd ( w_list );
 
 		foreach ( CDocument::Item *pos, m_doc-> selection ( )) {
 			QString str = pos-> remarks ( );
 			str. remove ( QRegExp( "\\b" + QRegExp::escape ( remremarks ) + "\\b" ));
-			str = str. simplifyWhiteSpace ( );
+			str = str.simplified();
 			
 			if ( str != pos-> remarks ( )) {
 				CDocument::Item item = *pos;
@@ -1052,7 +1037,7 @@ void CWindow::removeRemark ( )
 				remarkcount++;
 			}
 		}
-		m_doc-> macroEnd ( macro, tr( "Modified remark on %1 items" ). arg ( remarkcount ));
+		m_doc-> endMacro ( tr( "Modified remark on %1 items" ). arg ( remarkcount ));
 	}
 }
 
@@ -1077,7 +1062,7 @@ void CWindow::addComment ( )
 	
 	if ( CMessageBox::getString ( this, tr( "Enter the text, that should be added to the comments of all selected items:" ), addcomments )) {
 		uint commentcount = 0;
-		CUndoCmd *macro = m_doc-> macroBegin ( );	                             
+		m_doc-> beginMacro ( );	                             
 	                             
 		CDisableUpdates disupd ( w_list );
 
@@ -1086,9 +1071,9 @@ void CWindow::addComment ( )
 			
 			if ( str. isEmpty ( ))
 				str = addcomments;
-			else if ( str. find ( QRegExp( "\\b" + QRegExp::escape ( addcomments ) + "\\b" )) != -1 )
+			else if ( str.indexOf(QRegExp( "\\b" + QRegExp::escape ( addcomments ) + "\\b" )) != -1 )
 				;
-			else if ( addcomments. find ( QRegExp( "\\b" + QRegExp::escape ( str ) + "\\b" )) != -1 )
+			else if ( addcomments.indexOf( QRegExp( "\\b" + QRegExp::escape ( str ) + "\\b" )) != -1 )
 				str = addcomments;
 			else			
 				str = str + " " + addcomments;
@@ -1102,7 +1087,7 @@ void CWindow::addComment ( )
 				commentcount++;
 			}
 		}
-		m_doc-> macroEnd ( macro, tr( "Modified comment on %1 items" ). arg ( commentcount ));
+		m_doc-> endMacro (tr( "Modified comment on %1 items" ). arg ( commentcount ));
 	}
 }
 
@@ -1115,14 +1100,14 @@ void CWindow::removeComment ( )
 	
 	if ( CMessageBox::getString ( this, tr( "Enter the text, that should be removed from the comments of all selected items:" ), remcomments )) {
 		uint commentcount = 0;
-		CUndoCmd *macro = m_doc-> macroBegin ( );	                             
+		m_doc-> beginMacro ( );	                             
 	                             
 		CDisableUpdates disupd ( w_list );
 
 		foreach ( CDocument::Item *pos, m_doc-> selection ( )) {
 			QString str = pos-> comments ( );
 			str. remove ( QRegExp( "\\b" + QRegExp::escape ( remcomments ) + "\\b" ));
-			str = str. simplifyWhiteSpace ( );
+			str = str.simplified();
 			
 			if ( str != pos-> comments ( )) {
 				CDocument::Item item = *pos;
@@ -1133,7 +1118,7 @@ void CWindow::removeComment ( )
 				commentcount++;
 			}
 		}
-		m_doc-> macroEnd ( macro, tr( "Modified comment on %1 items" ). arg ( commentcount ));
+		m_doc-> endMacro (tr( "Modified comment on %1 items" ). arg ( commentcount ));
 	}
 }
 
@@ -1151,7 +1136,7 @@ void CWindow::editReserved ( )
 
 void CWindow::updateErrorMask ( )
 {
-	Q_UINT64 em = 0;
+	quint64 em = 0;
 
 	if ( CConfig::inst ( )-> showInputErrors ( )) {
 		if ( CConfig::inst ( )-> simpleMode ( )) {
@@ -1178,10 +1163,10 @@ void CWindow::updateErrorMask ( )
 
 void CWindow::editCopyRemarks ( )
 {
-	DlgSubtractItemImpl d ( tr( "Please choose the document that should serve as a source to fill in the remarks fields of the current document:" ), this, "CopyRemarkDlg" );
+//	DlgSubtractItemImpl d ( tr( "Please choose the document that should serve as a source to fill in the remarks fields of the current document:" ), this, "CopyRemarkDlg" );
 
-	if ( d. exec ( ) == QDialog::Accepted ) {
-		BrickLink::InvItemList list = d. items ( );
+	if (true) { //TODO: d. exec ( ) == QDialog::Accepted ) {
+		BrickLink::InvItemList list; // = d. items ( );
 
 		if ( !list. isEmpty ( ))
 			copyRemarks ( list );
@@ -1195,7 +1180,7 @@ void CWindow::copyRemarks ( const BrickLink::InvItemList &items )
 	if ( items. isEmpty ( ))
 		return;
 
-	CUndoCmd *macro = m_doc-> macroBegin ( );
+	m_doc-> beginMacro ( );
 
 	CDisableUpdates disupd ( w_list );
 
@@ -1229,15 +1214,15 @@ void CWindow::copyRemarks ( const BrickLink::InvItemList &items )
 			copy_count++;
 		}
 	}
-	m_doc-> macroEnd ( macro, tr( "Copied Remarks for %1 Items" ). arg( copy_count ));
+	m_doc-> endMacro (tr( "Copied Remarks for %1 Items" ). arg( copy_count ));
 }
 
 void CWindow::editSubtractItems ( )
 {
-	DlgSubtractItemImpl d ( tr( "Which items should be subtracted from the current document:" ), this, "SubtractItemDlg" );
+	//DlgSubtractItemImpl d ( tr( "Which items should be subtracted from the current document:" ), this, "SubtractItemDlg" );
 
-	if ( d. exec ( ) == QDialog::Accepted ) {
-		BrickLink::InvItemList list = d. items ( );
+	if (true) { //TODO: d. exec ( ) == QDialog::Accepted ) {
+		BrickLink::InvItemList list; // = d. items ( );
 
 		if ( !list. isEmpty ( ))
 			subtractItems ( list );
@@ -1251,7 +1236,7 @@ void CWindow::subtractItems ( const BrickLink::InvItemList &items )
 	if ( items. isEmpty ( ))
 		return;
 
-	CUndoCmd *macro = m_doc-> macroBegin ( );
+	m_doc-> beginMacro ( );
 
 	CDisableUpdates disupd ( w_list );
 
@@ -1301,7 +1286,7 @@ void CWindow::subtractItems ( const BrickLink::InvItemList &items )
 			}
 		}
 	}
-	m_doc-> macroEnd ( macro, tr( "Subtracted %1 Items" ). arg( items. count ( )));
+	m_doc-> endMacro (tr( "Subtracted %1 Items" ). arg( items. count ( )));
 }
 
 void CWindow::editMergeItems ( )
@@ -1335,9 +1320,9 @@ void CWindow::setPrice ( money_t d )
 		QApplication::beep ( );
 }
 
-void CWindow::contextMenu ( QListViewItem *it, const QPoint &p )
+void CWindow::contextMenu ( const QPoint &p )
 {
-	CFrameWork::inst ( )-> showContextMenu (( it ), p );
+	CFrameWork::inst ( )-> showContextMenu ( /*TODO: */ true, p );
 }
 
 void CWindow::closeEvent ( QCloseEvent *e )
@@ -1345,7 +1330,7 @@ void CWindow::closeEvent ( QCloseEvent *e )
 	bool close_empty = ( m_doc-> items ( ). isEmpty ( ) && CConfig::inst ( )-> closeEmptyDocuments ( ));
 
 	if ( m_doc-> isModified ( ) && !close_empty ) {
-		switch ( CMessageBox::warning ( this, tr( "Save changes to %1?" ). arg ( CMB_BOLD( caption ( ). left ( caption ( ). length ( ) - 2 ))), CMessageBox::Yes | CMessageBox::Default, CMessageBox::No, CMessageBox::Cancel | CMessageBox::Escape )) {
+		switch ( CMessageBox::warning ( this, tr( "Save changes to %1?" ). arg ( CMB_BOLD( windowTitle ( ). left ( windowTitle ( ). length ( ) - 2 ))), CMessageBox::Yes | CMessageBox::No | CMessageBox::Cancel, CMessageBox::Yes)) {
 		case CMessageBox::Yes:
 			m_doc-> fileSave ( sortedItems ( ));
 
@@ -1373,44 +1358,44 @@ void CWindow::closeEvent ( QCloseEvent *e )
 void CWindow::showBLCatalog ( )
 {
 	if ( !m_doc-> selection ( ). isEmpty ( ))
-		CUtility::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_CatalogInfo, (*m_doc-> selection ( ). front ( )). item ( )));
+		QDesktopServices::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_CatalogInfo, (*m_doc-> selection ( ). front ( )). item ( )));
 }
 
 void CWindow::showBLPriceGuide ( )
 {
 	if ( !m_doc-> selection ( ). isEmpty ( ))
-		CUtility::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_PriceGuideInfo, (*m_doc-> selection ( ). front ( )). item ( ), (*m_doc-> selection ( ). front ( )). color ( )));
+		QDesktopServices::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_PriceGuideInfo, (*m_doc-> selection ( ). front ( )). item ( ), (*m_doc-> selection ( ). front ( )). color ( )));
 }
 
 void CWindow::showBLLotsForSale ( )
 {
 	if ( !m_doc-> selection ( ). isEmpty ( ))
-		CUtility::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_LotsForSale, (*m_doc-> selection ( ). front ( )). item ( ), (*m_doc-> selection ( ). front ( )). color ( )));
+		QDesktopServices::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_LotsForSale, (*m_doc-> selection ( ). front ( )). item ( ), (*m_doc-> selection ( ). front ( )). color ( )));
 }
 
 void CWindow::showBLMyInventory ( )
 {
 	if ( !m_doc-> selection ( ). isEmpty ( )) {
 		uint lotid = (*m_doc-> selection ( ). front ( )). lotId ( );
-		CUtility::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_StoreItemDetail, &lotid ));
+		QDesktopServices::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_StoreItemDetail, &lotid ));
 	}
 }
 
 void CWindow::setDifferenceMode ( bool b )
 {
-	w_list-> setDifferenceMode ( b );
+//TODO:	w_list-> setDifferenceMode ( b );
 }
 
 bool CWindow::isDifferenceMode ( ) const
 {
-	return w_list-> isDifferenceMode ( );
+return false; //TODO:	return w_list-> isDifferenceMode ( );
 }
 
 void CWindow::filePrint ( )
 {
 	if ( m_doc-> items ( ). isEmpty ( ))
 		return;
-
+/*
 	if ( CReportManager::inst ( )-> reports ( ). isEmpty ( )) {
 		CReportManager::inst ( )->reload ( );
 
@@ -1445,6 +1430,7 @@ void CWindow::filePrint ( )
 		return;
 
 	rep-> print ( prt, m_doc, sortedItems ( prt-> printRange ( ) == QPrinter::Selection ));
+	*/
 }
 
 void CWindow::fileSave ( )
@@ -1527,7 +1513,7 @@ CDocument::ItemList CWindow::exportCheck ( ) const
 CDocument::ItemList CWindow::sortedItems ( bool selection_only ) const
 {
 	CDocument::ItemList sorted;
-
+/*
 	for ( QListViewItemIterator it ( w_list ); it. current ( ); ++it ) {
 		CItemViewItem *ivi = static_cast <CItemViewItem *> ( it. current ( ));
 
@@ -1536,7 +1522,7 @@ CDocument::ItemList CWindow::sortedItems ( bool selection_only ) const
 
 		sorted. append ( ivi-> item ( ));
 	}
-
+*/
 	return sorted;
 }
 

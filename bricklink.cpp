@@ -35,7 +35,7 @@
 #define DEFAULT_DATABASE_NAME     "database-v%1"
 
 
-QUrl BrickLink::url ( UrlList u, const void *opt, const void *opt2 )
+QUrl BrickLink::Core::url ( UrlList u, const void *opt, const void *opt2 )
 {
 	QUrl url;
 
@@ -147,15 +147,15 @@ QUrl BrickLink::url ( UrlList u, const void *opt, const void *opt2 )
 }
 
 
-const QPixmap *BrickLink::noImage ( const QSize &s )
+const QPixmap *BrickLink::Core::noImage ( const QSize &s )
 {
 	QString key = QString( "%1x%2" ). arg( s. width ( )). arg( s. height ( ));
 
 	QPixmap *pix = m_noimages [key];
 
 	if ( !pix ) {
-		QImage img ( s, QImage::Format_ARGB32_Premultiplied );
-		QPainter p ( &img );
+		pix = new QPixmap(s);
+		QPainter p ( pix );
 
 		int w = pix-> width ( );
 		int h = pix-> height ( );
@@ -182,13 +182,13 @@ const QPixmap *BrickLink::noImage ( const QSize &s )
 		}
 		p. end ( );
 
-		m_noimages. insert ( key, new QPixmap ( QPixmap::fromImage ( img )));
+		m_noimages. insert ( key, pix );
 	}
 	return pix;
 }
 
 
-QImage BrickLink::colorImage ( const Color *col, int w, int h ) const
+QImage BrickLink::Core::colorImage ( const Color *col, int w, int h ) const
 {
 	if ( !col || w <= 0 || h <= 0 )
 		return QImage ( );
@@ -284,12 +284,12 @@ static bool check_and_create_path ( const QString &p )
 
 } // namespace
 
-QString BrickLink::dataPath ( ) const
+QString BrickLink::Core::dataPath ( ) const
 {
 	return m_datadir;
 }
 
-QString BrickLink::dataPath ( const ItemType *item_type ) const
+QString BrickLink::Core::dataPath ( const ItemType *item_type ) const
 {
 	QString p = dataPath ( );
 	p += item_type-> id ( );
@@ -301,7 +301,7 @@ QString BrickLink::dataPath ( const ItemType *item_type ) const
 	return p;
 }
 
-QString BrickLink::dataPath ( const Item *item ) const
+QString BrickLink::Core::dataPath ( const Item *item ) const
 {
 	QString p = dataPath ( item-> itemType ( ));
 	p += item-> m_id;
@@ -313,7 +313,7 @@ QString BrickLink::dataPath ( const Item *item ) const
 	return p;
 }
 
-QString BrickLink::dataPath ( const Item *item, const Color *color ) const
+QString BrickLink::Core::dataPath ( const Item *item, const Color *color ) const
 {
 	QString p = dataPath ( item );
 	p += QString::number ( color-> id ( ));
@@ -327,17 +327,12 @@ QString BrickLink::dataPath ( const Item *item, const Color *color ) const
 
 
 
-BrickLink *BrickLink::s_inst = 0;
+BrickLink::Core *BrickLink::Core::s_inst = 0;
 
-BrickLink *BrickLink::inst ( )
-{
-	return s_inst;
-}
-
-BrickLink *BrickLink::inst ( const QString &datadir, QString *errstring )
+BrickLink::Core *BrickLink::Core::create ( const QString &datadir, QString *errstring )
 {
 	if ( !s_inst ) {
-		s_inst = new BrickLink ( datadir );
+		s_inst = new Core ( datadir );
 
 		QString test = s_inst-> dataPath ( );
 		if ( test. isNull ( ) || !check_and_create_path ( test )) {
@@ -362,7 +357,7 @@ BrickLink *BrickLink::inst ( const QString &datadir, QString *errstring )
 	return s_inst;
 }
 
-BrickLink::BrickLink ( const QString &datadir )
+BrickLink::Core::Core ( const QString &datadir )
 	: m_datadir ( datadir ), m_c_locale ( QLocale::c ( ))
 {
 	if ( m_datadir. isEmpty ( ))
@@ -397,7 +392,7 @@ BrickLink::BrickLink ( const QString &datadir )
 	connect ( m_price_guides. transfer, SIGNAL( progress ( int, int )), this, SIGNAL( priceGuideProgress ( int, int )));
 }
 
-BrickLink::~BrickLink ( )
+BrickLink::Core::~Core ( )
 {
 	cancelPictureTransfers ( );
 	cancelPriceGuideTransfers ( );
@@ -410,65 +405,65 @@ BrickLink::~BrickLink ( )
 	s_inst = 0;
 }
 
-void BrickLink::setHttpProxy ( bool enable, const QString &name, int port )
+void BrickLink::Core::setHttpProxy ( bool enable, const QString &name, int port )
 {
 	m_pictures.     transfer-> setProxy ( enable, name, port );
 	m_price_guides. transfer-> setProxy ( enable, name, port );
 }
 
-void BrickLink::setUpdateIntervals ( int pic, int pg )
+void BrickLink::Core::setUpdateIntervals ( int pic, int pg )
 {
 	m_pictures.     update_iv = pic;
 	m_price_guides. update_iv = pg;
 }
 
-bool BrickLink::updateNeeded ( const QDateTime &last, int iv )
+bool BrickLink::Core::updateNeeded ( const QDateTime &last, int iv )
 {
 	return ( iv > 0 ) && ( last. secsTo ( QDateTime::currentDateTime ( )) > iv );
 }
 
-void BrickLink::setOnlineStatus ( bool on )
+void BrickLink::Core::setOnlineStatus ( bool on )
 {
 	m_online = on;
 }
 
-bool BrickLink::onlineStatus ( ) const
+bool BrickLink::Core::onlineStatus ( ) const
 {
 	return m_online;
 }
 
 
-const QHash<int, const BrickLink::Color *> &BrickLink::colors ( ) const
+const QHash<int, const BrickLink::Color *> &BrickLink::Core::colors ( ) const
 {
 	return m_databases. colors;
 }
 
-const QHash<int, const BrickLink::Category *> &BrickLink::categories ( ) const
+const QHash<int, const BrickLink::Category *> &BrickLink::Core::categories ( ) const
 {
 	return m_databases. categories;
 }
 
-const QHash<int, const BrickLink::ItemType *> &BrickLink::itemTypes ( ) const
+const QHash<int, const BrickLink::ItemType *> &BrickLink::Core::itemTypes ( ) const
 {
 	return m_databases. item_types;
 }
 
-const QVector<const BrickLink::Item *> &BrickLink::items ( ) const
+const QVector<const BrickLink::Item *> &BrickLink::Core::items ( ) const
 {
 	return m_databases. items;
 }
 
-const BrickLink::Category *BrickLink::category ( uint id ) const
+const BrickLink::Category *BrickLink::Core::category ( uint id ) const
 {
 	return m_databases. categories [id];
 }
 
-const BrickLink::Color *BrickLink::color ( uint id ) const
+const BrickLink::Color *BrickLink::Core::color ( uint id ) const
 {
 	return m_databases. colors [id];
 }
 
-const BrickLink::Color *BrickLink::colorFromPeeronName ( const char *peeron_name ) const
+const BrickLink::Color *BrickLink::Core::colorFromPeeronName ( const char *peeron_name ) const
 {
 	if ( !peeron_name || !peeron_name [0] )
 		return 0;
@@ -481,7 +476,7 @@ const BrickLink::Color *BrickLink::colorFromPeeronName ( const char *peeron_name
 }
 
 
-const BrickLink::Color *BrickLink::colorFromLDrawId ( int ldraw_id ) const
+const BrickLink::Color *BrickLink::Core::colorFromLDrawId ( int ldraw_id ) const
 {
 	for ( QHash<int, const Color *>::const_iterator it = m_databases. colors. begin ( ); it != m_databases. colors. end ( ); ++it ) {
 		if ( it. value ( )-> ldrawId ( ) == ldraw_id )
@@ -491,18 +486,18 @@ const BrickLink::Color *BrickLink::colorFromLDrawId ( int ldraw_id ) const
 }
         
 
-const BrickLink::ItemType *BrickLink::itemType ( char id ) const
+const BrickLink::ItemType *BrickLink::Core::itemType ( char id ) const
 {
 	return m_databases. item_types [id];
 }
 
-const BrickLink::Item *BrickLink::item ( char tid, const char *id ) const
+const BrickLink::Item *BrickLink::Core::item ( char tid, const char *id ) const
 {
-	BrickLink::Item key;
+	Item key;
 	key. m_item_type = itemType ( tid );
 	key. m_id = const_cast <char *> ( id );
 
-	BrickLink::Item *keyp = &key;
+	Item *keyp = &key;
 
 	Item **itp = (Item **) bsearch ( &keyp, m_databases. items. data ( ), m_databases. items. count ( ), sizeof( Item * ), (int (*) ( const void *, const void * )) Item::compare );
 
@@ -512,19 +507,19 @@ const BrickLink::Item *BrickLink::item ( char tid, const char *id ) const
 	return itp ? *itp : 0;
 }
 
-void BrickLink::cancelPictureTransfers ( )
+void BrickLink::Core::cancelPictureTransfers ( )
 {
 	while ( !m_pictures. diskload. isEmpty ( ))
 		m_pictures. diskload. takeFirst ( )-> release ( );
 	m_pictures. transfer-> cancelAllJobs ( );
 }
 
-void BrickLink::cancelPriceGuideTransfers ( )
+void BrickLink::Core::cancelPriceGuideTransfers ( )
 {
 	m_price_guides. transfer-> cancelAllJobs ( );
 }
 
-QString BrickLink::defaultDatabaseName ( ) const
+QString BrickLink::Core::defaultDatabaseName ( ) const
 {
 	return QString( DEFAULT_DATABASE_NAME ). arg ( DEFAULT_DATABASE_VERSION );
 }
@@ -551,7 +546,7 @@ private:
 } // namespace
 
 
-bool BrickLink::readDatabase ( const QString &fname )
+bool BrickLink::Core::readDatabase ( const QString &fname )
 {
 	QString filename = fname. isNull ( ) ? dataPath ( ) + defaultDatabaseName ( ) : fname;
 
@@ -662,7 +657,7 @@ bool BrickLink::readDatabase ( const QString &fname )
 }
 
 
-BrickLink::InvItemList *BrickLink::parseItemListXML ( QDomElement root, ItemListXMLHint hint, uint *invalid_items )
+BrickLink::InvItemList *BrickLink::Core::parseItemListXML ( QDomElement root, ItemListXMLHint hint, uint *invalid_items )
 {
 	QString roottag, itemtag;
 
@@ -765,10 +760,10 @@ BrickLink::InvItemList *BrickLink::parseItemListXML ( QDomElement root, ItemList
 					categoryname = val;
 				else if ( tag == "CHECKBOX" ) {
 					switch ( val. toInt ( )) {
-						case 0: ii-> setStatus ( InvItem::Exclude ); break;
-						case 1: ii-> setStatus ( InvItem::Include ); break;
-						case 3: ii-> setStatus ( InvItem::Extra   ); break;
-						case 5: ii-> setStatus ( InvItem::Unknown ); break;
+						case 0: ii-> setStatus ( Exclude ); break;
+						case 1: ii-> setStatus ( Include ); break;
+						case 3: ii-> setStatus ( Extra   ); break;
+						case 5: ii-> setStatus ( Unknown ); break;
 					}
 				}
 
@@ -784,7 +779,7 @@ BrickLink::InvItemList *BrickLink::parseItemListXML ( QDomElement root, ItemList
 			// ### Inventory Request ###
 			else if ( hint == XMLHint_Inventory ) {
 				if (( tag == "EXTRA" ) && ( val == "Y" ))
-					ii-> setStatus ( InvItem::Extra );
+					ii-> setStatus ( Extra );
 				else if ( tag == "ITEMNAME" )  // BrickStore extension for Peeron inventories
 					itemname = val;
 				else if ( tag == "COLORNAME" ) // BrickStore extension for Peeron inventories
@@ -838,16 +833,16 @@ BrickLink::InvItemList *BrickLink::parseItemListXML ( QDomElement root, ItemList
 				else if ( tag == "TP3" )
 					ii-> setTierPrice ( 2, money_t::fromCString ( val ));
 				else if ( tag == "Status" ) {
-					InvItem::Status st = InvItem::Include;
+					Status st = Include;
 
 					if ( val == "X" )
-						st = InvItem::Exclude;
+						st = Exclude;
 					else if ( val == "I" )
-						st = InvItem::Include;
+						st = Include;
 					else if ( val == "E" )
-						st = InvItem::Extra;
+						st = Extra;
 					else if ( val == "?" )
-						st = InvItem::Unknown;
+						st = Unknown;
 
 					ii-> setStatus ( st );
 				}
@@ -942,7 +937,7 @@ BrickLink::InvItemList *BrickLink::parseItemListXML ( QDomElement root, ItemList
 
 
 
-QDomElement BrickLink::createItemListXML ( QDomDocument doc, ItemListXMLHint hint, const InvItemList *items, QMap <QString, QString> *extra )
+QDomElement BrickLink::Core::createItemListXML ( QDomDocument doc, ItemListXMLHint hint, const InvItemList *items, QMap <QString, QString> *extra )
 {
 	QString roottag, itemtag;
 
@@ -965,7 +960,7 @@ QDomElement BrickLink::createItemListXML ( QDomDocument doc, ItemListXMLHint hin
 		if ( ii-> isIncomplete ( ))
 			continue;
 		
-		if (( ii-> status ( ) == InvItem::Exclude ) && ( hint != XMLHint_BrickStore && hint != XMLHint_BrikTrak ))
+		if (( ii-> status ( ) == Exclude ) && ( hint != XMLHint_BrickStore && hint != XMLHint_BrikTrak ))
 			continue;
 
 		if ( hint == XMLHint_MassUpdate ) {
@@ -1007,10 +1002,10 @@ QDomElement BrickLink::createItemListXML ( QDomDocument doc, ItemListXMLHint hin
 			
 			int cb = 1;
 			switch ( ii-> status ( )) {
-				case InvItem::Exclude: cb = 0; break;
-				case InvItem::Include: cb = 1; break;
-				case InvItem::Extra  : cb = 3; break;
-				case InvItem::Unknown: cb = 5; break;
+				case Exclude: cb = 0; break;
+				case Include: cb = 1; break;
+				case Extra  : cb = 3; break;
+				case Unknown: cb = 5; break;
 			}
 			item. appendChild ( doc. createElement ( "CHECKBOX"  ). appendChild ( doc. createTextNode ( QString::number ( cb ))). parentNode ( ));
 			item. appendChild ( doc. createElement ( "QTY"       ). appendChild ( doc. createTextNode ( QString::number ( ii-> quantity ( )))). parentNode ( ));
@@ -1054,10 +1049,10 @@ QDomElement BrickLink::createItemListXML ( QDomDocument doc, ItemListXMLHint hin
 			
 			const char *st;
 			switch ( ii-> status ( )) {
-				case InvItem::Unknown: st = "?"; break;
-				case InvItem::Extra  : st = "E"; break;
-				case InvItem::Exclude: st = "X"; break;
-				case InvItem::Include:
+				case Unknown: st = "?"; break;
+				case Extra  : st = "E"; break;
+				case Exclude: st = "X"; break;
+				case Include:
 				default              : st = "I"; break;
 			}
 			item. appendChild ( doc. createElement ( "Status"       ). appendChild ( doc. createTextNode ( st )). parentNode ( ));
@@ -1162,7 +1157,7 @@ QDomElement BrickLink::createItemListXML ( QDomDocument doc, ItemListXMLHint hin
 			item. appendChild ( doc. createElement ( "COLOR"     ). appendChild ( doc. createTextNode ( QString::number ( ii-> color ( )-> id ( )))). parentNode ( ));
 			item. appendChild ( doc. createElement ( "QTY"       ). appendChild ( doc. createTextNode ( QString::number ( ii-> quantity ( )))). parentNode ( ));
 			
-			if ( ii-> status ( ) == InvItem::Extra )
+			if ( ii-> status ( ) == Extra )
 				item. appendChild ( doc. createElement ( "EXTRA" ). appendChild ( doc. createTextNode ( "Y" )). parentNode ( ));
 		}
 
@@ -1178,14 +1173,14 @@ QDomElement BrickLink::createItemListXML ( QDomDocument doc, ItemListXMLHint hin
 
 
 
-bool BrickLink::parseLDrawModel ( QFile &f, InvItemList &items, uint *invalid_items )
+bool BrickLink::Core::parseLDrawModel ( QFile &f, InvItemList &items, uint *invalid_items )
 {
 	QHash<QString, InvItem *> mergehash;
 	
-	return BrickLink::parseLDrawModelInternal ( f, QString::null, items, invalid_items, mergehash );
+	return parseLDrawModelInternal ( f, QString::null, items, invalid_items, mergehash );
 }
 
-bool BrickLink::parseLDrawModelInternal ( QFile &f, const QString &model_name, InvItemList &items, uint *invalid_items, QHash<QString, InvItem *> &mergehash )
+bool BrickLink::Core::parseLDrawModelInternal ( QFile &f, const QString &model_name, InvItemList &items, uint *invalid_items, QHash<QString, InvItem *> &mergehash )
 {
 	QStringList searchpath;
 	QString ldrawdir = CConfig::inst ( )-> lDrawDir ( );
@@ -1325,19 +1320,19 @@ bool BrickLink::parseLDrawModelInternal ( QFile &f, const QString &model_name, I
 /*
  * Support routines to rebuild the DB from txt files
  */
-void BrickLink::setDatabase_ConsistsOf ( const QHash<const Item *, InvItemList> &hash )
+void BrickLink::Core::setDatabase_ConsistsOf ( const QHash<const Item *, InvItemList> &hash )
 {
 	for ( QHash<const Item *, InvItemList>::const_iterator it = hash. begin ( ); it != hash. end ( ); ++it )
 		it. key ( )-> setConsistsOf ( it. value ( ));
 }
 
-void BrickLink::setDatabase_AppearsIn ( const QHash<const Item *, Item::AppearsIn> &hash )
+void BrickLink::Core::setDatabase_AppearsIn ( const QHash<const Item *, Item::AppearsIn> &hash )
 {
 	for ( QHash<const Item *, Item::AppearsIn>::const_iterator it = hash. begin ( ); it != hash. end ( ); ++it )
 		it. key ( )-> setAppearsIn ( it. value ( ));
 }
 
-void BrickLink::setDatabase_Basics ( const QHash<int, const Color *> &colors, 
+void BrickLink::Core::setDatabase_Basics ( const QHash<int, const Color *> &colors, 
 									 const QHash<int, const Category *> &categories,
 									 const QHash<int, const ItemType *> &item_types,
 									 const QVector<const Item *> &items )
@@ -1360,7 +1355,7 @@ void BrickLink::setDatabase_Basics ( const QHash<int, const Color *> &colors,
 	m_databases. items      = items;
 }
 
-bool BrickLink::writeDatabase ( const QString &fname )
+bool BrickLink::Core::writeDatabase ( const QString &fname )
 {
 	QString filename = fname. isNull ( ) ? dataPath ( ) + defaultDatabaseName ( ) : fname;
 

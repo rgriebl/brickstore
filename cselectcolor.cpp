@@ -27,21 +27,51 @@
 
 namespace {
 
-class ColorModel : public QAbstractTableModel {
+#if 0
+class ColorModel : public QAbstractItemModel {
 public:
 	enum Role { BrickLinkColorRole = Qt::UserRole + 1 };
 
-	ColorModel ( )
-	{ m_colors = BrickLink::inst ( )-> colors ( ). values ( ); }
+	ColorModel(bool flat) 
+		: m_colors(BrickLink::inst()->colors()), m_flat(flat)
+	{
+	}
+
+	QModelIndex index(int row, int column, const QModelIndex &parent) const
+	{
+		if (hasIndex(row, column, parent)) {
+			if (m_flat) {
+				return parent.isValid() ? QModelIndex() : createIndex(row, column, m_colors.at(row));
+			}
+			else {
+			}
+			SimpleNode *parentNode = nodeForIndex(parent);
+			SimpleNode *childNode = parentNode->children.at(row);
+			return createIndex(row, column, childNode);
+		}
+		return QModelIndex();
+	}
 
 	const BrickLink::Color *color ( const QModelIndex &index ) const
-	{ return m_colors [index. row ( )]; }
+	{ return index.isValid() ? static_cast<BrickLink::Color *>(index.internalPointer()) : 0;
 
 	QModelIndex index ( const BrickLink::Color *color ) const
-	{ return color ? createIndex ( m_colors. indexOf ( color ), 0, 0 ) : QModelIndex ( ); }
+	{ 
+		if (m_flat)
+			return color ? createIndex(m_colors.indexOf(color), 0, color) : QModelIndex();
+		else
+			return color ? createIndex() : QModelIndex();
+	}
 
-	virtual int rowCount ( const QModelIndex & /*parent*/ ) const
-	{ return m_colors. count ( ); }
+	virtual int rowCount(const QModelIndex &parent) const
+	{
+		if (m_flat) {
+			return parent.isValid() ? 0 : BrickLink::inst()->colors().count();
+		}
+		else {
+
+		}
+		return m_colors. count ( ); }
 
 	virtual int columnCount ( const QModelIndex & /*parent*/ ) const
 	{ return 1;	}
@@ -111,9 +141,11 @@ public:
 	}
 
 private:
-	QList<const BrickLink::Color *> m_colors;
+	QHash<int, const BrickLink::Color *> &m_colors;
+	QHash<QString, QList<const BrickLink::Color *> > m_colorcats;
 };
 
+#endif
 
 class ColorDelegate : public QItemDelegate {
 public:
@@ -137,7 +169,7 @@ CSelectColor::CSelectColor ( QWidget *parent, Qt::WindowFlags f )
 	: QWidget ( parent, f )
 {
 	w_colors = new QTableView ( this );
-	w_colors-> setModel ( new ColorModel ( ));
+	w_colors-> setModel ( BrickLink::inst()->colorModel());
 	w_colors-> setItemDelegate ( new ColorDelegate ( ));
 	w_colors-> horizontalHeader ( )-> setResizeMode ( QHeaderView::Fixed );
 	w_colors-> horizontalHeader ( )-> setStretchLastSection ( true );
@@ -152,53 +184,58 @@ CSelectColor::CSelectColor ( QWidget *parent, Qt::WindowFlags f )
 
 	setFocusProxy ( w_colors );
 
-	connect ( w_colors-> selectionModel ( ), SIGNAL( selectionChanged ( const QItemSelection &, const QItemSelection & )), this, SLOT( colorChanged ( )));
-	connect ( w_colors, SIGNAL( activated ( const QModelIndex & )), this, SLOT( colorConfirmed ( )));
+	connect ( w_colors->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(colorChanged()));
+	connect ( w_colors, SIGNAL(activated(const QModelIndex &)), this, SLOT(colorConfirmed()));
 
 	QBoxLayout *lay = new QVBoxLayout ( this );
 	lay-> setMargin ( 0 );
 	lay-> addWidget ( w_colors );
 }
 
-const BrickLink::Color *CSelectColor::color ( ) const
-{
-	ColorModel *model = static_cast<ColorModel *>( w_colors-> model ( ));
 
-	if ( !w_colors-> selectionModel ( )-> selectedIndexes ( ). isEmpty ( ))
-		return model-> color ( w_colors-> selectionModel ( )-> selectedIndexes ( ). front ( ));
+const BrickLink::Color *CSelectColor::currentColor ( ) const
+{
+	BrickLink::ColorModel *model = qobject_cast<BrickLink::ColorModel *>(w_colors->model());
+
+	if (model && w_colors->selectionModel()->hasSelection()) {
+		QModelIndex idx = w_colors->selectionModel()->selectedIndexes().front();
+		return model->color(idx);
+	}
 	else
 		return 0;
 }
 
-void CSelectColor::enabledChange ( bool old )
+void CSelectColor::changeEvent(QEvent *e)
 {
-	if ( !isEnabled ( ))
-		setColor ( BrickLink::inst ( )-> color ( 0 ));
-
-	QWidget::enabledChange ( old );
+	if (e->type() == QEvent::EnabledChange) {
+		if (!isEnabled())
+			setCurrentColor(BrickLink::inst()->color(0));
+	}
+	QWidget::changeEvent(e);
 }
 
-void CSelectColor::setColor ( const BrickLink::Color *color )
+void CSelectColor::setCurrentColor(const BrickLink::Color *color)
 {
-	ColorModel *model = static_cast<ColorModel *>( w_colors-> model ( ));
+	BrickLink::ColorModel *model = qobject_cast<BrickLink::ColorModel *>(w_colors->model());
 
-	w_colors-> selectionModel ( )-> select ( model-> index ( color ), QItemSelectionModel::SelectCurrent );
+	if (model)
+		w_colors->selectionModel()->select(model->index(color), QItemSelectionModel::SelectCurrent);
 }
 
 void CSelectColor::colorChanged ( )
 {
-	emit colorSelected ( color ( ), false );
+	emit colorSelected(currentColor(), false);
 }
 
 void CSelectColor::colorConfirmed ( )
 {
-	emit colorSelected ( color ( ), true );
+	emit colorSelected(currentColor(), true);
 }
 
-void CSelectColor::showEvent ( QShowEvent * )
+void CSelectColor::showEvent(QShowEvent *)
 {
-	if ( !w_colors-> selectionModel ( )-> selectedIndexes ( ). isEmpty ( ))
-		w_colors-> scrollTo ( w_colors-> selectionModel ( )-> selectedIndexes ( ). front ( ), QAbstractItemView::PositionAtCenter );
+	if (w_colors->selectionModel()->hasSelection())
+		w_colors->scrollTo(w_colors->selectionModel()->selectedIndexes().front(), QAbstractItemView::PositionAtCenter);
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -246,12 +283,12 @@ DSelectColor::DSelectColor ( QWidget *parent, Qt::WindowFlags f )
 
 void DSelectColor::setColor ( const BrickLink::Color *col )
 {
-	w_sc-> setColor ( col );
+	w_sc->setCurrentColor(col);
 }
 
 const BrickLink::Color *DSelectColor::color ( ) const
 {
-	return w_sc-> color ( );
+	return w_sc->currentColor();
 }
 
 void DSelectColor::checkColor ( const BrickLink::Color *col, bool ok )

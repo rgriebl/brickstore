@@ -40,7 +40,7 @@
 #include "cmoney.h"
 #include "cmultiprogressbar.h"
 //#include "ciconfactory.h"
-#include "cutility.h"
+//#include "cutility.h"
 #include "cspinner.h"
 //#include "cundo.h"
 #include "cworkspace.h"
@@ -49,6 +49,7 @@
 #include "cprogressdialog.h"
 #include "cupdatedatabase.h"
 #include "csplash.h"
+#include "clocalemeasurement.h"
 
 #include "dadditem.h"
 //#include "dlgsettingsimpl.h"
@@ -117,7 +118,8 @@ CFrameWork::CFrameWork ( QWidget *parent, Qt::WindowFlags f )
 	setCentralWidget ( m_mdi );
 
 	m_taskpanes = new CTaskPaneManager ( this );
-	m_taskpanes-> setMode ( CConfig::inst ( )-> value ( "/MainWindow/Infobar/Mode", CTaskPaneManager::Modern ). toInt ( ) != CTaskPaneManager::Classic ? CTaskPaneManager::Modern : CTaskPaneManager::Classic );
+//	m_taskpanes-> setMode ( CConfig::inst ( )-> value ( "/MainWindow/Infobar/Mode", CTaskPaneManager::Modern ). toInt ( ) != CTaskPaneManager::Classic ? CTaskPaneManager::Modern : CTaskPaneManager::Classic );
+	m_taskpanes-> setMode ( CTaskPaneManager::Classic );
 
 	m_task_info = new CTaskInfoWidget ( 0 );
 	m_taskpanes-> addItem ( m_task_info, QIcon( ":/sidebar/info" ));
@@ -286,7 +288,8 @@ CFrameWork::CFrameWork ( QWidget *parent, Qt::WindowFlags f )
 		   << "-"             // << "edit_bl_info_group" << "-"
 		   << "extras_net";   // << "-" << "help_whatsthis";
 
-	m_toolbar = createToolBar ( "toolbar", sl );
+    m_toolbar = createToolBar ( "toolbar", sl );
+	addToolBar(m_toolbar);
 	connect ( m_toolbar, SIGNAL( visibilityChanged ( bool )), findAction ( "view_toolbar" ), SLOT( setChecked ( bool )));
 
 	createStatusBar ( );
@@ -310,13 +313,13 @@ CFrameWork::CFrameWork ( QWidget *parent, Qt::WindowFlags f )
 	if ( ba. isEmpty ( ) || !restoreState ( ba ))
 		findAction ( "view_toolbar" )-> setChecked ( true );
 
-	switch ( CConfig::inst ( )-> value ( "/MainWindow/Layout/WindowMode", 1 ). toInt ( )) {
+/*	switch ( CConfig::inst ( )-> value ( "/MainWindow/Layout/WindowMode", 1 ). toInt ( )) {
 		default: 
 		case  1: findAction ( "window_mode_tab_above" )-> setChecked ( true ); break;
 		case  2: findAction ( "window_mode_tab_below" )-> setChecked ( true ); break;
 	}
-
-	BrickLink *bl = BrickLink::inst ( );
+*/
+	BrickLink::Core *bl = BrickLink::inst ( );
 
 	connect ( CConfig::inst ( ), SIGNAL( onlineStatusChanged ( bool )), bl, SLOT( setOnlineStatus ( bool )));
 	connect ( CConfig::inst ( ), SIGNAL( blUpdateIntervalsChanged ( int, int )), bl, SLOT( setUpdateIntervals ( int, int )));
@@ -343,7 +346,7 @@ CFrameWork::CFrameWork ( QWidget *parent, Qt::WindowFlags f )
 	connect ( bl, SIGNAL( priceGuideProgress ( int, int )), this, SLOT( gotPriceGuideProgress ( int, int )));
 	connect ( bl, SIGNAL( pictureProgress ( int, int )),    this, SLOT( gotPictureProgress ( int, int )));
 
-	connect ( m_progress, SIGNAL( statusChange ( bool )), m_spinner, SLOT( setActive ( bool )));
+//	connect ( m_progress, SIGNAL( statusChange ( bool )), m_spinner, SLOT( setActive ( bool )));
 	connect ( m_undogroup, SIGNAL( cleanChanged ( bool )), this, SLOT( modificationUpdate ( )));
 
 	CSplash::inst ( )-> message ( qApp-> translate ( "CSplash", "Loading Database..." ));
@@ -372,8 +375,8 @@ CFrameWork::CFrameWork ( QWidget *parent, Qt::WindowFlags f )
 void CFrameWork::languageChange ( )
 {
 	m_toolbar-> setWindowTitle( tr( "Toolbar" ));
-	m_progress-> setItemLabel ( PGI_PriceGuide, tr( "Price Guide updates" ));
-	m_progress-> setItemLabel ( PGI_Picture,    tr( "Image updates" ));
+//	m_progress-> setItemLabel ( PGI_PriceGuide, tr( "Price Guide updates" ));
+//	m_progress-> setItemLabel ( PGI_Picture,    tr( "Image updates" ));
 
 	m_taskpanes-> setItemText ( m_task_info,       tr( "Info" ));
 	m_taskpanes-> setItemText ( m_task_priceguide, tr( "Price Guide" ));
@@ -576,22 +579,22 @@ void CFrameWork::createStatusBar ( )
 	m_modified = new QLabel ( statusBar ( ));
 	statusBar ( )-> addPermanentWidget ( m_modified, 0 );
 
-	m_progress = new CMultiProgressBar ( statusBar ( ));
-	m_progress-> setFixedWidth ( fontMetrics ( ). height ( ) * 10 );
-	m_progress-> setFixedHeight ( fontMetrics ( ). height ( ));
+//	m_progress = new CMultiProgressBar ( statusBar ( ));
+//	m_progress-> setFixedWidth ( fontMetrics ( ). height ( ) * 10 );
+//	m_progress-> setFixedHeight ( fontMetrics ( ). height ( ));
 
-	QPixmap p ( ":/status/stop" );
-	if ( !p. isNull ( ))
-		m_progress-> setStopPixmap ( p );
+//	QPixmap p ( ":/status/stop" );
+//	if ( !p. isNull ( ))
+//		m_progress-> setStopPixmap ( p );
 
-	m_progress-> addItem ( QString ( ), PGI_PriceGuide );
-	m_progress-> addItem ( QString ( ), PGI_Picture    );
+//	m_progress-> addItem ( QString ( ), PGI_PriceGuide );
+//	m_progress-> addItem ( QString ( ), PGI_Picture    );
 
 	//m_progress-> setProgress ( -1, 100 );
 
-	statusBar ( )-> addPermanentWidget ( m_progress, 0 );
+//	statusBar ( )-> addPermanentWidget ( m_progress, 0 );
 
-	connect ( m_progress, SIGNAL( stop ( )), this, SLOT( cancelAllTransfers ( )));
+//	connect ( m_progress, SIGNAL( stop ( )), this, SLOT( cancelAllTransfers ( )));
 
 	statusBar ( )-> hide ( );
 }
@@ -643,20 +646,19 @@ QToolBar *CFrameWork::createToolBar ( const QString &name, const QStringList &a_
 		}
 	}
 
-	t-> addWidget ( new QWidget ( ));
+	QWidget *spacer = new QWidget();
+	spacer->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+	spacer->setMinimumSize(4, 4);
+	t->addWidget(spacer);
 
-	QWidget *sw1 = new QWidget ( );
-	sw1-> setFixedSize ( 4, 4 );
-	t-> addWidget ( sw1 );
+	m_spinner = new CSpinner();
+	m_spinner->setToolTip(tr( "Download activity indicator"));
+	m_spinner->setPixmap(QPixmap ( ":/images/spinner"));
+	t->addWidget(m_spinner);
 
-	m_spinner = new CSpinner ( 0 );
-	m_spinner-> setToolTip ( tr( "Download activity indicator" ));
-	m_spinner-> setPixmap ( QPixmap ( ":/spinner" ));
-	t-> addWidget ( m_spinner );
-
-	QWidget *sw2 = new QWidget ( );
-	sw2-> setFixedSize ( 4, 4 );
-	t-> addWidget ( sw2 );
+	spacer = new QWidget();
+	spacer->setFixedSize(4, 4);
+	t->addWidget(spacer);
 
 	t-> hide ( );
 	return t;
@@ -863,10 +865,11 @@ void CFrameWork::createActions ( )
 	QList<QAction *> alist = findChildren<QAction *> ();
 	foreach ( QAction *a, alist ) {
 		if ( !a-> objectName ( ). isEmpty ( )) {
-			QIcon ico ( QLatin1String ( ":/images/" ) + a-> objectName ( ));
+			QString path = QLatin1String ( ":/images/22x22/" ) + a-> objectName ( );
 
-			if ( !ico. isNull ( ))
-				a-> setIcon ( ico );
+			// QIcon::isNull is useless in Qt4
+			if (QFile::exists(path + ".png") || QFile::exists(path + ".svg"))
+				a-> setIcon ( QIcon(path) );
 		}
 	}
 }
@@ -1026,12 +1029,9 @@ void CFrameWork::connectAction ( bool do_connect, const char *name, CWindow *win
 	QAction *a = findAction ( name );
 
 	if ( a ) {
-		QAction *a2 = a;
-
-		while ( a2 && qobject_cast<QActionGroup *> ( a2-> parent ( )))
-			a2 = static_cast<QAction *> ( a2-> parent ( ));
-
-		a2-> setEnabled ( do_connect );
+		a-> setEnabled ( do_connect );
+		if (a->actionGroup())
+			a->actionGroup()->setEnabled(do_connect);
 	}
 
 	if ( a && window ) {
@@ -1253,9 +1253,9 @@ void CFrameWork::selectionUpdate ( const CDocument::ItemList &selection )
 				stockroom = -1;
 		}
 	}
-	findAction ( "edit_status_include" )-> setChecked ( status == BrickLink::InvItem::Include );
-	findAction ( "edit_status_exclude" )-> setChecked ( status == BrickLink::InvItem::Exclude );
-	findAction ( "edit_status_extra" )-> setChecked ( status == BrickLink::InvItem::Extra );
+	findAction ( "edit_status_include" )-> setChecked ( status == BrickLink::Include );
+	findAction ( "edit_status_exclude" )-> setChecked ( status == BrickLink::Exclude );
+	findAction ( "edit_status_extra" )-> setChecked ( status == BrickLink::Extra );
 
 	findAction ( "edit_cond_new" )-> setChecked ( condition == BrickLink::New );
 	findAction ( "edit_cond_used" )-> setChecked ( condition == BrickLink::Used );
@@ -1276,7 +1276,7 @@ void CFrameWork::statisticsUpdate ( )
 		CDocument::ItemList not_exclude;
 
 		foreach ( CDocument::Item *item, m_current_window-> document ( )-> items ( )) {
-			if ( item-> status ( ) != BrickLink::InvItem::Exclude )
+			if ( item-> status ( ) != BrickLink::Exclude )
 				not_exclude. append ( item );
 		}
 
@@ -1303,7 +1303,7 @@ void CFrameWork::statisticsUpdate ( )
 				wgtstr = tr( "min." ) + " ";
 			}
 
-			wgtstr += CUtility::weightToString ( weight, ( CConfig::inst ( )-> weightSystem ( ) == CConfig::WeightImperial ), true, true );
+			wgtstr += CLocaleMeasurement::weightToString ( weight, true, true );
 		}
 
 		ss = QString( "  %1: %2   %3: %4   %5: %6   %7: %8  " ).
@@ -1355,12 +1355,12 @@ void CFrameWork::modificationUpdate ( )
 
 void CFrameWork::gotPictureProgress ( int p, int t )
 {
-	m_progress-> setItemProgress ( PGI_Picture, p, t );
+//	m_progress-> setItemProgress ( PGI_Picture, p, t );
 }
 
 void CFrameWork::gotPriceGuideProgress ( int p, int t )
 {
-	m_progress-> setItemProgress ( PGI_PriceGuide, p, t );
+//	m_progress-> setItemProgress ( PGI_PriceGuide, p, t );
 }
 
 void CFrameWork::configure ( )

@@ -40,8 +40,12 @@ const QPixmap BrickLink::Picture::pixmap ( ) const
 	return p;
 }
         
+QSize BrickLink::Core::pictureSize(const ItemType *itt) const
+{
+	return itt ? itt->pictureSize() : QSize();
+}
 
-BrickLink::Picture *BrickLink::picture ( const Item *item, const BrickLink::Color *color, bool high_priority )
+BrickLink::Picture *BrickLink::Core::picture ( const Item *item, const BrickLink::Color *color, bool high_priority )
 {
 	if ( !item )
 		return 0;
@@ -80,7 +84,7 @@ BrickLink::Picture *BrickLink::picture ( const Item *item, const BrickLink::Colo
 	return pic;
 }
 
-BrickLink::Picture *BrickLink::largePicture ( const Item *item, bool high_priority )
+BrickLink::Picture *BrickLink::Core::largePicture ( const Item *item, bool high_priority )
 {
 	if ( !item )
 		return 0;
@@ -92,7 +96,7 @@ BrickLink::Picture *BrickLink::largePicture ( const Item *item, bool high_priori
 // NO cpu usage, but it is very slow.
 // Loading 3 pictures per idle loop is a good compromise.
 
-void BrickLink::pictureIdleLoader ( )
+void BrickLink::Core::pictureIdleLoader ( )
 {
 	for ( int i = 0; i < 3; i++ )
 		pictureIdleLoader2 ( );
@@ -101,7 +105,7 @@ void BrickLink::pictureIdleLoader ( )
 		QTimer::singleShot ( 0, this, SLOT( pictureIdleLoader ( )));
 }
 
-void BrickLink::pictureIdleLoader2 ( )
+void BrickLink::Core::pictureIdleLoader2 ( )
 {
 	Picture *pic = 0;
 
@@ -176,7 +180,7 @@ void BrickLink::Picture::load_from_disk ( )
 		}
 		else {
 			if ( !large && m_item && m_item-> itemType ( ))
-				m_image = BrickLink::inst ( )-> noImage ( m_item-> itemType ( )-> imageSize ( ))-> toImage ( );
+				m_image = BrickLink::inst ( )-> noImage ( m_item-> itemType ( )-> pictureSize ( ))-> toImage ( );
 			else
 				m_image = QImage ( );
 
@@ -201,7 +205,7 @@ void BrickLink::Picture::update ( bool high_priority )
 	BrickLink::inst ( )-> updatePicture ( this, high_priority );
 }
 
-void BrickLink::updatePicture ( BrickLink::Picture *pic, bool high_priority )
+void BrickLink::Core::updatePicture ( BrickLink::Picture *pic, bool high_priority )
 {
 	if ( !pic || ( pic-> m_update_status == Updating ))
 		return;
@@ -237,7 +241,7 @@ void BrickLink::updatePicture ( BrickLink::Picture *pic, bool high_priority )
 }
 
 
-void BrickLink::pictureJobFinished ( CTransfer::Job *j )
+void BrickLink::Core::pictureJobFinished ( CTransfer::Job *j )
 {
 	if ( !j || !j-> data ( ) || !j-> userObject ( ))
 		return;

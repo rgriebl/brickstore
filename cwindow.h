@@ -27,9 +27,9 @@
 
 class QToolButton;
 class QComboBox;
-class QListViewItem;
-class CItemView;
-class CItemViewItem;
+//class QListViewItem;
+//class CItemView;
+class QTableView;
 class CFrameWork;
 class CUndoStack;
 class QLabel;
@@ -43,6 +43,16 @@ public:
 	~CWindow ( );
 
 	CDocument *document ( ) { return m_doc; }
+
+	enum Filter {
+		All        = -1,
+
+		Prices     = -2,
+		Texts      = -3,
+		Quantities = -4,
+
+		FilterCountSpecial = 4
+	};
 
 	enum MergeFlags {
 		MergeAction_None         = 0x00000000,
@@ -163,13 +173,10 @@ protected slots:
 
 private slots:
 	void applyFilter ( );
-	void updateSelectionFromView ( );
-	void updateSelectionFromDoc ( const CDocument::ItemList &itlist );
 	void updateCaption ( );
 
-	void contextMenu ( QListViewItem *, const QPoint & );
+	void contextMenu ( const QPoint & );
 	void priceGuideUpdated ( BrickLink::PriceGuide * );
-	void pictureUpdated ( BrickLink::Picture * );
 	void updateErrorMask ( );
 
 	void itemsAddedToDocument ( const CDocument::ItemList & );
@@ -184,21 +191,21 @@ private:
 	QRegExp        m_filter_expression;
 	int            m_filter_field;
 
-	bool m_ignore_selection_update;
+//	bool m_ignore_selection_update;
 
-	QHash<int, CItemViewItem *>  m_lvitems;
+//	QHash<int, CItemViewItem *>  m_lvitems;
 
 	QToolButton *  w_filter_clear;
 	QComboBox *    w_filter_expression;
 	QComboBox *    w_filter_field;
-	CItemView *	   w_list;
+	QTableView *   w_list;
 	QLabel *       w_filter_label;
 	QLabel *       w_filter_field_label;
 
 	uint                           m_settopg_failcnt;
-	QHash<int, CDocument::Item *> *    m_settopg_list;
-	BrickLink::PriceGuide::Time    m_settopg_time;
-	BrickLink::PriceGuide::Price   m_settopg_price;
+	QMultiHash<BrickLink::PriceGuide *, CDocument::Item *> *m_settopg_list;
+	BrickLink::Time    m_settopg_time;
+	BrickLink::Price   m_settopg_price;
 };
 
 #endif

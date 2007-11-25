@@ -18,7 +18,7 @@ isEmpty( RELEASE ) {
 
 TEMPLATE     = app
 CONFIG      *= warn_on thread qt 
-QT           = core gui xml
+QT          *= core gui xml network
 
 TARGET       = brickstore
 
@@ -63,13 +63,13 @@ win32 {
   
   CURLDIR=$$(CURLDIR)
 
-  isEmpty( $CURLDIR ):CURLDIR="C:/Projekte/Curl/Curl-7.15.3"
+  isEmpty( $CURLDIR ):CURLDIR="C:/Projekte/Curl/Curl-7.17.1"
   CONFIG += windows
-  CONFIG -= shared
+  #CONFIG -= shared
 
   INCLUDEPATH += $$CURLDIR\include
-  LIBS += $$CURLDIR\lib\libcurl.lib
-  DEFINES += CURL_STATICLIB
+  LIBS += $$CURLDIR\lib\libcurl.lib ws2_32.lib winmm.lib
+#  DEFINES += CURL_STATICLIB
   RC_FILE = brickstore.rc
 
   DEFINES += __USER__=\"$$(USERNAME)\" __HOST__=\"$$(COMPUTERNAME)\"
@@ -166,6 +166,7 @@ HEADERS += bricklink.h \
            cimport.h \
            cupdatedatabase.h \
            ctooltiphelper.h \
+           cdisableupdates.h \
 	   
 
 HEADERS += capplication.h \
@@ -191,6 +192,9 @@ HEADERS += capplication.h \
            cselectitem.h \
            cspinner.h \
            cutility.h \
+           clocalemeasurement.h \
+           cwindow.h \
+
 
 SOURCES += capplication.cpp \
            cmessagebox.cpp \
@@ -213,8 +217,10 @@ SOURCES += capplication.cpp \
            ctaskpanemanager.cpp \
            cspinner.cpp \
            cutility.cpp \
+           cselectitem.cpp \
+           clocalemeasurement.cpp \
+           cwindow.cpp \
 
-#           cselectitem.cpp \
 
 for( form, XFORMS ) {
   FORMS += dialogs/$${form}.ui
