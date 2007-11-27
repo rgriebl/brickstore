@@ -131,7 +131,7 @@ unix:!macx {
 }
 
 macx {
-  CONFIG += ppc x86
+  CONFIG += x86
 
   osx_minor = $$system( sw_vers -productVersion | awk -F. \'{ print $2; }\' )
 

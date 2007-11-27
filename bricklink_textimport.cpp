@@ -22,8 +22,6 @@
 #include "bricklink.h"
 
 
-namespace {
-
 static char *my_strdup ( const char *str )
 {
 	return str ? strcpy ( new char [strlen ( str ) + 1], str ) : 0;
@@ -55,7 +53,6 @@ private:
 	clock_t m_start;
 };
 
-} // namespace
 
 
 
@@ -113,7 +110,12 @@ void BrickLink::TextImport::appendCategoryToItemType ( const Category *cat, Item
     itt-> m_categories = catarr;
 }
 
-template <> BrickLink::Category *BrickLink::TextImport::parse<BrickLink::Category> ( uint count, const char **strs )
+namespace BrickLink {
+// explicitly namespaced, since gcc seems to have problems with specializations
+// within namespaces:
+// template <> BrickLink::Category *BrickLink::TextImport::parse<BrickLink::Category> ( uint count, const char **strs )
+
+template <> Category *TextImport::parse<Category> ( uint count, const char **strs )
 {
 	if ( count < 2 )
 		return 0;
@@ -124,7 +126,7 @@ template <> BrickLink::Category *BrickLink::TextImport::parse<BrickLink::Categor
 	return cat;
 }
 
-template <> BrickLink::Color *BrickLink::TextImport::parse<BrickLink::Color> ( uint count, const char **strs )
+template <> Color *TextImport::parse<Color> ( uint count, const char **strs )
 {
 	if ( count < 2 )
 		return 0;
@@ -141,7 +143,7 @@ template <> BrickLink::Color *BrickLink::TextImport::parse<BrickLink::Color> ( u
 	return col;
 }
 
-template <> BrickLink::ItemType *BrickLink::TextImport::parse<BrickLink::ItemType> ( uint count, const char **strs )
+template <> ItemType *TextImport::parse<ItemType> ( uint count, const char **strs )
 {
 	if ( count < 2 )
 		return 0;
@@ -159,7 +161,7 @@ template <> BrickLink::ItemType *BrickLink::TextImport::parse<BrickLink::ItemTyp
 	return itt;
 }
 
-template <> BrickLink::Item *BrickLink::TextImport::parse<BrickLink::Item> ( uint count, const char **strs )
+template <> Item *TextImport::parse<Item> ( uint count, const char **strs )
 {
 	if ( count < 4 )
 		return 0;
@@ -234,6 +236,8 @@ template <> BrickLink::Item *BrickLink::TextImport::parse<BrickLink::Item> ( uin
 		item-> m_color = 0;
 
 	return item;
+}
+
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

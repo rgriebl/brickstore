@@ -26,8 +26,13 @@
 
 #include <CoreFoundation/CFLocale.h>
 
-extern QString cfstring2qstring ( CFStringRef str ); // defined in qglobal.cpp
-
+// copied and simplified to static functions from private/qcore_mac_p.h
+class QCFString {
+public:
+	static QString toQString(CFStringRef cfstr);
+	static CFStringRef toCFStringRef(const QString &str);
+};
+                                
 #endif
 
 
@@ -140,9 +145,9 @@ CMoney::CMoney ( )
 		CFStringRef cs = (CFStringRef) CFLocaleGetValue ( loc, kCFLocaleCurrencySymbol );
 		CFStringRef cc = (CFStringRef) CFLocaleGetValue ( loc, kCFLocaleCurrencyCode );
 
-		decpoint = cfstring2qstring ( ds );
-		csymbol = cfstring2qstring ( cs );
-		csymbolint = cfstring2qstring ( cc );
+		decpoint = QCFString::toQString( ds );
+		csymbol = QCFString::toQString( cs );
+		csymbolint = QCFString::toQString( cc );
 	}
 
 #else
