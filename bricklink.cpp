@@ -342,17 +342,6 @@ BrickLink::Core *BrickLink::Core::create ( const QString &datadir, QString *errs
 			if ( errstring )
 				*errstring = tr( "Data directory \'%1\' is not both read- and writable." ). arg ( datadir );
 		}
-		else {
-			if (!( s_inst-> m_pictures. transfer-> init ( ) &&
-			       s_inst-> m_price_guides. transfer-> init ( ))) {
-				delete s_inst;
-				s_inst = 0;
-
-				if ( errstring )
-					*errstring = tr( "HTTP transfer threads could not be started." );
-			}
-		}
-
 	}
 	return s_inst;
 }
@@ -377,16 +366,16 @@ BrickLink::Core::Core ( const QString &datadir )
 	m_databases. items. setAutoDelete ( true );
 	*/
 
-	m_price_guides. transfer = new CTransfer ( );
-	m_price_guides. update_iv = 0;
+	m_price_guides.transfer = new CTransfer(1);
+	m_price_guides.update_iv = 0;
 
-	m_pictures. transfer = new CTransfer ( );
-	m_pictures. update_iv = 0;
+	m_pictures.transfer = new CTransfer(1);
+	m_pictures.update_iv = 0;
 
 	QPixmapCache::setCacheLimit ( 20 * 1024 );  // 80 x 60 x 32 (w x h x bpp) == 20kB -> room for ~1000 pixmaps
 
-	connect ( m_price_guides. transfer, SIGNAL( finished ( CTransfer::Job * )), this, SLOT( priceGuideJobFinished ( CTransfer::Job * )));
-	connect ( m_pictures.     transfer, SIGNAL( finished ( CTransfer::Job * )), this, SLOT( pictureJobFinished    ( CTransfer::Job * )));
+	connect ( m_price_guides. transfer, SIGNAL( finished ( CTransferJob * )), this, SLOT( priceGuideJobFinished ( CTransferJob * )));
+	connect ( m_pictures.     transfer, SIGNAL( finished ( CTransferJob * )), this, SLOT( pictureJobFinished    ( CTransferJob * )));
 
 	connect ( m_pictures.     transfer, SIGNAL( progress ( int, int )), this, SIGNAL( pictureProgress ( int, int )));
 	connect ( m_price_guides. transfer, SIGNAL( progress ( int, int )), this, SIGNAL( priceGuideProgress ( int, int )));
@@ -405,10 +394,10 @@ BrickLink::Core::~Core ( )
 	s_inst = 0;
 }
 
-void BrickLink::Core::setHttpProxy ( bool enable, const QString &name, int port )
+void BrickLink::Core::setHttpProxy (const QNetworkProxy &proxy)
 {
-	m_pictures.     transfer-> setProxy ( enable, name, port );
-	m_price_guides. transfer-> setProxy ( enable, name, port );
+	m_pictures.transfer->setProxy(proxy);
+	m_price_guides.transfer->setProxy(proxy);
 }
 
 void BrickLink::Core::setUpdateIntervals ( int pic, int pg )
@@ -511,12 +500,12 @@ void BrickLink::Core::cancelPictureTransfers ( )
 {
 	while ( !m_pictures. diskload. isEmpty ( ))
 		m_pictures. diskload. takeFirst ( )-> release ( );
-	m_pictures. transfer-> cancelAllJobs ( );
+	m_pictures.transfer->abortAllJobs ( );
 }
 
 void BrickLink::Core::cancelPriceGuideTransfers ( )
 {
-	m_price_guides. transfer-> cancelAllJobs ( );
+	m_price_guides.transfer->abortAllJobs ( );
 }
 
 QString BrickLink::Core::defaultDatabaseName ( ) const

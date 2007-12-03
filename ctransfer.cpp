@@ -2,8 +2,8 @@
 **
 ** This file is part of BrickStore.
 **
-** This file may be distributed and/or modified under the terms of the GNU 
-** General Public License version 2 as published by the Free Software Foundation 
+** This file may be distributed and/or modified under the terms of the GNU
+** General Public License version 2 as published by the Free Software Foundation
 ** and appearing in the file LICENSE.GPL included in the packaging of this file.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
@@ -11,471 +11,447 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <qfile.h>
+
+#include <QThread>
+#include <QFile>
+#include <QBuffer>
+#include <QLocale>
+#include <QHttp>
+#include <QTimer>
 
 #include "capplication.h"
 #include "ctransfer.h"
 
 
-#ifdef Q_OS_WIN
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#endif
 
-#include <curl/curl.h>
+// copied from Qt4.4 network access
+static QDateTime fromHttpDate(const QByteArray &value)
+{
+    // HTTP dates have three possible formats:
+    //  RFC 1123/822      -   ddd, dd MMM yyyy hh:mm:ss "GMT"
+    //  RFC 850           -   dddd, dd-MMM-yy hh:mm:ss "GMT"
+    //  ANSI C's asctime  -   ddd MMM d hh:mm:ss yyyy
+    // We only handle them exactly. If they deviate, we bail out.
 
-bool CTransfer::s_global_init = false;
-QMutex CTransfer::s_share_lock;
-CURLSH *CTransfer::s_curl_share = 0;
-uint CTransfer::s_instance_counter = 0;
+    int pos = value.indexOf(',');
+    QDateTime dt;
+    if (pos == -1) {
+        // no comma -> asctime(3) format
+        dt = QDateTime::fromString(QString::fromLatin1(value), Qt::TextDate);
+    } else {
+        // eat the weekday, the comma and the space following it
+        QString sansWeekday = QString::fromLatin1(value.constData() + pos + 2);
+
+        QLocale c = QLocale::c();
+        if (pos == 3)
+            // must be RFC 1123 date
+            dt = c.toDateTime(sansWeekday, QLatin1String("dd MMM yyyy hh:mm:ss 'GMT"));
+        else
+            // must be RFC 850 date
+            dt = c.toDateTime(sansWeekday, QLatin1String("dd-MMM-yy hh:mm:ss 'GMT'"));
+    }
+
+    if (dt.isValid())
+        dt.setTimeSpec(Qt::UTC);
+    return dt;
+}
+
+static QByteArray toHttpDate(const QDateTime &dt)
+{
+    return QLocale::c().toString(dt, QLatin1String("ddd, dd MMM yyyy hh:mm:ss 'GMT'")).toLatin1();
+}
 
 
-class CTransferEvent : public QEvent {
+// ===========================================================================
+// ===========================================================================
+// ===========================================================================
+
+
+class CTransferEngine : public QObject {
+    Q_OBJECT
+
 public:
-	enum Type {
-		Started  = QEvent::User + 0x42,
-		Finished = QEvent::User + 0x43,
-		Progress = QEvent::User + 0x44
-	};
+    CTransferEngine(CTransfer *trans)
+        : QObject(), m_transfer(trans)
+    {
+        setObjectName("Engine");
 
-	CTransferEvent ( Type t, CTransfer::Job *job )
-		: QEvent ( static_cast<QEvent::Type> ( t )), m_job ( job )
-	{ }
+        m_user_agent = cApp->appName() + "/" +
+                       cApp->appVersion() + " (" +
+                       cApp->sysName() + " " +
+                       cApp->sysVersion() + "; http://" +
+                       cApp->appURL() + ")";
 
-	CTransfer::Job *job ( ) const
-	{ return m_job; }
+        m_http = new QHttp(this);
+        connect(m_http, SIGNAL(requestFinished(int, bool)), this, SLOT(finished(int, bool)));
+        connect(m_http, SIGNAL(dataReadProgress(int, int)), this, SLOT(relayDataReadProgress(int, int)));
+        connect(m_http, SIGNAL(dataSendProgress(int, int)), this, SLOT(relayDataSendProgress(int, int)));
+        connect(this, SIGNAL(dataReadProgress(CTransferJob *, int, int)), m_transfer, SIGNAL(dataReadProgress(CTransferJob *, int, int)), Qt::QueuedConnection);
+        connect(this, SIGNAL(dataSendProgress(CTransferJob *, int, int)), m_transfer, SIGNAL(dataSendProgress(CTransferJob *, int, int)), Qt::QueuedConnection);
+        connect(this, SIGNAL(jobFinished(QThread *, CTransferJob *)), m_transfer, SLOT(internalJobFinished(QThread *, CTransferJob *)), Qt::QueuedConnection);
+        QTimer::singleShot(0, this, SLOT(ready()));
+    }
 
-private:
-	CTransfer::Job *m_job;
+protected slots:
+    void ready()
+    {
+        // we are ready to accept jobs now
+        m_transfer->threadIsIdleNow(thread());
+    }
+
+    void relayDataReadProgress(int done, int total)
+    {
+        emit dataReadProgress(m_job, done, total);
+    }
+
+    void relayDataSendProgress(int done, int total)
+    {
+        emit dataSendProgress(m_job, done, total);
+    }
+
+public slots:
+    void execute(CTransferJob *job)
+    {
+        m_job = job;
+        m_job->m_effective_url = m_job->m_url;
+        m_job->m_status = CTransferJob::Active;
+
+        download();
+    }
+
+signals:
+    void jobFinished(QThread *thread, CTransferJob *job);
+    void dataReadProgress(CTransferJob *, int, int);
+    void dataSendProgress(CTransferJob *, int, int);
+
+protected slots:
+    void finished(int id, bool error)
+    {
+        if (m_job && id == m_job_http_id) {
+            if (error) {
+                m_job->m_error_string = m_http->errorString();
+
+                if (m_job->m_error_string.isEmpty())
+                    m_job->m_error_string = QLatin1String("Internal Error");
+                m_job->m_status = CTransferJob::Failed;
+            }
+            else {
+
+                QHttpResponseHeader resp = m_http->lastResponse();
+                m_job->m_respcode = resp.statusCode();
+                m_job->m_error_string = resp.reasonPhrase();
+
+                switch (m_job->m_respcode) {
+                case 301:
+                case 302:
+                case 303:
+                case 307: {
+                    QUrl redirect = resp.value("Location");
+                    if (redirect.isEmpty()) {
+                      m_job->m_effective_url = redirect;
+                      download();
+                      //not finished yet!
+                    }
+                    break;
+                }
+                case 304: if (m_job->m_only_if_newer.isValid()) {
+                              m_job->m_was_not_modified = true;
+                              m_job->m_status = CTransferJob::Completed;
+                          }
+                          else
+                              m_job->m_status = CTransferJob::Failed;
+                          break;
+
+                case 200: m_job->m_last_modified = fromHttpDate(resp.value("Last-Modified").toLatin1());
+                          m_job->m_status = CTransferJob::Completed;
+                          break;
+
+                default : m_job->m_status = CTransferJob::Failed;
+                          break;
+                }
+            }
+
+            if (!m_job->isActive()) {
+                emit jobFinished(thread(), m_job);
+                m_job = 0;
+            }
+        }
+    }
+
+protected:
+    void download()
+    {
+        bool isget = (m_job->m_http_method == CTransferJob::HttpGet);
+        QUrl url = m_job->url();
+
+        m_http->setHost(url.host(),url.port(80));
+
+        QHttpRequestHeader req;
+        QByteArray postdata;
+
+        if (isget) {
+            QString path = url.path();
+            if (url.hasQuery())
+                path = path + "?" + url.encodedQuery();
+
+            req.setRequest("GET", path);
+
+            if (m_job->m_only_if_newer.isValid())
+                req.setValue("If-Modified-Since", toHttpDate(m_job->m_only_if_newer));
+        }
+        else {
+            req.setRequest("POST", url.path());
+            QByteArray postdata = url.encodedQuery();
+        }
+        req.setValue("Host", url.host());
+        req.setValue("User-Agent", m_user_agent);
+
+        qDebug() << req.toString();
+
+        m_job_http_id = m_http->request(req, postdata, m_job->m_file);
+    }
+
+protected:
+    QHttp *m_http;
+    CTransfer *m_transfer;
+    CTransferJob *m_job;
+    int m_job_http_id;
+    QString m_user_agent;
 };
 
-CTransfer::CTransfer ( )
+// ===========================================================================
+// ===========================================================================
+// ===========================================================================
+
+
+class CTransferThread : public QThread {
+    Q_OBJECT
+
+public:
+    CTransferThread(CTransfer *trans)
+        : QThread(trans)
+    { }
+
+    void execute(CTransferJob *job)
+    {
+        emit engineExecute(job);
+    }
+
+signals:
+    void engineExecute(CTransferJob *);
+
+protected:
+    virtual void run()
+    {
+        CTransferEngine *engine = new CTransferEngine(qobject_cast<CTransfer *>(parent()));
+        connect(this, SIGNAL(engineExecute(CTransferJob *)), engine, SLOT(execute(CTransferJob *)), Qt::QueuedConnection);
+        exec();
+    }
+};
+
+// ===========================================================================
+// ===========================================================================
+// ===========================================================================
+
+CTransferJob::CTransferJob()
 {
-	m_curl = 0;
-	m_total = m_progress = 0;
-	m_file_total = m_file_progress = 0;
-	m_stop = false;
+}
 
-	m_use_proxy = false;
-	m_proxy_port = 0;
+CTransferJob::~CTransferJob()
+{
+    delete m_file;
+    delete m_data;
+}
 
-	m_active_job = 0;
+CTransferJob *CTransferJob::get(const QUrl &url, QIODevice *file)
+{
+    return create(HttpGet, url, QDateTime(), file);
+}
 
-	s_instance_counter++;
+CTransferJob *CTransferJob::getIfNewer(const QUrl &url, const QDateTime &ifnewer, QIODevice *file)
+{
+    return create(HttpGet, url, ifnewer, file);
+}
+
+CTransferJob *CTransferJob::post(const QUrl &url, QIODevice *file)
+{
+    return create(HttpPost, url, QDateTime(), file);
+}
+
+CTransferJob *CTransferJob::create(HttpMethod method, const QUrl &url, const QDateTime &ifnewer, QIODevice *file)
+{
+   if (url.isEmpty())
+        return 0;
+
+    CTransferJob *j = new CTransferJob();
+
+    j->m_url = url;
+    j->m_only_if_newer = ifnewer;
+    j->m_data = file ? 0 : new QByteArray();
+    if (file)
+        j->m_file = file;
+    else
+        j->m_file = new QBuffer(j->m_data);
+    j->m_user_data = 0;
+    j->m_http_method = method;
+    j->m_transfer = 0;
+
+    j->m_respcode = 0;
+    j->m_was_not_modified = false;
+    j->m_status = Inactive;
+
+    return j;
+}
+
+bool CTransferJob::abort()
+{
+    if (!transfer())
+        return false;
+    return transfer()->abortJob(this);
+}
+
+// ===========================================================================
+// ===========================================================================
+// ===========================================================================
+
+
+CTransfer::CTransfer(int threadcount)
+{
+    if (threadcount < 0 || threadcount > 32)
+        threadcount = QThread::idealThreadCount();
+
+    while (threadcount--) {
+        QThread *thread = new CTransferThread(this);
+        m_threads.append(thread);
+
+        thread->start(QThread::IdlePriority);
+    }
+
+    m_jobs_total = m_jobs_progress = 0;
 }
 
 CTransfer::~CTransfer ( )
 {
-	//qDebug ( "stopping CTransfer thread" );
+    //qDebug ( "stopping CTransfer thread" );
 
-	cancelAllJobs ( );
+    abortAllJobs();
 
-	m_stop = true;
-	m_queue_cond. wakeOne ( );
-	wait ( );
-
-	if ( m_curl )
-		::curl_easy_cleanup ( m_curl );
-
-	s_instance_counter--;
-
-	if ( s_instance_counter == 0 ) {
-		if ( s_curl_share ) {
-			::curl_share_cleanup ( s_curl_share );
-			s_curl_share = 0;
-		}
-
-		if ( s_global_init ) {
-			::curl_global_cleanup ( );
-			s_global_init = false;
-		}
-	}
-
+    foreach(QThread *thread, m_threads) {
+        thread->quit();
+        thread->wait();
+    }
 }
 
-void CTransfer::setProxy ( bool enable, const QString &name, int port )
+void CTransfer::setProxy(const QNetworkProxy &proxy)
 {
-	m_queue_lock. lock ( );
-
-	m_use_proxy = enable;
-	m_proxy_name = name;
-	m_proxy_port = port;
-
-	m_queue_lock. unlock ( );
+    m_mutex.lock();
+    m_proxy = proxy;
+    m_mutex.unlock();
 }
 
-CTransfer::Job *CTransfer::get ( const QString &url, const CKeyValueList &query, QFile *file, void *userobject, bool high_priority )
+void CTransfer::threadIsIdleNow(QThread *thread)
 {
-	return retrieve ( true, url, query, 0, file, userobject, high_priority );
+    QMutexLocker locker(&m_mutex);
+    m_idle_threads.append(thread);
+
+    scheduler();
 }
 
-CTransfer::Job *CTransfer::getIfNewer ( const QString &url, const CKeyValueList &query, const QDateTime &dt, QFile *file, void *userobject, bool high_priority )
+bool CTransfer::retrieve(CTransferJob *job, bool high_priority)
 {
-	return retrieve ( true, url, query, dt. isValid ( ) ? dt. toTime_t ( ) : 0, file, userobject, high_priority );
+    if (!job || job->transfer())
+        return false;
+
+    job->m_transfer = this;
+
+    QMutexLocker locker(&m_mutex);
+
+    if (high_priority)
+        m_jobs.prepend(job);
+    else
+        m_jobs.append(job);
+
+    scheduler();
+    updateProgress(+1);
+
+    return true;
 }
 
-CTransfer::Job *CTransfer::post ( const QString &url, const CKeyValueList &query, QFile *file, void *userobject, bool high_priority )
+void CTransfer::scheduler()
 {
-	return retrieve ( false, url, query, 0, file, userobject, high_priority );
+    // has to called in the LOCKED state !!!!!!!!!!!!
+
+    if (!m_idle_threads.isEmpty() && !m_jobs.isEmpty()) {
+        QThread *thread = m_idle_threads.takeFirst();
+        CTransferJob *job = m_jobs.takeFirst();
+
+        qobject_cast<CTransferThread *>(thread)->execute(job);
+        emit started(job);
+    }
 }
 
-QByteArray CTransfer::buildQueryString ( const CKeyValueList &kvl )
+void CTransfer::internalJobFinished(QThread *thread, CTransferJob *job)
 {
-	QByteArray query;
+    QMutexLocker locker(&m_mutex);
 
-	for ( CKeyValueList::const_iterator it = kvl. begin ( ); it != kvl. end ( ); ++it ) {
-		QByteArray tmp1 = (*it). first. toLatin1 ( );
-		QByteArray tmp2 = (*it). second. toLatin1 ( );
+    m_idle_threads.append(thread);
 
-		char *etmp1 = curl_escape ( tmp1. data ( ), 0 );
-		char *etmp2 = curl_escape ( tmp2. data ( ), 0 );
+    emit finished(job);
+    delete job;
 
-		if ( etmp1 && *etmp1 ) {
-			if ( !query. isEmpty ( ))
-				query += '&';
-			query += etmp1;
-			query += '=';
-
-			if ( etmp2 && *etmp2 )
-				query += etmp2;
-		}
-		curl_free ( etmp2 );
-		curl_free ( etmp1 );
-	}
-	return query;
+    scheduler();
 }
 
-CTransfer::Job *CTransfer::retrieve ( bool get, const QString &url, const CKeyValueList &query, time_t ifnewer, QFile *file, void *userobject, bool high_priority )
+bool CTransfer::abortJob(CTransferJob *job)
 {
-	if ( url. isEmpty ( )) //  || ( file && ( !file-> isOpen ( ) || !file-> isWritable ( ))))
-		return 0;
+    m_mutex.lock();
 
-	Job *j = new Job ( );
-	j-> m_url = url. toLatin1 ( );
-	j-> m_query = buildQueryString ( query );
-	j-> m_ifnewer = ifnewer;
+    int idx = m_jobs.indexOf(job);
+    if (idx < 0)
+        return false;
+    m_jobs.removeAt(idx);
 
-	j-> m_data = file ? 0 : new QByteArray ( );
-	j-> m_file = file;
-	j-> m_userobject = userobject;
-	j-> m_get_or_post = get;
+    m_mutex.unlock();
 
-	j-> m_trans = this;
-	j-> m_result = CURLE_OK;
-	j-> m_respcode = 0;
-	j-> m_finished = false;
-	j-> m_filetime = 0;
-	j-> m_not_modified = false;
-	j-> m_failed = true;
+    job->m_status = CTransferJob::Aborted;
+    emit finished(job);
+    delete job;
 
-	m_queue_lock. lock ( );
-	if ( high_priority )
-		m_in_queue. prepend ( j );
-	else
-		m_in_queue. append ( j );
-	m_queue_cond. wakeOne ( );
-
-//	qDebug ( "waking up thread... (%d in list)", m_queue. count ( ));
-
-	m_queue_lock. unlock ( );
-
-	updateProgress ( +1 );
-
-	return j;
+    updateProgress(-1);
+    return true;
 }
 
-bool CTransfer::init ( )
+
+void CTransfer::abortAllJobs()
 {
-	if ( !s_global_init ) {
-		if ( ::curl_global_init ( CURL_GLOBAL_WIN32 ) == CURLE_OK ) {
-			s_curl_share = ::curl_share_init ( );
+    // we have to copy the job list to avoid problems with
+    // recursive mutex locking (abort emits signals, which
+    // can lead to slots calling another CTransfer function)
+    m_mutex.lock();
+    QList<CTransferJob *> inactive = m_jobs;
+    m_jobs.clear();
+    m_mutex.unlock();
 
-			if ( s_curl_share ) {
-				::curl_share_setopt ( s_curl_share, CURLSHOPT_LOCKFUNC,   lock_curl );
-				::curl_share_setopt ( s_curl_share, CURLSHOPT_UNLOCKFUNC, unlock_curl );
-				::curl_share_setopt ( s_curl_share, CURLSHOPT_USERDATA,   0 );
-				::curl_share_setopt ( s_curl_share, CURLSHOPT_SHARE,      CURL_LOCK_DATA_DNS );
-
-				s_global_init = true;
-			}
-		}
-	}
-
-	if ( s_global_init )
-		m_curl = ::curl_easy_init ( );
-
-	if ( m_curl ) {
-		::curl_easy_setopt ( m_curl, CURLOPT_SHARE, s_curl_share );
-
-		start ( IdlePriority );
-	}
-
-	return ( m_curl );
+    while (!inactive.isEmpty())
+        inactive.takeFirst()->abort();
 }
 
-void CTransfer::run ( )
+void CTransfer::updateProgress(int delta)
 {
-	QByteArray ua = ( cApp-> appName ( ) + "/" + 
-	                  cApp-> appVersion ( ) + " (" + 
-	                  cApp-> sysName ( ) + " " + 
-	                  cApp-> sysVersion ( ) + "; http://" + 
-	                  cApp-> appURL ( ) + ")" ). toLatin1 ( );
+    if (delta > 0)
+        m_jobs_total += delta;
+    else
+        m_jobs_progress -= delta;
 
-	::curl_easy_setopt ( m_curl, CURLOPT_VERBOSE, 0 );
-	::curl_easy_setopt ( m_curl, CURLOPT_NOPROGRESS, 0 );
-	::curl_easy_setopt ( m_curl, CURLOPT_PROGRESSFUNCTION, progress_curl );
-	::curl_easy_setopt ( m_curl, CURLOPT_PROGRESSDATA, this );
-	::curl_easy_setopt ( m_curl, CURLOPT_NOSIGNAL, 1 );
-	::curl_easy_setopt ( m_curl, CURLOPT_FOLLOWLOCATION, 1);
-//	::curl_easy_setopt ( m_curl, CURLOPT_TIMEOUT, 120 );
-	::curl_easy_setopt ( m_curl, CURLOPT_DNS_CACHE_TIMEOUT, 5*60 );
-	::curl_easy_setopt ( m_curl, CURLOPT_WRITEFUNCTION, write_curl );
-	::curl_easy_setopt ( m_curl, CURLOPT_WRITEDATA, this );
-	::curl_easy_setopt ( m_curl, CURLOPT_USERAGENT, ua. constData ( ));
-	::curl_easy_setopt ( m_curl, CURLOPT_ENCODING, "" );
-	::curl_easy_setopt ( m_curl, CURLOPT_FILETIME, 1 ); 
+    emit progress(m_jobs_progress, m_jobs_total);
 
-	QByteArray url, query;
+    if (m_jobs_total == m_jobs_progress) {
+        m_jobs_total = m_jobs_progress = 0;
 
-	while ( !m_stop ) {
-		Job *j = 0;
-
-		m_queue_lock. lock ( );
-		m_active_job = 0;
-
-		if ( m_in_queue. isEmpty ( ))
-			m_queue_cond. wait ( &m_queue_lock );
-		if ( !m_in_queue. isEmpty ( ))
-			j = m_in_queue. takeFirst ( );
-
-		if ( j ) {
-			m_active_job = j;
-
-			if ( m_use_proxy ) {
-				::curl_easy_setopt ( m_curl, CURLOPT_PROXY, m_proxy_name. toLatin1 ( ). data ( ));
-				::curl_easy_setopt ( m_curl, CURLOPT_PROXYPORT, m_proxy_port );
-			}
-			else
-				::curl_easy_setopt ( m_curl, CURLOPT_PROXY, 0 );
-
-			//qDebug ( "Running job: %p", j-> m_userobject );
-
-			if ( j-> m_get_or_post ) {
-				url = j-> m_url;
-
-				if ( !j-> m_query. isEmpty ( )) {
-					url += '?';
-					url += j-> m_query;
-				}
-				query = "";
-				
-				::curl_easy_setopt ( m_curl, CURLOPT_HTTPGET, 1 );
-				::curl_easy_setopt ( m_curl, CURLOPT_URL, url. constData ( ));
-				::curl_easy_setopt ( m_curl, CURLOPT_TIMEVALUE, j-> m_ifnewer );
-				::curl_easy_setopt ( m_curl, CURLOPT_TIMECONDITION, j-> m_ifnewer ? CURL_TIMECOND_IFMODSINCE : CURL_TIMECOND_NONE );
-				
-				//qDebug ( "CTransfer::get [%s]", url. data ( ));
-			}
-			else {
-				url = j-> m_url;
-				query = j-> m_query;
-				
-				::curl_easy_setopt ( m_curl, CURLOPT_POST, 1 );
-				::curl_easy_setopt ( m_curl, CURLOPT_URL, url. constData ( ));
-				::curl_easy_setopt ( m_curl, CURLOPT_POSTFIELDS, query. constData ( ));
-				
-				//qDebug ( "CTransfer::post [%s] - form-data [%s]", url. data ( ), query. data ( ));
-			}
-		}
-
-		m_queue_lock. unlock ( );
-
-		if ( m_stop )
-			break;
-		if ( !j )
-			continue;
-
-		CURLcode res = ::curl_easy_perform ( m_curl );
-		long respcode = 0;
-		char *effurl = 0;
-		long filetime = -1;
-
-		m_file_total = m_file_progress = -1;
-		QApplication::postEvent ( this, new CTransferEvent ( CTransferEvent::Progress, 0 ));
-
-		if ( res == CURLE_OK ) {
-			::curl_easy_getinfo ( m_curl, CURLINFO_RESPONSE_CODE, &respcode );
-			::curl_easy_getinfo ( m_curl, CURLINFO_EFFECTIVE_URL, &effurl );
-			::curl_easy_getinfo ( m_curl, CURLINFO_FILETIME, &filetime );
-		}
-
-		m_queue_lock. lock ( );
-
-		if ( m_active_job == j ) {
-			j-> m_result   = res;
-			if ( res != CURLE_OK )
-				j-> m_error = ::curl_easy_strerror ( res );
-			j-> m_respcode = respcode;
-			j-> m_effective_url = effurl;
-			j-> m_filetime = time_t(( filetime != -1 ) ? filetime : 0 );
-
-			if ( j-> m_ifnewer && (( respcode == 304 ) || ( filetime != -1 && filetime < j-> m_ifnewer ))) 
-				j-> m_not_modified = true;
-
-			j-> m_failed = ( res != CURLE_OK ) || !(( respcode == 200 ) || ( respcode == 304 ));
-		}
-		else if ( m_active_job == 0 ) {
-			j-> m_result = CURLE_ABORTED_BY_CALLBACK;
-			j-> m_error = "Aborted";
-			j-> m_respcode = 0;
-			j-> m_failed = true;
-		}
-		j-> m_finished = true;
-		m_out_queue. append ( j );
-
-		m_active_job = 0;
-		m_queue_lock. unlock ( );
-
-		QApplication::postEvent ( this, new CTransferEvent ( CTransferEvent::Finished, 0 ));
-	}
+        emit progress(0, 0);
+        emit done();
+    }
 }
 
-void CTransfer::customEvent ( QEvent *ev )
-{
-	if ( int( ev-> type ( )) == CTransferEvent::Finished ) {
-		// we have to copy the job list to avoid problems with
-		// recursive mutex locking (we emit signals, which 
-		// can lead to slots calling another CTransfer function)
-		QList<Job *> finish;
 
-		m_queue_lock. lock ( );
-
-		while ( !m_out_queue. isEmpty ( ))
-			finish. append ( m_out_queue. takeFirst ( ));
-
-		m_queue_lock. unlock ( );
-
-		while ( !finish. isEmpty ( )) {
-			Job *j = finish. takeFirst ( );
-		
-			emit finished ( j );
-			updateProgress ( -1 );
-
-			delete j-> file ( );
-			delete j-> data ( );
-			delete j;
-		}
-	}
-	else if ( int( ev-> type ( )) == CTransferEvent::Progress ) {
-		Job *j = static_cast <CTransferEvent *> ( ev )-> job ( );
-
-		if ( j )
-			emit progress ( j, m_file_progress, m_file_total );
-	}
-}
-
-void CTransfer::updateProgress ( int delta )
-{
-	if ( delta > 0 )
-		m_total += delta;
-	else
-		m_progress -= delta;
-
-	emit progress ( m_progress, m_total );
-
-	if ( m_total == m_progress ) {
-		m_total = m_progress = 0;
-
-		emit done ( );
-		emit progress ( 0, 0 );
-	}
-}
-
-void CTransfer::cancel ( Job *j )
-{
-	j-> m_result = CURLE_ABORTED_BY_CALLBACK;
-	j-> m_respcode = 0;
-	j-> m_finished = true;
-	emit finished ( j );
-	updateProgress ( -1 );
-
-	delete j-> file ( );
-	delete j-> data ( );
-	delete j;
-}
-
-void CTransfer::cancelAllJobs ( )
-{
-	// we have to copy the job list to avoid problems with
-	// recursive mutex locking (cancel emits signals, which 
-	// can lead to slots calling another CTransfer function)
-	QList<Job *> canceled;
-
-	m_queue_lock. lock ( );
-
-	while ( !m_out_queue. isEmpty ( ))
-		canceled. append ( m_out_queue. takeFirst ( ));
-
-	if ( m_active_job ) {
-		// we can't delete the Job data right away, since curl_write may be accessing it at any time
-		//canceled. append ( m_active_job );
-
-		// just tell the worker thread, that the active job doesn't matter anymore...
-		m_active_job = 0;
-	}
-	
-	while ( !m_in_queue. isEmpty ( ))
-		canceled. prepend ( m_in_queue. takeFirst ( ));
-	
-	m_queue_lock. unlock ( );
-
-	while ( !canceled. isEmpty ( ))
-		cancel ( canceled. takeFirst ( ));
-}
-
-size_t CTransfer::write_curl ( void *ptr, size_t size, size_t nmemb, void *stream )
-{
-	CTransfer *that = static_cast <CTransfer *> ( stream );
-	Job *j = that-> m_active_job;
-
-	if ( j && j-> m_data ) {
-		uint oldsize = j-> m_data-> size ( );
-
-		j-> m_data-> resize ( oldsize + size * nmemb );
-		::memcpy ( j-> m_data-> data ( ) + oldsize, ptr, size * nmemb );
-
-		return size * nmemb;
-	}
-	else if ( j && j-> m_file ) {
-		qint64 res = j-> m_file-> write ((const char *) ptr, size * nmemb );
-
-		if ( res < 0 ) {
-			// set error code
-			res = 0;
-		}
-		return res;
-	}
-	else
-		return 0;
-}
-
-int CTransfer::progress_curl ( void *stream, double dltotal, double dlnow, double /*ultotal*/, double /*ulnow*/ )
-{
-	CTransfer *that = static_cast <CTransfer *> ( stream );
-	
-	that-> m_file_progress = int( dlnow );
-	that-> m_file_total    = int( dltotal );
-	QApplication::postEvent ( that, new CTransferEvent ( CTransferEvent::Progress, that-> m_active_job ));
-	
-	return 0;
-}
-
-void CTransfer::lock_curl () // CURL * /*handle*/, curl_lock_data /*data*/, curl_lock_access /*access*/, void * /*userptr*/ )
-{
-	s_share_lock. lock ( );
-}
-
-void CTransfer::unlock_curl () // CURL * /*handle*/, curl_lock_data /*data*/, void * /*userptr*/ )
-{
-	s_share_lock. unlock ( );
-}
+#include "ctransfer.moc"

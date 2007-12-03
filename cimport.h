@@ -41,28 +41,27 @@ public:
 		pd-> setHeaderText ( tr( "Importing BrickLink Store" ));
 		pd-> setMessageText ( tr( "Download: %1/%2 KB" ));
 		
-		const char *url = "http://www.bricklink.com/invExcelFinal.asp"; 
+		QUrl url("http://www.bricklink.com/invExcelFinal.asp");
 
-		CKeyValueList query;
-		query << CKeyValue ( "itemType",      "" )
-		      << CKeyValue ( "catID",         "" )
-		      << CKeyValue ( "colorID",       "" )
-		      << CKeyValue ( "invNew",        "" )
-		      << CKeyValue ( "itemYear",      "" )
-		      << CKeyValue ( "viewType",      "x" )    // XML 
-		      << CKeyValue ( "invStock",      "Y" )   
-		      << CKeyValue ( "invStockOnly",  "" )
-		      << CKeyValue ( "invQty",        "" )
-		      << CKeyValue ( "invQtyMin",     "0" )
-		      << CKeyValue ( "invQtyMax",     "0" )
-		      << CKeyValue ( "invBrikTrak",   "" )
-		      << CKeyValue ( "invDesc",       "" )
-		      << CKeyValue ( "frmUsername",   CConfig::inst ( )-> blLoginUsername ( ))
-		      << CKeyValue ( "frmPassword",   CConfig::inst ( )-> blLoginPassword ( ));
+		url.addQueryItem("itemType",      "");
+		url.addQueryItem("catID",         "");
+		url.addQueryItem("colorID",       "");
+		url.addQueryItem("invNew",        "");
+		url.addQueryItem("itemYear",      "");
+	    url.addQueryItem("viewType",      "x");    // XML
+		url.addQueryItem("invStock",      "Y");
+		url.addQueryItem("invStockOnly",  "");
+		url.addQueryItem("invQty",        "");
+		url.addQueryItem("invQtyMin",     "0");
+		url.addQueryItem("invQtyMax",     "0");
+		url.addQueryItem("invBrikTrak",   "");
+		url.addQueryItem("invDesc",       "");
+		url.addQueryItem("frmUsername",   CConfig::inst()->blLoginUsername());
+		url.addQueryItem("frmPassword",   CConfig::inst()->blLoginPassword());
 		
-		pd-> post ( url, query );
+		pd->post(url);
 
-		pd-> layout ( );
+		pd->layout();
 	}
 
 	const BrickLink::InvItemList &items ( ) const 
@@ -73,7 +72,7 @@ public:
 private slots:
 	virtual void gotten ( )
 	{
-		CTransfer::Job *j = m_progress-> job ( );
+		CTransferJob *j = m_progress-> job ( );
 		QByteArray *data = j-> data ( );
 		bool ok = false;
 
@@ -153,29 +152,30 @@ public:
 		m_progress-> setHeaderText ( tr( "Importing BrickLink Order" ));
 		m_progress-> setMessageText ( tr( "Download: %1/%2 KB" ));
 		
-		m_url = "http://www.bricklink.com/orderExcelFinal.asp";
+		QUrl url("http://www.bricklink.com/orderExcelFinal.asp");
 
-		m_query << CKeyValue ( "orderType",     m_order_type == BrickLink::Order::Placed ? "placed" : "received" )
-		        << CKeyValue ( "action",        "save" )
-		        << CKeyValue ( "orderID",       m_order_id )
-		        << CKeyValue ( "viewType",      "X" )    // XML
-		        << CKeyValue ( "getDateFormat", "1" )    // YYYY/MM/DD
-		        << CKeyValue ( "getOrders",     m_order_id. isEmpty ( ) ? "date" : "" )
-		        << CKeyValue ( "fDD",           QString::number ( m_order_from. day ( )))
-		        << CKeyValue ( "fMM",           QString::number ( m_order_from. month ( )))
-		        << CKeyValue ( "fYY",           QString::number ( m_order_from. year ( )))
-		        << CKeyValue ( "tDD",           QString::number ( m_order_to. day ( )))
-		        << CKeyValue ( "tMM",           QString::number ( m_order_to. month ( )))
-		        << CKeyValue ( "tYY",           QString::number ( m_order_to. year ( )))
-		        << CKeyValue ( "getDetail",     "y" )    // get items (that's why we do this in the first place...)
-		        << CKeyValue ( "getFiled",      "Y" )    // regardless of filed state
-		        << CKeyValue ( "getStatus",     "" )     // regardless of status
-		        << CKeyValue ( "statusID",      "" )
-		        << CKeyValue ( "frmUsername",   CConfig::inst ( )-> blLoginUsername ( ))
-		        << CKeyValue ( "frmPassword",   CConfig::inst ( )-> blLoginPassword ( ));
+        url.addQueryItem("orderType",     m_order_type == BrickLink::Order::Placed ? "placed" : "received");
+		url.addQueryItem("action",        "save");
+		url.addQueryItem("orderID",       m_order_id);
+		url.addQueryItem("viewType",      "X");    // XML
+		url.addQueryItem("getDateFormat", "1");    // YYYY/MM/DD
+		url.addQueryItem("getOrders",     m_order_id.isEmpty() ? "date" : "" );
+		url.addQueryItem("fDD",           QString::number(m_order_from. day()));
+		url.addQueryItem("fMM",           QString::number(m_order_from. month()));
+		url.addQueryItem("fYY",           QString::number(m_order_from. year()));
+		url.addQueryItem("tDD",           QString::number(m_order_to. day()));
+		url.addQueryItem("tMM",           QString::number(m_order_to. month()));
+		url.addQueryItem("tYY",           QString::number(m_order_to. year()));
+		url.addQueryItem("getDetail",     "y");    // get items (that's why we do this in the first place...)
+		url.addQueryItem("getFiled",      "Y");    // regardless of filed state
+		url.addQueryItem("getStatus",     "");     // regardless of status
+		url.addQueryItem("statusID",      "");
+		url.addQueryItem("frmUsername",   CConfig::inst()->blLoginUsername());
+		url.addQueryItem("frmPassword",   CConfig::inst()->blLoginPassword());
 
-		m_progress-> post ( m_url, m_query );
-		m_progress-> layout ( );
+        m_url = url;
+		m_progress->post(url);
+		m_progress->layout();
 	}
 
 	const QList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > &orders ( ) const 
@@ -187,7 +187,7 @@ public:
 private slots:
 	virtual void gotten ( )
 	{
-		CTransfer::Job *j = m_progress-> job ( );
+		CTransferJob *j = m_progress-> job ( );
 		QByteArray *data = j-> data ( );
 		bool ok = false;
 		QString error;
@@ -269,11 +269,13 @@ private slots:
 		}
 
 
-		if ( m_retry_placed ) {
-			m_query [0]. second = "placed";
+		if (m_retry_placed) {
+            QList<QPair<QString, QString> > query = m_url.queryItems();
+            query[0].second = "placed";
+            m_url.setQueryItems(query);
 
-			m_progress-> post ( m_url, m_query, 0 );
-			m_progress-> layout ( );
+			m_progress->post(m_url);
+			m_progress->layout();
 
 			m_retry_placed = false;
 		}
@@ -297,8 +299,7 @@ private:
 	QDate                  m_order_from;
 	QDate                  m_order_to;
 	BrickLink::Order::Type m_order_type;
-	QString                m_url;
-	CKeyValueList          m_query;
+	QUrl                   m_url;
 	bool                   m_retry_placed;
 	QList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > m_orders;
 };
@@ -318,14 +319,13 @@ public:
 		pd-> setHeaderText ( tr( "Importing BrickLink Shopping Cart" ));
 		pd-> setMessageText ( tr( "Download: %1/%2 KB" ));
 		
-		const char *url = "http://www.bricklink.com/storeCart.asp"; 
+		QUrl url("http://www.bricklink.com/storeCart.asp");
 
-		CKeyValueList query;
-		query << CKeyValue ( "h", QString::number ( shopid ))
-		      << CKeyValue ( "b", QString::number ( cartid ));
+        url.addQueryItem("h", QString::number(shopid));
+        url.addQueryItem("b", QString::number(cartid));
 		
-		pd-> get ( url, query );
-		pd-> layout ( );
+		pd->get(url);
+		pd->layout();
 	}
 
 	const BrickLink::InvItemList &items ( ) const 
@@ -336,7 +336,7 @@ public:
 private slots:
 	virtual void gotten ( )
 	{
-		CTransfer::Job *j = m_progress-> job ( );
+		CTransferJob *j = m_progress-> job ( );
 		QByteArray *data = j-> data ( );
 		bool ok = false;
 
@@ -499,12 +499,10 @@ public:
 		pd-> setHeaderText ( tr( "Importing Peeron Inventory" ));
 		pd-> setMessageText ( tr( "Download: %1/%2 KB" ));
 
-		QString url;
-		url. sprintf ( "http://www.peeron.com/inv/sets/%s", peeronid. toLatin1 ( ). constData ( ));
+		QString url = QString("http://www.peeron.com/inv/sets/%1").arg(peeronid);
 
-		pd-> get ( url );
-
-		pd-> layout ( );
+		pd->get(url);
+		pd->layout();
 	}
 
 	const BrickLink::InvItemList &items ( ) const 
@@ -515,7 +513,7 @@ public:
 private slots:
 	virtual void gotten ( )
 	{
-		CTransfer::Job *j = m_progress-> job ( );
+		CTransferJob *j = m_progress-> job ( );
 		QByteArray *data = j-> data ( );
 		bool ok = false;
 

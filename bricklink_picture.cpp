@@ -221,37 +221,38 @@ void BrickLink::Core::updatePicture ( BrickLink::Picture *pic, bool high_priorit
 
 	bool large = ( !pic-> color ( ));
 
-	QString url;
-	CKeyValueList query;
+	QUrl url;
 	
 	if ( large ) {
-		url. sprintf ( "http://www.bricklink.com/%cL/%s.jpg", pic-> item ( )-> itemType ( )-> pictureId ( ), pic-> item ( )-> id ( ));
+        url = QString("http://www.bricklink.com/%1L/%2.jpg").arg(pic->item()->itemType()->pictureId()).arg(pic->item()->id());
 	}
 	else {
 		url = "http://www.bricklink.com/getPic.asp";
 		// ?itemType=%c&colorID=%d&itemNo=%s", pic-> item ( )-> itemType ( )-> pictureId ( ), pic-> color ( )-> id ( ), pic-> item ( )-> id ( ));
 
-		query << CKeyValue ( "itemType", QChar ( pic-> item ( )-> itemType ( )-> pictureId ( )))
-		      << CKeyValue ( "colorID",  QString::number ( pic-> color ( )-> id ( )))
-			  << CKeyValue ( "itemNo",   pic-> item ( )-> id ( ));
+        url.addQueryItem("itemType", QChar ( pic->item()->itemType()->pictureId()));
+        url.addQueryItem("colorID",  QString::number(pic->color()->id()));
+        url.addQueryItem("itemNo",   pic->item()->id());
 	}
 
 	//qDebug ( "PIC request started for %s", (const char *) url );
-	m_pictures. transfer-> get ( url, query, 0, pic, high_priority );
+    CTransferJob *job = CTransferJob::get(url);
+    job->setUserData<Picture>(pic);
+	m_pictures.transfer->retrieve(job, high_priority);
 }
 
 
-void BrickLink::Core::pictureJobFinished ( CTransfer::Job *j )
+void BrickLink::Core::pictureJobFinished ( CTransferJob *j )
 {
-	if ( !j || !j-> data ( ) || !j-> userObject ( ))
+	if ( !j || !j-> data ( ) || !j-> userData<Picture>())
 		return;
 
-	Picture *pic = static_cast <Picture *> ( j-> userObject ( ));
+	Picture *pic = j->userData<Picture>();
 	bool large = ( !pic-> color ( ));
 
 	pic-> m_update_status = UpdateFailed;
 
-	if ( !j-> failed ( )) {
+	if (j->isCompleted()) {
 		QString path;
 		QImage img;
 
@@ -265,7 +266,7 @@ void BrickLink::Core::pictureJobFinished ( CTransfer::Job *j )
 
 			pic-> m_update_status = Ok;
 
-			if (( j-> effectiveUrl ( ). indexOf ( "noimage", 0, Qt::CaseInsensitive ) == -1 ) && j-> data ( )-> size ( ) && img. loadFromData ( *j-> data ( ))) {
+			if ((j->effectiveUrl().path().indexOf("noimage", 0, Qt::CaseInsensitive) == -1) && j->data()->size() && img.loadFromData(*j->data())) {
 				if ( !large )
 					img = img. convertToFormat ( QImage::Format_Indexed8 );
 				img. save ( path, "PNG" );
@@ -284,16 +285,21 @@ void BrickLink::Core::pictureJobFinished ( CTransfer::Job *j )
 			qWarning ( "Couldn't get path to save image" );
 		}
 	}
-	else if ( large && ( j-> responseCode ( ) == 404 ) && ( j-> url ( ). right ( 3 ) == "jpg" )) {
+    else if (large && (j->responseCode() == 404) && (j->url().path().endsWith(".jpg"))) {
 		// no large JPG image -> try a GIF image instead
 
 		pic-> m_update_status = Updating;
 
-	    QString url = j-> url ( );
-	    url. replace ( url. length ( ) - 3, 3, "gif" );
+	    QUrl url = j->url();
+        QString path = url.path();
+        path.chop(3);
+        path.append("gif");
+        url.setPath(path);
 
 	    //qDebug ( "PIC request started for %s", (const char *) url );
-	    m_pictures. transfer-> get ( url, CKeyValueList ( ), 0, pic );
+        CTransferJob *job = CTransferJob::get(url);
+        job->setUserData<Picture>(pic);
+	    m_pictures.transfer->retrieve(job);
 		return;
 	}
 	else

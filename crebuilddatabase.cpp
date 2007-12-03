@@ -75,15 +75,11 @@ static void nirvanaMsgHandler ( QtMsgType type, const char * )
 
 int CRebuildDatabase::exec ( )
 {
-	m_trans = new CTransfer ( );
-	if ( !m_trans-> init ( )) {
-		delete m_trans;
-		return error ( "failed to init HTTP transfer." );
-	}
-	m_trans-> setProxy ( CConfig::inst ( )-> useProxy ( ), CConfig::inst ( )-> proxyName ( ), CConfig::inst ( )-> proxyPort ( ));
-	connect ( m_trans, SIGNAL( finished ( CTransfer::Job * )), this, SLOT( downloadJobFinished ( CTransfer::Job * )));
+	m_trans = new CTransfer(10);
+	m_trans->setProxy(CConfig::inst()->proxy());
+	connect(m_trans, SIGNAL(finished(CTransferJob *)), this, SLOT(downloadJobFinished(CTransferJob *)));
 
-	BrickLink::Core *bl = BrickLink::inst ( );
+	BrickLink::Core *bl = BrickLink::core();
 	bl-> setOnlineStatus ( false );
 
 	BrickLink::TextImport blti;
@@ -150,31 +146,28 @@ int CRebuildDatabase::exec ( )
 	return 0;
 }
 
-namespace {
-
-CKeyValueList itemQuery ( char item_type )
+static QList<QPair<QString, QString> > itemQuery(char item_type)
 {
-	CKeyValueList query;  //?a=a&viewType=0&itemType=X
-	query << CKeyValue ( "a", "a" )
-	      << CKeyValue ( "viewType", "0" )
-	      << CKeyValue ( "itemType", QChar ( item_type ))
-	      << CKeyValue ( "selItemColor", "Y" )  // special BrickStore flag to get default color - thanks Dan
-	      << CKeyValue ( "selWeight", "Y" )
-	      << CKeyValue ( "selYear", "Y" );
+    QList<QPair<QString, QString> > query;   //?a=a&viewType=0&itemType=X
+	query << QPair<QString, QString>("a", "a")
+	      << QPair<QString, QString>("viewType", "0")
+	      << QPair<QString, QString>("itemType", QChar(item_type))
+	      << QPair<QString, QString>("selItemColor", "Y")  // special BrickStore flag to get default color - thanks Dan
+	      << QPair<QString, QString>("selWeight", "Y")
+	      << QPair<QString, QString>("selYear", "Y");
 
 	return query;
 }	
 
-CKeyValueList dbQuery ( int which )
+static QList<QPair<QString, QString> > dbQuery(int which)
 {
-	CKeyValueList query; //?a=a&viewType=X
-	query << CKeyValue ( "a", "a" )
-	      << CKeyValue ( "viewType", QString::number ( which ));
+	QList<QPair<QString, QString> > query; //?a=a&viewType=X
+	query << QPair<QString, QString>("a", "a")
+	      << QPair<QString, QString>("viewType", QString::number(which));
 
 	return query;
 }
 
-} // namespace
 
 bool CRebuildDatabase::download ( )
 {
@@ -182,7 +175,7 @@ bool CRebuildDatabase::download ( )
 
 	struct {
 		const char *m_url;
-		const CKeyValueList m_query;
+		const QList<QPair<QString, QString> > m_query;
 		const char *m_file;
 	} * tptr, table [] = {
 		{ "http://www.bricklink.com/catalogDownload.asp", dbQuery ( 1 ),     "itemtypes.txt"   },
@@ -197,12 +190,12 @@ bool CRebuildDatabase::download ( )
 		{ "http://www.bricklink.com/catalogDownload.asp", itemQuery ( 'I' ), "items_I.txt"     },
 		{ "http://www.bricklink.com/catalogDownload.asp", itemQuery ( 'O' ), "items_O.txt"     },
 	//	{ "http://www.bricklink.com/catalogDownload.asp", itemQuery ( 'U' ), "items_U.txt"     }, // generates a 500 server error
-		{ "http://www.bricklink.com/btinvlist.asp",       CKeyValueList ( ), "btinvlist.txt"   },
-		{ "http://www.bricklink.com/catalogColors.asp",   CKeyValueList ( ), "colorguide.html" },
+		{ "http://www.bricklink.com/btinvlist.asp",       QList<QPair<QString, QString> > ( ), "btinvlist.txt"   },
+		{ "http://www.bricklink.com/catalogColors.asp",   QList<QPair<QString, QString> > ( ), "colorguide.html" },
 
-		{ "http://www.peeron.com/inv/colors",             CKeyValueList ( ), "peeron_colors.html" },
+		{ "http://www.peeron.com/inv/colors",             QList<QPair<QString, QString> > ( ), "peeron_colors.html" },
 
-		{ 0, CKeyValueList ( ), 0 }
+		{ 0, QList<QPair<QString, QString> > ( ), 0 }
 	};
 
 	bool failed = false;
@@ -223,13 +216,16 @@ bool CRebuildDatabase::download ( )
 			failed = true;
 			break;
 		}
+        QUrl url(tptr->m_url);
+        url.setQueryItems(tptr->m_query);
 
-		m_trans-> get ( tptr-> m_url, tptr-> m_query, f );
+        CTransferJob *job = CTransferJob::get(url, f);
+		m_trans->retrieve(job);
 		m_downloads_in_progress++;
 	}
 
 	if ( failed ) {
-		m_trans-> cancelAllJobs ( );
+		m_trans->abortAllJobs();
 		return false;
 	}
 
@@ -242,15 +238,15 @@ bool CRebuildDatabase::download ( )
 	return true;
 }
 
-void CRebuildDatabase::downloadJobFinished ( CTransfer::Job *job )
+void CRebuildDatabase::downloadJobFinished ( CTransferJob *job )
 {
 	if ( job ) {
-		QFile *f = job-> file ( );
+		QFile *f = qobject_cast<QFile *>(job->file());
 
 		m_downloads_in_progress--;
 		bool ok = false;
 
-		if ( !job-> failed ( ) && f ) {
+		if (job->isCompleted() && f ) {
 			f-> close ( );
 
 			QString basepath = f-> fileName ( );
@@ -288,7 +284,7 @@ bool CRebuildDatabase::downloadInventories ( QVector<const BrickLink::Item *> &i
 	m_downloads_in_progress = 0;
 	m_downloads_failed = 0;
 
-	QString url = "http://www.bricklink.com/catalogDownload.asp";
+	QUrl url = "http://www.bricklink.com/catalogDownload.asp";
 
 	const BrickLink::Item **itemp = invs. data ( );
 	for ( int i = 0; i < invs. count ( ); i++ ) {
@@ -304,14 +300,16 @@ bool CRebuildDatabase::downloadInventories ( QVector<const BrickLink::Item *> &i
 				break;
 			}
 
-			CKeyValueList query;
-			query << CKeyValue ( "a",            "a" )
-			      << CKeyValue ( "viewType",     "4" )
-			      << CKeyValue ( "itemTypeInv",  QChar ( item-> itemType ( )-> id ( )))
-			      << CKeyValue ( "itemNo",       item-> id ( ))
-			      << CKeyValue ( "downloadType", "X" );
+			QList<QPair<QString, QString> > query;
+			query << QPair<QString, QString>("a",            "a")
+			      << QPair<QString, QString>("viewType",     "4")
+			      << QPair<QString, QString>("itemTypeInv",  QChar(item->itemType()->id()))
+			      << QPair<QString, QString>("itemNo",       item->id())
+			      << QPair<QString, QString>("downloadType", "X");
 
-			m_trans-> get ( url, query, f );
+            url.setQueryItems(query);
+            CTransferJob *job = CTransferJob::get(url, f);
+			m_trans->retrieve(job);
 			m_downloads_in_progress++;
 		}
 		
@@ -325,7 +323,7 @@ bool CRebuildDatabase::downloadInventories ( QVector<const BrickLink::Item *> &i
 	if ( failed ) {
 		QString err = m_error;
 	
-		m_trans-> cancelAllJobs ( );
+		m_trans->abortAllJobs ( );
 		
 		m_error = err;
 		return false;

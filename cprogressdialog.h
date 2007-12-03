@@ -18,6 +18,7 @@
 
 #include "ctransfer.h"
 
+class QIODevice;
 class QLabel;
 class QProgressBar;
 class QWidget;
@@ -39,10 +40,10 @@ public:
 	void setProgress ( int steps, int total );
 	void setProgressVisible ( bool b );
 
-	bool post ( const QString &url, const CKeyValueList &query = CKeyValueList ( ), QFile *file = 0 );
-	bool get ( const QString &url, const CKeyValueList &query = CKeyValueList ( ), const QDateTime &ifnewer = QDateTime ( ), QFile *file = 0 );
+	bool post ( const QUrl &url, QIODevice *file = 0 );
+	bool get ( const QUrl &url, const QDateTime &ifnewer = QDateTime ( ), QIODevice *file = 0 );
 
-	CTransfer::Job *job ( ) const;
+	CTransferJob *job ( ) const;
 	bool hasErrors ( ) const;
 
 	void layout ( );
@@ -54,8 +55,8 @@ protected slots:
 	virtual void done ( int r );
 
 private slots:
-	void transferProgress ( CTransfer::Job *job, int, int );
-	void transferDone ( CTransfer::Job *job );
+	void transferProgress ( CTransferJob *job, int, int );
+	void transferDone ( CTransferJob *job );
 
 private:
 	bool initTransfer ( );
@@ -75,7 +76,7 @@ private:
 	bool m_override         : 1;
 
 	CTransfer *m_trans;
-	CTransfer::Job *m_job;
+	CTransferJob *m_job;
 };
 
 #endif

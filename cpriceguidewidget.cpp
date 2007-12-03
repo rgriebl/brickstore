@@ -121,17 +121,17 @@ CPriceGuideWidget::CPriceGuideWidget ( QWidget *parent, Qt::WindowFlags f )
 
 	QAction *a;
 	a = new QAction ( QIcon ( ":/reload" ), tr( "Update" ), this );
-	connect ( a, SIGNAL( activated ( )), this, SLOT( doUpdate ( )));
+	connect ( a, SIGNAL( triggered ( )), this, SLOT( doUpdate ( )));
 
 	a = new QAction ( this );
 	a-> setSeparator ( true );
 
 	a = new QAction ( QIcon ( "edit_bl_catalog" ), tr( "Show BrickLink Catalog Info..." ), this );
-	connect ( a, SIGNAL( activated ( )), this, SLOT( showBLCatalogInfo ( )));
+	connect ( a, SIGNAL( triggered ( )), this, SLOT( showBLCatalogInfo ( )));
 	a = new QAction ( QIcon ( "edit_bl_priceguide" ), tr( "Show BrickLink Price Guide Info..." ), this );
-	connect ( a, SIGNAL( activated ( )), this, SLOT( showBLPriceGuideInfo ( )));
+	connect ( a, SIGNAL( triggered ( )), this, SLOT( showBLPriceGuideInfo ( )));
 	a = new QAction ( QIcon ( "edit_bl_lotsforsale" ), tr( "Show Lots for Sale on BrickLink..." ), this );
-	connect ( a, SIGNAL( activated ( )), this, SLOT( showBLLotsForSale ( )));
+	connect ( a, SIGNAL( triggered ( )), this, SLOT( showBLLotsForSale ( )));
 
 	languageChange ( );
 }

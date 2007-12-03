@@ -314,7 +314,7 @@ CAppearsInWidget::CAppearsInWidget ( QWidget *parent )
 	a = new QAction ( this ); 
 	a-> setObjectName ( "edit_partoutitems" );
 	a-> setIcon ( QIcon( ":/edit_partoutitems" ));
-	connect ( a, SIGNAL( activated ( )), this, SLOT( partOut ( )));
+	connect ( a, SIGNAL( triggered ( )), this, SLOT( partOut ( )));
 
 	a = new QAction ( this );
 	a-> setSeparator ( true );
@@ -322,7 +322,7 @@ CAppearsInWidget::CAppearsInWidget ( QWidget *parent )
 	a = new QAction ( this );
 	a-> setObjectName ( "viewmagp" );
 	a-> setIcon ( QIcon( ":/viewmagp" ));
-	connect ( a, SIGNAL( activated ( )), this, SLOT( viewLargeImage ( )));
+	connect ( a, SIGNAL( triggered ( )), this, SLOT( viewLargeImage ( )));
 
 	a = new QAction ( this );
 	a-> setSeparator ( true );
@@ -330,15 +330,15 @@ CAppearsInWidget::CAppearsInWidget ( QWidget *parent )
 	a = new QAction ( this );
 	a-> setObjectName ( "edit_bl_catalog" );
 	a-> setIcon ( QIcon( ":/edit_bl_catalog" ));
-	connect ( a, SIGNAL( activated ( )), this, SLOT( showBLCatalogInfo ( )));
+	connect ( a, SIGNAL( triggered ( )), this, SLOT( showBLCatalogInfo ( )));
 	a = new QAction ( this );
 	a-> setObjectName ( "edit_bl_priceguide" );
 	a-> setIcon ( QIcon( ":/edit_bl_priceguide" ));
-	connect ( a, SIGNAL( activated ( )), this, SLOT( showBLPriceGuideInfo ( )));
+	connect ( a, SIGNAL( triggered ( )), this, SLOT( showBLPriceGuideInfo ( )));
 	a = new QAction ( this );
 	a-> setObjectName ( "edit_bl_lotsforsale" );
 	a-> setIcon ( QIcon( ":/edit_bl_lotsforsale" ));
-	connect ( a, SIGNAL( activated ( )), this, SLOT( showBLLotsForSale ( )));
+	connect ( a, SIGNAL( triggered ( )), this, SLOT( showBLLotsForSale ( )));
 
 	connect ( this, SIGNAL( customContextMenuRequested ( const QPoint & )), this, SLOT( showContextMenu ( const QPoint & )));
 //	connect ( this, SIGNAL( returnPressed ( QListViewItem * )), this, SLOT( partOut ( )));

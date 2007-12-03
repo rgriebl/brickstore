@@ -336,7 +336,7 @@ CFrameWork::CFrameWork ( QWidget *parent, Qt::WindowFlags f )
 	findAction ( CConfig::inst ( )-> onlineStatus ( ) ? "extras_net_online" : "extras_net_offline" )-> setChecked ( true );
 	 
 	bl-> setOnlineStatus ( CConfig::inst ( )-> onlineStatus ( ));
-	bl-> setHttpProxy ( CConfig::inst ( )-> useProxy ( ), CConfig::inst ( )-> proxyName ( ), CConfig::inst ( )-> proxyPort ( ));
+	bl-> setHttpProxy ( CConfig::inst ( )-> proxy ( ));
 	{
 		int pic, pg;
 		CConfig::inst ( )-> blUpdateIntervals ( pic, pg );
@@ -1037,7 +1037,7 @@ void CFrameWork::connectAction ( bool do_connect, const char *name, CWindow *win
 	if ( a && window ) {
 		bool is_toggle = ( ::strstr ( windowslot, "bool" ));
 
-		const char *actionsignal = is_toggle ? SIGNAL( toggled ( bool )) : SIGNAL( activated ( ));
+		const char *actionsignal = is_toggle ? SIGNAL( toggled ( bool )) : SIGNAL( triggered ( ));
 
 		if ( do_connect )
 			connect ( a, actionsignal, window, windowslot );

@@ -42,18 +42,17 @@ public:
 
 	//	m_error = tr( "Could not retrieve version information from server:<br /><br />%1" );
 
-		QString url = "http://" + cApp-> appURL ( ) + "/RELEASES";
-		
-		CKeyValueList query;
-		query << CKeyValue ( "version", cApp-> appVersion ( ));
+		QUrl url = QString("http://") + cApp->appURL() + QString("/RELEASES");
 
-		pd-> get ( url, query );
+        url.addQueryItem("version", cApp->appVersion());
+
+		pd->get(url);
 	}
 
 private slots:
 	void gotten ( )
 	{
-		CTransfer::Job *j = m_progress-> job ( );
+		CTransferJob *j = m_progress-> job ( );
 		QByteArray *data = j-> data ( );
 		bool ok = false;
 

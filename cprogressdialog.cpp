@@ -92,7 +92,7 @@ CProgressDialog::~CProgressDialog ( )
 void CProgressDialog::done ( int r )
 {
 	if ( m_trans )
-		m_trans-> cancelAllJobs ( );
+		m_trans->abortAllJobs ( );
 
 	QDialog::done ( r );
 
@@ -178,18 +178,18 @@ void CProgressDialog::syncRepaint ( QWidget *w )
 	qApp-> processEvents ( QEventLoop::ExcludeUserInputEvents );
 }
 
-CTransfer::Job *CProgressDialog::job ( ) const
+CTransferJob *CProgressDialog::job ( ) const
 {
 	return m_job;
 }
 
-void CProgressDialog::transferProgress ( CTransfer::Job *j, int s, int t )
+void CProgressDialog::transferProgress ( CTransferJob *j, int s, int t )
 {
 	if ( j && ( j == m_job ))
 		setProgress ( s / 1024, t / 1024 );
 }
 
-void CProgressDialog::transferDone ( CTransfer::Job *j )
+void CProgressDialog::transferDone ( CTransferJob *j )
 {
 	if ( !j || ( j != m_job ))
 		return;
@@ -197,7 +197,7 @@ void CProgressDialog::transferDone ( CTransfer::Job *j )
 	if ( j-> file ( ) && j-> file ( )-> isOpen ( ))
 		j-> file ( )-> close ( );
 
-	if ( j-> failed ( ))
+    if (j->isFailed() || j->isAborted())
 		setErrorText ( tr( "Download failed: %1" ). arg( j-> errorString ( )));
 	else
 		emit transferFinished ( );
@@ -208,17 +208,14 @@ bool CProgressDialog::initTransfer ( )
 	if ( m_trans )
 		return true;
 
-	m_trans = new CTransfer ( );
+	m_trans = new CTransfer(1);
 
-	if ( m_trans-> init ( )) {
-		connect ( m_trans, SIGNAL( finished ( CTransfer::Job * )), this, SLOT( transferDone ( CTransfer::Job * )));
-		connect ( m_trans, SIGNAL( progress ( CTransfer::Job *, int, int )), this, SLOT( transferProgress ( CTransfer::Job *, int, int )));
+	connect(m_trans, SIGNAL(finished(CTransferJob * )), this, SLOT(transferDone(CTransferJob *)));
+	connect(m_trans, SIGNAL(dataReadProgress(CTransferJob *, int, int )), this, SLOT(transferProgress(CTransferJob *, int, int)));
 
-		m_trans-> setProxy ( CConfig::inst ( )-> useProxy ( ), CConfig::inst ( )-> proxyName ( ), CConfig::inst ( )-> proxyPort ( ));
+	m_trans->setProxy(CConfig::inst()->proxy());
 
-		return true;
-	}
-	return false;
+	return true;
 }
 
 bool CProgressDialog::hasErrors ( ) const
@@ -226,20 +223,22 @@ bool CProgressDialog::hasErrors ( ) const
 	return m_has_errors;
 }
 
-bool CProgressDialog::post ( const QString &url, const CKeyValueList &query, QFile *file )
+bool CProgressDialog::post(const QUrl &url, QIODevice *file)
 {
-	if ( initTransfer ( )) {
-		m_job = m_trans-> post ( url, query, file );
-		return ( m_job != 0 );
+	if (initTransfer()) {
+        m_job = CTransferJob::post(url, file);
+		m_trans->retrieve(m_job);
+		return true;
 	}
 	return false;
 }
 
-bool CProgressDialog::get ( const QString &url, const CKeyValueList &query, const QDateTime &ifnewer, QFile *file )
+bool CProgressDialog::get(const QUrl &url, const QDateTime &ifnewer, QIODevice *file)
 {
-	if ( initTransfer ( )) {
-		m_job = m_trans-> getIfNewer ( url, query, ifnewer, file );
-		return ( m_job != 0 );
+	if (initTransfer()) {
+        m_job = CTransferJob::getIfNewer(url, ifnewer, file);
+		m_trans->retrieve(m_job);
+		return true;
 	}
 	return false;
 }

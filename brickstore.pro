@@ -61,15 +61,9 @@ else {
 win32 {
   system( cscript.exe //B scripts\update_version.js $$RELEASE)
   
-  CURLDIR=$$(CURLDIR)
-
-  isEmpty( $CURLDIR ):CURLDIR="C:/Projekte/Curl/Curl-7.17.1"
   CONFIG += windows
   #CONFIG -= shared
 
-  INCLUDEPATH += $$CURLDIR\include
-  LIBS += $$CURLDIR\lib\libcurl.lib ws2_32.lib winmm.lib
-#  DEFINES += CURL_STATICLIB
   RC_FILE = brickstore.rc
 
   DEFINES += __USER__=\"$$(USERNAME)\" __HOST__=\"$$(COMPUTERNAME)\"
@@ -98,8 +92,6 @@ unix {
 
 unix:!macx {
   CONFIG += x11
-
-  LIBS += -lcurl
 
   isEmpty( PREFIX ):PREFIX = /usr/local
 
@@ -132,17 +124,6 @@ unix:!macx {
 
 macx {
   CONFIG += x86
-
-  osx_minor = $$system( sw_vers -productVersion | awk -F. \'{ print $2; }\' )
-
-  system( test $$osx_minor -ge 4 ) {
-    LIBS += -lcurl
-  }
-  else {
-    # HACK, but we need the abs. path, since MacOS X <10.4 already has 
-    # an old 2.x version in /usr/lib ...
-    LIBS += /usr/local/lib/libcurl.a
-  }
 }
 
 

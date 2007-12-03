@@ -13,10 +13,12 @@
 */
 #include <string.h>
 
-#include <qfile.h>
-#include <qfileinfo.h>
-#include <qtextstream.h>
-#include <qlocale.h>
+#include <QFile>
+#include <QFileInfo>
+#include <QTextStream>
+#include <QLocale>
+#include <QNetworkRequest>
+#include <QNetworkAccessManager>
 
 #include "bricklink.h"
 
@@ -367,32 +369,31 @@ void BrickLink::Core::updatePriceGuide ( BrickLink::PriceGuide *pg, bool high_pr
 	pg-> m_update_status = Updating;
 	pg-> addRef ( );
 
-	QString url;
-	CKeyValueList query;
-	
-	url = "http://www.bricklink.com/priceGuide.asp"; // ?a=%c&viewType=N&colorID=%d&itemID=%s", tolower ( pg-> item ( )-> itemType ( )-> id ( )), pg-> color ( )-> id ( ), pg-> item ( )-> id ( ));
+	QUrl url = "http://www.bricklink.com/priceGuide.asp"; // ?a=%c&viewType=N&colorID=%d&itemID=%s", tolower ( pg-> item ( )-> itemType ( )-> id ( )), pg-> color ( )-> id ( ), pg-> item ( )-> id ( ));
 
-	query << CKeyValue ( "a",        QChar ( pg-> item ( )-> itemType ( )-> id ( )). toLower ( ))
-	      << CKeyValue ( "viewType", "N" )
-	      << CKeyValue ( "colorID",  QString::number ( pg-> color ( )-> id ( )))
-	      << CKeyValue ( "itemID",   pg-> item ( )-> id ( ))
-	      << CKeyValue ( "viewDec",  "3" );
+	url.addQueryItem("a",        QChar(pg->item()->itemType()->id()).toLower());
+	url.addQueryItem("viewType", "N");
+	url.addQueryItem("colorID",  QString::number(pg->color()->id()));
+	url.addQueryItem("itemID",   pg->item()->id());
+	url.addQueryItem("viewDec",  "3");
 
 	//qDebug ( "PG request started for %s", (const char *) url );
-	m_price_guides. transfer-> get ( url, query, 0, pg, high_priority );
+    CTransferJob *job = CTransferJob::get(url);
+    job->setUserData(pg);
+	m_price_guides.transfer->retrieve(job, high_priority);
 }
 
 
-void BrickLink::Core::priceGuideJobFinished ( CTransfer::Job *j )
+void BrickLink::Core::priceGuideJobFinished ( CTransferJob *j )
 {
-	if ( !j || !j-> data ( ) || !j-> userObject ( ))
+    if ( !j || !j-> data ( ) || !j-> userData<PriceGuide> ( ))
 		return;
 
-	PriceGuide *pg = static_cast <PriceGuide *> ( j-> userObject ( ));
+	PriceGuide *pg = j->userData<PriceGuide>();
 
 	pg-> m_update_status = UpdateFailed;
 
-	if ( !j-> failed ( )) {
+	if (j->isCompleted()) {
 		if ( pg-> parse ( j-> data ( )-> data ( ), j-> data ( )-> size ( )))
 			pg-> m_update_status = Ok;
 	}

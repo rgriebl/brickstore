@@ -50,7 +50,7 @@ public:
 		QFile *file = new QFile ( localfile + ".lzma" );
 
 		if ( file-> open ( QIODevice::WriteOnly )) {
-			pd-> get ( remotefile + ".lzma", CKeyValueList ( ), dt, file );
+			pd-> get ( remotefile + ".lzma", dt, file );
 		}
 		else {
 			pd-> setErrorText ( tr( "Could not write to file: %1" ). arg( file-> fileName ( )));
@@ -61,15 +61,15 @@ public:
 private slots:
 	virtual void gotten ( )
 	{
-		CTransfer::Job *job = m_progress-> job ( );
-		QFile *file = job-> file ( );
+		CTransferJob *job = m_progress-> job ( );
+		QFile *file = qobject_cast<QFile *>(job-> file ( ));
 
-		if ( job-> notModifiedSince ( )) {
+		if ( job-> wasNotModifiedSince ( )) {
 			file-> remove ( );
 			m_progress-> setMessageText ( tr( "Already up-to-date." ));
 			m_progress-> setFinished ( true );
 		}
-		else if ( file-> size ( )) {
+		else if ( file && file-> size ( )) {
 			QString basepath = file-> fileName ( );
 			basepath. truncate ( basepath. length ( ) - 5 ); // strip '.lzma'
 

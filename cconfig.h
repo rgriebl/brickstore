@@ -16,6 +16,7 @@
 
 #include <QSettings>
 #include <QDateTime>
+#include <QNetworkProxy>
 
 
 class CConfig : public QSettings {
@@ -49,9 +50,7 @@ public:
 	bool showInputErrors ( ) const;
 	bool simpleMode ( ) const;
 	bool onlineStatus ( ) const;
-	bool useProxy ( ) const;
-	QString proxyName ( ) const;
-	int proxyPort ( ) const;
+	QNetworkProxy proxy ( ) const;
 
 	QDateTime lastDatabaseUpdate ( ) const;
 
@@ -86,7 +85,7 @@ public slots:
 	void setShowInputErrors ( bool b );
 	void setSimpleMode ( bool sm );
 	void setOnlineStatus ( bool b );
-	void setProxy ( bool b, const QString &name, int port );
+	void setProxy(const QNetworkProxy &proxy);
 
 	void setLastDatabaseUpdate ( const QDateTime &dt );
 
@@ -101,7 +100,7 @@ signals:
 	void showInputErrorsChanged ( bool b );
 	void blUpdateIntervalsChanged ( int pic, int pg );
 	void onlineStatusChanged ( bool b );
-	void proxyChanged ( bool b, const QString &proxy, int port );
+	void proxyChanged(const QNetworkProxy &proxy);
 	void registrationChanged ( CConfig::Registration r );
 
 protected:

@@ -38,6 +38,7 @@
 
 
 class QIODevice;
+class QFile;
 class QAbstractItemModel;
 //template <typename T> class QDict;
 
@@ -811,7 +812,7 @@ namespace BrickLink {
 
 		void setOnlineStatus ( bool on );
 		void setUpdateIntervals ( int pic, int pg );
-		void setHttpProxy ( bool enable, const QString &name, int port );
+		void setHttpProxy (const QNetworkProxy &proxy);
 
 		void cancelPictureTransfers ( );
 		void cancelPriceGuideTransfers ( );
@@ -850,8 +851,8 @@ namespace BrickLink {
 	private slots:
 		void pictureIdleLoader ( );
 
-		void pictureJobFinished ( CTransfer::Job * );
-		void priceGuideJobFinished ( CTransfer::Job * );
+		void pictureJobFinished ( CTransferJob * );
+		void priceGuideJobFinished ( CTransferJob * );
 
 	private:
 		QString  m_datadir;

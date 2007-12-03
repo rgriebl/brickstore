@@ -113,15 +113,15 @@ CSelectItem::CSelectItem(bool inv_only, QWidget *parent)
 	d->m_viewaction[ListMode] = new QAction(ag);
 	d->m_viewaction[ListMode]->setIcon(QIcon(":/images/22x22/viewmode_list"));
 	d->m_viewaction[ListMode]->setCheckable(true);
-	connect(d->m_viewaction[ListMode], SIGNAL(activated()), this, SLOT(showAsList()));
+	connect(d->m_viewaction[ListMode], SIGNAL(triggered()), this, SLOT(showAsList()));
 	d->m_viewaction[TableMode] = new QAction(ag);
 	d->m_viewaction[TableMode]->setIcon(QIcon(":/images/22x22/viewmode_images"));
 	d->m_viewaction[TableMode]->setCheckable(true);
-	connect(d->m_viewaction[TableMode], SIGNAL(activated()), this, SLOT(showAsTable()));
+	connect(d->m_viewaction[TableMode], SIGNAL(triggered()), this, SLOT(showAsTable()));
 	d->m_viewaction[ThumbsMode] = new QAction(ag);
 	d->m_viewaction[ThumbsMode]->setIcon(QIcon(":/images/22x22/viewmode_thumbs"));
 	d->m_viewaction[ThumbsMode]->setCheckable(true);
-	connect(d->m_viewaction[ThumbsMode], SIGNAL(activated()), this, SLOT(showAsThumbs()));
+	connect(d->m_viewaction[ThumbsMode], SIGNAL(triggered()), this, SLOT(showAsThumbs()));
 
 	d->w_viewmenu->addActions(ag->actions());
 

@@ -369,33 +369,27 @@ void CConfig::setDocumentDir ( const QString &dir )
 }
 
 
-bool CConfig::useProxy ( ) const
+QNetworkProxy CConfig::proxy() const
 {
-	return value ( "/Internet/UseProxy", false ). toBool ( );
+    QNetworkProxy proxy;
+
+    proxy.setType(value("/Internet/UseProxy", false).toBool() ? QNetworkProxy::HttpCachingProxy : QNetworkProxy::NoProxy);
+    proxy.setHostName(value("/Internet/ProxyName").toString());
+    proxy.setPort(value("/Internet/ProxyPort", 8080).toInt());
+
+    return proxy;
 }
 
-QString CConfig::proxyName ( ) const
+void CConfig::setProxy(const QNetworkProxy &np)
 {
-	return value ( "/Internet/ProxyName" ). toString ( );
-}
+    QNetworkProxy op = proxy();
 
-int CConfig::proxyPort ( ) const
-{
-	return value ( "/Internet/ProxyPort", 8080 ). toInt ( );
-}
-
-void CConfig::setProxy ( bool b, const QString &name, int port )
-{
-	bool ob = useProxy ( );
-	QString oname = proxyName ( );
-	int oport = proxyPort ( );
-	
-	if (( b != ob ) || ( oname != name ) || ( oport != port )) {
-		setValue ( "/Internet/UseProxy", b );
-		setValue ( "/Internet/ProxyName", name );
-		setValue ( "/Internet/ProxyPort", port );
+    if ((op.type() != np.type()) || (op.hostName() != np.hostName()) || (op.port() != np.port())) {
+        setValue("/Internet/UseProxy", (np.type() != QNetworkProxy::NoProxy));
+        setValue("/Internet/ProxyName", np.hostName());
+        setValue("/Internet/ProxyPort", np.port());
 		
-		emit proxyChanged ( b, name, port );
+		emit proxyChanged(np);
 	}
 }
 
