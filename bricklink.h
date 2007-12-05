@@ -172,13 +172,24 @@ namespace BrickLink {
 
 		QString categoryName ( ) const   { return m_category_name; }
 
-		bool isTransparent ( ) const { return m_is_trans; }
-		bool isGlitter ( ) const     { return m_is_glitter; }
-		bool isSpeckle ( ) const     { return m_is_speckle; }
-		bool isMetallic ( ) const    { return m_is_metallic; }
-		bool isChrome ( ) const      { return m_is_chrome; }
-		bool isPearl ( ) const       { return m_is_pearl; }
-		bool isMilky ( ) const       { return m_is_milky; }
+        enum {
+            Solid        = 0x00,
+            Transparent  = 0x01,
+            Glitter      = 0x02,
+            Speckle      = 0x04,
+            Metallic     = 0x08,
+            Chrome       = 0x10,
+            Pearl        = 0x20,
+            Milky        = 0x40
+        };
+
+		bool isTransparent ( ) const { return m_type & Transparent; }
+		bool isGlitter ( ) const     { return m_type & Glitter; }
+		bool isSpeckle ( ) const     { return m_type & Speckle; }
+		bool isMetallic ( ) const    { return m_type & Metallic; }
+		bool isChrome ( ) const      { return m_type & Chrome; }
+		bool isPearl ( ) const       { return m_type & Pearl; }
+		bool isMilky ( ) const       { return m_type & Milky; }
 		~Color ( );
 
 	private:
@@ -188,14 +199,7 @@ namespace BrickLink {
 		int     m_ldraw_id;
 		QColor  m_color;
 		QString m_category_name;
-		
-		bool   m_is_trans    : 1;
-		bool   m_is_glitter  : 1;
-		bool   m_is_speckle  : 1;
-		bool   m_is_metallic : 1;
-		bool   m_is_chrome   : 1;
-		bool   m_is_milky    : 1;
-		bool   m_is_pearl    : 1;
+        uint    m_type;
 
 	private:
 		Color ( );

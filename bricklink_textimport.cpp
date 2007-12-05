@@ -73,8 +73,8 @@ const BrickLink::Category *BrickLink::TextImport::findCategoryByName ( const cha
 const BrickLink::Item *BrickLink::TextImport::findItem ( char tid, const char *id )
 {
 	Item key;
-	key. m_item_type = m_item_types [tid];
-	key. m_id = const_cast <char *> ( id );
+	key. m_item_type = m_item_types.value(tid);
+	key. m_id = const_cast<char *>(id);
 
 	Item *keyp = &key;
 
@@ -117,81 +117,86 @@ namespace BrickLink {
 
 template <> Category *TextImport::parse<Category> ( uint count, const char **strs )
 {
-	if ( count < 2 )
+	if (count < 2)
 		return 0;
 
-	Category *cat = new Category ( );
-	cat-> m_id   = strtol ( strs [0], 0, 10 );
-	cat-> m_name = my_strdup ( strs [1] );
+	Category *cat = new Category();
+	cat->m_id   = strtol(strs[0], 0, 10);
+	cat->m_name = my_strdup(strs[1]);
 	return cat;
 }
 
 template <> Color *TextImport::parse<Color> ( uint count, const char **strs )
 {
-	if ( count < 2 )
+	if (count < 2)
 		return 0;
 
 	Color *col = new Color ( );
-	col-> m_id          = strtol ( strs [0], 0, 10 );
-	col-> m_name        = my_strdup ( strs [1] );
-	col-> m_ldraw_id    = -1;
-	col-> m_is_trans    = ( strstr ( strs [1], "Trans-"    ) != 0 );
-	col-> m_is_glitter  = ( strstr ( strs [1], "Glitter "  ) != 0 );
-	col-> m_is_speckle  = ( strstr ( strs [1], "Speckle "  ) != 0 );
-	col-> m_is_metallic = ( strstr ( strs [1], "Metallic " ) != 0 );
-	col-> m_is_chrome   = ( strstr ( strs [1], "Chrome "   ) != 0 );
+	col->m_id          = strtol(strs[0], 0, 10);
+	col->m_name        = my_strdup(strs[1]);
+	col->m_ldraw_id    = -1;
+    col->m_color       = QColor(QString('#') + strs[2]);
+    col->m_type        = Color::Solid;
+
+    if (!strcmp(strs[3], "Transparent"))  col->m_type |= Color::Transparent;
+    if (!strcmp(strs[3], "Glitter"    ))  col->m_type |= Color::Glitter;
+    if (!strcmp(strs[3], "Speckle"    ))  col->m_type |= Color::Speckle;
+    if (!strcmp(strs[3], "Metallic"   ))  col->m_type |= Color::Metallic;
+    if (!strcmp(strs[3], "Chrome"     ))  col->m_type |= Color::Chrome;
+    if (!strcmp(strs[3], "Pearl"      ))  col->m_type |= Color::Pearl;
+    if (!strcmp(strs[3], "Milky"      ))  col->m_type |= Color::Milky;
 	return col;
 }
 
 template <> ItemType *TextImport::parse<ItemType> ( uint count, const char **strs )
 {
-	if ( count < 2 )
+	if (count < 2)
 		return 0;
 
 	char c = strs [0][0];
-	ItemType *itt = new ItemType ( );
-	itt-> m_id              = c;
-	itt-> m_picture_id      = ( c == 'I' ) ? 'S' : c;
-	itt-> m_name            = my_strdup ( strs [1] );
-	itt-> m_has_inventories = false;
-	itt-> m_has_colors      = ( c == 'P' || c == 'G' );
-	itt-> m_has_weight      = ( c == 'B' || c == 'P' || c == 'G' || c == 'S' || c == 'I' );
-	itt-> m_has_year        = ( c == 'B' || c == 'C' || c == 'G' || c == 'S' || c == 'I' );
+	ItemType *itt = new ItemType();
+	itt->m_id              = c;
+	itt->m_picture_id      = (c == 'I') ? 'S' : c;
+	itt->m_name            = my_strdup(strs[1]);
+	itt->m_has_inventories = false;
+	itt->m_has_colors      = (c == 'P' || c == 'G');
+	itt->m_has_weight      = (c == 'B' || c == 'P' || c == 'G' || c == 'S' || c == 'I');
+	itt->m_has_year        = (c == 'B' || c == 'C' || c == 'G' || c == 'S' || c == 'I');
 
 	return itt;
 }
 
 template <> Item *TextImport::parse<Item> ( uint count, const char **strs )
 {
-	if ( count < 4 )
+	if (count < 4)
 		return 0;
 
-	Item *item = new Item ( );
-	item-> m_id        = my_strdup ( strs [2] );
-	item-> m_name      = my_strdup ( strs [3] );
+	Item *item = new Item();
+	item-> m_id        = my_strdup(strs[2]);
+	item-> m_name      = my_strdup(strs[3]);
 	item-> m_item_type = m_current_item_type;
 		
 	// only allocate one block for name, id and category to speed up things
 
-	const char *pos = strs [1];
-	const Category *maincat = m_categories [strtol ( strs [0], 0, 10 )];
+	const char *pos = strs[1];
+	const Category *maincat = m_categories.value(strtol(strs[0], 0, 10));
 	
-	if ( maincat && pos [0] ) {
-		pos += strlen ( maincat-> name ( ));
+	if (maincat && pos [0]) {
+		pos += strlen(maincat->name());
 	
-		if ( *pos )
+		if (*pos)
 			pos += 3;
 	}
 	const char *auxcat = pos;
 
 	uint catcount = 1;
-	const Category *catlist [256] = { maincat };
+	const Category *catlist[256] = { maincat };
 
-	while (( pos = strstr ( pos, " / " ))) {
-		if ( auxcat [0] ) {
-			const Category *cat = findCategoryByName ( auxcat, pos - auxcat );
-			if ( cat )
-				catlist [catcount++] = cat;
+	while ((pos = strstr(pos, " / "))) {
+		if (auxcat[0]) {
+			const Category *cat = findCategoryByName(auxcat, pos - auxcat);
+			if (cat)
+				catlist[catcount++] = cat;
 			else {
 				// The field separator ' / ' also appears in category names !!!
 				pos += 3;
@@ -201,39 +206,39 @@ template <> Item *TextImport::parse<Item> ( uint count, const char **strs )
 		pos += 3;
 		auxcat = pos;
 	}
-	if ( auxcat [0] ) {
-		const Category *cat = findCategoryByName ( auxcat );
-		if ( cat )
-			catlist [catcount++] = cat;
+	if (auxcat[0]) {
+		const Category *cat = findCategoryByName(auxcat);
+		if (cat)
+			catlist[catcount++] = cat;
 		else
-			qWarning ( ) << "Invalid category name:" << auxcat;
+			qWarning() << "Invalid category name:" << auxcat;
 	}
 
-	item-> m_categories = new const Category * [catcount + 1];
-	memcpy ( item-> m_categories, catlist, catcount * sizeof( const Category * ));
-	item-> m_categories [catcount] = 0;
+	item->m_categories = new const Category * [catcount + 1];
+	memcpy(item->m_categories, catlist, catcount * sizeof(const Category *));
+	item->m_categories[catcount] = 0;
 
 	uint parsedfields = 4;
 
-	if (( parsedfields < count ) && ( item-> m_item_type-> hasYearReleased ( ))) {
-		int y = strtol ( strs [parsedfields], 0, 10 ) - 1900;
-		item-> m_year = (( y > 0 ) && ( y < 255 )) ? y : 0; // we only have 8 bits for the year
+	if ((parsedfields < count ) && (item->m_item_type->hasYearReleased())) {
+		int y = strtol(strs[parsedfields], 0, 10) - 1900;
+		item->m_year = ((y > 0) && (y < 255)) ? y : 0; // we only have 8 bits for the year
 		parsedfields++;
 	}
 	else
 		item-> m_year = 0;
 
 	if (( parsedfields < count ) && ( item-> m_item_type-> hasWeight ( ))) {
-		item-> m_weight = QLocale::c ( ). toFloat ( strs [parsedfields] );
+		item-> m_weight = QLocale::c().toFloat(strs[parsedfields]);
 		parsedfields++;
 	}
 	else
 		item-> m_weight = 0;
 
-	if ( parsedfields < count )
-		item-> m_color = m_colors [strtol ( strs [parsedfields], 0, 10 )];
+	if (parsedfields < count)
+		item->m_color = m_colors.value(strtol(strs[parsedfields], 0, 10));
 	else
-		item-> m_color = 0;
+		item->m_color = 0;
 
 	return item;
 }
@@ -261,8 +266,8 @@ bool BrickLink::TextImport::import ( const QString &path )
 	ok &= readColorGuide ( path + "colorguide.html" );
 	ok &= readPeeronColors ( path + "peeron_colors.html" );
 
-	// hack to speed up loading (exactly 36759 items on 22.08.2005)
-	m_items. resize ( 37000 );
+	// speed up loading (exactly 47976 items on 05.12.2007)
+	m_items.reserve(50000);
 
 	foreach ( const ItemType *itt, m_item_types ) {
 		m_current_item_type = itt;
@@ -310,10 +315,8 @@ template <typename T> bool BrickLink::TextImport::readDB_processLine ( QVector<c
 {
 	T *t = parse<T> ( tokencount, (const char **) tokens );
 
-	if ( t ) {
-		if ( v. size ( ) == v. count ( ))
- 			v. resize ( v. size ( ) + qMax( 40, qMin( 320, v. size ( ))));
-		v. insert ( v. count ( ), t );
+	if (t) {
+		v.append(t);
 		return true;
 	}
 	else
@@ -413,24 +416,24 @@ template <typename C> bool BrickLink::TextImport::readDB ( const QString &name, 
 
 bool BrickLink::TextImport::readColorGuide ( const QString &name )
 {
-	QFile f ( name );
-	if ( f. open ( QIODevice::ReadOnly )) {
-		QTextStream ts ( &f );
-		QString s = ts. readAll ( );
-		f. close ( );
+	QFile f(name);
+	if ( f.open(QIODevice::ReadOnly)) {
+		QTextStream ts(&f);
+		QString s = ts.readAll();
+		f.close();
 
-		QRegExp rxp ( ">([0-9]+)&nbsp;</TD><TD[ ]+BGCOLOR=\"#?([a-fA-F0-9]{6,6})\">" );
+		QRegExp rxp(">([0-9]+)&nbsp;</TD><TD[ ]+BGCOLOR=\"#?([a-fA-F0-9]{6,6})\">");
 
 		int pos = 0;
 
-		while (( pos = rxp. indexIn ( s, pos )) != -1 ) {
-			int id = rxp. cap ( 1 ). toInt ( );
+		while ((pos = rxp. indexIn(s, pos)) != -1) {
+			int id = rxp.cap(1).toInt();
 
-			Color *colp = const_cast<Color *> ( m_colors [id] );
-			if ( colp )
-				colp-> m_color = QColor ( "#" + rxp. cap ( 2 ));
+			Color *colp = const_cast<Color *>(m_colors.value(id));
+			if (colp)
+				colp->m_color = QColor("#" + rxp.cap(2));
 
-			pos += rxp. matchedLength ( );
+			pos += rxp.matchedLength();
 		}
 		return true;
 	}
@@ -449,7 +452,7 @@ bool BrickLink::TextImport::readPeeronColors ( const QString &name )
 
 		QRegExp namepattern ( "<a href=[^>]+>(.+)</a>" );
 		
-		while (( line = in. readLine ( )). isNull ( )) {
+		while (!( line = in. readLine ( )). isNull ( )) {
 			if ( line. startsWith ( "<td>" ) && line. endsWith ( "</td>" )) {
 				QString tmp = line. mid ( 4, line. length ( ) - 9 );
 				QStringList sl = tmp. split ( "</td><td>", QString::KeepEmptyParts );
@@ -469,7 +472,7 @@ bool BrickLink::TextImport::readPeeronColors ( const QString &name )
 						peeron_name = namepattern. cap ( 1 );
 
 					if ( id != -1 ) {
-						Color *colp = const_cast<Color *> ( m_colors [id] );
+						Color *colp = const_cast<Color *>(m_colors.value(id));
 						if ( colp ) {
 							if ( !peeron_name. isEmpty ( ))
 								colp-> m_peeron_name = my_strdup ( peeron_name. toLatin1 ( ));
@@ -493,19 +496,19 @@ bool BrickLink::TextImport::readPeeronColors ( const QString &name )
 
 bool BrickLink::TextImport::importInventories ( const QString &path, QVector<const Item *> &invs )
 {
-	const Item **itemp = invs. data ( );
-	for ( int i = 0; i < invs. count ( ); i++ ) {
-		const Item *&item = itemp [i];
+	const Item **itemp = invs.data();
+	for (int i = 0; i < invs.count(); i++) {
+		const Item *&item = itemp[i];
 
-		if ( !item ) // already yanked
+		if (!item) // already yanked
 			continue;
 
-		if ( !item-> hasInventory ( )) {
+		if (!item-> hasInventory()) {
 			item = 0;  // no inv at all -> yank it
 			continue;
 		}
 
-		if ( readInventory ( path, item )) {
+		if (readInventory(path, item)) {
 			item = 0;
 		}
 	}
@@ -542,8 +545,8 @@ bool BrickLink::TextImport::readInventory ( const QString &path, const Item *ite
 						if ( !ii-> item ( ) || !ii-> color ( ) || !ii-> quantity ( ))
 							continue;
 
-						BrickLink::Item::AppearsInColor &vec = m_appears_in_hash [ii-> item ( )][ii-> color ( )];
-						vec. append ( QPair<int, const BrickLink::Item *> ( ii-> quantity ( ), item ));
+                        BrickLink::Item::AppearsInColor &vec = m_appears_in_hash[ii->item()][ii->color()];
+						vec.append(QPair<int, const BrickLink::Item *>(ii->quantity(), item));
 					}
 					m_consists_of_hash. insert ( item, *items );
 					ok = true;

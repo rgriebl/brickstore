@@ -151,7 +151,7 @@ const QPixmap *BrickLink::Core::noImage ( const QSize &s )
 {
 	QString key = QString( "%1x%2" ). arg( s. width ( )). arg( s. height ( ));
 
-	QPixmap *pix = m_noimages [key];
+	QPixmap *pix = m_noimages.value(key);
 
 	if ( !pix ) {
 		pix = new QPixmap(s);
@@ -444,22 +444,22 @@ const QVector<const BrickLink::Item *> &BrickLink::Core::items ( ) const
 
 const BrickLink::Category *BrickLink::Core::category ( uint id ) const
 {
-	return m_databases. categories [id];
+	return m_databases.categories.value(id);
 }
 
 const BrickLink::Color *BrickLink::Core::color ( uint id ) const
 {
-	return m_databases. colors [id];
+	return m_databases.colors.value(id);
 }
 
 const BrickLink::Color *BrickLink::Core::colorFromPeeronName ( const char *peeron_name ) const
 {
-	if ( !peeron_name || !peeron_name [0] )
+	if (!peeron_name || !peeron_name[0])
 		return 0;
 
-	for ( QHash<int, const Color *>::const_iterator it = m_databases. colors. begin ( ); it != m_databases. colors. end ( ); ++it ) {
-		if ( qstricmp ( it. value ( )-> peeronName ( ), peeron_name ) == 0 )
-			return it. value ( );
+    foreach (const Color *col, m_databases.colors) {
+		if (!qstricmp(col-> peeronName(), peeron_name))
+			return col;
 	}
 	return 0;
 }
@@ -467,9 +467,9 @@ const BrickLink::Color *BrickLink::Core::colorFromPeeronName ( const char *peero
 
 const BrickLink::Color *BrickLink::Core::colorFromLDrawId ( int ldraw_id ) const
 {
-	for ( QHash<int, const Color *>::const_iterator it = m_databases. colors. begin ( ); it != m_databases. colors. end ( ); ++it ) {
-		if ( it. value ( )-> ldrawId ( ) == ldraw_id )
-			return it. value ( );
+    foreach (const Color *col, m_databases.colors) {
+		if (col-> ldrawId ( ) == ldraw_id )
+			return col;
 	}
 	return 0;
 }
@@ -477,7 +477,7 @@ const BrickLink::Color *BrickLink::Core::colorFromLDrawId ( int ldraw_id ) const
 
 const BrickLink::ItemType *BrickLink::Core::itemType ( char id ) const
 {
-	return m_databases. item_types [id];
+	return m_databases.item_types.value(id);
 }
 
 const BrickLink::Item *BrickLink::Core::item ( char tid, const char *id ) const
@@ -565,7 +565,9 @@ bool BrickLink::Core::readDatabase ( const QString &fname )
 
 	if ( pds ) {
 		QDataStream &ds = *pds;
-		quint32 magic = 0, filesize = 0, version = 0;
+		ds. setVersion ( QDataStream::Qt_3_3 );
+
+        quint32 magic = 0, filesize = 0, version = 0;
 
 		ds >> magic >> filesize >> version;
 		
@@ -573,7 +575,6 @@ bool BrickLink::Core::readDatabase ( const QString &fname )
 			return false;
 
 		ds. setByteOrder ( QDataStream::LittleEndian );
-		ds. setVersion ( QDataStream::Qt_3_3 );
 
 		// colors
 		quint32 colc = 0;
@@ -609,11 +610,11 @@ bool BrickLink::Core::readDatabase ( const QString &fname )
 		quint32 itc = 0;
 		ds >> itc;
 
-		m_databases. items. resize ( itc );
-		for ( quint32 i = 0; i < itc; i++ ) {
-			Item *item = new Item ( );
+		m_databases.items.reserve(itc);
+		for (quint32 i = itc; i; i--) {
+			Item *item = new Item();
 			ds >> item;
-			m_databases. items. replace ( i, item );
+			m_databases.items.append(item);
 		}
 		quint32 allc = 0;
 		ds >> allc >> magic;
@@ -1265,7 +1266,7 @@ bool BrickLink::Core::parseLDrawModelInternal ( QFile &f, const QString &model_n
 					
 					QString key = QString( "%1@%2" ). arg( partid ). arg( colid );
 
-					InvItem *ii = mergehash [key];
+					InvItem *ii = mergehash.value(key);
 					
 					if ( ii ) {
 						ii-> m_quantity++;
@@ -1351,6 +1352,7 @@ bool BrickLink::Core::writeDatabase ( const QString &fname )
 	QFile f ( filename + ".new" );
 	if ( f. open ( QIODevice::WriteOnly )) {
 		QDataStream ds ( &f );
+		ds. setVersion ( QDataStream::Qt_3_3 );
 
 		ds << quint32( 0 /*magic*/ ) << quint32 ( 0 /*filesize*/ ) << quint32( DEFAULT_DATABASE_VERSION /*version*/ );
 		

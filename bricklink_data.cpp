@@ -24,14 +24,7 @@ namespace BrickLink {
 
 QDataStream &operator << ( QDataStream &ds, const Color *col )
 {
-	quint8 flags = 0;
-	flags |= ( col-> m_is_trans    ? 0x01 : 0 );
-	flags |= ( col-> m_is_glitter  ? 0x02 : 0 );
-	flags |= ( col-> m_is_speckle  ? 0x04 : 0 );
-	flags |= ( col-> m_is_metallic ? 0x08 : 0 );
-	flags |= ( col-> m_is_chrome   ? 0x10 : 0 );
-
-	return ds << col-> m_id << col-> m_name << col-> m_peeron_name << col-> m_ldraw_id << col-> m_color << flags;
+	return ds << col-> m_id << col-> m_name << col-> m_peeron_name << col-> m_ldraw_id << col-> m_color << quint8(col->m_type);
 }
 
 QDataStream &operator >> ( QDataStream &ds, BrickLink::Color *col )
@@ -41,12 +34,7 @@ QDataStream &operator >> ( QDataStream &ds, BrickLink::Color *col )
 	quint8 flags;
 	ds >> col-> m_id >> col-> m_name >> col-> m_peeron_name >> col-> m_ldraw_id >> col-> m_color >> flags;
 
-	col-> m_is_trans    = flags & 0x01;
-	col-> m_is_glitter  = flags & 0x02;
-	col-> m_is_speckle  = flags & 0x04;
-	col-> m_is_metallic = flags & 0x08;
-	col-> m_is_chrome   = flags & 0x10;
-
+    col->m_type = flags;
 	return ds;
 }
 

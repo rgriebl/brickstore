@@ -432,8 +432,13 @@ void CTransfer::abortAllJobs()
     m_jobs.clear();
     m_mutex.unlock();
 
-    while (!inactive.isEmpty())
-        inactive.takeFirst()->abort();
+    foreach (CTransferJob *job, inactive) {
+        job->m_status = CTransferJob::Aborted;
+        emit finished(job);
+        delete job;
+
+        updateProgress(-1);
+    }
 }
 
 void CTransfer::updateProgress(int delta)
