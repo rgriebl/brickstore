@@ -1032,7 +1032,7 @@ void CSelectItem::itemContext ( const BrickLink::Item *item, const QPoint &pos )
 	CatListItem *cli = static_cast <CatListItem *> ( d-> w_categories-> selectedItem ( ));
 	const BrickLink::Category *cat = cli ? cli-> category ( ) : 0;
 
-	if ( !item-> category ( ) || ( item-> category ( ) == cat ))
+	if ( !item || !item-> category ( ) || ( item-> category ( ) == cat ))
 		return;
 
 	QPopupMenu pop ( this );

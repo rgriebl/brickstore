@@ -815,6 +815,9 @@ void CItemViewItem::paintCell ( QPainter *p, const QColorGroup &cg, int col, int
 	Q_UINT64 colmask = 1ULL << col;
 	CItemView *iv = listView ( );
 	int grayout_right_chars = 0;
+    QString bubble_str;
+    QColor bubble_col;
+    bool bubble_bold;
 
 
 	const QPixmap *pix = pixmap ( col );
@@ -828,14 +831,20 @@ void CItemViewItem::paintCell ( QPainter *p, const QColorGroup &cg, int col, int
 	fg = cg. text ( );
 
 	switch ( col ) {
-		case CDocument::Description:
+        case CDocument::Description: {
 			if ( m_item-> item ( )-> hasInventory ( )) {
 				QString invstr = CItemView::tr( "Inv" );
 				str = str + " [" + invstr + "]";
 				grayout_right_chars = invstr. length ( ) + 2;
 			}
+            int altid = m_item-> alternateId ( );
+            if ( altid ) {
+                bubble_str = QString::number ( altid );
+                bubble_col = CUtility::gradientColor ( bg, shadeColor ( altid ), 0.4f );
+                bubble_bold = !m_item-> alternate ( );
+            }
 			break;
-
+        }
 		case CDocument::ItemType:
 			bg = CUtility::gradientColor ( bg, shadeColor ( m_item-> itemType ( )-> id ( )), 0.1f );
 			break;
@@ -1016,6 +1025,22 @@ void CItemViewItem::paintCell ( QPainter *p, const QColorGroup &cg, int col, int
 		else
 			p-> drawText ( x + margin, y, rw, h, align, str );
 	}
+    if ( !bubble_str. isEmpty ( )) {
+		const QFontMetrics &fm = p-> fontMetrics ( );
+
+		int rw = w - 2 * margin;
+        int bw = fm. width ( bubble_str ) + 8;
+
+        if ( bubble_bold ) {
+            QFont f = p-> font ( );
+            f.setBold ( true );
+            p-> setFont ( f );
+        }
+        p-> setPen ( bubble_col );
+        p->drawRoundRect ( x + margin + rw - bw, 0, bw, h );
+        p-> setPen ( fg );
+        p-> drawText ( x + margin + rw - bw, y, bw, h, Qt::AlignCenter, bubble_str ); 
+    }
 }
 
 int CItemViewItem::rtti ( ) const

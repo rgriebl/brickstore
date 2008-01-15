@@ -1428,6 +1428,12 @@ void CWindow::filePrint ( )
 	prt-> setOptionEnabled ( QPrinter::PrintPageRange, false );
 	prt-> setPrintRange ( m_doc-> selection ( ). isEmpty ( ) ? QPrinter::AllPages : QPrinter::Selection );
 
+    QString doctitle = m_doc-> title ( );
+    if ( doctitle == m_doc-> fileName ( ))
+        doctitle = QFileInfo ( doctitle ). baseName ( );
+
+    prt-> setDocName ( doctitle );
+
 	prt-> setFullPage ( true );
 	
 

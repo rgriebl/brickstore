@@ -884,6 +884,10 @@ BrickLink::InvItemList *BrickLink::parseItemListXML ( QDomElement root, ItemList
 			else if ( hint == XMLHint_Inventory ) {
 				if (( tag == "EXTRA" ) && ( val == "Y" ))
 					ii-> setStatus ( InvItem::Extra );
+				else if ( tag == "ALTERNATE" )
+					ii-> setAlternate (( val == "Y" ));
+				else if ( tag == "MATCHID" )
+					ii-> setAlternateId ( val. toInt ( ));
 				else if ( tag == "ITEMNAME" )  // BrickStore extension for Peeron inventories
 					itemname = val;
 				else if ( tag == "COLORNAME" ) // BrickStore extension for Peeron inventories

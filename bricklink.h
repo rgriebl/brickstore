@@ -364,6 +364,11 @@ public:
 		QString reserved ( ) const            { return m_reserved; }
 		void setReserved ( const QString &r ) { m_reserved = r; }
 
+		bool alternate ( ) const            { return m_alternate; }
+		void setAlternate ( bool a )        { m_alternate = a; }
+		uint alternateId ( ) const          { return m_alt_id; }
+		void setAlternateId ( uint aid )    { m_alt_id = aid; }
+
 		Picture *customPicture ( ) const    { return m_custom_picture; }
 		
 		struct Incomplete {
@@ -397,6 +402,9 @@ public:
 		Condition        m_condition : 2;
 		bool             m_retain    : 1;
 		bool             m_stockroom : 1;
+        bool             m_alternate : 1;
+        uint             m_alt_id    : 6;
+        int              m_xreserved : 2;
 
 		QString          m_comments;
 		QString          m_remarks;

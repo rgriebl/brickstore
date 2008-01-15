@@ -258,7 +258,7 @@ void DlgLoadOrderImpl::checkId ( )
 	bool ok = true;
 
 	if ( w_select_by-> selectedId ( ) == 0 ) 
-		ok = w_order_number-> hasAcceptableInput ( ) && ( w_order_number-> text ( ). length ( ) == 6 );
+		ok = w_order_number-> hasAcceptableInput ( ) && ( w_order_number-> text ( ). length ( ) >= 6 ) && ( w_order_number-> text ( ). length ( ) <= 7 );
 	else
 		ok = ( w_order_from-> date ( ) <= w_order_to-> date ( )) && ( w_order_to-> date ( ) <= QDate::currentDate ( ));      
 

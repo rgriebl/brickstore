@@ -24,6 +24,7 @@
 #include <qsargument.h>
 #include <qsinputdialogfactory.h>
 #include <qsobjectfactory.h>
+#include <qsutilfactory.h>
 
 #include "cutility.h"
 #include "cresource.h"
@@ -102,6 +103,7 @@ bool CReport::load ( const QString &filename )
 
 		d-> m_interpreter = new QSInterpreter ( this, "report_interpreter" );
 		d-> m_interpreter-> addObjectFactory ( new QSInputDialogFactory ( ));
+		d-> m_interpreter-> addObjectFactory ( new QSUtilFactory ( ));
 		d-> m_interpreter-> addObjectFactory ( new CReportFactory ( ));
 
 		evaluate ( d-> m_interpreter, d-> m_code, 0, fi. baseName ( ));

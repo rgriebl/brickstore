@@ -243,8 +243,8 @@ void BrickLink::Item::setConsistsOf ( const InvItemList &items ) const
 			entry-> m_index    = item-> item ( )-> m_index;
 			entry-> m_color    = item-> color ( )-> id ( );
 			entry-> m_extra    = ( item-> status ( ) == BrickLink::InvItem::Extra ) ? 1 : 0;
-			entry-> m_isalt    = 0;
-			entry-> m_altid    = 0;
+			entry-> m_isalt    = item-> alternate ( );
+			entry-> m_altid    = item-> alternateId ( );
 			entry-> m_reserved = 0;
 			ptr++;
 		}
@@ -275,6 +275,8 @@ BrickLink::InvItemList BrickLink::Item::consistsOf ( ) const
 				ii-> setQuantity ( entry-> m_qty );
 				if ( entry-> m_extra )
 					ii-> setStatus ( BrickLink::InvItem::Extra );
+                ii-> setAlternate ( entry-> m_isalt );
+                ii-> setAlternateId ( entry-> m_altid );
 
 				list. append ( ii );
 			}
