@@ -405,6 +405,9 @@ BrickLink::InvItem::InvItem ( const Color *color, const Item *item )
 	m_status = Include;
 	m_condition = New;
 	m_retain = m_stockroom = false;
+    m_alternate = false;
+    m_alt_id = 0;
+    m_xreserved = 0;
 	m_weight = 0;
 
 	m_quantity = m_orig_quantity = 0;

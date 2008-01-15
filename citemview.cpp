@@ -840,7 +840,7 @@ void CItemViewItem::paintCell ( QPainter *p, const QColorGroup &cg, int col, int
             int altid = m_item-> alternateId ( );
             if ( altid ) {
                 bubble_str = QString::number ( altid );
-                bubble_col = CUtility::gradientColor ( bg, shadeColor ( altid ), 0.4f );
+                bubble_col = CUtility::gradientColor ( bg, shadeColor ( altid ), 0.1f );
                 bubble_bold = !m_item-> alternate ( );
             }
 			break;
@@ -916,6 +916,8 @@ void CItemViewItem::paintCell ( QPainter *p, const QColorGroup &cg, int col, int
 
 		bg = CUtility::gradientColor ( bg, cg. highlight ( ), f );
 		fg = cg. highlightedText ( );
+
+        bubble_col = CUtility::gradientColor ( bg, bubble_col, 0.1f );
 	}
 	
 	p-> fillRect ( x, y, w, h, bg );
@@ -1030,16 +1032,21 @@ void CItemViewItem::paintCell ( QPainter *p, const QColorGroup &cg, int col, int
 
 		int rw = w - 2 * margin;
         int bw = fm. width ( bubble_str ) + 8;
+        int bh = QMIN( h, fm. height ( ) + 4 );
+        int dx = x + margin + rw - bw;
+        int dy = ( h - bh ) / 2;
 
         if ( bubble_bold ) {
             QFont f = p-> font ( );
             f.setBold ( true );
             p-> setFont ( f );
         }
-        p-> setPen ( bubble_col );
-        p->drawRoundRect ( x + margin + rw - bw, 0, bw, h );
+        p-> setPen ( Qt::NoPen );
+        p-> setBrush ( bubble_col );
+        p-> drawRoundRect ( dx, dy, bw, bh );
+        p-> setBrush ( Qt::NoBrush );
         p-> setPen ( fg );
-        p-> drawText ( x + margin + rw - bw, y, bw, h, Qt::AlignCenter, bubble_str ); 
+        p-> drawText ( dx, dy, bw, bh, Qt::AlignCenter, bubble_str ); 
     }
 }
 
