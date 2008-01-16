@@ -840,7 +840,7 @@ void CItemViewItem::paintCell ( QPainter *p, const QColorGroup &cg, int col, int
             int altid = m_item-> alternateId ( );
             if ( altid ) {
                 bubble_str = QString::number ( altid );
-                bubble_col = CUtility::gradientColor ( bg, shadeColor ( altid ), 0.1f );
+                bubble_col = CUtility::gradientColor ( bg, shadeColor ( altid ), 0.2f );
                 bubble_bold = !m_item-> alternate ( );
             }
 			break;

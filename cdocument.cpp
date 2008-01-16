@@ -509,23 +509,29 @@ CDocument *CDocument::fileImportBrickLinkInventory ( const BrickLink::Item *pres
 	return 0;
 }
 
-CDocument *CDocument::fileImportBrickLinkOrder ( )
+QValueList<CDocument *> CDocument::fileImportBrickLinkOrders ( )
 {
-	DlgLoadOrderImpl dlg ( CFrameWork::inst ( ));
+    QValueList<CDocument *> docs;
+
+    DlgLoadOrderImpl dlg ( CFrameWork::inst ( ));
 
 	if ( dlg. exec ( ) == QDialog::Accepted ) {
-		QPair<BrickLink::Order *, BrickLink::InvItemList *> order = dlg. order ( );
+        QValueList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > orders = dlg. orders ( );
 
-		if ( order. first && order. second ) {
-			CDocument *doc = new CDocument ( true );
+        for ( QValueList<QPair<BrickLink::Order *, BrickLink::InvItemList *> >::const_iterator it = orders. begin ( ); it != orders. end ( ); ++it ) {
+            const QPair<BrickLink::Order *, BrickLink::InvItemList *> &order = *it;
 
-			doc-> setTitle ( tr( "Order #%1" ). arg ( order. first-> id ( )));
-			doc-> setBrickLinkItems ( *order. second );	
-			doc-> m_order = new BrickLink::Order ( *order. first );
-			return doc;
-		}
+		    if ( order. first && order. second ) {
+			    CDocument *doc = new CDocument ( true );
+
+			    doc-> setTitle ( tr( "Order #%1" ). arg ( order. first-> id ( )));
+			    doc-> setBrickLinkItems ( *order. second );	
+			    doc-> m_order = new BrickLink::Order ( *order. first );
+			    docs. append ( doc );
+		    }
+        }
 	}
-	return 0;
+    return docs;
 }
 
 CDocument *CDocument::fileImportBrickLinkStore ( )

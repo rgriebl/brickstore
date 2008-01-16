@@ -116,7 +116,7 @@ private:
 
 
 int   DlgLoadOrderImpl::s_last_select   = 0;
-QDate DlgLoadOrderImpl::s_last_from     = QDate::currentDate ( ). addMonths ( -1 );
+QDate DlgLoadOrderImpl::s_last_from     = QDate::currentDate ( ). addDays ( -7 );
 QDate DlgLoadOrderImpl::s_last_to       = QDate::currentDate ( );
 int   DlgLoadOrderImpl::s_last_type     = 0;
 
@@ -142,6 +142,7 @@ DlgLoadOrderImpl::DlgLoadOrderImpl ( QWidget *parent, const char *name, bool mod
 	w_order_list-> addColumn ( tr( "Total" ));
 	w_order_list-> setColumnAlignment ( 4, Qt::AlignRight );
 //	w_order_list-> setShowSortIndicator ( true );
+    w_order_list-> setSelectionMode ( QListView::Extended );
 
 	connect ( w_next, SIGNAL( clicked ( )), this, SLOT( download ( )));
 	connect ( w_back, SIGNAL( clicked ( )), this, SLOT( start ( )));
@@ -233,14 +234,15 @@ void DlgLoadOrderImpl::download ( )
 	delete import;
 }
 
-QPair<BrickLink::Order *, BrickLink::InvItemList *> DlgLoadOrderImpl::order ( ) const
+QValueList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > DlgLoadOrderImpl::orders ( ) const
 {
-	OrderListItem *oli = static_cast<OrderListItem *> ( w_order_list-> selectedItem ( ));
+    QValueList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > list;
+    
+    for ( QListViewItemIterator it ( w_order_list, QListViewItemIterator::Selected ); it. current ( ); ++it ) {
+        list. append ( static_cast<OrderListItem *> ( it. current ( ))-> order ( ));
+    }
 
-	if ( oli )
-		return oli-> order ( );
-	else
-		return qMakePair<BrickLink::Order *, BrickLink::InvItemList *> ( 0, 0 );
+    return list;
 }
 
 BrickLink::Order::Type DlgLoadOrderImpl::orderType ( ) const
@@ -267,7 +269,8 @@ void DlgLoadOrderImpl::checkId ( )
 
 void DlgLoadOrderImpl::checkSelected ( )
 {
-	w_ok-> setEnabled ( w_order_list->selectedItem ( ) != 0 );
+    QListViewItemIterator it ( w_order_list, QListViewItemIterator::Selected );
+	w_ok-> setEnabled ( it. current ( ));
 }
 
 void DlgLoadOrderImpl::activateItem ( QListViewItem * )

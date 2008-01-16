@@ -25,7 +25,7 @@ public:
     DlgLoadOrderImpl ( QWidget *parent = 0, const char * name = 0, bool modal = true );
     ~DlgLoadOrderImpl ( );
 
-	QPair<BrickLink::Order *, BrickLink::InvItemList *> order ( ) const;
+    QValueList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > orders ( ) const;
 
 protected:
 	virtual void accept ( );

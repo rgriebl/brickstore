@@ -156,7 +156,7 @@ public:
 	static CDocument *fileOpen ( );
 	static CDocument *fileOpen ( const QString &name );
 	static CDocument *fileImportBrickLinkInventory ( const BrickLink::Item *preselect = 0 );
-	static CDocument *fileImportBrickLinkOrder ( );
+	static QValueList<CDocument *> fileImportBrickLinkOrders ( );
 	static CDocument *fileImportBrickLinkStore ( );
 	static CDocument *fileImportBrickLinkCart ( );
 	static CDocument *fileImportBrickLinkXML ( );

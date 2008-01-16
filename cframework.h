@@ -174,6 +174,7 @@ private:
 	QToolBar *createToolBar ( const QString &label, const QStringList & );
 	void createStatusBar ( );
 	bool createWindow ( CDocument *doc );
+    bool createWindows ( const QValueList<CDocument *> &docs );
 
 	QMap<QAction *, bool ( CWindow::* ) ( ) const> m_toggle_updates;
 

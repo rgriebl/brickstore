@@ -1076,7 +1076,7 @@ void CFrameWork::fileImportBrickLinkOrder ( )
 	if ( !checkBrickLinkLogin ( ))
 		return;
 
-	createWindow ( CDocument::fileImportBrickLinkOrder ( ));
+	createWindows ( CDocument::fileImportBrickLinkOrders ( ));
 }
 
 void CFrameWork::fileImportBrickLinkStore ( )
@@ -1100,6 +1100,16 @@ void CFrameWork::fileImportBrickLinkCart ( )
 void CFrameWork::fileImportLDrawModel ( )
 {
 	createWindow ( CDocument::fileImportLDrawModel ( ));
+}
+
+bool CFrameWork::createWindows ( const QValueList<CDocument *> &docs )
+{
+    bool ok = true;
+
+    foreach ( CDocument *doc, docs ) {
+        ok &= createWindow ( doc );
+    }
+    return ok;
 }
 
 bool CFrameWork::createWindow ( CDocument *doc )
