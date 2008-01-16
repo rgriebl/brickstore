@@ -463,8 +463,9 @@ public:
 		Type type ( ) const         { return m_type; }
 		QDateTime date ( ) const    { return m_date; }
 		QDateTime statusChange ( ) const  { return m_status_change; }
-		QString buyer ( ) const     { return m_type == Received ? m_other : QString ( ); }
-		QString seller ( ) const    { return m_type == Placed ? m_other : QString ( ); }
+		//QString buyer ( ) const     { return m_type == Received ? m_other : QString ( ); }
+		//QString seller ( ) const    { return m_type == Placed ? m_other : QString ( ); }
+        QString other ( ) const     { return m_other; }
 		money_t shipping ( ) const  { return m_shipping; }
 		money_t insurance ( ) const { return m_insurance; }
 		money_t delivery ( ) const  { return m_delivery; }
@@ -473,6 +474,7 @@ public:
 		QString status ( ) const    { return m_status; }
 		QString payment ( ) const   { return m_payment; }
 		QString remarks ( ) const   { return m_remarks; }
+        QString address ( ) const   { return m_address; }
 
 		void setId ( const QString &id )             { m_id = id; }
 		void setDate ( const QDateTime &dt )         { m_date = dt; }
@@ -486,7 +488,8 @@ public:
 		void setGrandTotal ( const money_t &m )      { m_grand_total = m; }
 		void setStatus ( const QString &str )        { m_status = str; }
 		void setPayment ( const QString &str )       { m_payment = str; }
-		void setRemarks ( const QString &str )      { m_remarks = str; }
+		void setRemarks ( const QString &str )       { m_remarks = str; }
+        void setAddress ( const QString &str )       { m_address = str; } 
 
 	private:
 		QString   m_id;
@@ -502,6 +505,7 @@ public:
 		QString   m_status;
 		QString   m_payment;
 		QString   m_remarks;
+        QString   m_address;
 	};
 
 	class PriceGuide : public CRef {

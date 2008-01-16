@@ -20,6 +20,8 @@
 #include <qlabel.h>
 #include <qcombobox.h>
 #include <qpainter.h>
+#include <qtooltip.h>
+#include <qheader.h>
 
 #include "clistview.h"
 #include "cimport.h"
@@ -60,11 +62,28 @@ public:
 			case 0: return isReceived ( ) ? DlgLoadOrderImpl::tr( "Received" ) : DlgLoadOrderImpl::tr( "Placed" );
 			case 1: return m_order. first-> id ( );
 			case 2: return m_order. first-> date ( ). date ( ). toString ( Qt::LocalDate );
-			case 3: return isReceived ( ) ? m_order. first-> buyer ( ) : m_order. first-> seller ( );
+            case 3: {
+                int firstline = m_order. first-> address( ). find ( '\n' );
+
+                if ( firstline <= 0 )
+                    return m_order. first-> other ( );
+                else
+                    return QString( "%1 (%2)" ). arg ( m_order. first-> address( ). left ( firstline )). arg ( m_order. first-> other ( ));
+            }
 			case 4: return m_order. first-> grandTotal ( ). toLocalizedString ( true );
 			default: return QString ( );
 		}
 	}
+
+    QString toolTip ( int col ) const
+    {
+        QString tt = text ( col );
+
+        if ( col == 3 && !m_order.first->other().isEmpty()) {
+            tt = tt + "\n\n" + m_order.first->address();
+        }
+        return tt;
+    }
 
 	virtual int width ( const QFontMetrics &fm, const QListView *lv, int column ) const
 	{
@@ -111,14 +130,52 @@ private:
 	QPair<BrickLink::Order *, BrickLink::InvItemList *> m_order;
 };
 
+class OrderListToolTip : public QToolTip {
+public:
+	OrderListToolTip ( QWidget *parent, CListView *lv )
+		: QToolTip( parent ), m_lv ( lv )
+	{ }
+	
+	virtual ~OrderListToolTip ( )
+	{ }
+
+    void maybeTip ( const QPoint &pos )
+	{
+		if ( !parentWidget ( ) || !m_lv /*|| !m_iv-> showToolTips ( )*/ )
+			return;
+
+		OrderListItem *item = static_cast <OrderListItem *> ( m_lv-> itemAt ( pos ));
+		QPoint contentpos = m_lv-> viewportToContents ( pos );
+		
+		if ( !item )
+			return;
+
+		int col = m_lv-> header ( )-> sectionAt ( contentpos. x ( ));
+		QString text = item-> toolTip ( col );
+
+		if ( text. isEmpty ( ))
+			return;
+
+		QRect r = m_lv-> itemRect ( item );
+		int headerleft = m_lv-> header ( )-> sectionPos ( col ) - m_lv-> contentsX ( );
+		r. setLeft ( headerleft );
+		r. setRight ( headerleft + m_lv-> header ( )-> sectionSize ( col ));
+		tip ( r, text );
+	}
+
+private:
+    CListView *m_lv;
+};
+
+
 } // namespace
 
 
 
-int   DlgLoadOrderImpl::s_last_select   = 0;
+int   DlgLoadOrderImpl::s_last_select   = 1;
 QDate DlgLoadOrderImpl::s_last_from     = QDate::currentDate ( ). addDays ( -7 );
 QDate DlgLoadOrderImpl::s_last_to       = QDate::currentDate ( );
-int   DlgLoadOrderImpl::s_last_type     = 0;
+int   DlgLoadOrderImpl::s_last_type     = 1;
 
 
 DlgLoadOrderImpl::DlgLoadOrderImpl ( QWidget *parent, const char *name, bool modal )
@@ -143,6 +200,9 @@ DlgLoadOrderImpl::DlgLoadOrderImpl ( QWidget *parent, const char *name, bool mod
 	w_order_list-> setColumnAlignment ( 4, Qt::AlignRight );
 //	w_order_list-> setShowSortIndicator ( true );
     w_order_list-> setSelectionMode ( QListView::Extended );
+	w_order_list-> setShowToolTips ( false );
+	(void) new OrderListToolTip ( w_order_list-> viewport ( ), w_order_list );
+
 
 	connect ( w_next, SIGNAL( clicked ( )), this, SLOT( download ( )));
 	connect ( w_back, SIGNAL( clicked ( )), this, SLOT( start ( )));

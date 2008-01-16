@@ -140,6 +140,8 @@ public:
 
 	void init ( )
 	{
+        m_get_address_mode = false;
+        m_current_address = -1;
 		m_retry_placed = ( m_order_type == BrickLink::Order::Any );
 
 		if ( !m_order_id. isEmpty ( )) {
@@ -193,80 +195,100 @@ private slots:
 
 
 		if ( data && data-> size ( )) {
-			QBuffer order_buffer ( *data );
+            if ( m_get_address_mode ) {
+                QString s = QString::fromLatin1 ( data-> data ( ), data-> size ( ));
 
-			if ( order_buffer. open ( IO_ReadOnly )) {
-				QString emsg;
-				int eline = 0, ecol = 0;
-				QDomDocument doc;
+                QRegExp rx1 ( "<B>Name:</B></FONT></TD>\\s*<TD NOWRAP><FONT FACE=\"Tahoma, Arial\" SIZE=\"2\">(.+)</FONT></TD>" );
+                QRegExp rx2 ( "<B>Address:</B></FONT></TD>\\s*<TD NOWRAP><FONT FACE=\"Tahoma, Arial\" SIZE=\"2\">(.+)</FONT></TD>" );
+                QRegExp rx3 ( "<B>Country:</B></FONT></TD>\\s*<TD NOWRAP><FONT FACE=\"Tahoma, Arial\" SIZE=\"2\">(.+)</FONT></TD>" );
 
-				if ( doc. setContent ( &order_buffer, &emsg, &eline, &ecol )) {
-					QDomElement root = doc. documentElement ( );
+                rx1. setMinimal ( true );
+                rx1. search ( s );
+                rx2. setMinimal ( true );
+                rx2. search ( s );
+                rx3. setMinimal ( true );
+                rx3. search ( s );
 
-					BrickLink::InvItemList *items = 0;
+                QString a = rx1. cap ( 1 ) + "\n" + rx2. cap ( 1 ) + "\n" + rx3. cap ( 1 );
+                a.replace("<BR>", "\n");
+                
+                m_orders[m_current_address].first->setAddress(a);
+            }
+            else {
+			    QBuffer order_buffer ( *data );
 
-					if (( root. nodeName ( ) == "ORDERS" ) && ( root. firstChild ( ). nodeName ( ) == "ORDER" )) {
-						for ( QDomNode ordernode = root. firstChild ( ); !ordernode. isNull ( ); ordernode = ordernode. nextSibling ( )) {
-							if ( !ordernode. isElement ( ))
-								continue;
+			    if ( order_buffer. open ( IO_ReadOnly )) {
+				    QString emsg;
+				    int eline = 0, ecol = 0;
+				    QDomDocument doc;
 
-							items = BrickLink::inst ( )-> parseItemListXML ( ordernode. toElement ( ), BrickLink::XMLHint_Order /*, &invalid_items*/ );
+				    if ( doc. setContent ( &order_buffer, &emsg, &eline, &ecol )) {
+					    QDomElement root = doc. documentElement ( );
 
-							if ( items ) {
-								BrickLink::Order *order = new BrickLink::Order ( "", BrickLink::Order::Placed );
+					    BrickLink::InvItemList *items = 0;
 
-								for ( QDomNode node = ordernode. firstChild ( ); !node. isNull ( ); node = node. nextSibling ( )) {
-									if ( !node. isElement ( ))
-										continue;
+					    if (( root. nodeName ( ) == "ORDERS" ) && ( root. firstChild ( ). nodeName ( ) == "ORDER" )) {
+						    for ( QDomNode ordernode = root. firstChild ( ); !ordernode. isNull ( ); ordernode = ordernode. nextSibling ( )) {
+							    if ( !ordernode. isElement ( ))
+								    continue;
 
-									QString tag = node. toElement ( ). tagName ( );
-									QString val = node. toElement ( ). text ( );
+							    items = BrickLink::inst ( )-> parseItemListXML ( ordernode. toElement ( ), BrickLink::XMLHint_Order /*, &invalid_items*/ );
 
-									if ( tag == "BUYER" )
-										order-> setBuyer ( val );
-									else if ( tag == "SELLER" )
-										order-> setSeller ( val );
-									else if ( tag == "ORDERID" )
-										order-> setId ( val );
-									else if ( tag == "ORDERDATE" )
-										order-> setDate ( ymd2date ( val ));
-									else if ( tag == "ORDERSTATUSCHANGED" )
-										order-> setStatusChange ( ymd2date ( val ));
-									else if ( tag == "ORDERSHIPPING" )
-										order-> setShipping ( money_t::fromCString ( val ));
-									else if ( tag == "ORDERINSURANCE" )
-										order-> setInsurance ( money_t::fromCString ( val ));
-									else if ( tag == "ORDERDELIVERY" )
-										order-> setDelivery ( money_t::fromCString ( val ));
-									else if ( tag == "ORDERCREDIT" )
-										order-> setCredit ( money_t::fromCString ( val ));
-									else if ( tag == "GRANDTOTAL" )
-										order-> setGrandTotal ( money_t::fromCString ( val ));
-									else if ( tag == "ORDERSTATUS" )
-										order-> setStatus ( val );
-									else if ( tag == "PAYMENTTYPE" )
-										order-> setPayment ( val );
-									else if ( tag == "ORDERREMARKS" )
-										order-> setRemarks ( val );
-								}
+							    if ( items ) {
+								    BrickLink::Order *order = new BrickLink::Order ( "", BrickLink::Order::Placed );
 
-								if ( !order-> id ( ). isEmpty ( )) {
-									m_orders << qMakePair ( order, items );
-									ok = true;
-								}
-								else {
-									delete items;
-								}
-							}
-						}
-					}
-				}
-				// find a better way - we shouldn't display widgets here
-				//else
-				//	CMessageBox::warning ( 0, tr( "Could not parse the XML data for your orders:<br /><i>Line %1, column %2: %3</i>" ). arg ( eline ). arg ( ecol ). arg ( emsg ));
-			}
-		}
+								    for ( QDomNode node = ordernode. firstChild ( ); !node. isNull ( ); node = node. nextSibling ( )) {
+									    if ( !node. isElement ( ))
+										    continue;
 
+									    QString tag = node. toElement ( ). tagName ( );
+									    QString val = node. toElement ( ). text ( );
+
+									    if ( tag == "BUYER" )
+										    order-> setBuyer ( val );
+									    else if ( tag == "SELLER" )
+										    order-> setSeller ( val );
+									    else if ( tag == "ORDERID" )
+										    order-> setId ( val );
+									    else if ( tag == "ORDERDATE" )
+										    order-> setDate ( ymd2date ( val ));
+									    else if ( tag == "ORDERSTATUSCHANGED" )
+										    order-> setStatusChange ( ymd2date ( val ));
+									    else if ( tag == "ORDERSHIPPING" )
+										    order-> setShipping ( money_t::fromCString ( val ));
+									    else if ( tag == "ORDERINSURANCE" )
+										    order-> setInsurance ( money_t::fromCString ( val ));
+									    else if ( tag == "ORDERDELIVERY" )
+										    order-> setDelivery ( money_t::fromCString ( val ));
+									    else if ( tag == "ORDERCREDIT" )
+										    order-> setCredit ( money_t::fromCString ( val ));
+									    else if ( tag == "GRANDTOTAL" )
+										    order-> setGrandTotal ( money_t::fromCString ( val ));
+									    else if ( tag == "ORDERSTATUS" )
+										    order-> setStatus ( val );
+									    else if ( tag == "PAYMENTTYPE" )
+										    order-> setPayment ( val );
+									    else if ( tag == "ORDERREMARKS" )
+										    order-> setRemarks ( val );
+								    }
+
+								    if ( !order-> id ( ). isEmpty ( )) {
+									    m_orders << qMakePair ( order, items );
+									    ok = true;
+								    }
+								    else {
+									    delete items;
+								    }
+							    }
+						    }
+					    }
+				    }
+				    // find a better way - we shouldn't display widgets here
+				    //else
+				    //	CMessageBox::warning ( 0, tr( "Could not parse the XML data for your orders:<br /><i>Line %1, column %2: %3</i>" ). arg ( eline ). arg ( ecol ). arg ( emsg ));
+			    }
+		    }
+        }
 
 		if ( m_retry_placed ) {
 			m_query [0]. second = "placed";
@@ -276,6 +298,14 @@ private slots:
 
 			m_retry_placed = false;
 		}
+        else if ( !m_get_address_mode || ( m_current_address + 1 ) < int( m_orders. size ( ))) {
+            m_get_address_mode = true;
+            m_current_address++;
+
+            QString url = QString( "http://www.bricklink.com/memberInfo.asp?u=" ) + m_orders [m_current_address]. first-> other( );
+            m_progress-> get ( url );
+			m_progress-> layout ( );
+        }
 		else {
 			m_progress-> setFinished ( true );
 		}
@@ -299,6 +329,8 @@ private:
 	QCString               m_url;
 	CKeyValueList          m_query;
 	bool                   m_retry_placed;
+    bool                   m_get_address_mode;
+    int                    m_current_address;
 	QValueList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > m_orders;
 };
 

@@ -31,6 +31,7 @@
 #include "cmoney.h"
 #include "creport.h"
 #include "creport_p.h"
+#include "cconfig.h"
 
 #include "creportobjects.h"
 
@@ -155,7 +156,9 @@ void CReport::print ( QPaintDevice *pd, const CDocument *doc, const CDocument::I
 		ordermap ["type"]         = ( order-> type ( ) == BrickLink::Order::Placed ? "P" : "R" );
 		ordermap ["date"]         = order-> date ( ). toString ( Qt::TextDate );
 		ordermap ["statusChange"] = order-> statusChange ( );
-		ordermap ["buyer"]        = order-> buyer ( );
+		ordermap ["other"]        = order-> other ( );
+        ordermap ["buyer"]        = ( order-> type ( ) == BrickLink::Order::Placed ? CConfig::inst()->blLoginUsername() : order-> other ( ));
+        ordermap ["seller"]       = ( order-> type ( ) == BrickLink::Order::Placed ? order-> other ( ) : CConfig::inst()->blLoginUsername());
 		ordermap ["shipping"]     = order-> shipping ( ). toDouble ( );
 		ordermap ["insurance"]    = order-> insurance ( ). toDouble ( );
 		ordermap ["delivery"]     = order-> delivery ( ). toDouble ( );
@@ -164,6 +167,7 @@ void CReport::print ( QPaintDevice *pd, const CDocument *doc, const CDocument::I
 		ordermap ["status"]       = order-> status ( );
 		ordermap ["payment"]      = order-> payment ( );
 		ordermap ["remarks"]      = order-> remarks ( );
+		ordermap ["address"]      = order-> address ( );
 
 		docmap ["order"] = ordermap;
 	}
