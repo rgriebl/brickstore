@@ -51,15 +51,8 @@ double money_t::toDouble ( ) const
 
 QString money_t::toCString ( bool with_currency_symbol, int precision ) const
 {
-    double delta = .5;
-    
-    for ( int i = precision; i > 0; i-- )
-        delta /= 10;
-
-    double v = toDouble ( );
-    v += ( v > 0 ? delta : -delta );
-
-	QString s = QLocale::c ( ). toString ( v, 'f', precision );
+ 	QString s = QLocale::c ( ). toString ( toDouble ( ), 'f', precision );
+ 
 	if ( with_currency_symbol )
 		s. prepend ( "$ " );
 	return s;
@@ -250,13 +243,6 @@ QString CMoney::toString ( double v, bool with_currency_symbol, int precision ) 
 {
 	if ( d-> m_localized )
 		v *= d-> m_factor;
-
-    double delta = .5;
-    
-    for ( int i = precision; i > 0; i-- )
-        delta /= 10;
-
-    v += ( v > 0 ? delta : -delta );
 
 	QString s = QString::number ( v, 'f', precision );
 
