@@ -998,6 +998,8 @@ void CWindow::addRemark ( )
 		uint remarkcount = 0;
 		CUndoCmd *macro = m_doc-> macroBegin ( );	                             
 	                             
+		QRegExp regexp ( QRegExp( "\\b" + QRegExp::escape ( addremarks ) + "\\b" ));
+
 		CDisableUpdates disupd ( w_list );
 
 		foreach ( CDocument::Item *pos, m_doc-> selection ( )) {
@@ -1005,7 +1007,7 @@ void CWindow::addRemark ( )
 			
 			if ( str. isEmpty ( ))
 				str = addremarks;
-			else if ( str. find ( QRegExp( "\\b" + QRegExp::escape ( addremarks ) + "\\b" )) != -1 )
+			else if ( str. find ( regexp ) != -1 )
 				;
 			else if ( addremarks. find ( QRegExp( "\\b" + QRegExp::escape ( str ) + "\\b" )) != -1 )
 				str = addremarks;
@@ -1034,13 +1036,15 @@ void CWindow::removeRemark ( )
 	
 	if ( CMessageBox::getString ( this, tr( "Enter the text, that should be removed from the remarks of all selected items:" ), remremarks )) {
 		uint remarkcount = 0;
-		CUndoCmd *macro = m_doc-> macroBegin ( );	                             
-	                             
+		CUndoCmd *macro = m_doc-> macroBegin ( );
+
+		QRegExp regexp ( QRegExp( "\\b" + QRegExp::escape ( remremarks ) + "\\b" ));
+
 		CDisableUpdates disupd ( w_list );
 
 		foreach ( CDocument::Item *pos, m_doc-> selection ( )) {
 			QString str = pos-> remarks ( );
-			str. remove ( QRegExp( "\\b" + QRegExp::escape ( remremarks ) + "\\b" ));
+			str. remove ( regexp );
 			str = str. simplifyWhiteSpace ( );
 			
 			if ( str != pos-> remarks ( )) {
@@ -1078,6 +1082,8 @@ void CWindow::addComment ( )
 	if ( CMessageBox::getString ( this, tr( "Enter the text, that should be added to the comments of all selected items:" ), addcomments )) {
 		uint commentcount = 0;
 		CUndoCmd *macro = m_doc-> macroBegin ( );	                             
+	       
+		QRegExp regexp ( QRegExp( "\\b" + QRegExp::escape ( addcomments ) + "\\b" ));
 	                             
 		CDisableUpdates disupd ( w_list );
 
@@ -1086,7 +1092,7 @@ void CWindow::addComment ( )
 			
 			if ( str. isEmpty ( ))
 				str = addcomments;
-			else if ( str. find ( QRegExp( "\\b" + QRegExp::escape ( addcomments ) + "\\b" )) != -1 )
+			else if ( str. find ( regexp ) != -1 )
 				;
 			else if ( addcomments. find ( QRegExp( "\\b" + QRegExp::escape ( str ) + "\\b" )) != -1 )
 				str = addcomments;
@@ -1115,13 +1121,15 @@ void CWindow::removeComment ( )
 	
 	if ( CMessageBox::getString ( this, tr( "Enter the text, that should be removed from the comments of all selected items:" ), remcomments )) {
 		uint commentcount = 0;
-		CUndoCmd *macro = m_doc-> macroBegin ( );	                             
+		CUndoCmd *macro = m_doc-> macroBegin ( );
+		
+		QRegExp regexp ( QRegExp( "\\b" + QRegExp::escape ( remcomments ) + "\\b" ));
 	                             
 		CDisableUpdates disupd ( w_list );
 
 		foreach ( CDocument::Item *pos, m_doc-> selection ( )) {
 			QString str = pos-> comments ( );
-			str. remove ( QRegExp( "\\b" + QRegExp::escape ( remcomments ) + "\\b" ));
+			str. remove ( regexp );
 			str = str. simplifyWhiteSpace ( );
 			
 			if ( str != pos-> comments ( )) {
