@@ -128,26 +128,25 @@ CMoney::CMoney ( )
 	d-> m_localized = CConfig::inst ( )-> readBoolEntry   ( "/General/Money/Localized", false );
 	d-> m_precision = CConfig::inst ( )-> readNumEntry    ( "/General/Money/Precision", 3 );
 
-	QString decpoint;
-	QString csymbol, csymbolint;
 
 #if defined( Q_OS_MACX )
-	// BSD and MACOSX don't have support for LC_MONETARY !!!
+	// MACOSX does not set the native environment 
 
 	// we need at least 10.3 for CFLocale... stuff (weak import)
 	if ( CFLocaleCopyCurrent != 0  && CFLocaleGetValue != 0 ) {
 		CFLocaleRef loc = CFLocaleCopyCurrent ( );
-		CFStringRef ds = (CFStringRef) CFLocaleGetValue ( loc, kCFLocaleDecimalSeparator );
-		CFStringRef cs = (CFStringRef) CFLocaleGetValue ( loc, kCFLocaleCurrencySymbol );
-		CFStringRef cc = (CFStringRef) CFLocaleGetValue ( loc, kCFLocaleCurrencyCode );
+		QString locstr = cfstring2qstring ((CFStringRef) CFLocaleGetValue ( loc, kCFLocaleLanguageCode )) + "_" + 
+                                 cfstring2qstring ((CFStringRef) CFLocaleGetValue ( loc, kCFLocaleCountryCode ));
 
-		decpoint = cfstring2qstring ( ds );
-		csymbol = cfstring2qstring ( cs );
-		csymbolint = cfstring2qstring ( cc );
+		::setenv ( "LC_ALL", locstr. utf8 ( ), 1 );
 	}
+#endif
+	::setlocale ( LC_ALL, "" ) ; // initialize C-locale to OS supplied values
 
-#else
-	::setlocale ( LC_ALL, "" );  // initialize C-locale to OS supplied values
+
+	QString decpoint;
+	QString csymbol, csymbolint;
+
 	::lconv *lc = ::localeconv ( );
 	
 	if ( lc-> mon_decimal_point && *lc-> mon_decimal_point && *lc-> mon_decimal_point != CHAR_MAX )
@@ -155,6 +154,12 @@ CMoney::CMoney ( )
 		
 	csymbol = QString::fromLocal8Bit ( lc-> currency_symbol );
 	csymbolint = QString::fromLocal8Bit ( lc-> int_curr_symbol );
+
+#if defined( Q_OS_MACX )
+	// only the Irish locale is using the official Euro character - 
+	// the rest is just using a stupid 'Eu'
+	if ( csymbol == "Eu" && csymbolint == "EUR " )
+		csymbol = QString::fromUtf8 ( "\xe2\x82\xac" );
 #endif
 
 	if ( !decpoint. isEmpty ( ))
