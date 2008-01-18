@@ -19,37 +19,6 @@
 IDI_ICON1               ICON         "brickstore.ico"
 IDI_ICON2               ICON         "brickstore_doc.ico"
 
-1 RT_MANIFEST
-BEGIN
-"<?xml version=""1.0"" encoding=""UTF-8"" standalone=""yes""?>
-<assembly xmlns=""urn:schemas-microsoft-com:asm.v1""
-          manifestVersion=""1.0"">
-  <assemblyIdentity type=""win32""
-                    processorArchitecture=""*""
-                    version=""1.0.0.0""
-                    name=""Softforge.BrickStore.brickstore"" />
-  <description>BrickStore</description>
-  <dependency>
-    <dependentAssembly>
-      <assemblyIdentity type=""win32""
-                        processorArchitecture=""*""
-                        version=""6.0.0.0""
-                        name=""Microsoft.Windows.Common-Controls""
-                        publicKeyToken=""6595b64144ccf1df""
-                        language=""*"" />
-    </dependentAssembly>
-  </dependency>
-  <dependency>
-    <dependentAssembly>
-      <assemblyIdentity type=""win32"" 
-                        name=""Microsoft.VC80.CRT""
-                        version=""8.0.50608.0""
-                        processorArchitecture=""x86""
-                        publicKeyToken=""1fc8b3b9a1e18e3b"" />
-    </dependentAssembly>
-  </dependency>
-</assembly>"
-END
 
 VS_VERSION_INFO VERSIONINFO
   FILEVERSION    BRICKSTORE_MAJOR,BRICKSTORE_MINOR,BRICKSTORE_PATCH,0

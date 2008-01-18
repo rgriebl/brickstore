@@ -140,7 +140,6 @@ public:
 
 	void init ( )
 	{
-        m_get_address_mode = false;
         m_current_address = -1;
 		m_retry_placed = ( m_order_type == BrickLink::Order::Any );
 
@@ -195,7 +194,7 @@ private slots:
 
 
 		if ( data && data-> size ( )) {
-            if ( m_get_address_mode ) {
+            if ( m_current_address >= 0 ) {
                 QString s = QString::fromLatin1 ( data-> data ( ), data-> size ( ));
 
                 QRegExp rx1 ( "<B>Name:</B></FONT></TD>\\s*<TD NOWRAP><FONT FACE=\"Tahoma, Arial\" SIZE=\"2\">(.+)</FONT></TD>" );
@@ -298,11 +297,11 @@ private slots:
 
 			m_retry_placed = false;
 		}
-        else if ( !m_get_address_mode || ( m_current_address + 1 ) < int( m_orders. size ( ))) {
-            m_get_address_mode = true;
+        else if (( m_current_address + 1 ) < int( m_orders. size ( ))) {
             m_current_address++;
 
             QString url = QString( "http://www.bricklink.com/memberInfo.asp?u=" ) + m_orders [m_current_address]. first-> other( );
+    		m_progress-> setHeaderText ( tr( "Importing address records" ));
             m_progress-> get ( url );
 			m_progress-> layout ( );
         }
@@ -329,7 +328,6 @@ private:
 	QCString               m_url;
 	CKeyValueList          m_query;
 	bool                   m_retry_placed;
-    bool                   m_get_address_mode;
     int                    m_current_address;
 	QValueList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > m_orders;
 };

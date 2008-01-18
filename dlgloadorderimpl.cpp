@@ -181,7 +181,7 @@ int   DlgLoadOrderImpl::s_last_type     = 1;
 DlgLoadOrderImpl::DlgLoadOrderImpl ( QWidget *parent, const char *name, bool modal )
 	: DlgLoadOrder ( parent, name, modal )
 {
-	w_order_number-> setValidator ( new QIntValidator ( 1, 999999, w_order_number ));
+	w_order_number-> setValidator ( new QIntValidator ( 1, 9999999, w_order_number ));
 
 	connect ( w_order_number, SIGNAL( textChanged ( const QString & )), this, SLOT( checkId ( )));
 	connect ( w_select_by, SIGNAL( clicked ( int )), this, SLOT( checkId ( )));
