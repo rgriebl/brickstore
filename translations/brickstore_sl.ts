@@ -404,15 +404,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>BrickLink Inventory...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Ctrl+I</source>
-        <comment>File|Import BrickLink Inventory</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>BrickLink XML...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -445,15 +436,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>BrickLink XML to Clipboard</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>BrickLink Mass-Update XML to Clipboard</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>BrickLink Inventory XML to Clipboard</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -862,6 +845,32 @@
         <source>Do you want to cancel all outstanding inventory, image and Price Guide transfers?</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>BrickLink Set Inventory...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ctrl+I</source>
+        <comment>File|Import BrickLink Set Inventory</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>BrickLink Mass-Upload XML to Clipboard</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>BrickLink Set Inventory XML to Clipboard</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Copy Remarks from Document...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ctrl+U</source>
+        <comment>File|Import BrickLink Order</comment>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>CImportBLCart</name>
@@ -890,6 +899,10 @@
     </message>
     <message>
         <source>Download: %1/%2 KB</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Importing address records</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -967,7 +980,7 @@
     </message>
     <message>
         <source>Qty.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Količina</translation>
     </message>
     <message>
         <source>Bulk</source>
@@ -1144,7 +1157,7 @@
     </message>
     <message>
         <source>&amp;OK</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;V redu</translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
@@ -1155,7 +1168,7 @@
     <name>CMessageBox</name>
     <message>
         <source>&amp;OK</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;V redu</translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
@@ -1208,7 +1221,7 @@
     </message>
     <message>
         <source>Qty.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Količina</translation>
     </message>
     <message>
         <source>New</source>
@@ -1260,15 +1273,15 @@
     </message>
     <message>
         <source>All Time Sales</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Celotna prodaja.</translation>
     </message>
     <message>
         <source>Last 6 Months Sales</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Prodaja zadnjih šest mesecev.</translation>
     </message>
     <message>
         <source>Current Inventory</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Trenutna zaloga</translation>
     </message>
     <message>
         <source>Please wait ... updating</source>
@@ -1295,7 +1308,7 @@
     <name>CProgressDialog</name>
     <message>
         <source>&amp;OK</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;V redu</translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
@@ -1325,7 +1338,7 @@
     <name>CSelectColorDialog</name>
     <message>
         <source>&amp;OK</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;V redu</translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
@@ -1340,7 +1353,7 @@
     </message>
     <message>
         <source>[Image is loading]</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">[Nalagam sliko]</translation>
     </message>
     <message>
         <source>Item type:</source>
@@ -1412,7 +1425,7 @@
     <name>CSelectItemDialog</name>
     <message>
         <source>&amp;OK</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;V redu</translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
@@ -1846,6 +1859,18 @@
         <source>This list contains items with errors.&lt;br /&gt;&lt;br /&gt;Do you really want to export this list?</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Please choose the document that should serve as a source to fill in the remarks fields of the current document:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Copied Remarks for %1 Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Which items should be subtracted from the current document:</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>DlgAddItem</name>
@@ -1946,7 +1971,7 @@
     </message>
     <message>
         <source>&amp;OK</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;V redu</translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
@@ -1989,7 +2014,7 @@
     </message>
     <message>
         <source>&amp;OK</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;V redu</translation>
     </message>
     <message>
         <source>&amp;Delete</source>
@@ -2059,7 +2084,7 @@
     </message>
     <message>
         <source>&amp;OK</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;V redu</translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
@@ -2118,7 +2143,7 @@
     </message>
     <message>
         <source>&amp;OK</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;V redu</translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
@@ -2199,7 +2224,7 @@
     <name>DlgMessage</name>
     <message>
         <source>&amp;OK</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;V redu</translation>
     </message>
 </context>
 <context>
@@ -2258,7 +2283,7 @@
     </message>
     <message>
         <source>&amp;OK</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;V redu</translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
@@ -2292,7 +2317,7 @@
     </message>
     <message>
         <source>&amp;OK</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;V redu</translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
@@ -2315,7 +2340,7 @@
     </message>
     <message>
         <source>&amp;OK</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;V redu</translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
@@ -2326,23 +2351,23 @@
     <name>DlgSetToPGImpl</name>
     <message>
         <source>All Time Sales</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Celotna prodaja.</translation>
     </message>
     <message>
         <source>Last 6 Months Sales</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Prodaja zadnjih šest mesecev.</translation>
     </message>
     <message>
         <source>Current Inventory</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Trenutna zaloga</translation>
     </message>
     <message>
         <source>Minimum</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Minimum</translation>
     </message>
     <message>
         <source>Average</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Povprečje</translation>
     </message>
     <message>
         <source>Quantity Average</source>
@@ -2350,7 +2375,7 @@
     </message>
     <message>
         <source>Maximum</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Maksimum</translation>
     </message>
 </context>
 <context>
@@ -2489,7 +2514,7 @@
     </message>
     <message>
         <source>&amp;OK</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;V redu</translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
@@ -2547,11 +2572,11 @@
     <name>DlgSubtractItem</name>
     <message>
         <source>Subtract Items from %1</source>
-        <translation>Odstrani postavko (-ki, -ke) iz %1.</translation>
+        <translation type="obsolete">Odstrani postavko (-ki, -ke) iz %1.</translation>
     </message>
     <message>
         <source>&amp;Which items should be subtracted from the current document:</source>
-        <translation>&amp;Katere postavke odstranim iz obstojeÄŤega dokumenta:</translation>
+        <translation type="obsolete">&amp;Katere postavke odstranim iz obstojeÄŤega dokumenta:</translation>
     </message>
     <message>
         <source>Items from Clipboard</source>
@@ -2567,6 +2592,14 @@
     </message>
     <message>
         <source>&amp;Cancel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Document Selector</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

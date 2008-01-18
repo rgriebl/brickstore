@@ -347,7 +347,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
     <message>
         <source>BrickLink Inventory...</source>
-        <translation>BrickLink Inventarliste...</translation>
+        <translation type="obsolete">BrickLink Inventarliste...</translation>
     </message>
     <message>
         <source>BrickLink XML...</source>
@@ -359,7 +359,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
     <message>
         <source>BrickLink XML to Clipboard</source>
-        <translation>BrickLink XML in die Zwischenablage</translation>
+        <translation type="obsolete">BrickLink XML in die Zwischenablage</translation>
     </message>
     <message>
         <source>Close</source>
@@ -595,11 +595,11 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
     <message>
         <source>BrickLink Mass-Update XML to Clipboard</source>
-        <translation>BrickLink XML Massenaktualisierung in die Zwischenablage</translation>
+        <translation>BrickLink Mass-Update XML in die Zwischenablage</translation>
     </message>
     <message>
         <source>BrickLink Inventory XML to Clipboard</source>
-        <translation>BrickLink XML Inventarliste in die Zwischenablage</translation>
+        <translation type="obsolete">BrickLink XML Inventarliste in die Zwischenablage</translation>
     </message>
     <message>
         <source>BrickLink Wanted List XML to Clipboard</source>
@@ -664,7 +664,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     <message>
         <source>Ctrl+I</source>
         <comment>File|Import BrickLink Inventory</comment>
-        <translation>Ctrl+I</translation>
+        <translation type="obsolete">Ctrl+I</translation>
     </message>
     <message>
         <source>Insert</source>
@@ -870,6 +870,32 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
         <source>Round to 2 Decimal Places</source>
         <translation>Auf 2 Nachkommastellen runden</translation>
     </message>
+    <message>
+        <source>BrickLink Set Inventory...</source>
+        <translation>BrickLink Set Inventarliste...</translation>
+    </message>
+    <message>
+        <source>Ctrl+I</source>
+        <comment>File|Import BrickLink Set Inventory</comment>
+        <translation>Ctrl+I</translation>
+    </message>
+    <message>
+        <source>BrickLink Mass-Upload XML to Clipboard</source>
+        <translation>BrickLink Mass-Upload XML in die Zwischenablage</translation>
+    </message>
+    <message>
+        <source>BrickLink Set Inventory XML to Clipboard</source>
+        <translation>BrickLink Set Inventarliste in die Zwischenablage</translation>
+    </message>
+    <message>
+        <source>Copy Remarks from Document...</source>
+        <translation>Kopiere Anmerkungen von Dokument...</translation>
+    </message>
+    <message>
+        <source>Ctrl+U</source>
+        <comment>File|Import BrickLink Order</comment>
+        <translation>Ctrl+U</translation>
+    </message>
 </context>
 <context>
     <name>CImportBLCart</name>
@@ -899,6 +925,10 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     <message>
         <source>Download: %1/%2 KB</source>
         <translation>Download: %1/%2 KB</translation>
+    </message>
+    <message>
+        <source>Importing address records</source>
+        <translation>Adressdaten werden importiert</translation>
     </message>
 </context>
 <context>
@@ -1854,6 +1884,18 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
         <source>Set price on %1 items</source>
         <translation>Preis für %1 Teile gesetzt</translation>
     </message>
+    <message>
+        <source>Please choose the document that should serve as a source to fill in the remarks fields of the current document:</source>
+        <translation>Wählen sie das  Dokument das als Quelle zum Ausfüllen der Anmerkungsfelder im aktuellen Dokument dienen soll:</translation>
+    </message>
+    <message>
+        <source>Copied Remarks for %1 Items</source>
+        <translation>Anmerkung bei %1 Teilen kopiert</translation>
+    </message>
+    <message>
+        <source>Which items should be subtracted from the current document:</source>
+        <translation>Welche Teile sollen von aktuellen Dokument abgezogen werden:</translation>
+    </message>
 </context>
 <context>
     <name>DlgAddItem</name>
@@ -2555,11 +2597,11 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     <name>DlgSubtractItem</name>
     <message>
         <source>Subtract Items from %1</source>
-        <translation>Teile von %1 abziehen</translation>
+        <translation type="obsolete">Teile von %1 abziehen</translation>
     </message>
     <message>
         <source>&amp;Which items should be subtracted from the current document:</source>
-        <translation>&amp;Welche Teile sollen vom aktuellen Dokument abgezogen werden:</translation>
+        <translation type="obsolete">&amp;Welche Teile sollen vom aktuellen Dokument abgezogen werden:</translation>
     </message>
     <message>
         <source>Items from Clipboard</source>
@@ -2576,6 +2618,14 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     <message>
         <source>&amp;Cancel</source>
         <translation>&amp;Abbrechen</translation>
+    </message>
+    <message>
+        <source>Document Selector</source>
+        <translation>Dokumentenliste</translation>
+    </message>
+    <message>
+        <source>%1</source>
+        <translation>%1</translation>
     </message>
 </context>
 </TS>

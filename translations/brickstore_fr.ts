@@ -380,7 +380,7 @@
     </message>
     <message>
         <source>BrickLink Inventory...</source>
-        <translation>Inventaire BrickLink...</translation>
+        <translation type="obsolete">Inventaire BrickLink...</translation>
     </message>
     <message>
         <source>BrickLink Order...</source>
@@ -400,7 +400,7 @@
     </message>
     <message>
         <source>BrickLink XML to Clipboard</source>
-        <translation>BrickLink XML vers le presse-papiers</translation>
+        <translation type="obsolete">BrickLink XML vers le presse-papiers</translation>
     </message>
     <message>
         <source>BrickLink Mass-Update XML to Clipboard</source>
@@ -408,7 +408,7 @@
     </message>
     <message>
         <source>BrickLink Inventory XML to Clipboard</source>
-        <translation>BrickLink inventaire XML vers le presse-papiers</translation>
+        <translation type="obsolete">BrickLink inventaire XML vers le presse-papiers</translation>
     </message>
     <message>
         <source>BrickLink Wanted List XML to Clipboard</source>
@@ -624,11 +624,6 @@
     <message>
         <source>Links</source>
         <translation>Liens</translation>
-    </message>
-    <message>
-        <source>Ctrl+I</source>
-        <comment>File|Import BrickLink Inventory</comment>
-        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Peeron Inventory...</source>
@@ -862,6 +857,32 @@
         <source>Round to 2 Decimal Places</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>BrickLink Set Inventory...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ctrl+I</source>
+        <comment>File|Import BrickLink Set Inventory</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>BrickLink Mass-Upload XML to Clipboard</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>BrickLink Set Inventory XML to Clipboard</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Copy Remarks from Document...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ctrl+U</source>
+        <comment>File|Import BrickLink Order</comment>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>CImportBLCart</name>
@@ -890,6 +911,10 @@
     </message>
     <message>
         <source>Download: %1/%2 KB</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Importing address records</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1846,6 +1871,18 @@
         <source>Set price on %1 items</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Please choose the document that should serve as a source to fill in the remarks fields of the current document:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Copied Remarks for %1 Items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Which items should be subtracted from the current document:</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>DlgAddItem</name>
@@ -2547,11 +2584,11 @@
     <name>DlgSubtractItem</name>
     <message>
         <source>Subtract Items from %1</source>
-        <translation>Enlever des items de %1</translation>
+        <translation type="obsolete">Enlever des items de %1</translation>
     </message>
     <message>
         <source>&amp;Which items should be subtracted from the current document:</source>
-        <translation>&amp;Quels items doivent être enlevés du document courant :</translation>
+        <translation type="obsolete">&amp;Quels items doivent être enlevés du document courant :</translation>
     </message>
     <message>
         <source>Items from Clipboard</source>
@@ -2568,6 +2605,14 @@
     <message>
         <source>&amp;Cancel</source>
         <translation>&amp;Annuler</translation>
+    </message>
+    <message>
+        <source>Document Selector</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>
