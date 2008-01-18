@@ -1552,14 +1552,21 @@ void CFrameWork::registrationUpdate ( )
 {
 	bool personal = ( CConfig::inst ( )-> registration ( ) == CConfig::Personal );
 	bool demo = ( CConfig::inst ( )-> registration ( ) == CConfig::Demo );
+    bool full = ( CConfig::inst ( )-> registration ( ) == CConfig::Full );
 
 	QAction *a = findAction ( "view_simple_mode" );
 	
 	// personal -> always on
-	// demo -> always off
-	a-> setOn (( CConfig::inst ( )-> simpleMode ( ) || personal ) && !demo );
-	a-> setEnabled (!( demo || personal ));
+	// demo, full -> always off
+    // opensource -> don't change
+    if ( personal )
+        a-> setOn ( true );
+    else if ( demo || full )
+        a-> setOn ( false );
+    else
+        a-> setOn ( CConfig::inst ( )-> simpleMode ( ));
 
+    a-> setEnabled ( !personal );
 	setSimpleMode ( a-> isOn ( ));
 }
 
