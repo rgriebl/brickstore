@@ -234,9 +234,11 @@ public:
 			Q_UINT64  m_extra    : 1;
 			Q_UINT64  m_isalt    : 1;
 			Q_UINT64  m_altid    : 6;
-			Q_UINT64  m_reserved : 12;
+            Q_UINT64  m_cpart    : 1;
+			Q_UINT64  m_reserved : 11;
 #else
-			Q_UINT64  m_reserved : 12;
+			Q_UINT64  m_reserved : 11;
+            Q_UINT64  m_cpart    : 1;
 			Q_UINT64  m_altid    : 6;
 			Q_UINT64  m_isalt    : 1;
 			Q_UINT64  m_extra    : 1;
@@ -369,6 +371,9 @@ public:
 		uint alternateId ( ) const          { return m_alt_id; }
 		void setAlternateId ( uint aid )    { m_alt_id = aid; }
 
+        bool counterPart ( ) const          { return m_cpart; }
+        void setCounterPart ( bool b )      { m_cpart = b; }
+
 		Picture *customPicture ( ) const    { return m_custom_picture; }
 		
 		struct Incomplete {
@@ -404,7 +409,8 @@ public:
 		bool             m_stockroom : 1;
         bool             m_alternate : 1;
         uint             m_alt_id    : 6;
-        int              m_xreserved : 2;
+        bool             m_cpart     : 1;
+        int              m_xreserved : 1;
 
 		QString          m_comments;
 		QString          m_remarks;

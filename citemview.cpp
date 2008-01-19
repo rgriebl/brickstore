@@ -169,7 +169,7 @@ CItemView::CItemView ( CDocument *doc, QWidget *parent, const char *name )
 		int hidden = 0;
 
 		switch ( i ) {
-			case CDocument::Status      : align = AlignCenter; width = -16; break;
+			case CDocument::Status      : align = AlignLeft | AlignVCenter; width = -16; break;
 			case CDocument::Picture     : align = AlignCenter; width = -40; break;
 			case CDocument::PartNo      : width = 10; break;
 			case CDocument::Description : width = 28; break;
@@ -761,7 +761,6 @@ template <> static int cmp<QString> ( const QString &a, const QString &b )
             return 0;
 }
 
-
 } // namespace
 
 //#define cmp(a,b)	((a)-(b) < 0 ? - 1 : ((a)-(b) > 0 ? +1 : 0 ));
@@ -771,7 +770,16 @@ int CItemViewItem::compare ( QListViewItem *i, int col, bool /*ascending*/ ) con
 	CItemViewItem *ci = static_cast <CItemViewItem *> ( i );
 
 	switch ( col ) {
-		case CDocument::Status      : return cmp( m_item-> status ( ), (*ci-> m_item). status ( ));
+        case CDocument::Status      : {
+            if ( m_item-> counterPart ( ) != (*ci-> m_item). counterPart ( ))
+                return m_item-> counterPart ( ) ? 1 : -1;
+            else if ( m_item-> alternateId ( ) != (*ci-> m_item). alternateId ( ))
+                return cmp ( m_item-> alternateId ( ), (*ci-> m_item). alternateId ( ));
+            if ( m_item-> alternate ( ) != (*ci-> m_item). alternate ( ))
+                return m_item-> alternate ( ) ? 1 : -1;
+            else 
+                return cmp( m_item-> status ( ), (*ci-> m_item). status ( ));
+        }
 		case CDocument::Picture     :
 		case CDocument::PartNo      : return qstrcmp ( m_item-> item ( )-> id ( ),       (*ci-> m_item). item ( )-> id ( ));
 		case CDocument::LotId       : return m_item-> lotId ( )                        - (*ci-> m_item). lotId ( );
@@ -833,7 +841,7 @@ void CItemViewItem::paintCell ( QPainter *p, const QColorGroup &cg, int col, int
 	int grayout_right_chars = 0;
     QString bubble_str;
     QColor bubble_col;
-    bool bubble_bold;
+    bool bubble_bold = false;
 
 
 	const QPixmap *pix = pixmap ( col );
@@ -847,21 +855,25 @@ void CItemViewItem::paintCell ( QPainter *p, const QColorGroup &cg, int col, int
 	fg = cg. text ( );
 
 	switch ( col ) {
-        case CDocument::Description: {
+        case CDocument::Status: {
+            int altid = m_item-> alternateId ( );
+            bool cp = m_item-> counterPart ( );
+            if ( altid || cp ) {
+                bubble_str = cp ? QString( "CP" ) : QString::number ( altid );
+                bubble_col = CUtility::gradientColor ( bg, shadeColor ( cp ? 0 : 1 + altid ), 0.2f );
+                bubble_bold = cp || !m_item-> alternate ( );
+            }
+            break;
+        }
+        case CDocument::Description:
 			if ( m_item-> item ( )-> hasInventory ( )) {
 				QString invstr = CItemView::tr( "Inv" );
 				str = str + " [" + invstr + "]";
 				grayout_right_chars = invstr. length ( ) + 2;
 			}
-            int altid = m_item-> alternateId ( );
-            if ( altid ) {
-                bubble_str = QString::number ( altid );
-                bubble_col = CUtility::gradientColor ( bg, shadeColor ( altid ), 0.2f );
-                bubble_bold = !m_item-> alternate ( );
-            }
 			break;
-        }
-		case CDocument::ItemType:
+
+        case CDocument::ItemType:
 			bg = CUtility::gradientColor ( bg, shadeColor ( m_item-> itemType ( )-> id ( )), 0.1f );
 			break;
 

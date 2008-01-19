@@ -884,6 +884,8 @@ BrickLink::InvItemList *BrickLink::parseItemListXML ( QDomElement root, ItemList
 			else if ( hint == XMLHint_Inventory ) {
 				if (( tag == "EXTRA" ) && ( val == "Y" ))
 					ii-> setStatus ( InvItem::Extra );
+				else if ( tag == "COUNTERPART" )
+					ii-> setCounterPart (( val == "Y" ));
 				else if ( tag == "ALTERNATE" )
 					ii-> setAlternate (( val == "Y" ));
 				else if ( tag == "MATCHID" )

@@ -245,6 +245,7 @@ void BrickLink::Item::setConsistsOf ( const InvItemList &items ) const
 			entry-> m_extra    = ( item-> status ( ) == BrickLink::InvItem::Extra ) ? 1 : 0;
 			entry-> m_isalt    = item-> alternate ( );
 			entry-> m_altid    = item-> alternateId ( );
+            entry-> m_cpart    = item-> counterPart ( );
 			entry-> m_reserved = 0;
 			ptr++;
 		}
@@ -277,6 +278,7 @@ BrickLink::InvItemList BrickLink::Item::consistsOf ( ) const
 					ii-> setStatus ( BrickLink::InvItem::Extra );
                 ii-> setAlternate ( entry-> m_isalt );
                 ii-> setAlternateId ( entry-> m_altid );
+                ii-> setCounterPart ( entry-> m_cpart );
 
 				list. append ( ii );
 			}
@@ -407,6 +409,7 @@ BrickLink::InvItem::InvItem ( const Color *color, const Item *item )
 	m_retain = m_stockroom = false;
     m_alternate = false;
     m_alt_id = 0;
+    m_cpart = false;
     m_xreserved = 0;
 	m_weight = 0;
 
@@ -451,6 +454,7 @@ BrickLink::InvItem &BrickLink::InvItem::operator = ( const InvItem &copy )
 	m_stockroom      = copy. m_stockroom;
     m_alternate      = copy. m_alternate;
     m_alt_id         = copy. m_alt_id;
+    m_cpart          = copy. m_cpart;
 	m_comments       = copy. m_comments;
 	m_remarks        = copy. m_remarks;
 	m_reserved       = copy. m_reserved;
