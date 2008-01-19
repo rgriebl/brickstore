@@ -746,6 +746,22 @@ template <typename T> static int cmp ( const T &a, const T &b )
 		return 1;
 }
 
+template <> static int cmp<QString> ( const QString &a, const QString &b )
+{
+    bool ann = !a. isNull ( );
+    bool bnn = !b. isNull ( );
+
+    if ( ann && bnn )
+            return a. localeAwareCompare ( b );
+    else if ( ann )
+            return 1;
+    else if ( bnn )
+            return -1;
+    else
+            return 0;
+}
+
+
 } // namespace
 
 //#define cmp(a,b)	((a)-(b) < 0 ? - 1 : ((a)-(b) > 0 ? +1 : 0 ));
@@ -760,8 +776,8 @@ int CItemViewItem::compare ( QListViewItem *i, int col, bool /*ascending*/ ) con
 		case CDocument::PartNo      : return qstrcmp ( m_item-> item ( )-> id ( ),       (*ci-> m_item). item ( )-> id ( ));
 		case CDocument::LotId       : return m_item-> lotId ( )                        - (*ci-> m_item). lotId ( );
 		case CDocument::Description : return qstrcmp ( m_item-> item ( )-> name ( ),     (*ci-> m_item). item ( )-> name ( ));
-		case CDocument::Comments    : return m_item-> comments ( ).            compare ( (*ci-> m_item). comments ( ));
-		case CDocument::Remarks     : return m_item-> remarks ( ).             compare ( (*ci-> m_item). remarks ( ));
+		case CDocument::Comments    : return cmp( m_item-> comments ( ),                 (*ci-> m_item). comments ( ));
+		case CDocument::Remarks     : return cmp( m_item-> remarks ( ),                  (*ci-> m_item). remarks ( ));
 		case CDocument::Quantity    : return m_item-> quantity ( )                     - (*ci-> m_item). quantity ( );
 		case CDocument::Bulk        : return m_item-> bulkQuantity ( )                 - (*ci-> m_item). bulkQuantity ( );
 		case CDocument::Price       : return cmp( m_item-> price ( ),                    (*ci-> m_item). price ( ));
@@ -779,7 +795,7 @@ int CItemViewItem::compare ( QListViewItem *i, int col, bool /*ascending*/ ) con
 		case CDocument::TierP3      : return cmp( m_item-> tierPrice ( 2 ),              (*ci-> m_item). tierPrice ( 2 ));
 		case CDocument::Retain      : return cmp( m_item-> retain ( ) ? 1 : 0,           (*ci-> m_item). retain ( ) ? 1 : 0 );
 		case CDocument::Stockroom   : return cmp( m_item-> stockroom ( ) ? 1 : 0,        (*ci-> m_item). stockroom ( ) ? 1 : 0 );
-		case CDocument::Reserved    : return m_item-> reserved ( ).            compare ( (*ci-> m_item). reserved ( ));
+		case CDocument::Reserved    : return cmp( m_item-> reserved ( ),                 (*ci-> m_item). reserved ( ));
 		case CDocument::Weight      : return cmp( m_item-> weight ( ),                   (*ci-> m_item). weight ( ));
 		case CDocument::YearReleased: return cmp( m_item-> item ( )-> yearReleased ( ),  (*ci-> m_item). item ( )-> yearReleased ( ));
 
