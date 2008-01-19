@@ -128,24 +128,33 @@ CMoney::CMoney ( )
 	d-> m_localized = CConfig::inst ( )-> readBoolEntry   ( "/General/Money/Localized", false );
 	d-> m_precision = CConfig::inst ( )-> readNumEntry    ( "/General/Money/Precision", 3 );
 
+	QString decpoint;
+	QString csymbol, csymbolint;
 
 #if defined( Q_OS_MACX )
 	// MACOSX does not set the native environment 
 
 	// we need at least 10.3 for CFLocale... stuff (weak import)
-	if ( CFLocaleCopyCurrent != 0  && CFLocaleGetValue != 0 ) {
+	if ( CFLocaleCopyCurrent != 0  && CFLocaleGetIdentifier != 0 && CFLocaleGetValue != 0 ) {
 		CFLocaleRef loc = CFLocaleCopyCurrent ( );
-		QString locstr = cfstring2qstring ((CFStringRef) CFLocaleGetValue ( loc, kCFLocaleLanguageCode )) + "_" + 
-                                 cfstring2qstring ((CFStringRef) CFLocaleGetValue ( loc, kCFLocaleCountryCode ));
+
+		CFStringRef ds = (CFStringRef) CFLocaleGetValue ( loc, kCFLocaleDecimalSeparator );
+		CFStringRef cs = (CFStringRef) CFLocaleGetValue ( loc, kCFLocaleCurrencySymbol );
+		CFStringRef cc = (CFStringRef) CFLocaleGetValue ( loc, kCFLocaleCurrencyCode );
+ 
+		decpoint = cfstring2qstring ( ds );
+		csymbol = cfstring2qstring ( cs );
+		csymbolint = cfstring2qstring ( cc );
+
+		QString locstr =  cfstring2qstring ((CFStringRef) CFLocaleGetIdentifier ( loc ));
+		if (locstr. find ( '.' ) == -1 )
+			locstr += QString( ".UTF-8" );
 
 		::setenv ( "LC_ALL", locstr. utf8 ( ), 1 );
+		::setlocale ( LC_ALL, "" );
 	}
-#endif
+#else
 	::setlocale ( LC_ALL, "" ) ; // initialize C-locale to OS supplied values
-
-
-	QString decpoint;
-	QString csymbol, csymbolint;
 
 	::lconv *lc = ::localeconv ( );
 	
@@ -154,12 +163,6 @@ CMoney::CMoney ( )
 		
 	csymbol = QString::fromLocal8Bit ( lc-> currency_symbol );
 	csymbolint = QString::fromLocal8Bit ( lc-> int_curr_symbol );
-
-#if defined( Q_OS_MACX )
-	// only the Irish locale is using the official Euro character - 
-	// the rest is just using a stupid 'Eu'
-	if ( csymbol == "Eu" && csymbolint == "EUR " )
-		csymbol = QString::fromUtf8 ( "\xe2\x82\xac" );
 #endif
 
 	if ( !decpoint. isEmpty ( ))
