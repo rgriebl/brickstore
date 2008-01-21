@@ -141,7 +141,7 @@ QCString BrickLink::url ( UrlList u, const void *opt, const void *opt2 )
 }
 
 
-const QPixmap *BrickLink::noImage ( const QSize &s )
+const QPixmap *BrickLink::noImage ( const QSize &s ) const
 {
 	QString key = QString( "%1x%2" ). arg( s. width ( )). arg( s. height ( ));
 
@@ -182,91 +182,97 @@ const QPixmap *BrickLink::noImage ( const QSize &s )
 }
 
 
-QImage BrickLink::colorImage ( const Color *col, int w, int h ) const
+const QPixmap *BrickLink::colorImage ( const Color *col, int w, int h ) const
 {
 	if ( !col || w <= 0 || h <= 0 )
-		return QImage ( );
+		return 0;
 		
-	QColor c = col-> color ( );
-	bool is_valid = c. isValid ( );
-	
-	QPixmap pix ( w, h );
-	
-	QPainter p ( &pix );
-	QRect r = pix. rect ( );
-	
-	if ( is_valid ) {
-		p. fillRect ( r, c );
-		
-		if ( col-> isGlitter ( )) {
-			p. setPen ( Qt::NoPen );
-			p. setBackgroundColor ( c );
-			p. setBrush ( QBrush( CUtility::contrastColor ( c, 0.25f ), Qt::Dense6Pattern ));
-			p. drawRect ( r );
-		}
-		else if ( col-> isSpeckle ( )) {
-			p. setPen ( Qt::NoPen );
-			p. setBackgroundColor ( c );
-			p. setBrush ( QBrush( CUtility::contrastColor ( c, 0.20f ), Qt::Dense7Pattern ));
-			p. drawRect ( r );
-		}
-		else if ( col-> isMetallic ( )) {
-			if ( h >= 7 ) {
-				int mid = ( h & 1 ) ? 3 : 4;
-				QColor c2 = CUtility::gradientColor ( c, Qt::black );
-				QImage tgrad = CUtility::createGradient ( QSize ( w, ( h - mid ) / 2 ), Qt::Vertical, c, c2,  110.f );
-				QImage bgrad = tgrad. mirror ( false, true );
-				
-				p. drawImage ( 0, 0, tgrad );
-				p. drawImage ( 0, tgrad. height ( ) + mid, bgrad );
-			}
-		}
-		else if ( col-> isChrome ( )) {
-			if ( w >= 7 ) {
-				int mid = ( w & 1 ) ? 3 : 4;
-				QColor c2 = CUtility::gradientColor ( c, Qt::black );
-				QImage lgrad = CUtility::createGradient ( QSize (( w - mid ) / 2, h ), Qt::Horizontal, c, c2,  115.f );
-				QImage rgrad = lgrad. mirror ( true, false );
+    QString key = QString( "%1:%2x%3" ). arg( col-> id ( )). arg( w ). arg( h );
 
-				p. drawImage ( 0, 0, lgrad );
-				p. drawImage ( lgrad. width ( ) + mid, 0, rgrad );
-			}
-		}
-	}
-	else {
-		p. fillRect ( r, Qt::white );
-		p. setPen ( Qt::darkGray );
-		p. setBackgroundColor ( Qt::white );
-		p. setBrush ( Qt::NoBrush );
-		p. drawRect ( r );
-		p. drawLine ( 0, 0,   w-1, h-1 );
-		p. drawLine ( 0, h-1, w-1, 0   );
-	}
-	
-	p. end ( );
-	QImage img = pix. convertToImage ( );
-	
-	if ( col-> isTransparent ( ) && CResource::inst ( )-> pixmapAlphaSupported ( )) {
-		img. setAlphaBuffer ( true );
-		
-		float e = float( w ) / float( h );
-		float f = e;
-		
-		for ( int y = 0; y < h; y++ ) {
-			QRgb *line = (QRgb *) img. scanLine ( y );
+	QPixmap *pix = m_colimages [key];
 
-			for ( int x = 0; x < w; x++ ) {
-				int a = ( x > ( w - 1 - int( f ))) ? 128 : 255;
+	if ( !pix ) {
+	    QColor c = col-> color ( );
+	    bool is_valid = c. isValid ( );
+    	
+	    pix = new QPixmap ( w, h );
+    	
+	    QPainter p ( pix );
+	    QRect r = pix-> rect ( );
+    	
+	    if ( is_valid ) {
+		    p. fillRect ( r, c );
+    		
+		    if ( col-> isGlitter ( )) {
+			    p. setPen ( Qt::NoPen );
+			    p. setBackgroundColor ( c );
+			    p. setBrush ( QBrush( CUtility::contrastColor ( c, 0.25f ), Qt::Dense6Pattern ));
+			    p. drawRect ( r );
+		    }
+		    else if ( col-> isSpeckle ( )) {
+			    p. setPen ( Qt::NoPen );
+			    p. setBackgroundColor ( c );
+			    p. setBrush ( QBrush( CUtility::contrastColor ( c, 0.20f ), Qt::Dense7Pattern ));
+			    p. drawRect ( r );
+		    }
+		    else if ( col-> isMetallic ( )) {
+			    if ( h >= 7 ) {
+				    int mid = ( h & 1 ) ? 3 : 4;
+				    QColor c2 = CUtility::gradientColor ( c, Qt::black );
+				    QImage tgrad = CUtility::createGradient ( QSize ( w, ( h - mid ) / 2 ), Qt::Vertical, c, c2,  110.f );
+				    QImage bgrad = tgrad. mirror ( false, true );
+    				
+				    p. drawImage ( 0, 0, tgrad );
+				    p. drawImage ( 0, tgrad. height ( ) + mid, bgrad );
+			    }
+		    }
+		    else if ( col-> isChrome ( )) {
+			    if ( w >= 7 ) {
+				    int mid = ( w & 1 ) ? 3 : 4;
+				    QColor c2 = CUtility::gradientColor ( c, Qt::black );
+				    QImage lgrad = CUtility::createGradient ( QSize (( w - mid ) / 2, h ), Qt::Horizontal, c, c2,  115.f );
+				    QImage rgrad = lgrad. mirror ( true, false );
 
-				*line = qRgba ( qRed ( *line ), qGreen ( *line ), qBlue ( *line ), a );
-				line++;
-			}
-			f += e;
-		}
-		
-	}
-	
-	return img;
+				    p. drawImage ( 0, 0, lgrad );
+				    p. drawImage ( lgrad. width ( ) + mid, 0, rgrad );
+			    }
+		    }
+	    }
+	    else {
+		    p. fillRect ( r, Qt::white );
+		    p. setPen ( Qt::darkGray );
+		    p. setBackgroundColor ( Qt::white );
+		    p. setBrush ( Qt::NoBrush );
+		    p. drawRect ( r );
+		    p. drawLine ( 0, 0,   w-1, h-1 );
+		    p. drawLine ( 0, h-1, w-1, 0   );
+	    }
+    	
+	    p. end ( );
+    	
+	    if ( col-> isTransparent ( ) && CResource::inst ( )-> pixmapAlphaSupported ( )) {
+    	    QImage img = pix-> convertToImage ( );
+		    img. setAlphaBuffer ( true );
+    		
+		    float e = float( w ) / float( h );
+		    float f = e;
+    		
+		    for ( int y = 0; y < h; y++ ) {
+			    QRgb *line = (QRgb *) img. scanLine ( y );
+
+			    for ( int x = 0; x < w; x++ ) {
+				    int a = ( x > ( w - 1 - int( f ))) ? 128 : 255;
+
+				    *line = qRgba ( qRed ( *line ), qGreen ( *line ), qBlue ( *line ), a );
+				    line++;
+			    }
+			    f += e;
+		    }
+            pix-> convertFromImage ( img );
+	    }
+		m_colimages. insert ( key, pix );
+    }
+	return pix;
 }
 
 

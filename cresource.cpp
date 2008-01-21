@@ -80,8 +80,7 @@ CResource::CResource ( )
 
 	m_has_alpha &= (( wv != Qt::WV_95 ) && ( wv != Qt::WV_NT ));
 	
-	if ( wv & Qt::WV_DOS_based )
-		QPixmap::setDefaultOptimization ( QPixmap::MemoryOptim );
+    QPixmap::setDefaultOptimization ( QPixmap::MemoryOptim );
 
 	// using the native dialog causes the app to crash under W2K (comdlg32.dll)
 	// (both the release and the debug versions will crash ONLY when run

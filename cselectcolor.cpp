@@ -31,11 +31,11 @@ public:
 		: CListViewItem ( lv ), m_col ( col )
 	{
 		QFontMetrics fm = lv-> fontMetrics ( );
-		m_pix. convertFromImage ( BrickLink::inst ( )-> colorImage ( col, fm. height ( ) + 2, fm. height ( ) + 2 ));
+		m_pix = BrickLink::inst ( )-> colorImage ( col, fm. height ( ) + 2, fm. height ( ) + 2 );
 	}
 
 	virtual const QPixmap *pixmap ( int /*col*/ ) const
-	{ return &m_pix; }
+	{ return m_pix; }
 
 	virtual QString text ( int /*col*/ ) const
 	{ return m_col-> name ( ); }
@@ -44,8 +44,7 @@ public:
 	{ 
 		if ( color ( )-> color ( ). isValid ( )) {
 			QFontMetrics fm = listView ( )-> fontMetrics ( );
-			QPixmap bigpix;
-			bigpix. convertFromImage ( BrickLink::inst ( )-> colorImage ( color ( ), fm. height ( ) * 8, fm. height ( ) * 4 ));
+			QPixmap bigpix ( *BrickLink::inst ( )-> colorImage ( color ( ), fm. height ( ) * 8, fm. height ( ) * 4 ));
 		
 			QMimeSourceFactory::defaultFactory ( )-> setPixmap ( "select_color_tooltip_picture", bigpix );
 
@@ -69,7 +68,7 @@ public:
 
 private:
 	const BrickLink::Color *m_col;
-	QPixmap m_pix;
+	const QPixmap *m_pix;
 };
 
 class ColToolTip : public QToolTip {

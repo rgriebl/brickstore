@@ -97,12 +97,9 @@ public:
 		for ( QIntDictIterator<BrickLink::Color> it ( coldict ); it. current ( ); ++it ) {
 			const BrickLink::Color *color = it. current ( );
 
-			QPixmap *pix = new QPixmap ( );
-			pix-> convertFromImage ( BrickLink::inst ( )-> colorImage ( color, w, h ));
-			
-			m_pixmap_color. insert ( color-> id ( ), pix );
+			m_pixmap_color. insert ( color-> id ( ), BrickLink::inst ( )-> colorImage ( color, w, h ));
 		}
-		m_pixmap_color. setAutoDelete ( true );
+		m_pixmap_color. setAutoDelete ( false );
 	}
 };
 

@@ -195,9 +195,7 @@ void CReport::print ( QPaintDevice *pd, const CDocument *doc, const CDocument::I
 		color ["id"]       = item-> color ( ) ? (int) item-> color ( )-> id ( ) : -1;
 		color ["name"]     = item-> color ( ) ? item-> color ( )-> name ( ) : "";
 		color ["rgb"]      = item-> color ( ) ? item-> color ( )-> color ( ) : QColor ( );
-		QPixmap colorpix;
-		colorpix. convertFromImage ( BrickLink::inst ( )-> colorImage ( item-> color ( ), 20, 20 ));
-		color ["picture"]  = colorpix;
+		color ["picture"]  = *BrickLink::inst ( )-> colorImage ( item-> color ( ), 20, 20 );
 		imap ["color"]     = color;
 
 		QMap<QString, QVariant> cond;

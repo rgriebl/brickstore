@@ -646,9 +646,9 @@ public:
 	const QIntDict<ItemType> &itemTypes ( ) const;
 	const QPtrVector<Item>   &items ( ) const;
 
-	const QPixmap *noImage ( const QSize &s );
+	const QPixmap *noImage ( const QSize &s ) const;
 
-	QImage colorImage ( const BrickLink::Color *col, int w, int h ) const;
+	const QPixmap *colorImage ( const BrickLink::Color *col, int w, int h ) const;
 
 	const Color *color ( uint id ) const;
 	const Color *colorFromPeeronName ( const char *peeron_name ) const;
@@ -731,7 +731,8 @@ private:
 	bool     m_online;
 	QLocale  m_c_locale;
 
-	QDict <QPixmap>  m_noimages;
+	mutable QDict <QPixmap>  m_noimages;
+	mutable QDict <QPixmap>  m_colimages;
 
 	struct dummy1 {
 		QIntDict<Color>           colors;      // id -> Color *
