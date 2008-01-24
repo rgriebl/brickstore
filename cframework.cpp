@@ -448,20 +448,20 @@ void CFrameWork::languageChange ( )
 		{ "file_saveas",                    tr( "Save As..." ),                         0 },
 		{ "file_print",                     tr( "Print..." ),                           tr( "Ctrl+P", "File|Print" ) },
 		{ "file_import",                    tr( "Import" ),                             0 },
-		{ "file_import_bl_inv",             tr( "BrickLink Set Inventory..." ),         tr( "Ctrl+I", "File|Import BrickLink Set Inventory" ) },
-		{ "file_import_bl_xml",             tr( "BrickLink XML..." ),                   0 },
-        { "file_import_bl_order",           tr( "BrickLink Order..." ),                 tr( "Ctrl+U", "File|Import BrickLink Order" ) },
-		{ "file_import_bl_store_inv",       tr( "BrickLink Store Inventory..." ),       0 },
-		{ "file_import_bl_cart",            tr( "BrickLink Shopping Cart..." ),         0 },
-		{ "file_import_peeron_inv",         tr( "Peeron Inventory..." ),                0 },
-		{ "file_import_ldraw_model",        tr( "LDraw Model..." ),                     0 },
+		{ "file_import_bl_inv",             tr( "BrickLink Set Inventory..." ),         tr( "Ctrl+I,Ctrl+I", "File|Import BrickLink Set Inventory" ) },
+		{ "file_import_bl_xml",             tr( "BrickLink XML..." ),                   tr( "Ctrl+I,Ctrl+X", "File|Import BrickLink XML" ) },
+        { "file_import_bl_order",           tr( "BrickLink Order..." ),                 tr( "Ctrl+I,Ctrl+O", "File|Import BrickLink Order" ) },
+		{ "file_import_bl_store_inv",       tr( "BrickLink Store Inventory..." ),       tr( "Ctrl+I,Ctrl+S", "File|Import BrickLink Store Inventory" ) },
+		{ "file_import_bl_cart",            tr( "BrickLink Shopping Cart..." ),         tr( "Ctrl+I,Ctrl+C", "File|Import BrickLink Shopping Cart" ) },
+		{ "file_import_peeron_inv",         tr( "Peeron Inventory..." ),                tr( "Ctrl+I,Ctrl+P", "File|Import Peeron Inventory" ) },
+		{ "file_import_ldraw_model",        tr( "LDraw Model..." ),                     tr( "Ctrl+I,Ctrl+L", "File|Import LDraw Model" ) },
 		{ "file_import_briktrak",           tr( "BrikTrak Inventory..." ),              0 },
 		{ "file_export",                    tr( "Export" ),                             0 },
-		{ "file_export_bl_xml",             tr( "BrickLink XML..." ),                   0 },
-		{ "file_export_bl_xml_clip",        tr( "BrickLink Mass-Upload XML to Clipboard" ),         0 },
-		{ "file_export_bl_update_clip",     tr( "BrickLink Mass-Update XML to Clipboard" ), 0 },
-		{ "file_export_bl_invreq_clip",     tr( "BrickLink Set Inventory XML to Clipboard" ),   0 },
-		{ "file_export_bl_wantedlist_clip", tr( "BrickLink Wanted List XML to Clipboard" ), 0 },
+		{ "file_export_bl_xml",             tr( "BrickLink XML..." ),                         tr( "Ctrl+E,Ctrl+X", "File|Import BrickLink XML" ) },
+		{ "file_export_bl_xml_clip",        tr( "BrickLink Mass-Upload XML to Clipboard" ),   tr( "Ctrl+E,Ctrl+U", "File|Import BrickLink Mass-Upload" ) },
+		{ "file_export_bl_update_clip",     tr( "BrickLink Mass-Update XML to Clipboard" ),   tr( "Ctrl+E,Ctrl+P", "File|Import BrickLink Mass-Update" ) },
+		{ "file_export_bl_invreq_clip",     tr( "BrickLink Set Inventory XML to Clipboard" ), tr( "Ctrl+E,Ctrl+I", "File|Import BrickLink Set Inventory" ) },
+		{ "file_export_bl_wantedlist_clip", tr( "BrickLink Wanted List XML to Clipboard" ),   tr( "Ctrl+E,Ctrl+W", "File|Import BrickLink Wanted List" ) },
 		{ "file_export_briktrak",           tr( "BrikTrak Inventory..." ),              0 },
 		{ "file_close",                     tr( "Close" ),                              tr( "Ctrl+W", "File|Close" ) },
 		{ "file_exit",                      tr( "Exit" ),                               tr( "Ctrl+Q", "File|Quit" ) },
@@ -763,6 +763,8 @@ void CFrameWork::createActions ( )
 	CListAction *l;
 	QActionGroup *g, *g2, *g3;
 
+    QAccel *acc = new QAccel ( this );
+
 	a = new QAction ( this, "file_new" );
 	connect ( a, SIGNAL( activated ( )), this, SLOT( fileNew ( )));
 
@@ -823,14 +825,17 @@ void CFrameWork::createActions ( )
 	(void) CUndoManager::inst ( )-> createUndoAction ( this, "edit_undo" );
 	(void) CUndoManager::inst ( )-> createRedoAction ( this, "edit_redo" );
 
-	(void) new QAction ( this, "edit_cut" );
-	(void) new QAction ( this, "edit_copy" );
-	(void) new QAction ( this, "edit_paste" );
+	a = new QAction ( this, "edit_cut" );
+    acc-> connectItem ( acc-> insertItem ( Qt::SHIFT  + Qt::Key_Delete ), a, SLOT( activate ( ))); // old style cut
+	a = new QAction ( this, "edit_copy" );    
+    acc-> connectItem ( acc-> insertItem ( Qt::SHIFT + Qt::Key_Insert ), a, SLOT( activate ( ))); // old style copy
+	a = new QAction ( this, "edit_paste" );
+    acc-> connectItem ( acc-> insertItem ( Qt::CTRL  + Qt::Key_Insert ), a, SLOT( activate ( ))); // old style paste
 	(void) new QAction ( this, "edit_delete" );
 	a = new QAction ( this, "edit_additems", true );
 	connect ( a, SIGNAL( toggled ( bool )), this, SLOT( toggleAddItemDialog ( bool )));
 
-	(void) new QAction ( this, "edit_subtractitems" );
+    (void) new QAction ( this, "edit_subtractitems" );
 	(void) new QAction ( this, "edit_mergeitems" );
 	(void) new QAction ( this, "edit_partoutitems" );
 	(void) new QAction ( this, "edit_reset_diffs" );
@@ -1684,6 +1689,10 @@ void CFrameWork::toggleAddItemDialog ( bool b )
 
 		QAction *action = findAction ( "edit_additems" );
 		acc-> connectItem ( acc-> insertItem ( action-> accel ( )), action, SLOT( toggle ( )));
+        if ( action-> accel ( )[0] == Qt::Key_Insert ) {
+            acc-> insertItem ( Qt::SHIFT + Qt::Key_Insert ); // ignore old style copy
+            acc-> insertItem ( Qt::CTRL  + Qt::Key_Insert ); // ignore old style paste
+        }
 		
 		connect ( m_add_dialog, SIGNAL( closed ( )), this, SLOT( closedAddItemDialog ( )));
 
