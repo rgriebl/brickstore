@@ -324,7 +324,7 @@ void CApplication::about ( )
 					"</big></td>"
 				"</tr></table>"
 				"<br />%4<br /><br />%5"
-			"</center>%6"
+            "</center>%6<p>%7</p>"
 		"</qt>";
 
 
@@ -340,6 +340,47 @@ void CApplication::about ( )
 	QString z    = curlver-> libz_version;
 	QString qt   = qVersion ( );
 	QString qsa  = QSA_VERSION_STRING;
+
+    QString translators = "<b>" + tr( "Translators" ) + "</b><table border=\"0\">";
+   	QDomDocument doc;
+	QFile file ( CResource::inst ( )-> locate ( "translations/translations.xml" ));
+
+    qWarning(QLocale::languageToString(QLocale().language()).ascii());
+	if ( file. open ( IO_ReadOnly )) {
+		QString err_str;
+		int err_line = 0, err_col = 0;
+	
+		if ( doc. setContent ( &file, &err_str, &err_line, &err_col )) {
+			QDomElement root = doc. documentElement ( );
+
+			if ( root. isElement ( ) && root. nodeName ( ) == "translations" ) {
+				for ( QDomNode trans = root. firstChild ( ); !trans. isNull ( ); trans = trans. nextSibling ( )) {
+					if ( !trans. isElement ( ) || ( trans. nodeName ( ) != "translation" ))
+						continue;
+					QDomNamedNodeMap map = trans. attributes ( );
+
+                    if ( !map.contains ( "default" )) {
+    					QString lang_id = map. namedItem ( "lang" ). toAttr ( ). value ( );
+	    				QString author = map. namedItem ( "author" ). toAttr ( ). value ( );
+		    			QString email = map. namedItem ( "authoremail" ). toAttr ( ). value ( );
+                        QString langname;
+
+                        for ( QDomNode name = trans. firstChild ( ); !name. isNull ( ); name = name. nextSibling ( )) {
+						    if ( !name. isElement ( ) || ( name. nodeName ( ) != "name" ))
+							    continue;
+						    QDomNamedNodeMap map = name. attributes ( );
+
+                            if ( QLocale().name().startsWith ( map. namedItem ( "lang" ). toAttr ( ). value ( )))
+                                langname = name. toElement ( ). text ( );
+                        }
+                        if ( !langname. isEmpty ( ))
+                            translators += QString("<tr><td>%1</td><td>%2 &lt;<a href=\"mailto:%3\">%4</a>&gt;</td></tr>").arg(langname, author, email, email);
+                    }
+                }
+            }
+        }
+    }
+    translators += "</table>";
 
 	static const char *legal_src = QT_TR_NOOP(
 		"<p>"
@@ -362,10 +403,6 @@ void CApplication::about ( )
 		"which does not sponsor, authorize or endorse this software."
 		"</p><p>"
 		"All other trademarks recognised."
-		"</p><p>"
-		"French translation by Sylvain Perez (<a href=\"mailto:bricklink@1001bricks.com\">bricklink@1001bricks.com</a>)"
-		"<br />"
-		"Dutch translation by Eric van Horssen (<a href=\"mailto:horzel@hacktic.nl\">horzel@hacktic.nl</a>)"
 		"</p>"
 	);
 
@@ -403,8 +440,8 @@ void CApplication::about ( )
 
 	QString legal = tr( legal_src );
 
-	QString page1 = QString ( layout ). arg ( appName ( ), copyright, version, support ). arg ( page1_link, legal );
-	QString page2 = QString ( layout ). arg ( appName ( ), copyright, version, support ). arg ( page2_link, technical );
+	QString page1 = QString ( layout ). arg ( appName ( ), copyright, version, support ). arg ( page1_link, legal, translators );
+	QString page2 = QString ( layout ). arg ( appName ( ), copyright, version, support ). arg ( page2_link, technical, QString());
 
 	QMimeSourceFactory::defaultFactory ( )-> setText ( "brickstore-info-page1", page1 );
 	QMimeSourceFactory::defaultFactory ( )-> setText ( "brickstore-info-page2", page2 );

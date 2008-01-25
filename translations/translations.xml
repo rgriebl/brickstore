@@ -9,7 +9,7 @@
 		<name lang="sl">Angleščina</name>
 	</translation>
 
-	<translation lang="de">
+	<translation lang="de" author="Robert Griebl" authoremail="rg@softforge.de">
 		<name>German</name>
 		<name lang="de">Deutsch</name>
 		<name lang="fr">Allemand</name>
@@ -17,7 +17,7 @@
 		<name lang="sl">Nemščina</name>
 	</translation>
 
-	<translation lang="fr">
+	<translation lang="fr" author="Sylvain Perez" authoremail="bricklink@1001bricks.com">
 		<name>French</name>
 		<name lang="de">Französisch</name>
 		<name lang="fr">Français</name>
@@ -25,7 +25,7 @@
 		<name lang="sl">Francoščina</name>
 	</translation>
 
-	<translation lang="nl">
+	<translation lang="nl" author="Eric van Horssen" authoremail="horzel@hacktic.nl">
 		<name>Dutch</name>
 		<name lang="de">Holländisch</name>
 		<name lang="fr">Hollandais</name>
@@ -33,7 +33,7 @@
 		<name lang="sl">Nizozemščina</name>
 	</translation>
 
-	<translation lang="sl">
+	<translation lang="sl" author="Sašo Tomat" authoremail="miskox@hotmail.com">
 		<name>Slovene</name>
 		<name lang="de">Slowenisch</name>
 		<name lang="fr">Slovène</name>

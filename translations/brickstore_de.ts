@@ -104,7 +104,7 @@
     </message>
     <message>
         <source>&lt;p&gt;This program is free software; it may be distributed and/or modified under the terms of the GNU General Public License version 2 as published by the Free Software Foundation and appearing in the file LICENSE.GPL included in this software package.&lt;br /&gt;This program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.&lt;br /&gt;See &lt;a href=&quot;http://fsf.org/licensing/licenses/gpl.html&quot;&gt;www.fsf.org/licensing/licenses/gpl.html&lt;/a&gt; for GPL licensing information.&lt;/p&gt;&lt;p&gt;All data from &lt;a href=&quot;http://www.bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; is owned by BrickLink&lt;sup&gt;TM&lt;/sup&gt;, which is a trademark of Dan Jezek.&lt;/p&gt;&lt;p&gt;Peeron Inventories from &lt;a href=&quot;http://www.peeron.com&quot;&gt;www.peeron.com&lt;/a&gt; are owned by Dan and Jennifer Boger.&lt;/p&gt;&lt;p&gt;LEGO&lt;sup&gt;&amp;reg;&lt;/sup&gt; is a trademark of the LEGO group of companies, which does not sponsor, authorize or endorse this software.&lt;/p&gt;&lt;p&gt;All other trademarks recognised.&lt;/p&gt;&lt;p&gt;French translation by Sylvain Perez (&lt;a href=&quot;mailto:bricklink@1001bricks.com&quot;&gt;bricklink@1001bricks.com&lt;/a&gt;)&lt;br /&gt;Dutch translation by Eric van Horssen (&lt;a href=&quot;mailto:horzel@hacktic.nl&quot;&gt;horzel@hacktic.nl&lt;/a&gt;)&lt;/p&gt;</source>
-        <translation>&lt;p&gt;Dieses Programm ist freie Software. Sie können es unter den Bedingungen der GNU General Public License Version 2, wie von der Free Software Foundation veröffentlicht und in der Datei LICENSE.GPL dieses Software-Paketes zu Lesen, weitergeben und/oder modifizieren.&lt;br /&gt;
+        <translation type="obsolete">&lt;p&gt;Dieses Programm ist freie Software. Sie können es unter den Bedingungen der GNU General Public License Version 2, wie von der Free Software Foundation veröffentlicht und in der Datei LICENSE.GPL dieses Software-Paketes zu Lesen, weitergeben und/oder modifizieren.&lt;br /&gt;
 Die Veröffentlichung dieses Programms erfolgt in der Hoffnung, daß es Ihnen von Nutzen sein wird, aber OHNE IRGENDEINE GARANTIE, sogar ohne die implizite Garantie der MARKTREIFE oder der VERWENDBARKEIT FÜR EINEN BESTIMMTEN ZWECK.&lt;br /&gt;
 Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf.org/licensing/licenses/gpl.html&quot;&gt;www.fsf.org/licensing/licenses/gpl.html&lt;/a&gt;.&lt;/p&gt;
 &lt;p&gt;Alle Daten von &lt;a href=&quot;http://www.bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; sind Eigentum von BrickLink&lt;sup&gt;TM&lt;/sup&gt; (ein Warenzeichen von Dan Jezek).&lt;/p&gt;
@@ -113,6 +113,33 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
 &lt;p&gt;Alle anderen Warenzeichen, auch wenn nicht explizit erwähnt, werden als solche betrachtet.&lt;/p&gt;
 &lt;p&gt;Französische Übersetzung von Sylvain Perez (&lt;a href=&quot;mailto:bricklink@1001bricks.com&quot;&gt;1001bricks&lt;/a&gt;)&lt;br /&gt;
 Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@hacktic.nl&quot;&gt;horzel@hacktic.nl&lt;/a&gt;)&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;This program is free software; it may be distributed and/or modified under the terms of the GNU General Public License version 2 as published by the Free Software Foundation and appearing in the file LICENSE.GPL included in this software package.&lt;br /&gt;This program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.&lt;br /&gt;See &lt;a href=&quot;http://fsf.org/licensing/licenses/gpl.html&quot;&gt;www.fsf.org/licensing/licenses/gpl.html&lt;/a&gt; for GPL licensing information.&lt;/p&gt;&lt;p&gt;All data from &lt;a href=&quot;http://www.bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; is owned by BrickLink&lt;sup&gt;TM&lt;/sup&gt;, which is a trademark of Dan Jezek.&lt;/p&gt;&lt;p&gt;Peeron Inventories from &lt;a href=&quot;http://www.peeron.com&quot;&gt;www.peeron.com&lt;/a&gt; are owned by Dan and Jennifer Boger.&lt;/p&gt;&lt;p&gt;LEGO&lt;sup&gt;&amp;reg;&lt;/sup&gt; is a trademark of the LEGO group of companies, which does not sponsor, authorize or endorse this software.&lt;/p&gt;&lt;p&gt;All other trademarks recognised.&lt;/p&gt;&lt;p&gt;French translation by Sylvain Perez (&lt;a href=&quot;mailto:bricklink@1001bricks.com&quot;&gt;bricklink@1001bricks.com&lt;/a&gt;)&lt;br /&gt;Dutch translation by Eric van Horssen (&lt;a href=&quot;mailto:horzel@hacktic.nl&quot;&gt;horzel@hacktic.nl&lt;/a&gt;)&lt;br /&gt;Slovene translation by Saso Tomat (&lt;a href=&quot;mailto:miskox@hotmail.com&quot;&gt;miskox@hotmail.com&lt;/a&gt;)&lt;/p&gt;</source>
+        <translation type="obsolete">&lt;p&gt;Dieses Programm ist freie Software. Sie können es unter den Bedingungen der GNU General Public License Version 2, wie von der Free Software Foundation veröffentlicht und in der Datei LICENSE.GPL dieses Software-Paketes zu Lesen, weitergeben und/oder modifizieren.&lt;br /&gt;
+Die Veröffentlichung dieses Programms erfolgt in der Hoffnung, daß es Ihnen von Nutzen sein wird, aber OHNE IRGENDEINE GARANTIE, sogar ohne die implizite Garantie der MARKTREIFE oder der VERWENDBARKEIT FÜR EINEN BESTIMMTEN ZWECK.&lt;br /&gt;
+Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf.org/licensing/licenses/gpl.html&quot;&gt;www.fsf.org/licensing/licenses/gpl.html&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Alle Daten von &lt;a href=&quot;http://www.bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; sind Eigentum von BrickLink&lt;sup&gt;TM&lt;/sup&gt; (ein Warenzeichen von Dan Jezek).&lt;/p&gt;
+&lt;p&gt;Peeron Inventare von &lt;a href=&quot;http://www.peeron.com&quot;&gt;www.peeron.com&lt;/a&gt; sind Eigentum von Dan und Jennifer Boger.&lt;/p&gt;
+&lt;p&gt;LEGO&lt;sup&gt;&amp;reg;&lt;/sup&gt; ist ein Warenzeichen der LEGO Gruppe, welche diese Software weder gesponsort noch autorisiert hat.&lt;/p&gt;
+&lt;p&gt;Alle anderen Warenzeichen, auch wenn nicht explizit erwähnt, werden als solche betrachtet.&lt;/p&gt;
+&lt;p&gt;Französische Übersetzung von Sylvain Perez (&lt;a href=&quot;mailto:bricklink@1001bricks.com&quot;&gt;1001bricks&lt;/a&gt;)&lt;br /&gt;
+Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@hacktic.nl&quot;&gt;horzel@hacktic.nl&lt;/a&gt;)&lt;br /&gt;
+Slovenische Übersetzung von Saso Tomat (&lt;a href=&quot;mailto:miskox@hotmail.com&quot;&gt;miskox@hotmail.com&lt;/a&gt;)&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Translators</source>
+        <translation>Übersetzer</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;This program is free software; it may be distributed and/or modified under the terms of the GNU General Public License version 2 as published by the Free Software Foundation and appearing in the file LICENSE.GPL included in this software package.&lt;br /&gt;This program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.&lt;br /&gt;See &lt;a href=&quot;http://fsf.org/licensing/licenses/gpl.html&quot;&gt;www.fsf.org/licensing/licenses/gpl.html&lt;/a&gt; for GPL licensing information.&lt;/p&gt;&lt;p&gt;All data from &lt;a href=&quot;http://www.bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; is owned by BrickLink&lt;sup&gt;TM&lt;/sup&gt;, which is a trademark of Dan Jezek.&lt;/p&gt;&lt;p&gt;Peeron Inventories from &lt;a href=&quot;http://www.peeron.com&quot;&gt;www.peeron.com&lt;/a&gt; are owned by Dan and Jennifer Boger.&lt;/p&gt;&lt;p&gt;LEGO&lt;sup&gt;&amp;reg;&lt;/sup&gt; is a trademark of the LEGO group of companies, which does not sponsor, authorize or endorse this software.&lt;/p&gt;&lt;p&gt;All other trademarks recognised.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Dieses Programm ist freie Software. Sie können es unter den Bedingungen der GNU General Public License Version 2, wie von der Free Software Foundation veröffentlicht und in der Datei LICENSE.GPL dieses Software-Paketes zu Lesen, weitergeben und/oder modifizieren.&lt;br /&gt;
+Die Veröffentlichung dieses Programms erfolgt in der Hoffnung, daß es Ihnen von Nutzen sein wird, aber OHNE IRGENDEINE GARANTIE, sogar ohne die implizite Garantie der MARKTREIFE oder der VERWENDBARKEIT FÜR EINEN BESTIMMTEN ZWECK.&lt;br /&gt;
+Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf.org/licensing/licenses/gpl.html&quot;&gt;www.fsf.org/licensing/licenses/gpl.html&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Alle Daten von &lt;a href=&quot;http://www.bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; sind Eigentum von BrickLink&lt;sup&gt;TM&lt;/sup&gt; (ein Warenzeichen von Dan Jezek).&lt;/p&gt;
+&lt;p&gt;Peeron Inventare von &lt;a href=&quot;http://www.peeron.com&quot;&gt;www.peeron.com&lt;/a&gt; sind Eigentum von Dan und Jennifer Boger.&lt;/p&gt;
+&lt;p&gt;LEGO&lt;sup&gt;&amp;reg;&lt;/sup&gt; ist ein Warenzeichen der LEGO Gruppe, welche diese Software weder gesponsort noch autorisiert hat.&lt;/p&gt;
+&lt;p&gt;Alle anderen Warenzeichen, auch wenn nicht explizit erwähnt, werden als solche betrachtet.&lt;/p&gt;</translation>
     </message>
 </context>
 <context>
@@ -309,7 +336,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     <message>
         <source>Ctrl+N</source>
         <comment>File|New</comment>
-        <translation>Ctrl+N</translation>
+        <translation></translation>
     </message>
     <message>
         <source>Open...</source>
@@ -318,7 +345,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     <message>
         <source>Ctrl+O</source>
         <comment>File|Open</comment>
-        <translation>Ctrl+O</translation>
+        <translation></translation>
     </message>
     <message>
         <source>Open Recent</source>
@@ -339,7 +366,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     <message>
         <source>Ctrl+P</source>
         <comment>File|Print</comment>
-        <translation>Ctrl+P</translation>
+        <translation></translation>
     </message>
     <message>
         <source>Import</source>
@@ -368,7 +395,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     <message>
         <source>Ctrl+W</source>
         <comment>File|Close</comment>
-        <translation>Ctrl+W</translation>
+        <translation></translation>
     </message>
     <message>
         <source>Exit</source>
@@ -377,17 +404,17 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     <message>
         <source>Ctrl+Q</source>
         <comment>File|Quit</comment>
-        <translation>Ctrl+Q</translation>
+        <translation></translation>
     </message>
     <message>
         <source>Ctrl+Z</source>
         <comment>Edit|Undo</comment>
-        <translation>Ctrl+Z</translation>
+        <translation></translation>
     </message>
     <message>
         <source>Ctrl+Y</source>
         <comment>Edit|Redo</comment>
-        <translation>Ctrl+Y</translation>
+        <translation></translation>
     </message>
     <message>
         <source>Cut</source>
@@ -396,7 +423,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     <message>
         <source>Ctrl+X</source>
         <comment>Edit|Cut</comment>
-        <translation>Ctrl+X</translation>
+        <translation></translation>
     </message>
     <message>
         <source>Copy</source>
@@ -405,7 +432,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     <message>
         <source>Ctrl+C</source>
         <comment>Edit|Copy</comment>
-        <translation>Ctrl+C</translation>
+        <translation></translation>
     </message>
     <message>
         <source>Paste</source>
@@ -414,7 +441,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     <message>
         <source>Ctrl+V</source>
         <comment>Edit|Paste</comment>
-        <translation>Ctrl+V</translation>
+        <translation></translation>
     </message>
     <message>
         <source>Delete</source>
@@ -426,12 +453,12 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
     <message>
         <source>Select All</source>
-        <translation>Alles auswählen</translation>
+        <translation>Alles auswählenx</translation>
     </message>
     <message>
         <source>Ctrl+A</source>
         <comment>Edit|SelectAll</comment>
-        <translation>Ctrl+A</translation>
+        <translation></translation>
     </message>
     <message>
         <source>Select None</source>
@@ -440,7 +467,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     <message>
         <source>Ctrl+Shift+A</source>
         <comment>Edit|SelectNone</comment>
-        <translation>Ctrl+Shift+A</translation>
+        <translation></translation>
     </message>
     <message>
         <source>View Toolbar</source>
@@ -503,7 +530,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     <message>
         <source>Ctrl+S</source>
         <comment>File|Save</comment>
-        <translation>Ctrl+S</translation>
+        <translation></translation>
     </message>
     <message>
         <source>Show BrickLink Catalog Info...</source>
@@ -730,7 +757,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     <message>
         <source>Ctrl+*</source>
         <comment>Edit|Quantity|Multiply</comment>
-        <translation>Ctrl+*</translation>
+        <translation></translation>
     </message>
     <message>
         <source>Divide...</source>
@@ -739,7 +766,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     <message>
         <source>Ctrl+/</source>
         <comment>Edit|Quantity|Divide</comment>
-        <translation>Ctrl+/</translation>
+        <translation></translation>
     </message>
     <message>
         <source>Price</source>
@@ -748,7 +775,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     <message>
         <source>Ctrl+G</source>
         <comment>Edit|Price|Set to PriceGuide</comment>
-        <translation>Ctrl+G</translation>
+        <translation></translation>
     </message>
     <message>
         <source>Inc- or Decrease...</source>
@@ -757,7 +784,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     <message>
         <source>Ctrl++</source>
         <comment>Edit|Price|Inc/Dec</comment>
-        <translation>Ctrl++</translation>
+        <translation></translation>
     </message>
     <message>
         <source>Bulk Quantity...</source>
@@ -770,7 +797,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     <message>
         <source>Ctrl+%</source>
         <comment>Edit|Sale</comment>
-        <translation>Ctrl+%</translation>
+        <translation></translation>
     </message>
     <message>
         <source>Retain in Inventory</source>
@@ -877,7 +904,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     <message>
         <source>Ctrl+I</source>
         <comment>File|Import BrickLink Set Inventory</comment>
-        <translation>Ctrl+I</translation>
+        <translation type="obsolete">Ctrl+I</translation>
     </message>
     <message>
         <source>BrickLink Mass-Upload XML to Clipboard</source>
@@ -894,7 +921,67 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     <message>
         <source>Ctrl+U</source>
         <comment>File|Import BrickLink Order</comment>
-        <translation>Ctrl+U</translation>
+        <translation type="obsolete">Ctrl+U</translation>
+    </message>
+    <message>
+        <source>Ctrl+I,Ctrl+I</source>
+        <comment>File|Import BrickLink Set Inventory</comment>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Ctrl+I,Ctrl+X</source>
+        <comment>File|Import BrickLink XML</comment>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Ctrl+I,Ctrl+O</source>
+        <comment>File|Import BrickLink Order</comment>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Ctrl+I,Ctrl+S</source>
+        <comment>File|Import BrickLink Store Inventory</comment>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Ctrl+I,Ctrl+C</source>
+        <comment>File|Import BrickLink Shopping Cart</comment>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Ctrl+I,Ctrl+P</source>
+        <comment>File|Import Peeron Inventory</comment>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Ctrl+I,Ctrl+L</source>
+        <comment>File|Import LDraw Model</comment>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Ctrl+E,Ctrl+X</source>
+        <comment>File|Import BrickLink XML</comment>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Ctrl+E,Ctrl+U</source>
+        <comment>File|Import BrickLink Mass-Upload</comment>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Ctrl+E,Ctrl+P</source>
+        <comment>File|Import BrickLink Mass-Update</comment>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Ctrl+E,Ctrl+I</source>
+        <comment>File|Import BrickLink Set Inventory</comment>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Ctrl+E,Ctrl+W</source>
+        <comment>File|Import BrickLink Wanted List</comment>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -1130,6 +1217,18 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     <message>
         <source>Part #</source>
         <translation>Teile #</translation>
+    </message>
+    <message>
+        <source>Complete</source>
+        <translation>Vollständig</translation>
+    </message>
+    <message>
+        <source>Incomplete</source>
+        <translation>Unvollständig</translation>
+    </message>
+    <message>
+        <source>MISB</source>
+        <translation>MISB</translation>
     </message>
 </context>
 <context>

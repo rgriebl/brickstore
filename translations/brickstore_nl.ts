@@ -104,7 +104,15 @@
     </message>
     <message>
         <source>&lt;p&gt;This program is free software; it may be distributed and/or modified under the terms of the GNU General Public License version 2 as published by the Free Software Foundation and appearing in the file LICENSE.GPL included in this software package.&lt;br /&gt;This program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.&lt;br /&gt;See &lt;a href=&quot;http://fsf.org/licensing/licenses/gpl.html&quot;&gt;www.fsf.org/licensing/licenses/gpl.html&lt;/a&gt; for GPL licensing information.&lt;/p&gt;&lt;p&gt;All data from &lt;a href=&quot;http://www.bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; is owned by BrickLink&lt;sup&gt;TM&lt;/sup&gt;, which is a trademark of Dan Jezek.&lt;/p&gt;&lt;p&gt;Peeron Inventories from &lt;a href=&quot;http://www.peeron.com&quot;&gt;www.peeron.com&lt;/a&gt; are owned by Dan and Jennifer Boger.&lt;/p&gt;&lt;p&gt;LEGO&lt;sup&gt;&amp;reg;&lt;/sup&gt; is a trademark of the LEGO group of companies, which does not sponsor, authorize or endorse this software.&lt;/p&gt;&lt;p&gt;All other trademarks recognised.&lt;/p&gt;&lt;p&gt;French translation by Sylvain Perez (&lt;a href=&quot;mailto:bricklink@1001bricks.com&quot;&gt;bricklink@1001bricks.com&lt;/a&gt;)&lt;br /&gt;Dutch translation by Eric van Horssen (&lt;a href=&quot;mailto:horzel@hacktic.nl&quot;&gt;horzel@hacktic.nl&lt;/a&gt;)&lt;/p&gt;</source>
-        <translation>&lt;p&gt;Dit programma is vrije software. U kunt het onder de voorwaarden van de GNU General Public License Version 2, zoals gepubliceerd door de Free Software Foundation en in het bestand LICENSE.GPL van dit software pakket te lezen, doorgeven en/of aanpassen.&lt;br /&gt;De openbaarmaking van dit programma gebeurd in de hoop dat het U van nut kan zijn, maar ZONDER ENIGE GARANTIE, zelfs zonder de impliciete garantie dat het programma MARKTRIJP is, of de BRUIKBAARHEID VOOR EEN BEPAALD DOEL.&lt;br /&gt;Gedetailleerde GPL License informatie vind U hier: &lt;a href=&quot;http://fsf.org/licensing/licenses/gpl.html&quot;&gt;www.fsf.org/licensing/licenses/gpl.html&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Alle gegevens van &lt;a href=&quot;http://www.bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; zijn eigendom van BrickLink&lt;sup&gt;TM&lt;/sup&gt;, hetgeen een handelsmerk is van Dan Jezek.&lt;/p&gt;&lt;p&gt;Peeron inventarissen van &lt;a href=&quot;http://www.peeron.com&quot;&gt;www.peeron.com&lt;/a&gt; zijn eigendom van Dan en Jennifer Boger.&lt;/p&gt;&lt;p&gt;LEGO&lt;sup&gt;&amp;reg;&lt;/sup&gt; is een  handelsmerk van de LEGO groep, welke deze software niet gesponsored of erkend heeft.&lt;/p&gt;&lt;p&gt;Alle andere handelsmerken worden, ook wanneer niet expliciet vermeld, erkend .&lt;/p&gt;&lt;p&gt;Franse vertaling door Sylvain Perez (&lt;a href=&quot;mailto:bricklink@1001bricks.com&quot;&gt;bricklink@1001bricks.com&lt;/a&gt;)&lt;br /&gt;Nederlandse vertaling door Eric van Horssen (&lt;a href=&quot;mailto:horzel@hacktic.nl&quot;&gt;horzel@hacktic.nl&lt;/a&gt;)&lt;/p&gt;</translation>
+        <translation type="obsolete">&lt;p&gt;Dit programma is vrije software. U kunt het onder de voorwaarden van de GNU General Public License Version 2, zoals gepubliceerd door de Free Software Foundation en in het bestand LICENSE.GPL van dit software pakket te lezen, doorgeven en/of aanpassen.&lt;br /&gt;De openbaarmaking van dit programma gebeurd in de hoop dat het U van nut kan zijn, maar ZONDER ENIGE GARANTIE, zelfs zonder de impliciete garantie dat het programma MARKTRIJP is, of de BRUIKBAARHEID VOOR EEN BEPAALD DOEL.&lt;br /&gt;Gedetailleerde GPL License informatie vind U hier: &lt;a href=&quot;http://fsf.org/licensing/licenses/gpl.html&quot;&gt;www.fsf.org/licensing/licenses/gpl.html&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Alle gegevens van &lt;a href=&quot;http://www.bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; zijn eigendom van BrickLink&lt;sup&gt;TM&lt;/sup&gt;, hetgeen een handelsmerk is van Dan Jezek.&lt;/p&gt;&lt;p&gt;Peeron inventarissen van &lt;a href=&quot;http://www.peeron.com&quot;&gt;www.peeron.com&lt;/a&gt; zijn eigendom van Dan en Jennifer Boger.&lt;/p&gt;&lt;p&gt;LEGO&lt;sup&gt;&amp;reg;&lt;/sup&gt; is een  handelsmerk van de LEGO groep, welke deze software niet gesponsored of erkend heeft.&lt;/p&gt;&lt;p&gt;Alle andere handelsmerken worden, ook wanneer niet expliciet vermeld, erkend .&lt;/p&gt;&lt;p&gt;Franse vertaling door Sylvain Perez (&lt;a href=&quot;mailto:bricklink@1001bricks.com&quot;&gt;bricklink@1001bricks.com&lt;/a&gt;)&lt;br /&gt;Nederlandse vertaling door Eric van Horssen (&lt;a href=&quot;mailto:horzel@hacktic.nl&quot;&gt;horzel@hacktic.nl&lt;/a&gt;)&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>Translators</source>
+        <translation>Vertalers</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;This program is free software; it may be distributed and/or modified under the terms of the GNU General Public License version 2 as published by the Free Software Foundation and appearing in the file LICENSE.GPL included in this software package.&lt;br /&gt;This program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.&lt;br /&gt;See &lt;a href=&quot;http://fsf.org/licensing/licenses/gpl.html&quot;&gt;www.fsf.org/licensing/licenses/gpl.html&lt;/a&gt; for GPL licensing information.&lt;/p&gt;&lt;p&gt;All data from &lt;a href=&quot;http://www.bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; is owned by BrickLink&lt;sup&gt;TM&lt;/sup&gt;, which is a trademark of Dan Jezek.&lt;/p&gt;&lt;p&gt;Peeron Inventories from &lt;a href=&quot;http://www.peeron.com&quot;&gt;www.peeron.com&lt;/a&gt; are owned by Dan and Jennifer Boger.&lt;/p&gt;&lt;p&gt;LEGO&lt;sup&gt;&amp;reg;&lt;/sup&gt; is a trademark of the LEGO group of companies, which does not sponsor, authorize or endorse this software.&lt;/p&gt;&lt;p&gt;All other trademarks recognised.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Dit programma is vrije software. U kunt het onder de voorwaarden van de GNU General Public License Version 2, zoals gepubliceerd door de Free Software Foundation en in het bestand LICENSE.GPL van dit software pakket te lezen, doorgeven en/of aanpassen.&lt;br /&gt;De openbaarmaking van dit programma gebeurd in de hoop dat het U van nut kan zijn, maar ZONDER ENIGE GARANTIE, zelfs zonder de impliciete garantie dat het programma MARKTRIJP is, of de BRUIKBAARHEID VOOR EEN BEPAALD DOEL.&lt;br /&gt;Gedetailleerde GPL License informatie vind U hier: &lt;a href=&quot;http://fsf.org/licensing/licenses/gpl.html&quot;&gt;www.fsf.org/licensing/licenses/gpl.html&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Alle gegevens van &lt;a href=&quot;http://www.bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; zijn eigendom van BrickLink&lt;sup&gt;TM&lt;/sup&gt;, hetgeen een handelsmerk is van Dan Jezek.&lt;/p&gt;&lt;p&gt;Peeron inventarissen van &lt;a href=&quot;http://www.peeron.com&quot;&gt;www.peeron.com&lt;/a&gt; zijn eigendom van Dan en Jennifer Boger.&lt;/p&gt;&lt;p&gt;LEGO&lt;sup&gt;&amp;reg;&lt;/sup&gt; is een  handelsmerk van de LEGO groep, welke deze software niet gesponsored of erkend heeft.&lt;/p&gt;&lt;p&gt;Alle andere handelsmerken worden, ook wanneer niet expliciet vermeld, erkend .&lt;/p&gt;</translation>
     </message>
 </context>
 <context>
@@ -349,7 +357,7 @@
     <message>
         <source>Ctrl+N</source>
         <comment>File|New</comment>
-        <translation>Ctrl+N</translation>
+        <translation></translation>
     </message>
     <message>
         <source>Open...</source>
@@ -358,7 +366,7 @@
     <message>
         <source>Ctrl+O</source>
         <comment>File|Open</comment>
-        <translation>Ctrl+O</translation>
+        <translation></translation>
     </message>
     <message>
         <source>Open Recent</source>
@@ -371,7 +379,7 @@
     <message>
         <source>Ctrl+S</source>
         <comment>File|Save</comment>
-        <translation>Ctrl+S</translation>
+        <translation></translation>
     </message>
     <message>
         <source>Save As...</source>
@@ -384,7 +392,7 @@
     <message>
         <source>Ctrl+P</source>
         <comment>File|Print</comment>
-        <translation>Ctrl+P</translation>
+        <translation></translation>
     </message>
     <message>
         <source>Import</source>
@@ -450,7 +458,7 @@
     <message>
         <source>Ctrl+W</source>
         <comment>File|Close</comment>
-        <translation>Ctrl+W</translation>
+        <translation></translation>
     </message>
     <message>
         <source>Exit</source>
@@ -459,17 +467,17 @@
     <message>
         <source>Ctrl+Q</source>
         <comment>File|Quit</comment>
-        <translation>Ctrl+Q</translation>
+        <translation></translation>
     </message>
     <message>
         <source>Ctrl+Z</source>
         <comment>Edit|Undo</comment>
-        <translation>Ctrl+Z</translation>
+        <translation></translation>
     </message>
     <message>
         <source>Ctrl+Y</source>
         <comment>Edit|Redo</comment>
-        <translation>Ctrl+Y</translation>
+        <translation></translation>
     </message>
     <message>
         <source>Cut</source>
@@ -478,7 +486,7 @@
     <message>
         <source>Ctrl+X</source>
         <comment>Edit|Cut</comment>
-        <translation>Ctrl+X</translation>
+        <translation></translation>
     </message>
     <message>
         <source>Copy</source>
@@ -487,7 +495,7 @@
     <message>
         <source>Ctrl+C</source>
         <comment>Edit|Copy</comment>
-        <translation>Ctrl+C</translation>
+        <translation></translation>
     </message>
     <message>
         <source>Paste</source>
@@ -496,7 +504,7 @@
     <message>
         <source>Ctrl+V</source>
         <comment>Edit|Paste</comment>
-        <translation>Ctrl+V</translation>
+        <translation></translation>
     </message>
     <message>
         <source>Delete</source>
@@ -539,7 +547,7 @@
     <message>
         <source>Ctrl+A</source>
         <comment>Edit|SelectAll</comment>
-        <translation>Ctrl+A</translation>
+        <translation></translation>
     </message>
     <message>
         <source>Select None</source>
@@ -548,7 +556,7 @@
     <message>
         <source>Ctrl+Shift+A</source>
         <comment>Edit|SelectNone</comment>
-        <translation>Ctrl+Shift+A</translation>
+        <translation></translation>
     </message>
     <message>
         <source>Buyer/Collector Mode</source>
@@ -690,7 +698,7 @@
     <message>
         <source>Ctrl+*</source>
         <comment>Edit|Quantity|Multiply</comment>
-        <translation>Ctrl+*</translation>
+        <translation></translation>
     </message>
     <message>
         <source>Divide...</source>
@@ -699,7 +707,7 @@
     <message>
         <source>Ctrl+/</source>
         <comment>Edit|Quantity|Divide</comment>
-        <translation>Ctrl+/</translation>
+        <translation></translation>
     </message>
     <message>
         <source>Price</source>
@@ -708,7 +716,7 @@
     <message>
         <source>Ctrl+G</source>
         <comment>Edit|Price|Set to PriceGuide</comment>
-        <translation>Ctrl+G</translation>
+        <translation></translation>
     </message>
     <message>
         <source>Inc- or Decrease...</source>
@@ -717,7 +725,7 @@
     <message>
         <source>Ctrl++</source>
         <comment>Edit|Price|Inc/Dec</comment>
-        <translation>Ctrl++</translation>
+        <translation></translation>
     </message>
     <message>
         <source>Bulk Quantity...</source>
@@ -730,7 +738,7 @@
     <message>
         <source>Ctrl+%</source>
         <comment>Edit|Sale</comment>
-        <translation>Ctrl+%</translation>
+        <translation></translation>
     </message>
     <message>
         <source>Comment</source>
@@ -869,11 +877,11 @@
     <message>
         <source>Ctrl+I</source>
         <comment>File|Import BrickLink Set Inventory</comment>
-        <translation type="unfinished">Ctrl+I</translation>
+        <translation type="obsolete">Ctrl+I</translation>
     </message>
     <message>
         <source>BrickLink Mass-Upload XML to Clipboard</source>
-        <translation type="unfinished"></translation>
+        <translation>BrickLink Mass-Update XML to Clipboard</translation>
     </message>
     <message>
         <source>BrickLink Set Inventory XML to Clipboard</source>
@@ -884,9 +892,64 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Ctrl+U</source>
+        <source>Ctrl+I,Ctrl+I</source>
+        <comment>File|Import BrickLink Set Inventory</comment>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Ctrl+I,Ctrl+X</source>
+        <comment>File|Import BrickLink XML</comment>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Ctrl+I,Ctrl+O</source>
         <comment>File|Import BrickLink Order</comment>
-        <translation type="unfinished"></translation>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Ctrl+I,Ctrl+S</source>
+        <comment>File|Import BrickLink Store Inventory</comment>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Ctrl+I,Ctrl+C</source>
+        <comment>File|Import BrickLink Shopping Cart</comment>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Ctrl+I,Ctrl+P</source>
+        <comment>File|Import Peeron Inventory</comment>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Ctrl+I,Ctrl+L</source>
+        <comment>File|Import LDraw Model</comment>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Ctrl+E,Ctrl+X</source>
+        <comment>File|Import BrickLink XML</comment>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Ctrl+E,Ctrl+U</source>
+        <comment>File|Import BrickLink Mass-Upload</comment>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Ctrl+E,Ctrl+P</source>
+        <comment>File|Import BrickLink Mass-Update</comment>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Ctrl+E,Ctrl+I</source>
+        <comment>File|Import BrickLink Set Inventory</comment>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Ctrl+E,Ctrl+W</source>
+        <comment>File|Import BrickLink Wanted List</comment>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -1122,6 +1185,18 @@
     <message>
         <source>The value you entered was not valid and will not be changed.</source>
         <translation>De ingegeven waarde is niet geldig en zal niet worden gewijzigd.</translation>
+    </message>
+    <message>
+        <source>Complete</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Incomplete</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>MISB</source>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -2617,7 +2692,7 @@
     </message>
     <message>
         <source>%1</source>
-        <translation type="unfinished">%1</translation>
+        <translation></translation>
     </message>
 </context>
 </TS>
