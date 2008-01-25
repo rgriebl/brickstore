@@ -822,8 +822,8 @@ namespace BrickLink {
 		void cancelPriceGuideTransfers ( );
 
 	signals:
-		void priceGuideUpdated ( PriceGuide *pg );
-		void pictureUpdated ( Picture *inv );
+		void priceGuideUpdated ( BrickLink::PriceGuide *pg );
+		void pictureUpdated ( BrickLink::Picture *inv );
 
 		void priceGuideProgress ( int, int );
 		void pictureProgress ( int, int );
