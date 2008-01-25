@@ -257,6 +257,41 @@ bool CDocument::Item::operator == ( const Item &cmp ) const
 	return BrickLink::InvItem::operator == ( cmp );
 }
 
+QImage CDocument::Item::image(const QSize &s) const
+{
+    if (m_picture && ((m_picture->item() != item()) || (m_picture->color() != color()))) {
+	    m_picture->release();
+	    m_picture = 0;
+    }
+
+    if (!m_picture) {
+	    if (customPicture())
+		    m_picture = customPicture();
+	    else
+		    m_picture = BrickLink::inst()->picture(item(), color());
+
+	    if (m_picture)
+		    m_picture->addRef();
+    }
+
+    if (m_picture && m_picture->valid()) {
+        if (s.isValid())
+            return m_picture->image().scaled(s, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        else
+            return m_picture->image();
+    }
+    else {
+        QImage img(s.isValid() ? s : BrickLink::inst()->pictureSize(itemType()), QImage::Format_Mono);
+        img.fill(Qt::white);
+        return img;
+    }
+}
+
+QPixmap CDocument::Item::pixmap(const QSize &s) const
+{
+    return QPixmap::fromImage(image(s));
+}
+
 // *****************************************************************************************
 // *****************************************************************************************
 // *****************************************************************************************
@@ -1144,6 +1179,23 @@ void CDocument::resetDifferences ( const ItemList &items )
 ////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////
 
+QModelIndex CDocument::index(int row, int column, const QModelIndex &parent) const
+{
+	if (hasIndex(row, column, parent))
+		return parent.isValid() ? QModelIndex() : createIndex(row, column, m_items.at(row));
+	return QModelIndex();
+}
+
+CDocument::Item *CDocument::item(const QModelIndex &idx) const
+{
+	return idx.isValid() ? static_cast<Item *>(idx.internalPointer()) : 0;
+}
+
+QModelIndex CDocument::index(Item *i) const
+{
+	return i ? createIndex(m_items.indexOf(i), 0, i) : QModelIndex();
+}
+
 
 int CDocument::rowCount(const QModelIndex &parent) const
 { 
@@ -1157,6 +1209,10 @@ int CDocument::columnCount(const QModelIndex &parent) const
 
 QVariant CDocument::data(const QModelIndex &index, int role) const
 {
+    //if (role == Qt::DecorationRole)
+        //qDebug() << "data() for row " << index.row() << "(picture: " << items().at(index.row())->m_picture << ", item: "<< items().at(index.row())->item()->name();
+
+
 	if (index.isValid()) {
 		Item *it = items().at(index.row());
 		Field f = static_cast<Field>(index.column());
@@ -1221,29 +1277,11 @@ QString CDocument::dataForDisplayRole(Item *it, Field f) const
 	return QString();
 }
 
-QPixmap CDocument::dataForDecorationRole(Item *it, Field f) const
+QVariant CDocument::dataForDecorationRole(Item *it, Field f) const
 {
 	switch (f) {
 		case Picture: {
-			if (it->m_picture && ((it->m_picture->item() != it->item()) || (it->m_picture->color() != it-> color()))) {
-				it->m_picture->release();
-				it->m_picture = 0;
-			}
-
-			if (!it->m_picture) {
-				if (it->customPicture())
-					it->m_picture = it->customPicture();
-				else
-					it->m_picture = BrickLink::inst()->picture(it->item(), it->color());
-
-				if (it->m_picture)
-					it->m_picture->addRef();
-			}
-
-			if (it->m_picture && it->m_picture->valid())
-				return it->m_picture->pixmap();
-			else
-				return QPixmap(BrickLink::inst()->pictureSize(it->itemType()));
+            return it->image();
 		}
 	}
 	return QPixmap();
@@ -1265,8 +1303,8 @@ int CDocument::dataForTextAlignmentRole(Item *it, Field f) const
 		case TierP1      :
 		case TierP2      :
 		case TierP3      :
-		case Weight      : return Qt::AlignRight | Qt::AlignHCenter;
-		default          : return Qt::AlignLeft | Qt::AlignHCenter;
+		case Weight      : return Qt::AlignRight | Qt::AlignVCenter;
+		default          : return Qt::AlignLeft | Qt::AlignVCenter;
 	}
 }
 
@@ -1362,6 +1400,7 @@ int CDocument::headerDataForTextAlignmentRole(Field f) const
 
 void CDocument::pictureUpdated(BrickLink::Picture *pic)
 {
+    qDebug() << "pic update for "<< pic;
 	if ( !pic )
 		return;
 
@@ -1369,7 +1408,8 @@ void CDocument::pictureUpdated(BrickLink::Picture *pic)
 	foreach (Item *it, items()) {
 		if ((pic->item() == it->item()) && (pic->color() == it-> color())) {
 			QModelIndex idx = index(row, Picture);
-			emit dataChanged(idx, idx);
+            qDebug() << "dataChanged() for row " << row << "(picture: " << pic << ", item: "<<pic->item()->name();
+			emit dataChanged(idx, idx); // index(0,Picture), index(rowCount(QModelIndex())-1,Picture));
 		}
 		row++;
 	}

@@ -12,23 +12,28 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 #include <float.h>
+#include <math.h>
 
 #include <qtoolbutton.h>
 #include <qcombobox.h>
-#include <qpainter.h>
+#include <QPainter>
 #include <qlayout.h>
 #include <qlabel.h>
 #include <qapplication.h>
 #include <qfiledialog.h>
 #include <qlineedit.h>
-//#include <qheader.h>
+#include <QTextLayout>
 #include <qvalidator.h>
 #include <qclipboard.h>
 #include <qcursor.h>
 #include <qtooltip.h>
+#include <QIcon>
 #include <QTableView>
+#include <QHeaderView>
 #include <QCloseEvent>
 #include <QDesktopServices>
+#include <QItemDelegate>
+#include <QStyleOptionFrameV2>
 
 #include "cselectcolor.h"
 #include "cmessagebox.h"
@@ -116,6 +121,329 @@ private:
 
 } // namespace
 
+class DocumentDelegate : public QItemDelegate {
+public:
+    DocumentDelegate(CDocument *doc, QTableView *view)
+        : QItemDelegate(view), m_doc(doc)
+    {
+    }
+
+    static QColor shadeColor(int idx, qreal alpha = 0)
+    {
+        if (s_shades.isEmpty()) {
+            s_shades.resize(13);
+            for (int i = 0; i < 13; i++)
+                s_shades[i] = QColor::fromHsv(i == 0 ? -1 : (i - 1) * 30, 255, 255);
+        }
+        QColor c = s_shades[idx % s_shades.size()];
+        if (alpha)
+            c.setAlphaF(alpha);
+        return c;
+    }
+
+    inline QIcon::Mode iconMode(QStyle::State state) const
+    {
+        if (!(state & QStyle::State_Enabled)) return QIcon::Disabled;
+        if (state & QStyle::State_Selected) return QIcon::Selected;
+        return QIcon::Normal;
+    }
+
+    inline QIcon::State iconState(QStyle::State state) const
+    {
+        return state & QStyle::State_Open ? QIcon::On : QIcon::Off;
+    }
+
+
+    virtual QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &idx) const
+    {
+        if (!idx.isValid())
+            return QSize();
+
+        static QSize picsize = BrickLink::core()->itemType('P')->pictureSize();
+
+        int w = -1;
+        int h = 4 + qMax(option.fontMetrics.height() * 2, picsize.height() / 2);
+
+        if (idx.column() == CDocument::Picture) {
+            w = picsize.width() / 2 + 4;
+        }
+        else {
+            w = QItemDelegate::sizeHint(option, idx).width();
+        }
+        return QSize(w, h);
+	}
+
+    virtual void paint(QPainter *p, const QStyleOptionViewItem &option1, const QModelIndex &idx) const
+    {
+        if (!idx.isValid())
+            return;
+
+        CDocument::Item *it = m_doc->item(idx);
+        if (!it)
+            return;
+
+        QStyleOptionViewItemV3 option(option1);
+
+        QPalette::ColorGroup cg = (option.state & QStyle::State_Enabled) ? QPalette::Normal : QPalette::Disabled;
+        if (cg == QPalette::Normal && !(option.state & QStyle::State_Active))
+            cg = QPalette::Inactive;
+
+	    int x = option.rect.x(), y = option.rect.y();
+        int w = option.rect.width();
+	    int h = option.rect.height();
+	    int margin = 2;
+        Qt::Alignment align = (m_doc->data(idx, Qt::TextAlignmentRole).toInt() & ~Qt::AlignVertical_Mask) | Qt::AlignVCenter;
+	    quint64 colmask = 1ULL << idx.column();
+	    QString has_inv_tag;
+
+
+	    QPixmap pix;
+        QIcon ico;
+        QString str = idx.model()->data(idx, Qt::DisplayRole).toString();
+
+	    QColor bg;
+	    QColor fg;
+	    int checkmark = 0;
+
+        bg = option.palette.color(cg, option.features & QStyleOptionViewItemV2::Alternate ? QPalette::AlternateBase : QPalette::Base);
+        fg = option.palette.color(cg, QPalette::Text);
+
+        switch (idx.column()) {
+        case CDocument::Status:
+            ico = s_status_icons[it->status()];
+            if (ico.isNull()) {
+                switch (it->status()) {
+                case BrickLink::Exclude: ico = QIcon(":/images/status_exclude"); break;
+                case BrickLink::Extra  : ico = QIcon(":/images/status_extra"); break;
+                default                :
+                case BrickLink::Include: ico = QIcon(":/images/status_include"); break;
+                }
+                s_status_icons.insert(it->status(), ico);
+            }
+            break;
+
+        case CDocument::Description:
+			if (it->item()->hasInventory())
+                has_inv_tag = tr("Inv");
+            break;
+
+        case CDocument::Picture:
+            pix = it->pixmap(it->itemType()->pictureSize() / 2);
+            break;
+
+        case CDocument::Color:
+            pix = s_color_cache.value(it->color());
+
+            if (pix.isNull()) {
+                pix = QPixmap::fromImage(BrickLink::core()->colorImage(it->color(), option.decorationSize.width(), option.rect.height()));
+                s_color_cache.insert(it->color(), pix);
+            }
+            break;
+
+		case CDocument::ItemType:
+			bg = shadeColor(it->itemType()->id(), 0.1f);
+			break;
+
+		case CDocument::Category:
+			bg = shadeColor(it->category()->id(), 0.2f);
+			break;
+
+		case CDocument::Quantity:
+			if (it->quantity() <= 0)
+                bg = (it->quantity() == 0) ? QColor::fromRgbF(1, 1, 0, 0.4f)
+                                           : QColor::fromRgbF(1, 0, 0, 0.4f);
+			break;
+
+		case CDocument::QuantityDiff:
+			if (it->origQuantity() < it->quantity())
+                bg = QColor::fromRgbF(0, 1, 0, 0.3f);
+			else if (it->origQuantity() > it->quantity())
+                bg = QColor::fromRgbF(1, 0, 0, 0.3f);
+			break;
+
+		case CDocument::PriceOrig:
+		case CDocument::QuantityOrig:
+            fg.setAlphaF(0.5f);
+			break;
+
+		case CDocument::PriceDiff:
+			if (it-> origPrice() < it->price())
+                bg = QColor::fromRgbF(0, 1, 0, 0.3f);
+			else if (it->origPrice() > it->price())
+                bg = QColor::fromRgbF(1, 0, 0, 0.3f);
+			break;
+
+		case CDocument::Total:
+            bg = QColor::fromRgbF(1, 1, 0, 0.1f);
+			break;
+
+		case CDocument::Condition:
+            if (it->condition() != BrickLink::New) {
+                bg = fg;
+                bg.setAlphaF(0.3f);
+            }
+			break;
+
+		case CDocument::TierP1:
+		case CDocument::TierQ1:
+            bg = fg;
+            bg.setAlphaF(0.06f);
+			break;
+
+		case CDocument::TierP2:
+		case CDocument::TierQ2:
+            bg = fg;
+            bg.setAlphaF(0.12f);
+			break;
+
+		case CDocument::TierP3:
+		case CDocument::TierQ3:
+            bg = fg;
+            bg.setAlphaF(0.18f);
+			break;
+
+		case CDocument::Retain:
+			checkmark = it->retain() ? 1 : -1;
+			break;
+
+		case CDocument::Stockroom:
+			checkmark = it->stockroom() ? 1 : -1;
+			break;
+	    }
+
+	    if (option.state & QStyle::State_Selected) {
+            bg = option.palette.color(cg, QPalette::Highlight);
+            if (!(option.state & QStyle::State_HasFocus))
+                bg.setAlphaF(0.7f);
+            fg = option.palette.color(cg, QPalette::HighlightedText);
+	    }
+
+	    if (!has_inv_tag.isEmpty()) {
+            int itw = option.fontMetrics.width(has_inv_tag) + 2;
+            int ith = option.fontMetrics.height() + 2;
+
+            QRadialGradient grad(option.rect.bottomRight(), itw + ith);
+            QColor col = fg;
+            col.setAlphaF(0.2f);
+            grad.setColorAt(0, col);
+            grad.setColorAt(0.5, col);
+            grad.setColorAt(1, bg);
+
+            p->fillRect(option.rect, grad);
+
+            p->setPen(bg);
+            p->drawText(option.rect, Qt::AlignRight | Qt::AlignBottom, has_inv_tag);
+        }
+        else
+            p->fillRect(option.rect, bg);
+
+
+	    if ((it->errors() & m_doc->errorMask() & (1ULL << idx.column()))) {
+            p->setPen(QColor::fromRgbF(1, 0, 0, 0.75f));
+		    p->drawRect(x+.5, y+.5, w-1, h-1);
+            p->setPen(QColor::fromRgbF(1, 0, 0, 0.50f));
+		    p->drawRect(x+1.5, y+1.5, w-3, h-3);
+	    }
+
+	    p->setPen(fg);
+
+	    x++;	// extra spacing
+	    w -=2;
+
+	    if ( checkmark != 0 ) {
+            QItemDelegate::drawCheck(p, option, option.rect, (checkmark > 0) ? Qt::Checked : Qt::Unchecked);
+        }
+	    else if (!pix.isNull()) {
+		    // clip the pixmap here .. this is cheaper than a cliprect
+
+		    int rw = w - 2 * margin;
+		    int rh = h; // - 2 * margin;
+
+		    int sw, sh;
+
+		    if ( pix.height ( ) <= rh ) {
+			    sw = qMin( rw, pix.width ( ));
+			    sh = qMin( rh, pix.height ( ));
+		    }
+		    else {
+			    sw = pix.width ( ) * rh / pix.height ( );
+			    sh = rh;
+		    }
+
+		    int px = x + margin;
+		    int py = y + /*margin +*/ ( rh - sh ) / 2;
+
+            if ( align == Qt::AlignCenter )
+			    px += ( rw - sw ) / 2; // center if there is enough room
+
+		    if ( pix.height ( ) <= rh )
+			    p-> drawPixmap ( px, py, pix, 0, 0, sw, sh );
+		    else
+			    p-> drawPixmap ( QRect ( px, py, sw, sh ), pix );
+
+		    w -= ( margin + sw );
+		    x += ( margin + sw );
+	    }
+        else if (!ico.isNull()) {
+            ico.paint(p, x, y, w, h, Qt::AlignCenter, iconMode(option.state), iconState(option.state));
+        }
+
+        if ( !str. isEmpty ( )) {
+		    int rw = w - 2 * margin;
+
+            if ( !( align & Qt::AlignVertical_Mask ))
+                align |= Qt::AlignVCenter;
+
+		    const QFontMetrics &fm = p-> fontMetrics ( );
+
+
+            bool do_elide = false;
+            int lcount = (h + fm.leading()) / fm.lineSpacing();
+            int height = 0;
+            qreal widthUsed = 0;
+
+            QTextLayout tl(str, option.font, const_cast<QWidget *>(option.widget));
+            tl.beginLayout();
+
+            for (int i = 0; i < lcount; i++) {
+                QTextLine line = tl.createLine();
+                if (!line.isValid())
+                    break;
+
+                line.setLineWidth(rw);
+                height += fm.leading();
+                line.setPosition(QPoint(0, height));
+                height += line.height();
+                widthUsed = line.naturalTextWidth();
+
+                if ((i == (lcount - 1)) && ((line.textStart() + line.textLength()) < str.length())) {
+                    do_elide = true;
+                    QString elide = QLatin1String("...");
+                    int elide_width = fm.width(elide) + 2;
+
+                    line.setLineWidth(rw - elide_width);
+                    widthUsed = line.naturalTextWidth();
+                }
+            }
+            tl.endLayout();
+
+            tl.draw(p, QPoint(x + margin, y + (h - height)/2));
+            if (do_elide)
+                p->drawText(QPoint(x + margin + widthUsed, y + (h - height)/2 + (lcount - 1) * fm.lineSpacing() + fm.ascent()), QLatin1String("..."));
+        }
+    }
+
+protected:
+    CDocument *m_doc;
+    static QVector<QColor> s_shades;
+    static QHash<const BrickLink::Color *, QPixmap> s_color_cache;
+    static QHash<BrickLink::Status, QIcon> s_status_icons;
+};
+
+QVector<QColor> DocumentDelegate::s_shades;
+QHash<const BrickLink::Color *, QPixmap> DocumentDelegate::s_color_cache;
+QHash<BrickLink::Status, QIcon> DocumentDelegate::s_status_icons;
+
 CWindow::CWindow ( CDocument *doc, QWidget *parent)
 	: QWidget(parent)
 {
@@ -130,8 +458,6 @@ CWindow::CWindow ( CDocument *doc, QWidget *parent)
 	m_settopg_list = 0;
 	m_settopg_time = BrickLink::AllTime;
 	m_settopg_price = BrickLink::Average;
-
-	// m_items. setAutoDelete ( true ); NOT ANYMORE -> UndoRedo
 
 	w_filter_clear = new QToolButton ( this );
 	w_filter_clear-> setAutoRaise ( true );
@@ -149,13 +475,17 @@ CWindow::CWindow ( CDocument *doc, QWidget *parent)
     w_list->setSelectionBehavior(QAbstractItemView::SelectRows);
 	w_list->setAlternatingRowColors(true);
 	w_list->setTabKeyNavigation (true);
-	w_list->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+    w_list->setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
 	w_list->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
 	w_list->setContextMenuPolicy(Qt::CustomContextMenu);
+    w_list->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 	setFocusProxy(w_list);
 
-	w_list->setModel(doc);
+    connect(w_list->horizontalHeader(), SIGNAL(geometriesChanged()), w_list, SLOT(resizeRowsToContents()));
+//    connect(w_list->horizontalHeader(), SIGNAL(sectionResized(int, int, int)), w_list, SLOT(resizeRowsToContents()));
 
+    w_list->setModel(doc);
+    w_list->setItemDelegate(new DocumentDelegate(doc, w_list));
 	/*
 	w_list-> setShowSortIndicator ( true );
 	w_list-> setColumnsHideable ( true );

@@ -89,6 +89,11 @@ public:
 
 		quint64 errors() const          { return m_errors; }
 		void setErrors ( quint64 errors ) { m_errors = errors; }
+
+        BrickLink::Picture *picture() const { return m_picture; }
+        QImage image(const QSize & = QSize()) const;
+        QPixmap pixmap(const QSize & = QSize()) const;
+
 	private:
 		quint64 m_errors;
 		mutable BrickLink::Picture *m_picture;
@@ -125,13 +130,17 @@ public:
 
 
 	// Itemviews API
+    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
+    Item *item(const QModelIndex &idx) const;
+    QModelIndex index(Item *i) const;
+
 	virtual int rowCount(const QModelIndex &parent) const;
 	virtual int columnCount(const QModelIndex &parent) const;
 	virtual QVariant data(const QModelIndex &index, int role) const;
 	virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const;
 
 	QString dataForDisplayRole(Item *it, Field f) const;
-	QPixmap dataForDecorationRole(Item *it, Field f) const;
+	QVariant dataForDecorationRole(Item *it, Field f) const;
 	int dataForTextAlignmentRole(Item *it, Field f) const;
 	QString dataForToolTipRole(Item *it, Field f) const;
 	QString headerDataForDisplayRole(Field f) const;
