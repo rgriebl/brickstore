@@ -64,7 +64,7 @@ int CRebuildDatabase::error ( const QString &error )
 
 namespace {
 
-static void nirvanaMsgHandler ( QtMsgType type, const char *x )
+static void nirvanaMsgHandler ( QtMsgType type, const char * /*x*/ )
 {
 	if ( type == QtFatalMsg )
 		abort ( );
@@ -168,6 +168,12 @@ static QList<QPair<QString, QString> > dbQuery(int which)
 	return query;
 }
 
+static QList<QPair<QString, QString> > pgQuery(char item_type)
+{
+    QList<QPair<QString, QString> > query;   //?itemType=X
+	query << QPair<QString, QString>("itemType", QChar(item_type));
+	return query;
+}
 
 bool CRebuildDatabase::download ( )
 {
@@ -178,22 +184,30 @@ bool CRebuildDatabase::download ( )
 		const QList<QPair<QString, QString> > m_query;
 		const char *m_file;
 	} * tptr, table [] = {
-		{ "http://www.bricklink.com/catalogDownload.asp", dbQuery ( 1 ),     "itemtypes.txt"   },
-		{ "http://www.bricklink.com/catalogDownload.asp", dbQuery ( 2 ),     "categories.txt"  },
-		{ "http://www.bricklink.com/catalogDownload.asp", dbQuery ( 3 ),     "colors.txt"      },
-		{ "http://www.bricklink.com/catalogDownload.asp", itemQuery ( 'S' ), "items_S.txt"     },
-		{ "http://www.bricklink.com/catalogDownload.asp", itemQuery ( 'P' ), "items_P.txt"     },
-		{ "http://www.bricklink.com/catalogDownload.asp", itemQuery ( 'M' ), "items_M.txt"     },
-		{ "http://www.bricklink.com/catalogDownload.asp", itemQuery ( 'B' ), "items_B.txt"     },
-		{ "http://www.bricklink.com/catalogDownload.asp", itemQuery ( 'G' ), "items_G.txt"     },
-		{ "http://www.bricklink.com/catalogDownload.asp", itemQuery ( 'C' ), "items_C.txt"     },
-		{ "http://www.bricklink.com/catalogDownload.asp", itemQuery ( 'I' ), "items_I.txt"     },
-		{ "http://www.bricklink.com/catalogDownload.asp", itemQuery ( 'O' ), "items_O.txt"     },
-	//	{ "http://www.bricklink.com/catalogDownload.asp", itemQuery ( 'U' ), "items_U.txt"     }, // generates a 500 server error
-		{ "http://www.bricklink.com/btinvlist.asp",       QList<QPair<QString, QString> > ( ), "btinvlist.txt"   },
-		{ "http://www.bricklink.com/catalogColors.asp",   QList<QPair<QString, QString> > ( ), "colorguide.html" },
+		{ "http://www.bricklink.com/catalogDownload.asp", dbQuery(1),     "itemtypes.txt"   },
+		{ "http://www.bricklink.com/catalogDownload.asp", dbQuery(2),     "categories.txt"  },
+		{ "http://www.bricklink.com/catalogDownload.asp", dbQuery(3),     "colors.txt"      },
+		{ "http://www.bricklink.com/catalogDownload.asp", itemQuery('S'), "items_S.txt"     },
+		{ "http://www.bricklink.com/catalogDownload.asp", itemQuery('P'), "items_P.txt"     },
+		{ "http://www.bricklink.com/catalogDownload.asp", itemQuery('M'), "items_M.txt"     },
+		{ "http://www.bricklink.com/catalogDownload.asp", itemQuery('B'), "items_B.txt"     },
+		{ "http://www.bricklink.com/catalogDownload.asp", itemQuery('G'), "items_G.txt"     },
+		{ "http://www.bricklink.com/catalogDownload.asp", itemQuery('C'), "items_C.txt"     },
+		{ "http://www.bricklink.com/catalogDownload.asp", itemQuery('I'), "items_I.txt"     },
+		{ "http://www.bricklink.com/catalogDownload.asp", itemQuery('O'), "items_O.txt"     },
+	//	{ "http://www.bricklink.com/catalogDownload.asp", itemQuery('U'), "items_U.txt"     }, // generates a 500 server error
+        { "http://www.bricklink.com/btpriceguide.asp",    pgQuery('S'),   "alltimepg_S.txt" },
+        { "http://www.bricklink.com/btpriceguide.asp",    pgQuery('P'),   "alltimepg_P.txt" },
+        { "http://www.bricklink.com/btpriceguide.asp",    pgQuery('M'),   "alltimepg_M.txt" },
+        { "http://www.bricklink.com/btpriceguide.asp",    pgQuery('B'),   "alltimepg_B.txt" },
+        { "http://www.bricklink.com/btpriceguide.asp",    pgQuery('G'),   "alltimepg_G.txt" },
+        { "http://www.bricklink.com/btpriceguide.asp",    pgQuery('C'),   "alltimepg_C.txt" },
+        { "http://www.bricklink.com/btpriceguide.asp",    pgQuery('I'),   "alltimepg_I.txt" },
+        { "http://www.bricklink.com/btpriceguide.asp",    pgQuery('O'),   "alltimepg_O.txt" },
+		{ "http://www.bricklink.com/btinvlist.asp",       QList<QPair<QString, QString> >(), "btinvlist.txt"   },
+		{ "http://www.bricklink.com/catalogColors.asp",   QList<QPair<QString, QString> >(), "colorguide.html" },
 
-		{ "http://www.peeron.com/inv/colors",             QList<QPair<QString, QString> > ( ), "peeron_colors.html" },
+		{ "http://www.peeron.com/inv/colors",             QList<QPair<QString, QString> >(), "peeron_colors.html" },
 
 		{ 0, QList<QPair<QString, QString> > ( ), 0 }
 	};
