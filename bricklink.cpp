@@ -830,6 +830,18 @@ BrickLink::InvItemList *BrickLink::parseItemListXML ( QDomElement root, ItemList
 					ii-> setSale ( val. toInt ( ));
 				else if ( tag == "CONDITION" )
 					ii-> setCondition ( val == "N" ? New : Used );
+                else if ( tag == "SUBCONDITION" ) {
+					SubCondition scond = None;
+
+					if ( val == "C" )
+						scond = Complete;
+					else if ( val == "I" )
+						scond = Incomplete;
+					else if ( val == "M" )
+						scond = MISB;
+
+					ii-> setSubCondition ( scond );
+                }
 				else if ( tag == ( hint == XMLHint_BrikTrak ? "NOTES" : "DESCRIPTION" ))
 					ii-> setComments ( val );
 				else if ( tag == "REMARKS" )
@@ -932,6 +944,18 @@ BrickLink::InvItemList *BrickLink::parseItemListXML ( QDomElement root, ItemList
 					ii-> setSale ( val. toInt ( ));
 				else if ( tag == "Condition" )
 					ii-> setCondition ( val == "N" ? New : Used );
+                else if ( tag == "SubCondition" ) {
+					SubCondition scond = None;
+
+					if ( val == "C" )
+						scond = Complete;
+					else if ( val == "I" )
+						scond = Incomplete;
+					else if ( val == "M" )
+						scond = MISB;
+
+					ii-> setSubCondition ( scond );
+                }
 				else if ( tag == "Comments" )
 					ii-> setComments ( val );
 				else if ( tag == "Remarks" )
@@ -1176,6 +1200,16 @@ QDomElement BrickLink::createItemListXML ( QDomDocument doc, ItemListXMLHint hin
 			item. appendChild ( doc. createElement ( "Price"        ). appendChild ( doc. createTextNode ( ii-> price ( ). toCString ( ))). parentNode ( ));
 			item. appendChild ( doc. createElement ( "Condition"    ). appendChild ( doc. createTextNode (( ii-> condition ( ) == New ) ? "N" : "U" )). parentNode ( ));
 
+            if ( ii-> subCondition ( ) != None ) {
+       			const char *st;
+			    switch ( ii-> subCondition ( )) {
+				    case Incomplete: st = "I"; break;
+				    case Complete  : st = "C"; break;
+				    case MISB      : st = "M"; break;
+				    default        : st = "?"; break;
+			    }
+			    item. appendChild ( doc. createElement ( "SubCondition" ). appendChild ( doc. createTextNode ( st )). parentNode ( ));
+            }
 			if ( !ii-> customPictureUrl ( ). isEmpty ( ))
 				item. appendChild ( doc. createElement ( "Image"    ). appendChild ( doc. createTextNode ( ii-> customPictureUrl ( ))). parentNode ( ));
 			if ( ii-> bulkQuantity ( ) != 1 )
@@ -1223,6 +1257,16 @@ QDomElement BrickLink::createItemListXML ( QDomDocument doc, ItemListXMLHint hin
 			item. appendChild ( doc. createElement ( "PRICE"     ). appendChild ( doc. createTextNode ( ii-> price ( ). toCString ( ))). parentNode ( ));
 			item. appendChild ( doc. createElement ( "CONDITION" ). appendChild ( doc. createTextNode (( ii-> condition ( ) == New ) ? "N" : "U" )). parentNode ( ));
 
+            if ( ii-> subCondition ( ) != None ) {
+       			const char *st;
+			    switch ( ii-> subCondition ( )) {
+				    case Incomplete: st = "I"; break;
+				    case Complete  : st = "C"; break;
+				    case MISB      : st = "M"; break;
+				    default        : st = "?"; break;
+			    }
+			    item. appendChild ( doc. createElement ( "SUBCONDITION" ). appendChild ( doc. createTextNode ( st )). parentNode ( ));
+            }
 			if ( !ii-> customPictureUrl ( ). isEmpty ( ))
 				item. appendChild ( doc. createElement ( "IMAGE"     ). appendChild ( doc. createTextNode ( ii-> customPictureUrl ( ))). parentNode ( ));
 			if ( ii-> bulkQuantity ( ) != 1 )

@@ -91,6 +91,7 @@ protected slots:
 protected:
 	static QString statusLabel ( BrickLink::InvItem::Status status );
 	static QString conditionLabel ( BrickLink::Condition cond );
+	static QString subConditionLabel ( BrickLink::SubCondition scond );
 
 private:
 	CItemViewPrivate *d;

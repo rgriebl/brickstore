@@ -323,6 +323,19 @@ QString CItemView::conditionLabel ( BrickLink::Condition cond )
 	return str;
 }
 
+QString CItemView::subConditionLabel ( BrickLink::SubCondition scond )
+{
+	QString str;
+
+	switch ( scond ) {
+		case BrickLink::Complete  : str = CItemView::tr( "Complete" ); break;
+		case BrickLink::Incomplete: str = CItemView::tr( "Incomplete" ); break;
+        case BrickLink::MISB      : str = CItemView::tr( "MISB" ); break;
+		default             : break;
+	}
+	return str;
+}
+
 bool CItemView::isSimpleMode ( ) const
 {
 	return d-> m_simple_mode;
@@ -628,7 +641,13 @@ QString CItemViewItem::toolTip ( int column ) const
 	switch ( column ) {
 		case CDocument::Status      : str = CItemView::statusLabel ( m_item-> status ( )); break;
 		case CDocument::Picture     : str = text ( CDocument::PartNo ) + " " + text ( CDocument::Description ); break;
-		case CDocument::Condition   : str = CItemView::conditionLabel ( m_item-> condition ( )); break;
+        case CDocument::Condition   : {
+            str = CItemView::conditionLabel ( m_item-> condition ( ));
+
+            if ( m_item->subCondition ( ) != BrickLink::None )
+                str += QString ( "<br /><i>%1</i>" ). arg( CItemView::subConditionLabel ( m_item-> subCondition ( )));
+            break;
+        }
 		case CDocument::Category    : {
 			const BrickLink::Category **catpp = m_item-> item ( )-> allCategories ( );
 			

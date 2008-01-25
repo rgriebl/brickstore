@@ -260,6 +260,7 @@ public:
 
 
 	enum Condition { New, Used, ConditionCount };
+    enum SubCondition { None, Complete, Incomplete, MISB, SubConditionCount };
 
 	enum UpdateStatus { Ok, Updating, UpdateFailed };
 
@@ -326,6 +327,8 @@ public:
 		void setStatus ( Status s )         { m_status = s; }
 		Condition condition ( ) const       { return m_condition; }
 		void setCondition ( Condition c )   { m_condition = c; }
+		SubCondition subCondition ( ) const     { return m_scondition; }
+		void setSubCondition ( SubCondition c ) { m_scondition = c; }
 		QString comments ( ) const          { return m_comments; }
 		void setComments ( const QString &n ) { m_comments = n; }
 		QString remarks ( ) const           { return m_remarks; }
@@ -404,13 +407,13 @@ public:
 		Incomplete *     m_incomplete;
 
 		Status           m_status    : 3;
-		Condition        m_condition : 2;
+		Condition        m_condition : 1;
+        SubCondition     m_scondition: 2;
 		bool             m_retain    : 1;
 		bool             m_stockroom : 1;
         bool             m_alternate : 1;
         uint             m_alt_id    : 6;
         bool             m_cpart     : 1;
-        int              m_xreserved : 1;
 
 		QString          m_comments;
 		QString          m_remarks;

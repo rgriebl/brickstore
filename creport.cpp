@@ -203,6 +203,12 @@ void CReport::print ( QPaintDevice *pd, const CDocument *doc, const CDocument::I
 		cond ["used"]      = ( item-> condition ( ) == BrickLink::Used );
 		imap ["condition"] = cond;
 
+		QMap<QString, QVariant> scond;
+		cond ["complete"]  = ( item-> subCondition ( ) == BrickLink::Complete );
+		cond ["incomplete"]= ( item-> subCondition ( ) == BrickLink::Incomplete );
+		cond ["misb"]      = ( item-> subCondition ( ) == BrickLink::MISB );
+		imap ["subcondition"] = scond;
+
 		imap ["price"]     = item-> price ( ). toDouble ( );
 		imap ["total"]     = item-> total ( ). toDouble ( );
 		imap ["bulkQuantity"] = item-> bulkQuantity ( );
