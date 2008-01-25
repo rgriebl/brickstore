@@ -19,57 +19,57 @@ CAsciiRefCacheBase::CAsciiRefCacheBase ( int cachesize )
 {
 }
 
-CAsciiRefCacheBase::~CAsciiRefCacheBase ( )
+CAsciiRefCacheBase::~CAsciiRefCacheBase()
 {
-	clear ( );
+	clear();
 }
 
-bool CAsciiRefCacheBase::put ( const QString &key, CRef *ref )
+bool CAsciiRefCacheBase::put(const QString &key, CRef *ref)
 {
-	if ( ref-> m_cache )
+	if (ref->m_cache)
 		return false;
 
-	ref-> m_cache = this;
-	m_no_ref. append ( ref );
-	m_dict. insert ( key, ref );
+	ref->m_cache = this;
+	m_no_ref.append (ref);
+	m_dict.insert(key, ref);
 	return true;
 }
 
-CRef *CAsciiRefCacheBase::get ( const QString &key )
+CRef *CAsciiRefCacheBase::get(const QString &key)
 {
-	return m_dict [key];
+	return m_dict.value(key);
 }
 
-void CAsciiRefCacheBase::clear ( )
+void CAsciiRefCacheBase::clear()
 {
-	m_no_ref. clear ( );
-	qDeleteAll ( m_dict );
-	m_dict. clear ( );
+	m_no_ref.clear();
+	qDeleteAll(m_dict);
+	m_dict.clear();
 }
 
-void CAsciiRefCacheBase::addRefFor ( const CRef *ref )
+void CAsciiRefCacheBase::addRefFor(const CRef *ref)
 {
 	//qDebug ( "addRefFor called" );
 
-	if ( ref && ( ref-> m_cache == this ) && ( ref-> m_refcnt == 1 )) {
+	if (ref && (ref->m_cache == this) && (ref->m_refcnt == 1)) {
 		//qDebug ( "Moving item [%p] to in-use dict...", (void *) ref );
-		m_no_ref. removeAll ( ref );
+		m_no_ref.removeAll(ref);
 	}
 }
 
-void CAsciiRefCacheBase::releaseFor ( const CRef *ref )
+void CAsciiRefCacheBase::releaseFor(const CRef *ref)
 {
-	if ( ref && ( ref-> m_refcnt == 0 ) && ( ref-> m_cache == this )) {
+	if (ref && (ref->m_refcnt == 0) && (ref->m_cache == this)) {
 		//qDebug ( "Moving item [%p] to cache...", (void *) ref );
-		m_no_ref. append ( ref );
+		m_no_ref.append(ref);
 
-		while ( m_no_ref. count ( ) > m_cache_size ) {
-			const CRef *del = m_no_ref. takeFirst ( );
+		while (m_no_ref.count() > m_cache_size) {
+			const CRef *del = m_no_ref.takeFirst();
 
-			for ( QHash<QString, CRef *>::iterator it = m_dict. begin ( ); it != m_dict. end ( ); ++it ) {
-				if ( it. value ( ) == del ) {
+			for (QHash<QString, CRef *>::iterator it = m_dict.begin(); it != m_dict.end(); ++it) {
+				if (it.value() == del) {
 					//qDebug ( "Purging item \"%s\" from cache...", it. currentKey ( ));
-					m_dict. remove ( it. key ( ));
+					m_dict.erase(it);
 					break;
 				}
 			}
@@ -79,6 +79,6 @@ void CAsciiRefCacheBase::releaseFor ( const CRef *ref )
 
 CRef::~CRef ( )
 {
-	if ( m_refcnt )
-		qWarning ( "Deleting %p, although refcnt=%d", this, m_refcnt );
+	if (m_refcnt)
+		qWarning("Deleting %p, although refcnt=%d", this, m_refcnt);
 }
