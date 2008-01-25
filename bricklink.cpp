@@ -369,7 +369,7 @@ BrickLink::Core::Core ( const QString &datadir )
 	m_price_guides.transfer = new CTransfer(1);
 	m_price_guides.update_iv = 0;
 
-	m_pictures.transfer = new CTransfer(1);
+	m_pictures.transfer = new CTransfer(10);
 	m_pictures.update_iv = 0;
 
 	QPixmapCache::setCacheLimit ( 20 * 1024 );  // 80 x 60 x 32 (w x h x bpp) == 20kB -> room for ~1000 pixmaps
