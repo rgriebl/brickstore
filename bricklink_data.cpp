@@ -733,7 +733,7 @@ BrickLink::Order::Order ( const QString &id, Type type )
 #include <QPixmap>
 #include <QImage>
 
-BrickLink::ColorModel::ColorModel(const Core *core) 
+BrickLink::ColorModel::ColorModel(const Core *)
 { 
 	m_sorted = Qt::AscendingOrder;
 	m_filter = 0;
@@ -888,7 +888,7 @@ BrickLink::ColorModel *BrickLink::Core::colorModel() const
 // this hack is needed since 0 means 'no selection at all'
 const BrickLink::Category *BrickLink::CategoryModel::AllCategories = reinterpret_cast <const BrickLink::Category *>(-1);
 
-BrickLink::CategoryModel::CategoryModel(Features f, const Core *core)
+BrickLink::CategoryModel::CategoryModel(Features f, const Core *)
 {
 	m_sorted = Qt::AscendingOrder;
 	m_filter = 0;

@@ -17,8 +17,6 @@
 #include <QFileInfo>
 #include <QTextStream>
 #include <QLocale>
-#include <QNetworkRequest>
-#include <QNetworkAccessManager>
 
 #include "bricklink.h"
 
