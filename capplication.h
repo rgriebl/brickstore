@@ -50,7 +50,7 @@ signals:
 	void openDocument ( const QString & );
 
 protected:
-	virtual void customEvent ( QEvent *e );
+	virtual bool event ( QEvent *e );
    	
 private slots:
 	void doEmitOpenDocument ( );

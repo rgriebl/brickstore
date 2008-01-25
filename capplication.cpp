@@ -18,13 +18,11 @@
 #include <QTranslator>
 #include <QLibraryInfo>
 #include <QSysInfo>
+#include <QFileOpenEvent>
 
 #if defined( Q_OS_UNIX )
 #include <sys/utsname.h>
 #endif
-
-//#include <curl/curl.h>
-
 
 #include "cframework.h"
 #if 0
@@ -56,22 +54,6 @@
 #define STR(a)	XSTR(a)
 
 
-class COpenEvent : public QEvent {
-public:
-	enum { Type = QEvent::User + 142 };
-
-	COpenEvent ( const QString &file ) 
-		: QEvent ( static_cast<QEvent::Type> ( Type )), m_file ( file ) 
-	{ }
-	
-	QString fileName ( ) const 
-	{ return m_file; }
-	
-private:
-	QString m_file;
-};
-
-
 CApplication *cApp = 0;                
 
 CApplication::CApplication ( const char *rebuild_db_only, int _argc, char **_argv ) 
@@ -90,10 +72,7 @@ CApplication::CApplication ( const char *rebuild_db_only, int _argc, char **_arg
 	if ( m_rebuild_db_only. isEmpty ( ))
 		CSplash::inst ( );
 
-#if defined( Q_WS_MACX )
-	AEInstallEventHandler( kCoreEventClass, kAEOpenDocuments, appleEventHandler, 0, false );
-
-#elif defined( Q_WS_WIN )
+#if defined( Q_WS_WIN )
 	int wv = QSysInfo::WindowsVersion;
 
 	m_has_alpha &= (( wv != QSysInfo::WV_95 ) && ( wv != QSysInfo::WV_NT ));
@@ -170,9 +149,6 @@ CApplication::CApplication ( const char *rebuild_db_only, int _argc, char **_arg
 	
 CApplication::~CApplication ( )
 {
-#if defined( Q_WS_MACX )
-	AERemoveEventHandler ( kCoreEventClass, kAEOpenDocuments, appleEventHandler, false );
-#endif
 	exitBrickLink ( );
 
 //	delete CReportManager::inst ( );
@@ -265,6 +241,7 @@ QString CApplication::sysVersion ( ) const
 		case QSysInfo::MV_10_2: sys_version = "10.2 (Jaguar)";  break;
 		case QSysInfo::MV_10_3: sys_version = "10.3 (Panther)"; break;
 		case QSysInfo::MV_10_4: sys_version = "10.4 (Tiger)";   break;
+		case QSysInfo::MV_10_5: sys_version = "10.5 (Leopard)"; break;
 		default               : break;
 	}
 #elif defined( Q_OS_WIN )
@@ -308,39 +285,18 @@ void CApplication::doEmitOpenDocument ( )
 	}
 }
 
-void CApplication::customEvent ( QEvent *e )
+bool CApplication::event(QEvent *e)
 {
-	if ( int( e-> type ( )) == int( COpenEvent::Type )) {
-		m_files_to_open. append ( static_cast <COpenEvent *> ( e )-> fileName ( ));
-		
+    switch (e->type()) {
+    case QEvent::FileOpen:
+		m_files_to_open.append(static_cast<QFileOpenEvent *>(e)->file());
 		doEmitOpenDocument ( );
+        return true;
+    default:
+        return QApplication::event(e);
 	}
 }
    	
-#if defined( Q_WS_MACX )
-OSErr CApplication::appleEventHandler ( const AppleEvent *event, AppleEvent *, long )
-{
-	AEDescList docs;
-	
-	if ( AEGetParamDesc ( event, keyDirectObject, typeAEList, &docs ) == noErr ) {
-		long n = 0;
-		AECountItems ( &docs, &n );
-		UInt8 strbuffer [PATH_MAX];
-		for ( long i = 0; i < n; i++ ) {
-			FSRef ref;
-			if ( AEGetNthPtr ( &docs, i + 1, typeFSRef, 0, 0, &ref, sizeof( ref ), 0) != noErr )
-				continue;
-			if ( FSRefMakePath ( &ref, strbuffer, 256 ) == noErr ) {
-				COpenEvent e ( QString::fromUtf8 ( reinterpret_cast <char *> ( strbuffer )));
-				QApplication::sendEvent ( qApp, &e );
-			}
-		}	
-	}
-	return noErr;
-}
-#endif
-
-
 bool CApplication::initBrickLink ( )
 {
 	QString errstring;
