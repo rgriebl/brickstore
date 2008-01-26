@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2005 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2004-2005 Robert Griebl.All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -30,12 +30,12 @@ static QDateTime fromHttpDate(const QByteArray &value)
     //  RFC 1123/822      -   ddd, dd MMM yyyy hh:mm:ss "GMT"
     //  RFC 850           -   dddd, dd-MMM-yy hh:mm:ss "GMT"
     //  ANSI C's asctime  -   ddd MMM d hh:mm:ss yyyy
-    // We only handle them exactly. If they deviate, we bail out.
+    // We only handle them exactly.If they deviate, we bail out.
 
     int pos = value.indexOf(',');
     QDateTime dt;
     if (pos == -1) {
-        // no comma -> asctime(3) format
+        // no comma ->asctime(3) format
         dt = QDateTime::fromString(QString::fromLatin1(value), Qt::TextDate);
     } else {
         // eat the weekday, the comma and the space following it
@@ -175,19 +175,19 @@ protected slots:
             break;
         }
         case 304: if (m_job->m_only_if_newer.isValid()) {
-                      m_job->m_was_not_modified = true;
-                      m_job->m_status = CTransferJob::Completed;
-                  }
-                  else {
-                      m_job->m_status = CTransferJob::Failed;
-                  }
-                  break;
+                m_job->m_was_not_modified = true;
+                m_job->m_status = CTransferJob::Completed;
+            }
+            else {
+                m_job->m_status = CTransferJob::Failed;
+            }
+            break;
 
         case 200: m_job->m_last_modified = fromHttpDate(resp.value("Last-Modified").toLatin1());
-                  break;
+            break;
 
         default : m_job->m_status = CTransferJob::Failed;
-                  break;
+            break;
         }
     }
 
@@ -307,7 +307,7 @@ CTransferJob *CTransferJob::post(const QUrl &url, QIODevice *file)
 
 CTransferJob *CTransferJob::create(HttpMethod method, const QUrl &url, const QDateTime &ifnewer, QIODevice *file)
 {
-   if (url.isEmpty())
+    if (url.isEmpty())
         return 0;
 
     CTransferJob *j = new CTransferJob();
@@ -354,7 +354,7 @@ CTransfer::CTransfer(int threadcount)
     m_jobs_total = m_jobs_progress = 0;
 }
 
-CTransfer::~CTransfer ( )
+CTransfer::~CTransfer()
 {
     //qDebug ( "stopping CTransfer thread" );
 
@@ -456,7 +456,7 @@ void CTransfer::abortAllJobs()
     m_jobs.clear();
     m_mutex.unlock();
 
-    foreach (CTransferJob *job, inactive) {
+    foreach(CTransferJob *job, inactive) {
         job->m_status = CTransferJob::Aborted;
         emit finished(job);
         delete job;

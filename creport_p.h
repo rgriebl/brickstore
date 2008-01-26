@@ -1,9 +1,9 @@
-/* Copyright (C) 2004-2005 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2004-2005 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
-** This file may be distributed and/or modified under the terms of the GNU 
-** General Public License version 2 as published by the Free Software Foundation 
+** This file may be distributed and/or modified under the terms of the GNU
+** General Public License version 2 as published by the Free Software Foundation
 ** and appearing in the file LICENSE.GPL included in the packaging of this file.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
@@ -20,11 +20,11 @@ class QSInterpreter;
 
 class CReportPrivate {
 public:
-	time_t              m_loaded;
-	QString             m_name;
-	QString             m_code;
-	QString             m_label;
-	QSInterpreter *     m_interpreter;
+    time_t              m_loaded;
+    QString             m_name;
+    QString             m_code;
+    QString             m_label;
+    QSInterpreter *     m_interpreter;
 };
 
 #endif

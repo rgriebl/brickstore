@@ -1,9 +1,9 @@
-/* Copyright (C) 2004-2005 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2004-2005 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
-** This file may be distributed and/or modified under the terms of the GNU 
-** General Public License version 2 as published by the Free Software Foundation 
+** This file may be distributed and/or modified under the terms of the GNU
+** General Public License version 2 as published by the Free Software Foundation
 ** and appearing in the file LICENSE.GPL included in the packaging of this file.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
@@ -25,82 +25,82 @@ class CSelectItemPrivate;
 
 
 class CSelectItem : public QWidget {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	CSelectItem(bool inv_only, QWidget *parent = 0);
+    CSelectItem(bool inv_only, QWidget *parent = 0);
 
-	bool isOnlyWithInventory ( ) const;
-	
-	enum ViewMode { 
-		ListMode = 0,
-		TableMode,
-		ThumbsMode
-	};
+    bool isOnlyWithInventory() const;
 
-	virtual QSize sizeHint ( ) const;
+    enum ViewMode {
+        ListMode = 0,
+        TableMode,
+        ThumbsMode
+    };
 
-	const BrickLink::Category *currentCategory() const;
-	const BrickLink::ItemType *currentItemType() const;
-	const BrickLink::Item *currentItem() const;
+    virtual QSize sizeHint() const;
 
-	void setCurrentCategory(const BrickLink::Category *cat);
-	void setCurrentItemType(const BrickLink::ItemType *it);
-	bool setCurrentItem(const BrickLink::Item *item);
+    const BrickLink::Category *currentCategory() const;
+    const BrickLink::ItemType *currentItemType() const;
+    const BrickLink::Item *currentItem() const;
+
+    void setCurrentCategory(const BrickLink::Category *cat);
+    void setCurrentItemType(const BrickLink::ItemType *it);
+    bool setCurrentItem(const BrickLink::Item *item);
 
 
 signals:
-	//void hasColors ( bool );
-	//void itemSelected ( const BrickLink::Item *, bool );
+    //void hasColors ( bool );
+    //void itemSelected ( const BrickLink::Item *, bool );
 
 public slots:
-	void itemTypeChanged();
-	void categoryChanged();
-//	void itemChanged();
+    void itemTypeChanged();
+    void categoryChanged();
+// void itemChanged();
 
-	void showAsList();
-	void showAsTable();
-	void showAsThumbs();
+    void showAsList();
+    void showAsTable();
+    void showAsThumbs();
 
-//	void itemConfirmed();
+// void itemConfirmed();
 
-	void findItem();
+    void findItem();
 
 protected slots:
-	void applyFilter ( );
-	void languageChange ( );
+    void applyFilter();
+    void languageChange();
 
 protected:
-	virtual void showEvent(QShowEvent *);
+    virtual void showEvent(QShowEvent *);
 
 private:
-	bool checkViewMode(ViewMode vm);
-	void ensureSelectionVisible ( );
+    bool checkViewMode(ViewMode vm);
+    void ensureSelectionVisible();
 
 protected:
-	CSelectItemPrivate *d;
+    CSelectItemPrivate *d;
 };
 
 class DSelectItem : public QDialog {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	explicit DSelectItem(bool only_with_inventory, QWidget *parent = 0);
+    explicit DSelectItem(bool only_with_inventory, QWidget *parent = 0);
 
-	void setItemType ( const BrickLink::ItemType * );
-	void setItem ( const BrickLink::Item * );
-	//bool setItemTypeCategoryAndFilter ( const BrickLink::ItemType *itt, const BrickLink::Category *cat, const QString &filter );
+    void setItemType(const BrickLink::ItemType *);
+    void setItem(const BrickLink::Item *);
+    //bool setItemTypeCategoryAndFilter ( const BrickLink::ItemType *itt, const BrickLink::Category *cat, const QString &filter );
 
-	const BrickLink::Item *item ( ) const;
+    const BrickLink::Item *item() const;
 
-	virtual int exec ( const QRect &pos = QRect ( ));
+    virtual int exec(const QRect &pos = QRect());
 
 private slots:
-	void checkItem ( const BrickLink::Item *, bool );
-	
-private:
-	CSelectItem *w_si;
+    void checkItem(const BrickLink::Item *, bool);
 
-	QPushButton *w_ok;
-	QPushButton *w_cancel;
+private:
+    CSelectItem *w_si;
+
+    QPushButton *w_ok;
+    QPushButton *w_cancel;
 };
 
 #endif

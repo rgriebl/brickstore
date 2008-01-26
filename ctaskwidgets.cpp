@@ -1,9 +1,9 @@
-/* Copyright (C) 2004-2005 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2004-2005 Robert Griebl.All rights reserved.
 **
 ** This file is part of BrickStore.
 **
-** This file may be distributed and/or modified under the terms of the GNU 
-** General Public License version 2 as published by the Free Software Foundation 
+** This file may be distributed and/or modified under the terms of the GNU
+** General Public License version 2 as published by the Free Software Foundation
 ** and appearing in the file LICENSE.GPL included in the packaging of this file.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
@@ -27,254 +27,254 @@
 #include "ctaskwidgets.h"
 
 
-CTaskLinksWidget::CTaskLinksWidget ( QWidget *parent )
-	: QTextBrowser ( parent ), m_doc ( 0 )
+CTaskLinksWidget::CTaskLinksWidget(QWidget *parent)
+        : QTextBrowser(parent), m_doc(0)
 {
-	connect ( CFrameWork::inst ( ), SIGNAL( documentActivated ( CDocument * )), this, SLOT( documentUpdate ( CDocument * )));
+    connect(CFrameWork::inst(), SIGNAL(documentActivated(CDocument *)), this, SLOT(documentUpdate(CDocument *)));
 
-	setHtml ( "<b>ABCDEFGHIJKLM</b><br />1<br />2<br />3<br />4<br /><br /><b>X</b><br />1<br />" );
-	setMinimumSize ( sizeHint ( ));
-	setHtml ( QString ( ));
+    setHtml("<b>ABCDEFGHIJKLM</b><br />1<br />2<br />3<br />4<br /><br /><b>X</b><br />1<br />");
+    setMinimumSize(sizeHint());
+    setHtml(QString());
 }
 
-void CTaskLinksWidget::documentUpdate ( CDocument *doc )
+void CTaskLinksWidget::documentUpdate(CDocument *doc)
 {
-	if ( m_doc )
-		disconnect ( m_doc, SIGNAL( selectionChanged ( const CDocument::ItemList & )), this, SLOT( selectionUpdate ( const CDocument::ItemList & )));
-	m_doc = doc;
-	if ( m_doc )
-		connect ( m_doc, SIGNAL( selectionChanged ( const CDocument::ItemList & )), this, SLOT( selectionUpdate ( const CDocument::ItemList & )));
+    if (m_doc)
+        disconnect(m_doc, SIGNAL(selectionChanged(const CDocument::ItemList &)), this, SLOT(selectionUpdate(const CDocument::ItemList &)));
+    m_doc = doc;
+    if (m_doc)
+        connect(m_doc, SIGNAL(selectionChanged(const CDocument::ItemList &)), this, SLOT(selectionUpdate(const CDocument::ItemList &)));
 
-	selectionUpdate ( m_doc ? m_doc-> selection ( ) : CDocument::ItemList ( ));
+    selectionUpdate(m_doc ? m_doc->selection() : CDocument::ItemList());
 }
 
-void CTaskLinksWidget::selectionUpdate ( const CDocument::ItemList &list )
+void CTaskLinksWidget::selectionUpdate(const CDocument::ItemList &list)
 {
-	QString str;
+    QString str;
 
-	if ( m_doc && ( list. count ( ) == 1 )) {
-		const BrickLink::Item *item   = list. front ( )-> item ( );
-		const BrickLink::Color *color = list. front ( )-> color ( );
+    if (m_doc && (list.count() == 1)) {
+        const BrickLink::Item *item   = list.front()->item();
+        const BrickLink::Color *color = list.front()->color();
 
-		if ( item && color ) {
-			QString fmt1 = "&nbsp;&nbsp;<b>%1</b><br />";
-			QString fmt2 = "&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"%2\">%1...</a><br />";
+        if (item && color) {
+            QString fmt1 = "&nbsp;&nbsp;<b>%1</b><br />";
+            QString fmt2 = "&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"%2\">%1...</a><br />";
 
-			str += fmt1. arg( tr( "BrickLink" ));
-			if ( list. front ( )-> lotId ( )) {
-				uint lotid = list. front ( )-> lotId ( );
-				str += fmt2. arg( tr( "My Inventory" )). arg( BrickLink::inst ( )-> url ( BrickLink::URL_StoreItemDetail, &lotid ). toString ( ));
-			}
+            str += fmt1.arg(tr("BrickLink"));
+            if (list.front()->lotId()) {
+                uint lotid = list.front()->lotId();
+                str += fmt2.arg(tr("My Inventory")).arg(BrickLink::inst()->url(BrickLink::URL_StoreItemDetail, &lotid).toString());
+            }
 
-			str += fmt2. arg( tr( "Catalog" )).         arg( BrickLink::inst ( )-> url ( BrickLink::URL_CatalogInfo,    item, color ). toString ( ));
-			str += fmt2. arg( tr( "Price Guide" )).     arg( BrickLink::inst ( )-> url ( BrickLink::URL_PriceGuideInfo, item, color ). toString ( ));
-			str += fmt2. arg( tr( "Lots for Sale" )).   arg( BrickLink::inst ( )-> url ( BrickLink::URL_LotsForSale,    item, color ). toString ( ));
+            str += fmt2.arg(tr("Catalog")).       arg(BrickLink::inst()->url(BrickLink::URL_CatalogInfo,    item, color).toString());
+            str += fmt2.arg(tr("Price Guide")).   arg(BrickLink::inst()->url(BrickLink::URL_PriceGuideInfo, item, color).toString());
+            str += fmt2.arg(tr("Lots for Sale")). arg(BrickLink::inst()->url(BrickLink::URL_LotsForSale,    item, color).toString());
 
-			str += "<br />";
+            str += "<br />";
 
-			str += fmt1. arg( tr( "Peeron" ));
-			str += fmt2. arg( tr( "Information" )). arg( BrickLink::inst ( )-> url ( BrickLink::URL_PeeronInfo, item, color ). toString ( ));
-		}
-	}
-	setHtml ( str );
+            str += fmt1.arg(tr("Peeron"));
+            str += fmt2.arg(tr("Information")).arg(BrickLink::inst()->url(BrickLink::URL_PeeronInfo, item, color).toString());
+        }
+    }
+    setHtml(str);
 }
 
-void CTaskLinksWidget::languageChange ( )
+void CTaskLinksWidget::languageChange()
 {
-	if ( m_doc )
-		selectionUpdate ( m_doc-> selection ( ));
+    if (m_doc)
+        selectionUpdate(m_doc->selection());
 }
 
 // ----------------------------------------------------------------------
 // ----------------------------------------------------------------------
 // ----------------------------------------------------------------------
 
-CTaskPriceGuideWidget::CTaskPriceGuideWidget ( QWidget *parent )
-	: CPriceGuideWidget ( parent ), m_doc ( 0 ), m_dock ( 0 )
+CTaskPriceGuideWidget::CTaskPriceGuideWidget(QWidget *parent)
+        : CPriceGuideWidget(parent), m_doc(0), m_dock(0)
 {
-	setFrameStyle ( QFrame::StyledPanel | QFrame::Sunken );
+    setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
 
-	connect ( CFrameWork::inst ( ), SIGNAL( documentActivated ( CDocument * )), this, SLOT( documentUpdate ( CDocument * )));
-	connect ( this, SIGNAL( priceDoubleClicked ( money_t )), this, SLOT( setPrice ( money_t )));
-	fixParentDockWindow ( );
+    connect(CFrameWork::inst(), SIGNAL(documentActivated(CDocument *)), this, SLOT(documentUpdate(CDocument *)));
+    connect(this, SIGNAL(priceDoubleClicked(money_t)), this, SLOT(setPrice(money_t)));
+    fixParentDockWindow();
 }
 
-void CTaskPriceGuideWidget::documentUpdate ( CDocument *doc )
+void CTaskPriceGuideWidget::documentUpdate(CDocument *doc)
 {
-	if ( m_doc )
-		disconnect ( m_doc, SIGNAL( selectionChanged ( const CDocument::ItemList & )), this, SLOT( selectionUpdate ( const CDocument::ItemList & )));
-	m_doc = doc;
-	if ( m_doc )
-		connect ( m_doc, SIGNAL( selectionChanged ( const CDocument::ItemList & )), this, SLOT( selectionUpdate ( const CDocument::ItemList & )));
+    if (m_doc)
+        disconnect(m_doc, SIGNAL(selectionChanged(const CDocument::ItemList &)), this, SLOT(selectionUpdate(const CDocument::ItemList &)));
+    m_doc = doc;
+    if (m_doc)
+        connect(m_doc, SIGNAL(selectionChanged(const CDocument::ItemList &)), this, SLOT(selectionUpdate(const CDocument::ItemList &)));
 
-	selectionUpdate ( m_doc ? m_doc-> selection ( ) : CDocument::ItemList ( ));
+    selectionUpdate(m_doc ? m_doc->selection() : CDocument::ItemList());
 }
 
-void CTaskPriceGuideWidget::selectionUpdate ( const CDocument::ItemList &list )
+void CTaskPriceGuideWidget::selectionUpdate(const CDocument::ItemList &list)
 {
-	bool ok = ( m_doc && ( list. count ( ) == 1 ));
+    bool ok = (m_doc && (list.count() == 1));
 
-	setPriceGuide ( ok ? BrickLink::inst ( )-> priceGuide ( list. front ( )-> item ( ), list. front ( )-> color ( ), true ) : 0 );
+    setPriceGuide(ok ? BrickLink::inst()->priceGuide(list.front()->item(), list.front()->color(), true) : 0);
 }
 
-void CTaskPriceGuideWidget::setPrice ( money_t p )
+void CTaskPriceGuideWidget::setPrice(money_t p)
 {
-	if ( m_doc && ( m_doc-> selection ( ). count ( ) == 1 )) {
-		CDocument::Item *pos = m_doc-> selection ( ). front ( );
-		CDocument::Item item = *pos;
+    if (m_doc && (m_doc->selection().count() == 1)) {
+        CDocument::Item *pos = m_doc->selection().front();
+        CDocument::Item item = *pos;
 
-		item. setPrice ( p );
-		m_doc-> changeItem ( pos, item );
-	}
+        item.setPrice(p);
+        m_doc->changeItem(pos, item);
+    }
 }
 
-bool CTaskPriceGuideWidget::event ( QEvent *e )
+bool CTaskPriceGuideWidget::event(QEvent *e)
 {
-	if ( e-> type ( ) == QEvent::ParentChange )
-		fixParentDockWindow ( );
+    if (e->type() == QEvent::ParentChange)
+        fixParentDockWindow();
 
-	return CPriceGuideWidget::event ( e );
+    return CPriceGuideWidget::event(e);
 }
 
-void CTaskPriceGuideWidget::fixParentDockWindow ( )
+void CTaskPriceGuideWidget::fixParentDockWindow()
 {
-	if ( m_dock ) {
-		disconnect(m_dock, SIGNAL(dockLocationChanged(Qt::DockWidgetArea)), this, SLOT(dockChanged()));
-		disconnect(m_dock, SIGNAL(topLevelChanged(bool)), this, SLOT(dockChanged()));
-	}
+    if (m_dock) {
+        disconnect(m_dock, SIGNAL(dockLocationChanged(Qt::DockWidgetArea)), this, SLOT(dockChanged()));
+        disconnect(m_dock, SIGNAL(topLevelChanged(bool)), this, SLOT(dockChanged()));
+    }
 
-	m_dock = 0;
+    m_dock = 0;
 
-	for ( QObject *p = parent( ); p; p = p-> parent ( )) {
-		if ( qobject_cast<QDockWidget *>( p )) {
-			m_dock = static_cast<QDockWidget *> ( p );
-			break;
-		}
-	}
+    for (QObject *p = parent(); p; p = p->parent()) {
+        if (qobject_cast<QDockWidget *>(p)) {
+            m_dock = static_cast<QDockWidget *>(p);
+            break;
+        }
+    }
 
-	if ( m_dock ) {
-		connect(m_dock, SIGNAL(dockLocationChanged(Qt::DockWidgetArea)), this, SLOT(dockChanged()));
-		connect(m_dock, SIGNAL(topLevelChanged(bool)), this, SLOT(dockChanged()));
-	}
-	dockChanged();
+    if (m_dock) {
+        connect(m_dock, SIGNAL(dockLocationChanged(Qt::DockWidgetArea)), this, SLOT(dockChanged()));
+        connect(m_dock, SIGNAL(topLevelChanged(bool)), this, SLOT(dockChanged()));
+    }
+    dockChanged();
 }
 
 void CTaskPriceGuideWidget::dockChanged()
 {
-	CPriceGuideWidget::Layout lay = CPriceGuideWidget::Normal;
+    CPriceGuideWidget::Layout lay = CPriceGuideWidget::Normal;
 
-	if (m_dock) {
-		if (QMainWindow *mw = qobject_cast<QMainWindow *>(m_dock->parentWidget())) {
-			if (m_dock->isFloating())
-				lay = CPriceGuideWidget::Normal;
-			else if ((mw->dockWidgetArea(m_dock) == Qt::LeftDockWidgetArea) || (mw->dockWidgetArea(m_dock) == Qt::RightDockWidgetArea))
-				lay = CPriceGuideWidget::Vertical;
-			else
-				lay = CPriceGuideWidget::Horizontal;
-		}
-	}
-	setLayout(lay);
+    if (m_dock) {
+        if (QMainWindow *mw = qobject_cast<QMainWindow *>(m_dock->parentWidget())) {
+            if (m_dock->isFloating())
+                lay = CPriceGuideWidget::Normal;
+            else if ((mw->dockWidgetArea(m_dock) == Qt::LeftDockWidgetArea) || (mw->dockWidgetArea(m_dock) == Qt::RightDockWidgetArea))
+                lay = CPriceGuideWidget::Vertical;
+            else
+                lay = CPriceGuideWidget::Horizontal;
+        }
+    }
+    setLayout(lay);
 }
 
 // ----------------------------------------------------------------------
 // ----------------------------------------------------------------------
 // ----------------------------------------------------------------------
 
-CTaskInfoWidget::CTaskInfoWidget ( QWidget *parent )
-	: QStackedWidget ( parent ), m_doc ( 0 )
+CTaskInfoWidget::CTaskInfoWidget(QWidget *parent)
+        : QStackedWidget(parent), m_doc(0)
 {
-	setFrameStyle ( QFrame::StyledPanel | QFrame::Sunken );
+    setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
 
-	m_pic = new CPictureWidget ( this );
-	m_text = new QLabel ( this );
-	m_text-> setAlignment ( Qt::AlignLeft | Qt::AlignTop );
-	m_text-> setIndent ( 8 );
+    m_pic = new CPictureWidget(this);
+    m_text = new QLabel(this);
+    m_text->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+    m_text->setIndent(8);
 
-	addWidget ( m_pic );
-	addWidget ( m_text );
+    addWidget(m_pic);
+    addWidget(m_text);
 
-	paletteChange ( palette ( ));
+    paletteChange(palette());
 
-	connect ( CFrameWork::inst ( ), SIGNAL( documentActivated ( CDocument * )), this, SLOT( documentUpdate ( CDocument * )));
-	connect ( CMoney::inst ( ), SIGNAL( monetarySettingsChanged ( )), this, SLOT( refresh ( )));
-	connect ( CConfig::inst ( ), SIGNAL( weightSystemChanged ( CConfig::WeightSystem )), this, SLOT( refresh ( )));
+    connect(CFrameWork::inst(), SIGNAL(documentActivated(CDocument *)), this, SLOT(documentUpdate(CDocument *)));
+    connect(CMoney::inst(), SIGNAL(monetarySettingsChanged()), this, SLOT(refresh()));
+    connect(CConfig::inst(), SIGNAL(weightSystemChanged(CConfig::WeightSystem)), this, SLOT(refresh()));
 }
 
-void CTaskInfoWidget::documentUpdate ( CDocument *doc )
+void CTaskInfoWidget::documentUpdate(CDocument *doc)
 {
-	if ( m_doc )
-		disconnect ( m_doc, SIGNAL( selectionChanged ( const CDocument::ItemList & )), this, SLOT( selectionUpdate ( const CDocument::ItemList & )));
-	m_doc = doc;
-	if ( m_doc )
-		connect ( m_doc, SIGNAL( selectionChanged ( const CDocument::ItemList & )), this, SLOT( selectionUpdate ( const CDocument::ItemList & )));
+    if (m_doc)
+        disconnect(m_doc, SIGNAL(selectionChanged(const CDocument::ItemList &)), this, SLOT(selectionUpdate(const CDocument::ItemList &)));
+    m_doc = doc;
+    if (m_doc)
+        connect(m_doc, SIGNAL(selectionChanged(const CDocument::ItemList &)), this, SLOT(selectionUpdate(const CDocument::ItemList &)));
 
-	selectionUpdate ( m_doc ? m_doc-> selection ( ) : CDocument::ItemList ( ));
+    selectionUpdate(m_doc ? m_doc->selection() : CDocument::ItemList());
 }
 
-void CTaskInfoWidget::selectionUpdate ( const CDocument::ItemList &list )
+void CTaskInfoWidget::selectionUpdate(const CDocument::ItemList &list)
 {
-	if ( !m_doc || ( list. count ( ) == 0 )) {
-		m_pic-> setPicture ( 0 );
-		setCurrentWidget ( m_pic );
-	}
-	else if ( list. count ( ) == 1 ) {
-		m_pic-> setPicture ( BrickLink::inst ( )-> picture ( list. front ( )-> item ( ), list. front ( )-> color ( ), true ));
-		setCurrentWidget ( m_pic );
-	}
-	else {
-		CDocument::Statistics stat = m_doc-> statistics ( list );
+    if (!m_doc || (list.count() == 0)) {
+        m_pic->setPicture(0);
+        setCurrentWidget(m_pic);
+    }
+    else if (list.count() == 1) {
+        m_pic->setPicture(BrickLink::inst()->picture(list.front()->item(), list.front()->color(), true));
+        setCurrentWidget(m_pic);
+    }
+    else {
+        CDocument::Statistics stat = m_doc->statistics(list);
 
-		QString s;
-		QString valstr, wgtstr;
+        QString s;
+        QString valstr, wgtstr;
 
-		if ( stat. value ( ) != stat. minValue ( )) {
-			valstr = QString ( "%1 (%2 %3)" ).
-						arg( stat. value ( ). toLocalizedString ( true )).
-						arg( tr( "min." )).
-						arg( stat. minValue ( ). toLocalizedString ( true ));
-		}
-		else
-			valstr = stat. value ( ). toLocalizedString ( true );
+        if (stat.value() != stat.minValue()) {
+            valstr = QString("%1 (%2 %3)").
+                     arg(stat.value().toLocalizedString(true)).
+                     arg(tr("min.")).
+                     arg(stat.minValue().toLocalizedString(true));
+        }
+        else
+            valstr = stat.value().toLocalizedString(true);
 
-		if ( stat. weight ( ) == -DBL_MIN ) {
-			wgtstr = "-";
-		}
-		else {
-			double weight = stat. weight ( );
+        if (stat.weight() == -DBL_MIN) {
+            wgtstr = "-";
+        }
+        else {
+            double weight = stat.weight();
 
-			if ( weight < 0 ) {
-				weight = -weight;
-				wgtstr = tr( "min." ) + " ";
-			}
+            if (weight < 0) {
+                weight = -weight;
+                wgtstr = tr("min.") + " ";
+            }
 
-			wgtstr += CLocaleMeasurement::weightToString ( weight, true, true );
-		}
+            wgtstr += CLocaleMeasurement::weightToString(weight, true, true);
+        }
 
-		s = QString ( "<h3>%1</h3>&nbsp;&nbsp;%2: %3<br />&nbsp;&nbsp;%4: %5<br /><br />&nbsp;&nbsp;%6: %7<br /><br />&nbsp;&nbsp;%8: %9" ).
-			arg ( tr( "Multiple lots selected" )).
-			arg ( tr( "Lots" )). arg ( stat. lots ( )).
-			arg ( tr( "Items" )). arg ( stat. items ( )).
-			arg ( tr( "Value" )). arg ( valstr ).
-			arg ( tr( "Weight" )). arg ( wgtstr );
+        s = QString("<h3>%1</h3>&nbsp;&nbsp;%2: %3<br />&nbsp;&nbsp;%4: %5<br /><br />&nbsp;&nbsp;%6: %7<br /><br />&nbsp;&nbsp;%8: %9").
+            arg(tr("Multiple lots selected")).
+            arg(tr("Lots")).arg(stat.lots()).
+            arg(tr("Items")).arg(stat.items()).
+            arg(tr("Value")).arg(valstr).
+            arg(tr("Weight")).arg(wgtstr);
 
-//		if (( stat. errors ( ) > 0 ) && CConfig::inst ( )-> showInputErrors ( ))
-//			s += QString ( "<br /><br />&nbsp;&nbsp;%1: %2" ). arg ( tr( "Errors" )). arg ( stat. errors ( ));
+//  if (( stat.errors ( ) > 0 ) && CConfig::inst ( )->showInputErrors ( ))
+//   s += QString ( "<br /><br />&nbsp;&nbsp;%1: %2" ).arg ( tr( "Errors" )).arg ( stat.errors ( ));
 
-		m_pic-> setPicture ( 0 );
-		m_text-> setText ( s );
-		setCurrentWidget ( m_text );
-	}
+        m_pic->setPicture(0);
+        m_text->setText(s);
+        setCurrentWidget(m_text);
+    }
 }
 
-void CTaskInfoWidget::languageChange ( )
+void CTaskInfoWidget::languageChange()
 {
-	refresh ( );
+    refresh();
 }
 
-void CTaskInfoWidget::refresh ( )
+void CTaskInfoWidget::refresh()
 {
-	if ( m_doc )
-		selectionUpdate ( m_doc-> selection ( ));
+    if (m_doc)
+        selectionUpdate(m_doc->selection());
 }
 
 
@@ -282,38 +282,38 @@ void CTaskInfoWidget::refresh ( )
 // ----------------------------------------------------------------------
 // ----------------------------------------------------------------------
 
-CTaskAppearsInWidget::CTaskAppearsInWidget ( QWidget *parent )
-	: CAppearsInWidget ( parent ), m_doc ( 0 )
+CTaskAppearsInWidget::CTaskAppearsInWidget(QWidget *parent)
+        : CAppearsInWidget(parent), m_doc(0)
 {
-	connect ( CFrameWork::inst ( ), SIGNAL( documentActivated ( CDocument * )), this, SLOT( documentUpdate ( CDocument * )));
+    connect(CFrameWork::inst(), SIGNAL(documentActivated(CDocument *)), this, SLOT(documentUpdate(CDocument *)));
 }
 
-QSize CTaskAppearsInWidget::minimumSizeHint ( ) const
+QSize CTaskAppearsInWidget::minimumSizeHint() const
 {
-	const QFontMetrics &fm = fontMetrics ( );
+    const QFontMetrics &fm = fontMetrics();
 
-	return QSize ( fm. width ( 'm' ) * 20, fm.height ( ) * 10 );
+    return QSize(fm.width('m') * 20, fm.height() * 10);
 }
 
-QSize CTaskAppearsInWidget::sizeHint ( ) const
+QSize CTaskAppearsInWidget::sizeHint() const
 {
-	return minimumSizeHint ( );
+    return minimumSizeHint();
 }
 
-void CTaskAppearsInWidget::documentUpdate ( CDocument *doc )
+void CTaskAppearsInWidget::documentUpdate(CDocument *doc)
 {
-	if ( m_doc )
-		disconnect ( m_doc, SIGNAL( selectionChanged ( const CDocument::ItemList & )), this, SLOT( selectionUpdate ( const CDocument::ItemList & )));
-	m_doc = doc;
-	if ( m_doc )
-		connect ( m_doc, SIGNAL( selectionChanged ( const CDocument::ItemList & )), this, SLOT( selectionUpdate ( const CDocument::ItemList & )));
+    if (m_doc)
+        disconnect(m_doc, SIGNAL(selectionChanged(const CDocument::ItemList &)), this, SLOT(selectionUpdate(const CDocument::ItemList &)));
+    m_doc = doc;
+    if (m_doc)
+        connect(m_doc, SIGNAL(selectionChanged(const CDocument::ItemList &)), this, SLOT(selectionUpdate(const CDocument::ItemList &)));
 
-	selectionUpdate ( m_doc ? m_doc-> selection ( ) : CDocument::ItemList ( ));
+    selectionUpdate(m_doc ? m_doc->selection() : CDocument::ItemList());
 }
 
-void CTaskAppearsInWidget::selectionUpdate ( const CDocument::ItemList &list )
+void CTaskAppearsInWidget::selectionUpdate(const CDocument::ItemList &list)
 {
-	bool ok = ( m_doc && ( list. count ( ) == 1 ));
+    bool ok = (m_doc && (list.count() == 1));
 
-	setItem ( ok ? (*list. front ( )). item ( ) : 0, ok ? (*list. front ( )). color ( ) : 0 );
+    setItem(ok ? (*list.front()).item() : 0, ok ? (*list.front()).color() : 0);
 }

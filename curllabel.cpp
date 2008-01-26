@@ -1,9 +1,9 @@
-/* Copyright (C) 2004-2005 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2004-2005 Robert Griebl.All rights reserved.
 **
 ** This file is part of BrickStore.
 **
-** This file may be distributed and/or modified under the terms of the GNU 
-** General Public License version 2 as published by the Free Software Foundation 
+** This file may be distributed and/or modified under the terms of the GNU
+** General Public License version 2 as published by the Free Software Foundation
 ** and appearing in the file LICENSE.GPL included in the packaging of this file.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
@@ -20,66 +20,66 @@
 #include "curllabel.h"
 
 
-CUrlLabel::CUrlLabel ( QWidget *parent, const char *name )
-	: QTextBrowser ( parent, name )
+CUrlLabel::CUrlLabel(QWidget *parent, const char *name)
+        : QTextBrowser(parent, name)
 {
-	QPalette pal = palette ( );
-	pal. setColor ( QPalette::Active,   QColorGroup::Text, pal. color ( QPalette::Active,   QColorGroup::Foreground ));
-	pal. setBrush ( QPalette::Active,   QColorGroup::Base, pal. brush ( QPalette::Active,   QColorGroup::Background ));
-	pal. setColor ( QPalette::Inactive, QColorGroup::Text, pal. color ( QPalette::Inactive, QColorGroup::Foreground ));
-	pal. setBrush ( QPalette::Inactive, QColorGroup::Base, pal. brush ( QPalette::Inactive, QColorGroup::Background ));
-	pal. setColor ( QPalette::Disabled, QColorGroup::Text, pal. color ( QPalette::Disabled, QColorGroup::Foreground ));
-	pal. setBrush ( QPalette::Disabled, QColorGroup::Base, pal. brush ( QPalette::Disabled, QColorGroup::Background ));
-	setPalette ( pal );
+    QPalette pal = palette();
+    pal.setColor(QPalette::Active,   QColorGroup::Text, pal.color(QPalette::Active,   QColorGroup::Foreground));
+    pal.setBrush(QPalette::Active,   QColorGroup::Base, pal.brush(QPalette::Active,   QColorGroup::Background));
+    pal.setColor(QPalette::Inactive, QColorGroup::Text, pal.color(QPalette::Inactive, QColorGroup::Foreground));
+    pal.setBrush(QPalette::Inactive, QColorGroup::Base, pal.brush(QPalette::Inactive, QColorGroup::Background));
+    pal.setColor(QPalette::Disabled, QColorGroup::Text, pal.color(QPalette::Disabled, QColorGroup::Foreground));
+    pal.setBrush(QPalette::Disabled, QColorGroup::Base, pal.brush(QPalette::Disabled, QColorGroup::Background));
+    setPalette(pal);
 
-	setFocusPolicy( NoFocus );
-	
-	setTextFormat ( Qt::RichText );
-	setFrameStyle ( NoFrame );
-	setHScrollBarMode ( AlwaysOff );
-	setVScrollBarMode ( AlwaysOff );
+    setFocusPolicy(NoFocus);
 
-	if ( qApp-> mainWidget ( ) && qApp-> mainWidget ( )-> inherits ( "QMainWindow" ))
-		connect ( this, SIGNAL( highlighted ( const QString & )), static_cast <QMainWindow *> ( qApp-> mainWidget ( ))-> statusBar ( ), SLOT( message ( const QString & )));
+    setTextFormat(Qt::RichText);
+    setFrameStyle(NoFrame);
+    setHScrollBarMode(AlwaysOff);
+    setVScrollBarMode(AlwaysOff);
+
+    if (qApp->mainWidget() && qApp->mainWidget()->inherits("QMainWindow"))
+        connect(this, SIGNAL(highlighted(const QString &)), static_cast <QMainWindow *>(qApp->mainWidget())->statusBar(), SLOT(message(const QString &)));
 }
 
-CUrlLabel::~CUrlLabel ( )
+CUrlLabel::~CUrlLabel()
 {
 }
 
-void CUrlLabel::setSource ( const QString &src )
+void CUrlLabel::setSource(const QString &src)
 {
-	if ( src. find ( ':' ) > 0 )
-		CUtility::openUrl ( src );
-	else
-		QTextBrowser::setSource ( src );
+    if (src.find(':') > 0)
+        CUtility::openUrl(src);
+    else
+        QTextBrowser::setSource(src);
 }
 
-QSize CUrlLabel::sizeHint ( ) const
+QSize CUrlLabel::sizeHint() const
 {
-	return minimumSizeHint ( );
+    return minimumSizeHint();
 }
 
-QSize CUrlLabel::minimumSizeHint ( ) const
+QSize CUrlLabel::minimumSizeHint() const
 {
-	QSize ms = minimumSize ( );
-	if (( ms. width ( ) > 0 ) && ( ms. height ( ) > 0 ))
-		return ms;
-	
-	int w = 500;
-	if ( ms. width ( ) > 0 )
-		w = ms. width ( );
-	
-	QSimpleRichText rt ( text ( ), font ( ));
-	rt. setWidth ( w - 2 * frameWidth ( ) - 10 );
-	
-	w = 10 + rt. widthUsed ( ) + 2 * frameWidth ( );
-	if ( w < ms. width ( ))
-		w = ms. width ( );
-	
-	int h = rt. height ( ) + 2 * frameWidth ( );
-	if ( h < ms. height ( ))
-		h = ms. height ( );
-	
-	return QSize ( w, h );
+    QSize ms = minimumSize();
+    if ((ms.width() > 0) && (ms.height() > 0))
+        return ms;
+
+    int w = 500;
+    if (ms.width() > 0)
+        w = ms.width();
+
+    QSimpleRichText rt(text(), font());
+    rt.setWidth(w - 2 * frameWidth() - 10);
+
+    w = 10 + rt.widthUsed() + 2 * frameWidth();
+    if (w < ms.width())
+        w = ms.width();
+
+    int h = rt.height() + 2 * frameWidth();
+    if (h < ms.height())
+        h = ms.height();
+
+    return QSize(w, h);
 }

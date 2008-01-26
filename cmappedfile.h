@@ -1,9 +1,9 @@
-/* Copyright (C) 2004-2005 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2004-2005 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
-** This file may be distributed and/or modified under the terms of the GNU 
-** General Public License version 2 as published by the Free Software Foundation 
+** This file may be distributed and/or modified under the terms of the GNU
+** General Public License version 2 as published by the Free Software Foundation
 ** and appearing in the file LICENSE.GPL included in the packaging of this file.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
@@ -30,23 +30,23 @@ class QDataStream;
 
 class CMappedFile {
 public:
-	CMappedFile ( const QString &filename );
-	~CMappedFile ( );
+    CMappedFile(const QString &filename);
+    ~CMappedFile();
 
-	QDataStream *open ( );
-	void close ( );
+    QDataStream *open();
+    void close();
 
-	quint32 size ( ) const;
+    quint32 size() const;
 
 private:
-	QFile        m_file;
-	quint32      m_filesize;
-	const char * m_memptr;
-	QByteArray   m_mem;
-	QDataStream *m_ds;
+    QFile        m_file;
+    quint32      m_filesize;
+    const char * m_memptr;
+    QByteArray   m_mem;
+    QDataStream *m_ds;
 
 #if defined( Q_OS_WIN32 )
-	HANDLE       m_maphandle;
+    HANDLE       m_maphandle;
 #endif
 };
 

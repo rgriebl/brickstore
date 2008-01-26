@@ -1,9 +1,9 @@
-/* Copyright (C) 2004-2005 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2004-2005 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
-** This file may be distributed and/or modified under the terms of the GNU 
-** General Public License version 2 as published by the Free Software Foundation 
+** This file may be distributed and/or modified under the terms of the GNU
+** General Public License version 2 as published by the Free Software Foundation
 ** and appearing in the file LICENSE.GPL included in the packaging of this file.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
@@ -27,19 +27,19 @@ class QDockWidget;
 
 
 class CTaskLinksWidget : public QTextBrowser {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	CTaskLinksWidget ( QWidget *parent );
+    CTaskLinksWidget(QWidget *parent);
 
 protected slots:
-	void documentUpdate ( CDocument *doc );
-	void selectionUpdate ( const CDocument::ItemList &list );
+    void documentUpdate(CDocument *doc);
+    void selectionUpdate(const CDocument::ItemList &list);
 
-	void languageChange ( );
+    void languageChange();
 
 private:
-	CDocument * m_doc;
+    CDocument * m_doc;
 
 };
 
@@ -50,25 +50,25 @@ private:
 
 
 class CTaskPriceGuideWidget : public CPriceGuideWidget {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	CTaskPriceGuideWidget ( QWidget *parent );
+    CTaskPriceGuideWidget(QWidget *parent);
 
 protected slots:
-	void documentUpdate ( CDocument *doc );
-	void selectionUpdate ( const CDocument::ItemList &list );
-	virtual void dockChanged();
+    void documentUpdate(CDocument *doc);
+    void selectionUpdate(const CDocument::ItemList &list);
+    virtual void dockChanged();
 
-	void setPrice ( money_t p );
+    void setPrice(money_t p);
 
 protected:
-	virtual bool event ( QEvent *e );
-	void fixParentDockWindow ( );
+    virtual bool event(QEvent *e);
+    void fixParentDockWindow();
 
 private:
-	CDocument *m_doc;
-	QDockWidget *m_dock;
+    CDocument *m_doc;
+    QDockWidget *m_dock;
 };
 
 
@@ -78,22 +78,22 @@ private:
 
 
 class CTaskInfoWidget : public QStackedWidget {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	CTaskInfoWidget ( QWidget *parent );
+    CTaskInfoWidget(QWidget *parent);
 
 protected slots:
-	void documentUpdate ( CDocument *doc );
-	void selectionUpdate ( const CDocument::ItemList &list );
+    void documentUpdate(CDocument *doc);
+    void selectionUpdate(const CDocument::ItemList &list);
 
-	void languageChange ( );
-	void refresh ( );
+    void languageChange();
+    void refresh();
 
 private:
-	QLabel *        m_text;
-	CPictureWidget *m_pic;
-	CDocument *     m_doc;
+    QLabel *        m_text;
+    CPictureWidget *m_pic;
+    CDocument *     m_doc;
 };
 
 
@@ -102,20 +102,20 @@ private:
 // ----------------------------------------------------------------------
 
 class CTaskAppearsInWidget : public CAppearsInWidget {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	CTaskAppearsInWidget ( QWidget *parent );
+    CTaskAppearsInWidget(QWidget *parent);
 
-	virtual QSize minimumSizeHint ( ) const;
-	virtual QSize sizeHint ( ) const;
+    virtual QSize minimumSizeHint() const;
+    virtual QSize sizeHint() const;
 
 protected slots:
-	void documentUpdate ( CDocument *doc );
-	void selectionUpdate ( const CDocument::ItemList &list );
+    void documentUpdate(CDocument *doc);
+    void selectionUpdate(const CDocument::ItemList &list);
 
 private:
-	CDocument * m_doc;
+    CDocument * m_doc;
 };
 
 #endif

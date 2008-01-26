@@ -1,9 +1,9 @@
-/* Copyright (C) 2004-2005 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2004-2005 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
-** This file may be distributed and/or modified under the terms of the GNU 
-** General Public License version 2 as published by the Free Software Foundation 
+** This file may be distributed and/or modified under the terms of the GNU
+** General Public License version 2 as published by the Free Software Foundation
 ** and appearing in the file LICENSE.GPL included in the packaging of this file.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
@@ -22,32 +22,32 @@
 
 
 class CRebuildDatabase : public QObject {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	CRebuildDatabase ( const QString &output );
-	~CRebuildDatabase ( );
+    CRebuildDatabase(const QString &output);
+    ~CRebuildDatabase();
 
-	int exec ( );
+    int exec();
 
 private slots:
-	void downloadJobFinished ( CTransferJob *job );
+    void downloadJobFinished(CTransferJob *job);
 
 private:
-	int error ( const QString & );
+    int error(const QString &);
 
-	bool download ( );
-	bool downloadInventories ( QVector<const BrickLink::Item *> &invs );
+    bool download();
+    bool downloadInventories(QVector<const BrickLink::Item *> &invs);
 
 private:
-	CTransfer *m_trans;
-	QString m_output;
-	QString m_error;
-	int m_downloads_in_progress;
-	int m_downloads_failed;
-	int m_processed;
-	int m_ptotal;
-	QDateTime m_date;
+    CTransfer *m_trans;
+    QString m_output;
+    QString m_error;
+    int m_downloads_in_progress;
+    int m_downloads_failed;
+    int m_processed;
+    int m_ptotal;
+    QDateTime m_date;
 };
 
 #endif

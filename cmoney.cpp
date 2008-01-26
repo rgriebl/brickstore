@@ -1,9 +1,9 @@
-/* Copyright (C) 2004-2005 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2004-2005 Robert Griebl.All rights reserved.
 **
 ** This file is part of BrickStore.
 **
-** This file may be distributed and/or modified under the terms of the GNU 
-** General Public License version 2 as published by the Free Software Foundation 
+** This file may be distributed and/or modified under the terms of the GNU
+** General Public License version 2 as published by the Free Software Foundation
 ** and appearing in the file LICENSE.GPL included in the packaging of this file.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
@@ -29,334 +29,334 @@
 // copied and simplified to static functions from private/qcore_mac_p.h
 class QCFString {
 public:
-	static QString toQString(CFStringRef cfstr);
-	static CFStringRef toCFStringRef(const QString &str);
+    static QString toQString(CFStringRef cfstr);
+    static CFStringRef toCFStringRef(const QString &str);
 };
-                                
+
 #endif
 
 
 #include "cconfig.h"
 #include "cmoney.h"
 
-QDataStream &operator << ( QDataStream &s, const money_t &m )
+QDataStream &operator << (QDataStream &s, const money_t &m)
 {
-	s << m. val; return s;
+    s << m.val; return s;
 }
 
-QDataStream &operator >> ( QDataStream &s, money_t &m )
+QDataStream &operator >> (QDataStream &s, money_t &m)
 {
-	s >> m. val; return s;
+    s >> m.val; return s;
 }
 
-double money_t::toDouble ( ) const
+double money_t::toDouble() const
 {
-	return double( val ) / 1000.;
+    return double(val) / 1000.;
 }
 
-QString money_t::toCString ( bool with_currency_symbol, int precision ) const
+QString money_t::toCString(bool with_currency_symbol, int precision) const
 {
-	QString s = QLocale::c ( ). toString ( toDouble ( ), 'f', precision );
-	if ( with_currency_symbol )
-		s. prepend ( "$ " );
-	return s;
+    QString s = QLocale::c().toString(toDouble(), 'f', precision);
+    if (with_currency_symbol)
+        s.prepend("$ ");
+    return s;
 }
 
-QString money_t::toLocalizedString ( bool with_currency_symbol, int precision ) const
+QString money_t::toLocalizedString(bool with_currency_symbol, int precision) const
 {
-	return CMoney::inst ( )-> toString ( toDouble ( ), with_currency_symbol, precision );
+    return CMoney::inst()->toString(toDouble(), with_currency_symbol, precision);
 }
 
-money_t money_t::fromCString ( const QString &str )
+money_t money_t::fromCString(const QString &str)
 {
-	return money_t ( QLocale::c ( ). toDouble ( str ));
+    return money_t (QLocale::c().toDouble(str));
 }
 
-money_t money_t::fromLocalizedString ( const QString &str )
+money_t money_t::fromLocalizedString(const QString &str)
 {
-	return CMoney::inst ( )-> toMoney ( str );
+    return CMoney::inst()->toMoney(str);
 }
 
 
 
 class CMoneyData : public QObject {
 public:
-	CMoneyData ( )
-		: m_locale ( QLocale::system ( ))
-	{ 
-		qApp-> installEventFilter ( this );
-	}
+    CMoneyData()
+            : m_locale(QLocale::system())
+    {
+        qApp->installEventFilter(this);
+    }
 
-	virtual ~CMoneyData ( )
-	{
-		qApp-> removeEventFilter ( this );
-	}
+    virtual ~CMoneyData()
+    {
+        qApp->removeEventFilter(this);
+    }
 
-	virtual bool eventFilter ( QObject *o, QEvent *e )
-	{
-		bool res = false;
+    virtual bool eventFilter(QObject *o, QEvent *e)
+    {
+        bool res = false;
 
-		if ((( e-> type ( ) == QEvent::KeyPress ) || ( e-> type ( ) == QEvent::KeyRelease )) && qobject_cast<QLineEdit *> ( o )) {
-			const QValidator *val = static_cast <QLineEdit *> ( o )-> validator ( );
+        if (((e->type() == QEvent::KeyPress) || (e->type() == QEvent::KeyRelease)) && qobject_cast<QLineEdit *> (o)) {
+            const QValidator *val = static_cast <QLineEdit *>(o)->validator();
 
-			if ( val && qobject_cast<const CMoneyValidator *> ( val ))
-				res = static_cast <const CMoneyValidator *> ( val )-> filterInput ( static_cast <QLineEdit *> ( o ), static_cast <QKeyEvent *> ( e ));
-		}
-		return res;
-	}
+            if (val && qobject_cast<const CMoneyValidator *> (val))
+                res = static_cast <const CMoneyValidator *>(val)->filterInput(static_cast <QLineEdit *>(o), static_cast <QKeyEvent *>(e));
+        }
+        return res;
+    }
 
-	bool    m_localized;
-	int     m_precision;
-	double  m_factor;
-	
-	QLocale m_locale;
-	QString m_csymbol;
-	QChar   m_decpoint;
+    bool    m_localized;
+    int     m_precision;
+    double  m_factor;
+
+    QLocale m_locale;
+    QString m_csymbol;
+    QChar   m_decpoint;
 };
 
 
 CMoney *CMoney::s_inst = 0;
 
-CMoney *CMoney::inst ( )
+CMoney *CMoney::inst()
 {
-	if ( !s_inst )
-		s_inst = new CMoney ( );
-	return s_inst;
+    if (!s_inst)
+        s_inst = new CMoney();
+    return s_inst;
 }
 
-CMoney::CMoney ( )
+CMoney::CMoney()
 {
-	d = new CMoneyData;
-	
-	d-> m_factor    = CConfig::inst ( )-> value ( "/General/Money/Factor",    1. ). toDouble ( );
-	d-> m_localized = CConfig::inst ( )-> value ( "/General/Money/Localized", false ). toBool ( );
-	d-> m_precision = CConfig::inst ( )-> value ( "/General/Money/Precision", 3 ). toInt ( );
+    d = new CMoneyData;
 
-	QString decpoint;
-	QString csymbol, csymbolint;
+    d->m_factor    = CConfig::inst()->value("/General/Money/Factor",    1.).toDouble();
+    d->m_localized = CConfig::inst()->value("/General/Money/Localized", false).toBool();
+    d->m_precision = CConfig::inst()->value("/General/Money/Precision", 3).toInt();
+
+    QString decpoint;
+    QString csymbol, csymbolint;
 
 #if defined( Q_OS_MACX )
-	// BSD and MACOSX don't have support for LC_MONETARY !!!
+    // BSD and MACOSX don't have support for LC_MONETARY !!!
 
-	// we need at least 10.3 for CFLocale... stuff (weak import)
-	if ( CFLocaleCopyCurrent != 0  && CFLocaleGetValue != 0 ) {
-		CFLocaleRef loc = CFLocaleCopyCurrent ( );
-		CFStringRef ds = (CFStringRef) CFLocaleGetValue ( loc, kCFLocaleDecimalSeparator );
-		CFStringRef cs = (CFStringRef) CFLocaleGetValue ( loc, kCFLocaleCurrencySymbol );
-		CFStringRef cc = (CFStringRef) CFLocaleGetValue ( loc, kCFLocaleCurrencyCode );
+    // we need at least 10.3 for CFLocale...stuff (weak import)
+    if (CFLocaleCopyCurrent != 0  && CFLocaleGetValue != 0) {
+        CFLocaleRef loc = CFLocaleCopyCurrent();
+        CFStringRef ds = (CFStringRef) CFLocaleGetValue(loc, kCFLocaleDecimalSeparator);
+        CFStringRef cs = (CFStringRef) CFLocaleGetValue(loc, kCFLocaleCurrencySymbol);
+        CFStringRef cc = (CFStringRef) CFLocaleGetValue(loc, kCFLocaleCurrencyCode);
 
-		decpoint = QCFString::toQString( ds );
-		csymbol = QCFString::toQString( cs );
-		csymbolint = QCFString::toQString( cc );
-	}
+        decpoint = QCFString::toQString(ds);
+        csymbol = QCFString::toQString(cs);
+        csymbolint = QCFString::toQString(cc);
+    }
 
 #else
-	::setlocale ( LC_ALL, "" );  // initialize C-locale to OS supplied values
-	::lconv *lc = ::localeconv ( );
-	
-	if ( lc-> mon_decimal_point && *lc-> mon_decimal_point && *lc-> mon_decimal_point != CHAR_MAX )
-		decpoint = QString::fromLocal8Bit ( lc-> mon_decimal_point ) [0];
-		
-	csymbol = QString::fromLocal8Bit ( lc-> currency_symbol );
-	csymbolint = QString::fromLocal8Bit ( lc-> int_curr_symbol );
+    ::setlocale(LC_ALL, "");     // initialize C-locale to OS supplied values
+    ::lconv *lc = ::localeconv();
+
+    if (lc->mon_decimal_point && *lc->mon_decimal_point && *lc->mon_decimal_point != CHAR_MAX)
+        decpoint = QString::fromLocal8Bit(lc->mon_decimal_point)[0];
+
+    csymbol = QString::fromLocal8Bit(lc->currency_symbol);
+    csymbolint = QString::fromLocal8Bit(lc->int_curr_symbol);
 #endif
 
-	if ( !decpoint. isEmpty ( ))
-		d-> m_decpoint = decpoint [0];
-	else
-		d-> m_decpoint = d-> m_locale. toString ( 1.5, 'f', 1 ) [1]; // simple hack as fallback
-	
-	if ( !csymbol. isEmpty ( )) 
-		d-> m_csymbol = csymbol;
-	else
-		d-> m_csymbol = csymbolint;
+    if (!decpoint.isEmpty())
+        d->m_decpoint = decpoint [0];
+    else
+        d->m_decpoint = d->m_locale.toString(1.5, 'f', 1)[1];     // simple hack as fallback
+
+    if (!csymbol.isEmpty())
+        d->m_csymbol = csymbol;
+    else
+        d->m_csymbol = csymbolint;
 }
 
-CMoney::~CMoney ( )
+CMoney::~CMoney()
 {
-	delete d;
-	s_inst = 0;
+    delete d;
+    s_inst = 0;
 }
 
-QString CMoney::localCurrencySymbol ( ) const
+QString CMoney::localCurrencySymbol() const
 {
-	return d-> m_csymbol;
+    return d->m_csymbol;
 }
 
-QString CMoney::currencySymbol ( ) const
+QString CMoney::currencySymbol() const
 {
-	return d-> m_localized ? d-> m_csymbol : QChar ( '$' );
+    return d->m_localized ? d->m_csymbol : QChar('$');
 }
 
-QChar CMoney::localDecimalPoint ( ) const
+QChar CMoney::localDecimalPoint() const
 {
-	return d-> m_decpoint;
+    return d->m_decpoint;
 }
 
-QChar CMoney::decimalPoint ( ) const
+QChar CMoney::decimalPoint() const
 {
-	return d-> m_localized ? d-> m_decpoint : QChar ( '.' );
+    return d->m_localized ? d->m_decpoint : QChar('.');
 }
 
-void CMoney::setLocalization ( bool loc )
+void CMoney::setLocalization(bool loc)
 {
-	if ( loc != d-> m_localized ) {
-		d-> m_localized = loc;
-		CConfig::inst ( )-> setValue ( "/General/Money/Localized", loc );
+    if (loc != d->m_localized) {
+        d->m_localized = loc;
+        CConfig::inst()->setValue("/General/Money/Localized", loc);
 
-		emit monetarySettingsChanged ( );
-	}
+        emit monetarySettingsChanged();
+    }
 }
 
-bool CMoney::isLocalized ( ) const
+bool CMoney::isLocalized() const
 {
-	return d-> m_localized;
+    return d->m_localized;
 }
 
-void CMoney::setFactor ( double f )
+void CMoney::setFactor(double f)
 {
-	if ( f != d-> m_factor ) {
-		d-> m_factor = f;
-		CConfig::inst ( )-> setValue ( "/General/Money/Factor", f );
+    if (f != d->m_factor) {
+        d->m_factor = f;
+        CConfig::inst()->setValue("/General/Money/Factor", f);
 
-		emit monetarySettingsChanged ( );
-	}
+        emit monetarySettingsChanged();
+    }
 }
 
-double CMoney::factor ( ) const
+double CMoney::factor() const
 {
-	return d-> m_factor;
+    return d->m_factor;
 }
 
-void CMoney::setPrecision ( int prec )
+void CMoney::setPrecision(int prec)
 {
-	if ( prec != d-> m_precision ) {
-		d-> m_precision = prec;
-		CConfig::inst ( )-> setValue ( "/General/Money/Precision", prec );
+    if (prec != d->m_precision) {
+        d->m_precision = prec;
+        CConfig::inst()->setValue("/General/Money/Precision", prec);
 
-		emit monetarySettingsChanged ( );
-	}
+        emit monetarySettingsChanged();
+    }
 }
 
-int CMoney::precision ( ) const
+int CMoney::precision() const
 {
-	return d-> m_precision;
+    return d->m_precision;
 }
 
-QString CMoney::toString ( double v, bool with_currency_symbol, int precision ) const
+QString CMoney::toString(double v, bool with_currency_symbol, int precision) const
 {
-	if ( d-> m_localized )
-		v *= d-> m_factor;
+    if (d->m_localized)
+        v *= d->m_factor;
 
-	QString s = QString::number ( v, 'f', precision );
+    QString s = QString::number(v, 'f', precision);
 
-	if ( d-> m_localized )
-		s. replace ( QChar( '.' ), d-> m_decpoint );
+    if (d->m_localized)
+        s.replace(QChar('.'), d->m_decpoint);
 
-	if ( with_currency_symbol )
-		return currencySymbol ( ) + " " + s;
-	else
-		return s;
+    if (with_currency_symbol)
+        return currencySymbol() + " " + s;
+    else
+        return s;
 }
 
-money_t CMoney::toMoney ( const QString &str, bool *ok ) const
+money_t CMoney::toMoney(const QString &str, bool *ok) const
 {
-	QString s = str. simplified ( );
-		
-	if ( !s. isEmpty ( ) && s. startsWith ( currencySymbol ( )))
-		s = s. mid ( currencySymbol ( ). length ( )). simplified ( );
+    QString s = str.simplified();
 
-	if ( d-> m_localized )
-		s. replace ( d-> m_decpoint, QChar( '.' ));
+    if (!s.isEmpty() && s.startsWith(currencySymbol()))
+        s = s.mid(currencySymbol().length()).simplified();
 
-	money_t v = s. toDouble ( ok );
+    if (d->m_localized)
+        s.replace(d->m_decpoint, QChar('.'));
 
-	if ( d-> m_localized )
-		return v /= d-> m_factor;
-		
-	return v;
+    money_t v = s.toDouble(ok);
+
+    if (d->m_localized)
+        return v /= d->m_factor;
+
+    return v;
 }
 
 
 
-CMoneyValidator::CMoneyValidator ( QObject *parent )
-	: QDoubleValidator ( parent )
+CMoneyValidator::CMoneyValidator(QObject *parent)
+        : QDoubleValidator(parent)
 { }
 
-CMoneyValidator::CMoneyValidator ( money_t bottom, money_t top, int decimals, QObject *parent )
-	: QDoubleValidator ( bottom. toDouble ( ), top. toDouble ( ), decimals, parent )
+CMoneyValidator::CMoneyValidator(money_t bottom, money_t top, int decimals, QObject *parent)
+        : QDoubleValidator(bottom.toDouble(), top.toDouble(), decimals, parent)
 { }
 
-QValidator::State CMoneyValidator::validate ( QString &input, int &pos ) const
+QValidator::State CMoneyValidator::validate(QString &input, int &pos) const
 {
-	double b = bottom ( ), t = top ( );
-	int d = decimals ( );
+    double b = bottom(), t = top();
+    int d = decimals();
 
-	if ( CMoney::inst ( )-> isLocalized ( )) {
-		double f = CMoney::inst ( )-> factor ( );
+    if (CMoney::inst()->isLocalized()) {
+        double f = CMoney::inst()->factor();
 
-		b *= f;
-		t *= f;
-	}
-
-	QChar dp = CMoney::inst ( )-> decimalPoint ( );
-
-	QRegExp r ( QString ( " *-?\\d*\\%1?\\d* *" ). arg ( dp ));
-
-	if ( b >= 0 && input. simplified ( ). startsWith ( QString::fromLatin1 ( "-" )))
-		return Invalid;
-	
-	if ( r. exactMatch ( input )) {
-		QString s = input;
-		s. replace ( dp, QChar( '.' ));
-
-		int i = s. indexOf ( '.' );
-		if ( i >= 0 ) {
-			// has decimal point, now count digits after that
-			i++;                                                        
-			int j = i;
-			while ( s [j]. isDigit ( ))
-				j++;
-			if ( j > i ) {
-				while ( s [j - 1] == '0' )
-					j--;
-			}
-				
-			if ( j - i > d ) {
-				return Intermediate;
-			}
-		}
-		
-		double entered = s. toDouble ( );
-
-		if ( entered < b || entered > t )
-			return Intermediate;
-		else
-			return Acceptable;
+        b *= f;
+        t *= f;
     }
-	else if ( r. matchedLength ( ) == (int) input. length ( )) {
-		return Intermediate;
+
+    QChar dp = CMoney::inst()->decimalPoint();
+
+    QRegExp r(QString(" *-?\\d*\\%1?\\d* *").arg(dp));
+
+    if (b >= 0 && input.simplified().startsWith(QString::fromLatin1("-")))
+        return Invalid;
+
+    if (r.exactMatch(input)) {
+        QString s = input;
+        s.replace(dp, QChar('.'));
+
+        int i = s.indexOf('.');
+        if (i >= 0) {
+            // has decimal point, now count digits after that
+            i++;
+            int j = i;
+            while (s [j].isDigit())
+                j++;
+            if (j > i) {
+                while (s [j - 1] == '0')
+                    j--;
+            }
+
+            if (j - i > d) {
+                return Intermediate;
+            }
+        }
+
+        double entered = s.toDouble();
+
+        if (entered < b || entered > t)
+            return Intermediate;
+        else
+            return Acceptable;
     }
-	else {
-		pos = input. length ( );
-		return Invalid;
-	}
+    else if (r.matchedLength() == (int) input.length()) {
+        return Intermediate;
+    }
+    else {
+        pos = input.length();
+        return Invalid;
+    }
 }
 
-bool CMoneyValidator::filterInput ( QLineEdit * /*edit*/, QKeyEvent *ke ) const
+bool CMoneyValidator::filterInput(QLineEdit * /*edit*/, QKeyEvent *ke) const
 {
-	QString text = ke-> text ( );
-	bool fixed = false;
+    QString text = ke->text();
+    bool fixed = false;
 
-	for ( int i = 0; i < int( text. length ( )); i++ ) {
-		QCharRef ir = text [i];
-		if ( ir == '.' || ir == ',' ) {
-			ir = CMoney::inst ( )-> decimalPoint ( );
-			fixed = true;
-		}
-	}
+    for (int i = 0; i < int(text.length()); i++) {
+        QCharRef ir = text [i];
+        if (ir == '.' || ir == ',') {
+            ir = CMoney::inst()->decimalPoint();
+            fixed = true;
+        }
+    }
 
-	if ( fixed )
-		*ke = QKeyEvent ( ke-> type ( ), ke-> key ( ), ke-> modifiers ( ), text, ke-> isAutoRepeat ( ), ke-> count ( ));
-	return false;
+    if (fixed)
+        *ke = QKeyEvent(ke->type(), ke->key(), ke->modifiers(), text, ke->isAutoRepeat(), ke->count());
+    return false;
 }

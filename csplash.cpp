@@ -1,9 +1,9 @@
-/* Copyright (C) 2004-2005 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2004-2005 Robert Griebl.All rights reserved.
 **
 ** This file is part of BrickStore.
 **
-** This file may be distributed and/or modified under the terms of the GNU 
-** General Public License version 2 as published by the Free Software Foundation 
+** This file may be distributed and/or modified under the terms of the GNU
+** General Public License version 2 as published by the Free Software Foundation
 ** and appearing in the file LICENSE.GPL included in the packaging of this file.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
@@ -25,103 +25,103 @@
 CSplash *CSplash::s_inst = 0;
 bool CSplash::s_dont_show = false;
 
-CSplash *CSplash::inst ( )
+CSplash *CSplash::inst()
 {
-	if ( !s_inst && !s_dont_show ) {
-		s_inst = new CSplash ( );
-		s_inst-> show ( );
-	}
-	return s_inst;
+    if (!s_inst && !s_dont_show) {
+        s_inst = new CSplash();
+        s_inst->show();
+    }
+    return s_inst;
 }
 
-CSplash::CSplash ( )
-	: QSplashScreen ( QPixmap ( 1, 1 ))
+CSplash::CSplash()
+        : QSplashScreen(QPixmap(1, 1))
 {
-	setAttribute ( Qt::WA_DeleteOnClose );
-	setWindowOpacity ( 0.9 );
-	
-	QFont f = QApplication::font ( );
-	f. setPixelSize ( qMax( 14 * qApp-> desktop ( )-> height ( ) / 1200, 10 ));
-	setFont ( f );
-	QFontMetrics fm ( f );
+    setAttribute(Qt::WA_DeleteOnClose);
+    setWindowOpacity(0.9);
 
-	QSize s ( 20 + fm. width ( "x" ) * 50, 10 + fm. height ( ) * 8 );
+    QFont f = QApplication::font();
+    f.setPixelSize(qMax(14 * qApp->desktop()->height() / 1200, 10));
+    setFont(f);
+    QFontMetrics fm(f);
 
-	QLinearGradient gradient2 ( 0, 0, 0, s. height ( ));
-	QRadialGradient gradient1 ( s. width ( ) / 2, s. height ( ) / 2, qMax( s. width ( ), s. height ( )) / 2 );
-	gradient1. setColorAt ( 0,    Qt::white );
-	gradient1. setColorAt ( 0.2,  QColor ( 230, 230, 230 ));
-	gradient1. setColorAt ( 0.45, QColor ( 190, 190, 190 ));
-	gradient1. setColorAt ( 0.5,  QColor ( 210, 210, 210 ));
-	gradient1. setColorAt ( 0.55, QColor ( 190, 190, 190 ));
-	gradient1. setColorAt ( 0.8,  QColor ( 230, 230, 230 ));
-	gradient1. setColorAt ( 1,    Qt::white );
-	gradient2. setColorAt ( 0,    Qt::white );
-	gradient2. setColorAt ( 0.2,  QColor ( 230, 230, 230, 128 ));
-	gradient2. setColorAt ( 0.45, QColor ( 190, 190, 190,   0 ));
-	gradient2. setColorAt ( 0.5,  QColor ( 210, 210, 210,  50 ));
-	gradient2. setColorAt ( 0.55, QColor ( 190, 190, 190,   0));
-	gradient2. setColorAt ( 0.8,  QColor ( 230, 230, 230, 128 ));
-	gradient2. setColorAt ( 1,    Qt::white );
-	
-	QImage img ( s, QImage::Format_ARGB32_Premultiplied );
-	QPainter p;
-	p. begin ( &img );
-	p. initFrom ( this );
-	p. setPen ( Qt::NoPen );
+    QSize s(20 + fm.width("x") * 50, 10 + fm.height() * 8);
 
-	p. setBrush ( gradient1 );
-	p. drawRect ( 0, 0, s. width ( ), s. height ( ));
+    QLinearGradient gradient2(0, 0, 0, s.height());
+    QRadialGradient gradient1(s.width() / 2, s.height() / 2, qMax(s.width(), s.height()) / 2);
+    gradient1.setColorAt(0,    Qt::white);
+    gradient1.setColorAt(0.2,  QColor(230, 230, 230));
+    gradient1.setColorAt(0.45, QColor(190, 190, 190));
+    gradient1.setColorAt(0.5,  QColor(210, 210, 210));
+    gradient1.setColorAt(0.55, QColor(190, 190, 190));
+    gradient1.setColorAt(0.8,  QColor(230, 230, 230));
+    gradient1.setColorAt(1,    Qt::white);
+    gradient2.setColorAt(0,    Qt::white);
+    gradient2.setColorAt(0.2,  QColor(230, 230, 230, 128));
+    gradient2.setColorAt(0.45, QColor(190, 190, 190,   0));
+    gradient2.setColorAt(0.5,  QColor(210, 210, 210,  50));
+    gradient2.setColorAt(0.55, QColor(190, 190, 190,   0));
+    gradient2.setColorAt(0.8,  QColor(230, 230, 230, 128));
+    gradient2.setColorAt(1,    Qt::white);
 
-	p. setCompositionMode ( QPainter::CompositionMode_SourceOver );
+    QImage img(s, QImage::Format_ARGB32_Premultiplied);
+    QPainter p;
+    p.begin(&img);
+    p.initFrom(this);
+    p.setPen(Qt::NoPen);
 
-	p. setBrush ( gradient2 );
-	p. drawRect ( 0, 0, s. width ( ), s. height ( ));
+    p.setBrush(gradient1);
+    p.drawRect(0, 0, s.width(), s.height());
 
-	p. setPen ( QColor ( 232, 232, 232 ));
-	for ( int i = s. height ( ) / 5; i < ( s. height ( ) - s. height ( ) / 5 + 5 ); i += s. height ( ) / 20 )
-		p. drawLine ( 0, i, s. width ( ) - 1, i );
-	p. setPen ( QColor ( 0, 0, 0 ));
+    p.setCompositionMode(QPainter::CompositionMode_SourceOver);
 
-	QFont f2 = f;
-	f2. setPixelSize ( f2.pixelSize ( ) * 2 );
-	f2. setBold ( true );
-	p. setFont ( f2 );
+    p.setBrush(gradient2);
+    p.drawRect(0, 0, s.width(), s.height());
 
-	QPixmap logo ( ":/images/icon.png" );
-	QString logo_text = cApp-> appName ( );
+    p.setPen(QColor(232, 232, 232));
+    for (int i = s.height() / 5; i < (s.height() - s.height() / 5 + 5); i += s.height() / 20)
+        p.drawLine(0, i, s.width() - 1, i);
+    p.setPen(QColor(0, 0, 0));
 
-	QSize ts = p. boundingRect ( geometry ( ), Qt::AlignCenter, logo_text ). size ( );
-	QSize ps = logo. size ( );
+    QFont f2 = f;
+    f2.setPixelSize(f2.pixelSize() * 2);
+    f2.setBold(true);
+    p.setFont(f2);
 
-	int dx = ( s. width ( ) - ( ps. width ( ) + 8 + ts. width ( ))) / 2;
-	int dy = s. height ( ) / 2;
+    QPixmap logo(":/images/icon.png");
+    QString logo_text = cApp->appName();
 
-	p. drawPixmap ( dx, dy - ps. height ( ) / 2, logo );
-	p. drawText ( dx + ps. width ( ) + 8, dy - ts. height ( ) / 2, ts. width ( ), ts. height ( ), Qt::AlignCenter, logo_text );
-	p. end ( );
+    QSize ts = p.boundingRect(geometry(), Qt::AlignCenter, logo_text).size();
+    QSize ps = logo.size();
 
-	setPixmap ( QPixmap::fromImage ( img ));
+    int dx = (s.width() - (ps.width() + 8 + ts.width())) / 2;
+    int dy = s.height() / 2;
 
-	QBitmap mask ( img. size ( ));
-	mask. fill ( Qt::color0 );
-	QPainter mp;
-	mp. begin ( &mask );
-	mp. setPen ( Qt::NoPen );
-	mp. setBrush ( Qt::color1 );
-	mp. drawRoundRect ( 0, 0, mask. width ( ), mask. height ( ), mask. width ( ) / 30, mask. width ( ) / 30 * ( mask. width ( ) / mask. height ( )));
-	mp. end ( );
+    p.drawPixmap(dx, dy - ps.height() / 2, logo);
+    p.drawText(dx + ps.width() + 8, dy - ts.height() / 2, ts.width(), ts.height(), Qt::AlignCenter, logo_text);
+    p.end();
 
-	setMask ( mask );
+    setPixmap(QPixmap::fromImage(img));
+
+    QBitmap mask(img.size());
+    mask.fill(Qt::color0);
+    QPainter mp;
+    mp.begin(&mask);
+    mp.setPen(Qt::NoPen);
+    mp.setBrush(Qt::color1);
+    mp.drawRoundRect(0, 0, mask.width(), mask.height(), mask.width() / 30, mask.width() / 30 * (mask.width() / mask.height()));
+    mp.end();
+
+    setMask(mask);
 }
 
-CSplash::~CSplash ( )
+CSplash::~CSplash()
 {
-	s_inst = 0;
-	s_dont_show = true;
+    s_inst = 0;
+    s_dont_show = true;
 }
 
-void CSplash::message ( const QString &msg )
+void CSplash::message(const QString &msg)
 {
-	QSplashScreen::showMessage ( msg, Qt::AlignHCenter | Qt::AlignBottom );
+    QSplashScreen::showMessage(msg, Qt::AlignHCenter | Qt::AlignBottom);
 }

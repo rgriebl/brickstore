@@ -1,9 +1,9 @@
-/* Copyright (C) 2004-2005 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2004-2005 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
-** This file may be distributed and/or modified under the terms of the GNU 
-** General Public License version 2 as published by the Free Software Foundation 
+** This file may be distributed and/or modified under the terms of the GNU
+** General Public License version 2 as published by the Free Software Foundation
 ** and appearing in the file LICENSE.GPL included in the packaging of this file.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
@@ -24,30 +24,30 @@ class DImportOrder : public QDialog, private Ui::ImportOrder {
     Q_OBJECT
 
 public:
-    DImportOrder ( QWidget *parent = 0, Qt::WindowFlags f = 0 );
-    ~DImportOrder ( );
+    DImportOrder(QWidget *parent = 0, Qt::WindowFlags f = 0);
+    ~DImportOrder();
 
-	QPair<BrickLink::Order *, BrickLink::InvItemList *> order ( ) const;
+    QPair<BrickLink::Order *, BrickLink::InvItemList *> order() const;
 
 protected:
-	virtual void accept ( );
-	virtual void changeEvent ( QEvent *e );
+    virtual void accept();
+    virtual void changeEvent(QEvent *e);
 
 protected slots:
-	void checkId ( );
-	void checkSelected ( );
-	void activateItem ( /*QListViewItem **/ );
+    void checkId();
+    void checkSelected();
+    void activateItem(/*QListViewItem **/);
 
-	void start ( );
-	void download ( );
+    void start();
+    void download();
 
 private:
-	BrickLink::Order::Type orderType ( ) const;
+    BrickLink::Order::Type orderType() const;
 
-	static bool  s_last_select;
-	static QDate s_last_from;
-	static QDate s_last_to;
-	static int   s_last_type;
+    static bool  s_last_select;
+    static QDate s_last_from;
+    static QDate s_last_to;
+    static int   s_last_type;
 };
 
 #endif

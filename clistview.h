@@ -1,9 +1,9 @@
-/* Copyright (C) 2004-2005 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2004-2005 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
-** This file may be distributed and/or modified under the terms of the GNU 
-** General Public License version 2 as published by the Free Software Foundation 
+** This file may be distributed and/or modified under the terms of the GNU
+** General Public License version 2 as published by the Free Software Foundation
 ** and appearing in the file LICENSE.GPL included in the packaging of this file.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
@@ -24,140 +24,140 @@ class QPopupMenu;
 
 class CDisableUpdates {
 public:
-	CDisableUpdates ( QWidget *w );
-	~CDisableUpdates ( );
-	void reenable ( );
+    CDisableUpdates(QWidget *w);
+    ~CDisableUpdates();
+    void reenable();
 
 private:
-	QWidget * m_w;
-	bool      m_upd_enabled : 1;
-	bool      m_reenabled   : 1;
+    QWidget * m_w;
+bool      m_upd_enabled : 1;
+bool      m_reenabled   : 1;
 };
 
- class CListViewColumnsDialog;
+class CListViewColumnsDialog;
 
 class CListView : public QListView {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	CListView ( QWidget *parent, const char *name = 0 );
+    CListView(QWidget *parent, const char *name = 0);
 
-	virtual void setSorting ( int column, bool ascending = true );
-	virtual void setColumnWidth ( int column, int w );
+    virtual void setSorting(int column, bool ascending = true);
+    virtual void setColumnWidth(int column, int w);
 
-	void setAlwaysShowSelection ( bool b );
-	bool hasAlwaysShowSelection ( ) const;
+    void setAlwaysShowSelection(bool b);
+    bool hasAlwaysShowSelection() const;
 
-	void setColumnsHideable ( bool b );
-	bool columnsHideable ( ) const;
+    void setColumnsHideable(bool b);
+    bool columnsHideable() const;
 
-	bool isColumnVisible ( int ) const;
+    bool isColumnVisible(int) const;
 
-	void loadSettings ( const QMap <QString, QString> &map );
-	QMap <QString, QString> saveSettings ( ) const;
+    void loadSettings(const QMap <QString, QString> &map);
+    QMap <QString, QString> saveSettings() const;
 
-	void centerItem ( const QListViewItem *item );
+    void centerItem(const QListViewItem *item);
 
-	bool gridMode ( ) const;
-	void setGridMode ( bool b );
-	int currentColumn ( ) const;
-	void setCurrentColumn ( int col );
+    bool gridMode() const;
+    void setGridMode(bool b);
+    int currentColumn() const;
+    void setCurrentColumn(int col);
 
-	void setColumnAvailable ( int, bool avail );
+    void setColumnAvailable(int, bool avail);
 
 protected:
-	virtual bool event ( QEvent *e );
-	virtual bool eventFilter ( QObject *o, QEvent *e );
-	virtual void viewportPaintEvent ( QPaintEvent *e );
-	virtual void keyPressEvent( QKeyEvent *e );
+    virtual bool event(QEvent *e);
+    virtual bool eventFilter(QObject *o, QEvent *e);
+    virtual void viewportPaintEvent(QPaintEvent *e);
+    virtual void keyPressEvent(QKeyEvent *e);
 
 protected slots:
-	void hideColumn ( int );
-	void showColumn ( int );
-	void toggleColumn ( int );
-	void setColumnVisible ( int, bool visible );
+    void hideColumn(int);
+    void showColumn(int);
+    void toggleColumn(int);
+    void setColumnVisible(int, bool visible);
 
 private slots:
-	void checkCurrentColumn ( int button, QListViewItem * item, const QPoint & pos, int c );
-	void configureColumns ( );
+    void checkCurrentColumn(int button, QListViewItem * item, const QPoint & pos, int c);
+    void configureColumns();
 
 private:
-	void recalc_alternate_background ( );
-	void recalc_highlight_palette ( );
-	void update_column ( int, bool toggle_visible, bool toggle_available );
-	
-	QListViewItem *m_paint_above;
-	QListViewItem *m_paint_current;
-	QListViewItem *m_paint_below;
-	bool           m_painting;
-	QColor         m_alternate_background;
+    void recalc_alternate_background();
+    void recalc_highlight_palette();
+    void update_column(int, bool toggle_visible, bool toggle_available);
 
-	bool           m_always_show_selection;
-	bool           m_use_header_popup;
+    QListViewItem *m_paint_above;
+    QListViewItem *m_paint_current;
+    QListViewItem *m_paint_below;
+    bool           m_painting;
+    QColor         m_alternate_background;
 
-	bool           m_grid_mode;
-	int            m_current_column;
+    bool           m_always_show_selection;
+    bool           m_use_header_popup;
 
-	QPopupMenu *   m_header_popup;
-	
-	struct colinfo {
-		bool m_visible   : 1;
-		bool m_available : 1;
-		uint m_width     : 30;
+    bool           m_grid_mode;
+    int            m_current_column;
 
-		inline colinfo ( ) : m_visible ( true ), m_available ( true ), m_width ( 0 ) { }
-	};
-	
-	QMap<int, colinfo>  m_columns;
+    QPopupMenu *   m_header_popup;
 
-	friend class CListViewItem;
-	friend class CListViewColumnsDialog;
+    struct colinfo {
+bool m_visible   : 1;
+bool m_available : 1;
+uint m_width     : 30;
+
+        inline colinfo() : m_visible(true), m_available(true), m_width(0) { }
+    };
+
+    QMap<int, colinfo>  m_columns;
+
+    friend class CListViewItem;
+    friend class CListViewColumnsDialog;
 };
 
 class CListViewItem : public QListViewItem {
 public:
-	CListViewItem ( QListView *parent );
-	CListViewItem ( QListViewItem *parent );
-	CListViewItem ( QListView *parent, QListViewItem *after );
-	CListViewItem ( QListViewItem *parent, QListViewItem *after );
+    CListViewItem(QListView *parent);
+    CListViewItem(QListViewItem *parent);
+    CListViewItem(QListView *parent, QListViewItem *after);
+    CListViewItem(QListViewItem *parent, QListViewItem *after);
 
-	CListViewItem ( QListView *parent,
-		QString, QString = QString::null,
-		QString = QString::null, QString = QString::null,
-		QString = QString::null, QString = QString::null,
-		QString = QString::null, QString = QString::null );
+    CListViewItem(QListView *parent,
+                  QString, QString = QString::null,
+                  QString = QString::null, QString = QString::null,
+                  QString = QString::null, QString = QString::null,
+                  QString = QString::null, QString = QString::null);
 
-	CListViewItem ( QListViewItem *parent,
-		QString, QString = QString::null,
-		QString = QString::null, QString = QString::null,
-		QString = QString::null, QString = QString::null,
-		QString = QString::null, QString = QString::null );
+    CListViewItem(QListViewItem *parent,
+                  QString, QString = QString::null,
+                  QString = QString::null, QString = QString::null,
+                  QString = QString::null, QString = QString::null,
+                  QString = QString::null, QString = QString::null);
 
-	CListViewItem ( QListView *parent, QListViewItem *after,
-		QString, QString = QString::null,
-		QString = QString::null, QString = QString::null,
-		QString = QString::null, QString = QString::null,
-		QString = QString::null, QString = QString::null );
+    CListViewItem(QListView *parent, QListViewItem *after,
+                  QString, QString = QString::null,
+                  QString = QString::null, QString = QString::null,
+                  QString = QString::null, QString = QString::null,
+                  QString = QString::null, QString = QString::null);
 
-	CListViewItem ( QListViewItem *parent, QListViewItem *after,
-		QString, QString = QString::null,
-		QString = QString::null, QString = QString::null,
-		QString = QString::null, QString = QString::null,
-		QString = QString::null, QString = QString::null );
+    CListViewItem(QListViewItem *parent, QListViewItem *after,
+                  QString, QString = QString::null,
+                  QString = QString::null, QString = QString::null,
+                  QString = QString::null, QString = QString::null,
+                  QString = QString::null, QString = QString::null);
 
 
-	bool isAlternate ( );
-	virtual const QColor &backgroundColor ( );
+    bool isAlternate();
+    virtual const QColor &backgroundColor();
 
-	virtual void paintCell ( QPainter *p, const QColorGroup &cg, int column, int width, int alignment );
-
-private:
-	void init ( );
+    virtual void paintCell(QPainter *p, const QColorGroup &cg, int column, int width, int alignment);
 
 private:
-	bool m_odd   : 1;
-	bool m_known : 1;
+    void init();
 
-	friend class CListView;
+private:
+bool m_odd   : 1;
+bool m_known : 1;
+
+    friend class CListView;
 };
 
 #endif

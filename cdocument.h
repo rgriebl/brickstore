@@ -1,9 +1,9 @@
-/* Copyright (C) 2004-2005 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2004-2005 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
-** This file may be distributed and/or modified under the terms of the GNU 
-** General Public License version 2 as published by the Free Software Foundation 
+** This file may be distributed and/or modified under the terms of the GNU
+** General Public License version 2 as published by the Free Software Foundation
 ** and appearing in the file LICENSE.GPL included in the packaging of this file.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
@@ -28,241 +28,241 @@ class CChangeCmd;
 
 class IDocumentView {
 public:
-	virtual ~IDocumentView() { }
+    virtual ~IDocumentView() { }
 
-	virtual QDomElement createGuiStateXML ( QDomDocument doc ) = 0;
-	virtual bool parseGuiStateXML ( QDomElement root ) = 0;
+    virtual QDomElement createGuiStateXML(QDomDocument doc) = 0;
+    virtual bool parseGuiStateXML(QDomElement root) = 0;
 };
 
 
 
 class CDocument : public QAbstractTableModel {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	enum Field {
-		Status = 0,
-		Picture,
-		PartNo,
-		Description,
-		Condition,
-		Color,
-		Quantity,
-		Price,
-		Total,
-		Bulk,
-		Sale,
-		Comments,
-		Remarks,
-		Category,
-		ItemType,
-		TierQ1,
-		TierP1,
-		TierQ2,
-		TierP2,
-		TierQ3,
-		TierP3,
-		LotId,
-		Retain,
-		Stockroom,
-		Reserved,
-		Weight,
-		YearReleased,
+    enum Field {
+        Status = 0,
+        Picture,
+        PartNo,
+        Description,
+        Condition,
+        Color,
+        Quantity,
+        Price,
+        Total,
+        Bulk,
+        Sale,
+        Comments,
+        Remarks,
+        Category,
+        ItemType,
+        TierQ1,
+        TierP1,
+        TierQ2,
+        TierP2,
+        TierQ3,
+        TierP3,
+        LotId,
+        Retain,
+        Stockroom,
+        Reserved,
+        Weight,
+        YearReleased,
 
-		QuantityOrig,
-		QuantityDiff,
-		PriceOrig,
-		PriceDiff,
+        QuantityOrig,
+        QuantityDiff,
+        PriceOrig,
+        PriceDiff,
 
-		FieldCount,
-	};
+        FieldCount,
+    };
 
-	class Item : public BrickLink::InvItem {
-	public:
-		Item();
-		Item ( const BrickLink::InvItem & );
-		Item ( const Item & );
-		virtual ~Item ( );
+class Item : public BrickLink::InvItem {
+    public:
+        Item();
+        Item(const BrickLink::InvItem &);
+        Item(const Item &);
+        virtual ~Item();
 
-		Item &operator = ( const Item & );
-		bool operator == ( const Item & ) const;
+        Item &operator = (const Item &);
+        bool operator == (const Item &) const;
 
-		quint64 errors() const          { return m_errors; }
-		void setErrors ( quint64 errors ) { m_errors = errors; }
+        quint64 errors() const          { return m_errors; }
+        void setErrors(quint64 errors) { m_errors = errors; }
 
         BrickLink::Picture *picture() const { return m_picture; }
         QImage image(const QSize & = QSize()) const;
         QPixmap pixmap(const QSize & = QSize()) const;
 
-	private:
-		quint64 m_errors;
-		mutable BrickLink::Picture *m_picture;
+    private:
+        quint64 m_errors;
+        mutable BrickLink::Picture *m_picture;
 
-		friend class CDocument;
-	};
+        friend class CDocument;
+    };
 
-	typedef QList<Item *>      ItemList;
-	typedef int                Position;
-	typedef QVector<Position>  PositionVector;
+    typedef QList<Item *>      ItemList;
+    typedef int                Position;
+    typedef QVector<Position>  PositionVector;
 
-	class Statistics {
-	public:
-		uint lots() const         { return m_lots; }
-		uint items() const        { return m_items; }
-		money_t value() const     { return m_val; }
-		money_t minValue() const  { return m_minval; }
-		double weight() const     { return m_weight; }
-		uint errors() const       { return m_errors; }
+    class Statistics {
+    public:
+        uint lots() const         { return m_lots; }
+        uint items() const        { return m_items; }
+        money_t value() const     { return m_val; }
+        money_t minValue() const  { return m_minval; }
+        double weight() const     { return m_weight; }
+        uint errors() const       { return m_errors; }
 
-	private:
-		friend class CDocument;
+    private:
+        friend class CDocument;
 
-		Statistics ( const CDocument *doc, const ItemList &list );
+        Statistics(const CDocument *doc, const ItemList &list);
 
-		uint m_lots;
-		uint m_items;
-		money_t m_val;
-		money_t m_minval;
-		double m_weight;
-		uint m_errors;
-	};
+        uint m_lots;
+        uint m_items;
+        money_t m_val;
+        money_t m_minval;
+        double m_weight;
+        uint m_errors;
+    };
 
 
 
-	// Itemviews API
+    // Itemviews API
     QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
     Item *item(const QModelIndex &idx) const;
     QModelIndex index(Item *i) const;
 
-	virtual int rowCount(const QModelIndex &parent) const;
-	virtual int columnCount(const QModelIndex &parent) const;
-	virtual QVariant data(const QModelIndex &index, int role) const;
-	virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const;
+    virtual int rowCount(const QModelIndex &parent) const;
+    virtual int columnCount(const QModelIndex &parent) const;
+    virtual QVariant data(const QModelIndex &index, int role) const;
+    virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const;
 
-	QString dataForDisplayRole(Item *it, Field f) const;
-	QVariant dataForDecorationRole(Item *it, Field f) const;
-	int dataForTextAlignmentRole(Item *it, Field f) const;
-	QString dataForToolTipRole(Item *it, Field f) const;
-	QString headerDataForDisplayRole(Field f) const;
-	int headerDataForTextAlignmentRole(Field f) const;
-
-public slots:
-	void pictureUpdated(BrickLink::Picture *pic);
-
-public:
-	CDocument ( bool dont_sort = false );
-	virtual ~CDocument();
-
-	static const QList<CDocument *> &allDocuments();
-
-	void addView ( QWidget *view, IDocumentView *docview = 0 );
-
-	QString fileName() const;
-	QString title() const;
-	bool doNotSortItems() const;
-
-	const BrickLink::Order *order() const;
-
-	bool isModified() const;
-
-	const ItemList &items() const;
-	const ItemList &selection() const;
-
-	bool clear();
-
-	bool insertItems ( const ItemList &positions, const ItemList &list );
-	bool removeItems ( const ItemList &positions );
-
-	bool insertItem ( Item *position, Item *item );
-	bool removeItem ( Item *position );
-
-	bool changeItem ( Item *position, const Item &item );
-
-	void resetDifferences ( const ItemList &items );
-
-	Statistics statistics ( const ItemList &list ) const;
-
-	quint64 errorMask() const;
-	void setErrorMask ( quint64 );
-
-	static CDocument *fileNew();
-	static CDocument *fileOpen();
-	static CDocument *fileOpen ( const QString &name );
-	static CDocument *fileImportBrickLinkInventory ( const BrickLink::Item *preselect = 0 );
-	static CDocument *fileImportBrickLinkOrder();
-	static CDocument *fileImportBrickLinkStore();
-	static CDocument *fileImportBrickLinkCart();
-	static CDocument *fileImportBrickLinkXML();
-	static CDocument *fileImportPeeronInventory(); 
-	static CDocument *fileImportBrikTrakInventory ( const QString &fn = QString::null );
-	static CDocument *fileImportLDrawModel();
+    QString dataForDisplayRole(Item *it, Field f) const;
+    QVariant dataForDecorationRole(Item *it, Field f) const;
+    int dataForTextAlignmentRole(Item *it, Field f) const;
+    QString dataForToolTipRole(Item *it, Field f) const;
+    QString headerDataForDisplayRole(Field f) const;
+    int headerDataForTextAlignmentRole(Field f) const;
 
 public slots:
-	void setFileName ( const QString &str );
-	void setTitle ( const QString &str );
-
-	void setSelection ( const ItemList & );
-
-	void fileSave ( const ItemList &itemlist );
-	void fileSaveAs ( const ItemList &itemlist );
-	void fileExportBrickLinkXML ( const ItemList &itemlist );
-	void fileExportBrickLinkXMLClipboard ( const ItemList &itemlist );
-	void fileExportBrickLinkUpdateClipboard ( const ItemList &itemlist );
-	void fileExportBrickLinkInvReqClipboard ( const ItemList &itemlist );
-	void fileExportBrickLinkWantedListClipboard ( const ItemList &itemlist );
-	void fileExportBrikTrakInventory ( const ItemList &itemlist );
+    void pictureUpdated(BrickLink::Picture *pic);
 
 public:
-	void beginMacro ( const QString &label = QString());
-	void endMacro ( const QString &label = QString());
+    CDocument(bool dont_sort = false);
+    virtual ~CDocument();
+
+    static const QList<CDocument *> &allDocuments();
+
+    void addView(QWidget *view, IDocumentView *docview = 0);
+
+    QString fileName() const;
+    QString title() const;
+    bool doNotSortItems() const;
+
+    const BrickLink::Order *order() const;
+
+    bool isModified() const;
+
+    const ItemList &items() const;
+    const ItemList &selection() const;
+
+    bool clear();
+
+    bool insertItems(const ItemList &positions, const ItemList &list);
+    bool removeItems(const ItemList &positions);
+
+    bool insertItem(Item *position, Item *item);
+    bool removeItem(Item *position);
+
+    bool changeItem(Item *position, const Item &item);
+
+    void resetDifferences(const ItemList &items);
+
+    Statistics statistics(const ItemList &list) const;
+
+    quint64 errorMask() const;
+    void setErrorMask(quint64);
+
+    static CDocument *fileNew();
+    static CDocument *fileOpen();
+    static CDocument *fileOpen(const QString &name);
+    static CDocument *fileImportBrickLinkInventory(const BrickLink::Item *preselect = 0);
+    static CDocument *fileImportBrickLinkOrder();
+    static CDocument *fileImportBrickLinkStore();
+    static CDocument *fileImportBrickLinkCart();
+    static CDocument *fileImportBrickLinkXML();
+    static CDocument *fileImportPeeronInventory();
+    static CDocument *fileImportBrikTrakInventory(const QString &fn = QString::null);
+    static CDocument *fileImportLDrawModel();
+
+public slots:
+    void setFileName(const QString &str);
+    void setTitle(const QString &str);
+
+    void setSelection(const ItemList &);
+
+    void fileSave(const ItemList &itemlist);
+    void fileSaveAs(const ItemList &itemlist);
+    void fileExportBrickLinkXML(const ItemList &itemlist);
+    void fileExportBrickLinkXMLClipboard(const ItemList &itemlist);
+    void fileExportBrickLinkUpdateClipboard(const ItemList &itemlist);
+    void fileExportBrickLinkInvReqClipboard(const ItemList &itemlist);
+    void fileExportBrickLinkWantedListClipboard(const ItemList &itemlist);
+    void fileExportBrikTrakInventory(const ItemList &itemlist);
+
+public:
+    void beginMacro(const QString &label = QString());
+    void endMacro(const QString &label = QString());
 
 signals:
-	void itemsAdded ( const CDocument::ItemList & );
-	void itemsAboutToBeRemoved ( const CDocument::ItemList & );
-	void itemsRemoved ( const CDocument::ItemList & );
-	void itemsChanged ( const CDocument::ItemList &, bool );
+    void itemsAdded(const CDocument::ItemList &);
+    void itemsAboutToBeRemoved(const CDocument::ItemList &);
+    void itemsRemoved(const CDocument::ItemList &);
+    void itemsChanged(const CDocument::ItemList &, bool);
 
-	void errorsChanged ( CDocument::Item * );
-	void statisticsChanged();
-	void fileNameChanged ( const QString & );
-	void titleChanged ( const QString & );
-	void modificationChanged ( bool );
-	void selectionChanged ( const CDocument::ItemList & );
+    void errorsChanged(CDocument::Item *);
+    void statisticsChanged();
+    void fileNameChanged(const QString &);
+    void titleChanged(const QString &);
+    void modificationChanged(bool);
+    void selectionChanged(const CDocument::ItemList &);
 
 private slots:
-	void clean2Modified ( bool );
+    void clean2Modified(bool);
 
 private:
-	static CDocument *fileLoadFrom ( const QString &s, const char *type, bool import_only = false );
-	bool fileSaveTo ( const QString &s, const char *type, bool export_only, const ItemList &itemlist );
-	void setBrickLinkItems ( const BrickLink::InvItemList &bllist, uint multiply = 1 );
+    static CDocument *fileLoadFrom(const QString &s, const char *type, bool import_only = false);
+    bool fileSaveTo(const QString &s, const char *type, bool export_only, const ItemList &itemlist);
+    void setBrickLinkItems(const BrickLink::InvItemList &bllist, uint multiply = 1);
 
-	void insertItemsDirect ( ItemList &items, ItemList &positions );
-	void removeItemsDirect ( ItemList &items, ItemList &positions );
-	void changeItemDirect ( Item *position, Item &item );
+    void insertItemsDirect(ItemList &items, ItemList &positions);
+    void removeItemsDirect(ItemList &items, ItemList &positions);
+    void changeItemDirect(Item *position, Item &item);
 
-	friend class CAddRemoveCmd;
-	friend class CChangeCmd;
+    friend class CAddRemoveCmd;
+    friend class CChangeCmd;
 
-	void updateErrors ( Item * );
+    void updateErrors(Item *);
 
 private:
-	ItemList         m_items;
-	ItemList         m_selection;
+    ItemList         m_items;
+    ItemList         m_selection;
 
-	quint64          m_error_mask;
-	QString          m_filename;
-	QString          m_title;
-	bool             m_dont_sort;
+    quint64          m_error_mask;
+    QString          m_filename;
+    QString          m_title;
+    bool             m_dont_sort;
 
-	QUndoStack *     m_undo;
+    QUndoStack *     m_undo;
 
-	BrickLink::Order *m_order;
+    BrickLink::Order *m_order;
 
-	QList<IDocumentView *> m_views;
-	QDomElement  m_gui_state;
+    QList<IDocumentView *> m_views;
+    QDomElement  m_gui_state;
 
-	static QList<CDocument *> s_documents;
+    static QList<CDocument *> s_documents;
 };
 
 #endif

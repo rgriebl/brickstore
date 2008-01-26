@@ -1,9 +1,9 @@
-/* Copyright (C) 2004-2005 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2004-2005 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
-** This file may be distributed and/or modified under the terms of the GNU 
-** General Public License version 2 as published by the Free Software Foundation 
+** This file may be distributed and/or modified under the terms of the GNU
+** General Public License version 2 as published by the Free Software Foundation
 ** and appearing in the file LICENSE.GPL included in the packaging of this file.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
@@ -29,124 +29,124 @@
 #endif
 
 
-CWorkspace::CWorkspace ( QWidget *parent, Qt::WindowFlags f )
-	: QWidget ( parent, f )
+CWorkspace::CWorkspace(QWidget *parent, Qt::WindowFlags f)
+        : QWidget(parent, f)
 {
-	m_tabmode = TopTabs;
+    m_tabmode = TopTabs;
 
-	m_verticallayout = new QVBoxLayout ( this );
-	m_verticallayout-> setContentsMargins(0, 0, 0 , 0);
-	m_verticallayout-> setSpacing ( 0 );
+    m_verticallayout = new QVBoxLayout(this);
+    m_verticallayout->setContentsMargins(0, 0, 0 , 0);
+    m_verticallayout->setSpacing(0);
 
-	m_tabbar = new QTabBar ( this );
-	m_tabbar-> setElideMode ( Qt::ElideMiddle );
-	m_tabbar-> hide ( );
+    m_tabbar = new QTabBar(this);
+    m_tabbar->setElideMode(Qt::ElideMiddle);
+    m_tabbar->hide();
 
-	m_tablayout = new QHBoxLayout ( );
-	m_tablayout-> addSpacing ( 4 );
-	m_tablayout-> addWidget ( m_tabbar );
-	m_tablayout-> addSpacing ( 4 );
-	m_verticallayout-> addLayout ( m_tablayout );
-	
-	m_stacklayout = new QStackedLayout ( );
-	m_stacklayout-> setContentsMargins(0, 0, 0 , 0);
-	m_stacklayout-> setSpacing ( 0 );
-	m_verticallayout-> addLayout ( m_stacklayout );
+    m_tablayout = new QHBoxLayout();
+    m_tablayout->addSpacing(4);
+    m_tablayout->addWidget(m_tabbar);
+    m_tablayout->addSpacing(4);
+    m_verticallayout->addLayout(m_tablayout);
+
+    m_stacklayout = new QStackedLayout();
+    m_stacklayout->setContentsMargins(0, 0, 0 , 0);
+    m_stacklayout->setSpacing(0);
+    m_verticallayout->addLayout(m_stacklayout);
 
 
-	relayout ( );
+    relayout();
 
-	connect ( m_tabbar, SIGNAL( currentChanged ( int )), m_stacklayout, SLOT( setCurrentIndex ( int )));
-	connect ( m_stacklayout, SIGNAL( currentChanged ( int )), this, SLOT( currentChangedHelper ( int )));
-	connect ( m_stacklayout, SIGNAL( widgetRemoved ( int )), this, SLOT( removeWindow ( int )));
+    connect(m_tabbar, SIGNAL(currentChanged(int)), m_stacklayout, SLOT(setCurrentIndex(int)));
+    connect(m_stacklayout, SIGNAL(currentChanged(int)), this, SLOT(currentChangedHelper(int)));
+    connect(m_stacklayout, SIGNAL(widgetRemoved(int)), this, SLOT(removeWindow(int)));
 }
 
 
-void CWorkspace::relayout ( )
+void CWorkspace::relayout()
 {
-	switch ( m_tabmode ) {
-	case BottomTabs:
-		m_verticallayout-> removeItem ( m_tablayout );
-		m_tabbar-> setShape ( QTabBar::TriangularSouth );
-		m_verticallayout-> addLayout ( m_tablayout );
-		break;
-	
-	default:	
-	case TopTabs:
-		m_verticallayout-> removeItem ( m_stacklayout );
-		m_tabbar-> setShape ( QTabBar::RoundedNorth );
-		m_verticallayout-> addLayout ( m_stacklayout );
-		break;
-	}	
+    switch (m_tabmode) {
+    case BottomTabs:
+        m_verticallayout->removeItem(m_tablayout);
+        m_tabbar->setShape(QTabBar::TriangularSouth);
+        m_verticallayout->addLayout(m_tablayout);
+        break;
 
-	if ( m_stacklayout-> count ( ) > 1 )
-		m_tabbar-> show ( );
+    default:
+    case TopTabs:
+        m_verticallayout->removeItem(m_stacklayout);
+        m_tabbar->setShape(QTabBar::RoundedNorth);
+        m_verticallayout->addLayout(m_stacklayout);
+        break;
+    }
+
+    if (m_stacklayout->count() > 1)
+        m_tabbar->show();
 }
 
 
-void CWorkspace::addWindow ( QWidget *w )
+void CWorkspace::addWindow(QWidget *w)
 {
-	if ( !w )
-		return;
+    if (!w)
+        return;
 
-	m_tabbar-> addTab ( w-> windowTitle ( ));
-	m_stacklayout-> addWidget ( w );
+    m_tabbar->addTab(w->windowTitle());
+    m_stacklayout->addWidget(w);
 
-	w-> installEventFilter ( this );
+    w->installEventFilter(this);
 
-	m_tabbar-> setShown ( m_stacklayout-> count ( ) > 1 );
+    m_tabbar->setShown(m_stacklayout->count() > 1);
 }
 
-void CWorkspace::currentChangedHelper ( int id )
+void CWorkspace::currentChangedHelper(int id)
 {
-	emit currentChanged ( m_stacklayout-> widget ( id ));
+    emit currentChanged(m_stacklayout->widget(id));
 }
 
-void CWorkspace::setCurrentWidget ( QWidget *w )
+void CWorkspace::setCurrentWidget(QWidget *w)
 {
-	m_tabbar-> setCurrentIndex ( m_stacklayout-> indexOf ( w ));
+    m_tabbar->setCurrentIndex(m_stacklayout->indexOf(w));
 }
 
-void CWorkspace::removeWindow ( int id )
+void CWorkspace::removeWindow(int id)
 {
-	m_tabbar-> removeTab ( id );
-	m_tabbar-> setShown ( m_stacklayout-> count ( ) > 1 );
+    m_tabbar->removeTab(id);
+    m_tabbar->setShown(m_stacklayout->count() > 1);
 }
 
-CWorkspace::TabMode CWorkspace::tabMode ( ) const
+CWorkspace::TabMode CWorkspace::tabMode() const
 {
-	return m_tabmode;
+    return m_tabmode;
 }
 
-void CWorkspace::setTabMode ( TabMode tm )
+void CWorkspace::setTabMode(TabMode tm)
 {
-	if ( tm != m_tabmode ) {
-		m_tabmode = tm;
-		relayout ( );
-	}
+    if (tm != m_tabmode) {
+        m_tabmode = tm;
+        relayout();
+    }
 }
 
-bool CWorkspace::eventFilter( QObject *o, QEvent *e )
+bool CWorkspace::eventFilter(QObject *o, QEvent *e)
 {
-	QWidget *w = qobject_cast <QWidget *> ( o );
+    QWidget *w = qobject_cast <QWidget *> (o);
 
-	if ( w && ( e-> type ( ) == QEvent::WindowTitleChange ))
-		m_tabbar-> setTabText ( m_stacklayout-> indexOf ( w ), w-> windowTitle ( ));
+    if (w && (e->type() == QEvent::WindowTitleChange))
+        m_tabbar->setTabText(m_stacklayout->indexOf(w), w->windowTitle());
 
-	return QWidget::eventFilter ( o, e );
+    return QWidget::eventFilter(o, e);
 }
 
-QList <QWidget *> CWorkspace::allWindows ( )
+QList <QWidget *> CWorkspace::allWindows()
 {
-	QList <QWidget *> res;
+    QList <QWidget *> res;
 
-	for ( int i = 0; i < m_stacklayout-> count ( ); i++ )
-		res << m_stacklayout-> widget ( i );
-	
-	return res;
+    for (int i = 0; i < m_stacklayout->count(); i++)
+        res << m_stacklayout->widget(i);
+
+    return res;
 }
 
-QWidget *CWorkspace::activeWindow ( )
+QWidget *CWorkspace::activeWindow()
 {
-	return m_stacklayout-> currentWidget ( );
+    return m_stacklayout->currentWidget();
 }
