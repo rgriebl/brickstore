@@ -84,7 +84,6 @@ DAddItem::DAddItem(QWidget *parent, Qt::WindowFlags f)
 
     w_appears_in->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
     w_appears_in->setLineWidth(2);
-    w_appears_in->hide();
 
     w_toggle_appears_in->setIcon(QIcon(":/images/sidebar/appearsin"));
 
@@ -150,6 +149,7 @@ DAddItem::DAddItem(QWidget *parent, Qt::WindowFlags f)
 void DAddItem::languageChange()
 {
     Ui::AddItem::retranslateUi(this);
+    w_add->setText(tr("Add"));
     updateMonetary();
     updateCaption();
 }
@@ -242,7 +242,7 @@ void DAddItem::updateMonetary()
 {
     w_label_currency->setText(m_price_label_fmt.arg(CMoney::inst()->currencySymbol()));
     w_radio_currency->setText(m_currency_label_fmt.arg(CMoney::inst()->currencySymbol()));
-    w_price->setText(money_t(0).toLocalizedString(true));
+    w_price->setText(money_t(0).toLocalizedString(false));
 }
 
 
@@ -273,7 +273,7 @@ void DAddItem::showTotal()
     if (w_price->hasAcceptableInput() && w_qty->hasAcceptableInput())
         tot = money_t::fromLocalizedString(w_price->text()) * w_qty->text().toInt();
 
-    w_total->setText(tot.toLocalizedString(true));
+    w_total->setText(tot.toLocalizedString(false));
 
     checkAddPossible();
 }
@@ -281,7 +281,7 @@ void DAddItem::showTotal()
 void DAddItem::setTierType(int type)
 {
     QValidator *valid = (type == 0) ? m_percent_validator : m_money_validator;
-    QString text = (type == 0) ? QString("0") : money_t (0).toLocalizedString(true);
+    QString text = (type == 0) ? QString("0") : money_t (0).toLocalizedString(false);
 
     for (int i = 0; i < 3; i++) {
         w_tier_price [i]->setValidator(valid);
@@ -374,6 +374,6 @@ void DAddItem::addClicked()
 
 void DAddItem::setPrice(money_t d)
 {
-    w_price->setText(d.toLocalizedString(true));
+    w_price->setText(d.toLocalizedString(false));
     checkAddPossible();
 }

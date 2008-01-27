@@ -27,6 +27,7 @@ class CSelectItemPrivate;
 class CSelectItem : public QWidget {
     Q_OBJECT
 public:
+    CSelectItem(QWidget *parent = 0);
     CSelectItem(bool inv_only, QWidget *parent = 0);
 
     bool isOnlyWithInventory() const;
@@ -49,19 +50,19 @@ public:
 
 
 signals:
-    //void hasColors ( bool );
-    //void itemSelected ( const BrickLink::Item *, bool );
+    void hasColors(bool);
+    void itemSelected(const BrickLink::Item *, bool);
 
 public slots:
     void itemTypeChanged();
     void categoryChanged();
-// void itemChanged();
+    void itemChanged();
 
     void showAsList();
     void showAsTable();
     void showAsThumbs();
 
-// void itemConfirmed();
+    void itemConfirmed();
 
     void findItem();
 
@@ -73,6 +74,7 @@ protected:
     virtual void showEvent(QShowEvent *);
 
 private:
+    void init();
     bool checkViewMode(ViewMode vm);
     void ensureSelectionVisible();
 

@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>693</width>
-    <height>768</height>
+    <width>745</width>
+    <height>580</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -20,7 +20,7 @@
        <property name="sizePolicy" >
         <sizepolicy vsizetype="Expanding" hsizetype="MinimumExpanding" >
          <horstretch>100</horstretch>
-         <verstretch>0</verstretch>
+         <verstretch>100</verstretch>
         </sizepolicy>
        </property>
        <property name="minimumSize" >
@@ -34,9 +34,9 @@
      <item>
       <widget class="CSelectColor" native="1" name="w_select_color" >
        <property name="sizePolicy" >
-        <sizepolicy vsizetype="MinimumExpanding" hsizetype="MinimumExpanding" >
+        <sizepolicy vsizetype="Expanding" hsizetype="MinimumExpanding" >
          <horstretch>10</horstretch>
-         <verstretch>0</verstretch>
+         <verstretch>100</verstretch>
         </sizepolicy>
        </property>
       </widget>
@@ -71,7 +71,7 @@
         <enum>Qt::Horizontal</enum>
        </property>
        <widget class="CAppearsInWidget" native="1" name="w_appears_in" />
-       <widget class="QWidget" name="" >
+       <widget class="QWidget" name="layoutWidget" >
         <layout class="QGridLayout" >
          <item row="0" column="0" >
           <widget class="QLabel" name="label" >
@@ -137,7 +137,11 @@
           </widget>
          </item>
          <item row="1" column="3" >
-          <widget class="QLineEdit" name="w_total" />
+          <widget class="QLineEdit" name="w_total" >
+           <property name="readOnly" >
+            <bool>true</bool>
+           </property>
+          </widget>
          </item>
          <item row="2" column="0" >
           <widget class="QLabel" name="w_tier_label" >
@@ -261,10 +265,13 @@
            <property name="orientation" >
             <enum>Qt::Vertical</enum>
            </property>
+           <property name="sizeType" >
+            <enum>QSizePolicy::MinimumExpanding</enum>
+           </property>
            <property name="sizeHint" >
             <size>
              <width>20</width>
-             <height>40</height>
+             <height>0</height>
             </size>
            </property>
           </spacer>
@@ -302,7 +309,36 @@
        <property name="icon" >
         <iconset resource="../brickstore.qrc" >:/images/sidebar/appearsin.png</iconset>
        </property>
+       <property name="checked" >
+        <bool>true</bool>
+       </property>
       </widget>
+     </item>
+     <item>
+      <spacer>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" >
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <spacer>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" >
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
      <item>
       <spacer>
@@ -343,7 +379,7 @@
      <item>
       <widget class="QDialogButtonBox" name="w_buttons" >
        <property name="sizePolicy" >
-        <sizepolicy vsizetype="Fixed" hsizetype="MinimumExpanding" >
+        <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -409,6 +445,54 @@
     <hint type="destinationlabel" >
      <x>286</x>
      <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>w_toggle_appears_in</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>w_appears_in</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>133</x>
+     <y>865</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>129</x>
+     <y>731</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>w_toggle_picture</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>w_picture</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>51</x>
+     <y>865</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>41</x>
+     <y>731</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>w_toggle_price_guide</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>w_price_guide</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>92</x>
+     <y>865</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>63</x>
+     <y>731</y>
     </hint>
    </hints>
   </connection>

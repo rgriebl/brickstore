@@ -17,7 +17,7 @@
 #include <QHash>
 #include <QApplication>
 #include <QHeaderView>
-#include <QTableView>
+#include <QTreeView>
 #include <QItemDelegate>
 
 #include "cutility.h"
@@ -170,18 +170,19 @@ class ColorDelegate : public QItemDelegate {
 CSelectColor::CSelectColor(QWidget *parent, Qt::WindowFlags f)
         : QWidget(parent, f)
 {
-    w_colors = new QTableView(this);
-    w_colors->setModel(BrickLink::inst()->colorModel());
+    w_colors = new QTreeView(this);
     w_colors->setItemDelegate(new ColorDelegate());
-    w_colors->horizontalHeader()->setResizeMode(QHeaderView::Fixed);
-    w_colors->horizontalHeader()->setStretchLastSection(true);
-    w_colors->horizontalHeader()->setMovable(false);
-    w_colors->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
-    w_colors->verticalHeader()->hide();
-    w_colors->setShowGrid(false);
     w_colors->setAlternatingRowColors(true);
+    w_colors->setAllColumnsShowFocus(true);
+    w_colors->setUniformRowHeights(true);
+    w_colors->setRootIsDecorated(false);
     w_colors->setSortingEnabled(true);
-    w_colors->setFixedWidth(w_colors->sizeHint().width() + w_colors->style()->pixelMetric(QStyle::PM_ScrollBarExtent));
+
+    w_colors->setModel(BrickLink::inst()->colorModel());
+
+    w_colors->resizeColumnToContents(0);
+    w_colors->setFixedWidth(w_colors->columnWidth(0) + 2 * w_colors->frameWidth() + w_colors->style()->pixelMetric(QStyle::PM_ScrollBarExtent) + 4);
+
     w_colors->sortByColumn(0);
 
     setFocusProxy(w_colors);

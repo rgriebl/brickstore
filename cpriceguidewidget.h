@@ -38,6 +38,8 @@ public:
         Vertical
     };
 
+    virtual QSize sizeHint() const;
+
 public slots:
     void setLayout(Layout l);
     virtual void setPriceGuide(BrickLink::PriceGuide *pg);
