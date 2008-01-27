@@ -24,7 +24,18 @@ namespace BrickLink {
 
 QDataStream &operator << (QDataStream &ds, const Color *col)
 {
-    return ds << col->m_id << col->m_name << col->m_peeron_name << col->m_ldraw_id << col->m_color << quint8(col->m_type);
+    ds << col->m_id << col->m_name << col->m_peeron_name << col->m_ldraw_id;
+
+    if (ds.version() < QDataStream::Qt_4_0) {
+        // Qt3 used this magic number for invalid QColor objects...
+        static quint32 Invalid = 0x49000000;
+
+        ds << (col->color().isValid() ? col->color().rgb() : Invalid);
+    }
+    else
+        ds << col->m_color;
+    ds << quint8(col->m_type);
+    return ds;
 }
 
 QDataStream &operator >> (QDataStream &ds, BrickLink::Color *col)
@@ -32,7 +43,22 @@ QDataStream &operator >> (QDataStream &ds, BrickLink::Color *col)
     delete [] col->m_name; delete [] col->m_peeron_name;
 
     quint8 flags;
-    ds >> col->m_id >> col->m_name >> col->m_peeron_name >> col->m_ldraw_id >> col->m_color >> flags;
+    ds >> col->m_id >> col->m_name >> col->m_peeron_name >> col->m_ldraw_id;
+
+    if (ds.version() < QDataStream::Qt_4_0) {
+        // Qt3 used this magic number for invalid QColor objects...
+        static QRgb Invalid = 0x49000000;
+
+        quint32 x;
+        ds >> x;
+        if (x == Invalid)
+            col->m_color = QColor();
+        else
+            col->m_color.setRgb(x);
+    }
+    else
+        ds >> col->m_color;
+    ds >> flags;
 
     col->m_type = flags;
     return ds;
@@ -814,7 +840,7 @@ BrickLink::ColorModel::Compare::Compare(bool asc) : m_asc(asc) { }
 
 bool BrickLink::ColorModel::Compare::operator()(const Color *c1, const Color *c2)
 {
-    if (m_asc) {
+    if (!m_asc) {
         return (qstrcmp(c1->name(), c2->name()) < 0);
     }
     else {
@@ -1117,5 +1143,222 @@ bool BrickLink::ItemTypeModel::Compare::operator()(const ItemType *c1, const Ite
 BrickLink::ItemTypeModel *BrickLink::Core::itemTypeModel(ItemTypeModel::Features f) const
 {
     return new ItemTypeModel(f, this);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+BrickLink::ItemModel::ItemModel(Features, const Core *)
+{
+    m_cat_filter = 0;
+    m_type_filter = 0;
+    m_inv_filter = false;
+    m_sorted = Qt::AscendingOrder;
+    m_sortcol = 1;
+    m_items.reserve(BrickLink::core()->items().count());
+
+    rebuildItemList();
+}
+
+QModelIndex BrickLink::ItemModel::index(int row, int column, const QModelIndex &parent) const
+{
+    if (hasIndex(row, column, parent))
+        return parent.isValid() ? QModelIndex() : createIndex(row, column, const_cast<Item *>(m_items.at(row)));
+    return QModelIndex();
+}
+
+const BrickLink::Item *BrickLink::ItemModel::item(const QModelIndex &index) const
+{
+    return index.isValid() ? static_cast<const Item *>(index.internalPointer()) : 0;
+}
+
+QModelIndex BrickLink::ItemModel::index(const Item *item) const
+{
+    return item ? createIndex(m_items.indexOf(item), 0, const_cast<Item *>(item)) : QModelIndex();
+}
+
+int BrickLink::ItemModel::rowCount(const QModelIndex &parent) const
+{
+    return parent.isValid() ? 0 : m_items.count();
+}
+
+int BrickLink::ItemModel::columnCount(const QModelIndex &parent) const
+{
+    return parent.isValid() ? 0 : 3;
+}
+
+QVariant BrickLink::ItemModel::data(const QModelIndex &index, int role) const
+{
+    if (!index.isValid() || !item(index))
+        return QVariant();
+
+    QVariant res;
+    const Item *i = item(index);
+
+    if (role == Qt::DisplayRole) {
+        switch(index.column()) {
+        case 1: res = QString::fromLatin1(i->id()); break;
+        case 2: res = QString::fromLatin1(i->name()); break;
+        }
+    }
+    else if (role == Qt::DecorationRole) {
+        if (index.column() == 0) {
+            // picture
+
+        }
+    }
+    else if (role == ItemPointerRole) {
+        res = i;
+    }
+    return res;
+}
+
+QVariant BrickLink::ItemModel::headerData(int section, Qt::Orientation orient, int role) const
+{
+    if ((orient == Qt::Horizontal) && (role == Qt::DisplayRole)) {
+        switch(section) {
+        case 1: return tr("Part #");
+        case 2: return tr("Description");
+        }
+    }
+    return QVariant();
+}
+
+void BrickLink::ItemModel::sort(int column, Qt::SortOrder so)
+{
+    if (column != 0) {
+        emit layoutAboutToBeChanged();
+        Compare cmp(so == Qt::AscendingOrder, column == 1);
+        m_sorted = so;
+        m_sortcol = column;
+        qStableSort(m_items.begin(), m_items.end(), cmp);
+        emit layoutChanged();
+    }
+}
+
+BrickLink::ItemModel::Compare::Compare(bool asc, bool on_id) : m_asc(asc), m_id(on_id) { }
+
+bool BrickLink::ItemModel::Compare::operator()(const Item *c1, const Item *c2)
+{
+    bool b = (qstrcmp(m_id ? c1->id() : c1->name(), m_id ? c2->id() : c2->name()) >= 0);
+    return m_asc ^ b;
+}
+
+void BrickLink::ItemModel::rebuildItemList()
+{
+    if (!m_type_filter && !m_cat_filter && m_text_filter.isEmpty() && !m_inv_filter) {
+        m_items = BrickLink::core()->items();
+    }
+    else {
+        m_items.clear();
+        foreach (const Item *item, BrickLink::core()->items()) {
+            if (m_type_filter && item->itemType() != m_type_filter)
+                continue;
+            if (m_cat_filter && item->category() != m_cat_filter)
+                continue;
+            if (m_inv_filter && !item->hasInventory())
+                continue;
+            if (!m_text_filter.isEmpty()) {
+                // continue;
+                //TODO
+            }
+
+            m_items << item;
+        }
+    }
+    qStableSort(m_items.begin(), m_items.end(), Compare(m_sorted == Qt::AscendingOrder, m_sortcol == 1));
+}
+
+void BrickLink::ItemModel::setItemTypeFilter(const ItemType *it)
+{
+    if (it == m_type_filter)
+        return;
+
+    emit layoutAboutToBeChanged();
+
+    m_type_filter = it;
+    rebuildItemList();
+
+    emit layoutChanged();
+}
+
+void BrickLink::ItemModel::clearItemTypeFilter()
+{
+    setItemTypeFilter(0);
+}
+
+void BrickLink::ItemModel::setCategoryFilter(const Category *cat)
+{
+    if (cat == BrickLink::CategoryModel::AllCategories)
+        cat = 0;
+
+    if (cat == m_cat_filter)
+        return;
+
+    emit layoutAboutToBeChanged();
+
+    m_cat_filter = cat;
+    rebuildItemList();
+
+    emit layoutChanged();
+}
+
+void BrickLink::ItemModel::clearCategoryFilter()
+{
+    setCategoryFilter(0);
+}
+
+void BrickLink::ItemModel::setTextFilter(const QString &str)
+{
+    if (str == m_text_filter)
+        return;
+
+    emit layoutAboutToBeChanged();
+
+    m_text_filter = str;
+    rebuildItemList();
+
+    emit layoutChanged();
+}
+
+void BrickLink::ItemModel::clearTextFilter()
+{
+    setTextFilter(QString());
+}
+
+void BrickLink::ItemModel::setExcludeWithoutInventoryFilter(bool on)
+{
+    if (on == m_inv_filter)
+        return;
+
+    emit layoutAboutToBeChanged();
+
+    m_inv_filter = on;
+    rebuildItemList();
+
+    emit layoutChanged();
+}
+
+
+
+
+BrickLink::ItemModel *BrickLink::Core::itemModel(ItemModel::Features f) const
+{
+    return new ItemModel(f, this);
 }
 
