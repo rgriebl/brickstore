@@ -420,7 +420,9 @@ void CTransfer::internalJobFinished(QThread *thread, CTransferJob *job)
 
     m_idle_threads.append(thread);
 
+    locker.unlock();
     emit finished(job);
+    locker.relock();
     delete job;
 
     scheduler();
