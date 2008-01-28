@@ -308,36 +308,42 @@ CAppearsInWidget::CAppearsInWidget(QWidget *parent)
     QAction *a;
     a = new QAction(this);
     a->setObjectName("edit_partoutitems");
-    a->setIcon(QIcon(":/edit_partoutitems"));
+    a->setIcon(QIcon(":/images/22x22/edit_partoutitems"));
     connect(a, SIGNAL(triggered()), this, SLOT(partOut()));
+    addAction(a);
 
     a = new QAction(this);
     a->setSeparator(true);
+    addAction(a);
 
     a = new QAction(this);
-    a->setObjectName("viewmagp");
-    a->setIcon(QIcon(":/viewmagp"));
+    a->setObjectName("edit_magnify");
+    a->setIcon(QIcon(":/images/22x22/viewmagp"));
     connect(a, SIGNAL(triggered()), this, SLOT(viewLargeImage()));
+    addAction(a);
 
     a = new QAction(this);
     a->setSeparator(true);
+    addAction(a);
 
     a = new QAction(this);
     a->setObjectName("edit_bl_catalog");
-    a->setIcon(QIcon(":/edit_bl_catalog"));
+    a->setIcon(QIcon(":/images/22x22/edit_bl_catalog"));
     connect(a, SIGNAL(triggered()), this, SLOT(showBLCatalogInfo()));
+    addAction(a);
     a = new QAction(this);
     a->setObjectName("edit_bl_priceguide");
-    a->setIcon(QIcon(":/edit_bl_priceguide"));
+    a->setIcon(QIcon(":/images/22x22/edit_bl_priceguide"));
     connect(a, SIGNAL(triggered()), this, SLOT(showBLPriceGuideInfo()));
+    addAction(a);
     a = new QAction(this);
     a->setObjectName("edit_bl_lotsforsale");
-    a->setIcon(QIcon(":/edit_bl_lotsforsale"));
+    a->setIcon(QIcon(":/images/22x22/edit_bl_lotsforsale"));
     connect(a, SIGNAL(triggered()), this, SLOT(showBLLotsForSale()));
+    addAction(a);
 
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(showContextMenu(const QPoint &)));
-// connect ( this, SIGNAL( returnPressed ( QListViewItem * )), this, SLOT( partOut ( )));
-// connect ( this, SIGNAL( doubleClicked ( QListViewItem *, const QPoint &, int )), this, SLOT( partOut ( )));
+    connect(this, SIGNAL(activated(const QModelIndex &)), this, SLOT(partOut()));
 
     languageChange();
 }
@@ -345,7 +351,7 @@ CAppearsInWidget::CAppearsInWidget(QWidget *parent)
 void CAppearsInWidget::languageChange()
 {
     findChild<QAction *> ("edit_partoutitems")->setText(tr("Part out Item..."));
-    findChild<QAction *> ("viewmagp")->setText(tr("View large image..."));
+    findChild<QAction *> ("edit_magnify")->setText(tr("View large image..."));
     findChild<QAction *> ("edit_bl_catalog")->setText(tr("Show BrickLink Catalog Info..."));
     findChild<QAction *> ("edit_bl_priceguide")->setText(tr("Show BrickLink Price Guide Info..."));
     findChild<QAction *> ("edit_bl_lotsforsale")->setText(tr("Show Lots for Sale on BrickLink..."));

@@ -120,24 +120,43 @@ CPriceGuideWidget::CPriceGuideWidget(QWidget *parent, Qt::WindowFlags f)
     connect(CMoney::inst(), SIGNAL(monetarySettingsChanged()), this, SLOT(repaint()));
 
     QAction *a;
-    a = new QAction(QIcon(":/reload"), tr("Update"), this);
+    a = new QAction(this);
+    a->setObjectName("edit_reload");
+    a->setIcon(QIcon(":/images/22x22/reload"));
     connect(a, SIGNAL(triggered()), this, SLOT(doUpdate()));
+    addAction(a);
 
     a = new QAction(this);
     a->setSeparator(true);
+    addAction(a);
 
-    a = new QAction(QIcon("edit_bl_catalog"), tr("Show BrickLink Catalog Info..."), this);
+    a = new QAction(this);
+    a->setObjectName("edit_bl_catalog");
+    a->setIcon(QIcon(":/images/22x22/edit_bl_catalog"));
     connect(a, SIGNAL(triggered()), this, SLOT(showBLCatalogInfo()));
-    a = new QAction(QIcon("edit_bl_priceguide"), tr("Show BrickLink Price Guide Info..."), this);
+    addAction(a);
+    a = new QAction(this);
+    a->setObjectName("edit_bl_priceguide");
+    a->setIcon(QIcon(":/images/22x22/edit_bl_priceguide"));
     connect(a, SIGNAL(triggered()), this, SLOT(showBLPriceGuideInfo()));
-    a = new QAction(QIcon("edit_bl_lotsforsale"), tr("Show Lots for Sale on BrickLink..."), this);
+    addAction(a);
+    a = new QAction(this);
+    a->setObjectName("edit_bl_lotsforsale");
+    a->setIcon(QIcon(":/images/22x22/edit_bl_lotsforsale"));
     connect(a, SIGNAL(triggered()), this, SLOT(showBLLotsForSale()));
+    addAction(a);
+
 
     languageChange();
 }
 
 void CPriceGuideWidget::languageChange()
 {
+    findChild<QAction *> ("edit_reload")->setText(tr("Update"));
+    findChild<QAction *> ("edit_bl_catalog")->setText(tr("Show BrickLink Catalog Info..."));
+    findChild<QAction *> ("edit_bl_priceguide")->setText(tr("Show BrickLink Price Guide Info..."));
+    findChild<QAction *> ("edit_bl_lotsforsale")->setText(tr("Show Lots for Sale on BrickLink..."));
+
     d->m_str_qty                                       = tr("Qty.");
     d->m_str_cond [BrickLink::New]                     = tr("New");
     d->m_str_cond [BrickLink::Used]                    = tr("Used");
@@ -545,11 +564,6 @@ void CPriceGuideWidget::paintHeader(QPainter *p, const QRect &r, Qt::Alignment a
     opt.initFrom(this);
     opt.state           &= ~QStyle::State_MouseOver;
     opt.rect             = r;
-    if (bold) {
-        QFont f = font();
-        f.setBold(true);
-        opt.fontMetrics   = QFontMetrics(f, this);
-    }
     opt.orientation      = Qt::Horizontal;
     opt.position         = QStyleOptionHeader::Middle;
     opt.section          = 1;
@@ -558,7 +572,15 @@ void CPriceGuideWidget::paintHeader(QPainter *p, const QRect &r, Qt::Alignment a
     opt.text             = str;
     opt.textAlignment    = align;
 
+    p->save();
+    if (bold) {
+        QFont f = font();
+        f.setBold(true);
+        opt.fontMetrics   = QFontMetrics(f, this);
+        p->setFont(f);
+    }
     style()->drawControl(QStyle::CE_Header, &opt, p, this);
+    p->restore();
 }
 
 void CPriceGuideWidget::paintCell(QPainter *p, const QRect &r, Qt::Alignment align, const QString &str, bool alternate)
@@ -615,7 +637,7 @@ void CPriceGuideWidget::paintEvent(QPaintEvent *e)
         case cell::Price:
             if (!is_updating) {
                 if (valid)
-                    str = d->m_pg->price(c.m_time, c.m_condition, c.m_price).toLocalizedString(true);
+                    str = d->m_pg->price(c.m_time, c.m_condition, c.m_price).toLocalizedString(false);
 
                 paintCell(&p, c, c.m_text_flags, str, c.m_flag);
             }

@@ -46,11 +46,13 @@ CPictureWidget::CPictureWidget(QWidget *parent, Qt::WindowFlags f)
     setBackgroundRole(QPalette::Base);
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
     setAutoFillBackground(true);
+    setContextMenuPolicy(Qt::ActionsContextMenu);
 
     int fw = frameWidth() * 2;
     d->m_plabel = new QLabel(this);
     d->m_plabel->setAlignment(Qt::AlignCenter);
     d->m_plabel->setFixedSize(80, 80);
+    d->m_plabel->setContextMenuPolicy(Qt::NoContextMenu);
 
     d->m_tlabel = new QLabel("Ay<br />Ay<br />Ay<br />Ay<br />Ay", this);
     d->m_tlabel->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
@@ -58,6 +60,7 @@ CPictureWidget::CPictureWidget(QWidget *parent, Qt::WindowFlags f)
     d->m_tlabel->setTextInteractionFlags(Qt::TextBrowserInteraction);
     d->m_tlabel->setFixedSize(2 * d->m_plabel->width(), d->m_tlabel->sizeHint().height());
     d->m_tlabel->setText(QString());
+    d->m_tlabel->setContextMenuPolicy(Qt::NoContextMenu);
 
     QBoxLayout *lay = new QVBoxLayout(this);
     lay->setMargin(fw + 4);
@@ -66,30 +69,53 @@ CPictureWidget::CPictureWidget(QWidget *parent, Qt::WindowFlags f)
     lay->addWidget(d->m_tlabel, 0, Qt::AlignCenter );
 
     QAction *a;
-    a = new QAction(QIcon(":/reload"), tr("Update"), this);
+    a = new QAction(this);
+    a->setObjectName("edit_reload");
+    a->setIcon(QIcon(":/images/22x22/reload"));
     connect(a, SIGNAL(triggered()), this, SLOT(doUpdate()));
+    addAction(a);
 
     a = new QAction(this);
     a->setSeparator(true);
+    addAction(a);
 
-    a = new QAction(QIcon(":/viewmagp"), tr("View large image..."), this);
+    a = new QAction(this);
+    a->setObjectName("edit_magnify");
+    a->setIcon(QIcon(":/images/22x22/viewmagp"));
     connect(a, SIGNAL(triggered()), this, SLOT(viewLargeImage()));
+    addAction(a);
 
     a = new QAction(this);
     a->setSeparator(true);
+    addAction(a);
 
-    a = new QAction(QIcon(":/edit_bl_catalog"), tr("Show BrickLink Catalog Info..."), this);
+    a = new QAction(this);
+    a->setObjectName("edit_bl_catalog");
+    a->setIcon(QIcon(":/images/22x22/edit_bl_catalog"));
     connect(a, SIGNAL(triggered()), this, SLOT(showBLCatalogInfo()));
-    a = new QAction(QIcon(":/edit_bl_priceguide"), tr("Show BrickLink Price Guide Info..."), this);
+    addAction(a);
+    a = new QAction(this);
+    a->setObjectName("edit_bl_priceguide");
+    a->setIcon(QIcon(":/images/22x22/edit_bl_priceguide"));
     connect(a, SIGNAL(triggered()), this, SLOT(showBLPriceGuideInfo()));
-    a = new QAction(QIcon(":/edit_bl_lotsforsale"), tr("Show Lots for Sale on BrickLink..."), this);
+    addAction(a);
+    a = new QAction(this);
+    a->setObjectName("edit_bl_lotsforsale");
+    a->setIcon(QIcon(":/images/22x22/edit_bl_lotsforsale"));
     connect(a, SIGNAL(triggered()), this, SLOT(showBLLotsForSale()));
+    addAction(a);
 
+    languageChange();
     redraw();
 }
 
 void CPictureWidget::languageChange()
 {
+    findChild<QAction *> ("edit_reload")->setText(tr("Update"));
+    findChild<QAction *> ("edit_magnify")->setText(tr("View large image..."));
+    findChild<QAction *> ("edit_bl_catalog")->setText(tr("Show BrickLink Catalog Info..."));
+    findChild<QAction *> ("edit_bl_priceguide")->setText(tr("Show BrickLink Price Guide Info..."));
+    findChild<QAction *> ("edit_bl_lotsforsale")->setText(tr("Show Lots for Sale on BrickLink..."));
 }
 
 CPictureWidget::~CPictureWidget()
@@ -185,7 +211,9 @@ void CPictureWidget::gotUpdate(BrickLink::Picture *pic)
 void CPictureWidget::redraw()
 {
     if (d->m_pic && (d->m_pic->updateStatus() == BrickLink::Updating)) {
-        d->m_tlabel->setText(tr("Please wait ...updating"));
+        d->m_tlabel->setText(QLatin1String("<center><i>") +
+                                           tr("Please wait ...updating") +
+                                           QLatin1String("</i></center>"));
         d->m_plabel->setPixmap(QPixmap());
     }
     else if (d->m_pic && d->m_pic->valid()) {
@@ -212,39 +240,50 @@ CLargePictureWidget::CLargePictureWidget(BrickLink::Picture *lpic, QWidget *pare
     d = new CLargePictureWidgetPrivate();
 
     setWindowFlags(Qt::Tool | Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowStaysOnTopHint);
-    setWindowModality(Qt::ApplicationModal);
+    //setWindowModality(Qt::ApplicationModal);
     setAttribute(Qt::WA_DeleteOnClose);
 
 
     setBackgroundRole(QPalette::Base);
+    setAutoFillBackground(true);
     setFrameStyle(QFrame::NoFrame);
     setAlignment(Qt::AlignCenter);
-// setScaledContents ( true );
     setFixedSize(640, 480);
     setContextMenuPolicy(Qt::ActionsContextMenu);
+    setWordWrap(true);
 
     d->m_pic = lpic;
     if (d->m_pic)
         d->m_pic->addRef();
 
-    connect(BrickLink::inst(), SIGNAL(pictureUpdated(BrickLink::Picture *)), this, SLOT(gotUpdate(BrickLink::Picture *)));
+    connect(BrickLink::core(), SIGNAL(pictureUpdated(BrickLink::Picture *)), this, SLOT(gotUpdate(BrickLink::Picture *)));
 
     QAction *a;
-    a = new QAction(QIcon(":/reload"), tr("Update"), this);
+    a = new QAction(this);
+    a->setObjectName("edit_reload");
+    a->setIcon(QIcon(":/images/22x22/reload"));
     connect(a, SIGNAL(triggered()), this, SLOT(doUpdate()));
+    addAction(a);
 
     a = new QAction(this);
     a->setSeparator(true);
+    addAction(a);
 
-    a = new QAction(QIcon(":/file_close"), tr("Close"), this);
+    a = new QAction(this);
+    a->setObjectName("edit_close");
+    a->setIcon(QIcon(":/images/22x22/file_close"));
     connect(a, SIGNAL(triggered()), this, SLOT(close()));
+    addAction(a);
 
-    setToolTip(tr("Double-click to close this window."));
+    languageChange();
     redraw();
 }
 
 void CLargePictureWidget::languageChange()
 {
+    findChild<QAction *> ("edit_reload")->setText(tr("Update"));
+    findChild<QAction *> ("edit_close")->setText(tr("Close"));
+    setToolTip(tr("Double-click to close this window."));
 }
 
 CLargePictureWidget::~CLargePictureWidget()
@@ -266,7 +305,9 @@ void CLargePictureWidget::redraw()
         setWindowTitle(QString(d->m_pic->item()->id()) + " " + d->m_pic->item()->name());
 
         if (d->m_pic->updateStatus() == BrickLink::Updating)
-            setText(tr("Please wait ...updating"));
+            setText(QLatin1String("<center><i>") +
+                    tr("Please wait ...updating") +
+                    QLatin1String("</i></center>"));
         else if (d->m_pic->valid())
             setPixmap(d->m_pic->pixmap());
         else
