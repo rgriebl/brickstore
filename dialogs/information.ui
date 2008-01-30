@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>359</width>
-    <height>163</height>
+    <width>401</width>
+    <height>220</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -48,6 +48,9 @@
      <property name="alignment" >
       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
      </property>
+     <property name="wordWrap" >
+      <bool>true</bool>
+     </property>
      <property name="textInteractionFlags" >
       <set>Qt::TextBrowserInteraction</set>
      </property>
@@ -67,6 +70,9 @@
      </property>
      <property name="standardButtons" >
       <set>QDialogButtonBox::Ok</set>
+     </property>
+     <property name="centerButtons" >
+      <bool>true</bool>
      </property>
     </widget>
    </item>

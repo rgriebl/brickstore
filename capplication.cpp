@@ -326,19 +326,18 @@ void CApplication::exitBrickLink()
 void CApplication::about()
 {
     static const char *layout =
-        "<qt>"
         "<center>"
         "<table border=\"0\"><tr>"
-        "<td valign=\"middle\" align=\"right\"><img src=\":/images/icon.png\" /></td>"
-        "<td align=\"left\"><big>"
+        "<td valign=\"middle\" align=\"right\" width=\"30%\"><img src=\":/images/icon.png\" /></td>"
+        "<td align=\"left\" width=\"70%\"><big>"
         "<big><strong>%1</strong></big>"
         "<br />%2<br />"
         "<strong>%3</strong>"
         "</big></td>"
         "</tr></table>"
+        "</center><center>"
         "<br />%4<br /><br />%5"
-        "</center>%6"
-        "</qt>";
+        "</center>%6";
 
 
     QString page1_link = QString("<strong>%1</strong> | <a href=\"system\">%2</a>").arg(tr("Legal Info"), tr("System Info"));
@@ -348,9 +347,6 @@ void CApplication::about()
     QString version   = tr("Version %1").arg(BRICKSTORE_VERSION);
     QString support   = tr("Visit %1, or send an email to %2").arg("<a href=\"http://" BRICKSTORE_URL "\">" BRICKSTORE_URL "</a>", "<a href=\"mailto:" BRICKSTORE_MAIL "\">" BRICKSTORE_MAIL "</a>");
 
-// ::curl_version_info_data *curlver = curl_version_info ( CURLVERSION_FIRST );
-    QString curl = ""; //curlver->version;
-    QString z    = ""; //curlver->libz_version;
     QString qt   = qVersion();
 
     static const char *legal_src = QT_TR_NOOP(
@@ -383,34 +379,33 @@ void CApplication::about()
 
     static const char *technical_src =
         "<p>"
-        "<strong>Build Info</strong><br /><br />"
         "<table>"
+        "<th colspan=\"2\" align=\"left\">Build Info</th>"
         "<tr><td>User     </td><td>%1</td></tr>"
         "<tr><td>Host     </td><td>%2</td></tr>"
         "<tr><td>Date     </td><td>%3</td></tr>"
         "<tr><td>Compiler </td><td>%4</td></tr>"
         "</table><br />"
-        "<strong>Runtime Info</strong><br /><br />"
         "<table>"
+        "<th colspan=\"2\" align=\"left\">Runtime Info</th>"
         "<tr><td>OS     </td><td>%5</td></tr>"
         "<tr><td>libqt  </td><td>%6</td></tr>"
-        "<tr><td>libcurl</td><td>%8</td></tr>"
-        "<tr><td>libz   </td><td>%9</td></tr>"
         "</table>"
         "</p>";
 
     QString technical = QString(technical_src).arg(STR(__USER__), STR(__HOST__), __DATE__ " " __TIME__).arg(
 #if defined( _MSC_VER )
-                            "Microsoft Visual-C++ " + QString(_MSC_VER < 1200 ? "???" :
-                                                              (_MSC_VER < 1300 ? "6.0" :
-                                                               (_MSC_VER < 1310 ? ".NET" :
-                                                                (_MSC_VER < 1400 ? ".NET 2003" : "2005"))))
+                         "Microsoft Visual-C++ " + QString(_MSC_VER >= 1500 ? ".NET 2008" :
+                                                          (_MSC_VER >= 1400 ? ".NET 2005" :
+                                                          (_MSC_VER >= 1310 ? ".NET 2003" :
+                                                          (_MSC_VER >= 1300 ? ".NET" :
+                                                          (_MSC_VER >= 1200 ? "6.0" : "???")))))
 #elif defined( __GNUC__ )
-                            "GCC " __VERSION__
+                         "GCC " __VERSION__
 #else
-                            "???"
+                         "???"
 #endif
-                        ).arg(sysName() + " " + sysVersion()).arg(qt, curl, z);
+                        ).arg(sysName() + " " + sysVersion()).arg(qt);
 
     QString legal = tr(legal_src);
 
