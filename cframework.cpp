@@ -67,6 +67,47 @@ enum ProgressItem {
 } // namespace
 
 
+class RecentMenu : public QMenu {
+    Q_OBJECT
+public:
+    RecentMenu(CFrameWork *fw, QWidget *parent)
+        : QMenu(parent), m_fw(fw)
+    {
+        connect(this, SIGNAL(aboutToShow()), this, SLOT(buildMenu()));
+        connect(this, SIGNAL(triggered(QAction *)), this, SLOT(openRecentAction(QAction *)));
+    }
+
+signals:
+    void openRecent(int);
+
+private slots:
+    void buildMenu()
+    {
+        clear();
+
+        int i = 0;
+        foreach (QString s, m_fw->recentFiles()) {
+            if (i < 10)
+                s.prepend(QString("&%1   ").arg((i+1)%10));
+            addAction(s)->setData(i++);
+        }
+        if (!i)
+            addAction(tr("No recent files"))->setEnabled(false);
+    }
+
+    void openRecentAction(QAction *a)
+    {
+        if (a && !a->data().isNull()) {
+            int idx = qvariant_cast<int>(a->data());
+            emit openRecent(idx);
+        }
+    }
+
+private:
+    CFrameWork *m_fw;
+};
+
+
 CFrameWork *CFrameWork::s_inst = 0;
 
 CFrameWork *CFrameWork::inst()
@@ -693,11 +734,9 @@ void CFrameWork::createActions()
 
     a = newQAction(this, "file_open", false, this, SLOT(fileOpen()));
 
-    g = newQActionGroup(this, "file_open_recent");
-    for (int i = 0; i < MaxRecentFiles; i++) {
-        a = newQAction(this, "file_open_recent_%1", false, this, SLOT(fileOpenRecent()));
-        a->setActionGroup(g);
-    }
+    QMenu *rm = new RecentMenu(this, this);
+    rm->menuAction()->setObjectName("file_open_recent");
+    connect(rm, SIGNAL(openRecent(int)), this, SLOT(fileOpenRecent(int)));
 
     (void) newQAction(this, "file_save");
     (void) newQAction(this, "file_saveas");
@@ -1436,6 +1475,11 @@ void CFrameWork::showContextMenu(bool /*onitem*/, const QPoint &pos)
     m_contextmenu->popup(pos);
 }
 
+QStringList CFrameWork::recentFiles() const
+{
+    return m_recent_files;
+}
+
 void CFrameWork::addToRecentFiles(const QString &s)
 {
     QString name = QDir::convertSeparators(QFileInfo(s).absoluteFilePath());
@@ -1528,3 +1572,4 @@ void CFrameWork::closedAddItemDialog()
     findAction("edit_additems")->setChecked(m_add_dialog && m_add_dialog->isVisible());
 }
 
+#include "cframework.moc"

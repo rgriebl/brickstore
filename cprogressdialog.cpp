@@ -208,7 +208,7 @@ bool CProgressDialog::initTransfer()
     if (m_trans)
         return true;
 
-    m_trans = new CTransfer(1);
+    m_trans = new CTransfer(10);
 
     connect(m_trans, SIGNAL(finished(CTransferJob *)), this, SLOT(transferDone(CTransferJob *)));
     connect(m_trans, SIGNAL(dataReadProgress(CTransferJob *, int, int)), this, SLOT(transferProgress(CTransferJob *, int, int)));

@@ -48,21 +48,31 @@ private slots:
         clear();
         addAction(m_tabtop);
         addAction(m_tabbot);
+
+        m_tabtop->setChecked(m_ws->tabMode() == CWorkspace::TopTabs);
+        m_tabbot->setChecked(m_ws->tabMode() == CWorkspace::BottomTabs);
+
+        if (m_ws->allWindows().isEmpty())
+            return;
+
         addSeparator();
 
         QWidget *active = m_ws->activeWindow();
 
+        int i = 0;
         foreach (QWidget *w, m_ws->allWindows()) {
-            QAction *a = addAction(w->windowTitle());
+            QString s = w->windowTitle();
+            if (i < 10)
+                s.prepend(QString("&%1   ").arg((i+1)%10));
+
+            QAction *a = addAction(s);
             a->setCheckable(true);
             QVariant v;
             v.setValue(w);
             a->setData(v);
             a->setChecked(w == active);
+            i++;
         }
-
-        m_tabtop->setChecked(m_ws->tabMode() == CWorkspace::TopTabs);
-        m_tabbot->setChecked(m_ws->tabMode() == CWorkspace::BottomTabs);
     }
 
     void activateWindow(QAction *a)

@@ -54,6 +54,7 @@ public:
     static CFrameWork *inst();
 
     void addToRecentFiles(const QString &s);
+    QStringList recentFiles() const;
 
     bool closeAllWindows();
 
@@ -134,31 +135,6 @@ private:
 
 private:
     enum { MaxRecentFiles = 9 };
-
-private:
-#if 0
-class RecentListProvider : public CListAction::Provider {
-    public:
-        RecentListProvider(CFrameWork *fw);
-        virtual ~RecentListProvider();
-        virtual QStringList list(int &active, QValueList <int> &);
-
-    private:
-        CFrameWork *m_fw;
-    };
-    friend class RecentListProvider;
-
-class WindowListProvider : public CListAction::Provider {
-    public:
-        WindowListProvider(CFrameWork *fw);
-        virtual ~WindowListProvider();
-        virtual QStringList list(int &active, QValueList <int> &);
-
-    private:
-        CFrameWork *m_fw;
-    };
-    friend class WindowListProvider;
-#endif
 
 private:
     QIcon *icon(const char *name);
