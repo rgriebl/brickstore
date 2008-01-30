@@ -219,16 +219,9 @@ CFrameWork::CFrameWork(QWidget *parent, Qt::WindowFlags f)
 
     menuBar()->addMenu(createMenu("extras", sl));
 
-    sl = CConfig::inst()->value("/MainWindow/Menubar/Window").toStringList();
-    if (sl.isEmpty())
-        sl << "window_mode"
-        << "-"
-        << "window_cascade"
-        << "window_tile"
-        << "-"
-        << "window_list";
-
-    menuBar()->addMenu(createMenu("window", sl));
+    QMenu *m = m_mdi->windowMenu(this);
+    m->menuAction()->setObjectName("window");
+    menuBar()->addMenu(m);
 
     sl = CConfig::inst()->value("/MainWindow/Menubar/Help").toStringList();
     if (sl.isEmpty())

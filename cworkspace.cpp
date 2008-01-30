@@ -17,16 +17,82 @@
 #include <QStackedLayout>
 #include <QTabBar>
 #include <QEvent>
-
-//#include "cresource.h"
+#include <QAction>
+#include <QMenu>
 
 #include "cworkspace.h"
 
+Q_DECLARE_METATYPE(QWidget *)
 
-#if defined( Q_WS_WIN )
-#include <QWindowsXPStyle>
-#include <QWindowsStyle>
-#endif
+class WindowMenu : public QMenu {
+    Q_OBJECT
+public:
+    WindowMenu(CWorkspace *ws, QWidget *parent)
+        : QMenu(parent), m_ws(ws)
+    {
+        connect(this, SIGNAL(aboutToShow()), this, SLOT(buildMenu()));
+        connect(this, SIGNAL(triggered(QAction *)), this, SLOT(activateWindow(QAction *)));
+
+        QActionGroup *ag = new QActionGroup(this);
+        ag->setExclusive(true);
+
+        m_tabtop = new QAction(tr("Show Tabs at Top"), ag);
+        m_tabtop->setCheckable(true);
+        m_tabbot = new QAction(tr("Show Tabs at Bottom"), ag);
+        m_tabbot->setCheckable(true);
+    }
+
+private slots:
+    void buildMenu()
+    {
+        clear();
+        addAction(m_tabtop);
+        addAction(m_tabbot);
+        addSeparator();
+
+        QWidget *active = m_ws->activeWindow();
+
+        foreach (QWidget *w, m_ws->allWindows()) {
+            QAction *a = addAction(w->windowTitle());
+            a->setCheckable(true);
+            QVariant v;
+            v.setValue(w);
+            a->setData(v);
+            a->setChecked(w == active);
+        }
+
+        m_tabtop->setChecked(m_ws->tabMode() == CWorkspace::TopTabs);
+        m_tabbot->setChecked(m_ws->tabMode() == CWorkspace::BottomTabs);
+    }
+
+    void activateWindow(QAction *a)
+    {
+        if (a == m_tabtop) {
+            m_ws->setTabMode(CWorkspace::TopTabs);
+        }
+        else if (a == m_tabbot) {
+            m_ws->setTabMode(CWorkspace::BottomTabs);
+        }
+        else if (a) {
+            if (QWidget *w = qvariant_cast<QWidget *>(a->data()))
+                m_ws->setCurrentWidget(w);
+        }
+    }
+
+private:
+    CWorkspace *m_ws;
+    QAction *   m_tabtop;
+    QAction *   m_tabbot;
+};
+
+
+QMenu *CWorkspace::windowMenu(QWidget *parent, const char *name)
+{
+    WindowMenu *wm = new WindowMenu(this, parent);
+    if (name)
+        wm->setObjectName(QLatin1String(name));
+    return wm;
+}
 
 
 CWorkspace::CWorkspace(QWidget *parent, Qt::WindowFlags f)
@@ -150,3 +216,5 @@ QWidget *CWorkspace::activeWindow()
 {
     return m_stacklayout->currentWidget();
 }
+
+#include "cworkspace.moc"

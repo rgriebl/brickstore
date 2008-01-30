@@ -20,6 +20,7 @@
 class QStackedLayout;
 class QTabBar;
 class QBoxLayout;
+class QMenu;
 
 
 class CWorkspace : public QWidget {
@@ -40,6 +41,8 @@ public:
 
     QWidget *activeWindow();
     QList <QWidget *> allWindows();
+
+    QMenu *windowMenu(QWidget *parent = 0, const char *name = 0);
 
 signals:
     void currentChanged(QWidget *);
