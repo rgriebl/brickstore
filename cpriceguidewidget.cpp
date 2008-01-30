@@ -585,8 +585,6 @@ void CPriceGuideWidget::paintHeader(QPainter *p, const QRect &r, Qt::Alignment a
 
 void CPriceGuideWidget::paintCell(QPainter *p, const QRect &r, Qt::Alignment align, const QString &str, bool alternate)
 {
-// style()->drawItemText(
-
     p->fillRect(r, palette().color(alternate ? QPalette::AlternateBase : QPalette::Base));
 
     QRect r2(r);
