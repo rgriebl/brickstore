@@ -291,19 +291,14 @@ public:
 };
 
 CAppearsInWidget::CAppearsInWidget(QWidget *parent)
-        : QTableView(parent)
+        : QTreeView(parent)
 {
     d = new CAppearsInWidgetPrivate();
 
-    //setItemDelegate ( new ColorDelegate ( ));
-    horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
-    horizontalHeader()->setStretchLastSection(true);
-    horizontalHeader()->setMovable(false);
-    horizontalHeader()->setSortIndicatorShown(false);
-    verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
-    verticalHeader()->hide();
-    setShowGrid(false);
     setAlternatingRowColors(true);
+    setAllColumnsShowFocus(true);
+    setUniformRowHeights(true);
+    setRootIsDecorated(false);
     setSortingEnabled(true);
     sortByColumn(0);
     setContextMenuPolicy(Qt::CustomContextMenu);

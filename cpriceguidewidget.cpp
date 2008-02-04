@@ -205,6 +205,11 @@ void CPriceGuideWidget::showBLLotsForSale()
         QDesktopServices::openUrl(BrickLink::inst()->url(BrickLink::URL_LotsForSale, d->m_pg->item(), d->m_pg->color()));
 }
 
+QSize CPriceGuideWidget::sizeHint() const
+{
+    return minimumSize();
+}
+
 void CPriceGuideWidget::doUpdate()
 {
     if (d->m_pg)
@@ -599,7 +604,8 @@ void CPriceGuideWidget::paintEvent(QPaintEvent *e)
     QPalette pal = palette();
     QPainter p(this);
 
-    p.fillRect(rect(), pal.base());
+    p.fillRect(contentsRect(), pal.base());
+    p.translate(offset.x(), offset.y());
 
     bool valid = d->m_pg && d->m_pg->valid();
     bool is_updating = d->m_pg && (d->m_pg->updateStatus() == BrickLink::Updating);

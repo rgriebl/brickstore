@@ -14,14 +14,14 @@
 #ifndef __CAPPEARSINWIDGET_H__
 #define __CAPPEARSINWIDGET_H__
 
-#include <QTableView>
+#include <QTreeView>
 #include "bricklink.h"
 
 
 class CAppearsInWidgetPrivate;
 class QAction;
 
-class CAppearsInWidget : public QTableView {
+class CAppearsInWidget : public QTreeView {
     Q_OBJECT
 
 public:

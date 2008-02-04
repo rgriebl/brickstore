@@ -25,11 +25,12 @@
 #include <qcursor.h>
 #include <qregexp.h>
 #include <qtooltip.h>
-#include <QTableView>
+#include <QTreeView>
 #include <QListView>
 #include <QHeaderView>
 #include <QStackedLayout>
 #include <QMenu>
+#include <QItemDelegate>
 
 //#include "citemtypecombo.h"
 //#include "cresource.h"
@@ -49,9 +50,9 @@ class CSelectItemPrivate {
 public:
     QLabel *      w_item_types_label;
     QComboBox *   w_item_types;
-    QTableView *  w_categories;
+    QTreeView *   w_categories;
     QStackedLayout *m_stack;
-    QTableView *  w_items;
+    QTreeView *   w_items;
     QListView *   w_thumbs;
     QToolButton * w_goto;
     QLabel *      w_filter_label;
@@ -69,30 +70,60 @@ public:
 };
 
 
+class CategoryDelegate : public QItemDelegate {
+public:
+    CategoryDelegate(QObject *parent = 0)
+            : QItemDelegate(parent)
+    { }
+
+    virtual void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
+    {
+        const BrickLink::CategoryModel *model = qobject_cast<const BrickLink::CategoryModel *>(index.model());
+
+        if (model && model->category(index) == BrickLink::CategoryModel::AllCategories) {
+            QStyleOptionViewItem myoption(option);
+
+            myoption.font.setBold(true);
+            QItemDelegate::paint(painter, myoption, index);
+            return;
+        }
+        QItemDelegate::paint(painter, option, index);
+    }
+};
+
+
+
+CSelectItem::CSelectItem(QWidget *parent)
+        : QWidget(parent)
+{
+    d = new CSelectItemPrivate();
+    d->m_inv_only = false;
+    init();
+}
+
 CSelectItem::CSelectItem(bool inv_only, QWidget *parent)
         : QWidget(parent)
 {
     d = new CSelectItemPrivate();
-
     d->m_inv_only = inv_only;
+    init();
+}
 
+void CSelectItem::init()
+{
     d->w_item_types_label = new QLabel(this);
     d->w_item_types = new QComboBox(this);
     d->w_item_types->setEditable(false);
 
-    d->w_categories = new QTableView(this);
+    d->w_categories = new QTreeView(this);
     d->w_categories->setSortingEnabled(true);
     d->w_categories->setAlternatingRowColors(true);
+    d->w_categories->setAllColumnsShowFocus(true);
+    d->w_categories->setUniformRowHeights(true);
+    d->w_categories->setRootIsDecorated(false);
     d->w_categories->setSelectionBehavior(QAbstractItemView::SelectRows);
     d->w_categories->setSelectionMode(QAbstractItemView::SingleSelection);
-    d->w_categories->setTextElideMode(Qt::ElideRight);
-    d->w_categories->horizontalHeader()->setResizeMode(QHeaderView::Fixed);
-    d->w_categories->horizontalHeader()->setStretchLastSection(true);
-    d->w_categories->horizontalHeader()->setMovable(false);
-    d->w_categories->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
-    d->w_categories->verticalHeader()->hide();
-    d->w_categories->setShowGrid(false);
-    d->w_categories->setWordWrap(false);
+    d->w_categories->setItemDelegate(new CategoryDelegate);
 
     d->w_goto = new QToolButton(this);
     d->w_goto->setAutoRaise(true);
@@ -131,23 +162,14 @@ CSelectItem::CSelectItem(bool inv_only, QWidget *parent)
     d->w_viewbutton->setMenu(d->w_viewmenu);
     d->w_viewbutton->setIcon(QIcon(":/images/22x22/viewmode"));
 
-    d->w_items = new QTableView(this);
+    d->w_items = new QTreeView(this);
     d->w_items->setSortingEnabled(true);
     d->w_items->setAlternatingRowColors(true);
+    d->w_items->setAllColumnsShowFocus(true);
+    d->w_items->setUniformRowHeights(true);
+    d->w_items->setRootIsDecorated(false);
     d->w_items->setSelectionBehavior(QAbstractItemView::SelectRows);
     d->w_items->setSelectionMode(QAbstractItemView::SingleSelection);
-    d->w_items->setTextElideMode(Qt::ElideRight);
-    d->w_items->horizontalHeader()->setResizeMode(QHeaderView::Fixed);
-    d->w_items->horizontalHeader()->setStretchLastSection(true);
-    d->w_items->horizontalHeader()->setMovable(false);
-    d->w_items->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
-    d->w_items->verticalHeader()->hide();
-    d->w_items->setShowGrid(false);
-
-// d->w_items->setSortColumn ( 2 );
-// d->w_items->setColumnWidthMode ( 0, QListView::Manual );
-// d->w_items->setColumnWidth ( 0, 0 );
-// d->m_items_tip = new ItemListToolTip ( d->w_items );
 
     d->w_thumbs = new QListView(this);
     d->w_thumbs->setMovement(QListView::Static);
@@ -155,29 +177,31 @@ CSelectItem::CSelectItem(bool inv_only, QWidget *parent)
     d->w_thumbs->setSelectionMode(QAbstractItemView::SingleSelection);
     d->w_thumbs->setTextElideMode(Qt::ElideRight);
 
-// d->w_thumbs->setShowToolTips ( false );
-// (void) new ItemIconToolTip ( d->w_thumbs );
-
     d->w_item_types->setModel(BrickLink::core()->itemTypeModel(d->m_inv_only ? BrickLink::ItemTypeModel::ExcludeWithoutInventory : BrickLink::ItemTypeModel::Default));
     d->w_categories->setModel(BrickLink::core()->categoryModel(BrickLink::CategoryModel::IncludeAllCategoriesItem));
+    d->w_items->setModel(BrickLink::core()->itemModel(BrickLink::ItemModel::Default));
+    d->w_thumbs->setModel(d->w_items->model());
+    d->w_items->hideColumn(0);
 
     connect(d->w_goto, SIGNAL(clicked()), this, SLOT(findItem()));
-    connect(d->w_filter_clear, SIGNAL(clicked()), d->w_filter_expression, SLOT(clearEdit()));
-    connect(d->w_filter_expression, SIGNAL(textChanged(const QString &)), this, SLOT(applyFilter()));
+    connect(d->w_filter_clear, SIGNAL(clicked()), d->w_filter_expression, SLOT(clearEditText()));
+    connect(d->w_filter_expression, SIGNAL(editTextChanged(const QString &)), this, SLOT(applyFilter()));
 
     connect(d->w_item_types, SIGNAL(currentIndexChanged(int)), this, SLOT(itemTypeChanged()));
     connect(d->w_categories->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(categoryChanged()));
 
-// connect ( d->w_item_types, SIGNAL( itemTypeActivated ( const BrickLink::ItemType * )), this, SLOT( itemTypeChanged ( )));
-// connect ( d->w_categories, SIGNAL( selectionChanged ( )), this, SLOT( categoryChanged ( )));
-    connect(d->w_items, SIGNAL(selectionChanged()), this, SLOT(itemChangedList()));
-    connect(d->w_items, SIGNAL(doubleClicked(QListViewItem *, const QPoint &, int)), this, SLOT(itemConfirmed()));
-    connect(d->w_items, SIGNAL(returnPressed(QListViewItem *)), this, SLOT(itemConfirmed()));
-    connect(d->w_items, SIGNAL(contextMenuRequested(QListViewItem *, const QPoint &, int)), this, SLOT(itemContextList(QListViewItem *, const QPoint &)));
+    connect(d->w_items->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(itemChanged()));
+    connect(d->w_thumbs->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(itemChanged()));
+    connect(d->w_items, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(itemConfirmed()));
+    connect(d->w_thumbs, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(itemConfirmed()));
+    connect(d->w_items, SIGNAL(activated(const QModelIndex &)), this, SLOT(itemConfirmed()));
+    connect(d->w_thumbs, SIGNAL(activated(const QModelIndex &)), this, SLOT(itemConfirmed()));
+
+/*    connect(d->w_items, SIGNAL(contextMenuRequested(QListViewItem *, const QPoint &, int)), this, SLOT(itemContextList(QListViewItem *, const QPoint &)));
     connect(d->w_thumbs, SIGNAL(selectionChanged()), this, SLOT(itemChangedIcon()));
     connect(d->w_thumbs, SIGNAL(doubleClicked(QIconViewItem *)), this, SLOT(itemConfirmed()));
     connect(d->w_thumbs, SIGNAL(returnPressed(QIconViewItem *)), this, SLOT(itemConfirmed()));
-    connect(d->w_thumbs, SIGNAL(contextMenuRequested(QIconViewItem *, const QPoint &)), this, SLOT(itemContextIcon(QIconViewItem *, const QPoint &)));
+    connect(d->w_thumbs, SIGNAL(contextMenuRequested(QIconViewItem *, const QPoint &)), this, SLOT(itemContextIcon(QIconViewItem *, const QPoint &)));*/
 // connect ( d->w_viewpopup, SIGNAL( activated ( int )), this, SLOT( viewModeChanged ( int )));
 
     QGridLayout *toplay = new QGridLayout(this);
@@ -218,8 +242,7 @@ CSelectItem::CSelectItem(bool inv_only, QWidget *parent)
 
     languageChange();
 
-// activating the [All Items] category takes too long
-// d->w_categories->setSelected ( d->w_categories->firstChild ( ), true );
+    setCurrentCategory(BrickLink::CategoryModel::AllCategories);
     setFocusProxy(d->w_item_types);
 }
 
@@ -254,6 +277,10 @@ bool CSelectItem::isOnlyWithInventory() const
 
 void CSelectItem::categoryChanged()
 {
+    BrickLink::ItemModel *model = qobject_cast<BrickLink::ItemModel *>(d->w_items->model());
+    const BrickLink::Category *cat = currentCategory();
+
+    model->setCategoryFilter(cat);
 }
 
 const BrickLink::Category *CSelectItem::currentCategory() const
@@ -283,6 +310,13 @@ void CSelectItem::itemTypeChanged()
     BrickLink::CategoryModel *model = qobject_cast<BrickLink::CategoryModel *>(d->w_categories->model());
     model->setItemTypeFilter(currentItemType());
     setCurrentCategory(oldcat);
+
+
+    BrickLink::ItemModel *model2 = qobject_cast<BrickLink::ItemModel *>(d->w_items->model());
+    const BrickLink::Category *cat = currentCategory();
+
+    model2->setItemTypeFilter(currentItemType());
+    model2->setCategoryFilter(cat);
 }
 
 const BrickLink::ItemType *CSelectItem::currentItemType() const
@@ -374,9 +408,32 @@ void CSelectItem::findItem()
     }
 }
 
+void CSelectItem::itemChanged()
+{
+    const BrickLink::Item *item = currentItem();
+
+    if (item)
+        emit itemSelected(item, false);
+}
+
+void CSelectItem::itemConfirmed()
+{
+    const BrickLink::Item *item = currentItem();
+
+    if (item)
+        emit itemSelected(item, true);
+}
+
 const BrickLink::Item *CSelectItem::currentItem() const
 {
-    return 0;
+    BrickLink::ItemModel *model = qobject_cast<BrickLink::ItemModel *>(d->w_items->model());
+
+    if (model && d->w_items->selectionModel()->hasSelection()) {
+        QModelIndex idx = d->w_items->selectionModel()->selectedIndexes().front();
+        return model->item(idx);
+    }
+    else
+        return 0;
 }
 
 bool CSelectItem::setCurrentItem(const BrickLink::Item *item)
@@ -391,7 +448,18 @@ bool CSelectItem::setCurrentItem(const BrickLink::Item *item)
     setCurrentItemType(itt ? itt : BrickLink::core()->itemType('P'));
     setCurrentCategory(cat ? cat : BrickLink::CategoryModel::AllCategories);
 
-    //TODO: set current item, if filter permits ->return true/false (found)
+    BrickLink::ItemModel *model = qobject_cast<BrickLink::ItemModel *>(d->w_items->model());
+
+    if (model) {
+        QModelIndex idx = model->index(item);
+        if (idx.isValid()) {
+            d->w_items->selectionModel()->select(model->index(item), QItemSelectionModel::SelectCurrent);
+            found = true;
+        }
+    }
+
+    //TODO: check filter-> return true/false (found)
+
     return found;
 }
 

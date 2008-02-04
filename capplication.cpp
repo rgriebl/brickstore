@@ -198,7 +198,7 @@ void CApplication::rebuildDatabase()
 
 QString CApplication::appName() const
 {
-    return "BrickStore";
+    return "BSE";
 }
 
 QString CApplication::appVersion() const

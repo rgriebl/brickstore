@@ -33,6 +33,8 @@ public:
     void setPicture(BrickLink::Picture *pic);
     BrickLink::Picture *picture() const;
 
+    virtual QSize sizeHint() const;
+
 protected slots:
     void doUpdate();
     void gotUpdate(BrickLink::Picture *);

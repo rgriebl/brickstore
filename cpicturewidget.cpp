@@ -49,17 +49,15 @@ CPictureWidget::CPictureWidget(QWidget *parent, Qt::WindowFlags f)
     setContextMenuPolicy(Qt::ActionsContextMenu);
 
     int fw = frameWidth() * 2;
-
     d->m_plabel = new QLabel(this);
-    d->m_plabel->setFrameStyle(QFrame::NoFrame);
     d->m_plabel->setAlignment(Qt::AlignCenter);
-    d->m_plabel->setBackgroundRole(QPalette::Base);
     d->m_plabel->setFixedSize(80, 80);
     d->m_plabel->setContextMenuPolicy(Qt::NoContextMenu);
 
     d->m_tlabel = new QLabel("Ay<br />Ay<br />Ay<br />Ay<br />Ay", this);
-    d->m_tlabel->setAlignment(Qt::AlignCenter);
-    d->m_tlabel->setBackgroundRole(QPalette::Base);
+    d->m_tlabel->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
+    d->m_tlabel->setWordWrap(true);
+    d->m_tlabel->setTextInteractionFlags(Qt::TextBrowserInteraction);
     d->m_tlabel->setFixedSize(2 * d->m_plabel->width(), d->m_tlabel->sizeHint().height());
     d->m_tlabel->setText(QString());
     d->m_tlabel->setContextMenuPolicy(Qt::NoContextMenu);
@@ -67,9 +65,8 @@ CPictureWidget::CPictureWidget(QWidget *parent, Qt::WindowFlags f)
     QBoxLayout *lay = new QVBoxLayout(this);
     lay->setMargin(fw + 4);
     lay->setSpacing(4);
-    lay->addWidget(d->m_plabel, 0, Qt::AlignCenter /*, AlignTop | AlignHCenter*/);
-
-    lay->addWidget(d->m_tlabel, 1, Qt::AlignCenter /*, Qt::AlignBottom | Qt::AlignHCenter*/);
+    lay->addWidget(d->m_plabel, 0, Qt::AlignCenter );
+    lay->addWidget(d->m_tlabel, 0, Qt::AlignCenter );
 
     QAction *a;
     a = new QAction(this);
@@ -127,6 +124,11 @@ CPictureWidget::~CPictureWidget()
         d->m_pic->release();
 
     delete d;
+}
+
+QSize CPictureWidget::sizeHint() const
+{
+    return layout()->minimumSize();
 }
 
 void CPictureWidget::mouseDoubleClickEvent(QMouseEvent *)
@@ -215,7 +217,11 @@ void CPictureWidget::redraw()
         d->m_plabel->setPixmap(QPixmap());
     }
     else if (d->m_pic && d->m_pic->valid()) {
-        d->m_tlabel->setText(QString("<b>") + d->m_pic->item()->id() + "</b>&nbsp; " + d->m_pic->item()->name());
+        d->m_tlabel->setText(QLatin1String("<center><b>") +
+                             d->m_pic->item()->id() +
+                             QLatin1String("</b>&nbsp; ") +
+                             d->m_pic->item()->name() +
+                             QLatin1String("</center>"));
         d->m_plabel->setPixmap(d->m_pic->pixmap());
     }
     else {
