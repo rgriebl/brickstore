@@ -14,14 +14,16 @@
 #ifndef __CREPORT_H__
 #define __CREPORT_H__
 
-#include <QObject>
-#include <QString>
-#include <QList>
+#include <qobject.h>
+#include <qstring.h>
+#include <qptrlist.h>
+#include <qprinter.h>
 
 #include "cdocument.h"
 
+//typedef QMap <QString, QString>  CReportVariables;
+
 class CReportPrivate;
-class QPrinter;
 
 class CReport : public QObject {
     Q_OBJECT
@@ -51,10 +53,10 @@ public:
 
     QPrinter *printer() const;
 
-    const QList<CReport *> &reports() const;
+    const QPtrList <CReport> &reports() const;
 
 private:
-    QList<CReport *> m_reports;
+    QPtrList <CReport> m_reports;
 
     mutable QPrinter *m_printer; // mutable for delayed initialization
 };

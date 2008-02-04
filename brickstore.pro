@@ -18,7 +18,7 @@ isEmpty( RELEASE ) {
 
 TEMPLATE     = app
 CONFIG      *= warn_on thread qt 
-QT          *= core gui xml network script
+QT          *= core gui xml network
 
 TARGET       = brickstore
 
@@ -94,7 +94,6 @@ unix:!macx {
   CONFIG += x11
 
   isEmpty( PREFIX ):PREFIX = /usr/local
-  DEFINES += INSTALL_PREFIX=\"$$PREFIX\"
 
   target.path = $$PREFIX/bin
   resources_i1.path  = $$PREFIX/share/brickstore/images
@@ -176,7 +175,6 @@ HEADERS += capplication.h \
            cutility.h \
            clocalemeasurement.h \
            cwindow.h \
-           creport.h \
 
 
 SOURCES += capplication.cpp \
@@ -203,7 +201,6 @@ SOURCES += capplication.cpp \
            cselectitem.cpp \
            clocalemeasurement.cpp \
            cwindow.cpp \
-           creport.cpp \
 
 
 for( form, XFORMS ) {

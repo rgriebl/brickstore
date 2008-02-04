@@ -16,7 +16,7 @@
 
 #include <time.h>
 
-class QScriptEngine;
+class QSInterpreter;
 
 class CReportPrivate {
 public:
@@ -24,7 +24,7 @@ public:
     QString             m_name;
     QString             m_code;
     QString             m_label;
-    QScriptEngine *     m_engine;
+    QSInterpreter *     m_interpreter;
 };
 
 #endif

@@ -17,7 +17,6 @@
 #include <QFileInfo>
 #include <QTextStream>
 #include <QLocale>
-#include <QUrl>
 
 #include "bricklink.h"
 
@@ -368,7 +367,7 @@ void BrickLink::Core::updatePriceGuide(BrickLink::PriceGuide *pg, bool high_prio
     pg->m_update_status = Updating;
     pg->addRef();
 
-    QUrl url("http://www.bricklink.com/priceGuide.asp"); // ?a=%c&viewType=N&colorID=%d&itemID=%s", tolower ( pg->item ( )->itemType ( )->id ( )), pg->color ( )->id ( ), pg->item ( )->id ( ));
+    QUrl url = "http://www.bricklink.com/priceGuide.asp"; // ?a=%c&viewType=N&colorID=%d&itemID=%s", tolower ( pg->item ( )->itemType ( )->id ( )), pg->color ( )->id ( ), pg->item ( )->id ( ));
 
     url.addQueryItem("a",        QChar(pg->item()->itemType()->id()).toLower());
     url.addQueryItem("viewType", "N");

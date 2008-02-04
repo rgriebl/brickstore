@@ -37,9 +37,6 @@ public:
     QString appURL() const;
     QString sysName() const;
     QString sysVersion() const;
-    
-    QString systemDataDir() const;
-    QString userDataDir() const;
 
     bool pixmapAlphaSupported() const;
 
