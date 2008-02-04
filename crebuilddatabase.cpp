@@ -298,7 +298,7 @@ bool CRebuildDatabase::downloadInventories(QVector<const BrickLink::Item *> &inv
     m_downloads_in_progress = 0;
     m_downloads_failed = 0;
 
-    QUrl url = "http://www.bricklink.com/catalogDownload.asp";
+    QUrl url("http://www.bricklink.com/catalogDownload.asp");
 
     const BrickLink::Item **itemp = invs.data();
     for (int i = 0; i < invs.count(); i++) {
