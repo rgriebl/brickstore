@@ -237,7 +237,6 @@ QImage BrickLink::Core::colorImage(const Color *col, int w, int h) const
 
     }
     else {
-        p.fillRect(0, 0, w, h, Qt::white);
         p.setRenderHint(QPainter::Antialiasing);
         p.setPen(Qt::darkGray);
         p.setBrush(QColor(255, 255, 255, 128));

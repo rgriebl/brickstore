@@ -18,7 +18,7 @@
 
 #include "bricklink.h"
 
-class QTreeView;
+class QTableView;
 
 
 class CSelectColor : public QWidget {
@@ -41,7 +41,7 @@ protected:
     virtual void showEvent(QShowEvent *);
 
 protected:
-    QTreeView *w_colors;
+    QTableView *w_colors;
 
     friend class DSelectColor;
 };

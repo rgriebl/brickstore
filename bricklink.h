@@ -750,63 +750,6 @@ protected:
 };
 
 
-class ItemModel : public QAbstractTableModel {
-    Q_OBJECT
-
-public:
-    enum Feature {
-        Default = 0,
-    };
-    Q_DECLARE_FLAGS(Features, Feature)
-
-    ItemModel(Features f, const Core *core);
-
-    QModelIndex index(int row, int column, const QModelIndex &parent) const;
-    QModelIndex index(const Item *item) const;
-    const Item *item(const QModelIndex &index) const;
-
-    virtual int rowCount(const QModelIndex &parent) const;
-    virtual int columnCount(const QModelIndex &parent) const;
-
-    virtual QVariant data(const QModelIndex &index, int role) const;
-    virtual QVariant headerData(int section, Qt::Orientation orient, int role) const;
-    virtual void sort(int column, Qt::SortOrder so);
-
-    void setItemTypeFilter(const ItemType *it);
-    void setCategoryFilter(const Category *cat);
-    void setTextFilter(const QString &regex);
-
-    void clearItemTypeFilter();
-    void clearCategoryFilter();
-    void clearTextFilter();
-
-    void setExcludeWithoutInventoryFilter(bool on);
-
-protected:
-    void rebuildItemList();
-
-    class Compare {
-    public:
-        Compare(bool asc, bool on_id);
-        bool operator()(const Item *i1, const Item *i2);
-
-    protected:
-        bool m_asc;
-        bool m_id;
-    };
-
-    QVector<const Item *> m_items;
-    const ItemType *m_type_filter;
-    const Category *m_cat_filter;
-    QString         m_text_filter;
-    Qt::SortOrder   m_sorted : 8;
-    int             m_sortcol : 8;
-    bool            m_inv_filter : 1;
-};
-
-
-
-
 class Core : public QObject {
     Q_OBJECT
 public:
@@ -833,7 +776,7 @@ public:
     ColorModel *colorModel() const;
     CategoryModel *categoryModel(CategoryModel::Features f) const;
     ItemTypeModel *itemTypeModel(ItemTypeModel::Features f) const;
-    ItemModel *itemModel(ItemModel::Features f) const;
+    //const QAbstractItemModel *itemModel() const;
 
     const QPixmap *noImage(const QSize &s);
 

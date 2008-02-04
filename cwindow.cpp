@@ -519,8 +519,8 @@ CWindow::CWindow(CDocument *doc, QWidget *parent)
     connect(BrickLink::inst(), SIGNAL(priceGuideUpdated(BrickLink::PriceGuide *)), this, SLOT(priceGuideUpdated(BrickLink::PriceGuide *)));
 
     connect(w_list, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(contextMenu(const QPoint &)));
-    connect(w_filter_clear, SIGNAL(clicked()), w_filter_expression, SLOT(clearEditText()));
-    connect(w_filter_expression, SIGNAL(editTextChanged(const QString &)), this, SLOT(applyFilter()));
+    connect(w_filter_clear, SIGNAL(clicked()), w_filter_expression, SLOT(clearEdit()));
+    connect(w_filter_expression, SIGNAL(textChanged(const QString &)), this, SLOT(applyFilter()));
     connect(w_filter_field, SIGNAL(activated(int)), this, SLOT(applyFilter()));
 
     connect(CConfig::inst(), SIGNAL(simpleModeChanged(bool)), w_list, SLOT(setSimpleMode(bool)));
