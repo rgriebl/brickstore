@@ -451,6 +451,7 @@ private slots:
 						for ( uint i = 0; i < all_items. count ( ); i++ ) {
 							const BrickLink::Item *it = all_items [i];
 							QString n ( it-> name ( ));
+                            n = n. stripWhiteSpace ( );
 
 							if (( n. length ( ) > longest_match ) &&
 								( color_and_item. find ( n )) >= 0 ) {
