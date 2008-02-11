@@ -192,7 +192,7 @@ public:
         int w = option.rect.width();
         int h = option.rect.height();
         int margin = 2;
-        Qt::Alignment align = (m_doc->data(idx, Qt::TextAlignmentRole).toInt() & ~Qt::AlignVertical_Mask) | Qt::AlignVCenter;
+        int align = (m_doc->data(idx, Qt::TextAlignmentRole).toInt() & ~Qt::AlignVertical_Mask) | Qt::AlignVCenter;
         quint64 colmask = 1ULL << idx.column();
         QString has_inv_tag;
 
@@ -545,7 +545,7 @@ CWindow::CWindow(CDocument *doc, QWidget *parent)
     updateErrorMask();
     languageChange();
 
-    w_list->setFocus();
+    setFocusProxy(w_list);
 }
 
 void CWindow::languageChange()

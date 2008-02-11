@@ -28,11 +28,12 @@
 class CMultiProgressBar;
 class QLabel;
 class QUndoGroup;
+class QMdiSubWindow;
 
 class CWindow;
 class CInfoBar;
 class CSpinner;
-class CWorkspace;
+class QMdiArea;
 class CTaskPaneManager;
 class CTaskInfoWidget;
 class CTaskPriceGuideWidget;
@@ -99,11 +100,9 @@ private slots:
     void viewStatusBar(bool);
     void viewFullScreen(bool);
 
-    void windowActivate(int);
-
     bool updateDatabase();
 
-    void connectWindow(QWidget *w);
+    void connectWindow(QMdiSubWindow *w);
 
     void gotPictureProgress(int p, int t);
     void gotPriceGuideProgress(int p, int t);
@@ -112,7 +111,6 @@ private slots:
     void configure(const char *);
 
     void setOnlineStatus(QAction *);
-    void setWindowMode(QAction *);
     void setSimpleMode(bool);
     void cancelAllTransfers();
     void toggleAddItemDialog(bool b);
@@ -151,7 +149,7 @@ private:
 
     QMap<QAction *, bool (CWindow::*)() const> m_toggle_updates;
 
-    CWorkspace * m_mdi;
+    QMdiArea * m_mdi;
 
     CWindow *m_current_window;
 

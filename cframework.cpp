@@ -18,10 +18,11 @@
 #include <QAction>
 #include <QDesktopWidget>
 #include <QCloseEvent>
-#include <qmenubar.h>
-#include <qtoolbar.h>
-#include <qstatusbar.h>
-//#include <qwidgetlist.h>
+#include <QMdiSubWindow>
+#include <QMenuBar>
+#include <QToolBar>
+#include <QStatusBar>
+#include <QMdiArea>
 #include <qtimer.h>
 #include <qlabel.h>
 #include <qbitmap.h>
@@ -43,7 +44,6 @@
 //#include "cutility.h"
 #include "cspinner.h"
 //#include "cundo.h"
-#include "cworkspace.h"
 #include "ctaskpanemanager.h"
 #include "ctaskwidgets.h"
 #include "cprogressdialog.h"
@@ -108,6 +108,116 @@ private:
 };
 
 
+Q_DECLARE_METATYPE(QMdiSubWindow *)
+
+class WindowMenu : public QMenu {
+    Q_OBJECT
+public:
+    WindowMenu(QMdiArea *mdi, QWidget *parent)
+        : QMenu(parent), m_mdi(mdi)
+    {
+        connect(this, SIGNAL(aboutToShow()), this, SLOT(buildMenu()));
+        connect(this, SIGNAL(triggered(QAction *)), this, SLOT(activateWindow(QAction *)));
+
+        QActionGroup *ag = new QActionGroup(this);
+        ag->setExclusive(true);
+
+        m_subwin = new QAction(tr("Show &Sub Windows"), ag);
+        m_subwin->setCheckable(true);
+        m_tabtop = new QAction(tr("Show Tabs at &Top"), ag);
+        m_tabtop->setCheckable(true);
+        m_tabbot = new QAction(tr("Show Tabs at &Bottom"), ag);
+        m_tabbot->setCheckable(true);
+        m_cascade = new QAction(tr("&Cascade"), ag);
+        m_tile = new QAction(tr("T&ile"), ag);
+    }
+
+private slots:
+    void buildMenu()
+    {
+        clear();
+        addAction(m_subwin);
+        addAction(m_tabtop);
+        addAction(m_tabbot);
+
+        
+        if (m_mdi->viewMode() == QMdiArea::SubWindowView)
+            m_subwin->setChecked(true);
+        else if (m_mdi->tabPosition() == QTabWidget::North) 
+            m_tabtop->setChecked(true);
+        else
+            m_tabbot->setChecked(true);
+
+        QList<QMdiSubWindow *> subw = m_mdi->subWindowList();
+        
+        if (subw.isEmpty()){
+            return;
+        }
+        else if (m_subwin->isChecked()) {
+            addSeparator();
+            addAction(m_cascade);
+            addAction(m_tile);
+        }
+
+        addSeparator();
+
+        QMdiSubWindow *active = m_mdi->currentSubWindow();
+
+        int i = 0;
+        foreach (QMdiSubWindow *w, subw) {
+            QString s = w->windowTitle();
+            if (i < 10)
+                s.prepend(QString("&%1   ").arg((i+1)%10));
+
+            QAction *a = addAction(s);
+            a->setCheckable(true);
+            QVariant v;
+            v.setValue(w);
+            a->setData(v);
+            a->setChecked(w == active);
+            i++;
+        }
+    }
+
+    void activateWindow(QAction *a)
+    {
+        if (a == m_subwin) {
+            m_mdi->setViewMode(QMdiArea::SubWindowView);
+        }
+        if (a == m_tabtop) {
+            m_mdi->setViewMode(QMdiArea::TabbedView);
+            m_mdi->setTabPosition(QTabWidget::North);
+            m_mdi->setTabShape(QTabWidget::Rounded);
+        }
+        else if (a == m_tabbot) {
+            m_mdi->setViewMode(QMdiArea::TabbedView);
+            m_mdi->setTabPosition(QTabWidget::South);
+            m_mdi->setTabShape(QTabWidget::Triangular);
+        }
+        else if (a == m_cascade) {
+            m_mdi->cascadeSubWindows();
+        }
+        else if (a == m_tile) {
+            m_mdi->tileSubWindows();
+        }
+        else if (a) {
+            if (QMdiSubWindow *w = qvariant_cast<QMdiSubWindow *>(a->data()))
+                m_mdi->setActiveSubWindow(w);
+        }
+    }
+
+private:
+    QMdiArea *m_mdi;
+    QAction * m_subwin;
+    QAction * m_tabtop;
+    QAction * m_tabbot;
+    QAction * m_cascade;
+    QAction * m_tile;
+};
+
+
+
+
 CFrameWork *CFrameWork::s_inst = 0;
 
 CFrameWork *CFrameWork::inst()
@@ -153,9 +263,21 @@ CFrameWork::CFrameWork(QWidget *parent, Qt::WindowFlags f)
 
     m_current_window = 0;
 
-    m_mdi = new CWorkspace(this);
-    connect(m_mdi, SIGNAL(currentChanged(QWidget *)), this, SLOT(connectWindow(QWidget *)));
+    m_mdi = new QMdiArea(this);
+    connect(m_mdi, SIGNAL(subWindowActivated(QMdiSubWindow *)), this, SLOT(connectWindow(QMdiSubWindow *)));
 
+    bool subwin = (CConfig::inst()->value("/MainWindow/Layout/MdiViewMode", QMdiArea::TabbedView).toInt() == QMdiArea::SubWindowView);
+    bool below = (CConfig::inst()->value("/MainWindow/Layout/TabPosition", QTabWidget::North).toInt() == QTabWidget::South);
+/*
+    if (subwin) {
+        m_mdi->setViewMode(QMdiArea::SubWindowView);
+    }    
+    else {
+        m_mdi->setViewMode(QMdiArea::TabbedView);
+        m_mdi->setTabPosition(below ? QTabWidget::South : QTabWidget::North);
+        m_mdi->setTabShape(below ? QTabWidget::Triangular : QTabWidget::Rounded);
+    }
+*/     
     setCentralWidget(m_mdi);
 
     m_taskpanes = new CTaskPaneManager(this);
@@ -260,7 +382,7 @@ CFrameWork::CFrameWork(QWidget *parent, Qt::WindowFlags f)
 
     menuBar()->addMenu(createMenu("extras", sl));
 
-    QMenu *m = m_mdi->windowMenu(this);
+    QMenu *m = new WindowMenu(m_mdi, this);
     m->menuAction()->setObjectName("window");
     menuBar()->addMenu(m);
 
@@ -347,12 +469,6 @@ CFrameWork::CFrameWork(QWidget *parent, Qt::WindowFlags f)
     if (ba.isEmpty() || !restoreState(ba))
         findAction("view_toolbar")->setChecked(true);
 
-    /* switch ( CConfig::inst ( )->value ( "/MainWindow/Layout/WindowMode", 1 ).toInt ( )) {
-      default:
-      case  1: findAction ( "window_mode_tab_above" )->setChecked ( true ); break;
-      case  2: findAction ( "window_mode_tab_below" )->setChecked ( true ); break;
-     }
-    */
     BrickLink::Core *bl = BrickLink::inst();
 
     connect(CConfig::inst(), SIGNAL(onlineStatusChanged(bool)), bl, SLOT(setOnlineStatus(bool)));
@@ -485,11 +601,6 @@ void CFrameWork::translateActions()
         { "extras_net_online",              tr("Online Mode"),                        0 },
         { "extras_net_offline",             tr("Offline Mode"),                       0 },
         { "window",                         tr("&Windows"),                           0 },
-        { "window_mode_mdi",                tr("Standard MDI Mode"),                  0 },
-        { "window_mode_tab_above",          tr("Show Tabs at Top"),                   0 },
-        { "window_mode_tab_below",          tr("Show Tabs at Bottom"),                0 },
-        { "window_cascade",                 tr("Cascade"),                            0 },
-        { "window_tile",                    tr("Tile"),                               0 },
         { "help",                           tr("&Help"),                              0 },
         { "help_whatsthis",                 tr("What's this?"),                       tr("Shift+F1", "Help|WhatsThis") },
         { "help_about",                     tr("About..."),                           0 },
@@ -565,7 +676,8 @@ CFrameWork::~CFrameWork()
 
     CConfig::inst()->setValue("/MainWindow/Layout/DockWindows", saveState());
     CConfig::inst()->setValue("/MainWindow/Layout/Geometry", saveGeometry());
-    CConfig::inst()->setValue("/MainWindow/Layout/WindowMode", m_mdi->tabMode());
+    CConfig::inst()->setValue("/MainWindow/Layout/WindowMode", m_mdi->viewMode());
+    CConfig::inst()->setValue("/MainWindow/Layout/TabPosition", m_mdi->tabPosition());
 
     if (m_add_dialog)
         CConfig::inst()->setValue("/MainWindow/AddItemDialog/Geometry", m_add_dialog->saveGeometry());
@@ -874,12 +986,6 @@ void CFrameWork::createActions()
     (void) newQAction(g, "extras_net_online", true);
     (void) newQAction(g, "extras_net_offline", true);
 
-    /*
-     l = new CListAction ( true, this, "window_list" );
-     l->setListProvider ( new WindowListProvider ( this ));
-     connect ( l, SIGNAL( activated ( int )), this, SLOT( windowActivate ( int )));
-    */
-
     (void) newQAction(this, "help_whatsthis", false, this, SLOT(whatsThis()));
 
     a = newQAction(this, "help_about", false, cApp, SLOT(about()));
@@ -1017,18 +1123,21 @@ bool CFrameWork::createWindow(CDocument *doc)
     if (!doc)
         return false;
 
-    QList <CWindow *> l = allWindows();
-
-    foreach(CWindow *w, l) {
-        if (w->document() == doc) {
-            m_mdi->setCurrentWidget(w);
-            w->setFocus();
+    foreach(QMdiSubWindow *w, m_mdi->subWindowList()) {
+        CWindow *iw = qobject_cast<CWindow *>(w->widget());
+        
+        if (iw && iw->document() == doc) {
+            m_mdi->setActiveSubWindow(w);
+            iw->setFocus();
             return true;
         }
     }
 
-    m_mdi->addWindow(new CWindow(doc, m_mdi));
-    return true;
+    QMdiSubWindow *sw = m_mdi->addSubWindow(new CWindow(doc, 0));
+    if (sw)
+        sw->widget()->show();
+    
+    return (sw);
 }
 
 
@@ -1043,17 +1152,6 @@ bool CFrameWork::updateDatabase()
         return d.exec();
     }
     return false;
-}
-
-void CFrameWork::windowActivate(int i)
-{
-    QList <CWindow *> l = allWindows();
-
-    if ((i >= 0) && (i < l.count())) {
-        QWidget *w = l.at(i);
-        m_mdi->setCurrentWidget(w);
-        w->setFocus();
-    }
 }
 
 void CFrameWork::connectAction(bool do_connect, const char *name, CWindow *window, const char *windowslot, bool (CWindow::* is_on_func)() const)
@@ -1167,9 +1265,9 @@ void CFrameWork::connectAllActions(bool do_connect, CWindow *window)
     updateAllToggleActions(window);
 }
 
-void CFrameWork::connectWindow(QWidget *w)
+void CFrameWork::connectWindow(QMdiSubWindow *sw)
 {
-    if (w && (w == m_current_window))
+    if (sw && sw->widget() && (sw->widget() == m_current_window))
         return;
 
     if (m_current_window) {
@@ -1183,8 +1281,8 @@ void CFrameWork::connectWindow(QWidget *w)
         m_current_window = 0;
     }
 
-    if (w && qobject_cast <CWindow *> (w)) {
-        CWindow *window = static_cast <CWindow *>(w);
+    if (sw && qobject_cast<CWindow *>(sw->widget())) {
+        CWindow *window = static_cast <CWindow *>(sw->widget());
         CDocument *doc = window->document();
 
         connectAllActions(true, window);
@@ -1410,14 +1508,6 @@ void CFrameWork::configure(const char *page)
      dlg.exec ( );*/
 }
 
-void CFrameWork::setWindowMode(QAction *act)
-{
-    bool below = (act == findAction("window_mode_tab_below"));
-
-    m_mdi->setTabMode(below ? CWorkspace::BottomTabs : CWorkspace::TopTabs);
-
-}
-
 void CFrameWork::setOnlineStatus(QAction *act)
 {
     bool b = (act == findAction("extras_net_online"));
@@ -1504,25 +1594,11 @@ void CFrameWork::closeEvent(QCloseEvent *e)
 
 bool CFrameWork::closeAllWindows()
 {
-    QList <CWindow *> list = allWindows();
-
-    foreach(CWindow *w, list) {
+    foreach(QMdiSubWindow *w, m_mdi->subWindowList()) {
         if (!w->close())
             return false;
     }
     return true;
-}
-
-QList <CWindow *> CFrameWork::allWindows() const
-{
-    QList <CWindow *> res;
-
-    foreach(QWidget *w, m_mdi->allWindows()) {
-        CWindow *win = qobject_cast<CWindow *> (w);
-        if (win)
-            res << win;
-    }
-    return res;
 }
 
 void CFrameWork::cancelAllTransfers()
