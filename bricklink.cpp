@@ -28,7 +28,6 @@
 
 #include "cconfig.h"
 #include "cutility.h"
-#include "cmappedfile.h"
 #include "bricklink.h"
 
 #define DEFAULT_DATABASE_VERSION  0
@@ -561,79 +560,83 @@ bool BrickLink::Core::readDatabase(const QString &fname)
     bool result = false;
     stopwatch *sw = 0; //new stopwatch( "readDatabase" );
 
-    CMappedFile f(filename);
-    QDataStream *pds = f.open();
+    QFile f(filename);
+    if (f.open(QFile::ReadOnly)) {
+        const char *data = reinterpret_cast<char *>(f.map(0, f.size()));
 
-    if (pds) {
-        QDataStream &ds = *pds;
-        ds.setVersion(QDataStream::Qt_3_3);
+        if (data) {
+            QByteArray ba = QByteArray::fromRawData(data, f.size());
+            QDataStream ds(ba);
 
-        quint32 magic = 0, filesize = 0, version = 0;
+            ds.setVersion(QDataStream::Qt_3_3);
 
-        ds >> magic >> filesize >> version;
+            quint32 magic = 0, filesize = 0, version = 0;
 
-        if ((magic != quint32(0xb91c5703)) || (filesize != f.size()) || (version != DEFAULT_DATABASE_VERSION))
-            return false;
+            ds >> magic >> filesize >> version;
 
-        ds.setByteOrder(QDataStream::LittleEndian);
+            if ((magic != quint32(0xb91c5703)) || (filesize != f.size()) || (version != DEFAULT_DATABASE_VERSION))
+                return false;
 
-        // colors
-        quint32 colc = 0;
-        ds >> colc;
+            ds.setByteOrder(QDataStream::LittleEndian);
 
-        for (quint32 i = colc; i; i--) {
-            Color *col = new Color();
-            ds >> col;
-            m_databases.colors.insert(col->id(), col);
-        }
+            // colors
+            quint32 colc = 0;
+            ds >> colc;
 
-        // categories
-        quint32 catc = 0;
-        ds >> catc;
+            for (quint32 i = colc; i; i--) {
+                Color *col = new Color();
+                ds >> col;
+                m_databases.colors.insert(col->id(), col);
+            }
 
-        for (quint32 i = catc; i; i--) {
-            Category *cat = new Category();
-            ds >> cat;
-            m_databases.categories.insert(cat->id(), cat);
-        }
+            // categories
+            quint32 catc = 0;
+            ds >> catc;
 
-        // types
-        quint32 ittc = 0;
-        ds >> ittc;
+            for (quint32 i = catc; i; i--) {
+                Category *cat = new Category();
+                ds >> cat;
+                m_databases.categories.insert(cat->id(), cat);
+            }
 
-        for (quint32 i = ittc; i; i--) {
-            ItemType *itt = new ItemType();
-            ds >> itt;
-            m_databases.item_types.insert(itt->id(), itt);
-        }
+            // types
+            quint32 ittc = 0;
+            ds >> ittc;
 
-        // items
-        quint32 itc = 0;
-        ds >> itc;
+            for (quint32 i = ittc; i; i--) {
+                ItemType *itt = new ItemType();
+                ds >> itt;
+                m_databases.item_types.insert(itt->id(), itt);
+            }
 
-        m_databases.items.reserve(itc);
-        for (quint32 i = itc; i; i--) {
-            Item *item = new Item();
-            ds >> item;
-            m_databases.items.append(item);
-        }
-        quint32 allc = 0;
-        ds >> allc >> magic;
+            // items
+            quint32 itc = 0;
+            ds >> itc;
 
-        if ((allc == (colc + ittc + catc + itc)) && (magic == quint32(0xb91c5703))) {
-            delete sw;
-#ifdef _MSC_VER
-#define PF_SIZE_T   "I"
-#else
-#define PF_SIZE_T   "z"
-#endif
-            qDebug("Color: %8u  (%11" PF_SIZE_T "u bytes)", m_databases.colors.count(),     m_databases.colors.count()     * (sizeof(Color)    + 20));
-            qDebug("Types: %8u  (%11" PF_SIZE_T "u bytes)", m_databases.item_types.count(), m_databases.item_types.count() * (sizeof(ItemType) + 20));
-            qDebug("Cats : %8u  (%11" PF_SIZE_T "u bytes)", m_databases.categories.count(), m_databases.categories.count() * (sizeof(Category) + 20));
-            qDebug("Items: %8u  (%11" PF_SIZE_T "u bytes)", m_databases.items.count(),      m_databases.items.count()      * (sizeof(Item)     + 20));
-#undef PF_SIZE_T
+            m_databases.items.reserve(itc);
+            for (quint32 i = itc; i; i--) {
+                Item *item = new Item();
+                ds >> item;
+                m_databases.items.append(item);
+            }
+            quint32 allc = 0;
+            ds >> allc >> magic;
 
-            result = true;
+            if ((allc == (colc + ittc + catc + itc)) && (magic == quint32(0xb91c5703))) {
+                delete sw;
+    #ifdef _MSC_VER
+    #define PF_SIZE_T   "I"
+    #else
+    #define PF_SIZE_T   "z"
+    #endif
+                qDebug("Color: %8u  (%11" PF_SIZE_T "u bytes)", m_databases.colors.count(),     m_databases.colors.count()     * (sizeof(Color)    + 20));
+                qDebug("Types: %8u  (%11" PF_SIZE_T "u bytes)", m_databases.item_types.count(), m_databases.item_types.count() * (sizeof(ItemType) + 20));
+                qDebug("Cats : %8u  (%11" PF_SIZE_T "u bytes)", m_databases.categories.count(), m_databases.categories.count() * (sizeof(Category) + 20));
+                qDebug("Items: %8u  (%11" PF_SIZE_T "u bytes)", m_databases.items.count(),      m_databases.items.count()      * (sizeof(Item)     + 20));
+    #undef PF_SIZE_T
+
+                result = true;
+            }
         }
     }
     if (!result) {
