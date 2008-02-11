@@ -32,6 +32,8 @@
 #include <QMimeData>
 #include <QAbstractListModel>
 
+#include <time.h>
+
 #include "cref.h"
 #include "cmoney.h"
 #include "ctransfer.h"
