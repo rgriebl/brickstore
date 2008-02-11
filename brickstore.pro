@@ -156,14 +156,12 @@ HEADERS += capplication.h \
            cmoney.h \
            cref.h \
            ctransfer.h \
-           cmappedfile.h \
            cconfig.h \
            crebuilddatabase.h \
            cprogressdialog.h \
            cdocument.h \
            cdocument_p.h \
            cselectcolor.h \
-           cworkspace.h \
            cframework.h \
            cpicturewidget.h \
            cappearsinwidget.h \
@@ -183,13 +181,11 @@ SOURCES += capplication.cpp \
            cmoney.cpp \
            cref.cpp \
            ctransfer.cpp \
-           cmappedfile.cpp \
            cconfig.cpp \
            crebuilddatabase.cpp \
            cprogressdialog.cpp \
            cdocument.cpp \
            cselectcolor.cpp \
-           cworkspace.cpp \
            cframework.cpp \
            cpicturewidget.cpp \
            cappearsinwidget.cpp \
