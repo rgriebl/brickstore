@@ -9,7 +9,7 @@
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
-****************************************************************************/
+*****************************************************************************/
 
 #include "qtemporaryresource.h"
 #include "qtemporaryresource_p.h"
@@ -23,7 +23,7 @@
 #include "qstringlist.h"
 #include <qshareddata.h>
 #include <qplatformdefs.h>
-#include "private/qabstractfileengine_p.h"
+//#include "private/qabstractfileengine_p.h"
 
 class QTemporaryResourcePrivate {
 public:
@@ -99,10 +99,11 @@ QAbstractFileEngine *QTemporaryResourceFileEngineHandler::create(const QString &
 }
 
 //resource engine
-class QTemporaryResourceFileEnginePrivate : public QAbstractFileEnginePrivate
+class QTemporaryResourceFileEnginePrivate //: public QAbstractFileEnginePrivate
 {
 protected:
-    Q_DECLARE_PUBLIC(QTemporaryResourceFileEngine)
+//    Q_DECLARE_PUBLIC(QTemporaryResourceFileEngine)
+    friend class QTemporaryResourceFileEngine;
 private:
     QString key;
     QByteArray value;
@@ -138,7 +139,8 @@ bool QTemporaryResourceFileEngine::caseSensitive() const
 }
 
 QTemporaryResourceFileEngine::QTemporaryResourceFileEngine(const QString &file) :
-    QAbstractFileEngine(*new QTemporaryResourceFileEnginePrivate)
+//    QAbstractFileEngine(*new QTemporaryResourceFileEnginePrivate)
+    QAbstractFileEngine(), d(new QTemporaryResourceFileEnginePrivate)
 {
     setFileName(file);
 }
@@ -149,7 +151,7 @@ QTemporaryResourceFileEngine::~QTemporaryResourceFileEngine()
 
 void QTemporaryResourceFileEngine::setFileName(const QString &file)
 {
-    Q_D(QTemporaryResourceFileEngine);
+//    Q_D(QTemporaryResourceFileEngine);
 
     d->key = file;
     if (d->key.startsWith(QLatin1String("#/")))
@@ -158,7 +160,7 @@ void QTemporaryResourceFileEngine::setFileName(const QString &file)
 
 bool QTemporaryResourceFileEngine::open(QIODevice::OpenMode flags)
 {
-    Q_D(QTemporaryResourceFileEngine);
+//    Q_D(QTemporaryResourceFileEngine);
     if (d->key.isEmpty()) {
         qWarning("QTemporaryResourceFileEngine::open: Missing file name");
         return false;
@@ -185,7 +187,7 @@ bool QTemporaryResourceFileEngine::flush()
 
 qint64 QTemporaryResourceFileEngine::read(char *data, qint64 len)
 {
-    Q_D(QTemporaryResourceFileEngine);
+//    Q_D(QTemporaryResourceFileEngine);
     if(len > d->value.size()-d->offset)
         len = d->value.size()-d->offset;
     if(len <= 0)
@@ -222,7 +224,7 @@ bool QTemporaryResourceFileEngine::link(const QString &)
 
 qint64 QTemporaryResourceFileEngine::size() const
 {
-    Q_D(const QTemporaryResourceFileEngine);
+//    Q_D(const QTemporaryResourceFileEngine);
     if(!d->valid)
         return 0;
     return d->value.size();
@@ -230,13 +232,13 @@ qint64 QTemporaryResourceFileEngine::size() const
 
 qint64 QTemporaryResourceFileEngine::pos() const
 {
-    Q_D(const QTemporaryResourceFileEngine);
+//    Q_D(const QTemporaryResourceFileEngine);
     return d->offset;
 }
 
 bool QTemporaryResourceFileEngine::atEnd() const
 {
-    Q_D(const QTemporaryResourceFileEngine);
+//    Q_D(const QTemporaryResourceFileEngine);
     if(!d->valid)
         return true;
     return d->offset == d->value.size();
@@ -244,7 +246,7 @@ bool QTemporaryResourceFileEngine::atEnd() const
 
 bool QTemporaryResourceFileEngine::seek(qint64 pos)
 {
-    Q_D(QTemporaryResourceFileEngine);
+//    Q_D(QTemporaryResourceFileEngine);
     if(!d->valid)
         return false;
 
@@ -261,7 +263,7 @@ bool QTemporaryResourceFileEngine::isSequential() const
 
 QAbstractFileEngine::FileFlags QTemporaryResourceFileEngine::fileFlags(QAbstractFileEngine::FileFlags type) const
 {
-    Q_D(const QTemporaryResourceFileEngine);
+//    Q_D(const QTemporaryResourceFileEngine);
     QAbstractFileEngine::FileFlags ret = 0;
     if(!d->valid)
         return ret;
@@ -282,7 +284,7 @@ bool QTemporaryResourceFileEngine::setPermissions(uint)
 
 QString QTemporaryResourceFileEngine::fileName(FileName) const
 {
-    Q_D(const QTemporaryResourceFileEngine);
+//    Q_D(const QTemporaryResourceFileEngine);
     return d->key;
 }
 

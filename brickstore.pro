@@ -126,6 +126,10 @@ macx {
   CONFIG += x86
 }
 
+win {
+  SOURCES += dotnetstyle.cpp
+  HEADERS += dotnetstyle.h
+}
 
 XFORMS  += registration \
            information \

@@ -31,7 +31,8 @@ class QTemporaryResourceFileEnginePrivate;
 class QTemporaryResourceFileEngine : public QAbstractFileEngine
 {
 private:
-    Q_DECLARE_PRIVATE(QTemporaryResourceFileEngine)
+//    Q_DECLARE_PRIVATE(QTemporaryResourceFileEngine)
+    QTemporaryResourceFileEnginePrivate *d;
 public:
     explicit QTemporaryResourceFileEngine(const QString &path);
     ~QTemporaryResourceFileEngine();

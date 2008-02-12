@@ -64,6 +64,8 @@ public:
 
     void updateAllToggleActions(CWindow *window);
 
+    bool eventFilter(QObject *o, QEvent *e);
+
 public slots:
     void selectionUpdate(const CDocument::ItemList &selection);
     void statisticsUpdate();

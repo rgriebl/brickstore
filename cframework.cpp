@@ -231,6 +231,19 @@ CFrameWork *CFrameWork::inst()
     return s_inst;
 }
 
+bool CFrameWork::eventFilter(QObject *o, QEvent *e)
+{
+    if (o == m_mdi && e->type() == QEvent::ChildPolished) {
+        QChildEvent *ce = static_cast<QChildEvent *>(e);
+        
+        if (QTabBar *tb = qobject_cast<QTabBar *>(ce->child())) {
+            tb->setElideMode(Qt::ElideMiddle);
+            tb->setDrawBase(false);
+        }
+    }
+    return QMainWindow::eventFilter(o, e);
+}
+
 
 CFrameWork::CFrameWork(QWidget *parent, Qt::WindowFlags f)
         : QMainWindow(parent, f)
@@ -239,27 +252,22 @@ CFrameWork::CFrameWork(QWidget *parent, Qt::WindowFlags f)
 
     m_running = false;
 
-// qApp->setMainWidget ( this );
-
 #if defined( Q_WS_X11 )
     if (!icon() || icon()->isNull()) {
         QPixmap pix(":/icon");
         if (!pix.isNull())
-            setIcon(pix);
+            setWindowIcon(pix);
     }
 #endif
 
     setUnifiedTitleAndToolBarOnMac(true);
     setAcceptDrops(true);
 
-// (void) new CIconFactory ( );
-
     m_undogroup = new QUndoGroup(this);
 
     connect(cApp, SIGNAL(openDocument(const QString &)), this, SLOT(openDocument(const QString &)));
 
     m_recent_files = CConfig::inst()->value("/Files/Recent").toStringList();
-
     while (m_recent_files.count() > MaxRecentFiles)
         m_recent_files.pop_back();
 
@@ -268,6 +276,24 @@ CFrameWork::CFrameWork(QWidget *parent, Qt::WindowFlags f)
     m_mdi = new CWorkspace(this);
     m_mdi->setTabMode(static_cast<CWorkspace::TabMode>(CConfig::inst()->value("/MainWindow/Layout/WindowMode", CWorkspace::TopTabs).toInt()));
     connect(m_mdi, SIGNAL(currentChanged(QWidget *)), this, SLOT(connectWindow(QWidget *)));
+
+#else
+    m_mdi = new QMdiArea(this);
+    m_mdi->installEventFilter(this);
+    connect(m_mdi, SIGNAL(subWindowActivated(QMdiSubWindow *)), this, SLOT(connectWindow(QMdiSubWindow *)));
+
+    bool subwin = (CConfig::inst()->value("/MainWindow/Layout/MdiViewMode", QMdiArea::TabbedView).toInt() == QMdiArea::SubWindowView);
+    bool below = (CConfig::inst()->value("/MainWindow/Layout/TabPosition", QTabWidget::North).toInt() == QTabWidget::South);
+
+    if (subwin) {
+        m_mdi->setViewMode(QMdiArea::SubWindowView);
+    }
+    else {
+        m_mdi->setViewMode(QMdiArea::TabbedView);
+        m_mdi->setTabPosition(below ? QTabWidget::South : QTabWidget::North);
+        m_mdi->setTabShape(below ? QTabWidget::Triangular : QTabWidget::Rounded);
+    }
+#endif
 
     setCentralWidget(m_mdi);
 

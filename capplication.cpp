@@ -53,8 +53,9 @@
 #define XSTR(a) #a
 #define STR(a) XSTR(a)
 
-#include "dotnetstyle.cpp"
-
+#if defined( Q_WS_WIN )
+#include "dotnetstyle.h"
+#endif
 
 CApplication *cApp = 0;
 
