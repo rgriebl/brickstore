@@ -53,6 +53,8 @@
 #define XSTR(a) #a
 #define STR(a) XSTR(a)
 
+#include "dotnetstyle.cpp"
+
 
 CApplication *cApp = 0;
 
@@ -83,6 +85,9 @@ CApplication::CApplication(const char *rebuild_db_only, int _argc, char **_argv)
 
     extern bool Q_GUI_EXPORT qt_use_native_dialogs;
     qt_use_native_dialogs = !((wv & QSysInfo::WV_DOS_based) || ((wv & QSysInfo::WV_NT_based) < QSysInfo::WV_XP));
+
+ //   if (!rebuild_db_only)
+ //       setStyle(new DotNetStyle());
 
 #elif defined( Q_WS_X11 )
     extern bool qt_use_xrender;

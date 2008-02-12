@@ -21,6 +21,7 @@ class QStackedLayout;
 class QTabBar;
 class QBoxLayout;
 class QMenu;
+class QToolButton;
 
 
 class CWorkspace : public QWidget {
@@ -46,6 +47,7 @@ public:
 
 signals:
     void currentChanged(QWidget *);
+    void activeWindowTitleChanged(const QString &);
 
 public slots:
     void setCurrentWidget(QWidget *);
@@ -56,9 +58,11 @@ protected:
 private slots:
     void removeWindow(int);
     void currentChangedHelper(int);
+    void closeWindow();
 
 private:
     void relayout();
+    void updateVisibility();
 
 private:
     TabMode               m_tabmode;
@@ -66,6 +70,8 @@ private:
     QStackedLayout *      m_stacklayout;
     QBoxLayout *          m_verticallayout;
     QBoxLayout *          m_tablayout;
+    QToolButton *         m_close;
+    QToolButton *         m_list;
 };
 
 #endif

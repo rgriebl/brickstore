@@ -23,12 +23,14 @@
 #include <QToolBar>
 #include <QStatusBar>
 #include <QMdiArea>
+#include <QMetaObject>
+#include <QMetaMethod>
 #include <qtimer.h>
 #include <qlabel.h>
 #include <qbitmap.h>
 #include <qdir.h>
 #include <qfileinfo.h>
-//#include <qobjectlist.h>
+#include <QToolButton>
 #include <qtooltip.h>
 #include <qcursor.h>
 //#include <qaccel.h>
@@ -43,7 +45,8 @@
 //#include "ciconfactory.h"
 //#include "cutility.h"
 #include "cspinner.h"
-//#include "cundo.h"
+#include "cfilteredit.h"
+#include "cworkspace.h"
 #include "ctaskpanemanager.h"
 #include "ctaskwidgets.h"
 #include "cprogressdialog.h"
@@ -246,9 +249,8 @@ CFrameWork::CFrameWork(QWidget *parent, Qt::WindowFlags f)
     }
 #endif
 
-    setWindowTitle(cApp->appName());
     setUnifiedTitleAndToolBarOnMac(true);
-// setUsesBigPixmaps ( true );
+    setAcceptDrops(true);
 
 // (void) new CIconFactory ( );
 
@@ -263,21 +265,10 @@ CFrameWork::CFrameWork(QWidget *parent, Qt::WindowFlags f)
 
     m_current_window = 0;
 
-    m_mdi = new QMdiArea(this);
-    connect(m_mdi, SIGNAL(subWindowActivated(QMdiSubWindow *)), this, SLOT(connectWindow(QMdiSubWindow *)));
+    m_mdi = new CWorkspace(this);
+    m_mdi->setTabMode(static_cast<CWorkspace::TabMode>(CConfig::inst()->value("/MainWindow/Layout/WindowMode", CWorkspace::TopTabs).toInt()));
+    connect(m_mdi, SIGNAL(currentChanged(QWidget *)), this, SLOT(connectWindow(QWidget *)));
 
-    bool subwin = (CConfig::inst()->value("/MainWindow/Layout/MdiViewMode", QMdiArea::TabbedView).toInt() == QMdiArea::SubWindowView);
-    bool below = (CConfig::inst()->value("/MainWindow/Layout/TabPosition", QTabWidget::North).toInt() == QTabWidget::South);
-/*
-    if (subwin) {
-        m_mdi->setViewMode(QMdiArea::SubWindowView);
-    }    
-    else {
-        m_mdi->setViewMode(QMdiArea::TabbedView);
-        m_mdi->setTabPosition(below ? QTabWidget::South : QTabWidget::North);
-        m_mdi->setTabShape(below ? QTabWidget::Triangular : QTabWidget::Rounded);
-    }
-*/     
     setCentralWidget(m_mdi);
 
     m_taskpanes = new CTaskPaneManager(this);
@@ -498,13 +489,14 @@ CFrameWork::CFrameWork(QWidget *parent, Qt::WindowFlags f)
 
 // connect ( m_progress, SIGNAL( statusChange ( bool )), m_spinner, SLOT( setActive ( bool )));
     connect(m_undogroup, SIGNAL(cleanChanged(bool)), this, SLOT(modificationUpdate()));
+    connect(m_mdi, SIGNAL(activeWindowTitleChanged(const QString &)), this, SLOT(titleUpdate()));
 
     CSplash::inst()->message(qApp->translate("CSplash", "Loading Database..."));
 
     bool dbok = BrickLink::inst()->readDatabase();
 
     if (!dbok) {
-        if (CMessageBox::warning(this, tr("Could not load the BrickLink database files.<br /><br />Should these files be updated now?"), CMessageBox::Yes, CMessageBox::No) == CMessageBox::Yes)
+        if (CMessageBox::warning(this, tr("Could not load the BrickLink database files.<br /><br />Should these files be updated now?"), CMessageBox::Yes | CMessageBox::No) == CMessageBox::Yes)
             dbok = updateDatabase();
     }
 
@@ -512,8 +504,6 @@ CFrameWork::CFrameWork(QWidget *parent, Qt::WindowFlags f)
         cApp->enableEmitOpenDocument();
     else
         CMessageBox::warning(this, tr("Could not load the BrickLink database files.<br /><br />The program is not functional without these files."));
-
-    setAcceptDrops(true);
 
     m_add_dialog = 0;
     m_running = true;
@@ -532,6 +522,24 @@ void CFrameWork::languageChange()
     m_taskpanes->setItemText(m_task_priceguide, tr("Price Guide"));
     m_taskpanes->setItemText(m_task_appears,    tr("Appears In Sets"));
     m_taskpanes->setItemText(m_task_links,      tr("Links"));
+
+    m_filter->setToolTip(tr("Filter the list using this pattern (wildcards allowed: * ? [])"));
+
+    foreach (QAction *a, m_filter->menu()->actions()) {
+        QString s;
+        int i = qvariant_cast<int>(a->data());
+
+        switch(i) {
+        case CWindow::All       : s = tr("All"); break;
+        case CWindow::Prices    : s = tr("All Prices"); break;
+        case CWindow::Texts     : s = tr("All Texts"); break;
+        case CWindow::Quantities: s = tr("All Quantities"); break;
+//        default                 : s = w_list->model()->headerData(i, Qt::Horizontal, Qt::DisplayRole).toString(); break;
+        }
+        a->setText(s);
+    }
+
+
 
     translateActions();
 
@@ -668,11 +676,11 @@ CFrameWork::~CFrameWork()
     CConfig::inst()->setValue("/Files/Recent", m_recent_files);
 
     CConfig::inst()->setValue("/MainWindow/Statusbar/Visible",         statusBar()->isVisibleTo(this));
-    CConfig::inst()->setValue("/MainWindow/Infobar/Mode",              m_taskpanes->mode());
-    CConfig::inst()->setValue("/MainWindow/Infobar/InfoVisible",       m_taskpanes->isItemVisible(m_task_info));
-    CConfig::inst()->setValue("/MainWindow/Infobar/PriceguideVisible", m_taskpanes->isItemVisible(m_task_priceguide));
-    CConfig::inst()->setValue("/MainWindow/Infobar/AppearsinVisible",  m_taskpanes->isItemVisible(m_task_appears));
-    CConfig::inst()->setValue("/MainWindow/Infobar/LinksVisible",      m_taskpanes->isItemVisible(m_task_links));
+//    CConfig::inst()->setValue("/MainWindow/Infobar/Mode",              m_taskpanes->mode());
+//    CConfig::inst()->setValue("/MainWindow/Infobar/InfoVisible",       m_taskpanes->isItemVisible(m_task_info));
+//    CConfig::inst()->setValue("/MainWindow/Infobar/PriceguideVisible", m_taskpanes->isItemVisible(m_task_priceguide));
+//    CConfig::inst()->setValue("/MainWindow/Infobar/AppearsinVisible",  m_taskpanes->isItemVisible(m_task_appears));
+//    CConfig::inst()->setValue("/MainWindow/Infobar/LinksVisible",      m_taskpanes->isItemVisible(m_task_links));
 
     CConfig::inst()->setValue("/MainWindow/Layout/DockWindows", saveState());
     CConfig::inst()->setValue("/MainWindow/Layout/Geometry", saveGeometry());
@@ -685,33 +693,32 @@ CFrameWork::~CFrameWork()
     s_inst = 0;
 }
 
-#if 0
-void CFrameWork::dragMoveEvent(QDragMoveEvent *e)
-{
-    e->acceptAction(e->action() == QDropEvent::Copy);
-}
 
 void CFrameWork::dragEnterEvent(QDragEnterEvent *e)
 {
-    if (QUriDrag::canDecode(e))
+    if (e->mimeData()->hasUrls()) {
+        e->setDropAction(Qt::CopyAction);
         e->accept();
+    }
 }
 
 void CFrameWork::dropEvent(QDropEvent *e)
 {
-    QStringList sl;
+    foreach (QUrl u, e->mimeData()->urls())
+        openDocument(u.toLocalFile());
 
-    if (QUriDrag::decodeLocalFiles(e, sl)) {
-        for (QStringList::Iterator it = sl.begin(); it != sl.end(); ++it) {
-            openDocument(*it);
-        }
-    }
+    e->setDropAction(Qt::CopyAction);
+    e->accept();
 }
-#endif
 
 QAction *CFrameWork::findAction(const QString &name)
 {
     return name.isEmpty() ? 0 : static_cast <QAction *>(findChild<QAction *>(name));
+}
+
+QActionGroup *CFrameWork::findActionGroup(const QString &name)
+{
+    return name.isEmpty() ? 0 : static_cast <QActionGroup *>(findChild<QActionGroup *>(name));
 }
 
 void CFrameWork::createStatusBar()
@@ -760,10 +767,16 @@ QMenu *CFrameWork::createMenu(const QString &name, const QStringList &a_names)
         else {
             QAction *a = findAction(an);
 
-            if (a)
+            if (a) {
                 m->addAction(a);
-            else
-                qWarning("Couldn't find action '%s'", qPrintable(an));
+            }
+            else {
+                QActionGroup *ag = findActionGroup(an);
+                if (ag)
+                    m->addActions(ag->actions());
+                else
+                    qWarning("Couldn't find action '%s'", qPrintable(an));
+            }
         }
     }
     return m;
@@ -785,8 +798,14 @@ QToolBar *CFrameWork::createToolBar(const QString &name, const QStringList &a_na
         else {
             QAction *a = findAction(an);
 
-            if (a)
+            if (a) {
                 t->addAction(a);
+
+                // workaround for Qt4 bug: can't set the popup mode on a QAction
+                QToolButton *tb;
+                if (a->menu() && (tb = qobject_cast<QToolButton *>(t->widgetForAction(a))))
+                    tb->setPopupMode(QToolButton::InstantPopup);
+            }
             else
                 qWarning("Couldn't find action '%s'", qPrintable(an));
         }
@@ -795,6 +814,36 @@ QToolBar *CFrameWork::createToolBar(const QString &name, const QStringList &a_na
     QWidget *spacer = new QWidget();
     spacer->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     spacer->setMinimumSize(4, 4);
+    t->addWidget(spacer);
+
+    m_filter = new CFilterEdit();
+    m_filter->setMenuIcon(QIcon(":/images/22x22/filter_menu"));
+    m_filter->setClearIcon(QIcon(":/images/22x22/filter_clear"));
+
+    QMenu *m = new QMenu(this);
+    QActionGroup *ag = new QActionGroup(m);
+    for (int i = 0; i < (CWindow::FilterCountSpecial + CDocument::FieldCount); i++) {
+        QAction *a = new QAction(ag);
+        a->setCheckable(true);
+
+        if (i < CWindow::FilterCountSpecial)
+            a->setData(-i - 1);
+        else
+            a->setData(i - CWindow::FilterCountSpecial);
+
+        if (i == CWindow::FilterCountSpecial)
+            m->addSeparator();
+        else if (i == 0)
+            a->setChecked(true);
+
+        m->addAction(a);
+    }
+    m_filter->setMenu(m);
+    t->addWidget(m_filter);
+
+
+    spacer = new QWidget();
+    spacer->setFixedSize(4, 4);
     t->addWidget(spacer);
 
     m_spinner = new CSpinner();
@@ -840,38 +889,40 @@ void CFrameWork::createActions()
 {
     QAction *a;
     QActionGroup *g, *g2, *g3;
+    QMenu *m;
 
 
     a = newQAction(this, "file_new", false, this, SLOT(fileNew()));
 
     a = newQAction(this, "file_open", false, this, SLOT(fileOpen()));
 
-    QMenu *rm = new RecentMenu(this, this);
-    rm->menuAction()->setObjectName("file_open_recent");
-    connect(rm, SIGNAL(openRecent(int)), this, SLOT(fileOpenRecent(int)));
+    m = new RecentMenu(this, this);
+    m->menuAction()->setObjectName("file_open_recent");
+    connect(m, SIGNAL(openRecent(int)), this, SLOT(fileOpenRecent(int)));
 
     (void) newQAction(this, "file_save");
     (void) newQAction(this, "file_saveas");
     (void) newQAction(this, "file_print");
 
-    g = newQActionGroup(this, "file_import", false);
-    (void) newQAction(g, "file_import_bl_inv", false, this, SLOT(fileImportBrickLinkInventory()));
-    (void) newQAction(g, "file_import_bl_xml", false, this, SLOT(fileImportBrickLinkXML()));
-    (void) newQAction(g, "file_import_bl_order", false, this, SLOT(fileImportBrickLinkOrder()));
-    (void) newQAction(g, "file_import_bl_store_inv", false, this, SLOT(fileImportBrickLinkStore()));
-    (void) newQAction(g, "file_import_bl_cart", false, this, SLOT(fileImportBrickLinkCart()));
-    (void) newQAction(g, "file_import_peeron_inv", false, this, SLOT(fileImportPeeronInventory()));
-    (void) newQAction(g, "file_import_ldraw_model", false, this, SLOT(fileImportLDrawModel()));
-    (void) newQAction(g, "file_import_briktrak", false, this, SLOT(fileImportBrikTrakInventory()));
+    m = new QMenu(this);
+    m->menuAction()->setObjectName("file_import");
+    m->addAction(newQAction(this, "file_import_bl_inv", false, this, SLOT(fileImportBrickLinkInventory())));
+    m->addAction(newQAction(this, "file_import_bl_xml", false, this, SLOT(fileImportBrickLinkXML())));
+    m->addAction(newQAction(this, "file_import_bl_order", false, this, SLOT(fileImportBrickLinkOrder())));
+    m->addAction(newQAction(this, "file_import_bl_store_inv", false, this, SLOT(fileImportBrickLinkStore())));
+    m->addAction(newQAction(this, "file_import_bl_cart", false, this, SLOT(fileImportBrickLinkCart())));
+    m->addAction(newQAction(this, "file_import_peeron_inv", false, this, SLOT(fileImportPeeronInventory())));
+    m->addAction(newQAction(this, "file_import_ldraw_model", false, this, SLOT(fileImportLDrawModel())));
+    m->addAction(newQAction(this, "file_import_briktrak", false, this, SLOT(fileImportBrikTrakInventory())));
 
-    g = newQActionGroup(this, "file_export", false);
-
-    (void) newQAction(g, "file_export_bl_xml");
-    (void) newQAction(g, "file_export_bl_xml_clip");
-    (void) newQAction(g, "file_export_bl_update_clip");
-    (void) newQAction(g, "file_export_bl_invreq_clip");
-    (void) newQAction(g, "file_export_bl_wantedlist_clip");
-    (void) newQAction(g, "file_export_briktrak");
+    m = new QMenu(this);
+    m->menuAction()->setObjectName("file_export");
+    m->addAction(newQAction(this, "file_export_bl_xml"));
+    m->addAction(newQAction(this, "file_export_bl_xml_clip"));
+    m->addAction(newQAction(this, "file_export_bl_update_clip"));
+    m->addAction(newQAction(this, "file_export_bl_invreq_clip"));
+    m->addAction(newQAction(this, "file_export_bl_wantedlist_clip"));
+    m->addAction(newQAction(this, "file_export_briktrak"));
 
     (void) newQAction(this, "file_close");
 
@@ -892,6 +943,7 @@ void CFrameWork::createActions()
     (void) newQAction(this, "edit_mergeitems");
     (void) newQAction(this, "edit_partoutitems");
     (void) newQAction(this, "edit_reset_diffs");
+    (void) newQAction(this, "edit_copyremarks");
     (void) newQAction(this, "edit_select_all");
     (void) newQAction(this, "edit_select_none");
 
@@ -1079,7 +1131,7 @@ bool CFrameWork::checkBrickLinkLogin()
 {
     while (CConfig::inst()->blLoginUsername().isEmpty() ||
            CConfig::inst()->blLoginPassword().isEmpty()) {
-        if (CMessageBox::question(this, tr("No valid BrickLink login settings found.<br /><br />Do you want to change the settings now?"), CMessageBox::Yes, CMessageBox::No) == CMessageBox::Yes)
+        if (CMessageBox::question(this, tr("No valid BrickLink login settings found.<br /><br />Do you want to change the settings now?"), CMessageBox::Yes | CMessageBox::No) == CMessageBox::Yes)
             configure("network");
         else
             return false;
@@ -1188,6 +1240,76 @@ void CFrameWork::updateAllToggleActions(CWindow *window)
 
 void CFrameWork::connectAllActions(bool do_connect, CWindow *window)
 {
+    QMetaObject mo = CWindow::staticMetaObject;
+    QObjectList list = qFindChildren<QObject *>(this, QString());
+
+    for (int i = 0; i < mo.methodCount(); ++i) {
+        const char *slot = mo.method(i).signature();
+        if (!slot || slot[0] != 'o' || slot[1] != 'n' || slot[2] != '_')
+            continue;
+        bool foundIt = false;
+
+
+        for(int j = 0; j < list.count(); ++j) {
+            QObject *co = list.at(j);
+            QByteArray objName = co->objectName().toAscii();
+            int len = objName.length();
+            if (!len || qstrncmp(slot + 3, objName.data(), len) || slot[len+3] != '_')
+                continue;
+            const QMetaObject *smo = co->metaObject();
+            int sigIndex = smo->indexOfMethod(slot + len + 4);
+            if (sigIndex < 0) { // search for compatible signals
+                int slotlen = qstrlen(slot + len + 4) - 1;
+                for (int k = 0; k < co->metaObject()->methodCount(); ++k) {
+                    if (smo->method(k).methodType() != QMetaMethod::Signal)
+                        continue;
+
+                    if (!qstrncmp(smo->method(k).signature(), slot + len + 4, slotlen)) {
+                        sigIndex = k;
+                        break;
+                    }
+                }
+            }
+            if (sigIndex < 0)
+                continue;
+            if (do_connect && window && QMetaObject::connect(co, sigIndex, window, i)) {
+                foundIt = true;
+            }
+            else if (!do_connect && window) {
+                // ignore errors on disconnect
+                QMetaObject::disconnect(co, sigIndex, window, i);
+                foundIt = true;
+            }
+            if (QAction *act = qobject_cast<QAction *>(co))
+                act->setEnabled(do_connect);
+
+            if (foundIt)
+                break;
+        }
+        if (foundIt) {
+            // we found our slot, now skip all overloads
+            while (mo.method(i + 1).attributes() & QMetaMethod::Cloned)
+                  ++i;
+        }
+        else if (window && (!(mo.method(i).attributes() & QMetaMethod::Cloned))) {
+            qWarning("CFrameWork::connectAllActions: No matching signal for %s", slot);
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+#if 0
+
+
     m_toggle_updates.clear();
 
     connectAction(do_connect, "file_save", window, SLOT(fileSave()));
@@ -1264,6 +1386,7 @@ void CFrameWork::connectAllActions(bool do_connect, CWindow *window)
 
     updateAllToggleActions(window);
 }
+#endif
 
 void CFrameWork::connectWindow(QMdiSubWindow *sw)
 {
@@ -1303,6 +1426,7 @@ void CFrameWork::connectWindow(QMdiSubWindow *sw)
     selectionUpdate(m_current_window ? m_current_window->document()->selection() : CDocument::ItemList());
     statisticsUpdate();
     modificationUpdate();
+    titleUpdate();
 
     emit windowActivated(m_current_window);
     emit documentActivated(m_current_window ? m_current_window->document() : 0);
@@ -1452,6 +1576,16 @@ void CFrameWork::statisticsUpdate()
     emit statisticsChanged(m_current_window);
 }
 
+void CFrameWork::titleUpdate()
+{
+    QString t = cApp->appName();
+
+    if (m_current_window) {
+        t.append(QString(" - %1 [*]").arg(m_current_window->windowTitle()));
+    }
+    setWindowTitle(t);
+}
+
 void CFrameWork::modificationUpdate()
 {
     bool b = m_undogroup->activeStack() ? m_undogroup->activeStack()->isClean() : true;
@@ -1476,11 +1610,9 @@ void CFrameWork::modificationUpdate()
             pmod = p.scaled(h, h, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     }
     m_modified->setPixmap(b ? pnomod : pmod);
+    m_modified->setToolTip(b ? QString() : tr("Unsaved modifications"));
 
-    if (b)
-        m_modified->setToolTip(QString());
-    else
-        m_modified->setToolTip(tr("Unsaved modifications"));
+    setWindowModified(!b);
 }
 
 void CFrameWork::gotPictureProgress(int p, int t)

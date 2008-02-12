@@ -29,7 +29,7 @@
 //#include "creport.h"
 
 #include "dimportorder.h"
-//#include "dimportinventory.h"
+#include "dimportinventory.h"
 //#include "dlgselectreportimpl.h"
 //#include "dlgincompleteitemimpl.h"
 
@@ -559,7 +559,6 @@ CDocument *CDocument::fileOpen(const QString &s)
 
 CDocument *CDocument::fileImportBrickLinkInventory(const BrickLink::Item *preselect)
 {
-#if 0
     DImportInventory dlg(CFrameWork::inst());
 
     if (preselect)
@@ -585,7 +584,6 @@ CDocument *CDocument::fileImportBrickLinkInventory(const BrickLink::Item *presel
         else
             CMessageBox::warning(CFrameWork::inst(), tr("Requested item was not found in the database."));
     }
-#endif
     return 0;
 }
 

@@ -28,9 +28,9 @@ class CSelectItem : public QWidget {
     Q_OBJECT
 public:
     CSelectItem(QWidget *parent = 0);
-    CSelectItem(bool inv_only, QWidget *parent = 0);
 
-    bool isOnlyWithInventory() const;
+    bool hasExcludeWithoutInventoryFilter() const;
+    void setExcludeWithoutInventoryFilter(bool b);
 
     enum ViewMode {
         ListMode = 0,
@@ -46,7 +46,7 @@ public:
 
     void setCurrentCategory(const BrickLink::Category *cat);
     void setCurrentItemType(const BrickLink::ItemType *it);
-    bool setCurrentItem(const BrickLink::Item *item);
+    bool setCurrentItem(const BrickLink::Item *item, bool dont_force_category = false);
 
 
 signals:
@@ -72,11 +72,13 @@ protected slots:
 
 protected:
     virtual void showEvent(QShowEvent *);
+    virtual void changeEvent(QEvent *);
 
 private:
     void init();
     bool checkViewMode(ViewMode vm);
     void ensureSelectionVisible();
+    void recalcHighlightPalette();
 
 protected:
     CSelectItemPrivate *d;

@@ -83,10 +83,8 @@ BrickLink::PriceGuide *BrickLink::Core::priceGuide(const BrickLink::Item *item, 
     if (!item || !color)
         return 0;
 
-    QString key;
-    key.sprintf("%c@%d@%d", item->itemType()->id(), item->index(), color->id());
+    quint64 key = quint64(color->id()) << 32 | quint64(item->itemType()->id()) << 24 | quint64(item->index());
 
-    //qDebug ( "PG requested for %s", key.data ( ));
     PriceGuide *pg = m_price_guides.cache [key];
 
     if (!pg) {

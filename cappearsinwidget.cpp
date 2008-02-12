@@ -16,6 +16,9 @@
 #include <QAction>
 #include <QHeaderView>
 #include <QDesktopServices>
+#include <QToolTip>
+#include <QApplication>
+#include "qtemporaryresource.h"
 
 #include "cframework.h"
 #include "cpicturewidget.h"
@@ -27,6 +30,7 @@ namespace {
 
 
 class AppearsInModel : public QAbstractTableModel {
+    Q_OBJECT
 public:
     AppearsInModel(const BrickLink::Item *item, const BrickLink::Color *color)
     {
@@ -38,17 +42,13 @@ public:
 
         m_rows = 0;
         foreach(const BrickLink::Item::AppearsInColor &vec, m_appearsin)
-        m_rows += vec.count();
+            m_rows += vec.count();
 
-        m_pictures.fill(0, m_rows);
+        connect(BrickLink::inst(), SIGNAL(pictureUpdated(BrickLink::Picture *)), this, SLOT(pictureUpdated(BrickLink::Picture *)));
     }
 
     ~AppearsInModel()
     {
-        foreach(BrickLink::Picture *pic, m_pictures) {
-            if (pic)
-                pic->release();
-        }
     }
 
     const BrickLink::Item::AppearsInItem *appearsIn(const QModelIndex &index) const
@@ -65,29 +65,6 @@ public:
         return 0;
     }
 
-    BrickLink::Picture *picture(const QModelIndex &index) const
-    {
-        int row = index.row();
-        BrickLink::Picture *pic = 0;
-
-        if (row >= 0 || row <= m_rows) {
-            pic = m_pictures [row];
-
-            if (!pic) {
-                pic = BrickLink::inst()->picture(m_item, m_item->defaultColor(), true);
-
-                if (pic) {
-                    pic->addRef();
-                    m_pictures [row] = pic;
-                }
-            }
-        }
-        return pic;
-    }
-
-    /* QModelIndex index ( const BrickLink::Color *color ) const
-     { return color ? createIndex ( m_colors.indexOf ( color ), 0, 0 ) : QModelIndex ( ); }
-    */
     virtual int rowCount(const QModelIndex & /*parent*/) const
     { return m_rows; }
 
@@ -113,21 +90,14 @@ public:
             break;
 
         case Qt::ToolTipRole: {
-            QString str = "<table><tr><td rowspan=\"2\">%1</td><td><b>%2</b></td></tr><tr><td>%3</td></tr></table>";
-            QString left_cell;
+            BrickLink::Picture *pic = BrickLink::inst()->picture(appears->second, appears->second->defaultColor(), true);
+            if (pic)
+                pic->addRef();
 
-            BrickLink::Picture *pic = picture(index);
+            QTemporaryResource::registerResource("#/appears_in_set_tooltip_picture.png", (pic && pic->valid()) ? pic->image() : QImage());
+            m_tooltip_item = appears->second;
 
-            if (pic && pic->valid()) {
-                //QMimeSourceFactory::defaultFactory ( )->setPixmap ( "appears_in_set_tooltip_picture", pic->pixmap ( ));
-
-                left_cell = "<img src=\"#/appears_in_set_tooltip_picture\" />";
-            }
-            else if (pic && (pic->updateStatus() == BrickLink::Updating)) {
-                left_cell = "<i>" + CAppearsInWidget::tr("[Image is loading]") + "</i>";
-            }
-
-            res = str.arg(left_cell).arg(m_item->id()).arg(m_item->name());
+            res = createToolTip(appears->second, pic);
             break;
         }
         }
@@ -135,11 +105,23 @@ public:
         return res;
     }
 
+    QString createToolTip(const BrickLink::Item *item, BrickLink::Picture *pic) const
+    {
+        QString str = QLatin1String("<div class=\"appearsin\"><table><tr><td rowspan=\"2\">%1</td><td><b>%2</b></td></tr><tr><td>%3</td></tr></table></div>");
+        QString img_left = QLatin1String("<img src=\"#/appears_in_set_tooltip_picture.png\" />");
+        QString note_left = QLatin1String("<i>") + CAppearsInWidget::tr("[Image is loading]") + QLatin1String("</i>");
+
+        if (pic && (pic->updateStatus() == BrickLink::Updating))
+            return str.arg(note_left).arg(item->id()).arg(item->name());
+        else
+            return str.arg(img_left).arg(item->id()).arg(item->name());
+    }
+
     virtual QVariant headerData(int section, Qt::Orientation orient, int role) const
     {
         if ((orient == Qt::Horizontal) && (role == Qt::DisplayRole)) {
             switch (section) {
-            case 0: return tr("Qty.");
+            case 0: return tr("#");
             case 1: return tr("Set");
             case 2: return tr("Name");
             }
@@ -147,12 +129,39 @@ public:
         return QVariant();
     }
 
+private slots:
+    void pictureUpdated(BrickLink::Picture *pic)
+    {
+        if (!pic)
+            return;
+
+        if (pic->item() == m_tooltip_item) {
+            if (QToolTip::isVisible() && QToolTip::text().startsWith("<div class=\"appearsin\">")) {
+                QTemporaryResource::registerResource("#/appears_in_set_tooltip_picture.png", pic->image());
+
+                QPoint pos;
+                foreach (QWidget *w, QApplication::topLevelWidgets()) {
+                    if (w->inherits("QTipLabel")) {
+                //        pos = w->pos();
+                        QSize extra = w->size() - w->sizeHint();
+                        qobject_cast<QLabel *>(w)->setText(createToolTip(pic->item(), pic));
+                        w->resize(w->sizeHint() + extra);
+                        break;
+                    }
+                }
+             //   if (!pos.isNull())
+              //      QToolTip::showText(pos, createToolTip(pic->item(), pic));
+            }
+        }
+        pic->release();
+    }
+
 private:
-    const BrickLink::Item *       m_item;
-    const BrickLink::Color *      m_color;
-    int                           m_rows;
-    BrickLink::Item::AppearsIn    m_appearsin;
-    mutable QVector<BrickLink::Picture *> m_pictures;
+    const BrickLink::Item *        m_item;
+    const BrickLink::Color *       m_color;
+    int                            m_rows;
+    BrickLink::Item::AppearsIn     m_appearsin;
+    mutable const BrickLink::Item *m_tooltip_item;
 };
 
 #if 0
@@ -291,7 +300,7 @@ public:
 };
 
 CAppearsInWidget::CAppearsInWidget(QWidget *parent)
-        : QTreeView(parent)
+    : QTreeView(parent)
 {
     d = new CAppearsInWidgetPrivate();
 

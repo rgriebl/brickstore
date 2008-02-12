@@ -130,7 +130,8 @@ macx {
 XFORMS  += registration \
            information \
            importorder \
-           additem
+           importinventory \
+           additem \
 
 
 SOURCES += main.cpp \
@@ -139,7 +140,10 @@ SOURCES += main.cpp \
            bricklink_textimport.cpp \
            bricklink_priceguide.cpp \
            bricklink_picture.cpp \
-           lzmadec.c
+           bricklink_model.cpp \
+           lzmadec.c \
+           qtemporaryresource.cpp \
+
 
 HEADERS += bricklink.h \
            lzmadec.h \
@@ -148,6 +152,7 @@ HEADERS += bricklink.h \
            cupdatedatabase.h \
            ctooltiphelper.h \
            cdisableupdates.h \
+           qtemporaryresource.h \
 	   
 
 HEADERS += capplication.h \
@@ -173,6 +178,7 @@ HEADERS += capplication.h \
            cutility.h \
            clocalemeasurement.h \
            cwindow.h \
+           cfilteredit.h \
 
 
 SOURCES += capplication.cpp \
@@ -197,6 +203,7 @@ SOURCES += capplication.cpp \
            cselectitem.cpp \
            clocalemeasurement.cpp \
            cwindow.cpp \
+           cfilteredit.cpp \
 
 
 for( form, XFORMS ) {

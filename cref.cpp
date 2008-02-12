@@ -14,17 +14,17 @@
 
 #include "cref.h"
 
-CAsciiRefCacheBase::CAsciiRefCacheBase(int cachesize)
-        : m_cache_size(cachesize)
+CRefCacheBase::CRefCacheBase(int cachesize)
+    : m_cache_size(cachesize)
 {
 }
 
-CAsciiRefCacheBase::~CAsciiRefCacheBase()
+CRefCacheBase::~CRefCacheBase()
 {
     clear();
 }
 
-bool CAsciiRefCacheBase::put(const QString &key, CRef *ref)
+bool CRefCacheBase::put(quint64 key, CRef *ref)
 {
     if (ref->m_cache)
         return false;
@@ -35,40 +35,40 @@ bool CAsciiRefCacheBase::put(const QString &key, CRef *ref)
     return true;
 }
 
-CRef *CAsciiRefCacheBase::get(const QString &key)
+CRef *CRefCacheBase::get(quint64 key)
 {
     return m_dict.value(key);
 }
 
-void CAsciiRefCacheBase::clear()
+void CRefCacheBase::clear()
 {
     m_no_ref.clear();
     qDeleteAll(m_dict);
     m_dict.clear();
 }
 
-void CAsciiRefCacheBase::addRefFor(const CRef *ref)
+void CRefCacheBase::addRefFor(const CRef *ref)
 {
-    //qDebug ( "addRefFor called" );
+    qDebug ( "addRefFor called" );
 
     if (ref && (ref->m_cache == this) && (ref->m_refcnt == 1)) {
-        //qDebug ( "Moving item [%p] to in-use dict...", (void *) ref );
+        qDebug ( "Moving item [%p] to in-use dict...", (void *) ref );
         m_no_ref.removeAll(ref);
     }
 }
 
-void CAsciiRefCacheBase::releaseFor(const CRef *ref)
+void CRefCacheBase::releaseFor(const CRef *ref)
 {
     if (ref && (ref->m_refcnt == 0) && (ref->m_cache == this)) {
-        //qDebug ( "Moving item [%p] to cache...", (void *) ref );
+        qDebug ( "Moving item [%p] to cache...", (void *) ref );
         m_no_ref.append(ref);
 
         while (m_no_ref.count() > m_cache_size) {
             const CRef *del = m_no_ref.takeFirst();
 
-            for (QHash<QString, CRef *>::iterator it = m_dict.begin(); it != m_dict.end(); ++it) {
+            for (QHash<quint64, CRef *>::iterator it = m_dict.begin(); it != m_dict.end(); ++it) {
                 if (it.value() == del) {
-                    //qDebug ( "Purging item \"%s\" from cache...", it.currentKey ( ));
+                    qDebug ( "Purging item \"%llx\" from cache...", it.key ( ));
                     m_dict.erase(it);
                     break;
                 }

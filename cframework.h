@@ -31,6 +31,7 @@ class QUndoGroup;
 class QMdiSubWindow;
 
 class CWindow;
+class CFilterEdit;
 class CInfoBar;
 class CSpinner;
 class QMdiArea;
@@ -59,7 +60,7 @@ public:
 
     bool closeAllWindows();
 
-    QList <CWindow *> allWindows() const;
+    QList<CWindow *> allWindows() const;
 
     void updateAllToggleActions(CWindow *window);
 
@@ -67,6 +68,7 @@ public slots:
     void selectionUpdate(const CDocument::ItemList &selection);
     void statisticsUpdate();
     void modificationUpdate();
+    void titleUpdate();
     void showContextMenu(bool onitem, const QPoint &pos);
 
     void fileImportBrickLinkInventory(const BrickLink::Item *item);
@@ -119,9 +121,8 @@ private slots:
     void registrationUpdate();
 
 protected:
-// virtual void dragMoveEvent ( QDragMoveEvent *e );
-// virtual void dragEnterEvent ( QDragEnterEvent *e );
-// virtual void dropEvent ( QDropEvent *e );
+   virtual void dragEnterEvent(QDragEnterEvent *e);
+   virtual void dropEvent(QDropEvent *e);
 
     virtual void closeEvent(QCloseEvent *e);
 
@@ -138,6 +139,7 @@ private:
     QIcon *icon(const char *name);
 
     QAction *findAction(const QString &);
+    QActionGroup *findActionGroup(const QString &);
     void connectAction(bool do_connect, const char *name, CWindow *window, const char *slot, bool (CWindow::* is_on_func)() const = 0);
     void connectAllActions(bool do_connect, CWindow *window);
     void createActions();
@@ -155,6 +157,7 @@ private:
 
     //CMultiProgressBar *m_progress;
     CSpinner *m_spinner;
+    CFilterEdit *m_filter;
     QLabel *m_statistics;
     QLabel *m_errors;
     QLabel *m_modified;

@@ -314,7 +314,7 @@ public:
     virtual ~Picture();
 
     const QImage image() const        { return m_image; }
-    const char *key() const           { return m_key; }
+    QString key() const               { return QString::number(m_image.cacheKey()); }
 
 private:
     const Item *  m_item;
@@ -325,11 +325,10 @@ private:
     bool          m_valid         : 1;
     int           m_update_status : 7;
 
-    char *        m_key;
     QImage        m_image;
 
 private:
-    Picture(const Item *item, const Color *color, const char *key);
+    Picture(const Item *item, const Color *color);
 
     void load_from_disk();
     void save_to_disk();
@@ -632,7 +631,7 @@ class ColorModel : public QAbstractListModel {
     Q_OBJECT
 
 public:
-    ColorModel(const Core *core);
+    ColorModel();
 
     QModelIndex index(int row, int column, const QModelIndex &parent) const;
     QModelIndex index(const Color *color) const;
@@ -679,7 +678,7 @@ public:
 
     static const Category *AllCategories;
 
-    CategoryModel(Features f, const Core *core);
+    CategoryModel(Features f = Default);
 
     QModelIndex index(int row, int column, const QModelIndex &parent) const;
     QModelIndex index(const Category *category) const;
@@ -720,12 +719,10 @@ class ItemTypeModel : public QAbstractListModel {
 public:
     enum Feature {
         Default = 0,
-
-        ExcludeWithoutInventory
     };
     Q_DECLARE_FLAGS(Features, Feature)
 
-    ItemTypeModel(Features sub, const Core *core);
+    ItemTypeModel(Features f = Default);
 
     QModelIndex index(int row, int column, const QModelIndex &parent) const;
     QModelIndex index(const ItemType *itemtype) const;
@@ -738,7 +735,11 @@ public:
     virtual QVariant headerData(int section, Qt::Orientation orient, int role) const;
     virtual void sort(int column, Qt::SortOrder so);
 
+    void setExcludeWithoutInventoryFilter(bool on);
+
 protected:
+    void rebuildItemList();
+
     class Compare {
     public:
         Compare(bool asc);
@@ -749,6 +750,8 @@ protected:
     };
 
     QList<const ItemType *> m_itemtypes;
+    Qt::SortOrder           m_sorted : 8;
+    bool                    m_inv_filter : 1;
 };
 
 
@@ -761,7 +764,7 @@ public:
     };
     Q_DECLARE_FLAGS(Features, Feature)
 
-    ItemModel(Features f, const Core *core);
+    ItemModel(Features f = Default);
 
     QModelIndex index(int row, int column, const QModelIndex &parent) const;
     QModelIndex index(const Item *item) const;
@@ -789,12 +792,12 @@ protected:
 
     class Compare {
     public:
-        Compare(bool asc, bool on_id);
+        Compare(bool asc, bool byname);
         bool operator()(const Item *i1, const Item *i2);
 
     protected:
         bool m_asc;
-        bool m_id;
+        bool m_byname;
     };
 
     QVector<const Item *> m_items;
@@ -806,7 +809,34 @@ protected:
     bool            m_inv_filter : 1;
 };
 
+#if 0
+class AppearsInModel : public QAbstractTableModel {
+    Q_OBJECT
+public:
 
+    QModelIndex index(int row, int column, const QModelIndex &parent) const;
+    QModelIndex index(const Item *item) const;
+    const Item *item(const QModelIndex &index) const;
+
+    virtual int rowCount(const QModelIndex & /*parent*/) const;
+    virtual int columnCount(const QModelIndex & /*parent*/) const;
+    virtual QVariant data(const QModelIndex &index, int role) const;
+
+protected slots:
+    void pictureUpdated(BrickLink::Picture *);
+
+private:
+    struct AIMItem {
+        const Color *m_color;
+        const Item * m_item;
+        uint         m_qty;
+    };
+
+    QList<AIMItem>                 m_list;
+    const BrickLink::Item *        m_item;
+    const BrickLink::Color *       m_color;
+};
+#endif
 
 
 class Core : public QObject {
@@ -833,9 +863,10 @@ public:
 
 
     ColorModel *colorModel() const;
-    CategoryModel *categoryModel(CategoryModel::Features f) const;
-    ItemTypeModel *itemTypeModel(ItemTypeModel::Features f) const;
-    ItemModel *itemModel(ItemModel::Features f) const;
+    CategoryModel *categoryModel(CategoryModel::Features f = CategoryModel::Default) const;
+    ItemTypeModel *itemTypeModel(ItemTypeModel::Features f = ItemTypeModel::Default) const;
+    ItemModel *itemModel(ItemModel::Features f = ItemModel::Default) const;
+    //AppearsInModel *appearsInModel(const BrickLink::Item *item, const BrickLink::Color *color) const;
 
     const QPixmap *noImage(const QSize &s);
 
@@ -932,10 +963,10 @@ private:
     } m_databases;
 
     struct dummy2 {
-        CTransfer *               transfer;
-        int                       update_iv;
+        CTransfer *                transfer;
+        int                        update_iv;
 
-        CAsciiRefCache<PriceGuide, 500> cache;
+        CRefCache<PriceGuide, 500> cache;
     } m_price_guides;
 
     struct dummy3 {
@@ -944,7 +975,7 @@ private:
 
         QList <Picture *>         diskload;
 
-        CAsciiRefCache<Picture, 500>    cache;
+        CRefCache<Picture, 500>   cache;
     } m_pictures;
 };
 

@@ -15,7 +15,7 @@
 #include <math.h>
 
 #include <qtoolbutton.h>
-#include <qcombobox.h>
+#include <QMenu>
 #include <QPainter>
 #include <qlayout.h>
 #include <qlabel.h>
@@ -37,7 +37,7 @@
 
 #include "cselectcolor.h"
 #include "cmessagebox.h"
-//#include "citemview.h"
+#include "cfilteredit.h"
 //#include "cresource.h"
 #include "cconfig.h"
 #include "cframework.h"
@@ -459,17 +459,6 @@ CWindow::CWindow(CDocument *doc, QWidget *parent)
     m_settopg_time = BrickLink::AllTime;
     m_settopg_price = BrickLink::Average;
 
-    w_filter_clear = new QToolButton(this);
-    w_filter_clear->setAutoRaise(true);
-    w_filter_clear->setIcon(QIcon(":images/filter_clear"));
-    w_filter_label = new QLabel(this);
-
-    w_filter_expression = new QComboBox(this);
-    w_filter_expression->setEditable(true);
-    w_filter_field = new QComboBox(this);
-    w_filter_expression->setEditable(false);
-    w_filter_field_label = new QLabel(this);
-
     w_list = new QTableView(this);
     w_list->setSelectionMode(QAbstractItemView::ExtendedSelection);
     w_list->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -498,30 +487,20 @@ CWindow::CWindow(CDocument *doc, QWidget *parent)
     connect ( w_list, SIGNAL( selectionChanged ( )), this, SLOT( updateSelectionFromView ( )));
     */
 
-    for (int i = 0; i < (FilterCountSpecial + CDocument::FieldCount); i++)
-        w_filter_field->addItem(QString());
-
     QBoxLayout *toplay = new QVBoxLayout(this);
     toplay->setSpacing(0);
     toplay->setMargin(0);
-    QBoxLayout *barlay = new QHBoxLayout();
-    barlay->setSpacing(4);
-    toplay->addLayout(barlay);
-
-    barlay->setMargin(4);
-    barlay->addWidget(w_filter_clear, 0);
-    barlay->addWidget(w_filter_label, 0);
-    barlay->addWidget(w_filter_expression, 15);
-    barlay->addWidget(w_filter_field_label, 0);
-    barlay->addWidget(w_filter_field, 5);
-    toplay->addWidget(w_list);
+    toplay->addWidget(w_list, 10);
 
     connect(BrickLink::inst(), SIGNAL(priceGuideUpdated(BrickLink::PriceGuide *)), this, SLOT(priceGuideUpdated(BrickLink::PriceGuide *)));
 
     connect(w_list, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(contextMenu(const QPoint &)));
-    connect(w_filter_clear, SIGNAL(clicked()), w_filter_expression, SLOT(clearEditText()));
-    connect(w_filter_expression, SIGNAL(editTextChanged(const QString &)), this, SLOT(applyFilter()));
-    connect(w_filter_field, SIGNAL(activated(int)), this, SLOT(applyFilter()));
+//    connect(w_filter_clear, SIGNAL(clicked()), w_filter_expression, SLOT(clearEditText()));
+//    connect(w_filter_expression, SIGNAL(editTextChanged(const QString &)), this, SLOT(applyFilter()));
+//    connect(w_filter_field, SIGNAL(activated(int)), this, SLOT(applyFilter()));
+
+//    connect(w_filter, SIGNAL(textChanged(const QString &)), this, SLOT(applyFilter()));
+//    connect(w_filter->menu(), SIGNAL(triggered(QAction *)), this, SLOT(applyFilterField(QAction *)));
 
     connect(CConfig::inst(), SIGNAL(simpleModeChanged(bool)), w_list, SLOT(setSimpleMode(bool)));
     connect(CConfig::inst(), SIGNAL(simpleModeChanged(bool)), this, SLOT(updateErrorMask()));
@@ -543,35 +522,16 @@ CWindow::CWindow(CDocument *doc, QWidget *parent)
     itemsAddedToDocument(m_doc->items());
 
     updateErrorMask();
-    languageChange();
+    updateCaption();
 
     setFocusProxy(w_list);
 }
 
-void CWindow::languageChange()
+void CWindow::changeEvent(QEvent *e)
 {
-    w_filter_label->setText(tr("Filter:"));
-    w_filter_field_label->setText(tr("Field:"));
-
-    w_filter_expression->setToolTip(tr("Filter the list using this pattern (wildcards allowed: * ? [])"));
-    w_filter_clear->setToolTip(tr("Reset an active filter"));
-    w_filter_field->setToolTip(tr("Restrict the filter to this/these field(s)"));
-
-    int i, j;
-    for (i = 0; i < FilterCountSpecial; i++) {
-        QString s;
-        switch (-i - 1) {
-        case All       : s = tr("All"); break;
-        case Prices    : s = tr("All Prices"); break;
-        case Texts     : s = tr("All Texts"); break;
-        case Quantities: s = tr("All Quantities"); break;
-        }
-        w_filter_field->setItemText(i, s);
+    if (e->type() == QEvent::LanguageChange) {
+        updateCaption();
     }
-    for (j = 0; j < CDocument::FieldCount; j++)
-        w_filter_field->setItemText(i + j, w_list->model()->headerData(j, Qt::Horizontal, Qt::DisplayRole).toString());
-
-    updateCaption();
 }
 
 void CWindow::updateCaption()
@@ -583,13 +543,6 @@ void CWindow::updateCaption()
     if (cap.isEmpty())
         cap = tr("Untitled");
 
-    //TODO: make this a bit more intelligent
-    if (cap.length() > 50)
-        cap = cap.left(16) + "..." + cap.right(32);
-
-    if (m_doc->isModified())
-        cap += " *";
-
     setWindowTitle(cap);
 }
 
@@ -598,7 +551,7 @@ CWindow::~CWindow()
     m_doc->deleteLater();
 }
 
-void CWindow::saveDefaultColumnLayout()
+void CWindow::on_view_save_default_col_triggered()
 {
     //TODO w_list->saveDefaultLayout ( );
 }
@@ -647,6 +600,17 @@ void CWindow::applyFilter()
     //TODO w_list->applyFilter ( w_filter_expression->lineEdit ( )->text ( ), w_filter_field->currentItem ( ), true );
 }
 
+void CWindow::applyFilterField(QAction *a)
+{
+    if (a && a->isChecked()) {
+        int i = qvariant_cast<int>(a->data());
+
+        if (i != m_filter_field) {
+            m_filter_field = i;
+            applyFilter();
+        }
+    }
+}
 
 uint CWindow::addItems(const BrickLink::InvItemList &items, int multiply, uint globalmergeflags, bool dont_change_sorting)
 {
@@ -874,7 +838,7 @@ bool CWindow::parseGuiStateXML(QDomElement root)
             QString tag = n.toElement().tagName();
 
             if (tag == "DifferenceMode") {
-                setDifferenceMode(true);
+                on_view_difference_mode_toggled(true);
             }
             else if (tag == "ItemView") {
                 QMap <QString, QString> list_map;
@@ -896,13 +860,13 @@ bool CWindow::parseGuiStateXML(QDomElement root)
 }
 
 
-void CWindow::editCut()
+void CWindow::on_edit_cut_triggered()
 {
-    editCopy();
-    editDelete();
+    on_edit_copy_triggered();
+    on_edit_delete_triggered();
 }
 
-void CWindow::editCopy()
+void CWindow::on_edit_copy_triggered()
 {
     if (!m_doc->selection().isEmpty()) {
         BrickLink::InvItemList bllist;
@@ -914,7 +878,7 @@ void CWindow::editCopy()
     }
 }
 
-void CWindow::editPaste()
+void CWindow::on_edit_paste_triggered()
 {
     BrickLink::InvItemList bllist = BrickLink::InvItemMimeData::items(QApplication::clipboard()->mimeData());
 
@@ -928,23 +892,23 @@ void CWindow::editPaste()
     }
 }
 
-void CWindow::editDelete()
+void CWindow::on_edit_delete_triggered()
 {
     if (!m_doc->selection().isEmpty())
         m_doc->removeItems(m_doc->selection());
 }
 
-void CWindow::selectAll()
+void CWindow::on_edit_select_all_triggered()
 {
     w_list->selectAll();
 }
 
-void CWindow::selectNone()
+void CWindow::on_edit_select_none_triggered()
 {
     w_list->clearSelection();
 }
 
-void CWindow::editResetDifferences()
+void CWindow::on_edit_reset_diffs_triggered()
 {
     CDisableUpdates disupd(w_list);
 
@@ -952,73 +916,73 @@ void CWindow::editResetDifferences()
 }
 
 
-void CWindow::editStatusInclude()
+void CWindow::on_edit_status_include_triggered()
 {
     setOrToggle<BrickLink::Status>::set(this, tr("Set 'include' status on %1 items"), &CDocument::Item::status, &CDocument::Item::setStatus, BrickLink::Include);
 }
 
-void CWindow::editStatusExclude()
+void CWindow::on_edit_status_exclude_triggered()
 {
     setOrToggle<BrickLink::Status>::set(this, tr("Set 'exclude' status on %1 items"), &CDocument::Item::status, &CDocument::Item::setStatus, BrickLink::Exclude);
 }
 
-void CWindow::editStatusExtra()
+void CWindow::on_edit_status_extra_triggered()
 {
     setOrToggle<BrickLink::Status>::set(this, tr("Set 'extra' status on %1 items"), &CDocument::Item::status, &CDocument::Item::setStatus, BrickLink::Extra);
 }
 
-void CWindow::editStatusToggle()
+void CWindow::on_edit_status_toggle_triggered()
 {
     setOrToggle<BrickLink::Status>::toggle(this, tr("Toggled status on %1 items"), &CDocument::Item::status, &CDocument::Item::setStatus, BrickLink::Include, BrickLink::Exclude);
 }
 
-void CWindow::editConditionNew()
+void CWindow::on_edit_cond_new_triggered()
 {
     setOrToggle<BrickLink::Condition>::set(this, tr("Set 'new' condition on %1 items"), &CDocument::Item::condition, &CDocument::Item::setCondition, BrickLink::New);
 }
 
-void CWindow::editConditionUsed()
+void CWindow::on_edit_cond_used_triggered()
 {
     setOrToggle<BrickLink::Condition>::set(this, tr("Set 'used' condition on %1 items"), &CDocument::Item::condition, &CDocument::Item::setCondition, BrickLink::Used);
 }
 
-void CWindow::editConditionToggle()
+void CWindow::on_edit_cond_toggle_triggered()
 {
     setOrToggle<BrickLink::Condition>::toggle(this, tr("Toggled condition on %1 items"), &CDocument::Item::condition, &CDocument::Item::setCondition, BrickLink::New, BrickLink::Used);
 }
 
-void CWindow::editRetainYes()
+void CWindow::on_edit_retain_yes_triggered()
 {
     setOrToggle<bool>::set(this, tr("Set 'retain' flag on %1 items"), &CDocument::Item::retain, &CDocument::Item::setRetain, true);
 }
 
-void CWindow::editRetainNo()
+void CWindow::on_edit_retain_no_triggered()
 {
     setOrToggle<bool>::set(this, tr("Cleared 'retain' flag on %1 items"), &CDocument::Item::retain, &CDocument::Item::setRetain, false);
 }
 
-void CWindow::editRetainToggle()
+void CWindow::on_edit_retain_toggle_triggered()
 {
     setOrToggle<bool>::toggle(this, tr("Toggled 'retain' flag on %1 items"), &CDocument::Item::retain, &CDocument::Item::setRetain, true, false);
 }
 
-void CWindow::editStockroomYes()
+void CWindow::on_edit_stockroom_yes_triggered()
 {
     setOrToggle<bool>::set(this, tr("Set 'stockroom' flag on %1 items"), &CDocument::Item::stockroom, &CDocument::Item::setStockroom, true);
 }
 
-void CWindow::editStockroomNo()
+void CWindow::on_edit_stockroom_no_triggered()
 {
     setOrToggle<bool>::set(this, tr("Cleared 'stockroom' flag on %1 items"), &CDocument::Item::stockroom, &CDocument::Item::setStockroom, false);
 }
 
-void CWindow::editStockroomToggle()
+void CWindow::on_edit_stockroom_toggle_triggered()
 {
     setOrToggle<bool>::toggle(this, tr("Toggled 'stockroom' flag on %1 items"), &CDocument::Item::stockroom, &CDocument::Item::setStockroom, true, false);
 }
 
 
-void CWindow::editPrice()
+void CWindow::on_edit_price_set_triggered()
 {
     if (m_doc->selection().isEmpty())
         return;
@@ -1030,7 +994,7 @@ void CWindow::editPrice()
     }
 }
 
-void CWindow::editPriceRound()
+void CWindow::on_edit_price_round_triggered()
 {
     if (m_doc->selection().isEmpty())
         return;
@@ -1056,7 +1020,7 @@ void CWindow::editPriceRound()
 }
 
 
-void CWindow::editPriceToPG()
+void CWindow::on_edit_price_to_priceguide_triggered()
 {
     if (m_doc->selection().isEmpty())
         return;
@@ -1144,7 +1108,7 @@ void CWindow::priceGuideUpdated(BrickLink::PriceGuide *pg)
 }
 
 
-void CWindow::editPriceIncDec()
+void CWindow::on_edit_price_inc_dec_triggered()
 {
     if (m_doc->selection().isEmpty())
         return;
@@ -1190,7 +1154,7 @@ void CWindow::editPriceIncDec()
     }
 }
 
-void CWindow::editQtyDivide()
+void CWindow::on_edit_qty_divide_triggered()
 {
     if (m_doc->selection().isEmpty())
         return;
@@ -1229,7 +1193,7 @@ void CWindow::editQtyDivide()
     }
 }
 
-void CWindow::editQtyMultiply()
+void CWindow::on_edit_qty_multiply_triggered()
 {
     if (m_doc->selection().isEmpty())
         return;
@@ -1256,7 +1220,7 @@ void CWindow::editQtyMultiply()
     }
 }
 
-void CWindow::editSale()
+void CWindow::on_edit_sale_triggered()
 {
     if (m_doc->selection().isEmpty())
         return;
@@ -1267,7 +1231,7 @@ void CWindow::editSale()
         setOrToggle<int>::set(this, tr("Set sale on %1 items"), &CDocument::Item::sale, &CDocument::Item::setSale, sale);
 }
 
-void CWindow::editBulk()
+void CWindow::on_edit_bulk_triggered()
 {
     if (m_doc->selection().isEmpty())
         return;
@@ -1278,20 +1242,20 @@ void CWindow::editBulk()
         setOrToggle<int>::set(this, tr("Set bulk quantity on %1 items"), &CDocument::Item::bulkQuantity, &CDocument::Item::setBulkQuantity, bulk);
 }
 
-void CWindow::editColor()
+void CWindow::on_edit_color_triggered()
 {
     if (m_doc->selection().isEmpty())
         return;
 
-// CSelectColorDialog d ( this );
-// d.setCaption ( CItemView::tr( "Modify Color" ));
-// d.setColor ( m_doc->selection ( ).front ( )->color ( ));
+    DSelectColor d(this);
+    d.setWindowTitle(tr("Modify Color"));
+    d.setColor(m_doc->selection().front()->color());
 
-// if ( d.exec ( ) == QDialog::Accepted )
-//  setOrToggle<const BrickLink::Color *>::set ( this, tr( "Set color on %1 items" ), &CDocument::Item::color, &CDocument::Item::setColor, d.color ( ));
+    if (d.exec() == QDialog::Accepted)
+        setOrToggle<const BrickLink::Color *>::set(this, tr( "Set color on %1 items" ), &CDocument::Item::color, &CDocument::Item::setColor, d.color());
 }
 
-void CWindow::editRemark()
+void CWindow::on_edit_remark_set_triggered()
 {
     if (m_doc->selection().isEmpty())
         return;
@@ -1302,7 +1266,7 @@ void CWindow::editRemark()
         setOrToggle<QString, const QString &>::set(this, tr("Set remark on %1 items"), &CDocument::Item::remarks, &CDocument::Item::setRemarks, remarks);
 }
 
-void CWindow::addRemark()
+void CWindow::on_edit_remark_add_triggered()
 {
     if (m_doc->selection().isEmpty())
         return;
@@ -1340,7 +1304,7 @@ void CWindow::addRemark()
     }
 }
 
-void CWindow::removeRemark()
+void CWindow::on_edit_remark_rem_triggered()
 {
     if (m_doc->selection().isEmpty())
         return;
@@ -1372,7 +1336,7 @@ void CWindow::removeRemark()
 }
 
 
-void CWindow::editComment()
+void CWindow::on_edit_comment_set_triggered()
 {
     if (m_doc->selection().isEmpty())
         return;
@@ -1383,7 +1347,7 @@ void CWindow::editComment()
         setOrToggle<QString, const QString &>::set(this, tr("Set comment on %1 items"), &CDocument::Item::comments, &CDocument::Item::setComments, comments);
 }
 
-void CWindow::addComment()
+void CWindow::on_edit_comment_add_triggered()
 {
     if (m_doc->selection().isEmpty())
         return;
@@ -1421,7 +1385,7 @@ void CWindow::addComment()
     }
 }
 
-void CWindow::removeComment()
+void CWindow::on_edit_comment_rem_triggered()
 {
     if (m_doc->selection().isEmpty())
         return;
@@ -1453,7 +1417,7 @@ void CWindow::removeComment()
 }
 
 
-void CWindow::editReserved()
+void CWindow::on_edit_reserved_triggered()
 {
     if (m_doc->selection().isEmpty())
         return;
@@ -1491,7 +1455,7 @@ void CWindow::updateErrorMask()
     m_doc->setErrorMask(em);
 }
 
-void CWindow::editCopyRemarks()
+void CWindow::on_edit_copyremarks_triggered()
 {
 // DlgSubtractItemImpl d ( tr( "Please choose the document that should serve as a source to fill in the remarks fields of the current document:" ), this, "CopyRemarkDlg" );
 
@@ -1547,7 +1511,7 @@ void CWindow::copyRemarks(const BrickLink::InvItemList &items)
     m_doc->endMacro(tr("Copied Remarks for %1 Items").arg(copy_count));
 }
 
-void CWindow::editSubtractItems()
+void CWindow::on_edit_subtractitems_triggered()
 {
     //DlgSubtractItemImpl d ( tr( "Which items should be subtracted from the current document:" ), this, "SubtractItemDlg" );
 
@@ -1619,7 +1583,7 @@ void CWindow::subtractItems(const BrickLink::InvItemList &items)
     m_doc->endMacro(tr("Subtracted %1 Items").arg(items.count()));
 }
 
-void CWindow::editMergeItems()
+void CWindow::on_edit_mergeitems_triggered()
 {
     if (!m_doc->selection().isEmpty())
         mergeItems(m_doc->selection());
@@ -1627,7 +1591,7 @@ void CWindow::editMergeItems()
         mergeItems(m_doc->items());
 }
 
-void CWindow::editPartOutItems()
+void CWindow::on_edit_partoutitems_triggered()
 {
     if (m_doc->selection().count() >= 1) {
         foreach(CDocument::Item *item, m_doc->selection())
@@ -1653,6 +1617,11 @@ void CWindow::setPrice(money_t d)
 void CWindow::contextMenu(const QPoint &p)
 {
     CFrameWork::inst()->showContextMenu(/*TODO: */ true, p);
+}
+
+void CWindow::on_file_close_triggered()
+{
+    close();
 }
 
 void CWindow::closeEvent(QCloseEvent *e)
@@ -1685,25 +1654,25 @@ void CWindow::closeEvent(QCloseEvent *e)
 
 }
 
-void CWindow::showBLCatalog()
+void CWindow::on_edit_bl_catalog_triggered()
 {
     if (!m_doc->selection().isEmpty())
         QDesktopServices::openUrl(BrickLink::inst()->url(BrickLink::URL_CatalogInfo, (*m_doc->selection().front()).item()));
 }
 
-void CWindow::showBLPriceGuide()
+void CWindow::on_edit_bl_priceguide_triggered()
 {
     if (!m_doc->selection().isEmpty())
         QDesktopServices::openUrl(BrickLink::inst()->url(BrickLink::URL_PriceGuideInfo, (*m_doc->selection().front()).item(), (*m_doc->selection().front()).color()));
 }
 
-void CWindow::showBLLotsForSale()
+void CWindow::on_edit_bl_lotsforsale_triggered()
 {
     if (!m_doc->selection().isEmpty())
         QDesktopServices::openUrl(BrickLink::inst()->url(BrickLink::URL_LotsForSale, (*m_doc->selection().front()).item(), (*m_doc->selection().front()).color()));
 }
 
-void CWindow::showBLMyInventory()
+void CWindow::on_edit_bl_myinventory_triggered()
 {
     if (!m_doc->selection().isEmpty()) {
         uint lotid = (*m_doc->selection().front()).lotId();
@@ -1711,7 +1680,7 @@ void CWindow::showBLMyInventory()
     }
 }
 
-void CWindow::setDifferenceMode(bool b)
+void CWindow::on_view_difference_mode_toggled(bool b)
 {
 //TODO: w_list->setDifferenceMode ( b );
 }
@@ -1721,7 +1690,7 @@ bool CWindow::isDifferenceMode() const
     return false; //TODO: return w_list->isDifferenceMode ( );
 }
 
-void CWindow::filePrint()
+void CWindow::on_file_print_triggered()
 {
     if (m_doc->items().isEmpty())
         return;
@@ -1763,17 +1732,17 @@ void CWindow::filePrint()
      */
 }
 
-void CWindow::fileSave()
+void CWindow::on_file_save_triggered()
 {
     m_doc->fileSave(sortedItems());
 }
 
-void CWindow::fileSaveAs()
+void CWindow::on_file_saveas_triggered()
 {
     m_doc->fileSaveAs(sortedItems());
 }
 
-void CWindow::fileExportBrickLinkXML()
+void CWindow::on_file_export_bl_xml_triggered()
 {
     CDocument::ItemList items = exportCheck();
 
@@ -1781,7 +1750,7 @@ void CWindow::fileExportBrickLinkXML()
         m_doc->fileExportBrickLinkXML(items);
 }
 
-void CWindow::fileExportBrickLinkXMLClipboard()
+void CWindow::on_file_export_bl_xml_clip_triggered()
 {
     CDocument::ItemList items = exportCheck();
 
@@ -1789,7 +1758,7 @@ void CWindow::fileExportBrickLinkXMLClipboard()
         m_doc->fileExportBrickLinkXMLClipboard(items);
 }
 
-void CWindow::fileExportBrickLinkUpdateClipboard()
+void CWindow::on_file_export_bl_update_clip_triggered()
 {
     CDocument::ItemList items = exportCheck();
 
@@ -1797,7 +1766,7 @@ void CWindow::fileExportBrickLinkUpdateClipboard()
         m_doc->fileExportBrickLinkUpdateClipboard(items);
 }
 
-void CWindow::fileExportBrickLinkInvReqClipboard()
+void CWindow::on_file_export_bl_invreq_clip_triggered()
 {
     CDocument::ItemList items = exportCheck();
 
@@ -1805,7 +1774,7 @@ void CWindow::fileExportBrickLinkInvReqClipboard()
         m_doc->fileExportBrickLinkInvReqClipboard(items);
 }
 
-void CWindow::fileExportBrickLinkWantedListClipboard()
+void CWindow::on_file_export_bl_wantedlist_clip_triggered()
 {
     CDocument::ItemList items = exportCheck();
 
@@ -1813,7 +1782,7 @@ void CWindow::fileExportBrickLinkWantedListClipboard()
         m_doc->fileExportBrickLinkWantedListClipboard(items);
 }
 
-void CWindow::fileExportBrikTrakInventory()
+void CWindow::on_file_export_briktrak_triggered()
 {
     CDocument::ItemList items = exportCheck();
 

@@ -11,36 +11,25 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __CFILTEREDIT_H__
-#define __CFILTEREDIT_H__
+#ifndef __DIMPORTINVENTORY_H__
+#define __DIMPORTINVENTORY_H__
 
-#include <QLineEdit>
+#include <QDialog>
 
-class QMenu;
-class QToolButton;
+#include "ui_importinventory.h"
 
-class CFilterEdit : public QLineEdit {
+class DImportInventory : public QDialog, private Ui::ImportInventory {
     Q_OBJECT
+
 public:
-    CFilterEdit(QWidget *parent = 0);
-    void setMenu(QMenu *menu);
-    QMenu *menu() const;
+    DImportInventory(QWidget *parent = 0, Qt::WindowFlags f = 0);
 
-    void setMenuIcon(const QIcon &icon);
-    void setClearIcon(const QIcon &icon);
-
-protected:
-    virtual void resizeEvent(QResizeEvent *);
+    bool setItem(const BrickLink::Item *item);
+    const BrickLink::Item *item() const;
+    int quantity() const;
 
 protected slots:
-    void updateClearButton(const QString &);
-
-private:
-    void doLayout(bool setpositions);
-
-private:
-    QToolButton *w_menu;
-    QToolButton *w_clear;
+    void checkItem(const BrickLink::Item *it, bool ok);
 };
 
 #endif

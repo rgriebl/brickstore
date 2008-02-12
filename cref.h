@@ -16,17 +16,16 @@
 
 #include <QList>
 #include <QHash>
-#include <QString>
 
 class CRef;
 
-class CAsciiRefCacheBase {
+class CRefCacheBase {
 protected:
-    CAsciiRefCacheBase(int cachesize);
-    virtual ~CAsciiRefCacheBase();
+    CRefCacheBase(int cachesize);
+    virtual ~CRefCacheBase();
 
-    bool put(const QString &key, CRef *ref);
-    CRef *get(const QString &key);
+    bool put(quint64 key, CRef *ref);
+    CRef *get(quint64 key);
 
 public:
     virtual void clear();
@@ -38,17 +37,17 @@ private:
     friend class CRef;
 
 private:
-    QHash<QString, CRef *>  m_dict;
+    QHash<quint64, CRef *>  m_dict;
     QList<const CRef *>     m_no_ref;
     int                     m_cache_size;
 };
 
-template <typename T, uint CACHESIZE> class CAsciiRefCache : public CAsciiRefCacheBase {
+template <typename T, uint CACHESIZE> class CRefCache : public CRefCacheBase {
 public:
-    CAsciiRefCache() : CAsciiRefCacheBase(CACHESIZE) { }
+    CRefCache() : CRefCacheBase(CACHESIZE) { }
 
-    bool insert(const QString &key, T *ref)  { return put(key, ref); }
-    T *operator [](const QString &key)       { return (T *) get(key); }
+    bool insert(quint64 key, T *ref)  { return put(key, ref); }
+    T *operator [](quint64 key)       { return (T *) get(key); }
 };
 
 
@@ -63,10 +62,10 @@ public:
     uint refCount() const { return m_refcnt; }
 
 private:
-    friend class CAsciiRefCacheBase;
+    friend class CRefCacheBase;
 
-    mutable uint                m_refcnt;
-    mutable CAsciiRefCacheBase *m_cache;
+    mutable uint           m_refcnt;
+    mutable CRefCacheBase *m_cache;
 };
 
 #endif

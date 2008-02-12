@@ -26,7 +26,7 @@
         <file>images/16x16/extras_net_online.png</file>
         <file>images/16x16/edit_paste.png</file>
         <file>images/16x16/edit_find_again.png</file>
-        <file>images/16x16/filter_label.png</file>
+        <file>images/16x16/filter_menu.png</file>
         <file>images/16x16/edit_find.png</file>
         <file>images/16x16/help_whatsthis.png</file>
         <file>images/16x16/view_hierarchic.png</file>
@@ -78,7 +78,7 @@
         <file>images/22x22/extras_net_online.png</file>
         <file>images/22x22/edit_paste.png</file>
         <file>images/22x22/edit_find_again.png</file>
-        <file>images/22x22/filter_label.png</file>
+        <file>images/22x22/filter_menu.png</file>
         <file>images/22x22/edit_find.png</file>
         <file>images/22x22/help_whatsthis.png</file>
         <file>images/22x22/view_hierarchic.png</file>
@@ -111,6 +111,8 @@
         <file>images/status_extra.png</file>
         <file>images/status_include.png</file>
         <file>images/status_unknown.png</file>
+        <file>images/tabclose.png</file>
+        <file>images/tablist.png</file>
         <file>images/sidebar/priceguide.png</file>
         <file>images/sidebar/links.png</file>
         <file>images/sidebar/appearsin.png</file>

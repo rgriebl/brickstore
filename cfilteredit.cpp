@@ -1,92 +1,97 @@
-#include <qlineedit.h>
-#include <qpixmap.h>
-#include <qpainter.h>
-#include <qvaluelist.h>
+/* Copyright (C) 2004-2005 Robert Griebl.All rights reserved.
+**
+** This file is part of BrickStore.
+**
+** This file may be distributed and/or modified under the terms of the GNU
+** General Public License version 2 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
+*/
 
-#include "cresource.h"
+#include <QToolButton>
+#include <QStyle>
+
 #include "cfilteredit.h"
 
-class CFilterEditPrivate {
-public:
-    QLineEdit *w_lineedit;
-    QPixmap m_icon_filter;
-    QPixmap m_icon_menu;
-    QPixmap m_icon_clear;
 
-    class FilterType {
-        int id;
-        QString name;
-    };
-
-    QValueList <FilterType> m_typelist;
-};
-
-CFilterEdit::CFilterEdit(QWidget *parent, const char *name, WFlags fl)
-        : QFrame(parent, name, fl)
+CFilterEdit::CFilterEdit(QWidget *parent)
+    : QLineEdit(parent)
 {
-    d = new CFilterEditPrivate();
+    w_menu = new QToolButton(this);
+    w_menu->setCursor(Qt::ArrowCursor);
+    w_menu->setAutoRaise(true);
+    w_menu->setPopupMode(QToolButton::InstantPopup);
 
-    d->m_icon_filter = CResource::inst()->pixmap("filteredit/filter");
-    d->m_icon_menu   = CResource::inst()->pixmap("filteredit/menu");
-    d->m_icon_clear  = CResource::inst()->pixmap("filteredit/clear");
+    w_clear = new QToolButton(this);
+    w_clear->setCursor(Qt::ArrowCursor);
+    w_clear->hide();
 
-    d->w_lineedit = new QLineEdit(this);
+    w_menu->setStyleSheet("QToolButton { border: none; padding: 0px; }\n"
+                          "QToolButton::menu-indicator { subcontrol-origin: border; subcontrol-position: bottom right;"
+#if defined( Q_WS_WIN )
+                          "position: relative; top: 4px; left: 4px;"
+#endif
+                          " }");
+    w_clear->setStyleSheet("QToolButton { border: none; padding: 0px; }");
 
-    setFrameStyle(d->w_lineedit->frameStyle());
-    setLineWidth(d->w_lineedit->lineWidth());
-    setMidLineWidth(d->w_lineedit->midLineWidth());
-    setMargin(d->w_lineedit->margin());
+    connect(w_clear, SIGNAL(clicked()), this, SLOT(clear()));
+    connect(this, SIGNAL(textChanged(const QString&)), this, SLOT(updateClearButton(const QString&)));
 
-    d->w_lineedit->setFrameStyle(QFrame::NoFrame);
-
-
-    connect(d->w_lineedit, SIGNAL(textChanged(const QString &)), this, SIGNAL(filterTextChanged(const QString &)));
-    connect(d->w_lineedit, SIGNAL(returnPressed()), this, SIGNAL(returnPressed()));
-    setFocusProxy(d->w_lineedit);
+    doLayout(false);
 }
 
-CFilterEdit::~CFilterEdit()
+void CFilterEdit::doLayout(bool setpositionsonly)
 {
-    delete d;
+    QSize ms = w_menu->sizeHint();
+    QSize cs = w_clear->sizeHint();
+    int fw = style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
+
+    if (!setpositionsonly) {
+        setStyleSheet(QString("QLineEdit { padding-left: %1px; padding-right: %2px; } ")
+                      .arg(ms.width() + fw + 1)
+                      .arg(cs.width() + fw + 1));
+
+        QSize mins = QLineEdit::minimumSizeHint();
+        setMinimumSize(mins.width() + ms.width() + cs.width() + fw * 4 + 4,
+                       qMax(mins.height(), qMax(cs.height(), ms.height()) + fw * 2 + 2));
+    }
+    w_menu->move(rect().left() + fw, (rect().bottom() + 1 - ms.height())/2);
+    w_clear->move(rect().right() - fw - cs.width(), (rect().bottom() + 1 - cs.height())/2);
 }
 
-void CFilterEdit::slotTextChanged(const QString &str)
+void CFilterEdit::setMenuIcon(const QIcon &icon)
 {
-    calcLayout();
-    emit filterTextChanged(str);
+    w_menu->setIcon(icon);
+    doLayout(false);
+}
+
+void CFilterEdit::setClearIcon(const QIcon &icon)
+{
+    w_clear->setIcon(icon);
+    doLayout(false);
+}
+
+
+void CFilterEdit::setMenu(QMenu *menu)
+{
+    w_menu->setMenu(menu);
+}
+
+QMenu *CFilterEdit::menu() const
+{
+    return w_menu->menu();
 }
 
 void CFilterEdit::resizeEvent(QResizeEvent *)
 {
-    calcLayout();
+    doLayout(true);
 }
 
-void CFilterEdit::calcLayout()
+void CFilterEdit::updateClearButton(const QString &str)
 {
-    int left = d->m_icon_filter.width() + 4;
-    int right = 0;
-    int lw = frameWidth();
-
-    if (!d->w_lineedit->text().isEmpty())
-        right = d->m_icon_clear.width() + 4;
-
-    d->w_lineedit->setGeometry(lw + left, lw, width() - 2 * lw - left - right, height() - 2 * lw);
+    w_clear->setVisible(!str.isEmpty());
 }
-
-void CFilterEdit::paintEvent(QPaintEvent *)
-{
-    QPainter p(this);
-
-    int lw = frameWidth();
-
-    p.drawPixmap(lw, lw, d->m_icon_filter);
-
-    if (!d->m_typelist.isEmpty()) {
-        p.drawPixmap(lw, lw, d->m_icon_menu);
-    }
-
-    if (!d->w_lineedit->text().isEmpty()) {
-        p.drawPixmap(width() - lw - d->m_icon_clear.width(), lw, d->m_icon_clear);
-    }
-}
-

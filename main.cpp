@@ -18,7 +18,6 @@
 
 #include "capplication.h"
 
-
 int main(int argc, char **argv)
 {
     const char *rebuild_db = 0;

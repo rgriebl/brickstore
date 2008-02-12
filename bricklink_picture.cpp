@@ -32,10 +32,11 @@
 const QPixmap BrickLink::Picture::pixmap() const
 {
     QPixmap p;
+    QString key (QString::number(m_image.cacheKey()));
 
-    if (!QPixmapCache::find(m_key, p)) {
+    if (!QPixmapCache::find(key, p)) {
         p = QPixmap::fromImage(m_image);
-        QPixmapCache::insert(m_key, p);
+        QPixmapCache::insert(key, p);
     }
     return p;
 }
@@ -50,17 +51,19 @@ BrickLink::Picture *BrickLink::Core::picture(const Item *item, const BrickLink::
     if (!item)
         return 0;
 
-    QString key;
-    if (color)
-        key.sprintf("%c@%d@%d", item->itemType()->pictureId(), item->index(), color->id());
-    else
-        key.sprintf("%c@%d", item->itemType()->pictureId(), item->index());
+    quint64 key = 0;
+    Picture *pic = 0;
 
-    Picture *pic = m_pictures.cache [key];
+
+    if (color) {
+        key = quint64(color ? color->id() : -1) << 32 | quint64(item->itemType()->id()) << 24 | quint64(item->index() + 1);
+        pic = m_pictures.cache [key];
+    }
+
     bool need_to_load = false;
 
     if (!pic) {
-        pic = new Picture(item, color, key.toLatin1());
+        pic = new Picture(item, color);
         if (color)
             m_pictures.cache.insert(key, pic);
         need_to_load = true;
@@ -139,22 +142,18 @@ void BrickLink::Core::pictureIdleLoader2()
 }
 
 
-BrickLink::Picture::Picture(const Item *item, const Color *color, const char *key)
+BrickLink::Picture::Picture(const Item *item, const Color *color)
 {
     m_item = item;
     m_color = color;
 
     m_valid = false;
     m_update_status = Ok;
-    m_key = key ? strdup(key) : 0;
 }
 
 BrickLink::Picture::~Picture()
 {
-    if (m_key) {
-        QPixmapCache::remove(m_key);
-        free(m_key);
-    }
+    QPixmapCache::remove(key());
 }
 
 void BrickLink::Picture::load_from_disk()
@@ -197,7 +196,7 @@ void BrickLink::Picture::load_from_disk()
         //m_image = m_image.convertToFormat ( QImage::Format_Indexed8 );
     }
 
-    QPixmapCache::remove(m_key);
+    QPixmapCache::remove(QString::number(m_image.cacheKey()));
 }
 
 
