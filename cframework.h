@@ -133,6 +133,7 @@ private:
     void setBrickLinkHTTPProxy();
 
     bool checkBrickLinkLogin();
+    void createAddItemDialog();
 
 private:
     enum { MaxRecentFiles = 9 };

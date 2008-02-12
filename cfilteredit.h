@@ -18,6 +18,7 @@
 
 class QMenu;
 class QToolButton;
+class QTimer;
 
 class CFilterEdit : public QLineEdit {
     Q_OBJECT
@@ -29,11 +30,20 @@ public:
     void setMenuIcon(const QIcon &icon);
     void setClearIcon(const QIcon &icon);
 
+    void setIdleText(const QString &str);
+
+signals:
+    void filterTextChanged(const QString &);
+
 protected:
     virtual void resizeEvent(QResizeEvent *);
+    virtual void paintEvent(QPaintEvent *e);
+    virtual void focusInEvent(QFocusEvent *e);
+    virtual void focusOutEvent(QFocusEvent *e);
 
 protected slots:
-    void updateClearButton(const QString &);
+    void checkText(const QString &);
+    void timerTick();
 
 private:
     void doLayout(bool setpositions);
@@ -41,6 +51,8 @@ private:
 private:
     QToolButton *w_menu;
     QToolButton *w_clear;
+    QTimer *     m_timer;
+    QString      m_idletext;
 };
 
 #endif

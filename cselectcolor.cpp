@@ -157,7 +157,7 @@ class ColorDelegate : public QItemDelegate {
 
         virtual void drawDecoration(QPainter *painter, const QStyleOptionViewItem &option, const QRect &rect, const QPixmap &pixmap) const
         {
-            QStyleOptionViewItem myoption(option);
+            QStyleOptionViewItemV4 myoption(option);
             myoption.state &= ~QStyle::State_Selected;
 
             QItemDelegate::drawDecoration(painter, myoption, rect, pixmap);

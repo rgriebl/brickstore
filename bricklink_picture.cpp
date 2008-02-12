@@ -69,14 +69,14 @@ BrickLink::Picture *BrickLink::Core::picture(const Item *item, const BrickLink::
         need_to_load = true;
     }
 
-    if (high_priority) {
+    if (high_priority || need_to_load) {
         if (!pic->valid())
             pic->load_from_disk();
 
         if (!pic->valid() || updateNeeded(pic->lastUpdate(), m_pictures.update_iv))
             updatePicture(pic, high_priority);
     }
-    else if (need_to_load) {
+    else if (false) {
         pic->addRef();
         m_pictures.diskload.append(pic);
 

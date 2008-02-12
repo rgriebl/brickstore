@@ -76,7 +76,6 @@ protected:
 
 private:
     void init();
-    bool checkViewMode(ViewMode vm);
     void ensureSelectionVisible();
     void recalcHighlightPalette();
 

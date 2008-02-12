@@ -60,11 +60,12 @@ void CRefCacheBase::addRefFor(const CRef *ref)
 void CRefCacheBase::releaseFor(const CRef *ref)
 {
     if (ref && (ref->m_refcnt == 0) && (ref->m_cache == this)) {
-        qDebug ( "Moving item [%p] to cache...", (void *) ref );
+        qDebug("Moving item [%p] to cache...", (void *) ref);
         m_no_ref.append(ref);
 
         while (m_no_ref.count() > m_cache_size) {
             const CRef *del = m_no_ref.takeFirst();
+            qDebug("Purging item [%p] from cache...", (void *) del);
 
             for (QHash<quint64, CRef *>::iterator it = m_dict.begin(); it != m_dict.end(); ++it) {
                 if (it.value() == del) {

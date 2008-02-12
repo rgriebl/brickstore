@@ -27,14 +27,15 @@
 #include <qtooltip.h>
 #include <QTreeView>
 #include <QListView>
+#include <QTableView>
 #include <QHeaderView>
 #include <QStackedLayout>
 #include <QMenu>
-#include <QItemDelegate>
+#include <QStyledItemDelegate>
 
 //#include "citemtypecombo.h"
 //#include "cresource.h"
-//#include "clistview.h"
+#include "cfilteredit.h"
 #include "cselectitem.h"
 #include "cutility.h"
 #include "cmessagebox.h"
@@ -53,11 +54,13 @@ public:
     QTreeView *   w_categories;
     QStackedLayout *m_stack;
     QTreeView *   w_items;
+    QTreeView *   w_itemthumbs;
     QListView *   w_thumbs;
-    QToolButton * w_goto;
-    QLabel *      w_filter_label;
-    QToolButton * w_filter_clear;
-    QComboBox *   w_filter_expression;
+//    QToolButton * w_goto;
+//    QLabel *      w_filter_label;
+//    QToolButton * w_filter_clear;
+//    QComboBox *   w_filter_expression;
+    CFilterEdit * w_filter;
     QToolButton * w_viewbutton;
     QAction *     m_viewaction[3];
     QMenu *       w_viewmenu;
@@ -70,10 +73,10 @@ public:
 };
 
 
-class CategoryDelegate : public QItemDelegate {
+class CategoryDelegate : public QStyledItemDelegate {
 public:
     CategoryDelegate(QObject *parent = 0)
-            : QItemDelegate(parent)
+            : QStyledItemDelegate(parent)
     { }
 
     virtual void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
@@ -84,10 +87,29 @@ public:
             QStyleOptionViewItem myoption(option);
 
             myoption.font.setBold(true);
-            QItemDelegate::paint(painter, myoption, index);
+            QStyledItemDelegate::paint(painter, myoption, index);
             return;
         }
-        QItemDelegate::paint(painter, option, index);
+        QStyledItemDelegate::paint(painter, option, index);
+    }
+};
+
+
+class ItemThumbsDelegate : public QStyledItemDelegate {
+public:
+    ItemThumbsDelegate(QObject *parent = 0)
+            : QStyledItemDelegate(parent)
+    { }
+
+    virtual QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
+    {
+        if (index.column() == 0) {
+            const BrickLink::ItemModel *model = qobject_cast<const BrickLink::ItemModel *>(index.model());
+            const BrickLink::Item *item = model ? model->item(index) : 0;
+
+            return item ? item->itemType()->pictureSize() : QSize(80, 60);
+        }
+        return QStyledItemDelegate::sizeHint(option, index);
     }
 };
 
@@ -117,6 +139,7 @@ void CSelectItem::init()
     d->w_categories->setSelectionMode(QAbstractItemView::SingleSelection);
     d->w_categories->setItemDelegate(new CategoryDelegate);
 
+#if 0
     d->w_goto = new QToolButton(this);
     d->w_goto->setAutoRaise(true);
     d->w_goto->setIcon(QIcon(":/images/22x22/edit_find"));
@@ -128,6 +151,10 @@ void CSelectItem::init()
 
     d->w_filter_expression = new QComboBox(this);
     d->w_filter_expression->setEditable(true);
+#endif
+    d->w_filter = new CFilterEdit(this);
+    d->w_filter->setMenuIcon(QIcon(":/images/22x22/filter_menu"));
+    d->w_filter->setClearIcon(QIcon(":/images/22x22/filter_clear"));
 
     d->w_viewmenu = new QMenu(this);
     QActionGroup *ag = new QActionGroup(this);
@@ -150,9 +177,9 @@ void CSelectItem::init()
 
     d->w_viewbutton = new QToolButton(this);
     d->w_viewbutton->setAutoRaise(true);
-    d->w_viewbutton->setPopupMode(QToolButton::MenuButtonPopup);
+    d->w_viewbutton->setPopupMode(QToolButton::InstantPopup);
     d->w_viewbutton->setMenu(d->w_viewmenu);
-    d->w_viewbutton->setIcon(QIcon(":/images/22x22/viewmode"));
+    d->w_viewbutton->setIcon(QIcon(":/images/22x22/viewmode_list"));
 
     d->w_items = new QTreeView(this);
     d->w_items->setSortingEnabled(true);
@@ -163,33 +190,47 @@ void CSelectItem::init()
     d->w_items->setSelectionBehavior(QAbstractItemView::SelectRows);
     d->w_items->setSelectionMode(QAbstractItemView::SingleSelection);
 
+    d->w_itemthumbs = new QTreeView(this);
+    d->w_itemthumbs->setSortingEnabled(true);
+    d->w_itemthumbs->setAlternatingRowColors(true);
+    d->w_itemthumbs->setAllColumnsShowFocus(true);
+    d->w_itemthumbs->setWordWrap(true);
+    d->w_itemthumbs->setRootIsDecorated(false);
+    d->w_itemthumbs->setSelectionBehavior(QAbstractItemView::SelectRows);
+    d->w_itemthumbs->setSelectionMode(QAbstractItemView::SingleSelection);
+    d->w_itemthumbs->setItemDelegate(new ItemThumbsDelegate);
+
     d->w_thumbs = new QListView(this);
     d->w_thumbs->setMovement(QListView::Static);
     d->w_thumbs->setViewMode(QListView::IconMode);
+    d->w_thumbs->setLayoutMode(QListView::Batched);
+    d->w_thumbs->setResizeMode(QListView::Adjust);
+    d->w_thumbs->setSelectionBehavior(QAbstractItemView::SelectRows);
     d->w_thumbs->setSelectionMode(QAbstractItemView::SingleSelection);
     d->w_thumbs->setTextElideMode(Qt::ElideRight);
+    d->w_thumbs->setItemDelegate(new ItemThumbsDelegate);
 
     d->w_item_types->setModel(BrickLink::core()->itemTypeModel());
     d->w_categories->setModel(BrickLink::core()->categoryModel(BrickLink::CategoryModel::IncludeAllCategoriesItem));
     d->w_items->setModel(BrickLink::core()->itemModel());
-//    d->w_thumbs->setModel(d->w_items->model());
-//    d->w_thumbs->setSelectionModel(d->w_items->selectionModel());
+    d->w_itemthumbs->setModel(d->w_items->model());
+    d->w_thumbs->setModel(d->w_items->model());
+    d->w_itemthumbs->setSelectionModel(d->w_items->selectionModel());
+    d->w_thumbs->setSelectionModel(d->w_items->selectionModel());
     d->w_items->hideColumn(0);
-    d->w_items->hideColumn(3);
-    d->w_thumbs->setModelColumn(3);
+    d->w_thumbs->setModelColumn(0);
 
-    connect(d->w_goto, SIGNAL(clicked()), this, SLOT(findItem()));
-    connect(d->w_filter_clear, SIGNAL(clicked()), d->w_filter_expression, SLOT(clearEditText()));
-    connect(d->w_filter_expression, SIGNAL(editTextChanged(const QString &)), this, SLOT(applyFilter()));
+    connect(d->w_filter, SIGNAL(filterTextChanged(const QString &)), this, SLOT(applyFilter()));
 
     connect(d->w_item_types, SIGNAL(currentIndexChanged(int)), this, SLOT(itemTypeChanged()));
     connect(d->w_categories->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(categoryChanged()));
 
     connect(d->w_items->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(itemChanged()));
-    connect(d->w_thumbs->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(itemChanged()));
     connect(d->w_items, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(itemConfirmed()));
+    connect(d->w_itemthumbs, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(itemConfirmed()));
     connect(d->w_thumbs, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(itemConfirmed()));
     connect(d->w_items, SIGNAL(activated(const QModelIndex &)), this, SLOT(itemConfirmed()));
+    connect(d->w_itemthumbs, SIGNAL(activated(const QModelIndex &)), this, SLOT(itemConfirmed()));
     connect(d->w_thumbs, SIGNAL(activated(const QModelIndex &)), this, SLOT(itemConfirmed()));
 
 /*    connect(d->w_items, SIGNAL(contextMenuRequested(QListViewItem *, const QPoint &, int)), this, SLOT(itemContextList(QListViewItem *, const QPoint &)));
@@ -214,17 +255,19 @@ void CSelectItem::init()
     toplay->addWidget(d->w_categories, 1, 0);
 
     lay = new QHBoxLayout();
-    lay->addWidget(d->w_goto, 0);
-    lay->addSpacing(6);
-    lay->addWidget(d->w_filter_clear, 0);
-    lay->addWidget(d->w_filter_label, 0);
-    lay->addWidget(d->w_filter_expression, 15);
+    //lay->addWidget(d->w_goto, 0);
+    //lay->addSpacing(6);
+    //lay->addWidget(d->w_filter_clear, 0);
+    //lay->addWidget(d->w_filter_label, 0);
+    //lay->addWidget(d->w_filter_expression, 15);
+    lay->addWidget(d->w_filter);
     lay->addSpacing(6);
     lay->addWidget(d->w_viewbutton);
 
     toplay->addLayout(lay, 0, 1);
     d->m_stack = new QStackedLayout();
     d->m_stack->addWidget(d->w_items);
+    d->m_stack->addWidget(d->w_itemthumbs);
     d->m_stack->addWidget(d->w_thumbs);
     toplay->addLayout(d->m_stack, 1, 1);
 
@@ -257,14 +300,16 @@ void CSelectItem::recalcHighlightPalette()
 void CSelectItem::languageChange()
 {
     d->w_item_types_label->setText(tr("Item type:"));
-    d->w_filter_label->setText(tr("Filter:"));
+//    d->w_filter_label->setText(tr("Filter:"));
 
-    d->w_goto->setShortcut(tr("Ctrl+F", "Find Item"));
-    d->w_goto->setToolTip(tr("Find Item...") + " (" + QString(d->w_goto->shortcut()) + ")");
+//    d->w_goto->setShortcut(tr("Ctrl+F", "Find Item"));
+//    d->w_goto->setToolTip(tr("Find Item...") + " (" + QString(d->w_goto->shortcut()) + ")");
 
-    d->w_filter_expression->setToolTip(tr("Filter the list using this pattern (wildcards allowed: * ? [])"));
-    d->w_filter_clear->setToolTip(tr("Reset an active filter"));
-    d->w_viewbutton->setToolTip(tr("View"));
+//    d->w_filter_expression->setToolTip(tr("Filter the list using this pattern (wildcards allowed: * ? [])"));
+//    d->w_filter_clear->setToolTip(tr("Reset an active filter"));
+//    d->w_viewbutton->setToolTip(tr("View"));
+    d->w_filter->setToolTip(tr("Filter the list using this pattern (wildcards allowed: * ? [])"));
+    d->w_filter->setIdleText(tr("Filter"));
 
     d->m_viewaction[ListMode]->setText(tr("List"));
     d->m_viewaction[TableMode]->setText(tr("List with images"));
@@ -340,11 +385,10 @@ void CSelectItem::categoryChanged()
 const BrickLink::Category *CSelectItem::currentCategory() const
 {
     BrickLink::CategoryModel *model = qobject_cast<BrickLink::CategoryModel *>(d->w_categories->model());
+    QModelIndexList idxlst = d->w_categories->selectionModel()->selectedIndexes();
 
-    if (model && d->w_categories->selectionModel()->hasSelection()) {
-        QModelIndex idx = d->w_categories->selectionModel()->selectedIndexes().front();
-        return model->category(idx);
-    }
+    if (model && !idxlst.isEmpty())
+        return model->category(idxlst.front());
     else
         return 0;
 }
@@ -365,11 +409,10 @@ void CSelectItem::setCurrentCategory(const BrickLink::Category *cat)
 const BrickLink::Item *CSelectItem::currentItem() const
 {
     BrickLink::ItemModel *model = qobject_cast<BrickLink::ItemModel *>(d->w_items->model());
+    QModelIndexList idxlst = d->w_items->selectionModel()->selectedIndexes();
 
-    if (model && d->w_items->selectionModel()->hasSelection()) {
-        QModelIndex idx = d->w_items->selectionModel()->selectedIndexes().front();
-        return model->item(idx);
-    }
+    if (model && !idxlst.isEmpty())
+        return model->item(idxlst.front());
     else
         return 0;
 }
@@ -402,47 +445,25 @@ bool CSelectItem::setCurrentItem(const BrickLink::Item *item, bool dont_force_ca
     return found;
 }
 
-bool CSelectItem::checkViewMode(CSelectItem::ViewMode vm)
-{
-    if (vm == d->m_viewmode)
-        return false;
-
-    if ((vm != ListMode) && (currentCategory() == BrickLink::CategoryModel::AllCategories)) {
-        if (CMessageBox::question(this, tr("Viewing all items with images is a bandwidth- and memory-hungry operation.<br />Are you sure you want to continue?"), QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
-            return false;
-    }
-    return true;
-}
-
 void CSelectItem::showAsList()
 {
-    if (checkViewMode(ListMode)) {
-        if (d->m_viewmode == ThumbsMode)
-            d->m_stack->setCurrentWidget(d->w_items);
-
-        d->w_items->hideColumn(0);
+    if (d->m_viewmode != ListMode) {
+        d->m_stack->setCurrentWidget(d->w_items);
         d->m_viewmode = ListMode;
     }
 }
 
 void CSelectItem::showAsTable()
 {
-    if (checkViewMode(TableMode)) {
-        if (d->m_viewmode == ThumbsMode)
-            d->m_stack->setCurrentWidget(d->w_items);
-
-        d->w_items->showColumn(0);
+    if (d->m_viewmode != TableMode) {
+        d->m_stack->setCurrentWidget(d->w_itemthumbs);
         d->m_viewmode = TableMode;
     }
 }
 
 void CSelectItem::showAsThumbs()
 {
-    if (checkViewMode(ThumbsMode)) {
-/*        if (currentCategory() == BrickLink::CategoryModel::AllCategories) {
-            if (CMessageBox::question(this, tr("Viewing all items with images is a bandwidth- and memory-hungry operation.<br />Are you sure you want to continue?"), QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
-                return;
-        }*/
+    if (d->m_viewmode != ThumbsMode) {
         d->m_stack->setCurrentWidget(d->w_thumbs);
         d->m_viewmode = ThumbsMode;
     }
@@ -521,7 +542,7 @@ void CSelectItem::ensureSelectionVisible()
 
 void CSelectItem::applyFilter()
 {
-    QRegExp regexp(d->w_filter_expression->lineEdit()->text(), Qt::CaseInsensitive, QRegExp::Wildcard);
+    QRegExp regexp(d->w_filter->text(), Qt::CaseInsensitive, QRegExp::Wildcard);
 
     bool regexp_ok = !regexp.isEmpty() && regexp.isValid();
 
@@ -529,24 +550,13 @@ void CSelectItem::applyFilter()
         //qDebug ( "ignoring filter...." );
         return;
     }
-    /*
-     QApplication::setOverrideCursor ( QCursor( Qt::WaitCursor ));
 
-    // CDisableUpdates disupd ( d->w_items );
+    BrickLink::ItemModel *model = qobject_cast<BrickLink::ItemModel *>(d->w_items->model());
 
-     for ( QListViewItemIterator it ( d->w_items ); it.current ( ); ++it ) {
-      QListViewItem *ivi = it.current ( );
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+    model->setTextFilter(regexp);
+    QApplication::restoreOverrideCursor();
 
-      bool b = !regexp_ok || ( regexp.search ( ivi->text ( 1 )) >= 0 ) || ( regexp.search ( ivi->text ( 2 )) >= 0 );
-
-      if ( !b && ivi->isSelected ( ))
-       d->w_items->setSelected ( ivi, false );
-
-      ivi->setVisible ( b );
-     }
-
-     QApplication::restoreOverrideCursor ( );
-    */
     d->m_filter_active = regexp_ok;
 }
 

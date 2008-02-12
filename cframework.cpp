@@ -33,7 +33,7 @@
 #include <QToolButton>
 #include <qtooltip.h>
 #include <qcursor.h>
-//#include <qaccel.h>
+#include <QStyleFactory>
 
 #include "capplication.h"
 #include "cmessagebox.h"
@@ -189,11 +189,13 @@ private slots:
         }
         if (a == m_tabtop) {
             m_mdi->setViewMode(QMdiArea::TabbedView);
+    m_mdi->findChildren<QTabBar *>().first()->setStyle(QStyleFactory::create("windows"));
             m_mdi->setTabPosition(QTabWidget::North);
             m_mdi->setTabShape(QTabWidget::Rounded);
         }
         else if (a == m_tabbot) {
             m_mdi->setViewMode(QMdiArea::TabbedView);
+    m_mdi->findChildren<QTabBar *>().first()->setStyle(QStyleFactory::create("windows"));
             m_mdi->setTabPosition(QTabWidget::South);
             m_mdi->setTabShape(QTabWidget::Triangular);
         }
@@ -532,6 +534,8 @@ CFrameWork::CFrameWork(QWidget *parent, Qt::WindowFlags f)
         CMessageBox::warning(this, tr("Could not load the BrickLink database files.<br /><br />The program is not functional without these files."));
 
     m_add_dialog = 0;
+    createAddItemDialog();
+
     m_running = true;
 
     connectAllActions(false, 0);    // init enabled/disabled status of document actions
@@ -550,6 +554,7 @@ void CFrameWork::languageChange()
     m_taskpanes->setItemText(m_task_links,      tr("Links"));
 
     m_filter->setToolTip(tr("Filter the list using this pattern (wildcards allowed: * ? [])"));
+    m_filter->setIdleText(tr("Filter"));
 
     foreach (QAction *a, m_filter->menu()->actions()) {
         QString s;
@@ -1767,7 +1772,7 @@ void CFrameWork::cancelAllTransfers()
     }
 }
 
-void CFrameWork::toggleAddItemDialog(bool b)
+void CFrameWork::createAddItemDialog()
 {
     if (!m_add_dialog) {
         m_add_dialog = new DAddItem(this);
@@ -1787,6 +1792,11 @@ void CFrameWork::toggleAddItemDialog(bool b)
 
         m_add_dialog->attach(m_current_window);
     }
+}
+
+void CFrameWork::toggleAddItemDialog(bool b)
+{
+    createAddItemDialog();
 
     if (b) {
         if (m_add_dialog->isVisible()) {

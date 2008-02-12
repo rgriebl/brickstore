@@ -32,8 +32,9 @@
 #include <QHeaderView>
 #include <QCloseEvent>
 #include <QDesktopServices>
-#include <QItemDelegate>
+#include <QStyledItemDelegate>
 #include <QStyleOptionFrameV2>
+#include <QStyle>
 
 #include "cselectcolor.h"
 #include "cmessagebox.h"
@@ -121,10 +122,10 @@ private:
 
 } // namespace
 
-class DocumentDelegate : public QItemDelegate {
+class DocumentDelegate : public QStyledItemDelegate {
 public:
     DocumentDelegate(CDocument *doc, QTableView *view)
-        : QItemDelegate(view), m_doc(doc)
+        : QStyledItemDelegate(view), m_doc(doc)
     {
     }
 
@@ -168,7 +169,7 @@ public:
             w = picsize.width() / 2 + 4;
         }
         else {
-            w = QItemDelegate::sizeHint(option, idx).width();
+            w = QStyledItemDelegate::sizeHint(option, idx).width();
         }
         return QSize(w, h);
     }
@@ -182,7 +183,7 @@ public:
         if (!it)
             return;
 
-        QStyleOptionViewItemV3 option(option1);
+        QStyleOptionViewItemV4 option(option1);
 
         QPalette::ColorGroup cg = (option.state & QStyle::State_Enabled) ? QPalette::Normal : QPalette::Disabled;
         if (cg == QPalette::Normal && !(option.state & QStyle::State_Active))
@@ -351,7 +352,11 @@ public:
         w -=2;
 
         if (checkmark != 0) {
-            QItemDelegate::drawCheck(p, option, option.rect, (checkmark > 0) ? Qt::Checked : Qt::Unchecked);
+            QStyleOptionViewItem opt(option);
+            opt.state &= ~QStyle::State_HasFocus;
+            opt.state |= ((checkmark > 0) ? QStyle::State_On : QStyle::State_Off);
+            QStyle *style = option.widget ? option.widget->style() : QApplication::style();
+            style->drawPrimitive(QStyle::PE_IndicatorViewItemCheck, &opt, p, option.widget);
         }
         else if (!pix.isNull()) {
             // clip the pixmap here ..this is cheaper than a cliprect

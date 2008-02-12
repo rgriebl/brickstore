@@ -779,13 +779,16 @@ public:
 
     void setItemTypeFilter(const ItemType *it);
     void setCategoryFilter(const Category *cat);
-    void setTextFilter(const QString &regex);
+    void setTextFilter(const QRegExp &regex);
 
     void clearItemTypeFilter();
     void clearCategoryFilter();
     void clearTextFilter();
 
     void setExcludeWithoutInventoryFilter(bool on);
+
+protected slots:
+    void pictureUpdated(BrickLink::Picture *);
 
 protected:
     void rebuildItemList();
@@ -803,7 +806,7 @@ protected:
     QVector<const Item *> m_items;
     const ItemType *m_type_filter;
     const Category *m_cat_filter;
-    QString         m_text_filter;
+    QRegExp         m_text_filter;
     Qt::SortOrder   m_sorted : 8;
     int             m_sortcol : 8;
     bool            m_inv_filter : 1;

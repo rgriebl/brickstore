@@ -428,7 +428,7 @@ int BrickLink::ItemModel::rowCount(const QModelIndex &parent) const
 
 int BrickLink::ItemModel::columnCount(const QModelIndex &parent) const
 {
-    return parent.isValid() ? 0 : 4;
+    return parent.isValid() ? 0 : 3;
 }
 
 QVariant BrickLink::ItemModel::data(const QModelIndex &index, int role) const
@@ -441,32 +441,20 @@ QVariant BrickLink::ItemModel::data(const QModelIndex &index, int role) const
 
     if (role == Qt::DisplayRole) {
         switch(index.column()) {
-        case 1:
-        case 3: res = QString::fromLatin1(i->id()); break;
+        case 1: res = QString::fromLatin1(i->id()); break;
         case 2: res = QString::fromLatin1(i->name()); break;
         }
     }
     else if (role == Qt::DecorationRole) {
-        int scale = 1;
-
         switch(index.column()) {
-        case 0:
-            scale = 2;
-            //no break;
-        case 3: {
+        case 0: {
             BrickLink::Picture *pic = BrickLink::core()->picture(i, i->defaultColor());
-
+            //pic->addRef();
             if (pic && pic->valid()) {
-                QImage img = pic->image();
-                if (scale > 1)
-                    return img.scaled(img.size() / scale, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-                else
-                    return img;
+                return pic->image();
             }
             else {
                 QSize s = BrickLink::core()->pictureSize(i->itemType());
-                if (scale > 1)
-                    s /= scale;
                 QImage img(s, QImage::Format_Mono);
                 img.fill(Qt::white);
                 return img;
@@ -477,7 +465,7 @@ QVariant BrickLink::ItemModel::data(const QModelIndex &index, int role) const
     }
     else if (role == Qt::ToolTipRole) {
         switch(index.column()) {
-        case 3:  res = QString::fromLatin1(i->name()); break;
+        case 0:  res = QString::fromLatin1(i->name()); break;
         }
     }
     else if (role == ItemPointerRole) {
@@ -531,9 +519,10 @@ void BrickLink::ItemModel::rebuildItemList()
                 continue;
             if (m_inv_filter && !item->hasInventory())
                 continue;
-            if (!m_text_filter.isEmpty()) {
-                // continue;
-                //TODO
+            if (!m_text_filter.isEmpty() && m_text_filter.isValid()) {
+                if ((m_text_filter.indexIn(QLatin1String(item->id())) < 0) &&
+                    (m_text_filter.indexIn(QLatin1String(item->name())) < 0))
+                    continue;
             }
 
             m_items << item;
@@ -581,14 +570,14 @@ void BrickLink::ItemModel::clearCategoryFilter()
     setCategoryFilter(0);
 }
 
-void BrickLink::ItemModel::setTextFilter(const QString &str)
+void BrickLink::ItemModel::setTextFilter(const QRegExp &rx)
 {
-    if (str == m_text_filter)
+    if (rx == m_text_filter)
         return;
 
     emit layoutAboutToBeChanged();
 
-    m_text_filter = str;
+    m_text_filter = rx;
     rebuildItemList();
 
     emit layoutChanged();
@@ -596,7 +585,7 @@ void BrickLink::ItemModel::setTextFilter(const QString &str)
 
 void BrickLink::ItemModel::clearTextFilter()
 {
-    setTextFilter(QString());
+    setTextFilter(QRegExp());
 }
 
 void BrickLink::ItemModel::setExcludeWithoutInventoryFilter(bool on)
@@ -612,6 +601,14 @@ void BrickLink::ItemModel::setExcludeWithoutInventoryFilter(bool on)
     emit layoutChanged();
 }
 
+void BrickLink::ItemModel::pictureUpdated(BrickLink::Picture *pic)
+{
+    if (!pic || !pic->item() || pic->color() != pic->item()->defaultColor())
+        return;
+
+    QModelIndex idx = index(pic->item());
+    emit dataChanged(idx, idx);
+}
 
 
 

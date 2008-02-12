@@ -20,7 +20,7 @@
 #include <QComboBox>
 #include <QHeaderView>
 #include <QAbstractTableModel>
-#include <QItemDelegate>
+#include <QStyledItemDelegate>
 #include <QColorGroup>
 #include <QVariant>
 
@@ -158,10 +158,10 @@ private:
 };
 
 
-class TransHighlightDelegate : public QItemDelegate {
+class TransHighlightDelegate : public QStyledItemDelegate {
 public:
     TransHighlightDelegate(QObject *parent = 0)
-            : QItemDelegate(parent)
+            : QStyledItemDelegate(parent)
     { }
 
     void makeTrans(QPalette &pal, QPalette::ColorGroup cg, QPalette::ColorRole cr, const QColor &bg, qreal factor) const
@@ -189,12 +189,12 @@ public:
                 makeTrans(myoption.palette, QPalette::Inactive, QPalette::Highlight, c, 0.2);
                 makeTrans(myoption.palette, QPalette::Disabled, QPalette::Highlight, c, 0.2);
 
-                QItemDelegate::paint(painter, myoption, index);
+                QStyledItemDelegate::paint(painter, myoption, index);
                 return;
             }
         }
 
-        QItemDelegate::paint(painter, option, index);
+        QStyledItemDelegate::paint(painter, option, index);
     }
 };
 

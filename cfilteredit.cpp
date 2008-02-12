@@ -14,6 +14,9 @@
 
 #include <QToolButton>
 #include <QStyle>
+#include <QTimer>
+#include <QPainter>
+#include <QStyleOptionFrame>
 
 #include "cfilteredit.h"
 
@@ -21,10 +24,11 @@
 CFilterEdit::CFilterEdit(QWidget *parent)
     : QLineEdit(parent)
 {
+    m_timer = new QTimer(this);
+
     w_menu = new QToolButton(this);
     w_menu->setCursor(Qt::ArrowCursor);
-    w_menu->setAutoRaise(true);
-    w_menu->setPopupMode(QToolButton::InstantPopup);
+//    w_menu->setAutoRaise(true);
 
     w_clear = new QToolButton(this);
     w_clear->setCursor(Qt::ArrowCursor);
@@ -39,7 +43,8 @@ CFilterEdit::CFilterEdit(QWidget *parent)
     w_clear->setStyleSheet("QToolButton { border: none; padding: 0px; }");
 
     connect(w_clear, SIGNAL(clicked()), this, SLOT(clear()));
-    connect(this, SIGNAL(textChanged(const QString&)), this, SLOT(updateClearButton(const QString&)));
+    connect(this, SIGNAL(textChanged(const QString&)), this, SLOT(checkText(const QString&)));
+    connect(m_timer, SIGNAL(timeout()), this, SLOT(timerTick()));
 
     doLayout(false);
 }
@@ -79,6 +84,7 @@ void CFilterEdit::setClearIcon(const QIcon &icon)
 void CFilterEdit::setMenu(QMenu *menu)
 {
     w_menu->setMenu(menu);
+    w_menu->setPopupMode(QToolButton::InstantPopup);
 }
 
 QMenu *CFilterEdit::menu() const
@@ -91,7 +97,61 @@ void CFilterEdit::resizeEvent(QResizeEvent *)
     doLayout(true);
 }
 
-void CFilterEdit::updateClearButton(const QString &str)
+void CFilterEdit::checkText(const QString &str)
 {
     w_clear->setVisible(!str.isEmpty());
+    m_timer->start(250);
+}
+
+void CFilterEdit::timerTick()
+{
+    emit filterTextChanged(text());
+}
+
+void CFilterEdit::setIdleText(const QString &str)
+{
+    m_idletext = str;
+    update();
+}
+
+void CFilterEdit::paintEvent(QPaintEvent *e)
+{
+    QLineEdit::paintEvent(e);
+
+    if (!hasFocus() && !m_idletext.isEmpty() && text().isEmpty()) {
+        QPainter p(this);
+        QPen tmp = p.pen();
+        p.setPen(palette().color(QPalette::Disabled, QPalette::Text));
+
+        //FIXME: fugly alert!
+        // qlineedit uses an internal qstyleoption set to figure this out
+        // and then adds a hardcoded 2 pixel interior to that.
+        // probably requires fixes to Qt itself to do this cleanly
+        QStyleOptionFrame opt;
+        opt.init(this);
+        opt.rect = contentsRect();
+        opt.lineWidth = hasFrame() ? style()->pixelMetric(QStyle::PM_DefaultFrameWidth) : 0;
+        opt.midLineWidth = 0;
+        opt.state |= QStyle::State_Sunken;
+        QRect cr = style()->subElementRect(QStyle::SE_LineEditContents, &opt, this);
+        cr.setLeft(cr.left() + 2);
+        cr.setRight(cr.right() - 2);
+
+        p.drawText(cr, Qt::AlignLeft|Qt::AlignVCenter, m_idletext);
+        p.setPen(tmp);
+    }
+}
+
+void CFilterEdit::focusInEvent(QFocusEvent *e)
+{
+    if (!m_idletext.isEmpty())
+        update();
+    QLineEdit::focusInEvent(e);
+}
+
+void CFilterEdit::focusOutEvent(QFocusEvent *e)
+{
+    if (!m_idletext.isEmpty())
+        update();
+    QLineEdit::focusOutEvent(e);
 }
