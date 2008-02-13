@@ -253,6 +253,8 @@ CFrameWork::CFrameWork(QWidget *parent, Qt::WindowFlags f)
     s_inst = this;
 
     m_running = false;
+    m_spinner = 0;
+    m_filter = 0;
 
 #if defined( Q_WS_X11 )
     if (!icon() || icon()->isNull()) {
@@ -304,18 +306,22 @@ CFrameWork::CFrameWork(QWidget *parent, Qt::WindowFlags f)
     m_taskpanes->setMode(CTaskPaneManager::Classic);
 
     m_task_info = new CTaskInfoWidget(0);
+    m_task_info->setObjectName(QLatin1String("TaskInfo"));
     m_taskpanes->addItem(m_task_info, QIcon(":/sidebar/info"));
     m_taskpanes->setItemVisible(m_task_info, CConfig::inst()->value("/MainWindow/Infobar/InfoVisible", true).toBool());
 
     m_task_priceguide = new CTaskPriceGuideWidget(0);
+    m_task_priceguide->setObjectName(QLatin1String("TaskPriceGuide"));
     m_taskpanes->addItem(m_task_priceguide, QIcon(":/sidebar/priceguide"));
     m_taskpanes->setItemVisible(m_task_priceguide, CConfig::inst()->value("/MainWindow/Infobar/PriceguideVisible", true).toBool());
 
     m_task_appears = new CTaskAppearsInWidget(0);
+    m_task_appears->setObjectName(QLatin1String("TaskAppears"));
     m_taskpanes->addItem(m_task_appears,  QIcon(":/sidebar/appearsin"));
     m_taskpanes->setItemVisible(m_task_appears, CConfig::inst()->value("/MainWindow/Infobar/AppearsinVisible", true).toBool());
 
     m_task_links = new CTaskLinksWidget(0);
+    m_task_links->setObjectName(QLatin1String("TaskLinks"));
     m_taskpanes->addItem(m_task_links,  QIcon(":/sidebar/links"));
     m_taskpanes->setItemVisible(m_task_links, CConfig::inst()->value("/MainWindow/Infobar/LinksVisible", true).toBool());
 
@@ -461,7 +467,12 @@ CFrameWork::CFrameWork(QWidget *parent, Qt::WindowFlags f)
         << "edit_bl_priceguide"
         << "edit_bl_lotsforsale"
         << "-"             // << "edit_bl_info_group" << "-"
-        << "extras_net";   // << "-" << "help_whatsthis";
+        << "extras_net"    // << "-" << "help_whatsthis";
+        << "<>"
+        << "widget_filter"
+        << "|"
+        << "widget_spinner"
+        << "|";
 
     m_toolbar = createToolBar("toolbar", sl);
     addToolBar(m_toolbar);
@@ -517,7 +528,6 @@ CFrameWork::CFrameWork(QWidget *parent, Qt::WindowFlags f)
 
 // connect ( m_progress, SIGNAL( statusChange ( bool )), m_spinner, SLOT( setActive ( bool )));
     connect(m_undogroup, SIGNAL(cleanChanged(bool)), this, SLOT(modificationUpdate()));
-    connect(m_mdi, SIGNAL(activeWindowTitleChanged(const QString &)), this, SLOT(titleUpdate()));
 
     CSplash::inst()->message(qApp->translate("CSplash", "Loading Database..."));
 
@@ -556,6 +566,8 @@ void CFrameWork::languageChange()
     m_filter->setToolTip(tr("Filter the list using this pattern (wildcards allowed: * ? [])"));
     m_filter->setIdleText(tr("Filter"));
 
+    m_spinner->setToolTip(tr("Download activity indicator"));
+
     foreach (QAction *a, m_filter->menu()->actions()) {
         QString s;
         int i = qvariant_cast<int>(a->data());
@@ -565,7 +577,7 @@ void CFrameWork::languageChange()
         case CWindow::Prices    : s = tr("All Prices"); break;
         case CWindow::Texts     : s = tr("All Texts"); break;
         case CWindow::Quantities: s = tr("All Quantities"); break;
-//        default                 : s = w_list->model()->headerData(i, Qt::Horizontal, Qt::DisplayRole).toString(); break;
+        default                 : s = CDocument::headerDataForDisplayRole(static_cast<CDocument::Field>(i)); break;
         }
         a->setText(s);
     }
@@ -819,12 +831,66 @@ QToolBar *CFrameWork::createToolBar(const QString &name, const QStringList &a_na
     if (a_names.isEmpty())
         return 0;
 
-    QToolBar *t = new QToolBar(this);
+    QToolBar *t = new QToolBar(0);
     t->setObjectName(name);
 
     foreach(const QString &an, a_names) {
         if (an == "-") {
             t->addSeparator();
+        }
+        else if (an == "|") {
+            QWidget *spacer = new QWidget();
+            spacer->setFixedSize(4, 4); //TODO: get spacing from QStyle
+            t->addWidget(spacer);
+        }
+        else if (an == "<>") {
+            QWidget *spacer = new QWidget();
+            spacer->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+            spacer->setMinimumSize(0, 4);
+            t->addWidget(spacer);
+        }
+        else if (an.startsWith("widget_")) {
+            if (an == "widget_filter") {
+                if (m_filter) {
+                    qWarning("Only one filter widget can be added to toolbars");
+                    continue;
+                }
+
+                m_filter = new CFilterEdit();
+                m_filter->setMenuIcon(QIcon(":/images/22x22/filter_menu"));
+                m_filter->setClearIcon(QIcon(":/images/22x22/filter_clear"));
+
+                QMenu *m = new QMenu(this);
+                QActionGroup *ag = new QActionGroup(m);
+                for (int i = 0; i < (CWindow::FilterCountSpecial + CDocument::FieldCount); i++) {
+                    QAction *a = new QAction(ag);
+                    a->setCheckable(true);
+
+                    if (i < CWindow::FilterCountSpecial)
+                        a->setData(-i - 1);
+                    else
+                        a->setData(i - CWindow::FilterCountSpecial);
+
+                    if (i == CWindow::FilterCountSpecial)
+                        m->addSeparator();
+                    else if (i == 0)
+                        a->setChecked(true);
+
+                    m->addAction(a);
+                }
+                m_filter->setMenu(m);
+                t->addWidget(m_filter);
+            }
+            else if (an == "widget_spinner") {
+                if (m_spinner) {
+                    qWarning("Only one spinner widget can be added to toolbars");
+                    continue;
+                }
+
+                m_spinner = new CSpinner();
+                m_spinner->setPixmap(QPixmap(":/images/spinner"));
+                t->addWidget(m_spinner);
+            }
         }
         else {
             QAction *a = findAction(an);
@@ -841,52 +907,6 @@ QToolBar *CFrameWork::createToolBar(const QString &name, const QStringList &a_na
                 qWarning("Couldn't find action '%s'", qPrintable(an));
         }
     }
-
-    QWidget *spacer = new QWidget();
-    spacer->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
-    spacer->setMinimumSize(4, 4);
-    t->addWidget(spacer);
-
-    m_filter = new CFilterEdit();
-    m_filter->setMenuIcon(QIcon(":/images/22x22/filter_menu"));
-    m_filter->setClearIcon(QIcon(":/images/22x22/filter_clear"));
-
-    QMenu *m = new QMenu(this);
-    QActionGroup *ag = new QActionGroup(m);
-    for (int i = 0; i < (CWindow::FilterCountSpecial + CDocument::FieldCount); i++) {
-        QAction *a = new QAction(ag);
-        a->setCheckable(true);
-
-        if (i < CWindow::FilterCountSpecial)
-            a->setData(-i - 1);
-        else
-            a->setData(i - CWindow::FilterCountSpecial);
-
-        if (i == CWindow::FilterCountSpecial)
-            m->addSeparator();
-        else if (i == 0)
-            a->setChecked(true);
-
-        m->addAction(a);
-    }
-    m_filter->setMenu(m);
-    t->addWidget(m_filter);
-
-
-    spacer = new QWidget();
-    spacer->setFixedSize(4, 4);
-    t->addWidget(spacer);
-
-    m_spinner = new CSpinner();
-    m_spinner->setToolTip(tr("Download activity indicator"));
-    m_spinner->setPixmap(QPixmap(":/images/spinner"));
-    t->addWidget(m_spinner);
-
-    spacer = new QWidget();
-    spacer->setFixedSize(4, 4);
-    t->addWidget(spacer);
-
-    t->hide();
     return t;
 }
 

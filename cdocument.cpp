@@ -1353,7 +1353,7 @@ QString CDocument::dataForToolTipRole(Item *it, Field f) const
 }
 
 
-QString CDocument::headerDataForDisplayRole(Field f) const
+QString CDocument::headerDataForDisplayRole(Field f)
 {
     switch (f) {
     case Status      : return tr("Status");

@@ -77,7 +77,7 @@ public:
         FieldCount,
     };
 
-class Item : public BrickLink::InvItem {
+    class Item : public BrickLink::InvItem {
     public:
         Item();
         Item(const BrickLink::InvItem &);
@@ -143,7 +143,7 @@ class Item : public BrickLink::InvItem {
     QVariant dataForDecorationRole(Item *it, Field f) const;
     int dataForTextAlignmentRole(Item *it, Field f) const;
     QString dataForToolTipRole(Item *it, Field f) const;
-    QString headerDataForDisplayRole(Field f) const;
+    static QString headerDataForDisplayRole(Field f);
     int headerDataForTextAlignmentRole(Field f) const;
 
 public slots:
