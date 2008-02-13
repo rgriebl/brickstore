@@ -64,7 +64,7 @@ public:
 private:
     friend class CRefCacheBase;
 
-    mutable uint           m_refcnt;
+    mutable int           m_refcnt;
     mutable CRefCacheBase *m_cache;
 };
 

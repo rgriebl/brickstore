@@ -376,7 +376,7 @@ QDataStream &operator >> (QDataStream &ds, BrickLink::Item *item)
     quint32 index = 0, year = 0;
     qint64 invupd = 0;
     ds >> colorid >> invupd >> item->m_weight >> index >> year;
-    item->m_color = colorid == -1 ? 0 : BrickLink::inst()->color(colorid);
+    item->m_color = BrickLink::inst()->color(colorid == -1 ? 0 : colorid);
     item->m_index = index;
     item->m_year = year;
     item->m_last_inv_update = invupd;

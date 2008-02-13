@@ -194,6 +194,7 @@ void CSelectItem::init()
     d->w_itemthumbs->setSortingEnabled(true);
     d->w_itemthumbs->setAlternatingRowColors(true);
     d->w_itemthumbs->setAllColumnsShowFocus(true);
+    d->w_itemthumbs->setUniformRowHeights(true);
     d->w_itemthumbs->setWordWrap(true);
     d->w_itemthumbs->setRootIsDecorated(false);
     d->w_itemthumbs->setSelectionBehavior(QAbstractItemView::SelectRows);

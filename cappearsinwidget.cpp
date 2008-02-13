@@ -91,12 +91,16 @@ public:
 
         case Qt::ToolTipRole: {
             BrickLink::Picture *pic = BrickLink::inst()->picture(appears->second, appears->second->defaultColor(), true);
-            if (pic)
-                pic->addRef();
 
             QTemporaryResource::registerResource("#/appears_in_set_tooltip_picture.png", (pic && pic->valid()) ? pic->image() : QImage());
-            m_tooltip_item = appears->second;
+            m_tooltip_pic = pic;
 
+            foreach (QWidget *w, QApplication::topLevelWidgets()) {
+                if (w->inherits("QTipLabel")) {
+                    qobject_cast<QLabel *>(w)->clear();
+                    break;
+                }
+            }
             res = createToolTip(appears->second, pic);
             break;
         }
@@ -132,28 +136,28 @@ public:
 private slots:
     void pictureUpdated(BrickLink::Picture *pic)
     {
-        if (!pic)
+        if (!pic || pic != m_tooltip_pic)
             return;
 
-        if (pic->item() == m_tooltip_item) {
-            if (QToolTip::isVisible() && QToolTip::text().startsWith("<div class=\"appearsin\">")) {
-                QTemporaryResource::registerResource("#/appears_in_set_tooltip_picture.png", pic->image());
+        if (QToolTip::isVisible() && QToolTip::text().startsWith("<div class=\"appearsin\">")) {
+            QTemporaryResource::registerResource("#/appears_in_set_tooltip_picture.png", pic->image());
 
-                QPoint pos;
-                foreach (QWidget *w, QApplication::topLevelWidgets()) {
-                    if (w->inherits("QTipLabel")) {
-                //        pos = w->pos();
-                        QSize extra = w->size() - w->sizeHint();
-                        qobject_cast<QLabel *>(w)->setText(createToolTip(pic->item(), pic));
-                        w->resize(w->sizeHint() + extra);
-                        break;
-                    }
+            QPoint pos;
+            foreach (QWidget *w, QApplication::topLevelWidgets()) {
+                if (w->inherits("QTipLabel")) {
+             //       pos = w->pos();
+                    QSize extra = w->size() - w->sizeHint();
+                    qobject_cast<QLabel *>(w)->clear();
+                    qobject_cast<QLabel *>(w)->setText(createToolTip(pic->item(), pic));
+                    w->resize(w->sizeHint() + extra);
+                    break;
                 }
-             //   if (!pos.isNull())
-              //      QToolTip::showText(pos, createToolTip(pic->item(), pic));
             }
+//            if (!pos.isNull()) {
+  //              QToolTip::showText(pos, createToolTip(pic->item(), pic));
+    //        }
         }
-        pic->release();
+        m_tooltip_pic = 0;
     }
 
 private:
@@ -161,7 +165,7 @@ private:
     const BrickLink::Color *       m_color;
     int                            m_rows;
     BrickLink::Item::AppearsIn     m_appearsin;
-    mutable const BrickLink::Item *m_tooltip_item;
+    mutable BrickLink::Picture *   m_tooltip_pic;
 };
 
 #if 0

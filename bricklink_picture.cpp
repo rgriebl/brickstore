@@ -69,14 +69,14 @@ BrickLink::Picture *BrickLink::Core::picture(const Item *item, const BrickLink::
         need_to_load = true;
     }
 
-    if (high_priority || need_to_load) {
+    if (high_priority) {
         if (!pic->valid())
             pic->load_from_disk();
 
         if (!pic->valid() || updateNeeded(pic->lastUpdate(), m_pictures.update_iv))
             updatePicture(pic, high_priority);
     }
-    else if (false) {
+    else if (need_to_load) {
         pic->addRef();
         m_pictures.diskload.append(pic);
 
@@ -119,7 +119,7 @@ void BrickLink::Core::pictureIdleLoader2()
             continue;
         }
         // already loaded? ..or ..nobody listening?
-        else if (pic->valid() || (pic->refCount() == 1)) {
+        else if (pic->valid() /*|| (pic->refCount() == 1)*/) {
             pic->release();
             pic = 0;
             continue;

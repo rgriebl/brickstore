@@ -401,6 +401,8 @@ BrickLink::ItemModel::ItemModel(Features)
     m_sortcol = 1;
     m_items.reserve(BrickLink::core()->items().count());
 
+    connect(BrickLink::core(), SIGNAL(pictureUpdated(BrickLink::Picture *)), this, SLOT(pictureUpdated(BrickLink::Picture *)));
+
     rebuildItemList();
 }
 
@@ -448,8 +450,8 @@ QVariant BrickLink::ItemModel::data(const QModelIndex &index, int role) const
     else if (role == Qt::DecorationRole) {
         switch(index.column()) {
         case 0: {
-            BrickLink::Picture *pic = BrickLink::core()->picture(i, i->defaultColor());
-            //pic->addRef();
+            Picture *pic = BrickLink::core()->picture(i, i->defaultColor());
+
             if (pic && pic->valid()) {
                 return pic->image();
             }
@@ -607,7 +609,8 @@ void BrickLink::ItemModel::pictureUpdated(BrickLink::Picture *pic)
         return;
 
     QModelIndex idx = index(pic->item());
-    emit dataChanged(idx, idx);
+    if (idx.isValid())
+        emit dataChanged(idx, idx);
 }
 
 

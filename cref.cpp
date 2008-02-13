@@ -49,10 +49,10 @@ void CRefCacheBase::clear()
 
 void CRefCacheBase::addRefFor(const CRef *ref)
 {
-    qDebug ( "addRefFor called" );
+    //qDebug ( "addRefFor called" );
 
     if (ref && (ref->m_cache == this) && (ref->m_refcnt == 1)) {
-        qDebug ( "Moving item [%p] to in-use dict...", (void *) ref );
+        //qDebug ( "Moving item [%p] to in-use dict...", (void *) ref );
         m_no_ref.removeAll(ref);
     }
 }
@@ -60,20 +60,21 @@ void CRefCacheBase::addRefFor(const CRef *ref)
 void CRefCacheBase::releaseFor(const CRef *ref)
 {
     if (ref && (ref->m_refcnt == 0) && (ref->m_cache == this)) {
-        qDebug("Moving item [%p] to cache...", (void *) ref);
+        //qDebug("Moving item [%p] to cache...", (void *) ref);
         m_no_ref.append(ref);
 
         while (m_no_ref.count() > m_cache_size) {
             const CRef *del = m_no_ref.takeFirst();
-            qDebug("Purging item [%p] from cache...", (void *) del);
+            //qDebug("Purging item [%p] from cache...", (void *) del);
 
             for (QHash<quint64, CRef *>::iterator it = m_dict.begin(); it != m_dict.end(); ++it) {
                 if (it.value() == del) {
-                    qDebug ( "Purging item \"%llx\" from cache...", it.key ( ));
+                    //qDebug ( "Purging item \"%llx\" from cache...", it.key ( ));
                     m_dict.erase(it);
                     break;
                 }
             }
+            delete del;
         }
     }
 }
@@ -81,5 +82,5 @@ void CRefCacheBase::releaseFor(const CRef *ref)
 CRef::~CRef()
 {
     if (m_refcnt)
-        qWarning("Deleting %p, although refcnt=%d", this, m_refcnt);
+        qWarning("Deleting %p, although refcnt=%d, cache=%p", this, m_refcnt, m_cache);
 }

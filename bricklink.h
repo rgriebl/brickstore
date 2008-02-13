@@ -978,7 +978,7 @@ private:
 
         QList <Picture *>         diskload;
 
-        CRefCache<Picture, 500>   cache;
+        CRefCache<Picture, 2500>   cache;
     } m_pictures;
 };
 
