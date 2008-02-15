@@ -11,16 +11,17 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <stdlib.h>
-#include <locale.h>
+#include <cstdlib>
+#include <clocale>
+#include <climits>
 
 #include <QApplication>
 #include <QLocale>
 #include <QValidator>
-#include <QRegexp>
-#include <QLineedit>
+#include <QRegExp>
+#include <QLineEdit>
 #include <QKeyEvent>
-#include <QDatastream>
+#include <QDataStream>
 
 #if defined( Q_OS_MACX )
 

@@ -91,8 +91,9 @@ CApplication::CApplication(const char *rebuild_db_only, int _argc, char **_argv)
  //       setStyle(new DotNetStyle());
 
 #elif defined( Q_WS_X11 )
-    extern bool qt_use_xrender;
-    m_has_alpha &= qt_use_xrender;
+    //TODO: Qt4 has QX11Info, but no public use_xrender flag...
+    //extern bool qt_use_xrender;
+    m_has_alpha &= true; //qt_use_xrender;
 
 #endif
 

@@ -36,7 +36,7 @@
 #include "cappearsinwidget.h"
 #include "cselectitem.h"
 #include "cselectcolor.h"
-#include "DAddItem.h"
+#include "dadditem.h"
 
 
 class HackSpinBox : public QSpinBox {

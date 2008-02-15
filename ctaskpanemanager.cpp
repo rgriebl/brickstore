@@ -20,7 +20,7 @@
 #include <QColor>
 #include <QFont>
 #include <QCursor>
-#include <QMainwindow>
+#include <QMainWindow>
 #include <QMenu>
 #include <QAction>
 #include <QDockWidget>

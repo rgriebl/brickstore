@@ -16,7 +16,7 @@
 #include <qlist.h>
 #include <qmenu.h>
 #include <qcursor.h>
-#include <QAction.h>
+#include <QAction>
 #include <QToolTip>
 #include <QEvent>
 #include <QPaintEvent>

@@ -11,7 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <QPushbutton>
+#include <QPushButton>
 #include <QLabel>
 #include <QProgressBar>
 #include <QApplication>

@@ -257,7 +257,7 @@ CFrameWork::CFrameWork(QWidget *parent, Qt::WindowFlags f)
     m_filter = 0;
 
 #if defined( Q_WS_X11 )
-    if (!icon() || icon()->isNull()) {
+    if (windowIcon().isNull()) {
         QPixmap pix(":/icon");
         if (!pix.isNull())
             setWindowIcon(pix);

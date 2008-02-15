@@ -53,7 +53,7 @@ class TextImport;
 class InvItem;
 class Item;
 class ItemType;
-
+class Core;
 
 QDataStream &operator << (QDataStream &ds, const InvItem &ii);
 QDataStream &operator >> (QDataStream &ds, InvItem &ii);

@@ -244,8 +244,9 @@ void CUtility::setPopupPos(QWidget *w, const QRect &pos)
     if ((y + sh.height()) > desktop.height()) {
         int d = w->frameSize().height() - w->size().height();
 #if defined( Q_WS_X11 )
-        if ((d <= 0) && qApp->mainWidget())
-            d = qApp->mainWidget()->frameSize().height() - qApp->mainWidget()->size().height();
+    //TODO: qt4 doesn't have mainWidget()
+//        if ((d <= 0) && qApp->mainWidget())
+//            d = qApp->mainWidget()->frameSize().height() - qApp->mainWidget()->size().height();
 #endif
         y = pos.y() - sh.height() - d;
     }

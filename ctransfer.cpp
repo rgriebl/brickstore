@@ -174,7 +174,8 @@ protected slots:
             }
             break;
         }
-        case 304: if (m_job->m_only_if_newer.isValid()) {
+        case 304: 
+            if (m_job->m_only_if_newer.isValid()) {
                 m_job->m_was_not_modified = true;
                 m_job->m_status = CTransferJob::Completed;
             }
@@ -183,10 +184,14 @@ protected slots:
             }
             break;
 
-        case 200: m_job->m_last_modified = fromHttpDate(resp.value("Last-Modified").toLatin1());
+        case 200: {
+            QString lm = resp.value("Last-Modified");
+            if (!lm.isEmpty())
+                m_job->m_last_modified = fromHttpDate(lm.toLatin1());
             break;
-
-        default : m_job->m_status = CTransferJob::Failed;
+        }
+        default: 
+            m_job->m_status = CTransferJob::Failed;
             break;
         }
     }

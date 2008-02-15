@@ -14,7 +14,7 @@
 #include <QDialog>
 #include <QPushButton>
 #include <QRadioButton>
-#include <QLineedit>
+#include <QLineEdit>
 #include <QLabel>
 #include <QToolTip>
 

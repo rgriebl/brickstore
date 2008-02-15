@@ -13,7 +13,7 @@
 */
 #include <stdlib.h>
 
-#include <QFileinfo>
+#include <QFileInfo>
 #include <QTimer>
 #include <QPixmapCache>
 #include <QImage>

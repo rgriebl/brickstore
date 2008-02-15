@@ -11,12 +11,13 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <clocale>
+#include <cstdio>
 #include <cstring>
 
 #include <QMessageBox>
 
 #include "capplication.h"
+
 
 int main(int argc, char **argv)
 {

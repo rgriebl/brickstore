@@ -35,11 +35,7 @@ CFilterEdit::CFilterEdit(QWidget *parent)
     w_clear->hide();
 
     w_menu->setStyleSheet("QToolButton { border: none; padding: 0px; }\n"
-                          "QToolButton::menu-indicator { subcontrol-origin: border; subcontrol-position: bottom right;"
-#if defined( Q_WS_WIN )
-                          "position: relative; top: 4px; left: 4px;"
-#endif
-                          " }");
+                          "QToolButton::menu-indicator { left: -30px }");
     w_clear->setStyleSheet("QToolButton { border: none; padding: 0px; }");
 
     connect(w_clear, SIGNAL(clicked()), this, SLOT(clear()));
