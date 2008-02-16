@@ -2525,7 +2525,7 @@
     </message>
     <message>
         <source>days</source>
-        <translation></translation>
+        <translation> </translation>
     </message>
     <message>
         <source>Price G&amp;uides, if older than</source>
