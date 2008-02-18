@@ -20,3 +20,4 @@ Makefile
 brickstore
 brickstore.exe
 brickstore.app
+qrc_brickstore.cpp

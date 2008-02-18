@@ -921,51 +921,37 @@ void CTaskPane::updateBackground()
     if (CUtility::colorDifference(cap1, cap2) < 0.1f)
         cap2 = CUtility::contrastColor(cap2, 0.2f);
 
-    m_bgrad = QLinearGradient(1, 0, width()-2, 0);
-    m_bgrad.setColorAt(0, cap1);
-    m_bgrad.setColorAt(1, cap2);
-
-    QColor cap1a = cap1;
-    cap1a.setAlphaF(0.f);
-
-    m_tgrad = QLinearGradient(0, 0, width() - m_margins.left() - m_margins.right(), m_xh);
-    m_tgrad.setColorAt(0,   cap2);
-    m_tgrad.setColorAt(0.5, cap2);
-    m_tgrad.setColorAt(1,   cap1a);
-
     m_lcol = cap1;
     m_rcol = cap2;
     m_tcol = text;
-    m_fcol = CUtility::gradientColor(CUtility::gradientColor(cap1, cap2), palette().color(QPalette::Base), .5f);
 
-#elif defined( Q_WS_MACX )
+#else // if defined( Q_WS_MACX ) || defined( Q_WS_X11 )
     // leopard title bar gradient
     QColor cap1(192, 192, 192);
     QColor cap2(150, 150, 150);
-    m_bgrad = QLinearGradient(1, 0, width()-2, 0);
-    m_bgrad.setColorAt(0, cap1);
-    m_bgrad.setColorAt(1, cap2);
-
-    QColor cap1a = cap1;
-    cap1a.setAlphaF(0.f);
-
-    m_tgrad = QLinearGradient(1, 0, width()-2, 0);
-    m_tgrad.setColorAt(0, cap2);
-    m_tgrad.setColorAt(0.5, cap2);
-    m_tgrad.setColorAt(1, cap1a);
 
     m_lcol = QColor(220, 220, 220);
     m_rcol = QColor(64, 64, 64);
     m_tcol = Qt::black;
-    m_fcol = CUtility::gradientColor(CUtility::gradientColor(cap1, cap2), palette().color(QPalette::Base), .5f);
-#else
-    // used the same as Mac Os X leopard title bar gradient
-    m_bgrad = QLinearGradient(1, 0, width()-2, height());
-    m_bgrad.setColorAt(0, QColor(192,192,192));
-    m_bgrad.setColorAt(1, QColor(150,150,150));
-    m_lcol = QColor(220, 220, 220);
-    m_rcol = QColor(64, 64, 64);
+
 #endif
+
+    m_bgrad = QLinearGradient(1, 0, width()-2, 0);
+    m_bgrad.setColorAt(0, cap1);
+    m_bgrad.setColorAt(1, cap2);
+
+    QColor cap1a = cap1;
+    cap1a.setAlphaF(0.f);
+    QColor cap2a = cap2;
+    cap2a.setAlphaF(0.f);
+
+    m_tgrad = QLinearGradient(0, 0, width() - m_margins.left() - m_margins.right(), 0);
+    m_tgrad.setColorAt(0,   cap2a);
+    m_tgrad.setColorAt(0.1, cap2);
+    m_tgrad.setColorAt(0.5, cap2);
+    m_tgrad.setColorAt(1,   cap1a);
+
+    m_fcol = CUtility::gradientColor(CUtility::gradientColor(cap1, cap2), palette().color(QPalette::Base), .5f);
 }
 
 void CTaskPane::updatePalette()

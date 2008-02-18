@@ -54,19 +54,19 @@ public:
     {
     }
 
-    QModelIndex AppearsInModel::index(int row, int column, const QModelIndex &parent) const
+    QModelIndex index(int row, int column, const QModelIndex &parent) const
     {
         if (hasIndex(row, column, parent) && !parent.isValid())
             return createIndex(row, column, m_items.at(row));
         return QModelIndex();
     }
 
-    const BrickLink::Item::AppearsInItem *AppearsInModel::appearsIn(const QModelIndex &idx) const
+    const BrickLink::Item::AppearsInItem *appearsIn(const QModelIndex &idx) const
     {
         return idx.isValid() ? static_cast<const BrickLink::Item::AppearsInItem *>(idx.internalPointer()) : 0;
     }
 
-    QModelIndex AppearsInModel::index(const BrickLink::Item::AppearsInItem *const_ai) const
+    QModelIndex index(const BrickLink::Item::AppearsInItem *const_ai) const
     {
         BrickLink::Item::AppearsInItem *ai = const_cast<BrickLink::Item::AppearsInItem *>(const_ai);
 
