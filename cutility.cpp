@@ -68,6 +68,14 @@ QString CUtility::ellipsisText(const QString &org, const QFontMetrics &fm, int w
     return text;
 }
 
+float CUtility::colorDifference(const QColor &c1, const QColor &c2)
+{
+    qreal r1, g1, b1, a1, r2, g2, b2, a2;
+    c1.getRgbF(&r1, &g1, &b1, &a1);
+    c2.getRgbF(&r2, &g2, &b2, &a2);
+
+    return (qAbs(r1-r2) + qAbs(g1-g2) + qAbs(b1-b2)) / 3.f;
+}
 
 QColor CUtility::gradientColor(const QColor &c1, const QColor &c2, qreal f)
 {

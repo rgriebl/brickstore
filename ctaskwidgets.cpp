@@ -17,10 +17,12 @@
 #include <QDockWidget>
 #include <QMainWindow>
 #include <QEvent>
+#include <QDesktopServices>
+#include <QStatusTipEvent>
+#include <QApplication>
 
 #include "bricklink.h"
 #include "cconfig.h"
-//#include "cutility.h"
 #include "cframework.h"
 #include "clocalemeasurement.h"
 
@@ -28,13 +30,39 @@
 
 
 CTaskLinksWidget::CTaskLinksWidget(QWidget *parent)
-        : QTextBrowser(parent), m_doc(0)
+        : QLabel(parent), m_doc(0)
 {
     connect(CFrameWork::inst(), SIGNAL(documentActivated(CDocument *)), this, SLOT(documentUpdate(CDocument *)));
 
-    setHtml("<b>ABCDEFGHIJKLM</b><br />1<br />2<br />3<br />4<br /><br /><b>X</b><br />1<br />");
-    setMinimumSize(sizeHint());
-    setHtml(QString());
+    setAlignment(Qt::AlignLeft | Qt::AlignTop);
+    setIndent(8);
+    setBackgroundRole(QPalette::Base);
+    setAutoFillBackground(true);
+
+    setText("<b>ABCDEFGHIJKLM</b><br />1<br />2<br />3<br />4<br /><br /><b>X</b><br />1<br />");
+    setMinimumSize(minimumSizeHint());
+    setText(QString());
+
+    connect(this, SIGNAL(linkActivated(const QString &)), this, SLOT(linkActivate(const QString &)));
+    connect(this, SIGNAL(linkHovered(const QString &)), this, SLOT(linkHover(const QString &)));
+
+}
+
+void CTaskLinksWidget::linkActivate(const QString &url)
+{
+    QDesktopServices::openUrl(url);
+}
+
+void CTaskLinksWidget::linkHover(const QString &url)
+{
+    if (parent()) {
+        QStatusTipEvent tip(url);
+        QApplication::sendEvent(parent(), &tip);
+    }
+//    setStatusTip(url);
+  //  if (QMainWindow *tl = qobject_cast<QMainWindow *>(topLevelWidget())) {
+  //      tl->
+  //  }
 }
 
 void CTaskLinksWidget::documentUpdate(CDocument *doc)
@@ -76,7 +104,7 @@ void CTaskLinksWidget::selectionUpdate(const CDocument::ItemList &list)
             str += fmt2.arg(tr("Information")).arg(BrickLink::inst()->url(BrickLink::URL_PeeronInfo, item, color).toString());
         }
     }
-    setHtml(str);
+    setText(str);
 }
 
 void CTaskLinksWidget::languageChange()
@@ -189,11 +217,11 @@ CTaskInfoWidget::CTaskInfoWidget(QWidget *parent)
     m_text = new QLabel(this);
     m_text->setAlignment(Qt::AlignLeft | Qt::AlignTop);
     m_text->setIndent(8);
+    m_text->setBackgroundRole(QPalette::Base);
+    m_text->setAutoFillBackground(true);
 
     addWidget(m_pic);
     addWidget(m_text);
-
-    paletteChange(palette());
 
     connect(CFrameWork::inst(), SIGNAL(documentActivated(CDocument *)), this, SLOT(documentUpdate(CDocument *)));
     connect(CMoney::inst(), SIGNAL(monetarySettingsChanged()), this, SLOT(refresh()));

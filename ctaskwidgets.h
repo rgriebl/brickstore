@@ -15,7 +15,7 @@
 #define __CTASKWIDGETS_H__
 
 #include <QStackedWidget>
-#include <QTextBrowser>
+#include <QLabel>
 
 #include "cdocument.h"
 #include "cappearsinwidget.h"
@@ -26,7 +26,7 @@ class QLabel;
 class QDockWidget;
 
 
-class CTaskLinksWidget : public QTextBrowser {
+class CTaskLinksWidget : public QLabel {
     Q_OBJECT
 
 public:
@@ -37,6 +37,8 @@ protected slots:
     void selectionUpdate(const CDocument::ItemList &list);
 
     void languageChange();
+    void linkActivate(const QString &url);
+    void linkHover(const QString &url);
 
 private:
     CDocument * m_doc;

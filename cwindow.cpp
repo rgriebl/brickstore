@@ -473,6 +473,8 @@ CWindow::CWindow(CDocument *doc, QWidget *parent)
     w_list->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
     w_list->setContextMenuPolicy(Qt::CustomContextMenu);
     w_list->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+    w_list->verticalHeader()->hide();
+    w_list->horizontalHeader()->setHighlightSections(false);
     setFocusProxy(w_list);
 
     connect(w_list->horizontalHeader(), SIGNAL(geometriesChanged()), w_list, SLOT(resizeRowsToContents()));
@@ -488,9 +490,9 @@ CWindow::CWindow(CDocument *doc, QWidget *parent)
 
     if ( doc->doNotSortItems ( ))
      w_list->setSorting ( w_list->columns ( ) + 1 );
+*/
+    connect(w_list->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(updateSelectionFromView()));
 
-    connect ( w_list, SIGNAL( selectionChanged ( )), this, SLOT( updateSelectionFromView ( )));
-    */
 
     QBoxLayout *toplay = new QVBoxLayout(this);
     toplay->setSpacing(0);
@@ -804,6 +806,16 @@ void CWindow::mergeItems(const CDocument::ItemList &items, int globalmergeflags)
         }
     }
     m_doc->endMacro(tr("Merged %1 items").arg(mergecount));
+}
+
+void CWindow::updateSelectionFromView()
+{
+	CDocument::ItemList itlist;
+
+    foreach (const QModelIndex &idx, w_list->selectionModel()->selectedRows())
+        itlist.append(m_doc->item(idx));
+
+    m_doc->setSelection(itlist);
 }
 
 QDomElement CWindow::createGuiStateXML(QDomDocument doc)
@@ -1621,7 +1633,7 @@ void CWindow::setPrice(money_t d)
 
 void CWindow::contextMenu(const QPoint &p)
 {
-    CFrameWork::inst()->showContextMenu(/*TODO: */ true, p);
+    CFrameWork::inst()->showContextMenu(/*TODO: */ true, w_list->viewport()->mapToGlobal(p));
 }
 
 void CWindow::on_file_close_triggered()

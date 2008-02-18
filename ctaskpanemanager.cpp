@@ -30,6 +30,9 @@
 #include "ctaskpanemanager.h"
 #include "cutility.h"
 
+#if defined( Q_WS_WIN )
+#include <windows.h>
+#endif
 
 class CTaskPaneManagerPrivate {
 public:
@@ -45,21 +48,20 @@ public:
         QIcon        m_iconset;
         QString      m_label;
         int          m_orig_framestyle;
-bool         m_expandible       : 1;
-bool         m_special          : 1;
-bool         m_visible          : 1;
+        bool         m_expandible  : 1;
+        bool         m_visible     : 1;
 
         Item()
                 : m_itemdock(0), m_taskpaneid(0),
                 m_widget(0), m_orig_framestyle(QFrame::NoFrame), m_expandible(false),
-                m_special(false), m_visible(true)
+                m_visible(true)
         { }
 
         Item(const Item &copy)
                 : m_itemdock(copy.m_itemdock), m_taskpaneid(copy.m_taskpaneid),
                 m_widget(copy.m_widget), m_iconset(copy.m_iconset), m_label(copy.m_label),
                 m_orig_framestyle(copy.m_orig_framestyle), m_expandible(copy.m_expandible),
-                m_special(copy.m_special), m_visible(copy.m_visible)
+                m_visible(copy.m_visible)
         { }
     };
 
@@ -81,7 +83,7 @@ public:
     CTaskPane(QWidget *parent);
     virtual ~CTaskPane();
 
-    void addItem(QWidget *w, const QIcon &is, const QString &txt, bool expandible = true, bool special = false);
+    void addItem(QWidget *w, const QIcon &is, const QString &txt, bool expandible = true);
     void removeItem(QWidget *w, bool delete_widget = true);
 
     bool isExpanded(QWidget *w) const;
@@ -104,17 +106,19 @@ protected:
     virtual void paintEvent(QPaintEvent *pe);
     virtual void changeEvent(QEvent *e);
 
+    void updateFont();
+    void updatePalette();
+    void updateBackground();
+
 private:
-    QPixmap            m_lgrad;
-    QPixmap            m_rgrad;
-    QColor             m_mcol;
+    QLinearGradient    m_bgrad, m_tgrad;
+    QColor             m_lcol, m_rcol, m_tcol, m_fcol;
 
     QRect m_margins;
     QFont m_font;
     int m_xh, m_xw;
     int m_vspace, m_hspace;
     int m_arrow;
-bool m_condensed : 1;
     QList <CTaskGroup *> *m_groups;
 };
 
@@ -162,7 +166,6 @@ void CTaskPaneManager::addItem(QWidget *w, const QIcon &is, const QString &text)
         item.m_iconset    = is;
         item.m_label      = text;
         item.m_expandible = true;
-        item.m_special    = false;
         item.m_orig_framestyle  = QFrame::NoFrame;
 
         kill();
@@ -293,6 +296,7 @@ void CTaskPaneManager::create()
         d->m_mainwindow->addDockWidget(Qt::LeftDockWidgetArea, d->m_panedock);
 
         d->m_panedock->setFeatures(QDockWidget::NoDockWidgetFeatures);
+        d->m_panedock->setTitleBarWidget(new QWidget());
 
         d->m_taskpane = new CTaskPane(0);
         d->m_panedock->setWidget(d->m_taskpane);
@@ -307,10 +311,11 @@ void CTaskPaneManager::create()
                 f->setFrameStyle(QFrame::NoFrame);
             }
 
-            d->m_taskpane->addItem(item.m_widget, item.m_iconset, item.m_label, item.m_expandible, item.m_special);
+            d->m_taskpane->addItem(item.m_widget, item.m_iconset, item.m_label, item.m_expandible);
             item.m_widget->show();
             d->m_taskpane->setExpanded(item.m_widget, item.m_visible);
         }
+        d->m_taskpane->setFixedWidth(d->m_taskpane->sizeHint().width());
         d->m_taskpane->show();
         d->m_panedock->show();
 
@@ -500,7 +505,7 @@ private:
         m_bar = parent;
         m_expanded = true;
         m_expandible = true;
-        m_special = m_hot = false;
+        m_hot = false;
         m_widget = 0;
 
         setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
@@ -544,20 +549,6 @@ public:
     QIcon icon() const
     {
         return m_is;
-    }
-
-    void setSpecial(bool b)
-    {
-        if (m_special != b) {
-            m_special = b;
-            m_bar->recalcLayout();
-            update();
-        }
-    }
-
-    bool isSpecial() const
-    {
-        return m_special;
     }
 
     void setExpandible(bool b)
@@ -625,10 +616,9 @@ protected:
     }
 
 protected:
-bool m_expandible  : 1;
-bool m_expanded    : 1;
-bool m_special     : 1;
-bool m_hot         : 1;
+    bool m_expandible  : 1;
+    bool m_expanded    : 1;
+    bool m_hot         : 1;
 
     int m_leadin;
     int m_leadout;
@@ -658,12 +648,11 @@ CTaskPane::CTaskPane(QWidget *parent)
         : QWidget(parent)
 {
     m_margins = QRect(6, 6, 1, 1);
-    m_condensed = false;
     m_groups = new QList <CTaskGroup *>;
     //m_groups->setAutoDelete ( true );
 
-    fontChange(font());
-    paletteChange(palette());
+    updateFont();
+    updatePalette();
 
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 }
@@ -672,12 +661,11 @@ CTaskPane::~CTaskPane()
 {
 }
 
-void CTaskPane::addItem(QWidget *w, const QIcon &is, const QString &txt, bool expandible, bool special)
+void CTaskPane::addItem(QWidget *w, const QIcon &is, const QString &txt, bool expandible)
 {
     CTaskGroup *g = new CTaskGroup(this);
     g->setIcon(is);
     g->setText(txt);
-    g->setSpecial(special);
     g->setExpandible(expandible);
     g->setWidget(w);
     g->show();
@@ -730,22 +718,7 @@ void CTaskPane::drawHeaderBackground(QPainter *p, CTaskGroup *g, bool /*hot*/)
 
     int offy = r.height() - (m_vspace + m_xh + m_vspace);
 
-    if (offy > 0)
-        p->fillRect(r.x(), r.y(), r.width(), offy, m_mcol);
-
-    if (g->isSpecial()) {
-        p->fillRect(r.x(), r.y() + offy, r.width(), r.height() - offy, pal.color(QPalette::Highlight).dark(150));
-    }
-    else {
-        QLinearGradient gradient(0, 0, r.width(), 0);
-        gradient.setColorAt(0, pal.color(QPalette::Base));
-        gradient.setColorAt(1, pal.color(QPalette::Highlight));
-
-        p->fillRect(r.x(), r.y() + offy, r.width(), r.height() - offy, gradient);
-    }
-    p->setPen(m_mcol);
-    p->drawPoint(r.x(), r.y() + offy);
-    p->drawPoint(r.right(), r.y() + offy);
+    p->fillRect(r.x(), r.y() + offy, r.width(), r.height() - offy, m_tgrad);
 }
 
 void CTaskPane::drawHeaderContents(QPainter *p, CTaskGroup *g, bool hot)
@@ -758,31 +731,22 @@ void CTaskPane::drawHeaderContents(QPainter *p, CTaskGroup *g, bool hot)
     int offx = m_hspace;
 
     if (!g->icon().isNull()) {
-        QPixmap pix = g->icon().pixmap(32, hot ? QIcon::Active : QIcon::Normal, QIcon::On);
+        g->icon().paint(p, QRect(x + offx, y, 22, 22), Qt::AlignCenter, hot ? QIcon::Active : QIcon::Normal, QIcon::On);
+      //  QPixmap pix = g->icon().pixmap(22, y + (h > pix.height() ? (h - pix.height()) / 2 : 0), );
 
-        if (!pix.isNull()) {
-            p->drawPixmap(x + offx, y + (h > pix.height() ? (h - pix.height()) / 2 : 0), pix);
-            offx += (pix.width() + m_hspace);
-        }
+        offx += (22 + m_hspace);
     }
-
-    QColor stc = pal.color(QPalette::HighlightedText);
-    QColor sbc = pal.color(QPalette::Highlight);
-    QColor tc = pal.color(QPalette::Highlight);
-    QColor bc = pal.color(QPalette::Base);
-    if (hot) {
-        stc = CUtility::gradientColor(stc, sbc, .5f);
-        tc = CUtility::gradientColor(tc, bc, .5f);
-    }
-    p->setPen(g->isSpecial() ? stc : tc);
-    p->setFont(m_font);
 
     QRect tr(x + offx, y + h - (2 * m_vspace + m_xh), w - (offx + m_hspace), 2 * m_vspace + m_xh);
+
+    p->setFont(m_font);
+    p->setPen(CUtility::contrastColor(hot ? CUtility::contrastColor(m_tcol, 0.1f) : m_tcol, 0.5f));
+    p->drawText(tr.translated(1,1), Qt::AlignLeft | Qt::AlignVCenter, g->text());
+
+    p->setPen(hot ? CUtility::contrastColor(m_tcol,0.1f) : m_tcol);
     p->drawText(tr, Qt::AlignLeft | Qt::AlignVCenter, g->text());
 
     if (g->isExpandible()) {
-        p->setPen(stc);
-
         QRect ar(tr.right() - m_arrow, tr.top() + (tr.height() - m_arrow) / 2, m_arrow, m_arrow);
 
         for (int i = 0; i < m_arrow; i++) {
@@ -810,17 +774,12 @@ QSize CTaskPane::sizeHint() const
     w += (m_margins.left() + m_margins.right());
     h += (m_margins.top() + m_margins.bottom());
 
-    if (m_condensed) {
-        w += 2;
-        h += 2;
-    }
-
     int iw = 0;
 
     bool first = true;
 
     foreach(CTaskGroup *g, *m_groups) {
-        if (!first && !m_condensed)
+        if (!first)
             h += m_xh / 2;
         first = false;
 
@@ -834,14 +793,14 @@ QSize CTaskPane::sizeHint() const
 
         QWidget *content = g->widget();
 
-        if (content && g->isExpanded()) {
-            QSize cs = content->sizeHint();
+        if (content /*&& g->isExpanded()*/) {
+            QSize cs = content->minimumSizeHint();
 
             if (cs.isEmpty())
                 cs = content->minimumSize();
 
-            if ((cs.width() + 2) > iw)
-                iw = cs.width() + 2;
+            if ((cs.width() + 4) > iw)
+                iw = cs.width() + 4;
 
             h += cs.height();
             h++;
@@ -864,15 +823,10 @@ void CTaskPane::recalcLayout()
     if (w <= 0 || h <= 0)
         return;
 
-    if (m_condensed) {
-        offx++; offy++;
-        w -= 2; h -= 2;
-    }
-
     bool first = true;
 
     foreach(CTaskGroup *g, *m_groups) {
-        if (!first && !m_condensed)
+        if (!first)
             offy += m_xh / 2;
         first = false;
 
@@ -893,9 +847,9 @@ void CTaskPane::recalcLayout()
 
                 int ch = cs.height();
 
-                content->setGeometry(offx + (m_condensed ? 0 : 1), offy, w - (m_condensed ? 0 : 2), ch);
+                content->setGeometry(offx + 2, offy + 1, w - 4, ch);
                 offy += ch;
-                offy++;
+                offy+=2;
                 content->show();
             }
             else
@@ -912,8 +866,8 @@ QSize CTaskPane::sizeForGroup(const CTaskGroup *g) const
     QSize icons(0, 0);
     if (!g->icon().isNull())
         icons = g->icon().pixmap(32).size();
-    int tw = fm.width(g->text());
-    int th = 2 * m_vspace + m_xh;
+    int tw = fm.width(g->text()) + 1;
+    int th = 2 * m_vspace + m_xh + 1;
 
     s.setWidth(m_hspace + icons.width() + (icons.width() ? m_hspace : 0) + tw + (tw ? m_hspace : 0) + (g->isExpandible() ? m_arrow + m_hspace : 0));
     s.setHeight(qMax(icons.height(), th));
@@ -924,40 +878,117 @@ QSize CTaskPane::sizeForGroup(const CTaskGroup *g) const
 void CTaskPane::resizeEvent(QResizeEvent *re)
 {
     QWidget::resizeEvent(re);
+    updateBackground();
     recalcLayout();
+}
+
+void CTaskPane::updateFont()
+{
+    m_font = font();
+    m_font.setBold(true);
+
+    QFontMetrics fm(m_font);
+
+    m_xw = fm.width("x");
+    m_xh = fm.height();
+
+    m_arrow = (m_xh / 2) | 1;
+    m_hspace = m_xw;
+    m_vspace = m_xh / 6;
+
+    recalcLayout();
+    update();
+}
+
+#ifdef Q_WS_WIN
+static inline QRgb colorref2qrgb(COLORREF col)
+{
+    return qRgb(GetRValue(col), GetGValue(col), GetBValue(col));
+}
+#endif
+
+void CTaskPane::updateBackground()
+{
+#if defined( Q_WS_WIN )
+    QColor text (colorref2qrgb(GetSysColor(COLOR_CAPTIONTEXT)));
+    QColor cap1 (colorref2qrgb(GetSysColor(COLOR_ACTIVECAPTION)));
+    QColor cap2;
+    if (QSysInfo::WindowsVersion == QSysInfo::WV_95 || QSysInfo::WindowsVersion == QSysInfo::WV_NT)
+        cap2 = CUtility::contrastColor(cap2, 0.2f);
+    else
+        cap2.setRgb(colorref2qrgb(GetSysColor(COLOR_GRADIENTACTIVECAPTION)));
+
+    if (CUtility::colorDifference(cap1, cap2) < 0.1f)
+        cap2 = CUtility::contrastColor(cap2, 0.2f);
+
+    m_bgrad = QLinearGradient(1, 0, width()-2, 0);
+    m_bgrad.setColorAt(0, cap1);
+    m_bgrad.setColorAt(1, cap2);
+
+    QColor cap1a = cap1;
+    cap1a.setAlphaF(0.f);
+
+    m_tgrad = QLinearGradient(0, 0, width() - m_margins.left() - m_margins.right(), m_xh);
+    m_tgrad.setColorAt(0,   cap2);
+    m_tgrad.setColorAt(0.5, cap2);
+    m_tgrad.setColorAt(1,   cap1a);
+
+    m_lcol = cap1;
+    m_rcol = cap2;
+    m_tcol = text;
+    m_fcol = CUtility::gradientColor(CUtility::gradientColor(cap1, cap2), palette().color(QPalette::Base), .5f);
+
+#elif defined( Q_WS_MACX )
+    // leopard title bar gradient
+    QColor cap1(192, 192, 192);
+    QColor cap2(150, 150, 150);
+    m_bgrad = QLinearGradient(1, 0, width()-2, 0);
+    m_bgrad.setColorAt(0, cap1);
+    m_bgrad.setColorAt(1, cap2);
+
+    QColor cap1a = cap1;
+    cap1a.setAlphaF(0.f);
+
+    m_tgrad = QLinearGradient(1, 0, width()-2, 0);
+    m_tgrad.setColorAt(0, cap2);
+    m_tgrad.setColorAt(0.5, cap2);
+    m_tgrad.setColorAt(1, cap1a);
+
+    m_lcol = QColor(220, 220, 220);
+    m_rcol = QColor(64, 64, 64);
+    m_tcol = Qt::black;
+    m_fcol = CUtility::gradientColor(CUtility::gradientColor(cap1, cap2), palette().color(QPalette::Base), .5f);
+#else
+    // used the same as Mac Os X leopard title bar gradient
+    m_bgrad = QLinearGradient(1, 0, width()-2, height());
+    m_bgrad.setColorAt(0, QColor(192,192,192));
+    m_bgrad.setColorAt(1, QColor(150,150,150));
+    m_lcol = QColor(220, 220, 220);
+    m_rcol = QColor(64, 64, 64);
+#endif
+}
+
+void CTaskPane::updatePalette()
+{
+    updateBackground();
+    update();
 }
 
 
 void CTaskPane::changeEvent(QEvent *e)
 {
     if (e->type() == QEvent::FontChange) {
-        m_font = font();
-        m_font.setBold(true);
-
-        QFontMetrics fm(m_font);
-
-        m_xw = fm.width("x");
-        m_xh = fm.height();
-
-        m_arrow = (m_xh / 2) | 1;
-        m_hspace = m_xw;
-        m_vspace = m_xh / 6;
-
-        recalcLayout();
-        update();
+        updateFont();
     }
     else if (e->type() == QEvent::PaletteChange) {
-        const QColor &colh = palette().color(QPalette::Active, QPalette::Highlight);
-        const QColor &colb = palette().color(QPalette::Active, QPalette::Background);
-        m_mcol = CUtility::gradientColor(colh, colb, .2f);
-        update();
+        updatePalette();
     }
     else {
         QWidget::changeEvent(e);
     }
 }
 
-void CTaskPane::paintEvent(QPaintEvent *e)
+void CTaskPane::paintEvent(QPaintEvent *)
 {
     QPalette pal = palette();
     QPainter p(this);
@@ -965,31 +996,16 @@ void CTaskPane::paintEvent(QPaintEvent *e)
     int w = width();
     int h = height();
 
-    int ml = m_margins.left();
-    int mr = m_margins.right();
-
-    QRect rl = QRect(0, 0, ml, h) & e->rect();
-    QPoint pl(rl.left(), 0);
-
-    QRect rr = QRect(w - mr, 0, mr, h) & e->rect();
-    QPoint pr(rr.left() - (w - mr), 0);
-
-    QRect rm = QRect(ml, 0, w - ml - mr, h) & e->rect();
-
-    if (!rl.isEmpty())
-        p.fillRect(rl, m_mcol);
-//  p.drawTiledPixmap ( rl, m_lgrad, pl );
-    if (!rr.isEmpty())
-        p.fillRect(rr, m_mcol);
-//  p.drawTiledPixmap ( rr, m_rgrad, pr );
-    if (!rm.isEmpty())
-        p.fillRect(rm, m_mcol);
-
-    p.setPen(CUtility::gradientColor(pal.color(QPalette::Base), pal.color(QPalette::Highlight), .2f));
+    p.fillRect(1, 0, w-2, h, m_bgrad);
+    p.setPen(m_lcol);
+    p.drawLine(0, 0, 0, h-1);
+    p.setPen(m_rcol);
+    p.drawLine(w-1, 0, w-1, h-1);
+    p.setPen(m_fcol);
 
     foreach(CTaskGroup *g, *m_groups) {
         if (g->widget() && g->isExpanded()) {
-            p.drawRect(g->widget()->geometry().adjusted(-1, -1, 1, 1));
+            p.drawRect(g->widget()->geometry().adjusted(-2, -2, 1, 1));
         }
         else {
             QRect gr = g->geometry();

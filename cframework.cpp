@@ -303,26 +303,26 @@ CFrameWork::CFrameWork(QWidget *parent, Qt::WindowFlags f)
 
     m_taskpanes = new CTaskPaneManager(this);
 // m_taskpanes->setMode ( CConfig::inst ( )->value ( "/MainWindow/Infobar/Mode", CTaskPaneManager::Modern ).toInt ( ) != CTaskPaneManager::Classic ? CTaskPaneManager::Modern : CTaskPaneManager::Classic );
-    m_taskpanes->setMode(CTaskPaneManager::Classic);
+    m_taskpanes->setMode(CTaskPaneManager::Modern);
 
     m_task_info = new CTaskInfoWidget(0);
     m_task_info->setObjectName(QLatin1String("TaskInfo"));
-    m_taskpanes->addItem(m_task_info, QIcon(":/sidebar/info"));
+    m_taskpanes->addItem(m_task_info, QIcon(":/images/sidebar/info"));
     m_taskpanes->setItemVisible(m_task_info, CConfig::inst()->value("/MainWindow/Infobar/InfoVisible", true).toBool());
 
     m_task_priceguide = new CTaskPriceGuideWidget(0);
     m_task_priceguide->setObjectName(QLatin1String("TaskPriceGuide"));
-    m_taskpanes->addItem(m_task_priceguide, QIcon(":/sidebar/priceguide"));
+    m_taskpanes->addItem(m_task_priceguide, QIcon(":/images/sidebar/priceguide"));
     m_taskpanes->setItemVisible(m_task_priceguide, CConfig::inst()->value("/MainWindow/Infobar/PriceguideVisible", true).toBool());
 
     m_task_appears = new CTaskAppearsInWidget(0);
     m_task_appears->setObjectName(QLatin1String("TaskAppears"));
-    m_taskpanes->addItem(m_task_appears,  QIcon(":/sidebar/appearsin"));
+    m_taskpanes->addItem(m_task_appears,  QIcon(":/images/sidebar/appearsin"));
     m_taskpanes->setItemVisible(m_task_appears, CConfig::inst()->value("/MainWindow/Infobar/AppearsinVisible", true).toBool());
 
     m_task_links = new CTaskLinksWidget(0);
     m_task_links->setObjectName(QLatin1String("TaskLinks"));
-    m_taskpanes->addItem(m_task_links,  QIcon(":/sidebar/links"));
+    m_taskpanes->addItem(m_task_links,  QIcon(":/images/sidebar/links"));
     m_taskpanes->setItemVisible(m_task_links, CConfig::inst()->value("/MainWindow/Infobar/LinksVisible", true).toBool());
 
     createActions();

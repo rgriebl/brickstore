@@ -31,7 +31,7 @@ public:
 
     static QColor gradientColor(const QColor &c1, const QColor &c2, qreal f = 0.5f);
     static QColor contrastColor(const QColor &c, qreal f = 0.04f);
-
+    static float colorDifference(const QColor &c1, const QColor &c2);
 // static QImage shadeImage ( const QImage &oimg, const QColor &col );
 
     static void setPopupPos(QWidget *w, const QRect &pos);

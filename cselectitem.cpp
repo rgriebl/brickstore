@@ -386,7 +386,7 @@ void CSelectItem::categoryChanged()
 const BrickLink::Category *CSelectItem::currentCategory() const
 {
     BrickLink::CategoryModel *model = qobject_cast<BrickLink::CategoryModel *>(d->w_categories->model());
-    QModelIndexList idxlst = d->w_categories->selectionModel()->selectedIndexes();
+    QModelIndexList idxlst = d->w_categories->selectionModel()->selectedRows();
 
     if (model && !idxlst.isEmpty())
         return model->category(idxlst.front());
@@ -410,7 +410,7 @@ void CSelectItem::setCurrentCategory(const BrickLink::Category *cat)
 const BrickLink::Item *CSelectItem::currentItem() const
 {
     BrickLink::ItemModel *model = qobject_cast<BrickLink::ItemModel *>(d->w_items->model());
-    QModelIndexList idxlst = d->w_items->selectionModel()->selectedIndexes();
+    QModelIndexList idxlst = d->w_items->selectionModel()->selectedRows();
 
     if (model && !idxlst.isEmpty())
         return model->item(idxlst.front());
