@@ -43,6 +43,7 @@ protected slots:
 private slots:
     void showContextMenu(const QPoint &);
     void partOut();
+    void resizeColumns();
 
 private:
     const BrickLink::Item::AppearsInItem *appearsIn() const;

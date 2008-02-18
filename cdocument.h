@@ -22,6 +22,7 @@
 
 class QUndoStack;
 class QUndoCommand;
+class QItemSelectionModel;
 class CAddRemoveCmd;
 class CChangeCmd;
 
@@ -132,7 +133,7 @@ public:
     // Itemviews API
     QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
     Item *item(const QModelIndex &idx) const;
-    QModelIndex index(Item *i) const;
+    QModelIndex index(const Item *i) const;
 
     virtual int rowCount(const QModelIndex &parent) const;
     virtual int columnCount(const QModelIndex &parent) const;
@@ -146,6 +147,8 @@ public:
     static QString headerDataForDisplayRole(Field f);
     int headerDataForTextAlignmentRole(Field f) const;
 
+    QItemSelectionModel *selectionModel() const;
+
 public slots:
     void pictureUpdated(BrickLink::Picture *pic);
 
@@ -154,8 +157,6 @@ public:
     virtual ~CDocument();
 
     static const QList<CDocument *> &allDocuments();
-
-    void addView(QWidget *view, IDocumentView *docview = 0);
 
     QString fileName() const;
     QString title() const;
@@ -231,6 +232,7 @@ signals:
 
 private slots:
     void clean2Modified(bool);
+    void selectionHelper();
 
 private:
     static CDocument *fileLoadFrom(const QString &s, const char *type, bool import_only = false);
@@ -259,8 +261,7 @@ private:
 
     BrickLink::Order *m_order;
 
-    QList<IDocumentView *> m_views;
-    QDomElement  m_gui_state;
+    QItemSelectionModel *m_selection_model;
 
     static QList<CDocument *> s_documents;
 };

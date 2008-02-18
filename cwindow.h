@@ -179,8 +179,6 @@ private slots:
     void priceGuideUpdated(BrickLink::PriceGuide *);
     void updateErrorMask();
 
-    void updateSelectionFromView();
-
     void itemsAddedToDocument(const CDocument::ItemList &);
     void itemsRemovedFromDocument(const CDocument::ItemList &);
     void itemsChangedInDocument(const CDocument::ItemList &, bool);

@@ -481,6 +481,7 @@ CWindow::CWindow(CDocument *doc, QWidget *parent)
 //    connect(w_list->horizontalHeader(), SIGNAL(sectionResized(int, int, int)), w_list, SLOT(resizeRowsToContents()));
 
     w_list->setModel(doc);
+    w_list->setSelectionModel(doc->selectionModel());
     w_list->setItemDelegate(new DocumentDelegate(doc, w_list));
     /*
     w_list->setShowSortIndicator ( true );
@@ -491,7 +492,7 @@ CWindow::CWindow(CDocument *doc, QWidget *parent)
     if ( doc->doNotSortItems ( ))
      w_list->setSorting ( w_list->columns ( ) + 1 );
 */
-    connect(w_list->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(updateSelectionFromView()));
+//    connect(w_list->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(updateSelectionFromView()));
 
 
     QBoxLayout *toplay = new QVBoxLayout(this);
@@ -525,7 +526,6 @@ CWindow::CWindow(CDocument *doc, QWidget *parent)
     connect(m_doc, SIGNAL(itemsRemoved(const CDocument::ItemList &)), this, SLOT(itemsRemovedFromDocument(const CDocument::ItemList &)));
     connect(m_doc, SIGNAL(itemsChanged(const CDocument::ItemList &, bool)), this, SLOT(itemsChangedInDocument(const CDocument::ItemList &, bool)));
 
-    m_doc->addView(this, this);
     itemsAddedToDocument(m_doc->items());
 
     updateErrorMask();
@@ -806,16 +806,6 @@ void CWindow::mergeItems(const CDocument::ItemList &items, int globalmergeflags)
         }
     }
     m_doc->endMacro(tr("Merged %1 items").arg(mergecount));
-}
-
-void CWindow::updateSelectionFromView()
-{
-	CDocument::ItemList itlist;
-
-    foreach (const QModelIndex &idx, w_list->selectionModel()->selectedRows())
-        itlist.append(m_doc->item(idx));
-
-    m_doc->setSelection(itlist);
 }
 
 QDomElement CWindow::createGuiStateXML(QDomDocument doc)

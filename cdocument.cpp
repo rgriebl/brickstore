@@ -308,7 +308,8 @@ CDocument::CDocument(bool dont_sort)
     m_error_mask = 0;
     m_dont_sort = dont_sort;
 
-
+    m_selection_model = new QItemSelectionModel(this, this);
+    connect(m_selection_model, SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(selectionHelper()));
 
     connect(BrickLink::inst(), SIGNAL(pictureUpdated(BrickLink::Picture *)), this, SLOT(pictureUpdated(BrickLink::Picture *)));
 
@@ -323,6 +324,38 @@ CDocument::~CDocument()
     qDeleteAll(m_items);
 
     s_documents.removeAll(this);
+}
+
+void CDocument::selectionHelper()
+{
+    m_selection.clear();
+
+    foreach (const QModelIndex &idx, m_selection_model->selectedRows())
+        m_selection.append(item(idx));
+
+    emit selectionChanged(m_selection);
+}
+
+const CDocument::ItemList &CDocument::selection() const
+{
+    return m_selection;
+}
+
+void CDocument::setSelection(const CDocument::ItemList &lst)
+{
+    QItemSelection idxs;
+
+    foreach (const Item *item, lst) {
+        QModelIndex idx(index(item));
+        idxs.select(idx, idx);
+    }
+    m_selection_model->select(idxs, QItemSelectionModel::Clear | QItemSelectionModel::Select | QItemSelectionModel::Current |QItemSelectionModel::Rows);
+}
+
+
+QItemSelectionModel *CDocument::selectionModel() const
+{
+    return m_selection_model;
 }
 
 const QList<CDocument *> &CDocument::allDocuments()
@@ -340,18 +373,6 @@ const CDocument::ItemList &CDocument::items() const
     return m_items;
 }
 
-const CDocument::ItemList &CDocument::selection() const
-{
-    return m_selection;
-}
-
-void CDocument::setSelection(const ItemList &selection)
-{
-    m_selection = selection;
-
-    emit selectionChanged(m_selection);
-}
-
 CDocument::Statistics CDocument::statistics(const ItemList &list) const
 {
     return Statistics(this, list);
@@ -362,22 +383,11 @@ void CDocument::beginMacro(const QString &label)
     m_undo->beginMacro(label);
 }
 
-void CDocument::endMacro(const QString &label)
+void CDocument::endMacro(const QString &)
 {
     //TODO: Fix Qt to accept a label in QUndoStack::endMacro()
 
     m_undo->endMacro(/*label*/);
-}
-
-void CDocument::addView(QWidget *view, IDocumentView *docview)
-{
-// CUndoManager::inst ( )->associateView ( view, m_undo );
-
-    if (docview) {
-        m_views.append(docview);
-
-        docview->parseGuiStateXML(m_gui_state);
-    }
 }
 
 bool CDocument::clear()
@@ -418,16 +428,27 @@ bool CDocument::changeItem(Item *position, const Item &item)
 void CDocument::insertItemsDirect(ItemList &items, ItemList &positions)
 {
     ItemList::iterator pos = positions.begin();
+    QModelIndex root;
 
     foreach(Item *item, items) {
         if (pos != positions.end()) {
-            m_items.insert(qFind(m_items.begin(), m_items.end(), *pos), item);
+            int idx;
+            if (Item *itempos = *pos)
+                idx = m_items.indexOf(itempos);
+            else
+                idx = rowCount(root);
+            emit beginInsertRows(root, idx, idx);
+
+            m_items.insert(idx, item);
             ++pos;
         }
         else {
+            emit beginInsertRows(root, rowCount(root), rowCount(root));
             m_items.append(item);
         }
         updateErrors(item);
+
+        emit endInsertRows();
     }
 
     emit itemsAdded(items);
@@ -440,23 +461,15 @@ void CDocument::removeItemsDirect(ItemList &items, ItemList &positions)
 
     emit itemsAboutToBeRemoved(items);
 
-    bool selection_changed = false;
-
     foreach(Item *item, items) {
-        ItemList::iterator next = m_items.erase(qFind(m_items.begin(), m_items.end(), item));
+        int idx = m_items.indexOf(item);
+        emit beginRemoveRows(QModelIndex(), idx, idx);
 
+        ItemList::iterator next = m_items.erase(qFind(m_items.begin(), m_items.end(), item));
         positions.append((next != m_items.end()) ? *next : 0);
 
-        ItemList::iterator selit = qFind(m_selection.begin(), m_selection.end(), item);
-
-        if (selit != m_selection.end()) {
-            m_selection.erase(selit);
-            selection_changed = true;
-        }
+        emit endRemoveRows();
     }
-
-    if (selection_changed)
-        emit selectionChanged(m_selection);
 
     emit itemsRemoved(items);
     emit statisticsChanged();
@@ -472,9 +485,9 @@ void CDocument::changeItemDirect(Item *position, Item &item)
     updateErrors(position);
     emit statisticsChanged();
 
-    if (qFind(m_selection.begin(), m_selection.end(), position) != m_selection.end())
-        emit selectionChanged(m_selection);
-
+    QModelIndex idx1 = index(position);
+    QModelIndex idx2 = createIndex(idx1.row(), columnCount(idx1.parent()) - 1, idx1.internalPointer());
+    emit dataChanged(idx1, idx2);
 }
 
 void CDocument::updateErrors(Item *item)
@@ -748,7 +761,6 @@ CDocument *CDocument::fileLoadFrom(const QString &name, const char *type, bool i
     QString emsg;
     int eline = 0, ecol = 0;
     QDomDocument doc;
-    QDomElement gui_state;
 
     if (doc.setContent(&f, &emsg, &eline, &ecol)) {
         QDomElement root = doc.documentElement();
@@ -761,8 +773,6 @@ CDocument *CDocument::fileLoadFrom(const QString &name, const char *type, bool i
 
                 if (n.nodeName() == "Inventory")
                     item_elem = n.toElement();
-                else if (n.nodeName() == "GuiState")
-                    gui_state = n.cloneNode(true).toElement();
             }
         }
         else {
@@ -793,7 +803,6 @@ CDocument *CDocument::fileLoadFrom(const QString &name, const char *type, bool i
         if (!import_only)
             CFrameWork::inst()->addToRecentFiles(name);
 
-        doc->m_gui_state = gui_state;
         return doc;
     }
     else {
@@ -985,13 +994,6 @@ bool CDocument::fileSaveTo(const QString &s, const char *type, bool export_only,
             QDomElement root = doc.createElement("BrickStoreXML");
 
             root.appendChild(item_elem);
-
-            foreach(IDocumentView *docview, m_views) {
-                QDomNode guinode = docview->createGuiStateXML(doc);
-                if (!guinode.isNull())
-                    root.appendChild(guinode);
-            }
-
             doc.appendChild(root);
         }
         else {
@@ -1189,8 +1191,10 @@ CDocument::Item *CDocument::item(const QModelIndex &idx) const
     return idx.isValid() ? static_cast<Item *>(idx.internalPointer()) : 0;
 }
 
-QModelIndex CDocument::index(Item *i) const
+QModelIndex CDocument::index(const Item *ci) const
 {
+    Item *i = const_cast<Item *>(ci);
+
     return i ? createIndex(m_items.indexOf(i), 0, i) : QModelIndex();
 }
 
@@ -1285,7 +1289,7 @@ QVariant CDocument::dataForDecorationRole(Item *it, Field f) const
     return QPixmap();
 }
 
-int CDocument::dataForTextAlignmentRole(Item *it, Field f) const
+int CDocument::dataForTextAlignmentRole(Item *, Field f) const
 {
     switch (f) {
     case Retain      :

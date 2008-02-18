@@ -18,6 +18,8 @@
 #include <QDesktopServices>
 #include <QToolTip>
 #include <QApplication>
+#include <QTimer>
+
 #include "qtemporaryresource.h"
 
 #include "cframework.h"
@@ -38,11 +40,12 @@ public:
         m_color = color;
 
         if (item)
-            m_appearsin= item->appearsIn(color);
+            m_appearsin = item->appearsIn(color);
 
-        m_rows = 0;
-        foreach(const BrickLink::Item::AppearsInColor &vec, m_appearsin)
-            m_rows += vec.count();
+       foreach(const BrickLink::Item::AppearsInColor &vec, m_appearsin) {
+            foreach(const BrickLink::Item::AppearsInItem &item, vec)
+                m_items.append(const_cast<BrickLink::Item::AppearsInItem *>(&item));
+       }
 
         connect(BrickLink::inst(), SIGNAL(pictureUpdated(BrickLink::Picture *)), this, SLOT(pictureUpdated(BrickLink::Picture *)));
     }
@@ -51,22 +54,27 @@ public:
     {
     }
 
-    const BrickLink::Item::AppearsInItem *appearsIn(const QModelIndex &index) const
+    QModelIndex AppearsInModel::index(int row, int column, const QModelIndex &parent) const
     {
-        int row = index.row();
-        if (row >= 0 && row <= m_rows) {
-            foreach(const BrickLink::Item::AppearsInColor &vec, m_appearsin) {
-                foreach(const BrickLink::Item::AppearsInItem &item, vec) {
-                    if (row-- == 0)
-                        return &item;
-                }
-            }
-        }
-        return 0;
+        if (hasIndex(row, column, parent) && !parent.isValid())
+            return createIndex(row, column, m_items.at(row));
+        return QModelIndex();
+    }
+
+    const BrickLink::Item::AppearsInItem *AppearsInModel::appearsIn(const QModelIndex &idx) const
+    {
+        return idx.isValid() ? static_cast<const BrickLink::Item::AppearsInItem *>(idx.internalPointer()) : 0;
+    }
+
+    QModelIndex AppearsInModel::index(const BrickLink::Item::AppearsInItem *const_ai) const
+    {
+        BrickLink::Item::AppearsInItem *ai = const_cast<BrickLink::Item::AppearsInItem *>(const_ai);
+
+        return ai ? createIndex(m_items.indexOf(ai), 0, ai) : QModelIndex();
     }
 
     virtual int rowCount(const QModelIndex & /*parent*/) const
-    { return m_rows; }
+    { return m_items.size(); }
 
     virtual int columnCount(const QModelIndex & /*parent*/) const
     { return 3; }
@@ -163,8 +171,8 @@ private slots:
 private:
     const BrickLink::Item *        m_item;
     const BrickLink::Color *       m_color;
-    int                            m_rows;
     BrickLink::Item::AppearsIn     m_appearsin;
+    QList<BrickLink::Item::AppearsInItem *> m_items;
     mutable BrickLink::Picture *   m_tooltip_pic;
 };
 
@@ -301,12 +309,14 @@ class CAppearsInWidgetPrivate {
 public:
     const BrickLink::Item * m_item;
     const BrickLink::Color *m_color;
+    QTimer *m_resize_timer;
 };
 
 CAppearsInWidget::CAppearsInWidget(QWidget *parent)
     : QTreeView(parent)
 {
     d = new CAppearsInWidgetPrivate();
+    d->m_resize_timer = new QTimer(this);
 
     setAlternatingRowColors(true);
     setAllColumnsShowFocus(true);
@@ -314,9 +324,8 @@ CAppearsInWidget::CAppearsInWidget(QWidget *parent)
     setRootIsDecorated(false);
     setSortingEnabled(true);
     sortByColumn(0);
+    header()->setSortIndicatorShown(false);
     setContextMenuPolicy(Qt::CustomContextMenu);
-
-    setItem(0, 0);
 
     QAction *a;
     a = new QAction(this);
@@ -355,10 +364,12 @@ CAppearsInWidget::CAppearsInWidget(QWidget *parent)
     connect(a, SIGNAL(triggered()), this, SLOT(showBLLotsForSale()));
     addAction(a);
 
+    connect(d->m_resize_timer, SIGNAL(timeout()), this, SLOT(resizeColumns()));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(showContextMenu(const QPoint &)));
     connect(this, SIGNAL(activated(const QModelIndex &)), this, SLOT(partOut()));
 
     languageChange();
+    setItem(0, 0);
 }
 
 void CAppearsInWidget::languageChange()
@@ -418,6 +429,22 @@ void CAppearsInWidget::setItem(const BrickLink::Item *item, const BrickLink::Col
     d->m_color = color;
 
     setModel(new AppearsInModel(d->m_item , d->m_color));
+
+    if (item) {
+        d->m_resize_timer->start(100);
+    }
+    else {
+        d->m_resize_timer->stop();
+        resizeColumns();
+    }
+}
+
+void CAppearsInWidget::resizeColumns()
+{
+    setUpdatesEnabled(false);
+    resizeColumnToContents(0);
+    resizeColumnToContents(1);
+    setUpdatesEnabled(true);
 }
 
 void CAppearsInWidget::viewLargeImage()
