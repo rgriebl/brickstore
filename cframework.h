@@ -25,16 +25,16 @@
 #include "bricklink.h"
 
 
-class CMultiProgressBar;
 class QLabel;
-class QUndoGroup;
+class QMdiArea;
 class QMdiSubWindow;
 
+class CMultiProgressBar;
 class CWindow;
 class CFilterEdit;
 class CInfoBar;
 class CSpinner;
-class QMdiArea;
+class CUndoGroup;
 class CTaskPaneManager;
 class CTaskInfoWidget;
 class CTaskPriceGuideWidget;
@@ -185,7 +185,7 @@ private:
     int m_menuid_help;
 
 
-    QUndoGroup *m_undogroup;
+    CUndoGroup *m_undogroup;
 };
 
 #endif

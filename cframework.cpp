@@ -13,7 +13,6 @@
 */
 #include <float.h>
 
-#include <QUndoGroup>
 #include <QUndoStack>
 #include <QAction>
 #include <QDesktopWidget>
@@ -43,7 +42,7 @@
 #include "cmoney.h"
 #include "cmultiprogressbar.h"
 //#include "ciconfactory.h"
-//#include "cutility.h"
+#include "cundo.h"
 #include "cspinner.h"
 #include "cfilteredit.h"
 #include "cworkspace.h"
@@ -267,7 +266,7 @@ CFrameWork::CFrameWork(QWidget *parent, Qt::WindowFlags f)
     setUnifiedTitleAndToolBarOnMac(true);
     setAcceptDrops(true);
 
-    m_undogroup = new QUndoGroup(this);
+    m_undogroup = new CUndoGroup(this);
 
     connect(cApp, SIGNAL(openDocument(const QString &)), this, SLOT(openDocument(const QString &)));
 
@@ -1235,6 +1234,7 @@ bool CFrameWork::createWindow(CDocument *doc)
             return true;
         }
     }
+    m_undogroup->addStack(doc->undoStack());
 
     QMdiSubWindow *sw = m_mdi->addSubWindow(new CWindow(doc, 0));
     if (sw)
@@ -1452,6 +1452,8 @@ void CFrameWork::connectWindow(QMdiSubWindow *sw)
         disconnect(doc, SIGNAL(statisticsChanged()), this, SLOT(statisticsUpdate()));
         disconnect(doc, SIGNAL(selectionChanged(const CDocument::ItemList &)), this, SLOT(selectionUpdate(const CDocument::ItemList &)));
 
+        m_undogroup->setActiveStack(0);
+
         m_current_window = 0;
     }
 
@@ -1463,6 +1465,8 @@ void CFrameWork::connectWindow(QMdiSubWindow *sw)
 
         connect(doc, SIGNAL(statisticsChanged()), this, SLOT(statisticsUpdate()));
         connect(doc, SIGNAL(selectionChanged(const CDocument::ItemList &)), this, SLOT(selectionUpdate(const CDocument::ItemList &)));
+
+        m_undogroup->setActiveStack(doc->undoStack());
 
         m_current_window = window;
     }

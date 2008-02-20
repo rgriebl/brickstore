@@ -390,6 +390,12 @@ void CDocument::endMacro(const QString &)
     m_undo->endMacro(/*label*/);
 }
 
+QUndoStack *CDocument::undoStack() const
+{
+    return m_undo;
+}
+
+
 bool CDocument::clear()
 {
     m_undo->push(new CAddRemoveCmd(CAddRemoveCmd::Remove, this, ItemList(), m_items));

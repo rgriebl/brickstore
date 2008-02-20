@@ -182,6 +182,7 @@ HEADERS += capplication.h \
            cutility.h \
            clocalemeasurement.h \
            cwindow.h \
+           cundo.h \
            cfilteredit.h \
 
 
@@ -207,6 +208,7 @@ SOURCES += capplication.cpp \
            cselectitem.cpp \
            clocalemeasurement.cpp \
            cwindow.cpp \
+           cundo.cpp \
            cfilteredit.cpp \
 
 

@@ -217,6 +217,8 @@ public:
     void beginMacro(const QString &label = QString());
     void endMacro(const QString &label = QString());
 
+    QUndoStack *undoStack() const;
+
 signals:
     void itemsAdded(const CDocument::ItemList &);
     void itemsAboutToBeRemoved(const CDocument::ItemList &);
