@@ -324,6 +324,9 @@ CFrameWork::CFrameWork(QWidget *parent, Qt::WindowFlags f)
     m_taskpanes->addItem(m_task_links,  QIcon(":/images/sidebar/links"));
     m_taskpanes->setItemVisible(m_task_links, CConfig::inst()->value("/MainWindow/Infobar/LinksVisible", true).toBool());
 
+    m_toolbar = new QToolBar(this);
+    m_toolbar->setObjectName("toolbar");
+
     createActions();
 
     QString str;
@@ -473,9 +476,8 @@ CFrameWork::CFrameWork(QWidget *parent, Qt::WindowFlags f)
         << "widget_spinner"
         << "|";
 
-    m_toolbar = createToolBar("toolbar", sl);
+    setupToolBar(m_toolbar, sl);
     addToolBar(m_toolbar);
-    connect(m_toolbar, SIGNAL(visibilityChanged(bool)), findAction("view_toolbar"), SLOT(setChecked(bool)));
 
     createStatusBar();
     findAction("view_statusbar")->setChecked(CConfig::inst()->value("/MainWindow/Statusbar/Visible", true).toBool());
@@ -496,8 +498,8 @@ CFrameWork::CFrameWork(QWidget *parent, Qt::WindowFlags f)
 
     ba = CConfig::inst()->value("/MainWindow/Layout/DockWindows").toByteArray();
     if (ba.isEmpty() || !restoreState(ba))
-        findAction("view_toolbar")->setChecked(true);
-
+        m_toolbar->show();
+    
     BrickLink::Core *bl = BrickLink::inst();
 
     connect(CConfig::inst(), SIGNAL(onlineStatusChanged(bool)), bl, SLOT(setOnlineStatus(bool)));
@@ -825,13 +827,10 @@ QMenu *CFrameWork::createMenu(const QString &name, const QStringList &a_names)
 }
 
 
-QToolBar *CFrameWork::createToolBar(const QString &name, const QStringList &a_names)
+bool CFrameWork::setupToolBar(QToolBar *t, const QStringList &a_names)
 {
-    if (a_names.isEmpty())
-        return 0;
-
-    QToolBar *t = new QToolBar(0);
-    t->setObjectName(name);
+    if (!t || a_names.isEmpty())
+        return false;
 
     foreach(const QString &an, a_names) {
         if (an == "-") {
@@ -906,7 +905,7 @@ QToolBar *CFrameWork::createToolBar(const QString &name, const QStringList &a_na
                 qWarning("Couldn't find action '%s'", qPrintable(an));
         }
     }
-    return t;
+    return true;
 }
 
 inline QAction *newQAction(QObject *parent, const char *name, bool toggle = false, QObject *receiver = 0, const char *slot = 0)
@@ -953,6 +952,7 @@ void CFrameWork::createActions()
     (void) newQAction(this, "file_save");
     (void) newQAction(this, "file_saveas");
     (void) newQAction(this, "file_print");
+
 
     m = new QMenu(this);
     m->menuAction()->setObjectName("file_import");
@@ -1066,10 +1066,10 @@ void CFrameWork::createActions()
 
     (void) newQAction(this, "view_simple_mode", true, CConfig::inst(), SLOT(setSimpleMode(bool)));
 
-    (void) newQAction(this, "view_toolbar", true, this, SLOT(viewToolBar(bool)));
-
+    m_toolbar->toggleViewAction()->setObjectName("view_toolbar");
+    
     (void) m_taskpanes->createItemVisibilityAction(this, "view_infobar");
-
+    
     (void) newQAction(this, "view_statusbar", true, this, SLOT(viewStatusBar(bool)));
 
     (void) newQAction(this, "view_show_input_errors", true, CConfig::inst(), SLOT(setShowInputErrors(bool)));

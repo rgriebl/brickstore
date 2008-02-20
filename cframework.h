@@ -148,7 +148,7 @@ private:
     void createActions();
     void translateActions();
     QMenu *createMenu(const QString &, const QStringList &);
-    QToolBar *createToolBar(const QString &, const QStringList &);
+    bool setupToolBar(QToolBar *, const QStringList &);
     void createStatusBar();
     bool createWindow(CDocument *doc);
 

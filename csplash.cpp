@@ -38,7 +38,7 @@ CSplash::CSplash()
         : QSplashScreen(QPixmap(1, 1))
 {
     setAttribute(Qt::WA_DeleteOnClose);
-    setWindowOpacity(0.9);
+    setWindowOpacity(0.85f);    
 
     QFont f = QApplication::font();
     f.setPixelSize(qMax(14 * qApp->desktop()->height() / 1200, 10));
@@ -102,17 +102,6 @@ CSplash::CSplash()
     p.end();
 
     setPixmap(QPixmap::fromImage(img));
-
-    QBitmap mask(img.size());
-    mask.fill(Qt::color0);
-    QPainter mp;
-    mp.begin(&mask);
-    mp.setPen(Qt::NoPen);
-    mp.setBrush(Qt::color1);
-    mp.drawRoundRect(0, 0, mask.width(), mask.height(), mask.width() / 30, mask.width() / 30 * (mask.width() / mask.height()));
-    mp.end();
-
-    setMask(mask);
 }
 
 CSplash::~CSplash()

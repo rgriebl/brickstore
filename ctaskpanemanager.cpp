@@ -372,15 +372,13 @@ void CTaskPaneManager::itemVisibilityChanged(QWidget *w, bool b)
 QMenu *CTaskPaneManager::createItemVisibilityMenu() const
 {
     QMenu *m = new QMenu(d->m_mainwindow);
-// m->setCheckable ( true );
     connect(m, SIGNAL(aboutToShow()), this, SLOT(itemMenuAboutToShow()));
     return m;
 }
 
 void CTaskPaneManager::itemMenuAboutToShow()
 {
-#if 0
-    QPopupMenu *m = ::qt_cast <QPopupMenu *> (sender());
+    QMenu *m = qobject_cast<QMenu *> (sender());
 
     if (m) {
         m->clear();
@@ -420,7 +418,6 @@ void CTaskPaneManager::itemMenuAboutToShow()
         m->setItemChecked(classicid, d->m_mode != Modern);
         m->setItemParameter(classicid, -4);
     }
-#endif
 }
 
 void CTaskPaneManager::itemMenuActivated(int id)
@@ -463,6 +460,7 @@ public:
     TaskPaneAction(CTaskPaneManager *tpm, QObject *parent, const char *name = 0)
             : QAction(parent), m_tpm(tpm)
     {
+        
         setObjectName(name);
     }
     /*
