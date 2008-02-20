@@ -260,6 +260,8 @@ QWidget *CUndoAction::createWidget(QWidget *parent)
         QWidgetAction *labelaction = new QWidgetAction(this);
         labelaction->setDefaultWidget(m_label);
         m_menu->addAction(labelaction);
+        
+        m_menu->setFocusProxy(m_list);
 
         connect(m_list, SIGNAL(itemEntered(QListWidgetItem *)), this, SLOT(setCurrentItemSlot(QListWidgetItem *)));
         connect(m_list, SIGNAL(currentItemChanged(QListWidgetItem *, QListWidgetItem *)), this, SLOT(selectRange(QListWidgetItem *)));
@@ -319,7 +321,8 @@ bool CUndoAction::eventFilter(QObject *o, QEvent *e)
 
 void CUndoAction::setCurrentItemSlot(QListWidgetItem *item)
 {
-    m_list->setCurrentItem(item);
+    if (m_list->currentItem() != item)
+        m_list->setCurrentItem(item);
 }
 
 void CUndoAction::fixMenu()
@@ -332,7 +335,6 @@ void CUndoAction::selectRange(QListWidgetItem *item)
 {
     if (item) {
         int hl = m_list->row(item);
-        qWarning("selectRange: %p %d", item, hl);
 
         for (int i = 0; i < m_list->count(); i++)
             m_list->item(i)->setSelected(i <= hl);
