@@ -373,56 +373,67 @@ QMenu *CTaskPaneManager::createItemVisibilityMenu() const
 {
     QMenu *m = new QMenu(d->m_mainwindow);
     connect(m, SIGNAL(aboutToShow()), this, SLOT(itemMenuAboutToShow()));
+    connect(m, SIGNAL(triggered(QAction *)), this, SLOT(itemMenuTriggered(QAction *)));
     return m;
 }
 
 void CTaskPaneManager::itemMenuAboutToShow()
 {
-    QMenu *m = qobject_cast<QMenu *> (sender());
+    QMenu *m = qobject_cast<QMenu *>(sender());
 
     if (m) {
         m->clear();
 
         bool allon = true;
+        QAction *a;
 
         int index = 0;
         for (QList<CTaskPaneManagerPrivate::Item>::iterator it = d->m_items.begin(); it != d->m_items.end(); ++it, index++) {
-            int id = m->insertItem((*it).m_label, this, SLOT(itemMenuActivated(int)));
-            m->setItemParameter(id, index);
-
+            a = m->addAction((*it).m_label);
+            a->setData(index);
+            a->setCheckable(true);
+            
             bool vis = isItemVisible((*it).m_widget);
             if (d->m_mode == Modern) {
                 bool pdvis = d->m_panedock->isVisible();
                 vis &= pdvis;
-                m->setItemEnabled(id, pdvis);
+                a->setEnabled(pdvis);
             }
-            m->setItemChecked(id, vis);
+            a->setChecked(vis);
             allon &= vis;
         }
-        m->insertSeparator();
-        int allid = m->insertItem(tr("All"), this, SLOT(itemMenuActivated(int)));
+        m->addSeparator();
 
+        a = m->addAction(tr("All"));
+        
         if (d->m_mode == Modern)
             allon = d->m_panedock->isVisible();
 
-        m->setItemChecked(allid, allon);
-        m->setItemParameter(allid, allon ? -2 : -1);
+        a->setCheckable(true);
+        a->setChecked(allon);
+        a->setData(allon ? -2 : -1);
 
-        m->insertSeparator();
+        m->addSeparator();
 
-        int modernid = m->insertItem(tr("Modern (fixed)"), this, SLOT(itemMenuActivated(int)));
-        m->setItemChecked(modernid, d->m_mode == Modern);
-        m->setItemParameter(modernid, -3);
+        a = m->addAction(tr("Modern (fixed)"));
+        a->setCheckable(true);
+        a->setChecked(d->m_mode == Modern);
+        a->setData(-3);
 
-        int classicid = m->insertItem(tr("Classic (moveable)"), this, SLOT(itemMenuActivated(int)));
-        m->setItemChecked(classicid, d->m_mode != Modern);
-        m->setItemParameter(classicid, -4);
+        a = m->addAction(tr("Classic (movable)"));
+        a->setCheckable(true);
+        a->setChecked(d->m_mode != Modern);
+        a->setData(-4);
     }
 }
 
-void CTaskPaneManager::itemMenuActivated(int id)
+void CTaskPaneManager::itemMenuTriggered(QAction *a)
 {
-#if 0
+    if (!a)
+        return;
+
+    int id = qvariant_cast<int>(a->data());
+
     if (id == -4) {
         setMode(Classic);
     }
@@ -451,39 +462,17 @@ void CTaskPaneManager::itemMenuActivated(int id)
             }
         }
     }
-#endif
 }
 
 
 class TaskPaneAction : public QAction {
 public:
     TaskPaneAction(CTaskPaneManager *tpm, QObject *parent, const char *name = 0)
-            : QAction(parent), m_tpm(tpm)
+        : QAction(parent)
     {
-        
         setObjectName(name);
+        setMenu(tpm->createItemVisibilityMenu());
     }
-    /*
-     virtual bool addTo ( QWidget *w )
-     {
-      if ( w->inherits ( "QPopupMenu" )) {
-       int id = static_cast <QPopupMenu *> ( w )->insertItem ( menuText ( ), m_tpm->createItemVisibilityMenu ( ));
-       m_update_menutexts.insert ( static_cast <QPopupMenu *> ( w ), id );
-       return true;
-      }
-      return false;
-     }
-     virtual void setText ( const QString &txt )
-     {
-      QActionGroup::setText ( txt );
-
-      for ( QMap <QPopupMenu *, int>::const_iterator it = m_update_menutexts.begin ( ); it != m_update_menutexts.end ( ); ++it )
-       it.key ( )->changeItem ( it.data ( ), menuText ( ));
-     }
-    */
-private:
-    CTaskPaneManager *m_tpm;
-// QMap <QPopupMenu *, int> m_update_menutexts;
 };
 
 QAction *CTaskPaneManager::createItemVisibilityAction(QObject *parent, const char *name) const
