@@ -20,12 +20,12 @@
 #include "dinformation.h"
 
 DInformation::DInformation(const QString &title, const QMap<QString, QString> &pages, bool delayok, QWidget *parent, Qt::WindowFlags f)
-        : QDialog(parent, f), m_pages(pages)
+    : QDialog(parent, f), m_pages(pages)
 {
     setupUi(this);
     setWindowTitle(title);
 
-    w_browser->setMaximumWidth(500);
+//    w_browser->setMaximumWidth(500);
 
     gotoPage("index");
     connect(w_browser, SIGNAL(linkActivated(const QString &)), this, SLOT(gotoPage(const QString &)));
@@ -64,8 +64,6 @@ void DInformation::closeEvent(QCloseEvent *ce)
 
 void DInformation::gotoPage(const QString &url)
 {
-    qWarning("URL: %s", qPrintable(url));
-
     if (m_pages.contains(url)) {
         w_browser->setText(m_pages [url]);
         // w_browser->document()->setTextWidth(500);

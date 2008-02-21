@@ -37,7 +37,7 @@ static const int windowsItemFrame       =  2; // menu item frame width
 static const int windowsSepHeight       =  9; // separator item height
 static const int windowsItemHMargin     =  3; // menu item hor text margin
 static const int windowsItemVMargin     =  2; // menu item ver text margin
-static const int windowsArrowHMargin	=  6; // arrow horizontal margin
+static const int windowsArrowHMargin    =  6; // arrow horizontal margin
 static const int windowsRightBorder     = 15; // right border on windows
 
 class DotNetStylePrivate

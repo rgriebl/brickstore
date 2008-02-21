@@ -26,7 +26,6 @@
 #include <QWheelEvent>
 
 #include "cconfig.h"
-//#include "cresource.h"
 #include "cmoney.h"
 #include "bricklink.h"
 #include "cwindow.h"

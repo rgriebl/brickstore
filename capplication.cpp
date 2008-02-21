@@ -78,23 +78,13 @@ CApplication::CApplication(const char *rebuild_db_only, int _argc, char **_argv)
 #if defined( Q_WS_WIN )
     int wv = QSysInfo::WindowsVersion;
 
-    m_has_alpha &= ((wv != QSysInfo::WV_95) && (wv != QSysInfo::WV_NT));
-
-    // using the native dialog causes the app to crash under W2K (comdlg32.dll)
-    // (both the release and the debug versions will crash ONLY when run
-    //  without a debugger, destroying the stack at the same time...)
-
+    // don't use the native file dialogs on Windows < XP, since it
+    // (a) may crash on some configurations (not yet checked with Qt4) and
+    // (b) the Qt dialog is more powerful on these systems
     extern bool Q_GUI_EXPORT qt_use_native_dialogs;
     qt_use_native_dialogs = !((wv & QSysInfo::WV_DOS_based) || ((wv & QSysInfo::WV_NT_based) < QSysInfo::WV_XP));
 
- //   if (!rebuild_db_only)
- //       setStyle(new DotNetStyle());
-
-#elif defined( Q_WS_X11 )
-    //TODO: Qt4 has QX11Info, but no public use_xrender flag...
-    //extern bool qt_use_xrender;
-    m_has_alpha &= true; //qt_use_xrender;
-
+    // setStyle(new DotNetStyle());
 #endif
 
     // initialize config & resource
@@ -134,23 +124,6 @@ CApplication::CApplication(const char *rebuild_db_only, int _argc, char **_argv)
         }
         demoVersion();
         connect(CConfig::inst(), SIGNAL(registrationChanged(CConfig::Registration)), this, SLOT(demoVersion()));
-
-
-#if 0
-        bool dbok = BrickLink::inst()->readDatabase();
-
-        if (!dbok) {
-            CMessageBox::warning(0, tr("Could not load the BrickLink database files.<br /><br />Should these files be updated now?"), CMessageBox::Yes, CMessageBox::No);
-            //dbok = updateDatabase ( );
-        }
-
-        DImportOrder d;
-        d.exec();
-
-        DSelectColor d1;
-        d1.exec();
-#endif
-
     }
 }
 
@@ -223,7 +196,7 @@ QString CApplication::sysName() const
     QString sys_name = "(unknown)";
 
 #if defined( Q_OS_MACX )
-    sys_name = "MacOS";
+    sys_name = "Mac OS X";
 #elif defined( Q_OS_WIN )
     sys_name = "Windows";
 #elif defined( Q_OS_UNIX )

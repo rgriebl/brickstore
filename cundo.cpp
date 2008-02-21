@@ -29,7 +29,7 @@
 class CUndoAction : public QWidgetAction {
     Q_OBJECT
 public:
-    enum Type {	Undo, Redo };
+    enum Type { Undo, Redo };
 
     template<typename T>
     static QAction *create(Type type, const T *stack, QObject *parent);

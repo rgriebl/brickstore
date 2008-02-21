@@ -82,5 +82,5 @@ void CRefCacheBase::releaseFor(const CRef *ref)
 CRef::~CRef()
 {
     if (m_refcnt)
-        qWarning("Deleting %p, although refcnt=%d, cache=%p", this, m_refcnt, m_cache);
+        qWarning("Deleting %p, although refcnt=%d (cache=%p)", this, m_refcnt, m_cache);
 }

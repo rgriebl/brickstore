@@ -6,6 +6,8 @@
 
 #include "sha1.cpp"
 
+QString privkey;
+
 QString generateKey(const QString &name, const QString &privkey)
 {
     if (name.isEmpty())
@@ -52,10 +54,12 @@ int main(int argc, char **argv)
 
         QFile f(".private-key");
         if (f.open(IO_ReadOnly)) {
-            QString privkey;
             QTextStream ts(&f);
             ts >> privkey;
-
+#ifdef GUI
+            if (name == "--gui")
+                return gui_main(argc, argv);
+#endif
             QString regkey = generateKey(name, privkey);
 
             if (regkey.length() == 14) {
@@ -73,3 +77,33 @@ int main(int argc, char **argv)
         printf("Usage: %s <name>\n", argv[0]);
     return 1;
 }
+
+#ifdef GUI
+
+class KeyWidget : public QLineEdit {
+    Q_OBJECT
+public:
+    KeyWidget(QWidget *parent) : QLineEdit(parent) { }
+public slots:
+    void updateKey(const QString &name) { setText(generateKey(name, privkey)); }
+};
+
+int gui_main(int argc, char **argv)
+{
+    QApplication a(argc, argv);
+    QWidget d = new QWidget();
+    d->setWindowTitle(QLatin1String("BrickStore KeyGen"));
+    QGridLayout *grid = new QGridLayout(d);
+    grid->addWidget(new QLabel(QLatin1String("Name", d), 0, 0);
+    grid->addWidget(new QLabel(QLatin1String("Key", d), 1, 0);
+    KeyWidget *kw = new KeyWidget(d);
+    le->setReadOnly(true);
+    grid->addWidget(le, 1, 1);
+    QLineEdit *le = new QLineEdit(d);
+    connect(le, SIGNAL(textChanged(const QString &)), kw, SLOT(updateKey(const QString &)));
+    grid->addWidget(le, 0, 1);
+    d->show();
+    return a.exec();
+}
+
+#endif

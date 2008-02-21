@@ -40,7 +40,7 @@ DImportInventory::DImportInventory(QWidget *parent, Qt::WindowFlags f)
     w_select->setExcludeWithoutInventoryFilter(true);
     w_select->setCurrentItemType(BrickLink::core()->itemType(CConfig::inst()->value("/Defaults/ImportInventory/ItemType", 'S').toChar().toLatin1()));
     connect(w_select, SIGNAL(itemSelected(const BrickLink::Item *, bool)), this, SLOT(checkItem(const BrickLink::Item *, bool)));
-	w_qty->setValue(1);
+    w_qty->setValue(1);
     w_buttons->button(QDialogButtonBox::Ok)->setEnabled(false);
 }
 
