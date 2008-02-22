@@ -1,10 +1,5 @@
 TEMPLATE    = app
-TARGET      = ../keygen 
-QT         *= core
-
+TARGET      = keygen
+QT         *= core gui
 SOURCES    += keygen.cpp
-
-gui {
-    DEFINES += GUI
-    QT      *= gui
-}
+RESOURCES   = keygen.qrc

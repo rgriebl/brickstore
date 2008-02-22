@@ -1,12 +1,18 @@
-#include <qstring.h>
-#include <qfile.h>
-#include <qdatastream.h>
-#include <qtextstream.h>
-#include <qcstring.h>
-
-#include "sha1.cpp"
+#include <QString>
+#include <QFile>
+#include <QDataStream>
+#include <QTextStream>
+#include <QByteArray>
+#include <QCryptographicHash>
+#include <QLineEdit>
+#include <QLabel>
+#include <QLayout>
+#include <QApplication>
+#include <QToolButton>
+#include <QDialog>
 
 QString privkey;
+
 
 QString generateKey(const QString &name, const QString &privkey)
 {
@@ -14,18 +20,21 @@ QString generateKey(const QString &name, const QString &privkey)
         return QString();
 
     QByteArray src;
-    QDataStream ss(src, IO_WriteOnly);
+    QDataStream ss(&src, QIODevice::WriteOnly);
     ss.setByteOrder(QDataStream::LittleEndian);
     ss << (privkey + name);
+    
 
-    QByteArray sha1 = sha1::calc(src.data() + 4, src.size() - 4);
+    QCryptographicHash hash(QCryptographicHash::Sha1);
+    hash.addData(src.data() + 4, src.size() - 4);
+    QByteArray sha1 = hash.result();
 
     if (sha1.count() < 8)
         return QString();
 
     QString result;
-    Q_UINT64 serial = 0;
-    QDataStream ds(sha1, IO_ReadOnly);
+    quint64 serial = 0;
+    QDataStream ds(&sha1, QIODevice::ReadOnly);
     ds >> serial;
 
     // 32bit without 0/O and 5/S
@@ -42,6 +51,60 @@ QString generateKey(const QString &name, const QString &privkey)
     return result;
 }
 
+class KeyWidget : public QDialog {
+    Q_OBJECT
+public:
+    KeyWidget() : QDialog()
+    { 
+        setWindowTitle(tr("BrickStore KeyGen"));
+        QGridLayout *grid = new QGridLayout(this);
+        grid->addWidget(new QLabel(tr("Name"), this), 0, 0);
+        grid->addWidget(new QLabel(tr("Key"), this), 1, 0);
+        m_key = new QLineEdit(this);
+        m_key->setReadOnly(true); 
+        grid->addWidget(m_key, 1, 1);
+        m_name = new QLineEdit(this);
+        QObject::connect(m_name, SIGNAL(textChanged(const QString &)), this, SLOT(updateKey(const QString &)));
+        grid->addWidget(m_name, 0, 1);
+        QToolButton *paste = new QToolButton(this);
+        paste->setIcon(QIcon(":/images/paste"));
+        paste->setToolTip(tr("Paste Name from Clipboard"));
+        paste->setAutoRaise(true);
+        QObject::connect(paste, SIGNAL(clicked()), this, SLOT(clearAndPaste()));
+        grid->addWidget(paste, 0, 2);
+        QToolButton *copy = new QToolButton(this);
+        copy->setIcon(QIcon(":/images/copy"));
+        copy->setToolTip(tr("Copy Key to Clipboard"));
+        copy->setAutoRaise(true);
+        QObject::connect(copy, SIGNAL(clicked()), this, SLOT(selectAndCopy()));
+        grid->addWidget(copy, 1, 2);
+    }
+public slots:
+    void updateKey(const QString &name)
+    {
+        m_key->setText(generateKey(name, privkey));
+    }
+    
+    void selectAndCopy()
+    {
+        m_key->selectAll(); m_key->copy(); m_key->deselect();
+    }
+
+    void clearAndPaste()
+    {
+        m_name->clear(); m_name->paste();
+    }
+private:
+    QLineEdit *m_name, *m_key;    
+};
+
+int gui_main(int argc, char **argv)
+{
+    QApplication a(argc, argv);
+    (new KeyWidget())->show();
+    return a.exec();
+}
+
 int main(int argc, char **argv)
 {
     if (argc >= 2) {
@@ -53,17 +116,17 @@ int main(int argc, char **argv)
         }
 
         QFile f(".private-key");
-        if (f.open(IO_ReadOnly)) {
+        if (f.open(QIODevice::ReadOnly)) {
             QTextStream ts(&f);
             ts >> privkey;
-#ifdef GUI
+
             if (name == "--gui")
                 return gui_main(argc, argv);
-#endif
+
             QString regkey = generateKey(name, privkey);
 
             if (regkey.length() == 14) {
-                printf("%s\n", regkey.latin1());
+                printf("%s\n", qPrintable(regkey));
 
                 return 0;
             }
@@ -78,32 +141,5 @@ int main(int argc, char **argv)
     return 1;
 }
 
-#ifdef GUI
+#include "keygen.moc"
 
-class KeyWidget : public QLineEdit {
-    Q_OBJECT
-public:
-    KeyWidget(QWidget *parent) : QLineEdit(parent) { }
-public slots:
-    void updateKey(const QString &name) { setText(generateKey(name, privkey)); }
-};
-
-int gui_main(int argc, char **argv)
-{
-    QApplication a(argc, argv);
-    QWidget d = new QWidget();
-    d->setWindowTitle(QLatin1String("BrickStore KeyGen"));
-    QGridLayout *grid = new QGridLayout(d);
-    grid->addWidget(new QLabel(QLatin1String("Name", d), 0, 0);
-    grid->addWidget(new QLabel(QLatin1String("Key", d), 1, 0);
-    KeyWidget *kw = new KeyWidget(d);
-    le->setReadOnly(true);
-    grid->addWidget(le, 1, 1);
-    QLineEdit *le = new QLineEdit(d);
-    connect(le, SIGNAL(textChanged(const QString &)), kw, SLOT(updateKey(const QString &)));
-    grid->addWidget(le, 0, 1);
-    d->show();
-    return a.exec();
-}
-
-#endif
