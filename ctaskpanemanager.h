@@ -59,7 +59,6 @@ private slots:
     void itemMenuAboutToShow();
     void itemMenuTriggered(QAction *);
     void dockVisibilityChanged(bool b);
-    void itemVisibilityChanged(QWidget *w, bool b);
 
 private:
     void kill();
