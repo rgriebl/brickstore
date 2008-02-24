@@ -919,6 +919,12 @@ inline QAction *newQAction(QObject *parent, const char *name, bool toggle = fals
     return a;
 }
 
+inline QAction *setQActionIcon(QAction *a, const char *ico)
+{
+    a->setIcon(QIcon(ico));
+    return a;
+}
+
 inline QAction *newQActionSeparator(QObject *parent)
 {
     QAction *a = new QAction(parent);
@@ -997,62 +1003,87 @@ void CFrameWork::createActions()
     (void) newQAction(this, "edit_select_all");
     (void) newQAction(this, "edit_select_none");
 
-    g2 = newQActionGroup(this, "edit_modify", false);
-    g3 = newQActionGroup(this, "edit_modify_context", false);
+    g = newQActionGroup(this, "edit_modify", false);
+    g2 = newQActionGroup(this, "edit_modify_context", false);
 
-    g = newQActionGroup(this, "edit_status", false);
-    (newQAction(g, "edit_status_include", true))->setIcon(QIcon(":images/status_include"));
-    (newQAction(g, "edit_status_exclude", true))->setIcon(QIcon(":images/status_exclude"));
-    (newQAction(g, "edit_status_extra",   true))->setIcon(QIcon(":images/status_extra"));
-    (void) newQActionSeparator(g);
-    (void) newQAction(g, "edit_status_toggle");
+    m = new QMenu(this);
+    m->menuAction()->setObjectName("edit_status");
+    g->addAction(m->menuAction());
+    g2->addAction(m->menuAction());
+    g3 = newQActionGroup(this, 0, true);
+    m->addAction(setQActionIcon(newQAction(g3, "edit_status_include", true), ":images/status_include"));
+    m->addAction(setQActionIcon(newQAction(g3, "edit_status_exclude", true), ":images/status_exclude"));
+    m->addAction(setQActionIcon(newQAction(g3, "edit_status_extra",   true), ":images/status_extra"));
+    m->addSeparator();
+    m->addAction(newQAction(this, "edit_status_toggle"));
 
-    g = newQActionGroup(this, "edit_cond", false);
-    (void) newQAction(g, "edit_cond_new", true);
-    (void) newQAction(g, "edit_cond_used", true);
-    (void) newQActionSeparator(g);
-    (void) newQAction(g, "edit_cond_toggle");
+    m = new QMenu(this);
+    m->menuAction()->setObjectName("edit_cond");
+    g->addAction(m->menuAction());
+    g2->addAction(m->menuAction());
+    g3 = newQActionGroup(this, 0, true);
+    m->addAction(newQAction(g3, "edit_cond_new", true));
+    m->addAction(newQAction(g3, "edit_cond_used", true));
+    m->addSeparator();
+    m->addAction(newQAction(this, "edit_cond_toggle"));
 
-    (void) newQAction(this, "edit_color");
+    g2->addAction(newQAction(g, "edit_color"));
 
-    g = newQActionGroup(this, "edit_qty", false);
-    (void) newQAction(g, "edit_qty_multiply");
-    (void) newQAction(g, "edit_qty_divide");
+    m = new QMenu(this);
+    m->menuAction()->setObjectName("edit_qty");
+    g->addAction(m->menuAction());
+    g2->addAction(m->menuAction());
+    m->addAction(newQAction(this, "edit_qty_multiply"));
+    m->addAction(newQAction(this, "edit_qty_divide"));
 
-    g = newQActionGroup(this, "edit_price", false);
-    (void) newQAction(g, "edit_price_set");
-    (void) newQAction(g, "edit_price_inc_dec");
-    (void) newQAction(g, "edit_price_to_priceguide");
-    (void) newQAction(g, "edit_price_round");
+    m = new QMenu(this);
+    m->menuAction()->setObjectName("edit_price");
+    g->addAction(m->menuAction());
+    g2->addAction(m->menuAction());
+    m->addAction(newQAction(this, "edit_price_set"));
+    m->addAction(newQAction(this, "edit_price_inc_dec"));
+    m->addAction(newQAction(this, "edit_price_to_priceguide"));
+    m->addAction(newQAction(this, "edit_price_round"));
 
     (void) newQAction(this, "edit_bulk");
     (void) newQAction(this, "edit_sale");
 
-    g = newQActionGroup(this, "edit_comment", false);
-    (void) newQAction(g, "edit_comment_set");
-    (void) newQActionSeparator(g);
-    (void) newQAction(g, "edit_comment_add");
-    (void) newQAction(g, "edit_comment_rem");
+    m = new QMenu(this);
+    m->menuAction()->setObjectName("edit_comment");
+    g->addAction(m->menuAction());
+    m->addAction(newQAction(this, "edit_comment_set"));
+    m->addSeparator();
+    m->addAction(newQAction(this, "edit_comment_add"));
+    m->addAction(newQAction(this, "edit_comment_rem"));
 
-    g = newQActionGroup(this, "edit_remark", false);
-    (void) newQAction(g, "edit_remark_set");
-    (void) newQActionSeparator(g);
-    (void) newQAction(g, "edit_remark_add");
-    (void) newQAction(g, "edit_remark_rem");
+    m = new QMenu(this);
+    m->menuAction()->setObjectName("edit_remark");
+    g->addAction(m->menuAction());
+    g2->addAction(m->menuAction());
+    m->addAction(newQAction(this, "edit_remark_set"));
+    m->addSeparator();
+    m->addAction(newQAction(this, "edit_remark_add"));
+    m->addAction(newQAction(this, "edit_remark_rem"));
 
     //tier
 
-    g = newQActionGroup(this, "edit_retain", false);
-    (void) newQAction(g, "edit_retain_yes", true);
-    (void) newQAction(g, "edit_retain_no", true);
-    (void) newQActionSeparator(g);
-    (void) newQAction(g, "edit_retain_toggle");
+    m = new QMenu(this);
+    m->menuAction()->setObjectName("edit_retain");
+    g->addAction(m->menuAction());
+    g3 = newQActionGroup(this, 0, true);
+    m->addAction(newQAction(g3, "edit_retain_yes", true));
+    m->addAction(newQAction(g3, "edit_retain_no", true));
+    m->addSeparator();
+    m->addAction(newQAction(this, "edit_retain_toggle"));
 
-    g = newQActionGroup(this, "edit_stockroom", false);
-    (void) newQAction(g, "edit_stockroom_yes", true);
-    (void) newQAction(g, "edit_stockroom_no", true);
-    (void) newQActionSeparator(g);
-    (void) newQAction(g2, "edit_stockroom_toggle");
+    m = new QMenu(this);
+    m->menuAction()->setObjectName("edit_stockroom");
+    g->addAction(m->menuAction());
+    g3 = newQActionGroup(this, 0, true);
+    m->addAction(newQAction(g3, "edit_stockroom_yes", true));
+    m->addAction(newQAction(g3, "edit_stockroom_no", true));
+    m->addSeparator();
+    m->addAction(newQAction(this, "edit_stockroom_toggle"));
 
     (void) newQAction(g, "edit_reserved");
 
