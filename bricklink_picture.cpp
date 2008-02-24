@@ -191,10 +191,8 @@ void BrickLink::Picture::load_from_disk()
     else
         m_valid = false;
 
-    if (m_valid && !large && m_image.depth() > 8) {
-        // Qt4 always tries to dither when converting images with alpha channel
-        //m_image = m_image.convertToFormat ( QImage::Format_Indexed8 );
-    }
+    if (m_valid && !large && m_image.depth() > 8)
+        m_image = m_image.convertToFormat(QImage::Format_Indexed8, Qt::ThresholdDither | Qt::ThresholdAlphaDither | Qt::AvoidDither);
 
     QPixmapCache::remove(QString::number(m_image.cacheKey()));
 }
@@ -267,10 +265,8 @@ void BrickLink::Core::pictureJobFinished(CTransferJob *j)
             pic->m_update_status = Ok;
 
             if ((j->effectiveUrl().path().indexOf("noimage", 0, Qt::CaseInsensitive) == -1) && j->data()->size() && img.loadFromData(*j->data())) {
-                if (!large) {
-                    // Qt4 always tries to dither when converting images with alpha channel
-                    //img = img.convertToFormat(QImage::Format_Indexed8, Qt::ThresholdDither | Qt::ThresholdAlphaDither | Qt::AvoidDither);
-                }
+                if (!large)
+                    img = img.convertToFormat(QImage::Format_Indexed8, Qt::ThresholdDither | Qt::ThresholdAlphaDither | Qt::AvoidDither);
                 img.save(path, "PNG");
             }
             else {
