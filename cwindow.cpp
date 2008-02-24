@@ -1636,7 +1636,7 @@ void CWindow::closeEvent(QCloseEvent *e)
     bool close_empty = (m_doc->items().isEmpty() && CConfig::inst()->closeEmptyDocuments());
 
     if (m_doc->isModified() && !close_empty) {
-        switch (CMessageBox::warning(this, tr("Save changes to %1?").arg(CMB_BOLD(windowTitle().left(windowTitle().length() - 2))), CMessageBox::Yes | CMessageBox::No | CMessageBox::Cancel, CMessageBox::Yes)) {
+        switch (CMessageBox::warning(this, tr("Save changes to %1?").arg(CMB_BOLD(windowTitle())), CMessageBox::Yes | CMessageBox::No | CMessageBox::Cancel, CMessageBox::Yes)) {
         case CMessageBox::Yes:
             m_doc->fileSave(sortedItems());
 
