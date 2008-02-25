@@ -35,6 +35,9 @@
 #include <windows.h>
 #endif
 
+#define ANIM_DURATION   300
+#define ANIM_FPS        20
+
 
 class CTaskPane;
 
@@ -494,12 +497,10 @@ CTaskPaneManager::CTaskPaneManager(QMainWindow *parent)
     d->m_anim_item = -1;
     d->m_margins.setRect(6, 6, 1, 1);
 
-    int duration = 400;
-    int fps = 20;
-    d->m_anim_timeline.setDuration(duration);
-    d->m_anim_timeline.setFrameRange(0, duration * fps / 1000 - 1);
-    d->m_anim_timeline.setUpdateInterval(1000 / fps);
-    d->m_anim_timeline.setCurveShape(QTimeLine::EaseInOutCurve);
+    d->m_anim_timeline.setDuration(ANIM_DURATION);
+    d->m_anim_timeline.setFrameRange(0, ANIM_DURATION * ANIM_FPS / 1000 - 1);
+    d->m_anim_timeline.setUpdateInterval(1000 / ANIM_FPS);
+    d->m_anim_timeline.setCurveShape(QTimeLine::EaseInCurve);
     d->m_anim_timeline.setDirection(QTimeLine::Forward);
 
     setMode(Modern);
@@ -589,11 +590,13 @@ void CTaskPaneManager::setItemVisible(QWidget *w, bool visible)
 
             if (d->m_mode == Modern) {
                 d->m_anim_item = idx;
+                if (d->m_anim_timeline.state() == QTimeLine::Running) {
+                    d->m_anim_timeline.setCurrentTime(d->m_anim_timeline.duration());
+                    d->m_anim_timeline.stop();
+                    d->m_taskpane->recalcLayout();
+                }
                 d->m_anim_timeline.setDirection(visible ? QTimeLine::Forward : QTimeLine::Backward);
                 d->m_anim_timeline.start();
-
-//                d->m_taskpane->recalcLayout();
-  //              d->m_taskpane->update();
             }
             else
                 item.m_itemdock->setShown(visible);

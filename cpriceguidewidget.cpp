@@ -573,12 +573,8 @@ void CPriceGuideWidget::paintHeader(QPainter *p, const QRect &r, Qt::Alignment a
     opt.textAlignment    = align;
 
     p->save();
-    if (bold) {
-        QFont f = font();
-        f.setBold(true);
-        opt.fontMetrics   = QFontMetrics(f, this);
-        p->setFont(f);
-    }
+    if (bold)
+        opt.state |= QStyle::State_On;
     style()->drawControl(QStyle::CE_Header, &opt, p, this);
     p->restore();
 }
