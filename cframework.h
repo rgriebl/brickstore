@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2005 Robert Griebl. All rights reserved.
+/* Copyright (C) 2004-2008 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -151,6 +151,7 @@ private:
     bool setupToolBar(QToolBar *, const QStringList &);
     void createStatusBar();
     bool createWindow(CDocument *doc);
+    bool createWindows(const QList<CDocument *> &docs);
 
     QMap<QAction *, bool (CWindow::*)() const> m_toggle_updates;
 

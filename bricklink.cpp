@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2005 Robert Griebl. All rights reserved.
+/* Copyright (C) 2004-2008 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -146,7 +146,7 @@ QUrl BrickLink::Core::url(UrlList u, const void *opt, const void *opt2)
 }
 
 
-const QPixmap *BrickLink::Core::noImage(const QSize &s)
+const QPixmap *BrickLink::Core::noImage(const QSize &s) const
 {
     QString key = QString("%1x%2").arg(s.width()).arg(s.height());
 
@@ -187,84 +187,81 @@ const QPixmap *BrickLink::Core::noImage(const QSize &s)
 }
 
 
-QImage BrickLink::Core::colorImage(const Color *col, int w, int h) const
+const QPixmap *BrickLink::Core::colorImage(const Color *col, int w, int h) const
 {
     if (!col || w <= 0 || h <= 0)
-        return QImage();
+        return 0;
 
-    QColor c = col->color();
-    bool is_valid = c.isValid();
+    QString key = QString("%1:%2x%3").arg(col->id()).arg(w).arg(h);
 
-    QImage img(w, h, QImage::Format_ARGB32_Premultiplied);
-    QRect r(0, 0, w, h);
-    QPainter p;
+    QPixmap *pix = m_colimages.value(key);
 
-    p.begin(&img);
+    if (!pix) {
+        QColor c = col->color();
+        bool is_valid = c.isValid();
 
-    if (is_valid) {
-        QBrush brush;
+        pix = new QPixmap(w, h);
+        QPainter p(pix);
+        QRect r = pix->rect();
 
-        if (col->isGlitter()) {
-            brush = QBrush(CUtility::contrastColor(c, 0.25f), Qt::Dense6Pattern);
+        if (is_valid) {
+            QBrush brush;
+
+            if (col->isGlitter()) {
+                brush = QBrush(CUtility::contrastColor(c, 0.25f), Qt::Dense6Pattern);
+            }
+            else if (col->isSpeckle()) {
+                brush = QBrush(CUtility::contrastColor(c, 0.20f), Qt::Dense7Pattern);
+            }
+            else if (col->isMetallic()) {
+                QColor c2 = CUtility::gradientColor(c, Qt::black);
+
+                QLinearGradient gradient(0, 0, 0, r.height());
+                gradient.setColorAt(0,   c2);
+                gradient.setColorAt(0.3, c);
+                gradient.setColorAt(0.7, c);
+                gradient.setColorAt(1,   c2);
+                brush = gradient;
+            }
+            else if (col->isChrome()) {
+                QColor c2 = CUtility::gradientColor(c, Qt::black);
+
+                QLinearGradient gradient(0, 0, r.width(), 0);
+                gradient.setColorAt(0,   c2);
+                gradient.setColorAt(0.3, c);
+                gradient.setColorAt(0.7, c);
+                gradient.setColorAt(1,   c2);
+                brush = gradient;
+            }
+
+            p.fillRect(r, c);
+            p.fillRect(r, brush);
+
         }
-        else if (col->isSpeckle()) {
-            brush = QBrush(CUtility::contrastColor(c, 0.20f), Qt::Dense7Pattern);
-        }
-        else if (col->isMetallic()) {
-            QColor c2 = CUtility::gradientColor(c, Qt::black);
-
-            QLinearGradient gradient(0, 0, 0, r.height());
-            gradient.setColorAt(0,   c2);
-            gradient.setColorAt(0.3, c);
-            gradient.setColorAt(0.7, c);
-            gradient.setColorAt(1,   c2);
-            brush = gradient;
-        }
-        else if (col->isChrome()) {
-            QColor c2 = CUtility::gradientColor(c, Qt::black);
-
-            QLinearGradient gradient(0, 0, r.width(), 0);
-            gradient.setColorAt(0,   c2);
-            gradient.setColorAt(0.3, c);
-            gradient.setColorAt(0.7, c);
-            gradient.setColorAt(1,   c2);
-            brush = gradient;
+        else {
+            p.fillRect(0, 0, w, h, Qt::white);
+            p.setRenderHint(QPainter::Antialiasing);
+            p.setPen(Qt::darkGray);
+            p.setBrush(QColor(255, 255, 255, 128));
+            p.drawRect(r);
+            p.drawLine(0, 0, w, h);
+            p.drawLine(0, h, w, 0);
         }
 
-        p.fillRect(r, c);
-        p.fillRect(r, brush);
+        if (col->isTransparent() /*&& CResource::inst ( )->pixmapAlphaSupported ( )*/) {
+            QLinearGradient gradient(0, 0, r.width(), r.height());
+            gradient.setColorAt(0,   Qt::transparent);
+            gradient.setColorAt(0.4, Qt::transparent);
+            gradient.setColorAt(0.6, QColor(255, 255, 255, 100));
+            gradient.setColorAt(1,   QColor(255, 255, 255, 100));
 
+            p.fillRect(r, gradient);
+	    }
+        p.end();
+
+        m_colimages.insert(key, pix);
     }
-    else {
-        p.fillRect(0, 0, w, h, Qt::white);
-        p.setRenderHint(QPainter::Antialiasing);
-        p.setPen(Qt::darkGray);
-        p.setBrush(QColor(255, 255, 255, 128));
-        p.drawRect(r);
-        p.drawLine(0, 0, w, h);
-        p.drawLine(0, h, w, 0);
-    }
-
-    p.end();
-
-    if (col->isTransparent() /*&& CResource::inst ( )->pixmapAlphaSupported ( )*/) {
-        QImage alpha(w, h, QImage::Format_ARGB32_Premultiplied);
-
-        QLinearGradient gradient(0, 0, r.width(), r.height());
-        gradient.setColorAt(0,   Qt::white);
-        gradient.setColorAt(0.4, Qt::white);
-        gradient.setColorAt(0.6, Qt::darkGray);
-        gradient.setColorAt(1,   Qt::darkGray);
-
-        QPainter ap;
-        ap.begin(&alpha);
-        ap.fillRect(r, gradient);
-        ap.end();
-
-        img.setAlphaChannel(alpha);
-    }
-
-    return img;
+    return pix;
 }
 
 
@@ -774,6 +771,12 @@ BrickLink::InvItemList *BrickLink::Core::parseItemListXML(QDomElement root, Item
             else if (hint == XMLHint_Inventory) {
                 if ((tag == "EXTRA") && (val == "Y"))
                     ii->setStatus(Extra);
+                else if (tag == "COUNTERPART")
+                     ii->setCounterPart((val == "Y"));
+                else if (tag == "ALTERNATE")
+                     ii->setAlternate((val == "Y"));
+                else if (tag == "MATCHID")
+                     ii->setAlternateId(val.toInt());
                 else if (tag == "ITEMNAME")    // BrickStore extension for Peeron inventories
                     itemname = val;
                 else if (tag == "COLORNAME")   // BrickStore extension for Peeron inventories

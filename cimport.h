@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2005 Robert Griebl. All rights reserved.
+/* Copyright (C) 2004-2008 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -140,6 +140,8 @@ public:
 
     void init()
     {
+        m_current_address = -1;
+
         m_retry_placed = (m_order_type == BrickLink::Order::Any);
 
         if (!m_order_id.isEmpty()) {
@@ -192,82 +194,101 @@ private slots:
         bool ok = false;
         QString error;
 
-
         if (data && data->size()) {
-            QBuffer order_buffer(data);
+            if (m_current_address >= 0) {
+                QString s = QString::fromLatin1(data->data(), data->size());
 
-            if (order_buffer.open(QIODevice::ReadOnly)) {
-                QString emsg;
-                int eline = 0, ecol = 0;
-                QDomDocument doc;
+                QRegExp rx1("<B>Name:</B></FONT></TD>\\s*<TD NOWRAP><FONT FACE=\"Tahoma, Arial\" SIZE=\"2\">(.+)</FONT></TD>");
+                QRegExp rx2("<B>Address:</B></FONT></TD>\\s*<TD NOWRAP><FONT FACE=\"Tahoma, Arial\" SIZE=\"2\">(.+)</FONT></TD>");
+                QRegExp rx3("<B>Country:</B></FONT></TD>\\s*<TD NOWRAP><FONT FACE=\"Tahoma, Arial\" SIZE=\"2\">(.+)</FONT></TD>");
 
-                if (doc.setContent(&order_buffer, &emsg, &eline, &ecol)) {
-                    QDomElement root = doc.documentElement();
+                rx1.setMinimal(true);
+                rx1.indexIn(s);
+                rx2.setMinimal(true);
+                rx2.indexIn(s);
+                rx3.setMinimal(true);
+                rx3.indexIn(s);
 
-                    BrickLink::InvItemList *items = 0;
+                QString a = rx1.cap(1) + "\n" + rx2.cap(1) + "\n" + rx3.cap(1);
+                a.replace("<BR>", "\n");
 
-                    if ((root.nodeName() == "ORDERS") && (root.firstChild().nodeName() == "ORDER")) {
-                        for (QDomNode ordernode = root.firstChild(); !ordernode.isNull(); ordernode = ordernode.nextSibling()) {
-                            if (!ordernode.isElement())
-                                continue;
+                m_orders[m_current_address].first->setAddress(a);
+            }
+            else {
+                QBuffer order_buffer(data);
 
-                            items = BrickLink::inst()->parseItemListXML(ordernode.toElement(), BrickLink::XMLHint_Order /*, &invalid_items*/);
+                if (order_buffer.open(QIODevice::ReadOnly)) {
+                    QString emsg;
+                    int eline = 0, ecol = 0;
+                    QDomDocument doc;
 
-                            if (items) {
-                                BrickLink::Order *order = new BrickLink::Order("", BrickLink::Order::Placed);
+                    if (doc.setContent(&order_buffer, &emsg, &eline, &ecol)) {
+                        QDomElement root = doc.documentElement();
 
-                                for (QDomNode node = ordernode.firstChild(); !node.isNull(); node = node.nextSibling()) {
-                                    if (!node.isElement())
-                                        continue;
+                        BrickLink::InvItemList *items = 0;
 
-                                    QString tag = node.toElement().tagName();
-                                    QString val = node.toElement().text();
+                        if ((root.nodeName() == "ORDERS") && (root.firstChild().nodeName() == "ORDER")) {
+                            for (QDomNode ordernode = root.firstChild(); !ordernode.isNull(); ordernode = ordernode.nextSibling()) {
+                                if (!ordernode.isElement())
+                                    continue;
 
-                                    if (tag == "BUYER")
-                                        order->setBuyer(val);
-                                    else if (tag == "SELLER")
-                                        order->setSeller(val);
-                                    else if (tag == "ORDERID")
-                                        order->setId(val);
-                                    else if (tag == "ORDERDATE")
-                                        order->setDate(QDateTime(ymd2date(val)));
-                                    else if (tag == "ORDERSTATUSCHANGED")
-                                        order->setStatusChange(QDateTime(ymd2date(val)));
-                                    else if (tag == "ORDERSHIPPING")
-                                        order->setShipping(money_t::fromCString(val));
-                                    else if (tag == "ORDERINSURANCE")
-                                        order->setInsurance(money_t::fromCString(val));
-                                    else if (tag == "ORDERDELIVERY")
-                                        order->setDelivery(money_t::fromCString(val));
-                                    else if (tag == "ORDERCREDIT")
-                                        order->setCredit(money_t::fromCString(val));
-                                    else if (tag == "GRANDTOTAL")
-                                        order->setGrandTotal(money_t::fromCString(val));
-                                    else if (tag == "ORDERSTATUS")
-                                        order->setStatus(val);
-                                    else if (tag == "PAYMENTTYPE")
-                                        order->setPayment(val);
-                                    else if (tag == "ORDERREMARKS")
-                                        order->setRemarks(val);
-                                }
+                                items = BrickLink::core()->parseItemListXML(ordernode.toElement(), BrickLink::XMLHint_Order /*, &invalid_items*/);
 
-                                if (!order->id().isEmpty()) {
-                                    m_orders << qMakePair(order, items);
-                                    ok = true;
-                                }
-                                else {
-                                    delete items;
+                                if (items) {
+                                    BrickLink::Order *order = new BrickLink::Order("", BrickLink::Order::Placed);
+
+                                    for (QDomNode node = ordernode.firstChild(); !node.isNull(); node = node.nextSibling()) {
+                                        if (!node. isElement())
+                                            continue;
+
+                                        QString tag = node.toElement().tagName();
+                                        QString val = node.toElement().text();
+
+                                        if (tag == "BUYER")
+                                            order->setBuyer(val);
+                                        else if (tag == "SELLER")
+                                            order->setSeller(val);
+                                        else if (tag == "ORDERID")
+                                            order->setId(val);
+                                        else if (tag == "ORDERDATE")
+                                            order->setDate(QDateTime(ymd2date(val)));
+                                        else if (tag == "ORDERSTATUSCHANGED")
+                                            order->setStatusChange(QDateTime(ymd2date(val)));
+                                        else if (tag == "ORDERSHIPPING")
+                                            order->setShipping(money_t::fromCString(val));
+                                        else if (tag == "ORDERINSURANCE")
+                                            order->setInsurance(money_t::fromCString(val));
+                                        else if (tag == "ORDERDELIVERY")
+                                            order->setDelivery(money_t::fromCString(val));
+                                        else if (tag == "ORDERCREDIT")
+                                            order->setCredit(money_t::fromCString(val));
+                                        else if (tag == "GRANDTOTAL")
+                                            order->setGrandTotal(money_t::fromCString(val));
+                                        else if (tag == "ORDERSTATUS")
+                                            order->setStatus(val);
+                                        else if (tag == "PAYMENTTYPE")
+                                            order->setPayment(val);
+                                        else if (tag == "ORDERREMARKS")
+                                            order->setRemarks(val);
+                                    }
+
+                                    if (!order->id().isEmpty()) {
+                                        m_orders << qMakePair(order, items);
+                                        ok = true;
+                                    }
+                                    else {
+                                        delete items;
+                                    }
                                 }
                             }
                         }
                     }
+                    // find a better way - we shouldn't display widgets here
+                    //else
+                    //    CMessageBox::warning ( 0, tr( "Could not parse the XML data for your orders:<br /><i>Line %1, column %2: %3</i>" ). arg ( eline ). arg ( ecol ). arg ( emsg ));
                 }
-                // find a better way - we shouldn't display widgets here
-                //else
-                // CMessageBox::warning ( 0, tr( "Could not parse the XML data for your orders:<br /><i>Line %1, column %2: %3</i>" ).arg ( eline ).arg ( ecol ).arg ( emsg ));
             }
         }
-
 
         if (m_retry_placed) {
             QList<QPair<QString, QString> > query = m_url.queryItems();
@@ -278,6 +299,14 @@ private slots:
             m_progress->layout();
 
             m_retry_placed = false;
+        }
+        else if ((m_current_address + 1) < m_orders.size()) {
+            m_current_address++;
+
+            QString url = QString("http://www.bricklink.com/memberInfo.asp?u=") + m_orders[m_current_address].first->other();
+            m_progress->setHeaderText(tr("Importing address records"));
+            m_progress->get(url);
+			m_progress->layout();
         }
         else {
             m_progress->setFinished(true);
@@ -301,6 +330,7 @@ private:
     BrickLink::Order::Type m_order_type;
     QUrl                   m_url;
     bool                   m_retry_placed;
+    int                    m_current_address;
     QList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > m_orders;
 };
 
@@ -422,6 +452,7 @@ private slots:
                         for (int i = 0; i < all_items.count(); i++) {
                             const BrickLink::Item *it = all_items [i];
                             QString n(it->name());
+                            n = n.trimmed();
 
                             if ((n.length() > longest_match) &&
                                 (color_and_item.indexOf(n)) >= 0) {

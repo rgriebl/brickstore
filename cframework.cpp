@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2005 Robert Griebl. All rights reserved.
+/* Copyright (C) 2004-2008 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -33,6 +33,7 @@
 #include <qtooltip.h>
 #include <qcursor.h>
 #include <QStyleFactory>
+#include <QShortcut>
 
 #include "capplication.h"
 #include "cmessagebox.h"
@@ -606,20 +607,20 @@ void CFrameWork::translateActions()
         { "file_saveas",                    tr("Save As..."),                         0 },
         { "file_print",                     tr("Print..."),                           tr("Ctrl+P", "File|Print") },
         { "file_import",                    tr("Import"),                             0 },
-        { "file_import_bl_inv",             tr("BrickLink Inventory..."),             tr("Ctrl+I", "File|Import BrickLink Inventory") },
-        { "file_import_bl_xml",             tr("BrickLink XML..."),                   0 },
-        { "file_import_bl_order",           tr("BrickLink Order..."),                 0 },
-        { "file_import_bl_store_inv",       tr("BrickLink Store Inventory..."),       0 },
-        { "file_import_bl_cart",            tr("BrickLink Shopping Cart..."),         0 },
-        { "file_import_peeron_inv",         tr("Peeron Inventory..."),                0 },
-        { "file_import_ldraw_model",        tr("LDraw Model..."),                     0 },
+        { "file_import_bl_inv",             tr("BrickLink Set Inventory..."),         tr("Ctrl+I,Ctrl+I", "File|Import BrickLink Set Inventory") },
+        { "file_import_bl_xml",             tr("BrickLink XML..."),                   tr("Ctrl+I,Ctrl+X", "File|Import BrickLink XML") },
+        { "file_import_bl_order",           tr("BrickLink Order..."),                 tr("Ctrl+I,Ctrl+O", "File|Import BrickLink Order") },
+        { "file_import_bl_store_inv",       tr("BrickLink Store Inventory..."),       tr("Ctrl+I,Ctrl+S", "File|Import BrickLink Store Inventory") },
+        { "file_import_bl_cart",            tr("BrickLink Shopping Cart..."),         tr("Ctrl+I,Ctrl+C", "File|Import BrickLink Shopping Cart") },
+        { "file_import_peeron_inv",         tr("Peeron Inventory..."),                tr("Ctrl+I,Ctrl+P", "File|Import Peeron Inventory") },
+        { "file_import_ldraw_model",        tr("LDraw Model..."),                     tr("Ctrl+I,Ctrl+L", "File|Import LDraw Model") },
         { "file_import_briktrak",           tr("BrikTrak Inventory..."),              0 },
         { "file_export",                    tr("Export"),                             0 },
-        { "file_export_bl_xml",             tr("BrickLink XML..."),                   0 },
-        { "file_export_bl_xml_clip",        tr("BrickLink XML to Clipboard"),         0 },
-        { "file_export_bl_update_clip",     tr("BrickLink Mass-Update XML to Clipboard"), 0 },
-        { "file_export_bl_invreq_clip",     tr("BrickLink Inventory XML to Clipboard"),   0 },
-        { "file_export_bl_wantedlist_clip", tr("BrickLink Wanted List XML to Clipboard"), 0 },
+        { "file_export_bl_xml",             tr("BrickLink XML..."),                         tr("Ctrl+E,Ctrl+X", "File|Import BrickLink XML") },
+        { "file_export_bl_xml_clip",        tr("BrickLink Mass-Upload XML to Clipboard"),   tr("Ctrl+E,Ctrl+U", "File|Import BrickLink Mass-Upload") },
+        { "file_export_bl_update_clip",     tr("BrickLink Mass-Update XML to Clipboard"),   tr("Ctrl+E,Ctrl+P", "File|Import BrickLink Mass-Update") },
+        { "file_export_bl_invreq_clip",     tr("BrickLink Set Inventory XML to Clipboard"), tr("Ctrl+E,Ctrl+I", "File|Import BrickLink Set Inventory") },
+        { "file_export_bl_wantedlist_clip", tr("BrickLink Wanted List XML to Clipboard"),   tr("Ctrl+E,Ctrl+W", "File|Import BrickLink Wanted List") },
         { "file_export_briktrak",           tr("BrikTrak Inventory..."),              0 },
         { "file_close",                     tr("Close"),                              tr("Ctrl+W", "File|Close") },
         { "file_exit",                      tr("Exit"),                               tr("Ctrl+Q", "File|Quit") },
@@ -988,10 +989,14 @@ void CFrameWork::createActions()
     m_undogroup->createUndoAction(this)->setObjectName("edit_undo");
     m_undogroup->createRedoAction(this)->setObjectName("edit_redo");
 
-    (void) newQAction(this, "edit_cut");
-    (void) newQAction(this, "edit_copy");
-    (void) newQAction(this, "edit_paste");
+    a = newQAction(this, "edit_cut");
+    connect(new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Delete), this, 0, 0, Qt::WindowShortcut), SIGNAL(activated()), a, SLOT(trigger()));
+    a = newQAction(this, "edit_copy");
+    connect(new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Insert), this, 0, 0, Qt::WindowShortcut), SIGNAL(activated()), a, SLOT(trigger()));
+    a = newQAction(this, "edit_paste");
+    connect(new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Insert), this, 0, 0, Qt::WindowShortcut), SIGNAL(activated()), a, SLOT(trigger()));
     (void) newQAction(this, "edit_delete");
+
     a = newQAction(this, "edit_additems", true, this, SLOT(toggleAddItemDialog(bool)));
     a->setShortcutContext(Qt::ApplicationShortcut);
 
@@ -1225,7 +1230,7 @@ void CFrameWork::fileImportBrickLinkOrder()
     if (!checkBrickLinkLogin())
         return;
 
-    createWindow(CDocument::fileImportBrickLinkOrder());
+    createWindows(CDocument::fileImportBrickLinkOrders());
 }
 
 void CFrameWork::fileImportBrickLinkStore()
@@ -1250,6 +1255,17 @@ void CFrameWork::fileImportLDrawModel()
 {
     createWindow(CDocument::fileImportLDrawModel());
 }
+
+bool CFrameWork::createWindows(const QList<CDocument *> &docs)
+{
+    bool ok = true;
+
+    foreach (CDocument *doc, docs)
+        ok &= createWindow(doc);
+    return ok;
+}
+
+
 
 bool CFrameWork::createWindow(CDocument *doc)
 {
@@ -1739,14 +1755,21 @@ void CFrameWork::setOnlineStatus(QAction *act)
 void CFrameWork::registrationUpdate()
 {
     bool personal = (CConfig::inst()->registration() == CConfig::Personal);
-    bool demo = (CConfig::inst()->registration() == CConfig::Demo);
+    bool demo     = (CConfig::inst()->registration() == CConfig::Demo);
+    bool full     = (CConfig::inst()->registration() == CConfig::Full);
 
     QAction *a = findAction("view_simple_mode");
 
-    // personal ->always on
-    // demo ->always off
-    a->setChecked((CConfig::inst()->simpleMode() || personal) && !demo);
-    a->setEnabled(!(demo || personal));
+    // demo, full -> always off
+    // opensource -> don't change
+    if (personal)
+        a->setChecked(true);
+    else if (demo || full)
+        a->setChecked(false);
+    else
+        a->setChecked(CConfig::inst()->simpleMode());
+
+    a->setEnabled(!personal);
 
     setSimpleMode(a->isChecked());
 }
@@ -1837,11 +1860,6 @@ void CFrameWork::createAddItemDialog()
 
         if (ba.isEmpty() || !m_add_dialog->restoreGeometry(ba))
             ; // should the dialog be centered??
-
-//  QShortcut *sc = new QShortcut ( m_add_dialog );
-
-//  QAction *action = findAction ( "edit_additems" );
-//  sc->connectItem ( acc->insertItem ( action->shortcut ( )), action, SLOT( toggle ( )));
 
         connect(m_add_dialog, SIGNAL(closed()), this, SLOT(closedAddItemDialog()));
 

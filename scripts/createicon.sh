@@ -1,6 +1,6 @@
 #!/bin/sh
 
-## Copyright (C) 2004-2005 Robert Griebl.  All rights reserved.
+## Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
 ##
 ## This file is part of BrickStore.
 ##

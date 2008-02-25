@@ -153,7 +153,9 @@ void CReport::print(QPaintDevice *pd, const CDocument *doc, const CDocument::Ite
         ordermap ["type"]         = (order->type() == BrickLink::Order::Placed ? "P" : "R");
         ordermap ["date"]         = order->date().toString(Qt::TextDate);
         ordermap ["statusChange"] = order->statusChange();
-        ordermap ["buyer"]        = order->buyer();
+        ordermap ["other"]        = order->other();
+        ordermap ["buyer"]        = (order->type() == BrickLink::Order::Placed ? CConfig::inst()->blLoginUsername() : order->other());
+        ordermap ["seller"]       = (order->type() == BrickLink::Order::Placed ? order->other() : CConfig::inst()->blLoginUsername());
         ordermap ["shipping"]     = order->shipping().toDouble();
         ordermap ["insurance"]    = order->insurance().toDouble();
         ordermap ["delivery"]     = order->delivery().toDouble();
@@ -162,6 +164,7 @@ void CReport::print(QPaintDevice *pd, const CDocument *doc, const CDocument::Ite
         ordermap ["status"]       = order->status();
         ordermap ["payment"]      = order->payment();
         ordermap ["remarks"]      = order->remarks();
+        ordermap ["address"]      = order->address();
 
         docmap ["order"] = ordermap;
     }
@@ -189,9 +192,8 @@ void CReport::print(QPaintDevice *pd, const CDocument *doc, const CDocument::Ite
         color ["id"]       = item->color() ? (int) item->color()->id() : -1;
         color ["name"]     = item->color() ? item->color()->name() : "";
         color ["rgb"]      = item->color() ? item->color()->color() : QColor();
-        QPixmap colorpix;
-        colorpix.convertFromImage(BrickLink::inst()->colorImage(item->color(), 20, 20));
-        color ["picture"]  = colorpix;
+        const QPixmap *pixptr = BrickLink::core()->colorImage(item->color(), 20, 20);
+        color ["picture"]  = pixptr ? *pixptr : QPixmap();
         imap ["color"]     = color;
 
         QMap<QString, QVariant> cond;

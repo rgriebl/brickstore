@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2005 Robert Griebl.All rights reserved.
+/* Copyright (C) 2004-2008 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -165,9 +165,9 @@ bool BrickLink::PriceGuide::parse(const char *data, uint size)
     // parse data -- evil (but fast) hack :)
 
     struct keyword kw_times [] = {
-        { "All Time Sales",           AllTime, -1, -1 },
-        { "Past 6 Months Sales",      PastSix, -1, -1 },
-        { "Current Items for Sale",   Current, -1, -1 },
+        { "All Time Sales",         AllTime, -1, -1 },
+        { "Past 6 Months Sales",    PastSix, -1, -1 },
+        { "Current Items for Sale", Current, -1, -1 },
         { 0, 0, 0, 0 }
     };
 

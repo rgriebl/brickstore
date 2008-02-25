@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2005 Robert Griebl. All rights reserved.
+/* Copyright (C) 2004-2008 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -266,8 +266,9 @@ void BrickLink::Item::setConsistsOf(const InvItemList &items) const
             entry->m_index    = item->item()->m_index;
             entry->m_color    = item->color()->id();
             entry->m_extra    = (item->status() == BrickLink::Extra) ? 1 : 0;
-            entry->m_isalt    = 0;
-            entry->m_altid    = 0;
+            entry->m_isalt    = item->alternate();
+            entry->m_altid    = item->alternateId();
+            entry->m_cpart    = item->counterPart();
             entry->m_reserved = 0;
             ptr++;
         }
@@ -298,6 +299,9 @@ BrickLink::InvItemList BrickLink::Item::consistsOf() const
                 ii->setQuantity(entry->m_qty);
                 if (entry->m_extra)
                     ii->setStatus(BrickLink::Extra);
+                ii->setAlternate(entry->m_isalt);
+                ii->setAlternateId(entry->m_altid);
+                ii->setCounterPart(entry->m_cpart);
 
                 list.append(ii);
             }
@@ -429,6 +433,10 @@ BrickLink::InvItem::InvItem(const Color *color, const Item *item)
     m_status = Include;
     m_condition = New;
     m_retain = m_stockroom = false;
+    m_alternate = false;
+    m_alt_id = 0;
+    m_cpart = false;
+    m_xreserved = 0;
     m_weight = 0;
 
     m_quantity = m_orig_quantity = 0;
@@ -470,6 +478,9 @@ BrickLink::InvItem &BrickLink::InvItem::operator = (const InvItem &copy)
     m_condition      = copy.m_condition;
     m_retain         = copy.m_retain;
     m_stockroom      = copy.m_stockroom;
+    m_alternate      = copy.m_alternate;
+    m_alt_id         = copy.m_alt_id;
+    m_cpart          = copy.m_cpart;
     m_comments       = copy.m_comments;
     m_remarks        = copy.m_remarks;
     m_reserved       = copy.m_reserved;

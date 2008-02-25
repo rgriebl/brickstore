@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2005 Robert Griebl.All rights reserved.
+/* Copyright (C) 2004-2008 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -234,12 +234,8 @@ public:
             break;
         }
         case CDocument::Color:
-            pix = s_color_cache.value(it->color());
-
-            if (pix.isNull()) {
-                pix = QPixmap::fromImage(BrickLink::core()->colorImage(it->color(), option.decorationSize.width(), option.rect.height()));
-                s_color_cache.insert(it->color(), pix);
-            }
+            if (const QPixmap *pixptr = BrickLink::core()->colorImage(it->color(), option.decorationSize.width(), option.rect.height()))
+                pix = *pixptr;
             break;
 
         case CDocument::ItemType:
@@ -442,12 +438,10 @@ public:
 protected:
     CDocument *m_doc;
     static QVector<QColor> s_shades;
-    static QHash<const BrickLink::Color *, QPixmap> s_color_cache;
     static QHash<BrickLink::Status, QIcon> s_status_icons;
 };
 
 QVector<QColor> DocumentDelegate::s_shades;
-QHash<const BrickLink::Color *, QPixmap> DocumentDelegate::s_color_cache;
 QHash<BrickLink::Status, QIcon> DocumentDelegate::s_status_icons;
 
 CWindow::CWindow(CDocument *doc, QWidget *parent)
@@ -1285,6 +1279,8 @@ void CWindow::on_edit_remark_add_triggered()
         uint remarkcount = 0;
         m_doc->beginMacro();
 
+        QRegExp regexp("\\b" + QRegExp::escape(addremarks) + "\\b");
+
         CDisableUpdates disupd(w_list);
 
         foreach(CDocument::Item *pos, m_doc->selection()) {
@@ -1292,7 +1288,7 @@ void CWindow::on_edit_remark_add_triggered()
 
             if (str.isEmpty())
                 str = addremarks;
-            else if (str.indexOf(QRegExp("\\b" + QRegExp::escape(addremarks) + "\\b")) != -1)
+            else if (str.indexOf(regexp) != -1)
                 ;
             else if (addremarks.indexOf(QRegExp("\\b" + QRegExp::escape(str) + "\\b")) != -1)
                 str = addremarks;
@@ -1323,11 +1319,13 @@ void CWindow::on_edit_remark_rem_triggered()
         uint remarkcount = 0;
         m_doc->beginMacro();
 
+        QRegExp regexp("\\b" + QRegExp::escape(remremarks) + "\\b");
+
         CDisableUpdates disupd(w_list);
 
         foreach(CDocument::Item *pos, m_doc->selection()) {
             QString str = pos->remarks();
-            str.remove(QRegExp("\\b" + QRegExp::escape(remremarks) + "\\b"));
+            str.remove(regexp);
             str = str.simplified();
 
             if (str != pos->remarks()) {
@@ -1366,6 +1364,8 @@ void CWindow::on_edit_comment_add_triggered()
         uint commentcount = 0;
         m_doc->beginMacro();
 
+        QRegExp regexp("\\b" + QRegExp::escape(addcomments) + "\\b");
+
         CDisableUpdates disupd(w_list);
 
         foreach(CDocument::Item *pos, m_doc->selection()) {
@@ -1373,7 +1373,7 @@ void CWindow::on_edit_comment_add_triggered()
 
             if (str.isEmpty())
                 str = addcomments;
-            else if (str.indexOf(QRegExp("\\b" + QRegExp::escape(addcomments) + "\\b")) != -1)
+            else if (str.indexOf(regexp) != -1)
                 ;
             else if (addcomments.indexOf(QRegExp("\\b" + QRegExp::escape(str) + "\\b")) != -1)
                 str = addcomments;
@@ -1404,11 +1404,13 @@ void CWindow::on_edit_comment_rem_triggered()
         uint commentcount = 0;
         m_doc->beginMacro();
 
+        QRegExp regexp("\\b" + QRegExp::escape(remcomments) + "\\b");
+
         CDisableUpdates disupd(w_list);
 
         foreach(CDocument::Item *pos, m_doc->selection()) {
             QString str = pos->comments();
-            str.remove(QRegExp("\\b" + QRegExp::escape(remcomments) + "\\b"));
+            str.remove(regexp);
             str = str.simplified();
 
             if (str != pos->comments()) {
@@ -1719,6 +1721,12 @@ void CWindow::on_file_print_triggered()
      prt->setOptionEnabled ( QPrinter::PrintSelection, !m_doc->selection ( ).isEmpty ( ));
      prt->setOptionEnabled ( QPrinter::PrintPageRange, false );
      prt->setPrintRange ( m_doc->selection ( ).isEmpty ( ) ? QPrinter::AllPages : QPrinter::Selection );
+
+     QString doctitle = m_doc->title();
+     if (doctitle == m_doc->fileName())
+         doctitle = QFileInfo(doctitle).baseName();
+
+     prt->setDocName(doctitle);
 
      prt->setFullPage ( true );
 

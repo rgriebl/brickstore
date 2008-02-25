@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2005 Robert Griebl. All rights reserved.
+/* Copyright (C) 2004-2008 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -275,9 +275,11 @@ private:
         quint64  m_extra    : 1;
         quint64  m_isalt    : 1;
         quint64  m_altid    : 6;
-        quint64  m_reserved : 12;
+        quint64  m_cpart    : 1;
+        quint64  m_reserved : 11;
 #else
-        quint64  m_reserved : 12;
+        quint64  m_reserved : 11;
+        quint64  m_cpart    : 1;
         quint64  m_altid    : 6;
         quint64  m_isalt    : 1;
         quint64  m_extra    : 1;
@@ -398,6 +400,14 @@ public:
     QString reserved() const           { return m_reserved; }
     void setReserved(const QString &r) { m_reserved = r; }
 
+    bool alternate() const             { return m_alternate; }
+    void setAlternate(bool a)          { m_alternate = a; }
+    uint alternateId() const           { return m_alt_id; }
+    void setAlternateId(uint aid)      { m_alt_id = aid; }
+
+    bool counterPart() const           { return m_cpart; }
+    void setCounterPart(bool b)        { m_cpart = b; }
+
     Picture *customPicture() const     { return m_custom_picture; }
 
     struct Incomplete {
@@ -431,6 +441,10 @@ private:
     Condition        m_condition : 2;
     bool             m_retain    : 1;
     bool             m_stockroom : 1;
+    bool             m_alternate : 1;
+    uint             m_alt_id    : 6;
+    bool             m_cpart     : 1;
+    int              m_xreserved : 1;
 
     QString          m_comments;
     QString          m_remarks;
@@ -483,8 +497,9 @@ public:
     Type type() const         { return m_type; }
     QDateTime date() const    { return m_date; }
     QDateTime statusChange() const  { return m_status_change; }
-    QString buyer() const     { return m_type == Received ? m_other : QString(); }
-    QString seller() const    { return m_type == Placed ? m_other : QString(); }
+    //QString buyer() const     { return m_type == Received ? m_other : QString(); }
+    //QString seller() const    { return m_type == Placed ? m_other : QString(); }
+    QString other() const     { return m_other; }
     money_t shipping() const  { return m_shipping; }
     money_t insurance() const { return m_insurance; }
     money_t delivery() const  { return m_delivery; }
@@ -493,6 +508,7 @@ public:
     QString status() const    { return m_status; }
     QString payment() const   { return m_payment; }
     QString remarks() const   { return m_remarks; }
+    QString address() const   { return m_address; }
 
     void setId(const QString &id)             { m_id = id; }
     void setDate(const QDateTime &dt)         { m_date = dt; }
@@ -507,6 +523,7 @@ public:
     void setStatus(const QString &str)        { m_status = str; }
     void setPayment(const QString &str)       { m_payment = str; }
     void setRemarks(const QString &str)       { m_remarks = str; }
+    void setAddress(const QString &str)       { m_address = str; }
 
 private:
     QString   m_id;
@@ -522,6 +539,7 @@ private:
     QString   m_status;
     QString   m_payment;
     QString   m_remarks;
+    QString   m_address;
 };
 
 class PriceGuide : public CRef {
@@ -871,9 +889,9 @@ public:
     ItemModel *itemModel(ItemModel::Features f = ItemModel::Default) const;
     //AppearsInModel *appearsInModel(const BrickLink::Item *item, const BrickLink::Color *color) const;
 
-    const QPixmap *noImage(const QSize &s);
+    const QPixmap *noImage(const QSize &s) const;
 
-    QImage colorImage(const Color *col, int w, int h) const;
+    const QPixmap *colorImage(const Color *col, int w, int h) const;
 
     const Color *color(uint id) const;
     const Color *colorFromPeeronName(const char *peeron_name) const;
@@ -956,7 +974,8 @@ private:
     bool     m_online;
     QLocale  m_c_locale;
 
-    QHash<QString, QPixmap *>  m_noimages;
+    mutable QHash<QString, QPixmap *>  m_noimages;
+    mutable QHash<QString, QPixmap *>  m_colimages;
 
     struct dummy1 {
         QHash<int, const Color *>       colors;      // id ->Color *

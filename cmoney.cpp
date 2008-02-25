@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2005 Robert Griebl.All rights reserved.
+/* Copyright (C) 2004-2008 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -137,10 +137,10 @@ CMoney::CMoney()
     QString csymbol, csymbolint;
 
 #if defined( Q_OS_MACX )
-    // BSD and MACOSX don't have support for LC_MONETARY !!!
+    // MACOSX does not set the native environment
 
     // we need at least 10.3 for CFLocale...stuff (weak import)
-    if (CFLocaleCopyCurrent != 0  && CFLocaleGetValue != 0) {
+    if (CFLocaleCopyCurrent != 0 && CFLocaleGetIdentifier != 0 && CFLocaleGetValue != 0) {
         CFLocaleRef loc = CFLocaleCopyCurrent();
         CFStringRef ds = (CFStringRef) CFLocaleGetValue(loc, kCFLocaleDecimalSeparator);
         CFStringRef cs = (CFStringRef) CFLocaleGetValue(loc, kCFLocaleCurrencySymbol);
@@ -149,6 +149,13 @@ CMoney::CMoney()
         decpoint = QCFString::toQString(ds);
         csymbol = QCFString::toQString(cs);
         csymbolint = QCFString::toQString(cc);
+
+        QString locstr = QCFString::toQString((CFStringRef) CFLocaleGetIdentifier(loc));
+        if (locstr.indexOf('.') == -1)
+            locstr += QLatin1String(".UTF-8");
+
+        ::setenv("LC_ALL", locstr.toUtf8().constData(), 1);
+        ::setlocale(LC_ALL, "");
     }
 
 #else

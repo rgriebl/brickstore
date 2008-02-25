@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2005 Robert Griebl.All rights reserved.
+/* Copyright (C) 2004-2008 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -576,23 +576,29 @@ CDocument *CDocument::fileImportBrickLinkInventory(const BrickLink::Item *presel
     return 0;
 }
 
-CDocument *CDocument::fileImportBrickLinkOrder()
+QList<CDocument *> CDocument::fileImportBrickLinkOrders()
 {
+    QList<CDocument *> docs;
+
     DImportOrder dlg(CFrameWork::inst());
 
     if (dlg.exec() == QDialog::Accepted) {
-        QPair<BrickLink::Order *, BrickLink::InvItemList *> order = dlg.order();
+        QList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > orders = dlg.orders();
 
-        if (order.first && order.second) {
-            CDocument *doc = new CDocument(true);
+        for (QList<QPair<BrickLink::Order *, BrickLink::InvItemList *> >::const_iterator it = orders.begin(); it != orders.end(); ++it) {
+            const QPair<BrickLink::Order *, BrickLink::InvItemList *> &order = *it;
 
-            doc->setTitle(tr("Order #%1").arg(order.first->id()));
-            doc->setBrickLinkItems(*order.second);
-            doc->m_order = new BrickLink::Order(*order.first);
-            return doc;
+            if (order.first && order.second) {
+                CDocument *doc = new CDocument(true);
+
+                doc->setTitle(tr("Order #%1").arg(order.first->id()));
+                doc->setBrickLinkItems(*order.second);
+                doc->m_order = new BrickLink::Order(*order. first);
+                docs.append(doc);
+            }
         }
     }
-    return 0;
+    return docs;
 }
 
 CDocument *CDocument::fileImportBrickLinkStore()

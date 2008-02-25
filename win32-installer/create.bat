@@ -1,6 +1,6 @@
 @ECHO off
 
-REM Copyright (C) 2004-2005 Robert Griebl.  All rights reserved.
+REM Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
 REM
 REM This file is part of BrickStore.
 REM

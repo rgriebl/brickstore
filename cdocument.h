@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2005 Robert Griebl. All rights reserved.
+/* Copyright (C) 2004-2008 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -188,7 +188,7 @@ public:
     static CDocument *fileOpen();
     static CDocument *fileOpen(const QString &name);
     static CDocument *fileImportBrickLinkInventory(const BrickLink::Item *preselect = 0);
-    static CDocument *fileImportBrickLinkOrder();
+    static QList<CDocument *> fileImportBrickLinkOrders();
     static CDocument *fileImportBrickLinkStore();
     static CDocument *fileImportBrickLinkCart();
     static CDocument *fileImportBrickLinkXML();

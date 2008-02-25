@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2005 Robert Griebl. All rights reserved.
+/* Copyright (C) 2004-2008 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -27,7 +27,7 @@ public:
     DImportOrder(QWidget *parent = 0, Qt::WindowFlags f = 0);
     ~DImportOrder();
 
-    QPair<BrickLink::Order *, BrickLink::InvItemList *> order() const;
+    QList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > orders() const;
 
 protected:
     virtual void accept();

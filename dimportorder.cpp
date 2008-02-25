@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2005 Robert Griebl.All rights reserved.
+/* Copyright (C) 2004-2008 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -82,7 +82,14 @@ public:
             case 0: res = isReceived(order) ? DImportOrder::tr("Received") : DImportOrder::tr("Placed"); break;
             case 1: res = order.first->id(); break;
             case 2: res = QLocale().toString(order.first->date().date(), QLocale::ShortFormat); break;
-            case 3: res = isReceived(order) ? order.first->buyer() : order.first->seller(); break;
+            case 3: {
+                int firstline = order.first->address().indexOf('\n');
+
+                if (firstline <= 0)
+                    return order.first->other();
+                else
+                    return QString("%1 (%2)").arg(order.first->address().left(firstline)).arg(order.first->other());
+            }
             case 4: res = order.first->grandTotal().toLocalizedString(); break;
             }
         }
@@ -95,6 +102,13 @@ public:
                 c.setAlphaF(0.2);
                 res = c;
             }
+        }
+        else if (role == Qt::ToolTipRole) {
+            QString tt = data(index, Qt::DisplayRole).toString();
+
+            if (!order.first->other().isEmpty())
+                tt = tt + QLatin1String("\n\n") + order.first->address();
+            res = tt;
         }
 
         return res;
@@ -141,7 +155,7 @@ public:
             case  0: d = (o1.first->type() < o2.first->type()); break;
             case  1: d = (o1.first->id() <  o2.first->id()); break;
             case  2: d = (o1.first->date() < o2.first->date()); break;
-            case  3: d = (o1.first->buyer().toLower() < o2.first->buyer().toLower()); break;
+            case  3: d = (o1.first->other().toLower() < o2.first->other().toLower()); break;
             case  4: d = (o1.first->grandTotal() < o2.first->grandTotal()); break;
             }
             return m_so == Qt::DescendingOrder ? d : !d;
@@ -202,17 +216,17 @@ public:
 
 
 bool  DImportOrder::s_last_select   = true;
-QDate DImportOrder::s_last_from     = QDate::currentDate().addMonths(-1);
+QDate DImportOrder::s_last_from     = QDate::currentDate().addDays(-7);
 QDate DImportOrder::s_last_to       = QDate::currentDate();
-int   DImportOrder::s_last_type     = 0;
+int   DImportOrder::s_last_type     = 1;
 
 
 DImportOrder::DImportOrder(QWidget *parent, Qt::WindowFlags f)
-        : QDialog(parent, f)
+    : QDialog(parent, f)
 {
     setupUi(this);
 
-    w_order_number->setValidator(new QIntValidator(1, 999999, w_order_number));
+    w_order_number->setValidator(new QIntValidator(1, 9999999, w_order_number));
 
     w_order_list->setItemDelegate(new TransHighlightDelegate());
     w_order_list->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
@@ -222,6 +236,7 @@ DImportOrder::DImportOrder(QWidget *parent, Qt::WindowFlags f)
     w_order_list->setShowGrid(false);
     w_order_list->setAlternatingRowColors(true);
     w_order_list->setSortingEnabled(true);
+    w_order_list->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
     connect(w_order_number, SIGNAL(textChanged(const QString &)), this, SLOT(checkId()));
     connect(w_by_number, SIGNAL(toggled(bool)), this, SLOT(checkId()));
@@ -325,14 +340,13 @@ void DImportOrder::download()
     delete import;
 }
 
-QPair<BrickLink::Order *, BrickLink::InvItemList *> DImportOrder::order() const
+QList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > DImportOrder::orders() const
 {
-// OrderListItem *oli = static_cast<OrderListItem *> ( w_order_list->selectedItem ( ));
+    QList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > list;
 
-// if ( oli )
-//  return oli->order ( );
-// else
-    return qMakePair<BrickLink::Order *, BrickLink::InvItemList *> (0, 0);
+    //TODO: process selection, fill list
+
+    return list;
 }
 
 BrickLink::Order::Type DImportOrder::orderType() const
@@ -350,7 +364,7 @@ void DImportOrder::checkId()
     bool ok = true;
 
     if (w_by_number->isChecked())
-        ok = w_order_number->hasAcceptableInput() && (w_order_number->text().length() == 6);
+        ok = w_order_number->hasAcceptableInput() && (w_order_number->text().length() >= 6) && (w_order_number->text().length() <= 7);
     else
         ok = (w_order_from->date() <= w_order_to->date()) && (w_order_to->date() <= QDate::currentDate());
 
@@ -359,7 +373,7 @@ void DImportOrder::checkId()
 
 void DImportOrder::checkSelected()
 {
-// w_ok->setEnabled ( w_order_list->selectedItem ( ) != 0 );
+    w_ok->setEnabled(w_order_list->selectionModel()->hasSelection());
 }
 
 void DImportOrder::activateItem(/*QListViewItem **/)
