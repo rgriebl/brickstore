@@ -155,7 +155,7 @@ void CTaskPane::animateExpand(qreal value)
     if (d->m_anim_item > -1) {
         int h = qMin(d->m_anim_src.height(), int(d->m_anim_src.height() * value));
 
-        d->m_anim_img = d->m_anim_src.scaled(d->m_anim_src.width(), h, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        d->m_anim_img = d->m_anim_src.scaled(d->m_anim_src.width(), h, Qt::IgnoreAspectRatio, Qt::FastTransformation);
 
         QImage alpha(d->m_anim_img.size(), QImage::Format_Indexed8);
         alpha.fill(char(value * 255));
@@ -494,8 +494,8 @@ CTaskPaneManager::CTaskPaneManager(QMainWindow *parent)
     d->m_anim_item = -1;
     d->m_margins.setRect(6, 6, 1, 1);
 
-    int duration = 500;
-    int fps = 30;
+    int duration = 400;
+    int fps = 20;
     d->m_anim_timeline.setDuration(duration);
     d->m_anim_timeline.setFrameRange(0, duration * fps / 1000 - 1);
     d->m_anim_timeline.setUpdateInterval(1000 / fps);

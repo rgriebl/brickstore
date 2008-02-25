@@ -228,10 +228,11 @@ public:
                 has_inv_tag = tr("Inv");
             break;
 
-        case CDocument::Picture:
-            pix = it->pixmap(it->itemType()->pictureSize() / 2);
+        case CDocument::Picture: {
+            QImage img = it->image();
+            pix = QPixmap::fromImage(img.scaled(img.size() / 2, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
             break;
-
+        }
         case CDocument::Color:
             pix = s_color_cache.value(it->color());
 

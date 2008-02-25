@@ -214,42 +214,27 @@ CDocument::Statistics::Statistics(const CDocument *doc, const ItemList &list)
 
 
 CDocument::Item::Item()
-    : BrickLink::InvItem(0, 0), m_errors(0), m_picture(0)
+    : BrickLink::InvItem(0, 0), m_errors(0)
 { }
 
 CDocument::Item::Item(const BrickLink::InvItem &copy)
-    : BrickLink::InvItem(copy), m_errors(0), m_picture(0)
+    : BrickLink::InvItem(copy), m_errors(0)
 { }
 
 CDocument::Item::Item(const Item &copy)
-    : BrickLink::InvItem(copy), m_errors(copy.m_errors), m_picture(copy.m_picture)
-{
-    if (m_picture)
-        m_picture->addRef();
-}
+    : BrickLink::InvItem(copy), m_errors(copy.m_errors)
+{ }
 
 CDocument::Item &CDocument::Item::operator = (const Item &copy)
 {
     BrickLink::InvItem::operator = (copy);
 
     m_errors = copy.m_errors;
-
-    if (m_picture)
-        m_picture->release();
-    m_picture = copy.m_picture;
-    if (m_picture)
-        m_picture->addRef();
-
     return *this;
 }
 
 CDocument::Item::~Item()
-{
-    if (m_picture) {
-        m_picture->release();
-        m_picture = 0;
-    }
-}
+{ }
 
 bool CDocument::Item::operator == (const Item &cmp) const
 {
@@ -257,39 +242,24 @@ bool CDocument::Item::operator == (const Item &cmp) const
     return BrickLink::InvItem::operator == (cmp);
 }
 
-QImage CDocument::Item::image(const QSize &s) const
+QImage CDocument::Item::image() const
 {
-    if (m_picture && ((m_picture->item() != item()) || (m_picture->color() != color()))) {
-        m_picture->release();
-        m_picture = 0;
-    }
+    BrickLink::Picture *pic = BrickLink::core()->picture(item(), color());
 
-    if (!m_picture) {
-        if (customPicture())
-            m_picture = customPicture();
-        else
-            m_picture = BrickLink::inst()->picture(item(), color());
-
-        if (m_picture)
-            m_picture->addRef();
-    }
-
-    if (m_picture && m_picture->valid()) {
-        if (s.isValid())
-            return m_picture->image().scaled(s, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-        else
-            return m_picture->image();
+    if (pic && pic->valid()) {
+        return pic->image();
     }
     else {
-        QImage img(s.isValid() ? s : BrickLink::inst()->pictureSize(itemType()), QImage::Format_Mono);
+        QSize s = BrickLink::core()->pictureSize(item()->itemType());
+        QImage img(s, QImage::Format_Mono);
         img.fill(Qt::white);
         return img;
     }
 }
 
-QPixmap CDocument::Item::pixmap(const QSize &s) const
+QPixmap CDocument::Item::pixmap() const
 {
-    return QPixmap::fromImage(image(s));
+    return QPixmap::fromImage(image());
 }
 
 // *****************************************************************************************
@@ -1408,16 +1378,14 @@ int CDocument::headerDataForTextAlignmentRole(Field f) const
 
 void CDocument::pictureUpdated(BrickLink::Picture *pic)
 {
-    qDebug() << "pic update for "<< pic;
-    if (!pic)
+    if (!pic || !pic->item())
         return;
 
     int row = 0;
     foreach(Item *it, items()) {
         if ((pic->item() == it->item()) && (pic->color() == it->color())) {
             QModelIndex idx = index(row, Picture);
-            qDebug() << "dataChanged() for row " << row << "(picture: " << pic << ", item: "<<pic->item()->name();
-            emit dataChanged(idx, idx); // index(0,Picture), index(rowCount(QModelIndex())-1,Picture));
+            emit dataChanged(idx, idx);
         }
         row++;
     }

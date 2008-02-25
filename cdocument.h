@@ -91,13 +91,11 @@ public:
         quint64 errors() const          { return m_errors; }
         void setErrors(quint64 errors) { m_errors = errors; }
 
-        BrickLink::Picture *picture() const { return m_picture; }
-        QImage image(const QSize & = QSize()) const;
-        QPixmap pixmap(const QSize & = QSize()) const;
+        QImage image() const;
+        QPixmap pixmap() const;
 
     private:
         quint64 m_errors;
-        mutable BrickLink::Picture *m_picture;
 
         friend class CDocument;
     };
