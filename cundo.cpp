@@ -260,7 +260,7 @@ QWidget *CUndoAction::createWidget(QWidget *parent)
         QWidgetAction *labelaction = new QWidgetAction(this);
         labelaction->setDefaultWidget(m_label);
         m_menu->addAction(labelaction);
-        
+
         m_menu->setFocusProxy(m_list);
 
         connect(m_list, SIGNAL(itemEntered(QListWidgetItem *)), this, SLOT(setCurrentItemSlot(QListWidgetItem *)));
@@ -311,9 +311,12 @@ bool CUndoAction::eventFilter(QObject *o, QEvent *e)
     else if (qobject_cast<QToolButton *>(o) &&
              (e->type() == QEvent::EnabledChange)) {
         bool b = static_cast<QWidget *>(o)->isEnabled();
-        m_menu->setEnabled(b);
-        m_list->setEnabled(b);
-        m_label->setEnabled(b);
+        // don't disable the widgets - this will lead to an empty menu on the Mac!
+        if (b) {
+            m_menu->setEnabled(b);
+            m_list->setEnabled(b);
+            m_label->setEnabled(b);
+        }
     }
 
     return QAction::eventFilter(o, e);
@@ -329,6 +332,10 @@ void CUndoAction::fixMenu()
 {
     m_list->setCurrentItem(m_list->item(0));
     selectRange(m_list->item(0));
+
+#if defined( Q_WS_MACX )
+    m_list->setFocus();
+#endif
 }
 
 void CUndoAction::selectRange(QListWidgetItem *item)
