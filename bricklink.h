@@ -830,34 +830,29 @@ protected:
     bool            m_inv_filter : 1;
 };
 
-#if 0
 class AppearsInModel : public QAbstractTableModel {
     Q_OBJECT
 public:
-
+    AppearsInModel(const BrickLink::Item *item, const BrickLink::Color *color);
+    ~AppearsInModel();
+    
     QModelIndex index(int row, int column, const QModelIndex &parent) const;
-    QModelIndex index(const Item *item) const;
-    const Item *item(const QModelIndex &index) const;
-
+    const BrickLink::Item::AppearsInItem *appearsIn(const QModelIndex &idx) const;
+    QModelIndex index(const BrickLink::Item::AppearsInItem *const_ai) const;
+    
     virtual int rowCount(const QModelIndex & /*parent*/) const;
     virtual int columnCount(const QModelIndex & /*parent*/) const;
+    
     virtual QVariant data(const QModelIndex &index, int role) const;
-
-protected slots:
-    void pictureUpdated(BrickLink::Picture *);
+    virtual QVariant headerData(int section, Qt::Orientation orient, int role) const;
 
 private:
-    struct AIMItem {
-        const Color *m_color;
-        const Item * m_item;
-        uint         m_qty;
-    };
-
-    QList<AIMItem>                 m_list;
     const BrickLink::Item *        m_item;
     const BrickLink::Color *       m_color;
+    BrickLink::Item::AppearsIn     m_appearsin;
+    QList<BrickLink::Item::AppearsInItem *> m_items;
 };
-#endif
+
 
 
 class Core : public QObject {
@@ -887,7 +882,7 @@ public:
     CategoryModel *categoryModel(CategoryModel::Features f = CategoryModel::Default) const;
     ItemTypeModel *itemTypeModel(ItemTypeModel::Features f = ItemTypeModel::Default) const;
     ItemModel *itemModel(ItemModel::Features f = ItemModel::Default) const;
-    //AppearsInModel *appearsInModel(const BrickLink::Item *item, const BrickLink::Color *color) const;
+    AppearsInModel *appearsInModel(const BrickLink::Item *item, const BrickLink::Color *color) const;
 
     const QPixmap *noImage(const QSize &s) const;
 

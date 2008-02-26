@@ -19,6 +19,8 @@
 #include <QToolTip>
 #include <QApplication>
 #include <QTimer>
+#include <QStyledItemDelegate>
+#include <QHelpEvent>
 
 #include "qtemporaryresource.h"
 
@@ -28,92 +30,53 @@
 #include "cappearsinwidget.h"
 
 
-class AppearsInModel : public QAbstractTableModel {
+class AppearsInDelegate : public QStyledItemDelegate {
     Q_OBJECT
 public:
-    AppearsInModel(const BrickLink::Item *item, const BrickLink::Color *color)
+    AppearsInDelegate(QObject *parent)
+        : QStyledItemDelegate(parent), m_tooltip_pic(0)
     {
-        m_item = item;
-        m_color = color;
-
-        if (item)
-            m_appearsin = item->appearsIn(color);
-
-       foreach(const BrickLink::Item::AppearsInColor &vec, m_appearsin) {
-            foreach(const BrickLink::Item::AppearsInItem &item, vec)
-                m_items.append(const_cast<BrickLink::Item::AppearsInItem *>(&item));
-       }
-
         connect(BrickLink::inst(), SIGNAL(pictureUpdated(BrickLink::Picture *)), this, SLOT(pictureUpdated(BrickLink::Picture *)));
     }
-
-    ~AppearsInModel()
+    
+public slots: // this is really is a faked virtual
+    bool helpEvent(QHelpEvent *event, QAbstractItemView *view, const QStyleOptionViewItem &option, const QModelIndex &index)
     {
-    }
+        if (event->type() == QEvent::ToolTip && index.isValid()) {
+            const BrickLink::AppearsInModel *model = qobject_cast<const BrickLink::AppearsInModel *>(index.model());          
+            if (!model)
+                goto out;
 
-    QModelIndex index(int row, int column, const QModelIndex &parent) const
-    {
-        if (hasIndex(row, column, parent) && !parent.isValid())
-            return createIndex(row, column, m_items.at(row));
-        return QModelIndex();
-    }
-
-    const BrickLink::Item::AppearsInItem *appearsIn(const QModelIndex &idx) const
-    {
-        return idx.isValid() ? static_cast<const BrickLink::Item::AppearsInItem *>(idx.internalPointer()) : 0;
-    }
-
-    QModelIndex index(const BrickLink::Item::AppearsInItem *const_ai) const
-    {
-        BrickLink::Item::AppearsInItem *ai = const_cast<BrickLink::Item::AppearsInItem *>(const_ai);
-
-        return ai ? createIndex(m_items.indexOf(ai), 0, ai) : QModelIndex();
-    }
-
-    virtual int rowCount(const QModelIndex & /*parent*/) const
-    { return m_items.size(); }
-
-    virtual int columnCount(const QModelIndex & /*parent*/) const
-    { return 3; }
-
-    virtual QVariant data(const QModelIndex &index, int role) const
-    {
-        QVariant res;
-        const BrickLink::Item::AppearsInItem *appears = appearsIn(index);
-        int col = index.column();
-
-        if (!appears)
-            return res;
-
-        switch (role) {
-        case Qt::DisplayRole:
-            switch (col) {
-            case 0: res = QString::number(appears->first); break;
-            case 1: res = appears->second->id(); break;
-            case 2: res = appears->second->name(); break;
-            }
-            break;
-
-        case Qt::ToolTipRole: {
+            const BrickLink::Item::AppearsInItem *appears = model->appearsIn(index);            
+            if (!appears)
+                goto out;
+                
             BrickLink::Picture *pic = BrickLink::inst()->picture(appears->second, appears->second->defaultColor(), true);
 
-            QTemporaryResource::registerResource("#/appears_in_set_tooltip_picture.png", (pic && pic->valid()) ? pic->image() : QImage());
-            m_tooltip_pic = pic;
+            if (!pic)
+                goto out;
 
+            QTemporaryResource::registerResource("#/appears_in_set_tooltip_picture.png", pic->valid() ? pic->image() : QImage());
+            m_tooltip_pic = (pic->updateStatus() == BrickLink::Updating) ? pic : 0;
+
+            // need to 'clear' to reset the image cache of the QTextDocument
             foreach (QWidget *w, QApplication::topLevelWidgets()) {
                 if (w->inherits("QTipLabel")) {
                     qobject_cast<QLabel *>(w)->clear();
                     break;
                 }
             }
-            res = createToolTip(appears->second, pic);
-            break;
+            QString tt = createToolTip(appears->second, pic);
+            if (!tt.isEmpty()) {
+                QToolTip::showText(event->globalPos(), tt, view);
+                return true;
+            }
         }
-        }
-
-        return res;
+    out:    
+        return QStyledItemDelegate::helpEvent(event, view, option, index);
     }
-
+    
+private:
     QString createToolTip(const BrickLink::Item *item, BrickLink::Picture *pic) const
     {
         QString str = QLatin1String("<div class=\"appearsin\"><table><tr><td rowspan=\"2\">%1</td><td><b>%2</b></td></tr><tr><td>%3</td></tr></table></div>");
@@ -126,23 +89,13 @@ public:
             return str.arg(img_left).arg(item->id()).arg(item->name());
     }
 
-    virtual QVariant headerData(int section, Qt::Orientation orient, int role) const
-    {
-        if ((orient == Qt::Horizontal) && (role == Qt::DisplayRole)) {
-            switch (section) {
-            case 0: return tr("#");
-            case 1: return tr("Set");
-            case 2: return tr("Name");
-            }
-        }
-        return QVariant();
-    }
-
 private slots:
     void pictureUpdated(BrickLink::Picture *pic)
     {
         if (!pic || pic != m_tooltip_pic)
             return;
+
+        m_tooltip_pic = 0;
 
         if (QToolTip::isVisible() && QToolTip::text().startsWith("<div class=\"appearsin\">")) {
             QTemporaryResource::registerResource("#/appears_in_set_tooltip_picture.png", pic->image());
@@ -161,15 +114,10 @@ private slots:
             //xx if (!pos.isNull()) {
             //xx     QToolTip::showText(pos, createToolTip(pic->item(), pic));
         }
-        m_tooltip_pic = 0;
     }
-
+    
 private:
-    const BrickLink::Item *        m_item;
-    const BrickLink::Color *       m_color;
-    BrickLink::Item::AppearsIn     m_appearsin;
-    QList<BrickLink::Item::AppearsInItem *> m_items;
-    mutable BrickLink::Picture *   m_tooltip_pic;
+    BrickLink::Picture *m_tooltip_pic;
 };
 
 
@@ -194,6 +142,7 @@ CAppearsInWidget::CAppearsInWidget(QWidget *parent)
     sortByColumn(0);
     header()->setSortIndicatorShown(false);
     setContextMenuPolicy(Qt::CustomContextMenu);
+    setItemDelegate(new AppearsInDelegate(this));
 
     QAction *a;
     a = new QAction(this);
@@ -263,9 +212,9 @@ void CAppearsInWidget::showContextMenu(const QPoint &pos)
 
 const BrickLink::Item::AppearsInItem *CAppearsInWidget::appearsIn() const
 {
-    AppearsInModel *m = static_cast<AppearsInModel *>(model());
+    BrickLink::AppearsInModel *m = qobject_cast<BrickLink::AppearsInModel *>(model());
 
-    if (!selectionModel()->selectedIndexes().isEmpty())
+    if (m && !selectionModel()->selectedIndexes().isEmpty())
         return m->appearsIn(selectionModel()->selectedIndexes().front());
     else
         return 0;
@@ -296,7 +245,7 @@ void CAppearsInWidget::setItem(const BrickLink::Item *item, const BrickLink::Col
     d->m_item = item;
     d->m_color = color;
 
-    setModel(new AppearsInModel(d->m_item , d->m_color));
+    setModel(BrickLink::core()->appearsInModel(d->m_item , d->m_color));
 
     if (item) {
         d->m_resize_timer->start(100);

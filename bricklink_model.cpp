@@ -633,163 +633,80 @@ void BrickLink::ItemModel::pictureUpdated(BrickLink::Picture *pic)
 /////////////////////////////////////////////////////////////
 
 
-
-#if 0
-
 BrickLink::AppearsInModel::AppearsInModel(const BrickLink::Item *item, const BrickLink::Color *color)
 {
     m_item = item;
     m_color = color;
-    BrickLink::Item::AppearsIn ai;
 
     if (item)
-        ai = item->appearsIn(color);
+        m_appearsin = item->appearsIn(color);
 
-    for (QHashIterator<const Color *, Item::AppearsInColor> it(ai); it.hasNext(); ) {
-        it.next();
-
-        foreach(const Item::AppearsInItem &item, it.value()) {
-            AIMItem aimi;
-            aimi.m_color = it.key();
-            aimi.m_item = item.second;
-            aimi.m_qty = item.first;
-
-            m_list.append(aimi);
-        }
-    }
-
-    connect(BrickLink::inst(), SIGNAL(pictureUpdated(BrickLink::Picture *)), this, SLOT(pictureUpdated(BrickLink::Picture *)));
+   foreach(const BrickLink::Item::AppearsInColor &vec, m_appearsin) {
+        foreach(const BrickLink::Item::AppearsInItem &item, vec)
+            m_items.append(const_cast<BrickLink::Item::AppearsInItem *>(&item));
+   }
 }
 
+BrickLink::AppearsInModel::~AppearsInModel()
+{
+}
 
 QModelIndex BrickLink::AppearsInModel::index(int row, int column, const QModelIndex &parent) const
 {
-    if (hasIndex(row, column, parent))
-        return parent.isValid() ? QModelIndex() : createIndex(row, column, const_cast<Item::AppearsInItem *>(m_items.at(row)));
+    if (hasIndex(row, column, parent) && !parent.isValid())
+        return createIndex(row, column, m_items.at(row));
     return QModelIndex();
 }
 
-const BrickLink::Item::AppearsInItem *BrickLink::AppearsInModel::item(const QModelIndex &index) const
+const BrickLink::Item::AppearsInItem *BrickLink::AppearsInModel::appearsIn(const QModelIndex &idx) const
 {
-    return index.isValid() ? static_cast<const Item::AppearsInItem *>(index.internalPointer()) : 0;
+    return idx.isValid() ? static_cast<const BrickLink::Item::AppearsInItem *>(idx.internalPointer()) : 0;
 }
 
-QModelIndex BrickLink::AppearsInModel::index(const Item::AppearsInItem *appearsin) const
+QModelIndex BrickLink::AppearsInModel::index(const BrickLink::Item::AppearsInItem *const_ai) const
 {
-    return appearsin ? createIndex(m_list.indexOf(appearsin), 0, const_cast<Item *>(item)) : QModelIndex();
+    BrickLink::Item::AppearsInItem *ai = const_cast<BrickLink::Item::AppearsInItem *>(const_ai);
+
+    return ai ? createIndex(m_items.indexOf(ai), 0, ai) : QModelIndex();
 }
 
 int BrickLink::AppearsInModel::rowCount(const QModelIndex & /*parent*/) const
-{
-    return m_list.size();
-}
+{ return m_items.size(); }
 
 int BrickLink::AppearsInModel::columnCount(const QModelIndex & /*parent*/) const
-{
-    return 3;
-}
+{ return 3; }
 
 QVariant BrickLink::AppearsInModel::data(const QModelIndex &index, int role) const
 {
-        QVariant res;
-        const BrickLink::Item::AppearsInItem *appears = appearsIn(index);
-        int col = index.column();
+    QVariant res;
+    const BrickLink::Item::AppearsInItem *appears = appearsIn(index);
+    int col = index.column();
 
-        if (!appears)
-            return res;
-
-        switch (role) {
-        case Qt::DisplayRole:
-            switch (col) {
-            case 0: res = QString::number(appears->first); break;
-            case 1: res = appears->second->id(); break;
-            case 2: res = appears->second->name(); break;
-            }
-            break;
-
-        case Qt::ToolTipRole: {
-            BrickLink::Picture *pic = BrickLink::inst()->picture(appears->second, appears->second->defaultColor(), true);
-            if (pic)
-                pic->addRef();
-
-            QTemporaryResource::registerResource("#/appears_in_set_tooltip_picture.png", (pic && pic->valid()) ? pic->image() : QImage());
-            m_tooltip_item = appears->second;
-
-            res = createToolTip(appears->second, pic);
-            break;
-        }
-        }
-
+    if (!appears)
         return res;
-    }
 
-    virtual QVariant headerData(int section, Qt::Orientation orient, int role) const
-    {
-        if ((orient == Qt::Horizontal) && (role == Qt::DisplayRole)) {
-            switch (section) {
-            case 0: return tr("#");
-            case 1: return tr("Set");
-            case 2: return tr("Name");
-            }
+    switch (role) {
+    case Qt::DisplayRole:
+        switch (col) {
+        case 0: res = QString::number(appears->first); break;
+        case 1: res = appears->second->id(); break;
+        case 2: res = appears->second->name(); break;
         }
-        return QVariant();
+        break;
     }
 
-void BrickLink::AppearsInModel::pictureUpdated(BrickLink::Picture *pic)
-{
-    qDebug() << "pic update for "<< pic;
-    if (!pic)
-        return;
-
-    int row = 0;
-    foreach(Item *it, items()) {
-        if ((pic->item() == it->item()) && (pic->color() == it->color())) {
-            QModelIndex idx = index(row, Picture);
-            qDebug() << "dataChanged() for row " << row << "(picture: " << pic << ", item: "<<pic->item()->name();
-            emit dataChanged(idx, idx); // index(0,Picture), index(rowCount(QModelIndex())-1,Picture));
-        }
-        row++;
-    }
+    return res;
 }
-#endif
-#if 0
- /// appears in delegate
 
-    QString createToolTip(const BrickLink::Item *item, BrickLink::Picture *pic) const
-    {
-        QString str = QLatin1String("<div class=\"appearsin\"><table><tr><td rowspan=\"2\">%1</td><td><b>%2</b></td></tr><tr><td>%3</td></tr></table></div>");
-        QString img_left = QLatin1String("<img src=\"#/appears_in_set_tooltip_picture.png\" />");
-        QString note_left = QLatin1String("<i>") + CAppearsInWidget::tr("[Image is loading]") + QLatin1String("</i>");
-
-        if (pic && (pic->updateStatus() == BrickLink::Updating))
-            return str.arg(note_left).arg(item->id()).arg(item->name());
-        else
-            return str.arg(img_left).arg(item->id()).arg(item->name());
-    }
-    void pictureUpdated(BrickLink::Picture *pic)
-    {
-        if (!pic)
-            return;
-
-        if (pic->item() == m_tooltip_item) {
-            if (QToolTip::isVisible() && QToolTip::text().startsWith("<div class=\"appearsin\">")) {
-                QTemporaryResource::registerResource("#/appears_in_set_tooltip_picture.png", pic->image());
-
-                QPoint pos;
-                foreach (QWidget *w, QApplication::topLevelWidgets()) {
-                    if (w->inherits("QTipLabel")) {
-                //        pos = w->pos();
-                        QSize extra = w->size() - w->sizeHint();
-                        qobject_cast<QLabel *>(w)->setText(createToolTip(pic->item(), pic));
-                        w->resize(w->sizeHint() + extra);
-                        break;
-                    }
-                }
-             //   if (!pos.isNull())
-              //      QToolTip::showText(pos, createToolTip(pic->item(), pic));
-            }
+QVariant BrickLink::AppearsInModel::headerData(int section, Qt::Orientation orient, int role) const
+{
+    if ((orient == Qt::Horizontal) && (role == Qt::DisplayRole)) {
+        switch (section) {
+        case 0: return tr("#");
+        case 1: return tr("Set");
+        case 2: return tr("Name");
         }
-        pic->release();
     }
+    return QVariant();
+}
 
-#endif

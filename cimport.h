@@ -90,7 +90,7 @@ private slots:
                     QDomElement root = doc.documentElement();
 
                     if ((root.nodeName() == "INVENTORY"))
-                        items = BrickLink::inst()->parseItemListXML(root, BrickLink::XMLHint_MassUpload /*, &invalid_items */);
+                        items = BrickLink::core()->parseItemListXML(root, BrickLink::XMLHint_MassUpload /*, &invalid_items */);
 
                     if (items) {
                         m_items += *items;
@@ -417,12 +417,12 @@ private slots:
                         int slash = rx_ids.cap(2).indexOf('/');
 
                         if (slash >= 0) {   // with color
-                            item = BrickLink::inst()->item(rx_type.cap(1)[0].toLatin1(), rx_ids.cap(2).mid(slash + 1).toLatin1());
-                            col = BrickLink::inst()->color(rx_ids.cap(2).left(slash).toInt());
+                            item = BrickLink::core()->item(rx_type.cap(1)[0].toLatin1(), rx_ids.cap(2).mid(slash + 1).toLatin1());
+                            col = BrickLink::core()->color(rx_ids.cap(2).left(slash).toInt());
                         }
                         else {
-                            item = BrickLink::inst()->item(rx_type.cap(1)[0].toLatin1(), rx_ids.cap(2).toLatin1().constData());
-                            col = BrickLink::inst()->color(0);
+                            item = BrickLink::core()->item(rx_type.cap(1)[0].toLatin1(), rx_ids.cap(2).toLatin1().constData());
+                            col = BrickLink::core()->color(0);
                         }
                     }
 
@@ -431,7 +431,7 @@ private slots:
                     if (!col || !color_and_item.startsWith(col->name())) {
                         int longest_match = 0;
 
-                        foreach(const BrickLink::Color *blcolor, BrickLink::inst()->colors()) {
+                        foreach(const BrickLink::Color *blcolor, BrickLink::core()->colors()) {
                             QString n(blcolor->name());
 
                             if ((n.length() > longest_match) &&
@@ -442,13 +442,13 @@ private slots:
                         }
 
                         if (!longest_match)
-                            col = BrickLink::inst()->color(0);
+                            col = BrickLink::core()->color(0);
                     }
 
                     if (!item /*|| !color_and_item.endsWith ( item->name ( ))*/) {
                         int longest_match = 0;
 
-                        const QVector<const BrickLink::Item *> &all_items = BrickLink::inst()->items();
+                        const QVector<const BrickLink::Item *> &all_items = BrickLink::core()->items();
                         for (int i = 0; i < all_items.count(); i++) {
                             const BrickLink::Item *it = all_items [i];
                             QString n(it->name());
@@ -575,7 +575,7 @@ private:
         QTextStream in(peeron);
 
         QDomDocument doc(QString::null);
-        QDomElement root = BrickLink::inst()->createItemListXML(doc, BrickLink::XMLHint_Inventory, 0);
+        QDomElement root = BrickLink::core()->createItemListXML(doc, BrickLink::XMLHint_Inventory, 0);
         doc.appendChild(root);
 
         QString line;
@@ -602,7 +602,7 @@ private:
                         itemid = itempattern.cap(1);
 
                     colorname = sl [2];
-                    const BrickLink::Color *color = BrickLink::inst()->colorFromPeeronName(colorname.toLatin1().constData());
+                    const BrickLink::Color *color = BrickLink::core()->colorFromPeeronName(colorname.toLatin1().constData());
                     colorid = color ? int(color->id()) : -1;
 
                     itemname = sl [3];
@@ -644,7 +644,7 @@ private:
                 next_is_item = false;
         }
 
-        return count ? BrickLink::inst()->parseItemListXML(root, BrickLink::XMLHint_Inventory /*, &invalid_items */) : 0;
+        return count ? BrickLink::core()->parseItemListXML(root, BrickLink::XMLHint_Inventory /*, &invalid_items */) : 0;
     }
 
 

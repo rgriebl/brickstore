@@ -40,8 +40,8 @@ public:
         pd->setHeaderText(tr("Updating BrickLink Database"));
         pd->setMessageText(tr("Download: %1/%2 KB"));
 
-        QString remotefile = DATABASE_URL + BrickLink::inst()->defaultDatabaseName();
-        QString localfile = BrickLink::inst()->dataPath() + BrickLink::inst()->defaultDatabaseName();
+        QString remotefile = DATABASE_URL + BrickLink::core()->defaultDatabaseName();
+        QString localfile = BrickLink::core()->dataPath() + BrickLink::core()->defaultDatabaseName();
 
         QDateTime dt;
         if (QFile::exists(localfile))
@@ -76,7 +76,7 @@ private slots:
             QString error = decompress(file->fileName(), basepath);
 
             if (error.isNull()) {
-                if (BrickLink::inst()->readDatabase()) {
+                if (BrickLink::core()->readDatabase()) {
                     CConfig::inst()->setLastDatabaseUpdate(QDateTime::currentDateTime());
 
                     m_progress->setMessageText(tr("Finished."));

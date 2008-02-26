@@ -770,17 +770,7 @@ BrickLink::ItemModel *BrickLink::Core::itemModel(ItemModel::Features f) const
     return new ItemModel(f);
 }
 
-
-/*BrickLink::AppearsInModel *BrickLink::Core::appearsInModel(const BrickLink::Item *item, const BrickLink::Color *color) const
+BrickLink::AppearsInModel *BrickLink::Core::appearsInModel(const BrickLink::Item *item, const BrickLink::Color *color) const
 {
     return new AppearsInModel(item, color);
 }
-*/
-
-
-
-
-
-
-
-
