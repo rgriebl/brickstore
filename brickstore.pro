@@ -139,6 +139,7 @@ XFORMS  += registration \
 
 
 SOURCES += main.cpp \
+           ldraw.cpp \
            bricklink.cpp \
            bricklink_data.cpp \
            bricklink_textimport.cpp \
@@ -150,6 +151,7 @@ SOURCES += main.cpp \
 
 
 HEADERS += bricklink.h \
+           ldraw.h \
            lzmadec.h \
            ccheckforupdates.h \
            cimport.h \
@@ -183,6 +185,7 @@ HEADERS += capplication.h \
            clocalemeasurement.h \
            cwindow.h \
            cundo.h \
+	   cthreadpool.h \
            cfilteredit.h \
 
 
@@ -209,6 +212,7 @@ SOURCES += capplication.cpp \
            clocalemeasurement.cpp \
            cwindow.cpp \
            cundo.cpp \
+	   cthreadpool.cpp \
            cfilteredit.cpp \
 
 

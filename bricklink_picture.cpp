@@ -18,6 +18,8 @@
 #include <QPixmapCache>
 #include <QImage>
 
+#include "cthreadpool.h"
+
 #include "bricklink.h"
 
 // directly use C-library str* functions instead of Qt's qstr* function
@@ -27,16 +29,39 @@
 #define strdup _strdup
 #endif
 
+namespace BrickLink {
 
+class PictureLoaderJob : public CThreadPoolJob {
+public:
+    PictureLoaderJob(Picture *pic)
+        : CThreadPoolJob(), m_pic(pic)
+    { }
+
+    virtual void run()
+    {
+        if (m_pic && !m_pic->valid())
+            m_pic->load_from_disk();
+    }
+
+    Picture *picture() const
+    {
+        return m_pic;
+    }
+
+private:
+    Picture *m_pic;
+};
+
+}
 
 const QPixmap BrickLink::Picture::pixmap() const
 {
     QPixmap p;
-    QString key (QString::number(m_image.cacheKey()));
+    QString k = key();
 
-    if (!QPixmapCache::find(key, p)) {
+    if (!QPixmapCache::find(k, p)) {
         p = QPixmap::fromImage(m_image);
-        QPixmapCache::insert(key, p);
+        QPixmapCache::insert(k, p);
     }
     return p;
 }
@@ -51,21 +76,17 @@ BrickLink::Picture *BrickLink::Core::picture(const Item *item, const BrickLink::
     if (!item)
         return 0;
 
-    quint64 key = 0;
-    Picture *pic = 0;
+    quint64 key = quint64(color ? color->id() : -1) << 32 | quint64(item->itemType()->id()) << 24 | quint64(item->index() + 1);
 
+    QMutexLocker lock(&m_corelock);
 
-    if (color) {
-        key = quint64(color ? color->id() : -1) << 32 | quint64(item->itemType()->id()) << 24 | quint64(item->index() + 1);
-        pic = m_pictures.cache [key];
-    }
+    Picture *pic = m_pic_cache[key];
 
     bool need_to_load = false;
 
     if (!pic) {
         pic = new Picture(item, color);
-        if (color)
-            m_pictures.cache.insert(key, pic);
+        m_pic_cache.insert(key, pic);
         need_to_load = true;
     }
 
@@ -73,15 +94,12 @@ BrickLink::Picture *BrickLink::Core::picture(const Item *item, const BrickLink::
         if (!pic->valid())
             pic->load_from_disk();
 
-        if (!pic->valid() || updateNeeded(pic->lastUpdate(), m_pictures.update_iv))
+        if (!pic->valid() || updateNeeded(pic->lastUpdate(), m_pic_update_iv))
             updatePicture(pic, high_priority);
     }
     else if (need_to_load) {
         pic->addRef();
-        m_pictures.diskload.append(pic);
-
-        if (m_pictures.diskload.count() == 1)
-            QTimer::singleShot(0, BrickLink::inst(), SLOT(pictureIdleLoader()));
+        m_pic_diskload.execute(new PictureLoaderJob(pic));
     }
 
     return pic;
@@ -93,54 +111,6 @@ BrickLink::Picture *BrickLink::Core::largePicture(const Item *item, bool high_pr
         return 0;
     return picture(item, 0, high_priority);
 }
-
-// loading pictures directly when creating Picture objects locks
-// up the machine.Loading only one per idle loop generates nearly
-// NO cpu usage, but it is very slow.
-// Loading 3 pictures per idle loop is a good compromise.
-
-void BrickLink::Core::pictureIdleLoader()
-{
-    for (int i = 0; i < 3; i++)
-        pictureIdleLoader2();
-
-    if (!m_pictures.diskload.isEmpty())
-        QTimer::singleShot(0, this, SLOT(pictureIdleLoader()));
-}
-
-void BrickLink::Core::pictureIdleLoader2()
-{
-    Picture *pic = 0;
-
-    while (!m_pictures.diskload.isEmpty()) {
-        pic = m_pictures.diskload.takeFirst();
-
-        if (!pic) {
-            continue;
-        }
-        // already loaded? ..or ..nobody listening?
-        else if (pic->valid() /*|| (pic->refCount() == 1)*/) {
-            pic->release();
-            pic = 0;
-            continue;
-        }
-        else {
-            break;
-        }
-    }
-
-    if (pic) {
-        pic->load_from_disk();
-
-        if (!pic->valid() || updateNeeded(pic->lastUpdate(), m_pictures.update_iv))
-            updatePicture(pic, false);
-        else
-            emit pictureUpdated(pic);
-
-        pic->release();
-    }
-}
-
 
 BrickLink::Picture::Picture(const Item *item, const Color *color)
 {
@@ -163,9 +133,9 @@ void BrickLink::Picture::load_from_disk()
     bool large = (!m_color);
 
     if (!large && m_item->itemType()->hasColors())
-        path = BrickLink::inst()->dataPath(m_item, m_color);
+        path = BrickLink::core()->dataPath(m_item, m_color);
     else
-        path = BrickLink::inst()->dataPath(m_item);
+        path = BrickLink::core()->dataPath(m_item);
 
     if (path.isEmpty())
         return;
@@ -173,40 +143,63 @@ void BrickLink::Picture::load_from_disk()
 
     QFileInfo fi(path);
 
+    bool is_valid = false;
+    QImage image;
+    QDateTime lastmod;
+
     if (fi.exists()) {
         if (fi.size() > 0) {
-            m_valid = m_image.load(path);
+            is_valid = image.load(path);
         }
         else {
             if (!large && m_item && m_item->itemType())
-                m_image = BrickLink::inst()->noImage(m_item->itemType()->pictureSize())->toImage();
-            else
-                m_image = QImage();
+                image = BrickLink::core()->noImage(m_item->itemType()->pictureSize())->toImage();
 
-            m_valid = true;
+            is_valid = true;
         }
 
-        m_fetched = fi.lastModified();
+        lastmod = fi.lastModified();
     }
     else
-        m_valid = false;
+        is_valid = false;
 
-    if (m_valid && !large && m_image.depth() > 8)
-        m_image = m_image.convertToFormat(QImage::Format_Indexed8, Qt::ThresholdDither | Qt::ThresholdAlphaDither | Qt::AvoidDither);
+    if (is_valid && !large && image.depth() > 8)
+        image = image.convertToFormat(QImage::Format_Indexed8, Qt::ThresholdDither | Qt::ThresholdAlphaDither | Qt::AvoidDither);
 
-    QPixmapCache::remove(QString::number(m_image.cacheKey()));
+    if (is_valid) {
+        m_image = image;
+        m_fetched = lastmod;
+    }
+    m_valid = is_valid;
 }
 
 
 void BrickLink::Picture::update(bool high_priority)
 {
-    BrickLink::inst()->updatePicture(this, high_priority);
+    BrickLink::core()->updatePicture(this, high_priority);
+}
+
+void BrickLink::Core::pictureLoaded(CThreadPoolJob *pj)
+{
+    Picture *pic = static_cast<PictureLoaderJob *>(pj)->picture();
+
+   if (pic) {
+        if (!pic->valid() || updateNeeded(pic->lastUpdate(), m_pic_update_iv))
+            updatePicture(pic, false);
+        else
+            emit pictureUpdated(pic);
+
+        QPixmapCache::remove(pic->key());
+        pic->release();
+    }
 }
 
 void BrickLink::Core::updatePicture(BrickLink::Picture *pic, bool high_priority)
 {
     if (!pic || (pic->m_update_status == Updating))
         return;
+
+    QMutexLocker lock(&m_corelock);
 
     if (!m_online) {
         pic->m_update_status = UpdateFailed;
@@ -236,17 +229,21 @@ void BrickLink::Core::updatePicture(BrickLink::Picture *pic, bool high_priority)
     //qDebug ( "PIC request started for %s", (const char *) url );
     CTransferJob *job = CTransferJob::get(url);
     job->setUserData<Picture>(pic);
-    m_pictures.transfer->retrieve(job, high_priority);
+    m_pic_transfer.retrieve(job, high_priority);
 }
 
 
-void BrickLink::Core::pictureJobFinished(CTransferJob *j)
+void BrickLink::Core::pictureJobFinished(CThreadPoolJob *pj)
 {
+    CTransferJob *j = static_cast<CTransferJob *>(pj);
+
     if (!j || !j->data() || !j->userData<Picture>())
         return;
 
     Picture *pic = j->userData<Picture>();
     bool large = (!pic->color());
+
+    QMutexLocker lock(&m_corelock);
 
     pic->m_update_status = UpdateFailed;
 
@@ -255,9 +252,9 @@ void BrickLink::Core::pictureJobFinished(CTransferJob *j)
         QImage img;
 
         if (!large && pic->item()->itemType()->hasColors())
-            path = BrickLink::inst()->dataPath(pic->item(), pic->color());
+            path = BrickLink::core()->dataPath(pic->item(), pic->color());
         else
-            path = BrickLink::inst()->dataPath(pic->item());
+            path = BrickLink::core()->dataPath(pic->item());
 
         if (!path.isEmpty()) {
             path.append(large ? "large.png" : "small.png");
@@ -278,6 +275,7 @@ void BrickLink::Core::pictureJobFinished(CTransferJob *j)
             }
 
             pic->load_from_disk();
+            QPixmapCache::remove(pic->key());
         }
         else {
             qWarning("Couldn't get path to save image");
@@ -297,7 +295,7 @@ void BrickLink::Core::pictureJobFinished(CTransferJob *j)
         //qDebug ( "PIC request started for %s", (const char *) url );
         CTransferJob *job = CTransferJob::get(url);
         job->setUserData<Picture>(pic);
-        m_pictures.transfer->retrieve(job);
+        m_pic_transfer.retrieve(job);
         return;
     }
     else

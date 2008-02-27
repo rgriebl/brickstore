@@ -77,7 +77,7 @@ int CRebuildDatabase::exec()
 {
     m_trans = new CTransfer(10);
     m_trans->setProxy(CConfig::inst()->proxy());
-    connect(m_trans, SIGNAL(finished(CTransferJob *)), this, SLOT(downloadJobFinished(CTransferJob *)));
+    connect(m_trans, SIGNAL(finished(CThreadPoolJob *)), this, SLOT(downloadJobFinished(CThreadPoolJob *)));
 
     BrickLink::Core *bl = BrickLink::core();
     bl->setOnlineStatus(false);
@@ -177,7 +177,7 @@ static QList<QPair<QString, QString> > pgQuery(char item_type)
 
 bool CRebuildDatabase::download()
 {
-    QString path = BrickLink::inst()->dataPath();
+    QString path = BrickLink::core()->dataPath();
 
     struct {
         const char *m_url;
@@ -252,9 +252,11 @@ bool CRebuildDatabase::download()
     return true;
 }
 
-void CRebuildDatabase::downloadJobFinished(CTransferJob *job)
+void CRebuildDatabase::downloadJobFinished(CThreadPoolJob *pj)
 {
-    if (job) {
+    if (pj) {
+        CTransferJob *job = static_cast<CTransferJob *>(pj);
+
         QFile *f = qobject_cast<QFile *>(job->file());
 
         m_downloads_in_progress--;
@@ -280,7 +282,7 @@ void CRebuildDatabase::downloadJobFinished(CTransferJob *job)
             m_downloads_failed++;
 
         QString fname = f->fileName();
-        fname.remove(0, BrickLink::inst()->dataPath().length());
+        fname.remove(0, BrickLink::core()->dataPath().length());
         printf("%c > %s", ok ? ' ' : '*', qPrintable(fname));
         if (ok)
             printf("\n");
@@ -292,7 +294,7 @@ void CRebuildDatabase::downloadJobFinished(CTransferJob *job)
 
 bool CRebuildDatabase::downloadInventories(QVector<const BrickLink::Item *> &invs)
 {
-    QString path = BrickLink::inst()->dataPath();
+    QString path = BrickLink::core()->dataPath();
 
     bool failed = false;
     m_downloads_in_progress = 0;
@@ -305,7 +307,7 @@ bool CRebuildDatabase::downloadInventories(QVector<const BrickLink::Item *> &inv
         const BrickLink::Item *&item = itemp [i];
 
         if (item) {
-            QFile *f = new QFile(BrickLink::inst()->dataPath(item) + "inventory.xml.new");
+            QFile *f = new QFile(BrickLink::core()->dataPath(item) + "inventory.xml.new");
 
             if (!f->open(QIODevice::WriteOnly)) {
                 m_error = QString("failed to write %1: %2").arg(f->fileName()).arg(f->errorString());

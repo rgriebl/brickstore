@@ -190,19 +190,19 @@ CPriceGuideWidget::~CPriceGuideWidget()
 void CPriceGuideWidget::showBLCatalogInfo()
 {
     if (d->m_pg && d->m_pg->item())
-        QDesktopServices::openUrl(BrickLink::inst()->url(BrickLink::URL_CatalogInfo, d->m_pg->item()));
+        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_CatalogInfo, d->m_pg->item()));
 }
 
 void CPriceGuideWidget::showBLPriceGuideInfo()
 {
     if (d->m_pg && d->m_pg->item() && d->m_pg->color())
-        QDesktopServices::openUrl(BrickLink::inst()->url(BrickLink::URL_PriceGuideInfo, d->m_pg->item(), d->m_pg->color()));
+        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_PriceGuideInfo, d->m_pg->item(), d->m_pg->color()));
 }
 
 void CPriceGuideWidget::showBLLotsForSale()
 {
     if (d->m_pg && d->m_pg->item() && d->m_pg->color())
-        QDesktopServices::openUrl(BrickLink::inst()->url(BrickLink::URL_LotsForSale, d->m_pg->item(), d->m_pg->color()));
+        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_LotsForSale, d->m_pg->item(), d->m_pg->color()));
 }
 
 QSize CPriceGuideWidget::sizeHint() const
@@ -236,7 +236,7 @@ void CPriceGuideWidget::setPriceGuide(BrickLink::PriceGuide *pg)
         pg->addRef();
 
     if (!d->m_connected && pg)
-        d->m_connected = connect(BrickLink::inst(), SIGNAL(priceGuideUpdated(BrickLink::PriceGuide *)), this, SLOT(gotUpdate(BrickLink::PriceGuide *)));
+        d->m_connected = connect(BrickLink::core(), SIGNAL(priceGuideUpdated(BrickLink::PriceGuide *)), this, SLOT(gotUpdate(BrickLink::PriceGuide *)));
 
     d->m_pg = pg;
     update();

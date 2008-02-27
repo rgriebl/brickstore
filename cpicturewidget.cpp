@@ -149,7 +149,7 @@ void CPictureWidget::viewLargeImage()
     if (!d->m_pic)
         return;
 
-    BrickLink::Picture *lpic = BrickLink::inst()->largePicture(d->m_pic->item(), true);
+    BrickLink::Picture *lpic = BrickLink::core()->largePicture(d->m_pic->item(), true);
 
     if (lpic) {
         CLargePictureWidget *l = new CLargePictureWidget(lpic, this);
@@ -163,19 +163,19 @@ void CPictureWidget::viewLargeImage()
 void CPictureWidget::showBLCatalogInfo()
 {
     if (d->m_pic && d->m_pic->item())
-        QDesktopServices::openUrl(BrickLink::inst()->url(BrickLink::URL_CatalogInfo, d->m_pic->item()));
+        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_CatalogInfo, d->m_pic->item()));
 }
 
 void CPictureWidget::showBLPriceGuideInfo()
 {
     if (d->m_pic && d->m_pic->item() && d->m_pic->color())
-        QDesktopServices::openUrl(BrickLink::inst()->url(BrickLink::URL_PriceGuideInfo, d->m_pic->item(), d->m_pic->color()));
+        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_PriceGuideInfo, d->m_pic->item(), d->m_pic->color()));
 }
 
 void CPictureWidget::showBLLotsForSale()
 {
     if (d->m_pic && d->m_pic->item() && d->m_pic->color())
-        QDesktopServices::openUrl(BrickLink::inst()->url(BrickLink::URL_LotsForSale, d->m_pic->item(), d->m_pic->color()));
+        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_LotsForSale, d->m_pic->item(), d->m_pic->color()));
 }
 
 void CPictureWidget::setPicture(BrickLink::Picture *pic)
@@ -190,7 +190,7 @@ void CPictureWidget::setPicture(BrickLink::Picture *pic)
         d->m_pic->addRef();
 
     if (!d->m_connected && pic)
-        d->m_connected = connect(BrickLink::inst(), SIGNAL(pictureUpdated(BrickLink::Picture *)), this, SLOT(gotUpdate(BrickLink::Picture *)));
+        d->m_connected = connect(BrickLink::core(), SIGNAL(pictureUpdated(BrickLink::Picture *)), this, SLOT(gotUpdate(BrickLink::Picture *)));
 
     setToolTip(pic ? tr("Double-click to view the large image.") : QString());
 

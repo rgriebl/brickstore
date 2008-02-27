@@ -299,7 +299,7 @@ bool CApplication::initBrickLink()
 
 void CApplication::exitBrickLink()
 {
-    delete BrickLink::inst();
+    delete BrickLink::core();
 }
 
 

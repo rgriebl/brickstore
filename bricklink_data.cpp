@@ -121,7 +121,7 @@ QDataStream &operator >> (QDataStream &ds, BrickLink::ItemType *itt)
     for (quint32 i = 0; i < catcount; i++) {
         qint32 id = 0;
         ds >> id;
-        itt->m_categories [i] = BrickLink::inst()->category(id);
+        itt->m_categories [i] = BrickLink::core()->category(id);
     }
     itt->m_categories [catcount] = 0;
 
@@ -214,8 +214,8 @@ BrickLink::Item::AppearsIn BrickLink::Item::appearsIn(const Color *only_color) c
 {
     AppearsIn map;
 
-    const BrickLink::Item * const *items = BrickLink::inst()->items().data();
-    uint count = BrickLink::inst()->items().count();
+    const BrickLink::Item * const *items = BrickLink::core()->items().data();
+    uint count = BrickLink::core()->items().count();
 
     if (m_appears_in) {
         quint32 *ptr = m_appears_in + 2;
@@ -224,7 +224,7 @@ BrickLink::Item::AppearsIn BrickLink::Item::appearsIn(const Color *only_color) c
             appears_in_record *color_header = reinterpret_cast <appears_in_record *>(ptr);
             ptr++;
 
-            const BrickLink::Color *color = BrickLink::inst()->color(color_header->m12);
+            const BrickLink::Color *color = BrickLink::core()->color(color_header->m12);
 
             if (color && (!only_color || (color == only_color))) {
                 AppearsInColor &vec = map [color];
@@ -281,8 +281,8 @@ BrickLink::InvItemList BrickLink::Item::consistsOf() const
 {
     InvItemList list;
 
-    const BrickLink::Item * const *items = BrickLink::inst()->items().data();
-    uint count = BrickLink::inst()->items().count();
+    const BrickLink::Item * const *items = BrickLink::core()->items().data();
+    uint count = BrickLink::core()->items().count();
 
     if (m_consists_of) {
         quint64 *ptr = m_consists_of + 1;
@@ -291,7 +291,7 @@ BrickLink::InvItemList BrickLink::Item::consistsOf() const
             consists_of_record *entry = reinterpret_cast <consists_of_record *>(ptr);
             ptr++;
 
-            const BrickLink::Color *color = BrickLink::inst()->color(entry->m_color);
+            const BrickLink::Color *color = BrickLink::core()->color(entry->m_color);
             const BrickLink::Item *item = (entry->m_index < count) ? items [entry->m_index] : 0;
 
             if (color && item) {
@@ -365,14 +365,14 @@ QDataStream &operator >> (QDataStream &ds, BrickLink::Item *item)
     quint32 catcount = 0;
 
     ds >> item->m_id >> item->m_name >> ittid >> catcount;
-    item->m_item_type = BrickLink::inst()->itemType(ittid);
+    item->m_item_type = BrickLink::core()->itemType(ittid);
 
     item->m_categories = new const BrickLink::Category * [catcount + 1];
 
     for (quint32 i = 0; i < catcount; i++) {
         qint32 id = 0;
         ds >> id;
-        item->m_categories [i] = BrickLink::inst()->category(id);
+        item->m_categories [i] = BrickLink::core()->category(id);
     }
     item->m_categories [catcount] = 0;
 
@@ -380,7 +380,7 @@ QDataStream &operator >> (QDataStream &ds, BrickLink::Item *item)
     quint32 index = 0, year = 0;
     qint64 invupd = 0;
     ds >> colorid >> invupd >> item->m_weight >> index >> year;
-    item->m_color = BrickLink::inst()->color(colorid == -1 ? 0 : colorid);
+    item->m_color = BrickLink::core()->color(colorid == -1 ? 0 : colorid);
     item->m_index = index;
     item->m_year = year;
     item->m_last_inv_update = invupd;
@@ -654,10 +654,10 @@ QDataStream &operator >> (QDataStream &ds, BrickLink::InvItem &ii)
     ds >> itemtypeid;
     ds >> colorid;
 
-    const BrickLink::Item *item = BrickLink::inst()->item(itemtypeid, itemid);
+    const BrickLink::Item *item = BrickLink::core()->item(itemtypeid, itemid);
 
     ii.setItem(item);
-    ii.setColor(BrickLink::inst()->color(colorid));
+    ii.setColor(BrickLink::core()->color(colorid));
 
     qint32 status = 0, cond = 0;
 

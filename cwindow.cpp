@@ -154,24 +154,29 @@ public:
         return state & QStyle::State_Open ? QIcon::On : QIcon::Off;
     }
 
+    int defaultItemHeight(const QWidget *w = 0) const
+    {
+        static QSize picsize = BrickLink::core()->itemType('P')->pictureSize();
+        QFontMetrics fm(w ? w->font() : QApplication::font("QTableView"));
 
-    virtual QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &idx) const
+        return 4 + qMax(fm.height() * 2, picsize.height() / 2);
+    }
+
+    virtual QSize sizeHint(const QStyleOptionViewItem &option1, const QModelIndex &idx) const
     {
         if (!idx.isValid())
             return QSize();
 
         static QSize picsize = BrickLink::core()->itemType('P')->pictureSize();
-
         int w = -1;
-        int h = 4 + qMax(option.fontMetrics.height() * 2, picsize.height() / 2);
 
-        if (idx.column() == CDocument::Picture) {
+        if (idx.column() == CDocument::Picture)
             w = picsize.width() / 2 + 4;
-        }
-        else {
-            w = QStyledItemDelegate::sizeHint(option, idx).width();
-        }
-        return QSize(w, h);
+        else
+            w = QStyledItemDelegate::sizeHint(option1, idx).width();
+
+        QStyleOptionViewItemV4 option(option1);
+        return QSize(w, defaultItemHeight(option.widget));
     }
 
     virtual void paint(QPainter *p, const QStyleOptionViewItem &option1, const QModelIndex &idx) const
@@ -467,17 +472,23 @@ CWindow::CWindow(CDocument *doc, QWidget *parent)
     w_list->setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
     w_list->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
     w_list->setContextMenuPolicy(Qt::CustomContextMenu);
-    w_list->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+    w_list->verticalHeader()->setResizeMode(QHeaderView::Fixed);
     w_list->verticalHeader()->hide();
     w_list->horizontalHeader()->setHighlightSections(false);
     setFocusProxy(w_list);
 
-    connect(w_list->horizontalHeader(), SIGNAL(geometriesChanged()), w_list, SLOT(resizeRowsToContents()));
-//    connect(w_list->horizontalHeader(), SIGNAL(sectionResized(int, int, int)), w_list, SLOT(resizeRowsToContents()));
-
     w_list->setModel(doc);
     w_list->setSelectionModel(doc->selectionModel());
-    w_list->setItemDelegate(new DocumentDelegate(doc, w_list));
+    DocumentDelegate *dd = new DocumentDelegate(doc, w_list);
+    w_list->setItemDelegate(dd);
+    w_list->verticalHeader()->setDefaultSectionSize(dd->defaultItemHeight(w_list));
+
+    int em = w_list->fontMetrics().width(QChar('m'));
+    for (int i = 0; i < w_list->model()->columnCount(); i++) {
+        int width = w_list->model()->headerData(i, Qt::Horizontal, Qt::UserRole).toInt();
+        if (width)
+            w_list->horizontalHeader()->resizeSection(i, (width < 0 ? -width : width * em) + 8);
+    }
     /*
     w_list->setShowSortIndicator ( true );
     w_list->setColumnsHideable ( true );
@@ -495,7 +506,7 @@ CWindow::CWindow(CDocument *doc, QWidget *parent)
     toplay->setMargin(0);
     toplay->addWidget(w_list, 10);
 
-    connect(BrickLink::inst(), SIGNAL(priceGuideUpdated(BrickLink::PriceGuide *)), this, SLOT(priceGuideUpdated(BrickLink::PriceGuide *)));
+    connect(BrickLink::core(), SIGNAL(priceGuideUpdated(BrickLink::PriceGuide *)), this, SLOT(priceGuideUpdated(BrickLink::PriceGuide *)));
 
     connect(w_list, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(contextMenu(const QPoint &)));
 //    connect(w_filter_clear, SIGNAL(clicked()), w_filter_expression, SLOT(clearEditText()));
@@ -1044,7 +1055,7 @@ void CWindow::on_edit_price_to_priceguide_triggered()
         bool force_update = false; //dlg.forceUpdate ( );
 
         foreach(CDocument::Item *item, m_doc->selection()) {
-            BrickLink::PriceGuide *pg = BrickLink::inst()->priceGuide(item->item(), item->color());
+            BrickLink::PriceGuide *pg = BrickLink::core()->priceGuide(item->item(), item->color());
 
             if (force_update && pg && (pg->updateStatus() != BrickLink::Updating))
                 pg->update();
@@ -1667,26 +1678,26 @@ void CWindow::closeEvent(QCloseEvent *e)
 void CWindow::on_edit_bl_catalog_triggered()
 {
     if (!m_doc->selection().isEmpty())
-        QDesktopServices::openUrl(BrickLink::inst()->url(BrickLink::URL_CatalogInfo, (*m_doc->selection().front()).item()));
+        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_CatalogInfo, (*m_doc->selection().front()).item()));
 }
 
 void CWindow::on_edit_bl_priceguide_triggered()
 {
     if (!m_doc->selection().isEmpty())
-        QDesktopServices::openUrl(BrickLink::inst()->url(BrickLink::URL_PriceGuideInfo, (*m_doc->selection().front()).item(), (*m_doc->selection().front()).color()));
+        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_PriceGuideInfo, (*m_doc->selection().front()).item(), (*m_doc->selection().front()).color()));
 }
 
 void CWindow::on_edit_bl_lotsforsale_triggered()
 {
     if (!m_doc->selection().isEmpty())
-        QDesktopServices::openUrl(BrickLink::inst()->url(BrickLink::URL_LotsForSale, (*m_doc->selection().front()).item(), (*m_doc->selection().front()).color()));
+        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_LotsForSale, (*m_doc->selection().front()).item(), (*m_doc->selection().front()).color()));
 }
 
 void CWindow::on_edit_bl_myinventory_triggered()
 {
     if (!m_doc->selection().isEmpty()) {
         uint lotid = (*m_doc->selection().front()).lotId();
-        QDesktopServices::openUrl(BrickLink::inst()->url(BrickLink::URL_StoreItemDetail, &lotid));
+        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_StoreItemDetail, &lotid));
     }
 }
 

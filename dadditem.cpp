@@ -69,7 +69,7 @@ DAddItem::DAddItem(QWidget *parent, Qt::WindowFlags f)
     w_add = new QPushButton();
     w_buttons->addButton(w_add, QDialogButtonBox::ActionRole);
 
-    w_select_item->setCurrentItemType(BrickLink::inst()->itemType(CConfig::inst()->value("/Defaults/AddItems/ItemType", 'P').toInt()));
+    w_select_item->setCurrentItemType(BrickLink::core()->itemType(CConfig::inst()->value("/Defaults/AddItems/ItemType", 'P').toInt()));
 
     w_picture->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
     w_picture->setLineWidth(2);
@@ -253,8 +253,8 @@ void DAddItem::updateItemAndColor()
 void DAddItem::showItemInColor(const BrickLink::Item *it, const BrickLink::Color *col)
 {
     if (it && col) {
-        w_picture->setPicture(BrickLink::inst()->picture(it, col, true));
-        w_price_guide->setPriceGuide(BrickLink::inst()->priceGuide(it, col, true));
+        w_picture->setPicture(BrickLink::core()->picture(it, col, true));
+        w_price_guide->setPriceGuide(BrickLink::core()->priceGuide(it, col, true));
         w_appears_in->setItem(it, col);
     }
     else {

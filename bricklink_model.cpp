@@ -71,7 +71,7 @@ QVariant BrickLink::ColorModel::data(const QModelIndex &index, int role) const
     }
     else if (role == Qt::DecorationRole) {
         QFontMetrics fm = QApplication::fontMetrics();
-        if (const QPixmap *pix = BrickLink::inst()->colorImage(c, fm.height(), fm.height()))
+        if (const QPixmap *pix = BrickLink::core()->colorImage(c, fm.height(), fm.height()))
             res = *pix;
     }
     else if (role == Qt::ToolTipRole) {

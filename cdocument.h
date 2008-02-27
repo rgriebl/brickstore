@@ -144,6 +144,7 @@ public:
     QString dataForToolTipRole(Item *it, Field f) const;
     static QString headerDataForDisplayRole(Field f);
     int headerDataForTextAlignmentRole(Field f) const;
+    int headerDataForDefaultWidthRole(Field f) const;
 
     QItemSelectionModel *selectionModel() const;
 

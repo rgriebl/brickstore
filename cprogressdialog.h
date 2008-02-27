@@ -55,8 +55,8 @@ protected slots:
     virtual void done(int r);
 
 private slots:
-    void transferProgress(CTransferJob *job, int, int);
-    void transferDone(CTransferJob *job);
+    void transferProgress(CThreadPoolJob *job, int, int);
+    void transferDone(CThreadPoolJob *job);
 
 private:
     bool initTransfer();

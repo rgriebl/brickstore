@@ -85,15 +85,15 @@ BrickLink::PriceGuide *BrickLink::Core::priceGuide(const BrickLink::Item *item, 
 
     quint64 key = quint64(color->id()) << 32 | quint64(item->itemType()->id()) << 24 | quint64(item->index());
 
-    PriceGuide *pg = m_price_guides.cache [key];
+    PriceGuide *pg = m_pg_cache [key];
 
     if (!pg) {
         //qDebug ( "  ...not in cache" );
         pg = new PriceGuide(item, color);
-        m_price_guides.cache.insert(key, pg);
+        m_pg_cache.insert(key, pg);
     }
 
-    if (pg && (!pg->valid() || updateNeeded(pg->lastUpdate(), m_price_guides.update_iv)))
+    if (pg && (!pg->valid() || updateNeeded(pg->lastUpdate(), m_pg_update_iv)))
         updatePriceGuide(pg, high_priority);
 
     return pg;
@@ -237,7 +237,7 @@ bool BrickLink::PriceGuide::parse(const char *data, uint size)
 
 void BrickLink::PriceGuide::save_to_disk()
 {
-    QString path = BrickLink::inst()->dataPath(m_item, m_color);
+    QString path = BrickLink::core()->dataPath(m_item, m_color);
 
     if (path.isEmpty())
         return;
@@ -272,7 +272,7 @@ void BrickLink::PriceGuide::save_to_disk()
 
 void BrickLink::PriceGuide::load_from_disk()
 {
-    QString path = BrickLink::inst()->dataPath(m_item, m_color);
+    QString path = BrickLink::core()->dataPath(m_item, m_color);
 
     if (path.isEmpty())
         return;
@@ -347,7 +347,7 @@ void BrickLink::PriceGuide::load_from_disk()
 
 void BrickLink::PriceGuide::update(bool high_priority)
 {
-    BrickLink::inst()->updatePriceGuide(this, high_priority);
+    BrickLink::core()->updatePriceGuide(this, high_priority);
 }
 
 
@@ -376,12 +376,14 @@ void BrickLink::Core::updatePriceGuide(BrickLink::PriceGuide *pg, bool high_prio
     //qDebug ( "PG request started for %s", (const char *) url );
     CTransferJob *job = CTransferJob::get(url);
     job->setUserData(pg);
-    m_price_guides.transfer->retrieve(job, high_priority);
+    m_pg_transfer.retrieve(job, high_priority);
 }
 
 
-void BrickLink::Core::priceGuideJobFinished(CTransferJob *j)
+void BrickLink::Core::priceGuideJobFinished(CThreadPoolJob *pj)
 {
+    CTransferJob *j = static_cast<CTransferJob *>(pj);
+
     if (!j || !j->data() || !j->userData<PriceGuide> ())
         return;
 

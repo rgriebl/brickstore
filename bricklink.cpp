@@ -25,6 +25,7 @@
 #include <QPainterPath>
 #include <QPixmapCache>
 #include <QDebug>
+#include <QThread>
 
 #include "cconfig.h"
 #include "cutility.h"
@@ -150,6 +151,8 @@ const QPixmap *BrickLink::Core::noImage(const QSize &s) const
 {
     QString key = QString("%1x%2").arg(s.width()).arg(s.height());
 
+    QMutexLocker lock(&m_corelock);
+
     QPixmap *pix = m_noimages.value(key);
 
     if (!pix) {
@@ -193,6 +196,8 @@ const QPixmap *BrickLink::Core::colorImage(const Color *col, int w, int h) const
         return 0;
 
     QString key = QString("%1:%2x%3").arg(col->id()).arg(w).arg(h);
+
+    QMutexLocker lock(&m_corelock);
 
     QPixmap *pix = m_colimages.value(key);
 
@@ -344,7 +349,10 @@ BrickLink::Core *BrickLink::Core::create(const QString &datadir, QString *errstr
 }
 
 BrickLink::Core::Core(const QString &datadir)
-    : m_datadir(datadir), m_c_locale(QLocale::c())
+    : m_datadir(datadir), m_c_locale(QLocale::c()), m_corelock(QMutex::Recursive),
+      m_pg_transfer(5), m_pg_update_iv(0),
+      m_pic_transfer(10), m_pic_update_iv(0),
+      m_pic_diskload(QThread::idealThreadCount() * 3)
 {
     if (m_datadir.isEmpty())
         m_datadir = "./";
@@ -357,34 +365,26 @@ BrickLink::Core::Core(const QString &datadir)
     m_online = true;
 
     /*
-    m_databases.colors.setAutoDelete ( true );
-    m_databases.categories.setAutoDelete ( true );
-    m_databases.item_types.setAutoDelete ( true );
-    m_databases.items.setAutoDelete ( true );
+    m_colors.setAutoDelete ( true );
+    m_categories.setAutoDelete ( true );
+    m_item_types.setAutoDelete ( true );
+    m_items.setAutoDelete ( true );
     */
-
-    m_price_guides.transfer = new CTransfer(1);
-    m_price_guides.update_iv = 0;
-
-    m_pictures.transfer = new CTransfer(10);
-    m_pictures.update_iv = 0;
 
     QPixmapCache::setCacheLimit(20 * 1024);     // 80 x 60 x 32 (w x h x bpp) == 20kB ->room for ~1000 pixmaps
 
-    connect(m_price_guides.transfer, SIGNAL(finished(CTransferJob *)), this, SLOT(priceGuideJobFinished(CTransferJob *)));
-    connect(m_pictures.    transfer, SIGNAL(finished(CTransferJob *)), this, SLOT(pictureJobFinished(CTransferJob *)));
+    connect(&m_pg_transfer,  SIGNAL(finished(CThreadPoolJob *)), this, SLOT(priceGuideJobFinished(CThreadPoolJob *)));
+    connect(&m_pic_transfer, SIGNAL(finished(CThreadPoolJob *)), this, SLOT(pictureJobFinished(CThreadPoolJob *)));
+    connect(&m_pic_diskload, SIGNAL(finished(CThreadPoolJob *)), this, SLOT(pictureLoaded(CThreadPoolJob *)));
 
-    connect(m_pictures.    transfer, SIGNAL(progress(int, int)), this, SIGNAL(pictureProgress(int, int)));
-    connect(m_price_guides.transfer, SIGNAL(progress(int, int)), this, SIGNAL(priceGuideProgress(int, int)));
+    connect(&m_pic_transfer, SIGNAL(progress(int, int)), this, SIGNAL(pictureProgress(int, int)));
+    connect(&m_pg_transfer,  SIGNAL(progress(int, int)), this, SIGNAL(priceGuideProgress(int, int)));
 }
 
 BrickLink::Core::~Core()
 {
     cancelPictureTransfers();
     cancelPriceGuideTransfers();
-
-    delete m_pictures.transfer;
-    delete m_price_guides.transfer;
 
     qDeleteAll(m_noimages);
 
@@ -393,14 +393,14 @@ BrickLink::Core::~Core()
 
 void BrickLink::Core::setHttpProxy(const QNetworkProxy &proxy)
 {
-    m_pictures.transfer->setProxy(proxy);
-    m_price_guides.transfer->setProxy(proxy);
+    m_pic_transfer.setProxy(proxy);
+    m_pg_transfer.setProxy(proxy);
 }
 
 void BrickLink::Core::setUpdateIntervals(int pic, int pg)
 {
-    m_pictures.    update_iv = pic;
-    m_price_guides.update_iv = pg;
+    m_pic_update_iv = pic;
+    m_pg_update_iv = pg;
 }
 
 bool BrickLink::Core::updateNeeded(const QDateTime &last, int iv)
@@ -421,32 +421,32 @@ bool BrickLink::Core::onlineStatus() const
 
 const QHash<int, const BrickLink::Color *> &BrickLink::Core::colors() const
 {
-    return m_databases.colors;
+    return m_colors;
 }
 
 const QHash<int, const BrickLink::Category *> &BrickLink::Core::categories() const
 {
-    return m_databases.categories;
+    return m_categories;
 }
 
 const QHash<int, const BrickLink::ItemType *> &BrickLink::Core::itemTypes() const
 {
-    return m_databases.item_types;
+    return m_item_types;
 }
 
 const QVector<const BrickLink::Item *> &BrickLink::Core::items() const
 {
-    return m_databases.items;
+    return m_items;
 }
 
 const BrickLink::Category *BrickLink::Core::category(uint id) const
 {
-    return m_databases.categories.value(id);
+    return m_categories.value(id);
 }
 
 const BrickLink::Color *BrickLink::Core::color(uint id) const
 {
-    return m_databases.colors.value(id);
+    return m_colors.value(id);
 }
 
 const BrickLink::Color *BrickLink::Core::colorFromPeeronName(const char *peeron_name) const
@@ -454,7 +454,7 @@ const BrickLink::Color *BrickLink::Core::colorFromPeeronName(const char *peeron_
     if (!peeron_name || !peeron_name[0])
         return 0;
 
-    foreach(const Color *col, m_databases.colors) {
+    foreach(const Color *col, m_colors) {
         if (!qstricmp(col->peeronName(), peeron_name))
             return col;
     }
@@ -464,7 +464,7 @@ const BrickLink::Color *BrickLink::Core::colorFromPeeronName(const char *peeron_
 
 const BrickLink::Color *BrickLink::Core::colorFromLDrawId(int ldraw_id) const
 {
-    foreach(const Color *col, m_databases.colors) {
+    foreach(const Color *col, m_colors) {
         if (col->ldrawId() == ldraw_id)
             return col;
     }
@@ -474,7 +474,7 @@ const BrickLink::Color *BrickLink::Core::colorFromLDrawId(int ldraw_id) const
 
 const BrickLink::ItemType *BrickLink::Core::itemType(char id) const
 {
-    return m_databases.item_types.value(id);
+    return m_item_types.value(id);
 }
 
 const BrickLink::Item *BrickLink::Core::item(char tid, const char *id) const
@@ -485,7 +485,7 @@ const BrickLink::Item *BrickLink::Core::item(char tid, const char *id) const
 
     Item *keyp = &key;
 
-    Item **itp = (Item **) bsearch(&keyp, m_databases.items.data(), m_databases.items.count(), sizeof(Item *), (int (*)(const void *, const void *)) Item::compare);
+    Item **itp = (Item **) bsearch(&keyp, m_items.data(), m_items.count(), sizeof(Item *), (int (*)(const void *, const void *)) Item::compare);
 
     key.m_id = 0;
     key.m_item_type = 0;
@@ -495,14 +495,17 @@ const BrickLink::Item *BrickLink::Core::item(char tid, const char *id) const
 
 void BrickLink::Core::cancelPictureTransfers()
 {
-    while (!m_pictures.diskload.isEmpty())
-        m_pictures.diskload.takeFirst()->release();
-    m_pictures.transfer->abortAllJobs();
+    QMutexLocker lock(&m_corelock);
+
+    m_pic_diskload.abortAllJobs();
+    m_pic_transfer.abortAllJobs();
 }
 
 void BrickLink::Core::cancelPriceGuideTransfers()
 {
-    m_price_guides.transfer->abortAllJobs();
+    QMutexLocker lock(&m_corelock);
+
+    m_pg_transfer.abortAllJobs();
 }
 
 QString BrickLink::Core::defaultDatabaseName() const
@@ -536,22 +539,24 @@ bool BrickLink::Core::readDatabase(const QString &fname)
 {
     QString filename = fname.isNull() ? dataPath() + defaultDatabaseName() : fname;
 
+    QMutexLocker lock(&m_corelock);
+
     cancelPictureTransfers();
     cancelPriceGuideTransfers();
 
-    m_price_guides.cache.clear();
-    m_pictures.cache.clear();
+    m_pg_cache.clear();
+    m_pic_cache.clear();
     QPixmapCache::clear();
 
-    qDeleteAll(m_databases.colors);
-    qDeleteAll(m_databases.item_types);
-    qDeleteAll(m_databases.categories);
-    qDeleteAll(m_databases.items);
+    qDeleteAll(m_colors);
+    qDeleteAll(m_item_types);
+    qDeleteAll(m_categories);
+    qDeleteAll(m_items);
 
-    m_databases.colors.clear();
-    m_databases.item_types.clear();
-    m_databases.categories.clear();
-    m_databases.items.clear();
+    m_colors.clear();
+    m_item_types.clear();
+    m_categories.clear();
+    m_items.clear();
 
 
     bool result = false;
@@ -583,7 +588,7 @@ bool BrickLink::Core::readDatabase(const QString &fname)
             for (quint32 i = colc; i; i--) {
                 Color *col = new Color();
                 ds >> col;
-                m_databases.colors.insert(col->id(), col);
+                m_colors.insert(col->id(), col);
             }
 
             // categories
@@ -593,7 +598,7 @@ bool BrickLink::Core::readDatabase(const QString &fname)
             for (quint32 i = catc; i; i--) {
                 Category *cat = new Category();
                 ds >> cat;
-                m_databases.categories.insert(cat->id(), cat);
+                m_categories.insert(cat->id(), cat);
             }
 
             // types
@@ -603,18 +608,18 @@ bool BrickLink::Core::readDatabase(const QString &fname)
             for (quint32 i = ittc; i; i--) {
                 ItemType *itt = new ItemType();
                 ds >> itt;
-                m_databases.item_types.insert(itt->id(), itt);
+                m_item_types.insert(itt->id(), itt);
             }
 
             // items
             quint32 itc = 0;
             ds >> itc;
 
-            m_databases.items.reserve(itc);
+            m_items.reserve(itc);
             for (quint32 i = itc; i; i--) {
                 Item *item = new Item();
                 ds >> item;
-                m_databases.items.append(item);
+                m_items.append(item);
             }
             quint32 allc = 0;
             ds >> allc >> magic;
@@ -626,10 +631,10 @@ bool BrickLink::Core::readDatabase(const QString &fname)
     #else
     #define PF_SIZE_T   "z"
     #endif
-                qDebug("Color: %8u  (%11" PF_SIZE_T "u bytes)", m_databases.colors.count(),     m_databases.colors.count()     * (sizeof(Color)    + 20));
-                qDebug("Types: %8u  (%11" PF_SIZE_T "u bytes)", m_databases.item_types.count(), m_databases.item_types.count() * (sizeof(ItemType) + 20));
-                qDebug("Cats : %8u  (%11" PF_SIZE_T "u bytes)", m_databases.categories.count(), m_databases.categories.count() * (sizeof(Category) + 20));
-                qDebug("Items: %8u  (%11" PF_SIZE_T "u bytes)", m_databases.items.count(),      m_databases.items.count()      * (sizeof(Item)     + 20));
+                qDebug("Color: %8u  (%11" PF_SIZE_T "u bytes)", m_colors.count(),     m_colors.count()     * (sizeof(Color)    + 20));
+                qDebug("Types: %8u  (%11" PF_SIZE_T "u bytes)", m_item_types.count(), m_item_types.count() * (sizeof(ItemType) + 20));
+                qDebug("Cats : %8u  (%11" PF_SIZE_T "u bytes)", m_categories.count(), m_categories.count() * (sizeof(Category) + 20));
+                qDebug("Items: %8u  (%11" PF_SIZE_T "u bytes)", m_items.count(),      m_items.count()      * (sizeof(Item)     + 20));
     #undef PF_SIZE_T
 
                 result = true;
@@ -637,10 +642,10 @@ bool BrickLink::Core::readDatabase(const QString &fname)
         }
     }
     if (!result) {
-        m_databases.colors.clear();
-        m_databases.item_types.clear();
-        m_databases.categories.clear();
-        m_databases.items.clear();
+        m_colors.clear();
+        m_item_types.clear();
+        m_categories.clear();
+        m_items.clear();
 
         qWarning("Error reading databases!");
     }
@@ -1319,12 +1324,16 @@ bool BrickLink::Core::parseLDrawModelInternal(QFile &f, const QString &model_nam
  */
 void BrickLink::Core::setDatabase_ConsistsOf(const QHash<const Item *, InvItemList> &hash)
 {
+    QMutexLocker lock(&m_corelock);
+
     for (QHash<const Item *, InvItemList>::const_iterator it = hash.begin(); it != hash.end(); ++it)
         it.key()->setConsistsOf(it.value());
 }
 
 void BrickLink::Core::setDatabase_AppearsIn(const QHash<const Item *, Item::AppearsIn> &hash)
 {
+    QMutexLocker lock(&m_corelock);
+
     for (QHash<const Item *, Item::AppearsIn>::const_iterator it = hash.begin(); it != hash.end(); ++it)
         it.key()->setAppearsIn(it.value());
 }
@@ -1334,27 +1343,31 @@ void BrickLink::Core::setDatabase_Basics(const QHash<int, const Color *> &colors
         const QHash<int, const ItemType *> &item_types,
         const QVector<const Item *> &items)
 {
+    QMutexLocker lock(&m_corelock);
+
     cancelPictureTransfers();
     cancelPriceGuideTransfers();
 
-    m_price_guides.cache.clear();
-    m_pictures.cache.clear();
+    m_pg_cache.clear();
+    m_pic_cache.clear();
     QPixmapCache::clear();
 
-    m_databases.colors.clear();
-    m_databases.item_types.clear();
-    m_databases.categories.clear();
-    m_databases.items.clear();
+    m_colors.clear();
+    m_item_types.clear();
+    m_categories.clear();
+    m_items.clear();
 
-    m_databases.colors     = colors;
-    m_databases.item_types = item_types;
-    m_databases.categories = categories;
-    m_databases.items      = items;
+    m_colors     = colors;
+    m_item_types = item_types;
+    m_categories = categories;
+    m_items      = items;
 }
 
 bool BrickLink::Core::writeDatabase(const QString &fname)
 {
     QString filename = fname.isNull() ? dataPath() + defaultDatabaseName() : fname;
+
+    QMutexLocker lock(&m_corelock);
 
     QFile f(filename + ".new");
     if (f.open(QIODevice::WriteOnly)) {
@@ -1366,31 +1379,31 @@ bool BrickLink::Core::writeDatabase(const QString &fname)
         ds.setByteOrder(QDataStream::LittleEndian);
 
         // colors
-        quint32 colc = m_databases.colors.count();
+        quint32 colc = m_colors.count();
         ds << colc;
 
-        foreach(const Color *col, m_databases.colors)
+        foreach(const Color *col, m_colors)
         ds << col;
 
         // categories
-        quint32 catc = m_databases.categories.count();
+        quint32 catc = m_categories.count();
         ds << catc;
 
-        foreach(const Category *cat, m_databases.categories)
+        foreach(const Category *cat, m_categories)
         ds << cat;
 
         // types
-        quint32 ittc = m_databases.item_types.count();
+        quint32 ittc = m_item_types.count();
         ds << ittc;
 
-        foreach(const ItemType *itt, m_databases.item_types)
+        foreach(const ItemType *itt, m_item_types)
         ds << itt;
 
         // items
-        quint32 itc = m_databases.items.count();
+        quint32 itc = m_items.count();
         ds << itc;
 
-        const Item **itp = m_databases.items.data();
+        const Item **itp = m_items.data();
         for (quint32 i = itc; i; itp++, i--)
             ds << *itp;
 

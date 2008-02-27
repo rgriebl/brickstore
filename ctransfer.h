@@ -14,47 +14,26 @@
 #ifndef __CTRANSFER_H__
 #define __CTRANSFER_H__
 
-#include <QObject>
-#include <QList>
-#include <QMutex>
 #include <QDateTime>
 #include <QUrl>
 #include <QNetworkProxy>
+
+#include "cthreadpool.h"
+
 
 class QIODevice;
 class CTransfer;
 class CTransferThread;
 
-class CTransferJob {
+class CTransferJob : public CThreadPoolJob {
 public:
     ~CTransferJob();
 
-    CTransfer *transfer() const      { return m_transfer; }
+    CTransfer *transfer() const      { return qobject_cast<CTransfer *>(threadPool()); }
 
     static CTransferJob *get(const QUrl &url, QIODevice *file = 0);
     static CTransferJob *getIfNewer(const QUrl &url, const QDateTime &dt, QIODevice *file = 0);
     static CTransferJob *post(const QUrl &url, QIODevice *file = 0);
-
-    enum Status {
-        Inactive = 0,
-        Active,
-        Completed,
-        Failed,
-        Aborted
-    };
-
-    Status status() const            { return m_status; }
-    bool isActive() const            { return m_status == Active; }
-    bool isCompleted() const         { return m_status == Completed; }
-    bool isFailed() const            { return m_status == Failed; }
-    bool isAborted() const           { return m_status == Aborted; }
-    bool abort();
-
-    template<typename T>
-    void setUserData(T *t)           { m_user_data = static_cast<void *>(t); }
-
-    template<typename T>
-    T *userData() const              { return static_cast<T *>(m_user_data); }
 
     QUrl url() const                 { return m_url; }
     QUrl effectiveUrl() const        { return m_effective_url; }
@@ -78,8 +57,6 @@ private:
     CTransferJob();
 
 private:
-    CTransfer *  m_transfer;
-
     QUrl         m_url;
     QUrl         m_effective_url;
     QByteArray * m_data;
@@ -90,7 +67,6 @@ private:
     QDateTime    m_last_modified;
 
     int          m_respcode         : 16;
-    Status       m_status           : 3;
     HttpMethod   m_http_method      : 1;
     bool         m_was_not_modified : 1;
 
@@ -98,56 +74,27 @@ private:
 };
 
 
-
-
-
-class CTransfer : public QObject {
+class CTransfer : public CThreadPool {
     Q_OBJECT
 public:
     CTransfer(int threadcount);
-    virtual ~CTransfer();
 
-    bool retrieve(CTransferJob *job, bool high_priority = false);
-
-public slots:
-    bool abortJob(CTransferJob *job);
-    void abortAllJobs();
-    void setProxy(const QNetworkProxy &proxy);
+    inline bool retrieve(CTransferJob *job, bool high_priority = false)
+    { return execute(job, high_priority); }
 
 signals:
-    void progress(int done, int total);
-    void done();
-
     void finished(CTransferJob *);
     void started(CTransferJob *);
-    void dataReadProgress(CTransferJob *, int done, int total);
-    void dataSendProgress(CTransferJob *, int done, int total);
+    void jobProgress(CTransferJob *, int done, int total);
 
-private slots:
-    void internalJobFinished(QThread *thread, CTransferJob *job);
+protected:
+    virtual CThreadPoolEngine *createThreadPoolEngine();
 
-private:
-    void updateProgress(int delta);
-    void scheduler();
-
-    void threadIsIdleNow(QThread *thread);
-    friend class CTransferEngine;
+public slots:
+    void setProxy(const QNetworkProxy &proxy);
 
 private:
-// int   m_file_total;
-// int   m_file_progress;
-
-    int                   m_bytes_per_sec;
-    int                   m_jobs_total;
-    int                   m_jobs_progress;
-
-
-    QMutex                m_mutex;
     QNetworkProxy         m_proxy;
-    QList<CTransferJob *> m_jobs;
-    QList<QThread *>      m_threads;
-    QList<QThread *>      m_idle_threads;
-
 };
 
 #endif

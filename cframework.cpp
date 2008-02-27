@@ -501,7 +501,7 @@ CFrameWork::CFrameWork(QWidget *parent, Qt::WindowFlags f)
     if (ba.isEmpty() || !restoreState(ba))
         m_toolbar->show();
     
-    BrickLink::Core *bl = BrickLink::inst();
+    BrickLink::Core *bl = BrickLink::core();
 
     connect(CConfig::inst(), SIGNAL(onlineStatusChanged(bool)), bl, SLOT(setOnlineStatus(bool)));
     connect(CConfig::inst(), SIGNAL(blUpdateIntervalsChanged(int, int)), bl, SLOT(setUpdateIntervals(int, int)));
@@ -533,7 +533,7 @@ CFrameWork::CFrameWork(QWidget *parent, Qt::WindowFlags f)
 
     CSplash::inst()->message(qApp->translate("CSplash", "Loading Database..."));
 
-    bool dbok = BrickLink::inst()->readDatabase();
+    bool dbok = BrickLink::core()->readDatabase();
 
     if (!dbok) {
         if (CMessageBox::warning(this, tr("Could not load the BrickLink database files.<br /><br />Should these files be updated now?"), CMessageBox::Yes | CMessageBox::No) == CMessageBox::Yes)
@@ -735,6 +735,7 @@ CFrameWork::~CFrameWork()
     if (m_add_dialog)
         CConfig::inst()->setValue("/MainWindow/AddItemDialog/Geometry", m_add_dialog->saveGeometry());
 
+    delete m_mdi;
     s_inst = 0;
 }
 
@@ -1845,8 +1846,8 @@ bool CFrameWork::closeAllWindows()
 void CFrameWork::cancelAllTransfers()
 {
     if (CMessageBox::question(this, tr("Do you want to cancel all outstanding inventory, image and Price Guide transfers?"), CMessageBox::Yes | CMessageBox::No) == CMessageBox::Yes) {
-        BrickLink::inst()->cancelPictureTransfers();
-        BrickLink::inst()->cancelPriceGuideTransfers();
+        BrickLink::core()->cancelPictureTransfers();
+        BrickLink::core()->cancelPriceGuideTransfers();
     }
 }
 

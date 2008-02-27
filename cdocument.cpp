@@ -281,7 +281,7 @@ CDocument::CDocument(bool dont_sort)
     m_selection_model = new QItemSelectionModel(this, this);
     connect(m_selection_model, SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(selectionHelper()));
 
-    connect(BrickLink::inst(), SIGNAL(pictureUpdated(BrickLink::Picture *)), this, SLOT(pictureUpdated(BrickLink::Picture *)));
+    connect(BrickLink::core(), SIGNAL(pictureUpdated(BrickLink::Picture *)), this, SLOT(pictureUpdated(BrickLink::Picture *)));
 
     connect(m_undo, SIGNAL(cleanChanged(bool)), this, SLOT(clean2Modified(bool)));
 
@@ -761,7 +761,7 @@ CDocument *CDocument::fileLoadFrom(const QString &name, const char *type, bool i
             item_elem = root;
         }
 
-        items = BrickLink::inst()->parseItemListXML(item_elem, hint, &invalid_items);
+        items = BrickLink::core()->parseItemListXML(item_elem, hint, &invalid_items);
     }
     else {
         CMessageBox::warning(CFrameWork::inst(), tr("Could not parse the XML data in file %1:<br /><i>Line %2, column %3: %4</i>").arg(CMB_BOLD(name)).arg(eline).arg(ecol).arg(emsg));
@@ -816,7 +816,7 @@ CDocument *CDocument::fileImportLDrawModel()
     uint invalid_items = 0;
     BrickLink::InvItemList items;
 
-    bool b = BrickLink::inst()->parseLDrawModel(f, items, &invalid_items);
+    bool b = BrickLink::core()->parseLDrawModel(f, items, &invalid_items);
 
     QApplication::restoreOverrideCursor();
 
@@ -970,7 +970,7 @@ bool CDocument::fileSaveTo(const QString &s, const char *type, bool export_only,
         QDomDocument doc((hint == BrickLink::XMLHint_BrickStore) ? QString("BrickStoreXML") : QString::null);
         doc.appendChild(doc.createProcessingInstruction("xml", "version=\"1.0\" encoding=\"UTF-8\""));
 
-        QDomElement item_elem = BrickLink::inst()->createItemListXML(doc, hint, reinterpret_cast<const BrickLink::InvItemList *>(&itemlist));
+        QDomElement item_elem = BrickLink::core()->createItemListXML(doc, hint, reinterpret_cast<const BrickLink::InvItemList *>(&itemlist));
 
         if (hint == BrickLink::XMLHint_BrickStore) {
             QDomElement root = doc.createElement("BrickStoreXML");
@@ -1010,12 +1010,12 @@ bool CDocument::fileSaveTo(const QString &s, const char *type, bool export_only,
 void CDocument::fileExportBrickLinkInvReqClipboard(const ItemList &itemlist)
 {
     QDomDocument doc(QString::null);
-    doc.appendChild(BrickLink::inst()->createItemListXML(doc, BrickLink::XMLHint_Inventory, reinterpret_cast<const BrickLink::InvItemList *>(&itemlist)));
+    doc.appendChild(BrickLink::core()->createItemListXML(doc, BrickLink::XMLHint_Inventory, reinterpret_cast<const BrickLink::InvItemList *>(&itemlist)));
 
     QApplication::clipboard()->setText(doc.toString(), QClipboard::Clipboard);
 
     if (CConfig::inst()->value("/General/Export/OpenBrowser", true).toBool())
-        QDesktopServices::openUrl(BrickLink::inst()->url(BrickLink::URL_InventoryRequest));
+        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_InventoryRequest));
 }
 
 void CDocument::fileExportBrickLinkWantedListClipboard(const ItemList &itemlist)
@@ -1028,24 +1028,24 @@ void CDocument::fileExportBrickLinkWantedListClipboard(const ItemList &itemlist)
             extra.insert("WANTEDLISTID", wantedlist);
 
         QDomDocument doc(QString::null);
-        doc.appendChild(BrickLink::inst()->createItemListXML(doc, BrickLink::XMLHint_WantedList, reinterpret_cast<const BrickLink::InvItemList *>(&itemlist), extra.isEmpty() ? 0 : &extra));
+        doc.appendChild(BrickLink::core()->createItemListXML(doc, BrickLink::XMLHint_WantedList, reinterpret_cast<const BrickLink::InvItemList *>(&itemlist), extra.isEmpty() ? 0 : &extra));
 
         QApplication::clipboard()->setText(doc.toString(), QClipboard::Clipboard);
 
         if (CConfig::inst()->value("/General/Export/OpenBrowser", true).toBool())
-            QDesktopServices::openUrl(BrickLink::inst()->url(BrickLink::URL_WantedListUpload));
+            QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_WantedListUpload));
     }
 }
 
 void CDocument::fileExportBrickLinkXMLClipboard(const ItemList &itemlist)
 {
     QDomDocument doc(QString::null);
-    doc.appendChild(BrickLink::inst()->createItemListXML(doc, BrickLink::XMLHint_MassUpload, reinterpret_cast<const BrickLink::InvItemList *>(&itemlist)));
+    doc.appendChild(BrickLink::core()->createItemListXML(doc, BrickLink::XMLHint_MassUpload, reinterpret_cast<const BrickLink::InvItemList *>(&itemlist)));
 
     QApplication::clipboard()->setText(doc.toString(), QClipboard::Clipboard);
 
     if (CConfig::inst()->value("/General/Export/OpenBrowser", true).toBool())
-        QDesktopServices::openUrl(BrickLink::inst()->url(BrickLink::URL_InventoryUpload));
+        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_InventoryUpload));
 }
 
 void CDocument::fileExportBrickLinkUpdateClipboard(const ItemList &itemlist)
@@ -1060,12 +1060,12 @@ void CDocument::fileExportBrickLinkUpdateClipboard(const ItemList &itemlist)
     }
 
     QDomDocument doc(QString::null);
-    doc.appendChild(BrickLink::inst()->createItemListXML(doc, BrickLink::XMLHint_MassUpdate, reinterpret_cast<const BrickLink::InvItemList *>(&itemlist)));
+    doc.appendChild(BrickLink::core()->createItemListXML(doc, BrickLink::XMLHint_MassUpdate, reinterpret_cast<const BrickLink::InvItemList *>(&itemlist)));
 
     QApplication::clipboard()->setText(doc.toString(), QClipboard::Clipboard);
 
     if (CConfig::inst()->value("/General/Export/OpenBrowser", true).toBool())
-        QDesktopServices::openUrl(BrickLink::inst()->url(BrickLink::URL_InventoryUpdate));
+        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_InventoryUpdate));
 }
 
 void CDocument::fileExportBrickLinkXML(const ItemList &itemlist)
@@ -1219,6 +1219,7 @@ QVariant CDocument::headerData(int section, Qt::Orientation orientation, int rol
         switch (role) {
         case Qt::DisplayRole      : return headerDataForDisplayRole(f);
         case Qt::TextAlignmentRole: return headerDataForTextAlignmentRole(f);
+        case Qt::UserRole         : return headerDataForDefaultWidthRole(f);
         }
     }
     return QVariant();
@@ -1381,6 +1382,47 @@ int CDocument::headerDataForTextAlignmentRole(Field f) const
 {
     return dataForTextAlignmentRole(0, f);
 }
+
+int CDocument::headerDataForDefaultWidthRole(Field f) const
+{
+    int width = 0;
+
+    switch (f) {
+	case Status      : width = -16; break;
+	case Picture     : width = -40; break;
+	case PartNo      : width = 10; break;
+	case Description : width = 28; break;
+	case Comments    : width = 8; break;
+	case Remarks     : width = 8; break;
+	case QuantityOrig: width = 5; break;
+	case QuantityDiff: width = 5; break;
+	case Quantity    : width = 5; break;
+	case Bulk        : width = 5; break;
+	case PriceOrig   : width = 8; break;
+	case PriceDiff   : width = 8; break;
+	case Price       : width = 8; break;
+	case Total       : width = 8; break;
+	case Sale        : width = 5; break;
+	case Condition   : width = 5; break;
+	case Color       : width = 15; break;
+	case Category    : width = 12; break;
+	case ItemType    : width = 12; break;
+	case TierQ1      : width = 5; break;
+	case TierP1      : width = 8; break;
+	case TierQ2      : width = 5; break;
+	case TierP2      : width = 8; break;
+	case TierQ3      : width = 5; break;
+	case TierP3      : width = 8; break;
+	case LotId       : width = 8; break;
+	case Retain      : width = 8; break;
+	case Stockroom   : width = 8; break;
+	case Reserved    : width = 8; break;
+	case Weight      : width = 10; break;
+	case YearReleased: width = 5; break;
+    }
+    return width;
+}
+
 
 void CDocument::pictureUpdated(BrickLink::Picture *pic)
 {

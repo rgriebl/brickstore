@@ -36,7 +36,7 @@
 #endif
 
 #define ANIM_DURATION   300
-#define ANIM_FPS        20
+#define ANIM_FPS        33
 
 
 class CTaskPane;

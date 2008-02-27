@@ -31,11 +31,13 @@
 #include <QUrl>
 #include <QMimeData>
 #include <QAbstractListModel>
+#include <QMutex>
 
 #include <time.h>
 
 #include "cref.h"
 #include "cmoney.h"
+#include "cthreadpool.h"
 #include "ctransfer.h"
 
 
@@ -338,6 +340,7 @@ private:
     void parse(const char *data, uint size);
 
     friend class Core;
+    friend class PictureLoaderJob;
 };
 
 class InvItem {
@@ -947,7 +950,6 @@ private:
 private:
     bool updateNeeded(const QDateTime &last, int iv);
     bool parseLDrawModelInternal(QFile &file, const QString &model_name, InvItemList &items, uint *invalid_items, QHash<QString, InvItem *> &mergehash);
-    void pictureIdleLoader2();
 
     void setDatabase_ConsistsOf(const QHash<const Item *, InvItemList> &hash);
     void setDatabase_AppearsIn(const QHash<const Item *, Item::AppearsIn> &hash);
@@ -959,45 +961,38 @@ private:
     friend class TextImport;
 
 private slots:
-    void pictureIdleLoader();
+    void pictureJobFinished(CThreadPoolJob *);
+    void priceGuideJobFinished(CThreadPoolJob *);
 
-    void pictureJobFinished(CTransferJob *);
-    void priceGuideJobFinished(CTransferJob *);
+    void pictureLoaded(CThreadPoolJob *);
 
 private:
     QString  m_datadir;
     bool     m_online;
     QLocale  m_c_locale;
+    mutable QMutex m_corelock;
 
     mutable QHash<QString, QPixmap *>  m_noimages;
     mutable QHash<QString, QPixmap *>  m_colimages;
 
-    struct dummy1 {
-        QHash<int, const Color *>       colors;      // id ->Color *
-        QHash<int, const Category *>    categories;  // id ->Category *
-        QHash<int, const ItemType *>    item_types;  // id ->ItemType *
-        QVector<const Item *>           items;       // sorted array of Item *
-    } m_databases;
+    QHash<int, const Color *>       m_colors;      // id ->Color *
+    QHash<int, const Category *>    m_categories;  // id ->Category *
+    QHash<int, const ItemType *>    m_item_types;  // id ->ItemType *
+    QVector<const Item *>           m_items;       // sorted array of Item *
 
-    struct dummy2 {
-        CTransfer *                transfer;
-        int                        update_iv;
+    CTransfer                  m_pg_transfer;
+    int                        m_pg_update_iv;
+    CRefCache<PriceGuide, 500> m_pg_cache;
 
-        CRefCache<PriceGuide, 500> cache;
-    } m_price_guides;
+    CTransfer                 m_pic_transfer;
+    int                       m_pic_update_iv;
 
-    struct dummy3 {
-        CTransfer *               transfer;
-        int                       update_iv;
+    CThreadPool               m_pic_diskload;
 
-        QList <Picture *>         diskload;
-
-        CRefCache<Picture, 2500>   cache;
-    } m_pictures;
+    CRefCache<Picture, 5000>  m_pic_cache;
 };
 
 inline Core *core() { return Core::inst(); }
-inline Core *inst() { return core(); }
 
 inline Core *create(const QString &datadir, QString *errstring) { return Core::create(datadir, errstring); }
 

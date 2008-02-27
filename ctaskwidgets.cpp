@@ -91,17 +91,17 @@ void CTaskLinksWidget::selectionUpdate(const CDocument::ItemList &list)
             str += fmt1.arg(tr("BrickLink"));
             if (list.front()->lotId()) {
                 uint lotid = list.front()->lotId();
-                str += fmt2.arg(tr("My Inventory")).arg(BrickLink::inst()->url(BrickLink::URL_StoreItemDetail, &lotid).toString());
+                str += fmt2.arg(tr("My Inventory")).arg(BrickLink::core()->url(BrickLink::URL_StoreItemDetail, &lotid).toString());
             }
 
-            str += fmt2.arg(tr("Catalog")).       arg(BrickLink::inst()->url(BrickLink::URL_CatalogInfo,    item, color).toString());
-            str += fmt2.arg(tr("Price Guide")).   arg(BrickLink::inst()->url(BrickLink::URL_PriceGuideInfo, item, color).toString());
-            str += fmt2.arg(tr("Lots for Sale")). arg(BrickLink::inst()->url(BrickLink::URL_LotsForSale,    item, color).toString());
+            str += fmt2.arg(tr("Catalog")).       arg(BrickLink::core()->url(BrickLink::URL_CatalogInfo,    item, color).toString());
+            str += fmt2.arg(tr("Price Guide")).   arg(BrickLink::core()->url(BrickLink::URL_PriceGuideInfo, item, color).toString());
+            str += fmt2.arg(tr("Lots for Sale")). arg(BrickLink::core()->url(BrickLink::URL_LotsForSale,    item, color).toString());
 
             str += "<br />";
 
             str += fmt1.arg(tr("Peeron"));
-            str += fmt2.arg(tr("Information")).arg(BrickLink::inst()->url(BrickLink::URL_PeeronInfo, item, color).toString());
+            str += fmt2.arg(tr("Information")).arg(BrickLink::core()->url(BrickLink::URL_PeeronInfo, item, color).toString());
         }
     }
     setText(str);
@@ -142,7 +142,7 @@ void CTaskPriceGuideWidget::selectionUpdate(const CDocument::ItemList &list)
 {
     bool ok = (m_doc && (list.count() == 1));
 
-    setPriceGuide(ok ? BrickLink::inst()->priceGuide(list.front()->item(), list.front()->color(), true) : 0);
+    setPriceGuide(ok ? BrickLink::core()->priceGuide(list.front()->item(), list.front()->color(), true) : 0);
 }
 
 void CTaskPriceGuideWidget::setPrice(money_t p)
@@ -246,7 +246,7 @@ void CTaskInfoWidget::selectionUpdate(const CDocument::ItemList &list)
         setCurrentWidget(m_pic);
     }
     else if (list.count() == 1) {
-        m_pic->setPicture(BrickLink::inst()->picture(list.front()->item(), list.front()->color(), true));
+        m_pic->setPicture(BrickLink::core()->picture(list.front()->item(), list.front()->color(), true));
         setCurrentWidget(m_pic);
     }
     else {

@@ -183,14 +183,16 @@ CTransferJob *CProgressDialog::job() const
     return m_job;
 }
 
-void CProgressDialog::transferProgress(CTransferJob *j, int s, int t)
+void CProgressDialog::transferProgress(CThreadPoolJob *j, int s, int t)
 {
     if (j && (j == m_job))
         setProgress(s / 1024, t / 1024);
 }
 
-void CProgressDialog::transferDone(CTransferJob *j)
+void CProgressDialog::transferDone(CThreadPoolJob *pj)
 {
+    CTransferJob *j = static_cast<CTransferJob *>(pj);
+
     if (!j || (j != m_job))
         return;
 
@@ -208,10 +210,10 @@ bool CProgressDialog::initTransfer()
     if (m_trans)
         return true;
 
-    m_trans = new CTransfer(10);
+    m_trans = new CTransfer(1);
 
-    connect(m_trans, SIGNAL(finished(CTransferJob *)), this, SLOT(transferDone(CTransferJob *)));
-    connect(m_trans, SIGNAL(dataReadProgress(CTransferJob *, int, int)), this, SLOT(transferProgress(CTransferJob *, int, int)));
+    connect(m_trans, SIGNAL(finished(CThreadPoolJob *)), this, SLOT(transferDone(CThreadPoolJob *)));
+    connect(m_trans, SIGNAL(jobProgress(CThreadPoolJob *, int, int)), this, SLOT(transferProgress(CThreadPoolJob *, int, int)));
 
     m_trans->setProxy(CConfig::inst()->proxy());
 

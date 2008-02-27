@@ -537,7 +537,7 @@ bool BrickLink::TextImport::readInventory(const QString &path, const Item *item)
         if (doc.setContent(&f, &emsg, &eline, &ecol)) {
             QDomElement root = doc.documentElement();
 
-            items = BrickLink::inst()->parseItemListXML(doc.documentElement().toElement(), BrickLink::XMLHint_Inventory , &invalid_items);
+            items = BrickLink::core()->parseItemListXML(doc.documentElement().toElement(), BrickLink::XMLHint_Inventory , &invalid_items);
 
             if (items) {
                 if (!invalid_items) {

@@ -36,7 +36,7 @@ public:
     AppearsInDelegate(QObject *parent)
         : QStyledItemDelegate(parent), m_tooltip_pic(0)
     {
-        connect(BrickLink::inst(), SIGNAL(pictureUpdated(BrickLink::Picture *)), this, SLOT(pictureUpdated(BrickLink::Picture *)));
+        connect(BrickLink::core(), SIGNAL(pictureUpdated(BrickLink::Picture *)), this, SLOT(pictureUpdated(BrickLink::Picture *)));
     }
     
 public slots: // this is really is a faked virtual
@@ -51,7 +51,7 @@ public slots: // this is really is a faked virtual
             if (!appears)
                 goto out;
                 
-            BrickLink::Picture *pic = BrickLink::inst()->picture(appears->second, appears->second->defaultColor(), true);
+            BrickLink::Picture *pic = BrickLink::core()->picture(appears->second, appears->second->defaultColor(), true);
 
             if (!pic)
                 goto out;
@@ -269,7 +269,7 @@ void CAppearsInWidget::viewLargeImage()
     const BrickLink::Item::AppearsInItem *ai = appearsIn();
 
     if (ai && ai->second) {
-        BrickLink::Picture *lpic = BrickLink::inst()->largePicture(ai->second, true);
+        BrickLink::Picture *lpic = BrickLink::core()->largePicture(ai->second, true);
 
         if (lpic) {
             CLargePictureWidget *l = new CLargePictureWidget(lpic, this);
@@ -286,7 +286,7 @@ void CAppearsInWidget::showBLCatalogInfo()
     const BrickLink::Item::AppearsInItem *ai = appearsIn();
 
     if (ai && ai->second)
-        QDesktopServices::openUrl(BrickLink::inst()->url(BrickLink::URL_CatalogInfo, ai->second));
+        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_CatalogInfo, ai->second));
 }
 
 void CAppearsInWidget::showBLPriceGuideInfo()
@@ -294,7 +294,7 @@ void CAppearsInWidget::showBLPriceGuideInfo()
     const BrickLink::Item::AppearsInItem *ai = appearsIn();
 
     if (ai && ai->second)
-        QDesktopServices::openUrl(BrickLink::inst()->url(BrickLink::URL_PriceGuideInfo, ai->second, BrickLink::inst()->color(0)));
+        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_PriceGuideInfo, ai->second, BrickLink::core()->color(0)));
 }
 
 void CAppearsInWidget::showBLLotsForSale()
@@ -302,7 +302,7 @@ void CAppearsInWidget::showBLLotsForSale()
     const BrickLink::Item::AppearsInItem *ai = appearsIn();
 
     if (ai && ai->second)
-        QDesktopServices::openUrl(BrickLink::inst()->url(BrickLink::URL_LotsForSale, ai->second, BrickLink::inst()->color(0)));
+        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_LotsForSale, ai->second, BrickLink::core()->color(0)));
 }
 
 #include "cappearsinwidget.moc"

@@ -33,7 +33,7 @@ public:
     enum Role { BrickLinkColorRole = Qt::UserRole + 1 };
 
     ColorModel(bool flat)
-            : m_colors(BrickLink::inst()->colors()), m_flat(flat)
+            : m_colors(BrickLink::core()->colors()), m_flat(flat)
     {
     }
 
@@ -67,7 +67,7 @@ public:
         virtual int rowCount(const QModelIndex &parent) const
         {
             if (m_flat) {
-                return parent.isValid() ? 0 : BrickLink::inst()->colors().count();
+                return parent.isValid() ? 0 : BrickLink::core()->colors().count();
             }
             else {
 
@@ -90,7 +90,7 @@ public:
                 }
                 else if (role == Qt::DecorationRole) {
                     QFontMetrics fm = QApplication::fontMetrics();
-                    QPixmap pix = QPixmap::fromImage(BrickLink::inst()->colorImage(color, fm.height(), fm.height()));
+                    QPixmap pix = QPixmap::fromImage(BrickLink::core()->colorImage(color, fm.height(), fm.height()));
                     res = pix;
                 }
                 else if (role == Qt::ToolTipRole) {
@@ -178,7 +178,7 @@ CSelectColor::CSelectColor(QWidget *parent, Qt::WindowFlags f)
     w_colors->setRootIsDecorated(false);
     w_colors->setSortingEnabled(true);
 
-    w_colors->setModel(BrickLink::inst()->colorModel());
+    w_colors->setModel(BrickLink::core()->colorModel());
 
     w_colors->resizeColumnToContents(0);
     w_colors->setFixedWidth(w_colors->columnWidth(0) + 2 * w_colors->frameWidth() + w_colors->style()->pixelMetric(QStyle::PM_ScrollBarExtent) + 4);
@@ -212,7 +212,7 @@ void CSelectColor::changeEvent(QEvent *e)
 {
     if (e->type() == QEvent::EnabledChange) {
         if (!isEnabled())
-            setCurrentColor(BrickLink::inst()->color(0));
+            setCurrentColor(BrickLink::core()->color(0));
     }
     QWidget::changeEvent(e);
 }
