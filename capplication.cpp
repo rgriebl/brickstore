@@ -60,7 +60,7 @@
 CApplication *cApp = 0;
 
 CApplication::CApplication(const char *rebuild_db_only, int _argc, char **_argv)
-        : QApplication(_argc, _argv, !rebuild_db_only)
+    : QApplication(_argc, _argv, !rebuild_db_only)
 {
     cApp = this;
 

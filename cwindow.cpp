@@ -561,7 +561,7 @@ void CWindow::updateCaption()
 
 CWindow::~CWindow()
 {
-    m_doc->deleteLater();
+    delete m_doc; //->deleteLater();
 }
 
 void CWindow::on_view_save_default_col_triggered()
