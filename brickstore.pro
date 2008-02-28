@@ -136,6 +136,7 @@ XFORMS  += registration \
            importorder \
            importinventory \
            additem \
+           settings \
 
 
 SOURCES += main.cpp \
