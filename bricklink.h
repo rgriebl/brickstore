@@ -654,33 +654,37 @@ class ColorModel : public QAbstractListModel {
     Q_OBJECT
 
 public:
-    QModelIndex index(int row, int column, const QModelIndex &parent) const;
-    virtual int rowCount(const QModelIndex &parent) const;
-    virtual int columnCount(const QModelIndex &parent) const;
+    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
+    virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
+    virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
     virtual QVariant data(const QModelIndex &index, int role) const;
     virtual QVariant headerData(int section, Qt::Orientation orient, int role) const;
 
-protected:
-    ColorModel(QObject *parent = 0);
-
     QModelIndex index(const Color *color) const;
     const Color *color(const QModelIndex &index) const;
 
+protected:
+    ColorModel(QObject *parent = 0);
+
     QList<const Color *> m_colors;
 
-    friend class Core;    
-    friend class ColorProxyModel;
+    friend class Core;
 };
 
 
 class ColorProxyModel : public QSortFilterProxyModel {
+    Q_OBJECT
+
 public:
     ColorProxyModel(ColorModel *model);
-    
-    void setItemTypeFilter(const ItemType *it);
-    void clearItemTypeFilter();
-    
+
+    using QSortFilterProxyModel::index;
+    QModelIndex index(const Color *color) const;
+    const Color *color(const QModelIndex &index) const;
+
+    void setFilterItemType(const ItemType *it);
+
 protected:
     virtual bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const;
     virtual bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
@@ -697,35 +701,38 @@ class CategoryModel : public QAbstractListModel {
 public:
     static const Category *AllCategories;
 
-    QModelIndex index(int row, int column, const QModelIndex &parent) const;
-    virtual int rowCount(const QModelIndex &parent) const;
-    virtual int columnCount(const QModelIndex &parent) const;
+    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
+    virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
+    virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
     virtual QVariant data(const QModelIndex &index, int role) const;
     virtual QVariant headerData(int section, Qt::Orientation orient, int role) const;
 
-protected:
-    CategoryModel(QObject *parent = 0);
-
     QModelIndex index(const Category *category) const;
     const Category *category(const QModelIndex &index) const;
 
+protected:
+    CategoryModel(QObject *parent = 0);
+
     QList<const Category *> m_categories;
 
-    friend class Core;    
-    friend class CategoryProxyModel;
+    friend class Core;
 };
 
 
 class CategoryProxyModel : public QSortFilterProxyModel {
+    Q_OBJECT
+
 public:
     CategoryProxyModel(CategoryModel *model);
-    
-    void setItemTypeFilter(const ItemType *it);
-    void clearItemTypeFilter();
-    
+
+    void setFilterItemType(const ItemType *it);
     void setFilterAllCategories(bool);
-    
+
+    using QSortFilterProxyModel::index;
+    QModelIndex index(const Category *category) const;
+    const Category *category(const QModelIndex &index) const;
+
 protected:
     virtual bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const;
     virtual bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
@@ -739,22 +746,42 @@ class ItemTypeModel : public QAbstractListModel {
     Q_OBJECT
 
 public:
-    QModelIndex index(int row, int column, const QModelIndex &parent) const;
-    virtual int rowCount(const QModelIndex &parent) const;
-    virtual int columnCount(const QModelIndex &parent) const;
+    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
+    virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
+    virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
     virtual QVariant data(const QModelIndex &index, int role) const;
     virtual QVariant headerData(int section, Qt::Orientation orient, int role) const;
 
-protected:
-    ItemTypeModel(QObject *parent = 0);
-
     QModelIndex index(const ItemType *itemtype) const;
     const ItemType *itemType(const QModelIndex &index) const;
 
+protected:
+    ItemTypeModel(QObject *parent = 0);
+
     QList<const ItemType *> m_itemtypes;
 
-    friend class Core;    
+    friend class Core;
+};
+
+
+class ItemTypeProxyModel : public QSortFilterProxyModel {
+    Q_OBJECT
+
+public:
+    ItemTypeProxyModel(ItemTypeModel *model);
+
+    void setFilterWithoutInventory(bool on);
+
+    using QSortFilterProxyModel::index;
+    QModelIndex index(const ItemType *itemtype) const;
+    const ItemType *itemType(const QModelIndex &index) const;
+
+protected:
+    virtual bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const;
+    virtual bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
+
+    bool m_inv_filter;
 };
 
 
@@ -762,12 +789,15 @@ class ItemModel : public QAbstractTableModel {
     Q_OBJECT
 
 public:
-    QModelIndex index(int row, int column, const QModelIndex &parent) const;
-    virtual int rowCount(const QModelIndex &parent) const;
-    virtual int columnCount(const QModelIndex &parent) const;
+    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
+    virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
+    virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
     virtual QVariant data(const QModelIndex &index, int role) const;
     virtual QVariant headerData(int section, Qt::Orientation orient, int role) const;
+
+    QModelIndex index(const Item *item) const;
+    const Item *item(const QModelIndex &index) const;
 
 protected slots:
     void pictureUpdated(BrickLink::Picture *);
@@ -775,35 +805,70 @@ protected slots:
 protected:
     ItemModel(QObject *parent = 0);
 
+    const QVector<const Item *> &m_items;
+
+    friend class Core;
+};
+
+class ItemProxyModel : public QSortFilterProxyModel {
+    Q_OBJECT
+
+public:
+    ItemProxyModel(ItemModel *model);
+
+    void setFilterItemType(const ItemType *it);
+    void setFilterCategory(const Category *it);
+    void setFilterWithoutInventory(bool on);
+
+    using QSortFilterProxyModel::index;
     QModelIndex index(const Item *item) const;
     const Item *item(const QModelIndex &index) const;
 
-    QVector<const Item *> &m_items;
+protected:
+    virtual bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const;
+    virtual bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
 
-    friend class Core;    
+    const ItemType *m_itemtype_filter;
+    const Category *m_category_filter;
+    bool            m_inv_filter;
 };
+
 
 class AppearsInModel : public QAbstractTableModel {
     Q_OBJECT
 public:
-    AppearsInModel(const BrickLink::Item *item, const BrickLink::Color *color);
+    AppearsInModel(const Item *item, const Color *color);
     ~AppearsInModel();
-    
-    QModelIndex index(int row, int column, const QModelIndex &parent) const;
-    virtual int rowCount(const QModelIndex &parent) const;
-    virtual int columnCount(const QModelIndex &parent) const;
-    
+
+    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
+    virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
+    virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
+
     virtual QVariant data(const QModelIndex &index, int role) const;
     virtual QVariant headerData(int section, Qt::Orientation orient, int role) const;
 
+    const Item::AppearsInItem *appearsIn(const QModelIndex &idx) const;
+    QModelIndex index(const Item::AppearsInItem *const_ai) const;
+
 protected:
-    const BrickLink::Item::AppearsInItem *appearsIn(const QModelIndex &idx) const;
-    QModelIndex index(const BrickLink::Item::AppearsInItem *const_ai) const;
-    
-    const BrickLink::Item *        m_item;
-    const BrickLink::Color *       m_color;
-    BrickLink::Item::AppearsIn     m_appearsin;
-    QList<BrickLink::Item::AppearsInItem *> m_items;
+    const Item *        m_item;
+    const Color *       m_color;
+    Item::AppearsIn     m_appearsin;
+    QList<Item::AppearsInItem *> m_items;
+};
+
+class AppearsInProxyModel : public QSortFilterProxyModel {
+    Q_OBJECT
+
+public:
+    AppearsInProxyModel(AppearsInModel *model);
+
+    using QSortFilterProxyModel::index;
+    const Item::AppearsInItem *appearsIn(const QModelIndex &idx) const;
+    QModelIndex index(const Item::AppearsInItem *const_ai) const;
+
+protected:
+    virtual bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
 };
 
 

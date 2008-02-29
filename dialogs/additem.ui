@@ -70,6 +70,9 @@
        <property name="orientation" >
         <enum>Qt::Horizontal</enum>
        </property>
+       <property name="childrenCollapsible" >
+        <bool>false</bool>
+       </property>
        <widget class="CAppearsInWidget" native="1" name="w_appears_in" />
        <widget class="QWidget" name="layoutWidget" >
         <layout class="QGridLayout" >

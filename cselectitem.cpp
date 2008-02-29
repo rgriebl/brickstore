@@ -76,9 +76,7 @@ public:
 
     virtual void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
     {
-        const BrickLink::CategoryModel *model = qobject_cast<const BrickLink::CategoryModel *>(index.model());
-
-        if (model && model->category(index) == BrickLink::CategoryModel::AllCategories) {
+        if (index.isValid() && qvariant_cast<const BrickLink::Category *>(index.data(BrickLink::CategoryPointerRole)) == BrickLink::CategoryModel::AllCategories) {
             QStyleOptionViewItem myoption(option);
 
             myoption.font.setBold(true);
@@ -99,8 +97,7 @@ public:
     virtual QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
     {
         if (index.column() == 0) {
-            const BrickLink::ItemModel *model = qobject_cast<const BrickLink::ItemModel *>(index.model());
-            const BrickLink::Item *item = model ? model->item(index) : 0;
+            const BrickLink::Item *item = qvariant_cast<const BrickLink::Item *>(index.data(BrickLink::ItemPointerRole));
 
             return item ? item->itemType()->pictureSize() : QSize(80, 60);
         }
@@ -193,15 +190,17 @@ void CSelectItem::init()
     d->w_thumbs->setTextElideMode(Qt::ElideRight);
     d->w_thumbs->setItemDelegate(new ItemThumbsDelegate);
 
-    d->w_item_types->setModel(BrickLink::core()->itemTypeModel());
-    d->w_categories->setModel(BrickLink::core()->categoryModel(BrickLink::CategoryModel::IncludeAllCategoriesItem));
-    d->w_items->setModel(BrickLink::core()->itemModel());
+    d->w_item_types->setModel(new BrickLink::ItemTypeProxyModel(BrickLink::core()->itemTypeModel()));
+    d->w_categories->setModel(new BrickLink::CategoryProxyModel(BrickLink::core()->categoryModel()));
+    d->w_items->setModel(new BrickLink::ItemProxyModel(BrickLink::core()->itemModel()));
     d->w_itemthumbs->setModel(d->w_items->model());
     d->w_thumbs->setModel(d->w_items->model());
     d->w_itemthumbs->setSelectionModel(d->w_items->selectionModel());
     d->w_thumbs->setSelectionModel(d->w_items->selectionModel());
     d->w_items->hideColumn(0);
     d->w_thumbs->setModelColumn(0);
+    d->w_categories->sortByColumn(0, Qt::AscendingOrder);
+    d->w_items->sortByColumn(2, Qt::AscendingOrder);
 
     connect(d->w_filter, SIGNAL(filterTextChanged(const QString &)), this, SLOT(applyFilter()));
 
@@ -307,11 +306,11 @@ bool CSelectItem::hasExcludeWithoutInventoryFilter() const
 void CSelectItem::setExcludeWithoutInventoryFilter(bool b)
 {
     if (b != d->m_inv_only) {
-        BrickLink::ItemTypeModel *model1 = qobject_cast<BrickLink::ItemTypeModel *>(d->w_item_types->model());
-        BrickLink::ItemModel *model2 = qobject_cast<BrickLink::ItemModel *>(d->w_items->model());
+        BrickLink::ItemTypeProxyModel *model1 = qobject_cast<BrickLink::ItemTypeProxyModel *>(d->w_item_types->model());
+        BrickLink::ItemProxyModel *model2 = qobject_cast<BrickLink::ItemProxyModel *>(d->w_items->model());
 
-        model1->setExcludeWithoutInventoryFilter(b);
-        model2->setExcludeWithoutInventoryFilter(b);
+        model1->setFilterWithoutInventory(b);
+        model2->setFilterWithoutInventory(b);
     }
 }
 
@@ -319,23 +318,26 @@ void CSelectItem::itemTypeChanged()
 {
     const BrickLink::Category *oldcat = currentCategory();
     const BrickLink::Item *olditem = currentItem();
+    const BrickLink::ItemType *itemtype = currentItemType();
 
-    BrickLink::CategoryModel *model = qobject_cast<BrickLink::CategoryModel *>(d->w_categories->model());
-    model->setItemTypeFilter(currentItemType());
+    BrickLink::CategoryProxyModel *model = qobject_cast<BrickLink::CategoryProxyModel *>(d->w_categories->model());
+    model->setFilterItemType(itemtype);
     setCurrentCategory(oldcat);
 
-    BrickLink::ItemModel *model2 = qobject_cast<BrickLink::ItemModel *>(d->w_items->model());
-    model2->setItemTypeFilter(currentItemType());
-    model2->setCategoryFilter(currentCategory());
+    BrickLink::ItemProxyModel *model2 = qobject_cast<BrickLink::ItemProxyModel *>(d->w_items->model());
+    model2->setFilterItemType(itemtype);
+    model2->setFilterCategory(currentCategory());
     setCurrentItem(olditem, true);
+
+    emit hasColors(itemtype->hasColors());
 }
 
 const BrickLink::ItemType *CSelectItem::currentItemType() const
 {
-    BrickLink::ItemTypeModel *model = qobject_cast<BrickLink::ItemTypeModel *>(d->w_item_types->model());
+    BrickLink::ItemTypeProxyModel *model = qobject_cast<BrickLink::ItemTypeProxyModel *>(d->w_item_types->model());
 
     if (model && d->w_item_types->currentIndex() >= 0) {
-        QModelIndex idx = model->index(d->w_item_types->currentIndex(), 0, QModelIndex());
+        QModelIndex idx = model->index(d->w_item_types->currentIndex(), 0);
         return model->itemType(idx);
     }
     else
@@ -344,7 +346,7 @@ const BrickLink::ItemType *CSelectItem::currentItemType() const
 
 void CSelectItem::setCurrentItemType(const BrickLink::ItemType *it)
 {
-    BrickLink::ItemTypeModel *model = qobject_cast<BrickLink::ItemTypeModel *>(d->w_item_types->model());
+    BrickLink::ItemTypeProxyModel *model = qobject_cast<BrickLink::ItemTypeProxyModel *>(d->w_item_types->model());
 
     if (model) {
         QModelIndex idx = model->index(it);
@@ -360,14 +362,14 @@ void CSelectItem::categoryChanged()
 {
     const BrickLink::Item *olditem = currentItem();
 
-    BrickLink::ItemModel *model = qobject_cast<BrickLink::ItemModel *>(d->w_items->model());
-    model->setCategoryFilter(currentCategory());
+    BrickLink::ItemProxyModel *model = qobject_cast<BrickLink::ItemProxyModel *>(d->w_items->model());
+    model->setFilterCategory(currentCategory());
     setCurrentItem(olditem, true);
 }
 
 const BrickLink::Category *CSelectItem::currentCategory() const
 {
-    BrickLink::CategoryModel *model = qobject_cast<BrickLink::CategoryModel *>(d->w_categories->model());
+    BrickLink::CategoryProxyModel *model = qobject_cast<BrickLink::CategoryProxyModel *>(d->w_categories->model());
     QModelIndexList idxlst = d->w_categories->selectionModel()->selectedRows();
 
     if (model && !idxlst.isEmpty())
@@ -378,7 +380,7 @@ const BrickLink::Category *CSelectItem::currentCategory() const
 
 void CSelectItem::setCurrentCategory(const BrickLink::Category *cat)
 {
-    BrickLink::CategoryModel *model = qobject_cast<BrickLink::CategoryModel *>(d->w_categories->model());
+    BrickLink::CategoryProxyModel *model = qobject_cast<BrickLink::CategoryProxyModel *>(d->w_categories->model());
 
     if (model) {
         QModelIndex idx = model->index(cat);
@@ -391,7 +393,7 @@ void CSelectItem::setCurrentCategory(const BrickLink::Category *cat)
 
 const BrickLink::Item *CSelectItem::currentItem() const
 {
-    BrickLink::ItemModel *model = qobject_cast<BrickLink::ItemModel *>(d->w_items->model());
+    BrickLink::ItemProxyModel *model = qobject_cast<BrickLink::ItemProxyModel *>(d->w_items->model());
     QModelIndexList idxlst = d->w_items->selectionModel()->selectedRows();
 
     if (model && !idxlst.isEmpty())
@@ -411,7 +413,7 @@ bool CSelectItem::setCurrentItem(const BrickLink::Item *item, bool dont_force_ca
         setCurrentCategory(cat ? cat : BrickLink::CategoryModel::AllCategories);
     }
 
-    BrickLink::ItemModel *model = qobject_cast<BrickLink::ItemModel *>(d->w_items->model());
+    BrickLink::ItemProxyModel *model = qobject_cast<BrickLink::ItemProxyModel *>(d->w_items->model());
 
     if (model) {
         QModelIndex idx = model->index(item);
@@ -509,7 +511,7 @@ void CSelectItem::ensureSelectionVisible()
     const BrickLink::Item *item = currentItem();
 
     if (cat) {
-        BrickLink::CategoryModel *model = qobject_cast<BrickLink::CategoryModel *>(d->w_categories->model());
+        BrickLink::CategoryProxyModel *model = qobject_cast<BrickLink::CategoryProxyModel *>(d->w_categories->model());
 
         d->w_categories->scrollTo(model->index(cat));
     }
@@ -534,10 +536,10 @@ void CSelectItem::applyFilter()
         return;
     }
 
-    BrickLink::ItemModel *model = qobject_cast<BrickLink::ItemModel *>(d->w_items->model());
+    BrickLink::ItemProxyModel *model = qobject_cast<BrickLink::ItemProxyModel *>(d->w_items->model());
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-    model->setTextFilter(regexp);
+    model->setFilterRegExp(regexp);
     QApplication::restoreOverrideCursor();
 
     d->m_filter_active = regexp_ok;

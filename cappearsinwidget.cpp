@@ -139,7 +139,7 @@ CAppearsInWidget::CAppearsInWidget(QWidget *parent)
     setUniformRowHeights(true);
     setRootIsDecorated(false);
     setSortingEnabled(true);
-    sortByColumn(0);
+    sortByColumn(0, Qt::AscendingOrder);
     header()->setSortIndicatorShown(false);
     setContextMenuPolicy(Qt::CustomContextMenu);
     setItemDelegate(new AppearsInDelegate(this));
@@ -245,7 +245,7 @@ void CAppearsInWidget::setItem(const BrickLink::Item *item, const BrickLink::Col
     d->m_item = item;
     d->m_color = color;
 
-    setModel(BrickLink::core()->appearsInModel(d->m_item , d->m_color));
+    setModel(new BrickLink::AppearsInModel(d->m_item , d->m_color));
 
     if (item) {
         d->m_resize_timer->start(100);

@@ -350,8 +350,8 @@ BrickLink::Core *BrickLink::Core::create(const QString &datadir, QString *errstr
 
 BrickLink::Core::Core(const QString &datadir)
     : m_datadir(datadir), m_c_locale(QLocale::c()), m_corelock(QMutex::Recursive),
-      m_pg_transfer(5), m_pg_update_iv(0),
-      m_pic_transfer(10), m_pic_update_iv(0),
+      m_color_model(0), m_category_model(0), m_itemtype_model (0), m_item_model(0),
+      m_pg_transfer(5), m_pg_update_iv(0), m_pic_transfer(10), m_pic_update_iv(0),
       m_pic_diskload(QThread::idealThreadCount() * 3)
 {
     if (m_datadir.isEmpty())

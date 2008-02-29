@@ -34,8 +34,8 @@ BrickLink::ColorModel::ColorModel(QObject *parent)
     : QAbstractListModel(parent)
 {
     MODELTEST_ATTACH(this)
-    
-    m_colors = BrickLink::core()->colors().values();
+
+    m_colors = core()->colors().values();
 }
 
 QModelIndex BrickLink::ColorModel::index(int row, int column, const QModelIndex &parent) const
@@ -47,10 +47,10 @@ QModelIndex BrickLink::ColorModel::index(int row, int column, const QModelIndex 
 
 const BrickLink::Color *BrickLink::ColorModel::color(const QModelIndex &index) const
 {
-    return index.isValid() ? static_cast<const BrickLink::Color *>(index.internalPointer()) : 0;
+    return index.isValid() ? static_cast<const Color *>(index.internalPointer()) : 0;
 }
 
-QModelIndex BrickLink::ColorModel::index(const BrickLink::Color *color) const
+QModelIndex BrickLink::ColorModel::index(const Color *color) const
 {
     return color ? createIndex(m_colors.indexOf(color), 0, const_cast<Color *>(color)) : QModelIndex();
 }
@@ -78,14 +78,14 @@ QVariant BrickLink::ColorModel::data(const QModelIndex &index, int role) const
     }
     else if (role == Qt::DecorationRole) {
         QFontMetrics fm = QApplication::fontMetrics();
-        if (const QPixmap *pix = BrickLink::core()->colorImage(c, fm.height(), fm.height()))
+        if (const QPixmap *pix = core()->colorImage(c, fm.height(), fm.height()))
             res = *pix;
     }
     else if (role == Qt::ToolTipRole) {
         res = QString("<table width=\"100%\" border=\"0\" bgcolor=\"%3\"><tr><td><br><br></td></tr></table><br />%1: %2").arg(tr("RGB"), c->color().name(), c->color().name()); //%
     }
     else if (role == ColorPointerRole) {
-        res = c;
+        res.setValue(c);
     }
     return res;
 }
@@ -103,17 +103,12 @@ BrickLink::ColorProxyModel::ColorProxyModel(ColorModel *attach)
     setSourceModel(attach);
 }
 
-void BrickLink::ColorProxyModel::setItemTypeFilter(const ItemType *it)
+void BrickLink::ColorProxyModel::setFilterItemType(const ItemType *it)
 {
     if (it == m_itemtype_filter)
         return;
     m_itemtype_filter = it;
     invalidateFilter();
-}
-
-void BrickLink::ColorProxyModel::clearItemTypeFilter()
-{
-    setItemTypeFilter(0);
 }
 
 void BrickLink::ColorProxyModel::sort(int column, Qt::SortOrder order)
@@ -126,44 +121,70 @@ bool BrickLink::ColorProxyModel::lessThan(const QModelIndex &left, const QModelI
 {
     // the indexes are from the source model, so the internal pointers are valid
     // this is faster than fetching the Color* via data()/QVariant marshalling
-    const ColorModel *cm = static_cast<const ColorModel *>(left.model());
-    
-    const Color *c1 = cm->color(left);
-    const Color *c2 = cm->color(right);
+    const ColorModel *cm = qobject_cast<const ColorModel *>(sourceModel());
+    const Color *c1 = cm ? cm->color(left) : 0;
+    const Color *c2 = cm ? cm->color(right) : 0;
 
-    if (m_order == Qt::AscendingOrder) {
-        return (qstrcmp(c1->name(), c2->name()) < 0);
-    }
+    if (!c1)
+        return true;
+    else if (!c2)
+        return false;
     else {
-        int lh, rh, ls, rs, lv, rv, d;
+        if (m_order == Qt::AscendingOrder) {
+            return (qstrcmp(c1->name(), c2->name()) < 0);
+        }
+        else {
+            int lh, rh, ls, rs, lv, rv, d;
 
-        c1->color().getHsv(&lh, &ls, &lv);
-        c2->color().getHsv(&rh, &rs, &rv);
+            c1->color().getHsv(&lh, &ls, &lv);
+            c2->color().getHsv(&rh, &rs, &rv);
 
-        if (lh != rh)
-            d = lh - rh;
-        else if (ls != rs)
-            d = ls - rs;
-        else
-            d = lv - rv;
+            if (lh != rh)
+                d = lh - rh;
+            else if (ls != rs)
+                d = ls - rs;
+            else
+                d = lv - rv;
 
-        return d < 0;
+            return d < 0;
+        }
     }
 }
 
 bool BrickLink::ColorProxyModel::filterAcceptsRow(int source_row, const QModelIndex &source_parent) const
 {
+    if (source_parent.isValid())
+        return false;
+
     if (m_itemtype_filter && !m_itemtype_filter->hasColors()) {
         // the indexes are from the source model, so the internal pointers are valid
         // this is faster than fetching the Color* via data()/QVariant marshalling
-        const ColorModel *cm = static_cast<const ColorModel *>(source_parent.model());
+        const ColorModel *cm = qobject_cast<const ColorModel *>(sourceModel());
+        const Color *c = cm ? cm->color(cm->index(source_row, 0)) : 0;
 
-        const Color *c = cm->color(source_parent.child(source_row, 0));
-        
         return (c && c->id() == 0);
     }
     else
         return true;
+}
+
+
+const BrickLink::Color *BrickLink::ColorProxyModel::color(const QModelIndex &index) const
+{
+    ColorModel *cm = qobject_cast<ColorModel *>(sourceModel());
+
+    if (cm && index.isValid())
+        return cm->color(mapToSource(index));
+    return 0;
+}
+
+QModelIndex BrickLink::ColorProxyModel::index(const Color *color) const
+{
+    ColorModel *cm = qobject_cast<ColorModel *>(sourceModel());
+
+    if (cm && color)
+        return mapFromSource(cm->index(color));
+    return QModelIndex();
 }
 
 
@@ -180,7 +201,7 @@ BrickLink::CategoryModel::CategoryModel(QObject *parent)
 {
     MODELTEST_ATTACH(this)
 
-    m_categories = BrickLink::core()->categories().values();
+    m_categories = core()->categories().values();
 }
 
 QModelIndex BrickLink::CategoryModel::index(int row, int column, const QModelIndex &parent) const
@@ -226,7 +247,7 @@ QVariant BrickLink::CategoryModel::data(const QModelIndex &index, int role) cons
         res = c != AllCategories ? c->name() : QString("[%1]").arg(tr("All Items"));
     }
     else if (role == CategoryPointerRole) {
-        res = c;
+        res.setValue(c);
     }
     return res;
 }
@@ -244,17 +265,12 @@ BrickLink::CategoryProxyModel::CategoryProxyModel(CategoryModel *attach)
     setSourceModel(attach);
 }
 
-void BrickLink::CategoryProxyModel::setItemTypeFilter(const ItemType *it)
+void BrickLink::CategoryProxyModel::setFilterItemType(const ItemType *it)
 {
     if (it == m_itemtype_filter)
         return;
     m_itemtype_filter = it;
     invalidateFilter();
-}
-
-void BrickLink::CategoryProxyModel::clearItemTypeFilter()
-{
-    setItemTypeFilter(0);
 }
 
 void BrickLink::CategoryProxyModel::setFilterAllCategories(bool b)
@@ -269,15 +285,14 @@ void BrickLink::CategoryProxyModel::setFilterAllCategories(bool b)
 bool BrickLink::CategoryProxyModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
 {
     // the indexes are from the source model, so the internal pointers are valid
-    // this is faster than fetching the Category* via data()/QVariant marshalling
-    const CategoryModel *cm = static_cast<const CategoryModel *>(left.model());
-    
-    const Category *c1 = cm->category(left);
-    const Category *c2 = cm->category(right);
+    // this is faster than fetching the Categorsety* via data()/QVariant marshalling
+    const CategoryModel *cm = qobject_cast<const CategoryModel *>(left.model());
+    const Category *c1 = cm ? cm->category(left) : 0;
+    const Category *c2 = cm ? cm->category(right) : 0;
 
-    if (c1 == CategoryModel::AllCategories)
+    if (!c1 || c1 == CategoryModel::AllCategories)
         return true;
-    else if (c2 == CategoryModel::AllCategories)
+    else if (!c2 || c2 == CategoryModel::AllCategories)
         return false;
     else
         return (qstrcmp(c1->name(), c2->name()) < 0);
@@ -285,17 +300,20 @@ bool BrickLink::CategoryProxyModel::lessThan(const QModelIndex &left, const QMod
 
 bool BrickLink::CategoryProxyModel::filterAcceptsRow(int source_row, const QModelIndex &source_parent) const
 {
+    if (source_parent.isValid())
+        return false;
+
     if (m_itemtype_filter || m_all_filter) {
         // the indexes are from the source model, so the internal pointers are valid
         // this is faster than fetching the Category* via data()/QVariant marshalling
-        const CategoryModel *cm = static_cast<const CategoryModel *>(source_parent.model());
+        const CategoryModel *cm = qobject_cast<const CategoryModel *>(sourceModel());
+        const Category *c = cm ? cm->category(cm->index(source_row, 0)) : 0;
 
-        const Category *c = cm->category(source_parent.child(source_row, 0));
-        
-        if (c == CategoryModel::AllCategories)
+        if (!c)
+            return false;
+        else if (c == CategoryModel::AllCategories)
             return !m_all_filter;
-        
-        if (m_itemtype_filter) {
+        else if (m_itemtype_filter) {
             for (const Category **cp = m_itemtype_filter->categories(); *cp; cp++) {
                 if (c == *cp)
                     return true;
@@ -305,6 +323,26 @@ bool BrickLink::CategoryProxyModel::filterAcceptsRow(int source_row, const QMode
     }
     return true;
 }
+
+const BrickLink::Category *BrickLink::CategoryProxyModel::category(const QModelIndex &index) const
+{
+    CategoryModel *cm = qobject_cast<CategoryModel *>(sourceModel());
+
+    if (cm && index.isValid())
+        return cm->category(mapToSource(index));
+    return 0;
+}
+
+QModelIndex BrickLink::CategoryProxyModel::index(const Category *category) const
+{
+    CategoryModel *cm = qobject_cast<CategoryModel *>(sourceModel());
+
+    if (cm && category)
+        return mapFromSource(cm->index(category));
+    return QModelIndex();
+}
+
+
 
 
 
@@ -316,14 +354,12 @@ bool BrickLink::CategoryProxyModel::filterAcceptsRow(int source_row, const QMode
 // ITEMTYPEMODEL
 /////////////////////////////////////////////////////////////
 
-BrickLink::ItemTypeModel::ItemTypeModel(Features)
+BrickLink::ItemTypeModel::ItemTypeModel(QObject *parent)
+    : QAbstractListModel(parent)
 {
     MODELTEST_ATTACH(this)
 
-    m_inv_filter = false;
-    m_sorted = Qt::AscendingOrder;
-
-    rebuildItemList();
+    m_itemtypes = core()->itemTypes().values();
 }
 
 QModelIndex BrickLink::ItemTypeModel::index(int row, int column, const QModelIndex &parent) const
@@ -365,7 +401,7 @@ QVariant BrickLink::ItemTypeModel::data(const QModelIndex &index, int role) cons
         res = i->name();
     }
     else if (role == ItemTypePointerRole) {
-        res = i;
+        res.setValue(i);
     }
     return res;
 }
@@ -377,63 +413,77 @@ QVariant BrickLink::ItemTypeModel::headerData(int section, Qt::Orientation orien
     return QVariant();
 }
 
-void BrickLink::ItemTypeModel::setExcludeWithoutInventoryFilter(bool on)
+
+
+BrickLink::ItemTypeProxyModel::ItemTypeProxyModel(ItemTypeModel *attach)
+    : QSortFilterProxyModel(attach->QObject::parent()), m_inv_filter(false)
 {
-    if (on == m_inv_filter)
+    setSourceModel(attach);
+}
+
+void BrickLink::ItemTypeProxyModel::setFilterWithoutInventory(bool b)
+{
+    if (b == m_inv_filter)
         return;
 
-    emit layoutAboutToBeChanged();
-
-    m_inv_filter = on;
-    rebuildItemList();
-
-    emit layoutChanged();
+    m_inv_filter = b;
+    invalidateFilter();
 }
 
-void BrickLink::ItemTypeModel::sort(int column, Qt::SortOrder so)
+bool BrickLink::ItemTypeProxyModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
 {
-    if (column == 0) {
-        emit layoutAboutToBeChanged();
+    // the indexes are from the source model, so the internal pointers are valid
+    // this is faster than fetching the Category* via data()/QVariant marshalling
+    const ItemTypeModel *im = qobject_cast<const ItemTypeModel *>(sourceModel());
+    const ItemType *i1 = im ? im->itemType(left) : 0;
+    const ItemType *i2 = im ? im->itemType(right) : 0;
 
-        QModelIndexList pidx_old = persistentIndexList();
-        QModelIndexList pidx_now;
-
-        Compare cmp(so == Qt::AscendingOrder);
-        m_sorted = so;
-        qStableSort(m_itemtypes.begin(), m_itemtypes.end(), cmp);
-
-        foreach (QModelIndex idx, pidx_old)
-            pidx_now.append(index(itemType(idx)));
-        changePersistentIndexList(pidx_old, pidx_now);
-
-        emit layoutChanged();
-    }
+    if (!i1)
+        return true;
+    else if (!i2)
+        return false;
+    else
+        return (qstrcmp(i1->name(), i2->name()) < 0);
 }
 
-void BrickLink::ItemTypeModel::rebuildItemList()
+bool BrickLink::ItemTypeProxyModel::filterAcceptsRow(int source_row, const QModelIndex &source_parent) const
 {
-    if (!m_inv_filter) {
-        m_itemtypes = BrickLink::core()->itemTypes().values();
-    }
-    else {
-        m_itemtypes.clear();
-        foreach (const ItemType *itemtype, BrickLink::core()->itemTypes().values()) {
-            if (m_inv_filter && !itemtype->hasInventories())
-                continue;
+    if (source_parent.isValid())
+        return false;
 
-            m_itemtypes << itemtype;
-        }
+    if (m_inv_filter) {
+        // the indexes are from the source model, so the internal pointers are valid
+        // this is faster than fetching the Category* via data()/QVariant marshalling
+        const ItemTypeModel *im = qobject_cast<const ItemTypeModel *>(sourceModel());
+        const ItemType *i = im ? im->itemType(im->index(source_row, 0)) : 0;
+
+        if (!i || !i->hasInventories())
+            return false;
     }
-    qStableSort(m_itemtypes.begin(), m_itemtypes.end(), Compare(m_sorted == Qt::AscendingOrder));
+    return true;
 }
 
-BrickLink::ItemTypeModel::Compare::Compare(bool asc) : m_asc(asc) { }
-
-bool BrickLink::ItemTypeModel::Compare::operator()(const ItemType *c1, const ItemType *c2)
+const BrickLink::ItemType *BrickLink::ItemTypeProxyModel::itemType(const QModelIndex &index) const
 {
-    bool b = (qstrcmp(c1->name(), c2->name()) >= 0);
-    return m_asc ^ b;
+    ItemTypeModel *im = qobject_cast<ItemTypeModel *>(sourceModel());
+
+    if (im && index.isValid())
+        return im->itemType(mapToSource(index));
+    return 0;
 }
+
+QModelIndex BrickLink::ItemTypeProxyModel::index(const ItemType *itemtype) const
+{
+    ItemTypeModel *im = qobject_cast<ItemTypeModel *>(sourceModel());
+
+    if (im && itemtype)
+        return mapFromSource(im->index(itemtype));
+    return QModelIndex();
+}
+
+
+
+
 
 
 
@@ -442,19 +492,12 @@ bool BrickLink::ItemTypeModel::Compare::operator()(const ItemType *c1, const Ite
 // ITEMMODEL
 /////////////////////////////////////////////////////////////
 
-BrickLink::ItemModel::ItemModel(Features)
+BrickLink::ItemModel::ItemModel(QObject *parent)
+    : QAbstractTableModel(parent), m_items(core()->items())
 {
     MODELTEST_ATTACH(this)
 
-    m_cat_filter = 0;
-    m_type_filter = 0;
-    m_inv_filter = false;
-    m_sorted = Qt::AscendingOrder;
-    m_sortcol = 1;
-
-    connect(BrickLink::core(), SIGNAL(pictureUpdated(BrickLink::Picture *)), this, SLOT(pictureUpdated(BrickLink::Picture *)));
-
-    rebuildItemList();
+    connect(core(), SIGNAL(pictureUpdated(BrickLink::Picture *)), this, SLOT(pictureUpdated(BrickLink::Picture *)));
 }
 
 QModelIndex BrickLink::ItemModel::index(int row, int column, const QModelIndex &parent) const
@@ -501,13 +544,13 @@ QVariant BrickLink::ItemModel::data(const QModelIndex &index, int role) const
     else if (role == Qt::DecorationRole) {
         switch(index.column()) {
         case 0: {
-            Picture *pic = BrickLink::core()->picture(i, i->defaultColor());
+            Picture *pic = core()->picture(i, i->defaultColor());
 
             if (pic && pic->valid()) {
                 return pic->image();
             }
             else {
-                QSize s = BrickLink::core()->pictureSize(i->itemType());
+                QSize s = core()->pictureSize(i->itemType());
                 QImage img(s, QImage::Format_Mono);
                 img.fill(Qt::white);
                 return img;
@@ -522,7 +565,13 @@ QVariant BrickLink::ItemModel::data(const QModelIndex &index, int role) const
         }
     }
     else if (role == ItemPointerRole) {
-        res = i;
+        res.setValue(i);
+    }
+    else if (role == ItemTypePointerRole) {
+        res.setValue(i->itemType());
+    }
+    else if (role == CategoryPointerRole) {
+        res.setValue(i->category());
     }
     return res;
 }
@@ -538,136 +587,7 @@ QVariant BrickLink::ItemModel::headerData(int section, Qt::Orientation orient, i
     return QVariant();
 }
 
-void BrickLink::ItemModel::sort(int column, Qt::SortOrder so)
-{
-    if (column != 0) {
-        m_sorted = so;
-        m_sortcol = column;
-        rebuildItemList(true);
-         
-        Compare cmp(so == Qt::AscendingOrder, column == 2);
-        qStableSort(m_items.begin(), m_items.end(), cmp);
-
-        foreach (QModelIndex idx, pidx_old)
-            pidx_now.append(index(item(idx)));
-        changePersistentIndexList(pidx_old, pidx_now);
-
-        emit layoutChanged();
-    }
-}
-
-BrickLink::ItemModel::Compare::Compare(bool asc, bool byname) : m_asc(asc), m_byname(byname) { }
-
-bool BrickLink::ItemModel::Compare::operator()(const Item *c1, const Item *c2)
-{
-    bool b = (qstrcmp(m_byname ? c1->name() : c1->id(), m_byname ? c2->name() : c2->id()) >= 0);
-    return m_asc ^ b;
-}
-
-void BrickLink::ItemModel::rebuildItemList(bool sort_only)
-{
-    emit layoutAboutToBeChanged();
-    
-    QModelIndexList pidx_old = persistentIndexList();
-    QModelIndexList pidx_now;
-
-    if (!sort_only) {
-        if (!m_type_filter && !m_cat_filter && m_text_filter.isEmpty() && !m_inv_filter) {
-            m_items = BrickLink::core()->items();
-        }
-        else {
-            m_items.clear();
-            foreach (const Item *item, BrickLink::core()->items()) {
-                if (m_type_filter && item->itemType() != m_type_filter)
-                    continue;
-                if (m_cat_filter && !item->hasCategory(m_cat_filter))
-                    continue;
-                if (m_inv_filter && !item->hasInventory())
-                    continue;
-                if (!m_text_filter.isEmpty() && m_text_filter.isValid()) {
-                    if ((m_text_filter.indexIn(QLatin1String(item->id())) < 0) &&
-                        (m_text_filter.indexIn(QLatin1String(item->name())) < 0))
-                        continue;
-                }
-
-                m_items << item;
-            }
-        }
-    }
-    qStableSort(m_items.begin(), m_items.end(), Compare(m_sorted == Qt::AscendingOrder, m_sortcol == 2));
-}
-
-void BrickLink::ItemModel::setItemTypeFilter(const ItemType *it)
-{
-    if (it == m_type_filter)
-        return;
-
-    emit layoutAboutToBeChanged();
-
-    m_type_filter = it;
-    rebuildItemList();
-
-    emit layoutChanged();
-}
-
-void BrickLink::ItemModel::clearItemTypeFilter()
-{
-    setItemTypeFilter(0);
-}
-
-void BrickLink::ItemModel::setCategoryFilter(const Category *cat)
-{
-    if (cat == BrickLink::CategoryModel::AllCategories)
-        cat = 0;
-
-    if (cat == m_cat_filter)
-        return;
-
-    emit layoutAboutToBeChanged();
-
-    m_cat_filter = cat;
-    rebuildItemList();
-
-    emit layoutChanged();
-}
-
-void BrickLink::ItemModel::clearCategoryFilter()
-{
-    setCategoryFilter(0);
-}
-
-void BrickLink::ItemModel::setTextFilter(const QRegExp &rx)
-{
-    if (rx == m_text_filter)
-        return;
-
-    emit layoutAboutToBeChanged();
-
-    m_text_filter = rx;
-    rebuildItemList();
-
-    emit layoutChanged();
-}
-
-void BrickLink::ItemModel::clearTextFilter()
-{
-    setTextFilter(QRegExp());
-}
-
-void BrickLink::ItemModel::setExcludeWithoutInventoryFilter(bool on)
-{
-    if (on == m_inv_filter)
-        return;
-
-    emit layoutAboutToBeChanged();
-
-    m_inv_filter = on;
-    rebuildItemList();
-
-    emit layoutChanged();
-}
-
-void BrickLink::ItemModel::pictureUpdated(BrickLink::Picture *pic)
+void BrickLink::ItemModel::pictureUpdated(Picture *pic)
 {
     if (!pic || !pic->item() || pic->color() != pic->item()->defaultColor())
         return;
@@ -679,12 +599,111 @@ void BrickLink::ItemModel::pictureUpdated(BrickLink::Picture *pic)
 
 
 
+
+BrickLink::ItemProxyModel::ItemProxyModel(ItemModel *attach)
+    : QSortFilterProxyModel(attach->QObject::parent()), m_itemtype_filter(0), m_category_filter(0), m_inv_filter(false)
+{
+    setSourceModel(attach);
+}
+
+void BrickLink::ItemProxyModel::setFilterItemType(const ItemType *it)
+{
+    if (it == m_itemtype_filter)
+        return;
+    m_itemtype_filter = it;
+    invalidateFilter();
+}
+
+void BrickLink::ItemProxyModel::setFilterCategory(const Category *cat)
+{
+    if (cat == m_category_filter)
+        return;
+    m_category_filter = cat;
+    invalidateFilter();
+}
+
+void BrickLink::ItemProxyModel::setFilterWithoutInventory(bool b)
+{
+    if (b == m_inv_filter)
+        return;
+
+    m_inv_filter = b;
+    invalidateFilter();
+}
+
+const BrickLink::Item *BrickLink::ItemProxyModel::item(const QModelIndex &index) const
+{
+    ItemModel *im = qobject_cast<ItemModel *>(sourceModel());
+
+    if (im && index.isValid())
+        return im->item(mapToSource(index));
+    return 0;
+}
+
+QModelIndex BrickLink::ItemProxyModel::index(const Item *item) const
+{
+    ItemModel *im = qobject_cast<ItemModel *>(sourceModel());
+
+    if (im && item)
+        return mapFromSource(im->index(item));
+    return QModelIndex();
+}
+
+bool BrickLink::ItemProxyModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
+{
+    // the indexes are from the source model, so the internal pointers are valid
+    // this is faster than fetching the Category* via data()/QVariant marshalling
+    const ItemModel *im = qobject_cast<const ItemModel *>(sourceModel());
+    const Item *i1 = im ? im->item(left) : 0;
+    const Item *i2 = im ? im->item(right) : 0;
+
+    bool byname = (left.column() == 2);
+
+    if (!i1)
+        return true;
+    else if (!i2)
+        return false;
+    else
+        return (qstrcmp(byname ? i1->name() : i1->id(), byname ? i2->name() : i2->id()) < 0);
+}
+
+bool BrickLink::ItemProxyModel::filterAcceptsRow(int source_row, const QModelIndex &source_parent) const
+{
+    if (source_parent.isValid())
+        return false;
+
+    // the indexes are from the source model, so the internal pointers are valid
+    // this is faster than fetching the Category* via data()/QVariant marshalling
+    const ItemModel *cm = qobject_cast<const ItemModel *>(sourceModel());
+    const Item *item = cm ? cm->item(cm->index(source_row, 0)) : 0;
+
+    if (source_row == 0)
+        qWarning("FILTERING ROW 0");
+
+    if (!item)
+        return false;
+    else if (m_itemtype_filter && item->itemType() != m_itemtype_filter)
+        return false;
+    else if (m_category_filter && (m_category_filter != BrickLink::CategoryModel::AllCategories) && !item->hasCategory(m_category_filter))
+        return false;
+    else if (m_inv_filter && !item->hasInventory())
+        return false;
+    else {
+        QRegExp rx = filterRegExp();
+        if (!rx.isEmpty() && rx.isValid())
+            return ((rx.indexIn(QLatin1String(item->id())) >= 0) ||
+                    (rx.indexIn(QLatin1String(item->name())) >= 0));
+    }
+    return true;
+}
+
+
 /////////////////////////////////////////////////////////////
 // APPEARSINMODEL
 /////////////////////////////////////////////////////////////
 
 
-BrickLink::AppearsInModel::AppearsInModel(const BrickLink::Item *item, const BrickLink::Color *color)
+BrickLink::AppearsInModel::AppearsInModel(const Item *item, const Color *color)
 {
     MODELTEST_ATTACH(this)
 
@@ -694,9 +713,9 @@ BrickLink::AppearsInModel::AppearsInModel(const BrickLink::Item *item, const Bri
     if (item)
         m_appearsin = item->appearsIn(color);
 
-   foreach(const BrickLink::Item::AppearsInColor &vec, m_appearsin) {
-        foreach(const BrickLink::Item::AppearsInItem &item, vec)
-            m_items.append(const_cast<BrickLink::Item::AppearsInItem *>(&item));
+   foreach(const Item::AppearsInColor &vec, m_appearsin) {
+        foreach(const Item::AppearsInItem &item, vec)
+            m_items.append(const_cast<Item::AppearsInItem *>(&item));
    }
 }
 
@@ -713,41 +732,45 @@ QModelIndex BrickLink::AppearsInModel::index(int row, int column, const QModelIn
 
 const BrickLink::Item::AppearsInItem *BrickLink::AppearsInModel::appearsIn(const QModelIndex &idx) const
 {
-    return idx.isValid() ? static_cast<const BrickLink::Item::AppearsInItem *>(idx.internalPointer()) : 0;
+    return idx.isValid() ? static_cast<const Item::AppearsInItem *>(idx.internalPointer()) : 0;
 }
 
-QModelIndex BrickLink::AppearsInModel::index(const BrickLink::Item::AppearsInItem *const_ai) const
+QModelIndex BrickLink::AppearsInModel::index(const Item::AppearsInItem *const_ai) const
 {
-    BrickLink::Item::AppearsInItem *ai = const_cast<BrickLink::Item::AppearsInItem *>(const_ai);
+    Item::AppearsInItem *ai = const_cast<Item::AppearsInItem *>(const_ai);
 
     return ai ? createIndex(m_items.indexOf(ai), 0, ai) : QModelIndex();
 }
 
-int BrickLink::AppearsInModel::rowCount(const QModelIndex & /*parent*/) const
-{ return m_items.size(); }
+int BrickLink::AppearsInModel::rowCount(const QModelIndex &parent) const
+{
+    return parent.isValid() ? 0 : m_items.size();
+}
 
-int BrickLink::AppearsInModel::columnCount(const QModelIndex & /*parent*/) const
-{ return 3; }
+int BrickLink::AppearsInModel::columnCount(const QModelIndex &parent) const
+{
+    return parent.isValid() ? 0 : 3;
+}
 
 QVariant BrickLink::AppearsInModel::data(const QModelIndex &index, int role) const
 {
     QVariant res;
-    const BrickLink::Item::AppearsInItem *appears = appearsIn(index);
+    const Item::AppearsInItem *appears = appearsIn(index);
     int col = index.column();
 
     if (!appears)
         return res;
 
-    switch (role) {
-    case Qt::DisplayRole:
+    if (role == Qt::DisplayRole) {
         switch (col) {
         case 0: res = QString::number(appears->first); break;
         case 1: res = appears->second->id(); break;
         case 2: res = appears->second->name(); break;
         }
-        break;
     }
-
+    else if (role == BrickLink::AppearsInItemPointerRole) {
+        res.setValue(appears);
+    }
     return res;
 }
 
@@ -763,3 +786,49 @@ QVariant BrickLink::AppearsInModel::headerData(int section, Qt::Orientation orie
     return QVariant();
 }
 
+
+BrickLink::AppearsInProxyModel::AppearsInProxyModel(AppearsInModel *attach)
+    : QSortFilterProxyModel(attach->QObject::parent())
+{
+    setSourceModel(attach);
+}
+
+const BrickLink::Item::AppearsInItem *BrickLink::AppearsInProxyModel::appearsIn(const QModelIndex &index) const
+{
+    AppearsInModel *aim = qobject_cast<AppearsInModel *>(sourceModel());
+
+    if (aim && index.isValid())
+        return aim->appearsIn(mapToSource(index));
+    return 0;
+}
+
+QModelIndex BrickLink::AppearsInProxyModel::index(const Item::AppearsInItem *item) const
+{
+    AppearsInModel *aim = qobject_cast<AppearsInModel *>(sourceModel());
+
+    if (aim && item)
+        return mapFromSource(aim->index(item));
+    return QModelIndex();
+}
+
+bool BrickLink::AppearsInProxyModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
+{
+    // the indexes are from the source model, so the internal pointers are valid
+    // this is faster than fetching the Category* via data()/QVariant marshalling
+    const AppearsInModel *aim = qobject_cast<const AppearsInModel *>(sourceModel());
+    const Item::AppearsInItem *ai1 = aim ? aim->appearsIn(left) : 0;
+    const Item::AppearsInItem *ai2 = aim ? aim->appearsIn(right) : 0;
+
+    if (!ai1)
+        return true;
+    else if (!ai2)
+        return false;
+    else {
+        switch (left.column()) {
+        default:
+        case  0: return ai1->first < ai2->first;
+        case  1: return (qstrcmp(ai1->second->id(), ai2->second->id()) < 0);
+        case  2: return (qstrcmp(ai1->second->name(), ai2->second->name()) < 0 );
+        }
+    }
+}

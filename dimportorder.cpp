@@ -323,7 +323,7 @@ void DImportOrder::download()
 
         w_order_list->setModel(new OrderListModel(import->orders()));
         w_order_list->horizontalHeader()->setResizeMode(2, QHeaderView::Stretch);
-        w_order_list->sortByColumn(2);
+        w_order_list->sortByColumn(2, Qt::AscendingOrder);
 
         w_order_list->selectionModel()->select(w_order_list->model()->index(0, 0), QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
         w_order_list->scrollTo(w_order_list->model()->index(0, 0));

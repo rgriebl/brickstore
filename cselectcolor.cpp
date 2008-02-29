@@ -43,7 +43,7 @@ public:
 
 
 CSelectColor::CSelectColor(QWidget *parent, Qt::WindowFlags f)
-        : QWidget(parent, f)
+    : QWidget(parent, f)
 {
     w_colors = new QTreeView(this);
     w_colors->setItemDelegate(new ColorDelegate());
@@ -53,12 +53,12 @@ CSelectColor::CSelectColor(QWidget *parent, Qt::WindowFlags f)
     w_colors->setRootIsDecorated(false);
     w_colors->setSortingEnabled(true);
 
-    w_colors->setModel(BrickLink::core()->colorModel());
+    w_colors->setModel(new BrickLink::ColorProxyModel(BrickLink::core()->colorModel()));
 
     w_colors->resizeColumnToContents(0);
     w_colors->setFixedWidth(w_colors->columnWidth(0) + 2 * w_colors->frameWidth() + w_colors->style()->pixelMetric(QStyle::PM_ScrollBarExtent) + 4);
 
-    w_colors->sortByColumn(0);
+    w_colors->sortByColumn(0, Qt::AscendingOrder);
 
     setFocusProxy(w_colors);
 
@@ -68,36 +68,26 @@ CSelectColor::CSelectColor(QWidget *parent, Qt::WindowFlags f)
     QBoxLayout *lay = new QVBoxLayout(this);
     lay->setMargin(0);
     lay->addWidget(w_colors);
+
+    recalcHighlightPalette();
 }
 
 
 const BrickLink::Color *CSelectColor::currentColor() const
 {
-    BrickLink::ColorModel *model = qobject_cast<BrickLink::ColorModel *>(w_colors->model());
-
-    if (model && w_colors->selectionModel()->hasSelection()) {
+    if (w_colors->selectionModel()->hasSelection()) {
         QModelIndex idx = w_colors->selectionModel()->selectedIndexes().front();
-        return model->color(idx);
+        return qvariant_cast<const BrickLink::Color *>(w_colors->model()->data(idx, BrickLink::ColorPointerRole));
     }
     else
         return 0;
 }
 
-void CSelectColor::changeEvent(QEvent *e)
-{
-    if (e->type() == QEvent::EnabledChange) {
-        if (!isEnabled())
-            setCurrentColor(BrickLink::core()->color(0));
-    }
-    QWidget::changeEvent(e);
-}
-
 void CSelectColor::setCurrentColor(const BrickLink::Color *color)
 {
-    BrickLink::ColorModel *model = qobject_cast<BrickLink::ColorModel *>(w_colors->model());
+    BrickLink::ColorProxyModel *model = qobject_cast<BrickLink::ColorProxyModel *>(w_colors->model());
 
-    if (model)
-        w_colors->selectionModel()->select(model->index(color), QItemSelectionModel::SelectCurrent);
+    w_colors->selectionModel()->select(model->index(color), QItemSelectionModel::SelectCurrent);
 }
 
 void CSelectColor::colorChanged()
@@ -116,6 +106,31 @@ void CSelectColor::showEvent(QShowEvent *)
         w_colors->scrollTo(w_colors->selectionModel()->selectedIndexes().front(), QAbstractItemView::PositionAtCenter);
 }
 
+void CSelectColor::changeEvent(QEvent *e)
+{
+    if (e->type() == QEvent::EnabledChange) {
+        if (!isEnabled())
+            setCurrentColor(BrickLink::core()->color(0));
+    }
+    else if (e->type() == QEvent::PaletteChange) {
+        recalcHighlightPalette();
+    }
+    QWidget::changeEvent(e);
+}
+
+void CSelectColor::recalcHighlightPalette()
+{
+    QPalette p = qApp->palette();
+    QColor hc = CUtility::gradientColor(p.color(QPalette::Active, QPalette::Highlight), p.color(QPalette::Inactive, QPalette::Highlight), 0.35f);
+    QColor htc = p.color(QPalette::Active, QPalette::HighlightedText);
+
+    p.setColor(QPalette::Inactive, QPalette::Highlight, hc);
+    p.setColor(QPalette::Inactive, QPalette::HighlightedText, htc);
+    setPalette(p);
+}
+
+
+
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
@@ -123,7 +138,7 @@ void CSelectColor::showEvent(QShowEvent *)
 
 
 DSelectColor::DSelectColor(QWidget *parent, Qt::WindowFlags f)
-        : QDialog(parent, f)
+    : QDialog(parent, f)
 {
     w_sc = new CSelectColor(this);
     w_sc->w_colors->setMaximumSize(32767, 32767);    // fixed width ->minimum width in this case

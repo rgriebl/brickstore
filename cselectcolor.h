@@ -39,6 +39,7 @@ protected slots:
 protected:
     virtual void changeEvent(QEvent *);
     virtual void showEvent(QShowEvent *);
+    void recalcHighlightPalette();
 
 protected:
     QTreeView *w_colors;

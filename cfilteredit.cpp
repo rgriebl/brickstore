@@ -25,6 +25,8 @@ CFilterEdit::CFilterEdit(QWidget *parent)
     : QLineEdit(parent)
 {
     m_timer = new QTimer(this);
+    m_timer->setSingleShot(true);
+    m_timer->setInterval(200);
 
     w_menu = new QToolButton(this);
     w_menu->setCursor(Qt::ArrowCursor);
@@ -96,7 +98,7 @@ void CFilterEdit::resizeEvent(QResizeEvent *)
 void CFilterEdit::checkText(const QString &str)
 {
     w_clear->setVisible(!str.isEmpty());
-    m_timer->start(250);
+    m_timer->start();
 }
 
 void CFilterEdit::timerTick()
