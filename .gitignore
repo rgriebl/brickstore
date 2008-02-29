@@ -1,6 +1,7 @@
 .moc
 .obj
 .uic
+.svn
 .private-key
 Thumbs.db
 *.bak

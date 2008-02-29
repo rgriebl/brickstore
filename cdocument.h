@@ -137,7 +137,8 @@ public:
     virtual int columnCount(const QModelIndex &parent) const;
     virtual QVariant data(const QModelIndex &index, int role) const;
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const;
-
+    Qt::ItemFlags flags(const QModelIndex&) const;
+    bool setData(const QModelIndex&, const QVariant&, int);
     QString dataForDisplayRole(Item *it, Field f) const;
     QVariant dataForDecorationRole(Item *it, Field f) const;
     int dataForTextAlignmentRole(Item *it, Field f) const;

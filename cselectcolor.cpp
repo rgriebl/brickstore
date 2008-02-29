@@ -25,147 +25,22 @@
 #include "cselectcolor.h"
 
 
-namespace {
-
-#if 0
-class ColorModel : public QAbstractItemModel {
-public:
-    enum Role { BrickLinkColorRole = Qt::UserRole + 1 };
-
-    ColorModel(bool flat)
-            : m_colors(BrickLink::core()->colors()), m_flat(flat)
-    {
-    }
-
-    QModelIndex index(int row, int column, const QModelIndex &parent) const
-    {
-        if (hasIndex(row, column, parent)) {
-            if (m_flat) {
-                return parent.isValid() ? QModelIndex() : createIndex(row, column, m_colors.at(row));
-            }
-            else {
-            }
-            SimpleNode *parentNode = nodeForIndex(parent);
-            SimpleNode *childNode = parentNode->children.at(row);
-            return createIndex(row, column, childNode);
-        }
-        return QModelIndex();
-    }
-
-    const BrickLink::Color *color(const QModelIndex &index) const
-    {
-        return index.isValid() ? static_cast<BrickLink::Color *>(index.internalPointer()) : 0;
-
-        QModelIndex index(const BrickLink::Color *color) const
-        {
-            if (m_flat)
-                return color ? createIndex(m_colors.indexOf(color), 0, color) : QModelIndex();
-            else
-                return color ? createIndex() : QModelIndex();
-        }
-
-        virtual int rowCount(const QModelIndex &parent) const
-        {
-            if (m_flat) {
-                return parent.isValid() ? 0 : BrickLink::core()->colors().count();
-            }
-            else {
-
-            }
-            return m_colors.count();
-        }
-
-        virtual int columnCount(const QModelIndex & /*parent*/) const
-        { return 1; }
-
-        virtual QVariant data(const QModelIndex &index, int role) const
-        {
-            QVariant res;
-            const BrickLink::Color *color = this->color(index);
-            int col = index.column();
-
-            if (col == 0) {
-                if (role == Qt:: DisplayRole) {
-                    res = color->name();
-                }
-                else if (role == Qt::DecorationRole) {
-                    QFontMetrics fm = QApplication::fontMetrics();
-                    QPixmap pix = QPixmap::fromImage(BrickLink::core()->colorImage(color, fm.height(), fm.height()));
-                    res = pix;
-                }
-                else if (role == Qt::ToolTipRole) {
-                    res = QString("<img src=\"#/select_color_tooltip_picture\"><br />%1: %2").arg(CSelectColor::tr("RGB"), color->color().name());
-                }
-                else if (role == BrickLinkColorRole) {
-                    res = color;
-                }
-            }
-
-            return res;
-        }
-
-        virtual QVariant headerData(int section, Qt::Orientation orient, int role) const
-        {
-            if ((orient == Qt::Horizontal) && (role == Qt::DisplayRole) && (section == 0))
-                return CSelectColor::tr("Color");
-            return QVariant();
-        }
-
-        virtual void sort(int column, Qt::SortOrder so)
-        {
-            if (column == 0) {
-                emit layoutAboutToBeChanged();
-                qStableSort(m_colors.begin(), m_colors.end(), so == Qt::DescendingOrder ? colorNameCompare : colorHsvCompare);
-                emit layoutChanged();
-            }
-        }
-
-        static bool colorNameCompare(const BrickLink::Color *c1, const BrickLink::Color *c2)
-        {
-            return qstrcmp(c1->name(), c2->name()) < 0;
-        }
-
-        static bool colorHsvCompare(const BrickLink::Color *c1, const BrickLink::Color *c2)
-        {
-            int lh, rh, ls, rs, lv, rv, d;
-
-            c1->color().getHsv(&lh, &ls, &lv);
-            c2->color().getHsv(&rh, &rs, &rv);
-
-            if (lh != rh)
-                d = lh - rh;
-            else if (ls != rs)
-                d = ls - rs;
-            else
-                d = lv - rv;
-
-            return d < 0;
-        }
-
-private:
-        QHash<int, const BrickLink::Color *> &m_colors;
-        QHash<QString, QList<const BrickLink::Color *> > m_colorcats;
-    };
-
-#endif
-
 class ColorDelegate : public QItemDelegate {
-    public:
-        ColorDelegate(QObject *parent = 0)
-                : QItemDelegate(parent)
-        { }
+public:
+    ColorDelegate(QObject *parent = 0)
+            : QItemDelegate(parent)
+    { }
 
-        virtual void drawDecoration(QPainter *painter, const QStyleOptionViewItem &option, const QRect &rect, const QPixmap &pixmap) const
-        {
-            QStyleOptionViewItemV4 myoption(option);
-            myoption.state &= ~QStyle::State_Selected;
+    virtual void drawDecoration(QPainter *painter, const QStyleOptionViewItem &option, const QRect &rect, const QPixmap &pixmap) const
+    {
+        QStyleOptionViewItemV4 myoption(option);
+        myoption.state &= ~QStyle::State_Selected;
 
-            QItemDelegate::drawDecoration(painter, myoption, rect, pixmap);
-        }
-    };
+        QItemDelegate::drawDecoration(painter, myoption, rect, pixmap);
+    }
+};
 
 
-}
 
 CSelectColor::CSelectColor(QWidget *parent, Qt::WindowFlags f)
         : QWidget(parent, f)

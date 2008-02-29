@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>605</width>
-    <height>422</height>
+    <width>622</width>
+    <height>436</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -26,8 +26,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>575</width>
-        <height>343</height>
+        <width>592</width>
+        <height>357</height>
        </rect>
       </property>
       <attribute name="title" >
@@ -176,8 +176,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>575</width>
-        <height>343</height>
+        <width>592</width>
+        <height>357</height>
        </rect>
       </property>
       <attribute name="title" >
@@ -308,8 +308,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>575</width>
-        <height>343</height>
+        <width>592</width>
+        <height>357</height>
        </rect>
       </property>
       <attribute name="title" >
@@ -410,8 +410,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>575</width>
-        <height>343</height>
+        <width>592</width>
+        <height>357</height>
        </rect>
       </property>
       <attribute name="title" >
@@ -427,7 +427,7 @@
           <item row="0" column="0" >
            <widget class="QLabel" name="label_3" >
             <property name="text" >
-             <string>Username</string>
+             <string>Username:</string>
             </property>
            </widget>
           </item>
@@ -437,12 +437,16 @@
           <item row="1" column="0" >
            <widget class="QLabel" name="label_4" >
             <property name="text" >
-             <string>Password</string>
+             <string>Password:</string>
             </property>
            </widget>
           </item>
           <item row="1" column="1" >
-           <widget class="QLineEdit" name="w_bl_password" />
+           <widget class="QLineEdit" name="w_bl_password" >
+            <property name="echoMode" >
+             <enum>QLineEdit::PasswordEchoOnEdit</enum>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -462,7 +466,7 @@
           <item row="0" column="0" >
            <widget class="QLabel" name="label" >
             <property name="text" >
-             <string>Hostname</string>
+             <string>Hostname:</string>
             </property>
            </widget>
           </item>
@@ -479,24 +483,62 @@
           <item row="1" column="0" >
            <widget class="QLabel" name="label_2" >
             <property name="text" >
-             <string>Port</string>
+             <string>Port:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1" >
+           <widget class="QLineEdit" name="w_proxy_user" />
+          </item>
+          <item row="2" column="0" >
+           <widget class="QLabel" name="label_14" >
+            <property name="text" >
+             <string>Username:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1" >
+           <widget class="QLineEdit" name="w_proxy_pass" >
+            <property name="echoMode" >
+             <enum>QLineEdit::PasswordEchoOnEdit</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0" >
+           <widget class="QLabel" name="label_15" >
+            <property name="text" >
+             <string>Password:</string>
             </property>
            </widget>
           </item>
           <item row="1" column="1" >
-           <widget class="QLineEdit" name="w_proxy_port" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Fixed" hsizetype="MinimumExpanding" >
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
+           <widget class="QComboBox" name="w_proxy_port" >
+            <property name="editable" >
+             <bool>true</bool>
             </property>
-            <property name="text" >
-             <string/>
+            <property name="insertPolicy" >
+             <enum>QComboBox::NoInsert</enum>
             </property>
-            <property name="maxLength" >
-             <number>6</number>
-            </property>
+            <item>
+             <property name="text" >
+              <string>3128</string>
+             </property>
+            </item>
+            <item>
+             <property name="text" >
+              <string>8000</string>
+             </property>
+            </item>
+            <item>
+             <property name="text" >
+              <string>8008</string>
+             </property>
+            </item>
+            <item>
+             <property name="text" >
+              <string>8080</string>
+             </property>
+            </item>
            </widget>
           </item>
          </layout>

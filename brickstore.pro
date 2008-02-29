@@ -15,7 +15,7 @@
 isEmpty( RELEASE ) {
   RELEASE    = 2.0.0
 }
-
+DEFINES += Q_NO_USING_KEYWORD
 TEMPLATE     = app
 CONFIG      *= warn_on thread qt 
 QT          *= core gui xml network
@@ -129,6 +129,11 @@ macx {
 win {
   SOURCES += dotnetstyle.cpp
   HEADERS += dotnetstyle.h
+}
+
+modeltest:debug {
+  include(modeltest/modeltest.pri)
+  DEFINES += MODELTEST
 }
 
 XFORMS  += registration \

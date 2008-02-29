@@ -22,6 +22,13 @@
 #include <qregexp.h>
 #include <QDesktopServices>
 
+#if defined( MODELTEST )
+#include <modeltest.h>
+#define MODELTEST_ATTACH(x)   { (void) new ModelTest(x, x); }
+#else
+#define MODELTEST_ATTACH(x)   ;
+#endif
+
 #include "cutility.h"
 #include "cconfig.h"
 #include "cframework.h"
@@ -273,6 +280,8 @@ QList<CDocument *> CDocument::s_documents;
 
 CDocument::CDocument(bool dont_sort)
 {
+    MODELTEST_ATTACH(this)
+
     m_undo = new QUndoStack(this);
     m_order = 0;
     m_error_mask = 0;
@@ -1191,6 +1200,67 @@ int CDocument::columnCount(const QModelIndex &parent) const
     return parent.isValid() ? 0 : FieldCount;
 }
 
+Qt::ItemFlags CDocument::flags(const QModelIndex &index) const
+{
+    if (!index.isValid())
+        return Qt::ItemIsEnabled;
+                
+    Qt::ItemFlags ifs = QAbstractItemModel::flags(index);
+    
+    switch (index.column()) {
+    case Total:
+    case LotId: break;
+    default   : ifs |= Qt::ItemIsEditable; break;
+    }
+    return ifs;
+}
+
+bool CDocument::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    if (index.isValid() && role == Qt::EditRole) {
+        Item *itemp = items().at(index.row());
+        Item item = *itemp;
+        Field f = static_cast<Field>(index.column());
+        
+        switch (f) {
+        case CDocument::PartNo      : {
+/*            const BrickLink::Item *newitem = BrickLink::inst ( )-> item ( m_item-> itemType ( )-> id ( ), result. latin1 ( ));
+            if ( newitem ) {
+                item. setItem ( newitem );
+            }
+            else {
+                CMessageBox::information ( listView ( ), not_valid );
+                return;
+            }*/
+            break;
+        }
+        case CDocument::Comments    : item.setComments(value.toString()); break;
+        case CDocument::Remarks     : item.setRemarks(value.toString()); break; 
+        case CDocument::Reserved    : item.setReserved(value.toString()); break;
+        case CDocument::Sale        : item.setSale(value.toInt()); break;
+        case CDocument::Bulk        : item.setBulkQuantity(value.toInt()); break;
+        case CDocument::TierQ1      : item.setTierQuantity(0, value.toInt()); break;
+        case CDocument::TierQ2      : item.setTierQuantity(1, value.toInt()); break;
+        case CDocument::TierQ3      : item.setTierQuantity(2, value.toInt()); break;
+        case CDocument::TierP1      : item.setTierPrice(0, money_t::fromLocalizedString(value.toString())); break;
+        case CDocument::TierP2      : item.setTierPrice(1, money_t::fromLocalizedString(value.toString())); break;
+        case CDocument::TierP3      : item.setTierPrice(2, money_t::fromLocalizedString(value.toString())); break;
+        case CDocument::Weight      : item.setWeight(CLocaleMeasurement::stringToWeight(value.toString())); break;
+        case CDocument::Quantity    : item.setQuantity(value.toInt()); break;
+        case CDocument::QuantityDiff: item.setQuantity(itemp->origQuantity() + value.toInt()); break;
+        case CDocument::Price       : item.setPrice(money_t::fromLocalizedString(value.toString())); break;
+        case CDocument::PriceDiff   : item.setPrice(itemp->origPrice() + money_t::fromLocalizedString(value.toString())); break;
+        }
+        if (!(item == *itemp)) {
+            changeItem(itemp, item);
+            emit dataChanged(index, index);
+            return true;
+        }
+    }
+    return false;
+}
+                      
+                      
 QVariant CDocument::data(const QModelIndex &index, int role) const
 {
     //if (role == Qt::DecorationRole)

@@ -750,27 +750,31 @@ BrickLink::Order::Order(const QString &id, Type type)
 { }
 
 
-BrickLink::ColorModel *BrickLink::Core::colorModel() const
+BrickLink::ColorModel *BrickLink::Core::colorModel()
 {
-    return new ColorModel();
+    if (!m_color_model)
+        m_color_model = new ColorModel(this);
+    return m_color_model;
 }
 
-BrickLink::CategoryModel *BrickLink::Core::categoryModel(CategoryModel::Features f) const
+BrickLink::CategoryModel *BrickLink::Core::categoryModel()
 {
-    return new CategoryModel(f);
+    if (!m_category_model)
+        m_category_model = new CategoryModel(this);
+    return m_category_model;
 }
 
-BrickLink::ItemTypeModel *BrickLink::Core::itemTypeModel(ItemTypeModel::Features f) const
+BrickLink::ItemTypeModel *BrickLink::Core::itemTypeModel()
 {
-    return new ItemTypeModel(f);
+    if (!m_itemtype_model)
+        m_itemtype_model = new ItemTypeModel(this);
+    return m_itemtype_model;
 }
 
-BrickLink::ItemModel *BrickLink::Core::itemModel(ItemModel::Features f) const
+BrickLink::ItemModel *BrickLink::Core::itemModel()
 {
-    return new ItemModel(f);
+    if (!m_item_model)
+        m_item_model = new ItemModel(this);
+    return m_item_model;
 }
 
-BrickLink::AppearsInModel *BrickLink::Core::appearsInModel(const BrickLink::Item *item, const BrickLink::Color *color) const
-{
-    return new AppearsInModel(item, color);
-}
