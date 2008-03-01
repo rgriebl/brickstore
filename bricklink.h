@@ -799,6 +799,9 @@ public:
     QModelIndex index(const Item *item) const;
     const Item *item(const QModelIndex &index) const;
 
+    // shortcut for ItemProxyModel::filterAcceptsRow()
+    inline const Item *itemAtRow(int row) const { return m_items.at(row); }
+
 protected slots:
     void pictureUpdated(BrickLink::Picture *);
 
@@ -818,6 +821,7 @@ public:
 
     void setFilterItemType(const ItemType *it);
     void setFilterCategory(const Category *it);
+    void setFilterText(const QString &str);
     void setFilterWithoutInventory(bool on);
 
     using QSortFilterProxyModel::index;
@@ -830,6 +834,7 @@ protected:
 
     const ItemType *m_itemtype_filter;
     const Category *m_category_filter;
+    QRegExp         m_text_filter;
     bool            m_inv_filter;
 };
 

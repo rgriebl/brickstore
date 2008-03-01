@@ -26,7 +26,7 @@ CFilterEdit::CFilterEdit(QWidget *parent)
 {
     m_timer = new QTimer(this);
     m_timer->setSingleShot(true);
-    m_timer->setInterval(200);
+    m_timer->setInterval(400);
 
     w_menu = new QToolButton(this);
     w_menu->setCursor(Qt::ArrowCursor);

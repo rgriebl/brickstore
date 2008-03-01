@@ -33,8 +33,6 @@
 #include <QMenu>
 #include <QStyledItemDelegate>
 
-//#include "citemtypecombo.h"
-//#include "cresource.h"
 #include "cfilteredit.h"
 #include "cselectitem.h"
 #include "cutility.h"
@@ -215,13 +213,6 @@ void CSelectItem::init()
     connect(d->w_itemthumbs, SIGNAL(activated(const QModelIndex &)), this, SLOT(itemConfirmed()));
     connect(d->w_thumbs, SIGNAL(activated(const QModelIndex &)), this, SLOT(itemConfirmed()));
 
-/*    connect(d->w_items, SIGNAL(contextMenuRequested(QListViewItem *, const QPoint &, int)), this, SLOT(itemContextList(QListViewItem *, const QPoint &)));
-    connect(d->w_thumbs, SIGNAL(selectionChanged()), this, SLOT(itemChangedIcon()));
-    connect(d->w_thumbs, SIGNAL(doubleClicked(QIconViewItem *)), this, SLOT(itemConfirmed()));
-    connect(d->w_thumbs, SIGNAL(returnPressed(QIconViewItem *)), this, SLOT(itemConfirmed()));
-    connect(d->w_thumbs, SIGNAL(contextMenuRequested(QIconViewItem *, const QPoint &)), this, SLOT(itemContextIcon(QIconViewItem *, const QPoint &)));*/
-// connect ( d->w_viewpopup, SIGNAL( activated ( int )), this, SLOT( viewModeChanged ( int )));
-
     QGridLayout *toplay = new QGridLayout(this);
     toplay->setContentsMargins(0, 0, 0, 0);
     toplay->setColumnStretch(0, 25);
@@ -282,14 +273,6 @@ void CSelectItem::recalcHighlightPalette()
 void CSelectItem::languageChange()
 {
     d->w_item_types_label->setText(tr("Item type:"));
-//    d->w_filter_label->setText(tr("Filter:"));
-
-//    d->w_goto->setShortcut(tr("Ctrl+F", "Find Item"));
-//    d->w_goto->setToolTip(tr("Find Item...") + " (" + QString(d->w_goto->shortcut()) + ")");
-
-//    d->w_filter_expression->setToolTip(tr("Filter the list using this pattern (wildcards allowed: * ? [])"));
-//    d->w_filter_clear->setToolTip(tr("Reset an active filter"));
-//    d->w_viewbutton->setToolTip(tr("View"));
     d->w_filter->setToolTip(tr("Filter the list using this pattern (wildcards allowed: * ? [])"));
     d->w_filter->setIdleText(tr("Filter"));
 
@@ -309,8 +292,10 @@ void CSelectItem::setExcludeWithoutInventoryFilter(bool b)
         BrickLink::ItemTypeProxyModel *model1 = qobject_cast<BrickLink::ItemTypeProxyModel *>(d->w_item_types->model());
         BrickLink::ItemProxyModel *model2 = qobject_cast<BrickLink::ItemProxyModel *>(d->w_items->model());
 
+        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
         model1->setFilterWithoutInventory(b);
         model2->setFilterWithoutInventory(b);
+        QApplication::restoreOverrideCursor();
     }
 }
 
@@ -320,6 +305,7 @@ void CSelectItem::itemTypeChanged()
     const BrickLink::Item *olditem = currentItem();
     const BrickLink::ItemType *itemtype = currentItemType();
 
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     BrickLink::CategoryProxyModel *model = qobject_cast<BrickLink::CategoryProxyModel *>(d->w_categories->model());
     model->setFilterItemType(itemtype);
     setCurrentCategory(oldcat);
@@ -330,6 +316,7 @@ void CSelectItem::itemTypeChanged()
     setCurrentItem(olditem, true);
 
     emit hasColors(itemtype->hasColors());
+    QApplication::restoreOverrideCursor();
 }
 
 const BrickLink::ItemType *CSelectItem::currentItemType() const
@@ -363,8 +350,10 @@ void CSelectItem::categoryChanged()
     const BrickLink::Item *olditem = currentItem();
 
     BrickLink::ItemProxyModel *model = qobject_cast<BrickLink::ItemProxyModel *>(d->w_items->model());
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     model->setFilterCategory(currentCategory());
     setCurrentItem(olditem, true);
+    QApplication::restoreOverrideCursor();
 }
 
 const BrickLink::Category *CSelectItem::currentCategory() const

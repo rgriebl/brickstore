@@ -121,9 +121,9 @@ bool BrickLink::ColorProxyModel::lessThan(const QModelIndex &left, const QModelI
 {
     // the indexes are from the source model, so the internal pointers are valid
     // this is faster than fetching the Color* via data()/QVariant marshalling
-    const ColorModel *cm = qobject_cast<const ColorModel *>(sourceModel());
-    const Color *c1 = cm ? cm->color(left) : 0;
-    const Color *c2 = cm ? cm->color(right) : 0;
+    const ColorModel *cm = static_cast<const ColorModel *>(sourceModel());
+    const Color *c1 = cm->color(left);
+    const Color *c2 = cm->color(right);
 
     if (!c1)
         return true;
@@ -159,8 +159,8 @@ bool BrickLink::ColorProxyModel::filterAcceptsRow(int source_row, const QModelIn
     if (m_itemtype_filter && !m_itemtype_filter->hasColors()) {
         // the indexes are from the source model, so the internal pointers are valid
         // this is faster than fetching the Color* via data()/QVariant marshalling
-        const ColorModel *cm = qobject_cast<const ColorModel *>(sourceModel());
-        const Color *c = cm ? cm->color(cm->index(source_row, 0)) : 0;
+        const ColorModel *cm = static_cast<const ColorModel *>(sourceModel());
+        const Color *c = cm->color(cm->index(source_row, 0));
 
         return (c && c->id() == 0);
     }
@@ -171,7 +171,7 @@ bool BrickLink::ColorProxyModel::filterAcceptsRow(int source_row, const QModelIn
 
 const BrickLink::Color *BrickLink::ColorProxyModel::color(const QModelIndex &index) const
 {
-    ColorModel *cm = qobject_cast<ColorModel *>(sourceModel());
+    ColorModel *cm = static_cast<ColorModel *>(sourceModel());
 
     if (cm && index.isValid())
         return cm->color(mapToSource(index));
@@ -180,7 +180,7 @@ const BrickLink::Color *BrickLink::ColorProxyModel::color(const QModelIndex &ind
 
 QModelIndex BrickLink::ColorProxyModel::index(const Color *color) const
 {
-    ColorModel *cm = qobject_cast<ColorModel *>(sourceModel());
+    ColorModel *cm = static_cast<ColorModel *>(sourceModel());
 
     if (cm && color)
         return mapFromSource(cm->index(color));
@@ -286,9 +286,9 @@ bool BrickLink::CategoryProxyModel::lessThan(const QModelIndex &left, const QMod
 {
     // the indexes are from the source model, so the internal pointers are valid
     // this is faster than fetching the Categorsety* via data()/QVariant marshalling
-    const CategoryModel *cm = qobject_cast<const CategoryModel *>(left.model());
-    const Category *c1 = cm ? cm->category(left) : 0;
-    const Category *c2 = cm ? cm->category(right) : 0;
+    const CategoryModel *cm = static_cast<const CategoryModel *>(left.model());
+    const Category *c1 = cm->category(left);
+    const Category *c2 = cm->category(right);
 
     if (!c1 || c1 == CategoryModel::AllCategories)
         return true;
@@ -306,8 +306,8 @@ bool BrickLink::CategoryProxyModel::filterAcceptsRow(int source_row, const QMode
     if (m_itemtype_filter || m_all_filter) {
         // the indexes are from the source model, so the internal pointers are valid
         // this is faster than fetching the Category* via data()/QVariant marshalling
-        const CategoryModel *cm = qobject_cast<const CategoryModel *>(sourceModel());
-        const Category *c = cm ? cm->category(cm->index(source_row, 0)) : 0;
+        const CategoryModel *cm = static_cast<const CategoryModel *>(sourceModel());
+        const Category *c = cm->category(cm->index(source_row, 0));
 
         if (!c)
             return false;
@@ -326,7 +326,7 @@ bool BrickLink::CategoryProxyModel::filterAcceptsRow(int source_row, const QMode
 
 const BrickLink::Category *BrickLink::CategoryProxyModel::category(const QModelIndex &index) const
 {
-    CategoryModel *cm = qobject_cast<CategoryModel *>(sourceModel());
+    CategoryModel *cm = static_cast<CategoryModel *>(sourceModel());
 
     if (cm && index.isValid())
         return cm->category(mapToSource(index));
@@ -335,7 +335,7 @@ const BrickLink::Category *BrickLink::CategoryProxyModel::category(const QModelI
 
 QModelIndex BrickLink::CategoryProxyModel::index(const Category *category) const
 {
-    CategoryModel *cm = qobject_cast<CategoryModel *>(sourceModel());
+    CategoryModel *cm = static_cast<CategoryModel *>(sourceModel());
 
     if (cm && category)
         return mapFromSource(cm->index(category));
@@ -434,9 +434,9 @@ bool BrickLink::ItemTypeProxyModel::lessThan(const QModelIndex &left, const QMod
 {
     // the indexes are from the source model, so the internal pointers are valid
     // this is faster than fetching the Category* via data()/QVariant marshalling
-    const ItemTypeModel *im = qobject_cast<const ItemTypeModel *>(sourceModel());
-    const ItemType *i1 = im ? im->itemType(left) : 0;
-    const ItemType *i2 = im ? im->itemType(right) : 0;
+    const ItemTypeModel *im = static_cast<const ItemTypeModel *>(sourceModel());
+    const ItemType *i1 = im->itemType(left);
+    const ItemType *i2 = im->itemType(right);
 
     if (!i1)
         return true;
@@ -454,8 +454,8 @@ bool BrickLink::ItemTypeProxyModel::filterAcceptsRow(int source_row, const QMode
     if (m_inv_filter) {
         // the indexes are from the source model, so the internal pointers are valid
         // this is faster than fetching the Category* via data()/QVariant marshalling
-        const ItemTypeModel *im = qobject_cast<const ItemTypeModel *>(sourceModel());
-        const ItemType *i = im ? im->itemType(im->index(source_row, 0)) : 0;
+        const ItemTypeModel *im = static_cast<const ItemTypeModel *>(sourceModel());
+        const ItemType *i = im->itemType(im->index(source_row, 0));
 
         if (!i || !i->hasInventories())
             return false;
@@ -465,7 +465,7 @@ bool BrickLink::ItemTypeProxyModel::filterAcceptsRow(int source_row, const QMode
 
 const BrickLink::ItemType *BrickLink::ItemTypeProxyModel::itemType(const QModelIndex &index) const
 {
-    ItemTypeModel *im = qobject_cast<ItemTypeModel *>(sourceModel());
+    ItemTypeModel *im = static_cast<ItemTypeModel *>(sourceModel());
 
     if (im && index.isValid())
         return im->itemType(mapToSource(index));
@@ -474,7 +474,7 @@ const BrickLink::ItemType *BrickLink::ItemTypeProxyModel::itemType(const QModelI
 
 QModelIndex BrickLink::ItemTypeProxyModel::index(const ItemType *itemtype) const
 {
-    ItemTypeModel *im = qobject_cast<ItemTypeModel *>(sourceModel());
+    ItemTypeModel *im = static_cast<ItemTypeModel *>(sourceModel());
 
     if (im && itemtype)
         return mapFromSource(im->index(itemtype));
@@ -502,7 +502,8 @@ BrickLink::ItemModel::ItemModel(QObject *parent)
 
 QModelIndex BrickLink::ItemModel::index(int row, int column, const QModelIndex &parent) const
 {
-    if (hasIndex(row, column, parent))
+    // if (hasIndex(row, column, parent)) // too expensive
+    if (!parent.isValid() && row >= 0 && column >= 0 && row < m_items.count() && column < 3)
         return parent.isValid() ? QModelIndex() : createIndex(row, column, const_cast<Item *>(m_items.at(row)));
     return QModelIndex();
 }
@@ -622,6 +623,14 @@ void BrickLink::ItemProxyModel::setFilterCategory(const Category *cat)
     invalidateFilter();
 }
 
+void BrickLink::ItemProxyModel::setFilterText(const QString &str)
+{
+    if (str == m_text_filter.pattern())
+        return;
+    m_text_filter = QRegExp(str, Qt::CaseInsensitive, QRegExp::Wildcard);
+    invalidateFilter();
+}
+
 void BrickLink::ItemProxyModel::setFilterWithoutInventory(bool b)
 {
     if (b == m_inv_filter)
@@ -633,7 +642,7 @@ void BrickLink::ItemProxyModel::setFilterWithoutInventory(bool b)
 
 const BrickLink::Item *BrickLink::ItemProxyModel::item(const QModelIndex &index) const
 {
-    ItemModel *im = qobject_cast<ItemModel *>(sourceModel());
+    ItemModel *im = static_cast<ItemModel *>(sourceModel());
 
     if (im && index.isValid())
         return im->item(mapToSource(index));
@@ -642,7 +651,7 @@ const BrickLink::Item *BrickLink::ItemProxyModel::item(const QModelIndex &index)
 
 QModelIndex BrickLink::ItemProxyModel::index(const Item *item) const
 {
-    ItemModel *im = qobject_cast<ItemModel *>(sourceModel());
+    ItemModel *im = static_cast<ItemModel *>(sourceModel());
 
     if (im && item)
         return mapFromSource(im->index(item));
@@ -653,9 +662,9 @@ bool BrickLink::ItemProxyModel::lessThan(const QModelIndex &left, const QModelIn
 {
     // the indexes are from the source model, so the internal pointers are valid
     // this is faster than fetching the Category* via data()/QVariant marshalling
-    const ItemModel *im = qobject_cast<const ItemModel *>(sourceModel());
-    const Item *i1 = im ? im->item(left) : 0;
-    const Item *i2 = im ? im->item(right) : 0;
+    const ItemModel *im = static_cast<const ItemModel *>(sourceModel());
+    const Item *i1 = im->item(left);
+    const Item *i2 = im->item(right);
 
     bool byname = (left.column() == 2);
 
@@ -674,8 +683,8 @@ bool BrickLink::ItemProxyModel::filterAcceptsRow(int source_row, const QModelInd
 
     // the indexes are from the source model, so the internal pointers are valid
     // this is faster than fetching the Category* via data()/QVariant marshalling
-    const ItemModel *cm = qobject_cast<const ItemModel *>(sourceModel());
-    const Item *item = cm ? cm->item(cm->index(source_row, 0)) : 0;
+    const ItemModel *cm = static_cast<const ItemModel *>(sourceModel());
+    const Item *item = cm->itemAtRow(source_row);
 
     if (source_row == 0)
         qWarning("FILTERING ROW 0");
@@ -690,9 +699,9 @@ bool BrickLink::ItemProxyModel::filterAcceptsRow(int source_row, const QModelInd
         return false;
     else {
         QRegExp rx = filterRegExp();
-        if (!rx.isEmpty() && rx.isValid())
-            return ((rx.indexIn(QLatin1String(item->id())) >= 0) ||
-                    (rx.indexIn(QLatin1String(item->name())) >= 0));
+        if (!rx.isEmpty())
+           return ((rx.indexIn(QLatin1String(item->id())) >= 0) ||
+                   (rx.indexIn(QLatin1String(item->name())) >= 0));
     }
     return true;
 }
@@ -795,7 +804,7 @@ BrickLink::AppearsInProxyModel::AppearsInProxyModel(AppearsInModel *attach)
 
 const BrickLink::Item::AppearsInItem *BrickLink::AppearsInProxyModel::appearsIn(const QModelIndex &index) const
 {
-    AppearsInModel *aim = qobject_cast<AppearsInModel *>(sourceModel());
+    AppearsInModel *aim = static_cast<AppearsInModel *>(sourceModel());
 
     if (aim && index.isValid())
         return aim->appearsIn(mapToSource(index));
@@ -804,7 +813,7 @@ const BrickLink::Item::AppearsInItem *BrickLink::AppearsInProxyModel::appearsIn(
 
 QModelIndex BrickLink::AppearsInProxyModel::index(const Item::AppearsInItem *item) const
 {
-    AppearsInModel *aim = qobject_cast<AppearsInModel *>(sourceModel());
+    AppearsInModel *aim = static_cast<AppearsInModel *>(sourceModel());
 
     if (aim && item)
         return mapFromSource(aim->index(item));
@@ -815,9 +824,9 @@ bool BrickLink::AppearsInProxyModel::lessThan(const QModelIndex &left, const QMo
 {
     // the indexes are from the source model, so the internal pointers are valid
     // this is faster than fetching the Category* via data()/QVariant marshalling
-    const AppearsInModel *aim = qobject_cast<const AppearsInModel *>(sourceModel());
-    const Item::AppearsInItem *ai1 = aim ? aim->appearsIn(left) : 0;
-    const Item::AppearsInItem *ai2 = aim ? aim->appearsIn(right) : 0;
+    const AppearsInModel *aim = static_cast<const AppearsInModel *>(sourceModel());
+    const Item::AppearsInItem *ai1 = aim->appearsIn(left);
+    const Item::AppearsInItem *ai2 = aim->appearsIn(right);
 
     if (!ai1)
         return true;
