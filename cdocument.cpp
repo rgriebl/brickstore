@@ -1203,14 +1203,17 @@ int CDocument::columnCount(const QModelIndex &parent) const
 Qt::ItemFlags CDocument::flags(const QModelIndex &index) const
 {
     if (!index.isValid())
-        return Qt::ItemIsEnabled;
+        return 0;
                 
     Qt::ItemFlags ifs = QAbstractItemModel::flags(index);
     
     switch (index.column()) {
-    case Total:
-    case LotId: break;
-    default   : ifs |= Qt::ItemIsEditable; break;
+    case Total       :
+    case ItemType    :
+    case Category    :
+    case YearReleased:
+    case LotId       : break;
+    default          : ifs |= Qt::ItemIsEditable; break;
     }
     return ifs;
 }
