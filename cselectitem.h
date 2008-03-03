@@ -16,7 +16,7 @@
 
 #include <QDialog>
 
-#include "bricklink.h"
+#include "bricklinkfwd.h"
 
 class QListViewItem;
 class QIconViewItem;
@@ -83,27 +83,6 @@ protected:
     CSelectItemPrivate *d;
 };
 
-class DSelectItem : public QDialog {
-    Q_OBJECT
-public:
-    explicit DSelectItem(bool only_with_inventory, QWidget *parent = 0);
 
-    void setItemType(const BrickLink::ItemType *);
-    void setItem(const BrickLink::Item *);
-    //bool setItemTypeCategoryAndFilter ( const BrickLink::ItemType *itt, const BrickLink::Category *cat, const QString &filter );
-
-    const BrickLink::Item *item() const;
-
-    virtual int exec(const QRect &pos = QRect());
-
-private slots:
-    void checkItem(const BrickLink::Item *, bool);
-
-private:
-    CSelectItem *w_si;
-
-    QPushButton *w_ok;
-    QPushButton *w_cancel;
-};
 
 #endif

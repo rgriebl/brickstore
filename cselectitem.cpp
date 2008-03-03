@@ -33,6 +33,7 @@
 #include <QMenu>
 #include <QStyledItemDelegate>
 
+#include "bricklink.h"
 #include "cfilteredit.h"
 #include "cselectitem.h"
 #include "cutility.h"
@@ -47,29 +48,26 @@
 
 class CSelectItemPrivate {
 public:
-    QLabel *      w_item_types_label;
-    QComboBox *   w_item_types;
-    QTreeView *   w_categories;
-    QStackedLayout *m_stack;
-    QTreeView *   w_items;
-    QTreeView *   w_itemthumbs;
-    QListView *   w_thumbs;
-    CFilterEdit * w_filter;
-    QToolButton * w_viewbutton;
-    QAction *     m_viewaction[3];
-    QMenu *       w_viewmenu;
+    QLabel *         w_item_types_label;
+    QComboBox *      w_item_types;
+    QTreeView *      w_categories;
+    QStackedLayout * m_stack;
+    QTreeView *      w_items;
+    QTreeView *      w_itemthumbs;
+    QListView *      w_thumbs;
+    CFilterEdit *    w_filter;
+    QToolButton *    w_viewbutton;
+    QAction *        m_viewaction[3];
+    QMenu *          w_viewmenu;
     CSelectItem::ViewMode m_viewmode;
-
-    bool                   m_filter_active;
-    bool                   m_inv_only;
-    const BrickLink::Item *m_selected;
+    bool             m_inv_only;
 };
 
 
 class CategoryDelegate : public QStyledItemDelegate {
 public:
     CategoryDelegate(QObject *parent = 0)
-            : QStyledItemDelegate(parent)
+        : QStyledItemDelegate(parent)
     { }
 
     virtual void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
@@ -79,9 +77,9 @@ public:
 
             myoption.font.setBold(true);
             QStyledItemDelegate::paint(painter, myoption, index);
-            return;
         }
-        QStyledItemDelegate::paint(painter, option, index);
+        else
+            QStyledItemDelegate::paint(painter, option, index);
     }
 };
 
@@ -99,14 +97,15 @@ public:
 
             return item ? item->itemType()->pictureSize() : QSize(80, 60);
         }
-        return QStyledItemDelegate::sizeHint(option, index);
+        else
+            return QStyledItemDelegate::sizeHint(option, index);
     }
 };
 
 
 
 CSelectItem::CSelectItem(QWidget *parent)
-        : QWidget(parent)
+    : QWidget(parent)
 {
     d = new CSelectItemPrivate();
     d->m_inv_only = false;
@@ -137,16 +136,16 @@ void CSelectItem::init()
     QActionGroup *ag = new QActionGroup(this);
     ag->setExclusive(true);
 
-    d->m_viewaction[ListMode] = new QAction(ag);
-    d->m_viewaction[ListMode]->setIcon(QIcon(":/images/22x22/viewmode_list"));
+    d->m_viewaction[ListMode] = new QAction(QIcon(":/images/22x22/viewmode_list"), QString(), ag);
+    d->m_viewaction[ListMode]->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_1));
     d->m_viewaction[ListMode]->setCheckable(true);
     connect(d->m_viewaction[ListMode], SIGNAL(triggered()), this, SLOT(showAsList()));
-    d->m_viewaction[TableMode] = new QAction(ag);
-    d->m_viewaction[TableMode]->setIcon(QIcon(":/images/22x22/viewmode_images"));
+    d->m_viewaction[TableMode] = new QAction(QIcon(":/images/22x22/viewmode_images"), QString(), ag);
+    d->m_viewaction[TableMode]->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_2));
     d->m_viewaction[TableMode]->setCheckable(true);
     connect(d->m_viewaction[TableMode], SIGNAL(triggered()), this, SLOT(showAsTable()));
-    d->m_viewaction[ThumbsMode] = new QAction(ag);
-    d->m_viewaction[ThumbsMode]->setIcon(QIcon(":/images/22x22/viewmode_thumbs"));
+    d->m_viewaction[ThumbsMode] = new QAction(QIcon(":/images/22x22/viewmode_thumbs"), QString(), ag);
+    d->m_viewaction[ThumbsMode]->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_3));
     d->m_viewaction[ThumbsMode]->setCheckable(true);
     connect(d->m_viewaction[ThumbsMode], SIGNAL(triggered()), this, SLOT(showAsThumbs()));
 
@@ -154,6 +153,7 @@ void CSelectItem::init()
 
     d->w_viewbutton = new QToolButton(this);
     d->w_viewbutton->setAutoRaise(true);
+    d->w_viewbutton->setFocusPolicy(Qt::NoFocus);
     d->w_viewbutton->setPopupMode(QToolButton::InstantPopup);
     d->w_viewbutton->setMenu(d->w_viewmenu);
     d->w_viewbutton->setIcon(QIcon(":/images/22x22/viewmode_list"));
@@ -189,16 +189,22 @@ void CSelectItem::init()
     d->w_thumbs->setItemDelegate(new ItemThumbsDelegate);
 
     d->w_item_types->setModel(new BrickLink::ItemTypeProxyModel(BrickLink::core()->itemTypeModel()));
+
     d->w_categories->setModel(new BrickLink::CategoryProxyModel(BrickLink::core()->categoryModel()));
+    d->w_categories->sortByColumn(0, Qt::AscendingOrder);
+//    setCurrentCategory(BrickLink::CategoryModel::AllCategories);
+
     d->w_items->setModel(new BrickLink::ItemProxyModel(BrickLink::core()->itemModel()));
+    d->w_items->hideColumn(0);
+    d->w_items->sortByColumn(2, Qt::AscendingOrder);
+
     d->w_itemthumbs->setModel(d->w_items->model());
+
     d->w_thumbs->setModel(d->w_items->model());
+    d->w_thumbs->setModelColumn(0);
+
     d->w_itemthumbs->setSelectionModel(d->w_items->selectionModel());
     d->w_thumbs->setSelectionModel(d->w_items->selectionModel());
-    d->w_items->hideColumn(0);
-    d->w_thumbs->setModelColumn(0);
-    d->w_categories->sortByColumn(0, Qt::AscendingOrder);
-    d->w_items->sortByColumn(2, Qt::AscendingOrder);
 
     connect(d->w_filter, SIGNAL(filterTextChanged(const QString &)), this, SLOT(applyFilter()));
 
@@ -244,17 +250,12 @@ void CSelectItem::init()
     d->m_stack->addWidget(d->w_thumbs);
     toplay->addLayout(d->m_stack, 1, 1);
 
-    d->m_filter_active = false;
-
     d->m_stack->setCurrentWidget(d->w_items);
     d->m_viewmode = ListMode;
-
-    d->m_selected = 0;
 
     languageChange();
     recalcHighlightPalette();
 
-    setCurrentCategory(BrickLink::CategoryModel::AllCategories);
     setFocusProxy(d->w_item_types);
 }
 
@@ -296,6 +297,8 @@ void CSelectItem::setExcludeWithoutInventoryFilter(bool b)
         model1->setFilterWithoutInventory(b);
         model2->setFilterWithoutInventory(b);
         QApplication::restoreOverrideCursor();
+
+        d->m_inv_only = b;
     }
 }
 
@@ -373,8 +376,9 @@ void CSelectItem::setCurrentCategory(const BrickLink::Category *cat)
 
     if (model) {
         QModelIndex idx = model->index(cat);
-        if (idx.isValid())
-            d->w_categories->selectionModel()->select(idx, QItemSelectionModel::SelectCurrent);
+        if (idx.isValid()) {
+            d->w_categories->setCurrentIndex(idx);
+        }
         else
             d->w_categories->clearSelection();
     }
@@ -398,8 +402,8 @@ bool CSelectItem::setCurrentItem(const BrickLink::Item *item, bool dont_force_ca
     const BrickLink::Category *cat = item ? item->category() : 0;
 
     if (!dont_force_category) {
-        setCurrentItemType(itt ? itt : BrickLink::core()->itemType('P'));
         setCurrentCategory(cat ? cat : BrickLink::CategoryModel::AllCategories);
+        setCurrentItemType(itt ? itt : BrickLink::core()->itemType('P'));
     }
 
     BrickLink::ItemProxyModel *model = qobject_cast<BrickLink::ItemProxyModel *>(d->w_items->model());
@@ -407,7 +411,7 @@ bool CSelectItem::setCurrentItem(const BrickLink::Item *item, bool dont_force_ca
     if (model) {
         QModelIndex idx = model->index(item);
         if (idx.isValid()) {
-            d->w_items->selectionModel()->select(idx, QItemSelectionModel::SelectCurrent);
+            d->w_items->setCurrentIndex(idx);
             found = true;
         }
         else
@@ -502,14 +506,15 @@ void CSelectItem::ensureSelectionVisible()
     if (cat) {
         BrickLink::CategoryProxyModel *model = qobject_cast<BrickLink::CategoryProxyModel *>(d->w_categories->model());
 
-        d->w_categories->scrollTo(model->index(cat));
+        d->w_categories->scrollTo(model->index(cat), QAbstractItemView::PositionAtCenter);
     }
 
     if (item) {
-        /*  BrickLink::ItemModel *model = qobject_cast<BrickLink::ItemModel *>(d->w_items->model());
+        BrickLink::ItemProxyModel *model = qobject_cast<BrickLink::ItemProxyModel *>(d->w_items->model());
 
-          d->w_items->scrollTo(model->index(item));
-          d->w_thumbs->scrollTo(model->index(item));*/
+        d->w_items->scrollTo(model->index(item), QAbstractItemView::PositionAtCenter);
+        d->w_itemthumbs->scrollTo(model->index(item), QAbstractItemView::PositionAtCenter);
+        d->w_thumbs->scrollTo(model->index(item), QAbstractItemView::PositionAtCenter);
     }
 }
 
@@ -518,20 +523,11 @@ void CSelectItem::applyFilter()
 {
     QRegExp regexp(d->w_filter->text(), Qt::CaseInsensitive, QRegExp::Wildcard);
 
-    bool regexp_ok = !regexp.isEmpty() && regexp.isValid();
-
-    if (!regexp_ok && !d->m_filter_active) {
-        //qDebug ( "ignoring filter...." );
-        return;
-    }
-
     BrickLink::ItemProxyModel *model = qobject_cast<BrickLink::ItemProxyModel *>(d->w_items->model());
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     model->setFilterRegExp(regexp);
     QApplication::restoreOverrideCursor();
-
-    d->m_filter_active = regexp_ok;
 }
 
 
@@ -574,81 +570,3 @@ void CSelectItem::itemContext ( const BrickLink::Item *item, const QPoint &pos )
  }
 }
 */
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-
-DSelectItem::DSelectItem(bool only_with_inventory, QWidget *parent)
-        : QDialog(parent)
-{
-    w_si = new CSelectItem(this);
-    w_si->setExcludeWithoutInventoryFilter(only_with_inventory);
-
-    w_ok = new QPushButton(tr("&OK"), this);
-    w_ok->setAutoDefault(true);
-    w_ok->setDefault(true);
-
-    w_cancel = new QPushButton(tr("&Cancel"), this);
-    w_cancel->setAutoDefault(true);
-
-    QFrame *hline = new QFrame(this);
-    hline->setFrameStyle(QFrame::HLine | QFrame::Sunken);
-
-    QBoxLayout *toplay = new QVBoxLayout(this);
-    toplay->addWidget(w_si);
-    toplay->addWidget(hline);
-
-    QBoxLayout *butlay = new QHBoxLayout();
-    butlay->addStretch(60);
-    butlay->addWidget(w_ok, 15);
-    butlay->addWidget(w_cancel, 15);
-    toplay->addLayout(butlay);
-
-    setSizeGripEnabled(true);
-    setMinimumSize(minimumSizeHint());
-
-    connect(w_ok, SIGNAL(clicked()), this, SLOT(accept()));
-    connect(w_cancel, SIGNAL(clicked()), this, SLOT(reject()));
-    connect(w_si, SIGNAL(itemSelected(const BrickLink::Item *, bool)), this, SLOT(checkItem(const BrickLink::Item *, bool)));
-
-    w_ok->setEnabled(false);
-}
-
-void DSelectItem::setItemType(const BrickLink::ItemType *itt)
-{
-    w_si->setCurrentItemType(itt);
-}
-
-void DSelectItem::setItem(const BrickLink::Item *item)
-{
-    w_si->setCurrentItem(item);
-}
-/*
-bool DSelectItem::setItemTypeCategoryAndFilter ( const BrickLink::ItemType *itt, const BrickLink::Category *cat, const QString &filter )
-{
- return w_si->setItemTypeCategoryAndFilter ( itt, cat, filter );
-}
-*/
-const BrickLink::Item *DSelectItem::item() const
-{
-    return w_si->currentItem();
-}
-
-void DSelectItem::checkItem(const BrickLink::Item *it, bool ok)
-{
-    bool b = w_si->hasExcludeWithoutInventoryFilter() ? it->hasInventory() : true;
-
-    w_ok->setEnabled((it) && b);
-
-    if (it && b && ok)
-        w_ok->animateClick();
-}
-
-int DSelectItem::exec(const QRect &pos)
-{
-    if (pos.isValid())
-        CUtility::setPopupPos(this, pos);
-
-    return QDialog::exec();
-}

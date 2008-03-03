@@ -142,6 +142,8 @@ XFORMS  += registration \
            importinventory \
            additem \
            settings \
+	   selectcolor \
+	   selectitem \
 
 
 SOURCES += main.cpp \

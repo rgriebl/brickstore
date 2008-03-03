@@ -36,29 +36,18 @@
 #include <QStyleOptionFrameV2>
 #include <QStyle>
 
-#include "cselectcolor.h"
 #include "cmessagebox.h"
 #include "cfilteredit.h"
-//#include "cresource.h"
 #include "cconfig.h"
 #include "cframework.h"
 #include "cutility.h"
-//#include "creport.h"
 #include "cmoney.h"
-//#include "cundo.h"
 #include "cdocument.h"
 #include "cdisableupdates.h"
-/*
-#include "dlgincdecpriceimpl.h"
-#include "dlgsettopgimpl.h"
-#include "dlgloadinventoryimpl.h"
-#include "dlgloadorderimpl.h"
-#include "dlgselectreportimpl.h"
-#include "dlgincompleteitemimpl.h"
-#include "dlgmergeimpl.h"
-#include "dlgsubtractitemimpl.h"
-*/
 #include "cwindow.h"
+
+#include "dselectitem.h"
+#include "dselectcolor.h"
 
 namespace {
 
@@ -125,7 +114,7 @@ private:
 class DocumentDelegate : public QStyledItemDelegate {
 public:
     DocumentDelegate(CDocument *doc, QTableView *view)
-        : QStyledItemDelegate(view), m_doc(doc)
+        : QStyledItemDelegate(view), m_doc(doc), m_view(view)
     {
     }
 
@@ -191,8 +180,8 @@ public:
         QStyleOptionViewItemV4 option(option1);
 
         QPalette::ColorGroup cg = (option.state & QStyle::State_Enabled) ? QPalette::Normal : QPalette::Disabled;
-        if (cg == QPalette::Normal && !(option.state & QStyle::State_Active))
-            cg = QPalette::Inactive;
+//        if (cg == QPalette::Normal && !(option.state & QStyle::State_Active))
+//            cg = QPalette::Inactive;
 
         int x = option.rect.x(), y = option.rect.y();
         int w = option.rect.width();
@@ -440,8 +429,151 @@ public:
         }
     }
 
+    virtual bool editorEvent(QEvent *e, QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &idx)
+    {
+        if (!e || !model || !idx.isValid())
+            return false;
+
+        CDocument::Item *it = m_doc->item(idx);
+        if (!it)
+            return false;
+
+        switch (e->type()) {
+        case QEvent::KeyPress: {
+            //no break
+        }
+        case QEvent::MouseButtonDblClick: {
+            if (nonInlineEdit(e, it, option, idx))
+                return true;
+            break;
+        }
+        default: break;
+        }
+
+        return QStyledItemDelegate::editorEvent(e, model, option, idx);
+    }
+
+    bool nonInlineEdit(QEvent *e, CDocument::Item *it, const QStyleOptionViewItem &option, const QModelIndex &idx)
+    {
+        bool accept = true;
+
+        bool dblclick = (e->type() == QEvent::MouseButtonDblClick);
+        bool keypress = (e->type() == QEvent::KeyPress);
+        bool editkey = false;
+        int key = -1;
+
+        if (keypress) {
+            key = static_cast<QKeyEvent*>(e)->key();
+
+            if (key == Qt::Key_Space ||
+                key == Qt::Key_Return ||
+#if defined( Q_WS_MAC )
+                (key == Qt::Key_O && e->modifiers() & Qt::ControlModifier)
+#else
+                key == Qt::Key_F2
+#endif
+               ) {
+                editkey = true;
+            }
+        }
+
+
+        switch (idx.column()) {
+        case CDocument::Retain:
+            if (dblclick || (keypress && editkey)) {
+                CDocument::Item item = *it;
+                item.setRetain(!it->retain());
+                m_doc->changeItem(it, item);
+            }
+            break;
+
+        case CDocument::Stockroom:
+            if (dblclick || (keypress && editkey)) {
+                CDocument::Item item = *it;
+                item.setStockroom(!it->stockroom());
+                m_doc->changeItem(it, item);
+            }
+            break;
+
+        case CDocument::Condition:
+            if (dblclick || (keypress && (editkey || key == Qt::Key_N || key == Qt::Key_U))) {
+                BrickLink::Condition cond;
+                if (key == Qt::Key_N)
+                    cond = BrickLink::New;
+                else if (key == Qt::Key_U)
+                    cond = BrickLink::Used;
+                else
+                    cond = (it->condition() == BrickLink::New) ? BrickLink::Used : BrickLink::New;
+
+                CDocument::Item item = *it;
+                item.setCondition(cond);
+                m_doc->changeItem(it, item);
+            }
+            break;
+
+        case CDocument::Status:
+            if (dblclick || (keypress && (editkey || key == Qt::Key_I || key == Qt::Key_E || key == Qt::Key_X))) {
+                BrickLink::Status st = it->status();
+                if (key == Qt::Key_I)
+                    st = BrickLink::Include;
+                else if (key == Qt::Key_E)
+                    st = BrickLink::Exclude;
+                else if (key == Qt::Key_X)
+                    st = BrickLink::Extra;
+                else
+                    switch (st) {
+                            case BrickLink::Include: st = BrickLink::Exclude; break;
+                            case BrickLink::Exclude: st = BrickLink::Extra; break;
+                            case BrickLink::Extra  :
+                            default                : st = BrickLink::Include; break;
+                    }
+
+                CDocument::Item item = *it;
+                item.setStatus(st);
+                m_doc->changeItem(it, item);
+            }
+            break;
+
+        case CDocument::Picture:
+        case CDocument::Description:
+            if (dblclick || (keypress && editkey)) {
+                DSelectItem d(false, m_view, Qt::Tool);
+                d.setWindowTitle(tr("Modify Item"));
+                d.setItem(it->item());
+
+                if (d.exec(QRect(m_view->viewport()->mapToGlobal(option.rect.topLeft()), option.rect.size())) == QDialog::Accepted) {
+                    CDocument::Item item = *it;
+                    item.setItem(d.item());
+                    m_doc->changeItem(it, item);
+                }
+            }
+            break;
+
+        case CDocument::Color:
+            if (dblclick || (keypress && editkey)) {
+                DSelectColor d(m_view, Qt::Tool);
+                d.setWindowTitle(tr("Modify Color"));
+                d.setColor(it->color());
+
+                if (d.exec(QRect(m_view->viewport()->mapToGlobal(option.rect.topLeft()), option.rect.size())) == QDialog::Accepted) {
+                    CDocument::Item item = *it;
+                    item.setColor(d.color());
+                    m_doc->changeItem(it, item);
+                }
+            }
+            break;
+
+        default:
+            accept = false;
+            break;
+        }
+        return accept;
+    }
+
+
 protected:
     CDocument *m_doc;
+    QTableView *m_view;
     static QVector<QColor> s_shades;
     static QHash<BrickLink::Status, QIcon> s_status_icons;
 };
@@ -475,6 +607,7 @@ CWindow::CWindow(CDocument *doc, QWidget *parent)
     w_list->verticalHeader()->setResizeMode(QHeaderView::Fixed);
     w_list->verticalHeader()->hide();
     w_list->horizontalHeader()->setHighlightSections(false);
+    w_list->setEditTriggers(QAbstractItemView::DoubleClicked | QAbstractItemView::EditKeyPressed | QAbstractItemView::AnyKeyPressed);
     setFocusProxy(w_list);
 
     w_list->setModel(doc);
@@ -509,6 +642,7 @@ CWindow::CWindow(CDocument *doc, QWidget *parent)
     connect(BrickLink::core(), SIGNAL(priceGuideUpdated(BrickLink::PriceGuide *)), this, SLOT(priceGuideUpdated(BrickLink::PriceGuide *)));
 
     connect(w_list, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(contextMenu(const QPoint &)));
+    //connect(w_list, SIGNAL(activated(const QModelIndex &)), w_list, SLOT(edit(const QModelIndex &)));
 //    connect(w_filter_clear, SIGNAL(clicked()), w_filter_expression, SLOT(clearEditText()));
 //    connect(w_filter_expression, SIGNAL(editTextChanged(const QString &)), this, SLOT(applyFilter()));
 //    connect(w_filter_field, SIGNAL(activated(int)), this, SLOT(applyFilter()));

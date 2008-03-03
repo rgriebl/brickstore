@@ -38,7 +38,6 @@ CSplash::CSplash()
         : QSplashScreen(QPixmap(1, 1))
 {
     setAttribute(Qt::WA_DeleteOnClose);
-    setWindowOpacity(0.85f);    
 
     QFont f = QApplication::font();
     f.setPixelSize(qMax(14 * qApp->desktop()->height() / 1200, 10));

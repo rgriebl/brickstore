@@ -21,9 +21,7 @@
 #include <QPointer>
 
 #include "cdocument.h"
-//#include "clistaction.h"
-#include "bricklink.h"
-
+#include "bricklinkfwd.h"
 
 class QLabel;
 class QMdiArea;

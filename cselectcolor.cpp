@@ -12,41 +12,19 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 #include <QLayout>
-#include <QList>
-#include <QPushButton>
-#include <QHash>
-#include <QApplication>
 #include <QHeaderView>
 #include <QTreeView>
-#include <QItemDelegate>
+#include <QEvent>
 
+#include "bricklink.h"
 #include "cutility.h"
-//#include "clistview.h"
 #include "cselectcolor.h"
-
-
-class ColorDelegate : public QItemDelegate {
-public:
-    ColorDelegate(QObject *parent = 0)
-            : QItemDelegate(parent)
-    { }
-
-    virtual void drawDecoration(QPainter *painter, const QStyleOptionViewItem &option, const QRect &rect, const QPixmap &pixmap) const
-    {
-        QStyleOptionViewItemV4 myoption(option);
-        myoption.state &= ~QStyle::State_Selected;
-
-        QItemDelegate::drawDecoration(painter, myoption, rect, pixmap);
-    }
-};
-
 
 
 CSelectColor::CSelectColor(QWidget *parent, Qt::WindowFlags f)
     : QWidget(parent, f)
 {
     w_colors = new QTreeView(this);
-    w_colors->setItemDelegate(new ColorDelegate());
     w_colors->setAlternatingRowColors(true);
     w_colors->setAllColumnsShowFocus(true);
     w_colors->setUniformRowHeights(true);
@@ -54,10 +32,6 @@ CSelectColor::CSelectColor(QWidget *parent, Qt::WindowFlags f)
     w_colors->setSortingEnabled(true);
 
     w_colors->setModel(new BrickLink::ColorProxyModel(BrickLink::core()->colorModel()));
-
-    w_colors->resizeColumnToContents(0);
-    w_colors->setFixedWidth(w_colors->columnWidth(0) + 2 * w_colors->frameWidth() + w_colors->style()->pixelMetric(QStyle::PM_ScrollBarExtent) + 4);
-
     w_colors->sortByColumn(0, Qt::AscendingOrder);
 
     setFocusProxy(w_colors);
@@ -72,6 +46,16 @@ CSelectColor::CSelectColor(QWidget *parent, Qt::WindowFlags f)
     recalcHighlightPalette();
 }
 
+void CSelectColor::setWidthToContents(bool b)
+{
+    if (b) {
+        w_colors->resizeColumnToContents(0);
+        w_colors->setFixedWidth(w_colors->columnWidth(0) + 2 * w_colors->frameWidth() + w_colors->style()->pixelMetric(QStyle::PM_ScrollBarExtent) + 4);
+    }
+    else {
+        w_colors->setMaximumWidth(INT_MAX);
+    }
+}
 
 const BrickLink::Color *CSelectColor::currentColor() const
 {
@@ -87,7 +71,7 @@ void CSelectColor::setCurrentColor(const BrickLink::Color *color)
 {
     BrickLink::ColorProxyModel *model = qobject_cast<BrickLink::ColorProxyModel *>(w_colors->model());
 
-    w_colors->selectionModel()->select(model->index(color), QItemSelectionModel::SelectCurrent);
+    w_colors->setCurrentIndex(model->index(color));
 }
 
 void CSelectColor::colorChanged()
@@ -102,8 +86,13 @@ void CSelectColor::colorConfirmed()
 
 void CSelectColor::showEvent(QShowEvent *)
 {
-    if (w_colors->selectionModel()->hasSelection())
-        w_colors->scrollTo(w_colors->selectionModel()->selectedIndexes().front(), QAbstractItemView::PositionAtCenter);
+    const BrickLink::Color *color = currentColor();
+
+    if (color) {
+        BrickLink::ColorProxyModel *model = qobject_cast<BrickLink::ColorProxyModel *>(w_colors->model());
+
+        w_colors->scrollTo(model->index(color), QAbstractItemView::PositionAtCenter);
+    }
 }
 
 void CSelectColor::changeEvent(QEvent *e)
@@ -120,7 +109,7 @@ void CSelectColor::changeEvent(QEvent *e)
 
 void CSelectColor::recalcHighlightPalette()
 {
-    QPalette p = qApp->palette();
+    QPalette p;
     QColor hc = CUtility::gradientColor(p.color(QPalette::Active, QPalette::Highlight), p.color(QPalette::Inactive, QPalette::Highlight), 0.35f);
     QColor htc = p.color(QPalette::Active, QPalette::HighlightedText);
 
@@ -128,75 +117,3 @@ void CSelectColor::recalcHighlightPalette()
     p.setColor(QPalette::Inactive, QPalette::HighlightedText, htc);
     setPalette(p);
 }
-
-
-
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-
-
-DSelectColor::DSelectColor(QWidget *parent, Qt::WindowFlags f)
-    : QDialog(parent, f)
-{
-    w_sc = new CSelectColor(this);
-    w_sc->w_colors->setMaximumSize(32767, 32767);    // fixed width ->minimum width in this case
-
-    w_ok = new QPushButton(tr("&OK"), this);
-    w_ok->setAutoDefault(true);
-    w_ok->setDefault(true);
-
-    w_cancel = new QPushButton(tr("&Cancel"), this);
-    w_cancel->setAutoDefault(true);
-
-    QFrame *hline = new QFrame(this);
-    hline->setFrameStyle(QFrame::HLine | QFrame::Sunken);
-
-    QBoxLayout *toplay = new QVBoxLayout(this);
-    toplay->addWidget(w_sc);
-    toplay->addWidget(hline);
-
-    QBoxLayout *butlay = new QHBoxLayout();
-    toplay->addLayout(butlay);
-    butlay->addStretch(60);
-    butlay->addWidget(w_ok, 15);
-    butlay->addWidget(w_cancel, 15);
-
-    setSizeGripEnabled(true);
-    setMinimumSize(minimumSizeHint());
-
-    connect(w_ok, SIGNAL(clicked()), this, SLOT(accept()));
-    connect(w_cancel, SIGNAL(clicked()), this, SLOT(reject()));
-    connect(w_sc, SIGNAL(colorSelected(const BrickLink::Color *, bool)), this, SLOT(checkColor(const BrickLink::Color *, bool)));
-
-    w_ok->setEnabled(false);
-    w_sc->setFocus();
-}
-
-void DSelectColor::setColor(const BrickLink::Color *col)
-{
-    w_sc->setCurrentColor(col);
-}
-
-const BrickLink::Color *DSelectColor::color() const
-{
-    return w_sc->currentColor();
-}
-
-void DSelectColor::checkColor(const BrickLink::Color *col, bool ok)
-{
-    w_ok->setEnabled((col));
-
-    if (col && ok)
-        w_ok->animateClick();
-}
-
-int DSelectColor::exec(const QRect &pos)
-{
-    if (pos.isValid())
-        CUtility::setPopupPos(this, pos);
-
-    return QDialog::exec();
-}
-

@@ -19,16 +19,13 @@
 #include <QHash>
 #include <qdom.h>
 
-//#include "citemview.h"
-#include "bricklink.h"
+#include "bricklinkfwd.h"
 #include "cdocument.h"
 #include "cconfig.h"
 #include "cmoney.h"
 
 class QToolButton;
 class QComboBox;
-//class QListViewItem;
-//class CItemView;
 class QTableView;
 class CFrameWork;
 class CUndoStack;

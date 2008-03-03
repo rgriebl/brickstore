@@ -30,10 +30,12 @@ CFilterEdit::CFilterEdit(QWidget *parent)
 
     w_menu = new QToolButton(this);
     w_menu->setCursor(Qt::ArrowCursor);
+    w_menu->setFocusPolicy(Qt::NoFocus);
 //    w_menu->setAutoRaise(true);
 
     w_clear = new QToolButton(this);
     w_clear->setCursor(Qt::ArrowCursor);
+    w_clear->setFocusPolicy(Qt::NoFocus);
     w_clear->hide();
 
     w_menu->setStyleSheet("QToolButton { border: none; padding: 0px; }\n"

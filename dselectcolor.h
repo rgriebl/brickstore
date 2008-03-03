@@ -11,41 +11,30 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __CSELECTCOLOR_H__
-#define __CSELECTCOLOR_H__
+#ifndef __DSELECTCOLOR_H__
+#define __DSELECTCOLOR_H__
 
 #include <QDialog>
+#include "ui_selectcolor.h"
 
-#include "bricklinkfwd.h"
+class BrickLink::Color;
 
-class QTreeView;
-
-class CSelectColor : public QWidget {
+class DSelectColor : public QDialog, private Ui::SelectColor {
     Q_OBJECT
+
 public:
-    CSelectColor(QWidget *parent = 0, Qt::WindowFlags f = 0);
+    DSelectColor(QWidget *parent = 0, Qt::WindowFlags f = 0);
 
-    void setWidthToContents(bool b);
+    void setColor(const BrickLink::Color *);
+    const BrickLink::Color *color() const;
 
-    void setCurrentColor(const BrickLink::Color *);
-    const BrickLink::Color *currentColor() const;
-
-signals:
-    void colorSelected(const BrickLink::Color *, bool);
-
-protected slots:
-    void colorChanged();
-    void colorConfirmed();
+    virtual int exec(const QRect &pos = QRect());
 
 protected:
-    virtual void changeEvent(QEvent *);
     virtual void showEvent(QShowEvent *);
-    void recalcHighlightPalette();
 
-protected:
-    QTreeView *w_colors;
-
-//    friend class DSelectColor;
+private slots:
+    void checkColor(const BrickLink::Color *, bool);
 };
 
 #endif

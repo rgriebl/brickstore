@@ -46,7 +46,7 @@ public:
 
 
 DAddItem::DAddItem(QWidget *parent, Qt::WindowFlags f)
-        : QDialog(parent, f | Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowContextHelpButtonHint | Qt::WindowSystemMenuHint | Qt::WindowMaximizeButtonHint)
+    : QDialog(parent, f | Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowContextHelpButtonHint | Qt::WindowSystemMenuHint | Qt::WindowMaximizeButtonHint)
 {
     setupUi(this);
 
@@ -65,6 +65,7 @@ DAddItem::DAddItem(QWidget *parent, Qt::WindowFlags f)
     m_condition->addButton(w_radio_new, BrickLink::New);
     m_condition->addButton(w_radio_used, BrickLink::Used);
 
+    w_select_color->setWidthToContents(true);
 
     w_add = new QPushButton();
     w_buttons->addButton(w_add, QDialogButtonBox::ActionRole);

@@ -14,15 +14,15 @@
 #ifndef __BRICKLINK_H__
 #define __BRICKLINK_H__
 
-#include <QtGlobal>
+#include "bricklinkfwd.h"
+
 #include <QDateTime>
 #include <QString>
-#include <qcolor.h>
-#include <qobject.h>
-#include <qimage.h>
-//#include <qdragobject.h>
+#include <QColor>
+#include <QObject>
+#include <QImage>
 #include <QtXml/QDomDocument>
-#include <qlocale.h>
+#include <QLocale>
 #include <QHash>
 #include <QVector>
 #include <QList>
@@ -33,6 +33,8 @@
 #include <QAbstractListModel>
 #include <QSortFilterProxyModel>
 #include <QMutex>
+#include <QTimer>
+
 
 #include <time.h>
 
@@ -41,72 +43,11 @@
 #include "cthreadpool.h"
 #include "ctransfer.h"
 
-
 class QIODevice;
 class QFile;
-class QAbstractItemModel;
-//template <typename T> class QDict;
 
 
 namespace BrickLink {
-class Picture;
-class Category;
-class Color;
-class TextImport;
-class InvItem;
-class Item;
-class ItemType;
-class Core;
-
-QDataStream &operator << (QDataStream &ds, const InvItem &ii);
-QDataStream &operator >> (QDataStream &ds, InvItem &ii);
-
-QDataStream &operator << (QDataStream &ds, const Item *item);
-QDataStream &operator >> (QDataStream &ds, Item *item);
-
-QDataStream &operator << (QDataStream &ds, const ItemType *itt);
-QDataStream &operator >> (QDataStream &ds, ItemType *itt);
-
-QDataStream &operator << (QDataStream &ds, const Category *cat);
-QDataStream &operator >> (QDataStream &ds, Category *cat);
-
-QDataStream &operator << (QDataStream &ds, const Color *col);
-QDataStream &operator >> (QDataStream &ds, Color *col);
-
-typedef QList<InvItem *> InvItemList;
-
-enum Time      { AllTime, PastSix, Current, TimeCount };
-enum Price     { Lowest, Average, WAverage, Highest, PriceCount };
-enum Condition { New, Used, ConditionCount };
-
-enum Status    { Include, Exclude, Extra, Unknown };
-
-enum UpdateStatus { Ok, Updating, UpdateFailed };
-
-enum UrlList {
-    URL_InventoryRequest,
-    URL_WantedListUpload,
-    URL_InventoryUpload,
-    URL_InventoryUpdate,
-    URL_CatalogInfo,
-    URL_PriceGuideInfo,
-    URL_ColorChangeLog,
-    URL_ItemChangeLog,
-    URL_LotsForSale,
-    URL_AppearsInSets,
-    URL_PeeronInfo,
-    URL_StoreItemDetail
-};
-
-enum ItemListXMLHint {
-    XMLHint_MassUpload,
-    XMLHint_MassUpdate,
-    XMLHint_Inventory,
-    XMLHint_Order,
-    XMLHint_WantedList,
-    XMLHint_BrikTrak,
-    XMLHint_BrickStore
-};
 
 class ItemType {
 public:
@@ -230,10 +171,6 @@ public:
     int yearReleased() const               { return m_year ? m_year + 1900 : 0; }
 
     ~Item();
-
-    typedef QPair <int, const Item *>              AppearsInItem;
-    typedef QVector <AppearsInItem>                AppearsInColor;
-    typedef QHash <const Color *, AppearsInColor>  AppearsIn;
 
     AppearsIn appearsIn(const Color *color = 0) const;
     InvItemList  consistsOf() const;
@@ -493,12 +430,10 @@ private:
 
 class Order {
 public:
-    enum Type { Received, Placed, Any };
-
-    Order(const QString &id, Type type);
+    Order(const QString &id, OrderType type);
 
     QString id() const        { return m_id; }
-    Type type() const         { return m_type; }
+    OrderType type() const    { return m_type; }
     QDateTime date() const    { return m_date; }
     QDateTime statusChange() const  { return m_status_change; }
     //QString buyer() const     { return m_type == Received ? m_other : QString(); }
@@ -531,7 +466,7 @@ public:
 
 private:
     QString   m_id;
-    Type      m_type;
+    OrderType m_type;
     QDateTime m_date;
     QDateTime m_status_change;
     QString   m_other;
@@ -631,24 +566,12 @@ private:
     QHash<int, const Category *> m_categories;
     QVector<const Item *>        m_items;
 
-    QHash<const Item *, Item::AppearsIn> m_appears_in_hash;
+    QHash<const Item *, AppearsIn> m_appears_in_hash;
     QHash<const Item *, InvItemList>     m_consists_of_hash;
 
     const ItemType *m_current_item_type;
 };
 
-
-enum ModelRoles {
-    RoleBase = 0x05c136c8,  // printf "0x%08x\n" $(($RANDOM*$RANDOM))
-
-    ColorPointerRole,
-    CategoryPointerRole,
-    ItemTypePointerRole,
-    ItemPointerRole,
-    AppearsInItemPointerRole,
-
-    RoleMax
-};
 
 class ColorModel : public QAbstractListModel {
     Q_OBJECT
@@ -802,13 +725,16 @@ public:
     // shortcut for ItemProxyModel::filterAcceptsRow()
     inline const Item *itemAtRow(int row) const { return m_items.at(row); }
 
+    void setItemType(const ItemType *itemtype);
+
 protected slots:
     void pictureUpdated(BrickLink::Picture *);
 
 protected:
     ItemModel(QObject *parent = 0);
 
-    const QVector<const Item *> &m_items;
+    QVector<const Item *> m_items;
+    const ItemType *m_itemtype;
 
     friend class Core;
 };
@@ -832,10 +758,15 @@ protected:
     virtual bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const;
     virtual bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
 
+protected slots:
+    void invalidateFilterSlot();
+
+protected:
     const ItemType *m_itemtype_filter;
     const Category *m_category_filter;
     QRegExp         m_text_filter;
     bool            m_inv_filter;
+    QTimer          m_filter_timer;
 };
 
 
@@ -852,14 +783,14 @@ public:
     virtual QVariant data(const QModelIndex &index, int role) const;
     virtual QVariant headerData(int section, Qt::Orientation orient, int role) const;
 
-    const Item::AppearsInItem *appearsIn(const QModelIndex &idx) const;
-    QModelIndex index(const Item::AppearsInItem *const_ai) const;
+    const AppearsInItem *appearsIn(const QModelIndex &idx) const;
+    QModelIndex index(const AppearsInItem *const_ai) const;
 
 protected:
     const Item *        m_item;
     const Color *       m_color;
-    Item::AppearsIn     m_appearsin;
-    QList<Item::AppearsInItem *> m_items;
+    AppearsIn     m_appearsin;
+    QList<AppearsInItem *> m_items;
 };
 
 class AppearsInProxyModel : public QSortFilterProxyModel {
@@ -869,8 +800,8 @@ public:
     AppearsInProxyModel(AppearsInModel *model);
 
     using QSortFilterProxyModel::index;
-    const Item::AppearsInItem *appearsIn(const QModelIndex &idx) const;
-    QModelIndex index(const Item::AppearsInItem *const_ai) const;
+    const AppearsInItem *appearsIn(const QModelIndex &idx) const;
+    QModelIndex index(const AppearsInItem *const_ai) const;
 
 protected:
     virtual bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
@@ -969,7 +900,7 @@ private:
     bool parseLDrawModelInternal(QFile &file, const QString &model_name, InvItemList &items, uint *invalid_items, QHash<QString, InvItem *> &mergehash);
 
     void setDatabase_ConsistsOf(const QHash<const Item *, InvItemList> &hash);
-    void setDatabase_AppearsIn(const QHash<const Item *, Item::AppearsIn> &hash);
+    void setDatabase_AppearsIn(const QHash<const Item *, AppearsIn> &hash);
     void setDatabase_Basics(const QHash<int, const Color *> &colors,
                             const QHash<int, const Category *> &categories,
                             const QHash<int, const ItemType *> &item_types,
@@ -1020,12 +951,11 @@ inline Core *create(const QString &datadir, QString *errstring) { return Core::c
 
 } // namespace BrickLink
 
-
 Q_DECLARE_METATYPE(const BrickLink::Color *)
 Q_DECLARE_METATYPE(const BrickLink::Category *)
 Q_DECLARE_METATYPE(const BrickLink::ItemType *)
 Q_DECLARE_METATYPE(const BrickLink::Item *)
-Q_DECLARE_METATYPE(const BrickLink::Item::AppearsInItem *)
+Q_DECLARE_METATYPE(const BrickLink::AppearsInItem *)
 
 #endif
 

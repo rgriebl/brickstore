@@ -17,7 +17,7 @@
 #include <QObject>
 #include <QDateTime>
 
-#include "bricklink.h"
+#include "bricklinkfwd.h"
 #include "ctransfer.h"
 
 

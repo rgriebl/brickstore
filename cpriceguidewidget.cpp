@@ -23,6 +23,7 @@
 #include <QStyleOptionHeader>
 #include <QDesktopServices>
 
+#include "bricklink.h"
 #include "cutility.h"
 #include "cmoney.h"
 

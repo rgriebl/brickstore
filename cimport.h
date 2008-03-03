@@ -126,13 +126,13 @@ class CImportBLOrder : public QObject {
     Q_OBJECT
 
 public:
-    CImportBLOrder(const QDate &from, const QDate &to, BrickLink::Order::Type type, CProgressDialog *pd)
+    CImportBLOrder(const QDate &from, const QDate &to, BrickLink::OrderType type, CProgressDialog *pd)
         : m_progress(pd), m_order_from(from), m_order_to(to), m_order_type(type)
     {
         init();
     }
 
-    CImportBLOrder(const QString &order, BrickLink::Order::Type type, CProgressDialog *pd)
+    CImportBLOrder(const QString &order, BrickLink::OrderType type, CProgressDialog *pd)
         : m_progress(pd), m_order_id(order), m_order_type(type)
     {
         init();
@@ -142,7 +142,7 @@ public:
     {
         m_current_address = -1;
 
-        m_retry_placed = (m_order_type == BrickLink::Order::Any);
+        m_retry_placed = (m_order_type == BrickLink::Any);
 
         if (!m_order_id.isEmpty()) {
             m_order_to = QDate::currentDate();
@@ -156,7 +156,7 @@ public:
 
         QUrl url("http://www.bricklink.com/orderExcelFinal.asp");
 
-        url.addQueryItem("orderType",     m_order_type == BrickLink::Order::Placed ? "placed" : "received");
+        url.addQueryItem("orderType",     m_order_type == BrickLink::Placed ? "placed" : "received");
         url.addQueryItem("action",        "save");
         url.addQueryItem("orderID",       m_order_id);
         url.addQueryItem("viewType",      "X");    // XML
@@ -235,7 +235,7 @@ private slots:
                                 items = BrickLink::core()->parseItemListXML(ordernode.toElement(), BrickLink::XMLHint_Order /*, &invalid_items*/);
 
                                 if (items) {
-                                    BrickLink::Order *order = new BrickLink::Order("", BrickLink::Order::Placed);
+                                    BrickLink::Order *order = new BrickLink::Order("", BrickLink::Placed);
 
                                     for (QDomNode node = ordernode.firstChild(); !node.isNull(); node = node.nextSibling()) {
                                         if (!node. isElement())
@@ -327,7 +327,7 @@ private:
     QString                m_order_id;
     QDate                  m_order_from;
     QDate                  m_order_to;
-    BrickLink::Order::Type m_order_type;
+    BrickLink::OrderType m_order_type;
     QUrl                   m_url;
     bool                   m_retry_placed;
     int                    m_current_address;

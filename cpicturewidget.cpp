@@ -19,6 +19,7 @@
 #include <QDesktopServices>
 #include <QMouseEvent>
 
+#include "bricklink.h"
 #include "cpicturewidget.h"
 
 

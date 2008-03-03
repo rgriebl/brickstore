@@ -19,7 +19,7 @@
 #include "ui_additem.h"
 
 #include "cmoney.h"
-#include "bricklink.h"
+#include "bricklinkfwd.h"
 
 class QValidator;
 class QPushButton;

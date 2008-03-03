@@ -17,7 +17,7 @@
 #include <QFrame>
 
 #include "cmoney.h"
-#include "bricklink.h"
+#include "bricklinkfwd.h"
 
 
 class QAction;

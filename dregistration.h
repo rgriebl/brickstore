@@ -14,7 +14,7 @@
 #ifndef __DREGISTRATION_H__
 #define __DREGISTRATION_H__
 
-#include "bricklink.h"
+#include "bricklinkfwd.h"
 
 #include "ui_registration.h"
 

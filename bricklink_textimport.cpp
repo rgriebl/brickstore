@@ -545,7 +545,7 @@ bool BrickLink::TextImport::readInventory(const QString &path, const Item *item)
                         if (!ii->item() || !ii->color() || !ii->quantity())
                             continue;
 
-                        BrickLink::Item::AppearsInColor &vec = m_appears_in_hash[ii->item()][ii->color()];
+                        BrickLink::AppearsInColor &vec = m_appears_in_hash[ii->item()][ii->color()];
                         vec.append(QPair<int, const BrickLink::Item *>(ii->quantity(), item));
                     }
                     m_consists_of_hash.insert(item, *items);

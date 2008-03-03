@@ -15,7 +15,8 @@
 #define __CAPPEARSINWIDGET_H__
 
 #include <QTreeView>
-#include "bricklink.h"
+
+#include "bricklinkfwd.h"
 
 
 class CAppearsInWidgetPrivate;
@@ -46,7 +47,7 @@ private slots:
     void resizeColumns();
 
 private:
-    const BrickLink::Item::AppearsInItem *appearsIn() const;
+    const BrickLink::AppearsInItem *appearsIn() const;
 
 private:
     CAppearsInWidgetPrivate *d;

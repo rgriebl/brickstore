@@ -17,7 +17,7 @@
 #include <QFrame>
 #include <QLabel>
 
-#include "bricklink.h"
+#include "bricklinkfwd.h"
 
 
 class CPictureWidgetPrivate;

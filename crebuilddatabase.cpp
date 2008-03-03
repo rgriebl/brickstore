@@ -20,6 +20,7 @@
 #include <windows.h>
 #endif
 
+#include "bricklink.h"
 #include "cconfig.h"
 #include "cutility.h"
 

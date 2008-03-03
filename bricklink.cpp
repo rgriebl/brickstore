@@ -364,13 +364,6 @@ BrickLink::Core::Core(const QString &datadir)
 
     m_online = true;
 
-    /*
-    m_colors.setAutoDelete ( true );
-    m_categories.setAutoDelete ( true );
-    m_item_types.setAutoDelete ( true );
-    m_items.setAutoDelete ( true );
-    */
-
     QPixmapCache::setCacheLimit(20 * 1024);     // 80 x 60 x 32 (w x h x bpp) == 20kB ->room for ~1000 pixmaps
 
     connect(&m_pg_transfer,  SIGNAL(finished(CThreadPoolJob *)), this, SLOT(priceGuideJobFinished(CThreadPoolJob *)));
@@ -1330,11 +1323,11 @@ void BrickLink::Core::setDatabase_ConsistsOf(const QHash<const Item *, InvItemLi
         it.key()->setConsistsOf(it.value());
 }
 
-void BrickLink::Core::setDatabase_AppearsIn(const QHash<const Item *, Item::AppearsIn> &hash)
+void BrickLink::Core::setDatabase_AppearsIn(const QHash<const Item *, AppearsIn> &hash)
 {
     QMutexLocker lock(&m_corelock);
 
-    for (QHash<const Item *, Item::AppearsIn>::const_iterator it = hash.begin(); it != hash.end(); ++it)
+    for (QHash<const Item *, AppearsIn>::const_iterator it = hash.begin(); it != hash.end(); ++it)
         it.key()->setAppearsIn(it.value());
 }
 

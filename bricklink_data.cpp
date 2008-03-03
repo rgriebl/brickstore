@@ -210,7 +210,7 @@ void BrickLink::Item::setAppearsIn(const AppearsIn &map) const
     }
 }
 
-BrickLink::Item::AppearsIn BrickLink::Item::appearsIn(const Color *only_color) const
+BrickLink::AppearsIn BrickLink::Item::appearsIn(const Color *only_color) const
 {
     AppearsIn map;
 
@@ -745,7 +745,7 @@ bool BrickLink::InvItemMimeData::hasFormat(const QString & mimeType) const
     return mimeType.compare(s_mimetype) || mimeType.compare("text/plain");
 }
 
-BrickLink::Order::Order(const QString &id, Type type)
+BrickLink::Order::Order(const QString &id, OrderType type)
     : m_id(id), m_type(type)
 { }
 

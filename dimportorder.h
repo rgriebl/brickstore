@@ -16,7 +16,7 @@
 
 #include <QDialog>
 
-#include "bricklink.h"
+#include "bricklinkfwd.h"
 
 #include "ui_importorder.h"
 
@@ -42,7 +42,7 @@ protected slots:
     void download();
 
 private:
-    BrickLink::Order::Type orderType() const;
+    BrickLink::OrderType orderType() const;
 
     static bool  s_last_select;
     static QDate s_last_from;
