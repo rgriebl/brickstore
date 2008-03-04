@@ -139,6 +139,7 @@ public:
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const;
     Qt::ItemFlags flags(const QModelIndex&) const;
     bool setData(const QModelIndex&, const QVariant&, int);
+    QVariant CDocument::dataForEditRole(Item *it, Field f) const;
     QString dataForDisplayRole(Item *it, Field f) const;
     QVariant dataForDecorationRole(Item *it, Field f) const;
     int dataForTextAlignmentRole(Item *it, Field f) const;

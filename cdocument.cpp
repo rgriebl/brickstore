@@ -1204,9 +1204,9 @@ Qt::ItemFlags CDocument::flags(const QModelIndex &index) const
 {
     if (!index.isValid())
         return 0;
-                
+
     Qt::ItemFlags ifs = QAbstractItemModel::flags(index);
-    
+
     switch (index.column()) {
     case Total       :
     case ItemType    :
@@ -1224,21 +1224,10 @@ bool CDocument::setData(const QModelIndex &index, const QVariant &value, int rol
         Item *itemp = items().at(index.row());
         Item item = *itemp;
         Field f = static_cast<Field>(index.column());
-        
+
         switch (f) {
-        case CDocument::PartNo      : {
-/*            const BrickLink::Item *newitem = BrickLink::inst ( )-> item ( m_item-> itemType ( )-> id ( ), result. latin1 ( ));
-            if ( newitem ) {
-                item. setItem ( newitem );
-            }
-            else {
-                CMessageBox::information ( listView ( ), not_valid );
-                return;
-            }*/
-            break;
-        }
         case CDocument::Comments    : item.setComments(value.toString()); break;
-        case CDocument::Remarks     : item.setRemarks(value.toString()); break; 
+        case CDocument::Remarks     : item.setRemarks(value.toString()); break;
         case CDocument::Reserved    : item.setReserved(value.toString()); break;
         case CDocument::Sale        : item.setSale(value.toInt()); break;
         case CDocument::Bulk        : item.setBulkQuantity(value.toInt()); break;
@@ -1253,6 +1242,7 @@ bool CDocument::setData(const QModelIndex &index, const QVariant &value, int rol
         case CDocument::QuantityDiff: item.setQuantity(itemp->origQuantity() + value.toInt()); break;
         case CDocument::Price       : item.setPrice(money_t::fromLocalizedString(value.toString())); break;
         case CDocument::PriceDiff   : item.setPrice(itemp->origPrice() + money_t::fromLocalizedString(value.toString())); break;
+        default                     : break;
         }
         if (!(item == *itemp)) {
             changeItem(itemp, item);
@@ -1262,8 +1252,8 @@ bool CDocument::setData(const QModelIndex &index, const QVariant &value, int rol
     }
     return false;
 }
-                      
-                      
+
+
 QVariant CDocument::data(const QModelIndex &index, int role) const
 {
     //if (role == Qt::DecorationRole)
@@ -1279,6 +1269,7 @@ QVariant CDocument::data(const QModelIndex &index, int role) const
         case Qt::DecorationRole   : return dataForDecorationRole(it, f);
         case Qt::ToolTipRole      : return dataForToolTipRole(it, f);
         case Qt::TextAlignmentRole: return dataForTextAlignmentRole(it, f);
+        case Qt::EditRole         : return dataForEditRole(it, f);
         }
     }
     return QVariant();
@@ -1296,6 +1287,29 @@ QVariant CDocument::headerData(int section, Qt::Orientation orientation, int rol
         }
     }
     return QVariant();
+}
+
+QVariant CDocument::dataForEditRole(Item *it, Field f) const
+{
+    switch (f) {
+    case CDocument::Comments    : return it->comments(); break;
+    case CDocument::Remarks     : return it->remarks(); break;
+    case CDocument::Reserved    : return it->reserved(); break;
+    case CDocument::Sale        : return it->sale(); break;
+    case CDocument::Bulk        : return it->bulkQuantity(); break;
+    case CDocument::TierQ1      : return it->tierQuantity(0); break;
+    case CDocument::TierQ2      : return it->tierQuantity(1); break;
+    case CDocument::TierQ3      : return it->tierQuantity(2); break;
+    case CDocument::TierP1      : return (it->tierPrice(0) != 0 ? it->tierPrice(0) : it->price()     ).toLocalizedString(false); break;
+    case CDocument::TierP2      : return (it->tierPrice(1) != 0 ? it->tierPrice(1) : it->tierPrice(0)).toLocalizedString(false); break;
+    case CDocument::TierP3      : return (it->tierPrice(2) != 0 ? it->tierPrice(2) : it->tierPrice(1)).toLocalizedString(false); break;
+    case CDocument::Weight      : return CLocaleMeasurement::weightToString(it->weight(), false); break;
+    case CDocument::Quantity    : return it->quantity(); break;
+    case CDocument::QuantityDiff: return it->quantity() - it->origQuantity(); break;
+    case CDocument::Price       : return it->price().toLocalizedString(false); break;
+    case CDocument::PriceDiff   : return (it->price() - it->origPrice()).toLocalizedString(false); break;
+    default                     : return QString();
+    }
 }
 
 QString CDocument::dataForDisplayRole(Item *it, Field f) const
