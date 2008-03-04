@@ -1964,6 +1964,11 @@ void CWindow::on_file_print_triggered()
      */
 }
 
+void CWindow::on_file_print_pdf_triggered()
+{
+    qWarning("Print to PDF is not implemented yet");
+}
+
 void CWindow::on_file_save_triggered()
 {
     m_doc->fileSave(sortedItems());

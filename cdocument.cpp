@@ -269,6 +269,16 @@ QPixmap CDocument::Item::pixmap() const
     return QPixmap::fromImage(image());
 }
 
+QDataStream &operator << (QDataStream &ds, const CDocument::Item &item)   
+{
+    return operator<<(ds, static_cast<const BrickLink::InvItem &>(item));
+}
+
+QDataStream &operator >> (QDataStream &ds, CDocument::Item &item)   
+{
+    return operator>>(ds, static_cast<BrickLink::InvItem &>(item));
+}
+
 // *****************************************************************************************
 // *****************************************************************************************
 // *****************************************************************************************
@@ -279,6 +289,7 @@ QPixmap CDocument::Item::pixmap() const
 QList<CDocument *> CDocument::s_documents;
 
 CDocument::CDocument(bool dont_sort)
+    : m_uuid(QUuid::createUuid())
 {
     MODELTEST_ATTACH(this)
 
@@ -294,15 +305,79 @@ CDocument::CDocument(bool dont_sort)
 
     connect(m_undo, SIGNAL(cleanChanged(bool)), this, SLOT(clean2Modified(bool)));
 
+    connect(&m_autosave_timer, SIGNAL(timeout()), this, SLOT(autosave()));
+    m_autosave_timer.start(5000);
+
     s_documents.append(this);
 }
 
 CDocument::~CDocument()
 {
+    m_autosave_timer.stop();
+    
+    QDir temp(QDesktopServices::storageLocation(QDesktopServices::TempLocation));
+    QString filename = QString("bse_%1.autosave").arg(m_uuid.toString());
+
+    temp.remove(filename);
+
     delete m_order;
     qDeleteAll(m_items);
 
     s_documents.removeAll(this);
+}
+
+void CDocument::autosave()
+{
+    if (m_uuid.isNull() || !isModified())
+        return;
+
+    QDir temp(QDesktopServices::storageLocation(QDesktopServices::TempLocation));
+    QString filename = QString("bse_%1.autosave").arg(m_uuid.toString());        
+
+    QFile f(temp.filePath(filename));
+    if (f.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+        QDataStream ds(&f);
+        ds << QByteArray("BSE AUTOSAVE MAGIC");
+        ds << m_items.count();
+        foreach (const Item *item, m_items)
+            ds << *item;
+        ds << QByteArray("BSE AUTOSAVE MAGIC");
+    }
+}
+
+QList<CDocument::ItemList> CDocument::restoreAutosave()
+{
+    QList<ItemList> restored;
+
+    QDir temp(QDesktopServices::storageLocation(QDesktopServices::TempLocation));
+    QStringList ondisk = temp.entryList(QStringList(QLatin1String("bse_*.autosave")));
+
+    foreach (QString filename, ondisk) {
+        QFile f(temp.filePath(filename));
+        if (f.open(QIODevice::ReadOnly)) {
+            ItemList items;
+            QByteArray magic;
+            int count = 0;
+        
+            QDataStream ds(&f);
+            ds >> magic >> count;;
+            
+            if (count > 0 && magic == QByteArray("BSE AUTOSAVE MAGIC")) {
+                for (int i = 0; i < count; ++i) {
+                    Item *item = new Item();
+                    ds >> *item;
+                    items.append(item);
+                }            
+                ds >> magic;
+                
+                if (magic == QByteArray("BSE AUTOSAVE MAGIC"))
+                    restored.append(items);
+            }
+            f.close();
+            f.remove();
+        }
+    }
+    return restored;
 }
 
 void CDocument::selectionHelper()
@@ -509,7 +584,6 @@ void CDocument::updateErrors(Item *item)
         emit statisticsChanged();
     }
 }
-
 
 CDocument *CDocument::fileNew()
 {
@@ -1345,18 +1419,16 @@ QString CDocument::dataForDisplayRole(Item *it, Field f) const
     case PriceDiff   : return (it->price() - it->origPrice()).toLocalizedString();
     case QuantityOrig: return QString::number(it->origQuantity());
     case QuantityDiff: return QString::number(it->quantity() - it->origQuantity());
+    default          : return QString();
     }
-    return QString();
 }
 
 QVariant CDocument::dataForDecorationRole(Item *it, Field f) const
 {
     switch (f) {
-    case Picture: {
-        return it->image();
+    case Picture: return it->image();
+    default     : return QPixmap();
     }
-    }
-    return QPixmap();
 }
 
 int CDocument::dataForTextAlignmentRole(Item *, Field f) const
@@ -1461,8 +1533,8 @@ QString CDocument::headerDataForDisplayRole(Field f)
     case Reserved    : return tr("Reserved");
     case Weight      : return tr("Weight");
     case YearReleased: return tr("Year");
+    default          : return QString();
     }
-    return QString();
 }
 
 int CDocument::headerDataForTextAlignmentRole(Field f) const
@@ -1506,6 +1578,7 @@ int CDocument::headerDataForDefaultWidthRole(Field f) const
 	case Reserved    : width = 8; break;
 	case Weight      : width = 10; break;
 	case YearReleased: width = 5; break;
+	default          : break;
     }
     return width;
 }

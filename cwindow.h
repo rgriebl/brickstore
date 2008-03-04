@@ -101,6 +101,7 @@ public slots:
     void on_file_export_briktrak_triggered();
 
     void on_file_print_triggered();
+    void on_file_print_pdf_triggered();
     void on_file_close_triggered();
 
     void on_edit_cut_triggered();

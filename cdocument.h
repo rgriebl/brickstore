@@ -17,6 +17,7 @@
 #include <QAbstractTableModel>
 #include <QDomDocument>
 #include <QPixmap>
+#include <QUuid>
 
 #include "bricklink.h"
 
@@ -158,6 +159,7 @@ public:
     virtual ~CDocument();
 
     static const QList<CDocument *> &allDocuments();
+    static QList<ItemList> restoreAutosave();
 
     QString fileName() const;
     QString title() const;
@@ -236,6 +238,7 @@ signals:
 private slots:
     void clean2Modified(bool);
     void selectionHelper();
+    void autosave();
 
 private:
     static CDocument *fileLoadFrom(const QString &s, const char *type, bool import_only = false);
@@ -259,6 +262,8 @@ private:
     QString          m_filename;
     QString          m_title;
     bool             m_dont_sort;
+    QUuid            m_uuid;  // for autosave
+    QTimer           m_autosave_timer;
 
     QUndoStack *     m_undo;
 
@@ -268,5 +273,8 @@ private:
 
     static QList<CDocument *> s_documents;
 };
+
+QDataStream &operator << (QDataStream &ds, const CDocument::Item &item);
+QDataStream &operator >> (QDataStream &ds, CDocument::Item &item);
 
 #endif
