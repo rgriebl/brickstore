@@ -346,6 +346,9 @@ CFrameWork::CFrameWork(QWidget *parent, Qt::WindowFlags f)
         << "file_export"
         << "-"
         << "file_print"
+#if !defined(Q_WS_MAC)
+        << "file_print_pdf"
+#endif
         << "-"
         << "file_close"
         << "-"
@@ -606,6 +609,7 @@ void CFrameWork::translateActions()
         { "file_save",                      tr("Save"),                               tr("Ctrl+S", "File|Save") },
         { "file_saveas",                    tr("Save As..."),                         0 },
         { "file_print",                     tr("Print..."),                           tr("Ctrl+P", "File|Print") },
+        { "file_print_pdf",                 tr("Print to PDF..."),                    0 },
         { "file_import",                    tr("Import"),                             0 },
         { "file_import_bl_inv",             tr("BrickLink Set Inventory..."),         tr("Ctrl+I,Ctrl+I", "File|Import BrickLink Set Inventory") },
         { "file_import_bl_xml",             tr("BrickLink XML..."),                   tr("Ctrl+I,Ctrl+X", "File|Import BrickLink XML") },
@@ -960,6 +964,7 @@ void CFrameWork::createActions()
     (void) newQAction(this, "file_save");
     (void) newQAction(this, "file_saveas");
     (void) newQAction(this, "file_print");
+    (void) newQAction(this, "file_print_pdf");
 
 
     m = new QMenu(this);
