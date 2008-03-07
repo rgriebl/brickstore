@@ -17,6 +17,7 @@
 #include <QLocale>
 #include <QHttp>
 #include <QTimer>
+#include <QNetworkCookieJar>
 
 #include "capplication.h"
 #include "ctransfer.h"
@@ -128,6 +129,22 @@ protected:
         req.setValue(QLatin1String("Host"), url.host());
         req.setValue(QLatin1String("User-Agent"), m_user_agent);
 
+        s_cookie_mutex.lock();
+        QList<QNetworkCookie> cookies = s_cookies.cookiesForUrl(j->m_effective_url);
+        s_cookie_mutex.unlock();
+        
+        if (!cookies.isEmpty()) {
+            QByteArray rawcookies;
+            
+            foreach (QNetworkCookie c, cookies) {
+                rawcookies += c.toRawForm(QNetworkCookie::NameAndValueOnly);
+                rawcookies += ';';
+            }
+            rawcookies.chop(1);
+            
+            req.setValue(QLatin1String("Cookie"), rawcookies);
+        }
+        
         //qDebug() << req.toString();
 
         m_job_http_id = m_http->request(req, postdata, j->m_file);
@@ -174,6 +191,14 @@ protected slots:
             QString lm = resp.value(QLatin1String("Last-Modified"));
             if (!lm.isEmpty())
                 j->m_last_modified = fromHttpDate(lm.toLatin1());
+
+            QList<QNetworkCookie> cookies = QNetworkCookie::parseCookies(resp.value(QLatin1String("Set-Cookie")).toLatin1());
+            
+            if (!cookies.isEmpty()) {
+                s_cookie_mutex.lock();
+                s_cookies.setCookiesFromUrl(cookies, j->m_effective_url);
+                s_cookie_mutex.unlock();
+            }
             break;
         }
         default: 
@@ -226,7 +251,13 @@ protected:
     int m_job_http_id;
     QString m_user_agent;
     QUrl m_last_url;
+    
+    static QNetworkCookieJar s_cookies;
+    static QMutex            s_cookie_mutex;
 };
+
+QNetworkCookieJar CTransferEngine::s_cookies;
+QMutex CTransferEngine::s_cookie_mutex;
 
 // ===========================================================================
 // ===========================================================================
