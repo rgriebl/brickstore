@@ -157,7 +157,7 @@ private:
 
     CWindow *m_current_window;
 
-    //CMultiProgressBar *m_progress;
+    CMultiProgressBar *m_progress;
     CSpinner *m_spinner;
     CFilterEdit *m_filter;
     QLabel *m_statistics;

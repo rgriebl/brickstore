@@ -142,8 +142,8 @@ XFORMS  += registration \
            importinventory \
            additem \
            settings \
-	   selectcolor \
-	   selectitem \
+           selectcolor \
+           selectitem \
 
 
 SOURCES += main.cpp \
@@ -169,63 +169,41 @@ HEADERS += bricklink.h \
            qtemporaryresource.h \
 	   
 
-HEADERS += capplication.h \
-           cmessagebox.h \
-           csplash.h \
-           cmoney.h \
-           cref.h \
-           ctransfer.h \
-           cconfig.h \
-           crebuilddatabase.h \
-           cprogressdialog.h \
-           cdocument.h \
-           cdocument_p.h \
-           cselectcolor.h \
-           cframework.h \
-           cpicturewidget.h \
-           cappearsinwidget.h \
-           cpriceguidewidget.h \
-           ctaskwidgets.h \
-           ctaskpanemanager.h \
-           cselectitem.h \
-           cspinner.h \
-           cutility.h \
-           clocalemeasurement.h \
-           cwindow.h \
-           cundo.h \
-	   cthreadpool.h \
-           cfilteredit.h \
-
-
-SOURCES += capplication.cpp \
-           cmessagebox.cpp \
-           csplash.cpp \
-           cmoney.cpp \
-           cref.cpp \
-           ctransfer.cpp \
-           cconfig.cpp \
-           crebuilddatabase.cpp \
-           cprogressdialog.cpp \
-           cdocument.cpp \
-           cselectcolor.cpp \
-           cframework.cpp \
-           cpicturewidget.cpp \
-           cappearsinwidget.cpp \
-           cpriceguidewidget.cpp \
-           ctaskwidgets.cpp \
-           ctaskpanemanager.cpp \
-           cspinner.cpp \
-           cutility.cpp \
-           cselectitem.cpp \
-           clocalemeasurement.cpp \
-           cwindow.cpp \
-           cundo.cpp \
-	   cthreadpool.cpp \
-           cfilteredit.cpp \
+XSOURCES += application \
+            messagebox \
+            splash \
+            money \
+            ref \
+            transfer \
+            config \
+            rebuilddatabase \
+            progressdialog \
+            document \
+            selectcolor \
+            framework \
+            picturewidget \
+            appearsinwidget \
+            priceguidewidget \
+            taskwidgets \
+            taskpanemanager \
+            spinner \
+            utility \
+            selectitem \
+            localemeasurement \
+            window \
+            undo \
+            threadpool \
+            filteredit \
+            multiprogressbar \
 
 
 for( form, XFORMS ) {
   FORMS += dialogs/$${form}.ui
   HEADERS += d$${form}.h
   SOURCES += d$${form}.cpp
+}
+
+for( src, XSOURCES ) {
+  HEADERS += c$${src}.h
+  SOURCES += c$${src}.cpp
 }

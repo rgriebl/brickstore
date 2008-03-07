@@ -42,7 +42,6 @@
 #include "cconfig.h"
 #include "cmoney.h"
 #include "cmultiprogressbar.h"
-//#include "ciconfactory.h"
 #include "cundo.h"
 #include "cspinner.h"
 #include "cfilteredit.h"
@@ -55,7 +54,7 @@
 #include "clocalemeasurement.h"
 
 #include "dadditem.h"
-//#include "dlgsettingsimpl.h"
+#include "dsettings.h"
 
 #include "cframework.h"
 
@@ -531,7 +530,7 @@ CFrameWork::CFrameWork(QWidget *parent, Qt::WindowFlags f)
     connect(bl, SIGNAL(priceGuideProgress(int, int)), this, SLOT(gotPriceGuideProgress(int, int)));
     connect(bl, SIGNAL(pictureProgress(int, int)),    this, SLOT(gotPictureProgress(int, int)));
 
-// connect ( m_progress, SIGNAL( statusChange ( bool )), m_spinner, SLOT( setActive ( bool )));
+    connect(m_progress, SIGNAL(statusChange(bool)), m_spinner, SLOT(setActive(bool)));
     connect(m_undogroup, SIGNAL(cleanChanged(bool)), this, SLOT(modificationUpdate()));
 
     CSplash::inst()->message(qApp->translate("CSplash", "Loading Database..."));
@@ -560,8 +559,8 @@ CFrameWork::CFrameWork(QWidget *parent, Qt::WindowFlags f)
 void CFrameWork::languageChange()
 {
     m_toolbar->setWindowTitle(tr("Toolbar"));
-// m_progress->setItemLabel ( PGI_PriceGuide, tr( "Price Guide updates" ));
-// m_progress->setItemLabel ( PGI_Picture,    tr( "Image updates" ));
+    m_progress->setItemLabel(PGI_PriceGuide, tr("Price Guide updates"));
+    m_progress->setItemLabel(PGI_Picture,    tr("Image updates"));
 
     m_taskpanes->setItemText(m_task_info,       tr("Info"));
     m_taskpanes->setItemText(m_task_priceguide, tr("Price Guide"));
@@ -782,22 +781,17 @@ void CFrameWork::createStatusBar()
     m_modified = new QLabel(statusBar());
     statusBar()->addPermanentWidget(m_modified, 0);
 
-// m_progress = new CMultiProgressBar ( statusBar ( ));
-// m_progress->setFixedWidth ( fontMetrics ( ).height ( ) * 10 );
-// m_progress->setFixedHeight ( fontMetrics ( ).height ( ));
+    m_progress = new CMultiProgressBar(statusBar());
+    m_progress->setFixedWidth(fontMetrics().height() * 10);
+    m_progress->setFixedHeight(fontMetrics().height());
+    m_progress->setStopIcon(QIcon(":/status/stop"));
 
-// QPixmap p ( ":/status/stop" );
-// if ( !p.isNull ( ))
-//  m_progress->setStopPixmap ( p );
+    m_progress->addItem(QString(), PGI_PriceGuide);
+    m_progress->addItem(QString(), PGI_Picture   );
 
-// m_progress->addItem ( QString ( ), PGI_PriceGuide );
-// m_progress->addItem ( QString ( ), PGI_Picture    );
+    statusBar()->addPermanentWidget(m_progress, 0);
 
-    //m_progress->setProgress ( -1, 100 );
-
-// statusBar ( )->addPermanentWidget ( m_progress, 0 );
-
-// connect ( m_progress, SIGNAL( stop ( )), this, SLOT( cancelAllTransfers ( )));
+    connect(m_progress, SIGNAL(stop()), this, SLOT(cancelAllTransfers()));
 
     statusBar()->hide();
 }
@@ -1740,12 +1734,8 @@ void CFrameWork::configure()
 
 void CFrameWork::configure(const char *page)
 {
-    /* DlgSettingsImpl dlg ( this );
-
-     if ( page )
-      dlg.setCurrentPage ( page );
-
-     dlg.exec ( );*/
+    DSettings d(page, this);
+    d.exec();
 }
 
 void CFrameWork::setOnlineStatus(QAction *act)

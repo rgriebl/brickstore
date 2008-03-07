@@ -15,21 +15,20 @@
 #define __CMULTIPROGRESSBAR_H__
 
 #include <QWidget>
-#include <QHash>
-#include <QPixmap>
+#include <QMap>
+#include <QIcon>
 
 class QProgressBar;
 class QToolButton;
 
 
-
 class CMultiProgressBar : public QWidget {
     Q_OBJECT
 public:
-    CMultiProgressBar(QWidget *parent = 0, const char *name = 0);
+    CMultiProgressBar(QWidget *parent = 0);
     virtual ~CMultiProgressBar();
 
-    void setStopPixmap(const QPixmap &);
+    void setStopIcon(const QIcon &);
 
     int addItem(const QString &label, int id = -1);
     void removeItem(int id);
@@ -58,7 +57,6 @@ protected slots:
 
 private:
     void recalc();
-    void recalcPixmap(QToolButton *but, const QPixmap &pix);
 
 private:
     int m_autoid;
@@ -66,7 +64,7 @@ private:
     QProgressBar *m_progress;
     QToolButton *m_stop;
 
-    QPixmap m_stop_pix;
+    QIcon m_stop_ico;
 
     struct ItemData {
         ItemData(const QString &label);
@@ -76,7 +74,7 @@ private:
         int     m_total;
     };
 
-    QHash<int, ItemData *> m_items;
+    QMap<int, ItemData> m_items;
 };
 
 #endif

@@ -12,37 +12,25 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 
-#include <qprogressbar.h>
-#include <qlabel.h>
-#include <qtoolbutton.h>
-#include <qtooltip.h>
-#include <qgrid.h>
-#include <qlayout.h>
-#include <qimage.h>
+#include <QProgressBar>
+#include <QToolButton>
+#include <QToolTip>
 
 #include "cmultiprogressbar.h"
 
 
-CMultiProgressBar::CMultiProgressBar(QWidget *parent, const char *name)
-        : QWidget(parent, name)
+CMultiProgressBar::CMultiProgressBar(QWidget *parent)
+    : QWidget(parent)
 {
     m_autoid = -1;
 
-    QBoxLayout *lay = new QHBoxLayout(this, 0, 0);
-
     m_progress = new QProgressBar(this);
-    m_progress->setFrameStyle(QFrame::NoFrame);
-    m_progress->setIndicatorFollowsStyle(false);
-    m_progress->setCenterIndicator(true);
-    m_progress->setPercentageVisible(false);
-    lay->addWidget(m_progress, 1);
-    lay->addStretch(0);
+    m_progress->setTextVisible(false);
 
     m_stop = new QToolButton(this);
     m_stop->setAutoRaise(true);
     m_stop->setAutoRepeat(false);
     m_stop->hide();
-    lay->addWidget(m_stop, 0);
 
     connect(m_stop, SIGNAL(clicked()), this, SIGNAL(stop()));
     recalc();
@@ -52,38 +40,35 @@ CMultiProgressBar::CMultiProgressBar(QWidget *parent, const char *name)
 
 void CMultiProgressBar::languageChange()
 {
-    QToolTip::add(m_stop, tr("Cancel all active transfers"));
+    m_stop->setToolTip(tr("Cancel all active transfers"));
 }
 
 CMultiProgressBar::~CMultiProgressBar()
 {
-    m_items.setAutoDelete(true);
     m_items.clear();
 }
 
-void CMultiProgressBar::setStopPixmap(const QPixmap &pix)
+void CMultiProgressBar::setStopIcon(const QIcon &ico)
 {
-    m_stop_pix = pix;
-    m_stop->setHidden(pix.isNull());
-
-    recalcPixmap(m_stop, m_stop_pix);
+    m_stop_ico = ico;
+    m_stop->setHidden(ico.isNull());
 }
 
 void CMultiProgressBar::resizeEvent(QResizeEvent *)
 {
-    m_stop->setFixedSize(height(), height());
-
-    recalcPixmap(m_stop, m_stop_pix);
-}
-
-void CMultiProgressBar::recalcPixmap(QToolButton *but, const QPixmap &pix)
-{
-    int h = but->height() - 2;
-
-    QPixmap pnew;
-    pnew.convertFromImage(pix.convertToImage().smoothScale(pix.size().boundedTo(QSize(h, h))));
-
-    but->setPixmap(pnew);
+    int h = height();
+    int w = width();
+    bool too_small = (w < h);
+    
+    m_stop->setHidden(too_small);
+    
+    if (too_small) {
+        m_progress->setGeometry(0, 0, w, h);
+    }
+    else {
+        m_progress->setGeometry(0, 0, w - h, h);
+        m_stop->setGeometry(w - h, 0, h, h);
+    }
 }
 
 
@@ -93,26 +78,25 @@ void CMultiProgressBar::recalc()
     QStringList sl;
     QString str;
 
-    for (QIntDictIterator <ItemData> it(m_items); it.current(); ++it) {
-        ItemData *p = it.current();
+    foreach (const ItemData &id, m_items) {
+        ta += id.m_total;
+        pa += id.m_progress;
 
-        ta += p->m_total;
-        pa += p->m_progress;
-
-        if (p->m_total > 0) {
+        if (id.m_total > 0) {
             sl << QString("<tr><td><b>%1:</b></td><td align=\"right\">%2%</td><td>(%3/%4)</td></tr>").
-            arg(p->m_label).arg(int(100.f * float(p->m_progress) / float(p->m_total))).
-            arg(p->m_progress).arg(p->m_total);
+            arg(id.m_label).arg(int(100.f * float(id.m_progress) / float(id.m_total))).
+            arg(id.m_progress).arg(id.m_total);
         }
     }
     if (ta > 0) {
-        m_progress->setProgress(pa, ta);
+        m_progress->setMaximum(ta);
+        m_progress->setValue(pa);
         str = "<table>" + sl.join("") + "</table>";
 
         if (!m_progress->isVisible())
             m_progress->show();
 
-        QToolTip::add(m_progress, str);
+        m_progress->setToolTip(str);
     }
     else {
         m_progress->hide();
@@ -135,8 +119,7 @@ int CMultiProgressBar::addItem(const QString &label, int id)
     if (id < 0)
         id = --m_autoid;
 
-    ItemData *p = new ItemData(label);
-    m_items.insert(id, p);
+    m_items.insert(id, ItemData(label));
 
     recalc();
     return id;
@@ -144,65 +127,62 @@ int CMultiProgressBar::addItem(const QString &label, int id)
 
 void CMultiProgressBar::removeItem(int id)
 {
-    ItemData *p = m_items [id];
-
-    if (p) {
-        m_items.remove(id);
-        delete p;
+    QMap<int, ItemData>::iterator it = m_items.find(id);
+    
+    if (it != m_items.end()) {
+        m_items.erase(it);
         recalc();
     }
 }
 
 QString CMultiProgressBar::itemLabel(int id) const
 {
-    ItemData *p = m_items [id];
-
-    return p ? p->m_label : QString::null;
+    QMap<int, ItemData>::const_iterator it = m_items.find(id);
+    
+    return (it != m_items.end()) ? it->m_label : QString();
 }
-
 
 int CMultiProgressBar::itemProgress(int id) const
 {
-    ItemData *p = m_items [id];
-
-    return p ? p->m_progress : -1;
+    QMap<int, ItemData>::const_iterator it = m_items.find(id);
+    
+    return (it != m_items.end()) ? it->m_progress : -1;
 }
 
 int CMultiProgressBar::itemTotalSteps(int id) const
 {
-    ItemData *p = m_items [id];
-
-    return p ? p->m_total : -1;
+    QMap<int, ItemData>::const_iterator it = m_items.find(id);
+    
+    return (it != m_items.end()) ? it->m_total : -1;
 }
-
 
 void CMultiProgressBar::setItemProgress(int id, int progress)
 {
-    ItemData *p = m_items [id];
-
-    if (p) {
-        p->m_progress = progress;
+    QMap<int, ItemData>::iterator it = m_items.find(id);
+    
+    if (it != m_items.end()) {
+        it->m_progress = progress;
         recalc();
     }
 }
 
 void CMultiProgressBar::setItemProgress(int id, int progress, int total)
 {
-    ItemData *p = m_items [id];
-
-    if (p) {
-        p->m_progress = progress;
-        p->m_total = total;
+    QMap<int, ItemData>::iterator it = m_items.find(id);
+    
+    if (it != m_items.end()) {
+        it->m_progress = progress;
+        it->m_total = total;
         recalc();
     }
 }
 
 void CMultiProgressBar::setItemTotalSteps(int id, int total)
 {
-    ItemData *p = m_items [id];
-
-    if (p) {
-        p->m_total = total;
+    QMap<int, ItemData>::iterator it = m_items.find(id);
+    
+    if (it != m_items.end()) {
+        it->m_total = total;
         recalc();
     }
 }
@@ -210,9 +190,11 @@ void CMultiProgressBar::setItemTotalSteps(int id, int total)
 
 void CMultiProgressBar::setItemLabel(int id, const QString &label)
 {
-    ItemData *p = m_items [id];
-
-    if (p)
-        p->m_label = label;
+    QMap<int, ItemData>::iterator it = m_items.find(id);
+    
+    if (it != m_items.end()) {
+        it->m_label = label;
+        recalc();
+    }
 }
 
