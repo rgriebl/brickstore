@@ -152,13 +152,18 @@ void CProgressDialog::setProgress(int s, int t)
     m_progress->setValue(s);
 
     if (m_message_progress) {
-        QString str = m_message_text.arg(s);
+        QString str = m_message_text;
+        
+        if (str.contains("%p")) {
+            QString prog;
 
-        if (t)
-            str = str.arg(t);
-        else
-            str = str.arg("?");
+            if (t)
+                prog = QString("%1/%2 KB").arg(s).arg(t);
+            else
+                prog = QString("%1 KB").arg(s);
 
+            str.replace("%d", prog);
+        }
         m_message->setText(str);
     }
 }

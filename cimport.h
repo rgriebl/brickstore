@@ -39,7 +39,7 @@ public:
         connect(pd, SIGNAL(transferFinished()), this, SLOT(gotten()));
 
         pd->setHeaderText(tr("Importing BrickLink Store"));
-        pd->setMessageText(tr("Download: %1/%2 KB"));
+        pd->setMessageText(tr("Download: %p"));
 
         QUrl url("http://www.bricklink.com/invExcelFinal.asp");
 
@@ -152,7 +152,7 @@ public:
         connect(m_progress, SIGNAL(transferFinished()), this, SLOT(gotten()));
 
         m_progress->setHeaderText(tr("Importing BrickLink Order"));
-        m_progress->setMessageText(tr("Download: %1/%2 KB"));
+        m_progress->setMessageText(tr("Download: %p"));
 
         QUrl url("http://www.bricklink.com/orderExcelFinal.asp");
 
@@ -347,7 +347,7 @@ public:
         connect(pd, SIGNAL(transferFinished()), this, SLOT(gotten()));
 
         pd->setHeaderText(tr("Importing BrickLink Shopping Cart"));
-        pd->setMessageText(tr("Download: %1/%2 KB"));
+        pd->setMessageText(tr("Download: %p"));
 
         QUrl url("http://www.bricklink.com/storeCart.asp");
 
@@ -528,7 +528,7 @@ public:
         connect(pd, SIGNAL(transferFinished()), this, SLOT(gotten()));
 
         pd->setHeaderText(tr("Importing Peeron Inventory"));
-        pd->setMessageText(tr("Download: %1/%2 KB"));
+        pd->setMessageText(tr("Download: %p"));
 
         QString url = QString("http://www.peeron.com/inv/sets/%1").arg(peeronid);
 

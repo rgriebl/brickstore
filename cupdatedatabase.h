@@ -38,7 +38,7 @@ public:
 
         pd->setAutoClose(false);
         pd->setHeaderText(tr("Updating BrickLink Database"));
-        pd->setMessageText(tr("Download: %1/%2 KB"));
+        pd->setMessageText(tr("Download: %p"));
 
         QString remotefile = DATABASE_URL + BrickLink::core()->defaultDatabaseName();
         QString localfile = BrickLink::core()->dataPath() + BrickLink::core()->defaultDatabaseName();

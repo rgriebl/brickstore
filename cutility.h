@@ -14,13 +14,10 @@
 #ifndef __CUTILITY_H__
 #define __CUTILITY_H__
 
-#include <time.h>
-
 #include <QString>
 #include <QColor>
 
 class QFontMetrics;
-class QDateTime;
 class QRect;
 class QWidget;
 
@@ -32,17 +29,10 @@ public:
     static QColor gradientColor(const QColor &c1, const QColor &c2, qreal f = 0.5f);
     static QColor contrastColor(const QColor &c, qreal f = 0.04f);
     static float colorDifference(const QColor &c1, const QColor &c2);
-// static QImage shadeImage ( const QImage &oimg, const QColor &col );
 
     static void setPopupPos(QWidget *w, const QRect &pos);
 
-// static QString weightToString ( double w, bool imperial = false, bool optimize = false, bool show_unit = false );
-// static double stringToWeight ( const QString &s, bool imperial = false );
-
-    //static QString safeOpen ( const QString &basepath );
     static QString safeRename(const QString &basepath);
-
-    static time_t toUTC(const QDateTime &dt, const char *settz = 0);
 };
 
 #endif

@@ -12,6 +12,7 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 #include <stdlib.h>
+#include <time.h>
 
 #include <QFile>
 #include <QFileInfo>
@@ -54,6 +55,54 @@ private:
 };
 
 
+void set_tz(const char *tz)
+{
+    char pebuf [256] = "TZ=";
+    if (tz)
+        strcat(pebuf, tz);
+
+#if defined( Q_OS_WIN32 )
+    _putenv(pebuf);
+    _tzset();
+#else
+    putenv(pebuf);
+    tzset();
+#endif
+}
+
+time_t toUTC(const QDateTime &dt, const char *settz)
+{
+    QByteArray oldtz;
+
+    if (settz) {
+        oldtz = getenv("TZ");
+        set_tz(settz);
+    }
+
+    // get a tm structure from the system to get the correct tz_name
+    time_t t = time(0);
+    struct tm *lt = localtime(&t);
+
+    lt->tm_sec   = dt.time().second();
+    lt->tm_min   = dt.time().minute();
+    lt->tm_hour  = dt.time().hour();
+    lt->tm_mday  = dt.date().day();
+    lt->tm_mon   = dt.date().month() - 1;       // 0-11 instead of 1-12
+    lt->tm_year  = dt.date().year() - 1900;     // year - 1900
+    lt->tm_wday  = -1;
+    lt->tm_yday  = -1;
+    lt->tm_isdst = -1; // tm_isdst negative ->mktime will find out about DST
+
+    // keep tm_zone and tm_gmtoff
+    t = mktime(lt);
+
+    if (settz)
+        set_tz(oldtz.data());
+
+    //time_t t2 = dt.toTime_t();
+
+    return t;
+}
 
 
 const BrickLink::Category *BrickLink::TextImport::findCategoryByName(const char *name, int len)
@@ -335,6 +384,9 @@ bool BrickLink::TextImport::readDB_processLine(btinvlist_dummy & /*dummy*/, uint
         time_t t = time_t (0);   // 1.1.1970 00:00
 
         if (strs [2][0]) {
+#if DAN_FIXED_BTINVLIST_TO_USE_UTC
+            t = QDateTime::fromString(QLatin1String(strs[2][0]), QLatin1String("%mm/%dd/%yyyy %hh:%mm:%ss %ap")).toTime_t();
+#else         
             char ampm;
             int d, m, y, hh, mm, ss;
 
@@ -346,10 +398,10 @@ bool BrickLink::TextImport::readDB_processLine(btinvlist_dummy & /*dummy*/, uint
                 dt.setTime(QTime(hh, mm, ss));
 
                 // !!! These dates are in EST (-0500), not UTC !!!
-                t = CUtility::toUTC(dt, "EST5EDT");
+                t = toUTC(dt, "EST5EDT");
             }
         }
-
+#endif
         const_cast <Item *>(itm)->m_last_inv_update = t;
         const_cast <ItemType *>(itm->m_item_type)->m_has_inventories = true;
     }
