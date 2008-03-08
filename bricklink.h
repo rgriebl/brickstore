@@ -407,13 +407,14 @@ public:
 		Incomplete *     m_incomplete;
 
 		Status           m_status    : 3;
-		Condition        m_condition : 1;
-        SubCondition     m_scondition: 2;
+		Condition        m_condition : 2;
+        SubCondition     m_scondition: 3;
+        bool             m_alternate : 1;
+        bool             m_cpart     : 1;
+        uint             m_alt_id    : 6;
 		bool             m_retain    : 1;
 		bool             m_stockroom : 1;
-        bool             m_alternate : 1;
-        uint             m_alt_id    : 6;
-        bool             m_cpart     : 1;
+        uint             m_xresverved: 14;
 
 		QString          m_comments;
 		QString          m_remarks;
