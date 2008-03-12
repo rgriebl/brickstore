@@ -203,17 +203,19 @@ CWorkspace::CWorkspace(QWidget *parent, Qt::WindowFlags f)
     m_list->setAutoRaise(true);
 
     m_tablayout = new QHBoxLayout();
+    m_verticallayout->addLayout(m_tablayout);
+
     m_tablayout->addSpacing(4);
     m_tablayout->addWidget(m_tabbar,10);
     m_tablayout->addSpacing(4);
     m_tablayout->addWidget(m_list);
     m_tablayout->addWidget(m_close);
-    m_verticallayout->addLayout(m_tablayout);
 
     m_stacklayout = new QStackedLayout();
+    m_verticallayout->addLayout(m_stacklayout);
+
     m_stacklayout->setContentsMargins(0, 0, 0 , 0);
     m_stacklayout->setSpacing(0);
-    m_verticallayout->addLayout(m_stacklayout);
 
     relayout();
 

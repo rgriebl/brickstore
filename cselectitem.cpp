@@ -32,6 +32,7 @@
 #include <QStackedLayout>
 #include <QMenu>
 #include <QStyledItemDelegate>
+#include <QFormLayout>
 
 #include "bricklink.h"
 #include "cfilteredit.h"
@@ -206,7 +207,7 @@ void CSelectItem::init()
     d->w_itemthumbs->setSelectionModel(d->w_items->selectionModel());
     d->w_thumbs->setSelectionModel(d->w_items->selectionModel());
 
-    connect(d->w_filter, SIGNAL(filterTextChanged(const QString &)), this, SLOT(applyFilter()));
+    connect(d->w_filter, SIGNAL(textChanged(const QString &)), this, SLOT(applyFilter()));
 
     connect(d->w_item_types, SIGNAL(currentIndexChanged(int)), this, SLOT(itemTypeChanged()));
     connect(d->w_categories->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(categoryChanged()));
@@ -221,34 +222,31 @@ void CSelectItem::init()
 
     QGridLayout *toplay = new QGridLayout(this);
     toplay->setContentsMargins(0, 0, 0, 0);
+    //toplay->setSpacing(0);
     toplay->setColumnStretch(0, 25);
     toplay->setColumnStretch(1, 75);
     toplay->setRowStretch(0, 0);
     toplay->setRowStretch(1, 100);
 
-    QBoxLayout *lay = new QHBoxLayout();
-    lay->addWidget(d->w_item_types_label, 0);
-    lay->addWidget(d->w_item_types, 1);
+    QFormLayout *flay = new QFormLayout();
+    toplay->addLayout(flay, 0, 0);
 
-    toplay->addLayout(lay, 0, 0);
+    flay->addRow(d->w_item_types_label, d->w_item_types);
+
     toplay->addWidget(d->w_categories, 1, 0);
 
-    lay = new QHBoxLayout();
-    //lay->addWidget(d->w_goto, 0);
-    //lay->addSpacing(6);
-    //lay->addWidget(d->w_filter_clear, 0);
-    //lay->addWidget(d->w_filter_label, 0);
-    //lay->addWidget(d->w_filter_expression, 15);
-    lay->addWidget(d->w_filter);
-    lay->addSpacing(6);
-    lay->addWidget(d->w_viewbutton);
-
+    QBoxLayout *lay = new QHBoxLayout();
     toplay->addLayout(lay, 0, 1);
+    lay->addWidget(d->w_filter, 1);
+    lay->addSpacing(6);
+    lay->addWidget(d->w_viewbutton, 0);
+
     d->m_stack = new QStackedLayout();
+    toplay->addLayout(d->m_stack, 1, 1);
+
     d->m_stack->addWidget(d->w_items);
     d->m_stack->addWidget(d->w_itemthumbs);
     d->m_stack->addWidget(d->w_thumbs);
-    toplay->addLayout(d->m_stack, 1, 1);
 
     d->m_stack->setCurrentWidget(d->w_items);
     d->m_viewmode = ListMode;

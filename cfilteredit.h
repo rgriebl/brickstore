@@ -14,13 +14,11 @@
 #ifndef __CFILTEREDIT_H__
 #define __CFILTEREDIT_H__
 
-#include <QLineEdit>
+#include <QWidget>
 
 class QMenu;
-class QToolButton;
-class QTimer;
 
-class CFilterEdit : public QLineEdit {
+class CFilterEdit : public QWidget {
     Q_OBJECT
 public:
     CFilterEdit(QWidget *parent = 0);
@@ -31,28 +29,22 @@ public:
     void setClearIcon(const QIcon &icon);
 
     void setIdleText(const QString &str);
+    
+    virtual QSize sizeHint() const; 
+   virtual QSize minimumSizeHint() const; 
+
+    QString text() const;
+    void setText(const QString &);
 
 signals:
-    void filterTextChanged(const QString &);
+    void textChanged(const QString &);
 
 protected:
-    virtual void resizeEvent(QResizeEvent *);
-    virtual void paintEvent(QPaintEvent *e);
-    virtual void focusInEvent(QFocusEvent *e);
-    virtual void focusOutEvent(QFocusEvent *e);
-
-protected slots:
-    void checkText(const QString &);
-    void timerTick();
-
+    virtual void resizeEvent(QResizeEvent *e);
+    
 private:
-    void doLayout(bool setpositions);
-
-private:
-    QToolButton *w_menu;
-    QToolButton *w_clear;
-    QTimer *     m_timer;
-    QString      m_idletext;
+    friend class CFilterEditPrivate;
+    CFilterEditPrivate *d;
 };
 
 #endif
