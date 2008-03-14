@@ -36,7 +36,7 @@ protected:
 protected slots:
     void checkId();
     void checkSelected();
-    void activateItem(/*QListViewItem **/);
+    void activateItem();
 
     void start();
     void download();
@@ -44,7 +44,7 @@ protected slots:
 private:
     BrickLink::OrderType orderType() const;
 
-    static bool  s_last_select;
+    static bool  s_last_by_number;
     static QDate s_last_from;
     static QDate s_last_to;
     static int   s_last_type;

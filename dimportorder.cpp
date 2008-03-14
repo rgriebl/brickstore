@@ -37,42 +37,45 @@
 
 #include "dimportorder.h"
 
-namespace {
+Q_DECLARE_METATYPE(BrickLink::Order *)
+Q_DECLARE_METATYPE(BrickLink::InvItemList *)
 
-template <typename T> static int cmp(const T &a, const T &b)
-{
-    if (a < b)
-        return -1;
-    else if (a == b)
-        return 0;
-    else
-        return 1;
-}
+enum {
+    OrderPointerRole = 0x0560ec9b,
+    ItemListPointerRole,
+};
+
 
 class OrderListModel : public QAbstractTableModel {
 public:
-    OrderListModel(const QList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > &orderlist)
-            : m_orderlist(orderlist)
+    OrderListModel()
     {
         MODELTEST_ATTACH(this) 
     }
 
     ~OrderListModel()
     {
+        setOrderList(QList<QPair<BrickLink::Order *, BrickLink::InvItemList *> >());
+    }
+
+    void setOrderList(const QList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > &orderlist)
+    {
         for (QList<QPair<BrickLink::Order *, BrickLink::InvItemList *> >::iterator it = m_orderlist.begin(); it != m_orderlist.end(); ++it) {
             delete it->first;
             delete it->second;
         }
+        m_orderlist = orderlist;
+        reset();
     }
 
-    virtual int rowCount(const QModelIndex & /*parent*/) const
+    virtual int rowCount(const QModelIndex &parent) const
     {
-        return m_orderlist.size();
+        return parent.isValid() ? 0 : m_orderlist.size();
     }
 
-    virtual int columnCount(const QModelIndex & /*parent*/) const
+    virtual int columnCount(const QModelIndex &parent) const
     {
-        return 5;
+        return parent.isValid() ? 0 : 5;
     }
 
     bool isReceived(const QPair<BrickLink::Order *, BrickLink::InvItemList *> &order) const
@@ -82,6 +85,9 @@ public:
 
     virtual QVariant data(const QModelIndex &index, int role) const
     {
+        if (!index.isValid())
+            return QVariant();
+
         QVariant res;
         const QPair<BrickLink::Order *, BrickLink::InvItemList *> &order = m_orderlist [index.row()];
         int col = index.column();
@@ -115,9 +121,15 @@ public:
         else if (role == Qt::ToolTipRole) {
             QString tt = data(index, Qt::DisplayRole).toString();
 
-            if (!order.first->other().isEmpty())
+            if (!order.first->address().isEmpty())
                 tt = tt + QLatin1String("\n\n") + order.first->address();
             res = tt;
+        }
+        else if (role == OrderPointerRole) {
+            res.setValue(order.first);
+        }
+        else if (role == ItemListPointerRole) {
+            res.setValue(order.second);
         }
 
         return res;
@@ -221,13 +233,11 @@ public:
     }
 };
 
-}
 
-
-bool  DImportOrder::s_last_select   = true;
-QDate DImportOrder::s_last_from     = QDate::currentDate().addDays(-7);
-QDate DImportOrder::s_last_to       = QDate::currentDate();
-int   DImportOrder::s_last_type     = 1;
+bool  DImportOrder::s_last_by_number = false;
+QDate DImportOrder::s_last_from      = QDate::currentDate().addDays(-7);
+QDate DImportOrder::s_last_to        = QDate::currentDate();
+int   DImportOrder::s_last_type      = 1;
 
 
 DImportOrder::DImportOrder(QWidget *parent, Qt::WindowFlags f)
@@ -236,25 +246,15 @@ DImportOrder::DImportOrder(QWidget *parent, Qt::WindowFlags f)
     setupUi(this);
 
     w_order_number->setValidator(new QIntValidator(1, 9999999, w_order_number));
-
+    w_order_list->setModel(new OrderListModel());
     w_order_list->setItemDelegate(new TransHighlightDelegate());
-    w_order_list->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
-    w_order_list->horizontalHeader()->setMovable(false);
-    w_order_list->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
-    w_order_list->verticalHeader()->hide();
-    w_order_list->setShowGrid(false);
-    w_order_list->setAlternatingRowColors(true);
-    w_order_list->setSortingEnabled(true);
-    w_order_list->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
     connect(w_order_number, SIGNAL(textChanged(const QString &)), this, SLOT(checkId()));
     connect(w_by_number, SIGNAL(toggled(bool)), this, SLOT(checkId()));
-    connect(w_order_from, SIGNAL(valueChanged(const QDate &)), this, SLOT(checkId()));
-    connect(w_order_to, SIGNAL(valueChanged(const QDate &)), this, SLOT(checkId()));
+    connect(w_order_from, SIGNAL(dateChanged(const QDate &)), this, SLOT(checkId()));
+    connect(w_order_to, SIGNAL(dateChanged(const QDate &)), this, SLOT(checkId()));
 
-    connect(w_order_list, SIGNAL(selectionChanged()), this, SLOT(checkSelected()));
-    connect(w_order_list, SIGNAL(doubleClicked(QListViewItem *, const QPoint &, int)), this, SLOT(activateItem(QListViewItem *)));
-    connect(w_order_list, SIGNAL(returnPressed(QListViewItem *)), this, SLOT(activateItem(QListViewItem *)));
+    connect(w_order_list->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(checkSelected()));
 
     connect(w_next, SIGNAL(clicked()), this, SLOT(download()));
     connect(w_back, SIGNAL(clicked()), this, SLOT(start()));
@@ -262,7 +262,7 @@ DImportOrder::DImportOrder(QWidget *parent, Qt::WindowFlags f)
     w_order_from->setDate(s_last_from);
     w_order_to->setDate(s_last_to);
     w_order_type->setCurrentIndex(s_last_type);
-    w_by_number->setChecked(s_last_select);
+    w_by_number->setChecked(s_last_by_number);
 
     start();
     resize(sizeHint());
@@ -281,10 +281,10 @@ void DImportOrder::changeEvent(QEvent *e)
 
 void DImportOrder::accept()
 {
-    s_last_select = w_by_number->isChecked();
-    s_last_from   = w_order_from->date();
-    s_last_to     = w_order_to->date();
-    s_last_type   = w_order_type->currentIndex();
+    s_last_by_number = w_by_number->isChecked();
+    s_last_from      = w_order_from->date();
+    s_last_to        = w_order_to->date();
+    s_last_type      = w_order_type->currentIndex();
 
     QDialog::accept();
 }
@@ -321,12 +321,12 @@ void DImportOrder::download()
     if (ok && !import->orders().isEmpty()) {
         w_stack->setCurrentIndex(2);
 
-        w_order_list->setModel(new OrderListModel(import->orders()));
-        w_order_list->horizontalHeader()->setResizeMode(2, QHeaderView::Stretch);
+        static_cast<OrderListModel *>(w_order_list->model())->setOrderList(import->orders());
         w_order_list->sortByColumn(2, Qt::AscendingOrder);
 
         w_order_list->selectionModel()->select(w_order_list->model()->index(0, 0), QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
         w_order_list->scrollTo(w_order_list->model()->index(0, 0));
+        w_order_list->header()->resizeSections(QHeaderView::ResizeToContents);
         w_order_list->setFocus();
 
         w_ok->show();
@@ -353,7 +353,14 @@ QList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > DImportOrder::orders
 {
     QList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > list;
 
-    //TODO: process selection, fill list
+    foreach (const QModelIndex &idx, w_order_list->selectionModel()->selectedRows()) {
+        QPair<BrickLink::Order *, BrickLink::InvItemList *> pair;
+        pair.first = qvariant_cast<BrickLink::Order *>(w_order_list->model()->data(idx, OrderPointerRole));
+        pair.second = qvariant_cast<BrickLink::InvItemList *>(w_order_list->model()->data(idx, ItemListPointerRole));
+
+        if (pair.first && pair.second)
+            list << pair;
+    }
 
     return list;
 }
@@ -385,7 +392,7 @@ void DImportOrder::checkSelected()
     w_ok->setEnabled(w_order_list->selectionModel()->hasSelection());
 }
 
-void DImportOrder::activateItem(/*QListViewItem **/)
+void DImportOrder::activateItem()
 {
     checkSelected();
     w_ok->animateClick();

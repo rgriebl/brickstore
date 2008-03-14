@@ -50,8 +50,7 @@ CMultiProgressBar::~CMultiProgressBar()
 
 void CMultiProgressBar::setStopIcon(const QIcon &ico)
 {
-    m_stop_ico = ico;
-    m_stop->setHidden(ico.isNull());
+    m_stop->setIcon(ico);
 }
 
 void CMultiProgressBar::resizeEvent(QResizeEvent *)

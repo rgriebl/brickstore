@@ -32,7 +32,7 @@ class CUndoStack;
 class CFilterEdit;
 
 
-class CWindow : public QWidget, public IDocumentView {
+class CWindow : public QWidget {
     Q_OBJECT
 
 public:

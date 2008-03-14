@@ -28,16 +28,6 @@ class CAddRemoveCmd;
 class CChangeCmd;
 
 
-class IDocumentView {
-public:
-    virtual ~IDocumentView() { }
-
-    virtual QDomElement createGuiStateXML(QDomDocument doc) = 0;
-    virtual bool parseGuiStateXML(QDomElement root) = 0;
-};
-
-
-
 class CDocument : public QAbstractTableModel {
     Q_OBJECT
 
@@ -79,12 +69,39 @@ public:
         FieldCount,
     };
 
-    class Item : public BrickLink::InvItem {
+    class ItemBase {
+    public:
+        enum Type { IsItem, IsGroup };
+
+        virtual Type type() const = 0;
+        virtual ~ItemBase() { };
+
+    protected:
+        ItemBase() { };
+    };
+
+    class Group : public ItemBase {
+    public:
+        Group();
+        Group(const BrickLink::Item *, const BrickLink::Color *);
+        Group(const QString &);
+
+    private:
+        QString m_text;
+        const BrickLink::Item  *m_item;
+        const BrickLink::Color *m_color;
+
+        QList<ItemBase *> m_children;
+    };
+
+    class Item : public ItemBase, public BrickLink::InvItem {
     public:
         Item();
         Item(const BrickLink::InvItem &);
         Item(const Item &);
         virtual ~Item();
+
+        virtual Type type() const { return IsItem; }
 
         Item &operator = (const Item &);
         bool operator == (const Item &) const;

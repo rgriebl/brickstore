@@ -783,7 +783,7 @@ void CFrameWork::createStatusBar()
     m_progress = new CMultiProgressBar(statusBar());
     m_progress->setFixedWidth(fontMetrics().height() * 10);
     m_progress->setFixedHeight(fontMetrics().height());
-    m_progress->setStopIcon(QIcon(":/status/stop"));
+    m_progress->setStopIcon(QIcon(":/images/status/stop"));
 
     m_progress->addItem(QString(), PGI_PriceGuide);
     m_progress->addItem(QString(), PGI_Picture   );
@@ -1721,12 +1721,12 @@ void CFrameWork::modificationUpdate()
 
 void CFrameWork::gotPictureProgress(int p, int t)
 {
-// m_progress->setItemProgress ( PGI_Picture, p, t );
+    m_progress->setItemProgress(PGI_Picture, p, t);
 }
 
 void CFrameWork::gotPriceGuideProgress(int p, int t)
 {
-// m_progress->setItemProgress ( PGI_PriceGuide, p, t );
+    m_progress->setItemProgress(PGI_PriceGuide, p, t);
 }
 
 void CFrameWork::configure()
@@ -1856,8 +1856,8 @@ void CFrameWork::createAddItemDialog()
 
         QByteArray ba = CConfig::inst()->value("/MainWindow/AddItemDialog/Geometry").toByteArray();
 
-        if (ba.isEmpty() || !m_add_dialog->restoreGeometry(ba))
-            ; // should the dialog be centered??
+        if (!ba.isEmpty())
+            m_add_dialog->restoreGeometry(ba);
 
         connect(m_add_dialog, SIGNAL(closed()), this, SLOT(closedAddItemDialog()));
 

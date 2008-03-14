@@ -192,7 +192,9 @@ protected slots:
             if (!lm.isEmpty())
                 j->m_last_modified = fromHttpDate(lm.toLatin1());
 
-            QList<QNetworkCookie> cookies = QNetworkCookie::parseCookies(resp.value(QLatin1String("Set-Cookie")).toLatin1());
+            QList<QNetworkCookie> cookies;
+            foreach (const QString &cookie, resp.allValues(QLatin1String("Set-Cookie")))
+                cookies += QNetworkCookie::parseCookies(cookie.toAscii());
             
             if (!cookies.isEmpty()) {
                 s_cookie_mutex.lock();

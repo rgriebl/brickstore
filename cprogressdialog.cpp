@@ -109,7 +109,7 @@ void CProgressDialog::setHeaderText(const QString &str)
 void CProgressDialog::setMessageText(const QString &str)
 {
     m_message_text = str;
-    m_message_progress = (str.contains("%1") && str.contains("%2"));
+    m_message_progress = str.contains("%p");
 
     if (m_message_progress)
         setProgress(0, 0);
@@ -162,7 +162,7 @@ void CProgressDialog::setProgress(int s, int t)
             else
                 prog = QString("%1 KB").arg(s);
 
-            str.replace("%d", prog);
+            str.replace("%p", prog);
         }
         m_message->setText(str);
     }

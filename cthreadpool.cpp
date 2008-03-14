@@ -190,6 +190,7 @@ void CThreadPool::internalJobFinished(QThread *thread, CThreadPoolJob *job)
     locker.relock();
     delete job;
 
+    updateProgress(-1);
     scheduler();
 }
 
