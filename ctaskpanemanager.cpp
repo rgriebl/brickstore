@@ -11,6 +11,8 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
+#include <math.h>
+
 #include <QIcon>
 #include <QPixmap>
 #include <QImage>
@@ -99,7 +101,7 @@ class CTaskPane : public QWidget {
 public:
     CTaskPane(CTaskPaneManager *manager, CTaskPaneManagerPrivate *priv);
 
-    void recalcLayout();
+    QRegion recalcLayout();
     virtual QSize sizeHint() const;
 
 protected:
@@ -152,20 +154,31 @@ void CTaskPane::animateExpand(qreal value)
     else if (d->m_anim_item > -1 && frame == end) {
         d->m_anim_item = -1;
         recalcLayout();
-        update();
+        update(); // could be smaller
     }
 
     if (d->m_anim_item > -1) {
         int h = qMin(d->m_anim_src.height(), int(d->m_anim_src.height() * value));
-
+#if 0
+        // SCALE
         d->m_anim_img = d->m_anim_src.scaled(d->m_anim_src.width(), h, Qt::IgnoreAspectRatio, Qt::FastTransformation);
-
+#elif 1
+        // SCROLL
+        d->m_anim_img = d->m_anim_src.copy(0, d->m_anim_src.height() - h, d->m_anim_src.width(), h);
+#else
+        // PERSPECTIVE
+        const qreal pi = 3.14159265;
+        QTransform tf;
+        tf.translate(d->m_anim_src.width() / 2, 0);
+        tf.rotate(-180.0 * acos(qreal(h) / qreal(d->m_anim_src.height())) / pi, Qt::XAxis);
+        tf.translate(-d->m_anim_src.width() / 2, 0);
+        d->m_anim_img = d->m_anim_src.transformed(tf, Qt::FastTransformation);
+#endif
         QImage alpha(d->m_anim_img.size(), QImage::Format_Indexed8);
-        alpha.fill(char(value * 255));
+        alpha.fill(127 + char(value * 128));
         d->m_anim_img.setAlphaChannel(alpha);
 
-        recalcLayout();
-        repaint();
+        update(recalcLayout());
     }
 }
 
@@ -182,7 +195,7 @@ void CTaskPane::changeEvent(QEvent *e)
 void CTaskPane::resizeEvent(QResizeEvent *e)
 {
     updateBackground();
-    recalcLayout();
+    update(recalcLayout());
     QWidget::resizeEvent(e);
 }
 
@@ -276,13 +289,18 @@ void CTaskPane::mouseMoveEvent(QMouseEvent *e)
     int idx = findItemHeader(e->pos());
 
     if (idx != d->m_hot_item) {
+        if (d->m_hot_item > -1)
+            update(d->m_items[d->m_hot_item].m_header_rect);
+
         d->m_hot_item = idx;
-        update();
+
+        if (d->m_hot_item > -1) {
+            update(d->m_items[d->m_hot_item].m_header_rect);
+            setCursor(Qt::PointingHandCursor);
+        }
+        else
+            unsetCursor();
     }
-    if (idx > -1)
-        setCursor(Qt::PointingHandCursor);
-    else
-        unsetCursor();
 
     QWidget::mouseMoveEvent(e);
 }
@@ -291,8 +309,8 @@ void CTaskPane::leaveEvent(QEvent *e)
 {
     if (d->m_hot_item > -1) {
         unsetCursor();
+        update(d->m_items[d->m_hot_item].m_header_rect);
         d->m_hot_item = -1;
-        update();
     }
     QWidget::leaveEvent(e);
 }
@@ -386,7 +404,7 @@ QSize CTaskPane::sizeHint() const
     return d->m_size_hint;
 }
 
-void CTaskPane::recalcLayout()
+QRegion CTaskPane::recalcLayout()
 {
     //updateGeometry();
 
@@ -397,10 +415,12 @@ void CTaskPane::recalcLayout()
     int maxw = 0;
 
     if (w <= 0 || h <= 0)
-        return;
+        return QRegion();
 
     bool first = true;
     int headerh = qMax(22, 2 * d->m_vspace + d->m_xh + 1);
+
+    QRegion dirty;
 
     for (int idx = 0; idx < d->m_items.size(); idx++) {
         CTaskPaneManagerPrivate::Item &item = d->m_items[idx];
@@ -409,7 +429,13 @@ void CTaskPane::recalcLayout()
             offy += d->m_xh / 2;
         first = false;
 
-        item.m_header_rect.setRect(offx, offy, w, headerh);
+        QRect headerr(offx, offy, w, headerh);
+
+        if (headerr != item.m_header_rect) {
+            dirty |= item.m_header_rect.adjusted(0, 0, 0, 1);
+            dirty |= headerr.adjusted(0, 0, 0, 1);
+            item.m_header_rect = headerr;
+        }
 
         offy += (headerh + 1);
 
@@ -423,10 +449,18 @@ void CTaskPane::recalcLayout()
         if (item.m_visible) {
             int wh = ws.height();
 
-            wid->setGeometry(offx + 2, offy + 1, w - 4, wh);
+            QRect widgetr(offx + 2, offy + 1, w - 4, wh);
 
-            if (anim)
+            if (wid->geometry() != widgetr) {
+                dirty |= wid->geometry().adjusted(-2, -2, 2, 2);
+                dirty |= widgetr.adjusted(-2, -2, 2, 2);
+                wid->setGeometry(widgetr);
+            }
+
+            if (anim) {
                 wid->hide();
+                dirty |= QRect(offx, offy - 1, w, d->m_anim_img.height() + 4);
+            }
             else if (isVisible())
                 wid->show();
 
@@ -435,6 +469,9 @@ void CTaskPane::recalcLayout()
         else {
             wid->hide();
             wid->setGeometry(0, 0, w - 4, ws.height());
+
+            if (anim)
+                dirty |= QRect(offx, offy - 1, w, ws.height() + 4);
 
             offy += (anim ? d->m_anim_img.height() + 2 : 0);
         }
@@ -448,6 +485,8 @@ void CTaskPane::recalcLayout()
         maxw = qMax(maxw, ws.width() + 4);
     }
     d->m_size_hint = QSize(offx + maxw + d->m_margins.right(), offy + d->m_margins.bottom());
+
+    return dirty;
 }
 
 

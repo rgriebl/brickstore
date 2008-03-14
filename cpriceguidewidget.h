@@ -71,6 +71,7 @@ protected slots:
 private:
     void paintHeader(QPainter *p, const QRect &r, Qt::Alignment align, const QString &str, bool bold = false);
     void paintCell(QPainter *p, const QRect &r, Qt::Alignment align, const QString &str, bool alternate = false);
+    QRegion nonStaticCells() const;
 
 private:
     CPriceGuideWidgetPrivate *d;

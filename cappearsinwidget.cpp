@@ -133,6 +133,7 @@ CAppearsInWidget::CAppearsInWidget(QWidget *parent)
 {
     d = new CAppearsInWidgetPrivate();
     d->m_resize_timer = new QTimer(this);
+    d->m_resize_timer->setSingleShot(true);
 
     setAlternatingRowColors(true);
     setAllColumnsShowFocus(true);

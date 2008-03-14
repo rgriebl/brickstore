@@ -118,7 +118,7 @@ CPriceGuideWidget::CPriceGuideWidget(QWidget *parent, Qt::WindowFlags f)
 
     d->m_connected = false;
 
-    connect(CMoney::inst(), SIGNAL(monetarySettingsChanged()), this, SLOT(repaint()));
+    connect(CMoney::inst(), SIGNAL(monetarySettingsChanged()), this, SLOT(update()));
 
     QAction *a;
     a = new QAction(this);
@@ -158,9 +158,9 @@ void CPriceGuideWidget::languageChange()
     findChild<QAction *> ("edit_bl_priceguide")->setText(tr("Show BrickLink Price Guide Info..."));
     findChild<QAction *> ("edit_bl_lotsforsale")->setText(tr("Show Lots for Sale on BrickLink..."));
 
-    d->m_str_qty                                       = tr("Qty.");
-    d->m_str_cond [BrickLink::New]                     = tr("New");
-    d->m_str_cond [BrickLink::Used]                    = tr("Used");
+    d->m_str_qty                           = tr("Qty.");
+    d->m_str_cond [BrickLink::New]         = tr("New");
+    d->m_str_cond [BrickLink::Used]        = tr("Used");
     d->m_str_price [BrickLink::Lowest]     = tr("Min.");
     d->m_str_price [BrickLink::Average]    = tr("Avg.");
     d->m_str_price [BrickLink::WAverage]   = tr("Q.Avg.");
@@ -174,7 +174,7 @@ void CPriceGuideWidget::languageChange()
     d->m_str_vtime [BrickLink::AllTime]    = tr("All Time Sales");
     d->m_str_vtime [BrickLink::PastSix]    = tr("Last 6 Months Sales");
     d->m_str_vtime [BrickLink::Current]    = tr("Current Inventory");
-    d->m_str_wait                                      = tr("Please wait ...updating");
+    d->m_str_wait                          = tr("Please wait ...updating");
 
     recalcLayout();
     update();
@@ -215,14 +215,14 @@ void CPriceGuideWidget::doUpdate()
 {
     if (d->m_pg)
         d->m_pg->update(true);
-    update();
+    update(nonStaticCells());
 }
 
 
 void CPriceGuideWidget::gotUpdate(BrickLink::PriceGuide *pg)
 {
     if (pg == d->m_pg)
-        update();
+        update(nonStaticCells());
 }
 
 
@@ -240,7 +240,7 @@ void CPriceGuideWidget::setPriceGuide(BrickLink::PriceGuide *pg)
         d->m_connected = connect(BrickLink::core(), SIGNAL(priceGuideUpdated(BrickLink::PriceGuide *)), this, SLOT(gotUpdate(BrickLink::PriceGuide *)));
 
     d->m_pg = pg;
-    update();
+    update(nonStaticCells());
 }
 
 BrickLink::PriceGuide *CPriceGuideWidget::priceGuide() const
@@ -697,4 +697,21 @@ bool CPriceGuideWidget::event(QEvent *e)
     }
     else
         return QWidget::event(e);
+}
+
+QRegion CPriceGuideWidget::nonStaticCells() const
+{
+    QRegion r;
+
+    for (QList<cell>::const_iterator it = d->m_cells.begin(); it != d->m_cells.end(); ++it) {
+        const cell &c = *it;
+
+        switch (c.m_type) {
+        case cell::Quantity:
+        case cell::Price   :
+        case cell::Update  : r |= c; break;
+        default            : break;
+        }
+    }
+    return r;
 }
