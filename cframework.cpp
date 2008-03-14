@@ -506,7 +506,7 @@ CFrameWork::CFrameWork(QWidget *parent, Qt::WindowFlags f)
     BrickLink::Core *bl = BrickLink::core();
 
     connect(CConfig::inst(), SIGNAL(onlineStatusChanged(bool)), bl, SLOT(setOnlineStatus(bool)));
-    connect(CConfig::inst(), SIGNAL(blUpdateIntervalsChanged(int, int)), bl, SLOT(setUpdateIntervals(int, int)));
+    connect(CConfig::inst(), SIGNAL(updateIntervalsChanged(int, int)), bl, SLOT(setUpdateIntervals(int, int)));
     connect(CConfig::inst(), SIGNAL(proxyChanged(bool, const QString &, int)), bl, SLOT(setHttpProxy(bool, const QString &, int)));
     connect(CMoney::inst(), SIGNAL(monetarySettingsChanged()), this, SLOT(statisticsUpdate()));
     connect(CConfig::inst(), SIGNAL(weightSystemChanged(CConfig::WeightSystem)), this, SLOT(statisticsUpdate()));
@@ -522,9 +522,8 @@ CFrameWork::CFrameWork(QWidget *parent, Qt::WindowFlags f)
     bl->setOnlineStatus(CConfig::inst()->onlineStatus());
     bl->setHttpProxy(CConfig::inst()->proxy());
     {
-        int pic, pg;
-        CConfig::inst()->blUpdateIntervals(pic, pg);
-        bl->setUpdateIntervals(pic, pg);
+        QMap<QByteArray, int> uiv = CConfig::inst()->updateIntervals();
+        bl->setUpdateIntervals(uiv["Picture"], uiv["PriceGuide"]);
     }
 
     connect(bl, SIGNAL(priceGuideProgress(int, int)), this, SLOT(gotPriceGuideProgress(int, int)));
@@ -1215,14 +1214,17 @@ void CFrameWork::fileImportBrickLinkInventory(const BrickLink::Item *item)
 
 bool CFrameWork::checkBrickLinkLogin()
 {
-    while (CConfig::inst()->blLoginUsername().isEmpty() ||
-           CConfig::inst()->blLoginPassword().isEmpty()) {
+    forever {
+        QPair<QString, QString> auth = CConfig::inst()->loginForBrickLink();
+
+        if (!auth.first.isEmpty() && !auth.second.isEmpty())
+            return true;
+            
         if (CMessageBox::question(this, tr("No valid BrickLink login settings found.<br /><br />Do you want to change the settings now?"), CMessageBox::Yes | CMessageBox::No) == CMessageBox::Yes)
             configure("network");
         else
             return false;
     }
-    return true;
 }
 
 void CFrameWork::fileImportBrickLinkOrder()

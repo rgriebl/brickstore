@@ -26,7 +26,7 @@ private:
     CConfig();
     static CConfig *s_inst;
 
-    static QString obscure(const QString &);
+    static QString scramble(const QString &);
 
 public:
     ~CConfig();
@@ -54,10 +54,19 @@ public:
 
     QDateTime lastDatabaseUpdate() const;
 
-    QString blLoginUsername() const;
-    QString blLoginPassword() const;
-    void blUpdateIntervals(int &pic, int &pg) const;
-    void blUpdateIntervalsDefaults(int &picd, int &pgd) const;
+    QPair<QString, QString> loginForBrickLink() const;
+    QMap<QByteArray, int> updateIntervals() const;
+    QMap<QByteArray, int> updateIntervalsDefault() const;
+
+    struct Translation {
+        QString m_langid;
+        QString m_translator;
+        QString m_contact;
+        bool    m_default;
+        QMap<QString, QString> m_names;
+    };
+
+    QList<Translation> translations() const;
 
     enum Registration {
         None,
@@ -89,29 +98,29 @@ public slots:
 
     void setLastDatabaseUpdate(const QDateTime &dt);
 
-    void setBlLoginUsername(const QString &name);
-    void setBlLoginPassword(const QString &pass);
-    void setBlUpdateIntervals(int pic, int pg);
+    void setLoginForBrickLink(const QString &user, const QString &pass);
+    void setUpdateIntervals(const QMap<QByteArray, int> &intervals);
 
 signals:
     void simpleModeChanged(bool);
     void languageChanged();
     void weightSystemChanged(CConfig::WeightSystem ws);
     void showInputErrorsChanged(bool b);
-    void blUpdateIntervalsChanged(int pic, int pg);
+    void updateIntervalsChanged(const QMap<QByteArray, int> &intervals);
     void onlineStatusChanged(bool b);
     void proxyChanged(const QNetworkProxy &proxy);
     void registrationChanged(CConfig::Registration r);
 
 protected:
-    QString readPasswordEntry(const QString &key) const;
-    void writePasswordEntry(const QString &key, const QString &password);
+    bool parseTranslations() const;
 
 private:
     bool         m_show_input_errors;
     WeightSystem m_weight_system;
     bool         m_simple_mode;
     Registration m_registration;
+    mutable bool m_translations_parsed;
+    mutable QList<Translation> m_translations;
 };
 
 #endif

@@ -56,8 +56,8 @@ public:
         url.addQueryItem("invQtyMax",     "0");
         url.addQueryItem("invBrikTrak",   "");
         url.addQueryItem("invDesc",       "");
-        url.addQueryItem("frmUsername",   CConfig::inst()->blLoginUsername());
-        url.addQueryItem("frmPassword",   CConfig::inst()->blLoginPassword());
+        url.addQueryItem("frmUsername",   CConfig::inst()->loginForBrickLink().first);
+        url.addQueryItem("frmPassword",   CConfig::inst()->loginForBrickLink().second);
 
         pd->post(url);
 
@@ -172,8 +172,8 @@ public:
         url.addQueryItem("getFiled",      "Y");    // regardless of filed state
         url.addQueryItem("getStatus",     "");     // regardless of status
         url.addQueryItem("statusID",      "");
-        url.addQueryItem("frmUsername",   CConfig::inst()->blLoginUsername());
-        url.addQueryItem("frmPassword",   CConfig::inst()->blLoginPassword());
+        url.addQueryItem("frmUsername",   CConfig::inst()->loginForBrickLink().first);
+        url.addQueryItem("frmPassword",   CConfig::inst()->loginForBrickLink().second);
 
         m_url = url;
         m_progress->post(url);

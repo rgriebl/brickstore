@@ -18,6 +18,7 @@
 #include <QGlobalStatic>
 #include <QStringList>
 #include <QDir>
+#include <QDomDocument>
 
 #if defined( Q_WS_WIN )
 #include <windows.h>
@@ -53,6 +54,7 @@ CConfig::CConfig()
     m_simple_mode = value("/General/SimpleMode", false).toBool();
 
     m_registration = OpenSource;
+    m_translations_parsed = false;
     setRegistration(registrationName(), registrationKey());
 }
 
@@ -155,7 +157,7 @@ CConfig::Registration CConfig::setRegistration(const QString &name, const QStrin
     return m_registration;
 }
 
-QString CConfig::obscure(const QString &str)
+QString CConfig::scramble(const QString &str)
 {
 #if defined( Q_WS_WIN )
     // win9x registries cannot store unicode values
@@ -170,17 +172,6 @@ QString CConfig::obscure(const QString &str)
                   QChar(0x1001F - unicode [i].unicode());
     return result;
 }
-
-QString CConfig::readPasswordEntry(const QString &key) const
-{
-    return obscure(value(key).toString());
-}
-
-void CConfig::writePasswordEntry(const QString &key, const QString &password)
-{
-    setValue(key, obscure(password));
-}
-
 
 void CConfig::upgrade(int vmajor, int vminor, int vrev)
 {
@@ -452,58 +443,58 @@ void CConfig::setSimpleMode(bool sm)
 }
 
 
-void CConfig::blUpdateIntervals(int &pic, int &pg) const
+QMap<QByteArray, int> CConfig::updateIntervals() const
 {
-    int picd, pgd;
+    QMap<QByteArray, int> uiv = updateIntervalsDefault();
+    
+    const char *lut[] = { "Picture", "PriceGuide", "Database", "LDraw", 0 };
 
-    blUpdateIntervalsDefaults(picd, pgd);
-
-    pic = CConfig::inst()->value("/BrickLink/UpdateInterval/Pictures",    picd).toInt();
-    pg  = CConfig::inst()->value("/BrickLink/UpdateInterval/PriceGuides", pgd).toInt();
+    for (const char **ptr = lut; *ptr; ++ptr)
+        uiv[*ptr] = value(QLatin1String("/BrickLink/UpdateInterval/") + QLatin1String(*ptr), uiv[*ptr]).toInt();
+    return uiv;
 }
 
-void CConfig::blUpdateIntervalsDefaults(int &picd, int &pgd) const
+QMap<QByteArray, int> CConfig::updateIntervalsDefault() const
 {
-    int day2sec = 60*60*24;
+    const int day2sec = 60*60*24;
+    QMap<QByteArray, int> uiv;
 
-    picd = 180 * day2sec;
-    pgd  =  14 * day2sec;
+    uiv.insert("Picture",   180 * day2sec);
+    uiv.insert("PriceGuide", 14 * day2sec);
+    uiv.insert("Database",    7 * day2sec);
+    uiv.insert("LDraw",      31 * day2sec);
+
+    return uiv;
 }
 
-void CConfig::setBlUpdateIntervals(int pic, int pg)
+void CConfig::setUpdateIntervals(const QMap<QByteArray, int> &uiv)
 {
-    int opic, opg;
+    bool modified = false;    
+    QMap<QByteArray, int> old_uiv = updateIntervals();
+    
+    for (QMapIterator<QByteArray, int> it(uiv); it.hasNext(); ) {
+        it.next();
+        
+        if (it.value() != old_uiv.value(it.key())) {
+            setValue(QLatin1String("/BrickLink/UpdateInterval/") + it.key(), it.value());
+            modified = true;
+        }
+    }    
 
-    blUpdateIntervals(opic, opg);
-
-    if ((opic != pic) || (opg != pg)) {
-        setValue("/BrickLink/UpdateInterval/Pictures",    pic);
-        setValue("/BrickLink/UpdateInterval/PriceGuides", pg);
-
-        emit blUpdateIntervalsChanged(pic, pg);
-    }
+    if (modified)
+        emit updateIntervalsChanged(updateIntervals());
 }
 
 
-QString CConfig::blLoginUsername() const
+QPair<QString, QString> CConfig::loginForBrickLink() const
 {
-    return value("/BrickLink/Login/Username").toString();
+    return qMakePair(value("/BrickLink/Login/Username").toString(), scramble(value("/BrickLink/Login/Password").toString()));
 }
 
-void CConfig::setBlLoginUsername(const QString &name)
+void CConfig::setLoginForBrickLink(const QString &name, const QString &pass)
 {
     setValue("/BrickLink/Login/Username", name);
-}
-
-
-QString CConfig::blLoginPassword() const
-{
-    return readPasswordEntry("/BrickLink/Login/Password");
-}
-
-void CConfig::setBlLoginPassword(const QString &pass)
-{
-    writePasswordEntry("/BrickLink/Login/Password", pass);
+    setValue("/BrickLink/Login/Password", scramble(pass));
 }
 
 
@@ -521,5 +512,74 @@ void CConfig::setOnlineStatus(bool b)
 
         emit onlineStatusChanged(b);
     }
+}
+
+QList<CConfig::Translation> CConfig::translations() const
+{
+    if (!m_translations_parsed)
+        m_translations_parsed = parseTranslations();
+    return m_translations;
+}
+
+bool CConfig::parseTranslations() const
+{
+	m_translations.clear();
+
+	QDomDocument doc;
+	QFile file(":/translations/translations.xml");
+
+	if (file.open(QIODevice::ReadOnly)) {
+		QString err_str;
+		int err_line = 0, err_col = 0;
+	
+		if (doc.setContent(&file, &err_str, &err_line, &err_col)) {
+			QDomElement root = doc.documentElement();
+
+			if (root.isElement() && root.nodeName() == "translations") {
+				bool found_default = false;
+
+				for (QDomNode node = root.firstChild(); !node.isNull(); node = node.nextSibling()) {
+					if (!node.isElement() || (node.nodeName() != "translation"))
+						continue;
+					QDomNamedNodeMap map = node.attributes();
+					Translation trans;
+
+					trans.m_langid = map.namedItem("lang").toAttr().value();
+					trans.m_default = map.contains("default");
+
+					if (trans.m_default) {
+						if (found_default)
+							goto error;
+						found_default = true;
+					}
+
+					if (trans.m_langid.isEmpty())
+						goto error;
+
+					QString defname, trname;
+
+					for (QDomNode name = node.firstChild(); !name.isNull(); name = name.nextSibling()) {
+						if (!name.isElement() || (name.nodeName() != "name"))
+							continue;
+						QDomNamedNodeMap map = name.attributes();
+
+						QString tr_id = map.namedItem("lang").toAttr().value();
+                        QString tr_name = name.toElement().text();
+                        
+                        if (!tr_name.isEmpty())
+                            trans.m_names[tr_id.isEmpty() ? trans.m_langid : tr_id] = tr_name;
+					}
+
+					if (trans.m_names.isEmpty())
+						goto error;
+
+					m_translations << trans;
+				}
+				return true;
+			}
+		}
+	}
+error:
+	return false;
 }
 

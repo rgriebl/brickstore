@@ -24,7 +24,17 @@ class DSettings : public QDialog, private Ui::Settings {
 public:
     DSettings(const QString &goto_page, QWidget *parent = 0, Qt::WindowFlags f = 0);
 
+public slots:
+    virtual void accept();
+    
+protected slots:
+    void selectDocDir();
+    void rateTypeToggled(bool);
+    void resetUpdateIntervals();
+    
 protected:
+    void load();
+    void save();
 
 private:
 };

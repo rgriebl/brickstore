@@ -27,6 +27,9 @@ public:
 
     static MeasurementSystem measurementSystem();
     static void setMeasurementSystem(MeasurementSystem ms);
+    
+    static bool isMetric()    { return measurementSystem() == MetricSystem; }
+    static bool isImperial()  { return measurementSystem() == ImperialSystem; }
 
     static QString weightToString(double gramm, bool optimize = false, bool show_unit = false);
     static double stringToWeight(const QString &s);
