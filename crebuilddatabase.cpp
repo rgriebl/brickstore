@@ -22,7 +22,7 @@
 
 #include "bricklink.h"
 #include "cconfig.h"
-#include "cutility.h"
+#include "utility.h"
 
 #include "crebuilddatabase.h"
 
@@ -269,7 +269,7 @@ void CRebuildDatabase::downloadJobFinished(CThreadPoolJob *pj)
             QString basepath = f->fileName();
             basepath.truncate(basepath.length() - 4);
 
-            QString err = CUtility::safeRename(basepath);
+            QString err = Utility::safeRename(basepath);
 
             if (err.isNull())
                 ok = true;

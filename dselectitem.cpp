@@ -15,7 +15,7 @@
 
 #include "dselectitem.h"
 #include "cselectitem.h"
-#include "cutility.h"
+#include "utility.h"
 #include "bricklink.h"
 
 
@@ -60,7 +60,7 @@ void DSelectItem::checkItem(const BrickLink::Item *item, bool ok)
 int DSelectItem::exec(const QRect &pos)
 {
     if (pos.isValid())
-        CUtility::setPopupPos(this, pos);
+        Utility::setPopupPos(this, pos);
 
     return QDialog::exec();
 }

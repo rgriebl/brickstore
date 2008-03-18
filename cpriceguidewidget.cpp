@@ -24,7 +24,7 @@
 #include <QDesktopServices>
 
 #include "bricklink.h"
-#include "cutility.h"
+#include "utility.h"
 #include "cmoney.h"
 
 #include "cpriceguidewidget.h"
@@ -122,7 +122,7 @@ CPriceGuideWidget::CPriceGuideWidget(QWidget *parent, Qt::WindowFlags f)
 
     QAction *a;
     a = new QAction(this);
-    a->setObjectName("edit_reload");
+    a->setObjectName("priceguide_reload");
     a->setIcon(QIcon(":/images/22x22/reload"));
     connect(a, SIGNAL(triggered()), this, SLOT(doUpdate()));
     addAction(a);
@@ -132,17 +132,17 @@ CPriceGuideWidget::CPriceGuideWidget(QWidget *parent, Qt::WindowFlags f)
     addAction(a);
 
     a = new QAction(this);
-    a->setObjectName("edit_bl_catalog");
+    a->setObjectName("priceguide_bl_catalog");
     a->setIcon(QIcon(":/images/22x22/edit_bl_catalog"));
     connect(a, SIGNAL(triggered()), this, SLOT(showBLCatalogInfo()));
     addAction(a);
     a = new QAction(this);
-    a->setObjectName("edit_bl_priceguide");
+    a->setObjectName("priceguide_bl_priceguide");
     a->setIcon(QIcon(":/images/22x22/edit_bl_priceguide"));
     connect(a, SIGNAL(triggered()), this, SLOT(showBLPriceGuideInfo()));
     addAction(a);
     a = new QAction(this);
-    a->setObjectName("edit_bl_lotsforsale");
+    a->setObjectName("priceguide_bl_lotsforsale");
     a->setIcon(QIcon(":/images/22x22/edit_bl_lotsforsale"));
     connect(a, SIGNAL(triggered()), this, SLOT(showBLLotsForSale()));
     addAction(a);
@@ -153,10 +153,10 @@ CPriceGuideWidget::CPriceGuideWidget(QWidget *parent, Qt::WindowFlags f)
 
 void CPriceGuideWidget::languageChange()
 {
-    findChild<QAction *> ("edit_reload")->setText(tr("Update"));
-    findChild<QAction *> ("edit_bl_catalog")->setText(tr("Show BrickLink Catalog Info..."));
-    findChild<QAction *> ("edit_bl_priceguide")->setText(tr("Show BrickLink Price Guide Info..."));
-    findChild<QAction *> ("edit_bl_lotsforsale")->setText(tr("Show Lots for Sale on BrickLink..."));
+    findChild<QAction *> ("priceguide_reload")->setText(tr("Update"));
+    findChild<QAction *> ("priceguide_bl_catalog")->setText(tr("Show BrickLink Catalog Info..."));
+    findChild<QAction *> ("priceguide_bl_priceguide")->setText(tr("Show BrickLink Price Guide Info..."));
+    findChild<QAction *> ("priceguide_bl_lotsforsale")->setText(tr("Show Lots for Sale on BrickLink..."));
 
     d->m_str_qty                           = tr("Qty.");
     d->m_str_cond [BrickLink::New]         = tr("New");

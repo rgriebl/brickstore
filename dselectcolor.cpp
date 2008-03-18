@@ -15,7 +15,7 @@
 
 #include "dselectcolor.h"
 #include "cselectcolor.h"
-#include "cutility.h"
+#include "utility.h"
 
 
 DSelectColor::DSelectColor(QWidget *parent, Qt::WindowFlags f)
@@ -51,7 +51,7 @@ void DSelectColor::checkColor(const BrickLink::Color *col, bool ok)
 int DSelectColor::exec(const QRect &pos)
 {
     if (pos.isValid())
-        CUtility::setPopupPos(this, pos);
+        Utility::setPopupPos(this, pos);
 
     return QDialog::exec();
 }

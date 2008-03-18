@@ -19,7 +19,7 @@
 #include <QTextStream>
 #include <QtDebug>
 
-#include "cutility.h"
+#include "utility.h"
 #include "bricklink.h"
 
 

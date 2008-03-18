@@ -26,7 +26,7 @@
 #include "cconfig.h"
 #include "bricklink.h"
 #include "cprogressdialog.h"
-#include "cutility.h"
+#include "utility.h"
 
 
 class CImportBLStore : public QObject {

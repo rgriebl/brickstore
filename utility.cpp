@@ -36,33 +36,7 @@
 #include "utility.h"
 
 
-QString Utility::ellipsisText(const QString &org, const QFontMetrics &fm, int width, int align)
-{
-    int ellWidth = fm.width("...");
-    QString text = QString::fromLatin1("");
-    int i = 0;
-    int len = org.length();
-    int offset = (align & Qt::AlignRight) ? (len - 1) - i : i;
-
-    while (i < len && fm.width(text + org [offset]) + ellWidth < width) {
-        if (align & Qt::AlignRight)
-            text.prepend(org [offset]);
-        else
-            text += org [offset];
-        offset = (align & Qt::AlignRight) ? (len - 1) - ++i : ++i;
-    }
-
-    if (text.isEmpty())
-        text = (align & Qt::AlignRight) ? org.right(1) : text = org.left(1);
-
-    if (align & Qt::AlignRight)
-        text.prepend("...");
-    else
-        text += "...";
-    return text;
-}
-
-float Utility::colorDifference(const QColor &c1, const QColor &c2)
+qreal Utility::colorDifference(const QColor &c1, const QColor &c2)
 {
     qreal r1, g1, b1, a1, r2, g2, b2, a2;
     c1.getRgbF(&r1, &g1, &b1, &a1);
@@ -146,16 +120,16 @@ QString Utility::safeRename(const QString &basepath)
                 if (cwd.rename(newpath, basepath))
                     error = QString();
                 else
-                    error = qApp->translate("CUtility", "Could not rename %1 to %2.").arg(newpath).arg(basepath);
+                    error = qApp->translate("Utility", "Could not rename %1 to %2.").arg(newpath).arg(basepath);
             }
             else
-                error = qApp->translate("CUtility", "Could not backup %1 to %2.").arg(basepath).arg(oldpath);
+                error = qApp->translate("Utility", "Could not backup %1 to %2.").arg(basepath).arg(oldpath);
         }
         else
-            error = qApp->translate("CUtility", "Could not delete %1.").arg(oldpath);
+            error = qApp->translate("Utility", "Could not delete %1.").arg(oldpath);
     }
     else
-        error = qApp->translate("CUtility", "Could not find %1.").arg(newpath);
+        error = qApp->translate("Utility", "Could not find %1.").arg(newpath);
 
     return error;
 }

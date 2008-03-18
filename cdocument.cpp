@@ -29,7 +29,7 @@
 #define MODELTEST_ATTACH(x)   ;
 #endif
 
-#include "cutility.h"
+#include "utility.h"
 #include "cconfig.h"
 #include "cframework.h"
 #include "cmessagebox.h"

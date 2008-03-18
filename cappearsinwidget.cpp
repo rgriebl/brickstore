@@ -147,7 +147,7 @@ CAppearsInWidget::CAppearsInWidget(QWidget *parent)
 
     QAction *a;
     a = new QAction(this);
-    a->setObjectName("edit_partoutitems");
+    a->setObjectName("appearsin_partoutitems");
     a->setIcon(QIcon(":/images/22x22/edit_partoutitems"));
     connect(a, SIGNAL(triggered()), this, SLOT(partOut()));
     addAction(a);
@@ -157,7 +157,7 @@ CAppearsInWidget::CAppearsInWidget(QWidget *parent)
     addAction(a);
 
     a = new QAction(this);
-    a->setObjectName("edit_magnify");
+    a->setObjectName("appearsin_magnify");
     a->setIcon(QIcon(":/images/22x22/viewmagp"));
     connect(a, SIGNAL(triggered()), this, SLOT(viewLargeImage()));
     addAction(a);
@@ -167,17 +167,17 @@ CAppearsInWidget::CAppearsInWidget(QWidget *parent)
     addAction(a);
 
     a = new QAction(this);
-    a->setObjectName("edit_bl_catalog");
+    a->setObjectName("appearsin_bl_catalog");
     a->setIcon(QIcon(":/images/22x22/edit_bl_catalog"));
     connect(a, SIGNAL(triggered()), this, SLOT(showBLCatalogInfo()));
     addAction(a);
     a = new QAction(this);
-    a->setObjectName("edit_bl_priceguide");
+    a->setObjectName("appearsin_bl_priceguide");
     a->setIcon(QIcon(":/images/22x22/edit_bl_priceguide"));
     connect(a, SIGNAL(triggered()), this, SLOT(showBLPriceGuideInfo()));
     addAction(a);
     a = new QAction(this);
-    a->setObjectName("edit_bl_lotsforsale");
+    a->setObjectName("appearsin_bl_lotsforsale");
     a->setIcon(QIcon(":/images/22x22/edit_bl_lotsforsale"));
     connect(a, SIGNAL(triggered()), this, SLOT(showBLLotsForSale()));
     addAction(a);
@@ -192,11 +192,11 @@ CAppearsInWidget::CAppearsInWidget(QWidget *parent)
 
 void CAppearsInWidget::languageChange()
 {
-    findChild<QAction *>("edit_partoutitems")->setText(tr("Part out Item..."));
-    findChild<QAction *>("edit_magnify")->setText(tr("View large image..."));
-    findChild<QAction *>("edit_bl_catalog")->setText(tr("Show BrickLink Catalog Info..."));
-    findChild<QAction *>("edit_bl_priceguide")->setText(tr("Show BrickLink Price Guide Info..."));
-    findChild<QAction *>("edit_bl_lotsforsale")->setText(tr("Show Lots for Sale on BrickLink..."));
+    findChild<QAction *>("appearsin_partoutitems")->setText(tr("Part out Item..."));
+    findChild<QAction *>("appearsin_magnify")->setText(tr("View large image..."));
+    findChild<QAction *>("appearsin_bl_catalog")->setText(tr("Show BrickLink Catalog Info..."));
+    findChild<QAction *>("appearsin_bl_priceguide")->setText(tr("Show BrickLink Price Guide Info..."));
+    findChild<QAction *>("appearsin_bl_lotsforsale")->setText(tr("Show Lots for Sale on BrickLink..."));
 }
 
 CAppearsInWidget::~CAppearsInWidget()

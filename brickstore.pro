@@ -189,7 +189,6 @@ XSOURCES += application \
             taskwidgets \
             taskpanemanager \
             spinner \
-            utility \
             selectitem \
             localemeasurement \
             window \

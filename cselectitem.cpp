@@ -37,7 +37,7 @@
 #include "bricklink.h"
 #include "cfilteredit.h"
 #include "cselectitem.h"
-#include "cutility.h"
+#include "utility.h"
 #include "cmessagebox.h"
 
 
@@ -261,7 +261,7 @@ void CSelectItem::init()
 void CSelectItem::recalcHighlightPalette()
 {
     QPalette p = qApp->palette();
-    QColor hc = CUtility::gradientColor(p.color(QPalette::Active, QPalette::Highlight), p.color(QPalette::Inactive, QPalette::Highlight), 0.35f);
+    QColor hc = Utility::gradientColor(p.color(QPalette::Active, QPalette::Highlight), p.color(QPalette::Inactive, QPalette::Highlight), 0.35f);
     QColor htc = p.color(QPalette::Active, QPalette::HighlightedText);
 
     p.setColor(QPalette::Inactive, QPalette::Highlight, hc);

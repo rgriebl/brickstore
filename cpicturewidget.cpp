@@ -11,13 +11,15 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <QLabel>
+#include <QTextBrowser>
+#include <QPalette>
 #include <QMenu>
 #include <QLayout>
 #include <QApplication>
 #include <QAction>
 #include <QDesktopServices>
 #include <QMouseEvent>
+#include <QPainter>
 
 #include "bricklink.h"
 #include "cpicturewidget.h"
@@ -26,9 +28,10 @@
 class CPictureWidgetPrivate {
 public:
     BrickLink::Picture *m_pic;
-    QLabel *            m_plabel;
-    QLabel *            m_tlabel;
+    QTextBrowser *      m_tlabel;
     bool                m_connected;
+    int                 m_img_height;
+    QImage              m_img;
 };
 
 class CLargePictureWidgetPrivate {
@@ -47,31 +50,22 @@ CPictureWidget::CPictureWidget(QWidget *parent, Qt::WindowFlags f)
     setBackgroundRole(QPalette::Base);
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
     setAutoFillBackground(true);
-    setContextMenuPolicy(Qt::ActionsContextMenu);
+    setContextMenuPolicy(Qt::NoContextMenu);
 
-    int fw = frameWidth() * 2;
-    d->m_plabel = new QLabel(this);
-    d->m_plabel->setAlignment(Qt::AlignCenter);
-    d->m_plabel->setFixedSize(80, 80);
-    d->m_plabel->setContextMenuPolicy(Qt::NoContextMenu);
-
-    d->m_tlabel = new QLabel("Ay<br />Ay<br />Ay<br />Ay<br />Ay", this);
+    d->m_tlabel = new QTextBrowser(this);
+    d->m_tlabel->setFrameStyle(QFrame::NoFrame);
     d->m_tlabel->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
-    d->m_tlabel->setWordWrap(true);
+    d->m_tlabel->setLineWrapMode(QTextEdit::WidgetWidth);
     d->m_tlabel->setTextInteractionFlags(Qt::TextBrowserInteraction);
-    d->m_tlabel->setFixedSize(2 * d->m_plabel->width(), d->m_tlabel->sizeHint().height());
-    d->m_tlabel->setText(QString());
     d->m_tlabel->setContextMenuPolicy(Qt::NoContextMenu);
-
-    QBoxLayout *lay = new QVBoxLayout(this);
-    lay->setMargin(fw + 4);
-    lay->setSpacing(4);
-    lay->addWidget(d->m_plabel, 0, Qt::AlignCenter );
-    lay->addWidget(d->m_tlabel, 0, Qt::AlignCenter );
+    QPalette pal = d->m_tlabel->palette();
+    pal.setColor(QPalette::Base, Qt::transparent);
+    d->m_tlabel->setPalette(pal);
+    connect(d->m_tlabel, SIGNAL(copyAvailable(bool)), this, SLOT(checkContextMenu(bool)));
 
     QAction *a;
     a = new QAction(this);
-    a->setObjectName("edit_reload");
+    a->setObjectName("picture_reload");
     a->setIcon(QIcon(":/images/22x22/reload"));
     connect(a, SIGNAL(triggered()), this, SLOT(doUpdate()));
     addAction(a);
@@ -81,7 +75,7 @@ CPictureWidget::CPictureWidget(QWidget *parent, Qt::WindowFlags f)
     addAction(a);
 
     a = new QAction(this);
-    a->setObjectName("edit_magnify");
+    a->setObjectName("picture_magnify");
     a->setIcon(QIcon(":/images/22x22/viewmagp"));
     connect(a, SIGNAL(triggered()), this, SLOT(viewLargeImage()));
     addAction(a);
@@ -91,17 +85,17 @@ CPictureWidget::CPictureWidget(QWidget *parent, Qt::WindowFlags f)
     addAction(a);
 
     a = new QAction(this);
-    a->setObjectName("edit_bl_catalog");
+    a->setObjectName("picture_bl_catalog");
     a->setIcon(QIcon(":/images/22x22/edit_bl_catalog"));
     connect(a, SIGNAL(triggered()), this, SLOT(showBLCatalogInfo()));
     addAction(a);
     a = new QAction(this);
-    a->setObjectName("edit_bl_priceguide");
+    a->setObjectName("picture_bl_priceguide");
     a->setIcon(QIcon(":/images/22x22/edit_bl_priceguide"));
     connect(a, SIGNAL(triggered()), this, SLOT(showBLPriceGuideInfo()));
     addAction(a);
     a = new QAction(this);
-    a->setObjectName("edit_bl_lotsforsale");
+    a->setObjectName("picture_bl_lotsforsale");
     a->setIcon(QIcon(":/images/22x22/edit_bl_lotsforsale"));
     connect(a, SIGNAL(triggered()), this, SLOT(showBLLotsForSale()));
     addAction(a);
@@ -112,11 +106,11 @@ CPictureWidget::CPictureWidget(QWidget *parent, Qt::WindowFlags f)
 
 void CPictureWidget::languageChange()
 {
-    findChild<QAction *> ("edit_reload")->setText(tr("Update"));
-    findChild<QAction *> ("edit_magnify")->setText(tr("View large image..."));
-    findChild<QAction *> ("edit_bl_catalog")->setText(tr("Show BrickLink Catalog Info..."));
-    findChild<QAction *> ("edit_bl_priceguide")->setText(tr("Show BrickLink Price Guide Info..."));
-    findChild<QAction *> ("edit_bl_lotsforsale")->setText(tr("Show Lots for Sale on BrickLink..."));
+    findChild<QAction *> ("picture_reload")->setText(tr("Update"));
+    findChild<QAction *> ("picture_magnify")->setText(tr("View large image..."));
+    findChild<QAction *> ("picture_bl_catalog")->setText(tr("Show BrickLink Catalog Info..."));
+    findChild<QAction *> ("picture_bl_priceguide")->setText(tr("Show BrickLink Price Guide Info..."));
+    findChild<QAction *> ("picture_bl_lotsforsale")->setText(tr("Show Lots for Sale on BrickLink..."));
 }
 
 CPictureWidget::~CPictureWidget()
@@ -129,7 +123,8 @@ CPictureWidget::~CPictureWidget()
 
 QSize CPictureWidget::sizeHint() const
 {
-    return layout()->minimumSize();
+    QFontMetrics fm = fontMetrics();
+    return QSize(4 + 2*80 + 4, 4 + 80 + 4 + 5 * (fm.height() + 1) + 4);
 }
 
 void CPictureWidget::mouseDoubleClickEvent(QMouseEvent *)
@@ -194,6 +189,7 @@ void CPictureWidget::setPicture(BrickLink::Picture *pic)
         d->m_connected = connect(BrickLink::core(), SIGNAL(pictureUpdated(BrickLink::Picture *)), this, SLOT(gotUpdate(BrickLink::Picture *)));
 
     setToolTip(pic ? tr("Double-click to view the large image.") : QString());
+    setContextMenuPolicy(pic ? Qt::ActionsContextMenu : Qt::NoContextMenu);
 
     redraw();
 }
@@ -209,28 +205,76 @@ void CPictureWidget::gotUpdate(BrickLink::Picture *pic)
         redraw();
 }
 
+static QImage createImg(const QImage &img)
+{
+    QLinearGradient grad(0, 0, 0, img.height());
+    grad.setColorAt(0, QColor(0, 0, 0, 24));
+    grad.setColorAt(1, QColor(0, 0, 0, 0));
+
+    QImage res(QSize(img.width(), 2 * img.height() + 1), QImage::Format_ARGB32);
+    res.fill(Qt::transparent);
+
+    QPainter p(&res);
+    p.drawImage(0, 0, img);
+    p.translate(0, img.height() + 1);
+    p.drawImage(0, 0, img.mirrored(false, true));
+    p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
+    p.fillRect(0, 0, img.width(), img.height(), grad);
+    p.end();
+
+    return res;
+}
+
 void CPictureWidget::redraw()
 {
     if (d->m_pic && (d->m_pic->updateStatus() == BrickLink::Updating)) {
-        d->m_tlabel->setText(QLatin1String("<center><i>") +
+        d->m_tlabel->setHtml(QLatin1String("<center><i>") +
                                            tr("Please wait ...updating") +
                                            QLatin1String("</i></center>"));
-        d->m_plabel->setPixmap(QPixmap());
+        d->m_img = QImage();
     }
     else if (d->m_pic && d->m_pic->valid()) {
-        d->m_tlabel->setText(QLatin1String("<center><b>") +
+        d->m_tlabel->setHtml(QLatin1String("<center><b>") +
                              d->m_pic->item()->id() +
                              QLatin1String("</b>&nbsp; ") +
                              d->m_pic->item()->name() +
                              QLatin1String("</center>"));
-        d->m_plabel->setPixmap(d->m_pic->pixmap());
+        d->m_img = createImg(d->m_pic->image());
+        d->m_img_height = d->m_pic->image().height();
     }
     else {
         d->m_tlabel->setText(QString::null);
-        d->m_plabel->setPixmap(QPixmap());
+        d->m_img = QImage();
+    }
+    update();
+}
+
+void CPictureWidget::paintEvent(QPaintEvent *e)
+{
+    QFrame::paintEvent(e);
+
+    QRect cr = contentsRect();
+    if (cr.width() >= 80 && !d->m_img.isNull()) {
+        QPainter p(this);
+        p.setClipRect(e->rect());
+
+        QPoint tl = cr.topLeft() + QPoint((cr.width() - d->m_img.width()) / 2, 4 + (80 - d->m_img_height) / 2);
+        p.drawImage(tl, d->m_img);
     }
 }
 
+void CPictureWidget::resizeEvent(QResizeEvent *e)
+{
+    QFrame::resizeEvent(e);
+
+    QRect cr = contentsRect();
+    d->m_tlabel->setGeometry(cr.left() + 4, cr.top() + 4 + 80 + 4, cr.width() - 2*4, cr.height() - (4 + 80 + 4 + 4));
+}
+
+void CPictureWidget::checkContextMenu(bool b)
+{
+    d->m_tlabel->setContextMenuPolicy(b ? Qt::DefaultContextMenu : Qt::NoContextMenu);
+}
 
 // -------------------------------------------------------------------------
 
@@ -261,7 +305,7 @@ CLargePictureWidget::CLargePictureWidget(BrickLink::Picture *lpic, QWidget *pare
 
     QAction *a;
     a = new QAction(this);
-    a->setObjectName("edit_reload");
+    a->setObjectName("picture_reload");
     a->setIcon(QIcon(":/images/22x22/reload"));
     connect(a, SIGNAL(triggered()), this, SLOT(doUpdate()));
     addAction(a);
@@ -271,7 +315,7 @@ CLargePictureWidget::CLargePictureWidget(BrickLink::Picture *lpic, QWidget *pare
     addAction(a);
 
     a = new QAction(this);
-    a->setObjectName("edit_close");
+    a->setObjectName("picture_close");
     a->setIcon(QIcon(":/images/22x22/file_close"));
     connect(a, SIGNAL(triggered()), this, SLOT(close()));
     addAction(a);
@@ -282,8 +326,8 @@ CLargePictureWidget::CLargePictureWidget(BrickLink::Picture *lpic, QWidget *pare
 
 void CLargePictureWidget::languageChange()
 {
-    findChild<QAction *> ("edit_reload")->setText(tr("Update"));
-    findChild<QAction *> ("edit_close")->setText(tr("Close"));
+    findChild<QAction *> ("picture_reload")->setText(tr("Update"));
+    findChild<QAction *> ("picture_close")->setText(tr("Close"));
     setToolTip(tr("Double-click to close this window."));
 }
 

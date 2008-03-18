@@ -24,11 +24,9 @@ class QWidget;
 
 namespace Utility {
 
-QString ellipsisText(const QString &org, const QFontMetrics &fm, int width, int align);
-
 QColor gradientColor(const QColor &c1, const QColor &c2, qreal f = 0.5f);
 QColor contrastColor(const QColor &c, qreal f = 0.04f);
-float colorDifference(const QColor &c1, const QColor &c2);
+qreal colorDifference(const QColor &c1, const QColor &c2);
 
 void setPopupPos(QWidget *w, const QRect &pos);
 

@@ -17,7 +17,7 @@
 #include <QEvent>
 
 #include "bricklink.h"
-#include "cutility.h"
+#include "utility.h"
 #include "cselectcolor.h"
 
 
@@ -110,7 +110,7 @@ void CSelectColor::changeEvent(QEvent *e)
 void CSelectColor::recalcHighlightPalette()
 {
     QPalette p;
-    QColor hc = CUtility::gradientColor(p.color(QPalette::Active, QPalette::Highlight), p.color(QPalette::Inactive, QPalette::Highlight), 0.35f);
+    QColor hc = Utility::gradientColor(p.color(QPalette::Active, QPalette::Highlight), p.color(QPalette::Inactive, QPalette::Highlight), 0.35f);
     QColor htc = p.color(QPalette::Active, QPalette::HighlightedText);
 
     p.setColor(QPalette::Inactive, QPalette::Highlight, hc);

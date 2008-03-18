@@ -40,7 +40,7 @@
 #include "cfilteredit.h"
 #include "cconfig.h"
 #include "cframework.h"
-#include "cutility.h"
+#include "utility.h"
 #include "cmoney.h"
 #include "cdocument.h"
 #include "cdisableupdates.h"

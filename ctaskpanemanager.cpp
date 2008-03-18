@@ -31,7 +31,7 @@
 
 #include <QTimeLine>
 #include "ctaskpanemanager.h"
-#include "cutility.h"
+#include "utility.h"
 
 #if defined( Q_WS_WIN )
 #include <windows.h>
@@ -232,12 +232,12 @@ void CTaskPane::updateBackground()
     QColor cap1 (colorref2qrgb(GetSysColor(COLOR_ACTIVECAPTION)));
     QColor cap2;
     if (QSysInfo::WindowsVersion == QSysInfo::WV_95 || QSysInfo::WindowsVersion == QSysInfo::WV_NT)
-        cap2 = CUtility::contrastColor(cap2, 0.2f);
+        cap2 = Utility::contrastColor(cap2, 0.2f);
     else
         cap2.setRgb(colorref2qrgb(GetSysColor(COLOR_GRADIENTACTIVECAPTION)));
 
-    if (CUtility::colorDifference(cap1, cap2) < 0.1f)
-        cap2 = CUtility::contrastColor(cap2, 0.2f);
+    if (Utility::colorDifference(cap1, cap2) < 0.1f)
+        cap2 = Utility::contrastColor(cap2, 0.2f);
 
     d->m_lcol = cap1;
     d->m_rcol = cap2;
@@ -269,7 +269,7 @@ void CTaskPane::updateBackground()
     d->m_tgrad.setColorAt(0.5, cap2);
     d->m_tgrad.setColorAt(1,   cap1a);
 
-    d->m_fcol = CUtility::gradientColor(CUtility::gradientColor(cap1, cap2), palette().color(QPalette::Base), .5f);
+    d->m_fcol = Utility::gradientColor(Utility::gradientColor(cap1, cap2), palette().color(QPalette::Base), .5f);
 }
 
 
@@ -362,10 +362,10 @@ void CTaskPane::paintEvent(QPaintEvent *e)
         QRect tr = r.adjusted(offx, dy, -d->m_hspace, 0);
 
         p.setFont(d->m_bold_font);
-        p.setPen(CUtility::contrastColor(hot ? CUtility::contrastColor(d->m_tcol, 0.1f) : d->m_tcol, 0.5f));
+        p.setPen(Utility::contrastColor(hot ? Utility::contrastColor(d->m_tcol, 0.1f) : d->m_tcol, 0.5f));
         p.drawText(tr.translated(1,1), Qt::AlignLeft | Qt::AlignVCenter, item.m_text);
 
-        p.setPen(hot ? CUtility::contrastColor(d->m_tcol,0.1f) : d->m_tcol);
+        p.setPen(hot ? Utility::contrastColor(d->m_tcol,0.1f) : d->m_tcol);
         p.drawText(tr, Qt::AlignLeft | Qt::AlignVCenter, item.m_text);
 
         QRect ar(tr.right() - d->m_arrow, tr.top() + (tr.height() - d->m_arrow) / 2, d->m_arrow, d->m_arrow);

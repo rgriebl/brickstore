@@ -33,7 +33,7 @@
 
 #include "cimport.h"
 #include "cprogressdialog.h"
-#include "cutility.h"
+#include "utility.h"
 
 #include "dimportorder.h"
 
