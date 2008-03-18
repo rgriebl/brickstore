@@ -14,58 +14,23 @@
 #ifndef __CREF_H__
 #define __CREF_H__
 
-#include <QList>
-#include <QHash>
-
-class CRef;
-
-class CRefCacheBase {
-protected:
-    CRefCacheBase(int cachesize);
-    virtual ~CRefCacheBase();
-
-    bool put(quint64 key, CRef *ref);
-    CRef *get(quint64 key);
-
-public:
-    virtual void clear();
-
-private:
-    void addRefFor(const CRef *ref);
-    void releaseFor(const CRef *ref);
-
-    friend class CRef;
-
-private:
-    QHash<quint64, CRef *>  m_dict;
-    QList<const CRef *>     m_no_ref;
-    int                     m_cache_size;
-};
-
-template <typename T, uint CACHESIZE> class CRefCache : public CRefCacheBase {
-public:
-    CRefCache() : CRefCacheBase(CACHESIZE) { }
-
-    bool insert(quint64 key, T *ref)  { return put(key, ref); }
-    T *operator [](quint64 key)       { return (T *) get(key); }
-};
-
+#include <QBasicAtomicInt>
 
 class CRef {
 public:
-    CRef() : m_refcnt(0), m_cache(0) { }
-    virtual ~CRef();
+    inline CRef()                { ref = 0; }
+    inline void addRef() const   { ref.ref(); }
+    inline void release() const  { ref.deref(); }
+    inline int refCount() const  { return ref; }
 
-    void addRef() const   { if (m_cache) { m_refcnt++; m_cache->addRefFor(this); } }
-    void release() const  { if (m_cache) { m_refcnt--; m_cache->releaseFor(this); } }
-
-    uint refCount() const { return m_refcnt; }
+    virtual ~CRef()
+    {
+        if (ref != 0)
+            qWarning("Deleting %p, although refCount=%d", this, int(ref));
+    }
 
 private:
-    friend class CRefCacheBase;
-
-    mutable int           m_refcnt;
-    mutable CRefCacheBase *m_cache;
+    mutable QBasicAtomicInt ref;
 };
 
 #endif

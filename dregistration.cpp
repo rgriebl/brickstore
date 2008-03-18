@@ -19,7 +19,7 @@
 #include <QToolTip>
 
 #include "cmessagebox.h"
-#include "cutility.h"
+#include "utility.h"
 #include "cconfig.h"
 #include "version.h"
 

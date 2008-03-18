@@ -88,9 +88,11 @@ BrickLink::PriceGuide *BrickLink::Core::priceGuide(const BrickLink::Item *item, 
     PriceGuide *pg = m_pg_cache [key];
 
     if (!pg) {
-        //qDebug ( "  ...not in cache" );
         pg = new PriceGuide(item, color);
-        m_pg_cache.insert(key, pg);
+        if (!m_pg_cache.insert(key, pg)) {
+            qWarning("Can not add priceguide to cache (cache max/cur: %d/%d, cost: %d)", m_pic_cache.maxCost(), m_pic_cache.totalCost(), 1);
+            return 0;
+        }
     }
 
     if (pg && (!pg->valid() || updateNeeded(pg->lastUpdate(), m_pg_update_iv)))

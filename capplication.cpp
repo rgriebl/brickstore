@@ -24,16 +24,6 @@
 #include <sys/utsname.h>
 #endif
 
-#include "cframework.h"
-#if 0
-#include "creport.h"
-#endif
-
-
-#include "dimportorder.h"
-#include "cselectcolor.h"
-
-
 #include "dinformation.h"
 #include "dregistration.h"
 #include "cprogressdialog.h"
@@ -44,7 +34,10 @@
 #include "bricklink.h"
 #include "csplash.h"
 #include "cmessagebox.h"
+#include "cframework.h"
+//#include "creport.h"
 
+#include "utility.h"
 #include "version.h"
 
 #include "capplication.h"
@@ -369,7 +362,8 @@ void CApplication::about()
         "<table>"
         "<th colspan=\"2\" align=\"left\">Runtime Info</th>"
         "<tr><td>OS     </td><td>%5</td></tr>"
-        "<tr><td>libqt  </td><td>%6</td></tr>"
+        "<tr><td>Memory </td><td>%L6 MB</td></tr>"
+        "<tr><td>libqt  </td><td>%7</td></tr>"
         "</table>"
         "</p>";
 
@@ -385,7 +379,7 @@ void CApplication::about()
 #else
                          "???"
 #endif
-                        ).arg(sysName() + " " + sysVersion()).arg(qt);
+                         ).arg(sysName() + " " + sysVersion()).arg(Utility::physicalMemory()/(1024ULL*1024ULL)).arg(qt);
 
     QString legal = tr(legal_src);
 
@@ -460,3 +454,4 @@ void CApplication::registration()
         quit();
     }
 }
+

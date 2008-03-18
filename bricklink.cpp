@@ -28,7 +28,7 @@
 #include <QThread>
 
 #include "cconfig.h"
-#include "cutility.h"
+#include "utility.h"
 #include "bricklink.h"
 
 #define DEFAULT_DATABASE_VERSION  0
@@ -213,13 +213,13 @@ const QPixmap *BrickLink::Core::colorImage(const Color *col, int w, int h) const
             QBrush brush;
 
             if (col->isGlitter()) {
-                brush = QBrush(CUtility::contrastColor(c, 0.25f), Qt::Dense6Pattern);
+                brush = QBrush(Utility::contrastColor(c, 0.25f), Qt::Dense6Pattern);
             }
             else if (col->isSpeckle()) {
-                brush = QBrush(CUtility::contrastColor(c, 0.20f), Qt::Dense7Pattern);
+                brush = QBrush(Utility::contrastColor(c, 0.20f), Qt::Dense7Pattern);
             }
             else if (col->isMetallic()) {
-                QColor c2 = CUtility::gradientColor(c, Qt::black);
+                QColor c2 = Utility::gradientColor(c, Qt::black);
 
                 QLinearGradient gradient(0, 0, 0, r.height());
                 gradient.setColorAt(0,   c2);
@@ -229,7 +229,7 @@ const QPixmap *BrickLink::Core::colorImage(const Color *col, int w, int h) const
                 brush = gradient;
             }
             else if (col->isChrome()) {
-                QColor c2 = CUtility::gradientColor(c, Qt::black);
+                QColor c2 = Utility::gradientColor(c, Qt::black);
 
                 QLinearGradient gradient(0, 0, r.width(), 0);
                 gradient.setColorAt(0,   c2);
@@ -364,7 +364,13 @@ BrickLink::Core::Core(const QString &datadir)
 
     m_online = true;
 
+    // cache size is physical memory * 0.25, at least 64MB, at most 256MB
+    quint64 cachemem = qBound(64ULL *1024*1024, Utility::physicalMemory() / 4, 256ULL *1024*1024);
+    //quint64 cachemem = 1024*1024; // DEBUG
+
     QPixmapCache::setCacheLimit(20 * 1024);     // 80 x 60 x 32 (w x h x bpp) == 20kB ->room for ~1000 pixmaps
+    m_pg_cache.setMaxCost(500);          // each priceguide has a cost of 1
+    m_pic_cache.setMaxCost(cachemem);    // each pic has a cost of (w*h*d/8 + 1024)
 
     connect(&m_pg_transfer,  SIGNAL(finished(CThreadPoolJob *)), this, SLOT(priceGuideJobFinished(CThreadPoolJob *)));
     connect(&m_pic_transfer, SIGNAL(finished(CThreadPoolJob *)), this, SLOT(pictureJobFinished(CThreadPoolJob *)));
@@ -1415,7 +1421,7 @@ bool BrickLink::Core::writeDatabase(const QString &fname)
                 if (f.error() == QFile::NoError) {
                     f.close();
 
-                    QString err = CUtility::safeRename(filename);
+                    QString err = Utility::safeRename(filename);
 
                     if (err.isNull())
                         return true;

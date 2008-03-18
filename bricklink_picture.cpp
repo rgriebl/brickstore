@@ -86,7 +86,10 @@ BrickLink::Picture *BrickLink::Core::picture(const Item *item, const BrickLink::
 
     if (!pic) {
         pic = new Picture(item, color);
-        m_pic_cache.insert(key, pic);
+        if (!m_pic_cache.insert(key, pic, pic->cost())) {
+            qWarning("Can not add picture to cache (cache max/cur: %d/%d, cost: %d)", m_pic_cache.maxCost(), m_pic_cache.totalCost(), pic->cost());
+            return 0;
+        }
         need_to_load = true;
     }
 
@@ -124,6 +127,14 @@ BrickLink::Picture::Picture(const Item *item, const Color *color)
 BrickLink::Picture::~Picture()
 {
     QPixmapCache::remove(key());
+}
+
+int BrickLink::Picture::cost() const
+{
+    if (m_color)
+        return 80*60 + 512;  // 80x60 8bpp + data
+    else
+        return 640*480*4 / 2;    // max. 640*480 32bpp + data, most are smaller
 }
 
 void BrickLink::Picture::load_from_disk()

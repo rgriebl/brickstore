@@ -11,8 +11,8 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __CUTILITY_H__
-#define __CUTILITY_H__
+#ifndef __UTILITY_H__
+#define __UTILITY_H__
 
 #include <QString>
 #include <QColor>
@@ -22,18 +22,21 @@ class QRect;
 class QWidget;
 
 
-class CUtility {
-public:
-    static QString ellipsisText(const QString &org, const QFontMetrics &fm, int width, int align);
+namespace Utility {
 
-    static QColor gradientColor(const QColor &c1, const QColor &c2, qreal f = 0.5f);
-    static QColor contrastColor(const QColor &c, qreal f = 0.04f);
-    static float colorDifference(const QColor &c1, const QColor &c2);
+QString ellipsisText(const QString &org, const QFontMetrics &fm, int width, int align);
 
-    static void setPopupPos(QWidget *w, const QRect &pos);
+QColor gradientColor(const QColor &c1, const QColor &c2, qreal f = 0.5f);
+QColor contrastColor(const QColor &c, qreal f = 0.04f);
+float colorDifference(const QColor &c1, const QColor &c2);
 
-    static QString safeRename(const QString &basepath);
-};
+void setPopupPos(QWidget *w, const QRect &pos);
+
+QString safeRename(const QString &basepath);
+
+quint64 physicalMemory();
+
+} // namespace Utility
 
 #endif
 

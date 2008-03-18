@@ -20,14 +20,23 @@
 #include <QDir>
 #include <QWidget>
 
-#if defined ( Q_WS_X11 ) || defined ( Q_WS_MACX )
-#include <stdlib.h>
+#if defined( Q_OS_WIN )
+#include <windows.h>
+
+#elif defined( Q_OS_BSD4 )
+#include <sys/types.h>
+#include <sys/sysctl.h>
+
+#else
+#include <QFile>
+#include <QByteArray>
+
 #endif
 
-#include "cutility.h"
+#include "utility.h"
 
 
-QString CUtility::ellipsisText(const QString &org, const QFontMetrics &fm, int width, int align)
+QString Utility::ellipsisText(const QString &org, const QFontMetrics &fm, int width, int align)
 {
     int ellWidth = fm.width("...");
     QString text = QString::fromLatin1("");
@@ -53,7 +62,7 @@ QString CUtility::ellipsisText(const QString &org, const QFontMetrics &fm, int w
     return text;
 }
 
-float CUtility::colorDifference(const QColor &c1, const QColor &c2)
+float Utility::colorDifference(const QColor &c1, const QColor &c2)
 {
     qreal r1, g1, b1, a1, r2, g2, b2, a2;
     c1.getRgbF(&r1, &g1, &b1, &a1);
@@ -62,7 +71,7 @@ float CUtility::colorDifference(const QColor &c1, const QColor &c2)
     return (qAbs(r1-r2) + qAbs(g1-g2) + qAbs(b1-b2)) / 3.f;
 }
 
-QColor CUtility::gradientColor(const QColor &c1, const QColor &c2, qreal f)
+QColor Utility::gradientColor(const QColor &c1, const QColor &c2, qreal f)
 {
     qreal r1, g1, b1, a1, r2, g2, b2, a2;
     c1.getRgbF(&r1, &g1, &b1, &a1);
@@ -74,7 +83,7 @@ QColor CUtility::gradientColor(const QColor &c1, const QColor &c2, qreal f)
     return QColor::fromRgbF(r1 * e + r2 * f, g1 * e + g2 * f, b1 * e + b2 * f, a1 * e + a2 * f);
 }
 
-QColor CUtility::contrastColor(const QColor &c, qreal f)
+QColor Utility::contrastColor(const QColor &c, qreal f)
 {
     qreal h, s, v, a;
     c.getHsvF(&h, &s, &v, &a);
@@ -87,7 +96,7 @@ QColor CUtility::contrastColor(const QColor &c, qreal f)
     return QColor::fromHsvF(h, s, v, a);
 }
 
-void CUtility::setPopupPos(QWidget *w, const QRect &pos)
+void Utility::setPopupPos(QWidget *w, const QRect &pos)
 {
     QSize sh = w->sizeHint();
     QSize desktop = qApp->desktop()->size();
@@ -123,7 +132,7 @@ void CUtility::setPopupPos(QWidget *w, const QRect &pos)
 
 
 
-QString CUtility::safeRename(const QString &basepath)
+QString Utility::safeRename(const QString &basepath)
 {
     QString error;
     QString newpath = basepath + ".new";
@@ -151,3 +160,56 @@ QString CUtility::safeRename(const QString &basepath)
     return error;
 }
 
+quint64 Utility::physicalMemory()
+{
+    quint64 physmem = 0;
+
+#if defined( Q_OS_BSD4 )
+#if defined( HW_MEMSIZE )      // Darwin
+    const int sctl2 = HW_MEMSIZE;
+    uint64_t ram;
+#elif defined( HW_PHYSMEM64 )  // NetBSD, OpenBSD
+    const int sctl2 = HW_PHYSMEM64;
+    uint64_t ram;
+#else                          // legacy, 32bit only
+    const int sctl2 = HW_PHYSMEM;
+    unsigned int ram;
+#endif
+     const int sctl[] = { CTL_HW, sctl2 };
+     size_t ramsize = sizeof(ram);
+
+    if (sysctl(sctl, 2, &ram, &ramsize, 0, 0) == 0)
+        physmem = quint64(ram);
+
+#elif defined( Q_OS_WIN )
+    if ((QSysInfo::WindowsVersion & QSysInfo::WV_NT_based) >= QSysInfo::WV_2000) {
+        MEMORYSTATUSEX memstatex;
+        GlobalMemoryStatusEx(&memstatex);
+        physmem = memstatex.ullTotalPhys;
+    }
+    else {
+        MEMORYSTATUS memstat;
+        GlobalMemoryStatus(&memstat);
+        physmem = memstat.dwTotalPhys;
+    }
+
+#elif defined( Q_OS_LINUX )
+    QFile f(QLatin1String("/proc/meminfo"));
+    if (f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QByteArray line;
+        while (!(line = f.readLine()).isNull()) {
+            if (line.startsWith("MemTotal:")) {
+                line.chop(3); // strip "kB\n" at the end
+                physmem = line.mid(9).trimmed().toULongLong() * 1024LL;
+                break;
+            }
+        }
+        f.close();
+    }
+
+#else
+#warning "BrickStore doesn't know how to get the physical memory size on this platform!"
+#endif
+
+    return physmem;
+}

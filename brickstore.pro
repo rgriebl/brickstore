@@ -148,6 +148,7 @@ XFORMS  += registration \
 
 SOURCES += main.cpp \
            ldraw.cpp \
+           utility.cpp \
            bricklink.cpp \
            bricklink_data.cpp \
            bricklink_textimport.cpp \
@@ -160,9 +161,11 @@ SOURCES += main.cpp \
 
 HEADERS += bricklink.h \
            ldraw.h \
+           utility.h \
            lzmadec.h \
            ccheckforupdates.h \
            cimport.h \
+           cref.h \
            cupdatedatabase.h \
            ctooltiphelper.h \
            cdisableupdates.h \
@@ -173,7 +176,6 @@ XSOURCES += application \
             messagebox \
             splash \
             money \
-            ref \
             transfer \
             config \
             rebuilddatabase \

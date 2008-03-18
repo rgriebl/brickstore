@@ -34,6 +34,7 @@
 #include <QSortFilterProxyModel>
 #include <QMutex>
 #include <QTimer>
+#include <QCache>
 
 
 #include <time.h>
@@ -257,6 +258,8 @@ public:
 
     const QImage image() const        { return m_image; }
     QString key() const               { return QString::number(m_image.cacheKey()); }
+
+    int cost() const;
 
 private:
     const Item *  m_item;
@@ -935,14 +938,14 @@ private:
 
     CTransfer                  m_pg_transfer;
     int                        m_pg_update_iv;
-    CRefCache<PriceGuide, 500> m_pg_cache;
+    QCache<quint64, PriceGuide> m_pg_cache;
 
     CTransfer                 m_pic_transfer;
     int                       m_pic_update_iv;
 
     CThreadPool               m_pic_diskload;
 
-    CRefCache<Picture, 5000>  m_pic_cache;
+    QCache<quint64, Picture>  m_pic_cache;
 };
 
 inline Core *core() { return Core::inst(); }
@@ -956,6 +959,10 @@ Q_DECLARE_METATYPE(const BrickLink::Category *)
 Q_DECLARE_METATYPE(const BrickLink::ItemType *)
 Q_DECLARE_METATYPE(const BrickLink::Item *)
 Q_DECLARE_METATYPE(const BrickLink::AppearsInItem *)
+
+
+template<> inline bool qIsDetached<BrickLink::Picture>(BrickLink::Picture &c) { return c.refCount() == 0; }
+template<> inline bool qIsDetached<BrickLink::PriceGuide>(BrickLink::PriceGuide &c) { return c.refCount() == 0; }
 
 #endif
 
