@@ -50,7 +50,7 @@ CConfig::CConfig()
         : QSettings()
 {
     m_show_input_errors = value("/General/ShowInputErrors", true).toBool();
-    m_weight_system = (value("/General/WeightSystem", "metric").toString() == "metric") ? WeightMetric : WeightImperial;
+    m_measurement = (value("/General/MeasurementSystem", "metric").toString() == "metric") ? QLocale::MetricSystem : QLocale::ImperialSystem;
     m_simple_mode = value("/General/SimpleMode", false).toBool();
 
     m_registration = OpenSource;
@@ -411,18 +411,18 @@ void CConfig::setLanguage(const QString &lang)
     }
 }
 
-CConfig::WeightSystem CConfig::weightSystem() const
+QLocale::MeasurementSystem CConfig::measurementSystem() const
 {
-    return m_weight_system;
+    return m_measurement;
 }
 
-void CConfig::setWeightSystem(WeightSystem ws)
+void CConfig::setMeasurementSystem(QLocale::MeasurementSystem ms)
 {
-    if (ws != m_weight_system) {
-        m_weight_system = ws;
-        setValue("/General/WeightSystem", ws == WeightMetric ? "metric" : "imperial");
+    if (ms != m_measurement) {
+        m_measurement= ms;
+        setValue("/General/MeasurementSystem", ms == QLocale::MetricSystem ? "metric" : "imperial");
 
-        emit weightSystemChanged(ws);
+        emit measurementSystemChanged(ms);
     }
 }
 

@@ -17,6 +17,7 @@
 #include <QSettings>
 #include <QDateTime>
 #include <QNetworkProxy>
+#include <QLocale>
 
 
 class CConfig : public QSettings {
@@ -34,13 +35,10 @@ public:
 
     void upgrade(int vmajor, int vminor, int vrev);
 
-    enum WeightSystem {
-        WeightMetric,
-        WeightImperial
-    };
-
     QString language() const;
-    WeightSystem weightSystem() const;
+    QLocale::MeasurementSystem measurementSystem() const;
+    inline bool isMeasurementMetric()    { return measurementSystem() == QLocale::MetricSystem;   }
+    inline bool isMeasurementImperial()  { return measurementSystem() == QLocale::ImperialSystem; }
 
     bool closeEmptyDocuments() const;
     QString documentDir() const;
@@ -84,7 +82,7 @@ public:
 
 public slots:
     void setLanguage(const QString &lang);
-    void setWeightSystem(WeightSystem ws);
+    void setMeasurementSystem(QLocale::MeasurementSystem ms);
 
     void setCloseEmptyDocuments(bool b);
     void setDocumentDir(const QString &dir);
@@ -104,7 +102,7 @@ public slots:
 signals:
     void simpleModeChanged(bool);
     void languageChanged();
-    void weightSystemChanged(CConfig::WeightSystem ws);
+    void measurementSystemChanged(QLocale::MeasurementSystem ms);
     void showInputErrorsChanged(bool b);
     void updateIntervalsChanged(const QMap<QByteArray, int> &intervals);
     void onlineStatusChanged(bool b);
@@ -116,7 +114,7 @@ protected:
 
 private:
     bool         m_show_input_errors;
-    WeightSystem m_weight_system;
+    QLocale::MeasurementSystem m_measurement;
     bool         m_simple_mode;
     Registration m_registration;
     mutable bool m_translations_parsed;

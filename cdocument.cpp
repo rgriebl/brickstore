@@ -45,8 +45,6 @@
 #include "cdocument.h"
 #include "cdocument_p.h"
 
-#include "clocalemeasurement.h"
-
 namespace {
 
 template <typename T> static inline T pack(typename T::const_reference item)
@@ -1311,7 +1309,7 @@ bool CDocument::setData(const QModelIndex &index, const QVariant &value, int rol
         case CDocument::TierP1      : item.setTierPrice(0, money_t::fromLocalizedString(value.toString())); break;
         case CDocument::TierP2      : item.setTierPrice(1, money_t::fromLocalizedString(value.toString())); break;
         case CDocument::TierP3      : item.setTierPrice(2, money_t::fromLocalizedString(value.toString())); break;
-        case CDocument::Weight      : item.setWeight(CLocaleMeasurement::stringToWeight(value.toString())); break;
+        case CDocument::Weight      : item.setWeight(Utility::stringToWeight(value.toString(), CConfig::inst()->measurementSystem())); break;
         case CDocument::Quantity    : item.setQuantity(value.toInt()); break;
         case CDocument::QuantityDiff: item.setQuantity(itemp->origQuantity() + value.toInt()); break;
         case CDocument::Price       : item.setPrice(money_t::fromLocalizedString(value.toString())); break;
@@ -1377,7 +1375,7 @@ QVariant CDocument::dataForEditRole(Item *it, Field f) const
     case CDocument::TierP1      : return (it->tierPrice(0) != 0 ? it->tierPrice(0) : it->price()     ).toLocalizedString(false); break;
     case CDocument::TierP2      : return (it->tierPrice(1) != 0 ? it->tierPrice(1) : it->tierPrice(0)).toLocalizedString(false); break;
     case CDocument::TierP3      : return (it->tierPrice(2) != 0 ? it->tierPrice(2) : it->tierPrice(1)).toLocalizedString(false); break;
-    case CDocument::Weight      : return CLocaleMeasurement::weightToString(it->weight(), false); break;
+    case CDocument::Weight      : return Utility::weightToString(it->weight(), CConfig::inst()->measurementSystem(), false); break;
     case CDocument::Quantity    : return it->quantity(); break;
     case CDocument::QuantityDiff: return it->quantity() - it->origQuantity(); break;
     case CDocument::Price       : return it->price().toLocalizedString(false); break;
@@ -1412,7 +1410,7 @@ QString CDocument::dataForDisplayRole(Item *it, Field f) const
     case TierP2      : return it->tierPrice(1).toLocalizedString();
     case TierP3      : return it->tierPrice(2).toLocalizedString();
     case Reserved    : return it->reserved();
-    case Weight      : return (it->weight() == 0 ? dash : CLocaleMeasurement().weightToString(it->weight(), true, true));
+    case Weight      : return (it->weight() == 0 ? dash : Utility::weightToString(it->weight(), CConfig::inst()->measurementSystem(), true, true));
     case YearReleased: return (it->item()->yearReleased() == 0 ? dash : QString::number(it->item()->yearReleased()));
 
     case PriceOrig   : return it->origPrice().toLocalizedString();

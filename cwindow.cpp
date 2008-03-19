@@ -45,7 +45,6 @@
 #include "cdocument.h"
 #include "cdisableupdates.h"
 #include "cwindow.h"
-#include "clocalemeasurement.h"
 
 #include "dselectitem.h"
 #include "dselectcolor.h"

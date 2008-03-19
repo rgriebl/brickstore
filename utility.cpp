@@ -187,3 +187,58 @@ quint64 Utility::physicalMemory()
 
     return physmem;
 }
+
+
+QString Utility::weightToString(double w, QLocale::MeasurementSystem ms, bool optimize, bool show_unit)
+{
+    static QLocale loc(QLocale::system());
+
+    int prec = 0;
+    const char *unit = 0;
+
+    if (ms == QLocale::ImperialSystem) {
+        w *= 0.035273961949580412915675808215204;
+
+        prec = 4;
+        unit = "oz";
+
+        if (optimize && (w >= 32)) {
+            unit = "lb";
+            w /= 16.;
+        }
+    }
+    else {
+        prec = 3;
+        unit = "g";
+
+        if (optimize && (w >= 1000.)) {
+            unit = "kg";
+            w /= 1000.;
+
+            if (w >= 1000.) {
+                unit = "t";
+                w /= 1000.;
+            }
+        }
+    }
+    QString s = loc.toString(w, 'f', prec);
+
+    if (show_unit) {
+        s += " ";
+        s += unit;
+    }
+    return s;
+}
+
+double Utility::stringToWeight(const QString &s, QLocale::MeasurementSystem ms)
+{
+    static QLocale loc(QLocale::system());
+
+    double w = loc.toDouble(s);
+
+    if (ms == QLocale::ImperialSystem)
+        w *= 28.349523125000000000000000000164;
+
+    return w;
+}
+

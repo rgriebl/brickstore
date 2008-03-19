@@ -22,9 +22,9 @@
 #include <QApplication>
 
 #include "bricklink.h"
+#include "utility.h"
 #include "cconfig.h"
 #include "cframework.h"
-#include "clocalemeasurement.h"
 
 #include "ctaskwidgets.h"
 
@@ -275,7 +275,7 @@ void CTaskInfoWidget::selectionUpdate(const CDocument::ItemList &list)
                 wgtstr = tr("min.") + " ";
             }
 
-            wgtstr += CLocaleMeasurement::weightToString(weight, true, true);
+            wgtstr += Utility::weightToString(weight, CConfig::inst()->measurementSystem(), true, true);
         }
 
         s = QString("<h3>%1</h3>&nbsp;&nbsp;%2: %3<br />&nbsp;&nbsp;%4: %5<br /><br />&nbsp;&nbsp;%6: %7<br /><br />&nbsp;&nbsp;%8: %9").

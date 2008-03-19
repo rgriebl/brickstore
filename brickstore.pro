@@ -170,6 +170,7 @@ HEADERS += bricklink.h \
            ctooltiphelper.h \
            cdisableupdates.h \
            qtemporaryresource.h \
+           cdocument_p.h \
 	   
 
 XSOURCES += application \
@@ -190,7 +191,6 @@ XSOURCES += application \
             taskpanemanager \
             spinner \
             selectitem \
-            localemeasurement \
             window \
             undo \
             threadpool \

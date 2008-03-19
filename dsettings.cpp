@@ -17,7 +17,6 @@
 
 #include "dsettings.h"
 #include "cconfig.h"
-#include "clocalemeasurement.h"
 #include "bricklink.h"
 
 static int sec2day ( int s )
@@ -109,8 +108,8 @@ void DSettings::load()
  		}
 	}
 
-	w_metric->setChecked(CLocaleMeasurement::isMetric());
-	w_imperial->setChecked(CLocaleMeasurement::isImperial());
+    w_metric->setChecked(CConfig::inst()->isMeasurementMetric());
+	w_imperial->setChecked(CConfig::inst()->isMeasurementImperial());
 
 	w_rate_fixed->setChecked(true);
 	w_rate_daily->setChecked(false);

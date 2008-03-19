@@ -16,6 +16,7 @@
 
 #include <QString>
 #include <QColor>
+#include <QLocale>
 
 class QFontMetrics;
 class QRect;
@@ -33,6 +34,9 @@ void setPopupPos(QWidget *w, const QRect &pos);
 QString safeRename(const QString &basepath);
 
 quint64 physicalMemory();
+
+QString weightToString(double gramm, QLocale::MeasurementSystem ms, bool optimize = false, bool show_unit = false);
+double stringToWeight(const QString &s, QLocale::MeasurementSystem ms);
 
 } // namespace Utility
 

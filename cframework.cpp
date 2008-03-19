@@ -51,8 +51,7 @@
 #include "cprogressdialog.h"
 #include "cupdatedatabase.h"
 #include "csplash.h"
-#include "clocalemeasurement.h"
-
+#include "utility.h"
 #include "dadditem.h"
 #include "dsettings.h"
 
@@ -1661,7 +1660,7 @@ void CFrameWork::statisticsUpdate()
                 wgtstr = tr("min.") + " ";
             }
 
-            wgtstr += CLocaleMeasurement::weightToString(weight, true, true);
+            wgtstr += Utility::weightToString(weight, CConfig::inst()->measurementSystem(), true, true);
         }
 
         ss = QString("  %1: %2   %3: %4   %5: %6   %7: %8  ").
