@@ -35,8 +35,10 @@ DSettings::DSettings(const QString &start_on_page, QWidget *parent, Qt::WindowFl
 {
     setupUi(this);
     
-    connect(w_rate_fixed, SIGNAL(toggled(bool)), this, SLOT(rateTypeToggled(bool)));    
-    connect(w_docdir_select, SIGNAL(clicked()), this, SLOT(selectDocDir()));   
+    w_upd_reset->setAttribute(Qt::WA_MacSmallSize);
+
+    connect(w_rate_fixed, SIGNAL(toggled(bool)), this, SLOT(rateTypeToggled(bool)));
+    connect(w_docdir_select, SIGNAL(clicked()), this, SLOT(selectDocDir()));
     connect(w_upd_reset, SIGNAL(clicked()), this, SLOT(resetUpdateIntervals()));
     
     w_proxy_port->setValidator(new QIntValidator(1, 65535, w_proxy_port));

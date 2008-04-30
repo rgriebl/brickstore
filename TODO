@@ -14,3 +14,53 @@ STUFF FOR QT4.1:
 
  * export as PDF
  * print-preview
+
+
+
+ * export order status
+   - alle $ fields (ausser total)
+   - status
+   - pmt. status
+   - order no.
+   - remark on order
+ 
+
+ * new document widget
+ 
+ QWidget
+  Splitter
+   QWidget*
+    QTabBar
+    <MyEditor>
+   
+ bei d&d -> overlay <MyEditor> with Trans QWidget
+ 
+Enabled-/Icon-/TitleChange auf QWidget -> Tab anpassen 
+QWidget delete -> Tab anpassen
+
+ 
+class CMultiTabWidget : public QWidget {
+
+    QPair<QTabBar *, int> tabPositionForWidget(QWidget *);
+    
+
+    friend class CMultiTabWidgetPrivate;
+    
+    CMultiTabWidgetPrivate *d;
+};
+
+class CMultiTabPage : public QWidget {
+    QTabBar *m_tab;
+    QList<QWidget *> m_items;
+};
+
+class CMultiTabDrop : public QWidget {
+    CMultiTabDrop(CMultiTabWidget *mtw, int splitter_index);
+    dragEvent()
+};
+
+class CMultiTabWidgetPrivate {
+    QSplitter *m_split;
+    QList<CMultiTabPage *> m_pages;
+
+};
