@@ -92,7 +92,7 @@ CApplication::CApplication(const char *rebuild_db_only, int _argc, char **_argv)
     if (!initBrickLink()) {
         // we cannot call quit directly, since there is
         // no event loop to quit from...
-        postEvent(this, new QEvent(QEvent::Quit));
+        QTimer::singleShot(0, this, SLOT(quit()));
         return;
     }
     else if (!m_rebuild_db_only.isEmpty()) {

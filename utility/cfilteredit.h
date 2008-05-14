@@ -18,6 +18,8 @@
 
 class QMenu;
 
+class CFilterEditPrivate;
+
 class CFilterEdit : public QWidget {
     Q_OBJECT
 public:

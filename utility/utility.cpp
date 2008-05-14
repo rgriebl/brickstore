@@ -33,6 +33,10 @@
 
 #endif
 
+#if defined( Q_WS_X11 )
+#include <QMainWindow>
+#endif
+
 #include "utility.h"
 
 

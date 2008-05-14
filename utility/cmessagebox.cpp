@@ -17,7 +17,7 @@
 #include <QApplication>
 #include <QValidator>
 #include <QPushButton>
-#include <QLineedit>
+#include <QLineEdit>
 #include <QLabel>
 #include <QLayout>
 #include <QDialog>

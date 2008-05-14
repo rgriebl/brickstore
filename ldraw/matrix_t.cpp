@@ -1,5 +1,5 @@
 #include <cstdio>
-#include <gl.h>
+#include <qgl.h>
 
 #include "matrix_t.h"
 
