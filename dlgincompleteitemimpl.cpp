@@ -64,7 +64,7 @@ void DlgIncompleteItemImpl::fixItem ( )
 	CSelectItemDialog d ( false, this );
 
 	d. setCaption ( tr( "Fix Item" ));
-	d. setItemTypeCategoryAndFilter ( itt, cat, inc-> m_item_name );
+    d. setItemTypeCategoryAndFilter ( itt, cat, !inc-> m_item_name. isEmpty ( ) ? inc-> m_item_name : inc-> m_item_id );
 
 	if ( d. exec ( ) == QDialog::Accepted ) {
 		const BrickLink::Item *it = d. item ( );

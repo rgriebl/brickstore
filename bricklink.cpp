@@ -1452,7 +1452,7 @@ bool BrickLink::parseLDrawModelInternal ( QFile &f, const QString &model_name, I
 							
 							if ( !itemp ) {
 								inc-> m_item_id = partid;
-								inc-> m_item_name = QString( "LDraw ID: %1" ). arg ( partid );
+								inc-> m_item_name = QString ( );
 								inc-> m_itemtype_id = 'P';
 							}
 							if ( !colp ) {
