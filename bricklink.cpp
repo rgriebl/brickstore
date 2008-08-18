@@ -1336,12 +1336,17 @@ QDomElement BrickLink::createItemListXML ( QDomDocument doc, ItemListXMLHint hin
 bool BrickLink::parseLDrawModel ( QFile &f, InvItemList &items, uint *invalid_items )
 {
 	QDict <InvItem> mergehash;
+    QStringList recursion_detection;
 	
-	return BrickLink::parseLDrawModelInternal ( f, QString::null, items, invalid_items, mergehash );
+	return BrickLink::parseLDrawModelInternal ( f, QString::null, items, invalid_items, mergehash, recursion_detection );
 }
 
-bool BrickLink::parseLDrawModelInternal ( QFile &f, const QString &model_name, InvItemList &items, uint *invalid_items, QDict <InvItem> &mergehash )
+bool BrickLink::parseLDrawModelInternal ( QFile &f, const QString &model_name, InvItemList &items, uint *invalid_items, QDict <InvItem> &mergehash, QStringList &recursion_detection )
 {
+    if ( recursion_detection. find ( model_name ) != recursion_detection. end ( ))
+        return false;
+    recursion_detection. push_back ( model_name );
+
 	QStringList searchpath;
 	QString ldrawdir = CConfig::inst ( )-> lDrawDir ( );
 	uint invalid = 0;
@@ -1372,7 +1377,9 @@ bool BrickLink::parseLDrawModelInternal ( QFile &f, const QString &model_name, I
 
 				if (( sl. count ( ) >= 2 ) && ( sl [1] == "FILE" )) {
 					is_mpd = true;
-					current_mpd_model = sl [2]. lower ( );
+                    sl. pop_front ( );
+                    sl. pop_front ( );
+                    current_mpd_model = sl. join ( " " ). lower ( );
 					current_mpd_index++;
 
 					if ( is_mpd_model_found )
@@ -1394,6 +1401,10 @@ bool BrickLink::parseLDrawModelInternal ( QFile &f, const QString &model_name, I
 				if ( sl. count ( ) >= 15 ) {
 					int colid = sl [1]. toInt ( );
 					QString partname = sl [14]. lower ( );
+                    for ( uint i = 15; i < sl. count ( ); ++i ) {
+                        partname. append ( ' ' );
+                        partname. append ( sl [i]. lower ( ));
+                    }
 					
 					QString partid = partname;
 					partid. truncate ( partid. findRev ( '.' ));
@@ -1411,7 +1422,7 @@ bool BrickLink::parseLDrawModelInternal ( QFile &f, const QString &model_name, I
 							QFile::Offset oldpos = f. at ( );
 							f. at ( 0 );
 
-							got_subfile = parseLDrawModelInternal ( f, partname, items, &sub_invalid_items, mergehash );
+							got_subfile = parseLDrawModelInternal ( f, partname, items, &sub_invalid_items, mergehash, recursion_detection );
 
 							invalid += sub_invalid_items;
 							f. at ( oldpos );
@@ -1424,7 +1435,7 @@ bool BrickLink::parseLDrawModelInternal ( QFile &f, const QString &model_name, I
 								if ( subf. open ( IO_ReadOnly )) {
 									uint sub_invalid_items = 0;
 									
-									(void) parseLDrawModelInternal ( subf, partname, items, &sub_invalid_items, mergehash );
+									(void) parseLDrawModelInternal ( subf, partname, items, &sub_invalid_items, mergehash, recursion_detection );
 									
 									invalid += sub_invalid_items;
 									got_subfile = true;
@@ -1474,6 +1485,7 @@ bool BrickLink::parseLDrawModelInternal ( QFile &f, const QString &model_name, I
 	if ( invalid_items )
 		*invalid_items = invalid;
 		
+    recursion_detection. pop_back ( );
 	return is_mpd ? is_mpd_model_found : true;
 }
 

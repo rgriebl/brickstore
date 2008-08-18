@@ -714,7 +714,7 @@ private:
 	static BrickLink *s_inst;
 
 	bool updateNeeded ( const QDateTime &last, int iv );
-	bool parseLDrawModelInternal ( QFile &file, const QString &model_name, InvItemList &items, uint *invalid_items, QDict <InvItem> &mergehash );
+	bool parseLDrawModelInternal ( QFile &file, const QString &model_name, InvItemList &items, uint *invalid_items, QDict <InvItem> &mergehash, QStringList &recursion_detection );
 	void pictureIdleLoader2 ( );
 
 	void setDatabase_ConsistsOf ( const QMap<const Item *, InvItemList> &map );
