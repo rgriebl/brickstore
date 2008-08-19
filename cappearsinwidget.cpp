@@ -46,7 +46,7 @@ public:
 	virtual QString text ( int col ) const
 	{ 
 		switch ( col ) {
-			case  0: return QString::number ( m_qty );
+            case  0: return ( m_qty > 0  ) ? QString::number ( m_qty ) : QString ( "-" );
 			case  1: return m_item-> id ( );
 			case  2: return m_item-> name ( ); 
 			default: return QString ( );
@@ -159,8 +159,8 @@ private:
 
 class CAppearsInWidgetPrivate {
 public:
-	const BrickLink::Item * m_item;
-	const BrickLink::Color *m_color;
+//	const BrickLink::Item * m_item;
+//	const BrickLink::Color *m_color;
 	QPopupMenu *            m_popup;
 	AppearsInToolTip *      m_tip;
 };
@@ -170,8 +170,8 @@ CAppearsInWidget::CAppearsInWidget ( QWidget *parent, const char *name, WFlags /
 {
 	d = new CAppearsInWidgetPrivate ( );
 
-	d-> m_item = 0;
-	d-> m_color = 0;
+//	d-> m_item = 0;
+//	d-> m_color = 0;
 	d-> m_popup = 0;
 
 	setShowSortIndicator ( false );
@@ -205,7 +205,7 @@ CAppearsInWidget::~CAppearsInWidget ( )
 
 void CAppearsInWidget::showContextMenu ( QListViewItem *lvitem, const QPoint &pos )
 {
-	if ( d-> m_item && lvitem ) {
+	if ( /*d-> m_item &&*/ lvitem ) {
 		if ( lvitem != currentItem ( ))
 			setCurrentItem ( lvitem );
 
@@ -247,8 +247,8 @@ void CAppearsInWidget::setItem ( const BrickLink::Item *item, const BrickLink::C
 {
 	d-> m_tip-> hideTip ( );
 	clear ( );
-	d-> m_item = item;
-	d-> m_color = color;
+//	d-> m_item = item;
+//	d-> m_color = color;
 
 	if ( item ) {
 		BrickLink::Item::AppearsInMap map = item-> appearsIn ( color );
@@ -259,6 +259,38 @@ void CAppearsInWidget::setItem ( const BrickLink::Item *item, const BrickLink::C
 			}
 		}
 	}
+}
+
+void CAppearsInWidget::setItem ( const BrickLink::InvItemList &list )
+{
+	d-> m_tip-> hideTip ( );
+	clear ( );
+//	d-> m_item = item;
+//	d-> m_color = color;
+
+	if ( !list. isEmpty ( )) {
+        QMap<const BrickLink::Item *, int> unique;
+        bool first_item = true;
+
+        foreach ( const BrickLink::InvItem *it, list ) {
+		    BrickLink::Item::AppearsInMap map = it-> item ( )-> appearsIn ( it-> color ( ));
+
+		    for ( BrickLink::Item::AppearsInMap::const_iterator itc = map. begin ( ); itc != map. end ( ); ++itc ) {
+			    for ( BrickLink::Item::AppearsInMapVector::const_iterator itv = itc. data ( ). begin ( ); itv != itc. data ( ). end ( ); ++itv ) {
+                    QMap<const BrickLink::Item *, int>::iterator unique_it = unique. find ( itv-> second );
+                    if ( unique_it != unique. end ( ))
+                        ++unique_it. data ( );
+                    else if ( first_item )
+                        unique. insert ( itv-> second, 1 );
+			    }
+		    }
+            first_item = false;
+	    }
+        for ( QMap<const BrickLink::Item *, int>::iterator unique_it = unique. begin ( ); unique_it != unique. end ( ); ++unique_it ) {
+            if ( unique_it. data ( ) == list. count ( ))
+        	    (void) new AppearsInListItem ( this, -1, unique_it. key ( ));
+        }
+    }
 }
 
 void CAppearsInWidget::viewLargeImage ( )

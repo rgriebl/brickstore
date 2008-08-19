@@ -303,7 +303,10 @@ void CTaskAppearsInWidget::documentUpdate ( CDocument *doc )
 
 void CTaskAppearsInWidget::selectionUpdate ( const CDocument::ItemList &list )
 {
-	bool ok = ( m_doc && ( list. count ( ) == 1 ));
-
-	setItem ( ok ? (*list. front ( )). item ( ) : 0, ok ? (*list. front ( )). color ( ) : 0 );
+    if ( !m_doc || list. isEmpty ( ))
+        setItem ( 0, 0 );
+    else if ( list. count ( ) == 1 )
+    	setItem ((*list. front ( )). item ( ), (*list. front ( )). color ( ));
+    else
+        setItem ( reinterpret_cast<const BrickLink::InvItemList &> ( list ));
 }

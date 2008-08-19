@@ -29,6 +29,7 @@ public:
 	virtual ~CAppearsInWidget ( );
 	
 	void setItem ( const BrickLink::Item *item, const BrickLink::Color *color = 0 );
+    void setItem ( const BrickLink::InvItemList &list );
 
 	virtual QSize minimumSizeHint ( ) const;
 	virtual QSize sizeHint ( ) const;
