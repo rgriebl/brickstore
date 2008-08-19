@@ -434,9 +434,12 @@ void BrickLink::setUpdateIntervals ( int pic, int pg )
 	m_price_guides. update_iv = pg;
 }
 
-bool BrickLink::updateNeeded ( const QDateTime &last, int iv )
+bool BrickLink::updateNeeded ( bool valid, const QDateTime &last, int iv )
 {
-	return ( iv > 0 ) && ( last. secsTo ( QDateTime::currentDateTime ( )) > iv );
+    if ( iv > 0 )
+        return !valid || ( last. secsTo ( QDateTime::currentDateTime ( )) > iv );
+    else
+        return false;
 }
 
 void BrickLink::setOnlineStatus ( bool on )

@@ -713,7 +713,7 @@ private:
 	BrickLink ( const QString &datadir );
 	static BrickLink *s_inst;
 
-	bool updateNeeded ( const QDateTime &last, int iv );
+	bool updateNeeded ( bool valid, const QDateTime &last, int iv );
 	bool parseLDrawModelInternal ( QFile &file, const QString &model_name, InvItemList &items, uint *invalid_items, QDict <InvItem> &mergehash, QStringList &recursion_detection );
 	void pictureIdleLoader2 ( );
 

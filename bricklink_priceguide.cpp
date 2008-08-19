@@ -96,7 +96,7 @@ BrickLink::PriceGuide *BrickLink::priceGuide ( const BrickLink::Item *item, cons
 		m_price_guides. cache. insert ( key, pg );
 	}
 
-	if ( pg && ( !pg-> valid ( ) || updateNeeded ( pg-> lastUpdate ( ), m_price_guides. update_iv )))
+	if ( pg && updateNeeded ( pg-> valid ( ), pg-> lastUpdate ( ), m_price_guides. update_iv ))
 		updatePriceGuide ( pg, high_priority );
 
 	return pg;
