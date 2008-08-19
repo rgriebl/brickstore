@@ -326,6 +326,22 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
         <source>Cart in Shop %1</source>
         <translation>Warenkorb in Shop %1</translation>
     </message>
+    <message>
+        <source>All</source>
+        <translation type="obsolete">Alle</translation>
+    </message>
+    <message>
+        <source>All Prices</source>
+        <translation type="obsolete">Alle Preise</translation>
+    </message>
+    <message>
+        <source>All Texts</source>
+        <translation type="obsolete">Alle Texte</translation>
+    </message>
+    <message>
+        <source>All Quantities</source>
+        <translation type="obsolete">Alle Mengen</translation>
+    </message>
 </context>
 <context>
     <name>CFrameWork</name>
@@ -1230,6 +1246,54 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
         <source>MISB</source>
         <translation>MISB</translation>
     </message>
+    <message>
+        <source>contains</source>
+        <translation>enthält</translation>
+    </message>
+    <message>
+        <source>doesn&apos;t contain</source>
+        <translation>enthält nicht</translation>
+    </message>
+    <message>
+        <source>is</source>
+        <translation>ist</translation>
+    </message>
+    <message>
+        <source>isn&apos;t</source>
+        <translation>ist nicht</translation>
+    </message>
+    <message>
+        <source>begins with</source>
+        <translation>beginnt mit</translation>
+    </message>
+    <message>
+        <source>ends with</source>
+        <translation>endet mit</translation>
+    </message>
+    <message>
+        <source>and</source>
+        <translation>und</translation>
+    </message>
+    <message>
+        <source>or</source>
+        <translation>oder</translation>
+    </message>
+    <message>
+        <source>All</source>
+        <translation>Alle</translation>
+    </message>
+    <message>
+        <source>All Prices</source>
+        <translation>Alle Preise</translation>
+    </message>
+    <message>
+        <source>All Texts</source>
+        <translation>Alle Texte</translation>
+    </message>
+    <message>
+        <source>All Quantities</source>
+        <translation>Alle Mengen</translation>
+    </message>
 </context>
 <context>
     <name>CLargePictureWidget</name>
@@ -1765,7 +1829,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>Field:</source>
-        <translation>Feld:</translation>
+        <translation type="obsolete">Feld:</translation>
     </message>
     <message>
         <source>Overwrite the currently selected items?</source>
@@ -1781,7 +1845,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>Reset an active filter</source>
-        <translation>Setze den aktiven Filter zurück</translation>
+        <translation type="obsolete">Setze den aktiven Filter zurück</translation>
     </message>
     <message>
         <source>Restrict the filter to this/these field(s)</source>

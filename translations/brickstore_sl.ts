@@ -299,6 +299,22 @@
         <source>Reset differences</source>
         <translation>Zbriši razlike</translation>
     </message>
+    <message>
+        <source>All</source>
+        <translation type="obsolete">Vsi</translation>
+    </message>
+    <message>
+        <source>All Prices</source>
+        <translation type="obsolete">Vse cene</translation>
+    </message>
+    <message>
+        <source>All Texts</source>
+        <translation type="obsolete">Vse besedilo</translation>
+    </message>
+    <message>
+        <source>All Quantities</source>
+        <translation type="obsolete">Vsa količina</translation>
+    </message>
 </context>
 <context>
     <name>CFrameWork</name>
@@ -1193,6 +1209,54 @@
         <source>MISB</source>
         <translation>MISB</translation>
     </message>
+    <message>
+        <source>contains</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>doesn&apos;t contain</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>is</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>isn&apos;t</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>begins with</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>ends with</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>and</source>
+        <translation>in</translation>
+    </message>
+    <message>
+        <source>or</source>
+        <translation>ali</translation>
+    </message>
+    <message>
+        <source>All</source>
+        <translation>Vsi</translation>
+    </message>
+    <message>
+        <source>All Prices</source>
+        <translation>Vse cene</translation>
+    </message>
+    <message>
+        <source>All Texts</source>
+        <translation>Vse besedilo</translation>
+    </message>
+    <message>
+        <source>All Quantities</source>
+        <translation>Vsa količina</translation>
+    </message>
 </context>
 <context>
     <name>CLargePictureWidget</name>
@@ -1712,7 +1776,7 @@
     </message>
     <message>
         <source>Field:</source>
-        <translation>Polje:</translation>
+        <translation type="obsolete">Polje:</translation>
     </message>
     <message>
         <source>Filter the list using this pattern (wildcards allowed: * ? [])</source>
@@ -1720,7 +1784,7 @@
     </message>
     <message>
         <source>Reset an active filter</source>
-        <translation>Prekliči trenutni omejevalnik</translation>
+        <translation type="obsolete">Prekliči trenutni omejevalnik</translation>
     </message>
     <message>
         <source>Restrict the filter to this/these field(s)</source>

@@ -299,6 +299,22 @@
         <source>Cart in Shop %1</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>All</source>
+        <translation type="obsolete">Tous</translation>
+    </message>
+    <message>
+        <source>All Prices</source>
+        <translation type="obsolete">Tous les prix</translation>
+    </message>
+    <message>
+        <source>All Texts</source>
+        <translation type="obsolete">Tous les textes</translation>
+    </message>
+    <message>
+        <source>All Quantities</source>
+        <translation type="obsolete">Toutes les quantités</translation>
+    </message>
 </context>
 <context>
     <name>CFrameWork</name>
@@ -1188,6 +1204,54 @@
         <source>MISB</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>contains</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>doesn&apos;t contain</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>is</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>isn&apos;t</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>begins with</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>ends with</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>and</source>
+        <translation>et</translation>
+    </message>
+    <message>
+        <source>or</source>
+        <translation>ou</translation>
+    </message>
+    <message>
+        <source>All</source>
+        <translation>Tous</translation>
+    </message>
+    <message>
+        <source>All Prices</source>
+        <translation>Tous les prix</translation>
+    </message>
+    <message>
+        <source>All Texts</source>
+        <translation>Tous les textes</translation>
+    </message>
+    <message>
+        <source>All Quantities</source>
+        <translation>Toutes les quantités</translation>
+    </message>
 </context>
 <context>
     <name>CLargePictureWidget</name>
@@ -1703,7 +1767,7 @@
     <name>CWindow</name>
     <message>
         <source>Reset an active filter</source>
-        <translation>Réinitialiser le filtre</translation>
+        <translation type="obsolete">Réinitialiser le filtre</translation>
     </message>
     <message>
         <source>Filter the list using this pattern (wildcards allowed: * ? [])</source>
@@ -1735,7 +1799,7 @@
     </message>
     <message>
         <source>Field:</source>
-        <translation>Champ :</translation>
+        <translation type="obsolete">Champ :</translation>
     </message>
     <message>
         <source>Untitled</source>

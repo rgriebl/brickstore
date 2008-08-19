@@ -299,6 +299,22 @@
         <source>Cart in Shop %1</source>
         <translation>Winkelwagen in winkel %1</translation>
     </message>
+    <message>
+        <source>All</source>
+        <translation type="obsolete">Alles</translation>
+    </message>
+    <message>
+        <source>All Prices</source>
+        <translation type="obsolete">Alle prijzen</translation>
+    </message>
+    <message>
+        <source>All Texts</source>
+        <translation type="obsolete">Alle teksten</translation>
+    </message>
+    <message>
+        <source>All Quantities</source>
+        <translation type="obsolete">Alle aantallen</translation>
+    </message>
 </context>
 <context>
     <name>CFrameWork</name>
@@ -1198,6 +1214,54 @@
         <source>MISB</source>
         <translation></translation>
     </message>
+    <message>
+        <source>contains</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>doesn&apos;t contain</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>is</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>isn&apos;t</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>begins with</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>ends with</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>and</source>
+        <translation>en</translation>
+    </message>
+    <message>
+        <source>or</source>
+        <translation>of</translation>
+    </message>
+    <message>
+        <source>All</source>
+        <translation>Alles</translation>
+    </message>
+    <message>
+        <source>All Prices</source>
+        <translation>Alle prijzen</translation>
+    </message>
+    <message>
+        <source>All Texts</source>
+        <translation>Alle teksten</translation>
+    </message>
+    <message>
+        <source>All Quantities</source>
+        <translation>Alle aantallen</translation>
+    </message>
 </context>
 <context>
     <name>CLargePictureWidget</name>
@@ -1717,7 +1781,7 @@
     </message>
     <message>
         <source>Field:</source>
-        <translation>Veld:</translation>
+        <translation type="obsolete">Veld:</translation>
     </message>
     <message>
         <source>Filter the list using this pattern (wildcards allowed: * ? [])</source>
@@ -1725,7 +1789,7 @@
     </message>
     <message>
         <source>Reset an active filter</source>
-        <translation>Reset het actieve filter</translation>
+        <translation type="obsolete">Reset het actieve filter</translation>
     </message>
     <message>
         <source>Restrict the filter to this/these field(s)</source>
