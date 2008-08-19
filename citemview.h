@@ -65,6 +65,8 @@ public:
 	bool isDifferenceMode ( ) const;
 	bool isSimpleMode ( ) const;
 
+	QWidget *createFilterWidget(QWidget *parent);
+
 public slots:
 	void setDifferenceMode ( bool b );
 	void setSimpleMode ( bool b );
@@ -86,12 +88,15 @@ protected:
 
 protected slots:
 	virtual void listItemDoubleClicked ( QListViewItem *, const QPoint &, int );
+	void applyFilterInternal ( );
 	void languageChange ( );
 
 protected:
 	static QString statusLabel ( BrickLink::InvItem::Status status );
 	static QString conditionLabel ( BrickLink::Condition cond );
 	static QString subConditionLabel ( BrickLink::SubCondition scond );
+
+	static bool filterExpressionMatch ( const QRegExp &regxep, int comp, const QString &str );
 
 private:
 	CItemViewPrivate *d;

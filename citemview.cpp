@@ -23,6 +23,9 @@
 #include <qtooltip.h>
 #include <qstyle.h>
 #include <qintdict.h>
+#include <qtimer.h>
+#include <qtoolbutton.h>
+#include <qlayout.h>
 
 #include "cmessagebox.h"
 #include "cutility.h"
@@ -33,6 +36,336 @@
 #include "cconfig.h"
 
 #include "citemview.h"
+
+
+
+class FilterWidget : public QWidget {
+    Q_OBJECT
+    
+public:
+    FilterWidget ( CItemView *iv, QWidget *parent );
+
+    struct FilterItem {
+        QRegExp m_expression;
+        int m_field;
+        enum Comparison { Contains, DoesNotContain, Is, IsNot, BeginsWith, EndsWith } m_comparison;
+        enum Combination { And, Or, Undefined } m_combination;
+    };
+    
+    QPtrList<const FilterItem> filter() const;
+
+signals:
+    void filterChanged();
+
+protected slots:
+    void languageChange();
+
+private slots:
+    void filterAnd ( );
+    void filterOr ( );
+    void filterDelete ( );
+
+    void timerTick();
+
+#if defined(Q_WS_MACX)
+    void makeButtonsAutoRaise();
+#endif
+    
+private:
+    struct Filter : public FilterItem {
+        Filter();
+        ~Filter();
+    
+        QWidget *w_container;
+        QComboBox *w_fields;
+        QComboBox *w_comparison;
+        QLineEdit *w_expression;
+        QToolButton *w_and_combination;
+        QToolButton *w_or_combination;
+        QToolButton *w_delete;
+    };
+
+    void filterAndOr ( int idx, Filter::Combination comb );    
+    void copyUiTexts ( const Filter *from, Filter *to );
+
+    bool createFilter(int idx);
+    void triggerFilterChanged();
+
+private:
+    CItemView *m_iv;
+    QBoxLayout *m_layout;
+    QTimer *m_timer;
+    
+    mutable QPtrList<Filter> m_filters;
+
+    friend class CItemView;    
+};
+
+QWidget *CItemView::createFilterWidget(QWidget *parent)
+{
+    FilterWidget *w = new FilterWidget(this, parent);
+    w-> languageChange ( );
+    connect ( w, SIGNAL( filterChanged ( )), this, SLOT( applyFilterInternal ( )));
+    return w;
+}
+
+
+FilterWidget::FilterWidget ( CItemView *iv, QWidget *parent )
+    : QWidget ( parent ), m_iv ( iv )
+{
+    m_timer = new QTimer(this);
+    
+    connect(m_timer, SIGNAL(timeout()), this, SLOT(timerTick()));
+
+    m_layout = new QVBoxLayout ( this, 0, 0 );
+    createFilter ( 0 );
+}
+
+
+
+FilterWidget::Filter::Filter()
+    : FilterItem(), w_container ( 0 )
+{ }
+
+FilterWidget::Filter::~Filter()
+{
+    delete w_container;
+}
+      
+bool FilterWidget::createFilter ( int idx )
+{
+    if ( idx > int(m_filters. count ( )))
+        return false;
+
+    struct Filter *f = new Filter();
+    
+    f-> w_container = new QWidget ( this );
+    
+    f-> w_fields = new QComboBox ( false, f-> w_container );
+    for ( int i = 0; i < ( CItemView::FilterCountSpecial + CDocument::FieldCount ); i++ )
+          f-> w_fields-> insertItem ( QString ( ));
+    f-> w_comparison = new QComboBox ( false, f-> w_container );
+    for ( int i = 0; i < 6; ++i)
+        f-> w_comparison-> insertItem ( QString() );
+    f-> w_expression = new QLineEdit ( f-> w_container );
+    f-> w_and_combination = new QToolButton ( f-> w_container );
+    f-> w_and_combination->setAutoRaise(true);
+    f-> w_or_combination = new QToolButton ( f-> w_container );
+    f-> w_or_combination->setAutoRaise(true);
+    f-> w_delete = new QToolButton ( f-> w_container );
+    f-> w_delete-> setAutoRaise ( true );
+    f-> w_delete-> setPixmap ( CResource::inst ( )-> pixmap ( "status_exclude" ));
+    
+#if defined(Q_WS_MACX)
+    QTimer::singleShot(0, this, SLOT(makeButtonsAutoRaise()));
+#endif
+    
+    QHBoxLayout *lay = new QHBoxLayout ( f-> w_container, 0, 6 );
+    lay-> addWidget ( f-> w_fields );
+    lay-> addWidget ( f-> w_comparison );
+    lay-> addWidget ( f-> w_expression );
+    lay-> addWidget ( f-> w_and_combination );
+    lay-> addWidget ( f-> w_or_combination );
+    lay-> addSpacing ( 4 );
+    lay-> addWidget ( f-> w_delete );
+    
+    connect ( f-> w_fields, SIGNAL( activated ( int )), this, SIGNAL( filterChanged ( )));
+    connect ( f-> w_expression, SIGNAL( textChanged ( const QString & )), this, SIGNAL( filterChanged ( )));
+    connect ( f-> w_comparison, SIGNAL( activated ( int )), this, SIGNAL( filterChanged ( )));
+    connect ( f-> w_or_combination, SIGNAL( clicked ( )), this, SLOT( filterOr ( )));
+    connect ( f-> w_and_combination, SIGNAL( clicked ( )), this, SLOT( filterAnd ( )));
+    connect ( f-> w_delete, SIGNAL( clicked ( )), this, SLOT( filterDelete ( )));
+    
+    if ( !m_filters. isEmpty ( )) 
+        copyUiTexts ( m_filters. first ( ), f );
+    m_filters. insert ( idx, f );
+    
+    m_layout-> insertWidget ( idx, f-> w_container );
+    f-> w_container-> show ( );
+    
+  //  m_layout-> activate ( );
+  //  updateGeometry();  
+//    if (idx) {
+//    parentWidget()->updateGeometry();
+//    parentWidget()->layout()->activate();
+//    }
+    return true;
+}
+
+#if defined(Q_WS_MACX)
+// The QAquaStyle removes the autoRaise flag when polish()ing the widget.
+// That may be in conformance with the HIG, but in this case we DO want it like that.
+
+void FilterWidget::makeButtonsAutoRaise()
+{
+    for ( int i = 0; i < int( m_filters. count ( )); ++i ) {
+        Filter *f = m_filters. at ( i );
+        f-> w_and_combination-> setAutoRaise ( true );
+        f-> w_or_combination-> setAutoRaise ( true );
+        f-> w_delete-> setAutoRaise ( true );
+    }
+}
+#endif
+
+void FilterWidget::copyUiTexts ( const Filter *from, Filter *to )
+{    
+    for (int i = 0; i < from-> w_fields-> count ( ); ++i )
+        to-> w_fields-> changeItem ( from-> w_fields-> text ( i ), i );
+        
+    for (int i = 0; i < from-> w_comparison-> count ( ); ++i )
+        to-> w_comparison-> changeItem ( from-> w_comparison-> text ( i ), i );
+
+    to-> w_and_combination-> setText ( from-> w_and_combination-> text ( ));
+    to-> w_or_combination-> setText ( from-> w_or_combination-> text ( ));
+    
+    //TODO: copy tooltips!
+}
+
+void FilterWidget::languageChange()
+{
+    Filter *f = m_filters. first ( );
+
+//    QToolTip::add ( f. w_expression, tr( "Filter the list using this pattern (wildcards allowed: * ? [])" ));
+//	QToolTip::add ( f. w_delete, tr( "Reset an active filter" ));
+//    QToolTip::add ( f. w_fields, tr( "Restrict the filter to this/these field(s)" ));
+
+    int i, j;
+    for ( i = 0; i < CItemView::FilterCountSpecial; i++ ) {
+        QString s;
+        switch ( -i - 1 ) {
+            case CItemView::All       : s = tr( "All" ); break;
+            case CItemView::Prices    : s = tr( "All Prices" ); break;
+            case CItemView::Texts     : s = tr( "All Texts" ); break;
+            case CItemView::Quantities: s = tr( "All Quantities" ); break;
+        }
+        f-> w_fields-> changeItem ( s, i );
+    }
+    for ( j = 0; j < CDocument::FieldCount; j++ )
+        f-> w_fields-> changeItem ( m_iv-> header ( )-> label ( j ), i + j );
+        
+    f-> w_comparison-> changeItem ( tr( "contains" ), Filter::Contains );
+    f-> w_comparison-> changeItem ( tr( "doesn't contain" ), Filter::DoesNotContain );
+    f-> w_comparison-> changeItem ( tr( "is" ), Filter::Is );
+    f-> w_comparison-> changeItem ( tr( "isn't" ), Filter::IsNot );
+    f-> w_comparison-> changeItem ( tr( "begins with" ), Filter::BeginsWith );
+    f-> w_comparison-> changeItem ( tr( "ends with" ), Filter::EndsWith );
+
+    f-> w_and_combination-> setText ( tr( "and" ));
+    f-> w_or_combination-> setText ( tr( "or" ));
+
+    for ( int i = 1; i < int( m_filters. count ( )); ++i )
+        copyUiTexts ( m_filters. first ( ), m_filters. at ( i ));
+}
+
+void FilterWidget::filterAnd ( )
+{
+    for ( int i = 0; i < int( m_filters. count ( )); ++i ) {
+        Filter *f = m_filters. at ( i );
+    
+        if ( f-> w_and_combination == ::qt_cast<QToolButton *>(sender ( ))) {
+            filterAndOr ( i, Filter::And );
+            break;
+        }
+    }
+}
+
+void FilterWidget::filterOr ( )
+{
+    for ( int i = 0; i < int( m_filters. count ( )); ++i ) {
+        Filter *f = m_filters. at ( i );
+    
+        if ( f-> w_or_combination == ::qt_cast<QToolButton *>(sender ( ))) {
+            filterAndOr ( i, Filter::Or );
+            break;
+        }
+    }
+}
+
+void FilterWidget::filterAndOr ( int idx, Filter::Combination comb )
+{
+    Filter *f = m_filters. at ( idx );
+
+    if ( idx == int ( m_filters. count ( ) - 1 )) {
+        f-> w_and_combination-> setToggleButton ( true );
+        f-> w_or_combination-> setToggleButton ( true );
+        
+        createFilter ( idx + 1 );
+    }
+
+    f-> m_combination = comb;
+    f-> w_or_combination-> setOn ( comb == Filter::Or );
+    f-> w_and_combination-> setOn ( comb == Filter::And );
+    
+    triggerFilterChanged ( );
+}
+
+void FilterWidget::filterDelete()
+{
+    if ( m_filters. count ( ) == 1 ) {
+        Filter *f = m_filters.first();
+    
+        f->w_fields->setCurrentItem(0);
+        f->w_comparison->setCurrentItem(0);
+        f-> m_expression = QString ( );
+        f-> w_expression-> setText ( QString ( ));
+
+        triggerFilterChanged ( );
+    }
+    else {
+        for ( int i = 0; i < int(m_filters. count ( )); ++i ) {
+            Filter *f = m_filters. at ( i );
+        
+            if ( f-> w_delete == ::qt_cast<QToolButton *>(sender ( ))) {
+    
+                m_layout-> remove ( f-> w_container );
+                m_filters. remove ( i );
+                delete f;
+                    
+                triggerFilterChanged ( );
+
+                // last filter has to have non-toggle [and] and [or] buttons
+                if (i == int(m_filters. count ( ))) {
+                    f = m_filters. last ( );
+                    f-> m_combination = Filter::Undefined;
+                    f-> w_or_combination-> setOn ( false );
+                    f-> w_and_combination-> setOn ( false );
+                    f-> w_or_combination-> setToggleButton ( false );
+                    f-> w_and_combination-> setToggleButton ( false );
+                }
+            }
+        }
+    }
+}
+
+
+QPtrList<const FilterWidget::FilterItem> FilterWidget::filter() const
+{
+    QPtrList<const FilterItem> lst;
+
+    for ( int i = 0; i < int(m_filters. count ( )); ++i ) {
+        Filter *f = m_filters. at ( i );
+
+        f-> m_expression = QRegExp ( f-> w_expression-> text ( ), false, true );
+        f-> m_comparison = static_cast<FilterItem::Comparison>( f-> w_comparison-> currentItem ( ));
+        f-> m_combination = f-> w_and_combination-> isOn ( ) ? FilterItem::And : f-> w_or_combination-> isOn ( ) ? FilterItem::Or : FilterItem::Undefined;
+        f-> m_field = f-> w_fields-> currentItem ( );
+        
+        lst. append ( f );
+    }
+    return lst;
+}
+
+void FilterWidget::timerTick()
+{
+    emit filterChanged();
+}
+
+void FilterWidget::triggerFilterChanged()
+{ 
+    m_timer->start(400, true);    
+}
+
+
 
 class CItemViewToolTip;
 
@@ -391,6 +724,106 @@ void CItemView::setDifferenceMode ( bool b )
 			header ( )-> moveSection ( CDocument::PriceOrig, header ( )-> mapToIndex ( CDocument::PriceDiff ));
 		}
 	}
+}
+
+void CItemView::applyFilterInternal ( )
+{
+    FilterWidget *fw = ::qt_cast<FilterWidget *>(sender());
+    
+    if ( !fw )    
+        return;
+
+    QPtrList<const FilterWidget::FilterItem> filters = fw-> filter ( );
+    
+
+//    for ( int i = 0; i < int(filters. count ( )); ++i ) {
+//        const FilterWidget::FilterItem *f = filters[i]-> w_expression-> text;  
+//    }
+
+	QApplication::setOverrideCursor ( QCursor( Qt::WaitCursor ));
+
+	CDisableUpdates disupd ( this );
+
+	for ( QListViewItemIterator it ( this ); it. current ( ); ++it ) {
+		QListViewItem *ivi = it. current ( );
+
+		FilterWidget::FilterItem::Combination lastcomb = FilterWidget::FilterItem::Or;
+		bool match = false;
+
+        for ( int fi = 0; fi < int(filters. count ( )); ++fi ) {
+            const FilterWidget::FilterItem *f = filters. at ( fi );
+              
+        	int field = ( f-> m_field < FilterCountSpecial ) ? -f-> m_field - 1 : f-> m_field - FilterCountSpecial;
+            bool b = f-> m_expression. isEmpty ( ) || !f->m_expression. isValid ( );
+
+    		if ( !b && ( field >= 0 ) && ( field < CDocument::FieldCount )) { // normal field
+	    		b = filterExpressionMatch ( f-> m_expression, f-> m_comparison, ivi-> text ( field )); //  f-> m_expression. search ( ivi-> text ( field )) >= 0 );
+	    	}
+    		else if ( !b && ( field < 0 )) { // special field
+    			int fieldindex = -field - 1;
+
+    			static int matchfields [FilterCountSpecial][CDocument::FieldCount + 1] = {
+    				{ /*All       */ CDocument::PartNo, CDocument::Description, CDocument::Comments, CDocument::Remarks, CDocument::Quantity, CDocument::Price, CDocument::Color, CDocument::Category, CDocument::ItemType, CDocument::TierQ1, CDocument::TierP1, CDocument::TierQ2, CDocument::TierP2, CDocument::TierQ3, CDocument::TierP3, CDocument::Weight, CDocument::YearReleased, -1 },
+    				{ /*Prices    */ CDocument::Price, CDocument::TierP1, CDocument::TierP2, CDocument::TierP3, CDocument::Total, -1 },
+    				{ /*Texts     */ CDocument::Description, CDocument::Comments, CDocument::Remarks, -1 },
+    				{ /*Quantities*/ CDocument::Quantity, CDocument::TierQ1, CDocument::TierQ2, CDocument::TierQ3, -1 },
+    			};
+
+                bool neg_comp = ( f->m_comparison == FilterWidget::FilterItem::IsNot || f-> m_comparison == FilterWidget::FilterItem::DoesNotContain );
+                if (neg_comp)
+                    b = true;
+                    
+	    		for ( int i = 0; matchfields [fieldindex][i] != -1; i++ ) {
+	    			bool result = filterExpressionMatch ( f-> m_expression, f-> m_comparison, ivi-> text ( matchfields [fieldindex][i] )); // ( f-> m_expression. search ( QString ( ivi-> text ( matchfields [fieldindex][i] ))) >= 0 );
+	    		
+	    			if (neg_comp)
+	    			    b &= result;
+                    else
+                        b |= result;
+	    		}
+            }
+            if ( lastcomb == FilterWidget::FilterItem::And )
+                match &= b;
+            else 
+                match |= b;
+                
+            lastcomb = f-> m_combination;
+		}
+		
+
+		if ( !match && ivi-> isSelected ( ))
+			setSelected ( ivi, false );
+
+		ivi-> setVisible ( match );
+	}
+	QApplication::restoreOverrideCursor ( );
+
+}
+
+bool CItemView::filterExpressionMatch ( const QRegExp &regexp, int comp, const QString &str )
+{
+    int pos = ( comp == FilterWidget::FilterItem::EndsWith ) ? regexp. searchRev ( str ) : regexp. search ( str );
+
+    switch ( comp ) {
+    default:
+    case FilterWidget::FilterItem::Contains:
+        return pos >= 0;
+    
+    case FilterWidget::FilterItem::DoesNotContain:
+        return pos < 0;
+    
+    case FilterWidget::FilterItem::Is:
+        return pos == 0 && regexp. matchedLength ( ) == int( str. length ( ));
+    
+    case FilterWidget::FilterItem::IsNot:
+        return pos != 0 || regexp. matchedLength ( ) != int( str. length ( ));
+    
+    case FilterWidget::FilterItem::BeginsWith:
+        return pos == 0;
+
+    case FilterWidget::FilterItem::EndsWith:
+        return ( pos + regexp. matchedLength ( )) == int( str. length ( ));
+    }
 }
 
 void CItemView::applyFilter ( const QString &filter, int field, bool is_regex )
@@ -1264,3 +1697,4 @@ void CItemViewItem::editDone ( int col, const QString &result, bool valid )
 	listView ( )-> document ( )-> changeItem ( m_item, item );
 }
 
+#include "citemview.moc"

@@ -117,24 +117,15 @@ CWindow::CWindow ( CDocument *doc, QWidget *parent, const char *name )
 {
 	m_doc = doc;
 	m_ignore_selection_update = false;
-
-	m_filter_field = CItemView::All;
-
+	
 	m_settopg_failcnt = 0;
-	m_settopg_list = 0;
+	m_settopg_list = 0; 
 	m_settopg_time = BrickLink::PriceGuide::AllTime;
 	m_settopg_price = BrickLink::PriceGuide::Average;
 
 	// m_items. setAutoDelete ( true ); NOT ANYMORE -> UndoRedo
-
-	w_filter_clear = new QToolButton ( this );
-	w_filter_clear-> setAutoRaise ( true );
-	w_filter_clear-> setIconSet ( CResource::inst ( )-> iconSet ( "filter_clear" ));
+	
 	w_filter_label = new QLabel ( this );
-
-	w_filter_expression = new QComboBox ( true, this );
-	w_filter_field = new QComboBox ( false, this );
-	w_filter_field_label = new QLabel ( this );
 
 	w_list = new CItemView ( doc, this );
 	setFocusProxy ( w_list );
@@ -148,26 +139,19 @@ CWindow::CWindow ( CDocument *doc, QWidget *parent, const char *name )
 
 	connect ( w_list, SIGNAL( selectionChanged ( )), this, SLOT( updateSelectionFromView ( )));
 
-	for ( int i = 0; i < ( CItemView::FilterCountSpecial + CDocument::FieldCount ); i++ )
-		w_filter_field-> insertItem ( QString ( ));
+	w_filter = w_list-> createFilterWidget ( this );
 
 	QBoxLayout *toplay = new QVBoxLayout ( this, 0, 0 );
 	QBoxLayout *barlay = new QHBoxLayout ( toplay, 4 );
 	barlay-> setMargin ( 4 );
-	barlay-> addWidget ( w_filter_clear, 0 );
 	barlay-> addWidget ( w_filter_label, 0 );
-	barlay-> addWidget ( w_filter_expression, 15 );
-	barlay-> addWidget ( w_filter_field_label, 0 );
-	barlay-> addWidget ( w_filter_field, 5 );
+	barlay-> addWidget ( w_filter );
 	toplay-> addWidget ( w_list );
 
 	connect ( BrickLink::inst ( ), SIGNAL( priceGuideUpdated ( BrickLink::PriceGuide * )), this, SLOT( priceGuideUpdated ( BrickLink::PriceGuide * )));
 	connect ( BrickLink::inst ( ), SIGNAL( pictureUpdated ( BrickLink::Picture * )), this, SLOT( pictureUpdated ( BrickLink::Picture * )));
 
 	connect ( w_list, SIGNAL( contextMenuRequested ( QListViewItem *, const QPoint &, int )), this, SLOT( contextMenu ( QListViewItem *, const QPoint & )));
-	connect ( w_filter_clear, SIGNAL( clicked ( )), w_filter_expression, SLOT( clearEdit ( )));
-	connect ( w_filter_expression, SIGNAL( textChanged ( const QString & )), this, SLOT( applyFilter ( )));
-	connect ( w_filter_field, SIGNAL( activated ( int )), this, SLOT( applyFilter ( )));
 
 	connect ( CConfig::inst ( ), SIGNAL( simpleModeChanged ( bool )), w_list, SLOT( setSimpleMode ( bool )));
 	connect ( CConfig::inst ( ), SIGNAL( simpleModeChanged ( bool )), this, SLOT( updateErrorMask ( )));
@@ -197,11 +181,11 @@ CWindow::CWindow ( CDocument *doc, QWidget *parent, const char *name )
 void CWindow::languageChange ( )
 {
 	w_filter_label-> setText ( tr( "Filter:" ));
-	w_filter_field_label-> setText ( tr( "Field:" ));
-
-	QToolTip::add ( w_filter_expression, tr( "Filter the list using this pattern (wildcards allowed: * ? [])" ));
-	QToolTip::add ( w_filter_clear, tr( "Reset an active filter" ));
-	QToolTip::add ( w_filter_field, tr( "Restrict the filter to this/these field(s)" ));
+//	w_filter_field_label-> setText ( tr( "Field:" ));
+#if 0
+	QToolTip::add ( m_filter-> w_expression, tr( "Filter the list using this pattern (wildcards allowed: * ? [])" ));
+//	QToolTip::add ( w_filter_clear, tr( "Reset an active filter" ));
+	QToolTip::add ( m_filter-> w_fields, tr( "Restrict the filter to this/these field(s)" ));
 
 	int i, j;
 	for ( i = 0; i < CItemView::FilterCountSpecial; i++ ) {
@@ -212,11 +196,14 @@ void CWindow::languageChange ( )
 			case CItemView::Texts     : s = tr( "All Texts" ); break;
 			case CItemView::Quantities: s = tr( "All Quantities" ); break;
 		}
-		w_filter_field-> changeItem ( s, i );
+		m_filter-> w_fields-> changeItem ( s, i );
 	}
 	for ( j = 0; j < CDocument::FieldCount; j++ )
-		w_filter_field-> changeItem ( w_list-> header ( )-> label ( j ), i + j );
+		m_filter-> w_fields-> changeItem ( w_list-> header ( )-> label ( j ), i + j );
 
+    for ( Filter *f = m_filter-> m_next; f; f = f-> m_next )
+        f-> copyUiTextsFrom ( m_filter );
+#endif
 	updateCaption ( );
 }
 
@@ -278,12 +265,6 @@ void CWindow::itemsChangedInDocument ( const CDocument::ItemList &items, bool /*
 			ivi-> repaint ( );
 		}
 	}
-}
-
-
-void CWindow::applyFilter ( )
-{
-	w_list-> applyFilter ( w_filter_expression-> lineEdit ( )-> text ( ), w_filter_field-> currentItem ( ), true );
 }
 
 

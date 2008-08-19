@@ -162,7 +162,6 @@ protected slots:
 	void languageChange ( );
 
 private slots:
-	void applyFilter ( );
 	void updateSelectionFromView ( );
 	void updateSelectionFromDoc ( const CDocument::ItemList &itlist );
 	void updateCaption ( );
@@ -181,19 +180,14 @@ private:
 
 private:
 	CDocument * m_doc;
-	QRegExp        m_filter_expression;
-	int            m_filter_field;
 
 	bool m_ignore_selection_update;
 
 	QPtrDict<CItemViewItem>  m_lvitems;
-
-	QToolButton *  w_filter_clear;
-	QComboBox *    w_filter_expression;
-	QComboBox *    w_filter_field;
+	
+    QWidget *      w_filter;
 	CItemView *	   w_list;
 	QLabel *       w_filter_label;
-	QLabel *       w_filter_field_label;
 
 	uint                           m_settopg_failcnt;
 	QPtrDict<CDocument::Item> *    m_settopg_list;
