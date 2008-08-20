@@ -66,10 +66,7 @@ private slots:
     void filterDelete ( );
 
     void timerTick();
-
-#if defined(Q_WS_MACX)
     void makeButtonsAutoRaise();
-#endif
     
 private:
     struct Filter : public FilterItem {
@@ -192,20 +189,20 @@ bool FilterWidget::createFilter ( int idx )
     return true;
 }
 
-#if defined(Q_WS_MACX)
 // The QAquaStyle removes the autoRaise flag when polish()ing the widget.
 // That may be in conformance with the HIG, but in this case we DO want it like that.
 
 void FilterWidget::makeButtonsAutoRaise()
 {
+#if defined(Q_WS_MACX)
     for ( int i = 0; i < int( m_filters. count ( )); ++i ) {
         Filter *f = m_filters. at ( i );
         f-> w_and_combination-> setAutoRaise ( true );
         f-> w_or_combination-> setAutoRaise ( true );
         f-> w_delete-> setAutoRaise ( true );
     }
-}
 #endif
+}
 
 void FilterWidget::copyUiTexts ( const Filter *from, Filter *to )
 {    
@@ -250,8 +247,8 @@ void FilterWidget::languageChange()
     f-> w_comparison-> changeItem ( tr( "begins with" ), Filter::BeginsWith );
     f-> w_comparison-> changeItem ( tr( "ends with" ), Filter::EndsWith );
 
-    f-> w_and_combination-> setText ( tr( "and" ));
-    f-> w_or_combination-> setText ( tr( "or" ));
+    f-> w_and_combination-> setText ( QString( " %1  " ). arg( tr( "and" )));
+    f-> w_or_combination-> setText ( QString( " %1  " ). arg( tr( "or" )));
 
     for ( int i = 1; i < int( m_filters. count ( )); ++i )
         copyUiTexts ( m_filters. first ( ), m_filters. at ( i ));
