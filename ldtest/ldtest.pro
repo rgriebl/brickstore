@@ -10,6 +10,9 @@ QT *= gui opengl
 DEPENDPATH += .
 INCLUDEPATH += .
 
+MOC_DIR = .moc
+!win:OBJ_DIR = .obj
+
 # Input
 HEADERS += ldraw.h ldrawrenderer.h matrix.h vector.h
 SOURCES += ldraw.cpp main.cpp ldrawrenderer.cpp matrix.cpp vector.cpp
