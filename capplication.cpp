@@ -53,20 +53,19 @@
 
 CApplication *cApp = 0;
 
-CApplication::CApplication(const char *rebuild_db_only, int _argc, char **_argv)
+CApplication::CApplication(bool rebuild_db_only, int _argc, char **_argv)
     : QApplication(_argc, _argv, !rebuild_db_only)
 {
     cApp = this;
 
     m_enable_emit = false;
-    m_rebuild_db_only = rebuild_db_only;
     m_has_alpha = (QPixmap::defaultDepth() >= 15);
 
     setOrganizationName("Softforge");
     setOrganizationDomain("softforge.de");
     setApplicationName(appName());
 
-    if (m_rebuild_db_only.isEmpty())
+    if (!rebuild_db_only)
         CSplash::inst();
 
 #if defined( Q_WS_WIN )
@@ -95,7 +94,7 @@ CApplication::CApplication(const char *rebuild_db_only, int _argc, char **_argv)
         QTimer::singleShot(0, this, SLOT(quit()));
         return;
     }
-    else if (!m_rebuild_db_only.isEmpty()) {
+    else if (rebuild_db_only) {
         QTimer::singleShot(0, this, SLOT(rebuildDatabase()));
     }
     else {
@@ -165,7 +164,7 @@ void CApplication::updateTranslations()
 
 void CApplication::rebuildDatabase()
 {
-    CRebuildDatabase rdb(m_rebuild_db_only);
+    CRebuildDatabase rdb;
     exit(rdb.exec());
 }
 

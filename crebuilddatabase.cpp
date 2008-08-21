@@ -27,10 +27,9 @@
 #include "crebuilddatabase.h"
 
 
-CRebuildDatabase::CRebuildDatabase(const QString &output)
-        : QObject(0)
+CRebuildDatabase::CRebuildDatabase()
+    : QObject(0)
 {
-    m_output = output;
     m_trans = 0;
 
 #if defined( Q_OS_WIN32 )
@@ -76,7 +75,7 @@ static void nirvanaMsgHandler(QtMsgType type, const char * /*x*/)
 
 int CRebuildDatabase::exec()
 {
-    m_trans = new CTransfer(10);
+    m_trans = new CTransfer(5);
     m_trans->setProxy(CConfig::inst()->proxy());
     connect(m_trans, SIGNAL(finished(CThreadPoolJob *)), this, SLOT(downloadJobFinished(CThreadPoolJob *)));
 
@@ -129,16 +128,20 @@ int CRebuildDatabase::exec()
 
     blti.exportInventoriesTo(bl);
 
-    extern uint _dwords_for_appears, _qwords_for_consists;
+    extern uint _dwords_for_appears, _qwords_for_consists, _bytes_for_alltime_pg;
 
     printf("  > appears-in : %11u bytes\n", _dwords_for_appears * 4);
     printf("  > consists-of: %11u bytes\n", _qwords_for_consists * 8);
-
+    printf("  > alltime-pg : %11u bytes\n", _bytes_for_alltime_pg);
 
     /////////////////////////////////////////////////////////////////////////////////
-    printf("\nSTEP 7: Writing the new database to disk...\n");
-    if (!bl->writeDatabase(m_output))
-        return error("failed to write the database file.");
+    printf("\nSTEP 7: Writing the new v0 (BS 1.1) database to disk...\n");
+    if (!bl->writeDatabase(bl->dataPath() + bl->defaultDatabaseName(BrickLink::Core::BrickStore_1_1), BrickLink::Core::BrickStore_1_1))
+        return error("failed to write the v0 (BS 1.1) database file.");
+
+    printf("\nSTEP 8: Writing the new v1 (BS 2.0) database to disk...\n");
+    if (!bl->writeDatabase(bl->dataPath() + bl->defaultDatabaseName(BrickLink::Core::BrickStore_2_0), BrickLink::Core::BrickStore_2_0))
+        return error("failed to write the v1 (BS 2.0) database file.");
 
     printf("\nFINISHED.\n\n");
 
@@ -206,7 +209,7 @@ bool CRebuildDatabase::download()
         { "http://www.bricklink.com/btpriceguide.asp",    pgQuery('I'),   "alltimepg_I.txt" },
         { "http://www.bricklink.com/btpriceguide.asp",    pgQuery('O'),   "alltimepg_O.txt" },
         { "http://www.bricklink.com/btinvlist.asp",       QList<QPair<QString, QString> >(), "btinvlist.txt"   },
-        { "http://www.bricklink.com/catalogColors.asp",   QList<QPair<QString, QString> >(), "colorguide.html" },
+        // { "http://www.bricklink.com/catalogColors.asp",   QList<QPair<QString, QString> >(), "colorguide.html" },
 
         { "http://www.peeron.com/inv/colors",             QList<QPair<QString, QString> >(), "peeron_colors.html" },
 
@@ -218,8 +221,11 @@ bool CRebuildDatabase::download()
     m_downloads_failed = 0;
 
     { // workaround for U type
-        QFile uf(path + "items_U.txt");
-        uf.open(QIODevice::WriteOnly);
+        QFile uif(path + "items_U.txt");
+        uif.open(QIODevice::WriteOnly);
+
+        QFile upf(path + "alltimepg_U.txt");
+        upf.open(QIODevice::WriteOnly);
     }
 
     for (tptr = table; tptr->m_url; tptr++) {

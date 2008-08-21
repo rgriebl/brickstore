@@ -21,6 +21,47 @@
 #include "bricklink.h"
 
 
+BrickLink::AllTimePriceGuide BrickLink::Core::allTimePriceGuide(const Item *item, const Color *color) const
+{
+    static AllTimePriceGuide none = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+    if (!item || !color)
+        return none;
+
+    quint32 id = (quint32(item->index() + 1) & 0x000fffff) | (quint32(color->id()) << 20);
+
+    const alltimepg_record *ptr = reinterpret_cast<const alltimepg_record *>(m_alltime_pg.data());
+
+    while (ptr->m_id && ptr->m_id != id) {
+        int off = ptr->m_new_qty ? ptr->m_new_qty == 1 ? 1 : 3 * ptr->m_new_qty : 0;
+        off += (ptr->m_used_qty ? ptr->m_used_qty == 1 ? 1 : 3 * ptr->m_used_qty : 0);
+
+        ptr = reinterpret_cast<const alltimepg_record *>(reinterpret_cast<const char *>(ptr) + sizeof(alltimepg_record) + off * sizeof(float));
+    }
+
+    if (ptr->m_id) {
+        AllTimePriceGuide pg = none;
+        quint16 q[2] = {ptr->m_new_qty, ptr->m_used_qty};
+        int index = 0;
+
+        for (int i = 0; i < 2; i++) {
+            pg.condition[i].quantity = q[i];
+            if (q[i] == 1) {
+                pg.condition[i].minPrice = pg.condition[i].avgPrice = pg.condition[i].maxPrice = ptr->m_prices[index++];
+            }
+            else if (q[i] > 1) {
+                pg.condition[i].minPrice = ptr->m_prices[index++];
+                pg.condition[i].avgPrice = ptr->m_prices[index++];
+                pg.condition[i].maxPrice = ptr->m_prices[index++];
+            }
+        }
+        return pg;
+    }
+    else
+        return none;
+}
+
+
 namespace {
 
 struct keyword {

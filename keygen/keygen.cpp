@@ -11,10 +11,15 @@
 #include <QToolButton>
 #include <QDialog>
 
-QString privkey;
+#ifndef BS_REGKEY
+#error BS_REGKEY is not defined
+#endif
+
+#define XSTR(a) #a
+#define STR(a) XSTR(a)
 
 
-QString generateKey(const QString &name, const QString &privkey)
+QString generateKey(const QString &name)
 {
     if (name.isEmpty())
         return QString();
@@ -22,8 +27,7 @@ QString generateKey(const QString &name, const QString &privkey)
     QByteArray src;
     QDataStream ss(&src, QIODevice::WriteOnly);
     ss.setByteOrder(QDataStream::LittleEndian);
-    ss << (privkey + name);
-    
+    ss << (QString(STR(BS_REGKEY)) + name);
 
     QCryptographicHash hash(QCryptographicHash::Sha1);
     hash.addData(src.data() + 4, src.size() - 4);
@@ -78,11 +82,12 @@ public:
         copy->setAutoRaise(true);
         QObject::connect(copy, SIGNAL(clicked()), this, SLOT(selectAndCopy()));
         grid->addWidget(copy, 1, 2);
+        m_name->setFocus();
     }
 public slots:
     void updateKey(const QString &name)
     {
-        m_key->setText(generateKey(name, privkey));
+        m_key->setText(generateKey(name));
     }
     
     void selectAndCopy()
@@ -105,39 +110,29 @@ int gui_main(int argc, char **argv)
     return a.exec();
 }
 
+
 int main(int argc, char **argv)
 {
-    if (argc >= 2) {
-        QString name = argv [1];
+    if (argc == 1 || (argc == 2 && !strcmp(argv[1], "--gui")))
+        return gui_main(argc, argv);
 
-        for (int i = 2; i < argc; i++) {
-            name += " ";
-            name += argv [i];
-        }
+    QString name = argv [1];
 
-        QFile f(".private-key");
-        if (f.open(QIODevice::ReadOnly)) {
-            QTextStream ts(&f);
-            ts >> privkey;
+    for (int i = 2; i < argc; i++) {
+        name += " ";
+        name += argv [i];
+    }
 
-            if (name == "--gui")
-                return gui_main(argc, argv);
+    QString regkey = generateKey(name);
 
-            QString regkey = generateKey(name, privkey);
+    if (regkey.length() == 14) {
+        printf("%s\n", qPrintable(regkey));
 
-            if (regkey.length() == 14) {
-                printf("%s\n", qPrintable(regkey));
-
-                return 0;
-            }
-            else
-                printf("Could not generate key.\n");
-        }
-        else
-            printf("Could not read .private-key\n");
+        return 0;
     }
     else
-        printf("Usage: %s <name>\n", argv[0]);
+        printf("Could not generate key.\n");
+
     return 1;
 }
 

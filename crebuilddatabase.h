@@ -25,7 +25,7 @@ class CRebuildDatabase : public QObject {
     Q_OBJECT
 
 public:
-    CRebuildDatabase(const QString &output);
+    CRebuildDatabase();
     ~CRebuildDatabase();
 
     int exec();
@@ -41,7 +41,6 @@ private:
 
 private:
     CTransfer *m_trans;
-    QString m_output;
     QString m_error;
     int m_downloads_in_progress;
     int m_downloads_failed;

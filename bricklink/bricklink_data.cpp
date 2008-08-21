@@ -427,9 +427,6 @@ BrickLink::InvItem::InvItem(const Color *color, const Item *item)
 {
     m_item = item;
     m_color = color;
-
-    m_custom_picture = 0;
-
     m_status = Include;
     m_condition = New;
     m_retain = m_stockroom = false;
@@ -457,8 +454,6 @@ BrickLink::InvItem::InvItem(const Color *color, const Item *item)
 BrickLink::InvItem::InvItem(const BrickLink::InvItem &copy)
 {
     m_incomplete = 0;
-    m_custom_picture = 0;
-
     *this = copy;
 }
 
@@ -466,11 +461,6 @@ BrickLink::InvItem &BrickLink::InvItem::operator = (const InvItem &copy)
 {
     delete m_incomplete;
     m_incomplete = 0;
-
-    if (m_custom_picture) {
-        m_custom_picture->release();
-        m_custom_picture = 0;
-    }
 
     m_item           = copy.m_item;
     m_color          = copy.m_color;
@@ -484,7 +474,6 @@ BrickLink::InvItem &BrickLink::InvItem::operator = (const InvItem &copy)
     m_comments       = copy.m_comments;
     m_remarks        = copy.m_remarks;
     m_reserved       = copy.m_reserved;
-    m_custom_picture_url = copy.m_custom_picture_url;
     m_quantity       = copy.m_quantity;
     m_bulk_quantity  = copy.m_bulk_quantity;
     m_tier_quantity [0] = copy.m_tier_quantity [0];
@@ -513,9 +502,6 @@ BrickLink::InvItem &BrickLink::InvItem::operator = (const InvItem &copy)
         m_incomplete->m_color_name    = copy.m_incomplete->m_color_name;
     }
 
-    if (m_custom_picture)
-        m_custom_picture->addRef();
-
     return *this;
 }
 
@@ -524,7 +510,6 @@ bool BrickLink::InvItem::operator == (const InvItem &cmp) const
     bool same = true;
 
     same &= (m_incomplete         == cmp.m_incomplete);
-    same &= (m_custom_picture     == cmp.m_custom_picture);
     same &= (m_item               == cmp.m_item);
     same &= (m_color              == cmp.m_color);
     same &= (m_status             == cmp.m_status);
@@ -534,7 +519,6 @@ bool BrickLink::InvItem::operator == (const InvItem &cmp) const
     same &= (m_comments           == cmp.m_comments);
     same &= (m_remarks            == cmp.m_remarks);
     same &= (m_reserved           == cmp.m_reserved);
-    same &= (m_custom_picture_url == cmp.m_custom_picture_url);
     same &= (m_quantity           == cmp.m_quantity);
     same &= (m_bulk_quantity      == cmp.m_bulk_quantity);
     same &= (m_tier_quantity [0]  == cmp.m_tier_quantity [0]);
@@ -556,9 +540,6 @@ bool BrickLink::InvItem::operator == (const InvItem &cmp) const
 BrickLink::InvItem::~InvItem()
 {
     delete m_incomplete;
-
-    if (m_custom_picture)
-        m_custom_picture->release();
 }
 
 bool BrickLink::InvItem::mergeFrom(const InvItem &from, bool prefer_from)
@@ -611,8 +592,6 @@ bool BrickLink::InvItem::mergeFrom(const InvItem &from, bool prefer_from)
 
     if (!from.reserved().isEmpty() && (reserved().isEmpty() || prefer_from))
         setReserved(from.reserved());
-    if (!from.customPictureUrl().isEmpty() && (customPictureUrl().isEmpty() || prefer_from))
-        setCustomPictureUrl(from.customPictureUrl());
 
     if (prefer_from) {
         setStatus(from.status());
@@ -635,7 +614,7 @@ QDataStream &operator << (QDataStream &ds, const BrickLink::InvItem &ii)
     ds << qint8(ii.itemType() ? ii.itemType()->id() : -1);
     ds << qint32(ii.color() ? ii.color()->id() : 0xffffffff);
 
-    ds << qint32(ii.status()) << qint32(ii.condition()) << ii.comments() << ii.remarks() << ii.customPictureUrl()
+    ds << qint32(ii.status()) << qint32(ii.condition()) << ii.comments() << ii.remarks()
        << ii.quantity() << ii.bulkQuantity() << ii.tierQuantity(0) << ii.tierQuantity(1) << ii.tierQuantity(2)
        << ii.price() << ii.tierPrice(0) << ii.tierPrice(1) << ii.tierPrice(2) << ii.sale()
        << qint8(ii.retain() ? 1 : 0) << qint8(ii.stockroom() ? 1 : 0) << ii.m_reserved << quint32(ii.m_lot_id)
@@ -661,7 +640,7 @@ QDataStream &operator >> (QDataStream &ds, BrickLink::InvItem &ii)
 
     qint32 status = 0, cond = 0;
 
-    ds >> status >> cond >> ii.m_comments >> ii.m_remarks >> ii.m_custom_picture_url
+    ds >> status >> cond >> ii.m_comments >> ii.m_remarks
        >> ii.m_quantity >> ii.m_bulk_quantity >> ii.m_tier_quantity [0] >> ii.m_tier_quantity [1] >> ii.m_tier_quantity [2]
        >> ii.m_price >> ii.m_tier_price [0] >> ii.m_tier_price [1] >> ii.m_tier_price [2] >> ii.m_sale
        >> retain >> stockroom >> ii.m_reserved >> ii.m_lot_id
@@ -671,11 +650,6 @@ QDataStream &operator >> (QDataStream &ds, BrickLink::InvItem &ii)
     ii.m_condition = (BrickLink::Condition) cond;
     ii.m_retain = (retain);
     ii.m_stockroom = (stockroom);
-
-    if (ii.m_custom_picture) {
-        ii.m_custom_picture->release();
-        ii.m_custom_picture = 0;
-    }
 
     return ds;
 }

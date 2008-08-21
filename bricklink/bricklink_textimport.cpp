@@ -290,11 +290,10 @@ bool BrickLink::TextImport::import(const QString &path)
 {
     bool ok = true;
 
-    ok &= readDB <> (path + "colors.txt",     m_colors);
-    ok &= readDB <> (path + "categories.txt", m_categories);
-    ok &= readDB <> (path + "itemtypes.txt",  m_item_types);
+    ok &= readDB<>(path + "colors.txt",     m_colors);
+    ok &= readDB<>(path + "categories.txt", m_categories);
+    ok &= readDB<>(path + "itemtypes.txt",  m_item_types);
 
-    ok &= readColorGuide(path + "colorguide.html");
     ok &= readPeeronColors(path + "peeron_colors.html");
 
     // speed up loading (exactly 47976 items on 05.12.2007)
@@ -302,7 +301,7 @@ bool BrickLink::TextImport::import(const QString &path)
 
     foreach(const ItemType *itt, m_item_types) {
         m_current_item_type = itt;
-        ok &= readDB <> (path + "items_" + char(itt->m_id) + ".txt", m_items);
+        ok &= readDB<>(path + "items_" + char(itt->m_id) + ".txt", m_items);
     }
     m_current_item_type = 0;
 
@@ -323,6 +322,13 @@ bool BrickLink::TextImport::import(const QString &path)
 
     btinvlist_dummy btinvlist_dummy;
     ok &= readDB <> (path + "btinvlist.txt", btinvlist_dummy);
+
+    btpriceguide_dummy btpriceguide_dummy;
+    foreach(const ItemType *itt, m_item_types) {
+        m_current_item_type = itt;
+        ok &= readDB<>(path + "alltimepg_" + char(itt->m_id) + ".txt", btpriceguide_dummy);
+    }
+    m_current_item_type = 0;
 
     if (!ok)
         qWarning() << "Error importing databases!";
@@ -394,6 +400,37 @@ bool BrickLink::TextImport::readDB_processLine(btinvlist_dummy & /*dummy*/, uint
 }
 
 
+bool BrickLink::TextImport::readDB_processLine(btpriceguide_dummy & /*dummy*/, uint count, const char **strs)
+{
+    if (count < 10 || !strs[0][0] || !strs[1][0])
+        return false;
+
+    const Item *itm = findItem(m_current_item_type->id(), strs[0]);
+    const Color *col = m_colors.value(strtol(strs[1], 0, 10));
+
+    if (itm && col) {
+        AllTimePriceGuide pg;
+        pg.item = itm;
+        pg.color = col;
+        pg.condition[New].minPrice = money_t::fromCString(strs[2]);
+        pg.condition[New].avgPrice = money_t::fromCString(strs[3]);
+        pg.condition[New].maxPrice = money_t::fromCString(strs[4]);
+        pg.condition[New].quantity = strtol(strs[5], 0, 10);
+        pg.condition[Used].minPrice = money_t::fromCString(strs[6]);
+        pg.condition[Used].avgPrice = money_t::fromCString(strs[7]);
+        pg.condition[Used].maxPrice = money_t::fromCString(strs[8]);
+        pg.condition[Used].quantity = strtol(strs[9], 0, 10);
+
+        if (pg.condition[New].quantity || pg.condition[Used].quantity)
+            m_alltime_pg_list << pg;
+    }
+    else
+        qWarning() << "WARNING: parsing btpriceguide: item " << strs[0] << " [" << m_current_item_type->id() << "] in color " << strs[1] << " doesn't exist!";
+
+    return true;
+}
+
+
 template <typename C> bool BrickLink::TextImport::readDB(const QString &name, C &container)
 {
     // plain C is way faster than Qt on top of C++
@@ -445,32 +482,6 @@ template <typename C> bool BrickLink::TextImport::readDB(const QString &name, C 
         return true;
     }
     qWarning().nospace() <<  "ERROR: could not open file \"" << name << "\"";
-    return false;
-}
-
-bool BrickLink::TextImport::readColorGuide(const QString &name)
-{
-    QFile f(name);
-    if (f.open(QIODevice::ReadOnly)) {
-        QTextStream ts(&f);
-        QString s = ts.readAll();
-        f.close();
-
-        QRegExp rxp(">([0-9]+)&nbsp;</TD><TD[ ]+BGCOLOR=\"#?([a-fA-F0-9]{6,6})\">");
-
-        int pos = 0;
-
-        while ((pos = rxp.indexIn(s, pos)) != -1) {
-            int id = rxp.cap(1).toInt();
-
-            Color *colp = const_cast<Color *>(m_colors.value(id));
-            if (colp)
-                colp->m_color = QColor("#" + rxp.cap(2));
-
-            pos += rxp.matchedLength();
-        }
-        return true;
-    }
     return false;
 }
 
@@ -595,6 +606,7 @@ bool BrickLink::TextImport::readInventory(const QString &path, const Item *item)
 void BrickLink::TextImport::exportTo(Core *bl)
 {
     bl->setDatabase_Basics(m_colors, m_categories, m_item_types, m_items);
+    bl->setDatabase_AllTimePG(m_alltime_pg_list);
 }
 
 void BrickLink::TextImport::exportInventoriesTo(Core *bl)

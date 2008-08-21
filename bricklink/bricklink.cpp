@@ -15,6 +15,7 @@
 #include <cstdlib>
 
 #include <QFile>
+#include <QBuffer>
 #include <QFileInfo>
 #include <QDir>
 #include <QTextStream>
@@ -32,8 +33,285 @@
 #include "stopwatch.h"
 #include "bricklink.h"
 
-#define DEFAULT_DATABASE_VERSION  0
-#define DEFAULT_DATABASE_NAME     "database-v%1"
+
+
+
+
+
+
+/*
+32 ID
+32 VERSION
+64 SIZE
+
+SIZE BYTES DATA
+
+PAD WITH 0 TO SIZE %16
+
+64 SIZE
+32 VERSION
+32 ID
+*/
+
+
+#include <QStack>
+
+#define ChunkId(a,b,c,d)  quint32((quint32(d & 0x7f) << 24) | (quint32(c & 0x7f) << 16) | (quint32(b & 0x7f) << 8) | quint32(a & 0x7f))
+
+class ChunkReader {
+public:
+    ChunkReader(QIODevice *dev, QDataStream::ByteOrder bo);
+    ~ChunkReader();
+
+    QDataStream &dataStream();
+
+    bool startChunk();
+    bool endChunk();
+    bool skipChunk();
+
+    quint32 chunkId() const;
+    quint32 chunkVersion() const;
+    quint64 chunkSize() const;
+
+private:
+    struct chunk_info {
+        quint32 id;
+        quint32 version;
+        quint64 startpos;
+        quint64 size;
+    };
+
+    QStack<chunk_info> m_chunks;
+    QIODevice * m_file;
+    QDataStream m_stream;
+};
+
+ChunkReader::ChunkReader(QIODevice *dev, QDataStream::ByteOrder bo)
+    : m_file(0), m_stream(0)
+{
+    if (dev->isSequential()) {
+        qWarning("ChunkReader: device does not support direct access!");
+        return;
+    }
+
+    if (!dev->isOpen() || !dev->isReadable()) {
+        qWarning("ChunkReader: device is not open and readable!");
+        return;
+    }
+    m_file = dev;
+    m_stream.setDevice(dev);
+    m_stream.setByteOrder(bo);
+}
+
+ChunkReader::~ChunkReader()
+{
+}
+
+QDataStream &ChunkReader::dataStream()
+{
+    static QDataStream nullstream;
+
+    if (!m_file)
+        return nullstream;
+    return m_stream;
+}
+
+bool ChunkReader::startChunk()
+{
+    if (!m_file)
+        return false;
+
+    if (!m_chunks.isEmpty()) {
+        chunk_info parent = m_chunks.top();
+
+        if (m_file->pos() >= qint64(parent.startpos + parent.size))
+            return false;
+    }
+
+    chunk_info ci;
+
+    m_stream >> ci.id >> ci.version >> ci.size;
+    if (m_stream.status() == QDataStream::Ok) {
+        ci.startpos = m_file->pos();
+        m_chunks.push(ci);
+        return true;
+    }
+    return false;
+}
+
+bool ChunkReader::skipChunk()
+{
+    if (!m_file || m_chunks.isEmpty())
+        return false;
+
+    chunk_info ci = m_chunks.top();
+
+    m_stream.skipRawData(ci.size);
+    return endChunk();
+}
+
+bool ChunkReader::endChunk()
+{
+    if (!m_file || m_chunks.isEmpty())
+        return false;
+
+    chunk_info ci = m_chunks.pop();
+
+    quint64 endpos = m_file->pos();
+    if (ci.startpos + ci.size != endpos) {
+        qWarning("ChunkReader: called endChunk() on a position %d bytes from the chunk end.", ci.startpos + ci.size - endpos);
+        m_file->seek(ci.startpos + ci.size);
+    }
+
+    quint64 padsize = ci.size % 16;
+    if (padsize)
+        m_stream.skipRawData(padsize);
+
+    chunk_info ciend;
+    m_stream >> ciend.size >> ciend.version >> ciend.id;
+    return (m_stream.status() == QDataStream::Ok) && !memcmp(&ci, &ciend, sizeof(ci));
+}
+
+quint32 ChunkReader::chunkId() const
+{
+    if (m_chunks.isEmpty())
+        return 0;
+    return m_chunks.top().id;
+}
+
+quint32 ChunkReader::chunkVersion() const
+{
+    if (m_chunks.isEmpty())
+        return 0;
+    return m_chunks.top().version;
+}
+
+quint64 ChunkReader::chunkSize() const
+{
+    if (m_chunks.isEmpty())
+        return 0;
+    return m_chunks.top().size;
+}
+
+
+/*
+    QFile f(...);
+    if (f.open(QIODevice::WriteOnly)) {
+        ChunkWriter cw(&f);
+        QDataStream &ds;
+
+        ds = cw.startChunk('BSDB'L, 1);
+        ds << QString("INFO TEXT");
+        ds = cw.startChunk('COLO', 1);
+        cw.endChunk();
+        cw.endChunk();
+        f.close();
+    }
+  */
+
+class ChunkWriter {
+public:
+    ChunkWriter(QIODevice *dev, QDataStream::ByteOrder bo);
+    ~ChunkWriter();
+
+    QDataStream &dataStream();
+
+    bool startChunk(quint32 id, quint32 version = 0);
+    bool endChunk();
+
+private:
+    struct chunk_info {
+        quint32 id;
+        quint32 version;
+        quint64 startpos;
+    };
+
+    QStack<chunk_info> m_chunks;
+    QIODevice * m_file;
+    QDataStream m_stream;
+};
+
+ChunkWriter::ChunkWriter(QIODevice *dev, QDataStream::ByteOrder bo)
+    : m_file(0), m_stream(0)
+{
+    if (dev->isSequential()) {
+        qWarning("ChunkWriter: device does not support direct access!");
+        return;
+    }
+
+    if (!dev->isOpen() || !dev->isWritable()) {
+        qWarning("ChunkWriter: device is not yet open!");
+        return;
+    }
+    m_file = dev;
+    m_stream.setDevice(dev);
+    m_stream.setByteOrder(bo);
+}
+
+ChunkWriter::~ChunkWriter()
+{
+    while (!m_chunks.isEmpty()) {
+        if (m_file && m_file->isOpen())
+            endChunk();
+        else
+            qWarning("ChunkWriter: file was closed before ending chunk %lc", m_chunks.pop().id);
+    }
+}
+
+QDataStream &ChunkWriter::dataStream()
+{
+    static QDataStream nullstream;
+
+    if (!m_file)
+        return nullstream;
+    return m_stream;
+}
+
+bool ChunkWriter::startChunk(quint32 id, quint32 version)
+{
+    m_stream << id << version << quint64(0);
+
+    chunk_info ci;
+    ci.id = id;
+    ci.version = version;
+    ci.startpos = m_file->pos();
+    m_chunks.push(ci);
+
+    return (m_stream.status() == QDataStream::Ok);
+}
+
+bool ChunkWriter::endChunk()
+{
+    if (!m_file || m_chunks.isEmpty())
+        return false;
+
+    chunk_info ci = m_chunks.pop();
+    quint64 endpos = m_file->pos();
+    m_file->seek(ci.startpos - sizeof(quint64));
+    m_stream << quint64(endpos - ci.startpos);
+    m_file->seek(endpos);
+
+    static const char padbytes[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    quint64 padsize = (endpos - ci.startpos) % 16;
+    if (padsize)
+        m_stream.writeRawData(padbytes, padsize);
+
+    m_stream << quint64(endpos - ci.startpos) << ci.version << ci.id;
+
+    return (m_stream.status() == QDataStream::Ok);
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 QUrl BrickLink::Core::url(UrlList u, const void *opt, const void *opt2)
@@ -204,45 +482,68 @@ const QPixmap *BrickLink::Core::colorImage(const Color *col, int w, int h) const
 
     if (!pix) {
         QColor c = col->color();
-        bool is_valid = c.isValid();
 
         pix = new QPixmap(w, h);
         QPainter p(pix);
         QRect r = pix->rect();
 
-        if (is_valid) {
-            QBrush brush;
+        QBrush brush;
 
-            if (col->isGlitter()) {
-                brush = QBrush(Utility::contrastColor(c, 0.25f), Qt::Dense6Pattern);
-            }
-            else if (col->isSpeckle()) {
-                brush = QBrush(Utility::contrastColor(c, 0.20f), Qt::Dense7Pattern);
-            }
-            else if (col->isMetallic()) {
-                QColor c2 = Utility::gradientColor(c, Qt::black);
+        if (col->isGlitter()) {
+            brush = QBrush(Utility::contrastColor(c, 0.25f), Qt::Dense6Pattern);
+        }
+        else if (col->isSpeckle()) {
+            // hack for speckled colors
+            QColor c2;
 
-                QLinearGradient gradient(0, 0, 0, r.height());
-                gradient.setColorAt(0,   c2);
-                gradient.setColorAt(0.3, c);
-                gradient.setColorAt(0.7, c);
-                gradient.setColorAt(1,   c2);
-                brush = gradient;
-            }
-            else if (col->isChrome()) {
-                QColor c2 = Utility::gradientColor(c, Qt::black);
+            if (!c.isValid()) {
+                QByteArray name = col->name();
+                int dash = name.indexOf('-');
+                if (dash > 0) {
+                    QByteArray basename = name.mid(8, dash - 8);
+                    if (basename.startsWith("DB"))
+                        basename.replace(0, 2, "Dark Bluish ");
+                    QByteArray speckname = name.mid(dash + 1);
 
-                QLinearGradient gradient(0, 0, r.width(), 0);
-                gradient.setColorAt(0,   c2);
-                gradient.setColorAt(0.3, c);
-                gradient.setColorAt(0.7, c);
-                gradient.setColorAt(1,   c2);
-                brush = gradient;
-            }
+                    const BrickLink::Color *basec = colorFromName(basename.constData());
+                    const BrickLink::Color *speckc = colorFromName(speckname.constData());
 
+                    if (basec)
+                        c = basec->color();
+                    if (speckc)
+                        c2 = speckc->color();
+                }
+            }
+            if (c.isValid()) {
+                if (!c2.isValid()) // fake
+                    c2 = Utility::contrastColor(c, 0.20f);
+                brush = QBrush(c2, Qt::Dense7Pattern);
+            }
+        }
+        else if (col->isMetallic()) {
+            QColor c2 = Utility::gradientColor(c, Qt::black);
+
+            QLinearGradient gradient(0, 0, 0, r.height());
+            gradient.setColorAt(0,   c2);
+            gradient.setColorAt(0.3, c);
+            gradient.setColorAt(0.7, c);
+            gradient.setColorAt(1,   c2);
+            brush = gradient;
+        }
+        else if (col->isChrome()) {
+            QColor c2 = Utility::gradientColor(c, Qt::black);
+
+            QLinearGradient gradient(0, 0, r.width(), 0);
+            gradient.setColorAt(0,   c2);
+            gradient.setColorAt(0.3, c);
+            gradient.setColorAt(0.7, c);
+            gradient.setColorAt(1,   c2);
+            brush = gradient;
+        }
+
+        if (c.isValid()) {
             p.fillRect(r, c);
             p.fillRect(r, brush);
-
         }
         else {
             p.fillRect(0, 0, w, h, Qt::white);
@@ -449,6 +750,18 @@ const BrickLink::Color *BrickLink::Core::color(uint id) const
     return m_colors.value(id);
 }
 
+const BrickLink::Color *BrickLink::Core::colorFromName(const char *name) const
+{
+    if (!name || !name[0])
+        return 0;
+
+    foreach(const Color *col, m_colors) {
+        if (!qstricmp(col->name(), name))
+            return col;
+    }
+    return 0;
+}
+
 const BrickLink::Color *BrickLink::Core::colorFromPeeronName(const char *peeron_name) const
 {
     if (!peeron_name || !peeron_name[0])
@@ -508,9 +821,9 @@ void BrickLink::Core::cancelPriceGuideTransfers()
     m_pg_transfer.abortAllJobs();
 }
 
-QString BrickLink::Core::defaultDatabaseName() const
+QString BrickLink::Core::defaultDatabaseName(DatabaseVersion version) const
 {
-    return QString(DEFAULT_DATABASE_NAME).arg(DEFAULT_DATABASE_VERSION);
+    return QString("database-v%1").arg(version);
 }
 
 bool BrickLink::Core::readDatabase(const QString &fname)
@@ -535,7 +848,7 @@ bool BrickLink::Core::readDatabase(const QString &fname)
     m_item_types.clear();
     m_categories.clear();
     m_items.clear();
-
+    m_alltime_pg.clear();
 
     bool result = false;
     stopwatch *sw = 0; //new stopwatch("BrickLink::Core::readDatabase()");
@@ -546,6 +859,83 @@ bool BrickLink::Core::readDatabase(const QString &fname)
 
         if (data) {
             QByteArray ba = QByteArray::fromRawData(data, f.size());
+#if 1
+            QBuffer buf(&ba);
+            buf.open(QIODevice::ReadOnly);
+
+            ChunkReader cr(&buf, QDataStream::LittleEndian);
+            QDataStream &ds = cr.dataStream();
+
+            if (cr.startChunk() && cr.chunkId() == ChunkId('B','S','D','B') && cr.chunkVersion() == 1) {
+                while (result && cr.startChunk()) {
+                    switch (cr.chunkId() | quint64(cr.chunkVersion()) << 32) {
+                        case ChunkId('C','O','L',' ') | 1ULL << 32: {
+                            quint32 colc = 0;
+                            ds >> colc;
+
+                            for (quint32 i = colc; i; i--) {
+                                Color *col = new Color();
+                                ds >> col;
+                                m_colors.insert(col->id(), col);
+                            }
+                            break;
+                        }
+                        case ChunkId('C','A','T',' ') | 1ULL << 32: {
+                            quint32 catc = 0;
+                            ds >> catc;
+
+                            for (quint32 i = catc; i; i--) {
+                                Category *cat = new Category();
+                                ds >> cat;
+                                m_categories.insert(cat->id(), cat);
+                            }
+                            break;
+                        }
+                        case ChunkId('T','Y','P','E') | 1ULL << 32: {
+                            quint32 ittc = 0;
+                            ds >> ittc;
+
+                            for (quint32 i = ittc; i; i--) {
+                                ItemType *itt = new ItemType();
+                                ds >> itt;
+                                m_item_types.insert(itt->id(), itt);
+                            }
+                            break;
+                        }
+                        case ChunkId('I','T','E','M') | 1ULL << 32: {
+                            quint32 itc = 0;
+                            ds >> itc;
+
+                            m_items.reserve(itc);
+                            for (quint32 i = itc; i; i--) {
+                                Item *item = new Item();
+                                ds >> item;
+                                m_items.append(item);
+                            }
+                            break;
+                        }
+                        case ChunkId('A','T','P','G') | 1ULL << 32: {
+                            quint32 pgc = 0;
+                            ds >> pgc;
+
+                            m_alltime_pg.reserve(pgc);
+                            ds.readRawData(m_alltime_pg.data(), pgc);
+                            break;
+                        }
+                        default: {
+                            if (!cr.skipChunk())
+                                goto out;
+                            break;
+                        }
+                    }
+                    if (!cr.endChunk())
+                        goto out;
+                }
+                if (!cr.endChunk())
+                    goto out;
+            }
+
+#else
             QDataStream ds(ba);
 
             ds.setVersion(QDataStream::Qt_3_3);
@@ -603,27 +993,33 @@ bool BrickLink::Core::readDatabase(const QString &fname)
             ds >> allc >> magic;
 
             if ((allc == (colc + ittc + catc + itc)) && (magic == quint32(0xb91c5703))) {
-                delete sw;
+                result = true;
+            }
+#endif
+        }
+    }
+
+out:
+    if (result) {
+        delete sw;
 #ifdef _MSC_VER
 #define PF_SIZE_T   "I"
 #else
 #define PF_SIZE_T   "z"
 #endif
-                qDebug("Color: %8u  (%11" PF_SIZE_T "u bytes)", m_colors.count(),     m_colors.count()     * (sizeof(Color)    + 20));
-                qDebug("Types: %8u  (%11" PF_SIZE_T "u bytes)", m_item_types.count(), m_item_types.count() * (sizeof(ItemType) + 20));
-                qDebug("Cats : %8u  (%11" PF_SIZE_T "u bytes)", m_categories.count(), m_categories.count() * (sizeof(Category) + 20));
-                qDebug("Items: %8u  (%11" PF_SIZE_T "u bytes)", m_items.count(),      m_items.count()      * (sizeof(Item)     + 20));
+        qDebug("Color: %8u  (%11" PF_SIZE_T "u bytes)", m_colors.count(),     m_colors.count()     * (sizeof(Color)    + 20));
+        qDebug("Types: %8u  (%11" PF_SIZE_T "u bytes)", m_item_types.count(), m_item_types.count() * (sizeof(ItemType) + 20));
+        qDebug("Cats : %8u  (%11" PF_SIZE_T "u bytes)", m_categories.count(), m_categories.count() * (sizeof(Category) + 20));
+        qDebug("Items: %8u  (%11" PF_SIZE_T "u bytes)", m_items.count(),      m_items.count()      * (sizeof(Item)     + 20));
+        qDebug("Price:           (%11u bytes)",         m_alltime_pg.size() + 20);
 #undef PF_SIZE_T
-
-                result = true;
-            }
-        }
     }
-    if (!result) {
+    else {
         m_colors.clear();
         m_item_types.clear();
         m_categories.clear();
         m_items.clear();
+        m_alltime_pg.clear();
 
         qWarning("Error reading databases!");
     }
@@ -682,8 +1078,6 @@ BrickLink::InvItemList *BrickLink::Core::parseItemListXML(QDomElement root, Item
                     categoryid = val;
                 else if (tag == (hint == XMLHint_BrikTrak ? "TYPE" : "ITEMTYPE"))
                     itemtypeid = val;
-                else if (tag == "IMAGE")
-                    ii->setCustomPictureUrl(val);
                 else if (tag == "PRICE")
                     ii->setPrice(money_t::fromCString(val));
                 else if (tag == "BULK")
@@ -784,8 +1178,6 @@ BrickLink::InvItemList *BrickLink::Core::parseItemListXML(QDomElement root, Item
                     categoryname = val;
                 else if (tag == "ItemTypeName")
                     itemtypename = val;
-                else if (tag == "Image")
-                    ii->setCustomPictureUrl(val);
                 else if (tag == "Price")
                     ii->setPrice(money_t::fromCString(val));
                 else if (tag == "Bulk")
@@ -992,8 +1384,6 @@ QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint
             item.appendChild(doc.createElement("PRICE").appendChild(doc.createTextNode(ii->price().toCString())).parentNode());
             item.appendChild(doc.createElement("CONDITION").appendChild(doc.createTextNode((ii->condition() == New) ? "N" : "U")).parentNode());
 
-            if (!ii->customPictureUrl().isEmpty())
-                item.appendChild(doc.createElement("IMAGE").appendChild(doc.createTextNode(ii->customPictureUrl())).parentNode());
             if (ii->bulkQuantity() != 1)
                 item.appendChild(doc.createElement("BULK").appendChild(doc.createTextNode(QString::number(ii->bulkQuantity()))).parentNode());
             if (ii->sale())
@@ -1040,8 +1430,6 @@ QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint
             item.appendChild(doc.createElement("Price").appendChild(doc.createTextNode(ii->price().toCString())).parentNode());
             item.appendChild(doc.createElement("Condition").appendChild(doc.createTextNode((ii->condition() == New) ? "N" : "U")).parentNode());
 
-            if (!ii->customPictureUrl().isEmpty())
-                item.appendChild(doc.createElement("Image").appendChild(doc.createTextNode(ii->customPictureUrl())).parentNode());
             if (ii->bulkQuantity() != 1)
                 item.appendChild(doc.createElement("Bulk").appendChild(doc.createTextNode(QString::number(ii->bulkQuantity()))).parentNode());
             if (ii->sale())
@@ -1087,8 +1475,6 @@ QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint
             item.appendChild(doc.createElement("PRICE").appendChild(doc.createTextNode(ii->price().toCString())).parentNode());
             item.appendChild(doc.createElement("CONDITION").appendChild(doc.createTextNode((ii->condition() == New) ? "N" : "U")).parentNode());
 
-            if (!ii->customPictureUrl().isEmpty())
-                item.appendChild(doc.createElement("IMAGE").appendChild(doc.createTextNode(ii->customPictureUrl())).parentNode());
             if (ii->bulkQuantity() != 1)
                 item.appendChild(doc.createElement("BULK").appendChild(doc.createTextNode(QString::number(ii->bulkQuantity()))).parentNode());
             if (ii->sale())
@@ -1341,70 +1727,162 @@ void BrickLink::Core::setDatabase_Basics(const QHash<int, const Color *> &colors
     m_items      = items;
 }
 
-bool BrickLink::Core::writeDatabase(const QString &fname)
+uint _bytes_for_alltime_pg = 0;
+
+void BrickLink::Core::setDatabase_AllTimePG(const QList<AllTimePriceGuide> &list)
 {
-    QString filename = fname.isNull() ? dataPath() + defaultDatabaseName() : fname;
+    QMutexLocker lock(&m_corelock);
+
+    alltimepg_record *pg = reinterpret_cast<alltimepg_record *>(new char[sizeof(alltimepg_record) + 6*sizeof(float)]);
+
+    for (QList<AllTimePriceGuide>::const_iterator it = list.begin(); it != list.end(); ++it) {
+        int index = 0;
+
+        pg->m_item_index = it->item->index() + 1;
+        pg->m_color_id = it->color->id();
+        pg->m_new_qty = it->condition[New].quantity;
+        if (pg->m_new_qty) {
+            pg->m_prices[index++] = it->condition[New].minPrice.toDouble();
+            if (pg->m_new_qty > 1) {
+                pg->m_prices[index++] = it->condition[New].avgPrice.toDouble();
+                pg->m_prices[index++] = it->condition[New].maxPrice.toDouble();
+            }
+        }
+        pg->m_used_qty = it->condition[Used].quantity;
+        if (pg->m_used_qty) {
+            pg->m_prices[index++] = it->condition[Used].minPrice.toDouble();
+            if (pg->m_used_qty > 1) {
+                pg->m_prices[index++] = it->condition[Used].avgPrice.toDouble();
+                pg->m_prices[index++] = it->condition[Used].maxPrice.toDouble();
+            }
+        }
+
+        int olds = m_alltime_pg.size();
+        int news = sizeof(alltimepg_record) + sizeof(float) * index;
+
+        m_alltime_pg.resize(olds + news);
+        memcpy(m_alltime_pg.data() + olds, pg, news);
+    }
+    m_alltime_pg += QVector<char>(sizeof(quint32), 0);
+
+    _bytes_for_alltime_pg = m_alltime_pg.size();
+
+    delete pg;
+}
+
+bool BrickLink::Core::writeDatabase(const QString &filename, DatabaseVersion version)
+{
+    if (filename.isEmpty() || (version != BrickStore_1_1 && version != BrickStore_2_0))
+        return false;
 
     QMutexLocker lock(&m_corelock);
 
     QFile f(filename + ".new");
     if (f.open(QIODevice::WriteOnly)) {
-        QDataStream ds(&f);
-        ds.setVersion(QDataStream::Qt_3_3);
+        if (version == BrickStore_1_1) {
+            QDataStream ds(&f);
+            ds.setVersion(QDataStream::Qt_3_3);
 
-        ds << quint32(0 /*magic*/) << quint32(0 /*filesize*/) << quint32(DEFAULT_DATABASE_VERSION /*version*/);
+            ds << quint32(0 /*magic*/) << quint32(0 /*filesize*/) << quint32(BrickStore_1_1 /*version*/);
 
-        ds.setByteOrder(QDataStream::LittleEndian);
+            ds.setByteOrder(QDataStream::LittleEndian);
 
-        // colors
-        quint32 colc = m_colors.count();
-        ds << colc;
+            // colors
+            quint32 colc = m_colors.count();
+            ds << colc;
+            foreach(const Color *col, m_colors)
+                ds << col;
 
-        foreach(const Color *col, m_colors)
-        ds << col;
+            // categories
+            quint32 catc = m_categories.count();
+            ds << catc;
+            foreach(const Category *cat, m_categories)
+                ds << cat;
 
-        // categories
-        quint32 catc = m_categories.count();
-        ds << catc;
+            // types
+            quint32 ittc = m_item_types.count();
+            ds << ittc;
+            foreach(const ItemType *itt, m_item_types)
+                ds << itt;
 
-        foreach(const Category *cat, m_categories)
-        ds << cat;
+            // items
+            quint32 itc = m_items.count();
+            ds << itc;
+            const Item **itp = m_items.data();
+            for (quint32 i = itc; i; ++itp, --i)
+                ds << *itp;
 
-        // types
-        quint32 ittc = m_item_types.count();
-        ds << ittc;
+            ds << (colc + ittc + catc + itc);
+            ds << quint32(0xb91c5703);
 
-        foreach(const ItemType *itt, m_item_types)
-        ds << itt;
+            quint32 filesize = quint32(f.pos());
 
-        // items
-        quint32 itc = m_items.count();
-        ds << itc;
+            if (f.error() == QFile::NoError) {
+                f.close();
 
-        const Item **itp = m_items.data();
-        for (quint32 i = itc; i; itp++, i--)
-            ds << *itp;
+                if (f.open(QIODevice::ReadWrite)) {
+                    QDataStream ds2(&f);
+                    ds2 << quint32(0xb91c5703) << filesize;
 
-        ds << (colc + ittc + catc + itc);
-        ds << quint32(0xb91c5703);
+                    if (f.error() == QFile::NoError) {
+                        f.close();
 
-        quint32 filesize = quint32(f.pos());
+                        QString err = Utility::safeRename(filename);
 
-        if (f.error() == QFile::NoError) {
-            f.close();
-
-            if (f.open(QIODevice::ReadWrite)) {
-                QDataStream ds2(&f);
-                ds2 << quint32(0xb91c5703) << filesize;
-
-                if (f.error() == QFile::NoError) {
-                    f.close();
-
-                    QString err = Utility::safeRename(filename);
-
-                    if (err.isNull())
-                        return true;
+                        if (err.isNull())
+                            return true;
+                    }
                 }
+            }
+        }
+        else if (version == BrickStore_2_0) {
+            ChunkWriter cw(&f, QDataStream::LittleEndian);
+            QDataStream &ds = cw.dataStream();
+            bool ok = true;
+
+            ok &= cw.startChunk(ChunkId('B','S','D','B'), version);
+            ds << QString("INFO TEXT");
+
+            ok &= cw.startChunk(ChunkId('C','O','L',' '), version);
+            ds << m_colors.count();
+            foreach(const Color *col, m_colors)
+                ds << col;
+            ok &= cw.endChunk();
+
+            ok &= cw.startChunk(ChunkId('C','A','T',' '), version);
+            ds << m_categories.count();
+            foreach(const Category *cat, m_categories)
+                ds << cat;
+            ok &= cw.endChunk();
+
+            ok &= cw.startChunk(ChunkId('T','Y','P','E'), version);
+            ds << m_item_types.count();
+            foreach(const ItemType *itt, m_item_types)
+                ds << itt;
+            ok &= cw.endChunk();
+
+            ok &= cw.startChunk(ChunkId('I','T','E','M'), version);
+            quint32 itc = m_items.count();
+            ds << itc;
+            const Item **itp = m_items.data();
+            for (quint32 i = itc; i; ++itp, --i)
+                ds << *itp;
+            ok &= cw.endChunk();
+
+            ok &= cw.startChunk(ChunkId('A','T','P','G'), version);
+            ds << quint32(m_alltime_pg.size());
+            ds.writeRawData(m_alltime_pg.constData(), m_alltime_pg.size());
+            ok &= cw.endChunk();
+
+            ok &= cw.endChunk();
+
+            if (ok && f.error() == QFile::NoError) {
+                f.close();
+
+                QString err = Utility::safeRename(filename);
+
+                if (err.isNull())
+                    return true;
             }
         }
     }
@@ -1414,3 +1892,6 @@ bool BrickLink::Core::writeDatabase(const QString &fname)
     QFile::remove(filename + ".new");
     return false;
 }
+
+
+

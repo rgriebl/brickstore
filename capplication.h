@@ -24,7 +24,7 @@ class QTranslator;
 class CApplication : public QApplication {
     Q_OBJECT
 public:
-    CApplication(const char *rebuild_db_only, int argc, char **argv);
+    CApplication(bool rebuild_db_only, int argc, char **argv);
     virtual ~CApplication();
 
     void enableEmitOpenDocument(bool b = true);
@@ -62,7 +62,6 @@ private:
     QStringList m_files_to_open;
     bool m_enable_emit;
     bool m_has_alpha;
-    QString m_rebuild_db_only;
 
     QTranslator *m_trans_qt;
     QTranslator *m_trans_brickstore;

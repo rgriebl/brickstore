@@ -35,25 +35,24 @@
 
 int main(int argc, char **argv)
 {
-    const char *rebuild_db = 0;
+    bool rebuild_db = false;
     bool show_usage = false;
 
     if ((argc == 2) && (!strcmp(argv [1], "-h") || !strcmp(argv [1], "--help"))) {
         show_usage = true;
     }
     else if ((argc >= 2) && !strcmp(argv [1], "--rebuild-database")) {
-        if ((argc != 3) || !argv [2][0])
-            show_usage = true;
-        else
-            rebuild_db = argv [2];
+        rebuild_db = true;
+        show_usage = (argc != 2); // bail out if a db name is specified on the cmd line (BS1.1)
     }
 
     if (show_usage) {
 #if defined( Q_OS_WIN32 )
-        QMessageBox::information(0, "BrickStore", "<b>Usage:</b><br />brickstore.exe [&lt;files&gt;]<br /><br />brickstore.exe --rebuild-database &lt;dbname&gt;<br />");
+        QApplication a(argc, argv);
+        QMessageBox::information(0, "BrickStore", "<b>Usage:</b><br />brickstore.exe [&lt;files&gt;]<br /><br />brickstore.exe --rebuild-database<br />");
 #else
         printf("Usage: %s [<files>]\n", argv [0]);
-        printf("       %s --rebuild-database <dbname>\n", argv [0]);
+        printf("       %s --rebuild-database\n", argv [0]);
 #endif
         return 1;
     }

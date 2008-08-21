@@ -20,7 +20,8 @@ TEMPLATE     = app
 CONFIG      *= warn_on thread qt modeltest
 QT          *= core gui xml network
 
-TARGET       = brickstore
+TARGET            = BrickStore
+unix:!macx:TARGET = brickstore
 
 #TRANSLATIONS = translations/brickstore_de.ts \
 #               translations/brickstore_fr.ts \
@@ -44,9 +45,6 @@ dist_macx           = macx-bundle/create.sh macx-bundle/install-table.txt macx-b
 dist_win32          = win32-installer/*.wx?
 
 DISTFILES += $$res_images $$res_images_16 $$res_images_22 $$res_images_status $$res_images_sidebar $$res_translations $$res_print_templates $$dist_extra $$dist_scripts $$dist_unix_rpm $$dist_unix_deb $$dist_macx $$dist_win32
-
-MOC_DIR   = .moc
-UI_DIR    = .uic
 
 exists( .private-key ) {
   win32:cat_cmd = type
@@ -85,6 +83,8 @@ win32 {
 unix {
   system( scripts/update_version.sh $$RELEASE)
 
+  MOC_DIR     = .moc
+  UI_DIR      = .uic
   OBJECTS_DIR = .obj
 
   DEFINES += __USER__=\"$$(USER)\" __HOST__=\"$$system( hostname )\"

@@ -309,9 +309,6 @@ public:
     QString remarks() const            { return m_remarks; }
     void setRemarks(const QString &r)  { m_remarks = r; }
 
-    QString customPictureUrl() const   { return m_custom_picture_url; }
-    void setCustomPictureUrl(const QString &url) { m_custom_picture_url = url; }
-
     int quantity() const               { return m_quantity; }
     void setQuantity(int q)            { m_quantity = q; }
     int origQuantity() const           { return m_orig_quantity; }
@@ -352,8 +349,6 @@ public:
     bool counterPart() const           { return m_cpart; }
     void setCounterPart(bool b)        { m_cpart = b; }
 
-    Picture *customPicture() const     { return m_custom_picture; }
-
     struct Incomplete {
         QString m_item_id;
         QString m_item_name;
@@ -393,9 +388,6 @@ private:
     QString          m_comments;
     QString          m_remarks;
     QString          m_reserved;
-
-    QString          m_custom_picture_url;
-    Picture  *       m_custom_picture;
 
     int              m_quantity;
     int              m_bulk_quantity;
@@ -525,6 +517,18 @@ private:
     friend class Core;
 };
 
+// semi-internal class for TextImport -> Core communciation
+struct AllTimePriceGuide {
+    const BrickLink::Item * item;
+    const BrickLink::Color *color;
+    struct {
+        uint    quantity;
+        money_t minPrice;
+        money_t avgPrice;
+        money_t maxPrice;
+    } condition[ConditionCount];
+};
+
 class TextImport {
 public:
     TextImport();
@@ -553,6 +557,8 @@ private:
 
     struct btinvlist_dummy { };
     bool readDB_processLine(btinvlist_dummy &, uint count, const char **strs);
+    struct btpriceguide_dummy { };
+    bool readDB_processLine(btpriceguide_dummy &, uint count, const char **strs);
 
     bool readColorGuide(const QString &name);
     bool readPeeronColors(const QString &name);
@@ -569,8 +575,9 @@ private:
     QHash<int, const Category *> m_categories;
     QVector<const Item *>        m_items;
 
-    QHash<const Item *, AppearsIn> m_appears_in_hash;
-    QHash<const Item *, InvItemList>     m_consists_of_hash;
+    QHash<const Item *, AppearsIn>   m_appears_in_hash;
+    QHash<const Item *, InvItemList> m_consists_of_hash;
+    QList<AllTimePriceGuide>         m_alltime_pg_list;
 
     const ItemType *m_current_item_type;
 };
@@ -811,7 +818,6 @@ protected:
 };
 
 
-
 class Core : public QObject {
     Q_OBJECT
 public:
@@ -821,12 +827,19 @@ public:
 
     QUrl url(UrlList u, const void *opt = 0, const void *opt2 = 0);
 
+    enum DatabaseVersion {
+        BrickStore_1_1,
+        BrickStore_2_0,
+
+        Default = BrickStore_2_0
+    };
+
+    QString defaultDatabaseName(DatabaseVersion version = Default) const;
+
     QString dataPath() const;
     QString dataPath(const ItemType *) const;
     QString dataPath(const Item *) const;
     QString dataPath(const Item *, const Color *) const;
-
-    QString defaultDatabaseName() const;
 
     const QHash<int, const Color *>    &colors() const;
     const QHash<int, const Category *> &categories() const;
@@ -843,12 +856,15 @@ public:
     const QPixmap *colorImage(const Color *col, int w, int h) const;
 
     const Color *color(uint id) const;
+    const Color *colorFromName(const char *name) const;
     const Color *colorFromPeeronName(const char *peeron_name) const;
     const Color *colorFromLDrawId(int ldraw_id) const;
     const Category *category(uint id) const;
-    const Category *category(const char *name, int len = -1) const;
+    const Category *categoryFromName(const char *name, int len = -1) const;
     const ItemType *itemType(char id) const;
     const Item *item(char tid, const char *id) const;
+
+    AllTimePriceGuide allTimePriceGuide(const Item *item, const Color *color) const;
 
     PriceGuide *priceGuide(const Item *item, const Color *color, bool high_priority = false);
 
@@ -868,8 +884,8 @@ public:
     bool onlineStatus() const;
 
 public slots:
-    bool readDatabase(const QString &fname = QString());
-    bool writeDatabase(const QString &fname = QString());
+    bool readDatabase(const QString &filename = QString());
+    bool writeDatabase(const QString &filename, DatabaseVersion version);
 
     void updatePriceGuide(PriceGuide *pg, bool high_priority = false);
     void updatePicture(Picture *pic, bool high_priority = false);
@@ -908,6 +924,7 @@ private:
                             const QHash<int, const Category *> &categories,
                             const QHash<int, const ItemType *> &item_types,
                             const QVector<const Item *> &items);
+    void setDatabase_AllTimePG(const QList<AllTimePriceGuide> &list);
 
     friend class TextImport;
 
@@ -946,6 +963,28 @@ private:
     CThreadPool               m_pic_diskload;
 
     QCache<quint64, Picture>  m_pic_cache;
+
+    struct alltimepg_record {
+        union {
+            quint32 m_id;
+            struct {
+#if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
+                quint32 m_item_index  : 20;
+                quint32 m_color_id    : 12;
+#else
+                quint32 m_color_id    : 12;
+                quint32 m_item_index  : 20;
+#endif
+            };
+        };
+        quint16 m_new_qty;
+        quint16 m_used_qty;
+#pragma warning(disable:4200)
+        float   m_prices[];
+#pragma warning(default:4200)
+    };
+
+    QVector<char>  m_alltime_pg; // really alltimepg_records
 };
 
 inline Core *core() { return Core::inst(); }
