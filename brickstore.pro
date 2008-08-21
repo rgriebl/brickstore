@@ -29,22 +29,6 @@ unix:!macx:TARGET = brickstore
 
 RESOURCES     = brickstore.qrc
 
-res_images          = images/*.png images/*.jpg 
-res_images_16       = images/16x16/*.png
-res_images_22       = images/22x22/*.png
-res_images_status   = images/status/*.png
-res_images_sidebar  = images/sidebar/*.png
-res_translations    = translations/translations.xml $$TRANSLATIONS
-res_print_templates = print-templates/*.qs
-
-dist_extra          = version.h.in icon.png
-dist_scripts        = scripts/*.sh scripts/*.pl scripts/*.js
-dist_unix_rpm       = rpm/create.sh rpm/brickstore.spec
-dist_unix_deb       = debian/create.sh debian/rules
-dist_macx           = macx-bundle/create.sh macx-bundle/install-table.txt macx-bundle/*.plist macx-bundle/Resources/*.icns macx-bundle/Resources/??.lproj/*.plist
-dist_win32          = win32-installer/*.wx?
-
-DISTFILES += $$res_images $$res_images_16 $$res_images_22 $$res_images_status $$res_images_sidebar $$res_translations $$res_print_templates $$dist_extra $$dist_scripts $$dist_unix_rpm $$dist_unix_deb $$dist_macx $$dist_win32
 
 exists( .private-key ) {
   win32:cat_cmd = type
@@ -94,32 +78,8 @@ unix:!macx {
   CONFIG += x11
 
   isEmpty( PREFIX ):PREFIX = /usr/local
-
   target.path = $$PREFIX/bin
-  resources_i1.path  = $$PREFIX/share/brickstore/images
-  resources_i1.files = $$res_images
-  resources_i2.path  = $$PREFIX/share/brickstore/images/16x16
-  resources_i2.files = $$res_images_16
-  resources_i3.path  = $$PREFIX/share/brickstore/images/22x22
-  resources_i3.files = $$res_images_22
-  resources_i4.path  = $$PREFIX/share/brickstore/images/status
-  resources_i4.files = $$res_images_status
-  resources_i5.path  = $$PREFIX/share/brickstore/images/sidebar
-  resources_i5.files = $$res_images_sidebar
-
-  res_qm = $$res_translations
-  res_qm ~= s/.ts/.qm/g
-
-  resources_t1.path  = $$PREFIX/share/brickstore/translations
-  resources_t1.files = $$res_qm
-
-  resources_p1.path  = $$PREFIX/share/brickstore/print-templates
-  resources_p1.files = $$res_print_templates
-
-  # this does not work, since qmake loads the qt prl after processing this file...
-  #!contains( CONFIG, shared ):resources5.extra = cp $(QTDIR)/translations/qt_de.qm translations
-
-  INSTALLS += target resources_i1 resources_i2 resources_i3 resources_i4 resources_i5 resources_t1 resources_p1
+  INSTALLS += target
 }
 
 macx {
@@ -147,7 +107,6 @@ HEADERS += ccheckforupdates.h \
            cimport.h \
            cref.h \
            cupdatedatabase.h \
-           ctooltiphelper.h \
 	   
 
 XSOURCES = capplication \
@@ -178,8 +137,8 @@ for( src, XSOURCES ) {
   HEADERS += $${src}.h
   SOURCES += $${src}.cpp
 
-  exists($$PWD/$${src}_p.h) {
-    HEADERS += $$PWD/$${src}_p.h
+  exists($${src}_p.h) {
+    HEADERS += $${src}_p.h
   }
 }
 
@@ -188,3 +147,37 @@ for( form, XFORMS ) {
   SOURCES += d$${form}.cpp
   FORMS   += dialogs/$${form}.ui
 }
+
+DISTFILES += $$SOURCES $$HEADERS $$FORMS
+DISTFILES += brickstore.pro */*.pri
+
+res_images          = images/*.png images/*.jpg
+res_images_16       = images/16x16/*.png
+res_images_22       = images/22x22/*.png
+res_images_status   = images/status/*.png
+res_images_sidebar  = images/sidebar/*.png
+res_translations    = translations/translations.xml $$TRANSLATIONS
+res_print_templates = print-templates/*.qs
+
+dist_extra          = version.h.in icon.png
+dist_scripts        = scripts/*.sh scripts/*.pl scripts/*.js
+dist_unix_rpm       = rpm/create.sh rpm/brickstore.spec
+dist_unix_deb       = debian/create.sh debian/rules
+dist_macx           = macx-bundle/create.sh macx-bundle/install-table.txt macx-bundle/*.plist macx-bundle/Resources/*.icns macx-bundle/Resources/??.lproj/*.plist
+dist_win32          = win32-installer/*.wx?
+
+DISTFILES += $$res_images $$res_images_16 $$res_images_22 $$res_images_status $$res_images_sidebar $$res_translations $$res_print_templates $$dist_extra $$dist_scripts $$dist_unix_rpm $$dist_unix_deb $$dist_macx $$dist_win32
+
+#tarball.target = $$lower($$TARGET)-$$RELEASE.tar.bz2
+tarball.commands = ( dst=$$lower($$TARGET)-$$RELEASE; \
+                     rm -rf \$$dst ; \
+                     mkdir \$$dst ; \
+                     for i in $$DISTFILES; do \
+                         j=\$$dst/`dirname \$$i`; \
+                         [ -d \$$j ] || mkdir -p \$$j; \
+                         cp \$$i \$$j; \
+                     done ; \
+                     tar -cjf \$$dst.tar.bz2 \$$dst ; \
+                     rm -rf \$$dst )
+
+QMAKE_EXTRA_TARGETS += tarball

@@ -1,8 +1,10 @@
-INCLUDEPATH += $$PWD
-DEPENDPATH  += $$PWD
+RELPWD = $$replace(PWD,$$_PRO_FILE_PWD_,.)
+
+INCLUDEPATH += $$RELPWD
+DEPENDPATH  += $$RELPWD
 
 # is this really still needed?
-HEADERS += $$PWD/cdisableupdates.h \
+HEADERS += $$RELPWD/cdisableupdates.h \
 
 
 XSOURCES = cfilteredit \
@@ -20,11 +22,11 @@ XSOURCES = cfilteredit \
            utility \
 
 for( src, XSOURCES ) {
-  HEADERS += $$PWD/$${src}.h
-  SOURCES += $$PWD/$${src}.cpp
+  HEADERS += $$RELPWD/$${src}.h
+  SOURCES += $$RELPWD/$${src}.cpp
   
-  exists($$PWD/$${src}_p.h) {
-    HEADERS += $$PWD/$${src}_p.h
+  exists($$RELPWD/$${src}_p.h) {
+    HEADERS += $$RELPWD/$${src}_p.h
   }
 }
 

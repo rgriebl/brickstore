@@ -1,8 +1,10 @@
 DEFINES += MODELTEST
 
-INCLUDEPATH += $$PWD
-DEPENDPATH += $$PWD
+RELPWD = $$replace(PWD,$$_PRO_FILE_PWD_,.)
 
-SOURCES += $$PWD/modeltest.cpp
+INCLUDEPATH += $$RELPWD
+DEPENDPATH  += $$RELPWD
 
-HEADERS += $$PWD/modeltest.h
+SOURCES += $$RELPWD/modeltest.cpp
+
+HEADERS += $$RELPWD/modeltest.h

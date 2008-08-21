@@ -1,7 +1,9 @@
 QT *= opengl
 
-INCLUDEPATH += $$PWD
-DEPENDPATH  += $$PWD
+RELPWD = $$replace(PWD,$$_PRO_FILE_PWD_,.)
+
+INCLUDEPATH += $$RELPWD
+DEPENDPATH  += $$RELPWD
 
 XSOURCES = ldraw \
            renderwidget \
@@ -10,6 +12,6 @@ XSOURCES = ldraw \
 
            
 for( src, XSOURCES ) {
-  HEADERS += $$PWD/$${src}.h
-  SOURCES += $$PWD/$${src}.cpp
+  HEADERS += $$RELPWD/$${src}.h
+  SOURCES += $$RELPWD/$${src}.cpp
 }

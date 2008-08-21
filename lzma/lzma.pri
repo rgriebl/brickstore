@@ -1,7 +1,9 @@
-INCLUDEPATH += $$PWD
-DEPENDPATH  += $$PWD
+RELPWD = $$replace(PWD,$$_PRO_FILE_PWD_,.)
 
-HEADERS += $$PWD/lzmadec.h \
+INCLUDEPATH += $$RELPWD
+DEPENDPATH  += $$RELPWD
+
+HEADERS += $$RELPWD/lzmadec.h \
 
 
-SOURCES += $$PWD/lzmadec.c \
+SOURCES += $$RELPWD/lzmadec.c \

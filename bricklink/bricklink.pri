@@ -1,12 +1,14 @@
-INCLUDEPATH += $$PWD
-DEPENDPATH  += $$PWD
+RELPWD = $$replace(PWD,$$_PRO_FILE_PWD_,.)
 
-HEADERS += $$PWD/bricklink.h \
+INCLUDEPATH += $$RELPWD
+DEPENDPATH  += $$RELPWD
+
+HEADERS += $$RELPWD/bricklink.h \
 
 
-SOURCES += $$PWD/bricklink.cpp \
-           $$PWD/bricklink_data.cpp \
-           $$PWD/bricklink_textimport.cpp \
-           $$PWD/bricklink_priceguide.cpp \
-           $$PWD/bricklink_picture.cpp \
-           $$PWD/bricklink_model.cpp \
+SOURCES += $$RELPWD/bricklink.cpp \
+           $$RELPWD/bricklink_data.cpp \
+           $$RELPWD/bricklink_textimport.cpp \
+           $$RELPWD/bricklink_priceguide.cpp \
+           $$RELPWD/bricklink_picture.cpp \
+           $$RELPWD/bricklink_model.cpp \
