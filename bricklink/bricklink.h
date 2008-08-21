@@ -979,9 +979,13 @@ private:
         };
         quint16 m_new_qty;
         quint16 m_used_qty;
+#if defined(Q_CC_MSVC)
 #pragma warning(disable:4200)
+#endif
         float   m_prices[];
+#if defined(Q_CC_MSVC)
 #pragma warning(default:4200)
+#endif
     };
 
     QVector<char>  m_alltime_pg; // really alltimepg_records
