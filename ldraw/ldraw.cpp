@@ -10,6 +10,12 @@
 #include <QDateTime>
 #include <QtDebug>
 
+#if defined( Q_WS_WIN )
+#include <windows.h>
+#include <tchar.h>
+#include <shlobj.h>
+#endif
+
 #include "ldraw.h"
 #include "stopwatch.h"
 
