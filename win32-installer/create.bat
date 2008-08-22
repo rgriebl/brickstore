@@ -29,10 +29,18 @@ IF "x%PKG_VER%" == "x" (
   EXIT /B 2
 )
 
-CD win32-installer
+IF "x%VCINSTALLDIR%" == "x" (
+  ECHO Error: please run this command from a Visual Studio Command Prompt
+  EXIT /B 3
+)
 
 ECHO.
 ECHO Creating Windows Installer (%PKG_VER%)
+
+ECHO ^> Compiling...
+"%VCINSTALLDIR%\VCPackages\vcbuild.exe" /r /nologo /nohtmllog /M2 brickstore.sln "Release|Win32"
+
+CD win32-installer
 
 ECHO  ^> Compiling brickstore.wxs...
 Tools\candle.exe -nologo -dTARGET=.. -dVERSION=%PKG_VER% brickstore.wxs

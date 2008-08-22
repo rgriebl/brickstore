@@ -22,7 +22,7 @@
     <Media Id="1" EmbedCab="yes" Cabinet="Setup.cab" CompressionLevel="none" />
 
     <Upgrade Id="FE06FEC9-2BAA-4100-88FE-40EB1316D14E">
-      <UpgradeVersion Minimum="1.0.0" Maximum="$(var.VERSION)" IncludeMinimum="yes" Property="PREVIOUSVERSIONSINSTALLED" MigrateFeatures="yes" />
+      <UpgradeVersion Minimum="2.0.0" Maximum="$(var.VERSION)" IncludeMinimum="yes" Property="PREVIOUSVERSIONSINSTALLED" MigrateFeatures="yes" />
       <UpgradeVersion Minimum="$(var.VERSION)" OnlyDetect="yes" IncludeMinimum="yes" Property="NEWERPRODUCTFOUND" />
     </Upgrade>
 
@@ -32,7 +32,7 @@
 
     <CustomAction Id="ErrorNewerVersion" Return="check" Error="Unable to install because a newer version of this product is already installed." />
     <CustomAction Id="FixReinstall" Property="REINSTALL" Value="" />
-    <CustomAction Id="LaunchFile" FileKey="brickstore.exe" ExeCommand="" Return="asyncNoWait" />
+    <CustomAction Id="LaunchFile" FileKey="BrickStore.exe" ExeCommand="" Return="asyncNoWait" />
 
     <AdminExecuteSequence />
 
@@ -57,7 +57,7 @@
         <Directory Id="Softforge" Name="softforg" LongName="SoftForge">
           <Directory Id="INSTALLDIR" Name="BrickSto" LongName="BrickStore">
             <Component Id="c_main" Guid="96E5E9DA-8E91-11D9-8BDE-F66BAD1E3F3A">
-              <File DiskId="1" Id="brickstore.exe"   Name="BrickSto.exe" LongName="brickstore.exe"   src="$(var.TARGET)\brickstore.exe" Checksum="yes" />
+              <File DiskId="1" Id="BrickStore.exe"   Name="BrickSto.exe" LongName="BrickStore.exe"   src="$(var.TARGET)\Release\BrickStore.exe" Checksum="yes" />
               <Shortcut Id="sm_brickstore.exe"       Name="BrickSto"     LongName="BrickStore"       Icon="icon_bs.exe" IconIndex="0" Directory="ProgramMenuDir" Target="Complete" WorkingDirectory="INSTALLDIR" />
               <Shortcut Id="sd_brickstore.exe"       Name="BrickSto"     LongName="BrickStore"       Icon="icon_bs.exe" IconIndex="0" Directory="DesktopFolder"  Target="Complete" WorkingDirectory="INSTALLDIR" />
               <File DiskId="1" Id="LICENSE.GPL"      Name="LICENSE.txt"  LongName="LICENSE.GPL.txt"  src="$(var.TARGET)\LICENSE.GPL" />
@@ -66,23 +66,21 @@
               <Registry Id="reg_installver" Root="HKLM" Key="Software\Softforge\BrickStore" Name="CurrentVersion" Action="write" Type="string" Value="$(var.VERSION)" />
               <Registry Id="reg_clean"      Root="HKLM" Key="Software\Softforge\BrickStore" Action="removeKeyOnUninstall" />
 
-              <ProgId Id="BrickStore.bsxfile" Description="BrickStore XML" Advertise="no" Icon="[#brickstore.exe]" IconIndex="1">
+              <ProgId Id="BrickStore.bsxfile" Description="BrickStore XML" Advertise="no" Icon="[#BrickStore.exe]" IconIndex="1">
                 <Extension Id="bsx" ContentType="application/x-brickstore-xml">
-                  <Verb Id="open" Sequence="10" Argument="&quot;%1&quot;" Target="[#brickstore.exe]" />
+                  <Verb Id="open" Sequence="10" Argument="&quot;%1&quot;" Target="[#BrickStore.exe]" />
                 </Extension>
               </ProgId>
 
-              <ProgId Id="BrickStore.btifile" Description="BrickStore Data File" Advertise="no" Icon="[#brickstore.exe]" IconIndex="1">
+              <ProgId Id="BrickStore.btifile" Description="BrickStore Data File" Advertise="no" Icon="[#BrickStore.exe]" IconIndex="1">
                 <Extension Id="bti" ContentType="application/x-brickstore">
-                  <Verb Id="open" Sequence="10" Argument="&quot;%1&quot;" Target="[#brickstore.exe]" />
+                  <Verb Id="open" Sequence="10" Argument="&quot;%1&quot;" Target="[#BrickStore.exe]" />
                 </Extension>
               </ProgId>
             </Component>
             <Component Id="c_runtime" Guid="514ECE62-8EB1-11D9-8BDE-F66BAD1E3F3A">
               <File DiskId="1" Id="msvcr80"          Name="msvcr80.dll" src="C:/Programme/Microsoft Visual Studio 8/VC/redist/x86/Microsoft.VC80.CRT/msvcr80.dll" />
               <File DiskId="1" Id="msvcr80.mf"       Name="msvcr80.man" LongName="Microsoft.VC80.CRT.manifest" src="C:/Programme/Microsoft Visual Studio 8/VC/redist/x86/Microsoft.VC80.CRT/Microsoft.VC80.CRT.manifest" />
-              <RemoveFile      Id="msvcr71"          Name="msvcr71.dll" On="install" />
-              <RemoveFile      Id="msvcp71"          Name="msvcp71.dll" On="install" />
             </Component>
 
             <!-- the original MS msm's are broken (install to c:\)
@@ -105,9 +103,6 @@
             </Directory>
             <Directory Id="print_templates" Name="print-te" LongName="print-templates">
               <Component Id="c_print_templates" Guid="ED89FB38-8C96-4405-BF13-9B724B50B53C">
-                <RemoveFile      Id="standard.xml"        Name="standard.xml"                                On="install" />
-                <RemoveFile      Id="invoice_example.xml" Name="invoice-.xml" LongName="invoice-example.xml" On="install" />
-
                 <File DiskId="1" Id="standard.qs"         Name="standard.qs"                                 src="$(var.TARGET)\print-templates\standard.qs" />
               </Component>
             </Directory>
@@ -139,18 +134,6 @@
               </Directory>
               <Directory Id="images_16x16" Name="16x16">
                 <Component Id="c_images_16x16" Guid="A7EEE510-8E91-11D9-8BDE-F66BAD1E3F3A">
-                  <RemoveFile      Id="i16x16_browser.png"                   Name="browser.png"                                           On="install" />
-                  <RemoveFile      Id="i16x16_configure.png"                 Name="config~1.png" LongName="configure.png"                 On="install" />
-                  <RemoveFile      Id="i16x16_edit.png"                      Name="edit.png"                                              On="install" />
-                  <RemoveFile      Id="i16x16_edit_buy_bl.png"               Name="edit_b~1.png" LongName="edit_buy_bl.png"               On="install" />
-                  <RemoveFile      Id="i16x16_edit_open_bl.png"              Name="edit_b~2.png" LongName="edit_open_bl.png"              On="install" />
-                  <RemoveFile      Id="i16x16_settings_refresh_database.png" Name="settin~1.png" LongName="settings_refresh_database.png" On="install" />
-                  <RemoveFile      Id="i16x16_net_offline.png"               Name="net_of~1.png" LongName="net_offline.png"               On="install" />
-                  <RemoveFile      Id="i16x16_net_online.png"                Name="net_on~1.png" LongName="net_online.png"                On="install" />
-                  <RemoveFile      Id="i16x16_edit_divide_qty.png"           Name="imageah0.png" LongName="edit_divide_qty.png"           On="install" />
-                  <RemoveFile      Id="i16x16_edit_multiply_qty.png"         Name="imageal0.png" LongName="edit_multiply_qty.png"         On="install" />
-                  <RemoveFile      Id="i16x16_edit_set_sale.png"             Name="imagear0.png" LongName="edit_set_sale.png"             On="install" />
-                 
                   <File DiskId="1" Id="i16x16_edit_additems.png"             Name="imageaa0.png" LongName="edit_additems.png"             src="$(var.TARGET)\images\16x16\edit_additems.png" />
                   <File DiskId="1" Id="i16x16_edit_bl_catalog.png"           Name="imageab0.png" LongName="edit_bl_catalog.png"           src="$(var.TARGET)\images\16x16\edit_bl_catalog.png" />
                   <File DiskId="1" Id="i16x16_edit_bl_lotsforsale.png"       Name="imageac0.png" LongName="edit_bl_lotsforsale.png"       src="$(var.TARGET)\images\16x16\edit_bl_lotsforsale.png" />
@@ -188,7 +171,6 @@
                   <File DiskId="1" Id="i16x16_file_save_all.png"             Name="imagebh0.png" LongName="file_save_all.png"             src="$(var.TARGET)\images\16x16\file_save_all.png" />
                   <File DiskId="1" Id="i16x16_file_saveas.png"               Name="imagebi0.png" LongName="file_saveas.png"               src="$(var.TARGET)\images\16x16\file_saveas.png" />
                   <File DiskId="1" Id="i16x16_filter_clear.png"              Name="imagebj0.png" LongName="filter_clear.png"              src="$(var.TARGET)\images\16x16\filter_clear.png" />
-                  <File DiskId="1" Id="i16x16_filter_label.png"              Name="imagebk0.png" LongName="filter_label.png"              src="$(var.TARGET)\images\16x16\filter_label.png" />
                   <File DiskId="1" Id="i16x16_help_contents.png"             Name="imagebl0.png" LongName="help_contents.png"             src="$(var.TARGET)\images\16x16\help_contents.png" />
                   <File DiskId="1" Id="i16x16_help_updates.png"              Name="imagebm0.png" LongName="help_updates.png"              src="$(var.TARGET)\images\16x16\help_updates.png" />
                   <File DiskId="1" Id="i16x16_help_whatsthis.png"            Name="imagebn0.png" LongName="help_whatsthis.png"            src="$(var.TARGET)\images\16x16\help_whatsthis.png" />
@@ -207,18 +189,6 @@
               </Directory>
               <Directory Id="images_22x22" Name="22x22">
                 <Component Id="c_images_22x22" Guid="AEE85EDC-8E91-11D9-8BDE-F66BAD1E3F3A">
-                  <RemoveFile      Id="i22x22_browser.png"                   Name="browser.png"                                           On="install" />
-                  <RemoveFile      Id="i22x22_configure.png"                 Name="config~1.png" LongName="configure.png"                 On="install" />
-                  <RemoveFile      Id="i22x22_edit.png"                      Name="edit.png"                                              On="install" />
-                  <RemoveFile      Id="i22x22_edit_buy_bl.png"               Name="edit_b~1.png" LongName="edit_buy_bl.png"               On="install" />
-                  <RemoveFile      Id="i22x22_edit_open_bl.png"              Name="edit_b~2.png" LongName="edit_open_bl.png"              On="install" />
-                  <RemoveFile      Id="i22x22_settings_refresh_database.png" Name="settin~1.png" LongName="settings_refresh_database.png" On="install" />
-                  <RemoveFile      Id="i22x22_net_offline.png"               Name="net_of~1.png" LongName="net_offline.png"               On="install" />
-                  <RemoveFile      Id="i22x22_net_online.png"                Name="net_on~1.png" LongName="net_online.png"                On="install" />
-                  <RemoveFile      Id="i22x22_edit_divide_qty.png"           Name="imageah0.png" LongName="edit_divide_qty.png"           On="install" />
-                  <RemoveFile      Id="i22x22_edit_multiply_qty.png"         Name="imageal0.png" LongName="edit_multiply_qty.png"         On="install" />
-                  <RemoveFile      Id="i22x22_edit_set_sale.png"             Name="imagear0.png" LongName="edit_set_sale.png"             On="install" />
-
                   <File DiskId="1" Id="i22x22_edit_additems.png"             Name="imageaa0.png" LongName="edit_additems.png"             src="$(var.TARGET)\images\22x22\edit_additems.png" />
                   <File DiskId="1" Id="i22x22_edit_bl_catalog.png"           Name="imageab0.png" LongName="edit_bl_catalog.png"           src="$(var.TARGET)\images\22x22\edit_bl_catalog.png" />
                   <File DiskId="1" Id="i22x22_edit_bl_lotsforsale.png"       Name="imageac0.png" LongName="edit_bl_lotsforsale.png"       src="$(var.TARGET)\images\22x22\edit_bl_lotsforsale.png" />
@@ -256,7 +226,6 @@
                   <File DiskId="1" Id="i22x22_file_save_all.png"             Name="imagebh0.png" LongName="file_save_all.png"             src="$(var.TARGET)\images\22x22\file_save_all.png" />
                   <File DiskId="1" Id="i22x22_file_saveas.png"               Name="imagebi0.png" LongName="file_saveas.png"               src="$(var.TARGET)\images\22x22\file_saveas.png" />
                   <File DiskId="1" Id="i22x22_filter_clear.png"              Name="imagebj0.png" LongName="filter_clear.png"              src="$(var.TARGET)\images\22x22\filter_clear.png" />
-                  <File DiskId="1" Id="i22x22_filter_label.png"              Name="imagebk0.png" LongName="filter_label.png"              src="$(var.TARGET)\images\22x22\filter_label.png" />
                   <File DiskId="1" Id="i22x22_help_contents.png"             Name="imagebl0.png" LongName="help_contents.png"             src="$(var.TARGET)\images\22x22\help_contents.png" />
                   <File DiskId="1" Id="i22x22_help_updates.png"              Name="imagebm0.png" LongName="help_updates.png"              src="$(var.TARGET)\images\22x22\help_updates.png" />
                   <File DiskId="1" Id="i22x22_help_whatsthis.png"            Name="imagebn0.png" LongName="help_whatsthis.png"            src="$(var.TARGET)\images\22x22\help_whatsthis.png" />
