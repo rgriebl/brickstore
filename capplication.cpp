@@ -47,9 +47,6 @@
 #define XSTR(a) #a
 #define STR(a) XSTR(a)
 
-#if defined( Q_WS_WIN )
-#include "dotnetstyle.h"
-#endif
 
 CApplication *cApp = 0;
 
@@ -77,7 +74,6 @@ CApplication::CApplication(bool rebuild_db_only, int _argc, char **_argv)
     extern bool Q_GUI_EXPORT qt_use_native_dialogs;
     qt_use_native_dialogs = !((wv & QSysInfo::WV_DOS_based) || ((wv & QSysInfo::WV_NT_based) < QSysInfo::WV_XP));
 
-    // setStyle(new DotNetStyle());
 #endif
 
     // initialize config & resource

@@ -1,4 +1,3 @@
-
 ## Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
 ##
 ## This file is part of BrickStore.
@@ -23,82 +22,11 @@ QT          *= core gui xml network
 TARGET            = BrickStore
 unix:!macx:TARGET = brickstore
 
-#TRANSLATIONS = translations/brickstore_de.ts \
-#               translations/brickstore_fr.ts \
-#               translations/brickstore_nl.ts
+LANGUAGES    = de fr nl sl
+RESOURCES    = brickstore.qrc
+SUBPROJECTS  = utility bricklink ldraw lzma
 
-RESOURCES     = brickstore.qrc
-
-
-exists( .private-key ) {
-  win32:cat_cmd = type
-  unix:cat_cmd = cat
-
-  DEFINES += BS_REGKEY=\"$$system( $$cat_cmd .private-key )\"
-} 
-else {
-  message( Building an OpenSource version )
-}
-
-win32 {
-  system( cscript.exe //B scripts\update_version.js $$RELEASE)
-  
-  CONFIG += windows
-  #CONFIG -= shared
-
-  RC_FILE = brickstore.rc
-
-  DEFINES += __USER__=\"$$(USERNAME)\" __HOST__=\"$$(COMPUTERNAME)\"
-
-  QMAKE_CXXFLAGS_DEBUG   += /Od /GL-
-  QMAKE_CXXFLAGS_RELEASE += /O2 /GL
-
-  win32-msvc2005 {
-     DEFINES += _CRT_SECURE_NO_DEPRECATE
-
-#    QMAKE_LFLAGS_WINDOWS += "/MANIFEST:NO"
-#    QMAKE_LFLAGS_WINDOWS += "/LTCG"
-
-     QMAKE_CXXFLAGS_DEBUG   += /EHc- /EHs- /GR-
-     QMAKE_CXXFLAGS_RELEASE += /EHc- /EHs- /GR-
-  }
-}
-
-unix {
-  system( scripts/update_version.sh $$RELEASE)
-
-  MOC_DIR     = .moc
-  UI_DIR      = .uic
-  OBJECTS_DIR = .obj
-
-  DEFINES += __USER__=\"$$(USER)\" __HOST__=\"$$system( hostname )\"
-}
-
-unix:!macx {
-  CONFIG += x11
-
-  isEmpty( PREFIX ):PREFIX = /usr/local
-  target.path = $$PREFIX/bin
-  INSTALLS += target
-}
-
-macx {
-  CONFIG += x86
-}
-
-win {
-  SOURCES += dotnetstyle.cpp
-  HEADERS += dotnetstyle.h
-}
-
-modeltest:debug {
-  include(modeltest/modeltest.pri)
-}
-
-include(utility/utility.pri)
-include(bricklink/bricklink.pri)
-include(ldraw/ldraw.pri)
-include(lzma/lzma.pri)
+modeltest:debug:SUBPROJECTS += modeltest
 
 
 SOURCES += main.cpp
@@ -107,7 +35,7 @@ HEADERS += ccheckforupdates.h \
            cimport.h \
            cref.h \
            cupdatedatabase.h \
-	   
+
 
 XSOURCES = capplication \
            csplash \
@@ -133,13 +61,16 @@ XFORMS  = additem \
           selectitem \
           settings \
 
+
+#
+# Expand convenience variables
+#
+
 for( src, XSOURCES ) {
   HEADERS += $${src}.h
   SOURCES += $${src}.cpp
 
-  exists($${src}_p.h) {
-    HEADERS += $${src}_p.h
-  }
+  exists($${src}_p.h) : HEADERS += $${src}_p.h
 }
 
 for( form, XFORMS ) {
@@ -148,36 +79,141 @@ for( form, XFORMS ) {
   FORMS   += dialogs/$${form}.ui
 }
 
-DISTFILES += $$SOURCES $$HEADERS $$FORMS
-DISTFILES += brickstore.pro */*.pri
+for(subp, SUBPROJECTS) : include($${subp}/$${subp}.pri)
 
-res_images          = images/*.png images/*.jpg
-res_images_16       = images/16x16/*.png
-res_images_22       = images/22x22/*.png
-res_images_status   = images/status/*.png
-res_images_sidebar  = images/sidebar/*.png
-res_translations    = translations/translations.xml $$TRANSLATIONS
-res_print_templates = print-templates/*.qs
+for(lang, LANGUAGES) : TRANSLATIONS += translations/brickstore_$${lang}.ts
 
-dist_extra          = version.h.in icon.png
-dist_scripts        = scripts/*.sh scripts/*.pl scripts/*.js
-dist_unix_rpm       = rpm/create.sh rpm/brickstore.spec
-dist_unix_deb       = debian/create.sh debian/rules
-dist_macx           = macx-bundle/create.sh macx-bundle/install-table.txt macx-bundle/*.plist macx-bundle/Resources/*.icns macx-bundle/Resources/??.lproj/*.plist
-dist_win32          = win32-installer/*.wx?
 
-DISTFILES += $$res_images $$res_images_16 $$res_images_22 $$res_images_status $$res_images_sidebar $$res_translations $$res_print_templates $$dist_extra $$dist_scripts $$dist_unix_rpm $$dist_unix_deb $$dist_macx $$dist_win32
+#
+# (n)make tarball
+#
 
-#tarball.target = $$lower($$TARGET)-$$RELEASE.tar.bz2
-tarball.commands = ( dst=$$lower($$TARGET)-$$RELEASE; \
-                     rm -rf \$$dst ; \
-                     mkdir \$$dst ; \
-                     for i in $$DISTFILES; do \
-                         j=\$$dst/`dirname \$$i`; \
-                         [ -d \$$j ] || mkdir -p \$$j; \
-                         cp \$$i \$$j; \
-                     done ; \
-                     tar -cjf \$$dst.tar.bz2 \$$dst ; \
-                     rm -rf \$$dst )
+DISTFILES += $$SOURCES $$HEADERS $$FORMS $$RESOURCES
+
+DISTFILES += brickstore.rc brickstore.ico brickstore_doc.ico
+DISTFILES += version.h.in icon.png LICENSE.GPL brickstore.pro
+for(subp, SUBPROJECTS) : DISTFILES += $${subp}/$${subp}.pri
+
+DISTFILES += images/*.png images/*.jpg images/16x16/*.png images/22x22/*.png images/status/*.png images/sidebar/*.png
+DISTFILES += translations/translations.xml $$TRANSLATIONS $$replace(TRANSLATIONS, .ts, .qm)
+DISTFILES += print-templates/*.qs
+
+DISTFILES += scripts/*.sh scripts/*.pl scripts/*.js
+DISTFILES += rpm/create.sh rpm/brickstore.spec
+DISTFILES += debian/create.sh debian/rules
+DISTFILES += win32-installer/*.wx? win32-installer/create.bat win32-installer/7zS.ini win32-installer/VsSetup.ini win32-installer/Tools/* win32-installer/Binary/*
+DISTFILES += macx-bundle/create.sh macx-bundle/install-table.txt macx-bundle/*.plist macx-bundle/Resources/*.icns
+for(lang, LANGUAGES) : DISTFILES += macx-bundle/Resources/$${lang}.lproj/*.plist
+
+unix {
+  #tarball.target = $$lower($$TARGET)-$$RELEASE.tar.bz2
+  tarball.commands = ( dst=$$lower($$TARGET)-$$RELEASE; \
+                       rm -rf \$$dst ; \
+                       mkdir \$$dst ; \
+                       for i in $$DISTFILES; do \
+                           j=\$$dst/`dirname \$$i`; \
+                           [ -d \$$j ] || mkdir -p \$$j; \
+                           cp \$$i \$$j; \
+                       done ; \
+                       tar -cjf \$$dst.tar.bz2 \$$dst ; \
+                       rm -rf \$$dst )
+
+  macx {
+    bundle.commands = macx-bundle/create.sh
+  } else {
+    rpm.commands = rpm/create.sh
+    deb.commands = debian/create.sh
+  }
+}
+
+win32 {
+  DISTFILES=$$replace(DISTFILES, /, \\)
+  DISTFILES=$$replace(DISTFILES, ^\.\\\, ) # 7-zip doesn't like file names starting with dot-backslash
+
+  tarball.commands = ( DEL $$lower($$TARGET)-$${RELEASE}.zip 2>NUL & win32-installer\Tools\7za a -tzip $$lower($$TARGET)-$${RELEASE}.zip $$DISTFILES )
+
+  installer.commands = win32-installer\create.bat
+}
 
 QMAKE_EXTRA_TARGETS += tarball
+
+
+#
+# check key
+#
+
+exists( .private-key ) {
+  win32:cat_cmd = type
+  unix:cat_cmd = cat
+
+  DEFINES += BS_REGKEY=\"$$system( $$cat_cmd .private-key )\"
+} 
+else {
+  message( Building an OpenSource version )
+}
+
+
+#
+# Windows specific
+#
+
+win32 {
+  system( cscript.exe //B scripts\update_version.js $$RELEASE)
+  
+  CONFIG  += windows
+  #CONFIG -= shared
+
+  RC_FILE  = brickstore.rc
+
+  DEFINES += __USER__=\"$$(USERNAME)\" __HOST__=\"$$(COMPUTERNAME)\"
+
+  QMAKE_CXXFLAGS_DEBUG   += /Od /GL-
+  QMAKE_CXXFLAGS_RELEASE += /O2 /GL
+
+  win32-msvc2005 {
+     DEFINES += _CRT_SECURE_NO_DEPRECATE
+
+#    QMAKE_LFLAGS_WINDOWS += "/MANIFEST:NO"
+#    QMAKE_LFLAGS_WINDOWS += "/LTCG"
+
+     QMAKE_CXXFLAGS_DEBUG   += /EHc- /EHs- /GR-
+     QMAKE_CXXFLAGS_RELEASE += /EHc- /EHs- /GR-
+  }
+}
+
+
+#
+# Unix specific
+#
+
+unix {
+  system( scripts/update_version.sh $$RELEASE)
+
+  MOC_DIR     = .moc
+  UI_DIR      = .uic
+  OBJECTS_DIR = .obj
+
+  DEFINES += __USER__=\"$$(USER)\" __HOST__=\"$$system( hostname )\"
+}
+
+
+#
+# Unix/X11 specific
+#
+
+unix:!macx {
+  CONFIG += x11
+
+  isEmpty( PREFIX ):PREFIX = /usr/local
+  target.path = $$PREFIX/bin
+  INSTALLS += target
+}
+
+
+#
+# Mac OS X specific
+#
+
+macx {
+  CONFIG += x86
+}

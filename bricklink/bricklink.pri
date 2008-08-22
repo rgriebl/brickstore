@@ -4,6 +4,7 @@ INCLUDEPATH += $$RELPWD
 DEPENDPATH  += $$RELPWD
 
 HEADERS += $$RELPWD/bricklink.h \
+           $$RELPWD/bricklinkfwd.h \
 
 
 SOURCES += $$RELPWD/bricklink.cpp \

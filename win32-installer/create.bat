@@ -34,28 +34,48 @@ IF "x%VCINSTALLDIR%" == "x" (
   EXIT /B 3
 )
 
+QMAKE.EXE --version >NUL 2>&1
+IF ERRORLEVEL 1 (
+  ECHO Error: please make sure that the bin directory of your Qt installation is included in the PATH.
+  EXIT /B 4
+}
+
 ECHO.
 ECHO Creating Windows Installer (%PKG_VER%)
 
-ECHO ^> Compiling...
-"%VCINSTALLDIR%\VCPackages\vcbuild.exe" /r /nologo /nohtmllog /M2 brickstore.sln "Release|Win32"
+ECHO ^> Creating Tarball...
+QMAKE.EXE brickstore.pro
+NMAKE.EXE tarball
+
+
+ECHO ^> Setting up build directory...
 
 CD win32-installer
+RMDIR /S /Q tmp 2>NUL
+MKDIR tmp
+CD tmp
+..\Tools\7za x ..\..\brickstore-%PKG_VER%.zip >NUL 2>NUL
+
+
+ECHO ^> Compiling...
+QMAKE.EXE -tp vc brickstore.pro
+"%VCINSTALLDIR%\VCPackages\vcbuild.exe" /r /nologo /nohtmllog /M2 brickstore.vcproj "Release|Win32"
+
 
 ECHO  ^> Compiling brickstore.wxs...
-Tools\candle.exe -nologo -dTARGET=.. -dVERSION=%PKG_VER% brickstore.wxs
+FOR /F "tokens=*" %%Q IN ('QMAKE.EXE -query QT_INSTALL_PREFIX') DO SET QTDIR=%%Q
+..\Tools\candle.exe -nologo -dTARGET=.. -dVERSION=%PKG_VER% brickstore.wxs
 
 ECHO  ^> Linking brickstore.msi...
-Tools\light.exe -nologo brickstore.wixobj -out brickstore.msi
-DEL brickstore.wixobj
+..\Tools\light.exe -nologo brickstore.wixobj -out brickstore.msi
+
+CD ..
+
 
 ECHO  ^> Moving to %PKG_VER%...
-IF NOT EXIST %PKG_VER% ( 
-  MKDIR %PKG_VER% 
-) ELSE ( 
-  DEL /F /Q %PKG_VER%\*
-)
-MOVE /Y brickstore.msi %PKG_VER%
+RMDIR /S /Q %PKG_VER% 2>NUL
+MKDIR %PKG_VER%
+MOVE /Y tmp\brickstore.msi %PKG_VER%
 
 ECHO  ^> Copying vssetup to %PKG_VER%...
 COPY Binary\vssetup.exe %PKG_VER%\Setup.exe >NUL

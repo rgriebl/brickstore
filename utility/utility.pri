@@ -5,6 +5,7 @@ DEPENDPATH  += $$RELPWD
 
 # is this really still needed?
 HEADERS += $$RELPWD/cdisableupdates.h \
+           $$RELPWD/stopwatch.h \
 
 
 XSOURCES = cfilteredit \
@@ -25,9 +26,7 @@ for( src, XSOURCES ) {
   HEADERS += $$RELPWD/$${src}.h
   SOURCES += $$RELPWD/$${src}.cpp
   
-  exists($$RELPWD/$${src}_p.h) {
-    HEADERS += $$RELPWD/$${src}_p.h
-  }
+  exists($${src}_p.h) : HEADERS += $$RELPWD/$${src}_p.h
 }
 
 
