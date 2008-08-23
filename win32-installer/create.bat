@@ -34,7 +34,7 @@ IF "x%VCINSTALLDIR%" == "x" (
   EXIT /B 3
 )
 
-QMAKE.EXE --version >NUL 2>NUL
+QMAKE.EXE --version | FIND "Using Qt version 4.4." >NUL 2>NUL
 IF ERRORLEVEL 1 (
   ECHO Error: please make sure that the bin directory of your Qt installation is included in the PATH.
   EXIT /B 4
