@@ -34,18 +34,18 @@ IF "x%VCINSTALLDIR%" == "x" (
   EXIT /B 3
 )
 
-QMAKE.EXE --version >NUL 2>&1
+QMAKE.EXE --version >NUL 2>NUL
 IF ERRORLEVEL 1 (
   ECHO Error: please make sure that the bin directory of your Qt installation is included in the PATH.
   EXIT /B 4
-}
+)
 
 ECHO.
 ECHO Creating Windows Installer (%PKG_VER%)
 
 ECHO ^> Creating Tarball...
-QMAKE.EXE brickstore.pro
-NMAKE.EXE tarball
+QMAKE.EXE brickstore.pro >NUL
+NMAKE.EXE tarball >NUL 2>NUL
 
 
 ECHO ^> Setting up build directory...
@@ -58,13 +58,13 @@ CD tmp
 
 
 ECHO ^> Compiling...
-QMAKE.EXE -tp vc brickstore.pro
+QMAKE.EXE -tp vc brickstore.pro >NUL
 "%VCINSTALLDIR%\VCPackages\vcbuild.exe" /r /nologo /nohtmllog /M2 brickstore.vcproj "Release|Win32"
 
 
 ECHO  ^> Compiling brickstore.wxs...
 FOR /F "tokens=*" %%Q IN ('QMAKE.EXE -query QT_INSTALL_PREFIX') DO SET QTDIR=%%Q
-..\Tools\candle.exe -nologo -dTARGET=.. -dVERSION=%PKG_VER% brickstore.wxs
+..\Tools\candle.exe -nologo -dTARGET=. -dBINARY=..\Binary -dVERSION=%PKG_VER% win32-installer\brickstore.wxs
 
 ECHO  ^> Linking brickstore.msi...
 ..\Tools\light.exe -nologo brickstore.wixobj -out brickstore.msi
@@ -87,6 +87,10 @@ CD %PKG_VER%
 COPY /B ..\Binary\7zS.sfx + ..\7zS.ini + brickstore.7z BrickStore-%PKG_VER%.exe >NUL
 DEL Setup.exe Setup.ini brickstore.7z
 CD ..
+
+
+ECHO ^> Cleaning build directory...
+RMDIR /S /Q tmp >NUL
 CD ..
 
 ECHO.

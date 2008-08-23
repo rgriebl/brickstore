@@ -416,7 +416,7 @@
         </Control>
         <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44" TabSkip="no" Text="[BannerBitmap]" />
         <Control Id="AgreementText" Type="ScrollableText" X="20" Y="60" Width="330" Height="120" Sunken="yes" TabSkip="no">
-          <Text src="Binary\License.rtf" />
+          <Text src="$(var.BINARY)\License.rtf" />
         </Control>
         <Control Id="Description" Type="Text" X="25" Y="23" Width="280" Height="15" Transparent="yes" NoPrefix="yes">
           <Text>Please read the following license agreement carefully</Text>
@@ -1138,13 +1138,13 @@
     <Property Id="ButtonText_OK">OK</Property>
     <Property Id="ButtonText_Update">Update</Property>
 
-    <Binary Id="Up" src="Binary\Up.ico" />
-    <Binary Id="New" src="Binary\New.ico" />
-    <Binary Id="custicon" src="Binary\Custom.ico" />
-    <Binary Id="repairic" src="Binary\Repair.ico" />
-    <Binary Id="exclamic" src="Binary\Exclam.ico" />
-    <Binary Id="removico" src="Binary\Remove.ico" />
-    <Binary Id="info" src="Binary\Info.ico" />
-    <Binary Id="bannrbmp" src="Binary\Banner.bmp" />
-    <Binary Id="dlgbmp" src="Binary\Dialog.bmp" />
+    <Binary Id="Up" src="$(var.BINARY)\Up.ico" />
+    <Binary Id="New" src="$(var.BINARY)\New.ico" />
+    <Binary Id="custicon" src="$(var.BINARY)\Custom.ico" />
+    <Binary Id="repairic" src="$(var.BINARY)\Repair.ico" />
+    <Binary Id="exclamic" src="$(var.BINARY)\Exclam.ico" />
+    <Binary Id="removico" src="$(var.BINARY)\Remove.ico" />
+    <Binary Id="info" src="$(var.BINARY)\Info.ico" />
+    <Binary Id="bannrbmp" src="$(var.BINARY)\Banner.bmp" />
+    <Binary Id="dlgbmp" src="$(var.BINARY)\Dialog.bmp" />
 </Include>
