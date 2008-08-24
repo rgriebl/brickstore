@@ -17,9 +17,6 @@
 #include <QApplication>
 #include <QStringList>
 
-#if defined( Q_WS_MACX )
-#include <Carbon/Carbon.h>
-#endif
 
 class CFrameWork;
 class QTranslator;
@@ -60,10 +57,6 @@ private slots:
 private:
     bool initBrickLink();
     void exitBrickLink();
-
-#if defined( Q_WS_MACX )
-    static OSErr appleEventHandler(const AppleEvent *event, AppleEvent *, long);
-#endif
 
 private:
     QStringList m_files_to_open;

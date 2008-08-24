@@ -11,8 +11,8 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <stdlib.h>
-#include <time.h>
+#include <cstdlib>
+#include <ctime>
 
 #include <QFile>
 #include <QFileInfo>
@@ -36,24 +36,6 @@ static bool my_strncmp(const char *s1, const char *s2, int len)
     }
     return (len == 0) && (*s1 == 0);
 }
-
-class stopwatch {
-public:
-    stopwatch(const char *desc)
-    {
-        m_label = desc;
-        m_start = clock();
-    }
-    ~stopwatch()
-    {
-        uint msec = uint(clock() - m_start) * 1000 / CLOCKS_PER_SEC;
-        qWarning().nospace() << m_label << ": " << msec / 1000 << "'" << msec % 1000 << " [sec]";
-    }
-private:
-    const char *m_label;
-    clock_t m_start;
-};
-
 
 void set_tz(const char *tz)
 {

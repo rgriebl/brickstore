@@ -12,7 +12,7 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 
-#include <math.h>
+#include <cmath>
 
 #include <QColor>
 #include <QDesktopWidget>
@@ -149,7 +149,7 @@ quint64 Utility::physicalMemory()
     const int sctl2 = HW_PHYSMEM;
     unsigned int ram;
 #endif
-     const int sctl[] = { CTL_HW, sctl2 };
+     int sctl[] = { CTL_HW, sctl2 };
      size_t ramsize = sizeof(ram);
 
     if (sysctl(sctl, 2, &ram, &ramsize, 0, 0) == 0)

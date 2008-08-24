@@ -11,7 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <string.h>
+#include <cstring>
 
 #include <QFile>
 #include <QFileInfo>

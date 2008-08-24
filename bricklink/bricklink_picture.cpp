@@ -11,7 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <stdlib.h>
+#include <cstdlib>
 
 #include <QFileInfo>
 #include <QTimer>

@@ -17,14 +17,23 @@
 #include <QHash>
 #include <QString>
 #include <QVector>
+#include <QList>
+#include <QDir>
+#include <QColor>
+
+#include "vector_t.h"
+#include "matrix_t.h"
 
 namespace LDraw {
 
 class Part;
 class Element;
 class PartElement;
-typedef QHash<QString, Part *> ParseContext;
 
+struct ParseContext {
+    QHash<QString, Part *> *m_cache;
+    QList<QDir> m_searchpath;
+};
 
 class Model {
 public:
@@ -47,14 +56,27 @@ class Part {
 public:
     static Part *fromFile(const QString &file, ParseContext *cache = 0);
 
-    const QVector<Element *> &elements() const  { return m_elements; }
+    inline const QVector<Element *> &elements() const  { return m_elements; }
+
+    bool boundingBox(vector_t &vmin, vector_t &vmax);
+
+    void dump() const;
 
 protected:
-    static Part *parse(const QString &file, ParseContext *cache);
+    Part();
+
+    static Part *parse(const QString &file, ParseContext *ctx);
     friend class PartElement;
     friend class Model;
 
+    static void calc_bounding_box(const Part *part, const matrix_t &matrix, vector_t &vmin, vector_t &vmax);
+    static void check_bounding(int cnt, const vector_t *v, const matrix_t &matrix, vector_t &vmin, vector_t &vmax);
+    
+
     QVector<Element *> m_elements;
+    bool m_bounding_calculated;
+    vector_t m_bounding_min;
+    vector_t m_bounding_max;
 };
 
 
@@ -71,9 +93,11 @@ public:
 
     static Element *fromString(const QString &line, ParseContext *cache = 0);
 
-    Type type() const  { return m_type; }
+    inline Type type() const  { return m_type; }
 
     virtual ~Element() { };
+    
+    virtual void dump() const { };
 
 protected:
     Element(Type t)
@@ -90,6 +114,8 @@ public:
 
     static CommentElement *create(const QString &text);
 
+    virtual void dump() const;
+
 protected:
     CommentElement(const QString &);
 
@@ -99,83 +125,130 @@ protected:
 
 class LineElement : public Element {
 public:
-    int color() const            { return m_color; }
-    const qreal *points() const  { return m_points;}
+    int color() const              { return m_color; }
+    const vector_t *points() const { return m_points;}
 
-    static LineElement *create(int color, const qreal *points);
+    static LineElement *create(int color, const vector_t *points);
+
+    virtual void dump() const;
 
 protected:
-    LineElement(int color, const qreal *points);
+    LineElement(int color, const vector_t *points);
 
-    int   m_color;
-    qreal m_points[6];
+    int    m_color;
+    vector_t m_points[2];
 };
 
 
 class CondLineElement : public Element {
 public:
-    int color() const            { return m_color; }
-    const qreal *points() const  { return m_points;}
+    int color() const              { return m_color; }
+    const vector_t *points() const { return m_points;}
 
-    static CondLineElement *create(int color, const qreal *points);
+    static CondLineElement *create(int color, const vector_t *points);
+
+    virtual void dump() const;
 
 protected:
-    CondLineElement(int color, const qreal *points);
+    CondLineElement(int color, const vector_t *points);
 
-    int   m_color;
-    qreal m_points[12];
+    int    m_color;
+    vector_t m_points[4];
 };
 
 
 class TriangleElement : public Element {
 public:
-    int color() const            { return m_color; }
-    const qreal *points() const  { return m_points;}
+    int color() const              { return m_color; }
+    const vector_t *points() const { return m_points;}
 
-    static TriangleElement *create(int color, const qreal *points);
+    static TriangleElement *create(int color, const vector_t *points);
+
+    virtual void dump() const;
 
 protected:
-    TriangleElement(int color, const qreal *points);
+    TriangleElement(int color, const vector_t *points);
 
-    int   m_color;
-    qreal m_points[9];
+    int    m_color;
+    vector_t m_points[3];
 };
 
 
 class QuadElement : public Element {
 public:
-    int color() const            { return m_color; }
-    const qreal *points() const  { return m_points;}
+    int color() const              { return m_color; }
+    const vector_t *points() const { return m_points;}
 
-    static QuadElement *create(int color, const qreal *points);
+    static QuadElement *create(int color, const vector_t *points);
+
+    virtual void dump() const;
 
 protected:
-    QuadElement(int color, const qreal *points);
+    QuadElement(int color, const vector_t *points);
 
-    int   m_color;
-    qreal m_points[12];
+    int    m_color;
+    vector_t m_points[4];
 };
 
 
 class PartElement : public Element {
 public:
-    int color() const            { return m_color; }
-    QString fileName() const     { return m_file; }
-    const qreal *matrix() const  { return m_matrix; }
+    int color() const              { return m_color; }
+    QString fileName() const       { return m_file; }
+    const matrix_t &matrix() const { return m_matrix; }
+    LDraw::Part *part() const      { return m_part; }
 
-    static PartElement *create(int color, const qreal *matrix, const QString &filename, ParseContext *cache);
+    static PartElement *create(int color, const matrix_t &m, const QString &filename, ParseContext *cache);
 
     virtual ~PartElement();
+    virtual void dump() const;
 
 protected:
-    PartElement(int color, const qreal *matrix, const QString &filename);
+    PartElement(int color, const matrix_t &m, const QString &filename);
 
-    int     m_color;
-    QString m_file;
-    qreal   m_matrix[16];
-    bool    m_no_partcache;
-    LDraw::Part *m_part;
+    int           m_color;
+    QString       m_file;
+    matrix_t      m_matrix;
+    bool          m_no_partcache;
+    LDraw::Part * m_part;
 };
+
+class Core {
+public:
+    QString dataPath() const;
+    bool setDataPath(const QString &dir);
+    
+    QColor color(int id, int baseid = -1) const;
+    QColor edgeColor(int id) const;
+    
+private:
+    bool create_part_list();
+    bool parse_ldconfig(const char *file);
+    QColor parse_color_string(const QString &str);
+
+    Core(const QString &datadir);
+
+    static Core *create(const QString &datadir, QString *errstring);
+    static inline Core *inst() { return s_inst; }
+    static Core *s_inst;
+
+    friend Core *core();
+    friend Core *create(const QString &, QString *);
+    
+    static bool check_ldrawdir(const QString &dir);
+    static QString get_platform_ldrawdir();
+
+    
+private:
+    QString m_datadir;
+    
+    QHash<int, QPair<QColor, QColor> > m_colors;
+    QMap<QByteArray, QByteArray> m_items;
+};
+
+inline Core *core() { return Core::inst(); }
+
+inline Core *create(const QString &datadir, QString *errstring) { return Core::create(datadir, errstring); }
 
 } // namespace LDraw
 

@@ -11,16 +11,16 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <limits.h>
-#include <float.h>
+#include <climits>
+#include <cfloat>
 
-#include <qapplication.h>
-#include <qvalidator.h>
-#include <qpushbutton.h>
-#include <qlineedit.h>
-#include <qlabel.h>
-#include <qlayout.h>
-#include <qdialog.h>
+#include <QApplication>
+#include <QValidator>
+#include <QPushButton>
+#include <QLineedit>
+#include <QLabel>
+#include <QLayout>
+#include <QDialog>
 
 #include "cmessagebox.h"
 

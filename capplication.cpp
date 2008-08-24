@@ -32,6 +32,7 @@
 #include "cmoney.h"
 #include "crebuilddatabase.h"
 #include "bricklink.h"
+#include "ldraw.h"
 #include "csplash.h"
 #include "cmessagebox.h"
 #include "cframework.h"
@@ -286,13 +287,19 @@ bool CApplication::initBrickLink()
     if (!bl)
         CMessageBox::critical(0, tr("Could not initialize the BrickLink kernel:<br /><br />%1").arg(errstring));
 
-    return (bl != 0);
+    LDraw::Core *ld = LDraw::create(QString(), &errstring);
+
+    if (!ld)
+        CMessageBox::critical(0, tr("Could not initialize the LDraw kernel:<br /><br />%1").arg(errstring));
+
+    return (bl != 0) && (ld != 0);
 }
 
 
 void CApplication::exitBrickLink()
 {
     delete BrickLink::core();
+    delete LDraw::core();
 }
 
 

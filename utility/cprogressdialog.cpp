@@ -16,7 +16,6 @@
 #include <QProgressBar>
 #include <QApplication>
 #include <QEventLoop>
-//#include <qcursor.h>
 #include <QFile>
 #include <QDialogButtonBox>
 #include <QLayout>
@@ -27,7 +26,7 @@
 #include "cprogressdialog.h"
 
 CProgressDialog::CProgressDialog(QWidget *parent, Qt::WindowFlags f)
-        : QDialog(parent, f)
+    : QDialog(parent, f)
 {
     m_has_errors = false;
     m_autoclose = true;

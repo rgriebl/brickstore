@@ -14,10 +14,10 @@
 #ifndef __CMONEY_H__
 #define __CMONEY_H__
 
-#include <qstring.h>
-#include <qvalidator.h>
-#include <qmap.h>
-#include <qvariant.h>
+#include <QString>
+#include <QValidator>
+#include <QMap>
+#include <QVariant>
 
 class CMoneyData;
 class QKeyEvent;

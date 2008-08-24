@@ -133,78 +133,58 @@ win {
 
 modeltest:debug {
   include(modeltest/modeltest.pri)
-  DEFINES += MODELTEST
 }
 
-XFORMS  += registration \
-           information \
-           importorder \
-           importinventory \
-           additem \
-           settings \
-           selectcolor \
-           selectitem \
+include(utility/utility.pri)
+include(bricklink/bricklink.pri)
+include(ldraw/ldraw.pri)
+include(lzma/lzma.pri)
 
 
-SOURCES += main.cpp \
-           ldraw.cpp \
-           utility.cpp \
-           bricklink.cpp \
-           bricklink_data.cpp \
-           bricklink_textimport.cpp \
-           bricklink_priceguide.cpp \
-           bricklink_picture.cpp \
-           bricklink_model.cpp \
-           lzmadec.c \
-           qtemporaryresource.cpp \
+SOURCES += main.cpp
 
-
-HEADERS += bricklink.h \
-           ldraw.h \
-           utility.h \
-           lzmadec.h \
-           ccheckforupdates.h \
+HEADERS += ccheckforupdates.h \
            cimport.h \
            cref.h \
            cupdatedatabase.h \
            ctooltiphelper.h \
-           cdisableupdates.h \
-           qtemporaryresource.h \
-           cdocument_p.h \
 	   
 
-XSOURCES += application \
-            messagebox \
-            splash \
-            money \
-            transfer \
-            config \
-            rebuilddatabase \
-            progressdialog \
-            document \
-            selectcolor \
-            framework \
-            picturewidget \
-            appearsinwidget \
-            priceguidewidget \
-            taskwidgets \
-            taskpanemanager \
-            spinner \
-            selectitem \
-            window \
-            undo \
-            threadpool \
-            filteredit \
-            multiprogressbar \
+XSOURCES = capplication \
+           csplash \
+           cconfig \
+           crebuilddatabase \
+           cdocument \
+           cselectcolor \
+           cframework \
+           cpicturewidget \
+           cappearsinwidget \
+           cpriceguidewidget \
+           ctaskwidgets \
+           cselectitem \
+           cwindow \
 
 
-for( form, XFORMS ) {
-  FORMS += dialogs/$${form}.ui
-  HEADERS += d$${form}.h
-  SOURCES += d$${form}.cpp
-}
+XFORMS  = additem \
+          importinventory \
+          importorder \
+          information \
+          registration \
+          selectcolor \
+          selectitem \
+          settings \
 
 for( src, XSOURCES ) {
-  HEADERS += c$${src}.h
-  SOURCES += c$${src}.cpp
+  HEADERS += $${src}.h
+  SOURCES += $${src}.cpp
+
+  exists($$PWD/$${src}_p.h) {
+    HEADERS += $$PWD/$${src}_p.h
+  }
+}
+
+for( form, XFORMS ) {
+  HEADERS += d$${form}.h
+  SOURCES += d$${form}.cpp
+  FORMS   += dialogs/$${form}.ui
 }

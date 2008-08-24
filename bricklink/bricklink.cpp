@@ -11,8 +11,8 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 
 #include <QFile>
 #include <QFileInfo>
@@ -29,6 +29,7 @@
 
 #include "cconfig.h"
 #include "utility.h"
+#include "stopwatch.h"
 #include "bricklink.h"
 
 #define DEFAULT_DATABASE_VERSION  0
@@ -512,28 +513,6 @@ QString BrickLink::Core::defaultDatabaseName() const
     return QString(DEFAULT_DATABASE_NAME).arg(DEFAULT_DATABASE_VERSION);
 }
 
-namespace {
-
-class stopwatch {
-public:
-    stopwatch(const char *desc)
-    {
-        m_label = desc;
-        m_start = clock();
-    }
-    ~stopwatch()
-    {
-        uint msec = uint(clock() - m_start) * 1000 / CLOCKS_PER_SEC;
-        qWarning("%s: %d'%d [sec]", m_label, msec / 1000, msec % 1000);
-    }
-private:
-    const char *m_label;
-    clock_t m_start;
-};
-
-} // namespace
-
-
 bool BrickLink::Core::readDatabase(const QString &fname)
 {
     QString filename = fname.isNull() ? dataPath() + defaultDatabaseName() : fname;
@@ -559,7 +538,7 @@ bool BrickLink::Core::readDatabase(const QString &fname)
 
 
     bool result = false;
-    stopwatch *sw = 0; //new stopwatch( "readDatabase" );
+    stopwatch *sw = 0; //new stopwatch("BrickLink::Core::readDatabase()");
 
     QFile f(filename);
     if (f.open(QFile::ReadOnly)) {
@@ -625,16 +604,16 @@ bool BrickLink::Core::readDatabase(const QString &fname)
 
             if ((allc == (colc + ittc + catc + itc)) && (magic == quint32(0xb91c5703))) {
                 delete sw;
-    #ifdef _MSC_VER
-    #define PF_SIZE_T   "I"
-    #else
-    #define PF_SIZE_T   "z"
-    #endif
+#ifdef _MSC_VER
+#define PF_SIZE_T   "I"
+#else
+#define PF_SIZE_T   "z"
+#endif
                 qDebug("Color: %8u  (%11" PF_SIZE_T "u bytes)", m_colors.count(),     m_colors.count()     * (sizeof(Color)    + 20));
                 qDebug("Types: %8u  (%11" PF_SIZE_T "u bytes)", m_item_types.count(), m_item_types.count() * (sizeof(ItemType) + 20));
                 qDebug("Cats : %8u  (%11" PF_SIZE_T "u bytes)", m_categories.count(), m_categories.count() * (sizeof(Category) + 20));
                 qDebug("Items: %8u  (%11" PF_SIZE_T "u bytes)", m_items.count(),      m_items.count()      * (sizeof(Item)     + 20));
-    #undef PF_SIZE_T
+#undef PF_SIZE_T
 
                 result = true;
             }
