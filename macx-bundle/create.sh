@@ -26,6 +26,11 @@ if [ -z $pkg_ver ]; then
 	exit 2
 fi
 
+if ! qmake --version 2>/dev/null | grep -sq 'Using Qt version 4.4.'; then
+    echo "Error: No Qt 4.4.x qmake found in PATH."
+    exit 3
+fi
+
 bundle="BrickStore.app"
 arch=`uname -p`
 [ "$arch" = "i386" ] && arch="intel" 
@@ -35,7 +40,8 @@ echo
 echo "Creating Mac Os X bundle ($pkg_ver)"
 
 echo " > Creating tarball..."
-scripts/mkdist.sh "$pkg_ver"
+[ ! -e Makefile ] && qmake
+make tarball RELEASE=$pkg_ver
 
 echo " > Creating Mac Os X build directories..."
 cd macx-bundle
@@ -45,11 +51,10 @@ tar -xjf "../brickstore-$pkg_ver.tar.bz2" -C tmp
 tmpdir="tmp/brickstore-$pkg_ver"
 cd "$tmpdir"
 
-cp -aH ../../../qsa .
 [ -f ../../../.private-key ] && cp -H ../../../.private-key .
 
 echo -n " > Compiling..."
-qmake
+qmake CONFIG=release
 make
 
 echo -n " > Populating bundle.."

@@ -36,7 +36,7 @@ IF "x%VCINSTALLDIR%" == "x" (
 
 QMAKE.EXE --version | FIND "Using Qt version 4.4." >NUL 2>NUL
 IF ERRORLEVEL 1 (
-  ECHO Error: please make sure that the bin directory of your Qt installation is included in the PATH.
+  ECHO Error: No Qt 4.4.x qmake found in PATH.
   EXIT /B 4
 )
 
@@ -45,7 +45,7 @@ ECHO Creating Windows Installer (%PKG_VER%)
 
 ECHO ^> Creating Tarball...
 QMAKE.EXE brickstore.pro >NUL
-NMAKE.EXE tarball >NUL 2>NUL
+NMAKE.EXE tarball RELEASE=%PKG_VER% >NUL 2>NUL
 
 
 ECHO ^> Setting up build directory...

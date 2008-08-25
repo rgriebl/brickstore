@@ -107,7 +107,7 @@ for(lang, LANGUAGES) : DISTFILES += macx-bundle/Resources/$${lang}.lproj/*.plist
 
 unix {
   #tarball.target = $$lower($$TARGET)-$$RELEASE.tar.bz2
-  tarball.commands = ( dst=$$lower($$TARGET)-$$RELEASE; \
+  tarball.commands = ( rel=$(RELEASE) ; dst=$$lower($$TARGET)-\$${rel:-$$RELEASE}; \
                        rm -rf \$$dst ; \
                        mkdir \$$dst ; \
                        for i in $$DISTFILES; do \
