@@ -29,6 +29,8 @@
 
 Q_DECLARE_METATYPE(QWidget *)
 
+namespace {
+
 class WindowMenu : public QMenu {
     Q_OBJECT
 public:
@@ -107,6 +109,8 @@ private:
     QAction *   m_tabbot;
     bool        m_shortcut;
 };
+
+}
 
 class WindowButton : public QToolButton {
     Q_OBJECT

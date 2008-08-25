@@ -40,11 +40,11 @@ DSettings::DSettings(const QString &start_on_page, QWidget *parent, Qt::WindowFl
     connect(w_rate_fixed, SIGNAL(toggled(bool)), this, SLOT(rateTypeToggled(bool)));
     connect(w_docdir_select, SIGNAL(clicked()), this, SLOT(selectDocDir()));
     connect(w_upd_reset, SIGNAL(clicked()), this, SLOT(resetUpdateIntervals()));
-    
+
     w_proxy_port->setValidator(new QIntValidator(1, 65535, w_proxy_port));
 
     load();
-    
+
     if (!start_on_page.isEmpty()) {
         if (QWidget *w = findChild<QWidget *>(start_on_page))
             w_tabs->setCurrentWidget(w);
@@ -67,7 +67,7 @@ void DSettings::selectDocDir()
 void DSettings::resetUpdateIntervals()
 {
 	QMap<QByteArray, int> intervals = CConfig::inst()->updateIntervalsDefault();
-	
+
 	w_upd_picture->setValue(sec2day(intervals["Picture"]));
 	w_upd_priceguide->setValue(sec2day(intervals["PriceGuide"]));
 	w_upd_database->setValue(sec2day(intervals["Database"]));
@@ -93,7 +93,7 @@ void DSettings::load()
 	else {
 	    bool localematch = false;
 	    QLocale l_active;
-	
+
 		foreach (const CConfig::Translation &trans, translations) {
 			w_language->addItem(QString("%1 (%2)").arg(trans.m_names[QLatin1String("en")], trans.m_names[trans.m_langid]));
 
@@ -103,11 +103,11 @@ void DSettings::load()
 				if (l.language() == l_active.language()) {
 					if (l.country() == l_active.country())
 						localematch = true;
-						
+
 					w_language->setCurrentIndex(w_language->count()-1);
 				}
 			}
- 		}
+        }
 	}
 
     w_metric->setChecked(CConfig::inst()->isMeasurementMetric());
@@ -123,7 +123,7 @@ void DSettings::load()
 	w_local_currency_factor->setText(QString::number(CMoney::inst()->factor()));
 	w_local_currency_factor->setValidator(newQDoubleValidator(w_local_currency_factor));
 	*/
-	
+
 	w_openbrowser->setChecked(CConfig::inst()->value("/General/Export/OpenBrowser", true).toBool());
 	w_closeempty->setChecked(CConfig::inst()->closeEmptyDocuments());
 
@@ -132,7 +132,7 @@ void DSettings::load()
 	// --[ UPDATES ]-------------------------------------------------------------------
 
 	QMap<QByteArray, int> intervals = CConfig::inst()->updateIntervals();
-	
+
 	w_upd_picture->setValue(sec2day(intervals["Picture"]));
 	w_upd_priceguide->setValue(sec2day(intervals["PriceGuide"]));
 	w_upd_database->setValue(sec2day(intervals["Database"]));
@@ -146,14 +146,14 @@ void DSettings::load()
 	BrickLink::ItemTypeProxyModel *importmodel = new BrickLink::ItemTypeProxyModel(BrickLink::core()->itemTypeModel());
 	importmodel->setFilterWithoutInventory(true);
 	w_def_import_type->setModel(importmodel);
-	
+
 	int importdef = importmodel->index(itype ? itype : BrickLink::core()->itemType('S')).row();
 	w_def_import_type->setCurrentIndex(importdef);
 
 	itype = BrickLink::core()->itemType(CConfig::inst()->value("/Defaults/AddItems/ItemType", 'P').toInt());
 	BrickLink::ItemTypeProxyModel *addmodel = new BrickLink::ItemTypeProxyModel(BrickLink::core()->itemTypeModel());
 	w_def_add_type->setModel(addmodel);
-	
+
 	int adddef = addmodel->index(itype ? itype : BrickLink::core()->itemType('P')).row();
 	w_def_add_type->setCurrentIndex(adddef);
 
@@ -181,7 +181,7 @@ void DSettings::load()
 	w_bl_password->setText(blcred.second);
 
 	QNetworkProxy proxy = CConfig::inst()->proxy();
-	
+
 	w_proxy_host->setText(proxy.hostName());
 	w_proxy_port->setEditText(QString::number(proxy.port()));
 	w_proxy_user->setText(proxy.user());

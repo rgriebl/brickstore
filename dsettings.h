@@ -26,12 +26,12 @@ public:
 
 public slots:
     virtual void accept();
-    
+
 protected slots:
     void selectDocDir();
     void rateTypeToggled(bool);
     void resetUpdateIntervals();
-    
+
 protected:
     void load();
     void save();

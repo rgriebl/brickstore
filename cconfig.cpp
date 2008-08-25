@@ -446,7 +446,7 @@ void CConfig::setSimpleMode(bool sm)
 QMap<QByteArray, int> CConfig::updateIntervals() const
 {
     QMap<QByteArray, int> uiv = updateIntervalsDefault();
-    
+
     const char *lut[] = { "Picture", "PriceGuide", "Database", "LDraw", 0 };
 
     for (const char **ptr = lut; *ptr; ++ptr)
@@ -469,17 +469,17 @@ QMap<QByteArray, int> CConfig::updateIntervalsDefault() const
 
 void CConfig::setUpdateIntervals(const QMap<QByteArray, int> &uiv)
 {
-    bool modified = false;    
+    bool modified = false;
     QMap<QByteArray, int> old_uiv = updateIntervals();
-    
+
     for (QMapIterator<QByteArray, int> it(uiv); it.hasNext(); ) {
         it.next();
-        
+
         if (it.value() != old_uiv.value(it.key())) {
             setValue(QLatin1String("/BrickLink/UpdateInterval/") + it.key(), it.value());
             modified = true;
         }
-    }    
+    }
 
     if (modified)
         emit updateIntervalsChanged(updateIntervals());
@@ -531,7 +531,7 @@ bool CConfig::parseTranslations() const
 	if (file.open(QIODevice::ReadOnly)) {
 		QString err_str;
 		int err_line = 0, err_col = 0;
-	
+
 		if (doc.setContent(&file, &err_str, &err_line, &err_col)) {
 			QDomElement root = doc.documentElement();
 
@@ -565,7 +565,7 @@ bool CConfig::parseTranslations() const
 
 						QString tr_id = map.namedItem("lang").toAttr().value();
                         QString tr_name = name.toElement().text();
-                        
+
                         if (!tr_name.isEmpty())
                             trans.m_names[tr_id.isEmpty() ? trans.m_langid : tr_id] = tr_name;
 					}

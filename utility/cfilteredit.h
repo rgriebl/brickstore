@@ -31,9 +31,9 @@ public:
     void setClearIcon(const QIcon &icon);
 
     void setIdleText(const QString &str);
-    
-    virtual QSize sizeHint() const; 
-   virtual QSize minimumSizeHint() const; 
+
+    virtual QSize sizeHint() const;
+   virtual QSize minimumSizeHint() const;
 
     QString text() const;
     void setText(const QString &);
@@ -43,7 +43,7 @@ signals:
 
 protected:
     virtual void resizeEvent(QResizeEvent *e);
-    
+
 private:
     friend class CFilterEditPrivate;
     CFilterEditPrivate *d;

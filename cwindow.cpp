@@ -496,12 +496,12 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, CDocument::Item *it, const QStyl
     int key = -1;
 
     if (keypress) {
-        key = static_cast<QKeyEvent*>(e)->key();
+        key = static_cast<QKeyEvent *>(e)->key();
 
         if (key == Qt::Key_Space ||
             key == Qt::Key_Return ||
 #if defined( Q_WS_MAC )
-            (key == Qt::Key_O && e->modifiers() & Qt::ControlModifier)
+            (key == Qt::Key_O && static_cast<QKeyEvent *>(e)->modifiers() & Qt::ControlModifier)
 #else
             key == Qt::Key_F2
 #endif
@@ -1846,7 +1846,7 @@ void CWindow::contextMenu(const QPoint &p)
 
 void CWindow::on_file_close_triggered()
 {
-    close();
+    parentWidget()->close();
 }
 
 void CWindow::closeEvent(QCloseEvent *e)

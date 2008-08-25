@@ -37,15 +37,15 @@ typedef QLineEdit superclass;
 
 class CFilterEditPrivate : public superclass {
     Q_OBJECT
-    
+
     friend class CFilterEdit;
-    
+
 public:
     CFilterEditPrivate(CFilterEdit *parent);
     ~CFilterEditPrivate();
 
-    virtual QSize sizeHint() const; 
-    virtual QSize minimumSizeHint() const; 
+    virtual QSize sizeHint() const;
+    virtual QSize minimumSizeHint() const;
 
 protected slots:
     void checkText(const QString &);
@@ -93,7 +93,7 @@ CFilterEditPrivate::CFilterEditPrivate(CFilterEdit *parent)
     m_timer->setInterval(400);
 
     m_menu = 0;
-    
+
 //    setBackgroundRole(QPalette::Base);
 //    setAutoFillBackground(true);
 
@@ -105,7 +105,7 @@ CFilterEditPrivate::CFilterEditPrivate(CFilterEdit *parent)
     create(reinterpret_cast<WId>(m_hisearch));
     //setAttribute(Qt::WA_MacShowFocusRect);
     setAttribute(Qt::WA_MacNormalSize);
-    
+
 #else
     w_menu = new QToolButton(this);
     w_menu->setCursor(Qt::ArrowCursor);
@@ -126,7 +126,7 @@ CFilterEditPrivate::CFilterEditPrivate(CFilterEdit *parent)
 
     doLayout(false);
 #endif
-    
+
 }
 
 CFilterEditPrivate::~CFilterEditPrivate()
@@ -304,7 +304,7 @@ CFilterEdit::CFilterEdit(QWidget *parent)
     : QWidget(parent)
 {
     d = new CFilterEditPrivate(this);
-    
+
     setSizePolicy(d->sizePolicy());
     setFocusProxy(d);
 }
@@ -353,10 +353,10 @@ void CFilterEdit::setIdleText(const QString &str)
     const CFStringRef cfs = CFStringCreateWithCharactersNoCopy(kCFAllocatorDefault,
             reinterpret_cast<const UniChar *>(str.unicode()), str.length(), kCFAllocatorNull);
     HISearchFieldSetDescriptiveText(m_hisearch, cfs);
-    CFRelease(cfs);    
+    CFRelease(cfs);
 #else
     d->update();
-#endif    
+#endif
 }
 
 QSize CFilterEdit::sizeHint() const

@@ -17,13 +17,13 @@
 #include <QAction>
 #include <QDesktopWidget>
 #include <QCloseEvent>
+#include <QMetaObject>
+#include <QMetaMethod>
 #include <QMdiSubWindow>
 #include <QMenuBar>
 #include <QToolBar>
 #include <QStatusBar>
 #include <QMdiArea>
-#include <QMetaObject>
-#include <QMetaMethod>
 #include <qtimer.h>
 #include <qlabel.h>
 #include <qbitmap.h>
@@ -141,16 +141,16 @@ private slots:
         addAction(m_tabtop);
         addAction(m_tabbot);
 
-        
+
         if (m_mdi->viewMode() == QMdiArea::SubWindowView)
             m_subwin->setChecked(true);
-        else if (m_mdi->tabPosition() == QTabWidget::North) 
+        else if (m_mdi->tabPosition() == QTabWidget::North)
             m_tabtop->setChecked(true);
         else
             m_tabbot->setChecked(true);
 
         QList<QMdiSubWindow *> subw = m_mdi->subWindowList();
-        
+
         if (subw.isEmpty()){
             return;
         }
@@ -235,7 +235,7 @@ bool CFrameWork::eventFilter(QObject *o, QEvent *e)
 {
     if (o == m_mdi && e->type() == QEvent::ChildPolished) {
         QChildEvent *ce = static_cast<QChildEvent *>(e);
-        
+
         if (QTabBar *tb = qobject_cast<QTabBar *>(ce->child())) {
             tb->setElideMode(Qt::ElideMiddle);
             tb->setDrawBase(false);
@@ -275,6 +275,7 @@ CFrameWork::CFrameWork(QWidget *parent, Qt::WindowFlags f)
 
     m_current_window = 0;
 
+#if defined( WORKSPACE )
     m_mdi = new CWorkspace(this);
     m_mdi->setTabMode(static_cast<CWorkspace::TabMode>(CConfig::inst()->value("/MainWindow/Layout/WindowMode", CWorkspace::TopTabs).toInt()));
     connect(m_mdi, SIGNAL(currentChanged(QWidget *)), this, SLOT(connectWindow(QWidget *)));
@@ -501,7 +502,7 @@ CFrameWork::CFrameWork(QWidget *parent, Qt::WindowFlags f)
     ba = CConfig::inst()->value("/MainWindow/Layout/DockWindows").toByteArray();
     if (ba.isEmpty() || !restoreState(ba))
         m_toolbar->show();
-    
+
     BrickLink::Core *bl = BrickLink::core();
 
     connect(CConfig::inst(), SIGNAL(onlineStatusChanged(bool)), bl, SLOT(setOnlineStatus(bool)));
@@ -1100,9 +1101,9 @@ void CFrameWork::createActions()
     (void) newQAction(this, "view_simple_mode", true, CConfig::inst(), SLOT(setSimpleMode(bool)));
 
     m_toolbar->toggleViewAction()->setObjectName("view_toolbar");
-    
+
     (void) m_taskpanes->createItemVisibilityAction(this, "view_infobar");
-    
+
     (void) newQAction(this, "view_statusbar", true, this, SLOT(viewStatusBar(bool)));
 
     (void) newQAction(this, "view_show_input_errors", true, CConfig::inst(), SLOT(setShowInputErrors(bool)));
@@ -1217,7 +1218,7 @@ bool CFrameWork::checkBrickLinkLogin()
 
         if (!auth.first.isEmpty() && !auth.second.isEmpty())
             return true;
-            
+
         if (CMessageBox::question(this, tr("No valid BrickLink login settings found.<br /><br />Do you want to change the settings now?"), CMessageBox::Yes | CMessageBox::No) == CMessageBox::Yes)
             configure("network");
         else
@@ -1274,7 +1275,7 @@ bool CFrameWork::createWindow(CDocument *doc)
 
     foreach(QMdiSubWindow *w, m_mdi->subWindowList()) {
         CWindow *iw = qobject_cast<CWindow *>(w->widget());
-        
+
         if (iw && iw->document() == doc) {
             m_mdi->setActiveSubWindow(w);
             iw->setFocus();
@@ -1286,7 +1287,7 @@ bool CFrameWork::createWindow(CDocument *doc)
     QMdiSubWindow *sw = m_mdi->addSubWindow(new CWindow(doc, 0));
     if (sw)
         sw->widget()->show();
-    
+
     return (sw);
 }
 
