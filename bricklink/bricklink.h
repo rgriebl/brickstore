@@ -35,6 +35,7 @@
 #include <QMutex>
 #include <QTimer>
 #include <QCache>
+#include <QPointer>
 
 
 #include <time.h>
@@ -883,6 +884,9 @@ public:
 
     bool onlineStatus() const;
 
+    CTransfer *transfer() const;
+    void setTransfer(CTransfer *trans);
+
 public slots:
     bool readDatabase(const QString &filename = QString());
     bool writeDatabase(const QString &filename, DatabaseVersion version);
@@ -892,7 +896,6 @@ public slots:
 
     void setOnlineStatus(bool on);
     void setUpdateIntervals(int pic, int pg);
-    void setHttpProxy(const QNetworkProxy &proxy);
 
     void cancelPictureTransfers();
     void cancelPriceGuideTransfers();
@@ -953,11 +956,13 @@ private:
     ItemTypeModel *m_itemtype_model;
     ItemModel *    m_item_model;
 
-    CTransfer                  m_pg_transfer;
+    QPointer<CTransfer>  m_transfer;
+
+    //CTransfer                  m_pg_transfer;
     int                        m_pg_update_iv;
     QCache<quint64, PriceGuide> m_pg_cache;
 
-    CTransfer                 m_pic_transfer;
+    //CTransfer                 m_pic_transfer;
     int                       m_pic_update_iv;
 
     CThreadPool               m_pic_diskload;

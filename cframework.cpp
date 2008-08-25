@@ -506,7 +506,7 @@ CFrameWork::CFrameWork(QWidget *parent, Qt::WindowFlags f)
 
     connect(CConfig::inst(), SIGNAL(onlineStatusChanged(bool)), bl, SLOT(setOnlineStatus(bool)));
     connect(CConfig::inst(), SIGNAL(updateIntervalsChanged(int, int)), bl, SLOT(setUpdateIntervals(int, int)));
-    connect(CConfig::inst(), SIGNAL(proxyChanged(bool, const QString &, int)), bl, SLOT(setHttpProxy(bool, const QString &, int)));
+    connect(CConfig::inst(), SIGNAL(proxyChanged(QNetworkProxy)), bl->transfer(), SLOT(setProxy(QNetworkProxy)));
     connect(CMoney::inst(), SIGNAL(monetarySettingsChanged()), this, SLOT(statisticsUpdate()));
     connect(CConfig::inst(), SIGNAL(weightSystemChanged(CConfig::WeightSystem)), this, SLOT(statisticsUpdate()));
     connect(CConfig::inst(), SIGNAL(simpleModeChanged(bool)), this, SLOT(setSimpleMode(bool)));
@@ -519,7 +519,6 @@ CFrameWork::CFrameWork(QWidget *parent, Qt::WindowFlags f)
     findAction(CConfig::inst()->onlineStatus() ? "extras_net_online" : "extras_net_offline")->setChecked(true);
 
     bl->setOnlineStatus(CConfig::inst()->onlineStatus());
-    bl->setHttpProxy(CConfig::inst()->proxy());
     {
         QMap<QByteArray, int> uiv = CConfig::inst()->updateIntervals();
         bl->setUpdateIntervals(uiv["Picture"], uiv["PriceGuide"]);
@@ -1297,7 +1296,10 @@ bool CFrameWork::updateDatabase()
     if (closeAllWindows()) {
         delete m_add_dialog;
 
-        CProgressDialog d(this);
+        CTransfer trans(1);
+        trans.setProxy(CConfig::inst()->proxy());
+
+        CProgressDialog d(&trans, this);
         CUpdateDatabase update(&d);
 
         return d.exec();

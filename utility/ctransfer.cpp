@@ -18,8 +18,8 @@
 #include <QHttp>
 #include <QTimer>
 #include <QNetworkCookieJar>
+#include <QCoreApplication>
 
-#include "capplication.h"
 #include "ctransfer.h"
 
 
@@ -73,13 +73,10 @@ public:
     CTransferEngine(CTransfer *trans)
         : CThreadPoolEngine(trans)
     {
-        m_user_agent = cApp->appName() + "/" +
-                       cApp->appVersion() + " (" +
-                       cApp->sysName() + " " +
-                       cApp->sysVersion() + "; http://" +
-                       cApp->appURL() + ")";
-
+        m_user_agent = trans->userAgent();
         m_http = new QHttp(this);
+        m_http->setProxy(trans->proxy());
+
         connect(m_http, SIGNAL(responseHeaderReceived(const QHttpResponseHeader &)), this, SLOT(responseHeaderReceived(const QHttpResponseHeader &)));
         connect(m_http, SIGNAL(readyRead(const QHttpResponseHeader &)), this, SLOT(readyRead(const QHttpResponseHeader &)));
         connect(m_http, SIGNAL(dataReadProgress(int, int)), this, SLOT(progress(int, int)));
@@ -319,13 +316,24 @@ CTransferJob *CTransferJob::create(HttpMethod method, const QUrl &url, const QDa
 // ===========================================================================
 // ===========================================================================
 
+QString CTransfer::s_default_user_agent;
+
 CTransfer::CTransfer(int threadcount)
     : CThreadPool(threadcount)
-{ }
+{
+    if (s_default_user_agent.isEmpty())
+        s_default_user_agent = QString("%1/%2").arg(qApp->applicationName()).arg(qApp->applicationVersion());
+    m_user_agent = s_default_user_agent;
+}
 
 void CTransfer::setProxy(const QNetworkProxy &proxy)
 {
     m_proxy = proxy;
+}
+
+void CTransfer::setUserAgent(const QString &ua)
+{
+    m_user_agent = ua;
 }
 
 CThreadPoolEngine *CTransfer::createThreadPoolEngine()

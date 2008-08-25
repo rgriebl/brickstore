@@ -684,7 +684,10 @@ QList<CDocument *> CDocument::fileImportBrickLinkOrders()
 
 CDocument *CDocument::fileImportBrickLinkStore()
 {
-    CProgressDialog d(CFrameWork::inst());
+    CTransfer trans(1);
+    trans.setProxy(CConfig::inst()->proxy());
+
+    CProgressDialog d(&trans, CFrameWork::inst());
     CImportBLStore import(&d);
 
     if (d.exec() == QDialog::Accepted) {
@@ -717,7 +720,10 @@ CDocument *CDocument::fileImportBrickLinkCart()
         int cartid = rx.cap(2).toInt();
 
         if (shopid && cartid) {
-            CProgressDialog d(CFrameWork::inst());
+            CTransfer trans(1);
+            trans.setProxy(CConfig::inst()->proxy());
+
+            CProgressDialog d(&trans, CFrameWork::inst());
             CImportBLCart import(shopid, cartid, &d);
 
             if (d.exec() == QDialog::Accepted) {
@@ -758,7 +764,10 @@ CDocument *CDocument::fileImportPeeronInventory()
     QString peeronid;
 
     if (CMessageBox::getString(CFrameWork::inst(), tr("Enter the set ID of the Peeron inventory:"), peeronid)) {
-        CProgressDialog d(CFrameWork::inst());
+        CTransfer trans(1);
+        trans.setProxy(CConfig::inst()->proxy());
+
+        CProgressDialog d(&trans, CFrameWork::inst());
         CImportPeeronInventory import(peeronid, &d);
 
         if (d.exec() == QDialog::Accepted) {

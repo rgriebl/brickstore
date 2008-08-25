@@ -653,7 +653,7 @@ BrickLink::Core *BrickLink::Core::create(const QString &datadir, QString *errstr
 BrickLink::Core::Core(const QString &datadir)
     : m_datadir(datadir), m_c_locale(QLocale::c()), m_corelock(QMutex::Recursive),
       m_color_model(0), m_category_model(0), m_itemtype_model (0), m_item_model(0),
-      m_pg_transfer(5), m_pg_update_iv(0), m_pic_transfer(10), m_pic_update_iv(0),
+      m_transfer(0), m_pg_update_iv(0), m_pic_update_iv(0),
       m_pic_diskload(QThread::idealThreadCount() * 3)
 {
     if (m_datadir.isEmpty())
@@ -674,12 +674,7 @@ BrickLink::Core::Core(const QString &datadir)
     m_pg_cache.setMaxCost(500);          // each priceguide has a cost of 1
     m_pic_cache.setMaxCost(cachemem);    // each pic has a cost of (w*h*d/8 + 1024)
 
-    connect(&m_pg_transfer,  SIGNAL(finished(CThreadPoolJob *)), this, SLOT(priceGuideJobFinished(CThreadPoolJob *)));
-    connect(&m_pic_transfer, SIGNAL(finished(CThreadPoolJob *)), this, SLOT(pictureJobFinished(CThreadPoolJob *)));
     connect(&m_pic_diskload, SIGNAL(finished(CThreadPoolJob *)), this, SLOT(pictureLoaded(CThreadPoolJob *)));
-
-    connect(&m_pic_transfer, SIGNAL(progress(int, int)), this, SIGNAL(pictureProgress(int, int)));
-    connect(&m_pg_transfer,  SIGNAL(progress(int, int)), this, SIGNAL(priceGuideProgress(int, int)));
 }
 
 BrickLink::Core::~Core()
@@ -692,10 +687,31 @@ BrickLink::Core::~Core()
     s_inst = 0;
 }
 
-void BrickLink::Core::setHttpProxy(const QNetworkProxy &proxy)
+void BrickLink::Core::setTransfer(CTransfer *trans)
 {
-    m_pic_transfer.setProxy(proxy);
-    m_pg_transfer.setProxy(proxy);
+    CTransfer *old = m_transfer;
+
+    m_transfer = trans;
+
+    if (old) { // disconnect
+        disconnect(old, SIGNAL(finished(CThreadPoolJob *)), this, SLOT(priceGuideJobFinished(CThreadPoolJob *)));
+        disconnect(old, SIGNAL(finished(CThreadPoolJob *)), this, SLOT(pictureJobFinished(CThreadPoolJob *)));
+
+        disconnect(old, SIGNAL(progress(int, int)), this, SIGNAL(pictureProgress(int, int)));
+        disconnect(old, SIGNAL(progress(int, int)), this, SIGNAL(priceGuideProgress(int, int)));
+    }
+    if (trans) { // connect
+        connect(trans, SIGNAL(finished(CThreadPoolJob *)), this, SLOT(priceGuideJobFinished(CThreadPoolJob *)));
+        connect(trans, SIGNAL(finished(CThreadPoolJob *)), this, SLOT(pictureJobFinished(CThreadPoolJob *)));
+
+        connect(trans, SIGNAL(progress(int, int)), this, SIGNAL(pictureProgress(int, int)));
+        connect(trans, SIGNAL(progress(int, int)), this, SIGNAL(priceGuideProgress(int, int)));
+    }
+}
+
+CTransfer *BrickLink::Core::transfer() const
+{
+    return m_transfer;
 }
 
 void BrickLink::Core::setUpdateIntervals(int pic, int pg)
@@ -811,14 +827,14 @@ void BrickLink::Core::cancelPictureTransfers()
     QMutexLocker lock(&m_corelock);
 
     m_pic_diskload.abortAllJobs();
-    m_pic_transfer.abortAllJobs();
+    m_transfer->abortAllJobs();
 }
 
 void BrickLink::Core::cancelPriceGuideTransfers()
 {
     QMutexLocker lock(&m_corelock);
 
-    m_pg_transfer.abortAllJobs();
+    m_transfer->abortAllJobs();
 }
 
 QString BrickLink::Core::defaultDatabaseName(DatabaseVersion version) const

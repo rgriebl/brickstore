@@ -308,7 +308,10 @@ void DImportOrder::start()
 
 void DImportOrder::download()
 {
-    CProgressDialog progress(this);
+    CTransfer trans(1);
+    trans.setProxy(CConfig::inst()->proxy());
+
+    CProgressDialog progress(&trans, this);
     CImportBLOrder *import;
 
     if (w_by_number->isChecked())

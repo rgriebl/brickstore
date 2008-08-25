@@ -31,16 +31,33 @@ arch=`uname -p`
 [ "$arch" = "i386" ] && arch="intel" 
 archive="BrickStore-$arch-$pkg_ver"
 
-tmpdir="macx-bundle/$pkg_ver/tmp"
-
 echo
 echo "Creating Mac Os X bundle ($pkg_ver)"
 
-echo -n " > Populating bundle.."
-rm -rf "macx-bundle/$pkg_ver"
-mkdir -p "$tmpdir/$bundle"
-#cp ../README.txt "$tmpdir"
+echo " > Creating tarball..."
+scripts/mkdist.sh "$pkg_ver"
 
+echo " > Creating Mac Os X build directories..."
+cd macx-bundle
+rm -rf tmp
+mkdir tmp
+tar -xjf "../brickstore-$pkg_ver.tar.bz2" -C tmp
+tmpdir="tmp/brickstore-$pkg_ver"
+cd "$tmpdir"
+
+cp -aH ../../../qsa .
+[ -f ../../../.private-key ] && cp -H ../../../.private-key .
+
+echo -n " > Compiling..."
+qmake
+make
+
+echo -n " > Populating bundle.."
+if [ ! -d "$bundle" ]; then
+    echo "Bundle \"$bundle\" was not created by make"
+    exit 3
+fi
+cd ../..
 cat macx-bundle/install-table.txt | while read xsrc xdst xname; do
 	[ -z "${xsrc}" ] && continue
 	[ "${xsrc:0:1}" = "#" ] && continue

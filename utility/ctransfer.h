@@ -82,6 +82,12 @@ public:
     inline bool retrieve(CTransferJob *job, bool high_priority = false)
     { return execute(job, high_priority); }
 
+    QNetworkProxy proxy() const  { return m_proxy; }
+    QString userAgent() const    { return m_user_agent; }
+
+    static void setDefaultUserAgent(const QString &ua)   { s_default_user_agent = ua; }
+    static QString defaultUserAgent()                    { return s_default_user_agent; }
+
 signals:
     void finished(CTransferJob *);
     void started(CTransferJob *);
@@ -92,9 +98,13 @@ protected:
 
 public slots:
     void setProxy(const QNetworkProxy &proxy);
+    void setUserAgent(const QString &ua);
 
 private:
-    QNetworkProxy         m_proxy;
+    QNetworkProxy m_proxy;
+    QString       m_user_agent;
+
+    static QString s_default_user_agent;
 };
 
 #endif

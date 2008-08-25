@@ -19,23 +19,26 @@
 #include <QFile>
 #include <QDialogButtonBox>
 #include <QLayout>
+#include <QApplication>
 
-#include "capplication.h"
-#include "cconfig.h"
+//#include "cconfig.h"
 
 #include "cprogressdialog.h"
 
-CProgressDialog::CProgressDialog(QWidget *parent, Qt::WindowFlags f)
+CProgressDialog::CProgressDialog(CTransfer *trans, QWidget *parent, Qt::WindowFlags f)
     : QDialog(parent, f)
 {
     m_has_errors = false;
     m_autoclose = true;
     m_job = 0;
-    m_trans = 0;
+    m_trans = trans;
+
+    connect(m_trans, SIGNAL(finished(CThreadPoolJob *)), this, SLOT(transferDone(CThreadPoolJob *)));
+    connect(m_trans, SIGNAL(jobProgress(CThreadPoolJob *, int, int)), this, SLOT(transferProgress(CThreadPoolJob *, int, int)));
 
     m_message_progress = false;
 
-    setWindowTitle(cApp->appName());
+    setWindowTitle(qApp->applicationName());
 
     int minwidth = fontMetrics().width('m') * 40;
 
@@ -85,13 +88,12 @@ CProgressDialog::CProgressDialog(QWidget *parent, Qt::WindowFlags f)
 
 CProgressDialog::~CProgressDialog()
 {
-    delete m_trans;
 }
 
 void CProgressDialog::done(int r)
 {
-    if (m_trans)
-        m_trans->abortAllJobs();
+    if (m_job && m_job->isActive())
+        m_job->abort();
 
     QDialog::done(r);
 
@@ -209,21 +211,6 @@ void CProgressDialog::transferDone(CThreadPoolJob *pj)
         emit transferFinished();
 }
 
-bool CProgressDialog::initTransfer()
-{
-    if (m_trans)
-        return true;
-
-    m_trans = new CTransfer(1);
-
-    connect(m_trans, SIGNAL(finished(CThreadPoolJob *)), this, SLOT(transferDone(CThreadPoolJob *)));
-    connect(m_trans, SIGNAL(jobProgress(CThreadPoolJob *, int, int)), this, SLOT(transferProgress(CThreadPoolJob *, int, int)));
-
-    m_trans->setProxy(CConfig::inst()->proxy());
-
-    return true;
-}
-
 bool CProgressDialog::hasErrors() const
 {
     return m_has_errors;
@@ -231,22 +218,16 @@ bool CProgressDialog::hasErrors() const
 
 bool CProgressDialog::post(const QUrl &url, QIODevice *file)
 {
-    if (initTransfer()) {
-        m_job = CTransferJob::post(url, file);
-        m_trans->retrieve(m_job);
-        return true;
-    }
-    return false;
+    m_job = CTransferJob::post(url, file);
+    m_trans->retrieve(m_job);
+    return true;
 }
 
 bool CProgressDialog::get(const QUrl &url, const QDateTime &ifnewer, QIODevice *file)
 {
-    if (initTransfer()) {
-        m_job = CTransferJob::getIfNewer(url, ifnewer, file);
-        m_trans->retrieve(m_job);
-        return true;
-    }
-    return false;
+    m_job = CTransferJob::getIfNewer(url, ifnewer, file);
+    m_trans->retrieve(m_job);
+    return true;
 }
 
 

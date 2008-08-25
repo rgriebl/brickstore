@@ -29,7 +29,7 @@ class CProgressDialog : public QDialog {
     Q_OBJECT
 
 public:
-    CProgressDialog(QWidget *parent = 0, Qt::WindowFlags f = 0);
+    CProgressDialog(CTransfer *trans, QWidget *parent = 0, Qt::WindowFlags f = 0);
     virtual ~CProgressDialog();
 
     void setAutoClose(bool ac);
@@ -59,7 +59,6 @@ private slots:
     void transferDone(CThreadPoolJob *job);
 
 private:
-    bool initTransfer();
     void syncRepaint(QWidget *w);
 
 private:

@@ -36,6 +36,7 @@
 #include "csplash.h"
 #include "cmessagebox.h"
 #include "cframework.h"
+#include "ctransfer.h"
 //#include "creport.h"
 
 #include "utility.h"
@@ -61,6 +62,8 @@ CApplication::CApplication(bool rebuild_db_only, int _argc, char **_argv)
     setOrganizationName("Softforge");
     setOrganizationDomain("softforge.de");
     setApplicationName(appName());
+
+    CTransfer::setDefaultUserAgent(appName() + "/" + cApp->appVersion() + " (" + cApp->sysName() + " " + cApp->sysVersion() + "; http://" + cApp->appURL() + ")");
 
     if (!rebuild_db_only)
         CSplash::inst();
@@ -282,6 +285,9 @@ bool CApplication::initBrickLink()
     if (!bl)
         CMessageBox::critical(0, tr("Could not initialize the BrickLink kernel:<br /><br />%1").arg(errstring));
 
+    bl->setTransfer(new CTransfer(10));
+    bl->transfer()->setProxy(CConfig::inst()->proxy());
+
     LDraw::Core *ld = LDraw::create(QString(), &errstring);
 
     if (!ld)
@@ -437,7 +443,10 @@ void CApplication::demoVersion()
 
 void CApplication::checkForUpdates()
 {
-    CProgressDialog d(CFrameWork::inst());
+    CTransfer trans(1);
+    trans.setProxy(CConfig::inst()->proxy());
+
+    CProgressDialog d(&trans, CFrameWork::inst());
     CCheckForUpdates cfu(&d);
     d.exec();
 }

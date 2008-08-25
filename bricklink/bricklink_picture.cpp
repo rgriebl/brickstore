@@ -212,7 +212,7 @@ void BrickLink::Core::updatePicture(BrickLink::Picture *pic, bool high_priority)
 
     QMutexLocker lock(&m_corelock);
 
-    if (!m_online) {
+    if (!m_online || !m_transfer) {
         pic->m_update_status = UpdateFailed;
         emit pictureUpdated(pic);
         return;
@@ -240,7 +240,7 @@ void BrickLink::Core::updatePicture(BrickLink::Picture *pic, bool high_priority)
     //qDebug ( "PIC request started for %s", (const char *) url );
     CTransferJob *job = CTransferJob::get(url);
     job->setUserData<Picture>(pic);
-    m_pic_transfer.retrieve(job, high_priority);
+    m_transfer->retrieve(job, high_priority);
 }
 
 
@@ -295,6 +295,11 @@ void BrickLink::Core::pictureJobFinished(CThreadPoolJob *pj)
     else if (large && (j->responseCode() == 404) && (j->url().path().endsWith(".jpg"))) {
         // no large JPG image ->try a GIF image instead
 
+        if (!m_transfer) {
+            pic->m_update_status = UpdateFailed;
+            return;
+        }
+
         pic->m_update_status = Updating;
 
         QUrl url = j->url();
@@ -306,7 +311,7 @@ void BrickLink::Core::pictureJobFinished(CThreadPoolJob *pj)
         //qDebug ( "PIC request started for %s", (const char *) url );
         CTransferJob *job = CTransferJob::get(url);
         job->setUserData<Picture>(pic);
-        m_pic_transfer.retrieve(job);
+        m_transfer->retrieve(job);
         return;
     }
     else

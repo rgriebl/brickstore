@@ -399,7 +399,7 @@ void BrickLink::Core::updatePriceGuide(BrickLink::PriceGuide *pg, bool high_prio
     if (!pg || (pg->m_update_status == Updating))
         return;
 
-    if (!m_online) {
+    if (!m_online || !m_transfer) {
         pg->m_update_status = UpdateFailed;
         emit priceGuideUpdated(pg);
         return;
@@ -419,7 +419,7 @@ void BrickLink::Core::updatePriceGuide(BrickLink::PriceGuide *pg, bool high_prio
     //qDebug ( "PG request started for %s", (const char *) url );
     CTransferJob *job = CTransferJob::get(url);
     job->setUserData(pg);
-    m_pg_transfer.retrieve(job, high_priority);
+    m_transfer->retrieve(job, high_priority);
 }
 
 
