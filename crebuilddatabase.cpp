@@ -11,13 +11,13 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <stdlib.h>
+#include <cstdlib>
 
 #include <QFile>
 #include <QApplication>
 
 #if defined(Q_OS_WIN)
-#include <windows.h>
+#  include <windows.h>
 #endif
 
 #include "bricklink.h"

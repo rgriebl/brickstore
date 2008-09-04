@@ -11,7 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <float.h>
+#include <cfloat>
 
 #include <QUndoStack>
 #include <QAction>
@@ -24,14 +24,14 @@
 #include <QToolBar>
 #include <QStatusBar>
 #include <QMdiArea>
-#include <qtimer.h>
-#include <qlabel.h>
-#include <qbitmap.h>
-#include <qdir.h>
-#include <qfileinfo.h>
+#include <QTimer>
+#include <QLabel>
+#include <QBitmap>
+#include <QDir>
+#include <QFileInfo>
 #include <QToolButton>
-#include <qtooltip.h>
-#include <qcursor.h>
+#include <QTooltip>
+#include <QCursor>
 #include <QStyleFactory>
 #include <QShortcut>
 

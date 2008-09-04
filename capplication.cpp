@@ -21,7 +21,7 @@
 #include <QFileOpenEvent>
 
 #if defined( Q_OS_UNIX )
-#include <sys/utsname.h>
+#  include <sys/utsname.h>
 #endif
 
 #include "dinformation.h"

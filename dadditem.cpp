@@ -11,18 +11,18 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <qlineedit.h>
-#include <qlayout.h>
-#include <qlabel.h>
-#include <qstyle.h>
+#include <QLineEdit>
+#include <QLayout>
+#include <QLabel>
+#include <QStyle>
 #include <QButtonGroup>
-#include <qradiobutton.h>
-#include <qvalidator.h>
-#include <qtextedit.h>
-#include <qpushbutton.h>
-#include <qcursor.h>
-#include <qcheckbox.h>
-#include <qtoolbutton.h>
+#include <QRadioButton>
+#include <QValidator>
+#include <QTextEdit>
+#include <QPushButton>
+#include <QCursor>
+#include <QCheckBox>
+#include <QToolbutton>
 #include <QWheelEvent>
 
 #include "cconfig.h"

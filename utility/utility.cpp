@@ -21,20 +21,17 @@
 #include <QWidget>
 
 #if defined( Q_OS_WIN )
-#include <windows.h>
-
+#  include <windows.h>
 #elif defined( Q_OS_BSD4 )
-#include <sys/types.h>
-#include <sys/sysctl.h>
-
+#  include <sys/types.h>
+#  include <sys/sysctl.h>
 #else
-#include <QFile>
-#include <QByteArray>
-
+#  include <QFile>
+#  include <QByteArray>
 #endif
 
 #if defined( Q_WS_X11 )
-#include <QMainWindow>
+#  include <QMainWindow>
 #endif
 
 #include "utility.h"

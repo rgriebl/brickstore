@@ -11,8 +11,8 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <stdlib.h>
-#include <time.h>
+#include <cstdlib>
+#include <ctime>
 
 
 #include <QGlobalStatic>
@@ -20,14 +20,12 @@
 #include <QDir>
 #include <QDomDocument>
 
-#if defined( Q_WS_WIN )
-#include <windows.h>
-#include <tchar.h>
-#include <shlobj.h>
-#endif
-
-#if defined ( Q_WS_MACX )
-#include <Carbon/Carbon.h>
+#if defined(Q_WS_WIN)
+#  include <windows.h>
+#  include <tchar.h>
+#  include <shlobj.h>
+#elif defined(Q_WS_MACX)
+#  include <Carbon/Carbon.h>
 #endif
 
 #include <QCryptographicHash>

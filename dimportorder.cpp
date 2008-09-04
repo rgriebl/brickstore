@@ -25,10 +25,10 @@
 #include <QVariant>
 
 #if defined( MODELTEST )
-#include <modeltest.h>
-#define MODELTEST_ATTACH(x)   { (void) new ModelTest(x, x); }
+#  include "modeltest.h"
+#  define MODELTEST_ATTACH(x)   { (void) new ModelTest(x, x); }
 #else
-#define MODELTEST_ATTACH(x)   ;
+#  define MODELTEST_ATTACH(x)   ;
 #endif
 
 #include "cimport.h"

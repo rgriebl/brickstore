@@ -11,22 +11,22 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <float.h>
-#include <math.h>
+#include <cfloat>
+#include <cmath>
 
-#include <qtoolbutton.h>
+#include <QToolButton>
 #include <QMenu>
 #include <QPainter>
-#include <qlayout.h>
-#include <qlabel.h>
-#include <qapplication.h>
-#include <qfiledialog.h>
-#include <qlineedit.h>
+#include <QLayout>
+#include <QLabel>
+#include <QApplication>
+#include <QFileDialog>
+#include <QLineEdit>
 #include <QTextLayout>
-#include <qvalidator.h>
-#include <qclipboard.h>
-#include <qcursor.h>
-#include <qtooltip.h>
+#include <QValidator>
+#include <QClipboard>
+#include <QCursor>
+#include <QTooltip>
 #include <QIcon>
 #include <QTableView>
 #include <QHeaderView>

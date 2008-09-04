@@ -11,22 +11,22 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <float.h>
+#include <cfloat>
 
-#include <qapplication.h>
-#include <qcursor.h>
-#include <qfiledialog.h>
-#include <qclipboard.h>
-#include <qprinter.h>
-#include <qpainter.h>
-#include <qregexp.h>
+#include <QApplication>
+#include <QCursor>
+#include <QFileDialog>
+#include <QClipboard>
+#include <QPrinter>
+#include <QPainter>
+#include <QRegExp>
 #include <QDesktopServices>
 
 #if defined( MODELTEST )
-#include <modeltest.h>
-#define MODELTEST_ATTACH(x)   { (void) new ModelTest(x, x); }
+#  include "modeltest.h"
+#  define MODELTEST_ATTACH(x)   { (void) new ModelTest(x, x); }
 #else
-#define MODELTEST_ATTACH(x)   ;
+#  define MODELTEST_ATTACH(x)   ;
 #endif
 
 #include "utility.h"

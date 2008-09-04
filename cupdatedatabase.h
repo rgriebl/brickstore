@@ -14,8 +14,8 @@
 #ifndef __CUPDATEDATABASE_H__
 #define __CUPDATEDATABASE_H__
 
-#include <qfile.h>
-#include <qdatetime.h>
+#include <QFile>
+#include <QDateTime>
 
 #include "lzmadec.h"
 

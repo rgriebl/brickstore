@@ -34,7 +34,7 @@
 #include "utility.h"
 
 #if defined( Q_WS_WIN )
-#include <windows.h>
+#  include <windows.h>
 #endif
 
 #define ANIM_DURATION   300

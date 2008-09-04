@@ -11,11 +11,11 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <qpainter.h>
-#include <qstyle.h>
-#include <qlist.h>
-#include <qmenu.h>
-#include <qcursor.h>
+#include <QPainter>
+#include <QStyle>
+#include <QList>
+#include <QMenu>
+#include <QCursor>
 #include <QAction>
 #include <QToolTip>
 #include <QEvent>

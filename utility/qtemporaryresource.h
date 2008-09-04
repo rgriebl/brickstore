@@ -14,7 +14,7 @@
 #ifndef QTEMPORARYRESOURCE_H
 #define QTEMPORARYRESOURCE_H
 
-#include <QtCore/qglobal.h>
+#include <QtGlobal>
 
 QT_BEGIN_HEADER
 

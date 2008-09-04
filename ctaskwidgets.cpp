@@ -12,7 +12,7 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 
-#include <float.h>
+#include <cfloat>
 
 #include <QDockWidget>
 #include <QMainWindow>
