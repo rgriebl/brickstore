@@ -25,8 +25,11 @@ class CThreadPoolEngine;
 class CThreadPool : public QObject {
     Q_OBJECT
 public:
+    CThreadPool();
     CThreadPool(int threadcount);
     virtual ~CThreadPool();
+
+    void init(int threadcount);
 
     bool execute(CThreadPoolJob *job, bool high_priority = false);
 

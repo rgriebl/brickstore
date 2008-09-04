@@ -113,8 +113,20 @@ bool CThreadPoolJob::abort()
 /////////////////////////////////////////////////////////////////
 
 
+CThreadPool::CThreadPool()
+{
+    init(0);
+}
+
 CThreadPool::CThreadPool(int threadcount)
 {
+    init(threadcount);
+}
+
+void CThreadPool::init(int threadcount)
+{
+    m_jobs_total = m_jobs_progress = 0;
+
     if (threadcount < 0 || threadcount > 32)
         threadcount = QThread::idealThreadCount();
 
@@ -124,8 +136,6 @@ CThreadPool::CThreadPool(int threadcount)
 
         thread->start(QThread::IdlePriority);
     }
-
-    m_jobs_total = m_jobs_progress = 0;
 }
 
 CThreadPool::~CThreadPool()
@@ -148,7 +158,7 @@ void CThreadPool::threadIsIdleNow(QThread *thread)
 
 bool CThreadPool::execute(CThreadPoolJob *job, bool high_priority)
 {
-    if (!job || job->threadPool())
+    if (!job || job->threadPool() || m_threads.isEmpty())
         return false;
 
     job->m_threadpool = this;

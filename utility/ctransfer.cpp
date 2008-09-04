@@ -319,11 +319,13 @@ CTransferJob *CTransferJob::create(HttpMethod method, const QUrl &url, const QDa
 QString CTransfer::s_default_user_agent;
 
 CTransfer::CTransfer(int threadcount)
-    : CThreadPool(threadcount)
+    : CThreadPool()
 {
     if (s_default_user_agent.isEmpty())
         s_default_user_agent = QString("%1/%2").arg(qApp->applicationName()).arg(qApp->applicationVersion());
     m_user_agent = s_default_user_agent;
+
+    init(threadcount);
 }
 
 void CTransfer::setProxy(const QNetworkProxy &proxy)
