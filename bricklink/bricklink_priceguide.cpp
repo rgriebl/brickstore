@@ -23,7 +23,7 @@
 
 BrickLink::AllTimePriceGuide BrickLink::Core::allTimePriceGuide(const Item *item, const Color *color) const
 {
-    static AllTimePriceGuide none = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    static AllTimePriceGuide none = {0, 0, { {0, 0, 0, 0}, {0, 0, 0, 0} } };
 
     if (!item || !color)
         return none;

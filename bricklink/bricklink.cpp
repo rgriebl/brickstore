@@ -159,7 +159,7 @@ bool ChunkReader::endChunk()
 
     quint64 endpos = m_file->pos();
     if (ci.startpos + ci.size != endpos) {
-        qWarning("ChunkReader: called endChunk() on a position %d bytes from the chunk end.", ci.startpos + ci.size - endpos);
+        qWarning("ChunkReader: called endChunk() on a position %lld bytes from the chunk end.", ci.startpos + ci.size - endpos);
         m_file->seek(ci.startpos + ci.size);
     }
 

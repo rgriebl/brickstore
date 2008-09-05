@@ -22,7 +22,7 @@
 #include <QPushButton>
 #include <QCursor>
 #include <QCheckBox>
-#include <QToolbutton>
+#include <QToolButton>
 #include <QWheelEvent>
 
 #include "cconfig.h"

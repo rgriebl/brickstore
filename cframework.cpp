@@ -30,7 +30,7 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QToolButton>
-#include <QTooltip>
+#include <QToolTip>
 #include <QCursor>
 #include <QStyleFactory>
 #include <QShortcut>

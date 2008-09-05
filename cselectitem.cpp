@@ -24,7 +24,7 @@
 #include <QApplication>
 #include <QCursor>
 #include <QRegExp>
-#include <QTooltip>
+#include <QToolTip>
 #include <QTreeView>
 #include <QListView>
 #include <QTableView>

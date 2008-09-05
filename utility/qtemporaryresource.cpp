@@ -17,7 +17,7 @@
 #include <QHash>
 #include <QtGlobal>
 #include <QVector>
-#include <QDatetime>
+#include <QDateTime>
 #include <QBuffer>
 #include <QImage>
 #include <QByteArray>

@@ -26,7 +26,7 @@
 #include <QValidator>
 #include <QClipboard>
 #include <QCursor>
-#include <QTooltip>
+#include <QToolTip>
 #include <QIcon>
 #include <QTableView>
 #include <QHeaderView>
