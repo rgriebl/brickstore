@@ -15,9 +15,9 @@
 #define __DSELECTCOLOR_H__
 
 #include <QDialog>
+#include "bricklinkfwd.h"
 #include "ui_selectcolor.h"
 
-class BrickLink::Color;
 
 class DSelectColor : public QDialog, private Ui::SelectColor {
     Q_OBJECT

@@ -25,7 +25,7 @@
 
 #if defined( Q_OS_MACX )
 
-#include <CoreFoundation/CFLocale.h>
+#  include <CoreFoundation/CFLocale.h>
 
 // copied and simplified to static functions from private/qcore_mac_p.h
 class QCFString {

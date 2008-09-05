@@ -38,7 +38,7 @@
 #include <QPointer>
 
 
-#include <time.h>
+#include <ctime>
 
 #include "cref.h"
 #include "cmoney.h"

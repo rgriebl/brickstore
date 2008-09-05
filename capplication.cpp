@@ -21,7 +21,7 @@
 #include <QFileOpenEvent>
 
 #if defined( Q_OS_UNIX )
-#include <sys/utsname.h>
+#  include <sys/utsname.h>
 #endif
 
 #include "dinformation.h"
@@ -57,7 +57,7 @@ CApplication::CApplication(bool rebuild_db_only, int _argc, char **_argv)
     cApp = this;
 
     m_enable_emit = false;
-    m_has_alpha = (QPixmap::defaultDepth() >= 15);
+    m_has_alpha = rebuild_db_only ? false : (QPixmap::defaultDepth() >= 15);
 
     setOrganizationName("Softforge");
     setOrganizationDomain("softforge.de");
@@ -82,7 +82,7 @@ CApplication::CApplication(bool rebuild_db_only, int _argc, char **_argv)
     // initialize config & resource
     (void) CConfig::inst()->upgrade(BRICKSTORE_MAJOR, BRICKSTORE_MINOR, BRICKSTORE_PATCH);
     (void) CMoney::inst();
-// (void) CReportManager::inst ( );
+//    (void) CReportManager::inst ( );
 
     m_trans_qt = 0;
     m_trans_brickstore = 0;
@@ -123,7 +123,7 @@ CApplication::~CApplication()
 {
     exitBrickLink();
 
-// delete CReportManager::inst ( );
+//    delete CReportManager::inst ( );
     delete CMoney::inst();
     delete CConfig::inst();
 }
@@ -282,18 +282,25 @@ bool CApplication::initBrickLink()
 
     BrickLink::Core *bl = BrickLink::create(CConfig::inst()->value("/BrickLink/DataDir", defdatadir).toString(), &errstring);
 
-    if (!bl)
-        CMessageBox::critical(0, tr("Could not initialize the BrickLink kernel:<br /><br />%1").arg(errstring));
-
+    if (!bl) {
+        if (type() == QApplication::Tty)
+            qCritical("Could not initialize the BrickLink kernel:\n%s", qPrintable(errstring));
+        else
+            CMessageBox::critical(0, tr("Could not initialize the BrickLink kernel:<br /><br />%1").arg(errstring));
+    }
+    
     bl->setTransfer(new CTransfer(10));
     bl->transfer()->setProxy(CConfig::inst()->proxy());
 
     LDraw::Core *ld = LDraw::create(QString(), &errstring);
 
-    if (!ld)
-        CMessageBox::critical(0, tr("Could not initialize the LDraw kernel:<br /><br />%1").arg(errstring));
-
-    return (bl != 0) && (ld != 0);
+    if (!ld) {
+        if (type() == QApplication::Tty)
+            qCritical("Could not initialize the LDraw kernel:\n%s", qPrintable(errstring));
+        else
+            CMessageBox::critical(0, tr("Could not initialize the LDraw kernel:<br /><br />%1").arg(errstring));
+    }
+    return (bl != 0); // && (ld != 0);
 }
 
 

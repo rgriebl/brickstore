@@ -14,16 +14,16 @@
 
 #include "qtemporaryresource.h"
 #include "qtemporaryresource_p.h"
-#include "qhash.h"
-#include "qglobal.h"
-#include "qvector.h"
-#include "qdatetime.h"
-#include "qbuffer.h"
-#include "qimage.h"
-#include "qbytearray.h"
-#include "qstringlist.h"
-#include <qshareddata.h>
-#include <qplatformdefs.h>
+#include <QHash>
+#include <QtGlobal>
+#include <QVector>
+#include <QDateTime>
+#include <QBuffer>
+#include <QImage>
+#include <QByteArray>
+#include <QStringList>
+//#include <qshareddata.h>
+//#include <qplatformdefs.h>
 //#include "private/qabstractfileengine_p.h"
 
 class QTemporaryResourcePrivate {

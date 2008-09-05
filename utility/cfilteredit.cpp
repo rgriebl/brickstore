@@ -24,15 +24,15 @@
 #include "cfilteredit.h"
 
 #if defined( Q_WS_MAC )
-//#define MAC_USE_NATIVE_SEARCHFIELD
+//#  define MAC_USE_NATIVE_SEARCHFIELD
 #endif
 
 #if defined( MAC_USE_NATIVE_SEARCHFIELD )
-#include <Carbon/Carbon.h>
-typedef QWidget superclass;
+#  include <Carbon/Carbon.h>
+   typedef QWidget superclass;
 #else
-#include <QLineEdit>
-typedef QLineEdit superclass;
+#  include <QLineEdit>
+   typedef QLineEdit superclass;
 #endif
 
 class CFilterEditPrivate : public superclass {
