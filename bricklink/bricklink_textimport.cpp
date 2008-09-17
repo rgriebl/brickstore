@@ -159,7 +159,7 @@ template <> Category *TextImport::parse<Category> (uint count, const char **strs
 
 template <> Color *TextImport::parse<Color> (uint count, const char **strs)
 {
-    if (count < 2)
+    if (count < 4)
         return 0;
 
     Color *col = new Color();
