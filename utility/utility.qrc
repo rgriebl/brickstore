@@ -1,0 +1,7 @@
+<!DOCTYPE RCC><RCC version="1.0">
+    <qresource>
+        <file>images/filter_edit_clear.png</file>
+        <file>images/filter_edit_menu.png</file>
+        <file>images/filter_edit_menu_arrow.png</file>
+    </qresource>
+</RCC>

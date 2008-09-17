@@ -22,24 +22,26 @@ class CFilterEditPrivate;
 
 class CFilterEdit : public QWidget {
     Q_OBJECT
+
 public:
     CFilterEdit(QWidget *parent = 0);
     void setMenu(QMenu *menu);
     QMenu *menu() const;
 
-    void setMenuIcon(const QIcon &icon);
-    void setClearIcon(const QIcon &icon);
-
-    void setIdleText(const QString &str);
-
     virtual QSize sizeHint() const;
-   virtual QSize minimumSizeHint() const;
+    virtual QSize minimumSizeHint() const;
 
     QString text() const;
+    QString idleText() const;
+
+public slots:
     void setText(const QString &);
+    void setIdleText(const QString &str);
+    void clear();
 
 signals:
     void textChanged(const QString &);
+    void returnPressed();
 
 protected:
     virtual void resizeEvent(QResizeEvent *e);

@@ -3,6 +3,8 @@ RELPWD = $$replace(PWD,$$_PRO_FILE_PWD_,.)
 INCLUDEPATH += $$RELPWD
 DEPENDPATH  += $$RELPWD
 
+RESOURCES += utility.qrc
+
 # is this really still needed?
 HEADERS += $$RELPWD/cdisableupdates.h \
            $$RELPWD/stopwatch.h \

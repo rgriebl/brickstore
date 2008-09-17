@@ -473,7 +473,7 @@ CFrameWork::CFrameWork(QWidget *parent, Qt::WindowFlags f)
         << "edit_bl_lotsforsale"
         << "-"             // << "edit_bl_info_group" << "-"
         << "extras_net"    // << "-" << "help_whatsthis";
-        << "<>"
+        << "|"
         << "widget_filter"
         << "|"
         << "widget_spinner"
@@ -836,13 +836,15 @@ bool CFrameWork::setupToolBar(QToolBar *t, const QStringList &a_names)
         }
         else if (an == "|") {
             QWidget *spacer = new QWidget();
-            spacer->setFixedSize(4, 4); //TODO: get spacing from QStyle
+            int sp = style()->pixelMetric(QStyle::PM_ToolBarSeparatorExtent);
+            spacer->setFixedSize(sp, sp);
             t->addWidget(spacer);
         }
         else if (an == "<>") {
             QWidget *spacer = new QWidget();
+            int sp = style()->pixelMetric(QStyle::PM_ToolBarSeparatorExtent);
+            spacer->setMinimumSize(sp, sp);
             spacer->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
-            spacer->setMinimumSize(0, 4);
             t->addWidget(spacer);
         }
         else if (an.startsWith("widget_")) {
@@ -853,8 +855,7 @@ bool CFrameWork::setupToolBar(QToolBar *t, const QStringList &a_names)
                 }
 
                 m_filter = new CFilterEdit();
-                m_filter->setMenuIcon(QIcon(":/images/22x22/filter_menu"));
-                m_filter->setClearIcon(QIcon(":/images/22x22/filter_clear"));
+                m_filter->setIdleText(tr("Filter"));
 
                 QMenu *m = new QMenu(this);
                 QActionGroup *ag = new QActionGroup(m);
