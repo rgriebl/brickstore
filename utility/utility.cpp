@@ -158,12 +158,12 @@ quint64 Utility::physicalMemory()
 
 #elif defined( Q_OS_WIN )
     if ((QSysInfo::WindowsVersion & QSysInfo::WV_NT_based) >= QSysInfo::WV_2000) {
-        MEMORYSTATUSEX memstatex;
+        MEMORYSTATUSEX memstatex = { sizeof(memstatex) };
         GlobalMemoryStatusEx(&memstatex);
         physmem = memstatex.ullTotalPhys;
     }
     else {
-        MEMORYSTATUS memstat;
+        MEMORYSTATUS memstat = { sizeof(memstat) };
         GlobalMemoryStatus(&memstat);
         physmem = memstat.dwTotalPhys;
     }

@@ -31,35 +31,35 @@ modeltest:debug:SUBPROJECTS += modeltest
 
 SOURCES += main.cpp
 
-HEADERS += ccheckforupdates.h \
-           cimport.h \
-           cref.h \
-           cupdatedatabase.h \
+HEADERS += checkforupdates.h \
+           import.h \
+           ref.h \
+           updatedatabase.h \
 
 
-XSOURCES = capplication \
-           csplash \
-           cconfig \
-           crebuilddatabase \
-           cdocument \
-           cselectcolor \
-           cframework \
-           cpicturewidget \
-           cappearsinwidget \
-           cpriceguidewidget \
-           ctaskwidgets \
-           cselectitem \
-           cwindow \
+XSOURCES = application \
+           splash \
+           config \
+           rebuilddatabase \
+           document \
+           selectcolor \
+           framework \
+           picturewidget \
+           appearsinwidget \
+           priceguidewidget \
+           taskwidgets \
+           selectitem \
+           window \
 
 
-XFORMS  = additem \
-          importinventory \
-          importorder \
-          information \
-          registration \
-          selectcolor \
-          selectitem \
-          settings \
+XFORMS  = additemdialog \
+          importinventorydialog \
+          importorderdialog \
+          informationdialog \
+          registrationdialog \
+          selectcolordialog \
+          selectitemdialog \
+          settingsdialog \
 
 
 #
@@ -74,9 +74,9 @@ for( src, XSOURCES ) {
 }
 
 for( form, XFORMS ) {
-  HEADERS += d$${form}.h
-  SOURCES += d$${form}.cpp
-  FORMS   += dialogs/$${form}.ui
+  HEADERS += $${form}.h
+  SOURCES += $${form}.cpp
+  FORMS   += $${form}.ui
 }
 
 for(subp, SUBPROJECTS) : include($${subp}/$${subp}.pri)

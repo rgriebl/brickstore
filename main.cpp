@@ -16,7 +16,7 @@
 
 #include <QMessageBox>
 
-#include "capplication.h"
+#include "application.h"
 
 
 // needed for themed common controls (e.g. file open dialogs)
@@ -49,7 +49,7 @@ int main(int argc, char **argv)
         return 1;
     }
     else {
-        CApplication a(rebuild_db, argc, argv);
+        Application a(rebuild_db, argc, argv);
         return a.exec();
     }
 }

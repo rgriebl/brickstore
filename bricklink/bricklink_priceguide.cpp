@@ -417,20 +417,23 @@ void BrickLink::Core::updatePriceGuide(BrickLink::PriceGuide *pg, bool high_prio
     url.addQueryItem("viewDec",  "3");
 
     //qDebug ( "PG request started for %s", (const char *) url );
-    CTransferJob *job = CTransferJob::get(url);
-    job->setUserData(pg);
+    TransferJob *job = TransferJob::get(url);
+    job->setUserData('G', pg);
     m_transfer->retrieve(job, high_priority);
 }
 
 
-void BrickLink::Core::priceGuideJobFinished(CThreadPoolJob *pj)
+void BrickLink::Core::priceGuideJobFinished(ThreadPoolJob *pj)
 {
-    CTransferJob *j = static_cast<CTransferJob *>(pj);
+    TransferJob *j = static_cast<TransferJob *>(pj);
 
-    if (!j || !j->data() || !j->userData<PriceGuide> ())
+    if (!j || !j->data())
         return;
 
-    PriceGuide *pg = j->userData<PriceGuide>();
+    PriceGuide *pg = j->userData<PriceGuide>('G');
+
+    if (!pg)
+        return;
 
     pg->m_update_status = UpdateFailed;
 

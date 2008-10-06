@@ -11,7 +11,7 @@
     </message>
 </context>
 <context>
-    <name>CAddRemoveCmd</name>
+    <name>AddRemoveCmd</name>
     <message>
         <source>Added %1 items</source>
         <translation>%1 items toegevoegd</translation>
@@ -30,7 +30,7 @@
     </message>
 </context>
 <context>
-    <name>CAppearsInWidget</name>
+    <name>AppearsInWidget</name>
     <message>
         <source>[Image is loading]</source>
         <translation>[Afbeelding wordt geladen]</translation>
@@ -69,7 +69,7 @@
     </message>
 </context>
 <context>
-    <name>CApplication</name>
+    <name>Application</name>
     <message>
         <source>Could not initialize the BrickLink kernel:&lt;br /&gt;&lt;br /&gt;%1</source>
         <translation>De BrickLink kernel kon niet worden gestart:&lt;br /&gt;&lt;br /&gt;%1</translation>
@@ -108,14 +108,14 @@
     </message>
 </context>
 <context>
-    <name>CChangeCmd</name>
+    <name>ChangeCmd</name>
     <message>
         <source>Modified item</source>
         <translation>Een item aangepast</translation>
     </message>
 </context>
 <context>
-    <name>CCheckForUpdates</name>
+    <name>CheckForUpdates</name>
     <message>
         <source>Checking for program updates</source>
         <translation>Aan het controleren op programma updates</translation>
@@ -158,7 +158,7 @@
     </message>
 </context>
 <context>
-    <name>CDocument</name>
+    <name>Document</name>
     <message>
         <source>Untitled</source>
         <translation>Naamloos</translation>
@@ -293,7 +293,7 @@
     </message>
 </context>
 <context>
-    <name>CFrameWork</name>
+    <name>FrameWork</name>
     <message>
         <source>Could not load the BrickLink database files.&lt;br /&gt;&lt;br /&gt;Should these files be updated now?</source>
         <translation>De BrickLink database bestanden konden niet worden geladen.&lt;br /&gt;&lt;br /&gt;Deze bestanden nu bijwerken?</translation>
@@ -864,7 +864,7 @@
     </message>
 </context>
 <context>
-    <name>CImportBLCart</name>
+    <name>ImportBLCart</name>
     <message>
         <source>Importing BrickLink Shopping Cart</source>
         <translation>BrickLink winkelwagen word geïmporteerd</translation>
@@ -883,7 +883,7 @@
     </message>
 </context>
 <context>
-    <name>CImportBLOrder</name>
+    <name>ImportBLOrder</name>
     <message>
         <source>Importing BrickLink Order</source>
         <translation>BrickLink bestelling word geïmporteerd</translation>
@@ -894,7 +894,7 @@
     </message>
 </context>
 <context>
-    <name>CImportBLStore</name>
+    <name>ImportBLStore</name>
     <message>
         <source>Importing BrickLink Store</source>
         <translation>BrickLink winkel word geïmporteerd</translation>
@@ -917,7 +917,7 @@
     </message>
 </context>
 <context>
-    <name>CImportPeeronInventory</name>
+    <name>ImportPeeronInventory</name>
     <message>
         <source>Importing Peeron Inventory</source>
         <translation>Peeron inventaris word geimporteerd</translation>
@@ -1152,7 +1152,7 @@
     </message>
 </context>
 <context>
-    <name>CMessageBox</name>
+    <name>MessageBox</name>
     <message>
         <source>&amp;OK</source>
         <translation>&amp;OK</translation>
@@ -1163,14 +1163,14 @@
     </message>
 </context>
 <context>
-    <name>CMultiProgressBar</name>
+    <name>MultiProgressBar</name>
     <message>
         <source>Cancel all active transfers</source>
         <translation>Annuleer alle actieve overdrachten</translation>
     </message>
 </context>
 <context>
-    <name>CPictureWidget</name>
+    <name>PictureWidget</name>
     <message>
         <source>Update</source>
         <translation>Bijwerken</translation>
@@ -1201,7 +1201,7 @@
     </message>
 </context>
 <context>
-    <name>CPriceGuideWidget</name>
+    <name>PriceGuideWidget</name>
     <message>
         <source>Double-click to set the price of the current item.</source>
         <translation>Dubbelklik om een prijs aan het huidige item te geven.</translation>
@@ -1292,7 +1292,7 @@
     </message>
 </context>
 <context>
-    <name>CProgressDialog</name>
+    <name>ProgressDialog</name>
     <message>
         <source>&amp;OK</source>
         <translation>&amp;OK</translation>
@@ -1311,7 +1311,7 @@
     </message>
 </context>
 <context>
-    <name>CSelectColor</name>
+    <name>SelectColor</name>
     <message>
         <source>RGB</source>
         <translation>RGB</translation>
@@ -1322,7 +1322,7 @@
     </message>
 </context>
 <context>
-    <name>CSelectColorDialog</name>
+    <name>SelectColorDialog</name>
     <message>
         <source>&amp;OK</source>
         <translation>&amp;OK</translation>
@@ -1333,7 +1333,7 @@
     </message>
 </context>
 <context>
-    <name>CSelectItem</name>
+    <name>SelectItem</name>
     <message>
         <source>All Items</source>
         <translation>Alle items</translation>
@@ -1409,7 +1409,7 @@
     </message>
 </context>
 <context>
-    <name>CSelectItemDialog</name>
+    <name>SelectItemDialog</name>
     <message>
         <source>&amp;OK</source>
         <translation>&amp;OK</translation>
@@ -1420,7 +1420,7 @@
     </message>
 </context>
 <context>
-    <name>CSplash</name>
+    <name>Splash</name>
     <message>
         <source>Loading Database...</source>
         <translation>Database word geladen...</translation>
@@ -1431,7 +1431,7 @@
     </message>
 </context>
 <context>
-    <name>CTaskInfoWidget</name>
+    <name>TaskInfoWidget</name>
     <message>
         <source>min.</source>
         <translation>min.</translation>
@@ -1458,7 +1458,7 @@
     </message>
 </context>
 <context>
-    <name>CTaskLinksWidget</name>
+    <name>TaskLinksWidget</name>
     <message>
         <source>BrickLink</source>
         <translation>BrickLink</translation>
@@ -1489,7 +1489,7 @@
     </message>
 </context>
 <context>
-    <name>CTaskPaneManager</name>
+    <name>TaskPaneManager</name>
     <message>
         <source>All</source>
         <translation>Alles</translation>
@@ -1504,7 +1504,7 @@
     </message>
 </context>
 <context>
-    <name>CUndoManager</name>
+    <name>UndoManager</name>
     <message>
         <source>Redo</source>
         <translation>Herhalen</translation>
@@ -1531,7 +1531,7 @@
     </message>
 </context>
 <context>
-    <name>CUpdateDatabase</name>
+    <name>UpdateDatabase</name>
     <message>
         <source>Updating BrickLink Database</source>
         <translation>BrickLink database aan het bijwerken</translation>
@@ -1605,7 +1605,7 @@
     </message>
 </context>
 <context>
-    <name>CWindow</name>
+    <name>Window</name>
     <message>
         <source>Filter:</source>
         <translation>Filter:</translation>

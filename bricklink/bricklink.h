@@ -40,10 +40,10 @@
 
 #include <ctime>
 
-#include "cref.h"
-#include "cmoney.h"
-#include "cthreadpool.h"
-#include "ctransfer.h"
+#include "ref.h"
+#include "money.h"
+#include "threadpool.h"
+#include "transfer.h"
 
 class QIODevice;
 class QFile;
@@ -242,7 +242,7 @@ private:
 };
 
 
-class Picture : public CRef {
+class Picture : public Ref {
 public:
     const Item *item() const          { return m_item; }
     const Color *color() const        { return m_color; }
@@ -477,7 +477,7 @@ private:
     QString   m_address;
 };
 
-class PriceGuide : public CRef {
+class PriceGuide : public Ref {
 public:
     const Item *item() const          { return m_item; }
     const Color *color() const        { return m_color; }
@@ -884,8 +884,8 @@ public:
 
     bool onlineStatus() const;
 
-    CTransfer *transfer() const;
-    void setTransfer(CTransfer *trans);
+    Transfer *transfer() const;
+    void setTransfer(Transfer *trans);
 
 public slots:
     bool readDatabase(const QString &filename = QString());
@@ -932,10 +932,10 @@ private:
     friend class TextImport;
 
 private slots:
-    void pictureJobFinished(CThreadPoolJob *);
-    void priceGuideJobFinished(CThreadPoolJob *);
+    void pictureJobFinished(ThreadPoolJob *);
+    void priceGuideJobFinished(ThreadPoolJob *);
 
-    void pictureLoaded(CThreadPoolJob *);
+    void pictureLoaded(ThreadPoolJob *);
 
 private:
     QString  m_datadir;
@@ -956,16 +956,16 @@ private:
     ItemTypeModel *m_itemtype_model;
     ItemModel *    m_item_model;
 
-    QPointer<CTransfer>  m_transfer;
+    QPointer<Transfer>  m_transfer;
 
-    //CTransfer                  m_pg_transfer;
+    //Transfer                  m_pg_transfer;
     int                        m_pg_update_iv;
     QCache<quint64, PriceGuide> m_pg_cache;
 
-    //CTransfer                 m_pic_transfer;
+    //Transfer                 m_pic_transfer;
     int                       m_pic_update_iv;
 
-    CThreadPool               m_pic_diskload;
+    ThreadPool               m_pic_diskload;
 
     QCache<quint64, Picture>  m_pic_cache;
 

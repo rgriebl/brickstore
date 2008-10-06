@@ -6,21 +6,21 @@ DEPENDPATH  += $$RELPWD
 RESOURCES += utility.qrc
 
 # is this really still needed?
-HEADERS += $$RELPWD/cdisableupdates.h \
+HEADERS += $$RELPWD/disableupdates.h \
            $$RELPWD/stopwatch.h \
 
 
-XSOURCES = cfilteredit \
-           cmessagebox \
-           cmoney \
-           cmultiprogressbar \
-           cprogressdialog \
-           cspinner \
-           ctaskpanemanager \
-           cthreadpool \
-           ctransfer \
-           cundo \
-           cworkspace \
+XSOURCES = filteredit \
+           messagebox \
+           money \
+           multiprogressbar \
+           progressdialog \
+           spinner \
+           taskpanemanager \
+           threadpool \
+           transfer \
+           undo \
+           workspace \
            qtemporaryresource \
            utility \
 

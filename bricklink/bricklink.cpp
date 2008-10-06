@@ -28,7 +28,7 @@
 #include <QDebug>
 #include <QThread>
 
-#include "cconfig.h"
+#include "config.h"
 #include "utility.h"
 #include "stopwatch.h"
 #include "bricklink.h"
@@ -163,13 +163,15 @@ bool ChunkReader::endChunk()
         m_file->seek(ci.startpos + ci.size);
     }
 
-    quint64 padsize = ci.size % 16;
-    if (padsize)
-        m_stream.skipRawData(padsize);
+    if (ci.size % 16)
+        m_stream.skipRawData(16 - ci.size % 16);
 
     chunk_info ciend;
     m_stream >> ciend.size >> ciend.version >> ciend.id;
-    return (m_stream.status() == QDataStream::Ok) && !memcmp(&ci, &ciend, sizeof(ci));
+    return (m_stream.status() == QDataStream::Ok) &&
+           (ci.id == ciend.id) &&
+           (ci.version == ciend.version) &&
+           (ci.size == ciend.size);
 }
 
 quint32 ChunkReader::chunkId() const
@@ -287,16 +289,16 @@ bool ChunkWriter::endChunk()
 
     chunk_info ci = m_chunks.pop();
     quint64 endpos = m_file->pos();
+    quint64 len = endpos - ci.startpos;
     m_file->seek(ci.startpos - sizeof(quint64));
-    m_stream << quint64(endpos - ci.startpos);
+    m_stream << len;
     m_file->seek(endpos);
 
     static const char padbytes[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    quint64 padsize = (endpos - ci.startpos) % 16;
-    if (padsize)
-        m_stream.writeRawData(padbytes, padsize);
+    if (len % 16)
+        m_stream.writeRawData(padbytes, 16 - len % 16);
 
-    m_stream << quint64(endpos - ci.startpos) << ci.version << ci.id;
+    m_stream << len << ci.version << ci.id;
 
     return (m_stream.status() == QDataStream::Ok);
 }
@@ -674,7 +676,7 @@ BrickLink::Core::Core(const QString &datadir)
     m_pg_cache.setMaxCost(500);          // each priceguide has a cost of 1
     m_pic_cache.setMaxCost(cachemem);    // each pic has a cost of (w*h*d/8 + 1024)
 
-    connect(&m_pic_diskload, SIGNAL(finished(CThreadPoolJob *)), this, SLOT(pictureLoaded(CThreadPoolJob *)));
+    connect(&m_pic_diskload, SIGNAL(finished(ThreadPoolJob *)), this, SLOT(pictureLoaded(ThreadPoolJob *)));
 }
 
 BrickLink::Core::~Core()
@@ -687,29 +689,29 @@ BrickLink::Core::~Core()
     s_inst = 0;
 }
 
-void BrickLink::Core::setTransfer(CTransfer *trans)
+void BrickLink::Core::setTransfer(Transfer *trans)
 {
-    CTransfer *old = m_transfer;
+    Transfer *old = m_transfer;
 
     m_transfer = trans;
 
     if (old) { // disconnect
-        disconnect(old, SIGNAL(finished(CThreadPoolJob *)), this, SLOT(priceGuideJobFinished(CThreadPoolJob *)));
-        disconnect(old, SIGNAL(finished(CThreadPoolJob *)), this, SLOT(pictureJobFinished(CThreadPoolJob *)));
+        disconnect(old, SIGNAL(finished(ThreadPoolJob *)), this, SLOT(priceGuideJobFinished(ThreadPoolJob *)));
+        disconnect(old, SIGNAL(finished(ThreadPoolJob *)), this, SLOT(pictureJobFinished(ThreadPoolJob *)));
 
         disconnect(old, SIGNAL(progress(int, int)), this, SIGNAL(pictureProgress(int, int)));
         disconnect(old, SIGNAL(progress(int, int)), this, SIGNAL(priceGuideProgress(int, int)));
     }
     if (trans) { // connect
-        connect(trans, SIGNAL(finished(CThreadPoolJob *)), this, SLOT(priceGuideJobFinished(CThreadPoolJob *)));
-        connect(trans, SIGNAL(finished(CThreadPoolJob *)), this, SLOT(pictureJobFinished(CThreadPoolJob *)));
+        connect(trans, SIGNAL(finished(ThreadPoolJob *)), this, SLOT(priceGuideJobFinished(ThreadPoolJob *)));
+        connect(trans, SIGNAL(finished(ThreadPoolJob *)), this, SLOT(pictureJobFinished(ThreadPoolJob *)));
 
         connect(trans, SIGNAL(progress(int, int)), this, SIGNAL(pictureProgress(int, int)));
         connect(trans, SIGNAL(progress(int, int)), this, SIGNAL(priceGuideProgress(int, int)));
     }
 }
 
-CTransfer *BrickLink::Core::transfer() const
+Transfer *BrickLink::Core::transfer() const
 {
     return m_transfer;
 }
@@ -869,6 +871,8 @@ bool BrickLink::Core::readDatabase(const QString &fname)
     bool result = false;
     stopwatch *sw = 0; //new stopwatch("BrickLink::Core::readDatabase()");
 
+    QString message;
+
     QFile f(filename);
     if (f.open(QFile::ReadOnly)) {
         const char *data = reinterpret_cast<char *>(f.map(0, f.size()));
@@ -883,8 +887,12 @@ bool BrickLink::Core::readDatabase(const QString &fname)
             QDataStream &ds = cr.dataStream();
 
             if (cr.startChunk() && cr.chunkId() == ChunkId('B','S','D','B') && cr.chunkVersion() == 1) {
-                while (result && cr.startChunk()) {
+                while (cr.startChunk()) {
                     switch (cr.chunkId() | quint64(cr.chunkVersion()) << 32) {
+                        case ChunkId('I','N','F','O') | 1ULL << 32: {
+                            ds >> message;
+                            break;
+                        }
                         case ChunkId('C','O','L',' ') | 1ULL << 32: {
                             quint32 colc = 0;
                             ds >> colc;
@@ -949,6 +957,8 @@ bool BrickLink::Core::readDatabase(const QString &fname)
                 }
                 if (!cr.endChunk())
                     goto out;
+
+                result = true;
             }
 
 #else
@@ -1565,7 +1575,7 @@ bool BrickLink::Core::parseLDrawModel(QFile &f, InvItemList &items, uint *invali
 bool BrickLink::Core::parseLDrawModelInternal(QFile &f, const QString &model_name, InvItemList &items, uint *invalid_items, QHash<QString, InvItem *> &mergehash)
 {
     QStringList searchpath;
-    QString ldrawdir = CConfig::inst()->lDrawDir();
+    QString ldrawdir = Config::inst()->lDrawDir();
     uint invalid = 0;
     int linecount = 0;
 
@@ -1857,7 +1867,10 @@ bool BrickLink::Core::writeDatabase(const QString &filename, DatabaseVersion ver
             bool ok = true;
 
             ok &= cw.startChunk(ChunkId('B','S','D','B'), version);
-            ds << QString("INFO TEXT");
+
+            ok &= cw.startChunk(ChunkId('I','N','F','O'), version);
+            ds << QString("Info text");
+            ok &= cw.endChunk();
 
             ok &= cw.startChunk(ChunkId('C','O','L',' '), version);
             ds << m_colors.count();

@@ -1,0 +1,74 @@
+<ui version="4.0" >
+ <class>SelectItemDialog</class>
+ <widget class="QDialog" name="SelectItemDialog" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>239</width>
+    <height>284</height>
+   </rect>
+  </property>
+  <property name="sizeGripEnabled" >
+   <bool>true</bool>
+  </property>
+  <property name="modal" >
+   <bool>true</bool>
+  </property>
+  <layout class="QVBoxLayout" >
+   <item>
+    <widget class="SelectItem" native="1" name="w_si" />
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="w_buttons" >
+     <property name="standardButtons" >
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>SelectItem</class>
+   <extends>QWidget</extends>
+   <header>cselectitem.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>w_buttons</sender>
+   <signal>accepted()</signal>
+   <receiver>SelectItem</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>279</x>
+     <y>345</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>279</x>
+     <y>183</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>w_buttons</sender>
+   <signal>rejected()</signal>
+   <receiver>SelectItem</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>279</x>
+     <y>345</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>279</x>
+     <y>183</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

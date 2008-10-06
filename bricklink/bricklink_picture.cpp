@@ -18,7 +18,7 @@
 #include <QPixmapCache>
 #include <QImage>
 
-#include "cthreadpool.h"
+#include "threadpool.h"
 
 #include "bricklink.h"
 
@@ -31,10 +31,10 @@
 
 namespace BrickLink {
 
-class PictureLoaderJob : public CThreadPoolJob {
+class PictureLoaderJob : public ThreadPoolJob {
 public:
     PictureLoaderJob(Picture *pic)
-        : CThreadPoolJob(), m_pic(pic)
+        : ThreadPoolJob(), m_pic(pic)
     { }
 
     virtual void run()
@@ -190,7 +190,7 @@ void BrickLink::Picture::update(bool high_priority)
     BrickLink::core()->updatePicture(this, high_priority);
 }
 
-void BrickLink::Core::pictureLoaded(CThreadPoolJob *pj)
+void BrickLink::Core::pictureLoaded(ThreadPoolJob *pj)
 {
     Picture *pic = static_cast<PictureLoaderJob *>(pj)->picture();
 
@@ -238,20 +238,24 @@ void BrickLink::Core::updatePicture(BrickLink::Picture *pic, bool high_priority)
     }
 
     //qDebug ( "PIC request started for %s", (const char *) url );
-    CTransferJob *job = CTransferJob::get(url);
-    job->setUserData<Picture>(pic);
+    TransferJob *job = TransferJob::get(url);
+    job->setUserData<Picture>('P', pic);
     m_transfer->retrieve(job, high_priority);
 }
 
 
-void BrickLink::Core::pictureJobFinished(CThreadPoolJob *pj)
+void BrickLink::Core::pictureJobFinished(ThreadPoolJob *pj)
 {
-    CTransferJob *j = static_cast<CTransferJob *>(pj);
+    TransferJob *j = static_cast<TransferJob *>(pj);
 
-    if (!j || !j->data() || !j->userData<Picture>())
+    if (!j || !j->data())
         return;
 
-    Picture *pic = j->userData<Picture>();
+    Picture *pic = j->userData<Picture>('P');
+
+    if (!pic)
+        return;
+
     bool large = (!pic->color());
 
     QMutexLocker lock(&m_corelock);
@@ -309,8 +313,8 @@ void BrickLink::Core::pictureJobFinished(CThreadPoolJob *pj)
         url.setPath(path);
 
         //qDebug ( "PIC request started for %s", (const char *) url );
-        CTransferJob *job = CTransferJob::get(url);
-        job->setUserData<Picture>(pic);
+        TransferJob *job = TransferJob::get(url);
+        job->setUserData<Picture>('P', pic);
         m_transfer->retrieve(job);
         return;
     }

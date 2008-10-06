@@ -11,7 +11,7 @@
     </message>
 </context>
 <context>
-    <name>CAddRemoveCmd</name>
+    <name>AddRemoveCmd</name>
     <message>
         <source>Added %1 items</source>
         <translation>%1 Teile hinzugefügt</translation>
@@ -30,7 +30,7 @@
     </message>
 </context>
 <context>
-    <name>CAppearsInWidget</name>
+    <name>AppearsInWidget</name>
     <message>
         <source>[Image is loading]</source>
         <translation>[Bild wird geladen]</translation>
@@ -69,7 +69,7 @@
     </message>
 </context>
 <context>
-    <name>CApplication</name>
+    <name>Application</name>
     <message>
         <source>Could not initialize the BrickLink kernel:&lt;br /&gt;&lt;br /&gt;%1</source>
         <translation>Konnte den BrickLink-Kernel nicht starten:&lt;br /&gt;&lt;br /&gt;%1</translation>
@@ -116,14 +116,14 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
 </context>
 <context>
-    <name>CChangeCmd</name>
+    <name>ChangeCmd</name>
     <message>
         <source>Modified item</source>
         <translation>Ein Teil modifiziert</translation>
     </message>
 </context>
 <context>
-    <name>CCheckForUpdates</name>
+    <name>CheckForUpdates</name>
     <message>
         <source>Checking for program updates</source>
         <translation>Es wird nach Programm-Updates gesucht</translation>
@@ -166,7 +166,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
 </context>
 <context>
-    <name>CDocument</name>
+    <name>Document</name>
     <message>
         <source>Untitled</source>
         <translation>Unbenannt</translation>
@@ -301,7 +301,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
 </context>
 <context>
-    <name>CFrameWork</name>
+    <name>FrameWork</name>
     <message>
         <source>Toolbar</source>
         <translation>Werkzeugleiste</translation>
@@ -872,7 +872,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
 </context>
 <context>
-    <name>CImportBLCart</name>
+    <name>ImportBLCart</name>
     <message>
         <source>Importing BrickLink Shopping Cart</source>
         <translation>BrickLink Warenkorb wird importiert</translation>
@@ -891,7 +891,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
 </context>
 <context>
-    <name>CImportBLOrder</name>
+    <name>ImportBLOrder</name>
     <message>
         <source>Importing BrickLink Order</source>
         <translation>BrickLink Bestellung wird importiert</translation>
@@ -902,7 +902,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
 </context>
 <context>
-    <name>CImportBLStore</name>
+    <name>ImportBLStore</name>
     <message>
         <source>Importing BrickLink Store</source>
         <translation>BrickLink Shopbestand wird importiert</translation>
@@ -925,7 +925,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
 </context>
 <context>
-    <name>CImportPeeronInventory</name>
+    <name>ImportPeeronInventory</name>
     <message>
         <source>Importing Peeron Inventory</source>
         <translation>Peeron Inventarliste wird importiert</translation>
@@ -1160,7 +1160,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
 </context>
 <context>
-    <name>CMessageBox</name>
+    <name>MessageBox</name>
     <message>
         <source>&amp;Cancel</source>
         <translation>&amp;Abbrechen</translation>
@@ -1171,14 +1171,14 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
 </context>
 <context>
-    <name>CMultiProgressBar</name>
+    <name>MultiProgressBar</name>
     <message>
         <source>Cancel all active transfers</source>
         <translation>Alle aktiven Übertragungen abbrechen</translation>
     </message>
 </context>
 <context>
-    <name>CPictureWidget</name>
+    <name>PictureWidget</name>
     <message>
         <source>Update</source>
         <translation>Aktualisieren</translation>
@@ -1209,7 +1209,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
 </context>
 <context>
-    <name>CPriceGuideWidget</name>
+    <name>PriceGuideWidget</name>
     <message>
         <source>New</source>
         <translation>Neu</translation>
@@ -1300,7 +1300,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
 </context>
 <context>
-    <name>CProgressDialog</name>
+    <name>ProgressDialog</name>
     <message>
         <source>&amp;OK</source>
         <translation>&amp;OK</translation>
@@ -1319,7 +1319,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
 </context>
 <context>
-    <name>CSelectColor</name>
+    <name>SelectColor</name>
     <message>
         <source>Color</source>
         <translation>Farbe</translation>
@@ -1330,7 +1330,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
 </context>
 <context>
-    <name>CSelectColorDialog</name>
+    <name>SelectColorDialog</name>
     <message>
         <source>&amp;OK</source>
         <translation>&amp;OK</translation>
@@ -1341,7 +1341,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
 </context>
 <context>
-    <name>CSelectItem</name>
+    <name>SelectItem</name>
     <message>
         <source>All Items</source>
         <translation>Alle Teile</translation>
@@ -1417,7 +1417,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
 </context>
 <context>
-    <name>CSelectItemDialog</name>
+    <name>SelectItemDialog</name>
     <message>
         <source>&amp;OK</source>
         <translation>&amp;OK</translation>
@@ -1428,7 +1428,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
 </context>
 <context>
-    <name>CSplash</name>
+    <name>Splash</name>
     <message>
         <source>Loading Database...</source>
         <translation>Datenbank wird geladen...</translation>
@@ -1439,7 +1439,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
 </context>
 <context>
-    <name>CTaskInfoWidget</name>
+    <name>TaskInfoWidget</name>
     <message>
         <source>min.</source>
         <translation>min.</translation>
@@ -1466,7 +1466,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
 </context>
 <context>
-    <name>CTaskLinksWidget</name>
+    <name>TaskLinksWidget</name>
     <message>
         <source>BrickLink</source>
         <translation>BrickLink</translation>
@@ -1497,7 +1497,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
 </context>
 <context>
-    <name>CTaskPaneManager</name>
+    <name>TaskPaneManager</name>
     <message>
         <source>All</source>
         <translation>Alle</translation>
@@ -1512,7 +1512,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
 </context>
 <context>
-    <name>CUndoManager</name>
+    <name>UndoManager</name>
     <message>
         <source>Redo</source>
         <translation>Wiederherstellen</translation>
@@ -1539,7 +1539,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
 </context>
 <context>
-    <name>CUpdateDatabase</name>
+    <name>UpdateDatabase</name>
     <message>
         <source>Updating BrickLink Database</source>
         <translation>BrickLink Datenbank wird aktualisiert</translation>
@@ -1613,7 +1613,7 @@ Holländische Übersetzung von Eric van Horssen (&lt;a href=&quot;mailto:horzel@
     </message>
 </context>
 <context>
-    <name>CWindow</name>
+    <name>Window</name>
     <message>
         <source>All</source>
         <translation>Alle</translation>
