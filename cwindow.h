@@ -168,6 +168,8 @@ protected:
     virtual void closeEvent(QCloseEvent *e);
     virtual void changeEvent(QEvent *e);
 
+    void print(bool aspdf);
+    
 private slots:
     void applyFilter();
     void applyFilterField(QAction *);

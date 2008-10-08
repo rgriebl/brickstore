@@ -21,6 +21,7 @@ XSOURCES = cfilteredit \
            ctransfer \
            cundo \
            cworkspace \
+           filterparser \
            qtemporaryresource \
            utility \
 

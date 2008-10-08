@@ -17,13 +17,13 @@ isEmpty( RELEASE ) {
 
 TEMPLATE     = app
 CONFIG      *= warn_on thread qt modeltest
-QT          *= core gui xml network
+QT          *= core gui xml network script
 
 TARGET            = BrickStore
 unix:!macx:TARGET = brickstore
 
 LANGUAGES    = de fr nl sl
-RESOURCES    = brickstore.qrc
+RESOURCES   += brickstore.qrc
 SUBPROJECTS  = utility bricklink ldraw lzma
 
 modeltest:debug:SUBPROJECTS += modeltest
@@ -47,6 +47,8 @@ XSOURCES = capplication \
            cpicturewidget \
            cappearsinwidget \
            cpriceguidewidget \
+           creport \
+           creportobjects \
            ctaskwidgets \
            cselectitem \
            cwindow \
@@ -59,6 +61,7 @@ XFORMS  = additem \
           registration \
           selectcolor \
           selectitem \
+          selectreport \
           settings \
 
 

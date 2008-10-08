@@ -69,39 +69,12 @@ public:
         FieldCount,
     };
 
-    class ItemBase {
-    public:
-        enum Type { IsItem, IsGroup };
-
-        virtual Type type() const = 0;
-        virtual ~ItemBase() { };
-
-    protected:
-        ItemBase() { };
-    };
-
-    class Group : public ItemBase {
-    public:
-        Group();
-        Group(const BrickLink::Item *, const BrickLink::Color *);
-        Group(const QString &);
-
-    private:
-        QString m_text;
-        const BrickLink::Item  *m_item;
-        const BrickLink::Color *m_color;
-
-        QList<ItemBase *> m_children;
-    };
-
-    class Item : public ItemBase, public BrickLink::InvItem {
+    class Item : public BrickLink::InvItem {
     public:
         Item();
         Item(const BrickLink::InvItem &);
         Item(const Item &);
         virtual ~Item();
-
-        virtual Type type() const { return IsItem; }
 
         Item &operator = (const Item &);
         bool operator == (const Item &) const;
@@ -151,8 +124,8 @@ public:
     Item *item(const QModelIndex &idx) const;
     QModelIndex index(const Item *i) const;
 
-    virtual int rowCount(const QModelIndex &parent) const;
-    virtual int columnCount(const QModelIndex &parent) const;
+    virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
+    virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
     virtual QVariant data(const QModelIndex &index, int role) const;
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const;
     Qt::ItemFlags flags(const QModelIndex&) const;

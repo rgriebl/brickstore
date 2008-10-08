@@ -37,7 +37,7 @@
 #include "cmessagebox.h"
 #include "cframework.h"
 #include "ctransfer.h"
-//#include "creport.h"
+#include "creport.h"
 
 #include "utility.h"
 #include "version.h"
@@ -82,7 +82,7 @@ CApplication::CApplication(bool rebuild_db_only, int _argc, char **_argv)
     // initialize config & resource
     (void) CConfig::inst()->upgrade(BRICKSTORE_MAJOR, BRICKSTORE_MINOR, BRICKSTORE_PATCH);
     (void) CMoney::inst();
-//    (void) CReportManager::inst ( );
+    (void) CReportManager::inst ( );
 
     m_trans_qt = 0;
     m_trans_brickstore = 0;
@@ -123,7 +123,7 @@ CApplication::~CApplication()
 {
     exitBrickLink();
 
-//    delete CReportManager::inst ( );
+    delete CReportManager::inst ( );
     delete CMoney::inst();
     delete CConfig::inst();
 }

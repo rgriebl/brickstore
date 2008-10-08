@@ -1,22 +1,23 @@
 #ifndef __CREPORTOBJECTS_H__
 #define __CREPORTOBJECTS_H__
 
-#include <qobject.h>
-#include <qfont.h>
-#include <qcolor.h>
-#include <qvariant.h>
-#include <qvaluelist.h>
+#include <QObject>
+#include <QFont>
+#include <QColor>
+#include <QVariant>
+#include <QList>
+#include <QSize>
 
 class QPaintDevice;
 class QPixmap;
 class CReportPage;
 class QPainter;
-class QSInterpreter;
+class QScriptEngine;
 
 
 class CReportUtility : public QObject {
     Q_OBJECT
-    Q_OVERRIDE(QCString name         SCRIPTABLE false)
+    Q_OVERRIDE(QString objectName         SCRIPTABLE false)
 
 public slots:
     QString translate(const QString &context, const QString &text) const;
@@ -31,10 +32,10 @@ public:
 
 class CReportMoneyStatic : public QObject {
     Q_OBJECT
-    Q_OVERRIDE(QCString name SCRIPTABLE false)
+    Q_OVERRIDE(QString objectName SCRIPTABLE false)
 
 public:
-    CReportMoneyStatic(QSInterpreter *ip);
+    CReportMoneyStatic(QScriptEngine *eng);
 
 public slots:
     double fromValue(double d);
@@ -49,18 +50,18 @@ public slots:
     QString toLocalString(double d, bool with_currency_symbol = false, int precision = 3);
 
 private:
-    QSInterpreter *m_ip;
+    QScriptEngine *m_engine;
 };
 
 
 class CReportJob : public QObject {
     Q_OBJECT
-    Q_OVERRIDE(QCString name         SCRIPTABLE false)
+    Q_OVERRIDE(QString objectName   SCRIPTABLE false)
 
-    Q_PROPERTY(uint     pageCount    READ pageCount)
-// Q_PROPERTY( int      paperFormat  READ paperFormat)
-    Q_PROPERTY(QSize    paperSize    READ paperSize)
-    Q_PROPERTY(double   scaling      READ scaling WRITE setScaling)
+    Q_PROPERTY(uint    pageCount    READ pageCount)
+// Q_PROPERTY( int     paperFormat  READ paperFormat)
+    Q_PROPERTY(QSize   paperSize    READ paperSize)
+    Q_PROPERTY(double  scaling      READ scaling WRITE setScaling)
 
 public slots:
     CReportPage *addPage();
@@ -84,7 +85,7 @@ public:
     void dump();
 
 private:
-    QValueList <CReportPage *> m_pages;
+    QList<CReportPage *> m_pages;
     QPaintDevice *m_pd;
     bool m_aborted;
     double m_scaling;
@@ -92,10 +93,10 @@ private:
 
 class CReportPage : public QObject {
     Q_OBJECT
-    Q_OVERRIDE(QCString name SCRIPTABLE false)
+    Q_OVERRIDE(QString objectName       SCRIPTABLE false)
 
     Q_ENUMS(LineStyle)
-    Q_SETS(Alignment)
+    Q_FLAGS(Alignment)
 
     Q_PROPERTY(int     number           READ pageNumber)
     Q_PROPERTY(QFont   font             READ font       WRITE setFont)
@@ -114,7 +115,7 @@ public:
         DashDotDotLine,
     };
 
-    enum Alignment {
+    enum AlignmentFlag {
         AlignLeft     = Qt::AlignLeft,
         AlignHCenter  = Qt::AlignHCenter,
         AlignRight    = Qt::AlignRight,
@@ -123,6 +124,8 @@ public:
         AlignBottom   = Qt::AlignBottom,
         AlignCenter   = Qt::AlignCenter
     };
+
+    Q_DECLARE_FLAGS(Alignment, AlignmentFlag)
 
 public slots:
     QSize textSize(const QString &text);
@@ -183,7 +186,7 @@ struct DrawCmd : public Cmd {
     void attr_cmd();
 
 private:
-    QPtrList <Cmd> m_cmds;
+    QList<Cmd *> m_cmds;
     const CReportJob *m_job;
     AttrCmd m_attr;
 };

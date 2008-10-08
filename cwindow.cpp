@@ -35,6 +35,8 @@
 #include <QStyledItemDelegate>
 #include <QStyleOptionFrameV2>
 #include <QStyle>
+#include <QPrinter>
+#include <QPrintDialog>
 
 #include "cmessagebox.h"
 #include "cfilteredit.h"
@@ -45,9 +47,11 @@
 #include "cdocument.h"
 #include "cdisableupdates.h"
 #include "cwindow.h"
+#include "creport.h"
 
 #include "dselectitem.h"
 #include "dselectcolor.h"
+#include "dselectreport.h"
 
 namespace {
 
@@ -1917,55 +1921,75 @@ bool CWindow::isDifferenceMode() const
 
 void CWindow::on_file_print_triggered()
 {
-    if (m_doc->items().isEmpty())
-        return;
-    /*
-     if ( CReportManager::inst ( )->reports ( ).isEmpty ( )) {
-      CReportManager::inst ( )->reload ( );
-
-      if ( CReportManager::inst ( )->reports ( ).isEmpty ( ))
-       return;
-     }
-
-     QPrinter *prt = CReportManager::inst ( )->printer ( );
-
-     if ( !prt )
-      return;
-
-     //prt->setOptionEnabled ( QPrinter::PrintToFile, false );
-     prt->setOptionEnabled ( QPrinter::PrintSelection, !m_doc->selection ( ).isEmpty ( ));
-     prt->setOptionEnabled ( QPrinter::PrintPageRange, false );
-     prt->setPrintRange ( m_doc->selection ( ).isEmpty ( ) ? QPrinter::AllPages : QPrinter::Selection );
-
-     QString doctitle = m_doc->title();
-     if (doctitle == m_doc->fileName())
-         doctitle = QFileInfo(doctitle).baseName();
-
-     prt->setDocName(doctitle);
-
-     prt->setFullPage ( true );
-
-
-     if ( !prt->setup ( CFrameWork::inst ( )))
-      return;
-
-     DlgSelectReportImpl d ( this );
-
-     if ( d.exec ( ) != QDialog::Accepted )
-      return;
-
-     const CReport *rep = d.report ( );
-
-     if ( !rep )
-      return;
-
-     rep->print ( prt, m_doc, sortedItems ( prt->printRange ( ) == QPrinter::Selection ));
-     */
+    print(false);
 }
 
 void CWindow::on_file_print_pdf_triggered()
 {
-    qWarning("Print to PDF is not implemented yet");
+    print(true);
+}
+
+void CWindow::print(bool as_pdf)
+{
+    if (m_doc->items().isEmpty())
+        return;
+    
+    if (CReportManager::inst()->reports().isEmpty()) {
+        CReportManager::inst()->reload();
+
+        if (CReportManager::inst()->reports().isEmpty())
+            return;
+    }
+
+    QPrinter *prt = CReportManager::inst()->printer();
+
+    if (!prt )
+        return;
+
+    QString doctitle = m_doc->title();
+    if (doctitle == m_doc->fileName())
+        doctitle = QFileInfo(doctitle).baseName();
+
+    if (as_pdf) {
+        QString pdfname = doctitle + QLatin1String(".pdf");
+        pdfname = QFileDialog::getSaveFileName(CFrameWork::inst(), tr("Save PDF as"), pdfname, tr("PDF Documents (*.pdf)"));
+    
+        if (pdfname.isEmpty())
+            return;
+
+        prt->setOutputFileName(pdfname);
+        prt->setOutputFormat(QPrinter::PdfFormat);
+    }
+    else {
+        QPrintDialog pd(prt, CFrameWork::inst());
+        
+        pd.addEnabledOption(QAbstractPrintDialog::PrintToFile);
+        pd.addEnabledOption(QAbstractPrintDialog::PrintCollateCopies);
+        pd.addEnabledOption(QAbstractPrintDialog::PrintShowPageSize);
+
+        if (!m_doc->selection().isEmpty())
+            pd.addEnabledOption(QAbstractPrintDialog::PrintSelection);
+
+        //pd.setPrintRange(m_doc->selection().isEmpty() ? QAbstractPrintDialog::AllPages : QAbstractPrintDialog::Selection);
+
+        if (pd.exec() != QDialog::Accepted)
+            return;
+    }
+    
+    prt->setDocName(doctitle);
+    prt->setFullPage(true);
+
+    DSelectReport d(this);
+
+    if (d.exec() != QDialog::Accepted)
+        return;
+
+    const CReport *rep = d.report();
+
+    if (!rep)
+        return;
+
+    rep->print(prt, m_doc, sortedItems(prt->printRange() == QPrinter::Selection));
 }
 
 void CWindow::on_file_save_triggered()
@@ -2048,16 +2072,16 @@ CDocument::ItemList CWindow::exportCheck() const
 CDocument::ItemList CWindow::sortedItems(bool selection_only) const
 {
     CDocument::ItemList sorted;
-    /*
-     for ( QListViewItemIterator it ( w_list ); it.current ( ); ++it ) {
-      CItemViewItem *ivi = static_cast <CItemViewItem *> ( it.current ( ));
-
-      if ( selection_only && ( m_doc->selection ( ).find ( ivi->item ( )) == m_doc->selection ( ).end ( )))
-       continue;
-
-      sorted.append ( ivi->item ( ));
-     }
-    */
+    QItemSelectionModel *selmodel = m_doc->selectionModel();
+    
+    for (int i = 0; i < m_doc->rowCount(); ++i) {
+        //QModelIndex visual_idx = m_proxy->index(i, 0);
+        //QModelIndex data_idx = m_proxy->mapSelectionToSource(visidx);
+        QModelIndex idx = m_doc->index(i, 0);
+        
+        if (idx.isValid() && (!selection_only || selmodel->isSelected(idx)))
+            sorted << m_doc->item(idx);     
+    }
     return sorted;
 }
 

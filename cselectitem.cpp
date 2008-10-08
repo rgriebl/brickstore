@@ -130,9 +130,7 @@ void CSelectItem::init()
     d->w_categories->setItemDelegate(new CategoryDelegate);
 
     d->w_filter = new CFilterEdit(this);
-    d->w_filter->setMenuIcon(QIcon(":/images/22x22/filter_menu"));
-    d->w_filter->setClearIcon(QIcon(":/images/22x22/filter_clear"));
-
+    
     d->w_viewmenu = new QMenu(this);
     QActionGroup *ag = new QActionGroup(this);
     ag->setExclusive(true);
