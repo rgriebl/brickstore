@@ -96,7 +96,7 @@ protected:
 ////////////////////////////////////////////////////////////////
 
 ThreadPoolJob::ThreadPoolJob()
-    : m_threadpool(0), m_user_tag(0), m_user_ptr(0), m_status(Inactive)
+    : m_threadpool(0), m_user_ptr(0), m_user_tag(0), m_status(Inactive)
 { }
 
 ThreadPoolJob::~ThreadPoolJob()

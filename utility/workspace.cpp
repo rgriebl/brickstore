@@ -203,12 +203,13 @@ Workspace::Workspace(QWidget *parent, Qt::WindowFlags f)
 
     m_tabbar = new QTabBar(this);
     m_tabbar->setElideMode(Qt::ElideMiddle);
-    m_tabbar->setDocumentMode(true);
     m_tabbar->setDrawBase(false);
+#if QT_VERSION >= 0x040500
+    m_tabbar->setDocumentMode(true);
     m_tabbar->setMovable(true);
     m_tabbar->setSelectionBehaviorOnRemove(QTabBar::SelectPreviousTab);
     m_tabbar->setTabsClosable(true);
-
+#endif
     m_close = new QToolButton(this);
     m_close->setIcon(QIcon(":/images/tabclose"));
     m_close->setAutoRaise(true);

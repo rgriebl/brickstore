@@ -403,31 +403,31 @@
   <customwidget>
    <class>SelectItem</class>
    <extends>QWidget</extends>
-   <header>cselectitem.h</header>
+   <header>selectitem.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>PriceGuideWidget</class>
    <extends>QFrame</extends>
-   <header>cpriceguidewidget.h</header>
+   <header>priceguidewidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>PictureWidget</class>
    <extends>QFrame</extends>
-   <header>cpicturewidget.h</header>
+   <header>picturewidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>AppearsInWidget</class>
    <extends>QWidget</extends>
-   <header>cappearsinwidget.h</header>
+   <header>appearsinwidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>SelectColor</class>
    <extends>QWidget</extends>
-   <header>cselectcolor.h</header>
+   <header>selectcolor.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

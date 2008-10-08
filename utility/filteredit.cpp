@@ -25,7 +25,7 @@
 #include "filteredit.h"
 
 #if defined( Q_WS_MAC )
-//#  define MAC_USE_NATIVE_SEARCHFIELD
+#  define MAC_USE_NATIVE_SEARCHFIELD
 #else
 #  undef MAC_USE_NATIVE_SEARCHFIELD
 #endif

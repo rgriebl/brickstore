@@ -216,7 +216,6 @@ QString Application::sysVersion() const
     case QSysInfo::MV_10_3  : sys_version = "10.3 (Panther)"; break;
     case QSysInfo::MV_10_4  : sys_version = "10.4 (Tiger)";   break;
     case QSysInfo::MV_10_5  : sys_version = "10.5 (Leopard)"; break;
-    case QSysInfo::MV_10_5  : sys_version = "10.5 (Leopard)"; break;
     case QSysInfo::MV_10_5+1: sys_version = "10.6 (Snow Leopard)"; break; //TODO: replace with MV_10_6 in Qt 4.6
     default               : break;
     }
