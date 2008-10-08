@@ -1,8 +1,105 @@
 
 #include <QStringList>
 #include <QCoreApplication>
+#include <QVariant>
 
 #include "filterparser.h"
+
+
+
+Filter::Filter()
+    : m_field(-1), m_comparison(Matches), m_combination(And)
+{ }
+
+void Filter::setField(int field)
+{
+    m_field = field;
+}
+void Filter::setExpression(const QString &expr)
+{
+    m_expression = expr;
+}
+
+void Filter::setComparison(Comparison cmp)
+{
+    m_comparison = cmp;
+}
+
+void Filter::setCombination(Combination cmb)
+{
+    m_combination = cmb;
+}
+
+bool Filter::matches(const QVariant &v) const
+{
+    bool isint = false, isfloat = false;
+    int i1, i2;
+    double d1, d2;
+    QString s1, s2;
+    
+    switch (v.type()) {
+    case QVariant::Int:
+    case QVariant::UInt:
+    case QVariant::LongLong:
+    case QVariant::ULongLong: {
+        bool ok = false;        
+        i1 = m_expression.toInt(&ok);
+        if (!ok)
+            return false; // data is int, but expression is not
+        i2 = v.toInt();
+        isint = true;
+        break;
+    }   
+    case QVariant::Double: {
+        bool ok = false;
+        d1 = m_expression.toDouble(&ok);
+        if (!ok)
+            return false;
+        d2 = v.toDouble();
+        isfloat = true;
+        break;
+    }    
+    default:
+        s1 = m_expression;
+        s2 = v.toString();
+        break;
+    }
+
+    switch (comparison()) {
+    case Is:
+        return isint ? i1 == i2 : isfloat ? d1 == d2 : s2.compare(s1, Qt::CaseInsensitive) == 0;
+    case IsNot:
+        return isint ? i1 != i2 : isfloat ? d1 != d2 : s2.compare(s1, Qt::CaseInsensitive) != 0;
+    case Less:
+        return isint ? i1 < i2 : isfloat ? d1 < d2 : false;
+    case LessEqual:
+        return isint ? i1 <= i2 : isfloat ? d1 <= d2 : false;
+    case Greater:
+        return isint ? i1 > i2 : isfloat ? d1 > d2 : false;
+    case GreaterEqual:
+        return isint ? i1 >= i2 : isfloat ? d1 >= d2 : false;
+    case StartsWith:
+        return isint || isfloat ? false : s2.startsWith(s1, Qt::CaseInsensitive);
+    case DoesNotStartWith:
+        return isint || isfloat ? false : !s2.startsWith(s1, Qt::CaseInsensitive);
+    case EndsWith:
+        return isint || isfloat ? false : s2.endsWith(s1, Qt::CaseInsensitive);
+    case DoesNotEndWith:
+        return isint || isfloat ? false : !s2.endsWith(s1, Qt::CaseInsensitive);
+    case Matches:
+    case DoesNotMatch: {
+        if (isint || isfloat) {
+            s1 = m_expression;
+            s2 = v.toString();
+        }
+        bool res = s2.contains(QRegExp(s1, Qt::CaseInsensitive));
+    
+        return (comparison() == Matches) ? res : !res;
+    }
+    }
+    return false;
+}
+
 
 enum State {
     StateStart,
@@ -13,8 +110,6 @@ enum State {
 
 FilterParser::FilterParser()
 {
-    m_comparison_tokens = defaultComparisonTokens();
-    m_combination_tokens = defaultCombinationTokens();
 }
 
 
@@ -158,6 +253,11 @@ QPair<QString, Filter::Combination> FilterParser::matchFilterAndCombination(int 
     return res;
 }
 
+void FilterParser::setFieldTokens(const QMultiMap<int, QString> &tokens)
+{
+    m_field_tokens = tokens;
+}
+
 void FilterParser::setComparisonTokens(const QMultiMap<Filter::Comparison, QString> &tokens)
 {
     m_comparison_tokens = tokens;
@@ -168,7 +268,17 @@ void FilterParser::setCombinationTokens(const QMultiMap<Filter::Combination, QSt
     m_combination_tokens = tokens;
 }
 
-QMultiMap<Filter::Combination, QString> FilterParser::defaultCombinationTokens()
+void FilterParser::setStandardComparisonTokens(Filter::Comparisons mask)
+{
+    m_comparison_tokens = standardComparisonTokens(mask);
+}
+
+void FilterParser::setStandardCombinationTokens(Filter::Combinations mask)
+{
+    m_combination_tokens = standardCombinationTokens(mask);
+}
+
+QMultiMap<Filter::Combination, QString> FilterParser::standardCombinationTokens(Filter::Combinations mask)
 {
     struct token_table { 
         Filter::Combination m_combination;
@@ -184,6 +294,9 @@ QMultiMap<Filter::Combination, QString> FilterParser::defaultCombinationTokens()
     QMap<Filter::Combination, QString> dct;
     
     for (token_table *tt = predefined; tt->m_symbols || tt->m_words; ++tt) {
+        if (!mask & tt->m_combination)
+            continue;
+    
         foreach (QString symbol, QString::fromLatin1(tt->m_symbols).split(QLatin1Char(',')))
             dct.insert(tt->m_combination, symbol); 
 
@@ -196,32 +309,35 @@ QMultiMap<Filter::Combination, QString> FilterParser::defaultCombinationTokens()
     return dct;
 }
 
-QMultiMap<Filter::Comparison, QString> FilterParser::defaultComparisonTokens()
+QMultiMap<Filter::Comparison, QString> FilterParser::standardComparisonTokens(Filter::Comparisons mask)
 {
     struct token_table { 
         Filter::Comparison m_comparison;
         const char *       m_symbols;
         const char *       m_words;
     } predefined[] = {
-        { Filter::Is,                           "=,==,===",         QT_TR_NOOP( "is,equals" ) },
-        { Filter::Is | Filter::Negated,         "!=,=!,!==,==!,<>", QT_TR_NOOP( "is not,doesn't equal,does not equal" ) },
-        { Filter::Less,                         "<",                QT_TR_NOOP( "less than" ) },
-        { Filter::Greater | Filter::Negated,    "<=,=<",            QT_TR_NOOP( "less equal than" ) },
-        { Filter::Greater,                      ">",                QT_TR_NOOP( "greater than" ) },
-        { Filter::Less | Filter::Negated,       ">=,=>",            QT_TR_NOOP( "greater equal than" ) },
-        { Filter::Matches,                      "~,~=,=~",          QT_TR_NOOP( "contains,matches" ) },
-        { Filter::Matches | Filter::Negated,    "!~,~!,!~=,!=~",    QT_TR_NOOP( "doesn't contain,does not contain,doesn't match,does not match" ) },
-        { Filter::StartsWith,                   "^,^=,=^",          QT_TR_NOOP( "starts with,begins with" ) },
-        { Filter::StartsWith | Filter::Negated, "!^,^!=,!=^",       QT_TR_NOOP( "doesn't start with,does not start with,doesn't begin with,does not begin with" ) },
-        { Filter::EndsWith,                     "$,$=,=$",          QT_TR_NOOP( "ends with" ) },
-        { Filter::EndsWith | Filter::Negated,   "!$,$!=,!=$",       QT_TR_NOOP( "doesn't end with,does not end with" ) },
+        { Filter::Is,               "=,==,===",         QT_TR_NOOP( "is,equals" ) },
+        { Filter::IsNot,            "!=,=!,!==,==!,<>", QT_TR_NOOP( "is not,doesn't equal,does not equal" ) },
+        { Filter::Less,             "<",                QT_TR_NOOP( "less than" ) },
+        { Filter::LessEqual,        "<=,=<",            QT_TR_NOOP( "less equal than" ) },
+        { Filter::Greater,          ">",                QT_TR_NOOP( "greater than" ) },
+        { Filter::GreaterEqual,     ">=,=>",            QT_TR_NOOP( "greater equal than" ) },
+        { Filter::Matches,          "~,~=,=~",          QT_TR_NOOP( "contains,matches" ) },
+        { Filter::DoesNotMatch,     "!~,~!,!~=,!=~",    QT_TR_NOOP( "doesn't contain,does not contain,doesn't match,does not match" ) },
+        { Filter::StartsWith,       "^,^=,=^",          QT_TR_NOOP( "starts with,begins with" ) },
+        { Filter::DoesNotStartWith, "!^,^!=,!=^",       QT_TR_NOOP( "doesn't start with,does not start with,doesn't begin with,does not begin with" ) },
+        { Filter::EndsWith,         "$,$=,=$",          QT_TR_NOOP( "ends with" ) },
+        { Filter::DoesNotEndWith,   "!$,$!=,!=$",       QT_TR_NOOP( "doesn't end with,does not end with" ) },
         
-        { 0, 0, 0 }
+        { Filter::Is, 0, 0 }
     };
     
     QMap<Filter::Comparison, QString> dct;
     
     for (token_table *tt = predefined; tt->m_symbols || tt->m_words; ++tt) {
+        if (!mask & tt->m_comparison)
+            continue;
+    
         foreach (QString symbol, QString::fromLatin1(tt->m_symbols).split(QLatin1Char(',')))
             dct.insert(tt->m_comparison, symbol); 
 

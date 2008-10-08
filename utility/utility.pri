@@ -11,6 +11,7 @@ HEADERS += $$RELPWD/disableupdates.h \
 
 
 XSOURCES = filteredit \
+           filterparser \
            messagebox \
            money \
            multiprogressbar \

@@ -41,16 +41,6 @@ public:
 
     Document *document() { return m_doc; }
 
-    enum Filter {
-        All        = -1,
-
-        Prices     = -2,
-        Texts      = -3,
-        Quantities = -4,
-
-        FilterCountSpecial = 4
-    };
-
     enum MergeFlags {
         MergeAction_None         = 0x00000000,
         MergeAction_Force        = 0x00000001,
@@ -73,12 +63,8 @@ public:
     void subtractItems(const BrickLink::InvItemList &items);
     void copyRemarks(const BrickLink::InvItemList &items);
 
-// bool hasFilter ( ) const;
-// void setFilter ( const QRegExp &exp, Field f );
-// void setFilterExpression ( const QRegExp &exp );
-// void setFilterField ( Field f );
-// QRegExp filterExpression ( ) const;
-// Field filterField ( ) const;
+    QString filter() const;
+    void setFilter(const QString &str);
 
 // InvItemList &selectedItems ( );
 // void setSelectedItems ( const InvItemList &items );
@@ -169,8 +155,8 @@ protected:
     virtual void changeEvent(QEvent *e);
 
 private slots:
-    void applyFilter();
-    void applyFilterField(QAction *);
+//    void applyFilter();
+//    void applyFilterField(QAction *);
     void updateCaption();
 
     void contextMenu(const QPoint &);
@@ -186,8 +172,9 @@ private:
 
 private:
     Document * m_doc;
-    QRegExp        m_filter_expression;
-    int            m_filter_field;
+    DocumentProxyModel * m_docmodel;
+//    QRegExp        m_filter_expression;
+//    int            m_filter_field;
 
 // bool m_ignore_selection_update;
 

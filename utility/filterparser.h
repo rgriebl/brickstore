@@ -8,27 +8,31 @@
 
 class Filter {
 public:
-    enum ComparisonFlag {
-        Matches     = 0x00,
-        Is          = 0x01,
-        Less        = 0x02,
-        Greater     = 0x03,
-        StartsWith  = 0x04,
-        EndsWith    = 0x05,
-        
-        ComparisonCount = 6,
-        
-        Negated     = 0x80
+    enum Comparison {
+        Matches,
+        DoesNotMatch,
+        Is,
+        IsNot,
+        Less,
+        GreaterEqual,
+        Greater,
+        LessEqual,
+        StartsWith,
+        DoesNotStartWith,
+        EndsWith,
+        DoesNotEndWith,        
     };
     
-    Q_DECLARE_FLAGS(Comparison, ComparisonFlag)
+    Q_DECLARE_FLAGS(Comparisons, Comparison)
     
     enum Combination {
         And,
         Or,
-        
-        CombinationCount,
     };
+    
+    Q_DECLARE_FLAGS(Combinations, Combination)
+
+    Filter();
     
     inline int field() const                { return m_field; }
     inline QString expression() const       { return m_expression; }
@@ -39,6 +43,8 @@ public:
     void setExpression(const QString &expr);
     void setComparison(Comparison cmp);
     void setCombination(Combination cmb);
+
+    bool matches(const QVariant &v) const;
     
 private:
     int         m_field;
@@ -47,7 +53,8 @@ private:
     QString     m_expression;
 };
 
-Q_DECLARE_OPERATORS_FOR_FLAGS(Filter::Comparison)
+Q_DECLARE_OPERATORS_FOR_FLAGS(Filter::Comparisons)
+Q_DECLARE_OPERATORS_FOR_FLAGS(Filter::Combinations)
 
 class FilterParser {
 public:
@@ -58,15 +65,18 @@ public:
     void setFieldTokens(const QMultiMap<int, QString> &idToName);
     void setComparisonTokens(const QMultiMap<Filter::Comparison, QString> &comparisonToName);
     void setCombinationTokens(const QMultiMap<Filter::Combination, QString> &combinationToName);
-    
+
+    void setStandardComparisonTokens(Filter::Comparisons);
+    void setStandardCombinationTokens(Filter::Combinations);
+
 private:
     bool eatWhiteSpace(int &pos, const QString &str);
 
     template<typename T> T matchTokens(int &pos, const QString &str, const QMultiMap<T, QString> &tokens, int *start_of_token = 0);
     QPair<QString, Filter::Combination> matchFilterAndCombination(int &pos, const QString &str);
 
-    QMultiMap<Filter::Comparison, QString> defaultComparisonTokens();
-    QMultiMap<Filter::Combination, QString> defaultCombinationTokens();
+    QMultiMap<Filter::Comparison, QString> standardComparisonTokens(Filter::Comparisons mask);
+    QMultiMap<Filter::Combination, QString> standardCombinationTokens(Filter::Combinations mask);
     
     QMultiMap<int,                 QString> m_field_tokens;
     QMultiMap<Filter::Comparison,  QString> m_comparison_tokens;

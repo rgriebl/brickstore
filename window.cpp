@@ -37,7 +37,7 @@
 #include <QStyle>
 
 #include "messagebox.h"
-#include "filteredit.h"
+//#include "filteredit.h"
 #include "config.h"
 #include "framework.h"
 #include "utility.h"
@@ -657,9 +657,10 @@ Window::Window(Document *doc, QWidget *parent)
     setAttribute(Qt::WA_DeleteOnClose);
 
     m_doc = doc;
+    m_docmodel = new DocumentProxyModel(doc);
 // m_ignore_selection_update = false;
 
-    m_filter_field = All;
+//    m_filter_field = All;
 
     m_settopg_failcnt = 0;
     m_settopg_list = 0;
@@ -680,7 +681,7 @@ Window::Window(Document *doc, QWidget *parent)
     w_list->setEditTriggers(QAbstractItemView::DoubleClicked | QAbstractItemView::EditKeyPressed | QAbstractItemView::AnyKeyPressed);
     setFocusProxy(w_list);
 
-    w_list->setModel(doc);
+    w_list->setModel(m_docmodel);
     w_list->setSelectionModel(doc->selectionModel());
     DocumentDelegate *dd = new DocumentDelegate(doc, w_list);
     w_list->setItemDelegate(dd);
@@ -812,21 +813,14 @@ void Window::itemsChangedInDocument(const Document::ItemList &items, bool /*grav
 }
 
 
-void Window::applyFilter()
+void Window::setFilter(const QString &str)
 {
-    //TODO w_list->applyFilter ( w_filter_expression->lineEdit ( )->text ( ), w_filter_field->currentItem ( ), true );
+    m_docmodel->setFilterExpression(str);
 }
 
-void Window::applyFilterField(QAction *a)
+QString Window::filter() const
 {
-    if (a && a->isChecked()) {
-        int i = qvariant_cast<int>(a->data());
-
-        if (i != m_filter_field) {
-            m_filter_field = i;
-            applyFilter();
-        }
-    }
+    return m_docmodel->filterExpression();
 }
 
 uint Window::addItems(const BrickLink::InvItemList &items, int multiply, uint globalmergeflags, bool dont_change_sorting)

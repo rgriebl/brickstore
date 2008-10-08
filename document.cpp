@@ -1605,3 +1605,126 @@ void Document::pictureUpdated(BrickLink::Picture *pic)
         row++;
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+DocumentProxyModel::DocumentProxyModel(Document *model)
+    : QSortFilterProxyModel(0)
+{
+    setSourceModel(model);
+    m_parser = new FilterParser();
+    
+    m_parser->setStandardCombinationTokens(Filter::And | Filter::Or);
+    m_parser->setStandardComparisonTokens(Filter::Matches | Filter::DoesNotMatch |
+                                          Filter::Is | Filter::IsNot |
+                                          Filter::Less | Filter::LessEqual |
+                                          Filter::Greater | Filter::GreaterEqual |
+                                          Filter::StartsWith | Filter::DoesNotStartWith |
+                                          Filter::EndsWith | Filter::DoesNotEndWith);
+
+    QMultiMap<int, QString> fields;
+    QString str;
+    for (int i = 0; i < model->columnCount(QModelIndex()); ++i) {
+        str = model->headerData(i, Qt::Horizontal, Qt::DisplayRole).toString();
+        if (!str.isEmpty())
+            fields.insert(i, str);
+#if QT_VERSION >= 0x040500            
+         str = model->headerData(i, Qt::Horizontal, Qt::UntranslatedDisplayRole);
+         if (!str.isEmpty())
+            fields.insert(i, str);
+#endif
+    }
+    fields.insert(-1, QLatin1String("Any"));
+    fields.insert(-1, tr("Any"));
+    
+    m_parser->setFieldTokens(fields);
+}
+
+DocumentProxyModel::~DocumentProxyModel()
+{
+    delete m_parser;
+}
+
+void DocumentProxyModel::setFilterExpression(const QString &str)
+{
+    bool had_filter = !m_filter.isEmpty();
+
+    m_filter_expression = str;
+    m_filter = m_parser->parse(str);
+    
+    if (had_filter || !m_filter.isEmpty())
+        invalidateFilter();
+}
+
+QString DocumentProxyModel::filterExpression() const
+{
+    return m_filter_expression;
+}
+
+bool DocumentProxyModel::filterAcceptsColumn(int, const QModelIndex &) const
+{
+    return true;
+}
+
+bool DocumentProxyModel::filterAcceptsRow(int source_row, const QModelIndex &source_parent) const
+{
+    if (source_parent.isValid() || source_row < 0 || source_row >= sourceModel()->rowCount())
+        return false;
+    else if (m_filter.isEmpty())    
+        return true;    
+
+    bool result = false;
+    Filter::Combination nextcomb = Filter::Or;
+
+    foreach (const Filter &f, m_filter) {
+        int firstcol = f.field();
+        int lastcol = firstcol;
+        if (firstcol < 0) {
+            firstcol = 0;
+            lastcol = sourceModel()->columnCount() - 1;
+        }    
+
+        bool localresult = false;
+        for (int c = firstcol; c <= lastcol && !localresult; ++c) {
+            QVariant v = sourceModel()->data(sourceModel()->index(source_row, c), Qt::DisplayRole);
+            
+            localresult = f.matches(v);
+        }
+        if (nextcomb == Filter::And)
+            result &= localresult;
+        else
+            result |= localresult;
+
+        nextcomb = f.combination();
+    }
+    return result;
+}

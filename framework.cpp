@@ -430,11 +430,13 @@ void FrameWork::languageChange()
     m_taskpanes->setItemText(m_task_appears,    tr("Appears In Sets"));
     m_taskpanes->setItemText(m_task_links,      tr("Links"));
 
-    m_filter->setToolTip(tr("Filter the list using this pattern (wildcards allowed: * ? [])"));
-    m_filter->setIdleText(tr("Filter"));
-
-    m_spinner->setToolTip(tr("Download activity indicator"));
-
+    if (m_filter) {
+        m_filter->setToolTip(tr("Filter the list using this pattern (wildcards allowed: * ? [])"));
+        m_filter->setIdleText(tr("Filter"));
+    }
+    if (m_spinner)
+        m_spinner->setToolTip(tr("Download activity indicator"));
+/*
     foreach (QAction *a, m_filter->menu()->actions()) {
         QString s;
         int i = qvariant_cast<int>(a->data());
@@ -449,7 +451,7 @@ void FrameWork::languageChange()
         a->setText(s);
     }
 
-
+*/
 
     translateActions();
 
@@ -720,11 +722,10 @@ bool FrameWork::setupToolBar(QToolBar *t, const QStringList &a_names)
                 }
 
                 m_filter = new FilterEdit();
-                m_filter->setIdleText(tr("Filter"));
 
                 QMenu *m = new QMenu(this);
                 QActionGroup *ag = new QActionGroup(m);
-                for (int i = 0; i < (Window::FilterCountSpecial + Document::FieldCount); i++) {
+             /*   for (int i = 0; i < (Window::FilterCountSpecial + Document::FieldCount); i++) {
                     QAction *a = new QAction(ag);
                     a->setCheckable(true);
 
@@ -733,13 +734,14 @@ bool FrameWork::setupToolBar(QToolBar *t, const QStringList &a_names)
                     else
                         a->setData(i - Window::FilterCountSpecial);
 
-                    if (i == Window::FilterCountSpecial)
-                        m->addSeparator();
+                    if (i == Window::FilterCountSpecial) */
+                        m->addSeparator(); /*
                     else if (i == 0)
                         a->setChecked(true);
 
                     m->addAction(a);
                 }
+                */
                 m_filter->setMenu(m);
                 t->addWidget(m_filter);
             }
@@ -1375,7 +1377,10 @@ void FrameWork::connectWindow(QWidget *w)
 
         disconnect(doc, SIGNAL(statisticsChanged()), this, SLOT(statisticsUpdate()));
         disconnect(doc, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
-
+        if (m_filter) {
+            disconnect(m_filter, SIGNAL(textChanged(const QString &)), m_current_window, SLOT(setFilter(const QString &)));
+            m_filter->setText(QString());
+        }
         m_undogroup->setActiveStack(0);
 
         m_current_window = 0;
@@ -1388,7 +1393,11 @@ void FrameWork::connectWindow(QWidget *w)
 
         connect(doc, SIGNAL(statisticsChanged()), this, SLOT(statisticsUpdate()));
         connect(doc, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
-
+        if (m_filter) {
+            m_filter->setText(window->filter());
+            connect(m_filter, SIGNAL(textChanged(const QString &)), window, SLOT(setFilter(const QString &)));
+        }
+        
         m_undogroup->setActiveStack(doc->undoStack());
 
         m_current_window = window;

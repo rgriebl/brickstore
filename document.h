@@ -20,6 +20,7 @@
 #include <QUuid>
 
 #include "bricklink.h"
+#include "filterparser.h"
 
 class QUndoStack;
 class QUndoCommand;
@@ -264,21 +265,31 @@ private:
     static QList<Document *> s_documents;
 };
 
-/*
+
 class DocumentProxyModel : public QSortFilterProxyModel {
     Q_OBJECT
 
 public:
     DocumentProxyModel(Document *model);
+    ~DocumentProxyModel();
 
-    using QSortFilterProxyModel::index;
-    const AppearsInItem *appearsIn(const QModelIndex &idx) const;
-    QModelIndex index(const AppearsInItem *const_ai) const;
+//    using QSortFilterProxyModel::index;
+//    const AppearsInItem *appearsIn(const QModelIndex &idx) const;
+//    QModelIndex index(const AppearsInItem *const_ai) const;
+
+    void setFilterExpression(const QString &filter);
+    QString filterExpression() const;
 
 protected:
-    virtual bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
+//    virtual bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
+    virtual bool filterAcceptsColumn(int source_column, const QModelIndex &source_parent) const;
+    virtual bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const;
+
+private:
+    QString        m_filter_expression;
+    FilterParser * m_parser;
+    QList<Filter>  m_filter;
 };
-*/
 
 
 QDataStream &operator << (QDataStream &ds, const Document::Item &item);
