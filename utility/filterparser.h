@@ -9,25 +9,25 @@
 class Filter {
 public:
     enum Comparison {
-        Matches,
-        DoesNotMatch,
-        Is,
-        IsNot,
-        Less,
-        GreaterEqual,
-        Greater,
-        LessEqual,
-        StartsWith,
-        DoesNotStartWith,
-        EndsWith,
-        DoesNotEndWith,        
+        Matches          = 0x0001,
+        DoesNotMatch     = 0x0002,
+        Is               = 0x0004,
+        IsNot            = 0x0008,
+        Less             = 0x0010,
+        GreaterEqual     = 0x0020,
+        Greater          = 0x0040,
+        LessEqual        = 0x0080,
+        StartsWith       = 0x0100,
+        DoesNotStartWith = 0x0200,
+        EndsWith         = 0x0400,
+        DoesNotEndWith   = 0x0800,        
     };
     
     Q_DECLARE_FLAGS(Comparisons, Comparison)
     
     enum Combination {
-        And,
-        Or,
+        And  = 0x01,
+        Or   = 0x02,
     };
     
     Q_DECLARE_FLAGS(Combinations, Combination)

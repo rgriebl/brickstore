@@ -2,6 +2,7 @@
 #include <QStringList>
 #include <QCoreApplication>
 #include <QVariant>
+#include <QtDebug>
 
 #include "filterparser.h"
 
@@ -120,6 +121,8 @@ QList<Filter> FilterParser::parse(const QString &str_)
     Filter f;
     State state = StateStart;
     QString str = str_.simplified();
+
+    qDebug() << "Parsing filter expr:" << str;
     
     while (state != StateInvalid && pos < str.length()) {
         
@@ -129,6 +132,8 @@ QList<Filter> FilterParser::parse(const QString &str_)
         switch(state) {
         case StateStart: {
             int field = matchTokens(pos, str, m_field_tokens);
+
+            qDebug() << "Got field: " << field;
 
             if (field > -1) {
                 f.setField(field);
@@ -140,21 +145,28 @@ QList<Filter> FilterParser::parse(const QString &str_)
         }
         case StateCompare: {
             f.setComparison(matchTokens(pos, str, m_comparison_tokens));
+            
+            qDebug() << "Got comparison: " << f.comparison();
             state = StateFilter;
             break;
         }
         case StateFilter: {
             QPair<QString, Filter::Combination> res = matchFilterAndCombination(pos, str);
             
+            qDebug() << "Got expression: \"" << res.first << "\" with combination: " << res.second;
+            
             f.setExpression(res.first);
             f.setCombination(res.second);
+            filters.append(f);
             state = StateStart;
             break;
         }
         case StateInvalid:
             break;
         }
+        qDebug() << "State: " << state << "  Position: " << pos;
     }
+    qDebug() << "Parsed " << filters.count() << " subexpressions";
     return filters;
 }
 
@@ -179,24 +191,27 @@ T FilterParser::matchTokens(int &pos, const QString &str, const QMultiMap<T, QSt
     int found_len = -1;
     int found_pos = -1;
   
+    qDebug() << "Matching token:" << str.mid(pos);
+    qDebug() << "       against:" << tokens;  
+
     QMapIterator<T, QString> it(tokens);
     while (it.hasNext()) {
         it.next();
 
         int flen = it.value().length();
         
-        if (len - pos >= flen) {
+        if (len - pos >= flen) {    
             if (!start_of_token) {
-                QStringRef sr(&str, pos, flen);
-                if (it.value() == sr && found_len < flen) {
+                if (!it.value().compare(str.mid(pos, flen), Qt::CaseInsensitive) && found_len < flen) {
                     found_field = it.key();
                     found_len = flen;
                 }
             }
             else {
-                int fpos = str.indexOf(it.value(), pos);
+            qDebug("=======================X");
+                int fpos = str.indexOf(it.value(), pos, Qt::CaseInsensitive);
                 
-                if (fpos >= 0 && fpos <= found_pos && found_len < flen &&
+                if (fpos >= 0 && (found_pos == -1 || fpos <= found_pos) && found_len < flen &&
                     (fpos == 0 || str[fpos - 1].isSpace())) {
                     found_field = it.key();
                     found_len = flen;
@@ -205,8 +220,12 @@ T FilterParser::matchTokens(int &pos, const QString &str, const QMultiMap<T, QSt
             }
         }  
     }
-    if (found_field != (T) -1)
+    qDebug("**************** %d", found_field);
+    if (found_field != (T) -1) {
+//        if (start_of_token)
+//            pos = found_pos;
         pos += found_len;
+    }
     if (start_of_token)
         *start_of_token = found_pos;
     return found_field;
@@ -245,7 +264,9 @@ QPair<QString, Filter::Combination> FilterParser::matchFilterAndCombination(int 
         
         if (start_of_token == -1) {
             res.first = str.mid(pos);
-            pos = len;
+            pos += len;
+            
+            qDebug() << "Did not find token for:" << str << " - Pos:" << pos << "Len:" << len;
         } else {
             res.first = str.mid(pos, start_of_token - pos).trimmed();
         }
@@ -291,7 +312,7 @@ QMultiMap<Filter::Combination, QString> FilterParser::standardCombinationTokens(
         { Filter::And, 0, 0 }
     };
     
-    QMap<Filter::Combination, QString> dct;
+    QMultiMap<Filter::Combination, QString> dct;
     
     for (token_table *tt = predefined; tt->m_symbols || tt->m_words; ++tt) {
         if (!mask & tt->m_combination)
@@ -332,7 +353,7 @@ QMultiMap<Filter::Comparison, QString> FilterParser::standardComparisonTokens(Fi
         { Filter::Is, 0, 0 }
     };
     
-    QMap<Filter::Comparison, QString> dct;
+    QMultiMap<Filter::Comparison, QString> dct;
     
     for (token_table *tt = predefined; tt->m_symbols || tt->m_words; ++tt) {
         if (!mask & tt->m_comparison)

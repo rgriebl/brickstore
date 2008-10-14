@@ -273,6 +273,8 @@ public:
     DocumentProxyModel(Document *model);
     ~DocumentProxyModel();
 
+    inline Document::Item *item(const QModelIndex &idx) const  { return static_cast<Document *>(sourceModel())->item(mapToSource(idx)); }
+
 //    using QSortFilterProxyModel::index;
 //    const AppearsInItem *appearsIn(const QModelIndex &idx) const;
 //    QModelIndex index(const AppearsInItem *const_ai) const;

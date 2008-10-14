@@ -200,6 +200,7 @@ QSize FilterEditPrivate::minimumSizeHint() const
 
 void FilterEditPrivate::timerTick()
 {
+    qDebug("** FILTER TEXT CHANGED **");
     emit q->textChanged(text());
 }
 
@@ -355,7 +356,7 @@ OSStatus FilterEditPrivate::macEventHandler(EventHandlerCallRef, EventRef event,
     case kEventClassTextField:
         switch (GetEventKind(event)) {
         case kEventTextDidChange:
-            emit that->m_timer->start();
+            that->m_timer->start();
             break;
         case kEventTextAccepted:
             emit that->q->returnPressed();

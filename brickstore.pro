@@ -16,7 +16,8 @@ isEmpty( RELEASE ) {
 }
 
 TEMPLATE     = app
-CONFIG      *= warn_on thread qt modeltest
+CONFIG      *= warn_on thread qt
+# CONFIG      *= modeltest
 QT          *= core gui xml network
 
 TARGET            = BrickStore

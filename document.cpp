@@ -1640,6 +1640,7 @@ void Document::pictureUpdated(BrickLink::Picture *pic)
 DocumentProxyModel::DocumentProxyModel(Document *model)
     : QSortFilterProxyModel(0)
 {
+    setDynamicSortFilter(true);
     setSourceModel(model);
     m_parser = new FilterParser();
     
@@ -1681,6 +1682,7 @@ void DocumentProxyModel::setFilterExpression(const QString &str)
     m_filter_expression = str;
     m_filter = m_parser->parse(str);
     
+    qWarning("new filter: %d", m_filter.size());
     if (had_filter || !m_filter.isEmpty())
         invalidateFilter();
 }

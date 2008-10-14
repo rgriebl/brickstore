@@ -846,8 +846,6 @@ QString BrickLink::Core::defaultDatabaseName(DatabaseVersion version) const
 
 bool BrickLink::Core::readDatabase(const QString &fname)
 {
-    QString filename = fname.isNull() ? dataPath() + defaultDatabaseName() : fname;
-
     QMutexLocker lock(&m_corelock);
 
     cancelPictureTransfers();
@@ -873,155 +871,168 @@ bool BrickLink::Core::readDatabase(const QString &fname)
 
     QString message;
 
-    QFile f(filename);
+    QString filename = fname.isNull() ? dataPath() + defaultDatabaseName() : fname;
+
+    QFile f;
+    if (!fname.isEmpty())
+        f.setFileName(fname);
+    else if (QFile::exists(dataPath() + defaultDatabaseName()))
+        f.setFileName(dataPath() + defaultDatabaseName());
+    else if (QFile::exists(dataPath() + defaultDatabaseName(BrickStore_1_1)))
+        f.setFileName(dataPath() + defaultDatabaseName(BrickStore_1_1));
+
     if (f.open(QFile::ReadOnly)) {
         const char *data = reinterpret_cast<char *>(f.map(0, f.size()));
 
         if (data) {
             QByteArray ba = QByteArray::fromRawData(data, f.size());
-#if 1
-            QBuffer buf(&ba);
-            buf.open(QIODevice::ReadOnly);
 
-            ChunkReader cr(&buf, QDataStream::LittleEndian);
-            QDataStream &ds = cr.dataStream();
+            if (ba.size() >= 4 && data[0] == 'B' && data[1] == 'S' && data[2] == 'D' && data[3] == 'B') {
+                QBuffer buf(&ba);
+                buf.open(QIODevice::ReadOnly);
 
-            if (cr.startChunk() && cr.chunkId() == ChunkId('B','S','D','B') && cr.chunkVersion() == 1) {
-                while (cr.startChunk()) {
-                    switch (cr.chunkId() | quint64(cr.chunkVersion()) << 32) {
-                        case ChunkId('I','N','F','O') | 1ULL << 32: {
-                            ds >> message;
-                            break;
-                        }
-                        case ChunkId('C','O','L',' ') | 1ULL << 32: {
-                            quint32 colc = 0;
-                            ds >> colc;
+                ChunkReader cr(&buf, QDataStream::LittleEndian);
+                QDataStream &ds = cr.dataStream();
 
-                            for (quint32 i = colc; i; i--) {
-                                Color *col = new Color();
-                                ds >> col;
-                                m_colors.insert(col->id(), col);
+                if (cr.startChunk() && cr.chunkId() == ChunkId('B','S','D','B') && cr.chunkVersion() == 1) {
+                    while (cr.startChunk()) {
+                        switch (cr.chunkId() | quint64(cr.chunkVersion()) << 32) {
+                            case ChunkId('I','N','F','O') | 1ULL << 32: {
+                                ds >> message;
+                                break;
                             }
-                            break;
-                        }
-                        case ChunkId('C','A','T',' ') | 1ULL << 32: {
-                            quint32 catc = 0;
-                            ds >> catc;
+                            case ChunkId('C','O','L',' ') | 1ULL << 32: {
+                                quint32 colc = 0;
+                                ds >> colc;
 
-                            for (quint32 i = catc; i; i--) {
-                                Category *cat = new Category();
-                                ds >> cat;
-                                m_categories.insert(cat->id(), cat);
+                                for (quint32 i = colc; i; i--) {
+                                    Color *col = new Color();
+                                    ds >> col;
+                                    m_colors.insert(col->id(), col);
+                                }
+                                break;
                             }
-                            break;
-                        }
-                        case ChunkId('T','Y','P','E') | 1ULL << 32: {
-                            quint32 ittc = 0;
-                            ds >> ittc;
+                            case ChunkId('C','A','T',' ') | 1ULL << 32: {
+                                quint32 catc = 0;
+                                ds >> catc;
 
-                            for (quint32 i = ittc; i; i--) {
-                                ItemType *itt = new ItemType();
-                                ds >> itt;
-                                m_item_types.insert(itt->id(), itt);
+                                for (quint32 i = catc; i; i--) {
+                                    Category *cat = new Category();
+                                    ds >> cat;
+                                    m_categories.insert(cat->id(), cat);
+                                }
+                                break;
                             }
-                            break;
-                        }
-                        case ChunkId('I','T','E','M') | 1ULL << 32: {
-                            quint32 itc = 0;
-                            ds >> itc;
+                            case ChunkId('T','Y','P','E') | 1ULL << 32: {
+                                quint32 ittc = 0;
+                                ds >> ittc;
 
-                            m_items.reserve(itc);
-                            for (quint32 i = itc; i; i--) {
-                                Item *item = new Item();
-                                ds >> item;
-                                m_items.append(item);
+                                for (quint32 i = ittc; i; i--) {
+                                    ItemType *itt = new ItemType();
+                                    ds >> itt;
+                                    m_item_types.insert(itt->id(), itt);
+                                }
+                                break;
                             }
-                            break;
-                        }
-                        case ChunkId('A','T','P','G') | 1ULL << 32: {
-                            quint32 pgc = 0;
-                            ds >> pgc;
+                            case ChunkId('I','T','E','M') | 1ULL << 32: {
+                                quint32 itc = 0;
+                                ds >> itc;
 
-                            m_alltime_pg.reserve(pgc);
-                            ds.readRawData(m_alltime_pg.data(), pgc);
-                            break;
+                                m_items.reserve(itc);
+                                for (quint32 i = itc; i; i--) {
+                                    Item *item = new Item();
+                                    ds >> item;
+                                    m_items.append(item);
+                                }
+                                break;
+                            }
+                            case ChunkId('A','T','P','G') | 1ULL << 32: {
+                                quint32 pgc = 0;
+                                ds >> pgc;
+
+                                m_alltime_pg.reserve(pgc);
+                                ds.readRawData(m_alltime_pg.data(), pgc);
+                                break;
+                            }
+                            default: {
+                                if (!cr.skipChunk())
+                                    goto out;
+                                break;
+                            }
                         }
-                        default: {
-                            if (!cr.skipChunk())
-                                goto out;
-                            break;
-                        }
+                        if (!cr.endChunk())
+                            goto out;
                     }
                     if (!cr.endChunk())
                         goto out;
+
+                    result = true;
                 }
-                if (!cr.endChunk())
-                    goto out;
+            } 
+            else if (f.size() >= 4 && data[0] == char(0xb9) && data[1] == 0x1c && data[2] == 0x57 && data[3] == 0x03) {
+                QDataStream ds(ba);
 
-                result = true;
+                ds.setVersion(QDataStream::Qt_3_3);
+
+                quint32 magic = 0, filesize = 0, version = 0;
+
+                ds >> magic >> filesize >> version;
+
+                if ((magic != quint32(0xb91c5703)) || (filesize != f.size()) || (version != BrickStore_1_1))
+                    return false;
+
+                ds.setByteOrder(QDataStream::LittleEndian);
+
+                // colors
+                quint32 colc = 0;
+                ds >> colc;
+
+                for (quint32 i = colc; i; i--) {
+                    Color *col = new Color();
+                    ds >> col;
+                    m_colors.insert(col->id(), col);
+                }
+
+                // categories
+                quint32 catc = 0;
+                ds >> catc;
+
+                for (quint32 i = catc; i; i--) {
+                    Category *cat = new Category();
+                    ds >> cat;
+                    m_categories.insert(cat->id(), cat);
+                }
+
+                // types
+                quint32 ittc = 0;
+                ds >> ittc;
+
+                for (quint32 i = ittc; i; i--) {
+                    ItemType *itt = new ItemType();
+                    ds >> itt;
+                    m_item_types.insert(itt->id(), itt);
+                }
+
+                // items
+                quint32 itc = 0;
+                ds >> itc;
+
+                m_items.reserve(itc);
+                for (quint32 i = itc; i; i--) {
+                    Item *item = new Item();
+                    ds >> item;
+                    m_items.append(item);
+                }
+                quint32 allc = 0;
+                ds >> allc >> magic;
+
+                if ((allc == (colc + ittc + catc + itc)) && (magic == quint32(0xb91c5703))) {
+                    result = true;
+                }
+            } 
+            else {
+                qWarning("readDatabase(): Unknown database format!");
             }
-
-#else
-            QDataStream ds(ba);
-
-            ds.setVersion(QDataStream::Qt_3_3);
-
-            quint32 magic = 0, filesize = 0, version = 0;
-
-            ds >> magic >> filesize >> version;
-
-            if ((magic != quint32(0xb91c5703)) || (filesize != f.size()) || (version != DEFAULT_DATABASE_VERSION))
-                return false;
-
-            ds.setByteOrder(QDataStream::LittleEndian);
-
-            // colors
-            quint32 colc = 0;
-            ds >> colc;
-
-            for (quint32 i = colc; i; i--) {
-                Color *col = new Color();
-                ds >> col;
-                m_colors.insert(col->id(), col);
-            }
-
-            // categories
-            quint32 catc = 0;
-            ds >> catc;
-
-            for (quint32 i = catc; i; i--) {
-                Category *cat = new Category();
-                ds >> cat;
-                m_categories.insert(cat->id(), cat);
-            }
-
-            // types
-            quint32 ittc = 0;
-            ds >> ittc;
-
-            for (quint32 i = ittc; i; i--) {
-                ItemType *itt = new ItemType();
-                ds >> itt;
-                m_item_types.insert(itt->id(), itt);
-            }
-
-            // items
-            quint32 itc = 0;
-            ds >> itc;
-
-            m_items.reserve(itc);
-            for (quint32 i = itc; i; i--) {
-                Item *item = new Item();
-                ds >> item;
-                m_items.append(item);
-            }
-            quint32 allc = 0;
-            ds >> allc >> magic;
-
-            if ((allc == (colc + ittc + catc + itc)) && (magic == quint32(0xb91c5703))) {
-                result = true;
-            }
-#endif
         }
     }
 

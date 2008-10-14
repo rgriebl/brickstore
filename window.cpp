@@ -113,7 +113,7 @@ private:
 
 class DocumentDelegate : public QStyledItemDelegate {
 public:
-    DocumentDelegate(Document *doc, QTableView *view);
+    DocumentDelegate(Document *doc, DocumentProxyModel *doc, QTableView *view);
 
     int defaultItemHeight(const QWidget *w = 0) const;
 
@@ -132,7 +132,8 @@ protected:
     static QColor shadeColor(int idx, qreal alpha = 0);
 
 protected:
-    Document *   m_doc;
+    Document *m_doc;
+    DocumentProxyModel *   m_docmodel;
     QTableView *  m_view;
     SelectItemDialog * m_select_item;
     SelectColorDialog *m_select_color;
@@ -142,8 +143,8 @@ protected:
     static QHash<BrickLink::Status, QIcon> s_status_icons;
 };
 
-DocumentDelegate::DocumentDelegate(Document *doc, QTableView *view)
-    : QStyledItemDelegate(view), m_doc(doc), m_view(view),
+DocumentDelegate::DocumentDelegate(Document *doc, DocumentProxyModel *docmodel, QTableView *view)
+    : QStyledItemDelegate(view), m_doc(doc), m_docmodel(docmodel), m_view(view),
       m_select_item(0), m_select_color(0)
 {
 }
@@ -203,7 +204,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
     if (!idx.isValid())
         return;
 
-    Document::Item *it = m_doc->item(idx);
+    Document::Item *it = m_docmodel->item(idx);
     if (!it)
         return;
 
@@ -217,7 +218,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
     int w = option.rect.width();
     int h = option.rect.height();
     int margin = 2;
-    int align = (m_doc->data(idx, Qt::TextAlignmentRole).toInt() & ~Qt::AlignVertical_Mask) | Qt::AlignVCenter;
+    int align = (m_docmodel->data(idx, Qt::TextAlignmentRole).toInt() & ~Qt::AlignVertical_Mask) | Qt::AlignVCenter;
     quint64 colmask = 1ULL << idx.column();
     QString has_inv_tag;
 
@@ -467,7 +468,7 @@ bool DocumentDelegate::editorEvent(QEvent *e, QAbstractItemModel *model, const Q
     if (!e || !model || !idx.isValid())
         return false;
 
-    Document::Item *it = m_doc->item(idx);
+    Document::Item *it = m_docmodel->item(idx);
     if (!it)
         return false;
 
@@ -609,7 +610,7 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
 
 QWidget *DocumentDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &/*option*/, const QModelIndex &idx) const
 {
-    Document::Item *it = m_doc->item(idx);
+    Document::Item *it = m_docmodel->item(idx);
     if (!it)
         return false;
 
@@ -683,9 +684,10 @@ Window::Window(Document *doc, QWidget *parent)
 
     w_list->setModel(m_docmodel);
     w_list->setSelectionModel(doc->selectionModel());
-    DocumentDelegate *dd = new DocumentDelegate(doc, w_list);
+    DocumentDelegate *dd = new DocumentDelegate(doc, m_docmodel, w_list);
     w_list->setItemDelegate(dd);
     w_list->verticalHeader()->setDefaultSectionSize(dd->defaultItemHeight(w_list));
+    w_list->setSortingEnabled(true);
 
     int em = w_list->fontMetrics().width(QChar('m'));
     for (int i = 0; i < w_list->model()->columnCount(); i++) {

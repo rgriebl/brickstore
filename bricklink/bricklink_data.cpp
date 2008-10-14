@@ -25,7 +25,7 @@ namespace BrickLink {
 QDataStream &operator << (QDataStream &ds, const Color *col)
 {
     ds << col->m_id << col->m_name << col->m_peeron_name << col->m_ldraw_id;
-
+#if QT_VERSION < 0x040500
     if (ds.version() < QDataStream::Qt_4_0) {
         // Qt3 used this magic number for invalid QColor objects...
         static quint32 Invalid = 0x49000000;
@@ -33,7 +33,8 @@ QDataStream &operator << (QDataStream &ds, const Color *col)
         ds << (col->color().isValid() ? col->color().rgb() : Invalid);
     }
     else
-        ds << col->m_color;
+#endif
+    ds << col->m_color;
     ds << quint8(col->m_type);
     return ds;
 }
@@ -45,6 +46,7 @@ QDataStream &operator >> (QDataStream &ds, BrickLink::Color *col)
     quint8 flags;
     ds >> col->m_id >> col->m_name >> col->m_peeron_name >> col->m_ldraw_id;
 
+#if QT_VERSION < 0x040500
     if (ds.version() < QDataStream::Qt_4_0) {
         // Qt3 used this magic number for invalid QColor objects...
         static QRgb Invalid = 0x49000000;
@@ -57,7 +59,8 @@ QDataStream &operator >> (QDataStream &ds, BrickLink::Color *col)
             col->m_color.setRgb(x);
     }
     else
-        ds >> col->m_color;
+#endif
+    ds >> col->m_color;
     ds >> flags;
 
     col->m_type = flags;

@@ -64,7 +64,6 @@ public:
     void copyRemarks(const BrickLink::InvItemList &items);
 
     QString filter() const;
-    void setFilter(const QString &str);
 
 // InvItemList &selectedItems ( );
 // void setSelectedItems ( const InvItemList &items );
@@ -75,6 +74,8 @@ public:
     bool isDifferenceMode() const;
 
 public slots:
+    void setFilter(const QString &str);
+
     void on_view_difference_mode_toggled(bool);
 
     void on_file_save_triggered();
