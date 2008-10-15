@@ -72,7 +72,7 @@ public:
 private:
     bool eatWhiteSpace(int &pos, const QString &str);
 
-    template<typename T> T matchTokens(int &pos, const QString &str, const QMultiMap<T, QString> &tokens, int *start_of_token = 0);
+    template<typename T> T matchTokens(int &pos, const QString &str, const QMultiMap<T, QString> &tokens, const T default_result, int *start_of_token = 0);
     QPair<QString, Filter::Combination> matchFilterAndCombination(int &pos, const QString &str);
 
     QMultiMap<Filter::Comparison, QString> standardComparisonTokens(Filter::Comparisons mask);

@@ -131,7 +131,7 @@ QList<Filter> FilterParser::parse(const QString &str_)
 
         switch(state) {
         case StateStart: {
-            int field = matchTokens(pos, str, m_field_tokens);
+            int field = matchTokens(pos, str, m_field_tokens, -1);
 
             qDebug() << "Got field: " << field;
 
@@ -144,7 +144,7 @@ QList<Filter> FilterParser::parse(const QString &str_)
             break;
         }
         case StateCompare: {
-            f.setComparison(matchTokens(pos, str, m_comparison_tokens));
+            f.setComparison(matchTokens(pos, str, m_comparison_tokens, Filter::Matches));
             
             qDebug() << "Got comparison: " << f.comparison();
             state = StateFilter;
@@ -183,11 +183,11 @@ bool FilterParser::eatWhiteSpace(int &pos, const QString &str)
 }
 
 template<typename T>
-T FilterParser::matchTokens(int &pos, const QString &str, const QMultiMap<T, QString> &tokens, int *start_of_token)
+T FilterParser::matchTokens(int &pos, const QString &str, const QMultiMap<T, QString> &tokens, const T defaultresult, int *start_of_token)
 {
     int len = str.length();
 
-    T found_field = (T) -1;
+    T found_field;
     int found_len = -1;
     int found_pos = -1;
   
@@ -208,7 +208,6 @@ T FilterParser::matchTokens(int &pos, const QString &str, const QMultiMap<T, QSt
                 }
             }
             else {
-            qDebug("=======================X");
                 int fpos = str.indexOf(it.value(), pos, Qt::CaseInsensitive);
                 
                 if (fpos >= 0 && (found_pos == -1 || fpos <= found_pos) && found_len < flen &&
@@ -220,15 +219,29 @@ T FilterParser::matchTokens(int &pos, const QString &str, const QMultiMap<T, QSt
             }
         }  
     }
-    qDebug("**************** %d", found_field);
-    if (found_field != (T) -1) {
-//        if (start_of_token)
-//            pos = found_pos;
-        pos += found_len;
+    
+    // token not found:
+    //   start_of_token = -1
+    //   result = default
+    //   pos (unchanged)
+    
+    // token found:
+    //   start_of_token = found_pos (if start_of_token != 0)
+    //   found_field = it.key()
+    //   pos = (start_of_token ? found_pos + found_len : pos + found_len)
+    
+    if (found_len > 0) {
+        if (start_of_token) {
+            *start_of_token = found_pos;
+            pos = found_pos + found_len;
+        } else {
+            pos += found_len;
+        }
+    } else {
+        if (start_of_token)
+            *start_of_token = -1;
     }
-    if (start_of_token)
-        *start_of_token = found_pos;
-    return found_field;
+    return found_len > 0 ? found_field : defaultresult;
 }
 
 QPair<QString, Filter::Combination> FilterParser::matchFilterAndCombination(int &pos, const QString &str)
@@ -256,11 +269,12 @@ QPair<QString, Filter::Combination> FilterParser::matchFilterAndCombination(int 
         } else {
             res.first = str.mid(pos, end - pos);
             pos = end + 1;
-            res.second = matchTokens(pos, str, m_combination_tokens);
+            res.second = matchTokens(pos, str, m_combination_tokens, Filter::And);
         }
     } else {
         int start_of_token = -1;
-        res.second = matchTokens(pos, str, m_combination_tokens, &start_of_token);
+        int oldpos = pos;
+        res.second = matchTokens(pos, str, m_combination_tokens, Filter::And, &start_of_token);
         
         if (start_of_token == -1) {
             res.first = str.mid(pos);
@@ -268,7 +282,7 @@ QPair<QString, Filter::Combination> FilterParser::matchFilterAndCombination(int 
             
             qDebug() << "Did not find token for:" << str << " - Pos:" << pos << "Len:" << len;
         } else {
-            res.first = str.mid(pos, start_of_token - pos).trimmed();
+            res.first = str.mid(oldpos, start_of_token - oldpos).trimmed();
         }
     }
     return res;
