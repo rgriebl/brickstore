@@ -192,6 +192,7 @@ unix {
 
   MOC_DIR     = .moc
   UI_DIR      = .uic
+  RCC_DIR     = .rcc
   OBJECTS_DIR = .obj
 
   DEFINES += __USER__=\"$$(USER)\" __HOST__=\"$$system( hostname )\"

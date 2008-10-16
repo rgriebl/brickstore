@@ -638,6 +638,7 @@ bool LDraw::Core::create_part_list()
 
     QDateTime lastmod;
     
+    // TODO: caching !!!
     // set lastmod to cache file's mod time
     
     while (it.hasNext()) {
