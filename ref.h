@@ -33,5 +33,10 @@ private:
     mutable QBasicAtomicInt ref;
 };
 
+// tell Qt that Refs are shared and can't simply be deleted
+// (QCache will use that function to determine what can really be purged from the cache)
+
+template<> inline bool qIsDetached<Ref>(Ref &r) { return r.refCount() == 0; }
+
 #endif
 
