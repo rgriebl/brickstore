@@ -4,7 +4,7 @@
 #include <QVariant>
 #include <QtDebug>
 
-#include "filterparser.h"
+#include "filter.h"
 
 
 
@@ -109,12 +109,12 @@ enum State {
     StateInvalid
 };
 
-FilterParser::FilterParser()
+Filter::Parser::Parser()
 {
 }
 
 
-QList<Filter> FilterParser::parse(const QString &str_)
+QList<Filter> Filter::Parser::parse(const QString &str_)
 {
     QList<Filter> filters;
     int pos = 0;
@@ -122,8 +122,6 @@ QList<Filter> FilterParser::parse(const QString &str_)
     State state = StateStart;
     QString str = str_.simplified();
 
-    qDebug() << "Parsing filter expr:" << str;
-    
     while (state != StateInvalid && pos < str.length()) {
         
         if (!eatWhiteSpace(pos, str))
@@ -132,8 +130,6 @@ QList<Filter> FilterParser::parse(const QString &str_)
         switch(state) {
         case StateStart: {
             int field = matchTokens(pos, str, m_field_tokens, -1);
-
-            qDebug() << "Got field: " << field;
 
             if (field > -1) {
                 f.setField(field);
@@ -146,14 +142,11 @@ QList<Filter> FilterParser::parse(const QString &str_)
         case StateCompare: {
             f.setComparison(matchTokens(pos, str, m_comparison_tokens, Filter::Matches));
             
-            qDebug() << "Got comparison: " << f.comparison();
             state = StateFilter;
             break;
         }
         case StateFilter: {
             QPair<QString, Filter::Combination> res = matchFilterAndCombination(pos, str);
-            
-            qDebug() << "Got expression: \"" << res.first << "\" with combination: " << res.second;
             
             f.setExpression(res.first);
             f.setCombination(res.second);
@@ -164,13 +157,11 @@ QList<Filter> FilterParser::parse(const QString &str_)
         case StateInvalid:
             break;
         }
-        qDebug() << "State: " << state << "  Position: " << pos;
     }
-    qDebug() << "Parsed " << filters.count() << " subexpressions";
     return filters;
 }
 
-bool FilterParser::eatWhiteSpace(int &pos, const QString &str)
+bool Filter::Parser::eatWhiteSpace(int &pos, const QString &str)
 {
     int len = str.length();
 
@@ -183,7 +174,7 @@ bool FilterParser::eatWhiteSpace(int &pos, const QString &str)
 }
 
 template<typename T>
-T FilterParser::matchTokens(int &pos, const QString &str, const QMultiMap<T, QString> &tokens, const T defaultresult, int *start_of_token)
+T Filter::Parser::matchTokens(int &pos, const QString &str, const QMultiMap<T, QString> &tokens, const T defaultresult, int *start_of_token)
 {
     int len = str.length();
 
@@ -191,9 +182,6 @@ T FilterParser::matchTokens(int &pos, const QString &str, const QMultiMap<T, QSt
     int found_len = -1;
     int found_pos = -1;
   
-    qDebug() << "Matching token:" << str.mid(pos);
-    qDebug() << "       against:" << tokens;  
-
     QMapIterator<T, QString> it(tokens);
     while (it.hasNext()) {
         it.next();
@@ -244,7 +232,7 @@ T FilterParser::matchTokens(int &pos, const QString &str, const QMultiMap<T, QSt
     return found_len > 0 ? found_field : defaultresult;
 }
 
-QPair<QString, Filter::Combination> FilterParser::matchFilterAndCombination(int &pos, const QString &str)
+QPair<QString, Filter::Combination> Filter::Parser::matchFilterAndCombination(int &pos, const QString &str)
 {
     QPair<QString, Filter::Combination> res;
     res.second = Filter::And;
@@ -279,8 +267,6 @@ QPair<QString, Filter::Combination> FilterParser::matchFilterAndCombination(int 
         if (start_of_token == -1) {
             res.first = str.mid(pos);
             pos += len;
-            
-            qDebug() << "Did not find token for:" << str << " - Pos:" << pos << "Len:" << len;
         } else {
             res.first = str.mid(oldpos, start_of_token - oldpos).trimmed();
         }
@@ -288,32 +274,32 @@ QPair<QString, Filter::Combination> FilterParser::matchFilterAndCombination(int 
     return res;
 }
 
-void FilterParser::setFieldTokens(const QMultiMap<int, QString> &tokens)
+void Filter::Parser::setFieldTokens(const QMultiMap<int, QString> &tokens)
 {
     m_field_tokens = tokens;
 }
 
-void FilterParser::setComparisonTokens(const QMultiMap<Filter::Comparison, QString> &tokens)
+void Filter::Parser::setComparisonTokens(const QMultiMap<Filter::Comparison, QString> &tokens)
 {
     m_comparison_tokens = tokens;
 }
 
-void FilterParser::setCombinationTokens(const QMultiMap<Filter::Combination, QString> &tokens)
+void Filter::Parser::setCombinationTokens(const QMultiMap<Filter::Combination, QString> &tokens)
 {
     m_combination_tokens = tokens;
 }
 
-void FilterParser::setStandardComparisonTokens(Filter::Comparisons mask)
+void Filter::Parser::setStandardComparisonTokens(Filter::Comparisons mask)
 {
     m_comparison_tokens = standardComparisonTokens(mask);
 }
 
-void FilterParser::setStandardCombinationTokens(Filter::Combinations mask)
+void Filter::Parser::setStandardCombinationTokens(Filter::Combinations mask)
 {
     m_combination_tokens = standardCombinationTokens(mask);
 }
 
-QMultiMap<Filter::Combination, QString> FilterParser::standardCombinationTokens(Filter::Combinations mask)
+QMultiMap<Filter::Combination, QString> Filter::Parser::standardCombinationTokens(Filter::Combinations mask)
 {
     struct token_table { 
         Filter::Combination m_combination;
@@ -338,13 +324,13 @@ QMultiMap<Filter::Combination, QString> FilterParser::standardCombinationTokens(
         foreach (QString word, QString::fromLatin1(tt->m_words).split(QLatin1Char(',')))
             dct.insert(tt->m_combination, word);
 
-        foreach (QString word, qApp->translate("FilterParser", tt->m_words).split(QLatin1Char(',')))
+        foreach (QString word, qApp->translate("Filter::Parser", tt->m_words).split(QLatin1Char(',')))
             dct.insert(tt->m_combination, word);
     }
     return dct;
 }
 
-QMultiMap<Filter::Comparison, QString> FilterParser::standardComparisonTokens(Filter::Comparisons mask)
+QMultiMap<Filter::Comparison, QString> Filter::Parser::standardComparisonTokens(Filter::Comparisons mask)
 {
     struct token_table { 
         Filter::Comparison m_comparison;
@@ -379,7 +365,7 @@ QMultiMap<Filter::Comparison, QString> FilterParser::standardComparisonTokens(Fi
         foreach (QString word, QString::fromLatin1(tt->m_words).split(QLatin1Char(',')))
             dct.insert(tt->m_comparison, word);
 
-        foreach (QString word, qApp->translate("FilterParser", tt->m_words).split(QLatin1Char(',')))
+        foreach (QString word, qApp->translate("Filter::Parser", tt->m_words).split(QLatin1Char(',')))
             dct.insert(tt->m_comparison, word);
     }
     return dct;

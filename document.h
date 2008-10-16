@@ -20,7 +20,7 @@
 #include <QUuid>
 
 #include "bricklink.h"
-#include "filterparser.h"
+#include "filter.h"
 
 class QUndoStack;
 class QUndoCommand;
@@ -288,9 +288,9 @@ protected:
     virtual bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const;
 
 private:
-    QString        m_filter_expression;
-    FilterParser * m_parser;
-    QList<Filter>  m_filter;
+    QString         m_filter_expression;
+    Filter::Parser *m_parser;
+    QList<Filter>   m_filter;
 };
 
 

@@ -1642,7 +1642,7 @@ DocumentProxyModel::DocumentProxyModel(Document *model)
 {
     setDynamicSortFilter(true);
     setSourceModel(model);
-    m_parser = new FilterParser();
+    m_parser = new Filter::Parser();
     
     m_parser->setStandardCombinationTokens(Filter::And | Filter::Or);
     m_parser->setStandardComparisonTokens(Filter::Matches | Filter::DoesNotMatch |
