@@ -45,7 +45,7 @@
 #include "document.h"
 #include "disableupdates.h"
 #include "window.h"
-
+#include "headerview.h"
 #include "selectitemdialog.h"
 #include "selectcolordialog.h"
 
@@ -669,6 +669,7 @@ Window::Window(Document *doc, QWidget *parent)
     m_settopg_price = BrickLink::Average;
 
     w_list = new QTableView(this);
+    w_list->setHorizontalHeader(new HeaderView(Qt::Horizontal, w_list));
     w_list->setSelectionMode(QAbstractItemView::ExtendedSelection);
     w_list->setSelectionBehavior(QAbstractItemView::SelectRows);
     w_list->setAlternatingRowColors(true);

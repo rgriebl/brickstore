@@ -12,6 +12,7 @@ HEADERS += $$RELPWD/disableupdates.h \
 
 XSOURCES = filteredit \
            filter \
+           headerview \
            messagebox \
            money \
            multiprogressbar \
@@ -25,6 +26,7 @@ XSOURCES = filteredit \
            qtemporaryresource \
            utility \
 
+
 for( src, XSOURCES ) {
   HEADERS += $$RELPWD/$${src}.h
   SOURCES += $$RELPWD/$${src}.cpp
@@ -32,4 +34,9 @@ for( src, XSOURCES ) {
   exists($${src}_p.h) : HEADERS += $$RELPWD/$${src}_p.h
 }
 
+#for( form, XFORMS ) {
+#  exists($${form}.h) : HEADERS += $${form}.h
+#  exists($${form}.cpp) : SOURCES += $${form}.cpp
+#  FORMS   += $${form}.ui
+#}
 
