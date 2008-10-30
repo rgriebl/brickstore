@@ -72,9 +72,12 @@ public:
     virtual bool parseGuiStateXML(QDomElement root);
 
     bool isDifferenceMode() const;
+    bool isSimpleMode() const;
 
 public slots:
     void setFilter(const QString &str);
+    void setDifferenceMode(bool b);
+    void setSimpleMode(bool b);
 
     void on_view_difference_mode_toggled(bool);
 
@@ -188,6 +191,8 @@ private:
     QMultiHash<BrickLink::PriceGuide *, Document::Item *> *m_settopg_list;
     BrickLink::Time    m_settopg_time;
     BrickLink::Price   m_settopg_price;
+    bool m_diff_mode;
+    bool m_simple_mode;
 };
 
 #endif

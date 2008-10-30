@@ -667,6 +667,8 @@ Window::Window(Document *doc, QWidget *parent)
     m_settopg_list = 0;
     m_settopg_time = BrickLink::AllTime;
     m_settopg_price = BrickLink::Average;
+    m_simple_mode = false;
+    m_diff_mode = false;
 
     w_list = new QTableView(this);
     w_list->setHorizontalHeader(new HeaderView(Qt::Horizontal, w_list));
@@ -696,11 +698,13 @@ Window::Window(Document *doc, QWidget *parent)
         if (width)
             w_list->horizontalHeader()->resizeSection(i, (width < 0 ? -width : width * em) + 8);
     }
+
+    setSimpleMode(Config::inst()->simpleMode());
+    setDifferenceMode(false);
+
     /*
     w_list->setShowSortIndicator ( true );
     w_list->setColumnsHideable ( true );
-    w_list->setDifferenceMode ( false );
-    w_list->setSimpleMode ( Config::inst ( )->simpleMode ( ));
 
     if ( doc->doNotSortItems ( ))
      w_list->setSorting ( w_list->columns ( ) + 1 );
@@ -724,8 +728,7 @@ Window::Window(Document *doc, QWidget *parent)
 //    connect(w_filter, SIGNAL(textChanged(const QString &)), this, SLOT(applyFilter()));
 //    connect(w_filter->menu(), SIGNAL(triggered(QAction *)), this, SLOT(applyFilterField(QAction *)));
 
-    connect(Config::inst(), SIGNAL(simpleModeChanged(bool)), w_list, SLOT(setSimpleMode(bool)));
-    connect(Config::inst(), SIGNAL(simpleModeChanged(bool)), this, SLOT(updateErrorMask()));
+    connect(Config::inst(), SIGNAL(simpleModeChanged(bool)), this, SLOT(setSimpleMode(bool)));
     connect(Config::inst(), SIGNAL(showInputErrorsChanged(bool)), this, SLOT(updateErrorMask()));
 
     connect(Config::inst(), SIGNAL(weightSystemChanged(Config::WeightSystem)), w_list, SLOT(triggerUpdate()));
@@ -771,6 +774,75 @@ Window::~Window()
 {
     delete m_doc; //->deleteLater();
 }
+
+bool Window::isSimpleMode() const
+{
+    return m_simple_mode;
+}
+
+void Window::setSimpleMode(bool b)
+{
+    HeaderView *header = qobject_cast<HeaderView *>(w_list->horizontalHeader());
+
+    if (!header)
+        return;
+    m_simple_mode = b;
+
+    header->setSectionAvailable(Document::Bulk, !b);
+    header->setSectionAvailable(Document::Sale, !b);
+    header->setSectionAvailable(Document::TierQ1, !b);
+    header->setSectionAvailable(Document::TierQ2, !b);
+    header->setSectionAvailable(Document::TierQ3, !b);
+    header->setSectionAvailable(Document::TierP1, !b);
+    header->setSectionAvailable(Document::TierP2, !b);
+    header->setSectionAvailable(Document::TierP3, !b);
+    header->setSectionAvailable(Document::Reserved, !b);
+    header->setSectionAvailable(Document::Stockroom, !b);
+    header->setSectionAvailable(Document::Retain, !b);
+    header->setSectionAvailable(Document::LotId, !b);
+    header->setSectionAvailable(Document::Comments, !b);
+
+    updateErrorMask();
+}
+
+bool Window::isDifferenceMode() const
+{
+    return m_diff_mode;
+}
+
+void Window::setDifferenceMode(bool b)
+{
+    HeaderView *header = qobject_cast<HeaderView *>(w_list->horizontalHeader());
+
+    if (!header)
+        return;
+
+    m_diff_mode = b;
+
+    header->setSectionAvailable(Document::PriceOrig, b);
+    header->setSectionAvailable(Document::PriceDiff, b);
+    header->setSectionAvailable(Document::QuantityOrig, b);
+    header->setSectionAvailable(Document::QuantityDiff, b);
+
+    if (b) {
+        if (!header->isSectionHidden(Document::Quantity)) {
+            header->showSection(Document::QuantityDiff);
+            header->showSection(Document::QuantityOrig);
+
+            header->moveSection(header->visualIndex(Document::QuantityDiff), header->visualIndex(Document::Quantity));
+            header->moveSection(header->visualIndex(Document::QuantityOrig), header->visualIndex(Document::QuantityDiff));
+        }
+
+        if (!header->isSectionHidden(Document::Price)) {
+            header->showSection(Document::PriceDiff);
+            header->showSection(Document::PriceOrig);
+
+            header->moveSection(header->visualIndex(Document::PriceDiff), header->visualIndex(Document::Price));
+            header->moveSection(header->visualIndex(Document::PriceOrig), header->visualIndex(Document::PriceDiff));
+        }
+    }
+}
+
 
 void Window::on_view_save_default_col_triggered()
 {
@@ -1904,12 +1976,7 @@ void Window::on_edit_bl_myinventory_triggered()
 
 void Window::on_view_difference_mode_toggled(bool b)
 {
-//TODO: w_list->setDifferenceMode ( b );
-}
-
-bool Window::isDifferenceMode() const
-{
-    return false; //TODO: return w_list->isDifferenceMode ( );
+    setDifferenceMode(b);
 }
 
 void Window::on_file_print_triggered()

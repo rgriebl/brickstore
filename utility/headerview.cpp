@@ -24,20 +24,20 @@
 
 class SectionConfigDialog : public QDialog {
     Q_OBJECT
-    
+
     class SectionItem : public QListWidgetItem {
     public:
         SectionItem() : QListWidgetItem(), m_lidx(-1) { }
-        
+
         int logicalIndex() const { return m_lidx; }
         void setLogicalIndex(int idx) { m_lidx = idx; }
-    
+
     private:
         int m_lidx;
     };
-    
+
 public:
-    SectionConfigDialog(QHeaderView *header)
+    SectionConfigDialog(HeaderView *header)
         : QDialog(header), m_header(header)
     {
         m_label = new QLabel(this);
@@ -46,7 +46,7 @@ public:
         m_list->setAlternatingRowColors(true);
         m_list->setDragDropMode(QAbstractItemView::InternalMove);
         m_buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, this);
-        
+
         QVBoxLayout *lay = new QVBoxLayout(this);
         lay->addWidget(m_label);
         lay->addWidget(m_list);
@@ -54,28 +54,32 @@ public:
 
         QVector<SectionItem *> v(m_header->count());
         for (int i = 0; i < m_header->count(); ++i) {
-            SectionItem *it = new SectionItem();
-            it->setText(header->model()->headerData(i, m_header->orientation(), Qt::DisplayRole).toString());
-            it->setCheckState(header->isSectionHidden(i) ? Qt::Unchecked : Qt::Checked);
-            it->setLogicalIndex(i);
-            
+            SectionItem *it = 0;
+
+            if (m_header->isSectionAvailable(i)) {
+                it = new SectionItem();
+                it->setText(header->model()->headerData(i, m_header->orientation(), Qt::DisplayRole).toString());
+                it->setCheckState(header->isSectionHidden(i) ? Qt::Unchecked : Qt::Checked);
+                it->setLogicalIndex(i);
+            }
             v[m_header->visualIndex(i)] = it;
         }
-        foreach(SectionItem *si, v)
-            m_list->addItem(si);
-    
+        foreach(SectionItem *si, v) {
+            if (si)
+                m_list->addItem(si);
+        }
         connect(m_buttons, SIGNAL(accepted()), this, SLOT(accept()));
         connect(m_buttons, SIGNAL(rejected()), this, SLOT(reject()));
-    
+
         retranslateUi();
     }
-    
+
     void retranslateUi()
     {
         setWindowTitle(tr("Configure Columns"));
         m_label->setText(tr("Drag the columns into the order you prefer and show/hide them using the check mark."));
     }
-    
+
     void accept()
     {
         for (int vi = 0; vi < m_list->count(); ++vi) {
@@ -86,26 +90,26 @@ public:
 
             if (oldvi != vi)
                 m_header->moveSection(oldvi, vi);
-            
+
             bool oldvis = !m_header->isSectionHidden(li);
             bool vis = (si->checkState() == Qt::Checked);
-            
+
             if (vis != oldvis)
                 vis ? m_header->showSection(li) : m_header->hideSection(li);
         }
-    
+
         QDialog::accept();
     }
-    
+
     void changeEvent(QEvent *e)
     {
         if (e->type() == QEvent::LanguageChange)
             retranslateUi();
         QDialog::changeEvent(e);
     }
-    
+
 private:
-    QHeaderView *     m_header;
+    HeaderView *      m_header;
     QLabel *          m_label;
     QListWidget *     m_list;
     QDialogButtonBox *m_buttons;
@@ -118,6 +122,64 @@ private:
 HeaderView::HeaderView(Qt::Orientation o, QWidget *parent)
     : QHeaderView(o, parent)
 {
+}
+
+void HeaderView::setModel(QAbstractItemModel *m)
+{
+    QAbstractItemModel *oldm = model();
+
+    if (m == oldm)
+        return;
+
+    bool horiz = (orientation() == Qt::Horizontal);
+    if (oldm) {
+        disconnect(oldm, horiz ? SIGNAL(columnsRemoved(QModelIndex,int,int)) : SIGNAL(rowsRemoved(QModelIndex,int,int)),
+                   this, SLOT(sectionsRemoved(QModelIndex,int,int)));
+    }
+
+
+    if (m) {
+        connect(m, horiz ? SIGNAL(columnsRemoved(QModelIndex,int,int)) : SIGNAL(rowsRemoved(QModelIndex,int,int)),
+                this, SLOT(sectionsRemoved(QModelIndex,int,int)));
+    }
+
+    QHeaderView::setModel(m);
+
+    m_unavailable.clear();
+}
+
+void HeaderView::sectionsRemoved(const QModelIndex &parent, int logicalFirst, int logicalLast)
+{
+    if (parent.isValid())
+        return;
+
+    for (int i = logicalFirst; i <= logicalLast; ++i)
+        m_unavailable.removeOne(i);
+}
+
+bool HeaderView::isSectionAvailable(int section) const
+{
+    return !m_unavailable.contains(section);
+}
+
+void HeaderView::setSectionAvailable(int section, bool avail)
+{
+    bool oldavail = isSectionAvailable(section);
+
+    if (avail == oldavail)
+        return;
+
+    if (!avail) {
+        hideSection(section);
+        m_unavailable.append(section);
+    } else {
+        m_unavailable.removeOne(section);
+    }
+}
+
+int HeaderView::availableSectionCount() const
+{
+    return count() - m_unavailable.count();
 }
 
 bool HeaderView::viewportEvent(QEvent *e)
@@ -139,17 +201,24 @@ void HeaderView::showMenu(const QPoint &pos)
 
     m.addAction(tr("Configure columns..."))->setData(-1);
     m.addSeparator();
-    
+
     QVector<QAction *> actions(count());
-    for (int li = 0; li < count(); li++) {
-        QAction *a = new QAction(&m);
-        a->setText(model()->headerData(li, Qt::Horizontal, Qt::DisplayRole).toString());
-        a->setCheckable(true);
-        a->setChecked(!isSectionHidden(li));
-        a->setData(li);
+    for (int li = 0; li < count(); ++li) {
+        QAction *a = 0;
+
+        if (isSectionAvailable(li)) {
+            a = new QAction(&m);
+            a->setText(model()->headerData(li, Qt::Horizontal, Qt::DisplayRole).toString());
+            a->setCheckable(true);
+            a->setChecked(!isSectionHidden(li));
+            a->setData(li);
+        }
         actions[visualIndex(li)] = a;
     }
-    m.addActions(QList<QAction *>::fromVector(actions));
+    foreach (QAction *a, actions) {
+        if (a)
+            m.addAction(a);
+    }
 
     QAction *action = m.exec(pos);
 
@@ -157,7 +226,7 @@ void HeaderView::showMenu(const QPoint &pos)
         return;
     int idx = action->data().toInt();
     bool on = action->isChecked();
-    
+
     if (idx >= 0 && idx < count()) {
         on ? showSection(idx) : hideSection(idx);
     } else if (idx == -1) {

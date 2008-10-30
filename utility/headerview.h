@@ -21,11 +21,23 @@ class HeaderView : public QHeaderView {
 public:
     HeaderView(Qt::Orientation orientation, QWidget *parent = 0);
     
+    bool isSectionAvailable(int section) const;
+    void setSectionAvailable(int section, bool b);
+    int availableSectionCount() const;
+
+    void setModel(QAbstractItemModel*);
+
 protected:
     bool viewportEvent(QEvent *e);
-    
+
 private:
     void showMenu(const QPoint &pos);
+
+private slots:
+    void sectionsRemoved(const QModelIndex&, int, int);
+
+private:
+    QList<int> m_unavailable;
 };
 
 #endif
