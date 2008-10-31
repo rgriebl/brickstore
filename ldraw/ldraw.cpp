@@ -854,3 +854,18 @@ QColor LDraw::Core::color(int id, int baseid) const
         return QColor::fromRgbF(qreal(qrand()) / RAND_MAX, qreal(qrand()) / RAND_MAX, qreal(qrand()) / RAND_MAX);
     }
 }
+
+LDraw::Model *LDraw::Core::itemModel(const char *id)
+{
+    Model *p = 0;
+
+    if (m_items.contains(QByteArray(id))) {
+        QDir ldrawdir(dataPath());
+        if (ldrawdir.cd(QLatin1String("parts")) || ldrawdir.cd(QLatin1String("PARTS"))) {
+            QString fn = QLatin1String(id) + QLatin1String(".dat");
+
+            p = Model::fromFile(ldrawdir.filePath(fn));
+        }
+    }
+    return p;
+}

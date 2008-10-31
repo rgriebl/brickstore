@@ -48,6 +48,7 @@ XSOURCES = application \
            picturewidget \
            appearsinwidget \
            priceguidewidget \
+           itemdetailpopup \
            taskwidgets \
            selectitem \
            window \

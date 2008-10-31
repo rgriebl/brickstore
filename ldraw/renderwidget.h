@@ -16,6 +16,13 @@
 
 #include <QGLWidget>
 
+#include "vector_t.h"
+
+#ifdef MessageBox
+#undef MessageBox
+#endif
+
+
 namespace LDraw {
 
 class Part;
@@ -49,9 +56,19 @@ protected:
 private:
     void create_display_list();
     void render_complete_visit(Part *part, int ldraw_basecolor);
-    void render_dynamic_visit(Part *part, int ldraw_basecolor);
-    void render_static_visit(Part *part, int ldraw_basecolor);
+    void render_condlines_visit(Part *part, int ldraw_basecolor);
+    void render_surfaces_visit(Part *part, int ldraw_basecolor);
+    void render_lines_visit(Part *part, int ldraw_basecolor);
     
+    struct linebuffer {
+        const vector_t *v;
+        int color;
+    };
+
+    void renderOptimizedLines(int s, int e, const QVector<linebuffer> &buffer, int mode, int ldraw_basecolor);
+    void optimizeLines(const QVector<linebuffer> &buffer, int ldraw_basecolor);
+
+
     Part *m_part;
     qreal m_rx, m_ry, m_rz;
     int m_color;

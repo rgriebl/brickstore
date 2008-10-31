@@ -213,6 +213,38 @@ protected:
     LDraw::Part * m_part;
 };
 
+/*
+class Color {
+public:
+    enum Material {
+        Plastic = 0,
+        Chrome,
+        Pearlescent,
+        Rubber,
+        MatteMetallic,
+        Metal,
+
+        Default = Plastic
+    };
+
+private:
+    uint     m_id;
+    char *   m_name;
+    float    m_luminance;
+    Material m_material;
+    QColor   m_color;
+    QColor   m_edgecolor;
+};
+
+class Item {
+private:
+    char *m_id;
+    char *m_name;
+    char *m_path;
+};
+
+*/
+
 class Core {
 public:
     QString dataPath() const;
@@ -221,6 +253,8 @@ public:
     QColor color(int id, int baseid = -1) const;
     QColor edgeColor(int id) const;
     
+    Model *itemModel(const char *id);
+
 private:
     bool create_part_list();
     bool parse_ldconfig(const char *file);

@@ -54,6 +54,7 @@
 #include "utility.h"
 #include "additemdialog.h"
 #include "settingsdialog.h"
+#include "itemdetailpopup.h"
 
 #include "framework.h"
 
@@ -1381,6 +1382,10 @@ void FrameWork::connectWindow(QWidget *w)
             disconnect(m_filter, SIGNAL(textChanged(const QString &)), m_current_window, SLOT(setFilter(const QString &)));
             m_filter->setText(QString());
         }
+        if (m_details) {
+            disconnect(m_current_window, SIGNAL(currentChanged(Document::Item *)), m_details, SLOT(setItem(Document::Item *)));
+            m_details->setItem(0);
+        }
         m_undogroup->setActiveStack(0);
 
         m_current_window = 0;
@@ -1397,6 +1402,10 @@ void FrameWork::connectWindow(QWidget *w)
             m_filter->setText(window->filter());
             connect(m_filter, SIGNAL(textChanged(const QString &)), window, SLOT(setFilter(const QString &)));
         }
+        if (m_details) {
+            m_details->setItem(window->current());
+            connect(window, SIGNAL(currentChanged(Document::Item *)), m_details, SLOT(setItem(Document::Item *)));
+        }
         
         m_undogroup->setActiveStack(doc->undoStack());
 
@@ -1408,6 +1417,7 @@ void FrameWork::connectWindow(QWidget *w)
         if (!m_current_window)
             m_add_dialog->close();
     }
+
     findAction("edit_additems")->setEnabled((m_current_window));
 
     selectionUpdate(m_current_window ? m_current_window->selection() : Document::ItemList());
@@ -1416,7 +1426,6 @@ void FrameWork::connectWindow(QWidget *w)
     titleUpdate();
 
     emit windowActivated(m_current_window);
-    emit documentActivated(m_current_window ? m_current_window->document() : 0);
 }
 
 void FrameWork::selectionUpdate(const Document::ItemList &selection)
@@ -1766,6 +1775,24 @@ void FrameWork::toggleAddItemDialog(bool b)
 void FrameWork::closedAddItemDialog()
 {
     findAction("edit_additems")->setChecked(m_add_dialog && m_add_dialog->isVisible());
+}
+
+void FrameWork::toggleItemDetailPopup()
+{
+    if (!m_details) {
+        m_details = new ItemDetailPopup(this);
+
+        if (m_current_window)
+            connect(m_current_window, SIGNAL(currentChanged(Document::Item *)), m_details, SLOT(setItem(Document::Item *)));
+    }
+
+    if (!m_details->isVisible()) {
+        m_details->setItem(m_current_window ? m_current_window->current() : 0);
+        m_details->show();
+    } else {
+        m_details->hide();
+        m_details->setItem(0);
+    }
 }
 
 #include "framework.moc"
