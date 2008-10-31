@@ -724,7 +724,7 @@ bool FrameWork::setupToolBar(QToolBar *t, const QStringList &a_names)
                 m_filter = new FilterEdit();
 
                 QMenu *m = new QMenu(this);
-                QActionGroup *ag = new QActionGroup(m);
+             //   QActionGroup *ag = new QActionGroup(m);
              /*   for (int i = 0; i < (Window::FilterCountSpecial + Document::FieldCount); i++) {
                     QAction *a = new QAction(ag);
                     a->setCheckable(true);
@@ -1376,7 +1376,7 @@ void FrameWork::connectWindow(QWidget *w)
         connectAllActions(false, m_current_window);
 
         disconnect(doc, SIGNAL(statisticsChanged()), this, SLOT(statisticsUpdate()));
-        disconnect(doc, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
+        disconnect(m_current_window, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
         if (m_filter) {
             disconnect(m_filter, SIGNAL(textChanged(const QString &)), m_current_window, SLOT(setFilter(const QString &)));
             m_filter->setText(QString());
@@ -1392,7 +1392,7 @@ void FrameWork::connectWindow(QWidget *w)
         connectAllActions(true, window);
 
         connect(doc, SIGNAL(statisticsChanged()), this, SLOT(statisticsUpdate()));
-        connect(doc, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
+        connect(window, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
         if (m_filter) {
             m_filter->setText(window->filter());
             connect(m_filter, SIGNAL(textChanged(const QString &)), window, SLOT(setFilter(const QString &)));
@@ -1410,7 +1410,7 @@ void FrameWork::connectWindow(QWidget *w)
     }
     findAction("edit_additems")->setEnabled((m_current_window));
 
-    selectionUpdate(m_current_window ? m_current_window->document()->selection() : Document::ItemList());
+    selectionUpdate(m_current_window ? m_current_window->selection() : Document::ItemList());
     statisticsUpdate();
     modificationUpdate();
     titleUpdate();
@@ -1559,8 +1559,6 @@ void FrameWork::statisticsUpdate()
 
     m_statistics->setText(ss);
     m_errors->setText(es);
-
-    emit statisticsChanged(m_current_window);
 }
 
 void FrameWork::titleUpdate()

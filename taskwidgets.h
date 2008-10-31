@@ -17,7 +17,7 @@
 #include <QStackedWidget>
 #include <QLabel>
 
-#include "document.h"
+#include "window.h"
 #include "appearsinwidget.h"
 #include "priceguidewidget.h"
 #include "picturewidget.h"
@@ -33,7 +33,7 @@ public:
     TaskLinksWidget(QWidget *parent);
 
 protected slots:
-    void documentUpdate(Document *doc);
+    void windowUpdate(Window *win);
     void selectionUpdate(const Document::ItemList &list);
 
     void languageChange();
@@ -41,7 +41,7 @@ protected slots:
     void linkHover(const QString &url);
 
 private:
-    QPointer<Document> m_doc;
+    QPointer<Window> m_win;
 };
 
 
@@ -57,7 +57,7 @@ public:
     TaskPriceGuideWidget(QWidget *parent);
 
 protected slots:
-    void documentUpdate(Document *doc);
+    void windowUpdate(Window *win);
     void selectionUpdate(const Document::ItemList &list);
     virtual void dockChanged();
 
@@ -68,7 +68,7 @@ protected:
     void fixParentDockWindow();
 
 private:
-    QPointer<Document> m_doc;
+    QPointer<Window> m_win;
     QDockWidget *m_dock;
 };
 
@@ -85,7 +85,7 @@ public:
     TaskInfoWidget(QWidget *parent);
 
 protected slots:
-    void documentUpdate(Document *doc);
+    void windowUpdate(Window *win);
     void selectionUpdate(const Document::ItemList &list);
 
     void languageChange();
@@ -94,7 +94,7 @@ protected slots:
 private:
     QLabel *        m_text;
     PictureWidget *m_pic;
-    QPointer<Document> m_doc;
+    QPointer<Window> m_win;
 };
 
 
@@ -112,11 +112,11 @@ public:
     virtual QSize sizeHint() const;
 
 protected slots:
-    void documentUpdate(Document *doc);
+    void windowUpdate(Window *win);
     void selectionUpdate(const Document::ItemList &list);
 
 private:
-    QPointer<Document> m_doc;
+    QPointer<Window> m_win;
 };
 
 #endif

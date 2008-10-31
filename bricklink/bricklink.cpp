@@ -1064,8 +1064,9 @@ out:
 }
 
 
-BrickLink::InvItemList *BrickLink::Core::parseItemListXML(QDomElement root, ItemListXMLHint hint, uint *invalid_items)
+BrickLink::InvItemList BrickLink::Core::parseItemListXML(QDomElement root, ItemListXMLHint hint, uint *invalid_items)
 {
+    InvItemList inv;
     QString roottag, itemtag;
 
     switch (hint) {
@@ -1079,9 +1080,7 @@ BrickLink::InvItemList *BrickLink::Core::parseItemListXML(QDomElement root, Item
     }
 
     if (root.nodeName() != roottag)
-        return 0;
-
-    InvItemList *inv = new InvItemList();
+        return inv;
 
     uint incomplete = 0;
 
@@ -1331,7 +1330,7 @@ BrickLink::InvItemList *BrickLink::Core::parseItemListXML(QDomElement root, Item
         }
 
         if (ok)
-            inv->append(ii);
+            inv << ii;
         else
             delete ii;
     }
@@ -1346,7 +1345,7 @@ BrickLink::InvItemList *BrickLink::Core::parseItemListXML(QDomElement root, Item
 
 
 
-QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint hint, const InvItemList *items, QMap <QString, QString> *extra)
+QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint hint, const InvItemList &items, QMap <QString, QString> *extra)
 {
     QString roottag, itemtag;
 
@@ -1365,7 +1364,7 @@ QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint
     if (root.isNull() || roottag.isNull() || itemtag.isEmpty() || !items)
         return root;
 
-    foreach(const InvItem *ii, *items) {
+    foreach(const InvItem *ii, items) {
         if (ii->isIncomplete())
             continue;
 

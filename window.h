@@ -30,6 +30,7 @@ class QTableView;
 class FrameWork;
 class UndoStack;
 class FilterEdit;
+class QItemSelectionModel;
 
 
 class Window : public QWidget {
@@ -52,7 +53,8 @@ public:
         MergeKeep_Mask           = 0xffff0000
     };
 
-    Document::ItemList sortedItems(bool selection_only = false) const;
+//    const Document::ItemList &items() const      { return m_doc->items(); }
+    const Document::ItemList &selection() const  { return m_selection; }
 
     uint setItems(const BrickLink::InvItemList &items, int multiply = 1);
     uint addItems(const BrickLink::InvItemList &items, int multiply = 1, uint mergeflags = MergeAction_None, bool dont_change_sorting = false);
@@ -78,6 +80,7 @@ public slots:
     void setFilter(const QString &str);
     void setDifferenceMode(bool b);
     void setSimpleMode(bool b);
+    void setSelection(const Document::ItemList &);
 
     void on_view_difference_mode_toggled(bool);
 
@@ -151,48 +154,40 @@ public slots:
     void setPrice(money_t);
 
 signals:
-    void selectionChanged(const BrickLink::InvItemList &);
-    void statisticsChanged();
+    void selectionChanged(const Document::ItemList &);
 
 protected:
     virtual void closeEvent(QCloseEvent *e);
     virtual void changeEvent(QEvent *e);
 
 private slots:
-//    void applyFilter();
-//    void applyFilterField(QAction *);
+    void ensureLatestVisible();
+    void documentRowsInserted(const QModelIndex &, int, int);
     void updateCaption();
-
+    void selectionHelper();
     void contextMenu(const QPoint &);
     void priceGuideUpdated(BrickLink::PriceGuide *);
     void updateErrorMask();
-
-    void itemsAddedToDocument(const Document::ItemList &);
-    void itemsRemovedFromDocument(const Document::ItemList &);
-    void itemsChangedInDocument(const Document::ItemList &, bool);
 
 private:
     Document::ItemList exportCheck() const;
 
 private:
-    Document * m_doc;
-    DocumentProxyModel * m_docmodel;
-//    QRegExp        m_filter_expression;
-//    int            m_filter_field;
+    Document *           m_doc;
+    DocumentProxyModel * m_view;
+    QItemSelectionModel *m_selection_model;
+    Document::ItemList   m_selection;
+    QTableView *         w_list;
+    bool                 m_diff_mode;
+    bool                 m_simple_mode;
 
-// bool m_ignore_selection_update;
+    int                  m_latest_row;
+    QTimer *             m_latest_timer;
 
-// QHash<int, CItemViewItem *>  m_lvitems;
-
-    //FilterEdit *  w_filter;
-    QTableView *   w_list;
-
-    uint                           m_settopg_failcnt;
+    uint                 m_settopg_failcnt;
+    BrickLink::Time      m_settopg_time;
+    BrickLink::Price     m_settopg_price;
     QMultiHash<BrickLink::PriceGuide *, Document::Item *> *m_settopg_list;
-    BrickLink::Time    m_settopg_time;
-    BrickLink::Price   m_settopg_price;
-    bool m_diff_mode;
-    bool m_simple_mode;
 };
 
 #endif

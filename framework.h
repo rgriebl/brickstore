@@ -73,8 +73,6 @@ public slots:
 signals:
     void windowActivated(Window *);
     void documentActivated(Document *);
-    void selectionChanged(Window *, const BrickLink::InvItemList &);
-    void statisticsChanged(Window *);
 
 protected slots:
     void languageChange();

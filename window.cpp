@@ -66,7 +66,7 @@ private:
     {
         Document *doc = w->document();
 
-        if (w->document()->selection().isEmpty())
+        if (w->selection().isEmpty())
             return;
 
         //DisableUpdates disupd ( w_list );
@@ -74,9 +74,9 @@ private:
         uint count = 0;
 
         // Apples gcc4 has problems compiling this line (internal error)
-        //foreach ( Document::Item *pos, doc->selection ( )) {
-        for (Document::ItemList::const_iterator it = doc->selection().begin() ; it != doc->selection().end(); ++it) {
-            Document::Item *pos = *it;
+        foreach (Document::Item *pos, w->selection()) {
+        //for (Document::ItemList::const_iterator it = doc->selection().begin() ; it != doc->selection().end(); ++it) {
+        //    Document::Item *pos = *it;
             if (toggle) {
                 TG val = (pos->* getter)();
 
@@ -133,8 +133,8 @@ protected:
 
 protected:
     Document *m_doc;
-    DocumentProxyModel *   m_docmodel;
-    QTableView *  m_view;
+    DocumentProxyModel *   m_view;
+    QTableView *  m_table;
     SelectItemDialog * m_select_item;
     SelectColorDialog *m_select_color;
     mutable QPointer<QLineEdit> m_lineedit;
@@ -143,8 +143,8 @@ protected:
     static QHash<BrickLink::Status, QIcon> s_status_icons;
 };
 
-DocumentDelegate::DocumentDelegate(Document *doc, DocumentProxyModel *docmodel, QTableView *view)
-    : QStyledItemDelegate(view), m_doc(doc), m_docmodel(docmodel), m_view(view),
+DocumentDelegate::DocumentDelegate(Document *doc, DocumentProxyModel *view, QTableView *table)
+    : QStyledItemDelegate(view), m_doc(doc), m_view(view), m_table(table),
       m_select_item(0), m_select_color(0)
 {
 }
@@ -204,7 +204,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
     if (!idx.isValid())
         return;
 
-    Document::Item *it = m_docmodel->item(idx);
+    Document::Item *it = m_view->item(idx);
     if (!it)
         return;
 
@@ -218,7 +218,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
     int w = option.rect.width();
     int h = option.rect.height();
     int margin = 2;
-    int align = (m_docmodel->data(idx, Qt::TextAlignmentRole).toInt() & ~Qt::AlignVertical_Mask) | Qt::AlignVCenter;
+    int align = (m_view->data(idx, Qt::TextAlignmentRole).toInt() & ~Qt::AlignVertical_Mask) | Qt::AlignVCenter;
     quint64 colmask = 1ULL << idx.column();
     QString has_inv_tag;
 
@@ -468,7 +468,7 @@ bool DocumentDelegate::editorEvent(QEvent *e, QAbstractItemModel *model, const Q
     if (!e || !model || !idx.isValid())
         return false;
 
-    Document::Item *it = m_docmodel->item(idx);
+    Document::Item *it = m_view->item(idx);
     if (!it)
         return false;
 
@@ -572,12 +572,12 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
     case Document::Description:
         if (dblclick || (keypress && editkey)) {
             if (!m_select_item) {
-                m_select_item = new SelectItemDialog(false, m_view, Qt::Tool);
+                m_select_item = new SelectItemDialog(false, m_table, Qt::Tool);
                 m_select_item->setWindowTitle(tr("Modify Item"));
             }
             m_select_item->setItem(it->item());
 
-            if (m_select_item->exec(QRect(m_view->viewport()->mapToGlobal(option.rect.topLeft()), option.rect.size())) == QDialog::Accepted) {
+            if (m_select_item->exec(QRect(m_table->viewport()->mapToGlobal(option.rect.topLeft()), option.rect.size())) == QDialog::Accepted) {
                 Document::Item item = *it;
                 item.setItem(m_select_item->item());
                 m_doc->changeItem(it, item);
@@ -588,12 +588,12 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
     case Document::Color:
         if (dblclick || (keypress && editkey)) {
             if (!m_select_color) {
-                m_select_color = new SelectColorDialog(m_view, Qt::Tool);
+                m_select_color = new SelectColorDialog(m_table, Qt::Tool);
                 m_select_color->setWindowTitle(tr("Modify Color"));
             }
             m_select_color->setColor(it->color());
 
-            if (m_select_color->exec(QRect(m_view->viewport()->mapToGlobal(option.rect.topLeft()), option.rect.size())) == QDialog::Accepted) {
+            if (m_select_color->exec(QRect(m_table->viewport()->mapToGlobal(option.rect.topLeft()), option.rect.size())) == QDialog::Accepted) {
                 Document::Item item = *it;
                 item.setColor(m_select_color->color());
                 m_doc->changeItem(it, item);
@@ -610,7 +610,7 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
 
 QWidget *DocumentDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &/*option*/, const QModelIndex &idx) const
 {
-    Document::Item *it = m_docmodel->item(idx);
+    Document::Item *it = m_view->item(idx);
     if (!it)
         return false;
 
@@ -658,10 +658,11 @@ Window::Window(Document *doc, QWidget *parent)
     setAttribute(Qt::WA_DeleteOnClose);
 
     m_doc = doc;
-    m_docmodel = new DocumentProxyModel(doc);
-// m_ignore_selection_update = false;
-
-//    m_filter_field = All;
+    m_view = new DocumentProxyModel(doc);
+    m_latest_row = -1;
+    m_latest_timer = new QTimer(this);
+    m_latest_timer->setSingleShot(true);
+    m_latest_timer->setInterval(400);
 
     m_settopg_failcnt = 0;
     m_settopg_list = 0;
@@ -674,6 +675,9 @@ Window::Window(Document *doc, QWidget *parent)
     w_list->setHorizontalHeader(new HeaderView(Qt::Horizontal, w_list));
     w_list->setSelectionMode(QAbstractItemView::ExtendedSelection);
     w_list->setSelectionBehavior(QAbstractItemView::SelectRows);
+    w_list->setSortingEnabled(true);
+    w_list->horizontalHeader()->setClickable(true);
+    w_list->horizontalHeader()->setMovable(true);
     w_list->setAlternatingRowColors(true);
     w_list->setTabKeyNavigation(true);
     w_list->setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
@@ -685,12 +689,14 @@ Window::Window(Document *doc, QWidget *parent)
     w_list->setEditTriggers(QAbstractItemView::DoubleClicked | QAbstractItemView::EditKeyPressed | QAbstractItemView::AnyKeyPressed);
     setFocusProxy(w_list);
 
-    w_list->setModel(m_docmodel);
-    w_list->setSelectionModel(doc->selectionModel());
-    DocumentDelegate *dd = new DocumentDelegate(doc, m_docmodel, w_list);
+    w_list->setModel(m_view);
+    m_selection_model = new QItemSelectionModel(m_view, this);
+    connect(m_selection_model, SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(selectionHelper()));
+    w_list->setSelectionModel(m_selection_model);
+
+    DocumentDelegate *dd = new DocumentDelegate(doc, m_view, w_list);
     w_list->setItemDelegate(dd);
     w_list->verticalHeader()->setDefaultSectionSize(dd->defaultItemHeight(w_list));
-    w_list->setSortingEnabled(true);
 
     int em = w_list->fontMetrics().width(QChar('m'));
     for (int i = 0; i < w_list->model()->columnCount(); i++) {
@@ -704,12 +710,10 @@ Window::Window(Document *doc, QWidget *parent)
 
     /*
     w_list->setShowSortIndicator ( true );
-    w_list->setColumnsHideable ( true );
 
     if ( doc->doNotSortItems ( ))
      w_list->setSorting ( w_list->columns ( ) + 1 );
 */
-//    connect(w_list->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(updateSelectionFromView()));
 
 
     QBoxLayout *toplay = new QVBoxLayout(this);
@@ -717,33 +721,21 @@ Window::Window(Document *doc, QWidget *parent)
     toplay->setMargin(0);
     toplay->addWidget(w_list, 10);
 
-    connect(BrickLink::core(), SIGNAL(priceGuideUpdated(BrickLink::PriceGuide *)), this, SLOT(priceGuideUpdated(BrickLink::PriceGuide *)));
-
+    connect(m_latest_timer, SIGNAL(timeout()), this, SLOT(ensureLatestVisible()));
     connect(w_list, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(contextMenu(const QPoint &)));
-    //connect(w_list, SIGNAL(activated(const QModelIndex &)), w_list, SLOT(edit(const QModelIndex &)));
-//    connect(w_filter_clear, SIGNAL(clicked()), w_filter_expression, SLOT(clearEditText()));
-//    connect(w_filter_expression, SIGNAL(editTextChanged(const QString &)), this, SLOT(applyFilter()));
-//    connect(w_filter_field, SIGNAL(activated(int)), this, SLOT(applyFilter()));
 
-//    connect(w_filter, SIGNAL(textChanged(const QString &)), this, SLOT(applyFilter()));
-//    connect(w_filter->menu(), SIGNAL(triggered(QAction *)), this, SLOT(applyFilterField(QAction *)));
+    connect(BrickLink::core(), SIGNAL(priceGuideUpdated(BrickLink::PriceGuide *)), this, SLOT(priceGuideUpdated(BrickLink::PriceGuide *)));
 
     connect(Config::inst(), SIGNAL(simpleModeChanged(bool)), this, SLOT(setSimpleMode(bool)));
     connect(Config::inst(), SIGNAL(showInputErrorsChanged(bool)), this, SLOT(updateErrorMask()));
+    connect(Config::inst(), SIGNAL(measurementSystemChanged(QLocale::MeasurementSystem)), w_list->viewport(), SLOT(update()));
 
-    connect(Config::inst(), SIGNAL(weightSystemChanged(Config::WeightSystem)), w_list, SLOT(triggerUpdate()));
-    connect(Money::inst(), SIGNAL(monetarySettingsChanged()), w_list, SLOT(triggerUpdate()));
-
-////////////////////////////////////////////////////////////////////////////////
+    connect(Money::inst(), SIGNAL(monetarySettingsChanged()), w_list->viewport(), SLOT(update()));
 
     connect(m_doc, SIGNAL(titleChanged(const QString &)), this, SLOT(updateCaption()));
     connect(m_doc, SIGNAL(modificationChanged(bool)), this, SLOT(updateCaption()));
 
-    connect(m_doc, SIGNAL(itemsAdded(const Document::ItemList &)), this, SLOT(itemsAddedToDocument(const Document::ItemList &)));
-    connect(m_doc, SIGNAL(itemsRemoved(const Document::ItemList &)), this, SLOT(itemsRemovedFromDocument(const Document::ItemList &)));
-    connect(m_doc, SIGNAL(itemsChanged(const Document::ItemList &, bool)), this, SLOT(itemsChangedInDocument(const Document::ItemList &, bool)));
-
-    itemsAddedToDocument(m_doc->items());
+    connect(m_doc, SIGNAL(rowsInserted(const QModelIndex &, int, int)), this, SLOT(documentRowsInserted(const QModelIndex &, int, int)));
 
     updateErrorMask();
     updateCaption();
@@ -849,53 +841,31 @@ void Window::on_view_save_default_col_triggered()
     //TODO w_list->saveDefaultLayout ( );
 }
 
-void Window::itemsAddedToDocument(const Document::ItemList &items)
+void Window::documentRowsInserted(const QModelIndex &parent, int /*start*/, int end)
 {
-    /*
-    QListViewItem *last_item = w_list->lastItem ( );
-
-    foreach ( Document::Item *item, items ) {
-     CItemViewItem *ivi = new CItemViewItem ( item, w_list, last_item );
-     m_lvitems.insert ( item, ivi );
-     last_item = ivi;
+    if (!parent.isValid()) {
+        m_latest_row = end;
+        m_latest_timer->start();
     }
-
-    //TODO w_list->ensureItemVisible ( m_lvitems [items.front ( )] );
-    */
-
 }
 
-void Window::itemsRemovedFromDocument(const Document::ItemList &items)
+void Window::ensureLatestVisible()
 {
-    /*
-    foreach ( Document::Item *item, items )
-     delete m_lvitems.take ( item );
-     */
-}
-
-void Window::itemsChangedInDocument(const Document::ItemList &items, bool /*grave*/)
-{
-    /*
-    foreach ( Document::Item *item, items ) {
-     CItemViewItem *ivi = m_lvitems [item];
-
-     if ( ivi ) {
-      ivi->widthChanged ( );
-      ivi->repaint ( );
-     }
+    if (m_latest_row >= 0) {
+        w_list->scrollTo(m_view->index(m_latest_row, 0));
+        m_latest_row = -1;
     }
-    */
 }
 
 
 void Window::setFilter(const QString &str)
 {
-    m_docmodel->setFilterExpression(str);
+    m_view->setFilterExpression(str);
 }
 
 QString Window::filter() const
 {
-    return m_docmodel->filterExpression();
+    return m_view->filterExpression();
 }
 
 uint Window::addItems(const BrickLink::InvItemList &items, int multiply, uint globalmergeflags, bool dont_change_sorting)
@@ -1154,10 +1124,10 @@ void Window::on_edit_cut_triggered()
 
 void Window::on_edit_copy_triggered()
 {
-    if (!m_doc->selection().isEmpty()) {
+    if (!selection().isEmpty()) {
         BrickLink::InvItemList bllist;
 
-        foreach(Document::Item *item, m_doc->selection())
+        foreach(Document::Item *item, selection())
         bllist.append(item);
 
         QApplication::clipboard()->setMimeData(new BrickLink::InvItemMimeData(bllist));
@@ -1169,9 +1139,9 @@ void Window::on_edit_paste_triggered()
     BrickLink::InvItemList bllist = BrickLink::InvItemMimeData::items(QApplication::clipboard()->mimeData());
 
     if (bllist.count()) {
-        if (!m_doc->selection().isEmpty()) {
+        if (!selection().isEmpty()) {
             if (MessageBox::question(this, tr("Overwrite the currently selected items?"), QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes) == QMessageBox::Yes)
-                m_doc->removeItems(m_doc->selection());
+                m_doc->removeItems(selection());
         }
         addItems(bllist, 1, MergeAction_Ask | MergeKeep_New);
         qDeleteAll(bllist);
@@ -1180,8 +1150,8 @@ void Window::on_edit_paste_triggered()
 
 void Window::on_edit_delete_triggered()
 {
-    if (!m_doc->selection().isEmpty())
-        m_doc->removeItems(m_doc->selection());
+    if (!selection().isEmpty())
+        m_doc->removeItems(selection());
 }
 
 void Window::on_edit_select_all_triggered()
@@ -1198,7 +1168,7 @@ void Window::on_edit_reset_diffs_triggered()
 {
     DisableUpdates disupd(w_list);
 
-    m_doc->resetDifferences(m_doc->selection());
+    m_doc->resetDifferences(selection());
 }
 
 
@@ -1270,10 +1240,10 @@ void Window::on_edit_stockroom_toggle_triggered()
 
 void Window::on_edit_price_set_triggered()
 {
-    if (m_doc->selection().isEmpty())
+    if (selection().isEmpty())
         return;
 
-    QString price = m_doc->selection().front()->price().toLocalizedString(false);
+    QString price = selection().front()->price().toLocalizedString(false);
 
     if (MessageBox::getString(this, tr("Enter the new price for all selected items:"), Money::inst()->currencySymbol(), price, new MoneyValidator(0, 10000, 3, 0))) {
         setOrToggle<money_t>::set(this, tr("Set price on %1 items"), &Document::Item::price, &Document::Item::setPrice, money_t::fromLocalizedString(price));
@@ -1282,7 +1252,7 @@ void Window::on_edit_price_set_triggered()
 
 void Window::on_edit_price_round_triggered()
 {
-    if (m_doc->selection().isEmpty())
+    if (selection().isEmpty())
         return;
 
     uint roundcount = 0;
@@ -1290,7 +1260,7 @@ void Window::on_edit_price_round_triggered()
 
     DisableUpdates disupd(w_list);
 
-    foreach(Document::Item *pos, m_doc->selection()) {
+    foreach(Document::Item *pos, selection()) {
         money_t p = ((pos->price() + money_t (0.005)) / 10) * 10;
 
         if (p != pos->price()) {
@@ -1308,7 +1278,7 @@ void Window::on_edit_price_round_triggered()
 
 void Window::on_edit_price_to_priceguide_triggered()
 {
-    if (m_doc->selection().isEmpty())
+    if (selection().isEmpty())
         return;
 
     if (m_settopg_list) {
@@ -1327,7 +1297,7 @@ void Window::on_edit_price_to_priceguide_triggered()
         m_settopg_price   = BrickLink::Average; //dlg.price ( );
         bool force_update = false; //dlg.forceUpdate ( );
 
-        foreach(Document::Item *item, m_doc->selection()) {
+        foreach(Document::Item *item, selection()) {
             BrickLink::PriceGuide *pg = BrickLink::core()->priceGuide(item->item(), item->color());
 
             if (force_update && pg && (pg->updateStatus() != BrickLink::Updating))
@@ -1396,7 +1366,7 @@ void Window::priceGuideUpdated(BrickLink::PriceGuide *pg)
 
 void Window::on_edit_price_inc_dec_triggered()
 {
-    if (m_doc->selection().isEmpty())
+    if (selection().isEmpty())
         return;
 
     //DlgIncDecPriceImpl dlg ( this, "", true );
@@ -1412,7 +1382,7 @@ void Window::on_edit_price_inc_dec_triggered()
 
         DisableUpdates disupd(w_list);
 
-        foreach(Document::Item *pos, m_doc->selection()) {
+        foreach(Document::Item *pos, selection()) {
             Document::Item item = *pos;
 
             money_t p = item.price();
@@ -1442,7 +1412,7 @@ void Window::on_edit_price_inc_dec_triggered()
 
 void Window::on_edit_qty_divide_triggered()
 {
-    if (m_doc->selection().isEmpty())
+    if (selection().isEmpty())
         return;
 
     int divisor = 1;
@@ -1451,7 +1421,7 @@ void Window::on_edit_qty_divide_triggered()
         if (divisor > 1) {
             int lots_with_errors = 0;
 
-            foreach(Document::Item *item, m_doc->selection()) {
+            foreach(Document::Item *item, selection()) {
                 if (qAbs(item->quantity()) % divisor)
                     lots_with_errors++;
             }
@@ -1465,7 +1435,7 @@ void Window::on_edit_qty_divide_triggered()
 
                 DisableUpdates disupd(w_list);
 
-                foreach(Document::Item *pos, m_doc->selection()) {
+                foreach(Document::Item *pos, selection()) {
                     Document::Item item = *pos;
 
                     item.setQuantity(item.quantity() / divisor);
@@ -1481,7 +1451,7 @@ void Window::on_edit_qty_divide_triggered()
 
 void Window::on_edit_qty_multiply_triggered()
 {
-    if (m_doc->selection().isEmpty())
+    if (selection().isEmpty())
         return;
 
     int factor = 1;
@@ -1493,7 +1463,7 @@ void Window::on_edit_qty_multiply_triggered()
 
             DisableUpdates disupd(w_list);
 
-            foreach(Document::Item *pos, m_doc->selection()) {
+            foreach(Document::Item *pos, selection()) {
                 Document::Item item = *pos;
 
                 item.setQuantity(item.quantity() * factor);
@@ -1508,10 +1478,10 @@ void Window::on_edit_qty_multiply_triggered()
 
 void Window::on_edit_sale_triggered()
 {
-    if (m_doc->selection().isEmpty())
+    if (selection().isEmpty())
         return;
 
-    int sale = m_doc->selection().front()->sale();
+    int sale = selection().front()->sale();
 
     if (MessageBox::getInteger(this, tr("Set sale in percent for the selected items (this will <u>not</u> change any prices).<br />Negative values are also allowed."), tr("%"), sale, new QIntValidator(-1000, 99, 0)))
         setOrToggle<int>::set(this, tr("Set sale on %1 items"), &Document::Item::sale, &Document::Item::setSale, sale);
@@ -1519,10 +1489,10 @@ void Window::on_edit_sale_triggered()
 
 void Window::on_edit_bulk_triggered()
 {
-    if (m_doc->selection().isEmpty())
+    if (selection().isEmpty())
         return;
 
-    int bulk = m_doc->selection().front()->bulkQuantity();
+    int bulk = selection().front()->bulkQuantity();
 
     if (MessageBox::getInteger(this, tr("Set bulk quantity for the selected items:"), QString(), bulk, new QIntValidator(1, 99999, 0)))
         setOrToggle<int>::set(this, tr("Set bulk quantity on %1 items"), &Document::Item::bulkQuantity, &Document::Item::setBulkQuantity, bulk);
@@ -1530,12 +1500,12 @@ void Window::on_edit_bulk_triggered()
 
 void Window::on_edit_color_triggered()
 {
-    if (m_doc->selection().isEmpty())
+    if (selection().isEmpty())
         return;
 
     SelectColorDialog d(this);
     d.setWindowTitle(tr("Modify Color"));
-    d.setColor(m_doc->selection().front()->color());
+    d.setColor(selection().front()->color());
 
     if (d.exec() == QDialog::Accepted)
         setOrToggle<const BrickLink::Color *>::set(this, tr( "Set color on %1 items" ), &Document::Item::color, &Document::Item::setColor, d.color());
@@ -1543,10 +1513,10 @@ void Window::on_edit_color_triggered()
 
 void Window::on_edit_remark_set_triggered()
 {
-    if (m_doc->selection().isEmpty())
+    if (selection().isEmpty())
         return;
 
-    QString remarks = m_doc->selection().front()->remarks();
+    QString remarks = selection().front()->remarks();
 
     if (MessageBox::getString(this, tr("Enter the new remark for all selected items:"), remarks))
         setOrToggle<QString, const QString &>::set(this, tr("Set remark on %1 items"), &Document::Item::remarks, &Document::Item::setRemarks, remarks);
@@ -1554,7 +1524,7 @@ void Window::on_edit_remark_set_triggered()
 
 void Window::on_edit_remark_add_triggered()
 {
-    if (m_doc->selection().isEmpty())
+    if (selection().isEmpty())
         return;
 
     QString addremarks;
@@ -1567,7 +1537,7 @@ void Window::on_edit_remark_add_triggered()
 
         DisableUpdates disupd(w_list);
 
-        foreach(Document::Item *pos, m_doc->selection()) {
+        foreach(Document::Item *pos, selection()) {
             QString str = pos->remarks();
 
             if (str.isEmpty())
@@ -1594,7 +1564,7 @@ void Window::on_edit_remark_add_triggered()
 
 void Window::on_edit_remark_rem_triggered()
 {
-    if (m_doc->selection().isEmpty())
+    if (selection().isEmpty())
         return;
 
     QString remremarks;
@@ -1607,7 +1577,7 @@ void Window::on_edit_remark_rem_triggered()
 
         DisableUpdates disupd(w_list);
 
-        foreach(Document::Item *pos, m_doc->selection()) {
+        foreach(Document::Item *pos, selection()) {
             QString str = pos->remarks();
             str.remove(regexp);
             str = str.simplified();
@@ -1628,10 +1598,10 @@ void Window::on_edit_remark_rem_triggered()
 
 void Window::on_edit_comment_set_triggered()
 {
-    if (m_doc->selection().isEmpty())
+    if (selection().isEmpty())
         return;
 
-    QString comments = m_doc->selection().front()->comments();
+    QString comments = selection().front()->comments();
 
     if (MessageBox::getString(this, tr("Enter the new comment for all selected items:"), comments))
         setOrToggle<QString, const QString &>::set(this, tr("Set comment on %1 items"), &Document::Item::comments, &Document::Item::setComments, comments);
@@ -1639,7 +1609,7 @@ void Window::on_edit_comment_set_triggered()
 
 void Window::on_edit_comment_add_triggered()
 {
-    if (m_doc->selection().isEmpty())
+    if (selection().isEmpty())
         return;
 
     QString addcomments;
@@ -1652,7 +1622,7 @@ void Window::on_edit_comment_add_triggered()
 
         DisableUpdates disupd(w_list);
 
-        foreach(Document::Item *pos, m_doc->selection()) {
+        foreach(Document::Item *pos, selection()) {
             QString str = pos->comments();
 
             if (str.isEmpty())
@@ -1679,7 +1649,7 @@ void Window::on_edit_comment_add_triggered()
 
 void Window::on_edit_comment_rem_triggered()
 {
-    if (m_doc->selection().isEmpty())
+    if (selection().isEmpty())
         return;
 
     QString remcomments;
@@ -1692,7 +1662,7 @@ void Window::on_edit_comment_rem_triggered()
 
         DisableUpdates disupd(w_list);
 
-        foreach(Document::Item *pos, m_doc->selection()) {
+        foreach(Document::Item *pos, selection()) {
             QString str = pos->comments();
             str.remove(regexp);
             str = str.simplified();
@@ -1713,10 +1683,10 @@ void Window::on_edit_comment_rem_triggered()
 
 void Window::on_edit_reserved_triggered()
 {
-    if (m_doc->selection().isEmpty())
+    if (selection().isEmpty())
         return;
 
-    QString reserved = m_doc->selection().front()->reserved();
+    QString reserved = selection().front()->reserved();
 
     if (MessageBox::getString(this, tr("Reserve all selected items for this specific buyer (BrickLink username):"), reserved))
         setOrToggle<QString, const QString &>::set(this, tr("Set reservation on %1 items"), &Document::Item::reserved, &Document::Item::setReserved, reserved);
@@ -1879,16 +1849,16 @@ void Window::subtractItems(const BrickLink::InvItemList &items)
 
 void Window::on_edit_mergeitems_triggered()
 {
-    if (!m_doc->selection().isEmpty())
-        mergeItems(m_doc->selection());
+    if (!selection().isEmpty())
+        mergeItems(selection());
     else
         mergeItems(m_doc->items());
 }
 
 void Window::on_edit_partoutitems_triggered()
 {
-    if (m_doc->selection().count() >= 1) {
-        foreach(Document::Item *item, m_doc->selection())
+    if (selection().count() >= 1) {
+        foreach(Document::Item *item, selection())
         FrameWork::inst()->fileImportBrickLinkInventory(item->item());
     }
     else
@@ -1897,8 +1867,8 @@ void Window::on_edit_partoutitems_triggered()
 
 void Window::setPrice(money_t d)
 {
-    if (m_doc->selection().count() == 1) {
-        Document::Item *pos = m_doc->selection().front();
+    if (selection().count() == 1) {
+        Document::Item *pos = selection().front();
         Document::Item item = *pos;
 
         item.setPrice(d);
@@ -1925,7 +1895,7 @@ void Window::closeEvent(QCloseEvent *e)
     if (m_doc->isModified() && !close_empty) {
         switch (MessageBox::warning(this, tr("Save changes to %1?").arg(CMB_BOLD(windowTitle())), MessageBox::Yes | MessageBox::No | MessageBox::Cancel, MessageBox::Yes)) {
         case MessageBox::Yes:
-            m_doc->fileSave(sortedItems());
+            m_doc->fileSave();
 
             if (!m_doc->isModified())
                 e->accept();
@@ -1950,26 +1920,26 @@ void Window::closeEvent(QCloseEvent *e)
 
 void Window::on_edit_bl_catalog_triggered()
 {
-    if (!m_doc->selection().isEmpty())
-        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_CatalogInfo, (*m_doc->selection().front()).item()));
+    if (!selection().isEmpty())
+        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_CatalogInfo, (*selection().front()).item()));
 }
 
 void Window::on_edit_bl_priceguide_triggered()
 {
-    if (!m_doc->selection().isEmpty())
-        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_PriceGuideInfo, (*m_doc->selection().front()).item(), (*m_doc->selection().front()).color()));
+    if (!selection().isEmpty())
+        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_PriceGuideInfo, (*selection().front()).item(), (*selection().front()).color()));
 }
 
 void Window::on_edit_bl_lotsforsale_triggered()
 {
-    if (!m_doc->selection().isEmpty())
-        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_LotsForSale, (*m_doc->selection().front()).item(), (*m_doc->selection().front()).color()));
+    if (!selection().isEmpty())
+        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_LotsForSale, (*selection().front()).item(), (*selection().front()).color()));
 }
 
 void Window::on_edit_bl_myinventory_triggered()
 {
-    if (!m_doc->selection().isEmpty()) {
-        uint lotid = (*m_doc->selection().front()).lotId();
+    if (!selection().isEmpty()) {
+        uint lotid = (*selection().front()).lotId();
         QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_StoreItemDetail, &lotid));
     }
 }
@@ -1997,9 +1967,9 @@ void Window::on_file_print_triggered()
       return;
 
      //prt->setOptionEnabled ( QPrinter::PrintToFile, false );
-     prt->setOptionEnabled ( QPrinter::PrintSelection, !m_doc->selection ( ).isEmpty ( ));
+     prt->setOptionEnabled ( QPrinter::PrintSelection, !selection ( ).isEmpty ( ));
      prt->setOptionEnabled ( QPrinter::PrintPageRange, false );
-     prt->setPrintRange ( m_doc->selection ( ).isEmpty ( ) ? QPrinter::AllPages : QPrinter::Selection );
+     prt->setPrintRange ( selection ( ).isEmpty ( ) ? QPrinter::AllPages : QPrinter::Selection );
 
      QString doctitle = m_doc->title();
      if (doctitle == m_doc->fileName())
@@ -2034,12 +2004,12 @@ void Window::on_file_print_pdf_triggered()
 
 void Window::on_file_save_triggered()
 {
-    m_doc->fileSave(sortedItems());
+    m_doc->fileSave();
 }
 
 void Window::on_file_saveas_triggered()
 {
-    m_doc->fileSaveAs(sortedItems());
+    m_doc->fileSaveAs();
 }
 
 void Window::on_file_export_bl_xml_triggered()
@@ -2092,36 +2062,42 @@ void Window::on_file_export_briktrak_triggered()
 
 Document::ItemList Window::exportCheck() const
 {
-    Document::ItemList items;
-    bool selection_only = false;
+    Document::ItemList items = m_doc->items();
 
-    if (!m_doc->selection().isEmpty() && (m_doc->selection().count() != m_doc->items().count())) {
-        if (MessageBox::question(FrameWork::inst(), tr("There are %1 items selected.<br /><br />Do you want to export only these items?").arg(m_doc->selection().count()), MessageBox::Yes, MessageBox::No) == MessageBox::Yes) {
-            selection_only = true;
+    if (!selection().isEmpty() && (selection().count() != m_doc->items().count())) {
+        if (MessageBox::question(FrameWork::inst(), tr("There are %1 items selected.<br /><br />Do you want to export only these items?").arg(selection().count()), MessageBox::Yes | MessageBox::No, MessageBox::No) == MessageBox::Yes) {
+            items = selection();
         }
     }
 
-    if (m_doc->statistics(selection_only ? m_doc->selection() : m_doc->items()).errors()) {
-        if (MessageBox::warning(FrameWork::inst(), tr("This list contains items with errors.<br /><br />Do you really want to export this list?"), MessageBox::Yes, MessageBox::No) != MessageBox::Yes)
-            return Document::ItemList();
+    if (m_doc->statistics(items).errors()) {
+        if (MessageBox::warning(FrameWork::inst(), tr("This list contains items with errors.<br /><br />Do you really want to export this list?"), MessageBox::Yes | MessageBox::No, MessageBox::No) != MessageBox::Yes)
+            items.clear();
     }
 
-    return sortedItems(selection_only);
+    return m_view->sortItemList(items);
 }
 
-Document::ItemList Window::sortedItems(bool selection_only) const
+
+void Window::selectionHelper()
 {
-    Document::ItemList sorted;
-    /*
-     for ( QListViewItemIterator it ( w_list ); it.current ( ); ++it ) {
-      CItemViewItem *ivi = static_cast <CItemViewItem *> ( it.current ( ));
+    m_selection.clear();
 
-      if ( selection_only && ( m_doc->selection ( ).find ( ivi->item ( )) == m_doc->selection ( ).end ( )))
-       continue;
+    foreach (const QModelIndex &idx, m_selection_model->selectedRows())
+        m_selection.append(m_view->item(idx));
 
-      sorted.append ( ivi->item ( ));
-     }
-    */
-    return sorted;
+    emit selectionChanged(m_selection);
 }
+
+void Window::setSelection(const Document::ItemList &lst)
+{
+    QItemSelection idxs;
+
+    foreach (const Document::Item *item, lst) {
+        QModelIndex idx(m_view->index(item));
+        idxs.select(idx, idx);
+    }
+    m_selection_model->select(idxs, QItemSelectionModel::Clear | QItemSelectionModel::Select | QItemSelectionModel::Current | QItemSelectionModel::Rows);
+}
+
 
