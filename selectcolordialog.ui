@@ -22,7 +22,7 @@
    <item>
     <widget class="QDialogButtonBox" name="w_buttons" >
      <property name="standardButtons" >
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::NoButton|QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
      </property>
     </widget>
    </item>
@@ -41,32 +41,32 @@
   <connection>
    <sender>w_buttons</sender>
    <signal>accepted()</signal>
-   <receiver>SelectColor</receiver>
+   <receiver>SelectColorDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>279</x>
-     <y>345</y>
+     <x>103</x>
+     <y>260</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>279</x>
-     <y>183</y>
+     <x>5</x>
+     <y>271</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>w_buttons</sender>
    <signal>rejected()</signal>
-   <receiver>SelectColor</receiver>
+   <receiver>SelectColorDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>279</x>
-     <y>345</y>
+     <x>99</x>
+     <y>263</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>279</x>
-     <y>183</y>
+     <x>7</x>
+     <y>236</y>
     </hint>
    </hints>
   </connection>

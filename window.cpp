@@ -37,7 +37,6 @@
 #include <QStyle>
 
 #include "messagebox.h"
-//#include "filteredit.h"
 #include "config.h"
 #include "framework.h"
 #include "utility.h"
@@ -75,7 +74,7 @@ private:
 
         // Apples gcc4 has problems compiling this line (internal error)
         foreach (Document::Item *pos, w->selection()) {
-        //for (Document::ItemList::const_iterator it = doc->selection().begin() ; it != doc->selection().end(); ++it) {
+        //for (Document::ItemList::const_iterator it = selection().begin() ; it != selection().end(); ++it) {
         //    Document::Item *pos = *it;
             if (toggle) {
                 TG val = (pos->* getter)();
@@ -113,7 +112,7 @@ private:
 
 class DocumentDelegate : public QStyledItemDelegate {
 public:
-    DocumentDelegate(Document *doc, DocumentProxyModel *doc, QTableView *view);
+    DocumentDelegate(Document *doc, DocumentProxyModel *view, QTableView *table);
 
     int defaultItemHeight(const QWidget *w = 0) const;
 
@@ -652,6 +651,16 @@ void DocumentDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionV
 QVector<QColor> DocumentDelegate::s_shades;
 QHash<BrickLink::Status, QIcon> DocumentDelegate::s_status_icons;
 
+
+
+
+/////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
+
+
+
+
 Window::Window(Document *doc, QWidget *parent)
     : QWidget(parent)
 {
@@ -663,6 +672,7 @@ Window::Window(Document *doc, QWidget *parent)
     m_latest_timer = new QTimer(this);
     m_latest_timer->setSingleShot(true);
     m_latest_timer->setInterval(400);
+    m_current = 0;
 
     m_settopg_failcnt = 0;
     m_settopg_list = 0;
@@ -691,12 +701,12 @@ Window::Window(Document *doc, QWidget *parent)
 
     w_list->setModel(m_view);
     m_selection_model = new QItemSelectionModel(m_view, this);
-    connect(m_selection_model, SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(selectionHelper()));
     w_list->setSelectionModel(m_selection_model);
 
     DocumentDelegate *dd = new DocumentDelegate(doc, m_view, w_list);
     w_list->setItemDelegate(dd);
     w_list->verticalHeader()->setDefaultSectionSize(dd->defaultItemHeight(w_list));
+    w_list->installEventFilter(this);
 
     int em = w_list->fontMetrics().width(QChar('m'));
     for (int i = 0; i < w_list->model()->columnCount(); i++) {
@@ -723,6 +733,9 @@ Window::Window(Document *doc, QWidget *parent)
 
     connect(m_latest_timer, SIGNAL(timeout()), this, SLOT(ensureLatestVisible()));
     connect(w_list, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(contextMenu(const QPoint &)));
+
+    connect(m_selection_model, SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(updateSelection()));
+    connect(m_selection_model, SIGNAL(currentChanged(const QModelIndex &, const QModelIndex &)), this, SLOT(updateCurrent()));
 
     connect(BrickLink::core(), SIGNAL(priceGuideUpdated(BrickLink::PriceGuide *)), this, SLOT(priceGuideUpdated(BrickLink::PriceGuide *)));
 
@@ -2079,7 +2092,26 @@ Document::ItemList Window::exportCheck() const
 }
 
 
-void Window::selectionHelper()
+bool Window::eventFilter(QObject *o, QEvent *e)
+{
+    if (o == w_list && e->type() == QEvent::KeyPress) {
+        if (static_cast<QKeyEvent *>(e)->key() == Qt::Key_Space) {
+            FrameWork::inst()->toggleItemDetailPopup();
+            e->accept();
+            return true;
+        }
+    }
+    return QWidget::eventFilter(o, e);
+}
+
+void Window::updateCurrent()
+{
+    QModelIndex idx = m_selection_model->currentIndex();
+    m_current = idx.isValid() ? m_view->item(idx) : 0;
+    emit currentChanged(m_current);
+}
+
+void Window::updateSelection()
 {
     m_selection.clear();
 

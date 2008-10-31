@@ -29,9 +29,7 @@ class QComboBox;
 class QTableView;
 class FrameWork;
 class UndoStack;
-class FilterEdit;
 class QItemSelectionModel;
-
 
 class Window : public QWidget {
     Q_OBJECT
@@ -55,6 +53,7 @@ public:
 
 //    const Document::ItemList &items() const      { return m_doc->items(); }
     const Document::ItemList &selection() const  { return m_selection; }
+    Document::Item *current() const              { return m_current; }
 
     uint setItems(const BrickLink::InvItemList &items, int multiply = 1);
     uint addItems(const BrickLink::InvItemList &items, int multiply = 1, uint mergeflags = MergeAction_None, bool dont_change_sorting = false);
@@ -66,9 +65,6 @@ public:
     void copyRemarks(const BrickLink::InvItemList &items);
 
     QString filter() const;
-
-// InvItemList &selectedItems ( );
-// void setSelectedItems ( const InvItemList &items );
 
     virtual QDomElement createGuiStateXML(QDomDocument doc);
     virtual bool parseGuiStateXML(QDomElement root);
@@ -155,16 +151,20 @@ public slots:
 
 signals:
     void selectionChanged(const Document::ItemList &);
+    void currentChanged(Document::Item *);
 
 protected:
     virtual void closeEvent(QCloseEvent *e);
     virtual void changeEvent(QEvent *e);
+    virtual bool eventFilter(QObject *o, QEvent *e);
 
 private slots:
     void ensureLatestVisible();
     void documentRowsInserted(const QModelIndex &, int, int);
     void updateCaption();
-    void selectionHelper();
+    void updateSelection();
+    void updateCurrent();
+
     void contextMenu(const QPoint &);
     void priceGuideUpdated(BrickLink::PriceGuide *);
     void updateErrorMask();
@@ -177,6 +177,7 @@ private:
     DocumentProxyModel * m_view;
     QItemSelectionModel *m_selection_model;
     Document::ItemList   m_selection;
+    Document::Item *     m_current;
     QTableView *         w_list;
     bool                 m_diff_mode;
     bool                 m_simple_mode;

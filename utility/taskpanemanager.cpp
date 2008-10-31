@@ -718,7 +718,7 @@ void TaskPaneManager::create()
             item.m_widget->show();
         }
         d->m_taskpane->recalcLayout();
-        d->m_taskpane->setFixedWidth(d->m_taskpane->sizeHint().width());
+        d->m_taskpane->setMinimumSize(d->m_taskpane->sizeHint().width(), 30);
         d->m_taskpane->show();
         d->m_panedock->show();
     }

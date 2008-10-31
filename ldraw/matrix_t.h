@@ -131,12 +131,12 @@ inline vector_t::vector_t(const float *f)
 
 inline vector_t::vector_t(const double *f)
 {
-    v[0] = f[0]; v[1] = f[1]; v[2] = f[2];
+    v[0] = float(f[0]); v[1] = float(f[1]); v[2] = float(f[2]);
 }
 
 inline vector_t::vector_t(int x, int y, int z)
 {
-    v[0] = x; v[1] = y; v[2] = z;
+    v[0] = float(x); v[1] = float(y); v[2] = float(z);
 }
 
 inline vector_t::vector_t(float x, float y, float z)
@@ -146,7 +146,7 @@ inline vector_t::vector_t(float x, float y, float z)
 
 inline vector_t::vector_t(double x, double y, double z)
 {
-    v[0] = x; v[1] = y; v[2] = z;
+    v[0] = float(x); v[1] = float(y); v[2] = float(z);
 }
 
 inline vector_t &vector_t::operator=(const vector_t &vt)

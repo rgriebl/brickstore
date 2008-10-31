@@ -372,10 +372,10 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
     BrickLink::Core *bl = BrickLink::core();
 
     connect(Config::inst(), SIGNAL(onlineStatusChanged(bool)), bl, SLOT(setOnlineStatus(bool)));
-    connect(Config::inst(), SIGNAL(updateIntervalsChanged(int, int)), bl, SLOT(setUpdateIntervals(int, int)));
+    connect(Config::inst(), SIGNAL(updateIntervalsChanged(const QMap<QByteArray, int> &)), bl, SLOT(setUpdateIntervals(const QMap<QByteArray, int> &)));
     connect(Config::inst(), SIGNAL(proxyChanged(QNetworkProxy)), bl->transfer(), SLOT(setProxy(QNetworkProxy)));
     connect(Money::inst(), SIGNAL(monetarySettingsChanged()), this, SLOT(statisticsUpdate()));
-    connect(Config::inst(), SIGNAL(weightSystemChanged(Config::WeightSystem)), this, SLOT(statisticsUpdate()));
+    connect(Config::inst(), SIGNAL(measurementSystemChanged(QLocale::MeasurementSystem)), this, SLOT(statisticsUpdate()));
     connect(Config::inst(), SIGNAL(simpleModeChanged(bool)), this, SLOT(setSimpleMode(bool)));
     connect(Config::inst(), SIGNAL(registrationChanged(Config::Registration)), this, SLOT(registrationUpdate()));
 
@@ -386,10 +386,7 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
     findAction(Config::inst()->onlineStatus() ? "extras_net_online" : "extras_net_offline")->setChecked(true);
 
     bl->setOnlineStatus(Config::inst()->onlineStatus());
-    {
-        QMap<QByteArray, int> uiv = Config::inst()->updateIntervals();
-        bl->setUpdateIntervals(uiv["Picture"], uiv["PriceGuide"]);
-    }
+    bl->setUpdateIntervals(Config::inst()->updateIntervals());
 
     connect(bl, SIGNAL(priceGuideProgress(int, int)), this, SLOT(gotPriceGuideProgress(int, int)));
     connect(bl, SIGNAL(pictureProgress(int, int)),    this, SLOT(gotPictureProgress(int, int)));
@@ -524,7 +521,7 @@ void FrameWork::translateActions()
         { "extras_net_offline",             tr("Offline Mode"),                       0 },
         { "window",                         tr("&Windows"),                           0 },
         { "help",                           tr("&Help"),                              0 },
-        { "help_whatsthis",                 tr("What's this?"),                       tr("Shift+F1", "Help|WhatsThis") },
+//        { "help_whatsthis",                 tr("What's this?"),                       tr("Shift+F1", "Help|WhatsThis") },
         { "help_about",                     tr("About..."),                           0 },
         { "help_updates",                   tr("Check for Program Updates..."),       0 },
         { "help_registration",              tr("Registration..."),                    0 },
@@ -768,8 +765,13 @@ bool FrameWork::setupToolBar(QToolBar *t, const QStringList &a_names)
                 if (a->menu() && (tb = qobject_cast<QToolButton *>(t->widgetForAction(a))))
                     tb->setPopupMode(QToolButton::InstantPopup);
             }
-            else
-                qWarning("Couldn't find action '%s'", qPrintable(an));
+            else {
+                QActionGroup *ag = findActionGroup(an);
+                if (ag)
+                    t->addActions(ag->actions());
+                else
+                    qWarning("Couldn't find action '%s'", qPrintable(an));
+            }
         }
     }
     return true;
@@ -991,7 +993,7 @@ void FrameWork::createActions()
     (void) newQAction(g, "extras_net_online", true);
     (void) newQAction(g, "extras_net_offline", true);
 
-    (void) newQAction(this, "help_whatsthis", false, this, SLOT(whatsThis()));
+    //(void) newQAction(this, "help_whatsthis", false, this, SLOT(whatsThis()));
 
     a = newQAction(this, "help_about", false, cApp, SLOT(about()));
     a->setMenuRole(QAction::AboutRole);

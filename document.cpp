@@ -1090,7 +1090,7 @@ void Document::fileExportBrickLinkWantedListClipboard(const ItemList &itemlist)
 void Document::fileExportBrickLinkXMLClipboard(const ItemList &itemlist)
 {
     QDomDocument doc(QString::null);
-    BrickLink::InvItemList lst = itemlist;
+    BrickLink::InvItemList lst;
     foreach(Document::Item *it, itemlist)
         lst << it;
     doc.appendChild(BrickLink::core()->createItemListXML(doc, BrickLink::XMLHint_MassUpload, &lst /*reinterpret_cast<const BrickLink::InvItemList *>(&itemlist)*/));
@@ -1622,11 +1622,12 @@ DocumentProxyModel::DocumentProxyModel(Document *model)
         str = model->headerData(i, Qt::Horizontal, Qt::DisplayRole).toString();
         if (!str.isEmpty())
             fields.insert(i, str);
-#if QT_VERSION >= 0x040500            
-         str = model->headerData(i, Qt::Horizontal, Qt::UntranslatedDisplayRole);
-         if (!str.isEmpty())
-            fields.insert(i, str);
-#endif
+//TODO: not yet in 4.5.0
+//#if QT_VERSION >= 0x040500
+//         str = model->headerData(i, Qt::Horizontal, Qt::UntranslatedDisplayRole);
+//         if (!str.isEmpty())
+//            fields.insert(i, str);
+//#endif
     }
     fields.insert(-1, QLatin1String("Any"));
     fields.insert(-1, tr("Any"));

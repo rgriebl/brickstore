@@ -716,10 +716,10 @@ Transfer *BrickLink::Core::transfer() const
     return m_transfer;
 }
 
-void BrickLink::Core::setUpdateIntervals(int pic, int pg)
+void BrickLink::Core::setUpdateIntervals(const QMap<QByteArray, int> &intervals)
 {
-    m_pic_update_iv = pic;
-    m_pg_update_iv = pg;
+    m_pic_update_iv = intervals["Picture"];
+    m_pg_update_iv = intervals["PriceGuide"];
 }
 
 bool BrickLink::Core::updateNeeded(const QDateTime &last, int iv)
@@ -1039,17 +1039,12 @@ bool BrickLink::Core::readDatabase(const QString &fname)
 out:
     if (result) {
         delete sw;
-#ifdef _MSC_VER
-#define PF_SIZE_T   "I"
-#else
-#define PF_SIZE_T   "z"
-#endif
-        qDebug("Color: %8u  (%11" PF_SIZE_T "u bytes)", m_colors.count(),     m_colors.count()     * (sizeof(Color)    + 20));
-        qDebug("Types: %8u  (%11" PF_SIZE_T "u bytes)", m_item_types.count(), m_item_types.count() * (sizeof(ItemType) + 20));
-        qDebug("Cats : %8u  (%11" PF_SIZE_T "u bytes)", m_categories.count(), m_categories.count() * (sizeof(Category) + 20));
-        qDebug("Items: %8u  (%11" PF_SIZE_T "u bytes)", m_items.count(),      m_items.count()      * (sizeof(Item)     + 20));
+
+        qDebug("Color: %8u  (%11u bytes)", m_colors.count(),     m_colors.count()     * (sizeof(Color)    + 20));
+        qDebug("Types: %8u  (%11u bytes)", m_item_types.count(), m_item_types.count() * (sizeof(ItemType) + 20));
+        qDebug("Cats : %8u  (%11u bytes)", m_categories.count(), m_categories.count() * (sizeof(Category) + 20));
+        qDebug("Items: %8u  (%11u bytes)", m_items.count(),      m_items.count()      * (sizeof(Item)     + 20));
         qDebug("Price:           (%11u bytes)",         m_alltime_pg.size() + 20);
-#undef PF_SIZE_T
     }
     else {
         m_colors.clear();
@@ -1064,9 +1059,8 @@ out:
 }
 
 
-BrickLink::InvItemList BrickLink::Core::parseItemListXML(QDomElement root, ItemListXMLHint hint, uint *invalid_items)
+BrickLink::InvItemList *BrickLink::Core::parseItemListXML(QDomElement root, ItemListXMLHint hint, uint *invalid_items)
 {
-    InvItemList inv;
     QString roottag, itemtag;
 
     switch (hint) {
@@ -1080,8 +1074,9 @@ BrickLink::InvItemList BrickLink::Core::parseItemListXML(QDomElement root, ItemL
     }
 
     if (root.nodeName() != roottag)
-        return inv;
+        return 0;
 
+    InvItemList *inv = new InvItemList;
     uint incomplete = 0;
 
     for (QDomNode itemn = root.firstChild(); !itemn.isNull(); itemn = itemn.nextSibling()) {
@@ -1330,7 +1325,7 @@ BrickLink::InvItemList BrickLink::Core::parseItemListXML(QDomElement root, ItemL
         }
 
         if (ok)
-            inv << ii;
+            inv->append(ii);
         else
             delete ii;
     }
@@ -1345,7 +1340,7 @@ BrickLink::InvItemList BrickLink::Core::parseItemListXML(QDomElement root, ItemL
 
 
 
-QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint hint, const InvItemList &items, QMap <QString, QString> *extra)
+QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint hint, const InvItemList *items, QMap <QString, QString> *extra)
 {
     QString roottag, itemtag;
 
@@ -1364,7 +1359,7 @@ QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint
     if (root.isNull() || roottag.isNull() || itemtag.isEmpty() || !items)
         return root;
 
-    foreach(const InvItem *ii, items) {
+    foreach(const InvItem *ii, *items) {
         if (ii->isIncomplete())
             continue;
 

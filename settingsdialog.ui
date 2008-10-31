@@ -1,4 +1,4 @@
-<ui version="4.0" >
+﻿<ui version="4.0" >
  <class>SettingsDialog</class>
  <widget class="QDialog" name="SettingsDialog" >
   <property name="geometry" >
@@ -26,8 +26,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>592</width>
-        <height>357</height>
+        <width>598</width>
+        <height>360</height>
        </rect>
       </property>
       <attribute name="title" >
@@ -174,7 +174,7 @@
          <item>
           <widget class="QToolButton" name="w_docdir_select" >
            <property name="icon" >
-            <iconset resource="../brickstore.qrc" >
+            <iconset resource="brickstore.qrc" >
              <normaloff>:/images/16x16/file_open.png</normaloff>:/images/16x16/file_open.png</iconset>
            </property>
            <property name="autoRaise" >
@@ -204,8 +204,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>592</width>
-        <height>357</height>
+        <width>598</width>
+        <height>360</height>
        </rect>
       </property>
       <attribute name="title" >
@@ -383,14 +383,16 @@
         </spacer>
        </item>
       </layout>
+      <zorder>groupBox_5</zorder>
+      <zorder>w_buttons</zorder>
      </widget>
      <widget class="QWidget" name="defaults" >
       <property name="geometry" >
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>592</width>
-        <height>357</height>
+        <width>598</width>
+        <height>360</height>
        </rect>
       </property>
       <attribute name="title" >
@@ -503,8 +505,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>592</width>
-        <height>357</height>
+        <width>598</width>
+        <height>360</height>
        </rect>
       </property>
       <attribute name="title" >
@@ -667,38 +669,38 @@
   </layout>
  </widget>
  <resources>
-  <include location="../brickstore.qrc" />
+  <include location="brickstore.qrc" />
  </resources>
  <connections>
   <connection>
    <sender>w_buttons</sender>
    <signal>accepted()</signal>
-   <receiver>Settings</receiver>
+   <receiver>SettingsDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>248</x>
-     <y>254</y>
+     <x>507</x>
+     <y>415</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>157</x>
-     <y>274</y>
+     <x>399</x>
+     <y>433</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>w_buttons</sender>
    <signal>rejected()</signal>
-   <receiver>Settings</receiver>
+   <receiver>SettingsDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>316</x>
-     <y>260</y>
+     <x>567</x>
+     <y>414</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>286</x>
-     <y>274</y>
+     <x>567</x>
+     <y>430</y>
     </hint>
    </hints>
   </connection>

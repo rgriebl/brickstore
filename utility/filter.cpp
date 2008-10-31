@@ -328,7 +328,7 @@ QMultiMap<Filter::Combination, QString> Filter::Parser::standardCombinationToken
     QMultiMap<Filter::Combination, QString> dct;
     
     for (token_table *tt = predefined; tt->m_symbols || tt->m_words; ++tt) {
-        if (!mask & tt->m_combination)
+        if (!(mask & tt->m_combination))
             continue;
     
         foreach (QString symbol, QString::fromLatin1(tt->m_symbols).split(QLatin1Char(',')))
@@ -369,7 +369,7 @@ QMultiMap<Filter::Comparison, QString> Filter::Parser::standardComparisonTokens(
     QMultiMap<Filter::Comparison, QString> dct;
     
     for (token_table *tt = predefined; tt->m_symbols || tt->m_words; ++tt) {
-        if (!mask & tt->m_comparison)
+        if (!(mask & tt->m_comparison))
             continue;
     
         foreach (QString symbol, QString::fromLatin1(tt->m_symbols).split(QLatin1Char(',')))

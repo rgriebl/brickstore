@@ -225,7 +225,7 @@ TaskInfoWidget::TaskInfoWidget(QWidget *parent)
 
     connect(FrameWork::inst(), SIGNAL(windowActivated(Window *)), this, SLOT(windowUpdate(Window *)));
     connect(Money::inst(), SIGNAL(monetarySettingsChanged()), this, SLOT(refresh()));
-    connect(Config::inst(), SIGNAL(weightSystemChanged(Config::WeightSystem)), this, SLOT(refresh()));
+    connect(Config::inst(), SIGNAL(measurementSystemChanged(QLocale::MeasurementSystem)), this, SLOT(refresh()));
 }
 
 void TaskInfoWidget::windowUpdate(Window *win)
