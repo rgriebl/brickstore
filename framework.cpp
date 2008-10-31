@@ -54,6 +54,7 @@
 #include "utility.h"
 #include "additemdialog.h"
 #include "settingsdialog.h"
+#include "itemdetailpopup.h"
 
 #include "framework.h"
 
@@ -1376,10 +1377,14 @@ void FrameWork::connectWindow(QWidget *w)
         connectAllActions(false, m_current_window);
 
         disconnect(doc, SIGNAL(statisticsChanged()), this, SLOT(statisticsUpdate()));
-        disconnect(doc, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
+        disconnect(m_current_window, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
         if (m_filter) {
             disconnect(m_filter, SIGNAL(textChanged(const QString &)), m_current_window, SLOT(setFilter(const QString &)));
             m_filter->setText(QString());
+        }
+        if (m_details) {
+            disconnect(m_current_window, SIGNAL(currentChanged(Document::Item *)), m_details, SLOT(setItem(Document::Item *)));
+            m_details->setItem(0);
         }
         m_undogroup->setActiveStack(0);
 
@@ -1392,10 +1397,14 @@ void FrameWork::connectWindow(QWidget *w)
         connectAllActions(true, window);
 
         connect(doc, SIGNAL(statisticsChanged()), this, SLOT(statisticsUpdate()));
-        connect(doc, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
+        connect(window, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
         if (m_filter) {
             m_filter->setText(window->filter());
             connect(m_filter, SIGNAL(textChanged(const QString &)), window, SLOT(setFilter(const QString &)));
+        }
+        if (m_details) {
+            m_details->setItem(window->current());
+            connect(window, SIGNAL(currentChanged(Document::Item *)), m_details, SLOT(setItem(Document::Item *)));
         }
         
         m_undogroup->setActiveStack(doc->undoStack());
@@ -1408,15 +1417,15 @@ void FrameWork::connectWindow(QWidget *w)
         if (!m_current_window)
             m_add_dialog->close();
     }
+
     findAction("edit_additems")->setEnabled((m_current_window));
 
-    selectionUpdate(m_current_window ? m_current_window->document()->selection() : Document::ItemList());
+    selectionUpdate(m_current_window ? m_current_window->selection() : Document::ItemList());
     statisticsUpdate();
     modificationUpdate();
     titleUpdate();
 
     emit windowActivated(m_current_window);
-    emit documentActivated(m_current_window ? m_current_window->document() : 0);
 }
 
 void FrameWork::selectionUpdate(const Document::ItemList &selection)
@@ -1768,6 +1777,24 @@ void FrameWork::toggleAddItemDialog(bool b)
 void FrameWork::closedAddItemDialog()
 {
     findAction("edit_additems")->setChecked(m_add_dialog && m_add_dialog->isVisible());
+}
+
+void FrameWork::toggleItemDetailPopup()
+{
+    if (!m_details) {
+        m_details = new ItemDetailPopup(this);
+
+        if (m_current_window)
+            connect(m_current_window, SIGNAL(currentChanged(Document::Item *)), m_details, SLOT(setItem(Document::Item *)));
+    }
+
+    if (!m_details->isVisible()) {
+        m_details->setItem(m_current_window ? m_current_window->current() : 0);
+        m_details->show();
+    } else {
+        m_details->hide();
+        m_details->setItem(0);
+    }
 }
 
 #include "framework.moc"

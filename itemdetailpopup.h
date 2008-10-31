@@ -1,0 +1,54 @@
+#ifndef ITEMDETAILPOPUP_H
+#define ITEMDETAILPOPUP_H
+
+#include <QDialog>
+
+#include "document.h"
+#include "ldraw.h"
+#include "ldraw/renderwidget.h"
+
+class QToolButton;
+class QStackedWidget;
+class QLabel;
+class QTableView;
+
+
+class ItemDetailPopup : public QDialog {
+    Q_OBJECT
+
+public:
+    ItemDetailPopup(QWidget *parent);
+    virtual ~ItemDetailPopup();
+
+public slots:
+    void setItem(Document::Item *);
+
+protected:
+    void paintEvent(QPaintEvent *e);
+    void keyPressEvent(QKeyEvent *e);
+    void mousePressEvent(QMouseEvent *e);
+    void mouseMoveEvent(QMouseEvent *e);
+
+private slots:
+    void gotUpdate(BrickLink::Picture *pic);
+
+private:
+    void redraw();
+
+private:
+    LDraw::RenderWidget *m_ldraw;
+    QLabel *m_blpic;
+
+    QStackedWidget *m_stack;
+    QToolButton *m_close;
+    Document::Item *m_item;
+    QTableView *m_view;
+    QPoint m_movepos;
+    LDraw::Model *m_part;
+    BrickLink::Picture *m_pic;
+
+    bool m_connected;
+};
+
+#endif
+

@@ -39,6 +39,7 @@ class TaskLinksWidget;
 class TaskAppearsInWidget;
 class Document;
 class AddItemDialog;
+class ItemDetailPopup;
 
 
 class FrameWork : public QMainWindow {
@@ -70,9 +71,10 @@ public slots:
 
     void fileImportBrickLinkInventory(const BrickLink::Item *item);
 
+    void toggleItemDetailPopup();
+
 signals:
     void windowActivated(Window *);
-    void documentActivated(Document *);
     void selectionChanged(Window *, const BrickLink::InvItemList &);
     void statisticsChanged(Window *);
 
@@ -169,6 +171,8 @@ private:
     TaskAppearsInWidget *m_task_appears;
     QMenu *m_contextmenu;
     QPointer <AddItemDialog> m_add_dialog;
+    QPointer<ItemDetailPopup> m_details;
+
 
     QStringList m_recent_files;
 
