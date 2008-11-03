@@ -1040,11 +1040,11 @@ out:
     if (result) {
         delete sw;
 
-        qDebug("Color: %8u  (%11u bytes)", m_colors.count(),     m_colors.count()     * (sizeof(Color)    + 20));
-        qDebug("Types: %8u  (%11u bytes)", m_item_types.count(), m_item_types.count() * (sizeof(ItemType) + 20));
-        qDebug("Cats : %8u  (%11u bytes)", m_categories.count(), m_categories.count() * (sizeof(Category) + 20));
-        qDebug("Items: %8u  (%11u bytes)", m_items.count(),      m_items.count()      * (sizeof(Item)     + 20));
-        qDebug("Price:           (%11u bytes)",         m_alltime_pg.size() + 20);
+        qDebug("Color: %8u  (%11d bytes)", m_colors.count(),     int(m_colors.count()     * (sizeof(Color)    + 20)));
+        qDebug("Types: %8u  (%11d bytes)", m_item_types.count(), int(m_item_types.count() * (sizeof(ItemType) + 20)));
+        qDebug("Cats : %8u  (%11d bytes)", m_categories.count(), int(m_categories.count() * (sizeof(Category) + 20)));
+        qDebug("Items: %8u  (%11d bytes)", m_items.count(),      int(m_items.count()      * (sizeof(Item)     + 20)));
+        qDebug("Price:           (%11d bytes)",         int(m_alltime_pg.size() + 20));
     }
     else {
         m_colors.clear();
