@@ -779,8 +779,40 @@ BrickLink::AppearsInModel::AppearsInModel(const Item *item, const Color *color)
    }
 }
 
+BrickLink::AppearsInModel::AppearsInModel(const InvItemList &list)
+{
+    MODELTEST_ATTACH(this)
+
+    m_item = 0;
+    m_color = 0;
+
+    if (!list.isEmpty()) {
+        QMap<const Item *, int> unique;
+        bool first_item = true;
+
+        foreach (InvItem *invitem, list) {
+            foreach (const AppearsInColor &vec, invitem->item()->appearsIn(invitem->color())) {
+                foreach (const AppearsInItem &item, vec) {
+                    QMap<const Item *, int>::iterator it = unique.find(item.second);
+                    if (it != unique.end())
+                        ++it.value();
+                    else if (first_item)
+                        unique.insert(item.second, 1);
+                }
+            }
+            first_item = false;
+        }
+        for (QMap<const Item *, int>::iterator it = unique.begin(); it != unique.end(); ++it) {
+            if (it.value() == list.count())
+                m_items.append(new AppearsInItem(-1, it.key()));
+        }
+    }
+}
+
 BrickLink::AppearsInModel::~AppearsInModel()
 {
+    if (!m_item && !m_color && !m_items.isEmpty())
+        qDeleteAll(m_items);
 }
 
 QModelIndex BrickLink::AppearsInModel::index(int row, int column, const QModelIndex &parent) const
@@ -823,7 +855,7 @@ QVariant BrickLink::AppearsInModel::data(const QModelIndex &index, int role) con
 
     if (role == Qt::DisplayRole) {
         switch (col) {
-        case 0: res = QString::number(appears->first); break;
+        case 0: res = appears->first < 0 ? QLatin1String("-") : QString::number(appears->first); break;
         case 1: res = appears->second->id(); break;
         case 2: res = appears->second->name(); break;
         }

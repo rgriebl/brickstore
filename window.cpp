@@ -1137,14 +1137,8 @@ void Window::on_edit_cut_triggered()
 
 void Window::on_edit_copy_triggered()
 {
-    if (!selection().isEmpty()) {
-        BrickLink::InvItemList bllist;
-
-        foreach(Document::Item *item, selection())
-        bllist.append(item);
-
-        QApplication::clipboard()->setMimeData(new BrickLink::InvItemMimeData(bllist));
-    }
+    if (!selection().isEmpty())
+        QApplication::clipboard()->setMimeData(new BrickLink::InvItemMimeData(selection()));
 }
 
 void Window::on_edit_paste_triggered()

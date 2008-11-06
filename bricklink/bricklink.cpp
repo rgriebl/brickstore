@@ -722,9 +722,9 @@ void BrickLink::Core::setUpdateIntervals(const QMap<QByteArray, int> &intervals)
     m_pg_update_iv = intervals["PriceGuide"];
 }
 
-bool BrickLink::Core::updateNeeded(const QDateTime &last, int iv)
+bool BrickLink::Core::updateNeeded(bool valid, const QDateTime &last, int iv)
 {
-    return (iv > 0) && (last.secsTo(QDateTime::currentDateTime()) > iv);
+    return (iv > 0) && (!valid || (last.secsTo(QDateTime::currentDateTime()) > iv));
 }
 
 void BrickLink::Core::setOnlineStatus(bool on)
@@ -1119,6 +1119,11 @@ BrickLink::InvItemList *BrickLink::Core::parseItemListXML(QDomElement root, Item
                     ii->setSale(val.toInt());
                 else if (tag == "CONDITION")
                     ii->setCondition(val == "N" ? New : Used);
+                else if (tag == "SUBCONDITION") {
+                    ii->setSubCondition(val == "C" ? Complete : \
+                                        val == "I" ? Incomplete : \
+                                        val == "M" ? MISB : None);
+                }
                 else if (tag == (hint == XMLHint_BrikTrak ? "NOTES" : "DESCRIPTION"))
                     ii->setComments(val);
                 else if (tag == "REMARKS")
@@ -1219,6 +1224,11 @@ BrickLink::InvItemList *BrickLink::Core::parseItemListXML(QDomElement root, Item
                     ii->setSale(val.toInt());
                 else if (tag == "Condition")
                     ii->setCondition(val == "N" ? New : Used);
+                else if (tag == "SubCondition") {
+                    ii->setSubCondition(val == "C" ? Complete : \
+                                        val == "I" ? Incomplete : \
+                                        val == "M" ? MISB : None);
+                }
                 else if (tag == "Comments")
                     ii->setComments(val);
                 else if (tag == "Remarks")
@@ -1340,7 +1350,7 @@ BrickLink::InvItemList *BrickLink::Core::parseItemListXML(QDomElement root, Item
 
 
 
-QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint hint, const InvItemList *items, QMap <QString, QString> *extra)
+QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint hint, const InvItemList &items, QMap <QString, QString> *extra)
 {
     QString roottag, itemtag;
 
@@ -1356,10 +1366,10 @@ QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint
 
     QDomElement root = doc.createElement(roottag);
 
-    if (root.isNull() || roottag.isNull() || itemtag.isEmpty() || !items)
+    if (root.isNull() || roottag.isNull() || itemtag.isEmpty() || items.isEmpty())
         return root;
 
-    foreach(const InvItem *ii, *items) {
+    foreach(const InvItem *ii, items) {
         if (ii->isIncomplete())
             continue;
 
@@ -1403,14 +1413,16 @@ QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint
             item.appendChild(doc.createElement("COLOR").appendChild(doc.createTextNode(ii->color()->name())).parentNode());
             item.appendChild(doc.createElement("TOTAL_VALUE").appendChild(doc.createTextNode((ii->price() * ii->quantity()).toCString())).parentNode());
 
-            int cb = 1;
-            switch (ii->status()) {
-            case Exclude: cb = 0; break;
-            case Include: cb = 1; break;
-            case Extra  : cb = 3; break;
-            case Unknown: cb = 5; break;
+            {
+                int cb = 1;
+                switch (ii->status()) {
+                    case Exclude: cb = 0; break;
+                    case Include: cb = 1; break;
+                    case Extra  : cb = 3; break;
+                    case Unknown: cb = 5; break;
+                }
+                item.appendChild(doc.createElement("CHECKBOX").appendChild(doc.createTextNode(QString::number(cb))).parentNode());
             }
-            item.appendChild(doc.createElement("CHECKBOX").appendChild(doc.createTextNode(QString::number(cb))).parentNode());
             item.appendChild(doc.createElement("QTY").appendChild(doc.createTextNode(QString::number(ii->quantity()))).parentNode());
             item.appendChild(doc.createElement("PRICE").appendChild(doc.createTextNode(ii->price().toCString())).parentNode());
             item.appendChild(doc.createElement("CONDITION").appendChild(doc.createTextNode((ii->condition() == New) ? "N" : "U")).parentNode());
@@ -1448,18 +1460,32 @@ QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint
             item.appendChild(doc.createElement("CategoryID").appendChild(doc.createTextNode(QString::number(ii->category()->id()))).parentNode());
             item.appendChild(doc.createElement("CategoryName").appendChild(doc.createTextNode(ii->category()->name())).parentNode());
 
-            const char *st;
-            switch (ii->status()) {
-            case Unknown: st = "?"; break;
-            case Extra  : st = "E"; break;
-            case Exclude: st = "X"; break;
-            case Include:
-            default     : st = "I"; break;
+            {
+                const char *st;
+                switch (ii->status()) {
+                    case Unknown: st = "?"; break;
+                    case Extra  : st = "E"; break;
+                    case Exclude: st = "X"; break;
+                    case Include:
+                    default     : st = "I"; break;
+                }
+                item.appendChild(doc.createElement("Status").appendChild(doc.createTextNode(st)).parentNode());
             }
-            item.appendChild(doc.createElement("Status").appendChild(doc.createTextNode(st)).parentNode());
+
             item.appendChild(doc.createElement("Qty").appendChild(doc.createTextNode(QString::number(ii->quantity()))).parentNode());
             item.appendChild(doc.createElement("Price").appendChild(doc.createTextNode(ii->price().toCString())).parentNode());
             item.appendChild(doc.createElement("Condition").appendChild(doc.createTextNode((ii->condition() == New) ? "N" : "U")).parentNode());
+
+            if (ii->subCondition() != None) {
+                const char *st;
+                switch (ii->subCondition()) {
+                    case Incomplete: st = "I"; break;
+                    case Complete  : st = "C"; break;
+                    case MISB      : st = "M"; break;
+                    default        : st = "?"; break;
+                }
+                item.appendChild(doc.createElement("SubCondition").appendChild(doc.createTextNode(st)).parentNode());
+            }
 
             if (ii->bulkQuantity() != 1)
                 item.appendChild(doc.createElement("Bulk").appendChild(doc.createTextNode(QString::number(ii->bulkQuantity()))).parentNode());
@@ -1505,6 +1531,17 @@ QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint
             item.appendChild(doc.createElement("QTY").appendChild(doc.createTextNode(QString::number(ii->quantity()))).parentNode());
             item.appendChild(doc.createElement("PRICE").appendChild(doc.createTextNode(ii->price().toCString())).parentNode());
             item.appendChild(doc.createElement("CONDITION").appendChild(doc.createTextNode((ii->condition() == New) ? "N" : "U")).parentNode());
+
+            if (ii->subCondition() != None) {
+                const char *st;
+                switch (ii->subCondition()) {
+                    case Incomplete: st = "I"; break;
+                    case Complete  : st = "C"; break;
+                    case MISB      : st = "M"; break;
+                    default        : st = "?"; break;
+                }
+                item.appendChild(doc.createElement("SUBCONDITION").appendChild(doc.createTextNode(st)).parentNode());
+            }
 
             if (ii->bulkQuantity() != 1)
                 item.appendChild(doc.createElement("BULK").appendChild(doc.createTextNode(QString::number(ii->bulkQuantity()))).parentNode());
@@ -1573,12 +1610,17 @@ QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint
 bool BrickLink::Core::parseLDrawModel(QFile &f, InvItemList &items, uint *invalid_items)
 {
     QHash<QString, InvItem *> mergehash;
+    QStringList recursion_detection;
 
-    return parseLDrawModelInternal(f, QString::null, items, invalid_items, mergehash);
+    return parseLDrawModelInternal(f, QString::null, items, invalid_items, mergehash, recursion_detection);
 }
 
-bool BrickLink::Core::parseLDrawModelInternal(QFile &f, const QString &model_name, InvItemList &items, uint *invalid_items, QHash<QString, InvItem *> &mergehash)
+bool BrickLink::Core::parseLDrawModelInternal(QFile &f, const QString &model_name, InvItemList &items, uint *invalid_items, QHash<QString, InvItem *> &mergehash, QStringList &recursion_detection)
 {
+    if (recursion_detection.contains(model_name))
+        return false;
+    recursion_detection.append(model_name);
+
     QStringList searchpath;
     QString ldrawdir = Config::inst()->lDrawDir();
     uint invalid = 0;
@@ -1607,7 +1649,9 @@ bool BrickLink::Core::parseLDrawModelInternal(QFile &f, const QString &model_nam
 
                 if ((sl.count() >= 2) && (sl [1] == "FILE")) {
                     is_mpd = true;
-                    current_mpd_model = sl [2].toLower();
+                    sl.removeFirst();
+                    sl.removeFirst();
+                    current_mpd_model = sl.join(QLatin1String(" ")).toLower();
                     current_mpd_index++;
 
                     if (is_mpd_model_found)
@@ -1629,6 +1673,10 @@ bool BrickLink::Core::parseLDrawModelInternal(QFile &f, const QString &model_nam
                 if (sl.count() >= 15) {
                     int colid = sl [1].toInt();
                     QString partname = sl [14].toLower();
+                    for (int i = 15; i < sl.count(); ++i) {
+                        partname.append(QLatin1Char(' '));
+                        partname.append(sl [i].toLower());
+                    }
 
                     QString partid = partname;
                     partid.truncate(partid.lastIndexOf('.'));
@@ -1646,7 +1694,7 @@ bool BrickLink::Core::parseLDrawModelInternal(QFile &f, const QString &model_nam
                             qint64 oldpos = f.pos();
                             f.seek(0);
 
-                            got_subfile = parseLDrawModelInternal(f, partname, items, &sub_invalid_items, mergehash);
+                            got_subfile = parseLDrawModelInternal(f, partname, items, &sub_invalid_items, mergehash, recursion_detection);
 
                             invalid += sub_invalid_items;
                             f.seek(oldpos);
@@ -1659,7 +1707,7 @@ bool BrickLink::Core::parseLDrawModelInternal(QFile &f, const QString &model_nam
                                 if (subf.open(QIODevice::ReadOnly)) {
                                     uint sub_invalid_items = 0;
 
-                                    (void) parseLDrawModelInternal(subf, partname, items, &sub_invalid_items, mergehash);
+                                    (void) parseLDrawModelInternal(subf, partname, items, &sub_invalid_items, mergehash, recursion_detection);
 
                                     invalid += sub_invalid_items;
                                     got_subfile = true;
@@ -1687,7 +1735,7 @@ bool BrickLink::Core::parseLDrawModelInternal(QFile &f, const QString &model_nam
 
                             if (!itemp) {
                                 inc->m_item_id = partid;
-                                inc->m_item_name = QString("LDraw ID: %1").arg(partid);
+                                inc->m_item_name = QString();
                                 inc->m_itemtype_id = 'P';
                             }
                             if (!colp) {
@@ -1708,6 +1756,8 @@ bool BrickLink::Core::parseLDrawModelInternal(QFile &f, const QString &model_nam
 
     if (invalid_items)
         *invalid_items = invalid;
+
+    recursion_detection.removeLast();
 
     return is_mpd ? is_mpd_model_found : true;
 }

@@ -136,7 +136,7 @@ BrickLink::PriceGuide *BrickLink::Core::priceGuide(const BrickLink::Item *item, 
         }
     }
 
-    if (pg && (!pg->valid() || updateNeeded(pg->lastUpdate(), m_pg_update_iv)))
+    if (pg && (updateNeeded(pg->valid(), pg->lastUpdate(), m_pg_update_iv)))
         updatePriceGuide(pg, high_priority);
 
     return pg;

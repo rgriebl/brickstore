@@ -74,7 +74,7 @@ public:
         Item();
         Item(const BrickLink::InvItem &);
         Item(const Item &);
-        virtual ~Item();
+        ~Item();
 
         Item &operator = (const Item &);
         bool operator == (const Item &) const;
@@ -91,7 +91,14 @@ public:
         friend class Document;
     };
 
-    typedef QList<Item *>      ItemList;
+    class ItemList : public QList<Item *> {
+    public:
+        ItemList() { }
+        ItemList(const ItemList &copy) : QList<Item *>(copy) { }
+
+        operator const BrickLink::InvItemList &() const { return reinterpret_cast<const BrickLink::InvItemList &>(*this); }
+    };
+
     typedef int                Position;
     typedef QVector<Position>  PositionVector;
 

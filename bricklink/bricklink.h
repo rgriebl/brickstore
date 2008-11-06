@@ -305,6 +305,8 @@ public:
     void setStatus(Status s)           { m_status = s; }
     Condition condition() const        { return m_condition; }
     void setCondition(Condition c)     { m_condition = c; }
+    SubCondition subCondition() const  { return m_scondition; }
+    void setSubCondition(SubCondition c) { m_scondition = c; }
     QString comments() const           { return m_comments; }
     void setComments(const QString &n) { m_comments = n; }
     QString remarks() const            { return m_remarks; }
@@ -379,12 +381,13 @@ private:
 
     Status           m_status    : 3;
     Condition        m_condition : 2;
+    SubCondition     m_scondition: 3;
+    bool             m_alternate : 1;
+    bool             m_cpart     : 1;
+    uint             m_alt_id    : 6;
     bool             m_retain    : 1;
     bool             m_stockroom : 1;
-    bool             m_alternate : 1;
-    uint             m_alt_id    : 6;
-    bool             m_cpart     : 1;
-    int              m_xreserved : 1;
+    int              m_xreserved : 14;
 
     QString          m_comments;
     QString          m_remarks;
@@ -784,6 +787,7 @@ protected:
 class AppearsInModel : public QAbstractTableModel {
     Q_OBJECT
 public:
+    AppearsInModel(const BrickLink::InvItemList &list);
     AppearsInModel(const Item *item, const Color *color);
     ~AppearsInModel();
 
@@ -878,7 +882,7 @@ public:
     Picture *largePicture(const Item *item, bool high_priority = false);
 
     InvItemList *parseItemListXML(QDomElement root, ItemListXMLHint hint, uint *invalid_items = 0);
-    QDomElement createItemListXML(QDomDocument doc, ItemListXMLHint hint, const InvItemList *items, QMap <QString, QString> *extra = 0);
+    QDomElement createItemListXML(QDomDocument doc, ItemListXMLHint hint, const InvItemList &items, QMap <QString, QString> *extra = 0);
 
     bool parseLDrawModel(QFile &file, InvItemList &items, uint *invalid_items = 0);
 
@@ -918,8 +922,8 @@ private:
     friend Core *create(const QString &, QString *);
 
 private:
-    bool updateNeeded(const QDateTime &last, int iv);
-    bool parseLDrawModelInternal(QFile &file, const QString &model_name, InvItemList &items, uint *invalid_items, QHash<QString, InvItem *> &mergehash);
+    bool updateNeeded(bool valid, const QDateTime &last, int iv);
+    bool parseLDrawModelInternal(QFile &file, const QString &model_name, InvItemList &items, uint *invalid_items, QHash<QString, InvItem *> &mergehash, QStringList &recursion_detection);
 
     void setDatabase_ConsistsOf(const QHash<const Item *, InvItemList> &hash);
     void setDatabase_AppearsIn(const QHash<const Item *, AppearsIn> &hash);

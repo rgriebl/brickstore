@@ -341,7 +341,10 @@ void TaskAppearsInWidget::windowUpdate(Window *win)
 
 void TaskAppearsInWidget::selectionUpdate(const Document::ItemList &list)
 {
-    bool ok = (m_win && (list.count() == 1));
-
-    setItem(ok ? (*list.front()).item() : 0, ok ? (*list.front()).color() : 0);
+    if (!m_win || list.isEmpty())
+        setItem(0, 0);
+    else if (list.count() == 1)
+        setItem(list.first()->item(), list.first()->color());
+    else
+        setItems(list);
 }

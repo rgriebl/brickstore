@@ -97,7 +97,7 @@ BrickLink::Picture *BrickLink::Core::picture(const Item *item, const BrickLink::
         if (!pic->valid())
             pic->load_from_disk();
 
-        if (!pic->valid() || updateNeeded(pic->lastUpdate(), m_pic_update_iv))
+        if (updateNeeded(pic->valid(), pic->lastUpdate(), m_pic_update_iv))
             updatePicture(pic, high_priority);
     }
     else if (need_to_load) {
@@ -195,7 +195,7 @@ void BrickLink::Core::pictureLoaded(ThreadPoolJob *pj)
     Picture *pic = static_cast<PictureLoaderJob *>(pj)->picture();
 
    if (pic) {
-        if (!pic->valid() || updateNeeded(pic->lastUpdate(), m_pic_update_iv))
+        if (updateNeeded(pic->valid(), pic->lastUpdate(), m_pic_update_iv))
             updatePicture(pic, false);
         else
             emit pictureUpdated(pic);
