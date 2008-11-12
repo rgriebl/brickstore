@@ -22,6 +22,8 @@
 #include <QApplication>
 #include <QFileDialog>
 #include <QLineEdit>
+#include <QTextDocument>
+#include <QTextBlock>
 #include <QTextLayout>
 #include <QValidator>
 #include <QClipboard>
@@ -218,7 +220,6 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
     int h = option.rect.height();
     int margin = 2;
     int align = (m_view->data(idx, Qt::TextAlignmentRole).toInt() & ~Qt::AlignVertical_Mask) | Qt::AlignVCenter;
-    quint64 colmask = 1ULL << idx.column();
     QString has_inv_tag;
 
 
@@ -304,6 +305,8 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
             bg = fg;
             bg.setAlphaF(0.3f);
         }
+        if (it->itemType()->hasSubConditions() && it->subCondition() != BrickLink::None)
+            str = QString("%1<br /><i>%2</i>" ).arg(str, m_doc->subConditionLabel(it->subCondition()));
         break;
 
     case Document::TierP1:
@@ -428,14 +431,19 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
         int height = 0;
         qreal widthUsed = 0;
 
-        QTextLayout tl(str, option.font, const_cast<QWidget *>(option.widget));
-        QTextOption to = tl.textOption();
+        QTextDocument td;
+        td.setHtml(str);
+        td.setDefaultFont(option.font);
+        QTextLayout *tlp = td.firstBlock().layout();
+        QTextOption to = tlp->textOption();
         to.setAlignment(Qt::Alignment(align));
-        tl.setTextOption(to);
-        tl.beginLayout();
+        tlp->setTextOption(to);
+        tlp->beginLayout();
+
+        QString lstr = td.firstBlock().text();
 
         for (int i = 0; i < lcount; i++) {
-            QTextLine line = tl.createLine();
+            QTextLine line = tlp->createLine();
             if (!line.isValid())
                 break;
 
@@ -445,7 +453,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
             height += line.height();
             widthUsed = line.naturalTextWidth();
 
-            if ((i == (lcount - 1)) && ((line.textStart() + line.textLength()) < str.length())) {
+            if ((i == (lcount - 1)) && ((line.textStart() + line.textLength()) < lstr.length())) {
                 do_elide = true;
                 QString elide = QLatin1String("...");
                 int elide_width = fm.width(elide) + 2;
@@ -454,9 +462,9 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
                 widthUsed = line.naturalTextWidth();
             }
         }
-        tl.endLayout();
+        tlp->endLayout();
 
-        tl.draw(p, QPoint(x + margin, y + (h - height)/2));
+        tlp->draw(p, QPoint(x + margin, y + (h - height)/2));
         if (do_elide)
             p->drawText(QPoint(x + margin + widthUsed, y + (h - height)/2 + (lcount - 1) * fm.lineSpacing() + fm.ascent()), QLatin1String("..."));
     }
@@ -628,7 +636,7 @@ QWidget *DocumentDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
     case Document::TierP3      : valid = new MoneyValidator(0, 10000, 3, 0); break;
     case Document::PriceDiff   : valid = new MoneyValidator(-10000, 10000, 3, 0); break;
     case Document::Weight      : valid = new QDoubleValidator(0., 100000., 4, 0); break;
-    default                     : break;
+    default                    : break;
     }
 
     if (!m_lineedit)
@@ -643,8 +651,7 @@ QWidget *DocumentDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
 
 void DocumentDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &/*index*/) const
 {
-    if (qobject_cast<QLineEdit *>(editor))
-        editor->setGeometry(option.rect);
+    editor->setGeometry(option.rect);
 }
 
 
@@ -881,7 +888,7 @@ QString Window::filter() const
     return m_view->filterExpression();
 }
 
-uint Window::addItems(const BrickLink::InvItemList &items, int multiply, uint globalmergeflags, bool dont_change_sorting)
+uint Window::addItems(const BrickLink::InvItemList &items, int multiply, uint globalmergeflags, bool /*dont_change_sorting*/)
 {
     bool waitcursor = (items.count() > 100);
     bool was_empty = (w_list->model()->rowCount() == 0);
@@ -1118,8 +1125,8 @@ bool Window::parseGuiStateXML(QDomElement root)
                     list_map [niv.toElement().tagName()] = niv.toElement().text();
                 }
 
-                if (!list_map.isEmpty())
-                    ; //TODO: w_list->loadSettings ( list_map );
+                //if (!list_map.isEmpty())
+                //TODO: w_list->loadSettings ( list_map );
             }
         }
 
@@ -1212,6 +1219,26 @@ void Window::on_edit_cond_used_triggered()
 void Window::on_edit_cond_toggle_triggered()
 {
     setOrToggle<BrickLink::Condition>::toggle(this, tr("Toggled condition on %1 items"), &Document::Item::condition, &Document::Item::setCondition, BrickLink::New, BrickLink::Used);
+}
+
+void Window::on_edit_subcond_none_triggered()
+{
+    setOrToggle<BrickLink::SubCondition>::set(this, tr("Set 'none' sub-condition on %1 items"), &Document::Item::subCondition, &Document::Item::setSubCondition, BrickLink::None);
+}
+
+void Window::on_edit_subcond_misb_triggered()
+{
+    setOrToggle<BrickLink::SubCondition>::set(this, tr("Set 'MISB' sub-condition on %1 items"), &Document::Item::subCondition, &Document::Item::setSubCondition, BrickLink::MISB);
+}
+
+void Window::on_edit_subcond_complete_triggered()
+{
+    setOrToggle<BrickLink::SubCondition>::set(this, tr("Set 'complete' sub-condition on %1 items"), &Document::Item::subCondition, &Document::Item::setSubCondition, BrickLink::Complete);
+}
+
+void Window::on_edit_subcond_incomplete_triggered()
+{
+    setOrToggle<BrickLink::SubCondition>::set(this, tr("Set 'incomplete' sub-condition on %1 items"), &Document::Item::subCondition, &Document::Item::setSubCondition, BrickLink::Incomplete);
 }
 
 void Window::on_edit_retain_yes_triggered()

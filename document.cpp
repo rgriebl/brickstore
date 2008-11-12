@@ -1254,6 +1254,8 @@ Qt::ItemFlags Document::flags(const QModelIndex &index) const
     case Category    :
     case YearReleased:
     case LotId       : break;
+    case Stockroom   :
+    case Retain      : ifs |= Qt::ItemIsUserCheckable; //no break;
     default          : ifs |= Qt::ItemIsEditable; break;
     }
     return ifs;
@@ -1311,6 +1313,7 @@ QVariant Document::data(const QModelIndex &index, int role) const
         case Qt::ToolTipRole      : return dataForToolTipRole(it, f);
         case Qt::TextAlignmentRole: return dataForTextAlignmentRole(it, f);
         case Qt::EditRole         : return dataForEditRole(it, f);
+        case Qt::CheckStateRole   : return dataForCheckStateRole(it, f);
         }
     }
     return QVariant();
@@ -1355,7 +1358,7 @@ QVariant Document::dataForEditRole(Item *it, Field f) const
 
 QString Document::dataForDisplayRole(Item *it, Field f) const
 {
-    QString dash = QChar('-');
+    QString dash = QLatin1Char('-');
 
     switch (f) {
     case LotId       : return (it->lotId() == 0 ? dash : QString::number(it->lotId()));
@@ -1367,8 +1370,8 @@ QString Document::dataForDisplayRole(Item *it, Field f) const
     case Bulk        : return (it->bulkQuantity() == 1 ? dash : QString::number(it->bulkQuantity()));
     case Price       : return it->price().toLocalizedString();
     case Total       : return it->total().toLocalizedString();
-    case Sale        : return (it->sale() == 0 ? dash : QString::number(it->sale()) + "%");
-    case Condition   : return (it->condition() == BrickLink::New ? QChar('N') : QChar('U'));
+    case Sale        : return (it->sale() == 0 ? dash : QString::number(it->sale()) + QLatin1Char('%'));
+    case Condition   : return (it->condition() == BrickLink::New ? tr("N", "New") : tr("U", "Used"));
     case Color       : return it->color()->name();
     case Category    : return it->category()->name();
     case ItemType    : return it->itemType()->name();
@@ -1395,6 +1398,15 @@ QVariant Document::dataForDecorationRole(Item *it, Field f) const
     switch (f) {
     case Picture: return it->image();
     default     : return QPixmap();
+    }
+}
+
+Qt::CheckState Document::dataForCheckStateRole(Item *it, Field f) const
+{
+    switch (f) {
+    case Retain   : return it->retain() ? Qt::Checked : Qt::Unchecked;
+    case Stockroom: return it->stockroom() ? Qt::Checked : Qt::Unchecked;
+    default       : return Qt::Unchecked;
     }
 }
 
@@ -1563,6 +1575,18 @@ void Document::pictureUpdated(BrickLink::Picture *pic)
             emit dataChanged(idx, idx);
         }
         row++;
+    }
+}
+
+
+QString Document::subConditionLabel(BrickLink::SubCondition sc) const
+{
+    switch (sc) {
+    case BrickLink::None      : return tr("-", "no subcondition");
+    case BrickLink::MISB      : return tr("MISB");
+    case BrickLink::Complete  : return tr("Complete");
+    case BrickLink::Incomplete: return tr("Incomplete");
+    default                   : return QString();
     }
 }
 

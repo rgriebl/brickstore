@@ -115,6 +115,10 @@ public slots:
     void on_edit_cond_new_triggered();
     void on_edit_cond_used_triggered();
     void on_edit_cond_toggle_triggered();
+    void on_edit_subcond_none_triggered();
+    void on_edit_subcond_misb_triggered();
+    void on_edit_subcond_complete_triggered();
+    void on_edit_subcond_incomplete_triggered();
     void on_edit_color_triggered();
     void on_edit_qty_multiply_triggered();
     void on_edit_qty_divide_triggered();

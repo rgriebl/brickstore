@@ -61,21 +61,23 @@ public:
     bool hasColors() const          { return m_has_colors; }
     bool hasYearReleased() const    { return m_has_year; }
     bool hasWeight() const          { return m_has_weight; }
+    bool hasSubConditions() const   { return m_has_subconditions; }
     char pictureId() const          { return m_picture_id; }
     QSize pictureSize() const;
 
     ~ItemType();
 
 private:
-    char     m_id;
-    char     m_picture_id;
+    char  m_id;
+    char  m_picture_id;
 
-    bool     m_has_inventories : 1;
-    bool     m_has_colors      : 1;
-    bool     m_has_weight      : 1;
-    bool     m_has_year        : 1;
+    bool  m_has_inventories   : 1;
+    bool  m_has_colors        : 1;
+    bool  m_has_weight        : 1;
+    bool  m_has_year          : 1;
+    bool  m_has_subconditions : 1;
 
-    char  *  m_name;
+    char *m_name;
 
     const Category **m_categories;
 

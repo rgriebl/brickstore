@@ -85,10 +85,11 @@ namespace BrickLink {
 QDataStream &operator << (QDataStream &ds, const ItemType *itt)
 {
     quint8 flags = 0;
-    flags |= (itt->m_has_inventories ? 0x01 : 0);
-    flags |= (itt->m_has_colors      ? 0x02 : 0);
-    flags |= (itt->m_has_weight      ? 0x04 : 0);
-    flags |= (itt->m_has_year        ? 0x08 : 0);
+    flags |= (itt->m_has_inventories   ? 0x01 : 0);
+    flags |= (itt->m_has_colors        ? 0x02 : 0);
+    flags |= (itt->m_has_weight        ? 0x04 : 0);
+    flags |= (itt->m_has_year          ? 0x08 : 0);
+    flags |= (itt->m_has_subconditions ? 0x10 : 0);
 
     ds << quint8(itt->m_id) << quint8(itt->m_picture_id) << itt->m_name << flags;
 
@@ -128,10 +129,11 @@ QDataStream &operator >> (QDataStream &ds, BrickLink::ItemType *itt)
     }
     itt->m_categories [catcount] = 0;
 
-    itt->m_has_inventories = flags & 0x01;
-    itt->m_has_colors      = flags & 0x02;
-    itt->m_has_weight      = flags & 0x04;
-    itt->m_has_year        = flags & 0x08;
+    itt->m_has_inventories   = flags & 0x01;
+    itt->m_has_colors        = flags & 0x02;
+    itt->m_has_weight        = flags & 0x04;
+    itt->m_has_year          = flags & 0x08;
+    itt->m_has_subconditions = (id == 'S'); //flags & 0x10;
     return ds;
 }
 

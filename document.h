@@ -140,11 +140,14 @@ public:
     QVariant dataForEditRole(Item *it, Field f) const;
     QString dataForDisplayRole(Item *it, Field f) const;
     QVariant dataForDecorationRole(Item *it, Field f) const;
+    Qt::CheckState dataForCheckStateRole(Item *it, Field f) const;
     int dataForTextAlignmentRole(Item *it, Field f) const;
     QString dataForToolTipRole(Item *it, Field f) const;
     static QString headerDataForDisplayRole(Field f);
     int headerDataForTextAlignmentRole(Field f) const;
     int headerDataForDefaultWidthRole(Field f) const;
+
+    QString subConditionLabel(BrickLink::SubCondition sc) const;
 
 public slots:
     void pictureUpdated(BrickLink::Picture *pic);
