@@ -46,7 +46,7 @@ RegistrationDialog::RegistrationDialog(bool initial, QWidget *parent, Qt::Window
         w_full_name->setText(Config::inst()->registrationName());
         QString s = Config::inst()->registrationKey();
         if (s.isEmpty())
-            s = "1234-5678-9ABC";
+            s = QLatin1String("1234-5678-9ABC");
         w_full_key->setText(s);
 
         w_demo->setEnabled(false);
@@ -87,10 +87,10 @@ void RegistrationDialog::accept()
     bool ok = true;
 
     if (w_personal->isChecked()) {
-        name = "PERSONAL";
+        name = QLatin1String("PERSONAL");
     }
     else if (w_demo->isChecked()) {
-        name = "DEMO";
+        name = QLatin1String("DEMO");
     }
     else if (w_full->isChecked()) {
         name = w_full_name->text();
