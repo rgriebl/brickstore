@@ -30,9 +30,9 @@
 
 
 TaskLinksWidget::TaskLinksWidget(QWidget *parent)
-        : QLabel(parent), m_doc(0)
+        : QLabel(parent), m_win(0)
 {
-    connect(FrameWork::inst(), SIGNAL(documentActivated(Document *)), this, SLOT(documentUpdate(Document *)));
+    connect(FrameWork::inst(), SIGNAL(windowActivated(Window *)), this, SLOT(windowUpdate(Window *)));
 
     setAlignment(Qt::AlignLeft | Qt::AlignTop);
     setIndent(8);
@@ -65,22 +65,22 @@ void TaskLinksWidget::linkHover(const QString &url)
   //  }
 }
 
-void TaskLinksWidget::documentUpdate(Document *doc)
+void TaskLinksWidget::windowUpdate(Window *win)
 {
-    if (m_doc)
-        disconnect(m_doc, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
-    m_doc = doc;
-    if (m_doc)
-        connect(m_doc, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
+    if (m_win)
+        disconnect(m_win, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
+    m_win = win;
+    if (m_win)
+        connect(m_win, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
 
-    selectionUpdate(m_doc ? m_doc->selection() : Document::ItemList());
+    selectionUpdate(m_win ? m_win->selection() : Document::ItemList());
 }
 
 void TaskLinksWidget::selectionUpdate(const Document::ItemList &list)
 {
     QString str;
 
-    if (m_doc && (list.count() == 1)) {
+    if (m_win && (list.count() == 1)) {
         const BrickLink::Item *item   = list.front()->item();
         const BrickLink::Color *color = list.front()->color();
 
@@ -109,8 +109,8 @@ void TaskLinksWidget::selectionUpdate(const Document::ItemList &list)
 
 void TaskLinksWidget::languageChange()
 {
-    if (m_doc)
-        selectionUpdate(m_doc->selection());
+    if (m_win)
+        selectionUpdate(m_win->selection());
 }
 
 // ----------------------------------------------------------------------
@@ -118,41 +118,41 @@ void TaskLinksWidget::languageChange()
 // ----------------------------------------------------------------------
 
 TaskPriceGuideWidget::TaskPriceGuideWidget(QWidget *parent)
-        : PriceGuideWidget(parent), m_doc(0), m_dock(0)
+        : PriceGuideWidget(parent), m_win(0), m_dock(0)
 {
     setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
 
-    connect(FrameWork::inst(), SIGNAL(documentActivated(Document *)), this, SLOT(documentUpdate(Document *)));
+    connect(FrameWork::inst(), SIGNAL(windowActivated(Window *)), this, SLOT(windowUpdate(Window *)));
     connect(this, SIGNAL(priceDoubleClicked(money_t)), this, SLOT(setPrice(money_t)));
     fixParentDockWindow();
 }
 
-void TaskPriceGuideWidget::documentUpdate(Document *doc)
+void TaskPriceGuideWidget::windowUpdate(Window *win)
 {
-    if (m_doc)
-        disconnect(m_doc, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
-    m_doc = doc;
-    if (m_doc)
-        connect(m_doc, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
+    if (m_win)
+        disconnect(m_win, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
+    m_win = win;
+    if (m_win)
+        connect(m_win, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
 
-    selectionUpdate(m_doc ? m_doc->selection() : Document::ItemList());
+    selectionUpdate(m_win ? m_win->selection() : Document::ItemList());
 }
 
 void TaskPriceGuideWidget::selectionUpdate(const Document::ItemList &list)
 {
-    bool ok = (m_doc && (list.count() == 1));
+    bool ok = (m_win && (list.count() == 1));
 
     setPriceGuide(ok ? BrickLink::core()->priceGuide(list.front()->item(), list.front()->color(), true) : 0);
 }
 
 void TaskPriceGuideWidget::setPrice(money_t p)
 {
-    if (m_doc && (m_doc->selection().count() == 1)) {
-        Document::Item *pos = m_doc->selection().front();
+    if (m_win && (m_win->selection().count() == 1)) {
+        Document::Item *pos = m_win->selection().front();
         Document::Item item = *pos;
 
         item.setPrice(p);
-        m_doc->changeItem(pos, item);
+        m_win->document()->changeItem(pos, item);
     }
 }
 
@@ -209,7 +209,7 @@ void TaskPriceGuideWidget::dockChanged()
 // ----------------------------------------------------------------------
 
 TaskInfoWidget::TaskInfoWidget(QWidget *parent)
-        : QStackedWidget(parent), m_doc(0)
+        : QStackedWidget(parent), m_win(0)
 {
     setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
 
@@ -223,25 +223,25 @@ TaskInfoWidget::TaskInfoWidget(QWidget *parent)
     addWidget(m_pic);
     addWidget(m_text);
 
-    connect(FrameWork::inst(), SIGNAL(documentActivated(Document *)), this, SLOT(documentUpdate(Document *)));
+    connect(FrameWork::inst(), SIGNAL(windowActivated(Window *)), this, SLOT(windowUpdate(Window *)));
     connect(Money::inst(), SIGNAL(monetarySettingsChanged()), this, SLOT(refresh()));
-    connect(Config::inst(), SIGNAL(weightSystemChanged(Config::WeightSystem)), this, SLOT(refresh()));
+    connect(Config::inst(), SIGNAL(measurementSystemChanged(QLocale::MeasurementSystem)), this, SLOT(refresh()));
 }
 
-void TaskInfoWidget::documentUpdate(Document *doc)
+void TaskInfoWidget::windowUpdate(Window *win)
 {
-    if (m_doc)
-        disconnect(m_doc, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
-    m_doc = doc;
-    if (m_doc)
-        connect(m_doc, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
+    if (m_win)
+        disconnect(m_win, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
+    m_win = win;
+    if (m_win)
+        connect(m_win, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
 
-    selectionUpdate(m_doc ? m_doc->selection() : Document::ItemList());
+    selectionUpdate(m_win ? m_win->selection() : Document::ItemList());
 }
 
 void TaskInfoWidget::selectionUpdate(const Document::ItemList &list)
 {
-    if (!m_doc || (list.count() == 0)) {
+    if (!m_win || (list.count() == 0)) {
         m_pic->setPicture(0);
         setCurrentWidget(m_pic);
     }
@@ -250,7 +250,7 @@ void TaskInfoWidget::selectionUpdate(const Document::ItemList &list)
         setCurrentWidget(m_pic);
     }
     else {
-        Document::Statistics stat = m_doc->statistics(list);
+        Document::Statistics stat = m_win->document()->statistics(list);
 
         QString s;
         QString valstr, wgtstr;
@@ -301,8 +301,8 @@ void TaskInfoWidget::languageChange()
 
 void TaskInfoWidget::refresh()
 {
-    if (m_doc)
-        selectionUpdate(m_doc->selection());
+    if (m_win)
+        selectionUpdate(m_win->selection());
 }
 
 
@@ -311,9 +311,9 @@ void TaskInfoWidget::refresh()
 // ----------------------------------------------------------------------
 
 TaskAppearsInWidget::TaskAppearsInWidget(QWidget *parent)
-        : AppearsInWidget(parent), m_doc(0)
+        : AppearsInWidget(parent), m_win(0)
 {
-    connect(FrameWork::inst(), SIGNAL(documentActivated(Document *)), this, SLOT(documentUpdate(Document *)));
+    connect(FrameWork::inst(), SIGNAL(windowActivated(Window *)), this, SLOT(windowUpdate(Window *)));
 }
 
 QSize TaskAppearsInWidget::minimumSizeHint() const
@@ -328,20 +328,23 @@ QSize TaskAppearsInWidget::sizeHint() const
     return minimumSizeHint();
 }
 
-void TaskAppearsInWidget::documentUpdate(Document *doc)
+void TaskAppearsInWidget::windowUpdate(Window *win)
 {
-    if (m_doc)
-        disconnect(m_doc, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
-    m_doc = doc;
-    if (m_doc)
-        connect(m_doc, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
+    if (m_win)
+        disconnect(m_win, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
+    m_win = win;
+    if (m_win)
+        connect(m_win, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
 
-    selectionUpdate(m_doc ? m_doc->selection() : Document::ItemList());
+    selectionUpdate(m_win ? m_win->selection() : Document::ItemList());
 }
 
 void TaskAppearsInWidget::selectionUpdate(const Document::ItemList &list)
 {
-    bool ok = (m_doc && (list.count() == 1));
-
-    setItem(ok ? (*list.front()).item() : 0, ok ? (*list.front()).color() : 0);
+    if (!m_win || list.isEmpty())
+        setItem(0, 0);
+    else if (list.count() == 1)
+        setItem(list.first()->item(), list.first()->color());
+    else
+        setItems(list);
 }

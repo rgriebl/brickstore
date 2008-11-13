@@ -41,32 +41,32 @@
   <connection>
    <sender>w_buttons</sender>
    <signal>accepted()</signal>
-   <receiver>SelectItem</receiver>
+   <receiver>SelectItemDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>279</x>
-     <y>345</y>
+     <x>119</x>
+     <y>261</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>279</x>
-     <y>183</y>
+     <x>6</x>
+     <y>278</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>w_buttons</sender>
    <signal>rejected()</signal>
-   <receiver>SelectItem</receiver>
+   <receiver>SelectItemDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>279</x>
-     <y>345</y>
+     <x>196</x>
+     <y>259</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>279</x>
-     <y>183</y>
+     <x>189</x>
+     <y>279</y>
     </hint>
    </hints>
   </connection>

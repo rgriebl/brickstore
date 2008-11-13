@@ -13,11 +13,11 @@
    <string>Registration</string>
   </property>
   <layout class="QVBoxLayout" >
-   <property name="margin" >
-    <number>9</number>
-   </property>
    <property name="spacing" >
     <number>6</number>
+   </property>
+   <property name="margin" >
+    <number>9</number>
    </property>
    <item>
     <widget class="QLabel" name="label" >
@@ -28,19 +28,19 @@
    </item>
    <item>
     <layout class="QVBoxLayout" >
-     <property name="margin" >
-      <number>6</number>
-     </property>
      <property name="spacing" >
       <number>12</number>
      </property>
+     <property name="margin" >
+      <number>6</number>
+     </property>
      <item>
       <layout class="QVBoxLayout" >
-       <property name="margin" >
-        <number>0</number>
-       </property>
        <property name="spacing" >
         <number>6</number>
+       </property>
+       <property name="margin" >
+        <number>0</number>
        </property>
        <item>
         <widget class="QRadioButton" name="w_personal" >
@@ -62,11 +62,11 @@
        </item>
        <item>
         <layout class="QHBoxLayout" >
-         <property name="margin" >
-          <number>0</number>
-         </property>
          <property name="spacing" >
           <number>6</number>
+         </property>
+         <property name="margin" >
+          <number>0</number>
          </property>
          <item>
           <spacer>
@@ -76,7 +76,7 @@
            <property name="sizeType" >
             <enum>QSizePolicy::Fixed</enum>
            </property>
-           <property name="sizeHint" >
+           <property name="sizeHint" stdset="0" >
             <size>
              <width>20</width>
              <height>20</height>
@@ -97,11 +97,11 @@
      </item>
      <item>
       <layout class="QVBoxLayout" >
-       <property name="margin" >
-        <number>0</number>
-       </property>
        <property name="spacing" >
         <number>6</number>
+       </property>
+       <property name="margin" >
+        <number>0</number>
        </property>
        <item>
         <widget class="QRadioButton" name="w_demo" >
@@ -123,11 +123,11 @@
        </item>
        <item>
         <layout class="QHBoxLayout" >
-         <property name="margin" >
-          <number>0</number>
-         </property>
          <property name="spacing" >
           <number>6</number>
+         </property>
+         <property name="margin" >
+          <number>0</number>
          </property>
          <item>
           <spacer>
@@ -137,7 +137,7 @@
            <property name="sizeType" >
             <enum>QSizePolicy::Fixed</enum>
            </property>
-           <property name="sizeHint" >
+           <property name="sizeHint" stdset="0" >
             <size>
              <width>20</width>
              <height>20</height>
@@ -158,11 +158,11 @@
      </item>
      <item>
       <layout class="QVBoxLayout" >
-       <property name="margin" >
-        <number>0</number>
-       </property>
        <property name="spacing" >
         <number>6</number>
+       </property>
+       <property name="margin" >
+        <number>0</number>
        </property>
        <item>
         <widget class="QRadioButton" name="w_full" >
@@ -198,7 +198,7 @@
            <property name="sizeType" >
             <enum>QSizePolicy::Fixed</enum>
            </property>
-           <property name="sizeHint" >
+           <property name="sizeHint" stdset="0" >
             <size>
              <width>20</width>
              <height>20</height>
@@ -218,7 +218,7 @@
            <property name="orientation" >
             <enum>Qt::Horizontal</enum>
            </property>
-           <property name="sizeHint" >
+           <property name="sizeHint" stdset="0" >
             <size>
              <width>160</width>
              <height>20</height>
@@ -235,7 +235,7 @@
             <bool>true</bool>
            </property>
            <property name="textInteractionFlags" >
-            <enum>Qt::LinksAccessibleByMouse</enum>
+            <set>Qt::LinksAccessibleByMouse</set>
            </property>
           </widget>
          </item>
@@ -295,7 +295,7 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons" >
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::NoButton|QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
      </property>
     </widget>
    </item>
@@ -303,38 +303,6 @@
  </widget>
  <resources/>
  <connections>
-  <connection>
-   <sender>w_buttons</sender>
-   <signal>accepted()</signal>
-   <receiver>Registration</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>223</x>
-     <y>302</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>157</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>w_buttons</sender>
-   <signal>rejected()</signal>
-   <receiver>Registration</receiver>
-   <slot>reject()</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>291</x>
-     <y>302</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>286</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>w_full</sender>
    <signal>toggled(bool)</signal>
@@ -364,6 +332,38 @@
     <hint type="destinationlabel" >
      <x>127</x>
      <y>249</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>w_buttons</sender>
+   <signal>accepted()</signal>
+   <receiver>RegistrationDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>359</x>
+     <y>318</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>207</x>
+     <y>333</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>w_buttons</sender>
+   <signal>rejected()</signal>
+   <receiver>RegistrationDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>442</x>
+     <y>316</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>382</x>
+     <y>331</y>
     </hint>
    </hints>
   </connection>

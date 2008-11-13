@@ -24,7 +24,6 @@
 
 class QUndoStack;
 class QUndoCommand;
-class QItemSelectionModel;
 class AddRemoveCmd;
 class ChangeCmd;
 
@@ -75,7 +74,7 @@ public:
         Item();
         Item(const BrickLink::InvItem &);
         Item(const Item &);
-        virtual ~Item();
+        ~Item();
 
         Item &operator = (const Item &);
         bool operator == (const Item &) const;
@@ -92,7 +91,14 @@ public:
         friend class Document;
     };
 
-    typedef QList<Item *>      ItemList;
+    class ItemList : public QList<Item *> {
+    public:
+        ItemList() { }
+        ItemList(const ItemList &copy) : QList<Item *>(copy) { }
+
+        operator const BrickLink::InvItemList &() const { return reinterpret_cast<const BrickLink::InvItemList &>(*this); }
+    };
+
     typedef int                Position;
     typedef QVector<Position>  PositionVector;
 
@@ -121,9 +127,9 @@ public:
 
 
     // Itemviews API
-    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
     Item *item(const QModelIndex &idx) const;
-    QModelIndex index(const Item *i) const;
+    QModelIndex index(const Item *i, int column = 0) const;
+    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
 
     virtual int rowCount(const QModelIndex &parent) const;
     virtual int columnCount(const QModelIndex &parent) const;
@@ -134,19 +140,20 @@ public:
     QVariant dataForEditRole(Item *it, Field f) const;
     QString dataForDisplayRole(Item *it, Field f) const;
     QVariant dataForDecorationRole(Item *it, Field f) const;
+    Qt::CheckState dataForCheckStateRole(Item *it, Field f) const;
     int dataForTextAlignmentRole(Item *it, Field f) const;
     QString dataForToolTipRole(Item *it, Field f) const;
     static QString headerDataForDisplayRole(Field f);
     int headerDataForTextAlignmentRole(Field f) const;
     int headerDataForDefaultWidthRole(Field f) const;
 
-    QItemSelectionModel *selectionModel() const;
+    QString subConditionLabel(BrickLink::SubCondition sc) const;
 
 public slots:
     void pictureUpdated(BrickLink::Picture *pic);
 
 public:
-    Document(bool dont_sort = false);
+    Document();
     virtual ~Document();
 
     static const QList<Document *> &allDocuments();
@@ -154,15 +161,12 @@ public:
 
     QString fileName() const;
     QString title() const;
-    bool doNotSortItems() const;
 
     const BrickLink::Order *order() const;
 
     bool isModified() const;
 
     const ItemList &items() const;
-    const ItemList &selection() const;
-
     bool clear();
 
     bool insertItems(const ItemList &positions, const ItemList &list);
@@ -196,10 +200,8 @@ public slots:
     void setFileName(const QString &str);
     void setTitle(const QString &str);
 
-    void setSelection(const ItemList &);
-
-    void fileSave(const ItemList &itemlist);
-    void fileSaveAs(const ItemList &itemlist);
+    void fileSave();
+    void fileSaveAs();
     void fileExportBrickLinkXML(const ItemList &itemlist);
     void fileExportBrickLinkXMLClipboard(const ItemList &itemlist);
     void fileExportBrickLinkUpdateClipboard(const ItemList &itemlist);
@@ -224,11 +226,9 @@ signals:
     void fileNameChanged(const QString &);
     void titleChanged(const QString &);
     void modificationChanged(bool);
-    void selectionChanged(const Document::ItemList &);
 
 private slots:
     void clean2Modified(bool);
-    void selectionHelper();
     void autosave();
 
 private:
@@ -247,20 +247,16 @@ private:
 
 private:
     ItemList         m_items;
-    ItemList         m_selection;
 
     quint64          m_error_mask;
     QString          m_filename;
     QString          m_title;
-    bool             m_dont_sort;
     QUuid            m_uuid;  // for autosave
     QTimer           m_autosave_timer;
 
     QUndoStack *     m_undo;
 
     BrickLink::Order *m_order;
-
-    QItemSelectionModel *m_selection_model;
 
     static QList<Document *> s_documents;
 };
@@ -274,6 +270,11 @@ public:
     ~DocumentProxyModel();
 
     inline Document::Item *item(const QModelIndex &idx) const  { return static_cast<Document *>(sourceModel())->item(mapToSource(idx)); }
+    inline QModelIndex index(const Document::Item *i) const  { return mapFromSource(static_cast<Document *>(sourceModel())->index(i)); }
+    using QSortFilterProxyModel::index;
+
+    Document::ItemList sortItemList(const Document::ItemList &list) const;
+
 
 //    using QSortFilterProxyModel::index;
 //    const AppearsInItem *appearsIn(const QModelIndex &idx) const;
@@ -281,6 +282,8 @@ public:
 
     void setFilterExpression(const QString &filter);
     QString filterExpression() const;
+    
+    void sort(int column, Qt::SortOrder order);
 
 protected:
 //    virtual bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
@@ -291,6 +294,10 @@ private:
     QString         m_filter_expression;
     Filter::Parser *m_parser;
     QList<Filter>   m_filter;
+    int             m_sort_col;
+    Qt::SortOrder   m_sort_order;
+    
+    friend class SortItemListCompare;
 };
 
 

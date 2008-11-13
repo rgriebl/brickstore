@@ -123,8 +123,6 @@ private:
 
 class AppearsInWidgetPrivate {
 public:
-    const BrickLink::Item * m_item;
-    const BrickLink::Color *m_color;
     QTimer *                m_resize_timer;
 };
 
@@ -243,18 +241,24 @@ QSize AppearsInWidget::sizeHint() const
 
 void AppearsInWidget::setItem(const BrickLink::Item *item, const BrickLink::Color *color)
 {
-    d->m_item = item;
-    d->m_color = color;
+    setModel(new BrickLink::AppearsInModel(item , color));
+    triggerColumnResize();
+}
 
-    setModel(new BrickLink::AppearsInModel(d->m_item , d->m_color));
+void AppearsInWidget::setItems(const BrickLink::InvItemList &list)
+{
+    setModel(new BrickLink::AppearsInModel(list));
+    triggerColumnResize();
+}
 
-    if (item) {
+void AppearsInWidget::triggerColumnResize()
+{
+/*    if (model()->rowCount() > 0) {
         d->m_resize_timer->start(100);
-    }
-    else {
-        d->m_resize_timer->stop();
+    } else {
+        d->m_resize_timer->stop();*/
         resizeColumns();
-    }
+    //}
 }
 
 void AppearsInWidget::resizeColumns()

@@ -68,7 +68,7 @@
        <property name="orientation" >
         <enum>Qt::Horizontal</enum>
        </property>
-       <property name="sizeHint" >
+       <property name="sizeHint" stdset="0" >
         <size>
          <width>40</width>
          <height>20</height>
@@ -88,7 +88,7 @@
    <item>
     <widget class="QDialogButtonBox" name="w_buttons" >
      <property name="standardButtons" >
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::NoButton|QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
      </property>
     </widget>
    </item>
@@ -103,38 +103,38 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../brickstore.qrc" />
+  <include location="brickstore.qrc" />
  </resources>
  <connections>
   <connection>
    <sender>w_buttons</sender>
    <signal>accepted()</signal>
-   <receiver>ImportInventory</receiver>
+   <receiver>ImportInventoryDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>450</x>
-     <y>320</y>
+     <x>430</x>
+     <y>322</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>4</x>
-     <y>257</y>
+     <x>248</x>
+     <y>341</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>w_buttons</sender>
    <signal>rejected()</signal>
-   <receiver>ImportInventory</receiver>
+   <receiver>ImportInventoryDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>521</x>
-     <y>323</y>
+     <x>504</x>
+     <y>324</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>562</x>
-     <y>283</y>
+     <x>106</x>
+     <y>340</y>
     </hint>
    </hints>
   </connection>

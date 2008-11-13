@@ -372,10 +372,10 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
     BrickLink::Core *bl = BrickLink::core();
 
     connect(Config::inst(), SIGNAL(onlineStatusChanged(bool)), bl, SLOT(setOnlineStatus(bool)));
-    connect(Config::inst(), SIGNAL(updateIntervalsChanged(int, int)), bl, SLOT(setUpdateIntervals(int, int)));
+    connect(Config::inst(), SIGNAL(updateIntervalsChanged(const QMap<QByteArray, int> &)), bl, SLOT(setUpdateIntervals(const QMap<QByteArray, int> &)));
     connect(Config::inst(), SIGNAL(proxyChanged(QNetworkProxy)), bl->transfer(), SLOT(setProxy(QNetworkProxy)));
     connect(Money::inst(), SIGNAL(monetarySettingsChanged()), this, SLOT(statisticsUpdate()));
-    connect(Config::inst(), SIGNAL(weightSystemChanged(Config::WeightSystem)), this, SLOT(statisticsUpdate()));
+    connect(Config::inst(), SIGNAL(measurementSystemChanged(QLocale::MeasurementSystem)), this, SLOT(statisticsUpdate()));
     connect(Config::inst(), SIGNAL(simpleModeChanged(bool)), this, SLOT(setSimpleMode(bool)));
     connect(Config::inst(), SIGNAL(registrationChanged(Config::Registration)), this, SLOT(registrationUpdate()));
 
@@ -386,10 +386,7 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
     findAction(Config::inst()->onlineStatus() ? "extras_net_online" : "extras_net_offline")->setChecked(true);
 
     bl->setOnlineStatus(Config::inst()->onlineStatus());
-    {
-        QMap<QByteArray, int> uiv = Config::inst()->updateIntervals();
-        bl->setUpdateIntervals(uiv["Picture"], uiv["PriceGuide"]);
-    }
+    bl->setUpdateIntervals(Config::inst()->updateIntervals());
 
     connect(bl, SIGNAL(priceGuideProgress(int, int)), this, SLOT(gotPriceGuideProgress(int, int)));
     connect(bl, SIGNAL(pictureProgress(int, int)),    this, SLOT(gotPictureProgress(int, int)));
@@ -524,7 +521,7 @@ void FrameWork::translateActions()
         { "extras_net_offline",             tr("Offline Mode"),                       0 },
         { "window",                         tr("&Windows"),                           0 },
         { "help",                           tr("&Help"),                              0 },
-        { "help_whatsthis",                 tr("What's this?"),                       tr("Shift+F1", "Help|WhatsThis") },
+//        { "help_whatsthis",                 tr("What's this?"),                       tr("Shift+F1", "Help|WhatsThis") },
         { "help_about",                     tr("About..."),                           0 },
         { "help_updates",                   tr("Check for Program Updates..."),       0 },
         { "help_registration",              tr("Registration..."),                    0 },
@@ -537,6 +534,10 @@ void FrameWork::translateActions()
         { "edit_cond_new",                  tr("New", "Cond|New"),                    0 },
         { "edit_cond_used",                 tr("Used"),                               0 },
         { "edit_cond_toggle",               tr("Toggle New/Used"),                    0 },
+        { "edit_subcond_none",              tr("None", "SubCond|None"),               0 },
+        { "edit_subcond_misb",              tr("MISB", "SubCond|MISB"),               0 },
+        { "edit_subcond_complete",          tr("Complete", "SubCond|Complete"),       0 },
+        { "edit_subcond_incomplete",        tr("Incomplete", "SubCond|Incomplete"),   0 },
         { "edit_color",                     tr("Color..."),                           0 },
         { "edit_qty",                       tr("Quantity"),                           0 },
         { "edit_qty_multiply",              tr("Multiply..."),                        tr("Ctrl+*", "Edit|Quantity|Multiply") },
@@ -725,7 +726,7 @@ bool FrameWork::setupToolBar(QToolBar *t, const QStringList &a_names)
                 m_filter = new FilterEdit();
 
                 QMenu *m = new QMenu(this);
-                QActionGroup *ag = new QActionGroup(m);
+             //   QActionGroup *ag = new QActionGroup(m);
              /*   for (int i = 0; i < (Window::FilterCountSpecial + Document::FieldCount); i++) {
                     QAction *a = new QAction(ag);
                     a->setCheckable(true);
@@ -768,8 +769,13 @@ bool FrameWork::setupToolBar(QToolBar *t, const QStringList &a_names)
                 if (a->menu() && (tb = qobject_cast<QToolButton *>(t->widgetForAction(a))))
                     tb->setPopupMode(QToolButton::InstantPopup);
             }
-            else
-                qWarning("Couldn't find action '%s'", qPrintable(an));
+            else {
+                QActionGroup *ag = findActionGroup(an);
+                if (ag)
+                    t->addActions(ag->actions());
+                else
+                    qWarning("Couldn't find action '%s'", qPrintable(an));
+            }
         }
     }
     return true;
@@ -898,6 +904,12 @@ void FrameWork::createActions()
     m->addAction(newQAction(g3, "edit_cond_used", true));
     m->addSeparator();
     m->addAction(newQAction(this, "edit_cond_toggle"));
+    m->addSeparator();
+    g3 = newQActionGroup(this, 0, true);
+    m->addAction(newQAction(g3, "edit_subcond_none", true));
+    m->addAction(newQAction(g3, "edit_subcond_misb", true));
+    m->addAction(newQAction(g3, "edit_subcond_complete", true));
+    m->addAction(newQAction(g3, "edit_subcond_incomplete", true));
 
     g2->addAction(newQAction(g, "edit_color"));
 
@@ -991,7 +1003,7 @@ void FrameWork::createActions()
     (void) newQAction(g, "extras_net_online", true);
     (void) newQAction(g, "extras_net_offline", true);
 
-    (void) newQAction(this, "help_whatsthis", false, this, SLOT(whatsThis()));
+    //(void) newQAction(this, "help_whatsthis", false, this, SLOT(whatsThis()));
 
     a = newQAction(this, "help_about", false, cApp, SLOT(about()));
     a->setMenuRole(QAction::AboutRole);
@@ -1432,6 +1444,7 @@ void FrameWork::selectionUpdate(const Document::ItemList &selection)
 {
     static const int NeedLotId = 1;
     static const int NeedInventory = 2;
+    static const int NeedSubCondition = 4;
 
     struct {
         const char *m_name;
@@ -1450,6 +1463,10 @@ void FrameWork::selectionUpdate(const Document::ItemList &selection)
         { "edit_mergeitems",          2, 0, 0 },
         { "edit_partoutitems",        1, 0, NeedInventory },
         { "edit_reset_diffs",         1, 0, 0 },
+        { "edit_subcond_none",        1, 0, NeedSubCondition },
+        { "edit_subcond_misb",        1, 0, NeedSubCondition },
+        { "edit_subcond_complete",    1, 0, NeedSubCondition },
+        { "edit_subcond_incomplete",  1, 0, NeedSubCondition },
 
         { 0, 0, 0, 0 }
     }, *endisable_ptr;
@@ -1474,6 +1491,8 @@ void FrameWork::selectionUpdate(const Document::ItemList &selection)
                         b &= (item->lotId() != 0);
                     if (f & NeedInventory)
                         b &= (item->item() && item->item()->hasInventory());
+                    if (f & NeedSubCondition)
+                        b &= (item->item() && item->itemType() && item->item()->itemType()->hasSubConditions());
                 }
             }
 
@@ -1481,22 +1500,26 @@ void FrameWork::selectionUpdate(const Document::ItemList &selection)
         }
     }
 
-    int status    = -1;
-    int condition = -1;
-    int retain    = -1;
-    int stockroom = -1;
+    int status     = -1;
+    int condition  = -1;
+    int scondition = -1;
+    int retain     = -1;
+    int stockroom  = -1;
 
     if (cnt) {
-        status    = selection.front()->status();
-        condition = selection.front()->condition();
-        retain    = selection.front()->retain()    ? 1 : 0;
-        stockroom = selection.front()->stockroom() ? 1 : 0;
+        status     = selection.front()->status();
+        condition  = selection.front()->condition();
+        scondition = selection.front()->subCondition();
+        retain     = selection.front()->retain()    ? 1 : 0;
+        stockroom  = selection.front()->stockroom() ? 1 : 0;
 
         foreach(Document::Item *item, selection) {
             if ((status >= 0) && (status != item->status()))
                 status = -1;
             if ((condition >= 0) && (condition != item->condition()))
                 condition = -1;
+            if ((scondition >= 0) && (scondition != item->subCondition()))
+                scondition = -1;
             if ((retain >= 0) && (retain != (item->retain() ? 1 : 0)))
                 retain = -1;
             if ((stockroom >= 0) && (stockroom != (item->stockroom() ? 1 : 0)))
@@ -1509,6 +1532,11 @@ void FrameWork::selectionUpdate(const Document::ItemList &selection)
 
     findAction("edit_cond_new")->setChecked(condition == BrickLink::New);
     findAction("edit_cond_used")->setChecked(condition == BrickLink::Used);
+
+    findAction("edit_subcond_none")->setChecked(scondition == BrickLink::None);
+    findAction("edit_subcond_misb")->setChecked(scondition == BrickLink::MISB);
+    findAction("edit_subcond_complete")->setChecked(scondition == BrickLink::Complete);
+    findAction("edit_subcond_incomplete")->setChecked(scondition == BrickLink::Incomplete);
 
     findAction("edit_retain_yes")->setChecked(retain == 1);
     findAction("edit_retain_no")->setChecked(retain == 0);
@@ -1568,8 +1596,6 @@ void FrameWork::statisticsUpdate()
 
     m_statistics->setText(ss);
     m_errors->setText(es);
-
-    emit statisticsChanged(m_current_window);
 }
 
 void FrameWork::titleUpdate()

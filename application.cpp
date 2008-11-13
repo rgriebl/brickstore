@@ -348,7 +348,7 @@ void Application::about()
         "</tr></table>"
         "</center><center>"
         "<br />%4<br /><br />%5"
-        "</center>%6";
+        "</center>%6<p>%7</p>";
 
 
     QString page1_link = QString("<strong>%1</strong> | <a href=\"system\">%2</a>").arg(tr("Legal Info"), tr("System Info"));
@@ -356,9 +356,52 @@ void Application::about()
 
     QString copyright = tr("Copyright &copy; %1").arg(BRICKSTORE_COPYRIGHT);
     QString version   = tr("Version %1").arg(BRICKSTORE_VERSION);
-    QString support   = tr("Visit %1, or send an email to %2").arg("<a href=\"http://" BRICKSTORE_URL "\">" BRICKSTORE_URL "</a>", "<a href=\"mailto:" BRICKSTORE_MAIL "\">" BRICKSTORE_MAIL "</a>");
+    QString support   = tr("Visit %1, or send an email to %2").arg("<a href=\"http://" BRICKSTORE_URL "\">" BRICKSTORE_URL "</a>",
+                                                                   "<a href=\"mailto:" BRICKSTORE_MAIL "\">" BRICKSTORE_MAIL "</a>");
 
     QString qt   = qVersion();
+
+    QString translators = "<b>" + tr("Translators") + "</b><table border=\"0\">";
+    QFile file("translations/translations.xml");
+
+    if (file.open(QIODevice::ReadOnly)) {
+        QDomDocument doc;
+        QString err_str;
+        int err_line = 0, err_col = 0;
+
+        if (doc.setContent(&file, &err_str, &err_line, &err_col)) {
+            QDomElement root = doc.documentElement();
+
+            if (root.isElement() && root.nodeName() == "translations") {
+                for (QDomNode trans = root.firstChild(); !trans.isNull(); trans = trans.nextSibling()) {
+                    if (!trans.isElement() || (trans.nodeName() != "translation"))
+                        continue;
+                    QDomNamedNodeMap map = trans.attributes();
+
+                    if (!map.contains("default")) {
+                        QString lang_id = map.namedItem("lang").toAttr().value();
+                        QString author  = map.namedItem("author").toAttr().value();
+                        QString email   = map.namedItem("authoremail").toAttr().value();
+                        QString langname;
+
+                        for (QDomNode name = trans.firstChild(); !name.isNull(); name = name.nextSibling()) {
+                            if (!name. isElement() || (name.nodeName() != "name"))
+                                continue;
+                            QDomNamedNodeMap map = name.attributes();
+
+                            if (QLocale().name().startsWith(map.namedItem("lang").toAttr().value()))
+                                langname = name.toElement().text();
+                        }
+                        if (!langname.isEmpty())
+                            translators += QString("<tr><td>%1</td><td width=\"2em\"></td><td>%2 &lt;<a href=\"mailto:%3\">%4</a>&gt;</td></tr>").arg(langname, author, email, email);
+                    }
+                }
+            }
+        } else {
+            qWarning("Could not parse %s: %s, line %d, column %d", qPrintable(file.fileName()), qPrintable(err_str), err_line, err_col);
+        }
+    }
+    translators += "</table>";
 
     static const char *legal_src = QT_TR_NOOP(
                                        "<p>"
@@ -381,10 +424,6 @@ void Application::about()
                                        "which does not sponsor, authorize or endorse this software."
                                        "</p><p>"
                                        "All other trademarks recognised."
-                                       "</p><p>"
-                                       "French translation by Sylvain Perez (<a href=\"mailto:bricklink@1001bricks.com\">bricklink@1001bricks.com</a>)"
-                                       "<br />"
-                                       "Dutch translation by Eric van Horssen (<a href=\"mailto:horzel@hacktic.nl\">horzel@hacktic.nl</a>)"
                                        "</p>"
                                    );
 
@@ -406,13 +445,22 @@ void Application::about()
         "</p>";
 
     QString technical = QString(technical_src).arg(STR(__USER__), STR(__HOST__), __DATE__ " " __TIME__).arg(
-#if defined( _MSC_VER )
-                         "Microsoft Visual-C++ " + QString(_MSC_VER >= 1500 ? ".NET 2008" :
-                                                          (_MSC_VER >= 1400 ? ".NET 2005" :
-                                                          (_MSC_VER >= 1310 ? ".NET 2003" :
-                                                          (_MSC_VER >= 1300 ? ".NET" :
-                                                          (_MSC_VER >= 1200 ? "6.0" : "???")))))
-#elif defined( __GNUC__ )
+#if defined(_MSC_VER)
+                         "Microsoft Visual-C++ "
+#  if _MSC_VER >= 1500
+                         ".NET 2008"
+#  elif _MSC_VER >= 1400
+                         ".NET 2005"
+#  elif _MSC_VER >= 1310
+                         ".NET 2003"
+#  elif _MSC_VER >= 1300
+                         ".NET"
+#  elif _MSC_VER >= 1200
+                         "6.0"
+#  else
+                         "???"
+#  endif
+#elif defined(__GNUC__)
                          "GCC " __VERSION__
 #else
                          "???"
@@ -421,8 +469,8 @@ void Application::about()
 
     QString legal = tr(legal_src);
 
-    QString page1 = QString(layout).arg(appName(), copyright, version, support).arg(page1_link, legal);
-    QString page2 = QString(layout).arg(appName(), copyright, version, support).arg(page2_link, technical);
+    QString page1 = QString(layout).arg(appName(), copyright, version, support).arg(page1_link, legal, translators);
+    QString page2 = QString(layout).arg(appName(), copyright, version, support).arg(page2_link, technical, QString());
 
     QMap<QString, QString> pages;
     pages ["index"]  = page1;

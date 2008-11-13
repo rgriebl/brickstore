@@ -320,7 +320,7 @@ QMdiArea::ViewMode Workspace::viewMode () const
     return QMdiArea::TabbedView; //TODO: harcoded ATM
 }
 
-void Workspace::setViewMode(QMdiArea::ViewMode mode)
+void Workspace::setViewMode(QMdiArea::ViewMode /*mode*/)
 {
     qWarning("Workspace::setViewMode is not supported ATM");
 }

@@ -85,10 +85,11 @@ namespace BrickLink {
 QDataStream &operator << (QDataStream &ds, const ItemType *itt)
 {
     quint8 flags = 0;
-    flags |= (itt->m_has_inventories ? 0x01 : 0);
-    flags |= (itt->m_has_colors      ? 0x02 : 0);
-    flags |= (itt->m_has_weight      ? 0x04 : 0);
-    flags |= (itt->m_has_year        ? 0x08 : 0);
+    flags |= (itt->m_has_inventories   ? 0x01 : 0);
+    flags |= (itt->m_has_colors        ? 0x02 : 0);
+    flags |= (itt->m_has_weight        ? 0x04 : 0);
+    flags |= (itt->m_has_year          ? 0x08 : 0);
+    flags |= (itt->m_has_subconditions ? 0x10 : 0);
 
     ds << quint8(itt->m_id) << quint8(itt->m_picture_id) << itt->m_name << flags;
 
@@ -128,10 +129,11 @@ QDataStream &operator >> (QDataStream &ds, BrickLink::ItemType *itt)
     }
     itt->m_categories [catcount] = 0;
 
-    itt->m_has_inventories = flags & 0x01;
-    itt->m_has_colors      = flags & 0x02;
-    itt->m_has_weight      = flags & 0x04;
-    itt->m_has_year        = flags & 0x08;
+    itt->m_has_inventories   = flags & 0x01;
+    itt->m_has_colors        = flags & 0x02;
+    itt->m_has_weight        = flags & 0x04;
+    itt->m_has_year          = flags & 0x08;
+    itt->m_has_subconditions = (id == 'S'); //flags & 0x10;
     return ds;
 }
 
@@ -432,6 +434,7 @@ BrickLink::InvItem::InvItem(const Color *color, const Item *item)
     m_color = color;
     m_status = Include;
     m_condition = New;
+    m_scondition = None;
     m_retain = m_stockroom = false;
     m_alternate = false;
     m_alt_id = 0;
@@ -469,6 +472,7 @@ BrickLink::InvItem &BrickLink::InvItem::operator = (const InvItem &copy)
     m_color          = copy.m_color;
     m_status         = copy.m_status;
     m_condition      = copy.m_condition;
+    m_scondition     = copy.m_scondition;
     m_retain         = copy.m_retain;
     m_stockroom      = copy.m_stockroom;
     m_alternate      = copy.m_alternate;
@@ -517,6 +521,7 @@ bool BrickLink::InvItem::operator == (const InvItem &cmp) const
     same &= (m_color              == cmp.m_color);
     same &= (m_status             == cmp.m_status);
     same &= (m_condition          == cmp.m_condition);
+    same &= (m_scondition         == cmp.m_scondition);
     same &= (m_retain             == cmp.m_retain);
     same &= (m_stockroom          == cmp.m_stockroom);
     same &= (m_comments           == cmp.m_comments);
@@ -550,7 +555,8 @@ bool BrickLink::InvItem::mergeFrom(const InvItem &from, bool prefer_from)
     if ((&from == this) ||
         (from.item() != item()) ||
         (from.color() != color()) ||
-        (from.condition() != condition()))
+        (from.condition() != condition()) ||
+        (from.subCondition() != subCondition()))
         return false;
 
     if ((from.price() != 0) && ((price() == 0) || prefer_from))
@@ -600,6 +606,7 @@ bool BrickLink::InvItem::mergeFrom(const InvItem &from, bool prefer_from)
         setStatus(from.status());
         setRetain(from.retain());
         setStockroom(from.stockroom());
+        setLotId(from.lotId());
     }
 
     setQuantity(quantity() + from.quantity());
@@ -621,7 +628,7 @@ QDataStream &operator << (QDataStream &ds, const BrickLink::InvItem &ii)
        << ii.quantity() << ii.bulkQuantity() << ii.tierQuantity(0) << ii.tierQuantity(1) << ii.tierQuantity(2)
        << ii.price() << ii.tierPrice(0) << ii.tierPrice(1) << ii.tierPrice(2) << ii.sale()
        << qint8(ii.retain() ? 1 : 0) << qint8(ii.stockroom() ? 1 : 0) << ii.m_reserved << quint32(ii.m_lot_id)
-       << ii.origQuantity() << ii.origPrice();
+       << ii.origQuantity() << ii.origPrice() << qint32(ii.subCondition());
     return ds;
 }
 
@@ -641,16 +648,17 @@ QDataStream &operator >> (QDataStream &ds, BrickLink::InvItem &ii)
     ii.setItem(item);
     ii.setColor(BrickLink::core()->color(colorid));
 
-    qint32 status = 0, cond = 0;
+    qint32 status = 0, cond = 0, scond = 0;
 
     ds >> status >> cond >> ii.m_comments >> ii.m_remarks
        >> ii.m_quantity >> ii.m_bulk_quantity >> ii.m_tier_quantity [0] >> ii.m_tier_quantity [1] >> ii.m_tier_quantity [2]
        >> ii.m_price >> ii.m_tier_price [0] >> ii.m_tier_price [1] >> ii.m_tier_price [2] >> ii.m_sale
        >> retain >> stockroom >> ii.m_reserved >> ii.m_lot_id
-       >> ii.m_orig_quantity >> ii.m_orig_price;
+       >> ii.m_orig_quantity >> ii.m_orig_price >> scond;
 
     ii.m_status = (BrickLink::Status) status;
     ii.m_condition = (BrickLink::Condition) cond;
+    ii.m_scondition = (BrickLink::SubCondition) scond;
     ii.m_retain = (retain);
     ii.m_stockroom = (stockroom);
 

@@ -286,7 +286,7 @@ QDataStream &operator >> (QDataStream &ds, Document::Item &item)
 
 QList<Document *> Document::s_documents;
 
-Document::Document(bool dont_sort)
+Document::Document()
     : m_uuid(QUuid::createUuid())
 {
     MODELTEST_ATTACH(this)
@@ -294,10 +294,6 @@ Document::Document(bool dont_sort)
     m_undo = new QUndoStack(this);
     m_order = 0;
     m_error_mask = 0;
-    m_dont_sort = dont_sort;
-
-    m_selection_model = new QItemSelectionModel(this, this);
-    connect(m_selection_model, SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(selectionHelper()));
 
     connect(BrickLink::core(), SIGNAL(pictureUpdated(BrickLink::Picture *)), this, SLOT(pictureUpdated(BrickLink::Picture *)));
 
@@ -378,46 +374,10 @@ QList<Document::ItemList> Document::restoreAutosave()
     return restored;
 }
 
-void Document::selectionHelper()
-{
-    m_selection.clear();
-
-    foreach (const QModelIndex &idx, m_selection_model->selectedRows())
-        m_selection.append(item(idx));
-
-    emit selectionChanged(m_selection);
-}
-
-const Document::ItemList &Document::selection() const
-{
-    return m_selection;
-}
-
-void Document::setSelection(const Document::ItemList &lst)
-{
-    QItemSelection idxs;
-
-    foreach (const Item *item, lst) {
-        QModelIndex idx(index(item));
-        idxs.select(idx, idx);
-    }
-    m_selection_model->select(idxs, QItemSelectionModel::Clear | QItemSelectionModel::Select | QItemSelectionModel::Current |QItemSelectionModel::Rows);
-}
-
-
-QItemSelectionModel *Document::selectionModel() const
-{
-    return m_selection_model;
-}
 
 const QList<Document *> &Document::allDocuments()
 {
     return s_documents;
-}
-
-bool Document::doNotSortItems() const
-{
-    return m_dont_sort;
 }
 
 const Document::ItemList &Document::items() const
@@ -642,7 +602,7 @@ Document *Document::fileImportBrickLinkInventory(const BrickLink::Item *preselec
             BrickLink::InvItemList items = it->consistsOf();
 
             if (!items.isEmpty()) {
-                Document *doc = new Document(true);
+                Document *doc = new Document();
 
                 doc->setBrickLinkItems(items, qty);
                 doc->setTitle(tr("Inventory for %1").arg(it->id()));
@@ -670,7 +630,7 @@ QList<Document *> Document::fileImportBrickLinkOrders()
             const QPair<BrickLink::Order *, BrickLink::InvItemList *> &order = *it;
 
             if (order.first && order.second) {
-                Document *doc = new Document(true);
+                Document *doc = new Document();
 
                 doc->setTitle(tr("Order #%1").arg(order.first->id()));
                 doc->setBrickLinkItems(*order.second);
@@ -727,7 +687,7 @@ Document *Document::fileImportBrickLinkCart()
             ImportBLCart import(shopid, cartid, &d);
 
             if (d.exec() == QDialog::Accepted) {
-                Document *doc = new Document(true);
+                Document *doc = new Document();
 
                 doc->setBrickLinkItems(import.items());
                 doc->setTitle(tr("Cart in Shop %1").arg(shopid));
@@ -771,7 +731,7 @@ Document *Document::fileImportPeeronInventory()
         ImportPeeronInventory import(peeronid, &d);
 
         if (d.exec() == QDialog::Accepted) {
-            Document *doc = new Document(true);
+            Document *doc = new Document();
 
             doc->setBrickLinkItems(import.items());
             doc->setTitle(tr("Peeron Inventory for %1").arg(peeronid));
@@ -862,7 +822,7 @@ Document *Document::fileLoadFrom(const QString &name, const char *type, bool imp
     QApplication::restoreOverrideCursor();
 
     if (items) {
-        Document *doc = new Document(import_only);
+        Document *doc = new Document();
 
         if (invalid_items)
             MessageBox::information(FrameWork::inst(), tr("This file contains %1 unknown item(s).").arg(CMB_BOLD(QString::number(invalid_items))));
@@ -911,7 +871,7 @@ Document *Document::fileImportLDrawModel()
     QApplication::restoreOverrideCursor();
 
     if (b && !items.isEmpty()) {
-        Document *doc = new Document(true);
+        Document *doc = new Document();
 
         if (invalid_items)
             MessageBox::information(FrameWork::inst(), tr("This file contains %1 unknown item(s).").arg(CMB_BOLD(QString::number(invalid_items))));
@@ -999,16 +959,16 @@ bool Document::isModified() const
     return !m_undo->isClean();
 }
 
-void Document::fileSave(const ItemList &itemlist)
+void Document::fileSave()
 {
     if (fileName().isEmpty())
-        fileSaveAs(itemlist);
+        fileSaveAs();
     else if (isModified())
-        fileSaveTo(fileName(), "bsx", false, itemlist);
+        fileSaveTo(fileName(), "bsx", false, items());
 }
 
 
-void Document::fileSaveAs(const ItemList &itemlist)
+void Document::fileSaveAs()
 {
     QStringList filters;
     filters << tr("BrickStore XML Data") + " (*.bsx)";
@@ -1034,7 +994,7 @@ void Document::fileSaveAs(const ItemList &itemlist)
             MessageBox::question(FrameWork::inst(), tr("A file named %1 already exists.Are you sure you want to overwrite it?").arg(CMB_BOLD(fn)), MessageBox::Yes, MessageBox::No) != MessageBox::Yes)
             return;
 
-        fileSaveTo(fn, "bsx", false, itemlist);
+        fileSaveTo(fn, "bsx", false, items());
     }
 }
 
@@ -1060,7 +1020,7 @@ bool Document::fileSaveTo(const QString &s, const char *type, bool export_only, 
         QDomDocument doc((hint == BrickLink::XMLHint_BrickStore) ? QString("BrickStoreXML") : QString::null);
         doc.appendChild(doc.createProcessingInstruction("xml", "version=\"1.0\" encoding=\"UTF-8\""));
 
-        QDomElement item_elem = BrickLink::core()->createItemListXML(doc, hint, reinterpret_cast<const BrickLink::InvItemList *>(&itemlist));
+        QDomElement item_elem = BrickLink::core()->createItemListXML(doc, hint, itemlist);
 
         if (hint == BrickLink::XMLHint_BrickStore) {
             QDomElement root = doc.createElement("BrickStoreXML");
@@ -1100,7 +1060,7 @@ bool Document::fileSaveTo(const QString &s, const char *type, bool export_only, 
 void Document::fileExportBrickLinkInvReqClipboard(const ItemList &itemlist)
 {
     QDomDocument doc(QString::null);
-    doc.appendChild(BrickLink::core()->createItemListXML(doc, BrickLink::XMLHint_Inventory, reinterpret_cast<const BrickLink::InvItemList *>(&itemlist)));
+    doc.appendChild(BrickLink::core()->createItemListXML(doc, BrickLink::XMLHint_Inventory, itemlist));
 
     QApplication::clipboard()->setText(doc.toString(), QClipboard::Clipboard);
 
@@ -1118,7 +1078,7 @@ void Document::fileExportBrickLinkWantedListClipboard(const ItemList &itemlist)
             extra.insert("WANTEDLISTID", wantedlist);
 
         QDomDocument doc(QString::null);
-        doc.appendChild(BrickLink::core()->createItemListXML(doc, BrickLink::XMLHint_WantedList, reinterpret_cast<const BrickLink::InvItemList *>(&itemlist), extra.isEmpty() ? 0 : &extra));
+        doc.appendChild(BrickLink::core()->createItemListXML(doc, BrickLink::XMLHint_WantedList, itemlist, extra.isEmpty() ? 0 : &extra));
 
         QApplication::clipboard()->setText(doc.toString(), QClipboard::Clipboard);
 
@@ -1130,7 +1090,7 @@ void Document::fileExportBrickLinkWantedListClipboard(const ItemList &itemlist)
 void Document::fileExportBrickLinkXMLClipboard(const ItemList &itemlist)
 {
     QDomDocument doc(QString::null);
-    doc.appendChild(BrickLink::core()->createItemListXML(doc, BrickLink::XMLHint_MassUpload, reinterpret_cast<const BrickLink::InvItemList *>(&itemlist)));
+    doc.appendChild(BrickLink::core()->createItemListXML(doc, BrickLink::XMLHint_MassUpload, itemlist));
 
     QApplication::clipboard()->setText(doc.toString(), QClipboard::Clipboard);
 
@@ -1150,7 +1110,7 @@ void Document::fileExportBrickLinkUpdateClipboard(const ItemList &itemlist)
     }
 
     QDomDocument doc(QString::null);
-    doc.appendChild(BrickLink::core()->createItemListXML(doc, BrickLink::XMLHint_MassUpdate, reinterpret_cast<const BrickLink::InvItemList *>(&itemlist)));
+    doc.appendChild(BrickLink::core()->createItemListXML(doc, BrickLink::XMLHint_MassUpdate, itemlist));
 
     QApplication::clipboard()->setText(doc.toString(), QClipboard::Clipboard);
 
@@ -1263,11 +1223,11 @@ Document::Item *Document::item(const QModelIndex &idx) const
     return idx.isValid() ? static_cast<Item *>(idx.internalPointer()) : 0;
 }
 
-QModelIndex Document::index(const Item *ci) const
+QModelIndex Document::index(const Item *ci, int column) const
 {
     Item *i = const_cast<Item *>(ci);
 
-    return i ? createIndex(m_items.indexOf(i), 0, i) : QModelIndex();
+    return i ? createIndex(m_items.indexOf(i), column, i) : QModelIndex();
 }
 
 
@@ -1294,6 +1254,8 @@ Qt::ItemFlags Document::flags(const QModelIndex &index) const
     case Category    :
     case YearReleased:
     case LotId       : break;
+    case Stockroom   :
+    case Retain      : ifs |= Qt::ItemIsUserCheckable; //no break;
     default          : ifs |= Qt::ItemIsEditable; break;
     }
     return ifs;
@@ -1351,6 +1313,7 @@ QVariant Document::data(const QModelIndex &index, int role) const
         case Qt::ToolTipRole      : return dataForToolTipRole(it, f);
         case Qt::TextAlignmentRole: return dataForTextAlignmentRole(it, f);
         case Qt::EditRole         : return dataForEditRole(it, f);
+        case Qt::CheckStateRole   : return dataForCheckStateRole(it, f);
         }
     }
     return QVariant();
@@ -1395,7 +1358,7 @@ QVariant Document::dataForEditRole(Item *it, Field f) const
 
 QString Document::dataForDisplayRole(Item *it, Field f) const
 {
-    QString dash = QChar('-');
+    QString dash = QLatin1Char('-');
 
     switch (f) {
     case LotId       : return (it->lotId() == 0 ? dash : QString::number(it->lotId()));
@@ -1407,8 +1370,8 @@ QString Document::dataForDisplayRole(Item *it, Field f) const
     case Bulk        : return (it->bulkQuantity() == 1 ? dash : QString::number(it->bulkQuantity()));
     case Price       : return it->price().toLocalizedString();
     case Total       : return it->total().toLocalizedString();
-    case Sale        : return (it->sale() == 0 ? dash : QString::number(it->sale()) + "%");
-    case Condition   : return (it->condition() == BrickLink::New ? QChar('N') : QChar('U'));
+    case Sale        : return (it->sale() == 0 ? dash : QString::number(it->sale()) + QLatin1Char('%'));
+    case Condition   : return (it->condition() == BrickLink::New ? tr("N", "New") : tr("U", "Used"));
     case Color       : return it->color()->name();
     case Category    : return it->category()->name();
     case ItemType    : return it->itemType()->name();
@@ -1435,6 +1398,15 @@ QVariant Document::dataForDecorationRole(Item *it, Field f) const
     switch (f) {
     case Picture: return it->image();
     default     : return QPixmap();
+    }
+}
+
+Qt::CheckState Document::dataForCheckStateRole(Item *it, Field f) const
+{
+    switch (f) {
+    case Retain   : return it->retain() ? Qt::Checked : Qt::Unchecked;
+    case Stockroom: return it->stockroom() ? Qt::Checked : Qt::Unchecked;
+    default       : return Qt::Unchecked;
     }
 }
 
@@ -1607,6 +1579,18 @@ void Document::pictureUpdated(BrickLink::Picture *pic)
 }
 
 
+QString Document::subConditionLabel(BrickLink::SubCondition sc) const
+{
+    switch (sc) {
+    case BrickLink::None      : return tr("-", "no subcondition");
+    case BrickLink::MISB      : return tr("MISB");
+    case BrickLink::Complete  : return tr("Complete");
+    case BrickLink::Incomplete: return tr("Incomplete");
+    default                   : return QString();
+    }
+}
+
+
 
 
 
@@ -1642,6 +1626,7 @@ DocumentProxyModel::DocumentProxyModel(Document *model)
 {
     setDynamicSortFilter(true);
     setSourceModel(model);
+
     m_parser = new Filter::Parser();
     
     m_parser->setStandardCombinationTokens(Filter::And | Filter::Or);
@@ -1658,11 +1643,12 @@ DocumentProxyModel::DocumentProxyModel(Document *model)
         str = model->headerData(i, Qt::Horizontal, Qt::DisplayRole).toString();
         if (!str.isEmpty())
             fields.insert(i, str);
-#if QT_VERSION >= 0x040500            
-         str = model->headerData(i, Qt::Horizontal, Qt::UntranslatedDisplayRole);
-         if (!str.isEmpty())
-            fields.insert(i, str);
-#endif
+//TODO: not yet in 4.5.0
+//#if QT_VERSION >= 0x040500
+//         str = model->headerData(i, Qt::Horizontal, Qt::UntranslatedDisplayRole);
+//         if (!str.isEmpty())
+//            fields.insert(i, str);
+//#endif
     }
     fields.insert(-1, QLatin1String("Any"));
     fields.insert(-1, tr("Any"));
@@ -1728,5 +1714,40 @@ bool DocumentProxyModel::filterAcceptsRow(int source_row, const QModelIndex &sou
 
         nextcomb = f.combination();
     }
+    return result;
+}
+
+void DocumentProxyModel::sort(int column, Qt::SortOrder order)
+{
+    m_sort_col = column;
+    m_sort_order = order;
+    QSortFilterProxyModel::sort(column, order);
+}
+
+class SortItemListCompare {
+public:
+    SortItemListCompare(const DocumentProxyModel *view, int sortcol, Qt::SortOrder sortorder)
+        : m_doc(static_cast<Document *>(view->sourceModel())), m_view(view), 
+          m_sortcol(sortcol), m_sortasc(sortorder == Qt::AscendingOrder)
+    { }
+
+    bool operator()(const Document::Item *i1, const Document::Item *i2)
+    {
+        bool b = m_view->lessThan(m_doc->index(i1, m_sortcol), m_doc->index(i2, m_sortcol));
+        return m_sortasc ? b : !b;
+    }
+private:
+    const Document *m_doc;
+    const DocumentProxyModel *m_view;
+    int m_sortcol;
+    bool m_sortasc;
+};
+
+Document::ItemList DocumentProxyModel::sortItemList(const Document::ItemList &list) const
+{
+    qWarning("sort in: %d", list.count());
+    Document::ItemList result(list);
+    qStableSort(result.begin(), result.end(), SortItemListCompare(this, m_sort_col, m_sort_order));
+    qWarning("sort out: %d", result.count());
     return result;
 }

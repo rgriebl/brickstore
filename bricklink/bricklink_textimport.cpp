@@ -186,13 +186,14 @@ template <> ItemType *TextImport::parse<ItemType> (uint count, const char **strs
 
     char c = strs [0][0];
     ItemType *itt = new ItemType();
-    itt->m_id              = c;
-    itt->m_picture_id      = (c == 'I') ? 'S' : c;
-    itt->m_name            = my_strdup(strs[1]);
-    itt->m_has_inventories = false;
-    itt->m_has_colors      = (c == 'P' || c == 'G');
-    itt->m_has_weight      = (c == 'B' || c == 'P' || c == 'G' || c == 'S' || c == 'I');
-    itt->m_has_year        = (c == 'B' || c == 'C' || c == 'G' || c == 'S' || c == 'I');
+    itt->m_id                = c;
+    itt->m_picture_id        = (c == 'I') ? 'S' : c;
+    itt->m_name              = my_strdup(strs[1]);
+    itt->m_has_inventories   = false;
+    itt->m_has_colors        = (c == 'P' || c == 'G');
+    itt->m_has_weight        = (c == 'B' || c == 'P' || c == 'G' || c == 'S' || c == 'I');
+    itt->m_has_year          = (c == 'B' || c == 'C' || c == 'G' || c == 'S' || c == 'I');
+    itt->m_has_subconditions = (c == 'S');
 
     return itt;
 }

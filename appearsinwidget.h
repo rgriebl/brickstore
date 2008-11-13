@@ -30,6 +30,7 @@ public:
     virtual ~AppearsInWidget();
 
     void setItem(const BrickLink::Item *item, const BrickLink::Color *color = 0);
+    void setItems(const BrickLink::InvItemList &list);
 
     virtual QSize minimumSizeHint() const;
     virtual QSize sizeHint() const;
@@ -48,6 +49,7 @@ private slots:
 
 private:
     const BrickLink::AppearsInItem *appearsIn() const;
+    void triggerColumnResize();
 
 private:
     AppearsInWidgetPrivate *d;
