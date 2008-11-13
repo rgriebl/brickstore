@@ -25,7 +25,7 @@ ItemDetailPopup::ItemDetailPopup(QWidget *parent)
 
     //m_blpic = new QLabel(m_stack);
     //m_blpic->setFixedSize(640, 480);
-    m_ldraw = new LDraw::RenderWidget(this);
+    m_ldraw = new LDraw::RenderOffscreenWidget(this);
     //m_stack->addWidget(m_blpic);
     //m_stack->addWidget(m_ldraw);
 

@@ -12,6 +12,8 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 #include <QMouseEvent>
+#include <QGLFramebufferObject>
+#include <QPainter>
 
 #include <cfloat>
 #include <cmath>
@@ -33,8 +35,8 @@ static inline void glMultMatrix(const matrix_t &m)
 
 
 
-LDraw::GLRenderer::GLRenderer()
-    : m_part(0), m_color(-1), m_zoom(1), m_surfaces_list(0), m_initialized(false), m_resized(false)
+LDraw::GLRenderer::GLRenderer(QObject *parent)
+    : QObject(parent), m_part(0), m_color(-1), m_zoom(1), m_surfaces_list(0), m_initialized(false), m_resized(false)
 {
     memset(&m_rx, 0, sizeof(qreal) * 3);
     memset(&m_tx, 0, sizeof(qreal) * 3);
@@ -139,7 +141,8 @@ void LDraw::GLRenderer::initializeGL()
     glEnable(GL_LINE_SMOOTH);
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 
-    glClearColor(0, 0, 0, 0); // transparent
+//    glClearColor(0, 0, 0, 0); // transparent
+    glClearColor(255, 255, 255, 255); // white
 
     m_initialized = true;
 }
@@ -508,8 +511,12 @@ void LDraw::GLRenderer::render_condlines_visit(Part *part, int ldraw_basecolor)
 
 
 LDraw::RenderWidget::RenderWidget(QWidget *parent)
-    : QGLWidget(QGLFormat(QGL::SampleBuffers | QGL::Rgba | QGL::AlphaChannel), parent), GLRenderer()
+    : QGLWidget(QGLFormat(QGL::SampleBuffers | QGL::Rgba | QGL::AlphaChannel), parent)
 {
+    m_renderer = new GLRenderer(this);
+
+    connect(m_renderer, SIGNAL(makeCurrent()), this, SLOT(slotMakeCurrent()));
+    connect(m_renderer, SIGNAL(updateNeeded()), this, SLOT(updateGL()));
 }
 
 LDraw::RenderWidget::~RenderWidget()
@@ -537,26 +544,146 @@ void LDraw::RenderWidget::mouseMoveEvent(QMouseEvent *event)
     qreal dy = event->y() - m_last_pos.y();
 
     if ((event->buttons() & Qt::LeftButton) && (event->modifiers() == Qt::NoModifier)) {
-        setXRotation(xRotation() + dy / 2);
-        setYRotation(yRotation() + dx / 2);
+        m_renderer->setXRotation(m_renderer->xRotation() + dy / 2);
+        m_renderer->setYRotation(m_renderer->yRotation() + dx / 2);
     }
     else if ((event->buttons() & Qt::LeftButton) && (event->modifiers() == Qt::ShiftModifier)) {
-        setXRotation(xRotation() + dy / 2);
-        setZRotation(zRotation() + dx / 2);
+        m_renderer->setXRotation(m_renderer->xRotation() + dy / 2);
+        m_renderer->setZRotation(m_renderer->zRotation() + dx / 2);
     }
     else if ((event->buttons() & Qt::LeftButton) && (event->modifiers() == Qt::ControlModifier)) {
-        setZoom(zoom() * (dy < 0 ? 0.9 : 1.1));
+        m_renderer->setZoom(m_renderer->zoom() * (dy < 0 ? 0.9 : 1.1));
     }
     m_last_pos = event->pos();
 }
 
-void LDraw::RenderWidget::makeCurrent()
+void LDraw::RenderWidget::slotMakeCurrent()
 {
-    QGLWidget::makeCurrent();
+    makeCurrent();
 }
 
-void LDraw::RenderWidget::updateNeeded()
+void LDraw::RenderWidget::initializeGL()
 {
-    updateGL();
+    m_renderer->initializeGL();
 }
 
+void LDraw::RenderWidget::resizeGL(int w, int h)
+{
+    m_renderer->resizeGL(w, h);
+}
+
+void LDraw::RenderWidget::paintGL()
+{
+    m_renderer->paintGL();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+LDraw::RenderOffscreenWidget::RenderOffscreenWidget(QWidget *parent)
+    : QWidget(parent), m_context(QGLFormat(QGL::SampleBuffers | QGL::Rgba | QGL::AlphaChannel)), m_fbo(0), m_resize(false)
+{
+    m_context.create();
+    m_renderer = new GLRenderer(this);
+
+    connect(m_renderer, SIGNAL(makeCurrent()), this, SLOT(slotMakeCurrent()));
+    connect(m_renderer, SIGNAL(updateNeeded()), this, SLOT(update()));
+
+    m_renderer->initializeGL();
+}
+
+LDraw::RenderOffscreenWidget::~RenderOffscreenWidget()
+{
+}
+
+QSize LDraw::RenderOffscreenWidget::minimumSizeHint() const
+{
+    return QSize(50, 50);
+}
+
+QSize LDraw::RenderOffscreenWidget::sizeHint() const
+{
+    return QSize(400, 400);
+}
+
+void LDraw::RenderOffscreenWidget::resizeEvent(QResizeEvent *)
+{
+    setImageSize(width(), height());
+}
+
+void LDraw::RenderOffscreenWidget::paintEvent(QPaintEvent *)
+{
+    QPainter p(this);
+    p.drawImage(0, 0, renderImage());
+}
+
+void LDraw::RenderOffscreenWidget::mousePressEvent(QMouseEvent *event)
+{
+    m_last_pos = event->pos();
+}
+
+void LDraw::RenderOffscreenWidget::mouseMoveEvent(QMouseEvent *event)
+{
+    qreal dx = event->x() - m_last_pos.x();
+    qreal dy = event->y() - m_last_pos.y();
+
+    if ((event->buttons() & Qt::LeftButton) && (event->modifiers() == Qt::NoModifier)) {
+        m_renderer->setXRotation(m_renderer->xRotation() + dy / 2);
+        m_renderer->setYRotation(m_renderer->yRotation() + dx / 2);
+    }
+    else if ((event->buttons() & Qt::LeftButton) && (event->modifiers() == Qt::ShiftModifier)) {
+        m_renderer->setXRotation(m_renderer->xRotation() + dy / 2);
+        m_renderer->setZRotation(m_renderer->zRotation() + dx / 2);
+    }
+    else if ((event->buttons() & Qt::LeftButton) && (event->modifiers() == Qt::ControlModifier)) {
+        m_renderer->setZoom(m_renderer->zoom() * (dy < 0 ? 0.9 : 1.1));
+    }
+    m_last_pos = event->pos();
+}
+
+void LDraw::RenderOffscreenWidget::slotMakeCurrent()
+{
+    m_context.makeCurrent();
+}
+
+void LDraw::RenderOffscreenWidget::setImageSize(int w, int h)
+{
+    QSize s(w, h);
+
+    if (!m_fbo || s != m_fbo->size()) {
+        delete m_fbo;
+        m_fbo = new QGLFramebufferObject(s);
+        m_resize = true;
+    }
+}
+
+QImage LDraw::RenderOffscreenWidget::renderImage()
+{
+    if (!m_fbo)
+        return QImage();
+
+    m_context.makeCurrent();
+    m_fbo->bind();
+    if (m_resize) {
+        m_renderer->resizeGL(m_fbo->size().width(), m_fbo->size().height());
+        m_resize = false;
+    }
+    m_renderer->paintGL();
+    m_fbo->release();
+    //m_context.doneCurrent();
+    return m_fbo->toImage();
+}

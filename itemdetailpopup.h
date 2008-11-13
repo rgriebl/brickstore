@@ -36,7 +36,7 @@ private:
     void redraw();
 
 private:
-    LDraw::RenderWidget *m_ldraw;
+    LDraw::RenderOffscreenWidget *m_ldraw;
     QLabel *m_blpic;
 
     QStackedWidget *m_stack;

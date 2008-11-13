@@ -27,9 +27,11 @@ namespace LDraw {
 
 class Part;
 
-class GLRenderer {
+class GLRenderer : public QObject {
+    Q_OBJECT
+
 public:
-    GLRenderer();
+    GLRenderer(QObject *parent = 0);
     virtual ~GLRenderer();
 
     Part *part() const;
@@ -56,13 +58,13 @@ public:
 
     qreal zoom() const          { return m_zoom; }
 
-protected:
     virtual void initializeGL();
     virtual void resizeGL(int w, int h);
     virtual void paintGL();
 
-    virtual void makeCurrent() = 0;
-    virtual void updateNeeded() = 0;
+signals:
+    void updateNeeded();
+    void makeCurrent();
 
 private:
     void createSurfacesList();
@@ -89,11 +91,15 @@ private:
     QSize m_size;
 };
 
-class RenderWidget : public QGLWidget, public GLRenderer {
+class RenderWidget : public QGLWidget {
     Q_OBJECT
 public:
     RenderWidget(QWidget *parent = 0);
     virtual ~RenderWidget();
+
+    Part *part() const  { return m_renderer->part(); }
+    int color() const   { return m_renderer->color(); }
+    void setPartAndColor(Part *part, int basecolor)  { m_renderer->setPartAndColor(part, basecolor); }
 
     virtual QSize minimumSizeHint() const;
     virtual QSize sizeHint() const;
@@ -101,11 +107,49 @@ public:
     virtual void mousePressEvent(QMouseEvent *event);
     virtual void mouseMoveEvent(QMouseEvent *event);
 
+protected slots:
+    void slotMakeCurrent();
+
 protected:
-    virtual void makeCurrent();
-    virtual void updateNeeded();
+    virtual void initializeGL();
+    virtual void resizeGL(int w, int h);
+    virtual void paintGL();
 
 private:
+    GLRenderer *m_renderer;
+    QPoint m_last_pos;
+};
+
+
+class RenderOffscreenWidget : public QWidget {
+    Q_OBJECT
+public:
+    RenderOffscreenWidget(QWidget *parent = 0);
+    virtual ~RenderOffscreenWidget();
+
+    Part *part() const  { return m_renderer->part(); }
+    int color() const   { return m_renderer->color(); }
+    void setPartAndColor(Part *part, int basecolor)  { m_renderer->setPartAndColor(part, basecolor); }
+
+    virtual QSize minimumSizeHint() const;
+    virtual QSize sizeHint() const;
+
+    virtual void resizeEvent(QResizeEvent *event);
+    virtual void paintEvent(QPaintEvent *event);
+    virtual void mousePressEvent(QMouseEvent *event);
+    virtual void mouseMoveEvent(QMouseEvent *event);
+
+    void setImageSize(int w, int h);
+    QImage renderImage();
+
+protected slots:
+    void slotMakeCurrent();
+
+private:
+    QGLContext m_context;
+    QGLFramebufferObject *m_fbo;
+    bool m_resize;
+    GLRenderer *m_renderer;
     QPoint m_last_pos;
 };
 
