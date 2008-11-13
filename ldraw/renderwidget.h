@@ -27,55 +27,86 @@ namespace LDraw {
 
 class Part;
 
-class RenderWidget : public QGLWidget {
-    Q_OBJECT
+class GLRenderer {
 public:
-    RenderWidget(QWidget *parent = 0);
-    virtual ~RenderWidget();
-    
-    virtual QSize minimumSizeHint() const;
-    virtual QSize sizeHint() const;
-    
+    GLRenderer();
+    virtual ~GLRenderer();
+
     Part *part() const;
     int color() const;
     void setPartAndColor(Part *part, int basecolor);
-    
+
+    void setXTranslation(qreal t);
+    void setYTranslation(qreal t);
+    void setZTranslation(qreal t);
+
     void setXRotation(qreal r);
     void setYRotation(qreal r);
     void setZRotation(qreal r);
-    
+
     void setZoom(qreal r);
-    
+
+    qreal xTranslation() const  { return m_tx; }
+    qreal yTranslation() const  { return m_ty; }
+    qreal zTranslation() const  { return m_tz; }
+
+    qreal xRotation() const     { return m_rx; }
+    qreal yRotation() const     { return m_ry; }
+    qreal zRotation() const     { return m_rz; }
+
+    qreal zoom() const          { return m_zoom; }
+
 protected:
     virtual void initializeGL();
     virtual void resizeGL(int w, int h);
     virtual void paintGL();
-    virtual void mousePressEvent(QMouseEvent *event);
-    virtual void mouseMoveEvent(QMouseEvent *event);    
+
+    virtual void makeCurrent() = 0;
+    virtual void updateNeeded() = 0;
 
 private:
-    void create_display_list();
-    void render_complete_visit(Part *part, int ldraw_basecolor);
-    void render_condlines_visit(Part *part, int ldraw_basecolor);
-    void render_surfaces_visit(Part *part, int ldraw_basecolor);
-    void render_lines_visit(Part *part, int ldraw_basecolor);
-    
+    void createSurfacesList();
+    void renderSurfaces(Part *part, int ldraw_basecolor);
+    void renderLines(Part *part, int ldraw_basecolor);
+
     struct linebuffer {
         const vector_t *v;
         int color;
     };
 
-    void renderOptimizedLines(int s, int e, const QVector<linebuffer> &buffer, int mode, int ldraw_basecolor);
-    void optimizeLines(const QVector<linebuffer> &buffer, int ldraw_basecolor);
+    void renderLineBuffer(const QVector<linebuffer> &buffer, int ldraw_basecolor);
+    void renderLineBufferSegment(const QVector<linebuffer> &buffer, int s, int e, int mode, int ldraw_basecolor);
 
 
     Part *m_part;
-    qreal m_rx, m_ry, m_rz;
     int m_color;
-    GLuint m_dl_part;
-    QPoint m_last_pos;
-    bool m_initialized;
+    qreal m_rx, m_ry, m_rz;
+    qreal m_tx, m_ty, m_tz;
     qreal m_zoom;
+    GLuint m_surfaces_list;
+    bool m_initialized;
+    bool m_resized;
+    QSize m_size;
+};
+
+class RenderWidget : public QGLWidget, public GLRenderer {
+    Q_OBJECT
+public:
+    RenderWidget(QWidget *parent = 0);
+    virtual ~RenderWidget();
+
+    virtual QSize minimumSizeHint() const;
+    virtual QSize sizeHint() const;
+
+    virtual void mousePressEvent(QMouseEvent *event);
+    virtual void mouseMoveEvent(QMouseEvent *event);
+
+protected:
+    virtual void makeCurrent();
+    virtual void updateNeeded();
+
+private:
+    QPoint m_last_pos;
 };
 
 }
