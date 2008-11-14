@@ -101,11 +101,12 @@ public:
     int color() const   { return m_renderer->color(); }
     void setPartAndColor(Part *part, int basecolor)  { m_renderer->setPartAndColor(part, basecolor); }
 
-    virtual QSize minimumSizeHint() const;
-    virtual QSize sizeHint() const;
+    QSize minimumSizeHint() const;
+    QSize sizeHint() const;
 
-    virtual void mousePressEvent(QMouseEvent *event);
-    virtual void mouseMoveEvent(QMouseEvent *event);
+    void mousePressEvent(QMouseEvent *e);
+    void mouseMoveEvent(QMouseEvent *e);
+    void wheelEvent(QWheelEvent *e);
 
 protected slots:
     void slotMakeCurrent();
@@ -134,10 +135,11 @@ public:
     virtual QSize minimumSizeHint() const;
     virtual QSize sizeHint() const;
 
-    virtual void resizeEvent(QResizeEvent *event);
-    virtual void paintEvent(QPaintEvent *event);
-    virtual void mousePressEvent(QMouseEvent *event);
-    virtual void mouseMoveEvent(QMouseEvent *event);
+    void resizeEvent(QResizeEvent *e);
+    void paintEvent(QPaintEvent *e);
+    void mousePressEvent(QMouseEvent *e);
+    void mouseMoveEvent(QMouseEvent *e);
+    void wheelEvent(QWheelEvent *e);
 
     void setImageSize(int w, int h);
     QImage renderImage();
@@ -146,8 +148,9 @@ protected slots:
     void slotMakeCurrent();
 
 private:
-    QGLContext m_context;
+    QGLWidget *m_dummy;
     QGLFramebufferObject *m_fbo;
+    bool m_initialized;
     bool m_resize;
     GLRenderer *m_renderer;
     QPoint m_last_pos;

@@ -27,6 +27,7 @@ protected:
     void paintEvent(QPaintEvent *e);
     void keyPressEvent(QKeyEvent *e);
     void mousePressEvent(QMouseEvent *e);
+    void mouseReleaseEvent(QMouseEvent *e);
     void mouseMoveEvent(QMouseEvent *e);
 
 private slots:
@@ -46,6 +47,7 @@ private:
     QPoint m_movepos;
     LDraw::Model *m_part;
     BrickLink::Picture *m_pic;
+    bool m_pressed;
 
     bool m_connected;
 };

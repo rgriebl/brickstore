@@ -181,7 +181,7 @@ void LDraw::GLRenderer::resizeGL(int w, int h)
 
 void LDraw::GLRenderer::paintGL()
 {
-    if (!m_initialized || !m_resized || m_size.isEmpty() || !m_part || m_color <= 0)
+    if (!m_initialized || !m_resized || m_size.isEmpty() || !m_part || m_color < 0)
         return;
 
     //qWarning("paintGL - rotate: %.f / %.f / %.f", m_rx, m_ry, m_rz);
@@ -533,28 +533,38 @@ QSize LDraw::RenderWidget::sizeHint() const
     return QSize(400, 400);
 }
 
-void LDraw::RenderWidget::mousePressEvent(QMouseEvent *event)
+void LDraw::RenderWidget::mousePressEvent(QMouseEvent *e)
 {
-    m_last_pos = event->pos();
+    m_last_pos = e->pos();
 }
 
-void LDraw::RenderWidget::mouseMoveEvent(QMouseEvent *event)
+void LDraw::RenderWidget::mouseMoveEvent(QMouseEvent *e)
 {
-    qreal dx = event->x() - m_last_pos.x();
-    qreal dy = event->y() - m_last_pos.y();
+    qreal dx = e->x() - m_last_pos.x();
+    qreal dy = e->y() - m_last_pos.y();
 
-    if ((event->buttons() & Qt::LeftButton) && (event->modifiers() == Qt::NoModifier)) {
+    if ((e->buttons() & Qt::LeftButton) && (e->modifiers() == Qt::NoModifier)) {
         m_renderer->setXRotation(m_renderer->xRotation() + dy / 2);
         m_renderer->setYRotation(m_renderer->yRotation() + dx / 2);
     }
-    else if ((event->buttons() & Qt::LeftButton) && (event->modifiers() == Qt::ShiftModifier)) {
+    else if ((e->buttons() & Qt::LeftButton) && (e->modifiers() == Qt::ControlModifier)) {
         m_renderer->setXRotation(m_renderer->xRotation() + dy / 2);
         m_renderer->setZRotation(m_renderer->zRotation() + dx / 2);
     }
-    else if ((event->buttons() & Qt::LeftButton) && (event->modifiers() == Qt::ControlModifier)) {
+    else if ((e->buttons() & Qt::LeftButton) && (e->modifiers() == Qt::ShiftModifier)) {
+        m_renderer->setXTranslation(m_renderer->xTranslation() + dx);
+        m_renderer->setYTranslation(m_renderer->yTranslation() - dy);
+    }
+    else if ((e->buttons() & Qt::LeftButton) && (e->modifiers() == Qt::AltModifier)) {
         m_renderer->setZoom(m_renderer->zoom() * (dy < 0 ? 0.9 : 1.1));
     }
-    m_last_pos = event->pos();
+    m_last_pos = e->pos();
+}
+
+void LDraw::RenderWidget::wheelEvent(QWheelEvent *e)
+{
+    qreal d = 1.0 + (e->delta() / 1200.0);
+    m_renderer->setZoom(m_renderer->zoom() * d);
 }
 
 void LDraw::RenderWidget::slotMakeCurrent()
@@ -595,19 +605,22 @@ void LDraw::RenderWidget::paintGL()
 
 
 LDraw::RenderOffscreenWidget::RenderOffscreenWidget(QWidget *parent)
-    : QWidget(parent), m_context(QGLFormat(QGL::SampleBuffers | QGL::Rgba | QGL::AlphaChannel)), m_fbo(0), m_resize(false)
+    : QWidget(parent), m_fbo(0), m_initialized(false), m_resize(false)
 {
-    m_context.create();
+    m_dummy = new QGLWidget(QGLFormat(QGL::SampleBuffers | QGL::Rgba | QGL::AlphaChannel));
+
+    if (!QGLFramebufferObject::hasOpenGLFramebufferObjects())
+        qWarning("no OpenGL FBO extension available");
+
     m_renderer = new GLRenderer(this);
 
     connect(m_renderer, SIGNAL(makeCurrent()), this, SLOT(slotMakeCurrent()));
     connect(m_renderer, SIGNAL(updateNeeded()), this, SLOT(update()));
-
-    m_renderer->initializeGL();
 }
 
 LDraw::RenderOffscreenWidget::~RenderOffscreenWidget()
 {
+    delete m_dummy;
 }
 
 QSize LDraw::RenderOffscreenWidget::minimumSizeHint() const
@@ -631,33 +644,43 @@ void LDraw::RenderOffscreenWidget::paintEvent(QPaintEvent *)
     p.drawImage(0, 0, renderImage());
 }
 
-void LDraw::RenderOffscreenWidget::mousePressEvent(QMouseEvent *event)
+void LDraw::RenderOffscreenWidget::mousePressEvent(QMouseEvent *e)
 {
-    m_last_pos = event->pos();
+    m_last_pos = e->pos();
 }
 
-void LDraw::RenderOffscreenWidget::mouseMoveEvent(QMouseEvent *event)
+void LDraw::RenderOffscreenWidget::mouseMoveEvent(QMouseEvent *e)
 {
-    qreal dx = event->x() - m_last_pos.x();
-    qreal dy = event->y() - m_last_pos.y();
+    qreal dx = e->x() - m_last_pos.x();
+    qreal dy = e->y() - m_last_pos.y();
 
-    if ((event->buttons() & Qt::LeftButton) && (event->modifiers() == Qt::NoModifier)) {
+    if ((e->buttons() & Qt::LeftButton) && (e->modifiers() == Qt::NoModifier)) {
         m_renderer->setXRotation(m_renderer->xRotation() + dy / 2);
         m_renderer->setYRotation(m_renderer->yRotation() + dx / 2);
     }
-    else if ((event->buttons() & Qt::LeftButton) && (event->modifiers() == Qt::ShiftModifier)) {
+    else if ((e->buttons() & Qt::LeftButton) && (e->modifiers() == Qt::ControlModifier)) {
         m_renderer->setXRotation(m_renderer->xRotation() + dy / 2);
         m_renderer->setZRotation(m_renderer->zRotation() + dx / 2);
     }
-    else if ((event->buttons() & Qt::LeftButton) && (event->modifiers() == Qt::ControlModifier)) {
+    else if ((e->buttons() & Qt::LeftButton) && (e->modifiers() == Qt::ShiftModifier)) {
+        m_renderer->setXTranslation(m_renderer->xTranslation() + dx);
+        m_renderer->setYTranslation(m_renderer->yTranslation() - dy);
+    }
+    else if ((e->buttons() & Qt::LeftButton) && (e->modifiers() == Qt::AltModifier)) {
         m_renderer->setZoom(m_renderer->zoom() * (dy < 0 ? 0.9 : 1.1));
     }
-    m_last_pos = event->pos();
+    m_last_pos = e->pos();
+}
+
+void LDraw::RenderOffscreenWidget::wheelEvent(QWheelEvent *e)
+{
+    qreal d = 1.0 + (e->delta() / 1200.0);
+    m_renderer->setZoom(m_renderer->zoom() * d);
 }
 
 void LDraw::RenderOffscreenWidget::slotMakeCurrent()
 {
-    m_context.makeCurrent();
+    m_dummy->makeCurrent();
 }
 
 void LDraw::RenderOffscreenWidget::setImageSize(int w, int h)
@@ -665,8 +688,9 @@ void LDraw::RenderOffscreenWidget::setImageSize(int w, int h)
     QSize s(w, h);
 
     if (!m_fbo || s != m_fbo->size()) {
+        m_dummy->makeCurrent();
         delete m_fbo;
-        m_fbo = new QGLFramebufferObject(s);
+        m_fbo = new QGLFramebufferObject(s, QGLFramebufferObject::Depth);
         m_resize = true;
     }
 }
@@ -676,14 +700,20 @@ QImage LDraw::RenderOffscreenWidget::renderImage()
     if (!m_fbo)
         return QImage();
 
-    m_context.makeCurrent();
+    m_dummy->makeCurrent();
     m_fbo->bind();
+    if (!m_initialized) {
+        m_renderer->initializeGL();
+        m_dummy->qglClearColor(QColor(255, 255, 255, 0));
+        m_initialized = true;
+    }
+
     if (m_resize) {
         m_renderer->resizeGL(m_fbo->size().width(), m_fbo->size().height());
         m_resize = false;
     }
     m_renderer->paintGL();
     m_fbo->release();
-    //m_context.doneCurrent();
+    //m_context->doneCurrent();
     return m_fbo->toImage();
 }
