@@ -19,6 +19,7 @@
 #include <QLibraryInfo>
 #include <QSysInfo>
 #include <QFileOpenEvent>
+#include <QProcess>
 
 #if defined( Q_OS_UNIX )
 #  include <sys/utsname.h>
@@ -64,6 +65,15 @@ Application::Application(bool rebuild_db_only, int _argc, char **_argv)
     setOrganizationName("Softforge");
     setOrganizationDomain("softforge.de");
     setApplicationName(appName());
+
+#if defined(Q_WS_X11)
+    QPixmap pix(":/images/icon");
+    if (!pix.isNull())
+        setWindowIcon(pix);
+    else
+        qWarning("No window icon");
+#endif
+
 
     Transfer::setDefaultUserAgent(appName() + "/" + cApp->appVersion() + " (" + cApp->sysName() + " " + cApp->sysVersion() + "; http://" + cApp->appURL() + ")");
 

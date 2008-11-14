@@ -36,15 +36,15 @@ class TextImport;
 class InvItemMimeData;
 
 class ColorModel;
-class ColorProxyModel;
+class InternalColorModel;
 class CategoryModel;
-class CategoryProxyModel;
+class InternalCategoryModel;
 class ItemTypeModel;
-class ItemTypeProxyModel;
+class InternalItemTypeModel;
 class ItemModel;
-class ItemProxyModel;
+class InternalItemModel;
 class AppearsInModel;
-class AppearsInProxyModel;
+class InternalAppearsInModel;
 
 typedef QList<InvItem *>                      InvItemList;
 typedef QPair<int, const Item *>              AppearsInItem;

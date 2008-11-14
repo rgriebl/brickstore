@@ -48,7 +48,8 @@ enum {
 
 class OrderListModel : public QAbstractTableModel {
 public:
-    OrderListModel()
+    OrderListModel(QObject *parent)
+        : QAbstractTableModel(parent)
     {
         MODELTEST_ATTACH(this) 
     }
@@ -246,7 +247,7 @@ ImportOrderDialog::ImportOrderDialog(QWidget *parent, Qt::WindowFlags f)
     setupUi(this);
 
     w_order_number->setValidator(new QIntValidator(1, 9999999, w_order_number));
-    w_order_list->setModel(new OrderListModel());
+    w_order_list->setModel(new OrderListModel(this));
     w_order_list->setItemDelegate(new TransHighlightDelegate());
 
     connect(w_order_number, SIGNAL(textChanged(const QString &)), this, SLOT(checkId()));

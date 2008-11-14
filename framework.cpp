@@ -126,21 +126,13 @@ FrameWork *FrameWork::inst()
 
 
 FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
-        : QMainWindow(parent, f)
+    : QMainWindow(parent, f)
 {
     s_inst = this;
 
     m_running = false;
     m_spinner = 0;
     m_filter = 0;
-
-#if defined( Q_WS_X11 )
-    if (windowIcon().isNull()) {
-        QPixmap pix(":/icon");
-        if (!pix.isNull())
-            setWindowIcon(pix);
-    }
-#endif
 
     setUnifiedTitleAndToolBarOnMac(true);
     setAcceptDrops(true);

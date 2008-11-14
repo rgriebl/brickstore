@@ -143,7 +143,7 @@ void SettingsDialog::load()
 	const BrickLink::ItemType *itype;
 
 	itype = BrickLink::core()->itemType(Config::inst()->value("/Defaults/ImportInventory/ItemType", 'S').toInt());
-	BrickLink::ItemTypeProxyModel *importmodel = new BrickLink::ItemTypeProxyModel(BrickLink::core()->itemTypeModel());
+	BrickLink::ItemTypeModel *importmodel = new BrickLink::ItemTypeModel(this);
 	importmodel->setFilterWithoutInventory(true);
 	w_def_import_type->setModel(importmodel);
 
@@ -151,7 +151,7 @@ void SettingsDialog::load()
 	w_def_import_type->setCurrentIndex(importdef);
 
 	itype = BrickLink::core()->itemType(Config::inst()->value("/Defaults/AddItems/ItemType", 'P').toInt());
-	BrickLink::ItemTypeProxyModel *addmodel = new BrickLink::ItemTypeProxyModel(BrickLink::core()->itemTypeModel());
+	BrickLink::ItemTypeModel *addmodel = new BrickLink::ItemTypeModel(this);
 	w_def_add_type->setModel(addmodel);
 
 	int adddef = addmodel->index(itype ? itype : BrickLink::core()->itemType('P')).row();

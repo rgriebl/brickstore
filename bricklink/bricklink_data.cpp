@@ -735,31 +735,31 @@ BrickLink::Order::Order(const QString &id, OrderType type)
 { }
 
 
-BrickLink::ColorModel *BrickLink::Core::colorModel()
+BrickLink::InternalColorModel *BrickLink::Core::colorModel()
 {
     if (!m_color_model)
-        m_color_model = new ColorModel(this);
+        m_color_model = new InternalColorModel();
     return m_color_model;
 }
 
-BrickLink::CategoryModel *BrickLink::Core::categoryModel()
+BrickLink::InternalCategoryModel *BrickLink::Core::categoryModel()
 {
     if (!m_category_model)
-        m_category_model = new CategoryModel(this);
+        m_category_model = new InternalCategoryModel();
     return m_category_model;
 }
 
-BrickLink::ItemTypeModel *BrickLink::Core::itemTypeModel()
+BrickLink::InternalItemTypeModel *BrickLink::Core::itemTypeModel()
 {
     if (!m_itemtype_model)
-        m_itemtype_model = new ItemTypeModel(this);
+        m_itemtype_model = new InternalItemTypeModel();
     return m_itemtype_model;
 }
 
-BrickLink::ItemModel *BrickLink::Core::itemModel()
+BrickLink::InternalItemModel *BrickLink::Core::itemModel()
 {
     if (!m_item_model)
-        m_item_model = new ItemModel(this);
+        m_item_model = new InternalItemModel();
     return m_item_model;
 }
 

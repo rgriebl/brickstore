@@ -738,17 +738,17 @@ bool BrickLink::Core::onlineStatus() const
 }
 
 
-const QHash<int, const BrickLink::Color *> &BrickLink::Core::colors() const
+const QMap<int, const BrickLink::Color *> &BrickLink::Core::colors() const
 {
     return m_colors;
 }
 
-const QHash<int, const BrickLink::Category *> &BrickLink::Core::categories() const
+const QMap<int, const BrickLink::Category *> &BrickLink::Core::categories() const
 {
     return m_categories;
 }
 
-const QHash<int, const BrickLink::ItemType *> &BrickLink::Core::itemTypes() const
+const QMap<int, const BrickLink::ItemType *> &BrickLink::Core::itemTypes() const
 {
     return m_item_types;
 }
@@ -1783,9 +1783,9 @@ void BrickLink::Core::setDatabase_AppearsIn(const QHash<const Item *, AppearsIn>
         it.key()->setAppearsIn(it.value());
 }
 
-void BrickLink::Core::setDatabase_Basics(const QHash<int, const Color *> &colors,
-        const QHash<int, const Category *> &categories,
-        const QHash<int, const ItemType *> &item_types,
+void BrickLink::Core::setDatabase_Basics(const QMap<int, const Color *> &colors,
+        const QMap<int, const Category *> &categories,
+        const QMap<int, const ItemType *> &item_types,
         const QVector<const Item *> &items)
 {
     QMutexLocker lock(&m_corelock);

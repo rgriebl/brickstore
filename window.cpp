@@ -674,6 +674,8 @@ Window::Window(Document *doc, QWidget *parent)
     setAttribute(Qt::WA_DeleteOnClose);
 
     m_doc = doc;
+    m_doc->setParent(this);
+
     m_view = new DocumentProxyModel(doc);
     m_latest_row = -1;
     m_latest_timer = new QTimer(this);
@@ -784,7 +786,6 @@ void Window::updateCaption()
 
 Window::~Window()
 {
-    delete m_doc; //->deleteLater();
 }
 
 bool Window::isSimpleMode() const

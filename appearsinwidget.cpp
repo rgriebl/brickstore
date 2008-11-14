@@ -38,19 +38,19 @@ public:
     {
         connect(BrickLink::core(), SIGNAL(pictureUpdated(BrickLink::Picture *)), this, SLOT(pictureUpdated(BrickLink::Picture *)));
     }
-    
+
 public slots: // this is really is a faked virtual
     bool helpEvent(QHelpEvent *event, QAbstractItemView *view, const QStyleOptionViewItem &option, const QModelIndex &index)
     {
         if (event->type() == QEvent::ToolTip && index.isValid()) {
-            const BrickLink::AppearsInModel *model = qobject_cast<const BrickLink::AppearsInModel *>(index.model());          
+            const BrickLink::AppearsInModel *model = qobject_cast<const BrickLink::AppearsInModel *>(index.model());
             if (!model)
                 goto out;
 
             const BrickLink::AppearsInItem *appears = model->appearsIn(index);
             if (!appears)
                 goto out;
-                
+
             BrickLink::Picture *pic = BrickLink::core()->picture(appears->second, appears->second->defaultColor(), true);
 
             if (!pic)
@@ -72,10 +72,10 @@ public slots: // this is really is a faked virtual
                 return true;
             }
         }
-    out:    
+    out:
         return QStyledItemDelegate::helpEvent(event, view, option, index);
     }
-    
+
 private:
     QString createToolTip(const BrickLink::Item *item, BrickLink::Picture *pic) const
     {
@@ -115,7 +115,7 @@ private slots:
             //xx     QToolTip::showText(pos, createToolTip(pic->item(), pic));
         }
     }
-    
+
 private:
     BrickLink::Picture *m_tooltip_pic;
 };
@@ -241,14 +241,22 @@ QSize AppearsInWidget::sizeHint() const
 
 void AppearsInWidget::setItem(const BrickLink::Item *item, const BrickLink::Color *color)
 {
-    setModel(new BrickLink::AppearsInModel(item , color));
+    QAbstractItemModel *old_model = model();
+
+    setModel(new BrickLink::AppearsInModel(item , color, this));
     triggerColumnResize();
+
+    delete old_model;
 }
 
 void AppearsInWidget::setItems(const BrickLink::InvItemList &list)
 {
-    setModel(new BrickLink::AppearsInModel(list));
+    QAbstractItemModel *old_model = model();
+
+    setModel(new BrickLink::AppearsInModel(list, this));
     triggerColumnResize();
+
+    delete old_model;
 }
 
 void AppearsInWidget::triggerColumnResize()

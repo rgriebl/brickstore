@@ -31,7 +31,7 @@ SelectColor::SelectColor(QWidget *parent, Qt::WindowFlags f)
     w_colors->setRootIsDecorated(false);
     w_colors->setSortingEnabled(true);
 
-    w_colors->setModel(new BrickLink::ColorProxyModel(BrickLink::core()->colorModel()));
+    w_colors->setModel(new BrickLink::ColorModel(this));
     w_colors->sortByColumn(0, Qt::AscendingOrder);
 
     setFocusProxy(w_colors);
@@ -69,7 +69,7 @@ const BrickLink::Color *SelectColor::currentColor() const
 
 void SelectColor::setCurrentColor(const BrickLink::Color *color)
 {
-    BrickLink::ColorProxyModel *model = qobject_cast<BrickLink::ColorProxyModel *>(w_colors->model());
+    BrickLink::ColorModel *model = qobject_cast<BrickLink::ColorModel *>(w_colors->model());
 
     w_colors->setCurrentIndex(model->index(color));
 }
@@ -89,7 +89,7 @@ void SelectColor::showEvent(QShowEvent *)
     const BrickLink::Color *color = currentColor();
 
     if (color) {
-        BrickLink::ColorProxyModel *model = qobject_cast<BrickLink::ColorProxyModel *>(w_colors->model());
+        BrickLink::ColorModel *model = qobject_cast<BrickLink::ColorModel *>(w_colors->model());
 
         w_colors->scrollTo(model->index(color), QAbstractItemView::PositionAtCenter);
     }

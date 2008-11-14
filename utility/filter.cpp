@@ -47,8 +47,8 @@ void Filter::setCombination(Combination cmb)
 bool Filter::matches(const QVariant &v) const
 {
     bool isint = false, isfloat = false;
-    int i1, i2;
-    double d1, d2;
+    int i1 = 0, i2 = 0;
+    double d1 = 0, d2 = 0;
     QString s1, s2;
     
     switch (v.type()) {
@@ -191,7 +191,7 @@ T Filter::Parser::matchTokens(int &pos, const QString &str, const QMultiMap<T, Q
 {
     int len = str.length();
 
-    T found_field;
+    T found_field = defaultresult;
     int found_len = -1;
     int found_pos = -1;
   

@@ -545,10 +545,10 @@ public:
     bool importInventories(const QString &path, QVector<const Item *> &items);
     void exportInventoriesTo(Core *);
 
-    const QHash<int, const Color *>    &colors() const      { return m_colors; }
-    const QHash<int, const Category *> &categories() const  { return m_categories; }
-    const QHash<int, const ItemType *> &itemTypes() const   { return m_item_types; }
-    const QVector<const Item *>        &items() const       { return m_items; }
+    const QMap<int, const Color *>    &colors() const      { return m_colors; }
+    const QMap<int, const Category *> &categories() const  { return m_categories; }
+    const QMap<int, const ItemType *> &itemTypes() const   { return m_item_types; }
+    const QVector<const Item *>        &items() const      { return m_items; }
 
 private:
     template <typename T> T *parse(uint count, const char **strs);    // , T *gcc_dummy );
@@ -558,7 +558,7 @@ private:
 //  Item *parse ( uint count, const char **strs, Item * );
 
     template <typename C> bool readDB(const QString &name, C &container);
-    template <typename T> bool readDB_processLine(QHash<int, const T *> &d, uint tokencount, const char **tokens);
+    template <typename T> bool readDB_processLine(QMap<int, const T *> &d, uint tokencount, const char **tokens);
     template <typename T> bool readDB_processLine(QVector<const T *> &v, uint tokencount, const char **tokens);
 
     struct btinvlist_dummy { };
@@ -576,10 +576,10 @@ private:
     void appendCategoryToItemType(const Category *cat, ItemType *itt);
 
 private:
-    QHash<int, const Color *>    m_colors;
-    QHash<int, const ItemType *> m_item_types;
-    QHash<int, const Category *> m_categories;
-    QVector<const Item *>        m_items;
+    QMap<int, const Color *>    m_colors;
+    QMap<int, const ItemType *> m_item_types;
+    QMap<int, const Category *> m_categories;
+    QVector<const Item *>       m_items;
 
     QHash<const Item *, AppearsIn>   m_appears_in_hash;
     QHash<const Item *, InvItemList> m_consists_of_hash;
@@ -589,7 +589,7 @@ private:
 };
 
 
-class ColorModel : public QAbstractListModel {
+class InternalColorModel : public QAbstractListModel {
     Q_OBJECT
 
 public:
@@ -604,19 +604,17 @@ public:
     const Color *color(const QModelIndex &index) const;
 
 protected:
-    ColorModel(QObject *parent = 0);
-
-    QList<const Color *> m_colors;
+    InternalColorModel();
 
     friend class Core;
 };
 
 
-class ColorProxyModel : public QSortFilterProxyModel {
+class ColorModel : public QSortFilterProxyModel {
     Q_OBJECT
 
 public:
-    ColorProxyModel(ColorModel *model);
+    ColorModel(QObject *parent);
 
     using QSortFilterProxyModel::index;
     QModelIndex index(const Color *color) const;
@@ -634,7 +632,7 @@ protected:
 };
 
 
-class CategoryModel : public QAbstractListModel {
+class InternalCategoryModel : public QAbstractListModel {
     Q_OBJECT
 
 public:
@@ -651,19 +649,19 @@ public:
     const Category *category(const QModelIndex &index) const;
 
 protected:
-    CategoryModel(QObject *parent = 0);
-
-    QList<const Category *> m_categories;
+    InternalCategoryModel();
 
     friend class Core;
 };
 
 
-class CategoryProxyModel : public QSortFilterProxyModel {
+class CategoryModel : public QSortFilterProxyModel {
     Q_OBJECT
 
 public:
-    CategoryProxyModel(CategoryModel *model);
+    static const Category *AllCategories;
+
+    CategoryModel(QObject *parent);
 
     void setFilterItemType(const ItemType *it);
     void setFilterAllCategories(bool);
@@ -681,7 +679,7 @@ protected:
 };
 
 
-class ItemTypeModel : public QAbstractListModel {
+class InternalItemTypeModel : public QAbstractListModel {
     Q_OBJECT
 
 public:
@@ -696,19 +694,17 @@ public:
     const ItemType *itemType(const QModelIndex &index) const;
 
 protected:
-    ItemTypeModel(QObject *parent = 0);
-
-    QList<const ItemType *> m_itemtypes;
+    InternalItemTypeModel();
 
     friend class Core;
 };
 
 
-class ItemTypeProxyModel : public QSortFilterProxyModel {
+class ItemTypeModel : public QSortFilterProxyModel {
     Q_OBJECT
 
 public:
-    ItemTypeProxyModel(ItemTypeModel *model);
+    ItemTypeModel(QObject *parent);
 
     void setFilterWithoutInventory(bool on);
 
@@ -724,7 +720,7 @@ protected:
 };
 
 
-class ItemModel : public QAbstractTableModel {
+class InternalItemModel : public QAbstractTableModel {
     Q_OBJECT
 
 public:
@@ -738,28 +734,20 @@ public:
     QModelIndex index(const Item *item) const;
     const Item *item(const QModelIndex &index) const;
 
-    // shortcut for ItemProxyModel::filterAcceptsRow()
-    inline const Item *itemAtRow(int row) const { return m_items.at(row); }
-
-    void setItemType(const ItemType *itemtype);
-
 protected slots:
     void pictureUpdated(BrickLink::Picture *);
 
 protected:
-    ItemModel(QObject *parent = 0);
-
-    QVector<const Item *> m_items;
-    const ItemType *m_itemtype;
+    InternalItemModel();
 
     friend class Core;
 };
 
-class ItemProxyModel : public QSortFilterProxyModel {
+class ItemModel : public QSortFilterProxyModel {
     Q_OBJECT
 
 public:
-    ItemProxyModel(ItemModel *model);
+    ItemModel(QObject *parent);
 
     void setFilterItemType(const ItemType *it);
     void setFilterCategory(const Category *it);
@@ -785,13 +773,12 @@ protected:
     QTimer          m_filter_timer;
 };
 
+class AppearsInsModel;
 
-class AppearsInModel : public QAbstractTableModel {
+class InternalAppearsInModel : public QAbstractTableModel {
     Q_OBJECT
 public:
-    AppearsInModel(const BrickLink::InvItemList &list);
-    AppearsInModel(const Item *item, const Color *color);
-    ~AppearsInModel();
+    ~InternalAppearsInModel();
 
     QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
@@ -804,17 +791,23 @@ public:
     QModelIndex index(const AppearsInItem *const_ai) const;
 
 protected:
+    InternalAppearsInModel(const BrickLink::InvItemList &list, QObject *parent);
+    InternalAppearsInModel(const Item *item, const Color *color, QObject *parent);
+
     const Item *        m_item;
     const Color *       m_color;
     AppearsIn     m_appearsin;
     QList<AppearsInItem *> m_items;
+
+    friend class AppearsInModel;
 };
 
-class AppearsInProxyModel : public QSortFilterProxyModel {
+class AppearsInModel : public QSortFilterProxyModel {
     Q_OBJECT
 
 public:
-    AppearsInProxyModel(AppearsInModel *model);
+    AppearsInModel(const BrickLink::InvItemList &list, QObject *parent);
+    AppearsInModel(const Item *item, const Color *color, QObject *parent);
 
     using QSortFilterProxyModel::index;
     const AppearsInItem *appearsIn(const QModelIndex &idx) const;
@@ -848,15 +841,10 @@ public:
     QString dataPath(const Item *) const;
     QString dataPath(const Item *, const Color *) const;
 
-    const QHash<int, const Color *>    &colors() const;
-    const QHash<int, const Category *> &categories() const;
-    const QHash<int, const ItemType *> &itemTypes() const;
-    const QVector<const Item *>        &items() const;
-
-    ColorModel *colorModel();
-    CategoryModel *categoryModel();
-    ItemTypeModel *itemTypeModel();
-    ItemModel *itemModel();
+    const QMap<int, const Color *>    &colors() const;
+    const QMap<int, const Category *> &categories() const;
+    const QMap<int, const ItemType *> &itemTypes() const;
+    const QVector<const Item *>       &items() const;
 
     const QPixmap *noImage(const QSize &s) const;
 
@@ -923,15 +911,25 @@ private:
     friend Core *core();
     friend Core *create(const QString &, QString *);
 
+    InternalColorModel *colorModel();
+    InternalCategoryModel *categoryModel();
+    InternalItemTypeModel *itemTypeModel();
+    InternalItemModel *itemModel();
+
+    friend ColorModel::ColorModel(QObject *);
+    friend CategoryModel::CategoryModel(QObject *);
+    friend ItemTypeModel::ItemTypeModel(QObject *);
+    friend ItemModel::ItemModel(QObject *);
+
 private:
     bool updateNeeded(bool valid, const QDateTime &last, int iv);
     bool parseLDrawModelInternal(QFile &file, const QString &model_name, InvItemList &items, uint *invalid_items, QHash<QString, InvItem *> &mergehash, QStringList &recursion_detection);
 
     void setDatabase_ConsistsOf(const QHash<const Item *, InvItemList> &hash);
     void setDatabase_AppearsIn(const QHash<const Item *, AppearsIn> &hash);
-    void setDatabase_Basics(const QHash<int, const Color *> &colors,
-                            const QHash<int, const Category *> &categories,
-                            const QHash<int, const ItemType *> &item_types,
+    void setDatabase_Basics(const QMap<int, const Color *> &colors,
+                            const QMap<int, const Category *> &categories,
+                            const QMap<int, const ItemType *> &item_types,
                             const QVector<const Item *> &items);
     void setDatabase_AllTimePG(const QList<AllTimePriceGuide> &list);
 
@@ -952,15 +950,15 @@ private:
     mutable QHash<QString, QPixmap *>  m_noimages;
     mutable QHash<QString, QPixmap *>  m_colimages;
 
-    QHash<int, const Color *>       m_colors;      // id ->Color *
-    QHash<int, const Category *>    m_categories;  // id ->Category *
-    QHash<int, const ItemType *>    m_item_types;  // id ->ItemType *
-    QVector<const Item *>           m_items;       // sorted array of Item *
+    QMap<int, const Color *>       m_colors;      // id ->Color *
+    QMap<int, const Category *>    m_categories;  // id ->Category *
+    QMap<int, const ItemType *>    m_item_types;  // id ->ItemType *
+    QVector<const Item *>          m_items;       // sorted array of Item *
 
-    ColorModel *   m_color_model;
-    CategoryModel *m_category_model;
-    ItemTypeModel *m_itemtype_model;
-    ItemModel *    m_item_model;
+    InternalColorModel *   m_color_model;
+    InternalCategoryModel *m_category_model;
+    InternalItemTypeModel *m_itemtype_model;
+    InternalItemModel *    m_item_model;
 
     QPointer<Transfer>  m_transfer;
 

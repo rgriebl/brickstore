@@ -66,9 +66,9 @@ QMessageBox::StandardButton MessageBox::msgbox(QWidget *parent, const QString &m
             out = msg.toLocal8Bit();
 
         if (icon == Critical)
-            qCritical(out);
+            qCritical("%s", out.constData());
         else
-            qWarning(out);
+            qWarning("%s", out.constData());
 
         return defaultButton;
     }

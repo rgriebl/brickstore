@@ -1358,7 +1358,7 @@ QVariant Document::dataForEditRole(Item *it, Field f) const
 
 QString Document::dataForDisplayRole(Item *it, Field f) const
 {
-    QString dash = QLatin1Char('-');
+    QString dash = QLatin1String("-");
 
     switch (f) {
     case LotId       : return (it->lotId() == 0 ? dash : QString::number(it->lotId()));

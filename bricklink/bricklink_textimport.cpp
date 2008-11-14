@@ -337,7 +337,7 @@ bool BrickLink::TextImport::import(const QString &path)
     return ok;
 }
 
-template <typename T> bool BrickLink::TextImport::readDB_processLine(QHash<int, const T *> &h, uint tokencount, const char **tokens)
+template <typename T> bool BrickLink::TextImport::readDB_processLine(QMap<int, const T *> &h, uint tokencount, const char **tokens)
 {
     T *t = parse<T> (tokencount, (const char **) tokens);
 
@@ -442,7 +442,7 @@ template <typename C> bool BrickLink::TextImport::readDB(const QString &name, C 
         char line [1000];
         int lineno = 1;
 
-        (void) fgets(line, 1000, f);    // skip header
+        fgets(line, 1000, f);    // skip header
 
         while (!feof(f)) {
             if (!fgets(line, 1000, f))
