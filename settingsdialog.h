@@ -18,6 +18,10 @@
 
 #include "ui_settingsdialog.h"
 
+class QHttp;
+class QBuffer;
+
+
 class SettingsDialog : public QDialog, private Ui::SettingsDialog {
     Q_OBJECT
 
@@ -31,12 +35,16 @@ protected slots:
     void selectDocDir();
     void rateTypeToggled(bool);
     void resetUpdateIntervals();
+    void getRateFromECB();
+    void gotRateFromECB(bool ok);
 
 protected:
     void load();
     void save();
 
 private:
+    QHttp *m_http;
+    QBuffer *m_buffer;
 };
 
 #endif

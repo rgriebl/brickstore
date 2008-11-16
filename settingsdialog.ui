@@ -1,78 +1,74 @@
-﻿<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>SettingsDialog</class>
- <widget class="QDialog" name="SettingsDialog" >
-  <property name="geometry" >
+ <widget class="QDialog" name="SettingsDialog">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>622</width>
-    <height>436</height>
+    <width>674</width>
+    <height>427</height>
    </rect>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>Settings</string>
   </property>
-  <property name="sizeGripEnabled" >
+  <property name="sizeGripEnabled">
    <bool>true</bool>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_3" >
+  <layout class="QVBoxLayout" name="verticalLayout_3">
    <item>
-    <widget class="QTabWidget" name="w_tabs" >
-     <property name="currentIndex" >
-      <number>1</number>
+    <widget class="QTabWidget" name="w_tabs">
+     <property name="currentIndex">
+      <number>0</number>
      </property>
-     <widget class="QWidget" name="general" >
-      <property name="geometry" >
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>598</width>
-        <height>360</height>
-       </rect>
-      </property>
-      <attribute name="title" >
+     <widget class="QWidget" name="general">
+      <attribute name="title">
        <string>&amp;General</string>
       </attribute>
-      <layout class="QFormLayout" name="formLayout_7" >
-       <item row="0" column="0" >
-        <widget class="QLabel" name="label_8" >
-         <property name="text" >
+      <layout class="QFormLayout" name="formLayout_7">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_8">
+         <property name="text">
           <string>Language</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="1" >
-        <widget class="QComboBox" name="w_language" />
+       <item row="0" column="1">
+        <widget class="QComboBox" name="w_language"/>
        </item>
-       <item row="1" column="0" >
-        <widget class="QLabel" name="label_9" >
-         <property name="text" >
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_9">
+         <property name="text">
           <string>Weights</string>
          </property>
         </widget>
        </item>
-       <item row="1" column="1" >
-        <widget class="QWidget" native="1" name="widget" >
-         <property name="minimumSize" >
+       <item row="1" column="1">
+        <widget class="QWidget" name="widget" native="true">
+         <property name="minimumSize">
           <size>
            <width>24</width>
            <height>0</height>
           </size>
          </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_4" >
-          <property name="margin" >
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <property name="margin">
            <number>0</number>
           </property>
           <item>
-           <widget class="QRadioButton" name="w_metric" >
-            <property name="text" >
+           <widget class="QRadioButton" name="w_metric">
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+            <property name="text">
              <string>Metric (g)</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QRadioButton" name="w_imperial" >
-            <property name="text" >
+           <widget class="QRadioButton" name="w_imperial">
+            <property name="text">
              <string>Imperial (oz)</string>
             </property>
            </widget>
@@ -80,91 +76,279 @@
          </layout>
         </widget>
        </item>
-       <item row="2" column="0" >
-        <widget class="QLabel" name="label_27" >
-         <property name="text" >
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_27">
+         <property name="text">
           <string>Currency</string>
          </property>
         </widget>
        </item>
-       <item row="2" column="1" >
-        <widget class="QWidget" native="1" name="widget_2" >
-         <layout class="QVBoxLayout" name="verticalLayout_5" >
-          <property name="margin" >
+       <item row="2" column="1">
+        <widget class="QWidget" name="widget_2" native="true">
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <property name="margin">
            <number>0</number>
           </property>
           <item>
-           <widget class="QRadioButton" name="w_rate_fixed" >
-            <property name="text" >
+           <widget class="QRadioButton" name="w_rate_none">
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+            <property name="text">
+             <string>No exchange rate</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="w_rate_fixed">
+            <property name="text">
              <string>Fixed exchange rate</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QRadioButton" name="w_rate_daily" >
-            <property name="text" >
-             <string>Daily exchange rate from ecb.eu</string>
+           <widget class="QWidget" name="widget_4" native="true">
+            <property name="enabled">
+             <bool>false</bool>
             </property>
+            <layout class="QHBoxLayout" name="horizontalLayout">
+             <property name="margin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="label_29">
+               <property name="text">
+                <string>$1 =</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="w_currency">
+               <property name="editable">
+                <bool>true</bool>
+               </property>
+               <item>
+                <property name="text">
+                 <string>EUR</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>JPY</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>BGN</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>CZK</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>DKK</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>EEK</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>GBP</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>HUF</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>LTL</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>LVL</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>PLN</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>RON</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>SEK</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>SKK</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>CHF</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>ISK</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>NOK</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>HRK</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>RUB</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>TRY</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>AUD</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>BRL</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>CAD</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>CNY</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>HKD</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>IDR</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>KRW</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>MXN</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>MYR</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>NZD</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>PHP</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>SGD</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>THB</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>ZAR</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="w_rate"/>
+             </item>
+             <item>
+              <widget class="QPushButton" name="w_rate_ecb">
+               <property name="text">
+                <string>Get from ECB</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </widget>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout" >
-            <item>
-             <widget class="QLabel" name="label_29" >
-              <property name="text" >
-               <string>$1 =</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QComboBox" name="w_currency" >
-              <property name="editable" >
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="w_rate" />
-            </item>
-           </layout>
           </item>
          </layout>
         </widget>
        </item>
-       <item row="3" column="0" >
-        <widget class="QLabel" name="label_28" >
-         <property name="text" >
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_28">
+         <property name="text">
           <string>Interface</string>
          </property>
         </widget>
        </item>
-       <item row="3" column="1" >
-        <widget class="QCheckBox" name="w_openbrowser" >
-         <property name="text" >
+       <item row="3" column="1">
+        <widget class="QCheckBox" name="w_openbrowser">
+         <property name="text">
           <string>Open a Web-Browser window when exporting to the clipboard</string>
          </property>
         </widget>
        </item>
-       <item row="4" column="1" >
-        <widget class="QCheckBox" name="w_closeempty" >
-         <property name="text" >
+       <item row="4" column="1">
+        <widget class="QCheckBox" name="w_closeempty">
+         <property name="text">
           <string>Close empty documents without confirmation</string>
          </property>
         </widget>
        </item>
-       <item row="5" column="0" >
-        <widget class="QLabel" name="label_30" >
-         <property name="text" >
+       <item row="5" column="0">
+        <widget class="QLabel" name="label_30">
+         <property name="text">
           <string>Document Directory</string>
          </property>
         </widget>
        </item>
-       <item row="5" column="1" >
-        <layout class="QHBoxLayout" name="horizontalLayout_3" >
+       <item row="5" column="1">
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
          <item>
-          <widget class="QLineEdit" name="w_docdir" >
-           <property name="sizePolicy" >
-            <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+          <widget class="QLineEdit" name="w_docdir">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
@@ -172,24 +356,24 @@
           </widget>
          </item>
          <item>
-          <widget class="QToolButton" name="w_docdir_select" >
-           <property name="icon" >
-            <iconset resource="brickstore.qrc" >
+          <widget class="QToolButton" name="w_docdir_select">
+           <property name="icon">
+            <iconset resource="brickstore.qrc">
              <normaloff>:/images/16x16/file_open.png</normaloff>:/images/16x16/file_open.png</iconset>
            </property>
-           <property name="autoRaise" >
+           <property name="autoRaise">
             <bool>true</bool>
            </property>
           </widget>
          </item>
         </layout>
        </item>
-       <item row="6" column="1" >
-        <spacer name="verticalSpacer_4" >
-         <property name="orientation" >
+       <item row="6" column="1">
+        <spacer name="verticalSpacer_4">
+         <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
-         <property name="sizeHint" stdset="0" >
+         <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
            <height>40</height>
@@ -199,133 +383,125 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="updates" >
-      <property name="geometry" >
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>598</width>
-        <height>360</height>
-       </rect>
-      </property>
-      <attribute name="title" >
+     <widget class="QWidget" name="updates">
+      <attribute name="title">
        <string>Updates</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_4" >
+      <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
-        <widget class="QGroupBox" name="groupBox_5" >
-         <property name="title" >
+        <widget class="QGroupBox" name="groupBox_5">
+         <property name="title">
           <string>Automatically update cached data</string>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_7" >
+         <layout class="QVBoxLayout" name="verticalLayout_7">
           <item>
-           <layout class="QFormLayout" name="formLayout_6" >
-            <item row="0" column="0" >
-             <widget class="QLabel" name="label_13" >
-              <property name="text" >
+           <layout class="QFormLayout" name="formLayout_6">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_13">
+              <property name="text">
                <string>Part database, if older than</string>
               </property>
              </widget>
             </item>
-            <item row="0" column="1" >
-             <widget class="QSpinBox" name="w_upd_database" >
-              <property name="suffix" >
+            <item row="0" column="1">
+             <widget class="QSpinBox" name="w_upd_database">
+              <property name="value">
+               <number>7</number>
+              </property>
+              <property name="suffix">
                <string> days</string>
               </property>
-              <property name="minimum" >
+              <property name="minimum">
                <number>1</number>
               </property>
-              <property name="maximum" >
+              <property name="maximum">
                <number>365</number>
-              </property>
-              <property name="value" >
-               <number>7</number>
               </property>
              </widget>
             </item>
-            <item row="1" column="0" >
-             <widget class="QLabel" name="label_10" >
-              <property name="text" >
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_10">
+              <property name="text">
                <string>BrickLink Pictures, if older than</string>
               </property>
              </widget>
             </item>
-            <item row="1" column="1" >
-             <widget class="QSpinBox" name="w_upd_picture" >
-              <property name="suffix" >
+            <item row="1" column="1">
+             <widget class="QSpinBox" name="w_upd_picture">
+              <property name="value">
+               <number>99</number>
+              </property>
+              <property name="suffix">
                <string> days</string>
               </property>
-              <property name="minimum" >
+              <property name="minimum">
                <number>1</number>
               </property>
-              <property name="maximum" >
+              <property name="maximum">
                <number>365</number>
-              </property>
-              <property name="value" >
-               <number>180</number>
               </property>
              </widget>
             </item>
-            <item row="2" column="0" >
-             <widget class="QLabel" name="label_11" >
-              <property name="text" >
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_11">
+              <property name="text">
                <string>BrickLink Price Guides, if older than</string>
               </property>
              </widget>
             </item>
-            <item row="2" column="1" >
-             <widget class="QSpinBox" name="w_upd_priceguide" >
-              <property name="suffix" >
+            <item row="2" column="1">
+             <widget class="QSpinBox" name="w_upd_priceguide">
+              <property name="value">
+               <number>14</number>
+              </property>
+              <property name="suffix">
                <string> days</string>
               </property>
-              <property name="minimum" >
+              <property name="minimum">
                <number>1</number>
               </property>
-              <property name="maximum" >
+              <property name="maximum">
                <number>365</number>
-              </property>
-              <property name="value" >
-               <number>14</number>
               </property>
              </widget>
             </item>
-            <item row="3" column="0" >
-             <widget class="QLabel" name="label_12" >
-              <property name="text" >
+            <item row="3" column="0">
+             <widget class="QLabel" name="label_12">
+              <property name="text">
                <string>LDraw parts, if older than</string>
               </property>
              </widget>
             </item>
-            <item row="3" column="1" >
-             <widget class="QSpinBox" name="w_upd_ldraw" >
-              <property name="suffix" >
+            <item row="3" column="1">
+             <widget class="QSpinBox" name="w_upd_ldraw">
+              <property name="value">
+               <number>31</number>
+              </property>
+              <property name="suffix">
                <string> days</string>
               </property>
-              <property name="minimum" >
+              <property name="minimum">
                <number>1</number>
               </property>
-              <property name="maximum" >
+              <property name="maximum">
                <number>365</number>
               </property>
-              <property name="singleStep" >
+              <property name="singleStep">
                <number>1</number>
-              </property>
-              <property name="value" >
-               <number>31</number>
               </property>
              </widget>
             </item>
            </layout>
           </item>
           <item>
-           <spacer name="verticalSpacer_5" >
-            <property name="orientation" >
+           <spacer name="verticalSpacer_5">
+            <property name="orientation">
              <enum>Qt::Vertical</enum>
             </property>
-            <property name="sizeType" >
+            <property name="sizeType">
              <enum>QSizePolicy::Fixed</enum>
             </property>
-            <property name="sizeHint" stdset="0" >
+            <property name="sizeHint" stdset="0">
              <size>
               <width>20</width>
               <height>6</height>
@@ -334,13 +510,13 @@
            </spacer>
           </item>
           <item>
-           <layout class="QFormLayout" name="formLayout_8" >
-            <item row="0" column="0" >
-             <spacer name="horizontalSpacer" >
-              <property name="orientation" >
+           <layout class="QFormLayout" name="formLayout_8">
+            <item row="0" column="0">
+             <spacer name="horizontalSpacer">
+              <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <property name="sizeHint" stdset="0" >
+              <property name="sizeHint" stdset="0">
                <size>
                 <width>40</width>
                 <height>20</height>
@@ -348,18 +524,18 @@
               </property>
              </spacer>
             </item>
-            <item row="0" column="1" >
-             <widget class="QPushButton" name="w_upd_reset" >
-              <property name="sizePolicy" >
-               <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
+            <item row="0" column="1">
+             <widget class="QPushButton" name="w_upd_reset">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <property name="text" >
+              <property name="text">
                <string>Reset to defaults</string>
               </property>
-              <property name="flat" >
+              <property name="flat">
                <bool>false</bool>
               </property>
              </widget>
@@ -370,11 +546,11 @@
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacer_3" >
-         <property name="orientation" >
+        <spacer name="verticalSpacer_3">
+         <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
-         <property name="sizeHint" stdset="0" >
+         <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
            <height>117</height>
@@ -383,83 +559,73 @@
         </spacer>
        </item>
       </layout>
-      <zorder>groupBox_5</zorder>
-      <zorder>w_buttons</zorder>
      </widget>
-     <widget class="QWidget" name="defaults" >
-      <property name="geometry" >
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>598</width>
-        <height>360</height>
-       </rect>
-      </property>
-      <attribute name="title" >
+     <widget class="QWidget" name="defaults">
+      <attribute name="title">
        <string>Defaults</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout" >
+      <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <widget class="QGroupBox" name="groupBox_2" >
-         <property name="title" >
+        <widget class="QGroupBox" name="groupBox_2">
+         <property name="title">
           <string>Default values for 'Import BrickLink Set Inventory'</string>
          </property>
-         <layout class="QFormLayout" name="formLayout_5" >
-          <item row="0" column="0" >
-           <widget class="QLabel" name="label_7" >
-            <property name="text" >
+         <layout class="QFormLayout" name="formLayout_5">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_7">
+            <property name="text">
              <string>Item type</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="1" >
-           <widget class="QComboBox" name="w_def_import_type" />
+          <item row="0" column="1">
+           <widget class="QComboBox" name="w_def_import_type"/>
           </item>
          </layout>
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox_3" >
-         <property name="title" >
+        <widget class="QGroupBox" name="groupBox_3">
+         <property name="title">
           <string>Default values for 'Add Items'</string>
          </property>
-         <layout class="QFormLayout" name="formLayout_3" >
-          <property name="fieldGrowthPolicy" >
+         <layout class="QFormLayout" name="formLayout_3">
+          <property name="fieldGrowthPolicy">
            <enum>QFormLayout::FieldsStayAtSizeHint</enum>
           </property>
-          <item row="0" column="0" >
-           <widget class="QLabel" name="label_5" >
-            <property name="text" >
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_5">
+            <property name="text">
              <string>Item type</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="1" >
-           <widget class="QComboBox" name="w_def_add_type" />
+          <item row="0" column="1">
+           <widget class="QComboBox" name="w_def_add_type"/>
           </item>
-          <item row="1" column="0" >
-           <widget class="QLabel" name="label_6" >
-            <property name="text" >
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_6">
+            <property name="text">
              <string>Condition</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="1" >
-           <widget class="QWidget" native="1" name="widget_3" >
-            <layout class="QVBoxLayout" name="verticalLayout_6" >
-             <property name="margin" >
+          <item row="1" column="1">
+           <widget class="QWidget" name="widget_3" native="true">
+            <layout class="QVBoxLayout" name="verticalLayout_6">
+             <property name="margin">
               <number>0</number>
              </property>
              <item>
-              <widget class="QRadioButton" name="w_def_add_cond_new" >
-               <property name="text" >
+              <widget class="QRadioButton" name="w_def_add_cond_new">
+               <property name="text">
                 <string>New</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QRadioButton" name="w_def_add_cond_used" >
-               <property name="text" >
+              <widget class="QRadioButton" name="w_def_add_cond_used">
+               <property name="text">
                 <string>Used</string>
                </property>
               </widget>
@@ -471,26 +637,26 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox_4" >
-         <property name="title" >
+        <widget class="QGroupBox" name="groupBox_4">
+         <property name="title">
           <string>Default values for 'Set to Price Guide'</string>
          </property>
-         <layout class="QFormLayout" name="formLayout_4" >
-          <item row="0" column="0" >
-           <widget class="QComboBox" name="w_def_setpg_time" />
+         <layout class="QFormLayout" name="formLayout_4">
+          <item row="0" column="0">
+           <widget class="QComboBox" name="w_def_setpg_time"/>
           </item>
-          <item row="0" column="1" >
-           <widget class="QComboBox" name="w_def_setpg_price" />
+          <item row="0" column="1">
+           <widget class="QComboBox" name="w_def_setpg_price"/>
           </item>
          </layout>
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacer_2" >
-         <property name="orientation" >
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
-         <property name="sizeHint" stdset="0" >
+         <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
            <height>39</height>
@@ -500,45 +666,37 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="network" >
-      <property name="geometry" >
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>598</width>
-        <height>360</height>
-       </rect>
-      </property>
-      <attribute name="title" >
+     <widget class="QWidget" name="network">
+      <attribute name="title">
        <string>Network</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_2" >
+      <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <widget class="QGroupBox" name="groupBox" >
-         <property name="title" >
+        <widget class="QGroupBox" name="groupBox">
+         <property name="title">
           <string>BrickLink Login</string>
          </property>
-         <layout class="QFormLayout" name="formLayout" >
-          <item row="0" column="0" >
-           <widget class="QLabel" name="label_3" >
-            <property name="text" >
+         <layout class="QFormLayout" name="formLayout">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_3">
+            <property name="text">
              <string>Username:</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="1" >
-           <widget class="QLineEdit" name="w_bl_username" />
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="w_bl_username"/>
           </item>
-          <item row="1" column="0" >
-           <widget class="QLabel" name="label_4" >
-            <property name="text" >
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_4">
+            <property name="text">
              <string>Password:</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="1" >
-           <widget class="QLineEdit" name="w_bl_password" >
-            <property name="echoMode" >
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="w_bl_password">
+            <property name="echoMode">
              <enum>QLineEdit::PasswordEchoOnEdit</enum>
             </property>
            </widget>
@@ -547,90 +705,90 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="w_proxy_enable" >
-         <property name="title" >
+        <widget class="QGroupBox" name="w_proxy_enable">
+         <property name="title">
           <string>Use a Proxy for HTTP connections</string>
          </property>
-         <property name="flat" >
+         <property name="flat">
           <bool>false</bool>
          </property>
-         <property name="checkable" >
+         <property name="checkable">
           <bool>true</bool>
          </property>
-         <layout class="QFormLayout" name="formLayout_2" >
-          <item row="0" column="0" >
-           <widget class="QLabel" name="label" >
-            <property name="text" >
+         <layout class="QFormLayout" name="formLayout_2">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label">
+            <property name="text">
              <string>Hostname:</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="1" >
-           <widget class="QLineEdit" name="w_proxy_host" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="w_proxy_host">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
               <horstretch>10</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
            </widget>
           </item>
-          <item row="1" column="0" >
-           <widget class="QLabel" name="label_2" >
-            <property name="text" >
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_2">
+            <property name="text">
              <string>Port:</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="1" >
-           <widget class="QLineEdit" name="w_proxy_user" />
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="w_proxy_user"/>
           </item>
-          <item row="2" column="0" >
-           <widget class="QLabel" name="label_14" >
-            <property name="text" >
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_14">
+            <property name="text">
              <string>Username:</string>
             </property>
            </widget>
           </item>
-          <item row="3" column="1" >
-           <widget class="QLineEdit" name="w_proxy_pass" >
-            <property name="echoMode" >
+          <item row="3" column="1">
+           <widget class="QLineEdit" name="w_proxy_pass">
+            <property name="echoMode">
              <enum>QLineEdit::PasswordEchoOnEdit</enum>
             </property>
            </widget>
           </item>
-          <item row="3" column="0" >
-           <widget class="QLabel" name="label_15" >
-            <property name="text" >
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_15">
+            <property name="text">
              <string>Password:</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="1" >
-           <widget class="QComboBox" name="w_proxy_port" >
-            <property name="editable" >
+          <item row="1" column="1">
+           <widget class="QComboBox" name="w_proxy_port">
+            <property name="editable">
              <bool>true</bool>
             </property>
-            <property name="insertPolicy" >
+            <property name="insertPolicy">
              <enum>QComboBox::NoInsert</enum>
             </property>
             <item>
-             <property name="text" >
+             <property name="text">
               <string>3128</string>
              </property>
             </item>
             <item>
-             <property name="text" >
+             <property name="text">
               <string>8000</string>
              </property>
             </item>
             <item>
-             <property name="text" >
+             <property name="text">
               <string>8008</string>
              </property>
             </item>
             <item>
-             <property name="text" >
+             <property name="text">
               <string>8080</string>
              </property>
             </item>
@@ -640,11 +798,11 @@
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacer" >
-         <property name="orientation" >
+        <spacer name="verticalSpacer">
+         <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
-         <property name="sizeHint" stdset="0" >
+         <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
            <height>59</height>
@@ -657,11 +815,11 @@
     </widget>
    </item>
    <item>
-    <widget class="QDialogButtonBox" name="w_buttons" >
-     <property name="orientation" >
+    <widget class="QDialogButtonBox" name="w_buttons">
+     <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
-     <property name="standardButtons" >
+     <property name="standardButtons">
       <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
      </property>
     </widget>
@@ -669,7 +827,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="brickstore.qrc" />
+  <include location="brickstore.qrc"/>
  </resources>
  <connections>
   <connection>
@@ -678,13 +836,13 @@
    <receiver>SettingsDialog</receiver>
    <slot>accept()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>507</x>
      <y>415</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>399</x>
-     <y>433</y>
+     <y>426</y>
     </hint>
    </hints>
   </connection>
@@ -694,13 +852,29 @@
    <receiver>SettingsDialog</receiver>
    <slot>reject()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>567</x>
      <y>414</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>567</x>
-     <y>430</y>
+     <y>426</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>w_rate_none</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>widget_4</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>172</x>
+     <y>96</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>224</x>
+     <y>148</y>
     </hint>
    </hints>
   </connection>

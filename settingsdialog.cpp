@@ -14,10 +14,13 @@
 #include <QTabWidget>
 #include <QFileDialog>
 #include <QNetworkProxy>
+#include <QBuffer>
+#include <QHttp>
 
 #include "settingsdialog.h"
 #include "config.h"
 #include "bricklink.h"
+#include "messagebox.h"
 
 static int sec2day ( int s )
 {
@@ -31,7 +34,7 @@ static int day2sec ( int d )
 
 
 SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent, Qt::WindowFlags f)
-    : QDialog(parent, f)
+    : QDialog(parent, f), m_http(0), m_buffer(0)
 {
     setupUi(this);
     
@@ -40,6 +43,7 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent, Qt
     connect(w_rate_fixed, SIGNAL(toggled(bool)), this, SLOT(rateTypeToggled(bool)));
     connect(w_docdir_select, SIGNAL(clicked()), this, SLOT(selectDocDir()));
     connect(w_upd_reset, SIGNAL(clicked()), this, SLOT(resetUpdateIntervals()));
+    connect(w_rate_ecb, SIGNAL(clicked()), this, SLOT(getRateFromECB()));
 
     w_proxy_port->setValidator(new QIntValidator(1, 65535, w_proxy_port));
 
@@ -49,6 +53,62 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent, Qt
         if (QWidget *w = findChild<QWidget *>(start_on_page))
             w_tabs->setCurrentWidget(w);
     }
+}
+
+void SettingsDialog::getRateFromECB()
+{
+    w_rate_ecb->setEnabled(false);
+    if (!m_http) {
+        m_http = new QHttp(this);
+        connect(m_http, SIGNAL(done(bool)), this, SLOT(gotRateFromECB(bool)));
+        m_buffer = new QBuffer(m_http);
+    }
+    m_buffer->open(QIODevice::ReadWrite);
+    m_http->setHost(QLatin1String("www.ecb.europa.eu"));
+    m_http->get(QLatin1String("/stats/eurofxref/eurofxref-daily.xml"), m_buffer);
+}
+
+void SettingsDialog::gotRateFromECB(bool error)
+{
+    m_buffer->close();
+    if (error) {
+        MessageBox::warning(this, tr("There was an error downloading the exchange rates from the ECB server:<br>%2").arg(m_http->errorString()));
+    } else {
+        QDomDocument doc;
+        bool parse_ok = false;
+
+        if (doc.setContent(m_buffer->data())) {
+            QDomNodeList cubelist = doc.elementsByTagName(QLatin1String("Cube"));
+            double usd_eur = -1, xxx_eur = -1;
+            QString find_currency = w_currency->lineEdit()->text().trimmed();
+
+            for (int i = 0; i < cubelist.count(); ++i) {
+                QDomElement el = cubelist.at(i).toElement();
+                QString currency = el.attribute(QLatin1String("currency"));
+                double rate = el.attribute(QLatin1String("rate")).toDouble();
+
+                if (!currency.isEmpty() && rate) {
+                    if (currency == QLatin1String("USD"))
+                        usd_eur = rate;
+                    else if (currency.compare(find_currency, Qt::CaseInsensitive) == 0)
+                        xxx_eur = rate;
+                }
+            }
+
+            parse_ok = (usd_eur > 0);
+
+            if (find_currency.compare(QLatin1String("EUR"), Qt::CaseInsensitive) == 0)
+                xxx_eur = 1;
+            if (parse_ok && xxx_eur < 0)
+                MessageBox::information(this, tr("The ECB exchange rate service doesn't list the requested currency"));
+            if (parse_ok && xxx_eur > 0)
+                w_rate->setText(QString::number(xxx_eur / usd_eur));
+        }
+        if (!parse_ok)
+            MessageBox::warning(this, tr("There was an error parsing the exchange rates from the ECB server"));
+    }
+    m_buffer->close();
+    w_rate_ecb->setEnabled(true);
 }
 
 void SettingsDialog::rateTypeToggled(bool fixed)
@@ -114,7 +174,7 @@ void SettingsDialog::load()
 	w_imperial->setChecked(Config::inst()->isMeasurementImperial());
 
 	w_rate_fixed->setChecked(true);
-	w_rate_daily->setChecked(false);
+	//w_rate_daily->setChecked(false);
     w_currency->setEditText("EUR");
 	w_rate->setText("0.67");
 	/*
