@@ -731,10 +731,9 @@ bool BrickLink::ItemModel::filterAcceptsRow(int source_row, const QModelIndex &s
     else if (m_inv_filter && !item->hasInventory())
         return false;
     else {
-        QRegExp rx = filterRegExp();
-        if (!rx.isEmpty())
-           return ((rx.indexIn(QLatin1String(item->id())) >= 0) ||
-                   (rx.indexIn(QLatin1String(item->name())) >= 0));
+        if (!m_text_filter.isEmpty())
+           return ((m_text_filter.indexIn(QLatin1String(item->id())) >= 0) ||
+                   (m_text_filter.indexIn(QLatin1String(item->name())) >= 0));
     }
     return true;
 }
