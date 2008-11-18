@@ -1110,7 +1110,7 @@ BrickLink::InvItemList *BrickLink::Core::parseItemListXML(QDomElement root, Item
                 else if (tag == (hint == XMLHint_BrikTrak ? "TYPE" : "ITEMTYPE"))
                     itemtypeid = val;
                 else if (tag == "PRICE")
-                    ii->setPrice(money_t::fromCString(val));
+                    ii->setPrice(Currency::fromUSD(val));
                 else if (tag == "BULK")
                     ii->setBulkQuantity(val.toInt());
                 else if (tag == "QTY")
@@ -1135,11 +1135,11 @@ BrickLink::InvItemList *BrickLink::Core::parseItemListXML(QDomElement root, Item
                 else if (tag == "TQ3")
                     ii->setTierQuantity(2, val.toInt());
                 else if (tag == "TP1")
-                    ii->setTierPrice(0, money_t::fromCString(val));
+                    ii->setTierPrice(0, Currency::fromUSD(val));
                 else if (tag == "TP2")
-                    ii->setTierPrice(1, money_t::fromCString(val));
+                    ii->setTierPrice(1, Currency::fromUSD(val));
                 else if (tag == "TP3")
-                    ii->setTierPrice(2, money_t::fromCString(val));
+                    ii->setTierPrice(2, Currency::fromUSD(val));
                 else if (tag == "LOTID")
                     ii->setLotId(val.toUInt());
             }
@@ -1215,7 +1215,7 @@ BrickLink::InvItemList *BrickLink::Core::parseItemListXML(QDomElement root, Item
                 else if (tag == "ItemTypeName")
                     itemtypename = val;
                 else if (tag == "Price")
-                    ii->setPrice(money_t::fromCString(val));
+                    ii->setPrice(Currency::fromUSD(val));
                 else if (tag == "Bulk")
                     ii->setBulkQuantity(val.toInt());
                 else if (tag == "Qty")
@@ -1240,11 +1240,11 @@ BrickLink::InvItemList *BrickLink::Core::parseItemListXML(QDomElement root, Item
                 else if (tag == "TQ3")
                     ii->setTierQuantity(2, val.toInt());
                 else if (tag == "TP1")
-                    ii->setTierPrice(0, money_t::fromCString(val));
+                    ii->setTierPrice(0, Currency::fromUSD(val));
                 else if (tag == "TP2")
-                    ii->setTierPrice(1, money_t::fromCString(val));
+                    ii->setTierPrice(1, Currency::fromUSD(val));
                 else if (tag == "TP3")
-                    ii->setTierPrice(2, money_t::fromCString(val));
+                    ii->setTierPrice(2, Currency::fromUSD(val));
                 else if (tag == "Status") {
                     Status st = Include;
 
@@ -1270,7 +1270,7 @@ BrickLink::InvItemList *BrickLink::Core::parseItemListXML(QDomElement root, Item
                 else if (tag == "TotalWeight")
                     ii->setWeight(cLocale().toDouble(val));
                 else if (tag == "OrigPrice") {
-                    ii->setOrigPrice(money_t::fromCString(val));
+                    ii->setOrigPrice(Currency::fromUSD(val));
                     has_orig_price = true;
                 }
                 else if (tag == "OrigQty") {
@@ -1391,10 +1391,10 @@ QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint
             item.appendChild(doc.createElement("LOTID").appendChild(doc.createTextNode(QString::number(ii->lotId()))).parentNode());
 
             int qdiff = ii->quantity() - ii->origQuantity();
-            money_t pdiff = ii->price() - ii->origPrice();
+            Currency pdiff = ii->price() - ii->origPrice();
 
             if (pdiff != 0)
-                item.appendChild(doc.createElement("PRICE").appendChild(doc.createTextNode(ii->price().toCString())).parentNode());
+                item.appendChild(doc.createElement("PRICE").appendChild(doc.createTextNode(ii->price().toUSD())).parentNode());
             if (qdiff && (ii->quantity() > 0))
                 item.appendChild(doc.createElement("QTY").appendChild(doc.createTextNode((qdiff > 0 ? "+" : "") + QString::number(qdiff))).parentNode());
             else if (qdiff && (ii->quantity() <= 0))
@@ -1411,7 +1411,7 @@ QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint
             item.appendChild(doc.createElement("CATEGORY").appendChild(doc.createTextNode(ii->category()->name())).parentNode());
             item.appendChild(doc.createElement("PART_DESCRIPTION").appendChild(doc.createTextNode(ii->item()->name())).parentNode());
             item.appendChild(doc.createElement("COLOR").appendChild(doc.createTextNode(ii->color()->name())).parentNode());
-            item.appendChild(doc.createElement("TOTAL_VALUE").appendChild(doc.createTextNode((ii->price() * ii->quantity()).toCString())).parentNode());
+            item.appendChild(doc.createElement("TOTAL_VALUE").appendChild(doc.createTextNode((ii->price() * ii->quantity()).toUSD())).parentNode());
 
             {
                 int cb = 1;
@@ -1424,7 +1424,7 @@ QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint
                 item.appendChild(doc.createElement("CHECKBOX").appendChild(doc.createTextNode(QString::number(cb))).parentNode());
             }
             item.appendChild(doc.createElement("QTY").appendChild(doc.createTextNode(QString::number(ii->quantity()))).parentNode());
-            item.appendChild(doc.createElement("PRICE").appendChild(doc.createTextNode(ii->price().toCString())).parentNode());
+            item.appendChild(doc.createElement("PRICE").appendChild(doc.createTextNode(ii->price().toUSD())).parentNode());
             item.appendChild(doc.createElement("CONDITION").appendChild(doc.createTextNode((ii->condition() == New) ? "N" : "U")).parentNode());
 
             if (ii->bulkQuantity() != 1)
@@ -1438,11 +1438,11 @@ QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint
 
             if (ii->tierQuantity(0)) {
                 item.appendChild(doc.createElement("TQ1").appendChild(doc.createTextNode(QString::number(ii->tierQuantity(0)))).parentNode());
-                item.appendChild(doc.createElement("TP1").appendChild(doc.createTextNode(ii->tierPrice(0).toCString())).parentNode());
+                item.appendChild(doc.createElement("TP1").appendChild(doc.createTextNode(ii->tierPrice(0).toUSD())).parentNode());
                 item.appendChild(doc.createElement("TQ2").appendChild(doc.createTextNode(QString::number(ii->tierQuantity(1)))).parentNode());
-                item.appendChild(doc.createElement("TP2").appendChild(doc.createTextNode(ii->tierPrice(1).toCString())).parentNode());
+                item.appendChild(doc.createElement("TP2").appendChild(doc.createTextNode(ii->tierPrice(1).toUSD())).parentNode());
                 item.appendChild(doc.createElement("TQ3").appendChild(doc.createTextNode(QString::number(ii->tierQuantity(2)))).parentNode());
-                item.appendChild(doc.createElement("TP3").appendChild(doc.createTextNode(ii->tierPrice(2).toCString())).parentNode());
+                item.appendChild(doc.createElement("TP3").appendChild(doc.createTextNode(ii->tierPrice(2).toUSD())).parentNode());
             }
         }
 
@@ -1473,7 +1473,7 @@ QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint
             }
 
             item.appendChild(doc.createElement("Qty").appendChild(doc.createTextNode(QString::number(ii->quantity()))).parentNode());
-            item.appendChild(doc.createElement("Price").appendChild(doc.createTextNode(ii->price().toCString())).parentNode());
+            item.appendChild(doc.createElement("Price").appendChild(doc.createTextNode(ii->price().toUSD())).parentNode());
             item.appendChild(doc.createElement("Condition").appendChild(doc.createTextNode((ii->condition() == New) ? "N" : "U")).parentNode());
 
             if (ii->subCondition() != None) {
@@ -1506,17 +1506,17 @@ QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint
 
             if (ii->tierQuantity(0)) {
                 item.appendChild(doc.createElement("TQ1").appendChild(doc.createTextNode(QString::number(ii->tierQuantity(0)))).parentNode());
-                item.appendChild(doc.createElement("TP1").appendChild(doc.createTextNode(ii->tierPrice(0).toCString())).parentNode());
+                item.appendChild(doc.createElement("TP1").appendChild(doc.createTextNode(ii->tierPrice(0).toUSD())).parentNode());
                 item.appendChild(doc.createElement("TQ2").appendChild(doc.createTextNode(QString::number(ii->tierQuantity(1)))).parentNode());
-                item.appendChild(doc.createElement("TP2").appendChild(doc.createTextNode(ii->tierPrice(1).toCString())).parentNode());
+                item.appendChild(doc.createElement("TP2").appendChild(doc.createTextNode(ii->tierPrice(1).toUSD())).parentNode());
                 item.appendChild(doc.createElement("TQ3").appendChild(doc.createTextNode(QString::number(ii->tierQuantity(2)))).parentNode());
-                item.appendChild(doc.createElement("TP3").appendChild(doc.createTextNode(ii->tierPrice(2).toCString())).parentNode());
+                item.appendChild(doc.createElement("TP3").appendChild(doc.createTextNode(ii->tierPrice(2).toUSD())).parentNode());
             }
 
             if (ii->m_weight > 0)
                 item.appendChild(doc.createElement("TotalWeight").appendChild(doc.createTextNode(cLocale().toString(ii->weight(), 'f', 4))).parentNode());
             if (ii->origPrice() != ii->price())
-                item.appendChild(doc.createElement("OrigPrice").appendChild(doc.createTextNode(ii->origPrice().toCString())).parentNode());
+                item.appendChild(doc.createElement("OrigPrice").appendChild(doc.createTextNode(ii->origPrice().toUSD())).parentNode());
             if (ii->origQuantity() != ii->quantity())
                 item.appendChild(doc.createElement("OrigQty").appendChild(doc.createTextNode(QString::number(ii->origQuantity()))).parentNode());
         }
@@ -1529,7 +1529,7 @@ QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint
             item.appendChild(doc.createElement("ITEMTYPE").appendChild(doc.createTextNode(QChar(ii->itemType()->id()))).parentNode());
 
             item.appendChild(doc.createElement("QTY").appendChild(doc.createTextNode(QString::number(ii->quantity()))).parentNode());
-            item.appendChild(doc.createElement("PRICE").appendChild(doc.createTextNode(ii->price().toCString())).parentNode());
+            item.appendChild(doc.createElement("PRICE").appendChild(doc.createTextNode(ii->price().toUSD())).parentNode());
             item.appendChild(doc.createElement("CONDITION").appendChild(doc.createTextNode((ii->condition() == New) ? "N" : "U")).parentNode());
 
             if (ii->subCondition() != None) {
@@ -1560,11 +1560,11 @@ QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint
 
             if (ii->tierQuantity(0)) {
                 item.appendChild(doc.createElement("TQ1").appendChild(doc.createTextNode(QString::number(ii->tierQuantity(0)))).parentNode());
-                item.appendChild(doc.createElement("TP1").appendChild(doc.createTextNode(ii->tierPrice(0).toCString())).parentNode());
+                item.appendChild(doc.createElement("TP1").appendChild(doc.createTextNode(ii->tierPrice(0).toUSD())).parentNode());
                 item.appendChild(doc.createElement("TQ2").appendChild(doc.createTextNode(QString::number(ii->tierQuantity(1)))).parentNode());
-                item.appendChild(doc.createElement("TP2").appendChild(doc.createTextNode(ii->tierPrice(1).toCString())).parentNode());
+                item.appendChild(doc.createElement("TP2").appendChild(doc.createTextNode(ii->tierPrice(1).toUSD())).parentNode());
                 item.appendChild(doc.createElement("TQ3").appendChild(doc.createTextNode(QString::number(ii->tierQuantity(2)))).parentNode());
-                item.appendChild(doc.createElement("TP3").appendChild(doc.createTextNode(ii->tierPrice(2).toCString())).parentNode());
+                item.appendChild(doc.createElement("TP3").appendChild(doc.createTextNode(ii->tierPrice(2).toUSD())).parentNode());
             }
         }
 
@@ -1577,7 +1577,7 @@ QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint
             if (ii->quantity())
                 item.appendChild(doc.createElement("MINQTY").appendChild(doc.createTextNode(QString::number(ii->quantity()))).parentNode());
             if (ii->price() != 0)
-                item.appendChild(doc.createElement("MAXPRICE").appendChild(doc.createTextNode(ii->price().toCString())).parentNode());
+                item.appendChild(doc.createElement("MAXPRICE").appendChild(doc.createTextNode(ii->price().toUSD())).parentNode());
             if (!ii->remarks().isEmpty())
                 item.appendChild(doc.createElement("REMARKS").appendChild(doc.createTextNode(ii->remarks())).parentNode());
             if (ii->condition() == New)

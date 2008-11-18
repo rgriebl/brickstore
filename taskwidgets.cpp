@@ -123,7 +123,7 @@ TaskPriceGuideWidget::TaskPriceGuideWidget(QWidget *parent)
     setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
 
     connect(FrameWork::inst(), SIGNAL(windowActivated(Window *)), this, SLOT(windowUpdate(Window *)));
-    connect(this, SIGNAL(priceDoubleClicked(money_t)), this, SLOT(setPrice(money_t)));
+    connect(this, SIGNAL(priceDoubleClicked(Currency)), this, SLOT(setPrice(Currency)));
     fixParentDockWindow();
 }
 
@@ -145,7 +145,7 @@ void TaskPriceGuideWidget::selectionUpdate(const Document::ItemList &list)
     setPriceGuide(ok ? BrickLink::core()->priceGuide(list.front()->item(), list.front()->color(), true) : 0);
 }
 
-void TaskPriceGuideWidget::setPrice(money_t p)
+void TaskPriceGuideWidget::setPrice(Currency p)
 {
     if (m_win && (m_win->selection().count() == 1)) {
         Document::Item *pos = m_win->selection().front();
@@ -224,7 +224,7 @@ TaskInfoWidget::TaskInfoWidget(QWidget *parent)
     addWidget(m_text);
 
     connect(FrameWork::inst(), SIGNAL(windowActivated(Window *)), this, SLOT(windowUpdate(Window *)));
-    connect(Money::inst(), SIGNAL(monetarySettingsChanged()), this, SLOT(refresh()));
+    connect(Config::inst(), SIGNAL(localCurrencyChanged()), this, SLOT(refresh()));
     connect(Config::inst(), SIGNAL(measurementSystemChanged(QLocale::MeasurementSystem)), this, SLOT(refresh()));
 }
 
@@ -257,12 +257,12 @@ void TaskInfoWidget::selectionUpdate(const Document::ItemList &list)
 
         if (stat.value() != stat.minValue()) {
             valstr = QString("%1 (%2 %3)").
-                     arg(stat.value().toLocalizedString(true)).
+                     arg(stat.value().toLocal(Currency::LocalSymbol)).
                      arg(tr("min.")).
-                     arg(stat.minValue().toLocalizedString(true));
+                     arg(stat.minValue().toLocal(Currency::LocalSymbol));
         }
         else
-            valstr = stat.value().toLocalizedString(true);
+            valstr = stat.value().toLocal(Currency::LocalSymbol);
 
         if (stat.weight() == -DBL_MIN) {
             wgtstr = "-";

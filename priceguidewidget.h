@@ -45,7 +45,7 @@ public slots:
     virtual void setPriceGuide(BrickLink::PriceGuide *pg);
 
 signals:
-    void priceDoubleClicked(money_t p);
+    void priceDoubleClicked(Currency p);
 
 protected:
     void recalcLayout();

@@ -255,15 +255,15 @@ private slots:
                                         else if (tag == "ORDERSTATUSCHANGED")
                                             order->setStatusChange(QDateTime(ymd2date(val)));
                                         else if (tag == "ORDERSHIPPING")
-                                            order->setShipping(money_t::fromCString(val));
+                                            order->setShipping(Currency::fromUSD(val));
                                         else if (tag == "ORDERINSURANCE")
-                                            order->setInsurance(money_t::fromCString(val));
+                                            order->setInsurance(Currency::fromUSD(val));
                                         else if (tag == "ORDERDELIVERY")
-                                            order->setDelivery(money_t::fromCString(val));
+                                            order->setDelivery(Currency::fromUSD(val));
                                         else if (tag == "ORDERCREDIT")
-                                            order->setCredit(money_t::fromCString(val));
+                                            order->setCredit(Currency::fromUSD(val));
                                         else if (tag == "GRANDTOTAL")
-                                            order->setGrandTotal(money_t::fromCString(val));
+                                            order->setGrandTotal(Currency::fromUSD(val));
                                         else if (tag == "ORDERSTATUS")
                                             order->setStatus(val);
                                         else if (tag == "PAYMENTTYPE")
@@ -469,7 +469,7 @@ private slots:
                         rx_qty_price.indexIn(str);
 
                         int qty = rx_qty_price.cap(1).toInt();
-                        money_t price = QLocale::c().toDouble(rx_qty_price.cap(3));
+                        Currency price = QLocale::c().toDouble(rx_qty_price.cap(3));
 
                         BrickLink::Condition cond = (str.indexOf(str_cond) >= 0 ? BrickLink::New : BrickLink::Used);
 

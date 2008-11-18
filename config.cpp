@@ -30,6 +30,7 @@
 
 #include <QCryptographicHash>
 #include "config.h"
+#include "money.h"
 
 #define XSTR(a) #a
 #define STR(a) XSTR(a)
@@ -54,6 +55,11 @@ Config::Config()
     m_registration = OpenSource;
     m_translations_parsed = false;
     setRegistration(registrationName(), registrationKey());
+
+    if (isLocalSet()) {
+        QPair<QString, QString> syms = localCurrencySymbols();
+        Currency::setLocal(syms.first, syms.second, localCurrencyRate());
+    }
 }
 
 Config::~Config()
@@ -524,7 +530,7 @@ bool Config::parseTranslations() const
 	m_translations.clear();
 
 	QDomDocument doc;
-	QFile file(":/translations/translations.xml");
+	QFile file("translations/translations.xml");
 
 	if (file.open(QIODevice::ReadOnly)) {
 		QString err_str;
@@ -534,27 +540,18 @@ bool Config::parseTranslations() const
 			QDomElement root = doc.documentElement();
 
 			if (root.isElement() && root.nodeName() == "translations") {
-				bool found_default = false;
-
 				for (QDomNode node = root.firstChild(); !node.isNull(); node = node.nextSibling()) {
 					if (!node.isElement() || (node.nodeName() != "translation"))
 						continue;
 					QDomNamedNodeMap map = node.attributes();
 					Translation trans;
 
-					trans.m_langid = map.namedItem("lang").toAttr().value();
-					trans.m_default = map.contains("default");
+					trans.language = map.namedItem("lang").toAttr().value();
+                    trans.author = map.namedItem("author").toAttr().value();
+                    trans.authorEMail = map.namedItem("authoremail").toAttr().value();
 
-					if (trans.m_default) {
-						if (found_default)
-							goto error;
-						found_default = true;
-					}
-
-					if (trans.m_langid.isEmpty())
+					if (trans.language.isEmpty())
 						goto error;
-
-					QString defname, trname;
 
 					for (QDomNode name = node.firstChild(); !name.isNull(); name = name.nextSibling()) {
 						if (!name.isElement() || (name.nodeName() != "name"))
@@ -565,10 +562,10 @@ bool Config::parseTranslations() const
                         QString tr_name = name.toElement().text();
 
                         if (!tr_name.isEmpty())
-                            trans.m_names[tr_id.isEmpty() ? trans.m_langid : tr_id] = tr_name;
+                            trans.languageName[tr_id.isEmpty() ? QLatin1String("en") : tr_id] = tr_name;
 					}
 
-					if (trans.m_names.isEmpty())
+					if (trans.languageName.isEmpty())
 						goto error;
 
 					m_translations << trans;
@@ -581,3 +578,38 @@ error:
 	return false;
 }
 
+void Config::setLocal(const QString &symint, const QString &sym, double rate)
+{
+    setValue("/General/Local/Active", true);
+    setValue("/General/Local/IntSymbol", symint);
+    setValue("/General/Local/Symbol", sym);
+    setValue("/General/Local/Rate", rate);
+
+    Currency::setLocal(symint, sym, rate);
+
+    emit localCurrencyChanged();
+}
+
+void Config::unsetLocal()
+{
+    setValue("/General/Local/Active", false);
+    Currency::setLocal(QLatin1String("USD"), QLatin1String("$"), 1.);
+
+    emit localCurrencyChanged();
+}
+
+bool Config::isLocalSet() const
+{
+    return value("/General/Local/Active", false).toBool();
+}
+
+double Config::localCurrencyRate() const
+{
+    return value("/General/Local/Rate", 1.).toDouble();
+}
+
+QPair<QString, QString> Config::localCurrencySymbols() const
+{
+    return qMakePair(value("/General/Local/IntSymbol", QLatin1String("USD")).toString(),
+                     value("/General/Local/Symbol", QLatin1String("$")).toString());
+}

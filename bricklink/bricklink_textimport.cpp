@@ -413,13 +413,13 @@ bool BrickLink::TextImport::readDB_processLine(btpriceguide_dummy & /*dummy*/, u
         AllTimePriceGuide pg;
         pg.item = itm;
         pg.color = col;
-        pg.condition[New].minPrice = money_t::fromCString(strs[2]);
-        pg.condition[New].avgPrice = money_t::fromCString(strs[3]);
-        pg.condition[New].maxPrice = money_t::fromCString(strs[4]);
+        pg.condition[New].minPrice = Currency::fromUSD(strs[2]);
+        pg.condition[New].avgPrice = Currency::fromUSD(strs[3]);
+        pg.condition[New].maxPrice = Currency::fromUSD(strs[4]);
         pg.condition[New].quantity = strtol(strs[5], 0, 10);
-        pg.condition[Used].minPrice = money_t::fromCString(strs[6]);
-        pg.condition[Used].avgPrice = money_t::fromCString(strs[7]);
-        pg.condition[Used].maxPrice = money_t::fromCString(strs[8]);
+        pg.condition[Used].minPrice = Currency::fromUSD(strs[6]);
+        pg.condition[Used].avgPrice = Currency::fromUSD(strs[7]);
+        pg.condition[Used].maxPrice = Currency::fromUSD(strs[8]);
         pg.condition[Used].quantity = strtol(strs[9], 0, 10);
 
         if (pg.condition[New].quantity || pg.condition[Used].quantity)

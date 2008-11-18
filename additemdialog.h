@@ -52,7 +52,7 @@ private slots:
     void showTotal();
     bool checkAddPossible();
     void addClicked();
-    void setPrice(money_t d);
+    void setPrice(Currency d);
     void checkTieredPrices();
     void setTierType(int type);
     void updateMonetary();
@@ -60,7 +60,7 @@ private slots:
 
 private:
     void showItemInColor(const BrickLink::Item *it, const BrickLink::Color *col);
-    money_t tierPriceValue(int i);
+    Currency tierPriceValue(int i);
 
 private:
     QPointer<Window> m_window;

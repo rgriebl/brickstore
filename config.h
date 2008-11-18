@@ -40,6 +40,10 @@ public:
     inline bool isMeasurementMetric()    { return measurementSystem() == QLocale::MetricSystem;   }
     inline bool isMeasurementImperial()  { return measurementSystem() == QLocale::ImperialSystem; }
 
+    bool isLocalSet() const;
+    double localCurrencyRate() const;
+    QPair<QString, QString> localCurrencySymbols() const;
+
     bool closeEmptyDocuments() const;
     QString documentDir() const;
     QString lDrawDir() const;
@@ -57,11 +61,10 @@ public:
     QMap<QByteArray, int> updateIntervalsDefault() const;
 
     struct Translation {
-        QString m_langid;
-        QString m_translator;
-        QString m_contact;
-        bool    m_default;
-        QMap<QString, QString> m_names;
+        QString language;
+        QString author;
+        QString authorEMail;
+        QMap<QString, QString> languageName;
     };
 
     QList<Translation> translations() const;
@@ -83,6 +86,8 @@ public:
 public slots:
     void setLanguage(const QString &lang);
     void setMeasurementSystem(QLocale::MeasurementSystem ms);
+    void setLocal(const QString &symint, const QString &sym, double rate);
+    void unsetLocal();
 
     void setCloseEmptyDocuments(bool b);
     void setDocumentDir(const QString &dir);
@@ -103,6 +108,7 @@ signals:
     void simpleModeChanged(bool);
     void languageChanged();
     void measurementSystemChanged(QLocale::MeasurementSystem ms);
+    void localCurrencyChanged();
     void showInputErrorsChanged(bool b);
     void updateIntervalsChanged(const QMap<QByteArray, int> &intervals);
     void onlineStatusChanged(bool b);

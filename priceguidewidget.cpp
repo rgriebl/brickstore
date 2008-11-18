@@ -24,7 +24,7 @@
 #include <QDesktopServices>
 
 #include "bricklink.h"
-#include "utility.h"
+#include "config.h"
 #include "money.h"
 
 #include "priceguidewidget.h"
@@ -118,7 +118,7 @@ PriceGuideWidget::PriceGuideWidget(QWidget *parent, Qt::WindowFlags f)
 
     d->m_connected = false;
 
-    connect(Money::inst(), SIGNAL(monetarySettingsChanged()), this, SLOT(update()));
+    connect(Config::inst(), SIGNAL(localCurrencyChanged()), this, SLOT(update()));
 
     QAction *a;
     a = new QAction(this);
@@ -294,7 +294,7 @@ void PriceGuideWidget::recalcLayoutNormal(const QSize &s, const QFontMetrics &fm
     for (int i = 0; i < BrickLink::ConditionCount; i++)
         cw [1] = qMax(cw [1], fm.width(d->m_str_cond [i]));
     cw [2] = qMax(fm.width(d->m_str_qty), fm.width("0000 (000000)"));
-    cw [3] = fm.width(money_t (9000).toLocalizedString(true));
+    cw [3] = fm.width(Currency(9000).toLocal(Currency::LocalSymbol));
     for (int i = 0; i < BrickLink::PriceCount; i++)
         cw [3] = qMax(cw [3], fm.width(d->m_str_price [i]));
 
@@ -388,7 +388,7 @@ void PriceGuideWidget::recalcLayoutHorizontal(const QSize &s, const QFontMetrics
     for (int i = 0; i < BrickLink::ConditionCount; i++)
         cw [1] = qMax(cw [1], fm.width(d->m_str_cond [i]));
     cw [2] = qMax(fm.width(d->m_str_qty), fm.width("0000 (000000)"));
-    cw [3] = fm.width(money_t (9000).toLocalizedString(false));
+    cw [3] = fm.width(Currency (9000).toLocal(Currency::NoSymbol));
     for (int i = 0; i < BrickLink::PriceCount; i++)
         cw [3] = qMax(cw [3], fm.width(d->m_str_price [i]));
 
@@ -470,7 +470,7 @@ void PriceGuideWidget::recalcLayoutVertical(const QSize &s, const QFontMetrics &
         cw [0] = qMax(cw [0], fm.width(d->m_str_price [i]));
     cw [0] += 2 * hborder;
 
-    cw [1] = qMax(fm.width(money_t (9000).toLocalizedString(false)), fm.width("0000 (000000)"));
+    cw [1] = qMax(fm.width(Currency (9000).toLocal(Currency::NoSymbol)), fm.width("0000 (000000)"));
     for (int i = 0; i < BrickLink::ConditionCount; i++)
         cw [1] = qMax(cw [1], fm.width(d->m_str_cond [i]));
     cw [1] += 2 * hborder;
@@ -617,7 +617,7 @@ void PriceGuideWidget::paintEvent(QPaintEvent *e)
 
         switch (c.m_type) {
         case cell::Header:
-            paintHeader(&p, c, c.m_text_flags, c.m_text == "$$$" ? Money::inst()->currencySymbol() : c.m_text, c.m_flag);
+            paintHeader(&p, c, c.m_text_flags, c.m_text == "$$$" ? Currency::symbol() : c.m_text, c.m_flag);
             break;
 
         case cell::Quantity:
@@ -632,7 +632,7 @@ void PriceGuideWidget::paintEvent(QPaintEvent *e)
         case cell::Price:
             if (!is_updating) {
                 if (valid)
-                    str = d->m_pg->price(c.m_time, c.m_condition, c.m_price).toLocalizedString(false);
+                    str = d->m_pg->price(c.m_time, c.m_condition, c.m_price).toLocal();
 
                 paintCell(&p, c, c.m_text_flags, str, c.m_flag);
             }

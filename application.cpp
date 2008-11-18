@@ -30,7 +30,6 @@
 #include "progressdialog.h"
 #include "checkforupdates.h"
 #include "config.h"
-#include "money.h"
 #include "rebuilddatabase.h"
 #include "bricklink.h"
 #include "ldraw.h"
@@ -93,7 +92,6 @@ Application::Application(bool rebuild_db_only, int _argc, char **_argv)
 
     // initialize config & resource
     (void) Config::inst()->upgrade(BRICKSTORE_MAJOR, BRICKSTORE_MINOR, BRICKSTORE_PATCH);
-    (void) Money::inst();
 //    (void) CReportManager::inst ( );
 
     m_trans_qt = 0;
@@ -136,7 +134,6 @@ Application::~Application()
     exitBrickLink();
 
 //    delete CReportManager::inst ( );
-    delete Money::inst();
     delete Config::inst();
 }
 
@@ -253,7 +250,7 @@ QString Application::sysVersion() const
             QList<QByteArray> out = lsbrel.readAllStandardOutput().split('\n');
 
             foreach (QByteArray line, out) {
-                QByteArray val = line.mid(line.indexOf(':')).simplified();
+                QByteArray val = line.mid(line.indexOf(':')+1).simplified();
 
                 if (line.startsWith("Distributor ID:"))
                     dist = val;

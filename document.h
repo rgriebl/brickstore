@@ -106,8 +106,8 @@ public:
     public:
         uint lots() const         { return m_lots; }
         uint items() const        { return m_items; }
-        money_t value() const     { return m_val; }
-        money_t minValue() const  { return m_minval; }
+        Currency value() const     { return m_val; }
+        Currency minValue() const  { return m_minval; }
         double weight() const     { return m_weight; }
         uint errors() const       { return m_errors; }
 
@@ -118,8 +118,8 @@ public:
 
         uint m_lots;
         uint m_items;
-        money_t m_val;
-        money_t m_minval;
+        Currency m_val;
+        Currency m_minval;
         double m_weight;
         uint m_errors;
     };

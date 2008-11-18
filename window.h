@@ -151,7 +151,7 @@ public slots:
 
     void addItem(BrickLink::InvItem *, uint);
 
-    void setPrice(money_t);
+    void setPrice(Currency);
 
 signals:
     void selectionChanged(const Document::ItemList &);

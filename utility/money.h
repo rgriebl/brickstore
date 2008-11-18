@@ -11,135 +11,104 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __MONEY_H__
-#define __MONEY_H__
+#ifndef __CURRENCY_H__
+#define __CURRENCY_H__
 
 #include <QString>
 #include <QValidator>
-#include <QMap>
-#include <QVariant>
 
-class MoneyData;
 class QKeyEvent;
 class QLineEdit;
 class QDataStream;
 
-class money_t;
 
-
-class Money : public QObject {
-    Q_OBJECT
-
-private:
-    Money();
-    static Money *s_inst;
-
+class Currency {
 public:
-    ~Money();
-    static Money *inst();
+    Currency(int v = 0)          : val(qint64(v) * 1000) { }
+    Currency(double v)           : val(qint64(v * 1000)) { }
+    Currency(const Currency &m)   : val(m.val) { }
 
-    void setFactor(double f);
-    double factor() const;
+    Currency &operator=(int v)              { val = qint64(v) * 1000; return *this; }
+    Currency &operator=(double v)           { val = qint64(v * 1000); return *this; }
+    Currency &operator=(const Currency &m)   { val = m.val; return *this; }
+  //  Currency &operator = (const QString &str) { bool ok = false; Currency m = Money::inst()->toMoney(str, &ok); if (ok) *this = m; return *this; }
 
-    void setPrecision(int prec);
-    int precision() const;
+    //operator bool ( ) const { return val != 0; }
 
-    void setLocalization(bool b);
-    bool isLocalized() const;
+    Currency &operator+=(const Currency &m)  { val += m.val; return *this; }
+    Currency &operator-=(const Currency &m)  { val -= m.val; return *this; }
 
-    QString currencySymbol() const;
-    QString localCurrencySymbol() const;
+    Currency &operator*=(double d)  { val = qint64(val * d); return *this; }
+    Currency &operator*=(int i)     { val *= i; return *this; }
+    Currency &operator/=(double d)  { val = qint64(val / d); return *this; }
+    Currency &operator/=(int i)     { val /= i; return *this; }
 
-    QChar localDecimalPoint() const;
-    QChar decimalPoint() const;
+    friend bool operator< (const Currency &m1, const Currency &m2)  { return m1.val <  m2.val; }
+    friend bool operator<=(const Currency &m1, const Currency &m2)  { return m1.val <= m2.val; }
+    friend bool operator==(const Currency &m1, const Currency &m2)  { return m1.val == m2.val; }
+    friend bool operator!=(const Currency &m1, const Currency &m2)  { return m1.val != m2.val; }
+    friend bool operator>=(const Currency &m1, const Currency &m2)  { return m1.val >= m2.val; }
+    friend bool operator> (const Currency &m1, const Currency &m2)  { return m1.val >  m2.val; }
+
+    friend Currency operator-(const Currency &m)  { Currency t(m); t.val = -t.val; return t; }
+    friend Currency operator+(const Currency &m)  { Currency t(m); return t; }
+
+    friend Currency operator+(const Currency &m1, const Currency &m2)  { Currency t = m1; t += m2; return t; }
+    friend Currency operator-(const Currency &m1, const Currency &m2)  { Currency t = m1; t -= m2; return t; }
+
+    friend Currency operator*(const Currency &m1, double d2)  { Currency t = m1; t *= d2; return t; }
+    friend Currency operator*(const Currency &m1, int    i2)  { Currency t = m1; t *= i2; return t; }
+    friend Currency operator*(double d1, const Currency &m2)  { Currency t = m2; t *= d1; return t; }
+    friend Currency operator*(int    i1, const Currency &m2)  { Currency t = m2; t *= i1; return t; }
+
+    friend Currency operator/(const Currency &m1, double d2)  { Currency t = m1; t /= d2; return t; }
+    friend Currency operator/(const Currency &m1, int    i2)  { Currency t = m1; t /= i2; return t; }
+
+    friend QDataStream &operator<<(QDataStream &s, const Currency &m);
+    friend QDataStream &operator>>(QDataStream &s, Currency &m);
+
+    double toDouble() const { return val / 1000.; }
+
+    qint64 &internalValue() { return val; }
+
+    static void setLocal(const QString &symint, const QString &sym, double rate_to_usd);
+
+    static Currency fromUSD(const QString &);
+    static Currency fromLocal(const QString &);
+
+    enum CurrencySymbol {
+        NoSymbol = 0,
+        LocalSymbol,
+        InternationalSymbol
+    };
+
+    QString toUSD(CurrencySymbol cs = NoSymbol, int precision = 3) const;
+    QString toLocal(CurrencySymbol cs = NoSymbol, int precision = 3) const;
+
+    static double rate();
+    static QString symbol(CurrencySymbol = LocalSymbol);
 
 private:
-    QString toString(double dv, bool with_currency_symbol, int precision) const;
-    money_t toMoney(const QString &s, bool *ok = 0) const;
+    qint64 val;
 
-    friend class money_t;
-
-signals:
-    void monetarySettingsChanged();
-
-private:
-    MoneyData *d;
+    static QString s_symint;
+    static QString s_sym;
+    static double  s_rate;
 };
 
-class MoneyValidator : public QDoubleValidator {
+class CurrencyValidator : public QDoubleValidator {
     Q_OBJECT
 
 public:
-    MoneyValidator(QObject *parent);
-    MoneyValidator(money_t bottom, money_t top, int decimals, QObject *parent);
+    CurrencyValidator(QObject *parent);
+    CurrencyValidator(Currency bottom, Currency top, int decimals, QObject *parent);
 
     virtual QValidator::State validate(QString &input, int &) const;
 
 protected:
     bool filterInput(QLineEdit *edit, QKeyEvent *ke) const;
 
-    friend class MoneyData;
+    static bool s_once;
 };
-
-class money_t {
-public:
-    money_t (int v = 0)          : val(qint64(v) * 1000) { }
-    money_t (double v)           : val(qint64(v * 1000)) { }
-    money_t (const money_t &m)   : val(m.val) { }
-
-    money_t &operator = (int v)              { val = qint64(v) * 1000; return *this; }
-    money_t &operator = (double v)           { val = qint64(v * 1000); return *this; }
-    money_t &operator = (const money_t &m)   { val = m.val; return *this; }
-    money_t &operator = (const QString &str) { bool ok = false; money_t m = Money::inst()->toMoney(str, &ok); if (ok) *this = m; return *this; }
-
-    //operator bool ( ) const { return val != 0; }
-
-    money_t &operator += (const money_t &m)  { val += m.val; return *this; }
-    money_t &operator -= (const money_t &m)  { val -= m.val; return *this; }
-
-    money_t &operator *= (double d)  { val = qint64(val * d); return *this; }
-    money_t &operator *= (int i)     { val *= i; return *this; }
-    money_t &operator /= (double d)  { val = qint64(val / d); return *this; }
-    money_t &operator /= (int i)     { val /= i; return *this; }
-
-    friend bool operator < (const money_t &m1, const money_t &m2)  { return m1.val <  m2.val; }
-    friend bool operator <= (const money_t &m1, const money_t &m2)  { return m1.val <= m2.val; }
-    friend bool operator == (const money_t &m1, const money_t &m2)  { return m1.val == m2.val; }
-    friend bool operator != (const money_t &m1, const money_t &m2)  { return m1.val != m2.val; }
-    friend bool operator >= (const money_t &m1, const money_t &m2)  { return m1.val >= m2.val; }
-    friend bool operator > (const money_t &m1, const money_t &m2)  { return m1.val >  m2.val; }
-
-    friend money_t operator - (const money_t &m)  { money_t t(m); t.val = -t.val; return t; }
-    friend money_t operator + (const money_t &m)  { money_t t(m); return t; }
-
-    friend money_t operator + (const money_t &m1, const money_t &m2)  { money_t t = m1; t += m2; return t; }
-    friend money_t operator - (const money_t &m1, const money_t &m2)  { money_t t = m1; t -= m2; return t; }
-
-    friend money_t operator * (const money_t &m1, double d2)  { money_t t = m1; t *= d2; return t; }
-    friend money_t operator * (const money_t &m1, int    i2)  { money_t t = m1; t *= i2; return t; }
-    friend money_t operator * (double d1, const money_t &m2)  { money_t t = m2; t *= d1; return t; }
-    friend money_t operator * (int    i1, const money_t &m2)  { money_t t = m2; t *= i1; return t; }
-
-    friend money_t operator / (const money_t &m1, double d2)  { money_t t = m1; t /= d2; return t; }
-    friend money_t operator / (const money_t &m1, int    i2)  { money_t t = m1; t /= i2; return t; }
-
-    friend QDataStream &operator << (QDataStream &s, const money_t &m);
-    friend QDataStream &operator >> (QDataStream &s, money_t &m);
-
-    QString toCString(bool with_currency_symbol = false, int precision = 3) const;
-    QString toLocalizedString(bool with_currency_symbol = false, int precision = 3) const;
-
-    static money_t fromCString(const QString &);
-    static money_t fromLocalizedString(const QString &);
-
-    double toDouble() const;
-
-    qint64 &internalValue() { return val; }
-
-private:
-    qint64 val;
-};
-
-
 
 #endif

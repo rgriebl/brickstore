@@ -180,7 +180,7 @@ static int safe_strtol(const char *data, uint start, uint stop)
     return QString::fromAscii(data + start, i - start).toInt();
 }
 
-static money_t safe_strtomoney(const char *data, uint start, uint stop)
+static Currency safe_strtomoney(const char *data, uint start, uint stop)
 {
     uint i = start;
 
@@ -191,7 +191,7 @@ static money_t safe_strtomoney(const char *data, uint start, uint stop)
         return .0;
 
     // data [i] may NOT be writable
-    return money_t::fromCString(QString::fromAscii(data + start, i - start));
+    return Currency::fromUSD(QString::fromAscii(data + start, i - start));
 }
 
 } // namespace
@@ -300,10 +300,10 @@ void BrickLink::PriceGuide::save_to_disk()
                 ts << (t == AllTime ? 'A' : (t == PastSix ? 'P' : 'C')) << '\t' << (c == New ? 'N' : 'U') << '\t';
                 ts << m_quantities [t][c] << '\t'
                 << m_lots [t][c] << '\t'
-                << m_prices [t][c][Lowest].toCString() << '\t'
-                << m_prices [t][c][Average].toCString() << '\t'
-                << m_prices [t][c][WAverage].toCString() << '\t'
-                << m_prices [t][c][Highest].toCString() << '\n';
+                << m_prices [t][c][Lowest].toUSD() << '\t'
+                << m_prices [t][c][Average].toUSD() << '\t'
+                << m_prices [t][c][WAverage].toUSD() << '\t'
+                << m_prices [t][c][Highest].toUSD() << '\n';
             }
         }
         //qDebug ( "done." );
@@ -358,10 +358,10 @@ void BrickLink::PriceGuide::load_from_disk()
             if ((t != -1) && (c != -1)) {
                 m_quantities [t][c]       = sl [2].toInt();
                 m_lots [t][c]             = sl [3].toInt();
-                m_prices [t][c][Lowest]   = money_t::fromCString(sl [4]);
-                m_prices [t][c][Average]  = money_t::fromCString(sl [5]);
-                m_prices [t][c][WAverage] = money_t::fromCString(sl [6]);
-                m_prices [t][c][Highest]  = money_t::fromCString(sl [7]);
+                m_prices [t][c][Lowest]   = Currency::fromUSD(sl [4]);
+                m_prices [t][c][Average]  = Currency::fromUSD(sl [5]);
+                m_prices [t][c][WAverage] = Currency::fromUSD(sl [6]);
+                m_prices [t][c][Highest]  = Currency::fromUSD(sl [7]);
 
                 loaded [t][c] = true;
             }

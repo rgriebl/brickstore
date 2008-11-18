@@ -366,7 +366,7 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
     connect(Config::inst(), SIGNAL(onlineStatusChanged(bool)), bl, SLOT(setOnlineStatus(bool)));
     connect(Config::inst(), SIGNAL(updateIntervalsChanged(const QMap<QByteArray, int> &)), bl, SLOT(setUpdateIntervals(const QMap<QByteArray, int> &)));
     connect(Config::inst(), SIGNAL(proxyChanged(QNetworkProxy)), bl->transfer(), SLOT(setProxy(QNetworkProxy)));
-    connect(Money::inst(), SIGNAL(monetarySettingsChanged()), this, SLOT(statisticsUpdate()));
+    connect(Config::inst(), SIGNAL(localCurrencyChanged()), this, SLOT(statisticsUpdate()));
     connect(Config::inst(), SIGNAL(measurementSystemChanged(QLocale::MeasurementSystem)), this, SLOT(statisticsUpdate()));
     connect(Config::inst(), SIGNAL(simpleModeChanged(bool)), this, SLOT(setSimpleMode(bool)));
     connect(Config::inst(), SIGNAL(registrationChanged(Config::Registration)), this, SLOT(registrationUpdate()));
@@ -401,7 +401,7 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
         MessageBox::warning(this, tr("Could not load the BrickLink database files.<br /><br />The program is not functional without these files."));
 
     m_add_dialog = 0;
-    createAddItemDialog();
+    //createAddItemDialog();
 
     m_running = true;
 
@@ -1555,12 +1555,12 @@ void FrameWork::statisticsUpdate()
 
         if (stat.value() != stat.minValue()) {
             valstr = QString("%1 (%2 %3)").
-                     arg(stat.value().toLocalizedString(true)).
+                     arg(stat.value().toLocal(Currency::LocalSymbol)).
                      arg(tr("min.")).
-                     arg(stat.minValue().toLocalizedString(true));
+                     arg(stat.minValue().toLocal(Currency::LocalSymbol));
         }
         else
-            valstr = stat.value().toLocalizedString(true);
+            valstr = stat.value().toLocal(Currency::LocalSymbol);
 
         if (stat.weight() == -DBL_MIN) {
             wgtstr = "-";

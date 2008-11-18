@@ -180,7 +180,7 @@ Document::Statistics::Statistics(const Document *doc, const ItemList &list)
 
     foreach(const Item *item, list) {
         int qty = item->quantity();
-        money_t price = item->price();
+        Currency price = item->price();
 
         m_val += (qty * price);
 
@@ -1277,14 +1277,14 @@ bool Document::setData(const QModelIndex &index, const QVariant &value, int role
         case Document::TierQ1      : item.setTierQuantity(0, value.toInt()); break;
         case Document::TierQ2      : item.setTierQuantity(1, value.toInt()); break;
         case Document::TierQ3      : item.setTierQuantity(2, value.toInt()); break;
-        case Document::TierP1      : item.setTierPrice(0, money_t::fromLocalizedString(value.toString())); break;
-        case Document::TierP2      : item.setTierPrice(1, money_t::fromLocalizedString(value.toString())); break;
-        case Document::TierP3      : item.setTierPrice(2, money_t::fromLocalizedString(value.toString())); break;
+        case Document::TierP1      : item.setTierPrice(0, Currency::fromLocal(value.toString())); break;
+        case Document::TierP2      : item.setTierPrice(1, Currency::fromLocal(value.toString())); break;
+        case Document::TierP3      : item.setTierPrice(2, Currency::fromLocal(value.toString())); break;
         case Document::Weight      : item.setWeight(Utility::stringToWeight(value.toString(), Config::inst()->measurementSystem())); break;
         case Document::Quantity    : item.setQuantity(value.toInt()); break;
         case Document::QuantityDiff: item.setQuantity(itemp->origQuantity() + value.toInt()); break;
-        case Document::Price       : item.setPrice(money_t::fromLocalizedString(value.toString())); break;
-        case Document::PriceDiff   : item.setPrice(itemp->origPrice() + money_t::fromLocalizedString(value.toString())); break;
+        case Document::Price       : item.setPrice(Currency::fromLocal(value.toString())); break;
+        case Document::PriceDiff   : item.setPrice(itemp->origPrice() + Currency::fromLocal(value.toString())); break;
         default                     : break;
         }
         if (!(item == *itemp)) {
@@ -1344,14 +1344,14 @@ QVariant Document::dataForEditRole(Item *it, Field f) const
     case Document::TierQ1      : return it->tierQuantity(0); break;
     case Document::TierQ2      : return it->tierQuantity(1); break;
     case Document::TierQ3      : return it->tierQuantity(2); break;
-    case Document::TierP1      : return (it->tierPrice(0) != 0 ? it->tierPrice(0) : it->price()     ).toLocalizedString(false); break;
-    case Document::TierP2      : return (it->tierPrice(1) != 0 ? it->tierPrice(1) : it->tierPrice(0)).toLocalizedString(false); break;
-    case Document::TierP3      : return (it->tierPrice(2) != 0 ? it->tierPrice(2) : it->tierPrice(1)).toLocalizedString(false); break;
+    case Document::TierP1      : return (it->tierPrice(0) != 0 ? it->tierPrice(0) : it->price()     ).toLocal(); break;
+    case Document::TierP2      : return (it->tierPrice(1) != 0 ? it->tierPrice(1) : it->tierPrice(0)).toLocal(); break;
+    case Document::TierP3      : return (it->tierPrice(2) != 0 ? it->tierPrice(2) : it->tierPrice(1)).toLocal(); break;
     case Document::Weight      : return Utility::weightToString(it->weight(), Config::inst()->measurementSystem(), false); break;
     case Document::Quantity    : return it->quantity(); break;
     case Document::QuantityDiff: return it->quantity() - it->origQuantity(); break;
-    case Document::Price       : return it->price().toLocalizedString(false); break;
-    case Document::PriceDiff   : return (it->price() - it->origPrice()).toLocalizedString(false); break;
+    case Document::Price       : return it->price().toLocal(); break;
+    case Document::PriceDiff   : return (it->price() - it->origPrice()).toLocal(); break;
     default                     : return QString();
     }
 }
@@ -1368,8 +1368,8 @@ QString Document::dataForDisplayRole(Item *it, Field f) const
     case Remarks     : return it->remarks();
     case Quantity    : return QString::number(it->quantity());
     case Bulk        : return (it->bulkQuantity() == 1 ? dash : QString::number(it->bulkQuantity()));
-    case Price       : return it->price().toLocalizedString();
-    case Total       : return it->total().toLocalizedString();
+    case Price       : return it->price().toLocal();
+    case Total       : return it->total().toLocal();
     case Sale        : return (it->sale() == 0 ? dash : QString::number(it->sale()) + QLatin1Char('%'));
     case Condition   : return (it->condition() == BrickLink::New ? tr("N", "New") : tr("U", "Used"));
     case Color       : return it->color()->name();
@@ -1378,15 +1378,15 @@ QString Document::dataForDisplayRole(Item *it, Field f) const
     case TierQ1      : return (it->tierQuantity(0) == 0 ? dash : QString::number(it->tierQuantity(0)));
     case TierQ2      : return (it->tierQuantity(1) == 0 ? dash : QString::number(it->tierQuantity(1)));
     case TierQ3      : return (it->tierQuantity(2) == 0 ? dash : QString::number(it->tierQuantity(2)));
-    case TierP1      : return it->tierPrice(0).toLocalizedString();
-    case TierP2      : return it->tierPrice(1).toLocalizedString();
-    case TierP3      : return it->tierPrice(2).toLocalizedString();
+    case TierP1      : return it->tierPrice(0).toLocal();
+    case TierP2      : return it->tierPrice(1).toLocal();
+    case TierP3      : return it->tierPrice(2).toLocal();
     case Reserved    : return it->reserved();
     case Weight      : return (it->weight() == 0 ? dash : Utility::weightToString(it->weight(), Config::inst()->measurementSystem(), true, true));
     case YearReleased: return (it->item()->yearReleased() == 0 ? dash : QString::number(it->item()->yearReleased()));
 
-    case PriceOrig   : return it->origPrice().toLocalizedString();
-    case PriceDiff   : return (it->price() - it->origPrice()).toLocalizedString();
+    case PriceOrig   : return it->origPrice().toLocal();
+    case PriceDiff   : return (it->price() - it->origPrice()).toLocal();
     case QuantityOrig: return QString::number(it->origQuantity());
     case QuantityDiff: return QString::number(it->quantity() - it->origQuantity());
     default          : return QString();

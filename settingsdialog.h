@@ -33,7 +33,6 @@ public slots:
 
 protected slots:
     void selectDocDir();
-    void rateTypeToggled(bool);
     void resetUpdateIntervals();
     void getRateFromECB();
     void gotRateFromECB(bool ok);

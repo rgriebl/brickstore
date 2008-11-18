@@ -61,7 +61,7 @@ protected slots:
     void selectionUpdate(const Document::ItemList &list);
     virtual void dockChanged();
 
-    void setPrice(money_t p);
+    void setPrice(Currency p);
 
 protected:
     virtual bool event(QEvent *e);

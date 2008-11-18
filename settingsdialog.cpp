@@ -20,6 +20,7 @@
 #include "settingsdialog.h"
 #include "config.h"
 #include "bricklink.h"
+#include "utility.h"
 #include "messagebox.h"
 
 static int sec2day ( int s )
@@ -40,7 +41,6 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent, Qt
     
     w_upd_reset->setAttribute(Qt::WA_MacSmallSize);
 
-    connect(w_rate_fixed, SIGNAL(toggled(bool)), this, SLOT(rateTypeToggled(bool)));
     connect(w_docdir_select, SIGNAL(clicked()), this, SLOT(selectDocDir()));
     connect(w_upd_reset, SIGNAL(clicked()), this, SLOT(resetUpdateIntervals()));
     connect(w_rate_ecb, SIGNAL(clicked()), this, SLOT(getRateFromECB()));
@@ -49,10 +49,10 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent, Qt
 
     load();
 
-    if (!start_on_page.isEmpty()) {
-        if (QWidget *w = findChild<QWidget *>(start_on_page))
-            w_tabs->setCurrentWidget(w);
-    }
+    QWidget *w = w_tabs->widget(0);
+    if (!start_on_page.isEmpty())
+        w = findChild<QWidget *>(start_on_page);
+    w_tabs->setCurrentWidget(w);
 }
 
 void SettingsDialog::getRateFromECB()
@@ -111,11 +111,6 @@ void SettingsDialog::gotRateFromECB(bool error)
     w_rate_ecb->setEnabled(true);
 }
 
-void SettingsDialog::rateTypeToggled(bool fixed)
-{
-    w_rate->setReadOnly(!fixed);
-}
-
 void SettingsDialog::selectDocDir()
 {
 	QString newdir = QFileDialog::getExistingDirectory(this, tr("Document directory location"), w_docdir->text());
@@ -155,9 +150,12 @@ void SettingsDialog::load()
 	    QLocale l_active;
 
 		foreach (const Config::Translation &trans, translations) {
-			w_language->addItem(QString("%1 (%2)").arg(trans.m_names[QLatin1String("en")], trans.m_names[trans.m_langid]));
+            if (trans.language == QLatin1String("en"))
+                w_language->addItem(trans.languageName[QLatin1String("en")], trans.language);
+            else
+                w_language->addItem(QString("%1 (%2)").arg(trans.languageName[QLatin1String("en")], trans.languageName[trans.language]), trans.language);
 
-			QLocale l(trans.m_langid);
+			QLocale l(trans.language);
 
 			if (!localematch) {
 				if (l.language() == l_active.language()) {
@@ -173,16 +171,10 @@ void SettingsDialog::load()
     w_metric->setChecked(Config::inst()->isMeasurementMetric());
 	w_imperial->setChecked(Config::inst()->isMeasurementImperial());
 
-	w_rate_fixed->setChecked(true);
-	//w_rate_daily->setChecked(false);
-    w_currency->setEditText("EUR");
-	w_rate->setText("0.67");
-	/*
-	w_local_currency->setChecked(Money::inst()->isLocalized());
-	w_local_currency_label->setText(w_local_currency_label->text().arg(Money::inst()->localCurrencySymbol()));
-	w_local_currency_factor->setText(QString::number(Money::inst()->factor()));
-	w_local_currency_factor->setValidator(newQDoubleValidator(w_local_currency_factor));
-	*/
+    w_rate_fixed->setChecked(Config::inst()->isLocalSet());
+    w_currency->setEditText(Config::inst()->localCurrencySymbols().first);
+    w_rate->setText(QString::number(Config::inst()->localCurrencyRate()));
+	w_rate->setValidator(new QDoubleValidator(w_rate));
 
 	w_openbrowser->setChecked(Config::inst()->value("/General/Export/OpenBrowser", true).toBool());
 	w_closeempty->setChecked(Config::inst()->closeEmptyDocuments());
@@ -255,4 +247,29 @@ void SettingsDialog::load()
 
 void SettingsDialog::save()
 {
+	// --[ GENERAL ]-------------------------------------------------------------------
+
+    if (w_language->currentIndex() >= 0)
+        Config::inst()->setLanguage(w_language->itemData(w_language->currentIndex()).toString());
+    Config::inst()->setMeasurementSystem(w_imperial->isChecked() ? QLocale::ImperialSystem : QLocale::MetricSystem);
+
+    if (w_rate_none->isChecked()) {
+        Config::inst()->unsetLocal();
+    } else {
+        QString symint = w_currency->lineEdit()->text().trimmed().toUpper();
+        QString sym = Utility::currencySymbolsForCountry(Utility::countryForCurrencySymbol(symint)).second;
+        if (sym.isEmpty())
+            sym = symint;
+
+        Config::inst()->setLocal(symint, sym, w_rate->text().toDouble());
+    }
+
+    QDir dd(w_docdir->text());
+    if (dd.exists() && dd.isReadable())
+        Config::inst()->setDocumentDir(w_docdir->text());
+    else
+        MessageBox::warning(this, tr("The specified document directory does not exist or is not read- and writeable.<br />The document directory setting will not be changed."));
+
+    Config::inst()->setCloseEmptyDocuments(w_closeempty->isChecked ());
+    Config::inst()->setValue("/General/Export/OpenBrowser", w_openbrowser->isChecked());
 }
