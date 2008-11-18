@@ -165,6 +165,7 @@ QList<Filter> Filter::Parser::parse(const QString &str_)
             f.setCombination(res.second);
             filters.append(f);
             state = StateStart;
+            f = Filter();
             break;
         }
         case StateInvalid:
@@ -251,7 +252,7 @@ QPair<QString, Filter::Combination> Filter::Parser::matchFilterAndCombination(in
     res.second = Filter::And;
     
     int len = str.length();
-    QChar quote_char = str[0];
+    QChar quote_char = str[pos];
     bool quoted = false;
     
     if (quote_char == QLatin1Char('\'') || quote_char == QLatin1Char('"')) {
@@ -260,7 +261,7 @@ QPair<QString, Filter::Combination> Filter::Parser::matchFilterAndCombination(in
     }
     
     if (quoted) {
-        int end = str.indexOf(quote_char, pos);
+        int end = str.indexOf(quote_char, pos+1);
         
         if (end == -1) {
             // missing quote end: just take everything as filter expr
