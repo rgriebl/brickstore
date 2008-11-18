@@ -372,45 +372,14 @@ void Application::about()
     QString qt   = qVersion();
 
     QString translators = "<b>" + tr("Translators") + "</b><table border=\"0\">";
-    QFile file("translations/translations.xml");
 
-    if (file.open(QIODevice::ReadOnly)) {
-        QDomDocument doc;
-        QString err_str;
-        int err_line = 0, err_col = 0;
-
-        if (doc.setContent(&file, &err_str, &err_line, &err_col)) {
-            QDomElement root = doc.documentElement();
-
-            if (root.isElement() && root.nodeName() == "translations") {
-                for (QDomNode trans = root.firstChild(); !trans.isNull(); trans = trans.nextSibling()) {
-                    if (!trans.isElement() || (trans.nodeName() != "translation"))
-                        continue;
-                    QDomNamedNodeMap map = trans.attributes();
-
-                    if (!map.contains("default")) {
-                        QString lang_id = map.namedItem("lang").toAttr().value();
-                        QString author  = map.namedItem("author").toAttr().value();
-                        QString email   = map.namedItem("authoremail").toAttr().value();
-                        QString langname;
-
-                        for (QDomNode name = trans.firstChild(); !name.isNull(); name = name.nextSibling()) {
-                            if (!name. isElement() || (name.nodeName() != "name"))
-                                continue;
-                            QDomNamedNodeMap map = name.attributes();
-
-                            if (QLocale().name().startsWith(map.namedItem("lang").toAttr().value()))
-                                langname = name.toElement().text();
-                        }
-                        if (!langname.isEmpty())
-                            translators += QString("<tr><td>%1</td><td width=\"2em\"></td><td>%2 &lt;<a href=\"mailto:%3\">%4</a>&gt;</td></tr>").arg(langname, author, email, email);
-                    }
-                }
-            }
-        } else {
-            qWarning("Could not parse %s: %s, line %d, column %d", qPrintable(file.fileName()), qPrintable(err_str), err_line, err_col);
+    foreach (const Config::Translation &trans, Config::inst()->translations()) {
+        if (trans.language != QLatin1String("en")) {
+            QString langname = trans.languageName.value(QLocale().name().left(2), trans.languageName[QLatin1String("en")]);
+            translators += QString("<tr><td>%1</td><td width=\"2em\"></td><td>%2 &lt;<a href=\"mailto:%3\">%4</a>&gt;</td></tr>").arg(langname, trans.author, trans.authorEMail, trans.authorEMail);
         }
     }
+
     translators += "</table>";
 
     static const char *legal_src = QT_TR_NOOP(
