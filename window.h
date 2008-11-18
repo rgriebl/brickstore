@@ -22,7 +22,7 @@
 #include "bricklinkfwd.h"
 #include "document.h"
 #include "config.h"
-#include "money.h"
+#include "currency.h"
 
 class QToolButton;
 class QComboBox;

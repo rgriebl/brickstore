@@ -40,7 +40,7 @@
 #include "window.h"
 #include "document.h"
 #include "config.h"
-#include "money.h"
+#include "currency.h"
 #include "multiprogressbar.h"
 #include "undo.h"
 #include "spinner.h"

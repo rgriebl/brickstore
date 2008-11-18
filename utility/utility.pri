@@ -14,7 +14,7 @@ XSOURCES = filteredit \
            filter \
            headerview \
            messagebox \
-           money \
+           currency \
            multiprogressbar \
            progressdialog \
            spinner \

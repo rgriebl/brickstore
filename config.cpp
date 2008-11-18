@@ -30,7 +30,7 @@
 
 #include <QCryptographicHash>
 #include "config.h"
-#include "money.h"
+#include "currency.h"
 
 #define XSTR(a) #a
 #define STR(a) XSTR(a)

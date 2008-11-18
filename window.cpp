@@ -42,7 +42,7 @@
 #include "config.h"
 #include "framework.h"
 #include "utility.h"
-#include "money.h"
+#include "currency.h"
 #include "document.h"
 #include "disableupdates.h"
 #include "window.h"

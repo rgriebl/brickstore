@@ -41,7 +41,7 @@
 #include <ctime>
 
 #include "ref.h"
-#include "money.h"
+#include "currency.h"
 #include "threadpool.h"
 #include "transfer.h"
 

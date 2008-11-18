@@ -25,7 +25,7 @@
 
 #include "bricklink.h"
 #include "config.h"
-#include "money.h"
+#include "currency.h"
 
 #include "priceguidewidget.h"
 

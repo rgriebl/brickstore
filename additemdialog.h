@@ -19,7 +19,7 @@
 
 #include "ui_additemdialog.h"
 
-#include "money.h"
+#include "currency.h"
 #include "bricklinkfwd.h"
 
 class QValidator;

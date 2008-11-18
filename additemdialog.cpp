@@ -26,7 +26,7 @@
 #include <QWheelEvent>
 
 #include "config.h"
-#include "money.h"
+#include "currency.h"
 #include "bricklink.h"
 #include "window.h"
 #include "document.h"

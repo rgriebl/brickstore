@@ -25,7 +25,7 @@
 
 #include "config.h"
 #include "utility.h"
-#include "money.h"
+#include "currency.h"
 
 
 

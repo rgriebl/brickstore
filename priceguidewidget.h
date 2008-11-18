@@ -16,7 +16,7 @@
 
 #include <QFrame>
 
-#include "money.h"
+#include "currency.h"
 #include "bricklinkfwd.h"
 
 
