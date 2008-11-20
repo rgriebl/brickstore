@@ -49,6 +49,9 @@
 #include "headerview.h"
 #include "selectitemdialog.h"
 #include "selectcolordialog.h"
+#include "selectdocumentdialog.h"
+#include "settopriceguidedialog.h"
+#include "incdecpricesdialog.h"
 
 namespace {
 
@@ -1321,16 +1324,16 @@ void Window::on_edit_price_to_priceguide_triggered()
         return;
     }
 
-    //DlgSetToPGImpl dlg ( this );
+    SetToPriceGuideDialog dlg(this);
 
-    if (true) { //TODO: dlg.exec ( ) == QDialog::Accepted ) {
+    if (dlg.exec() == QDialog::Accepted) {
         DisableUpdates disupd(w_list);
 
         m_settopg_list    = new QMultiHash<BrickLink::PriceGuide *, Document::Item *>();
         m_settopg_failcnt = 0;
-        m_settopg_time    = BrickLink::PastSix; //dlg.time ( );
-        m_settopg_price   = BrickLink::Average; //dlg.price ( );
-        bool force_update = false; //dlg.forceUpdate ( );
+        m_settopg_time    = dlg.time();
+        m_settopg_price   = dlg.price();
+        bool force_update = dlg.forceUpdate();
 
         foreach(Document::Item *item, selection()) {
             BrickLink::PriceGuide *pg = BrickLink::core()->priceGuide(item->item(), item->color());
@@ -1404,13 +1407,13 @@ void Window::on_edit_price_inc_dec_triggered()
     if (selection().isEmpty())
         return;
 
-    //DlgIncDecPriceImpl dlg ( this, "", true );
+    IncDecPricesDialog dlg(this);
 
-    if (true) { //TODO: dlg.exec ( ) == QDialog::Accepted ) {
-        Currency fixed   = Currency(1); //dlg.fixed ( );
-        double percent = 0; //dlg.percent ( );
-        double factor  = (1.+ percent / 100.);
-        bool tiers     = true; //dlg.applyToTiers ( );
+    if (dlg.exec() == QDialog::Accepted) {
+        Currency fixed   = dlg.fixed();
+        double percent   = dlg.percent();
+        double factor    = (1.+ percent / 100.);
+        bool tiers       = dlg.applyToTiers();
         uint incdeccount = 0;
 
         m_doc->beginMacro();
@@ -1756,10 +1759,10 @@ void Window::updateErrorMask()
 
 void Window::on_edit_copyremarks_triggered()
 {
-// DlgSubtractItemImpl d ( tr( "Please choose the document that should serve as a source to fill in the remarks fields of the current document:" ), this, "CopyRemarkDlg" );
+    SelectDocumentDialog dlg(document(), tr("Please choose the document that should serve as a source to fill in the remarks fields of the current document:"));
 
-    if (true) { //TODO: d.exec ( ) == QDialog::Accepted ) {
-        BrickLink::InvItemList list; // = d.items ( );
+    if (dlg.exec() == QDialog::Accepted ) {
+        BrickLink::InvItemList list = dlg.items();
 
         if (!list.isEmpty())
             copyRemarks(list);
@@ -1812,10 +1815,10 @@ void Window::copyRemarks(const BrickLink::InvItemList &items)
 
 void Window::on_edit_subtractitems_triggered()
 {
-    //DlgSubtractItemImpl d ( tr( "Which items should be subtracted from the current document:" ), this, "SubtractItemDlg" );
+    SelectDocumentDialog dlg(document(), tr("Which items should be subtracted from the current document:"));
 
-    if (true) { //TODO: d.exec ( ) == QDialog::Accepted ) {
-        BrickLink::InvItemList list; // = d.items ( );
+    if (dlg.exec() == QDialog::Accepted ) {
+        BrickLink::InvItemList list = dlg.items();
 
         if (!list.isEmpty())
             subtractItems(list);

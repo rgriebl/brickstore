@@ -57,10 +57,13 @@ XSOURCES = application \
 XFORMS  = additemdialog \
           importinventorydialog \
           importorderdialog \
+          incdecpricesdialog \
           informationdialog \
           registrationdialog \
           selectcolordialog \
           selectitemdialog \
+          selectdocumentdialog \
+          settopriceguidedialog \
           settingsdialog \
 
 
