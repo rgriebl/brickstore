@@ -308,16 +308,21 @@ Document::Document()
 Document::~Document()
 {
     m_autosave_timer.stop();
-    
-    QDir temp(QDesktopServices::storageLocation(QDesktopServices::TempLocation));
-    QString filename = QString("bse_%1.autosave").arg(m_uuid.toString());
-
-    temp.remove(filename);
+    deleteAutosave();
 
     delete m_order;
     qDeleteAll(m_items);
 
     s_documents.removeAll(this);
+}
+
+static const char *autosavemagic = "||BRICKSTORE AUTOSAVE MAGIC||";
+
+void Document::deleteAutosave()
+{
+    QDir temp(QDesktopServices::storageLocation(QDesktopServices::TempLocation));
+    QString filename = QString("brickstore_%1.autosave").arg(m_uuid.toString());
+    temp.remove(filename);
 }
 
 void Document::autosave()
@@ -326,16 +331,16 @@ void Document::autosave()
         return;
 
     QDir temp(QDesktopServices::storageLocation(QDesktopServices::TempLocation));
-    QString filename = QString("bse_%1.autosave").arg(m_uuid.toString());        
+    QString filename = QString("brickstore_%1.autosave").arg(m_uuid.toString());        
 
     QFile f(temp.filePath(filename));
     if (f.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
         QDataStream ds(&f);
-        ds << QByteArray("BSE AUTOSAVE MAGIC");
+        ds << QByteArray(autosavemagic);
         ds << m_items.count();
         foreach (const Item *item, m_items)
             ds << *item;
-        ds << QByteArray("BSE AUTOSAVE MAGIC");
+        ds << QByteArray(autosavemagic);
     }
 }
 
@@ -344,7 +349,7 @@ QList<Document::ItemList> Document::restoreAutosave()
     QList<ItemList> restored;
 
     QDir temp(QDesktopServices::storageLocation(QDesktopServices::TempLocation));
-    QStringList ondisk = temp.entryList(QStringList(QLatin1String("bse_*.autosave")));
+    QStringList ondisk = temp.entryList(QStringList(QLatin1String("brickstore_*.autosave")));
 
     foreach (QString filename, ondisk) {
         QFile f(temp.filePath(filename));
@@ -356,7 +361,7 @@ QList<Document::ItemList> Document::restoreAutosave()
             QDataStream ds(&f);
             ds >> magic >> count;;
             
-            if (count > 0 && magic == QByteArray("BSE AUTOSAVE MAGIC")) {
+            if (count > 0 && magic == QByteArray(autosavemagic)) {
                 for (int i = 0; i < count; ++i) {
                     Item *item = new Item();
                     ds >> *item;
@@ -364,7 +369,7 @@ QList<Document::ItemList> Document::restoreAutosave()
                 }            
                 ds >> magic;
                 
-                if (magic == QByteArray("BSE AUTOSAVE MAGIC"))
+                if (magic == QByteArray(autosavemagic))
                     restored.append(items);
             }
             f.close();
@@ -1041,6 +1046,7 @@ bool Document::fileSaveTo(const QString &s, const char *type, bool export_only, 
 
         if (ok) {
             if (!export_only) {
+                deleteAutosave();
                 m_undo->setClean();
                 setFileName(s);
 

@@ -159,8 +159,7 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
     setCentralWidget(m_mdi);
 
     m_taskpanes = new TaskPaneManager(this);
-// m_taskpanes->setMode ( Config::inst ( )->value ( "/MainWindow/Infobar/Mode", TaskPaneManager::Modern ).toInt ( ) != TaskPaneManager::Classic ? TaskPaneManager::Modern : TaskPaneManager::Classic );
-    m_taskpanes->setMode(TaskPaneManager::Modern);
+    m_taskpanes->setMode(Config::inst()->value("/MainWindow/Infobar/Mode", TaskPaneManager::Modern).toInt() != TaskPaneManager::Classic ? TaskPaneManager::Modern : TaskPaneManager::Classic);
 
     m_task_info = new TaskInfoWidget(0);
     m_task_info->setObjectName(QLatin1String("TaskInfo"));
@@ -174,16 +173,16 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
 
     m_task_appears = new TaskAppearsInWidget(0);
     m_task_appears->setObjectName(QLatin1String("TaskAppears"));
-    m_taskpanes->addItem(m_task_appears,  QIcon(":/images/sidebar/appearsin"));
+    m_taskpanes->addItem(m_task_appears, QIcon(":/images/sidebar/appearsin"));
     m_taskpanes->setItemVisible(m_task_appears, Config::inst()->value("/MainWindow/Infobar/AppearsinVisible", true).toBool());
 
     m_task_links = new TaskLinksWidget(0);
     m_task_links->setObjectName(QLatin1String("TaskLinks"));
-    m_taskpanes->addItem(m_task_links,  QIcon(":/images/sidebar/links"));
+    m_taskpanes->addItem(m_task_links, QIcon(":/images/sidebar/links"));
     m_taskpanes->setItemVisible(m_task_links, Config::inst()->value("/MainWindow/Infobar/LinksVisible", true).toBool());
 
     m_toolbar = new QToolBar(this);
-    m_toolbar->setObjectName("toolbar");
+    m_toolbar->setObjectName(QLatin1String("toolbar"));
 
     createActions();
 
@@ -583,11 +582,11 @@ FrameWork::~FrameWork()
     Config::inst()->setValue("/Files/Recent", m_recent_files);
 
     Config::inst()->setValue("/MainWindow/Statusbar/Visible",         statusBar()->isVisibleTo(this));
-//    Config::inst()->setValue("/MainWindow/Infobar/Mode",              m_taskpanes->mode());
-//    Config::inst()->setValue("/MainWindow/Infobar/InfoVisible",       m_taskpanes->isItemVisible(m_task_info));
-//    Config::inst()->setValue("/MainWindow/Infobar/PriceguideVisible", m_taskpanes->isItemVisible(m_task_priceguide));
-//    Config::inst()->setValue("/MainWindow/Infobar/AppearsinVisible",  m_taskpanes->isItemVisible(m_task_appears));
-//    Config::inst()->setValue("/MainWindow/Infobar/LinksVisible",      m_taskpanes->isItemVisible(m_task_links));
+    Config::inst()->setValue("/MainWindow/Infobar/Mode",              m_taskpanes->mode());
+    Config::inst()->setValue("/MainWindow/Infobar/InfoVisible",       m_taskpanes->isItemVisible(m_task_info));
+    Config::inst()->setValue("/MainWindow/Infobar/PriceguideVisible", m_taskpanes->isItemVisible(m_task_priceguide));
+    Config::inst()->setValue("/MainWindow/Infobar/AppearsinVisible",  m_taskpanes->isItemVisible(m_task_appears));
+    Config::inst()->setValue("/MainWindow/Infobar/LinksVisible",      m_taskpanes->isItemVisible(m_task_links));
 
     Config::inst()->setValue("/MainWindow/Layout/DockWindows", saveState());
     Config::inst()->setValue("/MainWindow/Layout/Geometry", saveGeometry());

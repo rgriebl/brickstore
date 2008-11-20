@@ -19,13 +19,12 @@
 #include <QStringList>
 #include <QDir>
 #include <QDomDocument>
+#include <QDesktopServices>
 
 #if defined(Q_WS_WIN)
 #  include <windows.h>
 #  include <tchar.h>
 #  include <shlobj.h>
-#elif defined(Q_WS_MACX)
-#  include <Carbon/Carbon.h>
 #endif
 
 #include <QCryptographicHash>
@@ -56,7 +55,7 @@ Config::Config()
     m_translations_parsed = false;
     setRegistration(registrationName(), registrationKey());
 
-    if (isLocalSet()) {
+    if (isLocalCurrencySet()) {
         QPair<QString, QString> syms = localCurrencySymbols();
         Currency::setLocal(syms.first, syms.second, localCurrencyRate());
     }
@@ -325,36 +324,11 @@ QString Config::lDrawDir() const
 
 QString Config::documentDir() const
 {
-    QString dir = value("/General/DocDir").toString();
+    QString dir = value("/General/DocDir", QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation)).toString();
 
-    if (dir.isEmpty()) {
+    if (dir.isEmpty())
         dir = QDir::homePath();
 
-#if defined( Q_WS_WIN )
-        QT_WA({
-            WCHAR wpath [MAX_PATH];
-
-            if (SHGetSpecialFolderPathW(NULL, wpath, CSIDL_PERSONAL, TRUE))
-                dir = QString::fromUtf16(wpath);
-        }, {
-            char apath [MAX_PATH];
-
-            if (SHGetSpecialFolderPathA(NULL, apath, CSIDL_PERSONAL, TRUE))
-                dir = QString::fromLocal8Bit(apath);
-        })
-
-#elif defined( Q_WS_MACX )
-        FSRef dref;
-
-        if (FSFindFolder(kUserDomain, kDocumentsFolderType, kDontCreateFolder, &dref) == noErr) {
-            UInt8 strbuffer [PATH_MAX];
-
-            if (FSRefMakePath(&dref, strbuffer, sizeof(strbuffer)) == noErr)
-                dir = QString::fromUtf8(reinterpret_cast <char *>(strbuffer));
-        }
-
-#endif
-    }
     return dir;
 }
 
@@ -391,7 +365,11 @@ void Config::setProxy(const QNetworkProxy &np)
 
 QString Config::dataDir() const
 {
-    return value("/BrickLink/DataDir").toString();
+#if QT_VERSION < 0x040500
+    return value("/BrickLink/DataDir", QDesktopServices::storageLocation(QDesktopServices::DataLocation)).toString();
+#else
+    return value("/BrickLink/DataDir", QDesktopServices::storageLocation(QDesktopServices::CacheLocation)).toString();
+#endif
 }
 
 void Config::setDataDir(const QString &dir)
@@ -401,7 +379,7 @@ void Config::setDataDir(const QString &dir)
 
 QString Config::language() const
 {
-    return value("/General/Locale").toString();
+    return value("/General/Locale", QLocale::system().name()).toString();
 }
 
 void Config::setLanguage(const QString &lang)
@@ -578,7 +556,7 @@ error:
 	return false;
 }
 
-void Config::setLocal(const QString &symint, const QString &sym, double rate)
+void Config::setLocalCurrency(const QString &symint, const QString &sym, double rate)
 {
     setValue("/General/Local/Active", true);
     setValue("/General/Local/IntSymbol", symint);
@@ -590,7 +568,7 @@ void Config::setLocal(const QString &symint, const QString &sym, double rate)
     emit localCurrencyChanged();
 }
 
-void Config::unsetLocal()
+void Config::unsetLocalCurrency()
 {
     setValue("/General/Local/Active", false);
     Currency::setLocal(QLatin1String("USD"), QLatin1String("$"), 1.);
@@ -598,7 +576,7 @@ void Config::unsetLocal()
     emit localCurrencyChanged();
 }
 
-bool Config::isLocalSet() const
+bool Config::isLocalCurrencySet() const
 {
     return value("/General/Local/Active", false).toBool();
 }

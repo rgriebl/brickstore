@@ -171,7 +171,7 @@ void SettingsDialog::load()
     w_metric->setChecked(Config::inst()->isMeasurementMetric());
 	w_imperial->setChecked(Config::inst()->isMeasurementImperial());
 
-    w_rate_fixed->setChecked(Config::inst()->isLocalSet());
+    w_rate_fixed->setChecked(Config::inst()->isLocalCurrencySet());
     w_currency->setEditText(Config::inst()->localCurrencySymbols().first);
     w_rate->setText(QString::number(Config::inst()->localCurrencyRate()));
 	w_rate->setValidator(new QDoubleValidator(w_rate));
@@ -254,14 +254,14 @@ void SettingsDialog::save()
     Config::inst()->setMeasurementSystem(w_imperial->isChecked() ? QLocale::ImperialSystem : QLocale::MetricSystem);
 
     if (w_rate_none->isChecked()) {
-        Config::inst()->unsetLocal();
+        Config::inst()->unsetLocalCurrency();
     } else {
         QString symint = w_currency->lineEdit()->text().trimmed().toUpper();
         QString sym = Utility::currencySymbolsForCountry(Utility::countryForCurrencySymbol(symint)).second;
         if (sym.isEmpty())
             sym = symint;
 
-        Config::inst()->setLocal(symint, sym, w_rate->text().toDouble());
+        Config::inst()->setLocalCurrency(symint, sym, w_rate->text().toDouble());
     }
 
     QDir dd(w_docdir->text());

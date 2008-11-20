@@ -40,7 +40,7 @@ public:
     inline bool isMeasurementMetric()    { return measurementSystem() == QLocale::MetricSystem;   }
     inline bool isMeasurementImperial()  { return measurementSystem() == QLocale::ImperialSystem; }
 
-    bool isLocalSet() const;
+    bool isLocalCurrencySet() const;
     double localCurrencyRate() const;
     QPair<QString, QString> localCurrencySymbols() const;
 
@@ -86,8 +86,8 @@ public:
 public slots:
     void setLanguage(const QString &lang);
     void setMeasurementSystem(QLocale::MeasurementSystem ms);
-    void setLocal(const QString &symint, const QString &sym, double rate);
-    void unsetLocal();
+    void setLocalCurrency(const QString &symint, const QString &sym, double rate);
+    void unsetLocalCurrency();
 
     void setCloseEmptyDocuments(bool b);
     void setDocumentDir(const QString &dir);

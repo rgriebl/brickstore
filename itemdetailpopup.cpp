@@ -119,7 +119,7 @@ void ItemDetailPopup::setItem(Document::Item *item)
     if (m_item) {
         m_pic = BrickLink::core()->largePicture(m_item->item(), true);
         m_pic->addRef();
-        m_part = LDraw::core()->itemModel(m_item->item()->id());
+        m_part = LDraw::core() ? LDraw::core()->itemModel(m_item->item()->id()) : 0;
 
         m_blpic->setText(QString());
 

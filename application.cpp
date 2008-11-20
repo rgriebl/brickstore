@@ -179,17 +179,17 @@ void Application::rebuildDatabase()
 
 QString Application::appName() const
 {
-    return "BSE";
+    return QLatin1String(BRICKSTORE_NAME);
 }
 
 QString Application::appVersion() const
 {
-    return BRICKSTORE_VERSION;
+    return QLatin1String(BRICKSTORE_VERSION);
 }
 
 QString Application::appURL() const
 {
-    return BRICKSTORE_URL;
+    return QLatin1String(BRICKSTORE_URL);
 }
 
 QString Application::sysName() const

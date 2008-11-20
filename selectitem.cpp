@@ -33,18 +33,13 @@
 #include <QMenu>
 #include <QStyledItemDelegate>
 #include <QFormLayout>
+#include <QContextMenuEvent>
 
 #include "bricklink.h"
 #include "filteredit.h"
 #include "selectitem.h"
 #include "utility.h"
 #include "messagebox.h"
-
-
-
-
-
-
 
 
 class SelectItemPrivate {
@@ -165,6 +160,7 @@ void SelectItem::init()
     d->w_items->setRootIsDecorated(false);
     d->w_items->setSelectionBehavior(QAbstractItemView::SelectRows);
     d->w_items->setSelectionMode(QAbstractItemView::SingleSelection);
+    d->w_items->setContextMenuPolicy(Qt::CustomContextMenu);
 
     d->w_itemthumbs = new QTreeView(this);
     d->w_itemthumbs->setSortingEnabled(true);
@@ -176,6 +172,7 @@ void SelectItem::init()
     d->w_itemthumbs->setSelectionBehavior(QAbstractItemView::SelectRows);
     d->w_itemthumbs->setSelectionMode(QAbstractItemView::SingleSelection);
     d->w_itemthumbs->setItemDelegate(new ItemThumbsDelegate);
+    d->w_itemthumbs->setContextMenuPolicy(Qt::CustomContextMenu);
 
     d->w_thumbs = new QListView(this);
     d->w_thumbs->setMovement(QListView::Static);
@@ -186,6 +183,7 @@ void SelectItem::init()
     d->w_thumbs->setSelectionMode(QAbstractItemView::SingleSelection);
     d->w_thumbs->setTextElideMode(Qt::ElideRight);
     d->w_thumbs->setItemDelegate(new ItemThumbsDelegate);
+    d->w_thumbs->setContextMenuPolicy(Qt::CustomContextMenu);
 
     d->w_item_types->setModel(new BrickLink::ItemTypeModel(this));
 
@@ -217,6 +215,9 @@ void SelectItem::init()
     connect(d->w_items, SIGNAL(activated(const QModelIndex &)), this, SLOT(itemConfirmed()));
     connect(d->w_itemthumbs, SIGNAL(activated(const QModelIndex &)), this, SLOT(itemConfirmed()));
     connect(d->w_thumbs, SIGNAL(activated(const QModelIndex &)), this, SLOT(itemConfirmed()));
+    connect(d->w_items, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(showContextMenu(const QPoint &)));
+    connect(d->w_itemthumbs, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(showContextMenu(const QPoint &)));
+    connect(d->w_thumbs, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(showContextMenu(const QPoint &)));
 
     QGridLayout *toplay = new QGridLayout(this);
     toplay->setContentsMargins(0, 0, 0, 0);
@@ -534,35 +535,28 @@ QSize SelectItem::sizeHint() const
     return QSize(120 * fm.width('x'), 20 * fm.height());
 }
 
-/*
-void SelectItem::itemContextList ( QListViewItem *lvi, const QPoint &pos )
+void SelectItem::showContextMenu(const QPoint &p)
 {
- const BrickLink::Item *item = lvi ? static_cast <ItemListItem *> ( lvi )->item ( ) : 0;
+    QAbstractItemView *iv = qobject_cast<QAbstractItemView *>(sender());
 
- itemContext ( item, pos );
+    if (iv) {
+        QModelIndex idx = iv->indexAt(p);
+
+        qWarning("Got context: %d", idx.isValid()?1:0);
+
+        if (idx.isValid()) {
+            const BrickLink::Item *item = idx.model()->data(idx, BrickLink::ItemPointerRole).value<const BrickLink::Item *>();
+
+            if (item && item->category() != currentCategory()) {
+                QMenu m(this);
+                QAction *gotocat = m.addAction(tr("View item's category"));
+
+                if (m.exec(iv->mapToGlobal(p)) == gotocat) {
+                    setCurrentItem(item);
+                    ensureSelectionVisible();
+                }
+            }
+        }
+
+    }
 }
-
-void SelectItem::itemContextIcon ( QIconViewItem *ivi, const QPoint &pos )
-{
- const BrickLink::Item *item = ivi ? static_cast <ItemIconItem *> ( ivi )->item ( ) : 0;
-
- itemContext ( item, pos );
-}
-
-void SelectItem::itemContext ( const BrickLink::Item *item, const QPoint &pos )
-{
- CatListItem *cli = static_cast <CatListItem *> ( d->w_categories->selectedItem ( ));
- const BrickLink::Category *cat = cli ? cli->category ( ) : 0;
-
- if ( !item || !item->category ( ) || ( item->category ( ) == cat ))
-  return;
-
- QPopupMenu pop ( this );
- pop.insertItem ( tr( "View item's category" ), 0 );
-
- if ( pop.exec ( pos ) == 0 ) {
-  setItem ( item );
-  ensureSelectionVisible ( );
- }
-}
-*/

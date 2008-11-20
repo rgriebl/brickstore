@@ -69,6 +69,7 @@ public slots:
 protected slots:
     void applyFilter();
     void languageChange();
+    void showContextMenu(const QPoint &);
 
 protected:
     virtual void showEvent(QShowEvent *);

@@ -56,14 +56,14 @@ private:
 };
 
 
-class CLargePictureWidgetPrivate;
+class LargePictureWidgetPrivate;
 
-class CLargePictureWidget : public QLabel {
+class LargePictureWidget : public QLabel {
     Q_OBJECT
 
 public:
-    CLargePictureWidget(BrickLink::Picture *lpic, QWidget *parent);
-    virtual ~CLargePictureWidget();
+    LargePictureWidget(BrickLink::Picture *lpic, QWidget *parent);
+    virtual ~LargePictureWidget();
 
 protected slots:
     void doUpdate();
@@ -76,7 +76,7 @@ protected:
     virtual void keyPressEvent(QKeyEvent *e);
 
 private:
-    CLargePictureWidgetPrivate *d;
+    LargePictureWidgetPrivate *d;
 };
 
 #endif

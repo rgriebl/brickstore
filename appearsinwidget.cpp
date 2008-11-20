@@ -285,7 +285,7 @@ void AppearsInWidget::viewLargeImage()
         BrickLink::Picture *lpic = BrickLink::core()->largePicture(ai->second, true);
 
         if (lpic) {
-            CLargePictureWidget *l = new CLargePictureWidget(lpic, this);
+            LargePictureWidget *l = new LargePictureWidget(lpic, this);
             l->show();
             l->raise();
             l->activateWindow();

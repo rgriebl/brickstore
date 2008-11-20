@@ -697,6 +697,7 @@ void TaskPaneManager::create()
     // create new window
     if (d->m_mode == Modern) {
         d->m_panedock = new QDockWidget(d->m_mainwindow);
+        d->m_panedock->setObjectName(QLatin1String("panedock"));
         d->m_mainwindow->addDockWidget(Qt::LeftDockWidgetArea, d->m_panedock);
 
         d->m_panedock->setFeatures(QDockWidget::NoDockWidgetFeatures);
@@ -727,6 +728,7 @@ void TaskPaneManager::create()
             TaskPaneManagerPrivate::Item &item = d->m_items[idx];
 
             item.m_itemdock = new QDockWidget(item.m_text, d->m_mainwindow);
+            item.m_itemdock->setObjectName(QLatin1String("itemdock_") + item.m_text);
             d->m_mainwindow->addDockWidget(Qt::LeftDockWidgetArea, item.m_itemdock);
 
             item.m_itemdock->setFeatures(QDockWidget::AllDockWidgetFeatures);

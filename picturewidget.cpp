@@ -34,7 +34,7 @@ public:
     QImage              m_img;
 };
 
-class CLargePictureWidgetPrivate {
+class LargePictureWidgetPrivate {
 public:
     BrickLink::Picture *m_pic;
 };
@@ -148,7 +148,7 @@ void PictureWidget::viewLargeImage()
     BrickLink::Picture *lpic = BrickLink::core()->largePicture(d->m_pic->item(), true);
 
     if (lpic) {
-        CLargePictureWidget *l = new CLargePictureWidget(lpic, this);
+        LargePictureWidget *l = new LargePictureWidget(lpic, this);
         l->show();
         l->raise();
         l->activateWindow();
@@ -279,10 +279,10 @@ void PictureWidget::checkContextMenu(bool b)
 // -------------------------------------------------------------------------
 
 
-CLargePictureWidget::CLargePictureWidget(BrickLink::Picture *lpic, QWidget *parent)
+LargePictureWidget::LargePictureWidget(BrickLink::Picture *lpic, QWidget *parent)
         : QLabel(parent)
 {
-    d = new CLargePictureWidgetPrivate();
+    d = new LargePictureWidgetPrivate();
 
     setWindowFlags(Qt::Tool | Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowStaysOnTopHint);
     //setWindowModality(Qt::ApplicationModal);
@@ -324,27 +324,27 @@ CLargePictureWidget::CLargePictureWidget(BrickLink::Picture *lpic, QWidget *pare
     redraw();
 }
 
-void CLargePictureWidget::languageChange()
+void LargePictureWidget::languageChange()
 {
     findChild<QAction *> ("picture_reload")->setText(tr("Update"));
     findChild<QAction *> ("picture_close")->setText(tr("Close"));
     setToolTip(tr("Double-click to close this window."));
 }
 
-CLargePictureWidget::~CLargePictureWidget()
+LargePictureWidget::~LargePictureWidget()
 {
     if (d->m_pic)
         d->m_pic->release();
     delete d;
 }
 
-void CLargePictureWidget::gotUpdate(BrickLink::Picture *pic)
+void LargePictureWidget::gotUpdate(BrickLink::Picture *pic)
 {
     if (pic == d->m_pic)
         redraw();
 }
 
-void CLargePictureWidget::redraw()
+void LargePictureWidget::redraw()
 {
     if (d->m_pic) {
         setWindowTitle(QString(d->m_pic->item()->id()) + " " + d->m_pic->item()->name());
@@ -360,13 +360,13 @@ void CLargePictureWidget::redraw()
     }
 }
 
-void CLargePictureWidget::mouseDoubleClickEvent(QMouseEvent *e)
+void LargePictureWidget::mouseDoubleClickEvent(QMouseEvent *e)
 {
     e->accept();
     close();
 }
 
-void CLargePictureWidget::keyPressEvent(QKeyEvent *e)
+void LargePictureWidget::keyPressEvent(QKeyEvent *e)
 {
     if (e->key() == Qt::Key_Escape || e->key() == Qt::Key_Return) {
         e->accept();
@@ -374,7 +374,7 @@ void CLargePictureWidget::keyPressEvent(QKeyEvent *e)
     }
 }
 
-void CLargePictureWidget::doUpdate()
+void LargePictureWidget::doUpdate()
 {
     if (d->m_pic)
         d->m_pic->update(true);

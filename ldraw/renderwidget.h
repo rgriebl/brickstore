@@ -22,6 +22,8 @@
 #undef MessageBox
 #endif
 
+class QGLFramebufferObject;
+
 
 namespace LDraw {
 

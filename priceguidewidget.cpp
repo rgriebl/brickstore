@@ -87,9 +87,9 @@ protected:
 private:
     friend class PriceGuideWidget;
 
-    PriceGuideWidget *       m_widget;
+    PriceGuideWidget *        m_widget;
     BrickLink::PriceGuide *   m_pg;
-    PriceGuideWidget::Layout m_layout;
+    PriceGuideWidget::Layout  m_layout;
     QList<cell>               m_cells;
     bool                      m_connected;
     bool                      m_on_price;
@@ -153,10 +153,10 @@ PriceGuideWidget::PriceGuideWidget(QWidget *parent, Qt::WindowFlags f)
 
 void PriceGuideWidget::languageChange()
 {
-    findChild<QAction *> ("priceguide_reload")->setText(tr("Update"));
-    findChild<QAction *> ("priceguide_bl_catalog")->setText(tr("Show BrickLink Catalog Info..."));
-    findChild<QAction *> ("priceguide_bl_priceguide")->setText(tr("Show BrickLink Price Guide Info..."));
-    findChild<QAction *> ("priceguide_bl_lotsforsale")->setText(tr("Show Lots for Sale on BrickLink..."));
+    findChild<QAction *>("priceguide_reload")->setText(tr("Update"));
+    findChild<QAction *>("priceguide_bl_catalog")->setText(tr("Show BrickLink Catalog Info..."));
+    findChild<QAction *>("priceguide_bl_priceguide")->setText(tr("Show BrickLink Price Guide Info..."));
+    findChild<QAction *>("priceguide_bl_lotsforsale")->setText(tr("Show Lots for Sale on BrickLink..."));
 
     d->m_str_qty                           = tr("Qty.");
     d->m_str_cond [BrickLink::New]         = tr("New");

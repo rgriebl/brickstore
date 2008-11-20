@@ -232,6 +232,7 @@ private slots:
     void autosave();
 
 private:
+    void deleteAutosave();
     static Document *fileLoadFrom(const QString &s, const char *type, bool import_only = false);
     bool fileSaveTo(const QString &s, const char *type, bool export_only, const ItemList &itemlist);
     void setBrickLinkItems(const BrickLink::InvItemList &bllist, uint multiply = 1);
