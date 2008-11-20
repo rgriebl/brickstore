@@ -99,15 +99,12 @@ public:
         operator const BrickLink::InvItemList &() const { return reinterpret_cast<const BrickLink::InvItemList &>(*this); }
     };
 
-    typedef int                Position;
-    typedef QVector<Position>  PositionVector;
-
     class Statistics {
     public:
         uint lots() const         { return m_lots; }
         uint items() const        { return m_items; }
-        Currency value() const     { return m_val; }
-        Currency minValue() const  { return m_minval; }
+        Currency value() const    { return m_val; }
+        Currency minValue() const { return m_minval; }
         double weight() const     { return m_weight; }
         uint errors() const       { return m_errors; }
 

@@ -174,8 +174,10 @@ void BrickLink::Picture::load_from_disk()
     else
         is_valid = false;
 
-    if (is_valid && !large && image.depth() > 8)
-        image = image.convertToFormat(QImage::Format_Indexed8, Qt::ThresholdDither | Qt::ThresholdAlphaDither | Qt::AvoidDither);
+    // this will decrease the image a quality a bit (8bit/channel -> 5bit/channel),
+    // but it will only use half the ram (read: you can cache twice as many images)
+    if (is_valid && !large && image.depth() > 16)
+        image = image.convertToFormat(QImage::Format_RGB16);
 
     if (is_valid) {
         m_image = image;
@@ -277,8 +279,6 @@ void BrickLink::Core::pictureJobFinished(ThreadPoolJob *pj)
             pic->m_update_status = Ok;
 
             if ((j->effectiveUrl().path().indexOf("noimage", 0, Qt::CaseInsensitive) == -1) && j->data()->size() && img.loadFromData(*j->data())) {
-                if (!large)
-                    img = img.convertToFormat(QImage::Format_Indexed8, Qt::ThresholdDither | Qt::ThresholdAlphaDither | Qt::AvoidDither);
                 img.save(path, "PNG");
             }
             else {

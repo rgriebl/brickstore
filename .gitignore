@@ -12,9 +12,8 @@ brickstore.pri
 brickstore.sln
 brickstore.suo
 brickstore.vcproj*
-Debug
-debug
-Release
+[dD]ebug
+[rR]elease
 vc80.idb
 vc80.pdb
 version.h
