@@ -132,7 +132,7 @@ BrickLink::Picture::~Picture()
 int BrickLink::Picture::cost() const
 {
     if (m_color)
-        return 80*60 + 512;  // 80x60 8bpp + data
+        return 80*60*2 + 128;  // 80x60 16bpp + data
     else
         return 640*480*4 / 2;    // max. 640*480 32bpp + data, most are smaller
 }

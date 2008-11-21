@@ -92,8 +92,8 @@ int RebuildDatabase::exec()
     /////////////////////////////////////////////////////////////////////////////////
     printf("\nSTEP 1: Downloading (text) database files...\n");
 
-    //if (!download())
-    //    return error(m_error);
+    if (!download())
+        return error(m_error);
 
     /////////////////////////////////////////////////////////////////////////////////
     printf("\nSTEP 2: Parsing downloaded files...\n");
@@ -209,7 +209,7 @@ bool RebuildDatabase::download()
         { "http://www.bricklink.com/btpriceguide.asp",    pgQuery('I'),   "alltimepg_I.txt" },
         { "http://www.bricklink.com/btpriceguide.asp",    pgQuery('O'),   "alltimepg_O.txt" },
         { "http://www.bricklink.com/btinvlist.asp",       QList<QPair<QString, QString> >(), "btinvlist.txt"   },
-        // { "http://www.bricklink.com/catalogColors.asp",   QList<QPair<QString, QString> >(), "colorguide.html" },
+        { "http://www.bricklink.com/btchglog.asp",        QList<QPair<QString, QString> >(), "btchglog.txt" },
 
         { "http://www.peeron.com/inv/colors",             QList<QPair<QString, QString> >(), "peeron_colors.html" },
 

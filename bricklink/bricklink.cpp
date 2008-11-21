@@ -32,287 +32,8 @@
 #include "utility.h"
 #include "stopwatch.h"
 #include "bricklink.h"
-
-
-
-
-
-
-
-/*
-32 ID
-32 VERSION
-64 SIZE
-
-SIZE BYTES DATA
-
-PAD WITH 0 TO SIZE %16
-
-64 SIZE
-32 VERSION
-32 ID
-*/
-
-
-#include <QStack>
-
-#define ChunkId(a,b,c,d)  quint32((quint32(d & 0x7f) << 24) | (quint32(c & 0x7f) << 16) | (quint32(b & 0x7f) << 8) | quint32(a & 0x7f))
-
-class ChunkReader {
-public:
-    ChunkReader(QIODevice *dev, QDataStream::ByteOrder bo);
-    ~ChunkReader();
-
-    QDataStream &dataStream();
-
-    bool startChunk();
-    bool endChunk();
-    bool skipChunk();
-
-    quint32 chunkId() const;
-    quint32 chunkVersion() const;
-    quint64 chunkSize() const;
-
-private:
-    struct chunk_info {
-        quint32 id;
-        quint32 version;
-        quint64 startpos;
-        quint64 size;
-    };
-
-    QStack<chunk_info> m_chunks;
-    QIODevice * m_file;
-    QDataStream m_stream;
-};
-
-ChunkReader::ChunkReader(QIODevice *dev, QDataStream::ByteOrder bo)
-    : m_file(0), m_stream(0)
-{
-    if (dev->isSequential()) {
-        qWarning("ChunkReader: device does not support direct access!");
-        return;
-    }
-
-    if (!dev->isOpen() || !dev->isReadable()) {
-        qWarning("ChunkReader: device is not open and readable!");
-        return;
-    }
-    m_file = dev;
-    m_stream.setDevice(dev);
-    m_stream.setByteOrder(bo);
-}
-
-ChunkReader::~ChunkReader()
-{
-}
-
-QDataStream &ChunkReader::dataStream()
-{
-    static QDataStream nullstream;
-
-    if (!m_file)
-        return nullstream;
-    return m_stream;
-}
-
-bool ChunkReader::startChunk()
-{
-    if (!m_file)
-        return false;
-
-    if (!m_chunks.isEmpty()) {
-        chunk_info parent = m_chunks.top();
-
-        if (m_file->pos() >= qint64(parent.startpos + parent.size))
-            return false;
-    }
-
-    chunk_info ci;
-
-    m_stream >> ci.id >> ci.version >> ci.size;
-    if (m_stream.status() == QDataStream::Ok) {
-        ci.startpos = m_file->pos();
-        m_chunks.push(ci);
-        return true;
-    }
-    return false;
-}
-
-bool ChunkReader::skipChunk()
-{
-    if (!m_file || m_chunks.isEmpty())
-        return false;
-
-    chunk_info ci = m_chunks.top();
-
-    m_stream.skipRawData(ci.size);
-    return endChunk();
-}
-
-bool ChunkReader::endChunk()
-{
-    if (!m_file || m_chunks.isEmpty())
-        return false;
-
-    chunk_info ci = m_chunks.pop();
-
-    quint64 endpos = m_file->pos();
-    if (ci.startpos + ci.size != endpos) {
-        qWarning("ChunkReader: called endChunk() on a position %lld bytes from the chunk end.", ci.startpos + ci.size - endpos);
-        m_file->seek(ci.startpos + ci.size);
-    }
-
-    if (ci.size % 16)
-        m_stream.skipRawData(16 - ci.size % 16);
-
-    chunk_info ciend;
-    m_stream >> ciend.size >> ciend.version >> ciend.id;
-    return (m_stream.status() == QDataStream::Ok) &&
-           (ci.id == ciend.id) &&
-           (ci.version == ciend.version) &&
-           (ci.size == ciend.size);
-}
-
-quint32 ChunkReader::chunkId() const
-{
-    if (m_chunks.isEmpty())
-        return 0;
-    return m_chunks.top().id;
-}
-
-quint32 ChunkReader::chunkVersion() const
-{
-    if (m_chunks.isEmpty())
-        return 0;
-    return m_chunks.top().version;
-}
-
-quint64 ChunkReader::chunkSize() const
-{
-    if (m_chunks.isEmpty())
-        return 0;
-    return m_chunks.top().size;
-}
-
-
-/*
-    QFile f(...);
-    if (f.open(QIODevice::WriteOnly)) {
-        ChunkWriter cw(&f);
-        QDataStream &ds;
-
-        ds = cw.startChunk('BSDB'L, 1);
-        ds << QString("INFO TEXT");
-        ds = cw.startChunk('COLO', 1);
-        cw.endChunk();
-        cw.endChunk();
-        f.close();
-    }
-  */
-
-class ChunkWriter {
-public:
-    ChunkWriter(QIODevice *dev, QDataStream::ByteOrder bo);
-    ~ChunkWriter();
-
-    QDataStream &dataStream();
-
-    bool startChunk(quint32 id, quint32 version = 0);
-    bool endChunk();
-
-private:
-    struct chunk_info {
-        quint32 id;
-        quint32 version;
-        quint64 startpos;
-    };
-
-    QStack<chunk_info> m_chunks;
-    QIODevice * m_file;
-    QDataStream m_stream;
-};
-
-ChunkWriter::ChunkWriter(QIODevice *dev, QDataStream::ByteOrder bo)
-    : m_file(0), m_stream(0)
-{
-    if (dev->isSequential()) {
-        qWarning("ChunkWriter: device does not support direct access!");
-        return;
-    }
-
-    if (!dev->isOpen() || !dev->isWritable()) {
-        qWarning("ChunkWriter: device is not yet open!");
-        return;
-    }
-    m_file = dev;
-    m_stream.setDevice(dev);
-    m_stream.setByteOrder(bo);
-}
-
-ChunkWriter::~ChunkWriter()
-{
-    while (!m_chunks.isEmpty()) {
-        if (m_file && m_file->isOpen())
-            endChunk();
-        else
-            qWarning("ChunkWriter: file was closed before ending chunk %lc", m_chunks.pop().id);
-    }
-}
-
-QDataStream &ChunkWriter::dataStream()
-{
-    static QDataStream nullstream;
-
-    if (!m_file)
-        return nullstream;
-    return m_stream;
-}
-
-bool ChunkWriter::startChunk(quint32 id, quint32 version)
-{
-    m_stream << id << version << quint64(0);
-
-    chunk_info ci;
-    ci.id = id;
-    ci.version = version;
-    ci.startpos = m_file->pos();
-    m_chunks.push(ci);
-
-    return (m_stream.status() == QDataStream::Ok);
-}
-
-bool ChunkWriter::endChunk()
-{
-    if (!m_file || m_chunks.isEmpty())
-        return false;
-
-    chunk_info ci = m_chunks.pop();
-    quint64 endpos = m_file->pos();
-    quint64 len = endpos - ci.startpos;
-    m_file->seek(ci.startpos - sizeof(quint64));
-    m_stream << len;
-    m_file->seek(endpos);
-
-    static const char padbytes[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    if (len % 16)
-        m_stream.writeRawData(padbytes, 16 - len % 16);
-
-    m_stream << len << ci.version << ci.id;
-
-    return (m_stream.status() == QDataStream::Ok);
-}
-
-
-
-
-
-
-
-
-
-
-
+#include "chunkreader.h"
+#include "chunkwriter.h"
 
 
 
@@ -859,6 +580,7 @@ bool BrickLink::Core::readDatabase(const QString &fname)
     qDeleteAll(m_item_types);
     qDeleteAll(m_categories);
     qDeleteAll(m_items);
+    qDeleteAll(m_changelog);
 
     m_colors.clear();
     m_item_types.clear();
@@ -952,6 +674,20 @@ bool BrickLink::Core::readDatabase(const QString &fname)
 
                                 m_alltime_pg.reserve(pgc);
                                 ds.readRawData(m_alltime_pg.data(), pgc);
+                                break;
+                            }
+                            case ChunkId('C','H','G','L') | 1ULL << 32: {
+                                quint32 clc = 0;
+                                ds >> clc;
+                                int xxx= 0;
+
+                                m_changelog.reserve(clc);
+                                for (quint32 i = clc; i; i--) {
+                                    char *entry;
+                                    ds >> entry;
+                                    m_changelog.append(entry);
+                                    xxx += (4+qstrlen(entry) + 1);
+                                }
                                 break;
                             }
                             default: {
@@ -1315,12 +1051,8 @@ BrickLink::InvItemList *BrickLink::Core::parseItemListXML(QDomElement root, Item
             if (!ii->item()) {
                 inc->m_item_id = itemid;
                 inc->m_item_name = itemname;
-            }
-            if (!ii->itemType()) {
                 inc->m_itemtype_id = itemtypeid;
                 inc->m_itemtype_name = itemtypename;
-            }
-            if (!ii->category()) {
                 inc->m_category_id = categoryid;
                 inc->m_category_name = categoryname;
             }
@@ -1851,6 +1583,12 @@ void BrickLink::Core::setDatabase_AllTimePG(const QList<AllTimePriceGuide> &list
     delete pg;
 }
 
+void BrickLink::Core::setDatabase_ChangeLog(const QVector<const char *> &changelog)
+{
+    QMutexLocker lock(&m_corelock);
+    m_changelog = changelog;
+}
+
 bool BrickLink::Core::writeDatabase(const QString &filename, DatabaseVersion version)
 {
     if (filename.isEmpty() || (version != BrickStore_1_1 && version != BrickStore_2_0))
@@ -1958,6 +1696,14 @@ bool BrickLink::Core::writeDatabase(const QString &filename, DatabaseVersion ver
             ds.writeRawData(m_alltime_pg.constData(), m_alltime_pg.size());
             ok &= cw.endChunk();
 
+            ok &= cw.startChunk(ChunkId('C','H','G','L'), version);
+            quint32 clc = m_changelog.count();
+            ds << clc;
+            const char **clp = m_changelog.data();
+            for (quint32 i = clc; i; ++clp, --i)
+                ds << *clp;
+            ok &= cw.endChunk();
+
             ok &= cw.endChunk();
 
             if (ok && f.error() == QFile::NoError) {
@@ -1975,6 +1721,65 @@ bool BrickLink::Core::writeDatabase(const QString &filename, DatabaseVersion ver
 
     QFile::remove(filename + ".new");
     return false;
+}
+
+int BrickLink::Core::applyChangeLogToItems(InvItemList &bllist)
+{
+    int count = 0;
+
+    foreach (InvItem *blitem, bllist) {
+        const InvItem::Incomplete *incpl = blitem->isIncomplete();
+        if (incpl) {
+            const Item *fixed_item = blitem->item();
+            const Color *fixed_color = blitem->color();
+
+            QString itemtypeid = incpl->m_itemtype_id;
+            QString itemid     = incpl->m_item_id;
+            QString colorid    = incpl->m_color_id;
+
+            for (int i = m_changelog.count() - 1; i >= 0 && !(fixed_color && fixed_item); --i) {
+                const ChangeLogEntry cl = ChangeLogEntry(m_changelog[i]);
+
+                if (!fixed_item) {
+                    if ((cl.type() == BrickLink::ChangeLogEntry::ItemId) ||
+                        (cl.type() == BrickLink::ChangeLogEntry::ItemMerge) ||
+                        (cl.type() == BrickLink::ChangeLogEntry::ItemType)) {
+                        if ((itemtypeid == QLatin1String(cl.from(0))) &&
+                            (itemid == QLatin1String(cl.from(1)))) {
+                            itemtypeid = QLatin1String(cl.to(0));
+                            itemid = QLatin1String(cl.to(1));
+
+                            if (itemtypeid.length() == 1 && !itemid.isEmpty())
+                                fixed_item = BrickLink::core()->item(itemtypeid[0].toLatin1(), itemid.toLatin1().constData());
+                        }
+                    }
+                }
+                if (!fixed_color) {
+                    if (cl.type() == BrickLink::ChangeLogEntry::ColorMerge) {
+                        if (colorid == QLatin1String(cl.from(0))) {
+                            colorid = QLatin1String(cl.to(0));
+
+                            bool ok;
+                            int cid = colorid.toInt(&ok);
+                            if (ok)
+                                fixed_color = BrickLink::core()->color(cid);
+                        }
+                    }
+                }
+            }
+
+            if (fixed_item && !blitem->item())
+                blitem->setItem(fixed_item);
+            if (fixed_color && !blitem->color())
+                blitem->setColor(fixed_color);
+
+            if (fixed_item && fixed_color) {
+                blitem->setIncomplete(0);
+                count++;
+            }
+        }
+    }
+    return count;
 }
 
 

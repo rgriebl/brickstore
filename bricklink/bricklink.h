@@ -233,8 +233,6 @@ private:
 #endif
     };
 
-    static Item *parse(const Core *bl, uint count, const char **strs, void *itemtype);
-
     static int compare(const Item **a, const Item **b);
 
     friend class Core;
@@ -535,6 +533,33 @@ struct AllTimePriceGuide {
     } condition[ConditionCount];
 };
 
+class ChangeLogEntry : public QByteArray {
+public:
+    enum Type {
+        Invalid,
+        ItemId,
+        ItemType,
+        ItemMerge,
+        CategoryName,
+        CategoryMerge,
+        ColorName,
+        ColorMerge
+    };
+
+    ChangeLogEntry(const char *data) { m_data = QByteArray::fromRawData(data, qstrlen(data)); }
+
+    Type type() const              { return m_data.isEmpty() ? Invalid : Type(m_data.at(0)); }
+    QByteArray from(int idx) const { return (idx < 0 || idx >= 2) ? QByteArray() : m_data.split('\t')[idx+1]; }
+    QByteArray to(int idx) const   { return (idx < 0 || idx >= 2) ? QByteArray() : m_data.split('\t')[idx+3]; }
+
+private:
+    ChangeLogEntry(const ChangeLogEntry &copy);
+
+    QByteArray m_data;
+
+    friend class Core;
+};
+
 class TextImport {
 public:
     TextImport();
@@ -551,13 +576,9 @@ public:
     const QVector<const Item *>        &items() const      { return m_items; }
 
 private:
-    template <typename T> T *parse(uint count, const char **strs);    // , T *gcc_dummy );
-//  Category *parse ( uint count, const char **strs, Category * );
-//  Color *parse ( uint count, const char **strs, Color * );
-//  ItemType *parse ( uint count, const char **strs, ItemType * );
-//  Item *parse ( uint count, const char **strs, Item * );
+    template <typename T> T *parse(uint count, const char **strs);
 
-    template <typename C> bool readDB(const QString &name, C &container);
+    template <typename C> bool readDB(const QString &name, C &container, bool skip_header = false);
     template <typename T> bool readDB_processLine(QMap<int, const T *> &d, uint tokencount, const char **tokens);
     template <typename T> bool readDB_processLine(QVector<const T *> &v, uint tokencount, const char **tokens);
 
@@ -565,10 +586,10 @@ private:
     bool readDB_processLine(btinvlist_dummy &, uint count, const char **strs);
     struct btpriceguide_dummy { };
     bool readDB_processLine(btpriceguide_dummy &, uint count, const char **strs);
+    struct btchglog_dummy { };
+    bool readDB_processLine(btchglog_dummy &, uint count, const char **strs);
 
-    bool readColorGuide(const QString &name);
     bool readPeeronColors(const QString &name);
-
     bool readInventory(const QString &path, const Item *item);
 
     const Category *findCategoryByName(const char *name, int len = -1);
@@ -584,6 +605,7 @@ private:
     QHash<const Item *, AppearsIn>   m_appears_in_hash;
     QHash<const Item *, InvItemList> m_consists_of_hash;
     QList<AllTimePriceGuide>         m_alltime_pg_list;
+    QVector<const char *>            m_changelog;
 
     const ItemType *m_current_item_type;
 };
@@ -863,10 +885,6 @@ public:
 
     PriceGuide *priceGuide(const Item *item, const Color *color, bool high_priority = false);
 
-    InvItemList *load(QIODevice *f, uint *invalid_items = 0);
-    InvItemList *loadXML(QIODevice *f, uint *invalid_items = 0);
-    InvItemList *loadBTI(QIODevice *f, uint *invalid_items = 0);
-
     QSize pictureSize(const ItemType *itt) const;
     Picture *picture(const Item *item, const Color *color, bool high_priority = false);
     Picture *largePicture(const Item *item, bool high_priority = false);
@@ -875,6 +893,8 @@ public:
     QDomElement createItemListXML(QDomDocument doc, ItemListXMLHint hint, const InvItemList &items, QMap <QString, QString> *extra = 0);
 
     bool parseLDrawModel(QFile &file, InvItemList &items, uint *invalid_items = 0);
+
+    int applyChangeLogToItems(BrickLink::InvItemList &bllist);
 
     bool onlineStatus() const;
 
@@ -932,6 +952,7 @@ private:
                             const QMap<int, const ItemType *> &item_types,
                             const QVector<const Item *> &items);
     void setDatabase_AllTimePG(const QList<AllTimePriceGuide> &list);
+    void setDatabase_ChangeLog(const QVector<const char *> &changelog);
 
     friend class TextImport;
 
@@ -950,10 +971,11 @@ private:
     mutable QHash<QString, QPixmap *>  m_noimages;
     mutable QHash<QString, QPixmap *>  m_colimages;
 
-    QMap<int, const Color *>       m_colors;      // id ->Color *
-    QMap<int, const Category *>    m_categories;  // id ->Category *
-    QMap<int, const ItemType *>    m_item_types;  // id ->ItemType *
-    QVector<const Item *>          m_items;       // sorted array of Item *
+    QMap<int, const Color *>        m_colors;      // id ->Color *
+    QMap<int, const Category *>     m_categories;  // id ->Category *
+    QMap<int, const ItemType *>     m_item_types;  // id ->ItemType *
+    QVector<const Item *>           m_items;       // sorted array of Item *
+    QVector<const char *>           m_changelog;
 
     InternalColorModel *   m_color_model;
     InternalCategoryModel *m_category_model;

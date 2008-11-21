@@ -8,12 +8,14 @@ RESOURCES += utility.qrc
 # is this really still needed?
 HEADERS += $$RELPWD/disableupdates.h \
            $$RELPWD/stopwatch.h \
+           $$RELPWD/chunkwriter.h \
 
 
 XSOURCES = filteredit \
            filter \
            headerview \
            messagebox \
+           chunkreader \
            currency \
            multiprogressbar \
            progressdialog \
