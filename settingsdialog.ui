@@ -118,7 +118,7 @@
              <item>
               <widget class="QLabel" name="label_29">
                <property name="text">
-                <string>$1 =</string>
+                <string>USD 1 =</string>
                </property>
               </widget>
              </item>

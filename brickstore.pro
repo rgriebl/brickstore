@@ -58,6 +58,7 @@ XFORMS  = additemdialog \
           importinventorydialog \
           importorderdialog \
           incdecpricesdialog \
+          incompleteitemdialog \
           informationdialog \
           registrationdialog \
           selectcolordialog \
