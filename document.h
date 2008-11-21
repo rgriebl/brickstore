@@ -153,6 +153,8 @@ public:
     Document();
     virtual ~Document();
 
+    static Document *createTemporary(const BrickLink::InvItemList &list);
+
     static const QList<Document *> &allDocuments();
     static QList<ItemList> restoreAutosave();
 

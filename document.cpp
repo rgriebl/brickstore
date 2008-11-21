@@ -286,6 +286,17 @@ QDataStream &operator >> (QDataStream &ds, Document::Item &item)
 
 QList<Document *> Document::s_documents;
 
+Document *Document::createTemporary(const BrickLink::InvItemList &list)
+{
+    Document *doc = new Document();
+    doc->m_autosave_timer.stop();
+    s_documents.removeAll(doc);
+
+    doc->setBrickLinkItems(list, 1);
+
+    return doc;
+}
+
 Document::Document()
     : m_uuid(QUuid::createUuid())
 {
