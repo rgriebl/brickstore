@@ -477,8 +477,10 @@ template <typename C> bool BrickLink::TextImport::readDB(const QString &name, C 
         char line [1000];
         int lineno = 1;
 
-        if (skip_header)
-            (void) fgets(line, 1000, f);    // skip header
+        if (skip_header) {
+            char *gcc_supress_warning = fgets(line, 1000, f);
+            Q_UNUSED(gcc_supress_warning);
+        }
 
         while (!feof(f)) {
             if (!fgets(line, 1000, f))
