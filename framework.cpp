@@ -23,7 +23,7 @@
 #include <QMenuBar>
 #include <QToolBar>
 #include <QStatusBar>
-#include <QMdiArea>
+#include <QPainter>
 #include <QTimer>
 #include <QLabel>
 #include <QBitmap>
@@ -68,6 +68,31 @@ enum ProgressItem {
 
 } // namespace
 
+
+class NoFrameStatusBar : public QStatusBar {
+public:
+    NoFrameStatusBar(QWidget *parent = 0)
+        : QStatusBar(parent)
+    { }
+
+protected:
+    void paintEvent(QPaintEvent *)
+    {
+        // nearly the same as QStatusBar::paintEvent(), minus those ugly frames
+        QString msg = currentMessage();
+
+        QPainter p(this);
+        QStyleOption opt;
+        opt.initFrom(this);
+        style()->drawPrimitive(QStyle::PE_PanelStatusBar, &opt, &p, this);
+
+        if (!msg.isEmpty()) {
+            p.setPen(palette().foreground().color());
+            QRect msgr = rect().adjusted(6, 0, -6, 0);
+            p.drawText(msgr, Qt::AlignLeading | Qt::AlignVCenter | Qt::TextSingleLine, msg);
+        }
+    }
+};
 
 class RecentMenu : public QMenu {
     Q_OBJECT
@@ -344,22 +369,6 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
 
     languageChange();
 
-    QByteArray ba;
-
-    ba = Config::inst()->value("/MainWindow/Layout/Geometry").toByteArray();
-    if (ba.isEmpty() || !restoreGeometry(ba)) {
-        float dw = qApp->desktop()->width() / 10.f;
-        float dh = qApp->desktop()->height() / 10.f;
-
-        setGeometry(int(dw), int(dh), int (8 * dw), int(8 * dh));
-        setWindowState(Qt::WindowMaximized);
-    }
-    findAction("view_fullscreen")->setChecked(windowState() & Qt::WindowFullScreen);
-
-    ba = Config::inst()->value("/MainWindow/Layout/DockWindows").toByteArray();
-    if (ba.isEmpty() || !restoreState(ba))
-        m_toolbar->show();
-
     BrickLink::Core *bl = BrickLink::core();
 
     connect(Config::inst(), SIGNAL(onlineStatusChanged(bool)), bl, SLOT(setOnlineStatus(bool)));
@@ -406,6 +415,26 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
 
     connectAllActions(false, 0);    // init enabled/disabled status of document actions
     connectWindow(0);
+
+    // we need to show now, since most X11 window managers and Mac OS X with 
+    // unified-toolbar look won't get the position right otherwise
+    show();
+
+    QByteArray ba;
+
+    ba = Config::inst()->value("/MainWindow/Layout/Geometry").toByteArray();
+    if (ba.isEmpty() || !restoreGeometry(ba)) {
+        float dw = qApp->desktop()->width() / 10.f;
+        float dh = qApp->desktop()->height() / 10.f;
+
+        setGeometry(int(dw), int(dh), int (8 * dw), int(8 * dh));
+        setWindowState(Qt::WindowMaximized);
+    }
+    ba = Config::inst()->value("/MainWindow/Layout/State").toByteArray();
+    if (ba.isEmpty() || !restoreState(ba))
+        m_toolbar->show();
+
+    findAction("view_fullscreen")->setChecked(windowState() & Qt::WindowFullScreen);
 }
 
 void FrameWork::languageChange()
@@ -588,7 +617,7 @@ FrameWork::~FrameWork()
     Config::inst()->setValue("/MainWindow/Infobar/AppearsinVisible",  m_taskpanes->isItemVisible(m_task_appears));
     Config::inst()->setValue("/MainWindow/Infobar/LinksVisible",      m_taskpanes->isItemVisible(m_task_links));
 
-    Config::inst()->setValue("/MainWindow/Layout/DockWindows", saveState());
+    Config::inst()->setValue("/MainWindow/Layout/State", saveState());
     Config::inst()->setValue("/MainWindow/Layout/Geometry", saveGeometry());
     Config::inst()->setValue("/MainWindow/Layout/WindowMode", m_mdi->viewMode());
     Config::inst()->setValue("/MainWindow/Layout/TabPosition", m_mdi->tabPosition());
@@ -630,6 +659,10 @@ QActionGroup *FrameWork::findActionGroup(const QString &name)
 
 void FrameWork::createStatusBar()
 {
+#ifdef Q_WS_MAC
+    setStatusBar(new NoFrameStatusBar(this));
+#endif
+
     m_errors = new QLabel(statusBar());
     statusBar()->addPermanentWidget(m_errors, 0);
 
