@@ -64,10 +64,10 @@ Splash::Splash()
     gradient2.setColorAt(0.8,  QColor(230, 230, 230, 128));
     gradient2.setColorAt(1,    Qt::transparent);
 
-    QImage img(s, QImage::Format_ARGB32);
-    img.fill(Qt::transparent);
+    m_pix = QPixmap(s);
+    m_pix.fill(Qt::transparent);
     QPainter p;
-    p.begin(&img);
+    p.begin(&m_pix);
     p.initFrom(this);
     p.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
     p.setPen(Qt::NoPen);
@@ -89,7 +89,7 @@ Splash::Splash()
     p.drawPicture(dx + ps.width() + 8, dy - ts.height() / 2 - ts.top(), logotext);
     p.end();
 
-    m_pix = QPixmap::fromImage(img);
+//    m_pix = QPixmap::fromImage(img);
     setPixmap(m_pix);
 }
 
