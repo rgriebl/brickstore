@@ -1361,7 +1361,7 @@ void Window::setPrice(Currency d)
 
 void Window::contextMenu(const QPoint &p)
 {
-    FrameWork::inst()->showContextMenu(/*TODO: */ true, w_list->viewport()->mapToGlobal(p));
+    FrameWork::inst()->showContextMenu(true, w_list->viewport()->mapToGlobal(p));
 }
 
 void Window::on_file_close_triggered()

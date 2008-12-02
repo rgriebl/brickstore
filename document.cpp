@@ -33,6 +33,7 @@
 #include "config.h"
 #include "framework.h"
 #include "messagebox.h"
+#include "undo.h"
 //#include "report.h"
 
 #include "importorderdialog.h"
@@ -302,7 +303,7 @@ Document::Document()
 {
     MODELTEST_ATTACH(this)
 
-    m_undo = new QUndoStack(this);
+    m_undo = new UndoStack(this);
     m_order = 0;
     m_error_mask = 0;
 
@@ -411,11 +412,9 @@ void Document::beginMacro(const QString &label)
     m_undo->beginMacro(label);
 }
 
-void Document::endMacro(const QString &)
+void Document::endMacro(const QString &label)
 {
-    //TODO: Fix Qt to accept a label in QUndoStack::endMacro()
-
-    m_undo->endMacro(/*label*/);
+    m_undo->endMacro(label);
 }
 
 QUndoStack *Document::undoStack() const

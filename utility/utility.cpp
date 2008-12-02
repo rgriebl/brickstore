@@ -225,8 +225,8 @@ QString Utility::weightToString(double w, QLocale::MeasurementSystem ms, bool op
     QString s = loc.toString(w, 'f', prec);
 
     if (show_unit) {
-        s += " ";
-        s += unit;
+        s.append(QLatin1Char(' '));
+        s.append(QLatin1String(unit));;
     }
     return s;
 }
@@ -307,7 +307,8 @@ static const struct CurrencyData {
     { QLocale::Jamaica,            { 'J', 'M', 'D', 0 }, { 2, 0x4a, 0x24 } },
     { QLocale::Japan,              { 'J', 'P', 'Y', 0 }, { 1, 0xa5 } },
     { QLocale::Kazakhstan,         { 'K', 'Z', 'T', 0 }, { 2, 0x43b, 0x432 } },
-    { QLocale::DemocraticRepublicOfKorea, { 'K', 'P', 'W', 0 }, { 0x20a9 } },
+    { QLocale::DemocraticRepublicOfKorea,
+                                   { 'K', 'P', 'W', 0 }, { 1, 0x20a9 } },
     { QLocale::RepublicOfKorea,    { 'K', 'R', 'W', 0 }, { 1, 0x20a9 } },
     { QLocale::Kyrgyzstan,         { 'K', 'G', 'S', 0 }, { 2, 0x43b, 0x432 } },
     { QLocale::Lao,                { 'L', 'A', 'K', 0 }, { 1, 0x20ad } },
