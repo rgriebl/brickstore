@@ -324,12 +324,14 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
         << "-"
         << "edit_price_to_priceguide"
         << "edit_price_inc_dec"
+#if !defined(Q_WS_MAC) // those Mac buttons are pretty large
         << "-"
         << "edit_bl_catalog"
         << "edit_bl_priceguide"
         << "edit_bl_lotsforsale"
         << "-"             // << "edit_bl_info_group" << "-"
         << "extras_net"    // << "-" << "help_whatsthis";
+#endif
         << "|"
         << "widget_filter"
         << "|"
@@ -1409,7 +1411,7 @@ void FrameWork::connectWindow(QWidget *w)
             m_details->setItem(window->current());
             connect(window, SIGNAL(currentChanged(Document::Item *)), m_details, SLOT(setItem(Document::Item *)));
         }
-        
+
         m_undogroup->setActiveStack(doc->undoStack());
 
         m_current_window = window;
