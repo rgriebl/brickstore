@@ -160,11 +160,12 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
     m_filter = 0;
 
     setUnifiedTitleAndToolBarOnMac(true);
+    setDocumentMode(true);
     setAcceptDrops(true);
 
     m_undogroup = new UndoGroup(this);
 
-    connect(cApp, SIGNAL(openDocument(const QString &)), this, SLOT(openDocument(const QString &)));
+    connect(Application::inst(), SIGNAL(openDocument(const QString &)), this, SLOT(openDocument(const QString &)));
 
     m_recent_files = Config::inst()->value("/Files/Recent").toStringList();
     while (m_recent_files.count() > MaxRecentFiles)
@@ -404,7 +405,7 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
     }
 
     if (dbok)
-        cApp->enableEmitOpenDocument();
+        Application::inst()->enableEmitOpenDocument();
     else
         MessageBox::warning(this, tr("Could not load the BrickLink database files.<br /><br />The program is not functional without these files."));
 
@@ -1029,13 +1030,13 @@ void FrameWork::createActions()
 
     //(void) newQAction(this, "help_whatsthis", false, this, SLOT(whatsThis()));
 
-    a = newQAction(this, "help_about", false, cApp, SLOT(about()));
+    a = newQAction(this, "help_about", false, Application::inst(), SLOT(about()));
     a->setMenuRole(QAction::AboutRole);
 
-    a = newQAction(this, "help_updates", false, cApp, SLOT(checkForUpdates()));
+    a = newQAction(this, "help_updates", false, Application::inst(), SLOT(checkForUpdates()));
     a->setMenuRole(QAction::ApplicationSpecificRole);
 
-    a = newQAction(this, "help_registration", false, cApp, SLOT(registration()));
+    a = newQAction(this, "help_registration", false, Application::inst(), SLOT(registration()));
     a->setMenuRole(QAction::ApplicationSpecificRole);
     a->setVisible(Config::inst()->registration() != Config::OpenSource);
 
@@ -1624,7 +1625,7 @@ void FrameWork::statisticsUpdate()
 
 void FrameWork::titleUpdate()
 {
-    QString t = cApp->appName();
+    QString t = Application::inst()->applicationName();
 
     if (m_current_window) {
         t.append(QString(" - %1 [*]").arg(m_current_window->windowTitle()));

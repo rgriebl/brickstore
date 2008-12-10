@@ -25,8 +25,7 @@ int main(int argc, char **argv)
         QFont font(fontname, fontsize);
         QFontMetrics fm(font);
         path.addText(1, fm.ascent(), font, logotext);
-        paint.setPen(Qt::black);
-        paint.fillPath(path, Qt::black);
+        paint.drawPath(path);
         paint.end();
     }
     {
@@ -37,8 +36,7 @@ int main(int argc, char **argv)
         QFontMetrics fm(font);
         QRect r = fm.tightBoundingRect(logotext);
         path.addText(1, -r.top() - fm.ascent(), font, logotext);
-        paint.setPen(Qt::black);
-        paint.fillPath(path, Qt::black);
+        paint.drawPath(path);
         paint.end();
         pic.save(basename + QLatin1String(".pic"));
     }

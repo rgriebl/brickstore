@@ -24,10 +24,6 @@ private:
     Splash();
     static Splash *s_inst;
     static bool s_dont_show;
-    QPixmap m_pix;
-
-protected:
-    void paintEvent(QPaintEvent *e);
 
 public:
     virtual ~Splash();

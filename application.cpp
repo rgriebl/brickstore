@@ -51,19 +51,20 @@
 #define STR(a) XSTR(a)
 
 
-Application *cApp = 0;
+Application *Application::s_inst = 0;
 
 Application::Application(bool rebuild_db_only, int _argc, char **_argv)
     : QApplication(_argc, _argv, !rebuild_db_only)
 {
-    cApp = this;
+    s_inst = this;
 
     m_enable_emit = false;
     m_has_alpha = rebuild_db_only ? false : (QPixmap::defaultDepth() >= 15);
 
     setOrganizationName("Softforge");
     setOrganizationDomain("softforge.de");
-    setApplicationName(appName());
+    setApplicationName(QLatin1String(BRICKSTORE_NAME));
+    setApplicationVersion(QLatin1String(BRICKSTORE_VERSION));
 
 #if defined(Q_WS_X11)
     QPixmap pix(":/images/icon");
@@ -73,8 +74,7 @@ Application::Application(bool rebuild_db_only, int _argc, char **_argv)
         qWarning("No window icon");
 #endif
 
-
-    Transfer::setDefaultUserAgent(appName() + "/" + cApp->appVersion() + " (" + cApp->sysName() + " " + cApp->sysVersion() + "; http://" + cApp->appURL() + ")");
+    Transfer::setDefaultUserAgent(applicationName() + "/" + applicationVersion() + " (" + systemName() + " " + systemVersion() + "; http://" + applicationUrl() + ")");
 
     if (!rebuild_db_only)
         Splash::inst();
@@ -112,7 +112,7 @@ Application::Application(bool rebuild_db_only, int _argc, char **_argv)
 
         Splash::inst()->message(qApp->translate("Splash", "Initializing..."));
 
-        MessageBox::setDefaultTitle(appName());
+        MessageBox::setDefaultTitle(applicationName());
 
         for (int i = 1; i < argc(); i++)
             m_files_to_open << argv()[i];
@@ -177,22 +177,12 @@ void Application::rebuildDatabase()
 }
 
 
-QString Application::appName() const
-{
-    return QLatin1String(BRICKSTORE_NAME);
-}
-
-QString Application::appVersion() const
-{
-    return QLatin1String(BRICKSTORE_VERSION);
-}
-
-QString Application::appURL() const
+QString Application::applicationUrl() const
 {
     return QLatin1String(BRICKSTORE_URL);
 }
 
-QString Application::sysName() const
+QString Application::systemName() const
 {
     QString sys_name = "(unknown)";
 
@@ -211,7 +201,7 @@ QString Application::sysName() const
     return sys_name;
 }
 
-QString Application::sysVersion() const
+QString Application::systemVersion() const
 {
     QString sys_version = "(unknown)";
 
@@ -325,10 +315,10 @@ bool Application::initBrickLink()
     bl->setTransfer(new Transfer(10));
     bl->transfer()->setProxy(Config::inst()->proxy());
 
-    LDraw::Core *ld = LDraw::create(QString(), &errstring);
+    /*LDraw::Core *ld =*/ LDraw::create(QString(), &errstring);
 
-    if (!ld)
-        MessageBox::critical(0, tr("Could not initialize the LDraw kernel:<br /><br />%1").arg(errstring));
+//    if (!ld)
+//        MessageBox::critical(0, tr("Could not initialize the LDraw kernel:<br /><br />%1").arg(errstring));
 
     return (bl != 0); // && (ld != 0);
 }
@@ -441,18 +431,18 @@ void Application::about()
 #else
                          "???"
 #endif
-                         ).arg(sysName() + " " + sysVersion()).arg(Utility::physicalMemory()/(1024ULL*1024ULL)).arg(qt);
+                         ).arg(systemName() + " " + systemVersion()).arg(Utility::physicalMemory()/(1024ULL*1024ULL)).arg(qt);
 
     QString legal = tr(legal_src);
 
-    QString page1 = QString(layout).arg(appName(), copyright, version, support).arg(page1_link, legal, translators);
-    QString page2 = QString(layout).arg(appName(), copyright, version, support).arg(page2_link, technical, QString());
+    QString page1 = QString(layout).arg(applicationName(), copyright, version, support).arg(page1_link, legal, translators);
+    QString page2 = QString(layout).arg(applicationName(), copyright, version, support).arg(page2_link, technical, QString());
 
     QMap<QString, QString> pages;
     pages ["index"]  = page1;
     pages ["system"] = page2;
 
-    InformationDialog d(appName(), pages, false, FrameWork::inst());
+    InformationDialog d(applicationName(), pages, false, FrameWork::inst());
     d.exec();
 }
 
@@ -484,12 +474,12 @@ void Application::demoVersion()
     QString copyright = tr("Copyright &copy; %1").arg(BRICKSTORE_COPYRIGHT);
     QString version   = tr("Version %1").arg(BRICKSTORE_VERSION);
     QString demo      = tr(demo_src);
-    QString text      = QString(layout).arg(appName(), copyright, version, demo);
+    QString text      = QString(layout).arg(applicationName(), copyright, version, demo);
 
     QMap<QString, QString> pages;
     pages ["index"] = text;
 
-    InformationDialog d(appName(), pages, true, FrameWork::inst());
+    InformationDialog d(applicationName(), pages, true, FrameWork::inst());
     d.exec();
 
     QTimer::singleShot(20*60*1000, this, SLOT(demoVersion()));
