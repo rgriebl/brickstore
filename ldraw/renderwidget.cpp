@@ -526,6 +526,8 @@ LDraw::RenderWidget::RenderWidget(QWidget *parent)
 
     connect(m_renderer, SIGNAL(makeCurrent()), this, SLOT(slotMakeCurrent()));
     connect(m_renderer, SIGNAL(updateNeeded()), this, SLOT(updateGL()));
+
+    setCursor(Qt::OpenHandCursor);
 }
 
 LDraw::RenderWidget::~RenderWidget()
@@ -545,6 +547,12 @@ QSize LDraw::RenderWidget::sizeHint() const
 void LDraw::RenderWidget::mousePressEvent(QMouseEvent *e)
 {
     m_last_pos = e->pos();
+    setCursor(Qt::ClosedHandCursor);
+}
+
+void LDraw::RenderWidget::mouseReleaseEvent(QMouseEvent *)
+{
+    setCursor(Qt::OpenHandCursor);
 }
 
 void LDraw::RenderWidget::mouseMoveEvent(QMouseEvent *e)
@@ -627,6 +635,8 @@ LDraw::RenderOffscreenWidget::RenderOffscreenWidget(QWidget *parent)
 
     connect(m_renderer, SIGNAL(makeCurrent()), this, SLOT(slotMakeCurrent()));
     connect(m_renderer, SIGNAL(updateNeeded()), this, SLOT(update()));
+
+    setCursor(Qt::OpenHandCursor);
 }
 
 LDraw::RenderOffscreenWidget::~RenderOffscreenWidget()
@@ -658,6 +668,12 @@ void LDraw::RenderOffscreenWidget::paintEvent(QPaintEvent *)
 void LDraw::RenderOffscreenWidget::mousePressEvent(QMouseEvent *e)
 {
     m_last_pos = e->pos();
+    setCursor(Qt::ClosedHandCursor);
+}
+
+void LDraw::RenderOffscreenWidget::mouseReleaseEvent(QMouseEvent *)
+{
+    setCursor(Qt::OpenHandCursor);
 }
 
 void LDraw::RenderOffscreenWidget::mouseMoveEvent(QMouseEvent *e)
