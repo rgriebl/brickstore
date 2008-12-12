@@ -46,9 +46,13 @@ Splash::Splash()
 
     QLinearGradient fgrad(0, 0, 0, s.height());
     fgrad.setColorAt(0,    QColor( 15,  15,  15));
-    fgrad.setColorAt(0.42, QColor( 63,  63,  63));
+    fgrad.setColorAt(0.25, QColor( 63,  63,  63));
     fgrad.setColorAt(0.5,  QColor( 15,  15,  15));
-    fgrad.setColorAt(0.58, QColor( 63,  63,  63));
+    fgrad.setColorAt(0.75, QColor( 63,  63,  63));
+    fgrad.setColorAt(1,    QColor( 15,  15,  15));
+
+    QRadialGradient fgrad2(s.width()/2, s.height()/2, s.width()/2, s.width()/2, s.height()*.75);
+    fgrad.setColorAt(0,    QColor( 63,  63,  63));
     fgrad.setColorAt(1,    QColor( 15,  15,  15));
 
     QLinearGradient hgrad(0, 0, s.width(), 0);
@@ -57,6 +61,13 @@ Splash::Splash()
     hgrad.setColorAt(0.5,  QColor(255, 255, 255));
     hgrad.setColorAt(0.75, QColor(180, 180, 180));
     hgrad.setColorAt(1,    QColor(  0,   0,   0));
+
+    QLinearGradient hgrad2(s.width()*.25, 0, s.width()*.75, 0);
+    hgrad2.setColorAt(0,    QColor(  0,   0,   0,   0));
+    hgrad2.setColorAt(0.25, QColor(180, 180, 180, 180));
+    hgrad2.setColorAt(0.5,  QColor(255, 255, 255, 255));
+    hgrad2.setColorAt(0.75, QColor(180, 180, 180, 180));
+    hgrad2.setColorAt(1,    QColor(  0,   0,   0,   0));
 
     QLinearGradient vgrad(0, 0, 0, s.height());
     vgrad.setColorAt(0,    QColor(  0,   0,   0));
@@ -71,26 +82,25 @@ Splash::Splash()
     QPainter p;
     p.begin(&pix);
     p.initFrom(this);
+
     p.setPen(Qt::NoPen);
     p.setBrush(fgrad);
     p.drawRect(0, 0, s.width(), s.height());
+    p.setBrush(fgrad2);
+    p.setCompositionMode(QPainter::CompositionMode_Multiply);
+    p.drawRect(0, 0, s.width(), s.height());
+    p.setCompositionMode(QPainter::CompositionMode_SourceOver);
 
     p.setBrush(Qt::NoBrush);
-    p.setPen(QPen(hgrad,2));
-    p.drawLine(2, 2, s.width()-3, 2);
-    p.drawLine(2, s.height()-2, s.width()-3, s.height()-2);
+    p.setPen(QPen(hgrad,1));
+    p.drawLine(1, 1, s.width()-2, 1);
+    p.drawLine(1, s.height()-2, s.width()-2, s.height()-2);
+    p.setPen(QPen(hgrad2,1));
+    p.drawLine(s.width()*.25, s.height()*.7, s.width()*.75, s.height()*.7);
 
-    p.setPen(QPen(vgrad,2));
-    p.drawLine(2, 2, 2, s.height()-3);
-    p.drawLine(s.width()-2, 2, s.width()-2, s.height()-3);
-
-    p.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
-    p.setPen(Qt::white);
-    p.setBrush(Qt::white);
-
-    QString version = Application::inst()->applicationVersion();
-    QRect vr = fm.boundingRect(version);
-    p.drawText(pix.rect().adjusted(0, 10, -10, 0), Qt::AlignTop | Qt::AlignRight, version);
+    p.setPen(QPen(vgrad,1));
+    p.drawLine(1, 1, 1, s.height()-2);
+    p.drawLine(s.width()-2, 1, s.width()-2, s.height()-2);
 
     QPixmap logo(":/images/icon.png");
     QPicture logotext;
@@ -103,7 +113,19 @@ Splash::Splash()
     int dy = s.height() / 2;
 
     p.drawPixmap(dx, dy - ps.height() / 2, logo);
+
+    p.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
+    p.setPen(Qt::white);
+    p.setBrush(QColor(240,240,240));
     p.drawPicture(dx + ps.width() + 8, dy - ts.height() / 2 - ts.top(), logotext);
+
+    QString version = Application::inst()->applicationVersion();
+    QRect vr = fm.boundingRect(version);
+
+    p.setPen(QColor(192, 192, 192));
+    p.setBrush(Qt::NoBrush);
+    p.drawText(pix.rect().adjusted(0, 10, -10, 0), Qt::AlignTop | Qt::AlignRight, version);
+
     p.end();
 
     setPixmap(pix);
