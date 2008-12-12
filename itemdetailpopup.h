@@ -42,8 +42,10 @@ private:
 
     QStackedWidget *m_stack;
     QToolButton *m_close;
+    QToolButton *m_play;
+    QToolButton *m_stop;
+    QToolButton *m_view;
     Document::Item *m_item;
-    QTableView *m_view;
     QPoint m_movepos;
     LDraw::Model *m_part;
     BrickLink::Picture *m_pic;

@@ -14,6 +14,7 @@
 #include <QMouseEvent>
 #include <QGLFramebufferObject>
 #include <QPainter>
+#include <QTimer>
 
 #include <cfloat>
 #include <cmath>
@@ -40,6 +41,11 @@ LDraw::GLRenderer::GLRenderer(QObject *parent)
 {
     memset(&m_rx, 0, sizeof(qreal) * 3);
     memset(&m_tx, 0, sizeof(qreal) * 3);
+
+    m_animation = new QTimer(this);
+    m_animation->setInterval(30);
+
+    connect(m_animation, SIGNAL(timeout()), this, SLOT(animationStep()));
 }
 
 LDraw::GLRenderer::~GLRenderer()
@@ -159,7 +165,6 @@ void LDraw::GLRenderer::resizeGL(int w, int h)
     glLoadIdentity();
 
     qreal radius = 1.0;
-    vector_t center;
 
     if (m_part) {
         vector_t vmin, vmax;
@@ -168,11 +173,11 @@ void LDraw::GLRenderer::resizeGL(int w, int h)
             qWarning("resizeGL - ortho: [%.f ..  %.f] x [%.f .. %.f] x [%.f .. %.f]", vmin[0], vmax[0], vmin[1], vmax[1], vmin[2], vmax[2]);
 
             radius = (vmax - vmin).length(); //qMax(vmin.length(), vmax.length());
-            center = vmin + (vmax - vmin) / 2;
+            m_center = vmin + (vmax - vmin) / 2;
         }
     }
 
-    glOrtho(center[0]-radius, center[0]+radius, center[1]-radius, center[1]+radius, -1.0-radius, 1.0+radius);
+    glOrtho(m_center[0]-radius, m_center[0]+radius, m_center[1]-radius, m_center[1]+radius, m_center[2]-1.0-radius, m_center[2]+1.0+radius);
     glMatrixMode(GL_MODELVIEW);
 
     m_resized = true;
@@ -189,9 +194,11 @@ void LDraw::GLRenderer::paintGL()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
     glTranslated(m_tx, m_ty, m_tz);
+    glTranslated(m_center[0], m_center[1], m_center[2]);
     glRotated(m_rx, 1.0, 0.0, 0.0);
     glRotated(m_ry, 0.0, 1.0, 0.0);
     glRotated(m_rz, 0.0, 0.0, 1.0);
+    glTranslated(-m_center[0], -m_center[1], -m_center[2]);
     glScaled(m_zoom, m_zoom, m_zoom);
 
 //    glEnable(GL_LIGHTING);
@@ -302,6 +309,7 @@ void LDraw::GLRenderer::renderSurfaces(Part *part, int ldraw_basecolor)
 void LDraw::GLRenderer::renderLines(Part *part, int ldraw_basecolor)
 {
     matrix_t proj_movi;
+    GLint view[4];
     bool proj_movi_init = false;
 
     Element * const *ep = part->elements().constData();
@@ -323,10 +331,9 @@ void LDraw::GLRenderer::renderLines(Part *part, int ldraw_basecolor)
         case Element::CondLine: {
             const CondLineElement *le = static_cast<const CondLineElement *>(e);
             const vector_t *v = le->points();
-            int view[4];
-            glGetIntegerv(GL_VIEWPORT, view);
 
             if (!proj_movi_init) {
+                glGetIntegerv(GL_VIEWPORT, view);
                 proj_movi = matrix_t::fromGL(GL_MODELVIEW_MATRIX) * matrix_t::fromGL(GL_PROJECTION_MATRIX);
                 proj_movi_init = true;
             }
@@ -515,6 +522,8 @@ LDraw::RenderWidget::RenderWidget(QWidget *parent)
 {
     m_renderer = new GLRenderer(this);
 
+    resetCamera();
+
     connect(m_renderer, SIGNAL(makeCurrent()), this, SLOT(slotMakeCurrent()));
     connect(m_renderer, SIGNAL(updateNeeded()), this, SLOT(updateGL()));
 }
@@ -613,6 +622,8 @@ LDraw::RenderOffscreenWidget::RenderOffscreenWidget(QWidget *parent)
         qWarning("no OpenGL FBO extension available");
 
     m_renderer = new GLRenderer(this);
+
+    resetCamera();
 
     connect(m_renderer, SIGNAL(makeCurrent()), this, SLOT(slotMakeCurrent()));
     connect(m_renderer, SIGNAL(updateNeeded()), this, SLOT(update()));
@@ -717,3 +728,74 @@ QImage LDraw::RenderOffscreenWidget::renderImage()
     //m_context->doneCurrent();
     return m_fbo->toImage();
 }
+
+void LDraw::GLRenderer::startAnimation()
+{
+    if (!m_animation->isActive())
+        m_animation->start();
+}
+
+void LDraw::GLRenderer::stopAnimation()
+{
+    if (m_animation->isActive())
+        m_animation->stop();
+}
+
+bool LDraw::GLRenderer::isAnimationActive() const
+{
+    return m_animation->isActive();
+}
+
+void LDraw::GLRenderer::animationStep()
+{
+    setXRotation(xRotation()+1.5);
+    setYRotation(yRotation()+1);
+    setZRotation(zRotation()+0.75);
+}
+
+void LDraw::RenderOffscreenWidget::resetCamera()
+{
+    m_renderer->setXRotation(-180+30);
+    m_renderer->setYRotation(45);
+    m_renderer->setZRotation(0);
+
+    m_renderer->setXTranslation(0);
+    m_renderer->setYTranslation(0);
+    m_renderer->setZTranslation(0);
+
+    m_renderer->setZoom(1);
+}
+
+void LDraw::RenderWidget::resetCamera()
+{
+    m_renderer->setXRotation(-180+30);
+    m_renderer->setYRotation(45);
+    m_renderer->setZRotation(0);
+
+    m_renderer->setXTranslation(0);
+    m_renderer->setYTranslation(0);
+    m_renderer->setZTranslation(0);
+
+    m_renderer->setZoom(1);
+}
+
+void LDraw::RenderWidget::startAnimation()
+{
+    m_renderer->startAnimation();
+}
+
+void LDraw::RenderWidget::stopAnimation()
+{
+    m_renderer->stopAnimation();
+}
+
+void LDraw::RenderOffscreenWidget::startAnimation()
+{
+    m_renderer->startAnimation();
+}
+
+void LDraw::RenderOffscreenWidget::stopAnimation()
+{
+    m_renderer->stopAnimation();
+}
+
