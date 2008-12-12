@@ -63,7 +63,7 @@ enum {
 }
 
 
-ChangeCmd::ChangeCmd(Document *doc, Document::Item *pos, const Document::Item &item, bool merge_allowed)
+ChangeCmd::ChangeCmd(Document *doc, int pos, const Document::Item &item, bool merge_allowed)
     : QUndoCommand(qApp->translate("ChangeCmd", "Modified item")), m_doc(doc), m_position(pos), m_item(item), m_merge_allowed(merge_allowed)
 { }
 
@@ -99,15 +99,18 @@ bool ChangeCmd::mergeWith(const QUndoCommand *other)
 }
 
 
-AddRemoveCmd::AddRemoveCmd(Type t, Document *doc, const Document::ItemList &positions, const Document::ItemList &items, bool merge_allowed)
+AddRemoveCmd::AddRemoveCmd(Type t, Document *doc, const QVector<int> &positions, const Document::ItemList &items, bool merge_allowed)
     : QUndoCommand(genDesc(t == Add, qMax(items.count(), positions.count()))),
       m_doc(doc), m_positions(positions), m_items(items), m_type(t), m_merge_allowed(merge_allowed)
-{ }
+{
+    // for add: specify items and optionally also positions
+    // for remove: specify items only
+}
 
 AddRemoveCmd::~AddRemoveCmd()
 {
-    if (m_type == Add)
-        qDeleteAll(m_items);
+    //if (m_type == Add)
+    qDeleteAll(m_items);
 }
 
 int AddRemoveCmd::id() const
@@ -118,14 +121,14 @@ int AddRemoveCmd::id() const
 void AddRemoveCmd::redo()
 {
     if (m_type == Add) {
-        // Document::insertItemsDirect() needs to update the itlist iterators to point directly to the items!
+        // Document::insertItemsDirect() adds all m_items at the positions given in m_positions
+        // (or append them to the document in case m_positions is empty)
         m_doc->insertItemsDirect(m_items, m_positions);
         m_positions.clear();
         m_type = Remove;
     }
     else {
-        // Document::removeItems() needs to update the itlist iterators to point directly past the items
-        //                                    and fill the m_item_list with the items
+        // Document::removeItemsDirect() removes all m_items and records the positions in m_positions
         m_doc->removeItemsDirect(m_items, m_positions);
         m_type = Add;
     }
@@ -343,7 +346,7 @@ void Document::autosave()
         return;
 
     QDir temp(QDesktopServices::storageLocation(QDesktopServices::TempLocation));
-    QString filename = QString("brickstore_%1.autosave").arg(m_uuid.toString());        
+    QString filename = QString("brickstore_%1.autosave").arg(m_uuid.toString());
 
     QFile f(temp.filePath(filename));
     if (f.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
@@ -369,18 +372,18 @@ QList<Document::ItemList> Document::restoreAutosave()
             ItemList items;
             QByteArray magic;
             int count = 0;
-        
+
             QDataStream ds(&f);
             ds >> magic >> count;;
-            
+
             if (count > 0 && magic == QByteArray(autosavemagic)) {
                 for (int i = 0; i < count; ++i) {
                     Item *item = new Item();
                     ds >> *item;
                     items.append(item);
-                }            
+                }
                 ds >> magic;
-                
+
                 if (magic == QByteArray(autosavemagic))
                     restored.append(items);
             }
@@ -425,102 +428,100 @@ QUndoStack *Document::undoStack() const
 
 bool Document::clear()
 {
-    m_undo->push(new AddRemoveCmd(AddRemoveCmd::Remove, this, ItemList(), m_items));
+    m_undo->push(new AddRemoveCmd(AddRemoveCmd::Remove, this, QVector<int>(), m_items));
     return true;
 }
 
-bool Document::insertItems(const ItemList &positions, const ItemList &items)
+bool Document::insertItems(const QVector<int> &positions, const ItemList &items)
 {
     m_undo->push(new AddRemoveCmd(AddRemoveCmd::Add, this, positions, items /*, true*/));
     return true;
 }
 
-bool Document::removeItems(const ItemList &positions)
+bool Document::removeItem(Item *item)
 {
-    m_undo->push(new AddRemoveCmd(AddRemoveCmd::Remove, this, ItemList(), positions /*, true*/));
+    return removeItems(pack<ItemList>(item));
+}
+
+bool Document::removeItems(const ItemList &items)
+{
+    m_undo->push(new AddRemoveCmd(AddRemoveCmd::Remove, this, QVector<int>(), items /*, true*/));
     return true;
 }
 
-bool Document::insertItem(Item *position, Item *item)
+bool Document::insertItem(int position, Item *item)
 {
-    return insertItems(pack<ItemList> (position), pack<ItemList> (item));
-}
-
-bool Document::removeItem(Item *position)
-{
-    return removeItems(pack<ItemList> (position));
+    return insertItems(pack<QVector<int> > (position), pack<ItemList> (item));
 }
 
 bool Document::changeItem(Item *position, const Item &item)
 {
-    if (!(item == *position))
-        m_undo->push(new ChangeCmd(this, position, item /*, true*/));
+    return changeItem(m_items.indexOf(position), item);
+}
+
+bool Document::changeItem(int position, const Item &item)
+{
+    m_undo->push(new ChangeCmd(this, position, item /*, true*/));
     return true;
 }
 
-void Document::insertItemsDirect(ItemList &items, ItemList &positions)
+void Document::insertItemsDirect(ItemList &items, QVector<int> &positions)
 {
-    ItemList::iterator pos = positions.begin();
+    QVector<int>::const_iterator pos = positions.begin();
     QModelIndex root;
 
     foreach(Item *item, items) {
-        if (pos != positions.end()) {
-            int idx;
-            if (Item *itempos = *pos)
-                idx = m_items.indexOf(itempos);
-            else
-                idx = rowCount(root);
-            emit beginInsertRows(root, idx, idx);
+        int rows = rowCount(root);
 
-            m_items.insert(idx, item);
+        if (pos != positions.end()) {
+            emit beginInsertRows(root, *pos, *pos);
+            m_items.insert(*pos, item);
             ++pos;
         }
         else {
-            emit beginInsertRows(root, rowCount(root), rowCount(root));
+            emit beginInsertRows(root, rows, rows);
             m_items.append(item);
         }
         updateErrors(item);
-
         emit endInsertRows();
     }
 
-    emit itemsAdded(items);
+//    emit itemsAdded(items);
     emit statisticsChanged();
 }
 
-void Document::removeItemsDirect(ItemList &items, ItemList &positions)
+void Document::removeItemsDirect(ItemList &items, QVector<int> &positions)
 {
-    positions.clear();
+    positions.resize(items.count());
 
-    emit itemsAboutToBeRemoved(items);
+//    emit itemsAboutToBeRemoved(items);
 
+    int i = 0;
     foreach(Item *item, items) {
         int idx = m_items.indexOf(item);
         emit beginRemoveRows(QModelIndex(), idx, idx);
-
-        ItemList::iterator next = m_items.erase(qFind(m_items.begin(), m_items.end(), item));
-        positions.append((next != m_items.end()) ? *next : 0);
-
+        positions[i++] = idx;
+        m_items.removeAt(idx);
         emit endRemoveRows();
     }
 
-    emit itemsRemoved(items);
+//    emit itemsRemoved(items);
     emit statisticsChanged();
 }
 
-void Document::changeItemDirect(Item *position, Item &item)
+void Document::changeItemDirect(int position, Item &item)
 {
-    qSwap(*position, item);
+    Item *olditem = m_items[position];
+    qSwap(*olditem, item);
 
-    bool grave = (position->item() != item.item()) || (position->color() != item.color());
-
-    emit itemsChanged(pack<ItemList> (position), grave);
-    updateErrors(position);
-    emit statisticsChanged();
-
-    QModelIndex idx1 = index(position);
+//    bool grave = (olditem->item() != item.item()) || (olditem->color() != item.color());
+//    emit itemsChanged(pack<ItemList> (position), grave);
+    QModelIndex idx1 = index(olditem);
     QModelIndex idx2 = createIndex(idx1.row(), columnCount(idx1.parent()) - 1, idx1.internalPointer());
+
     emit dataChanged(idx1, idx2);
+    updateErrors(olditem);
+    emit statisticsChanged();
 }
 
 void Document::updateErrors(Item *item)
@@ -910,7 +911,7 @@ Document *Document::fileImportLDrawModel()
 void Document::setBrickLinkItems(const BrickLink::InvItemList &bllist, uint multiply)
 {
     ItemList items;
-    ItemList positions;
+    QVector<int> positions;
 
     foreach(const BrickLink::InvItem *blitem, bllist) {
         Item *item = new Item(*blitem);
@@ -1309,7 +1310,7 @@ bool Document::setData(const QModelIndex &index, const QVariant &value, int role
         default                     : break;
         }
         if (!(item == *itemp)) {
-            changeItem(itemp, item);
+            changeItem(index.row(), item);
             emit dataChanged(index, index);
             return true;
         }
@@ -1649,7 +1650,7 @@ DocumentProxyModel::DocumentProxyModel(Document *model)
     setSourceModel(model);
 
     m_parser = new Filter::Parser();
-    
+
     m_parser->setStandardCombinationTokens(Filter::And | Filter::Or);
     m_parser->setStandardComparisonTokens(Filter::Matches | Filter::DoesNotMatch |
                                           Filter::Is | Filter::IsNot |
@@ -1673,7 +1674,7 @@ DocumentProxyModel::DocumentProxyModel(Document *model)
     }
     fields.insert(-1, QLatin1String("Any"));
     fields.insert(-1, tr("Any"));
-    
+
     m_parser->setFieldTokens(fields);
 }
 
@@ -1688,7 +1689,7 @@ void DocumentProxyModel::setFilterExpression(const QString &str)
 
     m_filter_expression = str;
     m_filter = m_parser->parse(str);
-    
+
     qWarning("new filter: %d", m_filter.size());
     if (had_filter || !m_filter.isEmpty())
         invalidateFilter();
@@ -1708,8 +1709,8 @@ bool DocumentProxyModel::filterAcceptsRow(int source_row, const QModelIndex &sou
 {
     if (source_parent.isValid() || source_row < 0 || source_row >= sourceModel()->rowCount())
         return false;
-    else if (m_filter.isEmpty())    
-        return true;    
+    else if (m_filter.isEmpty())
+        return true;
 
     bool result = false;
     Filter::Combination nextcomb = Filter::Or;
@@ -1720,12 +1721,12 @@ bool DocumentProxyModel::filterAcceptsRow(int source_row, const QModelIndex &sou
         if (firstcol < 0) {
             firstcol = 0;
             lastcol = sourceModel()->columnCount() - 1;
-        }    
+        }
 
         bool localresult = false;
         for (int c = firstcol; c <= lastcol && !localresult; ++c) {
             QVariant v = sourceModel()->data(sourceModel()->index(source_row, c), Qt::DisplayRole);
-            
+
             localresult = f.matches(v);
         }
         if (nextcomb == Filter::And)
@@ -1748,7 +1749,7 @@ void DocumentProxyModel::sort(int column, Qt::SortOrder order)
 class SortItemListCompare {
 public:
     SortItemListCompare(const DocumentProxyModel *view, int sortcol, Qt::SortOrder sortorder)
-        : m_doc(static_cast<Document *>(view->sourceModel())), m_view(view), 
+        : m_doc(static_cast<Document *>(view->sourceModel())), m_view(view),
           m_sortcol(sortcol), m_sortasc(sortorder == Qt::AscendingOrder)
     { }
 

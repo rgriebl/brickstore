@@ -22,7 +22,7 @@ class AddRemoveCmd : public QUndoCommand {
 public:
     enum Type { Add, Remove };
 
-    AddRemoveCmd(Type t, Document *doc, const Document::ItemList &positions, const Document::ItemList &items, bool merge_allowed = false);
+    AddRemoveCmd(Type t, Document *doc, const QVector<int> &positions, const Document::ItemList &items, bool merge_allowed = false);
     ~AddRemoveCmd();
 
     virtual int id() const;
@@ -35,15 +35,15 @@ public:
 
 private:
     Document *         m_doc;
-    Document::ItemList m_positions;
+    QVector<int>       m_positions;
     Document::ItemList m_items;
-    Type                m_type;
-    bool                m_merge_allowed;
+    Type               m_type;
+    bool               m_merge_allowed;
 };
 
 class ChangeCmd : public QUndoCommand {
 public:
-    ChangeCmd(Document *doc, Document::Item *position, const Document::Item &item, bool merge_allowed = false);
+    ChangeCmd(Document *doc, int position, const Document::Item &item, bool merge_allowed = false);
     virtual ~ChangeCmd();
 
     virtual int id() const;
@@ -54,9 +54,9 @@ public:
 
 private:
     Document *      m_doc;
-    Document::Item *m_position;
+    int             m_position;
     Document::Item  m_item;
-    bool             m_merge_allowed;
+    bool            m_merge_allowed;
 };
 
 #endif

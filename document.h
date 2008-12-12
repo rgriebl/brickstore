@@ -169,12 +169,13 @@ public:
     const ItemList &items() const;
     bool clear();
 
-    bool insertItems(const ItemList &positions, const ItemList &list);
-    bool removeItems(const ItemList &positions);
+    bool insertItems(const QVector<int> &positions, const ItemList &list);
+    bool insertItem(int position, Item *item);
 
-    bool insertItem(Item *position, Item *item);
+    bool removeItems(const ItemList &positions);
     bool removeItem(Item *position);
 
+    bool changeItem(int position, const Item &item);
     bool changeItem(Item *position, const Item &item);
 
     void resetDifferences(const ItemList &items);
@@ -237,9 +238,9 @@ private:
     bool fileSaveTo(const QString &s, const char *type, bool export_only, const ItemList &itemlist);
     void setBrickLinkItems(const BrickLink::InvItemList &bllist, uint multiply = 1);
 
-    void insertItemsDirect(ItemList &items, ItemList &positions);
-    void removeItemsDirect(ItemList &items, ItemList &positions);
-    void changeItemDirect(Item *position, Item &item);
+    void insertItemsDirect(ItemList &items, QVector<int> &positions);
+    void removeItemsDirect(ItemList &items, QVector<int> &positions);
+    void changeItemDirect(int position, Item &item);
 
     friend class AddRemoveCmd;
     friend class ChangeCmd;
