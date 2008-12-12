@@ -23,6 +23,7 @@
 #include "filter.h"
 
 class QUndoStack;
+class UndoStack;
 class QUndoCommand;
 class AddRemoveCmd;
 class ChangeCmd;
@@ -153,6 +154,8 @@ public:
     Document();
     virtual ~Document();
 
+    static Document *createTemporary(const BrickLink::InvItemList &list);
+
     static const QList<Document *> &allDocuments();
     static QList<ItemList> restoreAutosave();
 
@@ -252,7 +255,7 @@ private:
     QUuid            m_uuid;  // for autosave
     QTimer           m_autosave_timer;
 
-    QUndoStack *     m_undo;
+    UndoStack *      m_undo;
 
     BrickLink::Order *m_order;
 

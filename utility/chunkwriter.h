@@ -11,26 +11,4 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __SPLASH__
-#define __SPLASH__
-
-#include <QSplashScreen>
-#include <QPixmap>
-
-class Splash : public QSplashScreen {
-    Q_OBJECT
-
-private:
-    Splash();
-    static Splash *s_inst;
-    static bool s_dont_show;
-
-public:
-    virtual ~Splash();
-    static Splash *inst();
-
-    void message(const QString &msg);
-};
-
-#endif
-
+#include "chunkreader.h"

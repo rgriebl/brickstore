@@ -43,6 +43,7 @@ XSOURCES = application \
            config \
            rebuilddatabase \
            document \
+           documentdelegate \
            selectcolor \
            framework \
            picturewidget \
@@ -55,9 +56,11 @@ XSOURCES = application \
 
 
 XFORMS  = additemdialog \
+          consolidateitemsdialog \
           importinventorydialog \
           importorderdialog \
           incdecpricesdialog \
+          incompleteitemdialog \
           informationdialog \
           registrationdialog \
           selectcolordialog \

@@ -11,26 +11,24 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __SPLASH__
-#define __SPLASH__
+#ifndef CONSOLIDATEITEMSDIALOG_H
+#define CONSOLIDATEITEMSDIALOG_H
 
-#include <QSplashScreen>
-#include <QPixmap>
+#include "bricklinkfwd.h"
+#include "ui_consolidateitemsdialog.h"
 
-class Splash : public QSplashScreen {
+class QAbstractButton;
+class Document;
+class DocumentProxyModel;
+
+class ConsolidateItemsDialog : public QDialog, private Ui::ConsolidateItemsDialog {
     Q_OBJECT
 
-private:
-    Splash();
-    static Splash *s_inst;
-    static bool s_dont_show;
-
 public:
-    virtual ~Splash();
-    static Splash *inst();
+    ConsolidateItemsDialog(BrickLink::InvItem *existitem, BrickLink::InvItem *newitem, bool existing_attributes, QWidget *parent = 0, Qt::WindowFlags f = 0);
 
-    void message(const QString &msg);
+    bool yesNoToAll() const;
+    bool attributesFromExisting() const;
 };
 
 #endif
-

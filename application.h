@@ -27,13 +27,13 @@ public:
     Application(bool rebuild_db_only, int argc, char **argv);
     virtual ~Application();
 
+    static Application *inst() { return s_inst; }
+
     void enableEmitOpenDocument(bool b = true);
 
-    QString appName() const;
-    QString appVersion() const;
-    QString appURL() const;
-    QString sysName() const;
-    QString sysVersion() const;
+    QString applicationUrl() const;
+    QString systemName() const;
+    QString systemVersion() const;
 
     bool pixmapAlphaSupported() const;
 
@@ -65,8 +65,8 @@ private:
 
     QTranslator *m_trans_qt;
     QTranslator *m_trans_brickstore;
-};
 
-extern Application *cApp;
+    static Application *s_inst;
+};
 
 #endif

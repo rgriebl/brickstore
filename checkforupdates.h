@@ -36,15 +36,15 @@ public:
 
         pd->setAutoClose(false);
         pd->setHeaderText(tr("Checking for program updates"));
-        pd->setMessageText(tr("You are currently running %1 %2").arg(cApp->appName(), cApp->appVersion()));
+        pd->setMessageText(tr("You are currently running %1 %2").arg(Application::inst()->applicationName(), Application::inst()->applicationVersion()));
 
-        m_current_version.fromString(cApp->appVersion());
+        m_current_version.fromString(Application::inst()->applicationVersion());
 
         // m_error = tr( "Could not retrieve version information from server:<br /><br />%1" );
 
-        QUrl url = QString("http://") + cApp->appURL() + QString("/RELEASES");
+        QUrl url = QString("http://") + Application::inst()->applicationUrl() + QString("/RELEASES");
 
-        url.addQueryItem("version", cApp->appVersion());
+        url.addQueryItem("version", Application::inst()->applicationVersion());
 
         pd->get(url);
     }
@@ -123,11 +123,11 @@ private slots:
                             }
                         }
                         str += "</table><br />";
-                        str += QString("<a href=\"http://" + cApp->appURL() + "/changes\">%1</a>").arg(tr("Detailed list of changes"));
+                        str += QString("<a href=\"http://" + Application::inst()->applicationUrl() + "/changes\">%1</a>").arg(tr("Detailed list of changes"));
                     }
 
                     if (m_current_version.m_has_errors) {
-                        QString link = QString("<a href=\"http://" + cApp->appURL() + "\">%1</a>").arg(tr("the BrickStore homepage"));
+                        QString link = QString("<a href=\"http://" + Application::inst()->applicationUrl() + "\">%1</a>").arg(tr("the BrickStore homepage"));
 
                         str += "<br /><br /><br /><br /><br /><br /><table><tr><td><img src=\":/images/important.png\" align=\"left\" /></td><td>" +
                                tr("<b>Please note:</b> Your currently installed version is flagged as defective.Please visit %1 to find out the exact cause.").arg(link) +

@@ -203,7 +203,9 @@ Workspace::Workspace(QWidget *parent, Qt::WindowFlags f)
 
     m_tabbar = new QTabBar(this);
     m_tabbar->setElideMode(Qt::ElideMiddle);
-    m_tabbar->setDrawBase(false);
+#if defined(Q_WS_MAC)
+    m_tabbar->setDrawBase(true);
+#endif
 #if QT_VERSION >= 0x040500
     m_tabbar->setDocumentMode(true);
     m_tabbar->setMovable(true);

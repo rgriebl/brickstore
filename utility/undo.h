@@ -29,6 +29,9 @@ public:
     QAction *createRedoAction(QObject *parent = 0) const;
     QAction *createUndoAction(QObject *parent = 0) const;
 
+    // workaround as long as I haven't add that to Qt (4.6 hopefully)
+    void endMacro(const QString &str);
+
 public slots:
     void redo(int count);
     void undo(int count);

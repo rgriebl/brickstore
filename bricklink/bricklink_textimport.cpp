@@ -275,7 +275,7 @@ template <> Item *TextImport::parse<Item> (uint count, const char **strs)
     return item;
 }
 
-}
+} // namespace BrickLink
 
 /////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -291,9 +291,9 @@ bool BrickLink::TextImport::import(const QString &path)
 {
     bool ok = true;
 
-    ok &= readDB<>(path + "colors.txt",     m_colors);
-    ok &= readDB<>(path + "categories.txt", m_categories);
-    ok &= readDB<>(path + "itemtypes.txt",  m_item_types);
+    ok &= readDB<>(path + "colors.txt",     m_colors, true);
+    ok &= readDB<>(path + "categories.txt", m_categories, true);
+    ok &= readDB<>(path + "itemtypes.txt",  m_item_types, true);
 
     ok &= readPeeronColors(path + "peeron_colors.html");
 
@@ -302,7 +302,7 @@ bool BrickLink::TextImport::import(const QString &path)
 
     foreach(const ItemType *itt, m_item_types) {
         m_current_item_type = itt;
-        ok &= readDB<>(path + "items_" + char(itt->m_id) + ".txt", m_items);
+        ok &= readDB<>(path + "items_" + char(itt->m_id) + ".txt", m_items, true);
     }
     m_current_item_type = 0;
 
@@ -322,7 +322,9 @@ bool BrickLink::TextImport::import(const QString &path)
     }
 
     btinvlist_dummy btinvlist_dummy;
-    ok &= readDB <> (path + "btinvlist.txt", btinvlist_dummy);
+    ok &= readDB<>(path + "btinvlist.txt", btinvlist_dummy);
+    btchglog_dummy btchglog_dummy;
+    ok &= readDB<>(path + "btchglog.txt", btchglog_dummy);
 
     btpriceguide_dummy btpriceguide_dummy;
     foreach(const ItemType *itt, m_item_types) {
@@ -400,7 +402,6 @@ bool BrickLink::TextImport::readDB_processLine(btinvlist_dummy & /*dummy*/, uint
     return true;
 }
 
-
 bool BrickLink::TextImport::readDB_processLine(btpriceguide_dummy & /*dummy*/, uint count, const char **strs)
 {
     if (count < 10 || !strs[0][0] || !strs[1][0])
@@ -431,8 +432,42 @@ bool BrickLink::TextImport::readDB_processLine(btpriceguide_dummy & /*dummy*/, u
     return true;
 }
 
+bool BrickLink::TextImport::readDB_processLine(btchglog_dummy & /*dummy*/, uint count, const char **strs)
+{
+    if (count < 7 || !strs[2][0])
+        return false;
 
-template <typename C> bool BrickLink::TextImport::readDB(const QString &name, C &container)
+    ChangeLogEntry::Type t;
+
+    switch (strs[2][0]) {
+    case 'I': t = ChangeLogEntry::ItemId; break;
+    case 'T': t = ChangeLogEntry::ItemType; break;
+    case 'M': t = ChangeLogEntry::ItemMerge; break;
+    case 'E': t = ChangeLogEntry::CategoryName; break;
+    case 'G': t = ChangeLogEntry::CategoryMerge; break;
+    case 'C': t = ChangeLogEntry::ColorName; break;
+    case 'A': t = ChangeLogEntry::ColorMerge; break;
+    default : qWarning("Parsing btchglog: skipping invalid change code %c", strs[2][0]);
+              return true;
+    }
+
+    if (t == ChangeLogEntry::CategoryName || t == ChangeLogEntry::CategoryMerge || t == ChangeLogEntry::ColorName)
+        return true;
+
+    //QDate::fromString(QLatin1String(strs[1]), QLatin1String("M/d/yyyy"));
+
+    QByteArray ba;
+    ba.append(char(t));
+    for (int i = 0; i < 4; ++i) {
+        ba.append('\t');
+        ba.append(strs[3+i]);
+    }
+
+    m_changelog.append(qstrdup(ba.constData()));
+    return true;
+}
+
+template <typename C> bool BrickLink::TextImport::readDB(const QString &name, C &container, bool skip_header)
 {
     // plain C is way faster than Qt on top of C++
     // and this routine has to be fast to reduce the startup time
@@ -442,7 +477,10 @@ template <typename C> bool BrickLink::TextImport::readDB(const QString &name, C 
         char line [1000];
         int lineno = 1;
 
-        fgets(line, 1000, f);    // skip header
+        if (skip_header) {
+            char *gcc_supress_warning = fgets(line, 1000, f);
+            Q_UNUSED(gcc_supress_warning);
+        }
 
         while (!feof(f)) {
             if (!fgets(line, 1000, f))
@@ -608,6 +646,7 @@ void BrickLink::TextImport::exportTo(Core *bl)
 {
     bl->setDatabase_Basics(m_colors, m_categories, m_item_types, m_items);
     bl->setDatabase_AllTimePG(m_alltime_pg_list);
+    bl->setDatabase_ChangeLog(m_changelog);
 }
 
 void BrickLink::TextImport::exportInventoriesTo(Core *bl)

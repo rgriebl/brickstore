@@ -96,6 +96,16 @@ QAction *UndoStack::createUndoAction(QObject *parent) const
     return UndoAction::create(UndoAction::Undo, this, parent);
 }
 
+void UndoStack::endMacro(const QString &str)
+{
+    int idx = index();
+    QUndoStack::endMacro();
+    if (index() == (idx+1)) {
+        const_cast<QUndoCommand *>(command(idx))->setText(str);
+        emit undoTextChanged(str);
+    }
+}
+
 
 
 UndoGroup::UndoGroup(QObject *parent)

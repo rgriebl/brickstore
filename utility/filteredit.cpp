@@ -19,11 +19,13 @@
 #include <QTimer>
 #include <QPainter>
 #include <QStyleOptionFrame>
+#include <QMouseEvent>
 #include <QMenu>
 #include <QtDebug>
 
 #include "filteredit.h"
 
+//#if 0
 #if defined( Q_WS_MAC )
 #  define MAC_USE_NATIVE_SEARCHFIELD
 #else
@@ -47,6 +49,64 @@ typedef QWidget FilterEditPrivateBase;
 #  include <QLineEdit>
 typedef QLineEdit FilterEditPrivateBase;
 
+class FilterEditButton : public QAbstractButton {
+public:
+    FilterEditButton(const QIcon &icon, QWidget *parent)
+        : QAbstractButton(parent), m_menu(0), m_hover(false)
+    {
+        setIcon(icon);
+        setCursor(Qt::ArrowCursor);
+        setFocusPolicy(Qt::NoFocus);
+        setFixedSize(QSize(22, 22));
+        resize(22, 22);
+    }
+
+    void setMenu(QMenu *menu)
+    {
+        m_menu = menu;
+    }
+
+    QMenu *menu() const
+    {
+        return m_menu;
+    }
+
+protected:
+    void paintEvent(QPaintEvent *)
+    {
+        QPainter p(this);
+        icon().paint(&p, rect(), Qt::AlignCenter, isEnabled() ? (m_hover ? QIcon::Active : QIcon::Normal) : QIcon::Disabled, isDown() ? QIcon::On : QIcon::Off);
+    }
+
+    void enterEvent(QEvent *)
+    {
+        m_hover = true;
+        update();
+    }
+
+    void leaveEvent(QEvent *)
+    {
+        m_hover = false;
+        update();
+    }
+
+    void mousePressEvent(QMouseEvent *e)
+    {
+        if (m_menu && e->button() == Qt::LeftButton) {
+            QWidget *p = parentWidget();
+            if (p) {
+                QPoint r = p->mapToGlobal(QPoint(0, p->height()));
+                m_menu->exec(QPoint(r.x() + height() / 2, r.y()));
+            }
+            e->accept();
+        }
+        QAbstractButton::mousePressEvent(e);
+    }
+
+private:
+    QMenu *m_menu;
+    bool m_hover;
+};
 #endif
 
 
@@ -94,9 +154,13 @@ private slots:
 private:
     void doLayout(bool setpositions);
 
-    QString      m_idletext;
-    QToolButton *w_menu;
-    QToolButton *w_clear;
+    QString           m_idletext;
+    FilterEditButton *w_menu;
+    FilterEditButton *w_clear;
+    int               m_left;
+    int               m_top;
+    int               m_right;
+    int               m_bottom;
 #endif
 };
 
@@ -120,7 +184,7 @@ FilterEditPrivate::FilterEditPrivate(FilterEdit *parent)
     q->setAttribute(Qt::WA_MacShowFocusRect);
 
     // Create a native search field and pass its window id to QWidget::create.
-    HISearchFieldCreate(NULL/*bounds*/, kHISearchFieldAttributesSearchIcon | kHISearchFieldAttributesCancel, NULL/*menu ref*/, NULL, &m_hisearch);
+    HISearchFieldCreate(NULL/*bounds*/, kHISearchFieldAttributesSearchIcon, NULL/*menu ref*/, NULL, &m_hisearch);
     create(reinterpret_cast<WId>(m_hisearch));
     //setAttribute(Qt::WA_MacShowFocusRect);
     setAttribute(Qt::WA_MacNormalSize);
@@ -131,25 +195,14 @@ FilterEditPrivate::FilterEditPrivate(FilterEdit *parent)
 
     HIViewInstallEventHandler(m_hisearch, macEventHandler, GetEventTypeCount(mac_events), mac_events, this, NULL);
 #else
-    w_menu = new QToolButton(this);
-    w_menu->setIcon(QIcon(":/images/filter_edit_menu"));
-    w_menu->setCursor(Qt::ArrowCursor);
-    w_menu->setFocusPolicy(Qt::NoFocus);
-//    w_menu->setAutoRaise(true);
-
-    w_clear = new QToolButton(this);
-    w_clear->setIcon(QIcon(":/images/filter_edit_clear"));
-    w_clear->setCursor(Qt::ArrowCursor);
-    w_clear->setFocusPolicy(Qt::NoFocus);
+    w_menu = new FilterEditButton(QIcon(":/images/filter_edit_menu"), this);
+    w_clear = new FilterEditButton(QIcon(":/images/filter_edit_clear"), this);
     w_clear->hide();
-
-    w_menu->setStyleSheet("QToolButton { border: none; padding: 0px; }\n"
-                          "QToolButton::menu-indicator { left: -30px }");
-    w_clear->setStyleSheet("QToolButton { border: none; padding: 0px; }");
 
     connect(w_clear, SIGNAL(clicked()), q, SLOT(clear()));
     connect(this, SIGNAL(textChanged(const QString&)), this, SLOT(checkText(const QString&)));
 
+    getTextMargins(&m_left, &m_top, &m_right, &m_bottom);
     doLayout(false);
 #endif
 }
@@ -208,8 +261,12 @@ void FilterEditPrivate::setText(const QString &txt)
 {
 #if defined(MAC_USE_NATIVE_SEARCHFIELD)
     HIViewSetText(m_hisearch, QCFString::toCFStringRef(txt));
+    OptionBits c = kHISearchFieldAttributesCancel;
+    bool empty = txt.isEmpty();
+    HISearchFieldChangeAttributes(m_hisearch, empty ? 0 : c, empty ? c : 0);
 #else
     QLineEdit::setText(txt);
+    doLayout(false);
 #endif
     m_timer->stop();
     emit q->textChanged(txt);
@@ -233,7 +290,6 @@ void FilterEditPrivate::setMenu(QMenu *menu)
     HISearchFieldSetSearchMenu(m_hisearch, menu ? menu->macMenu(0) : 0);
 #else
     w_menu->setMenu(menu);
-    w_menu->setPopupMode(QToolButton::InstantPopup);
 
 #endif
     delete m_menu;
@@ -355,9 +411,13 @@ OSStatus FilterEditPrivate::macEventHandler(EventHandlerCallRef, EventRef event,
     switch (GetEventClass(event)) {
     case kEventClassTextField:
         switch (GetEventKind(event)) {
-        case kEventTextDidChange:
+        case kEventTextDidChange: {
             that->m_timer->start();
+            OptionBits c = kHISearchFieldAttributesCancel;
+            bool empty = that->text().isEmpty();
+            HISearchFieldChangeAttributes(that->m_hisearch, empty ? 0 : c, empty ? c : 0);
             break;
+        }
         case kEventTextAccepted:
             emit that->q->returnPressed();
             break;
@@ -386,27 +446,24 @@ OSStatus FilterEditPrivate::macEventHandler(EventHandlerCallRef, EventRef event,
 
 void FilterEditPrivate::checkText(const QString &str)
 {
-    w_clear->setVisible(!str.isEmpty());
+    doLayout(false);
     m_timer->start();
 }
 
 void FilterEditPrivate::doLayout(bool setpositionsonly)
 {
-    QSize ms = w_menu->sizeHint();
-    QSize cs = w_clear->sizeHint();
+//    QSize ms = w_menu->sizeHint();
+//    QSize cs = w_clear->sizeHint();
+    QSize ms = w_menu->size();
+    QSize cs = w_clear->size();
     int fw = style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
 
-    if (!setpositionsonly) {
-        setStyleSheet(QString("QLineEdit { padding-left: %1px; padding-right: %2px; } ")
-                      .arg(ms.width() + fw + 1)
-                      .arg(cs.width() + fw + 1));
-
-        QSize mins = QLineEdit::minimumSizeHint();
-        setMinimumSize(mins.width() + ms.width() + cs.width() + fw * 4 + 4,
-                       qMax(mins.height(), qMax(cs.height(), ms.height()) + fw * 2 + 2));
-    }
     w_menu->move(rect().left() + fw, (rect().bottom() + 1 - ms.height())/2);
-    w_clear->move(rect().right() - fw - cs.width(), (rect().bottom() + 1 - cs.height())/2);
+    w_clear->setVisible(!text().isEmpty());
+    if (w_clear->isVisible())
+        w_clear->move(rect().right() - fw - cs.width(), (rect().bottom() + 1 - cs.height())/2);
+
+    setTextMargins(m_left + ms.width() + fw, m_top, m_right + w_clear->isVisible() ? (cs.width() + fw) : 0, m_bottom);
 }
 
 
@@ -420,26 +477,16 @@ void FilterEditPrivate::paintEvent(QPaintEvent *e)
     QLineEdit::paintEvent(e);
 
     if (!hasFocus() && !m_idletext.isEmpty() && text().isEmpty()) {
-        QPainter p(this);
-        QPen tmp = p.pen();
-        p.setPen(palette().color(QPalette::Disabled, QPalette::Text));
-
-        //FIXME: fugly alert!
-        // qlineedit uses an internal qstyleoption set to figure this out
-        // and then adds a hardcoded 2 pixel interior to that.
-        // probably requires fixes to Qt itself to do this cleanly
-        QStyleOptionFrame opt;
-        opt.init(this);
-        opt.rect = contentsRect();
-        opt.lineWidth = hasFrame() ? style()->pixelMetric(QStyle::PM_DefaultFrameWidth) : 0;
-        opt.midLineWidth = 0;
-        opt.state |= QStyle::State_Sunken;
+        QStyleOptionFrameV2 opt;
+        initStyleOption(&opt);
         QRect cr = style()->subElementRect(QStyle::SE_LineEditContents, &opt, this);
-        cr.setLeft(cr.left() + 2);
-        cr.setRight(cr.right() - 2);
+        int l, r, t, b;
+        getTextMargins(&l, &t, &r, &b);
+        cr.adjust(l, t, -r, -b);
 
+        QPainter p(this);
+        p.setPen(palette().color(QPalette::Disabled, QPalette::Text));
         p.drawText(cr, Qt::AlignLeft|Qt::AlignVCenter, m_idletext);
-        p.setPen(tmp);
     }
 }
 

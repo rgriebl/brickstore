@@ -60,6 +60,8 @@ public:
 
     qreal zoom() const          { return m_zoom; }
 
+    bool isAnimationActive() const;
+
     virtual void initializeGL();
     virtual void resizeGL(int w, int h);
     virtual void paintGL();
@@ -67,6 +69,13 @@ public:
 signals:
     void updateNeeded();
     void makeCurrent();
+
+public slots:
+    void startAnimation();
+    void stopAnimation();
+
+private slots:
+    void animationStep();
 
 private:
     void createSurfacesList();
@@ -91,6 +100,8 @@ private:
     bool m_initialized;
     bool m_resized;
     QSize m_size;
+    vector_t m_center;
+    QTimer *m_animation;
 };
 
 class RenderWidget : public QGLWidget {
@@ -106,14 +117,21 @@ public:
     QSize minimumSizeHint() const;
     QSize sizeHint() const;
 
-    void mousePressEvent(QMouseEvent *e);
-    void mouseMoveEvent(QMouseEvent *e);
-    void wheelEvent(QWheelEvent *e);
+    bool isAnimationActive() const;
+
+public slots:
+    void resetCamera();
+    void startAnimation();
+    void stopAnimation();
 
 protected slots:
     void slotMakeCurrent();
 
 protected:
+    void mousePressEvent(QMouseEvent *e);
+    void mouseMoveEvent(QMouseEvent *e);
+    void wheelEvent(QWheelEvent *e);
+
     virtual void initializeGL();
     virtual void resizeGL(int w, int h);
     virtual void paintGL();
@@ -137,14 +155,22 @@ public:
     virtual QSize minimumSizeHint() const;
     virtual QSize sizeHint() const;
 
+    void setImageSize(int w, int h);
+    QImage renderImage();
+
+    bool isAnimationActive() const;
+
+public slots:
+    void resetCamera();
+    void startAnimation();
+    void stopAnimation();
+
+protected:
     void resizeEvent(QResizeEvent *e);
     void paintEvent(QPaintEvent *e);
     void mousePressEvent(QMouseEvent *e);
     void mouseMoveEvent(QMouseEvent *e);
     void wheelEvent(QWheelEvent *e);
-
-    void setImageSize(int w, int h);
-    QImage renderImage();
 
 protected slots:
     void slotMakeCurrent();

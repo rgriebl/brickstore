@@ -33,6 +33,7 @@
 #include "config.h"
 #include "framework.h"
 #include "messagebox.h"
+#include "undo.h"
 //#include "report.h"
 
 #include "importorderdialog.h"
@@ -286,12 +287,23 @@ QDataStream &operator >> (QDataStream &ds, Document::Item &item)
 
 QList<Document *> Document::s_documents;
 
+Document *Document::createTemporary(const BrickLink::InvItemList &list)
+{
+    Document *doc = new Document();
+    doc->m_autosave_timer.stop();
+    s_documents.removeAll(doc);
+
+    doc->setBrickLinkItems(list, 1);
+
+    return doc;
+}
+
 Document::Document()
     : m_uuid(QUuid::createUuid())
 {
     MODELTEST_ATTACH(this)
 
-    m_undo = new QUndoStack(this);
+    m_undo = new UndoStack(this);
     m_order = 0;
     m_error_mask = 0;
 
@@ -400,11 +412,9 @@ void Document::beginMacro(const QString &label)
     m_undo->beginMacro(label);
 }
 
-void Document::endMacro(const QString &)
+void Document::endMacro(const QString &label)
 {
-    //TODO: Fix Qt to accept a label in QUndoStack::endMacro()
-
-    m_undo->endMacro(/*label*/);
+    m_undo->endMacro(label);
 }
 
 QUndoStack *Document::undoStack() const
@@ -829,8 +839,12 @@ Document *Document::fileLoadFrom(const QString &name, const char *type, bool imp
     if (items) {
         Document *doc = new Document();
 
-        if (invalid_items)
-            MessageBox::information(FrameWork::inst(), tr("This file contains %1 unknown item(s).").arg(CMB_BOLD(QString::number(invalid_items))));
+        if (invalid_items) {
+            invalid_items -= BrickLink::core()->applyChangeLogToItems(*items);
+
+            if (invalid_items)
+                MessageBox::information(FrameWork::inst(), tr("This file contains %1 unknown item(s).").arg(CMB_BOLD(QString::number(invalid_items))));
+        }
 
         doc->setBrickLinkItems(*items);
         delete items;
@@ -891,6 +905,8 @@ Document *Document::fileImportLDrawModel()
     return 0;
 }
 
+
+
 void Document::setBrickLinkItems(const BrickLink::InvItemList &bllist, uint multiply)
 {
     ItemList items;
@@ -900,20 +916,19 @@ void Document::setBrickLinkItems(const BrickLink::InvItemList &bllist, uint mult
         Item *item = new Item(*blitem);
 
         if (item->isIncomplete()) {
-//   DlgIncompleteItemImpl d ( item, /*FrameWork::inst ( )*/ 0);
+            //IncompleteItemDialog dlg(item, FrameWork::inst());
 
-//-   if ( waitcursor )
-//-    QApplication::restoreOverrideCursor ( );
+            //if (waitcursor)
+            //    QApplication::restoreOverrideCursor();
 
-            bool drop_this = true; //( d.exec ( ) != QDialog::Accepted );
+            bool drop_this = true; //(dlg.exec() != QDialog::Accepted);
 
-//-   if ( waitcursor )
-//-    QApplication::setOverrideCursor ( QCursor( Qt::WaitCursor ));
+            //if (waitcursor)
+            //    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
             if (drop_this)
                 continue;
         }
-
         item->setQuantity(item->quantity() * multiply);
         items.append(item);
     }

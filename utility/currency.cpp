@@ -76,9 +76,9 @@ Currency Currency::fromLocal(const QString &str)
     else if (s.startsWith(s_sym))
         s = s.mid(s_sym.length()).trimmed();
 
-    s.replace(QLocale().decimalPoint(), QChar('.'));
-
-    return Currency(s.toDouble() / s_rate);
+    //s.replace(QLocale().decimalPoint(), QChar('.'));
+    //return Currency(s.toDouble() / s_rate);
+    return Currency(QLocale().toDouble(s) / s_rate);
 }
 
 QString Currency::toUSD(CurrencySymbol cs, int precision) const
@@ -95,8 +95,11 @@ QString Currency::toUSD(CurrencySymbol cs, int precision) const
 
 QString Currency::toLocal(CurrencySymbol cs, int precision) const
 {
-    QString s = QString::number(toDouble() * s_rate, 'f', precision);
-    s.replace(QChar('.'), QLocale().decimalPoint()); //TODO
+    //QString s = QString::number(toDouble() * s_rate, 'f', precision);
+    //s.replace(QChar('.'), QLocale().decimalPoint()); //TODO
+    QLocale loc;
+    loc.setNumberOptions(QLocale::OmitGroupSeparator);
+    QString s = loc.toString(toDouble() * s_rate, 'f', precision);
 
     if (cs == LocalSymbol)
         return s_sym + QLatin1String(" ") + s;
@@ -134,7 +137,7 @@ protected:
 
                 for (int i = 0; i < text.length(); ++i) {
                     QCharRef ir = text[i];
-                    if (ir == '.' || ir == ',') {
+                    if (ir == QLatin1Char('.') || ir == QLatin1Char(',')) {
                         ir = loc.decimalPoint();
                         fixed = true;
                     }
@@ -180,16 +183,16 @@ QValidator::State CurrencyValidator::validate(QString &input, int &pos) const
 
     QChar dp = QLocale().decimalPoint();
 
-    QRegExp r(QString(" *-?\\d*\\%1?\\d* *").arg(dp));
+    QRegExp r(QString(QLatin1String(" *-?\\d*\\%1?\\d* *")).arg(dp));
 
-    if (b >= 0 && input.simplified().startsWith(QString::fromLatin1("-")))
+    if (b >= 0 && input.simplified().startsWith(QLatin1Char('-')))
         return Invalid;
 
     if (r.exactMatch(input)) {
         QString s = input;
-        s.replace(dp, QChar('.'));
+        s.replace(dp, QLatin1Char('.'));
 
-        int i = s.indexOf('.');
+        int i = s.indexOf(QLatin1Char('.'));
         if (i >= 0) {
             // has decimal point, now count digits after that
             i++;

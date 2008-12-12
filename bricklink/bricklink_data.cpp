@@ -41,7 +41,7 @@ QDataStream &operator << (QDataStream &ds, const Color *col)
 
 QDataStream &operator >> (QDataStream &ds, BrickLink::Color *col)
 {
-    delete [] col->m_name; delete [] col->m_peeron_name;
+    col->~Color();
 
     quint8 flags;
     ds >> col->m_id >> col->m_name >> col->m_peeron_name >> col->m_ldraw_id;
@@ -109,8 +109,7 @@ QDataStream &operator << (QDataStream &ds, const ItemType *itt)
 
 QDataStream &operator >> (QDataStream &ds, BrickLink::ItemType *itt)
 {
-    delete [] itt->m_name;
-    delete [] itt->m_categories;
+    itt->~ItemType();
 
     quint8 flags = 0;
     quint32 catcount = 0;
@@ -151,7 +150,7 @@ QDataStream &operator << (QDataStream &ds, const BrickLink::Category *cat)
 
 QDataStream &operator >> (QDataStream &ds, BrickLink::Category *cat)
 {
-    delete [] cat->m_name;
+    cat->~Category();
     return ds >> cat->m_id >> cat->m_name;
 }
 
@@ -361,10 +360,7 @@ QDataStream &operator << (QDataStream &ds, const BrickLink::Item *item)
 
 QDataStream &operator >> (QDataStream &ds, BrickLink::Item *item)
 {
-    delete [] item->m_id;
-    delete [] item->m_name;
-    delete [] item->m_categories;
-    delete item->m_appears_in;
+    item->~Item();
 
     quint8 ittid = 0;
     quint32 catcount = 0;
@@ -427,6 +423,7 @@ QDataStream &operator >> (QDataStream &ds, BrickLink::Item *item)
 }
 
 } // namespace BrickLink
+
 
 BrickLink::InvItem::InvItem(const Color *color, const Item *item)
 {
