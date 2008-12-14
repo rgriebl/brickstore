@@ -145,6 +145,14 @@ ItemDetailPopup::ItemDetailPopup(QWidget *parent)
     connect(m_play, SIGNAL(clicked()), m_ldraw, SLOT(startAnimation()));
     connect(m_stop, SIGNAL(clicked()), m_ldraw, SLOT(stopAnimation()));
     connect(m_view, SIGNAL(clicked()), m_ldraw, SLOT(resetCamera()));
+
+#ifdef Q_WS_MAC
+    createWinId();
+    extern OSWindowRef qt_mac_window_for(const QWidget *);
+    extern void macWindowSetHasShadow(void *, bool);
+
+    macWindowSetHasShadow(qt_mac_window_for(this), false);
+#endif
 }
 
 ItemDetailPopup::~ItemDetailPopup()
