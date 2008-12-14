@@ -44,16 +44,16 @@ Splash::Splash()
 
     QSize s(20 + fm.width("x") * 50, 10 + fm.height() * 8);
 
-    QLinearGradient fgrad(0, 0, 0, s.height());
-    fgrad.setColorAt(0,    QColor( 15,  15,  15));
-    fgrad.setColorAt(0.25, QColor( 63,  63,  63));
-    fgrad.setColorAt(0.5,  QColor( 15,  15,  15));
-    fgrad.setColorAt(0.75, QColor( 63,  63,  63));
-    fgrad.setColorAt(1,    QColor( 15,  15,  15));
-
-    QRadialGradient fgrad2(s.width()/2, s.height()/2, s.width()/2, s.width()/2, s.height()*.75);
-    fgrad.setColorAt(0,    QColor( 63,  63,  63));
-    fgrad.setColorAt(1,    QColor( 15,  15,  15));
+    QLinearGradient fgrad(0, 0, s.width(), s.height());
+    fgrad.setColorAt(0,    QColor(  0,   0 ,  0));
+    fgrad.setColorAt(0.1,  QColor( 20,  20,  20));
+    fgrad.setColorAt(0.15, QColor( 40,  40,  40));
+    fgrad.setColorAt(0.2,  QColor( 20,  20,  20));
+    fgrad.setColorAt(0.5,  QColor(  0,   0,   0));
+    fgrad.setColorAt(0.8,  QColor( 20,  20,  20));
+    fgrad.setColorAt(0.85, QColor( 40,  40,  40));
+    fgrad.setColorAt(0.9,  QColor( 20,  20,  20));
+    fgrad.setColorAt(1,    QColor(  0,   0,   0));
 
     QLinearGradient hgrad(0, 0, s.width(), 0);
     hgrad.setColorAt(0,    QColor(  0,   0,   0));
@@ -83,13 +83,7 @@ Splash::Splash()
     p.begin(&pix);
     p.initFrom(this);
 
-    p.setPen(Qt::NoPen);
-    p.setBrush(fgrad);
-    p.drawRect(0, 0, s.width(), s.height());
-    p.setBrush(fgrad2);
-    p.setCompositionMode(QPainter::CompositionMode_Multiply);
-    p.drawRect(0, 0, s.width(), s.height());
-    p.setCompositionMode(QPainter::CompositionMode_SourceOver);
+    p.fillRect(pix.rect(), fgrad);
 
     p.setBrush(Qt::NoBrush);
     p.setPen(QPen(hgrad,1));
