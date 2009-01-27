@@ -375,11 +375,14 @@ void UndoAction::itemSelected(QListWidgetItem *item)
 QStringList UndoAction::descriptionList(QUndoStack *stack) const
 {
     QStringList sl;
-    int start = m_type == Undo ? 0 : stack->index();
-    int end   = m_type == Undo ? stack->index() : stack->count();
 
-    for (int i = start; i < end; i++)
-        sl.append(stack->text(i));
+    if (m_type == Undo) {
+        for (int i = stack->index()-1; i >= 0; --i)
+            sl.append(stack->text(i));
+    } else {
+        for (int i = stack->index(); i < stack->count(); ++i)
+            sl.append(stack->text(i));
+    }
     return sl;
 }
 
