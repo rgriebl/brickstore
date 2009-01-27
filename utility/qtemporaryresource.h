@@ -33,6 +33,7 @@ public:
     static bool registerResource(const QString &key, const QByteArray &value);
     static bool registerResource(const QString &key, const QImage &value);
     static bool unregisterResource(const QString &key);
+    static bool isRegisteredResource(const QString &key);
 
     static void clear();
 

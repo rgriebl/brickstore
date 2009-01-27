@@ -84,6 +84,18 @@ bool QTemporaryResource::unregisterResource(const QString &key)
     return d_inst()->contents.remove(realkey) > 0;
 }
 
+bool QTemporaryResource::isRegisteredResource(const QString &key)
+{
+    QString realkey = key;
+    if (key. startsWith(QLatin1String("#/")))
+        realkey = key.mid(2);
+
+    if (realkey.isEmpty())
+        return false;
+
+    return d_inst()->contents.contains(realkey);
+}
+
 //file type handler
 class QTemporaryResourceFileEngineHandler : public QAbstractFileEngineHandler
 {
