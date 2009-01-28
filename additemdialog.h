@@ -11,7 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __ADDITEM_H__
+#ifndef __ADDITEMDIALOG_H__
 #define __ADDITEMDIALOG_H__
 
 #include <QDialog>
