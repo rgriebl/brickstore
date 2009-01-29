@@ -815,7 +815,7 @@ QColor LDraw::Core::edgeColor(int id) const
         color(id).getHsvF(&h, &s, &v, &a);
 
         v += 0.5 * ((v < 0.5) ? 1.0 : -1.0);
-        v = qBound(0.0, v, 1.0);
+        v = qBound(0.0f, v, 1.0f);
 
         return QColor::fromHsvF(h, s, v, a);
     }

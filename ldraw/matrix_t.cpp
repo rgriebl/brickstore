@@ -13,8 +13,6 @@
 */
 
 #include <cstdio>
-#include <qgl.h>
-
 #include "matrix_t.h"
 
 static const float idval[16] = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
@@ -70,9 +68,17 @@ float matrix_t::det() const
     return m[0][0] * det0 - m[0][1] * det1 + m[0][2] * det2 - m[0][3] * det3;
 }
 
+#include <qglobal.h>
+
+#if !defined(QT_NO_OPENGL)
+
+#include <qgl.h>
+
 matrix_t matrix_t::fromGL(int param)
 {
     matrix_t m;
     glGetFloatv(param, m.a);
     return m;
 }
+
+#endif // !QT_NO_OPENGL

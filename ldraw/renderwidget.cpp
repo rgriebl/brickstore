@@ -11,6 +11,10 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
+#include <qglobal.h>
+
+#if !defined(QT_NO_OPENGL)
+
 #include <QMouseEvent>
 #include <QGLFramebufferObject>
 #include <QPainter>
@@ -799,3 +803,4 @@ void LDraw::RenderOffscreenWidget::stopAnimation()
     m_renderer->stopAnimation();
 }
 
+#endif // !QT_NO_OPENGL
