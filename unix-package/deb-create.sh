@@ -15,7 +15,7 @@
 
 set -e
 
-if [ ! -d rpm ]; then
+if [ ! -d unix-package ]; then
 	echo "Error: this script needs to be called from the base directory!"
 	exit 1
 fi
@@ -28,12 +28,21 @@ if [ -z $pkg_ver ]; then
 	exit 2
 fi
 
+if [ ! -x "`which dpkg-buildpackage`" ]; then
+	echo "Error: the dpkg-buildpackage utility can not be found!"
+	exit 3
+fi
+
 dist="unknown"
 
 ## Ubuntu (lsb package needed!)
 if grep -sq "^DISTRIB_ID=Ubuntu\$" /etc/lsb-release; then
 	dist=`grep "^DISTRIB_CODENAME" /etc/lsb-release | sed -e 's,^DISTRIB_CODENAME=\(.*\)$,\1,'`
 	
+## Maemo
+elif [ -e /etc/maemo_version ]; then
+	dist=maemo-`head -n1 /etc/maemo_version | sed -e 's, .*$,,'`
+
 ## Debian
 elif [ -e /etc/debian_version ]; then
 	case `cat /etc/debian_version` in
@@ -43,6 +52,10 @@ elif [ -e /etc/debian_version ]; then
 			;;
 		4.0) dist=etch
 			;;
+		*/*) dist=`sed </etc/debian_version -e 's,/.*$,,'`
+			;;
+		sid*) dist=sid
+			;;
 	esac
 fi
 
@@ -50,28 +63,30 @@ echo
 echo "Creating $dist DEB package ($pkg_ver)"
 
 echo " > Creating tarball..."
-scripts/mkdist.sh "$pkg_ver"
+make tarball RELEASE=$pkg_ver
 
 echo " > Creating DEB build directories..."
-cd debian
+cd unix-package
 rm -rf tmp
 mkdir tmp
 tar -xjf "../brickstore-$pkg_ver.tar.bz2" -C tmp
 tmpdir="tmp/brickstore-$pkg_ver"
 cd "$tmpdir"
 
-cp -aH ../../../qsa .
 [ -f ../../../.private-key ] && cp -H ../../../.private-key .
 
 
 ## -----------------------------------------------------
+
+mkdir debian
+cp unix-package/rules debian
 
 cat >debian/control <<EOF
 Source: brickstore
 Section: x11
 Priority: optional
 Maintainer: Robert Griebl <rg@softforge.de>
-Build-Depends: debhelper (>= 4.0.0), qt3-dev-tools (>= 3.3), libqt3-mt-dev (>= 3.3), libcurl3-dev (>= 7.13)
+Build-Depends: debhelper (>= 4.0.0), qt45-dev-tools (>= 4.5), libqt45-dev (>= 4.5)
 Standards-Version: 3.6.1
 
 Package: brickstore
@@ -112,6 +127,27 @@ On Debian GNU/Linux systems, the complete text of the GNU General
 Public License can be found in '/usr/share/common-licenses/GPL'.
 EOF
 
+if [ -e /etc/maemo_version ]; then
+  extra_postinst_commands="maemo-select-menu-location brickstore.desktop"
+fi
+
+cat >debian/postinst <<EOF
+#!/bin/sh
+set -e
+#DEBHELPER#
+# update icon cache
+touch /usr/share/icons/hicolor
+$extra_postinst_commands
+EOF
+
+cat >debian/postrm <<EOF
+#!/bin/sh
+set -e
+#DEBHELPER#
+# update icon cache
+touch /usr/share/icons/hicolor
+EOF
+
 echo >debian/compat '4'
 
 ## -----------------------------------------------------
@@ -122,8 +158,8 @@ chmod +x debian/rules
 BRICKSTORE_VERSION=$pkg_ver dpkg-buildpackage -b -D -rfakeroot -us -uc
 
 cd ../..
-rm -rf "$pkg_ver"
-mkdir "$pkg_ver"
+#rm -rf "$pkg_ver"
+mkdir -p "$pkg_ver"
 
 for i in `ls -1 tmp/*.deb`; do
 	j=`basename "$i" .deb`
