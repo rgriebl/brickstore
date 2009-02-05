@@ -12,6 +12,10 @@
 #include "window.h"
 #include "itemdetailpopup.h"
 
+#if defined(Q_WS_MACX)
+#  include "macx.h"
+#endif
+
 class GlassButton : public QToolButton {
 public:
     enum Type {
@@ -148,10 +152,7 @@ ItemDetailPopup::ItemDetailPopup(QWidget *parent)
 
 #ifdef Q_WS_MAC
     createWinId();
-    extern OSWindowRef qt_mac_window_for(const QWidget *);
-    extern void macWindowSetHasShadow(void *, bool);
-
-    macWindowSetHasShadow(qt_mac_window_for(this), false);
+    MacExtra::setWindowShadow(this, false);
 #endif
 }
 

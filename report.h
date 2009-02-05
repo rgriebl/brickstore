@@ -11,52 +11,51 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __CREPORT_H__
-#define __CREPORT_H__
+#ifndef __REPORT_H__
+#define __REPORT_H__
 
-#include <qobject.h>
-#include <qstring.h>
-#include <qptrlist.h>
-#include <qprinter.h>
+#include <QObject>
+#include <QString>
+#include <QList>
 
-#include "cdocument.h"
+#include "document.h"
 
-//typedef QMap <QString, QString>  CReportVariables;
+class ReportPrivate;
+class QPrinter;
 
-class CReportPrivate;
-
-class CReport : public QObject {
+class Report : public QObject {
     Q_OBJECT
 public:
-    CReport();
-    virtual ~CReport();
+    static Report *load(const QString &file);
+    virtual ~Report();
 
-    bool load(const QString &file);
     QString name() const;
 
-    void print(QPaintDevice *pd, const CDocument *doc, const CDocument::ItemList &items) const;
+    void print(QPaintDevice *pd, const Document *doc, const Document::ItemList &items) const;
 
 private:
-    CReportPrivate *d;
+    Report();
+
+    ReportPrivate *d;
 };
 
-class CReportManager {
+class ReportManager {
 private:
-    CReportManager();
-    static CReportManager *s_inst;
+    ReportManager();
+    static ReportManager *s_inst;
 
 public:
-    ~CReportManager();
-    static CReportManager *inst();
+    ~ReportManager();
+    static ReportManager *inst();
 
     bool reload();
 
     QPrinter *printer() const;
 
-    const QPtrList <CReport> &reports() const;
+    QList<Report *> reports() const;
 
 private:
-    QPtrList <CReport> m_reports;
+    QList<Report *> m_reports;
 
     mutable QPrinter *m_printer; // mutable for delayed initialization
 };

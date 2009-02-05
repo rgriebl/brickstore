@@ -162,6 +162,8 @@ protected:
     virtual void changeEvent(QEvent *e);
     virtual bool eventFilter(QObject *o, QEvent *e);
 
+    void print(bool aspdf);
+
 private slots:
     void ensureLatestVisible();
     void documentRowsInserted(const QModelIndex &, int, int);

@@ -1,22 +1,23 @@
-#ifndef __CREPORTOBJECTS_H__
-#define __CREPORTOBJECTS_H__
+#ifndef __REPORTOBJECTS_H__
+#define __REPORTOBJECTS_H__
 
-#include <qobject.h>
-#include <qfont.h>
-#include <qcolor.h>
-#include <qvariant.h>
-#include <qvaluelist.h>
+#include <QObject>
+#include <QFont>
+#include <QColor>
+#include <QVariant>
+#include <QList>
+#include <QSize>
 
 class QPaintDevice;
 class QPixmap;
 class CReportPage;
 class QPainter;
-class QSInterpreter;
+class QScriptEngine;
 
 
-class CReportUtility : public QObject {
+class ReportUtility : public QObject {
     Q_OBJECT
-    Q_OVERRIDE(QCString name         SCRIPTABLE false)
+    Q_OVERRIDE(QString objectName         SCRIPTABLE false)
 
 public slots:
     QString translate(const QString &context, const QString &text) const;
@@ -25,16 +26,16 @@ public slots:
     QString localTimeString(const QDateTime &dt) const;
 
 public:
-    CReportUtility();
+    ReportUtility();
 };
 
 
-class CReportMoneyStatic : public QObject {
+class ReportMoneyStatic : public QObject {
     Q_OBJECT
-    Q_OVERRIDE(QCString name SCRIPTABLE false)
+    Q_OVERRIDE(QString objectName SCRIPTABLE false)
 
 public:
-    CReportMoneyStatic(QSInterpreter *ip);
+    ReportMoneyStatic(QScriptEngine *eng);
 
 public slots:
     double fromValue(double d);
@@ -49,22 +50,24 @@ public slots:
     QString toLocalString(double d, bool with_currency_symbol = false, int precision = 3);
 
 private:
-    QSInterpreter *m_ip;
+    QScriptEngine *m_engine;
 };
 
 
-class CReportJob : public QObject {
-    Q_OBJECT
-    Q_OVERRIDE(QCString name         SCRIPTABLE false)
+class ReportPage;
 
-    Q_PROPERTY(uint     pageCount    READ pageCount)
-// Q_PROPERTY( int      paperFormat  READ paperFormat)
-    Q_PROPERTY(QSize    paperSize    READ paperSize)
-    Q_PROPERTY(double   scaling      READ scaling WRITE setScaling)
+class ReportJob : public QObject {
+    Q_OBJECT
+    Q_OVERRIDE(QString objectName   SCRIPTABLE false)
+
+    Q_PROPERTY(uint    pageCount    READ pageCount)
+// Q_PROPERTY( int     paperFormat  READ paperFormat)
+    Q_PROPERTY(QSize   paperSize    READ paperSize)
+    Q_PROPERTY(double  scaling      READ scaling WRITE setScaling)
 
 public slots:
-    CReportPage *addPage();
-    CReportPage *getPage(uint i) const;
+    ReportPage *addPage();
+    ReportPage *getPage(uint i) const;
     void abort();
 
 public:
@@ -75,8 +78,8 @@ public:
     void setScaling(double s);
 
 public:
-    CReportJob(QPaintDevice *pd);
-    ~CReportJob();
+    ReportJob(QPaintDevice *pd);
+    ~ReportJob();
 
     QPaintDevice *paintDevice() const;
 
@@ -84,18 +87,18 @@ public:
     void dump();
 
 private:
-    QValueList <CReportPage *> m_pages;
+    QList<ReportPage *> m_pages;
     QPaintDevice *m_pd;
     bool m_aborted;
     double m_scaling;
 };
 
-class CReportPage : public QObject {
+class ReportPage : public QObject {
     Q_OBJECT
-    Q_OVERRIDE(QCString name SCRIPTABLE false)
+    Q_OVERRIDE(QString objectName       SCRIPTABLE false)
 
     Q_ENUMS(LineStyle)
-    Q_SETS(Alignment)
+    Q_FLAGS(Alignment)
 
     Q_PROPERTY(int     number           READ pageNumber)
     Q_PROPERTY(QFont   font             READ font       WRITE setFont)
@@ -114,7 +117,7 @@ public:
         DashDotDotLine,
     };
 
-    enum Alignment {
+    enum AlignmentFlag {
         AlignLeft     = Qt::AlignLeft,
         AlignHCenter  = Qt::AlignHCenter,
         AlignRight    = Qt::AlignRight,
@@ -123,6 +126,8 @@ public:
         AlignBottom   = Qt::AlignBottom,
         AlignCenter   = Qt::AlignCenter
     };
+
+    Q_DECLARE_FLAGS(Alignment, AlignmentFlag)
 
 public slots:
     QSize textSize(const QString &text);
@@ -149,7 +154,7 @@ public:
     void setLineWidth(double linewidth);
 
 public:
-    CReportPage(const CReportJob *job);
+    ReportPage(const ReportJob *job);
 
     void dump();
     void print(QPainter *p, double scale [2]);
@@ -183,8 +188,8 @@ struct DrawCmd : public Cmd {
     void attr_cmd();
 
 private:
-    QPtrList <Cmd> m_cmds;
-    const CReportJob *m_job;
+    QList<Cmd *> m_cmds;
+    const ReportJob *m_job;
     AttrCmd m_attr;
 };
 

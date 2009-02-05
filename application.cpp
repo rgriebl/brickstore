@@ -20,6 +20,7 @@
 #include <QSysInfo>
 #include <QFileOpenEvent>
 #include <QProcess>
+#include <QDesktopServices>
 
 #if defined( Q_OS_UNIX )
 #  include <sys/utsname.h>
@@ -37,7 +38,7 @@
 #include "messagebox.h"
 #include "framework.h"
 #include "transfer.h"
-//#include "report.h"
+#include "report.h"
 
 #include "filteredit.h"
 
@@ -92,7 +93,7 @@ Application::Application(bool rebuild_db_only, int _argc, char **_argv)
 
     // initialize config & resource
     (void) Config::inst()->upgrade(BRICKSTORE_MAJOR, BRICKSTORE_MINOR, BRICKSTORE_PATCH);
-//    (void) CReportManager::inst ( );
+    (void) ReportManager::inst ( );
 
     m_trans_qt = 0;
     m_trans_brickstore = 0;
@@ -133,7 +134,7 @@ Application::~Application()
 {
     exitBrickLink();
 
-//    delete CReportManager::inst ( );
+    delete ReportManager::inst ( );
     delete Config::inst();
 }
 
@@ -157,17 +158,18 @@ void Application::updateTranslations()
     m_trans_qt = new QTranslator(this);
     m_trans_brickstore = new QTranslator(this);
 
-    if (qSharedBuild())
-        m_trans_qt->load(QLibraryInfo::location(QLibraryInfo::TranslationsPath) + "/qt_" + locale);
-    else
-        m_trans_qt->load(":/translations/qt_" + locale);
+    QString datadir = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
 
-    m_trans_brickstore->load(":/translations/brickstore_" + locale);
-
-    if (!m_trans_qt->isEmpty())
+    if ((qSharedBuild() && m_trans_qt->load(QLibraryInfo::location(QLibraryInfo::TranslationsPath) + QLatin1String("/qt_") + locale)) ||
+        m_trans_qt->load(QLatin1String("translations/qt_") + locale, datadir) ||
+        m_trans_qt->load(QLatin1String("translations/qt_") + locale, QLatin1String(":/"))) {
         installTranslator(m_trans_qt);
-    if (!m_trans_brickstore->isEmpty())
+    }
+
+    if (m_trans_brickstore->load(QLatin1String("brickstore_") + locale, datadir) ||
+        m_trans_brickstore->load(QLatin1String("brickstore_") + locale, QLatin1String(":/"))) {
         installTranslator(m_trans_brickstore);
+    }
 }
 
 void Application::rebuildDatabase()

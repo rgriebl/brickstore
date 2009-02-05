@@ -11,20 +11,20 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __CREPORT_P_H__
-#define __CREPORT_P_H__
+#ifndef __REPORT_P_H__
+#define __REPORT_P_H__
 
 #include <time.h>
 
-class QSInterpreter;
+class QScriptEngine;
 
-class CReportPrivate {
+class ReportPrivate {
 public:
     time_t              m_loaded;
     QString             m_name;
     QString             m_code;
     QString             m_label;
-    QSInterpreter *     m_interpreter;
+    QScriptEngine *     m_engine;
 };
 
 #endif

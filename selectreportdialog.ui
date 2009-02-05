@@ -1,0 +1,103 @@
+<ui version="4.0" >
+ <class>SelectReportDialog</class>
+ <widget class="QDialog" name="SelectReportDialog" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Dialog</string>
+  </property>
+  <property name="sizeGripEnabled" >
+   <bool>true</bool>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout" >
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout" >
+     <item>
+      <widget class="QLabel" name="label" >
+       <property name="text" >
+        <string>﻿Select a template for printing</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="w_update" >
+       <property name="text" >
+        <string>...</string>
+       </property>
+       <property name="icon" >
+        <iconset resource="../brickstore.qrc" >
+         <normaloff>:/images/16x16/extras_update_database.png</normaloff>:/images/16x16/extras_update_database.png</iconset>
+       </property>
+       <property name="autoRaise" >
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QListView" name="w_list" >
+     <property name="alternatingRowColors" >
+      <bool>true</bool>
+     </property>
+     <property name="wordWrap" >
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="w_buttons" >
+     <property name="orientation" >
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons" >
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="../brickstore.qrc" />
+ </resources>
+ <connections>
+  <connection>
+   <sender>w_buttons</sender>
+   <signal>accepted()</signal>
+   <receiver>SelectReport</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>w_buttons</sender>
+   <signal>rejected()</signal>
+   <receiver>SelectReport</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

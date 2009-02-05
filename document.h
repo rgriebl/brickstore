@@ -129,8 +129,8 @@ public:
     QModelIndex index(const Item *i, int column = 0) const;
     QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
 
-    virtual int rowCount(const QModelIndex &parent) const;
-    virtual int columnCount(const QModelIndex &parent) const;
+    virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
+    virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
     virtual QVariant data(const QModelIndex &index, int role) const;
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const;
     Qt::ItemFlags flags(const QModelIndex&) const;

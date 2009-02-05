@@ -27,14 +27,13 @@
 
 //#if 0
 #if defined( Q_WS_MAC )
-#  define MAC_USE_NATIVE_SEARCHFIELD
+//#  define MAC_USE_NATIVE_SEARCHFIELD
 #else
 #  undef MAC_USE_NATIVE_SEARCHFIELD
 #endif
 
 #if defined( MAC_USE_NATIVE_SEARCHFIELD )
 
-#include <Carbon/Carbon.h>
 
 // copied and simplified to static functions from private/qcore_mac_p.h
 class QCFString {
@@ -287,7 +286,7 @@ QString FilterEditPrivate::text() const
 void FilterEditPrivate::setMenu(QMenu *menu)
 {
 #if defined(MAC_USE_NATIVE_SEARCHFIELD)
-    HISearchFieldSetSearchMenu(m_hisearch, menu ? menu->macMenu(0) : 0);
+    HISearchFieldSetSearchMenu(m_hisearch, menu ? static_cast<OpaqueMenuRef *>(menu->macMenu(0)) : 0);
 #else
     w_menu->setMenu(menu);
 

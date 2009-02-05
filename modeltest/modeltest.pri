@@ -5,6 +5,7 @@ RELPWD = $$replace(PWD,$$_PRO_FILE_PWD_,.)
 INCLUDEPATH += $$RELPWD
 DEPENDPATH  += $$RELPWD
 
-SOURCES += $$RELPWD/modeltest.cpp
+SOURCES += modeltest.cpp
 
-HEADERS += $$RELPWD/modeltest.h
+HEADERS += modeltest.h
+

@@ -17,8 +17,6 @@
 #include <QCursor>
 #include <QFileDialog>
 #include <QClipboard>
-#include <QPrinter>
-#include <QPainter>
 #include <QRegExp>
 #include <QDesktopServices>
 
@@ -34,11 +32,9 @@
 #include "framework.h"
 #include "messagebox.h"
 #include "undo.h"
-//#include "report.h"
 
 #include "importorderdialog.h"
 #include "importinventorydialog.h"
-//#include "selectreportdialog.h"
 //#include "incompleteitemdialog.h"
 
 #include "import.h"

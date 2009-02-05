@@ -5,40 +5,49 @@ DEPENDPATH  += $$RELPWD
 
 RESOURCES += utility.qrc
 
-# is this really still needed?
-HEADERS += $$RELPWD/disableupdates.h \
-           $$RELPWD/stopwatch.h \
-           $$RELPWD/chunkwriter.h \
+HEADERS += \
+  chunkreader.h \
+  chunkwriter.h \
+  currency.h \
+  disableupdates.h \
+  filter.h \
+  filteredit.h \
+  headerview.h \
+  messagebox.h \
+  multiprogressbar.h \
+  progressdialog.h \
+  qtemporaryresource.h \
+  qtemporaryresource_p.h \
+  spinner.h \
+  stopwatch.h \
+  taskpanemanager.h \
+  threadpool.h \
+  transfer.h \
+  undo.h \
+  utility.h \
+  workspace.h \
 
 
-XSOURCES = filteredit \
-           filter \
-           headerview \
-           messagebox \
-           chunkreader \
-           currency \
-           multiprogressbar \
-           progressdialog \
-           spinner \
-           taskpanemanager \
-           threadpool \
-           transfer \
-           undo \
-           workspace \
-           qtemporaryresource \
-           utility \
+SOURCES += \
+  chunkreader.cpp \
+  currency.cpp \
+  filter.cpp \
+  filteredit.cpp \
+  headerview.cpp \
+  messagebox.cpp \
+  multiprogressbar.cpp \
+  progressdialog.cpp \
+  qtemporaryresource.cpp \
+  spinner.cpp \
+  taskpanemanager.cpp \
+  threadpool.cpp \
+  transfer.cpp \
+  undo.cpp \
+  utility.cpp \
+  workspace.cpp \
 
 
-for( src, XSOURCES ) {
-  HEADERS += $$RELPWD/$${src}.h
-  SOURCES += $$RELPWD/$${src}.cpp
-  
-  exists($${src}_p.h) : HEADERS += $$RELPWD/$${src}_p.h
+macx {
+  HEADERS += macx.h
+  OBJECTIVE_SOURCES += macx.mm
 }
-
-#for( form, XFORMS ) {
-#  exists($${form}.h) : HEADERS += $${form}.h
-#  exists($${form}.cpp) : SOURCES += $${form}.cpp
-#  FORMS   += $${form}.ui
-#}
-

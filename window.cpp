@@ -25,6 +25,8 @@
 #include <QHeaderView>
 #include <QCloseEvent>
 #include <QDesktopServices>
+#include <QPrinter>
+#include <QPrintDialog>
 
 #include "messagebox.h"
 #include "config.h"
@@ -36,6 +38,7 @@
 #include "window.h"
 #include "headerview.h"
 #include "documentdelegate.h"
+#include "report.h"
 
 #include "selectcolordialog.h"
 #include "selectdocumentdialog.h"
@@ -43,7 +46,7 @@
 #include "incdecpricesdialog.h"
 #include "incompleteitemdialog.h"
 #include "consolidateitemsdialog.h"
-
+#include "selectreportdialog.h"
 
 namespace {
 
@@ -1432,57 +1435,77 @@ void Window::on_view_difference_mode_toggled(bool b)
 
 void Window::on_file_print_triggered()
 {
-    if (m_doc->items().isEmpty())
-        return;
-    /*
-     if ( CReportManager::inst ( )->reports ( ).isEmpty ( )) {
-      CReportManager::inst ( )->reload ( );
-
-      if ( CReportManager::inst ( )->reports ( ).isEmpty ( ))
-       return;
-     }
-
-     QPrinter *prt = CReportManager::inst ( )->printer ( );
-
-     if ( !prt )
-      return;
-
-     //prt->setOptionEnabled ( QPrinter::PrintToFile, false );
-     prt->setOptionEnabled ( QPrinter::PrintSelection, !selection ( ).isEmpty ( ));
-     prt->setOptionEnabled ( QPrinter::PrintPageRange, false );
-     prt->setPrintRange ( selection ( ).isEmpty ( ) ? QPrinter::AllPages : QPrinter::Selection );
-
-     QString doctitle = m_doc->title();
-     if (doctitle == m_doc->fileName())
-         doctitle = QFileInfo(doctitle).baseName();
-
-     prt->setDocName(doctitle);
-
-     prt->setFullPage ( true );
-
-
-     if ( !prt->setup ( FrameWork::inst ( )))
-      return;
-
-     DlgSelectReportImpl d ( this );
-
-     if ( d.exec ( ) != QDialog::Accepted )
-      return;
-
-     const CReport *rep = d.report ( );
-
-     if ( !rep )
-      return;
-
-     rep->print ( prt, m_doc, sortedItems ( prt->printRange ( ) == QPrinter::Selection ));
-     */
+    print(false);
 }
 
 void Window::on_file_print_pdf_triggered()
 {
-    qWarning("Print to PDF is not implemented yet");
+    print(true);
 }
 
+void Window::print(bool as_pdf)
+{
+    if (m_doc->items().isEmpty())
+        return;
+
+    if (ReportManager::inst()->reports().isEmpty()) {
+        ReportManager::inst()->reload();
+
+        if (ReportManager::inst()->reports().isEmpty())
+            MessageBox::warning(this, tr("Couldn't find any print templates."), MessageBox::Ok);
+            return;
+    }
+
+    QPrinter *prt = ReportManager::inst()->printer();
+
+    if (!prt )
+        return;
+
+    QString doctitle = m_doc->title();
+    if (doctitle == m_doc->fileName())
+        doctitle = QFileInfo(doctitle).baseName();
+
+    if (as_pdf) {
+        QString pdfname = doctitle + QLatin1String(".pdf");
+        pdfname = QFileDialog::getSaveFileName(FrameWork::inst(), tr("Save PDF as"), pdfname, tr("PDF Documents (*.pdf)"));
+
+        if (pdfname.isEmpty())
+            return;
+
+        prt->setOutputFileName(pdfname);
+        prt->setOutputFormat(QPrinter::PdfFormat);
+    }
+    else {
+        QPrintDialog pd(prt, FrameWork::inst());
+
+        pd.addEnabledOption(QAbstractPrintDialog::PrintToFile);
+        pd.addEnabledOption(QAbstractPrintDialog::PrintCollateCopies);
+        pd.addEnabledOption(QAbstractPrintDialog::PrintShowPageSize);
+
+        if (!selection().isEmpty())
+            pd.addEnabledOption(QAbstractPrintDialog::PrintSelection);
+
+        //pd.setPrintRange(m_doc->selection().isEmpty() ? QAbstractPrintDialog::AllPages : QAbstractPrintDialog::Selection);
+
+        if (pd.exec() != QDialog::Accepted)
+            return;
+    }
+
+    prt->setDocName(doctitle);
+    prt->setFullPage(true);
+
+    SelectReportDialog d(this);
+
+    if (d.exec() != QDialog::Accepted)
+        return;
+
+    const Report *rep = d.report();
+
+    if (!rep)
+        return;
+
+    rep->print(prt, m_doc, m_view->sortItemList(prt->printRange() == QPrinter::Selection ? selection() : m_doc->items()));
+}
 void Window::on_file_save_triggered()
 {
     m_doc->fileSave();

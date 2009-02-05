@@ -12,135 +12,136 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 
-#include <qapplication.h>
-#include <qpixmap.h>
-#include <qprinter.h>
-#include <qpaintdevicemetrics.h>
-#include <qfontmetrics.h>
-#include <qpainter.h>
-#include <qdatetime.h>
+#include <QApplication>
+#include <QPixmap>
+#include <QPrinter>
+//#include <QPaintDeviceMetrics>
+#include <QFontMetrics>
+#include <QPainter>
+#include <QDateTime>
 
-#include <qsinterpreter.h>
-
-
-#include "cmoney.h"
-#include "cutility.h"
-
-#include "creportobjects.h"
+#include <QtScript>
 
 
-CReportUtility::CReportUtility()
-        : QObject(0, "Utility")
-{ }
+#include "currency.h"
+#include "utility.h"
 
-QString CReportUtility::translate(const QString &context, const QString &text) const
+#include "reportobjects.h"
+
+
+ReportUtility::ReportUtility()
+    : QObject(0)
 {
-    return qApp->translate(context.latin1(), text.latin1());
+    setObjectName(QLatin1String("Utility"));
 }
 
-QString CReportUtility::localDateString(const QDateTime &dt) const
+QString ReportUtility::translate(const QString &context, const QString &text) const
+{
+    return qApp->translate(context.toLatin1(), text.toLatin1());
+}
+
+QString ReportUtility::localDateString(const QDateTime &dt) const
 {
     return dt.date().toString(Qt::LocalDate);
 }
 
-QString CReportUtility::localTimeString(const QDateTime &dt) const
+QString ReportUtility::localTimeString(const QDateTime &dt) const
 {
     return dt.time().toString(Qt::LocalDate);
 }
 
 
-CReportJob::CReportJob(QPaintDevice *pd)
-        : QObject(0, "Job"), m_pd(pd), m_aborted(false), m_scaling(1.0f)
+ReportJob::ReportJob(QPaintDevice *pd)
+    : QObject(0), m_pd(pd), m_aborted(false), m_scaling(1.0f)
 {
+    setObjectName(QLatin1String("Job"));
 }
 
-CReportJob::~CReportJob()
+ReportJob::~ReportJob()
 {
     qDeleteAll(m_pages);
 }
 
-QPaintDevice *CReportJob::paintDevice() const
+QPaintDevice *ReportJob::paintDevice() const
 {
     return m_pd;
 }
 
-CReportPage *CReportJob::addPage()
+ReportPage *ReportJob::addPage()
 {
-    CReportPage *page = new CReportPage(this);
+    ReportPage *page = new ReportPage(this);
     m_pages.append(page);
     return page;
 }
 
-CReportPage *CReportJob::getPage(uint i) const
+ReportPage *ReportJob::getPage(uint i) const
 {
-    if (i < m_pages.count())
+    if (int(i) < m_pages.count())
         return m_pages [i];
     else
         return 0;
 }
 
-void CReportJob::abort()
+void ReportJob::abort()
 {
     m_aborted = true;
 }
 
-bool CReportJob::isAborted() const
+bool ReportJob::isAborted() const
 {
     return m_aborted;
 }
 
-double CReportJob::scaling() const
+double ReportJob::scaling() const
 {
     return m_scaling;
 }
 
-void CReportJob::setScaling(double s)
+void ReportJob::setScaling(double s)
 {
     m_scaling = s;
 }
 
-uint CReportJob::pageCount() const
+uint ReportJob::pageCount() const
 {
     return m_pages.count();
 }
 
-QSize CReportJob::paperSize() const
+QSize ReportJob::paperSize() const
 {
-    QPaintDeviceMetrics pdm(m_pd);
-    return QSize(pdm.widthMM(), pdm.heightMM());
+    return QSize(m_pd->widthMM(), m_pd->heightMM());
 }
 
-void CReportJob::dump()
+void ReportJob::dump()
 {
     qDebug("Print Job Dump");
     qDebug(" # of pages: %d", int(m_pages.count()));
     qDebug(" ");
 
-    for (uint i = 0; i < m_pages.count(); i++) {
+    for (int i = 0; i < m_pages.count(); ++i) {
         qDebug("Page #%d", i);
         m_pages [i]->dump();
     }
 }
 
-bool CReportJob::print(uint from, uint to)
+bool ReportJob::print(uint from, uint to)
 {
-    if (!m_pages.count() || (from > to) || (to >= m_pages.count()))
+    if (!m_pages.count() || (from > to) || (int(to) >= m_pages.count()))
         return false;
 
     QPainter p;
     if (!p.begin(m_pd))
         return false;
 
-    QPrinter *prt = ((m_pd->devType() & QInternal::DeviceTypeMask) == QInternal::Printer) ? static_cast<QPrinter *>(m_pd) : 0;
+    QPrinter *prt = (m_pd->devType() == QInternal::Printer) ? static_cast<QPrinter *>(m_pd) : 0;
 
-    QPaintDeviceMetrics pdm(m_pd);
     double scaling [2];
-    scaling [0] = m_scaling * double(pdm.logicalDpiX()) / 25.4f;
-    scaling [1] = m_scaling * double(pdm.logicalDpiY()) / 25.4f;
+    scaling [0] = m_scaling * double(m_pd->logicalDpiX()) / 25.4f;
+    scaling [1] = m_scaling * double(m_pd->logicalDpiY()) / 25.4f;
     bool no_new_page = true;
 
     for (uint i = from; i <= to; i++) {
-        CReportPage *page = m_pages [i];
+        ReportPage *page = m_pages [i];
 
         if (!no_new_page && prt)
             prt->newPage();
@@ -155,10 +156,10 @@ bool CReportJob::print(uint from, uint to)
 ///////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-CReportPage::CReportPage(const CReportJob *job)
-        : QObject(const_cast <CReportJob *>(job)), m_job(job)
+ReportPage::ReportPage(const ReportJob *job)
+        : QObject(const_cast <ReportJob *>(job)), m_job(job)
 {
-    setName(QString("Page%1").arg(job->pageCount() + 1).ascii());
+    setObjectName(QString("Page%1").arg(job->pageCount() + 1));
 
     m_attr.m_font = QFont("Arial", 10);
     m_attr.m_color = Qt::black;
@@ -167,7 +168,7 @@ CReportPage::CReportPage(const CReportJob *job)
     m_attr.m_linestyle = SolidLine;
 }
 
-int CReportPage::pageNumber() const
+int ReportPage::pageNumber() const
 {
     int res = -1;
 
@@ -180,26 +181,26 @@ int CReportPage::pageNumber() const
     return res;
 }
 
-void CReportPage::dump()
+void ReportPage::dump()
 {
     qDebug(" # of commands: %d", int(m_cmds.count()));
     qDebug(" ");
 
-    for (uint i = 0; i < m_cmds.count(); i++) {
+    for (int i = 0; i < m_cmds.count(); ++i) {
         switch (m_cmds.at(i)->m_cmd) {
         case Cmd::Attributes: {
             AttrCmd *ac = static_cast<AttrCmd *>(m_cmds.at(i));
 
-            qDebug(" [%d] Attributes (Font: %s | Color: %s | BgColor: %s | Line: %f | LineStyle: %d", i, ac->m_font.toString().latin1(), ac->m_color.name().latin1(), ac->m_bgcolor.name().latin1(), ac->m_linewidth, ac->m_linestyle);
+            qDebug(" [%d] Attributes (Font: %s | Color: %s | BgColor: %s | Line: %f | LineStyle: %d", i, qPrintable(ac->m_font.toString()), qPrintable(ac->m_color.name()), qPrintable(ac->m_bgcolor.name()), ac->m_linewidth, ac->m_linestyle);
             break;
         }
         case Cmd::Text:  {
             DrawCmd *dc = static_cast<DrawCmd *>(m_cmds.at(i));
 
             if (dc->m_w == -1 && dc->m_h == -1)
-                qDebug(" [%d] Text (%f,%f), \"%s\"", i, dc->m_x, dc->m_y, dc->m_p2.toString().latin1());
+                qDebug(" [%d] Text (%f,%f), \"%s\"", i, dc->m_x, dc->m_y, qPrintable(dc->m_p2.toString()));
             else
-                qDebug(" [%d] Text (%f,%f - %fx%f), align: %d, \"%s\"", i, dc->m_x, dc->m_y, dc->m_w, dc->m_h, dc->m_p1.toInt(), dc->m_p2.toString().latin1());
+                qDebug(" [%d] Text (%f,%f - %fx%f), align: %d, \"%s\"", i, dc->m_x, dc->m_y, dc->m_w, dc->m_h, dc->m_p1.toInt(), qPrintable(dc->m_p2.toString()));
 
             break;
         }
@@ -231,11 +232,11 @@ void CReportPage::dump()
     }
 }
 
-void CReportPage::print(QPainter *p, double scale [2])
+void ReportPage::print(QPainter *p, double scale [2])
 {
-    for (QPtrListIterator<Cmd> it(m_cmds); it.current(); ++it) {
-        if (it.current()->m_cmd == Cmd::Attributes) {
-            AttrCmd *ac = static_cast<AttrCmd *>(it.current());
+    foreach (const Cmd *c, m_cmds) {
+        if (c->m_cmd == Cmd::Attributes) {
+            const AttrCmd *ac = static_cast<const AttrCmd *>(c);
 
             // QFont f = ac->m_font;
             // f.setPointSizeFloat ( f.pointSizeFloat ( ) * scale [1] );
@@ -252,14 +253,14 @@ void CReportPage::print(QPainter *p, double scale [2])
                 p->setBrush(QBrush(Qt::NoBrush));
         }
         else {
-            DrawCmd *dc = static_cast<DrawCmd *>(it.current());
+            const DrawCmd *dc = static_cast<const DrawCmd *>(c);
 
             int x = int(dc->m_x * scale [0]);
             int y = int(dc->m_y * scale [1]);
             int w = int(dc->m_w * scale [0]);
             int h = int(dc->m_h * scale [1]);
 
-            switch (it.current()->m_cmd) {
+            switch (c->m_cmd) {
             case Cmd::Text:
                 if (w < 0 && h < 0)
                     p->drawText(x, y, dc->m_p2.toString());
@@ -280,18 +281,18 @@ void CReportPage::print(QPainter *p, double scale [2])
                 break;
 
             case Cmd::Pixmap: {
-                QPixmap pix = dc->m_p1.toPixmap();
+                QPixmap pix = dc->m_p1.value<QPixmap>();
 
                 if (!pix.isNull()) {
                     QRect dr = QRect(x, y, w, h);
 
                     QSize oldsize = dr.size();
                     QSize newsize = pix.size();
-                    newsize.scale(oldsize, QSize::ScaleMin);
+                    newsize.scale(oldsize, Qt::KeepAspectRatio);
 
                     dr.setSize(newsize);
-                    dr.moveBy((oldsize.width() - newsize.width()) / 2,
-                              (oldsize.height() - newsize.height()) / 2);
+                    dr.translate((oldsize.width() - newsize.width()) / 2,
+                                 (oldsize.height() - newsize.height()) / 2);
 
                     p->drawPixmap(dr, pix);
                 }
@@ -306,32 +307,32 @@ void CReportPage::print(QPainter *p, double scale [2])
 }
 
 
-QFont CReportPage::font() const
+QFont ReportPage::font() const
 {
     return m_attr.m_font;
 }
 
-QColor CReportPage::color() const
+QColor ReportPage::color() const
 {
     return m_attr.m_color;
 }
 
-QColor CReportPage::bgColor() const
+QColor ReportPage::bgColor() const
 {
     return m_attr.m_bgcolor;
 }
 
-int CReportPage::lineStyle() const
+int ReportPage::lineStyle() const
 {
     return m_attr.m_linestyle;
 }
 
-double CReportPage::lineWidth() const
+double ReportPage::lineWidth() const
 {
     return m_attr.m_linewidth;
 }
 
-void CReportPage::attr_cmd()
+void ReportPage::attr_cmd()
 {
     AttrCmd *ac = new AttrCmd();
     *ac = m_attr;
@@ -339,47 +340,47 @@ void CReportPage::attr_cmd()
     m_cmds.append(ac);
 }
 
-void CReportPage::setFont(const QFont &f)
+void ReportPage::setFont(const QFont &f)
 {
     m_attr.m_font = f;
     attr_cmd();
 }
 
-void CReportPage::setColor(const QColor &c)
+void ReportPage::setColor(const QColor &c)
 {
     m_attr.m_color = c;
     attr_cmd();
 }
 
-void CReportPage::setBgColor(const QColor &c)
+void ReportPage::setBgColor(const QColor &c)
 {
     m_attr.m_bgcolor = c;
     attr_cmd();
 }
 
-void CReportPage::setLineStyle(int linestyle)
+void ReportPage::setLineStyle(int linestyle)
 {
     m_attr.m_linestyle = linestyle;
     attr_cmd();
 }
 
-void CReportPage::setLineWidth(double linewidth)
+void ReportPage::setLineWidth(double linewidth)
 {
     m_attr.m_linewidth = linewidth;
     attr_cmd();
 }
 
 
-QSize CReportPage::textSize(const QString &text)
+QSize ReportPage::textSize(const QString &text)
 {
     QFontMetrics fm(m_attr.m_font);
-    QPaintDeviceMetrics pdm(m_job->paintDevice());
+    QPaintDevice *pd = m_job->paintDevice();
     QSize s = fm.size(0, text);
-    return QSize(s.width() * pdm.widthMM() / pdm.width(),
-                 s.height() * pdm.heightMM() / pdm.height());
+    return QSize(s.width() * pd->widthMM() / pd->width(),
+                 s.height() * pd->heightMM() / pd->height());
 }
 
-void CReportPage::drawText(double x, double y, const QString &text)
+void ReportPage::drawText(double x, double y, const QString &text)
 {
     DrawCmd *dc = new DrawCmd();
     dc->m_cmd = Cmd::Text;
@@ -390,7 +391,7 @@ void CReportPage::drawText(double x, double y, const QString &text)
     m_cmds.append(dc);
 }
 
-void CReportPage::drawText(double left, double top, double width, double height, Alignment align, const QString &text)
+void ReportPage::drawText(double left, double top, double width, double height, Alignment align, const QString &text)
 {
     DrawCmd *dc = new DrawCmd();
     dc->m_cmd = Cmd::Text;
@@ -398,12 +399,12 @@ void CReportPage::drawText(double left, double top, double width, double height,
     dc->m_y = top;
     dc->m_w = width;
     dc->m_h = height;
-    dc->m_p1 = align;
+    dc->m_p1 = int(align);
     dc->m_p2 = text;
     m_cmds.append(dc);
 }
 
-void CReportPage::drawLine(double x1, double y1, double x2, double y2)
+void ReportPage::drawLine(double x1, double y1, double x2, double y2)
 {
     DrawCmd *dc = new DrawCmd();
     dc->m_cmd = Cmd::Line;
@@ -414,7 +415,7 @@ void CReportPage::drawLine(double x1, double y1, double x2, double y2)
     m_cmds.append(dc);
 }
 
-void CReportPage::drawRect(double left, double top, double width, double height)
+void ReportPage::drawRect(double left, double top, double width, double height)
 {
     DrawCmd *dc = new DrawCmd();
     dc->m_cmd = Cmd::Rect;
@@ -425,7 +426,7 @@ void CReportPage::drawRect(double left, double top, double width, double height)
     m_cmds.append(dc);
 }
 
-void CReportPage::drawEllipse(double left, double top, double width, double height)
+void ReportPage::drawEllipse(double left, double top, double width, double height)
 {
     DrawCmd *dc = new DrawCmd();
     dc->m_cmd = Cmd::Ellipse;
@@ -436,7 +437,7 @@ void CReportPage::drawEllipse(double left, double top, double width, double heig
     m_cmds.append(dc);
 }
 
-void CReportPage::drawPixmap(double left, double top, double width, double height, const QPixmap &pixmap)
+void ReportPage::drawPixmap(double left, double top, double width, double height, const QPixmap &pixmap)
 {
     DrawCmd *dc = new DrawCmd();
     dc->m_cmd = Cmd::Pixmap;
@@ -455,48 +456,50 @@ void CReportPage::drawPixmap(double left, double top, double width, double heigh
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
 
-CReportMoneyStatic::CReportMoneyStatic(QSInterpreter *ip)
-        : m_ip(ip)
-{ }
+ReportMoneyStatic::ReportMoneyStatic(QScriptEngine *eng)
+    : m_engine(eng)
+{
+    setObjectName(QLatin1String("Money"));
+}
 
-double CReportMoneyStatic::fromValue(double d)
+double ReportMoneyStatic::fromValue(double d)
 {
     return d;
 }
 
-double CReportMoneyStatic::fromLocalValue(double d)
+double ReportMoneyStatic::fromLocalValue(double d)
 {
-    return d / CMoney::inst()->factor();
+    return d / Currency::rate();
 }
 
-double CReportMoneyStatic::value(double d) const
+double ReportMoneyStatic::value(double d) const
 {
     return d;
 }
-double CReportMoneyStatic::localValue(double d) const
+double ReportMoneyStatic::localValue(double d) const
 {
-    return d * CMoney::inst()->factor();
+    return d * Currency::rate();
 }
 
-QString CReportMoneyStatic::localCurrencySymbol() const
+QString ReportMoneyStatic::localCurrencySymbol() const
 {
-    return CMoney::inst()->localCurrencySymbol();
+    return Currency::symbol();
 }
 
-QString CReportMoneyStatic::toString(double d, bool with_currency_symbol, int precision)
+QString ReportMoneyStatic::toString(double d, bool with_currency_symbol, int precision)
 {
     if (precision > 3 || precision < 0) {
-        m_ip->throwError("Money.toString(): precision has to be in the range [0 ..3]");
+        m_engine->currentContext()->throwError("Money.toString(): precision has to be in the range [0 ..3]");
         return QString();
     }
-    return money_t (d).toCString(with_currency_symbol, precision);
+    return Currency(d).toUSD(with_currency_symbol ? Currency::LocalSymbol : Currency::NoSymbol, precision);
 }
 
-QString CReportMoneyStatic::toLocalString(double d, bool with_currency_symbol, int precision)
+QString ReportMoneyStatic::toLocalString(double d, bool with_currency_symbol, int precision)
 {
     if (precision > 3 || precision < 0) {
-        m_ip->throwError("Money.toLocalString(): precision has to be in the range [0 ..3]");
+        m_engine->currentContext()->throwError("Money.toLocalString(): precision has to be in the range [0 ..3]");
         return QString();
     }
-    return money_t (d).toLocalizedString(with_currency_symbol, precision);
+    return Currency(d).toLocal(with_currency_symbol ? Currency::LocalSymbol : Currency::NoSymbol, precision);
 }

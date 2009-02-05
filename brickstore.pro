@@ -15,87 +15,107 @@ isEmpty( RELEASE ) {
   RELEASE    = 2.0.0
 }
 
+!for(i, RELEASE):CONFIG *= using_qt_creator
+
 TEMPLATE     = app
 CONFIG      *= warn_on thread qt
 # CONFIG      *= modeltest
-QT          *= core gui xml network
+QT          *= core gui xml network script
 
 TARGET            = BrickStore
 unix:!macx:TARGET = brickstore
 
 LANGUAGES    = de fr nl sl
-RESOURCES    = brickstore.qrc
+RESOURCES   += brickstore.qrc
 SUBPROJECTS  = utility bricklink ldraw lzma
 
 modeltest:debug:SUBPROJECTS += modeltest
 
 
-SOURCES += main.cpp
+SOURCES += \
+  appearsinwidget.cpp \
+  application.cpp \
+  config.cpp \
+  document.cpp \
+  documentdelegate.cpp \
+  framework.cpp \
+  itemdetailpopup.cpp \
+  main.cpp \
+  picturewidget.cpp \
+  priceguidewidget.cpp \
+  rebuilddatabase.cpp \
+  report.cpp \
+  reportobjects.cpp \
+  selectcolor.cpp \
+  selectitem.cpp \
+  splash.cpp \
+  taskwidgets.cpp \
+  window.cpp \
 
-HEADERS += checkforupdates.h \
-           import.h \
-           ref.h \
-           updatedatabase.h \
+HEADERS += \
+  appearsinwidget.h \
+  application.h \
+  checkforupdates.h \
+  config.h \
+  document.h \
+  document_p.h \
+  documentdelegate.h \
+  framework.h \
+  import.h \
+  itemdetailpopup.h \
+  picturewidget.h \
+  priceguidewidget.h \
+  rebuilddatabase.h \
+  ref.h \
+  report.h \
+  report_p.h \
+  reportobjects.h \
+  selectcolor.h \
+  selectitem.h \
+  splash.h \
+  taskwidgets.h \
+  updatedatabase.h \
+  window.h \
 
 
-XSOURCES = application \
-           splash \
-           config \
-           rebuilddatabase \
-           document \
-           documentdelegate \
-           selectcolor \
-           framework \
-           picturewidget \
-           appearsinwidget \
-           priceguidewidget \
-           itemdetailpopup \
-           taskwidgets \
-           selectitem \
-           window \
+FORMS = \
+  additemdialog.ui \
+  consolidateitemsdialog.ui \
+  importinventorydialog.ui \
+  importorderdialog.ui \
+  incdecpricesdialog.ui \
+  incompleteitemdialog.ui \
+  informationdialog.ui \
+  registrationdialog.ui \
+  selectcolordialog.ui \
+  selectdocumentdialog.ui \
+  selectitemdialog.ui \
+  selectreportdialog.ui \
+  settingsdialog.ui \
+  settopriceguidedialog.ui \
 
+HEADERS += $$replace(FORMS, '.ui$', '.h')
+SOURCES += $$replace(FORMS, '.ui$', '.cpp')
 
-XFORMS  = additemdialog \
-          consolidateitemsdialog \
-          importinventorydialog \
-          importorderdialog \
-          incdecpricesdialog \
-          incompleteitemdialog \
-          informationdialog \
-          registrationdialog \
-          selectcolordialog \
-          selectitemdialog \
-          selectdocumentdialog \
-          settopriceguidedialog \
-          settingsdialog \
-
-
-#
-# Expand convenience variables
-#
-
-for( src, XSOURCES ) {
-  HEADERS += $${src}.h
-  SOURCES += $${src}.cpp
-
-  exists($${src}_p.h) : HEADERS += $${src}_p.h
+using_qt_creator {
+    # workaround until creator is able to cope with for()
+    include('utility/utility.pri')
+     include('bricklink/bricklink.pri')
+ #   include('a/a.pri')
+    include('ldraw/ldraw.pri')
+    include('lzma/lzma.pri')
+    include('modeltest/modeltest.pri')
+} else {
+#    for(subp, SUBPROJECTS) : include($${subp}/$${subp}.pri)
 }
 
-for( form, XFORMS ) {
-  HEADERS += $${form}.h
-  SOURCES += $${form}.cpp
-  FORMS   += $${form}.ui
-}
-
-for(subp, SUBPROJECTS) : include($${subp}/$${subp}.pri)
-
-for(lang, LANGUAGES) : TRANSLATIONS += translations/brickstore_$${lang}.ts
-
+TRANSLATIONS = $$replace(LANGUAGES, '$', '.ts')
+TRANSLATIONS = $$replace(TRANSLATIONS, '^', 'translations/brickstore_')
 
 #
 # (n)make tarball
 #
-
+!using_qt_creator {
 DISTFILES += $$SOURCES $$HEADERS $$FORMS $$RESOURCES
 
 DISTFILES += brickstore.rc brickstore.ico brickstore_doc.ico
@@ -225,4 +245,5 @@ unix:!macx {
 
 macx {
   CONFIG += x86
+}
 }

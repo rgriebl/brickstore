@@ -5,13 +5,15 @@ RELPWD = $$replace(PWD,$$_PRO_FILE_PWD_,.)
 INCLUDEPATH += $$RELPWD
 DEPENDPATH  += $$RELPWD
 
-XSOURCES = ldraw \
-           renderwidget \
-           matrix_t \
-           vector_t \
+HEADERS += \
+  ldraw.h \
+  renderwidget.h \
+  matrix_t.h \
+  vector_t.h \
 
-           
-for( src, XSOURCES ) {
-  HEADERS += $$RELPWD/$${src}.h
-  SOURCES += $$RELPWD/$${src}.cpp
-}
+SOURCES += \
+  ldraw.cpp \
+  renderwidget.cpp \
+  matrix_t.cpp \
+  vector_t.cpp \
+

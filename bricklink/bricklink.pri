@@ -3,13 +3,16 @@ RELPWD = $$replace(PWD,$$_PRO_FILE_PWD_,.)
 INCLUDEPATH += $$RELPWD
 DEPENDPATH  += $$RELPWD
 
-HEADERS += $$RELPWD/bricklink.h \
-           $$RELPWD/bricklinkfwd.h \
+HEADERS += \
+  bricklink.h \
+  bricklinkfwd.h \
 
 
-SOURCES += $$RELPWD/bricklink.cpp \
-           $$RELPWD/bricklink_data.cpp \
-           $$RELPWD/bricklink_textimport.cpp \
-           $$RELPWD/bricklink_priceguide.cpp \
-           $$RELPWD/bricklink_picture.cpp \
-           $$RELPWD/bricklink_model.cpp \
+SOURCES += \
+  bricklink.cpp \
+  bricklink_data.cpp \
+  bricklink_textimport.cpp \
+  bricklink_priceguide.cpp \
+  bricklink_picture.cpp \
+  bricklink_model.cpp \
+

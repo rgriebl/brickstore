@@ -228,9 +228,9 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
         << "file_export"
         << "-"
         << "file_print"
-#if !defined(Q_WS_MAC)
+//#if !defined(Q_WS_MAC)
         << "file_print_pdf"
-#endif
+//#endif
         << "-"
         << "file_close"
         << "-"
@@ -1306,97 +1306,6 @@ void FrameWork::connectAllActions(bool do_connect, Window *window)
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-#if 0
-
-
-    m_toggle_updates.clear();
-
-    connectAction(do_connect, "file_save", window, SLOT(fileSave()));
-    connectAction(do_connect, "file_saveas", window, SLOT(fileSaveAs()));
-    connectAction(do_connect, "file_print", window, SLOT(filePrint()));
-    connectAction(do_connect, "file_export", 0, 0);
-    connectAction(do_connect, "file_export_briktrak", window, SLOT(fileExportBrikTrakInventory()));
-    connectAction(do_connect, "file_export_bl_xml", window, SLOT(fileExportBrickLinkXML()));
-    connectAction(do_connect, "file_export_bl_xml_clip", window, SLOT(fileExportBrickLinkXMLClipboard()));
-    connectAction(do_connect, "file_export_bl_update_clip", window, SLOT(fileExportBrickLinkUpdateClipboard()));
-    connectAction(do_connect, "file_export_bl_invreq_clip", window, SLOT(fileExportBrickLinkInvReqClipboard()));
-    connectAction(do_connect, "file_export_bl_wantedlist_clip", window, SLOT(fileExportBrickLinkWantedListClipboard()));
-    connectAction(do_connect, "file_close", window, SLOT(close()));
-
-    connectAction(do_connect, "edit_cut", window, SLOT(editCut()));
-    connectAction(do_connect, "edit_copy", window, SLOT(editCopy()));
-    connectAction(do_connect, "edit_paste", window, SLOT(editPaste()));
-    connectAction(do_connect, "edit_delete", window, SLOT(editDelete()));
-
-    connectAction(do_connect, "edit_select_all", window, SLOT(selectAll()));
-    connectAction(do_connect, "edit_select_none", window, SLOT(selectNone()));
-
-    connectAction(do_connect, "edit_subtractitems", window, SLOT(editSubtractItems()));
-    connectAction(do_connect, "edit_mergeitems", window, SLOT(editMergeItems()));
-    connectAction(do_connect, "edit_partoutitems", window, SLOT(editPartOutItems()));
-    connectAction(do_connect, "edit_reset_diffs", window, SLOT(editResetDifferences()));
-    connectAction(do_connect, "edit_copyremarks", window, SLOT(editCopyRemarks()));
-
-    connectAction(do_connect, "edit_status_include", window, SLOT(editStatusInclude()));
-    connectAction(do_connect, "edit_status_exclude", window, SLOT(editStatusExclude()));
-    connectAction(do_connect, "edit_status_extra", window, SLOT(editStatusExtra()));
-    connectAction(do_connect, "edit_status_toggle", window, SLOT(editStatusToggle()));
-
-    connectAction(do_connect, "edit_cond_new", window, SLOT(editConditionNew()));
-    connectAction(do_connect, "edit_cond_used", window, SLOT(editConditionUsed()));
-    connectAction(do_connect, "edit_cond_toggle", window, SLOT(editConditionToggle()));
-
-    connectAction(do_connect, "edit_color", window, SLOT(editColor()));
-
-    connectAction(do_connect, "edit_qty_multiply", window, SLOT(editQtyMultiply()));
-    connectAction(do_connect, "edit_qty_divide", window, SLOT(editQtyDivide()));
-
-    connectAction(do_connect, "edit_price_set", window, SLOT(editPrice()));
-    connectAction(do_connect, "edit_price_round", window, SLOT(editPriceRound()));
-    connectAction(do_connect, "edit_price_to_priceguide", window, SLOT(editPriceToPG()));
-    connectAction(do_connect, "edit_price_inc_dec", window, SLOT(editPriceIncDec()));
-
-    connectAction(do_connect, "edit_bulk", window, SLOT(editBulk()));
-    connectAction(do_connect, "edit_sale", window, SLOT(editSale()));
-    connectAction(do_connect, "edit_comment_set", window, SLOT(editComment()));
-    connectAction(do_connect, "edit_comment_add", window, SLOT(addComment()));
-    connectAction(do_connect, "edit_comment_rem", window, SLOT(removeComment()));
-    connectAction(do_connect, "edit_remark_set", window, SLOT(editRemark()));
-    connectAction(do_connect, "edit_remark_add", window, SLOT(addRemark()));
-    connectAction(do_connect, "edit_remark_rem", window, SLOT(removeRemark()));
-
-    connectAction(do_connect, "edit_retain_yes", window, SLOT(editRetainYes()));
-    connectAction(do_connect, "edit_retain_no", window, SLOT(editRetainNo()));
-    connectAction(do_connect, "edit_retain_toggle", window, SLOT(editRetainToggle()));
-
-    connectAction(do_connect, "edit_stockroom_yes", window, SLOT(editStockroomYes()));
-    connectAction(do_connect, "edit_stockroom_no", window, SLOT(editStockroomNo()));
-    connectAction(do_connect, "edit_stockroom_toggle", window, SLOT(editStockroomToggle()));
-
-    connectAction(do_connect, "edit_reserved", window, SLOT(editReserved()));
-
-    connectAction(do_connect, "edit_bl_catalog", window, SLOT(showBLCatalog()));
-    connectAction(do_connect, "edit_bl_priceguide", window, SLOT(showBLPriceGuide()));
-    connectAction(do_connect, "edit_bl_lotsforsale", window, SLOT(showBLLotsForSale()));
-    connectAction(do_connect, "edit_bl_myinventory", window, SLOT(showBLMyInventory()));
-
-    connectAction(do_connect, "view_difference_mode", window, SLOT(setDifferenceMode(bool)), &Window::isDifferenceMode);
-    connectAction(do_connect, "view_save_default_col", window, SLOT(saveDefaultColumnLayout()));
-
-    updateAllToggleActions(window);
-}
-#endif
 
 void FrameWork::connectWindowMdiArea(QMdiSubWindow *sw)
 {
