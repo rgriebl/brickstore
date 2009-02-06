@@ -14,6 +14,10 @@
 #ifndef __LDRAW_RENDERWIDGET_GL_H__
 #define __LDRAW_RENDERWIDGET_GL_H__
 
+#include <qglobal.h>
+
+#if !defined(QT_NO_OPENGL)
+
 #include <QGLWidget>
 
 #include "vector_t.h"
@@ -187,5 +191,7 @@ private:
 };
 
 }
+
+#endif //!QT_NO_OPENGL
 
 #endif

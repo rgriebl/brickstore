@@ -52,7 +52,7 @@ QColor Utility::gradientColor(const QColor &c1, const QColor &c2, qreal f)
     c1.getRgbF(&r1, &g1, &b1, &a1);
     c2.getRgbF(&r2, &g2, &b2, &a2);
 
-    f = qMin(qMax(f, 0.0), 1.0);
+    f = qMin(qMax(f, 0.0f), 1.0f);
     qreal e = 1.0 - f;
 
     return QColor::fromRgbF(r1 * e + r2 * f, g1 * e + g2 * f, b1 * e + b2 * f, a1 * e + a2 * f);
@@ -63,10 +63,10 @@ QColor Utility::contrastColor(const QColor &c, qreal f)
     qreal h, s, v, a;
     c.getHsvF(&h, &s, &v, &a);
 
-    f = qMin(qMax(f, 0.0), 1.0);
+    f = qMin(qMax(f, 0.0f), 1.0f);
 
     v += f * ((v < 0.5) ? 1.0 : -1.0);
-    v = qMin(qMax(v, 0.0), 1.0);
+    v = qMin(qMax(v, 0.0f), 1.0f);
 
     return QColor::fromHsvF(h, s, v, a);
 }
