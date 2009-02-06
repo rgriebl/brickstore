@@ -3,7 +3,7 @@ RELPWD = $$replace(PWD,$$_PRO_FILE_PWD_,.)
 INCLUDEPATH += $$RELPWD
 DEPENDPATH  += $$RELPWD
 
-RESOURCES += utility.qrc
+RESOURCES += $$RELPWD/utility.qrc
 
 HEADERS += \
   chunkreader.h \

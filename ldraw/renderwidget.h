@@ -14,6 +14,10 @@
 #ifndef __LDRAW_RENDERWIDGET_GL_H__
 #define __LDRAW_RENDERWIDGET_GL_H__
 
+#include <qglobal.h>
+
+#if !defined(QT_NO_OPENGL)
+
 #include <QGLWidget>
 
 #include "vector_t.h"
@@ -129,6 +133,7 @@ protected slots:
 
 protected:
     void mousePressEvent(QMouseEvent *e);
+    void mouseReleaseEvent(QMouseEvent *e);
     void mouseMoveEvent(QMouseEvent *e);
     void wheelEvent(QWheelEvent *e);
 
@@ -169,6 +174,7 @@ protected:
     void resizeEvent(QResizeEvent *e);
     void paintEvent(QPaintEvent *e);
     void mousePressEvent(QMouseEvent *e);
+    void mouseReleaseEvent(QMouseEvent *e);
     void mouseMoveEvent(QMouseEvent *e);
     void wheelEvent(QWheelEvent *e);
 
@@ -185,5 +191,7 @@ private:
 };
 
 }
+
+#endif //!QT_NO_OPENGL
 
 #endif

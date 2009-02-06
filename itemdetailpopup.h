@@ -5,7 +5,11 @@
 
 #include "document.h"
 #include "ldraw.h"
-#include "ldraw/renderwidget.h"
+
+namespace LDraw {
+class Model;
+class RenderOffscreenWidget;
+}
 
 class QToolButton;
 class QStackedWidget;

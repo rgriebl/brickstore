@@ -15,7 +15,7 @@
 
 set -e
 
-if [ ! -d rpm ]; then
+if [ ! -d unix-package ]; then
 	echo "Error: this script needs to be called from the base directory!"
 	exit 1
 fi
@@ -28,24 +28,26 @@ if [ -z $pkg_ver ]; then
 	exit 2
 fi
 
+if [ ! -x "`which rpmbuild`" ]; then
+	echo "Error: the rpmbuild utility can not be found!"
+	exit 3
+fi
+
 dist="(unknown distribution)"
           
 ## SuSE
 if [ -r /etc/SuSE-release ]; then
-	export QTDIR="/usr/lib/qt3"
-	export BUILDREQ="curl-devel, qt3-devel, qt3-devel-tools, gcc-c++"
+	build_req="qt4-devel, qt4-devel-tools, gcc-c++"
 	dist="SuSE"
 
 ## Fedora
 elif [ -r /etc/fedora-release ]; then
-	export QTDIR="/usr/lib/qt-3.3"
-	export BUILDREQ="curl-devel, qt-devel, gcc-c++"
+	build_req="qt4-devel, gcc-c++"
 	dist="Fedora"
 
 ## RedHat
 elif [ -r /etc/redhat-release ]; then
-	export QTDIR="/usr/lib/qt-3.3"
-	export BUILDREQ="curl-devel, qt-devel, gcc-c++"
+	build_req="qt4-devel, gcc-c++"
 	dist="RedHat"
 fi
 
@@ -53,25 +55,26 @@ echo
 echo "Creating $dist RPM package ($pkg_ver)"
 
 echo " > Creating tarball..."
-scripts/mkdist.sh "$pkg_ver"
+make tarball RELEASE=$pkg_Ver
 
 echo " > Creating RPM build directories..."
-cd rpm
+cd unix-package
 rm -rf SPECS RPMS BUILD SRPMS SOURCES
 mkdir SPECS RPMS BUILD SRPMS SOURCES
 cp ../brickstore-$pkg_ver.tar.bz2 SOURCES
+cp -aH share SOURCES
+[ -f ../.private-key ] && cp -H ../.private-key SOURCES
 cp brickstore.spec SPECS
 
 echo " > Building package..."
 ( rpmbuild -bb --quiet \
            --define="_topdir `pwd`" \
            --define="_brickstore_version $pkg_ver" \
-           --define="_brickstore_qtdir $QTDIR" \
-           --define="_brickstore_buildreq $BUILDREQ" \
-           SPECS/brickstore.spec ) >/dev/null 2>/dev/null
+           --define="_brickstore_buildreq $build_req" \
+           SPECS/brickstore.spec ) # >/dev/null 2>/dev/null
 
-rm -rf "$pkg_ver"
-mkdir "$pkg_ver"
+#rm -rf "$pkg_ver"
+mkdir -p "$pkg_ver"
 for i in `find RPMS -name "*.rpm"`; do cp "$i" "$pkg_ver"; done
 
 echo " > Cleaning RPM build directories..."

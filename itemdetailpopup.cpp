@@ -11,6 +11,7 @@
 
 #include "window.h"
 #include "itemdetailpopup.h"
+#include "ldraw/renderwidget.h"
 
 #if defined(Q_WS_MACX)
 #  include "macx.h"
@@ -129,10 +130,14 @@ ItemDetailPopup::ItemDetailPopup(QWidget *parent)
     m_blpic = new QLabel(m_stack);
     m_blpic->setAlignment(Qt::AlignCenter);
     m_blpic->setFixedSize(640, 480);
-    m_ldraw = new LDraw::RenderOffscreenWidget(this);
     m_stack->addWidget(m_blpic);
-    m_stack->addWidget(m_ldraw);
 
+#if defined(QT_NO_OPENGL)
+    m_ldraw = 0;
+#else
+    m_ldraw = new LDraw::RenderOffscreenWidget(this);
+    m_stack->addWidget(m_ldraw);
+#endif
     QVBoxLayout *lay = new QVBoxLayout(this);
     QHBoxLayout *hor = new QHBoxLayout();
     hor->addWidget(m_close);
@@ -146,10 +151,12 @@ ItemDetailPopup::ItemDetailPopup(QWidget *parent)
     lay->addWidget(m_stack);
 
     connect(m_close, SIGNAL(clicked()), this, SLOT(close()));
+    
+#if !defined(QT_NO_OPENGL)
     connect(m_play, SIGNAL(clicked()), m_ldraw, SLOT(startAnimation()));
     connect(m_stop, SIGNAL(clicked()), m_ldraw, SLOT(stopAnimation()));
     connect(m_view, SIGNAL(clicked()), m_ldraw, SLOT(resetCamera()));
-
+#endif
 #ifdef Q_WS_MAC
     createWinId();
     MacExtra::setWindowShadow(this, false);
@@ -182,18 +189,25 @@ void ItemDetailPopup::setItem(Document::Item *item)
 
         m_blpic->setText(QString());
 
-        if (m_part && m_part->root() && m_item->color()->ldrawId() >= 0) {
+#if !defined(QT_NO_OPENGL)
+        if (m_part && m_part->root() && m_item->color()->ldrawId() >= 0 && m_ldraw) {
             m_ldraw->setPartAndColor(m_part->root(), m_item->color()->ldrawId());
             m_stack->setCurrentWidget(m_ldraw);
             m_blpic->setText(QString());
-        } else {
+        } else 
+#endif
+        {
             redraw();
             m_stack->setCurrentWidget(m_blpic);
+#if !defined(QT_NO_OPENGL)
             m_ldraw->setPartAndColor(0, -1);
+#endif
         }
     } else {
         m_blpic->setText(QString());
+#if !defined(QT_NO_OPENGL)
         m_ldraw->setPartAndColor(0, -1);
+#endif
     }
 
     if (!m_connected && item)

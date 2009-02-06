@@ -24,6 +24,11 @@
 #  pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #endif
 
+#if 0 // this should be needed for linking against a static Qt, but it works without
+#include <QtPlugin>
+Q_IMPORT_PLUGIN(qjpeg)
+Q_IMPORT_PLUGIN(qgif)
+#endif
 
 int main(int argc, char **argv)
 {
