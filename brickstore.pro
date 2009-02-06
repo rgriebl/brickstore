@@ -20,6 +20,8 @@ CONFIG      *= warn_on thread qt
 # CONFIG      *= modeltest
 QT          *= core gui xml network
 
+static:QTPLUGIN  *= qjpeg qgif
+
 TARGET            = BrickStore
 unix:!macx:TARGET = brickstore
 
