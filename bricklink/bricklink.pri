@@ -6,6 +6,7 @@ DEPENDPATH  += $$RELPWD
 HEADERS += \
   bricklink.h \
   bricklinkfwd.h \
+  bricklink_setmatch.h \
 
 
 SOURCES += \
@@ -15,4 +16,5 @@ SOURCES += \
   bricklink_priceguide.cpp \
   bricklink_picture.cpp \
   bricklink_model.cpp \
+  bricklink_setmatch.cpp \
 
