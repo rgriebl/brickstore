@@ -15,8 +15,6 @@ isEmpty( RELEASE ) {
   RELEASE    = 2.0.0
 }
 
-!for(i, RELEASE):CONFIG *= using_qt_creator
-
 TEMPLATE     = app
 CONFIG      *= warn_on thread qt
 # CONFIG      *= modeltest
@@ -99,25 +97,22 @@ FORMS = \
 HEADERS += $$replace(FORMS, '.ui$', '.h')
 SOURCES += $$replace(FORMS, '.ui$', '.cpp')
 
-using_qt_creator {
-    # workaround until creator is able to cope with for()
-    include('utility/utility.pri')
-     include('bricklink/bricklink.pri')
- #   include('a/a.pri')
-    include('ldraw/ldraw.pri')
-    include('lzma/lzma.pri')
-    include('modeltest/modeltest.pri')
-} else {
-#    for(subp, SUBPROJECTS) : include($${subp}/$${subp}.pri)
-}
+# for(subp, SUBPROJECTS) : include($${subp}/$${subp}.pri)
+# workaround until creator is able to cope with for()
+include('utility/utility.pri')
+include('bricklink/bricklink.pri')
+include('ldraw/ldraw.pri')
+include('lzma/lzma.pri')
+include('modeltest/modeltest.pri')
 
 TRANSLATIONS = $$replace(LANGUAGES, '$', '.ts')
 TRANSLATIONS = $$replace(TRANSLATIONS, '^', 'translations/brickstore_')
 
+
 #
 # (n)make tarball
 #
-!using_qt_creator {
+
 DISTFILES += $$SOURCES $$HEADERS $$FORMS $$RESOURCES
 
 DISTFILES += brickstore.rc brickstore.ico brickstore_doc.ico
@@ -253,5 +248,4 @@ unix:!macx {
 
 macx {
   CONFIG += x86
-}
 }
