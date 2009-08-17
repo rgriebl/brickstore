@@ -76,7 +76,7 @@ BrickLink::Picture *BrickLink::Core::picture(const Item *item, const BrickLink::
     if (!item)
         return 0;
 
-    quint64 key = quint64(color ? color->id() : -1) << 32 | quint64(item->itemType()->id()) << 24 | quint64(item->index() + 1);
+    quint64 key = quint64(color ? color->id() : uint(-1)) << 32 | quint64(item->itemType()->id()) << 24 | quint64(item->index() + 1);
 
     QMutexLocker lock(&m_corelock);
 

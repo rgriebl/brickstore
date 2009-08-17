@@ -40,7 +40,7 @@ extern "C" {
       Includes
      **********/
 
-#ifdef _WIN32
+#ifdef _MSC_VER
     typedef unsigned __int64  uint_fast64_t;
     typedef unsigned __int32  uint_fast32_t;
     typedef unsigned __int32  uint_fast16_t;

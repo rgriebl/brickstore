@@ -198,6 +198,7 @@ Workspace::Workspace(QWidget *parent, Qt::WindowFlags f)
     m_tabpos = QTabWidget::North;
 
     m_verticallayout = new QVBoxLayout(this);
+    m_verticallayout->setObjectName(QLatin1String("MDI vertical layout"));
     m_verticallayout->setContentsMargins(0, 0, 0 , 0);
     m_verticallayout->setSpacing(0);
 
@@ -221,6 +222,7 @@ Workspace::Workspace(QWidget *parent, Qt::WindowFlags f)
     m_list->setAutoRaise(true);
 
     m_tablayout = new QHBoxLayout();
+    m_tablayout->setObjectName(QLatin1String("MDI tab layout"));
     m_verticallayout->addLayout(m_tablayout);
 
     m_tablayout->addSpacing(4);
@@ -230,6 +232,7 @@ Workspace::Workspace(QWidget *parent, Qt::WindowFlags f)
     m_tablayout->addWidget(m_close);
 
     m_stacklayout = new QStackedLayout();
+    m_stacklayout->setObjectName(QLatin1String("MDI stack layout"));
     m_verticallayout->addLayout(m_stacklayout);
 
     m_stacklayout->setContentsMargins(0, 0, 0 , 0);
@@ -250,6 +253,7 @@ void Workspace::relayout()
     switch (m_tabpos) {
     case QTabWidget::South:
         m_verticallayout->removeItem(m_tablayout);
+        m_tablayout->setParent(0);
         m_tabbar->setShape(QTabBar::TriangularSouth);
         m_verticallayout->addLayout(m_tablayout);
         break;
@@ -257,6 +261,7 @@ void Workspace::relayout()
     default:
     case QTabWidget::North:
         m_verticallayout->removeItem(m_stacklayout);
+        m_stacklayout->setParent(0);
         m_tabbar->setShape(QTabBar::RoundedNorth);
         m_verticallayout->addLayout(m_stacklayout);
         break;

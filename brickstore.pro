@@ -21,6 +21,7 @@ CONFIG      *= warn_on thread qt
 QT          *= core gui xml network script
 
 static:QTPLUGIN  *= qjpeg qgif
+static:DEFINES += STATIC_QT_BUILD
 
 TARGET            = BrickStore
 unix:!macx:TARGET = brickstore
@@ -185,12 +186,22 @@ else {
 
 
 #
-# Windows specific
+# create version.h
 #
 
 win32 {
   system( cscript.exe //B scripts\update_version.js $$RELEASE)
-  
+}
+
+unix {
+  system( scripts/update_version.sh $$RELEASE)
+}
+
+#
+# Windows specific
+#
+
+win32 {
   CONFIG  += windows
   #CONFIG -= shared
 
@@ -198,8 +209,10 @@ win32 {
 
   DEFINES += __USER__=\"$$(USERNAME)\" __HOST__=\"$$(COMPUTERNAME)\"
 
-  QMAKE_CXXFLAGS_DEBUG   += /Od /GL-
-  QMAKE_CXXFLAGS_RELEASE += /O2 /GL
+  win32-msvc* {
+    QMAKE_CXXFLAGS_DEBUG   += /Od /GL-
+    QMAKE_CXXFLAGS_RELEASE += /O2 /GL
+  }
 
   win32-msvc2005 {
      DEFINES += _CRT_SECURE_NO_DEPRECATE
@@ -218,8 +231,6 @@ win32 {
 #
 
 unix {
-  system( scripts/update_version.sh $$RELEASE)
-
   MOC_DIR     = .moc
   UI_DIR      = .uic
   RCC_DIR     = .rcc
@@ -247,5 +258,8 @@ unix:!macx {
 #
 
 macx {
+  ICON = macx-bundle/designer.icns
+  QMAKE_INFO_PLIST = macx-bundle/Info_mac.plist
+
   CONFIG += x86
 }

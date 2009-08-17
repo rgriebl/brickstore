@@ -90,7 +90,7 @@ Splash::Splash()
     p.drawLine(1, 1, s.width()-2, 1);
     p.drawLine(1, s.height()-2, s.width()-2, s.height()-2);
     p.setPen(QPen(hgrad2,1));
-    p.drawLine(s.width()*.25, s.height()*.7, s.width()*.75, s.height()*.7);
+    p.drawLine(int(s.width()*.25), int(s.height()*.7), int(s.width()*.75), int(s.height()*.7));
 
     p.setPen(QPen(vgrad,1));
     p.drawLine(1, 1, 1, s.height()-2);
@@ -110,7 +110,7 @@ Splash::Splash()
 
     p.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
     p.setPen(Qt::white);
-    p.setBrush(QColor(240,240,240));
+    p.setBrush(QColor(240, 240, 240));
     p.drawPicture(dx + ps.width() + 8, dy - ts.height() / 2 - ts.top(), logotext);
 
     QString version = Application::inst()->applicationVersion();

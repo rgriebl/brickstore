@@ -211,15 +211,18 @@ static QImage createImg(const QImage &img)
     grad.setColorAt(0, QColor(0, 0, 0, 24));
     grad.setColorAt(1, QColor(0, 0, 0, 0));
 
-    QImage res(QSize(img.width(), 2 * img.height() + 1), QImage::Format_ARGB32);
-    res.fill(Qt::transparent);
+    QImage res(QSize(img.width(), 2 * img.height() + 1), QImage::Format_ARGB32_Premultiplied);
 
     QPainter p(&res);
+    p.setCompositionMode(QPainter::CompositionMode_Source);
+    p.fillRect(res.rect(), Qt::transparent);
+    p.setCompositionMode(QPainter::CompositionMode_SourceOver);
     p.drawImage(0, 0, img);
-    p.translate(0, img.height() + 1);
-    p.drawImage(0, 0, img.mirrored(false, true));
-    p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
-    p.fillRect(0, 0, img.width(), img.height(), grad);
+    // This code should produce a mirror image, but the result looks ugly
+//    p.translate(0, img.height() + 1);
+//    p.drawImage(0, 0, img.mirrored(true, true));
+//    p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
+//    p.fillRect(0, 0, img.width(), img.height(), grad);
     p.end();
 
     return res;

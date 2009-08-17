@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>674</width>
-    <height>427</height>
+    <width>683</width>
+    <height>431</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,6 +27,9 @@
        <string>&amp;General</string>
       </attribute>
       <layout class="QFormLayout" name="formLayout_7">
+       <property name="fieldGrowthPolicy">
+        <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+       </property>
        <item row="0" column="0">
         <widget class="QLabel" name="label_8">
          <property name="text">
@@ -44,38 +47,6 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="1">
-        <widget class="QWidget" name="widget" native="true">
-         <property name="minimumSize">
-          <size>
-           <width>24</width>
-           <height>0</height>
-          </size>
-         </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_4">
-          <property name="margin">
-           <number>0</number>
-          </property>
-          <item>
-           <widget class="QRadioButton" name="w_metric">
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-            <property name="text">
-             <string>Metric (g)</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QRadioButton" name="w_imperial">
-            <property name="text">
-             <string>Imperial (oz)</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
        <item row="2" column="0">
         <widget class="QLabel" name="label_27">
          <property name="text">
@@ -91,11 +62,11 @@
           </property>
           <item>
            <widget class="QRadioButton" name="w_rate_none">
-            <property name="checked">
-             <bool>true</bool>
-            </property>
             <property name="text">
              <string>No exchange rate</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -304,6 +275,13 @@
              </item>
              <item>
               <widget class="QPushButton" name="w_rate_ecb">
+               <property name="toolTip">
+                <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Download the current exchange rate from the &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;European Central Bank&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
                <property name="text">
                 <string>Get from ECB</string>
                </property>
@@ -358,7 +336,7 @@
          <item>
           <widget class="QToolButton" name="w_docdir_select">
            <property name="icon">
-            <iconset resource="brickstore.qrc">
+            <iconset>
              <normaloff>:/images/16x16/file_open.png</normaloff>:/images/16x16/file_open.png</iconset>
            </property>
            <property name="autoRaise">
@@ -380,6 +358,51 @@
           </size>
          </property>
         </spacer>
+       </item>
+       <item row="1" column="1">
+        <widget class="QWidget" name="widget" native="true">
+         <property name="minimumSize">
+          <size>
+           <width>24</width>
+           <height>0</height>
+          </size>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <property name="margin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QRadioButton" name="w_metric">
+            <property name="text">
+             <string>Metric (g)</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="w_imperial">
+            <property name="text">
+             <string>Imperial (oz)</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -405,9 +428,6 @@
             </item>
             <item row="0" column="1">
              <widget class="QSpinBox" name="w_upd_database">
-              <property name="value">
-               <number>7</number>
-              </property>
               <property name="suffix">
                <string> days</string>
               </property>
@@ -416,6 +436,9 @@
               </property>
               <property name="maximum">
                <number>365</number>
+              </property>
+              <property name="value">
+               <number>7</number>
               </property>
              </widget>
             </item>
@@ -428,9 +451,6 @@
             </item>
             <item row="1" column="1">
              <widget class="QSpinBox" name="w_upd_picture">
-              <property name="value">
-               <number>99</number>
-              </property>
               <property name="suffix">
                <string> days</string>
               </property>
@@ -439,6 +459,9 @@
               </property>
               <property name="maximum">
                <number>365</number>
+              </property>
+              <property name="value">
+               <number>99</number>
               </property>
              </widget>
             </item>
@@ -451,9 +474,6 @@
             </item>
             <item row="2" column="1">
              <widget class="QSpinBox" name="w_upd_priceguide">
-              <property name="value">
-               <number>14</number>
-              </property>
               <property name="suffix">
                <string> days</string>
               </property>
@@ -462,6 +482,9 @@
               </property>
               <property name="maximum">
                <number>365</number>
+              </property>
+              <property name="value">
+               <number>14</number>
               </property>
              </widget>
             </item>
@@ -474,9 +497,6 @@
             </item>
             <item row="3" column="1">
              <widget class="QSpinBox" name="w_upd_ldraw">
-              <property name="value">
-               <number>31</number>
-              </property>
               <property name="suffix">
                <string> days</string>
               </property>
@@ -488,6 +508,9 @@
               </property>
               <property name="singleStep">
                <number>1</number>
+              </property>
+              <property name="value">
+               <number>31</number>
               </property>
              </widget>
             </item>
@@ -826,9 +849,7 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="brickstore.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>w_buttons</sender>

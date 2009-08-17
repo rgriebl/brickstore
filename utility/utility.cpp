@@ -21,6 +21,9 @@
 #include <QWidget>
 
 #if defined( Q_OS_WIN )
+#  if defined( Q_CC_MINGW )
+#    define _WIN32_WINNT 0x0500
+#  endif
 #  include <windows.h>
 #elif defined( Q_OS_BSD4 )
 #  include <sys/types.h>

@@ -210,7 +210,7 @@ typedef struct {
 #include <config.h>
 #endif
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 #pragma warning( disable: 4100 )
 #endif
 

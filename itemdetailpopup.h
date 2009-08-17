@@ -44,6 +44,7 @@ private:
     LDraw::RenderOffscreenWidget *m_ldraw;
     QLabel *m_blpic;
 
+    QWidget *m_bar;
     QStackedWidget *m_stack;
     QToolButton *m_close;
     QToolButton *m_play;

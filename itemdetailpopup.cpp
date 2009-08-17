@@ -28,7 +28,9 @@ public:
 
     GlassButton(Type t, QWidget *parent)
         : QToolButton(parent), m_type(t), m_hovered(false)
-    { }
+    {
+        setFocusPolicy(Qt::NoFocus);
+    }
 
 protected:
     void enterEvent(QEvent *)
@@ -111,25 +113,26 @@ private:
 ItemDetailPopup::ItemDetailPopup(QWidget *parent)
     : QDialog(parent, Qt::FramelessWindowHint), m_item(0), m_part(0), m_pic(0), m_pressed(false), m_connected(false)
 {
-    setAttribute(Qt::WA_NoSystemBackground);
+    setAttribute(Qt::WA_TranslucentBackground);
 
+    m_bar = new QWidget(this);
     m_stack = new QStackedWidget(this);
-    m_close = new GlassButton(GlassButton::Close, this);
+    m_close = new GlassButton(GlassButton::Close, m_bar);
     m_close->setToolTip(tr("Close 3D view"));
     m_close->setFixedSize(20, 20);
-    m_play = new GlassButton(GlassButton::Play, this);
+    m_play = new GlassButton(GlassButton::Play, m_bar);
     m_play->setFixedSize(20, 20);
     m_close->setToolTip(tr("Start animation"));
-    m_stop = new GlassButton(GlassButton::Stop, this);
+    m_stop = new GlassButton(GlassButton::Stop, m_bar);
     m_stop->setFixedSize(20, 20);
     m_close->setToolTip(tr("Stop animation"));
-    m_view = new GlassButton(GlassButton::View, this);
+    m_view = new GlassButton(GlassButton::View, m_bar);
     m_view->setFixedSize(20, 20);
     m_close->setToolTip(tr("Reset 3D camera"));
 
     m_blpic = new QLabel(m_stack);
     m_blpic->setAlignment(Qt::AlignCenter);
-    m_blpic->setFixedSize(640, 480);
+    m_blpic->setMinimumSize(640, 480);
     m_stack->addWidget(m_blpic);
 
 #if defined(QT_NO_OPENGL)
@@ -139,7 +142,8 @@ ItemDetailPopup::ItemDetailPopup(QWidget *parent)
     m_stack->addWidget(m_ldraw);
 #endif
     QVBoxLayout *lay = new QVBoxLayout(this);
-    QHBoxLayout *hor = new QHBoxLayout();
+    lay->setContentsMargins(0, 0, 0, 0);
+    QHBoxLayout *hor = new QHBoxLayout(m_bar);
     hor->addWidget(m_close);
     hor->addStretch(10);
     hor->addWidget(m_play);
@@ -147,7 +151,7 @@ ItemDetailPopup::ItemDetailPopup(QWidget *parent)
     hor->addWidget(m_stop);
     hor->addStretch(10);
     hor->addWidget(m_view);
-    lay->addLayout(hor);
+    lay->addWidget(m_bar);
     lay->addWidget(m_stack);
 
     connect(m_close, SIGNAL(clicked()), this, SLOT(close()));
@@ -246,11 +250,30 @@ void ItemDetailPopup::redraw()
 
 void ItemDetailPopup::paintEvent(QPaintEvent *)
 {
+    qreal f = qreal(.7) * m_bar->height() / height();
+
+    QLinearGradient grad(0, 0, 0, height());
+    grad.setColorAt(0, QColor(80, 80, 80, 180));
+    grad.setColorAt(f, QColor(0, 0, 0, 180));
+    grad.setColorAt(1-f, QColor(0, 0, 0, 180));
+    grad.setColorAt(1, QColor(80, 80, 80, 180));
+
     QPainter p(this);
     p.setRenderHint(QPainter::Antialiasing);
-    p.setBrush(QColor(0, 0, 0 , 180));
     p.setPen(Qt::NoPen);
+    p.setBrush(grad);
     p.drawRoundedRect(rect(), 20, 20);
+/*
+    p.setClipRect(0, 0, width(), m_bar->height(), Qt::ReplaceClip);
+    p.setBrush(grad);
+    p.drawRoundedRect(rect(), 20, 20);
+
+    p.setClipRect(0, m_bar->height(), width(), height() - m_bar->height(), Qt::ReplaceClip);
+    p.setBrush(bg);
+    p.drawRoundedRect(rect(), 20, 20);
+
+    p.setClipping(false);
+    */
 }
 
 void ItemDetailPopup::keyPressEvent(QKeyEvent *e)

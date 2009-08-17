@@ -261,9 +261,9 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
 
     if ((it->errors() & m_doc->errorMask() & (1ULL << idx.column()))) {
         p->setPen(QColor::fromRgbF(1, 0, 0, 0.75f));
-        p->drawRect(x+.5, y+.5, w-1, h-1);
+        p->drawRect(QRectF(x+.5, y+.5, w-1, h-1));
         p->setPen(QColor::fromRgbF(1, 0, 0, 0.50f));
-        p->drawRect(x+1.5, y+1.5, w-3, h-3);
+        p->drawRect(QRectF(x+1.5, y+1.5, w-3, h-3));
     }
 
     p->setPen(fg);
@@ -346,7 +346,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
             line.setLineWidth(rw);
             height += fm.leading();
             line.setPosition(QPoint(0, height));
-            height += line.height();
+            height += int(line.height());
             widthUsed = line.naturalTextWidth();
 
             if ((i == (lcount - 1)) && ((line.textStart() + line.textLength()) < lstr.length())) {
@@ -362,7 +362,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
 
         tlp->draw(p, QPoint(x + margin, y + (h - height)/2));
         if (do_elide)
-            p->drawText(QPoint(x + margin + widthUsed, y + (h - height)/2 + (lcount - 1) * fm.lineSpacing() + fm.ascent()), QLatin1String("..."));
+            p->drawText(QPoint(x + margin + int(widthUsed), y + (h - height)/2 + (lcount - 1) * fm.lineSpacing() + fm.ascent()), QLatin1String("..."));
     }
 }
 
