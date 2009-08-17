@@ -30,6 +30,9 @@ public:
     static Splash *inst();
 
     void message(const QString &msg);
+
+protected:
+    void paintEvent(QPaintEvent *e);
 };
 
 #endif

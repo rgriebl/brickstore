@@ -16,6 +16,7 @@
 #include <QDesktopWidget>
 #include <QGradient>
 #include <QPicture>
+#include <QPalette>
 
 #include "application.h"
 #include "splash.h"
@@ -33,92 +34,83 @@ Splash *Splash::inst()
 }
 
 Splash::Splash()
-    : QSplashScreen(QPixmap(1, 1))
+    : QSplashScreen(QPixmap(1, 1), Qt::FramelessWindowHint)
 {
     setAttribute(Qt::WA_DeleteOnClose);
 
     QFont f = QApplication::font();
     f.setPixelSize(qMax(14 * qApp->desktop()->height() / 1200, 10));
+    f.setBold(true);
     setFont(f);
     QFontMetrics fm(f);
 
-    QSize s(20 + fm.width("x") * 50, 10 + fm.height() * 8);
+    QPixmap pix(fm.width("x") * 35, fm.width("x") * 35);
 
-    QLinearGradient fgrad(0, 0, s.width(), s.height());
-    fgrad.setColorAt(0,    QColor(  0,   0 ,  0));
-    fgrad.setColorAt(0.1,  QColor( 20,  20,  20));
-    fgrad.setColorAt(0.15, QColor( 40,  40,  40));
-    fgrad.setColorAt(0.2,  QColor( 20,  20,  20));
-    fgrad.setColorAt(0.5,  QColor(  0,   0,   0));
-    fgrad.setColorAt(0.8,  QColor( 20,  20,  20));
-    fgrad.setColorAt(0.85, QColor( 40,  40,  40));
-    fgrad.setColorAt(0.9,  QColor( 20,  20,  20));
-    fgrad.setColorAt(1,    QColor(  0,   0,   0));
+    bool transparent =
+#if defined(Q_WS_X11)
+        QX11Info::isCompositingManagerRunning();
+#elif defined(Q_WS_MAC) || defined(Q_WS_WIN)
+        true;
+#else
+        false;
+#endif
 
-    QLinearGradient hgrad(0, 0, s.width(), 0);
-    hgrad.setColorAt(0,    QColor(  0,   0,   0));
-    hgrad.setColorAt(0.25, QColor(180, 180, 180));
-    hgrad.setColorAt(0.5,  QColor(255, 255, 255));
-    hgrad.setColorAt(0.75, QColor(180, 180, 180));
-    hgrad.setColorAt(1,    QColor(  0,   0,   0));
+    if (transparent) {
+        // QSplash would ignore the translucency otherwise
+        QPalette pal = palette();
+        pal.setColor(QPalette::Window, Qt::transparent);
+        setPalette(pal);
 
-    QLinearGradient hgrad2(s.width()*.25, 0, s.width()*.75, 0);
-    hgrad2.setColorAt(0,    QColor(  0,   0,   0,   0));
-    hgrad2.setColorAt(0.25, QColor(180, 180, 180, 180));
-    hgrad2.setColorAt(0.5,  QColor(255, 255, 255, 255));
-    hgrad2.setColorAt(0.75, QColor(180, 180, 180, 180));
-    hgrad2.setColorAt(1,    QColor(  0,   0,   0,   0));
+        setAttribute(Qt::WA_TranslucentBackground);
 
-    QLinearGradient vgrad(0, 0, 0, s.height());
-    vgrad.setColorAt(0,    QColor(  0,   0,   0));
-    vgrad.setColorAt(0.25, QColor(180, 180, 180));
-    vgrad.setColorAt(0.5,  QColor(255, 255, 255));
-    vgrad.setColorAt(0.75, QColor(180, 180, 180));
-    vgrad.setColorAt(1,    QColor(  0,   0,   0));
-
-    QPixmap pix(s);
-    pix.fill(Qt::white);
+        pix.fill(Qt::transparent);
+    } else {
+        QWidget *desktop = QApplication::desktop();
+        pix = QPixmap::grabWindow(desktop->winId(), (desktop->width() - pix.width()) / 2, (desktop->height() - pix.height()) / 2, pix.width(), pix.height());
+    }
 
     QPainter p;
     p.begin(&pix);
     p.initFrom(this);
+    p.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
 
-    p.fillRect(pix.rect(), fgrad);
+    QPoint c = pix.rect().center();
 
-    p.setBrush(Qt::NoBrush);
-    p.setPen(QPen(hgrad,1));
-    p.drawLine(1, 1, s.width()-2, 1);
-    p.drawLine(1, s.height()-2, s.width()-2, s.height()-2);
-    p.setPen(QPen(hgrad2,1));
-    p.drawLine(int(s.width()*.25), int(s.height()*.7), int(s.width()*.75), int(s.height()*.7));
+    QRadialGradient gradient1(c.x(), c.y(), 0.8 * qMin(c.x(), c.y()) );
+    gradient1.setColorAt(0,    Qt::white);
+    gradient1.setColorAt(0.2,  QColor(230, 230, 230));
+    gradient1.setColorAt(0.45, QColor(190, 190, 190));
+    gradient1.setColorAt(0.5,  QColor(210, 210, 210));
+    gradient1.setColorAt(0.55, QColor(190, 190, 190));
+    gradient1.setColorAt(0.8,  QColor(230, 230, 230));
+    gradient1.setColorAt(1,    Qt::transparent);
+    p.fillRect(pix.rect(), gradient1);
 
-    p.setPen(QPen(vgrad,1));
-    p.drawLine(1, 1, 1, s.height()-2);
-    p.drawLine(s.width()-2, 1, s.width()-2, s.height()-2);
+    QPicture text;
+    text.load(":/images/logo-text.pic");
+    QRect textr = text.boundingRect();
+
+    QLinearGradient gradient2(textr.topLeft(), textr.bottomRight());
+    gradient2.setColorAt(0,    Qt::black);
+    gradient2.setColorAt(0.3,  Qt::darkGray);
+    gradient2.setColorAt(0.5,  Qt::white);
+    gradient2.setColorAt(0.7,  Qt::darkGray);
+    gradient2.setColorAt(1,    Qt::black);
+    p.setBrush(gradient2);
+    p.setPen(Qt::black);
+    p.drawPicture(c - textr.center(), text);
 
     QPixmap logo(":/images/icon.png");
-    QPicture logotext;
-    logotext.load(":/images/logo-text.pic");
-
-    QRect ts = logotext.boundingRect();
-    QSize ps = logo.size();
-
-    int dx = (s.width() - (ps.width() + 8 + ts.width())) / 2;
-    int dy = s.height() / 2;
-
-    p.drawPixmap(dx, dy - ps.height() / 2, logo);
-
-    p.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
-    p.setPen(Qt::white);
-    p.setBrush(QColor(240, 240, 240));
-    p.drawPicture(dx + ps.width() + 8, dy - ts.height() / 2 - ts.top(), logotext);
+    p.drawPixmap(c - logo.rect().center() - QPoint(0, 8 + logo.height() / 2 + textr.height() / 2), logo);
 
     QString version = Application::inst()->applicationVersion();
-    QRect vr = fm.boundingRect(version);
+    QRect versionr = fm.boundingRect(version);
 
-    p.setPen(QColor(192, 192, 192));
+    p.setPen(QColor(80, 80, 80));
     p.setBrush(Qt::NoBrush);
-    p.drawText(pix.rect().adjusted(0, 10, -10, 0), Qt::AlignTop | Qt::AlignRight, version);
+    versionr.moveCenter(c);
+    versionr.translate(0, 8 + versionr.height() / 2 + textr.height() / 2);
+    p.drawText(versionr, Qt::AlignCenter, version);
 
     p.end();
 
@@ -133,5 +125,13 @@ Splash::~Splash()
 
 void Splash::message(const QString &msg)
 {
-    QSplashScreen::showMessage(msg + QLatin1String("\n"), Qt::AlignHCenter | Qt::AlignBottom, Qt::white);
+    QSplashScreen::showMessage(msg + QLatin1String("\n\n\n\n"), Qt::AlignHCenter | Qt::AlignBottom, Qt::black);
+}
+
+void Splash::paintEvent(QPaintEvent *e)
+{
+    if (testAttribute(Qt::WA_TranslucentBackground)) {
+        QPainter p(this);
+        p.fillRect(rect(), palette().background());
+    }
 }

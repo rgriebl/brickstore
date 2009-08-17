@@ -263,17 +263,6 @@ void ItemDetailPopup::paintEvent(QPaintEvent *)
     p.setPen(Qt::NoPen);
     p.setBrush(grad);
     p.drawRoundedRect(rect(), 20, 20);
-/*
-    p.setClipRect(0, 0, width(), m_bar->height(), Qt::ReplaceClip);
-    p.setBrush(grad);
-    p.drawRoundedRect(rect(), 20, 20);
-
-    p.setClipRect(0, m_bar->height(), width(), height() - m_bar->height(), Qt::ReplaceClip);
-    p.setBrush(bg);
-    p.drawRoundedRect(rect(), 20, 20);
-
-    p.setClipping(false);
-    */
 }
 
 void ItemDetailPopup::keyPressEvent(QKeyEvent *e)
