@@ -128,11 +128,10 @@ int RebuildDatabase::exec()
 
     blti.exportInventoriesTo(bl);
 
-    extern uint _dwords_for_appears, _qwords_for_consists, _bytes_for_alltime_pg;
+    extern uint _dwords_for_appears, _qwords_for_consists;
 
     printf("  > appears-in : %11u bytes\n", _dwords_for_appears * 4);
     printf("  > consists-of: %11u bytes\n", _qwords_for_consists * 8);
-    printf("  > alltime-pg : %11u bytes\n", _bytes_for_alltime_pg);
 
     /////////////////////////////////////////////////////////////////////////////////
     printf("\nSTEP 7: Writing the new v0 (BS 1.1) database to disk...\n");
@@ -200,14 +199,6 @@ bool RebuildDatabase::download()
         { "http://www.bricklink.com/catalogDownload.asp", itemQuery('I'), "items_I.txt"     },
         { "http://www.bricklink.com/catalogDownload.asp", itemQuery('O'), "items_O.txt"     },
         // { "http://www.bricklink.com/catalogDownload.asp", itemQuery('U'), "items_U.txt"     }, // generates a 500 server error
-        { "http://www.bricklink.com/btpriceguide.asp",    pgQuery('S'),   "alltimepg_S.txt" },
-        { "http://www.bricklink.com/btpriceguide.asp",    pgQuery('P'),   "alltimepg_P.txt" },
-        { "http://www.bricklink.com/btpriceguide.asp",    pgQuery('M'),   "alltimepg_M.txt" },
-        { "http://www.bricklink.com/btpriceguide.asp",    pgQuery('B'),   "alltimepg_B.txt" },
-        { "http://www.bricklink.com/btpriceguide.asp",    pgQuery('G'),   "alltimepg_G.txt" },
-        { "http://www.bricklink.com/btpriceguide.asp",    pgQuery('C'),   "alltimepg_C.txt" },
-        { "http://www.bricklink.com/btpriceguide.asp",    pgQuery('I'),   "alltimepg_I.txt" },
-        { "http://www.bricklink.com/btpriceguide.asp",    pgQuery('O'),   "alltimepg_O.txt" },
         { "http://www.bricklink.com/btinvlist.asp",       QList<QPair<QString, QString> >(), "btinvlist.txt"   },
         { "http://www.bricklink.com/btchglog.asp",        QList<QPair<QString, QString> >(), "btchglog.txt" },
 
@@ -223,9 +214,6 @@ bool RebuildDatabase::download()
     { // workaround for U type
         QFile uif(path + "items_U.txt");
         uif.open(QIODevice::WriteOnly);
-
-        QFile upf(path + "alltimepg_U.txt");
-        upf.open(QIODevice::WriteOnly);
     }
 
     for (tptr = table; tptr->m_url; tptr++) {

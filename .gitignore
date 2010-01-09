@@ -26,3 +26,4 @@ brickstore.xcodeproj
 ldtest
 *.orig
 *.rej
+ui_*.h

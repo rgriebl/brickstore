@@ -326,11 +326,6 @@ bool BrickLink::TextImport::import(const QString &path)
     btchglog_dummy btchglog_dummy;
     ok &= readDB<>(path + "btchglog.txt", btchglog_dummy);
 
-    btpriceguide_dummy btpriceguide_dummy;
-    foreach(const ItemType *itt, m_item_types) {
-        m_current_item_type = itt;
-        ok &= readDB<>(path + "alltimepg_" + char(itt->m_id) + ".txt", btpriceguide_dummy);
-    }
     m_current_item_type = 0;
 
     if (!ok)
@@ -398,36 +393,6 @@ bool BrickLink::TextImport::readDB_processLine(btinvlist_dummy & /*dummy*/, uint
     }
     else
         qWarning() << "WARNING: parsing btinvlist: item " << strs [1] << " [" << strs [0][0] << "] doesn't exist!";
-
-    return true;
-}
-
-bool BrickLink::TextImport::readDB_processLine(btpriceguide_dummy & /*dummy*/, uint count, const char **strs)
-{
-    if (count < 10 || !strs[0][0] || !strs[1][0])
-        return false;
-
-    const Item *itm = findItem(m_current_item_type->id(), strs[0]);
-    const Color *col = m_colors.value(strtol(strs[1], 0, 10));
-
-    if (itm && col) {
-        AllTimePriceGuide pg;
-        pg.item = itm;
-        pg.color = col;
-        pg.condition[New].minPrice = Currency::fromUSD(strs[2]);
-        pg.condition[New].avgPrice = Currency::fromUSD(strs[3]);
-        pg.condition[New].maxPrice = Currency::fromUSD(strs[4]);
-        pg.condition[New].quantity = strtol(strs[5], 0, 10);
-        pg.condition[Used].minPrice = Currency::fromUSD(strs[6]);
-        pg.condition[Used].avgPrice = Currency::fromUSD(strs[7]);
-        pg.condition[Used].maxPrice = Currency::fromUSD(strs[8]);
-        pg.condition[Used].quantity = strtol(strs[9], 0, 10);
-
-        if (pg.condition[New].quantity || pg.condition[Used].quantity)
-            m_alltime_pg_list << pg;
-    }
-    else
-        qWarning() << "WARNING: parsing btpriceguide: item " << strs[0] << " [" << m_current_item_type->id() << "] in color " << strs[1] << " doesn't exist!";
 
     return true;
 }
@@ -645,7 +610,6 @@ bool BrickLink::TextImport::readInventory(const QString &path, const Item *item)
 void BrickLink::TextImport::exportTo(Core *bl)
 {
     bl->setDatabase_Basics(m_colors, m_categories, m_item_types, m_items);
-    bl->setDatabase_AllTimePG(m_alltime_pg_list);
     bl->setDatabase_ChangeLog(m_changelog);
 }
 

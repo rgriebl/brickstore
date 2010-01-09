@@ -21,104 +21,6 @@
 #include "bricklink.h"
 
 
-BrickLink::AllTimePriceGuide BrickLink::Core::allTimePriceGuide(const Item *item, const Color *color) const
-{
-    static AllTimePriceGuide none = {0, 0, { {0, 0, 0, 0}, {0, 0, 0, 0} } };
-
-    if (!item || !color)
-        return none;
-
-    quint32 id = (quint32(item->index() + 1) & 0x000fffff) | (quint32(color->id()) << 20);
-
-    const alltimepg_record *ptr = reinterpret_cast<const alltimepg_record *>(m_alltime_pg.data());
-
-    while (ptr->m_id && ptr->m_id != id) {
-        int off = ptr->m_new_qty ? ptr->m_new_qty == 1 ? 1 : 3 * ptr->m_new_qty : 0;
-        off += (ptr->m_used_qty ? ptr->m_used_qty == 1 ? 1 : 3 * ptr->m_used_qty : 0);
-
-        ptr = reinterpret_cast<const alltimepg_record *>(reinterpret_cast<const char *>(ptr) + sizeof(alltimepg_record) + off * sizeof(float));
-    }
-
-    if (ptr->m_id) {
-        AllTimePriceGuide pg = none;
-        quint16 q[2] = {ptr->m_new_qty, ptr->m_used_qty};
-        int index = 0;
-
-        for (int i = 0; i < 2; i++) {
-            pg.condition[i].quantity = q[i];
-            if (q[i] == 1) {
-                pg.condition[i].minPrice = pg.condition[i].avgPrice = pg.condition[i].maxPrice = ptr->m_prices[index++];
-            }
-            else if (q[i] > 1) {
-                pg.condition[i].minPrice = ptr->m_prices[index++];
-                pg.condition[i].avgPrice = ptr->m_prices[index++];
-                pg.condition[i].maxPrice = ptr->m_prices[index++];
-            }
-        }
-        return pg;
-    }
-    else
-        return none;
-}
-
-
-namespace {
-
-struct keyword {
-    const char *m_match;
-    int         m_id;
-    int         m_start;
-    int         m_stop;
-};
-
-static int find_keywords(const char *str, int start, int stop, struct keyword *kw)
-{
-    if ((start >= stop) || !kw || !kw->m_match || !str)
-        return 0;
-
-    int matches = 0;
-    const char *pos = str + start;
-    const char *end = str + stop;
-    struct keyword *lastkw = 0;
-
-    for (; kw->m_match; kw++) {
-        kw->m_start = kw->m_stop = -1;
-
-        int mlen = strlen(kw->m_match);
-
-        if (!mlen)
-            continue;
-
-        const char *testpos = pos;
-
-        while ((testpos <= (end - (mlen - 1))) && (testpos = (char *) memchr(testpos, kw->m_match [0], (end - testpos + 1) - (mlen - 1)))) {
-            if (qstrncmp(testpos, kw->m_match, mlen) == 0)
-                break;
-            else
-                testpos++;
-        }
-
-        if (!testpos)
-            continue;
-
-        kw->m_start = testpos - str;
-        kw->m_stop = stop;
-
-        matches++;
-
-        if (lastkw)
-            lastkw->m_stop = testpos - str - 1;
-
-        lastkw = kw;
-        pos = testpos + mlen;
-    }
-    return matches;
-}
-
-} // namespace
-
-// ---------------------------------------------------------------------------
-
 BrickLink::PriceGuide *BrickLink::Core::priceGuide(const BrickLink::Item *item, const BrickLink::Color *color, bool high_priority)
 {
     if (!item || !color)
@@ -164,120 +66,6 @@ BrickLink::PriceGuide::~PriceGuide()
     //qDebug ( "Deleting PG %p for %c_%s_%d", this, m_item->itemType ( )->id ( ), m_item->id ( ), m_color->id ( ));
 }
 
-namespace {
-
-static int safe_strtol(const char *data, uint start, uint stop)
-{
-    uint i = start;
-
-    while ((i <= stop) && (data [i] >= '0' && data [i] <= '9'))
-        i++;
-
-    if (i == start)
-        return 0;
-
-    // data [i] may NOT be writable
-    return QString::fromAscii(data + start, i - start).toInt();
-}
-
-static Currency safe_strtomoney(const char *data, uint start, uint stop)
-{
-    uint i = start;
-
-    while ((i <= stop) && (data [i] == '.' || data [i] == ',' || (data [i] >= '0' && data [i] <= '9')))
-        i++;
-
-    if (i == start)
-        return .0;
-
-    // data [i] may NOT be writable
-    return Currency::fromUSD(QString::fromAscii(data + start, i - start));
-}
-
-} // namespace
-
-bool BrickLink::PriceGuide::parse(const char *data, uint size)
-{
-    if (!data || !size)
-        return false;
-
-    memset(m_quantities, 0, sizeof(m_quantities));
-    memset(m_lots, 0, sizeof(m_lots));
-    memset(m_prices, 0, sizeof(m_prices));
-
-    // parse data -- evil (but fast) hack :)
-
-    struct keyword kw_times [] = {
-        { "All Time Sales",         AllTime, -1, -1 },
-        { "Past 6 Months Sales",    PastSix, -1, -1 },
-        { "Current Items for Sale", Current, -1, -1 },
-        { 0, 0, 0, 0 }
-    };
-
-    struct keyword kw_condition [] = {
-        { "New",  New,  -1, -1 },
-        { "Used", Used, -1, -1 },
-        { 0, 0, 0, 0 }
-    };
-
-    struct keyword kw_dummy [] = {
-        { "SIZE=\"2\">&nbsp;",  0,  -1, -1 },
-        { "SIZE=\"2\">&nbsp;",  1,  -1, -1 },
-        { "SIZE=\"2\">&nbsp;",  2,  -1, -1 },
-        { "SIZE=\"2\">&nbsp;",  3,  -1, -1 },
-        { "SIZE=\"2\">&nbsp;",  4,  -1, -1 },
-        { "SIZE=\"2\">&nbsp;",  5,  -1, -1 },
-        { 0, 0, 0, 0 }
-    };
-
-    find_keywords(data, 0, size - 1, kw_times);
-
-    for (keyword *tkw = kw_times; tkw->m_match; tkw++) {
-        if (tkw->m_start < 0)
-            continue;
-
-        find_keywords(data, tkw->m_start, tkw->m_stop, kw_condition);
-
-        for (keyword *ckw = kw_condition; ckw->m_match; ckw++) {
-            if (ckw->m_start < 0)
-                continue;
-
-            if (find_keywords(data, ckw->m_start, ckw->m_stop, kw_dummy) != 6)
-                continue;
-
-            for (int i = 0; i < 6; i++) {
-                uint offset = kw_dummy [i].m_start + strlen(kw_dummy [i].m_match);
-
-                switch (i) {
-                case 0:
-                    m_lots [tkw->m_id][ckw->m_id]  = safe_strtol(data, offset, size - 1);
-                    break;
-                case 1:
-                    m_quantities [tkw->m_id][ckw->m_id]  = safe_strtol(data, offset, size - 1);
-                    break;
-                case 2:
-                case 3:
-                case 4:
-                case 5: {
-                    offset++; // $
-                    m_prices [tkw->m_id][ckw->m_id][i-2] = safe_strtomoney(data, offset, size - 1);
-                    break;
-                }
-                }
-            }
-        }
-    }
-
-
-    m_valid = true;
-
-    m_fetched = QDateTime::currentDateTime();
-    save_to_disk();
-
-    return m_valid;
-}
-
-
 void BrickLink::PriceGuide::save_to_disk()
 {
     QString path = BrickLink::core()->dataPath(m_item, m_color);
@@ -285,8 +73,6 @@ void BrickLink::PriceGuide::save_to_disk()
     if (path.isEmpty())
         return;
     path += "priceguide.txt";
-
-    //qDebug ( "PG saving data to \"%s\"",  path.latin1 ( ));
 
     QFile f(path);
     if (f.open(QIODevice::WriteOnly)) {
@@ -297,19 +83,15 @@ void BrickLink::PriceGuide::save_to_disk()
 
         for (int t = 0; t < TimeCount; t++) {
             for (int c = 0; c < ConditionCount; c++) {
-                ts << (t == AllTime ? 'A' : (t == PastSix ? 'P' : 'C')) << '\t' << (c == New ? 'N' : 'U') << '\t';
-                ts << m_quantities [t][c] << '\t'
-                << m_lots [t][c] << '\t'
-                << m_prices [t][c][Lowest].toUSD() << '\t'
-                << m_prices [t][c][Average].toUSD() << '\t'
-                << m_prices [t][c][WAverage].toUSD() << '\t'
-                << m_prices [t][c][Highest].toUSD() << '\n';
+                ts << (t == PastSix ? 'O' : 'I') << '\t' << (c == New ? 'N' : 'U') << '\t'
+                   << m_lots [t][c] << '\t'
+                   << m_quantities [t][c] << '\t'
+                   << m_prices [t][c][Lowest].toUSD() << '\t'
+                   << m_prices [t][c][Average].toUSD() << '\t'
+                   << m_prices [t][c][WAverage].toUSD() << '\t'
+                   << m_prices [t][c][Highest].toUSD() << '\n';
             }
         }
-        //qDebug ( "done." );
-    }
-    else {
-        //qDebug ( "failed." );
     }
 }
 
@@ -321,69 +103,76 @@ void BrickLink::PriceGuide::load_from_disk()
         return;
     path += "priceguide.txt";
 
-    bool loaded [TimeCount][ConditionCount];
-    ::memset(loaded, 0, sizeof(loaded));
-
-    //qDebug ( "PG loading data from \"%s\"", path.latin1 ( ));
-
+    m_valid = false;
     QFile f(path);
     if (f.open(QIODevice::ReadOnly)) {
-        QTextStream ts(&f);
-        QString line;
-
-        while (!(line = ts.readLine()).isNull()) {
-            if (!line.length() || (line [0] == '#') || (line [0] == '\r'))         // skip comments fast
-                continue;
-
-            QStringList sl = line.split('\t', QString::KeepEmptyParts);
-
-            if ((sl.count() != 8) || (sl [0].length() != 1) || (sl [1].length() != 1)) {             // sanity check
-                continue;
-            }
-
-            int t = -1;
-            int c = -1;
-
-            switch (sl [0][0].toLatin1()) {
-            case 'A': t = AllTime; break;
-            case 'P': t = PastSix; break;
-            case 'C': t = Current; break;
-            }
-
-            switch (sl [1][0].toLatin1()) {
-            case 'N': c = New;  break;
-            case 'U': c = Used; break;
-            }
-
-            if ((t != -1) && (c != -1)) {
-                m_quantities [t][c]       = sl [2].toInt();
-                m_lots [t][c]             = sl [3].toInt();
-                m_prices [t][c][Lowest]   = Currency::fromUSD(sl [4]);
-                m_prices [t][c][Average]  = Currency::fromUSD(sl [5]);
-                m_prices [t][c][WAverage] = Currency::fromUSD(sl [6]);
-                m_prices [t][c][Highest]  = Currency::fromUSD(sl [7]);
-
-                loaded [t][c] = true;
-            }
-        }
+        parse(f.readAll());
         f.close();
+    }
+
+    if (m_valid) {
+        QFileInfo fi(path);
+        m_fetched = fi.lastModified();
+    }
+}
+
+void BrickLink::PriceGuide::parse(const QByteArray &ba)
+{
+    memset(m_quantities, 0, sizeof(m_quantities));
+    memset(m_lots, 0, sizeof(m_lots));
+    memset(m_prices, 0, sizeof(m_prices));
+
+    bool seen[TimeCount][ConditionCount];
+    ::memset(seen, 0, sizeof(seen));
+
+    QTextStream ts(ba);
+    QString line;
+
+    while (!(line = ts.readLine()).isNull()) {
+        if (!line.length() || (line[0] == '#') || (line[0] == '\r'))         // skip comments fast
+            continue;
+
+        QStringList sl = line.split('\t', QString::KeepEmptyParts);
+
+        if ((sl.count() != 8) || (sl[0].length() != 1) || (sl[1].length() != 1)) {             // sanity check
+            continue;
+        }
+
+        int t = -1;
+        int c = -1;
+        bool oldformat = false;
+
+        switch (sl [0][0].toLatin1()) {
+        case 'P': oldformat = true;
+        case 'O': t = PastSix;
+                  break;
+        case 'C': oldformat = true;
+        case 'I': t = Current;
+                  break;
+        }
+
+        switch (sl [1][0].toLatin1()) {
+        case 'N': c = New;  break;
+        case 'U': c = Used; break;
+        }
+
+        if ((t != -1) && (c != -1)) {
+            m_lots[t][c]             = sl[oldformat ? 3 : 2].toInt();
+            m_quantities[t][c]       = sl[oldformat ? 2 : 3].toInt();
+            m_prices[t][c][Lowest]   = Currency::fromUSD(sl[4]);
+            m_prices[t][c][Average]  = Currency::fromUSD(sl[5]);
+            m_prices[t][c][WAverage] = Currency::fromUSD(sl[6]);
+            m_prices[t][c][Highest]  = Currency::fromUSD(sl[7]);
+
+            seen[t][c] = true;
+        }
     }
 
     m_valid = true;
 
     for (int t = 0; t < TimeCount; t++) {
         for (int c = 0; c < ConditionCount; c++)
-            m_valid &= loaded [t][c];
-    }
-
-    if (m_valid) {
-        QFileInfo fi(path);
-        m_fetched = fi.lastModified();
-
-        //qDebug ( "done." );
-    }
-    else {
-        //qDebug ( "failed." );
+            m_valid &= seen[t][c];
     }
 }
 
@@ -408,13 +197,13 @@ void BrickLink::Core::updatePriceGuide(BrickLink::PriceGuide *pg, bool high_prio
     pg->m_update_status = Updating;
     pg->addRef();
 
-    QUrl url("http://www.bricklink.com/priceGuide.asp"); // ?a=%c&viewType=N&colorID=%d&itemID=%s", tolower ( pg->item ( )->itemType ( )->id ( )), pg->color ( )->id ( ), pg->item ( )->id ( ));
+    QUrl url("http://www.bricklink.com/BTpriceSummary.asp"); //?{item type}={item no}&colorID={color ID}&cCode={currency code}&cExc={Y to exclude incomplete sets}
 
-    url.addQueryItem("a",        QChar(pg->item()->itemType()->id()).toLower());
-    url.addQueryItem("viewType", "N");
+    url.addQueryItem(QChar(pg->item()->itemType()->id()).toUpper(),
+                                 pg->item()->id());
     url.addQueryItem("colorID",  QString::number(pg->color()->id()));
-    url.addQueryItem("itemID",   pg->item()->id());
-    url.addQueryItem("viewDec",  "3");
+    url.addQueryItem("cCode",    "USD");
+    url.addQueryItem("cExc",     "Y"); //  Y == exclude incomplete sets
 
     //qDebug ( "PG request started for %s", (const char *) url );
     TransferJob *job = TransferJob::get(url);
@@ -438,11 +227,14 @@ void BrickLink::Core::priceGuideJobFinished(ThreadPoolJob *pj)
     pg->m_update_status = UpdateFailed;
 
     if (j->isCompleted()) {
-        if (pg->parse(j->data()->data(), j->data()->size()))
+        pg->parse(*j->data());
+        if (pg->m_valid) {
+            pg->m_fetched = QDateTime::currentDateTime();
+            pg->save_to_disk();
             pg->m_update_status = Ok;
+        }
     }
 
     emit priceGuideUpdated(pg);
     pg->release();
 }
-

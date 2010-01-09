@@ -134,7 +134,7 @@ Window::Window(Document *doc, QWidget *parent)
 
     m_settopg_failcnt = 0;
     m_settopg_list = 0;
-    m_settopg_time = BrickLink::AllTime;
+    m_settopg_time = BrickLink::PastSix;
     m_settopg_price = BrickLink::Average;
     m_simple_mode = false;
     m_diff_mode = false;

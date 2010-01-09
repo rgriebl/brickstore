@@ -44,6 +44,7 @@
 #include "currency.h"
 #include "threadpool.h"
 #include "transfer.h"
+#include "staticpointermodel.h"
 
 class QIODevice;
 class QFile;
@@ -491,8 +492,8 @@ public:
     bool valid() const                { return m_valid; }
     int updateStatus() const          { return m_update_status; }
 
-    int quantity(Time t, Condition c) const           { return m_quantities [t < TimeCount ? t : 0][c < ConditionCount ? c : 0]; }
-    int lots(Time t, Condition c) const               { return m_lots [t < TimeCount ? t : 0][c < ConditionCount ? c : 0]; }
+    int quantity(Time t, Condition c) const            { return m_quantities [t < TimeCount ? t : 0][c < ConditionCount ? c : 0]; }
+    int lots(Time t, Condition c) const                { return m_lots [t < TimeCount ? t : 0][c < ConditionCount ? c : 0]; }
     Currency price(Time t, Condition c, Price p) const { return m_prices [t < TimeCount ? t : 0][c < ConditionCount ? c : 0][p < PriceCount ? p : 0]; }
 
     virtual ~PriceGuide();
@@ -508,7 +509,7 @@ private:
 
     int           m_quantities [TimeCount][ConditionCount];
     int           m_lots       [TimeCount][ConditionCount];
-    Currency       m_prices     [TimeCount][ConditionCount][PriceCount];
+    Currency      m_prices     [TimeCount][ConditionCount][PriceCount];
 
 private:
     PriceGuide(const Item *item, const Color *color);
@@ -516,21 +517,9 @@ private:
     void load_from_disk();
     void save_to_disk();
 
-    bool parse(const char *data, uint size);
+    void parse(const QByteArray &ba);
 
     friend class Core;
-};
-
-// semi-internal class for TextImport -> Core communciation
-struct AllTimePriceGuide {
-    const BrickLink::Item * item;
-    const BrickLink::Color *color;
-    struct {
-        uint    quantity;
-        Currency minPrice;
-        Currency avgPrice;
-        Currency maxPrice;
-    } condition[ConditionCount];
 };
 
 class ChangeLogEntry : public QByteArray {
@@ -604,196 +593,156 @@ private:
 
     QHash<const Item *, AppearsIn>   m_appears_in_hash;
     QHash<const Item *, InvItemList> m_consists_of_hash;
-    QList<AllTimePriceGuide>         m_alltime_pg_list;
     QVector<const char *>            m_changelog;
 
     const ItemType *m_current_item_type;
 };
 
 
-class InternalColorModel : public QAbstractListModel {
-    Q_OBJECT
-
-public:
-    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
-    virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
-    virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
-
-    virtual QVariant data(const QModelIndex &index, int role) const;
-    virtual QVariant headerData(int section, Qt::Orientation orient, int role) const;
-
-    QModelIndex index(const Color *color) const;
-    const Color *color(const QModelIndex &index) const;
-
-protected:
-    InternalColorModel();
-
-    friend class Core;
-};
-
-
-class ColorModel : public QSortFilterProxyModel {
+class ColorModel : public StaticPointerModel {
     Q_OBJECT
 
 public:
     ColorModel(QObject *parent);
 
-    using QSortFilterProxyModel::index;
+    virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
+
+    virtual QVariant data(const QModelIndex &index, int role) const;
+    virtual QVariant headerData(int section, Qt::Orientation orient, int role) const;
+
+    using StaticPointerModel::index;
     QModelIndex index(const Color *color) const;
     const Color *color(const QModelIndex &index) const;
 
+    bool isFiltered() const;
     void setFilterItemType(const ItemType *it);
 
 protected:
-    virtual bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const;
-    virtual bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
-    virtual void sort(int column, Qt::SortOrder order);
+    int pointerCount() const;
+    const void *pointerAt(int index) const;
+    int pointerIndexOf(const void *pointer) const;
 
+    bool filterAccepts(const void *pointer) const;
+    bool lessThan(const void *pointer1, const void *pointer2, int column) const;
+
+private:
     const ItemType *m_itemtype_filter;
-    Qt::SortOrder m_order;
-};
-
-
-class InternalCategoryModel : public QAbstractListModel {
-    Q_OBJECT
-
-public:
-    static const Category *AllCategories;
-
-    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
-    virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
-    virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
-
-    virtual QVariant data(const QModelIndex &index, int role) const;
-    virtual QVariant headerData(int section, Qt::Orientation orient, int role) const;
-
-    QModelIndex index(const Category *category) const;
-    const Category *category(const QModelIndex &index) const;
-
-protected:
-    InternalCategoryModel();
 
     friend class Core;
 };
 
 
-class CategoryModel : public QSortFilterProxyModel {
+class CategoryModel : public StaticPointerModel {
     Q_OBJECT
 
 public:
-    static const Category *AllCategories;
-
     CategoryModel(QObject *parent);
 
+    static const Category *AllCategories;
+
+    virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
+
+    virtual QVariant data(const QModelIndex &index, int role) const;
+    virtual QVariant headerData(int section, Qt::Orientation orient, int role) const;
+
+    using StaticPointerModel::index;
+    QModelIndex index(const Category *category) const;
+    const Category *category(const QModelIndex &index) const;
+
+    bool isFiltered() const;
     void setFilterItemType(const ItemType *it);
     void setFilterAllCategories(bool);
 
-    using QSortFilterProxyModel::index;
-    QModelIndex index(const Category *category) const;
-    const Category *category(const QModelIndex &index) const;
-
 protected:
-    virtual bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const;
-    virtual bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
+    int pointerCount() const;
+    const void *pointerAt(int index) const;
+    int pointerIndexOf(const void *pointer) const;
 
+    bool filterAccepts(const void *pointer) const;
+    bool lessThan(const void *pointer1, const void *pointer2, int column) const;
+
+private:
     const ItemType *m_itemtype_filter;
     bool m_all_filter;
-};
-
-
-class InternalItemTypeModel : public QAbstractListModel {
-    Q_OBJECT
-
-public:
-    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
-    virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
-    virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
-
-    virtual QVariant data(const QModelIndex &index, int role) const;
-    virtual QVariant headerData(int section, Qt::Orientation orient, int role) const;
-
-    QModelIndex index(const ItemType *itemtype) const;
-    const ItemType *itemType(const QModelIndex &index) const;
-
-protected:
-    InternalItemTypeModel();
 
     friend class Core;
 };
 
 
-class ItemTypeModel : public QSortFilterProxyModel {
+class ItemTypeModel : public StaticPointerModel {
     Q_OBJECT
 
 public:
     ItemTypeModel(QObject *parent);
 
-    void setFilterWithoutInventory(bool on);
-
-    using QSortFilterProxyModel::index;
-    QModelIndex index(const ItemType *itemtype) const;
-    const ItemType *itemType(const QModelIndex &index) const;
-
-protected:
-    virtual bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const;
-    virtual bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
-
-    bool m_inv_filter;
-};
-
-
-class InternalItemModel : public QAbstractTableModel {
-    Q_OBJECT
-
-public:
-    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
-    virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
     virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
     virtual QVariant data(const QModelIndex &index, int role) const;
     virtual QVariant headerData(int section, Qt::Orientation orient, int role) const;
 
-    QModelIndex index(const Item *item) const;
-    const Item *item(const QModelIndex &index) const;
+    using StaticPointerModel::index;
+    QModelIndex index(const ItemType *itemtype) const;
+    const ItemType *itemType(const QModelIndex &index) const;
 
-protected slots:
-    void pictureUpdated(BrickLink::Picture *);
+    bool isFiltered() const;
+    void setFilterWithoutInventory(bool on);
 
 protected:
-    InternalItemModel();
+    int pointerCount() const;
+    const void *pointerAt(int index) const;
+    int pointerIndexOf(const void *pointer) const;
+
+    bool filterAccepts(const void *pointer) const;
+    bool lessThan(const void *pointer1, const void *pointer2, int column) const;
+
+private:
+    bool m_inv_filter;
 
     friend class Core;
 };
 
-class ItemModel : public QSortFilterProxyModel {
+
+class ItemModel : public StaticPointerModel {
     Q_OBJECT
 
 public:
     ItemModel(QObject *parent);
 
+    int columnCount(const QModelIndex &parent = QModelIndex()) const;
+
+    QVariant data(const QModelIndex &index, int role) const;
+    QVariant headerData(int section, Qt::Orientation orient, int role) const;
+
+    using StaticPointerModel::index;
+    QModelIndex index(const Item *item) const;
+    const Item *item(const QModelIndex &index) const;
+
+    bool isFiltered() const;
     void setFilterItemType(const ItemType *it);
     void setFilterCategory(const Category *it);
     void setFilterText(const QString &str);
     void setFilterWithoutInventory(bool on);
 
-    using QSortFilterProxyModel::index;
-    QModelIndex index(const Item *item) const;
-    const Item *item(const QModelIndex &index) const;
-
-protected:
-    virtual bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const;
-    virtual bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
-
 protected slots:
-    void invalidateFilterSlot();
+    void pictureUpdated(BrickLink::Picture *);
 
 protected:
+    int pointerCount() const;
+    const void *pointerAt(int index) const;
+    int pointerIndexOf(const void *pointer) const;
+
+    bool filterAccepts(const void *pointer) const;
+    bool lessThan(const void *pointer1, const void *pointer2, int column) const;
+
+private:
     const ItemType *m_itemtype_filter;
     const Category *m_category_filter;
-    QRegExp         m_text_filter;
+    QString         m_text_filter;
     bool            m_inv_filter;
-    QTimer          m_filter_timer;
+
+    friend class Core;
 };
+
 
 class AppearsInsModel;
 
@@ -853,7 +802,7 @@ public:
         BrickStore_1_1,
         BrickStore_2_0,
 
-        Default = BrickStore_2_0
+        Default = BrickStore_1_1
     };
 
     QString defaultDatabaseName(DatabaseVersion version = Default) const;
@@ -880,8 +829,6 @@ public:
     const Category *categoryFromName(const char *name, int len = -1) const;
     const ItemType *itemType(char id) const;
     const Item *item(char tid, const char *id) const;
-
-    AllTimePriceGuide allTimePriceGuide(const Item *item, const Color *color) const;
 
     PriceGuide *priceGuide(const Item *item, const Color *color, bool high_priority = false);
 
@@ -931,16 +878,6 @@ private:
     friend Core *core();
     friend Core *create(const QString &, QString *);
 
-    InternalColorModel *colorModel();
-    InternalCategoryModel *categoryModel();
-    InternalItemTypeModel *itemTypeModel();
-    InternalItemModel *itemModel();
-
-    friend ColorModel::ColorModel(QObject *);
-    friend CategoryModel::CategoryModel(QObject *);
-    friend ItemTypeModel::ItemTypeModel(QObject *);
-    friend ItemModel::ItemModel(QObject *);
-
 private:
     bool updateNeeded(bool valid, const QDateTime &last, int iv);
     bool parseLDrawModelInternal(QFile &file, const QString &model_name, InvItemList &items, uint *invalid_items, QHash<QString, InvItem *> &mergehash, QStringList &recursion_detection);
@@ -951,7 +888,6 @@ private:
                             const QMap<int, const Category *> &categories,
                             const QMap<int, const ItemType *> &item_types,
                             const QVector<const Item *> &items);
-    void setDatabase_AllTimePG(const QList<AllTimePriceGuide> &list);
     void setDatabase_ChangeLog(const QVector<const char *> &changelog);
 
     friend class TextImport;
@@ -977,11 +913,6 @@ private:
     QVector<const Item *>           m_items;       // sorted array of Item *
     QVector<const char *>           m_changelog;
 
-    InternalColorModel *   m_color_model;
-    InternalCategoryModel *m_category_model;
-    InternalItemTypeModel *m_itemtype_model;
-    InternalItemModel *    m_item_model;
-
     QPointer<Transfer>  m_transfer;
 
     //Transfer                  m_pg_transfer;
@@ -994,32 +925,6 @@ private:
     ThreadPool               m_pic_diskload;
 
     QCache<quint64, Picture>  m_pic_cache;
-
-    struct alltimepg_record {
-        union {
-            quint32 m_id;
-            struct {
-#if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
-                quint32 m_item_index  : 20;
-                quint32 m_color_id    : 12;
-#else
-                quint32 m_color_id    : 12;
-                quint32 m_item_index  : 20;
-#endif
-            };
-        };
-        quint16 m_new_qty;
-        quint16 m_used_qty;
-#if defined(Q_CC_MSVC)
-#pragma warning(disable:4200)
-#endif
-        float   m_prices[];
-#if defined(Q_CC_MSVC)
-#pragma warning(default:4200)
-#endif
-    };
-
-    QVector<char>  m_alltime_pg; // really alltimepg_records
 };
 
 inline Core *core() { return Core::inst(); }

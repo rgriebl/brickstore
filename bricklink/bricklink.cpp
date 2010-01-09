@@ -375,7 +375,6 @@ BrickLink::Core *BrickLink::Core::create(const QString &datadir, QString *errstr
 
 BrickLink::Core::Core(const QString &datadir)
     : m_datadir(datadir), m_c_locale(QLocale::c()), m_corelock(QMutex::Recursive),
-      m_color_model(0), m_category_model(0), m_itemtype_model (0), m_item_model(0),
       m_transfer(0), m_pg_update_iv(0), m_pic_update_iv(0),
       m_pic_diskload(QThread::idealThreadCount() * 3)
 {
@@ -586,7 +585,6 @@ bool BrickLink::Core::readDatabase(const QString &fname)
     m_item_types.clear();
     m_categories.clear();
     m_items.clear();
-    m_alltime_pg.clear();
 
     bool result = false;
     stopwatch *sw = 0; //new stopwatch("BrickLink::Core::readDatabase()");
@@ -666,14 +664,6 @@ bool BrickLink::Core::readDatabase(const QString &fname)
                                     ds >> item;
                                     m_items.append(item);
                                 }
-                                break;
-                            }
-                            case ChunkId('A','T','P','G') | 1ULL << 32: {
-                                quint32 pgc = 0;
-                                ds >> pgc;
-
-                                m_alltime_pg.reserve(pgc);
-                                ds.readRawData(m_alltime_pg.data(), pgc);
                                 break;
                             }
                             case ChunkId('C','H','G','L') | 1ULL << 32: {
@@ -780,14 +770,12 @@ out:
         qDebug("Types: %8u  (%11d bytes)", m_item_types.count(), int(m_item_types.count() * (sizeof(ItemType) + 20)));
         qDebug("Cats : %8u  (%11d bytes)", m_categories.count(), int(m_categories.count() * (sizeof(Category) + 20)));
         qDebug("Items: %8u  (%11d bytes)", m_items.count(),      int(m_items.count()      * (sizeof(Item)     + 20)));
-        qDebug("Price:           (%11d bytes)",         int(m_alltime_pg.size() + 20));
     }
     else {
         m_colors.clear();
         m_item_types.clear();
         m_categories.clear();
         m_items.clear();
-        m_alltime_pg.clear();
 
         qWarning("Error reading databases!");
     }
@@ -1540,49 +1528,6 @@ void BrickLink::Core::setDatabase_Basics(const QMap<int, const Color *> &colors,
     m_items      = items;
 }
 
-uint _bytes_for_alltime_pg = 0;
-
-void BrickLink::Core::setDatabase_AllTimePG(const QList<AllTimePriceGuide> &list)
-{
-    QMutexLocker lock(&m_corelock);
-
-    alltimepg_record *pg = reinterpret_cast<alltimepg_record *>(new char[sizeof(alltimepg_record) + 6*sizeof(float)]);
-
-    for (QList<AllTimePriceGuide>::const_iterator it = list.begin(); it != list.end(); ++it) {
-        int index = 0;
-
-        pg->m_item_index = it->item->index() + 1;
-        pg->m_color_id = it->color->id();
-        pg->m_new_qty = it->condition[New].quantity;
-        if (pg->m_new_qty) {
-            pg->m_prices[index++] = it->condition[New].minPrice.toDouble();
-            if (pg->m_new_qty > 1) {
-                pg->m_prices[index++] = it->condition[New].avgPrice.toDouble();
-                pg->m_prices[index++] = it->condition[New].maxPrice.toDouble();
-            }
-        }
-        pg->m_used_qty = it->condition[Used].quantity;
-        if (pg->m_used_qty) {
-            pg->m_prices[index++] = it->condition[Used].minPrice.toDouble();
-            if (pg->m_used_qty > 1) {
-                pg->m_prices[index++] = it->condition[Used].avgPrice.toDouble();
-                pg->m_prices[index++] = it->condition[Used].maxPrice.toDouble();
-            }
-        }
-
-        int olds = m_alltime_pg.size();
-        int news = sizeof(alltimepg_record) + sizeof(float) * index;
-
-        m_alltime_pg.resize(olds + news);
-        memcpy(m_alltime_pg.data() + olds, pg, news);
-    }
-    m_alltime_pg += QVector<char>(sizeof(quint32), 0);
-
-    _bytes_for_alltime_pg = m_alltime_pg.size();
-
-    delete pg;
-}
-
 void BrickLink::Core::setDatabase_ChangeLog(const QVector<const char *> &changelog)
 {
     QMutexLocker lock(&m_corelock);
@@ -1689,11 +1634,6 @@ bool BrickLink::Core::writeDatabase(const QString &filename, DatabaseVersion ver
             const Item **itp = m_items.data();
             for (quint32 i = itc; i; ++itp, --i)
                 ds << *itp;
-            ok &= cw.endChunk();
-
-            ok &= cw.startChunk(ChunkId('A','T','P','G'), version);
-            ds << quint32(m_alltime_pg.size());
-            ds.writeRawData(m_alltime_pg.constData(), m_alltime_pg.size());
             ok &= cw.endChunk();
 
             ok &= cw.startChunk(ChunkId('C','H','G','L'), version);

@@ -32,7 +32,7 @@
 namespace {
 
 static const int hborder = 4;
-static const int vborder = 2;
+static const int vborder = 4;
 
 struct cell : public QRect {
     enum cell_type {
@@ -165,13 +165,10 @@ void PriceGuideWidget::languageChange()
     d->m_str_price [BrickLink::Average]    = tr("Avg.");
     d->m_str_price [BrickLink::WAverage]   = tr("Q.Avg.");
     d->m_str_price [BrickLink::Highest]    = tr("Max.");
-    d->m_str_htime [BrickLink::AllTime][0] = tr("All Time");
-    d->m_str_htime [BrickLink::AllTime][1] = tr("Sales");
     d->m_str_htime [BrickLink::PastSix][0] = tr("Last 6");
     d->m_str_htime [BrickLink::PastSix][1] = tr("Months Sales");
     d->m_str_htime [BrickLink::Current][0] = tr("Current");
     d->m_str_htime [BrickLink::Current][1] = tr("Inventory");
-    d->m_str_vtime [BrickLink::AllTime]    = tr("All Time Sales");
     d->m_str_vtime [BrickLink::PastSix]    = tr("Last 6 Months Sales");
     d->m_str_vtime [BrickLink::Current]    = tr("Current Inventory");
     d->m_str_wait                          = tr("Please wait ...updating");
@@ -267,6 +264,7 @@ void PriceGuideWidget::recalcLayout()
 {
     d->m_cells.clear();
 
+    ensurePolished();
     const QFontMetrics &fm = fontMetrics();
 
     QFont fb = font();

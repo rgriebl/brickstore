@@ -223,6 +223,7 @@ win32 {
      QMAKE_CXXFLAGS_DEBUG   += /EHc- /EHs- /GR-
      QMAKE_CXXFLAGS_RELEASE += /EHc- /EHs- /GR-
   }
+  LIBS += user32.lib advapi32.lib
 }
 
 

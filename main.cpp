@@ -35,6 +35,11 @@ int main(int argc, char **argv)
     bool rebuild_db = false;
     bool show_usage = false;
 
+/*	extern void test_par_sort();
+	test_par_sort();
+	return 0;*/
+
+
     if ((argc == 2) && (!strcmp(argv [1], "-h") || !strcmp(argv [1], "--help"))) {
         show_usage = true;
     }

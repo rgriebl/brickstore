@@ -16,10 +16,12 @@ HEADERS += \
   messagebox.h \
   multiprogressbar.h \
   progressdialog.h \
+  qparallelmergesort.h \
   qtemporaryresource.h \
   qtemporaryresource_p.h \
   spinner.h \
   stopwatch.h \
+  staticpointermodel.h \
   taskpanemanager.h \
   threadpool.h \
   transfer.h \
@@ -39,6 +41,7 @@ SOURCES += \
   progressdialog.cpp \
   qtemporaryresource.cpp \
   spinner.cpp \
+  staticpointermodel.cpp \
   taskpanemanager.cpp \
   threadpool.cpp \
   transfer.cpp \

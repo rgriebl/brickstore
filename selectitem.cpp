@@ -77,6 +77,10 @@ public:
         else
             QStyledItemDelegate::paint(painter, option, index);
     }
+    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
+    {
+        return QStyledItemDelegate::sizeHint(option, index) + QSize(0, 2);
+    }
 };
 
 
@@ -518,12 +522,10 @@ void SelectItem::ensureSelectionVisible()
 
 void SelectItem::applyFilter()
 {
-    QRegExp regexp(d->w_filter->text(), Qt::CaseInsensitive, QRegExp::Wildcard);
-
     BrickLink::ItemModel *model = qobject_cast<BrickLink::ItemModel *>(d->w_items->model());
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-    model->setFilterRegExp(regexp);
+    model->setFilterText(d->w_filter->text());
     QApplication::restoreOverrideCursor();
 }
 

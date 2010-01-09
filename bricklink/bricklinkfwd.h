@@ -66,7 +66,7 @@ QDataStream &operator >> (QDataStream &ds, Category *cat);
 QDataStream &operator << (QDataStream &ds, const Color *col);
 QDataStream &operator >> (QDataStream &ds, Color *col);
 
-enum Time      { AllTime, PastSix, Current, TimeCount };
+enum Time      { PastSix, Current, TimeCount };
 enum Price     { Lowest, Average, WAverage, Highest, PriceCount };
 enum Condition { New, Used, ConditionCount };
 enum SubCondition { None, Complete, Incomplete, MISB, SubConditionCount };

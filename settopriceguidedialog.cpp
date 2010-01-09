@@ -23,7 +23,6 @@ SetToPriceGuideDialog::SetToPriceGuideDialog(QWidget *parent, Qt::WindowFlags fl
 {
     setupUi(this);
     
-    w_type_time->addItem(tr("All Time Sales"), BrickLink::AllTime);
     w_type_time->addItem(tr("Last 6 Months Sales"), BrickLink::PastSix);
     w_type_time->addItem(tr("Current Inventory"), BrickLink::Current);
     

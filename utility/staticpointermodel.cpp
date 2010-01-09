@@ -1,0 +1,140 @@
+/* Copyright (C) 2004-2008 Robert Griebl. All rights reserved.
+**
+** This file is part of BrickStore.
+**
+** This file may be distributed and/or modified under the terms of the GNU
+** General Public License version 2 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
+*/
+
+#include <QtConcurrentFilter>
+
+#include "qparallelmergesort.h"
+
+#include "staticpointermodel.h"
+
+StaticPointerModel::StaticPointerModel(QObject *parent)
+    : QAbstractItemModel(parent), lastSortColumn(-1), lastSortOrder(Qt::AscendingOrder)
+{
+}
+
+QModelIndex StaticPointerModel::index(int row, int column, const QModelIndex &parent) const
+{
+    if (!parent.isValid() && row >= 0 && column >= 0 && row < rowCount() && column < columnCount()) {
+        const void *pointer = pointerAt(isFiltered() ? filtered.at(row) : sorted.at(row));
+        return parent.isValid() ? QModelIndex() : createIndex(row, column, const_cast<void *>(pointer));
+    }
+    return QModelIndex();
+}
+
+QModelIndex StaticPointerModel::parent(const QModelIndex &) const
+{
+    return QModelIndex();
+}
+
+
+int StaticPointerModel::rowCount(const QModelIndex &parent) const
+{
+    if (sorted.isEmpty()) {
+        int n = pointerCount();
+        sorted.resize(n);
+        int *ptr = sorted.data();
+        for	(int i = 0; i < n; ++i)
+            *ptr++ = i;
+    }
+
+    if (parent.isValid())
+        return 0;
+    else if (isFiltered())
+        return filtered.count();
+    else
+        return pointerCount();
+}
+
+const void *StaticPointerModel::pointer(const QModelIndex &index) const
+{
+    return index.isValid() ? static_cast<const void *>(index.internalPointer()) : 0;
+}
+
+QModelIndex StaticPointerModel::index(const void *pointer) const
+{
+    int row = pointer ? pointerIndexOf(pointer) : -1;
+    if (row >= 0) {
+        if (isFiltered())
+            row = filtered.indexOf(row);
+        else
+            row = sorted.indexOf(row);
+    }
+    return row >= 0 ? createIndex(row, 0, const_cast<void *>(pointer)) : QModelIndex();
+}
+
+bool StaticPointerModel::isFiltered() const
+{
+    return false;
+}
+
+bool StaticPointerModel::filterAccepts(const void *) const
+{
+    return true;
+}
+
+bool StaticPointerModel::lessThan(const void *, const void *, int) const
+{
+    return true;
+}
+
+void StaticPointerModel::invalidateFilter()
+{
+    emit layoutAboutToBeChanged();
+    invalidateFilterInternal();
+    emit layoutChanged();
+}
+
+void StaticPointerModel::invalidateFilterInternal()
+{
+    if (isFiltered())
+        filtered = QtConcurrent::filtered(sorted, StaticPointerModelFilter(this)).results();
+    else
+        filtered.clear();
+}
+
+void StaticPointerModel::sort(int column, Qt::SortOrder order)
+{
+    lastSortColumn = column;
+    lastSortOrder = order;
+
+    int n = pointerCount();
+    if (n < 2)
+        return;
+
+    emit layoutAboutToBeChanged();
+
+    if (column >= 0 && column < columnCount()) {
+        if (order == Qt::AscendingOrder)
+            qParallelMergeSort(sorted.begin(), sorted.end(), StaticPointerModelCompare<Qt::AscendingOrder>(column, this));
+        else
+            qParallelMergeSort(sorted.begin(), sorted.end(), StaticPointerModelCompare<Qt::DescendingOrder>(column, this));
+    } else { // restore the source model order
+        for (int i = 0; i < n; ++i)
+            sorted[i] = i;
+    }
+
+    invalidateFilterInternal();
+    emit layoutChanged();
+}
+
+int StaticPointerModel::sortColumn() const
+{
+    return lastSortColumn;
+}
+
+Qt::SortOrder StaticPointerModel::sortOrder() const
+{
+    return lastSortOrder;
+}
+

@@ -1194,7 +1194,7 @@ bool FrameWork::createWindow(Document *doc)
 
     Window *nw = new Window(doc, 0);
     m_mdi->addWindow(nw);
-    nw->show();
+    //nw->show();
 
     return true;
 }
