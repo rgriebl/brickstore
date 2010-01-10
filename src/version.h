@@ -14,10 +14,9 @@
 #ifndef __BRICKSTORE__VERSION_H__
 #define __BRICKSTORE__VERSION_H__
 
-#define BRICKSTORE_MAJOR    ?
-#define BRICKSTORE_MINOR    ?
-#define BRICKSTORE_PATCH    ?
-
+#if !defined(BRICKSTORE_MAJOR) || !defined(BRICKSTORE_MINOR) || !defined(BRICKSTORE_PATCH)
+#  error "You forgot to define BRICKSTORE_(MAJOR,MINOR,PATCH) before including version.h"
+#endif
 
 // stringification sucks :)
 #define _BS_STR(s)   _BS_STR2(s)
@@ -32,7 +31,7 @@
 
 // Win32 FILEVERSION resource
 #ifdef RC_INVOKED
-#define BRICKSTORE_VERSIONINFO   _BS_STR( BRICKSTORE_MAJOR ) ", " _BS_STR( BRICKSTORE_MINOR ) ", " _BS_STR( BRICKSTORE_PATCH ) ", 0"
+#  define BRICKSTORE_VERSIONINFO   _BS_STR( BRICKSTORE_MAJOR ) ", " _BS_STR( BRICKSTORE_MINOR ) ", " _BS_STR( BRICKSTORE_PATCH ) ", 0"
 #endif
 
 #endif
