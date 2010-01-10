@@ -172,16 +172,10 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
 
     m_current_window = 0;
 
-    m_mdi = new Workspace(this);
-    connect(m_mdi, SIGNAL(windowActivated(QWidget *)), this, SLOT(connectWindow(QWidget *)));
+    m_workspace = new Workspace(this);
+    connect(m_workspace, SIGNAL(windowActivated(QWidget *)), this, SLOT(connectWindow(QWidget *)));
 
-    bool subwin = (Config::inst()->value("/MainWindow/Layout/MdiViewMode", QMdiArea::TabbedView).toInt() == QMdiArea::SubWindowView);
-    bool below = (Config::inst()->value("/MainWindow/Layout/TabPosition", QTabWidget::North).toInt() == QTabWidget::South);
-
-    m_mdi->setTabPosition(below ? QTabWidget::South : QTabWidget::North);
-    m_mdi->setViewMode(subwin ? QMdiArea::SubWindowView : QMdiArea::TabbedView);
-
-    setCentralWidget(m_mdi);
+    setCentralWidget(m_workspace);
 
     m_taskpanes = new TaskPaneManager(this);
     m_taskpanes->setMode(Config::inst()->value("/MainWindow/Infobar/Mode", TaskPaneManager::Modern).toInt() != TaskPaneManager::Classic ? TaskPaneManager::Modern : TaskPaneManager::Classic);
@@ -294,7 +288,7 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
 
     menuBar()->addMenu(createMenu("extras", sl));
 
-    QMenu *m = m_mdi->windowMenu(this);
+    QMenu *m = m_workspace->windowMenu(this);
     m->menuAction()->setObjectName("window");
     menuBar()->addMenu(m);
 
@@ -612,13 +606,11 @@ FrameWork::~FrameWork()
 
     Config::inst()->setValue("/MainWindow/Layout/State", saveState());
     Config::inst()->setValue("/MainWindow/Layout/Geometry", saveGeometry());
-    Config::inst()->setValue("/MainWindow/Layout/WindowMode", m_mdi->viewMode());
-    Config::inst()->setValue("/MainWindow/Layout/TabPosition", m_mdi->tabPosition());
 
     if (m_add_dialog)
         Config::inst()->setValue("/MainWindow/AddItemDialog/Geometry", m_add_dialog->saveGeometry());
 
-    delete m_mdi;
+    delete m_workspace;
     s_inst = 0;
 }
 
@@ -1032,7 +1024,7 @@ void FrameWork::createActions()
     QList<QAction *> alist = findChildren<QAction *> ();
     foreach(QAction *a, alist) {
         if (!a->objectName().isEmpty()) {
-            QString path = QLatin1String(":/images/22x22/") + a->objectName();
+            QString path = QLatin1String(":/images/") + a->objectName();
 
             // QIcon::isNull is useless in Qt4
             if (QFile::exists(path + ".png") || QFile::exists(path + ".svg"))
@@ -1166,11 +1158,11 @@ bool FrameWork::createWindow(Document *doc)
     if (!doc)
         return false;
 
-    foreach(QWidget *w, m_mdi->windowList()) {
+    foreach(QWidget *w, m_workspace->windowList()) {
         Window *iw = qobject_cast<Window *>(w);
 
         if (iw && iw->document() == doc) {
-            m_mdi->setActiveWindow(w);
+            m_workspace->setActiveWindow(w);
             iw->setFocus();
             return true;
         }
@@ -1178,8 +1170,7 @@ bool FrameWork::createWindow(Document *doc)
     m_undogroup->addStack(doc->undoStack());
 
     Window *nw = new Window(doc, 0);
-    m_mdi->addWindow(nw);
-    //nw->show();
+    m_workspace->addWindow(nw);
 
     return true;
 }
@@ -1623,7 +1614,7 @@ void FrameWork::closeEvent(QCloseEvent *e)
 
 bool FrameWork::closeAllWindows()
 {
-    foreach(QWidget *w, m_mdi->windowList()) {
+    foreach(QWidget *w, m_workspace->windowList()) {
         if (!w->close())
             return false;
     }

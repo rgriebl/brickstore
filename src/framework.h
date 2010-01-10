@@ -148,7 +148,7 @@ private:
 
     QMap<QAction *, bool (Window::*)() const> m_toggle_updates;
 
-    Workspace *m_mdi;
+    Workspace *m_workspace;
 
     QPointer<Window> m_current_window;
 

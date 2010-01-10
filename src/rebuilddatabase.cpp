@@ -171,13 +171,6 @@ static QList<QPair<QString, QString> > dbQuery(int which)
     return query;
 }
 
-static QList<QPair<QString, QString> > pgQuery(char item_type)
-{
-    QList<QPair<QString, QString> > query;   //?itemType=X
-    query << QPair<QString, QString>("itemType", QChar(item_type));
-    return query;
-}
-
 bool RebuildDatabase::download()
 {
     QString path = BrickLink::core()->dataPath();

@@ -557,15 +557,8 @@ bool BrickLink::ItemModel::lessThan(const void *p1, const void *p2, int column) 
     const Item *i1 = static_cast<const Item *>(p1);
     const Item *i2 = static_cast<const Item *>(p2);
 
-#ifdef Q_OS_WIN32
-#define stricmp _stricmp
-#endif
-
-    return !i1 ? true : (!i2 ? false : stricmp((column == 2) ? i1->name() : i1->id(),
-                                               (column == 2) ? i2->name() : i2->id()) < 0);
-#ifdef Q_OS_WIN32
-#undef stricmp
-#endif
+    return !i1 ? true : (!i2 ? false : qstricmp((column == 2) ? i1->name() : i1->id(),
+                                                (column == 2) ? i2->name() : i2->id()) < 0);
 }
 
 namespace BrickLink {

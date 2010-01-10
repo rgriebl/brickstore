@@ -197,7 +197,6 @@ Window::Window(Document *doc, QWidget *parent)
 
     connect(BrickLink::core(), SIGNAL(priceGuideUpdated(BrickLink::PriceGuide *)), this, SLOT(priceGuideUpdated(BrickLink::PriceGuide *)));
 
-    connect(Config::inst(), SIGNAL(simpleModeChanged(bool)), this, SLOT(setSimpleMode(bool)));
     connect(Config::inst(), SIGNAL(showInputErrorsChanged(bool)), this, SLOT(updateErrorMask()));
     connect(Config::inst(), SIGNAL(measurementSystemChanged(QLocale::MeasurementSystem)), w_list->viewport(), SLOT(update()));
 

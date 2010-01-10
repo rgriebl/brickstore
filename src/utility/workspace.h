@@ -17,12 +17,8 @@
 #define USE_WORKSPACE
 
 #include <QWidget>
-#include <QHash>
-#include <QMdiArea>
 
-class QStackedLayout;
-class QTabBar;
-class QBoxLayout;
+class TabWidget;
 class QMenu;
 class QToolButton;
 
@@ -33,62 +29,35 @@ class Workspace : public QWidget {
 public:
     Workspace(QWidget *parent = 0, Qt::WindowFlags f = 0);
 
-    QTabWidget::TabPosition tabPosition () const;
-    void setTabPosition(QTabWidget::TabPosition position);
-
-    QMdiArea::ViewMode viewMode () const;
-    void setViewMode(QMdiArea::ViewMode mode);
-
     void addWindow(QWidget *w);
 
     QWidget *activeWindow() const;
-    QList <QWidget *> windowList() const;
+    QList<QWidget *> windowList() const;
 
     QMenu *windowMenu(QWidget *parent = 0, const char *name = 0);
 
 signals:
     void windowActivated(QWidget *);
-//    void activeWindowTitleChanged(const QString &);
 
 public slots:
     void setActiveWindow(QWidget *);
 
 protected:
     virtual bool eventFilter(QObject *o, QEvent *e);
+    void resizeEvent(QResizeEvent *);
 
 private slots:
     void closeWindow(int idx);
-
-#ifdef USE_WORKSPACE
-private slots:
-    void removeWindow(int);
     void currentChangedHelper(int);
-    void closeWindow();
-    void tabMoved(int from, int to);
 
 private:
     void relayout();
     void updateVisibility();
 
 private:
-    QTabWidget::TabPosition  m_tabpos;
-    QTabBar *             m_tabbar;
-    QStackedLayout *      m_stacklayout;
-    QBoxLayout *          m_verticallayout;
-    QBoxLayout *          m_tablayout;
-    QToolButton *         m_close;
-    QToolButton *         m_list;
-#else
-private slots:
-    void windowActivatedMdi(QMdiSubWindow *);
-
-
-private:
-    QMdiArea *            m_mdi;
-#endif
+    TabWidget *  m_tabwidget;
+    QToolButton *m_list;
 };
-
-
 
 #endif
 

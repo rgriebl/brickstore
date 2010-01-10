@@ -20,7 +20,7 @@ version.h
 Makefile*
 brickstore
 brickstore.exe
-brickstore.app
+BrickStore.app
 qrc_brickstore.cpp
 brickstore.xcodeproj
 ldtest
