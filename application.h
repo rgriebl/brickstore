@@ -41,7 +41,6 @@ public slots:
     void about();
     void checkForUpdates();
     void updateTranslations();
-    void registration();
 
 signals:
     void openDocument(const QString &);
@@ -51,7 +50,6 @@ protected:
 
 private slots:
     void doEmitOpenDocument();
-    void demoVersion();
     void rebuildDatabase();
 
 private:

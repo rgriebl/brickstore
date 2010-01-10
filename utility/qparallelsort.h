@@ -12,8 +12,8 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 
-// The parallel merge algorithm was derived from Markus Weissmann's
-// BSD licensed "pmsort" (implemented in C and pthreads):
+// The parallel merge sort algorithm was derived from Markus Weissmann's
+// BSD licensed "pmsort" (originally implemented in C and pthreads):
 
 /*_
  * Copyright (c) 2006, 2007, Markus W. Weissmann <mail@mweissmann.de>
@@ -47,8 +47,8 @@
  *
  */
 
-#ifndef QPARALLELMERGESORT_H
-#define QPARALLELMERGESORT_H
+#ifndef QPARALLELSORT_H
+#define QPARALLELSORT_H
 
 #include <QtConcurrentRun>
 #include <QtAlgorithms>
@@ -56,7 +56,7 @@
 namespace QAlgorithmsPrivate {
 
 template <typename RandomAccessIterator, typename T, typename LessThan>
-static inline void qParallelMergeSort_JoinSets(RandomAccessIterator begin, RandomAccessIterator end, LessThan lessThan, T *tmp, int a_span, int b_span)
+static inline void qParallelSortJoin(RandomAccessIterator begin, RandomAccessIterator end, LessThan lessThan, T *tmp, int a_span, int b_span)
 {
     RandomAccessIterator a = begin;
     RandomAccessIterator b = begin + a_span;
@@ -64,10 +64,6 @@ static inline void qParallelMergeSort_JoinSets(RandomAccessIterator begin, Rando
 
     Q_ASSERT(span == (end - begin));
     Q_ASSERT((b + b_span) == end);
-
-#ifndef QT_DEBUG
-    Q_UNUSED(end);
-#endif
 
     for (int i = 0; i < span; ++i) {
         // 'a' if no b left or a < b
@@ -82,12 +78,12 @@ static inline void qParallelMergeSort_JoinSets(RandomAccessIterator begin, Rando
             b_span--;
         }
     }
-    for (int i = 0; i < span; ++i)
+    while (begin != end)
         *begin++ = *tmp++;
 }
 
 template <typename RandomAccessIterator, typename T, typename LessThan>
-static inline void qParallelMergeSort_SerialSort(RandomAccessIterator begin, RandomAccessIterator end, LessThan lessThan, T *tmp)
+static inline void qParallelSortSerial(RandomAccessIterator begin, RandomAccessIterator end, LessThan lessThan, T *tmp)
 {
     int span = end - begin;
 
@@ -101,27 +97,27 @@ static inline void qParallelMergeSort_SerialSort(RandomAccessIterator begin, Ran
         }
     } else {
         int a_span = (span + 1) / 2;  // bigger half of array if array-size is uneven
-        int b_span = span / 2;      // smaller half of array if array-size is uneven
+        int b_span = span / 2;        // smaller half of array if array-size is uneven
 
         if (a_span > 1)	// no sorting necessary if size == 1
-            qParallelMergeSort_SerialSort(begin, begin + a_span, lessThan, tmp);
+            qParallelSortSerial(begin, begin + a_span, lessThan, tmp);
 
-        if (b_span > 1) // ### was 0
-            qParallelMergeSort_SerialSort(begin + a_span, end, lessThan, tmp + a_span);
+        if (b_span > 1)	// no sorting necessary if size == 1
+            qParallelSortSerial(begin + a_span, end, lessThan, tmp + a_span);
 
-        qParallelMergeSort_JoinSets(begin, end, lessThan, tmp, a_span, b_span);
+        qParallelSortJoin(begin, end, lessThan, tmp, a_span, b_span);
     }
 }
 
 template <typename RandomAccessIterator, typename T, typename LessThan>
-void qParallelMergeSort_Thread(RandomAccessIterator begin, RandomAccessIterator end, LessThan lessThan, T *tmp, int threadCount)
+void qParallelSortThread(RandomAccessIterator begin, RandomAccessIterator end, LessThan lessThan, T *tmp, int threadCount)
 {
     int span = end - begin;
 
     // stop if there are no threads left OR if size of array is at most 3
     if (threadCount < 2 || span <= 3) {
         // let's just sort this in serial
-        qParallelMergeSort_SerialSort(begin, end, lessThan, tmp);
+        qParallelSortSerial(begin, end, lessThan, tmp);
         return;
     } else {
         // divide & conquer
@@ -129,66 +125,102 @@ void qParallelMergeSort_Thread(RandomAccessIterator begin, RandomAccessIterator 
         int b_span = span - a_span;  // smaller half of array if array-size is uneven
 
         if (b_span > 1) {	// prepare thread only if sorting is necessary
-            QFuture<void> future = QtConcurrent::run(qParallelMergeSort_Thread<RandomAccessIterator, T, LessThan>, begin + a_span, end, lessThan, tmp + a_span, threadCount / 2);
-            qParallelMergeSort_Thread(begin, begin + a_span, lessThan, tmp, (threadCount + 1) / 2);
+            QFuture<void> future = QtConcurrent::run(qParallelSortThread<RandomAccessIterator, T, LessThan>, begin + a_span, end, lessThan, tmp + a_span, threadCount / 2);
+            qParallelSortThread(begin, begin + a_span, lessThan, tmp, (threadCount + 1) / 2);
             future.waitForFinished();
         } else if (a_span == 2) {
-            qParallelMergeSort_SerialSort(begin, end, lessThan, tmp);
+            qParallelSortSerial(begin, end, lessThan, tmp);
         }
 
-        qParallelMergeSort_JoinSets(begin, end, lessThan, tmp, a_span, b_span);
+        qParallelSortJoin(begin, end, lessThan, tmp, a_span, b_span);
     }
 }
 
 template <typename RandomAccessIterator, typename T, typename LessThan>
-Q_OUTOFLINE_TEMPLATE void qParallelMergeSortHelper(RandomAccessIterator begin, RandomAccessIterator end, const T &, LessThan lessThan)
+Q_OUTOFLINE_TEMPLATE void qParallelSortHelper(RandomAccessIterator begin, RandomAccessIterator end, const T &, LessThan lessThan)
 {
     const int span = end - begin;
     if (span < 2)
        return;
 
     int threadCount = QThread::idealThreadCount();
-    if (threadCount == 1) {
-        qStableSort(begin, end, lessThan);
+    if (threadCount == 1 || span < 1000) {
+        qSort(begin, end, lessThan);
         return;
     }
 
     T *tmp = new T[span];
-    qParallelMergeSort_Thread(begin, end, lessThan, tmp, threadCount);
+    qParallelSortThread(begin, end, lessThan, tmp, threadCount);
     delete tmp;
 }
 
 template <typename RandomAccessIterator, typename T>
-inline void qParallelMergeSortHelper(RandomAccessIterator begin, RandomAccessIterator end, const T &dummy)
+inline void qParallelSortHelper(RandomAccessIterator begin, RandomAccessIterator end, const T &dummy)
 {
-    qParallelMergeSortHelper(begin, end, dummy, qLess<T>());
+    qParallelSortHelper(begin, end, dummy, qLess<T>());
 }
 
 } // namespace QAlgorithmsPrivate
 
 template <typename RandomAccessIterator>
-inline void qParallelMergeSort(RandomAccessIterator start, RandomAccessIterator end)
+inline void qParallelSort(RandomAccessIterator start, RandomAccessIterator end)
 {
     if (start != end)
-        QAlgorithmsPrivate::qParallelMergeSortHelper(start, end, *start);
+        QAlgorithmsPrivate::qParallelSortHelper(start, end, *start);
 }
 
 template <typename RandomAccessIterator, typename LessThan>
-inline void qParallelMergeSort(RandomAccessIterator start, RandomAccessIterator end, LessThan lessThan)
+inline void qParallelSort(RandomAccessIterator start, RandomAccessIterator end, LessThan lessThan)
 {
     if (start != end)
-        QAlgorithmsPrivate::qParallelMergeSortHelper(start, end, *start, lessThan);
+        QAlgorithmsPrivate::qParallelSortHelper(start, end, *start, lessThan);
 }
 
 template<typename Container>
-inline void qParallelMergeSort(Container &c)
+inline void qParallelSort(Container &c)
 {
 #ifdef Q_CC_BOR
     // Work around Borland 5.5 optimizer bug
     c.detach();
 #endif
     if (!c.empty())
-        QAlgorithmsPrivate::qParallelMergeSortHelper(c.begin(), c.end(), *c.begin());
+        QAlgorithmsPrivate::qParallelSortHelper(c.begin(), c.end(), *c.begin());
 }
 
-#endif // QPARALLELMERGESORT_H
+#if 0 // benchmarking
+#include "stopwatch.h"
+
+void test_par_sort()
+{
+    for (int k = 0; k < 3; ++k) {
+        const char *which = (k == 0 ? "Stable Sort  " :
+                            (k == 1 ? "Quick Sort   " :
+                                      "Parallel Sort"));
+        int maxloop = 21;
+        int *src = new int[1 << maxloop];
+        for (int j = 0; j < (1 << maxloop); ++j)
+            src[j] = rand();
+
+        for (int i = 0; i <= maxloop; ++i) {
+            int count = 1 << i;
+            QByteArray msg = QString("%3 test run %1 ... %2 values").arg(i).arg(count).arg(which).toLatin1();
+            int *array = new int[count];
+            memcpy(array, src, sizeof(int) * count);
+
+            {
+                stopwatch sw(msg.constData());
+                if (k == 0)
+                    qStableSort(array, array + count);
+                else if (k == 1)
+                    qSort(array, array + count);
+                else
+                    qParallelSort(array, array + count);
+            }
+            delete [] array;
+        }
+        delete [] src;
+    }
+}
+#endif
+
+#endif // QPARALLELSort_H

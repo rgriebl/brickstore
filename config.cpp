@@ -49,11 +49,7 @@ Config::Config()
 {
     m_show_input_errors = value("/General/ShowInputErrors", true).toBool();
     m_measurement = (value("/General/MeasurementSystem", "metric").toString() == "metric") ? QLocale::MetricSystem : QLocale::ImperialSystem;
-    m_simple_mode = value("/General/SimpleMode", false).toBool();
-
-    m_registration = OpenSource;
     m_translations_parsed = false;
-    setRegistration(registrationName(), registrationKey());
 
     if (isLocalCurrencySet()) {
         QPair<QString, QString> syms = localCurrencySymbols();
@@ -73,91 +69,6 @@ Config *Config::inst()
     if (!s_inst)
         s_inst = new Config();
     return s_inst;
-}
-
-QString Config::registrationName() const
-{
-    return value("/General/Registration/Name").toString();
-}
-
-QString Config::registrationKey() const
-{
-    return value("/General/Registration/Key").toString();
-}
-
-bool Config::checkRegistrationKey(const QString &name, const QString &key)
-{
-#if !defined( BS_REGKEY )
-    Q_UNUSED(name)
-    Q_UNUSED(key)
-
-    return true;
-
-#else
-    if (name.isEmpty() || key.isEmpty())
-        return false;
-
-    QByteArray src;
-    QDataStream ss(&src, QIODevice::WriteOnly);
-    ss.setByteOrder(QDataStream::LittleEndian);
-    ss << (QString(STR(BS_REGKEY)) + name);
-
-    QCryptographicHash sha1_hash(QCryptographicHash::Sha1);
-    sha1_hash.addData(src.data() + 4, src.size() - 4);
-    QByteArray sha1 = sha1_hash.result();
-
-    if (sha1.count() < 8)
-        return false;
-
-    QString result;
-    quint64 serial = 0;
-    QDataStream ds(&sha1, QIODevice::ReadOnly);
-    ds >> serial;
-
-    // 32bit without 0/O and 5/S
-    const char *mapping = "12346789ABCDEFGHIJKLMNPQRTUVWXYZ";
-
-    // get 12*5 = 60 bits
-    for (int i = 12; i; i--) {
-        result.append(mapping [serial & 0x1f]);
-        serial >>= 5;
-    }
-    result.insert(8, '-');
-    result.insert(4, '-');
-
-    return (result == key);
-#endif
-}
-
-Config::Registration Config::registration() const
-{
-    return m_registration;
-}
-
-Config::Registration Config::setRegistration(const QString &name, const QString &key)
-{
-#if defined( BS_REGKEY )
-    Registration old = m_registration;
-
-    if (name.isEmpty() && key.isEmpty())
-        m_registration = None;
-    else if (name == "FREE")
-        m_registration = Personal;
-    else if (name == "DEMO")
-        m_registration = Demo;
-    else
-        m_registration = checkRegistrationKey(name, key) ? Full : Personal;
-
-    setValue("/General/Registration/Name", name);
-    setValue("/General/Registration/Key", key);
-
-    if (old != m_registration)
-        emit registrationChanged(m_registration);
-#else
-    Q_UNUSED(name)
-    Q_UNUSED(key)
-#endif
-    return m_registration;
 }
 
 QString Config::scramble(const QString &str)
@@ -405,22 +316,6 @@ void Config::setMeasurementSystem(QLocale::MeasurementSystem ms)
         setValue("/General/MeasurementSystem", ms == QLocale::MetricSystem ? "metric" : "imperial");
 
         emit measurementSystemChanged(ms);
-    }
-}
-
-
-bool Config::simpleMode() const
-{
-    return m_simple_mode;
-}
-
-void Config::setSimpleMode(bool sm)
-{
-    if (sm != m_simple_mode) {
-        m_simple_mode = sm;
-        setValue("/General/SimpleMode", sm);
-
-        emit simpleModeChanged(sm);
     }
 }
 

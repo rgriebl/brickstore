@@ -111,12 +111,9 @@ private slots:
     void configure(const char *);
 
     void setOnlineStatus(QAction *);
-    void setSimpleMode(bool);
     void cancelAllTransfers();
     void toggleAddItemDialog(bool b);
     void closedAddItemDialog();
-
-    void registrationUpdate();
 
 protected:
    virtual void dragEnterEvent(QDragEnterEvent *e);
@@ -175,13 +172,6 @@ private:
     QStringList m_recent_files;
 
     bool m_running;
-
-    int m_menuid_file;
-    int m_menuid_edit;
-    int m_menuid_view;
-    int m_menuid_extras;
-    int m_menuid_window;
-    int m_menuid_help;
 
 
     UndoGroup *m_undogroup;

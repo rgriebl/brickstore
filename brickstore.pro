@@ -87,7 +87,6 @@ FORMS = \
   incdecpricesdialog.ui \
   incompleteitemdialog.ui \
   informationdialog.ui \
-  registrationdialog.ui \
   selectcolordialog.ui \
   selectdocumentdialog.ui \
   selectitemdialog.ui \
@@ -168,21 +167,6 @@ win32 {
 }
 
 QMAKE_EXTRA_TARGETS += tarball package
-
-
-#
-# check key
-#
-
-exists( .private-key ) {
-  win32:cat_cmd = type
-  unix:cat_cmd = cat
-
-  DEFINES += BS_REGKEY=\"$$system( $$cat_cmd .private-key )\"
-} 
-else {
-  message( Building an OpenSource version )
-}
 
 
 #

@@ -50,7 +50,6 @@ public:
     QString dataDir() const;
 
     bool showInputErrors() const;
-    bool simpleMode() const;
     bool onlineStatus() const;
     QNetworkProxy proxy() const;
 
@@ -69,20 +68,6 @@ public:
 
     QList<Translation> translations() const;
 
-    enum Registration {
-        None,
-        Personal,
-        Demo,
-        Full,
-        OpenSource
-    };
-
-    Registration registration() const;
-    Registration setRegistration(const QString &name, const QString &key);
-    QString registrationName() const;
-    QString registrationKey() const;
-    bool checkRegistrationKey(const QString &name, const QString &key);
-
 public slots:
     void setLanguage(const QString &lang);
     void setMeasurementSystem(QLocale::MeasurementSystem ms);
@@ -95,7 +80,6 @@ public slots:
     void setDataDir(const QString &dir);
 
     void setShowInputErrors(bool b);
-    void setSimpleMode(bool sm);
     void setOnlineStatus(bool b);
     void setProxy(const QNetworkProxy &proxy);
 
@@ -105,7 +89,6 @@ public slots:
     void setUpdateIntervals(const QMap<QByteArray, int> &intervals);
 
 signals:
-    void simpleModeChanged(bool);
     void languageChanged();
     void measurementSystemChanged(QLocale::MeasurementSystem ms);
     void localCurrencyChanged();
@@ -113,7 +96,6 @@ signals:
     void updateIntervalsChanged(const QMap<QByteArray, int> &intervals);
     void onlineStatusChanged(bool b);
     void proxyChanged(const QNetworkProxy &proxy);
-    void registrationChanged(Config::Registration r);
 
 protected:
     bool parseTranslations() const;
@@ -121,8 +103,6 @@ protected:
 private:
     bool         m_show_input_errors;
     QLocale::MeasurementSystem m_measurement;
-    bool         m_simple_mode;
-    Registration m_registration;
     mutable bool m_translations_parsed;
     mutable QList<Translation> m_translations;
 };

@@ -50,7 +50,6 @@
 #include "taskwidgets.h"
 #include "progressdialog.h"
 #include "updatedatabase.h"
-#include "splash.h"
 #include "utility.h"
 #include "additemdialog.h"
 #include "settingsdialog.h"
@@ -273,7 +272,6 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
         << "-"
         << "view_fullscreen"
         << "-"
-        << "view_simple_mode"
         << "view_show_input_errors"
         << "view_difference_mode"
         << "-"
@@ -302,8 +300,6 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
     sl = Config::inst()->value("/MainWindow/Menubar/Help").toStringList();
     if (sl.isEmpty())
         sl << "help_updates"
-        << "-"
-        << "help_registration"
         << "-"
         << "help_about";
 
@@ -379,12 +375,8 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
     connect(Config::inst(), SIGNAL(proxyChanged(QNetworkProxy)), bl->transfer(), SLOT(setProxy(QNetworkProxy)));
     connect(Config::inst(), SIGNAL(localCurrencyChanged()), this, SLOT(statisticsUpdate()));
     connect(Config::inst(), SIGNAL(measurementSystemChanged(QLocale::MeasurementSystem)), this, SLOT(statisticsUpdate()));
-    connect(Config::inst(), SIGNAL(simpleModeChanged(bool)), this, SLOT(setSimpleMode(bool)));
-    connect(Config::inst(), SIGNAL(registrationChanged(Config::Registration)), this, SLOT(registrationUpdate()));
 
     findAction("view_show_input_errors")->setChecked(Config::inst()->showInputErrors());
-
-    registrationUpdate();
 
     findAction(Config::inst()->onlineStatus() ? "extras_net_online" : "extras_net_offline")->setChecked(true);
 
@@ -396,8 +388,6 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
 
     connect(m_progress, SIGNAL(statusChange(bool)), m_spinner, SLOT(setActive(bool)));
     connect(m_undogroup, SIGNAL(cleanChanged(bool)), this, SLOT(modificationUpdate()));
-
-    Splash::inst()->message(qApp->translate("Splash", "Loading Database..."));
 
     bool dbok = BrickLink::core()->readDatabase();
 
@@ -529,7 +519,6 @@ void FrameWork::translateActions()
         { "edit_select_all",                tr("Select All"),                         tr("Ctrl+A", "Edit|SelectAll") },
         { "edit_select_none",               tr("Select None"),                        tr("Ctrl+Shift+A", "Edit|SelectNone") },
         { "view",                           tr("&View"),                              0 },
-        { "view_simple_mode",               tr("Buyer/Collector Mode"),               0 },
         { "view_toolbar",                   tr("View Toolbar"),                       0 },
         { "view_infobar",                   tr("View Infobars"),                      0 },
         { "view_statusbar",                 tr("View Statusbar"),                     0 },
@@ -547,7 +536,6 @@ void FrameWork::translateActions()
 //        { "help_whatsthis",                 tr("What's this?"),                       tr("Shift+F1", "Help|WhatsThis") },
         { "help_about",                     tr("About..."),                           0 },
         { "help_updates",                   tr("Check for Program Updates..."),       0 },
-        { "help_registration",              tr("Registration..."),                    0 },
         { "edit_status",                    tr("Status"),                             0 },
         { "edit_status_include",            tr("Include"),                            0 },
         { "edit_status_exclude",            tr("Exclude"),                            0 },
@@ -1006,8 +994,6 @@ void FrameWork::createActions()
 
     (void) newQAction(this, "view_fullscreen", true, this, SLOT(viewFullScreen(bool)));
 
-    (void) newQAction(this, "view_simple_mode", true, Config::inst(), SLOT(setSimpleMode(bool)));
-
     m_toolbar->toggleViewAction()->setObjectName("view_toolbar");
 
     (void) m_taskpanes->createItemVisibilityAction(this, "view_infobar");
@@ -1037,10 +1023,6 @@ void FrameWork::createActions()
 
     a = newQAction(this, "help_updates", false, Application::inst(), SLOT(checkForUpdates()));
     a->setMenuRole(QAction::ApplicationSpecificRole);
-
-    a = newQAction(this, "help_registration", false, Application::inst(), SLOT(registration()));
-    a->setMenuRole(QAction::ApplicationSpecificRole);
-    a->setVisible(Config::inst()->registration() != Config::OpenSource);
 
     // set all icons that have a pixmap corresponding to name()
 
@@ -1602,55 +1584,6 @@ void FrameWork::setOnlineStatus(QAction *act)
         cancelAllTransfers();
 
     Config::inst()->setOnlineStatus(b);
-}
-
-void FrameWork::registrationUpdate()
-{
-    bool personal = (Config::inst()->registration() == Config::Personal);
-    bool demo     = (Config::inst()->registration() == Config::Demo);
-    bool full     = (Config::inst()->registration() == Config::Full);
-
-    QAction *a = findAction("view_simple_mode");
-
-    // demo, full -> always off
-    // opensource -> don't change
-    if (personal)
-        a->setChecked(true);
-    else if (demo || full)
-        a->setChecked(false);
-    else
-        a->setChecked(Config::inst()->simpleMode());
-
-    a->setEnabled(!personal);
-
-    setSimpleMode(a->isChecked());
-}
-
-void FrameWork::setSimpleMode(bool b)
-{
-    static const char *actions [] = {
-        "file_import_bl_xml",
-        "file_import_bl_store_inv",
-        "file_export_bl_xml",
-        "file_export_bl_xml_clip",
-        "file_export_bl_update_clip",
-        "edit_bulk",
-        "edit_sale",
-        "edit_reserved",
-        "edit_retain",
-        "edit_stockroom",
-        "edit_comment",
-        "edit_bl_myinventory",
-
-        0
-    };
-
-    for (const char **action_ptr = actions; *action_ptr; action_ptr++) {
-        QAction *a = findAction(*action_ptr);
-
-        if (a)
-            a->setVisible(!b);
-    }
 }
 
 void FrameWork::showContextMenu(bool /*onitem*/, const QPoint &pos)

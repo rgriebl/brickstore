@@ -141,8 +141,6 @@ AddItemDialog::AddItemDialog(QWidget *parent, Qt::WindowFlags f)
     showTotal();
     checkTieredPrices();
 
-    setSimpleMode(Config::inst()->simpleMode());
-
     languageChange();
 }
 

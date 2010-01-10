@@ -14,7 +14,7 @@
 
 #include <QtConcurrentFilter>
 
-#include "qparallelmergesort.h"
+#include "qparallelsort.h"
 
 #include "staticpointermodel.h"
 
@@ -91,7 +91,14 @@ bool StaticPointerModel::lessThan(const void *, const void *, int) const
 void StaticPointerModel::invalidateFilter()
 {
     emit layoutAboutToBeChanged();
+    QModelIndexList before = persistentIndexList();
+
     invalidateFilterInternal();
+
+    QModelIndexList after;
+    foreach (const QModelIndex &idx, before)
+        after.append(index(pointer(idx)));
+    changePersistentIndexList(before, after);
     emit layoutChanged();
 }
 
@@ -113,18 +120,24 @@ void StaticPointerModel::sort(int column, Qt::SortOrder order)
         return;
 
     emit layoutAboutToBeChanged();
+    QModelIndexList before = persistentIndexList();
 
     if (column >= 0 && column < columnCount()) {
         if (order == Qt::AscendingOrder)
-            qParallelMergeSort(sorted.begin(), sorted.end(), StaticPointerModelCompare<Qt::AscendingOrder>(column, this));
+            qParallelSort(sorted.begin(), sorted.end(), StaticPointerModelCompare<Qt::AscendingOrder>(column, this));
         else
-            qParallelMergeSort(sorted.begin(), sorted.end(), StaticPointerModelCompare<Qt::DescendingOrder>(column, this));
+            qParallelSort(sorted.begin(), sorted.end(), StaticPointerModelCompare<Qt::DescendingOrder>(column, this));
     } else { // restore the source model order
         for (int i = 0; i < n; ++i)
             sorted[i] = i;
     }
 
     invalidateFilterInternal();
+
+    QModelIndexList after;
+    foreach (const QModelIndex &idx, before)
+        after.append(index(pointer(idx)));
+    changePersistentIndexList(before, after);
     emit layoutChanged();
 }
 

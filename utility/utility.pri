@@ -16,7 +16,7 @@ HEADERS += \
   messagebox.h \
   multiprogressbar.h \
   progressdialog.h \
-  qparallelmergesort.h \
+  qparallelsort.h \
   qtemporaryresource.h \
   qtemporaryresource_p.h \
   spinner.h \

@@ -173,7 +173,6 @@ Window::Window(Document *doc, QWidget *parent)
             w_list->horizontalHeader()->resizeSection(i, (width < 0 ? -width : width * em) + 8);
     }
 
-    setSimpleMode(Config::inst()->simpleMode());
     setDifferenceMode(false);
 
     /*
@@ -1180,25 +1179,8 @@ void Window::updateErrorMask()
 {
     quint64 em = 0;
 
-    if (Config::inst()->showInputErrors()) {
-        if (Config::inst()->simpleMode()) {
-            em = 1ULL << Document::Status     | \
-                 1ULL << Document::Picture     | \
-                 1ULL << Document::PartNo      | \
-                 1ULL << Document::Description | \
-                 1ULL << Document::Condition   | \
-                 1ULL << Document::Color       | \
-                 1ULL << Document::Quantity    | \
-                 1ULL << Document::Remarks     | \
-                 1ULL << Document::Category    | \
-                 1ULL << Document::ItemType    | \
-                 1ULL << Document::Weight      | \
-                 1ULL << Document::YearReleased;
-        }
-        else {
-            em = (1ULL << Document::FieldCount) - 1;
-        }
-    }
+    if (Config::inst()->showInputErrors())
+        em = (1ULL << Document::FieldCount) - 1;
 
     m_doc->setErrorMask(em);
 }

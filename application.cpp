@@ -27,14 +27,12 @@
 #endif
 
 #include "informationdialog.h"
-#include "registrationdialog.h"
 #include "progressdialog.h"
 #include "checkforupdates.h"
 #include "config.h"
 #include "rebuilddatabase.h"
 #include "bricklink.h"
 #include "ldraw.h"
-#include "splash.h"
 #include "messagebox.h"
 #include "framework.h"
 #include "transfer.h"
@@ -77,9 +75,6 @@ Application::Application(bool rebuild_db_only, int _argc, char **_argv)
 
     Transfer::setDefaultUserAgent(applicationName() + "/" + applicationVersion() + " (" + systemName() + " " + systemVersion() + "; http://" + applicationUrl() + ")");
 
-    if (!rebuild_db_only)
-        Splash::inst();
-
 #if defined( Q_WS_WIN )
     int wv = QSysInfo::WindowsVersion;
 
@@ -111,22 +106,12 @@ Application::Application(bool rebuild_db_only, int _argc, char **_argv)
         updateTranslations();
         connect(Config::inst(), SIGNAL(languageChanged()), this, SLOT(updateTranslations()));
 
-        Splash::inst()->message(qApp->translate("Splash", "Initializing..."));
-
         MessageBox::setDefaultTitle(applicationName());
 
         for (int i = 1; i < argc(); i++)
             m_files_to_open << argv()[i];
 
-        Splash::inst()->finish(FrameWork::inst());
         FrameWork::inst()->show();
-
-        while (Config::inst()->registration() == Config::None) {
-            RegistrationDialog d(true, FrameWork::inst());
-            d.exec();
-        }
-        demoVersion();
-        connect(Config::inst(), SIGNAL(registrationChanged(Config::Registration)), this, SLOT(demoVersion()));
     }
 }
 
@@ -209,26 +194,27 @@ QString Application::systemVersion() const
 
 #if defined( Q_OS_MACX )
     switch (QSysInfo::MacintoshVersion) {
-    case QSysInfo::MV_10_0  : sys_version = "10.0 (Cheetah)"; break;
-    case QSysInfo::MV_10_1  : sys_version = "10.1 (Puma)";    break;
-    case QSysInfo::MV_10_2  : sys_version = "10.2 (Jaguar)";  break;
-    case QSysInfo::MV_10_3  : sys_version = "10.3 (Panther)"; break;
-    case QSysInfo::MV_10_4  : sys_version = "10.4 (Tiger)";   break;
-    case QSysInfo::MV_10_5  : sys_version = "10.5 (Leopard)"; break;
-    case QSysInfo::MV_10_5+1: sys_version = "10.6 (Snow Leopard)"; break; //TODO: replace with MV_10_6 in Qt 4.6
+    case QSysInfo::MV_10_0: sys_version = "10.0 (Cheetah)"; break;
+    case QSysInfo::MV_10_1: sys_version = "10.1 (Puma)";    break;
+    case QSysInfo::MV_10_2: sys_version = "10.2 (Jaguar)";  break;
+    case QSysInfo::MV_10_3: sys_version = "10.3 (Panther)"; break;
+    case QSysInfo::MV_10_4: sys_version = "10.4 (Tiger)";   break;
+    case QSysInfo::MV_10_5: sys_version = "10.5 (Leopard)"; break;
+    case QSysInfo::MV_10_6: sys_version = "10.6 (Snow Leopard)"; break;
     default               : break;
     }
 #elif defined( Q_OS_WIN )
     switch (QSysInfo::WindowsVersion) {
-    case QSysInfo::WV_95   : sys_version = "95";   break;
-    case QSysInfo::WV_98   : sys_version = "98";   break;
-    case QSysInfo::WV_Me   : sys_version = "ME";   break;
-    case QSysInfo::WV_NT   : sys_version = "NT";   break;
-    case QSysInfo::WV_2000 : sys_version = "2000"; break;
-    case QSysInfo::WV_XP   : sys_version = "XP";   break;
-    case QSysInfo::WV_2003 : sys_version = "2003"; break;
-    case QSysInfo::WV_VISTA: sys_version = "VISTA"; break;
-    default                : break;
+    case QSysInfo::WV_95 : sys_version = "95";    break;
+    case QSysInfo::WV_98 : sys_version = "98";    break;
+    case QSysInfo::WV_Me : sys_version = "ME";    break;
+    case QSysInfo::WV_4_0: sys_version = "NT";    break;
+    case QSysInfo::WV_5_0: sys_version = "2000";  break;
+    case QSysInfo::WV_5_1: sys_version = "XP";    break;
+    case QSysInfo::WV_5_2: sys_version = "2003";  break;
+    case QSysInfo::WV_6_0: sys_version = "VISTA"; break;
+    case QSysInfo::WV_6_1: sys_version = "7";     break;
+    default              : break;
     }
 #elif defined( Q_OS_UNIX )
     struct ::utsname utsinfo;
@@ -415,14 +401,16 @@ void Application::about()
     QString technical = QString(technical_src).arg(STR(__USER__), STR(__HOST__), __DATE__ " " __TIME__).arg(
 #if defined(_MSC_VER)
                          "Microsoft Visual-C++ "
-#  if _MSC_VER >= 1500
-                         ".NET 2008"
+#  if _MSC_VER >= 1600
+                         "2010"
+#  elif _MSC_VER >= 1500
+                         "2008"
 #  elif _MSC_VER >= 1400
-                         ".NET 2005"
+                         "2005"
 #  elif _MSC_VER >= 1310
                          ".NET 2003"
 #  elif _MSC_VER >= 1300
-                         ".NET"
+                         ".NET 2002"
 #  elif _MSC_VER >= 1200
                          "6.0"
 #  else
@@ -448,45 +436,6 @@ void Application::about()
     d.exec();
 }
 
-void Application::demoVersion()
-{
-    if (Config::inst()->registration() != Config::Demo)
-        return;
-
-    static const char *layout =
-        "<qt><center>"
-        "<table border=\"0\"><tr>"
-        "<td valign=\"middle\" align=\"right\"><img src=\":/images/icon.png\" /></td>"
-        "<td align=\"left\"><big>"
-        "<big><strong>%1</strong></big>"
-        "<br />%2<br />"
-        "<strong>%3</strong>"
-        "</big></td>"
-        "</tr></table>"
-        "<br />%4"
-        "</center</qt>";
-
-    static const char *demo_src = QT_TR_NOOP(
-                                      "BrickStore is currently running in <b>Demo</b> mode.<br /><br />"
-                                      "The complete functionality is accessible, but this reminder will pop up every 20 minutes."
-                                      "<br /><br />"
-                                      "You can change the mode of operation at anytime via <b>Help > Registration...</b>"
-                                  );
-
-    QString copyright = tr("Copyright &copy; %1").arg(BRICKSTORE_COPYRIGHT);
-    QString version   = tr("Version %1").arg(BRICKSTORE_VERSION);
-    QString demo      = tr(demo_src);
-    QString text      = QString(layout).arg(applicationName(), copyright, version, demo);
-
-    QMap<QString, QString> pages;
-    pages ["index"] = text;
-
-    InformationDialog d(applicationName(), pages, true, FrameWork::inst());
-    d.exec();
-
-    QTimer::singleShot(20*60*1000, this, SLOT(demoVersion()));
-}
-
 void Application::checkForUpdates()
 {
     Transfer trans(1);
@@ -496,19 +445,3 @@ void Application::checkForUpdates()
     CheckForUpdates cfu(&d);
     d.exec();
 }
-
-void Application::registration()
-{
-    Config::Registration oldreg = Config::inst()->registration();
-
-    RegistrationDialog d(false, FrameWork::inst());
-    if ((d.exec() == QDialog::Accepted) &&
-        (Config::inst()->registration() == Config::Demo) &&
-        (Config::inst()->registration() != oldreg))
-    {
-        MessageBox::information(FrameWork::inst(), tr("The program has to be restarted to activate the Demo mode."));
-        FrameWork::inst()->close();
-        quit();
-    }
-}
-
