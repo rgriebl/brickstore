@@ -36,7 +36,7 @@
 #include <QTimer>
 #include <QCache>
 #include <QPointer>
-
+#include <QStyledItemDelegate>
 
 #include <ctime>
 
@@ -787,6 +787,39 @@ public:
 protected:
     virtual bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
 };
+
+
+class ItemDelegate : public QStyledItemDelegate {
+    Q_OBJECT
+public:
+    enum Option {
+        None,
+        AlwaysShowSelection,
+    };
+    Q_DECLARE_FLAGS(Options, Option);
+
+    ItemDelegate(QObject *parent = 0, Options options = None);
+
+    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const;
+
+public slots:
+    // this really is a faked virtual
+    bool helpEvent(QHelpEvent *event, QAbstractItemView *view, const QStyleOptionViewItem &option, const QModelIndex &index);
+
+private:
+    QString createToolTip(const BrickLink::Item *item, BrickLink::Picture *pic) const;
+
+private slots:
+    void pictureUpdated(BrickLink::Picture *pic);
+
+private:
+    Options m_options;
+    BrickLink::Picture *m_tooltip_pic;
+};
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(ItemDelegate::Options)
+
 
 
 class Core : public QObject {

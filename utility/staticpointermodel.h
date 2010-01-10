@@ -44,7 +44,7 @@ protected:
     virtual bool filterAccepts(const void *pointer) const;
     virtual bool lessThan(const void *pointer1, const void *pointer2, int column) const;
 
-    QModelIndex index(const void *pointer) const;
+    QModelIndex index(const void *pointer, int column = 0) const;
     const void *pointer(const QModelIndex &index) const;
 
 private:

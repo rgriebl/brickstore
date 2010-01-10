@@ -103,7 +103,7 @@ include('utility/utility.pri')
 include('bricklink/bricklink.pri')
 include('ldraw/ldraw.pri')
 include('lzma/lzma.pri')
-include('modeltest/modeltest.pri')
+modeltest:debug:include('modeltest/modeltest.pri')
 
 TRANSLATIONS = $$replace(LANGUAGES, '$', '.ts')
 TRANSLATIONS = $$replace(TRANSLATIONS, '^', 'translations/brickstore_')

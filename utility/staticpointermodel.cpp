@@ -61,7 +61,7 @@ const void *StaticPointerModel::pointer(const QModelIndex &index) const
     return index.isValid() ? static_cast<const void *>(index.internalPointer()) : 0;
 }
 
-QModelIndex StaticPointerModel::index(const void *pointer) const
+QModelIndex StaticPointerModel::index(const void *pointer, int column) const
 {
     int row = pointer ? pointerIndexOf(pointer) : -1;
     if (row >= 0) {
@@ -70,7 +70,7 @@ QModelIndex StaticPointerModel::index(const void *pointer) const
         else
             row = sorted.indexOf(row);
     }
-    return row >= 0 ? createIndex(row, 0, const_cast<void *>(pointer)) : QModelIndex();
+    return row >= 0 ? createIndex(row, column, const_cast<void *>(pointer)) : QModelIndex();
 }
 
 bool StaticPointerModel::isFiltered() const
@@ -97,7 +97,7 @@ void StaticPointerModel::invalidateFilter()
 
     QModelIndexList after;
     foreach (const QModelIndex &idx, before)
-        after.append(index(pointer(idx)));
+        after.append(index(pointer(idx), idx.column()));
     changePersistentIndexList(before, after);
     emit layoutChanged();
 }
@@ -136,7 +136,7 @@ void StaticPointerModel::sort(int column, Qt::SortOrder order)
 
     QModelIndexList after;
     foreach (const QModelIndex &idx, before)
-        after.append(index(pointer(idx)));
+        after.append(index(pointer(idx), idx.column()));
     changePersistentIndexList(before, after);
     emit layoutChanged();
 }

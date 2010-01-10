@@ -15,6 +15,7 @@
 #include <QHeaderView>
 #include <QTreeView>
 #include <QEvent>
+#include <QStyledItemDelegate>
 
 #include "bricklink.h"
 #include "utility.h"
@@ -30,6 +31,7 @@ SelectColor::SelectColor(QWidget *parent, Qt::WindowFlags f)
     w_colors->setUniformRowHeights(true);
     w_colors->setRootIsDecorated(false);
     w_colors->setSortingEnabled(true);
+    w_colors->setItemDelegate(new BrickLink::ItemDelegate(this, BrickLink::ItemDelegate::AlwaysShowSelection));
 
     w_colors->setModel(new BrickLink::ColorModel(this));
     w_colors->sortByColumn(0, Qt::AscendingOrder);

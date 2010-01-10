@@ -16,109 +16,14 @@
 #include <QAction>
 #include <QHeaderView>
 #include <QDesktopServices>
-#include <QToolTip>
 #include <QApplication>
 #include <QTimer>
-#include <QStyledItemDelegate>
-#include <QHelpEvent>
-
-#include "qtemporaryresource.h"
 
 #include "framework.h"
 #include "picturewidget.h"
+#include "bricklink.h"
 
 #include "appearsinwidget.h"
-
-
-class AppearsInDelegate : public QStyledItemDelegate {
-    Q_OBJECT
-public:
-    AppearsInDelegate(QObject *parent)
-        : QStyledItemDelegate(parent), m_tooltip_pic(0)
-    {
-        connect(BrickLink::core(), SIGNAL(pictureUpdated(BrickLink::Picture *)), this, SLOT(pictureUpdated(BrickLink::Picture *)));
-    }
-
-public slots: // this is really is a faked virtual
-    bool helpEvent(QHelpEvent *event, QAbstractItemView *view, const QStyleOptionViewItem &option, const QModelIndex &index)
-    {
-        if (event->type() == QEvent::ToolTip && index.isValid()) {
-            const BrickLink::AppearsInModel *model = qobject_cast<const BrickLink::AppearsInModel *>(index.model());
-            if (!model)
-                goto out;
-
-            const BrickLink::AppearsInItem *appears = model->appearsIn(index);
-            if (!appears)
-                goto out;
-
-            BrickLink::Picture *pic = BrickLink::core()->picture(appears->second, appears->second->defaultColor(), true);
-
-            if (!pic)
-                goto out;
-
-            QTemporaryResource::registerResource("#/appears_in_set_tooltip_picture.png", pic->valid() ? pic->image() : QImage());
-            m_tooltip_pic = (pic->updateStatus() == BrickLink::Updating) ? pic : 0;
-
-            // need to 'clear' to reset the image cache of the QTextDocument
-            foreach (QWidget *w, QApplication::topLevelWidgets()) {
-                if (w->inherits("QTipLabel")) {
-                    qobject_cast<QLabel *>(w)->clear();
-                    break;
-                }
-            }
-            QString tt = createToolTip(appears->second, pic);
-            if (!tt.isEmpty()) {
-                QToolTip::showText(event->globalPos(), tt, view);
-                return true;
-            }
-        }
-    out:
-        return QStyledItemDelegate::helpEvent(event, view, option, index);
-    }
-
-private:
-    QString createToolTip(const BrickLink::Item *item, BrickLink::Picture *pic) const
-    {
-        QString str = QLatin1String("<div class=\"appearsin\"><table><tr><td rowspan=\"2\">%1</td><td><b>%2</b></td></tr><tr><td>%3</td></tr></table></div>");
-        QString img_left = QLatin1String("<img src=\"#/appears_in_set_tooltip_picture.png\" />");
-        QString note_left = QLatin1String("<i>") + AppearsInWidget::tr("[Image is loading]") + QLatin1String("</i>");
-
-        if (pic && (pic->updateStatus() == BrickLink::Updating))
-            return str.arg(note_left).arg(item->id()).arg(item->name());
-        else
-            return str.arg(img_left).arg(item->id()).arg(item->name());
-    }
-
-private slots:
-    void pictureUpdated(BrickLink::Picture *pic)
-    {
-        if (!pic || pic != m_tooltip_pic)
-            return;
-
-        m_tooltip_pic = 0;
-
-        if (QToolTip::isVisible() && QToolTip::text().startsWith("<div class=\"appearsin\">")) {
-            QTemporaryResource::registerResource("#/appears_in_set_tooltip_picture.png", pic->image());
-
-            //xx QPoint pos;
-            foreach (QWidget *w, QApplication::topLevelWidgets()) {
-                if (w->inherits("QTipLabel")) {
-                    //xx pos = w->pos();
-                    QSize extra = w->size() - w->sizeHint();
-                    qobject_cast<QLabel *>(w)->clear();
-                    qobject_cast<QLabel *>(w)->setText(createToolTip(pic->item(), pic));
-                    w->resize(w->sizeHint() + extra);
-                    break;
-                }
-            }
-            //xx if (!pos.isNull()) {
-            //xx     QToolTip::showText(pos, createToolTip(pic->item(), pic));
-        }
-    }
-
-private:
-    BrickLink::Picture *m_tooltip_pic;
-};
 
 
 class AppearsInWidgetPrivate {
@@ -141,7 +46,7 @@ AppearsInWidget::AppearsInWidget(QWidget *parent)
     sortByColumn(0, Qt::AscendingOrder);
     header()->setSortIndicatorShown(false);
     setContextMenuPolicy(Qt::CustomContextMenu);
-    setItemDelegate(new AppearsInDelegate(this));
+    setItemDelegate(new BrickLink::ItemDelegate(this));
 
     QAction *a;
     a = new QAction(this);
@@ -317,5 +222,3 @@ void AppearsInWidget::showBLLotsForSale()
     if (ai && ai->second)
         QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_LotsForSale, ai->second, BrickLink::core()->color(0)));
 }
-
-#include "appearsinwidget.moc"

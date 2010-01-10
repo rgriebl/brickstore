@@ -38,13 +38,11 @@ class InvItemMimeData;
 class ColorModel;
 class InternalColorModel;
 class CategoryModel;
-class InternalCategoryModel;
 class ItemTypeModel;
-class InternalItemTypeModel;
 class ItemModel;
-class InternalItemModel;
 class AppearsInModel;
 class InternalAppearsInModel;
+class ItemDelegate;
 
 typedef QList<InvItem *>                      InvItemList;
 typedef QPair<int, const Item *>              AppearsInItem;

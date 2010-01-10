@@ -151,7 +151,7 @@ private slots:
     void checkText(const QString &);
 
 private:
-    void doLayout(bool setpositions);
+    void doLayout();
 
     QString           m_idletext;
     FilterEditButton *w_menu;
@@ -171,7 +171,7 @@ FilterEditPrivate::FilterEditPrivate(FilterEdit *parent)
 {
     m_timer = new QTimer(this);
     m_timer->setSingleShot(true);
-    m_timer->setInterval(400);
+    m_timer->setInterval(250);
 
     m_menu = 0;
 
@@ -202,7 +202,7 @@ FilterEditPrivate::FilterEditPrivate(FilterEdit *parent)
     connect(this, SIGNAL(textChanged(const QString&)), this, SLOT(checkText(const QString&)));
 
     getTextMargins(&m_left, &m_top, &m_right, &m_bottom);
-    doLayout(false);
+    doLayout();
 #endif
 }
 
@@ -265,7 +265,7 @@ void FilterEditPrivate::setText(const QString &txt)
     HISearchFieldChangeAttributes(m_hisearch, empty ? 0 : c, empty ? c : 0);
 #else
     QLineEdit::setText(txt);
-    doLayout(false);
+    doLayout();
 #endif
     m_timer->stop();
     emit q->textChanged(txt);
@@ -443,13 +443,13 @@ OSStatus FilterEditPrivate::macEventHandler(EventHandlerCallRef, EventRef event,
 
 #else // MAC_USE_NATIVE_SEARCHFIELD
 
-void FilterEditPrivate::checkText(const QString &str)
+void FilterEditPrivate::checkText(const QString &)
 {
-    doLayout(false);
+    doLayout();
     m_timer->start();
 }
 
-void FilterEditPrivate::doLayout(bool setpositionsonly)
+void FilterEditPrivate::doLayout()
 {
 //    QSize ms = w_menu->sizeHint();
 //    QSize cs = w_clear->sizeHint();
@@ -468,7 +468,7 @@ void FilterEditPrivate::doLayout(bool setpositionsonly)
 
 void FilterEditPrivate::resizeEvent(QResizeEvent *)
 {
-    doLayout(true);
+    doLayout();
 }
 
 void FilterEditPrivate::paintEvent(QPaintEvent *e)

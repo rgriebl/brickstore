@@ -60,45 +60,37 @@ public:
 };
 
 
-class CategoryDelegate : public QStyledItemDelegate {
+
+class CategoryDelegate : public BrickLink::ItemDelegate {
 public:
     CategoryDelegate(QObject *parent = 0)
-        : QStyledItemDelegate(parent)
+        : BrickLink::ItemDelegate(parent, BrickLink::ItemDelegate::AlwaysShowSelection)
     { }
 
     virtual void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
     {
-        if (index.isValid() && qvariant_cast<const BrickLink::Category *>(index.data(BrickLink::CategoryPointerRole)) == BrickLink::CategoryModel::AllCategories) {
-            QStyleOptionViewItem myoption(option);
-
+        QStyleOptionViewItemV4 myoption(option);
+        if (index.isValid() && qvariant_cast<const BrickLink::Category *>(index.data(BrickLink::CategoryPointerRole)) == BrickLink::CategoryModel::AllCategories)
             myoption.font.setBold(true);
-            QStyledItemDelegate::paint(painter, myoption, index);
-        }
-        else
-            QStyledItemDelegate::paint(painter, option, index);
-    }
-    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
-    {
-        return QStyledItemDelegate::sizeHint(option, index) + QSize(0, 2);
+        BrickLink::ItemDelegate::paint(painter, myoption, index);
     }
 };
 
 
-class ItemThumbsDelegate : public QStyledItemDelegate {
+class ItemThumbsDelegate : public BrickLink::ItemDelegate {
 public:
     ItemThumbsDelegate(QObject *parent = 0)
-            : QStyledItemDelegate(parent)
+        : BrickLink::ItemDelegate(parent, BrickLink::ItemDelegate::AlwaysShowSelection)
     { }
 
     virtual QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
     {
         if (index.column() == 0) {
             const BrickLink::Item *item = qvariant_cast<const BrickLink::Item *>(index.data(BrickLink::ItemPointerRole));
-
             return item ? item->itemType()->pictureSize() : QSize(80, 60);
         }
         else
-            return QStyledItemDelegate::sizeHint(option, index);
+            return BrickLink::ItemDelegate::sizeHint(option, index);
     }
 };
 
@@ -164,6 +156,7 @@ void SelectItem::init()
     d->w_items->setRootIsDecorated(false);
     d->w_items->setSelectionBehavior(QAbstractItemView::SelectRows);
     d->w_items->setSelectionMode(QAbstractItemView::SingleSelection);
+    d->w_items->setItemDelegate(new BrickLink::ItemDelegate(this, BrickLink::ItemDelegate::AlwaysShowSelection));
     d->w_items->setContextMenuPolicy(Qt::CustomContextMenu);
 
     d->w_itemthumbs = new QTreeView(this);

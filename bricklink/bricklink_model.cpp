@@ -17,6 +17,12 @@
 #include <QImage>
 #include <QIcon>
 #include <QThreadStorage>
+#include <QHelpEvent>
+#include <QToolTip>
+#include <QLabel>
+#include <QAbstractItemView>
+
+#include "qtemporaryresource.h"
 
 #include "bricklink.h"
 
@@ -701,6 +707,12 @@ QVariant BrickLink::InternalAppearsInModel::data(const QModelIndex &index, int r
     else if (role == BrickLink::AppearsInItemPointerRole) {
         res.setValue(appears);
     }
+    else if (role == BrickLink::ItemPointerRole) {
+        res.setValue(appears->second);
+    }
+    else if (role == BrickLink::ColorPointerRole) {
+        res.setValue(appears->second->defaultColor());
+    }
     return res;
 }
 
@@ -764,6 +776,94 @@ bool BrickLink::AppearsInModel::lessThan(const QModelIndex &left, const QModelIn
         case  0: return ai1->first < ai2->first;
         case  1: return (qstrcmp(ai1->second->id(), ai2->second->id()) < 0);
         case  2: return (qstrcmp(ai1->second->name(), ai2->second->name()) < 0 );
+        }
+    }
+}
+
+
+/////////////////////////////////////////////////////////////
+// ITEMDELEGATE
+/////////////////////////////////////////////////////////////
+
+
+
+BrickLink::ItemDelegate::ItemDelegate(QObject *parent, Options options)
+    : QStyledItemDelegate(parent), m_options(options), m_tooltip_pic(0)
+{
+    connect(BrickLink::core(), SIGNAL(pictureUpdated(BrickLink::Picture *)), this, SLOT(pictureUpdated(BrickLink::Picture *)));
+}
+
+void BrickLink::ItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
+{
+    if (m_options & AlwaysShowSelection) {
+        QStyleOptionViewItemV4 myoption(option);
+        myoption.state |= QStyle::State_Active;
+        QStyledItemDelegate::paint(painter, myoption, index);
+    } else {
+        QStyledItemDelegate::paint(painter, option, index);
+    }
+}
+
+QSize BrickLink::ItemDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
+{
+    return QStyledItemDelegate::sizeHint(option, index) + QSize(0, 2);
+}
+
+bool BrickLink::ItemDelegate::helpEvent(QHelpEvent *event, QAbstractItemView *view, const QStyleOptionViewItem &option, const QModelIndex &index)
+{
+    if (event->type() == QEvent::ToolTip && index.isValid()) {
+        if (BrickLink::Picture *pic = BrickLink::core()->picture(index.data(BrickLink::ItemPointerRole).value<const BrickLink::Item *>(),
+                                                                 0 /*index.data(BrickLink::ColorPointerRole).value<const BrickLink::Color *>()*/, true)) {
+            QTemporaryResource::registerResource("#/tooltip_picture.png", pic->valid() ? pic->image() : QImage());
+            m_tooltip_pic = (pic->updateStatus() == BrickLink::Updating) ? pic : 0;
+
+            // need to 'clear' to reset the image cache of the QTextDocument
+            foreach (QWidget *w, QApplication::topLevelWidgets()) {
+                if (w->inherits("QTipLabel")) {
+                    qobject_cast<QLabel *>(w)->clear();
+                    break;
+                }
+            }
+            QString tt = createToolTip(pic->item(), pic);
+            if (!tt.isEmpty()) {
+                QToolTip::showText(event->globalPos(), tt, view);
+                return true;
+            }
+        }
+    }
+    return QStyledItemDelegate::helpEvent(event, view, option, index);
+}
+
+QString BrickLink::ItemDelegate::createToolTip(const BrickLink::Item *item, BrickLink::Picture *pic) const
+{
+    QString str = QLatin1String("<div class=\"tooltip_picture\"><table><tr><td rowspan=\"2\">%1</td><td><b>%2</b></td></tr><tr><td>%3</td></tr></table></div>");
+    QString img_left = QLatin1String("<img src=\"#/tooltip_picture.png\" />");
+    QString note_left = QLatin1String("<i>") + BrickLink::ItemDelegate::tr("[Image is loading]") + QLatin1String("</i>");
+
+    if (pic && (pic->updateStatus() == BrickLink::Updating))
+        return str.arg(note_left).arg(item->id()).arg(item->name());
+    else
+        return str.arg(img_left).arg(item->id()).arg(item->name());
+}
+
+void BrickLink::ItemDelegate::pictureUpdated(BrickLink::Picture *pic)
+{
+    if (!pic || pic != m_tooltip_pic)
+        return;
+
+    m_tooltip_pic = 0;
+
+    if (QToolTip::isVisible() && QToolTip::text().startsWith("<div class=\"tooltip_picture\">")) {
+        QTemporaryResource::registerResource("#/tooltip_picture.png", pic->image());
+
+        foreach (QWidget *w, QApplication::topLevelWidgets()) {
+            if (w->inherits("QTipLabel")) {
+                QSize extra = w->size() - w->sizeHint();
+                qobject_cast<QLabel *>(w)->clear();
+                qobject_cast<QLabel *>(w)->setText(createToolTip(pic->item(), pic));
+                w->resize(w->sizeHint() + extra);
+                break;
+            }
         }
     }
 }
