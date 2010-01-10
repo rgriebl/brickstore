@@ -254,6 +254,7 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
         << "edit_subtractitems"
         << "edit_mergeitems"
         << "edit_partoutitems"
+        << "edit_setmatch"
         << "-"
         << "edit_modify"
         << "-"
@@ -514,6 +515,7 @@ void FrameWork::translateActions()
         { "edit_subtractitems",             tr("Subtract Items..."),                  0 },
         { "edit_mergeitems",                tr("Consolidate Items..."),               0 },
         { "edit_partoutitems",              tr("Part out Item..."),                   0 },
+        { "edit_setmatch",                  tr("Match Items against Set Inventories..."),                   0 },
         { "edit_reset_diffs",               tr("Reset Differences"),                  0 },
         { "edit_copyremarks",               tr("Copy Remarks from Document..."),      0 },
         { "edit_select_all",                tr("Select All"),                         tr("Ctrl+A", "Edit|SelectAll") },
@@ -891,6 +893,7 @@ void FrameWork::createActions()
     (void) newQAction(this, "edit_subtractitems");
     (void) newQAction(this, "edit_mergeitems");
     (void) newQAction(this, "edit_partoutitems");
+    (void) newQAction(this, "edit_setmatch");
     (void) newQAction(this, "edit_reset_diffs");
     (void) newQAction(this, "edit_copyremarks");
     (void) newQAction(this, "edit_select_all");

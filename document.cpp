@@ -1052,7 +1052,7 @@ bool Document::fileSaveTo(const QString &s, const char *type, bool export_only, 
         // directly writing to an QTextStream would be way more efficient,
         // but we could not handle any error this way :(
         QByteArray output = doc.toByteArray();
-        bool ok = (f.write(output.data(), output.size() - 1) ==  qint64(output.size() - 1));             // no 0-byte
+        bool ok = (f.write(output.data(), output.size() - 1) == qint64(output.size() - 1));             // no 0-byte
 
         QApplication::restoreOverrideCursor();
 

@@ -15,7 +15,7 @@
 
 set -e
 
-if [ ! -d unix-package ]; then
+if [ ! -d unix ]; then
 	echo "Error: this script needs to be called from the base directory!"
 	exit 1
 fi
@@ -66,20 +66,17 @@ echo " > Creating tarball..."
 make tarball RELEASE=$pkg_ver
 
 echo " > Creating DEB build directories..."
-cd unix-package
-rm -rf tmp
-mkdir tmp
-tar -xjf "../brickstore-$pkg_ver.tar.bz2" -C tmp
-tmpdir="tmp/brickstore-$pkg_ver"
-cd "$tmpdir"
-
-[ -f ../../../.private-key ] && cp -H ../../../.private-key .
-
+cd unix
+rm -rf BUILD
+mkdir BUILD
+tar -xjf "../brickstore-$pkg_ver.tar.bz2" -C BUILD
+builddir="BUILD/brickstore-$pkg_ver"
+cd "$builddir"
 
 ## -----------------------------------------------------
 
 mkdir debian
-cp unix-package/rules debian
+cp unix/deb/rules debian
 
 cat >debian/control <<EOF
 Source: brickstore
@@ -167,7 +164,7 @@ for i in `ls -1 tmp/*.deb`; do
 done
 
 echo " > Cleaning DEB build directories..."
-rm -rf tmp
+rm -rf BUILD
 cd ..
 
 echo

@@ -88,7 +88,7 @@ Model mit neuer Header Data:
 
 On click --> open editor window
 
- v Advanced Filter \ > Order Details \
+ v Advanced Filter \ > Order Details \ [||||| ] Matching sets \ [||    ] Set  to PriceGuide
  [xxxx v] [contains v] [_______________] (and) (or) X
  
  
@@ -447,3 +447,56 @@ if (state == Start) {
     type = Simple;
     regex = QRegExp(str);
 }
+
+
+
+Label: [xxx]
+
+Filter: [      v]
+Set Matching: [||||||  ]
+
+int id = MySB->addWidgetSection(QString, QWidget)
+int id = MySB->addInfoSection(QString, bool clickable)
+
+
+Weight   P
+Total    P
+Lots     P
+Items    P
+Errors   P? A? -> go to next error  Errors: 5 (<)(>)
+SetToPG  P
+Matching P? A? -> Cancel  Matching [|||| ] (x)
+Order    A   Order: Robert Griebl (V)
+Filter   A   Filter:  [_________X] (V)
+
+
+class DocumentStatus {
+
+  QAbstractButton *createButton(const QString &);
+  QAbstractButton *createButton(const QIcon &);
+  
+    enum Button {
+        None,
+        More,
+        Cancel,
+        Prev,
+        Next,
+        Info
+    };
+    
+   Q_DECLARE_FLAGS(Button, Buttons)
+  
+  int addSection(const QString &label, QWidget *content, Buttons b = None);
+  void setSectionLabel()
+  void setSectionWidget();
+  void setSectionHighlight(bool on, const QColor &col);
+  
+  QWiddget *sectionWidget();
+
+    struct Section {
+        QLabel *m_label;
+        QWidgt m_widget;
+        QAbstractButton[Info] *m_buttons;
+    };
+}
+

@@ -102,6 +102,7 @@ public slots:
     void on_edit_copyremarks_triggered();
     void on_edit_mergeitems_triggered();
     void on_edit_partoutitems_triggered();
+    void on_edit_setmatch_triggered();
 
     void on_edit_reset_diffs_triggered();
 
@@ -174,6 +175,9 @@ private slots:
     void contextMenu(const QPoint &);
     void priceGuideUpdated(BrickLink::PriceGuide *);
     void updateErrorMask();
+
+    void setMatchProgress(int, int);
+    void setMatchFinished(QList<const BrickLink::Item *>);
 
 private:
     Document::ItemList exportCheck() const;

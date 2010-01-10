@@ -11,11 +11,14 @@
 		<key>CFBundleGetInfoString</key>
 		<string>Bundle for BrickStore</string>
 
+		<key>CFBundleIdentifier</key>
+		<string>de.softforge.BrickStore</string>
+
 		<key>CFBundleSignature</key>
 		<string>ttxt</string>
 
 		<key>CFBundleExecutable</key>
-		<string>BrickStore</string>
+		<string>@EXECUTABLE@</string>
 
 		<key>CFBundleName</key>
 		<string>BrickStore</string>

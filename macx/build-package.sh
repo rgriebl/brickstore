@@ -13,7 +13,7 @@
 ##
 ## See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 
-if [ ! -d brickstore.app ]; then
+if [ ! -d BrickStore.app ]; then
 	echo "Error: this script needs to be called from the base directory!"
 	exit 1
 fi
@@ -26,8 +26,8 @@ if [ -z $pkg_ver ]; then
 	exit 2
 fi
 
-if ! qmake --version 2>/dev/null | grep -sq 'Using Qt version 4.4.'; then
-    echo "Error: No Qt 4.4.x qmake found in PATH."
+if ! qmake --version 2>/dev/null | grep -sq 'Using Qt version 4.6.'; then
+    echo "Error: No Qt 4.6.x qmake found in PATH."
     exit 3
 fi
 
@@ -44,14 +44,12 @@ echo " > Creating tarball..."
 make tarball RELEASE=$pkg_ver
 
 echo " > Creating Mac Os X build directories..."
-cd macx-bundle
-rm -rf tmp
-mkdir tmp
-tar -xjf "../brickstore-$pkg_ver.tar.bz2" -C tmp
-tmpdir="tmp/brickstore-$pkg_ver"
-cd "$tmpdir"
-
-[ -f ../../../.private-key ] && cp -H ../../../.private-key .
+cd macx
+rm -rf BUILD
+mkdir BUILD
+tar -xjf "../brickstore-$pkg_ver.tar.bz2" -C BUILD
+builddir="BUILD/brickstore-$pkg_ver"
+cd "$builddir"
 
 echo -n " > Compiling..."
 qmake CONFIG=release
@@ -63,25 +61,25 @@ if [ ! -d "$bundle" ]; then
     exit 3
 fi
 cd ../..
-cat macx-bundle/install-table.txt | while read xsrc xdst xname; do
-	[ -z "${xsrc}" ] && continue
-	[ "${xsrc:0:1}" = "#" ] && continue
-
-	src=`eval echo $xsrc`
-	dst=`eval echo $xdst`
-	name=`eval echo $xname`
-	
-	mkdir -p "$tmpdir/$bundle/$dst"
-	cp $src "$tmpdir/$bundle/$dst/$name"
-	echo -n .
-done
-echo
+#cat macx/install-table.txt | while read xsrc xdst xname; do
+#	[ -z "${xsrc}" ] && continue
+#	[ "${xsrc:0:1}" = "#" ] && continue
+#
+#	src=`eval echo $xsrc`
+#	dst=`eval echo $xdst`
+#	name=`eval echo $xname`
+#	
+#	mkdir -p "$builddir/$bundle/$dst"
+#	cp $src "$builddir/$bundle/$dst/$name"
+#	echo -n .
+#done
+#echo
 
 echo " > Fixing version information..."
-perl -pi -e "s/%\{version\}/$pkg_ver/g" "$tmpdir/$bundle/Contents/Info.plist"
+perl -pi -e "s/%\{version\}/$pkg_ver/g" "$builddir/$bundle/Contents/Info.plist"
 
 echo " > Stripping binaries in bundle..."
-strip -Sx $tmpdir/$bundle/Contents/MacOS/*
+strip -Sx $builddir/$bundle/Contents/MacOS/*
 
 if [ "$arch" = "intel" ]; then
   compression="-format UDBZ"
@@ -92,8 +90,8 @@ else
 fi
 
 echo " > Creating disk image $archive ($comptype)..."
-hdiutil create "macx-bundle/$pkg_ver/$archive.dmg" -volname "BrickStore $pkg_ver" -fs "HFS+" -srcdir "$tmpdir" -quiet $compression
-rm -rf "$tmpdir"
+hdiutil create "macx/$pkg_ver/$archive.dmg" -volname "BrickStore $pkg_ver" -fs "HFS+" -srcdir "$builddir" -quiet $compression
+rm -rf "$builddir"
 
 echo
 echo " > Finished"

@@ -13,13 +13,12 @@ REM WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 REM
 REM See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 
-IF NOT EXIST win32-installer (
+IF NOT EXIST win32 (
   ECHO Error: this script needs to be called from the base directory
   EXIT /B 1
 )
 
 SET PKG_VER=
-
 
 IF EXIST brickstore.pro (FOR /F "usebackq tokens=3" %%V IN (`FINDSTR /R /C:"^ *RELEASE *=" brickstore.pro`) DO SET PKG_VER=%%V)
 IF NOT "x%1" == "x" SET PKG_VER=%1
@@ -34,9 +33,9 @@ IF "x%VCINSTALLDIR%" == "x" (
   EXIT /B 3
 )
 
-QMAKE.EXE --version | FIND "Using Qt version 4.4." >NUL 2>NUL
+QMAKE.EXE --version | FIND "Using Qt version 4.6." >NUL 2>NUL
 IF ERRORLEVEL 1 (
-  ECHO Error: No Qt 4.4.x qmake found in PATH.
+  ECHO Error: No Qt 4.6.x qmake found in PATH.
   EXIT /B 4
 )
 
@@ -50,11 +49,11 @@ NMAKE.EXE tarball RELEASE=%PKG_VER% >NUL 2>NUL
 
 ECHO ^> Setting up build directory...
 
-CD win32-installer
-RMDIR /S /Q tmp 2>NUL
-MKDIR tmp
-CD tmp
-..\Tools\7za x ..\..\brickstore-%PKG_VER%.zip >NUL 2>NUL
+CD win32
+RMDIR /S /Q BUILD 2>NUL
+MKDIR BUILD
+CD BUILD
+..\tools\7za x ..\..\brickstore-%PKG_VER%.zip >NUL 2>NUL
 
 
 ECHO ^> Compiling...
@@ -64,10 +63,10 @@ QMAKE.EXE -tp vc brickstore.pro >NUL
 
 ECHO  ^> Compiling brickstore.wxs...
 FOR /F "tokens=*" %%Q IN ('QMAKE.EXE -query QT_INSTALL_PREFIX') DO SET QTDIR=%%Q
-..\Tools\candle.exe -nologo -dTARGET=. -dBINARY=..\Binary -dVERSION=%PKG_VER% win32-installer\brickstore.wxs
+..\tools\candle.exe -nologo -dTARGET=. -dBINARY=..\Binary -dVERSION=%PKG_VER% ..\installer\brickstore.wxs
 
 ECHO  ^> Linking brickstore.msi...
-..\Tools\light.exe -nologo brickstore.wixobj -out brickstore.msi
+..\tools\light.exe -nologo brickstore.wixobj -out brickstore.msi
 
 CD ..
 
@@ -75,7 +74,7 @@ CD ..
 ECHO  ^> Moving to %PKG_VER%...
 RMDIR /S /Q %PKG_VER% 2>NUL
 MKDIR %PKG_VER%
-MOVE /Y tmp\brickstore.msi %PKG_VER%
+MOVE /Y BUILD\brickstore.msi %PKG_VER%
 
 ECHO  ^> Copying vssetup to %PKG_VER%...
 COPY Binary\vssetup.exe %PKG_VER%\Setup.exe >NUL
@@ -83,14 +82,14 @@ COPY vssetup.ini %PKG_VER%\Setup.ini >NUL
 
 ECHO  ^> Building sfx archive BrickStore-%PKG_VER%.exe...
 CD %PKG_VER%
-..\Tools\7za a -y -bd -ms -mx9 brickstore.7z Setup.exe Setup.ini brickstore.msi >NUL
+..\tools\7za a -y -bd -ms -mx9 brickstore.7z Setup.exe Setup.ini brickstore.msi >NUL
 COPY /B ..\Binary\7zS.sfx + ..\7zS.ini + brickstore.7z BrickStore-%PKG_VER%.exe >NUL
 DEL Setup.exe Setup.ini brickstore.7z
 CD ..
 
 
 ECHO ^> Cleaning build directory...
-RMDIR /S /Q tmp >NUL
+RMDIR /S /Q BUILD >NUL
 CD ..
 
 ECHO.

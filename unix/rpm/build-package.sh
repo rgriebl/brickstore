@@ -15,7 +15,7 @@
 
 set -e
 
-if [ ! -d unix-package ]; then
+if [ ! -d unix ]; then
 	echo "Error: this script needs to be called from the base directory!"
 	exit 1
 fi
@@ -58,13 +58,12 @@ echo " > Creating tarball..."
 make tarball RELEASE=$pkg_Ver
 
 echo " > Creating RPM build directories..."
-cd unix-package
+cd unix
 rm -rf SPECS RPMS BUILD SRPMS SOURCES
 mkdir SPECS RPMS BUILD SRPMS SOURCES
 cp ../brickstore-$pkg_ver.tar.bz2 SOURCES
 cp -aH share SOURCES
-[ -f ../.private-key ] && cp -H ../.private-key SOURCES
-cp brickstore.spec SPECS
+cp rpm/brickstore.spec SPECS
 
 echo " > Building package..."
 ( rpmbuild -bb --quiet \

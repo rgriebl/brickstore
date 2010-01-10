@@ -39,6 +39,7 @@
 #include "headerview.h"
 #include "documentdelegate.h"
 #include "report.h"
+#include "bricklink/bricklink_setmatch.h"
 
 #include "selectcolordialog.h"
 #include "selectdocumentdialog.h"
@@ -1325,10 +1326,47 @@ void Window::on_edit_partoutitems_triggered()
 {
     if (selection().count() >= 1) {
         foreach(Document::Item *item, selection())
-        FrameWork::inst()->fileImportBrickLinkInventory(item->item());
+            FrameWork::inst()->fileImportBrickLinkInventory(item->item());
     }
     else
         QApplication::beep();
+}
+
+void Window::setMatchProgress(int pmax, int pcur)
+{
+    fputc('.', stderr);
+}
+
+void Window::setMatchFinished(QList<const BrickLink::Item *> result)
+{
+    foreach (const BrickLink::Item *item, result)
+        qWarning("SetMatch: %s [%s]", item->name(), item->id());
+}
+
+void Window::on_edit_setmatch_triggered()
+{
+#if 0
+    if (!m_doc->items().isEmpty()) {
+    {
+        BrickLink::SetMatch *sm = new BrickLink::SetMatch(m_doc);
+
+        sm->setRecursiveBound(0.05f);
+        sm->setGreedyPreference(BrickLink::SetMatch::PreferLargerSets);
+
+        sm->setItemTypeConstraint(QList<const BrickLink::ItemType *>() << BrickLink::core()->itemType('S'));
+        sm->setPartCountConstraint(100, -1);
+        sm->setYearReleasedConstraint(1995, -1);
+
+        connect(sm, SIGNAL(finished(QList<const BrickLink::Item *>)), this, SLOT(setMatchFinished(QList<const BrickLink::Item *>)));
+        connect(sm, SIGNAL(progress(int, int)), this, SLOT(setMatchProgress(int, int)));
+
+        if (!sm->startMaximumPossibleSetMatch(selection().isEmpty() ? m_doc->items() : selection(), BrickLink::SetMatch::Recursive))
+            qWarning("SetMatch (Recursive): error.");
+    } else
+#endif
+    {
+        QApplication::beep();
+    }
 }
 
 void Window::setPrice(Currency d)

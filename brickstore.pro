@@ -125,17 +125,16 @@ DISTFILES += translations/translations.xml $$TRANSLATIONS $$replace(TRANSLATIONS
 DISTFILES += print-templates/*.qs
 
 DISTFILES += scripts/*.sh scripts/*.pl scripts/*.js
-DISTFILES += unix-package/create.sh unix-package/???-create.sh unix-package/brickstore.spec unix-package/rules \ 
-             unix-package/share/mimelnk/application/x-brickstore-xml.desktop \ 
-             unix-package/share/icons/hicolor/48x48/mimetypes/application-x-brickstore-xml.png \ 
-             unix-package/share/icons/hicolor/64x64/apps/brickstore.png \ 
-             unix-package/share/mime/packages/brickstore-mime.xml \ 
-             unix-package/share/applications/brickstore.desktop 
-DISTFILES += unix-package/brickstore.spec
-DISTFILES += unix-package/create.sh unix-package/rules
-DISTFILES += win32-installer/*.wx? win32-installer/create.bat win32-installer/7zS.ini win32-installer/VsSetup.ini win32-installer/Tools/* win32-installer/Binary/*
-DISTFILES += macx-bundle/create.sh macx-bundle/install-table.txt macx-bundle/*.plist macx-bundle/Resources/*.icns
-for(lang, LANGUAGES) : DISTFILES += macx-bundle/Resources/$${lang}.lproj/*.plist
+DISTFILES += unix/build-package.sh unix/deb/build-package.sh unix/rpm/build-package.sh \
+             unix/rpm/brickstore.spec unix/deb/rules \
+             unix/share/mimelnk/application/x-brickstore-xml.desktop \
+             unix/share/icons/hicolor/48x48/mimetypes/application-x-brickstore-xml.png \
+             unix/share/icons/hicolor/64x64/apps/brickstore.png \
+             unix/share/mime/packages/brickstore-mime.xml \
+             unix/share/applications/brickstore.desktop
+DISTFILES += win32/installer/*.wx? win32/build-package.bat win32/installer/7zS.ini win32/installer/VsSetup.ini win32/tools/* win32/installer/Binary/*
+DISTFILES += macx/build-package.sh macx/install-table.txt macx/*.plist macx/Resources/*.icns
+for(lang, LANGUAGES) : DISTFILES += macx/Resources/$${lang}.lproj/*.plist
 
 unix {
   #tarball.target = $$lower($$TARGET)-$$RELEASE.tar.bz2
@@ -151,9 +150,9 @@ unix {
                        rm -rf \$$dst )
 
   macx {
-    package.commands = macx-bundle/create.sh
+    package.commands = macx/build-package.sh
   } else {
-    package.commands = unix-package/create.sh
+    package.commands = unix/build-package.sh
   }
 }
 
@@ -161,9 +160,9 @@ win32 {
   DISTFILES=$$replace(DISTFILES, /, \\)
   DISTFILES=$$replace(DISTFILES, ^\.\\\, ) # 7-zip doesn't like file names starting with dot-backslash
 
-  tarball.commands = ( DEL $$lower($$TARGET)-$${RELEASE}.zip 2>NUL & win32-installer\Tools\7za a -tzip $$lower($$TARGET)-$${RELEASE}.zip $$DISTFILES )
+  tarball.commands = ( DEL $$lower($$TARGET)-$${RELEASE}.zip 2>NUL & win32\tools\7za a -tzip $$lower($$TARGET)-$${RELEASE}.zip $$DISTFILES )
 
-  package.commands = win32-installer\create.bat
+  package.commands = win32\build-package.bat
 }
 
 QMAKE_EXTRA_TARGETS += tarball package
@@ -243,8 +242,13 @@ unix:!macx {
 #
 
 macx {
-  ICON = macx-bundle/designer.icns
-  QMAKE_INFO_PLIST = macx-bundle/Info_mac.plist
-
   CONFIG += x86
+
+  QMAKE_INFO_PLIST = macx/Info.plist
+  bundle_icons.files = $$system(find macx/Resources/ -name '*.icns')
+  bundle_icons.path = Contents/Resources
+  bundle_locversions.files = $$system(find macx/Resources/ -name '*.lproj')
+  bundle_locversions.path = Contents/Resources
+  QMAKE_BUNDLE_DATA += bundle_icons bundle_locversions
 }
+
