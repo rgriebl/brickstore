@@ -109,7 +109,7 @@ TRANSLATIONS = $$replace(TRANSLATIONS, '^', 'translations/brickstore_')
 
 win32 {
   CONFIG  += windows
-  RC_FILE  = brickstore.rc
+  RC_FILE  = $$PWD/../win32/brickstore.rc
 
   win32-msvc* {
     QMAKE_CXXFLAGS_DEBUG   += /Od /GL-

@@ -35,7 +35,7 @@ namespace {
 class WindowMenu : public QMenu {
     Q_OBJECT
 public:
-    WindowMenu(Workspace *ws, bool shortcut, QWidget *parent)
+    WindowMenu(Workspace *ws, bool shortcut = false, QWidget *parent = 0)
         : QMenu(parent), m_ws(ws), m_shortcut(shortcut)
     {
         connect(this, SIGNAL(aboutToShow()), this, SLOT(buildMenu()));
@@ -86,60 +86,20 @@ class WindowButton : public QToolButton {
     Q_OBJECT
 
 public:
-    WindowButton(Workspace *ws)
-        : QToolButton(ws), m_ws(ws), m_menushown(false)
-    {
-        m_windows = new WindowMenu(ws, false, ws);
-        connect(this, SIGNAL(pressed()), this, SLOT(showWindowList()));
-    }
-
-private slots:
-    void showWindowList()
-    {
-        QPoint p(0 ,0);
-        p = mapToGlobal(p);
-        QSize s = m_windows->sizeHint();
-        QRect screen = qApp->desktop()->availableGeometry(this);
-
-        p.ry() += height();
-
-        if (p.ry() + s.height() > screen.height())
-            p.ry() = screen.height() - s.height();
-        if (p.ry() < screen.y())
-            p.ry() = screen.y();
-        if (p.rx() + s.width() > screen.width())
-            p.rx() = screen.width() - s.width();
-        if (p.rx() < screen.x())
-            p.rx() = screen.x();
-
-        m_menushown = true;
-        setDown(true);
-        repaint();
-
-        m_windows->exec(p);
-
-        m_menushown = false;
-        if (isDown())
-            setDown(false);
-        else
-            repaint();
-    }
+    WindowButton(QWidget *parent = 0)
+        : QToolButton(parent)
+    { }
 
 protected:
     virtual void paintEvent(QPaintEvent *)
     {
+        // do not draw the 'v' indicator as it doesn't make sense here
         QStylePainter p(this);
         QStyleOptionToolButton opt;
         initStyleOption(&opt);
-        if (m_menushown)
-            opt.state |= QStyle::State_Sunken;
+        opt.features &= ~QStyleOptionToolButton::HasMenu;
         p.drawComplexControl(QStyle::CC_ToolButton, opt);
     }
-
-private:
-    Workspace *m_ws;
-    QMenu *m_windows;
-    bool m_menushown;
 };
 
 class TabWidget : public QTabWidget {
@@ -168,17 +128,19 @@ protected:
 private: 
     void updateVisibility()
     {
-        setShown(count() > 1);
+        bool b = (count() > 1);
+        tabBar()->setShown(b);
+        if (QWidget *w = cornerWidget(Qt::TopRightCorner))
+            w->setShown(b);
+        if (QWidget *w = cornerWidget(Qt::TopLeftCorner))
+            w->setShown(b);
     }
 };
 
 
-QMenu *Workspace::windowMenu(QWidget *parent, const char *name)
+QMenu *Workspace::windowMenu()
 {
-    WindowMenu *wm = new WindowMenu(this, true, parent);
-    if (name)
-        wm->setObjectName(QLatin1String(name));
-    return wm;
+    return new WindowMenu(this, true);
 }
 
 
@@ -195,7 +157,10 @@ Workspace::Workspace(QWidget *parent, Qt::WindowFlags f)
     m_list = new WindowButton(this);
     m_list->setIcon(QIcon(":/images/tablist"));
     m_list->setAutoRaise(true);
+    m_list->setMenu(new WindowMenu(this));
+    m_list->setPopupMode(QToolButton::InstantPopup);
     m_list->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    m_list->setToolTip(tr("Show a list of all open documents"));
     
     m_tabwidget->setCornerWidget(m_list, Qt::TopRightCorner);
 

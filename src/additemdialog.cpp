@@ -71,6 +71,7 @@ AddItemDialog::AddItemDialog(QWidget *parent, Qt::WindowFlags f)
     w_buttons->addButton(w_add, QDialogButtonBox::ActionRole);
 
     w_select_item->setCurrentItemType(BrickLink::core()->itemType(Config::inst()->value("/Defaults/AddItems/ItemType", 'P').toInt()));
+    w_select_item->setCurrentCategory(BrickLink::CategoryModel::AllCategories);
 
     w_picture->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
     w_picture->setLineWidth(2);

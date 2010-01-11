@@ -66,7 +66,7 @@ PictureWidget::PictureWidget(QWidget *parent, Qt::WindowFlags f)
     QAction *a;
     a = new QAction(this);
     a->setObjectName("picture_reload");
-    a->setIcon(QIcon(":/images/22x22/reload"));
+    a->setIcon(QIcon(":/images/reload"));
     connect(a, SIGNAL(triggered()), this, SLOT(doUpdate()));
     addAction(a);
 
@@ -76,7 +76,7 @@ PictureWidget::PictureWidget(QWidget *parent, Qt::WindowFlags f)
 
     a = new QAction(this);
     a->setObjectName("picture_magnify");
-    a->setIcon(QIcon(":/images/22x22/viewmagp"));
+    a->setIcon(QIcon(":/images/viewmagp"));
     connect(a, SIGNAL(triggered()), this, SLOT(viewLargeImage()));
     addAction(a);
 
@@ -86,17 +86,17 @@ PictureWidget::PictureWidget(QWidget *parent, Qt::WindowFlags f)
 
     a = new QAction(this);
     a->setObjectName("picture_bl_catalog");
-    a->setIcon(QIcon(":/images/22x22/edit_bl_catalog"));
+    a->setIcon(QIcon(":/images/edit_bl_catalog"));
     connect(a, SIGNAL(triggered()), this, SLOT(showBLCatalogInfo()));
     addAction(a);
     a = new QAction(this);
     a->setObjectName("picture_bl_priceguide");
-    a->setIcon(QIcon(":/images/22x22/edit_bl_priceguide"));
+    a->setIcon(QIcon(":/images/edit_bl_priceguide"));
     connect(a, SIGNAL(triggered()), this, SLOT(showBLPriceGuideInfo()));
     addAction(a);
     a = new QAction(this);
     a->setObjectName("picture_bl_lotsforsale");
-    a->setIcon(QIcon(":/images/22x22/edit_bl_lotsforsale"));
+    a->setIcon(QIcon(":/images/edit_bl_lotsforsale"));
     connect(a, SIGNAL(triggered()), this, SLOT(showBLLotsForSale()));
     addAction(a);
 
@@ -309,7 +309,7 @@ LargePictureWidget::LargePictureWidget(BrickLink::Picture *lpic, QWidget *parent
     QAction *a;
     a = new QAction(this);
     a->setObjectName("picture_reload");
-    a->setIcon(QIcon(":/images/22x22/reload"));
+    a->setIcon(QIcon(":/images/reload"));
     connect(a, SIGNAL(triggered()), this, SLOT(doUpdate()));
     addAction(a);
 
@@ -319,7 +319,7 @@ LargePictureWidget::LargePictureWidget(BrickLink::Picture *lpic, QWidget *parent
 
     a = new QAction(this);
     a->setObjectName("picture_close");
-    a->setIcon(QIcon(":/images/22x22/file_close"));
+    a->setIcon(QIcon(":/images/file_close"));
     connect(a, SIGNAL(triggered()), this, SLOT(close()));
     addAction(a);
 

@@ -34,7 +34,7 @@ public:
     QWidget *activeWindow() const;
     QList<QWidget *> windowList() const;
 
-    QMenu *windowMenu(QWidget *parent = 0, const char *name = 0);
+    QMenu *windowMenu();
 
 signals:
     void windowActivated(QWidget *);

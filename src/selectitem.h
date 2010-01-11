@@ -44,8 +44,8 @@ public:
     const BrickLink::ItemType *currentItemType() const;
     const BrickLink::Item *currentItem() const;
 
-    void setCurrentCategory(const BrickLink::Category *cat);
-    void setCurrentItemType(const BrickLink::ItemType *it);
+    bool setCurrentCategory(const BrickLink::Category *cat);
+    bool setCurrentItemType(const BrickLink::ItemType *it);
     bool setCurrentItem(const BrickLink::Item *item, bool dont_force_category = false);
 
 
@@ -73,12 +73,10 @@ protected slots:
 
 protected:
     virtual void showEvent(QShowEvent *);
-    virtual void changeEvent(QEvent *);
 
 private:
     void init();
     void ensureSelectionVisible();
-    void recalcHighlightPalette();
 
 protected:
     SelectItemPrivate *d;

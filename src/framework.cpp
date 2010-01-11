@@ -288,7 +288,7 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
 
     menuBar()->addMenu(createMenu("extras", sl));
 
-    QMenu *m = m_workspace->windowMenu(this);
+    QMenu *m = m_workspace->windowMenu();
     m->menuAction()->setObjectName("window");
     menuBar()->addMenu(m);
 

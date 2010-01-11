@@ -44,6 +44,10 @@
 
 class SelectItemPrivate {
 public:
+    BrickLink::ItemTypeModel *itemTypeModel;
+    BrickLink::CategoryModel *categoryModel;
+    BrickLink::ItemModel *    itemModel;
+
     QLabel *         w_item_types_label;
     QComboBox *      w_item_types;
     QTreeView *      w_categories;
@@ -51,7 +55,7 @@ public:
     QTreeView *      w_items;
     QTreeView *      w_itemthumbs;
     QListView *      w_thumbs;
-    FilterEdit *    w_filter;
+    FilterEdit *     w_filter;
     QToolButton *    w_viewbutton;
     QAction *        m_viewaction[3];
     QMenu *          w_viewmenu;
@@ -126,15 +130,15 @@ void SelectItem::init()
     QActionGroup *ag = new QActionGroup(this);
     ag->setExclusive(true);
 
-    d->m_viewaction[ListMode] = new QAction(QIcon(":/images/22x22/viewmode_list"), QString(), ag);
+    d->m_viewaction[ListMode] = new QAction(QIcon(":/images/viewmode_list"), QString(), ag);
     d->m_viewaction[ListMode]->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_1));
     d->m_viewaction[ListMode]->setCheckable(true);
     connect(d->m_viewaction[ListMode], SIGNAL(triggered()), this, SLOT(showAsList()));
-    d->m_viewaction[TableMode] = new QAction(QIcon(":/images/22x22/viewmode_images"), QString(), ag);
+    d->m_viewaction[TableMode] = new QAction(QIcon(":/images/viewmode_images"), QString(), ag);
     d->m_viewaction[TableMode]->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_2));
     d->m_viewaction[TableMode]->setCheckable(true);
     connect(d->m_viewaction[TableMode], SIGNAL(triggered()), this, SLOT(showAsTable()));
-    d->m_viewaction[ThumbsMode] = new QAction(QIcon(":/images/22x22/viewmode_thumbs"), QString(), ag);
+    d->m_viewaction[ThumbsMode] = new QAction(QIcon(":/images/viewmode_thumbs"), QString(), ag);
     d->m_viewaction[ThumbsMode]->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_3));
     d->m_viewaction[ThumbsMode]->setCheckable(true);
     connect(d->m_viewaction[ThumbsMode], SIGNAL(triggered()), this, SLOT(showAsThumbs()));
@@ -146,7 +150,7 @@ void SelectItem::init()
     d->w_viewbutton->setFocusPolicy(Qt::NoFocus);
     d->w_viewbutton->setPopupMode(QToolButton::InstantPopup);
     d->w_viewbutton->setMenu(d->w_viewmenu);
-    d->w_viewbutton->setIcon(QIcon(":/images/22x22/viewmode_list"));
+    d->w_viewbutton->setIcon(QIcon(":/images/viewmode_list"));
 
     d->w_items = new QTreeView(this);
     d->w_items->setSortingEnabled(true);
@@ -182,19 +186,18 @@ void SelectItem::init()
     d->w_thumbs->setItemDelegate(new ItemThumbsDelegate);
     d->w_thumbs->setContextMenuPolicy(Qt::CustomContextMenu);
 
-    d->w_item_types->setModel(new BrickLink::ItemTypeModel(this));
+    d->itemTypeModel = new BrickLink::ItemTypeModel(this);
+    d->categoryModel = new BrickLink::CategoryModel(this);
+    d->itemModel = new BrickLink::ItemModel(this);
 
-    d->w_categories->setModel(new BrickLink::CategoryModel(this));
+    d->w_item_types->setModel(d->itemTypeModel);
+    d->w_categories->setModel(d->categoryModel);
     d->w_categories->sortByColumn(0, Qt::AscendingOrder);
-//    setCurrentCategory(BrickLink::CategoryModel::AllCategories);
-
-    d->w_items->setModel(new BrickLink::ItemModel(this));
-    d->w_items->hideColumn(0);
+    d->w_items->setModel(d->itemModel);
     d->w_items->sortByColumn(2, Qt::AscendingOrder);
-
-    d->w_itemthumbs->setModel(d->w_items->model());
-
-    d->w_thumbs->setModel(d->w_items->model());
+    d->w_items->hideColumn(0);
+    d->w_itemthumbs->setModel(d->itemModel);
+    d->w_thumbs->setModel(d->itemModel);
     d->w_thumbs->setModelColumn(0);
 
     d->w_itemthumbs->setSelectionModel(d->w_items->selectionModel());
@@ -247,22 +250,8 @@ void SelectItem::init()
     d->m_stack->setCurrentWidget(d->w_items);
     d->m_viewmode = ListMode;
 
-    languageChange();
-    recalcHighlightPalette();
-
     setFocusProxy(d->w_item_types);
-}
-
-
-void SelectItem::recalcHighlightPalette()
-{
-    QPalette p = qApp->palette();
-    QColor hc = Utility::gradientColor(p.color(QPalette::Active, QPalette::Highlight), p.color(QPalette::Inactive, QPalette::Highlight), 0.35f);
-    QColor htc = p.color(QPalette::Active, QPalette::HighlightedText);
-
-    p.setColor(QPalette::Inactive, QPalette::Highlight, hc);
-    p.setColor(QPalette::Inactive, QPalette::HighlightedText, htc);
-    setPalette(p);
+    languageChange();
 }
 
 void SelectItem::languageChange()
@@ -284,12 +273,9 @@ bool SelectItem::hasExcludeWithoutInventoryFilter() const
 void SelectItem::setExcludeWithoutInventoryFilter(bool b)
 {
     if (b != d->m_inv_only) {
-        BrickLink::ItemTypeModel *model1 = qobject_cast<BrickLink::ItemTypeModel *>(d->w_item_types->model());
-        BrickLink::ItemModel *model2 = qobject_cast<BrickLink::ItemModel *>(d->w_items->model());
-
         QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-        model1->setFilterWithoutInventory(b);
-        model2->setFilterWithoutInventory(b);
+        d->itemTypeModel->setFilterWithoutInventory(b);
+        d->itemModel->setFilterWithoutInventory(b);
         QApplication::restoreOverrideCursor();
 
         d->m_inv_only = b;
@@ -298,19 +284,11 @@ void SelectItem::setExcludeWithoutInventoryFilter(bool b)
 
 void SelectItem::itemTypeChanged()
 {
-    const BrickLink::Category *oldcat = currentCategory();
-    const BrickLink::Item *olditem = currentItem();
     const BrickLink::ItemType *itemtype = currentItemType();
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-    BrickLink::CategoryModel *model = qobject_cast<BrickLink::CategoryModel *>(d->w_categories->model());
-    model->setFilterItemType(itemtype);
-    setCurrentCategory(oldcat);
-
-    BrickLink::ItemModel *model2 = qobject_cast<BrickLink::ItemModel *>(d->w_items->model());
-    model2->setFilterItemType(itemtype);
-    model2->setFilterCategory(currentCategory());
-    setCurrentItem(olditem, true);
+    d->categoryModel->setFilterItemType(itemtype);
+    d->itemModel->setFilterItemType(itemtype);
 
     emit hasColors(itemtype->hasColors());
     QApplication::restoreOverrideCursor();
@@ -318,103 +296,65 @@ void SelectItem::itemTypeChanged()
 
 const BrickLink::ItemType *SelectItem::currentItemType() const
 {
-    BrickLink::ItemTypeModel *model = qobject_cast<BrickLink::ItemTypeModel *>(d->w_item_types->model());
-
-    if (model && d->w_item_types->currentIndex() >= 0) {
-        QModelIndex idx = model->index(d->w_item_types->currentIndex(), 0);
-        return model->itemType(idx);
-    }
-    else
+    if (d->w_item_types->currentIndex() >= 0) {
+        QModelIndex idx = d->itemTypeModel->index(d->w_item_types->currentIndex(), 0);
+        return d->itemTypeModel->itemType(idx);
+    } else {
         return 0;
+    }
 }
 
-void SelectItem::setCurrentItemType(const BrickLink::ItemType *it)
+bool SelectItem::setCurrentItemType(const BrickLink::ItemType *it)
 {
-    BrickLink::ItemTypeModel *model = qobject_cast<BrickLink::ItemTypeModel *>(d->w_item_types->model());
-
-    if (model) {
-        QModelIndex idx = model->index(it);
-        if (idx.isValid())
-            d->w_item_types->setCurrentIndex(idx.row());
-        else
-            d->w_item_types->setCurrentIndex(-1);
-    }
+    QModelIndex idx = d->itemTypeModel->index(it);
+    d->w_item_types->setCurrentIndex(idx.isValid() ? idx.row() : -1);
+    return idx.isValid();
 }
 
 
 void SelectItem::categoryChanged()
 {
-    const BrickLink::Item *olditem = currentItem();
-
-    BrickLink::ItemModel *model = qobject_cast<BrickLink::ItemModel *>(d->w_items->model());
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-    model->setFilterCategory(currentCategory());
-    setCurrentItem(olditem, true);
+    d->itemModel->setFilterCategory(currentCategory());
     QApplication::restoreOverrideCursor();
 }
 
 const BrickLink::Category *SelectItem::currentCategory() const
 {
-    BrickLink::CategoryModel *model = qobject_cast<BrickLink::CategoryModel *>(d->w_categories->model());
     QModelIndexList idxlst = d->w_categories->selectionModel()->selectedRows();
-
-    if (model && !idxlst.isEmpty())
-        return model->category(idxlst.front());
-    else
-        return 0;
+    return idxlst.isEmpty() ? 0 : d->categoryModel->category(idxlst.front());
 }
 
-void SelectItem::setCurrentCategory(const BrickLink::Category *cat)
+bool SelectItem::setCurrentCategory(const BrickLink::Category *cat)
 {
-    BrickLink::CategoryModel *model = qobject_cast<BrickLink::CategoryModel *>(d->w_categories->model());
-
-    if (model) {
-        QModelIndex idx = model->index(cat);
-        if (idx.isValid()) {
-            d->w_categories->setCurrentIndex(idx);
-        }
-        else
-            d->w_categories->clearSelection();
-    }
+    QModelIndex idx = d->categoryModel->index(cat);
+    if (idx.isValid())
+        d->w_categories->setCurrentIndex(idx);
+    else
+        d->w_categories->setCurrentIndex(idx);
+    return idx.isValid();
 }
 
 const BrickLink::Item *SelectItem::currentItem() const
 {
-    BrickLink::ItemModel *model = qobject_cast<BrickLink::ItemModel *>(d->w_items->model());
     QModelIndexList idxlst = d->w_items->selectionModel()->selectedRows();
-
-    if (model && !idxlst.isEmpty())
-        return model->item(idxlst.front());
-    else
-        return 0;
+    return idxlst.isEmpty() ? 0 : d->itemModel->item(idxlst.front());
 }
 
 bool SelectItem::setCurrentItem(const BrickLink::Item *item, bool dont_force_category)
 {
-    bool found = false;
     const BrickLink::ItemType *itt = item ? item->itemType() : 0;
     const BrickLink::Category *cat = item ? item->category() : 0;
 
-    if (!dont_force_category) {
-        setCurrentCategory(cat ? cat : BrickLink::CategoryModel::AllCategories);
-        setCurrentItemType(itt ? itt : BrickLink::core()->itemType('P'));
-    }
+    setCurrentItemType(itt ? itt : BrickLink::core()->itemType('P'));
+    setCurrentCategory(cat && !dont_force_category ? cat : BrickLink::CategoryModel::AllCategories);
 
-    BrickLink::ItemModel *model = qobject_cast<BrickLink::ItemModel *>(d->w_items->model());
-
-    if (model) {
-        QModelIndex idx = model->index(item);
-        if (idx.isValid()) {
-            d->w_items->setCurrentIndex(idx);
-            found = true;
-        }
-        else
-            d->w_items->clearSelection();
-    }
-
-    //TODO: check filter-> return true/false (found)
-
-    return found;
+    QModelIndex idx = d->itemModel->index(item);
+    if (idx.isValid())
+        d->w_items->setCurrentIndex(idx);
+    else
+        d->w_items->clearSelection();
+    return idx.isValid();
 }
 
 void SelectItem::showAsList()
@@ -444,36 +384,28 @@ void SelectItem::showAsThumbs()
 
 void SelectItem::findItem()
 {
-    const BrickLink::ItemType *itt = currentItemType();
+    if (const BrickLink::ItemType *itt = currentItemType()) {
+        QString str;
 
-    if (!itt)
-        return;
-
-    QString str;
-
-    if (MessageBox::getString(this, tr("Please enter the complete item number:"), str)) {
-        const BrickLink::Item *item = BrickLink::core()->item(itt->id(), str.toAscii().constData());
-
-        if (item) {
-            setCurrentItem(item);
-            ensureSelectionVisible();
+        if (MessageBox::getString(this, tr("Please enter the complete item number:"), str)) {
+            if (const BrickLink::Item *item = BrickLink::core()->item(itt->id(), str.toLatin1().constData())) {
+                setCurrentItem(item);
+                ensureSelectionVisible();
+            } else {
+                QApplication::beep();
+            }
         }
-        else
-            QApplication::beep();
     }
 }
 
 void SelectItem::itemChanged()
 {
-    const BrickLink::Item *item = currentItem();
-
-    emit itemSelected(item, false);
+    emit itemSelected(currentItem(), false);
 }
 
 void SelectItem::itemConfirmed()
 {
     const BrickLink::Item *item = currentItem();
-
     if (item)
         emit itemSelected(item, true);
 }
@@ -485,40 +417,28 @@ void SelectItem::showEvent(QShowEvent *)
     ensureSelectionVisible();
 }
 
-void SelectItem::changeEvent(QEvent *e)
-{
-    if (e->type() == QEvent::PaletteChange)
-        recalcHighlightPalette();
-}
-
-
 void SelectItem::ensureSelectionVisible()
 {
     const BrickLink::Category *cat = currentCategory();
     const BrickLink::Item *item = currentItem();
 
-    if (cat) {
-        BrickLink::CategoryModel *model = qobject_cast<BrickLink::CategoryModel *>(d->w_categories->model());
-
-        d->w_categories->scrollTo(model->index(cat), QAbstractItemView::PositionAtCenter);
-    }
+    if (cat)
+        d->w_categories->scrollTo(d->categoryModel->index(cat), QAbstractItemView::PositionAtCenter);
 
     if (item) {
-        BrickLink::ItemModel *model = qobject_cast<BrickLink::ItemModel *>(d->w_items->model());
+        QModelIndex idx = d->itemModel->index(item);
 
-        d->w_items->scrollTo(model->index(item), QAbstractItemView::PositionAtCenter);
-        d->w_itemthumbs->scrollTo(model->index(item), QAbstractItemView::PositionAtCenter);
-        d->w_thumbs->scrollTo(model->index(item), QAbstractItemView::PositionAtCenter);
+        d->w_items->scrollTo(idx, QAbstractItemView::PositionAtCenter);
+        d->w_itemthumbs->scrollTo(idx, QAbstractItemView::PositionAtCenter);
+        d->w_thumbs->scrollTo(idx, QAbstractItemView::PositionAtCenter);
     }
 }
 
 
 void SelectItem::applyFilter()
 {
-    BrickLink::ItemModel *model = qobject_cast<BrickLink::ItemModel *>(d->w_items->model());
-
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-    model->setFilterText(d->w_filter->text());
+    d->itemModel->setFilterText(d->w_filter->text());
     QApplication::restoreOverrideCursor();
 }
 
@@ -526,18 +446,13 @@ void SelectItem::applyFilter()
 QSize SelectItem::sizeHint() const
 {
     QFontMetrics fm = fontMetrics();
-
     return QSize(120 * fm.width('x'), 20 * fm.height());
 }
 
 void SelectItem::showContextMenu(const QPoint &p)
 {
-    QAbstractItemView *iv = qobject_cast<QAbstractItemView *>(sender());
-
-    if (iv) {
+    if (QAbstractItemView *iv = qobject_cast<QAbstractItemView *>(sender())) {
         QModelIndex idx = iv->indexAt(p);
-
-        qWarning("Got context: %d", idx.isValid()?1:0);
 
         if (idx.isValid()) {
             const BrickLink::Item *item = idx.model()->data(idx, BrickLink::ItemPointerRole).value<const BrickLink::Item *>();
@@ -547,11 +462,10 @@ void SelectItem::showContextMenu(const QPoint &p)
                 QAction *gotocat = m.addAction(tr("View item's category"));
 
                 if (m.exec(iv->mapToGlobal(p)) == gotocat) {
-                    setCurrentItem(item);
+                    setCurrentItem(item, false);
                     ensureSelectionVisible();
                 }
             }
         }
-
     }
 }

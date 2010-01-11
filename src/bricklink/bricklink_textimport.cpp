@@ -176,6 +176,7 @@ template <> Color *TextImport::parse<Color> (uint count, const char **strs)
     if (!strcmp(strs[3], "Chrome"))  col->m_type |= Color::Chrome;
     if (!strcmp(strs[3], "Pearl"))  col->m_type |= Color::Pearl;
     if (!strcmp(strs[3], "Milky"))  col->m_type |= Color::Milky;
+    if (!strcmp(strs[3], "Modulex"))  col->m_type |= Color::Modulex;
     return col;
 }
 

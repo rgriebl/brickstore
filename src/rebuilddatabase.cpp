@@ -166,7 +166,7 @@ static QList<QPair<QString, QString> > dbQuery(int which)
 {
     QList<QPair<QString, QString> > query; //?a=a&viewType=X
     query << QPair<QString, QString>("a", "a")
-    << QPair<QString, QString>("viewType", QString::number(which));
+          << QPair<QString, QString>("viewType", QString::number(which));
 
     return query;
 }

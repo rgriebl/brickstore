@@ -131,7 +131,8 @@ public:
         Metallic     = 0x08,
         Chrome       = 0x10,
         Pearl        = 0x20,
-        Milky        = 0x40
+        Milky        = 0x40,
+        Modulex      = 0x80
     };
 
     bool isTransparent() const { return m_type & Transparent; }
@@ -141,6 +142,7 @@ public:
     bool isChrome() const      { return m_type & Chrome; }
     bool isPearl() const       { return m_type & Pearl; }
     bool isMilky() const       { return m_type & Milky; }
+    bool isModulex() const     { return m_type & Modulex; }
     ~Color();
 
 private:
@@ -562,7 +564,7 @@ public:
     const QMap<int, const Color *>    &colors() const      { return m_colors; }
     const QMap<int, const Category *> &categories() const  { return m_categories; }
     const QMap<int, const ItemType *> &itemTypes() const   { return m_item_types; }
-    const QVector<const Item *>        &items() const      { return m_items; }
+    const QVector<const Item *>       &items() const       { return m_items; }
 
 private:
     template <typename T> T *parse(uint count, const char **strs);
@@ -719,7 +721,7 @@ public:
 
     bool isFiltered() const;
     void setFilterItemType(const ItemType *it);
-    void setFilterCategory(const Category *it);
+    void setFilterCategory(const Category *cat);
     void setFilterText(const QString &str);
     void setFilterWithoutInventory(bool on);
 

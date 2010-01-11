@@ -16,6 +16,8 @@
 #include <QVector>
 #include <QList>
 
+class QTimer;
+
 class StaticPointerModel : public QAbstractItemModel
 {
     Q_OBJECT
