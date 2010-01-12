@@ -346,8 +346,6 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
         << "edit_bl_catalog"
         << "edit_bl_priceguide"
         << "edit_bl_lotsforsale"
-        << "-"             // << "edit_bl_info_group" << "-"
-        << "extras_net"    // << "-" << "help_whatsthis";
 #endif
         << "|"
         << "widget_filter"

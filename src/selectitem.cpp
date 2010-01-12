@@ -331,7 +331,7 @@ bool SelectItem::setCurrentCategory(const BrickLink::Category *cat)
     if (idx.isValid())
         d->w_categories->setCurrentIndex(idx);
     else
-        d->w_categories->setCurrentIndex(idx);
+        d->w_categories->clearSelection();
     return idx.isValid();
 }
 

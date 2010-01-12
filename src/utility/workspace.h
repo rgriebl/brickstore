@@ -14,13 +14,10 @@
 #ifndef __WORKSPACE_H__
 #define __WORKSPACE_H__
 
-#define USE_WORKSPACE
-
 #include <QWidget>
 
 class TabWidget;
 class QMenu;
-class QToolButton;
 
 
 class Workspace : public QWidget {
@@ -51,12 +48,7 @@ private slots:
     void currentChangedHelper(int);
 
 private:
-    void relayout();
-    void updateVisibility();
-
-private:
     TabWidget *  m_tabwidget;
-    QToolButton *m_list;
 };
 
 #endif

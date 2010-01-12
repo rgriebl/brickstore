@@ -22,15 +22,39 @@
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QToolButton>
-#include <QStylePainter>
-#include <QStyleOptionToolButton>
+#include <QPixmap>
 
 #include "workspace.h"
 
 
 Q_DECLARE_METATYPE(QWidget *)
 
-namespace {
+/* XPM */
+static const char * const tablist_xpm[] = {
+"12 12 2 1",
+"  c None",
+"# c #000000",
+"            ",
+#if !defined(Q_OS_MACX)
+"  ########  ",
+#else
+"############",
+#endif
+" ########## ",
+" ########## ",
+" ########## ",
+" ########## ",
+" ########## ",
+#if !defined(Q_OS_MACX)
+"############",
+#else
+"  ########  ",
+#endif
+"            ",
+"            ",
+"            ",
+"            "};
+
 
 class WindowMenu : public QMenu {
     Q_OBJECT
@@ -80,33 +104,12 @@ private:
     bool       m_shortcut;
 };
 
-}
-
-class WindowButton : public QToolButton {
-    Q_OBJECT
-
-public:
-    WindowButton(QWidget *parent = 0)
-        : QToolButton(parent)
-    { }
-
-protected:
-    virtual void paintEvent(QPaintEvent *)
-    {
-        // do not draw the 'v' indicator as it doesn't make sense here
-        QStylePainter p(this);
-        QStyleOptionToolButton opt;
-        initStyleOption(&opt);
-        opt.features &= ~QStyleOptionToolButton::HasMenu;
-        p.drawComplexControl(QStyle::CC_ToolButton, opt);
-    }
-};
 
 class TabWidget : public QTabWidget {
     Q_OBJECT
 public:
-    TabWidget(QWidget *parent = 0)
-        : QTabWidget(parent)
+    TabWidget(QWidget *tabListWidget, QWidget *parent = 0)
+        : QTabWidget(parent), tabList(tabListWidget)
     {
         tabBar()->setSelectionBehaviorOnRemove(QTabBar::SelectPreviousTab);
         updateVisibility();
@@ -125,16 +128,16 @@ protected:
         updateVisibility();
     }
 
-private: 
+private:
     void updateVisibility()
     {
         bool b = (count() > 1);
         tabBar()->setShown(b);
-        if (QWidget *w = cornerWidget(Qt::TopRightCorner))
-            w->setShown(b);
-        if (QWidget *w = cornerWidget(Qt::TopLeftCorner))
-            w->setShown(b);
+        setCornerWidget(b ? tabList : 0, Qt::TopRightCorner);
+        tabList->setShown(b);
     }
+
+    QWidget *tabList;
 };
 
 
@@ -147,22 +150,20 @@ QMenu *Workspace::windowMenu()
 Workspace::Workspace(QWidget *parent, Qt::WindowFlags f)
     : QWidget(parent, f)
 {
-    m_tabwidget = new TabWidget(this);
+    QToolButton *tabList = new QToolButton(this);
+    tabList->setIcon(QPixmap(tablist_xpm));
+    tabList->setAutoRaise(true);
+    tabList->setMenu(new WindowMenu(this));
+    tabList->setPopupMode(QToolButton::InstantPopup);
+    tabList->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    tabList->setToolTip(tr("Show a list of all open documents"));
+
+    m_tabwidget = new TabWidget(tabList, this);
     m_tabwidget->setElideMode(Qt::ElideMiddle);
     m_tabwidget->setDocumentMode(true);
     m_tabwidget->setUsesScrollButtons(true);
     m_tabwidget->setMovable(true);
     m_tabwidget->setTabsClosable(true);
-   
-    m_list = new WindowButton(this);
-    m_list->setIcon(QIcon(":/images/tablist"));
-    m_list->setAutoRaise(true);
-    m_list->setMenu(new WindowMenu(this));
-    m_list->setPopupMode(QToolButton::InstantPopup);
-    m_list->setToolButtonStyle(Qt::ToolButtonIconOnly);
-    m_list->setToolTip(tr("Show a list of all open documents"));
-    
-    m_tabwidget->setCornerWidget(m_list, Qt::TopRightCorner);
 
     connect(m_tabwidget, SIGNAL(currentChanged(int)), this, SLOT(currentChangedHelper(int)));
     connect(m_tabwidget, SIGNAL(tabCloseRequested(int)), this, SLOT(closeWindow(int)));

@@ -66,8 +66,6 @@
         <file>images/status_extra.png</file>
         <file>images/status_include.png</file>
         <file>images/status_unknown.png</file>
-        <file>images/tabclose.png</file>
-        <file>images/tablist.png</file>
         <file>images/logo-text.pic</file>
     </qresource>
 </RCC>
