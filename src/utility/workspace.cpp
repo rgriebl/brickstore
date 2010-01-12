@@ -65,8 +65,13 @@ public:
         connect(this, SIGNAL(aboutToShow()), this, SLOT(buildMenu()));
         connect(this, SIGNAL(triggered(QAction *)), this, SLOT(activateWindow(QAction *)));
 
-        QActionGroup *ag = new QActionGroup(this);
-        ag->setExclusive(true);
+        setEnabled(false);
+    }
+
+public slots:
+    void checkEnabledStatus(int tabCount)
+    {
+        setEnabled(tabCount > 1);
     }
 
 private slots:
@@ -115,17 +120,22 @@ public:
         updateVisibility();
     }
     
+signals:
+    void tabCountChanged(int);
+
 protected:
     void tabInserted(int index)
     {
         QTabWidget::tabInserted(index);
         updateVisibility();
+        emit tabCountChanged(count());
     }
 
     void tabRemoved(int index)
     {
         QTabWidget::tabRemoved(index);
         updateVisibility();
+        emit tabCountChanged(count());
     }
 
 private:
@@ -141,19 +151,12 @@ private:
 };
 
 
-QMenu *Workspace::windowMenu()
-{
-    return new WindowMenu(this, true);
-}
-
-
 Workspace::Workspace(QWidget *parent, Qt::WindowFlags f)
     : QWidget(parent, f)
 {
     QToolButton *tabList = new QToolButton(this);
     tabList->setIcon(QPixmap(tablist_xpm));
     tabList->setAutoRaise(true);
-    tabList->setMenu(new WindowMenu(this));
     tabList->setPopupMode(QToolButton::InstantPopup);
     tabList->setToolButtonStyle(Qt::ToolButtonIconOnly);
     tabList->setToolTip(tr("Show a list of all open documents"));
@@ -165,9 +168,19 @@ Workspace::Workspace(QWidget *parent, Qt::WindowFlags f)
     m_tabwidget->setMovable(true);
     m_tabwidget->setTabsClosable(true);
 
+    tabList->setMenu(windowMenu(false, this));
+
     connect(m_tabwidget, SIGNAL(currentChanged(int)), this, SLOT(currentChangedHelper(int)));
     connect(m_tabwidget, SIGNAL(tabCloseRequested(int)), this, SLOT(closeWindow(int)));
 }
+
+QMenu *Workspace::windowMenu(bool hasShortcut, QWidget *parent)
+{
+    WindowMenu *m = new WindowMenu(this, hasShortcut, parent);
+    connect(m_tabwidget, SIGNAL(tabCountChanged(int)), m, SLOT(checkEnabledStatus(int)));
+    return m;
+}
+
 
 void Workspace::resizeEvent(QResizeEvent *)
 {

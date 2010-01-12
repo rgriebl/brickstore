@@ -31,7 +31,7 @@ public:
     QWidget *activeWindow() const;
     QList<QWidget *> windowList() const;
 
-    QMenu *windowMenu();
+    QMenu *windowMenu(bool hasShortcuts = false, QWidget *parent = 0);
 
 signals:
     void windowActivated(QWidget *);
