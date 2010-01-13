@@ -344,7 +344,7 @@ void Application::about()
     QString support   = tr("Visit %1, or send an email to %2").arg("<a href=\"http://" BRICKSTORE_URL "\">" BRICKSTORE_URL "</a>",
                                                                    "<a href=\"mailto:" BRICKSTORE_MAIL "\">" BRICKSTORE_MAIL "</a>");
 
-    QString qt   = qVersion();
+    QString qt = qVersion();
 
     QString translators = "<b>" + tr("Translators") + "</b><table border=\"0\">";
 
@@ -394,7 +394,7 @@ void Application::about()
         "<th colspan=\"2\" align=\"left\">Runtime Info</th>"
         "<tr><td>OS     </td><td>%5</td></tr>"
         "<tr><td>Memory </td><td>%L6 MB</td></tr>"
-        "<tr><td>libqt  </td><td>%7</td></tr>"
+        "<tr><td>Qt     </td><td>%7</td></tr>"
         "</table>"
         "</p>";
 

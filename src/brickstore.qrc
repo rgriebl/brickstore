@@ -62,10 +62,10 @@
         <file>images/status/modified.png</file>
         <file>images/status/popup.png</file>
         <file>images/status/stop.png</file>
-        <file>images/status_exclude.png</file>
-        <file>images/status_extra.png</file>
-        <file>images/status_include.png</file>
-        <file>images/status_unknown.png</file>
+        <file>images/edit_status_exclude.png</file>
+        <file>images/edit_status_extra.png</file>
+        <file>images/edit_status_include.png</file>
+        <file>images/edit_status_unknown.png</file>
         <file>images/logo-text.pic</file>
     </qresource>
 </RCC>

@@ -64,7 +64,7 @@
           <string/>
          </property>
          <property name="pixmap">
-          <pixmap resource="brickstore.qrc">:/images/status_exclude.png</pixmap>
+          <pixmap resource="brickstore.qrc">:/images/edit_status_exclude.png</pixmap>
          </property>
         </widget>
        </item>
@@ -111,7 +111,7 @@
           <string/>
          </property>
          <property name="pixmap">
-          <pixmap resource="brickstore.qrc">:/images/status_include.png</pixmap>
+          <pixmap resource="brickstore.qrc">:/images/edit_status_include.png</pixmap>
          </property>
         </widget>
        </item>
@@ -168,7 +168,7 @@
           <string/>
          </property>
          <property name="pixmap">
-          <pixmap resource="brickstore.qrc">:/images/status_exclude.png</pixmap>
+          <pixmap resource="brickstore.qrc">:/images/edit_status_exclude.png</pixmap>
          </property>
         </widget>
        </item>
@@ -215,7 +215,7 @@
           <string/>
          </property>
          <property name="pixmap">
-          <pixmap resource="brickstore.qrc">:/images/status_include.png</pixmap>
+          <pixmap resource="brickstore.qrc">:/images/edit_status_include.png</pixmap>
          </property>
         </widget>
        </item>

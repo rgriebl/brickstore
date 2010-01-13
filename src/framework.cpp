@@ -250,12 +250,26 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
         << "edit_partoutitems"
         << "edit_setmatch"
         << "-"
-        << "edit_modify"
+        << "edit_status"
+        << "edit_cond"
+        << "edit_color"
+        << "edit_qty"
+        << "edit_price"
+        << "edit_bulk"
+        << "edit_sale"
+        << "edit_comment"
+        << "edit_remark"
+        << "edit_retain"
+        << "edit_stockroom"
+        << "edit_reserved"
         << "-"
         << "edit_reset_diffs"
         << "edit_copyremarks"
         << "-"
-        << "edit_bl_info_group";
+        << "edit_bl_catalog"
+        << "edit_bl_priceguide"
+        << "edit_bl_lotsforsale"
+        << "edit_bl_myinventory";
 
     menuBar()->addMenu(createMenu("edit", sl));
 
@@ -276,7 +290,8 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
 
     sl = Config::inst()->value("/MainWindow/Menubar/Extras").toStringList();
     if (sl.isEmpty())
-        sl << "extras_net"
+        sl << "extras_net_online"
+        << "extras_net_offline"
         << "-"
         << "extras_update_database"
         << "-"
@@ -312,9 +327,17 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
         << "edit_mergeitems"
         << "edit_partoutitems"
         << "-"
-        << "edit_modify_context"
+        << "edit_status"
+        << "edit_cond"
+        << "edit_color"
+        << "edit_qty"
+        << "edit_price"
+        << "edit_remark"
         << "-"
-        << "edit_bl_info_group";
+        << "edit_bl_catalog"
+        << "edit_bl_priceguide"
+        << "edit_bl_lotsforsale"
+        << "edit_bl_myinventory";
 
     m_contextmenu = createMenu("context", sl);
 
@@ -341,12 +364,6 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
         << "-"
         << "edit_price_to_priceguide"
         << "edit_price_inc_dec"
-#if !defined(Q_WS_MAC) // those Mac buttons are pretty large
-        << "-"
-        << "edit_bl_catalog"
-        << "edit_bl_priceguide"
-        << "edit_bl_lotsforsale"
-#endif
         << "|"
         << "widget_filter"
         << "|"
@@ -635,11 +652,6 @@ QAction *FrameWork::findAction(const QString &name)
     return name.isEmpty() ? 0 : static_cast <QAction *>(findChild<QAction *>(name));
 }
 
-QActionGroup *FrameWork::findActionGroup(const QString &name)
-{
-    return name.isEmpty() ? 0 : static_cast <QActionGroup *>(findChild<QActionGroup *>(name));
-}
-
 void FrameWork::createStatusBar()
 {
 #ifdef Q_WS_MAC
@@ -679,23 +691,12 @@ QMenu *FrameWork::createMenu(const QString &name, const QStringList &a_names)
     m->menuAction()->setObjectName(name);
 
     foreach(const QString &an, a_names) {
-        if (an == "-") {
+        if (an == "-")
             m->addSeparator();
-        }
-        else {
-            QAction *a = findAction(an);
-
-            if (a) {
-                m->addAction(a);
-            }
-            else {
-                QActionGroup *ag = findActionGroup(an);
-                if (ag)
-                    m->addActions(ag->actions());
-                else
-                    qWarning("Couldn't find action '%s'", qPrintable(an));
-            }
-        }
+        else if (QAction *a = findAction(an))
+            m->addAction(a);
+        else
+            qWarning("Couldn't find action '%s'", qPrintable(an));
     }
     return m;
 }
@@ -709,21 +710,18 @@ bool FrameWork::setupToolBar(QToolBar *t, const QStringList &a_names)
     foreach(const QString &an, a_names) {
         if (an == "-") {
             t->addSeparator();
-        }
-        else if (an == "|") {
+        } else if (an == "|") {
             QWidget *spacer = new QWidget();
             int sp = style()->pixelMetric(QStyle::PM_ToolBarSeparatorExtent);
             spacer->setFixedSize(sp, sp);
             t->addWidget(spacer);
-        }
-        else if (an == "<>") {
+        } else if (an == "<>") {
             QWidget *spacer = new QWidget();
             int sp = style()->pixelMetric(QStyle::PM_ToolBarSeparatorExtent);
             spacer->setMinimumSize(sp, sp);
             spacer->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
             t->addWidget(spacer);
-        }
-        else if (an.startsWith("widget_")) {
+        } else if (an.startsWith("widget_")) {
             if (an == "widget_filter") {
                 if (m_filter) {
                     qWarning("Only one filter widget can be added to toolbars");
@@ -753,8 +751,7 @@ bool FrameWork::setupToolBar(QToolBar *t, const QStringList &a_names)
                 */
                 m_filter->setMenu(m);
                 t->addWidget(m_filter);
-            }
-            else if (an == "widget_spinner") {
+            } else if (an == "widget_spinner") {
                 if (m_spinner) {
                     qWarning("Only one spinner widget can be added to toolbars");
                     continue;
@@ -764,34 +761,31 @@ bool FrameWork::setupToolBar(QToolBar *t, const QStringList &a_names)
                 m_spinner->setPixmap(QPixmap(":/images/spinner"));
                 t->addWidget(m_spinner);
             }
-        }
-        else {
-            QAction *a = findAction(an);
+        } else if (QAction *a = findAction(an)) {
+            t->addAction(a);
 
-            if (a) {
-                t->addAction(a);
-
-                // workaround for Qt4 bug: can't set the popup mode on a QAction
-                QToolButton *tb;
-                if (a->menu() && (tb = qobject_cast<QToolButton *>(t->widgetForAction(a))))
-                    tb->setPopupMode(QToolButton::InstantPopup);
-            }
-            else {
-                QActionGroup *ag = findActionGroup(an);
-                if (ag)
-                    t->addActions(ag->actions());
-                else
-                    qWarning("Couldn't find action '%s'", qPrintable(an));
-            }
+            // workaround for Qt4 bug: can't set the popup mode on a QAction
+            QToolButton *tb;
+            if (a->menu() && (tb = qobject_cast<QToolButton *>(t->widgetForAction(a))))
+                tb->setPopupMode(QToolButton::InstantPopup);
+        } else {
+            qWarning("Couldn't find action '%s'", qPrintable(an));
         }
     }
     return true;
 }
 
-inline QAction *newQAction(QObject *parent, const char *name, bool toggle = false, QObject *receiver = 0, const char *slot = 0)
+inline static QMenu *newQMenu(QWidget *parent, const char *name)
+{
+    QMenu *m = new QMenu(parent);
+    m->menuAction()->setObjectName(QLatin1String(name));
+    return m;
+}
+
+inline static QAction *newQAction(QObject *parent, const char *name, bool toggle = false, QObject *receiver = 0, const char *slot = 0)
 {
     QAction *a = new QAction(parent);
-    a->setObjectName(name);
+    a->setObjectName(QLatin1String(name));
     if (toggle)
         a->setCheckable(true);
     if (receiver && slot)
@@ -799,20 +793,7 @@ inline QAction *newQAction(QObject *parent, const char *name, bool toggle = fals
     return a;
 }
 
-inline QAction *setQActionIcon(QAction *a, const char *ico)
-{
-    a->setIcon(QIcon(ico));
-    return a;
-}
-
-inline QAction *newQActionSeparator(QObject *parent)
-{
-    QAction *a = new QAction(parent);
-    a->setSeparator(true);
-    return a;
-}
-
-inline QActionGroup *newQActionGroup(QObject *parent, const char *name, bool exclusive = false)
+inline static QActionGroup *newQActionGroup(QObject *parent, const char *name, bool exclusive = false)
 {
     QActionGroup *g = new QActionGroup(parent);
     g->setObjectName(name);
@@ -823,12 +804,11 @@ inline QActionGroup *newQActionGroup(QObject *parent, const char *name, bool exc
 void FrameWork::createActions()
 {
     QAction *a;
-    QActionGroup *g, *g2, *g3;
+    QActionGroup *g;
     QMenu *m;
 
 
     a = newQAction(this, "file_new", false, this, SLOT(fileNew()));
-
     a = newQAction(this, "file_open", false, this, SLOT(fileOpen()));
 
     m = new RecentMenu(this, this);
@@ -840,9 +820,7 @@ void FrameWork::createActions()
     (void) newQAction(this, "file_print");
     (void) newQAction(this, "file_print_pdf");
 
-
-    m = new QMenu(this);
-    m->menuAction()->setObjectName("file_import");
+    m = newQMenu(this, "file_import");
     m->addAction(newQAction(this, "file_import_bl_inv", false, this, SLOT(fileImportBrickLinkInventory())));
     m->addAction(newQAction(this, "file_import_bl_xml", false, this, SLOT(fileImportBrickLinkXML())));
     m->addAction(newQAction(this, "file_import_bl_order", false, this, SLOT(fileImportBrickLinkOrder())));
@@ -852,8 +830,7 @@ void FrameWork::createActions()
     m->addAction(newQAction(this, "file_import_ldraw_model", false, this, SLOT(fileImportLDrawModel())));
     m->addAction(newQAction(this, "file_import_briktrak", false, this, SLOT(fileImportBrikTrakInventory())));
 
-    m = new QMenu(this);
-    m->menuAction()->setObjectName("file_export");
+    m = newQMenu(this, "file_export");
     m->addAction(newQAction(this, "file_export_bl_xml"));
     m->addAction(newQAction(this, "file_export_bl_xml_clip"));
     m->addAction(newQAction(this, "file_export_bl_update_clip"));
@@ -889,49 +866,34 @@ void FrameWork::createActions()
     (void) newQAction(this, "edit_select_all");
     (void) newQAction(this, "edit_select_none");
 
-    g = newQActionGroup(this, "edit_modify", false);
-    g2 = newQActionGroup(this, "edit_modify_context", false);
-
-    m = new QMenu(this);
-    m->menuAction()->setObjectName("edit_status");
-    g->addAction(m->menuAction());
-    g2->addAction(m->menuAction());
-    g3 = newQActionGroup(this, 0, true);
-    m->addAction(setQActionIcon(newQAction(g3, "edit_status_include", true), ":images/status_include"));
-    m->addAction(setQActionIcon(newQAction(g3, "edit_status_exclude", true), ":images/status_exclude"));
-    m->addAction(setQActionIcon(newQAction(g3, "edit_status_extra",   true), ":images/status_extra"));
+    m = newQMenu(this, "edit_status");
+    g = newQActionGroup(this, 0, true);
+    m->addAction(newQAction(g, "edit_status_include", true));
+    m->addAction(newQAction(g, "edit_status_exclude", true));
+    m->addAction(newQAction(g, "edit_status_extra",   true));
     m->addSeparator();
     m->addAction(newQAction(this, "edit_status_toggle"));
 
-    m = new QMenu(this);
-    m->menuAction()->setObjectName("edit_cond");
-    g->addAction(m->menuAction());
-    g2->addAction(m->menuAction());
-    g3 = newQActionGroup(this, 0, true);
-    m->addAction(newQAction(g3, "edit_cond_new", true));
-    m->addAction(newQAction(g3, "edit_cond_used", true));
+    m = newQMenu(this, "edit_cond");
+    g = newQActionGroup(this, 0, true);
+    m->addAction(newQAction(g, "edit_cond_new", true));
+    m->addAction(newQAction(g, "edit_cond_used", true));
     m->addSeparator();
     m->addAction(newQAction(this, "edit_cond_toggle"));
     m->addSeparator();
-    g3 = newQActionGroup(this, 0, true);
-    m->addAction(newQAction(g3, "edit_subcond_none", true));
-    m->addAction(newQAction(g3, "edit_subcond_misb", true));
-    m->addAction(newQAction(g3, "edit_subcond_complete", true));
-    m->addAction(newQAction(g3, "edit_subcond_incomplete", true));
+    g = newQActionGroup(this, 0, true);
+    m->addAction(newQAction(g, "edit_subcond_none", true));
+    m->addAction(newQAction(g, "edit_subcond_misb", true));
+    m->addAction(newQAction(g, "edit_subcond_complete", true));
+    m->addAction(newQAction(g, "edit_subcond_incomplete", true));
 
-    g2->addAction(newQAction(g, "edit_color"));
+    (void) newQAction(this, "edit_color");
 
-    m = new QMenu(this);
-    m->menuAction()->setObjectName("edit_qty");
-    g->addAction(m->menuAction());
-    g2->addAction(m->menuAction());
+    m = newQMenu(this, "edit_qty");
     m->addAction(newQAction(this, "edit_qty_multiply"));
     m->addAction(newQAction(this, "edit_qty_divide"));
 
-    m = new QMenu(this);
-    m->menuAction()->setObjectName("edit_price");
-    g->addAction(m->menuAction());
-    g2->addAction(m->menuAction());
+    m = newQMenu(this, "edit_price");
     m->addAction(newQAction(this, "edit_price_set"));
     m->addAction(newQAction(this, "edit_price_inc_dec"));
     m->addAction(newQAction(this, "edit_price_to_priceguide"));
@@ -940,50 +902,38 @@ void FrameWork::createActions()
     (void) newQAction(this, "edit_bulk");
     (void) newQAction(this, "edit_sale");
 
-    m = new QMenu(this);
-    m->menuAction()->setObjectName("edit_comment");
-    g->addAction(m->menuAction());
+    m = newQMenu(this, "edit_comment");
     m->addAction(newQAction(this, "edit_comment_set"));
     m->addSeparator();
     m->addAction(newQAction(this, "edit_comment_add"));
     m->addAction(newQAction(this, "edit_comment_rem"));
 
-    m = new QMenu(this);
-    m->menuAction()->setObjectName("edit_remark");
-    g->addAction(m->menuAction());
-    g2->addAction(m->menuAction());
+    m = newQMenu(this, "edit_remark");
     m->addAction(newQAction(this, "edit_remark_set"));
     m->addSeparator();
     m->addAction(newQAction(this, "edit_remark_add"));
     m->addAction(newQAction(this, "edit_remark_rem"));
 
-    //tier
-
-    m = new QMenu(this);
-    m->menuAction()->setObjectName("edit_retain");
-    g->addAction(m->menuAction());
-    g3 = newQActionGroup(this, 0, true);
-    m->addAction(newQAction(g3, "edit_retain_yes", true));
-    m->addAction(newQAction(g3, "edit_retain_no", true));
+    m = newQMenu(this, "edit_retain");
+    g = newQActionGroup(this, 0, true);
+    m->addAction(newQAction(g, "edit_retain_yes", true));
+    m->addAction(newQAction(g, "edit_retain_no", true));
     m->addSeparator();
     m->addAction(newQAction(this, "edit_retain_toggle"));
 
-    m = new QMenu(this);
-    m->menuAction()->setObjectName("edit_stockroom");
-    g->addAction(m->menuAction());
-    g3 = newQActionGroup(this, 0, true);
-    m->addAction(newQAction(g3, "edit_stockroom_yes", true));
-    m->addAction(newQAction(g3, "edit_stockroom_no", true));
+    m = newQMenu(this, "edit_stockroom");
+    g = newQActionGroup(this, 0, true);
+    m->addAction(newQAction(g, "edit_stockroom_yes", true));
+    m->addAction(newQAction(g, "edit_stockroom_no", true));
     m->addSeparator();
     m->addAction(newQAction(this, "edit_stockroom_toggle"));
 
-    (void) newQAction(g, "edit_reserved");
+    (void) newQAction(this, "edit_reserved");
 
-    g = newQActionGroup(this, "edit_bl_info_group", false);
-    (void) newQAction(g, "edit_bl_catalog");
-    (void) newQAction(g, "edit_bl_priceguide");
-    (void) newQAction(g, "edit_bl_lotsforsale");
-    (void) newQAction(g, "edit_bl_myinventory");
+    (void) newQAction(this, "edit_bl_catalog");
+    (void) newQAction(this, "edit_bl_priceguide");
+    (void) newQAction(this, "edit_bl_lotsforsale");
+    (void) newQAction(this, "edit_bl_myinventory");
 
     (void) newQAction(this, "view_fullscreen", true, this, SLOT(viewFullScreen(bool)));
 
@@ -992,19 +942,15 @@ void FrameWork::createActions()
     (void) m_taskpanes->createItemVisibilityAction(this, "view_infobar");
 
     (void) newQAction(this, "view_statusbar", true, this, SLOT(viewStatusBar(bool)));
-
     (void) newQAction(this, "view_show_input_errors", true, Config::inst(), SLOT(setShowInputErrors(bool)));
-
     (void) newQAction(this, "view_difference_mode", true);
-
     (void) newQAction(this, "view_save_default_col");
-
     (void) newQAction(this, "extras_update_database", false, this, SLOT(updateDatabase()));
 
     a = newQAction(this, "extras_configure", false, this, SLOT(configure()));
     a->setMenuRole(QAction::PreferencesRole);
 
-    g = newQActionGroup(this, "extras_net", true);
+    g = newQActionGroup(this, 0, true);
     connect(g, SIGNAL(triggered(QAction *)), this, SLOT(setOnlineStatus(QAction *)));
     (void) newQAction(g, "extras_net_online", true);
     (void) newQAction(g, "extras_net_offline", true);
@@ -1019,7 +965,7 @@ void FrameWork::createActions()
 
     // set all icons that have a pixmap corresponding to name()
 
-    QList<QAction *> alist = findChildren<QAction *> ();
+    QList<QAction *> alist = findChildren<QAction *>();
     foreach(QAction *a, alist) {
         if (!a->objectName().isEmpty()) {
             QString path = QLatin1String(":/images/") + a->objectName();
