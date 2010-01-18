@@ -51,8 +51,11 @@ protected:
 private slots:
     void doEmitOpenDocument();
     void rebuildDatabase();
+    void clientMessage();
 
 private:
+    bool isClient(int timeout = 1000);
+
     bool initBrickLink();
     void exitBrickLink();
 

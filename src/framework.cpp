@@ -1102,20 +1102,23 @@ bool FrameWork::createWindow(Document *doc)
     if (!doc)
         return false;
 
+    Window *window = 0;
     foreach(QWidget *w, m_workspace->windowList()) {
-        Window *iw = qobject_cast<Window *>(w);
+        Window *ww = qobject_cast<Window *>(w);
 
-        if (iw && iw->document() == doc) {
-            m_workspace->setActiveWindow(w);
-            iw->setFocus();
-            return true;
+        if (ww && ww->document() == doc) {
+            window = ww;
+            break;
         }
     }
-    m_undogroup->addStack(doc->undoStack());
+    if (!window) {
+        m_undogroup->addStack(doc->undoStack());
+        window = new Window(doc, 0);
+        m_workspace->addWindow(window);
+    }
 
-    Window *nw = new Window(doc, 0);
-    m_workspace->addWindow(nw);
-
+    m_workspace->setActiveWindow(window);
+    window->setFocus();
     return true;
 }
 

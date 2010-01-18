@@ -21,8 +21,15 @@
 #include <QFileOpenEvent>
 #include <QProcess>
 #include <QDesktopServices>
+#include <QLocalSocket>
+#include <QLocalServer>
 
-#if defined( Q_OS_UNIX )
+#if defined(Q_OS_WIN)
+#  include <windows.h>
+#  ifdef MessageBox
+#    undef MessageBox
+#  endif
+#elif defined(Q_OS_UNIX)
 #  include <sys/utsname.h>
 #endif
 
@@ -60,6 +67,18 @@ Application::Application(bool rebuild_db_only, int _argc, char **_argv)
     m_enable_emit = false;
     m_has_alpha = rebuild_db_only ? false : (QPixmap::defaultDepth() >= 15);
 
+
+    // check for an already running instance
+    if (!rebuild_db_only) {
+        if (isClient()) {
+            // we cannot call quit directly, since there is
+            // no event loop to quit from...
+            QTimer::singleShot(0, this, SLOT(quit()));
+            return;
+        }
+    }
+
+
     setOrganizationName("Softforge");
     setOrganizationDomain("softforge.de");
     setApplicationName(QLatin1String(BRICKSTORE_NAME));
@@ -88,7 +107,7 @@ Application::Application(bool rebuild_db_only, int _argc, char **_argv)
 
     // initialize config & resource
     (void) Config::inst()->upgrade(BRICKSTORE_MAJOR, BRICKSTORE_MINOR, BRICKSTORE_PATCH);
-    (void) ReportManager::inst ( );
+    (void) ReportManager::inst();
 
     m_trans_qt = 0;
     m_trans_brickstore = 0;
@@ -281,6 +300,114 @@ bool Application::event(QEvent *e)
         return true;
     default:
         return QApplication::event(e);
+    }
+}
+
+bool Application::isClient(int timeout)
+{
+    enum { Undecided, Server, Client } state = Undecided;
+    QString socketName = QLatin1String("BrickStore");
+    QLocalServer *server = 0;
+
+#if defined(Q_OS_WIN)
+    // QLocalServer::listen() would succeed for any number of callers
+    HANDLE semaphore = ::CreateSemaphore(0, 0, 1, L"Local\\BrickStore");
+    state = (semaphore && (::GetLastError() == ERROR_ALREADY_EXISTS)) ? Client : Server;
+#endif
+    if (state != Client) {
+        server = new QLocalServer(this);
+
+        bool res = server->listen(socketName);
+#if defined(Q_OS_UNIX)
+        if (!res && server->serverError() == QAbstractSocket::AddressInUseError) {
+            QFile::remove(QDir::cleanPath(QDir::tempPath()) + QLatin1Char('/') + socketName);
+            res = server->listen(socketName);
+        }
+#endif
+        if (res) {
+            connect(server, SIGNAL(newConnection()), this, SLOT(clientMessage()));
+            state = Server;
+        }
+    }
+    if (state != Server) {
+        QLocalSocket client(this);
+
+        for (int i = 0; i < 2; ++i) { // try twice
+            client.connectToServer(socketName);
+            if (client.waitForConnected(timeout / 2) || i) {
+                break;
+            } else {
+#if defined(Q_OS_WIN)
+                Sleep(timeout / 4);
+#else
+                struct timespec ts = { (timeout / 4) / 1000, ((timeout / 4) % 1000) * 1000 * 1000 };
+                ::nanosleep(&ts, 0);
+#endif
+            }
+        }
+
+        if (client.state() == QLocalSocket::ConnectedState) {
+            QStringList files;
+            for (int i = 1; i < argc(); i++) {
+                QFileInfo fi(argv()[i]);
+                if (fi.exists() && fi.isFile())
+                    files << fi.absoluteFilePath();
+            }
+            QByteArray data;
+            QDataStream ds(&data, QIODevice::WriteOnly);
+            ds << qint32(0) << files;
+            ds.device()->seek(0);
+            ds << qint32(data.size() - sizeof(qint32));
+
+            bool res = (client.write(data) == data.size());
+            res &= client.waitForBytesWritten(timeout / 2);
+            res &= client.waitForReadyRead(timeout / 2);
+            res &= (client.read(1) == QByteArray(1, 'X'));
+
+            if (res) {
+                delete server;
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+void Application::clientMessage()
+{
+    QLocalServer *server = qobject_cast<QLocalServer *>(sender());
+    if (!server)
+        return;
+    QLocalSocket *client = server->nextPendingConnection();
+    if (!client)
+        return;
+
+    QDataStream ds(client);
+    QStringList files;
+    bool header = true;
+    int need = sizeof(qint32);
+    while (need) {
+        int got = client->bytesAvailable();
+        if (got < need) {
+            client->waitForReadyRead();
+        } else if (header) {
+            need = 0;
+            ds >> need;
+            header = false;
+        } else {
+            ds >> files;
+            need = 0;
+        }
+    }
+    client->write("X", 1);
+
+    m_files_to_open += files;
+    doEmitOpenDocument();
+
+    if (FrameWork::inst()) {
+        FrameWork::inst()->setWindowState(FrameWork::inst()->windowState() & ~Qt::WindowMinimized);
+        FrameWork::inst()->raise();
+        FrameWork::inst()->activateWindow();
     }
 }
 
