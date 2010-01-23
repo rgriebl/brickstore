@@ -153,6 +153,12 @@ private:
     QColor  m_color;
     QString m_category_name;
     uint    m_type;
+    uint    m_parts_count;
+    uint    m_in_sets_count;
+    uint    m_wanted_count;
+    uint    m_for_sale_count;
+    quint16 m_year_from;
+    quint16 m_year_to;
 
 private:
     Color();
@@ -183,6 +189,8 @@ public:
     InvItemList  consistsOf() const;
 
     uint index() const { return m_index; }   // only for internal use (picture/priceguide hashes)
+
+    static int compareId(const char *id1, const char *id2);
 
 private:
     char *            m_id;
@@ -766,6 +774,8 @@ public:
 protected:
     InternalAppearsInModel(const BrickLink::InvItemList &list, QObject *parent);
     InternalAppearsInModel(const Item *item, const Color *color, QObject *parent);
+
+    void init(const InvItemList &list);
 
     const Item *        m_item;
     const Color *       m_color;

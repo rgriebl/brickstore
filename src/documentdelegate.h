@@ -14,11 +14,12 @@
 #ifndef DOCUMENTDELEGATE_H
 #define DOCUMENTDELEGATE_H
 
-#include <QStyledItemDelegate>
+#include <QItemDelegate>
 #include <QPointer>
 #include <QVector>
 #include <QColor>
 #include <QHash>
+#include <QCache>
 
 #include "document.h"
 
@@ -29,7 +30,7 @@ class QLineEdit;
 class QTableView;
 
 
-class DocumentDelegate : public QStyledItemDelegate {
+class DocumentDelegate : public QItemDelegate {
 public:
     DocumentDelegate(Document *doc, DocumentProxyModel *view, QTableView *table);
 
@@ -63,6 +64,7 @@ protected:
 
     static QVector<QColor> s_shades;
     static QHash<BrickLink::Status, QIcon> s_status_icons;
+    static QCache<QString, QPixmap> s_tag_cache;
 };
 
 #endif

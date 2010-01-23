@@ -175,6 +175,18 @@ int BrickLink::Item::compare(const BrickLink::Item **a, const BrickLink::Item **
     return d ? d : qstrcmp((*a)->m_id, (*b)->m_id);
 }
 
+int BrickLink::Item::compareId(const char *id1, const char *id2)
+{
+    if (!id1 || !id2)
+        return !id1 ? (!id2 ? 0 : -1) : 1;
+    if (isdigit(id1[0]) && isdigit(id2[0])) {
+        int d = atoi(id1) - atoi(id2);
+        if (d)
+            return d;
+    }
+    return qstrcmp(id1, id2);
+}
+
 uint _dwords_for_appears  = 0;
 uint _qwords_for_consists = 0;
 

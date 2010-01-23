@@ -177,6 +177,17 @@ template <> Color *TextImport::parse<Color> (uint count, const char **strs)
     if (!strcmp(strs[3], "Pearl"))  col->m_type |= Color::Pearl;
     if (!strcmp(strs[3], "Milky"))  col->m_type |= Color::Milky;
     if (!strcmp(strs[3], "Modulex"))  col->m_type |= Color::Modulex;
+
+    if (count >= 8) {
+        col->m_parts_count    = strtol(strs[4], 0, 10);
+        col->m_in_sets_count  = strtol(strs[5], 0, 10);
+        col->m_wanted_count   = strtol(strs[6], 0, 10);
+        col->m_for_sale_count = strtol(strs[7], 0, 10);
+    }
+    if (count >= 10) {
+        col->m_year_from = strtol(strs[8], 0, 10);
+        col->m_year_to   = strtol(strs[9], 0, 10);
+    }
     return col;
 }
 

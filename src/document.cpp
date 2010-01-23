@@ -288,13 +288,21 @@ QList<Document *> Document::s_documents;
 
 Document *Document::createTemporary(const BrickLink::InvItemList &list)
 {
-    Document *doc = new Document();
-    doc->m_autosave_timer.stop();
-    s_documents.removeAll(doc);
-
+    Document *doc = new Document(1 /*dummy*/);
     doc->setBrickLinkItems(list, 1);
-
     return doc;
+}
+
+Document::Document(int /*is temporary*/)
+    : m_uuid(QUuid::createUuid())
+{
+    MODELTEST_ATTACH(this)
+
+    m_undo = 0;
+    m_order = 0;
+    m_error_mask = 0;
+
+    connect(BrickLink::core(), SIGNAL(pictureUpdated(BrickLink::Picture *)), this, SLOT(pictureUpdated(BrickLink::Picture *)));
 }
 
 Document::Document()
@@ -428,6 +436,16 @@ bool Document::clear()
     return true;
 }
 
+int Document::positionOf(Item *item) const
+{
+    return m_items.indexOf(item);
+}
+
+const Document::Item *Document::itemAt(int position) const
+{
+    return (position >= 0 && position < m_items.count()) ? m_items.at(position) : 0;
+}
+
 bool Document::insertItems(const QVector<int> &positions, const ItemList &items)
 {
     m_undo->push(new AddRemoveCmd(AddRemoveCmd::Add, this, positions, items /*, true*/));
@@ -450,14 +468,14 @@ bool Document::insertItem(int position, Item *item)
     return insertItems(pack<QVector<int> > (position), pack<ItemList> (item));
 }
 
-bool Document::changeItem(Item *position, const Item &item)
+bool Document::changeItem(Item *item, const Item &value)
 {
-    return changeItem(m_items.indexOf(position), item);
+    return changeItem(positionOf(item), value);
 }
 
-bool Document::changeItem(int position, const Item &item)
+bool Document::changeItem(int position, const Item &value)
 {
-    m_undo->push(new ChangeCmd(this, position, item /*, true*/));
+    m_undo->push(new ChangeCmd(this, position, value /*, true*/));
     return true;
 }
 
@@ -599,29 +617,33 @@ Document *Document::fileOpen(const QString &s)
     return doc;
 }
 
-Document *Document::fileImportBrickLinkInventory(const BrickLink::Item *preselect)
+Document *Document::fileImportBrickLinkInventory(const BrickLink::Item *item)
 {
     ImportInventoryDialog dlg(FrameWork::inst());
 
-    if (preselect)
-        dlg.setItem(preselect);
+    if (item && !item->hasInventory())
+        return 0;
 
-    if (dlg.exec() == QDialog::Accepted) {
-        const BrickLink::Item *it = dlg.item();
-        int qty = dlg.quantity();
+    if (item || (dlg.exec() == QDialog::Accepted)) {
+        int qty = 1;
 
-        if (it && (qty > 0)) {
-            BrickLink::InvItemList items = it->consistsOf();
+        if (!item) {
+            item = dlg.item();
+            qty = dlg.quantity();
+        }
+
+        if (item && (qty > 0)) {
+            BrickLink::InvItemList items = item->consistsOf();
 
             if (!items.isEmpty()) {
                 Document *doc = new Document();
 
                 doc->setBrickLinkItems(items, qty);
-                doc->setTitle(tr("Inventory for %1").arg(it->id()));
+                doc->setTitle(tr("Inventory for %1").arg(item->id()));
                 return doc;
             }
             else
-                MessageBox::warning(FrameWork::inst(), tr("Internal error: Could not create an Inventory object for item %1").arg(CMB_BOLD(it->id())));
+                MessageBox::warning(FrameWork::inst(), tr("Internal error: Could not create an Inventory object for item %1").arg(CMB_BOLD(item->id())));
         }
         else
             MessageBox::warning(FrameWork::inst(), tr("Requested item was not found in the database."));

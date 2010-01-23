@@ -607,19 +607,19 @@ bool BrickLink::ItemModel::filterAccepts(const void *pointer) const
 BrickLink::InternalAppearsInModel::InternalAppearsInModel(const Item *item, const Color *color, QObject *parent)
     : QAbstractTableModel(parent), m_item(item), m_color(color)
 {
-    MODELTEST_ATTACH(this)
-
-    if (item)
-        m_appearsin = item->appearsIn(color);
-
-   foreach(const AppearsInColor &vec, m_appearsin) {
-        foreach(const AppearsInItem &item, vec)
-            m_items.append(const_cast<AppearsInItem *>(&item));
-   }
+    InvItemList list;
+    InvItem invitem(color, item);
+    list.append(&invitem);
+    init(list);
 }
 
 BrickLink::InternalAppearsInModel::InternalAppearsInModel(const InvItemList &list, QObject *parent)
     : QAbstractTableModel(parent), m_item(0), m_color(0)
+{
+    init(list);
+}
+
+void BrickLink::InternalAppearsInModel::init(const InvItemList &list)
 {
     MODELTEST_ATTACH(this)
 
@@ -628,6 +628,9 @@ BrickLink::InternalAppearsInModel::InternalAppearsInModel(const InvItemList &lis
         bool first_item = true;
 
         foreach (InvItem *invitem, list) {
+            if (!invitem->item())
+                continue;
+
             foreach (const AppearsInColor &vec, invitem->item()->appearsIn(invitem->color())) {
                 foreach (const AppearsInItem &item, vec) {
                     QMap<const Item *, int>::iterator it = unique.find(item.second);
@@ -640,7 +643,7 @@ BrickLink::InternalAppearsInModel::InternalAppearsInModel(const InvItemList &lis
             first_item = false;
         }
         for (QMap<const Item *, int>::iterator it = unique.begin(); it != unique.end(); ++it) {
-            if (it.value() == list.count())
+            if (it.value() >= list.count())
                 m_items.append(new AppearsInItem(-1, it.key()));
         }
     }
@@ -767,7 +770,7 @@ bool BrickLink::AppearsInModel::lessThan(const QModelIndex &left, const QModelIn
         switch (left.column()) {
         default:
         case  0: return ai1->first < ai2->first;
-        case  1: return (qstrcmp(ai1->second->id(), ai2->second->id()) < 0);
+        case  1: return (BrickLink::Item::compareId(ai1->second->id(), ai2->second->id()) < 0);
         case  2: return (qstrcmp(ai1->second->name(), ai2->second->name()) < 0 );
         }
     }

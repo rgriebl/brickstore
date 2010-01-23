@@ -11,18 +11,9 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <QLineEdit>
-#include <QValidator>
+#include <QSpinBox>
+#include <QDialogButtonBox>
 #include <QPushButton>
-#include <QDateTimeEdit>
-#include <QStackedWidget>
-#include <QLabel>
-#include <QComboBox>
-#include <QHeaderView>
-#include <QAbstractTableModel>
-#include <QItemDelegate>
-#include <QColorGroup>
-#include <QVariant>
 
 #include "import.h"
 #include "progressdialog.h"

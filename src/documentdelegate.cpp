@@ -22,7 +22,7 @@
 #include <QIcon>
 #include <QTableView>
 #include <QHeaderView>
-#include <QStyledItemDelegate>
+#include <QItemDelegate>
 #include <QStyleOptionFrameV2>
 #include <QStyle>
 #include <QApplication>
@@ -34,12 +34,15 @@
 
 QVector<QColor> DocumentDelegate::s_shades;
 QHash<BrickLink::Status, QIcon> DocumentDelegate::s_status_icons;
-
+QCache<QString, QPixmap> DocumentDelegate::s_tag_cache;
 
 DocumentDelegate::DocumentDelegate(Document *doc, DocumentProxyModel *view, QTableView *table)
-    : QStyledItemDelegate(view), m_doc(doc), m_view(view), m_table(table),
+    : QItemDelegate(view), m_doc(doc), m_view(view), m_table(table),
       m_select_item(0), m_select_color(0), m_read_only(false)
 {
+#ifndef Q_WS_MAC
+    connect(table, SIGNAL(activated(const QModelIndex &)), table, SLOT(edit(const QModelIndex &)));
+#endif
 }
 
 QColor DocumentDelegate::shadeColor(int idx, qreal alpha)
@@ -86,7 +89,7 @@ QSize DocumentDelegate::sizeHint(const QStyleOptionViewItem &option1, const QMod
     if (idx.column() == Document::Picture)
         w = picsize.width() / 2 + 4;
     else
-        w = QStyledItemDelegate::sizeHint(option1, idx).width();
+        w = QItemDelegate::sizeHint(option1, idx).width();
 
     QStyleOptionViewItemV4 option(option1);
     return QSize(w, defaultItemHeight(option.widget));
@@ -112,7 +115,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
     int h = option.rect.height();
     int margin = 2;
     int align = (m_view->data(idx, Qt::TextAlignmentRole).toInt() & ~Qt::AlignVertical_Mask) | Qt::AlignVCenter;
-    QString has_inv_tag;
+    QString tag;
 
 
     QPixmap pix;
@@ -142,7 +145,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
 
     case Document::Description:
         if (it->item()->hasInventory())
-            has_inv_tag = tr("Inv");
+            tag = tr("Inv");
         break;
 
     case Document::Picture: {
@@ -239,24 +242,37 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
         }
     }
 
-    if (!has_inv_tag.isEmpty()) {
-        int itw = option.fontMetrics.width(has_inv_tag) + 2;
-        int ith = option.fontMetrics.height() + 2;
+    p->fillRect(option.rect, bg);
+    if (!tag.isEmpty()) {
+        int itw = option.fontMetrics.width(tag) * 2;
 
-        QRadialGradient grad(option.rect.bottomRight(), itw + ith);
-        QColor col = fg;
-        col.setAlphaF(0.2f);
-        grad.setColorAt(0, col);
-        grad.setColorAt(0.5, col);
-        grad.setColorAt(1, bg);
+        QString key = QLatin1String("TAG_%1_%2_%4");
+        key = key.arg(tag).arg(itw).arg(fg.rgba());
 
-        p->fillRect(option.rect, grad);
+        QPixmap *pix = s_tag_cache[key];
+        if (!pix) {
+            pix = new QPixmap(itw, itw);
+            pix->fill(Qt::transparent);
+            QPainter pixp(pix);
 
+            QRadialGradient grad(pix->rect().bottomRight(), pix->width());
+            QColor col = fg;
+            col.setAlphaF(0.2f);
+            grad.setColorAt(0, col);
+            grad.setColorAt(0.5, col);
+            grad.setColorAt(1, Qt::transparent);
+
+            pixp.fillRect(pix->rect(), grad);
+            s_tag_cache.insert(key, pix);
+        }
+
+        int w = qMin(pix->width(), option.rect.width());
+        int h = qMin(pix->height(), option.rect.height());
+
+        p->drawPixmap(option.rect.right() - w + 1, option.rect.bottom() - h + 1, *pix, pix->width() - w, pix->height() - h, w, h);
         p->setPen(bg);
-        p->drawText(option.rect, Qt::AlignRight | Qt::AlignBottom, has_inv_tag);
+        p->drawText(option.rect.adjusted(0, 0, -2, -2), Qt::AlignRight | Qt::AlignBottom, tag);
     }
-    else
-        p->fillRect(option.rect, bg);
 
 
     if ((it->errors() & m_doc->errorMask() & (1ULL << idx.column()))) {
@@ -390,7 +406,7 @@ bool DocumentDelegate::editorEvent(QEvent *e, QAbstractItemModel *model, const Q
     default: break;
     }
 
-    return QStyledItemDelegate::editorEvent(e, model, option, idx);
+    return QItemDelegate::editorEvent(e, model, option, idx);
 }
 
 bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyleOptionViewItem &option, const QModelIndex &idx)

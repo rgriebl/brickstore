@@ -96,8 +96,16 @@ public:
     public:
         ItemList() { }
         ItemList(const ItemList &copy) : QList<Item *>(copy) { }
+        ItemList(const BrickLink::InvItemList &iil)
+        {
+            foreach (const BrickLink::InvItem *ii, iil)
+                append(new Item(*ii));
+        }
 
-        operator const BrickLink::InvItemList &() const { return reinterpret_cast<const BrickLink::InvItemList &>(*this); }
+        operator const BrickLink::InvItemList &() const
+        {
+            return reinterpret_cast<const BrickLink::InvItemList &>(*this);
+        }
     };
 
     class Statistics {
@@ -169,14 +177,17 @@ public:
     const ItemList &items() const;
     bool clear();
 
-    bool insertItems(const QVector<int> &positions, const ItemList &list);
+    bool insertItems(const QVector<int> &positions, const ItemList &items);
     bool insertItem(int position, Item *item);
 
-    bool removeItems(const ItemList &positions);
-    bool removeItem(Item *position);
+    bool removeItems(const ItemList &items);
+    bool removeItem(Item *item);
 
-    bool changeItem(int position, const Item &item);
-    bool changeItem(Item *position, const Item &item);
+    bool changeItem(int position, const Item &value);
+    bool changeItem(Item *item, const Item &value);
+
+    int positionOf(Item *item) const;
+    const Item *itemAt(int position) const;
 
     void resetDifferences(const ItemList &items);
 
@@ -233,6 +244,7 @@ private slots:
     void autosave();
 
 private:
+    Document(int dummy);
     void deleteAutosave();
     static Document *fileLoadFrom(const QString &s, const char *type, bool import_only = false);
     bool fileSaveTo(const QString &s, const char *type, bool export_only, const ItemList &itemlist);

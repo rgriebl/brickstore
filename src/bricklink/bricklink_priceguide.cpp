@@ -122,9 +122,6 @@ void BrickLink::PriceGuide::parse(const QByteArray &ba)
     memset(m_lots, 0, sizeof(m_lots));
     memset(m_prices, 0, sizeof(m_prices));
 
-    bool seen[TimeCount][ConditionCount];
-    ::memset(seen, 0, sizeof(seen));
-
     QTextStream ts(ba);
     QString line;
 
@@ -163,17 +160,10 @@ void BrickLink::PriceGuide::parse(const QByteArray &ba)
             m_prices[t][c][Average]  = Currency::fromUSD(sl[5]);
             m_prices[t][c][WAverage] = Currency::fromUSD(sl[6]);
             m_prices[t][c][Highest]  = Currency::fromUSD(sl[7]);
-
-            seen[t][c] = true;
         }
     }
 
     m_valid = true;
-
-    for (int t = 0; t < TimeCount; t++) {
-        for (int c = 0; c < ConditionCount; c++)
-            m_valid &= seen[t][c];
-    }
 }
 
 

@@ -1324,8 +1324,33 @@ void Window::on_edit_mergeitems_triggered()
 void Window::on_edit_partoutitems_triggered()
 {
     if (selection().count() >= 1) {
-        foreach(Document::Item *item, selection())
-            FrameWork::inst()->fileImportBrickLinkInventory(item->item());
+        bool inplace = (MessageBox::question(this, tr("Should the selected items be parted out into the current document, replacing the selected items?"), QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes) == QMessageBox::Yes);
+
+        m_doc->beginMacro();
+
+        DisableUpdates disupd(w_list);
+        int partcount = 0;
+
+        foreach(Document::Item *item, selection()) {
+            if (inplace) {
+                if (item->item()->hasInventory()) {
+                    BrickLink::InvItemList items = item->item()->consistsOf();
+                    if (!items.isEmpty()) {
+                        int startpos = m_doc->positionOf(item);
+                        QVector<int> positions(items.size());
+                        for (int i = 0; i < items.size(); ++i)
+                            positions[i] = startpos + i;
+                        m_doc->insertItems(positions, Document::ItemList(items));
+                        m_doc->removeItem(item);
+                        partcount++;
+                    }
+                    qDeleteAll(items);
+                }
+            } else {
+                FrameWork::inst()->fileImportBrickLinkInventory(item->item());
+            }
+        }
+        m_doc->endMacro(tr("Parted out %1 Items").arg(partcount));
     }
     else
         QApplication::beep();
