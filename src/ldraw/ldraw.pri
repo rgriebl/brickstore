@@ -1,4 +1,4 @@
-win32|macx|!isEmpty(QMAKE_LIBS_QT_OPENGL):QT *= opengl
+QT *= opengl
 
 RELPWD = $$replace(PWD,$$_PRO_FILE_PWD_,.)
 

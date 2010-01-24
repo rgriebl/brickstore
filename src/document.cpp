@@ -105,8 +105,8 @@ AddRemoveCmd::AddRemoveCmd(Type t, Document *doc, const QVector<int> &positions,
 
 AddRemoveCmd::~AddRemoveCmd()
 {
-    //if (m_type == Add)
-    qDeleteAll(m_items);
+    if (m_type == Add)
+        qDeleteAll(m_items);
 }
 
 int AddRemoveCmd::id() const
@@ -156,9 +156,9 @@ bool AddRemoveCmd::mergeWith(const QUndoCommand *other)
 QString AddRemoveCmd::genDesc(bool is_add, uint count)
 {
     if (is_add)
-        return Document::tr("Added %n item(s)").arg(count);
+        return Document::tr("Added %n item(s)", 0, count);
     else
-        return Document::tr("Removed %n item(s)").arg(count);
+        return Document::tr("Removed %n item(s)", 0, count);
 }
 
 

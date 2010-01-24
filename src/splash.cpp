@@ -17,6 +17,9 @@
 #include <QGradient>
 #include <QPicture>
 #include <QPalette>
+#if defined(Q_WS_X11)
+#  include <QX11Info>
+#endif
 
 #include "application.h"
 #include "splash.h"
