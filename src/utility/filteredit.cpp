@@ -27,13 +27,14 @@
 
 //#if 0
 #if defined( Q_WS_MAC )
-//#  define MAC_USE_NATIVE_SEARCHFIELD
+#  define MAC_USE_NATIVE_SEARCHFIELD
 #else
 #  undef MAC_USE_NATIVE_SEARCHFIELD
 #endif
 
 #if defined( MAC_USE_NATIVE_SEARCHFIELD )
 
+#include <Carbon/Carbon.h>
 
 // copied and simplified to static functions from private/qcore_mac_p.h
 class QCFString {
