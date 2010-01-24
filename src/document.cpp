@@ -83,14 +83,19 @@ void ChangeCmd::undo()
 
 bool ChangeCmd::mergeWith(const QUndoCommand *other)
 {
+#if 0 // untested
     const ChangeCmd *that = static_cast <const ChangeCmd *>(other);
 
     if ((m_merge_allowed && that->m_merge_allowed) &&
         (m_doc == that->m_doc) &&
         (m_position == that->m_position))
     {
+        m_item = that->m_item;
         return true;
     }
+#else
+    Q_UNUSED(other);
+#endif
     return false;
 }
 
@@ -509,12 +514,11 @@ void Document::removeItemsDirect(ItemList &items, QVector<int> &positions)
     positions.resize(items.count());
 
 //    emit itemsAboutToBeRemoved(items);
-
-    int i = 0;
-    foreach(Item *item, items) {
+    for (int i = items.count() - 1; i >= 0; --i) {
+        Item *item = items[i];
         int idx = m_items.indexOf(item);
         emit beginRemoveRows(QModelIndex(), idx, idx);
-        positions[i++] = idx;
+        positions[i] = idx;
         m_items.removeAt(idx);
         emit endRemoveRows();
     }
@@ -697,7 +701,7 @@ Document *Document::fileImportBrickLinkStore()
 Document *Document::fileImportBrickLinkCart()
 {
     QString url = QApplication::clipboard()->text(QClipboard::Clipboard);
-    QRegExp rx_valid("http://www\\.bricklink\\.com/storeCart\\.asp\\?h=[0-9]+&b=[0-9]+");
+    QRegExp rx_valid("http://www\\.bricklink\\.com/storeCart\\.asp\\?h=[0-9]+&b=[-0-9]+");
 
     if (!rx_valid.exactMatch(url))
         url = "http://www.bricklink.com/storeCart.asp?h=______&b=______";
@@ -708,7 +712,7 @@ Document *Document::fileImportBrickLinkCart()
                                "<b>Copy Link Location</b> (Firefox), <b>Copy Link</b> (Safari) "
                                "or <b>Copy Shortcut</b> (Internet Explorer).<br /><br />"
                                "<em>Super-lots and custom items are <b>not</b> supported</em>."), url)) {
-        QRegExp rx("\\?h=([0-9]+)&b=([0-9]+)");
+        QRegExp rx("\\?h=([0-9]+)&b=([-0-9]+)");
         rx.indexIn(url);
         int shopid = rx.cap(1).toInt();
         int cartid = rx.cap(2).toInt();

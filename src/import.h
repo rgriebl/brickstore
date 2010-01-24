@@ -377,7 +377,7 @@ private slots:
                 QTextStream ts(&cart_buffer);
                 QString line;
                 QString items_line;
-                QString sep = "<TR><TD HEIGHT=\"65\" ALIGN=\"CENTER\">";
+                QString sep = "<TR CLASS=\"tm\"><TD HEIGHT=\"65\" ALIGN=\"CENTER\">";
                 int invalid_items = 0;
                 bool parsing_items = false;
 
@@ -395,33 +395,32 @@ private slots:
                         break;
                 }
 
-                QStringList strlist = line.split(sep);
+                QStringList strlist = items_line.split(sep, QString::SkipEmptyParts);
 
                 foreach(const QString &str, strlist) {
                     BrickLink::InvItem *ii = 0;
 
-                    QRegExp rx_type(" ([A-Z])-No: ");
-                    QRegExp rx_ids("HEIGHT='60' SRC='/([A-Z])/([^ ]+).gif' NAME=");
-                    QRegExp rx_qty_price(" VALUE=\"([0-9]+)\">(&nbsp;\\(x[0-9]+\\))?<BR>Qty Available: <B>[0-9]+</B><BR>Each:&nbsp;<B>\\$([0-9.]+)</B>");
-                    QRegExp rx_names("<TD><FONT FACE=\"MS Sans Serif,Geneva\" SIZE=\"1\">(.+)</FONT></TD><TD VALIGN=\"TOP\" NOWRAP>");
+                    // US$ only at the moment
+                    QRegExp rx_ids("HEIGHT='60' SRC='http://img.bricklink.com/([A-Z])/([^ ]+).gif' NAME=");
+                    QRegExp rx_qty_price(" VALUE=\"([0-9]+)\">(&nbsp;\\(x[0-9]+\\))?<BR>Qty Available: <B>[0-9]+</B><BR>Each:&nbsp;<B>US \\$([0-9.]+)</B>");
+                    QRegExp rx_names("</TD><TD>(.+)</TD><TD VALIGN=\"TOP\" NOWRAP>");
                     QString str_cond("<B>New</B>");
 
-                    rx_type.indexIn(str);
                     rx_ids.indexIn(str);
                     rx_names.indexIn(str);
 
                     const BrickLink::Item *item = 0;
                     const BrickLink::Color *col = 0;
 
-                    if (rx_type.cap(1).length() == 1) {
+                    if (rx_ids.cap(1).length() == 1) {
                         int slash = rx_ids.cap(2).indexOf('/');
 
                         if (slash >= 0) {   // with color
-                            item = BrickLink::core()->item(rx_type.cap(1)[0].toLatin1(), rx_ids.cap(2).mid(slash + 1).toLatin1());
+                            item = BrickLink::core()->item(rx_ids.cap(1)[0].toLatin1(), rx_ids.cap(2).mid(slash + 1).toLatin1());
                             col = BrickLink::core()->color(rx_ids.cap(2).left(slash).toInt());
                         }
                         else {
-                            item = BrickLink::core()->item(rx_type.cap(1)[0].toLatin1(), rx_ids.cap(2).toLatin1().constData());
+                            item = BrickLink::core()->item(rx_ids.cap(1)[0].toLatin1(), rx_ids.cap(2).toLatin1().constData());
                             col = BrickLink::core()->color(0);
                         }
                     }
