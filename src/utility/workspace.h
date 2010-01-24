@@ -16,7 +16,8 @@
 
 #include <QWidget>
 
-class TabWidget;
+class TabBar;
+class QStackedLayout;
 class QMenu;
 
 
@@ -41,14 +42,19 @@ public slots:
 
 protected:
     virtual bool eventFilter(QObject *o, QEvent *e);
-    void resizeEvent(QResizeEvent *);
 
 private slots:
-    void closeWindow(int idx);
-    void currentChangedHelper(int);
+    void closeTab(int idx);
+    void activateTab(int idx);
+    void moveTab(int from, int to);
+    void removeTab(int idx);
+    void updateVisibility();
 
 private:
-    TabWidget *  m_tabwidget;
+    TabBar *        m_tabbar;
+    QStackedLayout *m_stack;
+    QWidget *       m_left;
+    QWidget *       m_right;
 };
 
 #endif

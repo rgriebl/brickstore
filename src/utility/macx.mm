@@ -1,7 +1,7 @@
 #include <qglobal.h>
 #include "qmacdefines_mac.h"
 
-#ifdef __OBJC__
+#if QT_MAC_USE_COCOA
 #  include <Cocoa/Cocoa.h>
 #else
 #  include <Carbon/Carbon.h>
