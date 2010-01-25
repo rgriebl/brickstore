@@ -482,6 +482,12 @@ void FrameWork::languageChange()
 
 void FrameWork::translateActions()
 {
+#ifdef Q_WS_MAC
+    static bool onMac = true;
+#else
+    static bool onMac = false;
+#endif
+
     struct {
         const char *m_name;
         QString     m_text;
@@ -519,7 +525,7 @@ void FrameWork::translateActions()
         { "edit_cut",                       tr("Cut"),                                tr("Ctrl+X", "Edit|Cut") },
         { "edit_copy",                      tr("Copy"),                               tr("Ctrl+C", "Edit|Copy") },
         { "edit_paste",                     tr("Paste"),                              tr("Ctrl+V", "Edit|Paste") },
-        { "edit_delete",                    tr("Delete"),                             tr("Delete", "Edit|Delete") },
+        { "edit_delete",                    tr("Delete"),                             onMac ? tr("Backspace", "Edit|Delete (Mac)") : tr("Delete", "Edit|Delete (Win,Unix)") },
         { "edit_additems",                  tr("Add Items..."),                       tr("Insert", "Edit|AddItems") },
         { "edit_subtractitems",             tr("Subtract Items..."),                  0 },
         { "edit_mergeitems",                tr("Consolidate Items..."),               0 },

@@ -32,12 +32,6 @@ public:
     bool hasExcludeWithoutInventoryFilter() const;
     void setExcludeWithoutInventoryFilter(bool b);
 
-    enum ViewMode {
-        ListMode = 0,
-        TableMode,
-        ThumbsMode
-    };
-
     virtual QSize sizeHint() const;
 
     const BrickLink::Category *currentCategory() const;
@@ -58,10 +52,6 @@ public slots:
     void categoryChanged();
     void itemChanged();
 
-    void showAsList();
-    void showAsTable();
-    void showAsThumbs();
-
     void itemConfirmed();
 
     void findItem();
@@ -70,6 +60,7 @@ protected slots:
     void applyFilter();
     void languageChange();
     void showContextMenu(const QPoint &);
+    void setViewMode(int);
 
 protected:
     virtual void showEvent(QShowEvent *);

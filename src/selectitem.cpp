@@ -56,10 +56,7 @@ public:
     QTreeView *      w_itemthumbs;
     QListView *      w_thumbs;
     FilterEdit *     w_filter;
-    QToolButton *    w_viewbutton;
-    QAction *        m_viewaction[3];
-    QMenu *          w_viewmenu;
-    SelectItem::ViewMode m_viewmode;
+    QComboBox *      w_viewmode;
     bool             m_inv_only;
 };
 
@@ -126,31 +123,11 @@ void SelectItem::init()
 
     d->w_filter = new FilterEdit(this);
 
-    d->w_viewmenu = new QMenu(this);
-    QActionGroup *ag = new QActionGroup(this);
-    ag->setExclusive(true);
-
-    d->m_viewaction[ListMode] = new QAction(QIcon(":/images/viewmode_list"), QString(), ag);
-    d->m_viewaction[ListMode]->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_1));
-    d->m_viewaction[ListMode]->setCheckable(true);
-    connect(d->m_viewaction[ListMode], SIGNAL(triggered()), this, SLOT(showAsList()));
-    d->m_viewaction[TableMode] = new QAction(QIcon(":/images/viewmode_images"), QString(), ag);
-    d->m_viewaction[TableMode]->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_2));
-    d->m_viewaction[TableMode]->setCheckable(true);
-    connect(d->m_viewaction[TableMode], SIGNAL(triggered()), this, SLOT(showAsTable()));
-    d->m_viewaction[ThumbsMode] = new QAction(QIcon(":/images/viewmode_thumbs"), QString(), ag);
-    d->m_viewaction[ThumbsMode]->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_3));
-    d->m_viewaction[ThumbsMode]->setCheckable(true);
-    connect(d->m_viewaction[ThumbsMode], SIGNAL(triggered()), this, SLOT(showAsThumbs()));
-
-    d->w_viewmenu->addActions(ag->actions());
-
-    d->w_viewbutton = new QToolButton(this);
-    d->w_viewbutton->setAutoRaise(true);
-    d->w_viewbutton->setFocusPolicy(Qt::NoFocus);
-    d->w_viewbutton->setPopupMode(QToolButton::InstantPopup);
-    d->w_viewbutton->setMenu(d->w_viewmenu);
-    d->w_viewbutton->setIcon(QIcon(":/images/viewmode_list"));
+    d->w_viewmode = new QComboBox(this);
+    d->w_viewmode->addItem(QIcon(":/images/viewmode_list"), QString());
+    d->w_viewmode->addItem(QIcon(":/images/viewmode_images"), QString());
+    d->w_viewmode->addItem(QIcon(":/images/viewmode_thumbs"), QString());
+    connect(d->w_viewmode, SIGNAL(currentIndexChanged(int)), this, SLOT(setViewMode(int)));
 
     d->w_items = new QTreeView(this);
     d->w_items->setSortingEnabled(true);
@@ -238,7 +215,7 @@ void SelectItem::init()
     toplay->addLayout(lay, 0, 1);
     lay->addWidget(d->w_filter, 1);
     lay->addSpacing(6);
-    lay->addWidget(d->w_viewbutton, 0);
+    lay->addWidget(d->w_viewmode, 0);
 
     d->m_stack = new QStackedLayout();
     toplay->addLayout(d->m_stack, 1, 1);
@@ -248,7 +225,6 @@ void SelectItem::init()
     d->m_stack->addWidget(d->w_thumbs);
 
     d->m_stack->setCurrentWidget(d->w_items);
-    d->m_viewmode = ListMode;
 
     setFocusProxy(d->w_item_types);
     languageChange();
@@ -260,9 +236,9 @@ void SelectItem::languageChange()
     d->w_filter->setToolTip(tr("Filter the list using this pattern (wildcards allowed: * ? [])"));
     d->w_filter->setIdleText(tr("Filter"));
 
-    d->m_viewaction[ListMode]->setText(tr("List"));
-    d->m_viewaction[TableMode]->setText(tr("List with images"));
-    d->m_viewaction[ThumbsMode]->setText(tr("Thumbnails"));
+    d->w_viewmode->setItemText(0, tr("List"));
+    d->w_viewmode->setItemText(1, tr("List with Images"));
+    d->w_viewmode->setItemText(2, tr("Thumbnails"));
 }
 
 bool SelectItem::hasExcludeWithoutInventoryFilter() const
@@ -357,27 +333,18 @@ bool SelectItem::setCurrentItem(const BrickLink::Item *item, bool dont_force_cat
     return idx.isValid();
 }
 
-void SelectItem::showAsList()
+void SelectItem::setViewMode(int mode)
 {
-    if (d->m_viewmode != ListMode) {
-        d->m_stack->setCurrentWidget(d->w_items);
-        d->m_viewmode = ListMode;
+    QWidget *w = 0;
+    switch (mode) {
+    case 0 : w = d->w_items; break;
+    case 1 : w = d->w_itemthumbs; break;
+    case 2 : w = d->w_thumbs; break;
+    default: break;
     }
-}
-
-void SelectItem::showAsTable()
-{
-    if (d->m_viewmode != TableMode) {
-        d->m_stack->setCurrentWidget(d->w_itemthumbs);
-        d->m_viewmode = TableMode;
-    }
-}
-
-void SelectItem::showAsThumbs()
-{
-    if (d->m_viewmode != ThumbsMode) {
-        d->m_stack->setCurrentWidget(d->w_thumbs);
-        d->m_viewmode = ThumbsMode;
+    if (w) {
+        d->m_stack->setCurrentWidget(w);
+        d->w_viewmode->setCurrentIndex(mode);
     }
 }
 

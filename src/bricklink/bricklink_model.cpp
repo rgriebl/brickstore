@@ -457,27 +457,16 @@ QVariant BrickLink::ItemModel::data(const QModelIndex &index, int role) const
         }
     }
     else if (role == Qt::DecorationRole) {
-        switch(index.column()) {
-        case 0: {
+        if (index.column() == 0) {
             Picture *pic = core()->picture(i, i->defaultColor());
 
-            if (pic && pic->valid()) {
-                return pic->image();
-            }
-            else {
-                QSize s = core()->pictureSize(i->itemType());
-                QImage img(s, QImage::Format_Mono);
-                img.fill(Qt::white);
-                return img;
-            }
-            break;
-        }
+            if (pic && pic->valid())
+                res = pic->image();
         }
     }
     else if (role == Qt::ToolTipRole) {
-        switch(index.column()) {
-        case 0:  res = QString::fromLatin1(i->name()); break;
-        }
+        if (index.column() == 0)
+            res = QString::fromLatin1(i->name());
     }
     else if (role == ItemPointerRole) {
         res.setValue(i);
