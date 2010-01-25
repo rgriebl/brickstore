@@ -56,9 +56,9 @@ static const char * const tablist_xpm[] = {
 "  ########  ",
 #endif
 "            ",
-"       #####",
-"        ### ",
-"         #  "};
+"            ",
+"            ",
+"            "};
 
 
 class WindowMenu : public QMenu {
@@ -128,7 +128,17 @@ protected:
         QPainter p(this);
         QStyleOptionTabBarBaseV2 option;
         option.initFrom(this);
-        option.documentMode = m_tabbar ? m_tabbar->documentMode() : false;
+        option.tabBarRect = option.rect;
+        if (m_tabbar) {
+            option.shape = m_tabbar->shape();
+            option.documentMode = m_tabbar->documentMode();
+
+            QStyleOptionTab tabOverlap;
+            tabOverlap.shape = m_tabbar->shape();
+            int overlap = m_tabbar->style()->pixelMetric(QStyle::PM_TabBarBaseOverlap, &tabOverlap, m_tabbar);
+            option.rect.setTop(option.rect.bottom() - overlap + 1);
+            option.rect.setHeight(overlap);
+        }
         style()->drawPrimitive(QStyle::PE_FrameTabBarBase, &option, &p, this);
     }
 
@@ -179,6 +189,29 @@ public:
         return QSize(sb.width(), st.height());
     }
 
+#ifdef Q_WS_MAC
+    void setIcon(const QIcon &icon)
+    {
+        QPixmap pnormal = icon.pixmap(iconSize());
+        QPixmap pactive = pnormal;
+        QColor textColor = palette().color(QPalette::Text);
+        {
+            QPainter p(&pnormal);
+            p.setCompositionMode(QPainter::CompositionMode_SourceIn);
+            p.fillRect(pnormal.rect(), textColor);
+        }
+        {
+            QPainter p(&pactive);
+            p.setCompositionMode(QPainter::CompositionMode_SourceIn);
+            p.fillRect(pactive.rect(), Utility::contrastColor(textColor, 0.2f));
+        }
+        QIcon icon2(pnormal);
+        icon2.addPixmap(pactive, QIcon::Active, QIcon::Off);
+        icon2.addPixmap(pactive, QIcon::Active, QIcon::On);
+        icon2.addPixmap(pactive, QIcon::Normal, QIcon::On);
+        QToolButton::setIcon(icon2);
+    }
+
 protected:
     void paintEvent(QPaintEvent *)
     {
@@ -188,6 +221,7 @@ protected:
 
         icon().paint(&p, rect(), Qt::AlignCenter, mode, state);
     }
+#endif
 
 private:
     QTabBar *m_tabbar;
@@ -209,27 +243,8 @@ Workspace::Workspace(QWidget *parent, Qt::WindowFlags f)
     m_right = new TabBarSide(m_tabbar);
     m_stack = new QStackedLayout();
 
-    QToolButton *tabList = new TabBarSideButton(m_tabbar);
-
-    QPixmap pnormal = QPixmap(tablist_xpm);
-    QPixmap pactive = pnormal;
-    QColor textColor = palette().color(QPalette::Text);
-    {
-        QPainter p(&pnormal);
-        p.setCompositionMode(QPainter::CompositionMode_SourceIn);
-        p.fillRect(pnormal.rect(), textColor);
-    }
-    {
-        QPainter p(&pactive);
-        p.setCompositionMode(QPainter::CompositionMode_SourceIn);
-        p.fillRect(pactive.rect(), Utility::contrastColor(textColor, 0.2f));
-    }
-    QIcon icon(pnormal);
-    icon.addPixmap(pactive, QIcon::Active, QIcon::Off);
-    icon.addPixmap(pactive, QIcon::Active, QIcon::On);
-    icon.addPixmap(pactive, QIcon::Normal, QIcon::On);
-
-    tabList->setIcon(icon);
+    TabBarSideButton *tabList = new TabBarSideButton(m_tabbar);
+    tabList->setIcon(QIcon(tablist_xpm));
     tabList->setAutoRaise(true);
     tabList->setPopupMode(QToolButton::InstantPopup);
     tabList->setToolButtonStyle(Qt::ToolButtonIconOnly);
@@ -285,11 +300,10 @@ void Workspace::addWindow(QWidget *w)
     if (!w)
         return;
 
-    int idx = m_tabbar->addTab(w->windowTitle());
+    int idx = m_stack->addWidget(w);
+    m_tabbar->insertTab(idx, w->windowTitle());
     if (!w->windowIcon().isNull())
         m_tabbar->setTabIcon(idx, w->windowIcon());
-
-    m_stack->insertWidget(idx, w);
 
     w->installEventFilter(this);
 }
