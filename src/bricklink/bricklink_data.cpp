@@ -17,25 +17,33 @@
 #include "bricklink.h"
 
 
-BrickLink::Color::Color() : m_name(0), m_peeron_name(0) { }
+BrickLink::Color::Color() : m_name(0), m_peeron_name(0), m_popularity(0), m_year_from(0), m_year_to(0) { }
 BrickLink::Color::~Color() { delete [] m_name; delete [] m_peeron_name; }
+
+const char *BrickLink::Color::typeName(TypeFlag t)
+{
+    static QMap<TypeFlag, const char *> colortypes;
+    if (colortypes.isEmpty()) {
+        colortypes.insert(Solid,    "Solid");
+        colortypes.insert(Transparent, "Transparent");
+        colortypes.insert(Glitter,  "Glitter");
+        colortypes.insert(Speckle,  "Speckle");
+        colortypes.insert(Metallic, "Metallic");
+        colortypes.insert(Chrome,   "Chrome");
+        colortypes.insert(Pearl,    "Pearl");
+        colortypes.insert(Milky,    "Milky");
+        colortypes.insert(Modulex,  "Modulex");
+    };
+    return colortypes.value(t);
+}
 
 namespace BrickLink {
 
 QDataStream &operator << (QDataStream &ds, const Color *col)
 {
     ds << col->m_id << col->m_name << col->m_peeron_name << col->m_ldraw_id;
-#if QT_VERSION < 0x040500
-    if (ds.version() < QDataStream::Qt_4_0) {
-        // Qt3 used this magic number for invalid QColor objects...
-        static quint32 Invalid = 0x49000000;
-
-        ds << (col->color().isValid() ? col->color().rgb() : Invalid);
-    }
-    else
-#endif
-    ds << col->m_color;
-    ds << quint8(col->m_type);
+    ds << col->m_color << quint32(col->m_type) << float(col->m_popularity);
+    ds << col->m_year_from << col->m_year_to;
     return ds;
 }
 
@@ -43,27 +51,14 @@ QDataStream &operator >> (QDataStream &ds, BrickLink::Color *col)
 {
     col->~Color();
 
-    quint8 flags;
+    quint32 flags;
+    float popularity;
     ds >> col->m_id >> col->m_name >> col->m_peeron_name >> col->m_ldraw_id;
+    ds >> col->m_color >> flags >> popularity;
+    ds >> col->m_year_from >> col->m_year_to;
 
-#if QT_VERSION < 0x040500
-    if (ds.version() < QDataStream::Qt_4_0) {
-        // Qt3 used this magic number for invalid QColor objects...
-        static QRgb Invalid = 0x49000000;
-
-        quint32 x;
-        ds >> x;
-        if (x == Invalid)
-            col->m_color = QColor();
-        else
-            col->m_color.setRgb(x);
-    }
-    else
-#endif
-    ds >> col->m_color;
-    ds >> flags;
-
-    col->m_type = flags;
+    col->m_type = static_cast<BrickLink::Color::Type>(flags);
+    col->m_popularity = qreal(popularity);
     return ds;
 }
 

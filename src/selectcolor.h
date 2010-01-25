@@ -19,6 +19,7 @@
 #include "bricklinkfwd.h"
 
 class QTreeView;
+class QComboBox;
 
 class SelectColor : public QWidget {
     Q_OBJECT
@@ -36,13 +37,14 @@ signals:
 protected slots:
     void colorChanged();
     void colorConfirmed();
+    void updateColorFilter(int filter);
 
 protected:
     virtual void changeEvent(QEvent *);
     virtual void showEvent(QShowEvent *);
-    void recalcHighlightPalette();
 
 protected:
+    QComboBox *w_filter;
     QTreeView *w_colors;
 
 //    friend class SelectColor;Dialog

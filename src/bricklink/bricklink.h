@@ -121,20 +121,24 @@ public:
     const char *peeronName() const { return m_peeron_name; }
     int ldrawId() const            { return m_ldraw_id; }
 
-    QString categoryName() const   { return m_category_name; }
+    enum TypeFlag {
+        Solid        = 0x0001,
+        Transparent  = 0x0002,
+        Glitter      = 0x0004,
+        Speckle      = 0x0008,
+        Metallic     = 0x0010,
+        Chrome       = 0x0020,
+        Pearl        = 0x0040,
+        Milky        = 0x0080,
+        Modulex      = 0x0100,
 
-    enum {
-        Solid        = 0x00,
-        Transparent  = 0x01,
-        Glitter      = 0x02,
-        Speckle      = 0x04,
-        Metallic     = 0x08,
-        Chrome       = 0x10,
-        Pearl        = 0x20,
-        Milky        = 0x40,
-        Modulex      = 0x80
+        Mask         = 0x01ff
     };
 
+    Q_DECLARE_FLAGS(Type, TypeFlag)
+    Type type() const          { return m_type; }
+
+    bool isSolid() const       { return m_type & Solid; }
     bool isTransparent() const { return m_type & Transparent; }
     bool isGlitter() const     { return m_type & Glitter; }
     bool isSpeckle() const     { return m_type & Speckle; }
@@ -143,7 +147,12 @@ public:
     bool isPearl() const       { return m_type & Pearl; }
     bool isMilky() const       { return m_type & Milky; }
     bool isModulex() const     { return m_type & Modulex; }
+
+    qreal popularity() const   { return m_popularity < 0 ? 0 : m_popularity; }
+
     ~Color();
+
+    static const char *typeName(TypeFlag t);
 
 private:
     uint    m_id;
@@ -151,12 +160,8 @@ private:
     char *  m_peeron_name;
     int     m_ldraw_id;
     QColor  m_color;
-    QString m_category_name;
-    uint    m_type;
-    uint    m_parts_count;
-    uint    m_in_sets_count;
-    uint    m_wanted_count;
-    uint    m_for_sale_count;
+    Type    m_type;
+    qreal   m_popularity;
     quint16 m_year_from;
     quint16 m_year_to;
 
@@ -168,6 +173,8 @@ private:
     friend QDataStream &operator << (QDataStream &ds, const Color *col);
     friend QDataStream &operator >> (QDataStream &ds, Color *col);
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(Color::Type)
 
 class Item {
 public:
@@ -595,6 +602,8 @@ private:
     const Item *findItem(char type, const char *id);
     void appendCategoryToItemType(const Category *cat, ItemType *itt);
 
+    void calculateColorPopularity();
+
 private:
     QMap<int, const Color *>    m_colors;
     QMap<int, const ItemType *> m_item_types;
@@ -626,6 +635,9 @@ public:
 
     bool isFiltered() const;
     void setFilterItemType(const ItemType *it);
+    void setFilterType(Color::Type type);
+    void unsetFilterType();
+    void setFilterPopularity(qreal p);
 
 protected:
     int pointerCount() const;
@@ -637,6 +649,8 @@ protected:
 
 private:
     const ItemType *m_itemtype_filter;
+    Color::Type m_type_filter;
+    qreal m_popularity_filter;
 
     friend class Core;
 };

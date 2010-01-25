@@ -167,7 +167,7 @@ template <> Color *TextImport::parse<Color> (uint count, const char **strs)
     col->m_name        = my_strdup(strs[1]);
     col->m_ldraw_id    = -1;
     col->m_color       = QColor(QString('#') + strs[2]);
-    col->m_type        = Color::Solid;
+    col->m_type        = 0;
 
     if (!strcmp(strs[3], "Transparent"))  col->m_type |= Color::Transparent;
     if (!strcmp(strs[3], "Glitter"))  col->m_type |= Color::Glitter;
@@ -177,12 +177,17 @@ template <> Color *TextImport::parse<Color> (uint count, const char **strs)
     if (!strcmp(strs[3], "Pearl"))  col->m_type |= Color::Pearl;
     if (!strcmp(strs[3], "Milky"))  col->m_type |= Color::Milky;
     if (!strcmp(strs[3], "Modulex"))  col->m_type |= Color::Modulex;
+    if (!col->m_type)
+        col->m_type = Color::Solid;
 
     if (count >= 8) {
-        col->m_parts_count    = strtol(strs[4], 0, 10);
-        col->m_in_sets_count  = strtol(strs[5], 0, 10);
-        col->m_wanted_count   = strtol(strs[6], 0, 10);
-        col->m_for_sale_count = strtol(strs[7], 0, 10);
+        col->m_popularity = strtol(strs[4], 0, 10) // parts
+                          + strtol(strs[5], 0, 10) // in sets
+                          + strtol(strs[6], 0, 10) // wanted
+                          + strtol(strs[7], 0, 10); // for sale
+        // needs to be divided by the max. after all colors are parsed!
+        // mark it as raw data meanwhile:
+        col->m_popularity = -col->m_popularity;
     }
     if (count >= 10) {
         col->m_year_from = strtol(strs[8], 0, 10);
@@ -307,10 +312,12 @@ bool BrickLink::TextImport::import(const QString &path)
     ok &= readDB<>(path + "categories.txt", m_categories, true);
     ok &= readDB<>(path + "itemtypes.txt",  m_item_types, true);
 
+    calculateColorPopularity();
+
     ok &= readPeeronColors(path + "peeron_colors.html");
 
-    // speed up loading (exactly 47976 items on 05.12.2007)
-    m_items.reserve(50000);
+    // speed up loading (exactly 55746 items on 26.01.2010)
+    m_items.reserve(65000);
 
     foreach(const ItemType *itt, m_item_types) {
         m_current_item_type = itt;
@@ -629,4 +636,14 @@ void BrickLink::TextImport::exportInventoriesTo(Core *bl)
 {
     bl->setDatabase_ConsistsOf(m_consists_of_hash);
     bl->setDatabase_AppearsIn(m_appears_in_hash);
+}
+
+
+void BrickLink::TextImport::calculateColorPopularity()
+{
+    qreal maxpop = 0;
+    for (QMap<int, const Color *>::const_iterator it = m_colors.constBegin(); it != m_colors.constEnd(); ++it)
+        maxpop = qMin(maxpop, it.value()->popularity());
+    for (QMap<int, const Color *>::const_iterator it = m_colors.constBegin(); it != m_colors.constEnd(); ++it)
+        const_cast<Color *>(it.value())->m_popularity /= maxpop;
 }

@@ -40,7 +40,7 @@
 /////////////////////////////////////////////////////////////
 
 BrickLink::ColorModel::ColorModel(QObject *parent)
-    : StaticPointerModel(parent), m_itemtype_filter(0)
+    : StaticPointerModel(parent), m_itemtype_filter(0), m_type_filter(0), m_popularity_filter(0)
 {
     MODELTEST_ATTACH(this)
 }
@@ -112,13 +112,13 @@ QVariant BrickLink::ColorModel::data(const QModelIndex &index, int role) const
 QVariant BrickLink::ColorModel::headerData(int section, Qt::Orientation orient, int role) const
 {
     if ((orient == Qt::Horizontal) && (role == Qt::DisplayRole) && (section == 0))
-        return tr("Color");
+        return tr("Color by %1").arg(sortOrder() == Qt::AscendingOrder ? tr("Name") : tr("Hue"));
     return QVariant();
 }
 
 bool BrickLink::ColorModel::isFiltered() const
 {
-    return m_itemtype_filter;
+    return m_itemtype_filter || m_type_filter || m_popularity_filter;
 }
 
 void BrickLink::ColorModel::setFilterItemType(const ItemType *it)
@@ -126,6 +126,30 @@ void BrickLink::ColorModel::setFilterItemType(const ItemType *it)
     if (it == m_itemtype_filter)
         return;
     m_itemtype_filter = it;
+    invalidateFilter();
+}
+
+void BrickLink::ColorModel::setFilterType(Color::Type type)
+{
+    if (type == m_type_filter)
+        return;
+    m_type_filter = type;
+    invalidateFilter();
+}
+
+void BrickLink::ColorModel::unsetFilterType()
+{
+    if (!m_type_filter)
+        return;
+    m_type_filter = 0;
+    invalidateFilter();
+}
+
+void BrickLink::ColorModel::setFilterPopularity(qreal p)
+{
+    if (p == m_popularity_filter)
+        return;
+    m_popularity_filter = p;
     invalidateFilter();
 }
 
@@ -164,7 +188,14 @@ bool BrickLink::ColorModel::filterAccepts(const void *pointer) const
 {
     const Color *color = static_cast<const Color *>(pointer);
 
-    return !m_itemtype_filter || m_itemtype_filter->hasColors() || (color && color->id() == 0);
+    if (m_itemtype_filter)
+        return m_itemtype_filter->hasColors() || (color && color->id() == 0);
+    else if (m_type_filter)
+        return color->type() & m_type_filter;
+    else if (m_popularity_filter)
+        return color->popularity() >= m_popularity_filter;
+    else
+        return true;
 }
 
 

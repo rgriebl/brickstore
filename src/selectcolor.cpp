@@ -15,17 +15,28 @@
 #include <QHeaderView>
 #include <QTreeView>
 #include <QEvent>
-#include <QStyledItemDelegate>
+#include <QComboBox>
 
 #include "bricklink.h"
-#include "utility.h"
 #include "selectcolor.h"
 
 
 SelectColor::SelectColor(QWidget *parent, Qt::WindowFlags f)
     : QWidget(parent, f)
 {
-    w_colors = new QTreeView(this);
+    w_filter = new QComboBox();
+    w_filter->addItem(tr("All Colors"), 0);
+    w_filter->addItem(tr("Popular Colors"), -1);
+    w_filter->addItem(tr("Most Popular Colors"), -2);
+    w_filter->insertSeparator(w_filter->count());
+
+    for (int i = 0; (1 << i ) & BrickLink::Color::Mask; ++i) {
+        BrickLink::Color::TypeFlag flag = static_cast<BrickLink::Color::TypeFlag>(1 << i);
+        if (const char *type = BrickLink::Color::typeName(flag))
+            w_filter->addItem(tr("Only \"%1\" Colors").arg(QLatin1String(type)), flag);
+    }
+
+    w_colors = new QTreeView();
     w_colors->setAlternatingRowColors(true);
     w_colors->setAllColumnsShowFocus(true);
     w_colors->setUniformRowHeights(true);
@@ -40,22 +51,45 @@ SelectColor::SelectColor(QWidget *parent, Qt::WindowFlags f)
 
     connect(w_colors->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(colorChanged()));
     connect(w_colors, SIGNAL(activated(const QModelIndex &)), this, SLOT(colorConfirmed()));
+    connect(w_filter, SIGNAL(currentIndexChanged(int)), this, SLOT(updateColorFilter(int)));
 
     QBoxLayout *lay = new QVBoxLayout(this);
     lay->setMargin(0);
+    lay->addWidget(w_filter);
     lay->addWidget(w_colors);
-
-    recalcHighlightPalette();
 }
 
 void SelectColor::setWidthToContents(bool b)
 {
     if (b) {
-        w_colors->resizeColumnToContents(0);
-        w_colors->setFixedWidth(w_colors->columnWidth(0) + 2 * w_colors->frameWidth() + w_colors->style()->pixelMetric(QStyle::PM_ScrollBarExtent) + 4);
+        int w1 = static_cast<QAbstractItemView *>(w_colors)->sizeHintForColumn(0) + 2 * w_colors->frameWidth() + w_colors->style()->pixelMetric(QStyle::PM_ScrollBarExtent) + 4;
+        int w2 = w_filter->minimumSizeHint().width();
+        w_filter->setFixedWidth(qMax(w1, w2));
+        w_colors->setFixedWidth(qMax(w1, w2));
     }
     else {
         w_colors->setMaximumWidth(INT_MAX);
+        w_filter->setMaximumWidth(INT_MAX);
+    }
+}
+
+void SelectColor::updateColorFilter(int index)
+{
+    int filter = w_filter->itemData(index < 0 ? 0 : index).toInt();
+    BrickLink::ColorModel *model = qobject_cast<BrickLink::ColorModel *>(w_colors->model());
+
+    if (filter > 0) {
+        model->setFilterType(static_cast<BrickLink::Color::TypeFlag>(filter));
+        model->setFilterPopularity(0);
+    } else {
+        qreal popularity = 0;
+        if (filter == -1)
+            popularity = qreal(0.8);
+        else if (filter == -2)
+            popularity = qreal(0.5);
+
+        model->setFilterType(0);
+        model->setFilterPopularity(popularity);
     }
 }
 
@@ -103,19 +137,5 @@ void SelectColor::changeEvent(QEvent *e)
         if (!isEnabled())
             setCurrentColor(BrickLink::core()->color(0));
     }
-    else if (e->type() == QEvent::PaletteChange) {
-        recalcHighlightPalette();
-    }
     QWidget::changeEvent(e);
-}
-
-void SelectColor::recalcHighlightPalette()
-{
-    QPalette p;
-    QColor hc = Utility::gradientColor(p.color(QPalette::Active, QPalette::Highlight), p.color(QPalette::Inactive, QPalette::Highlight), 0.35f);
-    QColor htc = p.color(QPalette::Active, QPalette::HighlightedText);
-
-    p.setColor(QPalette::Inactive, QPalette::Highlight, hc);
-    p.setColor(QPalette::Inactive, QPalette::HighlightedText, htc);
-    setPalette(p);
 }

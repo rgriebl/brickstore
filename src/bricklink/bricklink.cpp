@@ -715,7 +715,17 @@ bool BrickLink::Core::readDatabase(const QString &fname)
 
                 for (quint32 i = colc; i; i--) {
                     Color *col = new Color();
-                    ds >> col;
+
+                    // the format has changed, so we have to do it manually here
+                    quint8 flags;
+                    ds >> col->m_id >> col->m_name >> col->m_peeron_name >> col->m_ldraw_id;
+                    ds >> col->m_color;
+                    ds >> flags;
+
+                    col->m_type = static_cast<BrickLink::Color::Type>(quint32(flags) << 1);
+                    if (!col->m_type)
+                        col->m_type = Color::Solid;
+
                     m_colors.insert(col->id(), col);
                 }
 
@@ -1554,9 +1564,11 @@ bool BrickLink::Core::writeDatabase(const QString &filename, DatabaseVersion ver
             // colors
             quint32 colc = m_colors.count();
             ds << colc;
-            foreach(const Color *col, m_colors)
-                ds << col;
-
+            foreach(const Color *col, m_colors) {
+                // the format has changed, so we have to do it manually here
+                ds << col->m_id << col->m_name << col->m_peeron_name << col->m_ldraw_id;
+                ds << col->m_color << quint8(quint32(col->m_type) >> 1);
+            }
             // categories
             quint32 catc = m_categories.count();
             ds << catc;
