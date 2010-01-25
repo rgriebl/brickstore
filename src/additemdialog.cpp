@@ -46,7 +46,7 @@ public:
 
 
 AddItemDialog::AddItemDialog(QWidget *parent, Qt::WindowFlags f)
-    : QDialog(parent, f | Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowContextHelpButtonHint | Qt::WindowSystemMenuHint | Qt::WindowMaximizeButtonHint)
+    : QDialog(parent, f | Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowContextHelpButtonHint | Qt::WindowSystemMenuHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint)
 {
     setupUi(this);
 
