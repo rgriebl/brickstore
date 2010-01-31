@@ -14,7 +14,12 @@
 
 #include <winver.h>
 #include <winuser.h>
-#include "version.h"
+
+// stringification sucks :)
+#define _BS_STR(s)   _BS_STR2(s)
+#define _BS_STR2(s)  #s
+
+#define BRICKSTORE_VERSIONINFO   _BS_STR(BRICKSTORE_MAJOR) ", " _BS_STR(BRICKSTORE_MINOR) ", " _BS_STR(BRICKSTORE_PATCH) ", 0"
 
 IDI_ICON1               ICON         "brickstore.ico"
 IDI_ICON2               ICON         "brickstore_doc.ico"
@@ -40,7 +45,7 @@ VS_VERSION_INFO VERSIONINFO
         VALUE "FileDescription", "BrickStore\0"
         VALUE "FileVersion", BRICKSTORE_VERSIONINFO "\0"
         VALUE "InternalName", "BrickStore\0"
-        VALUE "LegalCopyright", "Copyright (c) " BRICKSTORE_COPYRIGHT "\0"
+        VALUE "LegalCopyright", "Copyright (c) 2004-2010 Robert Griebl\0"
         VALUE "OriginalFilename", "BrickStore.exe\0"
         VALUE "ProductName", "BrickStore\0"
         VALUE "ProductVersion", BRICKSTORE_VERSIONINFO "\0"
