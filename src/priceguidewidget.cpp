@@ -599,7 +599,7 @@ void PriceGuideWidget::paintEvent(QPaintEvent *e)
     QPalette pal = palette();
     QPainter p(this);
 
-    p.fillRect(contentsRect(), pal.base());
+    p.fillRect(contentsRect() & e->rect(), pal.base());
     p.translate(offset.x(), offset.y());
 
     bool valid = d->m_pg && d->m_pg->valid();
@@ -700,6 +700,7 @@ bool PriceGuideWidget::event(QEvent *e)
 QRegion PriceGuideWidget::nonStaticCells() const
 {
     QRegion r;
+    QPoint offset = contentsRect().topLeft();
 
     for (QList<cell>::const_iterator it = d->m_cells.begin(); it != d->m_cells.end(); ++it) {
         const cell &c = *it;
@@ -707,7 +708,7 @@ QRegion PriceGuideWidget::nonStaticCells() const
         switch (c.m_type) {
         case cell::Quantity:
         case cell::Price   :
-        case cell::Update  : r |= c; break;
+        case cell::Update  : r |= c.translated(offset); break;
         default            : break;
         }
     }

@@ -31,8 +31,8 @@ SetToPriceGuideDialog::SetToPriceGuideDialog(QWidget *parent, Qt::WindowFlags fl
     w_type_price->addItem(tr("Quantity Average"), BrickLink::WAverage);
     w_type_price->addItem(tr("Maximum"), BrickLink::Highest);
 
-    int timedef = Config::inst()->value(QLatin1String("/Defaults/SetToPG/Time"), 1 /*BrickLink::PastSix*/).toInt();
-    int pricedef = Config::inst()->value(QLatin1String("/Defaults/SetToPG/Price"), 1 /*BrickLink::Average*/).toInt();
+    int timedef = Config::inst()->value(QLatin1String("/Defaults/SetToPG/Time"), BrickLink::PastSix).toInt();
+    int pricedef = Config::inst()->value(QLatin1String("/Defaults/SetToPG/Price"), BrickLink::Average).toInt();
 
     if ((timedef >= 0) && (timedef < w_type_time->count()))
         w_type_time->setCurrentIndex(timedef);
@@ -42,12 +42,12 @@ SetToPriceGuideDialog::SetToPriceGuideDialog(QWidget *parent, Qt::WindowFlags fl
 
 BrickLink::Time SetToPriceGuideDialog::time() const
 {
-    return w_type_time->itemData(w_type_time->currentIndex()).value<BrickLink::Time>();
+    return static_cast<BrickLink::Time>(w_type_time->itemData(w_type_time->currentIndex()).toInt());
 }
 
 BrickLink::Price SetToPriceGuideDialog::price() const
 {
-    return w_type_price->itemData(w_type_price->currentIndex()).value<BrickLink::Price>();
+    return static_cast<BrickLink::Price>(w_type_price->itemData(w_type_price->currentIndex()).toInt());
 }
 
 bool SetToPriceGuideDialog::forceUpdate() const
