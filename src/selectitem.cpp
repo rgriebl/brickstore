@@ -250,8 +250,16 @@ void SelectItem::setExcludeWithoutInventoryFilter(bool b)
 {
     if (b != d->m_inv_only) {
         QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+        const BrickLink::ItemType *oldType = currentItemType();
+        const BrickLink::Item *oldItem = currentItem();
+        d->w_categories->clearSelection();
+        d->w_items->clearSelection();
+
         d->itemTypeModel->setFilterWithoutInventory(b);
         d->itemModel->setFilterWithoutInventory(b);
+
+        setCurrentItemType(oldType);
+        setCurrentItem(oldItem, true);
         QApplication::restoreOverrideCursor();
 
         d->m_inv_only = b;
@@ -263,8 +271,16 @@ void SelectItem::itemTypeChanged()
     const BrickLink::ItemType *itemtype = currentItemType();
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+    const BrickLink::Category *oldCat = currentCategory();
+    const BrickLink::Item *oldItem = currentItem();
+    d->w_categories->clearSelection();
+    d->w_items->clearSelection();
+
     d->categoryModel->setFilterItemType(itemtype);
     d->itemModel->setFilterItemType(itemtype);
+
+    setCurrentCategory(oldCat);
+    setCurrentItem(oldItem);
 
     emit hasColors(itemtype->hasColors());
     QApplication::restoreOverrideCursor();
@@ -291,7 +307,12 @@ bool SelectItem::setCurrentItemType(const BrickLink::ItemType *it)
 void SelectItem::categoryChanged()
 {
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+    const BrickLink::Item *oldItem = currentItem();
+    d->w_items->clearSelection();
+
     d->itemModel->setFilterCategory(currentCategory());
+
+    setCurrentItem(oldItem);
     QApplication::restoreOverrideCursor();
 }
 
@@ -317,17 +338,20 @@ const BrickLink::Item *SelectItem::currentItem() const
     return idxlst.isEmpty() ? 0 : d->itemModel->item(idxlst.front());
 }
 
-bool SelectItem::setCurrentItem(const BrickLink::Item *item, bool dont_force_category)
+bool SelectItem::setCurrentItem(const BrickLink::Item *item, bool force_items_category)
 {
-    const BrickLink::ItemType *itt = item ? item->itemType() : 0;
-    const BrickLink::Category *cat = item ? item->category() : 0;
-
-    setCurrentItemType(itt ? itt : BrickLink::core()->itemType('P'));
-    setCurrentCategory(cat && !dont_force_category ? cat : BrickLink::CategoryModel::AllCategories);
-
     QModelIndex idx = d->itemModel->index(item);
-    if (idx.isValid())
+    if (idx.isValid()) {
+        const BrickLink::ItemType *itt = item->itemType();
+        const BrickLink::Category *cat = item->category();
+
+        if (currentItemType() != itt)
+            setCurrentItemType(itt);
+        if ((currentCategory() != cat) &&
+            (force_items_category || currentCategory() != BrickLink::CategoryModel::AllCategories))
+            setCurrentCategory(cat);
         d->w_items->setCurrentIndex(idx);
+    }
     else
         d->w_items->clearSelection();
     return idx.isValid();
@@ -405,7 +429,12 @@ void SelectItem::ensureSelectionVisible()
 void SelectItem::applyFilter()
 {
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+    const BrickLink::Item *oldItem = currentItem();
+    d->w_items->clearSelection();
+
     d->itemModel->setFilterText(d->w_filter->text());
+
+    setCurrentItem(oldItem);
     QApplication::restoreOverrideCursor();
 }
 
@@ -429,7 +458,7 @@ void SelectItem::showContextMenu(const QPoint &p)
                 QAction *gotocat = m.addAction(tr("View item's category"));
 
                 if (m.exec(iv->mapToGlobal(p)) == gotocat) {
-                    setCurrentItem(item, false);
+                    setCurrentItem(item, true);
                     ensureSelectionVisible();
                 }
             }

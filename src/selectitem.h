@@ -40,7 +40,7 @@ public:
 
     bool setCurrentCategory(const BrickLink::Category *cat);
     bool setCurrentItemType(const BrickLink::ItemType *it);
-    bool setCurrentItem(const BrickLink::Item *item, bool dont_force_category = false);
+    bool setCurrentItem(const BrickLink::Item *item, bool force_items_category = false);
 
 
 signals:
