@@ -114,6 +114,8 @@ win32 {
   win32-msvc* {
     QMAKE_CXXFLAGS_DEBUG   += /Od /GL-
     QMAKE_CXXFLAGS_RELEASE += /O2 /GL
+
+    LIBS += user32.lib advapi32.lib
   }
   
   win32-msvc2005 {
@@ -125,7 +127,6 @@ win32 {
      QMAKE_CXXFLAGS_DEBUG   += /EHc- /EHs- /GR-
      QMAKE_CXXFLAGS_RELEASE += /EHc- /EHs- /GR-
   }
-  LIBS += user32.lib advapi32.lib
 }
 
 
