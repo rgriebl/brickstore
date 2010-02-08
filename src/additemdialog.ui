@@ -1,6 +1,6 @@
 <ui version="4.0" >
  <class>AddItemDialog</class>
- <widget class="QDialog" name="AddItemDialog" >
+ <widget class="QWidget" name="AddItemDialog" >
   <property name="geometry" >
    <rect>
     <x>0</x>
@@ -322,35 +322,12 @@
        <property name="orientation" >
         <enum>Qt::Horizontal</enum>
        </property>
-       <property name="sizeHint" stdset="0" >
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <spacer>
-       <property name="orientation" >
-        <enum>Qt::Horizontal</enum>
+       <property name="sizeType" >
+        <enum>QSizePolicy::Expanding</enum>
        </property>
        <property name="sizeHint" stdset="0" >
         <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <spacer>
-       <property name="orientation" >
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0" >
-        <size>
-         <width>40</width>
+         <width>10000</width>
          <height>20</height>
         </size>
        </property>
@@ -434,34 +411,18 @@
  <resources/>
  <connections>
   <connection>
-   <sender>w_buttons</sender>
-   <signal>rejected()</signal>
-   <receiver>AddItemDialog</receiver>
-   <slot>reject()</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>682</x>
-     <y>757</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>286</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>w_toggle_appears_in</sender>
    <signal>toggled(bool)</signal>
    <receiver>w_appears_in</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>133</x>
-     <y>865</y>
+     <x>91</x>
+     <y>558</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>129</x>
-     <y>731</y>
+     <x>165</x>
+     <y>524</y>
     </hint>
    </hints>
   </connection>
@@ -472,12 +433,12 @@
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>51</x>
-     <y>865</y>
+     <x>37</x>
+     <y>558</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>41</x>
-     <y>731</y>
+     <x>22</x>
+     <y>524</y>
     </hint>
    </hints>
   </connection>
@@ -488,12 +449,28 @@
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>92</x>
-     <y>865</y>
+     <x>64</x>
+     <y>558</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>63</x>
-     <y>731</y>
+     <x>48</x>
+     <y>524</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>w_buttons</sender>
+   <signal>rejected()</signal>
+   <receiver>AddItemDialog</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>699</x>
+     <y>552</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>556</x>
+     <y>577</y>
     </hint>
    </hints>
   </connection>

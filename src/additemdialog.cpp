@@ -24,6 +24,7 @@
 #include <QCheckBox>
 #include <QToolButton>
 #include <QWheelEvent>
+#include <QShortcut>
 
 #include "config.h"
 #include "currency.h"
@@ -45,8 +46,8 @@ public:
 };
 
 
-AddItemDialog::AddItemDialog(QWidget *parent, Qt::WindowFlags f)
-    : QDialog(parent, f | Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowContextHelpButtonHint | Qt::WindowSystemMenuHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint)
+AddItemDialog::AddItemDialog(QWidget *parent)
+    : QWidget(parent, Qt::Window)
 {
     setupUi(this);
 
@@ -130,6 +131,8 @@ AddItemDialog::AddItemDialog(QWidget *parent, Qt::WindowFlags f)
     connect(Config::inst(), SIGNAL(simpleModeChanged(bool)), this, SLOT(setSimpleMode(bool)));
     connect(Config::inst(), SIGNAL(localCurrencyChanged()), this, SLOT(updateMonetary()));
 
+    new QShortcut(Qt::Key_Escape, this, SLOT(close()));
+
     updateMonetary();
 
     if (Config::inst()->value("/Defaults/AddItems/Condition", "new").toString() != "new")
@@ -190,16 +193,12 @@ void AddItemDialog::wheelEvent(QWheelEvent *e)
 
 void AddItemDialog::closeEvent(QCloseEvent *e)
 {
-    QDialog::closeEvent(e);
+    QWidget::closeEvent(e);
 
-    if (e->isAccepted())
+    if (e->isAccepted()) {
+        hide();
         emit closed();
-}
-
-void AddItemDialog::reject()
-{
-    QDialog::reject();
-    close();
+    }
 }
 
 void AddItemDialog::setSimpleMode(bool b)

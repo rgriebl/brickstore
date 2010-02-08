@@ -112,8 +112,7 @@ private slots:
 
     void setOnlineStatus(QAction *);
     void cancelAllTransfers();
-    void toggleAddItemDialog(bool b);
-    void closedAddItemDialog();
+    void showAddItemDialog();
 
 protected:
    virtual void dragEnterEvent(QDragEnterEvent *e);

@@ -244,7 +244,7 @@ QSize FilterEditPrivate::minimumSizeHint() const
 
     ReleaseEvent(event);
     return QSize(optimalBounds.size.width + fontMetrics().maxWidth() + 2*optimalBounds.size.height,
-                 optimalBounds.size.height-8);
+                 optimalBounds.size.height-10);
 #else
     return QLineEdit::minimumSizeHint() + QSize(0, 0); //TODO: image sizes
 #endif
@@ -392,7 +392,7 @@ QSize FilterEdit::minimumSizeHint() const
 void FilterEdit::resizeEvent(QResizeEvent *)
 {
 #if defined(MAC_USE_NATIVE_SEARCHFIELD)
-    d->setGeometry(2, 4, width() - 6, height() - 6);
+    d->setGeometry(2, 2, width() - 4, height() - 4);
 #else
     d->setGeometry(0, 0, width(), height());
 #endif

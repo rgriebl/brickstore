@@ -197,24 +197,22 @@ void SelectItem::init()
     connect(d->w_thumbs, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(showContextMenu(const QPoint &)));
 
     QGridLayout *toplay = new QGridLayout(this);
-    toplay->setContentsMargins(0, 0, 0, 0);
-    //toplay->setSpacing(0);
+    toplay->setMargin(0);
     toplay->setColumnStretch(0, 25);
     toplay->setColumnStretch(1, 75);
     toplay->setRowStretch(0, 0);
-    toplay->setRowStretch(1, 100);
+    toplay->setRowStretch(1, 1);
 
-    QFormLayout *flay = new QFormLayout();
-    toplay->addLayout(flay, 0, 0);
-
-    flay->addRow(d->w_item_types_label, d->w_item_types);
+    QHBoxLayout *lay = new QHBoxLayout();
+    toplay->addLayout(lay, 0, 0);
+    lay->addWidget(d->w_item_types_label, 0);
+    lay->addWidget(d->w_item_types, 1);
 
     toplay->addWidget(d->w_categories, 1, 0);
 
-    QBoxLayout *lay = new QHBoxLayout();
+    lay = new QHBoxLayout();
     toplay->addLayout(lay, 0, 1);
     lay->addWidget(d->w_filter, 1);
-    lay->addSpacing(6);
     lay->addWidget(d->w_viewmode, 0);
 
     d->m_stack = new QStackedLayout();

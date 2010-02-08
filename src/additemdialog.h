@@ -14,7 +14,7 @@
 #ifndef __ADDITEMDIALOG_H__
 #define __ADDITEMDIALOG_H__
 
-#include <QDialog>
+#include <QWidget>
 #include <QPointer>
 
 #include "ui_additemdialog.h"
@@ -27,10 +27,10 @@ class QPushButton;
 class Window;
 
 
-class AddItemDialog : public QDialog, private Ui::AddItemDialog {
+class AddItemDialog : public QWidget, private Ui::AddItemDialog {
     Q_OBJECT
 public:
-    AddItemDialog(QWidget *parent = 0, Qt::WindowFlags f = 0);
+    AddItemDialog(QWidget *parent = 0);
     virtual ~AddItemDialog();
 
     void attach(Window *window);
@@ -40,7 +40,6 @@ signals:
 
 protected slots:
     virtual void languageChange();
-    virtual void reject();
 
 protected:
     virtual void wheelEvent(QWheelEvent *e);

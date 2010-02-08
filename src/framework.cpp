@@ -419,7 +419,7 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
     connectAllActions(false, 0);    // init enabled/disabled status of document actions
     connectWindow(0);
 
-    // we need to show now, since most X11 window managers and Mac OS X with 
+    // we need to show now, since most X11 window managers and Mac OS X with
     // unified-toolbar look won't get the position right otherwise
     show();
 
@@ -860,7 +860,7 @@ void FrameWork::createActions()
     connect(new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Insert), this, 0, 0, Qt::WindowShortcut), SIGNAL(activated()), a, SLOT(trigger()));
     (void) newQAction(this, "edit_delete");
 
-    a = newQAction(this, "edit_additems", true, this, SLOT(toggleAddItemDialog(bool)));
+    a = newQAction(this, "edit_additems", false, this, SLOT(showAddItemDialog()));
     a->setShortcutContext(Qt::ApplicationShortcut);
 
     (void) newQAction(this, "edit_subtractitems");
@@ -1585,7 +1585,7 @@ void FrameWork::cancelAllTransfers()
 void FrameWork::createAddItemDialog()
 {
     if (!m_add_dialog) {
-        m_add_dialog = new AddItemDialog(this);
+        m_add_dialog = new AddItemDialog();
         m_add_dialog->setObjectName("additems");
 
         QByteArray ba = Config::inst()->value("/MainWindow/AddItemDialog/Geometry").toByteArray();
@@ -1593,32 +1593,20 @@ void FrameWork::createAddItemDialog()
         if (!ba.isEmpty())
             m_add_dialog->restoreGeometry(ba);
 
-        connect(m_add_dialog, SIGNAL(closed()), this, SLOT(closedAddItemDialog()));
-
         m_add_dialog->attach(m_current_window);
     }
 }
 
-void FrameWork::toggleAddItemDialog(bool b)
+void FrameWork::showAddItemDialog()
 {
     createAddItemDialog();
 
-    if (b) {
-        if (m_add_dialog->isVisible()) {
-            m_add_dialog->raise();
-            m_add_dialog->activateWindow();
-        }
-        else {
-            m_add_dialog->show();
-        }
+    if (m_add_dialog->isVisible()) {
+        m_add_dialog->raise();
+        m_add_dialog->activateWindow();
+    } else {
+        m_add_dialog->show();
     }
-    else
-        m_add_dialog->close();
-}
-
-void FrameWork::closedAddItemDialog()
-{
-    findAction("edit_additems")->setChecked(m_add_dialog && m_add_dialog->isVisible());
 }
 
 void FrameWork::toggleItemDetailPopup()
