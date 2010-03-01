@@ -40,9 +40,6 @@ DocumentDelegate::DocumentDelegate(Document *doc, DocumentProxyModel *view, QTab
     : QItemDelegate(view), m_doc(doc), m_view(view), m_table(table),
       m_select_item(0), m_select_color(0), m_read_only(false)
 {
-#ifndef Q_WS_MAC
-    connect(table, SIGNAL(activated(const QModelIndex &)), table, SLOT(edit(const QModelIndex &)));
-#endif
 }
 
 QColor DocumentDelegate::shadeColor(int idx, qreal alpha)
@@ -453,6 +450,7 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
 
         if (key == Qt::Key_Space ||
             key == Qt::Key_Return ||
+            key == Qt::Key_Enter ||
 #if defined( Q_WS_MAC )
             (key == Qt::Key_O && static_cast<QKeyEvent *>(e)->modifiers() & Qt::ControlModifier)
 #else
@@ -587,9 +585,10 @@ QWidget *DocumentDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
     default                    : break;
     }
 
-    if (!m_lineedit)
+    if (!m_lineedit) {
         m_lineedit = new QLineEdit(parent);
-
+        m_lineedit->setFrame(m_lineedit->style()->styleHint(QStyle::SH_ItemView_DrawDelegateFrame, 0, m_lineedit));
+    }
     m_lineedit->setAlignment(Qt::Alignment(idx.data(Qt::TextAlignmentRole).toInt()));
     if (valid)
         m_lineedit->setValidator(valid);

@@ -106,6 +106,26 @@ private:
     }
 };
 
+
+class TableView : public QTableView {
+public:
+    TableView(QWidget *parent) : QTableView(parent) { }
+
+protected:
+    void keyPressEvent(QKeyEvent *e)
+    {
+        QTableView::keyPressEvent(e);
+#ifndef Q_WS_MAC
+        if (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter) {
+            if (state() != EditingState) {
+                if (edit(currentIndex(), EditKeyPressed, e))
+                    e->accept();
+            }
+        }
+#endif
+    }
+};
+
 } // namespace
 
 
@@ -140,7 +160,7 @@ Window::Window(Document *doc, QWidget *parent)
     m_simple_mode = false;
     m_diff_mode = false;
 
-    w_list = new QTableView(this);
+    w_list = new TableView(this);
     w_list->setHorizontalHeader(new HeaderView(Qt::Horizontal, w_list));
     w_list->setSelectionMode(QAbstractItemView::ExtendedSelection);
     w_list->setSelectionBehavior(QAbstractItemView::SelectRows);
