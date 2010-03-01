@@ -105,7 +105,8 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
     bool selected = (option.state & QStyle::State_Selected);
 
     QPalette::ColorGroup cg = (option.state & QStyle::State_Enabled) ? QPalette::Normal : QPalette::Disabled;
-    QColor bg = option.palette.color(cg, option.features & QStyleOptionViewItemV2::Alternate ? QPalette::AlternateBase : QPalette::Base);
+    QColor normalbg = option.palette.color(cg, option.features & QStyleOptionViewItemV2::Alternate ? QPalette::AlternateBase : QPalette::Base);
+    QColor bg = normalbg;
     QColor fg = option.palette.color(cg, QPalette::Text);
 
     if (selected) {
@@ -264,7 +265,13 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
         break;
     }
 
+    // we only want to do a single, opaque color fill, so we calculate the
+    // final fill color using the normal bg color and our special bg color
+    // (which most likely has an alpha component)
+    bg = Utility::gradientColor(normalbg, bg, bg.alphaF());
+    bg.setAlpha(255);
     p->fillRect(option.rect, bg);
+
     if (!tag.text.isEmpty()) {
         QFont font = option.font;
         font.setBold(tag.bold);
