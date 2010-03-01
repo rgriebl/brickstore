@@ -876,9 +876,9 @@ public:
     const QMap<int, const ItemType *> &itemTypes() const;
     const QVector<const Item *>       &items() const;
 
-    const QPixmap *noImage(const QSize &s) const;
+    const QImage noImage(const QSize &s) const;
 
-    const QPixmap *colorImage(const Color *col, int w, int h) const;
+    const QImage colorImage(const Color *col, int w, int h) const;
 
     const Color *color(uint id) const;
     const Color *colorFromName(const char *name) const;
@@ -963,8 +963,8 @@ private:
     QLocale  m_c_locale;
     mutable QMutex m_corelock;
 
-    mutable QHash<QString, QPixmap *>  m_noimages;
-    mutable QHash<QString, QPixmap *>  m_colimages;
+    mutable QHash<QString, QImage>  m_noimages;
+    mutable QHash<QString, QImage>  m_colimages;
 
     QMap<int, const Color *>        m_colors;      // id ->Color *
     QMap<int, const Category *>     m_categories;  // id ->Category *

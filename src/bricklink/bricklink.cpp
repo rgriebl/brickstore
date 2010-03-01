@@ -149,20 +149,21 @@ QUrl BrickLink::Core::url(UrlList u, const void *opt, const void *opt2)
 }
 
 
-const QPixmap *BrickLink::Core::noImage(const QSize &s) const
+const QImage BrickLink::Core::noImage(const QSize &s) const
 {
     QString key = QString("%1x%2").arg(s.width()).arg(s.height());
 
     QMutexLocker lock(&m_corelock);
 
-    QPixmap *pix = m_noimages.value(key);
+    QImage img = m_noimages.value(key);
 
-    if (!pix) {
-        pix = new QPixmap(s);
-        QPainter p(pix);
+    if (img.isNull()) {
+        img = QImage(s, QImage::Format_ARGB32_Premultiplied);
+        QPainter p(&img);
+        p.setRenderHints(QPainter::Antialiasing);
 
-        int w = pix->width();
-        int h = pix->height();
+        int w = img.width();
+        int h = img.height();
         bool high = (w < h);
 
         p.fillRect(0, 0, w, h, Qt::white);
@@ -186,29 +187,30 @@ const QPixmap *BrickLink::Core::noImage(const QSize &s) const
         }
         p.end();
 
-        m_noimages.insert(key, pix);
+        m_noimages.insert(key, img);
     }
-    return pix;
+    return img;
 }
 
 
-const QPixmap *BrickLink::Core::colorImage(const Color *col, int w, int h) const
+const QImage BrickLink::Core::colorImage(const Color *col, int w, int h) const
 {
     if (!col || w <= 0 || h <= 0)
-        return 0;
+        return QImage();
 
     QString key = QString("%1:%2x%3").arg(col->id()).arg(w).arg(h);
 
     QMutexLocker lock(&m_corelock);
 
-    QPixmap *pix = m_colimages.value(key);
+    QImage img = m_colimages.value(key);
 
-    if (!pix) {
+    if (img.isNull()) {
         QColor c = col->color();
 
-        pix = new QPixmap(w, h);
-        QPainter p(pix);
-        QRect r = pix->rect();
+        img = QImage(w, h, QImage::Format_ARGB32_Premultiplied);
+        QPainter p(&img);
+        p.setRenderHints(QPainter::Antialiasing);
+        QRect r = img.rect();
 
         QBrush brush;
 
@@ -278,7 +280,7 @@ const QPixmap *BrickLink::Core::colorImage(const Color *col, int w, int h) const
             p.drawLine(0, h, w, 0);
         }
 
-        if (col->isTransparent() /*&& CResource::inst ( )->pixmapAlphaSupported ( )*/) {
+        if (col->isTransparent()) {
             QLinearGradient gradient(0, 0, r.width(), r.height());
             gradient.setColorAt(0,   Qt::transparent);
             gradient.setColorAt(0.4, Qt::transparent);
@@ -289,9 +291,9 @@ const QPixmap *BrickLink::Core::colorImage(const Color *col, int w, int h) const
 	    }
         p.end();
 
-        m_colimages.insert(key, pix);
+        m_colimages.insert(key, img);
     }
-    return pix;
+    return img;
 }
 
 
@@ -403,8 +405,6 @@ BrickLink::Core::~Core()
 {
     cancelPictureTransfers();
     cancelPriceGuideTransfers();
-
-    qDeleteAll(m_noimages);
 
     s_inst = 0;
 }

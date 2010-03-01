@@ -32,14 +32,25 @@
 #include "selectcolordialog.h"
 #include "utility.h"
 
-QVector<QColor> DocumentDelegate::s_shades;
+QVector<QColor>                 DocumentDelegate::s_shades;
 QHash<BrickLink::Status, QIcon> DocumentDelegate::s_status_icons;
-QCache<QString, QPixmap> DocumentDelegate::s_tag_cache;
+QCache<QString, QPixmap>        DocumentDelegate::s_tag_cache;
 
 DocumentDelegate::DocumentDelegate(Document *doc, DocumentProxyModel *view, QTableView *table)
     : QItemDelegate(view), m_doc(doc), m_view(view), m_table(table),
       m_select_item(0), m_select_color(0), m_read_only(false)
 {
+    static bool first = true;
+    if (first) {
+        qAddPostRoutine(clearTagCache);
+        first = false;
+    }
+}
+
+void DocumentDelegate::clearTagCache()
+{
+    s_tag_cache.clear();
+    s_status_icons.clear();
 }
 
 QColor DocumentDelegate::shadeColor(int idx, qreal alpha)
@@ -133,7 +144,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
         QColor background;
     } tag = { QString(), false, QColor(), QColor() };
 
-    QPixmap pix;
+    QImage image;
     QIcon ico;
     QString str = idx.model()->data(idx, Qt::DisplayRole).toString();
     int checkmark = 0;
@@ -243,14 +254,13 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
 
     case Document::Picture: {
         if (!it->image().isNull())
-            pix = QPixmap::fromImage(it->image().scaled(it->image().size() / 2, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+            image = it->image().scaled(it->image().size() / 2, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
         break;
     }
-    case Document::Color:
-        if (const QPixmap *pixptr = BrickLink::core()->colorImage(it->color(), option.decorationSize.width(), option.rect.height()))
-            pix = *pixptr;
+    case Document::Color: {
+        image = BrickLink::core()->colorImage(it->color(), option.decorationSize.width(), option.rect.height());
         break;
-
+    }
     case Document::Condition:
         if (it->itemType()->hasSubConditions() && it->subCondition() != BrickLink::None)
             str = QString("%1<br /><i>%2</i>" ).arg(str, m_doc->subConditionLabel(it->subCondition()));
@@ -336,20 +346,19 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
         opt.rect = r.translated(dx, 0);
         style->drawPrimitive(QStyle::PE_IndicatorViewItemCheck, &opt, p, option.widget);
     }
-    else if (!pix.isNull()) {
-        // clip the pixmap here ..this is cheaper than a cliprect
+    else if (!image.isNull()) {
+        // clip the image here ..this is cheaper than a cliprect
 
         int rw = w - 2 * margin;
         int rh = h; // - 2 * margin;
 
         int sw, sh;
 
-        if (pix.height() <= rh) {
-            sw = qMin(rw, pix.width());
-            sh = qMin(rh, pix.height());
-        }
-        else {
-            sw = pix.width() * rh / pix.height();
+        if (image.height() <= rh) {
+            sw = qMin(rw, image.width());
+            sh = qMin(rh, image.height());
+        } else {
+            sw = image.width() * rh / image.height();
             sh = rh;
         }
 
@@ -361,10 +370,10 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
         else if (align & Qt::AlignRight)
             px += (rw - sw);
 
-        if (pix.height() <= rh)
-            p->drawPixmap(px, py, pix, 0, 0, sw, sh);
+        if (image.height() <= rh)
+            p->drawImage(px, py, image, 0, 0, sw, sh);
         else
-            p->drawPixmap(QRect(px, py, sw, sh), pix);
+            p->drawImage(QRect(px, py, sw, sh), image);
 
         w -= (margin + sw);
         x += (margin + sw);

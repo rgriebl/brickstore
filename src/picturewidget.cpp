@@ -205,32 +205,6 @@ void PictureWidget::gotUpdate(BrickLink::Picture *pic)
         redraw();
 }
 
-static QImage createImg(const QImage &img)
-{
-    if (img.isNull())
-        return img;
-
-    QLinearGradient grad(0, 0, 0, img.height());
-    grad.setColorAt(0, QColor(0, 0, 0, 24));
-    grad.setColorAt(1, QColor(0, 0, 0, 0));
-
-    QImage res(QSize(img.width(), 2 * img.height() + 1), QImage::Format_ARGB32_Premultiplied);
-
-    QPainter p(&res);
-    p.setCompositionMode(QPainter::CompositionMode_Source);
-    p.fillRect(res.rect(), Qt::transparent);
-    p.setCompositionMode(QPainter::CompositionMode_SourceOver);
-    p.drawImage(0, 0, img);
-    // This code should produce a mirror image, but the result looks ugly
-//    p.translate(0, img.height() + 1);
-//    p.drawImage(0, 0, img.mirrored(true, true));
-//    p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
-//    p.fillRect(0, 0, img.width(), img.height(), grad);
-    p.end();
-
-    return res;
-}
-
 void PictureWidget::redraw()
 {
     if (d->m_pic && (d->m_pic->updateStatus() == BrickLink::Updating)) {
@@ -245,7 +219,7 @@ void PictureWidget::redraw()
                              QLatin1String("</b>&nbsp; ") +
                              d->m_pic->item()->name() +
                              QLatin1String("</center>"));
-        d->m_img = createImg(d->m_pic->image());
+        d->m_img = d->m_pic->image();
         d->m_img_height = d->m_pic->image().height();
     }
     else {

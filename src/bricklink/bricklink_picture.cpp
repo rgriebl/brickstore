@@ -164,7 +164,7 @@ void BrickLink::Picture::load_from_disk()
         }
         else {
             if (!large && m_item && m_item->itemType())
-                image = BrickLink::core()->noImage(m_item->itemType()->pictureSize())->toImage();
+                image = BrickLink::core()->noImage(m_item->itemType()->pictureSize());
 
             is_valid = true;
         }

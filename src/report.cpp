@@ -161,8 +161,7 @@ void Report::print(QPaintDevice *pd, const Document *doc, const Document::ItemLi
         color ["id"]       = item->color() ? (int) item->color()->id() : -1;
         color ["name"]     = item->color() ? item->color()->name() : "";
         color ["rgb"]      = item->color() ? item->color()->color() : QColor();
-        QPixmap colorpix   = *BrickLink::core()->colorImage(item->color(), 20, 20);
-        color ["picture"]  = colorpix;
+        color ["picture"]  = QPixmap::fromImage(BrickLink::core()->colorImage(item->color(), 20, 20));
         imap ["color"]     = color;
 
         QVariantMap cond;
