@@ -124,7 +124,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
     int w = option.rect.width();
     int h = option.rect.height();
     int margin = 2;
-    int align = (m_view->data(idx, Qt::TextAlignmentRole).toInt() & ~Qt::AlignVertical_Mask) | Qt::AlignVCenter;
+    Qt::Alignment align = Qt::Alignment((idx.data(Qt::TextAlignmentRole).toInt() & ~Qt::AlignVertical_Mask) | Qt::AlignVCenter);
 
     struct Tag {
         QString text;
@@ -325,7 +325,15 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
         QStyleOptionViewItem opt(option);
         opt.state &= ~QStyle::State_HasFocus;
         opt.state |= ((checkmark > 0) ? QStyle::State_On : QStyle::State_Off);
+
         QStyle *style = option.widget ? option.widget->style() : QApplication::style();
+        QRect r = style->subElementRect(QStyle::SE_ViewItemCheckIndicator, &opt, option.widget);
+        int dx = margin;
+        if (align & Qt::AlignHCenter)
+            dx = (opt.rect.width() - r.width()) / 2;
+        else if (align & Qt::AlignRight)
+            dx = (opt.rect.width() - r.width() - margin);
+        opt.rect = r.translated(dx, 0);
         style->drawPrimitive(QStyle::PE_IndicatorViewItemCheck, &opt, p, option.widget);
     }
     else if (!pix.isNull()) {
@@ -348,8 +356,10 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
         int px = x + margin;
         int py = y + /*margin +*/ (rh - sh) / 2;
 
-        if (align == Qt::AlignCenter)
-            px += (rw - sw) / 2;   // center if there is enough room
+        if (align & Qt::AlignHCenter)
+            px += (rw - sw) / 2;
+        else if (align & Qt::AlignRight)
+            px += (rw - sw);
 
         if (pix.height() <= rh)
             p->drawPixmap(px, py, pix, 0, 0, sw, sh);
@@ -360,17 +370,12 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
         x += (margin + sw);
     }
     else if (!ico.isNull()) {
-        ico.paint(p, x, y, w, h, Qt::AlignCenter, iconMode(option.state), iconState(option.state));
+        ico.paint(p, x + margin, y, w - 2 * margin, h, align, iconMode(option.state), iconState(option.state));
     }
 
     if (!str.isEmpty()) {
         int rw = w - 2 * margin;
-
-        if (!(align & Qt::AlignVertical_Mask))
-            align |= Qt::AlignVCenter;
-
         const QFontMetrics &fm = p->fontMetrics();
-
 
         bool do_elide = false;
         int lcount = (h + fm.leading()) / fm.lineSpacing();
@@ -382,7 +387,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
         td.setDefaultFont(option.font);
         QTextLayout *tlp = td.firstBlock().layout();
         QTextOption to = tlp->textOption();
-        to.setAlignment(Qt::Alignment(align));
+        to.setAlignment(align);
         tlp->setTextOption(to);
         tlp->beginLayout();
 
