@@ -105,32 +105,110 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
         return;
 
     QStyleOptionViewItemV4 option(option1);
+    bool selected = (option.state & QStyle::State_Selected);
 
     QPalette::ColorGroup cg = (option.state & QStyle::State_Enabled) ? QPalette::Normal : QPalette::Disabled;
-//    if (cg == QPalette::Normal && !(option.state & QStyle::State_Active))
-//        cg = QPalette::Inactive;
+    QColor bg = option.palette.color(cg, option.features & QStyleOptionViewItemV2::Alternate ? QPalette::AlternateBase : QPalette::Base);
+    QColor fg = option.palette.color(cg, QPalette::Text);
+
+    if (selected) {
+        if (m_read_only) {
+            bg = Utility::gradientColor(bg, option.palette.color(cg, QPalette::Highlight));
+        } else {
+            bg = option.palette.color(cg, QPalette::Highlight);
+            if (!(option.state & QStyle::State_HasFocus))
+                bg.setAlphaF(0.7f);
+            fg = option.palette.color(cg, QPalette::HighlightedText);
+        }
+    }
 
     int x = option.rect.x(), y = option.rect.y();
     int w = option.rect.width();
     int h = option.rect.height();
     int margin = 2;
     int align = (m_view->data(idx, Qt::TextAlignmentRole).toInt() & ~Qt::AlignVertical_Mask) | Qt::AlignVCenter;
-    QString tag;
 
+    struct Tag {
+        QString text;
+        bool bold;
+        QColor foreground;
+        QColor background;
+    } tag = { QString(), false, QColor(), QColor() };
 
     QPixmap pix;
     QIcon ico;
     QString str = idx.model()->data(idx, Qt::DisplayRole).toString();
-
-    QColor bg;
-    QColor fg;
     int checkmark = 0;
 
-    bg = option.palette.color(cg, option.features & QStyleOptionViewItemV2::Alternate ? QPalette::AlternateBase : QPalette::Base);
-    fg = option.palette.color(cg, QPalette::Text);
+    if (!selected) {
+        switch (idx.column()) {
+        case Document::ItemType:
+            bg = shadeColor(it->itemType()->id(), 0.1f);
+            break;
+
+        case Document::Category:
+            bg = shadeColor(it->category()->id(), 0.2f);
+            break;
+
+        case Document::Quantity:
+            if (it->quantity() <= 0)
+                bg = (it->quantity() == 0) ? QColor::fromRgbF(1, 1, 0, 0.4f)
+                                           : QColor::fromRgbF(1, 0, 0, 0.4f);
+            break;
+
+        case Document::QuantityDiff:
+            if (it->origQuantity() < it->quantity())
+                bg = QColor::fromRgbF(0, 1, 0, 0.3f);
+            else if (it->origQuantity() > it->quantity())
+                bg = QColor::fromRgbF(1, 0, 0, 0.3f);
+            break;
+
+        case Document::PriceOrig:
+        case Document::QuantityOrig:
+            fg.setAlphaF(0.5f);
+            break;
+
+        case Document::PriceDiff:
+            if (it->origPrice() < it->price())
+                bg = QColor::fromRgbF(0, 1, 0, 0.3f);
+            else if (it->origPrice() > it->price())
+                bg = QColor::fromRgbF(1, 0, 0, 0.3f);
+            break;
+
+        case Document::Total:
+            bg = QColor::fromRgbF(1, 1, 0, 0.1f);
+            break;
+
+        case Document::Condition:
+            if (it->condition() != BrickLink::New) {
+                bg = fg;
+                bg.setAlphaF(0.3f);
+            }
+            break;
+
+        case Document::TierP1:
+        case Document::TierQ1:
+            bg = fg;
+            bg.setAlphaF(0.06f);
+            break;
+
+        case Document::TierP2:
+        case Document::TierQ2:
+            bg = fg;
+            bg.setAlphaF(0.12f);
+            break;
+
+        case Document::TierP3:
+        case Document::TierQ3:
+            bg = fg;
+            bg.setAlphaF(0.18f);
+            break;
+
+        }
+    }
 
     switch (idx.column()) {
-    case Document::Status:
+    case Document::Status: {
         ico = s_status_icons[it->status()];
         if (ico.isNull()) {
             switch (it->status()) {
@@ -141,11 +219,28 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
             }
             s_status_icons.insert(it->status(), ico);
         }
-        break;
 
+        int altid = it->alternateId();
+        bool cp = it->counterPart();
+        if (altid || cp) {
+            tag.text = cp ? QLatin1String( "CP" ) : QString::number(altid);
+            tag.bold = (cp || !it->alternate());
+            tag.foreground = fg;
+            if (cp || selected) {
+                tag.background = fg;
+                tag.background.setAlphaF(0.3f);
+            } else {
+                tag.background = shadeColor(1 + altid, 0);
+            }
+        }
+        break;
+    }
     case Document::Description:
         if (it->item()->hasInventory())
-            tag = tr("Inv");
+            tag.text = tr("Inv");
+            tag.foreground = bg;
+            tag.background = fg;
+            tag.background.setAlphaF(0.3f);
         break;
 
     case Document::Picture: {
@@ -158,68 +253,9 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
             pix = *pixptr;
         break;
 
-    case Document::ItemType:
-        bg = shadeColor(it->itemType()->id(), 0.1f);
-        break;
-
-    case Document::Category:
-        bg = shadeColor(it->category()->id(), 0.2f);
-        break;
-
-    case Document::Quantity:
-        if (it->quantity() <= 0)
-            bg = (it->quantity() == 0) ? QColor::fromRgbF(1, 1, 0, 0.4f)
-                 : QColor::fromRgbF(1, 0, 0, 0.4f);
-        break;
-
-    case Document::QuantityDiff:
-        if (it->origQuantity() < it->quantity())
-            bg = QColor::fromRgbF(0, 1, 0, 0.3f);
-        else if (it->origQuantity() > it->quantity())
-            bg = QColor::fromRgbF(1, 0, 0, 0.3f);
-        break;
-
-    case Document::PriceOrig:
-    case Document::QuantityOrig:
-        fg.setAlphaF(0.5f);
-        break;
-
-    case Document::PriceDiff:
-        if (it->origPrice() < it->price())
-            bg = QColor::fromRgbF(0, 1, 0, 0.3f);
-        else if (it->origPrice() > it->price())
-            bg = QColor::fromRgbF(1, 0, 0, 0.3f);
-        break;
-
-    case Document::Total:
-        bg = QColor::fromRgbF(1, 1, 0, 0.1f);
-        break;
-
     case Document::Condition:
-        if (it->condition() != BrickLink::New) {
-            bg = fg;
-            bg.setAlphaF(0.3f);
-        }
         if (it->itemType()->hasSubConditions() && it->subCondition() != BrickLink::None)
             str = QString("%1<br /><i>%2</i>" ).arg(str, m_doc->subConditionLabel(it->subCondition()));
-        break;
-
-    case Document::TierP1:
-    case Document::TierQ1:
-        bg = fg;
-        bg.setAlphaF(0.06f);
-        break;
-
-    case Document::TierP2:
-    case Document::TierQ2:
-        bg = fg;
-        bg.setAlphaF(0.12f);
-        break;
-
-    case Document::TierP3:
-    case Document::TierQ3:
-        bg = fg;
-        bg.setAlphaF(0.18f);
         break;
 
     case Document::Retain:
@@ -231,23 +267,16 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
         break;
     }
 
-    if (option.state & QStyle::State_Selected) {
-        if (m_read_only) {
-            bg = Utility::gradientColor(bg, option.palette.color(cg, QPalette::Highlight));
-        } else {
-            bg = option.palette.color(cg, QPalette::Highlight);
-            if (!(option.state & QStyle::State_HasFocus))
-                bg.setAlphaF(0.7f);
-            fg = option.palette.color(cg, QPalette::HighlightedText);
-        }
-    }
-
     p->fillRect(option.rect, bg);
-    if (!tag.isEmpty()) {
-        int itw = option.fontMetrics.width(tag) * 2;
+    if (!tag.text.isEmpty()) {
+        QFont font = option.font;
+        font.setBold(tag.bold);
+        QFontMetrics fontmetrics(font);
+        int itw = qMax(int(1.5f * fontmetrics.height()),
+                       2 * fontmetrics.width(tag.text));
 
-        QString key = QLatin1String("TAG_%1_%2_%4");
-        key = key.arg(tag).arg(itw).arg(fg.rgba());
+        QString key = QLatin1String("%1-%2");
+        key = key.arg(itw).arg(tag.background.rgba());
 
         QPixmap *pix = s_tag_cache[key];
         if (!pix) {
@@ -256,10 +285,8 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
             QPainter pixp(pix);
 
             QRadialGradient grad(pix->rect().bottomRight(), pix->width());
-            QColor col = fg;
-            col.setAlphaF(0.2f);
-            grad.setColorAt(0, col);
-            grad.setColorAt(0.5, col);
+            grad.setColorAt(0, tag.background);
+            grad.setColorAt(0.6, tag.background);
             grad.setColorAt(1, Qt::transparent);
 
             pixp.fillRect(pix->rect(), grad);
@@ -270,8 +297,11 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
         int h = qMin(pix->height(), option.rect.height());
 
         p->drawPixmap(option.rect.right() - w + 1, option.rect.bottom() - h + 1, *pix, pix->width() - w, pix->height() - h, w, h);
-        p->setPen(bg);
-        p->drawText(option.rect.adjusted(0, 0, -2, -2), Qt::AlignRight | Qt::AlignBottom, tag);
+        p->setPen(tag.foreground);
+        QFont oldfont = p->font();
+        p->setFont(font);
+        p->drawText(option.rect.adjusted(0, 0, -1, -1), Qt::AlignRight | Qt::AlignBottom, tag.text);
+        p->setFont(oldfont);
     }
 
 

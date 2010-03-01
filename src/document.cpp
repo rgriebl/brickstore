@@ -1479,13 +1479,18 @@ QString Document::dataForToolTipRole(Item *it, Field f) const
 {
     switch (f) {
     case Status: {
+        QString str;
         switch (it->status()) {
-        case BrickLink::Exclude: return tr("Exclude");
-        case BrickLink::Extra  : return tr("Extra");
-        case BrickLink::Include: return tr("Include");
+        case BrickLink::Exclude: str = tr("Exclude"); break;
+        case BrickLink::Extra  : str = tr("Extra"); break;
+        case BrickLink::Include: str = tr("Include"); break;
         default                : break;
         }
-        break;
+        if (it->counterPart())
+            str += QLatin1String("\n(") + tr("Counter part") + QLatin1String(")");
+        else if (it->alternateId())
+            str += QLatin1String("\n(") + tr("Alternate match id: %1").arg(it->alternateId()) + QLatin1String(")");
+        return str;
     }
     case Picture: {
         return dataForDisplayRole(it, PartNo) + " " + dataForDisplayRole(it, Description);
