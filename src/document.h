@@ -297,10 +297,8 @@ public:
     void setFilterExpression(const QString &filter);
     QString filterExpression() const;
     
-    void sort(int column, Qt::SortOrder order);
-
 protected:
-//    virtual bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
+    virtual bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
     virtual bool filterAcceptsColumn(int source_column, const QModelIndex &source_parent) const;
     virtual bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const;
 
@@ -308,8 +306,6 @@ private:
     QString         m_filter_expression;
     Filter::Parser *m_parser;
     QList<Filter>   m_filter;
-    int             m_sort_col;
-    Qt::SortOrder   m_sort_order;
     
     friend class SortItemListCompare;
 };

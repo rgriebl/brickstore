@@ -1765,11 +1765,59 @@ bool DocumentProxyModel::filterAcceptsRow(int source_row, const QModelIndex &sou
     return result;
 }
 
-void DocumentProxyModel::sort(int column, Qt::SortOrder order)
+bool DocumentProxyModel::lessThan(const QModelIndex &idx1, const QModelIndex &idx2) const
 {
-    m_sort_col = column;
-    m_sort_order = order;
-    QSortFilterProxyModel::sort(column, order);
+    const Document::Item *i1 = static_cast<Document *>(sourceModel())->item(idx1);
+    const Document::Item *i2 = static_cast<Document *>(sourceModel())->item(idx2);
+
+    switch (sortColumn()) {
+    case Document::Status      : {
+        if (i1->counterPart() != i2->counterPart())
+            return !i1->counterPart();
+        else if (i1->alternateId() != i2->alternateId())
+            return i1->alternateId() < i2->alternateId();
+        else if (i1->alternate() != i2->alternate())
+            return !i1->alternate();
+        else
+            return i1->status() < i2->status();
+    }
+    case Document::Picture     :
+    case Document::PartNo      : return BrickLink::Item::compareId(i1->item()->id(), i2->item()->id()) < 0;
+    case Document::LotId       : return i1->lotId() < i2->lotId();
+    case Document::Description : return qstrcmp(i1->item()->name(), i2->item()->name()) < 0;
+    case Document::Comments    : return i1->comments() < i2->comments();
+    case Document::Remarks     : return i1->remarks() < i2->remarks();
+    case Document::Quantity    : return i1->quantity() < i2->quantity();
+    case Document::Bulk        : return i1->bulkQuantity() < i2->bulkQuantity();
+    case Document::Price       : return i1->price() < i2->price();
+    case Document::Total       : return i1->total() < i2->total();
+    case Document::Sale        : return i1->sale() < i2->sale();
+    case Document::Condition   : {
+        if (i1->condition() == i2->condition())
+            return (i1->subCondition() < i2->subCondition());
+        else
+            return i1->condition() < i2->condition();
+    }
+    case Document::Color       : return qstrcmp(i1->color()->name(), i2->color()->name()) < 0;
+    case Document::Category    : return qstrcmp(i1->category()->name(), i2->category()->name()) < 0;
+    case Document::ItemType    : return qstrcmp(i1->itemType()->name(), i2->itemType()->name()) < 0;
+    case Document::TierQ1      : return i1->tierQuantity(0) < i2->tierQuantity(0);
+    case Document::TierQ2      : return i1->tierQuantity(1) < i2->tierQuantity(1);
+    case Document::TierQ3      : return i1->tierQuantity(2) < i2->tierQuantity(2);
+    case Document::TierP1      : return i1->tierPrice(0) < i2->tierPrice(0);
+    case Document::TierP2      : return i1->tierPrice(1) < i2->tierPrice(1);
+    case Document::TierP3      : return i1->tierPrice(2) < i2->tierPrice(2);
+    case Document::Retain      : return !i1->retain() && i2->retain();
+    case Document::Stockroom   : return i1->stockroom() && !i2->stockroom();
+    case Document::Reserved    : return i1->reserved() < i2->reserved();
+    case Document::Weight      : return i1->weight() < i2->weight();
+    case Document::YearReleased: return i1->item()->yearReleased() < i2->item()->yearReleased();
+    case Document::PriceOrig   : return i1->origPrice() < i2->origPrice();
+    case Document::PriceDiff   : return (i1->price() - i1->origPrice()) < (i2->price() - i2->origPrice());
+    case Document::QuantityOrig: return i1->origQuantity() < i2->origQuantity();
+    case Document::QuantityDiff: return (i1->quantity() - i1->origQuantity()) < (i2->quantity() - i2->origQuantity());
+    }
+    return false;
 }
 
 class SortItemListCompare {
@@ -1795,7 +1843,7 @@ Document::ItemList DocumentProxyModel::sortItemList(const Document::ItemList &li
 {
     qWarning("sort in: %d", list.count());
     Document::ItemList result(list);
-    qStableSort(result.begin(), result.end(), SortItemListCompare(this, m_sort_col, m_sort_order));
+    qStableSort(result.begin(), result.end(), SortItemListCompare(this, sortColumn(), sortOrder()));
     qWarning("sort out: %d", result.count());
     return result;
 }
