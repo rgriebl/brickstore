@@ -207,6 +207,9 @@ void PictureWidget::gotUpdate(BrickLink::Picture *pic)
 
 static QImage createImg(const QImage &img)
 {
+    if (img.isNull())
+        return img;
+
     QLinearGradient grad(0, 0, 0, img.height());
     grad.setColorAt(0, QColor(0, 0, 0, 24));
     grad.setColorAt(1, QColor(0, 0, 0, 0));

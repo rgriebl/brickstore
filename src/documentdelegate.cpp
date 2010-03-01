@@ -242,8 +242,8 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
         break;
 
     case Document::Picture: {
-        QImage img = it->image();
-        pix = QPixmap::fromImage(img.scaled(img.size() / 2, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+        if (!it->image().isNull())
+            pix = QPixmap::fromImage(it->image().scaled(it->image().size() / 2, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
         break;
     }
     case Document::Color:
