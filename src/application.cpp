@@ -133,6 +133,9 @@ Application::Application(bool rebuild_db_only, int _argc, char **_argv)
             m_files_to_open << argv()[i];
 
         FrameWork::inst()->show();
+#ifdef Q_WS_MAC
+        FrameWork::inst()->raise();
+#endif
     }
 }
 
