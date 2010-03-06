@@ -643,7 +643,13 @@ void BrickLink::TextImport::calculateColorPopularity()
 {
     qreal maxpop = 0;
     for (QMap<int, const Color *>::const_iterator it = m_colors.constBegin(); it != m_colors.constEnd(); ++it)
-        maxpop = qMin(maxpop, it.value()->popularity());
-    for (QMap<int, const Color *>::const_iterator it = m_colors.constBegin(); it != m_colors.constEnd(); ++it)
-        const_cast<Color *>(it.value())->m_popularity /= maxpop;
+        maxpop = qMin(maxpop, it.value()->m_popularity);
+    for (QMap<int, const Color *>::const_iterator it = m_colors.constBegin(); it != m_colors.constEnd(); ++it) {
+        qreal &pop = const_cast<Color *>(it.value())->m_popularity;
+
+        if (maxpop)
+            pop /= maxpop;
+        else
+            pop = 0;
+    }
 }
