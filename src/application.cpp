@@ -85,11 +85,13 @@ Application::Application(bool rebuild_db_only, int _argc, char **_argv)
     setApplicationVersion(QLatin1String(BRICKSTORE_VERSION));
 
 #if defined(Q_WS_X11)
-    QPixmap pix(":/images/icon");
-    if (!pix.isNull())
-        setWindowIcon(pix);
-    else
-        qWarning("No window icon");
+    if (!rebuild_db_only) {
+        QPixmap pix(":/images/icon");
+        if (!pix.isNull())
+            setWindowIcon(pix);
+        else
+            qWarning("No window icon");
+    }
 #endif
 
     Transfer::setDefaultUserAgent(applicationName() + "/" + applicationVersion() + " (" + systemName() + " " + systemVersion() + "; http://" + applicationUrl() + ")");
