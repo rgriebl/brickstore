@@ -65,6 +65,7 @@ public:
     void copyRemarks(const BrickLink::InvItemList &items);
 
     QString filter() const;
+    QString filterToolTip() const;
 
     virtual QDomElement createGuiStateXML(QDomDocument doc);
     virtual bool parseGuiStateXML(QDomElement root);
@@ -87,7 +88,6 @@ public slots:
     void on_file_export_bl_update_clip_triggered();
     void on_file_export_bl_invreq_clip_triggered();
     void on_file_export_bl_wantedlist_clip_triggered();
-    void on_file_export_briktrak_triggered();
 
     void on_file_print_triggered();
     void on_file_print_pdf_triggered();

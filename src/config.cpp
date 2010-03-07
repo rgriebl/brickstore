@@ -21,7 +21,7 @@
 #include <QDomDocument>
 #include <QDesktopServices>
 
-#if defined(Q_WS_WIN)
+#if defined(Q_OS_WIN)
 #  include <windows.h>
 #  include <tchar.h>
 #  include <shlobj.h>
@@ -48,7 +48,7 @@ Config::Config()
         : QSettings()
 {
     m_show_input_errors = value("/General/ShowInputErrors", true).toBool();
-    m_measurement = (value("/General/MeasurementSystem", "metric").toString() == "metric") ? QLocale::MetricSystem : QLocale::ImperialSystem;
+    m_measurement = (value("/General/MeasurementSystem").toString() == QLatin1String("imperial")) ? QLocale::ImperialSystem : QLocale::MetricSystem;
     m_translations_parsed = false;
 
     if (isLocalCurrencySet()) {
@@ -73,7 +73,7 @@ Config *Config::inst()
 
 QString Config::scramble(const QString &str)
 {
-#if defined( Q_WS_WIN )
+#if defined(Q_OS_WIN)
     // win9x registries cannot store unicode values
     if (QSysInfo::WindowsVersion & QSysInfo::WV_DOS_based)
         return str;
@@ -100,16 +100,16 @@ void Config::upgrade(int vmajor, int vminor, int vrev)
         beginGroup("/ItemView/List");
 
         sl = value("/ColumnWidths").toStringList();
-        if (!sl.isEmpty())  setValue("/ColumnWidths", sl.join(","));
+        if (!sl.isEmpty())  setValue("/ColumnWidths", sl.join(QLatin1String(",")));
 
         sl = value("/ColumnWidthsHidden").toStringList();
-        if (!sl.isEmpty())  setValue("/ColumnWidthsHidden", sl.join(","));
+        if (!sl.isEmpty())  setValue("/ColumnWidthsHidden", sl.join(QLatin1String(",")));
 
         sl = value("/ColumnOrder").toStringList();
-        if (!sl.isEmpty())  setValue("/ColumnOrder", sl.join(","));
+        if (!sl.isEmpty())  setValue("/ColumnOrder", sl.join(QLatin1String(",")));
 
         if (contains("/SortAscending")) {
-            setValue("/SortDirection", value("/SortAscending", true).toBool() ? "A" : "D");
+            setValue("/SortDirection", value("/SortAscending", true).toBool() ? QLatin1String("A") : QLatin1String("D"));
             remove("/SortAscending");
         }
 
@@ -173,61 +173,35 @@ QString Config::lDrawDir() const
     QString dir = value("/General/LDrawDir").toString();
 
     if (dir.isEmpty())
-        dir = ::getenv("LDRAWDIR");
+        dir = QString::fromLocal8Bit(::getenv("LDRAWDIR"));
 
-#if defined( Q_WS_WIN )
+#if defined(Q_OS_WIN)
     if (dir.isEmpty()) {
-        QT_WA({
-            wchar_t inidir [MAX_PATH];
+        wchar_t inidir [MAX_PATH];
 
-            DWORD l = GetPrivateProfileStringW(L"LDraw", L"BaseDirectory", L"", inidir, MAX_PATH, L"ldraw.ini");
-            if (l >= 0) {
-                inidir [l] = 0;
-                dir = QString::fromUtf16(reinterpret_cast<const ushort *>(inidir));
-            }
-        }, {
-            char inidir [MAX_PATH];
-
-            DWORD l = GetPrivateProfileStringA("LDraw", "BaseDirectory", "", inidir, MAX_PATH, "ldraw.ini");
-            if (l >= 0) {
-                inidir [l] = 0;
-                dir = QString::fromLocal8Bit(inidir);
-            }
-        })
+        DWORD l = GetPrivateProfileStringW(L"LDraw", L"BaseDirectory", L"", inidir, MAX_PATH, L"ldraw.ini");
+        if (l >= 0) {
+            inidir [l] = 0;
+            dir = QString::fromUtf16(reinterpret_cast<const ushort *>(inidir));
+        }
     }
 
     if (dir.isEmpty()) {
         HKEY skey, lkey;
 
-        QT_WA({
-            if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"Software", 0, KEY_READ, &skey) == ERROR_SUCCESS) {
-                if (RegOpenKeyExW(skey, L"LDraw", 0, KEY_READ, &lkey) == ERROR_SUCCESS) {
-                    wchar_t regdir [MAX_PATH + 1];
-                    DWORD regdirsize = MAX_PATH * sizeof(WCHAR);
+        if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"Software", 0, KEY_READ, &skey) == ERROR_SUCCESS) {
+            if (RegOpenKeyExW(skey, L"LDraw", 0, KEY_READ, &lkey) == ERROR_SUCCESS) {
+                wchar_t regdir [MAX_PATH + 1];
+                DWORD regdirsize = MAX_PATH * sizeof(WCHAR);
 
-                    if (RegQueryValueExW(lkey, L"InstallDir", 0, 0, (LPBYTE) &regdir, &regdirsize) == ERROR_SUCCESS) {
-                        regdir [regdirsize / sizeof(WCHAR)] = 0;
-                        dir = QString::fromUtf16(reinterpret_cast<const ushort *>(regdir));
-                    }
-                    RegCloseKey(lkey);
+                if (RegQueryValueExW(lkey, L"InstallDir", 0, 0, (LPBYTE) &regdir, &regdirsize) == ERROR_SUCCESS) {
+                    regdir [regdirsize / sizeof(WCHAR)] = 0;
+                    dir = QString::fromUtf16(reinterpret_cast<const ushort *>(regdir));
                 }
-                RegCloseKey(skey);
+                RegCloseKey(lkey);
             }
-        }, {
-            if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, "Software", 0, KEY_READ, &skey) == ERROR_SUCCESS) {
-                if (RegOpenKeyExA(skey, "LDraw", 0, KEY_READ, &lkey) == ERROR_SUCCESS) {
-                    char regdir [MAX_PATH + 1];
-                    DWORD regdirsize = MAX_PATH;
-
-                    if (RegQueryValueExA(lkey, "InstallDir", 0, 0, (LPBYTE) &regdir, &regdirsize) == ERROR_SUCCESS) {
-                        regdir [regdirsize] = 0;
-                        dir = QString::fromLocal8Bit(regdir);
-                    }
-                    RegCloseKey(lkey);
-                }
-                RegCloseKey(skey);
-            }
-        })
+            RegCloseKey(skey);
+        }
     }
 #endif
     return dir;
@@ -276,11 +250,7 @@ void Config::setProxy(const QNetworkProxy &np)
 
 QString Config::dataDir() const
 {
-#if QT_VERSION < 0x040500
-    return value("/BrickLink/DataDir", QDesktopServices::storageLocation(QDesktopServices::DataLocation)).toString();
-#else
     return value("/BrickLink/DataDir", QDesktopServices::storageLocation(QDesktopServices::CacheLocation)).toString();
-#endif
 }
 
 void Config::setDataDir(const QString &dir)
@@ -313,7 +283,7 @@ void Config::setMeasurementSystem(QLocale::MeasurementSystem ms)
 {
     if (ms != m_measurement) {
         m_measurement= ms;
-        setValue("/General/MeasurementSystem", ms == QLocale::MetricSystem ? "metric" : "imperial");
+        setValue("/General/MeasurementSystem", ms == QLocale::MetricSystem ? QLatin1String("metric") : QLatin1String("imperial"));
 
         emit measurementSystemChanged(ms);
     }
@@ -400,55 +370,55 @@ QList<Config::Translation> Config::translations() const
 
 bool Config::parseTranslations() const
 {
-	m_translations.clear();
+    m_translations.clear();
 
-	QDomDocument doc;
-	QFile file("translations/translations.xml");
+    QDomDocument doc;
+    QFile file(QLatin1String("translations/translations.xml"));
 
-	if (file.open(QIODevice::ReadOnly)) {
-		QString err_str;
-		int err_line = 0, err_col = 0;
+    if (file.open(QIODevice::ReadOnly)) {
+        QString err_str;
+        int err_line = 0, err_col = 0;
 
-		if (doc.setContent(&file, &err_str, &err_line, &err_col)) {
-			QDomElement root = doc.documentElement();
+        if (doc.setContent(&file, &err_str, &err_line, &err_col)) {
+            QDomElement root = doc.documentElement();
 
-			if (root.isElement() && root.nodeName() == "translations") {
-				for (QDomNode node = root.firstChild(); !node.isNull(); node = node.nextSibling()) {
-					if (!node.isElement() || (node.nodeName() != "translation"))
-						continue;
-					QDomNamedNodeMap map = node.attributes();
-					Translation trans;
+            if (root.isElement() && root.nodeName() == QLatin1String("translations")) {
+                for (QDomNode node = root.firstChild(); !node.isNull(); node = node.nextSibling()) {
+                    if (!node.isElement() || (node.nodeName() != QLatin1String("translation")))
+                        continue;
+                    QDomNamedNodeMap map = node.attributes();
+                    Translation trans;
 
-					trans.language = map.namedItem("lang").toAttr().value();
-                    trans.author = map.namedItem("author").toAttr().value();
-                    trans.authorEMail = map.namedItem("authoremail").toAttr().value();
+                    trans.language = map.namedItem(QLatin1String("lang")).toAttr().value();
+                    trans.author = map.namedItem(QLatin1String("author")).toAttr().value();
+                    trans.authorEMail = map.namedItem(QLatin1String("authoremail")).toAttr().value();
 
-					if (trans.language.isEmpty())
-						goto error;
+                    if (trans.language.isEmpty())
+                        goto error;
 
-					for (QDomNode name = node.firstChild(); !name.isNull(); name = name.nextSibling()) {
-						if (!name.isElement() || (name.nodeName() != "name"))
-							continue;
-						QDomNamedNodeMap map = name.attributes();
+                    for (QDomNode name = node.firstChild(); !name.isNull(); name = name.nextSibling()) {
+                        if (!name.isElement() || (name.nodeName() != QLatin1String("name")))
+                            continue;
+                        QDomNamedNodeMap map = name.attributes();
 
-						QString tr_id = map.namedItem("lang").toAttr().value();
+                        QString tr_id = map.namedItem(QLatin1String("lang")).toAttr().value();
                         QString tr_name = name.toElement().text();
 
                         if (!tr_name.isEmpty())
                             trans.languageName[tr_id.isEmpty() ? QLatin1String("en") : tr_id] = tr_name;
-					}
+                    }
 
-					if (trans.languageName.isEmpty())
-						goto error;
+                    if (trans.languageName.isEmpty())
+                        goto error;
 
-					m_translations << trans;
-				}
-				return true;
-			}
-		}
-	}
+                    m_translations << trans;
+                }
+                return true;
+            }
+        }
+    }
 error:
-	return false;
+    return false;
 }
 
 void Config::setLocalCurrency(const QString &symint, const QString &sym, double rate)

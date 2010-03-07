@@ -201,12 +201,8 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
 
     createActions();
 
-    QString str;
-    QStringList sl;
-
-    sl = Config::inst()->value("/MainWindow/Menubar/File").toStringList();
-    if (sl.isEmpty())
-        sl << "file_new"
+    menuBar()->addMenu(createMenu("file", QList<QByteArray>()
+        << "file_new"
         << "file_open"
         << "file_open_recent"
         << "-"
@@ -223,13 +219,11 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
         << "-"
         << "file_close"
         << "-"
-        << "file_exit";
+        << "file_exit"
+    ));
 
-    menuBar()->addMenu(createMenu("file", sl));
-
-    sl = Config::inst()->value("/MainWindow/Menubar/Edit").toStringList();
-    if (sl.isEmpty())
-        sl << "edit_undo"
+    menuBar()->addMenu(createMenu("edit", QList<QByteArray>()
+        << "edit_undo"
         << "edit_redo"
         << "-"
         << "edit_cut"
@@ -265,13 +259,12 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
         << "edit_bl_catalog"
         << "edit_bl_priceguide"
         << "edit_bl_lotsforsale"
-        << "edit_bl_myinventory";
+        << "edit_bl_myinventory"
+    ));
 
-    menuBar()->addMenu(createMenu("edit", sl));
 
-    sl = Config::inst()->value("/MainWindow/Menubar/View").toStringList();
-    if (sl.isEmpty())
-        sl << "view_toolbar"
+    menuBar()->addMenu(createMenu("view", QList<QByteArray>()
+        << "view_toolbar"
         << "view_infobar"
         << "view_statusbar"
         << "-"
@@ -280,40 +273,30 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
         << "view_show_input_errors"
         << "view_difference_mode"
         << "-"
-        << "view_save_default_col";
+        << "view_save_default_col"
+    ));
 
-    menuBar()->addMenu(createMenu("view", sl));
-
-    sl = Config::inst()->value("/MainWindow/Menubar/Extras").toStringList();
-    if (sl.isEmpty())
-        sl << "extras_net_online"
+    menuBar()->addMenu(createMenu("extras", QList<QByteArray>()
+        << "extras_net_online"
         << "extras_net_offline"
         << "-"
         << "extras_update_database"
         << "-"
-        << "extras_configure";
-
-    // Make sure there is a possibility to open the pref dialog!
-    if (sl.indexOf("extras_configure") == -1)
-        sl << "-" << "extras_configure";
-
-    menuBar()->addMenu(createMenu("extras", sl));
+        << "extras_configure"
+    ));
 
     QMenu *m = m_workspace->windowMenu(true, this);
-    m->menuAction()->setObjectName("window");
+    m->menuAction()->setObjectName(QLatin1String("window"));
     menuBar()->addMenu(m);
 
-    sl = Config::inst()->value("/MainWindow/Menubar/Help").toStringList();
-    if (sl.isEmpty())
-        sl << "help_updates"
+    menuBar()->addMenu(createMenu("help", QList<QByteArray>()
+        << "help_updates"
         << "-"
-        << "help_about";
+        << "help_about"
+    ));
 
-    menuBar()->addMenu(createMenu("help", sl));
-
-    sl = Config::inst()->value("/MainWindow/ContextMenu/Item").toStringList();
-    if (sl.isEmpty())
-        sl << "edit_cut"
+    m_contextmenu = createMenu("context", QList<QByteArray>()
+        << "edit_cut"
         << "edit_copy"
         << "edit_paste"
         << "edit_delete"
@@ -333,13 +316,11 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
         << "edit_bl_catalog"
         << "edit_bl_priceguide"
         << "edit_bl_lotsforsale"
-        << "edit_bl_myinventory";
+        << "edit_bl_myinventory"
+    );
 
-    m_contextmenu = createMenu("context", sl);
-
-    sl = Config::inst()->value("/MainWindow/Toolbar/Buttons").toStringList();
-    if (sl.isEmpty())
-        sl << "file_new"
+    setupToolBar(m_toolbar, QList<QByteArray>()
+        << "file_new"
         << "file_open"
         << "file_save"
         << "-"
@@ -364,13 +345,13 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
         << "widget_filter"
         << "|"
         << "widget_spinner"
-        << "|";
+        << "|"
+    );
 
-    setupToolBar(m_toolbar, sl);
     addToolBar(m_toolbar);
 
     createStatusBar();
-    findAction("view_statusbar")->setChecked(Config::inst()->value("/MainWindow/Statusbar/Visible", true).toBool());
+    findAction("view_statusbar")->setChecked(Config::inst()->value(QLatin1String("/MainWindow/Statusbar/Visible"), true).toBool());
 
     languageChange();
 
@@ -421,7 +402,7 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
 
     QByteArray ba;
 
-    ba = Config::inst()->value("/MainWindow/Layout/Geometry").toByteArray();
+    ba = Config::inst()->value(QLatin1String("/MainWindow/Layout/Geometry")).toByteArray();
     if (ba.isEmpty() || !restoreGeometry(ba)) {
         float dw = qApp->desktop()->width() / 10.f;
         float dh = qApp->desktop()->height() / 10.f;
@@ -429,7 +410,7 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
         setGeometry(int(dw), int(dh), int (8 * dw), int(8 * dh));
         setWindowState(Qt::WindowMaximized);
     }
-    ba = Config::inst()->value("/MainWindow/Layout/State").toByteArray();
+    ba = Config::inst()->value(QLatin1String("/MainWindow/Layout/State")).toByteArray();
     if (ba.isEmpty() || !restoreState(ba))
         m_toolbar->show();
 
@@ -512,14 +493,12 @@ void FrameWork::translateActions()
         { "file_import_bl_cart",            tr("BrickLink Shopping Cart..."),         tr("Ctrl+I,Ctrl+C", "File|Import BrickLink Shopping Cart") },
         { "file_import_peeron_inv",         tr("Peeron Inventory..."),                tr("Ctrl+I,Ctrl+P", "File|Import Peeron Inventory") },
         { "file_import_ldraw_model",        tr("LDraw Model..."),                     tr("Ctrl+I,Ctrl+L", "File|Import LDraw Model") },
-        { "file_import_briktrak",           tr("BrikTrak Inventory..."),              0 },
         { "file_export",                    tr("Export"),                             0 },
         { "file_export_bl_xml",             tr("BrickLink XML..."),                         tr("Ctrl+E,Ctrl+X", "File|Import BrickLink XML") },
         { "file_export_bl_xml_clip",        tr("BrickLink Mass-Upload XML to Clipboard"),   tr("Ctrl+E,Ctrl+U", "File|Import BrickLink Mass-Upload") },
         { "file_export_bl_update_clip",     tr("BrickLink Mass-Update XML to Clipboard"),   tr("Ctrl+E,Ctrl+P", "File|Import BrickLink Mass-Update") },
         { "file_export_bl_invreq_clip",     tr("BrickLink Set Inventory XML to Clipboard"), tr("Ctrl+E,Ctrl+I", "File|Import BrickLink Set Inventory") },
         { "file_export_bl_wantedlist_clip", tr("BrickLink Wanted List XML to Clipboard"),   tr("Ctrl+E,Ctrl+W", "File|Import BrickLink Wanted List") },
-        { "file_export_briktrak",           tr("BrikTrak Inventory..."),              0 },
         { "file_close",                     tr("Close"),                              tr("Ctrl+W", "File|Close") },
         { "file_exit",                      tr("Exit"),                               tr("Ctrl+Q", "File|Quit") },
         { "edit",                           tr("&Edit"),                              0 },
@@ -653,9 +632,9 @@ void FrameWork::dropEvent(QDropEvent *e)
     e->accept();
 }
 
-QAction *FrameWork::findAction(const QString &name)
+QAction *FrameWork::findAction(const char *name)
 {
-    return name.isEmpty() ? 0 : static_cast <QAction *>(findChild<QAction *>(name));
+    return !name || !name[0] ? 0 : static_cast <QAction *>(findChild<QAction *>(QLatin1String(name)));
 }
 
 QDockWidget *FrameWork::createDock(QWidget *widget)
@@ -698,32 +677,32 @@ void FrameWork::createStatusBar()
     statusBar()->hide();
 }
 
-QMenu *FrameWork::createMenu(const QString &name, const QStringList &a_names)
+QMenu *FrameWork::createMenu(const QByteArray &name, const QList<QByteArray> &a_names)
 {
     if (a_names.isEmpty())
         return 0;
 
     QMenu *m = new QMenu(this);
-    m->menuAction()->setObjectName(name);
+    m->menuAction()->setObjectName(QLatin1String(name.constData()));
 
-    foreach(const QString &an, a_names) {
+    foreach(const QByteArray &an, a_names) {
         if (an == "-")
             m->addSeparator();
         else if (QAction *a = findAction(an))
             m->addAction(a);
         else
-            qWarning("Couldn't find action '%s'", qPrintable(an));
+            qWarning("Couldn't find action '%s'", an.constData());
     }
     return m;
 }
 
 
-bool FrameWork::setupToolBar(QToolBar *t, const QStringList &a_names)
+bool FrameWork::setupToolBar(QToolBar *t, const QList<QByteArray> &a_names)
 {
     if (!t || a_names.isEmpty())
         return false;
 
-    foreach(const QString &an, a_names) {
+    foreach(const QByteArray &an, a_names) {
         if (an == "-") {
             t->addSeparator();
         } else if (an == "|") {
@@ -785,7 +764,7 @@ bool FrameWork::setupToolBar(QToolBar *t, const QStringList &a_names)
             if (a->menu() && (tb = qobject_cast<QToolButton *>(t->widgetForAction(a))))
                 tb->setPopupMode(QToolButton::InstantPopup);
         } else {
-            qWarning("Couldn't find action '%s'", qPrintable(an));
+            qWarning("Couldn't find action '%s'", an.constData());
         }
     }
     return true;
@@ -812,7 +791,7 @@ inline static QAction *newQAction(QObject *parent, const char *name, bool toggle
 inline static QActionGroup *newQActionGroup(QObject *parent, const char *name, bool exclusive = false)
 {
     QActionGroup *g = new QActionGroup(parent);
-    g->setObjectName(name);
+    g->setObjectName(QLatin1String(name));
     g->setExclusive(exclusive);
     return g;
 }
@@ -844,7 +823,6 @@ void FrameWork::createActions()
     m->addAction(newQAction(this, "file_import_bl_cart", false, this, SLOT(fileImportBrickLinkCart())));
     m->addAction(newQAction(this, "file_import_peeron_inv", false, this, SLOT(fileImportPeeronInventory())));
     m->addAction(newQAction(this, "file_import_ldraw_model", false, this, SLOT(fileImportLDrawModel())));
-    m->addAction(newQAction(this, "file_import_briktrak", false, this, SLOT(fileImportBrikTrakInventory())));
 
     m = newQMenu(this, "file_export");
     m->addAction(newQAction(this, "file_export_bl_xml"));
@@ -852,7 +830,6 @@ void FrameWork::createActions()
     m->addAction(newQAction(this, "file_export_bl_update_clip"));
     m->addAction(newQAction(this, "file_export_bl_invreq_clip"));
     m->addAction(newQAction(this, "file_export_bl_wantedlist_clip"));
-    m->addAction(newQAction(this, "file_export_briktrak"));
 
     (void) newQAction(this, "file_close");
 
@@ -988,7 +965,7 @@ void FrameWork::createActions()
             QString path = QLatin1String(":/images/") + a->objectName();
 
             // QIcon::isNull is useless in Qt4
-            if (QFile::exists(path + ".png") || QFile::exists(path + ".svg"))
+            if (QFile::exists(path + QLatin1String(".png")) || QFile::exists(path + QLatin1String(".svg")))
                 a->setIcon(QIcon(path));
         }
     }
@@ -1039,11 +1016,6 @@ void FrameWork::fileOpenRecent(int i)
 void FrameWork::fileImportPeeronInventory()
 {
     createWindow(Document::fileImportPeeronInventory());
-}
-
-void FrameWork::fileImportBrikTrakInventory()
-{
-    createWindow(Document::fileImportBrikTrakInventory());
 }
 
 void FrameWork::fileImportBrickLinkInventory()
@@ -1269,6 +1241,7 @@ void FrameWork::connectWindow(QWidget *w)
         if (m_filter) {
             disconnect(m_filter, SIGNAL(textChanged(const QString &)), m_current_window, SLOT(setFilter(const QString &)));
             m_filter->setText(QString());
+            m_filter->setToolTip(QString());
         }
         if (m_details) {
             disconnect(m_current_window, SIGNAL(currentChanged(Document::Item *)), m_details, SLOT(setItem(Document::Item *)));
@@ -1288,6 +1261,7 @@ void FrameWork::connectWindow(QWidget *w)
         connect(window, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
         if (m_filter) {
             m_filter->setText(window->filter());
+            m_filter->setToolTip(window->filterToolTip());
             connect(m_filter, SIGNAL(textChanged(const QString &)), window, SLOT(setFilter(const QString &)));
         }
         if (m_details) {
@@ -1447,7 +1421,7 @@ void FrameWork::statisticsUpdate()
             valstr = stat.value().toLocal(Currency::LocalSymbol);
 
         if (stat.weight() == -DBL_MIN) {
-            wgtstr = "-";
+            wgtstr = QLatin1String("-");
         }
         else {
             double weight = stat.weight();
@@ -1597,9 +1571,9 @@ void FrameWork::createAddItemDialog()
 {
     if (!m_add_dialog) {
         m_add_dialog = new AddItemDialog();
-        m_add_dialog->setObjectName("additems");
+        m_add_dialog->setObjectName(QLatin1String("additems"));
 
-        QByteArray ba = Config::inst()->value("/MainWindow/AddItemDialog/Geometry").toByteArray();
+        QByteArray ba = Config::inst()->value(QLatin1String("/MainWindow/AddItemDialog/Geometry")).toByteArray();
 
         if (!ba.isEmpty())
             m_add_dialog->restoreGeometry(ba);

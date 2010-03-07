@@ -449,37 +449,39 @@ class Order {
 public:
     Order(const QString &id, OrderType type);
 
-    QString id() const        { return m_id; }
-    OrderType type() const    { return m_type; }
-    QDateTime date() const    { return m_date; }
+    QString id() const          { return m_id; }
+    OrderType type() const      { return m_type; }
+    QDateTime date() const      { return m_date; }
     QDateTime statusChange() const  { return m_status_change; }
     //QString buyer() const     { return m_type == Received ? m_other : QString(); }
     //QString seller() const    { return m_type == Placed ? m_other : QString(); }
-    QString other() const     { return m_other; }
-    Currency shipping() const  { return m_shipping; }
-    Currency insurance() const { return m_insurance; }
-    Currency delivery() const  { return m_delivery; }
-    Currency credit() const    { return m_credit; }
-    Currency grandTotal() const{ return m_grand_total; }
-    QString status() const    { return m_status; }
-    QString payment() const   { return m_payment; }
-    QString remarks() const   { return m_remarks; }
-    QString address() const   { return m_address; }
+    QString other() const       { return m_other; }
+    Currency shipping() const   { return m_shipping; }
+    Currency insurance() const  { return m_insurance; }
+    Currency delivery() const   { return m_delivery; }
+    Currency credit() const     { return m_credit; }
+    Currency grandTotal() const { return m_grand_total; }
+    QString status() const      { return m_status; }
+    QString payment() const     { return m_payment; }
+    QString remarks() const     { return m_remarks; }
+    QString address() const     { return m_address; }
+    QString currencyCode() const { return m_currencycode; }
 
     void setId(const QString &id)             { m_id = id; }
     void setDate(const QDateTime &dt)         { m_date = dt; }
     void setStatusChange(const QDateTime &dt) { m_status_change = dt; }
     void setBuyer(const QString &str)         { m_other = str; m_type = Received; }
     void setSeller(const QString &str)        { m_other = str; m_type = Placed; }
-    void setShipping(const Currency &m)        { m_shipping = m; }
-    void setInsurance(const Currency &m)       { m_insurance = m; }
-    void setDelivery(const Currency &m)        { m_delivery = m; }
-    void setCredit(const Currency &m)          { m_credit = m; }
-    void setGrandTotal(const Currency &m)      { m_grand_total = m; }
+    void setShipping(const Currency &m)       { m_shipping = m; }
+    void setInsurance(const Currency &m)      { m_insurance = m; }
+    void setDelivery(const Currency &m)       { m_delivery = m; }
+    void setCredit(const Currency &m)         { m_credit = m; }
+    void setGrandTotal(const Currency &m)     { m_grand_total = m; }
     void setStatus(const QString &str)        { m_status = str; }
     void setPayment(const QString &str)       { m_payment = str; }
     void setRemarks(const QString &str)       { m_remarks = str; }
     void setAddress(const QString &str)       { m_address = str; }
+    void setCurrencyCode(const QString &str)  { m_currencycode = str; }
 
 private:
     QString   m_id;
@@ -487,15 +489,16 @@ private:
     QDateTime m_date;
     QDateTime m_status_change;
     QString   m_other;
-    Currency   m_shipping;
-    Currency   m_insurance;
-    Currency   m_delivery;
-    Currency   m_credit;
-    Currency   m_grand_total;
+    Currency  m_shipping;
+    Currency  m_insurance;
+    Currency  m_delivery;
+    Currency  m_credit;
+    Currency  m_grand_total;
     QString   m_status;
     QString   m_payment;
     QString   m_remarks;
     QString   m_address;
+    QString   m_currencycode;
 };
 
 class PriceGuide : public Ref {
@@ -861,7 +864,7 @@ public:
         BrickStore_1_1,
         BrickStore_2_0,
 
-        Default = BrickStore_1_1
+        Default = BrickStore_2_0
     };
 
     QString defaultDatabaseName(DatabaseVersion version = Default) const;
@@ -895,8 +898,18 @@ public:
     Picture *picture(const Item *item, const Color *color, bool high_priority = false);
     Picture *largePicture(const Item *item, bool high_priority = false);
 
-    InvItemList *parseItemListXML(QDomElement root, ItemListXMLHint hint, uint *invalid_items = 0);
-    QDomElement createItemListXML(QDomDocument doc, ItemListXMLHint hint, const InvItemList &items, QMap <QString, QString> *extra = 0);
+    struct ParseItemListXMLResult {
+        ParseItemListXMLResult()
+            : items(0), invalidItemCount(0)
+        { }
+
+        InvItemList *items;
+        uint invalidItemCount;
+        QString currencyCode;
+    };
+
+    ParseItemListXMLResult parseItemListXML(QDomElement root, ItemListXMLHint hint, uint *invalid_items = 0);
+    QDomElement createItemListXML(QDomDocument doc, ItemListXMLHint hint, const InvItemList &items, const QString &currencyCode = QString(), QMap<QString, QString> *extra = 0);
 
     bool parseLDrawModel(QFile &file, InvItemList &items, uint *invalid_items = 0);
 

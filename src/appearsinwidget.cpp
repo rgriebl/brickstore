@@ -50,8 +50,8 @@ AppearsInWidget::AppearsInWidget(QWidget *parent)
 
     QAction *a;
     a = new QAction(this);
-    a->setObjectName("appearsin_partoutitems");
-    a->setIcon(QIcon(":/images/edit_partoutitems"));
+    a->setObjectName(QLatin1String("appearsin_partoutitems"));
+    a->setIcon(QIcon(QLatin1String(":/images/edit_partoutitems")));
     connect(a, SIGNAL(triggered()), this, SLOT(partOut()));
     addAction(a);
 
@@ -60,8 +60,8 @@ AppearsInWidget::AppearsInWidget(QWidget *parent)
     addAction(a);
 
     a = new QAction(this);
-    a->setObjectName("appearsin_magnify");
-    a->setIcon(QIcon(":/images/viewmagp"));
+    a->setObjectName(QLatin1String("appearsin_magnify"));
+    a->setIcon(QIcon(QLatin1String(":/images/viewmagp")));
     connect(a, SIGNAL(triggered()), this, SLOT(viewLargeImage()));
     addAction(a);
 
@@ -70,18 +70,18 @@ AppearsInWidget::AppearsInWidget(QWidget *parent)
     addAction(a);
 
     a = new QAction(this);
-    a->setObjectName("appearsin_bl_catalog");
-    a->setIcon(QIcon(":/images/edit_bl_catalog"));
+    a->setObjectName(QLatin1String("appearsin_bl_catalog"));
+    a->setIcon(QIcon(QLatin1String(":/images/edit_bl_catalog")));
     connect(a, SIGNAL(triggered()), this, SLOT(showBLCatalogInfo()));
     addAction(a);
     a = new QAction(this);
-    a->setObjectName("appearsin_bl_priceguide");
-    a->setIcon(QIcon(":/images/edit_bl_priceguide"));
+    a->setObjectName(QLatin1String("appearsin_bl_priceguide"));
+    a->setIcon(QIcon(QLatin1String(":/images/edit_bl_priceguide")));
     connect(a, SIGNAL(triggered()), this, SLOT(showBLPriceGuideInfo()));
     addAction(a);
     a = new QAction(this);
-    a->setObjectName("appearsin_bl_lotsforsale");
-    a->setIcon(QIcon(":/images/edit_bl_lotsforsale"));
+    a->setObjectName(QLatin1String("appearsin_bl_lotsforsale"));
+    a->setIcon(QIcon(QLatin1String(":/images/edit_bl_lotsforsale")));
     connect(a, SIGNAL(triggered()), this, SLOT(showBLLotsForSale()));
     addAction(a);
 
@@ -95,11 +95,11 @@ AppearsInWidget::AppearsInWidget(QWidget *parent)
 
 void AppearsInWidget::languageChange()
 {
-    findChild<QAction *>("appearsin_partoutitems")->setText(tr("Part out Item..."));
-    findChild<QAction *>("appearsin_magnify")->setText(tr("View large image..."));
-    findChild<QAction *>("appearsin_bl_catalog")->setText(tr("Show BrickLink Catalog Info..."));
-    findChild<QAction *>("appearsin_bl_priceguide")->setText(tr("Show BrickLink Price Guide Info..."));
-    findChild<QAction *>("appearsin_bl_lotsforsale")->setText(tr("Show Lots for Sale on BrickLink..."));
+    findChild<QAction *>(QLatin1String("appearsin_partoutitems"))->setText(tr("Part out Item..."));
+    findChild<QAction *>(QLatin1String("appearsin_magnify"))->setText(tr("View large image..."));
+    findChild<QAction *>(QLatin1String("appearsin_bl_catalog"))->setText(tr("Show BrickLink Catalog Info..."));
+    findChild<QAction *>(QLatin1String("appearsin_bl_priceguide"))->setText(tr("Show BrickLink Price Guide Info..."));
+    findChild<QAction *>(QLatin1String("appearsin_bl_lotsforsale"))->setText(tr("Show Lots for Sale on BrickLink..."));
 }
 
 AppearsInWidget::~AppearsInWidget()
@@ -136,7 +136,7 @@ QSize AppearsInWidget::minimumSizeHint() const
 {
     const QFontMetrics &fm = fontMetrics();
 
-    return QSize(fm.width('m') * 20, fm.height() * 6);
+    return QSize(fm.width(QLatin1Char('m')) * 20, fm.height() * 6);
 }
 
 QSize AppearsInWidget::sizeHint() const

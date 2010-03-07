@@ -79,14 +79,16 @@ Application::Application(bool rebuild_db_only, int _argc, char **_argv)
         }
     }
 
-    setOrganizationName("Softforge");
-    setOrganizationDomain("softforge.de");
+    setOrganizationName(QLatin1String("Softforge"));
+    setOrganizationDomain(QLatin1String("softforge.de"));
     setApplicationName(QLatin1String(BRICKSTORE_NAME));
     setApplicationVersion(QLatin1String(BRICKSTORE_VERSION));
 
     QNetworkProxyFactory::setUseSystemConfiguration(true);
 
-    Transfer::setDefaultUserAgent(applicationName() + "/" + applicationVersion() + " (" + systemName() + " " + systemVersion() + "; http://" + applicationUrl() + ")");
+    Transfer::setDefaultUserAgent(applicationName() + QLatin1Char('/') + applicationVersion() +
+                                  QLatin1String(" (") + systemName() + QLatin1Char(' ') + systemVersion() +
+                                  QLatin1String("; http://") + applicationUrl() + QLatin1Char(')'));
 
     // initialize config & resource
     (void) Config::inst()->upgrade(BRICKSTORE_MAJOR, BRICKSTORE_MINOR, BRICKSTORE_PATCH);
@@ -186,18 +188,18 @@ QString Application::applicationUrl() const
 
 QString Application::systemName() const
 {
-    QString sys_name = "(unknown)";
+    QString sys_name = tr("(unknown)");
 
-#if defined( Q_OS_MACX )
-    sys_name = "Mac OS X";
-#elif defined( Q_OS_WIN )
-    sys_name = "Windows";
-#elif defined( Q_OS_UNIX )
-    sys_name = "Unix";
+#if defined(Q_OS_MACX)
+    sys_name = QLatin1String("Mac OS X");
+#elif defined(Q_OS_WIN)
+    sys_name = QLatin1String("Windows");
+#elif defined(Q_OS_UNIX)
+    sys_name = QLatin1String("Unix");
 
     struct ::utsname utsinfo;
     if (::uname(&utsinfo) >= 0)
-        sys_name = utsinfo.sysname;
+        sys_name = QString::fromLocal8Bit(utsinfo.sysname);
 #endif
 
     return sys_name;
@@ -205,39 +207,39 @@ QString Application::systemName() const
 
 QString Application::systemVersion() const
 {
-    QString sys_version = "(unknown)";
+    QString sys_version = tr("(unknown)");
 
-#if defined( Q_OS_MACX )
+#if defined(Q_OS_MACX)
     switch (QSysInfo::MacintoshVersion) {
-    case QSysInfo::MV_10_0: sys_version = "10.0 (Cheetah)"; break;
-    case QSysInfo::MV_10_1: sys_version = "10.1 (Puma)";    break;
-    case QSysInfo::MV_10_2: sys_version = "10.2 (Jaguar)";  break;
-    case QSysInfo::MV_10_3: sys_version = "10.3 (Panther)"; break;
-    case QSysInfo::MV_10_4: sys_version = "10.4 (Tiger)";   break;
-    case QSysInfo::MV_10_5: sys_version = "10.5 (Leopard)"; break;
-    case QSysInfo::MV_10_6: sys_version = "10.6 (Snow Leopard)"; break;
+    case QSysInfo::MV_10_0: sys_version = QLatin1String("10.0 (Cheetah)"); break;
+    case QSysInfo::MV_10_1: sys_version = QLatin1String("10.1 (Puma)");    break;
+    case QSysInfo::MV_10_2: sys_version = QLatin1String("10.2 (Jaguar)");  break;
+    case QSysInfo::MV_10_3: sys_version = QLatin1String("10.3 (Panther)"); break;
+    case QSysInfo::MV_10_4: sys_version = QLatin1String("10.4 (Tiger)");   break;
+    case QSysInfo::MV_10_5: sys_version = QLatin1String("10.5 (Leopard)"); break;
+    case QSysInfo::MV_10_6: sys_version = QLatin1String("10.6 (Snow Leopard)"); break;
     default               : break;
     }
-#elif defined( Q_OS_WIN )
+#elif defined(Q_OS_WIN)
     switch (QSysInfo::WindowsVersion) {
-    case QSysInfo::WV_95 : sys_version = "95";    break;
-    case QSysInfo::WV_98 : sys_version = "98";    break;
-    case QSysInfo::WV_Me : sys_version = "ME";    break;
-    case QSysInfo::WV_4_0: sys_version = "NT";    break;
-    case QSysInfo::WV_5_0: sys_version = "2000";  break;
-    case QSysInfo::WV_5_1: sys_version = "XP";    break;
-    case QSysInfo::WV_5_2: sys_version = "2003";  break;
-    case QSysInfo::WV_6_0: sys_version = "VISTA"; break;
-    case QSysInfo::WV_6_1: sys_version = "7";     break;
+    case QSysInfo::WV_95 : sys_version = QLatin1String("95");    break;
+    case QSysInfo::WV_98 : sys_version = QLatin1String("98");    break;
+    case QSysInfo::WV_Me : sys_version = QLatin1String("ME");    break;
+    case QSysInfo::WV_4_0: sys_version = QLatin1String("NT");    break;
+    case QSysInfo::WV_5_0: sys_version = QLatin1String("2000");  break;
+    case QSysInfo::WV_5_1: sys_version = QLatin1String("XP");    break;
+    case QSysInfo::WV_5_2: sys_version = QLatin1String("2003");  break;
+    case QSysInfo::WV_6_0: sys_version = QLatin1String("VISTA"); break;
+    case QSysInfo::WV_6_1: sys_version = QLatin1String("7");     break;
     default              : break;
     }
-#elif defined( Q_OS_UNIX )
+#elif defined(Q_OS_UNIX)
     struct ::utsname utsinfo;
     if (::uname(&utsinfo) >= 0) {
         QByteArray dist, release, nick;
         QProcess lsbrel;
 
-        lsbrel.start("lsb_release -a");
+        lsbrel.start(QLatin1String("lsb_release -a"));
 
         if (lsbrel.waitForStarted(1000) && lsbrel.waitForFinished(2000)) {
             QList<QByteArray> out = lsbrel.readAllStandardOutput().split('\n');
@@ -413,12 +415,12 @@ bool Application::initBrickLink()
     QString defdatadir = QDir::homePath();
 
 #if defined( Q_OS_WIN32 )
-    defdatadir += "/brickstore-cache/";
+    defdatadir += QLatin1String("/brickstore-cache/");
 #else
-    defdatadir += "/.brickstore-cache/";
+    defdatadir += QLatin1String("/.brickstore-cache/");
 #endif
 
-    BrickLink::Core *bl = BrickLink::create(Config::inst()->value("/BrickLink/DataDir", defdatadir).toString(), &errstring);
+    BrickLink::Core *bl = BrickLink::create(Config::inst()->value(QLatin1String("/BrickLink/DataDir"), defdatadir).toString(), &errstring);
 
     if (!bl)
         MessageBox::critical(0, tr("Could not initialize the BrickLink kernel:<br /><br />%1").arg(errstring));
@@ -444,7 +446,7 @@ void Application::exitBrickLink()
 
 void Application::about()
 {
-    static const char *layout =
+    QString layout = QLatin1String(
         "<center>"
         "<table border=\"0\"><tr>"
         "<td valign=\"middle\" align=\"right\" width=\"30%\"><img src=\":/images/icon.png\" /></td>"
@@ -456,11 +458,13 @@ void Application::about()
         "</tr></table>"
         "</center><center>"
         "<br />%4<br /><br />%5"
-        "</center>%6<p>%7</p>";
+        "</center>%6<p>%7</p>");
 
 
-    QString page1_link = QString("<strong>%1</strong> | <a href=\"system\">%2</a>").arg(tr("Legal Info"), tr("System Info"));
-    QString page2_link = QString("<a href=\"index\">%1</a> | <strong>%2</strong>").arg(tr("Legal Info"), tr("System Info"));
+    QString page1_link = QLatin1String("<strong>%1</strong> | <a href=\"system\">%2</a>");
+    page1_link = page1_link.arg(tr("Legal Info"), tr("System Info"));
+    QString page2_link = QLatin1String("<a href=\"index\">%1</a> | <strong>%2</strong>");
+    page2_link = page2_link.arg(tr("Legal Info"), tr("System Info"));
 
     QString copyright = tr("Copyright &copy; %1").arg(BRICKSTORE_COPYRIGHT);
     QString version   = tr("Version %1").arg(BRICKSTORE_VERSION);
@@ -469,42 +473,42 @@ void Application::about()
 
     QString qt = qVersion();
 
-    QString translators = "<b>" + tr("Translators") + "</b><table border=\"0\">";
+    QString translators = QLatin1String("<b>") + tr("Translators") + QLatin1String("</b><table border=\"0\">");
 
+    QString translators_html = QLatin1String("<tr><td>%1</td><td width=\"2em\"></td><td>%2 &lt;<a href=\"mailto:%3\">%4</a>&gt;</td></tr>");
     foreach (const Config::Translation &trans, Config::inst()->translations()) {
         if (trans.language != QLatin1String("en")) {
             QString langname = trans.languageName.value(QLocale().name().left(2), trans.languageName[QLatin1String("en")]);
-            translators += QString("<tr><td>%1</td><td width=\"2em\"></td><td>%2 &lt;<a href=\"mailto:%3\">%4</a>&gt;</td></tr>").arg(langname, trans.author, trans.authorEMail, trans.authorEMail);
+            translators += translators_html.arg(langname, trans.author, trans.authorEMail, trans.authorEMail);
         }
     }
 
-    translators += "</table>";
+    translators += QLatin1String("</table>");
 
-    static const char *legal_src = QT_TR_NOOP(
-                                       "<p>"
-                                       "This program is free software; it may be distributed and/or modified "
-                                       "under the terms of the GNU General Public License version 2 as published "
-                                       "by the Free Software Foundation and appearing in the file LICENSE.GPL "
-                                       "included in this software package."
-                                       "<br />"
-                                       "This program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE "
-                                       "WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE."
-                                       "<br />"
-                                       "See <a href=\"http://fsf.org/licensing/licenses/gpl.html\">www.fsf.org/licensing/licenses/gpl.html</a> for GPL licensing information."
-                                       "</p><p>"
-                                       "All data from <a href=\"http://www.bricklink.com\">www.bricklink.com</a> is owned by BrickLink<sup>TM</sup>, "
-                                       "which is a trademark of Dan Jezek."
-                                       "</p><p>"
-                                       "Peeron Inventories from <a href=\"http://www.peeron.com\">www.peeron.com</a> are owned by Dan and Jennifer Boger."
-                                       "</p><p>"
-                                       "LEGO<sup>&reg;</sup> is a trademark of the LEGO group of companies, "
-                                       "which does not sponsor, authorize or endorse this software."
-                                       "</p><p>"
-                                       "All other trademarks recognised."
-                                       "</p>"
-                                   );
+    QString legal = tr(
+        "<p>"
+        "This program is free software; it may be distributed and/or modified "
+        "under the terms of the GNU General Public License version 2 as published "
+        "by the Free Software Foundation and appearing in the file LICENSE.GPL "
+        "included in this software package."
+        "<br />"
+        "This program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE "
+        "WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE."
+        "<br />"
+        "See <a href=\"http://fsf.org/licensing/licenses/gpl.html\">www.fsf.org/licensing/licenses/gpl.html</a> for GPL licensing information."
+        "</p><p>"
+        "All data from <a href=\"http://www.bricklink.com\">www.bricklink.com</a> is owned by BrickLink<sup>TM</sup>, "
+        "which is a trademark of Dan Jezek."
+        "</p><p>"
+        "Peeron Inventories from <a href=\"http://www.peeron.com\">www.peeron.com</a> are owned by Dan and Jennifer Boger."
+        "</p><p>"
+        "LEGO<sup>&reg;</sup> is a trademark of the LEGO group of companies, "
+        "which does not sponsor, authorize or endorse this software."
+        "</p><p>"
+        "All other trademarks recognised."
+        "</p>");
 
-    static const char *technical_src =
+    QString technical = QLatin1String(
         "<p>"
         "<table>"
         "<th colspan=\"2\" align=\"left\">Build Info</th>"
@@ -519,9 +523,9 @@ void Application::about()
         "<tr><td>Memory </td><td>%L6 MB</td></tr>"
         "<tr><td>Qt     </td><td>%7</td></tr>"
         "</table>"
-        "</p>";
+        "</p>");
 
-    QString technical = QString(technical_src).arg(STR(__USER__), STR(__HOST__), __DATE__ " " __TIME__).arg(
+    technical = technical.arg(STR(__USER__), STR(__HOST__), __DATE__ " " __TIME__).arg(
 #if defined(_MSC_VER)
                          "Microsoft Visual-C++ "
 #  if _MSC_VER >= 1600
@@ -544,12 +548,10 @@ void Application::about()
 #else
                          "???"
 #endif
-                         ).arg(systemName() + " " + systemVersion()).arg(Utility::physicalMemory()/(1024ULL*1024ULL)).arg(qt);
+                         ).arg(systemName() + QLatin1Char(' ') + systemVersion()).arg(Utility::physicalMemory()/(1024ULL*1024ULL)).arg(qt);
 
-    QString legal = tr(legal_src);
-
-    QString page1 = QString(layout).arg(applicationName(), copyright, version, support).arg(page1_link, legal, translators);
-    QString page2 = QString(layout).arg(applicationName(), copyright, version, support).arg(page2_link, technical, QString());
+    QString page1 = layout.arg(applicationName(), copyright, version, support).arg(page1_link, legal, translators);
+    QString page2 = layout.arg(applicationName(), copyright, version, support).arg(page2_link, technical, QString());
 
     QMap<QString, QString> pages;
     pages ["index"]  = page1;

@@ -34,9 +34,7 @@ RebuildDatabase::RebuildDatabase()
 
 #if defined( Q_OS_WIN32 )
     AllocConsole();
-    const char *title = "BrickStore - Rebuilding Database";
-    QT_WA({ SetConsoleTitleW(reinterpret_cast<const wchar_t *>(QString(title).utf16())); },
-          { SetConsoleTitleA(title); })
+    SetConsoleTitleW(L"BrickStore - Rebuilding Database");
     freopen("CONIN$", "r", stdin);
     freopen("CONOUT$", "w", stdout);
 #endif

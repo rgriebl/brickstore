@@ -25,15 +25,15 @@ SelectColor::SelectColor(QWidget *parent, Qt::WindowFlags f)
     : QWidget(parent, f)
 {
     w_filter = new QComboBox();
-    w_filter->addItem(tr("All Colors"), 0);
-    w_filter->addItem(tr("Popular Colors"), -1);
-    w_filter->addItem(tr("Most Popular Colors"), -2);
+    w_filter->addItem(QString(), 0);
+    w_filter->addItem(QString(), -1);
+    w_filter->addItem(QString(), -2);
     w_filter->insertSeparator(w_filter->count());
 
-    for (int i = 0; (1 << i ) & BrickLink::Color::Mask; ++i) {
+    for (int i = 0; (1 << i) & BrickLink::Color::Mask; ++i) {
         BrickLink::Color::TypeFlag flag = static_cast<BrickLink::Color::TypeFlag>(1 << i);
         if (const char *type = BrickLink::Color::typeName(flag))
-            w_filter->addItem(tr("Only \"%1\" Colors").arg(QLatin1String(type)), flag);
+            w_filter->addItem(QString(), flag);
     }
 
     w_colors = new QTreeView();
@@ -59,6 +59,21 @@ SelectColor::SelectColor(QWidget *parent, Qt::WindowFlags f)
     lay->setRowStretch(1, 1);
     lay->addWidget(w_filter, 0, 0);
     lay->addWidget(w_colors, 1, 0);
+
+    languageChange();
+}
+
+void SelectColor::languageChange()
+{
+    w_filter->setItemText(0, tr("All Colors"));
+    w_filter->setItemText(1, tr("Popular Colors"));
+    w_filter->setItemText(2, tr("Most Popular Colors"));
+
+    for (int i = 0, j = 3; (1 << i) & BrickLink::Color::Mask; ++i) {
+        BrickLink::Color::TypeFlag flag = static_cast<BrickLink::Color::TypeFlag>(1 << i);
+        if (const char *type = BrickLink::Color::typeName(flag))
+            w_filter->setItemText(j++, tr("Only \"%1\" Colors").arg(QLatin1String(type)));
+    }
 }
 
 void SelectColor::setWidthToContents(bool b)
@@ -86,9 +101,9 @@ void SelectColor::updateColorFilter(int index)
     } else {
         qreal popularity = 0;
         if (filter == -1)
-            popularity = qreal(0.8);
+            popularity = qreal(0.005);
         else if (filter == -2)
-            popularity = qreal(0.5);
+            popularity = qreal(0.05);
 
         model->setFilterType(0);
         model->setFilterPopularity(popularity);

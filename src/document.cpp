@@ -587,9 +587,7 @@ Document *Document::fileNew()
 Document *Document::fileOpen()
 {
     QStringList filters;
-    filters << tr("Inventory Files") + " (*.bsx *.bti)";
     filters << tr("BrickStore XML Data") + " (*.bsx)";
-    filters << tr("BrikTrak Inventory") + " (*.bti)";
     filters << tr("All Files") + "(*.*)";
 
     return fileOpen(QFileDialog::getOpenFileName(FrameWork::inst(), tr("Open File"), Config::inst()->documentDir(), filters.join(";;")));
@@ -600,25 +598,14 @@ Document *Document::fileOpen(const QString &s)
     if (s.isEmpty())
         return 0;
 
-    QString abs_s  = QFileInfo(s).absoluteFilePath();
+    QString abs_s = QFileInfo(s).absoluteFilePath();
 
-    foreach(Document *doc, s_documents) {
+    foreach (Document *doc, s_documents) {
         if (QFileInfo(doc->fileName()).absoluteFilePath() == abs_s)
             return doc;
     }
 
-    Document *doc = 0;
-
-    if (s.right(4) == ".bti") {
-        doc = fileImportBrikTrakInventory(s);
-
-        if (doc)
-            MessageBox::information(FrameWork::inst(), tr("BrickStore has switched to a new file format (.bsx - BrickStore XML).<br /><br />Your document has been automatically imported and it will be converted as soon as you save it."));
-    }
-    else
-        doc = fileLoadFrom(s, "bsx");
-
-    return doc;
+    return fileLoadFrom(s, "bsx");
 }
 
 Document *Document::fileImportBrickLinkInventory(const BrickLink::Item *item)
@@ -671,6 +658,7 @@ QList<Document *> Document::fileImportBrickLinkOrders()
                 Document *doc = new Document();
 
                 doc->setTitle(tr("Order #%1").arg(order.first->id()));
+                doc->m_currencycode = order.first->currencyCode();
                 doc->setBrickLinkItems(*order.second);
                 doc->m_order = new BrickLink::Order(*order. first);
                 docs.append(doc);
@@ -692,6 +680,7 @@ Document *Document::fileImportBrickLinkStore()
         Document *doc = new Document();
 
         doc->setTitle(tr("Store %1").arg(QDate::currentDate().toString(Qt::LocalDate)));
+        doc->m_currencycode = import.currencyCode();
         doc->setBrickLinkItems(import.items());
         return doc;
     }
@@ -701,10 +690,10 @@ Document *Document::fileImportBrickLinkStore()
 Document *Document::fileImportBrickLinkCart()
 {
     QString url = QApplication::clipboard()->text(QClipboard::Clipboard);
-    QRegExp rx_valid("http://www\\.bricklink\\.com/storeCart\\.asp\\?h=[0-9]+&b=[-0-9]+");
+    QRegExp rx_valid(QLatin1String("http://www\\.bricklink\\.com/storeCart\\.asp\\?h=[0-9]+&b=[-0-9]+"));
 
     if (!rx_valid.exactMatch(url))
-        url = "http://www.bricklink.com/storeCart.asp?h=______&b=______";
+        url = QLatin1String("http://www.bricklink.com/storeCart.asp?h=______&b=______");
 
     if (MessageBox::getString(FrameWork::inst(), tr("Enter the URL of your current BrickLink shopping cart:"
                                "<br /><br />Right-click on the <b>View Cart</b> button "
@@ -712,7 +701,7 @@ Document *Document::fileImportBrickLinkCart()
                                "<b>Copy Link Location</b> (Firefox), <b>Copy Link</b> (Safari) "
                                "or <b>Copy Shortcut</b> (Internet Explorer).<br /><br />"
                                "<em>Super-lots and custom items are <b>not</b> supported</em>."), url)) {
-        QRegExp rx("\\?h=([0-9]+)&b=([-0-9]+)");
+        QRegExp rx(QLatin1String("\\?h=([0-9]+)&b=([-0-9]+)"));
         rx.indexIn(url);
         int shopid = rx.cap(1).toInt();
         int cartid = rx.cap(2).toInt();
@@ -727,6 +716,7 @@ Document *Document::fileImportBrickLinkCart()
             if (d.exec() == QDialog::Accepted) {
                 Document *doc = new Document();
 
+                doc->m_currencycode = import.currencyCode();
                 doc->setBrickLinkItems(import.items());
                 doc->setTitle(tr("Cart in Shop %1").arg(shopid));
                 return doc;
@@ -771,6 +761,7 @@ Document *Document::fileImportPeeronInventory()
         if (d.exec() == QDialog::Accepted) {
             Document *doc = new Document();
 
+            doc->m_currencycode = import.currencyCode();
             doc->setBrickLinkItems(import.items());
             doc->setTitle(tr("Peeron Inventory for %1").arg(peeronid));
             return doc;
@@ -779,37 +770,12 @@ Document *Document::fileImportPeeronInventory()
     return 0;
 }
 
-Document *Document::fileImportBrikTrakInventory(const QString &fn)
-{
-    QString s = fn;
-
-    if (s.isNull()) {
-        QStringList filters;
-        filters << tr("BrikTrak Inventory") + " (*.bti)";
-        filters << tr("All Files") + "(*.*)";
-
-        s = QFileDialog::getOpenFileName(FrameWork::inst(), tr("Import File"), Config::inst()->documentDir(), filters.join(";;"));
-    }
-
-    if (!s.isEmpty()) {
-        Document *doc = fileLoadFrom(s, "bti", true);
-
-        if (doc)
-            doc->setTitle(tr("Import of %1").arg(QFileInfo(s).fileName()));
-        return doc;
-    }
-    else
-        return 0;
-}
-
 Document *Document::fileLoadFrom(const QString &name, const char *type, bool import_only)
 {
     BrickLink::ItemListXMLHint hint;
 
     if (qstrcmp(type, "bsx") == 0)
         hint = BrickLink::XMLHint_BrickStore;
-    else if (qstrcmp(type, "bti") == 0)
-        hint = BrickLink::XMLHint_BrikTrak;
     else if (qstrcmp(type, "xml") == 0)
         hint = BrickLink::XMLHint_MassUpload;
     else
@@ -825,8 +791,7 @@ Document *Document::fileLoadFrom(const QString &name, const char *type, bool imp
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    uint invalid_items = 0;
-    BrickLink::InvItemList *items = 0;
+    BrickLink::Core::ParseItemListXMLResult result;
 
     QString emsg;
     int eline = 0, ecol = 0;
@@ -841,7 +806,7 @@ Document *Document::fileLoadFrom(const QString &name, const char *type, bool imp
                 if (!n.isElement())
                     continue;
 
-                if (n.nodeName() == "Inventory")
+                if (n.nodeName() == QLatin1String("Inventory"))
                     item_elem = n.toElement();
             }
         }
@@ -849,7 +814,7 @@ Document *Document::fileLoadFrom(const QString &name, const char *type, bool imp
             item_elem = root;
         }
 
-        items = BrickLink::core()->parseItemListXML(item_elem, hint, &invalid_items);
+        result = BrickLink::core()->parseItemListXML(item_elem, hint);
     }
     else {
         MessageBox::warning(FrameWork::inst(), tr("Could not parse the XML data in file %1:<br /><i>Line %2, column %3: %4</i>").arg(CMB_BOLD(name)).arg(eline).arg(ecol).arg(emsg));
@@ -859,18 +824,19 @@ Document *Document::fileLoadFrom(const QString &name, const char *type, bool imp
 
     QApplication::restoreOverrideCursor();
 
-    if (items) {
+    if (result.items) {
         Document *doc = new Document();
 
-        if (invalid_items) {
-            invalid_items -= BrickLink::core()->applyChangeLogToItems(*items);
+        if (result.invalidItemCount) {
+            result.invalidItemCount -= BrickLink::core()->applyChangeLogToItems(*result.items);
 
-            if (invalid_items)
-                MessageBox::information(FrameWork::inst(), tr("This file contains %1 unknown item(s).").arg(CMB_BOLD(QString::number(invalid_items))));
+            if (result.invalidItemCount)
+                MessageBox::information(FrameWork::inst(), tr("This file contains %1 unknown item(s).").arg(CMB_BOLD(QString::number(result.invalidItemCount))));
         }
 
-        doc->setBrickLinkItems(*items);
-        delete items;
+        doc->m_currencycode = result.currencyCode;
+        doc->setBrickLinkItems(*result.items);
+        delete result.items;
 
         doc->setFileName(import_only ? QString::null : name);
 
@@ -1024,7 +990,7 @@ void Document::fileSaveAs()
         if (d.exists())
             fn = d.filePath(m_title);
     }
-    if ((fn.right(4) == ".xml") || (fn.right(4) == ".bti"))
+    if (fn.right(4) == ".xml")
         fn.truncate(fn.length() - 4);
 
     fn = QFileDialog::getSaveFileName(FrameWork::inst(), tr("Save File as"), fn, filters.join(";;"));
@@ -1048,8 +1014,6 @@ bool Document::fileSaveTo(const QString &s, const char *type, bool export_only, 
 
     if (qstrcmp(type, "bsx") == 0)
         hint = BrickLink::XMLHint_BrickStore;
-    else if (qstrcmp(type, "bti") == 0)
-        hint = BrickLink::XMLHint_BrikTrak;
     else if (qstrcmp(type, "xml") == 0)
         hint = BrickLink::XMLHint_MassUpload;
     else
@@ -1122,7 +1086,7 @@ void Document::fileExportBrickLinkWantedListClipboard(const ItemList &itemlist)
             extra.insert("WANTEDLISTID", wantedlist);
 
         QDomDocument doc(QString::null);
-        doc.appendChild(BrickLink::core()->createItemListXML(doc, BrickLink::XMLHint_WantedList, itemlist, extra.isEmpty() ? 0 : &extra));
+        doc.appendChild(BrickLink::core()->createItemListXML(doc, BrickLink::XMLHint_WantedList, itemlist, QString(), extra.isEmpty() ? 0 : &extra));
 
         QApplication::clipboard()->setText(doc.toString(), QClipboard::Clipboard);
 
@@ -1158,7 +1122,7 @@ void Document::fileExportBrickLinkUpdateClipboard(const ItemList &itemlist)
 
     QApplication::clipboard()->setText(doc.toString(), QClipboard::Clipboard);
 
-    if (Config::inst()->value("/General/Export/OpenBrowser", true).toBool())
+    if (Config::inst()->value(QLatin1String("/General/Export/OpenBrowser"), true).toBool())
         QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_InventoryUpdate));
 }
 
@@ -1170,33 +1134,14 @@ void Document::fileExportBrickLinkXML(const ItemList &itemlist)
     QString s = QFileDialog::getSaveFileName(FrameWork::inst(), tr("Export File"), Config::inst()->documentDir(), filters.join(";;"));
 
     if (!s.isNull()) {
-        if (s.right(4) != ".xml")
-            s += ".xml";
+        if (s.right(4) != QLatin1String(".xml"))
+            s += QLatin1String(".xml");
 
         if (QFile::exists(s) &&
             MessageBox::question(FrameWork::inst(), tr("A file named %1 already exists.Are you sure you want to overwrite it?").arg(CMB_BOLD(s)), MessageBox::Yes, MessageBox::No) != MessageBox::Yes)
             return;
 
         fileSaveTo(s, "xml", true, itemlist);
-    }
-}
-
-void Document::fileExportBrikTrakInventory(const ItemList &itemlist)
-{
-    QStringList filters;
-    filters << tr("BrikTrak Inventory") + " (*.bti)";
-
-    QString s = QFileDialog::getSaveFileName(FrameWork::inst(), tr("Export File"), Config::inst()->documentDir(), filters.join(";;"));
-
-    if (!s.isNull()) {
-        if (s.right(4) != ".bti")
-            s += ".bti";
-
-        if (QFile::exists(s) &&
-            MessageBox::question(FrameWork::inst(), tr("A file named %1 already exists.Are you sure you want to overwrite it?").arg(CMB_BOLD(s)), MessageBox::Yes, MessageBox::No) != MessageBox::Yes)
-            return;
-
-        fileSaveTo(s, "bti", true, itemlist);
     }
 }
 
@@ -1396,7 +1341,7 @@ QVariant Document::dataForEditRole(Item *it, Field f) const
     case Document::QuantityDiff: return it->quantity() - it->origQuantity(); break;
     case Document::Price       : return it->price().toLocal(); break;
     case Document::PriceDiff   : return (it->price() - it->origPrice()).toLocal(); break;
-    default                     : return QString();
+    default                    : return QString();
     }
 }
 
@@ -1486,13 +1431,13 @@ QString Document::dataForToolTipRole(Item *it, Field f) const
         default                : break;
         }
         if (it->counterPart())
-            str += QLatin1String("\n(") + tr("Counter part") + QLatin1String(")");
+            str += QLatin1String("\n(") + tr("Counter part") + QLatin1Char(')');
         else if (it->alternateId())
-            str += QLatin1String("\n(") + tr("Alternate match id: %1").arg(it->alternateId()) + QLatin1String(")");
+            str += QLatin1String("\n(") + tr("Alternate match id: %1").arg(it->alternateId()) + QLatin1Char(')');
         return str;
     }
     case Picture: {
-        return dataForDisplayRole(it, PartNo) + " " + dataForDisplayRole(it, Description);
+        return dataForDisplayRole(it, PartNo) + QLatin1Char(' ') + dataForDisplayRole(it, Description);
     }
     case Condition: {
         switch (it->condition()) {
@@ -1509,9 +1454,9 @@ QString Document::dataForToolTipRole(Item *it, Field f) const
             return catpp[0]->name();
         }
         else {
-            QString str = QString("<b>%1</b>").arg(catpp [0]->name());
+            QString str = QLatin1String("<b>") + QLatin1String(catpp[0]->name()) + QLatin1String("</b>");
             while (*++catpp)
-                str = str + QString("<br />") + catpp [0]->name();
+                str = str + QLatin1String("<br />") + QLatin1String(catpp [0]->name());
             return str;
         }
         break;
@@ -1691,14 +1636,7 @@ DocumentProxyModel::DocumentProxyModel(Document *model)
         str = model->headerData(i, Qt::Horizontal, Qt::DisplayRole).toString();
         if (!str.isEmpty())
             fields.insert(i, str);
-//TODO: not yet in 4.5.0
-//#if QT_VERSION >= 0x040500
-//         str = model->headerData(i, Qt::Horizontal, Qt::UntranslatedDisplayRole);
-//         if (!str.isEmpty())
-//            fields.insert(i, str);
-//#endif
     }
-    fields.insert(-1, QLatin1String("Any"));
     fields.insert(-1, tr("Any"));
 
     m_parser->setFieldTokens(fields);
@@ -1716,7 +1654,6 @@ void DocumentProxyModel::setFilterExpression(const QString &str)
     m_filter_expression = str;
     m_filter = m_parser->parse(str);
 
-    qWarning("new filter: %d", m_filter.size());
     if (had_filter || !m_filter.isEmpty())
         invalidateFilter();
 }
@@ -1724,6 +1661,11 @@ void DocumentProxyModel::setFilterExpression(const QString &str)
 QString DocumentProxyModel::filterExpression() const
 {
     return m_filter_expression;
+}
+
+QString DocumentProxyModel::filterToolTip() const
+{
+    return m_parser->toolTip();
 }
 
 bool DocumentProxyModel::filterAcceptsColumn(int, const QModelIndex &) const
@@ -1751,9 +1693,11 @@ bool DocumentProxyModel::filterAcceptsRow(int source_row, const QModelIndex &sou
 
         bool localresult = false;
         for (int c = firstcol; c <= lastcol && !localresult; ++c) {
-            QVariant v = sourceModel()->data(sourceModel()->index(source_row, c), Qt::DisplayRole);
-
-            localresult = f.matches(v);
+            QVariant v = sourceModel()->data(sourceModel()->index(source_row, c), Qt::EditRole);
+            if (v.isNull())
+                v = sourceModel()->data(sourceModel()->index(source_row, c), Qt::DisplayRole);
+            if (!v.isNull())
+                localresult = f.matches(v);
         }
         if (nextcomb == Filter::And)
             result &= localresult;

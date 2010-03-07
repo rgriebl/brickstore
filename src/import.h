@@ -69,6 +69,11 @@ public:
         return m_items;
     }
 
+    QString currencyCode() const
+    {
+        return m_currencycode;
+    }
+
 private slots:
     virtual void gotten()
     {
@@ -80,8 +85,6 @@ private slots:
             QBuffer store_buffer(data);
 
             if (store_buffer.open(QIODevice::ReadOnly)) {
-                BrickLink::InvItemList *items = 0;
-
                 QString emsg;
                 int eline = 0, ecol = 0;
                 QDomDocument doc;
@@ -89,12 +92,12 @@ private slots:
                 if (doc.setContent(&store_buffer, &emsg, &eline, &ecol)) {
                     QDomElement root = doc.documentElement();
 
-                    if ((root.nodeName() == "INVENTORY"))
-                        items = BrickLink::core()->parseItemListXML(root, BrickLink::XMLHint_MassUpload /*, &invalid_items */);
+                    BrickLink::Core::ParseItemListXMLResult result = BrickLink::core()->parseItemListXML(root, BrickLink::XMLHint_MassUpload);
 
-                    if (items) {
-                        m_items += *items;
-                        delete items;
+                    if (result.items) {
+                        m_items = *result.items;
+                        m_currencycode = result.currencyCode;
+                        delete result.items;
                         ok = true;
                     }
                     else
@@ -114,6 +117,7 @@ private slots:
 private:
     ProgressDialog *m_progress;
     BrickLink::InvItemList m_items;
+    QString m_currencycode;
 };
 
 
@@ -185,6 +189,11 @@ public:
         return m_orders;
     }
 
+    QString currencyCode() const
+    {
+        return m_currencycode;
+    }
+
 
 private slots:
     virtual void gotten()
@@ -198,9 +207,9 @@ private slots:
             if (m_current_address >= 0) {
                 QString s = QString::fromUtf8(data->data(), data->size());
 
-                QRegExp rx1("<B>Name:</B></FONT></TD>\\s*<TD NOWRAP><FONT FACE=\"Tahoma, Arial\" SIZE=\"2\">(.+)</FONT></TD>");
-                QRegExp rx2("<B>Address:</B></FONT></TD>\\s*<TD NOWRAP><FONT FACE=\"Tahoma, Arial\" SIZE=\"2\">(.+)</FONT></TD>");
-                QRegExp rx3("<B>Country:</B></FONT></TD>\\s*<TD NOWRAP><FONT FACE=\"Tahoma, Arial\" SIZE=\"2\">(.+)</FONT></TD>");
+                QRegExp rx1(QLatin1String("<B>Name:</B></FONT></TD>\\s*<TD NOWRAP><FONT FACE=\"Tahoma, Arial\" SIZE=\"2\">(.+)</FONT></TD>"));
+                QRegExp rx2(QLatin1String("<B>Address:</B></FONT></TD>\\s*<TD NOWRAP><FONT FACE=\"Tahoma, Arial\" SIZE=\"2\">(.+)</FONT></TD>"));
+                QRegExp rx3(QLatin1String("<B>Country:</B></FONT></TD>\\s*<TD NOWRAP><FONT FACE=\"Tahoma, Arial\" SIZE=\"2\">(.+)</FONT></TD>"));
 
                 rx1.setMinimal(true);
                 rx1.indexIn(s);
@@ -209,8 +218,8 @@ private slots:
                 rx3.setMinimal(true);
                 rx3.indexIn(s);
 
-                QString a = rx1.cap(1) + "\n" + rx2.cap(1) + "\n" + rx3.cap(1);
-                a.replace("<BR>", "\n");
+                QString a = rx1.cap(1) + QLatin1Char('\n') + rx2.cap(1) + QLatin1Char('\n') + rx3.cap(1);
+                a.replace(QLatin1String("<BR>"), QLatin1String("\n"));
 
                 m_orders[m_current_address].first->setAddress(a);
             }
@@ -225,17 +234,15 @@ private slots:
                     if (doc.setContent(&order_buffer, &emsg, &eline, &ecol)) {
                         QDomElement root = doc.documentElement();
 
-                        BrickLink::InvItemList *items = 0;
-
-                        if ((root.nodeName() == "ORDERS") && (root.firstChild().nodeName() == "ORDER")) {
+                        if ((root.nodeName() == QLatin1String("ORDERS")) && (root.firstChild().nodeName() == QLatin1String("ORDER"))) {
                             for (QDomNode ordernode = root.firstChild(); !ordernode.isNull(); ordernode = ordernode.nextSibling()) {
                                 if (!ordernode.isElement())
                                     continue;
 
-                                items = BrickLink::core()->parseItemListXML(ordernode.toElement(), BrickLink::XMLHint_Order /*, &invalid_items*/);
+                                BrickLink::Core::ParseItemListXMLResult result = BrickLink::core()->parseItemListXML(ordernode.toElement(), BrickLink::XMLHint_Order);
 
-                                if (items) {
-                                    BrickLink::Order *order = new BrickLink::Order("", BrickLink::Placed);
+                                if (result.items) {
+                                    BrickLink::Order *order = new BrickLink::Order(QLatin1String(""), BrickLink::Placed);
 
                                     for (QDomNode node = ordernode.firstChild(); !node.isNull(); node = node.nextSibling()) {
                                         if (!node. isElement())
@@ -244,40 +251,42 @@ private slots:
                                         QString tag = node.toElement().tagName();
                                         QString val = node.toElement().text();
 
-                                        if (tag == "BUYER")
+                                        if (tag == QLatin1String("BUYER"))
                                             order->setBuyer(val);
-                                        else if (tag == "SELLER")
+                                        else if (tag == QLatin1String("SELLER"))
                                             order->setSeller(val);
-                                        else if (tag == "ORDERID")
+                                        else if (tag == QLatin1String("ORDERID"))
                                             order->setId(val);
-                                        else if (tag == "ORDERDATE")
+                                        else if (tag == QLatin1String("ORDERDATE"))
                                             order->setDate(QDateTime(ymd2date(val)));
-                                        else if (tag == "ORDERSTATUSCHANGED")
+                                        else if (tag == QLatin1String("ORDERSTATUSCHANGED"))
                                             order->setStatusChange(QDateTime(ymd2date(val)));
-                                        else if (tag == "ORDERSHIPPING")
+                                        else if (tag == QLatin1String("ORDERSHIPPING"))
                                             order->setShipping(Currency::fromUSD(val));
-                                        else if (tag == "ORDERINSURANCE")
+                                        else if (tag == QLatin1String("ORDERINSURANCE"))
                                             order->setInsurance(Currency::fromUSD(val));
-                                        else if (tag == "ORDERDELIVERY")
+                                        else if (tag == QLatin1String("ORDERDELIVERY"))
                                             order->setDelivery(Currency::fromUSD(val));
-                                        else if (tag == "ORDERCREDIT")
+                                        else if (tag == QLatin1String("ORDERCREDIT"))
                                             order->setCredit(Currency::fromUSD(val));
-                                        else if (tag == "GRANDTOTAL")
+                                        else if (tag == QLatin1String("GRANDTOTAL"))
                                             order->setGrandTotal(Currency::fromUSD(val));
-                                        else if (tag == "ORDERSTATUS")
+                                        else if (tag == QLatin1String("ORDERSTATUS"))
                                             order->setStatus(val);
-                                        else if (tag == "PAYMENTTYPE")
+                                        else if (tag ==QLatin1String( "PAYMENTTYPE"))
                                             order->setPayment(val);
-                                        else if (tag == "ORDERREMARKS")
+                                        else if (tag == QLatin1String("ORDERREMARKS"))
                                             order->setRemarks(val);
+                                        else if (tag == QLatin1String("BASECURRENCYCODE"))
+                                            m_currencycode = val;
                                     }
 
                                     if (!order->id().isEmpty()) {
-                                        m_orders << qMakePair(order, items);
+                                        m_orders << qMakePair(order, result.items);
                                         ok = true;
                                     }
                                     else {
-                                        delete items;
+                                        delete result.items;
                                     }
                                 }
                             }
@@ -292,7 +301,7 @@ private slots:
 
         if (m_retry_placed) {
             QList<QPair<QString, QString> > query = m_url.queryItems();
-            query[0].second = "placed";
+            query[0].second = QLatin1String("placed");
             m_url.setQueryItems(query);
 
             m_progress->post(m_url);
@@ -303,10 +312,10 @@ private slots:
         else if ((m_current_address + 1) < m_orders.size()) {
             m_current_address++;
 
-            QString url = QString("http://www.bricklink.com/memberInfo.asp?u=") + m_orders[m_current_address].first->other();
+            QString url = QLatin1String("http://www.bricklink.com/memberInfo.asp?u=") + m_orders[m_current_address].first->other();
             m_progress->setHeaderText(tr("Importing address records"));
             m_progress->get(url);
-			m_progress->layout();
+            m_progress->layout();
         }
         else {
             m_progress->setFinished(true);
@@ -317,21 +326,22 @@ private:
     static QDate ymd2date(const QString &ymd)
     {
         QDate d;
-        QStringList sl = ymd.split(QChar('/'));
+        QStringList sl = ymd.split(QLatin1Char('/'));
         d.setYMD(sl [0].toInt(), sl [1].toInt(), sl [2].toInt());
         return d;
     }
 
 private:
-    ProgressDialog *      m_progress;
+    ProgressDialog *       m_progress;
     QString                m_order_id;
     QDate                  m_order_from;
     QDate                  m_order_to;
-    BrickLink::OrderType m_order_type;
+    BrickLink::OrderType   m_order_type;
     QUrl                   m_url;
     bool                   m_retry_placed;
     int                    m_current_address;
     QList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > m_orders;
+    QString                m_currencycode;
 };
 
 
@@ -363,6 +373,11 @@ public:
         return m_items;
     }
 
+    QString currencyCode() const
+    {
+        return QLatin1String("USD"); // hard-coded for now
+    }
+
 private slots:
     virtual void gotten()
     {
@@ -377,7 +392,7 @@ private slots:
                 QTextStream ts(&cart_buffer);
                 QString line;
                 QString items_line;
-                QString sep = "<TR CLASS=\"tm\"><TD HEIGHT=\"65\" ALIGN=\"CENTER\">";
+                QString sep = QLatin1String("<TR CLASS=\"tm\"><TD HEIGHT=\"65\" ALIGN=\"CENTER\">");
                 int invalid_items = 0;
                 bool parsing_items = false;
 
@@ -391,7 +406,7 @@ private slots:
                     if (parsing_items)
                         items_line += line;
 
-                    if ((line == "</TABLE>") && parsing_items)
+                    if ((line == QLatin1String("</TABLE>")) && parsing_items)
                         break;
                 }
 
@@ -401,10 +416,10 @@ private slots:
                     BrickLink::InvItem *ii = 0;
 
                     // US$ only at the moment
-                    QRegExp rx_ids("HEIGHT='60' SRC='http://img.bricklink.com/([A-Z])/([^ ]+).gif' NAME=");
-                    QRegExp rx_qty_price(" VALUE=\"([0-9]+)\">(&nbsp;\\(x[0-9]+\\))?<BR>Qty Available: <B>[0-9]+</B><BR>Each:&nbsp;<B>US \\$([0-9.]+)</B>");
-                    QRegExp rx_names("</TD><TD>(.+)</TD><TD VALIGN=\"TOP\" NOWRAP>");
-                    QString str_cond("<B>New</B>");
+                    QRegExp rx_ids(QLatin1String("HEIGHT='60' SRC='http://img.bricklink.com/([A-Z])/([^ ]+).gif' NAME="));
+                    QRegExp rx_qty_price(QLatin1String(" VALUE=\"([0-9]+)\">(&nbsp;\\(x[0-9]+\\))?<BR>Qty Available: <B>[0-9]+</B><BR>Each:&nbsp;<B>US \\$([0-9.]+)</B>"));
+                    QRegExp rx_names(QLatin1String("</TD><TD>(.+)</TD><TD VALIGN=\"TOP\" NOWRAP>"));
+                    QString str_cond(QLatin1String("<B>New</B>"));
 
                     rx_ids.indexIn(str);
                     rx_names.indexIn(str);
@@ -413,7 +428,7 @@ private slots:
                     const BrickLink::Color *col = 0;
 
                     if (rx_ids.cap(1).length() == 1) {
-                        int slash = rx_ids.cap(2).indexOf('/');
+                        int slash = rx_ids.cap(2).indexOf(QLatin1Char('/'));
 
                         if (slash >= 0) {   // with color
                             item = BrickLink::core()->item(rx_ids.cap(1)[0].toLatin1(), rx_ids.cap(2).mid(slash + 1).toLatin1());
@@ -540,6 +555,11 @@ public:
         return m_items;
     }
 
+    QString currencyCode() const
+    {
+        return QLatin1String("USD");
+    }
+
 private slots:
     virtual void gotten()
     {
@@ -581,12 +601,12 @@ private:
         bool next_is_item = false;
         int count = 0;
 
-        QRegExp itempattern("<a href=[^>]+>(.+)</a>");
+        QRegExp itempattern(QLatin1String("<a href=[^>]+>(.+)</a>"));
 
         while (!(line = in.readLine()).isNull()) {
-            if (next_is_item && line.startsWith("<td>") && line.endsWith("</td>")) {
+            if (next_is_item && line.startsWith(QLatin1String("<td>")) && line.endsWith(QLatin1String("</td>"))) {
                 QString tmp = line.mid(4, line.length() - 9);
-                QStringList sl = tmp.split("</td><td>", QString::KeepEmptyParts);
+                QStringList sl = tmp.split(QLatin1String("</td><td>"), QString::KeepEmptyParts);
 
                 bool line_ok = false;
 
@@ -610,22 +630,22 @@ private:
                     if (pos > 0)
                         itemname.truncate(pos);
 
-                    if (itemid.indexOf(QRegExp("-\\d+$")) > 0)
+                    if (itemid.indexOf(QRegExp(QLatin1String("-\\d+$"))) > 0)
                         itemtype = 'S';
 
                     if (qty > 0) {
-                        QDomElement item = doc.createElement("ITEM");
+                        QDomElement item = doc.createElement(QLatin1String("ITEM"));
                         root.appendChild(item);
 
                         // <ITEMNAME> and <COLORNAME> are inofficial extension
                         // to help with incomplete items in Peeron inventories.
 
-                        item.appendChild(doc.createElement("ITEMTYPE").appendChild(doc.createTextNode(QChar(itemtype))).parentNode());
-                        item.appendChild(doc.createElement("ITEMID").appendChild(doc.createTextNode(itemid)).parentNode());
-                        item.appendChild(doc.createElement("ITEMNAME").appendChild(doc.createTextNode(itemname)).parentNode());
-                        item.appendChild(doc.createElement("COLOR").appendChild(doc.createTextNode(QString::number(colorid))).parentNode());
-                        item.appendChild(doc.createElement("COLORNAME").appendChild(doc.createTextNode(colorname)).parentNode());
-                        item.appendChild(doc.createElement("QTY").appendChild(doc.createTextNode(QString::number(qty))).parentNode());
+                        item.appendChild(doc.createElement(QLatin1String("ITEMTYPE")).appendChild(doc.createTextNode(QChar(itemtype))).parentNode());
+                        item.appendChild(doc.createElement(QLatin1String("ITEMID")).appendChild(doc.createTextNode(itemid)).parentNode());
+                        item.appendChild(doc.createElement(QLatin1String("ITEMNAME")).appendChild(doc.createTextNode(itemname)).parentNode());
+                        item.appendChild(doc.createElement(QLatin1String("COLOR")).appendChild(doc.createTextNode(QString::number(colorid))).parentNode());
+                        item.appendChild(doc.createElement(QLatin1String("COLORNAME")).appendChild(doc.createTextNode(colorname)).parentNode());
+                        item.appendChild(doc.createElement(QLatin1String("QTY")).appendChild(doc.createTextNode(QString::number(qty))).parentNode());
 
                         line_ok = true;
                         count++;
@@ -637,13 +657,13 @@ private:
                 next_is_item = false;
             }
 
-            if ((line == "<tr bgcolor=\"#dddddd\">") || (line == "<tr bgcolor=\"#eeeeee\">"))
+            if ((line == QLatin1String("<tr bgcolor=\"#dddddd\">")) || (line == QLatin1String("<tr bgcolor=\"#eeeeee\">")))
                 next_is_item = true;
             else
                 next_is_item = false;
         }
 
-        return count ? BrickLink::core()->parseItemListXML(root, BrickLink::XMLHint_Inventory /*, &invalid_items */) : 0;
+        return count ? BrickLink::core()->parseItemListXML(root, BrickLink::XMLHint_Inventory).items : 0;
     }
 
 

@@ -205,7 +205,6 @@ public:
     static Document *fileImportBrickLinkCart();
     static Document *fileImportBrickLinkXML();
     static Document *fileImportPeeronInventory();
-    static Document *fileImportBrikTrakInventory(const QString &fn = QString::null);
     static Document *fileImportLDrawModel();
 
 public slots:
@@ -219,7 +218,6 @@ public slots:
     void fileExportBrickLinkUpdateClipboard(const ItemList &itemlist);
     void fileExportBrickLinkInvReqClipboard(const ItemList &itemlist);
     void fileExportBrickLinkWantedListClipboard(const ItemList &itemlist);
-    void fileExportBrikTrakInventory(const ItemList &itemlist);
 
 public:
     void beginMacro(const QString &label = QString());
@@ -262,6 +260,7 @@ private:
 private:
     ItemList         m_items;
 
+    QString          m_currencycode;
     quint64          m_error_mask;
     QString          m_filename;
     QString          m_title;
@@ -296,7 +295,8 @@ public:
 
     void setFilterExpression(const QString &filter);
     QString filterExpression() const;
-    
+    QString filterToolTip() const;
+
 protected:
     virtual bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
     virtual bool filterAcceptsColumn(int source_column, const QModelIndex &source_parent) const;

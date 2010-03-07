@@ -200,7 +200,7 @@ QValidator::State CurrencyValidator::validate(QString &input, int &pos) const
             while (s [j].isDigit())
                 j++;
             if (j > i) {
-                while (s [j - 1] == '0')
+                while (s [j - 1] == QLatin1Char('0'))
                     j--;
             }
 

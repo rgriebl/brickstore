@@ -46,7 +46,7 @@ void Filter::setCombination(Combination cmb)
 
 bool Filter::matches(const QVariant &v) const
 {
-    bool isint = false, isfloat = false;
+    bool isint = false, isdbl = false;
     int i1 = 0, i2 = 0;
     double d1 = 0, d2 = 0;
     QString s1, s2;
@@ -70,7 +70,7 @@ bool Filter::matches(const QVariant &v) const
         if (!ok)
             return false;
         d2 = v.toDouble();
-        isfloat = true;
+        isdbl = true;
         break;
     }    
     default:
@@ -81,28 +81,28 @@ bool Filter::matches(const QVariant &v) const
 
     switch (comparison()) {
     case Is:
-        return isint ? i1 == i2 : isfloat ? d1 == d2 : s2.compare(s1, Qt::CaseInsensitive) == 0;
+        return isint ? i2 == i1 : isdbl ? d2 == d1 : s2.compare(s1, Qt::CaseInsensitive) == 0;
     case IsNot:
-        return isint ? i1 != i2 : isfloat ? d1 != d2 : s2.compare(s1, Qt::CaseInsensitive) != 0;
+        return isint ? i2 != i1 : isdbl ? d2 != d1 : s2.compare(s1, Qt::CaseInsensitive) != 0;
     case Less:
-        return isint ? i1 < i2 : isfloat ? d1 < d2 : false;
+        return isint ? i2 < i1 : isdbl ? d2 < d1 : false;
     case LessEqual:
-        return isint ? i1 <= i2 : isfloat ? d1 <= d2 : false;
+        return isint ? i2 <= i1 : isdbl ? d2 <= d1 : false;
     case Greater:
-        return isint ? i1 > i2 : isfloat ? d1 > d2 : false;
+        return isint ? i2 > i1 : isdbl ? d2 > d1 : false;
     case GreaterEqual:
-        return isint ? i1 >= i2 : isfloat ? d1 >= d2 : false;
+        return isint ? i2 >= i1 : isdbl ? d2 >= d1 : false;
     case StartsWith:
-        return isint || isfloat ? false : s2.startsWith(s1, Qt::CaseInsensitive);
+        return isint || isdbl ? false : s2.startsWith(s1, Qt::CaseInsensitive);
     case DoesNotStartWith:
-        return isint || isfloat ? false : !s2.startsWith(s1, Qt::CaseInsensitive);
+        return isint || isdbl ? false : !s2.startsWith(s1, Qt::CaseInsensitive);
     case EndsWith:
-        return isint || isfloat ? false : s2.endsWith(s1, Qt::CaseInsensitive);
+        return isint || isdbl ? false : s2.endsWith(s1, Qt::CaseInsensitive);
     case DoesNotEndWith:
-        return isint || isfloat ? false : !s2.endsWith(s1, Qt::CaseInsensitive);
+        return isint || isdbl ? false : !s2.endsWith(s1, Qt::CaseInsensitive);
     case Matches:
     case DoesNotMatch: {
-        if (isint || isfloat) {
+        if (isint || isdbl) {
             s1 = m_expression;
             s2 = v.toString();
         }
@@ -288,6 +288,58 @@ QPair<QString, Filter::Combination> Filter::Parser::matchFilterAndCombination(in
     return res;
 }
 
+template<typename T>
+static QString toString(const QMultiMap<T, QString> &tokens, const QString &before, const QString &after,
+                        const QString &key_before, const QString &key_after, const QString &key_separator,
+                        const QString &value_before, const QString &value_after, const QString &value_separator)
+{
+    QString res;
+    bool first_key = true;
+    foreach (T key, tokens.uniqueKeys()) {
+        if (first_key)
+            first_key = false;
+        else
+            res += key_separator;
+        res += key_before;
+        bool first_value = true;
+        foreach (const QString val, tokens.values(key)) {
+            if (first_value)
+                first_value = false;
+            else
+                res += value_separator;
+            res = res + value_before + val + value_after;
+        }
+        res += key_after;
+    }
+    if (!res.isEmpty())
+        res = before + res + after;
+    return res;
+}
+
+QString Filter::Parser::toolTip() const
+{
+    QString tt = Filter::tr("<p>Enter the filter expression(s) in either (near) natural language or with logical operators.<br />"
+       "A single expression looks like <b><i>FIELDNAME COMPARSION</i> TEXT</b>. <b><i>FIELDNAME</i></b> and "
+       "<b><i>COMPARISON</i></b> are optional and default to <b>in any field</b> and <b>contains</b> respectively.</p>"
+       "<p>Multiple filters can be combined by separating them with a <b>COMBINATION</b> token.</p>"
+       "<p>E.g. to search for anything resembling an brick in blue, you could use: <b>brick and color is blue</b></p>");
+
+    QString block = QLatin1String("<b><u>%1</u></b>%2");
+    tt += block.arg(Filter::tr("Field names:")).arg(toString(m_field_tokens,
+                                                    QLatin1String("<ul><li>"), QLatin1String("</li></ul>"),
+                                                    QString(),  QString(), QLatin1String(", "),
+                                                    QLatin1String("<b>"), QLatin1String("</b>"), QLatin1String(" / ")));
+    tt += block.arg(Filter::tr("Comparisons:")).arg(toString(m_comparison_tokens,
+                                                    QLatin1String("<ul>"), QLatin1String("</ul>"),
+                                                    QLatin1String("<li>"), QLatin1String("</li>"), QString(),
+                                                    QLatin1String("<b>"), QLatin1String("</b>"), QLatin1String(" / ")));
+    tt += block.arg(Filter::tr("Combinations:")).arg(toString(m_combination_tokens,
+                                                     QLatin1String("<ul>"), QLatin1String("</ul>"),
+                                                     QLatin1String("<li>"), QLatin1String("</li>"), QString(),
+                                                     QLatin1String("<b>"), QLatin1String("</b>"), QLatin1String(" / ")));
+    return tt;
+}
+
 void Filter::Parser::setFieldTokens(const QMultiMap<int, QString> &tokens)
 {
     m_field_tokens = tokens;
@@ -335,8 +387,8 @@ QMultiMap<Filter::Combination, QString> Filter::Parser::standardCombinationToken
         foreach (QString symbol, QString::fromLatin1(tt->m_symbols).split(QLatin1Char(',')))
             dct.insert(tt->m_combination, symbol); 
 
-        foreach (QString word, QString::fromLatin1(tt->m_words).split(QLatin1Char(',')))
-            dct.insert(tt->m_combination, word);
+//        foreach (QString word, QString::fromLatin1(tt->m_words).split(QLatin1Char(',')))
+//            dct.insert(tt->m_combination, word);
 
         foreach (QString word, qApp->translate("Filter::Parser", tt->m_words).split(QLatin1Char(',')))
             dct.insert(tt->m_combination, word);
@@ -376,8 +428,8 @@ QMultiMap<Filter::Comparison, QString> Filter::Parser::standardComparisonTokens(
         foreach (QString symbol, QString::fromLatin1(tt->m_symbols).split(QLatin1Char(',')))
             dct.insert(tt->m_comparison, symbol); 
 
-        foreach (QString word, QString::fromLatin1(tt->m_words).split(QLatin1Char(',')))
-            dct.insert(tt->m_comparison, word);
+//        foreach (QString word, QString::fromLatin1(tt->m_words).split(QLatin1Char(',')))
+//            dct.insert(tt->m_comparison, word);
 
         foreach (QString word, qApp->translate("Filter::Parser", tt->m_words).split(QLatin1Char(',')))
             dct.insert(tt->m_comparison, word);

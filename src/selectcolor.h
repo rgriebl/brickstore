@@ -38,6 +38,7 @@ protected slots:
     void colorChanged();
     void colorConfirmed();
     void updateColorFilter(int filter);
+    void languageChange();
 
 protected:
     virtual void changeEvent(QEvent *);

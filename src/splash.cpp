@@ -47,7 +47,7 @@ Splash::Splash()
     setFont(f);
     QFontMetrics fm(f);
 
-    QPixmap pix(fm.width("x") * 35, fm.width("x") * 35);
+    QPixmap pix(fm.width(QLatin1String("x")) * 35, fm.width(QLatin1String("x")) * 35);
 
     bool transparent =
 #if defined(Q_WS_X11)

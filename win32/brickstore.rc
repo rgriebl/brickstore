@@ -19,6 +19,12 @@
 #define _BS_STR(s)   _BS_STR2(s)
 #define _BS_STR2(s)  #s
 
+#ifndef BRICKSTORE_MAJOR // qmake mingw bug
+#  define BRICKSTORE_MAJOR 2
+#  define BRICKSTORE_MINOR 0
+#  define BRICKSTORE_PATCH 0
+#endif
+
 #define BRICKSTORE_VERSIONINFO   _BS_STR(BRICKSTORE_MAJOR) ", " _BS_STR(BRICKSTORE_MINOR) ", " _BS_STR(BRICKSTORE_PATCH) ", 0"
 
 IDI_ICON1               ICON         "brickstore.ico"

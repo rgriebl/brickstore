@@ -595,9 +595,6 @@ bool BrickLink::TextImport::readInventory(const QString &path, const Item *item)
 
     QFile f(filename);
     if (f.open(QIODevice::ReadOnly)) {
-        uint invalid_items = 0;
-        InvItemList *items = 0;
-
         QString emsg;
         int eline = 0, ecol = 0;
         QDomDocument doc;
@@ -605,21 +602,21 @@ bool BrickLink::TextImport::readInventory(const QString &path, const Item *item)
         if (doc.setContent(&f, &emsg, &eline, &ecol)) {
             QDomElement root = doc.documentElement();
 
-            items = BrickLink::core()->parseItemListXML(doc.documentElement().toElement(), BrickLink::XMLHint_Inventory , &invalid_items);
+            Core::ParseItemListXMLResult result = BrickLink::core()->parseItemListXML(doc.documentElement().toElement(), BrickLink::XMLHint_Inventory);
 
-            if (items) {
-                if (!invalid_items) {
-                    foreach(const BrickLink::InvItem *ii, *items) {
+            if (result.items) {
+                if (!result.invalidItemCount) {
+                    foreach(const BrickLink::InvItem *ii, *result.items) {
                         if (!ii->item() || !ii->color() || !ii->quantity())
                             continue;
 
                         BrickLink::AppearsInColor &vec = m_appears_in_hash[ii->item()][ii->color()];
                         vec.append(QPair<int, const BrickLink::Item *>(ii->quantity(), item));
                     }
-                    m_consists_of_hash.insert(item, *items);
+                    m_consists_of_hash.insert(item, *result.items);
                     ok = true;
                 }
-                delete items;
+                delete result.items;
             }
         }
     }

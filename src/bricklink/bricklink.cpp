@@ -322,7 +322,7 @@ QString BrickLink::Core::dataPath(const ItemType *item_type) const
 {
     QString p = dataPath();
     p += item_type->id();
-    p += '/';
+    p += QDir::separator();
 
     if (!check_and_create_path(p))
         return QString();
@@ -334,7 +334,7 @@ QString BrickLink::Core::dataPath(const Item *item) const
 {
     QString p = dataPath(item->itemType());
     p += item->m_id;
-    p += '/';
+    p += QDir::separator();
 
     if (!check_and_create_path(p))
         return QString();
@@ -346,7 +346,7 @@ QString BrickLink::Core::dataPath(const Item *item, const Color *color) const
 {
     QString p = dataPath(item);
     p += QString::number(color->id());
-    p += '/';
+    p += QDir::separator();
 
     if (!check_and_create_path(p))
         return QString();
@@ -381,12 +381,12 @@ BrickLink::Core::Core(const QString &datadir)
       m_pic_diskload(QThread::idealThreadCount() * 3)
 {
     if (m_datadir.isEmpty())
-        m_datadir = "./";
+        m_datadir = QLatin1String("./");
 
     m_datadir = QDir::cleanPath(datadir);
 
-    if (m_datadir.right(1) != "/")
-        m_datadir += "/";
+    if (m_datadir.right(1) != QDir::separator())
+        m_datadir += QDir::separator();
 
     m_online = true;
 
@@ -793,25 +793,28 @@ out:
 }
 
 
-BrickLink::InvItemList *BrickLink::Core::parseItemListXML(QDomElement root, ItemListXMLHint hint, uint *invalid_items)
+BrickLink::Core::ParseItemListXMLResult BrickLink::Core::parseItemListXML(QDomElement root, ItemListXMLHint hint, uint *invalid_items)
 {
+    ParseItemListXMLResult result;
     QString roottag, itemtag;
 
     switch (hint) {
-    case XMLHint_BrikTrak  : roottag = "GRID"; itemtag = "ITEM"; break;
-    case XMLHint_Order     : roottag = "ORDER"; itemtag = "ITEM"; break;
+    case XMLHint_Order     : roottag = QLatin1String("ORDER"); itemtag = QLatin1String("ITEM"); break;
     case XMLHint_MassUpload:
     case XMLHint_MassUpdate:
     case XMLHint_WantedList:
-    case XMLHint_Inventory : roottag = "INVENTORY"; itemtag = "ITEM"; break;
-    case XMLHint_BrickStore: roottag = "Inventory"; itemtag = "Item"; break;
+    case XMLHint_Inventory : roottag = QLatin1String("INVENTORY"); itemtag = QLatin1String("ITEM"); break;
+    case XMLHint_BrickStore: roottag = QLatin1String("Inventory"); itemtag = QLatin1String("Item"); break;
     }
 
     if (root.nodeName() != roottag)
-        return 0;
+        return result;
 
-    InvItemList *inv = new InvItemList;
-    uint incomplete = 0;
+    if (hint == XMLHint_BrickStore)
+        result.currencyCode = root.attribute(QLatin1String("Currency"));
+
+    result.items = new InvItemList;
+    bool multicurrency = false;
 
     for (QDomNode itemn = root.firstChild(); !itemn.isNull(); itemn = itemn.nextSibling()) {
         if (itemn.nodeName() != itemtag)
@@ -833,48 +836,54 @@ BrickLink::InvItemList *BrickLink::Core::parseItemListXML(QDomElement root, Item
             QString tag = n.toElement().tagName();
             QString val = n.toElement().text();
 
-            // ### BrickLink XML & BrikTrak ###
+            // ### BrickLink XML ###
             if (hint != XMLHint_BrickStore) {
-                if (tag == (hint == XMLHint_BrikTrak ? "PART_NO" : "ITEMID"))
+                if (tag == QLatin1String("ITEMID"))
                     itemid = val;
-                else if (tag == (hint == XMLHint_BrikTrak ? "COLOR_ID" : "COLOR"))
+                else if (tag == QLatin1String("COLOR"))
                     colorid = val;
-                else if (tag == (hint == XMLHint_BrikTrak ? "CATEGORY_ID" : "CATEGORY"))
+                else if (tag == QLatin1String("CATEGORY"))
                     categoryid = val;
-                else if (tag == (hint == XMLHint_BrikTrak ? "TYPE" : "ITEMTYPE"))
+                else if (tag == QLatin1String("ITEMTYPE"))
                     itemtypeid = val;
-                else if (tag == "PRICE")
-                    ii->setPrice(Currency::fromUSD(val));
-                else if (tag == "BULK")
-                    ii->setBulkQuantity(val.toInt());
-                else if (tag == "QTY")
-                    ii->setQuantity(val.toInt());
-                else if (tag == "SALE")
-                    ii->setSale(val.toInt());
-                else if (tag == "CONDITION")
-                    ii->setCondition(val == "N" ? New : Used);
-                else if (tag == "SUBCONDITION") {
-                    ii->setSubCondition(val == "C" ? Complete : \
-                                        val == "I" ? Incomplete : \
-                                        val == "M" ? MISB : None);
+                else if (tag == QLatin1String("BASECURRENCYCODE")) {
+                    if (result.items->isEmpty())
+                        result.currencyCode = val;
+                    else if (val != result.currencyCode)
+                        multicurrency = true;
                 }
-                else if (tag == (hint == XMLHint_BrikTrak ? "NOTES" : "DESCRIPTION"))
+                else if (tag == QLatin1String("PRICE"))
+                    ii->setPrice(Currency::fromUSD(val));
+                else if (tag ==QLatin1String( "BULK"))
+                    ii->setBulkQuantity(val.toInt());
+                else if (tag ==QLatin1String( "QTY"))
+                    ii->setQuantity(val.toInt());
+                else if (tag == QLatin1String("SALE"))
+                    ii->setSale(val.toInt());
+                else if (tag == QLatin1String("CONDITION"))
+                    ii->setCondition(val == QLatin1String("N") ? New : Used);
+                else if (tag == QLatin1String("SUBCONDITION")) {
+                    ii->setSubCondition(val == QLatin1String("C") ? Complete : \
+                                        val == QLatin1String("I") ? Incomplete : \
+                                        val == QLatin1String("M") ? MISB : None);
+                }
+                else if (tag == QLatin1String("DESCRIPTION"))
                     ii->setComments(val);
-                else if (tag == "REMARKS")
+                else if (tag == QLatin1String("REMARKS"))
                     ii->setRemarks(val);
-                else if (tag == "TQ1")
+                else if (tag == QLatin1String("TQ1"))
                     ii->setTierQuantity(0, val.toInt());
-                else if (tag == "TQ2")
+                else if (tag == QLatin1String("TQ2"))
                     ii->setTierQuantity(1, val.toInt());
-                else if (tag == "TQ3")
+                else if (tag == QLatin1String("TQ3"))
                     ii->setTierQuantity(2, val.toInt());
-                else if (tag == "TP1")
+                else if (tag == QLatin1String("TP1"))
                     ii->setTierPrice(0, Currency::fromUSD(val));
-                else if (tag == "TP2")
+                else if (tag == QLatin1String("TP2"))
                     ii->setTierPrice(1, Currency::fromUSD(val));
-                else if (tag == "TP3")
+                else if (tag == QLatin1String("TP3"))
                     ii->setTierPrice(2, Currency::fromUSD(val));
-                else if (tag == "LOTID")
+                else if (tag == QLatin1String("LOTID"))
                     ii->setLotId(val.toUInt());
             }
 
@@ -884,130 +893,104 @@ BrickLink::InvItemList *BrickLink::Core::parseItemListXML(QDomElement root, Item
                 // broken Order XML generator: the XML contains , as
                 // thousands-separator: 1,752 instead of 1752
 
-                if (tag == "QTY")
-                    ii->setQuantity(val.remove(',').toInt());
-            }
-
-            // ### BrikTrak import ###
-            if (hint == XMLHint_BrikTrak) {
-                if (tag == "PART_DESCRIPTION")
-                    itemname = val;
-                else if (tag == "COLOR")
-                    colorname = val;
-                else if (tag == "CATEGORY")
-                    categoryname = val;
-                else if (tag == "CHECKBOX") {
-                    switch (val.toInt()) {
-                    case 0: ii->setStatus(Exclude); break;
-                    case 1: ii->setStatus(Include); break;
-                    case 3: ii->setStatus(Extra); break;
-                    case 5: ii->setStatus(Unknown); break;
-                    }
-                }
-
-                // the following tags are BrickStore extensions
-                else if (tag == "RETAIN")
-                    ii->setRetain(val == "Y");
-                else if (tag == "STOCKROOM")
-                    ii->setStockroom(val == "Y");
-                else if (tag == "BUYERUSERNAME")
-                    ii->setReserved(val);
+                if (tag == QLatin1String("QTY"))
+                    ii->setQuantity(val.remove(QLatin1Char(',')).toInt());
             }
 
             // ### Inventory Request ###
             else if (hint == XMLHint_Inventory) {
-                if ((tag == "EXTRA") && (val == "Y"))
+                if ((tag == QLatin1String("EXTRA")) && (val == QLatin1String("Y")))
                     ii->setStatus(Extra);
-                else if (tag == "COUNTERPART")
-                     ii->setCounterPart((val == "Y"));
-                else if (tag == "ALTERNATE")
-                     ii->setAlternate((val == "Y"));
-                else if (tag == "MATCHID")
+                else if (tag == QLatin1String("COUNTERPART"))
+                     ii->setCounterPart((val == QLatin1String("Y")));
+                else if (tag == QLatin1String("ALTERNATE"))
+                     ii->setAlternate((val == QLatin1String("Y")));
+                else if (tag == QLatin1String("MATCHID"))
                      ii->setAlternateId(val.toInt());
-                else if (tag == "ITEMNAME")    // BrickStore extension for Peeron inventories
+                else if (tag == QLatin1String("ITEMNAME"))    // BrickStore extension for Peeron inventories
                     itemname = val;
-                else if (tag == "COLORNAME")   // BrickStore extension for Peeron inventories
+                else if (tag == QLatin1String("COLORNAME"))   // BrickStore extension for Peeron inventories
                     colorname = val;
             }
 
             // ### BrickStore BSX ###
             else if (hint == XMLHint_BrickStore) {
-                if (tag == "ItemID")
+                if (tag == QLatin1String("ItemID"))
                     itemid = val;
-                else if (tag == "ColorID")
+                else if (tag == QLatin1String("ColorID"))
                     colorid = val;
-                else if (tag == "CategoryID")
+                else if (tag == QLatin1String("CategoryID"))
                     categoryid = val;
-                else if (tag == "ItemTypeID")
+                else if (tag == QLatin1String("ItemTypeID"))
                     itemtypeid = val;
-                else if (tag == "ItemName")
+                else if (tag == QLatin1String("ItemName"))
                     itemname = val;
-                else if (tag == "ColorName")
+                else if (tag == QLatin1String("ColorName"))
                     colorname = val;
-                else if (tag == "CategoryName")
+                else if (tag == QLatin1String("CategoryName"))
                     categoryname = val;
-                else if (tag == "ItemTypeName")
+                else if (tag == QLatin1String("ItemTypeName"))
                     itemtypename = val;
-                else if (tag == "Price")
+                else if (tag == QLatin1String("Price"))
                     ii->setPrice(Currency::fromUSD(val));
-                else if (tag == "Bulk")
+                else if (tag == QLatin1String("Bulk"))
                     ii->setBulkQuantity(val.toInt());
-                else if (tag == "Qty")
+                else if (tag == QLatin1String("Qty"))
                     ii->setQuantity(val.toInt());
-                else if (tag == "Sale")
+                else if (tag == QLatin1String("Sale"))
                     ii->setSale(val.toInt());
-                else if (tag == "Condition")
-                    ii->setCondition(val == "N" ? New : Used);
-                else if (tag == "SubCondition") {
-                    ii->setSubCondition(val == "C" ? Complete : \
-                                        val == "I" ? Incomplete : \
-                                        val == "M" ? MISB : None);
+                else if (tag == QLatin1String("Condition"))
+                    ii->setCondition(val == QLatin1String("N") ? New : Used);
+                else if (tag == QLatin1String("SubCondition")) {
+                    ii->setSubCondition(val == QLatin1String("C") ? Complete : \
+                                        val == QLatin1String("I") ? Incomplete : \
+                                        val == QLatin1String("M") ? MISB : None);
                 }
-                else if (tag == "Comments")
+                else if (tag == QLatin1String("Comments"))
                     ii->setComments(val);
-                else if (tag == "Remarks")
+                else if (tag == QLatin1String("Remarks"))
                     ii->setRemarks(val);
-                else if (tag == "TQ1")
+                else if (tag == QLatin1String("TQ1"))
                     ii->setTierQuantity(0, val.toInt());
-                else if (tag == "TQ2")
+                else if (tag == QLatin1String("TQ2"))
                     ii->setTierQuantity(1, val.toInt());
-                else if (tag == "TQ3")
+                else if (tag == QLatin1String("TQ3"))
                     ii->setTierQuantity(2, val.toInt());
-                else if (tag == "TP1")
+                else if (tag == QLatin1String("TP1"))
                     ii->setTierPrice(0, Currency::fromUSD(val));
-                else if (tag == "TP2")
+                else if (tag == QLatin1String("TP2"))
                     ii->setTierPrice(1, Currency::fromUSD(val));
-                else if (tag == "TP3")
+                else if (tag == QLatin1String("TP3"))
                     ii->setTierPrice(2, Currency::fromUSD(val));
-                else if (tag == "Status") {
+                else if (tag == QLatin1String("Status")) {
                     Status st = Include;
 
-                    if (val == "X")
+                    if (val == QLatin1String("X"))
                         st = Exclude;
-                    else if (val == "I")
+                    else if (val == QLatin1String("I"))
                         st = Include;
-                    else if (val == "E")
+                    else if (val == QLatin1String("E"))
                         st = Extra;
-                    else if (val == "?")
+                    else if (val == QLatin1String("?"))
                         st = Unknown;
 
                     ii->setStatus(st);
                 }
-                else if (tag == "LotID")
+                else if (tag == QLatin1String("LotID"))
                     ii->setLotId(val.toUInt());
-                else if (tag == "Retain")
+                else if (tag == QLatin1String("Retain"))
                     ii->setRetain(true);
-                else if (tag == "Stockroom")
+                else if (tag == QLatin1String("Stockroom"))
                     ii->setStockroom(true);
-                else if (tag == "Reserved")
+                else if (tag == QLatin1String("Reserved"))
                     ii->setReserved(val);
-                else if (tag == "TotalWeight")
+                else if (tag == QLatin1String("TotalWeight"))
                     ii->setWeight(cLocale().toDouble(val));
-                else if (tag == "OrigPrice") {
+                else if (tag == QLatin1String("OrigPrice")) {
                     ii->setOrigPrice(Currency::fromUSD(val));
                     has_orig_price = true;
                 }
-                else if (tag == "OrigQty") {
+                else if (tag == QLatin1String("OrigQty")) {
                     ii->setOrigQuantity(val.toInt());
                     has_orig_qty = true;
                 }
@@ -1061,36 +1044,35 @@ BrickLink::InvItemList *BrickLink::Core::parseItemListXML(QDomElement root, Item
             ii->setIncomplete(inc);
 
             ok = true;
-            incomplete++;
+            result.invalidItemCount++;
         }
 
         if (ok)
-            inv->append(ii);
+            result.items->append(ii);
         else
             delete ii;
     }
 
-    if (invalid_items)
-        *invalid_items = incomplete;
-    if (incomplete)
-        qWarning() << "Parse XML (hint=" << int(hint) << "): " << incomplete << " items have incomplete records";
+    if (result.invalidItemCount)
+        qWarning() << "Parse XML (hint=" << int(hint) << "): " << result.invalidItemCount << " items have incomplete records";
+    if (multicurrency)
+        qWarning() << "Parse XML (hint=" << int(hint) << "): Multiple currencies within one XML file are not supported - everything will be parsed as " << result.currencyCode;
 
-    return inv;
+    return result;
 }
 
 
 
-QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint hint, const InvItemList &items, QMap <QString, QString> *extra)
+QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint hint, const InvItemList &items, const QString &currencyCode, QMap <QString, QString> *extra)
 {
     QString roottag, itemtag;
 
     switch (hint) {
-    case XMLHint_BrikTrak  : roottag = "GRID"; itemtag = "ITEM"; break;
     case XMLHint_MassUpload:
     case XMLHint_MassUpdate:
     case XMLHint_WantedList:
-    case XMLHint_Inventory : roottag = "INVENTORY"; itemtag = "ITEM"; break;
-    case XMLHint_BrickStore: roottag = "Inventory"; itemtag = "Item"; break;
+    case XMLHint_Inventory : roottag = QLatin1String("INVENTORY"); itemtag = QLatin1String("ITEM"); break;
+    case XMLHint_BrickStore: roottag = QLatin1String("Inventory"); itemtag = QLatin1String("Item"); break;
     case XMLHint_Order     : break;
     }
 
@@ -1099,11 +1081,14 @@ QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint
     if (root.isNull() || roottag.isNull() || itemtag.isEmpty() || items.isEmpty())
         return root;
 
+    if (hint == XMLHint_BrickStore)
+        root.setAttribute(QLatin1String("Currency"), currencyCode);
+
     foreach(const InvItem *ii, items) {
         if (ii->isIncomplete())
             continue;
 
-        if ((ii->status() == Exclude) && (hint != XMLHint_BrickStore && hint != XMLHint_BrikTrak))
+        if ((ii->status() == Exclude) && (hint != XMLHint_BrickStore))
             continue;
 
         if (hint == XMLHint_MassUpdate) {
@@ -1118,77 +1103,32 @@ QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint
 
         // ### MASS UPDATE ###
         if (hint == XMLHint_MassUpdate) {
-            item.appendChild(doc.createElement("LOTID").appendChild(doc.createTextNode(QString::number(ii->lotId()))).parentNode());
+            item.appendChild(doc.createElement(QLatin1String("LOTID")).appendChild(doc.createTextNode(QString::number(ii->lotId()))).parentNode());
 
             int qdiff = ii->quantity() - ii->origQuantity();
             Currency pdiff = ii->price() - ii->origPrice();
 
             if (pdiff != 0)
-                item.appendChild(doc.createElement("PRICE").appendChild(doc.createTextNode(ii->price().toUSD())).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("PRICE")).appendChild(doc.createTextNode(ii->price().toUSD())).parentNode());
             if (qdiff && (ii->quantity() > 0))
-                item.appendChild(doc.createElement("QTY").appendChild(doc.createTextNode((qdiff > 0 ? "+" : "") + QString::number(qdiff))).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("QTY")).appendChild(doc.createTextNode(QLatin1String(qdiff > 0 ? "+" : "") + QString::number(qdiff))).parentNode());
             else if (qdiff && (ii->quantity() <= 0))
-                item.appendChild(doc.createElement("DELETE"));
-        }
-
-        // ### BRIK TRAK EXPORT ###
-        else if (hint == XMLHint_BrikTrak) {
-            item.appendChild(doc.createElement("PART_NO").appendChild(doc.createTextNode(QString(ii->item()->id()))).parentNode());
-            item.appendChild(doc.createElement("COLOR_ID").appendChild(doc.createTextNode(QString::number(ii->color()->id()))).parentNode());
-            item.appendChild(doc.createElement("CATEGORY_ID").appendChild(doc.createTextNode(QString::number(ii->category()->id()))).parentNode());
-            item.appendChild(doc.createElement("TYPE").appendChild(doc.createTextNode(QChar(ii->itemType()->id()))).parentNode());
-
-            item.appendChild(doc.createElement("CATEGORY").appendChild(doc.createTextNode(ii->category()->name())).parentNode());
-            item.appendChild(doc.createElement("PART_DESCRIPTION").appendChild(doc.createTextNode(ii->item()->name())).parentNode());
-            item.appendChild(doc.createElement("COLOR").appendChild(doc.createTextNode(ii->color()->name())).parentNode());
-            item.appendChild(doc.createElement("TOTAL_VALUE").appendChild(doc.createTextNode((ii->price() * ii->quantity()).toUSD())).parentNode());
-
-            {
-                int cb = 1;
-                switch (ii->status()) {
-                    case Exclude: cb = 0; break;
-                    case Include: cb = 1; break;
-                    case Extra  : cb = 3; break;
-                    case Unknown: cb = 5; break;
-                }
-                item.appendChild(doc.createElement("CHECKBOX").appendChild(doc.createTextNode(QString::number(cb))).parentNode());
-            }
-            item.appendChild(doc.createElement("QTY").appendChild(doc.createTextNode(QString::number(ii->quantity()))).parentNode());
-            item.appendChild(doc.createElement("PRICE").appendChild(doc.createTextNode(ii->price().toUSD())).parentNode());
-            item.appendChild(doc.createElement("CONDITION").appendChild(doc.createTextNode((ii->condition() == New) ? "N" : "U")).parentNode());
-
-            if (ii->bulkQuantity() != 1)
-                item.appendChild(doc.createElement("BULK").appendChild(doc.createTextNode(QString::number(ii->bulkQuantity()))).parentNode());
-            if (ii->sale())
-                item.appendChild(doc.createElement("SALE").appendChild(doc.createTextNode(QString::number(ii->sale()))).parentNode());
-            if (!ii->comments().isEmpty())
-                item.appendChild(doc.createElement("NOTES").appendChild(doc.createTextNode(ii->comments())).parentNode());
-            if (!ii->remarks().isEmpty())
-                item.appendChild(doc.createElement("REMARKS").appendChild(doc.createTextNode(ii->remarks())).parentNode());
-
-            if (ii->tierQuantity(0)) {
-                item.appendChild(doc.createElement("TQ1").appendChild(doc.createTextNode(QString::number(ii->tierQuantity(0)))).parentNode());
-                item.appendChild(doc.createElement("TP1").appendChild(doc.createTextNode(ii->tierPrice(0).toUSD())).parentNode());
-                item.appendChild(doc.createElement("TQ2").appendChild(doc.createTextNode(QString::number(ii->tierQuantity(1)))).parentNode());
-                item.appendChild(doc.createElement("TP2").appendChild(doc.createTextNode(ii->tierPrice(1).toUSD())).parentNode());
-                item.appendChild(doc.createElement("TQ3").appendChild(doc.createTextNode(QString::number(ii->tierQuantity(2)))).parentNode());
-                item.appendChild(doc.createElement("TP3").appendChild(doc.createTextNode(ii->tierPrice(2).toUSD())).parentNode());
-            }
+                item.appendChild(doc.createElement(QLatin1String("DELETE")));
         }
 
         // ### BrickStore BSX ###
         else if (hint == XMLHint_BrickStore) {
-            item.appendChild(doc.createElement("ItemID").appendChild(doc.createTextNode(QString(ii->item()->id()))).parentNode());
-            item.appendChild(doc.createElement("ItemTypeID").appendChild(doc.createTextNode(QChar(ii->itemType()->id()))).parentNode());
-            item.appendChild(doc.createElement("ColorID").appendChild(doc.createTextNode(QString::number(ii->color()->id()))).parentNode());
+            item.appendChild(doc.createElement(QLatin1String("ItemID")).appendChild(doc.createTextNode(QString(ii->item()->id()))).parentNode());
+            item.appendChild(doc.createElement(QLatin1String("ItemTypeID")).appendChild(doc.createTextNode(QChar(ii->itemType()->id()))).parentNode());
+            item.appendChild(doc.createElement(QLatin1String("ColorID")).appendChild(doc.createTextNode(QString::number(ii->color()->id()))).parentNode());
 
             // this extra information is useful, if the e.g.the color- or item-id
             // are no longer available after a database update
-            item.appendChild(doc.createElement("ItemName").appendChild(doc.createTextNode(ii->item()->name())).parentNode());
-            item.appendChild(doc.createElement("ItemTypeName").appendChild(doc.createTextNode(ii->itemType()->name())).parentNode());
-            item.appendChild(doc.createElement("ColorName").appendChild(doc.createTextNode(ii->color()->name())).parentNode());
-            item.appendChild(doc.createElement("CategoryID").appendChild(doc.createTextNode(QString::number(ii->category()->id()))).parentNode());
-            item.appendChild(doc.createElement("CategoryName").appendChild(doc.createTextNode(ii->category()->name())).parentNode());
+            item.appendChild(doc.createElement(QLatin1String("ItemName")).appendChild(doc.createTextNode(ii->item()->name())).parentNode());
+            item.appendChild(doc.createElement(QLatin1String("ItemTypeName")).appendChild(doc.createTextNode(ii->itemType()->name())).parentNode());
+            item.appendChild(doc.createElement(QLatin1String("ColorName")).appendChild(doc.createTextNode(ii->color()->name())).parentNode());
+            item.appendChild(doc.createElement(QLatin1String("CategoryID")).appendChild(doc.createTextNode(QString::number(ii->category()->id()))).parentNode());
+            item.appendChild(doc.createElement(QLatin1String("CategoryName")).appendChild(doc.createTextNode(ii->category()->name())).parentNode());
 
             {
                 const char *st;
@@ -1199,12 +1139,12 @@ QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint
                     case Include:
                     default     : st = "I"; break;
                 }
-                item.appendChild(doc.createElement("Status").appendChild(doc.createTextNode(st)).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("Status")).appendChild(doc.createTextNode(QLatin1String(st))).parentNode());
             }
 
-            item.appendChild(doc.createElement("Qty").appendChild(doc.createTextNode(QString::number(ii->quantity()))).parentNode());
-            item.appendChild(doc.createElement("Price").appendChild(doc.createTextNode(ii->price().toUSD())).parentNode());
-            item.appendChild(doc.createElement("Condition").appendChild(doc.createTextNode((ii->condition() == New) ? "N" : "U")).parentNode());
+            item.appendChild(doc.createElement(QLatin1String("Qty")).appendChild(doc.createTextNode(QString::number(ii->quantity()))).parentNode());
+            item.appendChild(doc.createElement(QLatin1String("Price")).appendChild(doc.createTextNode(ii->price().toUSD())).parentNode());
+            item.appendChild(doc.createElement(QLatin1String("Condition")).appendChild(doc.createTextNode(QLatin1String((ii->condition() == New) ? "N" : "U"))).parentNode());
 
             if (ii->subCondition() != None) {
                 const char *st;
@@ -1214,53 +1154,53 @@ QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint
                     case MISB      : st = "M"; break;
                     default        : st = "?"; break;
                 }
-                item.appendChild(doc.createElement("SubCondition").appendChild(doc.createTextNode(st)).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("SubCondition")).appendChild(doc.createTextNode(QLatin1String(st))).parentNode());
             }
 
             if (ii->bulkQuantity() != 1)
-                item.appendChild(doc.createElement("Bulk").appendChild(doc.createTextNode(QString::number(ii->bulkQuantity()))).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("Bulk")).appendChild(doc.createTextNode(QString::number(ii->bulkQuantity()))).parentNode());
             if (ii->sale())
-                item.appendChild(doc.createElement("Sale").appendChild(doc.createTextNode(QString::number(ii->sale()))).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("Sale")).appendChild(doc.createTextNode(QString::number(ii->sale()))).parentNode());
             if (!ii->comments().isEmpty())
-                item.appendChild(doc.createElement("Comments").appendChild(doc.createTextNode(ii->comments())).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("Comments")).appendChild(doc.createTextNode(ii->comments())).parentNode());
             if (!ii->remarks().isEmpty())
-                item.appendChild(doc.createElement("Remarks").appendChild(doc.createTextNode(ii->remarks())).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("Remarks")).appendChild(doc.createTextNode(ii->remarks())).parentNode());
             if (ii->retain())
-                item.appendChild(doc.createElement("Retain"));
+                item.appendChild(doc.createElement(QLatin1String("Retain")));
             if (ii->stockroom())
-                item.appendChild(doc.createElement("Stockroom"));
+                item.appendChild(doc.createElement(QLatin1String("Stockroom")));
             if (!ii->reserved().isEmpty())
-                item.appendChild(doc.createElement("Reserved").appendChild(doc.createTextNode(ii->reserved())).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("Reserved")).appendChild(doc.createTextNode(ii->reserved())).parentNode());
             if (ii->lotId())
-                item.appendChild(doc.createElement("LotID").appendChild(doc.createTextNode(QString::number(ii->lotId()))).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("LotID")).appendChild(doc.createTextNode(QString::number(ii->lotId()))).parentNode());
 
             if (ii->tierQuantity(0)) {
-                item.appendChild(doc.createElement("TQ1").appendChild(doc.createTextNode(QString::number(ii->tierQuantity(0)))).parentNode());
-                item.appendChild(doc.createElement("TP1").appendChild(doc.createTextNode(ii->tierPrice(0).toUSD())).parentNode());
-                item.appendChild(doc.createElement("TQ2").appendChild(doc.createTextNode(QString::number(ii->tierQuantity(1)))).parentNode());
-                item.appendChild(doc.createElement("TP2").appendChild(doc.createTextNode(ii->tierPrice(1).toUSD())).parentNode());
-                item.appendChild(doc.createElement("TQ3").appendChild(doc.createTextNode(QString::number(ii->tierQuantity(2)))).parentNode());
-                item.appendChild(doc.createElement("TP3").appendChild(doc.createTextNode(ii->tierPrice(2).toUSD())).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("TQ1")).appendChild(doc.createTextNode(QString::number(ii->tierQuantity(0)))).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("TP1")).appendChild(doc.createTextNode(ii->tierPrice(0).toUSD())).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("TQ2")).appendChild(doc.createTextNode(QString::number(ii->tierQuantity(1)))).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("TP2")).appendChild(doc.createTextNode(ii->tierPrice(1).toUSD())).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("TQ3")).appendChild(doc.createTextNode(QString::number(ii->tierQuantity(2)))).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("TP3")).appendChild(doc.createTextNode(ii->tierPrice(2).toUSD())).parentNode());
             }
 
             if (ii->m_weight > 0)
-                item.appendChild(doc.createElement("TotalWeight").appendChild(doc.createTextNode(cLocale().toString(ii->weight(), 'f', 4))).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("TotalWeight")).appendChild(doc.createTextNode(cLocale().toString(ii->weight(), 'f', 4))).parentNode());
             if (ii->origPrice() != ii->price())
-                item.appendChild(doc.createElement("OrigPrice").appendChild(doc.createTextNode(ii->origPrice().toUSD())).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("OrigPrice")).appendChild(doc.createTextNode(ii->origPrice().toUSD())).parentNode());
             if (ii->origQuantity() != ii->quantity())
-                item.appendChild(doc.createElement("OrigQty").appendChild(doc.createTextNode(QString::number(ii->origQuantity()))).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("OrigQty")).appendChild(doc.createTextNode(QString::number(ii->origQuantity()))).parentNode());
         }
 
         // ### MASS UPLOAD ###
         else if (hint == XMLHint_MassUpload) {
-            item.appendChild(doc.createElement("ITEMID").appendChild(doc.createTextNode(QString(ii->item()->id()))).parentNode());
-            item.appendChild(doc.createElement("COLOR").appendChild(doc.createTextNode(QString::number(ii->color()->id()))).parentNode());
-            item.appendChild(doc.createElement("CATEGORY").appendChild(doc.createTextNode(QString::number(ii->category()->id()))).parentNode());
-            item.appendChild(doc.createElement("ITEMTYPE").appendChild(doc.createTextNode(QChar(ii->itemType()->id()))).parentNode());
+            item.appendChild(doc.createElement(QLatin1String("ITEMID")).appendChild(doc.createTextNode(QString(ii->item()->id()))).parentNode());
+            item.appendChild(doc.createElement(QLatin1String("COLOR")).appendChild(doc.createTextNode(QString::number(ii->color()->id()))).parentNode());
+            item.appendChild(doc.createElement(QLatin1String("CATEGORY")).appendChild(doc.createTextNode(QString::number(ii->category()->id()))).parentNode());
+            item.appendChild(doc.createElement(QLatin1String("ITEMTYPE")).appendChild(doc.createTextNode(QChar(ii->itemType()->id()))).parentNode());
 
-            item.appendChild(doc.createElement("QTY").appendChild(doc.createTextNode(QString::number(ii->quantity()))).parentNode());
-            item.appendChild(doc.createElement("PRICE").appendChild(doc.createTextNode(ii->price().toUSD())).parentNode());
-            item.appendChild(doc.createElement("CONDITION").appendChild(doc.createTextNode((ii->condition() == New) ? "N" : "U")).parentNode());
+            item.appendChild(doc.createElement(QLatin1String("QTY")).appendChild(doc.createTextNode(QString::number(ii->quantity()))).parentNode());
+            item.appendChild(doc.createElement(QLatin1String("PRICE")).appendChild(doc.createTextNode(ii->price().toUSD())).parentNode());
+            item.appendChild(doc.createElement(QLatin1String("CONDITION")).appendChild(doc.createTextNode(QLatin1String((ii->condition() == New) ? "N" : "U"))).parentNode());
 
             if (ii->subCondition() != None) {
                 const char *st;
@@ -1270,59 +1210,59 @@ QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint
                     case MISB      : st = "M"; break;
                     default        : st = "?"; break;
                 }
-                item.appendChild(doc.createElement("SUBCONDITION").appendChild(doc.createTextNode(st)).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("SUBCONDITION")).appendChild(doc.createTextNode(QLatin1String(st))).parentNode());
             }
 
             if (ii->bulkQuantity() != 1)
-                item.appendChild(doc.createElement("BULK").appendChild(doc.createTextNode(QString::number(ii->bulkQuantity()))).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("BULK")).appendChild(doc.createTextNode(QString::number(ii->bulkQuantity()))).parentNode());
             if (ii->sale())
-                item.appendChild(doc.createElement("SALE").appendChild(doc.createTextNode(QString::number(ii->sale()))).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("SALE")).appendChild(doc.createTextNode(QString::number(ii->sale()))).parentNode());
             if (!ii->comments().isEmpty())
-                item.appendChild(doc.createElement("DESCRIPTION").appendChild(doc.createTextNode(ii->comments())).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("DESCRIPTION")).appendChild(doc.createTextNode(ii->comments())).parentNode());
             if (!ii->remarks().isEmpty())
-                item.appendChild(doc.createElement("REMARKS").appendChild(doc.createTextNode(ii->remarks())).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("REMARKS")).appendChild(doc.createTextNode(ii->remarks())).parentNode());
             if (ii->retain())
-                item.appendChild(doc.createElement("RETAIN").appendChild(doc.createTextNode("Y")).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("RETAIN")).appendChild(doc.createTextNode(QLatin1String("Y"))).parentNode());
             if (ii->stockroom())
-                item.appendChild(doc.createElement("STOCKROOM").appendChild(doc.createTextNode("Y")).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("STOCKROOM")).appendChild(doc.createTextNode(QLatin1String("Y"))).parentNode());
             if (!ii->reserved().isEmpty())
-                item.appendChild(doc.createElement("BUYERUSERNAME").appendChild(doc.createTextNode(ii->reserved())).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("BUYERUSERNAME")).appendChild(doc.createTextNode(ii->reserved())).parentNode());
 
             if (ii->tierQuantity(0)) {
-                item.appendChild(doc.createElement("TQ1").appendChild(doc.createTextNode(QString::number(ii->tierQuantity(0)))).parentNode());
-                item.appendChild(doc.createElement("TP1").appendChild(doc.createTextNode(ii->tierPrice(0).toUSD())).parentNode());
-                item.appendChild(doc.createElement("TQ2").appendChild(doc.createTextNode(QString::number(ii->tierQuantity(1)))).parentNode());
-                item.appendChild(doc.createElement("TP2").appendChild(doc.createTextNode(ii->tierPrice(1).toUSD())).parentNode());
-                item.appendChild(doc.createElement("TQ3").appendChild(doc.createTextNode(QString::number(ii->tierQuantity(2)))).parentNode());
-                item.appendChild(doc.createElement("TP3").appendChild(doc.createTextNode(ii->tierPrice(2).toUSD())).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("TQ1")).appendChild(doc.createTextNode(QString::number(ii->tierQuantity(0)))).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("TP1")).appendChild(doc.createTextNode(ii->tierPrice(0).toUSD())).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("TQ2")).appendChild(doc.createTextNode(QString::number(ii->tierQuantity(1)))).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("TP2")).appendChild(doc.createTextNode(ii->tierPrice(1).toUSD())).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("TQ3")).appendChild(doc.createTextNode(QString::number(ii->tierQuantity(2)))).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("TP3")).appendChild(doc.createTextNode(ii->tierPrice(2).toUSD())).parentNode());
             }
         }
 
         // ### WANTED LIST ###
         else if (hint == XMLHint_WantedList) {
-            item.appendChild(doc.createElement("ITEMID").appendChild(doc.createTextNode(QString(ii->item()->id()))).parentNode());
-            item.appendChild(doc.createElement("ITEMTYPE").appendChild(doc.createTextNode(QChar(ii->itemType()->id()))).parentNode());
-            item.appendChild(doc.createElement("COLOR").appendChild(doc.createTextNode(QString::number(ii->color()->id()))).parentNode());
+            item.appendChild(doc.createElement(QLatin1String("ITEMID")).appendChild(doc.createTextNode(QString(ii->item()->id()))).parentNode());
+            item.appendChild(doc.createElement(QLatin1String("ITEMTYPE")).appendChild(doc.createTextNode(QChar(ii->itemType()->id()))).parentNode());
+            item.appendChild(doc.createElement(QLatin1String("COLOR")).appendChild(doc.createTextNode(QString::number(ii->color()->id()))).parentNode());
 
             if (ii->quantity())
-                item.appendChild(doc.createElement("MINQTY").appendChild(doc.createTextNode(QString::number(ii->quantity()))).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("MINQTY")).appendChild(doc.createTextNode(QString::number(ii->quantity()))).parentNode());
             if (ii->price() != 0)
-                item.appendChild(doc.createElement("MAXPRICE").appendChild(doc.createTextNode(ii->price().toUSD())).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("MAXPRICE")).appendChild(doc.createTextNode(ii->price().toUSD())).parentNode());
             if (!ii->remarks().isEmpty())
-                item.appendChild(doc.createElement("REMARKS").appendChild(doc.createTextNode(ii->remarks())).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("REMARKS")).appendChild(doc.createTextNode(ii->remarks())).parentNode());
             if (ii->condition() == New)
-                item.appendChild(doc.createElement("CONDITION").appendChild(doc.createTextNode("N")).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("CONDITION")).appendChild(doc.createTextNode(QLatin1String("N"))).parentNode());
         }
 
         // ### INVENTORY REQUEST ###
         else if (hint == XMLHint_Inventory) {
-            item.appendChild(doc.createElement("ITEMID").appendChild(doc.createTextNode(QString(ii->item()->id()))).parentNode());
-            item.appendChild(doc.createElement("ITEMTYPE").appendChild(doc.createTextNode(QChar(ii->itemType()->id()))).parentNode());
-            item.appendChild(doc.createElement("COLOR").appendChild(doc.createTextNode(QString::number(ii->color()->id()))).parentNode());
-            item.appendChild(doc.createElement("QTY").appendChild(doc.createTextNode(QString::number(ii->quantity()))).parentNode());
+            item.appendChild(doc.createElement(QLatin1String("ITEMID")).appendChild(doc.createTextNode(QString(ii->item()->id()))).parentNode());
+            item.appendChild(doc.createElement(QLatin1String("ITEMTYPE")).appendChild(doc.createTextNode(QChar(ii->itemType()->id()))).parentNode());
+            item.appendChild(doc.createElement(QLatin1String("COLOR")).appendChild(doc.createTextNode(QString::number(ii->color()->id()))).parentNode());
+            item.appendChild(doc.createElement(QLatin1String("QTY")).appendChild(doc.createTextNode(QString::number(ii->quantity()))).parentNode());
 
             if (ii->status() == Extra)
-                item.appendChild(doc.createElement("EXTRA").appendChild(doc.createTextNode("Y")).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("EXTRA")).appendChild(doc.createTextNode(QLatin1String("Y"))).parentNode());
         }
 
         // optional: additonal tags
@@ -1364,7 +1304,7 @@ bool BrickLink::Core::parseLDrawModelInternal(QFile &f, const QString &model_nam
 
     searchpath.append(QFileInfo(f).dir().absolutePath());
     if (!ldrawdir.isEmpty()) {
-        searchpath.append(ldrawdir + "/models");
+        searchpath.append(ldrawdir + QLatin1String("/models"));
     }
 
     if (f.isOpen()) {
@@ -1374,10 +1314,10 @@ bool BrickLink::Core::parseLDrawModelInternal(QFile &f, const QString &model_nam
         while (!(line = in.readLine()).isNull()) {
             linecount++;
 
-            if (!line.isEmpty() && line [0] == '0') {
+            if (!line.isEmpty() && line [0] == QLatin1Char('0')) {
                 QStringList sl = line.simplified().split(' ');
 
-                if ((sl.count() >= 2) && (sl [1] == "FILE")) {
+                if ((sl.count() >= 2) && (sl [1] == QLatin1String("FILE"))) {
                     is_mpd = true;
                     sl.removeFirst();
                     sl.removeFirst();
@@ -1394,11 +1334,11 @@ bool BrickLink::Core::parseLDrawModelInternal(QFile &f, const QString &model_nam
                         return false; // we need to seek!
                 }
             }
-            else if (!line.isEmpty() && line [0] == '1') {
+            else if (!line.isEmpty() && line [0] == QLatin1Char('1')) {
                 if (is_mpd && !is_mpd_model_found)
                     continue;
 
-                QStringList sl = line.simplified().split(' ');
+                QStringList sl = line.simplified().split(QLatin1Char(' '));
 
                 if (sl.count() >= 15) {
                     int colid = sl [1].toInt();
@@ -1409,7 +1349,7 @@ bool BrickLink::Core::parseLDrawModelInternal(QFile &f, const QString &model_nam
                     }
 
                     QString partid = partname;
-                    partid.truncate(partid.lastIndexOf('.'));
+                    partid.truncate(partid.lastIndexOf(QLatin1Char('.')));
 
                     const Color *colp = colorFromLDrawId(colid);
                     const Item *itemp = item('P', partid.toLatin1());
@@ -1432,7 +1372,7 @@ bool BrickLink::Core::parseLDrawModelInternal(QFile &f, const QString &model_nam
 
                         if (!got_subfile) {
                             for (QStringList::iterator it = searchpath.begin(); it != searchpath.end(); ++it) {
-                                QFile subf(*it + "/" + partname);
+                                QFile subf(*it + QDir::separator() + partname);
 
                                 if (subf.open(QIODevice::ReadOnly)) {
                                     uint sub_invalid_items = 0;
@@ -1551,7 +1491,7 @@ bool BrickLink::Core::writeDatabase(const QString &filename, DatabaseVersion ver
 
     QMutexLocker lock(&m_corelock);
 
-    QFile f(filename + ".new");
+    QFile f(filename + QLatin1String(".new"));
     if (f.open(QIODevice::WriteOnly)) {
         if (version == BrickStore_1_1) {
             QDataStream ds(&f);

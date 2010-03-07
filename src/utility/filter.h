@@ -5,8 +5,11 @@
 #include <QMultiMap>
 #include <QList>
 #include <QPair>
+#include <QCoreApplication>
 
 class Filter {
+    Q_DECLARE_TR_FUNCTIONS(Filter)
+
 public:
     enum Comparison {
         Matches          = 0x0001,
@@ -58,6 +61,8 @@ public:
 
         void setStandardComparisonTokens(Filter::Comparisons);
         void setStandardCombinationTokens(Filter::Combinations);
+
+        QString toolTip() const;
 
     private:
         bool eatWhiteSpace(int &pos, const QString &str);

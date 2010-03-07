@@ -18,7 +18,7 @@
 
 inline QString CMB_BOLD(const QString &str)
 {
-    return "<b>" + str + "</b>";
+    return QLatin1String("<b>") + str + QLatin1String("</b>");
 }
 
 class QValidator;

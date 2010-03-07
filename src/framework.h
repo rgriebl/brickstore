@@ -85,7 +85,6 @@ private slots:
     void fileOpen();
     void fileOpenRecent(int);
 
-    void fileImportBrikTrakInventory();
     void fileImportBrickLinkInventory();
     void fileImportBrickLinkOrder();
     void fileImportBrickLinkStore();
@@ -132,13 +131,13 @@ private:
 private:
     QIcon *icon(const char *name);
 
-    QAction *findAction(const QString &);
+    QAction *findAction(const char *name);
     void connectAction(bool do_connect, const char *name, Window *window, const char *slot, bool (Window::* is_on_func)() const = 0);
     void connectAllActions(bool do_connect, Window *window);
     void createActions();
     void translateActions();
-    QMenu *createMenu(const QString &, const QStringList &);
-    bool setupToolBar(QToolBar *, const QStringList &);
+    QMenu *createMenu(const QByteArray &, const QList<QByteArray> &);
+    bool setupToolBar(QToolBar *, const QList<QByteArray> &);
     QDockWidget *createDock(QWidget *widget);
     void createStatusBar();
     bool createWindow(Document *doc);

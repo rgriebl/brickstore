@@ -97,7 +97,6 @@ enum ItemListXMLHint {
     XMLHint_Inventory,
     XMLHint_Order,
     XMLHint_WantedList,
-    XMLHint_BrikTrak,
     XMLHint_BrickStore
 };
 

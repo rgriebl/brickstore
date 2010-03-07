@@ -174,7 +174,7 @@ void LDraw::GLRenderer::resizeGL(int w, int h)
         vector_t vmin, vmax;
 
         if (m_part->boundingBox(vmin, vmax)) {
-            qWarning("resizeGL - ortho: [%.f ..  %.f] x [%.f .. %.f] x [%.f .. %.f]", vmin[0], vmax[0], vmin[1], vmax[1], vmin[2], vmax[2]);
+            //qWarning("resizeGL - ortho: [%.f ..  %.f] x [%.f .. %.f] x [%.f .. %.f]", vmin[0], vmax[0], vmin[1], vmax[1], vmin[2], vmax[2]);
 
             radius = (vmax - vmin).length(); //qMax(vmin.length(), vmax.length());
             m_center = vmin + (vmax - vmin) / 2;

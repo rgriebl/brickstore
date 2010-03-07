@@ -499,61 +499,35 @@ bool LDraw::Core::check_ldrawdir(const QString &ldir)
 
 QString LDraw::Core::get_platform_ldrawdir()
 {
-    QString dir = ::getenv("LDRAWDIR");
+    QString dir = QString::fromLocal8Bit(::getenv("LDRAWDIR"));
 
 #if defined( Q_WS_WIN )
     if (dir.isEmpty() || !check_ldrawdir(dir)) {
-        QT_WA({
-            wchar_t inidir [MAX_PATH];
+        wchar_t inidir [MAX_PATH];
 
-            DWORD l = GetPrivateProfileStringW(L"LDraw", L"BaseDirectory", L"", inidir, MAX_PATH, L"ldraw.ini");
-            if (l >= 0) {
-                inidir [l] = 0;
-                dir = QString::fromUtf16(reinterpret_cast<ushort *>(inidir));
-            }
-        }, {
-            char inidir [MAX_PATH];
-
-            DWORD l = GetPrivateProfileStringA("LDraw", "BaseDirectory", "", inidir, MAX_PATH, "ldraw.ini");
-            if (l >= 0) {
-                inidir [l] = 0;
-                dir = QString::fromLocal8Bit(inidir);
-            }
-        })
+        DWORD l = GetPrivateProfileStringW(L"LDraw", L"BaseDirectory", L"", inidir, MAX_PATH, L"ldraw.ini");
+        if (l >= 0) {
+            inidir [l] = 0;
+            dir = QString::fromUtf16(reinterpret_cast<ushort *>(inidir));
+        }
     }
 
     if (dir.isEmpty() || !check_ldrawdir(dir)) {
         HKEY skey, lkey;
 
-        QT_WA({
-            if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"Software", 0, KEY_READ, &skey) == ERROR_SUCCESS) {
-                if (RegOpenKeyExW(skey, L"LDraw", 0, KEY_READ, &lkey) == ERROR_SUCCESS) {
-                    wchar_t regdir [MAX_PATH + 1];
-                    DWORD regdirsize = MAX_PATH * sizeof(wchar_t);
+        if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"Software", 0, KEY_READ, &skey) == ERROR_SUCCESS) {
+            if (RegOpenKeyExW(skey, L"LDraw", 0, KEY_READ, &lkey) == ERROR_SUCCESS) {
+                wchar_t regdir [MAX_PATH + 1];
+                DWORD regdirsize = MAX_PATH * sizeof(wchar_t);
 
-                    if (RegQueryValueExW(lkey, L"InstallDir", 0, 0, (LPBYTE) &regdir, &regdirsize) == ERROR_SUCCESS) {
-                        regdir [regdirsize / sizeof(WCHAR)] = 0;
-                        dir = QString::fromUtf16(reinterpret_cast<ushort *>(regdir));
-                    }
-                    RegCloseKey(lkey);
+                if (RegQueryValueExW(lkey, L"InstallDir", 0, 0, (LPBYTE) &regdir, &regdirsize) == ERROR_SUCCESS) {
+                    regdir [regdirsize / sizeof(WCHAR)] = 0;
+                    dir = QString::fromUtf16(reinterpret_cast<ushort *>(regdir));
                 }
-                RegCloseKey(skey);
+                RegCloseKey(lkey);
             }
-        }, {
-            if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, "Software", 0, KEY_READ, &skey) == ERROR_SUCCESS) {
-                if (RegOpenKeyExA(skey, "LDraw", 0, KEY_READ, &lkey) == ERROR_SUCCESS) {
-                    char regdir [MAX_PATH + 1];
-                    DWORD regdirsize = MAX_PATH;
-
-                    if (RegQueryValueExA(lkey, "InstallDir", 0, 0, (LPBYTE) &regdir, &regdirsize) == ERROR_SUCCESS) {
-                        regdir [regdirsize] = 0;
-                        dir = QString::fromLocal8Bit(regdir);
-                    }
-                    RegCloseKey(lkey);
-                }
-                RegCloseKey(skey);
-            }
-        })
+            RegCloseKey(skey);
+        }
     }
 #elif defined( Q_WS_MACX )
     if (dir.isEmpty() || !check_ldrawdir(dir)) {

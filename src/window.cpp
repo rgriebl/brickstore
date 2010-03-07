@@ -357,6 +357,11 @@ QString Window::filter() const
     return m_view->filterExpression();
 }
 
+QString Window::filterToolTip() const
+{
+    return m_view->filterToolTip();
+}
+
 uint Window::addItems(const BrickLink::InvItemList &items, int multiply, uint globalmergeflags, bool /*dont_change_sorting*/)
 {
     bool waitcursor = (items.count() > 100);
@@ -1622,14 +1627,6 @@ void Window::on_file_export_bl_wantedlist_clip_triggered()
 
     if (!items.isEmpty())
         m_doc->fileExportBrickLinkWantedListClipboard(items);
-}
-
-void Window::on_file_export_briktrak_triggered()
-{
-    Document::ItemList items = exportCheck();
-
-    if (!items.isEmpty())
-        m_doc->fileExportBrikTrakInventory(items);
 }
 
 Document::ItemList Window::exportCheck() const
