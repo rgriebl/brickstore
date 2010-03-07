@@ -32,7 +32,6 @@ class Window;
 class FilterEdit;
 class Spinner;
 class UndoGroup;
-class TaskPaneManager;
 class TaskInfoWidget;
 class TaskPriceGuideWidget;
 class TaskLinksWidget;
@@ -140,6 +139,7 @@ private:
     void translateActions();
     QMenu *createMenu(const QString &, const QStringList &);
     bool setupToolBar(QToolBar *, const QStringList &);
+    QDockWidget *createDock(QWidget *widget);
     void createStatusBar();
     bool createWindow(Document *doc);
     bool createWindows(const QList<Document *> &docs);
@@ -157,7 +157,7 @@ private:
     QLabel *m_errors;
     QLabel *m_modified;
     QToolBar *m_toolbar;
-    TaskPaneManager *m_taskpanes;
+    QList<QDockWidget *> m_dock_widgets;
     TaskInfoWidget *m_task_info;
     TaskPriceGuideWidget *m_task_priceguide;
     TaskLinksWidget *m_task_links;
@@ -166,11 +166,8 @@ private:
     QPointer <AddItemDialog> m_add_dialog;
     QPointer<ItemDetailPopup> m_details;
 
-
     QStringList m_recent_files;
-
     bool m_running;
-
 
     UndoGroup *m_undogroup;
 };

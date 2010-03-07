@@ -22,7 +22,6 @@ HEADERS += \
   spinner.h \
   stopwatch.h \
   staticpointermodel.h \
-  taskpanemanager.h \
   threadpool.h \
   transfer.h \
   undo.h \
@@ -42,7 +41,6 @@ SOURCES += \
   qtemporaryresource.cpp \
   spinner.cpp \
   staticpointermodel.cpp \
-  taskpanemanager.cpp \
   threadpool.cpp \
   transfer.cpp \
   undo.cpp \

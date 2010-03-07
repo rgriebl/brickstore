@@ -167,8 +167,8 @@ bool TaskPriceGuideWidget::event(QEvent *e)
 void TaskPriceGuideWidget::fixParentDockWindow()
 {
     if (m_dock) {
-        disconnect(m_dock, SIGNAL(dockLocationChanged(Qt::DockWidgetArea)), this, SLOT(dockChanged()));
-        disconnect(m_dock, SIGNAL(topLevelChanged(bool)), this, SLOT(dockChanged()));
+        disconnect(m_dock, SIGNAL(dockLocationChanged(Qt::DockWidgetArea)), this, SLOT(dockLocationChanged(Qt::DockWidgetArea)));
+        disconnect(m_dock, SIGNAL(topLevelChanged(bool)), this, SLOT(topLevelChanged(bool)));
     }
 
     m_dock = 0;
@@ -181,27 +181,21 @@ void TaskPriceGuideWidget::fixParentDockWindow()
     }
 
     if (m_dock) {
-        connect(m_dock, SIGNAL(dockLocationChanged(Qt::DockWidgetArea)), this, SLOT(dockChanged()));
-        connect(m_dock, SIGNAL(topLevelChanged(bool)), this, SLOT(dockChanged()));
+        connect(m_dock, SIGNAL(dockLocationChanged(Qt::DockWidgetArea)), this, SLOT(dockLocationChanged(Qt::DockWidgetArea)));
+        connect(m_dock, SIGNAL(topLevelChanged(bool)), this, SLOT(topLevelChanged(bool)));
     }
-    dockChanged();
 }
 
-void TaskPriceGuideWidget::dockChanged()
+void TaskPriceGuideWidget::topLevelChanged(bool b)
 {
-    PriceGuideWidget::Layout lay = PriceGuideWidget::Normal;
+    if (b)
+        setLayout(PriceGuideWidget::Normal);
+}
 
-    if (m_dock) {
-        if (QMainWindow *mw = qobject_cast<QMainWindow *>(m_dock->parentWidget())) {
-            if (m_dock->isFloating())
-                lay = PriceGuideWidget::Normal;
-            else if ((mw->dockWidgetArea(m_dock) == Qt::LeftDockWidgetArea) || (mw->dockWidgetArea(m_dock) == Qt::RightDockWidgetArea))
-                lay = PriceGuideWidget::Vertical;
-            else
-                lay = PriceGuideWidget::Horizontal;
-        }
-    }
-    setLayout(lay);
+void TaskPriceGuideWidget::dockLocationChanged(Qt::DockWidgetArea area)
+{
+    bool horiz = (area ==  Qt::LeftDockWidgetArea) || (area == Qt::RightDockWidgetArea);
+    setLayout(horiz ? PriceGuideWidget::Vertical : PriceGuideWidget::Horizontal);
 }
 
 // ----------------------------------------------------------------------

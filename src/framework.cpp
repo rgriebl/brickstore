@@ -34,6 +34,7 @@
 #include <QCursor>
 #include <QStyleFactory>
 #include <QShortcut>
+#include <QDockWidget>
 
 #include "application.h"
 #include "messagebox.h"
@@ -46,7 +47,6 @@
 #include "spinner.h"
 #include "filteredit.h"
 #include "workspace.h"
-#include "taskpanemanager.h"
 #include "taskwidgets.h"
 #include "progressdialog.h"
 #include "updatedatabase.h"
@@ -177,28 +177,24 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
 
     setCentralWidget(m_workspace);
 
-    m_taskpanes = new TaskPaneManager(this);
-    m_taskpanes->setMode(Config::inst()->value("/MainWindow/Infobar/Mode", TaskPaneManager::Modern).toInt() != TaskPaneManager::Classic ? TaskPaneManager::Modern : TaskPaneManager::Classic);
-
     m_task_info = new TaskInfoWidget(0);
     m_task_info->setObjectName(QLatin1String("TaskInfo"));
-    m_taskpanes->addItem(m_task_info, QIcon(":/images/sidebar/info"));
-    m_taskpanes->setItemVisible(m_task_info, Config::inst()->value("/MainWindow/Infobar/InfoVisible", true).toBool());
+    addDockWidget(Qt::LeftDockWidgetArea, createDock(m_task_info));
 
     m_task_priceguide = new TaskPriceGuideWidget(0);
     m_task_priceguide->setObjectName(QLatin1String("TaskPriceGuide"));
-    m_taskpanes->addItem(m_task_priceguide, QIcon(":/images/sidebar/priceguide"));
-    m_taskpanes->setItemVisible(m_task_priceguide, Config::inst()->value("/MainWindow/Infobar/PriceguideVisible", true).toBool());
+    splitDockWidget(m_dock_widgets.first(), createDock(m_task_priceguide), Qt::Vertical);
 
     m_task_appears = new TaskAppearsInWidget(0);
     m_task_appears->setObjectName(QLatin1String("TaskAppears"));
-    m_taskpanes->addItem(m_task_appears, QIcon(":/images/sidebar/appearsin"));
-    m_taskpanes->setItemVisible(m_task_appears, Config::inst()->value("/MainWindow/Infobar/AppearsinVisible", true).toBool());
+    tabifyDockWidget(m_dock_widgets.at(1), createDock(m_task_appears));
 
     m_task_links = new TaskLinksWidget(0);
     m_task_links->setObjectName(QLatin1String("TaskLinks"));
-    m_taskpanes->addItem(m_task_links, QIcon(":/images/sidebar/links"));
-    m_taskpanes->setItemVisible(m_task_links, Config::inst()->value("/MainWindow/Infobar/LinksVisible", true).toBool());
+    tabifyDockWidget(m_dock_widgets.first(), createDock(m_task_links));
+
+    m_dock_widgets.at(0)->raise();
+    m_dock_widgets.at(1)->raise();
 
     m_toolbar = new QToolBar(this);
     m_toolbar->setObjectName(QLatin1String("toolbar"));
@@ -446,11 +442,18 @@ void FrameWork::languageChange()
     m_progress->setItemLabel(PGI_PriceGuide, tr("Price Guide updates"));
     m_progress->setItemLabel(PGI_Picture,    tr("Image updates"));
 
-    m_taskpanes->setItemText(m_task_info,       tr("Info"));
-    m_taskpanes->setItemText(m_task_priceguide, tr("Price Guide"));
-    m_taskpanes->setItemText(m_task_appears,    tr("Appears In Sets"));
-    m_taskpanes->setItemText(m_task_links,      tr("Links"));
+    foreach (QDockWidget *dock, m_dock_widgets) {
+        QString name = dock->objectName();
 
+        if (name == QLatin1String("Dock-TaskInfo"))
+            dock->setWindowTitle(tr("Info"));
+        if (name == QLatin1String("Dock-TaskPriceGuide"))
+            dock->setWindowTitle(tr("Price Guide"));
+        if (name == QLatin1String("Dock-TaskAppears"))
+            dock->setWindowTitle(tr("Appears In Sets"));
+        if (name == QLatin1String("Dock-TaskLinks"))
+            dock->setWindowTitle(tr("Links"));
+    }
     if (m_filter) {
         m_filter->setToolTip(tr("Filter the list using this pattern (wildcards allowed: * ? [])"));
         m_filter->setIdleText(tr("Filter"));
@@ -618,13 +621,7 @@ FrameWork::~FrameWork()
 {
     Config::inst()->setValue("/Files/Recent", m_recent_files);
 
-    Config::inst()->setValue("/MainWindow/Statusbar/Visible",         statusBar()->isVisibleTo(this));
-    Config::inst()->setValue("/MainWindow/Infobar/Mode",              m_taskpanes->mode());
-    Config::inst()->setValue("/MainWindow/Infobar/InfoVisible",       m_taskpanes->isItemVisible(m_task_info));
-    Config::inst()->setValue("/MainWindow/Infobar/PriceguideVisible", m_taskpanes->isItemVisible(m_task_priceguide));
-    Config::inst()->setValue("/MainWindow/Infobar/AppearsinVisible",  m_taskpanes->isItemVisible(m_task_appears));
-    Config::inst()->setValue("/MainWindow/Infobar/LinksVisible",      m_taskpanes->isItemVisible(m_task_links));
-
+    Config::inst()->setValue("/MainWindow/Statusbar/Visible", statusBar()->isVisibleTo(this));
     Config::inst()->setValue("/MainWindow/Layout/State", saveState());
     Config::inst()->setValue("/MainWindow/Layout/Geometry", saveGeometry());
 
@@ -656,6 +653,16 @@ void FrameWork::dropEvent(QDropEvent *e)
 QAction *FrameWork::findAction(const QString &name)
 {
     return name.isEmpty() ? 0 : static_cast <QAction *>(findChild<QAction *>(name));
+}
+
+QDockWidget *FrameWork::createDock(QWidget *widget)
+{
+    QDockWidget *dock = new QDockWidget(QString(), this);
+    dock->setObjectName(QLatin1String("Dock-") + widget->objectName());
+    dock->setFeatures(QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable);
+    dock->setWidget(widget);
+    m_dock_widgets.append(dock);
+    return dock;
 }
 
 void FrameWork::createStatusBar()
@@ -944,8 +951,9 @@ void FrameWork::createActions()
     (void) newQAction(this, "view_fullscreen", true, this, SLOT(viewFullScreen(bool)));
 
     m_toolbar->toggleViewAction()->setObjectName("view_toolbar");
-
-    (void) m_taskpanes->createItemVisibilityAction(this, "view_infobar");
+    m = newQMenu(this, "view_infobar");
+    foreach (QDockWidget *dock, m_dock_widgets)
+        m->addAction(dock->toggleViewAction());
 
     (void) newQAction(this, "view_statusbar", true, this, SLOT(viewStatusBar(bool)));
     (void) newQAction(this, "view_show_input_errors", true, Config::inst(), SLOT(setShowInputErrors(bool)));

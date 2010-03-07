@@ -59,7 +59,8 @@ public:
 protected slots:
     void windowUpdate(Window *win);
     void selectionUpdate(const Document::ItemList &list);
-    virtual void dockChanged();
+    virtual void topLevelChanged(bool);
+    virtual void dockLocationChanged(Qt::DockWidgetArea);
 
     void setPrice(Currency p);
 
