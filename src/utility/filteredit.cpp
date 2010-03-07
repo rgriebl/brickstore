@@ -12,11 +12,10 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 
-#include <QToolButton>
+#include <QAbstractButton>
 #include <QLineEdit>
 #include <QIcon>
 #include <QStyle>
-#include <QTimer>
 #include <QPainter>
 #include <QStyleOptionFrame>
 #include <QMouseEvent>
@@ -25,29 +24,63 @@
 
 #include "filteredit.h"
 
-//#if 0
-#if defined( Q_WS_MAC )
-#  define MAC_USE_NATIVE_SEARCHFIELD
-#else
-#  undef MAC_USE_NATIVE_SEARCHFIELD
-#endif
-
-#if defined( MAC_USE_NATIVE_SEARCHFIELD )
-
+#ifdef Q_WS_MACX
+#include <QProxyStyle>
 #include <Carbon/Carbon.h>
 
-// copied and simplified to static functions from private/qcore_mac_p.h
-class QCFString {
+class MacSearchFieldProxyStyle : public QProxyStyle
+{
 public:
-    static QString toQString(CFStringRef cfstr);
-    static CFStringRef toCFStringRef(const QString &str);
+    void drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, QPainter *p, const QWidget *w) const
+    {
+        if (pe == PE_FrameLineEdit) {
+            if (const QStyleOptionFrame *frame = qstyleoption_cast<const QStyleOptionFrame *>(opt)) {
+                if (frame->state & State_Sunken) {
+                    QColor baseColor(frame->palette.background().color());
+                    HIThemeFrameDrawInfo fdi;
+                    fdi.version = 0;
+                    ThemeDrawState tds = kThemeStateActive;
+                    if (opt->state & QStyle::State_Active) {
+                        if (!(opt->state & QStyle::State_Enabled))
+                            tds = kThemeStateUnavailable;
+                    } else {
+                        if (opt->state & QStyle::State_Enabled)
+                            tds = kThemeStateInactive;
+                        else
+                            tds = kThemeStateUnavailableInactive;
+                    }
+                    fdi.state = tds;
+                    SInt32 frame_size;
+                    fdi.kind = kHIThemeFrameTextFieldRound;
+                    GetThemeMetric(kThemeMetricEditTextFrameOutset, &frame_size);
+                    if ((frame->state & State_ReadOnly) || !(frame->state & State_Enabled))
+                        fdi.state = kThemeStateInactive;
+                    fdi.isFocused = (frame->state & State_HasFocus);
+                    HIRect hirect = qt_hirectForQRect(frame->rect,
+                                                      QRect(frame_size, frame_size,
+                                                      frame_size * 2, frame_size * 2));
+                    QPixmap pix(frame->rect.size());
+                    pix.fill(Qt::transparent);
+                    CGContextRef context = qt_mac_cg_context(&pix);
+                    HIThemeDrawFrame(&hirect, &fdi, context, kHIThemeOrientationNormal);
+                    CGContextRelease(context);
+                    p->drawPixmap(frame->rect.topLeft(), pix);
+                    return;
+                }
+            }
+        }
+        QProxyStyle::drawPrimitive(pe, opt, p, w);
+    }
+private:
+    static inline HIRect qt_hirectForQRect(const QRect &convertRect, const QRect &rect = QRect())
+    {
+        return CGRectMake(convertRect.x() + rect.x(), convertRect.y() + rect.y(),
+                          convertRect.width() - rect.width(), convertRect.height() - rect.height());
+    }
+
 };
+#endif
 
-typedef QWidget FilterEditPrivateBase;
-
-#else
-#  include <QLineEdit>
-typedef QLineEdit FilterEditPrivateBase;
 
 class FilterEditButton : public QAbstractButton {
 public:
@@ -96,7 +129,7 @@ protected:
             QWidget *p = parentWidget();
             if (p) {
                 QPoint r = p->mapToGlobal(QPoint(0, p->height()));
-                m_menu->exec(QPoint(r.x() + height() / 2, r.y()));
+                m_menu->popup(QPoint(r.x() + height() / 2, r.y()));
             }
             e->accept();
         }
@@ -107,350 +140,56 @@ private:
     QMenu *m_menu;
     bool m_hover;
 };
-#endif
 
 
-class FilterEditPrivate : public FilterEditPrivateBase {
-    Q_OBJECT
-
-    friend class FilterEdit;
-
-public:
-    FilterEditPrivate(FilterEdit *parent);
-    ~FilterEditPrivate();
-
-    virtual QSize sizeHint() const;
-    virtual QSize minimumSizeHint() const;
-
-    virtual void setMenu(QMenu *menu);
-    virtual void setText(const QString &str);
-    virtual QString text() const;
-    virtual void setIdleText(const QString &str);
-    virtual QString idleText() const;
-
-private slots:
-    void timerTick();
-
-private:
-    FilterEdit *q;
-    QTimer *     m_timer;
-    QMenu *      m_menu;
-
-#if defined(MAC_USE_NATIVE_SEARCHFIELD)
-private:
-    static OSStatus macEventHandler(EventHandlerCallRef handler, EventRef event, void *data);
-    HIViewRef    m_hisearch;
-
-#else
-protected:
-    virtual void resizeEvent(QResizeEvent *);
-    virtual void paintEvent(QPaintEvent *e);
-    virtual void focusInEvent(QFocusEvent *e);
-    virtual void focusOutEvent(QFocusEvent *e);
-
-private slots:
-    void checkText(const QString &);
-
-private:
-    void doLayout();
-
-    QString           m_idletext;
-    FilterEditButton *w_menu;
-    FilterEditButton *w_clear;
-    int               m_left;
-    int               m_top;
-    int               m_right;
-    int               m_bottom;
-#endif
-};
-
-
-
-
-FilterEditPrivate::FilterEditPrivate(FilterEdit *parent)
-    : FilterEditPrivateBase(parent), q(parent)
+FilterEdit::FilterEdit(QWidget *parent)
+    : QLineEdit(parent)
 {
-    m_timer = new QTimer(this);
-    m_timer->setSingleShot(true);
-    m_timer->setInterval(250);
-
-    m_menu = 0;
-
-    connect(m_timer, SIGNAL(timeout()), this, SLOT(timerTick()));
-
-#if defined(MAC_USE_NATIVE_SEARCHFIELD)
-    setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed, QSizePolicy::LineEdit));
-    setFocusPolicy(Qt::StrongFocus);
-    q->setAttribute(Qt::WA_MacShowFocusRect);
-
-    // Create a native search field and pass its window id to QWidget::create.
-    HISearchFieldCreate(NULL/*bounds*/, kHISearchFieldAttributesSearchIcon, NULL/*menu ref*/, NULL, &m_hisearch);
-    create(reinterpret_cast<WId>(m_hisearch));
-    //setAttribute(Qt::WA_MacShowFocusRect);
-    setAttribute(Qt::WA_MacNormalSize);
-
-    EventTypeSpec mac_events[] = { { kEventClassSearchField, kEventSearchFieldCancelClicked },
-                                   { kEventClassTextField, kEventTextDidChange },
-                                   { kEventClassTextField, kEventTextAccepted } };
-
-    HIViewInstallEventHandler(m_hisearch, macEventHandler, GetEventTypeCount(mac_events), mac_events, this, NULL);
-#else
     w_menu = new FilterEditButton(QIcon(":/images/filter_edit_menu"), this);
     w_clear = new FilterEditButton(QIcon(":/images/filter_edit_clear"), this);
     w_clear->hide();
 
-    connect(w_clear, SIGNAL(clicked()), q, SLOT(clear()));
+    connect(w_clear, SIGNAL(clicked()), this, SLOT(clear()));
     connect(this, SIGNAL(textChanged(const QString&)), this, SLOT(checkText(const QString&)));
 
     getTextMargins(&m_left, &m_top, &m_right, &m_bottom);
     doLayout();
+
+#if defined(Q_WS_MACX)
+    setAttribute(Qt::WA_MacShowFocusRect, false);
+    setStyle(new MacSearchFieldProxyStyle());
 #endif
-}
-
-FilterEditPrivate::~FilterEditPrivate()
-{
-#if defined(MAC_USE_NATIVE_SEARCHFIELD)
-    CFRelease(m_hisearch);
-#endif
-}
-
-
-QSize FilterEditPrivate::sizeHint() const
-{
-#if defined(MAC_USE_NATIVE_SEARCHFIELD)
-    return minimumSizeHint() + QSize(10 * fontMetrics().width(QLatin1Char('x')), 0);
-#else
-    return QLineEdit::sizeHint() + QSize(0, 0); //TODO: image sizes
-#endif
-}
-
-QSize FilterEditPrivate::minimumSizeHint() const
-{
-#if defined(MAC_USE_NATIVE_SEARCHFIELD)
-    EventRef event;
-    HIRect optimalBounds;
-    CreateEvent(0, kEventClassControl,
-        kEventControlGetOptimalBounds,
-        GetCurrentEventTime(),
-        kEventAttributeUserEvent, &event);
-
-    SendEventToEventTargetWithOptions(event,
-        HIObjectGetEventTarget(HIObjectRef(winId())),
-        kEventTargetDontPropagate);
-
-    GetEventParameter(event,
-        kEventParamControlOptimalBounds, typeHIRect,
-        0, sizeof(HIRect), 0, &optimalBounds);
-
-    ReleaseEvent(event);
-    return QSize(optimalBounds.size.width + fontMetrics().maxWidth() + 2*optimalBounds.size.height,
-                 optimalBounds.size.height-10);
-#else
-    return QLineEdit::minimumSizeHint() + QSize(0, 0); //TODO: image sizes
-#endif
-}
-
-
-void FilterEditPrivate::timerTick()
-{
-    qDebug("** FILTER TEXT CHANGED **");
-    emit q->textChanged(text());
-}
-
-void FilterEditPrivate::setText(const QString &txt)
-{
-#if defined(MAC_USE_NATIVE_SEARCHFIELD)
-    HIViewSetText(m_hisearch, QCFString::toCFStringRef(txt));
-    OptionBits c = kHISearchFieldAttributesCancel;
-    bool empty = txt.isEmpty();
-    HISearchFieldChangeAttributes(m_hisearch, empty ? 0 : c, empty ? c : 0);
-#else
-    QLineEdit::setText(txt);
-    doLayout();
-#endif
-    m_timer->stop();
-    emit q->textChanged(txt);
-}
-
-QString FilterEditPrivate::text() const
-{
-#if defined(MAC_USE_NATIVE_SEARCHFIELD)
-    CFStringRef ref = HIViewCopyText(m_hisearch);
-    QString str = QCFString::toQString(ref);
-    CFRelease(ref);
-    return str;
-#else
-    return QLineEdit::text();
-#endif
-}
-
-void FilterEditPrivate::setMenu(QMenu *menu)
-{
-#if defined(MAC_USE_NATIVE_SEARCHFIELD)
-    HISearchFieldSetSearchMenu(m_hisearch, menu ? static_cast<OpaqueMenuRef *>(menu->macMenu(0)) : 0);
-#else
-    w_menu->setMenu(menu);
-
-#endif
-    delete m_menu;
-    m_menu = menu;
-}
-
-void FilterEditPrivate::setIdleText(const QString &str)
-{
-#if defined(MAC_USE_NATIVE_SEARCHFIELD)
-    CFStringRef ref = QCFString::toCFStringRef(str);
-    HISearchFieldSetDescriptiveText(m_hisearch, ref);
-    CFRelease(ref);
-#else
-    m_idletext = str;
-    if (QLineEdit::text().isEmpty())
-        update();
-#endif
-}
-
-QString FilterEditPrivate::idleText() const
-{
-#if defined(MAC_USE_NATIVE_SEARCHFIELD)
-    CFStringRef ref;
-    HISearchFieldCopyDescriptiveText(m_hisearch, &ref);
-    QString str = QCFString::toQString(ref);
-    CFRelease(ref);
-    return str;
-#else
-    return m_idletext;
-#endif
-}
-
-
-// ##########################################################################
-
-
-
-FilterEdit::FilterEdit(QWidget *parent)
-    : QWidget(parent)
-{
-    d = new FilterEditPrivate(this);
-
-    setSizePolicy(d->sizePolicy());
-    setFocusProxy(d);
-}
-
-void FilterEdit::clear()
-{
-    d->setText(QString());
-}
-
-void FilterEdit::setText(const QString &str)
-{
-    d->setText(str);
-}
-
-QString FilterEdit::text() const
-{
-    return d->text();
-}
-
-void FilterEdit::setMenu(QMenu *menu)
-{
-    d->setMenu(menu);
-}
-
-QMenu *FilterEdit::menu() const
-{
-    return d->m_menu;
 }
 
 void FilterEdit::setIdleText(const QString &str)
 {
-    d->setIdleText(str);
+    m_idletext = str;
+    if (QLineEdit::text().isEmpty())
+        update();
 }
 
 QString FilterEdit::idleText() const
 {
-    return d->idleText();
+    return m_idletext;
 }
 
-QSize FilterEdit::sizeHint() const
+void FilterEdit::setMenu(QMenu *menu)
 {
-#if defined(MAC_USE_NATIVE_SEARCHFIELD)
-    return d->sizeHint() + QSize(6, 6); //focus border
-#else
-    return d->sizeHint();
-#endif
+    w_menu->setMenu(menu);
 }
 
-QSize FilterEdit::minimumSizeHint() const
+QMenu *FilterEdit::menu() const
 {
-#if defined(MAC_USE_NATIVE_SEARCHFIELD)
-    return d->minimumSizeHint() + QSize(6, 6); //focus border
-#else
-    return d->minimumSizeHint();
-#endif
-}
-
-void FilterEdit::resizeEvent(QResizeEvent *)
-{
-#if defined(MAC_USE_NATIVE_SEARCHFIELD)
-    d->setGeometry(2, 2, width() - 4, height() - 4);
-#else
-    d->setGeometry(0, 0, width(), height());
-#endif
+    return w_menu->menu();
 }
 
 
-#if defined(MAC_USE_NATIVE_SEARCHFIELD)
-
-OSStatus FilterEditPrivate::macEventHandler(EventHandlerCallRef, EventRef event, void *data)
-{
-    FilterEditPrivate *that = static_cast<FilterEditPrivate *>(data);
-
-    if (!that)
-        return eventNotHandledErr;
-
-    switch (GetEventClass(event)) {
-    case kEventClassTextField:
-        switch (GetEventKind(event)) {
-        case kEventTextDidChange: {
-            that->m_timer->start();
-            OptionBits c = kHISearchFieldAttributesCancel;
-            bool empty = that->text().isEmpty();
-            HISearchFieldChangeAttributes(that->m_hisearch, empty ? 0 : c, empty ? c : 0);
-            break;
-        }
-        case kEventTextAccepted:
-            emit that->q->returnPressed();
-            break;
-        default:
-            break;
-        }
-        break;
-
-    case kEventClassSearchField:
-        switch (GetEventKind(event)) {
-        case kEventSearchFieldCancelClicked:
-            that->q->clear();
-            break;
-        case kEventSearchFieldSearchClicked:
-            emit that->q->returnPressed();
-            break;
-        default:
-            break;
-        }
-        break;
-    }
-    return noErr;
-}
-
-#else // MAC_USE_NATIVE_SEARCHFIELD
-
-void FilterEditPrivate::checkText(const QString &)
+void FilterEdit::checkText(const QString &)
 {
     doLayout();
-    m_timer->start();
 }
 
-void FilterEditPrivate::doLayout()
+void FilterEdit::doLayout()
 {
 //    QSize ms = w_menu->sizeHint();
 //    QSize cs = w_clear->sizeHint();
@@ -467,12 +206,12 @@ void FilterEditPrivate::doLayout()
 }
 
 
-void FilterEditPrivate::resizeEvent(QResizeEvent *)
+void FilterEdit::resizeEvent(QResizeEvent *)
 {
     doLayout();
 }
 
-void FilterEditPrivate::paintEvent(QPaintEvent *e)
+void FilterEdit::paintEvent(QPaintEvent *e)
 {
     QLineEdit::paintEvent(e);
 
@@ -490,21 +229,16 @@ void FilterEditPrivate::paintEvent(QPaintEvent *e)
     }
 }
 
-void FilterEditPrivate::focusInEvent(QFocusEvent *e)
+void FilterEdit::focusInEvent(QFocusEvent *e)
 {
     if (!m_idletext.isEmpty())
         update();
     QLineEdit::focusInEvent(e);
 }
 
-void FilterEditPrivate::focusOutEvent(QFocusEvent *e)
+void FilterEdit::focusOutEvent(QFocusEvent *e)
 {
     if (!m_idletext.isEmpty())
         update();
     QLineEdit::focusOutEvent(e);
 }
-
-#endif // MAC_USE_NATIVE_SEARCHFIELD
-
-#include "filteredit.moc"
-

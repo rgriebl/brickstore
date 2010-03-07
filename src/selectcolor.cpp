@@ -53,10 +53,12 @@ SelectColor::SelectColor(QWidget *parent, Qt::WindowFlags f)
     connect(w_colors, SIGNAL(activated(const QModelIndex &)), this, SLOT(colorConfirmed()));
     connect(w_filter, SIGNAL(currentIndexChanged(int)), this, SLOT(updateColorFilter(int)));
 
-    QBoxLayout *lay = new QVBoxLayout(this);
+    QGridLayout *lay = new QGridLayout(this);
     lay->setMargin(0);
-    lay->addWidget(w_filter);
-    lay->addWidget(w_colors);
+    lay->setRowStretch(0, 0);
+    lay->setRowStretch(1, 1);
+    lay->addWidget(w_filter, 0, 0);
+    lay->addWidget(w_colors, 1, 0);
 }
 
 void SelectColor::setWidthToContents(bool b)

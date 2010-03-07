@@ -14,41 +14,44 @@
 #ifndef __FILTEREDIT_H__
 #define __FILTEREDIT_H__
 
-#include <QWidget>
+#include <QLineEdit>
 
 class QMenu;
+class FilterEditButton;
 
-class FilterEditPrivate;
-
-class FilterEdit : public QWidget {
+class FilterEdit : public QLineEdit {
     Q_OBJECT
 
 public:
     FilterEdit(QWidget *parent = 0);
-    void setMenu(QMenu *menu);
-    QMenu *menu() const;
 
-    virtual QSize sizeHint() const;
-    virtual QSize minimumSizeHint() const;
-
-    QString text() const;
     QString idleText() const;
 
-public slots:
-    void setText(const QString &);
-    void setIdleText(const QString &str);
-    void clear();
+    void setMenu(QMenu *);
+    QMenu *menu() const;
 
-signals:
-    void textChanged(const QString &);
-    void returnPressed();
+public slots:
+    void setIdleText(const QString &str);
 
 protected:
-    virtual void resizeEvent(QResizeEvent *e);
+    void resizeEvent(QResizeEvent *e);
+    void paintEvent(QPaintEvent *e);
+    void focusInEvent(QFocusEvent *e);
+    void focusOutEvent(QFocusEvent *e);
+
+private slots:
+    void checkText(const QString &);
 
 private:
-    friend class FilterEditPrivate;
-    FilterEditPrivate *d;
+    void doLayout();
+
+    QString           m_idletext;
+    FilterEditButton *w_menu;
+    FilterEditButton *w_clear;
+    int               m_left;
+    int               m_top;
+    int               m_right;
+    int               m_bottom;
 };
 
 #endif

@@ -124,9 +124,9 @@ void SelectItem::init()
     d->w_filter = new FilterEdit(this);
 
     d->w_viewmode = new QComboBox(this);
-    d->w_viewmode->addItem(QIcon(":/images/viewmode_list"), QString());
-    d->w_viewmode->addItem(QIcon(":/images/viewmode_images"), QString());
-    d->w_viewmode->addItem(QIcon(":/images/viewmode_thumbs"), QString());
+    d->w_viewmode->addItem(QString());
+    d->w_viewmode->addItem(QString());
+    d->w_viewmode->addItem(QString());
     connect(d->w_viewmode, SIGNAL(currentIndexChanged(int)), this, SLOT(setViewMode(int)));
 
     d->w_items = new QTreeView(this);
@@ -196,27 +196,23 @@ void SelectItem::init()
     connect(d->w_itemthumbs, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(showContextMenu(const QPoint &)));
     connect(d->w_thumbs, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(showContextMenu(const QPoint &)));
 
-    QGridLayout *toplay = new QGridLayout(this);
-    toplay->setMargin(0);
-    toplay->setColumnStretch(0, 25);
-    toplay->setColumnStretch(1, 75);
-    toplay->setRowStretch(0, 0);
-    toplay->setRowStretch(1, 1);
+    QGridLayout *lay = new QGridLayout(this);
+    lay->setMargin(0);
+    lay->setColumnStretch(1, 25);
+    lay->setColumnStretch(2, 75);
+    lay->setRowStretch(0, 0);
+    lay->setRowStretch(1, 1);
 
-    QHBoxLayout *lay = new QHBoxLayout();
-    toplay->addLayout(lay, 0, 0);
-    lay->addWidget(d->w_item_types_label, 0);
-    lay->addWidget(d->w_item_types, 1);
+    lay->addWidget(d->w_item_types_label, 0, 0);
+    lay->addWidget(d->w_item_types, 0, 1);
 
-    toplay->addWidget(d->w_categories, 1, 0);
+    lay->addWidget(d->w_categories, 1, 0, 1, 2);
 
-    lay = new QHBoxLayout();
-    toplay->addLayout(lay, 0, 1);
-    lay->addWidget(d->w_filter, 1);
-    lay->addWidget(d->w_viewmode, 0);
+    lay->addWidget(d->w_filter, 0, 2);
+    lay->addWidget(d->w_viewmode, 0, 3);
 
     d->m_stack = new QStackedLayout();
-    toplay->addLayout(d->m_stack, 1, 1);
+    lay->addLayout(d->m_stack, 1, 2, 1, 2);
 
     d->m_stack->addWidget(d->w_items);
     d->m_stack->addWidget(d->w_itemthumbs);
