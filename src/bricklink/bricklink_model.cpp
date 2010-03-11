@@ -21,6 +21,7 @@
 #include <QToolTip>
 #include <QLabel>
 #include <QAbstractItemView>
+#include <QDesktopWidget>
 
 #include "qtemporaryresource.h"
 
@@ -871,10 +872,14 @@ void BrickLink::ItemDelegate::pictureUpdated(BrickLink::Picture *pic)
 
         foreach (QWidget *w, QApplication::topLevelWidgets()) {
             if (w->inherits("QTipLabel")) {
-                QSize extra = w->size() - w->sizeHint();
                 qobject_cast<QLabel *>(w)->clear();
                 qobject_cast<QLabel *>(w)->setText(createToolTip(pic->item(), pic));
-                w->resize(w->sizeHint() + extra);
+
+                QRect r(w->pos(), w->sizeHint());
+                QRect desktop = QApplication::desktop()->screenGeometry(w);
+                r.translate(r.right() > desktop.right() ? desktop.right() - r.right() : 0,
+                            r.bottom() > desktop.bottom() ? desktop.bottom() - r.bottom() : 0);
+                w->setGeometry(r);
                 break;
             }
         }

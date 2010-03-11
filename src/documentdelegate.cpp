@@ -239,7 +239,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
                 tag.background = fg;
                 tag.background.setAlphaF(0.3f);
             } else {
-                tag.background = shadeColor(1 + altid, 0);
+                tag.background = shadeColor(1 + altid, qreal(0.5));
             }
         }
         break;
