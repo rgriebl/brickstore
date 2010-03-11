@@ -611,8 +611,11 @@ void FrameWork::translateActions()
         if (a) {
             if (!atptr->m_text.isNull())
                 a->setText(atptr->m_text);
-            if (!atptr->m_shortcut.isNull())
+            if (!atptr->m_shortcut.isNull()) {
                 a->setShortcut(QKeySequence(atptr->m_shortcut));
+                a->setToolTip(QString("%1 <span style=\"color: gray; font-size: small\">%2</span>")
+                              .arg(a->toolTip()).arg(a->shortcut().toString(QKeySequence::NativeText)));
+            }
         }
     }
 }

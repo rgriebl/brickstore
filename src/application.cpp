@@ -66,7 +66,8 @@ Application::Application(bool rebuild_db_only, int _argc, char **_argv)
 
     m_enable_emit = false;
     m_has_alpha = rebuild_db_only ? false : (QPixmap::defaultDepth() >= 15);
-
+    m_trans_qt = 0;
+    m_trans_brickstore = 0;
 
     // check for an already running instance
     if (!rebuild_db_only) {
@@ -78,41 +79,18 @@ Application::Application(bool rebuild_db_only, int _argc, char **_argv)
         }
     }
 
-
     setOrganizationName("Softforge");
     setOrganizationDomain("softforge.de");
     setApplicationName(QLatin1String(BRICKSTORE_NAME));
     setApplicationVersion(QLatin1String(BRICKSTORE_VERSION));
 
-#if defined(Q_WS_X11)
-    if (!rebuild_db_only) {
-        QPixmap pix(":/images/icon");
-        if (!pix.isNull())
-            setWindowIcon(pix);
-        else
-            qWarning("No window icon");
-    }
-#endif
+    QNetworkProxyFactory::setUseSystemConfiguration(true);
 
     Transfer::setDefaultUserAgent(applicationName() + "/" + applicationVersion() + " (" + systemName() + " " + systemVersion() + "; http://" + applicationUrl() + ")");
-
-#if defined( Q_WS_WIN )
-    int wv = QSysInfo::WindowsVersion;
-
-    // don't use the native file dialogs on Windows < XP, since it
-    // (a) may crash on some configurations (not yet checked with Qt4) and
-    // (b) the Qt dialog is more powerful on these systems
-    extern bool Q_GUI_EXPORT qt_use_native_dialogs;
-    qt_use_native_dialogs = !((wv & QSysInfo::WV_DOS_based) || ((wv & QSysInfo::WV_NT_based) < QSysInfo::WV_XP));
-
-#endif
 
     // initialize config & resource
     (void) Config::inst()->upgrade(BRICKSTORE_MAJOR, BRICKSTORE_MINOR, BRICKSTORE_PATCH);
     (void) ReportManager::inst();
-
-    m_trans_qt = 0;
-    m_trans_brickstore = 0;
 
     if (!initBrickLink()) {
         // we cannot call quit directly, since there is
@@ -124,6 +102,19 @@ Application::Application(bool rebuild_db_only, int _argc, char **_argv)
         QTimer::singleShot(0, this, SLOT(rebuildDatabase()));
     }
     else {
+#if defined(Q_WS_X11)
+        QPixmap pix(":/images/icon");
+        if (!pix.isNull())
+            setWindowIcon(pix);
+#elif defined(Q_WS_WIN)
+    int wv = QSysInfo::WindowsVersion;
+
+    // don't use the native file dialogs on Windows < XP, since it
+    // (a) may crash on some configurations (not yet checked with Qt4) and
+    // (b) the Qt dialog is more powerful on these systems
+    extern bool Q_GUI_EXPORT qt_use_native_dialogs;
+    qt_use_native_dialogs = !((wv & QSysInfo::WV_DOS_based) || ((wv & QSysInfo::WV_NT_based) < QSysInfo::WV_XP));
+#endif
         updateTranslations();
         connect(Config::inst(), SIGNAL(languageChanged()), this, SLOT(updateTranslations()));
 

@@ -38,6 +38,7 @@ TaskLinksWidget::TaskLinksWidget(QWidget *parent)
     setIndent(8);
     setBackgroundRole(QPalette::Base);
     setAutoFillBackground(true);
+    setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
     setText("<b>ABCDEFGHIJKLM</b><br />1<br />2<br />3<br />4<br /><br /><b>X</b><br />1<br />");
     setMinimumSize(minimumSizeHint());
@@ -121,6 +122,7 @@ TaskPriceGuideWidget::TaskPriceGuideWidget(QWidget *parent)
         : PriceGuideWidget(parent), m_win(0), m_dock(0)
 {
     setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
+    setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
     connect(FrameWork::inst(), SIGNAL(windowActivated(Window *)), this, SLOT(windowUpdate(Window *)));
     connect(this, SIGNAL(priceDoubleClicked(Currency)), this, SLOT(setPrice(Currency)));
@@ -206,6 +208,7 @@ TaskInfoWidget::TaskInfoWidget(QWidget *parent)
         : QStackedWidget(parent), m_win(0)
 {
     setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
+    setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
     m_pic = new PictureWidget(this);
     m_text = new QLabel(this);
@@ -305,8 +308,10 @@ void TaskInfoWidget::refresh()
 // ----------------------------------------------------------------------
 
 TaskAppearsInWidget::TaskAppearsInWidget(QWidget *parent)
-        : AppearsInWidget(parent), m_win(0)
+    : AppearsInWidget(parent), m_win(0)
 {
+    setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+
     connect(FrameWork::inst(), SIGNAL(windowActivated(Window *)), this, SLOT(windowUpdate(Window *)));
 }
 
