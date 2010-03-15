@@ -23,6 +23,17 @@ StaticPointerModel::StaticPointerModel(QObject *parent)
 {
 }
 
+void StaticPointerModel::init() const
+{
+    if (sorted.isEmpty()) {
+        int n = pointerCount();
+        sorted.resize(n);
+        int *ptr = sorted.data();
+        for	(int i = 0; i < n; ++i)
+            *ptr++ = i;
+    }
+}
+
 QModelIndex StaticPointerModel::index(int row, int column, const QModelIndex &parent) const
 {
     if (!parent.isValid() && row >= 0 && column >= 0 && row < rowCount() && column < columnCount()) {
@@ -40,13 +51,7 @@ QModelIndex StaticPointerModel::parent(const QModelIndex &) const
 
 int StaticPointerModel::rowCount(const QModelIndex &parent) const
 {
-    if (sorted.isEmpty()) {
-        int n = pointerCount();
-        sorted.resize(n);
-        int *ptr = sorted.data();
-        for	(int i = 0; i < n; ++i)
-            *ptr++ = i;
-    }
+    init();
 
     if (parent.isValid())
         return 0;
@@ -63,6 +68,8 @@ const void *StaticPointerModel::pointer(const QModelIndex &index) const
 
 QModelIndex StaticPointerModel::index(const void *pointer, int column) const
 {
+    init();
+
     int row = pointer ? pointerIndexOf(pointer) : -1;
     if (row >= 0) {
         if (isFiltered())
@@ -90,6 +97,8 @@ bool StaticPointerModel::lessThan(const void *, const void *, int) const
 
 void StaticPointerModel::invalidateFilter()
 {
+    init();
+
     emit layoutAboutToBeChanged();
     QModelIndexList before = persistentIndexList();
 
@@ -112,6 +121,8 @@ void StaticPointerModel::invalidateFilterInternal()
 
 void StaticPointerModel::sort(int column, Qt::SortOrder order)
 {
+    init();
+
     lastSortColumn = column;
     lastSortOrder = order;
 

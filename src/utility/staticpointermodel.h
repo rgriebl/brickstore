@@ -50,6 +50,8 @@ protected:
     const void *pointer(const QModelIndex &index) const;
 
 private:
+    void init() const;
+
     struct StaticPointerModelFilter
     {
         inline StaticPointerModelFilter(StaticPointerModel *model)
@@ -83,7 +85,7 @@ private:
     };
     template<Qt::SortOrder> friend struct StaticPointerModelCompare;
 
-    mutable QVector<int> sorted; // this needs to initialized in the first rowCount() invocation
+    mutable QVector<int> sorted; // this needs to initialized in the first init() call
     QList<int> filtered;
     int lastSortColumn;
     Qt::SortOrder lastSortOrder;
