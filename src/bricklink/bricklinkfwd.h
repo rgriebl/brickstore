@@ -18,6 +18,7 @@
 #include <QHash>
 #include <QVector>
 #include <QList>
+#include <QMetaType>
 
 class QDataStream;
 
@@ -113,6 +114,9 @@ enum ModelRoles {
 };
 
 } // namespace BrickLink
+
+Q_DECLARE_METATYPE(BrickLink::Time)
+Q_DECLARE_METATYPE(BrickLink::Price)
 
 #endif
 

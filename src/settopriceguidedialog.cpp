@@ -14,9 +14,6 @@
 #include "config.h"
 #include "settopriceguidedialog.h"
 
-Q_DECLARE_METATYPE(BrickLink::Time)
-Q_DECLARE_METATYPE(BrickLink::Price)
-
 
 SetToPriceGuideDialog::SetToPriceGuideDialog(QWidget *parent, Qt::WindowFlags fl)
     : QDialog(parent, fl)
@@ -31,23 +28,21 @@ SetToPriceGuideDialog::SetToPriceGuideDialog(QWidget *parent, Qt::WindowFlags fl
     w_type_price->addItem(tr("Quantity Average"), BrickLink::WAverage);
     w_type_price->addItem(tr("Maximum"), BrickLink::Highest);
 
-    int timedef = Config::inst()->value(QLatin1String("/Defaults/SetToPG/Time"), BrickLink::PastSix).toInt();
-    int pricedef = Config::inst()->value(QLatin1String("/Defaults/SetToPG/Price"), BrickLink::Average).toInt();
+    BrickLink::Time timedef = static_cast<BrickLink::Time>(Config::inst()->value(QLatin1String("/Defaults/SetToPG/Time"), BrickLink::PastSix).toInt());
+    BrickLink::Price pricedef = static_cast<BrickLink::Price>(Config::inst()->value(QLatin1String("/Defaults/SetToPG/Price"), BrickLink::Average).toInt());
 
-    if ((timedef >= 0) && (timedef < w_type_time->count()))
-        w_type_time->setCurrentIndex(timedef);
-    if ((pricedef >= 0) && (pricedef < w_type_price->count()))
-        w_type_price->setCurrentIndex(pricedef);
+    w_type_time->setCurrentIndex(w_type_time->findData(timedef));
+    w_type_price->setCurrentIndex(w_type_price->findData(pricedef));
 }
 
 BrickLink::Time SetToPriceGuideDialog::time() const
 {
-    return static_cast<BrickLink::Time>(w_type_time->itemData(w_type_time->currentIndex()).toInt());
+    return w_type_time->itemData(w_type_time->currentIndex()).value<BrickLink::Time>();
 }
 
 BrickLink::Price SetToPriceGuideDialog::price() const
 {
-    return static_cast<BrickLink::Price>(w_type_price->itemData(w_type_price->currentIndex()).toInt());
+    return w_type_price->itemData(w_type_price->currentIndex()).value<BrickLink::Price>();
 }
 
 bool SetToPriceGuideDialog::forceUpdate() const

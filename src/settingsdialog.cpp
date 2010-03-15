@@ -38,14 +38,12 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent, Qt
     : QDialog(parent, f), m_http(0), m_buffer(0)
 {
     setupUi(this);
-    
+
     w_upd_reset->setAttribute(Qt::WA_MacSmallSize);
 
     connect(w_docdir_select, SIGNAL(clicked()), this, SLOT(selectDocDir()));
     connect(w_upd_reset, SIGNAL(clicked()), this, SLOT(resetUpdateIntervals()));
     connect(w_rate_ecb, SIGNAL(clicked()), this, SLOT(getRateFromECB()));
-
-    w_proxy_port->setValidator(new QIntValidator(1, 65535, w_proxy_port));
 
     load();
 
@@ -138,116 +136,109 @@ void SettingsDialog::accept()
 
 void SettingsDialog::load()
 {
-	// --[ GENERAL ]-------------------------------------------------------------------
+    // --[ GENERAL ]-------------------------------------------------------------------
 
-	QList<Config::Translation> translations = Config::inst()->translations();
+    QList<Config::Translation> translations = Config::inst()->translations();
 
-	if (translations.isEmpty()) {
-		w_language->setEnabled(false);
-	}
-	else {
-	    bool localematch = false;
-	    QLocale l_active;
+    if (translations.isEmpty()) {
+        w_language->setEnabled(false);
+    }
+    else {
+        bool localematch = false;
+        QLocale l_active;
 
-		foreach (const Config::Translation &trans, translations) {
+        foreach (const Config::Translation &trans, translations) {
             if (trans.language == QLatin1String("en"))
                 w_language->addItem(trans.languageName[QLatin1String("en")], trans.language);
             else
                 w_language->addItem(QString("%1 (%2)").arg(trans.languageName[QLatin1String("en")], trans.languageName[trans.language]), trans.language);
 
-			QLocale l(trans.language);
+            QLocale l(trans.language);
 
-			if (!localematch) {
-				if (l.language() == l_active.language()) {
-					if (l.country() == l_active.country())
-						localematch = true;
+            if (!localematch) {
+                if (l.language() == l_active.language()) {
+                    if (l.country() == l_active.country())
+                        localematch = true;
 
-					w_language->setCurrentIndex(w_language->count()-1);
-				}
-			}
+                    w_language->setCurrentIndex(w_language->count()-1);
+                }
+            }
         }
-	}
+    }
 
     w_metric->setChecked(Config::inst()->isMeasurementMetric());
-	w_imperial->setChecked(Config::inst()->isMeasurementImperial());
+    w_imperial->setChecked(Config::inst()->isMeasurementImperial());
 
     w_rate_fixed->setChecked(Config::inst()->isLocalCurrencySet());
     w_currency->setEditText(Config::inst()->localCurrencySymbols().first);
     w_rate->setText(QString::number(Config::inst()->localCurrencyRate()));
-	w_rate->setValidator(new QDoubleValidator(w_rate));
+    w_rate->setValidator(new QDoubleValidator(w_rate));
 
-	w_openbrowser->setChecked(Config::inst()->value("/General/Export/OpenBrowser", true).toBool());
-	w_closeempty->setChecked(Config::inst()->closeEmptyDocuments());
+    w_openbrowser->setChecked(Config::inst()->value("/General/Export/OpenBrowser", true).toBool());
+    w_closeempty->setChecked(Config::inst()->closeEmptyDocuments());
 
-	w_docdir->setText(QDir::convertSeparators(Config::inst()->documentDir()));
+    w_docdir->setText(QDir::convertSeparators(Config::inst()->documentDir()));
 
-	// --[ UPDATES ]-------------------------------------------------------------------
+    // --[ UPDATES ]-------------------------------------------------------------------
 
-	QMap<QByteArray, int> intervals = Config::inst()->updateIntervals();
+    QMap<QByteArray, int> intervals = Config::inst()->updateIntervals();
 
-	w_upd_picture->setValue(sec2day(intervals["Picture"]));
-	w_upd_priceguide->setValue(sec2day(intervals["PriceGuide"]));
-	w_upd_database->setValue(sec2day(intervals["Database"]));
-	w_upd_ldraw->setValue(sec2day(intervals["LDraw"]));
+    w_upd_picture->setValue(sec2day(intervals["Picture"]));
+    w_upd_priceguide->setValue(sec2day(intervals["PriceGuide"]));
+    w_upd_database->setValue(sec2day(intervals["Database"]));
+    w_upd_ldraw->setValue(sec2day(intervals["LDraw"]));
 
-	// --[ DEFAULTS ]-------------------------------------------------------------------
+    // --[ DEFAULTS ]-------------------------------------------------------------------
 
-	const BrickLink::ItemType *itype;
+    const BrickLink::ItemType *itype;
 
-	itype = BrickLink::core()->itemType(Config::inst()->value("/Defaults/ImportInventory/ItemType", 'S').toInt());
-	BrickLink::ItemTypeModel *importmodel = new BrickLink::ItemTypeModel(this);
-	importmodel->setFilterWithoutInventory(true);
-	w_def_import_type->setModel(importmodel);
+    itype = BrickLink::core()->itemType(Config::inst()->value("/Defaults/ImportInventory/ItemType", 'S').toInt());
+    BrickLink::ItemTypeModel *importmodel = new BrickLink::ItemTypeModel(this);
+    importmodel->setFilterWithoutInventory(true);
+    w_def_import_type->setModel(importmodel);
 
-	int importdef = importmodel->index(itype ? itype : BrickLink::core()->itemType('S')).row();
-	w_def_import_type->setCurrentIndex(importdef);
+    int importdef = importmodel->index(itype ? itype : BrickLink::core()->itemType('S')).row();
+    w_def_import_type->setCurrentIndex(importdef);
 
-	itype = BrickLink::core()->itemType(Config::inst()->value("/Defaults/AddItems/ItemType", 'P').toInt());
-	BrickLink::ItemTypeModel *addmodel = new BrickLink::ItemTypeModel(this);
-	w_def_add_type->setModel(addmodel);
+    itype = BrickLink::core()->itemType(Config::inst()->value("/Defaults/AddItems/ItemType", 'P').toInt());
+    BrickLink::ItemTypeModel *addmodel = new BrickLink::ItemTypeModel(this);
+    w_def_add_type->setModel(addmodel);
 
-	int adddef = addmodel->index(itype ? itype : BrickLink::core()->itemType('P')).row();
-	w_def_add_type->setCurrentIndex(adddef);
+    int adddef = addmodel->index(itype ? itype : BrickLink::core()->itemType('P')).row();
+    w_def_add_type->setCurrentIndex(adddef);
 
-	w_def_add_cond_new->setChecked(Config::inst()->value("/Defaults/AddItems/Condition", "new").toString() == QLatin1String("new"));
+    bool addnew = Config::inst()->value("/Defaults/AddItems/Condition", "new").toString() == QLatin1String("new");
+    w_def_add_cond_new->setChecked(addnew);
+    w_def_add_cond_used->setChecked(!addnew);
 
-	QStringList timel, pricel;
+    w_def_setpg_time->addItem(tr("Last 6 Months Sales"), BrickLink::PastSix);
+    w_def_setpg_time->addItem(tr("Current Inventory"), BrickLink::Current);
+    
+    w_def_setpg_price->addItem(tr("Minimum"), BrickLink::Lowest);
+    w_def_setpg_price->addItem(tr("Average"), BrickLink::Average);
+    w_def_setpg_price->addItem(tr("Quantity Average"), BrickLink::WAverage);
+    w_def_setpg_price->addItem(tr("Maximum"), BrickLink::Highest);
 
-	timel << tr("All Time Sales") << tr("Last 6 Months Sales") << tr("Current Inventory");
-	pricel << tr("Minimum") << tr("Average") << tr("Quantity Average") << tr("Maximum");
+    BrickLink::Time timedef = static_cast<BrickLink::Time>(Config::inst()->value(QLatin1String("/Defaults/SetToPG/Time"), BrickLink::PastSix).toInt());
+    BrickLink::Price pricedef = static_cast<BrickLink::Price>(Config::inst()->value(QLatin1String("/Defaults/SetToPG/Price"), BrickLink::Average).toInt());
 
-	w_def_setpg_time->addItems(timel);
-	w_def_setpg_price->addItems(pricel);
+    w_def_setpg_time->setCurrentIndex(w_def_setpg_time->findData(timedef));
+    w_def_setpg_price->setCurrentIndex(w_def_setpg_price->findData(pricedef));
 
-	int timedef = Config::inst()->value("/Defaults/SetToPG/Time", 1).toInt();
-	int pricedef = Config::inst()->value("/Defaults/SetToPG/Price", 1).toInt();
+    // --[ NETWORK ]-------------------------------------------------------------------
 
-    w_def_setpg_time->setCurrentIndex(timedef);
-    w_def_setpg_price->setCurrentIndex(pricedef);
+    QPair<QString, QString> blcred = Config::inst()->loginForBrickLink();
 
-	// --[ NETWORK ]-------------------------------------------------------------------
+    w_bl_username->setText(blcred.first);
+    w_bl_password->setText(blcred.second);
 
-	QPair<QString, QString> blcred = Config::inst()->loginForBrickLink();
-
-	w_bl_username->setText(blcred.first);
-	w_bl_password->setText(blcred.second);
-
-	QNetworkProxy proxy = Config::inst()->proxy();
-
-	w_proxy_host->setText(proxy.hostName());
-	w_proxy_port->setEditText(QString::number(proxy.port()));
-	w_proxy_user->setText(proxy.user());
-	w_proxy_pass->setText(proxy.password());
-
-	w_proxy_enable->setChecked(proxy.type() != QNetworkProxy::NoProxy);
-
-	// ---------------------------------------------------------------------
+    // ---------------------------------------------------------------------
 }
 
 
 void SettingsDialog::save()
 {
-	// --[ GENERAL ]-------------------------------------------------------------------
+    // --[ GENERAL ]-------------------------------------------------------------------
 
     if (w_language->currentIndex() >= 0)
         Config::inst()->setLanguage(w_language->itemData(w_language->currentIndex()).toString());
@@ -272,4 +263,36 @@ void SettingsDialog::save()
 
     Config::inst()->setCloseEmptyDocuments(w_closeempty->isChecked ());
     Config::inst()->setValue("/General/Export/OpenBrowser", w_openbrowser->isChecked());
+
+    // --[ UPDATES ]-------------------------------------------------------------------
+
+    QMap<QByteArray, int> intervals;
+
+    intervals.insert("Picture", day2sec(w_upd_picture->value()));
+    intervals.insert("PriceGuide", day2sec(w_upd_priceguide->value()));
+    intervals.insert("Database", day2sec(w_upd_database->value()));
+    intervals.insert("LDraw", day2sec(w_upd_ldraw->value()));
+
+    Config::inst()->setUpdateIntervals(intervals);
+
+    // --[ DEFAULTS ]-------------------------------------------------------------------
+
+    const BrickLink::ItemType *itype;
+    BrickLink::ItemTypeModel *model;
+
+    model = static_cast<BrickLink::ItemTypeModel *>(w_def_import_type->model());
+    itype = model->itemType(model->index(w_def_import_type->currentIndex(), 0));
+    Config::inst()->setValue("/Defaults/ImportInventory/ItemType", itype->id());
+
+    model = static_cast<BrickLink::ItemTypeModel *>(w_def_add_type->model());
+    itype = model->itemType(model->index(w_def_add_type->currentIndex(), 0));
+    Config::inst()->setValue("/Defaults/AddItems/ItemType", itype->id());
+
+    Config::inst()->setValue("/Defaults/AddItems/Condition", QLatin1String(w_def_add_cond_new->isChecked() ? "new" : "used"));
+    Config::inst()->setValue("/Defaults/SetToPG/Time", w_def_setpg_time->itemData(w_def_setpg_time->currentIndex()));
+    Config::inst()->setValue("/Defaults/SetToPG/Price", w_def_setpg_price->itemData(w_def_setpg_price->currentIndex()));
+
+    // --[ NETWORK ]-------------------------------------------------------------------
+
+    Config::inst()->setLoginForBrickLink(w_bl_username->text(), w_bl_password->text());
 }

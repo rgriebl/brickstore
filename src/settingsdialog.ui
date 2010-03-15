@@ -20,7 +20,7 @@
    <item>
     <widget class="QTabWidget" name="w_tabs">
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="general">
       <attribute name="title">
@@ -722,99 +722,6 @@ p, li { white-space: pre-wrap; }
             <property name="echoMode">
              <enum>QLineEdit::PasswordEchoOnEdit</enum>
             </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="w_proxy_enable">
-         <property name="title">
-          <string>Use a Proxy for HTTP connections</string>
-         </property>
-         <property name="flat">
-          <bool>false</bool>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-         <layout class="QFormLayout" name="formLayout_2">
-          <item row="0" column="0">
-           <widget class="QLabel" name="label">
-            <property name="text">
-             <string>Hostname:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="w_proxy_host">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-              <horstretch>10</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_2">
-            <property name="text">
-             <string>Port:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="w_proxy_user"/>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_14">
-            <property name="text">
-             <string>Username:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QLineEdit" name="w_proxy_pass">
-            <property name="echoMode">
-             <enum>QLineEdit::PasswordEchoOnEdit</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_15">
-            <property name="text">
-             <string>Password:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QComboBox" name="w_proxy_port">
-            <property name="editable">
-             <bool>true</bool>
-            </property>
-            <property name="insertPolicy">
-             <enum>QComboBox::NoInsert</enum>
-            </property>
-            <item>
-             <property name="text">
-              <string>3128</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>8000</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>8008</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>8080</string>
-             </property>
-            </item>
            </widget>
           </item>
          </layout>
