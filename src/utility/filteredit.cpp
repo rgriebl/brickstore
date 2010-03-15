@@ -33,7 +33,7 @@ class MacSearchFieldProxyStyle : public QProxyStyle
 public:
     void drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, QPainter *p, const QWidget *w) const
     {
-        if (pe == PE_FrameLineEdit) {
+        if (pe == PE_PanelLineEdit) {
             if (const QStyleOptionFrame *frame = qstyleoption_cast<const QStyleOptionFrame *>(opt)) {
                 if (frame->state & State_Sunken) {
                     QColor baseColor(frame->palette.background().color());
