@@ -109,13 +109,15 @@ Application::Application(bool rebuild_db_only, int _argc, char **_argv)
         if (!pix.isNull())
             setWindowIcon(pix);
 #elif defined(Q_WS_WIN)
-    int wv = QSysInfo::WindowsVersion;
+        int wv = QSysInfo::WindowsVersion;
 
-    // don't use the native file dialogs on Windows < XP, since it
-    // (a) may crash on some configurations (not yet checked with Qt4) and
-    // (b) the Qt dialog is more powerful on these systems
-    extern bool Q_GUI_EXPORT qt_use_native_dialogs;
-    qt_use_native_dialogs = !((wv & QSysInfo::WV_DOS_based) || ((wv & QSysInfo::WV_NT_based) < QSysInfo::WV_XP));
+        // don't use the native file dialogs on Windows < XP, since it
+        // (a) may crash on some configurations (not yet checked with Qt4) and
+        // (b) the Qt dialog is more powerful on these systems
+        extern bool Q_GUI_EXPORT qt_use_native_dialogs;
+        qt_use_native_dialogs = !((wv & QSysInfo::WV_DOS_based) || ((wv & QSysInfo::WV_NT_based) < QSysInfo::WV_XP));
+#elif defined(Q_WS_MACX)
+        setAttribute(Qt::AA_DontShowIconsInMenus);
 #endif
         updateTranslations();
         connect(Config::inst(), SIGNAL(languageChanged()), this, SLOT(updateTranslations()));
