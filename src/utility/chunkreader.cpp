@@ -47,6 +47,11 @@ example:
     }
 #endif
 
+#ifdef Q_OS_WIN
+#  define QINT64FMT "%I64d"
+#else
+#  define QINT64FMT "%lld"
+#endif
 
 ChunkReader::ChunkReader(QIODevice *dev, QDataStream::ByteOrder bo)
     : m_file(0), m_stream(0)
@@ -121,7 +126,7 @@ bool ChunkReader::endChunk()
 
     quint64 endpos = m_file->pos();
     if (ci.startpos + ci.size != endpos) {
-        qWarning("ChunkReader: called endChunk() on a position %lld bytes from the chunk end.", ci.startpos + ci.size - endpos);
+        qWarning("ChunkReader: called endChunk() on a position " QINT64FMT " bytes from the chunk end.", ci.startpos + ci.size - endpos);
         m_file->seek(ci.startpos + ci.size);
     }
 
