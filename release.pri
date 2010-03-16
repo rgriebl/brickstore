@@ -10,5 +10,5 @@ RELEASE_PATCH = $$member(RELEASE_SPLIT, 2)
 win32:RELEASE_USER = $$(USERNAME)
 unix:RELEASE_USER = $$(USER)
 win32:RELEASE_HOST = $$(COMPUTERNAME)
-unix:RELEAE_HOST = $$system(hostname)
+unix:RELEASE_HOST = $$system(hostname)
 

@@ -68,7 +68,7 @@ void SelectColor::languageChange()
     w_filter->setItemText(1, tr("Popular Colors"));
     w_filter->setItemText(2, tr("Most Popular Colors"));
 
-    for (int i = 0, j = 3; (1 << i) & BrickLink::Color::Mask; ++i) {
+    for (int i = 0, j = 4; (1 << i) & BrickLink::Color::Mask; ++i) {
         if (const char *type = BrickLink::Color::typeName(static_cast<BrickLink::Color::TypeFlag>(1 << i)))
             w_filter->setItemText(j++, tr("Only \"%1\" Colors").arg(QLatin1String(type)));
     }
