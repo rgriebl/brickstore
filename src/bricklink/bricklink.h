@@ -937,8 +937,7 @@ signals:
     void priceGuideUpdated(BrickLink::PriceGuide *pg);
     void pictureUpdated(BrickLink::Picture *inv);
 
-    void priceGuideProgress(int, int);
-    void pictureProgress(int, int);
+    void transferJobProgress(int, int);
 
 private:
     Core(const QString &datadir);

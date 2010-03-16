@@ -9,12 +9,11 @@ HEADERS += \
   chunkreader.h \
   chunkwriter.h \
   currency.h \
-  disableupdates.h \
   filter.h \
   filteredit.h \
   headerview.h \
   messagebox.h \
-  multiprogressbar.h \
+  progresscircle.h \
   progressdialog.h \
   qparallelsort.h \
   qtemporaryresource.h \
@@ -36,7 +35,7 @@ SOURCES += \
   filteredit.cpp \
   headerview.cpp \
   messagebox.cpp \
-  multiprogressbar.cpp \
+  progresscircle.cpp \
   progressdialog.cpp \
   qtemporaryresource.cpp \
   spinner.cpp \

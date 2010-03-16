@@ -22,11 +22,13 @@
 #include <QClipboard>
 #include <QCursor>
 #include <QTableView>
+#include <QScrollArea>
 #include <QHeaderView>
 #include <QCloseEvent>
 #include <QDesktopServices>
 #include <QPrinter>
 #include <QPrintDialog>
+#include <QProgressDialog>
 
 #include "messagebox.h"
 #include "config.h"
@@ -34,7 +36,6 @@
 #include "utility.h"
 #include "currency.h"
 #include "document.h"
-#include "disableupdates.h"
 #include "window.h"
 #include "headerview.h"
 #include "documentdelegate.h"
@@ -49,7 +50,7 @@
 #include "consolidateitemsdialog.h"
 #include "selectreportdialog.h"
 
-namespace {
+
 
 // should be a function, but MSVC.Net doesn't accept default
 // template arguments for template functions...
@@ -69,7 +70,7 @@ private:
         if (w->selection().isEmpty())
             return;
 
-        //DisableUpdates disupd ( w_list );
+        //DisableUpdates wp ( w_list );
         doc->beginMacro();
         uint count = 0;
 
@@ -106,6 +107,55 @@ private:
     }
 };
 
+class WindowProgress {
+public:
+    WindowProgress(QWidget *w, const QString &title = QString(), int total = 0)
+        : m_w(w), m_reenabled(false)
+    {
+        QScrollArea *sa = qobject_cast<QScrollArea *>(w);
+        m_w = sa ? sa->viewport() : w;
+        m_upd_enabled = m_w->updatesEnabled();
+        m_w->setUpdatesEnabled(false);
+        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+        if (total) {
+            m_progress = new QProgressDialog(title, QString(), 0, total, w->window());
+            m_progress->setWindowModality(Qt::WindowModal);
+            m_progress->setMinimumDuration(1500);
+            m_progress->setValue(0);
+        } else {
+            m_progress = 0;
+        }
+    }
+
+    ~WindowProgress()
+    {
+        stop();
+    }
+
+    void stop()
+    {
+        if (!m_reenabled) {
+            delete m_progress;
+            m_progress = 0;
+            QApplication::restoreOverrideCursor();
+            m_w->setUpdatesEnabled(m_upd_enabled);
+            m_reenabled = true;
+        }
+    }
+
+    void step(int d = 1)
+    {
+        if (m_progress)
+            m_progress->setValue(m_progress->value() + d);
+    }
+
+private:
+    QWidget * m_w;
+    bool      m_upd_enabled : 1;
+    bool      m_reenabled   : 1;
+    QProgressDialog *m_progress;
+};
+
 
 class TableView : public QTableView {
 public:
@@ -126,9 +176,27 @@ protected:
     }
 };
 
-} // namespace
 
+class WindowBar : public QWidget {
+    Q_OBJECT
+public:
+    WindowBar(QWidget *parent);
 
+    void addWidget(QWidget *w);
+    void removeWidget(QWidget *w);
+
+    void setWidgetVisible(QWidget *w, bool show);
+    bool isWidgetVisible(QWidget *w) const;
+
+protected:
+    void paintEvent(QPaintEvent *e);
+
+private slots:
+    void widgetWasDestroyed();
+
+private:
+    QList<QWidget *> widgets;
+};
 
 
 /////////////////////////////////////////////////////////////////
@@ -250,6 +318,7 @@ void Window::updateCaption()
         cap = tr("Untitled");
 
     setWindowTitle(cap);
+    setWindowModified(m_doc->isModified());
 }
 
 Window::~Window()
@@ -381,8 +450,7 @@ uint Window::addItems(const BrickLink::InvItemList &items, int multiply, uint gl
     if (waitcursor)
         QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    DisableUpdates disupd(w_list);
-
+    WindowProgress wp(w_list);
 
     foreach(const BrickLink::InvItem *origitem, items) {
         uint mergeflags = globalmergeflags;
@@ -461,7 +529,7 @@ uint Window::addItems(const BrickLink::InvItemList &items, int multiply, uint gl
         }
         }
     }
-    disupd.reenable();
+    wp.stop();
 
     if (waitcursor)
         QApplication::restoreOverrideCursor();
@@ -497,7 +565,7 @@ void Window::mergeItems(const Document::ItemList &items, int globalmergeflags)
 
     m_doc->beginMacro();
 
-    DisableUpdates disupd(w_list);
+    WindowProgress wp(w_list);
 
     foreach(Document::Item *from, items) {
         Document::Item *to = 0;
@@ -654,7 +722,7 @@ void Window::on_edit_select_none_triggered()
 
 void Window::on_edit_reset_diffs_triggered()
 {
-    DisableUpdates disupd(w_list);
+    WindowProgress wp(w_list);
 
     m_doc->resetDifferences(selection());
 }
@@ -766,7 +834,7 @@ void Window::on_edit_price_round_triggered()
     uint roundcount = 0;
     m_doc->beginMacro();
 
-    DisableUpdates disupd(w_list);
+    WindowProgress wp(w_list);
 
     foreach(Document::Item *pos, selection()) {
         Currency p = ((pos->price() + Currency (0.005)) / 10) * 10;
@@ -797,7 +865,7 @@ void Window::on_edit_price_to_priceguide_triggered()
     SetToPriceGuideDialog dlg(this);
 
     if (dlg.exec() == QDialog::Accepted) {
-        DisableUpdates disupd(w_list);
+        WindowProgress wp(w_list, tr("Verifying Price Guide data"), selection().count());
 
         m_settopg_list    = new QMultiHash<BrickLink::PriceGuide *, Document::Item *>();
         m_settopg_failcnt = 0;
@@ -831,7 +899,9 @@ void Window::on_edit_price_to_priceguide_triggered()
 
                 m_settopg_failcnt++;
             }
+            wp.step();
         }
+        wp.stop();
 
         if (m_settopg_list && m_settopg_list->isEmpty())
             priceGuideUpdated(0);
@@ -842,15 +912,12 @@ void Window::priceGuideUpdated(BrickLink::PriceGuide *pg)
 {
     if (m_settopg_list && pg) {
         foreach(Document::Item *item, m_settopg_list->values(pg)) {
-            if (pg->valid()) {
+            Currency p = pg->valid() ? pg->price(m_settopg_time, item->condition(), m_settopg_price) : 0;
 
-                Currency p = pg->price(m_settopg_time, item->condition(), m_settopg_price);
-
-                if (p != item->price()) {
-                    Document::Item newitem = *item;
-                    newitem.setPrice(p);
-                    m_doc->changeItem(item, newitem);
-                }
+            if (p != item->price()) {
+                Document::Item newitem = *item;
+                newitem.setPrice(p);
+                m_doc->changeItem(item, newitem);
             }
             pg->release();
         }
@@ -888,7 +955,7 @@ void Window::on_edit_price_inc_dec_triggered()
 
         m_doc->beginMacro();
 
-        DisableUpdates disupd(w_list);
+        WindowProgress wp(w_list);
 
         foreach(Document::Item *pos, selection()) {
             Document::Item item = *pos;
@@ -941,7 +1008,7 @@ void Window::on_edit_qty_divide_triggered()
                 uint divcount = 0;
                 m_doc->beginMacro();
 
-                DisableUpdates disupd(w_list);
+                WindowProgress wp(w_list);
 
                 foreach(Document::Item *pos, selection()) {
                     Document::Item item = *pos;
@@ -969,7 +1036,7 @@ void Window::on_edit_qty_multiply_triggered()
             uint mulcount = 0;
             m_doc->beginMacro();
 
-            DisableUpdates disupd(w_list);
+            WindowProgress wp(w_list);
 
             foreach(Document::Item *pos, selection()) {
                 Document::Item item = *pos;
@@ -1043,7 +1110,7 @@ void Window::on_edit_remark_add_triggered()
 
         QRegExp regexp("\\b" + QRegExp::escape(addremarks) + "\\b");
 
-        DisableUpdates disupd(w_list);
+        WindowProgress wp(w_list, tr("Changing remarks"), selection().count());
 
         foreach(Document::Item *pos, selection()) {
             QString str = pos->remarks();
@@ -1065,6 +1132,7 @@ void Window::on_edit_remark_add_triggered()
 
                 remarkcount++;
             }
+            wp.step();
         }
         m_doc->endMacro(tr("Modified remark on %1 items").arg(remarkcount));
     }
@@ -1083,7 +1151,7 @@ void Window::on_edit_remark_rem_triggered()
 
         QRegExp regexp("\\b" + QRegExp::escape(remremarks) + "\\b");
 
-        DisableUpdates disupd(w_list);
+        WindowProgress wp(w_list, tr("Changing remarks"), selection().count());
 
         foreach(Document::Item *pos, selection()) {
             QString str = pos->remarks();
@@ -1098,6 +1166,7 @@ void Window::on_edit_remark_rem_triggered()
 
                 remarkcount++;
             }
+            wp.step();
         }
         m_doc->endMacro(tr("Modified remark on %1 items").arg(remarkcount));
     }
@@ -1128,7 +1197,7 @@ void Window::on_edit_comment_add_triggered()
 
         QRegExp regexp("\\b" + QRegExp::escape(addcomments) + "\\b");
 
-        DisableUpdates disupd(w_list);
+        WindowProgress wp(w_list, tr("Changing comments"), selection().count());
 
         foreach(Document::Item *pos, selection()) {
             QString str = pos->comments();
@@ -1150,6 +1219,7 @@ void Window::on_edit_comment_add_triggered()
 
                 commentcount++;
             }
+            wp.step();
         }
         m_doc->endMacro(tr("Modified comment on %1 items").arg(commentcount));
     }
@@ -1168,7 +1238,7 @@ void Window::on_edit_comment_rem_triggered()
 
         QRegExp regexp("\\b" + QRegExp::escape(remcomments) + "\\b");
 
-        DisableUpdates disupd(w_list);
+        WindowProgress wp(w_list, tr("Changing comments"), selection().count());
 
         foreach(Document::Item *pos, selection()) {
             QString str = pos->comments();
@@ -1183,6 +1253,7 @@ void Window::on_edit_comment_rem_triggered()
 
                 commentcount++;
             }
+            wp.step();
         }
         m_doc->endMacro(tr("Modified comment on %1 items").arg(commentcount));
     }
@@ -1231,7 +1302,7 @@ void Window::copyRemarks(const BrickLink::InvItemList &items)
 
     m_doc->beginMacro();
 
-    DisableUpdates disupd(w_list);
+    WindowProgress wp(w_list);
 
     int copy_count = 0;
 
@@ -1287,7 +1358,7 @@ void Window::subtractItems(const BrickLink::InvItemList &items)
 
     m_doc->beginMacro();
 
-    DisableUpdates disupd(w_list);
+    WindowProgress wp(w_list, tr("Subtracting items"), items.count() * m_doc->items().count());
 
     foreach(BrickLink::InvItem *ii, items) {
         const BrickLink::Item *item   = ii->item();
@@ -1295,8 +1366,10 @@ void Window::subtractItems(const BrickLink::InvItemList &items)
         BrickLink::Condition cond     = ii->condition();
         int qty                       = ii->quantity();
 
-        if (!item || !color || !qty)
+        if (!item || !color || !qty) {
+            wp.step(m_doc->items().count());
             continue;
+        }
 
         Document::Item *last_match = 0;
 
@@ -1315,6 +1388,7 @@ void Window::subtractItems(const BrickLink::InvItemList &items)
                 m_doc->changeItem(pos, newitem);
                 last_match = pos;
             }
+            wp.step();
         }
 
         if (qty) {   // still a qty left
@@ -1351,9 +1425,10 @@ void Window::on_edit_partoutitems_triggered()
     if (selection().count() >= 1) {
         bool inplace = (MessageBox::question(this, tr("Should the selected items be parted out into the current document, replacing the selected items?"), QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes) == QMessageBox::Yes);
 
-        m_doc->beginMacro();
+        if (inplace)
+            m_doc->beginMacro();
 
-        DisableUpdates disupd(w_list);
+        WindowProgress wp(w_list, tr("Parting out items"), inplace ? selection().count() : 0);
         int partcount = 0;
 
         foreach(Document::Item *item, selection()) {
@@ -1378,8 +1453,10 @@ void Window::on_edit_partoutitems_triggered()
             } else {
                 FrameWork::inst()->fileImportBrickLinkInventory(item->item());
             }
+            wp.step();
         }
-        m_doc->endMacro(tr("Parted out %1 Items").arg(partcount));
+        if (inplace)
+            m_doc->endMacro(tr("Parted out %1 Items").arg(partcount));
     }
     else
         QApplication::beep();

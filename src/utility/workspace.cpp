@@ -350,12 +350,19 @@ QWidget *Workspace::activeWindow() const
 
 bool Workspace::eventFilter(QObject *o, QEvent *e)
 {
-    QWidget *w = qobject_cast<QWidget *>(o);
-
-    if (w && (e->type() == QEvent::WindowTitleChange))
-        m_tabbar->setTabText(m_stack->indexOf(w), w->windowTitle());
-    if (w && (e->type() == QEvent::WindowIconChange))
-        m_tabbar->setTabIcon(m_stack->indexOf(w), w->windowIcon());
+    if (QWidget *w = qobject_cast<QWidget *>(o)) {
+        switch (e->type()) {
+        case QEvent::WindowTitleChange:
+        case QEvent::ModifiedChange:
+            m_tabbar->setTabText(m_stack->indexOf(w), w->windowTitle() + QLatin1String(w->isWindowModified() ? "*" : ""));
+            break;
+        case QEvent::WindowIconChange:
+            m_tabbar->setTabIcon(m_stack->indexOf(w), w->windowIcon());
+            break;
+        default:
+            break;
+        }
+    }
 
     return QWidget::eventFilter(o, e);
 }

@@ -42,7 +42,7 @@
 #include "document.h"
 #include "config.h"
 #include "currency.h"
-#include "multiprogressbar.h"
+#include "progresscircle.h"
 #include "undo.h"
 #include "spinner.h"
 #include "filteredit.h"
@@ -157,6 +157,7 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
     m_running = false;
     m_spinner = 0;
     m_filter = 0;
+    m_progress = 0;
 
     setUnifiedTitleAndToolBarOnMac(true);
     setDocumentMode(true);
@@ -344,7 +345,7 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
         << "|"
         << "widget_filter"
         << "|"
-        << "widget_spinner"
+        << "widget_progress"
         << "|"
     );
 
@@ -358,7 +359,7 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
     BrickLink::Core *bl = BrickLink::core();
 
     connect(Config::inst(), SIGNAL(onlineStatusChanged(bool)), bl, SLOT(setOnlineStatus(bool)));
-    connect(Config::inst(), SIGNAL(updateIntervalsChanged(const QMap<QByteArray, int> &)), bl, SLOT(setUpdateIntervals(const QMap<QByteArray, int> &)));
+    connect(Config::inst(), SIGNAL(updateIntervalsChanged(QMap<QByteArray,int>)), bl, SLOT(setUpdateIntervals(QMap<QByteArray,int>)));
     connect(Config::inst(), SIGNAL(proxyChanged(QNetworkProxy)), bl->transfer(), SLOT(setProxy(QNetworkProxy)));
     connect(Config::inst(), SIGNAL(localCurrencyChanged()), this, SLOT(statisticsUpdate()));
     connect(Config::inst(), SIGNAL(measurementSystemChanged(QLocale::MeasurementSystem)), this, SLOT(statisticsUpdate()));
@@ -370,10 +371,8 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
     bl->setOnlineStatus(Config::inst()->onlineStatus());
     bl->setUpdateIntervals(Config::inst()->updateIntervals());
 
-    connect(bl, SIGNAL(priceGuideProgress(int, int)), this, SLOT(gotPriceGuideProgress(int, int)));
-    connect(bl, SIGNAL(pictureProgress(int, int)),    this, SLOT(gotPictureProgress(int, int)));
+    connect(bl, SIGNAL(transferJobProgress(int,int)), this, SLOT(transferJobProgressUpdate(int,int)));
 
-    connect(m_progress, SIGNAL(statusChange(bool)), m_spinner, SLOT(setActive(bool)));
     connect(m_undogroup, SIGNAL(cleanChanged(bool)), this, SLOT(modificationUpdate()));
 
     bool dbok = BrickLink::core()->readDatabase();
@@ -420,8 +419,6 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
 void FrameWork::languageChange()
 {
     m_toolbar->setWindowTitle(tr("Toolbar"));
-    m_progress->setItemLabel(PGI_PriceGuide, tr("Price Guide updates"));
-    m_progress->setItemLabel(PGI_Picture,    tr("Image updates"));
 
     foreach (QDockWidget *dock, m_dock_widgets) {
         QString name = dock->objectName();
@@ -659,21 +656,6 @@ void FrameWork::createStatusBar()
     m_statistics = new QLabel(statusBar());
     statusBar()->addPermanentWidget(m_statistics, 0);
 
-    m_modified = new QLabel(statusBar());
-    statusBar()->addPermanentWidget(m_modified, 0);
-
-    m_progress = new MultiProgressBar(statusBar());
-    m_progress->setFixedWidth(fontMetrics().height() * 10);
-    m_progress->setFixedHeight(fontMetrics().height());
-    m_progress->setStopIcon(QIcon(":/images/status/stop"));
-
-    m_progress->addItem(QString(), PGI_PriceGuide);
-    m_progress->addItem(QString(), PGI_Picture   );
-
-    statusBar()->addPermanentWidget(m_progress, 0);
-
-    connect(m_progress, SIGNAL(stop()), this, SLOT(cancelAllTransfers()));
-
     statusBar()->hide();
 }
 
@@ -746,6 +728,14 @@ bool FrameWork::setupToolBar(QToolBar *t, const QList<QByteArray> &a_names)
                 */
                 m_filter->setMenu(m);
                 t->addWidget(m_filter);
+            } else if (an == "widget_progress") {
+                if (m_progress) {
+                    qWarning("Only one progress widget can be added to toolbars");
+                    continue;
+                }
+                m_progress = new ProgressCircle();
+                m_progress->setIcon(QIcon(":/images/icon"));
+                t->addWidget(m_progress);
             } else if (an == "widget_spinner") {
                 if (m_spinner) {
                     qWarning("Only one spinner widget can be added to toolbars");
@@ -1450,52 +1440,54 @@ void FrameWork::statisticsUpdate()
 
 void FrameWork::titleUpdate()
 {
-    QString t = Application::inst()->applicationName();
+/*    QString t = Application::inst()->applicationName();
 
     if (m_current_window) {
         t.append(QString(" - %1 [*]").arg(m_current_window->windowTitle()));
     }
-    setWindowTitle(t);
+    setWindowTitle(t); */
+
+    QString file, title;
+
+    if (m_current_window) {
+        file = m_current_window->document()->fileName();
+        if (file.isEmpty()) {
+            title = m_current_window->document()->title();
+#if !defined(Q_WS_MACX)
+            title += QLatin1String("[*] ");
+            title += QChar(0x2014);
+            title += QLatin1Char(' ');
+            title += QApplication::applicationName();
+#endif
+        }
+    } else {
+        title = QApplication::applicationName();
+    }
+    setWindowTitle(title);
+    setWindowFilePath(file);
 }
 
 void FrameWork::modificationUpdate()
 {
-    bool b = m_undogroup->activeStack() ? m_undogroup->activeStack()->isClean() : true;
+    bool modified = m_undogroup->activeStack() ? !m_undogroup->activeStack()->isClean() : false;
 
-    QAction *a = findAction("file_save");
-    if (a)
-        a->setEnabled(!b);
+    if (QAction *a = findAction("file_save"))
+        a->setEnabled(modified);
 
-    static QPixmap pnomod, pmod;
+    setWindowModified(modified);
+}
 
-    if (pmod.isNull()) {
-        int h = m_modified->height() - 2;
-
-        pmod = QPixmap(h, h);
-        pmod.fill(Qt::black);
-
-        pnomod = pmod;
-        pnomod.setMask(pnomod.createHeuristicMask());
-
-        QPixmap p(":/images/status/modified");
-        if (!p.isNull())
-            pmod = p.scaled(h, h, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+void FrameWork::transferJobProgressUpdate(int p, int t)
+{
+    if (p == t) {
+        m_progress->reset();
+    } else {
+        if (m_progress->maximum() != t)
+            m_progress->setMaximum(t);
+        m_progress->setValue(p);
     }
-    m_modified->setPixmap(b ? pnomod : pmod);
-    m_modified->setToolTip(b ? QString() : tr("Unsaved modifications"));
-
-    setWindowModified(!b);
 }
 
-void FrameWork::gotPictureProgress(int p, int t)
-{
-    m_progress->setItemProgress(PGI_Picture, p, t);
-}
-
-void FrameWork::gotPriceGuideProgress(int p, int t)
-{
-    m_progress->setItemProgress(PGI_PriceGuide, p, t);
-}
 
 void FrameWork::configure()
 {

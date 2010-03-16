@@ -419,15 +419,13 @@ void BrickLink::Core::setTransfer(Transfer *trans)
         disconnect(old, SIGNAL(finished(ThreadPoolJob *)), this, SLOT(priceGuideJobFinished(ThreadPoolJob *)));
         disconnect(old, SIGNAL(finished(ThreadPoolJob *)), this, SLOT(pictureJobFinished(ThreadPoolJob *)));
 
-        disconnect(old, SIGNAL(progress(int, int)), this, SIGNAL(pictureProgress(int, int)));
-        disconnect(old, SIGNAL(progress(int, int)), this, SIGNAL(priceGuideProgress(int, int)));
+        disconnect(old, SIGNAL(progress(int, int)), this, SIGNAL(transferJobProgress(int, int)));
     }
     if (trans) { // connect
         connect(trans, SIGNAL(finished(ThreadPoolJob *)), this, SLOT(priceGuideJobFinished(ThreadPoolJob *)));
         connect(trans, SIGNAL(finished(ThreadPoolJob *)), this, SLOT(pictureJobFinished(ThreadPoolJob *)));
 
-        connect(trans, SIGNAL(progress(int, int)), this, SIGNAL(pictureProgress(int, int)));
-        connect(trans, SIGNAL(progress(int, int)), this, SIGNAL(priceGuideProgress(int, int)));
+        connect(trans, SIGNAL(progress(int, int)), this, SIGNAL(transferJobProgress(int, int)));
     }
 }
 

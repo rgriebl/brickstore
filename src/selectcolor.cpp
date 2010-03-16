@@ -31,9 +31,8 @@ SelectColor::SelectColor(QWidget *parent, Qt::WindowFlags f)
     w_filter->insertSeparator(w_filter->count());
 
     for (int i = 0; (1 << i) & BrickLink::Color::Mask; ++i) {
-        BrickLink::Color::TypeFlag flag = static_cast<BrickLink::Color::TypeFlag>(1 << i);
-        if (const char *type = BrickLink::Color::typeName(flag))
-            w_filter->addItem(QString(), flag);
+        if (BrickLink::Color::typeName(static_cast<BrickLink::Color::TypeFlag>(1 << i)))
+            w_filter->addItem(QString(), 1 << i);
     }
 
     w_colors = new QTreeView();
@@ -70,8 +69,7 @@ void SelectColor::languageChange()
     w_filter->setItemText(2, tr("Most Popular Colors"));
 
     for (int i = 0, j = 3; (1 << i) & BrickLink::Color::Mask; ++i) {
-        BrickLink::Color::TypeFlag flag = static_cast<BrickLink::Color::TypeFlag>(1 << i);
-        if (const char *type = BrickLink::Color::typeName(flag))
+        if (const char *type = BrickLink::Color::typeName(static_cast<BrickLink::Color::TypeFlag>(1 << i)))
             w_filter->setItemText(j++, tr("Only \"%1\" Colors").arg(QLatin1String(type)));
     }
 }

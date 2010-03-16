@@ -27,7 +27,7 @@ class QLabel;
 class QMdiSubWindow;
 
 class Workspace;
-class MultiProgressBar;
+class ProgressCircle;
 class Window;
 class FilterEdit;
 class Spinner;
@@ -102,8 +102,7 @@ private slots:
     void connectWindowMdiArea(QMdiSubWindow *w);
     void connectWindow(QWidget *w);
 
-    void gotPictureProgress(int p, int t);
-    void gotPriceGuideProgress(int p, int t);
+    void transferJobProgressUpdate(int p, int t);
 
     void configure();
     void configure(const char *);
@@ -149,12 +148,11 @@ private:
 
     QPointer<Window> m_current_window;
 
-    MultiProgressBar *m_progress;
+    ProgressCircle *m_progress;
     Spinner *m_spinner;
     FilterEdit *m_filter;
     QLabel *m_statistics;
     QLabel *m_errors;
-    QLabel *m_modified;
     QToolBar *m_toolbar;
     QList<QDockWidget *> m_dock_widgets;
     TaskInfoWidget *m_task_info;
