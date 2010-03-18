@@ -883,6 +883,12 @@ BrickLink::Core::ParseItemListXMLResult BrickLink::Core::parseItemListXML(QDomEl
                     ii->setTierPrice(2, Currency::fromUSD(val));
                 else if (tag == QLatin1String("LOTID"))
                     ii->setLotId(val.toUInt());
+                else if (tag == QLatin1String("RETAIN"))
+                    ii->setRetain(val == QLatin1String("Y"));
+                else if (tag == QLatin1String("STOCKROOM"))
+                    ii->setStockroom(val == QLatin1String("Y"));
+                else if (tag == QLatin1String("BUYERUSERNAME"))
+                    ii->setReserved(val);
             }
 
             // ### BrickLink Order (workaround for broken BL script) ###
