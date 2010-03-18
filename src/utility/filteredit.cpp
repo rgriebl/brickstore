@@ -28,6 +28,14 @@
 #include <QProxyStyle>
 #include <Carbon/Carbon.h>
 
+#if (MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_5)
+enum {
+    kHIThemeFrameTextFieldRound = 1000,
+    kHIThemeFrameTextFieldRoundSmall = 1001,
+    kHIThemeFrameTextFieldRoundMini = 1002
+};
+#endif
+
 class MacSearchFieldProxyStyle : public QProxyStyle
 {
 public:
