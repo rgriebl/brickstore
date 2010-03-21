@@ -37,12 +37,12 @@ SetToPriceGuideDialog::SetToPriceGuideDialog(QWidget *parent, Qt::WindowFlags fl
 
 BrickLink::Time SetToPriceGuideDialog::time() const
 {
-    return w_type_time->itemData(w_type_time->currentIndex()).value<BrickLink::Time>();
+    return static_cast<BrickLink::Time>(w_type_time->itemData(w_type_time->currentIndex()).toInt());
 }
 
 BrickLink::Price SetToPriceGuideDialog::price() const
 {
-    return w_type_price->itemData(w_type_price->currentIndex()).value<BrickLink::Price>();
+    return static_cast<BrickLink::Price>(w_type_price->itemData(w_type_price->currentIndex()).toInt());
 }
 
 bool SetToPriceGuideDialog::forceUpdate() const
