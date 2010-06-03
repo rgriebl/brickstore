@@ -908,7 +908,7 @@ public:
         QString currencyCode;
     };
 
-    ParseItemListXMLResult parseItemListXML(QDomElement root, ItemListXMLHint hint, uint *invalid_items = 0);
+    ParseItemListXMLResult parseItemListXML(QDomElement root, ItemListXMLHint hint);
     QDomElement createItemListXML(QDomDocument doc, ItemListXMLHint hint, const InvItemList &items, const QString &currencyCode = QString(), QMap<QString, QString> *extra = 0);
 
     bool parseLDrawModel(QFile &file, InvItemList &items, uint *invalid_items = 0);

@@ -791,7 +791,7 @@ out:
 }
 
 
-BrickLink::Core::ParseItemListXMLResult BrickLink::Core::parseItemListXML(QDomElement root, ItemListXMLHint hint, uint *invalid_items)
+BrickLink::Core::ParseItemListXMLResult BrickLink::Core::parseItemListXML(QDomElement root, ItemListXMLHint hint)
 {
     ParseItemListXMLResult result;
     QString roottag, itemtag;
