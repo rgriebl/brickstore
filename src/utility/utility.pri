@@ -50,4 +50,5 @@ SOURCES += \
 macx {
   HEADERS += macx.h
   OBJECTIVE_SOURCES += macx.mm
+  LIBS += -framework Cocoa -framework Carbon
 }
