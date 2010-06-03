@@ -196,6 +196,9 @@ public:
     quint64 errorMask() const;
     void setErrorMask(quint64);
 
+    QString currencyCode() const;
+    void setCurrencyCode(const QString &code);
+
     static Document *fileNew();
     static Document *fileOpen();
     static Document *fileOpen(const QString &name);
@@ -236,6 +239,7 @@ signals:
     void fileNameChanged(const QString &);
     void titleChanged(const QString &);
     void modificationChanged(bool);
+    void currencyCodeChanged();
 
 private slots:
     void clean2Modified(bool);
@@ -306,7 +310,7 @@ private:
     QString         m_filter_expression;
     Filter::Parser *m_parser;
     QList<Filter>   m_filter;
-    
+
     friend class SortItemListCompare;
 };
 

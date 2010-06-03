@@ -299,7 +299,7 @@ Document *Document::createTemporary(const BrickLink::InvItemList &list)
 }
 
 Document::Document(int /*is temporary*/)
-    : m_uuid(QUuid::createUuid())
+    : m_uuid(QUuid::createUuid()), m_currencycode(QLatin1String("USD"))
 {
     MODELTEST_ATTACH(this)
 
@@ -577,6 +577,20 @@ void Document::updateErrors(Item *item)
     }
 }
 
+QString Document::currencyCode() const
+{
+    return m_currencycode;
+}
+
+void Document::setCurrencyCode(const QString &code)
+{
+    if (code != m_currencycode) {
+        m_currencycode = code;
+        emit currencyCodeChanged();
+        emit statisticsChanged();
+    }
+}
+
 Document *Document::fileNew()
 {
     Document *doc = new Document();
@@ -658,7 +672,7 @@ QList<Document *> Document::fileImportBrickLinkOrders()
                 Document *doc = new Document();
 
                 doc->setTitle(tr("Order #%1").arg(order.first->id()));
-                doc->m_currencycode = order.first->currencyCode();
+                doc->setCurrencyCode(order.first->currencyCode());
                 doc->setBrickLinkItems(*order.second);
                 doc->m_order = new BrickLink::Order(*order. first);
                 docs.append(doc);
@@ -680,7 +694,7 @@ Document *Document::fileImportBrickLinkStore()
         Document *doc = new Document();
 
         doc->setTitle(tr("Store %1").arg(QDate::currentDate().toString(Qt::LocalDate)));
-        doc->m_currencycode = import.currencyCode();
+        doc->setCurrencyCode(import.currencyCode());
         doc->setBrickLinkItems(import.items());
         return doc;
     }
@@ -716,7 +730,7 @@ Document *Document::fileImportBrickLinkCart()
             if (d.exec() == QDialog::Accepted) {
                 Document *doc = new Document();
 
-                doc->m_currencycode = import.currencyCode();
+                doc->setCurrencyCode(import.currencyCode());
                 doc->setBrickLinkItems(import.items());
                 doc->setTitle(tr("Cart in Shop %1").arg(shopid));
                 return doc;
@@ -761,7 +775,7 @@ Document *Document::fileImportPeeronInventory()
         if (d.exec() == QDialog::Accepted) {
             Document *doc = new Document();
 
-            doc->m_currencycode = import.currencyCode();
+            doc->setCurrencyCode(import.currencyCode());
             doc->setBrickLinkItems(import.items());
             doc->setTitle(tr("Peeron Inventory for %1").arg(peeronid));
             return doc;
@@ -834,7 +848,7 @@ Document *Document::fileLoadFrom(const QString &name, const char *type, bool imp
                 MessageBox::information(FrameWork::inst(), tr("This file contains %1 unknown item(s).").arg(CMB_BOLD(QString::number(result.invalidItemCount))));
         }
 
-        doc->m_currencycode = result.currencyCode;
+        doc->setCurrencyCode(result.currencyCode);
         doc->setBrickLinkItems(*result.items);
         delete result.items;
 
