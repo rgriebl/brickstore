@@ -16,46 +16,26 @@
 
 #include <QHash>
 #include <QString>
+#include <QByteArray>
 #include <QVector>
 #include <QList>
-#include <QDir>
 #include <QColor>
+#include <QCache>
 
+#include "ref.h"
 #include "vector_t.h"
 #include "matrix_t.h"
 
+class QFile;
+class QDir;
+
 namespace LDraw {
 
-class Part;
 class Element;
 class PartElement;
 
-struct ParseContext {
-    QHash<QString, Part *> *m_cache;
-    QList<QDir> m_searchpath;
-};
-
-class Model {
+class Part : public Ref {
 public:
-    static Model *fromFile(const QString &file);
-
-    virtual ~Model();
-
-    Part *root() const  { return m_root; }
-    QVector<Part *> parts() const;
-
-protected:
-    Model();
-
-    Part *m_root;
-    QHash<QString, Part *> m_parts;
-};
-
-
-class Part {
-public:
-    static Part *fromFile(const QString &file, ParseContext *cache = 0);
-
     inline const QVector<Element *> &elements() const  { return m_elements; }
 
     bool boundingBox(vector_t &vmin, vector_t &vmax);
@@ -65,13 +45,13 @@ public:
 protected:
     Part();
 
-    static Part *parse(const QString &file, ParseContext *ctx);
+    static Part *parse(QFile &file, const QDir &dir);
     friend class PartElement;
-    friend class Model;
+    friend class Core;
 
     static void calc_bounding_box(const Part *part, const matrix_t &matrix, vector_t &vmin, vector_t &vmax);
     static void check_bounding(int cnt, const vector_t *v, const matrix_t &matrix, vector_t &vmin, vector_t &vmax);
-    
+
 
     QVector<Element *> m_elements;
     bool m_bounding_calculated;
@@ -91,12 +71,12 @@ public:
         CondLine
     };
 
-    static Element *fromString(const QString &line, ParseContext *cache = 0);
+    static Element *fromByteArray(const QByteArray &line, const QDir &dir);
 
     inline Type type() const  { return m_type; }
 
     virtual ~Element() { };
-    
+
     virtual void dump() const { };
 
 protected:
@@ -110,16 +90,16 @@ private:
 
 class CommentElement : public Element {
 public:
-    QString comment() const  { return m_comment; }
+    QByteArray comment() const  { return m_comment; }
 
-    static CommentElement *create(const QString &text);
+    static CommentElement *create(const QByteArray &text);
 
     virtual void dump() const;
 
 protected:
-    CommentElement(const QString &);
+    CommentElement(const QByteArray &);
 
-    QString m_comment;
+    QByteArray m_comment;
 };
 
 
@@ -194,22 +174,19 @@ protected:
 class PartElement : public Element {
 public:
     int color() const              { return m_color; }
-    QString fileName() const       { return m_file; }
     const matrix_t &matrix() const { return m_matrix; }
     LDraw::Part *part() const      { return m_part; }
 
-    static PartElement *create(int color, const matrix_t &m, const QString &filename, ParseContext *cache);
+    static PartElement *create(int color, const matrix_t &m, const QString &filename, const QDir &parentdir);
 
     virtual ~PartElement();
     virtual void dump() const;
 
 protected:
-    PartElement(int color, const matrix_t &m, const QString &filename);
+    PartElement(int color, const matrix_t &m, LDraw::Part *part);
 
     int           m_color;
-    QString       m_file;
     matrix_t      m_matrix;
-    bool          m_no_partcache;
     LDraw::Part * m_part;
 };
 
@@ -248,12 +225,12 @@ private:
 class Core {
 public:
     QString dataPath() const;
-    bool setDataPath(const QString &dir);
-    
+
     QColor color(int id, int baseid = -1) const;
     QColor edgeColor(int id) const;
-    
-    Model *itemModel(const char *id);
+
+    Part *partFromId(const char *id);
+    Part *partFromFile(const QString &filename);
 
 private:
     bool create_part_list();
@@ -262,22 +239,28 @@ private:
 
     Core(const QString &datadir);
 
+    Part *findPart(const QString &filename, const QDir &parentdir);
+
     static Core *create(const QString &datadir, QString *errstring);
     static inline Core *inst() { return s_inst; }
     static Core *s_inst;
 
     friend Core *core();
     friend Core *create(const QString &, QString *);
-    
+
     static bool check_ldrawdir(const QString &dir);
     static QString get_platform_ldrawdir();
 
-    
+
 private:
     QString m_datadir;
-    
-    QHash<int, QPair<QColor, QColor> > m_colors;
-    QMap<QByteArray, QByteArray> m_items;
+    QList<QDir> m_searchpath;
+
+    QHash<int, QPair<QColor, QColor> > m_colors;  // ldraw color -> [color, edge color]
+    QMap<QByteArray, QByteArray>       m_items;   // ldraw id -> ldraw name
+    QCache<QString, Part>              m_cache;   // path -> part
+
+    friend class PartElement;
 };
 
 inline Core *core() { return Core::inst(); }

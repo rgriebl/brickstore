@@ -155,7 +155,7 @@ ItemDetailPopup::ItemDetailPopup(QWidget *parent)
     lay->addWidget(m_stack);
 
     connect(m_close, SIGNAL(clicked()), this, SLOT(close()));
-    
+
 #if !defined(QT_NO_OPENGL)
     connect(m_play, SIGNAL(clicked()), m_ldraw, SLOT(startAnimation()));
     connect(m_stop, SIGNAL(clicked()), m_ldraw, SLOT(stopAnimation()));
@@ -172,7 +172,7 @@ ItemDetailPopup::~ItemDetailPopup()
     if (m_pic)
         m_pic->release();
     if (m_part)
-        delete m_part;
+        m_part->release();
 }
 
 void ItemDetailPopup::setItem(Document::Item *item)
@@ -183,22 +183,23 @@ void ItemDetailPopup::setItem(Document::Item *item)
         m_pic->release();
     m_pic = 0;
     if (m_part)
-        delete m_part;
+        m_part->release();
     m_part = 0;
 
     if (m_item) {
         m_pic = BrickLink::core()->largePicture(m_item->item(), true);
         m_pic->addRef();
-        m_part = LDraw::core() ? LDraw::core()->itemModel(m_item->item()->id()) : 0;
-
+        m_part = LDraw::core() ? LDraw::core()->partFromId(m_item->item()->id()) : 0;
+        if (m_part)
+            m_part->addRef();
         m_blpic->setText(QString());
 
 #if !defined(QT_NO_OPENGL)
-        if (m_part && m_part->root() && m_item->color()->ldrawId() >= 0 && m_ldraw) {
-            m_ldraw->setPartAndColor(m_part->root(), m_item->color()->ldrawId());
+        if (m_part && m_item->color()->ldrawId() >= 0 && m_ldraw) {
+            m_ldraw->setPartAndColor(m_part, m_item->color()->ldrawId());
             m_stack->setCurrentWidget(m_ldraw);
             m_blpic->setText(QString());
-        } else 
+        } else
 #endif
         {
             redraw();

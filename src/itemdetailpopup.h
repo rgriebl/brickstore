@@ -52,7 +52,7 @@ private:
     QToolButton *m_view;
     Document::Item *m_item;
     QPoint m_movepos;
-    LDraw::Model *m_part;
+    LDraw::Part *m_part;
     BrickLink::Picture *m_pic;
     bool m_pressed;
 
