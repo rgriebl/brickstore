@@ -8,12 +8,8 @@ DEPENDPATH  += $$RELPWD
 HEADERS += \
   ldraw.h \
   renderwidget.h \
-  matrix_t.h \
-  vector_t.h \
 
 SOURCES += \
   ldraw.cpp \
   renderwidget.cpp \
-  matrix_t.cpp \
-  vector_t.cpp \
 

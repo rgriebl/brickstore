@@ -19,8 +19,7 @@
 #if !defined(QT_NO_OPENGL)
 
 #include <QGLWidget>
-
-#include "vector_t.h"
+#include <QVector3D>
 
 #ifdef MessageBox
 #undef MessageBox
@@ -87,13 +86,12 @@ private:
     void renderLines(Part *part, int ldraw_basecolor);
 
     struct linebuffer {
-        const vector_t *v;
+        const QVector3D *v;
         int color;
     };
 
     void renderLineBuffer(const QVector<linebuffer> &buffer, int ldraw_basecolor);
     void renderLineBufferSegment(const QVector<linebuffer> &buffer, int s, int e, int mode, int ldraw_basecolor);
-
 
     Part *m_part;
     int m_color;
@@ -104,7 +102,7 @@ private:
     bool m_initialized;
     bool m_resized;
     QSize m_size;
-    vector_t m_center;
+    QVector3D m_center;
     QTimer *m_animation;
 };
 

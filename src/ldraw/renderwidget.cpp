@@ -19,25 +19,60 @@
 #include <QGLFramebufferObject>
 #include <QPainter>
 #include <QTimer>
+#include <QMatrix4x4>
 
 #include <cfloat>
 #include <cmath>
 
 #include "ldraw.h"
 #include "renderwidget.h"
-#include "matrix_t.h"
 
 
-static inline void glVertex(const vector_t &v)
+static inline void qMultMatrix(const QMatrix4x4 &mat)
 {
-    glVertex3fv(v);
+    if (sizeof(qreal) == sizeof(GLfloat))
+        glMultMatrixf((GLfloat*) mat.constData());
+#ifndef QT_OPENGL_ES
+    else if (sizeof(qreal) == sizeof(GLdouble))
+        glMultMatrixd((GLdouble*) mat.constData());
+#endif
+    else
+    {
+        GLfloat fmat[16];
+        qreal const *r = mat.constData();
+        for (int i = 0; i < 16; ++i)
+            fmat[i] = r[i];
+        glMultMatrixf(fmat);
+    }
 }
 
-static inline void glMultMatrix(const matrix_t &m)
+static inline QMatrix4x4 qMatrixFromGL(int param)
 {
-    glMultMatrixf(m);
+    QMatrix4x4 mat;
+    if (sizeof(qreal) == sizeof(GLfloat)) {
+        glGetFloatv(param, (GLfloat*) mat.data());
+    } else {
+        GLfloat fmat[16];
+        glGetFloatv(param, fmat);
+
+        qreal *r = mat.data();
+        for (int i = 0; i < 16; ++i)
+            r[i] = fmat[i];
+    }
+    mat.optimize();
+    return mat;
 }
 
+static inline void qVertex(int count, const QVector3D *v)
+{
+    while (count--) {
+        if (sizeof(qreal) == sizeof(GLfloat))
+            glVertex3f(v->x(), v->y(), v->z());
+        else
+            glVertex3d(v->x(), v->y(), v->z());
+        v++;
+    }
+}
 
 
 LDraw::GLRenderer::GLRenderer(QObject *parent)
@@ -171,7 +206,7 @@ void LDraw::GLRenderer::resizeGL(int w, int h)
     qreal radius = 1.0;
 
     if (m_part) {
-        vector_t vmin, vmax;
+        QVector3D vmin, vmax;
 
         if (m_part->boundingBox(vmin, vmax)) {
             //qWarning("resizeGL - ortho: [%.f ..  %.f] x [%.f .. %.f] x [%.f .. %.f]", vmin[0], vmax[0], vmin[1], vmax[1], vmin[2], vmax[2]);
@@ -181,7 +216,9 @@ void LDraw::GLRenderer::resizeGL(int w, int h)
         }
     }
 
-    glOrtho(m_center[0]-radius, m_center[0]+radius, m_center[1]-radius, m_center[1]+radius, m_center[2]-1.0-radius, m_center[2]+1.0+radius);
+    glOrtho(m_center.x() - radius, m_center.x() + radius,
+            m_center.y() - radius, m_center.y() + radius,
+            m_center.z() - 1.0 - radius, m_center.z() + 1.0 + radius);
     glMatrixMode(GL_MODELVIEW);
 
     m_resized = true;
@@ -198,11 +235,11 @@ void LDraw::GLRenderer::paintGL()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
     glTranslated(m_tx, m_ty, m_tz);
-    glTranslated(m_center[0], m_center[1], m_center[2]);
+    glTranslated(m_center.x(), m_center.y(), m_center.z());
     glRotated(m_rx, 1.0, 0.0, 0.0);
     glRotated(m_ry, 0.0, 1.0, 0.0);
     glRotated(m_rz, 0.0, 0.0, 1.0);
-    glTranslated(-m_center[0], -m_center[1], -m_center[2]);
+    glTranslated(-m_center.x(), -m_center.y(), -m_center.z());
     glScaled(m_zoom, m_zoom, m_zoom);
 
 //    glEnable(GL_LIGHTING);
@@ -253,7 +290,6 @@ void LDraw::GLRenderer::renderSurfaces(Part *part, int ldraw_basecolor)
         switch (e->type()) {
         case Element::Triangle: {
             const TriangleElement *te = static_cast<const TriangleElement *>(e);
-            const vector_t *v = te->points();
 
             QColor col = core()->color(te->color(), ldraw_basecolor);
             glColor4f(col.redF(), col.greenF(), col.blueF(), col.alphaF());
@@ -263,14 +299,11 @@ void LDraw::GLRenderer::renderSurfaces(Part *part, int ldraw_basecolor)
                 glBegin(GL_TRIANGLES);
                 began = GL_TRIANGLES;
             }
-            glVertex(v[0]);
-            glVertex(v[1]);
-            glVertex(v[2]);
+            qVertex(3, te->points());
             break;
         }
         case Element::Quad: {
             const QuadElement *qe = static_cast<const QuadElement *>(e);
-            const vector_t *v = qe->points();
 
             QColor col = core()->color(qe->color(), ldraw_basecolor);
             glColor4f(col.redF(), col.greenF(), col.blueF(), col.alphaF());
@@ -280,10 +313,7 @@ void LDraw::GLRenderer::renderSurfaces(Part *part, int ldraw_basecolor)
                 glBegin(GL_QUADS);
                 began = GL_QUADS;
             }
-            glVertex(v[0]);
-            glVertex(v[1]);
-            glVertex(v[2]);
-            glVertex(v[3]);
+            qVertex(4, qe->points());
             break;
         }
         case Element::Part: {
@@ -294,7 +324,7 @@ void LDraw::GLRenderer::renderSurfaces(Part *part, int ldraw_basecolor)
                 began = -1;
             }
             glPushMatrix();
-            glMultMatrix(pe->matrix());
+            qMultMatrix(pe->matrix());
 
             renderSurfaces(pe->part(), pe->color() == 16 ? ldraw_basecolor : pe->color());
 
@@ -312,7 +342,7 @@ void LDraw::GLRenderer::renderSurfaces(Part *part, int ldraw_basecolor)
 
 void LDraw::GLRenderer::renderLines(Part *part, int ldraw_basecolor)
 {
-    matrix_t proj_movi;
+    QMatrix4x4 proj_movi;
     GLint view[4];
     bool proj_movi_init = false;
 
@@ -334,28 +364,29 @@ void LDraw::GLRenderer::renderLines(Part *part, int ldraw_basecolor)
         }
         case Element::CondLine: {
             const CondLineElement *le = static_cast<const CondLineElement *>(e);
-            const vector_t *v = le->points();
+            const QVector3D *v = le->points();
 
             if (!proj_movi_init) {
                 glGetIntegerv(GL_VIEWPORT, view);
-                proj_movi = matrix_t::fromGL(GL_MODELVIEW_MATRIX) * matrix_t::fromGL(GL_PROJECTION_MATRIX);
+                proj_movi = qMatrixFromGL(GL_MODELVIEW_MATRIX) * qMatrixFromGL(GL_PROJECTION_MATRIX);
                 proj_movi_init = true;
             }
-            vector_t pv[4];
+            QVector3D pv[4];
 
             for (int i = 0; i < 4; i++) {
                 // gluProject(v[i][0], v[i][1], v[i][2], movi, proj, view, &pv[i][0], &pv[i][1], &pv[i][2]);
                 // would do the job, but this is double only...
 
                 pv[i] = proj_movi * v[i];
-                pv[i][0] = view[0] + view[2] * (pv[i][0] + 1) / 2;
-                pv[i][1] = view[1] + view[3] * (pv[i][1] + 1) / 2;
-                pv[i][2] = 0; // (pv[i][2] + 1) / 2;
+                pv[i].setX(view[0] + view[2] * (pv[i].x() + 1) / 2);
+                pv[i].setY(view[1] + view[3] * (pv[i].y() + 1) / 2);
+                pv[i].setZ(0); // (pv[i][2] + 1) / 2;
             }
 
-            vector_t line_norm = (pv[1] - pv[0]) % vector_t(0, 0, -1);
+            QVector3D line_norm = QVector3D::crossProduct(pv[1] - pv[0], QVector3D(0, 0, -1));
 
-            if ((line_norm * (pv[0] - pv[2]) < 0) == (line_norm * (pv[0] - pv[3]) < 0)) {
+            if ((QVector3D::dotProduct(line_norm, pv[0] - pv[2]) < 0) ==
+                (QVector3D::dotProduct(line_norm, pv[0] - pv[3]) < 0)) {
                 linebuffer lb = { le->points(), le->color() };
                 buffer.append(lb);
             }
@@ -364,7 +395,7 @@ void LDraw::GLRenderer::renderLines(Part *part, int ldraw_basecolor)
         case Element::Part: {
             const PartElement *pe = static_cast<const PartElement *>(e);
             glPushMatrix();
-            glMultMatrix(pe->matrix());
+            qMultMatrix(pe->matrix());
 
             renderLines(pe->part(), pe->color() == 16 ? ldraw_basecolor : pe->color());
 
@@ -421,8 +452,8 @@ void LDraw::GLRenderer::renderLineBufferSegment(const QVector<linebuffer> &buffe
         }
 
         if (i == s || mode == GL_LINES)
-            glVertex(buffer[i].v[0]);
-        glVertex(buffer[i].v[1]);
+            qVertex(1, &buffer[i].v[0]);
+        qVertex(1, &buffer[i].v[1]);
     }
     glEnd();
 }
@@ -432,7 +463,7 @@ void LDraw::GLRenderer::renderLineBufferSegment(const QVector<linebuffer> &buffe
 #if 0
 void LDraw::GLRenderer::render_condlines_visit(Part *part, int ldraw_basecolor)
 {
-    matrix_t proj_movi;
+    QMatrix4x4 proj_movi;
     bool proj_movi_init = false;
 
     Element * const *ep = part->elements().constData();
@@ -446,28 +477,29 @@ void LDraw::GLRenderer::render_condlines_visit(Part *part, int ldraw_basecolor)
         switch (e->type()) {
         case Element::CondLine: {
             const CondLineElement *le = static_cast<const CondLineElement *>(e);
-            const vector_t *v = le->points();
+            const QVector3D *v = le->points();
             int view[4];
             glGetIntegerv(GL_VIEWPORT, view);
 
             if (!proj_movi_init) {
-                proj_movi = matrix_t::fromGL(GL_MODELVIEW_MATRIX) * matrix_t::fromGL(GL_PROJECTION_MATRIX);
+                proj_movi = qMatrixFromGL(GL_MODELVIEW_MATRIX) * qMatrixFromGL(GL_PROJECTION_MATRIX);
                 proj_movi_init = true;
             }
-            vector_t pv[4];
+            QVector3D pv[4];
 
             for (int i = 0; i < 4; i++) {
                 // gluProject(v[i][0], v[i][1], v[i][2], movi, proj, view, &pv[i][0], &pv[i][1], &pv[i][2]);
                 // would do the job, but this is double only...
 
                 pv[i] = proj_movi * v[i];
-                pv[i][0] = view[0] + view[2] * (pv[i][0] + 1) / 2;
-                pv[i][1] = view[1] + view[3] * (pv[i][1] + 1) / 2;
-                pv[i][2] = 0; // (pv[i][2] + 1) / 2;
+                pv[i].setX(view[0] + view[2] * (pv[i].x() + 1) / 2);
+                pv[i].setY(view[1] + view[3] * (pv[i].y() + 1) / 2);
+                pv[i].setZ(0); // (pv[i][2] + 1) / 2;
             }
 
-            vector_t line_norm = (pv[1] - pv[0]) % vector_t(0, 0, -1);
-            if ((line_norm * (pv[0] - pv[2]) < 0) == (line_norm * (pv[0] - pv[3]) < 0)) {
+            QVector3D line_norm = QVector3D::crossProduct(pv[1] - pv[0], QVector3D(0, 0, -1));
+            if ((QVector3D::dotProduct(line_norm, pv[0] - pv[2]) < 0) ==
+                (QVector3D::dotProduct(line_norm, pv[0] - pv[3]) < 0)) {
                 qglColor(core()->color(le->color(), ldraw_basecolor));
 
                 if (began != GL_LINES) {
@@ -476,8 +508,7 @@ void LDraw::GLRenderer::render_condlines_visit(Part *part, int ldraw_basecolor)
                     glBegin(GL_LINES);
                     began = GL_LINES;
                 }
-                glVertex(v[0]);
-                glVertex(v[1]);
+                qVertex(2, v);
             }
             break;
         }

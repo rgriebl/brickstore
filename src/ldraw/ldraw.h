@@ -21,10 +21,10 @@
 #include <QList>
 #include <QColor>
 #include <QCache>
+#include <QVector3D>
+#include <QMatrix4x4>
 
 #include "ref.h"
-#include "vector_t.h"
-#include "matrix_t.h"
 
 class QFile;
 class QDir;
@@ -38,7 +38,7 @@ class Part : public Ref {
 public:
     inline const QVector<Element *> &elements() const  { return m_elements; }
 
-    bool boundingBox(vector_t &vmin, vector_t &vmax);
+    bool boundingBox(QVector3D &vmin, QVector3D &vmax);
 
     void dump() const;
 
@@ -49,14 +49,14 @@ protected:
     friend class PartElement;
     friend class Core;
 
-    static void calc_bounding_box(const Part *part, const matrix_t &matrix, vector_t &vmin, vector_t &vmax);
-    static void check_bounding(int cnt, const vector_t *v, const matrix_t &matrix, vector_t &vmin, vector_t &vmax);
+    static void calc_bounding_box(const Part *part, const QMatrix4x4 &matrix, QVector3D &vmin, QVector3D &vmax);
+    static void check_bounding(int cnt, const QVector3D *v, const QMatrix4x4 &matrix, QVector3D &vmin, QVector3D &vmax);
 
 
     QVector<Element *> m_elements;
     bool m_bounding_calculated;
-    vector_t m_bounding_min;
-    vector_t m_bounding_max;
+    QVector3D m_bounding_min;
+    QVector3D m_bounding_max;
 };
 
 
@@ -105,88 +105,88 @@ protected:
 
 class LineElement : public Element {
 public:
-    int color() const              { return m_color; }
-    const vector_t *points() const { return m_points;}
+    int color() const               { return m_color; }
+    const QVector3D *points() const { return m_points;}
 
-    static LineElement *create(int color, const vector_t *points);
+    static LineElement *create(int color, const QVector3D *points);
 
     virtual void dump() const;
 
 protected:
-    LineElement(int color, const vector_t *points);
+    LineElement(int color, const QVector3D *points);
 
     int    m_color;
-    vector_t m_points[2];
+    QVector3D m_points[2];
 };
 
 
 class CondLineElement : public Element {
 public:
-    int color() const              { return m_color; }
-    const vector_t *points() const { return m_points;}
+    int color() const               { return m_color; }
+    const QVector3D *points() const { return m_points;}
 
-    static CondLineElement *create(int color, const vector_t *points);
+    static CondLineElement *create(int color, const QVector3D *points);
 
     virtual void dump() const;
 
 protected:
-    CondLineElement(int color, const vector_t *points);
+    CondLineElement(int color, const QVector3D *points);
 
     int    m_color;
-    vector_t m_points[4];
+    QVector3D m_points[4];
 };
 
 
 class TriangleElement : public Element {
 public:
-    int color() const              { return m_color; }
-    const vector_t *points() const { return m_points;}
+    int color() const               { return m_color; }
+    const QVector3D *points() const { return m_points;}
 
-    static TriangleElement *create(int color, const vector_t *points);
+    static TriangleElement *create(int color, const QVector3D *points);
 
     virtual void dump() const;
 
 protected:
-    TriangleElement(int color, const vector_t *points);
+    TriangleElement(int color, const QVector3D *points);
 
     int    m_color;
-    vector_t m_points[3];
+    QVector3D m_points[3];
 };
 
 
 class QuadElement : public Element {
 public:
-    int color() const              { return m_color; }
-    const vector_t *points() const { return m_points;}
+    int color() const               { return m_color; }
+    const QVector3D *points() const { return m_points;}
 
-    static QuadElement *create(int color, const vector_t *points);
+    static QuadElement *create(int color, const QVector3D *points);
 
     virtual void dump() const;
 
 protected:
-    QuadElement(int color, const vector_t *points);
+    QuadElement(int color, const QVector3D *points);
 
     int    m_color;
-    vector_t m_points[4];
+    QVector3D m_points[4];
 };
 
 
 class PartElement : public Element {
 public:
     int color() const              { return m_color; }
-    const matrix_t &matrix() const { return m_matrix; }
+    const QMatrix4x4 &matrix() const { return m_matrix; }
     LDraw::Part *part() const      { return m_part; }
 
-    static PartElement *create(int color, const matrix_t &m, const QString &filename, const QDir &parentdir);
+    static PartElement *create(int color, const QMatrix4x4 &m, const QString &filename, const QDir &parentdir);
 
     virtual ~PartElement();
     virtual void dump() const;
 
 protected:
-    PartElement(int color, const matrix_t &m, LDraw::Part *part);
+    PartElement(int color, const QMatrix4x4 &m, LDraw::Part *part);
 
     int           m_color;
-    matrix_t      m_matrix;
+    QMatrix4x4    m_matrix;
     LDraw::Part * m_part;
 };
 

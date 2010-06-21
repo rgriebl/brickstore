@@ -60,68 +60,62 @@ LDraw::Element *LDraw::Element::fromByteArray(const QByteArray &line, const QDir
                 }
                 case 1: {
                     int color = bal[0].toInt();
-                    matrix_t m;
-                    m[0][0] = bal[4].toDouble();
-                    m[0][1] = bal[7].toDouble();
-                    m[0][2] = bal[10].toDouble();
-                    m[0][3] = 0;
-                    m[1][0] = bal[5].toDouble();
-                    m[1][1] = bal[8].toDouble();
-                    m[1][2] = bal[11].toDouble();
-                    m[1][3] = 0;
-                    m[2][0] = bal[6].toDouble();
-                    m[2][1] = bal[9].toDouble();
-                    m[2][2] = bal[12].toDouble();
-                    m[2][3] = 0;
-                    m[3][0] = bal[1].toDouble();
-                    m[3][1] = bal[2].toDouble();
-                    m[3][2] = bal[3].toDouble();
-                    m[3][3] = 1;
+                    QMatrix4x4 m(
+                        bal[4].toDouble(),
+                        bal[5].toDouble(),
+                        bal[6].toDouble(),
+                        bal[1].toDouble(),
+
+                        bal[7].toDouble(),
+                        bal[8].toDouble(),
+                        bal[9].toDouble(),
+                        bal[2].toDouble(),
+
+                        bal[10].toDouble(),
+                        bal[11].toDouble(),
+                        bal[12].toDouble(),
+                        bal[3].toDouble(),
+
+                        0, 0, 0, 1
+                    );
+                    m.optimize();
 
                     e = PartElement::create(color, m, bal[13], dir);
                     break;
                 }
                 case 2: {
                     int color = bal[0].toInt();
-                    vector_t v[2];
+                    QVector3D v[2];
 
-                    for (int i = 0; i < 2; ++i) {
-                        for (int j = 0; j < 3; ++j)
-                            v[i][j] = bal[3*i + j + 1].toDouble();
-                    }
+                    for (int i = 0; i < 2; ++i)
+                        v[i] = QVector3D(bal[3*i + 1].toDouble(), bal[3*i + 2].toDouble(), bal[3*i + 3].toDouble());
                     e = LineElement::create(color, v);
                     break;
                 }
                 case 3: {
                     int color = bal[0].toInt();
-                    vector_t v[3];
+                    QVector3D v[3];
 
-                    for (int i = 0; i < 3; ++i) {
-                        for (int j = 0; j < 3; ++j)
-                            v[i][j] = bal[3*i + j + 1].toDouble();
-                    }
+                    for (int i = 0; i < 3; ++i)
+                        v[i] = QVector3D(bal[3*i + 1].toDouble(), bal[3*i + 2].toDouble(), bal[3*i + 3].toDouble());
                     e = TriangleElement::create(color, v);
                     break;
                 }
                 case 4: {
                     int color = bal[0].toInt();
-                    vector_t v[4];
+                    QVector3D v[4];
 
-                    for (int i = 0; i < 4; ++i) {
-                        for (int j = 0; j < 3; ++j)
-                            v[i][j] = bal[3*i + j + 1].toDouble();
-                    }
+                    for (int i = 0; i < 4; ++i)
+                        v[i] = QVector3D(bal[3*i + 1].toDouble(), bal[3*i + 2].toDouble(), bal[3*i + 3].toDouble());
                     e = QuadElement::create(color, v);
                     break;
                 }
                 case 5: {
                     int color = bal[0].toInt();
-                    vector_t v[4];
+                    QVector3D v[4];
 
-                    for (int i = 0; i < 4; ++i) {
-                        for (int j = 0; j < 3; ++j)
-                            v[i][j] = bal[3*i + j + 1].toDouble();
-                    }
+                    for (int i = 0; i < 4; ++i)
+                        v[i] = QVector3D(bal[3*i + 1].toDouble(), bal[3*i + 2].toDouble(), bal[3*i + 3].toDouble());
                     e = CondLineElement::create(color, v);
                     break;
                 }
@@ -150,13 +144,13 @@ void LDraw::CommentElement::dump() const
 }
 
 
-LDraw::LineElement::LineElement(int color, const vector_t *v)
+LDraw::LineElement::LineElement(int color, const QVector3D *v)
     : Element(Line), m_color(color)
 {
     memcpy(m_points, v, sizeof(m_points));
 }
 
-LDraw::LineElement *LDraw::LineElement::create(int color, const vector_t *v)
+LDraw::LineElement *LDraw::LineElement::create(int color, const QVector3D *v)
 {
     return new LineElement(color, v);
 }
@@ -165,18 +159,18 @@ void LDraw::LineElement::dump() const
 {
     printf("2 %d %.f %.f %.f %.f %.f %.f\n",
         m_color,
-        m_points[0][0], m_points[0][1], m_points[0][2],
-        m_points[1][0], m_points[1][1], m_points[1][2]);
+        m_points[0].x(), m_points[0].y(), m_points[0].z(),
+        m_points[1].x(), m_points[1].y(), m_points[1].z());
 }
 
 
-LDraw::CondLineElement::CondLineElement(int color, const vector_t *v)
+LDraw::CondLineElement::CondLineElement(int color, const QVector3D *v)
     : Element(CondLine), m_color(color)
 {
     memcpy(m_points, v, sizeof(m_points));
 }
 
-LDraw::CondLineElement *LDraw::CondLineElement::create(int color, const vector_t *v)
+LDraw::CondLineElement *LDraw::CondLineElement::create(int color, const QVector3D *v)
 {
     return new CondLineElement(color, v);
 }
@@ -185,20 +179,20 @@ void LDraw::CondLineElement::dump() const
 {
     printf("5 %d %.f %.f %.f %.f %.f %.f %.f %.f %.f %.f %.f %.f\n",
         m_color,
-        m_points[0][0], m_points[0][1], m_points[0][2],
-        m_points[1][0], m_points[1][1], m_points[1][2],
-        m_points[2][0], m_points[2][1], m_points[2][2],
-        m_points[3][0], m_points[3][1], m_points[3][2]);
+        m_points[0].x(), m_points[0].y(), m_points[0].z(),
+        m_points[1].x(), m_points[1].y(), m_points[1].z(),
+        m_points[2].x(), m_points[2].y(), m_points[2].z(),
+        m_points[3].x(), m_points[3].y(), m_points[3].z());
 }
 
 
-LDraw::TriangleElement::TriangleElement(int color, const vector_t *v)
+LDraw::TriangleElement::TriangleElement(int color, const QVector3D *v)
     : Element(Triangle), m_color(color)
 {
     memcpy(m_points, v, sizeof(m_points));
 }
 
-LDraw::TriangleElement *LDraw::TriangleElement::create(int color, const vector_t *v)
+LDraw::TriangleElement *LDraw::TriangleElement::create(int color, const QVector3D *v)
 {
     return new TriangleElement(color, v);
 }
@@ -207,19 +201,19 @@ void LDraw::TriangleElement::dump() const
 {
     printf("3 %d %.f %.f %.f %.f %.f %.f %.f %.f %.f\n",
         m_color,
-        m_points[0][0], m_points[0][1], m_points[0][2],
-        m_points[1][0], m_points[1][1], m_points[1][2],
-        m_points[2][0], m_points[2][1], m_points[2][2]);
+        m_points[0].x(), m_points[0].y(), m_points[0].z(),
+        m_points[1].x(), m_points[1].y(), m_points[1].z(),
+        m_points[2].x(), m_points[2].y(), m_points[2].z());
 }
 
 
-LDraw::QuadElement::QuadElement(int color, const vector_t *v)
+LDraw::QuadElement::QuadElement(int color, const QVector3D *v)
     : Element(Quad), m_color(color)
 {
     memcpy(m_points, v, sizeof(m_points));
 #if 0
     //fix CCW order
-    // getting vector_ts from points
+    // getting QVector3Ds from points
     a10 = p0 - p1;
     a12 = p2 - p1;
     a13 = p3 - p1;
@@ -235,7 +229,7 @@ LDraw::QuadElement::QuadElement(int color, const vector_t *v)
 #endif
 }
 
-LDraw::QuadElement *LDraw::QuadElement::create(int color, const vector_t *v)
+LDraw::QuadElement *LDraw::QuadElement::create(int color, const QVector3D *v)
 {
     return new QuadElement(color, v);
 }
@@ -244,14 +238,14 @@ void LDraw::QuadElement::dump() const
 {
     printf("4 %d %.f %.f %.f %.f %.f %.f %.f %.f %.f %.f %.f %.f\n",
         m_color,
-        m_points[0][0], m_points[0][1], m_points[0][2],
-        m_points[1][0], m_points[1][1], m_points[1][2],
-        m_points[2][0], m_points[2][1], m_points[2][2],
-        m_points[3][0], m_points[3][1], m_points[3][2]);
+        m_points[0].x(), m_points[0].y(), m_points[0].z(),
+        m_points[1].x(), m_points[1].y(), m_points[1].z(),
+        m_points[2].x(), m_points[2].y(), m_points[2].z(),
+        m_points[3].x(), m_points[3].y(), m_points[3].z());
 }
 
 
-LDraw::PartElement::PartElement(int color, const matrix_t &matrix, LDraw::Part *p)
+LDraw::PartElement::PartElement(int color, const QMatrix4x4 &matrix, LDraw::Part *p)
     : Element(Part), m_color(color), m_matrix(matrix), m_part(p)
 {
     if (m_part)
@@ -264,7 +258,7 @@ LDraw::PartElement::~PartElement()
         m_part->release();
 }
 
-LDraw::PartElement *LDraw::PartElement::create(int color, const matrix_t &matrix, const QString &filename, const QDir &parentdir)
+LDraw::PartElement *LDraw::PartElement::create(int color, const QMatrix4x4 &matrix, const QString &filename, const QDir &parentdir)
 {
     PartElement *e = 0;
     if (LDraw::Part *p = Core::inst()->findPart(filename, parentdir))
@@ -276,10 +270,10 @@ void LDraw::PartElement::dump() const
 {
     printf("1 %d %.f %.f %.f %.f %.f %.f %.f %.f %.f %.f %.f %.f\n",
         m_color,
-        m_matrix[3][0], m_matrix[3][1], m_matrix[3][2],
-        m_matrix[0][0], m_matrix[1][0], m_matrix[2][0],
-        m_matrix[0][1], m_matrix[1][1], m_matrix[2][1],
-        m_matrix[0][2], m_matrix[1][2], m_matrix[2][2]);
+        m_matrix(3, 0), m_matrix(3, 1), m_matrix(3, 2),
+        m_matrix(0, 0), m_matrix(1, 0), m_matrix(2, 0),
+        m_matrix(0, 1), m_matrix(1, 1), m_matrix(2, 1),
+        m_matrix(0, 2), m_matrix(1, 2), m_matrix(2, 2));
 
     if (m_part) {
         printf(">> start of sub-part >>\n");
@@ -325,12 +319,12 @@ LDraw::Part *LDraw::Part::parse(QFile &file, const QDir &dir)
     return p;
 }
 
-bool LDraw::Part::boundingBox(vector_t &vmin, vector_t &vmax)
+bool LDraw::Part::boundingBox(QVector3D &vmin, QVector3D &vmax)
 {
     if (!m_bounding_calculated) {
-        matrix_t matrix;
-        m_bounding_min = vector_t(FLT_MAX, FLT_MAX, FLT_MAX);
-        m_bounding_max = vector_t(FLT_MIN, FLT_MIN, FLT_MIN);
+        QMatrix4x4 matrix;
+        m_bounding_min = QVector3D(FLT_MAX, FLT_MAX, FLT_MAX);
+        m_bounding_max = QVector3D(FLT_MIN, FLT_MIN, FLT_MIN);
 
         calc_bounding_box(this, matrix, m_bounding_min, m_bounding_max);
 
@@ -342,13 +336,13 @@ bool LDraw::Part::boundingBox(vector_t &vmin, vector_t &vmax)
     return true;
 }
 
-void LDraw::Part::check_bounding(int cnt, const vector_t *v, const matrix_t &matrix, vector_t &vmin, vector_t &vmax)
+void LDraw::Part::check_bounding(int cnt, const QVector3D *v, const QMatrix4x4 &matrix, QVector3D &vmin, QVector3D &vmax)
 {
     while (cnt--) {
-        vector_t vm = matrix * (*v);
+        QVector3D vm = matrix * (*v);
 
-        vmin = vector_t(qMin(vmin[0], vm[0]), qMin(vmin[1], vm[1]), qMin(vmin[2], vm[2]));
-        vmax = vector_t(qMax(vmax[0], vm[0]), qMax(vmax[1], vm[1]), qMax(vmax[2], vm[2]));
+        vmin = QVector3D(qMin(vmin.x(), vm.x()), qMin(vmin.y(), vm.y()), qMin(vmin.z(), vm.z()));
+        vmax = QVector3D(qMax(vmax.x(), vm.x()), qMax(vmax.y(), vm.y()), qMax(vmax.z(), vm.z()));
 
         v++;
     }
@@ -356,7 +350,7 @@ void LDraw::Part::check_bounding(int cnt, const vector_t *v, const matrix_t &mat
 
 
 
-void LDraw::Part::calc_bounding_box(const Part *part, const matrix_t &matrix, vector_t &vmin, vector_t &vmax)
+void LDraw::Part::calc_bounding_box(const Part *part, const QMatrix4x4 &matrix, QVector3D &vmin, QVector3D &vmax)
 {
     foreach (Element *e, part->elements()) {
         switch (e->type()) {
