@@ -221,10 +221,10 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
         ico = s_status_icons[it->status()];
         if (ico.isNull()) {
             switch (it->status()) {
-            case BrickLink::Exclude: ico = QIcon(":/images/edit_status_exclude"); break;
-            case BrickLink::Extra  : ico = QIcon(":/images/edit_status_extra"); break;
+            case BrickLink::Exclude: ico = QIcon(":/images/edit_status_exclude.png"); break;
+            case BrickLink::Extra  : ico = QIcon(":/images/edit_status_extra.png"); break;
             default                :
-            case BrickLink::Include: ico = QIcon(":/images/edit_status_include"); break;
+            case BrickLink::Include: ico = QIcon(":/images/edit_status_include.png"); break;
             }
             s_status_icons.insert(it->status(), ico);
         }

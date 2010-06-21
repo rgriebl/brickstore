@@ -734,7 +734,7 @@ bool FrameWork::setupToolBar(QToolBar *t, const QList<QByteArray> &a_names)
                     continue;
                 }
                 m_progress = new ProgressCircle();
-                m_progress->setIcon(QIcon(":/images/icon"));
+                m_progress->setIcon(QIcon(":/images/icon.png"));
                 t->addWidget(m_progress);
             } else if (an == "widget_spinner") {
                 if (m_spinner) {
@@ -952,10 +952,9 @@ void FrameWork::createActions()
     QList<QAction *> alist = findChildren<QAction *>();
     foreach(QAction *a, alist) {
         if (!a->objectName().isEmpty()) {
-            QString path = QLatin1String(":/images/") + a->objectName();
+            QString path = QLatin1String(":/images/") + a->objectName() + QLatin1String(".png");
 
-            // QIcon::isNull is useless in Qt4
-            if (QFile::exists(path + QLatin1String(".png")) || QFile::exists(path + QLatin1String(".svg")))
+            if (QFile::exists(path))
                 a->setIcon(QIcon(path));
         }
     }

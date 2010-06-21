@@ -51,7 +51,7 @@ AppearsInWidget::AppearsInWidget(QWidget *parent)
     QAction *a;
     a = new QAction(this);
     a->setObjectName(QLatin1String("appearsin_partoutitems"));
-    a->setIcon(QIcon(QLatin1String(":/images/edit_partoutitems")));
+    a->setIcon(QIcon(QLatin1String(":/images/edit_partoutitems.png")));
     connect(a, SIGNAL(triggered()), this, SLOT(partOut()));
     addAction(a);
 
@@ -61,7 +61,7 @@ AppearsInWidget::AppearsInWidget(QWidget *parent)
 
     a = new QAction(this);
     a->setObjectName(QLatin1String("appearsin_magnify"));
-    a->setIcon(QIcon(QLatin1String(":/images/viewmagp")));
+    a->setIcon(QIcon(QLatin1String(":/images/viewmagp.png")));
     connect(a, SIGNAL(triggered()), this, SLOT(viewLargeImage()));
     addAction(a);
 
@@ -71,17 +71,17 @@ AppearsInWidget::AppearsInWidget(QWidget *parent)
 
     a = new QAction(this);
     a->setObjectName(QLatin1String("appearsin_bl_catalog"));
-    a->setIcon(QIcon(QLatin1String(":/images/edit_bl_catalog")));
+    a->setIcon(QIcon(QLatin1String(":/images/edit_bl_catalog.png")));
     connect(a, SIGNAL(triggered()), this, SLOT(showBLCatalogInfo()));
     addAction(a);
     a = new QAction(this);
     a->setObjectName(QLatin1String("appearsin_bl_priceguide"));
-    a->setIcon(QIcon(QLatin1String(":/images/edit_bl_priceguide")));
+    a->setIcon(QIcon(QLatin1String(":/images/edit_bl_priceguide.png")));
     connect(a, SIGNAL(triggered()), this, SLOT(showBLPriceGuideInfo()));
     addAction(a);
     a = new QAction(this);
     a->setObjectName(QLatin1String("appearsin_bl_lotsforsale"));
-    a->setIcon(QIcon(QLatin1String(":/images/edit_bl_lotsforsale")));
+    a->setIcon(QIcon(QLatin1String(":/images/edit_bl_lotsforsale.png")));
     connect(a, SIGNAL(triggered()), this, SLOT(showBLLotsForSale()));
     addAction(a);
 

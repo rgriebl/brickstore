@@ -77,17 +77,17 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     w_picture->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
     w_picture->setLineWidth(2);
 
-    w_toggle_picture->setIcon(QIcon(":/images/sidebar/info"));
+    w_toggle_picture->setIcon(QIcon(":/images/sidebar/info.png"));
 
     w_price_guide->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
     w_price_guide->setLineWidth(2);
 
-    w_toggle_price_guide->setIcon(QIcon(":/images/sidebar/priceguide"));
+    w_toggle_price_guide->setIcon(QIcon(":/images/sidebar/priceguide.png"));
 
     w_appears_in->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
     w_appears_in->setLineWidth(2);
 
-    w_toggle_appears_in->setIcon(QIcon(":/images/sidebar/appearsin"));
+    w_toggle_appears_in->setIcon(QIcon(":/images/sidebar/appearsin.png"));
 
     static_cast<HackSpinBox *>(w_qty)->lineEdit()->setValidator(new QIntValidator(1, 99999, w_qty));
     w_qty->setValue(1);

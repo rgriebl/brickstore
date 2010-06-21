@@ -123,7 +123,7 @@ PriceGuideWidget::PriceGuideWidget(QWidget *parent, Qt::WindowFlags f)
     QAction *a;
     a = new QAction(this);
     a->setObjectName("priceguide_reload");
-    a->setIcon(QIcon(":/images/reload"));
+    a->setIcon(QIcon(":/images/reload.png"));
     connect(a, SIGNAL(triggered()), this, SLOT(doUpdate()));
     addAction(a);
 
@@ -133,17 +133,17 @@ PriceGuideWidget::PriceGuideWidget(QWidget *parent, Qt::WindowFlags f)
 
     a = new QAction(this);
     a->setObjectName("priceguide_bl_catalog");
-    a->setIcon(QIcon(":/images/edit_bl_catalog"));
+    a->setIcon(QIcon(":/images/edit_bl_catalog.png"));
     connect(a, SIGNAL(triggered()), this, SLOT(showBLCatalogInfo()));
     addAction(a);
     a = new QAction(this);
     a->setObjectName("priceguide_bl_priceguide");
-    a->setIcon(QIcon(":/images/edit_bl_priceguide"));
+    a->setIcon(QIcon(":/images/edit_bl_priceguide.png"));
     connect(a, SIGNAL(triggered()), this, SLOT(showBLPriceGuideInfo()));
     addAction(a);
     a = new QAction(this);
     a->setObjectName("priceguide_bl_lotsforsale");
-    a->setIcon(QIcon(":/images/edit_bl_lotsforsale"));
+    a->setIcon(QIcon(":/images/edit_bl_lotsforsale.png"));
     connect(a, SIGNAL(triggered()), this, SLOT(showBLLotsForSale()));
     addAction(a);
 
