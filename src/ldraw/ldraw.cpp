@@ -375,7 +375,7 @@ void LDraw::Part::calc_bounding_box(const Part *part, const QMatrix4x4 &matrix, 
         case Element::Part: {
             const PartElement *pe = static_cast<const PartElement *>(e);
 
-            calc_bounding_box(pe->part(), pe->matrix() * matrix, vmin, vmax);
+            calc_bounding_box(pe->part(), matrix * pe->matrix(), vmin, vmax);
             break;
         }
         default: {

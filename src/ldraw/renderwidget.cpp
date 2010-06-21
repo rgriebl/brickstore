@@ -209,16 +209,18 @@ void LDraw::GLRenderer::resizeGL(int w, int h)
         QVector3D vmin, vmax;
 
         if (m_part->boundingBox(vmin, vmax)) {
-            //qWarning("resizeGL - ortho: [%.f ..  %.f] x [%.f .. %.f] x [%.f .. %.f]", vmin[0], vmax[0], vmin[1], vmax[1], vmin[2], vmax[2]);
+            //qWarning("resizeGL - ortho: [%.f ..  %.f] x [%.f .. %.f] x [%.f .. %.f]", vmin.x(), vmax.x(), vmin.y(), vmax.y(), vmin.z(), vmax.z());
 
-            radius = (vmax - vmin).length(); //qMax(vmin.length(), vmax.length());
-            m_center = vmin + (vmax - vmin) / 2;
+            m_center = (vmin + vmax) / 2;
+            radius = (vmax - vmin).length() / 2;
+
+            //qWarning(" --> center: (%.f, %.f, %.f)  radius: %.f", m_center.x(), m_center.y(), m_center.z(), radius);
         }
     }
 
     glOrtho(m_center.x() - radius, m_center.x() + radius,
             m_center.y() - radius, m_center.y() + radius,
-            m_center.z() - 1.0 - radius, m_center.z() + 1.0 + radius);
+            m_center.z() - 2 * radius, m_center.z() + 2 * radius);
     glMatrixMode(GL_MODELVIEW);
 
     m_resized = true;
@@ -368,7 +370,7 @@ void LDraw::GLRenderer::renderLines(Part *part, int ldraw_basecolor)
 
             if (!proj_movi_init) {
                 glGetIntegerv(GL_VIEWPORT, view);
-                proj_movi = qMatrixFromGL(GL_MODELVIEW_MATRIX) * qMatrixFromGL(GL_PROJECTION_MATRIX);
+                proj_movi = qMatrixFromGL(GL_PROJECTION_MATRIX) * qMatrixFromGL(GL_MODELVIEW_MATRIX);
                 proj_movi_init = true;
             }
             QVector3D pv[4];
