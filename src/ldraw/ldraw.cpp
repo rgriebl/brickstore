@@ -394,9 +394,10 @@ void LDraw::Part::dump() const
     }
 }
 
-LDraw::Part *LDraw::Core::findPart(const QString &xfilename, const QDir &parentdir)
+LDraw::Part *LDraw::Core::findPart(const QString &_filename, const QDir &parentdir)
 {
-    QString filename = QDir::fromNativeSeparators(xfilename);
+    QString filename = _filename;
+    filename.replace(QLatin1Char('\\'), QLatin1Char('/'));
     bool found = false;
 
     if (QFileInfo(filename).isRelative()) {
@@ -406,8 +407,9 @@ LDraw::Part *LDraw::Core::findPart(const QString &xfilename, const QDir &parentd
         searchpath.prepend(parentdir);
 
         foreach (QDir sp, searchpath) {
-            if (sp.exists(filename)) {
-                filename = sp.absoluteFilePath(filename);
+            QString testname = sp.absolutePath() + QLatin1Char('/') + filename;
+            if (QFile::exists(testname)) {
+                filename = testname;
                 found = true;
                 break;
             }
