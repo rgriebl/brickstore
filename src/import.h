@@ -375,7 +375,7 @@ public:
 
     QString currencyCode() const
     {
-        return QLatin1String("USD"); // hard-coded for now
+        return m_currencycode;
     }
 
 private slots:
@@ -415,9 +415,8 @@ private slots:
                 foreach(const QString &str, strlist) {
                     BrickLink::InvItem *ii = 0;
 
-                    // US$ only at the moment
                     QRegExp rx_ids(QLatin1String("HEIGHT='60' SRC='http://img.bricklink.com/([A-Z])/([^ ]+).gif' NAME="));
-                    QRegExp rx_qty_price(QLatin1String(" VALUE=\"([0-9]+)\">(&nbsp;\\(x[0-9]+\\))?<BR>Qty Available: <B>[0-9]+</B><BR>Each:&nbsp;<B>US \\$([0-9.]+)</B>"));
+                    QRegExp rx_qty_price(QLatin1String(" VALUE=\"([0-9]+)\">(&nbsp;\\(x[0-9]+\\))?<BR>Qty Available: <B>[0-9]+</B><BR>Each:&nbsp;<B>([A-Z $])+([0-9.]+)</B>"));
                     QRegExp rx_names(QLatin1String("</TD><TD>(.+)</TD><TD VALIGN=\"TOP\" NOWRAP>"));
                     QString str_cond(QLatin1String("<B>New</B>"));
 
@@ -483,7 +482,12 @@ private slots:
                         rx_qty_price.indexIn(str);
 
                         int qty = rx_qty_price.cap(1).toInt();
-                        Currency price = QLocale::c().toDouble(rx_qty_price.cap(3));
+                        if (m_currencycode.isEmpty()) {
+                            m_currencycode = rx_qty_price.cap(3).trimmed();
+                            if (m_currencycode == QLatin1String("US $"))
+                                m_currencycode = QLatin1String("USD");
+                        }
+                        Currency price = QLocale::c().toDouble(rx_qty_price.cap(4));
 
                         BrickLink::Condition cond = (str.indexOf(str_cond) >= 0 ? BrickLink::New : BrickLink::Used);
 
@@ -525,8 +529,9 @@ private slots:
     }
 
 private:
-    ProgressDialog *m_progress;
+    ProgressDialog *       m_progress;
     BrickLink::InvItemList m_items;
+    QString                m_currencycode;
 };
 
 
@@ -668,9 +673,9 @@ private:
 
 
 private:
-    ProgressDialog *m_progress;
+    ProgressDialog *       m_progress;
     BrickLink::InvItemList m_items;
-    QString m_peeronid;
+    QString                m_peeronid;
 };
 
 #endif

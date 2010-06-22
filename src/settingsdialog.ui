@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>683</width>
-    <height>431</height>
+    <width>464</width>
+    <height>341</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,16 +20,13 @@
    <item>
     <widget class="QTabWidget" name="w_tabs">
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="general">
       <attribute name="title">
        <string>&amp;General</string>
       </attribute>
       <layout class="QFormLayout" name="formLayout_7">
-       <property name="fieldGrowthPolicy">
-        <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-       </property>
        <item row="0" column="0">
         <widget class="QLabel" name="label_8">
          <property name="text">
@@ -593,7 +590,7 @@ p, li { white-space: pre-wrap; }
          <property name="title">
           <string>Default values for 'Import BrickLink Set Inventory'</string>
          </property>
-         <layout class="QFormLayout" name="formLayout_5">
+         <layout class="QFormLayout" name="formLayout_2">
           <item row="0" column="0">
            <widget class="QLabel" name="label_7">
             <property name="text">
@@ -613,9 +610,6 @@ p, li { white-space: pre-wrap; }
           <string>Default values for 'Add Items'</string>
          </property>
          <layout class="QFormLayout" name="formLayout_3">
-          <property name="fieldGrowthPolicy">
-           <enum>QFormLayout::FieldsStayAtSizeHint</enum>
-          </property>
           <item row="0" column="0">
            <widget class="QLabel" name="label_5">
             <property name="text">
@@ -665,11 +659,25 @@ p, li { white-space: pre-wrap; }
           <string>Default values for 'Set to Price Guide'</string>
          </property>
          <layout class="QFormLayout" name="formLayout_4">
+          <item row="1" column="1">
+           <widget class="QComboBox" name="w_def_setpg_price"/>
+          </item>
           <item row="0" column="0">
-           <widget class="QComboBox" name="w_def_setpg_time"/>
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Guide</string>
+            </property>
+           </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QComboBox" name="w_def_setpg_price"/>
+           <widget class="QComboBox" name="w_def_setpg_time"/>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Price</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
