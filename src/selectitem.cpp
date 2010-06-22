@@ -40,6 +40,7 @@
 #include "selectitem.h"
 #include "utility.h"
 #include "messagebox.h"
+#include "itemdetailpopup.h"
 
 
 class SelectItemPrivate {
@@ -58,6 +59,7 @@ public:
     FilterEdit *     w_filter;
     QComboBox *      w_viewmode;
     bool             m_inv_only;
+    ItemDetailPopup *m_details;
 };
 
 
@@ -107,6 +109,8 @@ SelectItem::SelectItem(QWidget *parent)
 
 void SelectItem::init()
 {
+    d->m_details = 0;
+
     d->w_item_types_label = new QLabel(this);
     d->w_item_types = new QComboBox(this);
     d->w_item_types->setEditable(false);
@@ -139,6 +143,7 @@ void SelectItem::init()
     d->w_items->setSelectionMode(QAbstractItemView::SingleSelection);
     d->w_items->setItemDelegate(new BrickLink::ItemDelegate(this, BrickLink::ItemDelegate::AlwaysShowSelection));
     d->w_items->setContextMenuPolicy(Qt::CustomContextMenu);
+    d->w_items->installEventFilter(this);
 
     d->w_itemthumbs = new QTreeView(this);
     d->w_itemthumbs->setSortingEnabled(true);
@@ -151,6 +156,7 @@ void SelectItem::init()
     d->w_itemthumbs->setSelectionMode(QAbstractItemView::SingleSelection);
     d->w_itemthumbs->setItemDelegate(new ItemThumbsDelegate);
     d->w_itemthumbs->setContextMenuPolicy(Qt::CustomContextMenu);
+    d->w_itemthumbs->installEventFilter(this);
 
     d->w_thumbs = new QListView(this);
     d->w_thumbs->setMovement(QListView::Static);
@@ -162,6 +168,7 @@ void SelectItem::init()
     d->w_thumbs->setTextElideMode(Qt::ElideRight);
     d->w_thumbs->setItemDelegate(new ItemThumbsDelegate);
     d->w_thumbs->setContextMenuPolicy(Qt::CustomContextMenu);
+    d->w_thumbs->installEventFilter(this);
 
     d->itemTypeModel = new BrickLink::ItemTypeModel(this);
     d->categoryModel = new BrickLink::CategoryModel(this);
@@ -233,6 +240,28 @@ void SelectItem::languageChange()
     d->w_viewmode->setItemText(0, tr("List"));
     d->w_viewmode->setItemText(1, tr("List with Images"));
     d->w_viewmode->setItemText(2, tr("Thumbnails"));
+}
+
+bool SelectItem::eventFilter(QObject *o, QEvent *e)
+{
+    if ((o == d->w_items || o == d->w_itemthumbs || o == d->w_thumbs) &&
+        (e->type() == QEvent::KeyPress)) {
+        if (static_cast<QKeyEvent *>(e)->key() == Qt::Key_Space) {
+            if (!d->m_details)
+                d->m_details = new ItemDetailPopup(this);
+
+            if (!d->m_details->isVisible()) {
+                d->m_details->setItem(currentItem());
+                d->m_details->show();
+            } else {
+                d->m_details->hide();
+                d->m_details->setItem(0);
+            }
+            e->accept();
+            return true;
+        }
+    }
+    return QWidget::eventFilter(o, e);
 }
 
 bool SelectItem::hasExcludeWithoutInventoryFilter() const
@@ -386,6 +415,8 @@ void SelectItem::findItem()
 void SelectItem::itemChanged()
 {
     emit itemSelected(currentItem(), false);
+    if (d->m_details && d->m_details->isVisible())
+        d->m_details->setItem(currentItem());
 }
 
 void SelectItem::itemConfirmed()

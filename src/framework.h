@@ -111,6 +111,8 @@ private slots:
     void cancelAllTransfers();
     void showAddItemDialog();
 
+    void setItemDetailHelper(Document::Item *docitem);
+
 protected:
    virtual void dragEnterEvent(QDragEnterEvent *e);
    virtual void dropEvent(QDropEvent *e);

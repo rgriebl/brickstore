@@ -1233,8 +1233,8 @@ void FrameWork::connectWindow(QWidget *w)
             m_filter->setToolTip(QString());
         }
         if (m_details) {
-            disconnect(m_current_window, SIGNAL(currentChanged(Document::Item *)), m_details, SLOT(setItem(Document::Item *)));
-            m_details->setItem(0);
+            disconnect(m_current_window, SIGNAL(currentChanged(Document::Item *)), this, SLOT(setItemDetailHelper(Document::Item *)));
+            setItemDetailHelper(0);
         }
         m_undogroup->setActiveStack(0);
 
@@ -1254,8 +1254,8 @@ void FrameWork::connectWindow(QWidget *w)
             connect(m_filter, SIGNAL(textChanged(const QString &)), window, SLOT(setFilter(const QString &)));
         }
         if (m_details) {
-            m_details->setItem(window->current());
-            connect(window, SIGNAL(currentChanged(Document::Item *)), m_details, SLOT(setItem(Document::Item *)));
+            setItemDetailHelper(window->current());
+            connect(window, SIGNAL(currentChanged(Document::Item *)), this, SLOT(setItemDetailHelper(Document::Item *)));
         }
 
         m_undogroup->setActiveStack(doc->undoStack());
@@ -1577,6 +1577,9 @@ void FrameWork::showAddItemDialog()
 {
     createAddItemDialog();
 
+    if (m_details && m_details->isVisible())
+        toggleItemDetailPopup();
+
     if (m_add_dialog->isVisible()) {
         m_add_dialog->raise();
         m_add_dialog->activateWindow();
@@ -1591,15 +1594,25 @@ void FrameWork::toggleItemDetailPopup()
         m_details = new ItemDetailPopup(this);
 
         if (m_current_window)
-            connect(m_current_window, SIGNAL(currentChanged(Document::Item *)), m_details, SLOT(setItem(Document::Item *)));
+            connect(m_current_window, SIGNAL(currentChanged(Document::Item *)), this, SLOT(setItemDetailHelper(Document::Item *)));
     }
 
     if (!m_details->isVisible()) {
-        m_details->setItem(m_current_window ? m_current_window->current() : 0);
         m_details->show();
+        setItemDetailHelper(m_current_window ? m_current_window->current() : 0);
     } else {
         m_details->hide();
-        m_details->setItem(0);
+        setItemDetailHelper(0);
+    }
+}
+
+void FrameWork::setItemDetailHelper(Document::Item *docitem)
+{
+    if (m_details) {
+        if (!docitem)
+            m_details->setItem(0, 0);
+        else if (m_details->isVisible())
+            m_details->setItem(docitem->item(), docitem->color());
     }
 }
 

@@ -82,7 +82,7 @@ LDraw::GLRenderer::GLRenderer(QObject *parent)
     memset(&m_tx, 0, sizeof(qreal) * 3);
 
     m_animation = new QTimer(this);
-    m_animation->setInterval(30);
+    m_animation->setInterval(50);
 
     connect(m_animation, SIGNAL(timeout()), this, SLOT(animationStep()));
 }
@@ -220,7 +220,7 @@ void LDraw::GLRenderer::resizeGL(int w, int h)
 
     glOrtho(m_center.x() - radius, m_center.x() + radius,
             m_center.y() - radius, m_center.y() + radius,
-            m_center.z() - 2 * radius, m_center.z() + 2 * radius);
+            -m_center.z() - 2 * radius, -m_center.z() + 2 * radius);
     glMatrixMode(GL_MODELVIEW);
 
     m_resized = true;

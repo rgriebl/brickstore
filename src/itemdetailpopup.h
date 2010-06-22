@@ -3,8 +3,8 @@
 
 #include <QDialog>
 
-#include "document.h"
 #include "ldraw.h"
+#include "bricklinkfwd.h"
 
 namespace LDraw {
 class Model;
@@ -25,7 +25,7 @@ public:
     virtual ~ItemDetailPopup();
 
 public slots:
-    void setItem(Document::Item *);
+    void setItem(const BrickLink::Item *item, const BrickLink::Color *color = 0);
 
 protected:
     void paintEvent(QPaintEvent *e);
@@ -50,7 +50,6 @@ private:
     QToolButton *m_play;
     QToolButton *m_stop;
     QToolButton *m_view;
-    Document::Item *m_item;
     QPoint m_movepos;
     LDraw::Part *m_part;
     BrickLink::Picture *m_pic;

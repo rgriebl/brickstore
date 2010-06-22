@@ -111,7 +111,7 @@ private:
 
 
 ItemDetailPopup::ItemDetailPopup(QWidget *parent)
-    : QDialog(parent, Qt::FramelessWindowHint), m_item(0), m_part(0), m_pic(0), m_pressed(false), m_connected(false)
+    : QDialog(parent, Qt::FramelessWindowHint), m_part(0), m_pic(0), m_pressed(false), m_connected(false)
 {
     setAttribute(Qt::WA_TranslucentBackground);
 
@@ -175,10 +175,8 @@ ItemDetailPopup::~ItemDetailPopup()
         m_part->release();
 }
 
-void ItemDetailPopup::setItem(Document::Item *item)
+void ItemDetailPopup::setItem(const BrickLink::Item *item, const BrickLink::Color *color)
 {
-    m_item = item;
-
     if (m_pic)
         m_pic->release();
     m_pic = 0;
@@ -186,17 +184,17 @@ void ItemDetailPopup::setItem(Document::Item *item)
         m_part->release();
     m_part = 0;
 
-    if (m_item) {
-        m_pic = BrickLink::core()->largePicture(m_item->item(), true);
+    if (item) {
+        m_pic = BrickLink::core()->largePicture(item, true);
         m_pic->addRef();
-        m_part = LDraw::core() ? LDraw::core()->partFromId(m_item->item()->id()) : 0;
+        m_part = LDraw::core() ? LDraw::core()->partFromId(item->id()) : 0;
         if (m_part)
             m_part->addRef();
         m_blpic->setText(QString());
 
 #if !defined(QT_NO_OPENGL)
-        if (m_part && m_item->color()->ldrawId() >= 0 && m_ldraw) {
-            m_ldraw->setPartAndColor(m_part, m_item->color()->ldrawId());
+        if (m_part && m_ldraw) {
+            m_ldraw->setPartAndColor(m_part, color ? color->ldrawId() : 7 /* light gray */);
             m_stack->setCurrentWidget(m_ldraw);
             m_blpic->setText(QString());
         } else

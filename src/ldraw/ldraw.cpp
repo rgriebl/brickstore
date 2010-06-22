@@ -290,6 +290,10 @@ LDraw::Part::Part()
 {
 }
 
+LDraw::Part::~Part()
+{
+    qDeleteAll(m_elements);
+}
 
 LDraw::Part *LDraw::Part::parse(QFile &file, const QDir &dir)
 {

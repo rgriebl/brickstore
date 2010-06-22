@@ -299,7 +299,7 @@ Document *Document::createTemporary(const BrickLink::InvItemList &list)
 }
 
 Document::Document(int /*is temporary*/)
-    : m_uuid(QUuid::createUuid()), m_currencycode(QLatin1String("USD"))
+    : m_currencycode(QLatin1String("USD")), m_uuid(QUuid::createUuid())
 {
     MODELTEST_ATTACH(this)
 

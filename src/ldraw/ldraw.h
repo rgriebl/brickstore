@@ -36,6 +36,8 @@ class PartElement;
 
 class Part : public Ref {
 public:
+    virtual ~Part();
+
     inline const QVector<Element *> &elements() const  { return m_elements; }
 
     bool boundingBox(QVector3D &vmin, QVector3D &vmax);
@@ -51,7 +53,6 @@ protected:
 
     static void calc_bounding_box(const Part *part, const QMatrix4x4 &matrix, QVector3D &vmin, QVector3D &vmax);
     static void check_bounding(int cnt, const QVector3D *v, const QMatrix4x4 &matrix, QVector3D &vmin, QVector3D &vmax);
-
 
     QVector<Element *> m_elements;
     bool m_bounding_calculated;
@@ -268,5 +269,10 @@ inline Core *core() { return Core::inst(); }
 inline Core *create(const QString &datadir, QString *errstring) { return Core::create(datadir, errstring); }
 
 } // namespace LDraw
+
+// tell Qt that Parts are shared and can't simply be deleted
+// (QCache will use that function to determine what can really be purged from the cache)
+
+template<> inline bool qIsDetached<LDraw::Part>(LDraw::Part &p) { return p.refCount() == 0; }
 
 #endif

@@ -64,6 +64,7 @@ protected slots:
 
 protected:
     virtual void showEvent(QShowEvent *);
+    virtual bool eventFilter(QObject *o, QEvent *e);
 
 private:
     void init();

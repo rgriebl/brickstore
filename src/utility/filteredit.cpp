@@ -153,8 +153,8 @@ private:
 FilterEdit::FilterEdit(QWidget *parent)
     : QLineEdit(parent)
 {
-    w_menu = new FilterEditButton(QIcon(":/images/filter_edit_menu"), this);
-    w_clear = new FilterEditButton(QIcon(":/images/filter_edit_clear"), this);
+    w_menu = new FilterEditButton(QIcon(":/images/filter_edit_menu.png"), this);
+    w_clear = new FilterEditButton(QIcon(":/images/filter_edit_clear.png"), this);
     w_clear->hide();
 
     connect(w_clear, SIGNAL(clicked()), this, SLOT(clear()));
