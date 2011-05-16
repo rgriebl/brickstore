@@ -40,6 +40,70 @@
 #include "utility.h"
 
 
+static int naturalCompareNumbers(const char *&n1, const char *&n2)
+{
+    bool d1 = true, d2 = true;
+    int result = 0;
+
+    forever {
+        if (!d1 && !d2)
+            return result;
+        else if (!d1)
+            return -1;
+        else if (!d2)
+            return 1;
+        else if (*n1 != *n2 && !result)
+            result = *n1 - *n2;
+
+        d1 = isdigit(*++n1);
+        d2 = isdigit(*++n2);
+    }
+}
+
+int Utility::naturalCompare(const char *name1, const char *name2)
+{
+    if (name1 == name2)
+        return 0;
+    else if (!name1)
+        return -1;
+    else if (!name2)
+        return 1;
+
+    bool special = false;
+    const char *n1 = name1;
+    const char *n2 = name2;
+
+    forever {
+        // 1) skip white space
+        while (isspace(*n1)) {
+            n1++;
+            special = true;
+        }
+        while (isspace(*n2)) {
+            n2++;
+            special = true;
+        }
+
+        // 2) check for numbers
+        if (isdigit(*n1) && isdigit(*n2)) {
+            int d = naturalCompareNumbers(n1, n2);
+            if (d)
+                return d;
+            special = true;
+        }
+
+        // 4) naturally the same -> let the ascii order decide
+        if (!*n1 && !*n2)
+            return special ? qstrcmp(name1, name2) : 0;
+
+        // 5) found a difference
+        if (*n1 != *n2)
+            return *n1 - *n2;
+
+        n1++; n2++;
+    }
+}
+
 qreal Utility::colorDifference(const QColor &c1, const QColor &c2)
 {
     qreal r1, g1, b1, a1, r2, g2, b2, a2;
@@ -92,7 +156,7 @@ void Utility::setPopupPos(QWidget *w, const QRect &pos)
                     break;
                 }
             }
-        }     
+        }
 #endif
         y = pos.y() - sh.height() - d;
     }

@@ -197,8 +197,6 @@ public:
 
     uint index() const { return m_index; }   // only for internal use (picture/priceguide hashes)
 
-    static int compareId(const char *id1, const char *id2);
-
 private:
     char *            m_id;
     char *            m_name;

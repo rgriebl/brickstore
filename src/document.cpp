@@ -1740,9 +1740,9 @@ bool DocumentProxyModel::lessThan(const QModelIndex &idx1, const QModelIndex &id
             return i1->status() < i2->status();
     }
     case Document::Picture     :
-    case Document::PartNo      : return BrickLink::Item::compareId(i1->item()->id(), i2->item()->id()) < 0;
+    case Document::PartNo      : return Utility::naturalCompare(i1->item()->id(), i2->item()->id()) < 0;
     case Document::LotId       : return i1->lotId() < i2->lotId();
-    case Document::Description : return qstrcmp(i1->item()->name(), i2->item()->name()) < 0;
+    case Document::Description : return Utility::naturalCompare(i1->item()->name(), i2->item()->name()) < 0;
     case Document::Comments    : return i1->comments() < i2->comments();
     case Document::Remarks     : return i1->remarks() < i2->remarks();
     case Document::Quantity    : return i1->quantity() < i2->quantity();
