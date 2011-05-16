@@ -91,8 +91,8 @@ FORMS = \
   settingsdialog.ui \
   settopriceguidedialog.ui \
 
-HEADERS += $$replace(FORMS, '\.ui', '.h')
-SOURCES += $$replace(FORMS, '\.ui', '.cpp')
+HEADERS += $$replace(FORMS, '\\.ui', '.h')
+SOURCES += $$replace(FORMS, '\\.ui', '.cpp')
 
 include('utility/utility.pri')
 include('bricklink/bricklink.pri')

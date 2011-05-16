@@ -1,7 +1,7 @@
 unix:RELEASE = $$system(cat RELEASE)
 win32:RELEASE = $$system(type RELEASE)
 
-eval(RELEASE_SPLIT=$$replace(RELEASE, "\.", " "))
+eval(RELEASE_SPLIT=$$replace(RELEASE, "\\.", " "))
 
 RELEASE_MAJOR = $$member(RELEASE_SPLIT, 0)
 RELEASE_MINOR = $$member(RELEASE_SPLIT, 1)

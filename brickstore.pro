@@ -11,7 +11,7 @@
 ##
 ## See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 
-QT_TOO_OLD=$$find(QT_VERSION, ^4\.[0-5])
+QT_TOO_OLD=$$find(QT_VERSION, "^4\\.[0-5]")
 count(QT_TOO_OLD, 1) {
   error("BrickStore needs at least Qt version 4.6. You are trying to compile against Qt version " $$QT_VERSION)
 }
