@@ -532,14 +532,15 @@ void Document::changeItemDirect(int position, Item &item)
     Item *olditem = m_items[position];
     qSwap(*olditem, item);
 
-//    bool grave = (olditem->item() != item.item()) || (olditem->color() != item.color());
-//    emit itemsChanged(pack<ItemList> (position), grave);
     QModelIndex idx1 = index(olditem);
     QModelIndex idx2 = createIndex(idx1.row(), columnCount(idx1.parent()) - 1, idx1.internalPointer());
 
     emit dataChanged(idx1, idx2);
     updateErrors(olditem);
     emit statisticsChanged();
+
+    bool grave = (olditem->item() != item.item()) || (olditem->color() != item.color());
+    emit itemsChanged(pack<ItemList>(olditem), grave);
 }
 
 void Document::updateErrors(Item *item)
@@ -1272,6 +1273,13 @@ bool Document::setData(const QModelIndex &index, const QVariant &value, int role
         Field f = static_cast<Field>(index.column());
 
         switch (f) {
+        case Document::PartNo      : {
+            const BrickLink::Item *newitem = BrickLink::core()->item(item.item()->itemType()->id(),
+                                                                     value.toString().toLatin1().constData());
+            if (newitem)
+                item.setItem(newitem);
+            break;
+        }
         case Document::Comments    : item.setComments(value.toString()); break;
         case Document::Remarks     : item.setRemarks(value.toString()); break;
         case Document::Reserved    : item.setReserved(value.toString()); break;
@@ -1288,7 +1296,7 @@ bool Document::setData(const QModelIndex &index, const QVariant &value, int role
         case Document::QuantityDiff: item.setQuantity(itemp->origQuantity() + value.toInt()); break;
         case Document::Price       : item.setPrice(Currency::fromLocal(value.toString())); break;
         case Document::PriceDiff   : item.setPrice(itemp->origPrice() + Currency::fromLocal(value.toString())); break;
-        default                     : break;
+        default                    : break;
         }
         if (!(item == *itemp)) {
             changeItem(index.row(), item);
@@ -1339,6 +1347,7 @@ QVariant Document::headerData(int section, Qt::Orientation orientation, int role
 QVariant Document::dataForEditRole(Item *it, Field f) const
 {
     switch (f) {
+    case Document::PartNo      : return it->item()->id(); break;
     case Document::Comments    : return it->comments(); break;
     case Document::Remarks     : return it->remarks(); break;
     case Document::Reserved    : return it->reserved(); break;

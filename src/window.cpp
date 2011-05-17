@@ -295,6 +295,8 @@ Window::Window(Document *doc, QWidget *parent)
 
     connect(m_doc, SIGNAL(rowsInserted(const QModelIndex &, int, int)), this, SLOT(documentRowsInserted(const QModelIndex &, int, int)));
 
+    connect(m_doc, SIGNAL(itemsChanged(const Document::ItemList &, bool)), this, SLOT(documentItemsChanged(const Document::ItemList &, bool)));
+
     updateErrorMask();
     updateCaption();
 
@@ -1765,4 +1767,16 @@ void Window::setSelection(const Document::ItemList &lst)
     m_selection_model->select(idxs, QItemSelectionModel::Clear | QItemSelectionModel::Select | QItemSelectionModel::Current | QItemSelectionModel::Rows);
 }
 
-
+void Window::documentItemsChanged(const Document::ItemList &items, bool grave)
+{
+    if (!items.isEmpty() && grave) {
+        if (items.contains(m_current))
+            emit currentChanged(m_current);
+        foreach (Document::Item *item, m_selection) {
+            if (items.contains(item)) {
+                emit selectionChanged(m_selection);
+                break;
+            }
+        }
+    }
+}
