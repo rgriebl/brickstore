@@ -278,9 +278,6 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
     ));
 
     menuBar()->addMenu(createMenu("extras", QList<QByteArray>()
-        << "extras_net_online"
-        << "extras_net_offline"
-        << "-"
         << "extras_update_database"
         << "-"
         << "extras_configure"
@@ -358,16 +355,15 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
 
     BrickLink::Core *bl = BrickLink::core();
 
-    connect(Config::inst(), SIGNAL(onlineStatusChanged(bool)), bl, SLOT(setOnlineStatus(bool)));
+    connect(Application::inst(), SIGNAL(onlineStateChanged(bool)), this, SLOT(onlineStateChanged(bool)));
     connect(Config::inst(), SIGNAL(updateIntervalsChanged(QMap<QByteArray,int>)), bl, SLOT(setUpdateIntervals(QMap<QByteArray,int>)));
     connect(Config::inst(), SIGNAL(proxyChanged(QNetworkProxy)), bl->transfer(), SLOT(setProxy(QNetworkProxy)));
     connect(Config::inst(), SIGNAL(measurementSystemChanged(QLocale::MeasurementSystem)), this, SLOT(statisticsUpdate()));
 
     findAction("view_show_input_errors")->setChecked(Config::inst()->showInputErrors());
 
-    findAction(Config::inst()->onlineStatus() ? "extras_net_online" : "extras_net_offline")->setChecked(true);
+    onlineStateChanged(Application::inst()->isOnline());
 
-    bl->setOnlineStatus(Config::inst()->onlineStatus());
     bl->setUpdateIntervals(Config::inst()->updateIntervals());
 
     connect(bl, SIGNAL(transferJobProgress(int,int)), this, SLOT(transferJobProgressUpdate(int,int)));
@@ -528,8 +524,6 @@ void FrameWork::translateActions()
         { "extras",                         tr("E&xtras"),                            0 },
         { "extras_update_database",         tr("Update Database"),                    0 },
         { "extras_configure",               tr("Configure..."),                       0 },
-        { "extras_net_online",              tr("Online Mode"),                        0 },
-        { "extras_net_offline",             tr("Offline Mode"),                       0 },
         { "window",                         tr("&Windows"),                           0 },
         { "help",                           tr("&Help"),                              0 },
 //        { "help_whatsthis",                 tr("What's this?"),                       tr("Shift+F1", "Help|WhatsThis") },
@@ -936,11 +930,6 @@ void FrameWork::createActions()
 
     a = newQAction(this, "extras_configure", false, this, SLOT(configure()));
     a->setMenuRole(QAction::PreferencesRole);
-
-    g = newQActionGroup(this, 0, true);
-    connect(g, SIGNAL(triggered(QAction *)), this, SLOT(setOnlineStatus(QAction *)));
-    (void) newQAction(g, "extras_net_online", true);
-    (void) newQAction(g, "extras_net_offline", true);
 
     //(void) newQAction(this, "help_whatsthis", false, this, SLOT(whatsThis()));
 
@@ -1503,14 +1492,13 @@ void FrameWork::configure(const char *page)
     d.exec();
 }
 
-void FrameWork::setOnlineStatus(QAction *act)
+void FrameWork::onlineStateChanged(bool isOnline)
 {
-    bool b = (act == findAction("extras_net_online"));
-
-    if (!b && m_running)
-        cancelAllTransfers();
-
-    Config::inst()->setOnlineStatus(b);
+    BrickLink::core()->setOnlineStatus(isOnline);
+    if (m_progress)
+        m_progress->setOnlineState(isOnline);
+    if (!isOnline)
+        cancelAllTransfers(true);
 }
 
 void FrameWork::showContextMenu(bool /*onitem*/, const QPoint &pos)
@@ -1554,9 +1542,9 @@ bool FrameWork::closeAllWindows()
     return true;
 }
 
-void FrameWork::cancelAllTransfers()
+void FrameWork::cancelAllTransfers(bool force)
 {
-    if (MessageBox::question(this, tr("Do you want to cancel all outstanding inventory, image and Price Guide transfers?"), MessageBox::Yes | MessageBox::No) == MessageBox::Yes) {
+    if (force || MessageBox::question(this, tr("Do you want to cancel all outstanding inventory, image and Price Guide transfers?"), MessageBox::Yes | MessageBox::No) == MessageBox::Yes) {
         BrickLink::core()->cancelPictureTransfers();
         BrickLink::core()->cancelPriceGuideTransfers();
     }

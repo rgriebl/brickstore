@@ -107,11 +107,12 @@ private slots:
     void configure();
     void configure(const char *);
 
-    void setOnlineStatus(QAction *);
-    void cancelAllTransfers();
+    void cancelAllTransfers(bool force = false);
     void showAddItemDialog();
 
     void setItemDetailHelper(Document::Item *docitem);
+
+    void onlineStateChanged(bool isOnline);
 
 protected:
    virtual void dragEnterEvent(QDragEnterEvent *e);

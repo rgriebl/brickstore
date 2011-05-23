@@ -21,14 +21,20 @@
 
 
 ProgressCircle::ProgressCircle(QWidget *parent)
-    : QWidget(parent), m_min(0), m_max(100), m_value(-1),
-      m_format(QLatin1String("%p%")), m_fill(0)
+    : QWidget(parent)
+    , m_min(0)
+    , m_max(100)
+    , m_value(-1)
+    , m_online(false)
+    , m_format(QLatin1String("%p%"))
+    , m_fill(0)
 {
     QSizePolicy sp;
     sp.setHorizontalPolicy(QSizePolicy::Preferred);
     sp.setVerticalPolicy(QSizePolicy::Preferred);
     sp.setHeightForWidth(true);
     setSizePolicy(sp);
+    setToolTip(toolTip());
 }
 
 int ProgressCircle::heightForWidth(int w) const
@@ -113,8 +119,8 @@ void ProgressCircle::paintEvent(QPaintEvent *)
     QRectF r(dx, dy, s, s);
     r.adjust(1, 1, -1, -1);
 
-    QColor outColor = palette().color(QPalette::Text);
-    QColor inColor = palette().color(QPalette::Active, QPalette::Highlight);
+    QColor outColor = palette().color(m_online ? QPalette::Active : QPalette::Disabled, QPalette::Text);
+    QColor inColor = palette().color(m_online ? QPalette::Active : QPalette::Disabled, QPalette::Highlight);
     inColor.setAlphaF(inColor.alphaF() * qreal(0.8));
 
     int fromAngle = 0, sweepAngle = 0;
@@ -157,7 +163,8 @@ void ProgressCircle::paintEvent(QPaintEvent *)
     }
     if (!m_icon.isNull()) {
         int d = inactive ? 0 : s / 4 - 1;
-        m_icon.paint(&p, r.adjusted(d, d, -d, -d).toRect(), Qt::AlignCenter, QIcon::Normal, QIcon::On);
+        m_icon.paint(&p, r.adjusted(d, d, -d, -d).toRect(), Qt::AlignCenter,
+                     m_online ? QIcon::Normal : QIcon::Disabled, QIcon::On);
     }
 }
 
@@ -187,6 +194,9 @@ QString ProgressCircle::format() const
 
 QString ProgressCircle::toolTip() const
 {
+    if (!m_online)
+        return tr("Offline");
+
     if ((m_max == 0 && m_min == 0) ||
         (m_value < m_min) ||
         (m_value == INT_MIN && m_min == INT_MIN))
@@ -209,4 +219,18 @@ QString ProgressCircle::toolTip() const
     int progress = (qreal(m_value) - m_min) * 100.0 / totalSteps;
     result.replace(QLatin1String("%p"), QString::number(progress));
     return result;
+}
+
+bool ProgressCircle::isOnline() const
+{
+    return m_online;
+}
+
+void ProgressCircle::setOnlineState(bool isOnline)
+{
+    if (m_online != isOnline) {
+        m_online = isOnline;
+        repaint();
+        setToolTip(toolTip());
+    }
 }

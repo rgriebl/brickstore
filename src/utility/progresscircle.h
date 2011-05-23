@@ -31,6 +31,7 @@ public:
     int maximum() const;
     int minimum() const;
     int value() const;
+    bool isOnline() const;
 
     void setFormat(const QString &format);
     QString format() const;
@@ -44,6 +45,7 @@ public slots:
     void setMinimum(int minimum);
     void setRange(int minimum, int maximum);
     void setValue(int value);
+    void setOnlineState(bool isOnline);
 
 signals:
     void valueChanged(int value);
@@ -58,6 +60,7 @@ private:
     int m_min;
     int m_max;
     int m_value;
+    bool m_online;
     QString m_format;
     QIcon m_icon;
     QGradient *m_fill;

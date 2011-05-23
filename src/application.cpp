@@ -23,6 +23,7 @@
 #include <QDesktopServices>
 #include <QLocalSocket>
 #include <QLocalServer>
+#include <QNetworkConfigurationManager>
 
 #if defined(Q_OS_WIN)
 #  include <windows.h>
@@ -69,6 +70,14 @@ Application::Application(bool rebuild_db_only, int _argc, char **_argv)
     m_has_alpha = rebuild_db_only ? false : (QPixmap::defaultDepth() >= 15);
     m_trans_qt = 0;
     m_trans_brickstore = 0;
+
+    m_ncm = new QNetworkConfigurationManager(this);
+    m_online = true;
+    networkConfigurationChanged();
+
+    connect(m_ncm, SIGNAL(configurationAdded(QNetworkConfiguration)), this, SLOT(networkConfigurationChanged()));
+    connect(m_ncm, SIGNAL(configurationChanged(QNetworkConfiguration)), this, SLOT(networkConfigurationChanged()));
+    connect(m_ncm, SIGNAL(configurationRemoved(QNetworkConfiguration)), this, SLOT(networkConfigurationChanged()));
 
     // check for an already running instance
     if (!rebuild_db_only) {
@@ -574,4 +583,26 @@ void Application::checkForUpdates()
     ProgressDialog d(&trans, FrameWork::inst());
     CheckForUpdates cfu(&d);
     d.exec();
+}
+
+void Application::networkConfigurationChanged()
+{
+    bool online = false;
+    foreach (const QNetworkConfiguration &nc, m_ncm->allConfigurations(QNetworkConfiguration::Active)) {
+        if (nc.purpose() == QNetworkConfiguration::PublicPurpose || nc.purpose() == QNetworkConfiguration::UnknownPurpose) {
+            if (!nc.name().startsWith(QLatin1String("vmnet"))) {
+                online = true;
+                break;
+            }
+        }
+    }
+    if (online != m_online) {
+        m_online = online;
+        emit onlineStateChanged(m_online);
+    }
+}
+
+bool Application::isOnline() const
+{
+    return m_online;
 }

@@ -17,9 +17,10 @@
 #include <QApplication>
 #include <QStringList>
 
-
 class FrameWork;
 class QTranslator;
+class QNetworkConfigurationManager;
+
 
 class Application : public QApplication {
     Q_OBJECT
@@ -37,6 +38,10 @@ public:
 
     bool pixmapAlphaSupported() const;
 
+    QNetworkConfigurationManager *networkConfigurationManager() const;
+
+    bool isOnline() const;
+
 public slots:
     void about();
     void checkForUpdates();
@@ -44,6 +49,7 @@ public slots:
 
 signals:
     void openDocument(const QString &);
+    void onlineStateChanged(bool isOnline);
 
 protected:
     virtual bool event(QEvent *e);
@@ -52,6 +58,7 @@ private slots:
     void doEmitOpenDocument();
     void rebuildDatabase();
     void clientMessage();
+    void networkConfigurationChanged();
 
 private:
     bool isClient(int timeout = 1000);
@@ -63,6 +70,9 @@ private:
     QStringList m_files_to_open;
     bool m_enable_emit;
     bool m_has_alpha;
+
+    bool m_online;
+    QNetworkConfigurationManager *m_ncm;
 
     QTranslator *m_trans_qt;
     QTranslator *m_trans_brickstore;
