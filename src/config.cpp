@@ -50,11 +50,6 @@ Config::Config()
     m_show_input_errors = value("/General/ShowInputErrors", true).toBool();
     m_measurement = (value("/General/MeasurementSystem").toString() == QLatin1String("imperial")) ? QLocale::ImperialSystem : QLocale::MetricSystem;
     m_translations_parsed = false;
-
-    if (isLocalCurrencySet()) {
-        QPair<QString, QString> syms = localCurrencySymbols();
-        Currency::setLocal(syms.first, syms.second, localCurrencyRate());
-    }
 }
 
 Config::~Config()
@@ -421,38 +416,14 @@ error:
     return false;
 }
 
-void Config::setLocalCurrency(const QString &symint, const QString &sym, double rate)
+void Config::setDefaultCurrencyCode(const QString &currencyCode)
 {
-    setValue("/General/Local/Active", true);
-    setValue("/General/Local/IntSymbol", symint);
-    setValue("/General/Local/Symbol", sym);
-    setValue("/General/Local/Rate", rate);
+    setValue("/Currency/Default", currencyCode);
 
-    Currency::setLocal(symint, sym, rate);
-
-    emit localCurrencyChanged();
+    emit defaultCurrencyCodeChanged(currencyCode);
 }
 
-void Config::unsetLocalCurrency()
+QString Config::defaultCurrencyCode() const
 {
-    setValue("/General/Local/Active", false);
-    Currency::setLocal(QLatin1String("USD"), QLatin1String("$"), 1.);
-
-    emit localCurrencyChanged();
-}
-
-bool Config::isLocalCurrencySet() const
-{
-    return value("/General/Local/Active", false).toBool();
-}
-
-double Config::localCurrencyRate() const
-{
-    return value("/General/Local/Rate", 1.).toDouble();
-}
-
-QPair<QString, QString> Config::localCurrencySymbols() const
-{
-    return qMakePair(value("/General/Local/IntSymbol", QLatin1String("USD")).toString(),
-                     value("/General/Local/Symbol", QLatin1String("$")).toString());
+    return value("/Currency/Default", QLatin1String("USD")).toString();
 }

@@ -46,7 +46,6 @@ TaskLinksWidget::TaskLinksWidget(QWidget *parent)
 
     connect(this, SIGNAL(linkActivated(const QString &)), this, SLOT(linkActivate(const QString &)));
     connect(this, SIGNAL(linkHovered(const QString &)), this, SLOT(linkHover(const QString &)));
-
 }
 
 void TaskLinksWidget::linkActivate(const QString &url)
@@ -125,7 +124,7 @@ TaskPriceGuideWidget::TaskPriceGuideWidget(QWidget *parent)
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
     connect(FrameWork::inst(), SIGNAL(windowActivated(Window *)), this, SLOT(windowUpdate(Window *)));
-    connect(this, SIGNAL(priceDoubleClicked(Currency)), this, SLOT(setPrice(Currency)));
+    connect(this, SIGNAL(priceDoubleClicked(double)), this, SLOT(setPrice(double)));
     fixParentDockWindow();
 }
 
@@ -137,6 +136,7 @@ void TaskPriceGuideWidget::windowUpdate(Window *win)
     if (m_win)
         connect(m_win, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
 
+    setCurrencyCode(m_win ? m_win->document()->currencyCode() : Config::inst()->defaultCurrencyCode());
     selectionUpdate(m_win ? m_win->selection() : Document::ItemList());
 }
 
@@ -147,7 +147,7 @@ void TaskPriceGuideWidget::selectionUpdate(const Document::ItemList &list)
     setPriceGuide(ok ? BrickLink::core()->priceGuide(list.front()->item(), list.front()->color(), true) : 0);
 }
 
-void TaskPriceGuideWidget::setPrice(Currency p)
+void TaskPriceGuideWidget::setPrice(double p)
 {
     if (m_win && (m_win->selection().count() == 1)) {
         Document::Item *pos = m_win->selection().front();
@@ -221,7 +221,6 @@ TaskInfoWidget::TaskInfoWidget(QWidget *parent)
     addWidget(m_text);
 
     connect(FrameWork::inst(), SIGNAL(windowActivated(Window *)), this, SLOT(windowUpdate(Window *)));
-    connect(Config::inst(), SIGNAL(localCurrencyChanged()), this, SLOT(refresh()));
     connect(Config::inst(), SIGNAL(measurementSystemChanged(QLocale::MeasurementSystem)), this, SLOT(refresh()));
 }
 
@@ -251,15 +250,16 @@ void TaskInfoWidget::selectionUpdate(const Document::ItemList &list)
 
         QString s;
         QString valstr, wgtstr;
+        QString ccode = m_win->document()->currencyCode();
 
         if (stat.value() != stat.minValue()) {
             valstr = QString("%1 (%2 %3)").
-                     arg(stat.value().toLocal(Currency::LocalSymbol)).
+                     arg(Currency::toString(stat.value(), ccode, Currency::LocalSymbol)).
                      arg(tr("min.")).
-                     arg(stat.minValue().toLocal(Currency::LocalSymbol));
+                     arg(Currency::toString(stat.minValue(), ccode, Currency::LocalSymbol));
         }
         else
-            valstr = stat.value().toLocal(Currency::LocalSymbol);
+            valstr = Currency::toString(stat.value(), ccode, Currency::LocalSymbol);
 
         if (stat.weight() == -DBL_MIN) {
             wgtstr = "-";

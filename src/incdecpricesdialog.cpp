@@ -16,13 +16,13 @@
 #include "incdecpricesdialog.h"
 
 
-IncDecPricesDialog::IncDecPricesDialog(QWidget *parent, Qt::WindowFlags fl)
-    : QDialog(parent, fl)
+IncDecPricesDialog::IncDecPricesDialog(const QString &currencycode, QWidget *parent, Qt::WindowFlags fl)
+    : QDialog(parent, fl), m_currencycode(currencycode)
 {
     setupUi(this);
     
     w_value->setText(QLatin1String("0"));
-    w_fixed->setText(Currency::symbol());
+    w_fixed->setText(Currency::localSymbol(currencycode));
 
     m_pos_percent_validator = new QDoubleValidator (0., 1000., 1, this);
     m_neg_percent_validator = new QDoubleValidator (0., 99.,   1, this);
@@ -48,16 +48,16 @@ void IncDecPricesDialog::updateValidators()
         w_value->setText(QLatin1String("0"));
     } else {
         w_value->setValidator(m_fixed_validator);
-        w_value->setText(Currency(0).toLocal());
+        w_value->setText(Currency::toString(0, m_currencycode));
     }
     checkValue();
 }
 
 
-Currency IncDecPricesDialog::fixed() const
+double IncDecPricesDialog::fixed() const
 {
     if (w_value->hasAcceptableInput() && w_fixed->isChecked()) {
-        Currency v = Currency::fromLocal(w_value->text());
+        double v = Currency::fromString(w_value->text());
         return w_increase->isChecked() ? v : -v;
     } else {
         return 0;

@@ -336,15 +336,15 @@ public:
     void setBulkQuantity(int q)        { m_bulk_quantity = qMax(1, q); }
     int tierQuantity(uint i) const     { return m_tier_quantity [i < 3 ? i : 0]; }
     void setTierQuantity(uint i, int q){ m_tier_quantity [i < 3 ? i : 0] = q; }
-    Currency price() const              { return m_price; }
-    void setPrice(Currency p)           { m_price = p; }
-    Currency origPrice() const          { return m_orig_price; }
-    void setOrigPrice(Currency p)       { m_orig_price = p; }
-    Currency tierPrice(uint i) const    { return m_tier_price [i < 3 ? i : 0]; }
-    bool setTierPrice(uint i, Currency p){ if (p < 0) return false; m_tier_price [i < 3 ? i : 0] = p; return true; }
+    double price() const               { return m_price; }
+    void setPrice(double p)            { m_price = p; }
+    double origPrice() const           { return m_orig_price; }
+    void setOrigPrice(double p)        { m_orig_price = p; }
+    double tierPrice(uint i) const     { return m_tier_price [i < 3 ? i : 0]; }
+    bool setTierPrice(uint i, double p){ if (p < 0) return false; m_tier_price [i < 3 ? i : 0] = p; return true; }
     int sale() const                   { return m_sale; }
     void setSale(int s)                { m_sale = qMax(-99, qMin(100, s)); }
-    Currency total() const              { return m_price * m_quantity; }
+    double total() const               { return m_price * m_quantity; }
 
     uint lotId() const                 { return m_lot_id; }
     void setLotId(uint lid)            { m_lot_id = lid; }
@@ -414,13 +414,13 @@ private:
     int              m_tier_quantity [3];
     int              m_sale;
 
-    Currency          m_price;
-    Currency          m_tier_price [3];
+    double           m_price;
+    double           m_tier_price [3];
 
     float            m_weight;
     uint             m_lot_id;
 
-    Currency          m_orig_price;
+    double           m_orig_price;
     int              m_orig_quantity;
 
     friend QDataStream &operator << (QDataStream &ds, const InvItem &ii);
@@ -454,11 +454,11 @@ public:
     //QString buyer() const     { return m_type == Received ? m_other : QString(); }
     //QString seller() const    { return m_type == Placed ? m_other : QString(); }
     QString other() const       { return m_other; }
-    Currency shipping() const   { return m_shipping; }
-    Currency insurance() const  { return m_insurance; }
-    Currency delivery() const   { return m_delivery; }
-    Currency credit() const     { return m_credit; }
-    Currency grandTotal() const { return m_grand_total; }
+    double shipping() const     { return m_shipping; }
+    double insurance() const    { return m_insurance; }
+    double delivery() const     { return m_delivery; }
+    double credit() const       { return m_credit; }
+    double grandTotal() const   { return m_grand_total; }
     QString status() const      { return m_status; }
     QString payment() const     { return m_payment; }
     QString remarks() const     { return m_remarks; }
@@ -470,11 +470,11 @@ public:
     void setStatusChange(const QDateTime &dt) { m_status_change = dt; }
     void setBuyer(const QString &str)         { m_other = str; m_type = Received; }
     void setSeller(const QString &str)        { m_other = str; m_type = Placed; }
-    void setShipping(const Currency &m)       { m_shipping = m; }
-    void setInsurance(const Currency &m)      { m_insurance = m; }
-    void setDelivery(const Currency &m)       { m_delivery = m; }
-    void setCredit(const Currency &m)         { m_credit = m; }
-    void setGrandTotal(const Currency &m)     { m_grand_total = m; }
+    void setShipping(double m)                { m_shipping = m; }
+    void setInsurance(double m)               { m_insurance = m; }
+    void setDelivery(double m)                { m_delivery = m; }
+    void setCredit(double m)                  { m_credit = m; }
+    void setGrandTotal(const double &m)       { m_grand_total = m; }
     void setStatus(const QString &str)        { m_status = str; }
     void setPayment(const QString &str)       { m_payment = str; }
     void setRemarks(const QString &str)       { m_remarks = str; }
@@ -487,11 +487,11 @@ private:
     QDateTime m_date;
     QDateTime m_status_change;
     QString   m_other;
-    Currency  m_shipping;
-    Currency  m_insurance;
-    Currency  m_delivery;
-    Currency  m_credit;
-    Currency  m_grand_total;
+    double    m_shipping;
+    double    m_insurance;
+    double    m_delivery;
+    double    m_credit;
+    double    m_grand_total;
     QString   m_status;
     QString   m_payment;
     QString   m_remarks;
@@ -512,7 +512,7 @@ public:
 
     int quantity(Time t, Condition c) const            { return m_quantities [t < TimeCount ? t : 0][c < ConditionCount ? c : 0]; }
     int lots(Time t, Condition c) const                { return m_lots [t < TimeCount ? t : 0][c < ConditionCount ? c : 0]; }
-    Currency price(Time t, Condition c, Price p) const { return m_prices [t < TimeCount ? t : 0][c < ConditionCount ? c : 0][p < PriceCount ? p : 0]; }
+    double price(Time t, Condition c, Price p) const { return m_prices [t < TimeCount ? t : 0][c < ConditionCount ? c : 0][p < PriceCount ? p : 0]; }
 
     virtual ~PriceGuide();
 
@@ -527,7 +527,7 @@ private:
 
     int           m_quantities [TimeCount][ConditionCount];
     int           m_lots       [TimeCount][ConditionCount];
-    Currency      m_prices     [TimeCount][ConditionCount][PriceCount];
+    double        m_prices     [TimeCount][ConditionCount][PriceCount];
 
 private:
     PriceGuide(const Item *item, const Color *color);
@@ -853,8 +853,6 @@ class Core : public QObject {
     Q_OBJECT
 public:
     virtual ~Core();
-
-    const QLocale &cLocale() const   { return m_c_locale; }
 
     QUrl url(UrlList u, const void *opt = 0, const void *opt2 = 0);
 

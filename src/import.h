@@ -262,15 +262,15 @@ private slots:
                                         else if (tag == QLatin1String("ORDERSTATUSCHANGED"))
                                             order->setStatusChange(QDateTime(ymd2date(val)));
                                         else if (tag == QLatin1String("ORDERSHIPPING"))
-                                            order->setShipping(Currency::fromUSD(val));
+                                            order->setShipping(Currency::fromString(val));
                                         else if (tag == QLatin1String("ORDERINSURANCE"))
-                                            order->setInsurance(Currency::fromUSD(val));
+                                            order->setInsurance(Currency::fromString(val));
                                         else if (tag == QLatin1String("ORDERDELIVERY"))
-                                            order->setDelivery(Currency::fromUSD(val));
+                                            order->setDelivery(Currency::fromString(val));
                                         else if (tag == QLatin1String("ORDERCREDIT"))
-                                            order->setCredit(Currency::fromUSD(val));
+                                            order->setCredit(Currency::fromString(val));
                                         else if (tag == QLatin1String("GRANDTOTAL"))
-                                            order->setGrandTotal(Currency::fromUSD(val));
+                                            order->setGrandTotal(Currency::fromString(val));
                                         else if (tag == QLatin1String("ORDERSTATUS"))
                                             order->setStatus(val);
                                         else if (tag ==QLatin1String( "PAYMENTTYPE"))
@@ -487,7 +487,7 @@ private slots:
                             if (m_currencycode == QLatin1String("US $"))
                                 m_currencycode = QLatin1String("USD");
                         }
-                        Currency price = QLocale::c().toDouble(rx_qty_price.cap(4));
+                        double price = QLocale::c().toDouble(rx_qty_price.cap(4));
 
                         BrickLink::Condition cond = (str.indexOf(str_cond) >= 0 ? BrickLink::New : BrickLink::Used);
 

@@ -288,7 +288,7 @@ Window::Window(Document *doc, QWidget *parent)
     connect(Config::inst(), SIGNAL(showInputErrorsChanged(bool)), this, SLOT(updateErrorMask()));
     connect(Config::inst(), SIGNAL(measurementSystemChanged(QLocale::MeasurementSystem)), w_list->viewport(), SLOT(update()));
 
-    connect(Config::inst(), SIGNAL(localCurrencyChanged()), w_list->viewport(), SLOT(update()));
+    //connect(Config::inst(), SIGNAL(localCurrencyChanged()), w_list->viewport(), SLOT(update()));
 
     connect(m_doc, SIGNAL(titleChanged(const QString &)), this, SLOT(updateCaption()));
     connect(m_doc, SIGNAL(modificationChanged(bool)), this, SLOT(updateCaption()));
@@ -821,10 +821,10 @@ void Window::on_edit_price_set_triggered()
     if (selection().isEmpty())
         return;
 
-    QString price = selection().front()->price().toLocal(Currency::NoSymbol);
+    QString price = Currency::toString(selection().front()->price(), m_doc->currencyCode(), Currency::NoSymbol);
 
-    if (MessageBox::getString(this, tr("Enter the new price for all selected items:"), Currency::symbol(Currency::LocalSymbol), price, new CurrencyValidator(0, 10000, 3, 0))) {
-        setOrToggle<Currency>::set(this, tr("Set price on %1 items"), &Document::Item::price, &Document::Item::setPrice, Currency::fromLocal(price));
+    if (MessageBox::getString(this, tr("Enter the new price for all selected items:"), Currency::localSymbol(m_doc->currencyCode()), price, new CurrencyValidator(0, 10000, 3, 0))) {
+        setOrToggle<double>::set(this, tr("Set price on %1 items"), &Document::Item::price, &Document::Item::setPrice, Currency::fromString(price));
     }
 }
 
@@ -839,7 +839,7 @@ void Window::on_edit_price_round_triggered()
     WindowProgress wp(w_list);
 
     foreach(Document::Item *pos, selection()) {
-        Currency p = ((pos->price() + Currency (0.005)) / 10) * 10;
+        double p = ((pos->price() + double(0.005)) / 10) * 10;
 
         if (p != pos->price()) {
             Document::Item item = *pos;
@@ -886,7 +886,7 @@ void Window::on_edit_price_to_priceguide_triggered()
                 pg->addRef();
             }
             else if (pg && pg->valid()) {
-                Currency p = pg->price(m_settopg_time, item->condition(), m_settopg_price);
+                double p = pg->price(m_settopg_time, item->condition(), m_settopg_price);
 
                 if (p != item->price()) {
                     Document::Item newitem = *item;
@@ -914,7 +914,7 @@ void Window::priceGuideUpdated(BrickLink::PriceGuide *pg)
 {
     if (m_settopg_list && pg) {
         foreach(Document::Item *item, m_settopg_list->values(pg)) {
-            Currency p = pg->valid() ? pg->price(m_settopg_time, item->condition(), m_settopg_price) : 0;
+            double p = pg->valid() ? pg->price(m_settopg_time, item->condition(), m_settopg_price) : 0;
 
             if (p != item->price()) {
                 Document::Item newitem = *item;
@@ -946,10 +946,10 @@ void Window::on_edit_price_inc_dec_triggered()
     if (selection().isEmpty())
         return;
 
-    IncDecPricesDialog dlg(this);
+    IncDecPricesDialog dlg(m_doc->currencyCode(), this);
 
     if (dlg.exec() == QDialog::Accepted) {
-        Currency fixed   = dlg.fixed();
+        double fixed     = dlg.fixed();
         double percent   = dlg.percent();
         double factor    = (1.+ percent / 100.);
         bool tiers       = dlg.applyToTiers();
@@ -962,7 +962,7 @@ void Window::on_edit_price_inc_dec_triggered()
         foreach(Document::Item *pos, selection()) {
             Document::Item item = *pos;
 
-            Currency p = item.price();
+            double p = item.price();
 
             if (percent != 0)     p *= factor;
             else if (fixed != 0)  p += fixed;
@@ -1501,7 +1501,7 @@ void Window::on_edit_setmatch_triggered()
     }
 }
 
-void Window::setPrice(Currency d)
+void Window::setPrice(double d)
 {
     if (selection().count() == 1) {
         Document::Item *pos = selection().front();

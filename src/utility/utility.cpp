@@ -452,19 +452,29 @@ QPair<QString, QString> Utility::currencySymbolsForCountry(QLocale::Country c)
     for (const CurrencyData *p = currency_data; p->symbol_int[0]; ++p) {
         if (p->country == c) {
             result.first  = QLatin1String(p->symbol_int);
-            result.second = QString::fromRawData(p->symbol+1, *((qint16 *)p->symbol));
+            result.second = QString::fromRawData(p->symbol + 1, *((qint16 *) p->symbol));
             break;
         }
     }
     return result;
 }
 
+QString Utility::localForInternationalCurrencySymbol(const QString &international_symbol)
+{
+    QString local_symbol = international_symbol;
+
+    for (const CurrencyData *p = currency_data; p->symbol_int[0]; ++p) {
+        if (QLatin1String(p->symbol_int) == international_symbol)
+            return QString::fromRawData(p->symbol + 1, *((qint16 *) p->symbol));
+    }
+    return local_symbol;
+}
+
 QLocale::Country Utility::countryForCurrencySymbol(const QString &international_symbol)
 {
     for (const CurrencyData *p = currency_data; p->symbol_int[0]; ++p) {
-        if (QLatin1String(p->symbol_int) == international_symbol) {
+        if (QLatin1String(p->symbol_int) == international_symbol)
             return p->country;
-        }
     }
     return QLocale::AnyCountry;
 }

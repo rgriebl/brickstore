@@ -126,14 +126,11 @@ AddItemDialog::AddItemDialog(QWidget *parent)
 
     connect(w_add, SIGNAL(clicked()), this, SLOT(addClicked()));
 
-    connect(w_price_guide, SIGNAL(priceDoubleClicked(Currency)), this, SLOT(setPrice(Currency)));
+    connect(w_price_guide, SIGNAL(priceDoubleClicked(double)), this, SLOT(setPrice(double)));
 
     connect(Config::inst(), SIGNAL(simpleModeChanged(bool)), this, SLOT(setSimpleMode(bool)));
-    connect(Config::inst(), SIGNAL(localCurrencyChanged()), this, SLOT(updateMonetary()));
 
     new QShortcut(Qt::Key_Escape, this, SLOT(close()));
-
-    updateMonetary();
 
     if (Config::inst()->value("/Defaults/AddItems/Condition", "new").toString() != "new")
         w_radio_used->setChecked(true);
@@ -152,7 +149,7 @@ void AddItemDialog::languageChange()
 {
     Ui::AddItemDialog::retranslateUi(this);
     w_add->setText(tr("Add"));
-    updateMonetary();
+    updateCurrencyCode();
     updateCaption();
 }
 
@@ -168,17 +165,32 @@ void AddItemDialog::updateCaption()
     setWindowTitle(m_caption_fmt.arg(m_window ? m_window->document()->title() : QString()));
 }
 
+void AddItemDialog::updateCurrencyCode()
+{
+    m_currency_code = m_window ? m_window->document()->currencyCode() : QLatin1String("USD");
+
+    QString local = Currency::localSymbol(m_currency_code);
+
+    w_label_currency->setText(m_price_label_fmt.arg(local));
+    w_radio_currency->setText(m_currency_label_fmt.arg(local));
+    //w_price->setText(Currency::toString(0, m_currencycode));
+}
+
 void AddItemDialog::attach(Window *w)
 {
-    if (m_window)
+    if (m_window) {
         disconnect(m_window->document(), SIGNAL(titleChanged(const QString &)), this, SLOT(updateCaption()));
+        disconnect(m_window->document(), SIGNAL(currencyCodeChanged(const QString &)), this, SLOT(updateCurrencyCode()));
+    }
     m_window = w;
-    if (m_window)
+    if (m_window) {
         connect(m_window->document(), SIGNAL(titleChanged(const QString &)), this, SLOT(updateCaption()));
-
+        connect(m_window->document(), SIGNAL(currencyCodeChanged(const QString &)), this, SLOT(updateCurrencyCode()));
+    }
     setEnabled(m_window);
 
     updateCaption();
+    updateCurrencyCode();
 }
 
 void AddItemDialog::wheelEvent(QWheelEvent *e)
@@ -236,14 +248,6 @@ void AddItemDialog::setSimpleMode(bool b)
     }
 }
 
-void AddItemDialog::updateMonetary()
-{
-    w_label_currency->setText(m_price_label_fmt.arg(Currency::symbol()));
-    w_radio_currency->setText(m_currency_label_fmt.arg(Currency::symbol()));
-    w_price->setText(Currency(0).toLocal());
-}
-
-
 void AddItemDialog::updateItemAndColor()
 {
     showItemInColor(w_select_item->currentItem(), w_select_color->currentColor());
@@ -266,12 +270,12 @@ void AddItemDialog::showItemInColor(const BrickLink::Item *it, const BrickLink::
 
 void AddItemDialog::showTotal()
 {
-    Currency tot = 0;
+    double tot = 0;
 
     if (w_price->hasAcceptableInput() && w_qty->hasAcceptableInput())
-        tot = Currency::fromLocal(w_price->text()) * w_qty->text().toInt();
+        tot = Currency::fromString(w_price->text()) * w_qty->text().toInt();
 
-    w_total->setText(tot.toLocal());
+    w_total->setText(Currency::toString(tot, m_currency_code));
 
     checkAddPossible();
 }
@@ -279,7 +283,7 @@ void AddItemDialog::showTotal()
 void AddItemDialog::setTierType(int type)
 {
     QValidator *valid = (type == 0) ? m_percent_validator : m_money_validator;
-    QString text = (type == 0) ? QString("0") : Currency (0).toLocal();
+    QString text = (type == 0) ? QString("0") : Currency::toString(0, m_currency_code);
 
     for (int i = 0; i < 3; i++) {
         w_tier_price [i]->setValidator(valid);
@@ -301,17 +305,17 @@ void AddItemDialog::checkTieredPrices()
     checkAddPossible();
 }
 
-Currency AddItemDialog::tierPriceValue(int i)
+double AddItemDialog::tierPriceValue(int i)
 {
     if (i < 0 || i > 2)
         return 0.;
 
-    Currency val;
+    double val;
 
     if (m_tier_type->checkedId() == 0)     // %
-        val = Currency::fromLocal(w_price->text()) * (100 - w_tier_price [i]->text().toInt()) / 100;
+        val = Currency::fromString(w_price->text()) * (100 - w_tier_price [i]->text().toInt()) / 100;
     else // $
-        val = Currency::fromLocal(w_tier_price [i]->text());
+        val = Currency::fromString(w_tier_price [i]->text());
 
     return val;
 }
@@ -337,7 +341,7 @@ bool AddItemDialog::checkAddPossible()
             acceptable &= (w_tier_qty [i-1]->text().toInt() < w_tier_qty [i]->text().toInt()) &&
                           (tierPriceValue(i - 1) > tierPriceValue(i));
         else
-            acceptable &= (Currency::fromLocal(w_price->text()) > tierPriceValue(i));
+            acceptable &= (Currency::fromString(w_price->text()) > tierPriceValue(i));
     }
 
 
@@ -353,7 +357,7 @@ void AddItemDialog::addClicked()
     BrickLink::InvItem *ii = new BrickLink::InvItem(w_select_color->currentColor(), w_select_item->currentItem());
 
     ii->setQuantity(w_qty->text().toInt());
-    ii->setPrice(Currency::fromLocal(w_price->text()));
+    ii->setPrice(Currency::fromString(w_price->text()));
     ii->setBulkQuantity(w_bulk->text().toInt());
     ii->setCondition(static_cast <BrickLink::Condition>(m_condition->checkedId()));
     ii->setRemarks(w_remarks->text());
@@ -370,8 +374,8 @@ void AddItemDialog::addClicked()
     m_window->addItem(ii, w_merge->isChecked() ? Window::MergeAction_Force | Window::MergeKeep_Old : Window::MergeAction_None);
 }
 
-void AddItemDialog::setPrice(Currency d)
+void AddItemDialog::setPrice(double d)
 {
-    w_price->setText(d.toLocal());
+    w_price->setText(Currency::toString(d, m_currency_code));
     checkAddPossible();
 }

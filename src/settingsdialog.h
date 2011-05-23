@@ -34,16 +34,16 @@ public slots:
 protected slots:
     void selectDocDir();
     void resetUpdateIntervals();
-    void getRateFromECB();
-    void gotRateFromECB(bool ok);
+    void currenciesUpdated();
+    void currentCurrencyChanged(const QString &);
 
 protected:
     void load();
     void save();
 
 private:
-    QHttp *m_http;
-    QBuffer *m_buffer;
+    QString m_currency_status_fmt;
+    QString m_preferedCurrency;
 };
 
 #endif

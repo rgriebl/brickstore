@@ -40,12 +40,15 @@ public:
 
     virtual QSize sizeHint() const;
 
+    QString currencyCode() const;
+
 public slots:
     void setLayout(Layout l);
     virtual void setPriceGuide(BrickLink::PriceGuide *pg);
+    void setCurrencyCode(const QString &code);
 
 signals:
-    void priceDoubleClicked(Currency p);
+    void priceDoubleClicked(double p);
 
 protected:
     void recalcLayout();

@@ -22,9 +22,9 @@ class IncDecPricesDialog : public QDialog, private Ui::IncDecPricesDialog {
     Q_OBJECT
 
 public:
-    IncDecPricesDialog(QWidget *parent = 0, Qt::WindowFlags f = 0);
+    IncDecPricesDialog(const QString &currencycode, QWidget *parent = 0, Qt::WindowFlags f = 0);
 
-    Currency fixed() const;
+    double fixed() const;
     double percent() const;
     bool applyToTiers() const;
 
@@ -36,6 +36,7 @@ private:
     QDoubleValidator *m_pos_percent_validator;
     QDoubleValidator *m_neg_percent_validator;
     QDoubleValidator *m_fixed_validator;
+    QString m_currencycode;
 };
 
 #endif

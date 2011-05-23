@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>464</width>
-    <height>341</height>
+    <width>610</width>
+    <height>398</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,6 +27,9 @@
        <string>&amp;General</string>
       </attribute>
       <layout class="QFormLayout" name="formLayout_7">
+       <property name="fieldGrowthPolicy">
+        <enum>QFormLayout::FieldsStayAtSizeHint</enum>
+       </property>
        <item row="0" column="0">
         <widget class="QLabel" name="label_8">
          <property name="text">
@@ -37,326 +40,14 @@
        <item row="0" column="1">
         <widget class="QComboBox" name="w_language"/>
        </item>
-       <item row="1" column="0">
+       <item row="2" column="0">
         <widget class="QLabel" name="label_9">
          <property name="text">
           <string>Weights</string>
          </property>
         </widget>
        </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="label_27">
-         <property name="text">
-          <string>Currency</string>
-         </property>
-        </widget>
-       </item>
        <item row="2" column="1">
-        <widget class="QWidget" name="widget_2" native="true">
-         <layout class="QVBoxLayout" name="verticalLayout_5">
-          <property name="margin">
-           <number>0</number>
-          </property>
-          <item>
-           <widget class="QRadioButton" name="w_rate_none">
-            <property name="text">
-             <string>No exchange rate</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QRadioButton" name="w_rate_fixed">
-            <property name="text">
-             <string>Fixed exchange rate</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QWidget" name="widget_4" native="true">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <layout class="QHBoxLayout" name="horizontalLayout">
-             <property name="margin">
-              <number>0</number>
-             </property>
-             <item>
-              <widget class="QLabel" name="label_29">
-               <property name="text">
-                <string>USD 1 =</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QComboBox" name="w_currency">
-               <property name="editable">
-                <bool>true</bool>
-               </property>
-               <item>
-                <property name="text">
-                 <string>EUR</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>JPY</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>BGN</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>CZK</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>DKK</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>EEK</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>GBP</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>HUF</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>LTL</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>LVL</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>PLN</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>RON</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>SEK</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>SKK</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>CHF</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>ISK</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>NOK</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>HRK</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>RUB</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>TRY</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>AUD</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>BRL</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>CAD</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>CNY</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>HKD</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>IDR</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>KRW</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>MXN</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>MYR</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>NZD</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>PHP</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>SGD</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>THB</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>ZAR</string>
-                </property>
-               </item>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLineEdit" name="w_rate"/>
-             </item>
-             <item>
-              <widget class="QPushButton" name="w_rate_ecb">
-               <property name="toolTip">
-                <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Download the current exchange rate from the &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;European Central Bank&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-               </property>
-               <property name="text">
-                <string>Get from ECB</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="label_28">
-         <property name="text">
-          <string>Interface</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1">
-        <widget class="QCheckBox" name="w_openbrowser">
-         <property name="text">
-          <string>Open a Web-Browser window when exporting to the clipboard</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="1">
-        <widget class="QCheckBox" name="w_closeempty">
-         <property name="text">
-          <string>Close empty documents without confirmation</string>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="0">
-        <widget class="QLabel" name="label_30">
-         <property name="text">
-          <string>Document Directory</string>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="1">
-        <layout class="QHBoxLayout" name="horizontalLayout_3">
-         <item>
-          <widget class="QLineEdit" name="w_docdir">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QToolButton" name="w_docdir_select">
-           <property name="icon">
-            <iconset>
-             <normaloff>:/images/16x16/file_open.png</normaloff>:/images/16x16/file_open.png</iconset>
-           </property>
-           <property name="autoRaise">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item row="6" column="1">
-        <spacer name="verticalSpacer_4">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="1" column="1">
         <widget class="QWidget" name="widget" native="true">
          <property name="minimumSize">
           <size>
@@ -399,6 +90,109 @@ p, li { white-space: pre-wrap; }
            </spacer>
           </item>
          </layout>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <widget class="QWidget" name="widget_2" native="true">
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <property name="margin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QComboBox" name="w_currency">
+            <property name="editable">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="w_currency_status">
+            <property name="text">
+             <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Lucida Grande'; font-size:13pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;%1 &lt;a href=&quot;app://reload&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;Reload&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="textFormat">
+             <enum>Qt::RichText</enum>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <widget class="QLabel" name="label_28">
+         <property name="text">
+          <string>Interface</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="1">
+        <widget class="QCheckBox" name="w_openbrowser">
+         <property name="text">
+          <string>Open a Web-Browser window when exporting to the clipboard</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="1">
+        <widget class="QCheckBox" name="w_closeempty">
+         <property name="text">
+          <string>Close empty documents without confirmation</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="0">
+        <widget class="QLabel" name="label_30">
+         <property name="text">
+          <string>Document Directory</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="1">
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <item>
+          <widget class="QLineEdit" name="w_docdir">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="w_docdir_select">
+           <property name="icon">
+            <iconset>
+             <normaloff>:/images/16x16/file_open.png</normaloff>:/images/16x16/file_open.png</iconset>
+           </property>
+           <property name="autoRaise">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="9" column="1">
+        <spacer name="verticalSpacer_4">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="5" column="0">
+        <widget class="QLabel" name="label_27">
+         <property name="text">
+          <string>Default currency</string>
+         </property>
         </widget>
        </item>
       </layout>
@@ -795,22 +589,6 @@ p, li { white-space: pre-wrap; }
     <hint type="destinationlabel">
      <x>567</x>
      <y>426</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>w_rate_none</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>widget_4</receiver>
-   <slot>setDisabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>172</x>
-     <y>96</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>224</x>
-     <y>148</y>
     </hint>
    </hints>
   </connection>

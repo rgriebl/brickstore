@@ -43,7 +43,7 @@ double stringToWeight(const QString &s, QLocale::MeasurementSystem ms);
 
 QPair<QString, QString> currencySymbolsForCountry(QLocale::Country c);
 QLocale::Country countryForCurrencySymbol(const QString &international_symbol);
-
+QString localForInternationalCurrencySymbol(const QString &international_symbol);
 } // namespace Utility
 
 #endif

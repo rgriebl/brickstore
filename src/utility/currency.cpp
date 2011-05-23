@@ -22,94 +22,216 @@
 #include <QLineEdit>
 #include <QKeyEvent>
 #include <QDataStream>
+#include <QHttp>
+#include <QBuffer>
+#include <QXmlStreamReader>
 
 #include "config.h"
 #include "utility.h"
 #include "currency.h"
+#include "messagebox.h"
+#include "framework.h"
 
 
-
-QDataStream &operator<<(QDataStream &s, const Currency &m)
+// all rates as downloaded are relative to the Euro, but
+// we need everything relative to the US Dollar
+static void baseConvert(QMap<QString, qreal> &rates)
 {
-    s << m.val; return s;
+    QMap<QString, qreal>::iterator usd_it = rates.find(QLatin1String("USD"));
+
+    if (usd_it == rates.end()) {
+        rates.clear();
+        return;
+    }
+    qreal usd_eur = qreal(1) / usd_it.value();
+
+    for (QMap<QString, qreal>::iterator it = rates.begin(); it != rates.end(); ++it)
+        it.value() = (it == usd_it) ? 1 : it.value() *= usd_eur;
+
+    rates.insert(QLatin1String("EUR"), usd_eur);
 }
 
-QDataStream &operator>>(QDataStream &s, Currency &m)
+
+Currency *Currency::s_inst = 0;
+
+Currency::Currency()
+    : m_http(0), m_buffer(0)
 {
-    s >> m.val; return s;
+    m_lastUpdate = Config::inst()->value("/Rates/LastUpdate").toDateTime();
+    QStringList rates = Config::inst()->value("/Rates/Normal").toString().split(QLatin1Char(','));
+    QStringList customRates = Config::inst()->value("/Rates/Custom").toString().split(QLatin1Char(','));
+
+    parseRates(rates, m_rates);
+    parseRates(customRates, m_customRates);
 }
 
-QString Currency::s_symint = QLatin1String("USD");
-QString Currency::s_sym = QLatin1String("$");
-double  Currency::s_rate = 1;
-
-double Currency::rate()
+Currency::~Currency()
 {
-    return s_rate;
+    Config::inst()->setValue("/Rates/LastUpdate", m_lastUpdate);
+
+    QStringList sl;
+    QMap<QString, qreal>::const_iterator it;
+    for (it = m_rates.begin(); it != m_rates.end(); ++it) {
+        QString s = QLatin1String("%1|%2");
+        sl << s.arg(it.key()).arg(it.value());
+    }
+    Config::inst()->setValue("/Rates/Normal", sl.join(QLatin1String(",")));
+
+    sl.clear();
+    for (it = m_customRates.begin(); it != m_customRates.end(); ++it) {
+        QString s = QLatin1String("%1|%2");
+        sl << s.arg(it.key()).arg(it.value());
+    }
+    Config::inst()->setValue("/Rates/Custom", sl.join(QLatin1String(",")));
+
+    s_inst = 0;
 }
 
-QString Currency::symbol(CurrencySymbol cs)
+Currency *Currency::inst()
 {
-    return cs == LocalSymbol ? s_sym : cs == InternationalSymbol ? s_symint : QString();
+    if (!s_inst)
+        s_inst = new Currency;
+    return s_inst;
 }
 
-void Currency::setLocal(const QString &symint, const QString &sym, double rate_to_usd)
+void Currency::parseRates(const QStringList &ratesList, QMap<QString, double> &ratesMap)
 {
-    s_symint = symint;
-    s_sym    = sym;
-    s_rate   = rate_to_usd;
+    foreach (QString s, ratesList) {
+        QStringList sl = s.split(QLatin1Char('|'));
+        if (sl.count() == 2) {
+            QString sym = sl[0];
+            qreal rate = sl[1].toDouble();
+
+            if (!sym.isEmpty() && rate > 0)
+                ratesMap.insert(sym, rate);
+        }
+    }
 }
 
-Currency Currency::fromUSD(const QString &str)
+
+QStringList Currency::currencyCodes() const
 {
-    return Currency(QLocale::c().toDouble(str));
+    return m_rates.keys();
 }
 
-Currency Currency::fromLocal(const QString &str)
+QMap<QString, qreal> Currency::rates() const
+{
+    return m_rates;
+}
+
+QMap<QString, qreal> Currency::customRates() const
+{
+    return m_customRates;
+}
+
+qreal Currency::rate(const QString &currencyCode) const
+{
+    return m_rates.value(currencyCode);
+}
+
+qreal Currency::customRate(const QString &currencyCode) const
+{
+    return m_customRates.value(currencyCode);
+}
+
+void Currency::setCustomRate(const QString &currencyCode, qreal rate)
+{
+    m_customRates.insert(currencyCode, rate);
+}
+
+void Currency::unsetCustomRate(const QString &currencyCode)
+{
+    m_customRates.remove(currencyCode);
+}
+
+void Currency::updateRates()
+{
+    if (m_buffer && m_buffer->isOpen())
+        return;
+
+    if (!m_http) {
+        m_http = new QHttp(this);
+        connect(m_http, SIGNAL(done(bool)), this, SLOT(updateRatesDone(bool)));
+        m_buffer = new QBuffer(m_http);
+    }
+    m_buffer->open(QIODevice::ReadWrite | QIODevice::Truncate);
+    m_http->setHost(QLatin1String("www.ecb.europa.eu"));
+    m_http->get(QLatin1String("/stats/eurofxref/eurofxref-daily.xml"), m_buffer);
+}
+
+void Currency::updateRatesDone(bool error)
+{
+    m_buffer->close();
+    if (error) {
+        MessageBox::warning(FrameWork::inst(), tr("There was an error downloading the exchange rates from the ECB server:<br>%2").arg(m_http->errorString()));
+    } else {
+        QXmlStreamReader reader(m_buffer->data());
+        QMap<QString, qreal> newRates;
+        QLocale c = QLocale::c();
+
+        while (!reader.atEnd()) {
+            if (reader.readNext() == QXmlStreamReader::StartElement &&
+                reader.name() == QLatin1String("Cube") &&
+                reader.attributes().hasAttribute(QLatin1String("currency"))) {
+
+                QString currency = reader.attributes().value(QLatin1String("currency")).toString();
+                qreal rate = c.toDouble(reader.attributes().value(QLatin1String("rate")).toString());
+
+                if (currency.length() == 3 && rate > 0)
+                    newRates.insert(currency, rate);
+            }
+        }
+        baseConvert(newRates);
+
+        if (reader.hasError() || newRates.isEmpty()) {
+            QString err;
+            if (reader.hasError())
+                err = tr("%1 (line %2, column %3)").arg(reader.errorString()).arg(reader.lineNumber()).arg(reader.columnNumber());
+            else
+                err = tr("no currency data found");
+            MessageBox::warning(FrameWork::inst(), tr("There was an error parsing the exchange rates from the ECB server:\n%1").arg(err));
+            qWarning() << m_buffer->data();
+        } else {
+            m_rates = newRates;
+            m_lastUpdate = QDateTime::currentDateTime();
+            emit ratesChanged();
+        }
+    }
+    m_buffer->buffer().clear();
+}
+
+QDateTime Currency::lastUpdate() const
+{
+    return m_lastUpdate;
+}
+
+QString Currency::toString(double value, const QString &currencyCode, Symbol cs, int precision)
+{
+    QLocale loc;
+    loc.setNumberOptions(QLocale::OmitGroupSeparator);
+    QString s = loc.toString(value, 'f', precision);
+
+    if (cs == LocalSymbol)
+        return localSymbol(currencyCode) + QLatin1Char(' ') + s;
+    else if (cs == InternationalSymbol)
+        return currencyCode + QLatin1Char(' ') + s;
+    else
+        return s;
+}
+
+double Currency::fromString(const QString &str)
 {
     QString s = str.trimmed();
 
     if (s.isEmpty())
-        return Currency();
-    else if (s.startsWith(s_symint))
-        s = s.mid(s_symint.length()).trimmed();
-    else if (s.startsWith(s_sym))
-        s = s.mid(s_sym.length()).trimmed();
-
-    //s.replace(QLocale().decimalPoint(), QChar('.'));
-    //return Currency(s.toDouble() / s_rate);
-    return Currency(QLocale().toDouble(s) / s_rate);
+        return 0;
+    return QLocale().toDouble(s);
 }
 
-QString Currency::toUSD(CurrencySymbol cs, int precision) const
+QString Currency::localSymbol(const QString &intSymbol)
 {
-    QString s = QLocale::c().toString(toDouble(), 'f', precision);
-
-    if (cs == LocalSymbol)
-        return QLatin1String("$ ") + s;
-    else if (cs == InternationalSymbol)
-        return QLatin1String("USD ") + s;
-    else
-        return s;
+    return Utility::localForInternationalCurrencySymbol(intSymbol);
 }
-
-QString Currency::toLocal(CurrencySymbol cs, int precision) const
-{
-    //QString s = QString::number(toDouble() * s_rate, 'f', precision);
-    //s.replace(QChar('.'), QLocale().decimalPoint()); //TODO
-    QLocale loc;
-    loc.setNumberOptions(QLocale::OmitGroupSeparator);
-    QString s = loc.toString(toDouble() * s_rate, 'f', precision);
-
-    if (cs == LocalSymbol)
-        return s_sym + QLatin1String(" ") + s;
-    else if (cs == InternationalSymbol)
-        return s_symint + QLatin1String(" ") + s;
-    else
-        return s;
-}
-
-
 
 
 /////////////////////////////////////////////////////////////////////////
@@ -162,8 +284,8 @@ CurrencyValidator::CurrencyValidator(QObject *parent)
     }
 }
 
-CurrencyValidator::CurrencyValidator(Currency bottom, Currency top, int decimals, QObject *parent)
-    : QDoubleValidator(bottom.toDouble(), top.toDouble(), decimals, parent)
+CurrencyValidator::CurrencyValidator(double bottom, double top, int decimals, QObject *parent)
+    : QDoubleValidator(bottom, top, decimals, parent)
 {
     if (!s_once) {
         s_once = true;
@@ -176,10 +298,9 @@ QValidator::State CurrencyValidator::validate(QString &input, int &pos) const
     double b = bottom(), t = top();
     int d = decimals();
 
-    double f = Currency::rate();
-
-    b *= f;
-    t *= f;
+//    double f = Currency::rate();
+//    b *= f;
+//    t *= f;
 
     QChar dp = QLocale().decimalPoint();
 

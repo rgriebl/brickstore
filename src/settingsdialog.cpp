@@ -13,9 +13,6 @@
 */
 #include <QTabWidget>
 #include <QFileDialog>
-#include <QNetworkProxy>
-#include <QBuffer>
-#include <QHttp>
 
 #include "settingsdialog.h"
 #include "config.h"
@@ -23,27 +20,32 @@
 #include "utility.h"
 #include "messagebox.h"
 
-static int sec2day ( int s )
+static int sec2day(int s)
 {
-	return ( s + 60*60*24 - 1 ) / ( 60*60*24 );
+    return (s + 60*60*24 - 1) / (60*60*24);
 }
 
-static int day2sec ( int d )
+static int day2sec(int d)
 {
-	return d * ( 60*60*24 );
+    return d * (60*60*24);
 }
 
 
 SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent, Qt::WindowFlags f)
-    : QDialog(parent, f), m_http(0), m_buffer(0)
+    : QDialog(parent, f)
 {
     setupUi(this);
+
+    m_currency_status_fmt = w_currency_status->text();
+    w_currency_status->setText(QString());
 
     w_upd_reset->setAttribute(Qt::WA_MacSmallSize);
 
     connect(w_docdir_select, SIGNAL(clicked()), this, SLOT(selectDocDir()));
     connect(w_upd_reset, SIGNAL(clicked()), this, SLOT(resetUpdateIntervals()));
-    connect(w_rate_ecb, SIGNAL(clicked()), this, SLOT(getRateFromECB()));
+    connect(w_currency, SIGNAL(currentIndexChanged(QString)), this, SLOT(currentCurrencyChanged(QString)));
+    connect(w_currency_status, SIGNAL(linkActivated(QString)), Currency::inst(), SLOT(updateRates()));
+    connect(Currency::inst(), SIGNAL(ratesChanged()), this, SLOT(currenciesUpdated()));
 
     load();
 
@@ -53,78 +55,36 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent, Qt
     w_tabs->setCurrentWidget(w);
 }
 
-void SettingsDialog::getRateFromECB()
+void SettingsDialog::currentCurrencyChanged(const QString &ccode)
 {
-    w_rate_ecb->setEnabled(false);
-    if (!m_http) {
-        m_http = new QHttp(this);
-        connect(m_http, SIGNAL(done(bool)), this, SLOT(gotRateFromECB(bool)));
-        m_buffer = new QBuffer(m_http);
-    }
-    m_buffer->open(QIODevice::ReadWrite);
-    m_http->setHost(QLatin1String("www.ecb.europa.eu"));
-    m_http->get(QLatin1String("/stats/eurofxref/eurofxref-daily.xml"), m_buffer);
-}
+    qreal rate = Currency::inst()->rate(ccode);
 
-void SettingsDialog::gotRateFromECB(bool error)
-{
-    m_buffer->close();
-    if (error) {
-        MessageBox::warning(this, tr("There was an error downloading the exchange rates from the ECB server:<br>%2").arg(m_http->errorString()));
-    } else {
-        QDomDocument doc;
-        bool parse_ok = false;
+    QString fmt;
+    if (!rate)
+        fmt = tr("could not find a cross rate for %1").arg(ccode);
+    else if (rate != qreal(1))
+        fmt = tr("1 %1 equals %2 USD").arg(ccode).arg(qreal(1) / rate, 0, 'g', 3);
 
-        if (doc.setContent(m_buffer->data())) {
-            QDomNodeList cubelist = doc.elementsByTagName(QLatin1String("Cube"));
-            double usd_eur = -1, xxx_eur = -1;
-            QString find_currency = w_currency->lineEdit()->text().trimmed();
-
-            for (int i = 0; i < cubelist.count(); ++i) {
-                QDomElement el = cubelist.at(i).toElement();
-                QString currency = el.attribute(QLatin1String("currency"));
-                double rate = el.attribute(QLatin1String("rate")).toDouble();
-
-                if (!currency.isEmpty() && rate) {
-                    if (currency == QLatin1String("USD"))
-                        usd_eur = rate;
-                    else if (currency.compare(find_currency, Qt::CaseInsensitive) == 0)
-                        xxx_eur = rate;
-                }
-            }
-
-            parse_ok = (usd_eur > 0);
-
-            if (find_currency.compare(QLatin1String("EUR"), Qt::CaseInsensitive) == 0)
-                xxx_eur = 1;
-            if (parse_ok && xxx_eur < 0)
-                MessageBox::information(this, tr("The ECB exchange rate service doesn't list the requested currency"));
-            if (parse_ok && xxx_eur > 0)
-                w_rate->setText(QString::number(xxx_eur / usd_eur));
-        }
-        if (!parse_ok)
-            MessageBox::warning(this, tr("There was an error parsing the exchange rates from the ECB server"));
-    }
-    m_buffer->close();
-    w_rate_ecb->setEnabled(true);
+    w_currency_status->setText(m_currency_status_fmt.arg(fmt));
+    m_preferedCurrency = ccode;
 }
 
 void SettingsDialog::selectDocDir()
 {
-	QString newdir = QFileDialog::getExistingDirectory(this, tr("Document directory location"), w_docdir->text());
+    QString newdir = QFileDialog::getExistingDirectory(this, tr("Document directory location"), w_docdir->text());
 
-	if (!newdir.isNull())
-		w_docdir->setText(QDir::convertSeparators(newdir));
+    if (!newdir.isNull())
+        w_docdir->setText(QDir::convertSeparators(newdir));
 }
 
 void SettingsDialog::resetUpdateIntervals()
 {
-	QMap<QByteArray, int> intervals = Config::inst()->updateIntervalsDefault();
+    QMap<QByteArray, int> intervals = Config::inst()->updateIntervalsDefault();
 
-	w_upd_picture->setValue(sec2day(intervals["Picture"]));
-	w_upd_priceguide->setValue(sec2day(intervals["PriceGuide"]));
-	w_upd_database->setValue(sec2day(intervals["Database"]));
-	w_upd_ldraw->setValue(sec2day(intervals["LDraw"]));
+    w_upd_picture->setValue(sec2day(intervals["Picture"]));
+    w_upd_priceguide->setValue(sec2day(intervals["PriceGuide"]));
+    w_upd_database->setValue(sec2day(intervals["Database"]));
+    w_upd_ldraw->setValue(sec2day(intervals["LDraw"]));
 }
 
 void SettingsDialog::accept()
@@ -133,6 +93,21 @@ void SettingsDialog::accept()
     QDialog::accept();
 }
 
+void SettingsDialog::currenciesUpdated()
+{
+    QString oldprefered = m_preferedCurrency;
+    QStringList currencies = Currency::inst()->currencyCodes();
+    currencies.sort();
+    currencies.removeOne(QLatin1String("USD"));
+    currencies.prepend(QLatin1String("USD"));
+    w_currency->clear();
+    w_currency->insertItems(0, currencies);
+    if (currencies.count() > 1)
+        w_currency->insertSeparator(1);
+    w_currency->setCurrentIndex(qMax(0, w_currency->findText(oldprefered)));
+
+//    currentCurrencyChanged(w_currency->currentText());
+}
 
 void SettingsDialog::load()
 {
@@ -169,10 +144,8 @@ void SettingsDialog::load()
     w_metric->setChecked(Config::inst()->isMeasurementMetric());
     w_imperial->setChecked(Config::inst()->isMeasurementImperial());
 
-    w_rate_fixed->setChecked(Config::inst()->isLocalCurrencySet());
-    w_currency->setEditText(Config::inst()->localCurrencySymbols().first);
-    w_rate->setText(QString::number(Config::inst()->localCurrencyRate()));
-    w_rate->setValidator(new QDoubleValidator(w_rate));
+    m_preferedCurrency = Config::inst()->defaultCurrencyCode();
+    currenciesUpdated();
 
     w_openbrowser->setChecked(Config::inst()->value("/General/Export/OpenBrowser", true).toBool());
     w_closeempty->setChecked(Config::inst()->closeEmptyDocuments());
@@ -243,17 +216,7 @@ void SettingsDialog::save()
     if (w_language->currentIndex() >= 0)
         Config::inst()->setLanguage(w_language->itemData(w_language->currentIndex()).toString());
     Config::inst()->setMeasurementSystem(w_imperial->isChecked() ? QLocale::ImperialSystem : QLocale::MetricSystem);
-
-    if (w_rate_none->isChecked()) {
-        Config::inst()->unsetLocalCurrency();
-    } else {
-        QString symint = w_currency->lineEdit()->text().trimmed().toUpper();
-        QString sym = Utility::currencySymbolsForCountry(Utility::countryForCurrencySymbol(symint)).second;
-        if (sym.isEmpty())
-            sym = symint;
-
-        Config::inst()->setLocalCurrency(symint, sym, w_rate->text().toDouble());
-    }
+    Config::inst()->setDefaultCurrencyCode(m_preferedCurrency);
 
     QDir dd(w_docdir->text());
     if (dd.exists() && dd.isReadable())

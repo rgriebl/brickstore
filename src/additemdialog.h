@@ -47,19 +47,19 @@ protected:
 
 private slots:
     void updateCaption();
+    void updateCurrencyCode();
     void updateItemAndColor();
     void showTotal();
     bool checkAddPossible();
     void addClicked();
-    void setPrice(Currency d);
+    void setPrice(double d);
     void checkTieredPrices();
     void setTierType(int type);
-    void updateMonetary();
     void setSimpleMode(bool);
 
 private:
     void showItemInColor(const BrickLink::Item *it, const BrickLink::Color *col);
-    Currency tierPriceValue(int i);
+    double tierPriceValue(int i);
 
 private:
     QPointer<Window> m_window;
@@ -77,6 +77,8 @@ private:
     QString m_caption_fmt;
     QString m_price_label_fmt;
     QString m_currency_label_fmt;
+
+    QString m_currency_code;
 };
 
 #endif

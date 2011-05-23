@@ -106,7 +106,7 @@ public:
                 else
                     return QString("%1 (%2)").arg(order.first->address().left(firstline)).arg(order.first->other());
             }
-            case 4: res = order.first->grandTotal().toLocal(); break;
+            case 4: res = Currency::toString(order.first->grandTotal(), order.first->currencyCode()); break;
             }
         }
         else if (role == Qt::TextAlignmentRole) {

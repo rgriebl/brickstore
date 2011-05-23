@@ -62,7 +62,7 @@ protected slots:
     virtual void topLevelChanged(bool);
     virtual void dockLocationChanged(Qt::DockWidgetArea);
 
-    void setPrice(Currency p);
+    void setPrice(double p);
 
 protected:
     virtual bool event(QEvent *e);

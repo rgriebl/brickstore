@@ -110,12 +110,13 @@ public:
 
     class Statistics {
     public:
-        uint lots() const         { return m_lots; }
-        uint items() const        { return m_items; }
-        Currency value() const    { return m_val; }
-        Currency minValue() const { return m_minval; }
-        double weight() const     { return m_weight; }
-        uint errors() const       { return m_errors; }
+        uint lots() const            { return m_lots; }
+        uint items() const           { return m_items; }
+        double value() const         { return m_val; }
+        double minValue() const      { return m_minval; }
+        double weight() const        { return m_weight; }
+        uint errors() const          { return m_errors; }
+        QString currencyCode() const { return m_ccode; }
 
     private:
         friend class Document;
@@ -124,10 +125,11 @@ public:
 
         uint m_lots;
         uint m_items;
-        Currency m_val;
-        Currency m_minval;
+        double m_val;
+        double m_minval;
         double m_weight;
         uint m_errors;
+        QString m_ccode;
     };
 
 
@@ -239,7 +241,7 @@ signals:
     void fileNameChanged(const QString &);
     void titleChanged(const QString &);
     void modificationChanged(bool);
-    void currencyCodeChanged();
+    void currencyCodeChanged(const QString &ccode);
 
 private slots:
     void clean2Modified(bool);

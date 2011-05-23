@@ -77,19 +77,20 @@ void BrickLink::PriceGuide::save_to_disk()
     QFile f(path);
     if (f.open(QIODevice::WriteOnly)) {
         QTextStream ts(&f);
+        QLocale c = QLocale::c();
 
         ts << "# Price Guide for part #" << m_item->id() << " (" << m_item->name() << "), color #" << m_color->id() << " (" << m_color->name() << ")\n";
         ts << "# last update: " << m_fetched.toString() << "\n#\n";
 
-        for (int t = 0; t < TimeCount; t++) {
-            for (int c = 0; c < ConditionCount; c++) {
-                ts << (t == PastSix ? 'O' : 'I') << '\t' << (c == New ? 'N' : 'U') << '\t'
-                   << m_lots [t][c] << '\t'
-                   << m_quantities [t][c] << '\t'
-                   << m_prices [t][c][Lowest].toUSD() << '\t'
-                   << m_prices [t][c][Average].toUSD() << '\t'
-                   << m_prices [t][c][WAverage].toUSD() << '\t'
-                   << m_prices [t][c][Highest].toUSD() << '\n';
+        for (int ti = 0; ti < TimeCount; ti++) {
+            for (int ci = 0; ci < ConditionCount; ci++) {
+                ts << (ti == PastSix ? 'O' : 'I') << '\t' << (ci == New ? 'N' : 'U') << '\t'
+                   << m_lots[ti][ci] << '\t'
+                   << m_quantities[ti][ci] << '\t'
+                   << c.toString(m_prices[ti][ci][Lowest]) << '\t'
+                   << c.toString(m_prices[ti][ci][Average]) << '\t'
+                   << c.toString(m_prices[ti][ci][WAverage]) << '\t'
+                   << c.toString(m_prices[ti][ci][Highest]) << '\n';
             }
         }
     }
@@ -124,6 +125,7 @@ void BrickLink::PriceGuide::parse(const QByteArray &ba)
 
     QTextStream ts(ba);
     QString line;
+    QLocale c = QLocale::c();
 
     while (!(line = ts.readLine()).isNull()) {
         if (!line.length() || (line[0] == '#') || (line[0] == '\r'))         // skip comments fast
@@ -135,31 +137,31 @@ void BrickLink::PriceGuide::parse(const QByteArray &ba)
             continue;
         }
 
-        int t = -1;
-        int c = -1;
+        int ti = -1;
+        int ci = -1;
         bool oldformat = false;
 
-        switch (sl [0][0].toLatin1()) {
+        switch (sl[0][0].toLatin1()) {
         case 'P': oldformat = true;
-        case 'O': t = PastSix;
+        case 'O': ti = PastSix;
                   break;
         case 'C': oldformat = true;
-        case 'I': t = Current;
+        case 'I': ti = Current;
                   break;
         }
 
-        switch (sl [1][0].toLatin1()) {
-        case 'N': c = New;  break;
-        case 'U': c = Used; break;
+        switch (sl[1][0].toLatin1()) {
+        case 'N': ci = New;  break;
+        case 'U': ci = Used; break;
         }
 
-        if ((t != -1) && (c != -1)) {
-            m_lots[t][c]             = sl[oldformat ? 3 : 2].toInt();
-            m_quantities[t][c]       = sl[oldformat ? 2 : 3].toInt();
-            m_prices[t][c][Lowest]   = Currency::fromUSD(sl[4]);
-            m_prices[t][c][Average]  = Currency::fromUSD(sl[5]);
-            m_prices[t][c][WAverage] = Currency::fromUSD(sl[6]);
-            m_prices[t][c][Highest]  = Currency::fromUSD(sl[7]);
+        if ((ti != -1) && (ci != -1)) {
+            m_lots[ti][ci]             = sl[oldformat ? 3 : 2].toInt();
+            m_quantities[ti][ci]       = sl[oldformat ? 2 : 3].toInt();
+            m_prices[ti][ci][Lowest]   = c.toDouble(sl[4]);
+            m_prices[ti][ci][Average]  = c.toDouble(sl[5]);
+            m_prices[ti][ci][WAverage] = c.toDouble(sl[6]);
+            m_prices[ti][ci][Highest]  = c.toDouble(sl[7]);
         }
     }
 

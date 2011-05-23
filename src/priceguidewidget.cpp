@@ -55,9 +55,9 @@ struct cell : public QRect {
     QString       m_text;
     bool          m_flag;
 
-    BrickLink::Price m_price;
-    BrickLink::Time  m_time;
-    BrickLink::Condition         m_condition;
+    BrickLink::Price     m_price;
+    BrickLink::Time      m_time;
+    BrickLink::Condition m_condition;
 };
 
 } // namespace
@@ -93,6 +93,7 @@ private:
     QList<cell>               m_cells;
     bool                      m_connected;
     bool                      m_on_price;
+    QString                   m_ccode;
 
     QString m_str_qty;
     QString m_str_cond [BrickLink::ConditionCount];
@@ -110,6 +111,7 @@ PriceGuideWidget::PriceGuideWidget(QWidget *parent, Qt::WindowFlags f)
     d->m_pg = 0;
     d->m_layout = Normal;
     d->m_on_price = false;
+    d->m_ccode = Config::inst()->defaultCurrencyCode();
 
     setBackgroundRole(QPalette::Base);
     setMouseTracking(true);
@@ -117,8 +119,6 @@ PriceGuideWidget::PriceGuideWidget(QWidget *parent, Qt::WindowFlags f)
     setContextMenuPolicy(Qt::ActionsContextMenu);
 
     d->m_connected = false;
-
-    connect(Config::inst(), SIGNAL(localCurrencyChanged()), this, SLOT(update()));
 
     QAction *a;
     a = new QAction(this);
@@ -292,7 +292,7 @@ void PriceGuideWidget::recalcLayoutNormal(const QSize &s, const QFontMetrics &fm
     for (int i = 0; i < BrickLink::ConditionCount; i++)
         cw [1] = qMax(cw [1], fm.width(d->m_str_cond [i]));
     cw [2] = qMax(fm.width(d->m_str_qty), fm.width("0000 (000000)"));
-    cw [3] = fm.width(Currency(9000).toLocal(Currency::LocalSymbol));
+    cw [3] = fm.width(Currency::toString(9000, d->m_ccode, Currency::LocalSymbol));
     for (int i = 0; i < BrickLink::PriceCount; i++)
         cw [3] = qMax(cw [3], fm.width(d->m_str_price [i]));
 
@@ -386,7 +386,7 @@ void PriceGuideWidget::recalcLayoutHorizontal(const QSize &s, const QFontMetrics
     for (int i = 0; i < BrickLink::ConditionCount; i++)
         cw [1] = qMax(cw [1], fm.width(d->m_str_cond [i]));
     cw [2] = qMax(fm.width(d->m_str_qty), fm.width("0000 (000000)"));
-    cw [3] = fm.width(Currency (9000).toLocal(Currency::NoSymbol));
+    cw [3] = fm.width(Currency::toString(9000, d->m_ccode, Currency::NoSymbol));
     for (int i = 0; i < BrickLink::PriceCount; i++)
         cw [3] = qMax(cw [3], fm.width(d->m_str_price [i]));
 
@@ -468,7 +468,7 @@ void PriceGuideWidget::recalcLayoutVertical(const QSize &s, const QFontMetrics &
         cw [0] = qMax(cw [0], fm.width(d->m_str_price [i]));
     cw [0] += 2 * hborder;
 
-    cw [1] = qMax(fm.width(Currency (9000).toLocal(Currency::NoSymbol)), fm.width("0000 (000000)"));
+    cw [1] = qMax(fm.width(Currency::toString(9000, d->m_ccode, Currency::NoSymbol)), fm.width("0000 (000000)"));
     for (int i = 0; i < BrickLink::ConditionCount; i++)
         cw [1] = qMax(cw [1], fm.width(d->m_str_cond [i]));
     cw [1] += 2 * hborder;
@@ -615,7 +615,7 @@ void PriceGuideWidget::paintEvent(QPaintEvent *e)
 
         switch (c.m_type) {
         case cell::Header:
-            paintHeader(&p, c, c.m_text_flags, c.m_text == "$$$" ? Currency::symbol() : c.m_text, c.m_flag);
+            paintHeader(&p, c, c.m_text_flags, c.m_text == "$$$" ? Currency::localSymbol(d->m_ccode) : c.m_text, c.m_flag);
             break;
 
         case cell::Quantity:
@@ -630,7 +630,7 @@ void PriceGuideWidget::paintEvent(QPaintEvent *e)
         case cell::Price:
             if (!is_updating) {
                 if (valid)
-                    str = d->m_pg->price(c.m_time, c.m_condition, c.m_price).toLocal();
+                    str = Currency::toString(d->m_pg->price(c.m_time, c.m_condition, c.m_price), d->m_ccode);
 
                 paintCell(&p, c, c.m_text_flags, str, c.m_flag);
             }
@@ -714,3 +714,18 @@ QRegion PriceGuideWidget::nonStaticCells() const
     }
     return r;
 }
+
+QString PriceGuideWidget::currencyCode() const
+{
+    return d->m_ccode;
+}
+
+void PriceGuideWidget::setCurrencyCode(const QString &code)
+{
+    if (code != d->m_ccode) {
+        d->m_ccode = code;
+        recalcLayout();
+        update();
+    }
+}
+

@@ -32,8 +32,8 @@ public:
 
     static StandardButton information(QWidget *parent, const QString & text, StandardButtons buttons = Ok, StandardButton defaultButton = NoButton);
     static StandardButton question(QWidget *parent, const QString &text, StandardButtons buttons = Ok, StandardButton defaultButton = NoButton);
-    static StandardButton warning(QWidget *parent, const QString & text, StandardButtons buttons = Ok, StandardButton defaultButton = NoButton);
-    static StandardButton critical(QWidget *parent, const QString & text, StandardButtons buttons = Ok, StandardButton defaultButton = NoButton);
+    static StandardButton warning(QWidget *parent, const QString &text, StandardButtons buttons = Ok, StandardButton defaultButton = NoButton);
+    static StandardButton critical(QWidget *parent, const QString &text, StandardButtons buttons = Ok, StandardButton defaultButton = NoButton);
 
     static bool getString(QWidget *parent, const QString &text, const QString &unit, QString &value, QValidator *validate = 0);
     static bool getString(QWidget *parent, const QString &text, QString &value);

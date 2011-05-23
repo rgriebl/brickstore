@@ -361,7 +361,6 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
     connect(Config::inst(), SIGNAL(onlineStatusChanged(bool)), bl, SLOT(setOnlineStatus(bool)));
     connect(Config::inst(), SIGNAL(updateIntervalsChanged(QMap<QByteArray,int>)), bl, SLOT(setUpdateIntervals(QMap<QByteArray,int>)));
     connect(Config::inst(), SIGNAL(proxyChanged(QNetworkProxy)), bl->transfer(), SLOT(setProxy(QNetworkProxy)));
-    connect(Config::inst(), SIGNAL(localCurrencyChanged()), this, SLOT(statisticsUpdate()));
     connect(Config::inst(), SIGNAL(measurementSystemChanged(QLocale::MeasurementSystem)), this, SLOT(statisticsUpdate()));
 
     findAction("view_show_input_errors")->setChecked(Config::inst()->showInputErrors());
@@ -414,6 +413,10 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
         m_toolbar->show();
 
     findAction("view_fullscreen")->setChecked(windowState() & Qt::WindowFullScreen);
+
+    QDateTime rateUpdate = Currency::inst()->lastUpdate();
+    //if (!rateUpdate.isValid() || rateUpdate.daysTo(QDateTime::currentDateTime()) >= 1)
+        Currency::inst()->updateRates();
 }
 
 void FrameWork::languageChange()
@@ -1399,15 +1402,16 @@ void FrameWork::statisticsUpdate()
 
         Document::Statistics stat = m_current_window->document()->statistics(not_exclude);
         QString valstr, wgtstr;
+        QString ccode = m_current_window->document()->currencyCode();
 
         if (stat.value() != stat.minValue()) {
             valstr = QString("%1 (%2 %3)").
-                     arg(stat.value().toLocal(Currency::LocalSymbol)).
+                     arg(Currency::toString(stat.value(), ccode, Currency::LocalSymbol)).
                      arg(tr("min.")).
-                     arg(stat.minValue().toLocal(Currency::LocalSymbol));
+                     arg(Currency::toString(stat.minValue(), ccode, Currency::LocalSymbol));
         }
         else
-            valstr = stat.value().toLocal(Currency::LocalSymbol);
+            valstr = Currency::toString(stat.value(), ccode, Currency::LocalSymbol);
 
         if (stat.weight() == -DBL_MIN) {
             wgtstr = QLatin1String("-");

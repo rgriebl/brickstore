@@ -40,9 +40,7 @@ public:
     inline bool isMeasurementMetric()    { return measurementSystem() == QLocale::MetricSystem;   }
     inline bool isMeasurementImperial()  { return measurementSystem() == QLocale::ImperialSystem; }
 
-    bool isLocalCurrencySet() const;
-    double localCurrencyRate() const;
-    QPair<QString, QString> localCurrencySymbols() const;
+    QString defaultCurrencyCode() const;
 
     bool closeEmptyDocuments() const;
     QString documentDir() const;
@@ -71,8 +69,7 @@ public:
 public slots:
     void setLanguage(const QString &lang);
     void setMeasurementSystem(QLocale::MeasurementSystem ms);
-    void setLocalCurrency(const QString &symint, const QString &sym, double rate);
-    void unsetLocalCurrency();
+    void setDefaultCurrencyCode(const QString &ccode);
 
     void setCloseEmptyDocuments(bool b);
     void setDocumentDir(const QString &dir);
@@ -91,7 +88,7 @@ public slots:
 signals:
     void languageChanged();
     void measurementSystemChanged(QLocale::MeasurementSystem ms);
-    void localCurrencyChanged();
+    void defaultCurrencyCodeChanged(const QString &ccode);
     void showInputErrorsChanged(bool b);
     void updateIntervalsChanged(const QMap<QByteArray, int> &intervals);
     void onlineStatusChanged(bool b);
@@ -101,9 +98,9 @@ protected:
     bool parseTranslations() const;
 
 private:
-    bool         m_show_input_errors;
+    bool                       m_show_input_errors;
     QLocale::MeasurementSystem m_measurement;
-    mutable bool m_translations_parsed;
+    mutable bool               m_translations_parsed;
     mutable QList<Translation> m_translations;
 };
 

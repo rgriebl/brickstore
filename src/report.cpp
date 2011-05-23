@@ -108,8 +108,8 @@ void Report::print(QPaintDevice *pd, const Document *doc, const Document::ItemLi
     statmap ["errors"]   = stat.errors();
     statmap ["items"]    = stat.items();
     statmap ["lots"]     = stat.lots();
-    statmap ["minValue"] = stat.minValue().toDouble();
-    statmap ["value"]    = stat.value().toDouble();
+    statmap ["minValue"] = stat.minValue();
+    statmap ["value"]    = stat.value();
     statmap ["weight"]   = stat.weight();
 
     docmap ["statistics"] = statmap;
@@ -125,11 +125,11 @@ void Report::print(QPaintDevice *pd, const Document *doc, const Document::ItemLi
         ordermap ["other"]        = order->other();
         ordermap ["buyer"]        = (order->type() == BrickLink::Placed ? Config::inst()->loginForBrickLink().first : order->other());
         ordermap ["seller"]       = (order->type() == BrickLink::Placed ? order->other() : Config::inst()->loginForBrickLink().first);
-        ordermap ["shipping"]     = order->shipping().toDouble();
-        ordermap ["insurance"]    = order->insurance().toDouble();
-        ordermap ["delivery"]     = order->delivery().toDouble();
-        ordermap ["credit"]       = order->credit().toDouble();
-        ordermap ["grandTotal"]   = order->grandTotal().toDouble();
+        ordermap ["shipping"]     = order->shipping();
+        ordermap ["insurance"]    = order->insurance();
+        ordermap ["delivery"]     = order->delivery();
+        ordermap ["credit"]       = order->credit();
+        ordermap ["grandTotal"]   = order->grandTotal();
         ordermap ["status"]       = order->status();
         ordermap ["payment"]      = order->payment();
         ordermap ["remarks"]      = order->remarks();
@@ -169,8 +169,8 @@ void Report::print(QPaintDevice *pd, const Document *doc, const Document::ItemLi
         cond ["used"]      = (item->condition() == BrickLink::Used);
         imap ["condition"] = cond;
 
-        imap ["price"]     = item->price().toDouble();
-        imap ["total"]     = item->total().toDouble();
+        imap ["price"]     = item->price();
+        imap ["total"]     = item->total();
         imap ["bulkQuantity"] = item->bulkQuantity();
         imap ["sale"]      = item->sale();
         imap ["remarks"]   = item->remarks();
@@ -191,7 +191,7 @@ void Report::print(QPaintDevice *pd, const Document *doc, const Document::ItemLi
         imap ["tierQuantity"] = tq;
 
         QVariantList tp;
-        tp << item->tierPrice(0).toDouble() << item->tierPrice(1).toDouble() << item->tierPrice(2).toDouble();
+        tp << item->tierPrice(0) << item->tierPrice(1) << item->tierPrice(2);
         imap ["tierPrice"] = tp;
 
         imap ["lotId"]     = item->lotId();

@@ -44,6 +44,7 @@
 #include "framework.h"
 #include "transfer.h"
 #include "report.h"
+#include "currency.h"
 
 #include "filteredit.h"
 
@@ -92,6 +93,7 @@ Application::Application(bool rebuild_db_only, int _argc, char **_argv)
 
     // initialize config & resource
     (void) Config::inst()->upgrade(BRICKSTORE_MAJOR, BRICKSTORE_MINOR, BRICKSTORE_PATCH);
+    (void) Currency::inst();
     (void) ReportManager::inst();
 
     if (!initBrickLink()) {
@@ -138,7 +140,8 @@ Application::~Application()
 {
     exitBrickLink();
 
-    delete ReportManager::inst ( );
+    delete ReportManager::inst();
+    delete Currency::inst();
     delete Config::inst();
 }
 
