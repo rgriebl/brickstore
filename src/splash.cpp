@@ -131,7 +131,7 @@ void Splash::message(const QString &msg)
     QSplashScreen::showMessage(msg + QLatin1String("\n\n\n\n"), Qt::AlignHCenter | Qt::AlignBottom, Qt::black);
 }
 
-void Splash::paintEvent(QPaintEvent *e)
+void Splash::paintEvent(QPaintEvent *)
 {
     if (testAttribute(Qt::WA_TranslucentBackground)) {
         QPainter p(this);

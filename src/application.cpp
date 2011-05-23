@@ -149,6 +149,8 @@ Application::~Application()
 {
     exitBrickLink();
 
+    delete m_ncm;
+
     delete ReportManager::inst();
     delete Currency::inst();
     delete Config::inst();
