@@ -1439,21 +1439,14 @@ void FrameWork::titleUpdate()
     }
     setWindowTitle(t); */
 
-    QString file, title;
+    QString title = QApplication::applicationName();
+    QString file;
 
     if (m_current_window) {
+        QChar separator[] = { 0x0020, 0x2014, 0x0020 };
+
+        title = m_current_window->windowTitle() + QString(separator, 3) + title;
         file = m_current_window->document()->fileName();
-        if (file.isEmpty()) {
-            title = m_current_window->document()->title();
-#if !defined(Q_WS_MACX)
-            title += QLatin1String("[*] ");
-            title += QChar(0x2014);
-            title += QLatin1Char(' ');
-            title += QApplication::applicationName();
-#endif
-        }
-    } else {
-        title = QApplication::applicationName();
     }
     setWindowTitle(title);
     setWindowFilePath(file);

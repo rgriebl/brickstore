@@ -319,6 +319,8 @@ void Window::updateCaption()
     if (cap.isEmpty())
         cap = tr("Untitled");
 
+    cap += QLatin1String("[*]");
+
     setWindowTitle(cap);
     setWindowModified(m_doc->isModified());
 }

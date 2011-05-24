@@ -61,6 +61,14 @@ static const char * const tablist_xpm[] = {
 "            "};
 
 
+static QString cleanWindowTitle(QWidget *window)
+{
+    QString s = window->windowTitle();
+    s.replace(QLatin1String("[*]"), QLatin1String(window->isWindowModified() ? "*" : ""));
+    return s;
+}
+
+
 class WindowMenu : public QMenu {
     Q_OBJECT
 public:
@@ -87,7 +95,7 @@ private slots:
 
         int i = 0;
         foreach (QWidget *w, m_ws->windowList()) {
-            QString s = w->windowTitle();
+            QString s = cleanWindowTitle(w);
             if (m_shortcut && i < 10)
                 s.prepend(QString("&%1   ").arg((i+1)%10));
 
@@ -227,6 +235,7 @@ private:
     QTabBar *m_tabbar;
 };
 
+
 Workspace::Workspace(QWidget *parent, Qt::WindowFlags f)
     : QWidget(parent, f)
 {
@@ -301,7 +310,7 @@ void Workspace::addWindow(QWidget *w)
         return;
 
     int idx = m_stack->addWidget(w);
-    m_tabbar->insertTab(idx, w->windowTitle());
+    m_tabbar->insertTab(idx, cleanWindowTitle(w));
     if (!w->windowIcon().isNull())
         m_tabbar->setTabIcon(idx, w->windowIcon());
 
@@ -354,7 +363,7 @@ bool Workspace::eventFilter(QObject *o, QEvent *e)
         switch (e->type()) {
         case QEvent::WindowTitleChange:
         case QEvent::ModifiedChange:
-            m_tabbar->setTabText(m_stack->indexOf(w), w->windowTitle() + QLatin1String(w->isWindowModified() ? "*" : ""));
+            m_tabbar->setTabText(m_stack->indexOf(w), cleanWindowTitle(w));
             break;
         case QEvent::WindowIconChange:
             m_tabbar->setTabIcon(m_stack->indexOf(w), w->windowIcon());
