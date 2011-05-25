@@ -36,15 +36,12 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent, Qt
 {
     setupUi(this);
 
-    m_currency_status_fmt = w_currency_status->text();
-    w_currency_status->setText(QString());
-
     w_upd_reset->setAttribute(Qt::WA_MacSmallSize);
 
     connect(w_docdir_select, SIGNAL(clicked()), this, SLOT(selectDocDir()));
     connect(w_upd_reset, SIGNAL(clicked()), this, SLOT(resetUpdateIntervals()));
     connect(w_currency, SIGNAL(currentIndexChanged(QString)), this, SLOT(currentCurrencyChanged(QString)));
-    connect(w_currency_status, SIGNAL(linkActivated(QString)), Currency::inst(), SLOT(updateRates()));
+    connect(w_currency_update, SIGNAL(clicked()), Currency::inst(), SLOT(updateRates()));
     connect(Currency::inst(), SIGNAL(ratesChanged()), this, SLOT(currenciesUpdated()));
 
     load();
@@ -59,13 +56,13 @@ void SettingsDialog::currentCurrencyChanged(const QString &ccode)
 {
     qreal rate = Currency::inst()->rate(ccode);
 
-    QString fmt;
+    QString s;
     if (!rate)
-        fmt = tr("could not find a cross rate for %1").arg(ccode);
+        s = tr("could not find a cross rate for %1").arg(ccode);
     else if (rate != qreal(1))
-        fmt = tr("1 %1 equals %2 USD").arg(ccode).arg(qreal(1) / rate, 0, 'g', 3);
+        s = tr("1 %1 equals %2 USD").arg(ccode).arg(qreal(1) / rate, 0, 'g', 3);
 
-    w_currency_status->setText(m_currency_status_fmt.arg(fmt));
+    w_currency_status->setText(s);
     m_preferedCurrency = ccode;
 }
 

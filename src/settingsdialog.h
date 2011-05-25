@@ -42,7 +42,6 @@ protected:
     void save();
 
 private:
-    QString m_currency_status_fmt;
     QString m_preferedCurrency;
 };
 

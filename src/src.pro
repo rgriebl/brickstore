@@ -124,8 +124,8 @@ win32 {
      # QMAKE_LFLAGS_WINDOWS += "/MANIFEST:NO"
      release:QMAKE_LFLAGS_WINDOWS += "/LTCG"
 
-     QMAKE_CXXFLAGS_DEBUG   += /EHc- /EHs- /GR-
-     QMAKE_CXXFLAGS_RELEASE += /EHc- /EHs- /GR-
+     #QMAKE_CXXFLAGS_DEBUG   += /EHc- /EHs- /GR-
+     #QMAKE_CXXFLAGS_RELEASE += /EHc- /EHs- /GR-
   }
 }
 

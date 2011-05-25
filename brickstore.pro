@@ -26,7 +26,7 @@ unix:tarball.commands = cd $$PWD && git archive --format tar --prefix brickstore
 win32:tarball.commands = cd $$PWD && git archive --format zip -9 --prefix brickstore-$${RELEASE}/ HEAD >$$OUT_PWD/brickstore-$${RELEASE}.zip
 
 macx:package.commands = macx/build-package.sh $$RELEASE
-win32:package.commands = win32\build-package.bat $$RELEASE
+win32:package.commands = win32\\build-package.bat $$RELEASE
 else:package.commands = unix/build-package.sh $$RELEASE
 
 QMAKE_EXTRA_TARGETS += tarball package
