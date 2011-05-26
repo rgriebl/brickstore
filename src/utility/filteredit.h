@@ -25,19 +25,11 @@ class FilterEdit : public QLineEdit {
 public:
     FilterEdit(QWidget *parent = 0);
 
-    QString idleText() const;
-
     void setMenu(QMenu *);
     QMenu *menu() const;
 
-public slots:
-    void setIdleText(const QString &str);
-
 protected:
     void resizeEvent(QResizeEvent *e);
-    void paintEvent(QPaintEvent *e);
-    void focusInEvent(QFocusEvent *e);
-    void focusOutEvent(QFocusEvent *e);
 
 private slots:
     void checkText(const QString &);
@@ -45,13 +37,28 @@ private slots:
 private:
     void doLayout();
 
-    QString           m_idletext;
     FilterEditButton *w_menu;
     FilterEditButton *w_clear;
     int               m_left;
     int               m_top;
     int               m_right;
     int               m_bottom;
+
+#if (QT_VERSION < 0x407000) && !defined(Q_WS_MAEMO_5)
+public:
+    QString placeholderText() const;
+
+public slots:
+    void setPlaceholderText(const QString &str);
+
+protected:
+    void paintEvent(QPaintEvent *e);
+    void focusInEvent(QFocusEvent *e);
+    void focusOutEvent(QFocusEvent *e);
+
+private:
+    QString m_placeholdertext;
+#endif
 };
 
 #endif
