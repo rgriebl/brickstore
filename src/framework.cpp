@@ -44,7 +44,6 @@
 #include "currency.h"
 #include "progresscircle.h"
 #include "undo.h"
-#include "spinner.h"
 #include "filteredit.h"
 #include "workspace.h"
 #include "taskwidgets.h"
@@ -155,7 +154,6 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
     s_inst = this;
 
     m_running = false;
-    m_spinner = 0;
     m_filter = 0;
     m_progress = 0;
 
@@ -435,8 +433,11 @@ void FrameWork::languageChange()
         m_filter->setToolTip(tr("Filter the list using this pattern (wildcards allowed: * ? [])"));
         m_filter->setPlaceholderText(tr("Filter"));
     }
-    if (m_spinner)
-        m_spinner->setToolTip(tr("Download activity indicator"));
+    if (m_progress) {
+        m_progress->setToolTipTemplates(tr("Offline"),
+                                        tr("No outstanding jobs"),
+                                        tr("Downloading...<br><b>%p%</b> finished<br>(%v of %m)"));
+    }
 /*
     foreach (QAction *a, m_filter->menu()->actions()) {
         QString s;
@@ -733,15 +734,6 @@ bool FrameWork::setupToolBar(QToolBar *t, const QList<QByteArray> &a_names)
                 m_progress = new ProgressCircle();
                 m_progress->setIcon(QIcon(":/images/icon.png"));
                 t->addWidget(m_progress);
-            } else if (an == "widget_spinner") {
-                if (m_spinner) {
-                    qWarning("Only one spinner widget can be added to toolbars");
-                    continue;
-                }
-
-                m_spinner = new Spinner();
-                m_spinner->setPixmap(QPixmap(":/images/spinner"));
-                t->addWidget(m_spinner);
             }
         } else if (QAction *a = findAction(an)) {
             t->addAction(a);

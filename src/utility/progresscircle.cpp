@@ -26,7 +26,7 @@ ProgressCircle::ProgressCircle(QWidget *parent)
     , m_max(100)
     , m_value(-1)
     , m_online(false)
-    , m_format(QLatin1String("%p%"))
+    , m_tt_normal(QLatin1String("%p%"))
     , m_fill(0)
 {
     QSizePolicy sp;
@@ -179,32 +179,28 @@ QIcon ProgressCircle::icon() const
     return m_icon;
 }
 
-void ProgressCircle::setFormat(const QString &format)
+void ProgressCircle::setToolTipTemplates(const QString &offline, const QString &nothing, const QString &normal)
 {
-    if (m_format == format)
-        return;
-    m_format = format;
-    setToolTip(toolTip());
-}
+    m_tt_offline = offline;
+    m_tt_nothing = nothing;
+    m_tt_normal = normal;
 
-QString ProgressCircle::format() const
-{
-    return m_format;
+    setToolTip(toolTip());
 }
 
 QString ProgressCircle::toolTip() const
 {
     if (!m_online)
-        return tr("Offline");
+        return m_tt_offline;
 
     if ((m_max == 0 && m_min == 0) ||
         (m_value < m_min) ||
         (m_value == INT_MIN && m_min == INT_MIN))
-        return QString();
+        return m_tt_nothing;
 
     qint64 totalSteps = qint64(m_max) - m_min;
 
-    QString result = m_format;
+    QString result = m_tt_normal;
     result.replace(QLatin1String("%m"), QString::number(totalSteps));
     result.replace(QLatin1String("%v"), QString::number(m_value));
 

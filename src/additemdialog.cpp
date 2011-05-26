@@ -169,6 +169,8 @@ void AddItemDialog::updateCurrencyCode()
 {
     m_currency_code = m_window ? m_window->document()->currencyCode() : QLatin1String("USD");
 
+    w_price_guide->setCurrencyCode(m_currency_code);
+
     QString local = Currency::localSymbol(m_currency_code);
 
     w_label_currency->setText(m_price_label_fmt.arg(local));

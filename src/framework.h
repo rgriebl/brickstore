@@ -30,7 +30,6 @@ class Workspace;
 class ProgressCircle;
 class Window;
 class FilterEdit;
-class Spinner;
 class UndoGroup;
 class TaskInfoWidget;
 class TaskPriceGuideWidget;
@@ -152,7 +151,6 @@ private:
     QPointer<Window> m_current_window;
 
     ProgressCircle *m_progress;
-    Spinner *m_spinner;
     FilterEdit *m_filter;
     QLabel *m_statistics;
     QLabel *m_errors;

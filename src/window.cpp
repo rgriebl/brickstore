@@ -1531,7 +1531,7 @@ void Window::closeEvent(QCloseEvent *e)
     bool close_empty = (m_doc->items().isEmpty() && Config::inst()->closeEmptyDocuments());
 
     if (m_doc->isModified() && !close_empty) {
-        switch (MessageBox::warning(this, tr("Save changes to %1?").arg(CMB_BOLD(windowTitle())), MessageBox::Yes | MessageBox::No | MessageBox::Cancel, MessageBox::Yes)) {
+        switch (MessageBox::warning(this, tr("Save changes to %1?").arg(CMB_BOLD(windowTitle().replace(QLatin1String("[*]"), QString()))), MessageBox::Yes | MessageBox::No | MessageBox::Cancel, MessageBox::Yes)) {
         case MessageBox::Yes:
             m_doc->fileSave();
 

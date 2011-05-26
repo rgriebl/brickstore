@@ -33,8 +33,7 @@ public:
     int value() const;
     bool isOnline() const;
 
-    void setFormat(const QString &format);
-    QString format() const;
+    void setToolTipTemplates(const QString &offline, const QString &nothing, const QString &normal);
 
     void setIcon(const QIcon &icon);
     QIcon icon() const;
@@ -61,7 +60,9 @@ private:
     int m_max;
     int m_value;
     bool m_online;
-    QString m_format;
+    QString m_tt_offline;
+    QString m_tt_nothing;
+    QString m_tt_normal;
     QIcon m_icon;
     QGradient *m_fill;
 };
