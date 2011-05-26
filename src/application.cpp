@@ -23,13 +23,16 @@
 #include <QDesktopServices>
 #include <QLocalSocket>
 #include <QLocalServer>
-#include <QNetworkConfigurationManager>
 
 #if defined(Q_OS_WIN)
 #  include <windows.h>
 #  ifdef MessageBox
 #    undef MessageBox
 #  endif
+#elif Q_OS_MACX
+#  include <netinet/in.h>
+#  include <arpa/inet.h>
+#  include <SystemConfiguration/SCNetwork.h>
 #elif defined(Q_OS_UNIX)
 #  include <sys/utsname.h>
 #endif
@@ -71,13 +74,12 @@ Application::Application(bool rebuild_db_only, int _argc, char **_argv)
     m_trans_qt = 0;
     m_trans_brickstore = 0;
 
-    m_ncm = new QNetworkConfigurationManager(this);
     m_online = true;
-    networkConfigurationChanged();
+    checkNetwork();
 
-    connect(m_ncm, SIGNAL(configurationAdded(QNetworkConfiguration)), this, SLOT(networkConfigurationChanged()));
-    connect(m_ncm, SIGNAL(configurationChanged(QNetworkConfiguration)), this, SLOT(networkConfigurationChanged()));
-    connect(m_ncm, SIGNAL(configurationRemoved(QNetworkConfiguration)), this, SLOT(networkConfigurationChanged()));
+    QTimer *netcheck = new QTimer(this);
+    connect(netcheck, SIGNAL(timeout()), this, SLOT(checkNetwork()));
+    netcheck->start(5000);
 
     // check for an already running instance
     if (!rebuild_db_only) {
@@ -148,8 +150,6 @@ Application::Application(bool rebuild_db_only, int _argc, char **_argv)
 Application::~Application()
 {
     exitBrickLink();
-
-    delete m_ncm;
 
     delete ReportManager::inst();
     delete Currency::inst();
@@ -440,7 +440,7 @@ bool Application::initBrickLink()
 
     if (!bl)
         MessageBox::critical(0, tr("Could not initialize the BrickLink kernel:<br /><br />%1").arg(errstring));
-    
+
     bl->setTransfer(new Transfer(10));
     bl->transfer()->setProxy(Config::inst()->proxy());
 
@@ -587,17 +587,33 @@ void Application::checkForUpdates()
     d.exec();
 }
 
-void Application::networkConfigurationChanged()
+void Application::checkNetwork()
 {
     bool online = false;
-    foreach (const QNetworkConfiguration &nc, m_ncm->allConfigurations(QNetworkConfiguration::Active)) {
-        if (nc.purpose() == QNetworkConfiguration::PublicPurpose || nc.purpose() == QNetworkConfiguration::UnknownPurpose) {
-            if (!nc.name().startsWith(QLatin1String("vmnet"))) {
-                online = true;
-                break;
-            }
-        }
-    }
+
+#if defined(Q_OS_LINUX)
+    int res = ::system("ip route get 178.63.92.134/32 >/dev/null 2>/dev/null");
+
+    //qWarning() << "Linux NET change: " << res << WIFEXITED(res) << WEXITSTATUS(res);
+    if (!WIFEXITED(res) || (WEXITSTATUS(res) == 0 || WEXITSTATUS(res) == 127))
+        online = true;
+
+#elif defined(Q_OS_MACX)
+    struct ::sockaddr_in sock;
+    sock.sin_family = AF_INET;
+    sock.sin_port = htons(80);
+    sock.sin_addr.s_addr = inet_addr("178.63.92.134");
+    SCNetworkConnectionFlags flags = 0;
+    bool result = SCNetworkCheckReachabilityByAddress(reinterpret_cast<sockaddr *>(&sock), sizeof(sock), &flags);
+
+    //qWarning() << "Mac NET change: " << result << flags;
+    if (!result || (flags & (kSCNetworkFlagsReachable | kSCNetworkFlagsConnectionRequired)) == kSCNetworkFlagsReachable)
+        online = true;
+
+#else
+    online = true;
+#endif
+
     if (online != m_online) {
         m_online = online;
         emit onlineStateChanged(m_online);

@@ -19,7 +19,6 @@
 
 class FrameWork;
 class QTranslator;
-class QNetworkConfigurationManager;
 
 
 class Application : public QApplication {
@@ -37,8 +36,6 @@ public:
     QString systemVersion() const;
 
     bool pixmapAlphaSupported() const;
-
-    QNetworkConfigurationManager *networkConfigurationManager() const;
 
     bool isOnline() const;
 
@@ -58,7 +55,7 @@ private slots:
     void doEmitOpenDocument();
     void rebuildDatabase();
     void clientMessage();
-    void networkConfigurationChanged();
+    void checkNetwork();
 
 private:
     bool isClient(int timeout = 1000);
@@ -72,7 +69,6 @@ private:
     bool m_has_alpha;
 
     bool m_online;
-    QNetworkConfigurationManager *m_ncm;
 
     QTranslator *m_trans_qt;
     QTranslator *m_trans_brickstore;

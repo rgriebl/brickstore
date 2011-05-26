@@ -162,7 +162,7 @@ unix:!macx {
 #
 
 macx {
-  # CONFIG += x86
+  LIBS += -framework SystemConfiguration
 
   QMAKE_INFO_PLIST = $$PWD/../macx/Info.plist
   bundle_icons.files = $$system(find $$PWD/../macx/Resources/ -name '*.icns')
