@@ -30,7 +30,7 @@
 #    undef MessageBox
 #  endif
 # include <wininet.h>
-#elif Q_OS_MACX
+#elif defined(Q_OS_MACX)
 #  include <netinet/in.h>
 #  include <arpa/inet.h>
 #  include <SystemConfiguration/SCNetwork.h>
