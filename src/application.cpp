@@ -29,6 +29,7 @@
 #  ifdef MessageBox
 #    undef MessageBox
 #  endif
+# include <wininet.h>
 #elif Q_OS_MACX
 #  include <netinet/in.h>
 #  include <arpa/inet.h>
@@ -587,12 +588,14 @@ void Application::checkForUpdates()
     d.exec();
 }
 
+#define CHECK_IP "178.63.92.134" // brickforge.de
+
 void Application::checkNetwork()
 {
     bool online = false;
 
 #if defined(Q_OS_LINUX)
-    int res = ::system("ip route get 178.63.92.134/32 >/dev/null 2>/dev/null");
+    int res = ::system("ip route get " CHECK_IP "/32 >/dev/null 2>/dev/null");
 
     //qWarning() << "Linux NET change: " << res << WIFEXITED(res) << WEXITSTATUS(res);
     if (!WIFEXITED(res) || (WEXITSTATUS(res) == 0 || WEXITSTATUS(res) == 127))
@@ -602,13 +605,17 @@ void Application::checkNetwork()
     struct ::sockaddr_in sock;
     sock.sin_family = AF_INET;
     sock.sin_port = htons(80);
-    sock.sin_addr.s_addr = inet_addr("178.63.92.134");
+    sock.sin_addr.s_addr = inet_addr(CHECK_IP);
     SCNetworkConnectionFlags flags = 0;
     bool result = SCNetworkCheckReachabilityByAddress(reinterpret_cast<sockaddr *>(&sock), sizeof(sock), &flags);
 
     //qWarning() << "Mac NET change: " << result << flags;
     if (!result || (flags & (kSCNetworkFlagsReachable | kSCNetworkFlagsConnectionRequired)) == kSCNetworkFlagsReachable)
         online = true;
+
+#elif defined(Q_OS_WIN)
+    online = InternetCheckConnectionW(L"http://" CHECK_IP, 0, 0);
+    //qWarning() << "Win NET change: " << online;
 
 #else
     online = true;
