@@ -642,16 +642,19 @@ void BrickLink::InternalAppearsInModel::init(const InvItemList &list)
 {
     MODELTEST_ATTACH(this)
 
-    if (!list.isEmpty()) {
-        QMap<const Item *, int> unique;
-        bool first_item = true;
+    QMap<const Item *, int> unique;
+    bool first_item = true;
+    bool single_item = (list.count() == 1);
 
-        foreach (InvItem *invitem, list) {
-            if (!invitem->item())
-                continue;
+    foreach (InvItem *invitem, list) {
+        if (!invitem->item())
+            continue;
 
-            foreach (const AppearsInColor &vec, invitem->item()->appearsIn(invitem->color())) {
-                foreach (const AppearsInItem &item, vec) {
+        foreach (const AppearsInColor &vec, invitem->item()->appearsIn(invitem->color())) {
+            foreach (const AppearsInItem &item, vec) {
+                if (single_item) {
+                    m_items.append(new AppearsInItem(item.first, item.second));
+                } else {
                     QMap<const Item *, int>::iterator it = unique.find(item.second);
                     if (it != unique.end())
                         ++it.value();
@@ -659,12 +662,12 @@ void BrickLink::InternalAppearsInModel::init(const InvItemList &list)
                         unique.insert(item.second, 1);
                 }
             }
-            first_item = false;
         }
-        for (QMap<const Item *, int>::iterator it = unique.begin(); it != unique.end(); ++it) {
-            if (it.value() >= list.count())
-                m_items.append(new AppearsInItem(-1, it.key()));
-        }
+        first_item = false;
+    }
+    for (QMap<const Item *, int>::iterator it = unique.begin(); it != unique.end(); ++it) {
+        if (it.value() >= list.count())
+            m_items.append(new AppearsInItem(-1, it.key()));
     }
 }
 
