@@ -400,13 +400,13 @@ private slots:
                     line = ts.readLine();
                     if (line.isNull())
                         break;
-                    if (line.startsWith(sep) && !parsing_items)
+                    if (line.startsWith(sep, Qt::CaseInsensitive) && !parsing_items)
                         parsing_items = true;
 
                     if (parsing_items)
                         items_line += line;
 
-                    if ((line == QLatin1String("</TABLE>")) && parsing_items)
+                    if ((line.compare(QLatin1String("</TABLE>"), Qt::CaseInsensitive) == 0) && parsing_items)
                         break;
                 }
 
@@ -415,9 +415,9 @@ private slots:
                 foreach(const QString &str, strlist) {
                     BrickLink::InvItem *ii = 0;
 
-                    QRegExp rx_ids(QLatin1String("HEIGHT='60' SRC='http://img.bricklink.com/([A-Z])/([^ ]+).gif' NAME="));
-                    QRegExp rx_qty_price(QLatin1String(" VALUE=\"([0-9]+)\">(&nbsp;\\(x[0-9]+\\))?<BR>Qty Available: <B>[0-9]+</B><BR>Each:&nbsp;<B>([A-Z $])+([0-9.]+)</B>"));
-                    QRegExp rx_names(QLatin1String("</TD><TD>(.+)</TD><TD VALIGN=\"TOP\" NOWRAP>"));
+                    QRegExp rx_ids(QLatin1String("HEIGHT='60' SRC='http://img.bricklink.com/([A-Z])/([^ ]+).gif' NAME="), Qt::CaseInsensitive);
+                    QRegExp rx_qty_price(QLatin1String(" VALUE=\"([0-9]+)\">(&nbsp;\\(x[0-9]+\\))?<BR>Qty Available: <B>[0-9]+</B><BR>Each:&nbsp;<B>([A-Z $]+)([0-9.]+)</B>"), Qt::CaseInsensitive);
+                    QRegExp rx_names(QLatin1String("</TD><TD>(.+)</TD><TD VALIGN=\"TOP\" NOWRAP>"), Qt::CaseInsensitive);
                     QString str_cond(QLatin1String("<B>New</B>"));
 
                     rx_ids.indexIn(str);
@@ -484,12 +484,13 @@ private slots:
                         int qty = rx_qty_price.cap(1).toInt();
                         if (m_currencycode.isEmpty()) {
                             m_currencycode = rx_qty_price.cap(3).trimmed();
-                            if (m_currencycode == QLatin1String("US $"))
-                                m_currencycode = QLatin1String("USD");
+                            m_currencycode.replace(QLatin1String(" $"), QLatin1String("D")); // 'US $' -> 'USD', 'AU $' -> 'AUD'
+                            if (m_currencycode.length() != 3)
+                                m_currencycode.clear();
                         }
                         double price = QLocale::c().toDouble(rx_qty_price.cap(4));
 
-                        BrickLink::Condition cond = (str.indexOf(str_cond) >= 0 ? BrickLink::New : BrickLink::Used);
+                        BrickLink::Condition cond = (str.indexOf(str_cond, 0, Qt::CaseInsensitive) >= 0 ? BrickLink::New : BrickLink::Used);
 
                         QString comment;
                         int comment_pos = color_and_item.indexOf(item->name());

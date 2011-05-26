@@ -94,6 +94,7 @@ private:
     bool                      m_connected;
     bool                      m_on_price;
     QString                   m_ccode;
+    qreal                     m_crate;
 
     QString m_str_qty;
     QString m_str_cond [BrickLink::ConditionCount];
@@ -104,7 +105,7 @@ private:
 };
 
 PriceGuideWidget::PriceGuideWidget(QWidget *parent, Qt::WindowFlags f)
-        : QFrame(parent, f)
+    : QFrame(parent, f)
 {
     d = new PriceGuideWidgetPrivate(this);
 
@@ -112,6 +113,7 @@ PriceGuideWidget::PriceGuideWidget(QWidget *parent, Qt::WindowFlags f)
     d->m_layout = Normal;
     d->m_on_price = false;
     d->m_ccode = Config::inst()->defaultCurrencyCode();
+    d->m_crate = Currency::inst()->rate(d->m_ccode);
 
     setBackgroundRole(QPalette::Base);
     setMouseTracking(true);
@@ -630,7 +632,7 @@ void PriceGuideWidget::paintEvent(QPaintEvent *e)
         case cell::Price:
             if (!is_updating) {
                 if (valid)
-                    str = Currency::toString(d->m_pg->price(c.m_time, c.m_condition, c.m_price), d->m_ccode);
+                    str = Currency::toString(d->m_pg->price(c.m_time, c.m_condition, c.m_price) * d->m_crate, d->m_ccode);
 
                 paintCell(&p, c, c.m_text_flags, str, c.m_flag);
             }
@@ -724,6 +726,7 @@ void PriceGuideWidget::setCurrencyCode(const QString &code)
 {
     if (code != d->m_ccode) {
         d->m_ccode = code;
+        d->m_crate = Currency::inst()->rate(code);
         recalcLayout();
         update();
     }
