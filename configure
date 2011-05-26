@@ -1,0 +1,76 @@
+#!/bin/bash
+
+# set -e -x
+
+qt_minimum="4.6.0"
+
+qmake_bin=""
+qmake_bin_test=("$(which qmake-qt4)" "$(which qmake)" "$QTDIR/bin/qmake")
+
+debug_release=""
+
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+    --qmake=*)
+        qmake_bin_test=("${1:8}")
+        ;;
+    --qmake)
+        shift
+        qmake_bin_test=("$1")
+        ;;        
+    --debug)
+        debug_release="CONFIG+=debug CONFIG-=release"
+        ;;
+    --release)
+        debug_release="CONFIG+=release CONFIG-=debug"
+        ;;
+    *)
+        echo "Usage: configure [--qmake=<qmake path>] [--release|--debug]"
+        exit 1
+        ;;
+    esac
+    shift
+done
+
+for ((i=0; i<${#qmake_bin_test}; i++)); do
+   tst="${qmake_bin_test[$i]}"
+   # echo "Testing: $tst"
+
+   if [ -x "$tst" ]; then
+       qmake_bin="$tst"
+       break
+   fi
+done
+
+if [ ! -x "$qmake_bin" ]; then
+    echo "FAIL: Could not find a suitable qmake binary"
+    exit 2
+fi
+
+if ! "$qmake_bin" -query 2>/dev/null | grep -sq QT_VERSION; then
+    echo "FAIL: $qmake_bin is not a Qt 4 qmake"
+    exit 3
+fi
+
+qt_min_version=0
+qt_version=0 
+IFS="." ; for i in `echo "$qt_minimum"`; do qt_min_version=$(($qt_min_version * 256 + $i)); done
+IFS="." ; for i in `"$qmake_bin" -query QT_VERSION`; do qt_version=$(($qt_version * 256 + $i)); done
+
+# echo "min: $qt_min_version // is: $qt_version"
+
+if [ $qt_version -lt $qt_min_version ]; then
+    echo "FAIL: $qmake_bin points to Qt version `"$qmake_bin" -query QT_VERSION`, which is older than $qt_minimum"
+    exit 4
+fi
+
+qmake_out=$("$qmake_bin" -r $debug_release 2>&1)
+qmake_res="$?"
+
+if [ "$qmake_res" != "0" ]; then
+    echo -e "$qmake_out"
+fi
+
+exit $qmake_res
+
