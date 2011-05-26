@@ -464,10 +464,104 @@ Total    P
 Lots     P
 Items    P
 Errors   P? A? -> go to next error  Errors: 5 (<)(>)
-SetToPG  P
+SetToPG  P [|||  ] (x)
 Matching P? A? -> Cancel  Matching [|||| ] (x)
 Order    A   Order: Robert Griebl (V)
 Filter   A   Filter:  [_________X] (V)
+
+
+Name:
+Type: Label | Clickable | Progress | CancelButton | Prev | Next | More
+
+
+
+enum SectionFlags {
+    Collapsible, Expanding
+};
+
+
+
+class InfoBar : public QWidget
+{
+    Q_OBJECT
+    
+public:
+    InfoBar(QWidget *parent = 0);
+    
+    enum ButtonType {
+        Cancel,
+        Previous,
+        Next,
+        More,
+        
+        Count
+    };
+    
+    int addSection(const QString &title = QString());
+    int insertSection(int before, const QString &title = QString());
+    void removeSection(int section);
+    
+    QLabel *sectionTitel(int section);
+    QAbstractButton *sectionButton(int section, ButtonType button);
+    QWidget *sectionContent(int section);
+    void setSectionContent(int section, QWidget *w);
+    
+private:
+    class InfoBarPrivate;
+
+    QScopedPointer<InfoBarPrivate> d;
+}
+
+struct Section {
+    int                     id;
+    QWidget *               widget;
+    QLabel *                label;
+    QWidget *               content;
+    QAbstractButton[Count] *buttons;
+};
+
+struct InfoBarPrivate
+{
+    QList<InfoSection *> sections;
+    static int           sectionIds;
+};
+
+int InfoBarPrivate::sectionIds = 0;
+
+InfoBar::InfoBar(QWidget *parent)
+    : QWidget(parent), d(new InfoBarPrivate)
+{
+}
+
+int InfoBar::insertSection(int before, const QString &title)
+{
+    Section *s = new Section;
+    s->id = ++d->sectionIds;
+    s->label = new QLabel(title, this);
+    s->content = 0;
+    memset(s->buttons, 0, sizeof(s->buttons));
+    
+    d->sections.append(s);
+    
+    return s->id;
+}
+
+int InfoBar::addSection(const QString &title)
+{
+    return insertSection(d->sections.count(), title);    
+}
+
+void InfoBar::removeSection(int id)
+{
+    for (int i = 0; i < d->sections.count(); ++i) {
+        Section *s = d->sections.at(i);
+        
+        if (s->id == id) {
+            delete s->widget;
+            d->sections.removeAt(i);
+        }
+    }
+}
 
 
 class DocumentStatus {
