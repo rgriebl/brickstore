@@ -169,18 +169,6 @@ FilterEdit::FilterEdit(QWidget *parent)
 #endif
 }
 
-void FilterEdit::setIdleText(const QString &str)
-{
-    m_idletext = str;
-    if (QLineEdit::text().isEmpty())
-        update();
-}
-
-QString FilterEdit::idleText() const
-{
-    return m_idletext;
-}
-
 void FilterEdit::setMenu(QMenu *menu)
 {
     w_menu->setMenu(menu);
@@ -217,36 +205,4 @@ void FilterEdit::doLayout()
 void FilterEdit::resizeEvent(QResizeEvent *)
 {
     doLayout();
-}
-
-void FilterEdit::paintEvent(QPaintEvent *e)
-{
-    QLineEdit::paintEvent(e);
-
-    if (!hasFocus() && !m_idletext.isEmpty() && text().isEmpty()) {
-        QStyleOptionFrameV2 opt;
-        initStyleOption(&opt);
-        QRect cr = style()->subElementRect(QStyle::SE_LineEditContents, &opt, this);
-        int l, r, t, b;
-        getTextMargins(&l, &t, &r, &b);
-        cr.adjust(l, t, -r, -b);
-
-        QPainter p(this);
-        p.setPen(palette().color(QPalette::Disabled, QPalette::Text));
-        p.drawText(cr, Qt::AlignLeft|Qt::AlignVCenter, m_idletext);
-    }
-}
-
-void FilterEdit::focusInEvent(QFocusEvent *e)
-{
-    if (!m_idletext.isEmpty())
-        update();
-    QLineEdit::focusInEvent(e);
-}
-
-void FilterEdit::focusOutEvent(QFocusEvent *e)
-{
-    if (!m_idletext.isEmpty())
-        update();
-    QLineEdit::focusOutEvent(e);
 }
