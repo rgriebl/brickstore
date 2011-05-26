@@ -431,7 +431,7 @@ void FrameWork::languageChange()
     }
     if (m_filter) {
         m_filter->setToolTip(tr("Filter the list using this pattern (wildcards allowed: * ? [])"));
-        m_filter->setPlaceholderText(tr("Filter"));
+        m_filter->setIdleText(tr("Filter"));
     }
     if (m_progress) {
         m_progress->setToolTipTemplates(tr("Offline"),

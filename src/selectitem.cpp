@@ -235,7 +235,7 @@ void SelectItem::languageChange()
 {
     d->w_item_types_label->setText(tr("Item type:"));
     d->w_filter->setToolTip(tr("Filter the list using this pattern (wildcards allowed: * ? [])"));
-    d->w_filter->setPlaceholderText(tr("Filter"));
+    d->w_filter->setIdleText(tr("Filter"));
 
     d->w_viewmode->setItemText(0, tr("List"));
     d->w_viewmode->setItemText(1, tr("List with Images"));
