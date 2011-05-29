@@ -614,7 +614,7 @@ void Application::checkNetwork()
         online = true;
 
 #elif defined(Q_OS_WIN)
-    online = InternetCheckConnectionW(L"http://" CHECK_IP, 0, 0);
+    online = InternetCheckConnectionW(L"http://" TEXT(CHECK_IP), 0, 0);
     //qWarning() << "Win NET change: " << online;
 
 #else

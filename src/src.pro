@@ -114,18 +114,10 @@ win32 {
   win32-msvc* {
     QMAKE_CXXFLAGS_DEBUG   += /Od /GL-
     QMAKE_CXXFLAGS_RELEASE += /O2 /GL
+    release:QMAKE_LFLAGS_WINDOWS += "/LTCG"
+    DEFINES += _CRT_SECURE_NO_DEPRECATE
 
-    LIBS += user32.lib advapi32.lib
-  }
-  
-  win32-msvc2005 {
-     DEFINES += _CRT_SECURE_NO_DEPRECATE
-
-     # QMAKE_LFLAGS_WINDOWS += "/MANIFEST:NO"
-     release:QMAKE_LFLAGS_WINDOWS += "/LTCG"
-
-     #QMAKE_CXXFLAGS_DEBUG   += /EHc- /EHs- /GR-
-     #QMAKE_CXXFLAGS_RELEASE += /EHc- /EHs- /GR-
+    LIBS += user32.lib advapi32.lib wininet.lib
   }
 }
 
