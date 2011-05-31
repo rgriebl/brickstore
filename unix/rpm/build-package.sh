@@ -20,7 +20,7 @@ if [ ! -d unix ]; then
 	exit 1
 fi
 
-pkg_ver=`awk '/^ *RELEASE *=/ { print $3; }' <brickstore.pro `
+pkg_ver=`cat RELEASE`
 [ $# = 1 ] && pkg_ver="$1"
 
 if [ -z $pkg_ver ]; then

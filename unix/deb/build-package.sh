@@ -20,7 +20,7 @@ if [ ! -d unix ]; then
 	exit 1
 fi
 
-pkg_ver=`awk '/^ *RELEASE *=/ { print $3; }' <brickstore.pro `
+pkg_ver=`cat RELEASE`
 [ $# = 1 ] && pkg_ver="$1"
 
 if [ -z $pkg_ver ]; then
@@ -33,31 +33,17 @@ if [ ! -x "`which dpkg-buildpackage`" ]; then
 	exit 3
 fi
 
-dist="unknown"
+dist_id=$(lsb_release -i -s 2>/dev/null)
+dist_code=$(lsb_release -c -s 2>/dev/null)
 
-## Ubuntu (lsb package needed!)
-if grep -sq "^DISTRIB_ID=Ubuntu\$" /etc/lsb-release; then
-	dist=`grep "^DISTRIB_CODENAME" /etc/lsb-release | sed -e 's,^DISTRIB_CODENAME=\(.*\)$,\1,'`
-	
-## Maemo
-elif [ -e /etc/maemo_version ]; then
-	dist=maemo-`head -n1 /etc/maemo_version | sed -e 's, .*$,,'`
-
-## Debian
-elif [ -e /etc/debian_version ]; then
-	case `cat /etc/debian_version` in
-		3.0) dist=woody
-			;;
-		3.1) dist=sarge
-			;;
-		4.0) dist=etch
-			;;
-		*/*) dist=`sed </etc/debian_version -e 's,/.*$,,'`
-			;;
-		sid*) dist=sid
-			;;
-	esac
+if [ -n "$dist_code" ]; then
+	dist=$(printf "%s" "$dist_code")
+elif [ -n "$dist_id" ]; then
+	dist=$(printf "%s/unknown" "$dist_id")
+else
+	dist="unknown"
 fi
+
 
 echo
 echo "Creating $dist DEB package ($pkg_ver)"
@@ -83,7 +69,7 @@ Source: brickstore
 Section: x11
 Priority: optional
 Maintainer: Robert Griebl <rg@softforge.de>
-Build-Depends: debhelper (>= 4.0.0), qt45-dev-tools (>= 4.5), libqt45-dev (>= 4.5)
+Build-Depends: debhelper (>= 4.0.0), libqt4-dev (>= 4.6), libqt4-opengl-dev (>= 4.6), libxext-dev
 Standards-Version: 3.6.1
 
 Package: brickstore
@@ -152,13 +138,14 @@ echo >debian/compat '4'
 echo " > Building package..."
 
 chmod +x debian/rules
-BRICKSTORE_VERSION=$pkg_ver dpkg-buildpackage -b -D -rfakeroot -us -uc
+NUMJOBS="$(grep -s -E "^processor[[:space:]]+:" /proc/cpuinfo | wc -l)"
+BRICKSTORE_VERSION=$pkg_ver DEB_BUILD_OPTIONS="parallel=$NUMJOBS" dpkg-buildpackage -b -D -rfakeroot -us -uc
 
 cd ../..
 #rm -rf "$pkg_ver"
 mkdir -p "$pkg_ver"
 
-for i in `ls -1 tmp/*.deb`; do
+for i in `ls -1 BUILD/*.deb`; do
 	j=`basename "$i" .deb`
 	cp "$i" "$pkg_ver/${j}_$dist.deb"
 done

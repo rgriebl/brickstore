@@ -13,12 +13,12 @@
 ##
 ## See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 
-if [ ! -d BrickStore.app ]; then
+if [ ! -d macx ]; then
 	echo "Error: this script needs to be called from the base directory!"
 	exit 1
 fi
 
-pkg_ver=`awk '/^ *RELEASE *=/ { print $3; }' <brickstore.pro `
+pkg_ver=`cat RELEASE`
 [ $# = 1 ] && pkg_ver="$1"
 
 if [ -z $pkg_ver ]; then

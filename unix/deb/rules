@@ -10,7 +10,10 @@
 #export DH_VERBOSE=1
 
 
-
+ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+    NUMJOBS = $(patsubst parallel=%,%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+    MAKEFLAGS += -j$(NUMJOBS)
+endif
 
 CONFIG = release
 
@@ -19,7 +22,7 @@ configure: configure-stamp
 configure-stamp:
 	dh_testdir
 	# Add here commands to configure the package.
-	qmake CONFIG+=$(CONFIG) RELEASE=$(BRICKSTORE_VERSION) PREFIX=/usr
+	qmake-qt4 CONFIG+=$(CONFIG) RELEASE=$(BRICKSTORE_VERSION) PREFIX=/usr
 
 	touch configure-stamp
 
@@ -31,6 +34,7 @@ build-stamp: configure-stamp
 
 	# Add here commands to compile the package.
 	$(MAKE)
+
 	#docbook-to-man debian/brickstore.sgml > brickstore.1
 
 	touch build-stamp
@@ -54,7 +58,7 @@ install: build
 
 	# Add here commands to install the package into debian/brickstore.
 	$(MAKE) install INSTALL_ROOT=$(CURDIR)/debian/brickstore
-	cp -aH unix-package/share $(CURDIR)/debian/brickstore/usr/
+	cp -aH unix/share $(CURDIR)/debian/brickstore/usr/
 
 
 # Build architecture-independent files here.

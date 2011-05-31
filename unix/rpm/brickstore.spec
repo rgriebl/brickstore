@@ -38,19 +38,16 @@ http://www.bricklink.com
 
 # unpack the source and cd into the source directory
 %setup -q
-if [ -f $RPM_SOURCE_DIR/.private-key ]; then
-  cp $RPM_SOURCE_DIR/.private-key .
-fi
 
 # Build Stanza begins here
 #
 %build
 
 # run qmake to produce a Makefile
-qmake CONFIG+=release RELEASE=%{_brickstore_version} PREFIX=%{_prefix}
+qmake-qt4 CONFIG+=release CONFIG-=debug RELEASE=%{_brickstore_version} PREFIX=%{_prefix}
 
 # compile the software
-make
+make %{_smp_mflags}
 
 # Install Stanza begins here
 #
