@@ -27,3 +27,4 @@ ldtest
 *.orig
 *.rej
 ui_*.h
+*.pr?.user
