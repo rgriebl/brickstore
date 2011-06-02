@@ -94,7 +94,7 @@ QAbstractButton *InfoBar::sectionButton(int id, ButtonType button)
 #ifdef Q_OS_MACX
             b->setStyle(new QWindowsStyle());
 #endif
-            const char *icon = 0;
+            const char *icon;
             QString tooltip;
             switch (button) {
             case Cancel:
@@ -112,6 +112,9 @@ QAbstractButton *InfoBar::sectionButton(int id, ButtonType button)
             case More:
                 icon = ":/images/infobar/more.png";
                 tooltip = tr("More");
+                break;
+            default:
+                icon = 0;
                 break;
             }
             b->setIcon(QIcon(icon));

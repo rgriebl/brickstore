@@ -486,7 +486,7 @@ QString ReportMoneyStatic::localCurrencySymbol() const
     return QString(); //TODO: Currency::symbol();
 }
 
-QString ReportMoneyStatic::toString(double d, bool with_currency_symbol, int precision)
+QString ReportMoneyStatic::toString(double /*d*/, bool /*with_currency_symbol*/, int precision)
 {
     if (precision > 3 || precision < 0) {
         m_engine->currentContext()->throwError("Money.toString(): precision has to be in the range [0 ..3]");
@@ -495,7 +495,7 @@ QString ReportMoneyStatic::toString(double d, bool with_currency_symbol, int pre
     return QString(); //TODO: Currency(d).toUSD(with_currency_symbol ? Currency::LocalSymbol : Currency::NoSymbol, precision);
 }
 
-QString ReportMoneyStatic::toLocalString(double d, bool with_currency_symbol, int precision)
+QString ReportMoneyStatic::toLocalString(double /*d*/, bool /*with_currency_symbol*/, int precision)
 {
     if (precision > 3 || precision < 0) {
         m_engine->currentContext()->throwError("Money.toLocalString(): precision has to be in the range [0 ..3]");

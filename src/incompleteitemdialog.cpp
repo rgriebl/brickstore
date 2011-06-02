@@ -59,9 +59,9 @@ IncompleteItemDialog::IncompleteItemDialog(BrickLink::InvItem *item, QWidget *pa
 
 void IncompleteItemDialog::fixItem()
 {
-    const BrickLink::InvItem::Incomplete *inc = m_item->isIncomplete();
-    const BrickLink::ItemType *itt = inc->m_itemtype_id.isEmpty() ? 0 : BrickLink::core()->itemType(inc->m_itemtype_id[0].toLatin1());
-    const BrickLink::Category *cat = inc->m_category_id.isEmpty() ? 0 : BrickLink::core()->category(inc->m_category_id.toInt());
+    //const BrickLink::InvItem::Incomplete *inc = m_item->isIncomplete();
+    //const BrickLink::ItemType *itt = inc->m_itemtype_id.isEmpty() ? 0 : BrickLink::core()->itemType(inc->m_itemtype_id[0].toLatin1());
+    //const BrickLink::Category *cat = inc->m_category_id.isEmpty() ? 0 : BrickLink::core()->category(inc->m_category_id.toInt());
 
     SelectItemDialog dlg(false, this);
 

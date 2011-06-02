@@ -1466,7 +1466,7 @@ void Window::on_edit_partoutitems_triggered()
         QApplication::beep();
 }
 
-void Window::setMatchProgress(int pmax, int pcur)
+void Window::setMatchProgress(int /*pmax*/, int /*pcur*/)
 {
     fputc('.', stderr);
 }
