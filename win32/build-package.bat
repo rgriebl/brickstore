@@ -18,11 +18,9 @@ IF NOT EXIST win32 (
   EXIT /B 1
 )
 
-SET PKG_VER=
+SET PKG_VER=<RELEASE
 
-IF EXIST brickstore.pro (FOR /F "usebackq tokens=3" %%V IN (`FINDSTR /R /C:"^ *RELEASE *=" brickstore.pro`) DO SET PKG_VER=%%V)
 IF NOT "x%1" == "x" SET PKG_VER=%1
-
 IF "x%PKG_VER%" == "x" (
   ECHO Error: no package version supplied
   EXIT /B 2

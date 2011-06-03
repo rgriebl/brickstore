@@ -28,14 +28,14 @@ if [ -z $pkg_ver ]; then
 	exit 2
 fi
 
-if [ -x "`which rpmquery`" ]; then
-	echo "** Detected a RPM based distro **"
-	echo
-	`dirname $0`/rpm/build-package.sh "$@"
-elif [ -x "`which dpkg-query`" ]; then
+if [ -x "`which dpkg-query`" ]; then
 	echo "** Detected a DEB based distro **"
 	echo
 	`dirname $0`/deb/build-package.sh "$@"
+elif [ -x "`which rpmquery`" ]; then
+	echo "** Detected a RPM based distro **"
+	echo
+	`dirname $0`/rpm/build-package.sh "$@"
 else
 	echo "** You are running neither a RPM nor a DEB based distribution **"
 	echo

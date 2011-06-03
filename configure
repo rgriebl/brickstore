@@ -2,31 +2,40 @@
 
 # set -e -x
 
-qt_minimum="4.6.0"
-
 qmake_bin=""
 qmake_bin_test=("$(which qmake-qt4)" "$(which qmake)" "$QTDIR/bin/qmake")
-
+prefix="/usr/local"
 debug_release=""
 
 
 while [ $# -gt 0 ]; do
     case "$1" in
-    --qmake=*)
+    --qmake|--qmake=*)
         qmake_bin_test=("${1:8}")
+        if [ -z "${qmake_bin_test[0]}" ]; then
+            shift
+            qmake_bin_test=("$1")
+        fi
         ;;
-    --qmake)
-        shift
-        qmake_bin_test=("$1")
-        ;;        
+    --prefix|--prefix=*)
+        prefix="${1:9}"
+        if [ -z "$prefix" ]; then
+            shift
+            prefix="$1"
+        fi
+        ;;
     --debug)
-        debug_release="CONFIG+=debug CONFIG-=release"
+        debug_release="debug"
         ;;
     --release)
-        debug_release="CONFIG+=release CONFIG-=debug"
+        debug_release="release"
         ;;
     *)
-        echo "Usage: configure [--qmake=<qmake path>] [--release|--debug]"
+        echo "Usage: configure [options]"
+        echo "  --qmake=<qmake path>   (default: search $$PATH)"
+        echo "  --prefix=<prefix>      (default: /usr/local)"
+        echo "  --release"
+        echo "  --debug"
         exit 1
         ;;
     esac
@@ -53,19 +62,13 @@ if ! "$qmake_bin" -query 2>/dev/null | grep -sq QT_VERSION; then
     exit 3
 fi
 
-qt_min_version=0
-qt_version=0 
-IFS="." ; for i in `echo "$qt_minimum"`; do qt_min_version=$(($qt_min_version * 256 + $i)); done
-IFS="." ; for i in `"$qmake_bin" -query QT_VERSION`; do qt_version=$(($qt_version * 256 + $i)); done
+echo
+echo "Running $qmake_bin with the following options:"
+echo "  PREFIX  = $prefix"
+echo "  CONFIG += $debug_release"
+echo
 
-# echo "min: $qt_min_version // is: $qt_version"
-
-if [ $qt_version -lt $qt_min_version ]; then
-    echo "FAIL: $qmake_bin points to Qt version `"$qmake_bin" -query QT_VERSION`, which is older than $qt_minimum"
-    exit 4
-fi
-
-qmake_out=$("$qmake_bin" -r $debug_release 2>&1)
+qmake_out=$("$qmake_bin" -r "PREFIX=$prefix" "CONFIG+=$debug_release" 2>&1)
 qmake_res="$?"
 
 if [ "$qmake_res" != "0" ]; then
@@ -73,4 +76,3 @@ if [ "$qmake_res" != "0" ]; then
 fi
 
 exit $qmake_res
-

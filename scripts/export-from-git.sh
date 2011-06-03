@@ -1,3 +1,5 @@
+#!/bin/sh
+
 ## Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
 ##
 ## This file is part of BrickStore.
@@ -11,11 +13,18 @@
 ##
 ## See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 
-QT_TOO_OLD=$$find(QT_VERSION, "^4\\.[0-5]")
-count(QT_TOO_OLD, 1) {
-  error("BrickStore needs at least Qt version 4.6. You are trying to compile against Qt version " $$QT_VERSION)
-}
+set -e
 
-TEMPLATE = subdirs
-CONFIG  += ordered
-SUBDIRS  = src
+if [ ! -d unix ]; then
+	echo "Error: this script needs to be called from the base directory!"
+	exit 1
+fi
+
+release=`cat RELEASE`
+
+if [ -z $release ]; then
+	echo "Error: no package version supplied!"
+	exit 2
+fi
+
+git archive --format tar --prefix brickstore-$release/ HEAD | xz >brickstore-$release.tar.xz

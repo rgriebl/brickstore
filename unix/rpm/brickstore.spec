@@ -19,7 +19,7 @@ License: GPL
 Group: Applications/Internet
 
 # this software source file; not the use of variables
-Source: %{name}-%{version}.tar.bz2
+Source: %{name}-%{version}.tar.xz
 
 # temporary dir where the software should be compiled
 Buildroot: %{_tmppath}/%{name}-root

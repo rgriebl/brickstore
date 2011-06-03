@@ -146,6 +146,27 @@ unix:!macx {
   isEmpty( PREFIX ):PREFIX = /usr/local
   target.path = $$PREFIX/bin
   INSTALLS += target
+
+  linux* {
+    sharedir = "../unix/share"
+
+    share_desktop.path   = $$PREFIX/share/applications
+    share_desktop.files  = $$sharedir/applications/brickstore.desktop
+    share_mimelnk.path   = $$PREFIX/share/mimelnk/application
+    share_mimelnk.files  = $$sharedir/mimelnk/application/x-brickstore-xml.desktop
+    share_mimeicon.path  = $$PREFIX/share/icons/hicolor/48x48/mimetypes
+    share_mimeicon.files = $$sharedir/icons/hicolor/48x48/mimetypes/application-x-brickstore-xml.png
+    share_appicon.path   = $$PREFIX/share/icons/hicolor/64x64/apps
+    share_appicon.files  = $$sharedir/icons/hicolor/64x64/apps/brickstore.png
+    share_mime.path      = $$PREFIX/share/mime/packages
+    sharemime.files      = $$sharedir/mime/packages/brickstore-mime.xml
+
+    INSTALLS += share_desktop share_mimelnk share_mimeicon share_appicon share_mime
+
+    # avoid useless dependencies (and warnings from dpkg-buildpackage)
+    QMAKE_LIBS_X11 -= -lXext -lX11
+    QMAKE_LIBS_OPENGL -= -lGLU
+  }
 }
 
 
