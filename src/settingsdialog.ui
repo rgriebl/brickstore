@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>464</width>
-    <height>341</height>
+    <width>530</width>
+    <height>375</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -28,7 +28,7 @@
       </attribute>
       <layout class="QFormLayout" name="formLayout_7">
        <property name="fieldGrowthPolicy">
-        <enum>QFormLayout::FieldsStayAtSizeHint</enum>
+        <enum>QFormLayout::ExpandingFieldsGrow</enum>
        </property>
        <item row="0" column="0">
         <widget class="QLabel" name="label_8">
@@ -129,8 +129,8 @@
             </property>
             <property name="iconSize">
              <size>
-              <width>22</width>
-              <height>22</height>
+              <width>16</width>
+              <height>16</height>
              </size>
             </property>
             <property name="autoRaise">
@@ -169,31 +169,6 @@
          </property>
         </widget>
        </item>
-       <item row="8" column="1">
-        <layout class="QHBoxLayout" name="horizontalLayout_3">
-         <item>
-          <widget class="QLineEdit" name="w_docdir">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QToolButton" name="w_docdir_select">
-           <property name="icon">
-            <iconset>
-             <normaloff>:/images/16x16/file_open.png</normaloff>:/images/16x16/file_open.png</iconset>
-           </property>
-           <property name="autoRaise">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
        <item row="9" column="1">
         <spacer name="verticalSpacer_4">
          <property name="orientation">
@@ -211,6 +186,13 @@
         <widget class="QLabel" name="label_27">
          <property name="text">
           <string>Default currency</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="1">
+        <widget class="QComboBox" name="w_docdir">
+         <property name="sizeAdjustPolicy">
+          <enum>QComboBox::AdjustToContents</enum>
          </property>
         </widget>
        </item>

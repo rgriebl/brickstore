@@ -13,6 +13,8 @@
 */
 #include <QTabWidget>
 #include <QFileDialog>
+#include <QComboBox>
+#include <QDesktopServices>
 
 #include "settingsdialog.h"
 #include "config.h"
@@ -30,6 +32,32 @@ static int day2sec(int d)
     return d * (60*60*24);
 }
 
+static QString systemDirName(const QString &path)
+{
+    QDesktopServices::StandardLocation locations[] = {
+        QDesktopServices::DesktopLocation,
+        QDesktopServices::DocumentsLocation,
+        QDesktopServices::MusicLocation,
+        QDesktopServices::MoviesLocation,
+        QDesktopServices::PicturesLocation,
+        QDesktopServices::TempLocation,
+        QDesktopServices::HomeLocation,
+        QDesktopServices::DataLocation,
+        QDesktopServices::CacheLocation
+    };
+
+    for (uint i = 0; i < sizeof(locations)/sizeof(locations[0]); ++i) {
+        if (QDir(QDesktopServices::storageLocation(locations[i])) == QDir(path)) {
+            QString name = QDesktopServices::displayName(locations[i]);
+            if (!name.isEmpty())
+                return name;
+            else
+                break;
+        }
+    }
+    return path;
+}
+
 
 SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent, Qt::WindowFlags f)
     : QDialog(parent, f)
@@ -38,7 +66,14 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent, Qt
 
     w_upd_reset->setAttribute(Qt::WA_MacSmallSize);
 
-    connect(w_docdir_select, SIGNAL(clicked()), this, SLOT(selectDocDir()));
+    w_docdir->insertItem(0, style()->standardIcon(QStyle::SP_DirIcon), QString());
+    w_docdir->insertItem(1, QIcon(), tr("Other.."));
+    w_docdir->insertSeparator(1);
+
+    int is = fontMetrics().height();
+    w_currency_update->setIconSize(QSize(is, is));
+
+    connect(w_docdir, SIGNAL(activated(int)), this, SLOT(selectDocDir(int)));
     connect(w_upd_reset, SIGNAL(clicked()), this, SLOT(resetUpdateIntervals()));
     connect(w_currency, SIGNAL(currentIndexChanged(QString)), this, SLOT(currentCurrencyChanged(QString)));
     connect(w_currency_update, SIGNAL(clicked()), Currency::inst(), SLOT(updateRates()));
@@ -66,12 +101,17 @@ void SettingsDialog::currentCurrencyChanged(const QString &ccode)
     m_preferedCurrency = ccode;
 }
 
-void SettingsDialog::selectDocDir()
+void SettingsDialog::selectDocDir(int index)
 {
-    QString newdir = QFileDialog::getExistingDirectory(this, tr("Document directory location"), w_docdir->text());
+    if (index > 0) {
+        QString newdir = QFileDialog::getExistingDirectory(this, tr("Document directory location"), w_docdir->itemData(0).toString());
 
-    if (!newdir.isNull())
-        w_docdir->setText(QDir::convertSeparators(newdir));
+        if (!newdir.isNull()) {
+            w_docdir->setItemData(0, QDir::convertSeparators(newdir));
+            w_docdir->setItemText(0, systemDirName(newdir));
+        }
+    }
+    w_docdir->setCurrentIndex(0);
 }
 
 void SettingsDialog::resetUpdateIntervals()
@@ -147,7 +187,9 @@ void SettingsDialog::load()
     w_openbrowser->setChecked(Config::inst()->value("/General/Export/OpenBrowser", true).toBool());
     w_closeempty->setChecked(Config::inst()->closeEmptyDocuments());
 
-    w_docdir->setText(QDir::convertSeparators(Config::inst()->documentDir()));
+    QString docdir = QDir::convertSeparators(Config::inst()->documentDir());
+    w_docdir->setItemData(0, docdir);
+    w_docdir->setItemText(0, systemDirName(docdir));
 
     // --[ UPDATES ]-------------------------------------------------------------------
 
@@ -215,9 +257,9 @@ void SettingsDialog::save()
     Config::inst()->setMeasurementSystem(w_imperial->isChecked() ? QLocale::ImperialSystem : QLocale::MetricSystem);
     Config::inst()->setDefaultCurrencyCode(m_preferedCurrency);
 
-    QDir dd(w_docdir->text());
+    QDir dd(w_docdir->itemText(0));
     if (dd.exists() && dd.isReadable())
-        Config::inst()->setDocumentDir(w_docdir->text());
+        Config::inst()->setDocumentDir(w_docdir->itemText(0));
     else
         MessageBox::warning(this, tr("The specified document directory does not exist or is not read- and writeable.<br />The document directory setting will not be changed."));
 

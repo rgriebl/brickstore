@@ -32,7 +32,7 @@ public slots:
     virtual void accept();
 
 protected slots:
-    void selectDocDir();
+    void selectDocDir(int);
     void resetUpdateIntervals();
     void currenciesUpdated();
     void currentCurrencyChanged(const QString &);
