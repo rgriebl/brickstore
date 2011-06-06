@@ -60,11 +60,11 @@ cp -aH share SOURCES
 cp rpm/brickstore.spec SPECS
 
 echo " > Building package..."
-build_output = $(rpmbuild -bb --quiet \
-                          --define="_topdir `pwd`" \
-                          --define="_brickstore_version $pkg_ver" \
-                          --define="_brickstore_buildreq $build_req" \
-                          SPECS/brickstore.spec 2>&1)
+build_output=$(rpmbuild -bb --quiet \
+                        --define="_topdir `pwd`" \
+                        --define="_brickstore_version $pkg_ver" \
+                        --define="_brickstore_buildreq $build_req" \
+                        SPECS/brickstore.spec 2>&1)
 build_result=$?
 
 if [ "$build_result" != "0" ]; then
