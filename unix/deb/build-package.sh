@@ -93,10 +93,10 @@ fi
 
 cd ../..
 #rm -rf "$pkg_ver"
-mkdir -p "$pkg_ver"
+mkdir -p "../packages/$pkg_ver/deb"
 
 for i in `find BUILD -name "*.deb"`; do
-    cp "$i" "$pkg_ver";
+    cp "$i" "../packages/$pkg_ver/deb";
 done
 
 echo " > Cleaning DEB build directories..."

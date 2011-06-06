@@ -79,9 +79,9 @@ echo " > Creating disk image $archive ($comptype)..."
 
 mkdir BUILD/dmg
 mv "$builddir/src/$bundle" BUILD/dmg
-mkdir -p $pkg_ver
+mkdir -p "../packages/$pkg_ver/dmg"
 
-hdiutil create "$pkg_ver/$archive.dmg" -volname "BrickStore $pkg_ver" -fs "HFS+" -srcdir BUILD/dmg -quiet $compression
+hdiutil create "../packages/$pkg_ver/dmg/$archive.dmg" -volname "BrickStore $pkg_ver" -fs "HFS+" -srcdir BUILD/dmg -quiet $compression
 rm -rf BUILD
 
 echo
