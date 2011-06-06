@@ -55,7 +55,7 @@ echo " > Creating RPM build directories..."
 cd unix
 rm -rf SPECS RPMS BUILD SRPMS SOURCES
 mkdir SPECS RPMS BUILD SRPMS SOURCES
-cp ../brickstore-$pkg_ver.tar.xz SOURCES
+cp ../brickstore-$pkg_ver.tar.bz2 SOURCES
 cp -aH share SOURCES
 cp rpm/brickstore.spec SPECS
 

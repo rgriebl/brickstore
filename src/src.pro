@@ -183,4 +183,6 @@ macx {
   bundle_locversions.files = $$system(find $$PWD/../macx/Resources/ -name '*.lproj')
   bundle_locversions.path = Contents/Resources
   QMAKE_BUNDLE_DATA += bundle_icons bundle_locversions
+
+  QMAKE_POST_LINK = "sed -i '' -e 's/@VERSION@/$$RELEASE/g' $$OUT_PWD/$${TARGET}.app/Contents/Info.plist"
 }

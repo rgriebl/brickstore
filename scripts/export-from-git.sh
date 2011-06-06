@@ -20,11 +20,12 @@ if [ ! -d unix ]; then
 	exit 1
 fi
 
-release=`cat RELEASE`
+pkg_ver=`cat RELEASE`
+[ $# = 1 ] && pkg_ver="$1"
 
-if [ -z $release ]; then
+if [ -z $pkg_ver ]; then
 	echo "Error: no package version supplied!"
 	exit 2
 fi
 
-git archive --format tar --prefix brickstore-$release/ HEAD | xz >brickstore-$release.tar.xz
+git archive --format tar --prefix "brickstore-$pkg_ver/" HEAD | bzip2 > "brickstore-$pkg_ver.tar.bz2"

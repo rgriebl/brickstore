@@ -12,7 +12,7 @@
 		<string>Bundle for BrickStore</string>
 
 		<key>CFBundleIdentifier</key>
-		<string>de.softforge.BrickStore</string>
+		<string>de.softforge.@EXECUTABLE@</string>
 
 		<key>CFBundleSignature</key>
 		<string>ttxt</string>
@@ -24,10 +24,10 @@
 		<string>BrickStore</string>
 
 		<key>CFBundleShortVersionString</key>
-		<string>%{version}</string>
+		<string>@VERSION@</string>
 
 		<key>CFBundleVersion</key>
-		<string>%{version}</string>
+		<string>@VERSION@</string>
 
 		<key>CFBundleDocumentTypes</key>
 		<array>

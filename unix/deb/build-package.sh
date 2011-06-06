@@ -54,7 +54,7 @@ echo " > Creating DEB build directories..."
 cd unix
 rm -rf BUILD
 mkdir BUILD
-tar -xaf "../brickstore-$pkg_ver.tar.xz" -C BUILD
+tar -xjf "../brickstore-$pkg_ver.tar.bz2" -C BUILD
 builddir="BUILD/brickstore-$pkg_ver"
 cd "$builddir"
 

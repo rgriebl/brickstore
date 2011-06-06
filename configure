@@ -7,7 +7,6 @@ qmake_bin_test=("$(which qmake-qt4)" "$(which qmake)" "$QTDIR/bin/qmake")
 prefix="/usr/local"
 debug_release=""
 
-
 while [ $# -gt 0 ]; do
     case "$1" in
     --qmake|--qmake=*)
@@ -42,7 +41,7 @@ while [ $# -gt 0 ]; do
     shift
 done
 
-for ((i=0; i<${#qmake_bin_test}; i++)); do
+for ((i=0; i<${#qmake_bin_test[@]}; i++)); do
    tst="${qmake_bin_test[$i]}"
    # echo "Testing: $tst"
 

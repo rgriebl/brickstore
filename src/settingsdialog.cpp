@@ -15,6 +15,7 @@
 #include <QFileDialog>
 #include <QComboBox>
 #include <QDesktopServices>
+#include <QWindowsStyle>
 
 #include "settingsdialog.h"
 #include "config.h"
@@ -65,6 +66,9 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent, Qt
     setupUi(this);
 
     w_upd_reset->setAttribute(Qt::WA_MacSmallSize);
+#ifdef Q_WS_MACX
+    w_currency_update->setStyle(new QWindowsStyle());
+#endif
 
     w_docdir->insertItem(0, style()->standardIcon(QStyle::SP_DirIcon), QString());
     w_docdir->insertItem(1, QIcon(), tr("Other.."));
