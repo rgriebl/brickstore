@@ -1,94 +1,134 @@
-@ECHO off
+@echo off
 
-REM Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
-REM
-REM This file is part of BrickStore.
-REM
-REM This file may be distributed and/or modified under the terms of the GNU 
-REM General Public License version 2 as published by the Free Software Foundation 
-REM and appearing in the file LICENSE.GPL included in the packaging of this file.
-REM
-REM This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-REM WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-REM
-REM See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
+rem Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+rem
+rem This file is part of BrickStore.
+rem
+rem This file may be distributed and/or modified under the terms of the GNU
+rem General Public License version 2 as published by the Free Software Foundation
+rem and appearing in the file LICENSE.GPL included in the packaging of this file.
+rem
+rem This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+rem WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+rem
+rem See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 
-IF NOT EXIST win32 (
-  ECHO Error: this script needs to be called from the base directory
-  EXIT /B 1
+setlocal EnableDelayedExpansion
+
+if not exist win32 (
+  echo Error: this script needs to be called from the base directory
+  exit /b 1
 )
 
-SET PKG_VER=<RELEASE
+set /p pkg_ver= < RELEASE
+rem set VSINSTALLDIR=
+rem set QTDIR=
 
-IF NOT "x%1" == "x" SET PKG_VER=%1
-IF "x%PKG_VER%" == "x" (
-  ECHO Error: no package version supplied
-  EXIT /B 2
+:loop
+if "%~1" == "" goto continue
+set arg=%1
+if !arg! == /qt (
+  set "QTDIR=%~2"
+  shift
+) else (
+if !arg! == /vs (
+  set "VSINSTALLDIR=%~2"
+  shift
+) else (
+  set "pkg_ver=%~1"
+))
+shift
+goto loop
+:continue
+
+echo QTDIR       : %QTDIR%
+echo VSINSTALLDIR: %VSINSTALLDIR%
+
+if "%pkg_ver%x" == "x" (
+  echo Error: no package version supplied
+  exit /b 2
 )
 
-IF "x%VCINSTALLDIR%" == "x" (
-  ECHO Error: please run this command from a Visual Studio Command Prompt
-  EXIT /B 3
+if "%QTDIR%x" == "x" (
+  echo Error: please run this command with the correct /qt ^<path/to/qt^> parameter
+  exit /b 4
 )
 
-QMAKE.EXE --version | FIND "Using Qt version 4.6." >NUL 2>NUL
-IF ERRORLEVEL 1 (
-  ECHO Error: No Qt 4.6.x qmake found in PATH.
-  EXIT /B 4
+if "%VSINSTALLDIR%x" == "x" (
+  echo Error: please run this command with the correct /vs ^<path/to/visual studio^> parameter
+  exit /b 3
 )
 
-ECHO.
-ECHO Creating Windows Installer (%PKG_VER%)
+"%QTDIR%\bin\qmake" --version | find "Using Qt version 4." >NUL 2>NUL
+if errorlevel 1 (
+  echo Error: %QTDIR%\bin\qmake is not a Qt 4.x.y qmake.
+  exit /b 5
+)
 
-ECHO ^> Creating Tarball...
-QMAKE.EXE brickstore.pro >NUL
-NMAKE.EXE tarball RELEASE=%PKG_VER% >NUL 2>NUL
+echo.
+echo Creating Windows Installer (%pkg_ver%)
 
+echo ^> Creating Tarball...
+call scripts\export-from-git.bat %pkg_ver%
 
-ECHO ^> Setting up build directory...
+echo ^> Setting up build directory...
 
-CD win32
-RMDIR /S /Q BUILD 2>NUL
-MKDIR BUILD
-CD BUILD
-..\tools\7za x ..\..\brickstore-%PKG_VER%.zip >NUL 2>NUL
-
-
-ECHO ^> Compiling...
-QMAKE.EXE -tp vc brickstore.pro >NUL
-"%VCINSTALLDIR%\VCPackages\vcbuild.exe" /r /nologo /nohtmllog /M2 brickstore.vcproj "Release|Win32"
-
-
-ECHO  ^> Compiling brickstore.wxs...
-FOR /F "tokens=*" %%Q IN ('QMAKE.EXE -query QT_INSTALL_PREFIX') DO SET QTDIR=%%Q
-..\tools\candle.exe -nologo -dTARGET=. -dBINARY=..\Binary -dVERSION=%PKG_VER% ..\installer\brickstore.wxs
-
-ECHO  ^> Linking brickstore.msi...
-..\tools\light.exe -nologo brickstore.wixobj -out brickstore.msi
-
-CD ..
+cd win32
+rem rmdir /s /q BUILD 2>NUL
+rem mkdir BUILD
+cd BUILD
+rem call ..\tools\7za x ..\..\brickstore-%pkg_ver%.zip >NUL 2>NUL
+cd brickstore-%pkg_ver%
 
 
-ECHO  ^> Moving to %PKG_VER%...
-RMDIR /S /Q %PKG_VER% 2>NUL
-MKDIR %PKG_VER%
-MOVE /Y BUILD\brickstore.msi %PKG_VER%
+echo ^> Compiling...
+set "PATH=%VSINSTALLDIR%\Common7\IDE;%VSINSTALLDIR%\VC\bin;%PATH%"
+set devenv=devenv.com
 
-ECHO  ^> Copying vssetup to %PKG_VER%...
-COPY Binary\vssetup.exe %PKG_VER%\Setup.exe >NUL
-COPY vssetup.ini %PKG_VER%\Setup.ini >NUL
+if not exist "%VSINSTALLDIR%\Common7\IDE\%devenv%" (
+  set devenv=vcexpress.exe
+)
 
-ECHO  ^> Building sfx archive BrickStore-%PKG_VER%.exe...
-CD %PKG_VER%
-..\tools\7za a -y -bd -ms -mx9 brickstore.7z Setup.exe Setup.ini brickstore.msi >NUL
-COPY /B ..\Binary\7zS.sfx + ..\7zS.ini + brickstore.7z BrickStore-%PKG_VER%.exe >NUL
-DEL Setup.exe Setup.ini brickstore.7z
-CD ..
+rem call "%QTDIR%\bin\qmake" -tp vc -r brickstore.pro
+set vsconsoleoutput=1
+rem call %devenV% brickstore.sln /Build release
+cd ..
 
+echo  ^> Compiling brickstore.wxs...
 
-ECHO ^> Cleaning build directory...
-RMDIR /S /Q BUILD >NUL
-CD ..
+call ..\tools\candle.exe -nologo ^
+     -dTARGET=brickstore-%pkg_ver% ^
+     -dBINARY=..\installer\Binary ^
+     -dVERSION=%pkg_ver% ^
+     -dQTDIR=%QTDIR% ^
+     ..\installer\brickstore.wxs
 
-ECHO.
-ECHO  ^> Finished
+echo  ^> Linking brickstore.msi...
+call ..\tools\light.exe -ext WixUIExtension -nologo ^
+     -sice:ICE08 -sice:ICE09 -sice:ICE32 -sice:ICE60 -sice:ICE61 ^
+     brickstore.wixobj -out brickstore.msi
+
+echo  ^> Building sfx archive BrickStore-%pkg_ver%.exe...
+call ..\tools\7za a -y -bd -ms -mx9 brickstore.7z brickstore.msi >NUL
+copy /B ..\installer\7zS.sfx + ..\installer\7zS.ini + brickstore.7z BrickStore-%pkg_ver%.exe >NUL
+rem del Setup.exe Setup.ini brickstore.7z
+del brickstore.7z
+cd ..
+
+echo  ^> Moving to %pkg_ver%...
+if not exist ..\packages (
+  mkdir ..\packages
+)
+if not exist ..\packages\%pkg_ver% (
+  mkdir ..\packages\%pkg_ver%
+)
+
+move /y BUILD\brickstore.msi ..\packages\%pkg_ver%
+move /y BUILD\BrickStore-%PKG_VER%.exe ..\packages\%pkg_ver%
+
+echo ^> Cleaning build directory...
+rem rmdir /s /q BUILD >NUL
+cd ..
+
+echo.
+echo  ^> Finished

@@ -28,4 +28,4 @@ ldtest
 *.rej
 ui_*.h
 *.pr?.user
-debian/
+BUILD

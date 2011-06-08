@@ -1,4 +1,4 @@
-@ECHO off
+Rem @ECHO off
 
 REM Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
 REM
@@ -18,7 +18,7 @@ IF NOT EXIST win32 (
   EXIT /B 1
 )
 
-SET PKG_VER=<RELEASE
+SET /P PKG_VER=<RELEASE
 IF NOT "x%1" == "x" SET PKG_VER=%1
 
 IF "x%PKG_VER%" == "x" (
@@ -26,4 +26,5 @@ IF "x%PKG_VER%" == "x" (
   EXIT /B 2
 )
 
-git archive --format zip -9 --prefix brickstore-%PKG_VER%/ HEAD >brickstore-%PKG_VER%.zip
+CALL git archive --format zip -9 --prefix brickstore-%PKG_VER%/ HEAD >brickstore-%PKG_VER%.zip
+GOTO :EOF
