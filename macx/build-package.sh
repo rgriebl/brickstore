@@ -57,6 +57,17 @@ fi
 cd ../..
 
 echo " > Deploying Qt to bundle..."
+# this needs to be done before the macdeployqt step, since $qtdir
+# will not be a real filesystem path afterwards
+qtdir=$(otool -L "$builddir/src/$bundle/Contents/MacOS/BrickStore" | awk -F '/lib/QtCore.framework' '/QtCore.framework/ {  sub(/\t/, "", $1); print $1 }')
+languages=$(awk '/^LANGUAGES/ { ORS=" " ; for (i = 3; i <= NF; i++) print $i }' ../src/src.pro)
+
+for i in $languages; do
+    if [ -e "$qtdir/translations/qt_$i.qm" ]; then
+        cp "$qtdir/translations/qt_$i.qm" "$builddir/src/$bundle/Contents/Resources/translations"
+    fi
+done
+
 macdeployqt "$builddir/src/$bundle"
 
 ( cd "$builddir/src/$bundle/Contents/" &&
@@ -67,21 +78,13 @@ macdeployqt "$builddir/src/$bundle"
   xargs rm -rf )
 
 
-if [ "$arch" = "intel" ]; then
-    compression="-format UDBZ"
-    comptype="BZ"
-else
-    compression="-format UDZO -imagekey zlib-level=9"
-    comptype="GZ"
-fi
-
-echo " > Creating disk image $archive ($comptype)..."
+echo " > Creating disk image $archive..."
 
 mkdir BUILD/dmg
 mv "$builddir/src/$bundle" BUILD/dmg
 mkdir -p "../packages/$pkg_ver/dmg"
 
-hdiutil create "../packages/$pkg_ver/dmg/$archive.dmg" -volname "BrickStore $pkg_ver" -fs "HFS+" -srcdir BUILD/dmg -quiet $compression
+hdiutil create "../packages/$pkg_ver/dmg/$archive.dmg" -volname "BrickStore $pkg_ver" -fs "HFS+" -srcdir BUILD/dmg -quiet -format UDBZ -ov
 rm -rf BUILD
 
 echo

@@ -100,8 +100,7 @@ include('ldraw/ldraw.pri')
 include('lzma/lzma.pri')
 modeltest:debug:include('modeltest/modeltest.pri')
 
-TRANSLATIONS = $$replace(LANGUAGES, '$', '.ts')
-TRANSLATIONS = $$replace(TRANSLATIONS, '^', 'translations/brickstore_')
+for(l, LANGUAGES):TRANSLATIONS += translations/brickstore_$${l}.ts
 
 #
 # Windows specific
@@ -176,13 +175,19 @@ unix:!macx {
 
 macx {
   LIBS += -framework SystemConfiguration
+  QMS = $$replace(TRANSLATIONS, '.ts$', '.qm')
 
   QMAKE_INFO_PLIST = $$PWD/../macx/Info.plist
-  bundle_icons.files = $$system(find $$PWD/../macx/Resources/ -name '*.icns')
   bundle_icons.path = Contents/Resources
-  bundle_locversions.files = $$system(find $$PWD/../macx/Resources/ -name '*.lproj')
+  bundle_icons.files = $$system(find $$PWD/../macx/Resources/ -name '*.icns')
   bundle_locversions.path = Contents/Resources
-  QMAKE_BUNDLE_DATA += bundle_icons bundle_locversions
+  bundle_locversions.files = $$system(find $$PWD/../macx/Resources/ -name '*.lproj')
+  bundle_translations.path = Contents/Resources/translations
+  bundle_translations.files = $$PWD/translations/translations.xml \
+                              $$PWD/translations/qt_nl.qm \
+                              $$replace(QMS, '^', '$$PWD/')
+
+  QMAKE_BUNDLE_DATA += bundle_icons bundle_locversions bundle_translations
 
   QMAKE_POST_LINK = "sed -i '' -e 's/@VERSION@/$$RELEASE/g' $$OUT_PWD/$${TARGET}.app/Contents/Info.plist"
 }

@@ -29,3 +29,4 @@ ldtest
 ui_*.h
 *.pr?.user
 BUILD
+packages
