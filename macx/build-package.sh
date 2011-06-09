@@ -81,6 +81,10 @@ macdeployqt "$builddir/src/$bundle"
 echo " > Creating disk image $archive..."
 
 mkdir BUILD/dmg
+mkdir BUILD/dmg/.background
+cp dmg-background.png BUILD/dmg/.background/background.png
+ln -s /Applications "BUILD/dmg/ "
+cp dmg-ds_store BUILD/dmg/.DS_Store
 mv "$builddir/src/$bundle" BUILD/dmg
 mkdir -p "../packages/$pkg_ver/dmg"
 
