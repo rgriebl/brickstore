@@ -1,4 +1,4 @@
-## Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+## Copyright (C) 2004-2011 Robert Griebl.  All rights reserved.
 ##
 ## This file is part of BrickStore.
 ##
@@ -18,8 +18,7 @@ CONFIG      *= warn_on thread qt
 # CONFIG      *= modeltest
 QT          *= core gui xml network script
 
-static:QTPLUGIN  *= qjpeg qgif
-static:DEFINES   += STATIC_QT_BUILD
+static:error("ERROR: Static builds are not supported")
 
 TARGET            = BrickStore
 unix:!macx:TARGET = brickstore
@@ -147,7 +146,8 @@ unix:!macx {
   INSTALLS += target
 
   linux* {
-    sharedir = "../unix/share"
+    sharedir = "$$PWD/../unix/share"
+    QMS = $$replace(TRANSLATIONS, '.ts$', '.qm')
 
     share_desktop.path   = $$PREFIX/share/applications
     share_desktop.files  = $$sharedir/applications/brickstore.desktop
@@ -158,9 +158,13 @@ unix:!macx {
     share_appicon.path   = $$PREFIX/share/icons/hicolor/64x64/apps
     share_appicon.files  = $$sharedir/icons/hicolor/64x64/apps/brickstore.png
     share_mime.path      = $$PREFIX/share/mime/packages
-    sharemime.files      = $$sharedir/mime/packages/brickstore-mime.xml
+    share_mime.files     = $$sharedir/mime/packages/brickstore-mime.xml
+    share_trans.path     = $$PREFIX/share/brickstore2/translations
+    share_trans.files    = $$PWD/translations/translations.xml \
+                           $$PWD/translations/qt_nl.qm \
+                           $$replace(QMS, '^', '$$PWD/')
 
-    INSTALLS += share_desktop share_mimelnk share_mimeicon share_appicon share_mime
+    INSTALLS += share_desktop share_mimelnk share_mimeicon share_appicon share_mime share_trans
 
     # avoid useless dependencies (and warnings from dpkg-buildpackage)
     QMAKE_LIBS_X11 -= -lXext -lX11

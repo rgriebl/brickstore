@@ -1,30 +1,30 @@
-Rem @ECHO off
+rem @echo off
 
-REM Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
-REM
-REM This file is part of BrickStore.
-REM
-REM This file may be distributed and/or modified under the terms of the GNU 
-REM General Public License version 2 as published by the Free Software Foundation 
-REM and appearing in the file LICENSE.GPL included in the packaging of this file.
-REM
-REM This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-REM WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-REM
-REM See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
+rem Copyright (C) 2004-2011 Robert Griebl.  All rights reserved.
+rem
+rem This file is part of BrickStore.
+rem
+rem This file may be distributed and/or modified under the terms of the GNU
+rem General Public License version 2 as published by the Free Software Foundation
+rem and appearing in the file LICENSE.GPL included in the packaging of this file.
+rem
+rem This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+rem WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+rem
+rem See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 
-IF NOT EXIST win32 (
-  ECHO Error: this script needs to be called from the base directory
-  EXIT /B 1
+if not exist win32 (
+  echo Error: this script needs to be called from the base directory
+  exit /b 1
 )
 
-SET /P PKG_VER=<RELEASE
-IF NOT "x%1" == "x" SET PKG_VER=%1
+set /p pkg_ver=<RELEASE
+if not "x%1" == "x" set pkg_ver=%1
 
-IF "x%PKG_VER%" == "x" (
-  ECHO Error: no package version supplied
-  EXIT /B 2
+if "x%pkg_ver%" == "x" (
+  echo Error: no package version supplied
+  exit /b 2
 )
 
-CALL git archive --format zip -9 --prefix brickstore-%PKG_VER%/ HEAD >brickstore-%PKG_VER%.zip
-GOTO :EOF
+calL git archive --format zip -9 --prefix brickstore-%pkg_ver%/ HEAD >brickstore-%pkg_ver%.zip
+goto :EOF

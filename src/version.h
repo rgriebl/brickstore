@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2005 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2004-2011 Robert Griebl.  All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -23,7 +23,7 @@
 #define _BS_STR2(s)  #s
 
 #define BRICKSTORE_VERSION   _BS_STR( BRICKSTORE_MAJOR ) "." _BS_STR( BRICKSTORE_MINOR ) "." _BS_STR( BRICKSTORE_PATCH )
-#define BRICKSTORE_COPYRIGHT "2004-2009 R. Griebl"
+#define BRICKSTORE_COPYRIGHT "2004-2011 R. Griebl"
 #define BRICKSTORE_URL       "www.brickforge.de/software/brickstore"
 #define BRICKSTORE_MAIL      "brickstore@brickforge.de"
 #define BRICKSTORE_NAME      "Brickstore"
