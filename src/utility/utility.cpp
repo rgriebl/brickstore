@@ -20,12 +20,12 @@
 #include <QDir>
 #include <QWidget>
 
-#if defined( Q_OS_WIN )
-#  if defined( Q_CC_MINGW )
+#if defined(Q_OS_WIN)
+#  if defined(Q_CC_MINGW)
 #    define _WIN32_WINNT 0x0500
 #  endif
 #  include <windows.h>
-#elif defined( Q_OS_BSD4 )
+#elif defined(Q_OS_BSD4)
 #  include <sys/types.h>
 #  include <sys/sysctl.h>
 #else
@@ -33,7 +33,7 @@
 #  include <QByteArray>
 #endif
 
-#if defined( Q_WS_X11 )
+#if defined(Q_WS_X11)
 #  include <QMainWindow>
 #endif
 
@@ -148,7 +148,7 @@ void Utility::setPopupPos(QWidget *w, const QRect &pos)
 
     if ((y + sh.height()) > desktop.height()) {
         int d = w->frameSize().height() - w->size().height();
-#if defined( Q_WS_X11 )
+#if defined(Q_WS_X11)
         if (d <= 0) {
             foreach (QWidget *tlw, qApp->topLevelWidgets()) {
                 if (qobject_cast<QMainWindow *>(tlw)) {
@@ -206,7 +206,7 @@ quint64 Utility::physicalMemory()
 {
     quint64 physmem = 0;
 
-#if defined( Q_OS_BSD4 )
+#if defined(Q_OS_BSD4)
 #if defined( HW_MEMSIZE )      // Darwin
     const int sctl2 = HW_MEMSIZE;
     uint64_t ram;
@@ -223,7 +223,7 @@ quint64 Utility::physicalMemory()
     if (sysctl(sctl, 2, &ram, &ramsize, 0, 0) == 0)
         physmem = quint64(ram);
 
-#elif defined( Q_OS_WIN )
+#elif defined(Q_OS_WIN)
     if ((QSysInfo::WindowsVersion & QSysInfo::WV_NT_based) >= QSysInfo::WV_2000) {
         MEMORYSTATUSEX memstatex = { sizeof(memstatex) };
         GlobalMemoryStatusEx(&memstatex);
@@ -235,7 +235,7 @@ quint64 Utility::physicalMemory()
         physmem = memstat.dwTotalPhys;
     }
 
-#elif defined( Q_OS_LINUX )
+#elif defined(Q_OS_LINUX)
     QFile f(QLatin1String("/proc/meminfo"));
     if (f.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QByteArray line;
@@ -250,7 +250,7 @@ quint64 Utility::physicalMemory()
     }
 
 #else
-#warning "BrickStore doesn't know how to get the physical memory size on this platform!"
+#  warning "BrickStore doesn't know how to get the physical memory size on this platform!"
 #endif
 
     return physmem;

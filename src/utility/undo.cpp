@@ -343,7 +343,7 @@ void UndoAction::fixMenu()
     m_list->setCurrentItem(m_list->item(0));
     selectRange(m_list->item(0));
 
-#if defined( Q_WS_MACX )
+#if defined(Q_OS_MAC)
     m_list->setFocus();
 #endif
 }

@@ -44,7 +44,7 @@ int main(int argc, char **argv)
     }
 
     if (show_usage) {
-#if defined(Q_OS_WIN32)
+#if defined(Q_OS_WIN)
         QApplication a(argc, argv);
         QMessageBox::information(0, QLatin1String("BrickStore"), QLatin1String("<b>Usage:</b><br />brickstore.exe [&lt;files&gt;]<br /><br />brickstore.exe --rebuild-database<br />"));
 #else

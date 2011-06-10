@@ -141,7 +141,8 @@ unix {
 unix:!macx {
   CONFIG += x11
 
-  isEmpty( PREFIX ):PREFIX = /usr/local
+  isEmpty(PREFIX):PREFIX = /usr/local
+  DEFINES += INSTALL_PREFIX=\"$$PREFIX\"
   target.path = $$PREFIX/bin
   INSTALLS += target
 
@@ -189,6 +190,9 @@ macx {
   bundle_translations.path = Contents/Resources/translations
   bundle_translations.files = $$PWD/translations/translations.xml \
                               $$PWD/translations/qt_nl.qm \
+                              $$[QT_INSTALL_TRANSLATIONS]/qt_de.qm \
+                              $$[QT_INSTALL_TRANSLATIONS]/qt_fr.qm \
+                              $$[QT_INSTALL_TRANSLATIONS]/qt_sl.qm \
                               $$replace(QMS, '^', '$$PWD/')
 
   QMAKE_BUNDLE_DATA += bundle_icons bundle_locversions bundle_translations

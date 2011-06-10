@@ -39,6 +39,8 @@ public:
 
     bool isOnline() const;
 
+    QStringList externalResourceSearchPath(const QString &subdir = QString()) const;
+
 public slots:
     void about();
     void checkForUpdates();

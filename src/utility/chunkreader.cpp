@@ -47,7 +47,7 @@ example:
     }
 #endif
 
-#ifdef Q_OS_WIN
+#if defined(Q_OS_WIN)
 #  define QINT64FMT "%I64d"
 #else
 #  define QINT64FMT "%lld"

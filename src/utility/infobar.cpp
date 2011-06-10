@@ -1,7 +1,7 @@
 #include <QToolButton>
 #include <QLabel>
 #include <QLayout>
-#ifdef Q_WS_MACX
+#if defined(Q_OS_MAC)
 #  include <QWindowsStyle>
 #endif
 
@@ -91,7 +91,7 @@ QAbstractButton *InfoBar::sectionButton(int id, ButtonType button)
         if (!b) {
             s->buttons[button] = b = new QToolButton(s->widget);
             b->setAutoRaise(true);
-#ifdef Q_OS_MACX
+#if defined(Q_OS_MAC)
             b->setStyle(new QWindowsStyle());
 #endif
             const char *icon;

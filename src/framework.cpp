@@ -212,7 +212,7 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
         << "file_export"
         << "-"
         << "file_print"
-//#if !defined(Q_WS_MAC)
+//#if !defined(Q_OS_MAC)
         << "file_print_pdf"
 //#endif
         << "-"
@@ -463,7 +463,7 @@ void FrameWork::languageChange()
 
 void FrameWork::translateActions()
 {
-#ifdef Q_WS_MAC
+#if defined(Q_OS_MAC)
     static bool onMac = true;
 #else
     static bool onMac = false;
@@ -644,7 +644,7 @@ QDockWidget *FrameWork::createDock(QWidget *widget)
 
 void FrameWork::createStatusBar()
 {
-#ifdef Q_WS_MAC
+#if defined(Q_OS_MAC)
     setStatusBar(new NoFrameStatusBar(this));
 #endif
 

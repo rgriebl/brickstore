@@ -25,8 +25,8 @@
 // directly use C-library str* functions instead of Qt's qstr* function
 // to improve runtime performance
 
-#if defined( Q_OS_WIN32 )
-#define strdup _strdup
+#if defined(Q_OS_WIN)
+#  define strdup _strdup
 #endif
 
 namespace BrickLink {

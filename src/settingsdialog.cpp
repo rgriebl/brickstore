@@ -66,7 +66,7 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent, Qt
     setupUi(this);
 
     w_upd_reset->setAttribute(Qt::WA_MacSmallSize);
-#ifdef Q_WS_MACX
+#if defined(Q_OS_MAC)
     w_currency_update->setStyle(new QWindowsStyle());
 #endif
 

@@ -52,7 +52,7 @@ Splash::Splash()
     bool transparent =
 #if defined(Q_WS_X11)
         QX11Info::isCompositingManagerRunning();
-#elif defined(Q_WS_MAC) || defined(Q_WS_WIN)
+#elif defined(Q_OS_MAC) || defined(Q_OS_WIN)
         true;
 #else
         false;

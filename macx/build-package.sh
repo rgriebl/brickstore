@@ -57,17 +57,6 @@ fi
 cd ../..
 
 echo " > Deploying Qt to bundle..."
-# this needs to be done before the macdeployqt step, since $qtdir
-# will not be a real filesystem path afterwards
-qtdir=$(otool -L "$builddir/src/$bundle/Contents/MacOS/BrickStore" | awk -F '/lib/QtCore.framework' '/QtCore.framework/ {  sub(/\t/, "", $1); print $1 }')
-languages=$(awk '/^LANGUAGES/ { ORS=" " ; for (i = 3; i <= NF; i++) print $i }' ../src/src.pro)
-
-for i in $languages; do
-    if [ -e "$qtdir/translations/qt_$i.qm" ]; then
-        cp "$qtdir/translations/qt_$i.qm" "$builddir/src/$bundle/Contents/Resources/translations"
-    fi
-done
-
 macdeployqt "$builddir/src/$bundle"
 
 ( cd "$builddir/src/$bundle/Contents/" &&

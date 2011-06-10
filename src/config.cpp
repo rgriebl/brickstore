@@ -68,12 +68,6 @@ Config *Config::inst()
 
 QString Config::scramble(const QString &str)
 {
-#if defined(Q_OS_WIN)
-    // win9x registries cannot store unicode values
-    if (QSysInfo::WindowsVersion & QSysInfo::WV_DOS_based)
-        return str;
-#endif
-
     QString result;
     const QChar *unicode = str.unicode();
     for (int i = 0; i < str.length(); i++)

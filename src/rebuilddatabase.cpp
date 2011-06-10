@@ -32,7 +32,7 @@ RebuildDatabase::RebuildDatabase()
 {
     m_trans = 0;
 
-#if defined( Q_OS_WIN32 )
+#if defined(Q_OS_WIN)
     AllocConsole();
     SetConsoleTitleW(L"BrickStore - Rebuilding Database");
     freopen("CONIN$", "r", stdin);
@@ -42,7 +42,7 @@ RebuildDatabase::RebuildDatabase()
 
 RebuildDatabase::~RebuildDatabase()
 {
-#if defined( Q_OS_WIN32 )
+#if defined(Q_OS_WIN)
     printf("\n\nPress RETURN to quit...\n\n");
     getchar();
 #endif

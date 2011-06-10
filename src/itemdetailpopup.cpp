@@ -25,7 +25,7 @@
 #include "itemdetailpopup.h"
 #include "ldraw/renderwidget.h"
 
-#if defined(Q_WS_MACX)
+#if defined(Q_OS_MAC)
 #  include "macx.h"
 #endif
 
@@ -173,7 +173,7 @@ ItemDetailPopup::ItemDetailPopup(QWidget *parent)
     connect(m_stop, SIGNAL(clicked()), m_ldraw, SLOT(stopAnimation()));
     connect(m_view, SIGNAL(clicked()), m_ldraw, SLOT(resetCamera()));
 #endif
-#ifdef Q_WS_MAC
+#if defined(Q_OS_MAC)
     createWinId();
     MacExtra::setWindowShadow(this, false);
 #endif

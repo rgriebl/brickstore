@@ -29,8 +29,8 @@
 #  ifdef MessageBox
 #    undef MessageBox
 #  endif
-# include <wininet.h>
-#elif defined(Q_OS_MACX)
+#  include <wininet.h>
+#elif defined(Q_OS_MAC)
 #  include <netinet/in.h>
 #  include <arpa/inet.h>
 #  include <SystemConfiguration/SCNetwork.h>
@@ -62,6 +62,19 @@
 #define XSTR(a) #a
 #define STR(a) XSTR(a)
 
+enum {
+#if defined(QT_NO_DEBUG)
+    isDeveloperBuild = 0,
+#else
+    isDeveloperBuild = 1,
+#endif
+#if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
+    isUnix = 1,
+#else
+    isUnix = 0,
+#endif
+    is64Bit = (sizeof(void *) / 8)
+};
 
 Application *Application::s_inst = 0;
 
@@ -119,10 +132,11 @@ Application::Application(bool rebuild_db_only, int _argc, char **_argv)
     }
     else {
 #if defined(Q_WS_X11)
-        QPixmap pix(":/images/icon");
+        QPixmap pix(":/images/icon.png");
         if (!pix.isNull())
             setWindowIcon(pix);
-#elif defined(Q_WS_WIN)
+#endif
+#if defined(Q_OS_WIN)
         int wv = QSysInfo::WindowsVersion;
 
         // don't use the native file dialogs on Windows < XP, since it
@@ -130,7 +144,7 @@ Application::Application(bool rebuild_db_only, int _argc, char **_argv)
         // (b) the Qt dialog is more powerful on these systems
         extern bool Q_GUI_EXPORT qt_use_native_dialogs;
         qt_use_native_dialogs = !((wv & QSysInfo::WV_DOS_based) || ((wv & QSysInfo::WV_NT_based) < QSysInfo::WV_XP));
-#elif defined(Q_WS_MACX)
+#elif defined(Q_OS_MAC)
         setAttribute(Qt::AA_DontShowIconsInMenus);
 #endif
         updateTranslations();
@@ -142,7 +156,7 @@ Application::Application(bool rebuild_db_only, int _argc, char **_argv)
             m_files_to_open << argv()[i];
 
         FrameWork::inst()->show();
-#ifdef Q_WS_MAC
+#if defined(Q_OS_MAC)
         FrameWork::inst()->raise();
 #endif
     }
@@ -162,6 +176,36 @@ bool Application::pixmapAlphaSupported() const
     return m_has_alpha;
 }
 
+QStringList Application::externalResourceSearchPath(const QString &subdir) const
+{
+    static QStringList baseSearchPath;
+
+    if (baseSearchPath.isEmpty()) {
+        QString appdir = applicationDirPath();
+#if defined(Q_OS_WIN)
+        baseSearchPath << appdir;
+
+        if (isDeveloperBuild)
+            baseSearchPath << appdir + QLatin1String("/..");
+#elif defined(Q_OS_MAC)
+        searchPath << appdir + QLatin1String("/../Resources");
+#elif defined(Q_OS_UNIX)
+        searchPath << QLatin1String(STR(INSTALL_PREFIX) "/share/brickstore2");
+
+        if (isDeveloperBuild)
+            searchPath << appdir;
+#endif
+    }
+    if (subdir.isEmpty()) {
+        return baseSearchPath;
+    } else {
+        QStringList searchPath;
+        foreach (const QString &bsp, baseSearchPath)
+            searchPath << bsp + subdir;
+        return searchPath;
+    }
+}
+
 void Application::updateTranslations()
 {
     QString locale = Config::inst()->language();
@@ -177,18 +221,20 @@ void Application::updateTranslations()
     m_trans_qt = new QTranslator(this);
     m_trans_brickstore = new QTranslator(this);
 
-    QString datadir = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
+    QStringList spath = externalResourceSearchPath("/translations");
+    if (qSharedBuild() && (isDeveloperBuild || isUnix))
+        spath << QLibraryInfo::location(QLibraryInfo::TranslationsPath);
 
-    if ((qSharedBuild() && m_trans_qt->load(QLibraryInfo::location(QLibraryInfo::TranslationsPath) + QLatin1String("/qt_") + locale)) ||
-        m_trans_qt->load(QLatin1String("translations/qt_") + locale, datadir) ||
-        m_trans_qt->load(QLatin1String("translations/qt_") + locale, QLatin1String(":/"))) {
+    bool qtLoaded = false, bsLoaded = false;
+
+    foreach (const QString &sp, spath) {
+        qtLoaded |= m_trans_qt->load(QLatin1String("qt_") + locale, sp);
+        bsLoaded |= m_trans_brickstore->load(QLatin1String("brickstore_") + locale, sp);
+    }
+    if (qtLoaded)
         installTranslator(m_trans_qt);
-    }
-
-    if (m_trans_brickstore->load(QLatin1String("brickstore_") + locale, datadir) ||
-        m_trans_brickstore->load(QLatin1String("brickstore_") + locale, QLatin1String(":/"))) {
+    if (bsLoaded)
         installTranslator(m_trans_brickstore);
-    }
 }
 
 void Application::rebuildDatabase()
@@ -207,7 +253,7 @@ QString Application::systemName() const
 {
     QString sys_name = tr("(unknown)");
 
-#if defined(Q_OS_MACX)
+#if defined(Q_OS_MAC)
     sys_name = QLatin1String("Mac OS X");
 #elif defined(Q_OS_WIN)
     sys_name = QLatin1String("Windows");
@@ -226,7 +272,7 @@ QString Application::systemVersion() const
 {
     QString sys_version = tr("(unknown)");
 
-#if defined(Q_OS_MACX)
+#if defined(Q_OS_MAC)
     switch (QSysInfo::MacintoshVersion) {
     case QSysInfo::MV_10_0: sys_version = QLatin1String("10.0 (Cheetah)"); break;
     case QSysInfo::MV_10_1: sys_version = QLatin1String("10.1 (Puma)");    break;
@@ -235,6 +281,7 @@ QString Application::systemVersion() const
     case QSysInfo::MV_10_4: sys_version = QLatin1String("10.4 (Tiger)");   break;
     case QSysInfo::MV_10_5: sys_version = QLatin1String("10.5 (Leopard)"); break;
     case QSysInfo::MV_10_6: sys_version = QLatin1String("10.6 (Snow Leopard)"); break;
+    case QSysInfo::MV_10_6 + 1: sys_version = QLatin1String("10.7 (Lion)"); break;
     default               : break;
     }
 #elif defined(Q_OS_WIN)
@@ -431,7 +478,7 @@ bool Application::initBrickLink()
     QString errstring;
     QString defdatadir = QDir::homePath();
 
-#if defined( Q_OS_WIN32 )
+#if defined(Q_OS_WIN)
     defdatadir += QLatin1String("/brickstore-cache/");
 #else
     defdatadir += QLatin1String("/.brickstore-cache/");
@@ -601,7 +648,7 @@ void Application::checkNetwork()
     if (!WIFEXITED(res) || (WEXITSTATUS(res) == 0 || WEXITSTATUS(res) == 127))
         online = true;
 
-#elif defined(Q_OS_MACX)
+#elif defined(Q_OS_MAC)
     struct ::sockaddr_in sock;
     sock.sin_family = AF_INET;
     sock.sin_port = htons(80);

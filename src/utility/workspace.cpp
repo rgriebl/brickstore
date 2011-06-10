@@ -40,7 +40,7 @@ static const char * const tablist_xpm[] = {
 "  c None",
 "# c #000000",
 "            ",
-#if !defined(Q_OS_MACX)
+#if !defined(Q_OS_MAC)
 "  ########  ",
 #else
 "############",
@@ -50,7 +50,7 @@ static const char * const tablist_xpm[] = {
 " ########## ",
 " ########## ",
 " ########## ",
-#if !defined(Q_OS_MACX)
+#if !defined(Q_OS_MAC)
 "############",
 #else
 "  ########  ",
@@ -197,7 +197,7 @@ public:
         return QSize(sb.width(), st.height());
     }
 
-#ifdef Q_WS_MAC
+#ifdef Q_OS_MAC
     void setIcon(const QIcon &icon)
     {
         QPixmap pnormal = icon.pixmap(iconSize());

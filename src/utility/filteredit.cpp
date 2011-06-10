@@ -24,7 +24,7 @@
 
 #include "filteredit.h"
 
-#ifdef Q_WS_MACX
+#if defined(Q_OS_MAC)
 #include <QProxyStyle>
 #include <Carbon/Carbon.h>
 
@@ -163,7 +163,7 @@ FilterEdit::FilterEdit(QWidget *parent)
     getTextMargins(&m_left, &m_top, &m_right, &m_bottom);
     doLayout();
 
-#if defined(Q_WS_MACX)
+#if defined(Q_OS_MAC)
     setAttribute(Qt::WA_MacShowFocusRect, false);
     setStyle(new MacSearchFieldProxyStyle());
 #endif
