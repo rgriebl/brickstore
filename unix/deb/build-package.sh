@@ -83,8 +83,13 @@ echo " > Building package..."
 
 chmod +x debian/rules
 NUMJOBS="$(grep -s -E "^processor[[:space:]]+:" /proc/cpuinfo | wc -l)"
+
+set +e
+
 build_output=$(BRICKSTORE_VERSION=$pkg_ver DEB_BUILD_OPTIONS="parallel=$NUMJOBS" dpkg-buildpackage -b -D -rfakeroot -us -uc 2>&1)
 build_result=$?
+
+set -e
 
 if [ "$build_result" != "0" ]; then
     echo -e "$build_output"
@@ -92,7 +97,6 @@ if [ "$build_result" != "0" ]; then
 fi
 
 cd ../..
-#rm -rf "$pkg_ver"
 mkdir -p "../packages/$pkg_ver/deb"
 
 for i in `find BUILD -name "*.deb"`; do

@@ -188,12 +188,12 @@ QStringList Application::externalResourceSearchPath(const QString &subdir) const
         if (isDeveloperBuild)
             baseSearchPath << appdir + QLatin1String("/..");
 #elif defined(Q_OS_MAC)
-        searchPath << appdir + QLatin1String("/../Resources");
+        baseSearchPath << appdir + QLatin1String("/../Resources");
 #elif defined(Q_OS_UNIX)
-        searchPath << QLatin1String(STR(INSTALL_PREFIX) "/share/brickstore2");
+        baseSearchPath << QLatin1String(STR(INSTALL_PREFIX) "/share/brickstore2");
 
         if (isDeveloperBuild)
-            searchPath << appdir;
+            baseSearchPath << appdir;
 #endif
     }
     if (subdir.isEmpty()) {
