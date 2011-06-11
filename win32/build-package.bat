@@ -74,10 +74,10 @@ call scripts\export-from-git.bat %pkg_ver%
 echo ^> Setting up build directory...
 
 cd win32
-rem rmdir /s /q BUILD 2>NUL
-rem mkdir BUILD
+rmdir /s /q BUILD 2>NUL
+mkdir BUILD
 cd BUILD
-rem call ..\tools\7za x ..\..\brickstore-%pkg_ver%.zip >NUL 2>NUL
+call ..\tools\7za x ..\..\brickstore-%pkg_ver%.zip >NUL 2>NUL
 cd brickstore-%pkg_ver%
 
 
@@ -89,9 +89,9 @@ if not exist "%VSINSTALLDIR%\Common7\IDE\%devenv%" (
   set devenv=vcexpress.exe
 )
 
-rem call "%QTDIR%\bin\qmake" -tp vc -r brickstore.pro
+call "%QTDIR%\bin\qmake" -tp vc -r brickstore.pro
 set vsconsoleoutput=1
-rem call %devenV% brickstore.sln /Build release
+call %devenv% brickstore.sln /Build release
 cd ..
 
 echo  ^> Compiling brickstore.wxs...
@@ -111,8 +111,7 @@ call ..\tools\light.exe -ext WixUIExtension -nologo ^
 echo  ^> Building sfx archive BrickStore-%pkg_ver%.exe...
 call ..\tools\7za a -y -bd -ms -mx9 brickstore.7z brickstore.msi >NUL
 copy /B ..\installer\7zS.sfx + ..\installer\7zS.ini + brickstore.7z BrickStore-%pkg_ver%.exe >NUL
-rem del Setup.exe Setup.ini brickstore.7z
-del brickstore.7z
+del brickstore.7z brickstore.wixobj
 cd ..
 
 echo  ^> Moving to %pkg_ver%...
@@ -127,7 +126,7 @@ move /y BUILD\brickstore.msi ..\packages\%pkg_ver%
 move /y BUILD\BrickStore-%PKG_VER%.exe ..\packages\%pkg_ver%
 
 echo ^> Cleaning build directory...
-rem rmdir /s /q BUILD >NUL
+rmdir /s /q BUILD >NUL
 cd ..
 
 echo.

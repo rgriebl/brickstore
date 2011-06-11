@@ -661,7 +661,10 @@ void Application::checkNetwork()
         online = true;
 
 #elif defined(Q_OS_WIN)
-    online = InternetCheckConnectionW(L"http://" TEXT(CHECK_IP), 0, 0);
+    // this function is buggy/unreliable
+    //online = InternetCheckConnectionW(L"http://" TEXT(CHECK_IP), 0, 0);
+    DWORD flags;
+    online = InternetGetConnectedStateEx(&flags, 0, 0, 0);
     //qWarning() << "Win NET change: " << online;
 
 #else
