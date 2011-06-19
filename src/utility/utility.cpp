@@ -55,8 +55,8 @@ static int naturalCompareNumbers(const char *&n1, const char *&n2)
         else if (*n1 != *n2 && !result)
             result = *n1 - *n2;
 
-        d1 = isdigit(*++n1);
-        d2 = isdigit(*++n2);
+        d1 = QChar(*++n1).isDigit();
+        d2 = QChar(*++n2).isDigit();
     }
 }
 
@@ -75,17 +75,17 @@ int Utility::naturalCompare(const char *name1, const char *name2)
 
     forever {
         // 1) skip white space
-        while (isspace(*n1)) {
+        while (QChar(*n1).isSpace()) {
             n1++;
             special = true;
         }
-        while (isspace(*n2)) {
+        while (QChar(*n2).isSpace()) {
             n2++;
             special = true;
         }
 
         // 2) check for numbers
-        if (isdigit(*n1) && isdigit(*n2)) {
+        if (QChar(*n1).isDigit() && QChar(*n2).isDigit()) {
             int d = naturalCompareNumbers(n1, n2);
             if (d)
                 return d;
@@ -433,7 +433,7 @@ static const struct CurrencyData {
     { QLocale::Tuvalu,             { 'T', 'V', 'D', 0 }, { 1, 0x24 } },
     { QLocale::Ukraine,            { 'U', 'A', 'H', 0 }, { 1, 0x20b4 } },
     { QLocale::UnitedKingdom,      { 'G', 'B', 'P', 0 }, { 1, 0xa3 } },
-    { QLocale::UnitedStates,       { 'U', 'S', 'D', 0 }, { 1, 0x24  } },
+    { QLocale::UnitedStates,       { 'U', 'S', 'D', 0 }, { 1, 0x24 } },
     { QLocale::Uruguay,            { 'U', 'Y', 'U', 0 }, { 2, 0x24, 0x55 } },
     { QLocale::Uzbekistan,         { 'U', 'Z', 'S', 0 }, { 2, 0x43b, 0x432 } },
     { QLocale::VaticanCityState,   { 'E', 'U', 'R', 0 }, { 1, 0x20ac } },
