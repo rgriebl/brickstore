@@ -122,7 +122,7 @@ if not exist ..\packages\%pkg_ver% (
   mkdir ..\packages\%pkg_ver%
 )
 
-move /y BUILD\brickstore.msi ..\packages\%pkg_ver%
+rem move /y BUILD\brickstore.msi ..\packages\%pkg_ver%
 move /y BUILD\BrickStore-%PKG_VER%.exe ..\packages\%pkg_ver%
 
 echo ^> Cleaning build directory...

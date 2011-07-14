@@ -97,10 +97,10 @@ if [ "$build_result" != "0" ]; then
 fi
 
 cd ../..
-mkdir -p "../packages/$pkg_ver/deb"
+mkdir -p "../packages/$pkg_ver"
 
 for i in `find BUILD -name "*.deb"`; do
-    cp "$i" "../packages/$pkg_ver/deb";
+    cp "$i" "../packages/$pkg_ver";
 done
 
 echo " > Cleaning DEB build directories..."

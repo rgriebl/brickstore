@@ -75,9 +75,9 @@ cp dmg-background.png BUILD/dmg/.background/background.png
 ln -s /Applications "BUILD/dmg/ "
 cp dmg-ds_store BUILD/dmg/.DS_Store
 mv "$builddir/src/$bundle" BUILD/dmg
-mkdir -p "../packages/$pkg_ver/dmg"
+mkdir -p "../packages/$pkg_ver/"
 
-hdiutil create "../packages/$pkg_ver/dmg/$archive.dmg" -volname "BrickStore $pkg_ver" -fs "HFS+" -srcdir BUILD/dmg -quiet -format UDBZ -ov
+hdiutil create "../packages/$pkg_ver/$archive.dmg" -volname "BrickStore $pkg_ver" -fs "HFS+" -srcdir BUILD/dmg -quiet -format UDBZ -ov
 rm -rf BUILD
 
 echo

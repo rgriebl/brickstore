@@ -73,9 +73,9 @@ if [ "$build_result" != "0" ]; then
 fi
 
 #rm -rf "$pkg_ver"
-mkdir -p "../packages/$pkg_ver/rpm"
+mkdir -p "../packages/$pkg_ver"
 for i in `find RPMS -name "*.rpm"`; do
-    cp "$i" "../packages/$pkg_ver/rpm";
+    cp "$i" "../packages/$pkg_ver";
 done
 
 echo " > Cleaning RPM build directories..."
