@@ -93,8 +93,8 @@
           </Component>
 
           <Component Id="c_runtime" Guid="514ECE62-8EB1-11D9-8BDE-F66BAD1E3F3A">
-            <File Id="msvcr90"          Name="msvcr90.dll" Source="C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\msvcr90.dll" />
-            <File Id="msvcr90.mf"       Name="Microsoft.VC90.CRT.manifest" Source="C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\Microsoft.VC90.CRT.manifest" />
+            <File Id="msvcr90"    Name="msvcr90.dll"                 Source="$(var.VSINSTALLDIR)\VC\redist\x86\Microsoft.VC90.CRT\msvcr90.dll" />
+            <File Id="msvcr90.mf" Name="Microsoft.VC90.CRT.manifest" Source="$(var.VSINSTALLDIR)\VC\redist\x86\Microsoft.VC90.CRT\Microsoft.VC90.CRT.manifest" />
           </Component>
 
           <!-- the original MS msm's are broken (install to c:\)
@@ -112,14 +112,14 @@
 
           <Directory Id="translations" Name="translations">
             <Component Id="c_translations" Guid="7F2A4CBF-90FB-43A1-AC34-FEA6BF6FE1FE">
-              <File Id="translations.xml" Name="translations.xml" Source="$(var.TARGET)\translations\translations.xml" />
-              <File Id="brickstore_de.qm" Name="brickstore_de.qm" Source="$(var.TARGET)\translations\brickstore_de.qm" />
-              <File Id="brickstore_fr.qm" Name="brickstore_fr.qm" Source="$(var.TARGET)\translations\brickstore_fr.qm" />
-              <File Id="brickstore_nl.qm" Name="brickstore_nl.qm" Source="$(var.TARGET)\translations\brickstore_nl.qm" />
-              <File Id="brickstore_sl.qm" Name="brickstore_sl.qm" Source="$(var.TARGET)\translations\brickstore_sl.qm" />
+              <File Id="translations.xml" Name="translations.xml" Source="$(var.TARGET)\src\translations\translations.xml" />
+              <File Id="brickstore_de.qm" Name="brickstore_de.qm" Source="$(var.TARGET)\src\translations\brickstore_de.qm" />
+              <File Id="brickstore_fr.qm" Name="brickstore_fr.qm" Source="$(var.TARGET)\src\translations\brickstore_fr.qm" />
+              <File Id="brickstore_nl.qm" Name="brickstore_nl.qm" Source="$(var.TARGET)\src\translations\brickstore_nl.qm" />
+              <File Id="brickstore_sl.qm" Name="brickstore_sl.qm" Source="$(var.TARGET)\src\translations\brickstore_sl.qm" />
               <File Id="qt_de.qm"         Name="qt_de.qm"         Source="$(var.QTDIR)\translations\qt_de.qm" />
               <File Id="qt_fr.qm"         Name="qt_fr.qm"         Source="$(var.QTDIR)\translations\qt_fr.qm" />
-              <File Id="qt_nl.qm"         Name="qt_nl.qm"         Source="$(var.TARGET)\translations\qt_nl.qm" />
+              <File Id="qt_nl.qm"         Name="qt_nl.qm"         Source="$(var.TARGET)\src\translations\qt_nl.qm" />
               <File Id="qt_sl.qm"         Name="qt_sl.qm"         Source="$(var.QTDIR)\translations\qt_sl.qm" />
             </Component>
           </Directory>

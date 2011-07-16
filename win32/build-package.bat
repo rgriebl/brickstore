@@ -90,8 +90,10 @@ if not exist "%VSINSTALLDIR%\Common7\IDE\%devenv%" (
 )
 
 call "%QTDIR%\bin\qmake" -tp vc -r brickstore.pro
+if not "%ERRORLEVEL%" == "0" exit /b %ERRORLEVEL%
 set vsconsoleoutput=1
 call %devenv% brickstore.sln /Build release
+if not "%ERRORLEVEL%" == "0" exit /b %ERRORLEVEL%
 cd ..
 
 echo  ^> Compiling brickstore.wxs...
@@ -100,16 +102,20 @@ call ..\tools\candle.exe -nologo ^
      -dTARGET=brickstore-%pkg_ver% ^
      -dBINARY=..\installer\Binary ^
      -dVERSION=%pkg_ver% ^
-     -dQTDIR=%QTDIR% ^
+     -dQTDIR="%QTDIR%" ^
+     -dVSINSTALLDIR="%VSINSTALLDIR%" ^
      ..\installer\brickstore.wxs
+if not "%ERRORLEVEL%" == "0" exit /b %ERRORLEVEL%
 
 echo  ^> Linking brickstore.msi...
 call ..\tools\light.exe -ext WixUIExtension -nologo ^
      -sice:ICE08 -sice:ICE09 -sice:ICE32 -sice:ICE60 -sice:ICE61 ^
      brickstore.wixobj -out brickstore.msi
+if not "%ERRORLEVEL%" == "0" exit /b %ERRORLEVEL%
 
 echo  ^> Building sfx archive BrickStore-%pkg_ver%.exe...
 call ..\tools\7za a -y -bd -ms -mx9 brickstore.7z brickstore.msi >NUL
+if not "%ERRORLEVEL%" == "0" exit /b %ERRORLEVEL%
 copy /B ..\installer\7zS.sfx + ..\installer\7zS.ini + brickstore.7z BrickStore-%pkg_ver%.exe >NUL
 del brickstore.7z brickstore.wixobj
 cd ..
