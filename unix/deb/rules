@@ -15,3 +15,5 @@ export DH_VERBOSE=1
 override_dh_auto_configure:
 	./configure --release --prefix=/usr
 
+override_dh_builddeb:
+	dh_builddeb -- -Zxz

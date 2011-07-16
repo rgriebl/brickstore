@@ -62,7 +62,7 @@ cd "$builddir"
 
 mkdir debian
 for i in compat control copyright menu postinst postrm rules; do
-        cp unix/deb/$i debian
+    cp unix/deb/$i debian
 done
 
 maintainer=$(grep ^Maintainer: debian/control | sed -e 's,^.*:[ ]*,,g')
@@ -86,7 +86,7 @@ NUMJOBS="$(grep -s -E "^processor[[:space:]]+:" /proc/cpuinfo | wc -l)"
 
 set +e
 
-build_output=$(BRICKSTORE_VERSION=$pkg_ver DEB_BUILD_OPTIONS="parallel=$NUMJOBS" dpkg-buildpackage -b -D -rfakeroot -us -uc 2>&1)
+build_output=$(BRICKSTORE_VERSION=$pkg_ver DEB_BUILD_OPTIONS="parallel=$NUMJOBS" dpkg-buildpackage -b -D -rfakeroot -us -uc -Zxz 2>&1)
 build_result=$?
 
 set -e
