@@ -16,8 +16,9 @@ struct Section {
     QToolButton *buttons[InfoBar::Count];
 };
 
-struct InfoBarPrivate
+class InfoBarPrivate
 {
+public:
     QList<Section *> sections;
     static int       sectionIds;
 
