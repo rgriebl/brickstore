@@ -32,6 +32,7 @@
 #include "framework.h"
 #include "messagebox.h"
 #include "undo.h"
+#include "progressdialog.h"
 
 #include "importorderdialog.h"
 #include "importinventorydialog.h"

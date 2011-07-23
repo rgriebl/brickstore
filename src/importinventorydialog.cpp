@@ -15,6 +15,8 @@
 #include <QDialogButtonBox>
 #include <QPushButton>
 
+#include "bricklink.h"
+#include "config.h"
 #include "import.h"
 #include "progressdialog.h"
 #include "utility.h"

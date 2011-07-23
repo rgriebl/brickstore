@@ -23,6 +23,7 @@
 #include <QStyledItemDelegate>
 #include <QColorGroup>
 #include <QVariant>
+#include <QCache>
 
 #if defined( MODELTEST )
 #  include "modeltest.h"
@@ -31,9 +32,12 @@
 #  define MODELTEST_ATTACH(x)   ;
 #endif
 
+#include "bricklink.h"
 #include "import.h"
 #include "progressdialog.h"
 #include "utility.h"
+#include "config.h"
+#include "transfer.h"
 
 #include "importorderdialog.h"
 
@@ -42,21 +46,27 @@ Q_DECLARE_METATYPE(BrickLink::InvItemList *)
 
 enum {
     OrderPointerRole = 0x0560ec9b,
-    ItemListPointerRole,
+    ItemListPointerRole
 };
 
 
-class OrderListModel : public QAbstractTableModel {
+class OrderListModel : public QAbstractTableModel
+{
+    Q_OBJECT
 public:
     OrderListModel(QObject *parent)
         : QAbstractTableModel(parent)
     {
-        MODELTEST_ATTACH(this) 
+        MODELTEST_ATTACH(this)
+
+        m_trans = new Transfer(6);
+        connect(m_trans, SIGNAL(finished(ThreadPoolJob *)), this, SLOT(flagReceived(ThreadPoolJob*)));
     }
 
     ~OrderListModel()
     {
         setOrderList(QList<QPair<BrickLink::Order *, BrickLink::InvItemList *> >());
+        delete m_trans;
     }
 
     void setOrderList(const QList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > &orderlist)
@@ -106,10 +116,27 @@ public:
                 else
                     return QString("%1 (%2)").arg(order.first->address().left(firstline)).arg(order.first->other());
             }
-            case 4: res = Currency::toString(order.first->grandTotal(), order.first->currencyCode()); break;
+            case 4: res = Currency::toString(order.first->grandTotal(), order.first->currencyCode(), Currency::InternationalSymbol, 2); break;
             }
-        }
-        else if (role == Qt::TextAlignmentRole) {
+        } else if (role == Qt::DecorationRole) {
+            switch (col) {
+            case 3:
+                QImage *flag = 0;
+                QString cc = order.first->countryCode();
+                if (cc.length() == 2)
+                    flag = m_flags[cc];
+                if (!flag) {
+                    QString url = QString::fromLatin1("http://www.bricklink.com/images/flagsS/%1.gif").arg(cc);
+
+                    TransferJob *job = TransferJob::get(url);
+                    job->setUserData<int>(cc[0].unicode(), (int *)(cc[1].unicode()));
+                    m_trans->retrieve(job);
+                }
+                if (flag)
+                    res = *flag;
+                break;
+            }
+        } else if (role == Qt::TextAlignmentRole) {
             res = (col == 4) ? Qt::AlignRight : Qt::AlignLeft;
         }
         else if (role == Qt::BackgroundColorRole) {
@@ -188,9 +215,39 @@ public:
         Qt::SortOrder m_so;
     };
 
+private slots:
+    void flagReceived(ThreadPoolJob *pj)
+    {
+        TransferJob *j = static_cast<TransferJob *>(pj);
+
+        if (!j || !j->data())
+            return;
+
+        QPair<int, int *> ud = j->userData<int>();
+        QString cc;
+        cc.append(QChar(ud.first));
+        cc.append(QChar(int(ud.second)));
+
+        QImage *img = new QImage;
+        if (img->loadFromData(*j->data())) {
+            m_flags.insert(cc, img);
+
+            for (int r = 0; r < rowCount(QModelIndex()); ++r) {
+                QModelIndex idx = index(r, 3, QModelIndex());
+                BrickLink::Order *order = qvariant_cast<BrickLink::Order *>(data(idx, OrderPointerRole));
+
+                if (order->countryCode() == cc)
+                    emit dataChanged(idx, idx);
+            }
+        } else {
+            delete img;
+        }
+    }
 
 private:
     QList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > m_orderlist;
+    QCache<QString, QImage> m_flags;
+    Transfer *m_trans;
 };
 
 
@@ -266,7 +323,7 @@ ImportOrderDialog::ImportOrderDialog(QWidget *parent, Qt::WindowFlags f)
     w_by_number->setChecked(s_last_by_number);
 
     start();
-    resize(sizeHint());
+    //resize(sizeHint());
 }
 
 ImportOrderDialog::~ImportOrderDialog()
@@ -401,3 +458,5 @@ void ImportOrderDialog::activateItem()
     checkSelected();
     w_ok->animateClick();
 }
+
+#include "importorderdialog.moc"

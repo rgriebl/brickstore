@@ -13,6 +13,8 @@
 */
 #include <cstdlib>
 
+#include <QString>
+
 #include "utility.h"
 #include "bricklink.h"
 
@@ -724,7 +726,298 @@ bool BrickLink::InvItemMimeData::hasFormat(const QString & mimeType) const
 }
 
 BrickLink::Order::Order(const QString &id, OrderType type)
-    : m_id(id), m_type(type)
-{ }
+    : m_id(id), m_type(type), m_shipping(0), m_insurance(0),
+      m_delivery(0), m_credit(0), m_grand_total(0)
+{
+    m_countryCode[0] = QLatin1Char('U');
+    m_countryCode[1] = QLatin1Char('S');
+}
+
+// Bricklink doesn't use the standard ISO country names...
+static const char *countryList[] = {
+    "AF Afghanistan",
+    "AX ",
+    "AL Albania",
+    "DZ Algeria",
+    "AS American Samoa",
+    "AD Andorra",
+    "AO Angola",
+    "AI Anguilla",
+    "AQ ",
+    "AG Antigua and Barbuda",
+    "AR Argentina",
+    "AM Armenia",
+    "AW Aruba",
+    "AU Australia",
+    "AT Austria",
+    "AZ Azerbaijan",
+    "BS Bahamas",
+    "BH Bahrain",
+    "BD Bangladesh",
+    "BB Barbados",
+    "BY Belarus",
+    "BE Belgium",
+    "BZ Belize",
+    "BJ Benin",
+    "BM Bermuda",
+    "BT Bhutan",
+    "BO Bolivia",
+    "BQ ",
+    "BA Bosnia and Herzegovina",
+    "BW Botswana",
+    "BV ",
+    "BR Brazil",
+    "IO British Indian Ocean Territory",
+    "BN Brunei",
+    "BG Bulgaria",
+    "BF Burkina Faso",
+    "BI Burundi",
+    "KH Cambodia",
+    "CM Cameroon",
+    "CA Canada",
+    "CV Cape Verde",
+    "KY Cayman Islands",
+    "CF Central African Republic",
+    "TD Chad",
+    "CL Chile",
+    "CN China",
+    "CX ",
+    "CC ",
+    "CO Colombia",
+    "KM Comoros",
+    "CG Congo",
+    "CD Congo (DRC)",
+    "CK Cook Islands",
+    "CR Costa Rica",
+    "CI Cote D'Ivoire",
+    "HR Croatia",
+    "CU Cuba",
+    "CW ",
+    "CY Cyprus",
+    "CZ Czech Republic",
+    "DK Denmark",
+    "DJ Djibouti",
+    "DM Dominica",
+    "DO Dominican Republic",
+    "EC Ecuador",
+    "EG Egypt",
+    "SV El Salvador",
+    "GQ Equatorial Guinea",
+    "ER Eritrea",
+    "EE Estonia",
+    "ET Ethiopia",
+    "FK Falkland Islands (Islas Malvinas)",
+    "FO Faroe Islands",
+    "FJ Fiji",
+    "FI Finland",
+    "FR France",
+    "GF French Guiana",
+    "PF French Polynesia",
+    "TF ",
+    "GA Gabon",
+    "GM Gambia",
+    "GE Georgia",
+    "DE Germany",
+    "GH Ghana",
+    "GI Gibraltar",
+    "GR Greece",
+    "GL Greenland",
+    "GD Grenada",
+    "GP Guadeloupe",
+    "GU Guam",
+    "GT Guatemala",
+    "GG Guernsey",
+    "GN Guinea",
+    "GW Guinea-Bissau",
+    "GY Guyana",
+    "HT Haiti",
+    "HM ",
+    "VA Vatican City State",
+    "HN Honduras",
+    "HK Hong Kong",
+    "HU Hungary",
+    "IS Iceland",
+    "IN India",
+    "ID Indonesia",
+    "IR Iran",
+    "IQ Iraq",
+    "IE Ireland",
+    "IM Isle of Man",
+    "IL Israel",
+    "IT Italy",
+    "JM Jamaica",
+    "JP Japan",
+    "JE Jersey",
+    "JO Jordan",
+    "KZ Kazakhstan",
+    "KE Kenya",
+    "KI Kiribati",
+    "KP North Korea",
+    "KR South Korea",
+    "KW Kuwait",
+    "KG Kyrgyzstan",
+    "LA Laos",
+    "LV Latvia",
+    "LB Lebanon",
+    "LS Lesotho",
+    "LR Liberia",
+    "LY Lybia",
+    "LI Liechtenstein",
+    "LT Lithuania",
+    "LU Luxembourg",
+    "MO Macau",
+    "MK Macedonia",
+    "MG Madagascar",
+    "MW Malawi",
+    "MY Malaysia",
+    "MV Maldives",
+    "ML Mali",
+    "MT Malta",
+    "MH Marshall Islands",
+    "MQ Martinique",
+    "MR Mauritania",
+    "MU Mauritius",
+    "YT Mayotte",
+    "MX Mexico",
+    "FM Micronesia",
+    "MD Moldova",
+    "MC Monaco",
+    "MN Mongolia",
+    "ME Montenegro",
+    "MS Montserrat",
+    "MA Morocco",
+    "MZ Mozambique",
+    "MM Myanmar",
+    "NA Namibia",
+    "NR Nauru",
+    "NP Nepal",
+    "NL Netherlands",
+    "NC New Caledonia",
+    "NZ New Zealand",
+    "NI Nicaragua",
+    "NE Niger",
+    "NG Nigeria",
+    "NU Niue",
+    "NF Norfolk Island",
+    "MP Northern Mariana Islands",
+    "NO Norway",
+    "OM Oman",
+    "PK Pakistan",
+    "PW Palau",
+    "PS ",
+    "PA Panama",
+    "PG Papua new Guinea",
+    "PY Paraguay",
+    "PE Peru",
+    "PH Philippines",
+    "PN Pitcairn Islands",
+    "PL Poland",
+    "PT Portugal",
+    "PR Puerto Rico",
+    "QA Qatar",
+    "RE Reunion",
+    "RO Romania",
+    "RU Russia",
+    "RW Rwanda",
+    "BL ",
+    "SH St. Helena",
+    "KN St. Kitts and Nevis",
+    "LC St. Lucia",
+    "MF ",
+    "PM St. Pierre and Miquelon",
+    "VC St. Vincent and the Grenadines",
+    "WS Samoa",
+    "SM San Marino",
+    "ST Sao Tome and Principe",
+    "SA Saudi Arabia",
+    "SN Senegal",
+    "RS Serbia",
+    "SC Seychelles",
+    "SL Sierra Leone",
+    "SG Singapore",
+    "SX ",
+    "SK Slovakia",
+    "SI Slovenia",
+    "SB Solomon Islands",
+    "SO Somalia",
+    "ZA South Africa",
+    "GS South Georgia",
+    "ES Spain",
+    "LK Sri Lanka",
+    "SD Sudan",
+    "SR Suriname",
+    "SJ Svalbard and Jan Mayen",
+    "SZ Swaziland",
+    "SE Sweden",
+    "CH Switzerland",
+    "SY Syria",
+    "TW Taiwan",
+    "TJ Tajikistan",
+    "TZ Tanzania",
+    "TH Thailand",
+    "TL East Timor",
+    "TG Togo",
+    "TK ",
+    "TO Tonga",
+    "TT Trinidad and Tobago",
+    "TN Tunisia",
+    "TR Turkey",
+    "TM Turkmenistan",
+    "TC Turks and Caicos Islands",
+    "TV Tuvalu",
+    "UG Uganda",
+    "UA Ukraine",
+    "AE United Arab Emirates",
+    "GB ",
+    "US USA",
+    "UM ",
+    "UY Uruguay",
+    "UZ Uzbekistan",
+    "VU Vanuatu",
+    "VE Venezuela",
+    "VN Vietnam",
+    "VG Virgin Islands (British)",
+    "VI Virgin Islands (US)",
+    "WF Wallis and Futuna",
+    "EH ",
+    "YE Yemen",
+    "ZM Zambia",
+    "ZW Zimbabwe"
+};
 
 
+void BrickLink::Order::setCountryCode(const QString &str)
+{
+    if (str.length() == 2) {
+        m_countryCode[0] = str[0];
+        m_countryCode[1] = str[1];
+    }
+}
+
+void BrickLink::Order::setCountryName(const QString &str)
+{
+    if (str.isEmpty())
+        return;
+    for (int i = 0; i < sizeof(countryList) / sizeof(*countryList); ++i) {
+        QString istr = QString::fromLatin1(countryList[i]);
+        if (istr.mid(3) == str) {
+            setCountryCode(istr.left(2));
+            break;
+        }
+    }
+}
+
+QString BrickLink::Order::countryCode() const
+{
+    return QString(m_countryCode, 2);
+}
+
+QString BrickLink::Order::countryName() const
+{
+    for (int i = 0; i < sizeof(countryList) / sizeof(*countryList); ++i) {
+        QString istr = QString::fromLatin1(countryList[i]);
+        if (istr[0] == m_countryCode[0] && istr[1] == m_countryCode[1])
+            return istr.mid(3);
+    }
+    return QString();
+}

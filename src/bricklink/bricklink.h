@@ -463,6 +463,8 @@ public:
     QString payment() const     { return m_payment; }
     QString remarks() const     { return m_remarks; }
     QString address() const     { return m_address; }
+    QString countryName() const;
+    QString countryCode() const;
     QString currencyCode() const { return m_currencycode; }
 
     void setId(const QString &id)             { m_id = id; }
@@ -479,6 +481,8 @@ public:
     void setPayment(const QString &str)       { m_payment = str; }
     void setRemarks(const QString &str)       { m_remarks = str; }
     void setAddress(const QString &str)       { m_address = str; }
+    void setCountryName(const QString &str);
+    void setCountryCode(const QString &str);
     void setCurrencyCode(const QString &str)  { m_currencycode = str; }
 
 private:
@@ -497,6 +501,7 @@ private:
     QString   m_remarks;
     QString   m_address;
     QString   m_currencycode;
+    QChar     m_countryCode[2];
 };
 
 class PriceGuide : public Ref {

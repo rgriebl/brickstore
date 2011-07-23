@@ -48,6 +48,7 @@ SOURCES += \
   splash.cpp \
   taskwidgets.cpp \
   window.cpp \
+    import.cpp
 
 HEADERS += \
   appearsinwidget.h \

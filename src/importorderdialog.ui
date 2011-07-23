@@ -1,111 +1,104 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>ImportOrderDialog</class>
- <widget class="QDialog" name="ImportOrderDialog" >
-  <property name="geometry" >
+ <widget class="QDialog" name="ImportOrderDialog">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>496</width>
-    <height>229</height>
+    <width>633</width>
+    <height>277</height>
    </rect>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>Import BrickLink Order</string>
   </property>
-  <property name="sizeGripEnabled" >
+  <property name="sizeGripEnabled">
    <bool>false</bool>
   </property>
-  <layout class="QVBoxLayout" >
-   <property name="spacing" >
+  <layout class="QVBoxLayout">
+   <property name="spacing">
     <number>6</number>
    </property>
-   <property name="margin" >
+   <property name="margin">
     <number>9</number>
    </property>
    <item>
-    <widget class="QStackedWidget" name="w_stack" >
-     <property name="currentIndex" >
+    <widget class="QStackedWidget" name="w_stack">
+     <property name="currentIndex">
       <number>2</number>
      </property>
-     <widget class="QWidget" name="page" >
-      <property name="geometry" >
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>100</width>
-        <height>30</height>
-       </rect>
-      </property>
-      <layout class="QVBoxLayout" >
-       <property name="spacing" >
+     <widget class="QWidget" name="page">
+      <layout class="QVBoxLayout">
+       <property name="spacing">
         <number>6</number>
        </property>
-       <property name="margin" >
+       <property name="margin">
         <number>0</number>
        </property>
        <item>
-        <widget class="QLabel" name="textLabel3" >
-         <property name="text" >
+        <widget class="QLabel" name="textLabel3">
+         <property name="text">
           <string>Order number</string>
          </property>
         </widget>
        </item>
        <item>
-        <layout class="QGridLayout" >
-         <property name="margin" >
+        <layout class="QGridLayout">
+         <property name="margin">
           <number>0</number>
          </property>
-         <property name="spacing" >
+         <property name="spacing">
           <number>6</number>
          </property>
-         <item row="1" column="1" >
-          <layout class="QHBoxLayout" >
-           <property name="spacing" >
+         <item row="1" column="1">
+          <layout class="QHBoxLayout">
+           <property name="spacing">
             <number>6</number>
            </property>
-           <property name="margin" >
+           <property name="margin">
             <number>0</number>
            </property>
            <item>
-            <widget class="QRadioButton" name="w_by_date" >
-             <property name="text" >
+            <widget class="QRadioButton" name="w_by_date">
+             <property name="text">
               <string>Download an order bet&amp;ween</string>
              </property>
-             <property name="checked" >
+             <property name="checked">
               <bool>true</bool>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QDateEdit" name="w_order_from" >
-             <property name="calendarPopup" >
+            <widget class="QDateEdit" name="w_order_from">
+             <property name="calendarPopup">
               <bool>true</bool>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="textLabel1_2" >
-             <property name="text" >
+            <widget class="QLabel" name="textLabel1_2">
+             <property name="text">
               <string>and</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QDateEdit" name="w_order_to" >
-             <property name="calendarPopup" >
+            <widget class="QDateEdit" name="w_order_to">
+             <property name="calendarPopup">
               <bool>true</bool>
              </property>
             </widget>
            </item>
            <item>
             <spacer>
-             <property name="orientation" >
+             <property name="orientation">
               <enum>Qt::Horizontal</enum>
              </property>
-             <property name="sizeType" >
+             <property name="sizeType">
               <enum>QSizePolicy::Expanding</enum>
              </property>
-             <property name="sizeHint" stdset="0" >
+             <property name="sizeHint" stdset="0">
               <size>
                <width>21</width>
                <height>23</height>
@@ -115,15 +108,15 @@
            </item>
           </layout>
          </item>
-         <item row="0" column="0" >
+         <item row="0" column="0">
           <spacer>
-           <property name="orientation" >
+           <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
-           <property name="sizeType" >
+           <property name="sizeType">
             <enum>QSizePolicy::Fixed</enum>
            </property>
-           <property name="sizeHint" stdset="0" >
+           <property name="sizeHint" stdset="0">
             <size>
              <width>20</width>
              <height>20</height>
@@ -131,49 +124,49 @@
            </property>
           </spacer>
          </item>
-         <item row="0" column="1" >
-          <layout class="QHBoxLayout" >
-           <property name="spacing" >
+         <item row="0" column="1">
+          <layout class="QHBoxLayout">
+           <property name="spacing">
             <number>6</number>
            </property>
-           <property name="margin" >
+           <property name="margin">
             <number>0</number>
            </property>
            <item>
-            <widget class="QRadioButton" name="w_by_number" >
-             <property name="text" >
+            <widget class="QRadioButton" name="w_by_number">
+             <property name="text">
               <string>Download o&amp;rder #</string>
              </property>
-             <property name="checked" >
+             <property name="checked">
               <bool>false</bool>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="w_order_number" >
-             <property name="enabled" >
+            <widget class="QLineEdit" name="w_order_number">
+             <property name="enabled">
               <bool>false</bool>
              </property>
-             <property name="sizePolicy" >
-              <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
-             <property name="maxLength" >
+             <property name="maxLength">
               <number>7</number>
              </property>
             </widget>
            </item>
            <item>
             <spacer>
-             <property name="orientation" >
+             <property name="orientation">
               <enum>Qt::Horizontal</enum>
              </property>
-             <property name="sizeType" >
+             <property name="sizeType">
               <enum>QSizePolicy::MinimumExpanding</enum>
              </property>
-             <property name="sizeHint" stdset="0" >
+             <property name="sizeHint" stdset="0">
               <size>
                <width>20</width>
                <height>20</height>
@@ -186,37 +179,37 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" >
-         <property name="spacing" >
+        <layout class="QHBoxLayout">
+         <property name="spacing">
           <number>6</number>
          </property>
-         <property name="margin" >
+         <property name="margin">
           <number>0</number>
          </property>
          <item>
-          <widget class="QLabel" name="textLabel2" >
-           <property name="text" >
+          <widget class="QLabel" name="textLabel2">
+           <property name="text">
             <string>Order &amp;type</string>
            </property>
-           <property name="buddy" >
+           <property name="buddy">
             <cstring>w_order_type</cstring>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QComboBox" name="w_order_type" >
+          <widget class="QComboBox" name="w_order_type">
            <item>
-            <property name="text" >
+            <property name="text">
              <string>Any</string>
             </property>
            </item>
            <item>
-            <property name="text" >
+            <property name="text">
              <string>Received</string>
             </property>
            </item>
            <item>
-            <property name="text" >
+            <property name="text">
              <string>Placed</string>
             </property>
            </item>
@@ -224,13 +217,13 @@
          </item>
          <item>
           <spacer>
-           <property name="orientation" >
+           <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
-           <property name="sizeType" >
+           <property name="sizeType">
             <enum>QSizePolicy::Expanding</enum>
            </property>
-           <property name="sizeHint" stdset="0" >
+           <property name="sizeHint" stdset="0">
             <size>
              <width>91</width>
              <height>21</height>
@@ -242,13 +235,13 @@
        </item>
        <item>
         <spacer>
-         <property name="orientation" >
+         <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
-         <property name="sizeType" >
+         <property name="sizeType">
           <enum>QSizePolicy::Expanding</enum>
          </property>
-         <property name="sizeHint" stdset="0" >
+         <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
            <height>51</height>
@@ -258,90 +251,74 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="page_3" >
-      <property name="geometry" >
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>100</width>
-        <height>30</height>
-       </rect>
-      </property>
-      <layout class="QVBoxLayout" >
-       <property name="spacing" >
+     <widget class="QWidget" name="page_3">
+      <layout class="QVBoxLayout">
+       <property name="spacing">
         <number>6</number>
        </property>
-       <property name="margin" >
+       <property name="margin">
         <number>0</number>
        </property>
        <item>
-        <widget class="QLabel" name="w_message" >
-         <property name="sizePolicy" >
-          <sizepolicy vsizetype="Preferred" hsizetype="MinimumExpanding" >
+        <widget class="QLabel" name="w_message">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
-         <property name="text" >
+         <property name="text">
           <string/>
          </property>
-         <property name="alignment" >
+         <property name="alignment">
           <set>Qt::AlignTop</set>
          </property>
-         <property name="wordWrap" >
+         <property name="wordWrap">
           <bool>true</bool>
          </property>
         </widget>
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="page_4" >
-      <property name="geometry" >
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>478</width>
-        <height>169</height>
-       </rect>
-      </property>
-      <layout class="QVBoxLayout" >
-       <property name="spacing" >
+     <widget class="QWidget" name="page_4">
+      <layout class="QVBoxLayout">
+       <property name="spacing">
         <number>6</number>
        </property>
-       <property name="margin" >
+       <property name="margin">
         <number>0</number>
        </property>
        <item>
-        <widget class="QLabel" name="textLabel1" >
-         <property name="text" >
+        <widget class="QLabel" name="textLabel1">
+         <property name="text">
           <string>Select the order you want to import</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QTreeView" name="w_order_list" >
-         <property name="alternatingRowColors" >
+        <widget class="QTreeView" name="w_order_list">
+         <property name="alternatingRowColors">
           <bool>true</bool>
          </property>
-         <property name="selectionMode" >
+         <property name="selectionMode">
           <enum>QAbstractItemView::ExtendedSelection</enum>
          </property>
-         <property name="rootIsDecorated" >
+         <property name="rootIsDecorated">
           <bool>false</bool>
          </property>
-         <property name="uniformRowHeights" >
+         <property name="uniformRowHeights">
           <bool>true</bool>
          </property>
-         <property name="sortingEnabled" >
+         <property name="sortingEnabled">
           <bool>true</bool>
          </property>
-         <property name="animated" >
+         <property name="animated">
           <bool>true</bool>
          </property>
-         <property name="allColumnsShowFocus" >
+         <property name="allColumnsShowFocus">
           <bool>true</bool>
          </property>
-         <property name="wordWrap" >
+         <property name="wordWrap">
           <bool>true</bool>
          </property>
         </widget>
@@ -351,35 +328,35 @@
     </widget>
    </item>
    <item>
-    <widget class="Line" name="line2" >
-     <property name="frameShape" >
+    <widget class="Line" name="line2">
+     <property name="frameShape">
       <enum>QFrame::HLine</enum>
      </property>
-     <property name="frameShadow" >
+     <property name="frameShadow">
       <enum>QFrame::Sunken</enum>
      </property>
-     <property name="orientation" >
+     <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" >
-     <property name="spacing" >
+    <layout class="QHBoxLayout">
+     <property name="spacing">
       <number>6</number>
      </property>
-     <property name="margin" >
+     <property name="margin">
       <number>0</number>
      </property>
      <item>
       <spacer>
-       <property name="orientation" >
+       <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
-       <property name="sizeType" >
+       <property name="sizeType">
         <enum>QSizePolicy::Expanding</enum>
        </property>
-       <property name="sizeHint" stdset="0" >
+       <property name="sizeHint" stdset="0">
         <size>
          <width>34</width>
          <height>20</height>
@@ -388,35 +365,35 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="w_back" >
-       <property name="text" >
+      <widget class="QPushButton" name="w_back">
+       <property name="text">
         <string>&lt; &amp;Back</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="w_next" >
-       <property name="text" >
-        <string>&amp;Next ></string>
+      <widget class="QPushButton" name="w_next">
+       <property name="text">
+        <string>&amp;Next &gt;</string>
        </property>
-       <property name="default" >
+       <property name="default">
         <bool>true</bool>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="w_ok" >
-       <property name="text" >
+      <widget class="QPushButton" name="w_ok">
+       <property name="text">
         <string>&amp;OK</string>
        </property>
-       <property name="default" >
+       <property name="default">
         <bool>true</bool>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="w_cancel" >
-       <property name="text" >
+      <widget class="QPushButton" name="w_cancel">
+       <property name="text">
         <string>&amp;Cancel</string>
        </property>
       </widget>
@@ -425,7 +402,7 @@
    </item>
   </layout>
  </widget>
- <layoutdefault spacing="6" margin="11" />
+ <layoutdefault spacing="6" margin="11"/>
  <tabstops>
   <tabstop>w_back</tabstop>
   <tabstop>w_next</tabstop>
@@ -440,11 +417,11 @@
    <receiver>ImportOrderDialog</receiver>
    <slot>accept()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>20</x>
      <y>20</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>20</x>
      <y>20</y>
     </hint>
@@ -456,11 +433,11 @@
    <receiver>ImportOrderDialog</receiver>
    <slot>reject()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>20</x>
      <y>20</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>20</x>
      <y>20</y>
     </hint>
@@ -472,11 +449,11 @@
    <receiver>w_order_number</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>398</x>
      <y>161</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>526</x>
      <y>161</y>
     </hint>
@@ -488,11 +465,11 @@
    <receiver>w_order_from</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>422</x>
      <y>190</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>550</x>
      <y>190</y>
     </hint>
@@ -504,11 +481,11 @@
    <receiver>w_order_to</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>422</x>
      <y>190</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>663</x>
      <y>190</y>
     </hint>
