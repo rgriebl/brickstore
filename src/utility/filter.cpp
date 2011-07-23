@@ -142,14 +142,14 @@ QList<Filter> Filter::Parser::parse(const QString &str_)
 
         switch(state) {
         case StateStart: {
-            int field = matchTokens(pos, str, m_field_tokens, -1);
+            int field = matchTokens(pos, str, m_field_tokens, -2);
 
-            if (field > -1) {
+            if (field > -2) {
                 f.setField(field);
                 state = StateCompare;
-            }
-            else
+            } else {
                 state = StateFilter;
+            }
             break;
         }
         case StateCompare: {
