@@ -138,7 +138,7 @@ QUrl BrickLink::Core::url(UrlList u, const void *opt, const void *opt2)
     case URL_StoreItemDetail:
         if (opt) {
             url = "http://www.bricklink.com/inventory_detail.asp";
-            url.addQueryItem("itemID", QString::number(*static_cast <const unsigned int *>(opt)));
+            url.addQueryItem("invID", QString::number(*static_cast <const unsigned int *>(opt)));
         }
         break;
 
@@ -532,10 +532,13 @@ const BrickLink::Item *BrickLink::Core::item(char tid, const char *id) const
     key.m_item_type = itemType(tid);
     key.m_id = const_cast <char *>(id);
 
-    Item *keyp = &key;
+    Item **itp = 0;
 
-    Item **itp = (Item **) bsearch(&keyp, m_items.data(), m_items.count(), sizeof(Item *), (int (*)(const void *, const void *)) Item::compare);
+    if (key.m_item_type && key.m_id && key.m_id[0]) {
+        Item *keyp = &key;
 
+        itp = (Item **) bsearch(&keyp, m_items.data(), m_items.count(), sizeof(Item *), (int (*)(const void *, const void *)) Item::compare);
+    }
     key.m_id = 0;
     key.m_item_type = 0;
 
@@ -1035,17 +1038,14 @@ BrickLink::Core::ParseItemListXMLResult BrickLink::Core::parseItemListXML(QDomEl
             InvItem::Incomplete *inc = new InvItem::Incomplete;
 
             if (!ii->item()) {
-                inc->m_item_id = itemid;
-                inc->m_item_name = itemname;
-                inc->m_itemtype_id = itemtypeid;
-                inc->m_itemtype_name = itemtypename;
-                inc->m_category_id = categoryid;
-                inc->m_category_name = categoryname;
+                inc->m_item_id = itemid.toLatin1();
+                inc->m_item_name = itemname.toLatin1();
+                inc->m_itemtype_name = (itemtypename.isEmpty() ? itemtypeid : itemtypename).toLatin1();
+                inc->m_category_name = (categoryname.isEmpty() ? categoryid : categoryname).toLatin1();
             }
-            if (!ii->color()) {
-                inc->m_color_id = colorid;
-                inc->m_color_name = colorname;
-            }
+            if (!ii->color())
+                inc->m_color_name = (colorname.isEmpty() ? colorid : colorname).toLatin1();
+
             ii->setIncomplete(inc);
 
             ok = true;
@@ -1410,13 +1410,12 @@ bool BrickLink::Core::parseLDrawModelInternal(QFile &f, const QString &model_nam
                             InvItem::Incomplete *inc = new InvItem::Incomplete;
 
                             if (!itemp) {
-                                inc->m_item_id = partid;
-                                inc->m_item_name = QString();
-                                inc->m_itemtype_id = 'P';
+                                inc->m_item_id = partid.toLatin1();
+                                inc->m_item_name = QByteArray();
+                                inc->m_itemtype_name = "Part";
                             }
                             if (!colp) {
-                                inc->m_color_id = -1;
-                                inc->m_color_name = QString("LDraw #%1").arg(colid);
+                                inc->m_color_name = "LDraw #" + QByteArray::number(colid);
                             }
                             ii->setIncomplete(inc);
                             invalid++;
@@ -1631,9 +1630,9 @@ int BrickLink::Core::applyChangeLogToItems(InvItemList &bllist)
             const Item *fixed_item = blitem->item();
             const Color *fixed_color = blitem->color();
 
-            QString itemtypeid = incpl->m_itemtype_id;
+            QString itemtypeid = incpl->m_itemtype_name;
             QString itemid     = incpl->m_item_id;
-            QString colorid    = incpl->m_color_id;
+            QString colorid    = incpl->m_color_name;
 
             for (int i = m_changelog.count() - 1; i >= 0 && !(fixed_color && fixed_item); --i) {
                 const ChangeLogEntry cl = ChangeLogEntry(m_changelog[i]);

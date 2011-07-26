@@ -46,7 +46,6 @@
 #include "selectdocumentdialog.h"
 #include "settopriceguidedialog.h"
 #include "incdecpricesdialog.h"
-#include "incompleteitemdialog.h"
 #include "consolidateitemsdialog.h"
 #include "selectreportdialog.h"
 
@@ -460,29 +459,12 @@ uint Window::addItems(const BrickLink::InvItemList &items, int multiply, uint gl
         uint mergeflags = globalmergeflags;
 
         Document::Item *newitem = new Document::Item(*origitem);
-
-        if (newitem->isIncomplete()) {
-            IncompleteItemDialog dlg(newitem, this);
-
-            if (waitcursor)
-                QApplication::restoreOverrideCursor();
-
-            bool drop_this = (dlg.exec() != QDialog::Accepted);
-
-            if (waitcursor)
-                QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
-            if (drop_this) {
-                dropped++;
-                continue;
-            }
-        }
-
         Document::Item *olditem = 0;
 
         if (mergeflags != MergeAction_None) {
             foreach(Document::Item *item, m_doc->items()) {
-                if ((newitem->item() == item->item()) &&
+                if ((!newitem->isIncomplete() && !item->isIncomplete()) &&
+                    (newitem->item() == item->item()) &&
                     (newitem->color() == item->color()) &&
                     (newitem->status() == item->status()) &&
                     (newitem->condition() == item->condition())) {

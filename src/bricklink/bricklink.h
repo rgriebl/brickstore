@@ -317,6 +317,13 @@ public:
     const Color *color() const         { return m_color; }
     void setColor(const Color *c)      { m_color = c; }
 
+    const char *itemId() const         { return m_item ? m_item->id() : (m_incomplete ? m_incomplete->m_item_id.constData() : 0); }
+    const char *itemName() const       { return m_item ? m_item->name() : (m_incomplete ? m_incomplete->m_item_name.constData() : 0); }
+    const char *colorName() const      { return m_color ? m_color->name() : (m_incomplete ? m_incomplete->m_color_name.constData() : 0); }
+    const char *categoryName() const   { return category() ? category()->name() : (m_incomplete ? m_incomplete->m_category_name.constData() : 0); }
+    const char *itemTypeName() const   { return itemType() ? itemType()->name() : (m_incomplete ? m_incomplete->m_itemtype_name.constData() : 0); }
+    int itemYearReleased() const       { return m_item ? m_item->yearReleased() : 0; }
+
     Status status() const              { return m_status; }
     void setStatus(Status s)           { m_status = s; }
     Condition condition() const        { return m_condition; }
@@ -369,14 +376,11 @@ public:
     void setCounterPart(bool b)        { m_cpart = b; }
 
     struct Incomplete {
-        QString m_item_id;
-        QString m_item_name;
-        QString m_category_id;
-        QString m_category_name;
-        QString m_itemtype_id;
-        QString m_itemtype_name;
-        QString m_color_id;
-        QString m_color_name;
+        QByteArray m_item_id;
+        QByteArray m_item_name;
+        QByteArray m_itemtype_name;
+        QByteArray m_color_name;
+        QByteArray m_category_name;
     };
 
     const Incomplete *isIncomplete() const { return m_incomplete; }

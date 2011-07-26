@@ -295,7 +295,13 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
             pix->fill(Qt::transparent);
             QPainter pixp(pix);
             pixp.setPen(Qt::transparent);
-            pixp.setBrush(QColor(255, 0, 0, 64));
+            QLinearGradient grad(pix->rect().bottomLeft(), pix->rect().topRight());
+            grad.setColorAt(0, QColor(255, 0, 0, 16));
+            grad.setColorAt(0.2, QColor(255, 0, 0, 64));
+            grad.setColorAt(0.6, QColor(255, 0, 0, 32));
+            grad.setColorAt(0.8, QColor(255, 0, 0, 64));
+            grad.setColorAt(1, QColor(255, 0, 0, 16));
+            pixp.setBrush(grad);
             pixp.drawPolygon(QPolygon() << QPoint(d, 0) << QPoint(2 * d, 0) << QPoint(d, d) << QPoint(0, d));
             pixp.end();
             s_stripe_cache.insert(d, pix);

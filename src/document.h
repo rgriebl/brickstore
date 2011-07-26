@@ -116,6 +116,7 @@ public:
         double minValue() const      { return m_minval; }
         double weight() const        { return m_weight; }
         uint errors() const          { return m_errors; }
+        uint incomplete() const      { return m_incomplete; }
         QString currencyCode() const { return m_ccode; }
 
     private:
@@ -129,6 +130,7 @@ public:
         double m_minval;
         double m_weight;
         uint m_errors;
+        uint m_incomplete;
         QString m_ccode;
     };
 

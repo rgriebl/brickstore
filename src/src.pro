@@ -82,7 +82,6 @@ FORMS = \
   importinventorydialog.ui \
   importorderdialog.ui \
   incdecpricesdialog.ui \
-  incompleteitemdialog.ui \
   informationdialog.ui \
   selectcolordialog.ui \
   selectdocumentdialog.ui \

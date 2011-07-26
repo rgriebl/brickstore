@@ -496,11 +496,8 @@ BrickLink::InvItem &BrickLink::InvItem::operator = (const InvItem &copy)
 
         m_incomplete->m_item_id       = copy.m_incomplete->m_item_id;
         m_incomplete->m_item_name     = copy.m_incomplete->m_item_name;
-        m_incomplete->m_itemtype_id   = copy.m_incomplete->m_itemtype_id;
         m_incomplete->m_itemtype_name = copy.m_incomplete->m_itemtype_name;
-        m_incomplete->m_category_id   = copy.m_incomplete->m_category_id;
         m_incomplete->m_category_name = copy.m_incomplete->m_category_name;
-        m_incomplete->m_color_id      = copy.m_incomplete->m_color_id;
         m_incomplete->m_color_name    = copy.m_incomplete->m_color_name;
     }
 
@@ -548,6 +545,7 @@ BrickLink::InvItem::~InvItem()
 bool BrickLink::InvItem::mergeFrom(const InvItem &from, bool prefer_from)
 {
     if ((&from == this) ||
+        (from.isIncomplete() || isIncomplete()) ||
         (from.item() != item()) ||
         (from.color() != color()) ||
         (from.condition() != condition()) ||
@@ -615,7 +613,7 @@ namespace BrickLink {
 
 QDataStream &operator << (QDataStream &ds, const BrickLink::InvItem &ii)
 {
-    ds << QByteArray(ii.item() ? ii.item()->id() : "");
+    ds << QByteArray(ii.itemId());
     ds << qint8(ii.itemType() ? ii.itemType()->id() : -1);
     ds << qint32(ii.color() ? ii.color()->id() : 0xffffffff);
 
@@ -639,9 +637,22 @@ QDataStream &operator >> (QDataStream &ds, BrickLink::InvItem &ii)
     ds >> colorid;
 
     const BrickLink::Item *item = BrickLink::core()->item(itemtypeid, itemid);
+    const BrickLink::Color *color = BrickLink::core()->color(colorid);
 
     ii.setItem(item);
-    ii.setColor(BrickLink::core()->color(colorid));
+    ii.setColor(color);
+
+    BrickLink::InvItem::Incomplete *inc = 0;
+    if (!item || !color) {
+        inc = new BrickLink::InvItem::Incomplete;
+        if (!item) {
+            inc->m_item_id = itemid;
+            inc->m_itemtype_name = QByteArray(1, itemtypeid);
+        }
+        if (!color)
+            inc->m_color_name = QByteArray::number(colorid);
+    }
+    ii.setIncomplete(inc);
 
     qint32 status = 0, cond = 0, scond = 0;
 
@@ -682,7 +693,7 @@ void BrickLink::InvItemMimeData::setItems(const InvItemList &items)
         ds << *ii;
         if (!text.isEmpty())
             text.append("\n");
-        text.append(ii->item()->id());
+        text.append(ii->itemId());
     }
     setText(text);
     setData(s_mimetype, data);

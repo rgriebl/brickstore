@@ -62,9 +62,14 @@ static int naturalCompareNumbers(const QChar *&n1, const QChar *&n2)
 
 int Utility::naturalCompare(const QString &name1, const QString &name2)
 {
-    if (name1.isEmpty())
+    bool empty1 = name1.isEmpty();
+    bool empty2 = name2.isEmpty();
+
+    if (empty1 && empty2)
+        return 0;
+    else if (empty1)
         return -1;
-    else if (name2.isEmpty())
+    else if (empty2)
         return 1;
 
     bool special = false;

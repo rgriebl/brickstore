@@ -183,6 +183,7 @@ Document::Statistics::Statistics(const Document *doc, const ItemList &list)
     m_val = m_minval = 0.;
     m_weight = .0;
     m_errors = 0;
+    m_incomplete = 0;
     bool weight_missing = false;
 
     foreach(const Item *item, list) {
@@ -211,6 +212,9 @@ Document::Statistics::Statistics(const Document *doc, const ItemList &list)
                     m_errors++;
             }
         }
+
+        if (item->isIncomplete())
+            m_incomplete++;
     }
     if (weight_missing)
         m_weight = (m_weight == 0.) ? -DBL_MIN : -m_weight;
@@ -556,7 +560,7 @@ void Document::updateErrors(Item *item)
     if (item->quantity() <= 0)
         errors |= (1ULL << Quantity);
 
-    if (!item->color() || !item->itemType() || ((item->color()->id() != 0) && !item->itemType()->hasColors()))
+    if (item->color() && item->itemType() && ((item->color()->id() != 0) && !item->itemType()->hasColors()))
         errors |= (1ULL << Color);
 
     if (item->tierQuantity(0) && ((item->tierPrice(0) <= 0) || (item->tierPrice(0) >= item->price())))
@@ -1350,7 +1354,7 @@ QVariant Document::headerData(int section, Qt::Orientation orientation, int role
 QVariant Document::dataForEditRole(Item *it, Field f) const
 {
     switch (f) {
-    case PartNo      : return it->item() ? it->item()->id() : (it->isIncomplete() ? it->isIncomplete()->m_item_id: QString());
+    case PartNo      : return it->itemId();
     case Comments    : return it->comments(); break;
     case Remarks     : return it->remarks(); break;
     case Reserved    : return it->reserved(); break;
@@ -1377,8 +1381,8 @@ QString Document::dataForDisplayRole(Item *it, Field f) const
 
     switch (f) {
     case LotId       : return (it->lotId() == 0 ? dash : QString::number(it->lotId()));
-    case PartNo      : return it->item() ? it->item()->id() : (it->isIncomplete() ? it->isIncomplete()->m_item_id: dash);
-    case Description : return it->item() ? it->item()->name() : (it->isIncomplete() ? it->isIncomplete()->m_item_name: dash);;
+    case PartNo      : return it->itemId();
+    case Description : return it->itemName();
     case Comments    : return it->comments();
     case Remarks     : return it->remarks();
     case Quantity    : return QString::number(it->quantity());
@@ -1387,7 +1391,7 @@ QString Document::dataForDisplayRole(Item *it, Field f) const
     case Total       : return Currency::toString(it->total(), currencyCode());
     case Sale        : return (it->sale() == 0 ? dash : QString::number(it->sale()) + QLatin1Char('%'));
     case Condition   : return (it->condition() == BrickLink::New ? tr("N", "New") : tr("U", "Used"));
-    case Color       : return it->color() ? it->color()->name() : (it->isIncomplete() ? it->isIncomplete()->m_color_name : QString());
+    case Color       : return it->colorName();
     case Category    : return it->category() ? it->category()->name() : dash;
     case ItemType    : return it->itemType() ? it->itemType()->name() : dash;
     case TierQ1      : return (it->tierQuantity(0) == 0 ? dash : QString::number(it->tierQuantity(0)));
@@ -1398,7 +1402,7 @@ QString Document::dataForDisplayRole(Item *it, Field f) const
     case TierP3      : return Currency::toString(it->tierPrice(2), currencyCode());
     case Reserved    : return it->reserved();
     case Weight      : return (it->weight() == 0 ? dash : Utility::weightToString(it->weight(), Config::inst()->measurementSystem(), true, true));
-    case YearReleased: return (it->item()->yearReleased() == 0 ? dash : QString::number(it->item()->yearReleased()));
+    case YearReleased: return (it->itemYearReleased() == 0) ? dash : QString::number(it->itemYearReleased());
 
     case PriceOrig   : return Currency::toString(it->origPrice(), currencyCode());
     case PriceDiff   : return Currency::toString(it->price() - it->origPrice(), currencyCode());
@@ -1786,31 +1790,15 @@ int DocumentProxyModel::compare(const Document::Item *i1, const Document::Item *
             return i1->status() - i2->status();
     }
     case Document::Picture     :
-    case Document::PartNo      : {
-        QString s1 = i1->item() ? QLatin1String(i1->item()->id()) : (i1->isIncomplete() ? i1->isIncomplete()->m_item_id : QString());
-        QString s2 = i2->item() ? QLatin1String(i2->item()->id()) : (i2->isIncomplete() ? i2->isIncomplete()->m_item_id : QString());
-        return Utility::naturalCompare(s1, s2);
-    }
-    case Document::Description : {
-        QString s1 = i1->item() ? QLatin1String(i1->item()->name()) : (i1->isIncomplete() ? i1->isIncomplete()->m_item_name : QString());
-        QString s2 = i2->item() ? QLatin1String(i2->item()->name()) : (i2->isIncomplete() ? i2->isIncomplete()->m_item_name : QString());
-        return Utility::naturalCompare(s1, s2);
-    }
-    case Document::Color       : {
-        QString s1 = i1->color() ? QLatin1String(i1->color()->name()) : (i1->isIncomplete() ? i1->isIncomplete()->m_color_name : QString());
-        QString s2 = i2->color() ? QLatin1String(i2->color()->name()) : (i2->isIncomplete() ? i2->isIncomplete()->m_color_name : QString());
-        return s1.compare(s2);
-    }
-    case Document::Category    : {
-        QString s1 = i1->category() ? QLatin1String(i1->category()->name()) : (i1->isIncomplete() ? i1->isIncomplete()->m_category_name : QString());
-        QString s2 = i2->category() ? QLatin1String(i2->category()->name()) : (i2->isIncomplete() ? i2->isIncomplete()->m_category_name : QString());
-        return s1.compare(s2);
-    }
-    case Document::ItemType    : {
-        QString s1 = i1->itemType() ? QLatin1String(i1->itemType()->name()) : (i1->isIncomplete() ? i1->isIncomplete()->m_itemtype_name : QString());
-        QString s2 = i2->itemType() ? QLatin1String(i2->itemType()->name()) : (i2->isIncomplete() ? i2->isIncomplete()->m_itemtype_name : QString());
-        return s1.compare(s2);
-    }
+    case Document::PartNo      : return Utility::naturalCompare(QLatin1String(i1->itemId()),
+                                                                QLatin1String(i2->itemId()));
+    case Document::Description : return Utility::naturalCompare(QLatin1String(i1->itemName()),
+                                                                QLatin1String(i2->itemName()));
+
+    case Document::Color       : return qstrcmp(i1->colorName(), i2->colorName());
+    case Document::Category    : return qstrcmp(i1->categoryName(), i2->categoryName());
+    case Document::ItemType    : return qstrcmp(i1->itemTypeName(), i2->itemTypeName());
+
     case Document::Comments    : return i1->comments().compare(i2->comments());
     case Document::Remarks     : return i1->remarks().compare(i2->remarks());
 
@@ -1836,7 +1824,7 @@ int DocumentProxyModel::compare(const Document::Item *i1, const Document::Item *
     case Document::Stockroom   : return boolCompare(i1->stockroom(), i2->stockroom());
     case Document::Reserved    : return i1->reserved().compare(i2->reserved());
     case Document::Weight      : return doubleCompare(i1->weight(), i2->weight());
-    case Document::YearReleased: return i1->item()->yearReleased() - i2->item()->yearReleased();
+    case Document::YearReleased: return i1->itemYearReleased() - i2->itemYearReleased();
     case Document::PriceOrig   : return doubleCompare(i1->origPrice(), i2->origPrice());
     case Document::PriceDiff   : return doubleCompare((i1->price() - i1->origPrice()), (i2->price() - i2->origPrice()));
     case Document::QuantityOrig: return i1->origQuantity() - i2->origQuantity();
