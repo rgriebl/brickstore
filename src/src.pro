@@ -36,6 +36,7 @@ SOURCES += \
   document.cpp \
   documentdelegate.cpp \
   framework.cpp \
+  import.cpp \
   itemdetailpopup.cpp \
   main.cpp \
   picturewidget.cpp \
@@ -47,8 +48,7 @@ SOURCES += \
   selectitem.cpp \
   splash.cpp \
   taskwidgets.cpp \
-  window.cpp \
-    import.cpp
+  window.cpp
 
 HEADERS += \
   appearsinwidget.h \
@@ -74,10 +74,11 @@ HEADERS += \
   taskwidgets.h \
   updatedatabase.h \
   window.h \
-  version.h \
+  version.h
 
 FORMS = \
   additemdialog.ui \
+  changecurrencydialog.ui \
   consolidateitemsdialog.ui \
   importinventorydialog.ui \
   importorderdialog.ui \
@@ -88,7 +89,7 @@ FORMS = \
   selectitemdialog.ui \
   selectreportdialog.ui \
   settingsdialog.ui \
-  settopriceguidedialog.ui \
+  settopriceguidedialog.ui
 
 HEADERS += $$replace(FORMS, '\\.ui', '.h')
 SOURCES += $$replace(FORMS, '\\.ui', '.cpp')

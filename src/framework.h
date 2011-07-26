@@ -25,6 +25,7 @@
 
 class QLabel;
 class QMdiSubWindow;
+class QToolButton;
 
 class Workspace;
 class ProgressCircle;
@@ -113,6 +114,9 @@ private slots:
 
     void onlineStateChanged(bool isOnline);
 
+    void changeDocumentCurrency(QAction *a);
+    void updateCurrencyRates();
+
 protected:
    virtual void dragEnterEvent(QDragEnterEvent *e);
    virtual void dropEvent(QDropEvent *e);
@@ -152,8 +156,12 @@ private:
 
     ProgressCircle *m_progress;
     FilterEdit *m_filter;
-    QLabel *m_statistics;
-    QLabel *m_errors;
+    QLabel *m_st_weight;
+    QLabel *m_st_lots;
+    QLabel *m_st_items;
+    QLabel *m_st_value;
+    QLabel *m_st_errors;
+    QToolButton *m_st_currency;
     QToolBar *m_toolbar;
     QList<QDockWidget *> m_dock_widgets;
     TaskInfoWidget *m_task_info;

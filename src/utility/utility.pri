@@ -25,7 +25,6 @@ HEADERS += \
     undo.h \
     utility.h \
     workspace.h \
-    utility/infobar.h
 
 
 SOURCES += \
@@ -44,7 +43,6 @@ SOURCES += \
     undo.cpp \
     utility.cpp \
     workspace.cpp \
-    utility/infobar.cpp
 
 
 macx {

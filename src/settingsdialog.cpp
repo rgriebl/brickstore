@@ -99,7 +99,7 @@ void SettingsDialog::currentCurrencyChanged(const QString &ccode)
     if (!rate)
         s = tr("could not find a cross rate for %1").arg(ccode);
     else if (rate != qreal(1))
-        s = tr("1 %1 equals %2 USD").arg(ccode).arg(qreal(1) / rate, 0, 'g', 3);
+        s = tr("1 %1 equals %2 USD").arg(ccode).arg(qreal(1) / rate, 0, 'f', 3);
 
     w_currency_status->setText(s);
     m_preferedCurrency = ccode;

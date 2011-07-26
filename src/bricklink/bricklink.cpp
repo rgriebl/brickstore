@@ -813,6 +813,8 @@ BrickLink::Core::ParseItemListXMLResult BrickLink::Core::parseItemListXML(QDomEl
 
     if (hint == XMLHint_BrickStore)
         result.currencyCode = root.attribute(QLatin1String("Currency"));
+    if (result.currencyCode.isEmpty())
+        result.currencyCode = QLatin1String("USD");
 
     result.items = new InvItemList;
     bool multicurrency = false;

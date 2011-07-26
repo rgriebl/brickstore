@@ -67,7 +67,7 @@ public:
         PriceOrig,
         PriceDiff,
 
-        FieldCount,
+        FieldCount
     };
 
     class Item : public BrickLink::InvItem {

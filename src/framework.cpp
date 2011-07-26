@@ -35,6 +35,7 @@
 #include <QStyleFactory>
 #include <QShortcut>
 #include <QDockWidget>
+#include <QSizeGrip>
 
 #include "application.h"
 #include "messagebox.h"
@@ -53,6 +54,7 @@
 #include "additemdialog.h"
 #include "settingsdialog.h"
 #include "itemdetailpopup.h"
+#include "changecurrencydialog.h"
 
 #include "framework.h"
 
@@ -73,6 +75,16 @@ public:
         : QStatusBar(parent)
     { }
 
+    void addPermanentWidget(QWidget *w, int stretch, int margin = 6)
+    {
+        QWidget *wrapper = new QWidget();
+        QBoxLayout *l = new QHBoxLayout(wrapper);
+        l->setContentsMargins(margin, 0, margin, 0);
+        l->setSpacing(0);
+        l->addWidget(w);
+        QStatusBar::addPermanentWidget(wrapper, stretch);
+    }
+
 protected:
     void paintEvent(QPaintEvent *)
     {
@@ -88,6 +100,27 @@ protected:
             p.setPen(palette().foreground().color());
             QRect msgr = rect().adjusted(6, 0, -6, 0);
             p.drawText(msgr, Qt::AlignLeading | Qt::AlignVCenter | Qt::TextSingleLine, msg);
+        } else {
+            foreach (QWidget *w, findChildren<QWidget *>()) {
+                if (qobject_cast<QSizeGrip *>(w))
+                    continue;
+                QRect r = w->geometry();
+                r.adjust(-3, 0, 3, 0);
+                r.setTop(0);
+                r.setBottom(height() - 1);
+#ifdef Q_OS_MACX
+                qWarning() << "dark" << palette().color(QPalette::Dark);
+                qWarning() << "shadow" << palette().color(QPalette::Shadow);
+                qWarning() << "mid" << palette().color(QPalette::Mid);
+                p.setPen(QColor(112, 112, 112));
+#else
+                p.setPen(palette().color(QPalette::Shadow));
+#endif
+                p.drawLine(r.topLeft(), r.bottomLeft());
+//                p.setPen(palette().light().color());
+//                p.drawLine(r.topRight(), r.bottomRight());
+                qWarning() << "DRAWING at" << r << " : " << w;
+            }
         }
     }
 };
@@ -644,17 +677,63 @@ QDockWidget *FrameWork::createDock(QWidget *widget)
 
 void FrameWork::createStatusBar()
 {
-#if defined(Q_OS_MAC)
-    setStatusBar(new NoFrameStatusBar(this));
-#endif
+    NoFrameStatusBar *st = new NoFrameStatusBar(this);
+    setStatusBar(st);
 
-    m_errors = new QLabel(statusBar());
-    statusBar()->addPermanentWidget(m_errors, 0);
+    int margin = 2 * st->fontMetrics().width(QLatin1Char(' '));
 
-    m_statistics = new QLabel(statusBar());
-    statusBar()->addPermanentWidget(m_statistics, 0);
+    m_st_errors = new QLabel();
+    m_st_lots = new QLabel();
+    m_st_items = new QLabel();
+    m_st_weight = new QLabel();
+    m_st_value = new QLabel();
+    m_st_currency = new QToolButton();
+    m_st_currency->setPopupMode(QToolButton::InstantPopup);
+    m_st_currency->setToolButtonStyle(Qt::ToolButtonTextOnly);
+    QWidget *st_valcur = new QWidget();
+    QHBoxLayout *l = new QHBoxLayout(st_valcur);
+    l->setContentsMargins(0, 0, 0, 0);
+    l->setSpacing(6);
+    l->addWidget(m_st_value);
+    l->addWidget(m_st_currency);
+
+    connect(m_st_currency, SIGNAL(triggered(QAction*)), this, SLOT(changeDocumentCurrency(QAction *)));
+    connect(Currency::inst(), SIGNAL(ratesChanged()), this, SLOT(updateCurrencyRates()));
+    updateCurrencyRates();
+
+    st->addPermanentWidget(m_st_errors, 0, margin);
+    st->addPermanentWidget(m_st_weight, 0, margin);
+    st->addPermanentWidget(m_st_lots, 0, margin);
+    st->addPermanentWidget(m_st_items, 0, margin);
+    st->addPermanentWidget(st_valcur, 0, margin);
 
     statusBar()->hide();
+}
+
+void FrameWork::changeDocumentCurrency(QAction *a)
+{
+    if (m_current_window) {
+        ChangeCurrencyDialog d(m_current_window->document()->currencyCode(), a->text(), this);
+        if (d.exec() == QDialog::Accepted) {
+            double rate = d.exchangeRate();
+
+            if (rate > 0) {
+                m_current_window->document()->setCurrencyCode(a->text());
+                //TODO: fix prices
+            }
+        }
+    }
+}
+
+void FrameWork::updateCurrencyRates()
+{
+    foreach (QAction *a, m_st_currency->actions()) {
+        m_st_currency->removeAction(a);
+        delete a;
+    }
+
+    foreach (const QString &c, Currency::inst()->currencyCodes())
+        m_st_currency->addAction(new QAction(c, m_st_currency));
 }
 
 QMenu *FrameWork::createMenu(const QByteArray &name, const QList<QByteArray> &a_names)
@@ -1210,6 +1289,7 @@ void FrameWork::connectWindow(QWidget *w)
         connectAllActions(false, m_current_window);
 
         disconnect(doc, SIGNAL(statisticsChanged()), this, SLOT(statisticsUpdate()));
+//        disconnect(doc, SIGNAL(currencyCodeChanged(QString)), this, SLOT(updateCurrencyButton()));
         disconnect(m_current_window, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
         if (m_filter) {
             disconnect(m_filter, SIGNAL(textChanged(const QString &)), m_current_window, SLOT(setFilter(const QString &)));
@@ -1231,6 +1311,7 @@ void FrameWork::connectWindow(QWidget *w)
         connectAllActions(true, window);
 
         connect(doc, SIGNAL(statisticsChanged()), this, SLOT(statisticsUpdate()));
+//        connect(doc, SIGNAL(currencyCodeChanged(QString)), this, SLOT(updateCurrencyButton()));
         connect(window, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
         if (m_filter) {
             m_filter->setText(window->filter());
@@ -1259,6 +1340,7 @@ void FrameWork::connectWindow(QWidget *w)
     statisticsUpdate();
     modificationUpdate();
     titleUpdate();
+    //updateCurrencyButton();
 
     emit windowActivated(m_current_window);
 }
@@ -1370,7 +1452,7 @@ void FrameWork::selectionUpdate(const Document::ItemList &selection)
 
 void FrameWork::statisticsUpdate()
 {
-    QString ss, es;
+    QString lotstr, itmstr, errstr, valstr, wgtstr, ccode;
 
     if (m_current_window)
     {
@@ -1382,44 +1464,45 @@ void FrameWork::statisticsUpdate()
         }
 
         Document::Statistics stat = m_current_window->document()->statistics(not_exclude);
-        QString valstr, wgtstr;
-        QString ccode = m_current_window->document()->currencyCode();
+        ccode = m_current_window->document()->currencyCode();
 
         if (stat.value() != stat.minValue()) {
-            valstr = QString("%1 (%2 %3)").
-                     arg(Currency::toString(stat.value(), ccode, Currency::LocalSymbol)).
-                     arg(tr("min.")).
-                     arg(Currency::toString(stat.minValue(), ccode, Currency::LocalSymbol));
+            valstr = tr("Value: %1 (min. %2)").
+                     arg(Currency::toString(stat.value(), ccode, Currency::NoSymbol)).
+                     arg(Currency::toString(stat.minValue(), ccode, Currency::NoSymbol));
+        } else {
+            valstr = tr("Value: %1").arg(Currency::toString(stat.value(), ccode, Currency::NoSymbol));
         }
-        else
-            valstr = Currency::toString(stat.value(), ccode, Currency::LocalSymbol);
 
         if (stat.weight() == -DBL_MIN) {
-            wgtstr = QLatin1String("-");
-        }
-        else {
+            wgtstr = tr("Weight: -");
+        } else {
             double weight = stat.weight();
 
             if (weight < 0) {
                 weight = -weight;
-                wgtstr = tr("min.") + " ";
+                wgtstr = tr("Weight: min. %1");
+            } else {
+                wgtstr = tr("Weight: %1");
             }
 
-            wgtstr += Utility::weightToString(weight, Config::inst()->measurementSystem(), true, true);
+            wgtstr = wgtstr.arg(Utility::weightToString(weight, Config::inst()->measurementSystem(), true, true));
         }
 
-        ss = QString("  %1: %2   %3: %4   %5: %6   %7: %8  ").
-             arg(tr("Lots")).arg(stat.lots()).
-             arg(tr("Items")).arg(stat.items()).
-             arg(tr("Value")).arg(valstr).
-             arg(tr("Weight")).arg(wgtstr);
+        lotstr = tr("Lots: %1").arg(stat.lots());
+        itmstr = tr("Items: %1").arg(stat.items());
 
         if ((stat.errors() > 0) && Config::inst()->showInputErrors())
-            es = QString("  %1: %2  ").arg(tr("Errors")).arg(stat.errors());
+            errstr = tr("Errors: %1").arg(stat.errors());
     }
 
-    m_statistics->setText(ss);
-    m_errors->setText(es);
+    m_st_lots->setText(lotstr);
+    m_st_items->setText(itmstr);
+    m_st_weight->setText(wgtstr);
+    m_st_value->setText(valstr);
+    m_st_currency->setEnabled(m_current_window);
+    m_st_currency->setText(ccode + QLatin1String("  "));
+    m_st_errors->setText(errstr);
 }
 
 void FrameWork::titleUpdate()
