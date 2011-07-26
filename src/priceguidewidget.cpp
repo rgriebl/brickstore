@@ -595,7 +595,6 @@ void PriceGuideWidget::paintEvent(QPaintEvent *e)
 {
     QFrame::paintEvent(e);
 
-    const QSize s = contentsRect().size();
     const QPoint offset = contentsRect().topLeft();
 
     QPalette pal = palette();

@@ -172,8 +172,6 @@ void ImportBLOrder::gotten()
 {
     TransferJob *j = m_progress->job();
     QByteArray *data = j->data();
-    bool ok = false;
-    QString error;
 
     if (data && data->size()) {
         if (m_current_address >= 0) {
@@ -259,7 +257,6 @@ void ImportBLOrder::gotten()
 
                                 if (!order->id().isEmpty()) {
                                     m_orders << qMakePair(order, result.items);
-                                    ok = true;
                                 }
                                 else {
                                     delete result.items;

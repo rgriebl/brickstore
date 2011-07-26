@@ -129,7 +129,7 @@ public:
                     QString url = QString::fromLatin1("http://www.bricklink.com/images/flagsS/%1.gif").arg(cc);
 
                     TransferJob *job = TransferJob::get(url);
-                    job->setUserData<int>(cc[0].unicode(), (int *)(cc[1].unicode()));
+                    job->setUserData<int>(cc[0].unicode(), reinterpret_cast<int *>(cc[1].unicode()));
                     m_trans->retrieve(job);
                 }
                 if (flag)
@@ -226,7 +226,7 @@ private slots:
         QPair<int, int *> ud = j->userData<int>();
         QString cc;
         cc.append(QChar(ud.first));
-        cc.append(QChar(int(ud.second)));
+        cc.append(QChar(reinterpret_cast<int>(ud.second)));
 
         QImage *img = new QImage;
         if (img->loadFromData(*j->data())) {

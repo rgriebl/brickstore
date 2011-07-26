@@ -998,7 +998,7 @@ void BrickLink::Order::setCountryName(const QString &str)
 {
     if (str.isEmpty())
         return;
-    for (int i = 0; i < sizeof(countryList) / sizeof(*countryList); ++i) {
+    for (uint i = 0; i < sizeof(countryList) / sizeof(*countryList); ++i) {
         QString istr = QString::fromLatin1(countryList[i]);
         if (istr.mid(3) == str) {
             setCountryCode(istr.left(2));
@@ -1014,7 +1014,7 @@ QString BrickLink::Order::countryCode() const
 
 QString BrickLink::Order::countryName() const
 {
-    for (int i = 0; i < sizeof(countryList) / sizeof(*countryList); ++i) {
+    for (uint i = 0; i < sizeof(countryList) / sizeof(*countryList); ++i) {
         QString istr = QString::fromLatin1(countryList[i]);
         if (istr[0] == m_countryCode[0] && istr[1] == m_countryCode[1])
             return istr.mid(3);
