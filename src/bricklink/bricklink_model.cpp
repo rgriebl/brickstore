@@ -576,8 +576,8 @@ bool BrickLink::ItemModel::lessThan(const void *p1, const void *p2, int column) 
     const Item *i1 = static_cast<const Item *>(p1);
     const Item *i2 = static_cast<const Item *>(p2);
 
-    return !i1 ? true : (!i2 ? false : Utility::naturalCompare((column == 2) ? i1->name() : i1->id(),
-                                                               (column == 2) ? i2->name() : i2->id()) < 0);
+    return !i1 ? true : (!i2 ? false : Utility::naturalCompare(QLatin1String((column == 2) ? i1->name() : i1->id()),
+                                                               QLatin1String((column == 2) ? i2->name() : i2->id())) < 0);
 }
 
 namespace BrickLink {
@@ -792,8 +792,10 @@ bool BrickLink::AppearsInModel::lessThan(const QModelIndex &left, const QModelIn
         switch (left.column()) {
         default:
         case  0: return ai1->first < ai2->first;
-        case  1: return (Utility::naturalCompare(ai1->second->id(), ai2->second->id()) < 0);
-        case  2: return (Utility::naturalCompare(ai1->second->name(), ai2->second->name()) < 0);
+        case  1: return (Utility::naturalCompare(QLatin1String(ai1->second->id()),
+                                                 QLatin1String(ai2->second->id())) < 0);
+        case  2: return (Utility::naturalCompare(QLatin1String(ai1->second->name()),
+                                                 QLatin1String(ai2->second->name())) < 0);
         }
     }
 }

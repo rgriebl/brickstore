@@ -68,6 +68,8 @@ const QPixmap BrickLink::Picture::pixmap() const
 
 QSize BrickLink::Core::pictureSize(const ItemType *itt) const
 {
+    if (!itt)
+        itt = itemType('P');
     return itt ? itt->pictureSize() : QSize();
 }
 

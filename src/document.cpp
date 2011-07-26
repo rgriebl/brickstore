@@ -261,9 +261,8 @@ QImage Document::Item::image() const
 
     if (pic && pic->valid()) {
         return pic->image();
-    }
-    else {
-        QSize s = BrickLink::core()->pictureSize(item()->itemType());
+    } else {
+        QSize s = BrickLink::core()->pictureSize(itemType());
         QImage img(s, QImage::Format_Mono);
         img.fill(Qt::white);
         return img;
@@ -557,7 +556,7 @@ void Document::updateErrors(Item *item)
     if (item->quantity() <= 0)
         errors |= (1ULL << Quantity);
 
-    if ((item->color()->id() != 0) && (!item->itemType()->hasColors()))
+    if (!item->color() || !item->itemType() || ((item->color()->id() != 0) && !item->itemType()->hasColors()))
         errors |= (1ULL << Color);
 
     if (item->tierQuantity(0) && ((item->tierPrice(0) <= 0) || (item->tierPrice(0) >= item->price())))
@@ -929,7 +928,7 @@ void Document::setBrickLinkItems(const BrickLink::InvItemList &bllist, uint mult
             //if (waitcursor)
             //    QApplication::restoreOverrideCursor();
 
-            bool drop_this = true; //(dlg.exec() != QDialog::Accepted);
+            bool drop_this = false; //(dlg.exec() != QDialog::Accepted);
 
             //if (waitcursor)
             //    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -1278,29 +1277,29 @@ bool Document::setData(const QModelIndex &index, const QVariant &value, int role
 
         switch (f) {
         case Document::PartNo      : {
-            const BrickLink::Item *newitem = BrickLink::core()->item(item.item()->itemType()->id(),
-                                                                     value.toString().toLatin1().constData());
+            char itid = item.itemType() ? item.itemType()->id() : 'P';
+            const BrickLink::Item *newitem = BrickLink::core()->item(itid, value.toString().toLatin1().constData());
             if (newitem)
                 item.setItem(newitem);
             break;
         }
-        case Document::Comments    : item.setComments(value.toString()); break;
-        case Document::Remarks     : item.setRemarks(value.toString()); break;
-        case Document::Reserved    : item.setReserved(value.toString()); break;
-        case Document::Sale        : item.setSale(value.toInt()); break;
-        case Document::Bulk        : item.setBulkQuantity(value.toInt()); break;
-        case Document::TierQ1      : item.setTierQuantity(0, value.toInt()); break;
-        case Document::TierQ2      : item.setTierQuantity(1, value.toInt()); break;
-        case Document::TierQ3      : item.setTierQuantity(2, value.toInt()); break;
-        case Document::TierP1      : item.setTierPrice(0, Currency::fromString(value.toString())); break;
-        case Document::TierP2      : item.setTierPrice(1, Currency::fromString(value.toString())); break;
-        case Document::TierP3      : item.setTierPrice(2, Currency::fromString(value.toString())); break;
-        case Document::Weight      : item.setWeight(Utility::stringToWeight(value.toString(), Config::inst()->measurementSystem())); break;
-        case Document::Quantity    : item.setQuantity(value.toInt()); break;
-        case Document::QuantityDiff: item.setQuantity(itemp->origQuantity() + value.toInt()); break;
-        case Document::Price       : item.setPrice(Currency::fromString(value.toString())); break;
-        case Document::PriceDiff   : item.setPrice(itemp->origPrice() + Currency::fromString(value.toString())); break;
-        default                    : break;
+        case Comments    : item.setComments(value.toString()); break;
+        case Remarks     : item.setRemarks(value.toString()); break;
+        case Reserved    : item.setReserved(value.toString()); break;
+        case Sale        : item.setSale(value.toInt()); break;
+        case Bulk        : item.setBulkQuantity(value.toInt()); break;
+        case TierQ1      : item.setTierQuantity(0, value.toInt()); break;
+        case TierQ2      : item.setTierQuantity(1, value.toInt()); break;
+        case TierQ3      : item.setTierQuantity(2, value.toInt()); break;
+        case TierP1      : item.setTierPrice(0, Currency::fromString(value.toString())); break;
+        case TierP2      : item.setTierPrice(1, Currency::fromString(value.toString())); break;
+        case TierP3      : item.setTierPrice(2, Currency::fromString(value.toString())); break;
+        case Weight      : item.setWeight(Utility::stringToWeight(value.toString(), Config::inst()->measurementSystem())); break;
+        case Quantity    : item.setQuantity(value.toInt()); break;
+        case QuantityDiff: item.setQuantity(itemp->origQuantity() + value.toInt()); break;
+        case Price       : item.setPrice(Currency::fromString(value.toString())); break;
+        case PriceDiff   : item.setPrice(itemp->origPrice() + Currency::fromString(value.toString())); break;
+        default          : break;
         }
         if (!(item == *itemp)) {
             changeItem(index.row(), item);
@@ -1351,24 +1350,24 @@ QVariant Document::headerData(int section, Qt::Orientation orientation, int role
 QVariant Document::dataForEditRole(Item *it, Field f) const
 {
     switch (f) {
-    case Document::PartNo      : return it->item()->id(); break;
-    case Document::Comments    : return it->comments(); break;
-    case Document::Remarks     : return it->remarks(); break;
-    case Document::Reserved    : return it->reserved(); break;
-    case Document::Sale        : return it->sale(); break;
-    case Document::Bulk        : return it->bulkQuantity(); break;
-    case Document::TierQ1      : return it->tierQuantity(0); break;
-    case Document::TierQ2      : return it->tierQuantity(1); break;
-    case Document::TierQ3      : return it->tierQuantity(2); break;
-    case Document::TierP1      : return Currency::toString(it->tierPrice(0) != 0 ? it->tierPrice(0) : it->price(),      currencyCode()); break;
-    case Document::TierP2      : return Currency::toString(it->tierPrice(1) != 0 ? it->tierPrice(1) : it->tierPrice(0), currencyCode()); break;
-    case Document::TierP3      : return Currency::toString(it->tierPrice(2) != 0 ? it->tierPrice(2) : it->tierPrice(1), currencyCode()); break;
-    case Document::Weight      : return Utility::weightToString(it->weight(), Config::inst()->measurementSystem(), false); break;
-    case Document::Quantity    : return it->quantity(); break;
-    case Document::QuantityDiff: return it->quantity() - it->origQuantity(); break;
-    case Document::Price       : return Currency::toString(it->price(), currencyCode()); break;
-    case Document::PriceDiff   : return Currency::toString(it->price() - it->origPrice(), currencyCode()); break;
-    default                    : return QString();
+    case PartNo      : return it->item() ? it->item()->id() : (it->isIncomplete() ? it->isIncomplete()->m_item_id: QString());
+    case Comments    : return it->comments(); break;
+    case Remarks     : return it->remarks(); break;
+    case Reserved    : return it->reserved(); break;
+    case Sale        : return it->sale(); break;
+    case Bulk        : return it->bulkQuantity(); break;
+    case TierQ1      : return it->tierQuantity(0); break;
+    case TierQ2      : return it->tierQuantity(1); break;
+    case TierQ3      : return it->tierQuantity(2); break;
+    case TierP1      : return Currency::toString(it->tierPrice(0) != 0 ? it->tierPrice(0) : it->price(),      currencyCode()); break;
+    case TierP2      : return Currency::toString(it->tierPrice(1) != 0 ? it->tierPrice(1) : it->tierPrice(0), currencyCode()); break;
+    case TierP3      : return Currency::toString(it->tierPrice(2) != 0 ? it->tierPrice(2) : it->tierPrice(1), currencyCode()); break;
+    case Weight      : return Utility::weightToString(it->weight(), Config::inst()->measurementSystem(), false); break;
+    case Quantity    : return it->quantity(); break;
+    case QuantityDiff: return it->quantity() - it->origQuantity(); break;
+    case Price       : return Currency::toString(it->price(), currencyCode()); break;
+    case PriceDiff   : return Currency::toString(it->price() - it->origPrice(), currencyCode()); break;
+    default          : return QString();
     }
 }
 
@@ -1378,8 +1377,8 @@ QString Document::dataForDisplayRole(Item *it, Field f) const
 
     switch (f) {
     case LotId       : return (it->lotId() == 0 ? dash : QString::number(it->lotId()));
-    case PartNo      : return it->item()->id();
-    case Description : return it->item()->name();
+    case PartNo      : return it->item() ? it->item()->id() : (it->isIncomplete() ? it->isIncomplete()->m_item_id: dash);
+    case Description : return it->item() ? it->item()->name() : (it->isIncomplete() ? it->isIncomplete()->m_item_name: dash);;
     case Comments    : return it->comments();
     case Remarks     : return it->remarks();
     case Quantity    : return QString::number(it->quantity());
@@ -1388,9 +1387,9 @@ QString Document::dataForDisplayRole(Item *it, Field f) const
     case Total       : return Currency::toString(it->total(), currencyCode());
     case Sale        : return (it->sale() == 0 ? dash : QString::number(it->sale()) + QLatin1Char('%'));
     case Condition   : return (it->condition() == BrickLink::New ? tr("N", "New") : tr("U", "Used"));
-    case Color       : return it->color()->name();
-    case Category    : return it->category()->name();
-    case ItemType    : return it->itemType()->name();
+    case Color       : return it->color() ? it->color()->name() : (it->isIncomplete() ? it->isIncomplete()->m_color_name : QString());
+    case Category    : return it->category() ? it->category()->name() : dash;
+    case ItemType    : return it->itemType() ? it->itemType()->name() : dash;
     case TierQ1      : return (it->tierQuantity(0) == 0 ? dash : QString::number(it->tierQuantity(0)));
     case TierQ2      : return (it->tierQuantity(1) == 0 ? dash : QString::number(it->tierQuantity(1)));
     case TierQ3      : return (it->tierQuantity(2) == 0 ? dash : QString::number(it->tierQuantity(2)));
@@ -1475,6 +1474,9 @@ QString Document::dataForToolTipRole(Item *it, Field f) const
         break;
     }
     case Category: {
+        if (!it->item())
+            break;
+
         const BrickLink::Category **catpp = it->item()->allCategories();
 
         if (!catpp[1]) {
@@ -1644,6 +1646,8 @@ QString Document::subConditionLabel(BrickLink::SubCondition sc) const
 DocumentProxyModel::DocumentProxyModel(Document *model)
     : QSortFilterProxyModel(0)
 {
+    m_lastSortColumn[0] = m_lastSortColumn[1] = -1;
+
     setDynamicSortFilter(true);
     setSourceModel(model);
 
@@ -1736,57 +1740,107 @@ bool DocumentProxyModel::filterAcceptsRow(int source_row, const QModelIndex &sou
     return result;
 }
 
+void DocumentProxyModel::sort(int column, Qt::SortOrder order)
+{
+    m_lastSortColumn[1] = m_lastSortColumn[0];
+    m_lastSortColumn[0] = sortColumn();
+
+    QSortFilterProxyModel::sort(column, order);
+}
+
 bool DocumentProxyModel::lessThan(const QModelIndex &idx1, const QModelIndex &idx2) const
 {
     const Document::Item *i1 = static_cast<Document *>(sourceModel())->item(idx1);
     const Document::Item *i2 = static_cast<Document *>(sourceModel())->item(idx2);
 
-    switch (sortColumn()) {
+    int result = compare(i1, i2, sortColumn());
+    if (!result && m_lastSortColumn[0] > -1)
+        result = compare(i1, i2, m_lastSortColumn[0]);
+    if (!result && m_lastSortColumn[1] > -1)
+        result = compare(i1, i2, m_lastSortColumn[1]);
+    return result < 0;
+}
+
+static inline int boolCompare(bool b1, bool b2)
+{
+    return (b1 ? 1 : 0) - (b2 ? 1 : 0);
+}
+
+static inline int doubleCompare(double d1, double d2)
+{
+    double d = d1 - d2;
+    return d < 0 ? -1 : (d > 0 ? 1 : 0);
+}
+
+int DocumentProxyModel::compare(const Document::Item *i1, const Document::Item *i2, int sortColumn)
+{
+    switch (sortColumn) {
     case Document::Status      : {
         if (i1->counterPart() != i2->counterPart())
-            return !i1->counterPart();
+            return boolCompare(i1->counterPart(), i2->counterPart());
         else if (i1->alternateId() != i2->alternateId())
-            return i1->alternateId() < i2->alternateId();
+            return i1->alternateId() - i2->alternateId();
         else if (i1->alternate() != i2->alternate())
-            return !i1->alternate();
+            return boolCompare(i1->alternate(), i2->alternate());
         else
-            return i1->status() < i2->status();
+            return i1->status() - i2->status();
     }
     case Document::Picture     :
-    case Document::PartNo      : return Utility::naturalCompare(i1->item()->id(), i2->item()->id()) < 0;
-    case Document::LotId       : return i1->lotId() < i2->lotId();
-    case Document::Description : return Utility::naturalCompare(i1->item()->name(), i2->item()->name()) < 0;
-    case Document::Comments    : return i1->comments() < i2->comments();
-    case Document::Remarks     : return i1->remarks() < i2->remarks();
-    case Document::Quantity    : return i1->quantity() < i2->quantity();
-    case Document::Bulk        : return i1->bulkQuantity() < i2->bulkQuantity();
-    case Document::Price       : return i1->price() < i2->price();
-    case Document::Total       : return i1->total() < i2->total();
-    case Document::Sale        : return i1->sale() < i2->sale();
+    case Document::PartNo      : {
+        QString s1 = i1->item() ? QLatin1String(i1->item()->id()) : (i1->isIncomplete() ? i1->isIncomplete()->m_item_id : QString());
+        QString s2 = i2->item() ? QLatin1String(i2->item()->id()) : (i2->isIncomplete() ? i2->isIncomplete()->m_item_id : QString());
+        return Utility::naturalCompare(s1, s2);
+    }
+    case Document::Description : {
+        QString s1 = i1->item() ? QLatin1String(i1->item()->name()) : (i1->isIncomplete() ? i1->isIncomplete()->m_item_name : QString());
+        QString s2 = i2->item() ? QLatin1String(i2->item()->name()) : (i2->isIncomplete() ? i2->isIncomplete()->m_item_name : QString());
+        return Utility::naturalCompare(s1, s2);
+    }
+    case Document::Color       : {
+        QString s1 = i1->color() ? QLatin1String(i1->color()->name()) : (i1->isIncomplete() ? i1->isIncomplete()->m_color_name : QString());
+        QString s2 = i2->color() ? QLatin1String(i2->color()->name()) : (i2->isIncomplete() ? i2->isIncomplete()->m_color_name : QString());
+        return s1.compare(s2);
+    }
+    case Document::Category    : {
+        QString s1 = i1->category() ? QLatin1String(i1->category()->name()) : (i1->isIncomplete() ? i1->isIncomplete()->m_category_name : QString());
+        QString s2 = i2->category() ? QLatin1String(i2->category()->name()) : (i2->isIncomplete() ? i2->isIncomplete()->m_category_name : QString());
+        return s1.compare(s2);
+    }
+    case Document::ItemType    : {
+        QString s1 = i1->itemType() ? QLatin1String(i1->itemType()->name()) : (i1->isIncomplete() ? i1->isIncomplete()->m_itemtype_name : QString());
+        QString s2 = i2->itemType() ? QLatin1String(i2->itemType()->name()) : (i2->isIncomplete() ? i2->isIncomplete()->m_itemtype_name : QString());
+        return s1.compare(s2);
+    }
+    case Document::Comments    : return i1->comments().compare(i2->comments());
+    case Document::Remarks     : return i1->remarks().compare(i2->remarks());
+
+    case Document::LotId       : return i1->lotId() - i2->lotId();
+    case Document::Quantity    : return i1->quantity() - i2->quantity();
+    case Document::Bulk        : return i1->bulkQuantity() - i2->bulkQuantity();
+    case Document::Price       : return doubleCompare(i1->price(), i2->price());
+    case Document::Total       : return doubleCompare(i1->total(), i2->total());
+    case Document::Sale        : return i1->sale() - i2->sale();
     case Document::Condition   : {
         if (i1->condition() == i2->condition())
-            return (i1->subCondition() < i2->subCondition());
+            return i1->subCondition() - i2->subCondition();
         else
-            return i1->condition() < i2->condition();
+            return i1->condition() - i2->condition();
     }
-    case Document::Color       : return qstrcmp(i1->color()->name(), i2->color()->name()) < 0;
-    case Document::Category    : return qstrcmp(i1->category()->name(), i2->category()->name()) < 0;
-    case Document::ItemType    : return qstrcmp(i1->itemType()->name(), i2->itemType()->name()) < 0;
-    case Document::TierQ1      : return i1->tierQuantity(0) < i2->tierQuantity(0);
-    case Document::TierQ2      : return i1->tierQuantity(1) < i2->tierQuantity(1);
-    case Document::TierQ3      : return i1->tierQuantity(2) < i2->tierQuantity(2);
-    case Document::TierP1      : return i1->tierPrice(0) < i2->tierPrice(0);
-    case Document::TierP2      : return i1->tierPrice(1) < i2->tierPrice(1);
-    case Document::TierP3      : return i1->tierPrice(2) < i2->tierPrice(2);
-    case Document::Retain      : return !i1->retain() && i2->retain();
-    case Document::Stockroom   : return i1->stockroom() && !i2->stockroom();
-    case Document::Reserved    : return i1->reserved() < i2->reserved();
-    case Document::Weight      : return i1->weight() < i2->weight();
-    case Document::YearReleased: return i1->item()->yearReleased() < i2->item()->yearReleased();
-    case Document::PriceOrig   : return i1->origPrice() < i2->origPrice();
-    case Document::PriceDiff   : return (i1->price() - i1->origPrice()) < (i2->price() - i2->origPrice());
-    case Document::QuantityOrig: return i1->origQuantity() < i2->origQuantity();
-    case Document::QuantityDiff: return (i1->quantity() - i1->origQuantity()) < (i2->quantity() - i2->origQuantity());
+    case Document::TierQ1      : return i1->tierQuantity(0) - i2->tierQuantity(0);
+    case Document::TierQ2      : return i1->tierQuantity(1) - i2->tierQuantity(1);
+    case Document::TierQ3      : return i1->tierQuantity(2) - i2->tierQuantity(2);
+    case Document::TierP1      : return doubleCompare(i1->tierPrice(0), i2->tierPrice(0));
+    case Document::TierP2      : return doubleCompare(i1->tierPrice(1), i2->tierPrice(1));
+    case Document::TierP3      : return doubleCompare(i1->tierPrice(2), i2->tierPrice(2));
+    case Document::Retain      : return boolCompare(i1->retain(), i2->retain());
+    case Document::Stockroom   : return boolCompare(i1->stockroom(), i2->stockroom());
+    case Document::Reserved    : return i1->reserved().compare(i2->reserved());
+    case Document::Weight      : return doubleCompare(i1->weight(), i2->weight());
+    case Document::YearReleased: return i1->item()->yearReleased() - i2->item()->yearReleased();
+    case Document::PriceOrig   : return doubleCompare(i1->origPrice(), i2->origPrice());
+    case Document::PriceDiff   : return doubleCompare((i1->price() - i1->origPrice()), (i2->price() - i2->origPrice()));
+    case Document::QuantityOrig: return i1->origQuantity() - i2->origQuantity();
+    case Document::QuantityDiff: return (i1->quantity() - i1->origQuantity()) - (i2->quantity() - i2->origQuantity());
     }
     return false;
 }
@@ -1812,9 +1866,9 @@ private:
 
 Document::ItemList DocumentProxyModel::sortItemList(const Document::ItemList &list) const
 {
-    qWarning("sort in: %d", list.count());
+    //qWarning("sort in: %d", list.count());
     Document::ItemList result(list);
     qStableSort(result.begin(), result.end(), SortItemListCompare(this, sortColumn(), sortOrder()));
-    qWarning("sort out: %d", result.count());
+    //qWarning("sort out: %d", result.count());
     return result;
 }

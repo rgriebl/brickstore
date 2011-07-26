@@ -64,9 +64,10 @@ protected:
 
     static QVector<QColor> s_shades;
     static QHash<BrickLink::Status, QIcon> s_status_icons;
-    static QCache<QString, QPixmap> s_tag_cache;
+    static QCache<qint64, QPixmap> s_tag_cache;
+    static QCache<int, QPixmap> s_stripe_cache;
 
-    static void clearTagCache();
+    static void clearCaches();
 };
 
 #endif

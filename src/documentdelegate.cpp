@@ -34,7 +34,8 @@
 
 QVector<QColor>                 DocumentDelegate::s_shades;
 QHash<BrickLink::Status, QIcon> DocumentDelegate::s_status_icons;
-QCache<QString, QPixmap>        DocumentDelegate::s_tag_cache;
+QCache<qint64, QPixmap>         DocumentDelegate::s_tag_cache;
+QCache<int, QPixmap>            DocumentDelegate::s_stripe_cache;
 
 DocumentDelegate::DocumentDelegate(Document *doc, DocumentProxyModel *view, QTableView *table)
     : QItemDelegate(view), m_doc(doc), m_view(view), m_table(table),
@@ -42,13 +43,14 @@ DocumentDelegate::DocumentDelegate(Document *doc, DocumentProxyModel *view, QTab
 {
     static bool first = true;
     if (first) {
-        qAddPostRoutine(clearTagCache);
+        qAddPostRoutine(clearCaches);
         first = false;
     }
 }
 
-void DocumentDelegate::clearTagCache()
+void DocumentDelegate::clearCaches()
 {
+    s_stripe_cache.clear();
     s_tag_cache.clear();
     s_status_icons.clear();
 }
@@ -114,6 +116,8 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
 
     QStyleOptionViewItemV4 option(option1);
     bool selected = (option.state & QStyle::State_Selected);
+    bool nocolor = !it->color();
+    bool noitem = !it->item();
 
     QPalette::ColorGroup cg = (option.state & QStyle::State_Enabled) ? QPalette::Normal : QPalette::Disabled;
     QColor normalbg = option.palette.color(cg, option.features & QStyleOptionViewItemV2::Alternate ? QPalette::AlternateBase : QPalette::Base);
@@ -152,11 +156,13 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
     if (!selected) {
         switch (idx.column()) {
         case Document::ItemType:
-            bg = shadeColor(it->itemType()->id(), 0.1f);
+            if (it->itemType())
+                bg = shadeColor(it->itemType()->id(), 0.1f);
             break;
 
         case Document::Category:
-            bg = shadeColor(it->category()->id(), 0.2f);
+            if (it->category())
+                bg = shadeColor(it->category()->id(), 0.2f);
             break;
 
         case Document::Quantity:
@@ -245,7 +251,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
         break;
     }
     case Document::Description:
-        if (it->item()->hasInventory())
+        if (it->item() && it->item()->hasInventory())
             tag.text = tr("Inv");
             tag.foreground = bg;
             tag.background = fg;
@@ -262,7 +268,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
         break;
     }
     case Document::Condition:
-        if (it->itemType()->hasSubConditions() && it->subCondition() != BrickLink::None)
+        if (it->itemType() && it->itemType()->hasSubConditions() && it->subCondition() != BrickLink::None)
             str = QString("%1<br /><i>%2</i>" ).arg(str, m_doc->subConditionLabel(it->subCondition()));
         break;
 
@@ -281,6 +287,22 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
     bg = Utility::gradientColor(normalbg, bg, bg.alphaF());
     bg.setAlpha(255);
     p->fillRect(option.rect, bg);
+    if (nocolor || noitem) {
+        int d = option.rect.height();
+        QPixmap *pix = s_stripe_cache[d];
+        if (!pix) {
+            pix = new QPixmap(2 * d, d);
+            pix->fill(Qt::transparent);
+            QPainter pixp(pix);
+            pixp.setPen(Qt::transparent);
+            pixp.setBrush(QColor(255, 0, 0, 64));
+            pixp.drawPolygon(QPolygon() << QPoint(d, 0) << QPoint(2 * d, 0) << QPoint(d, d) << QPoint(0, d));
+            pixp.end();
+            s_stripe_cache.insert(d, pix);
+        }
+        int offset = (option.features & QStyleOptionViewItemV2::Alternate) ? d : 0;
+        p->drawTiledPixmap(option.rect, *pix, QPoint(option.rect.left() - offset, 0));
+    }
 
     if (!tag.text.isEmpty()) {
         QFont font = option.font;
@@ -289,10 +311,11 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
         int itw = qMax(int(1.5f * fontmetrics.height()),
                        2 * fontmetrics.width(tag.text));
 
-        QString key = QLatin1String("%1-%2");
-        key = key.arg(itw).arg(tag.background.rgba());
+        union { struct { qint32 i1; qint32 i2; }; qint64 q; } key;
+        key.i1 = itw;
+        key.i2 = tag.background.rgba();
 
-        QPixmap *pix = s_tag_cache[key];
+        QPixmap *pix = s_tag_cache[key.q];
         if (!pix) {
             pix = new QPixmap(itw, itw);
             pix->fill(Qt::transparent);
@@ -304,7 +327,8 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
             grad.setColorAt(1, Qt::transparent);
 
             pixp.fillRect(pix->rect(), grad);
-            s_tag_cache.insert(key, pix);
+            pixp.end();
+            s_tag_cache.insert(key.q, pix);
         }
 
         int w = qMin(pix->width(), option.rect.width());

@@ -40,7 +40,7 @@
 #include "utility.h"
 
 
-static int naturalCompareNumbers(const char *&n1, const char *&n2)
+static int naturalCompareNumbers(const QChar *&n1, const QChar *&n2)
 {
     bool d1 = true, d2 = true;
     int result = 0;
@@ -52,53 +52,52 @@ static int naturalCompareNumbers(const char *&n1, const char *&n2)
             return -1;
         else if (!d2)
             return 1;
-        else if (*n1 != *n2 && !result)
-            result = *n1 - *n2;
+        else if (n1->digitValue() != n2->digitValue() && !result)
+            result = n1->digitValue() - n2->digitValue();
 
-        d1 = QChar(*++n1).isDigit();
-        d2 = QChar(*++n2).isDigit();
+        d1 = (++n1)->isDigit();
+        d2 = (++n2)->isDigit();
     }
 }
 
-int Utility::naturalCompare(const char *name1, const char *name2)
+int Utility::naturalCompare(const QString &name1, const QString &name2)
 {
-    if (name1 == name2)
-        return 0;
-    else if (!name1)
+    if (name1.isEmpty())
         return -1;
-    else if (!name2)
+    else if (name2.isEmpty())
         return 1;
 
     bool special = false;
-    const char *n1 = name1;
-    const char *n2 = name2;
+    const QChar *n1 = name1.constData();
+    const QChar *n2 = name2.constData();
 
     forever {
         // 1) skip white space
-        while (QChar(*n1).isSpace()) {
+        while (n1->isSpace()) {
             n1++;
             special = true;
         }
-        while (QChar(*n2).isSpace()) {
+        while (n2->isSpace()) {
             n2++;
             special = true;
         }
 
         // 2) check for numbers
-        if (QChar(*n1).isDigit() && QChar(*n2).isDigit()) {
+        if (n1->isDigit() && n2->isDigit()) {
             int d = naturalCompareNumbers(n1, n2);
             if (d)
                 return d;
             special = true;
         }
 
-        // 4) naturally the same -> let the ascii order decide
-        if (!*n1 && !*n2)
-            return special ? qstrcmp(name1, name2) : 0;
+
+        // 4) naturally the same -> let the unicode order decide
+        if (n1->isNull() && n2->isNull())
+            return special ? name1.compare(name2) : 0;
 
         // 5) found a difference
         if (*n1 != *n2)
-            return *n1 - *n2;
+            return n1->unicode() - n2->unicode();
 
         n1++; n2++;
     }

@@ -26,7 +26,7 @@ class QWidget;
 
 namespace Utility {
 
-int naturalCompare(const char *s1, const char *s2);
+int naturalCompare(const QString &s1, const QString &s2);
 
 QColor gradientColor(const QColor &c1, const QColor &c2, qreal f = 0.5f);
 QColor contrastColor(const QColor &c, qreal f = 0.04f);

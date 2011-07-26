@@ -303,15 +303,21 @@ public:
     QString filterExpression() const;
     QString filterToolTip() const;
 
+    void sort(int column, Qt::SortOrder order = Qt::AscendingOrder);
+
 protected:
     virtual bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
     virtual bool filterAcceptsColumn(int source_column, const QModelIndex &source_parent) const;
     virtual bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const;
 
 private:
+    static int compare(const Document::Item *i1, const Document::Item *i2, int sortColumn);
+
     QString         m_filter_expression;
     Filter::Parser *m_parser;
     QList<Filter>   m_filter;
+
+    int             m_lastSortColumn[2];
 
     friend class SortItemListCompare;
 };

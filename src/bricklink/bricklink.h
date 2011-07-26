@@ -354,7 +354,7 @@ public:
     bool stockroom() const             { return m_stockroom; }
     void setStockroom(bool s)          { m_stockroom = s; }
 
-    double weight() const              { return m_weight ? m_weight : m_item->weight() * m_quantity; }
+    double weight() const              { return m_weight ? m_weight : (m_item ? m_item->weight() * m_quantity : 0); }
     void setWeight(double w)           { m_weight = (float) w; }
 
     QString reserved() const           { return m_reserved; }
