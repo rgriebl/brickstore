@@ -59,6 +59,7 @@ public:
 protected slots:
     void windowUpdate(Window *win);
     void selectionUpdate(const Document::ItemList &list);
+    void currencyUpdate(const QString &ccode);
     virtual void topLevelChanged(bool);
     virtual void dockLocationChanged(Qt::DockWidgetArea);
 
@@ -88,12 +89,13 @@ public:
 protected slots:
     void windowUpdate(Window *win);
     void selectionUpdate(const Document::ItemList &list);
+    void currencyUpdate();
 
     void languageChange();
     void refresh();
 
 private:
-    QLabel *        m_text;
+    QLabel *m_text;
     PictureWidget *m_pic;
     QPointer<Window> m_win;
 };

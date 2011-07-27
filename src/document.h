@@ -201,7 +201,7 @@ public:
     void setErrorMask(quint64);
 
     QString currencyCode() const;
-    void setCurrencyCode(const QString &code);
+    void setCurrencyCode(const QString &code, qreal crate = qreal(1));
 
     static Document *fileNew();
     static Document *fileOpen();
@@ -259,9 +259,11 @@ private:
     void insertItemsDirect(ItemList &items, QVector<int> &positions);
     void removeItemsDirect(ItemList &items, QVector<int> &positions);
     void changeItemDirect(int position, Item &item);
+    void changeCurrencyDirect(const QString &ccode, qreal crate, double *&prices);
 
     friend class AddRemoveCmd;
     friend class ChangeCmd;
+    friend class CurrencyCmd;
 
     void updateErrors(Item *);
 

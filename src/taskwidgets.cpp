@@ -130,14 +130,23 @@ TaskPriceGuideWidget::TaskPriceGuideWidget(QWidget *parent)
 
 void TaskPriceGuideWidget::windowUpdate(Window *win)
 {
-    if (m_win)
+    if (m_win) {
         disconnect(m_win, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
+        disconnect(m_win->document(), SIGNAL(currencyCodeChanged(QString)), this, SLOT(currencyUpdate(const QString &)));
+    }
     m_win = win;
-    if (m_win)
+    if (m_win) {
         connect(m_win, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
+        connect(m_win->document(), SIGNAL(currencyCodeChanged(QString)), this, SLOT(currencyUpdate(const QString &)));
+    }
 
     setCurrencyCode(m_win ? m_win->document()->currencyCode() : Config::inst()->defaultCurrencyCode());
     selectionUpdate(m_win ? m_win->selection() : Document::ItemList());
+}
+
+void TaskPriceGuideWidget::currencyUpdate(const QString &ccode)
+{
+    setCurrencyCode(ccode);
 }
 
 void TaskPriceGuideWidget::selectionUpdate(const Document::ItemList &list)
@@ -226,12 +235,21 @@ TaskInfoWidget::TaskInfoWidget(QWidget *parent)
 
 void TaskInfoWidget::windowUpdate(Window *win)
 {
-    if (m_win)
+    if (m_win) {
         disconnect(m_win, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
+        disconnect(m_win->document(), SIGNAL(currencyCodeChanged(QString)), this, SLOT(currencyUpdate(const QString &)));
+    }
     m_win = win;
-    if (m_win)
+    if (m_win) {
         connect(m_win, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
+        connect(m_win->document(), SIGNAL(currencyCodeChanged(QString)), this, SLOT(currencyUpdate()));
+    }
 
+    selectionUpdate(m_win ? m_win->selection() : Document::ItemList());
+}
+
+void TaskInfoWidget::currencyUpdate()
+{
     selectionUpdate(m_win ? m_win->selection() : Document::ItemList());
 }
 

@@ -1,5 +1,7 @@
 #include <QComboBox>
 #include <QLabel>
+#include <QLineEdit>
+#include <QValidator>
 
 #include "currency.h"
 
@@ -29,7 +31,10 @@ ChangeCurrencyDialog::ChangeCurrencyDialog(const QString &from, const QString &t
 
     w_labelEcb->installEventFilter(this);
     w_labelCustom->installEventFilter(this);
-    qWarning("to: %s", qPrintable(m_to));
+
+    w_editCustom->setValidator(new QDoubleValidator(0, 100000, 3, w_editCustom));
+    w_editCustom->setText(QString::number(double(1), 'f', 3));
+
     ratesUpdated();
 }
 
@@ -66,15 +71,18 @@ void ChangeCurrencyDialog::currencyChanged(const QString &to)
 {
     qreal rateFrom = Currency::inst()->rate(m_from);
     qreal rateTo = Currency::inst()->rate(to);
-    qreal rate = 1;
+    m_rate = 1;
     if (rateFrom && rateTo)
-        rate = rateTo / rateFrom;
+        m_rate = rateTo / rateFrom;
 
-    w_labelEcb->setText(m_labelEcbFormat.arg(to).arg(rate, 0, 'f', 3));
+    w_labelEcb->setText(m_labelEcbFormat.arg(to).arg(m_rate, 0, 'f', 3));
     w_labelCustom->setText(m_labelCustomFormat.arg(to));
 }
 
 double ChangeCurrencyDialog::exchangeRate() const
 {
-    return m_rate;
+    double rate = m_rate;
+    if (w_radioCustom->isChecked())
+        rate = w_editCustom->text().toDouble();
+    return rate;
 }

@@ -1,7 +1,8 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>AddItemDialog</class>
- <widget class="QWidget" name="AddItemDialog" >
-  <property name="geometry" >
+ <widget class="QWidget" name="AddItemDialog">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
@@ -9,21 +10,21 @@
     <height>580</height>
    </rect>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>Add Items to %1</string>
   </property>
-  <layout class="QVBoxLayout" >
+  <layout class="QVBoxLayout">
    <item>
-    <layout class="QHBoxLayout" >
+    <layout class="QHBoxLayout">
      <item>
-      <widget class="SelectItem" native="1" name="w_select_item" >
-       <property name="sizePolicy" >
-        <sizepolicy vsizetype="Expanding" hsizetype="MinimumExpanding" >
+      <widget class="SelectItem" name="w_select_item" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
          <horstretch>100</horstretch>
          <verstretch>100</verstretch>
         </sizepolicy>
        </property>
-       <property name="minimumSize" >
+       <property name="minimumSize">
         <size>
          <width>50</width>
          <height>50</height>
@@ -32,9 +33,9 @@
       </widget>
      </item>
      <item>
-      <widget class="SelectColor" native="1" name="w_select_color" >
-       <property name="sizePolicy" >
-        <sizepolicy vsizetype="Expanding" hsizetype="MinimumExpanding" >
+      <widget class="SelectColor" name="w_select_color" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
          <horstretch>10</horstretch>
          <verstretch>100</verstretch>
         </sizepolicy>
@@ -44,187 +45,187 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" >
+    <layout class="QHBoxLayout">
      <item>
-      <widget class="PictureWidget" name="w_picture" >
-       <property name="frameShape" >
+      <widget class="PictureWidget" name="w_picture">
+       <property name="frameShape">
         <enum>QFrame::StyledPanel</enum>
        </property>
-       <property name="frameShadow" >
+       <property name="frameShadow">
         <enum>QFrame::Raised</enum>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="PriceGuideWidget" name="w_price_guide" >
-       <property name="frameShape" >
+      <widget class="PriceGuideWidget" name="w_price_guide">
+       <property name="frameShape">
         <enum>QFrame::StyledPanel</enum>
        </property>
-       <property name="frameShadow" >
+       <property name="frameShadow">
         <enum>QFrame::Raised</enum>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QSplitter" name="splitter" >
-       <property name="orientation" >
+      <widget class="QSplitter" name="splitter">
+       <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
-       <property name="childrenCollapsible" >
+       <property name="childrenCollapsible">
         <bool>false</bool>
        </property>
-       <widget class="AppearsInWidget" native="1" name="w_appears_in" />
-       <widget class="QWidget" name="layoutWidget" >
-        <layout class="QGridLayout" >
-         <item row="0" column="0" >
-          <widget class="QLabel" name="label" >
-           <property name="text" >
+       <widget class="AppearsInWidget" name="w_appears_in" native="true"/>
+       <widget class="QWidget" name="layoutWidget">
+        <layout class="QGridLayout">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label">
+           <property name="text">
             <string>&amp;Quantity</string>
            </property>
-           <property name="buddy" >
+           <property name="buddy">
             <cstring>w_qty</cstring>
            </property>
           </widget>
          </item>
-         <item row="0" column="1" >
-          <widget class="QSpinBox" name="w_qty" >
-           <property name="maximum" >
+         <item row="0" column="1">
+          <widget class="QSpinBox" name="w_qty">
+           <property name="maximum">
             <number>2000000000</number>
            </property>
           </widget>
          </item>
-         <item row="0" column="2" >
-          <widget class="QLabel" name="w_bulk_label" >
-           <property name="text" >
+         <item row="0" column="2">
+          <widget class="QLabel" name="w_bulk_label">
+           <property name="text">
             <string>&amp;Bulk</string>
            </property>
-           <property name="buddy" >
+           <property name="buddy">
             <cstring>w_bulk</cstring>
            </property>
           </widget>
          </item>
-         <item row="0" column="3" >
-          <widget class="QSpinBox" name="w_bulk" >
-           <property name="minimum" >
+         <item row="0" column="3">
+          <widget class="QSpinBox" name="w_bulk">
+           <property name="minimum">
             <number>1</number>
            </property>
-           <property name="maximum" >
+           <property name="maximum">
             <number>2000000000</number>
            </property>
-           <property name="value" >
+           <property name="value">
             <number>1</number>
            </property>
           </widget>
          </item>
-         <item row="1" column="0" >
-          <widget class="QLabel" name="w_label_currency" >
-           <property name="text" >
+         <item row="1" column="0">
+          <widget class="QLabel" name="w_label_currency">
+           <property name="text">
             <string>&amp;Price (%1)</string>
            </property>
-           <property name="buddy" >
+           <property name="buddy">
             <cstring>w_price</cstring>
            </property>
           </widget>
          </item>
-         <item row="1" column="1" >
-          <widget class="QLineEdit" name="w_price" />
+         <item row="1" column="1">
+          <widget class="QLineEdit" name="w_price"/>
          </item>
-         <item row="1" column="2" >
-          <widget class="QLabel" name="label_4" >
-           <property name="text" >
+         <item row="1" column="2">
+          <widget class="QLabel" name="label_4">
+           <property name="text">
             <string>Total</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="3" >
-          <widget class="QLineEdit" name="w_total" >
-           <property name="readOnly" >
+         <item row="1" column="3">
+          <widget class="QLineEdit" name="w_total">
+           <property name="readOnly">
             <bool>true</bool>
            </property>
           </widget>
          </item>
-         <item row="2" column="0" >
-          <widget class="QLabel" name="w_tier_label" >
-           <property name="text" >
+         <item row="2" column="0">
+          <widget class="QLabel" name="w_tier_label">
+           <property name="text">
             <string>&amp;Tiered prices</string>
            </property>
-           <property name="buddy" >
+           <property name="buddy">
             <cstring>w_radio_percent</cstring>
            </property>
           </widget>
          </item>
-         <item rowspan="2" row="2" column="1" colspan="3" >
-          <layout class="QGridLayout" >
-           <item row="0" column="0" >
-            <widget class="QSpinBox" name="w_tier_qty_0" />
+         <item row="2" column="1" rowspan="2" colspan="3">
+          <layout class="QGridLayout">
+           <item row="0" column="0">
+            <widget class="QSpinBox" name="w_tier_qty_0"/>
            </item>
-           <item row="0" column="1" >
-            <widget class="QSpinBox" name="w_tier_qty_1" />
+           <item row="0" column="1">
+            <widget class="QSpinBox" name="w_tier_qty_1"/>
            </item>
-           <item row="0" column="2" >
-            <widget class="QSpinBox" name="w_tier_qty_2" />
+           <item row="0" column="2">
+            <widget class="QSpinBox" name="w_tier_qty_2"/>
            </item>
-           <item row="1" column="0" >
-            <widget class="QLineEdit" name="w_tier_price_0" />
+           <item row="1" column="0">
+            <widget class="QLineEdit" name="w_tier_price_0"/>
            </item>
-           <item row="1" column="1" >
-            <widget class="QLineEdit" name="w_tier_price_1" />
+           <item row="1" column="1">
+            <widget class="QLineEdit" name="w_tier_price_1"/>
            </item>
-           <item row="1" column="2" >
-            <widget class="QLineEdit" name="w_tier_price_2" />
+           <item row="1" column="2">
+            <widget class="QLineEdit" name="w_tier_price_2"/>
            </item>
           </layout>
          </item>
-         <item row="3" column="0" >
-          <layout class="QHBoxLayout" >
+         <item row="3" column="0">
+          <layout class="QHBoxLayout">
            <item>
-            <widget class="QRadioButton" name="w_radio_percent" >
-             <property name="text" >
+            <widget class="QRadioButton" name="w_radio_percent">
+             <property name="text">
               <string>%</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QRadioButton" name="w_radio_currency" >
-             <property name="text" >
+            <widget class="QRadioButton" name="w_radio_currency">
+             <property name="text">
               <string>%1</string>
              </property>
             </widget>
            </item>
           </layout>
          </item>
-         <item row="4" column="0" >
-          <widget class="QLabel" name="label_2" >
-           <property name="text" >
-            <string>C&amp;ondition</string>
+         <item row="4" column="0">
+          <widget class="QLabel" name="label_2">
+           <property name="text">
+            <string>Condition</string>
            </property>
-           <property name="buddy" >
+           <property name="buddy">
             <cstring>w_radio_new</cstring>
            </property>
           </widget>
          </item>
-         <item row="4" column="1" colspan="3" >
-          <layout class="QHBoxLayout" >
+         <item row="4" column="1" colspan="3">
+          <layout class="QHBoxLayout">
            <item>
-            <widget class="QRadioButton" name="w_radio_new" >
-             <property name="text" >
+            <widget class="QRadioButton" name="w_radio_new">
+             <property name="text">
               <string>&amp;New</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QRadioButton" name="w_radio_used" >
-             <property name="text" >
+            <widget class="QRadioButton" name="w_radio_used">
+             <property name="text">
               <string>&amp;Used</string>
              </property>
             </widget>
            </item>
            <item>
             <spacer>
-             <property name="orientation" >
+             <property name="orientation">
               <enum>Qt::Horizontal</enum>
              </property>
-             <property name="sizeHint" stdset="0" >
+             <property name="sizeHint" stdset="0">
               <size>
                <width>271</width>
                <height>20</height>
@@ -234,41 +235,41 @@
            </item>
           </layout>
          </item>
-         <item row="5" column="0" >
-          <widget class="QLabel" name="w_comments_label" >
-           <property name="text" >
+         <item row="5" column="0">
+          <widget class="QLabel" name="w_comments_label">
+           <property name="text">
             <string>Co&amp;mments</string>
            </property>
-           <property name="buddy" >
+           <property name="buddy">
             <cstring>w_comments</cstring>
            </property>
           </widget>
          </item>
-         <item row="5" column="1" colspan="3" >
-          <widget class="QLineEdit" name="w_comments" />
+         <item row="5" column="1" colspan="3">
+          <widget class="QLineEdit" name="w_comments"/>
          </item>
-         <item row="6" column="0" >
-          <widget class="QLabel" name="w_remarks_label" >
-           <property name="text" >
+         <item row="6" column="0">
+          <widget class="QLabel" name="w_remarks_label">
+           <property name="text">
             <string>&amp;Remarks</string>
            </property>
-           <property name="buddy" >
+           <property name="buddy">
             <cstring>w_remarks</cstring>
            </property>
           </widget>
          </item>
-         <item row="6" column="1" colspan="3" >
-          <widget class="QLineEdit" name="w_remarks" />
+         <item row="6" column="1" colspan="3">
+          <widget class="QLineEdit" name="w_remarks"/>
          </item>
-         <item row="7" column="1" >
+         <item row="7" column="1">
           <spacer>
-           <property name="orientation" >
+           <property name="orientation">
             <enum>Qt::Vertical</enum>
            </property>
-           <property name="sizeType" >
+           <property name="sizeType">
             <enum>QSizePolicy::MinimumExpanding</enum>
            </property>
-           <property name="sizeHint" stdset="0" >
+           <property name="sizeHint" stdset="0">
             <size>
              <width>20</width>
              <height>0</height>
@@ -283,49 +284,49 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" >
+    <layout class="QHBoxLayout">
      <item>
-      <widget class="QCheckBox" name="w_toggle_picture" >
-       <property name="icon" >
-        <iconset>
+      <widget class="QCheckBox" name="w_toggle_picture">
+       <property name="icon">
+        <iconset resource="brickstore.qrc">
          <normaloff>:/images/sidebar/info.png</normaloff>:/images/sidebar/info.png</iconset>
        </property>
-       <property name="checked" >
+       <property name="checked">
         <bool>true</bool>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QCheckBox" name="w_toggle_price_guide" >
-       <property name="icon" >
-        <iconset>
+      <widget class="QCheckBox" name="w_toggle_price_guide">
+       <property name="icon">
+        <iconset resource="brickstore.qrc">
          <normaloff>:/images/sidebar/priceguide.png</normaloff>:/images/sidebar/priceguide.png</iconset>
        </property>
-       <property name="checked" >
+       <property name="checked">
         <bool>true</bool>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QCheckBox" name="w_toggle_appears_in" >
-       <property name="icon" >
-        <iconset>
+      <widget class="QCheckBox" name="w_toggle_appears_in">
+       <property name="icon">
+        <iconset resource="brickstore.qrc">
          <normaloff>:/images/sidebar/appearsin.png</normaloff>:/images/sidebar/appearsin.png</iconset>
        </property>
-       <property name="checked" >
+       <property name="checked">
         <bool>true</bool>
        </property>
       </widget>
      </item>
      <item>
       <spacer>
-       <property name="orientation" >
+       <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
-       <property name="sizeType" >
+       <property name="sizeType">
         <enum>QSizePolicy::Expanding</enum>
        </property>
-       <property name="sizeHint" stdset="0" >
+       <property name="sizeHint" stdset="0">
         <size>
          <width>10000</width>
          <height>20</height>
@@ -334,21 +335,21 @@
       </spacer>
      </item>
      <item>
-      <widget class="QCheckBox" name="w_merge" >
-       <property name="text" >
-        <string>&amp;Consolidate with &amp;list</string>
+      <widget class="QCheckBox" name="w_merge">
+       <property name="text">
+        <string>&amp;Consolidate with list</string>
        </property>
       </widget>
      </item>
      <item>
       <spacer>
-       <property name="orientation" >
+       <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
-       <property name="sizeType" >
+       <property name="sizeType">
         <enum>QSizePolicy::Fixed</enum>
        </property>
-       <property name="sizeHint" stdset="0" >
+       <property name="sizeHint" stdset="0">
         <size>
          <width>11</width>
          <height>10</height>
@@ -357,17 +358,17 @@
       </spacer>
      </item>
      <item>
-      <widget class="QDialogButtonBox" name="w_buttons" >
-       <property name="sizePolicy" >
-        <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+      <widget class="QDialogButtonBox" name="w_buttons">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <property name="orientation" >
+       <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
-       <property name="standardButtons" >
+       <property name="standardButtons">
         <set>QDialogButtonBox::Close</set>
        </property>
       </widget>
@@ -408,7 +409,9 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="brickstore.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>w_toggle_appears_in</sender>
@@ -416,11 +419,11 @@
    <receiver>w_appears_in</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>91</x>
      <y>558</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>165</x>
      <y>524</y>
     </hint>
@@ -432,11 +435,11 @@
    <receiver>w_picture</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>37</x>
      <y>558</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>22</x>
      <y>524</y>
     </hint>
@@ -448,11 +451,11 @@
    <receiver>w_price_guide</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>64</x>
      <y>558</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>48</x>
      <y>524</y>
     </hint>
@@ -464,11 +467,11 @@
    <receiver>AddItemDialog</receiver>
    <slot>close()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>699</x>
      <y>552</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>556</x>
      <y>577</y>
     </hint>

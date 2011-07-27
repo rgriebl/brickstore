@@ -26,6 +26,7 @@
 #include <QStyleOptionFrameV2>
 #include <QStyle>
 #include <QApplication>
+#include <QScrollBar>
 
 #include "documentdelegate.h"
 #include "selectitemdialog.h"
@@ -307,6 +308,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
             s_stripe_cache.insert(d, pix);
         }
         int offset = (option.features & QStyleOptionViewItemV2::Alternate) ? d : 0;
+        offset -= m_table->horizontalScrollBar()->value();
         p->drawTiledPixmap(option.rect, *pix, QPoint(option.rect.left() - offset, 0));
     }
 

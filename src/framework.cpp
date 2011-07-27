@@ -101,25 +101,20 @@ protected:
             QRect msgr = rect().adjusted(6, 0, -6, 0);
             p.drawText(msgr, Qt::AlignLeading | Qt::AlignVCenter | Qt::TextSingleLine, msg);
         } else {
+#ifdef Q_OS_MACX
+            QColor lineColor(112, 112, 112));
+            int offset = 0;
+#else
+            QColor lineColor = palette().color(QPalette::Midlight);
+            int offset = 2;
+#endif
+            p.setPen(lineColor);
+
             foreach (QWidget *w, findChildren<QWidget *>()) {
                 if (qobject_cast<QSizeGrip *>(w))
                     continue;
                 QRect r = w->geometry();
-                r.adjust(-3, 0, 3, 0);
-                r.setTop(0);
-                r.setBottom(height() - 1);
-#ifdef Q_OS_MACX
-                qWarning() << "dark" << palette().color(QPalette::Dark);
-                qWarning() << "shadow" << palette().color(QPalette::Shadow);
-                qWarning() << "mid" << palette().color(QPalette::Mid);
-                p.setPen(QColor(112, 112, 112));
-#else
-                p.setPen(palette().color(QPalette::Shadow));
-#endif
-                p.drawLine(r.topLeft(), r.bottomLeft());
-//                p.setPen(palette().light().color());
-//                p.drawLine(r.topRight(), r.bottomRight());
-                qWarning() << "DRAWING at" << r << " : " << w;
+                p.drawLine(r.left() - 3, offset, r.left() - 3, height() - offset - 1);
             }
         }
     }
@@ -690,6 +685,7 @@ void FrameWork::createStatusBar()
     m_st_currency = new QToolButton();
     m_st_currency->setPopupMode(QToolButton::InstantPopup);
     m_st_currency->setToolButtonStyle(Qt::ToolButtonTextOnly);
+    m_st_currency->setAutoRaise(true);
     QWidget *st_valcur = new QWidget();
     QHBoxLayout *l = new QHBoxLayout(st_valcur);
     l->setContentsMargins(0, 0, 0, 0);
@@ -718,8 +714,7 @@ void FrameWork::changeDocumentCurrency(QAction *a)
             double rate = d.exchangeRate();
 
             if (rate > 0) {
-                m_current_window->document()->setCurrencyCode(a->text());
-                //TODO: fix prices
+                m_current_window->document()->setCurrencyCode(a->text(), rate);
             }
         }
     }

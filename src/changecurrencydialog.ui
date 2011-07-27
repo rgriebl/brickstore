@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>422</width>
+    <width>433</width>
     <height>178</height>
    </rect>
   </property>
@@ -19,6 +19,9 @@
    </property>
    <item>
     <layout class="QFormLayout" name="formLayout">
+     <property name="fieldGrowthPolicy">
+      <enum>QFormLayout::ExpandingFieldsGrow</enum>
+     </property>
      <item row="0" column="0">
       <widget class="QLabel" name="label">
        <property name="text">
@@ -65,7 +68,7 @@
      <item row="2" column="1">
       <layout class="QVBoxLayout" name="verticalLayout">
        <property name="spacing">
-        <number>0</number>
+        <number>3</number>
        </property>
        <item>
         <widget class="QWidget" name="widgetEcb" native="true">
@@ -86,11 +89,7 @@
           <item>
            <widget class="QLabel" name="w_labelEcb">
             <property name="text">
-             <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Lucida Grande'; font-size:13pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;From the &lt;a href=&quot;http://www.ecb.eu&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;ECB&lt;/span&gt;&lt;/a&gt;: %1 1 equals %2 %3&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string>From the &lt;a href=&quot;http://www.ecb.eu&quot;&gt;ECB&lt;/a&gt;: %1 1 equals %2 %3</string>
             </property>
            </widget>
           </item>
@@ -280,7 +279,7 @@ p, li { white-space: pre-wrap; }
   <connection>
    <sender>w_radioCustom</sender>
    <signal>toggled(bool)</signal>
-   <receiver>widgetCustom</receiver>
+   <receiver>w_editCustom</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -288,8 +287,8 @@ p, li { white-space: pre-wrap; }
      <y>114</y>
     </hint>
     <hint type="destinationlabel">
-     <x>384</x>
-     <y>122</y>
+     <x>312</x>
+     <y>87</y>
     </hint>
    </hints>
   </connection>

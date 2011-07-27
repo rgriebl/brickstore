@@ -44,7 +44,6 @@
 #include "document.h"
 #include "document_p.h"
 
-namespace {
 
 template <typename T> static inline T pack(typename T::const_reference item)
 {
@@ -55,9 +54,45 @@ template <typename T> static inline T pack(typename T::const_reference item)
 
 enum {
     CID_Change,
-    CID_AddRemove
+    CID_AddRemove,
+    CID_Currency
 };
 
+
+CurrencyCmd::CurrencyCmd(Document *doc, const QString &ccode, qreal crate)
+    : QUndoCommand(qApp->translate("CurrencyCmd", "Changed currency"))
+    , m_doc(doc)
+    , m_ccode(ccode)
+    , m_crate(crate)
+    , m_prices(0)
+{ }
+
+CurrencyCmd::~CurrencyCmd()
+{
+    delete [] m_prices;
+}
+
+int CurrencyCmd::id() const
+{
+    return CID_Currency;
+}
+
+void CurrencyCmd::redo()
+{
+    Q_ASSERT(!m_prices);
+
+    QString oldccode = m_doc->currencyCode();
+    m_doc->changeCurrencyDirect(m_ccode, m_crate, m_prices);
+    m_ccode = oldccode;
+}
+
+void CurrencyCmd::undo()
+{
+    Q_ASSERT(m_prices);
+
+    QString oldccode = m_doc->currencyCode();
+    m_doc->changeCurrencyDirect(m_ccode, m_crate, m_prices);
+    m_ccode = oldccode;
 }
 
 
@@ -550,6 +585,50 @@ void Document::changeItemDirect(int position, Item &item)
     emit itemsChanged(pack<ItemList>(olditem), grave);
 }
 
+void Document::changeCurrencyDirect(const QString &ccode, qreal crate, double *&prices)
+{
+    m_currencycode = ccode;
+
+    if (crate != qreal(1)) {
+        bool createPrices = (prices == 0);
+        if (createPrices)
+            prices = new double[5 * m_items.count()];
+
+        for (int i = 0; i < m_items.count(); ++i) {
+            Item *item = m_items[i];
+            if (createPrices) {
+                prices[i * 5] = item->origPrice();
+                prices[i * 5 + 1] = item->price();
+                prices[i * 5 + 2] = item->tierPrice(0);
+                prices[i * 5 + 3] = item->tierPrice(1);
+                prices[i * 5 + 4] = item->tierPrice(2);
+
+                item->setOrigPrice(prices[i * 5] * crate);
+                item->setPrice(prices[i * 5 + 1] * crate);
+                item->setTierPrice(0, prices[i * 5 + 2] * crate);
+                item->setTierPrice(1, prices[i * 5 + 3] * crate);
+                item->setTierPrice(2, prices[i * 5 + 4] * crate);
+            } else {
+                item->setOrigPrice(prices[i * 5]);
+                item->setPrice(prices[i * 5 + 1]);
+                item->setTierPrice(0, prices[i * 5 + 2]);
+                item->setTierPrice(1, prices[i * 5 + 3]);
+                item->setTierPrice(2, prices[i * 5 + 4]);
+            }
+        }
+
+        if (!createPrices) {
+            delete [] prices;
+            prices = 0;
+        }
+
+        emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
+        emit statisticsChanged();
+        emit itemsChanged(m_items, false);
+    }
+    emit currencyCodeChanged(m_currencycode);
+}
+
 void Document::updateErrors(Item *item)
 {
     quint64 errors = 0;
@@ -590,13 +669,10 @@ QString Document::currencyCode() const
     return m_currencycode;
 }
 
-void Document::setCurrencyCode(const QString &code)
+void Document::setCurrencyCode(const QString &ccode, qreal crate)
 {
-    if (code != m_currencycode) {
-        m_currencycode = code;
-        emit currencyCodeChanged(code);
-        emit statisticsChanged();
-    }
+    if (ccode != m_currencycode)
+        m_undo->push(new CurrencyCmd(this, ccode, crate));
 }
 
 Document *Document::fileNew()

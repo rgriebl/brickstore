@@ -25,11 +25,11 @@ public:
     AddRemoveCmd(Type t, Document *doc, const QVector<int> &positions, const Document::ItemList &items, bool merge_allowed = false);
     ~AddRemoveCmd();
 
-    virtual int id() const;
+    int id() const;
 
-    virtual void redo();
-    virtual void undo();
-    virtual bool mergeWith(const QUndoCommand *other);
+    void redo();
+    void undo();
+    bool mergeWith(const QUndoCommand *other);
 
     static QString genDesc(bool is_add, uint count);
 
@@ -44,19 +44,36 @@ private:
 class ChangeCmd : public QUndoCommand {
 public:
     ChangeCmd(Document *doc, int position, const Document::Item &item, bool merge_allowed = false);
-    virtual ~ChangeCmd();
+    ~ChangeCmd();
 
-    virtual int id() const;
+    int id() const;
 
-    virtual void redo();
-    virtual void undo();
-    virtual bool mergeWith(const QUndoCommand *other);
+    void redo();
+    void undo();
+    bool mergeWith(const QUndoCommand *other);
 
 private:
     Document *      m_doc;
     int             m_position;
     Document::Item  m_item;
     bool            m_merge_allowed;
+};
+
+class CurrencyCmd : public QUndoCommand {
+public:
+    CurrencyCmd(Document *doc, const QString &ccode, qreal crate);
+    ~CurrencyCmd();
+
+    virtual int id() const;
+
+    void redo();
+    void undo();
+
+private:
+    Document * m_doc;
+    QString    m_ccode;
+    qreal      m_crate;
+    double *   m_prices; // m_items.count() * 5 (price, origPrice, tierPrice * 3)
 };
 
 #endif
