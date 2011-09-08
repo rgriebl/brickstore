@@ -102,7 +102,7 @@ protected:
             p.drawText(msgr, Qt::AlignLeading | Qt::AlignVCenter | Qt::TextSingleLine, msg);
         } else {
 #ifdef Q_OS_MACX
-            QColor lineColor(112, 112, 112));
+            QColor lineColor(112, 112, 112);
             int offset = 0;
 #else
             QColor lineColor = palette().color(QPalette::Midlight);
