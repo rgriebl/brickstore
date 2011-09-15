@@ -26,6 +26,7 @@
 #include <QBuffer>
 #include <QXmlStreamReader>
 
+#include "application.h"
 #include "config.h"
 #include "utility.h"
 #include "currency.h"
@@ -154,16 +155,19 @@ void Currency::updateRates()
         connect(m_http, SIGNAL(done(bool)), this, SLOT(updateRatesDone(bool)));
         m_buffer = new QBuffer(m_http);
     }
-    m_buffer->open(QIODevice::ReadWrite | QIODevice::Truncate);
-    m_http->setHost(QLatin1String("www.ecb.europa.eu"));
-    m_http->get(QLatin1String("/stats/eurofxref/eurofxref-daily.xml"), m_buffer);
+    if (Application::inst()->isOnline()) {
+        m_buffer->open(QIODevice::ReadWrite | QIODevice::Truncate);
+        m_http->setHost(QLatin1String("www.ecb.europa.eu"));
+        m_http->get(QLatin1String("/stats/eurofxref/eurofxref-daily.xml"), m_buffer);
+    }
 }
 
 void Currency::updateRatesDone(bool error)
 {
     m_buffer->close();
     if (error) {
-        MessageBox::warning(FrameWork::inst(), tr("There was an error downloading the exchange rates from the ECB server:<br>%2").arg(m_http->errorString()));
+        if (Application::inst()->isOnline())
+            MessageBox::warning(FrameWork::inst(), tr("There was an error downloading the exchange rates from the ECB server:<br>%2").arg(m_http->errorString()));
     } else {
         QXmlStreamReader reader(m_buffer->data());
         QMap<QString, qreal> newRates;

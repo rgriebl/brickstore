@@ -237,7 +237,7 @@ void TaskInfoWidget::windowUpdate(Window *win)
 {
     if (m_win) {
         disconnect(m_win, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
-        disconnect(m_win->document(), SIGNAL(currencyCodeChanged(QString)), this, SLOT(currencyUpdate(const QString &)));
+        disconnect(m_win->document(), SIGNAL(currencyCodeChanged(QString)), this, SLOT(currencyUpdate()));
     }
     m_win = win;
     if (m_win) {

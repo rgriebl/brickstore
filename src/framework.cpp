@@ -59,15 +59,18 @@
 #include "framework.h"
 
 
-namespace {
-
 enum ProgressItem {
     PGI_PriceGuide,
     PGI_Picture
 };
 
-} // namespace
-
+enum {
+    NeedLotId = 1,
+    NeedInventory = 2,
+    NeedSubCondition = 4,
+    NeedNetwork = 8,
+    NeedDocument = 16
+};
 
 class NoFrameStatusBar : public QStatusBar {
 public:
@@ -413,7 +416,7 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
 
     m_running = true;
 
-    connectAllActions(false, 0);    // init enabled/disabled status of document actions
+    updateActions();    // init enabled/disabled status of document actions
     connectWindow(0);
 
     // we need to show now, since most X11 window managers and Mac OS X with
@@ -608,9 +611,7 @@ void FrameWork::translateActions()
     };
 
     for (atptr = actiontable; atptr->m_name; atptr++) {
-        QAction *a = findAction(atptr->m_name);
-
-        if (a) {
+        if (QAction *a = findAction(atptr->m_name)) {
             if (!atptr->m_text.isNull())
                 a->setText(atptr->m_text);
             if (!atptr->m_shortcut.isNull()) {
@@ -823,17 +824,26 @@ bool FrameWork::setupToolBar(QToolBar *t, const QList<QByteArray> &a_names)
     return true;
 }
 
-inline static QMenu *newQMenu(QWidget *parent, const char *name)
+inline static QMenu *newQMenu(QWidget *parent, const char *name, quint32 flags = 0)
 {
     QMenu *m = new QMenu(parent);
     m->menuAction()->setObjectName(QLatin1String(name));
+    if (flags)
+        m->menuAction()->setProperty("bsFlags", flags);
     return m;
 }
 
-inline static QAction *newQAction(QObject *parent, const char *name, bool toggle = false, QObject *receiver = 0, const char *slot = 0)
+static inline quint32 NeedSelection(quint8 minSel, quint8 maxSel = 0)
+{
+    return NeedDocument | (quint32(minSel) << 24) | (quint32(maxSel) << 16);
+}
+
+inline static QAction *newQAction(QObject *parent, const char *name, quint32 flags = 0, bool toggle = false, QObject *receiver = 0, const char *slot = 0)
 {
     QAction *a = new QAction(parent);
     a->setObjectName(QLatin1String(name));
+    if (flags)
+        a->setProperty("bsFlags", flags);
     if (toggle)
         a->setCheckable(true);
     if (receiver && slot)
@@ -856,159 +866,163 @@ void FrameWork::createActions()
     QMenu *m;
 
 
-    a = newQAction(this, "file_new", false, this, SLOT(fileNew()));
-    a = newQAction(this, "file_open", false, this, SLOT(fileOpen()));
+    a = newQAction(this, "file_new", 0, false, this, SLOT(fileNew()));
+    a = newQAction(this, "file_open", 0, false, this, SLOT(fileOpen()));
 
     m = new RecentMenu(this, this);
     m->menuAction()->setObjectName("file_open_recent");
     connect(m, SIGNAL(openRecent(int)), this, SLOT(fileOpenRecent(int)));
 
-    (void) newQAction(this, "file_save");
-    (void) newQAction(this, "file_saveas");
-    (void) newQAction(this, "file_print");
-    (void) newQAction(this, "file_print_pdf");
+    (void) newQAction(this, "file_save", NeedDocument);
+    (void) newQAction(this, "file_saveas", NeedDocument);
+    (void) newQAction(this, "file_print", NeedDocument);
+    (void) newQAction(this, "file_print_pdf", NeedDocument);
 
     m = newQMenu(this, "file_import");
-    m->addAction(newQAction(this, "file_import_bl_inv", false, this, SLOT(fileImportBrickLinkInventory())));
-    m->addAction(newQAction(this, "file_import_bl_xml", false, this, SLOT(fileImportBrickLinkXML())));
-    m->addAction(newQAction(this, "file_import_bl_order", false, this, SLOT(fileImportBrickLinkOrder())));
-    m->addAction(newQAction(this, "file_import_bl_store_inv", false, this, SLOT(fileImportBrickLinkStore())));
-    m->addAction(newQAction(this, "file_import_bl_cart", false, this, SLOT(fileImportBrickLinkCart())));
-    m->addAction(newQAction(this, "file_import_peeron_inv", false, this, SLOT(fileImportPeeronInventory())));
-    m->addAction(newQAction(this, "file_import_ldraw_model", false, this, SLOT(fileImportLDrawModel())));
+    m->addAction(newQAction(this, "file_import_bl_inv", 0, false, this, SLOT(fileImportBrickLinkInventory())));
+    m->addAction(newQAction(this, "file_import_bl_xml", 0, false, this, SLOT(fileImportBrickLinkXML())));
+    m->addAction(newQAction(this, "file_import_bl_order", NeedNetwork, false, this, SLOT(fileImportBrickLinkOrder())));
+    m->addAction(newQAction(this, "file_import_bl_store_inv", NeedNetwork, false, this, SLOT(fileImportBrickLinkStore())));
+    m->addAction(newQAction(this, "file_import_bl_cart", NeedNetwork, false, this, SLOT(fileImportBrickLinkCart())));
+    m->addAction(newQAction(this, "file_import_peeron_inv", 0, false, this, SLOT(fileImportPeeronInventory())));
+    m->addAction(newQAction(this, "file_import_ldraw_model", 0, false, this, SLOT(fileImportLDrawModel())));
 
     m = newQMenu(this, "file_export");
-    m->addAction(newQAction(this, "file_export_bl_xml"));
-    m->addAction(newQAction(this, "file_export_bl_xml_clip"));
-    m->addAction(newQAction(this, "file_export_bl_update_clip"));
-    m->addAction(newQAction(this, "file_export_bl_invreq_clip"));
-    m->addAction(newQAction(this, "file_export_bl_wantedlist_clip"));
+    m->addAction(newQAction(this, "file_export_bl_xml", NeedDocument));
+    m->addAction(newQAction(this, "file_export_bl_xml_clip", NeedDocument));
+    m->addAction(newQAction(this, "file_export_bl_update_clip", NeedDocument));
+    m->addAction(newQAction(this, "file_export_bl_invreq_clip", NeedDocument));
+    m->addAction(newQAction(this, "file_export_bl_wantedlist_clip", NeedDocument));
 
-    (void) newQAction(this, "file_close");
+    (void) newQAction(this, "file_close", NeedDocument);
 
-    a = newQAction(this, "file_exit", false, this, SLOT(close()));
+    a = newQAction(this, "file_exit", 0, false, this, SLOT(close()));
     a->setMenuRole(QAction::QuitRole);
 
-    m_undogroup->createUndoAction(this)->setObjectName("edit_undo");
-    m_undogroup->createRedoAction(this)->setObjectName("edit_redo");
+    a = m_undogroup->createUndoAction(this);
+    a->setObjectName("edit_undo");
+    a->setProperty("bsFlags", NeedDocument);
+    a = m_undogroup->createRedoAction(this);
+    a->setObjectName("edit_redo");
+    a->setProperty("bsFlags", NeedDocument);
 
-    a = newQAction(this, "edit_cut");
+    a = newQAction(this, "edit_cut", NeedSelection(1));
     connect(new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Delete), this, 0, 0, Qt::WindowShortcut), SIGNAL(activated()), a, SLOT(trigger()));
-    a = newQAction(this, "edit_copy");
+    a = newQAction(this, "edit_copy", NeedSelection(1));
     connect(new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Insert), this, 0, 0, Qt::WindowShortcut), SIGNAL(activated()), a, SLOT(trigger()));
-    a = newQAction(this, "edit_paste");
+    a = newQAction(this, "edit_paste", NeedDocument);
     connect(new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Insert), this, 0, 0, Qt::WindowShortcut), SIGNAL(activated()), a, SLOT(trigger()));
-    (void) newQAction(this, "edit_delete");
+    (void) newQAction(this, "edit_delete", NeedSelection(1));
 
-    a = newQAction(this, "edit_additems", false, this, SLOT(showAddItemDialog()));
+    a = newQAction(this, "edit_additems", NeedDocument, false, this, SLOT(showAddItemDialog()));
     a->setShortcutContext(Qt::ApplicationShortcut);
 
-    (void) newQAction(this, "edit_subtractitems");
-    (void) newQAction(this, "edit_mergeitems");
-    (void) newQAction(this, "edit_partoutitems");
-    (void) newQAction(this, "edit_setmatch");
-    (void) newQAction(this, "edit_reset_diffs");
-    (void) newQAction(this, "edit_copyremarks");
-    (void) newQAction(this, "edit_select_all");
-    (void) newQAction(this, "edit_select_none");
+    (void) newQAction(this, "edit_subtractitems", NeedDocument);
+    (void) newQAction(this, "edit_mergeitems", NeedSelection(2));
+    (void) newQAction(this, "edit_partoutitems", NeedInventory | NeedSelection(1));
+    (void) newQAction(this, "edit_setmatch", NeedSelection(1));
+    (void) newQAction(this, "edit_reset_diffs", NeedSelection(1));
+    (void) newQAction(this, "edit_copyremarks", NeedDocument);
+    (void) newQAction(this, "edit_select_all", NeedDocument);
+    (void) newQAction(this, "edit_select_none", NeedDocument);
 
-    m = newQMenu(this, "edit_status");
+    m = newQMenu(this, "edit_status", NeedSelection(1));
     g = newQActionGroup(this, 0, true);
-    m->addAction(newQAction(g, "edit_status_include", true));
-    m->addAction(newQAction(g, "edit_status_exclude", true));
-    m->addAction(newQAction(g, "edit_status_extra",   true));
+    m->addAction(newQAction(g, "edit_status_include", NeedSelection(1), true));
+    m->addAction(newQAction(g, "edit_status_exclude", NeedSelection(1), true));
+    m->addAction(newQAction(g, "edit_status_extra",   NeedSelection(1), true));
     m->addSeparator();
-    m->addAction(newQAction(this, "edit_status_toggle"));
+    m->addAction(newQAction(this, "edit_status_toggle", NeedSelection(1)));
 
-    m = newQMenu(this, "edit_cond");
+    m = newQMenu(this, "edit_cond", NeedSelection(1));
     g = newQActionGroup(this, 0, true);
-    m->addAction(newQAction(g, "edit_cond_new", true));
-    m->addAction(newQAction(g, "edit_cond_used", true));
+    m->addAction(newQAction(g, "edit_cond_new", NeedSelection(1), true));
+    m->addAction(newQAction(g, "edit_cond_used", NeedSelection(1), true));
     m->addSeparator();
-    m->addAction(newQAction(this, "edit_cond_toggle"));
+    m->addAction(newQAction(this, "edit_cond_toggle", NeedSelection(1)));
     m->addSeparator();
     g = newQActionGroup(this, 0, true);
-    m->addAction(newQAction(g, "edit_subcond_none", true));
-    m->addAction(newQAction(g, "edit_subcond_misb", true));
-    m->addAction(newQAction(g, "edit_subcond_complete", true));
-    m->addAction(newQAction(g, "edit_subcond_incomplete", true));
+    m->addAction(newQAction(g, "edit_subcond_none", NeedSelection(1) | NeedSubCondition, true));
+    m->addAction(newQAction(g, "edit_subcond_misb", NeedSelection(1) | NeedSubCondition, true));
+    m->addAction(newQAction(g, "edit_subcond_complete", NeedSelection(1) | NeedSubCondition, true));
+    m->addAction(newQAction(g, "edit_subcond_incomplete", NeedSelection(1) | NeedSubCondition, true));
 
-    (void) newQAction(this, "edit_color");
+    (void) newQAction(this, "edit_color", NeedSelection(1));
 
-    m = newQMenu(this, "edit_qty");
-    m->addAction(newQAction(this, "edit_qty_multiply"));
-    m->addAction(newQAction(this, "edit_qty_divide"));
+    m = newQMenu(this, "edit_qty", NeedSelection(1));
+    m->addAction(newQAction(this, "edit_qty_multiply", NeedSelection(1)));
+    m->addAction(newQAction(this, "edit_qty_divide", NeedSelection(1)));
 
-    m = newQMenu(this, "edit_price");
-    m->addAction(newQAction(this, "edit_price_set"));
-    m->addAction(newQAction(this, "edit_price_inc_dec"));
-    m->addAction(newQAction(this, "edit_price_to_priceguide"));
-    m->addAction(newQAction(this, "edit_price_round"));
+    m = newQMenu(this, "edit_price", NeedSelection(1));
+    m->addAction(newQAction(this, "edit_price_set", NeedSelection(1)));
+    m->addAction(newQAction(this, "edit_price_inc_dec", NeedSelection(1)));
+    m->addAction(newQAction(this, "edit_price_to_priceguide", NeedSelection(1)));
+    m->addAction(newQAction(this, "edit_price_round", NeedSelection(1)));
 
-    (void) newQAction(this, "edit_bulk");
-    (void) newQAction(this, "edit_sale");
+    (void) newQAction(this, "edit_bulk", NeedSelection(1));
+    (void) newQAction(this, "edit_sale", NeedSelection(1));
 
-    m = newQMenu(this, "edit_comment");
-    m->addAction(newQAction(this, "edit_comment_set"));
+    m = newQMenu(this, "edit_comment", NeedSelection(1));
+    m->addAction(newQAction(this, "edit_comment_set", NeedSelection(1)));
     m->addSeparator();
-    m->addAction(newQAction(this, "edit_comment_add"));
-    m->addAction(newQAction(this, "edit_comment_rem"));
+    m->addAction(newQAction(this, "edit_comment_add", NeedSelection(1)));
+    m->addAction(newQAction(this, "edit_comment_rem", NeedSelection(1)));
 
-    m = newQMenu(this, "edit_remark");
-    m->addAction(newQAction(this, "edit_remark_set"));
+    m = newQMenu(this, "edit_remark", NeedSelection(1));
+    m->addAction(newQAction(this, "edit_remark_set", NeedSelection(1)));
     m->addSeparator();
-    m->addAction(newQAction(this, "edit_remark_add"));
-    m->addAction(newQAction(this, "edit_remark_rem"));
+    m->addAction(newQAction(this, "edit_remark_add", NeedSelection(1)));
+    m->addAction(newQAction(this, "edit_remark_rem", NeedSelection(1)));
 
-    m = newQMenu(this, "edit_retain");
+    m = newQMenu(this, "edit_retain", NeedSelection(1));
     g = newQActionGroup(this, 0, true);
-    m->addAction(newQAction(g, "edit_retain_yes", true));
-    m->addAction(newQAction(g, "edit_retain_no", true));
+    m->addAction(newQAction(g, "edit_retain_yes", NeedSelection(1), true));
+    m->addAction(newQAction(g, "edit_retain_no", NeedSelection(1), true));
     m->addSeparator();
-    m->addAction(newQAction(this, "edit_retain_toggle"));
+    m->addAction(newQAction(this, "edit_retain_toggle", NeedSelection(1)));
 
-    m = newQMenu(this, "edit_stockroom");
+    m = newQMenu(this, "edit_stockroom", NeedSelection(1));
     g = newQActionGroup(this, 0, true);
-    m->addAction(newQAction(g, "edit_stockroom_yes", true));
-    m->addAction(newQAction(g, "edit_stockroom_no", true));
+    m->addAction(newQAction(g, "edit_stockroom_yes", NeedSelection(1), true));
+    m->addAction(newQAction(g, "edit_stockroom_no", NeedSelection(1), true));
     m->addSeparator();
-    m->addAction(newQAction(this, "edit_stockroom_toggle"));
+    m->addAction(newQAction(this, "edit_stockroom_toggle", NeedSelection(1)));
 
-    (void) newQAction(this, "edit_reserved");
+    (void) newQAction(this, "edit_reserved", NeedSelection(1));
 
-    (void) newQAction(this, "edit_bl_catalog");
-    (void) newQAction(this, "edit_bl_priceguide");
-    (void) newQAction(this, "edit_bl_lotsforsale");
-    (void) newQAction(this, "edit_bl_myinventory");
+    (void) newQAction(this, "edit_bl_catalog", NeedSelection(1, 1) | NeedNetwork);
+    (void) newQAction(this, "edit_bl_priceguide", NeedSelection(1, 1) | NeedNetwork);
+    (void) newQAction(this, "edit_bl_lotsforsale", NeedSelection(1, 1) | NeedNetwork);
+    (void) newQAction(this, "edit_bl_myinventory", NeedSelection(1, 1) | NeedLotId | NeedNetwork);
 
-    (void) newQAction(this, "view_fullscreen", true, this, SLOT(viewFullScreen(bool)));
+    (void) newQAction(this, "view_fullscreen", 0, true, this, SLOT(viewFullScreen(bool)));
 
     m_toolbar->toggleViewAction()->setObjectName("view_toolbar");
     m = newQMenu(this, "view_infobar");
     foreach (QDockWidget *dock, m_dock_widgets)
         m->addAction(dock->toggleViewAction());
 
-    (void) newQAction(this, "view_statusbar", true, this, SLOT(viewStatusBar(bool)));
-    (void) newQAction(this, "view_show_input_errors", true, Config::inst(), SLOT(setShowInputErrors(bool)));
-    (void) newQAction(this, "view_difference_mode", true);
+    (void) newQAction(this, "view_statusbar", 0, true, this, SLOT(viewStatusBar(bool)));
+    (void) newQAction(this, "view_show_input_errors", 0, true, Config::inst(), SLOT(setShowInputErrors(bool)));
+    (void) newQAction(this, "view_difference_mode", 0, true);
     (void) newQAction(this, "view_save_default_col");
-    (void) newQAction(this, "extras_update_database", false, this, SLOT(updateDatabase()));
+    (void) newQAction(this, "extras_update_database", NeedNetwork, false, this, SLOT(updateDatabase()));
 
-    a = newQAction(this, "extras_configure", false, this, SLOT(configure()));
+    a = newQAction(this, "extras_configure", 0, false, this, SLOT(configure()));
     a->setMenuRole(QAction::PreferencesRole);
 
-    //(void) newQAction(this, "help_whatsthis", false, this, SLOT(whatsThis()));
+    //(void) newQAction(this, "help_whatsthis", 0, false, this, SLOT(whatsThis()));
 
-    a = newQAction(this, "help_about", false, Application::inst(), SLOT(about()));
+    a = newQAction(this, "help_about", 0, false, Application::inst(), SLOT(about()));
     a->setMenuRole(QAction::AboutRole);
 
-    a = newQAction(this, "help_updates", false, Application::inst(), SLOT(checkForUpdates()));
+    a = newQAction(this, "help_updates", NeedNetwork, false, Application::inst(), SLOT(checkForUpdates()));
     a->setMenuRole(QAction::ApplicationSpecificRole);
 
     // set all icons that have a pixmap corresponding to name()
 
     QList<QAction *> alist = findChildren<QAction *>();
-    foreach(QAction *a, alist) {
+    foreach (QAction *a, alist) {
         if (!a->objectName().isEmpty()) {
             QString path = QLatin1String(":/images/") + a->objectName() + QLatin1String(".png");
 
@@ -1175,38 +1189,6 @@ bool FrameWork::updateDatabase()
     return false;
 }
 
-void FrameWork::connectAction(bool do_connect, const char *name, Window *window, const char *windowslot, bool (Window::* is_on_func)() const)
-{
-    QAction *a = findAction(name);
-
-    if (a) {
-        a->setEnabled(do_connect);
-        if (a->actionGroup())
-            a->actionGroup()->setEnabled(do_connect);
-    }
-
-    if (a && window) {
-        bool is_toggle = (::strstr(windowslot, "bool"));
-
-        const char *actionsignal = is_toggle ? SIGNAL(toggled(bool)) : SIGNAL(triggered());
-
-        if (do_connect)
-            connect(a, actionsignal, window, windowslot);
-        else
-            disconnect(a, actionsignal, window, windowslot);
-
-        if (is_toggle && do_connect && is_on_func)
-            m_toggle_updates.insert(a, is_on_func);
-    }
-}
-
-void FrameWork::updateAllToggleActions(Window *window)
-{
-    for (QMap <QAction *, bool (Window::*)() const>::iterator it = m_toggle_updates.begin(); it != m_toggle_updates.end(); ++it) {
-        it.key()->setChecked((window->* it.value())());
-    }
-}
-
 void FrameWork::connectAllActions(bool do_connect, Window *window)
 {
     QMetaObject mo = Window::staticMetaObject;
@@ -1219,7 +1201,7 @@ void FrameWork::connectAllActions(bool do_connect, Window *window)
         bool foundIt = false;
 
 
-        for(int j = 0; j < list.count(); ++j) {
+        for (int j = 0; j < list.count(); ++j) {
             QObject *co = list.at(j);
             QByteArray objName = co->objectName().toAscii();
             int len = objName.length();
@@ -1241,16 +1223,14 @@ void FrameWork::connectAllActions(bool do_connect, Window *window)
             }
             if (sigIndex < 0)
                 continue;
+
             if (do_connect && window && QMetaObject::connect(co, sigIndex, window, i)) {
                 foundIt = true;
-            }
-            else if (!do_connect && window) {
+            } else if (!do_connect && window) {
                 // ignore errors on disconnect
                 QMetaObject::disconnect(co, sigIndex, window, i);
                 foundIt = true;
             }
-            if (QAction *act = qobject_cast<QAction *>(co))
-                act->setEnabled(do_connect);
 
             if (foundIt)
                 break;
@@ -1259,18 +1239,10 @@ void FrameWork::connectAllActions(bool do_connect, Window *window)
             // we found our slot, now skip all overloads
             while (mo.method(i + 1).attributes() & QMetaMethod::Cloned)
                   ++i;
-        }
-        else if (window && (!(mo.method(i).attributes() & QMetaMethod::Cloned))) {
+        } else if (window && (!(mo.method(i).attributes() & QMetaMethod::Cloned))) {
             qWarning("FrameWork::connectAllActions: No matching signal for %s", slot);
         }
     }
-}
-
-void FrameWork::connectWindowMdiArea(QMdiSubWindow *sw)
-{
-    connectWindow(sw ? sw->widget() : 0);
-    if (sw && sw->widget() && (sw->widget() == m_current_window))
-        return;
 }
 
 void FrameWork::connectWindow(QWidget *w)
@@ -1340,66 +1312,54 @@ void FrameWork::connectWindow(QWidget *w)
     emit windowActivated(m_current_window);
 }
 
+void FrameWork::updateActions(const Document::ItemList &selection)
+{
+    int cnt = selection.count();
+    bool isOnline = Application::inst()->isOnline();
+
+    foreach (QAction *a, findChildren<QAction *>()) {
+        quint32 flags = a->property("bsFlags").toUInt();
+
+        if (!flags)
+            continue;
+
+        bool b = true;
+
+        if (flags & NeedNetwork)
+            b = b && isOnline;
+
+        if (flags & NeedDocument) {
+            b = b && m_current_window;
+
+            quint8 minSelection = flags >> 24;
+            quint8 maxSelection = (flags >> 16) & 0xff;
+
+            if (minSelection)
+                b = b && (cnt >= minSelection);
+            if (maxSelection)
+                b = b && (cnt <= maxSelection);
+        }
+
+        foreach (Document::Item *item, selection) {
+            if (flags & NeedLotId)
+                b = b && (item->lotId() != 0);
+            if (flags & NeedInventory)
+                b = b && (item->item() && item->item()->hasInventory());
+            if (flags & NeedSubCondition)
+                b = b && (item->item() && item->itemType() && item->item()->itemType()->hasSubConditions());
+
+            if (!b)
+                break;
+        }
+        a->setEnabled(b);
+    }
+}
+
 void FrameWork::selectionUpdate(const Document::ItemList &selection)
 {
-    static const int NeedLotId = 1;
-    static const int NeedInventory = 2;
-    static const int NeedSubCondition = 4;
+    updateActions(selection);
 
-    struct {
-        const char *m_name;
-        uint m_minsel;
-        uint m_maxsel;
-        int  m_flags;
-    } endisable_actions [] = {
-        { "edit_cut",                 1, 0, 0 },
-        { "edit_copy",                1, 0, 0 },
-        { "edit_delete",              1, 0, 0 },
-        { "edit_modify",              1, 0, 0 },
-        { "edit_bl_catalog",          1, 1, 0 },
-        { "edit_bl_priceguide",       1, 1, 0 },
-        { "edit_bl_lotsforsale",      1, 1, 0 },
-        { "edit_bl_myinventory",      1, 1, NeedLotId },
-        { "edit_mergeitems",          2, 0, 0 },
-        { "edit_partoutitems",        1, 0, NeedInventory },
-        { "edit_reset_diffs",         1, 0, 0 },
-        { "edit_subcond_none",        1, 0, NeedSubCondition },
-        { "edit_subcond_misb",        1, 0, NeedSubCondition },
-        { "edit_subcond_complete",    1, 0, NeedSubCondition },
-        { "edit_subcond_incomplete",  1, 0, NeedSubCondition },
-
-        { 0, 0, 0, 0 }
-    }, *endisable_ptr;
-
-    uint cnt = selection.count();
-
-    for (endisable_ptr = endisable_actions; endisable_ptr->m_name; endisable_ptr++) {
-        QAction *a = findAction(endisable_ptr->m_name);
-
-        if (a) {
-            uint &mins = endisable_ptr->m_minsel;
-            uint &maxs = endisable_ptr->m_maxsel;
-
-            bool b = true;
-
-            if (endisable_ptr->m_flags)
-            {
-                int f = endisable_ptr->m_flags;
-
-                foreach(Document::Item *item, selection) {
-                    if (f & NeedLotId)
-                        b &= (item->lotId() != 0);
-                    if (f & NeedInventory)
-                        b &= (item->item() && item->item()->hasInventory());
-                    if (f & NeedSubCondition)
-                        b &= (item->item() && item->itemType() && item->item()->itemType()->hasSubConditions());
-                }
-            }
-
-            a->setEnabled(b && (mins ? (cnt >= mins) : true) && (maxs ? (cnt <= maxs) : true));
-        }
-    }
-
+    int cnt        = selection.count();
     int status     = -1;
     int condition  = -1;
     int scondition = -1;
@@ -1413,7 +1373,7 @@ void FrameWork::selectionUpdate(const Document::ItemList &selection)
         retain     = selection.front()->retain()    ? 1 : 0;
         stockroom  = selection.front()->stockroom() ? 1 : 0;
 
-        foreach(Document::Item *item, selection) {
+        foreach (Document::Item *item, selection) {
             if ((status >= 0) && (status != item->status()))
                 status = -1;
             if ((condition >= 0) && (condition != item->condition()))
@@ -1562,6 +1522,11 @@ void FrameWork::onlineStateChanged(bool isOnline)
         m_progress->setOnlineState(isOnline);
     if (!isOnline)
         cancelAllTransfers(true);
+
+    if (m_current_window)
+        updateActions(m_current_window->selection());
+    else
+        updateActions();
 }
 
 void FrameWork::showContextMenu(bool /*onitem*/, const QPoint &pos)

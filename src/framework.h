@@ -59,7 +59,7 @@ public:
 
     QList<Window *> allWindows() const;
 
-    void updateAllToggleActions(Window *window);
+//    void updateAllToggleActions(Window *window);
 
 public slots:
     void selectionUpdate(const Document::ItemList &selection);
@@ -99,7 +99,6 @@ private slots:
 
     bool updateDatabase();
 
-    void connectWindowMdiArea(QMdiSubWindow *w);
     void connectWindow(QWidget *w);
 
     void transferJobProgressUpdate(int p, int t);
@@ -137,10 +136,11 @@ private:
     QIcon *icon(const char *name);
 
     QAction *findAction(const char *name);
-    void connectAction(bool do_connect, const char *name, Window *window, const char *slot, bool (Window::* is_on_func)() const = 0);
+//    void connectAction(bool do_connect, const char *name, Window *window, const char *slot, bool (Window::* is_on_func)() const = 0);
     void connectAllActions(bool do_connect, Window *window);
     void createActions();
     void translateActions();
+    void updateActions(const Document::ItemList &selection = Document::ItemList());
     QMenu *createMenu(const QByteArray &, const QList<QByteArray> &);
     bool setupToolBar(QToolBar *, const QList<QByteArray> &);
     QDockWidget *createDock(QWidget *widget);
