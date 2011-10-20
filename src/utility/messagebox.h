@@ -35,11 +35,9 @@ public:
     static StandardButton warning(QWidget *parent, const QString &text, StandardButtons buttons = Ok, StandardButton defaultButton = NoButton);
     static StandardButton critical(QWidget *parent, const QString &text, StandardButtons buttons = Ok, StandardButton defaultButton = NoButton);
 
-    static bool getString(QWidget *parent, const QString &text, const QString &unit, QString &value, QValidator *validate = 0);
     static bool getString(QWidget *parent, const QString &text, QString &value);
-    static bool getDouble(QWidget *parent, const QString &text, const QString &unit, double &value, QValidator *validate = 0);
-    static bool getInteger(QWidget *parent, const QString &text, const QString &unit, int &value, QValidator *validate = 0);
-
+    static bool getDouble(QWidget *parent, const QString &text, const QString &unit, double &value, double minValue = -2147483647, double maxValue = 2147483647, int decimals = 1);
+    static bool getInteger(QWidget *parent, const QString &text, const QString &unit, int &value, int minValue = -2147483647, int maxValue = 2147483647);
 
 private:
     MessageBox();

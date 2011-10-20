@@ -805,10 +805,10 @@ void Window::on_edit_price_set_triggered()
     if (selection().isEmpty())
         return;
 
-    QString price = Currency::toString(selection().front()->price(), m_doc->currencyCode(), Currency::NoSymbol);
+    double price = selection().front()->price();
 
-    if (MessageBox::getString(this, tr("Enter the new price for all selected items:"), Currency::localSymbol(m_doc->currencyCode()), price, new CurrencyValidator(0, 10000, 3, 0))) {
-        setOrToggle<double>::set(this, tr("Set price on %1 items"), &Document::Item::price, &Document::Item::setPrice, Currency::fromString(price));
+    if (MessageBox::getDouble(this, tr("Enter the new price for all selected items:"), Currency::localSymbol(m_doc->currencyCode()), price, 0, 10000, 3)) {
+        setOrToggle<double>::set(this, tr("Set price on %1 items"), &Document::Item::price, &Document::Item::setPrice, price);
     }
 }
 
@@ -980,7 +980,7 @@ void Window::on_edit_qty_divide_triggered()
 
     int divisor = 1;
 
-    if (MessageBox::getInteger(this, tr("Divide the quantities of all selected items by this number.<br /><br />(A check is made if all quantites are exactly divisible without reminder, before this operation is performed.)"), QString::null, divisor, new QIntValidator(1, 1000, 0))) {
+    if (MessageBox::getInteger(this, tr("Divide the quantities of all selected items by this number.<br /><br />(A check is made if all quantites are exactly divisible without reminder, before this operation is performed.)"), QString::null, divisor, 1, 1000)) {
         if (divisor > 1) {
             int lots_with_errors = 0;
 
@@ -1019,8 +1019,8 @@ void Window::on_edit_qty_multiply_triggered()
 
     int factor = 1;
 
-    if (MessageBox::getInteger(this, tr("Multiply the quantities of all selected items with this factor."), tr("x"), factor, new QIntValidator(-1000, 1000, 0))) {
-        if ((factor <= 1) || (factor > 1)) {
+    if (MessageBox::getInteger(this, tr("Multiply the quantities of all selected items with this factor."), tr("x"), factor, -1000, 1000)) {
+        if ((factor <= -1) || (factor > 1)) {
             uint mulcount = 0;
             m_doc->beginMacro();
 
@@ -1046,7 +1046,7 @@ void Window::on_edit_sale_triggered()
 
     int sale = selection().front()->sale();
 
-    if (MessageBox::getInteger(this, tr("Set sale in percent for the selected items (this will <u>not</u> change any prices).<br />Negative values are also allowed."), tr("%"), sale, new QIntValidator(-1000, 99, 0)))
+    if (MessageBox::getInteger(this, tr("Set sale in percent for the selected items (this will <u>not</u> change any prices).<br />Negative values are also allowed."), tr("%"), sale, -1000, 99))
         setOrToggle<int>::set(this, tr("Set sale on %1 items"), &Document::Item::sale, &Document::Item::setSale, sale);
 }
 
@@ -1057,7 +1057,7 @@ void Window::on_edit_bulk_triggered()
 
     int bulk = selection().front()->bulkQuantity();
 
-    if (MessageBox::getInteger(this, tr("Set bulk quantity for the selected items:"), QString(), bulk, new QIntValidator(1, 99999, 0)))
+    if (MessageBox::getInteger(this, tr("Set bulk quantity for the selected items:"), QString(), bulk, 1, 99999))
         setOrToggle<int>::set(this, tr("Set bulk quantity on %1 items"), &Document::Item::bulkQuantity, &Document::Item::setBulkQuantity, bulk);
 }
 
@@ -1515,8 +1515,15 @@ void Window::closeEvent(QCloseEvent *e)
     bool close_empty = (m_doc->items().isEmpty() && Config::inst()->closeEmptyDocuments());
 
     if (m_doc->isModified() && !close_empty) {
-        switch (MessageBox::warning(this, tr("Save changes to %1?").arg(CMB_BOLD(windowTitle().replace(QLatin1String("[*]"), QString()))), MessageBox::Yes | MessageBox::No | MessageBox::Cancel, MessageBox::Yes)) {
-        case MessageBox::Yes:
+        QMessageBox msgBox(this);
+        msgBox.setText(tr("The document %1 has been modified.").arg(CMB_BOLD(windowTitle().replace(QLatin1String("[*]"), QString()))));
+        msgBox.setInformativeText(tr("Do you want to save your changes?"));
+        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+        msgBox.setDefaultButton(QMessageBox::Save);
+        msgBox.setWindowModality(Qt::WindowModal);
+
+        switch (msgBox.exec()) {
+        case MessageBox::Save:
             m_doc->fileSave();
 
             if (!m_doc->isModified())
@@ -1525,7 +1532,7 @@ void Window::closeEvent(QCloseEvent *e)
                 e->ignore();
             break;
 
-        case MessageBox::No:
+        case MessageBox::Discard:
             e->accept();
             break;
 

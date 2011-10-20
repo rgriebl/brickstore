@@ -23,6 +23,8 @@
 #include <QDialog>
 #include <QTextDocument>
 #include <QByteArray>
+#include <QInputDialog>
+#include <QDoubleSpinBox>
 
 #include "messagebox.h"
 
@@ -96,92 +98,56 @@ QMessageBox::StandardButton MessageBox::critical(QWidget *parent, const QString 
 
 bool MessageBox::getString(QWidget *parent, const QString &text, QString &value)
 {
-    return getString(parent, text, QString::null, value, 0);
-}
+    QInputDialog dlg(parent, Qt::Sheet);
+    dlg.setWindowModality(Qt::WindowModal);
+    dlg.setInputMode(QInputDialog::TextInput);
+    dlg.setLabelText(text);
+    dlg.setTextValue(value);
 
-bool MessageBox::getDouble(QWidget *parent, const QString &text, const QString &unit, double &value, QValidator *validate)
-{
-    QString str_value = QString::number(value);
-    bool b = getString(parent, text, unit, str_value, validate ? validate : new QDoubleValidator(-DBL_MAX, DBL_MAX, 3, 0));
+    bool b = (dlg.exec() == QDialog::Accepted);
 
-    if (b)
-        value = str_value.toDouble();
+    value = dlg.textValue();
     return b;
 }
 
-bool MessageBox::getInteger(QWidget *parent, const QString &text, const QString &unit, int &value, QValidator *validate)
+bool MessageBox::getDouble(QWidget *parent, const QString &text, const QString &unit, double &value, double minValue, double maxValue, int decimals)
 {
-    QString str_value = QString::number(value);
-    bool b = getString(parent, text, unit, str_value, validate ? validate : new QIntValidator(INT_MIN, INT_MAX, 0));
+    QInputDialog dlg(parent, Qt::Sheet);
+    dlg.setWindowModality(Qt::WindowModal);
+    dlg.setInputMode(QInputDialog::DoubleInput);
+    dlg.setLabelText(text);
+    dlg.setDoubleValue(value);
+    dlg.setDoubleMinimum(minValue);
+    dlg.setDoubleMaximum(maxValue);
+    dlg.setDoubleDecimals(decimals);
 
-    if (b)
-        value = str_value.toInt();
-    return b;
-}
-
-bool MessageBox::getString(QWidget *parent, const QString &text, const QString &unit, QString &value, QValidator *validate)
-{
-    bool b = false;
-
-    QDialog *d = new QDialog(parent);
-    d->setObjectName("getbox");
-    d->setWindowTitle(s_deftitle);
-
-    QLabel *wlabel = new QLabel(text, d);
-    wlabel->setTextFormat(Qt::RichText);
-    QLabel *wunit = unit.isEmpty() ? 0 : new QLabel(unit, d);
-    QFrame *wline = new QFrame(d);
-    wline->setFrameStyle(QFrame::HLine | QFrame::Sunken);
-
-    QLineEdit *wedit = new QLineEdit(value, d);
-    wedit->setValidator(validate);
-
-    QFontMetrics wefm(wedit->font());
-    wedit->setMinimumWidth(20 + qMax(wefm.width("Aa0") * 3, wefm.width(value)));
-    wedit->setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed));
-
-    QPushButton *wok = new QPushButton(tr("&OK"), d);
-    wok->setAutoDefault(true);
-    wok->setDefault(true);
-
-    QPushButton *wcancel = new QPushButton(tr("&Cancel"), d);
-    wcancel->setAutoDefault(true);
-
-    QBoxLayout *toplay = new QVBoxLayout(d);    //, 11, 6 );
-    toplay->addWidget(wlabel);
-
-    QBoxLayout *midlay = new QHBoxLayout();
-    toplay->addLayout(midlay);
-    toplay->addWidget(wline);
-
-    QBoxLayout *botlay = new QHBoxLayout();
-    toplay->addLayout(botlay);
-
-    midlay->addWidget(wedit);
-    if (wunit) {
-        midlay->addWidget(wunit);
-        midlay->addStretch();
+    if (!unit.isEmpty()) {
+        if (QDoubleSpinBox *sp = dlg.findChild<QDoubleSpinBox *>())
+            sp->setSuffix(QLatin1Char(' ') + unit);
     }
+    bool b = (dlg.exec() == QDialog::Accepted);
 
-    botlay->addSpacing(QFontMetrics(d->font()).width("Aa0") * 6);
-    botlay->addStretch();
-    botlay->addWidget(wok);
-    botlay->addWidget(wcancel);
-
-    connect(wedit, SIGNAL(returnPressed()), wok, SLOT(animateClick()));
-    connect(wok, SIGNAL(clicked()), d, SLOT(accept()));
-    connect(wcancel, SIGNAL(clicked()), d, SLOT(reject()));
-
-    d->setSizeGripEnabled(true);
-    d->setMinimumSize(d->minimumSizeHint());
-    d->resize(d->sizeHint());
-
-    if (d->exec() == QDialog::Accepted) {
-        b = true;
-        value = wedit->text();
-    }
-
-    delete d;
-    delete validate;
+    value = dlg.doubleValue();
     return b;
 }
+
+bool MessageBox::getInteger(QWidget *parent, const QString &text, const QString &unit, int &value, int minValue, int maxValue)
+{
+    QInputDialog dlg(parent, Qt::Sheet);
+    dlg.setWindowModality(Qt::WindowModal);
+    dlg.setInputMode(QInputDialog::IntInput);
+    dlg.setLabelText(text);
+    dlg.setIntValue(value);
+    dlg.setIntMinimum(minValue);
+    dlg.setIntMaximum(maxValue);
+
+    if (!unit.isEmpty()) {
+        if (QSpinBox *sp = dlg.findChild<QSpinBox *>())
+            sp->setSuffix(QLatin1Char(' ') + unit);
+    }
+    bool b = (dlg.exec() == QDialog::Accepted);
+
+    value = dlg.intValue();
+    return b;
+}
+

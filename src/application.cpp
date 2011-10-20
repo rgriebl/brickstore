@@ -487,7 +487,7 @@ bool Application::initBrickLink()
     BrickLink::Core *bl = BrickLink::create(Config::inst()->value(QLatin1String("/BrickLink/DataDir"), defdatadir).toString(), &errstring);
 
     if (!bl)
-        MessageBox::critical(0, tr("Could not initialize the BrickLink kernel:<br /><br />%1").arg(errstring));
+        QMessageBox::critical(0, applicationName(), tr("Could not initialize the BrickLink kernel:<br /><br />%1").arg(errstring), QMessageBox::Ok);
 
     bl->setTransfer(new Transfer(10));
     bl->transfer()->setProxy(Config::inst()->proxy());
