@@ -305,7 +305,7 @@ void SelectItem::itemTypeChanged()
     setCurrentCategory(oldCat);
     setCurrentItem(oldItem);
 
-    emit hasColors(itemtype->hasColors());
+    emit hasColors(itemtype ? itemtype->hasColors() : false);
     QApplication::restoreOverrideCursor();
 }
 

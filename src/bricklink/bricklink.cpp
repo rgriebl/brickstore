@@ -1207,7 +1207,7 @@ QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint
             item.appendChild(doc.createElement(QLatin1String("ITEMTYPE")).appendChild(doc.createTextNode(QChar(ii->itemType()->id()))).parentNode());
 
             item.appendChild(doc.createElement(QLatin1String("QTY")).appendChild(doc.createTextNode(c.toString(ii->quantity()))).parentNode());
-            item.appendChild(doc.createElement(QLatin1String("PRICE")).appendChild(doc.createTextNode(c.toString(ii->price()))).parentNode());
+            item.appendChild(doc.createElement(QLatin1String("PRICE")).appendChild(doc.createTextNode(c.toString(ii->price(), 'f', 3))).parentNode());
             item.appendChild(doc.createElement(QLatin1String("CONDITION")).appendChild(doc.createTextNode(QLatin1String((ii->condition() == New) ? "N" : "U"))).parentNode());
 
             if (ii->subCondition() != None) {

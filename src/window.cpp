@@ -872,6 +872,8 @@ void Window::on_edit_price_to_priceguide_triggered()
             else if (pg && pg->valid()) {
                 double p = pg->price(m_settopg_time, item->condition(), m_settopg_price);
 
+                p *= Currency::inst()->rate(m_doc->currencyCode());
+
                 if (p != item->price()) {
                     Document::Item newitem = *item;
                     newitem.setPrice(p);
