@@ -1596,9 +1596,10 @@ void Window::print(bool as_pdf)
     if (ReportManager::inst()->reports().isEmpty()) {
         ReportManager::inst()->reload();
 
-        if (ReportManager::inst()->reports().isEmpty())
+        if (ReportManager::inst()->reports().isEmpty()) {
             MessageBox::warning(this, tr("Couldn't find any print templates."), MessageBox::Ok);
             return;
+        }
     }
 
     QPrinter *prt = ReportManager::inst()->printer();
@@ -1651,6 +1652,7 @@ void Window::print(bool as_pdf)
 
     rep->print(prt, m_doc, m_view->sortItemList(prt->printRange() == QPrinter::Selection ? selection() : m_doc->items()));
 }
+
 void Window::on_file_save_triggered()
 {
     m_doc->fileSave();

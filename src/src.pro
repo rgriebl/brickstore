@@ -14,9 +14,9 @@
 include(../release.pri)
 
 TEMPLATE     = app
-CONFIG      *= warn_on thread qt
+CONFIG      *= warn_on thread qt uitools
 # CONFIG      *= modeltest
-QT          *= core gui xml network script
+QT          *= core gui xml network script scripttools
 
 static:error("ERROR: Static builds are not supported")
 
@@ -185,9 +185,9 @@ macx {
 
   QMAKE_INFO_PLIST = $$PWD/../macx/Info.plist
   bundle_icons.path = Contents/Resources
-  bundle_icons.files = $$system(find $$PWD/../macx/Resources/ -name '*.icns')
+  bundle_icons.files = $$system(find $$PWD/../macx/Resources/ -name \'*.icns\')
   bundle_locversions.path = Contents/Resources
-  bundle_locversions.files = $$system(find $$PWD/../macx/Resources/ -name '*.lproj')
+  bundle_locversions.files = $$system(find $$PWD/../macx/Resources/ -name \'*.lproj\')
   bundle_translations.path = Contents/Resources/translations
   bundle_translations.files = $$PWD/translations/translations.xml \
                               $$PWD/translations/qt_nl.qm \
@@ -195,8 +195,10 @@ macx {
                               $$[QT_INSTALL_TRANSLATIONS]/qt_fr.qm \
                               $$[QT_INSTALL_TRANSLATIONS]/qt_sl.qm \
                               $$replace(QMS, '^', '$$PWD/')
+  bundle_printtemplates.path = Contents/Resources/print-templates
+  bundle_printtemplates.files = $$system(find $$PWD/../print-templates -name \'*.qs\' -or -name \'*.ui\')
 
-  QMAKE_BUNDLE_DATA += bundle_icons bundle_locversions bundle_translations
+  QMAKE_BUNDLE_DATA += bundle_icons bundle_locversions bundle_translations bundle_printtemplates
 
   QMAKE_POST_LINK = "sed -i '' -e 's/@VERSION@/$$RELEASE/g' $$OUT_PWD/$${TARGET}.app/Contents/Info.plist"
 }

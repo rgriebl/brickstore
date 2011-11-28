@@ -15,17 +15,18 @@
 #include <QApplication>
 #include <QPixmap>
 #include <QPrinter>
-//#include <QPaintDeviceMetrics>
 #include <QFontMetrics>
 #include <QPainter>
 #include <QDateTime>
+#include <QFileInfo>
+#include <QtUiTools/QUiLoader>
 
 #include <QtScript>
 
-
+#include "framework.h"
 #include "currency.h"
 #include "utility.h"
-
+#include "report.h"
 #include "reportobjects.h"
 
 
@@ -50,6 +51,29 @@ QString ReportUtility::localTimeString(const QDateTime &dt) const
     return dt.time().toString(Qt::LocalDate);
 }
 
+QWidget *ReportUtility::loadUiFile(const QString &fileName)
+{
+    QFileInfo uiInfo(fileName);
+    QString pathName = fileName;
+    if (uiInfo.isRelative()) {
+        QString scriptPath(engine()->property("bsScriptPath").toString());
+
+        if (scriptPath.isEmpty())
+            return 0;
+
+        QFileInfo scriptInfo(scriptPath);
+        pathName = scriptInfo.dir().absoluteFilePath(fileName);
+    }
+
+    QFile f(pathName);
+    if (f.open(QFile::ReadOnly)) {
+        QUiLoader loader;
+        return loader.load(&f, FrameWork::inst());
+    } else {
+        return 0;
+    }
+}
+
 
 ReportJob::ReportJob(QPaintDevice *pd)
     : QObject(0), m_pd(pd), m_aborted(false), m_scaling(1.0f)
@@ -67,14 +91,14 @@ QPaintDevice *ReportJob::paintDevice() const
     return m_pd;
 }
 
-ReportPage *ReportJob::addPage()
+QObject *ReportJob::addPage()
 {
     ReportPage *page = new ReportPage(this);
     m_pages.append(page);
     return page;
 }
 
-ReportPage *ReportJob::getPage(uint i) const
+QObject *ReportJob::getPage(uint i) const
 {
     if (int(i) < m_pages.count())
         return m_pages [i];
@@ -161,9 +185,9 @@ ReportPage::ReportPage(const ReportJob *job)
 {
     setObjectName(QString("Page%1").arg(job->pageCount() + 1));
 
-    m_attr.m_font = QFont("Arial", 10);
-    m_attr.m_color = Qt::black;
-    m_attr.m_bgcolor = Qt::white;
+    m_attr.m_font = new Font(QFont("Arial", 10));
+    m_attr.m_color = new Color(QColor(Qt::black));
+    m_attr.m_bgcolor = new Color(QColor(Qt::white));
     m_attr.m_linewidth = 0.1;
     m_attr.m_linestyle = SolidLine;
 }
@@ -191,7 +215,7 @@ void ReportPage::dump()
         case Cmd::Attributes: {
             AttrCmd *ac = static_cast<AttrCmd *>(m_cmds.at(i));
 
-            qDebug(" [%d] Attributes (Font: %s | Color: %s | BgColor: %s | Line: %f | LineStyle: %d", i, qPrintable(ac->m_font.toString()), qPrintable(ac->m_color.name()), qPrintable(ac->m_bgcolor.name()), ac->m_linewidth, ac->m_linestyle);
+            qDebug(" [%d] Attributes (Font: %s | Color: %s | BgColor: %s | Line: %f | LineStyle: %d", i, qPrintable(ac->m_font->toQFont().toString()), qPrintable(ac->m_color->toQColor().name()), qPrintable(ac->m_bgcolor->toQColor().name()), ac->m_linewidth, ac->m_linestyle);
             break;
         }
         case Cmd::Text:  {
@@ -240,15 +264,15 @@ void ReportPage::print(QPainter *p, double scale [2])
 
             // QFont f = ac->m_font;
             // f.setPointSizeFloat ( f.pointSizeFloat ( ) * scale [1] );
-            p->setFont(ac->m_font);
+            p->setFont(ac->m_font->toQFont());
 
-            if (ac->m_color.isValid())
-                p->setPen(QPen(ac->m_color, int(ac->m_linewidth * (scale [0] + scale [1]) / 2.f), Qt::PenStyle(ac->m_linestyle)));
+            if (ac->m_color->toQColor().isValid())
+                p->setPen(QPen(ac->m_color->toQColor(), int(ac->m_linewidth * (scale [0] + scale [1]) / 2.f), Qt::PenStyle(ac->m_linestyle)));
             else
                 p->setPen(QPen(Qt::NoPen));
 
-            if (ac->m_bgcolor.isValid())
-                p->setBrush(QBrush(ac->m_bgcolor));
+            if (ac->m_bgcolor->toQColor().isValid())
+                p->setBrush(QBrush(ac->m_bgcolor->toQColor()));
             else
                 p->setBrush(QBrush(Qt::NoBrush));
         }
@@ -307,17 +331,17 @@ void ReportPage::print(QPainter *p, double scale [2])
 }
 
 
-QFont ReportPage::font() const
+Font *ReportPage::font() const
 {
     return m_attr.m_font;
 }
 
-QColor ReportPage::color() const
+Color *ReportPage::color() const
 {
     return m_attr.m_color;
 }
 
-QColor ReportPage::bgColor() const
+Color *ReportPage::bgColor() const
 {
     return m_attr.m_bgcolor;
 }
@@ -340,21 +364,21 @@ void ReportPage::attr_cmd()
     m_cmds.append(ac);
 }
 
-void ReportPage::setFont(const QFont &f)
+void ReportPage::setFont(Font *font)
 {
-    m_attr.m_font = f;
+    m_attr.m_font->fromQFont(font->toQFont());
     attr_cmd();
 }
 
-void ReportPage::setColor(const QColor &c)
+void ReportPage::setColor(Color *color)
 {
-    m_attr.m_color = c;
+    m_attr.m_color->fromQColor(color->toQColor());
     attr_cmd();
 }
 
-void ReportPage::setBgColor(const QColor &c)
+void ReportPage::setBgColor(Color *color)
 {
-    m_attr.m_bgcolor = c;
+    m_attr.m_bgcolor->fromQColor(color->toQColor());
     attr_cmd();
 }
 
@@ -373,7 +397,7 @@ void ReportPage::setLineWidth(double linewidth)
 
 QSize ReportPage::textSize(const QString &text)
 {
-    QFontMetrics fm(m_attr.m_font);
+    QFontMetrics fm(m_attr.m_font->toQFont());
     QPaintDevice *pd = m_job->paintDevice();
     QSize s = fm.size(0, text);
     return QSize(s.width() * pd->widthMM() / pd->width(),

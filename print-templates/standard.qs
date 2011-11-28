@@ -29,6 +29,8 @@ function print ( )
 
 	var pagestat = new Array ( );
 
+        debugger
+
 	while ( items_left || !rfooter ) {
 		page = Job. addPage ( );
 

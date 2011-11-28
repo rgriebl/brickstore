@@ -20,6 +20,9 @@
 #include <QVariant>
 #include <QList>
 #include <QSize>
+#include <QScriptable>
+#include <QScriptValue>
+#include <QScriptEngine>
 
 class QPaintDevice;
 class QPixmap;
@@ -28,15 +31,16 @@ class QPainter;
 class QScriptEngine;
 
 
-class ReportUtility : public QObject {
+class ReportUtility : public QObject, public QScriptable {
     Q_OBJECT
-    Q_OVERRIDE(QString objectName         SCRIPTABLE false)
 
 public slots:
     QString translate(const QString &context, const QString &text) const;
 
     QString localDateString(const QDateTime &dt) const;
     QString localTimeString(const QDateTime &dt) const;
+
+    QWidget *loadUiFile(const QString &fileName);
 
 public:
     ReportUtility();
@@ -75,17 +79,17 @@ class ReportJob : public QObject {
 
     Q_PROPERTY(uint    pageCount    READ pageCount)
 // Q_PROPERTY( int     paperFormat  READ paperFormat)
-    Q_PROPERTY(QSize   paperSize    READ paperSize)
+    Q_PROPERTY(Size    paperSize    READ paperSize)
     Q_PROPERTY(double  scaling      READ scaling WRITE setScaling)
 
 public slots:
-    ReportPage *addPage();
-    ReportPage *getPage(uint i) const;
+    QObject *addPage();
+    QObject *getPage(uint i) const;
     void abort();
 
 public:
     uint pageCount() const;
-    QSize paperSize() const;
+    Size paperSize() const;
     bool isAborted() const;
     double scaling() const;
     void setScaling(double s);
@@ -106,6 +110,150 @@ private:
     double m_scaling;
 };
 
+class Font : public QObject
+{
+    Q_OBJECT
+    Q_PROPERTY(QString family     READ family     WRITE setFamily)
+    Q_PROPERTY(qreal   pointSize  READ pointSize  WRITE setPointSize)
+    Q_PROPERTY(int     pixelSize  READ pixelSize  WRITE setPixelSize)
+    Q_PROPERTY(bool    bold       READ bold       WRITE setBold)
+    Q_PROPERTY(bool    italic     READ italic     WRITE setItalic)
+    Q_PROPERTY(bool    underline  READ underline  WRITE setUnderline)
+    Q_PROPERTY(bool    strikeout  READ strikeout  WRITE setStrikeout)
+
+public:
+    Font() { }
+    Font(const QFont &qf) : d(qf) { }
+
+    QFont toQFont() const { return d; }
+    void fromQFont(const QFont &qf) { d = qf; }
+
+    static QScriptValue toScriptValue(QScriptEngine *engine, Font * const &in)
+    {
+        return engine->newQObject(in);
+    }
+
+    static void fromScriptValue(const QScriptValue &object, Font * &out)
+    {
+        out = qobject_cast<Font *>(object.toQObject());
+    }
+
+    static QScriptValue createScriptValue(QScriptContext *, QScriptEngine *engine)
+    {
+        Font *f = new Font();
+        return engine->newQObject(f);
+    }
+
+private:
+    QString family() const  { return d.family(); }
+    qreal pointSize() const { return d.pointSizeF(); }
+    int pixelSize() const   { return d.pixelSize(); }
+    bool bold() const       { return d.bold(); }
+    bool italic() const     { return d.italic(); }
+    bool underline() const  { return d.underline(); }
+    bool strikeout() const  { return d.strikeOut(); }
+
+    void setFamily(const QString &f) { d.setFamily(f); }
+    void setPointSize(qreal ps) { d.setPointSizeF(ps); }
+    void setPixelSize(int ps) { d.setPixelSize(ps); }
+    void setBold(bool b) { d.setBold(b); }
+    void setItalic(bool i) { d.setItalic(i); }
+    void setUnderline(bool u) { d.setUnderline(u); }
+    void setStrikeout(bool s) { d.setStrikeOut(s); }
+
+private:
+    QFont d;
+};
+
+Q_DECLARE_METATYPE(Font *)
+
+
+class Color : public QObject
+{
+    Q_OBJECT
+    Q_PROPERTY(int     red         READ red         WRITE setRed)
+    Q_PROPERTY(int     green       READ green       WRITE setGreen)
+    Q_PROPERTY(int     blue        READ blue        WRITE setBlue)
+    Q_PROPERTY(QString name        READ name        WRITE setName)
+    Q_PROPERTY(int     rgb         READ rgb         WRITE setRgb)
+    Q_PROPERTY(int     hue         READ hue         WRITE setHue)
+    Q_PROPERTY(int     saturation  READ saturation  WRITE setSaturation)
+    Q_PROPERTY(int     value       READ value       WRITE setValue)
+
+public:
+    Color() { }
+    Color(const QColor &qc) : d(qc) { }
+
+    QColor toQColor() const { return d; }
+    void fromQColor(const QColor &qc) { d = qc; }
+
+    static QScriptValue toScriptValue(QScriptEngine *engine, Color * const &in)
+    { return engine->newQObject(in); }
+
+    static void fromScriptValue(const QScriptValue &object, Color * &out)
+    { out = qobject_cast<Color *>(object.toQObject()); }
+
+    static QScriptValue createScriptValue(QScriptContext *, QScriptEngine *engine)
+    {
+        Color *c = new Color();
+        return engine->newQObject(c); // ###ScriptOwnership ???
+    }
+
+public slots:
+    void setRgb(int value) { d.setRgb(value); }
+    void setRgb(int r, int g, int b) { d.setRgb(r, g, b); }
+    Color *light() const { return new Color(d.light()); }
+    Color *dark() const { return new Color(d.dark()); }
+
+private:
+    int red() const        { return d.red(); }
+    int green() const      { return d.green(); }
+    int blue() const       { return d.blue(); }
+    QString name() const   { return d.name(); }
+    int rgb() const        { return d.rgb(); }
+    int hue() const        { return d.hue(); }
+    int saturation() const { return d.saturation(); }
+    int value() const      { return d.value(); }
+
+    void setRed(int r)        { d.setRed(r); }
+    void setGreen(int g)      { d.setGreen(g); }
+    void setBlue(int b)       { d.setBlue(b); }
+    void setName(const QString &name) { d.setNamedColor(name); }
+    void setHue(int h)        { d.setHsv(h, d.saturation(), d.value()); }
+    void setSaturation(int s) { d.setHsv(d.hue(), s, d.value()); }
+    void setValue(int v)      { d.setHsv(d.hue(), d.saturation(), v); }
+
+private:
+    QColor d;
+};
+
+Q_DECLARE_METATYPE(Color *)
+
+class Size : public QSizeF
+{
+public:
+    static QScriptValue toScriptValue(QScriptEngine *engine, const Size &s)
+    {
+        QScriptValue obj = engine->newObject();
+        obj.setProperty("width", s.width());
+        obj.setProperty("height", s.height());
+        return obj;
+    }
+
+    static void fromScriptValue(const QScriptValue &obj, Size &s)
+    {
+        s.setWidth(obj.property("width").toNumber());
+        s.setHeight(obj.property("height").toNumber());
+    }
+
+    static QScriptValue createScriptValue(QScriptContext *, QScriptEngine *engine)
+    {
+        return engine->toScriptValue(Size());
+    }
+};
+
+Q_DECLARE_METATYPE(Size)
+
 class ReportPage : public QObject {
     Q_OBJECT
     Q_OVERRIDE(QString objectName       SCRIPTABLE false)
@@ -114,9 +262,9 @@ class ReportPage : public QObject {
     Q_FLAGS(Alignment)
 
     Q_PROPERTY(int     number           READ pageNumber)
-    Q_PROPERTY(QFont   font             READ font       WRITE setFont)
-    Q_PROPERTY(QColor  color            READ color      WRITE setColor)
-    Q_PROPERTY(QColor  backgroundColor  READ bgColor    WRITE setBgColor)
+    Q_PROPERTY(Font *  font             READ font       WRITE setFont)
+    Q_PROPERTY(Color * color            READ color      WRITE setColor)
+    Q_PROPERTY(Color * backgroundColor  READ bgColor    WRITE setBgColor)
     Q_PROPERTY(int     lineStyle        READ lineStyle  WRITE setLineStyle)
     Q_PROPERTY(double  lineWidth        READ lineWidth  WRITE setLineWidth)
 
@@ -127,7 +275,7 @@ public:
         DashLine,
         DotLine,
         DashDotLine,
-        DashDotDotLine,
+        DashDotDotLine
     };
 
     enum AlignmentFlag {
@@ -143,7 +291,7 @@ public:
     Q_DECLARE_FLAGS(Alignment, AlignmentFlag)
 
 public slots:
-    QSize textSize(const QString &text);
+    Size textSize(const QString &text);
 
     void drawText(double x, double y, const QString &text);
     void drawText(double left, double top, double width, double height, Alignment align, const QString &text);
@@ -154,15 +302,15 @@ public slots:
 
 public:
     int pageNumber() const;
-    QFont font() const;
-    QColor color() const;
-    QColor bgColor() const;
+    Font *font() const;
+    Color *color() const;
+    Color *bgColor() const;
     int lineStyle() const;
     double lineWidth() const;
 
-    void setFont(const QFont &f);
-    void setColor(const QColor &c);
-    void setBgColor(const QColor &c);
+    void setFont(Font *f);
+    void setColor(Color *c);
+    void setBgColor(Color *c);
     void setLineStyle(int linestyle);
     void setLineWidth(double linewidth);
 
@@ -185,10 +333,10 @@ private:
     };
 
 struct AttrCmd : public Cmd {
-        QFont  m_font;
-        QColor m_color;
-        QColor m_bgcolor;
-        int    m_linestyle;
+        Font  * m_font;
+        Color * m_color;
+        Color * m_bgcolor;
+        int     m_linestyle;
         double  m_linewidth;
     };
 

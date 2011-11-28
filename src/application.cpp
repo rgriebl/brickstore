@@ -201,7 +201,7 @@ QStringList Application::externalResourceSearchPath(const QString &subdir) const
     } else {
         QStringList searchPath;
         foreach (const QString &bsp, baseSearchPath)
-            searchPath << bsp + subdir;
+            searchPath << bsp + QDir::separator() + subdir;
         return searchPath;
     }
 }
