@@ -877,14 +877,14 @@ Document *Document::fileLoadFrom(const QString &name, const char *type, bool imp
     else if (qstrcmp(type, "xml") == 0)
         hint = BrickLink::XMLHint_MassUpload;
     else
-        return false;
+        return 0;
 
 
     QFile f(name);
 
     if (!f.open(QIODevice::ReadOnly)) {
         MessageBox::warning(FrameWork::inst(), tr("Could not open file %1 for reading.").arg(CMB_BOLD(name)));
-        return false;
+        return 0;
     }
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -917,7 +917,7 @@ Document *Document::fileLoadFrom(const QString &name, const char *type, bool imp
     else {
         MessageBox::warning(FrameWork::inst(), tr("Could not parse the XML data in file %1:<br /><i>Line %2, column %3: %4</i>").arg(CMB_BOLD(name)).arg(eline).arg(ecol).arg(emsg));
         QApplication::restoreOverrideCursor();
-        return false;
+        return 0;
     }
 
     QApplication::restoreOverrideCursor();
@@ -945,7 +945,7 @@ Document *Document::fileLoadFrom(const QString &name, const char *type, bool imp
     }
     else {
         MessageBox::warning(FrameWork::inst(), tr("Could not parse the XML data in file %1.").arg(CMB_BOLD(name)));
-        return false;
+        return 0;
     }
 }
 
@@ -958,13 +958,13 @@ Document *Document::fileImportLDrawModel()
     QString s = QFileDialog::getOpenFileName(FrameWork::inst(), tr("Import File"), Config::inst()->documentDir(), filters.join(";;"));
 
     if (s.isEmpty())
-        return false;
+        return 0;
 
     QFile f(s);
 
     if (!f.open(QIODevice::ReadOnly)) {
         MessageBox::warning(FrameWork::inst(), tr("Could not open file %1 for reading.").arg(CMB_BOLD(s)));
-        return false;
+        return 0;
     }
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));

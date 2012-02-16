@@ -533,7 +533,7 @@ void ImportPeeronInventory::gotten()
 BrickLink::InvItemList *ImportPeeronInventory::fromPeeron(QIODevice *peeron)
 {
     if (!peeron)
-        return false;
+        return 0;
 
     QTextStream in(peeron);
 

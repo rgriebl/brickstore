@@ -618,7 +618,7 @@ QWidget *DocumentDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
 
     Document::Item *it = m_view->item(idx);
     if (!it)
-        return false;
+        return 0;
 
     QValidator *valid = 0;
     switch (idx.column()) {

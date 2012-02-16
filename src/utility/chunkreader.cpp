@@ -189,7 +189,7 @@ ChunkWriter::~ChunkWriter()
         if (m_file && m_file->isOpen())
             endChunk();
         else
-            qWarning("ChunkWriter: file was closed before ending chunk %lc", m_chunks.pop().id);
+            qWarning("ChunkWriter: file was closed before ending chunk.");
     }
 }
 
