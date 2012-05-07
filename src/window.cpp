@@ -902,6 +902,8 @@ void Window::priceGuideUpdated(BrickLink::PriceGuide *pg)
         foreach(Document::Item *item, m_settopg_list->values(pg)) {
             double p = pg->valid() ? pg->price(m_settopg_time, item->condition(), m_settopg_price) : 0;
 
+            p *= Currency::inst()->rate(m_doc->currencyCode());
+
             if (p != item->price()) {
                 Document::Item newitem = *item;
                 newitem.setPrice(p);
