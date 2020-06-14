@@ -14,8 +14,8 @@
 #include <QTabWidget>
 #include <QFileDialog>
 #include <QComboBox>
-#include <QDesktopServices>
-#include <QWindowsStyle>
+#include <QStandardPaths>
+#include <QProxyStyle>
 
 #include "settingsdialog.h"
 #include "config.h"
@@ -35,21 +35,21 @@ static int day2sec(int d)
 
 static QString systemDirName(const QString &path)
 {
-    QDesktopServices::StandardLocation locations[] = {
-        QDesktopServices::DesktopLocation,
-        QDesktopServices::DocumentsLocation,
-        QDesktopServices::MusicLocation,
-        QDesktopServices::MoviesLocation,
-        QDesktopServices::PicturesLocation,
-        QDesktopServices::TempLocation,
-        QDesktopServices::HomeLocation,
-        QDesktopServices::DataLocation,
-        QDesktopServices::CacheLocation
+    QStandardPaths::StandardLocation locations[] = {
+        QStandardPaths::DesktopLocation,
+        QStandardPaths::DocumentsLocation,
+        QStandardPaths::MusicLocation,
+        QStandardPaths::MoviesLocation,
+        QStandardPaths::PicturesLocation,
+        QStandardPaths::TempLocation,
+        QStandardPaths::HomeLocation,
+        QStandardPaths::DataLocation,
+        QStandardPaths::CacheLocation
     };
 
     for (uint i = 0; i < sizeof(locations)/sizeof(locations[0]); ++i) {
-        if (QDir(QDesktopServices::storageLocation(locations[i])) == QDir(path)) {
-            QString name = QDesktopServices::displayName(locations[i]);
+        if (QDir(QStandardPaths::writableLocation(locations[i])) == QDir(path)) {
+            QString name = QStandardPaths::displayName(locations[i]);
             if (!name.isEmpty())
                 return name;
             else
@@ -111,7 +111,7 @@ void SettingsDialog::selectDocDir(int index)
         QString newdir = QFileDialog::getExistingDirectory(this, tr("Document directory location"), w_docdir->itemData(0).toString());
 
         if (!newdir.isNull()) {
-            w_docdir->setItemData(0, QDir::convertSeparators(newdir));
+            w_docdir->setItemData(0, QDir::toNativeSeparators(newdir));
             w_docdir->setItemText(0, systemDirName(newdir));
         }
     }
@@ -191,7 +191,7 @@ void SettingsDialog::load()
     w_openbrowser->setChecked(Config::inst()->value("/General/Export/OpenBrowser", true).toBool());
     w_closeempty->setChecked(Config::inst()->closeEmptyDocuments());
 
-    QString docdir = QDir::convertSeparators(Config::inst()->documentDir());
+    QString docdir = QDir::toNativeSeparators(Config::inst()->documentDir());
     w_docdir->setItemData(0, docdir);
     w_docdir->setItemText(0, systemDirName(docdir));
 

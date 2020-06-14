@@ -17,6 +17,7 @@
 #include <QDateTime>
 #include <QUrl>
 #include <QNetworkProxy>
+#include <QNetworkAccessManager>
 
 #include "threadpool.h"
 
@@ -25,11 +26,10 @@ class QIODevice;
 class Transfer;
 class TransferThread;
 
-class TransferJob : public ThreadPoolJob {
+class TransferJob : public ThreadPoolJob // no correct anymore, but it keeps the API straight
+{
 public:
     ~TransferJob();
-
-    Transfer *transfer() const      { return qobject_cast<Transfer *>(threadPool()); }
 
     static TransferJob *get(const QUrl &url, QIODevice *file = 0);
     static TransferJob *getIfNewer(const QUrl &url, const QDateTime &dt, QIODevice *file = 0);
@@ -43,6 +43,8 @@ public:
     QByteArray *data() const         { return m_data; }
     QDateTime lastModified() const   { return m_last_modified; }
     bool wasNotModifiedSince() const { return m_was_not_modified; }
+
+    bool abort() override;
 
 private:
     friend class Transfer;
@@ -64,6 +66,7 @@ private:
     QString      m_error_string;
     QDateTime    m_only_if_newer;
     QDateTime    m_last_modified;
+    QNetworkReply *m_reply = nullptr;
 
     int          m_respcode         : 16;
     HttpMethod   m_http_method      : 1;
@@ -73,37 +76,43 @@ private:
 };
 
 
-class Transfer : public ThreadPool {
+class Transfer : public QObject {
     Q_OBJECT
 public:
-    Transfer(int threadcount);
+    Transfer(int maxConnections);
 
-    inline bool retrieve(TransferJob *job, bool high_priority = false)
-    { return execute(job, high_priority); }
+    bool retrieve(TransferJob *job, bool high_priority = false);
 
-    QNetworkProxy proxy() const  { return m_proxy; }
-    QString userAgent() const    { return m_user_agent; }
+    void abortAllJobs();
 
-    static void setDefaultUserAgent(const QString &ua)   { s_default_user_agent = ua; }
-    static QString defaultUserAgent()                    { return s_default_user_agent; }
+    QString userAgent() const;
+
+    static void setDefaultUserAgent(const QString &ua);
+    static QString defaultUserAgent();
 
 signals:
-    void finished(TransferJob *);
-    void started(TransferJob *);
-    void jobProgress(TransferJob *, int done, int total);
+    void progress(int done, int total);
+    void finished(ThreadPoolJob *);
+    //void started(TransferJob *);
+    void jobProgress(ThreadPoolJob *, int done, int total);
 
 protected:
-    virtual ThreadPoolEngine *createThreadPoolEngine();
 
 public slots:
     void setProxy(const QNetworkProxy &proxy);
     void setUserAgent(const QString &ua);
 
 private:
-    QNetworkProxy m_proxy;
-    QString       m_user_agent;
+    QString                m_user_agent;
+    int                    m_maxConnections;
+    QNetworkAccessManager *m_nam;
+    QList<TransferJob *>   m_jobs;
+    QList<TransferJob *>   m_currentJobs;
 
     static QString s_default_user_agent;
+    void schedule();
 };
+
+
 
 #endif

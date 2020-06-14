@@ -1034,12 +1034,12 @@ void FrameWork::createActions()
 
 void FrameWork::viewStatusBar(bool b)
 {
-    statusBar()->setShown(b);
+    statusBar()->setVisible(b);
 }
 
 void FrameWork::viewToolBar(bool b)
 {
-    m_toolbar->setShown(b);
+    m_toolbar->setVisible(b);
 }
 
 void FrameWork::viewFullScreen(bool b)
@@ -1192,10 +1192,10 @@ bool FrameWork::updateDatabase()
 void FrameWork::connectAllActions(bool do_connect, Window *window)
 {
     QMetaObject mo = Window::staticMetaObject;
-    QObjectList list = qFindChildren<QObject *>(this, QString());
+    QObjectList list = findChildren<QObject *>(QString());
 
     for (int i = 0; i < mo.methodCount(); ++i) {
-        const char *slot = mo.method(i).signature();
+        const char *slot = mo.method(i).methodSignature().constData();
         if (!slot || slot[0] != 'o' || slot[1] != 'n' || slot[2] != '_')
             continue;
         bool foundIt = false;
@@ -1203,7 +1203,7 @@ void FrameWork::connectAllActions(bool do_connect, Window *window)
 
         for (int j = 0; j < list.count(); ++j) {
             QObject *co = list.at(j);
-            QByteArray objName = co->objectName().toAscii();
+            QByteArray objName = co->objectName().toLatin1();
             int len = objName.length();
             if (!len || qstrncmp(slot + 3, objName.data(), len) || slot[len+3] != '_')
                 continue;
@@ -1215,7 +1215,7 @@ void FrameWork::connectAllActions(bool do_connect, Window *window)
                     if (smo->method(k).methodType() != QMetaMethod::Signal)
                         continue;
 
-                    if (!qstrncmp(smo->method(k).signature(), slot + len + 4, slotlen)) {
+                    if (!qstrncmp(smo->method(k).methodSignature().constData(), slot + len + 4, slotlen)) {
                         sigIndex = k;
                         break;
                     }
@@ -1541,7 +1541,7 @@ QStringList FrameWork::recentFiles() const
 
 void FrameWork::addToRecentFiles(const QString &s)
 {
-    QString name = QDir::convertSeparators(QFileInfo(s).absoluteFilePath());
+    QString name = QDir::toNativeSeparators(QFileInfo(s).absoluteFilePath());
 
     m_recent_files.removeAll(name);
     m_recent_files.prepend(name);

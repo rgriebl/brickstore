@@ -41,8 +41,6 @@ quint64 physicalMemory();
 QString weightToString(double gramm, QLocale::MeasurementSystem ms, bool optimize = false, bool show_unit = false);
 double stringToWeight(const QString &s, QLocale::MeasurementSystem ms);
 
-QPair<QString, QString> currencySymbolsForCountry(QLocale::Country c);
-QLocale::Country countryForCurrencySymbol(const QString &international_symbol);
 QString localForInternationalCurrencySymbol(const QString &international_symbol);
 } // namespace Utility
 

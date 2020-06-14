@@ -232,14 +232,14 @@ Window::Window(Document *doc, QWidget *parent)
     w_list->setSelectionMode(QAbstractItemView::ExtendedSelection);
     w_list->setSelectionBehavior(QAbstractItemView::SelectRows);
     w_list->setSortingEnabled(true);
-    w_list->horizontalHeader()->setClickable(true);
-    w_list->horizontalHeader()->setMovable(true);
+    w_list->horizontalHeader()->setSectionsClickable(true);
+    w_list->horizontalHeader()->setSectionsMovable(true);
     w_list->setAlternatingRowColors(true);
     w_list->setTabKeyNavigation(true);
     w_list->setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
     w_list->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
     w_list->setContextMenuPolicy(Qt::CustomContextMenu);
-    w_list->verticalHeader()->setResizeMode(QHeaderView::Fixed);
+    w_list->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     w_list->verticalHeader()->hide();
     w_list->horizontalHeader()->setHighlightSections(false);
     w_list->setEditTriggers(QAbstractItemView::DoubleClicked | QAbstractItemView::EditKeyPressed | QAbstractItemView::AnyKeyPressed);

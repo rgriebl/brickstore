@@ -15,6 +15,8 @@
 
 #include <QFile>
 #include <QApplication>
+#include <qlogging.h>
+#include <QUrlQuery>
 
 #if defined(Q_OS_WIN)
 #  include <windows.h>
@@ -62,7 +64,7 @@ int RebuildDatabase::error(const QString &error)
 
 namespace {
 
-static void nirvanaMsgHandler(QtMsgType type, const char * /*x*/)
+static void nirvanaMsgHandler(QtMsgType type, const QMessageLogContext &, const QString &)
 {
     if (type == QtFatalMsg)
         abort();
@@ -82,7 +84,7 @@ int RebuildDatabase::exec()
 
     BrickLink::TextImport blti;
 
-    qInstallMsgHandler(nirvanaMsgHandler);
+    //qInstallMessageHandler(nirvanaMsgHandler);
 
     printf("\n Rebuilding database ");
     printf("\n=====================\n");
@@ -143,7 +145,7 @@ int RebuildDatabase::exec()
     printf("\nFINISHED.\n\n");
 
 
-    qInstallMsgHandler(0);
+    qInstallMessageHandler(nullptr);
     return 0;
 }
 
@@ -217,7 +219,9 @@ bool RebuildDatabase::download()
             break;
         }
         QUrl url(tptr->m_url);
-        url.setQueryItems(tptr->m_query);
+        QUrlQuery query;
+        query.setQueryItems(tptr->m_query);
+        url.setQuery(query);
 
         TransferJob *job = TransferJob::get(url, f);
         m_trans->retrieve(job);
@@ -302,14 +306,16 @@ bool RebuildDatabase::downloadInventories(QVector<const BrickLink::Item *> &invs
                 break;
             }
 
-            QList<QPair<QString, QString> > query;
-            query << QPair<QString, QString>("a",            "a")
-            << QPair<QString, QString>("viewType",     "4")
-            << QPair<QString, QString>("itemTypeInv",  QChar(item->itemType()->id()))
-            << QPair<QString, QString>("itemNo",       item->id())
-            << QPair<QString, QString>("downloadType", "X");
-
-            url.setQueryItems(query);
+            QList<QPair<QString, QString> > items {
+                { QPair<QString, QString>("a",            "a") },
+                { QPair<QString, QString>("viewType",     "4") },
+                { QPair<QString, QString>("itemTypeInv",  QChar(item->itemType()->id())) },
+                { QPair<QString, QString>("itemNo",       item->id()) },
+                { QPair<QString, QString>("downloadType", "X") }
+            };
+            QUrlQuery query;
+            query.setQueryItems(items);
+            url.setQuery(query);
             TransferJob *job = TransferJob::get(url, f);
             m_trans->retrieve(job);
             m_downloads_in_progress++;

@@ -152,8 +152,7 @@ Application::Application(bool rebuild_db_only, int _argc, char **_argv)
 
         MessageBox::setDefaultTitle(applicationName());
 
-        for (int i = 1; i < argc(); i++)
-            m_files_to_open << argv()[i];
+        m_files_to_open << arguments().mid(1);
 
         FrameWork::inst()->show();
 #if defined(Q_OS_MAC)
@@ -410,8 +409,8 @@ bool Application::isClient(int timeout)
 
         if (client.state() == QLocalSocket::ConnectedState) {
             QStringList files;
-            for (int i = 1; i < argc(); i++) {
-                QFileInfo fi(argv()[i]);
+            Q_FOREACH(const QString &arg, arguments()) {
+                QFileInfo fi(arg);
                 if (fi.exists() && fi.isFile())
                     files << fi.absoluteFilePath();
             }

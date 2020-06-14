@@ -816,7 +816,7 @@ BrickLink::ItemDelegate::ItemDelegate(QObject *parent, Options options)
 void BrickLink::ItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
     if (m_options & AlwaysShowSelection) {
-        QStyleOptionViewItemV4 myoption(option);
+        QStyleOptionViewItem myoption(option);
         myoption.state |= QStyle::State_Active;
         QStyledItemDelegate::paint(painter, myoption, index);
     } else {

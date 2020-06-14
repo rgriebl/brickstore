@@ -27,6 +27,7 @@
 #include <QPixmapCache>
 #include <QDebug>
 #include <QThread>
+#include <QUrlQuery>
 
 #include "config.h"
 #include "utility.h"
@@ -63,7 +64,9 @@ QUrl BrickLink::Core::url(UrlList u, const void *opt, const void *opt2)
             const Item *item = static_cast <const Item *>(opt);
 
             url = "http://www.bricklink.com/catalogItem.asp";
-            url.addQueryItem(QChar(item->itemType()->id()), item->id());
+            QUrlQuery query;
+            query.addQueryItem(QChar(item->itemType()->id()), item->id());
+            url.setQuery(query);
         }
         break;
 
@@ -72,10 +75,11 @@ QUrl BrickLink::Core::url(UrlList u, const void *opt, const void *opt2)
             const Item *item = static_cast <const Item *>(opt);
 
             url = "http://www.bricklink.com/catalogPriceGuide.asp";
-            url.addQueryItem(QChar(item->itemType()->id()), item->id());
-
+            QUrlQuery query;
+            query.addQueryItem(QChar(item->itemType()->id()), item->id());
             if (item->itemType()->hasColors())
-                url.addQueryItem("colorID", QString::number(static_cast <const Color *>(opt2)->id()));
+                query.addQueryItem("colorID", QString::number(static_cast <const Color *>(opt2)->id()));
+            url.setQuery(query);
         }
         break;
 
@@ -84,8 +88,9 @@ QUrl BrickLink::Core::url(UrlList u, const void *opt, const void *opt2)
             const Item *item = static_cast <const Item *>(opt);
 
             url = "http://www.bricklink.com/search.asp";
-            url.addQueryItem("viewFrom", "sa");
-            url.addQueryItem("itemType", QChar(item->itemType()->id()));
+            QUrlQuery query;
+            query.addQueryItem("viewFrom", "sa");
+            query.addQueryItem("itemType", QChar(item->itemType()->id()));
 
             // workaround for BL not accepting the -X suffix for sets, instructions and boxes
             QString id = item->id();
@@ -96,10 +101,11 @@ QUrl BrickLink::Core::url(UrlList u, const void *opt, const void *opt2)
                 if (pos >= 0)
                     id.truncate(pos);
             }
-            url.addQueryItem("q", id);
+            query.addQueryItem("q", id);
 
             if (item->itemType()->hasColors())
-                url.addQueryItem("colorID", QString::number(static_cast <const Color *>(opt2)->id()));
+                query.addQueryItem("colorID", QString::number(static_cast <const Color *>(opt2)->id()));
+            url.setQuery(query);
         }
         break;
 
@@ -108,11 +114,13 @@ QUrl BrickLink::Core::url(UrlList u, const void *opt, const void *opt2)
             const Item *item = static_cast <const Item *>(opt);
 
             url = "http://www.bricklink.com/catalogItemIn.asp";
-            url.addQueryItem(QChar(item->itemType()->id()), item->id());
-            url.addQueryItem("in", "S");
+            QUrlQuery query;
+            query.addQueryItem(QChar(item->itemType()->id()), item->id());
+            query.addQueryItem("in", "S");
 
             if (item->itemType()->hasColors())
-                url.addQueryItem("colorID", QString::number(static_cast <const Color *>(opt2)->id()));
+                query.addQueryItem("colorID", QString::number(static_cast <const Color *>(opt2)->id()));
+            url.setQuery(query);
         }
         break;
 
@@ -120,28 +128,33 @@ QUrl BrickLink::Core::url(UrlList u, const void *opt, const void *opt2)
         url = "http://www.bricklink.com/catalogReqList.asp?pg=1&chgUserID=&viewActionType=R";
         break;
 
-    case URL_ItemChangeLog:
+    case URL_ItemChangeLog: {
         url = "http://www.bricklink.com/catalogReqList.asp?pg=1&chgUserID=&viewActionType=I";
-
+        QUrlQuery query;
         if (opt)
-            url.addQueryItem("q", static_cast <const char *>(opt));
+            query.addQueryItem("q", static_cast <const char *>(opt));
+        url.setQuery(query);
         break;
-
-    case URL_PeeronInfo:
+    }
+    case URL_PeeronInfo: {
         if (opt) {
             url = "http://peeron.com/cgi-bin/invcgis/psearch";
-            url.addQueryItem("query", static_cast <const Item *>(opt)->id());
-            url.addQueryItem("limit", "none");
+            QUrlQuery query;
+            query.addQueryItem("query", static_cast <const Item *>(opt)->id());
+            query.addQueryItem("limit", "none");
+            url.setQuery(query);
         }
         break;
-
-    case URL_StoreItemDetail:
+    }
+    case URL_StoreItemDetail: {
         if (opt) {
             url = "http://www.bricklink.com/inventory_detail.asp";
-            url.addQueryItem("invID", QString::number(*static_cast <const unsigned int *>(opt)));
+            QUrlQuery query;
+            query.addQueryItem("invID", QString::number(*static_cast <const unsigned int *>(opt)));
+            url.setQuery(query);
         }
         break;
-
+    }
     default:
         break;
     }

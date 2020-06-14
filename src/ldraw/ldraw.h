@@ -273,6 +273,6 @@ inline Core *create(const QString &datadir, QString *errstring) { return Core::c
 // tell Qt that Parts are shared and can't simply be deleted
 // (QCache will use that function to determine what can really be purged from the cache)
 
-template<> inline bool qIsDetached<LDraw::Part>(LDraw::Part &p) { return p.refCount() == 0; }
+//TODO5 REMOVED template<> inline bool qIsDetached<LDraw::Part>(LDraw::Part &p) { return p.refCount() == 0; }
 
 #endif

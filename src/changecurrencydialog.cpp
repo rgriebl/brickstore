@@ -2,6 +2,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QValidator>
+#include <QButtonGroup>
 
 #include "currency.h"
 

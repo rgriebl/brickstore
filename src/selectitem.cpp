@@ -72,7 +72,7 @@ public:
 
     virtual void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
     {
-        QStyleOptionViewItemV4 myoption(option);
+        QStyleOptionViewItem myoption(option);
         if (index.isValid() && qvariant_cast<const BrickLink::Category *>(index.data(BrickLink::CategoryPointerRole)) == BrickLink::CategoryModel::AllCategories)
             myoption.font.setBold(true);
         BrickLink::ItemDelegate::paint(painter, myoption, index);

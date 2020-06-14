@@ -226,7 +226,7 @@ void FilterEdit::paintEvent(QPaintEvent *e)
     QLineEdit::paintEvent(e);
 
     if (!hasFocus() && !m_placeholdertext.isEmpty() && text().isEmpty()) {
-        QStyleOptionFrameV2 opt;
+        QStyleOptionFrame opt;
         initStyleOption(&opt);
         QRect cr = style()->subElementRect(QStyle::SE_LineEditContents, &opt, this);
         int l, r, t, b;

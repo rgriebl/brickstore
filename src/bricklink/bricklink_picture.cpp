@@ -17,6 +17,7 @@
 #include <QTimer>
 #include <QPixmapCache>
 #include <QImage>
+#include <QUrlQuery>
 
 #include "threadpool.h"
 
@@ -235,10 +236,12 @@ void BrickLink::Core::updatePicture(BrickLink::Picture *pic, bool high_priority)
     else {
         url = "http://www.bricklink.com/getPic.asp";
         // ?itemType=%c&colorID=%d&itemNo=%s", pic->item ( )->itemType ( )->pictureId ( ), pic->color ( )->id ( ), pic->item ( )->id ( ));
+        QUrlQuery query;
 
-        url.addQueryItem("itemType", QChar(pic->item()->itemType()->pictureId()));
-        url.addQueryItem("colorID",  QString::number(pic->color()->id()));
-        url.addQueryItem("itemNo",   pic->item()->id());
+        query.addQueryItem("itemType", QChar(pic->item()->itemType()->pictureId()));
+        query.addQueryItem("colorID",  QString::number(pic->color()->id()));
+        query.addQueryItem("itemNo",   pic->item()->id());
+        url.setQuery(query);
     }
 
     //qDebug ( "PIC request started for %s", (const char *) url );

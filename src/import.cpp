@@ -18,6 +18,7 @@
 #include <QBuffer>
 #include <QTextStream>
 #include <QRegExp>
+#include <QUrlQuery>
 
 #include "lzmadec.h"
 
@@ -37,22 +38,23 @@ ImportBLStore::ImportBLStore(ProgressDialog *pd)
     pd->setMessageText(tr("Download: %p"));
 
     QUrl url("http://www.bricklink.com/invExcelFinal.asp");
-
-    url.addQueryItem("itemType",      "");
-    url.addQueryItem("catID",         "");
-    url.addQueryItem("colorID",       "");
-    url.addQueryItem("invNew",        "");
-    url.addQueryItem("itemYear",      "");
-    url.addQueryItem("viewType",      "x");    // XML
-    url.addQueryItem("invStock",      "Y");
-    url.addQueryItem("invStockOnly",  "");
-    url.addQueryItem("invQty",        "");
-    url.addQueryItem("invQtyMin",     "0");
-    url.addQueryItem("invQtyMax",     "0");
-    url.addQueryItem("invBrikTrak",   "");
-    url.addQueryItem("invDesc",       "");
-    url.addQueryItem("frmUsername",   Config::inst()->loginForBrickLink().first);
-    url.addQueryItem("frmPassword",   Config::inst()->loginForBrickLink().second);
+    QUrlQuery query;
+    query.addQueryItem("itemType",      "");
+    query.addQueryItem("catID",         "");
+    query.addQueryItem("colorID",       "");
+    query.addQueryItem("invNew",        "");
+    query.addQueryItem("itemYear",      "");
+    query.addQueryItem("viewType",      "x");    // XML
+    query.addQueryItem("invStock",      "Y");
+    query.addQueryItem("invStockOnly",  "");
+    query.addQueryItem("invQty",        "");
+    query.addQueryItem("invQtyMin",     "0");
+    query.addQueryItem("invQtyMax",     "0");
+    query.addQueryItem("invBrikTrak",   "");
+    query.addQueryItem("invDesc",       "");
+    query.addQueryItem("frmUsername",   Config::inst()->loginForBrickLink().first);
+    query.addQueryItem("frmPassword",   Config::inst()->loginForBrickLink().second);
+    url.setQuery(query);
 
     pd->post(url);
 
@@ -138,25 +140,26 @@ void ImportBLOrder::init()
     m_progress->setMessageText(tr("Download: %p"));
 
     QUrl url("http://www.bricklink.com/orderExcelFinal.asp");
-
-    url.addQueryItem("orderType",     m_order_type == BrickLink::Placed ? "placed" : "received");
-    url.addQueryItem("action",        "save");
-    url.addQueryItem("orderID",       m_order_id);
-    url.addQueryItem("viewType",      "X");    // XML
-    url.addQueryItem("getDateFormat", "1");    // YYYY/MM/DD
-    url.addQueryItem("getOrders",     m_order_id.isEmpty() ? "date" : "");
-    url.addQueryItem("fDD",           QString::number(m_order_from.day()));
-    url.addQueryItem("fMM",           QString::number(m_order_from.month()));
-    url.addQueryItem("fYY",           QString::number(m_order_from.year()));
-    url.addQueryItem("tDD",           QString::number(m_order_to.day()));
-    url.addQueryItem("tMM",           QString::number(m_order_to.month()));
-    url.addQueryItem("tYY",           QString::number(m_order_to.year()));
-    url.addQueryItem("getDetail",     "y");    // get items (that's why we do this in the first place...)
-    url.addQueryItem("getFiled",      "Y");    // regardless of filed state
-    url.addQueryItem("getStatus",     "");     // regardless of status
-    url.addQueryItem("statusID",      "");
-    url.addQueryItem("frmUsername",   Config::inst()->loginForBrickLink().first);
-    url.addQueryItem("frmPassword",   Config::inst()->loginForBrickLink().second);
+    QUrlQuery query;
+    query.addQueryItem("orderType",     m_order_type == BrickLink::Placed ? "placed" : "received");
+    query.addQueryItem("action",        "save");
+    query.addQueryItem("orderID",       m_order_id);
+    query.addQueryItem("viewType",      "X");    // XML
+    query.addQueryItem("getDateFormat", "1");    // YYYY/MM/DD
+    query.addQueryItem("getOrders",     m_order_id.isEmpty() ? "date" : "");
+    query.addQueryItem("fDD",           QString::number(m_order_from.day()));
+    query.addQueryItem("fMM",           QString::number(m_order_from.month()));
+    query.addQueryItem("fYY",           QString::number(m_order_from.year()));
+    query.addQueryItem("tDD",           QString::number(m_order_to.day()));
+    query.addQueryItem("tMM",           QString::number(m_order_to.month()));
+    query.addQueryItem("tYY",           QString::number(m_order_to.year()));
+    query.addQueryItem("getDetail",     "y");    // get items (that's why we do this in the first place...)
+    query.addQueryItem("getFiled",      "Y");    // regardless of filed state
+    query.addQueryItem("getStatus",     "");     // regardless of status
+    query.addQueryItem("statusID",      "");
+    query.addQueryItem("frmUsername",   Config::inst()->loginForBrickLink().first);
+    query.addQueryItem("frmPassword",   Config::inst()->loginForBrickLink().second);
+    url.setQuery(query);
 
     m_url = url;
     m_progress->post(url);
@@ -273,9 +276,11 @@ void ImportBLOrder::gotten()
     }
 
     if (m_retry_placed) {
-        QList<QPair<QString, QString> > query = m_url.queryItems();
-        query[0].second = QLatin1String("placed");
-        m_url.setQueryItems(query);
+        QList<QPair<QString, QString> > items = QUrlQuery(m_url).queryItems();
+        items[0].second = QLatin1String("placed");
+        QUrlQuery query;
+        query.setQueryItems(items);
+        m_url.setQuery(query);
 
         m_progress->post(m_url);
         m_progress->layout();
@@ -299,7 +304,7 @@ QDate ImportBLOrder::ymd2date(const QString &ymd)
 {
     QDate d;
     QStringList sl = ymd.split(QLatin1Char('/'));
-    d.setYMD(sl [0].toInt(), sl [1].toInt(), sl [2].toInt());
+    d.setDate(sl [0].toInt(), sl [1].toInt(), sl [2].toInt());
     return d;
 }
 
@@ -313,9 +318,10 @@ ImportBLCart::ImportBLCart(int shopid, int cartid, ProgressDialog *pd)
     pd->setMessageText(tr("Download: %p"));
 
     QUrl url("http://www.bricklink.com/storeCart.asp");
-
-    url.addQueryItem("h", QString::number(shopid));
-    url.addQueryItem("b", QString::number(cartid));
+    QUrlQuery query;
+    query.addQueryItem("h", QString::number(shopid));
+    query.addQueryItem("b", QString::number(cartid));
+    url.setQuery(query);
 
     pd->get(url);
     pd->layout();

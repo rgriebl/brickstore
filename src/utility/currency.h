@@ -21,7 +21,7 @@
 
 class QKeyEvent;
 class QLineEdit;
-class QHttp;
+class QNetworkAccessManager;
 class QBuffer;
 
 class Currency : public QObject
@@ -60,9 +60,6 @@ public slots:
 signals:
     void ratesChanged();
 
-private slots:
-    void updateRatesDone(bool error);
-
 private:
     Currency();
     Currency(const Currency &);
@@ -70,8 +67,7 @@ private:
 
     static void parseRates(const QStringList &ratesList, QMap<QString, double> &ratesMap);
 
-    QHttp *m_http;
-    QBuffer *m_buffer;
+    QNetworkAccessManager *m_nam;
     QMap<QString, qreal> m_rates;
     QMap<QString, qreal> m_customRates;
     QDateTime m_lastUpdate;

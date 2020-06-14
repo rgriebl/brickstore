@@ -14,9 +14,9 @@
 include(../release.pri)
 
 TEMPLATE     = app
-CONFIG      *= warn_on thread qt uitools
+CONFIG      *= warn_on thread qt # uitools
 # CONFIG      *= modeltest
-QT          *= core gui xml network script scripttools
+QT          *= core gui xml network script scripttools printsupport uitools
 
 static:error("ERROR: Static builds are not supported")
 

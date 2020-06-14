@@ -19,6 +19,7 @@
 #include <QClipboard>
 #include <QRegExp>
 #include <QDesktopServices>
+#include <QStandardPaths>
 
 #if defined( MODELTEST )
 #  include "modeltest.h"
@@ -386,7 +387,7 @@ static const char *autosavemagic = "||BRICKSTORE AUTOSAVE MAGIC||";
 
 void Document::deleteAutosave()
 {
-    QDir temp(QDesktopServices::storageLocation(QDesktopServices::TempLocation));
+    QDir temp(QStandardPaths::writableLocation(QStandardPaths::TempLocation));
     QString filename = QString("brickstore_%1.autosave").arg(m_uuid.toString());
     temp.remove(filename);
 }
@@ -396,7 +397,7 @@ void Document::autosave()
     if (m_uuid.isNull() || !isModified())
         return;
 
-    QDir temp(QDesktopServices::storageLocation(QDesktopServices::TempLocation));
+    QDir temp(QStandardPaths::writableLocation(QStandardPaths::TempLocation));
     QString filename = QString("brickstore_%1.autosave").arg(m_uuid.toString());
 
     QFile f(temp.filePath(filename));
@@ -414,7 +415,7 @@ QList<Document::ItemList> Document::restoreAutosave()
 {
     QList<ItemList> restored;
 
-    QDir temp(QDesktopServices::storageLocation(QDesktopServices::TempLocation));
+    QDir temp(QStandardPaths::writableLocation(QStandardPaths::TempLocation));
     QStringList ondisk = temp.entryList(QStringList(QLatin1String("brickstore_*.autosave")));
 
     foreach (QString filename, ondisk) {
@@ -1045,7 +1046,7 @@ void Document::setFileName(const QString &str)
     QFileInfo fi(str);
 
     if (fi.exists())
-        setTitle(QDir::convertSeparators(fi.absoluteFilePath()));
+        setTitle(QDir::toNativeSeparators(fi.absoluteFilePath()));
 
     emit fileNameChanged(m_filename);
 }
@@ -1342,7 +1343,7 @@ Qt::ItemFlags Document::flags(const QModelIndex &index) const
     case YearReleased:
     case LotId       : break;
     case Stockroom   :
-    case Retain      : ifs |= Qt::ItemIsUserCheckable; //no break;
+    case Retain      : ifs |= Qt::ItemIsUserCheckable; Q_FALLTHROUGH();
     default          : ifs |= Qt::ItemIsEditable; break;
     }
     return ifs;

@@ -134,7 +134,7 @@ protected:
     void paintEvent(QPaintEvent *)
     {
         QPainter p(this);
-        QStyleOptionTabBarBaseV2 option;
+        QStyleOptionTabBarBase option;
         option.initFrom(this);
         option.tabBarRect = option.rect;
         if (m_tabbar) {
@@ -253,7 +253,7 @@ Workspace::Workspace(QWidget *parent, Qt::WindowFlags f)
     m_stack = new QStackedLayout();
 
     TabBarSideButton *tabList = new TabBarSideButton(m_tabbar);
-    tabList->setIcon(QIcon(tablist_xpm));
+    tabList->setIcon(QIcon(QPixmap(tablist_xpm)));
     tabList->setAutoRaise(true);
     tabList->setPopupMode(QToolButton::InstantPopup);
     tabList->setToolButtonStyle(Qt::ToolButtonIconOnly);

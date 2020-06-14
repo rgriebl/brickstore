@@ -6,10 +6,10 @@ INCLUDEPATH += $$RELPWD
 DEPENDPATH  += $$RELPWD
 
 HEADERS += \
-  ldraw.h \
-  renderwidget.h \
+  $$PWD/ldraw.h \
+  $$PWD/renderwidget.h \
 
 SOURCES += \
-  ldraw.cpp \
-  renderwidget.cpp \
+  $$PWD/ldraw.cpp \
+  $$PWD/renderwidget.cpp \
 

@@ -15,14 +15,16 @@
 #include <QThread>
 #include <QFile>
 #include <QLocale>
-#include <QHttp>
+#include <QNetworkAccessManager>
 #include <QTimer>
-#include <QNetworkCookieJar>
+#include <QNetworkReply>
 #include <QCoreApplication>
+#include <QUrlQuery>
 
 #include "transfer.h"
+#include "config.h"
 
-
+#if 0
 // copied from Qt4.4 network access
 static QDateTime fromHttpDate(const QByteArray &value)
 {
@@ -59,12 +61,12 @@ static QByteArray toHttpDate(const QDateTime &dt)
 {
     return QLocale::c().toString(dt, QLatin1String("ddd, dd MMM yyyy hh:mm:ss 'GMT'")).toLatin1();
 }
-
+#endif
 
 // ===========================================================================
 // ===========================================================================
 // ===========================================================================
-
+/*
 
 class TransferEngine : public ThreadPoolEngine {
     Q_OBJECT
@@ -74,81 +76,11 @@ public:
         : ThreadPoolEngine(trans)
     {
         m_user_agent = trans->userAgent();
-        m_http = new QHttp(this);
-        m_http->setProxy(trans->proxy());
-
-        connect(m_http, SIGNAL(responseHeaderReceived(const QHttpResponseHeader &)), this, SLOT(responseHeaderReceived(const QHttpResponseHeader &)));
-        connect(m_http, SIGNAL(readyRead(const QHttpResponseHeader &)), this, SLOT(readyRead(const QHttpResponseHeader &)));
-        connect(m_http, SIGNAL(dataReadProgress(int, int)), this, SLOT(progress(int, int)));
-        connect(m_http, SIGNAL(dataSendProgress(int, int)), this, SLOT(progress(int, int)));
-        connect(m_http, SIGNAL(requestFinished(int, bool)), this, SLOT(finished(int, bool)));
+        m_nam = new QNetworkAccessManager(this);
+        m_nam->setProxy(trans->proxy());
     }
 
 protected:
-    virtual void run()
-    {
-        TransferJob *j = static_cast<TransferJob *>(job());
-
-        j->m_effective_url = j->m_url;
-
-        download();
-    }
-
-    void download()
-    {
-        TransferJob *j = static_cast<TransferJob *>(job());
-
-        bool isget = (j->m_http_method == TransferJob::HttpGet);
-        QUrl url = j->effectiveUrl();
-
-        if (url.host() != m_last_url.host() || url.port() != m_last_url.port())
-            m_http->setHost(url.host(), url.port(80));
-
-        QHttpRequestHeader req;
-        QByteArray postdata;
-
-        if (isget) {
-            QString path = url.path();
-            if (url.hasQuery())
-                path = path + QLatin1String("?") + url.encodedQuery();
-
-            req.setRequest("GET", path);
-
-            if (j->m_only_if_newer.isValid())
-                req.setValue(QLatin1String("If-Modified-Since"), toHttpDate(j->m_only_if_newer));
-        }
-        else {
-            req.setRequest(QLatin1String("POST"), url.path());
-            postdata = url.encodedQuery();
-            req.setContentType(QLatin1String("application/x-www-form-urlencoded"));
-            req.setContentLength(postdata.size());
-        }
-        req.setValue(QLatin1String("Host"), url.host());
-        req.setValue(QLatin1String("User-Agent"), m_user_agent);
-
-        s_cookie_mutex.lock();
-        QList<QNetworkCookie> cookies = s_cookies.cookiesForUrl(j->m_effective_url);
-        s_cookie_mutex.unlock();
-        
-        if (!cookies.isEmpty()) {
-            QByteArray rawcookies;
-            
-            foreach (QNetworkCookie c, cookies) {
-                rawcookies += c.toRawForm(QNetworkCookie::NameAndValueOnly);
-                rawcookies += ';';
-            }
-            rawcookies.chop(1);
-            
-            req.setValue(QLatin1String("Cookie"), rawcookies);
-        }
-        
-        //qDebug() << req.toString();
-
-        m_job_http_id = m_http->request(req, postdata, j->m_file);
-
-        m_last_url = url;
-    }
-
 
 protected slots:
     void responseHeaderReceived(const QHttpResponseHeader &resp)
@@ -159,22 +91,7 @@ protected slots:
         j->m_error_string = resp.reasonPhrase();
 
         switch (j->m_respcode) {
-        case 301:
-        case 302:
-        case 303:
-        case 307: {
-            QUrl redirect = resp.value("Location");
-            if (!redirect.isEmpty()) {
-                j->m_effective_url = j->m_effective_url.resolved(redirect);
-                download();
-                //not finished yet!
-            }
-            else {
-                j->setStatus(TransferJob::Failed);
-            }
-            break;
-        }
-        case 304: 
+        case 304:
             if (j->m_only_if_newer.isValid()) {
                 j->m_was_not_modified = true;
                 j->setStatus(TransferJob::Completed);
@@ -200,7 +117,7 @@ protected slots:
             }
             break;
         }
-        default: 
+        default:
             j->setStatus(TransferJob::Failed);
             break;
         }
@@ -246,17 +163,13 @@ protected slots:
     }
 
 protected:
-    QHttp *m_http;
+    QNetworkAccessManager *m_nam;
     int m_job_http_id;
     QString m_user_agent;
     QUrl m_last_url;
     
-    static QNetworkCookieJar s_cookies;
-    static QMutex            s_cookie_mutex;
 };
-
-QNetworkCookieJar TransferEngine::s_cookies;
-QMutex TransferEngine::s_cookie_mutex;
+*/
 
 // ===========================================================================
 // ===========================================================================
@@ -292,6 +205,12 @@ TransferJob *TransferJob::post(const QUrl &url, QIODevice *file)
     return create(HttpPost, url, QDateTime(), file);
 }
 
+bool TransferJob::abort()
+{
+    //TODO5
+    return false;
+}
+
 TransferJob *TransferJob::create(HttpMethod method, const QUrl &url, const QDateTime &ifnewer, QIODevice *file)
 {
     if (url.isEmpty())
@@ -300,6 +219,8 @@ TransferJob *TransferJob::create(HttpMethod method, const QUrl &url, const QDate
     TransferJob *j = new TransferJob();
 
     j->m_url = url;
+    if (j->m_url.scheme().isEmpty())
+        j->m_url.setScheme("http");
     j->m_only_if_newer = ifnewer;
     j->m_data = file ? 0 : new QByteArray();
     j->m_file = file ? file : 0;
@@ -317,19 +238,20 @@ TransferJob *TransferJob::create(HttpMethod method, const QUrl &url, const QDate
 
 QString Transfer::s_default_user_agent;
 
-Transfer::Transfer(int threadcount)
-    : ThreadPool()
+Transfer::Transfer(int maxConnections)
+    : m_maxConnections(maxConnections)
+    , m_nam(new QNetworkAccessManager(this))
 {
+    m_nam->setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
+
     if (s_default_user_agent.isEmpty())
         s_default_user_agent = QString("%1/%2").arg(qApp->applicationName()).arg(qApp->applicationVersion());
     m_user_agent = s_default_user_agent;
-
-    init(threadcount);
 }
 
 void Transfer::setProxy(const QNetworkProxy &proxy)
 {
-    m_proxy = proxy;
+    m_nam->setProxy(proxy);
 }
 
 void Transfer::setUserAgent(const QString &ua)
@@ -337,9 +259,127 @@ void Transfer::setUserAgent(const QString &ua)
     m_user_agent = ua;
 }
 
-ThreadPoolEngine *Transfer::createThreadPoolEngine()
+bool Transfer::retrieve(TransferJob *job, bool high_priority)
 {
-    return new TransferEngine(this);
+    if (high_priority)
+        m_jobs.prepend(job);
+    else
+        m_jobs.append(job);
+
+    schedule();
+    return true;
 }
 
-#include "transfer.moc"
+void Transfer::abortAllJobs()
+{
+
+}
+
+void Transfer::schedule()
+{
+    if ((m_currentJobs.size() <= m_maxConnections) && !m_jobs.isEmpty()) {
+        auto j = m_jobs.takeFirst();
+
+        bool isget = (j->m_http_method == TransferJob::HttpGet);
+        QUrl url = j->url();
+        j->m_effective_url = url;
+
+        //TODO5: bad hack to get things started again
+        if (url.host().endsWith("bricklink.com")) {
+            // BL wants a login for DB downloads as well
+            QUrlQuery query(url);
+            qWarning() << Config::inst()->loginForBrickLink();
+            query.addQueryItem("usernameOrEmail", Config::inst()->loginForBrickLink().first);
+            query.addQueryItem("password", Config::inst()->loginForBrickLink().second);
+            url.setQuery(query);
+        }
+
+        qWarning() << "DL" << url;
+
+        QNetworkRequest req(url);
+        req.setHeader(QNetworkRequest::UserAgentHeader, m_user_agent);
+
+        if (isget) {
+            if (j->m_only_if_newer.isValid())
+                req.setHeader(QNetworkRequest::IfModifiedSinceHeader, j->m_only_if_newer);
+            j->m_reply = m_nam->get(req);
+        }
+        else {
+            req.setHeader(QNetworkRequest::ContentTypeHeader, QLatin1String("application/x-www-form-urlencoded"));
+            QByteArray postdata = url.query(QUrl::FullyEncoded).toLatin1();
+            j->m_reply = m_nam->post(req, postdata);
+        }
+        connect(j->m_reply, &QNetworkReply::finished, this, [this, j]() {
+            auto error = j->m_reply->error();
+
+            if (error != QNetworkReply::NoError) {
+                j->m_error_string = j->m_reply->errorString();
+                j->setStatus(TransferJob::Failed);
+            } else {
+                j->m_respcode = j->m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+                j->m_effective_url = j->m_reply->url();
+
+                switch (j->m_respcode) {
+                case 304:
+                    if (j->m_only_if_newer.isValid()) {
+                        j->m_was_not_modified = true;
+                        j->setStatus(TransferJob::Completed);
+                    }
+                    else {
+                        j->setStatus(TransferJob::Failed);
+                    }
+                    break;
+
+                case 200: {
+                    auto lastmod = j->m_reply->header(QNetworkRequest::LastModifiedHeader);
+                    if (lastmod.isValid())
+                        j->m_last_modified = lastmod.toDateTime();
+                    if (j->m_data)
+                        *j->m_data = j->m_reply->readAll();
+                    else if (j->m_file) {
+                        j->m_file->write(j->m_reply->readAll());
+                        j->m_file->close();
+                    }
+                    j->setStatus(TransferJob::Completed);
+                    break;
+                }
+                default:
+                    j->setStatus(TransferJob::Failed);
+                    break;
+                }
+            }
+            j->m_reply->deleteLater();
+            j->m_reply = nullptr;
+
+            if (!j->isActive())
+                emit finished(j);
+
+            m_currentJobs.removeAll(j);
+            emit progress(m_currentJobs.size(), m_jobs.size() + m_currentJobs.size());
+
+            QMetaObject::invokeMethod(this, &Transfer::schedule, Qt::QueuedConnection);
+        });
+
+        connect(j->m_reply, &QNetworkReply::downloadProgress, this, [this, j](qint64 recv, qint64 total) {
+            emit jobProgress(j, int(recv), int(total));
+        });
+
+        m_currentJobs.append(j);
+    }
+}
+
+QString Transfer::userAgent() const
+{
+    return m_user_agent;
+}
+
+void Transfer::setDefaultUserAgent(const QString &ua)
+{
+    s_default_user_agent = ua;
+}
+
+QString Transfer::defaultUserAgent()
+{
+    return s_default_user_agent;
+}
+

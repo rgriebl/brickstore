@@ -22,7 +22,8 @@
 #include <QLineEdit>
 #include <QKeyEvent>
 #include <QDataStream>
-#include <QHttp>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
 #include <QBuffer>
 #include <QXmlStreamReader>
 
@@ -56,7 +57,7 @@ static void baseConvert(QMap<QString, qreal> &rates)
 Currency *Currency::s_inst = 0;
 
 Currency::Currency()
-    : m_http(0), m_buffer(0)
+    : m_nam(nullptr)
 {
     m_lastUpdate = Config::inst()->value("/Rates/LastUpdate").toDateTime();
     QStringList rates = Config::inst()->value("/Rates/Normal").toString().split(QLatin1Char(','));
@@ -147,61 +148,53 @@ void Currency::unsetCustomRate(const QString &currencyCode)
 
 void Currency::updateRates()
 {
-    if (m_buffer && m_buffer->isOpen())
-        return;
+    if (!m_nam) {
+        m_nam = new QNetworkAccessManager(this);
+        m_nam->setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
+        connect(m_nam, &QNetworkAccessManager::finished,
+                this, [this](QNetworkReply *reply) {
+            if (reply->error() != QNetworkReply::NoError) {
+                if (Application::inst()->isOnline())
+                    MessageBox::warning(FrameWork::inst(), tr("There was an error downloading the exchange rates from the ECB server:<br>%2").arg(reply->errorString()));
+            } else {
+                auto r = reply->readAll();
+                QXmlStreamReader reader(r);
+                QMap<QString, qreal> newRates;
+                QLocale c = QLocale::c();
 
-    if (!m_http) {
-        m_http = new QHttp(this);
-        connect(m_http, SIGNAL(done(bool)), this, SLOT(updateRatesDone(bool)));
-        m_buffer = new QBuffer(m_http);
+                while (!reader.atEnd()) {
+                    if (reader.readNext() == QXmlStreamReader::StartElement &&
+                        reader.name() == QLatin1String("Cube") &&
+                        reader.attributes().hasAttribute(QLatin1String("currency"))) {
+
+                        QString currency = reader.attributes().value(QLatin1String("currency")).toString();
+                        qreal rate = c.toDouble(reader.attributes().value(QLatin1String("rate")).toString());
+
+                        if (currency.length() == 3 && rate > 0)
+                            newRates.insert(currency, rate);
+                    }
+                }
+                baseConvert(newRates);
+
+                if (reader.hasError() || newRates.isEmpty()) {
+                    QString err;
+                    if (reader.hasError())
+                        err = tr("%1 (line %2, column %3)").arg(reader.errorString()).arg(reader.lineNumber()).arg(reader.columnNumber());
+                    else
+                        err = tr("no currency data found");
+                    MessageBox::warning(FrameWork::inst(), tr("There was an error parsing the exchange rates from the ECB server:\n%1").arg(err));
+                } else {
+                    m_rates = newRates;
+                    m_lastUpdate = QDateTime::currentDateTime();
+                    emit ratesChanged();
+                }
+            }
+            reply->deleteLater();
+        });
     }
     if (Application::inst()->isOnline()) {
-        m_buffer->open(QIODevice::ReadWrite | QIODevice::Truncate);
-        m_http->setHost(QLatin1String("www.ecb.europa.eu"));
-        m_http->get(QLatin1String("/stats/eurofxref/eurofxref-daily.xml"), m_buffer);
+        m_nam->get(QNetworkRequest(QUrl("http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml")));
     }
-}
-
-void Currency::updateRatesDone(bool error)
-{
-    m_buffer->close();
-    if (error) {
-        if (Application::inst()->isOnline())
-            MessageBox::warning(FrameWork::inst(), tr("There was an error downloading the exchange rates from the ECB server:<br>%2").arg(m_http->errorString()));
-    } else {
-        QXmlStreamReader reader(m_buffer->data());
-        QMap<QString, qreal> newRates;
-        QLocale c = QLocale::c();
-
-        while (!reader.atEnd()) {
-            if (reader.readNext() == QXmlStreamReader::StartElement &&
-                reader.name() == QLatin1String("Cube") &&
-                reader.attributes().hasAttribute(QLatin1String("currency"))) {
-
-                QString currency = reader.attributes().value(QLatin1String("currency")).toString();
-                qreal rate = c.toDouble(reader.attributes().value(QLatin1String("rate")).toString());
-
-                if (currency.length() == 3 && rate > 0)
-                    newRates.insert(currency, rate);
-            }
-        }
-        baseConvert(newRates);
-
-        if (reader.hasError() || newRates.isEmpty()) {
-            QString err;
-            if (reader.hasError())
-                err = tr("%1 (line %2, column %3)").arg(reader.errorString()).arg(reader.lineNumber()).arg(reader.columnNumber());
-            else
-                err = tr("no currency data found");
-            MessageBox::warning(FrameWork::inst(), tr("There was an error parsing the exchange rates from the ECB server:\n%1").arg(err));
-            qWarning() << m_buffer->data();
-        } else {
-            m_rates = newRates;
-            m_lastUpdate = QDateTime::currentDateTime();
-            emit ratesChanged();
-        }
-    }
-    m_buffer->buffer().clear();
 }
 
 QDateTime Currency::lastUpdate() const

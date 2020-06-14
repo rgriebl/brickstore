@@ -125,7 +125,7 @@ public:
     bool isCompleted() const         { return m_status == Completed; }
     bool isFailed() const            { return m_status == Failed; }
     bool isAborted() const           { return m_status == Aborted; }
-    bool abort();
+    virtual bool abort();
 
     template<typename T>
     void setUserData(int tag, T *t)  { m_user_tag = tag; m_user_ptr = static_cast<void *>(t); }

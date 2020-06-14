@@ -4,17 +4,17 @@ INCLUDEPATH += $$RELPWD
 DEPENDPATH  += $$RELPWD
 
 HEADERS += \
-  bricklink.h \
-  bricklinkfwd.h \
-  bricklink_setmatch.h \
+  $$PWD/bricklink.h \
+  $$PWD/bricklinkfwd.h \
+  $$PWD/bricklink_setmatch.h \
 
 
 SOURCES += \
-  bricklink.cpp \
-  bricklink_data.cpp \
-  bricklink_textimport.cpp \
-  bricklink_priceguide.cpp \
-  bricklink_picture.cpp \
-  bricklink_model.cpp \
-  bricklink_setmatch.cpp \
+  $$PWD/bricklink.cpp \
+  $$PWD/bricklink_data.cpp \
+  $$PWD/bricklink_textimport.cpp \
+  $$PWD/bricklink_priceguide.cpp \
+  $$PWD/bricklink_picture.cpp \
+  $$PWD/bricklink_model.cpp \
+  $$PWD/bricklink_setmatch.cpp \
 

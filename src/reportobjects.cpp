@@ -131,9 +131,9 @@ uint ReportJob::pageCount() const
     return m_pages.count();
 }
 
-QSize ReportJob::paperSize() const
+Size ReportJob::paperSize() const
 {
-    return QSize(m_pd->widthMM(), m_pd->heightMM());
+    return QSizeF(m_pd->widthMM(), m_pd->heightMM());
 }
 
 void ReportJob::dump()
@@ -395,13 +395,13 @@ void ReportPage::setLineWidth(double linewidth)
 }
 
 
-QSize ReportPage::textSize(const QString &text)
+Size ReportPage::textSize(const QString &text)
 {
     QFontMetrics fm(m_attr.m_font->toQFont());
     QPaintDevice *pd = m_job->paintDevice();
     QSize s = fm.size(0, text);
-    return QSize(s.width() * pd->widthMM() / pd->width(),
-                 s.height() * pd->heightMM() / pd->height());
+    return QSizeF(s.width() * pd->widthMM() / pd->width(),
+                  s.height() * pd->heightMM() / pd->height());
 }
 
 void ReportPage::drawText(double x, double y, const QString &text)

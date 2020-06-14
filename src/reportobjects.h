@@ -70,6 +70,40 @@ private:
     QScriptEngine *m_engine;
 };
 
+class Size : public QSizeF
+{
+public:
+    Size() = default;
+    Size(const Size &) = default;
+    Size(const QSizeF &sf)
+        : QSizeF(sf)
+    { }
+
+    Size &operator=(const Size &) = default;
+    Size &operator=(const QSizeF &sf) { *this = sf; return *this; }
+
+    static QScriptValue toScriptValue(QScriptEngine *engine, const Size &s)
+    {
+        QScriptValue obj = engine->newObject();
+        obj.setProperty("width", s.width());
+        obj.setProperty("height", s.height());
+        return obj;
+    }
+
+    static void fromScriptValue(const QScriptValue &obj, Size &s)
+    {
+        s.setWidth(obj.property("width").toNumber());
+        s.setHeight(obj.property("height").toNumber());
+    }
+
+    static QScriptValue createScriptValue(QScriptContext *, QScriptEngine *engine)
+    {
+        return engine->toScriptValue(Size());
+    }
+};
+
+Q_DECLARE_METATYPE(Size)
+
 
 class ReportPage;
 
@@ -228,31 +262,6 @@ private:
 };
 
 Q_DECLARE_METATYPE(Color *)
-
-class Size : public QSizeF
-{
-public:
-    static QScriptValue toScriptValue(QScriptEngine *engine, const Size &s)
-    {
-        QScriptValue obj = engine->newObject();
-        obj.setProperty("width", s.width());
-        obj.setProperty("height", s.height());
-        return obj;
-    }
-
-    static void fromScriptValue(const QScriptValue &obj, Size &s)
-    {
-        s.setWidth(obj.property("width").toNumber());
-        s.setHeight(obj.property("height").toNumber());
-    }
-
-    static QScriptValue createScriptValue(QScriptContext *, QScriptEngine *engine)
-    {
-        return engine->toScriptValue(Size());
-    }
-};
-
-Q_DECLARE_METATYPE(Size)
 
 class ReportPage : public QObject {
     Q_OBJECT

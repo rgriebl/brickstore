@@ -17,6 +17,7 @@
 #include <QFileInfo>
 #include <QTextStream>
 #include <QLocale>
+#include <QUrlQuery>
 
 #include "bricklink.h"
 
@@ -143,9 +144,11 @@ void BrickLink::PriceGuide::parse(const QByteArray &ba)
 
         switch (sl[0][0].toLatin1()) {
         case 'P': oldformat = true;
+                  Q_FALLTHROUGH();
         case 'O': ti = PastSix;
                   break;
         case 'C': oldformat = true;
+                  Q_FALLTHROUGH();
         case 'I': ti = Current;
                   break;
         }
@@ -190,12 +193,14 @@ void BrickLink::Core::updatePriceGuide(BrickLink::PriceGuide *pg, bool high_prio
     pg->addRef();
 
     QUrl url("http://www.bricklink.com/BTpriceSummary.asp"); //?{item type}={item no}&colorID={color ID}&cCode={currency code}&cExc={Y to exclude incomplete sets}
+    QUrlQuery query;
 
-    url.addQueryItem(QChar(pg->item()->itemType()->id()).toUpper(),
+    query.addQueryItem(QChar(pg->item()->itemType()->id()).toUpper(),
                                  pg->item()->id());
-    url.addQueryItem("colorID",  QString::number(pg->color()->id()));
-    url.addQueryItem("cCode",    "USD");
-    url.addQueryItem("cExc",     "Y"); //  Y == exclude incomplete sets
+    query.addQueryItem("colorID",  QString::number(pg->color()->id()));
+    query.addQueryItem("cCode",    "USD");
+    query.addQueryItem("cExc",     "Y"); //  Y == exclude incomplete sets
+    url.setQuery(query);
 
     //qDebug ( "PG request started for %s", (const char *) url );
     TransferJob *job = TransferJob::get(url);

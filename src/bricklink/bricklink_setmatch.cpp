@@ -260,7 +260,7 @@ class MatchThread : public QThread {
     Q_OBJECT
 public:
     MatchThread(bool all, BrickLink::SetMatch *sm, const BrickLink::InvItemList &list)
-        : QThread(m_sm), m_all(all), m_sm(sm), m_list(list)
+        : QThread(sm), m_all(all), m_sm(sm), m_list(list)
     { }
 
     void run()

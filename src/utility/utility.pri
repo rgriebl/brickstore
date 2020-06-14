@@ -1,48 +1,50 @@
 RELPWD = $$replace(PWD,$$_PRO_FILE_PWD_,.)
 
+QT *= core_private concurrent
+
 INCLUDEPATH += $$RELPWD
 DEPENDPATH  += $$RELPWD
 
 RESOURCES += $$RELPWD/utility.qrc
 
 HEADERS += \
-    chunkreader.h \
-    chunkwriter.h \
-    currency.h \
-    filter.h \
-    filteredit.h \
-    headerview.h \
-    messagebox.h \
-    progresscircle.h \
-    progressdialog.h \
-    qparallelsort.h \
-    qtemporaryresource.h \
-    qtemporaryresource_p.h \
-    stopwatch.h \
-    staticpointermodel.h \
-    threadpool.h \
-    transfer.h \
-    undo.h \
-    utility.h \
-    workspace.h \
+    $$PWD/chunkreader.h \
+    $$PWD/chunkwriter.h \
+    $$PWD/currency.h \
+    $$PWD/filter.h \
+    $$PWD/filteredit.h \
+    $$PWD/headerview.h \
+    $$PWD/messagebox.h \
+    $$PWD/progresscircle.h \
+    $$PWD/progressdialog.h \
+    $$PWD/qparallelsort.h \
+    $$PWD/qtemporaryresource.h \
+    $$PWD/qtemporaryresource_p.h \
+    $$PWD/stopwatch.h \
+    $$PWD/staticpointermodel.h \
+    $$PWD/threadpool.h \
+    $$PWD/transfer.h \
+    $$PWD/undo.h \
+    $$PWD/utility.h \
+    $$PWD/workspace.h \
 
 
 SOURCES += \
-    chunkreader.cpp \
-    currency.cpp \
-    filter.cpp \
-    filteredit.cpp \
-    headerview.cpp \
-    messagebox.cpp \
-    progresscircle.cpp \
-    progressdialog.cpp \
-    qtemporaryresource.cpp \
-    staticpointermodel.cpp \
-    threadpool.cpp \
-    transfer.cpp \
-    undo.cpp \
-    utility.cpp \
-    workspace.cpp \
+    $$PWD/chunkreader.cpp \
+    $$PWD/currency.cpp \
+    $$PWD/filter.cpp \
+    $$PWD/filteredit.cpp \
+    $$PWD/headerview.cpp \
+    $$PWD/messagebox.cpp \
+    $$PWD/progresscircle.cpp \
+    $$PWD/progressdialog.cpp \
+    $$PWD/qtemporaryresource.cpp \
+    $$PWD/staticpointermodel.cpp \
+    $$PWD/threadpool.cpp \
+    $$PWD/transfer.cpp \
+    $$PWD/undo.cpp \
+    $$PWD/utility.cpp \
+    $$PWD/workspace.cpp \
 
 
 macx {

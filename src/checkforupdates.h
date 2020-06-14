@@ -17,6 +17,7 @@
 #include <QBuffer>
 #include <QTextStream>
 #include <QList>
+#include <QUrlQuery>
 
 #include "application.h"
 #include "config.h"
@@ -43,8 +44,9 @@ public:
         // m_error = tr( "Could not retrieve version information from server:<br /><br />%1" );
 
         QUrl url = QString("http://") + Application::inst()->applicationUrl() + QString("/RELEASES");
-
-        url.addQueryItem("version", Application::inst()->applicationVersion());
+        QUrlQuery query;
+        query.addQueryItem("version", Application::inst()->applicationVersion());
+        url.setQuery(query);
 
         pd->get(url);
     }

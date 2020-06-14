@@ -281,7 +281,7 @@ bool ReportManager::reload()
     m_reports.clear();
 
     QStringList spath = Application::inst()->externalResourceSearchPath("print-templates");
-    QString dataloc = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
+    QString dataloc = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
     if (!dataloc.isEmpty())
         spath.prepend(dataloc + QLatin1String("/print-templates"));
 

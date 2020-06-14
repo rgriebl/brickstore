@@ -1019,8 +1019,8 @@ Q_DECLARE_METATYPE(const BrickLink::AppearsInItem *)
 // tell Qt that Pictures and PriceGuides are shared and can't simply be deleted
 // (QCache will use that function to determine what can really be purged from the cache)
 
-template<> inline bool qIsDetached<BrickLink::Picture>(BrickLink::Picture &c) { return c.refCount() == 0; }
-template<> inline bool qIsDetached<BrickLink::PriceGuide>(BrickLink::PriceGuide &c) { return c.refCount() == 0; }
+//TODO5 REMOVED template<> inline bool qIsDetached<BrickLink::Picture>(BrickLink::Picture &c) { return c.refCount() == 0; }
+//TODO5 REMOVED template<> inline bool qIsDetached<BrickLink::PriceGuide>(BrickLink::PriceGuide &c) { return c.refCount() == 0; }
 
 #endif
 

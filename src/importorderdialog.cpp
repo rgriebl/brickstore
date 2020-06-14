@@ -21,7 +21,7 @@
 #include <QHeaderView>
 #include <QAbstractTableModel>
 #include <QStyledItemDelegate>
-#include <QColorGroup>
+#include <QPalette>
 #include <QVariant>
 #include <QCache>
 
@@ -71,12 +71,13 @@ public:
 
     void setOrderList(const QList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > &orderlist)
     {
+        beginResetModel();
         for (QList<QPair<BrickLink::Order *, BrickLink::InvItemList *> >::iterator it = m_orderlist.begin(); it != m_orderlist.end(); ++it) {
             delete it->first;
             delete it->second;
         }
         m_orderlist = orderlist;
-        reset();
+        endResetModel();
     }
 
     virtual int rowCount(const QModelIndex &parent) const

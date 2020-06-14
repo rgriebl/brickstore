@@ -47,7 +47,7 @@ QString MessageBox::defaultTitle()
 
 QMessageBox::StandardButton MessageBox::msgbox(QWidget *parent, const QString &msg, QMessageBox::Icon icon, StandardButtons buttons, StandardButton defaultButton)
 {
-    if (qApp && qApp->type() != QApplication::Tty) {
+    if (qobject_cast<QApplication *>(qApp)) {
         QMessageBox *mb = new QMessageBox(icon, s_deftitle, msg, NoButton, parent);
         mb->setAttribute(Qt::WA_DeleteOnClose);
         mb->setObjectName("messagebox");

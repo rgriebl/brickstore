@@ -25,7 +25,7 @@
 // We mean it.
 //
 
-#include "QtCore/qabstractfileengine.h"
+#include "QtCore/private/qabstractfileengine_p.h"
 
 class QTemporaryResourceFileEnginePrivate;
 class QTemporaryResourceFileEngine : public QAbstractFileEngine

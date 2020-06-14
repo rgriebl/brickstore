@@ -43,9 +43,10 @@ public:
 public slots:
     void reload()
     {
+        beginResetModel();
         ReportManager::inst()->reload();
         m_reports = ReportManager::inst()->reports();
-        reset();
+        endResetModel();
     }
 
 public:

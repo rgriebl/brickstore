@@ -31,8 +31,8 @@ ConsolidateItemsDialog::ConsolidateItemsDialog(BrickLink::InvItem *existitem, Br
     Document *doc = Document::createTemporary(list);
 
     doc->setParent(this);
-    w_list->horizontalHeader()->setMovable(true);
-    w_list->verticalHeader()->setResizeMode(QHeaderView::Fixed);
+    w_list->horizontalHeader()->setSectionsMovable(true);
+    w_list->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     w_list->setContextMenuPolicy(Qt::NoContextMenu);
     setFocusProxy(w_list);
 

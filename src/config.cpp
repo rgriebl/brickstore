@@ -19,7 +19,7 @@
 #include <QStringList>
 #include <QDir>
 #include <QDomDocument>
-#include <QDesktopServices>
+#include <QStandardPaths>
 
 #if defined(Q_OS_WIN)
 #  include <windows.h>
@@ -198,7 +198,7 @@ QString Config::lDrawDir() const
 
 QString Config::documentDir() const
 {
-    QString dir = value("/General/DocDir", QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation)).toString();
+    QString dir = value("/General/DocDir", QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)).toString();
 
     if (dir.isEmpty())
         dir = QDir::homePath();
@@ -239,7 +239,7 @@ void Config::setProxy(const QNetworkProxy &np)
 
 QString Config::dataDir() const
 {
-    return value("/BrickLink/DataDir", QDesktopServices::storageLocation(QDesktopServices::CacheLocation)).toString();
+    return value("/BrickLink/DataDir", QStandardPaths::writableLocation(QStandardPaths::CacheLocation)).toString();
 }
 
 void Config::setDataDir(const QString &dir)

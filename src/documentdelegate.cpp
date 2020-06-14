@@ -102,7 +102,7 @@ QSize DocumentDelegate::sizeHint(const QStyleOptionViewItem &option1, const QMod
     else
         w = QItemDelegate::sizeHint(option1, idx).width();
 
-    QStyleOptionViewItemV4 option(option1);
+    QStyleOptionViewItem option(option1);
     return QSize(w, defaultItemHeight(option.widget));
 }
 
@@ -115,7 +115,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
     if (!it)
         return;
 
-    QStyleOptionViewItemV4 option(option1);
+    QStyleOptionViewItem option(option1);
     bool selected = (option.state & QStyle::State_Selected);
     bool nocolor = !it->color();
     bool noitem = !it->item();
@@ -252,11 +252,12 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
         break;
     }
     case Document::Description:
-        if (it->item() && it->item()->hasInventory())
+        if (it->item() && it->item()->hasInventory()) {
             tag.text = tr("Inv");
             tag.foreground = bg;
             tag.background = fg;
             tag.background.setAlphaF(0.3f);
+        }
         break;
 
     case Document::Picture: {
