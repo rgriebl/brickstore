@@ -630,10 +630,11 @@ public:
 
     QString url( UrlList u, const void *opt = 0, const void *opt2 = 0 );
 
-	QString dataPath ( ) const;
-	QString dataPath ( const ItemType * ) const;
-	QString dataPath ( const Item * ) const;
-	QString dataPath ( const Item *, const Color * ) const;
+    bool changeDataPath (QString , QWidget *parent = 0 );
+    QString dataPath ( ) const;
+    QString dataPath ( const ItemType * ) const;
+    QString dataPath ( const Item * ) const;
+    QString dataPath ( const Item *, const Color * ) const;
 
 	QString defaultDatabaseName ( ) const;
 

@@ -1,6 +1,8 @@
-## Copyright (C) 2004-2006 Robert Griebl.  All rights reserved.
+## Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 ##
 ## This file is part of BrickStock.
+## BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+## by Robert Griebl, Copyright (C) 2004-2008.
 ##
 ## This file may be distributed and/or modified under the terms of the GNU
 ## General Public License version 2 as published by the Free Software Foundation
@@ -12,7 +14,7 @@
 ## See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 
 isEmpty( RELEASE ) {
-  RELEASE    = 1.2.3
+  RELEASE    = 1.2.4
 }
 
 TEMPLATE     = app
@@ -42,49 +44,44 @@ dist_win32          = win32-installer/*.wx?
 
 DISTFILES += $$res_images $$res_images_16 $$res_images_22 $$res_images_status $$res_images_sidebar $$res_translations $$res_print_templates $$dist_extra $$dist_scripts $$dist_unix_rpm $$dist_unix_deb $$dist_macx $$dist_win32
 
-MOC_DIR   = .moc
-UI_DIR    = .uic
+MOC_DIR     = .moc
+UI_DIR      = .uic
+OBJECTS_DIR = .obj
 
 exists( .private-key ) {
   win32:cat_cmd = type
   unix:cat_cmd = cat
 
-  DEFINES += BS_REGKEY=\"\\\"$$system( $$cat_cmd .private-key )\\\"\"
+  DEFINES += BS_REGKEY="\"$$system( $$cat_cmd .private-key )\""  
 }
 else {
   message( Building an OpenSource version )
 }
 
 win32 {
-  system( cscript.exe //B scripts\update_version.js $$RELEASE)
+  system( cscript.exe //B scripts\\update_version.js $$RELEASE)
 
   INCLUDEPATH += $$(CURLDIR)\include
   LIBS += $$(CURLDIR)\lib\libcurl.lib
+  LIBS += wldap32.lib /NODEFAULTLIB:libcmt.lib
   DEFINES += CURL_STATICLIB
   RC_FILE = brickstock.rc
-
-  DEFINES += __USER__="\"$$(USERNAME)\"" __HOST__="\"$$(COMPUTERNAME)\""
 
   QMAKE_CXXFLAGS_DEBUG   += /Od /GL-
   QMAKE_CXXFLAGS_RELEASE += /O2 /GL
 
-  win32-msvc2005 {
+  win32-msvc2010 {
      DEFINES += _CRT_SECURE_NO_DEPRECATE
 
 #    QMAKE_LFLAGS_WINDOWS += "/MANIFEST:NO"
 #    QMAKE_LFLAGS_WINDOWS += "/LTCG"
 
-     QMAKE_CXXFLAGS_DEBUG   += /EHc- /EHs- /GR-
-     QMAKE_CXXFLAGS_RELEASE += /EHc- /EHs- /GR-
+     QMAKE_CXXFLAGS   += /EHc- /EHs- /GR-
   }
 }
 
 unix {
   system( scripts/update_version.sh $$RELEASE)
-
-  OBJECTS_DIR = .obj
-  
-  DEFINES += __USER__=\"\\\"$$(USER)\\\"\" __HOST__=\"\\\"$$system( hostname )\\\"\"
 }
 
 unix:!macx {
@@ -224,7 +221,7 @@ SOURCES += bricklink.cpp \
 
 FORMS   += dlgadditem.ui \
            dlgincdecprice.ui \
-	       dlgincompleteitem.ui \
+	   dlgincompleteitem.ui \
            dlgloadinventory.ui \
            dlgloadorder.ui \
            dlgmerge.ui \

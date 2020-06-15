@@ -16,6 +16,7 @@
 
 #include <math.h>
 
+#include <qapplication.h>
 #include <qcolor.h>
 #include <qfontmetrics.h>
 #include <qapplication.h>
@@ -416,3 +417,77 @@ time_t CUtility::toUTC ( const QDateTime &dt, const char *settz )
 
 	return t;
 }
+
+bool CUtility::copyDir(const QString source, const QString destination, const bool override) {
+    QDir directory ( source );
+    bool error = false;
+
+    if (!directory.exists()) {
+        return false;
+    }
+
+    QStringList dirs = directory.entryList(QDir::AllDirs | QDir::Hidden | QDir::NoDotAndDotDot);
+    QStringList files = directory.entryList(QDir::Files | QDir::Hidden);
+
+    QList<QString>::iterator d,f;
+
+    for (d = dirs.begin(); d != dirs.end(); ++d) {
+        if ((*d) == "." || (*d) == "..")
+            continue;
+
+        if (!QFileInfo(directory.path() + "/" + (*d)).isDir())
+            continue;
+
+        QDir temp(destination + "/" + (*d));
+        temp.mkpath(temp.path());
+
+        if (!copyDir(directory.path() + "/" + (*d), destination + "/" + (*d), override))
+            error = true;
+    }
+
+    for (f = files.begin(); f != files.end(); ++f) {
+        QFile tempFile(directory.path() + "/" + (*f));
+
+
+        if (QFileInfo(directory.path() + "/" + (*f)).isDir())
+            continue;
+
+        QFile destFile(destination + "/" + directory.relativeFilePath(tempFile.fileName()));
+
+        if (destFile.exists() && override)
+            destFile.remove();
+
+        if (!tempFile.copy(destination + "/" + directory.relativeFilePath(tempFile.fileName())))
+            error = true;
+
+        qApp->processEvents ( QEventLoop::ExcludeUserInputEvents );
+    }
+
+    return !error;
+}
+
+bool CUtility::emptyDir(const QString dirName, const bool remove)
+{
+    bool result = true;
+    QDir dir ( dirName );
+
+    if (dir. exists ( dirName ) ) {
+        Q_FOREACH ( QFileInfo info, dir.entryInfoList ( QDir::NoDotAndDotDot | QDir::System | QDir::Hidden  | QDir::AllDirs | QDir::Files, QDir::DirsFirst ) ) {
+            if ( info. isDir ( ) )
+                result = emptyDir ( info. absoluteFilePath ( ), true );
+            else
+                result = QFile::remove ( info. absoluteFilePath ( ) );
+
+            if ( ! result )
+                return result;
+
+            qApp->processEvents ( QEventLoop::ExcludeUserInputEvents );
+        }
+
+        if ( remove )
+            result = dir. rmdir ( dirName );
+    }
+
+    return result;
+}
+

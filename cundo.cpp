@@ -726,7 +726,8 @@ public:
 //			s2. setWidth ( s1. width ( ) + style ( ). pixelMetric ( QStyle::PM_ScrollBarExtent ));
 
 //		return s2. expandedTo ( QSize ( 60, 60 )) + QSize ( fw, fw );
-	}
+        return QSize (0, 0);
+    }
 
 public:
 	int m_highlight;

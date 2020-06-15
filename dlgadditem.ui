@@ -1,578 +1,566 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ui version="4.0" stdsetdef="1">
-  <author></author>
-  <comment></comment>
-  <exportmacro></exportmacro>
-  <class>DlgAddItem</class>
-  <widget class="QDialog" name="DlgAddItem">
-    <property name="geometry">
-      <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>872</width>
-        <height>670</height>
-      </rect>
-    </property>
-    <property name="windowTitle">
-      <string>Add Item to %1</string>
-    </property>
-    <property name="sizeGripEnabled">
-      <bool>true</bool>
-    </property>
-    <layout class="QVBoxLayout">
-      <item>
-        <layout class="QHBoxLayout">
-          <item>
-            <widget class="CSelectItem" name="w_select_item">
-              <property name="focusPolicy">
-                <enum>Qt::StrongFocus</enum>
-              </property>
-            </widget>
-          </item>
-          <item>
-            <widget class="CSelectColor" name="w_select_color">
-              <property name="focusPolicy">
-                <enum>Qt::StrongFocus</enum>
-              </property>
-            </widget>
-          </item>
-        </layout>
-      </item>
-      <item>
-        <layout class="QHBoxLayout">
-          <item>
-            <widget class="CPictureWidget" name="w_picture"/>
-          </item>
-          <item>
-            <widget class="CPriceGuideWidget" name="w_price_guide"/>
-          </item>
-          <item>
-            <widget class="QSplitter" name="splitter1">
-              <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="childrenCollapsible">
-                <bool>false</bool>
-              </property>
-              <widget class="CAppearsInWidget" name="w_appears_in"/>
-              <widget class="QWidget" name="l_grid">
-                <layout class="QGridLayout">
-                  <property name="margin">
-                    <number>0</number>
-                  </property>
-                  <item row="1" column="3">
-                    <widget class="QLineEdit" name="w_total">
-                      <property name="focusPolicy">
-                        <enum>Qt::NoFocus</enum>
-                      </property>
-                      <property name="readOnly">
-                        <bool>true</bool>
-                      </property>
-                    </widget>
-                  </item>
-                  <item row="1" column="0">
-                    <widget class="QLabel" name="w_label_currency">
-                      <property name="text">
-                        <string>&amp;Price (%1)</string>
-                      </property>
-                      <property name="buddy" stdset="0">
-                        <cstring>w_price</cstring>
-                      </property>
-                      <property name="wordWrap">
-                        <bool>false</bool>
-                      </property>
-                    </widget>
-                  </item>
-                  <item row="0" column="0">
-                    <widget class="QLabel" name="textLabel2">
-                      <property name="text">
-                        <string>&amp;Quantity</string>
-                      </property>
-                      <property name="buddy" stdset="0">
-                        <cstring>w_qty</cstring>
-                      </property>
-                      <property name="wordWrap">
-                        <bool>false</bool>
-                      </property>
-                    </widget>
-                  </item>
-                  <item row="0" column="1">
-                    <widget class="QLineEdit" name="w_qty"/>
-                  </item>
-                  <item row="0" column="3">
-                    <widget class="QLineEdit" name="w_bulk"/>
-                  </item>
-                  <item row="6" column="1" rowspan="1" colspan="3">
-                    <widget class="QLineEdit" name="w_remarks"/>
-                  </item>
-                  <item row="3" column="0">
-                    <widget class="Q3ButtonGroup" name="w_tier_type">
-                      <property name="frameShape">
-                        <enum>Q3GroupBox::NoFrame</enum>
-                      </property>
-                      <property name="title">
-                        <string/>
-                      </property>
-                      <property name="checkable">
-                        <bool>false</bool>
-                      </property>
-                      <property name="selectedId" stdset="0">
-                        <number>-1</number>
-                      </property>
-                      <layout class="QHBoxLayout">
-                        <property name="margin">
-                          <number>0</number>
-                        </property>
-                        <item>
-                          <widget class="QRadioButton" name="w_radio_percent">
-                            <property name="text">
-                              <string>%</string>
-                            </property>
-                          </widget>
-                        </item>
-                        <item>
-                          <widget class="QRadioButton" name="w_radio_currency">
-                            <property name="text">
-                              <string>%1</string>
-                            </property>
-                          </widget>
-                        </item>
-                        <item>
-                          <spacer name="spacer7">
-                            <property name="sizeHint">
-                              <size>
-                                <width>0</width>
-                                <height>20</height>
-                              </size>
-                            </property>
-                            <property name="sizeType">
-                              <enum>QSizePolicy::Expanding</enum>
-                            </property>
-                            <property name="orientation">
-                              <enum>Qt::Horizontal</enum>
-                            </property>
-                          </spacer>
-                        </item>
-                      </layout>
-                    </widget>
-                  </item>
-                  <item row="1" column="2">
-                    <widget class="QLabel" name="textLabel5">
-                      <property name="text">
-                        <string>Total</string>
-                      </property>
-                      <property name="wordWrap">
-                        <bool>false</bool>
-                      </property>
-                    </widget>
-                  </item>
-                  <item row="0" column="2">
-                    <widget class="QLabel" name="w_bulk_label">
-                      <property name="text">
-                        <string>&amp;Bulk</string>
-                      </property>
-                      <property name="buddy" stdset="0">
-                        <cstring>w_bulk</cstring>
-                      </property>
-                      <property name="wordWrap">
-                        <bool>false</bool>
-                      </property>
-                    </widget>
-                  </item>
-                  <item row="4" column="1" rowspan="1" colspan="3">
-                    <widget class="Q3ButtonGroup" name="w_condition">
-                      <property name="frameShape">
-                        <enum>Q3GroupBox::NoFrame</enum>
-                      </property>
-                      <property name="title">
-                        <string/>
-                      </property>
-                      <property name="selectedId" stdset="0">
-                        <number>-1</number>
-                      </property>
-                      <layout class="QHBoxLayout">
-                        <property name="margin">
-                          <number>0</number>
-                        </property>
-                        <item>
-                          <widget class="QRadioButton" name="w_radio_new">
-                            <property name="text">
-                              <string>&amp;New</string>
-                            </property>
-                          </widget>
-                        </item>
-                        <item>
-                          <widget class="QRadioButton" name="w_radio_used">
-                            <property name="text">
-                              <string>&amp;Used</string>
-                            </property>
-                          </widget>
-                        </item>
-                        <item>
-                          <spacer name="spacer3">
-                            <property name="sizeHint">
-                              <size>
-                                <width>41</width>
-                                <height>20</height>
-                              </size>
-                            </property>
-                            <property name="sizeType">
-                              <enum>QSizePolicy::Expanding</enum>
-                            </property>
-                            <property name="orientation">
-                              <enum>Qt::Horizontal</enum>
-                            </property>
-                          </spacer>
-                        </item>
-                      </layout>
-                    </widget>
-                  </item>
-                  <item row="1" column="1">
-                    <widget class="QLineEdit" name="w_price"/>
-                  </item>
-                  <item row="5" column="1" rowspan="1" colspan="3">
-                    <widget class="QLineEdit" name="w_comments"/>
-                  </item>
-                  <item row="4" column="0">
-                    <widget class="QLabel" name="textLabel7">
-                      <property name="text">
-                        <string>C&amp;ondition</string>
-                      </property>
-                      <property name="buddy" stdset="0">
-                        <cstring>w_radio_new</cstring>
-                      </property>
-                      <property name="wordWrap">
-                        <bool>false</bool>
-                      </property>
-                    </widget>
-                  </item>
-                  <item row="5" column="0">
-                    <widget class="QLabel" name="w_comments_label">
-                      <property name="text">
-                        <string>Co&amp;mments</string>
-                      </property>
-                      <property name="buddy" stdset="0">
-                        <cstring>w_comments</cstring>
-                      </property>
-                      <property name="wordWrap">
-                        <bool>false</bool>
-                      </property>
-                    </widget>
-                  </item>
-                  <item row="2" column="1" rowspan="2" colspan="3">
-                    <layout class="QGridLayout">
-                      <item row="1" column="1">
-                        <widget class="QLineEdit" name="w_tier_price_1"/>
-                      </item>
-                      <item row="1" column="0">
-                        <widget class="QLineEdit" name="w_tier_price_0"/>
-                      </item>
-                      <item row="0" column="1">
-                        <widget class="QLineEdit" name="w_tier_qty_1"/>
-                      </item>
-                      <item row="0" column="0">
-                        <widget class="QLineEdit" name="w_tier_qty_0"/>
-                      </item>
-                      <item row="1" column="2">
-                        <widget class="QLineEdit" name="w_tier_price_2"/>
-                      </item>
-                      <item row="0" column="2">
-                        <widget class="QLineEdit" name="w_tier_qty_2"/>
-                      </item>
-                    </layout>
-                  </item>
-                  <item row="6" column="0">
-                    <widget class="QLabel" name="w_remarks_label">
-                      <property name="text">
-                        <string>&amp;Remarks</string>
-                      </property>
-                      <property name="buddy" stdset="0">
-                        <cstring>w_remarks</cstring>
-                      </property>
-                      <property name="wordWrap">
-                        <bool>false</bool>
-                      </property>
-                    </widget>
-                  </item>
-                  <item row="7" column="0">
-                    <spacer name="spacer9">
-                      <property name="sizeHint">
-                        <size>
-                          <width>20</width>
-                          <height>0</height>
-                        </size>
-                      </property>
-                      <property name="sizeType">
-                        <enum>QSizePolicy::Expanding</enum>
-                      </property>
-                      <property name="orientation">
-                        <enum>Qt::Vertical</enum>
-                      </property>
-                    </spacer>
-                  </item>
-                  <item row="2" column="0">
-                    <widget class="QLabel" name="w_tier_label">
-                      <property name="text">
-                        <string>&amp;Tiered prices</string>
-                      </property>
-                      <property name="buddy" stdset="0">
-                        <cstring>w_radio_percent</cstring>
-                      </property>
-                      <property name="wordWrap">
-                        <bool>false</bool>
-                      </property>
-                    </widget>
-                  </item>
-                </layout>
-              </widget>
-            </widget>
-          </item>
-        </layout>
-      </item>
-      <item>
-        <widget class="Line" name="line1">
-          <property name="frameShape">
-            <enum>QFrame::HLine</enum>
-          </property>
-          <property name="frameShadow">
-            <enum>QFrame::Sunken</enum>
-          </property>
-        </widget>
-      </item>
-      <item>
-        <layout class="QHBoxLayout">
-          <item>
-            <widget class="QCheckBox" name="w_toggle_picture">
-              <property name="text">
-                <string/>
-              </property>
-              <property name="checked">
-                <bool>true</bool>
-              </property>
-            </widget>
-          </item>
-          <item>
-            <widget class="QCheckBox" name="w_toggle_price_guide">
-              <property name="text">
-                <string/>
-              </property>
-              <property name="checked">
-                <bool>true</bool>
-              </property>
-            </widget>
-          </item>
-          <item>
-            <widget class="QCheckBox" name="w_toggle_appears_in">
-              <property name="text">
-                <string/>
-              </property>
-            </widget>
-          </item>
-          <item>
-            <spacer name="spacer6">
-              <property name="sizeHint">
-                <size>
-                  <width>340</width>
-                  <height>21</height>
-                </size>
-              </property>
-              <property name="sizeType">
-                <enum>QSizePolicy::Expanding</enum>
-              </property>
-              <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-              </property>
-            </spacer>
-          </item>
-          <item>
-            <widget class="QCheckBox" name="w_merge">
-              <property name="text">
-                <string>Consolidate with &amp;list</string>
-              </property>
-            </widget>
-          </item>
-          <item>
-            <spacer name="Horizontal Spacing2">
-              <property name="sizeHint">
-                <size>
-                  <width>16</width>
-                  <height>16</height>
-                </size>
-              </property>
-              <property name="sizeType">
-                <enum>QSizePolicy::Fixed</enum>
-              </property>
-              <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-              </property>
-            </spacer>
-          </item>
-          <item>
-            <widget class="QPushButton" name="w_add">
-              <property name="text">
-                <string>&amp;Add</string>
-              </property>
-              <property name="autoDefault">
-                <bool>true</bool>
-              </property>
-              <property name="default">
-                <bool>true</bool>
-              </property>
-            </widget>
-          </item>
-          <item>
-            <widget class="QPushButton" name="w_close">
-              <property name="text">
-                <string>&amp;Close</string>
-              </property>
-              <property name="autoDefault">
-                <bool>false</bool>
-              </property>
-            </widget>
-          </item>
-        </layout>
-      </item>
+<ui version="4.0">
+ <class>DlgAddItem</class>
+ <widget class="QDialog" name="DlgAddItem">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>872</width>
+    <height>670</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Add Item to %1</string>
+  </property>
+  <property name="sizeGripEnabled">
+   <bool>true</bool>
+  </property>
+  <layout class="QVBoxLayout">
+   <item>
+    <layout class="QHBoxLayout" name="l_top">
+     <item>
+      <widget class="CSelectItem" name="w_select_item" native="true">
+       <property name="focusPolicy">
+        <enum>Qt::StrongFocus</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="CSelectColor" name="w_select_color" native="true">
+       <property name="focusPolicy">
+        <enum>Qt::StrongFocus</enum>
+       </property>
+      </widget>
+     </item>
     </layout>
-  </widget>
-  <layoutdefault spacing="6" margin="11"/>
-  <customwidgets>
-    <customwidget>
-      <class>CSelectItem</class>
-      <extends>QWidget</extends>
-      <header location="local">cselectitem.h</header>
-      <sizehint>
-        <width>100</width>
-        <height>100</height>
-      </sizehint>
-      <container>0</container>
-      <sizepolicy>
-        <hordata>3</hordata>
-        <verdata>3</verdata>
-      </sizepolicy>
-      <pixmap>image0</pixmap>
-    </customwidget>
-    <customwidget>
-      <class>CSelectColor</class>
-      <extends>QWidget</extends>
-      <header location="local">cselectcolor.h</header>
-      <sizehint>
-        <width>100</width>
-        <height>100</height>
-      </sizehint>
-      <container>0</container>
-      <sizepolicy>
-        <hordata>5</hordata>
-        <verdata>5</verdata>
-      </sizepolicy>
-      <pixmap>image0</pixmap>
-    </customwidget>
-    <customwidget>
-      <class>CPictureWidget</class>
-      <extends>QWidget</extends>
-      <header location="local">cpicturewidget.h</header>
-      <sizehint>
-        <width>100</width>
-        <height>100</height>
-      </sizehint>
-      <container>0</container>
-      <sizepolicy>
-        <hordata>5</hordata>
-        <verdata>5</verdata>
-      </sizepolicy>
-      <pixmap>image0</pixmap>
-    </customwidget>
-    <customwidget>
-      <class>CPriceGuideWidget</class>
-      <extends>QWidget</extends>
-      <header location="local">cpriceguidewidget.h</header>
-      <sizehint>
-        <width>100</width>
-        <height>100</height>
-      </sizehint>
-      <container>0</container>
-      <sizepolicy>
-        <hordata>5</hordata>
-        <verdata>5</verdata>
-      </sizepolicy>
-      <pixmap>image0</pixmap>
-    </customwidget>
-    <customwidget>
-      <class>CAppearsInWidget</class>
-      <extends>QWidget</extends>
-      <header location="local">cappearsinwidget.h</header>
-      <sizehint>
-        <width>100</width>
-        <height>100</height>
-      </sizehint>
-      <container>0</container>
-      <sizepolicy>
-        <hordata>5</hordata>
-        <verdata>5</verdata>
-      </sizepolicy>
-      <pixmap>image1</pixmap>
-    </customwidget>
-  </customwidgets>
-  <tabstops>
-    <tabstop>w_select_item</tabstop>
-    <tabstop>w_select_color</tabstop>
-    <tabstop>w_qty</tabstop>
-    <tabstop>w_bulk</tabstop>
-    <tabstop>w_price</tabstop>
-    <tabstop>w_radio_percent</tabstop>
-    <tabstop>w_radio_currency</tabstop>
-    <tabstop>w_tier_qty_0</tabstop>
-    <tabstop>w_tier_price_0</tabstop>
-    <tabstop>w_tier_qty_1</tabstop>
-    <tabstop>w_tier_price_1</tabstop>
-    <tabstop>w_tier_qty_2</tabstop>
-    <tabstop>w_tier_price_2</tabstop>
-    <tabstop>w_radio_new</tabstop>
-    <tabstop>w_radio_used</tabstop>
-    <tabstop>w_comments</tabstop>
-    <tabstop>w_remarks</tabstop>
-    <tabstop>w_merge</tabstop>
-    <tabstop>w_add</tabstop>
-    <tabstop>w_close</tabstop>
-  </tabstops>
-  <images>
-    <image name="image0">
-      <data format="PNG" length="1002">89504e470d0a1a0a0000000d4948445200000016000000160806000000c4b46c3b000003b149444154789cad94514c5b5518c77fe7dc4b7b4b6150bb96324418ca32358bee6192609c51d883892ce083f1718b3ebb185f8dc91e972cf39d2d6a78d0b027b3cd07d9e68c81c625a6c139408a4384f416100aed6d4b7bdb7b8e0fc0921a70c6ed7b3ae7e43bbff3fffedfc927e2f138bbd1dbdbab7902118fc785d8058f8d8de9aeae2e72b91cb66de338ce7f82e47239666767492412b8aefbf0dcdc553a323242f4501d918e2d3a8f15a9784584100809a609526eafd1a0f54e6142e029c5c21f3ef41583bb77a805efbe1ce9d86279e32619678eaab7853fa0f02a16abb64166ad0cdac75307eb3874b84cb0a14aa5a24108cc0688c48c9a4a1e826ddbe6f0b12219678e8ace610502ccdfafe3f68d3c33bf6c01c59dcc209d472c4e0d35d2f3ba81d205d06005e4de60c77170bd2255af80150870f70e8c0eaf009260a349577714e913a4175d16925b5cbe50607931cc3b677c68ca28a5f7066f5b26f00760febec9e8f032a0e81b68a17fc0201415989647a9d8c4c498cbe8f05f5cff3a4d4bac8bfe210b290b35e01afd428257b1b875cd01aaf4bd1de5dd0fea688e1530ad1c1bab16b7af17393558cf997311c0e49bafd670d6258621f6576c9ab09a3248fe5ae6c08103f49f36517213d33070369bf8e2529ee9c90ceb2b2eef7f14617c2c48722a4b7226845143fa87622905ebeb6514253a9eb5084504a66950c88618bee0303d99217cb09e9ed71a09369538fa523d00e9a50a42eed3bc6d8f41281fa0903e8561796cac86f8f2b33c33930ea0f0fb4d5adbeb30ad22866ffbbad226d2a805d7ee0484220208925aaa50deaa67e27b97e9c90ccdcdf5c462cdd8a94d2e7e62f3603244ea410989a4ed191f52a8fd156b056d9d553a9e0bf0e7ef45c6bf7339fd5e90ec7a88575e6d20d6e6e7e2a755ec854dce7fb8885b2cd014f6f3c2714d3a550bae55ac35c1068fb7061b00b87a7995899b25ce9e0b73e24d8fae97b37c7cbe9370b499fce6066eb54adf6098f6ee2a9a7ff9c70841a5023d270deca510d746537c7e29cdf8ad20475fb4307c82d4fc324ec6859d66fdfc6381e44014b36e9fe6e572393ca54068aa22cfd0598b686b3737aeae90bc9725796f0350802414b6e81b7c9a9f7e70708a2e6e5991cfeee3f1ecec2c0b0b3e8c068142a2a8d23728397132c6dc6f2e2b8b0a8da4b5ddc7f3c735ed47146f0cb4502983693a4c25ca7b83138904fa8a412466e00f48b4271086c2901263676c4a6990b615b6ade15b85694af239984a94585bf6f606bbae5b334f1f37e4a3531e031c8fc7c5a312ff17f849c3e3f1b8f81b8be6900aca9b61c90000000049454e44ae426082</data>
-    </image>
-    <image name="image1">
-      <data format="XBM.GZ" length="79">789c534e494dcbcc4b554829cdcdad8c2fcf4c29c95030e0524611cd48cd4ccf28010a1797249664262b2467241641a592324b8aa363156c15aab914146aadb90067111b1f</data>
-    </image>
-  </images>
-  <includes>
-    <include location="local">cselectitem.h</include>
-    <include location="local">cselectcolor.h</include>
-    <include location="local">cpicturewidget.h</include>
-    <include location="local">cpriceguidewidget.h</include>
-    <include location="local">cappearsinwidget.h</include>
-  </includes>
-  <connections>
-    <connection>
-      <sender>w_close</sender>
-      <signal>clicked()</signal>
-      <receiver>DlgAddItem</receiver>
-      <slot>close()</slot>
-    </connection>
-    <connection>
-      <sender>w_toggle_appears_in</sender>
-      <signal>toggled(bool)</signal>
-      <receiver>w_appears_in</receiver>
-      <slot>setShown(bool)</slot>
-    </connection>
-    <connection>
-      <sender>w_toggle_picture</sender>
-      <signal>toggled(bool)</signal>
-      <receiver>w_picture</receiver>
-      <slot>setShown(bool)</slot>
-    </connection>
-    <connection>
-      <sender>w_toggle_price_guide</sender>
-      <signal>toggled(bool)</signal>
-      <receiver>w_price_guide</receiver>
-      <slot>setShown(bool)</slot>
-    </connection>
-  </connections>
+   </item>
+   <item>
+    <layout class="QHBoxLayout">
+     <item>
+      <widget class="CPictureWidget" name="w_picture" native="true"/>
+     </item>
+     <item>
+      <widget class="CPriceGuideWidget" name="w_price_guide" native="true"/>
+     </item>
+     <item>
+      <widget class="QSplitter" name="splitter1">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="childrenCollapsible">
+        <bool>false</bool>
+       </property>
+       <widget class="CAppearsInWidget" name="w_appears_in" native="true"/>
+       <widget class="QWidget">
+        <layout class="QGridLayout" name="l_grid">
+         <item row="1" column="3">
+          <widget class="QLineEdit" name="w_total">
+           <property name="focusPolicy">
+            <enum>Qt::NoFocus</enum>
+           </property>
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="w_label_currency">
+           <property name="text">
+            <string>&amp;Price (%1)</string>
+           </property>
+           <property name="wordWrap">
+            <bool>false</bool>
+           </property>
+           <property name="buddy">
+            <cstring>w_price</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="textLabel2">
+           <property name="text">
+            <string>&amp;Quantity</string>
+           </property>
+           <property name="wordWrap">
+            <bool>false</bool>
+           </property>
+           <property name="buddy">
+            <cstring>w_qty</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="w_qty"/>
+         </item>
+         <item row="0" column="3">
+          <widget class="QLineEdit" name="w_bulk"/>
+         </item>
+         <item row="6" column="1" colspan="3">
+          <widget class="QLineEdit" name="w_remarks"/>
+         </item>
+         <item row="3" column="0">
+          <widget class="Q3ButtonGroup" name="w_tier_type">
+           <property name="title">
+            <string/>
+           </property>
+           <property name="checkable">
+            <bool>false</bool>
+           </property>
+           <property name="frameShape">
+            <enum>Q3GroupBox::NoFrame</enum>
+           </property>
+           <property name="selectedId" stdset="0">
+            <number>-1</number>
+           </property>
+           <layout class="QHBoxLayout">
+            <property name="margin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QRadioButton" name="w_radio_percent">
+              <property name="text">
+               <string>%</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="w_radio_currency">
+              <property name="text">
+               <string>%1</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="spacer7">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Expanding</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>0</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item row="1" column="2">
+          <widget class="QLabel" name="textLabel5">
+           <property name="text">
+            <string>Total</string>
+           </property>
+           <property name="wordWrap">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <widget class="QLabel" name="w_bulk_label">
+           <property name="text">
+            <string>&amp;Bulk</string>
+           </property>
+           <property name="wordWrap">
+            <bool>false</bool>
+           </property>
+           <property name="buddy">
+            <cstring>w_bulk</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1" colspan="3">
+          <widget class="Q3ButtonGroup" name="w_condition">
+           <property name="title">
+            <string/>
+           </property>
+           <property name="frameShape">
+            <enum>Q3GroupBox::NoFrame</enum>
+           </property>
+           <property name="selectedId" stdset="0">
+            <number>-1</number>
+           </property>
+           <layout class="QHBoxLayout">
+            <property name="margin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QRadioButton" name="w_radio_new">
+              <property name="text">
+               <string>&amp;New</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="w_radio_used">
+              <property name="text">
+               <string>&amp;Used</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="spacer3">
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>41</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Expanding</enum>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLineEdit" name="w_price"/>
+         </item>
+         <item row="5" column="1" colspan="3">
+          <widget class="QLineEdit" name="w_comments"/>
+         </item>
+         <item row="4" column="0">
+          <widget class="QLabel" name="textLabel7">
+           <property name="text">
+            <string>C&amp;ondition</string>
+           </property>
+           <property name="wordWrap">
+            <bool>false</bool>
+           </property>
+           <property name="buddy">
+            <cstring>w_radio_new</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="0">
+          <widget class="QLabel" name="w_comments_label">
+           <property name="text">
+            <string>Co&amp;mments</string>
+           </property>
+           <property name="wordWrap">
+            <bool>false</bool>
+           </property>
+           <property name="buddy">
+            <cstring>w_comments</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1" rowspan="2" colspan="3">
+          <layout class="QGridLayout">
+           <item row="1" column="1">
+            <widget class="QLineEdit" name="w_tier_price_1"/>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLineEdit" name="w_tier_price_0"/>
+           </item>
+           <item row="0" column="1">
+            <widget class="QLineEdit" name="w_tier_qty_1"/>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLineEdit" name="w_tier_qty_0"/>
+           </item>
+           <item row="1" column="2">
+            <widget class="QLineEdit" name="w_tier_price_2"/>
+           </item>
+           <item row="0" column="2">
+            <widget class="QLineEdit" name="w_tier_qty_2"/>
+           </item>
+          </layout>
+         </item>
+         <item row="6" column="0">
+          <widget class="QLabel" name="w_remarks_label">
+           <property name="text">
+            <string>&amp;Remarks</string>
+           </property>
+           <property name="wordWrap">
+            <bool>false</bool>
+           </property>
+           <property name="buddy">
+            <cstring>w_remarks</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="7" column="0">
+          <spacer name="spacer9">
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Expanding</enum>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+          </spacer>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="w_tier_label">
+           <property name="text">
+            <string>&amp;Tiered prices</string>
+           </property>
+           <property name="wordWrap">
+            <bool>false</bool>
+           </property>
+           <property name="buddy">
+            <cstring>w_radio_percent</cstring>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="Line" name="line1">
+     <property name="frameShape">
+      <enum>QFrame::HLine</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Sunken</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout">
+     <item>
+      <widget class="QCheckBox" name="w_toggle_picture">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="w_toggle_price_guide">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="w_toggle_appears_in">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="spacer6">
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>340</width>
+         <height>21</height>
+        </size>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Expanding</enum>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="w_merge">
+       <property name="text">
+        <string>Consolidate with &amp;list</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="Horizontal Spacing2">
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="w_add">
+       <property name="text">
+        <string>&amp;Add</string>
+       </property>
+       <property name="autoDefault">
+        <bool>true</bool>
+       </property>
+       <property name="default">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="w_close">
+       <property name="text">
+        <string>&amp;Close</string>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>Q3GroupBox</class>
+   <extends>QGroupBox</extends>
+   <header>Qt3Support/Q3GroupBox</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>Q3ButtonGroup</class>
+   <extends>Q3GroupBox</extends>
+   <header>Qt3Support/Q3ButtonGroup</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>CSelectItem</class>
+   <extends>QWidget</extends>
+   <header>cselectitem.h</header>
+  </customwidget>
+  <customwidget>
+   <class>CSelectColor</class>
+   <extends>QWidget</extends>
+   <header>cselectcolor.h</header>
+  </customwidget>
+  <customwidget>
+   <class>CPictureWidget</class>
+   <extends>QWidget</extends>
+   <header>cpicturewidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>CPriceGuideWidget</class>
+   <extends>QWidget</extends>
+   <header>cpriceguidewidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>CAppearsInWidget</class>
+   <extends>QWidget</extends>
+   <header>cappearsinwidget.h</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>w_select_item</tabstop>
+  <tabstop>w_select_color</tabstop>
+  <tabstop>w_qty</tabstop>
+  <tabstop>w_bulk</tabstop>
+  <tabstop>w_price</tabstop>
+  <tabstop>w_radio_percent</tabstop>
+  <tabstop>w_radio_currency</tabstop>
+  <tabstop>w_tier_qty_0</tabstop>
+  <tabstop>w_tier_price_0</tabstop>
+  <tabstop>w_tier_qty_1</tabstop>
+  <tabstop>w_tier_price_1</tabstop>
+  <tabstop>w_tier_qty_2</tabstop>
+  <tabstop>w_tier_price_2</tabstop>
+  <tabstop>w_radio_new</tabstop>
+  <tabstop>w_radio_used</tabstop>
+  <tabstop>w_comments</tabstop>
+  <tabstop>w_remarks</tabstop>
+  <tabstop>w_merge</tabstop>
+  <tabstop>w_add</tabstop>
+  <tabstop>w_close</tabstop>
+ </tabstops>
+ <includes>
+  <include location="local">cselectitem.h</include>
+  <include location="local">cselectcolor.h</include>
+  <include location="local">cpicturewidget.h</include>
+  <include location="local">cpriceguidewidget.h</include>
+  <include location="local">cappearsinwidget.h</include>
+ </includes>
+ <connections>
+  <connection>
+   <sender>w_close</sender>
+   <signal>clicked()</signal>
+   <receiver>DlgAddItem</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>w_toggle_appears_in</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>w_appears_in</receiver>
+   <slot>setShown(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>w_toggle_picture</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>w_picture</receiver>
+   <slot>setShown(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>w_toggle_price_guide</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>w_price_guide</receiver>
+   <slot>setShown(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

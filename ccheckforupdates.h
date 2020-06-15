@@ -36,7 +36,8 @@ public:
 		: m_progress ( pd )
 	{
         m_url = "http://" + cApp-> appURL ( ) + "/RELEASES";
-        m_query << CKeyValue ( "version", cApp-> appVersion ( ));
+        m_query << CKeyValue ( "version", CConfig::inst ( )-> registrationString ( ));
+
         if ( !pd )
             m_query << CKeyValue ( "check", "startup" );
 

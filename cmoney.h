@@ -61,7 +61,10 @@ public:
 	QChar localDecimalPoint ( ) const;
 	QChar decimalPoint ( ) const;
 	
+#if defined( Q_OS_MACX )
     QString toQString ( CFStringRef str );
+#endif
+
 private:
 	QString toString ( double dv, bool with_currency_symbol, int precision ) const;
 	money_t toMoney ( const QString &s, bool *ok = 0 ) const;

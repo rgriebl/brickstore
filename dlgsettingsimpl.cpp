@@ -18,7 +18,7 @@
 #include <qspinbox.h>
 #include <qcombobox.h>
 #include <qlineedit.h>
-#include <q3filedialog.h>
+#include <qfiledialog.h>
 #include <qlabel.h>
 #include <qvalidator.h>
 #include <q3buttongroup.h>
@@ -33,25 +33,23 @@
 
 #include "dlgsettingsimpl.h"
 
-
 namespace {
+    static int sec2day ( int s )
+    {
+        return ( s + 60*60*24 - 1 ) / ( 60*60*24 );
+    }
 
-static int sec2day ( int s )
-{
-	return ( s + 60*60*24 - 1 ) / ( 60*60*24 );
-}
-
-static int day2sec ( int d )
-{
-	return d * ( 60*60*24 );
-}
-
+    static int day2sec ( int d )
+    {
+        return d * ( 60*60*24 );
+    }
 } // namespace
 
 DlgSettingsImpl::DlgSettingsImpl( QWidget *parent, const char *name, bool modal, Qt::WFlags fl )
     : QDialog ( parent, name, modal, fl )
 {
     setupUi ( this );
+    w_tab-> setCurrentIndex ( 0 );
 	// ---------------------------------------------------------------------
 
 	QLocale l_active;
@@ -155,6 +153,8 @@ DlgSettingsImpl::DlgSettingsImpl( QWidget *parent, const char *name, bool modal,
 	w_proxy_enable-> setChecked ( CConfig::inst ( )-> useProxy ( ));
 
 	// ---------------------------------------------------------------------
+
+    resize ( minimumSizeHint ( ) );
 }
 
 DlgSettingsImpl::~DlgSettingsImpl ( )
@@ -173,7 +173,7 @@ void DlgSettingsImpl::setCurrentPage ( const char *page )
 
 void DlgSettingsImpl::selectCacheDir ( )
 {
-	QString newdir = Q3FileDialog::getExistingDirectory ( w_cache_dir-> text ( ), this, 0, tr( "Cache directory location" ));
+    QString newdir = QFileDialog::getExistingDirectory ( this, tr( "Cache directory location" ), w_cache_dir-> text ( ), QFileDialog::ShowDirsOnly);
 
 	if ( !newdir. isNull ( ))
 		w_cache_dir-> setText ( QDir::convertSeparators ( newdir ));
@@ -181,7 +181,7 @@ void DlgSettingsImpl::selectCacheDir ( )
 
 void DlgSettingsImpl::selectDocDir ( )
 {
-	QString newdir = Q3FileDialog::getExistingDirectory ( w_doc_dir-> text ( ), this, 0, tr( "Document directory location" ));
+    QString newdir = QFileDialog::getExistingDirectory ( this, tr( "Document directory location" ), w_doc_dir-> text ( ), QFileDialog::ShowDirsOnly);
 
 	if ( !newdir. isNull ( ))
 		w_doc_dir-> setText ( QDir::convertSeparators ( newdir ));
@@ -220,12 +220,17 @@ void DlgSettingsImpl::done ( int r )
 
 		CConfig::inst ( )-> setBlUpdateIntervals ( pic, pg );
 
-		QDir cd ( w_cache_dir-> text ( ));
-		if ( cd. exists ( ) && cd. isReadable ( ))
-			CConfig::inst ( )-> writeEntry ( "/BrickLink/DataDir", w_cache_dir-> text ( ));
-		else
-			CMessageBox::warning ( this, tr( "The specified cache directory does not exist or is not read- and writeable.<br />The cache directory setting will not be changed." ));
-
+        if ( w_cache_dir-> text ( ) != QDir::convertSeparators ( BrickLink::inst ( )-> dataPath ( ))) {
+            QFileInfo cd ( w_cache_dir-> text ( ) );
+            if ( !cd.exists ( ) || QDir ( w_cache_dir-> text ( ) ). entryInfoList ( QDir::NoDotAndDotDot|QDir::AllEntries ). count ( ) != 0 )
+                CMessageBox::warning ( this, tr( "The specified cache directory does not exist or is not empty.<br />The cache directory setting will not be changed." ));
+            else if ( !cd. isReadable ( ) || !cd.isWritable ( ) )
+                CMessageBox::warning ( this, tr( "The specified cache directory is not read- and writeable.<br />The cache directory setting will not be changed." ));
+            else if ( !BrickLink::inst ( )-> changeDataPath ( w_cache_dir-> text ( ), this ) )
+                CMessageBox::warning ( this, tr( "Cache directory could not be copied to the specified new location.<br />The cache directory setting will not be changed." ));
+            else
+                CConfig::inst ( )-> writeEntry ( "/BrickLink/DataDir", w_cache_dir-> text ( ));
+        }
 		// ---------------------------------------------------------------------
 
 		const BrickLink::ItemType *itype;

@@ -56,10 +56,10 @@ DlgAddItemImpl::DlgAddItemImpl ( QWidget *parent, const char *name, bool modal, 
 	m_currency_label_fmt = w_radio_currency-> text ( );
 
 	// Qt3's designer is too stupid...
-//	static_cast <QBoxLayout *> ( layout ( ))-> setStretchFactor ( l_top, 100 );
-//	l_top-> setStretchFactor ( w_select_item, 100 );
-//	l_grid-> setColStretch ( 1, 50 );
-//	l_grid-> setColStretch ( 3, 50 );
+    static_cast <QBoxLayout *> ( layout ( ))-> setStretchFactor ( l_top, 100 );
+    l_top-> setStretchFactor ( w_select_item, 100 );
+    l_grid-> setColumnStretch ( 1, 50 );
+    l_grid-> setColumnStretch ( 3, 50 );
 
 	w_select_item-> setItemType ( BrickLink::inst ( )-> itemType ( CConfig::inst ( )-> readNumEntry ( "/Defaults/AddItems/ItemType", 'P' )));
 

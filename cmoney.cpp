@@ -120,6 +120,7 @@ CMoney *CMoney::inst ( )
 	return s_inst;
 }
 
+#if defined( Q_OS_MACX )
 QString CMoney::toQString(CFStringRef str)
 {
     if (!str)
@@ -134,6 +135,7 @@ QString CMoney::toQString(CFStringRef str)
         (const_cast<QChar *>(string.unicode())));
     return string;
 }
+#endif
 
 CMoney::CMoney ( )
 {

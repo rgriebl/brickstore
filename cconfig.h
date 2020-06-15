@@ -13,11 +13,13 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
+
 #ifndef __CCONFIG_H__
 #define __CCONFIG_H__
 
 #include <qsettings.h>
 #include <qobject.h>
+#include <qdatetime.h>
 
 class CConfig : public QSettings {
 	Q_OBJECT
@@ -72,6 +74,7 @@ public:
 		OpenSource
 	};
 
+    QString registrationString ( ) const;
 	Registration registration ( ) const;
 	Registration setRegistration ( const QString &name, const QString &key );
     QString registrationName ( );
@@ -92,7 +95,7 @@ public slots:
 	void setOnlineStatus ( bool b );
 	void setProxy ( bool b, const QString &name, int port );
 
-    void setLastDatabaseUpdate ( QDateTime dt );
+    void setLastDatabaseUpdate (const QDateTime dt );
 
 	void setBlLoginUsername ( const QString &name );
 	void setBlLoginPassword ( const QString &pass );

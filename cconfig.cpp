@@ -35,6 +35,8 @@
 #include "sha1.h"
 #include "cconfig.h"
 
+#define QUOTE(string)  _QUOTE(string)
+#define _QUOTE(string) #string
 
 namespace {
 
@@ -108,8 +110,7 @@ bool CConfig::checkRegistrationKey ( const QString &name, const QString &key )
     QByteArray src;
     QDataStream ss ( &src, QIODevice::WriteOnly );
 	ss. setByteOrder ( QDataStream::LittleEndian );
-    ss << ( QString( BS_REGKEY ) + name );
-
+    ss << ( QString( QUOTE(BS_REGKEY) ) + name );
 	QByteArray sha1 = sha1::calc ( src. data ( ) + 4, src. size ( ) - 4 );
 
 	if ( sha1. count ( ) < 8 )
@@ -131,11 +132,23 @@ bool CConfig::checkRegistrationKey ( const QString &name, const QString &key )
 	result. insert ( 8, '-' );
 	result. insert ( 4, '-' );
 	
-    if ( name == "BrickStockTest" && QDateTime::currentDateTime().secsTo(QDateTime(QDate(2014, 02, 15), QTime(0, 0))) < 0)
+    if ( name == "BrickStockTest" && QDateTime::currentDateTime().secsTo(QDateTime(QDate(2014, 03, 15), QTime(0, 0))) < 0)
         return false;
 
 	return ( result == key );
 #endif	
+}
+
+QString CConfig::registrationString ( ) const
+{
+    switch (m_registration)
+    {
+        case Personal: return "Personal";
+        case Demo: return "Demo";
+        case Full: return "Full";
+        case OpenSource: return "OpenSource";
+        case None: default: return "None";
+    }
 }
 
 CConfig::Registration CConfig::registration ( ) const
@@ -246,7 +259,7 @@ QDateTime CConfig::lastDatabaseUpdate ( )
 	return dt;
 }
 
-void CConfig::setLastDatabaseUpdate ( QDateTime dt )
+void CConfig::setLastDatabaseUpdate ( const QDateTime dt )
 {
 	time_t tt = dt. isValid ( ) ? dt. toTime_t ( ) : 0;
 	writeEntry ( "/BrickLink/LastDBUpdate", int( tt ));

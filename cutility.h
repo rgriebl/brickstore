@@ -47,6 +47,9 @@ public:
 	static QString safeRename ( const QString &basepath );
 
 	static time_t toUTC ( const QDateTime &dt, const char *settz = 0 );
+
+    static bool copyDir ( const QString source, const QString destination, const bool override );
+    static bool emptyDir ( const QString dirName, const bool remove = false );
 };
 
 #endif

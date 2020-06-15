@@ -49,6 +49,7 @@ CResource::~CResource ( )
 	s_inst = 0;
 }
 
+#if defined( Q_OS_MACX )
 QString CResource::toQString(CFStringRef str)
 {
     if (!str)
@@ -63,6 +64,7 @@ QString CResource::toQString(CFStringRef str)
         (const_cast<QChar *>(string.unicode())));
     return string;
 }
+#endif
 
 CResource::CResource ( )
 	: m_iconset_dict ( 23 ), m_pixmap_dict ( 23 )
@@ -96,14 +98,14 @@ CResource::CResource ( )
 
 	m_has_alpha &= (( wv != QSysInfo::WV_95 ) && ( wv != QSysInfo::WV_NT ));
 	
-    QPixmap::setDefaultOptimization ( QPixmap::MemoryOptim );
+    //QPixmap::setDefaultOptimization ( QPixmap::MemoryOptim );
 
 	// using the native dialog causes the app to crash under W2K (comdlg32.dll)
 	// (both the release and the debug versions will crash ONLY when run
 	//  without a debugger, destroying the stack at the same time...)
 	
-	extern bool qt_use_native_dialogs;
-	qt_use_native_dialogs = !(( wv & QSysInfo::WV_DOS_based ) || (( wv & QSysInfo::WV_NT_based ) < QSysInfo::WV_XP ));
+    //extern bool qt_use_native_dialogs;
+    //qt_use_native_dialogs = !(( wv & QSysInfo::WV_DOS_based ) || (( wv & QSysInfo::WV_NT_based ) < QSysInfo::WV_XP ));
 
 #elif defined( Q_WS_X11 )
 	// default

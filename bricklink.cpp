@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <qapplication.h>
 #include <qfile.h>
 #include <qfileinfo.h>
 #include <qdir.h>
@@ -27,8 +28,10 @@
 #include <qpixmap.h>
 //Added by qt3to4:
 #include <q3textstream.h>
+#include <qprogressdialog.h>
 
 #include "cconfig.h"
+#include "cframework.h"
 #include "cresource.h"
 #include "cutility.h"
 #include "bricklink.h"
@@ -292,6 +295,33 @@ static bool check_and_create_path ( const QString &p )
 
 } // namespace
 
+bool BrickLink::changeDataPath ( QString newDataDir, QWidget *parent ) {
+    QProgressDialog progress ("Moving Cache...", 0, 0, 0, parent );
+    progress.setWindowModality(Qt::WindowModal);
+    progress.setValue ( -1 );
+    progress.open ( );
+    qApp->processEvents ( QEventLoop::ExcludeUserInputEvents );
+
+    bool success = false;
+    if ( newDataDir. right ( 1 ) != "/" )
+        newDataDir += "/";
+
+    if ( CUtility::copyDir ( m_datadir, newDataDir, false ) ) {
+        CUtility::emptyDir ( m_datadir, true );
+        m_datadir = newDataDir;
+
+        success = true;
+    }
+    else {
+        progress.setLabelText ( "Rolling back..." );
+        CUtility::emptyDir ( newDataDir );
+    }
+
+    progress.close ( );
+
+    return success;
+}
+
 QString BrickLink::dataPath ( ) const
 {
 	return m_datadir;
@@ -332,8 +362,6 @@ QString BrickLink::dataPath ( const Item *item, const Color *color ) const
 
 	return p;
 }
-
-
 
 BrickLink *BrickLink::s_inst = 0;
 

@@ -230,6 +230,7 @@ QString CApplication::sysVersion ( ) const
         case QSysInfo::WV_2003 : sys_version = "2003";  break;
         case QSysInfo::WV_VISTA: sys_version = "VISTA"; break;
         case QSysInfo::WV_WINDOWS7: sys_version = "7";  break;
+        case QSysInfo::WV_WINDOWS8: sys_version = "8";  break;
         default          : break;
 	}
 #elif defined( Q_OS_UNIX )
@@ -416,35 +417,16 @@ void CApplication::about ( )
 
 	static const char *technical_src = 
 		"<p>"
-//			"<strong>Build Info</strong><br /><br />"
-//			"<table>"
-//				"<tr><td>User     </td><td>%1</td></tr>"
-//				"<tr><td>Host     </td><td>%2</td></tr>"
-//				"<tr><td>Date     </td><td>%3</td></tr>"
-//				"<tr><td>Compiler </td><td>%4</td></tr>"
-//			"</table><br />"
 			"<strong>Runtime Info</strong><br /><br />"
 			"<table>"	
-				"<tr><td>OS     </td><td>%5</td></tr>"
-				"<tr><td>libqt  </td><td>%6</td></tr>"
-//              "<tr><td>libqsa </td><td>%7</td></tr>"
-				"<tr><td>libcurl</td><td>%8</td></tr>"
-				"<tr><td>libz   </td><td>%9</td></tr>"
+                "<tr><td>OS     </td><td>%1</td></tr>"
+                "<tr><td>libqt  </td><td>%2</td></tr>"
+                "<tr><td>libcurl</td><td>%3</td></tr>"
+                "<tr><td>libz   </td><td>%4</td></tr>"
 			"</table>"
 		"</p>";
 
-    QString technical = QString ( technical_src )/*. arg ( __USER__, __HOST__, __DATE__ " " __TIME__ ). arg (
-#if defined( _MSC_VER )
-		"Microsoft Visual-C++ " + QString( _MSC_VER < 1200 ? "???" : 
-		                                 ( _MSC_VER < 1300 ? "6.0" : 
-										 ( _MSC_VER < 1310 ? ".NET" : 
-										 ( _MSC_VER < 1400 ? ".NET 2003" : "2005" ))))
-#elif defined( __GNUC__ )
-		"GCC " __VERSION__
-#else
-		"???"
-#endif
-        )*/. arg ( sysName ( ) + " " + sysVersion ( )). arg ( qt, /*qsa, */curl, z );
+    QString technical = QString ( technical_src ). arg ( sysName ( ) + " " + sysVersion ( )). arg ( qt, curl, z );
 
 	QString legal = tr( legal_src );
 

@@ -49,7 +49,10 @@ public:
     QIcon icon ( const char *name );
 	QPixmap pixmap ( const char *name );
 
+#if defined( Q_OS_MACX )
     QString toQString(CFStringRef str);
+#endif
+
 private:
 	QStringList m_paths;
     Q3AsciiDict<QIcon> m_iconset_dict;
