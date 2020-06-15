@@ -728,7 +728,7 @@ bool LDraw::Core::parse_ldconfig(const char *filename)
                     }
                     else if (sl[idx] == QLatin1String("LUMINANCE")) {
                         int lum = sl[idx+1].toInt();
-                        lum = lum;
+                        Q_UNUSED(lum);
                         idx++;
                     }
                     else if (sl[idx] == QLatin1String("CHROME")) {

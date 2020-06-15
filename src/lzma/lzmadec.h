@@ -41,6 +41,9 @@ extern "C" {
      **********/
 
 #ifdef _MSC_VER
+#define __attribute__(x)
+#endif
+#if _MSC_VER < 1900
     typedef unsigned __int64  uint_fast64_t;
     typedef unsigned __int32  uint_fast32_t;
     typedef unsigned __int32  uint_fast16_t;
@@ -60,9 +63,6 @@ extern "C" {
     typedef          __int32  int32_t;
     typedef          __int16  int16_t;
     typedef          __int8   int8_t;
-
-#define __attribute__(x)
-
 #else
 #include <inttypes.h>
 #endif

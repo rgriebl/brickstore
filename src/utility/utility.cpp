@@ -76,7 +76,7 @@ int Utility::naturalCompare(const QString &name1, const QString &name2)
     const QChar *n1 = name1.constData();
     const QChar *n2 = name2.constData();
 
-    forever {
+    while (true) {
         // 1) skip white space
         while (n1->isSpace()) {
             n1++;

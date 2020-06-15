@@ -107,7 +107,7 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     for (int i = 0; i < 3; i++) {
         static_cast<HackSpinBox *>(w_tier_qty [i])->lineEdit()->setValidator(new QIntValidator(0, 99999, w_tier_qty [i]));
         w_tier_qty [i]->setValue(0);
-        w_tier_price [i]->setText("");
+        w_tier_price [i]->setText(QString());
 
         connect(w_tier_qty [i], SIGNAL(valueChanged(int)), this, SLOT(checkTieredPrices()));
         connect(w_tier_price [i], SIGNAL(textChanged(const QString &)), this, SLOT(checkTieredPrices()));

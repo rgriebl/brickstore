@@ -689,7 +689,7 @@ void BrickLink::InvItemMimeData::setItems(const InvItemList &items)
     QDataStream ds(&data, QIODevice::WriteOnly);
 
     ds << items.count();
-    foreach(const InvItem *ii, items) {
+    foreach (const InvItem *ii, items) {
         ds << *ii;
         if (!text.isEmpty())
             text.append("\n");
