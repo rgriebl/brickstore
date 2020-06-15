@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -17,6 +19,9 @@
 #include "clistview.h"
 #include "cdocument.h"
 #include "bricklink.h"
+//Added by qt3to4:
+#include <QPixmap>
+#include <QEvent>
 
 
 class QValidator;
@@ -87,7 +92,7 @@ protected:
 	bool eventFilter ( QObject *o, QEvent *e );
 
 protected slots:
-	virtual void listItemDoubleClicked ( QListViewItem *, const QPoint &, int );
+	virtual void listItemDoubleClicked ( Q3ListViewItem *, const QPoint &, int );
 	void applyFilterInternal ( );
 	void languageChange ( );
 
@@ -107,18 +112,18 @@ private:
 
 class CItemViewItem : public CListViewItem {
 public:
-	CItemViewItem ( CDocument::Item *item, QListViewItem *parent, QListViewItem *after );
-	CItemViewItem ( CDocument::Item *item, QListView *parent, QListViewItem *after );
+	CItemViewItem ( CDocument::Item *item, Q3ListViewItem *parent, Q3ListViewItem *after );
+	CItemViewItem ( CDocument::Item *item, Q3ListView *parent, Q3ListViewItem *after );
 
 	virtual ~CItemViewItem ( );
 
 	enum { RTTI = 1000 };
 
-	virtual int width ( const QFontMetrics &fm, const QListView *lv, int c ) const;
+	virtual int width ( const QFontMetrics &fm, const Q3ListView *lv, int c ) const;
 	virtual QString text ( int column ) const;
 	virtual const QPixmap *pixmap ( int column ) const;
 	virtual QString key ( int column, bool ascending ) const;
-	virtual int compare ( QListViewItem * i, int col, bool ascending ) const;
+	virtual int compare ( Q3ListViewItem * i, int col, bool ascending ) const;
 	virtual void setup ();
 	virtual void paintCell ( QPainter * p, const QColorGroup & cg, int column, int width, int align );
 	virtual int rtti () const;
@@ -145,7 +150,7 @@ private:
 	mutable BrickLink::Picture *m_picture;
 	Q_UINT64                    m_truncated;
 
-	friend class CItemViewToolTip;
+    friend class CItemViewToolTip;
 };
 
 

@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -14,14 +16,16 @@
 #include <qlineedit.h>
 #include <qvalidator.h>
 #include <qpushbutton.h>
-#include <qbuttongroup.h>
-#include <qdatetimeedit.h>
-#include <qwidgetstack.h>
+#include <q3buttongroup.h>
+#include <q3datetimeedit.h>
+#include <q3widgetstack.h>
 #include <qlabel.h>
 #include <qcombobox.h>
 #include <qpainter.h>
 #include <qtooltip.h>
-#include <qheader.h>
+#include <q3header.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 #include "clistview.h"
 #include "cimport.h"
@@ -85,7 +89,7 @@ public:
         return tt;
     }
 
-	virtual int width ( const QFontMetrics &fm, const QListView *lv, int column ) const
+	virtual int width ( const QFontMetrics &fm, const Q3ListView *lv, int column ) const
 	{
 		return CListViewItem::width ( fm, lv, column ) + 20;
 	}
@@ -98,14 +102,14 @@ public:
 			_cg. setColor ( QColorGroup::Base, CUtility::gradientColor ( backgroundColor ( ), isReceived ( ) ? Qt::green : Qt::blue, 0.2f ));
 			_cg. setColor ( QColorGroup::Highlight, CUtility::gradientColor ( cg. highlight ( ), isReceived ( ) ? Qt::green : Qt::blue, 0.2f ));
 			
-			QListViewItem::paintCell ( p, _cg, col, w, align );
+			Q3ListViewItem::paintCell ( p, _cg, col, w, align );
 		}
 		else {
 			CListViewItem::paintCell ( p, cg, col, w, align );
 		}
 	}
 
-	virtual int compare ( QListViewItem *i, int col, bool ascending ) const 
+	virtual int compare ( Q3ListViewItem *i, int col, bool ascending ) const 
 	{
 		OrderListItem *oli = static_cast<OrderListItem *> ( i );
 
@@ -130,18 +134,20 @@ private:
 	QPair<BrickLink::Order *, BrickLink::InvItemList *> m_order;
 };
 
-class OrderListToolTip : public QToolTip {
+class OrderListToolTip : public QObject/*, public QToolTip*/ {
+
 public:
 	OrderListToolTip ( QWidget *parent, CListView *lv )
-		: QToolTip( parent ), m_lv ( lv )
-	{ }
+        : QObject(parent), /*QToolTip( parent ), */
+          m_lv ( lv )
+    { }
 	
 	virtual ~OrderListToolTip ( )
 	{ }
 
     void maybeTip ( const QPoint &pos )
 	{
-		if ( !parentWidget ( ) || !m_lv /*|| !m_iv-> showToolTips ( )*/ )
+        if ( !((QWidget *)QObject::parent()) || !m_lv /*|| !m_iv-> showToolTips ( )*/ )
 			return;
 
 		OrderListItem *item = static_cast <OrderListItem *> ( m_lv-> itemAt ( pos ));
@@ -160,8 +166,13 @@ public:
 		int headerleft = m_lv-> header ( )-> sectionPos ( col ) - m_lv-> contentsX ( );
 		r. setLeft ( headerleft );
 		r. setRight ( headerleft + m_lv-> header ( )-> sectionSize ( col ));
-		tip ( r, text );
+        QToolTip::add((QWidget *)QObject::parent(), r, text);
 	}
+
+    void hideTip ( )
+    {
+        QToolTip::remove ( (QWidget *)QObject::parent());
+    }
 
 private:
     CListView *m_lv;
@@ -189,8 +200,8 @@ DlgLoadOrderImpl::DlgLoadOrderImpl ( QWidget *parent, const char *name, bool mod
 	connect ( w_order_to, SIGNAL( valueChanged ( const QDate & )), this, SLOT( checkId ( )));
 
 	connect ( w_order_list, SIGNAL( selectionChanged ( )), this, SLOT( checkSelected ( )));
-	connect ( w_order_list, SIGNAL( doubleClicked ( QListViewItem *, const QPoint &, int )), this, SLOT( activateItem ( QListViewItem * )));
-	connect ( w_order_list, SIGNAL( returnPressed ( QListViewItem * )), this, SLOT( activateItem ( QListViewItem * )));
+	connect ( w_order_list, SIGNAL( doubleClicked ( Q3ListViewItem *, const QPoint &, int )), this, SLOT( activateItem ( Q3ListViewItem * )));
+	connect ( w_order_list, SIGNAL( returnPressed ( Q3ListViewItem * )), this, SLOT( activateItem ( Q3ListViewItem * )));
 
 	w_order_list-> addColumn ( tr( "Type" ));
 	w_order_list-> addColumn ( tr( "Order #" ));
@@ -199,7 +210,7 @@ DlgLoadOrderImpl::DlgLoadOrderImpl ( QWidget *parent, const char *name, bool mod
 	w_order_list-> addColumn ( tr( "Total" ));
 	w_order_list-> setColumnAlignment ( 4, Qt::AlignRight );
 //	w_order_list-> setShowSortIndicator ( true );
-    w_order_list-> setSelectionMode ( QListView::Extended );
+    w_order_list-> setSelectionMode ( Q3ListView::Extended );
 	w_order_list-> setShowToolTips ( false );
 	(void) new OrderListToolTip ( w_order_list-> viewport ( ), w_order_list );
 
@@ -261,12 +272,12 @@ void DlgLoadOrderImpl::download ( )
 	if ( ok && !import-> orders ( ). isEmpty ( )) {
 		w_stack-> raiseWidget ( 2 );
 
-		const QValueList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > &orderlist = import-> orders ( );
+		const Q3ValueList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > &orderlist = import-> orders ( );
 
 		w_order_list-> clear ( );
 
 		//foreach ( const QPair<BrickLink::Order *, BrickLink::InvItemList *> &order, orderlist ) { // doesn't compile with MSVC.NET
-		for ( QValueList<QPair<BrickLink::Order *, BrickLink::InvItemList *> >::const_iterator it = orderlist. begin ( ); it != orderlist. end ( ); ++it )
+		for ( Q3ValueList<QPair<BrickLink::Order *, BrickLink::InvItemList *> >::const_iterator it = orderlist. begin ( ); it != orderlist. end ( ); ++it )
 			(void) new OrderListItem ( w_order_list, *it );
 
 		w_order_list-> setSorting ( 2 );
@@ -294,11 +305,11 @@ void DlgLoadOrderImpl::download ( )
 	delete import;
 }
 
-QValueList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > DlgLoadOrderImpl::orders ( ) const
+Q3ValueList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > DlgLoadOrderImpl::orders ( ) const
 {
-    QValueList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > list;
+    Q3ValueList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > list;
     
-    for ( QListViewItemIterator it ( w_order_list, QListViewItemIterator::Selected ); it. current ( ); ++it ) {
+    for ( Q3ListViewItemIterator it ( w_order_list, Q3ListViewItemIterator::Selected ); it. current ( ); ++it ) {
         list. append ( static_cast<OrderListItem *> ( it. current ( ))-> order ( ));
     }
 
@@ -329,11 +340,11 @@ void DlgLoadOrderImpl::checkId ( )
 
 void DlgLoadOrderImpl::checkSelected ( )
 {
-    QListViewItemIterator it ( w_order_list, QListViewItemIterator::Selected );
+    Q3ListViewItemIterator it ( w_order_list, Q3ListViewItemIterator::Selected );
 	w_ok-> setEnabled ( it. current ( ));
 }
 
-void DlgLoadOrderImpl::activateItem ( QListViewItem * )
+void DlgLoadOrderImpl::activateItem ( Q3ListViewItem * )
 {
 	checkSelected ( );
 	w_ok-> animateClick ( );

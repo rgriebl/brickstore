@@ -1,8 +1,10 @@
 #!/bin/sh
 
-## Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+## Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 ##
-## This file is part of BrickStore.
+## This file is part of BrickStock.
+## BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+## by Robert Griebl, Copyright (C) 2004-2008.
 ##
 ## This file may be distributed and/or modified under the terms of the GNU 
 ## General Public License version 2 as published by the Free Software Foundation 
@@ -13,7 +15,7 @@
 ##
 ## See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 
-echo -n "Creating brickstore.ico from images/icon.png... "
+echo -n "Creating brickstock.ico from images/icon.png... "
 
 pngtopnm images/icon.png | ppmquant -fs 256 >/tmp/ico$$_bp.ppm 2>/dev/null
 pngtopnm -alpha images/icon.png             >/tmp/ico$$_ba.ppm
@@ -21,7 +23,7 @@ pngtopnm -alpha images/icon.png             >/tmp/ico$$_ba.ppm
 pnmscale 0.5 </tmp/ico$$_bp.ppm >/tmp/ico$$_sp.ppm
 pnmscale 0.5 </tmp/ico$$_ba.ppm >/tmp/ico$$_sa.ppm
 
-ppmtowinicon -andpgms /tmp/ico$$_bp.ppm /tmp/ico$$_ba.ppm /tmp/ico$$_sp.ppm /tmp/ico$$_sa.ppm >brickstore.ico
+ppmtowinicon -andpgms /tmp/ico$$_bp.ppm /tmp/ico$$_ba.ppm /tmp/ico$$_sp.ppm /tmp/ico$$_sa.ppm >brickstock.ico
 
 rm -rf /tmp/ico$$_bp.ppm /tmp/ico$$_ba.ppm /tmp/ico$$_sp.ppm /tmp/ico$$_sa.ppm
 

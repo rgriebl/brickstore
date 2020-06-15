@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -17,7 +19,7 @@
 #include <qdialog.h>
 
 class CListView;
-class QListViewItem;
+class Q3ListViewItem;
 class QPushButton;
 
 class CListViewColumnsDialog : public QDialog {
@@ -35,7 +37,7 @@ private slots:
 	void showCol ( );
 	void hideCol ( );
 
-	void colSelected ( QListViewItem * );
+	void colSelected ( Q3ListViewItem * );
 
 private:
 	CListView *m_parent;

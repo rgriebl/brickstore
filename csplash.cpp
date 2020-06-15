@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -14,6 +16,9 @@
 #include <qapplication.h>
 #include <qpainter.h>
 #include <qimage.h>
+//Added by qt3to4:
+#include <QPixmap>
+#include <qdesktopwidget.h>
 
 #include "capplication.h"
 #include "cutility.h"
@@ -34,7 +39,7 @@ CSplash *CSplash::inst ( )
 }
 
 CSplash::CSplash ( )
-	: QSplashScreen ( QPixmap ( 1, 1 ), WDestructiveClose )
+	: QSplashScreen ( QPixmap ( 1, 1 ), Qt::WDestructiveClose )
 {
 	float d = qApp-> desktop ( )-> height ( ) / 1200.f;
 
@@ -47,8 +52,8 @@ CSplash::CSplash ( )
 
 	QImage gradient = CUtility::createGradient ( QSize ( s. width ( ), s. height ( ) / 2 ), Qt::Vertical, QColor ( 255, 255, 255 ), QColor ( 160, 160, 160 ),  150.0f );
 
-	QPixmap pix ( s );
-	QPainter p ( &pix, this );
+    QPixmap pix ( s );
+    QPainter p (&pix);
 	p. drawImage ( 0, 0, gradient );
 	p. drawImage ( 0, s. height ( ) / 2, gradient. mirror ( false, true ));
 
@@ -86,5 +91,6 @@ CSplash::~CSplash ( )
 
 void CSplash::message ( const QString &msg )
 {
-	QSplashScreen::message ( msg, Qt::AlignHCenter | Qt::AlignBottom );
+    showMessage ( msg, Qt::AlignHCenter | Qt::AlignBottom );
+    qApp-> processEvents();
 }

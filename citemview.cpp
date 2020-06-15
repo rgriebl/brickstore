@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -14,18 +16,27 @@
 #include <qvalidator.h>
 #include <qlineedit.h>
 #include <qcombobox.h>
-#include <qheader.h>
+#include <q3header.h>
 #include <qapplication.h>
 #include <qpainter.h>
 #include <qbitmap.h>
-#include <qlistbox.h>
+#include <q3listbox.h>
 #include <qcursor.h>
 #include <qtooltip.h>
 #include <qstyle.h>
-#include <qintdict.h>
+#include <q3intdict.h>
 #include <qtimer.h>
 #include <qtoolbutton.h>
 #include <qlayout.h>
+//Added by qt3to4:
+#include <Q3BoxLayout>
+#include <QPixmap>
+#include <QFocusEvent>
+#include <QKeyEvent>
+#include <Q3HBoxLayout>
+#include <QEvent>
+#include <Q3VBoxLayout>
+#include <Q3Frame>
 
 #include "cmessagebox.h"
 #include "cutility.h"
@@ -52,7 +63,7 @@ public:
         enum Combination { And, Or, Undefined } m_combination;
     };
     
-    QPtrList<const FilterItem> filter() const;
+    QList<const FilterItem *> filter() const;
 
 signals:
     void filterChanged();
@@ -90,10 +101,10 @@ private:
 
 private:
     CItemView *m_iv;
-    QBoxLayout *m_layout;
+    Q3BoxLayout *m_layout;
     QTimer *m_timer;
     
-    mutable QPtrList<Filter> m_filters;
+    mutable QList<Filter *> m_filters;
 
     friend class CItemView;    
 };
@@ -114,7 +125,7 @@ FilterWidget::FilterWidget ( CItemView *iv, QWidget *parent )
     
     connect(m_timer, SIGNAL(timeout()), this, SLOT(timerTick()));
 
-    m_layout = new QVBoxLayout ( this, 0, 0 );
+    m_layout = new Q3VBoxLayout ( this, 0, 0 );
     createFilter ( 0 );
 }
 
@@ -157,7 +168,7 @@ bool FilterWidget::createFilter ( int idx )
     QTimer::singleShot(0, this, SLOT(makeButtonsAutoRaise()));
 #endif
     
-    QHBoxLayout *lay = new QHBoxLayout ( f-> w_container, 0, 6 );
+    Q3HBoxLayout *lay = new Q3HBoxLayout ( f-> w_container, 0, 6 );
     lay-> addWidget ( f-> w_fields );
     lay-> addWidget ( f-> w_comparison );
     lay-> addWidget ( f-> w_expression );
@@ -259,7 +270,7 @@ void FilterWidget::filterAnd ( )
     for ( int i = 0; i < int( m_filters. count ( )); ++i ) {
         Filter *f = m_filters. at ( i );
     
-        if ( f-> w_and_combination == ::qt_cast<QToolButton *>(sender ( ))) {
+        if ( f-> w_and_combination == ::qobject_cast<QToolButton *>(sender ( ))) {
             filterAndOr ( i, Filter::And );
             break;
         }
@@ -271,7 +282,7 @@ void FilterWidget::filterOr ( )
     for ( int i = 0; i < int( m_filters. count ( )); ++i ) {
         Filter *f = m_filters. at ( i );
     
-        if ( f-> w_or_combination == ::qt_cast<QToolButton *>(sender ( ))) {
+        if ( f-> w_or_combination == ::qobject_cast<QToolButton *>(sender ( ))) {
             filterAndOr ( i, Filter::Or );
             break;
         }
@@ -303,7 +314,7 @@ void FilterWidget::filterDelete()
     
         f->w_fields->setCurrentItem(0);
         f->w_comparison->setCurrentItem(0);
-        f-> m_expression = QString ( );
+        f-> m_expression = QRegExp();
         f-> w_expression-> setText ( QString ( ));
 
         triggerFilterChanged ( );
@@ -312,10 +323,10 @@ void FilterWidget::filterDelete()
         for ( int i = 0; i < int(m_filters. count ( )); ++i ) {
             Filter *f = m_filters. at ( i );
         
-            if ( f-> w_delete == ::qt_cast<QToolButton *>(sender ( ))) {
+            if ( f-> w_delete == ::qobject_cast<QToolButton *>(sender ( ))) {
     
                 m_layout-> remove ( f-> w_container );
-                m_filters. remove ( i );
+                m_filters. removeAt ( i );
                 delete f;
                     
                 triggerFilterChanged ( );
@@ -335,9 +346,9 @@ void FilterWidget::filterDelete()
 }
 
 
-QPtrList<const FilterWidget::FilterItem> FilterWidget::filter() const
+QList<const FilterWidget::FilterItem *> FilterWidget::filter() const
 {
-    QPtrList<const FilterItem> lst;
+    QList<const FilterItem *> lst;
 
     for ( int i = 0; i < int(m_filters. count ( )); ++i ) {
         Filter *f = m_filters. at ( i );
@@ -373,7 +384,7 @@ public:
 	QPixmap   m_pixmap_nopicture;
 	QPixmap   m_pixmap_status [BrickLink::InvItem::Unknown + 1];
 
-	QIntDict <QPixmap> m_pixmap_color;
+	Q3IntDict <QPixmap> m_pixmap_color;
 
 	QWidget *          m_active_editor;
 	CItemViewItem *    m_active_item;
@@ -381,7 +392,7 @@ public:
 	QValidator *       m_active_validator;
 
 	QLineEdit *        m_lineedit;
-	CItemViewToolTip  *m_tooltips;
+    CItemViewToolTip  *m_tooltips;
 
 	CDocument *        m_doc;
 	bool               m_diff_mode;
@@ -398,7 +409,7 @@ public:
 		m_active_validator = 0;
 
 		m_lineedit = 0;
-		m_tooltips = 0;
+        m_tooltips = 0;
 
 		m_doc = doc;
 		m_diff_mode = false;
@@ -420,12 +431,12 @@ public:
 
 		m_pixmap_nopicture. setMask ( mask );
 
-		const QIntDict<BrickLink::Color> &coldict = BrickLink::inst ( )-> colors ( );
+        const QHash<int, BrickLink::Color *> &coldict = BrickLink::inst ( )-> colors ( );
 		int h = QMAX( 30, view-> fontMetrics ( ). height ( ));
 		int w = QMAX( 15, h / 2);
 
-		for ( QIntDictIterator<BrickLink::Color> it ( coldict ); it. current ( ); ++it ) {
-			const BrickLink::Color *color = it. current ( );
+        for ( QHashIterator<int, BrickLink::Color *> it ( coldict ); it. hasNext ( ); ) {
+            const BrickLink::Color *color = it. next ( ). value ( );
 
 			m_pixmap_color. insert ( color-> id ( ), BrickLink::inst ( )-> colorImage ( color, w, h ));
 		}
@@ -433,10 +444,10 @@ public:
 	}
 };
 
-class CItemViewToolTip : public QToolTip {
+class CItemViewToolTip : public QObject {
 public:
 	CItemViewToolTip ( QWidget *parent, CItemView *iv )
-		: QToolTip( parent ), m_iv ( iv )
+        : QObject( parent ), m_iv ( iv )
 	{ }
 	
 	virtual ~CItemViewToolTip ( )
@@ -444,12 +455,12 @@ public:
 
     void maybeTip ( const QPoint &pos )
 	{
-		if ( !parentWidget ( ) || !m_iv /*|| !m_iv-> showToolTips ( )*/ )
+        if ( !((QWidget *)QObject::parent()) || !m_iv /*|| !m_iv-> showToolTips ( )*/ )
 			return;
 
 		CItemViewItem *item = static_cast <CItemViewItem *> ( m_iv-> itemAt ( pos ));
 		QPoint contentpos = m_iv-> viewportToContents ( pos );
-		
+	
 		if ( !item )
 			return;
 
@@ -463,7 +474,7 @@ public:
 		int headerleft = m_iv-> header ( )-> sectionPos ( col ) - m_iv-> contentsX ( );
 		r. setLeft ( headerleft );
 		r. setRight ( headerleft + m_iv-> header ( )-> sectionSize ( col ));
-		tip ( r, text );
+        QToolTip::add((QWidget *)QObject::parent(), r, text);
 	}
 
 private:
@@ -479,25 +490,25 @@ CItemView::CItemView ( CDocument *doc, QWidget *parent, const char *name )
 	setGridMode ( true );
 
 	d-> m_lineedit = new QLineEdit ( viewport ( ));
-	d-> m_lineedit-> setFrameStyle ( QFrame::Box | QFrame::Plain );
+	d-> m_lineedit-> setFrameStyle ( Q3Frame::Box | Q3Frame::Plain );
 	d-> m_lineedit-> setLineWidth ( 1 );
 	d-> m_lineedit-> hide ( );
 	d-> m_lineedit-> installEventFilter ( this );
 
-	setSelectionMode ( QListView::Extended );
+	setSelectionMode ( Q3ListView::Extended );
 	setAlwaysShowSelection ( true );
 	setShowToolTips ( false );
-	d-> m_tooltips = new CItemViewToolTip ( viewport ( ), this );
+    d-> m_tooltips = new CItemViewToolTip ( viewport ( ), this );
 
 	for ( int i = 0; i < CDocument::FieldCount; i++ ) {
-		int align = AlignLeft;
+		int align = Qt::AlignLeft;
 		QString t;
 		int width = 0;
 		int hidden = 0;
 
 		switch ( i ) {
-			case CDocument::Status      : align = AlignLeft | AlignVCenter; width = -16; break;
-			case CDocument::Picture     : align = AlignCenter; width = -40; break;
+			case CDocument::Status      : align = Qt::AlignLeft | Qt::AlignVCenter; width = -16; break;
+			case CDocument::Picture     : align = Qt::AlignCenter; width = -40; break;
 			case CDocument::PartNo      : width = 10; break;
 			case CDocument::Description : width = 28; break;
 			case CDocument::Comments    : width = 8; break;
@@ -506,31 +517,31 @@ CItemView::CItemView ( CDocument *doc, QWidget *parent, const char *name )
 			case CDocument::QuantityDiff: width = 5; hidden = 2; break;
 			case CDocument::Quantity    : width = 5; break;
 			case CDocument::Bulk        : width = 5; break;
-			case CDocument::PriceOrig   : width = 8; align = AlignRight; hidden = 2; break;
-			case CDocument::PriceDiff   : width = 8; align = AlignRight; hidden = 2; break;
-			case CDocument::Price       : width = 8; align = AlignRight; break;
-			case CDocument::Total       : width = 8; align = AlignRight; break;
-			case CDocument::Sale        : width = 5; align = AlignRight; break;
-			case CDocument::Condition   : width = 5; align = AlignHCenter; break;
+			case CDocument::PriceOrig   : width = 8; align = Qt::AlignRight; hidden = 2; break;
+			case CDocument::PriceDiff   : width = 8; align = Qt::AlignRight; hidden = 2; break;
+			case CDocument::Price       : width = 8; align = Qt::AlignRight; break;
+			case CDocument::Total       : width = 8; align = Qt::AlignRight; break;
+			case CDocument::Sale        : width = 5; align = Qt::AlignRight; break;
+			case CDocument::Condition   : width = 5; align = Qt::AlignHCenter; break;
 			case CDocument::Color       : width = 15; break;
 			case CDocument::Category    : width = 12; break;
 			case CDocument::ItemType    : width = 12; break;
 			case CDocument::TierQ1      : width = 5; break;
-			case CDocument::TierP1      : width = 8; align = AlignRight; break;
+			case CDocument::TierP1      : width = 8; align = Qt::AlignRight; break;
 			case CDocument::TierQ2      : width = 5; break;
-			case CDocument::TierP2      : width = 8; align = AlignRight; break;
+			case CDocument::TierP2      : width = 8; align = Qt::AlignRight; break;
 			case CDocument::TierQ3      : width = 5; break;
-			case CDocument::TierP3      : width = 8; align = AlignRight; break;
-			case CDocument::LotId       : align = AlignLeft; width = 8; hidden = 1; break;
-			case CDocument::Retain      : align = AlignCenter; width = 8; hidden = 1; break;
-			case CDocument::Stockroom   : align = AlignCenter; width = 8; hidden = 1; break;
+			case CDocument::TierP3      : width = 8; align = Qt::AlignRight; break;
+			case CDocument::LotId       : align = Qt::AlignLeft; width = 8; hidden = 1; break;
+			case CDocument::Retain      : align = Qt::AlignCenter; width = 8; hidden = 1; break;
+			case CDocument::Stockroom   : align = Qt::AlignCenter; width = 8; hidden = 1; break;
 			case CDocument::Reserved    : width = 8; hidden = 1; break;
-			case CDocument::Weight      : align = AlignRight; width = 10; hidden = 1; break;
+			case CDocument::Weight      : align = Qt::AlignRight; width = 10; hidden = 1; break;
 			case CDocument::YearReleased: width = 5; hidden = 1; break;
 		}
 		int cid = addColumn ( t );
 		setColumnAlignment ( cid, align );
-		setColumnWidthMode ( cid, QListView::Manual );
+		setColumnWidthMode ( cid, Q3ListView::Manual );
 		setColumnWidth ( cid, 2 * itemMargin ( ) + 3 + ( width <= 0 ? -width : width * fontMetrics ( ). width ( "0" )));
 
 		if ( hidden == 1 )
@@ -541,7 +552,7 @@ CItemView::CItemView ( CDocument *doc, QWidget *parent, const char *name )
 
 	loadDefaultLayout ( );
 
-	connect ( this, SIGNAL( doubleClicked ( QListViewItem *, const QPoint &, int )), this, SLOT( listItemDoubleClicked ( QListViewItem *, const QPoint &, int )));
+	connect ( this, SIGNAL( doubleClicked ( Q3ListViewItem *, const QPoint &, int )), this, SLOT( listItemDoubleClicked ( Q3ListViewItem *, const QPoint &, int )));
 
 	connect ( this, SIGNAL( contentsMoving ( int, int )), this, SLOT( cancelEdit ( )));
 	connect ( this, SIGNAL( horizontalSliderPressed ( )), this, SLOT( cancelEdit ( )));
@@ -595,7 +606,7 @@ void CItemView::languageChange ( )
 
 CItemView::~CItemView ( )
 {
-	delete d-> m_tooltips;
+    delete d-> m_tooltips;
 	delete d;
 }
 
@@ -725,12 +736,12 @@ void CItemView::setDifferenceMode ( bool b )
 
 void CItemView::applyFilterInternal ( )
 {
-    FilterWidget *fw = ::qt_cast<FilterWidget *>(sender());
+    FilterWidget *fw = ::qobject_cast<FilterWidget *>(sender());
     
     if ( !fw )    
         return;
 
-    QPtrList<const FilterWidget::FilterItem> filters = fw-> filter ( );
+    QList<const FilterWidget::FilterItem *> filters = fw-> filter ( );
     
 
 //    for ( int i = 0; i < int(filters. count ( )); ++i ) {
@@ -741,8 +752,8 @@ void CItemView::applyFilterInternal ( )
 
 	CDisableUpdates disupd ( this );
 
-	for ( QListViewItemIterator it ( this ); it. current ( ); ++it ) {
-		QListViewItem *ivi = it. current ( );
+	for ( Q3ListViewItemIterator it ( this ); it. current ( ); ++it ) {
+		Q3ListViewItem *ivi = it. current ( );
 
 		FilterWidget::FilterItem::Combination lastcomb = FilterWidget::FilterItem::Or;
 		bool match = false;
@@ -836,8 +847,8 @@ void CItemView::applyFilter ( const QString &filter, int field, bool is_regex )
 
 	CDisableUpdates disupd ( this );
 
-	for ( QListViewItemIterator it ( this ); it. current ( ); ++it ) {
-		QListViewItem *ivi = it. current ( );
+	for ( Q3ListViewItemIterator it ( this ); it. current ( ); ++it ) {
+		Q3ListViewItem *ivi = it. current ( );
 
 		bool b = regexp. isEmpty ( ) || !regexp. isValid ( );
 
@@ -874,7 +885,7 @@ void CItemView::editWithLineEdit ( CItemViewItem *ivi, int col, const QString &t
 
 	d-> m_active_validator = valid;
 
-	d-> m_lineedit-> setAlignment ( columnAlignment ( col ));
+    d-> m_lineedit-> setAlignment ( (Qt::Alignment)columnAlignment ( col ));
 	d-> m_lineedit-> setValidator ( valid );
 	d-> m_lineedit-> setInputMask ( mask );
 	d-> m_lineedit-> setText ( text );
@@ -954,7 +965,7 @@ void CItemView::edit ( CItemViewItem *ivi, int col, QWidget *w )
 }
 
 
-void CItemView::listItemDoubleClicked ( QListViewItem *item, const QPoint &p, int col )
+void CItemView::listItemDoubleClicked ( Q3ListViewItem *item, const QPoint &p, int col )
 {
 	if ( !item || ( col < 0 ) || ( col >= columns ( )))
 		return;
@@ -974,7 +985,7 @@ bool CItemView::eventFilter ( QObject *o, QEvent *e )
 				QFocusEvent *fe = static_cast <QFocusEvent *> ( e );
 				fe = fe; // MSVC.NET
 				// Don't let a RMB close the editor
-				if ( fe->reason ( ) != QFocusEvent::Popup && fe->reason ( ) != QFocusEvent::ActiveWindow )
+                if ( fe->reason ( ) != Qt::PopupFocusReason && fe->reason ( ) != Qt::ActiveWindowFocusReason )
 					terminateEdit ( defaultRenameAction ( ) == Accept );
 				break;
 			}
@@ -1009,13 +1020,13 @@ bool CItemView::eventFilter ( QObject *o, QEvent *e )
 // ---------------------------------------------------------------------------
 
 
-CItemViewItem::CItemViewItem ( CDocument::Item *item, QListViewItem *parent, QListViewItem *after )
+CItemViewItem::CItemViewItem ( CDocument::Item *item, Q3ListViewItem *parent, Q3ListViewItem *after )
 	: CListViewItem ( parent, after )
 {
 	init ( item );
 }
 
-CItemViewItem::CItemViewItem ( CDocument::Item *item, QListView *parent, QListViewItem *after )
+CItemViewItem::CItemViewItem ( CDocument::Item *item, Q3ListView *parent, Q3ListViewItem *after )
 	: CListViewItem ( parent, after )
 {
 	init ( item );
@@ -1050,7 +1061,7 @@ QColor CItemViewItem::shadeColor ( int index ) const
 	return listView ( )-> d-> m_shades_table [index % ( sizeof( listView ( )-> d-> m_shades_table ) / sizeof( listView ( )-> d-> m_shades_table [0] ))];
 }
 
-int CItemViewItem::width ( const QFontMetrics &fm, const QListView *lv, int column ) const
+int CItemViewItem::width ( const QFontMetrics &fm, const Q3ListView *lv, int column ) const
 {
 	int w = 0;
 
@@ -1058,7 +1069,7 @@ int CItemViewItem::width ( const QFontMetrics &fm, const QListView *lv, int colu
 		case CDocument::Status      : w = pixmap ( column )-> width ( ); break;
 		case CDocument::Picture     : w = 40; break;
 		case CDocument::Retain      :
-		case CDocument::Stockroom   : w = lv-> style ( ). pixelMetric ( QStyle::PM_IndicatorWidth ); break;
+        case CDocument::Stockroom   : w = (*(lv-> style ( ))). pixelMetric ( QStyle::PM_IndicatorWidth ); break;
 		default                     : w = CListViewItem::width ( fm, lv, column ); break;
 	}
 	return w + 3;
@@ -1142,7 +1153,7 @@ QString CItemViewItem::text ( int col ) const
 const QPixmap *CItemViewItem::pixmap ( int column ) const
 {
 	if ( column == CDocument::Status ) {
-		return &listView ( )-> d-> m_pixmap_status [QMAX( 0, QMIN( m_item-> status ( ), BrickLink::InvItem::Unknown ))];
+        return &listView ( )-> d-> m_pixmap_status [QMAX( 0, (int)QMIN( m_item-> status ( ), BrickLink::InvItem::Unknown ))];
 	}
 	else if ( column == CDocument::Picture ) {
 		if ( m_picture && (( m_picture-> item ( ) != m_item-> item ( )) || ( m_picture-> color ( ) != m_item-> color ( )))) {
@@ -1192,7 +1203,7 @@ template <typename T> static int cmp ( const T &a, const T &b )
 		return 1;
 }
 
-template <> static int cmp<QString> ( const QString &a, const QString &b )
+template <> int cmp<QString> ( const QString &a, const QString &b )
 {
     bool ann = !a. isNull ( );
     bool bnn = !b. isNull ( );
@@ -1211,7 +1222,7 @@ template <> static int cmp<QString> ( const QString &a, const QString &b )
 
 //#define cmp(a,b)	((a)-(b) < 0 ? - 1 : ((a)-(b) > 0 ? +1 : 0 ));
 
-int CItemViewItem::compare ( QListViewItem *i, int col, bool /*ascending*/ ) const
+int CItemViewItem::compare ( Q3ListViewItem *i, int col, bool /*ascending*/ ) const
 {
 	CItemViewItem *ci = static_cast <CItemViewItem *> ( i );
 
@@ -1354,7 +1365,7 @@ void CItemViewItem::paintCell ( QPainter *p, const QColorGroup &cg, int col, int
 			break;
 
 		case CDocument::Total:
-			bg = CUtility::gradientColor ( bg, yellow, 0.1f );
+			bg = CUtility::gradientColor ( bg, Qt::yellow, 0.1f );
 			break;
 
 		case CDocument::Condition:
@@ -1412,7 +1423,7 @@ void CItemViewItem::paintCell ( QPainter *p, const QColorGroup &cg, int col, int
 	w -=2;
 
 	if ( checkmark != 0 ) {
-		const QStyle &style = iv-> style ( );
+        const QStyle &style = *(iv-> style ( ));
 
 		int iw = style. pixelMetric ( QStyle::PM_IndicatorWidth );
 		int ih = style. pixelMetric ( QStyle::PM_IndicatorHeight );
@@ -1425,7 +1436,10 @@ void CItemViewItem::paintCell ( QPainter *p, const QColorGroup &cg, int col, int
 		x = ( w - iw ) / 2;
 		y = ( h - ih ) / 2;
 
-		style. drawPrimitive ( QStyle::PE_Indicator, p, QRect( x, y, iw, ih ), cg, ( checkmark > 0 ? QStyle::Style_On : QStyle::Style_Off ) | QStyle::Style_Enabled );
+        QStyleOption option;
+        option.state = (checkmark > 0 ? QStyle::State_On : QStyle::State_Off) | QStyle::State_Enabled;
+        style. drawPrimitive ( QStyle::PE_IndicatorCheckBox, &option, p);
+        //style. drawPrimitive ( QStyle::PE_IndicatorCheckBox, p, QRect( x, y, iw, ih ), cg, ( checkmark > 0 ? QStyle::State_On : QStyle::State_Off ) | QStyle::State_Enabled );
 	}
 	else if ( pix && !pix-> isNull ( )) {
 		// clip the pixmap here .. this is cheaper than a cliprect
@@ -1447,7 +1461,7 @@ void CItemViewItem::paintCell ( QPainter *p, const QColorGroup &cg, int col, int
 		int px = x + margin;
 		int py = y + /*margin +*/ ( rh - sh ) / 2;
 
-		if ( align == AlignCenter ) 
+		if ( align == Qt::AlignCenter ) 
 			px += ( rw - sw ) / 2; // center if there is enough room
 
 		if ( pix-> height ( ) <= rh )
@@ -1461,8 +1475,8 @@ void CItemViewItem::paintCell ( QPainter *p, const QColorGroup &cg, int col, int
 	if ( !str. isEmpty ( )) {
 		int rw = w - 2 * margin;
 
-		if ( !( align & AlignVertical_Mask ))
-			align |= AlignVCenter;
+		if ( !( align & Qt::AlignVertical_Mask ))
+			align |= Qt::AlignVCenter;
 
 		const QFontMetrics &fm = p-> fontMetrics ( );
 
@@ -1488,7 +1502,7 @@ void CItemViewItem::paintCell ( QPainter *p, const QColorGroup &cg, int col, int
 			m_truncated &= ~colmask;
 		}
 
-		if ( grayout_right_chars && (( align & AlignHorizontal_Mask ) == AlignLeft )) {
+		if ( grayout_right_chars && (( align & Qt::AlignHorizontal_Mask ) == Qt::AlignLeft )) {
 			QString lstr = str. left ( str. length ( ) - grayout_right_chars );
 			QString rstr = str. right ( grayout_right_chars );
 
@@ -1537,7 +1551,7 @@ CItemView *CItemViewItem::listView ( ) const
 
 QRect CItemViewItem::globalRect ( int col ) const
 {
-	QListView *lv = listView ( );
+	Q3ListView *lv = listView ( );
 
 	QPoint p ( lv-> header ( )-> sectionPos ( col ), lv-> itemPos ( this ));
 	p = lv-> viewport ( )-> mapToGlobal ( lv-> contentsToViewport ( p ));

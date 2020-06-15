@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -17,6 +19,8 @@
 #include "bricklink.h"
 
 #include "dlgloadorder.h"
+//Added by qt3to4:
+#include <Q3ValueList>
 
 class DlgLoadOrderImpl : public DlgLoadOrder {
     Q_OBJECT
@@ -25,7 +29,7 @@ public:
     DlgLoadOrderImpl ( QWidget *parent = 0, const char * name = 0, bool modal = true );
     ~DlgLoadOrderImpl ( );
 
-    QValueList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > orders ( ) const;
+    Q3ValueList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > orders ( ) const;
 
 protected:
 	virtual void accept ( );
@@ -33,7 +37,7 @@ protected:
 protected slots:
 	void checkId ( );
 	void checkSelected ( );
-	void activateItem ( QListViewItem * );
+	void activateItem ( Q3ListViewItem * );
 
 	void start ( );
 	void download ( );

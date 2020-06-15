@@ -1,8 +1,10 @@
 #!/bin/sh
 
-## Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+## Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 ##
-## This file is part of BrickStore.
+## This file is part of BrickStock.
+## BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+## by Robert Griebl, Copyright (C) 2004-2008.
 ##
 ## This file may be distributed and/or modified under the terms of the GNU
 ## General Public License version 2 as published by the Free Software Foundation
@@ -20,7 +22,7 @@ if [ ! -d rpm ]; then
 	exit 1
 fi
 
-pkg_ver=`awk '/^ *RELEASE *=/ { print $3; }' <brickstore.pro `
+pkg_ver=`awk '/^ *RELEASE *=/ { print $3; }' <brickstock.pro `
 [ $# = 1 ] && pkg_ver="$1"
 
 if [ -z $pkg_ver ]; then
@@ -43,6 +45,10 @@ elif [ -e /etc/debian_version ]; then
 			;;
 		4.0) dist=etch
 			;;
+		*/*) dist=`sed </etc/debian_version -e 's,/.*$,,'`
+			;;
+		sid*) dist=sid
+			;;
 	esac
 fi
 
@@ -56,8 +62,8 @@ echo " > Creating DEB build directories..."
 cd debian
 rm -rf tmp
 mkdir tmp
-tar -xjf "../brickstore-$pkg_ver.tar.bz2" -C tmp
-tmpdir="tmp/brickstore-$pkg_ver"
+tar -xjf "../brickstock-$pkg_ver.tar.bz2" -C tmp
+tmpdir="tmp/brickstock-$pkg_ver"
 cd "$tmpdir"
 
 cp -aH ../../../qsa .
@@ -67,33 +73,33 @@ cp -aH ../../../qsa .
 ## -----------------------------------------------------
 
 cat >debian/control <<EOF
-Source: brickstore
+Source: brickstock
 Section: x11
 Priority: optional
 Maintainer: Robert Griebl <rg@softforge.de>
-Build-Depends: debhelper (>= 4.0.0), qt3-dev-tools (>= 3.3), libqt3-mt-dev (>= 3.3), libcurl3-dev (>= 7.13)
+Build-Depends: debhelper (>= 4.0.0), qt3-dev-tools (>= 3.3), libqt3-mt-dev (>= 3.3), libcurl3-dev
 Standards-Version: 3.6.1
 
-Package: brickstore
+Package: brickstock
 Architecture: any
 Depends: \${shlibs:Depends}, \${misc:Depends}
 Description: Offline tool for BrickLink
- BrickStore is an offline tool to manage your online store on
+ BrickStock is an offline tool to manage your online store on
  http://www.bricklink.com
  
 EOF
 
 cat >debian/dirs <<EOF
 usr/bin
-usr/share/brickstore
+usr/share/brickstock
 EOF
 	
 cat >debian/menu <<EOF
-?package(brickstore):needs="X11" section="Apps/Net" title="BrickStore" command="/usr/bin/brickstore" icon="/usr/share/brickstore/images/icon.png"
+?package(brickstock):needs="X11" section="Apps/Net" title="BrickStock" command="/usr/bin/brickstock" icon="/usr/share/brickstock/images/icon.png"
 EOF
 
 cat >debian/changelog <<EOF
-brickstore ($pkg_ver) $dist; urgency=low
+brickstock ($pkg_ver) $dist; urgency=low
 
   * Current Release
   
@@ -102,9 +108,9 @@ brickstore ($pkg_ver) $dist; urgency=low
 EOF
 
 cat >debian/copyright <<EOF
-BrickStore is Copyright (C) 2005 Robert Griebl <rg@softforge.de>
+BrickStock is Copyright (C) 2005 Robert Griebl <rg@softforge.de>
 
-BrickStore is free software; you can redistribute it and/or modify it
+BrickStock is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License version 2 as 
 published by the Free Software Foundation.
 
@@ -119,7 +125,7 @@ echo >debian/compat '4'
 echo " > Building package..."
 
 chmod +x debian/rules
-BRICKSTORE_VERSION=$pkg_ver dpkg-buildpackage -b -D -rfakeroot -us -uc
+BRICKSTOCK_VERSION=$pkg_ver dpkg-buildpackage -b -D -rfakeroot -us -uc
 
 cd ../..
 rm -rf "$pkg_ver"

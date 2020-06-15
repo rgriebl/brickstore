@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -53,7 +55,7 @@ void CAsciiRefCacheBase::addRefFor ( const CRef *ref )
 
 	if ( ref && ( ref-> m_cache == this ) && ( ref-> m_refcnt == 1 )) {
 		//qDebug ( "Moving item [%p] to in-use dict...", (void *) ref );
-		m_no_ref. removeRef ( ref );
+        m_no_ref. removeOne ( ref );
 	}
 }
 
@@ -64,9 +66,9 @@ void CAsciiRefCacheBase::releaseFor ( const CRef *ref )
 		m_no_ref. append ( ref );
 
 		while ( m_no_ref. count ( ) > m_cache_size ) {
-			const CRef *del = m_no_ref. take ( 0 );
+            const CRef *del = m_no_ref. takeAt ( 0 );
 
-			for ( QAsciiDictIterator<CRef> it ( m_dict ); it. current ( ); ++it ) {
+			for ( Q3AsciiDictIterator<CRef> it ( m_dict ); it. current ( ); ++it ) {
 				if ( it. current ( ) == del ) {
 					//qDebug ( "Purging item \"%s\" from cache...", it. currentKey ( ));
 					m_dict. remove ( it. currentKey ( ));

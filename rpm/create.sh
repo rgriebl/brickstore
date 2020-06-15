@@ -1,8 +1,10 @@
 #!/bin/sh
 
-## Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+## Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 ##
-## This file is part of BrickStore.
+## This file is part of BrickStock.
+## BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+## by Robert Griebl, Copyright (C) 2004-2008.
 ##
 ## This file may be distributed and/or modified under the terms of the GNU
 ## General Public License version 2 as published by the Free Software Foundation
@@ -20,7 +22,7 @@ if [ ! -d rpm ]; then
 	exit 1
 fi
 
-pkg_ver=`awk '/^ *RELEASE *=/ { print $3; }' <brickstore.pro `
+pkg_ver=`awk '/^ *RELEASE *=/ { print $3; }' <brickstock.pro `
 [ $# = 1 ] && pkg_ver="$1"
 
 if [ -z $pkg_ver ]; then
@@ -59,16 +61,16 @@ echo " > Creating RPM build directories..."
 cd rpm
 rm -rf SPECS RPMS BUILD SRPMS SOURCES
 mkdir SPECS RPMS BUILD SRPMS SOURCES
-cp ../brickstore-$pkg_ver.tar.bz2 SOURCES
-cp brickstore.spec SPECS
+cp ../brickstock-$pkg_ver.tar.bz2 SOURCES
+cp brickstock.spec SPECS
 
 echo " > Building package..."
 ( rpmbuild -bb --quiet \
            --define="_topdir `pwd`" \
-           --define="_brickstore_version $pkg_ver" \
-           --define="_brickstore_qtdir $QTDIR" \
-           --define="_brickstore_buildreq $BUILDREQ" \
-           SPECS/brickstore.spec ) >/dev/null 2>/dev/null
+           --define="_brickstock_version $pkg_ver" \
+           --define="_brickstock_qtdir $QTDIR" \
+           --define="_brickstock_buildreq $BUILDREQ" \
+           SPECS/brickstock.spec ) >/dev/null 2>/dev/null
 
 rm -rf "$pkg_ver"
 mkdir "$pkg_ver"

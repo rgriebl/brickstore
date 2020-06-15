@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -18,86 +20,10 @@
 
 #include <qstring.h>
 #include <qcolor.h>
+#include <QtGui/qimage.h>
 
 class QFontMetrics;
 class QDateTime;
-
-// foreach from Qt4
-#undef QT_NO_KEYWORDS
-
-#if defined(Q_CC_GNU) && !defined(Q_CC_INTEL)
-/* make use of typeof-extension */
-template <typename T>
-class QForeachContainer {
-public:
-    inline QForeachContainer(const T& t) : c(t), brk(0), i(c.begin()), e(c.end()) { }
-    const T c;
-    int brk;
-    typename T::const_iterator i, e;
-};
-
-#define Q_FOREACH(variable, container)                                \
-for (QForeachContainer<__typeof__(container)> _container_(container); \
-     !_container_.brk && _container_.i != _container_.e;              \
-     __extension__  ({ ++_container_.brk; ++_container_.i; }))                       \
-    for (variable = *_container_.i;; __extension__ ({--_container_.brk; break;}))
-
-#else
-
-struct QForeachContainerBase {};
-
-template <typename T>
-class QForeachContainer : public QForeachContainerBase {
-public:
-    inline QForeachContainer(const T& t): c(t), brk(0), i(c.begin()), e(c.end()){};
-    const T c;
-    mutable int brk;
-    mutable typename T::const_iterator i, e;
-    inline bool condition() const { return (!brk++ && i != e); }
-};
-
-template <typename T> inline T *qForeachPointer(const T &) { return 0; }
-
-template <typename T> inline QForeachContainer<T> qForeachContainerNew(const T& t)
-{ return QForeachContainer<T>(t); }
-
-template <typename T>
-inline const QForeachContainer<T> *qForeachContainer(const QForeachContainerBase *base, const T *)
-{ return static_cast<const QForeachContainer<T> *>(base); }
-
-#define Q_FOREACH(variable, container) \
-    for (const QForeachContainerBase &_container_ = qForeachContainerNew(container); \
-         qForeachContainer(&_container_, true ? 0 : qForeachPointer(container))->condition();       \
-         ++qForeachContainer(&_container_, true ? 0 : qForeachPointer(container))->i)               \
-        for (variable = *qForeachContainer(&_container_, true ? 0 : qForeachPointer(container))->i; \
-             qForeachContainer(&_container_, true ? 0 : qForeachPointer(container))->brk;           \
-             --qForeachContainer(&_container_, true ? 0 : qForeachPointer(container))->brk)
-
-#endif
-
-#define Q_FOREVER for(;;)
-#ifndef QT_NO_KEYWORDS
-#  ifndef foreach
-#    define foreach Q_FOREACH
-#  endif
-#  ifndef forever
-#    define forever Q_FOREVER
-#  endif
-#endif
-
-template <typename IT> void qDeleteAll(IT begin, IT end)
-{
-	while ( begin != end ) {
-		delete *begin;
-		++begin;
-	}
-}
-
-template <typename C> inline void qDeleteAll ( const C &c )
-{
-	qDeleteAll ( c. begin ( ), c. end ( ));
-}
-
 
 class CUtility {
 public:

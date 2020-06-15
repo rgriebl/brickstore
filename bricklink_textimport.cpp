@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -15,6 +17,8 @@
 
 #include <qfile.h>
 #include <qfileinfo.h>
+//Added by qt3to4:
+#include <Q3TextStream>
 
 #include "cutility.h"
 #include "bricklink.h"
@@ -64,9 +68,10 @@ const BrickLink::Category *BrickLink::TextImport::findCategoryByName ( const cha
 	if ( len < 0 )
 		len = strlen ( name );
 
-	for ( QIntDictIterator<Category> it ( m_categories ); it. current ( ); ++it ) {
-		if ( my_strncmp ( it. current ( )-> name ( ), name, len ))
-			return it. current ( );
+    for ( QHashIterator<int, Category *> it ( m_categories ); it. hasNext(); ) {
+        it.next();
+        if ( my_strncmp ( it. value ( )-> name ( ), name, len ))
+            return it. value ( );
 	}
 	return 0;
 }
@@ -241,9 +246,9 @@ template <> BrickLink::Item *BrickLink::TextImport::parse<BrickLink::Item> ( uin
 
 BrickLink::TextImport::TextImport ( )
 {
-	m_colors. resize ( 151 );
-	m_categories. resize ( 503 );
-	m_item_types. resize ( 13 );
+    m_colors. reserve ( 151 );
+    m_categories. reserve ( 503 );
+    m_item_types. reserve ( 13 );
 
 	m_current_item_type = 0;
 }
@@ -262,9 +267,10 @@ bool BrickLink::TextImport::import ( const QString &path )
 	// hack to speed up loading (exactly 36759 items on 22.08.2005)
 	m_items. resize ( 37000 );
 
-	for ( QIntDictIterator<ItemType> it ( m_item_types ); it. current ( ); ++it ) {
-		m_current_item_type = it. current ( );
-		ok &= readDB <> ( path + "items_" + char( it. current ( )-> m_id ) + ".txt", m_items );
+    for ( QHashIterator<int, ItemType *> it ( m_item_types ); it. hasNext ( ); ) {
+        it. next ( );
+        m_current_item_type = it. value ( );
+        ok &= readDB <> ( path + "items_" + char( it. value ( )-> m_id ) + ".txt", m_items );
 	}
 	m_current_item_type = 0;
 
@@ -292,7 +298,7 @@ bool BrickLink::TextImport::import ( const QString &path )
 	return ok;
 }
 
-template <typename T> bool BrickLink::TextImport::readDB_processLine ( QIntDict<T> &d, uint tokencount, const char **tokens )
+template <typename T> bool BrickLink::TextImport::readDB_processLine ( QHash<int, T *> &d, uint tokencount, const char **tokens )
 {
 	T *t = 0;
 	t = parse<T> ( tokencount, (const char **) tokens, t );
@@ -305,14 +311,14 @@ template <typename T> bool BrickLink::TextImport::readDB_processLine ( QIntDict<
 		return false;
 }
 
-template <typename T> bool BrickLink::TextImport::readDB_processLine ( QPtrVector<T> &v, uint tokencount, const char **tokens )
+template <typename T> bool BrickLink::TextImport::readDB_processLine ( Q3PtrVector<T> &v, uint tokencount, const char **tokens )
 {
 	T *t = 0;
 	t = parse<T> ( tokencount, (const char **) tokens, t );
 
 	if ( t ) {
 		if ( v. size ( ) == v. count ( ))
- 			v. resize ( v. size ( ) + QMAX( 40, QMIN( 320, v. size ( ))));
+            v. resize ( v. size ( ) + QMAX( (uint)40, QMIN( (uint)320, v. size ( ))));
 		v. insert ( v. count ( ), t );
 		return true;
 	}
@@ -414,8 +420,8 @@ template <typename C> bool BrickLink::TextImport::readDB ( const QString &name, 
 bool BrickLink::TextImport::readColorGuide ( const QString &name )
 {
 	QFile f ( name );
-	if ( f. open ( IO_ReadOnly )) {
-		QTextStream ts ( &f );
+	if ( f. open ( QIODevice::ReadOnly )) {
+		Q3TextStream ts ( &f );
 		QString s = ts. read ( );
 		f. close ( );
 
@@ -441,15 +447,16 @@ bool BrickLink::TextImport::readColorGuide ( const QString &name )
 bool BrickLink::TextImport::readPeeronColors ( const QString &name )
 {
 	QFile f ( name );
-	if ( f. open ( IO_ReadOnly )) {
-		QTextStream in ( &f );
+	if ( f. open ( QIODevice::ReadOnly )) {
+		Q3TextStream in ( &f );
 		
-		QString line;
 		int count = 0;
 
 		QRegExp namepattern ( "<a href=[^>]+>(.+)</a>" );
-		
-		while (( line = in. readLine ( ))) {
+
+        while (!in. atEnd ( )) {
+            QString line = in. readLine ( );
+
 			if ( line. startsWith ( "<td>" ) && line. endsWith ( "</td>" )) {
 				QString tmp = line. mid ( 4, line. length ( ) - 9 );
 				QStringList sl = QStringList::split ( "</td><td>", tmp, true );
@@ -491,7 +498,7 @@ bool BrickLink::TextImport::readPeeronColors ( const QString &name )
 	return false;
 }
 
-bool BrickLink::TextImport::importInventories ( const QString &path, QPtrVector<Item> &invs )
+bool BrickLink::TextImport::importInventories ( const QString &path, Q3PtrVector<Item> &invs )
 {
 	BrickLink::Item **itemp = invs. data ( );
 	for ( uint i = 0; i < invs. count ( ); i++ ) {
@@ -523,7 +530,7 @@ bool BrickLink::TextImport::readInventory ( const QString &path, Item *item )
 	bool ok = false;
 
 	QFile f ( filename );
-	if ( f. open ( IO_ReadOnly )) {
+	if ( f. open ( QIODevice::ReadOnly )) {
    		uint invalid_items = 0;
 		InvItemList *items = 0;
 

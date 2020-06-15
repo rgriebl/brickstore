@@ -1,6 +1,6 @@
 ## Copyright (C) 2004-2006 Robert Griebl.  All rights reserved.
 ##
-## This file is part of BrickStore.
+## This file is part of BrickStock.
 ##
 ## This file may be distributed and/or modified under the terms of the GNU
 ## General Public License version 2 as published by the Free Software Foundation
@@ -12,18 +12,18 @@
 ## See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 
 isEmpty( RELEASE ) {
-  RELEASE    = 1.1.15
+  RELEASE    = 1.2.0
 }
 
 TEMPLATE     = app
 CONFIG      *= warn_on thread qt link_prl
 
-TARGET       = brickstore
+TARGET       = brickstock
 
-TRANSLATIONS = translations/brickstore_de.ts \
-               translations/brickstore_fr.ts \
-               translations/brickstore_nl.ts \
-               translations/brickstore_sl.ts
+TRANSLATIONS = translations/brickstock_de.ts \
+               translations/brickstock_fr.ts \
+               translations/brickstock_nl.ts \
+               translations/brickstock_sl.ts
 
 res_images          = images/*.png images/*.jpg 
 res_images_16       = images/16x16/*.png
@@ -35,7 +35,7 @@ res_print_templates = print-templates/standard.qs
 
 dist_extra          = version.h.in icon.png
 dist_scripts        = scripts/*.sh scripts/*.pl scripts/*.js
-dist_unix_rpm       = rpm/create.sh rpm/brickstore.spec
+dist_unix_rpm       = rpm/create.sh rpm/brickstock.spec
 dist_unix_deb       = debian/create.sh debian/rules
 dist_macx           = macx-bundle/create.sh macx-bundle/install-table.txt macx-bundle/*.plist macx-bundle/Resources/*.icns macx-bundle/Resources/??.lproj/*.plist
 dist_win32          = win32-installer/*.wx?
@@ -49,8 +49,8 @@ exists( .private-key ) {
   win32:cat_cmd = type
   unix:cat_cmd = cat
 
-  DEFINES += BS_REGKEY="\"$$system( $$cat_cmd .private-key )\""
-} 
+  DEFINES += BS_REGKEY=\"\\\"$$system( $$cat_cmd .private-key )\\\"\"
+}
 else {
   message( Building an OpenSource version )
 }
@@ -61,7 +61,7 @@ win32 {
   INCLUDEPATH += $$(CURLDIR)\include
   LIBS += $$(CURLDIR)\lib\libcurl.lib
   DEFINES += CURL_STATICLIB
-  RC_FILE = brickstore.rc
+  RC_FILE = brickstock.rc
 
   DEFINES += __USER__="\"$$(USERNAME)\"" __HOST__="\"$$(COMPUTERNAME)\""
 
@@ -84,7 +84,7 @@ unix {
 
   OBJECTS_DIR = .obj
   
-  DEFINES += __USER__="\"$$(USER)\"" __HOST__="\"$$system( hostname )\""
+  DEFINES += __USER__=\"\\\"$$(USER)\\\"\" __HOST__=\"\\\"$$system( hostname )\\\"\"
 }
 
 unix:!macx {
@@ -93,24 +93,24 @@ unix:!macx {
   isEmpty( PREFIX ):PREFIX = /usr/local
 
   target.path = $$PREFIX/bin
-  resources_i1.path  = $$PREFIX/share/brickstore/images
+  resources_i1.path  = $$PREFIX/share/brickstock/images
   resources_i1.files = $$res_images
-  resources_i2.path  = $$PREFIX/share/brickstore/images/16x16
+  resources_i2.path  = $$PREFIX/share/brickstock/images/16x16
   resources_i2.files = $$res_images_16
-  resources_i3.path  = $$PREFIX/share/brickstore/images/22x22
+  resources_i3.path  = $$PREFIX/share/brickstock/images/22x22
   resources_i3.files = $$res_images_22
-  resources_i4.path  = $$PREFIX/share/brickstore/images/status
+  resources_i4.path  = $$PREFIX/share/brickstock/images/status
   resources_i4.files = $$res_images_status
-  resources_i5.path  = $$PREFIX/share/brickstore/images/sidebar
+  resources_i5.path  = $$PREFIX/share/brickstock/images/sidebar
   resources_i5.files = $$res_images_sidebar
 
   res_qm = $$res_translations
   res_qm ~= s/.ts/.qm/g
 
-  resources_t1.path  = $$PREFIX/share/brickstore/translations
+  resources_t1.path  = $$PREFIX/share/brickstock/translations
   resources_t1.files = $$res_qm
 
-  resources_p1.path  = $$PREFIX/share/brickstore/print-templates
+  resources_p1.path  = $$PREFIX/share/brickstock/print-templates
   resources_p1.files = $$res_print_templates
 
   # this does not work, since qmake loads the qt prl after processing this file...
@@ -120,7 +120,7 @@ unix:!macx {
 }
 
 macx {
-  osx_minor = $$system( sw_vers -productVersion | awk -F. '{ print $2; }' )
+  osx_minor = $$system( sw_vers -productVersion | cut -f2 -d'.' )
 
   system( test $$osx_minor -ge 4 ) {
     LIBS += -lcurl
@@ -130,6 +130,10 @@ macx {
     # an old 2.x version in /usr/lib ...
     LIBS += /usr/local/lib/libcurl.a
   }
+
+  LIBS += -framework CoreFoundation
+  LIBS += -framework Carbon
+  QMAKE_LFLAGS += -Bstatic
 }
 
 HEADERS += bricklink.h \
@@ -173,9 +177,9 @@ HEADERS += bricklink.h \
            curllabel.h \
            cutility.h \
            cwindow.h \
-           cworkspace.h \
            lzmadec.h \
-           sha1.h
+           sha1.h \
+    version.h
 
 SOURCES += bricklink.cpp \
            bricklink_data.cpp \
@@ -214,12 +218,12 @@ SOURCES += bricklink.cpp \
            curllabel.cpp \
            cutility.cpp \
            cwindow.cpp \
-           cworkspace.cpp \
            lzmadec.c \
            main.cpp \
            sha1.cpp
 
-FORMS   += dlgadditem.ui \
+#The following line was changed from FORMS to FORMS3 by qt3to4
+FORMS3   += dlgadditem.ui \
            dlgincdecprice.ui \
            dlgincompleteitem.ui \
            dlgloadinventory.ui \
@@ -265,3 +269,6 @@ unix:!macx {
 else {
   load( qsa )
 }
+
+QT += xml qt3support
+CONFIG += uic3 static

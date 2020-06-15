@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -16,6 +18,7 @@
 #include <qfileinfo.h>
 #include <qtimer.h>
 #include <qpixmapcache.h>
+#include <qpixmap.h>
 
 #include "bricklink.h"
 
@@ -45,7 +48,7 @@ BrickLink::Picture *BrickLink::picture ( const Item *item, const BrickLink::Colo
 	if ( !item )
 		return 0;
 
-	QCString key;
+	QString key;
 	if ( color )
 		key. sprintf ( "%c@%d@%d", item-> itemType ( )-> pictureId ( ), item-> index ( ), color-> id ( ));
 	else
@@ -105,7 +108,7 @@ void BrickLink::pictureIdleLoader2 ( )
 	Picture *pic = 0;
 
 	while ( !m_pictures. diskload. isEmpty ( )) {
-		pic = m_pictures. diskload. take ( 0 );
+        pic = m_pictures. diskload. takeAt ( 0 );
 	
 		if ( !pic ) {
 			continue;
@@ -216,7 +219,7 @@ void BrickLink::updatePicture ( BrickLink::Picture *pic, bool high_priority )
 
 	bool large = ( !pic-> color ( ));
 
-	QCString url;
+	QString url;
 	CKeyValueList query;
 	
 	if ( large ) {
@@ -260,14 +263,14 @@ void BrickLink::pictureJobFinished ( CTransfer::Job *j )
 
 			pic-> m_update_status = Ok;
 
-			if (( j-> effectiveUrl ( ). find ( "noimage", 0, false ) == -1 ) && j-> data ( )-> size ( ) && img. loadFromData ( *j-> data ( ))) {
+            if (( j-> effectiveUrl ( ). toLower( ). find ( "noimage", 0 ) == -1 ) && j-> data ( )-> size ( ) && img. loadFromData ( *j-> data ( ))) {
 				if ( !large )
 					img = img. convertDepth ( 8 );
 				img. save ( path, "PNG" );
 			}
 			else {
 				QFile f ( path );
-				f. open ( IO_WriteOnly | IO_Truncate );
+				f. open ( QIODevice::WriteOnly | QIODevice::Truncate );
 				f. close ( );
 
 				qWarning ( "No image !" );
@@ -284,7 +287,7 @@ void BrickLink::pictureJobFinished ( CTransfer::Job *j )
 
 		pic-> m_update_status = Updating;
 
-	    QCString url = j-> url ( );
+	    QString url = j-> url ( );
 	    url. replace ( url. length ( ) - 3, 3, "gif" );
 
 	    //qDebug ( "PIC request started for %s", (const char *) url );

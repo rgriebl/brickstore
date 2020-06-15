@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -14,12 +16,22 @@
 #include <qapplication.h>
 #include <qpixmap.h>
 #include <qpainter.h>
-#include <qheader.h>
-#include <qpopupmenu.h>
+#include <q3header.h>
+#include <q3popupmenu.h>
 #include <qsettings.h>
 #include <qlayout.h>
 #include <qpushbutton.h>
-#include <qvaluevector.h>
+#include <q3valuevector.h>
+//Added by qt3to4:
+#include <QContextMenuEvent>
+#include <Q3HBoxLayout>
+#include <QKeyEvent>
+#include <Q3ValueList>
+#include <Q3Frame>
+#include <QEvent>
+#include <Q3VBoxLayout>
+#include <Q3BoxLayout>
+#include <QPaintEvent>
 
 #include "cutility.h"
 #include "clistview.h"
@@ -28,7 +40,7 @@
 CDisableUpdates::CDisableUpdates ( QWidget *w )
 	: m_reenabled ( false )
 {
-	QScrollView *sv = ::qt_cast <QScrollView *> ( w );
+    Q3ScrollView *sv = ::qobject_cast <Q3ScrollView *> ( w );
 
 	if ( sv )
 		m_w = sv-> viewport ( );
@@ -54,7 +66,7 @@ void CDisableUpdates::reenable ( )
 
 
 CListView::CListView ( QWidget *parent, const char *name )
-	: QListView ( parent, name )
+	: Q3ListView ( parent, name )
 {
 	m_paint_above = 0;
 	m_paint_current = 0;
@@ -73,7 +85,7 @@ CListView::CListView ( QWidget *parent, const char *name )
 
 	header ( )-> installEventFilter ( this );
 
-	connect ( this, SIGNAL( mouseButtonPressed ( int, QListViewItem *, const QPoint &, int )), this, SLOT( checkCurrentColumn ( int, QListViewItem *, const QPoint &, int )));
+	connect ( this, SIGNAL( mouseButtonPressed ( int, Q3ListViewItem *, const QPoint &, int )), this, SLOT( checkCurrentColumn ( int, Q3ListViewItem *, const QPoint &, int )));
 }
 
 void CListView::recalc_alternate_background ( )
@@ -127,8 +139,8 @@ void CListView::setCurrentColumn ( int col )
 
 		QRect repaint_rect;
 
-		for ( QListViewItemIterator it ( this ); it. current ( ); ++it ) {
-			QListViewItem *item = it. current ( );
+		for ( Q3ListViewItemIterator it ( this ); it. current ( ); ++it ) {
+			Q3ListViewItem *item = it. current ( );
 			int y = itemPos ( item );
 
 			if ( item-> isSelected ( )) {
@@ -150,7 +162,7 @@ void CListView::setCurrentColumn ( int col )
 	}
 }
 
-void CListView::checkCurrentColumn ( int /*button*/, QListViewItem *item, const QPoint & /*pos*/, int column )
+void CListView::checkCurrentColumn ( int /*button*/, Q3ListViewItem *item, const QPoint & /*pos*/, int column )
 {
 	if ( gridMode ( ) && item && item-> isSelected ( ))
 		setCurrentColumn ( column );
@@ -159,7 +171,7 @@ void CListView::checkCurrentColumn ( int /*button*/, QListViewItem *item, const 
 void CListView::keyPressEvent( QKeyEvent *e )
 {
 	if ( !m_grid_mode ) {
-		QListView::keyPressEvent ( e );
+		Q3ListView::keyPressEvent ( e );
 		return;
 	}
 
@@ -181,11 +193,11 @@ void CListView::keyPressEvent( QKeyEvent *e )
 			e-> accept ( );
 			int d = ( e-> key ( ) == Qt::Key_Left ) ? -1 : +1;
 
-			if ( e-> state ( ) & Qt::ShiftButton ) {
+			if ( e-> state ( ) & Qt::ShiftModifier ) {
 				scrollBy ( d * 10, 0 );
 			}
 			else {
-				QHeader *head = header ( );
+				Q3Header *head = header ( );
 				int index = head-> mapToIndex ( currentColumn ( ));
 				bool found = false;
 
@@ -210,7 +222,7 @@ void CListView::keyPressEvent( QKeyEvent *e )
 			break;
 		}
 		default:
-			QListView::keyPressEvent ( e );
+			Q3ListView::keyPressEvent ( e );
 			break;
 	}
 }
@@ -219,7 +231,7 @@ QMap <QString, QString> CListView::saveSettings ( ) const
 {
 	QMap <QString, QString> map;
 
-	QHeader *head = header ( );
+	Q3Header *head = header ( );
 	QStringList wl, hl, ol;
 
 	for ( int i = 0; i < columns ( ); i++ ) {
@@ -234,14 +246,14 @@ QMap <QString, QString> CListView::saveSettings ( ) const
 	map ["ColumnWidthsHidden"] = hl. join ( "," );
 	map ["ColumnOrder"]        = ol. join ( "," );
 	map ["SortColumn"]         = QString::number ( sortColumn ( ));
-	map ["SortDirection"]      = ( sortOrder ( ) == Ascending ) ? "A" : "D";
+	map ["SortDirection"]      = ( sortOrder ( ) == Qt::AscendingOrder ) ? "A" : "D";
 
 	return map;
 }
 
 void CListView::loadSettings ( const QMap <QString, QString> &map )
 {
-	QHeader *head = header ( );
+	Q3Header *head = header ( );
 	QMap <QString, QString>::const_iterator it;
 	QStringList sl;
 
@@ -290,7 +302,7 @@ void CListView::loadSettings ( const QMap <QString, QString> &map )
 void CListView::setColumnsHideable ( bool b )
 {
 	if ( b && !m_header_popup ) {
-		m_header_popup = new QPopupMenu ( this );
+		m_header_popup = new Q3PopupMenu ( this );
 	}
 	else if ( !b && m_header_popup ) {
 		delete m_header_popup;
@@ -382,9 +394,9 @@ void CListView::update_column ( int i, bool toggle_visible, bool toggle_availabl
 
 void CListView::setColumnWidth ( int column, int w )
 {
-	QListView::setColumnWidth ( column, w );
+	Q3ListView::setColumnWidth ( column, w );
 
-	QHeader *head = header ( );
+	Q3Header *head = header ( );
 
 	head-> setClickEnabled (( w ), column );
 	head-> setResizeEnabled (( w ), column );
@@ -419,7 +431,8 @@ bool CListView::eventFilter ( QObject *o, QEvent *e )
 		m_header_popup-> popup ( static_cast<QContextMenuEvent *> ( e )-> globalPos ( ));
 		res = true;
 	}
-	return res ? true : QListView::eventFilter ( o, e );
+
+    return res ? true : Q3ListView::eventFilter ( o, e );
 }
 
 bool CListView::event ( QEvent *e )
@@ -428,7 +441,7 @@ bool CListView::event ( QEvent *e )
 		recalc_alternate_background ( );
 		recalc_highlight_palette ( );
 	}
-	return QListView::event ( e );
+	return Q3ListView::event ( e );
 }
 
 void CListView::setAlwaysShowSelection ( bool b )
@@ -447,8 +460,8 @@ bool CListView::hasAlwaysShowSelection ( ) const
 
 void CListView::setSorting ( int column, bool ascending )
 {
-	QListView::setSorting ( column, ascending );
-	QListViewItem *item = firstChild ( );
+	Q3ListView::setSorting ( column, ascending );
+	Q3ListViewItem *item = firstChild ( );
 
 	while ( item ) {
 		static_cast<CListViewItem *> ( item )-> m_known = false;
@@ -457,7 +470,7 @@ void CListView::setSorting ( int column, bool ascending )
 	centerItem ( currentItem ( ));
 }
 
-void CListView::centerItem ( const QListViewItem *item )
+void CListView::centerItem ( const Q3ListViewItem *item )
 {
 	if ( item )
 		center ( 0, itemPos ( item ) + item-> height ( ) / 2, 1.f, 1.f );
@@ -470,63 +483,63 @@ void CListView::viewportPaintEvent ( QPaintEvent *e )
 	m_paint_below = 0;
 	m_painting = true;
 
-	QListView::viewportPaintEvent ( e );
+	Q3ListView::viewportPaintEvent ( e );
 
 	m_painting = false;
 }
 
-CListViewItem::CListViewItem ( QListView *parent )
-	: QListViewItem ( parent )
+CListViewItem::CListViewItem ( Q3ListView *parent )
+	: Q3ListViewItem ( parent )
 {
 	init ( );
 }
 
-CListViewItem::CListViewItem ( QListViewItem *parent )
-	: QListViewItem ( parent )
+CListViewItem::CListViewItem ( Q3ListViewItem *parent )
+	: Q3ListViewItem ( parent )
 {
 	init ( );
 }
 
-CListViewItem::CListViewItem ( QListView *parent, QListViewItem *after )
-	: QListViewItem ( parent, after )
+CListViewItem::CListViewItem ( Q3ListView *parent, Q3ListViewItem *after )
+	: Q3ListViewItem ( parent, after )
 {
 	init ( );
 }
 
-CListViewItem::CListViewItem ( QListViewItem *parent, QListViewItem *after)
-	: QListViewItem ( parent, after )
+CListViewItem::CListViewItem ( Q3ListViewItem *parent, Q3ListViewItem *after)
+	: Q3ListViewItem ( parent, after )
 {
 	init ( );
 }
 
-CListViewItem::CListViewItem ( QListView *parent,
+CListViewItem::CListViewItem ( Q3ListView *parent,
 	QString label1, QString label2, QString label3, QString label4,
 	QString label5, QString label6, QString label7, QString label8 )
-	: QListViewItem ( parent, label1, label2, label3, label4, label5, label6, label7, label8 )
+	: Q3ListViewItem ( parent, label1, label2, label3, label4, label5, label6, label7, label8 )
 {
 	init ( );
 }
 
-CListViewItem::CListViewItem ( QListViewItem *parent,
+CListViewItem::CListViewItem ( Q3ListViewItem *parent,
 	QString label1, QString label2, QString label3, QString label4,
 	QString label5, QString label6, QString label7, QString label8 )
-	: QListViewItem ( parent, label1, label2, label3, label4, label5, label6, label7, label8 )
+	: Q3ListViewItem ( parent, label1, label2, label3, label4, label5, label6, label7, label8 )
 {
 	init ( );
 }
 
-CListViewItem::CListViewItem ( QListView *parent, QListViewItem *after,
+CListViewItem::CListViewItem ( Q3ListView *parent, Q3ListViewItem *after,
 	QString label1, QString label2, QString label3, QString label4,
 	QString label5, QString label6, QString label7, QString label8 )
-	: QListViewItem ( parent, after, label1, label2, label3, label4, label5, label6, label7, label8 )
+	: Q3ListViewItem ( parent, after, label1, label2, label3, label4, label5, label6, label7, label8 )
 {
 	init ( );
 }
 
-CListViewItem::CListViewItem ( QListViewItem *parent, QListViewItem *after,
+CListViewItem::CListViewItem ( Q3ListViewItem *parent, Q3ListViewItem *after,
 	QString label1, QString label2, QString label3, QString label4,
 	QString label5, QString label6, QString label7, QString label8 )
-	: QListViewItem ( parent, after, label1, label2, label3, label4, label5, label6, label7, label8 )
+	: Q3ListViewItem ( parent, after, label1, label2, label3, label4, label5, label6, label7, label8 )
 {
 	init ( );
 }
@@ -540,7 +553,7 @@ void CListViewItem::init ( )
 void CListViewItem::paintCell ( QPainter *p, const QColorGroup &cg, int column, int width, int alignment )
 {
 	QColorGroup _cg = cg;
-	QListView *lv = listView ( );
+	Q3ListView *lv = listView ( );
 
 	const QPixmap *pm = lv-> viewport ( )-> backgroundPixmap ( );
 
@@ -558,7 +571,7 @@ void CListViewItem::paintCell ( QPainter *p, const QColorGroup &cg, int column, 
 	if ( !lv-> isEnabled ( ))
 		_cg. setColor ( QColorGroup::Text, lv-> palette ( ). color ( QPalette::Disabled, QColorGroup::Text ));
 
-	QListViewItem::paintCell ( p, _cg, column, width, alignment );
+	Q3ListViewItem::paintCell ( p, _cg, column, width, alignment );
 }
 
 
@@ -643,10 +656,10 @@ const QColor &CListViewItem::backgroundColor ( )
 
 namespace {
 
-class ColListItem : public QCheckListItem {
+class ColListItem : public Q3CheckListItem {
 public:
 	ColListItem ( CListView *lv, int col, const QString &text, bool onoff )
-		: QCheckListItem ( lv, s_last, text, CheckBox ), m_col ( col )
+		: Q3CheckListItem ( lv, s_last, text, CheckBox ), m_col ( col )
 	{
 		setOn ( onoff );
 		s_last = this;
@@ -677,15 +690,15 @@ CListViewColumnsDialog::CListViewColumnsDialog ( CListView *parent )
 
 	QPushButton *p;
 
-	QBoxLayout *toplay = new QVBoxLayout ( this, 11, 6 );
+	Q3BoxLayout *toplay = new Q3VBoxLayout ( this, 11, 6 );
 	w_list = new CListView ( this );
 	w_list-> addColumn ( QString ( ));
 	w_list-> header ( )-> hide ( );
 	w_list-> setSorting ( -1 );
-	w_list-> setResizeMode ( QListView::LastColumn );
+	w_list-> setResizeMode ( Q3ListView::LastColumn );
 
 
-	QValueVector <int> indices ( m_parent-> columns ( ));
+	Q3ValueVector <int> indices ( m_parent-> columns ( ));
 
 	for ( int i = 0; i < m_parent-> columns ( ); i++ )
 		indices [m_parent-> header ( )-> mapToIndex ( i )] = i;
@@ -696,10 +709,10 @@ CListViewColumnsDialog::CListViewColumnsDialog ( CListView *parent )
 		if ( m_parent-> m_columns [col]. m_available )
 			(void) new ColListItem ( w_list, col, m_parent-> columnText ( col ), ( m_parent-> columnWidth ( col ) != 0 ));
 	}
-	QBoxLayout *horlay = new QHBoxLayout ( toplay );
+	Q3BoxLayout *horlay = new Q3HBoxLayout ( toplay );
 	horlay-> addWidget ( w_list, 10 );
 
-	QBoxLayout *rgtlay = new QVBoxLayout ( horlay );
+	Q3BoxLayout *rgtlay = new Q3VBoxLayout ( horlay );
 
 	w_up = new QPushButton ( tr( "Move &up" ), this );
 	connect ( w_up, SIGNAL( clicked ( )), this, SLOT( upCol ( )));
@@ -716,11 +729,11 @@ CListViewColumnsDialog::CListViewColumnsDialog ( CListView *parent )
 
 	rgtlay-> addStretch ( 10 );
 
-	QFrame *line = new QFrame ( this );
-	line-> setFrameStyle ( QFrame::HLine | QFrame::Sunken );
+	Q3Frame *line = new Q3Frame ( this );
+	line-> setFrameStyle ( Q3Frame::HLine | Q3Frame::Sunken );
 	toplay-> addWidget ( line );
 
-	QBoxLayout *botlay = new QHBoxLayout ( toplay );
+	Q3BoxLayout *botlay = new Q3HBoxLayout ( toplay );
 	botlay-> addSpacing ( QFontMetrics ( font ( )). width ( "Aa0" ) * 6 );
 	botlay-> addStretch ( 10 );
 	p = new QPushButton ( tr( "&OK" ), this );
@@ -733,7 +746,7 @@ CListViewColumnsDialog::CListViewColumnsDialog ( CListView *parent )
 	connect ( p, SIGNAL( clicked ( )), this, SLOT( reject ( )));
 	botlay-> addWidget ( p );
 
-	connect ( w_list, SIGNAL( currentChanged ( QListViewItem * )), this, SLOT( colSelected ( QListViewItem * )));
+	connect ( w_list, SIGNAL( currentChanged ( Q3ListViewItem * )), this, SLOT( colSelected ( Q3ListViewItem * )));
 	w_list-> setCurrentItem ( w_list-> firstChild ( ));
 	w_list-> setSelected ( w_list-> firstChild ( ), true );
 	colSelected ( w_list-> currentItem ( ));
@@ -746,10 +759,10 @@ CListViewColumnsDialog::CListViewColumnsDialog ( CListView *parent )
 void CListViewColumnsDialog::accept ( )
 {
 	int index = 0;
-	QHeader *head = m_parent-> header ( );
-	QValueList <int> collist;
+	Q3Header *head = m_parent-> header ( );
+	Q3ValueList <int> collist;
 
-	for ( QListViewItem *lvi = w_list-> firstChild ( ); lvi; lvi = lvi-> nextSibling ( ), index++ ) {
+	for ( Q3ListViewItem *lvi = w_list-> firstChild ( ); lvi; lvi = lvi-> nextSibling ( ), index++ ) {
 		ColListItem *cli = static_cast <ColListItem *> ( lvi );
 		int col = cli-> column ( );
 
@@ -759,14 +772,14 @@ void CListViewColumnsDialog::accept ( )
 		collist << col;
 	}
 
-	for ( uint i = 0; i < collist. count ( ); i++ )
+    for ( int i = 0; i < collist. count ( ); i++ )
 		head-> moveSection ( collist [i], i );
 
 	m_parent-> triggerUpdate ( );
 	QDialog::accept ( );
 }
 
-void CListViewColumnsDialog::colSelected ( QListViewItem *lvi )
+void CListViewColumnsDialog::colSelected ( Q3ListViewItem *lvi )
 {
 	ColListItem *cli = static_cast <ColListItem *> ( lvi );
 
@@ -795,7 +808,7 @@ void CListViewColumnsDialog::upCol ( )
 {
 	ColListItem *cli = static_cast <ColListItem *> ( w_list->currentItem ( ));
 	
-	QListViewItem *above = cli-> itemAbove ( );
+	Q3ListViewItem *above = cli-> itemAbove ( );
 	if ( above-> itemAbove ( )) {
 		cli-> moveItem ( above-> itemAbove ( ));
 	}

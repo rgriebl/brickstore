@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -12,11 +14,19 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 #include <qlabel.h>
-#include <qpopupmenu.h>
+#include <q3popupmenu.h>
 #include <qlayout.h>
 #include <qapplication.h>
 #include <qaction.h>
 #include <qtooltip.h>
+//Added by qt3to4:
+#include <QContextMenuEvent>
+#include <Q3BoxLayout>
+#include <Q3Frame>
+#include <QPixmap>
+#include <QMouseEvent>
+#include <QKeyEvent>
+#include <Q3VBoxLayout>
 
 #include "cresource.h"
 #include "cutility.h"
@@ -28,18 +38,18 @@ public:
 	BrickLink::Picture *m_pic;
 	QLabel *            m_plabel;
 	QLabel *            m_tlabel;
-	QPopupMenu *        m_popup;
+	Q3PopupMenu *        m_popup;
 	bool                m_connected;
 };
 
 class CLargePictureWidgetPrivate {
 public:
 	BrickLink::Picture *m_pic;
-	QPopupMenu *        m_popup;
+	Q3PopupMenu *        m_popup;
 };
 
-CPictureWidget::CPictureWidget ( QWidget *parent, const char *name, WFlags fl )
-	: QFrame ( parent, name, fl )
+CPictureWidget::CPictureWidget ( QWidget *parent, const char *name, Qt::WFlags fl )
+	: Q3Frame ( parent, name, fl )
 {
 	d = new CPictureWidgetPrivate ( );
 
@@ -53,18 +63,19 @@ CPictureWidget::CPictureWidget ( QWidget *parent, const char *name, WFlags fl )
 	int fw = frameWidth ( ) * 2;
 
 	d-> m_plabel = new QLabel ( this );
-	d-> m_plabel-> setFrameStyle ( QFrame::NoFrame );
-	d-> m_plabel-> setAlignment ( Qt::AlignCenter );
+	d-> m_plabel-> setFrameStyle ( Q3Frame::NoFrame );
+    d-> m_plabel-> setAlignment ( Qt::AlignCenter );
 	d-> m_plabel-> setBackgroundMode ( Qt::PaletteBase );
 	d-> m_plabel-> setFixedSize ( 80, 80 );
 
 	d-> m_tlabel = new QLabel ( "Ay<br />Ay<br />Ay<br />Ay<br />Ay", this );
-	d-> m_tlabel-> setAlignment ( Qt::AlignCenter | Qt::WordBreak );
+    d-> m_tlabel-> setWordWrap( true );
+    d-> m_tlabel-> setAlignment ( Qt::AlignCenter );
 	d-> m_tlabel-> setBackgroundMode ( Qt::PaletteBase );
 	d-> m_tlabel-> setFixedSize ( 2 * d-> m_plabel-> width ( ), d-> m_tlabel-> sizeHint ( ). height ( ));
 	d-> m_tlabel-> setText ( "" );
 
-	QBoxLayout *lay = new QVBoxLayout ( this, fw + 4, 4 );
+	Q3BoxLayout *lay = new Q3VBoxLayout ( this, fw + 4, 4 );
 	lay-> addWidget ( d-> m_plabel, 0, Qt::AlignCenter /*, AlignTop | AlignHCenter*/ );
 
 	lay-> addWidget ( d-> m_tlabel, 1, Qt::AlignCenter /*, Qt::AlignBottom | Qt::AlignHCenter*/ );
@@ -95,14 +106,14 @@ void CPictureWidget::contextMenuEvent ( QContextMenuEvent *e )
 {
 	if ( d-> m_pic ) {
 		if ( !d-> m_popup ) {
-			d-> m_popup = new QPopupMenu ( this );
-			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "reload" ), tr( "Update" ), this, SLOT( doUpdate ( )));
+			d-> m_popup = new Q3PopupMenu ( this );
+            d-> m_popup-> insertItem ( CResource::inst ( )-> icon ( "reload" ), tr( "Update" ), this, SLOT( doUpdate ( )));
 			d-> m_popup-> insertSeparator ( );
-			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "viewmagp" ), tr( "View large image..." ), this, SLOT( viewLargeImage ( )));
+            d-> m_popup-> insertItem ( CResource::inst ( )-> icon ( "viewmagp" ), tr( "View large image..." ), this, SLOT( viewLargeImage ( )));
 			d-> m_popup-> insertSeparator ( );
-			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "edit_bl_catalog" ), tr( "Show BrickLink Catalog Info..." ), this, SLOT( showBLCatalogInfo ( )));
-			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "edit_bl_priceguide" ), tr( "Show BrickLink Price Guide Info..." ), this, SLOT( showBLPriceGuideInfo ( )));
-			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "edit_bl_lotsforsale" ), tr( "Show Lots for Sale on BrickLink..." ), this, SLOT( showBLLotsForSale ( )));
+            d-> m_popup-> insertItem ( CResource::inst ( )-> icon ( "edit_bl_catalog" ), tr( "Show BrickLink Catalog Info..." ), this, SLOT( showBLCatalogInfo ( )));
+            d-> m_popup-> insertItem ( CResource::inst ( )-> icon ( "edit_bl_priceguide" ), tr( "Show BrickLink Price Guide Info..." ), this, SLOT( showBLPriceGuideInfo ( )));
+            d-> m_popup-> insertItem ( CResource::inst ( )-> icon ( "edit_bl_lotsforsale" ), tr( "Show Lots for Sale on BrickLink..." ), this, SLOT( showBLLotsForSale ( )));
 		}
 		d-> m_popup-> popup ( e-> globalPos ( ));
 	}
@@ -206,12 +217,12 @@ void CPictureWidget::redraw ( )
 
 
 CLargePictureWidget::CLargePictureWidget ( BrickLink::Picture *lpic, QWidget *parent )
-	: QLabel ( parent, "LargeImage", WType_Dialog | WShowModal | WStyle_Customize | WStyle_Dialog | WStyle_SysMenu | WStyle_Title | WStyle_Tool | WStyle_StaysOnTop | WDestructiveClose )
+	: QLabel ( parent, "LargeImage", Qt::WType_Dialog | Qt::WShowModal | Qt::WStyle_Customize | Qt::WType_Dialog | Qt::WStyle_SysMenu | Qt::WStyle_Title | Qt::WStyle_Tool | Qt::WStyle_StaysOnTop | Qt::WDestructiveClose )
 {
 	d = new CLargePictureWidgetPrivate ( );
 
 	setBackgroundMode ( Qt::PaletteBase );
-	setFrameStyle ( QFrame::NoFrame );
+	setFrameStyle ( Q3Frame::NoFrame );
 	setAlignment ( Qt::AlignCenter );
 //	setScaledContents ( true );
 	setFixedSize ( 640, 480 );
@@ -279,10 +290,10 @@ void CLargePictureWidget::contextMenuEvent ( QContextMenuEvent *e )
 {
 	if ( d-> m_pic ) {
 		if ( !d-> m_popup ) {
-			d-> m_popup = new QPopupMenu ( this );
-			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "reload" ), tr( "Update" ), this, SLOT( doUpdate ( )));
+			d-> m_popup = new Q3PopupMenu ( this );
+            d-> m_popup-> insertItem ( CResource::inst ( )-> icon ( "reload" ), tr( "Update" ), this, SLOT( doUpdate ( )));
 			d-> m_popup-> insertSeparator ( );
-			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "file_close" ), tr( "Close" ), this, SLOT( close ( )));
+            d-> m_popup-> insertItem ( CResource::inst ( )-> icon ( "file_close" ), tr( "Close" ), this, SLOT( close ( )));
 		}
 		d-> m_popup-> popup ( e-> globalPos ( ));
 	}

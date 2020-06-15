@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -17,51 +19,44 @@
 #include <qglobal.h>
 #include <qdatetime.h>
 #include <qstring.h>
-#include <qcstring.h>
-#include <qptrvector.h>
-#include <qptrlist.h>
-#include <qdict.h>
-#include <qintdict.h>
-#include <qasciicache.h>
+#include <q3ptrvector.h>
+#include <q3dict.h>
+#include <q3asciicache.h>
 #include <qcolor.h>
 #include <qobject.h>
 #include <qimage.h>
-#include <qdragobject.h>
+#include <q3dragobject.h>
 #include <qdom.h>
 #include <qlocale.h>
-#include <qvaluevector.h>
-#include <qvaluelist.h>
+#include <q3valuevector.h>
+#include <q3valuelist.h>
 #include <qmap.h>
 #include <qpair.h>
+//Added by qt3to4:
+#include <QPixmap>
 
 #include "cref.h"
 #include "cmoney.h"
 #include "ctransfer.h"
 
 #if defined( Q_OS_WIN )
-#define __LITTLE_ENDIAN	0
-#define __BIG_ENDIAN	1
-#define __BYTE_ORDER	__LITTLE_ENDIAN
-
+    #define __LITTLE_ENDIAN	0
+    #define __BIG_ENDIAN	1
+    #define __BYTE_ORDER	__LITTLE_ENDIAN
 #else
-#include <sys/param.h>
-
+    #include <sys/param.h>
 #endif
 
 #if !defined( __BYTE_ORDER ) && defined( BYTE_ORDER )
-#define __BYTE_ORDER	BYTE_ORDER
-#define __BIG_ENDIAN	BIG_ENDIAN
-#define __LITTLE_ENDIAN	LITTLE_ENDIAN
-
+    #define __BYTE_ORDER	BYTE_ORDER
+    #define __BIG_ENDIAN	BIG_ENDIAN
+    #define __LITTLE_ENDIAN	LITTLE_ENDIAN
 #elif !defined( __BYTE_ORDER ) && !defined( BYTE_ORDER )
-#error "Could not detect endianess of your platform!"
-
+    #error "Could not detect endianess of your platform!"
 #endif
 
-
 class QIODevice;
-template <typename T> class QDict;
-
+template <typename T> class Q3Dict;
 
 class BrickLink : public QObject {
 	Q_OBJECT
@@ -72,8 +67,7 @@ public:
 	class TextImport;
 	class InvItem;
 
-	typedef QValueList<InvItem *> InvItemList;
-
+	typedef Q3ValueList<InvItem *> InvItemList;
 
 	class ItemType {
 	public:
@@ -111,7 +105,6 @@ public:
 		friend QDataStream &operator << ( QDataStream &ds, const BrickLink::ItemType *itt );
 		friend QDataStream &operator >> ( QDataStream &ds, BrickLink::ItemType *itt );
 	};
-
 
 	class Category {
 	public:
@@ -188,7 +181,7 @@ public:
 
 		~Item ( );
 
-		typedef QValueVector <QPair <int, const Item *> >   AppearsInMapVector ;
+		typedef Q3ValueVector <QPair <int, const Item *> >   AppearsInMapVector ;
 		typedef QMap <const Color *, AppearsInMapVector>    AppearsInMap;
 
 		AppearsInMap appearsIn ( const Color *color = 0 ) const;
@@ -257,7 +250,6 @@ public:
 		friend QDataStream &operator << ( QDataStream &ds, const BrickLink::Item *item );
 		friend QDataStream &operator >> ( QDataStream &ds, BrickLink::Item *item );
 	};
-
 
 	enum Condition { New, Used, ConditionCount };
     enum SubCondition { None, Complete, Incomplete, MISB, SubConditionCount };
@@ -334,7 +326,7 @@ public:
 		QString remarks ( ) const           { return m_remarks; }
 		void setRemarks ( const QString &r ){ m_remarks = r; }
 
-		QCString customPictureUrl ( ) const { return m_custom_picture_url; }
+		QString customPictureUrl ( ) const  { return m_custom_picture_url; }
 		void setCustomPictureUrl ( const char *url ) { m_custom_picture_url = url; }
 
 		int quantity ( ) const              { return m_quantity; }
@@ -420,7 +412,7 @@ public:
 		QString          m_remarks;
 		QString          m_reserved;
 
-		QCString         m_custom_picture_url;
+		QString         m_custom_picture_url;
 		Picture  *       m_custom_picture;
 
 		int              m_quantity;
@@ -443,7 +435,7 @@ public:
 		friend class BrickLink;
 	};
 
-	class InvItemDrag : public QDragObject {
+	class InvItemDrag : public Q3DragObject {
 	public:
 		InvItemDrag ( const InvItemList &items, QWidget *dragsource = 0, const char *name = 0 );
 		InvItemDrag ( QWidget *dragSource = 0, const char *name = 0 );
@@ -460,7 +452,7 @@ public:
 		static const char *s_mimetype;
 
 		QByteArray m_data;
-		QCString   m_text;
+		QString   m_text;
 	};
 
 	class Order {
@@ -569,13 +561,13 @@ public:
 		bool import ( const QString &path );
 		void exportTo ( BrickLink * );
 
-		bool importInventories ( const QString &path, QPtrVector<Item> &items );
+		bool importInventories ( const QString &path, Q3PtrVector<Item> &items );
 		void exportInventoriesTo ( BrickLink * );
 
-		const QIntDict<Color>    &colors ( ) const      { return m_colors; }
-		const QIntDict<Category> &categories ( ) const  { return m_categories; }
-		const QIntDict<ItemType> &itemTypes ( ) const   { return m_item_types; }
-		const QPtrVector<Item>   &items ( ) const       { return m_items; }
+        const QHash <int, Color *>    &colors ( ) const      { return m_colors; }
+        const QHash <int, Category *> &categories ( ) const  { return m_categories; }
+        const QHash <int, ItemType *> &itemTypes ( ) const   { return m_item_types; }
+        const Q3PtrVector<Item>       &items ( ) const       { return m_items; }
 		
 	private:
 		template <typename T> T *parse ( uint count, const char **strs, T *gcc_dummy );
@@ -585,10 +577,10 @@ public:
 		Item *parse ( uint count, const char **strs, Item * );
 
 		template <typename C> bool readDB ( const QString &name, C &container );
-		template <typename T> bool readDB_processLine ( QIntDict<T> &d, uint tokencount, const char **tokens );
-		template <typename T> bool readDB_processLine ( QPtrVector<T> &v, uint tokencount, const char **tokens );
+        template <typename T> bool readDB_processLine ( QHash<int, T *> &d, uint tokencount, const char **tokens );
+		template <typename T> bool readDB_processLine ( Q3PtrVector<T> &v, uint tokencount, const char **tokens );
 
-		struct btinvlist_dummy { };
+        struct btinvlist_dummy { };
 		bool readDB_processLine ( btinvlist_dummy &, uint count, const char **strs );
 
 		bool readColorGuide ( const QString &name );
@@ -601,10 +593,10 @@ public:
 		void appendCategoryToItemType ( const Category *cat, ItemType *itt );
 
 	private:
-		QIntDict <Color>    m_colors;
-		QIntDict <ItemType> m_item_types;
-		QIntDict <Category> m_categories;
-		QPtrVector <Item>   m_items;
+        QHash <int, Color *>    m_colors;
+        QHash <int, ItemType *> m_item_types;
+        QHash <int, Category *> m_categories;
+        Q3PtrVector <Item>      m_items;
 
 		QMap<const BrickLink::Item *, BrickLink::Item::AppearsInMap> m_appears_in_map;
 		QMap<const BrickLink::Item *, BrickLink::InvItemList>        m_consists_of_map;
@@ -636,7 +628,7 @@ public:
 		URL_StoreItemDetail
 	};
 
-	QCString url ( UrlList u, const void *opt = 0, const void *opt2 = 0 );
+    QString url( UrlList u, const void *opt = 0, const void *opt2 = 0 );
 
 	QString dataPath ( ) const;
 	QString dataPath ( const ItemType * ) const;
@@ -645,10 +637,10 @@ public:
 
 	QString defaultDatabaseName ( ) const;
 
-	const QIntDict<Color>    &colors ( ) const;
-	const QIntDict<Category> &categories ( ) const;
-	const QIntDict<ItemType> &itemTypes ( ) const;
-	const QPtrVector<Item>   &items ( ) const;
+    const QHash<int, Color *>    &colors ( ) const;
+    const QHash<int, Category *> &categories ( ) const;
+    const QHash<int, ItemType* > &itemTypes ( ) const;
+    const Q3PtrVector<Item>      &items ( ) const;
 
 	const QPixmap *noImage ( const QSize &s ) const;
 
@@ -678,7 +670,7 @@ public:
 		XMLHint_Order, 
 		XMLHint_WantedList, 
 		XMLHint_BrikTrak,
-		XMLHint_BrickStore
+        XMLHint_BrickStock
 	};
 
 	InvItemList *parseItemListXML ( QDomElement root, ItemListXMLHint hint, uint *invalid_items = 0 );
@@ -714,15 +706,15 @@ private:
 	static BrickLink *s_inst;
 
 	bool updateNeeded ( bool valid, const QDateTime &last, int iv );
-	bool parseLDrawModelInternal ( QFile &file, const QString &model_name, InvItemList &items, uint *invalid_items, QDict <InvItem> &mergehash, QStringList &recursion_detection );
+	bool parseLDrawModelInternal ( QFile &file, const QString &model_name, InvItemList &items, uint *invalid_items, Q3Dict <InvItem> &mergehash, QStringList &recursion_detection );
 	void pictureIdleLoader2 ( );
 
 	void setDatabase_ConsistsOf ( const QMap<const Item *, InvItemList> &map );
 	void setDatabase_AppearsIn ( const QMap<const Item *, Item::AppearsInMap> &map );
-	void setDatabase_Basics ( const QIntDict<Color> &colors, 
-								const QIntDict<Category> &categories,
-								const QIntDict<ItemType> &item_types,
-								const QPtrVector<Item> &items );
+    void setDatabase_Basics (const QHash<int, Color *> &colors,
+                                const QHash<int, Category *> &categories,
+                                const QHash<int, ItemType *> &item_types,
+                                const Q3PtrVector<Item> &items );
 
 private slots:
 	void pictureIdleLoader ( );
@@ -735,14 +727,14 @@ private:
 	bool     m_online;
 	QLocale  m_c_locale;
 
-	mutable QDict <QPixmap>  m_noimages;
-	mutable QDict <QPixmap>  m_colimages;
+	mutable Q3Dict <QPixmap>  m_noimages;
+	mutable Q3Dict <QPixmap>  m_colimages;
 
 	struct dummy1 {
-		QIntDict<Color>           colors;      // id -> Color *
-		QIntDict<Category>        categories;  // id -> Category *
-		QIntDict<ItemType>        item_types;  // id -> ItemType *
-		QPtrVector<Item>          items;       // sorted array of Item *
+        QHash<int, Color*>           colors;      // id -> Color *
+        QHash<int, Category*>        categories;  // id -> Category *
+        QHash<int, ItemType*>        item_types;  // id -> ItemType *
+		Q3PtrVector<Item>          items;       // sorted array of Item *
 	} m_databases;
 
 	struct dummy2 {
@@ -756,7 +748,7 @@ private:
 		CTransfer *               transfer;
 		int                       update_iv;
 
-		QPtrList <Picture>        diskload;
+        QList <Picture *>        diskload;
 
 		CAsciiRefCache<Picture, 503, 500>    cache;
 	} m_pictures;
@@ -777,8 +769,6 @@ QDataStream &operator >> ( QDataStream &ds, BrickLink::Category *cat );
 QDataStream &operator << ( QDataStream &ds, const BrickLink::Color *col );
 QDataStream &operator >> ( QDataStream &ds, BrickLink::Color *col );
 
-
 //} // namespace BrickLink
 
 #endif
-

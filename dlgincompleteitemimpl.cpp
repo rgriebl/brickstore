@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -12,7 +14,7 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 
-#include <qwidgetstack.h>
+#include <q3widgetstack.h>
 #include <qpushbutton.h>
 #include <qlabel.h>
 
@@ -36,14 +38,14 @@ DlgIncompleteItemImpl::DlgIncompleteItemImpl ( BrickLink::InvItem *ii, QWidget *
 
 	if ( !itemok ) {
 		w_item_stack-> raiseWidget ( 1 );
-		w_item_add_info-> setText ( QString( "<a href=\"%1\">%2</a>" ). arg ( BrickLink::inst ( )-> url ( BrickLink::URL_ItemChangeLog, ii-> isIncomplete ( )-> m_item_id. latin1 ( ))). arg ( tr( "BrickLink Item Change Log" )));
+        w_item_add_info-> setText ( QString( "<a href=\"%1\">%2</a>" ). arg ( BrickLink::inst ( )-> url ( BrickLink::URL_ItemChangeLog, ii-> isIncomplete ( )-> m_item_id. latin1 ( ))). arg ( tr( "BrickLink Item Change Log" )));
 	}
 	
 	w_color_stack-> setShown ( !colorok );
 
 	if ( !colorok ) {
 		w_color_stack-> raiseWidget ( 1 );
-		w_color_add_info-> setText ( QString( "<a href=\"%1\">%2</a>" ). arg ( BrickLink::inst ( )-> url ( BrickLink::URL_ColorChangeLog )). arg ( tr( "BrickLink Color Change Log" )));
+        w_color_add_info-> setText ( QString( "<a href=\"%1\">%2</a>" ). arg ( BrickLink::inst ( )-> url ( BrickLink::URL_ColorChangeLog )). arg ( tr( "BrickLink Color Change Log" )));
 	}
 	
 	w_ok-> setEnabled ( false );
@@ -58,7 +60,7 @@ DlgIncompleteItemImpl::~DlgIncompleteItemImpl ( )
 void DlgIncompleteItemImpl::fixItem ( )
 {
 	const BrickLink::InvItem::Incomplete *inc = m_ii-> isIncomplete ( );
-	const BrickLink::ItemType *itt = inc-> m_itemtype_id. isEmpty ( ) ? 0 : BrickLink::inst ( )-> itemType ( inc-> m_itemtype_id [0] );
+    const BrickLink::ItemType *itt = inc-> m_itemtype_id. isEmpty ( ) ? 0 : BrickLink::inst ( )-> itemType ( inc-> m_itemtype_id [0]. toAscii ( ));
 	const BrickLink::Category *cat = inc-> m_category_id. isEmpty ( ) ? 0 : BrickLink::inst ( )-> category ( inc-> m_category_id. toInt ( ));
 
 	CSelectItemDialog d ( false, this );
@@ -128,7 +130,7 @@ QString DlgIncompleteItemImpl::createDisplayString ( BrickLink::InvItem *ii )
 		str_typ = ii-> itemType ( )-> name ( );
 	}	
 	else {
-		const BrickLink::ItemType *itt = inc-> m_itemtype_id. isEmpty ( ) ? 0 : BrickLink::inst ( )-> itemType ( inc-> m_itemtype_id [0] );
+        const BrickLink::ItemType *itt = inc-> m_itemtype_id. isEmpty ( ) ? 0 : BrickLink::inst ( )-> itemType ( inc-> m_itemtype_id [0]. toAscii ( ));
 		str_typ = createDisplaySubString ( tr( "Type" ), itt ? QString( itt-> name ( )) : QString::null, inc-> m_itemtype_id, inc-> m_itemtype_name );
 	}
 

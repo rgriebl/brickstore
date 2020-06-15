@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -16,23 +18,26 @@
 
 #include <qaction.h>
 #include <qmap.h>
-#include <qvaluevector.h>
+#include <q3valuevector.h>
+//Added by qt3to4:
+#include <Q3PopupMenu>
+#include <Q3ValueList>
 
 class QStringList;
 
-class CListAction : public QActionGroup {
-	Q_OBJECT
-public:
+class CListAction : public QMenu {
+    Q_OBJECT
 
+public:
 	class Provider {
 	public:
 		virtual ~Provider ( )
 		{ }
 		
-		virtual QStringList list ( int &active_index, QValueList <int> &custom_ids ) = 0;
+		virtual QStringList list ( int &active_index, Q3ValueList <int> &custom_ids ) = 0;
 	};
 
-	CListAction ( bool use_numbers, QObject *parent, const char *name );
+    CListAction (bool use_numbers, QWidget *parent, const char *name );
 	virtual ~CListAction ( );
 
 	void setListProvider ( Provider * );
@@ -40,11 +45,6 @@ public:
 
 	void setList ( const QStringList *list );
 	const QStringList *list ( ) const;
-
-	virtual bool addTo ( QWidget *w );
-	virtual bool removeFrom ( QWidget *w );
-
-	virtual void setText ( const QString &txt );
 
 signals:
 	void activated ( int );
@@ -58,8 +58,8 @@ private:
 	Provider *m_provider;
 	bool m_use_numbers;
 
-	QMap <QPopupMenu *, QValueVector<int> > m_id_map;
-	QMap <QPopupMenu *, int> m_update_menutexts;
+	QMap <Q3PopupMenu *, Q3ValueVector<int> > m_id_map;
+	QMap <Q3PopupMenu *, int> m_update_menutexts;
 };
 
 #endif

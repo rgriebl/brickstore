@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -19,13 +21,10 @@
 
 #include "lzmadec.h"
 
+#include "version.h"
 #include "cconfig.h"
 #include "bricklink.h"
 #include "cprogressdialog.h"
-
-
-#define DATABASE_URL   "http://brickforge.de/brickstore-data/"
-
 
 class CUpdateDatabase : public QObject {
 	Q_OBJECT
@@ -40,7 +39,7 @@ public:
 		pd-> setHeaderText ( tr( "Updating BrickLink Database" ));
 		pd-> setMessageText ( tr( "Download: %1/%2 KB" ));
 
-		QString remotefile = DATABASE_URL + BrickLink::inst ( )-> defaultDatabaseName ( );
+        QString remotefile = "http://" BRICKSTOCK_URL BRICKSTOCK_DB_PATH + BrickLink::inst ( )-> defaultDatabaseName ( );
 		QString localfile = BrickLink::inst ( )-> dataPath ( ) + BrickLink::inst ( )-> defaultDatabaseName ( );
 
 		QDateTime dt;
@@ -49,7 +48,7 @@ public:
 
 		QFile *file = new QFile ( localfile + ".lzma" );
 
-		if ( file-> open ( IO_WriteOnly )) {
+		if ( file-> open ( QIODevice::WriteOnly )) {
 			pd-> get ( remotefile + ".lzma", CKeyValueList ( ), dt, file );
 		}
 		else {
@@ -77,7 +76,7 @@ private slots:
 
 			if ( error. isNull ( )) {
 				if ( BrickLink::inst ( )-> readDatabase ( )) {
-					CConfig::inst ( )-> setLastDatabaseUpdate ( QDateTime::currentDateTime ( ));
+                    CConfig::inst ( )-> setLastDatabaseUpdate ( QDateTime::currentDateTime ( ));
 
 					m_progress-> setMessageText ( tr( "Finished." ));
 					m_progress-> setFinished ( true );
@@ -98,9 +97,9 @@ private:
 		QFile sf ( src );
 		QFile df ( dst );
 		
-		if ( !sf. open ( IO_ReadOnly ))
+		if ( !sf. open ( QIODevice::ReadOnly ))
 			return tr( "Could not read downloaded file: %1" ). arg( src );
-		if ( !df. open ( IO_WriteOnly ))
+		if ( !df. open ( QIODevice::WriteOnly ))
 			return tr( "Could not write to database file: %1" ). arg( dst );
 		
 		static const int CHUNKSIZE_IN = 4096;

@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -12,12 +14,13 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 #include <qlabel.h>
-#include <qpopupmenu.h>
+#include <q3popupmenu.h>
+#include <Q3MimeSourceFactory>
 #include <qlayout.h>
 #include <qapplication.h>
 #include <qaction.h>
 #include <qtooltip.h>
-#include <qheader.h>
+#include <q3header.h>
 #include <qcursor.h>
 
 #include "cframework.h"
@@ -27,151 +30,16 @@
 
 #include "cappearsinwidget.h"
 
-
-namespace {
-
-class AppearsInListItem : public CListViewItem {
-public:
-	AppearsInListItem ( CListView *lv, int qty, const BrickLink::Item *item )
-		: CListViewItem ( lv ), m_qty ( qty ), m_item ( item ), m_picture ( 0 )
-	{ 
-	}
-
-	virtual ~AppearsInListItem ( )
-	{
-		if ( m_picture )
-			m_picture-> release ( );
-	}
-
-	virtual QString text ( int col ) const
-	{ 
-		switch ( col ) {
-            case  0: return ( m_qty > 0  ) ? QString::number ( m_qty ) : QString ( "-" );
-			case  1: return m_item-> id ( );
-			case  2: return m_item-> name ( ); 
-			default: return QString ( );
-		}
-	}
-
-	QString toolTip ( ) const
-	{
-		QString str = "<table><tr><td rowspan=\"2\">%1</td><td><b>%2</b></td></tr><tr><td>%3</td></tr></table>";
-		QString left_cell;
-
-		BrickLink::Picture *pic = picture ( );
-
-		if ( pic && pic-> valid ( )) {
-			QMimeSourceFactory::defaultFactory ( )-> setPixmap ( "appears_in_set_tooltip_picture", pic-> pixmap ( ));
-			
-			left_cell = "<img src=\"appears_in_set_tooltip_picture\" />";
-		}
-		else if ( pic && ( pic-> updateStatus ( ) == BrickLink::Updating )) {
-			left_cell = "<i>" + CAppearsInWidget::tr( "[Image is loading]" ) + "</i>";
-		}
-
-		return str. arg( left_cell ). arg( m_item-> id ( )). arg( m_item-> name ( ));
-	}
-
-	virtual int compare ( QListViewItem *i, int col, bool ascending ) const
-	{
-		if ( col == 0 )
-			return ( m_qty - static_cast <AppearsInListItem *> ( i )-> m_qty );
-		else
-			return CListViewItem::compare ( i, col, ascending );
-	}
-
-	const BrickLink::Item *item ( ) const
-	{ return m_item; }
-
-	BrickLink::Picture *picture ( ) const
-	{ 
-		if ( !m_picture ) {
-			m_picture = BrickLink::inst ( )-> picture ( m_item, m_item-> defaultColor ( ), true );
-
-			if ( m_picture )
-				m_picture-> addRef ( );
-		}
-		return m_picture; 
-	}
-
-private:
-	int                         m_qty;
-	const BrickLink::Item *     m_item;
-	mutable BrickLink::Picture *m_picture;
-};
-
-
-class AppearsInToolTip : public QObject, public QToolTip {
-	Q_OBJECT
-	
-public:
-	AppearsInToolTip ( QWidget *parent, CAppearsInWidget *aiw )
-		: QObject ( parent), QToolTip ( parent, new QToolTipGroup ( parent )), 
-		  m_aiw ( aiw ), m_tip_item ( 0 )
-	{ 
-		connect ( group ( ), SIGNAL( removeTip ( )), this, SLOT( tipHidden ( )));
-		
-		connect ( BrickLink::inst ( ), SIGNAL( pictureUpdated ( BrickLink::Picture * )), this, SLOT( pictureUpdated ( BrickLink::Picture * )));
-	}
-	
-	virtual ~AppearsInToolTip ( )
-	{ }
-
-	void maybeTip ( const QPoint &pos )
-	{
-		if ( !parentWidget ( ) || !m_aiw /*|| !m_aiw-> showToolTips ( )*/ )
-			return;
-
-		AppearsInListItem *item = static_cast <AppearsInListItem *> ( m_aiw-> itemAt ( pos ));
-	
-		if ( item ) {
-			m_tip_item = item;
-			tip ( m_aiw-> itemRect ( item ), item-> toolTip ( ));
-		}
-	}
-
-	void hideTip ( )
-	{
-		QToolTip::hide ( );
-		m_tip_item = 0; // tipHidden() doesn't get called immediatly
-	}
-
-private slots:
-	void tipHidden ( )
-	{
-		m_tip_item = 0;
-	}
-	
-	void pictureUpdated ( BrickLink::Picture *pic )
-	{
-		if ( m_tip_item && m_tip_item-> picture ( ) == pic )
-			maybeTip ( parentWidget ( )-> mapFromGlobal ( QCursor::pos ( )));
-	}
-
-private:
-	CAppearsInWidget *m_aiw;
-	AppearsInListItem *m_tip_item;
-};
-
-
-} // namespace
-
-
 class CAppearsInWidgetPrivate {
 public:
-//	const BrickLink::Item * m_item;
-//	const BrickLink::Color *m_color;
-	QPopupMenu *            m_popup;
-	AppearsInToolTip *      m_tip;
+	Q3PopupMenu *           m_popup;
+    AppearsInToolTip *      m_tip;
 };
 
-CAppearsInWidget::CAppearsInWidget ( QWidget *parent, const char *name, WFlags /*fl*/ )
+CAppearsInWidget::CAppearsInWidget ( QWidget *parent, const char *name, Qt::WFlags /*fl*/ )
 	: CListView ( parent, name )
 {
 	d = new CAppearsInWidgetPrivate ( );
-
-//	d-> m_item = 0;
-//	d-> m_color = 0;
 	d-> m_popup = 0;
 
 	setShowSortIndicator ( false );
@@ -179,14 +47,14 @@ CAppearsInWidget::CAppearsInWidget ( QWidget *parent, const char *name, WFlags /
 	addColumn ( QString ( ));
 	addColumn ( QString ( ));
 	addColumn ( QString ( ));
-	setResizeMode ( QListView::LastColumn );
+	setResizeMode ( Q3ListView::LastColumn );
 	header ( )-> setMovingEnabled ( false );
 
-	d-> m_tip = new AppearsInToolTip ( viewport ( ), this );
+    d->m_tip = new AppearsInToolTip(viewport(), this );
+    viewport()->installEventFilter(d->m_tip);
 
-	connect ( this, SIGNAL( contextMenuRequested ( QListViewItem *, const QPoint &, int )), this, SLOT( showContextMenu ( QListViewItem *, const QPoint & )));
-	connect ( this, SIGNAL( returnPressed ( QListViewItem * )), this, SLOT( partOut ( )));
-	connect ( this, SIGNAL( doubleClicked ( QListViewItem *, const QPoint &, int )), this, SLOT( partOut ( )));
+	connect ( this, SIGNAL( contextMenuRequested ( Q3ListViewItem *, const QPoint &, int )), this, SLOT( showContextMenu ( Q3ListViewItem *, const QPoint & )));
+	connect ( this, SIGNAL( returnPressed ( Q3ListViewItem * )), this, SLOT( partOut ( )));
 
 	languageChange ( );
 }
@@ -200,24 +68,30 @@ void CAppearsInWidget::languageChange ( )
 
 CAppearsInWidget::~CAppearsInWidget ( )
 {
+    viewport()->removeEventFilter(d->m_tip);
 	delete d;
 }
 
-void CAppearsInWidget::showContextMenu ( QListViewItem *lvitem, const QPoint &pos )
+void CAppearsInWidget::contentsMouseDoubleClickEvent (QMouseEvent *e) {
+    partOut();
+    e->accept();
+}
+
+void CAppearsInWidget::showContextMenu ( Q3ListViewItem *lvitem, const QPoint &pos )
 {
 	if ( /*d-> m_item &&*/ lvitem ) {
 		if ( lvitem != currentItem ( ))
 			setCurrentItem ( lvitem );
 
 		if ( !d-> m_popup ) {
-			d-> m_popup = new QPopupMenu ( this );
-			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "edit_partoutitems" ), tr( "Part out Item..." ), this, SLOT( partOut ( )));
+			d-> m_popup = new Q3PopupMenu ( this );
+            d-> m_popup-> insertItem ( CResource::inst ( )-> icon ( "edit_partoutitems" ), tr( "Part out Item..." ), this, SLOT( partOut ( )));
 			d-> m_popup-> insertSeparator ( );
-			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "viewmagp" ), tr( "View large image..." ), this, SLOT( viewLargeImage ( )));
+            d-> m_popup-> insertItem ( CResource::inst ( )-> icon ( "viewmagp" ), tr( "View large image..." ), this, SLOT( viewLargeImage ( )));
 			d-> m_popup-> insertSeparator ( );
-			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "edit_bl_catalog" ), tr( "Show BrickLink Catalog Info..." ), this, SLOT( showBLCatalogInfo ( )));
-			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "edit_bl_priceguide" ), tr( "Show BrickLink Price Guide Info..." ), this, SLOT( showBLPriceGuideInfo ( )));
-			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "edit_bl_lotsforsale" ), tr( "Show Lots for Sale on BrickLink..." ), this, SLOT( showBLLotsForSale ( )));
+            d-> m_popup-> insertItem ( CResource::inst ( )-> icon ( "edit_bl_catalog" ), tr( "Show BrickLink Catalog Info..." ), this, SLOT( showBLCatalogInfo ( )));
+            d-> m_popup-> insertItem ( CResource::inst ( )-> icon ( "edit_bl_priceguide" ), tr( "Show BrickLink Price Guide Info..." ), this, SLOT( showBLPriceGuideInfo ( )));
+            d-> m_popup-> insertItem ( CResource::inst ( )-> icon ( "edit_bl_lotsforsale" ), tr( "Show Lots for Sale on BrickLink..." ), this, SLOT( showBLLotsForSale ( )));
 		}
 		d-> m_popup-> popup ( pos );
 	}
@@ -245,10 +119,7 @@ QSize CAppearsInWidget::sizeHint ( ) const
 
 void CAppearsInWidget::setItem ( const BrickLink::Item *item, const BrickLink::Color *color )
 {
-	d-> m_tip-> hideTip ( );
 	clear ( );
-//	d-> m_item = item;
-//	d-> m_color = color;
 
 	if ( item ) {
 		BrickLink::Item::AppearsInMap map = item-> appearsIn ( color );
@@ -263,10 +134,7 @@ void CAppearsInWidget::setItem ( const BrickLink::Item *item, const BrickLink::C
 
 void CAppearsInWidget::setItem ( const BrickLink::InvItemList &list )
 {
-	d-> m_tip-> hideTip ( );
 	clear ( );
-//	d-> m_item = item;
-//	d-> m_color = color;
 
 	if ( !list. isEmpty ( )) {
         QMap<const BrickLink::Item *, int> unique;
@@ -334,5 +202,3 @@ void CAppearsInWidget::showBLLotsForSale ( )
 	if ( item && item-> item ( ))
 		CUtility::openUrl ( BrickLink::inst ( )-> url ( BrickLink::URL_LotsForSale, item-> item ( ), BrickLink::inst ( )-> color ( 0 )));
 }
-
-#include "cappearsinwidget.moc"

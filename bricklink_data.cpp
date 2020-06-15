@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -15,6 +17,8 @@
 
 #include "cutility.h"
 #include "bricklink.h"
+//Added by qt3to4:
+#include <Q3CString>
 
 
 BrickLink::Color::Color ( ) : m_name ( 0 ), m_peeron_name ( 0 ) { }
@@ -606,7 +610,7 @@ bool BrickLink::InvItem::mergeFrom ( const InvItem &from, bool prefer_from )
 
 QDataStream &operator << ( QDataStream &ds, const BrickLink::InvItem &ii )
 {
-	ds << QCString( ii. item ( ) ? ii. item ( )-> id ( ) : "" );
+	ds << Q3CString( ii. item ( ) ? ii. item ( )-> id ( ) : "" );
 	ds << Q_INT8( ii. itemType ( ) ? ii. itemType ( )-> id ( ) : -1 );
 	ds << Q_INT32( ii. color ( ) ? ii. color ( )-> id ( ) : 0xffffffff );
 		
@@ -620,7 +624,7 @@ QDataStream &operator << ( QDataStream &ds, const BrickLink::InvItem &ii )
 
 QDataStream &operator >> ( QDataStream &ds, BrickLink::InvItem &ii )
 {
-	QCString itemid;
+	Q3CString itemid;
 	Q_INT32 colorid = 0;
 	Q_INT8 itemtypeid = 0;
 	Q_INT8 retain = 0, stockroom = 0;
@@ -659,13 +663,13 @@ QDataStream &operator >> ( QDataStream &ds, BrickLink::InvItem &ii )
 const char *BrickLink::InvItemDrag::s_mimetype = "application/x-bricklink-invitems";
 
 BrickLink::InvItemDrag::InvItemDrag( const InvItemList &items, QWidget *dragsource, const char *name )
-    : QDragObject( dragsource, name )
+    : Q3DragObject( dragsource, name )
 {
     setItems ( items );
 }
 
 BrickLink::InvItemDrag::InvItemDrag( QWidget *dragsource, const char *name )
-    : QDragObject( dragsource, name )
+    : Q3DragObject( dragsource, name )
 {
 	setItems ( InvItemList ( ));
 }
@@ -683,7 +687,7 @@ void BrickLink::InvItemDrag::setItems ( const InvItemList &items )
 {
 	m_text. truncate ( 0 );
 	m_data. truncate ( 0 );
-	QDataStream ds ( m_data, IO_WriteOnly );
+    QDataStream ds ( &m_data, QIODevice::WriteOnly );
 	
 	ds << items. count ( );
 	foreach ( const InvItem *ii, items ) {
@@ -699,7 +703,7 @@ QByteArray BrickLink::InvItemDrag::encodedData ( const char *mime ) const
 	if ( !qstricmp ( mime, format ( 0 )))      // normal data		
 		return m_data;
 	else if ( !qstricmp ( mime, format ( 1 ))) // text/plain
-		return m_text;
+        return m_text.toLocal8Bit ( );
 	else
 		return QByteArray ( );
 }
@@ -712,7 +716,7 @@ bool BrickLink::InvItemDrag::canDecode ( QMimeSource *e )
 bool BrickLink::InvItemDrag::decode ( QMimeSource *e, InvItemList &items )
 {
     QByteArray data = e-> encodedData ( s_mimetype );
-    QDataStream ds ( data, IO_ReadOnly );
+    QDataStream ds ( &data, QIODevice::ReadOnly );
 
     if ( !data. size ( ))
     	return false;

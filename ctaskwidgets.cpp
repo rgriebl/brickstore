@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -14,8 +16,12 @@
 
 #include <float.h>
 
-#include <qdockwindow.h>
+#include <QDockWidget>
 #include <qlabel.h>
+//Added by qt3to4:
+#include <QFrame>
+#include <QPixmap>
+#include <QEvent>
 
 #include "bricklink.h"
 #include "cconfig.h"
@@ -30,14 +36,14 @@
 CTaskLinksWidget::CTaskLinksWidget ( QWidget *parent, const char *name )
 	: CUrlLabel ( parent, name ), m_doc ( 0 )
 {
-	setFrameStyle ( QFrame::StyledPanel | QFrame::Sunken );
+    setFrameStyle ( QFrame::StyledPanel | QFrame::Sunken );
 
 	connect ( CFrameWork::inst ( ), SIGNAL( documentActivated ( CDocument * )), this, SLOT( documentUpdate ( CDocument * )));
 
 	unsetPalette ( );
-	setText ( "<b>ABCDEFGHIJKLM</b><br />1<br />2<br />3<br />4<br /><br /><b>X</b><br />1<br />" );
+    setText ( "<b>ABCDEFGHIJKLM</b><br />1<br />2<br />3<br />4<br /><br /><b>X</b><br />1<br />" );
 	setMinimumSize ( sizeHint ( ));
-	setText ( QString ( ));
+    setText ( QString ( ));
 }
 
 void CTaskLinksWidget::documentUpdate ( CDocument *doc )
@@ -79,7 +85,7 @@ void CTaskLinksWidget::selectionUpdate ( const CDocument::ItemList &list )
 			str += fmt2. arg( tr( "Information" )). arg( BrickLink::inst ( )-> url ( BrickLink::URL_PeeronInfo, item, color ));
 		}
 	}
-	setText ( str );
+    setText ( str );
 }
 
 void CTaskLinksWidget::languageChange ( )
@@ -95,7 +101,7 @@ void CTaskLinksWidget::languageChange ( )
 CTaskPriceGuideWidget::CTaskPriceGuideWidget ( QWidget *parent, const char *name )
 	: CPriceGuideWidget ( parent, name ), m_doc ( 0 )
 {
-	setFrameStyle ( QFrame::StyledPanel | QFrame::Sunken );
+    setFrameStyle ( QFrame::StyledPanel | QFrame::Sunken );
 
 	connect ( CFrameWork::inst ( ), SIGNAL( documentActivated ( CDocument * )), this, SLOT( documentUpdate ( CDocument * )));
 	connect ( this, SIGNAL( priceDoubleClicked ( money_t )), this, SLOT( setPrice ( money_t )));
@@ -133,7 +139,7 @@ void CTaskPriceGuideWidget::setPrice ( money_t p )
 
 bool CTaskPriceGuideWidget::event ( QEvent *e )
 {
-	if ( e-> type ( ) == QEvent::Reparent )
+    if ( e-> type ( ) == QEvent::ParentChange )
 		fixParentDockWindow ( );
 
 	return CPriceGuideWidget::event ( e );
@@ -141,18 +147,22 @@ bool CTaskPriceGuideWidget::event ( QEvent *e )
 
 void CTaskPriceGuideWidget::fixParentDockWindow ( )
 {
-	disconnect ( this, SLOT( setOrientation ( Orientation )));
+	disconnect ( this, SLOT( setOrientation ( Qt::Orientation )));
 
 	for ( QObject *p = parent( ); p; p = p-> parent ( )) {
-		if ( p-> inherits ( "QDockWindow" )) {
-			connect ( p, SIGNAL( orientationChanged ( Orientation )), this, SLOT( setOrientation ( Orientation )));
-			setOrientation ( static_cast <QDockWindow *> ( p )-> orientation ( ));
+        if ( p-> inherits ( "QDockWidget" )) {
+            //connect ( p, SIGNAL( orientationChanged ( Qt::Orientation )), this, SLOT( setOrientation ( Qt::Orientation )));
+            if (static_cast <QDockWidget *> ( p )->features() & QDockWidget::DockWidgetVerticalTitleBar) {
+                setOrientation ( Qt::Horizontal);
+            } else {
+                 setOrientation ( Qt::Vertical);
+            }
 			break;
 		}
 	}
 }
 
-void CTaskPriceGuideWidget::setOrientation ( Orientation o )
+void CTaskPriceGuideWidget::setOrientation ( Qt::Orientation o )
 {
 	setLayout ( o == Qt::Horizontal ? CPriceGuideWidget::Horizontal : CPriceGuideWidget::Vertical );
 }
@@ -161,20 +171,20 @@ void CTaskPriceGuideWidget::setOrientation ( Orientation o )
 // ----------------------------------------------------------------------
 // ----------------------------------------------------------------------
 
-CTaskInfoWidget::CTaskInfoWidget ( QWidget *parent, const char *name )
-	: QWidgetStack ( parent, name ), m_doc ( 0 )
+CTaskInfoWidget::CTaskInfoWidget ( QWidget *parent, const char * )
+    : QStackedWidget ( parent ), m_doc ( 0 )
 {
-	setFrameStyle ( QFrame::StyledPanel | QFrame::Sunken );
-
-	m_pic = new CPictureWidget ( this );
+    setFrameStyle ( QFrame::StyledPanel | QFrame::Sunken );
+    m_pic = new CPictureWidget ( this );
 	m_text = new QLabel ( this );
 	m_text-> setAlignment ( Qt::AlignLeft | Qt::AlignTop );
 	m_text-> setIndent ( 8 );
 
-	addWidget ( m_pic );
-	addWidget ( m_text );
+    addWidget ( m_pic );
+    addWidget ( m_text );
 
-	paletteChange ( palette ( ));
+    paletteChange ( palette ( ));
+    setBackgroundColor(Qt::white);
 
 	connect ( CFrameWork::inst ( ), SIGNAL( documentActivated ( CDocument * )), this, SLOT( documentUpdate ( CDocument * )));
 	connect ( CMoney::inst ( ), SIGNAL( monetarySettingsChanged ( )), this, SLOT( refresh ( )));
@@ -196,11 +206,11 @@ void CTaskInfoWidget::selectionUpdate ( const CDocument::ItemList &list )
 {
 	if ( !m_doc || ( list. count ( ) == 0 )) {
 		m_pic-> setPicture ( 0 );
-		raiseWidget ( m_pic );
+        setCurrentIndex(0);
 	}
 	else if ( list. count ( ) == 1 ) {
 		m_pic-> setPicture ( BrickLink::inst ( )-> picture ( list. front ( )-> item ( ), list. front ( )-> color ( ), true ));
-		raiseWidget ( m_pic );
+        setCurrentIndex(0);
 	}
 	else {
 		CDocument::Statistics stat = m_doc-> statistics ( list );
@@ -243,7 +253,7 @@ void CTaskInfoWidget::selectionUpdate ( const CDocument::ItemList &list )
 
 		m_pic-> setPicture ( 0 );
 		m_text-> setText ( s );
-		raiseWidget ( m_text );
+        setCurrentIndex(1);
 	}
 }
 
@@ -260,12 +270,17 @@ void CTaskInfoWidget::refresh ( )
 
 void CTaskInfoWidget::paletteChange ( const QPalette &oldpal )
 {
-	QPixmap pix;
-	pix. convertFromImage ( CUtility::shadeImage ( CResource::inst ( )-> pixmap( "bg_infotext" ). convertToImage ( ),
-													palette ( ). active ( ). base ( )));
+    QPalette palette = m_text->palette();
+    palette.setBrush(m_text->backgroundRole(), QBrush(CResource::inst ( )-> pixmap( "bg_infotext" )));
+    m_text->setPalette(palette);
+    m_text->setAutoFillBackground(true);
 
-	m_text-> setBackgroundPixmap ( pix );
-	QWidgetStack::paletteChange ( oldpal );
+    palette = this->palette();
+    palette.setColor(this->backgroundRole(), Qt::white);
+    this->setPalette(palette);
+    this->setAutoFillBackground(true);
+
+    QStackedWidget::paletteChange ( oldpal );
 }
 
 // ----------------------------------------------------------------------

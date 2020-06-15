@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -17,8 +19,10 @@
 #include <qfile.h>
 #include <qbuffer.h>
 #include <qdatetime.h>
-#include <qtextstream.h>
+#include <q3textstream.h>
 #include <qregexp.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 #include "lzmadec.h"
 
@@ -26,7 +30,6 @@
 #include "bricklink.h"
 #include "cprogressdialog.h"
 #include "cutility.h"
-
 
 class CImportBLStore : public QObject {
 	Q_OBJECT
@@ -61,7 +64,7 @@ public:
 		
 		pd-> post ( url, query );
 
-		pd-> layout ( );
+        pd-> setSize ( );
 	}
 
 	const BrickLink::InvItemList &items ( ) const 
@@ -77,9 +80,9 @@ private slots:
 		bool ok = false;
 
 		if ( data && data-> size ( )) {
-			QBuffer store_buffer ( *data );
+            QBuffer store_buffer ( data );
 
-			if ( store_buffer. open ( IO_ReadOnly )) {
+			if ( store_buffer. open ( QIODevice::ReadOnly )) {
 				BrickLink::InvItemList *items = 0;
 
 				QString emsg;
@@ -101,7 +104,7 @@ private slots:
 						m_progress-> setErrorText ( tr( "Could not parse the XML data for the store inventory." ));
 				}
 				else {
-					if (( QCString ( data-> data ( ), 7 ) == "<HTML>" ) && ( QCString ( data-> data ( ), data-> size ( )). find ( "Invalid password", 0, false ) != -1 ))
+                    if (( QString ( QByteArray(data-> data ( ), 6)) == "<HTML>" ) && ( QString ( QByteArray ( data-> data ( ), data-> size ( ))). toLower ( ). find ( "invalid password", 0 ) != -1 ))
 						m_progress-> setErrorText ( tr( "Either your username or password are incorrect." ));
 					else
 						m_progress-> setErrorText ( tr( "Could not parse the XML data for the store inventory:<br /><i>Line %1, column %2: %3</i>" ). arg ( eline ). arg ( ecol ). arg ( emsg ));
@@ -115,12 +118,6 @@ private:
 	CProgressDialog *m_progress;
 	BrickLink::InvItemList m_items;
 };
-
-
-
-
-
-
 
 class CImportBLOrder : public QObject {
 	Q_OBJECT
@@ -175,10 +172,10 @@ public:
 		        << CKeyValue ( "frmPassword",   CConfig::inst ( )-> blLoginPassword ( ));
 
 		m_progress-> post ( m_url, m_query );
-		m_progress-> layout ( );
+        m_progress-> setSize ( );
 	}
 
-	const QValueList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > &orders ( ) const 
+	const Q3ValueList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > &orders ( ) const 
 	{
 		return m_orders;
 	}
@@ -202,11 +199,11 @@ private slots:
                 QRegExp rx3 ( "<B>Country:</B></FONT></TD>\\s*<TD NOWRAP><FONT FACE=\"Tahoma, Arial\" SIZE=\"2\">(.+)</FONT></TD>" );
 
                 rx1. setMinimal ( true );
-                rx1. search ( s );
+                rx1. indexIn ( s );
                 rx2. setMinimal ( true );
-                rx2. search ( s );
+                rx2. indexIn ( s );
                 rx3. setMinimal ( true );
-                rx3. search ( s );
+                rx3. indexIn ( s );
 
                 QString a = rx1. cap ( 1 ) + "\n" + rx2. cap ( 1 ) + "\n" + rx3. cap ( 1 );
                 a.replace("<BR>", "\n");
@@ -214,9 +211,9 @@ private slots:
                 m_orders[m_current_address].first->setAddress(a);
             }
             else {
-			    QBuffer order_buffer ( *data );
+                QBuffer order_buffer ( data );
 
-			    if ( order_buffer. open ( IO_ReadOnly )) {
+			    if ( order_buffer. open ( QIODevice::ReadOnly )) {
 				    QString emsg;
 				    int eline = 0, ecol = 0;
 				    QDomDocument doc;
@@ -293,7 +290,7 @@ private slots:
 			m_query [0]. second = "placed";
 
 			m_progress-> post ( m_url, m_query, 0 );
-			m_progress-> layout ( );
+            m_progress-> setSize ( );
 
 			m_retry_placed = false;
 		}
@@ -303,7 +300,7 @@ private slots:
             QString url = QString( "http://www.bricklink.com/memberInfo.asp?u=" ) + m_orders [m_current_address]. first-> other( );
     		m_progress-> setHeaderText ( tr( "Importing address records" ));
             m_progress-> get ( url );
-			m_progress-> layout ( );
+            m_progress-> setSize ( );
         }
 		else {
 			m_progress-> setFinished ( true );
@@ -311,12 +308,16 @@ private slots:
 	}
 
 private:
-	static QDate ymd2date ( const QString &ymd )
+    static QDateTime ymd2date ( const QString &ymd )
 	{
-		QDate d;
+        QDate d;
 		QStringList sl = QStringList::split ( QChar ( '/' ), ymd, false );
 		d. setYMD ( sl [0]. toInt ( ), sl [1]. toInt ( ), sl [2]. toInt ( ));
-		return d;
+
+        QDateTime dt;
+        dt.setDate(d);
+
+        return dt;
 	}
 
 private:
@@ -325,15 +326,12 @@ private:
 	QDate                  m_order_from;
 	QDate                  m_order_to;
 	BrickLink::Order::Type m_order_type;
-	QCString               m_url;
+    QString                m_url;
 	CKeyValueList          m_query;
 	bool                   m_retry_placed;
     int                    m_current_address;
-	QValueList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > m_orders;
+	Q3ValueList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > m_orders;
 };
-
-
-
 
 class CImportBLCart : public QObject {
 	Q_OBJECT
@@ -354,7 +352,7 @@ public:
 		      << CKeyValue ( "b", QString::number ( cartid ));
 		
 		pd-> get ( url, query );
-		pd-> layout ( );
+        pd-> setSize ( );
 	}
 
 	const BrickLink::InvItemList &items ( ) const 
@@ -370,13 +368,13 @@ private slots:
 		bool ok = false;
 
 		if ( data && data-> size ( )) {
-			QBuffer cart_buffer ( *data );
+            QBuffer cart_buffer ( data );
 
-			if ( cart_buffer. open ( IO_ReadOnly )) {
-				QTextStream ts ( &cart_buffer );
+			if ( cart_buffer. open ( QIODevice::ReadOnly )) {
+				Q3TextStream ts ( &cart_buffer );
 				QString line;
 				QString items_line;
-				QString sep = "<TR><TD HEIGHT=\"65\" ALIGN=\"CENTER\">";
+                QString sep = "<TR CLASS=\"tm\"><TD HEIGHT=\"65\" ALIGN=\"CENTER\">";
 				int invalid_items = 0;
 				bool parsing_items = false;
 
@@ -394,33 +392,33 @@ private slots:
 						break;					
 				}
 
-				QStringList strlist = QStringList::split ( sep, items_line, false );
+                QStringList strlist = QStringList::split ( sep, items_line, false );
 
 				foreach ( const QString &str, strlist ) {
 					BrickLink::InvItem *ii = 0;
 
-					QRegExp rx_type ( " ([A-Z])-No: " );
-					QRegExp rx_ids ( "HEIGHT='60' SRC='/([A-Z])/([^ ]+).gif' NAME=" );
-					QRegExp rx_qty_price ( " VALUE=\"([0-9]+)\">(&nbsp;\\(x[0-9]+\\))?<BR>Qty Available: <B>[0-9]+</B><BR>Each:&nbsp;<B>\\$([0-9.]+)</B>" );
-					QRegExp rx_names ( "<TD><FONT FACE=\"MS Sans Serif,Geneva\" SIZE=\"1\">(.+)</FONT></TD><TD VALIGN=\"TOP\" NOWRAP>" );
+                    //QRegExp rx_type ( " HREF='/catalogItemPic.asp\?([A-Z]{1,1})=" );
+                    QRegExp rx_ids ( "HEIGHT='60' SRC='http://img.bricklink.com/([A-Z]+)/[0-9]*/([^ ]+).gif' NAME=" );
+                    QRegExp rx_qty_price ( " VALUE=\"([0-9]+)\">(&nbsp;\\(x[0-9]+\\))?<BR>Qty Available: <B>[0-9]+</B><BR>Each:&nbsp;<B>[^0-9]*([0-9.]+)</B>" );
+                    QRegExp rx_names ( "<TD>(.+)</TD><TD VALIGN=\"TOP\" NOWRAP>" );
 					QString str_cond ( "<B>New</B>" );
 
-					rx_type. search ( str );
-					rx_ids. search ( str );
-					rx_names. search ( str );
+                    //rx_type. indexIn ( str );
+                    rx_ids. indexIn ( str );
+                    rx_names. indexIn ( str );
 
 					const BrickLink::Item *item = 0;
 					const BrickLink::Color *col = 0;
 
-					if ( rx_type. cap ( 1 ). length ( ) == 1 ) {
+                    if ( rx_ids. cap ( 1 ). length ( ) == 1 ) {
 						int slash = rx_ids. cap ( 2 ). find ( '/' );
 						
 						if ( slash >= 0 ) { // with color
-							item = BrickLink::inst ( )-> item ( rx_type. cap ( 1 ) [0]. latin1 ( ), rx_ids. cap ( 2 ). mid ( slash + 1 ). latin1 ( ));
+                            item = BrickLink::inst ( )-> item ( rx_ids. cap ( 1 ) [0]. latin1 ( ), rx_ids. cap ( 2 ). mid ( slash + 1 ). latin1 ( ));
 							col = BrickLink::inst ( )-> color ( rx_ids. cap ( 2 ). left ( slash ). toInt ( ));
 						}
 						else {
-							item = BrickLink::inst ( )-> item ( rx_type. cap ( 1 ) [0]. latin1 ( ), rx_ids. cap ( 2 ). latin1 ( ));
+                            item = BrickLink::inst ( )-> item ( rx_ids. cap ( 1 ) [0]. latin1 ( ), rx_ids. cap ( 2 ). latin1 ( ));
 							col = BrickLink::inst ( )-> color ( 0 );
 						}
 					}
@@ -428,15 +426,16 @@ private slots:
 					QString color_and_item = rx_names. cap ( 1 ). stripWhiteSpace ( );
 
 					if ( !col || !color_and_item. startsWith ( col-> name ( ))) {
-						uint longest_match = 0;
+                        int longest_match = 0;
 
-						for ( QIntDictIterator<BrickLink::Color> it ( BrickLink::inst ( )-> colors ( )); it. current ( ); ++it )  {
-							QString n ( it. current ( )-> name ( ));
+                        for ( QHashIterator<int, BrickLink::Color *> it ( BrickLink::inst ( )-> colors ( )); it. hasNext ( ); )  {
+                            it. next ( );
+                            QString n ( it. value ( )-> name ( ));
 
 							if (( n. length ( ) > longest_match ) &&
 								( color_and_item. startsWith ( n ))) {
 								longest_match = n. length ( );
-								col = it. current ( );
+                                col = it. value ( );
 							}
 						}
 
@@ -445,9 +444,9 @@ private slots:
 					}
 
 					if ( !item /*|| !color_and_item. endsWith ( item-> name ( ))*/ ) {
-						uint longest_match = 0;
+                        int longest_match = 0;
 
-						const QPtrVector<BrickLink::Item> &all_items = BrickLink::inst ( )-> items ( );
+						const Q3PtrVector<BrickLink::Item> &all_items = BrickLink::inst ( )-> items ( );
 						for ( uint i = 0; i < all_items. count ( ); i++ ) {
 							const BrickLink::Item *it = all_items [i];
 							QString n ( it-> name ( ));
@@ -465,7 +464,7 @@ private slots:
 					}
 
 					if ( item && col ) {
-						rx_qty_price. search ( str );
+                        rx_qty_price. indexIn ( str );
 
 						int qty = rx_qty_price. cap ( 1 ). toInt ( );
 						money_t price = QLocale::c ( ). toDouble ( rx_qty_price. cap ( 3 ));
@@ -514,9 +513,6 @@ private:
 	BrickLink::InvItemList m_items;
 };
 
-
-
-
 class CImportPeeronInventory : public QObject {
 	Q_OBJECT
 
@@ -529,12 +525,12 @@ public:
 		pd-> setHeaderText ( tr( "Importing Peeron Inventory" ));
 		pd-> setMessageText ( tr( "Download: %1/%2 KB" ));
 
-		QCString url;
+        QString url;
 		url. sprintf ( "http://www.peeron.com/inv/sets/%s", peeronid. latin1 ( ));
 
 		pd-> get ( url );
 
-		pd-> layout ( );
+        pd-> setSize ( );
 	}
 
 	const BrickLink::InvItemList &items ( ) const 
@@ -550,9 +546,9 @@ private slots:
 		bool ok = false;
 
 		if ( data && data-> size ( )) {
-			QBuffer peeron_buffer ( *data );
+            QBuffer peeron_buffer ( data );
 
-			if ( peeron_buffer. open ( IO_ReadOnly )) {
+			if ( peeron_buffer. open ( QIODevice::ReadOnly )) {
 				BrickLink::InvItemList *items = fromPeeron ( &peeron_buffer );
 
 				if ( items ) {
@@ -573,7 +569,7 @@ private:
 		if ( !peeron )
 			return false;
 
-		QTextStream in ( peeron );
+		Q3TextStream in ( peeron );
 
 		QDomDocument doc ( QString::null );
 		QDomElement root = BrickLink::inst ( )-> createItemListXML ( doc, BrickLink::XMLHint_Inventory, 0 );
@@ -585,7 +581,8 @@ private:
 
 		QRegExp itempattern ( "<a href=[^>]+>(.+)</a>" );
 
-		while (( line = in. readLine ( ))) {
+        line = in. readLine ( );
+        while (!line. isEmpty ( )) {
 			if ( next_is_item && line. startsWith ( "<td>" ) && line. endsWith ( "</td>" )) {
 				QString tmp = line. mid ( 4, line. length ( ) - 9 );
 				QStringList sl = QStringList::split ( "</td><td>", tmp, true );
@@ -643,7 +640,9 @@ private:
 				next_is_item = true;
 			else
 				next_is_item = false;
-		}
+
+            line = in. readLine ( );
+        }
 
 		return count ? BrickLink::inst ( )-> parseItemListXML ( root, BrickLink::XMLHint_Inventory /*, &invalid_items */) : 0;
 	}

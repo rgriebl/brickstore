@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -14,9 +16,9 @@
 #ifndef __CURLLABEL_H__
 #define __CURLLABEL_H__
 
-#include <qtextbrowser.h>
+#include <q3textbrowser.h>
 
-class CUrlLabel : public QTextBrowser {
+class CUrlLabel : public Q3TextBrowser {
 public:
 	CUrlLabel ( QWidget *parent, const char *name = 0 );
 

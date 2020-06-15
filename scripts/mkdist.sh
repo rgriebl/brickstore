@@ -1,8 +1,10 @@
 #!/bin/sh
 
-## Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+## Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 ##
-## This file is part of BrickStore.
+## This file is part of BrickStock.
+## BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+## by Robert Griebl, Copyright (C) 2004-2008.
 ##
 ## This file may be distributed and/or modified under the terms of the GNU 
 ## General Public License version 2 as published by the Free Software Foundation 
@@ -15,12 +17,12 @@
 
 set -e
 
-if [ ! -r "brickstore.pro" ]; then
+if [ ! -r "brickstock.pro" ]; then
 	echo "Error: this script needs to be called from the base directory!"
 	exit 1
 fi
 
-pkg_ver=`awk '/^ *RELEASE *=/ { print $3; }' <brickstore.pro `
+pkg_ver=`awk '/^ *RELEASE *=/ { print $3; }' <brickstock.pro `
 [ $# = 1 ] && pkg_ver="$1"
 
 if [ -z $pkg_ver ]; then
@@ -42,7 +44,7 @@ if [ -z "$files" ]; then
 fi
 
 rm -rf .mkdist-tmp
-tmpdir=".mkdist-tmp/brickstore-$pkg_ver"
+tmpdir=".mkdist-tmp/brickstock-$pkg_ver"
 
 if ! mkdir -p "$tmpdir"; then
 	echo "Error: couldn't create directory $tmpdir!"
@@ -53,6 +55,6 @@ for i in `ls -1 $files | sort`; do
 	cp -f --parents "$i" "$tmpdir"
 done
 
-tar -cjsf brickstore-$pkg_ver.tar.bz2 -C "$tmpdir/.." "brickstore-$pkg_ver"
+tar -cjsf brickstock-$pkg_ver.tar.bz2 -C "$tmpdir/.." "brickstock-$pkg_ver"
 
 rm -rf .mkdist-tmp

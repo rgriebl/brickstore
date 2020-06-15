@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -15,19 +17,22 @@
 #define __CPRICEGUIDEWIDGET_H__
 
 #include <qframe.h>
+//Added by qt3to4:
+#include <QResizeEvent>
+#include <QEvent>
+#include <QMouseEvent>
+#include <QContextMenuEvent>
 
 #include "cmoney.h"
 #include "bricklink.h"
 
-
 class QAction;
 class CPriceGuideWidgetPrivate;
-
 
 class CPriceGuideWidget : public QFrame {
 	Q_OBJECT
 public:
-	CPriceGuideWidget ( QWidget *parent = 0, const char *name = 0, WFlags fl = 0 );
+	CPriceGuideWidget ( QWidget *parent = 0, const char *name = 0, Qt::WFlags fl = 0 );
 	virtual ~CPriceGuideWidget ( );
 
 	virtual BrickLink::PriceGuide *priceGuide ( ) const;
@@ -51,8 +56,7 @@ protected:
 	void recalcLayoutHorizontal ( const QSize &s, const QFontMetrics &fm, const QFontMetrics &fmb );
 	void recalcLayoutVertical ( const QSize &s, const QFontMetrics &fm, const QFontMetrics &fmb );
 
-	virtual void drawContents ( QPainter *p );
-	virtual void frameChanged ( );
+    virtual void paintEvent( QPaintEvent* event );
 	virtual void resizeEvent ( QResizeEvent * );
 	virtual void mouseDoubleClickEvent ( QMouseEvent * );
 	virtual void mouseMoveEvent ( QMouseEvent * );

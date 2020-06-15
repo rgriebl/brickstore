@@ -9,16 +9,16 @@
 		<string>APPL</string>
 
 		<key>CFBundleGetInfoString</key>
-		<string>Bundle for BrickStore</string>
+		<string>Bundle for BrickStock</string>
 
 		<key>CFBundleSignature</key>
 		<string>ttxt</string>
 
 		<key>CFBundleExecutable</key>
-		<string>BrickStore</string>
+		<string>BrickStock</string>
 
 		<key>CFBundleName</key>
-		<string>BrickStore</string>
+		<string>BrickStock</string>
 
 		<key>CFBundleShortVersionString</key>
 		<string>%{version}</string>
@@ -39,11 +39,11 @@
 
 				<key>CFBundleTypeMIMETypes</key>
 				<array>
-					<string>application/x-brickstore</string>
+					<string>application/x-brickstock</string>
 				</array>
 
 				<key>CFBundleTypeName</key>
-				<string>BrickStore Data File</string>
+				<string>BrickStock Data File</string>
 
 				<key>CFBundleTypeRole</key>
 				<string>Editor</string>
@@ -62,11 +62,11 @@
 
 				<key>CFBundleTypeMIMETypes</key>
 				<array>
-					<string>application/x-brickstore-xml</string>
+					<string>application/x-brickstock-xml</string>
 				</array>
 
 				<key>CFBundleTypeName</key>
-				<string>BrickStore XML</string>
+				<string>BrickStock XML</string>
 
 				<key>CFBundleTypeRole</key>
 				<string>Editor</string>

@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -15,14 +17,18 @@
 #include <qlayout.h>
 #include <qlabel.h>
 #include <qstyle.h>
-#include <qhbuttongroup.h>
 #include <qradiobutton.h>
 #include <qvalidator.h>
-#include <qtextedit.h>
+#include <q3textedit.h>
 #include <qpushbutton.h>
 #include <qcursor.h>
 #include <qcheckbox.h>
 #include <qtoolbutton.h>
+//Added by qt3to4:
+#include <QCloseEvent>
+#include <Q3BoxLayout>
+#include <QWheelEvent>
+#include <Q3Frame>
 
 #include "cconfig.h"
 #include "cresource.h"
@@ -40,7 +46,7 @@
 
 
 DlgAddItemImpl::DlgAddItemImpl ( QWidget *parent, const char *name, bool modal, int fl )
-	: DlgAddItem ( parent, name, modal, fl | WStyle_Customize | WStyle_Title | WStyle_ContextHelp | WStyle_NormalBorder | WStyle_SysMenu | WStyle_Maximize )
+    : DlgAddItem ( parent, name, modal, (Qt::WindowType)(fl | Qt::WStyle_Customize | Qt::WStyle_Title | Qt::WStyle_ContextHelp | Qt::WStyle_NormalBorder | Qt::WStyle_SysMenu | Qt::WStyle_Maximize) )
 {
 	m_window = 0;
 	m_caption_fmt        = caption ( );
@@ -48,24 +54,24 @@ DlgAddItemImpl::DlgAddItemImpl ( QWidget *parent, const char *name, bool modal, 
 	m_currency_label_fmt = w_radio_currency-> text ( );
 
 	// Qt3's designer is too stupid...
-	static_cast <QBoxLayout *> ( layout ( ))-> setStretchFactor ( l_top, 100 );
-	l_top-> setStretchFactor ( w_select_item, 100 );
-	l_grid-> setColStretch ( 1, 50 );
-	l_grid-> setColStretch ( 3, 50 );
+//	static_cast <QBoxLayout *> ( layout ( ))-> setStretchFactor ( l_top, 100 );
+//	l_top-> setStretchFactor ( w_select_item, 100 );
+//	l_grid-> setColStretch ( 1, 50 );
+//	l_grid-> setColStretch ( 3, 50 );
 
 	w_select_item-> setItemType ( BrickLink::inst ( )-> itemType ( CConfig::inst ( )-> readNumEntry ( "/Defaults/AddItems/ItemType", 'P' )));
 
-	w_picture-> setFrameStyle ( QFrame::StyledPanel | QFrame::Sunken );
+	w_picture-> setFrameStyle ( Q3Frame::StyledPanel | Q3Frame::Sunken );
 	w_picture-> setLineWidth ( 2 );
 
 	w_toggle_picture-> setPixmap ( CResource::inst ( )-> pixmap ( "sidebar/info" ));
 
-	w_price_guide-> setFrameStyle ( QFrame::StyledPanel | QFrame::Sunken );
+	w_price_guide-> setFrameStyle ( Q3Frame::StyledPanel | Q3Frame::Sunken );
 	w_price_guide-> setLineWidth ( 2 );
 
 	w_toggle_price_guide-> setPixmap ( CResource::inst ( )-> pixmap ( "sidebar/priceguide" ));
 
-	w_appears_in-> setFrameStyle ( QFrame::StyledPanel | QFrame::Sunken );
+	w_appears_in-> setFrameStyle ( Q3Frame::StyledPanel | Q3Frame::Sunken );
 	w_appears_in-> setLineWidth ( 2 );
 	w_appears_in-> hide ( );
 
@@ -161,7 +167,7 @@ void DlgAddItemImpl::attach ( CWindow *w )
 
 void DlgAddItemImpl::wheelEvent ( QWheelEvent *e )
 {
-	if ( e-> state ( ) == Qt::ControlButton ) {
+	if ( e-> state ( ) == Qt::ControlModifier ) {
 		double o = windowOpacity ( ) + double( e-> delta ( )) / 1200.0;
 		setWindowOpacity ( double( QMIN( QMAX( o, 0.2 ), 1.0 ))); 
 

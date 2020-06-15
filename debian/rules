@@ -19,7 +19,7 @@ configure: configure-stamp
 configure-stamp:
 	dh_testdir
 	# Add here commands to configure the package.
-	qmake CONFIG+=$(CONFIG) RELEASE=$(BRICKSTORE_VERSION) PREFIX=/usr
+	qmake CONFIG+=$(CONFIG) RELEASE=$(BRICKSTOCK_VERSION) PREFIX=/usr
 
 	touch configure-stamp
 
@@ -31,7 +31,7 @@ build-stamp: configure-stamp
 
 	# Add here commands to compile the package.
 	$(MAKE)
-	#docbook-to-man debian/brickstore.sgml > brickstore.1
+	#docbook-to-man debian/brickstock.sgml > brickstock.1
 
 	touch build-stamp
 
@@ -52,8 +52,8 @@ install: build
 	dh_clean -k
 	dh_installdirs
 
-	# Add here commands to install the package into debian/brickstore.
-	$(MAKE) install INSTALL_ROOT=$(CURDIR)/debian/brickstore
+	# Add here commands to install the package into debian/brickstock.
+	$(MAKE) install INSTALL_ROOT=$(CURDIR)/debian/brickstock
 
 
 # Build architecture-independent files here.

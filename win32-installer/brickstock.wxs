@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<!-- Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+<!-- Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
  !-
- !- This file is part of BrickStore.
+ !- This file is part of BrickStock.
+ !- BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+ !- by Robert Griebl, Copyright (C) 2004-2008.
  !-
  !- This file may be distributed and/or modified under the terms of the GNU
  !- General Public License version 2 as published by the Free Software Foundation
@@ -15,9 +17,9 @@
  !-->
 
 <Wix xmlns="http://schemas.microsoft.com/wix/2003/01/wi">
-  <Product Name="BrickStore" Id="07EA0F88-8E8F-11D9-8BDE-F66BAD1E3F3A" Version="$(var.VERSION)" 
+  <Product Name="BrickStock" Id="07EA0F88-8E8F-11D9-8BDE-F66BAD1E3F3A" Version="$(var.VERSION)" 
            Manufacturer="softforge.de" Language="1033" UpgradeCode="FE06FEC9-2BAA-4100-88FE-40EB1316D14E">
-    <Package Id="????????-????-????-????-????????????" Comments="This MSI file installs BrickStore $(var.VERSION)" 
+    <Package Id="????????-????-????-????-????????????" Comments="This MSI file installs BrickStock $(var.VERSION)" 
              Manufacturer="softforge.de" InstallerVersion="200" Languages="1033" Compressed="yes" />
     <Media Id="1" EmbedCab="yes" Cabinet="Setup.cab" CompressionLevel="none" />
 
@@ -32,7 +34,7 @@
 
     <CustomAction Id="ErrorNewerVersion" Return="check" Error="Unable to install because a newer version of this product is already installed." />
     <CustomAction Id="FixReinstall" Property="REINSTALL" Value="" />
-    <CustomAction Id="LaunchFile" FileKey="brickstore.exe" ExeCommand="" Return="asyncNoWait" />
+    <CustomAction Id="LaunchFile" FileKey="brickstock.exe" ExeCommand="" Return="asyncNoWait" />
 
     <AdminExecuteSequence />
 
@@ -48,33 +50,33 @@
       <Custom Action="FixReinstall" Before="CostFinalize"><![CDATA[NOT Installed]]></Custom>
     </InstallUISequence>
 
-    <Icon Id="icon_bs.exe" src="$(var.TARGET)\brickstore.ico" />
+    <Icon Id="icon_bs.exe" src="$(var.TARGET)\brickstock.ico" />
 
     <Property Id="ARPPRODUCTICON">icon_bs.exe</Property>
 
     <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="ProgramFilesFolder" Name="PFiles">
         <Directory Id="Softforge" Name="softforg" LongName="SoftForge">
-          <Directory Id="INSTALLDIR" Name="BrickSto" LongName="BrickStore">
+          <Directory Id="INSTALLDIR" Name="BrickSto" LongName="BrickStock">
             <Component Id="c_main" Guid="96E5E9DA-8E91-11D9-8BDE-F66BAD1E3F3A">
-              <File DiskId="1" Id="brickstore.exe"   Name="BrickSto.exe" LongName="brickstore.exe"   src="$(var.TARGET)\brickstore.exe" Checksum="yes" />
-              <Shortcut Id="sm_brickstore.exe"       Name="BrickSto"     LongName="BrickStore"       Icon="icon_bs.exe" IconIndex="0" Directory="ProgramMenuDir" Target="Complete" WorkingDirectory="INSTALLDIR" />
-              <Shortcut Id="sd_brickstore.exe"       Name="BrickSto"     LongName="BrickStore"       Icon="icon_bs.exe" IconIndex="0" Directory="DesktopFolder"  Target="Complete" WorkingDirectory="INSTALLDIR" />
+              <File DiskId="1" Id="brickstock.exe"   Name="BrickSto.exe" LongName="brickstock.exe"   src="$(var.TARGET)\brickstock.exe" Checksum="yes" />
+              <Shortcut Id="sm_brickstock.exe"       Name="BrickSto"     LongName="BrickStock"       Icon="icon_bs.exe" IconIndex="0" Directory="ProgramMenuDir" Target="Complete" WorkingDirectory="INSTALLDIR" />
+              <Shortcut Id="sd_brickstock.exe"       Name="BrickSto"     LongName="BrickStock"       Icon="icon_bs.exe" IconIndex="0" Directory="DesktopFolder"  Target="Complete" WorkingDirectory="INSTALLDIR" />
               <File DiskId="1" Id="LICENSE.GPL"      Name="LICENSE.txt"  LongName="LICENSE.GPL.txt"  src="$(var.TARGET)\LICENSE.GPL" />
 
-              <Registry Id="reg_installdir" Root="HKLM" Key="Software\Softforge\BrickStore" Name="InstallDir" Action="write" Type="string" Value="[INSTALLDIR]" />
-              <Registry Id="reg_installver" Root="HKLM" Key="Software\Softforge\BrickStore" Name="CurrentVersion" Action="write" Type="string" Value="$(var.VERSION)" />
-              <Registry Id="reg_clean"      Root="HKLM" Key="Software\Softforge\BrickStore" Action="removeKeyOnUninstall" />
+              <Registry Id="reg_installdir" Root="HKLM" Key="Software\Softforge\BrickStock" Name="InstallDir" Action="write" Type="string" Value="[INSTALLDIR]" />
+              <Registry Id="reg_installver" Root="HKLM" Key="Software\Softforge\BrickStock" Name="CurrentVersion" Action="write" Type="string" Value="$(var.VERSION)" />
+              <Registry Id="reg_clean"      Root="HKLM" Key="Software\Softforge\BrickStock" Action="removeKeyOnUninstall" />
 
-              <ProgId Id="BrickStore.bsxfile" Description="BrickStore XML" Advertise="no" Icon="[#brickstore.exe]" IconIndex="1">
-                <Extension Id="bsx" ContentType="application/x-brickstore-xml">
-                  <Verb Id="open" Sequence="10" Argument="&quot;%1&quot;" Target="[#brickstore.exe]" />
+              <ProgId Id="BrickStock.bsxfile" Description="BrickStock XML" Advertise="no" Icon="[#brickstock.exe]" IconIndex="1">
+                <Extension Id="bsx" ContentType="application/x-brickstock-xml">
+                  <Verb Id="open" Sequence="10" Argument="&quot;%1&quot;" Target="[#brickstock.exe]" />
                 </Extension>
               </ProgId>
 
-              <ProgId Id="BrickStore.btifile" Description="BrickStore Data File" Advertise="no" Icon="[#brickstore.exe]" IconIndex="1">
-                <Extension Id="bti" ContentType="application/x-brickstore">
-                  <Verb Id="open" Sequence="10" Argument="&quot;%1&quot;" Target="[#brickstore.exe]" />
+              <ProgId Id="BrickStock.btifile" Description="BrickStock Data File" Advertise="no" Icon="[#brickstock.exe]" IconIndex="1">
+                <Extension Id="bti" ContentType="application/x-brickstock">
+                  <Verb Id="open" Sequence="10" Argument="&quot;%1&quot;" Target="[#brickstock.exe]" />
                 </Extension>
               </ProgId>
             </Component>
@@ -93,10 +95,10 @@
             <Directory Id="translations" Name="translat" LongName="translations">
               <Component Id="c_translations" Guid="7F2A4CBF-90FB-43A1-AC34-FEA6BF6FE1FE">
                 <File DiskId="1" Id="translations.xml" Name="translat.xml" LongName="translations.xml" src="$(var.TARGET)\translations\translations.xml" />
-                <File DiskId="1" Id="brickstore_de.qm" Name="brkst_de.qm"  LongName="brickstore_de.qm" src="$(var.TARGET)\translations\brickstore_de.qm" />
-                <File DiskId="1" Id="brickstore_fr.qm" Name="brkst_fr.qm"  LongName="brickstore_fr.qm" src="$(var.TARGET)\translations\brickstore_fr.qm" />
-                <File DiskId="1" Id="brickstore_nl.qm" Name="brkst_nl.qm"  LongName="brickstore_nl.qm" src="$(var.TARGET)\translations\brickstore_nl.qm" />
-                <File DiskId="1" Id="brickstore_sl.qm" Name="brkst_sl.qm"  LongName="brickstore_sl.qm" src="$(var.TARGET)\translations\brickstore_sl.qm" />
+                <File DiskId="1" Id="brickstock_de.qm" Name="brkst_de.qm"  LongName="brickstock_de.qm" src="$(var.TARGET)\translations\brickstock_de.qm" />
+                <File DiskId="1" Id="brickstock_fr.qm" Name="brkst_fr.qm"  LongName="brickstock_fr.qm" src="$(var.TARGET)\translations\brickstock_fr.qm" />
+                <File DiskId="1" Id="brickstock_nl.qm" Name="brkst_nl.qm"  LongName="brickstock_nl.qm" src="$(var.TARGET)\translations\brickstock_nl.qm" />
+                <File DiskId="1" Id="brickstock_sl.qm" Name="brkst_sl.qm"  LongName="brickstock_sl.qm" src="$(var.TARGET)\translations\brickstock_sl.qm" />
                 <File DiskId="1" Id="qt_de.qm"         Name="qt_de.qm"                                 src="$(env.QTDIR)\translations\qt_de.qm" />
                 <File DiskId="1" Id="qt_fr.qm"         Name="qt_fr.qm"                                 src="$(env.QTDIR)\translations\qt_fr.qm" />
                 <File DiskId="1" Id="qt_nl.qm"         Name="qt_nl.qm"                                 src="$(env.QTDIR)\translations\qt_nl.qm" />
@@ -279,13 +281,13 @@
       </Directory>
         
       <Directory Id="ProgramMenuFolder" Name="Programs">
-        <Directory Id="ProgramMenuDir" Name="BRKSTORE" LongName="BrickStore" />
+        <Directory Id="ProgramMenuDir" Name="BRKSTORE" LongName="BrickStock" />
       </Directory>
 
       <Directory Id="DesktopFolder" Name="Desktop" />
     </Directory>
 
-    <Feature Id="Complete" Title="BrickStore" Description="The complete package."
+    <Feature Id="Complete" Title="BrickStock" Description="The complete package."
              TypicalDefault="install" Display="expand" Level="1" ConfigurableDirectory="INSTALLDIR">
       <ComponentRef Id="c_main" />
       <ComponentRef Id="c_runtime" />

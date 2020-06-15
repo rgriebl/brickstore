@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -14,10 +16,16 @@
 #ifndef __CRESOURCE_H__
 #define __CRESOURCE_H__
 
-#include <qasciidict.h>
+#include <q3asciidict.h>
 #include <qstringlist.h>
-#include <qiconset.h>
+#include <qicon.h>
 #include <qpixmap.h>
+//Added by qt3to4:
+#include <QTranslator>
+
+#if defined( Q_OS_MACX )
+#include <CoreFoundation/CFLocale.h>
+#endif
 
 class QTranslator;
 class QLocale;
@@ -38,13 +46,14 @@ public:
 	QString locate ( const QString &name, LocateType lt = LocateFile );
 
 	QTranslator *translation ( const char *name, const QLocale &locale );
-	QIconSet iconSet ( const char *name );
+    QIcon icon ( const char *name );
 	QPixmap pixmap ( const char *name );
 
+    QString toQString(CFStringRef str);
 private:
 	QStringList m_paths;
-	QAsciiDict<QIconSet> m_iconset_dict;
-	QAsciiDict<QPixmap>  m_pixmap_dict;
+    Q3AsciiDict<QIcon> m_iconset_dict;
+	Q3AsciiDict<QPixmap>  m_pixmap_dict;
 	bool m_has_alpha;
 };
 

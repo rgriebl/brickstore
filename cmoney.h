@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -18,6 +20,12 @@
 #include <qvalidator.h>
 #include <qmap.h>
 #include <qvariant.h>
+//Added by qt3to4:
+#include <QKeyEvent>
+
+#if defined( Q_OS_MACX )
+#include <CoreFoundation/CFLocale.h>
+#endif
 
 class CMoneyData;
 class QKeyEvent;
@@ -53,6 +61,7 @@ public:
 	QChar localDecimalPoint ( ) const;
 	QChar decimalPoint ( ) const;
 	
+    QString toQString ( CFStringRef str );
 private:
 	QString toString ( double dv, bool with_currency_symbol, int precision ) const;
 	money_t toMoney ( const QString &s, bool *ok = 0 ) const;

@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -12,7 +14,7 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 #include <qpushbutton.h>
-#include <qlistview.h>
+#include <q3listview.h>
 #include <qtoolbutton.h>
 
 #include "creport.h"
@@ -22,25 +24,25 @@
 
 namespace {
 
-class ReportListItem : public QListViewItem {
-public:
-	ReportListItem ( QListView *list, const CReport *rep )
-		: QListViewItem ( list ), m_report ( rep )
-	{ }
+//class ReportListItem : public Q3ListViewItem {
+//public:
+//	ReportListItem ( Q3ListView *list, const CReport *rep )
+//		: Q3ListViewItem ( list ), m_report ( rep )
+//	{ }
 
-	QString text ( int /*col*/ ) const
-	{
-		return m_report-> name ( );
-	}
+//	QString text ( int /*col*/ ) const
+//	{
+//		return m_report-> name ( );
+//	}
 
-	const CReport *report ( ) const
-	{
-		return m_report;
-	}
+//	const CReport *report ( ) const
+//	{
+//		return m_report;
+//	}
 	
-private:
-	const CReport *m_report;
-};
+//private:
+//	const CReport *m_report;
+//};
 
 } //namspace
 
@@ -48,14 +50,14 @@ private:
 DlgSelectReportImpl::DlgSelectReportImpl ( QWidget *parent, const char *name, bool modal )
 	: DlgSelectReport ( parent, name, modal )
 {
-	connect ( w_list, SIGNAL( selectionChanged ( QListViewItem * )), this, SLOT( checkItem ( QListViewItem * )));
-	connect ( w_list, SIGNAL( doubleClicked ( QListViewItem *, const QPoint &, int )), this, SLOT( activateItem ( QListViewItem * )));
-	connect ( w_list, SIGNAL( returnPressed ( QListViewItem * )), this, SLOT( activateItem ( QListViewItem * )));
+	connect ( w_list, SIGNAL( selectionChanged ( Q3ListViewItem * )), this, SLOT( checkItem ( Q3ListViewItem * )));
+	connect ( w_list, SIGNAL( doubleClicked ( Q3ListViewItem *, const QPoint &, int )), this, SLOT( activateItem ( Q3ListViewItem * )));
+	connect ( w_list, SIGNAL( returnPressed ( Q3ListViewItem * )), this, SLOT( activateItem ( Q3ListViewItem * )));
 	connect ( w_update, SIGNAL( clicked ( )), this, SLOT( updateList ( )));
 
 	w_ok-> setEnabled ( false );
 
-	setReports ( CReportManager::inst ( )-> reports ( ));
+//	setReports ( CReportManager::inst ( )-> reports ( ));
 }
 
 DlgSelectReportImpl::~DlgSelectReportImpl ( )
@@ -63,36 +65,36 @@ DlgSelectReportImpl::~DlgSelectReportImpl ( )
 
 void DlgSelectReportImpl::updateList ( )
 {
-	CReportManager::inst ( )-> reload ( );
-	setReports ( CReportManager::inst ( )-> reports ( ));
+//	CReportManager::inst ( )-> reload ( );
+//	setReports ( CReportManager::inst ( )-> reports ( ));
 }
 
-void DlgSelectReportImpl::checkItem ( QListViewItem *it )
+void DlgSelectReportImpl::checkItem ( Q3ListViewItem *it )
 {
 	w_ok-> setEnabled (( it ));
 }
 
-void DlgSelectReportImpl::activateItem ( QListViewItem *it )
+void DlgSelectReportImpl::activateItem ( Q3ListViewItem *it )
 {
 	checkItem ( it );
 	w_ok-> animateClick ( );
 }
 
-void DlgSelectReportImpl::setReports ( const QPtrList <CReport> &reps )
-{
-	w_list-> clear ( );
+//void DlgSelectReportImpl::setReports ( const Q3PtrList <CReport> &reps )
+//{
+//	w_list-> clear ( );
 
-	for ( QPtrListIterator <CReport> it ( reps ); it. current ( ); ++it ) {
-		new ReportListItem ( w_list, it. current ( ));
-	}
+//	for ( Q3PtrListIterator <CReport> it ( reps ); it. current ( ); ++it ) {
+//		new ReportListItem ( w_list, it. current ( ));
+//	}
 
-	if ( w_list-> childCount ( ))
-		w_list-> setSelected ( w_list-> firstChild ( ), true );
-}
+//	if ( w_list-> childCount ( ))
+//		w_list-> setSelected ( w_list-> firstChild ( ), true );
+//}
 
-const CReport *DlgSelectReportImpl::report ( ) const
-{
-	QListViewItem *it = w_list-> selectedItem ( );
+//const CReport *DlgSelectReportImpl::report ( ) const
+//{
+//	Q3ListViewItem *it = w_list-> selectedItem ( );
 
-	return it ? static_cast <ReportListItem *> ( it )-> report ( ) : 0;
-}
+//	return it ? static_cast <ReportListItem *> ( it )-> report ( ) : 0;
+//}

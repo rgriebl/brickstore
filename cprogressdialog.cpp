@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -20,10 +22,11 @@
 #include <qcursor.h>
 #include <qfile.h>
 
+#include <qdebug.h>
+
 #include "capplication.h"
 #include "curllabel.h"
 #include "cconfig.h"
-
 #include "cprogressdialog.h"
 
 CProgressDialog::CProgressDialog ( QWidget *parent, const char *name )
@@ -40,36 +43,40 @@ CProgressDialog::CProgressDialog ( QWidget *parent, const char *name )
 
 	int minwidth = fontMetrics ( ). width ( 'm' ) * 40;
 
-	QVBoxLayout *lay = new QVBoxLayout ( this, 11, 6 );
+    QVBoxLayout *lay = new QVBoxLayout;// ( this, 11, 6 );
+    lay-> setSpacing(6);
+    lay-> setMargin(11);
 
 	m_header = new QLabel ( this );
 	m_header-> setAlignment ( Qt::AlignLeft | Qt::AlignVCenter );
 	m_header->setMinimumWidth ( minwidth );
 	lay-> addWidget ( m_header );
 
-	QFrame *frame = new QFrame ( this );
-	frame-> setFrameStyle ( QFrame::HLine | QFrame::Sunken );
+    QFrame *frame = new QFrame ( this );
+    frame-> setFrameStyle ( QFrame::HLine | QFrame::Sunken );
 	lay-> addWidget ( frame );
 
 	m_message = new CUrlLabel ( this );
+    m_message->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	m_message-> setAlignment ( Qt::AlignCenter );
-	lay-> addWidget ( m_message );
+    lay-> addWidget ( m_message );
 
 	m_progress_container = new QWidget ( this );
 	lay-> addWidget ( m_progress_container );
-	QHBoxLayout *play = new QHBoxLayout ( m_progress_container, 0, 6 );
+    QHBoxLayout *play = new QHBoxLayout ( m_progress_container, 0, 6 );
 
-	m_progress = new QProgressBar ( m_progress_container );
-	m_progress-> setPercentageVisible ( false );
+    m_progress = new QProgressBar ( m_progress_container );
+    m_progress-> setTextVisible ( false );
+    m_progress-> setMinimum ( 0 );
 	play-> addSpacing ( 20 );
-	play-> addWidget ( m_progress );
+    play-> addWidget ( m_progress );
 	play-> addSpacing ( 20 );
 
-	frame = new QFrame ( this );
-	frame-> setFrameStyle ( QFrame::HLine | QFrame::Sunken );
+    frame = new QFrame ( this );
+    frame-> setFrameStyle ( QFrame::HLine | QFrame::Sunken );
 	lay-> addWidget ( frame );
 
-	QHBoxLayout *blay = new QHBoxLayout ( lay );
+    QHBoxLayout *blay = new QHBoxLayout ( lay );
 	blay-> addSpacing ( 11 );
 	blay-> addStretch ( 10 );
 	m_ok = new QPushButton ( tr( "&OK" ), this );
@@ -83,6 +90,8 @@ CProgressDialog::CProgressDialog ( QWidget *parent, const char *name )
 
 	QApplication::setOverrideCursor ( QCursor( Qt::WaitCursor ));
 	m_override = true;
+
+    setLayout(lay);
 }
 
 CProgressDialog::~CProgressDialog ( )
@@ -104,7 +113,7 @@ void CProgressDialog::done ( int r )
 void CProgressDialog::setHeaderText ( const QString &str )
 {
 	m_header-> setText ( QString( "<b>%1</b>" ). arg( str ));
-	syncRepaint ( m_header );;
+    syncRepaint ( m_header );
 }
 
 void CProgressDialog::setMessageText ( const QString &str )
@@ -115,14 +124,14 @@ void CProgressDialog::setMessageText ( const QString &str )
 	if ( m_message_progress )
 		setProgress ( 0, 0 );
 	else
-		m_message-> setText ( str );
+        m_message-> setText ( str );
 	
 	syncRepaint ( m_message );
 }
 
 void CProgressDialog::setErrorText ( const QString &str )
 {
-	m_message-> setText ( QString( "<b>%1</b>: %2" ). arg( tr( "Error" )). arg( str ));
+    m_message-> setText ( QString( "<b>%1</b>: %2" ). arg( tr( "Error" )). arg( str ));
 	setFinished ( false );
 
 	syncRepaint ( m_message );
@@ -134,7 +143,8 @@ void CProgressDialog::setFinished ( bool ok )
 	m_override = false;
 
 	m_has_errors = !ok;
-	m_progress-> setProgress ( 100, 100 );
+    m_progress-> setMaximum ( 100 );
+    m_progress-> setValue ( 100 );
 
 	if ( m_autoclose && ok ) {
 		accept ( );
@@ -143,13 +153,14 @@ void CProgressDialog::setFinished ( bool ok )
 		m_cancel-> hide ( );
 		m_ok-> show ( );
 		connect ( m_ok, SIGNAL( clicked ( )), this, ok ? SLOT( accept ( )) : SLOT( reject ( )));
-		layout ( );
+        setSize ( );
 	}
 }
 
 void CProgressDialog::setProgress ( int s, int t )
 {
-	m_progress-> setProgress ( s, t );
+    m_progress-> setMaximum( t );
+    m_progress-> setValue ( s );
 
 	if ( m_message_progress ) {
 		QString str = m_message_text. arg ( s );
@@ -159,7 +170,7 @@ void CProgressDialog::setProgress ( int s, int t )
 		else
 			str = str. arg ( "?" );
 
-		m_message-> setText ( str );
+        m_message-> setText ( str );
 	}
 }
 
@@ -173,9 +184,10 @@ void CProgressDialog::setProgressVisible ( bool b )
 
 void CProgressDialog::syncRepaint ( QWidget *w )
 {
-	layout ( );
-	w-> repaint ( );
-	qApp-> eventLoop ( )-> processEvents ( QEventLoop::ExcludeUserInput );
+    QApplication::processEvents( QEventLoop::ExcludeUserInput );
+    w-> repaint ( );
+    w->updateGeometry ( );
+    setSize ( );
 }
 
 CTransfer::Job *CProgressDialog::job ( ) const
@@ -245,7 +257,7 @@ bool CProgressDialog::get ( const QString &url, const CKeyValueList &query, cons
 }
 
 
-void CProgressDialog::layout ( )
+void CProgressDialog::setSize ( )
 {
 #if 0
 	QSize now = size ( );
@@ -253,11 +265,11 @@ void CProgressDialog::layout ( )
 
 	setFixedSize ( QSize ( QMAX( now. width ( ), then. height ( )), QMAX( now. height ( ), then. height ( ))));
 #endif
-	setFixedSize ( sizeHint ( ));
+
+    setFixedSize ( sizeHint ( ));
 }
 
 void CProgressDialog::setAutoClose ( bool ac )
 {
 	m_autoclose = ac;
 }
-

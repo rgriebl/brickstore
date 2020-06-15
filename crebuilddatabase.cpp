@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -30,7 +32,7 @@ CRebuildDatabase::CRebuildDatabase ( const QString &output )
 	
 #if defined( Q_OS_WIN32 )
 	AllocConsole ( );
-	const char *title = "BrickStore - Rebuilding Database";
+	const char *title = "BrickStock - Rebuilding Database";
 	QT_WA({ SetConsoleTitleW ((LPCWSTR) QString( title ). ucs2 ( )); }, 
 	      { SetConsoleTitleA ( title ); })
 	freopen ( "CONIN$", "r", stdin );
@@ -106,7 +108,7 @@ int CRebuildDatabase::exec ( )
 	/////////////////////////////////////////////////////////////////////////////////
 	printf ( "\nSTEP 3: Parsing inventories (part I)...\n" );
 
-	QPtrVector<BrickLink::Item> invs = blti. items ( );
+	Q3PtrVector<BrickLink::Item> invs = blti. items ( );
 	blti. importInventories ( bl-> dataPath ( ), invs );
 
 	/////////////////////////////////////////////////////////////////////////////////
@@ -154,7 +156,7 @@ CKeyValueList itemQuery ( char item_type )
 	query << CKeyValue ( "a", "a" )
 	      << CKeyValue ( "viewType", "0" )
 	      << CKeyValue ( "itemType", QChar ( item_type ))
-	      << CKeyValue ( "selItemColor", "Y" )  // special BrickStore flag to get default color - thanks Dan
+	      << CKeyValue ( "selItemColor", "Y" )  // special BrickStock flag to get default color - thanks Dan
 	      << CKeyValue ( "selWeight", "Y" )
 	      << CKeyValue ( "selYear", "Y" );
 
@@ -207,13 +209,13 @@ bool CRebuildDatabase::download ( )
 
 	{ // workaround for U type
 		QFile uf ( path + "items_U.txt" );
-		uf. open ( IO_WriteOnly );
+		uf. open ( QIODevice::WriteOnly );
 	}
 
 	for ( tptr = table; tptr-> m_url; tptr++ ) {
 		QFile *f = new QFile ( path + tptr-> m_file + ".new" );
 
-		if ( !f-> open ( IO_WriteOnly )) {
+		if ( !f-> open ( QIODevice::WriteOnly )) {
 			m_error = QString ( "failed to write %1: %2" ). arg( tptr-> m_file ). arg( f-> errorString ( ));
 			delete f;
 			failed = true;
@@ -276,7 +278,7 @@ void CRebuildDatabase::downloadJobFinished ( CTransfer::Job *job )
 }
 
 
-bool CRebuildDatabase::downloadInventories ( QPtrVector<BrickLink::Item> &invs )
+bool CRebuildDatabase::downloadInventories ( Q3PtrVector<BrickLink::Item> &invs )
 {
 	QString path = BrickLink::inst ( )-> dataPath ( );
 
@@ -284,7 +286,7 @@ bool CRebuildDatabase::downloadInventories ( QPtrVector<BrickLink::Item> &invs )
 	m_downloads_in_progress = 0;
 	m_downloads_failed = 0;
 
-	QCString url = "http://www.bricklink.com/catalogDownload.asp";
+    QString url = "http://www.bricklink.com/catalogDownload.asp";
 
 	BrickLink::Item **itemp = invs. data ( );
 	for ( uint i = 0; i < invs. count ( ); i++ ) {
@@ -293,7 +295,7 @@ bool CRebuildDatabase::downloadInventories ( QPtrVector<BrickLink::Item> &invs )
 		if ( item ) {
 			QFile *f = new QFile ( BrickLink::inst ( )-> dataPath ( item ) + "inventory.xml.new" );
 
-			if ( !f-> open ( IO_WriteOnly )) {
+			if ( !f-> open ( QIODevice::WriteOnly )) {
 				m_error = QString ( "failed to write %1: %2" ). arg( f-> name ( )). arg( f-> errorString ( ));
 				delete f;
 				failed = true;

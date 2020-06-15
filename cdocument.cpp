@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -15,11 +17,13 @@
 
 #include <qapplication.h>
 #include <qcursor.h>
-#include <qfiledialog.h>
+#include <q3filedialog.h>
 #include <qclipboard.h>
 #include <qprinter.h>
 #include <qpainter.h>
 #include <qregexp.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 #include "cundo.h"
 #include "cutility.h"
@@ -65,7 +69,7 @@ void CChangeCmd::undo ( )
 
 bool CChangeCmd::mergeMeWith ( CUndoCmd *other )
 {
-	CChangeCmd *that = ::qt_cast <CChangeCmd *> ( other );
+    CChangeCmd *that = ::qobject_cast <CChangeCmd *> ( other );
 
 	if (( m_doc == that-> m_doc ) &&
 		( m_position == that-> m_position )) 
@@ -110,7 +114,7 @@ void CAddRemoveCmd::undo ( )
 
 bool CAddRemoveCmd::mergeMeWith ( CUndoCmd *other )
 {
-	CAddRemoveCmd *that = ::qt_cast <CAddRemoveCmd *> ( other );
+    CAddRemoveCmd *that = ::qobject_cast <CAddRemoveCmd *> ( other );
 
 	if ( m_type == that-> m_type ) {
 		m_items     += that-> m_items;
@@ -223,7 +227,7 @@ bool CDocument::Item::operator == ( const Item &cmp ) const
 // *****************************************************************************************
 // *****************************************************************************************
 
-QValueList<CDocument *> CDocument::s_documents;
+Q3ValueList<CDocument *> CDocument::s_documents;
 
 CDocument::CDocument ( bool dont_sort )
 {
@@ -245,7 +249,7 @@ CDocument::~CDocument ( )
 	s_documents. remove ( this );
 }
 
-const QValueList<CDocument *> &CDocument::allDocuments ( )
+const Q3ValueList<CDocument *> &CDocument::allDocuments ( )
 {
 	return s_documents;
 }
@@ -446,11 +450,11 @@ CDocument *CDocument::fileOpen ( )
 {
 	QStringList filters;
 	filters << tr( "Inventory Files" ) + " (*.bsx *.bti)";
-	filters << tr( "BrickStore XML Data" ) + " (*.bsx)";
+    filters << tr( "BrickStock XML Data" ) + " (*.bsx)";
 	filters << tr( "BrikTrak Inventory" ) + " (*.bti)";
 	filters << tr( "All Files" ) + "(*.*)";
 
-	return fileOpen ( QFileDialog::getOpenFileName ( CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ), CFrameWork::inst ( ), "FileDialog", tr( "Open File" ), 0 ));
+	return fileOpen ( Q3FileDialog::getOpenFileName ( CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ), CFrameWork::inst ( ), "FileDialog", tr( "Open File" ), 0 ));
 }
 
 CDocument *CDocument::fileOpen ( const QString &s )
@@ -471,7 +475,7 @@ CDocument *CDocument::fileOpen ( const QString &s )
 		doc = fileImportBrikTrakInventory ( s );
 
 		if ( doc )
-			CMessageBox::information ( CFrameWork::inst ( ), tr( "BrickStore has switched to a new file format (.bsx - BrickStore XML).<br /><br />Your document has been automatically imported and it will be converted as soon as you save it." ));
+            CMessageBox::information ( CFrameWork::inst ( ), tr( "BrickStock has switched to a new file format (.bsx - BrickStock XML).<br /><br />Your document has been automatically imported and it will be converted as soon as you save it." ));
 	}
 	else
 		doc = fileLoadFrom ( s, "bsx" );
@@ -509,16 +513,16 @@ CDocument *CDocument::fileImportBrickLinkInventory ( const BrickLink::Item *pres
 	return 0;
 }
 
-QValueList<CDocument *> CDocument::fileImportBrickLinkOrders ( )
+Q3ValueList<CDocument *> CDocument::fileImportBrickLinkOrders ( )
 {
-    QValueList<CDocument *> docs;
+    Q3ValueList<CDocument *> docs;
 
     DlgLoadOrderImpl dlg ( CFrameWork::inst ( ));
 
 	if ( dlg. exec ( ) == QDialog::Accepted ) {
-        QValueList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > orders = dlg. orders ( );
+        Q3ValueList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > orders = dlg. orders ( );
 
-        for ( QValueList<QPair<BrickLink::Order *, BrickLink::InvItemList *> >::const_iterator it = orders. begin ( ); it != orders. end ( ); ++it ) {
+        for ( Q3ValueList<QPair<BrickLink::Order *, BrickLink::InvItemList *> >::const_iterator it = orders. begin ( ); it != orders. end ( ); ++it ) {
             const QPair<BrickLink::Order *, BrickLink::InvItemList *> &order = *it;
 
 		    if ( order. first && order. second ) {
@@ -552,7 +556,7 @@ CDocument *CDocument::fileImportBrickLinkStore ( )
 CDocument *CDocument::fileImportBrickLinkCart ( )
 {
 	QString url = QApplication::clipboard ( )-> text ( QClipboard::Clipboard );
-	QRegExp rx_valid ( "http://www\\.bricklink\\.com/storeCart\\.asp\\?h=[0-9]+&b=[0-9]+" );
+    QRegExp rx_valid ( "http://www\\.bricklink\\.com/storeCart\\.asp\\?h=[0-9]+&b=-?[0-9]+" );
 		
 	if ( !rx_valid. exactMatch ( url ))
 		url = "http://www.bricklink.com/storeCart.asp?h=______&b=______";
@@ -563,7 +567,7 @@ CDocument *CDocument::fileImportBrickLinkCart ( )
 															"<b>Copy Link Location</b> (Firefox), <b>Copy Link</b> (Safari) "
 															"or <b>Copy Shortcut</b> (Internet Explorer).<br /><br />"
 															"<em>Super-lots and custom items are <b>not</b> supported</em>." ), url )) {
-		QRegExp rx ( "\\?h=([0-9]+)&b=([0-9]+)" );
+        QRegExp rx ( "\\?h=([0-9]+)&b=(-?[0-9]+)" );
 		rx. search ( url );
 		int shopid = rx. cap ( 1 ). toInt ( );
 		int cartid = rx. cap ( 2 ). toInt ( );
@@ -592,7 +596,7 @@ CDocument *CDocument::fileImportBrickLinkXML ( )
 	filters << tr( "BrickLink XML File" ) + " (*.xml)";
 	filters << tr( "All Files" ) + "(*.*)";
 
-	QString s = QFileDialog::getOpenFileName ( CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ), CFrameWork::inst ( ), "FileDialog", tr( "Import File" ), 0 );
+	QString s = Q3FileDialog::getOpenFileName ( CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ), CFrameWork::inst ( ), "FileDialog", tr( "Import File" ), 0 );
 
 	if ( !s. isEmpty ( )) {
 		CDocument *doc = fileLoadFrom ( s, "xml", true );
@@ -633,7 +637,7 @@ CDocument *CDocument::fileImportBrikTrakInventory ( const QString &fn )
 		filters << tr( "BrikTrak Inventory" ) + " (*.bti)";
 		filters << tr( "All Files" ) + "(*.*)";
 
-		s = QFileDialog::getOpenFileName ( CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ), CFrameWork::inst ( ), "FileDialog", tr( "Import File" ), 0 );
+		s = Q3FileDialog::getOpenFileName ( CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ), CFrameWork::inst ( ), "FileDialog", tr( "Import File" ), 0 );
 	}
 
 	if ( !s. isEmpty ( )) {
@@ -652,7 +656,7 @@ CDocument *CDocument::fileLoadFrom ( const QString &name, const char *type, bool
 	BrickLink::ItemListXMLHint hint;
 
 	if ( qstrcmp ( type, "bsx" ) == 0 )
-		hint = BrickLink::XMLHint_BrickStore;
+        hint = BrickLink::XMLHint_BrickStock;
 	else if ( qstrcmp ( type, "bti" ) == 0 )
 		hint = BrickLink::XMLHint_BrikTrak;
 	else if ( qstrcmp ( type, "xml" ) == 0 )
@@ -663,7 +667,7 @@ CDocument *CDocument::fileLoadFrom ( const QString &name, const char *type, bool
 
 	QFile f ( name );
 
-	if ( !f. open ( IO_ReadOnly )) {
+	if ( !f. open ( QIODevice::ReadOnly )) {
 		CMessageBox::warning ( CFrameWork::inst ( ), tr( "Could not open file %1 for reading." ). arg ( CMB_BOLD( name )));
 		return false;
 	}
@@ -682,7 +686,7 @@ CDocument *CDocument::fileLoadFrom ( const QString &name, const char *type, bool
 		QDomElement root = doc. documentElement ( );
 		QDomElement item_elem;
 
-		if ( hint == BrickLink::XMLHint_BrickStore ) {
+        if ( hint == BrickLink::XMLHint_BrickStock ) {
 			for ( QDomNode n = root. firstChild ( ); !n. isNull ( ); n = n. nextSibling ( )) {
 				if ( !n. isElement ( ))
 					continue;
@@ -736,14 +740,14 @@ CDocument *CDocument::fileImportLDrawModel ( )
 	filters << tr( "LDraw Models" ) + " (*.dat;*.ldr;*.mpd)";
 	filters << tr( "All Files" ) + "(*.*)";
 
-	QString s = QFileDialog::getOpenFileName ( CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ), CFrameWork::inst ( ), "FileDialog", tr( "Import File" ), 0 );
+	QString s = Q3FileDialog::getOpenFileName ( CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ), CFrameWork::inst ( ), "FileDialog", tr( "Import File" ), 0 );
 
 	if ( s. isEmpty ( ))
 		return false;
 
 	QFile f ( s );
 
-	if ( !f. open ( IO_ReadOnly )) {
+	if ( !f. open ( QIODevice::ReadOnly )) {
 		CMessageBox::warning ( CFrameWork::inst ( ), tr( "Could not open file %1 for reading." ). arg ( CMB_BOLD( s )));
 		return false;
 	}
@@ -859,7 +863,7 @@ void CDocument::fileSave ( const ItemList &itemlist )
 void CDocument::fileSaveAs ( const ItemList &itemlist )
 {
 	QStringList filters;
-	filters << tr( "BrickStore XML Data" ) + " (*.bsx)";
+    filters << tr( "BrickStock XML Data" ) + " (*.bsx)";
 
 	QString fn = fileName ( );
 
@@ -872,7 +876,7 @@ void CDocument::fileSaveAs ( const ItemList &itemlist )
 	if (( fn. right ( 4 ) == ".xml" ) || ( fn. right ( 4 ) == ".bti" ))
 		fn. truncate ( fn.length ( ) - 4 );
 
-	fn = QFileDialog::getSaveFileName ( fn, filters. join ( ";;" ), CFrameWork::inst ( ), "FileDialog", tr( "Save File as" ), 0 );
+	fn = Q3FileDialog::getSaveFileName ( fn, filters. join ( ";;" ), CFrameWork::inst ( ), "FileDialog", tr( "Save File as" ), 0 );
 
 	if ( !fn. isNull ( )) {
 		if ( fn. right ( 4 ) != ".bsx" )
@@ -892,7 +896,7 @@ bool CDocument::fileSaveTo ( const QString &s, const char *type, bool export_onl
 	BrickLink::ItemListXMLHint hint;
 
 	if ( qstrcmp ( type, "bsx" ) == 0 )
-		hint = BrickLink::XMLHint_BrickStore;
+        hint = BrickLink::XMLHint_BrickStock;
 	else if ( qstrcmp ( type, "bti" ) == 0 )
 		hint = BrickLink::XMLHint_BrikTrak;
 	else if ( qstrcmp ( type, "xml" ) == 0 )
@@ -902,16 +906,16 @@ bool CDocument::fileSaveTo ( const QString &s, const char *type, bool export_onl
 
 
 	QFile f ( s );
-	if ( f. open ( IO_WriteOnly )) {
+	if ( f. open ( QIODevice::WriteOnly )) {
 		QApplication::setOverrideCursor ( QCursor( Qt::WaitCursor ));
 
-		QDomDocument doc (( hint == BrickLink::XMLHint_BrickStore ) ? QString( "BrickStoreXML" ) : QString::null );
+        QDomDocument doc (( hint == BrickLink::XMLHint_BrickStock ) ? QString( "BrickStockXML" ) : QString::null );
 		doc. appendChild ( doc. createProcessingInstruction ( "xml", "version=\"1.0\" encoding=\"UTF-8\"" ));
 
 		QDomElement item_elem = BrickLink::inst ( )-> createItemListXML ( doc, hint, reinterpret_cast<const BrickLink::InvItemList *> ( &itemlist ));
 
-		if ( hint == BrickLink::XMLHint_BrickStore ) {
-			QDomElement root = doc. createElement ( "BrickStoreXML" );
+        if ( hint == BrickLink::XMLHint_BrickStock ) {
+            QDomElement root = doc. createElement ( "BrickStockXML" );
 
 			root. appendChild ( item_elem );
 
@@ -927,10 +931,10 @@ bool CDocument::fileSaveTo ( const QString &s, const char *type, bool export_onl
 			doc. appendChild ( item_elem );
 		}
 
-		// directly writing to an QTextStream would be way more efficient,
+        // directly writing to an QTxtStream would be way more efficient,
 		// but we could not handle any error this way :(
-		QCString output = doc. toCString ( );
-		bool ok = ( f. writeBlock ( output. data ( ), output. size ( ) - 1 ) ==  int( output. size ( ) - 1 )); // no 0-byte
+        QString output = doc.toString ( );
+        bool ok = ( f. writeBlock ( output.toUtf8() ) ==  int( output. size ( ) )); // no 0-byte
 
 		QApplication::restoreOverrideCursor ( );
 
@@ -1018,7 +1022,7 @@ void CDocument::fileExportBrickLinkXML ( const ItemList &itemlist )
 	QStringList filters;
 	filters << tr( "BrickLink XML File" ) + " (*.xml)";
 
-	QString s = QFileDialog::getSaveFileName ( CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ), CFrameWork::inst ( ), "FileDialog", tr( "Export File" ), 0 );
+	QString s = Q3FileDialog::getSaveFileName ( CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ), CFrameWork::inst ( ), "FileDialog", tr( "Export File" ), 0 );
 
 	if ( !s. isNull ( )) {
 		if ( s. right ( 4 ) != ".xml" )
@@ -1037,7 +1041,7 @@ void CDocument::fileExportBrikTrakInventory ( const ItemList &itemlist )
 	QStringList filters;
 	filters << tr( "BrikTrak Inventory" ) + " (*.bti)";
 
-	QString s = QFileDialog::getSaveFileName ( CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ), CFrameWork::inst ( ), "FileDialog", tr( "Export File" ), 0 );
+	QString s = Q3FileDialog::getSaveFileName ( CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ), CFrameWork::inst ( ), "FileDialog", tr( "Export File" ), 0 );
 
 	if ( !s. isNull ( )) {
 		if ( s. right ( 4 ) != ".bti" )
@@ -1090,4 +1094,3 @@ void CDocument::resetDifferences ( const ItemList &items )
 	}
 	macroEnd ( macro );
 }
-

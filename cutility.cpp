@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -21,6 +23,10 @@
 #include <qimage.h>
 #include <qdir.h>
 #include <qlocale.h>
+//Added by qt3to4:
+#include <Q3CString>
+#include <qdesktopwidget.h>
+#include <qdatetime.h>
 
 #if defined ( Q_WS_X11 ) || defined ( Q_WS_MACX )
 #include <stdlib.h>
@@ -88,7 +94,7 @@ QColor CUtility::gradientColor ( const QColor &c1, const QColor &c2, float f )
 	c1. getRgb ( &r1, &g1, &b1 );
 	c2. getRgb ( &r2, &g2, &b2 );
 
-	f = QMIN( QMAX ( f, 0.0 ), 1.0 );
+    f = QMIN( QMAX ( f, 0.0f ), 1.0f );
 	float e = 1.0 - f;
 
 	return QColor ( int( r1 * e + r2 * f ), int( g1 * e + g2 * f ), int( b1 * e + b2 * f ), QColor::Rgb );
@@ -99,7 +105,7 @@ QColor CUtility::contrastColor ( const QColor &c, float f )
 	int h, s, v;
 	c. getHsv ( &h, &s, &v );
 
-	f = QMIN( QMAX ( f, 0.0 ), 1.0 );
+    f = QMIN( QMAX ( f, 0.0f ), 1.0f );
 
 	v += int( f * (( v < 128 ) ? 255.0 : -255.0 ));
 	v = QMIN( QMAX( v, 0 ), 255 );
@@ -127,7 +133,7 @@ QImage CUtility::createGradient ( const QSize &size, Qt::Orientation orient, con
 
 	bool invert = ( f < 0. );
 
-	f = QMIN( QMAX( QABS( f ), 1. ), 200. );
+    f = QMIN( QMAX( QABS( f ), 1.f ), 200.f );
 
 	if ( orient == Qt::Horizontal ) {
 		f /= ( w * -30. );
@@ -206,7 +212,7 @@ bool CUtility::openUrl ( const QString &url )
 		0
 	};
 
-	QCString buffer;
+	Q3CString buffer;
 	for ( const char **tryp = trylist; *tryp; tryp++ ) {
 		buffer. sprintf ( *tryp, url. local8Bit ( ). data ( ));
 
@@ -228,7 +234,7 @@ bool CUtility::openUrl ( const QString &url )
 	}
 
 #elif defined( Q_WS_MACX )
-	QCString buffer;
+	Q3CString buffer;
 	buffer. sprintf ( "open \"%s\"", url. local8Bit ( ). data ( ));
 
 	retval = ( ::system ( buffer. data ( )) == 0 );
@@ -379,7 +385,7 @@ void set_tz ( const char *tz )
 
 time_t CUtility::toUTC ( const QDateTime &dt, const char *settz )
 {
-    QCString oldtz;
+    char * oldtz;
 	
 	if ( settz ) {
 		oldtz = getenv ( "TZ" );
@@ -404,7 +410,7 @@ time_t CUtility::toUTC ( const QDateTime &dt, const char *settz )
 	t = mktime ( lt );
 
 	if ( settz )
-		set_tz ( oldtz. data ( ));
+        set_tz ( oldtz );
 
 	//time_t t2 = dt.toTime_t();
 

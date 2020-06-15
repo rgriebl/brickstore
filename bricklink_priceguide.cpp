@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -15,11 +17,10 @@
 
 #include <qfile.h>
 #include <qfileinfo.h>
-#include <qtextstream.h>
+#include <q3textstream.h>
 #include <qlocale.h>
 
 #include "bricklink.h"
-
 
 namespace {
 
@@ -83,7 +84,7 @@ BrickLink::PriceGuide *BrickLink::priceGuide ( const BrickLink::Item *item, cons
 	if ( !item || !color )
 		return 0;
 
-	QCString key;
+    QString key;
 	key. sprintf ( "%c@%d@%d", item-> itemType ( )-> id ( ), item-> index ( ), color-> id ( ));
 
 	//qDebug ( "PG requested for %s", key. data ( ));
@@ -254,8 +255,8 @@ void BrickLink::PriceGuide::save_to_disk ( )
 	//qDebug ( "PG saving data to \"%s\"",  path. latin1 ( ));
 
 	QFile f ( path );
-	if ( f. open ( IO_WriteOnly )) {
-		QTextStream ts ( &f );
+	if ( f. open ( QIODevice::WriteOnly )) {
+		Q3TextStream ts ( &f );
 
 		ts << "# Price Guide for part #" << m_item-> id ( ) << " (" << m_item-> name ( ) << "), color #" << m_color-> id ( ) << " (" << m_color-> name ( ) << ")\n";
 		ts << "# last update: " << m_fetched. toString ( ) << "\n#\n";
@@ -292,8 +293,8 @@ void BrickLink::PriceGuide::load_from_disk ( )
 	//qDebug ( "PG loading data from \"%s\"", path. latin1 ( ));
 
 	QFile f ( path );
-	if ( f. open ( IO_ReadOnly )) {
-		QTextStream ts ( &f );
+	if ( f. open ( QIODevice::ReadOnly )) {
+		Q3TextStream ts ( &f );
 		QString line;
 
 		while ( !( line = ts. readLine ( )). isNull ( )) {
@@ -373,7 +374,7 @@ void BrickLink::updatePriceGuide ( BrickLink::PriceGuide *pg, bool high_priority
 	pg-> m_update_status = Updating;
 	pg-> addRef ( );
 
-	QCString url;
+    QString url;
 	CKeyValueList query;
 	
 	url = "http://www.bricklink.com/priceGuide.asp"; // ?a=%c&viewType=N&colorID=%d&itemID=%s", tolower ( pg-> item ( )-> itemType ( )-> id ( )), pg-> color ( )-> id ( ), pg-> item ( )-> id ( ));

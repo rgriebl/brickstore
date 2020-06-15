@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -14,17 +16,19 @@
 #include <stdlib.h>
 
 #include <qapplication.h>
-#include <qiconset.h>
+#include <qicon.h>
 #include <qfile.h>
 #include <qdir.h>
 #include <qlocale.h>
+//Added by qt3to4:
+#include <QPixmap>
+#include <QTranslator>
 
 #if defined( Q_OS_MACX )
+#include <CoreFoundation/CFLocale.h>
 #include <CoreFoundation/CFURL.h>
 #include <CoreFoundation/CFBundle.h>
-
-extern QString cfstring2qstring ( CFStringRef str ); // defined in qglobal.cpp
-
+#include <CoreFoundation/CFString.h>
 #endif
 
 #include "cconfig.h"
@@ -45,12 +49,24 @@ CResource::~CResource ( )
 	s_inst = 0;
 }
 
+QString CResource::toQString(CFStringRef str)
+{
+    if (!str)
+        return QString();
+
+    CFIndex length = CFStringGetLength(str);
+    if (length == 0)
+        return QString();
+
+    QString string(length, Qt::Uninitialized);
+    CFStringGetCharacters(str, CFRangeMake(0, length), reinterpret_cast<UniChar *>
+        (const_cast<QChar *>(string.unicode())));
+    return string;
+}
+
 CResource::CResource ( )
 	: m_iconset_dict ( 23 ), m_pixmap_dict ( 23 )
 {
-	QIconSet::setIconSize ( QIconSet::Small, QSize ( 16, 16 ));
-	QIconSet::setIconSize ( QIconSet::Large, QSize ( 22, 22 ));
-
 	m_iconset_dict. setAutoDelete ( true );
 	m_pixmap_dict. setAutoDelete ( true );
 
@@ -61,7 +77,7 @@ CResource::CResource ( )
 	CFStringRef macpath = CFURLCopyFileSystemPath ( bundlepath, kCFURLPOSIXPathStyle );
 
 	// default
-	m_paths << cfstring2qstring ( macpath ) + "/Contents/Resources/";
+    m_paths << toQString ( macpath ) + "/Contents/Resources/";
 	// fallback
 	m_paths << qApp-> applicationDirPath ( ) + "/../Resources/";
 
@@ -74,11 +90,11 @@ CResource::CResource ( )
 	// development (debug in developer-studio)
 	m_paths << qApp-> applicationDirPath ( ) + "/../";
 	// fallback
-	m_paths << QString ( ::getenv ( "ProgramFiles" )) + "/SoftForge/BrickStore/";
+    m_paths << QString ( ::getenv ( "ProgramFiles" )) + "/BrickStock/";
 		
 	int wv = QApplication::winVersion ( );
 
-	m_has_alpha &= (( wv != Qt::WV_95 ) && ( wv != Qt::WV_NT ));
+	m_has_alpha &= (( wv != QSysInfo::WV_95 ) && ( wv != QSysInfo::WV_NT ));
 	
     QPixmap::setDefaultOptimization ( QPixmap::MemoryOptim );
 
@@ -87,13 +103,13 @@ CResource::CResource ( )
 	//  without a debugger, destroying the stack at the same time...)
 	
 	extern bool qt_use_native_dialogs;
-	qt_use_native_dialogs = !(( wv & Qt::WV_DOS_based ) || (( wv & Qt::WV_NT_based ) < Qt::WV_XP ));
+	qt_use_native_dialogs = !(( wv & QSysInfo::WV_DOS_based ) || (( wv & QSysInfo::WV_NT_based ) < QSysInfo::WV_XP ));
 
 #elif defined( Q_WS_X11 )
 	// default
-	m_paths << "/usr/share/brickstore/";
+	m_paths << "/usr/share/brickstock/";
 	// alternative
-	m_paths << "/opt/brickstore/";
+	m_paths << "/opt/brickstock/";
 	// fallbck / development
 	m_paths << qApp-> applicationDirPath ( ) + "/";
 
@@ -146,23 +162,23 @@ QTranslator *CResource::translation ( const char *name, const QLocale &locale )
 	return 0;
 }
 
-QIconSet CResource::iconSet ( const char *name )
+QIcon CResource::icon ( const char *name )
 {
 	if ( !name || !name [0] )
-		return QIconSet ( );
+        return QIcon ( );
 
-	QIconSet *is = m_iconset_dict [name];
+    QIcon *is = m_iconset_dict [name];
 
 	if ( !is ) {
 		QPixmap large ( locate ( QString( "images/22x22/" ) + name + ".png" ));
-		QPixmap small ( locate ( QString( "images/16x16/" ) + name + ".png" ));
+        //QPixmap small ( locate ( QString( "images/16x16/" ) + name + ".png" ));
 
-		if ( !large. isNull ( ) && !small. isNull ( )) {
-			is = new QIconSet ( small, large );
+        if ( !large. isNull ( )/* && !small. isNull ( )*/) {
+            is = new QIcon ( large );
 			m_iconset_dict. insert ( name, is );
 		}
 	}
-	return is ? *is : QIconSet ( );
+    return is ? *is : QIcon ( );
 }
 
 QPixmap CResource::pixmap ( const char *name )

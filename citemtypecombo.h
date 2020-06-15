@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -15,7 +17,7 @@
 #define __CITEMTYPECOMBO_H__
 
 #include <qcombobox.h>
-#include <qlistbox.h>
+#include <qmap.h>
 
 #include "bricklink.h"
 
@@ -23,7 +25,7 @@ class CItemTypeCombo : public QObject {
 	Q_OBJECT
 
 public:
-	CItemTypeCombo ( QComboBox *cb, bool onlywithinv = false )
+    CItemTypeCombo ( QComboBox *cb, bool onlywithinv = false )
 		: QObject ( cb ), m_cb ( cb )
 	{
 		connect ( cb, SIGNAL( activated ( int )), this, SLOT( cbActivated ( int )));
@@ -32,24 +34,24 @@ public:
 
 	void reset ( bool onlywithinv = false )
 	{
-		m_cb-> listBox ( )-> clear ( );
+        m_map. clear ( );
+        m_cb-> clear ( );
 
-		for ( QIntDictIterator<BrickLink::ItemType> it ( BrickLink::inst ( )-> itemTypes ( )); it. current ( ); ++it ) {
-			if ( !onlywithinv || it. current ( )-> hasInventories ( ))
-				(void) new MyListItem ( m_cb, it. current ( ));
+        for ( QHashIterator<int, BrickLink::ItemType *> it ( BrickLink::inst ( )-> itemTypes ( )); it. hasNext ( ); ) {
+            it.next ( );
+            if ( !onlywithinv || it. value ( )-> hasInventories ( ))
+                m_map.insert(it.value ( )-> name ( ), it.value ( ));
 		}
-		m_cb-> listBox ( )-> sort ( );
+
+        foreach (QString name, m_map.keys()) {
+            m_cb->addItem(name);
+        }
 	}
 
 	void setCurrentItemType ( const BrickLink::ItemType *it )
 	{
-		for ( uint i = 0; i < m_cb-> listBox ( )-> count ( ); i++ ) {
-			if ( index2type ( i ) == it ) {
-				m_cb-> setCurrentItem ( i );
-				break;
-			}
-		}
-	}
+        m_cb->setCurrentItem(m_cb->findText(it->name()));
+    }
 
 	const BrickLink::ItemType *currentItemType ( ) const
 	{
@@ -69,24 +71,13 @@ private:
 	const BrickLink::ItemType *index2type ( int i ) const
 	{
 		if (( i >= 0 ) && ( i < m_cb-> count ( )))
-			return ( static_cast <MyListItem *> ( m_cb-> listBox ( )-> item ( i ))-> itemType ( ));
+            return ( m_map[m_cb->itemText(i)]);
 		else
 			return 0;
-	}
+    }
 
-
-	class MyListItem : public QListBoxText {
-	public:
-		MyListItem ( QComboBox *combo, const BrickLink::ItemType *it )
-			: QListBoxText ( combo-> listBox ( ), it-> name ( )), m_item_type ( it ) { }
-
-		const BrickLink::ItemType *itemType ( ) { return m_item_type; }
-
-	private:
-		const BrickLink::ItemType *m_item_type;
-	};
-
-	QComboBox *m_cb;
+    QComboBox *m_cb;
+    QMap<QString, BrickLink::ItemType*> m_map;
 };
 
 #endif

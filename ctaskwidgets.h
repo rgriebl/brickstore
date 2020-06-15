@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -14,7 +16,10 @@
 #ifndef __CTASKWIDGETS_H__
 #define __CTASKWIDGETS_H__
 
-#include <qwidgetstack.h>
+#include <QStackedWidget>
+//Added by qt3to4:
+#include <QEvent>
+#include <QLabel>
 
 #include "cdocument.h"
 #include "cappearsinwidget.h"
@@ -65,7 +70,7 @@ protected:
 	void fixParentDockWindow ( );
 
 private slots:
-	void setOrientation ( Orientation o );
+	void setOrientation ( Qt::Orientation o );
 
 private:
 	CDocument *m_doc;
@@ -77,11 +82,11 @@ private:
 // ----------------------------------------------------------------------
 
 
-class CTaskInfoWidget : public QWidgetStack {
+class CTaskInfoWidget : public QStackedWidget {
 	Q_OBJECT
 
 public:
-	CTaskInfoWidget ( QWidget *parent, const char *name = 0 );
+    CTaskInfoWidget (QWidget *parent, const char *name = 0);
 
 protected slots:
 	void documentUpdate ( CDocument *doc );

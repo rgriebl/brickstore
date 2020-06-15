@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -12,14 +14,16 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 #include <qlabel.h>
-#include <qbuttongroup.h>
+#include <q3buttongroup.h>
 #include <qradiobutton.h>
 #include <qclipboard.h>
 #include <qpushbutton.h>
 #include <qapplication.h>
-#include <qheader.h>
-#include <qlistview.h>
+#include <q3header.h>
+#include <q3listview.h>
 #include <qlayout.h>
+//Added by qt3to4:
+#include <QPixmap>
 
 #include "cconfig.h"
 #include "cframework.h"
@@ -31,10 +35,10 @@
 #include "dlgsubtractitemimpl.h"
 
 
-class DocListItem : public QListViewItem {
+class DocListItem : public Q3ListViewItem {
 public:
-	DocListItem ( QListView *lv, CWindow *w )
-		: QListViewItem ( lv ), m_window ( w )
+	DocListItem ( Q3ListView *lv, CWindow *w )
+		: Q3ListViewItem ( lv ), m_window ( w )
 	{ }
 
 	virtual QString text ( int /*col*/ ) const
@@ -57,20 +61,23 @@ private:
 };
 
 DlgSubtractItemImpl::DlgSubtractItemImpl ( const QString &headertext, CWindow *parent, const char *name, bool modal, int fl )
-	: DlgSubtractItem ( parent, name, modal, fl )
+    : DlgSubtractItem ( parent, name, modal, (Qt::WindowType)fl )
 {
 	m_window = parent;
 	//setCaption ( caption ( ). arg ( parent-> caption ( )));
 	w_header-> setText ( headertext );
 
-	connect ( w_doc_list, SIGNAL( doubleClicked ( QListViewItem *, const QPoint &, int )), this, SLOT( docSelected ( QListViewItem * )));
+	connect ( w_doc_list, SIGNAL( doubleClicked ( Q3ListViewItem *, const QPoint &, int )), this, SLOT( docSelected ( Q3ListViewItem * )));
 	
-	QPtrList <CWindow> list = CFrameWork::inst ( )-> allWindows ( );
+    QList <CWindow *> list = CFrameWork::inst ( )-> allWindows ( );
+    QListIterator<CWindow *> i(list);
 
-	for ( QPtrListIterator <CWindow> it ( list ); it. current ( ); ++it ) {
-		if ( it.current ( ) != parent )
-			(void) new DocListItem ( w_doc_list, it. current ( ));
-	}
+    while (i.hasNext()) {
+        CWindow *w = i.next();
+        if (w != parent) {
+            (void) new DocListItem ( w_doc_list, w);
+        }
+    }
 
 	w_doc_list-> header ( )-> hide ( );
 
@@ -95,7 +102,7 @@ DlgSubtractItemImpl::DlgSubtractItemImpl ( const QString &headertext, CWindow *p
 		w_ok-> setEnabled ( false );
 }
 
-void DlgSubtractItemImpl::docSelected ( QListViewItem *item )
+void DlgSubtractItemImpl::docSelected ( Q3ListViewItem *item )
 {
 	if ( item )
 		w_ok-> animateClick ( );

@@ -1,4 +1,6 @@
-<!DOCTYPE TS><TS>
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.0">
 <context>
     <name>BrickLink</name>
     <message>
@@ -92,11 +94,11 @@
     </message>
     <message>
         <source>Visit %1, or send an email to %2</source>
-        <translation>Bezoek %1, of stuur een email naar %2</translation>
+        <translation type="obsolete">Bezoek %1, of stuur een email naar %2</translation>
     </message>
     <message>
-        <source>BrickStore is currently running in &lt;b&gt;Demo&lt;/b&gt; mode.&lt;br /&gt;&lt;br /&gt;The complete functionality is accessible, but this reminder will pop up every 20 minutes.&lt;br /&gt;&lt;br /&gt;You can change the mode of operation at anytime via &lt;b&gt;Help &gt; Registration...&lt;/b&gt;</source>
-        <translation>BrickStore draait momenteel in &lt;b&gt;Demo&lt;/b&gt; modus.&lt;br /&gt;&lt;br /&gt;De complete functionaliteit is beschikbaar, maar deze herinnering zal elke 20 minuten terugkomen.&lt;br /&gt;&lt;br /&gt;U kunt op elk moment wisselen tussen de verschillende modi via &lt;b&gt;Help &gt; Registratie...&lt;/b&gt;</translation>
+        <source>BrickStock is currently running in &lt;b&gt;Demo&lt;/b&gt; mode.&lt;br /&gt;&lt;br /&gt;The complete functionality is accessible, but this reminder will pop up every 20 minutes.&lt;br /&gt;&lt;br /&gt;You can change the mode of operation at anytime via &lt;b&gt;Help &gt; Registration...&lt;/b&gt;</source>
+        <translation>BrickStock draait momenteel in &lt;b&gt;Demo&lt;/b&gt; modus.&lt;br /&gt;&lt;br /&gt;De complete functionaliteit is beschikbaar, maar deze herinnering zal elke 20 minuten terugkomen.&lt;br /&gt;&lt;br /&gt;U kunt op elk moment wisselen tussen de verschillende modi via &lt;b&gt;Help &gt; Registratie...&lt;/b&gt;</translation>
     </message>
     <message>
         <source>The program has to be restarted to activate the Demo mode.</source>
@@ -157,8 +159,8 @@
         <translation>Gedetailleerde lijst van aanpassingen</translation>
     </message>
     <message>
-        <source>the BrickStore homepage</source>
-        <translation>de BrickStore homepage</translation>
+        <source>the BrickStock homepage</source>
+        <translation>de BrickStock homepage</translation>
     </message>
     <message>
         <source>&lt;b&gt;Please note:&lt;/b&gt; Your currently installed version is flagged as defective. Please visit %1 to find out the exact cause.</source>
@@ -176,8 +178,8 @@
         <translation>Inventaris bestanden</translation>
     </message>
     <message>
-        <source>BrickStore XML Data</source>
-        <translation>BrickStore XML gegevens</translation>
+        <source>BrickStock XML Data</source>
+        <translation>BrickStock XML gegevens</translation>
     </message>
     <message>
         <source>BrikTrak Inventory</source>
@@ -284,8 +286,8 @@
         <translation>Bestand exporteren</translation>
     </message>
     <message>
-        <source>BrickStore has switched to a new file format (.bsx - BrickStore XML).&lt;br /&gt;&lt;br /&gt;Your document has been automatically imported and it will be converted as soon as you save it.</source>
-        <translation>BrickStore is overgestapt op een nieuw bestandsformaat (.bsx - BrickStore XML).&lt;br /&gt;&lt;br /&gt;Uw document is automatisch geïmporteerd en zal worden geconverteerd zodra U het opslaat.</translation>
+        <source>BrickStock has switched to a new file format (.bsx - BrickStock XML).&lt;br /&gt;&lt;br /&gt;Your document has been automatically imported and it will be converted as soon as you save it.</source>
+        <translation>BrickStock is overgestapt op een nieuw bestandsformaat (.bsx - BrickStock XML).&lt;br /&gt;&lt;br /&gt;Uw document is automatisch geïmporteerd en zal worden geconverteerd zodra U het opslaat.</translation>
     </message>
     <message>
         <source>Reset differences</source>
@@ -967,6 +969,10 @@
         <comment>File|Import BrickLink Wanted List</comment>
         <translation></translation>
     </message>
+    <message>
+        <source>Windows</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>CImportBLCart</name>
@@ -1215,52 +1221,28 @@
         <translation></translation>
     </message>
     <message>
-        <source>contains</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>doesn&apos;t contain</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>is</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>isn&apos;t</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>begins with</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>ends with</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>and</source>
-        <translation>en</translation>
+        <translation type="obsolete">en</translation>
     </message>
     <message>
         <source>or</source>
-        <translation>of</translation>
+        <translation type="obsolete">of</translation>
     </message>
     <message>
         <source>All</source>
-        <translation>Alles</translation>
+        <translation type="obsolete">Alles</translation>
     </message>
     <message>
         <source>All Prices</source>
-        <translation>Alle prijzen</translation>
+        <translation type="obsolete">Alle prijzen</translation>
     </message>
     <message>
         <source>All Texts</source>
-        <translation>Alle teksten</translation>
+        <translation type="obsolete">Alle teksten</translation>
     </message>
     <message>
         <source>All Quantities</source>
-        <translation>Alle aantallen</translation>
+        <translation type="obsolete">Alle aantallen</translation>
     </message>
 </context>
 <context>
@@ -2390,8 +2372,8 @@
         <translation>Registratie</translation>
     </message>
     <message>
-        <source>&lt;b&gt;BrickStore&lt;/b&gt; supports three modes of operation:</source>
-        <translation>&lt;b&gt;BrickStore&lt;/b&gt; ondersteunt drie verschillende werkingsmodi:</translation>
+        <source>&lt;b&gt;BrickStock&lt;/b&gt; supports three modes of operation:</source>
+        <translation>&lt;b&gt;BrickStock&lt;/b&gt; ondersteunt drie verschillende werkingsmodi:</translation>
     </message>
     <message>
         <source>I do not need all the BrickLink Seller features (no reminders and no registration required).</source>
@@ -2418,8 +2400,8 @@
         <translation>Sleutel</translation>
     </message>
     <message>
-        <source>I want to use the full version (no reminders, but you need a &lt;a href=&quot;http://brickforge.de/software/brickstore&quot;&gt;valid registration key&lt;/a&gt;).</source>
-        <translation>Ik wil de volledige versie gebruiken (geen herinneringen, maar U heeft een &lt;a href=&quot;http://brickforge.de/software/brickstore&quot;&gt;geldige registratie sleutel&lt;/a&gt; nodig).</translation>
+        <source>I want to use the full version (no reminders, but you need a &lt;a href=&quot;http://brickforge.de/software/brickstock&quot;&gt;valid registration key&lt;/a&gt;).</source>
+        <translation>Ik wil de volledige versie gebruiken (geen herinneringen, maar U heeft een &lt;a href=&quot;http://brickforge.de/software/brickstock&quot;&gt;geldige registratie sleutel&lt;/a&gt; nodig).</translation>
     </message>
     <message>
         <source>You can change the mode of operation at anytime via &lt;b&gt;Help &gt; Registration...&lt;/b&gt;</source>
@@ -2757,6 +2739,57 @@
     <message>
         <source>%1</source>
         <translation></translation>
+    </message>
+</context>
+<context>
+    <name>FilterWidget</name>
+    <message>
+        <source>All</source>
+        <translation type="unfinished">Alles</translation>
+    </message>
+    <message>
+        <source>All Prices</source>
+        <translation type="unfinished">Alle prijzen</translation>
+    </message>
+    <message>
+        <source>All Texts</source>
+        <translation type="unfinished">Alle teksten</translation>
+    </message>
+    <message>
+        <source>All Quantities</source>
+        <translation type="unfinished">Alle aantallen</translation>
+    </message>
+    <message>
+        <source>contains</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>doesn&apos;t contain</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>is</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>isn&apos;t</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>begins with</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>ends with</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>and</source>
+        <translation type="unfinished">en</translation>
+    </message>
+    <message>
+        <source>or</source>
+        <translation type="unfinished">of</translation>
     </message>
 </context>
 </TS>

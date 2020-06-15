@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -15,6 +17,8 @@
 #define __CPROGRESSDIALOG_H__
 
 #include <qdialog.h>
+//Added by qt3to4:
+#include <QLabel>
 
 #include "ctransfer.h"
 
@@ -46,7 +50,7 @@ public:
 	CTransfer::Job *job ( ) const;
 	bool hasErrors ( ) const;
 
-	void layout ( );
+    void setSize ( );
 
 signals:
 	void transferFinished ( );
@@ -65,7 +69,7 @@ private:
 private:
 	QLabel *m_header;
 	CUrlLabel *m_message;
-	QProgressBar *m_progress;
+    QProgressBar *m_progress;
 	QWidget *m_progress_container;
 	QPushButton *m_ok;
 	QPushButton *m_cancel;

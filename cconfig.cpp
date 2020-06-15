@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -16,6 +18,7 @@
 
 #include <qglobal.h>
 #include <qdir.h>
+#include <qdatetime.h>
 
 #if defined( Q_WS_WIN )
 #include <windows.h>
@@ -44,9 +47,9 @@ static inline Q_INT32 mkver ( int a, int b, int c )
 
 
 CConfig::CConfig ( )
-	: QObject ( ), QSettings ( )
+    : QSettings ( )
 {
-	setPath ( "softforge.de", "BrickStore", QSettings::User );
+    setPath ( "patrickbrans.com", "BrickStock", QSettings::UserScope );
 
 	m_show_input_errors = readBoolEntry ( "/General/ShowInputErrors", true );
 	m_weight_system = ( readEntry ( "/General/WeightSystem", "metric" ) == "metric" ) ? WeightMetric : WeightImperial;
@@ -69,10 +72,10 @@ CConfig *CConfig::inst ( )
 #if defined( Q_OS_UNIX ) && !defined( Q_OS_MAC )
 		// config dirs have to exist, otherwise Qt falls back to the default location (~/.qt/...)
 		QDir d = QDir::homeDirPath ( );
-		if ( !d. cd ( ".softforge" )) {
+        if ( !d. cd ( ".patrickbrans" )) {
 			d = QDir::homeDirPath ( );
-			if ( !d. mkdir ( ".softforge" ))
-				qWarning ( "Could not create config directory: ~/.softforge" );
+            if ( !d. mkdir ( ".patrickbrans" ))
+                qWarning ( "Could not create config directory: ~/.patrickbrans" );
 		}
 #endif
 		s_inst = new CConfig ( );
@@ -80,14 +83,14 @@ CConfig *CConfig::inst ( )
 	return s_inst;
 }
 
-QString CConfig::registrationName ( ) const
+QString CConfig::registrationName ( )
 {
-	return readEntry ( "/General/Registration/Name" );
+    return readEntry ( "/General/Registration/Name" );
 }
 
-QString CConfig::registrationKey ( ) const
+QString CConfig::registrationKey ( )
 {
-	return readEntry ( "/General/Registration/Key" );
+    return readEntry ( "/General/Registration/Key" );
 }
 
 bool CConfig::checkRegistrationKey ( const QString &name, const QString &key )
@@ -102,10 +105,10 @@ bool CConfig::checkRegistrationKey ( const QString &name, const QString &key )
 	if ( name. isEmpty ( ) || key. isEmpty ( ))
 		return false;
 
-	QByteArray src;
-	QDataStream ss ( src, IO_WriteOnly );
+    QByteArray src;
+    QDataStream ss ( &src, QIODevice::WriteOnly );
 	ss. setByteOrder ( QDataStream::LittleEndian );
-	ss << ( QString( BS_REGKEY ) + name );
+    ss << ( QString( BS_REGKEY ) + name );
 
 	QByteArray sha1 = sha1::calc ( src. data ( ) + 4, src. size ( ) - 4 );
 
@@ -114,7 +117,7 @@ bool CConfig::checkRegistrationKey ( const QString &name, const QString &key )
 	
 	QString result;
 	Q_UINT64 serial = 0;
-	QDataStream ds ( sha1, IO_ReadOnly );
+    QDataStream ds ( &sha1, QIODevice::ReadOnly );
 	ds >> serial;
 	
 	// 32bit without 0/O and 5/S
@@ -128,6 +131,9 @@ bool CConfig::checkRegistrationKey ( const QString &name, const QString &key )
 	result. insert ( 8, '-' );
 	result. insert ( 4, '-' );
 	
+    if ( name == "BrickStockTest" && QDateTime::currentDateTime().secsTo(QDateTime(QDate(2014, 02, 15), QTime(0, 0))) < 0)
+        return false;
+
 	return ( result == key );
 #endif	
 }
@@ -151,8 +157,8 @@ CConfig::Registration CConfig::setRegistration ( const QString &name, const QStr
 	else
 		m_registration = checkRegistrationKey ( name, key ) ? Full : Personal;
 
-	writeEntry ( "/General/Registration/Name", name );
-	writeEntry ( "/General/Registration/Key", key );
+    writeEntry ( "/General/Registration/Name", name );
+    writeEntry ( "/General/Registration/Key", key );
 
 	if ( old != m_registration )
 		emit registrationChanged ( m_registration );
@@ -167,19 +173,19 @@ QString CConfig::obscure ( const QString &str )
 {
 #if defined( Q_WS_WIN )
 	// win9x registries cannot store unicode values
-	if ( QApplication::winVersion ( ) & Qt::WV_DOS_based )
+	if ( QApplication::winVersion ( ) & QSysInfo::WV_DOS_based )
 		return str;
 #endif
 
 	QString result;
 	const QChar *unicode = str. unicode ( );
-	for ( uint i = 0; i < str. length ( ); i++ )
+    for ( int i = 0; i < str. length ( ); i++ )
 		result += ( unicode [i]. unicode ( ) < 0x20 ) ? unicode [i] :
 	QChar ( 0x1001F - unicode [i]. unicode ( ));
 	return result;
 }
 
-QString CConfig::readPasswordEntry ( const QString &key ) const
+QString CConfig::readPasswordEntry ( const QString &key )
 {
 	return obscure ( readEntry ( key, QString ( "" )));
 }
@@ -230,7 +236,7 @@ void CConfig::upgrade ( int vmajor, int vminor, int vrev )
 	}
 }
 
-QDateTime CConfig::lastDatabaseUpdate ( ) const
+QDateTime CConfig::lastDatabaseUpdate ( )
 {
 	QDateTime dt;
 
@@ -240,13 +246,13 @@ QDateTime CConfig::lastDatabaseUpdate ( ) const
 	return dt;
 }
 
-void CConfig::setLastDatabaseUpdate ( const QDateTime &dt )
+void CConfig::setLastDatabaseUpdate ( QDateTime dt )
 {
 	time_t tt = dt. isValid ( ) ? dt. toTime_t ( ) : 0;
 	writeEntry ( "/BrickLink/LastDBUpdate", int( tt ));
 }
 
-bool CConfig::closeEmptyDocuments ( ) const
+bool CConfig::closeEmptyDocuments ( )
 {
 	return readBoolEntry ( "/General/CloseEmptyDocs", false );
 }
@@ -276,7 +282,7 @@ void CConfig::setLDrawDir ( const QString &dir )
 	writeEntry ( "/General/LDrawDir", dir );
 }
 
-QString CConfig::lDrawDir ( ) const
+QString CConfig::lDrawDir ( )
 {
 	QString dir = readEntry ( "/General/LDrawDir" );
 
@@ -341,7 +347,7 @@ QString CConfig::lDrawDir ( ) const
 	return dir;
 }
 
-QString CConfig::documentDir ( ) const
+QString CConfig::documentDir ( )
 {
 	QString dir = readEntry ( "/General/DocDir" );
 
@@ -382,17 +388,17 @@ void CConfig::setDocumentDir ( const QString &dir )
 }
 
 
-bool CConfig::useProxy ( ) const
+bool CConfig::useProxy ( )
 {
 	return readBoolEntry ( "/Internet/UseProxy", false );
 }
 
-QString CConfig::proxyName ( ) const
+QString CConfig::proxyName ( )
 {
 	return readEntry ( "/Internet/ProxyName" );
 }
 
-int CConfig::proxyPort ( ) const
+int CConfig::proxyPort ( )
 {
 	return readNumEntry ( "/Internet/ProxyPort", 8080 );
 }
@@ -413,7 +419,7 @@ void CConfig::setProxy ( bool b, const QString &name, int port )
 }
 
 
-QString CConfig::dataDir ( ) const
+QString CConfig::dataDir ( )
 {
 	return readEntry ( "/BrickLink/DataDir" );
 }
@@ -423,7 +429,7 @@ void CConfig::setDataDir ( const QString &dir )
 	writeEntry ( "/BrickLink/DataDir", dir );
 }
 
-QString CConfig::language ( ) const
+QString CConfig::language ( )
 {
 	return readEntry ( "/General/Locale" );
 }
@@ -504,7 +510,7 @@ void CConfig::setBlUpdateIntervals ( int pic, int pg )
 }
 
 
-QString CConfig::blLoginUsername ( ) const
+QString CConfig::blLoginUsername ( )
 {
 	return readEntry ( "/BrickLink/Login/Username" );
 }
@@ -515,7 +521,7 @@ void CConfig::setBlLoginUsername ( const QString &name )
 }
 
 
-QString CConfig::blLoginPassword ( ) const
+QString CConfig::blLoginPassword ( )
 {
 	return readPasswordEntry ( "/BrickLink/Login/Password" );
 }
@@ -526,7 +532,7 @@ void CConfig::setBlLoginPassword ( const QString &pass )
 }
 
 
-bool CConfig::onlineStatus ( ) const
+bool CConfig::onlineStatus ( )
 {
 	return readBoolEntry ( "/Internet/Online", true );
 }

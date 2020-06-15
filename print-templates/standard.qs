@@ -103,7 +103,7 @@ function pageHeader ( page, ps )
 	f1. bold = true;
 
 	page. font = f1;
-	page. drawText ( ps. x, y, ps. w / 2, h, page.AlignLeft | page.AlignVCenter,  "BrickStore" );
+	page. drawText ( ps. x, y, ps. w / 2, h, page.AlignLeft | page.AlignVCenter,  "BrickStock" );
 
 	var f2 = new Font ( );
 	f2. family = "Arial";

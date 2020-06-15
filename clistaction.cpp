@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -12,14 +14,18 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 #include <qstringlist.h>
-#include <qpopupmenu.h>
+#include <q3popupmenu.h>
+//Added by qt3to4:
+#include <Q3ActionGroup>
+#include <Q3ValueList>
 
 #include "clistaction.h"
 
 
-CListAction::CListAction ( bool use_numbers, QObject *parent, const char *name )
-	: QActionGroup ( parent, name )
+CListAction::CListAction ( bool use_numbers, QWidget *parent, const char *name )
+    : QMenu ( name, parent )
 {
+    setObjectName( name );
 	m_use_numbers = use_numbers;
 	m_list = 0;
 	m_provider = 0;
@@ -53,68 +59,16 @@ const QStringList *CListAction::list ( ) const
 	return m_list;
 }
 
-bool CListAction::addTo ( QWidget *w )
-{
-	if ( w-> inherits ( "QPopupMenu" )) {
-		QPopupMenu *sub;
-
-		if ( usesDropDown ( )) {
-			sub = new QPopupMenu ( w );
-			int id = static_cast <QPopupMenu *> ( w )-> insertItem ( menuText ( ), sub );
-
-			m_update_menutexts. insert ( static_cast <QPopupMenu *> ( w ), id );
-		}
-		else {
-			sub = static_cast <QPopupMenu *> ( w );
-			m_id_map [sub]. clear ( );
-		}
-
-		connect ( sub, SIGNAL( aboutToShow ( )), this, SLOT( refreshMenu ( )));
-		return true;
-	}
-	return false;
-}
-
-bool CListAction::removeFrom ( QWidget *w )
-{
-	if ( w-> inherits ( "QPopupMenu" )) {
-		if ( usesDropDown ( ))
-			m_update_menutexts. erase ( static_cast <QPopupMenu *> ( w ));
-		else
-			m_id_map. erase ( static_cast <QPopupMenu *> ( w ));
-	}
-	return true;
-}
-
-void CListAction::setText ( const QString &txt )
-{
-	QActionGroup::setText ( txt );
-
-	for ( QMap <QPopupMenu *, int>::const_iterator it = m_update_menutexts. begin ( ); it != m_update_menutexts. end ( ); ++it )
-		it. key ( )-> changeItem ( it. data ( ), menuText ( ));
-}
-
 void CListAction::refreshMenu ( )
 {
 	const QObject *o = sender ( );
 
-	if ( o-> inherits ( "QPopupMenu" )) {
-		QPopupMenu *sub = static_cast <QPopupMenu *> ( const_cast <QObject *> ( o ));
-
-		bool dd = usesDropDown ( );
-
-		if ( dd )
-			sub-> clear ( );
-		else {
-			QValueVector<int> &v = m_id_map [sub];
-
-			for ( QValueVector<int>::iterator it = v. begin ( ); it != v. end ( ); ++it )
-				sub-> removeItem ( *it );
-			v. clear ( );
-		}
+    if ( o-> inherits ( "QMenu" )) {
+        QMenu *sub = static_cast <QMenu *> ( const_cast <QObject *> ( o ));
+        sub-> clear ( );
 
 		int active = -1;
-		QValueList <int> custom_ids;
+		Q3ValueList <int> custom_ids;
 		QStringList sl = m_list ? *m_list : ( m_provider ? m_provider-> list ( active, custom_ids ) : QStringList ( ));
 
 		if ( !sl. isEmpty ( )) {
@@ -134,9 +88,6 @@ void CListAction::refreshMenu ( )
 
 				if ( i == active )
 					sub-> setItemChecked ( i, true );
-
-				if ( !dd )
-					m_id_map [sub]. push_back ( id );
 			}
 		}
 	}

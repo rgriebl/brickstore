@@ -1,4 +1,6 @@
-<!DOCTYPE TS><TS>
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.0">
 <context>
     <name>BrickLink</name>
     <message>
@@ -84,7 +86,7 @@
     </message>
     <message>
         <source>Visit %1, or send an email to %2</source>
-        <translation>Besuchen Sie %1 order senden Sie eine E-Mail an %2</translation>
+        <translation type="obsolete">Besuchen Sie %1 order senden Sie eine E-Mail an %2</translation>
     </message>
     <message>
         <source>Legal Info</source>
@@ -95,8 +97,8 @@
         <translation>Systeminformationen</translation>
     </message>
     <message>
-        <source>BrickStore is currently running in &lt;b&gt;Demo&lt;/b&gt; mode.&lt;br /&gt;&lt;br /&gt;The complete functionality is accessible, but this reminder will pop up every 20 minutes.&lt;br /&gt;&lt;br /&gt;You can change the mode of operation at anytime via &lt;b&gt;Help &gt; Registration...&lt;/b&gt;</source>
-        <translation>BrickStore läuft momentan im &lt;b&gt;Demo&lt;/b&gt; Modus.&lt;br /&gt;&lt;br /&gt;Die gesamte Funktionalität steht zur Verfügung - es erscheint jedoch diese Erinnerung alle 20 Minuten.&lt;br /&gt;&lt;br /&gt;Der Betriebsmodus kann jederzeit geändert werden: &lt;b&gt;Hilfe &gt; Registrierung...&lt;/b&gt;</translation>
+        <source>BrickStock is currently running in &lt;b&gt;Demo&lt;/b&gt; mode.&lt;br /&gt;&lt;br /&gt;The complete functionality is accessible, but this reminder will pop up every 20 minutes.&lt;br /&gt;&lt;br /&gt;You can change the mode of operation at anytime via &lt;b&gt;Help &gt; Registration...&lt;/b&gt;</source>
+        <translation>BrickStock läuft momentan im &lt;b&gt;Demo&lt;/b&gt; Modus.&lt;br /&gt;&lt;br /&gt;Die gesamte Funktionalität steht zur Verfügung - es erscheint jedoch diese Erinnerung alle 20 Minuten.&lt;br /&gt;&lt;br /&gt;Der Betriebsmodus kann jederzeit geändert werden: &lt;b&gt;Hilfe &gt; Registrierung...&lt;/b&gt;</translation>
     </message>
     <message>
         <source>The program has to be restarted to activate the Demo mode.</source>
@@ -184,8 +186,8 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
         <translation>Ausführliche Liste der Änderungen</translation>
     </message>
     <message>
-        <source>the BrickStore homepage</source>
-        <translation>die BrickStore Homepage</translation>
+        <source>the BrickStock homepage</source>
+        <translation>die BrickStock Homepage</translation>
     </message>
     <message>
         <source>&lt;b&gt;Please note:&lt;/b&gt; Your currently installed version is flagged as defective. Please visit %1 to find out the exact cause.</source>
@@ -199,8 +201,8 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
         <translation>Unbenannt</translation>
     </message>
     <message>
-        <source>BrickStore XML Data</source>
-        <translation>BrickStore XML Daten</translation>
+        <source>BrickStock XML Data</source>
+        <translation>BrickStock XML Daten</translation>
     </message>
     <message>
         <source>All Files</source>
@@ -311,8 +313,8 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
         <translation>Inventarlisten</translation>
     </message>
     <message>
-        <source>BrickStore has switched to a new file format (.bsx - BrickStore XML).&lt;br /&gt;&lt;br /&gt;Your document has been automatically imported and it will be converted as soon as you save it.</source>
-        <translation>Das Dateiformat von BrickStore hat sich geändert (.bsx - BrickStore XML).&lt;br /&gt;&lt;br /&gt;Das Dokument wurde automatisch importiert und es wird beim Abspeichern in das neue Format konvertiert.</translation>
+        <source>BrickStock has switched to a new file format (.bsx - BrickStock XML).&lt;br /&gt;&lt;br /&gt;Your document has been automatically imported and it will be converted as soon as you save it.</source>
+        <translation>Das Dateiformat von BrickStock hat sich geändert (.bsx - BrickStock XML).&lt;br /&gt;&lt;br /&gt;Das Dokument wurde automatisch importiert und es wird beim Abspeichern in das neue Format konvertiert.</translation>
     </message>
     <message>
         <source>Reset differences</source>
@@ -686,7 +688,7 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>About...</source>
-        <translation>Über BrickStore...</translation>
+        <translation>Über BrickStock...</translation>
     </message>
     <message>
         <source>Standard MDI Mode</source>
@@ -999,6 +1001,10 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
         <comment>File|Import BrickLink Wanted List</comment>
         <translation></translation>
     </message>
+    <message>
+        <source>Windows</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>CImportBLCart</name>
@@ -1248,51 +1254,51 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     </message>
     <message>
         <source>contains</source>
-        <translation>enthält</translation>
+        <translation type="obsolete">enthält</translation>
     </message>
     <message>
         <source>doesn&apos;t contain</source>
-        <translation>enthält nicht</translation>
+        <translation type="obsolete">enthält nicht</translation>
     </message>
     <message>
         <source>is</source>
-        <translation>ist</translation>
+        <translation type="obsolete">ist</translation>
     </message>
     <message>
         <source>isn&apos;t</source>
-        <translation>ist nicht</translation>
+        <translation type="obsolete">ist nicht</translation>
     </message>
     <message>
         <source>begins with</source>
-        <translation>beginnt mit</translation>
+        <translation type="obsolete">beginnt mit</translation>
     </message>
     <message>
         <source>ends with</source>
-        <translation>endet mit</translation>
+        <translation type="obsolete">endet mit</translation>
     </message>
     <message>
         <source>and</source>
-        <translation>und</translation>
+        <translation type="obsolete">und</translation>
     </message>
     <message>
         <source>or</source>
-        <translation>oder</translation>
+        <translation type="obsolete">oder</translation>
     </message>
     <message>
         <source>All</source>
-        <translation>Alle</translation>
+        <translation type="obsolete">Alle</translation>
     </message>
     <message>
         <source>All Prices</source>
-        <translation>Alle Preise</translation>
+        <translation type="obsolete">Alle Preise</translation>
     </message>
     <message>
         <source>All Texts</source>
-        <translation>Alle Texte</translation>
+        <translation type="obsolete">Alle Texte</translation>
     </message>
     <message>
         <source>All Quantities</source>
-        <translation>Alle Mengen</translation>
+        <translation type="obsolete">Alle Mengen</translation>
     </message>
 </context>
 <context>
@@ -2422,8 +2428,8 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
         <translation>Registrierung</translation>
     </message>
     <message>
-        <source>&lt;b&gt;BrickStore&lt;/b&gt; supports three modes of operation:</source>
-        <translation>&lt;b&gt;BrickStore&lt;/b&gt; unterstützt drei Betriebsmodi:</translation>
+        <source>&lt;b&gt;BrickStock&lt;/b&gt; supports three modes of operation:</source>
+        <translation>&lt;b&gt;BrickStock&lt;/b&gt; unterstützt drei Betriebsmodi:</translation>
     </message>
     <message>
         <source>I do not need all the BrickLink Seller features (no reminders and no registration required).</source>
@@ -2442,8 +2448,8 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
         <translation>Schlüssel</translation>
     </message>
     <message>
-        <source>I want to use the full version (no reminders, but you need a &lt;a href=&quot;http://brickforge.de/software/brickstore&quot;&gt;valid registration key&lt;/a&gt;).</source>
-        <translation>Ich will die Vollversion nutzen (keine Erinnerungen, aber ein &lt;a href=&quot;http://brickforge.de/software/brickstore&quot;&gt;gültiger Registrierungsschlüssel&lt;/a&gt; wird benötigt).</translation>
+        <source>I want to use the full version (no reminders, but you need a &lt;a href=&quot;http://brickforge.de/software/brickstock&quot;&gt;valid registration key&lt;/a&gt;).</source>
+        <translation>Ich will die Vollversion nutzen (keine Erinnerungen, aber ein &lt;a href=&quot;http://brickforge.de/software/brickstock&quot;&gt;gültiger Registrierungsschlüssel&lt;/a&gt; wird benötigt).</translation>
     </message>
     <message>
         <source>You can change the mode of operation at anytime via &lt;b&gt;Help &gt; Registration...&lt;/b&gt;</source>
@@ -2789,6 +2795,57 @@ Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf
     <message>
         <source>%1</source>
         <translation>%1</translation>
+    </message>
+</context>
+<context>
+    <name>FilterWidget</name>
+    <message>
+        <source>All</source>
+        <translation type="unfinished">Alle</translation>
+    </message>
+    <message>
+        <source>All Prices</source>
+        <translation type="unfinished">Alle Preise</translation>
+    </message>
+    <message>
+        <source>All Texts</source>
+        <translation type="unfinished">Alle Texte</translation>
+    </message>
+    <message>
+        <source>All Quantities</source>
+        <translation type="unfinished">Alle Mengen</translation>
+    </message>
+    <message>
+        <source>contains</source>
+        <translation type="unfinished">enthält</translation>
+    </message>
+    <message>
+        <source>doesn&apos;t contain</source>
+        <translation type="unfinished">enthält nicht</translation>
+    </message>
+    <message>
+        <source>is</source>
+        <translation type="unfinished">ist</translation>
+    </message>
+    <message>
+        <source>isn&apos;t</source>
+        <translation type="unfinished">ist nicht</translation>
+    </message>
+    <message>
+        <source>begins with</source>
+        <translation type="unfinished">beginnt mit</translation>
+    </message>
+    <message>
+        <source>ends with</source>
+        <translation type="unfinished">endet mit</translation>
+    </message>
+    <message>
+        <source>and</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>or</source>
+        <translation type="unfinished">oder</translation>
     </message>
 </context>
 </TS>

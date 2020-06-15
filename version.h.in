@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -11,27 +13,30 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __BRICKSTORE__VERSION_H__
-#define __BRICKSTORE__VERSION_H__
+#ifndef __BRICKSTOCK__VERSION_H__
+#define __BRICKSTOCK__VERSION_H__
 
-#define BRICKSTORE_MAJOR    ?
-#define BRICKSTORE_MINOR    ?
-#define BRICKSTORE_PATCH    ?
+#define BRICKSTOCK_MAJOR    ?
+#define BRICKSTOCK_MINOR    ?
+#define BRICKSTOCK_PATCH    ?
 
 
 // stringification sucks :)
 #define _BS_STR(s)   _BS_STR2(s)
 #define _BS_STR2(s)  #s
 
-#define BRICKSTORE_VERSION   _BS_STR( BRICKSTORE_MAJOR ) "." _BS_STR( BRICKSTORE_MINOR ) "." _BS_STR( BRICKSTORE_PATCH )
-#define BRICKSTORE_COPYRIGHT "2004-2008 R. Griebl"
-#define BRICKSTORE_URL       "www.brickforge.de/software/brickstore"
-#define BRICKSTORE_MAIL      "brickstore@brickforge.de"
+#define BRICKSTOCK_VERSION          _BS_STR( BRICKSTOCK_MAJOR ) "." _BS_STR( BRICKSTOCK_MINOR ) "." _BS_STR( BRICKSTOCK_PATCH )
+#define BRICKSTOCK_COPYRIGHT        "2013-2014 P. Brans"
+#define BRICKSTOCK_BASE_COPYRIGHT   "2004-2008 R. Griebl"
+#define BRICKSTOCK_URL              "brickstock.patrickbrans.com"
+#define BRICKSTOCK_DB_PATH          "/brickstock-data/"
+#define BRICKSTOCK_DB_VERSION       0
+#define BRICKSTOCK_DB_NAME          "database-v%1"
 
 
 // Win32 FILEVERSION resource
 #ifdef RC_INVOKED
-#define BRICKSTORE_VERSIONINFO   _BS_STR( BRICKSTORE_MAJOR ) ", " _BS_STR( BRICKSTORE_MINOR ) ", " _BS_STR( BRICKSTORE_PATCH ) ", 0"
+#define BRICKSTOCK_VERSIONINFO   _BS_STR( BRICKSTOCK_MAJOR ) ", " _BS_STR( BRICKSTOCK_MINOR ) ", " _BS_STR( BRICKSTOCK_PATCH ) ", 0"
 #endif
 
 #endif

@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -17,8 +19,7 @@
 #include <qsettings.h>
 #include <qobject.h>
 
-
-class CConfig : public QObject, public QSettings {
+class CConfig : public QSettings {
 	Q_OBJECT
 
 private:
@@ -38,25 +39,25 @@ public:
 		WeightImperial
 	};
 
-	QString language ( ) const;
+    QString language ( );
 	WeightSystem weightSystem ( ) const;
 
-	bool closeEmptyDocuments ( ) const;
-	QString documentDir ( ) const;
-	QString lDrawDir ( ) const;
-	QString dataDir ( ) const;
+    bool closeEmptyDocuments ( );
+    QString documentDir ( );
+    QString lDrawDir ( );
+    QString dataDir ( );
 
 	bool showInputErrors ( ) const;
 	bool simpleMode ( ) const;
-	bool onlineStatus ( ) const;
-	bool useProxy ( ) const;
-	QString proxyName ( ) const;
-	int proxyPort ( ) const;
+    bool onlineStatus ( );
+    bool useProxy ( );
+    QString proxyName ( );
+    int proxyPort ( );
 
-	QDateTime lastDatabaseUpdate ( ) const;
+    QDateTime lastDatabaseUpdate ( );
 
-	QString blLoginUsername ( ) const;
-	QString blLoginPassword ( ) const;
+    QString blLoginUsername ( );
+    QString blLoginPassword ( );
 	void blUpdateIntervals ( int &pic, int &pg ) const;
 	void blUpdateIntervalsDefaults ( int &picd, int &pgd ) const;
 
@@ -70,8 +71,8 @@ public:
 
 	Registration registration ( ) const;
 	Registration setRegistration ( const QString &name, const QString &key );
-	QString registrationName ( ) const;
-	QString registrationKey ( ) const;
+    QString registrationName ( );
+    QString registrationKey ( );
 	bool checkRegistrationKey ( const QString &name, const QString &key );
 
 public slots:
@@ -88,7 +89,7 @@ public slots:
 	void setOnlineStatus ( bool b );
 	void setProxy ( bool b, const QString &name, int port );
 
-	void setLastDatabaseUpdate ( const QDateTime &dt );
+    void setLastDatabaseUpdate (QDateTime dt );
 
 	void setBlLoginUsername ( const QString &name );
 	void setBlLoginPassword ( const QString &pass );
@@ -105,7 +106,7 @@ signals:
 	void registrationChanged ( CConfig::Registration r );
 
 protected:
-	QString readPasswordEntry ( const QString &key ) const;
+    QString readPasswordEntry ( const QString &key );
 	bool writePasswordEntry ( const QString &key, const QString &password );
 
 private:

@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -39,9 +41,9 @@ try {
 	while ( !istream. AtEndOfStream ) {
 		var str = istream. ReadLine ( );
 
-		str = str. replace ( /(^#define BRICKSTORE_MAJOR  *)[^ ]*$/, "$1" + release [0] );
-		str = str. replace ( /(^#define BRICKSTORE_MINOR  *)[^ ]*$/, "$1" + release [1] );
-		str = str. replace ( /(^#define BRICKSTORE_PATCH  *)[^ ]*$/, "$1" + release [2] );
+		str = str. replace ( /(^#define BRICKSTOCK_MAJOR  *)[^ ]*$/, "$1" + release [0] );
+		str = str. replace ( /(^#define BRICKSTOCK_MINOR  *)[^ ]*$/, "$1" + release [1] );
+		str = str. replace ( /(^#define BRICKSTOCK_PATCH  *)[^ ]*$/, "$1" + release [2] );
 
 		ostream. WriteLine ( str );
 	}

@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -14,12 +16,17 @@
 #ifndef __CLISTVIEW_H__
 #define __CLISTVIEW_H__
 
-#include <qlistview.h>
+#include <q3listview.h>
 #include <qcolor.h>
 #include <qmap.h>
+//Added by qt3to4:
+#include <QEvent>
+#include <QKeyEvent>
+#include <Q3PopupMenu>
+#include <QPaintEvent>
 
 class QSettings;
-class QPopupMenu;
+class Q3PopupMenu;
 
 
 class CDisableUpdates {
@@ -36,7 +43,7 @@ private:
 
  class CListViewColumnsDialog;
 
-class CListView : public QListView {
+class CListView : public Q3ListView {
 	Q_OBJECT
 public:
 	CListView ( QWidget *parent, const char *name = 0 );
@@ -55,7 +62,7 @@ public:
 	void loadSettings ( const QMap <QString, QString> &map );
 	QMap <QString, QString> saveSettings ( ) const;
 
-	void centerItem ( const QListViewItem *item );
+	void centerItem ( const Q3ListViewItem *item );
 
 	bool gridMode ( ) const;
 	void setGridMode ( bool b );
@@ -77,7 +84,7 @@ protected slots:
 	void setColumnVisible ( int, bool visible );
 
 private slots:
-	void checkCurrentColumn ( int button, QListViewItem * item, const QPoint & pos, int c );
+	void checkCurrentColumn ( int button, Q3ListViewItem * item, const QPoint & pos, int c );
 	void configureColumns ( );
 
 private:
@@ -85,9 +92,9 @@ private:
 	void recalc_highlight_palette ( );
 	void update_column ( int, bool toggle_visible, bool toggle_available );
 	
-	QListViewItem *m_paint_above;
-	QListViewItem *m_paint_current;
-	QListViewItem *m_paint_below;
+	Q3ListViewItem *m_paint_above;
+	Q3ListViewItem *m_paint_current;
+	Q3ListViewItem *m_paint_below;
 	bool           m_painting;
 	QColor         m_alternate_background;
 
@@ -97,7 +104,7 @@ private:
 	bool           m_grid_mode;
 	int            m_current_column;
 
-	QPopupMenu *   m_header_popup;
+	Q3PopupMenu *   m_header_popup;
 	
 	struct colinfo {
 		bool m_visible   : 1;
@@ -113,32 +120,32 @@ private:
 	friend class CListViewColumnsDialog;
 };
 
-class CListViewItem : public QListViewItem {
+class CListViewItem : public Q3ListViewItem {
 public:
-	CListViewItem ( QListView *parent );
-	CListViewItem ( QListViewItem *parent );
-	CListViewItem ( QListView *parent, QListViewItem *after );
-	CListViewItem ( QListViewItem *parent, QListViewItem *after );
+	CListViewItem ( Q3ListView *parent );
+	CListViewItem ( Q3ListViewItem *parent );
+	CListViewItem ( Q3ListView *parent, Q3ListViewItem *after );
+	CListViewItem ( Q3ListViewItem *parent, Q3ListViewItem *after );
 
-	CListViewItem ( QListView *parent,
+	CListViewItem ( Q3ListView *parent,
 		QString, QString = QString::null,
 		QString = QString::null, QString = QString::null,
 		QString = QString::null, QString = QString::null,
 		QString = QString::null, QString = QString::null );
 
-	CListViewItem ( QListViewItem *parent,
+	CListViewItem ( Q3ListViewItem *parent,
 		QString, QString = QString::null,
 		QString = QString::null, QString = QString::null,
 		QString = QString::null, QString = QString::null,
 		QString = QString::null, QString = QString::null );
 
-	CListViewItem ( QListView *parent, QListViewItem *after,
+	CListViewItem ( Q3ListView *parent, Q3ListViewItem *after,
 		QString, QString = QString::null,
 		QString = QString::null, QString = QString::null,
 		QString = QString::null, QString = QString::null,
 		QString = QString::null, QString = QString::null );
 
-	CListViewItem ( QListViewItem *parent, QListViewItem *after,
+	CListViewItem ( Q3ListViewItem *parent, Q3ListViewItem *after,
 		QString, QString = QString::null,
 		QString = QString::null, QString = QString::null,
 		QString = QString::null, QString = QString::null,

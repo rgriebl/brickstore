@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -21,6 +23,11 @@
 #include <qlabel.h>
 #include <qlayout.h>
 #include <qdialog.h>
+//Added by qt3to4:
+#include <Q3BoxLayout>
+#include <Q3HBoxLayout>
+#include <Q3VBoxLayout>
+#include <Q3Frame>
 
 #include "cmessagebox.h"
 
@@ -43,9 +50,9 @@ QString CMessageBox::defaultTitle ( )
 
 int CMessageBox::msgbox ( QWidget *parent, const QString &msg, QMessageBox::Icon icon, int but0, int but1, int but2 )
 {
-	QMessageBox *mb = new QMessageBox ( s_deftitle, msg, icon, but0, but1, but2, parent ? parent : qApp-> mainWidget ( ), "brickstore_msgbox", true, WDestructiveClose );
+    QMessageBox *mb = new QMessageBox ( s_deftitle, msg, icon, but0, but1, but2, parent ? parent : qApp-> mainWidget ( ), "brickstock_msgbox", true, Qt::WDestructiveClose );
 
-	mb-> setTextFormat ( RichText );
+    mb-> setTextFormat ( Qt::RichText );
 
 	return mb-> exec ( );
 }
@@ -103,10 +110,10 @@ bool CMessageBox::getString ( QWidget *parent, const QString &text, const QStrin
 	d-> setCaption ( s_deftitle );
 
 	QLabel *wlabel = new QLabel ( text, d );
-	wlabel-> setTextFormat( QLabel::RichText );
+	wlabel-> setTextFormat( Qt::RichText );
 	QLabel *wunit = unit. isEmpty ( ) ? 0 : new QLabel ( unit, d );
-	QFrame *wline = new QFrame ( d );
-	wline-> setFrameStyle ( QFrame::HLine | QFrame::Sunken );
+	Q3Frame *wline = new Q3Frame ( d );
+	wline-> setFrameStyle ( Q3Frame::HLine | Q3Frame::Sunken );
 
 	QLineEdit *wedit = new QLineEdit ( value, d );
 	wedit-> setValidator ( validate );
@@ -122,14 +129,14 @@ bool CMessageBox::getString ( QWidget *parent, const QString &text, const QStrin
 	QPushButton *wcancel = new QPushButton ( tr( "&Cancel" ), d );
 	wcancel-> setAutoDefault ( true );
 
-	QBoxLayout *toplay = new QVBoxLayout ( d, 11, 6 );
+	Q3BoxLayout *toplay = new Q3VBoxLayout ( d, 11, 6 );
 	toplay-> addWidget ( wlabel );
 
-	QBoxLayout *midlay = new QHBoxLayout ( );
+	Q3BoxLayout *midlay = new Q3HBoxLayout ( );
 	toplay-> addLayout ( midlay );
 	toplay-> addWidget ( wline );
 
-	QBoxLayout *botlay = new QHBoxLayout ( );
+	Q3BoxLayout *botlay = new Q3HBoxLayout ( );
 	toplay-> addLayout ( botlay );
 
 	midlay-> addWidget ( wedit );

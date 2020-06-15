@@ -33,7 +33,7 @@
                 <cstring>w_title</cstring>
             </property>
             <property name="text">
-                <string>&lt;b&gt;BrickStore&lt;/b&gt; supports three modes of operation:</string>
+                <string>&lt;b&gt;BrickStock&lt;/b&gt; supports three modes of operation:</string>
             </property>
         </widget>
         <widget class="QButtonGroup">
@@ -273,7 +273,7 @@
                                 <cstring>cUrlLabel1</cstring>
                             </property>
                             <property name="text" stdset="0">
-                                <string>I want to use the full version (no reminders, but you need a &lt;a href="http://brickforge.de/software/brickstore"&gt;valid registration key&lt;/a&gt;).</string>
+                                <string>I want to use the full version (no reminders, but you need a &lt;a href="http://brickstock.patrickbrans.com/"&gt;valid registration key&lt;/a&gt;).</string>
                             </property>
                         </widget>
                         <spacer row="2" column="3">

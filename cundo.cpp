@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -14,11 +16,15 @@
 
 #include <qapplication.h>
 #include <qtoolbutton.h>
-#include <qlistbox.h>
+#include <q3listbox.h>
 #include <qlabel.h>
-#include <qpopupmenu.h>
+#include <q3popupmenu.h>
 #include <qstyle.h>
 #include <qpainter.h>
+//Added by qt3to4:
+#include <Q3Frame>
+#include <QMouseEvent>
+#include <QEvent>
 
 #include "cundo.h"
 #include "cundo_p.h"
@@ -34,7 +40,7 @@ public:
 		m_can_redo  = m_stack ? m_stack-> canRedo ( ) : false;
 		m_undo_desc = m_stack ? m_stack-> undoDescription ( ) : QString ( );
 		m_redo_desc = m_stack ? m_stack-> redoDescription ( ) : QString ( );
-		m_current   = m_stack ? m_stack-> m_current. current ( ) : 0;
+        m_current   = m_stack ? m_stack-> m_current. current ( ) : 0;
 		m_clean     = m_stack ? m_stack-> isClean ( ) : false;
 	}
 
@@ -55,7 +61,7 @@ public:
 				mask |= UndoDesc;
 			if ( m_redo_desc != stack-> redoDescription ( ))
 				mask |= RedoDesc;
-			if ( m_current != stack-> m_current. current ( ))
+            if ( m_current != stack-> m_current. current ( ))
 				mask |= ( UndoDesc | RedoDesc );
 			if ( m_clean != stack-> isClean ( ))
 				mask |= Clean;
@@ -179,7 +185,7 @@ bool CUndoCmd::mergeMeWith ( CUndoCmd * /*other*/ )
 CUndoStack::CUndoStack ( QObject *parent )
 	: QObject ( parent ), m_current ( m_stack )
 {
-	m_stack. setAutoDelete ( true );
+    m_stack. setAutoDelete ( true );
 	m_clean_valid = true;
 	m_clean = 0;
 	m_macro_level = 0;
@@ -190,12 +196,12 @@ CUndoStack::CUndoStack ( QObject *parent )
 
 bool CUndoStack::canRedo ( ) const
 {
-	return !m_current. atLast ( ) && !m_macro_level;
+    return !m_current. atLast ( ) && !m_macro_level;
 }
 
 bool CUndoStack::canUndo ( ) const
 {
-	return ( m_current != 0 ) && !m_macro_level;
+    return ( m_current != 0 ) && !m_macro_level;
 }
 
 QAction *CUndoStack::createRedoAction ( QObject *parent, const char *name ) const
@@ -227,13 +233,13 @@ QAction *CUndoStack::createUndoAction ( QObject *parent, const char *name ) cons
 
 bool CUndoStack::isClean ( ) const
 {
-	return m_clean_valid && ( m_current == m_clean );
+    return m_clean_valid && ( m_current == m_clean );
 }
 
 void CUndoStack::setClean ( )
 {
 	m_clean_valid = true;
-	m_clean = *m_current;
+    m_clean = *m_current;
 	emit cleanChanged ( true );
 }
 
@@ -247,8 +253,8 @@ void CUndoStack::push ( CUndoCmd *cmd )
 
 	CUndoEmitter e ( this );
 
-	while ( !m_stack. isEmpty ( ) && !m_current. atLast ( )) {
-		if ( m_stack. getLast ( ) == m_clean )
+    while ( !m_stack. isEmpty ( ) && !m_current. atLast ( )) {
+        if ( m_stack. getLast ( ) == m_clean )
 			m_clean_valid = false;
 		m_stack. removeLast ( );
 	}
@@ -257,23 +263,23 @@ void CUndoStack::push ( CUndoCmd *cmd )
 
 	if (( cmd-> isCommand ( )) && 
 		( cmd-> canMerge ( )) && 
-	    ( *m_current ) &&
-		( *m_current )-> isCommand ( ) && 
-	    ( *m_current )-> canMerge ( ) && 
-	    ( cmd-> className ( ) == ( *m_current )-> className ( )) && 
-	    ( !m_clean_valid || ( m_clean != m_current ))) {
-		merged = ( *m_current )-> mergeMeWith ( cmd );
+        ( *m_current ) &&
+        ( *m_current )-> isCommand ( ) &&
+        ( *m_current )-> canMerge ( ) &&
+        ( cmd-> className ( ) == ( *m_current )-> className ( )) &&
+        ( !m_clean_valid || ( m_clean != m_current ))) {
+        merged = ( *m_current )-> mergeMeWith ( cmd );
 	}
 
 	if ( merged ) {
 		delete cmd;
-		cmd = *m_current;
+        cmd = *m_current;
 	}
 	else {
-		bool last_was_macro_begin = (( *m_current ) && ( *m_current )-> isMacroBegin ( ));
+        bool last_was_macro_begin = (( *m_current ) && ( *m_current )-> isMacroBegin ( ));
 
 		m_stack. append ( cmd );
-		m_current. toLast ( );
+        m_current. toLast ( );
 
 		if ( cmd-> isMacroBegin ( )) {
 			m_last_macro_begin = cmd;
@@ -290,8 +296,8 @@ void CUndoStack::push ( CUndoCmd *cmd )
 			m_macro_level--;
 
 			// yank out empty macros
-			if ( last_was_macro_begin ) {
-				m_current -= 2;
+            if ( last_was_macro_begin ) {
+                m_current -= 2;
 				m_stack. removeLast ( );
 				m_stack. removeLast ( );
 			}
@@ -309,42 +315,42 @@ void CUndoStack::setCurrent ( )
 
 QString CUndoStack::redoDescription ( ) const
 {
-	QPtrListIterator <CUndoCmd> it = m_current;
-	if ( *it )
-		++it;
+    Q3PtrListIterator <CUndoCmd> it = m_current;
+    if ( *it )
+        ++it;
 	else
-		it. toFirst ( );
+        it. toFirst ( );
 
-	return ( *it ) ? ( *it )-> description ( ) : QString ( );
+    return ( *it ) ? ( *it )-> description ( ) : QString ( );
 }
 
 QString CUndoStack::undoDescription ( ) const
 {
-	QPtrListIterator <CUndoCmd> it = m_current;
+    Q3PtrListIterator <CUndoCmd> it = m_current;
 
-	return ( *it ) ? ( *it )-> description ( ) : QString ( );
+    return ( *it ) ? ( *it )-> description ( ) : QString ( );
 }
 
 QStringList CUndoStack::redoList ( ) const
 {
 	QStringList sl;
-	QPtrListIterator <CUndoCmd> it = m_current;
-	if ( *it )
-		++it;
+    Q3PtrListIterator <CUndoCmd> it = m_current;
+    if ( *it )
+        ++it;
 	else
-		it. toFirst ( );
+        it. toFirst ( );
 
 	int macrolevel = 0;
 
-	while ( *it ) {
-		if (( *it )-> type ( ) == CUndoCmd::MacroBegin )
+    while ( *it ) {
+        if (( *it )-> type ( ) == CUndoCmd::MacroBegin )
 			macrolevel++;
-		else if (( *it )-> type ( ) == CUndoCmd::MacroEnd )
+        else if (( *it )-> type ( ) == CUndoCmd::MacroEnd )
 			macrolevel--;
 
 		if ( !macrolevel )
-			sl << ( *it )-> description ( );
-		++it;
+            sl << ( *it )-> description ( );
+        ++it;
 	}
 	return sl;
 }
@@ -352,19 +358,19 @@ QStringList CUndoStack::redoList ( ) const
 QStringList CUndoStack::undoList ( ) const
 {
 	QStringList sl;
-	QPtrListIterator <CUndoCmd> it = m_current;
+    Q3PtrListIterator <CUndoCmd> it = m_current;
 
 	int macrolevel = 0;
 
-	while ( *it ) {
-		if (( *it )-> type ( ) == CUndoCmd::MacroBegin )
+    while ( *it ) {
+        if (( *it )-> type ( ) == CUndoCmd::MacroBegin )
 			macrolevel--;
-		else if (( *it )-> type ( ) == CUndoCmd::MacroEnd )
+        else if (( *it )-> type ( ) == CUndoCmd::MacroEnd )
 			macrolevel++;
 
 		if ( !macrolevel )
-			sl << ( *it )-> description ( );
-		--it;
+            sl << ( *it )-> description ( );
+        --it;
 	}
 	return sl;
 }
@@ -384,14 +390,14 @@ void CUndoStack::redo ( int count )
 {
 	CUndoEmitter e ( this );
 
-	while ( !m_current. atLast ( ) && ( count > 0 )) {
-		QPtrListIterator <CUndoCmd> it = m_current;
-		if ( *it )
-			++it;
+    while ( !m_current. atLast ( ) && ( count > 0 )) {
+        Q3PtrListIterator <CUndoCmd> it = m_current;
+        if ( *it )
+            ++it;
 		else
-			it. toFirst ( );
+            it. toFirst ( );
 
-		switch (( *it )-> type ( )) {
+        switch (( *it )-> type ( )) {
 			case CUndoCmd::MacroBegin:
 				m_macro_level++;
 				break;
@@ -406,17 +412,17 @@ void CUndoStack::redo ( int count )
 
 			case CUndoCmd::Command:
 			default:
-				( *it )-> redo ( );
+                ( *it )-> redo ( );
 				if ( m_macro_level == 0 ) {
 					count--;
 					emit commandExecuted ( );
 				}
 				break;
 		}
-		if ( *m_current )
-			++m_current;
+        if ( *m_current )
+            ++m_current;
 		else
-			m_current. toFirst ( );
+            m_current. toFirst ( );
 	}
 }
 
@@ -424,8 +430,8 @@ void CUndoStack::undo ( int count )
 {
 	CUndoEmitter e ( this );
 
-	while (( m_current != 0 ) && ( count > 0 )) {
-		switch (( *m_current )-> type ( )) {
+    while (( m_current != 0 ) && ( count > 0 )) {
+        switch (( *m_current )-> type ( )) {
 			case CUndoCmd::MacroEnd:
 				m_macro_level++;
 				break;
@@ -440,14 +446,14 @@ void CUndoStack::undo ( int count )
 
 			case CUndoCmd::Command:
 			default:
-				( *m_current )-> undo ( );
+                ( *m_current )-> undo ( );
 				if ( m_macro_level == 0 ) {
 					count--;
 					emit commandExecuted ( );
 				}
 				break;
 		}
-		--m_current;
+        --m_current;
 	}
 }
 
@@ -683,7 +689,7 @@ void CUndoManager::stackDestroyed ( QObject *stack )
 {
 	QObject *view = 0;
 
-	for ( QPtrDictIterator <CUndoStack> it ( m_stacks ); it. current ( ); ++it ) {
+	for ( Q3PtrDictIterator <CUndoStack> it ( m_stacks ); it. current ( ); ++it ) {
 		if ( it. current ( ) == stack ) {
 			view = static_cast <QObject *> ( it. currentKey ( ));
 			break;
@@ -703,23 +709,23 @@ void CUndoManager::stackDestroyed ( QObject *stack )
 
 namespace {
 
-class MyListBox : public QListBox {
+class MyListBox : public Q3ListBox {
 public:
-	MyListBox ( QWidget *parent ) : QListBox ( parent ), m_highlight ( -1 ){ }
+	MyListBox ( QWidget *parent ) : Q3ListBox ( parent ), m_highlight ( -1 ){ }
 
 	virtual QSize sizeHint ( ) const
 	{
-		(void) QListBox::sizeHint ( );
+		(void) Q3ListBox::sizeHint ( );
 
-	    int fw = 2 * style ( ). pixelMetric ( QStyle::PM_DefaultFrameWidth );
+//	    int fw = 2 * style ( ). pixelMetric ( QStyle::PM_DefaultFrameWidth );
 
 		QSize s1 ( contentsWidth ( ), contentsHeight ( ));
 		QSize s2 = s1. boundedTo ( QSize ( 300, 300 ));
 
-		if (( s2. height ( ) < s1. height ( )) && ( s1. width ( ) <= s2. width ( )))
-			s2. setWidth ( s1. width ( ) + style ( ). pixelMetric ( QStyle::PM_ScrollBarExtent ));
+//		if (( s2. height ( ) < s1. height ( )) && ( s1. width ( ) <= s2. width ( )))
+//			s2. setWidth ( s1. width ( ) + style ( ). pixelMetric ( QStyle::PM_ScrollBarExtent ));
 
-		return s2. expandedTo ( QSize ( 60, 60 )) + QSize ( fw, fw );
+//		return s2. expandedTo ( QSize ( 60, 60 )) + QSize ( fw, fw );
 	}
 
 public:
@@ -727,10 +733,10 @@ public:
 };
 
 
-class MyListBoxItem : public QListBoxText {
+class MyListBoxItem : public Q3ListBoxText {
 public:
-	MyListBoxItem ( QListBox *parent, const QString & text = QString::null )
-		: QListBoxText ( parent, text )
+	MyListBoxItem ( Q3ListBox *parent, const QString & text = QString::null )
+		: Q3ListBoxText ( parent, text )
 	{
 		setCustomHighlighting ( true ); 
 	}
@@ -746,7 +752,7 @@ protected:
 		    p-> setPen ( mlb-> colorGroup ( ). highlightedText ( ));
 		}
 
-		QListBoxText::paint ( p );
+		Q3ListBoxText::paint ( p );
 	}
 };
 
@@ -759,8 +765,8 @@ public:
 	{
 		QSize s = QLabel::sizeHint ( );
 
-		int fw = 2 * style ( ). pixelMetric ( QStyle::PM_DefaultFrameWidth );
-		int w = s. width ( ) - 2 * fw;
+//		int fw = 2 * style ( ). pixelMetric ( QStyle::PM_DefaultFrameWidth );
+//		int w = s. width ( ) - 2 * fw;
 
 		const QFontMetrics &fm = fontMetrics ( );
 
@@ -769,9 +775,9 @@ public:
 			if (!( i & 1 ))
 				s = s. arg ( 1000 );
 			int w2 = fm. width ( s );
-			w = QMAX( w, w2 );
+//			w = QMAX( w, w2 );
 		}
-		s. setWidth ( w + 2 * fw + 8 );
+//		s. setWidth ( w + 2 * fw + 8 );
 		return s;
 	}
 private:
@@ -831,32 +837,32 @@ void CUndoAction::addedTo ( QWidget *w, QWidget *cont )
 	if ( cont-> inherits ( "QToolBar" ) && w-> inherits ( "QToolButton" )) {
 		QToolButton *tb = static_cast <QToolButton *> ( w );
 
-		m_menu = new QPopupMenu ( tb );
+		m_menu = new Q3PopupMenu ( tb );
 		tb-> setPopup ( m_menu );
 		tb-> setPopupDelay ( 0 );
 
 		m_list = new MyListBox ( m_menu );
-		m_list-> setFrameStyle ( QFrame::NoFrame );
-		m_list-> setSelectionMode ( QListBox::Multi );
-		m_list-> setHScrollBarMode ( QScrollView::AlwaysOff );
+		m_list-> setFrameStyle ( Q3Frame::NoFrame );
+		m_list-> setSelectionMode ( Q3ListBox::Multi );
+		m_list-> setHScrollBarMode ( Q3ScrollView::AlwaysOff );
 		m_list-> setMouseTracking ( true );
-		m_menu-> insertItem ( m_list );
+        //m_menu-> insertItem ( m_list );
 
 		m_label = new MyLabel ( m_menu, s_strings );
 		m_label-> setAlignment ( Qt::AlignCenter );
 		m_label-> installEventFilter ( this );
 		m_label-> setPalette ( QApplication::palette ( m_menu ));
 		m_label-> setBackgroundMode ( m_menu-> backgroundMode ( ));
-		m_menu-> insertItem ( m_label );
+        //m_menu-> insertItem ( m_label );
 
-		connect ( m_list, SIGNAL( onItem ( QListBoxItem * )),         this, SLOT( setCurrentItemSlot ( QListBoxItem * )));
-		connect ( m_list, SIGNAL( currentChanged ( QListBoxItem * )), this, SLOT( selectRange ( QListBoxItem * )));
-		connect ( m_list, SIGNAL( clicked ( QListBoxItem * )),        this, SLOT( itemSelected ( QListBoxItem * )));
-		connect ( m_list, SIGNAL( returnPressed ( QListBoxItem * )),  this, SLOT( itemSelected ( QListBoxItem * )));
+		connect ( m_list, SIGNAL( onItem ( Q3ListBoxItem * )),         this, SLOT( setCurrentItemSlot ( Q3ListBoxItem * )));
+		connect ( m_list, SIGNAL( currentChanged ( Q3ListBoxItem * )), this, SLOT( selectRange ( Q3ListBoxItem * )));
+		connect ( m_list, SIGNAL( clicked ( Q3ListBoxItem * )),        this, SLOT( itemSelected ( Q3ListBoxItem * )));
+		connect ( m_list, SIGNAL( returnPressed ( Q3ListBoxItem * )),  this, SLOT( itemSelected ( Q3ListBoxItem * )));
 
 		connect ( m_menu, SIGNAL( aboutToShow ( )), this, SLOT( fixMenu ( )));
 	}
-	QAction::addedTo ( w, cont );
+    //QAction::addedTo ( w, cont );
 }
 
 bool CUndoAction::eventFilter ( QObject *o, QEvent *e )
@@ -867,7 +873,7 @@ bool CUndoAction::eventFilter ( QObject *o, QEvent *e )
 	return QAction::eventFilter ( o, e );
 }
 
-void CUndoAction::setCurrentItemSlot ( QListBoxItem *item )
+void CUndoAction::setCurrentItemSlot ( Q3ListBoxItem *item )
 {
 	m_list-> setCurrentItem ( item );
 }
@@ -878,7 +884,7 @@ void CUndoAction::fixMenu ( )
 	selectRange ( m_list-> firstItem ( ));
 }
 
-void CUndoAction::selectRange ( QListBoxItem *item )
+void CUndoAction::selectRange ( Q3ListBoxItem *item )
 {
 	if ( item ) {
 		int hl = m_list-> index ( item );
@@ -896,7 +902,7 @@ void CUndoAction::selectRange ( QListBoxItem *item )
 }
 
 
-void CUndoAction::itemSelected ( QListBoxItem *item )
+void CUndoAction::itemSelected ( Q3ListBoxItem *item )
 {
 	if ( item ) {
 		m_menu-> close ( );
@@ -912,8 +918,8 @@ void CUndoAction::updateDescriptions ( )
 	QStringList sl;
 
 	if ( s ) {
-		CUndoManager *manager = ::qt_cast<CUndoManager *> ( s );
-		CUndoStack *stack = ::qt_cast<CUndoStack *> ( s );
+        CUndoManager *manager = (CUndoManager*) ( s );
+        CUndoStack *stack = (CUndoStack*) ( s );
 
 		if ( manager )
 			sl = (( m_type == Undo ) ? manager-> undoList ( ) : manager-> redoList ( ));

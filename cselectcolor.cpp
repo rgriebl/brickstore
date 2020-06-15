@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -12,11 +14,19 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 #include <qlayout.h>
-#include <qheader.h>
+#include <q3header.h>
 #include <qpushbutton.h>
 #include <qstyle.h>
 #include <qpainter.h>
 #include <qtooltip.h>
+//Added by qt3to4:
+#include <Q3HBoxLayout>
+#include <Q3BoxLayout>
+#include <QShowEvent>
+#include <Q3Frame>
+#include <QPixmap>
+#include <Q3VBoxLayout>
+#include <Q3MimeSourceFactory>
 
 #include "cutility.h"
 #include "clistview.h"
@@ -46,14 +56,14 @@ public:
 			QFontMetrics fm = listView ( )-> fontMetrics ( );
 			QPixmap bigpix ( *BrickLink::inst ( )-> colorImage ( color ( ), fm. height ( ) * 8, fm. height ( ) * 4 ));
 		
-			QMimeSourceFactory::defaultFactory ( )-> setPixmap ( "select_color_tooltip_picture", bigpix );
+			Q3MimeSourceFactory::defaultFactory ( )-> setPixmap ( "select_color_tooltip_picture", bigpix );
 
 			return QString( "<img src=\"select_color_tooltip_picture\"><br />%1: %2" ). arg ( CSelectColor::tr( "RGB" ), color ( )-> color ( ). name ( ));
 		}
 		return QString ( );
 	}
 	
-	virtual int compare ( QListViewItem *i, int /*col*/, bool ascending ) const
+	virtual int compare ( Q3ListViewItem *i, int /*col*/, bool ascending ) const
 	{
 		ColListItem *cli = static_cast <ColListItem *> ( i );
 
@@ -71,10 +81,10 @@ private:
 	const QPixmap *m_pix;
 };
 
-class ColToolTip : public QToolTip {
+class ColToolTip : public QObject {
 public:
 	ColToolTip ( QWidget *parent, CListView *clv )
-		: QToolTip( parent ), m_clv ( clv )
+        : QObject( parent ), m_clv ( clv )
 	{ }
 	
 	virtual ~ColToolTip ( )
@@ -82,13 +92,13 @@ public:
 
 	void maybeTip ( const QPoint &pos )
 	{
-		if ( !parentWidget ( ) || !m_clv /*|| !m_clv-> showToolTips ( )*/ )
+        if ( !((QWidget*)QObject::parent()) || !m_clv /*|| !m_clv-> showToolTips ( )*/ )
 			return;
 
 		ColListItem *item = static_cast <ColListItem *> ( m_clv-> itemAt ( pos ));
 		
 		if ( item )
-			tip ( m_clv-> itemRect ( item ), item-> toolTip ( ));
+            QToolTip::add(((QWidget*)QObject::parent()), m_clv-> itemRect ( item ), item-> toolTip ( ));
 	}
 
 private:
@@ -99,7 +109,7 @@ private:
 } // namespace
 
 
-CSelectColor::CSelectColor ( QWidget *parent, const char *name, WFlags fl )
+CSelectColor::CSelectColor ( QWidget *parent, const char *name, Qt::WFlags fl )
 	: QWidget ( parent, name, fl )
 {
 	w_colors = new CListView ( this );
@@ -108,23 +118,23 @@ CSelectColor::CSelectColor ( QWidget *parent, const char *name, WFlags fl )
 	w_colors-> addColumn ( QString ( ));
 	w_colors-> header ( )-> setMovingEnabled ( false );
 	w_colors-> header ( )-> setResizeEnabled ( false );
-	new ColToolTip ( w_colors-> viewport ( ), w_colors );
+    new ColToolTip ( w_colors-> viewport ( ), w_colors );
 
-	const QIntDict<BrickLink::Color> &coldict = BrickLink::inst ( )-> colors ( );
+    const QHash<int, BrickLink::Color *> &coldict = BrickLink::inst ( )-> colors ( );
 
-	for ( QIntDictIterator<BrickLink::Color> it ( coldict ); it. current ( ); ++it )
-		(void) new ColListItem ( w_colors, it. current ( ));
+    for ( QHashIterator<int, BrickLink::Color *> it ( coldict ); it. hasNext ( ); )
+        (void) new ColListItem ( w_colors, it. next ( ). value ( ));
 
 	w_colors-> sort ( );
 
 	connect ( w_colors, SIGNAL( selectionChanged ( )), this, SLOT( colorChanged ( )));
-	connect ( w_colors, SIGNAL( doubleClicked ( QListViewItem *, const QPoint &, int )), this, SLOT( colorConfirmed ( )));
-	connect ( w_colors, SIGNAL( returnPressed ( QListViewItem * )), this, SLOT( colorConfirmed ( ))); 
+	connect ( w_colors, SIGNAL( doubleClicked ( Q3ListViewItem *, const QPoint &, int )), this, SLOT( colorConfirmed ( )));
+	connect ( w_colors, SIGNAL( returnPressed ( Q3ListViewItem * )), this, SLOT( colorConfirmed ( ))); 
 
-	w_colors-> setFixedWidth ( w_colors-> sizeHint ( ). width ( ) + w_colors-> style ( ). pixelMetric ( QStyle::PM_ScrollBarExtent ));
-	w_colors-> setResizeMode ( QListView::LastColumn );
+    w_colors-> setFixedWidth ( w_colors-> sizeHint ( ). width ( ) + w_colors-> style ( )-> pixelMetric ( QStyle::PM_ScrollBarExtent ));
+	w_colors-> setResizeMode ( Q3ListView::LastColumn );
 
-	QBoxLayout *lay = new QVBoxLayout ( this, 0, 0 );
+	Q3BoxLayout *lay = new Q3VBoxLayout ( this, 0, 0 );
 	lay-> addWidget ( w_colors );
 
 	languageChange ( );
@@ -151,7 +161,7 @@ void CSelectColor::enabledChange ( bool old )
 
 void CSelectColor::setColor ( const BrickLink::Color *col )
 {
-	for ( QListViewItemIterator it ( w_colors ); *it; ++it ) {
+	for ( Q3ListViewItemIterator it ( w_colors ); *it; ++it ) {
 		if ( static_cast <ColListItem *> ( *it )-> color ( ) == col ) {
 			w_colors-> setSelected ( *it, true );
 			break;
@@ -180,7 +190,7 @@ void CSelectColor::showEvent ( QShowEvent * )
 ////////////////////////////////////////////////////////////////////////////
 
 
-CSelectColorDialog::CSelectColorDialog ( QWidget *parent, const char *name, bool modal, WFlags fl )
+CSelectColorDialog::CSelectColorDialog ( QWidget *parent, const char *name, bool modal, Qt::WFlags fl )
 	: QDialog ( parent, name, modal, fl )
 {
 	w_sc = new CSelectColor ( this );
@@ -193,14 +203,14 @@ CSelectColorDialog::CSelectColorDialog ( QWidget *parent, const char *name, bool
 	w_cancel = new QPushButton ( tr( "&Cancel" ), this );
 	w_cancel-> setAutoDefault ( true );
 
-	QFrame *hline = new QFrame ( this );
-	hline-> setFrameStyle ( QFrame::HLine | QFrame::Sunken );
+	Q3Frame *hline = new Q3Frame ( this );
+	hline-> setFrameStyle ( Q3Frame::HLine | Q3Frame::Sunken );
 	
-	QBoxLayout *toplay = new QVBoxLayout ( this, 11, 6 );
+	Q3BoxLayout *toplay = new Q3VBoxLayout ( this, 11, 6 );
 	toplay-> addWidget ( w_sc );
 	toplay-> addWidget ( hline );
 
-	QBoxLayout *butlay = new QHBoxLayout ( toplay );
+	Q3BoxLayout *butlay = new Q3HBoxLayout ( toplay );
 	butlay-> addStretch ( 60 );
 	butlay-> addWidget ( w_ok, 15 );
 	butlay-> addWidget ( w_cancel, 15 );

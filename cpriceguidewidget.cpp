@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -13,11 +15,19 @@
 */
 #include <qpainter.h>
 #include <qstyle.h>
-#include <qvaluelist.h>
-#include <qpopupmenu.h>
+#include <qstyleoption.h>
+#include <q3valuelist.h>
+#include <q3popupmenu.h>
 #include <qcursor.h>
 #include <qaction.h>
 #include <qtooltip.h>
+//Added by qt3to4:
+#include <QContextMenuEvent>
+#include <QPixmap>
+#include <QFrame>
+#include <QResizeEvent>
+#include <QMouseEvent>
+#include <QEvent>
 
 #include "cresource.h"
 #include "cutility.h"
@@ -58,19 +68,19 @@ struct cell : public QRect {
 
 } // namespace
 
-class CPriceGuideWidgetPrivate : public QToolTip {
+class CPriceGuideWidgetPrivate : public QObject {
 public:
 	CPriceGuideWidgetPrivate ( CPriceGuideWidget *parent )
-		: QToolTip ( parent ), m_widget ( parent )
+        : QObject ( parent ), m_widget ( parent )
 	{ }
 	
 	virtual ~CPriceGuideWidgetPrivate ( )
 	{ }
 
-	QValueList<cell>::const_iterator cellAtPos ( const QPoint &fpos ) 
+    Q3ValueList<cell>::const_iterator cellAtPos ( const QPoint &fpos )
 	{
 		QPoint pos = fpos - QPoint ( m_widget-> frameWidth ( ), m_widget-> frameWidth ( ));
-		QValueList<cell>::const_iterator it = m_cells. begin ( );
+        Q3ValueList<cell>::const_iterator it = m_cells. begin ( );
 
 		for ( ; it != m_cells. end ( ); ++it ) {
 			if (( *it ). contains ( pos ) && (( *it ). m_type != cell::Update ))
@@ -82,10 +92,10 @@ public:
 protected:
 	virtual void maybeTip ( const QPoint &pos )
 	{
-		QValueList<cell>::const_iterator it = cellAtPos ( pos );
+        Q3ValueList<cell>::const_iterator it = cellAtPos ( pos );
 
 		if (( it != m_cells. end ( )) && (( *it ). m_type == cell::Price ))
-			tip ( *it, CPriceGuideWidget::tr( "Double-click to set the price of the current item." ));
+            QToolTip::add(((QWidget *)QObject::parent()), *it, CPriceGuideWidget::tr( "Double-click to set the price of the current item." ));
 	}
 
 private:
@@ -94,9 +104,9 @@ private:
 	CPriceGuideWidget *       m_widget;
 	BrickLink::PriceGuide *   m_pg;
 	CPriceGuideWidget::Layout m_layout;
-	QValueList<cell>          m_cells;
+    Q3ValueList<cell>          m_cells;
 	bool                      m_connected;
-	QPopupMenu *              m_popup;
+    Q3PopupMenu *              m_popup;
 	bool                      m_on_price;
 
 	QString m_str_qty;
@@ -107,8 +117,8 @@ private:
 	QString m_str_wait;
 };
 
-CPriceGuideWidget::CPriceGuideWidget ( QWidget *parent, const char *name, WFlags fl )
-	: QFrame ( parent, name, fl | WNoAutoErase)
+CPriceGuideWidget::CPriceGuideWidget ( QWidget *parent, const char *name, Qt::WFlags fl )
+    : QFrame ( parent, name, fl | Qt::WNoAutoErase)
 {
 	d = new CPriceGuideWidgetPrivate ( this );
 
@@ -116,9 +126,9 @@ CPriceGuideWidget::CPriceGuideWidget ( QWidget *parent, const char *name, WFlags
 	d-> m_layout = Normal;
 	d-> m_on_price = false;
 
-	setBackgroundMode ( PaletteBase );
+	setBackgroundMode ( Qt::PaletteBase );
 	setMouseTracking ( true );
-	setSizePolicy ( QSizePolicy::Minimum, QSizePolicy::Minimum );
+    setSizePolicy ( QSizePolicy::Minimum, QSizePolicy::Minimum );
 
 	d-> m_connected = false;
 	d-> m_popup = 0;
@@ -168,12 +178,12 @@ void CPriceGuideWidget::contextMenuEvent ( QContextMenuEvent *e )
 {
 	if ( d-> m_pg ) {
 		if ( !d-> m_popup ) {
-			d-> m_popup = new QPopupMenu ( this );
-			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "reload" ), tr( "Update" ), this, SLOT( doUpdate ( )));
+			d-> m_popup = new Q3PopupMenu ( this );
+            d-> m_popup-> insertItem ( CResource::inst ( )-> icon ( "reload" ), tr( "Update" ), this, SLOT( doUpdate ( )));
 			d-> m_popup-> insertSeparator ( );
-			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "edit_bl_catalog" ), tr( "Show BrickLink Catalog Info..." ), this, SLOT( showBLCatalogInfo ( )));
-			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "edit_bl_priceguide" ), tr( "Show BrickLink Price Guide Info..." ), this, SLOT( showBLPriceGuideInfo ( )));
-			d-> m_popup-> insertItem ( CResource::inst ( )-> iconSet ( "edit_bl_lotsforsale" ), tr( "Show Lots for Sale on BrickLink..." ), this, SLOT( showBLLotsForSale ( )));
+            d-> m_popup-> insertItem ( CResource::inst ( )-> icon ( "edit_bl_catalog" ), tr( "Show BrickLink Catalog Info..." ), this, SLOT( showBLCatalogInfo ( )));
+            d-> m_popup-> insertItem ( CResource::inst ( )-> icon ( "edit_bl_priceguide" ), tr( "Show BrickLink Price Guide Info..." ), this, SLOT( showBLPriceGuideInfo ( )));
+            d-> m_popup-> insertItem ( CResource::inst ( )-> icon ( "edit_bl_lotsforsale" ), tr( "Show Lots for Sale on BrickLink..." ), this, SLOT( showBLLotsForSale ( )));
 		}
 		d-> m_popup-> popup ( e-> globalPos ( ));
 	}
@@ -245,16 +255,10 @@ void CPriceGuideWidget::setLayout ( Layout l )
 		update ( );
 	}
 }
-
-void CPriceGuideWidget::frameChanged ( )
-{
-	recalcLayout ( );
-	QFrame::frameChanged ( );
-}
 	
 void CPriceGuideWidget::resizeEvent ( QResizeEvent *e )
 {
-	QFrame::resizeEvent ( e );
+    QFrame::resizeEvent ( e );
 	recalcLayout ( );
 }
 
@@ -314,10 +318,10 @@ void CPriceGuideWidget::recalcLayoutNormal ( const QSize &s, const QFontMetrics 
 
 	dx = cw [1] + cw [2];
 
-	for ( int i = 0; i < BrickLink::PriceGuide::PriceCount; i++ ) {
+    for ( int i = 0; i < BrickLink::PriceGuide::PriceCount; i++ ) {
 		d-> m_cells << cell ( cell::Header, dx, 0, cw [3], ch, Qt::AlignCenter, d-> m_str_price [i] );
-		dx += cw [3];
-	}
+        dx += cw [3];
+    }
 
 	d-> m_cells << cell ( cell::Header, dx, 0, s. width ( ) - dx, ch, 0, QString::null );
 
@@ -331,7 +335,7 @@ void CPriceGuideWidget::recalcLayoutNormal ( const QSize &s, const QFontMetrics 
 		for ( int j = 0; j < BrickLink::ConditionCount; j++ )
 			d-> m_cells << cell ( cell::Header, 0, dy + j * ch, cw [1], ch, Qt::AlignCenter, d-> m_str_cond [j] );
 		
-		d-> m_cells << cell ( cell::Update, cw [1], dy, dx - cw [1], ch * BrickLink::ConditionCount, Qt::AlignCenter | Qt::WordBreak, QString::null );
+		d-> m_cells << cell ( cell::Update, cw [1], dy, dx - cw [1], ch * BrickLink::ConditionCount, Qt::AlignCenter | Qt::TextWordWrap, QString::null );
 		dy += ( BrickLink::ConditionCount * ch );
 	}
 
@@ -367,7 +371,6 @@ void CPriceGuideWidget::recalcLayoutNormal ( const QSize &s, const QFontMetrics 
 		}
 	}
 }
-
 
 void CPriceGuideWidget::recalcLayoutHorizontal ( const QSize &s, const QFontMetrics &fm, const QFontMetrics &fmb )
 {
@@ -450,7 +453,6 @@ void CPriceGuideWidget::recalcLayoutHorizontal ( const QSize &s, const QFontMetr
 		}
 	}
 }
-
 
 void CPriceGuideWidget::recalcLayoutVertical ( const QSize &s, const QFontMetrics &fm, const QFontMetrics &fmb )
 {
@@ -552,11 +554,9 @@ void CPriceGuideWidget::recalcLayoutVertical ( const QSize &s, const QFontMetric
 	}
 }
 
-
-
 void CPriceGuideWidget::paintHeader ( QPainter *p, const QSize &s, const QRect &r, const QColorGroup &cg, int align, const QString &str, bool bold )
 {
-	//style ( ). drawPrimitive ( QStyle::PE_HeaderSection, p, r, cg );
+    //style ( ). drawPrimitive ( QStyle::PE_HeaderSection, p, r, cg );
 
 	// vvv Official Qt3 hack to paint disabled headers (see qheader.cpp) vvv
 	p-> setBrushOrigin ( r. topLeft ( ));	
@@ -566,7 +566,10 @@ void CPriceGuideWidget::paintHeader ( QPainter *p, const QSize &s, const QRect &
 	QRect r1 ( r );
 	r1. addCoords ( -2, -2, 2, 2 );
 
-	style ( ). drawPrimitive ( QStyle::PE_HeaderSection, p, r1, cg, QStyle::Style_Horizontal | QStyle::Style_Off | QStyle::Style_Enabled | QStyle::Style_Raised, QStyleOption ( this ));
+    QStyleOption option;
+    option.state = QStyle::State_Horizontal | QStyle::State_Off | QStyle::State_Enabled | QStyle::State_Raised;
+    style ( )-> drawPrimitive ( (QStyle::PrimitiveElement)QStyle::CE_HeaderSection, &option, p);
+    //style ( ). drawPrimitive ( QStyle::PE_HeaderSection, p, r1, cg, QStyle::State_Horizontal | QStyle::State_Off | QStyle::State_Enabled | QStyle::State_Raised, QStyleOption ( this ));
 		
 	p-> setPen ( cg. color ( QColorGroup::Mid ));
 	if ( r. y ( ) + r. height ( ) < s. height ( ))
@@ -581,7 +584,7 @@ void CPriceGuideWidget::paintHeader ( QPainter *p, const QSize &s, const QRect &
 
 	p-> restore ( );
 	// ^^^ Official Qt3 hack to paint disabled headers (see qheader.cpp) ^^^
-	
+
 	if ( !str. isEmpty ( )) {
 		QRect r2 ( r );
 		r2. addCoords ( hborder, 0, -hborder, 0 );
@@ -614,8 +617,11 @@ void CPriceGuideWidget::paintCell ( QPainter *p, const QRect &r, const QColorGro
 	p-> drawText ( r2, align, str );
 }
 
-void CPriceGuideWidget::drawContents ( QPainter *p )
+void CPriceGuideWidget::paintEvent( QPaintEvent* event )
 {
+    QFrame::paintEvent( event );
+    QPainter *p = new QPainter( this );
+
 	const QSize s = contentsRect ( ). size ( );
 	const QPoint offset = contentsRect ( ). topLeft ( );
 	
@@ -632,7 +638,7 @@ void CPriceGuideWidget::drawContents ( QPainter *p )
 	
 	QString str = d-> m_pg ? "-" : "";
 
-	for ( QValueList<cell>::const_iterator it = d-> m_cells. begin ( ); it != d-> m_cells. end ( ); ++it ) {
+	for ( Q3ValueList<cell>::const_iterator it = d-> m_cells. begin ( ); it != d-> m_cells. end ( ); ++it ) {
 		const cell &c = *it;
 
 		switch ( c. m_type ) {
@@ -679,7 +685,8 @@ void CPriceGuideWidget::drawContents ( QPainter *p )
 		if ( cliprect. isValid ( ) && !cliprect. isEmpty ( ))
 			srcrect &= cliprect;
 	}*/
-	bitBlt ( p-> device ( ), offset, &pix, srcrect );
+    bitBlt ( p-> device ( ), offset, &pix, srcrect );
+    delete p;
 }
 
 void CPriceGuideWidget::mouseDoubleClickEvent ( QMouseEvent *me )
@@ -687,7 +694,7 @@ void CPriceGuideWidget::mouseDoubleClickEvent ( QMouseEvent *me )
 	if ( !d-> m_pg )
 		return;
 
-	QValueList<cell>::const_iterator it = d-> cellAtPos ( me-> pos ( ));
+	Q3ValueList<cell>::const_iterator it = d-> cellAtPos ( me-> pos ( ));
 
 	if (( it != d-> m_cells. end ( )) && ((*it). m_type == cell::Price ))
 		emit priceDoubleClicked ( d-> m_pg-> price ((*it). m_time, (*it). m_condition, (*it). m_price ));
@@ -698,7 +705,7 @@ void CPriceGuideWidget::mouseMoveEvent ( QMouseEvent *me )
 	if ( !d-> m_pg )
 		return;
 
-	QValueList<cell>::const_iterator it = d-> cellAtPos ( me-> pos ( ));
+	Q3ValueList<cell>::const_iterator it = d-> cellAtPos ( me-> pos ( ));
 
 	d-> m_on_price = (( it != d-> m_cells. end ( )) && ((*it). m_type == cell::Price ));
 

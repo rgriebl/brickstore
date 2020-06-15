@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -12,13 +14,19 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 
-#include <qprogressbar.h>
+#include <q3progressbar.h>
 #include <qlabel.h>
 #include <qtoolbutton.h>
 #include <qtooltip.h>
-#include <qgrid.h>
+#include <q3grid.h>
 #include <qlayout.h>
 #include <qimage.h>
+//Added by qt3to4:
+#include <QPixmap>
+#include <QResizeEvent>
+#include <Q3BoxLayout>
+#include <Q3HBoxLayout>
+#include <Q3Frame>
 
 #include "cmultiprogressbar.h"
 
@@ -28,11 +36,11 @@ CMultiProgressBar::CMultiProgressBar ( QWidget *parent, const char *name )
 {
 	m_autoid = -1;
 
-	QBoxLayout *lay = new QHBoxLayout ( this, 0, 0 );
+	Q3BoxLayout *lay = new Q3HBoxLayout ( this, 0, 0 );
 
-	m_progress = new QProgressBar ( this );
-	m_progress-> setFrameStyle ( QFrame::NoFrame );
-	m_progress-> setIndicatorFollowsStyle ( false );
+	m_progress = new Q3ProgressBar ( this );
+	m_progress-> setFrameStyle ( Q3Frame::NoFrame );
+    //m_progress-> setIndicatorFollowsStyle ( false );
 	m_progress-> setCenterIndicator ( true );
 	m_progress-> setPercentageVisible ( false );
 	lay-> addWidget ( m_progress, 1 );
@@ -93,7 +101,7 @@ void CMultiProgressBar::recalc ( )
 	QStringList sl;
 	QString str;
 
-	for ( QIntDictIterator <ItemData> it ( m_items ); it. current ( ); ++it ) {
+	for ( Q3IntDictIterator <ItemData> it ( m_items ); it. current ( ); ++it ) {
 		ItemData *p = it. current ( );
 
 		ta += p-> m_total;

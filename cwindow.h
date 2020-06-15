@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -16,9 +18,11 @@
 
 #include <qwidget.h>
 #include <qregexp.h>
-#include <qptrlist.h>
-#include <qptrdict.h>
+#include <q3ptrdict.h>
 #include <qdom.h>
+//Added by qt3to4:
+#include <QCloseEvent>
+#include <QLabel>
 
 #include "citemview.h"
 #include "bricklink.h"
@@ -28,7 +32,7 @@
 
 class QToolButton;
 class QComboBox;
-class QListViewItem;
+class Q3ListViewItem;
 class CItemView;
 class CFrameWork;
 class CUndoStack;
@@ -166,7 +170,7 @@ private slots:
 	void updateSelectionFromDoc ( const CDocument::ItemList &itlist );
 	void updateCaption ( );
 
-	void contextMenu ( QListViewItem *, const QPoint & );
+	void contextMenu ( Q3ListViewItem *, const QPoint & );
 	void priceGuideUpdated ( BrickLink::PriceGuide * );
 	void pictureUpdated ( BrickLink::Picture * );
 	void updateErrorMask ( );
@@ -183,14 +187,14 @@ private:
 
 	bool m_ignore_selection_update;
 
-	QPtrDict<CItemViewItem>  m_lvitems;
+	Q3PtrDict<CItemViewItem>  m_lvitems;
 	
     QWidget *      w_filter;
 	CItemView *	   w_list;
 	QLabel *       w_filter_label;
 
 	uint                           m_settopg_failcnt;
-	QPtrDict<CDocument::Item> *    m_settopg_list;
+	Q3PtrDict<CDocument::Item> *    m_settopg_list;
 	BrickLink::PriceGuide::Time    m_settopg_time;
 	BrickLink::PriceGuide::Price   m_settopg_price;
 };

@@ -1,4 +1,6 @@
-<!DOCTYPE TS><TS>
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.0">
 <context>
     <name>BrickLink</name>
     <message>
@@ -84,7 +86,7 @@
     </message>
     <message>
         <source>Visit %1, or send an email to %2</source>
-        <translation>Consultez %1, ou envoyez un e-mail à %2</translation>
+        <translation type="obsolete">Consultez %1, ou envoyez un e-mail à %2</translation>
     </message>
     <message>
         <source>Legal Info</source>
@@ -95,7 +97,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>BrickStore is currently running in &lt;b&gt;Demo&lt;/b&gt; mode.&lt;br /&gt;&lt;br /&gt;The complete functionality is accessible, but this reminder will pop up every 20 minutes.&lt;br /&gt;&lt;br /&gt;You can change the mode of operation at anytime via &lt;b&gt;Help &gt; Registration...&lt;/b&gt;</source>
+        <source>BrickStock is currently running in &lt;b&gt;Demo&lt;/b&gt; mode.&lt;br /&gt;&lt;br /&gt;The complete functionality is accessible, but this reminder will pop up every 20 minutes.&lt;br /&gt;&lt;br /&gt;You can change the mode of operation at anytime via &lt;b&gt;Help &gt; Registration...&lt;/b&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -157,8 +159,8 @@
         <translation>Liste détaillée des changements</translation>
     </message>
     <message>
-        <source>the BrickStore homepage</source>
-        <translation>la page d&apos;accueil de BrickStore</translation>
+        <source>the BrickStock homepage</source>
+        <translation>la page d&apos;accueil de BrickStock</translation>
     </message>
     <message>
         <source>&lt;b&gt;Please note:&lt;/b&gt; Your currently installed version is flagged as defective. Please visit %1 to find out the exact cause.</source>
@@ -172,7 +174,7 @@
         <translation>Sans titre</translation>
     </message>
     <message>
-        <source>BrickStore XML Data</source>
+        <source>BrickStock XML Data</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -284,7 +286,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>BrickStore has switched to a new file format (.bsx - BrickStore XML).&lt;br /&gt;&lt;br /&gt;Your document has been automatically imported and it will be converted as soon as you save it.</source>
+        <source>BrickStock has switched to a new file format (.bsx - BrickStock XML).&lt;br /&gt;&lt;br /&gt;Your document has been automatically imported and it will be converted as soon as you save it.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -957,6 +959,10 @@
         <comment>File|Import BrickLink Wanted List</comment>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Windows</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>CImportBLCart</name>
@@ -1205,52 +1211,28 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>contains</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>doesn&apos;t contain</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>is</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>isn&apos;t</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>begins with</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>ends with</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>and</source>
-        <translation>et</translation>
+        <translation type="obsolete">et</translation>
     </message>
     <message>
         <source>or</source>
-        <translation>ou</translation>
+        <translation type="obsolete">ou</translation>
     </message>
     <message>
         <source>All</source>
-        <translation>Tous</translation>
+        <translation type="obsolete">Tous</translation>
     </message>
     <message>
         <source>All Prices</source>
-        <translation>Tous les prix</translation>
+        <translation type="obsolete">Tous les prix</translation>
     </message>
     <message>
         <source>All Texts</source>
-        <translation>Tous les textes</translation>
+        <translation type="obsolete">Tous les textes</translation>
     </message>
     <message>
         <source>All Quantities</source>
-        <translation>Toutes les quantités</translation>
+        <translation type="obsolete">Toutes les quantités</translation>
     </message>
 </context>
 <context>
@@ -2277,7 +2259,7 @@
     </message>
     <message>
         <source>and</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">et</translation>
     </message>
     <message>
         <source>Any</source>
@@ -2324,7 +2306,7 @@
     </message>
     <message>
         <source>Total</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Total</translation>
     </message>
     <message>
         <source>There was a problem downloading the data for the specified order(s). This could have been caused by three things:&lt;ul&gt;&lt;li&gt;a network error occured.&lt;/li&gt;&lt;li&gt;the order number and/or type you entered is invalid.&lt;/li&gt;&lt;li&gt;there are no orders of the specified type in the given time period.&lt;/li&gt;&lt;/ul&gt;</source>
@@ -2380,7 +2362,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>&lt;b&gt;BrickStore&lt;/b&gt; supports three modes of operation:</source>
+        <source>&lt;b&gt;BrickStock&lt;/b&gt; supports three modes of operation:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2400,7 +2382,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>I want to use the full version (no reminders, but you need a &lt;a href=&quot;http://brickforge.de/software/brickstore&quot;&gt;valid registration key&lt;/a&gt;).</source>
+        <source>I want to use the full version (no reminders, but you need a &lt;a href=&quot;http://brickforge.de/software/brickstock&quot;&gt;valid registration key&lt;/a&gt;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2747,6 +2729,57 @@
     <message>
         <source>%1</source>
         <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>FilterWidget</name>
+    <message>
+        <source>All</source>
+        <translation type="unfinished">Tous</translation>
+    </message>
+    <message>
+        <source>All Prices</source>
+        <translation type="unfinished">Tous les prix</translation>
+    </message>
+    <message>
+        <source>All Texts</source>
+        <translation type="unfinished">Tous les textes</translation>
+    </message>
+    <message>
+        <source>All Quantities</source>
+        <translation type="unfinished">Toutes les quantités</translation>
+    </message>
+    <message>
+        <source>contains</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>doesn&apos;t contain</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>is</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>isn&apos;t</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>begins with</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>ends with</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>and</source>
+        <translation type="unfinished">et</translation>
+    </message>
+    <message>
+        <source>or</source>
+        <translation type="unfinished">ou</translation>
     </message>
 </context>
 </TS>

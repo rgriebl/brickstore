@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -12,6 +14,7 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 #include <qimage.h>
+#include <qpixmap.h>
 
 #include "cresource.h"
 #include "ciconfactory.h"
@@ -19,25 +22,25 @@
 
 CIconFactory::CIconFactory ( )
 {
-	setAutoDelete ( true );
-	installDefaultFactory ( this );
+    //setAutoDelete ( true );
+    //installDefaultFactory ( this );
 	
 	m_has_alpha = CResource::inst ( )-> pixmapAlphaSupported ( );
 }
 
-QPixmap *CIconFactory::createPixmap ( const QIconSet & iconSet, QIconSet::Size size, QIconSet::Mode mode, QIconSet::State state )
+QPixmap *CIconFactory::createPixmap ( const QIcon & icon, QIcon::Size size, QIcon::Mode mode, QIcon::State state )
 {
-	if ( !m_has_alpha )
-		return QIconFactory::createPixmap ( iconSet, size, mode, state );
+    //if ( !m_has_alpha )
+    //	return QIconFactory::createPixmap ( icon, size, mode, state );
 
-	if ( mode == QIconSet::Normal )
+	if ( mode == QIcon::Normal )
 		return 0;
 
-	int af = ( mode == QIconSet::Disabled ? 3 : 1 );
-	int vf = ( mode == QIconSet::Active ? 9 : 8 );
+	int af = ( mode == QIcon::Disabled ? 3 : 1 );
+	int vf = ( mode == QIcon::Active ? 9 : 8 );
 
 
-	QPixmap *p = new QPixmap ( iconSet. pixmap ( size, QIconSet::Normal, state ));
+	QPixmap *p = new QPixmap ( icon. pixmap ( size, QIcon::Normal, state ));
 
 	QImage img = p-> convertToImage ( );
 	img. setAlphaBuffer ( true );

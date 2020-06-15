@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -11,7 +13,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <qsimplerichtext.h>
+#include <q3simplerichtext.h>
 #include <qapplication.h>
 #include <qmainwindow.h>
 #include <qstatusbar.h>
@@ -21,7 +23,7 @@
 
 
 CUrlLabel::CUrlLabel ( QWidget *parent, const char *name )
-	: QTextBrowser ( parent, name )
+    : Q3TextBrowser ( parent, name )
 {
 	QPalette pal = palette ( );
 	pal. setColor ( QPalette::Active,   QColorGroup::Text, pal. color ( QPalette::Active,   QColorGroup::Foreground ));
@@ -32,15 +34,15 @@ CUrlLabel::CUrlLabel ( QWidget *parent, const char *name )
 	pal. setBrush ( QPalette::Disabled, QColorGroup::Base, pal. brush ( QPalette::Disabled, QColorGroup::Background ));
 	setPalette ( pal );
 
-	setFocusPolicy( NoFocus );
+    setFocusPolicy( Qt::NoFocus );
 	
 	setTextFormat ( Qt::RichText );
 	setFrameStyle ( NoFrame );
-	setHScrollBarMode ( AlwaysOff );
-	setVScrollBarMode ( AlwaysOff );
+    setHScrollBarMode ( AlwaysOff );
+    setVScrollBarMode ( AlwaysOff );
 
 	if ( qApp-> mainWidget ( ) && qApp-> mainWidget ( )-> inherits ( "QMainWindow" ))
-		connect ( this, SIGNAL( highlighted ( const QString & )), static_cast <QMainWindow *> ( qApp-> mainWidget ( ))-> statusBar ( ), SLOT( message ( const QString & )));
+        connect ( this, SIGNAL( highlighted ( const QString & )), static_cast <QMainWindow *> ( qApp-> mainWidget ( ))-> statusBar ( ), SLOT( message ( const QString & )));
 }
 
 CUrlLabel::~CUrlLabel ( )
@@ -51,8 +53,8 @@ void CUrlLabel::setSource ( const QString &src )
 {
 	if ( src. find ( ':' ) > 0 )
 		CUtility::openUrl ( src );
-	else
-		QTextBrowser::setSource ( src );
+    else
+        Q3TextBrowser::setSource ( src );
 }
 
 QSize CUrlLabel::sizeHint ( ) const
@@ -70,7 +72,7 @@ QSize CUrlLabel::minimumSizeHint ( ) const
 	if ( ms. width ( ) > 0 )
 		w = ms. width ( );
 	
-	QSimpleRichText rt ( text ( ), font ( ));
+    Q3SimpleRichText rt ( text ( ), font ( ));
 	rt. setWidth ( w - 2 * frameWidth ( ) - 10 );
 	
 	w = 10 + rt. widthUsed ( ) + 2 * frameWidth ( );

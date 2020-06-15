@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -19,13 +21,18 @@
 #include <qlayout.h>
 #include <qlabel.h>
 #include <qapplication.h>
-#include <qfiledialog.h>
+#include <q3filedialog.h>
 #include <qlineedit.h>
-#include <qheader.h>
+#include <q3header.h>
 #include <qvalidator.h>
 #include <qclipboard.h>
 #include <qcursor.h>
 #include <qtooltip.h>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QBoxLayout>
+//Added by qt3to4:
+#include <QCloseEvent>
 
 #include "cselectcolor.h"
 #include "cmessagebox.h"
@@ -113,8 +120,9 @@ private:
 } // namespace
 
 CWindow::CWindow ( CDocument *doc, QWidget *parent, const char *name )
-	: QWidget ( parent, name, WDestructiveClose ), m_lvitems ( 503 )
+    : QWidget ( parent ), m_lvitems ( 503 )
 {
+    setObjectName( name );
 	m_doc = doc;
 	m_ignore_selection_update = false;
 	
@@ -141,8 +149,8 @@ CWindow::CWindow ( CDocument *doc, QWidget *parent, const char *name )
 
 	w_filter = w_list-> createFilterWidget ( this );
 
-	QBoxLayout *toplay = new QVBoxLayout ( this, 0, 0 );
-	QBoxLayout *barlay = new QHBoxLayout ( toplay, 4 );
+    QBoxLayout *toplay = new QVBoxLayout ( this, 0, 0 );
+    QBoxLayout *barlay = new QHBoxLayout ( toplay, 4 );
 	barlay-> setMargin ( 4 );
 	barlay-> addWidget ( w_filter_label, 0 );
 	barlay-> addWidget ( w_filter );
@@ -151,7 +159,7 @@ CWindow::CWindow ( CDocument *doc, QWidget *parent, const char *name )
 	connect ( BrickLink::inst ( ), SIGNAL( priceGuideUpdated ( BrickLink::PriceGuide * )), this, SLOT( priceGuideUpdated ( BrickLink::PriceGuide * )));
 	connect ( BrickLink::inst ( ), SIGNAL( pictureUpdated ( BrickLink::Picture * )), this, SLOT( pictureUpdated ( BrickLink::Picture * )));
 
-	connect ( w_list, SIGNAL( contextMenuRequested ( QListViewItem *, const QPoint &, int )), this, SLOT( contextMenu ( QListViewItem *, const QPoint & )));
+	connect ( w_list, SIGNAL( contextMenuRequested ( Q3ListViewItem *, const QPoint &, int )), this, SLOT( contextMenu ( Q3ListViewItem *, const QPoint & )));
 
 	connect ( CConfig::inst ( ), SIGNAL( simpleModeChanged ( bool )), w_list, SLOT( setSimpleMode ( bool )));
 	connect ( CConfig::inst ( ), SIGNAL( simpleModeChanged ( bool )), this, SLOT( updateErrorMask ( )));
@@ -228,7 +236,8 @@ void CWindow::updateCaption ( )
 
 CWindow::~CWindow ( )
 {
-	m_doc-> deleteLater ( );
+    //delete m_doc;
+    //m_doc-> deleteLater ( );
 }
 
 void CWindow::saveDefaultColumnLayout ( )
@@ -238,7 +247,7 @@ void CWindow::saveDefaultColumnLayout ( )
 
 void CWindow::itemsAddedToDocument ( const CDocument::ItemList &items )
 {
-	QListViewItem *last_item = w_list-> lastItem ( );
+	Q3ListViewItem *last_item = w_list-> lastItem ( );
 
 	foreach ( CDocument::Item *item, items ) {
 		CItemViewItem *ivi = new CItemViewItem ( item, w_list, last_item );
@@ -246,7 +255,9 @@ void CWindow::itemsAddedToDocument ( const CDocument::ItemList &items )
 		last_item = ivi;
 	}
 
-	w_list-> ensureItemVisible ( m_lvitems [items. front ( )] );
+    if (!items.isEmpty()) {
+        w_list-> ensureItemVisible ( m_lvitems [items. front ( )] );
+    }
 }
 
 void CWindow::itemsRemovedFromDocument ( const CDocument::ItemList &items )
@@ -266,7 +277,6 @@ void CWindow::itemsChangedInDocument ( const CDocument::ItemList &items, bool /*
 		}
 	}
 }
-
 
 void CWindow::pictureUpdated ( BrickLink::Picture *pic )
 {
@@ -392,7 +402,6 @@ uint CWindow::addItems ( const BrickLink::InvItemList &items, int multiply, uint
 	return items. count ( ) - dropped;
 }
 
-
 void CWindow::addItem ( BrickLink::InvItem *item, uint mergeflags )
 {
 	BrickLink::InvItemList tmplist;
@@ -402,7 +411,6 @@ void CWindow::addItem ( BrickLink::InvItem *item, uint mergeflags )
 
 	delete item;
 }
-
 
 void CWindow::mergeItems ( const CDocument::ItemList &items, int globalmergeflags )
 {
@@ -472,7 +480,7 @@ void CWindow::updateSelectionFromView ( )
 {
 	CDocument::ItemList itlist;
 
-	for ( QListViewItemIterator it ( w_list ); it. current ( ); ++it ) {
+	for ( Q3ListViewItemIterator it ( w_list ); it. current ( ); ++it ) {
 		CItemViewItem *ivi = static_cast <CItemViewItem *> ( it. current ( ));
 
 		if ( ivi-> isSelected ( ) && ivi-> isVisible ( ))
@@ -501,7 +509,7 @@ QDomElement CWindow::createGuiStateXML ( QDomDocument doc )
 	int version = 1;
 
 	QDomElement root = doc. createElement ( "GuiState" );
-	root. setAttribute ( "Application", "BrickStore" );
+	root. setAttribute ( "Application", "BrickStock" );
 	root. setAttribute ( "Version", version );
 
 	if ( isDifferenceMode ( ))
@@ -525,7 +533,7 @@ bool CWindow::parseGuiStateXML ( QDomElement root )
 	bool ok = true;
 
 	if (( root. nodeName ( ) == "GuiState" ) && 
-	    ( root. attribute ( "Application" ) == "BrickStore" ) && 
+	    ( root. attribute ( "Application" ) == "BrickStock" ) && 
 		( root. attribute ( "Version" ). toInt ( ) == 1 )) {
 		for ( QDomNode n = root. firstChild ( ); !n. isNull ( ); n = n. nextSibling ( )) {
 			if ( !n. isElement ( ))
@@ -553,7 +561,6 @@ bool CWindow::parseGuiStateXML ( QDomElement root )
 
 	return ok;
 }
-
 
 void CWindow::editCut ( )
 {
@@ -611,7 +618,6 @@ void CWindow::editResetDifferences ( )
 
 	m_doc-> resetDifferences ( m_doc-> selection ( ));
 }
-
 
 void CWindow::editStatusInclude ( )
 {
@@ -678,7 +684,6 @@ void CWindow::editStockroomToggle ( )
 	setOrToggle<bool>::toggle ( this, tr( "Toggled 'stockroom' flag on %1 items" ), &CDocument::Item::stockroom, &CDocument::Item::setStockroom, true, false );
 }
 
-
 void CWindow::editPrice ( )
 {
 	if ( m_doc-> selection ( ). isEmpty ( ))
@@ -716,7 +721,6 @@ void CWindow::editPriceRound ( )
 	m_doc-> macroEnd ( macro, tr( "Price change on %1 items" ). arg ( roundcount ));
 }
 
-
 void CWindow::editPriceToPG ( )
 {
 	if ( m_doc-> selection ( ). isEmpty ( ))
@@ -732,7 +736,7 @@ void CWindow::editPriceToPG ( )
 	if ( dlg. exec ( ) == QDialog::Accepted ) {
 		CDisableUpdates disupd ( w_list );
 
-		m_settopg_list    = new QPtrDict<CDocument::Item> ( 251 );
+		m_settopg_list    = new Q3PtrDict<CDocument::Item> ( 251 );
 		m_settopg_failcnt = 0;
 		m_settopg_time    = dlg. time ( );
 		m_settopg_price   = dlg. price ( );
@@ -808,7 +812,6 @@ void CWindow::priceGuideUpdated ( BrickLink::PriceGuide *pg )
 		m_settopg_list = 0;
 	}
 }
-
 
 void CWindow::editPriceIncDec ( )
 {
@@ -1041,7 +1044,6 @@ void CWindow::removeRemark ( )
 	}
 }
 
-
 void CWindow::editComment ( )
 {
 	if ( m_doc-> selection ( ). isEmpty ( ))
@@ -1125,7 +1127,6 @@ void CWindow::removeComment ( )
 		m_doc-> macroEnd ( macro, tr( "Modified comment on %1 items" ). arg ( commentcount ));
 	}
 }
-
 
 void CWindow::editReserved ( )
 {
@@ -1324,7 +1325,7 @@ void CWindow::setPrice ( money_t d )
 		QApplication::beep ( );
 }
 
-void CWindow::contextMenu ( QListViewItem *it, const QPoint &p )
+void CWindow::contextMenu ( Q3ListViewItem *it, const QPoint &p )
 {
 	CFrameWork::inst ( )-> showContextMenu (( it ), p );
 }
@@ -1354,9 +1355,8 @@ void CWindow::closeEvent ( QCloseEvent *e )
 		}
 	}
 	else {
-		e-> accept ( );
-	}
-
+        e-> accept ( );
+    }
 }
 
 void CWindow::showBLCatalog ( )
@@ -1400,46 +1400,46 @@ void CWindow::filePrint ( )
 	if ( m_doc-> items ( ). isEmpty ( ))
 		return;
 
-	if ( CReportManager::inst ( )-> reports ( ). isEmpty ( )) {
-		CReportManager::inst ( )->reload ( );
+//	if ( CReportManager::inst ( )-> reports ( ). isEmpty ( )) {
+//		CReportManager::inst ( )->reload ( );
 
-		if ( CReportManager::inst ( )-> reports ( ). isEmpty ( ))
-			return;
-	}
+//		if ( CReportManager::inst ( )-> reports ( ). isEmpty ( ))
+//			return;
+//	}
 
-	QPrinter *prt = CReportManager::inst ( )-> printer ( );
+//	QPrinter *prt = CReportManager::inst ( )-> printer ( );
 
-	if ( !prt )
-		return;
+//	if ( !prt )
+//		return;
 
 	//prt-> setOptionEnabled ( QPrinter::PrintToFile, false );
-	prt-> setOptionEnabled ( QPrinter::PrintSelection, !m_doc->selection ( ). isEmpty ( ));
-	prt-> setOptionEnabled ( QPrinter::PrintPageRange, false );
-	prt-> setPrintRange ( m_doc-> selection ( ). isEmpty ( ) ? QPrinter::AllPages : QPrinter::Selection );
+//	prt-> setOptionEnabled ( QPrinter::PrintSelection, !m_doc->selection ( ). isEmpty ( ));
+//	prt-> setOptionEnabled ( QPrinter::PrintPageRange, false );
+//	prt-> setPrintRange ( m_doc-> selection ( ). isEmpty ( ) ? QPrinter::AllPages : QPrinter::Selection );
 
     QString doctitle = m_doc-> title ( );
     if ( doctitle == m_doc-> fileName ( ))
         doctitle = QFileInfo ( doctitle ). baseName ( );
 
-    prt-> setDocName ( doctitle );
+//  prt-> setDocName ( doctitle );
 
-	prt-> setFullPage ( true );
+//	prt-> setFullPage ( true );
 	
 
-	if ( !prt-> setup ( CFrameWork::inst ( )))
-		return;
+//	if ( !prt-> setup ( CFrameWork::inst ( )))
+//		return;
 
 	DlgSelectReportImpl d ( this );
 
 	if ( d. exec ( ) != QDialog::Accepted )
 		return;
 
-	const CReport *rep = d. report ( );
+//	const CReport *rep = d. report ( );
 
-	if ( !rep )
-		return;
+//	if ( !rep )
+//		return;
 
-	rep-> print ( prt, m_doc, sortedItems ( prt-> printRange ( ) == QPrinter::Selection ));
+//	rep-> print ( prt, m_doc, sortedItems ( prt-> printRange ( ) == QPrinter::Selection ));
 }
 
 void CWindow::fileSave ( )
@@ -1523,7 +1523,7 @@ CDocument::ItemList CWindow::sortedItems ( bool selection_only ) const
 {
 	CDocument::ItemList sorted;
 
-	for ( QListViewItemIterator it ( w_list ); it. current ( ); ++it ) {
+	for ( Q3ListViewItemIterator it ( w_list ); it. current ( ); ++it ) {
 		CItemViewItem *ivi = static_cast <CItemViewItem *> ( it. current ( ));
 
 		if ( selection_only && ( m_doc-> selection ( ). find ( ivi-> item ( )) == m_doc-> selection ( ). end ( )))

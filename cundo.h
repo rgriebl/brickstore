@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -15,11 +17,14 @@
 #define __CUNDO_H__
 
 #include <qobject.h>
-#include <qptrlist.h>
-#include <qptrdict.h>
 #include <qaction.h>
+//Added by qt3to4:
+#include <QEvent>
+#include <Q3PopupMenu>
+#include <q3ptrdict.h>
+#include <q3ptrlist.h>
 
-class QPopupMenu;
+class Q3PopupMenu;
 class CUndoManager;
 
 class CUndoCmd : public QObject {
@@ -100,8 +105,8 @@ private:
 	void currentChanged ( bool force_all = false );
 
 private:
-	QPtrList <CUndoCmd> m_stack;
-	QPtrListIterator <CUndoCmd> m_current;
+    Q3PtrList <CUndoCmd> m_stack;
+    Q3PtrListIterator <CUndoCmd> m_current;
 	CUndoCmd *m_clean;
 	bool m_clean_valid;
 	int m_macro_level;
@@ -166,7 +171,7 @@ private:
 
 private:
 	CUndoStack *          m_current;
-	QPtrDict <CUndoStack> m_stacks;
+	Q3PtrDict <CUndoStack> m_stacks;
 	uint                  m_limit;
 
 	static CUndoManager * s_inst;

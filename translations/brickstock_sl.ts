@@ -1,4 +1,6 @@
-<!DOCTYPE TS><TS>
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.0">
 <context>
     <name>BrickLink</name>
     <message>
@@ -92,15 +94,15 @@
     </message>
     <message>
         <source>Visit %1, or send an email to %2</source>
-        <translation>Obiščite %1 ali pa pošljite elektronsko pošto na %2</translation>
+        <translation type="obsolete">Obiščite %1 ali pa pošljite elektronsko pošto na %2</translation>
     </message>
     <message>
         <source>&lt;p&gt;This program is free software; it may be distributed and/or modified under the terms of the GNU General Public License version 2 as published by the Free Software Foundation and appearing in the file LICENSE.GPL included in this software package.&lt;br /&gt;This program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.&lt;br /&gt;See &lt;a href=&quot;http://fsf.org/licensing/licenses/gpl.html&quot;&gt;www.fsf.org/licensing/licenses/gpl.html&lt;/a&gt; for GPL licensing information.&lt;/p&gt;&lt;p&gt;All data from &lt;a href=&quot;http://www.bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; is owned by BrickLink&lt;sup&gt;TM&lt;/sup&gt;, which is a trademark of Dan Jezek.&lt;/p&gt;&lt;p&gt;Peeron Inventories from &lt;a href=&quot;http://www.peeron.com&quot;&gt;www.peeron.com&lt;/a&gt; are owned by Dan and Jennifer Boger.&lt;/p&gt;&lt;p&gt;LEGO&lt;sup&gt;&amp;reg;&lt;/sup&gt; is a trademark of the LEGO group of companies, which does not sponsor, authorize or endorse this software.&lt;/p&gt;&lt;p&gt;All other trademarks recognised.&lt;/p&gt;&lt;p&gt;French translation by Sylvain Perez (&lt;a href=&quot;mailto:bricklink@1001bricks.com&quot;&gt;bricklink@1001bricks.com&lt;/a&gt;)&lt;br /&gt;Dutch translation by Eric van Horssen (&lt;a href=&quot;mailto:horzel@hacktic.nl&quot;&gt;horzel@hacktic.nl&lt;/a&gt;)&lt;/p&gt;</source>
         <translation type="obsolete">&lt;p&gt; Ta program spada med prosto programje; lahko ga razširjate in/ali spreminjate pod pogoji Splošnega dovoljenja GNU (GNU General Public License), kot ga je objavila ustanova Free Software Foundation; bodisi različice 2 ali (po vaši izbiri) katere koli poznejše različice.Nahaja se v datoteki LICENSE.GPL, ki je del tega programskega paketa.&lt;br /&gt;Ta program se razširja v upanju, da bo uporaben, vendar BREZ VSAKRŠNEGA JAMSTVA; tudi brez posredne zagotovitve CENOVNE VREDNOSTI ali PRIMERNOSTI ZA DOLOČEN NAMEN.  Za podrobnosti glejte besedilo GNU General Public License.&lt;br /&gt;Za več informacij poglejte na &lt;a href=&quot;http://fsf.org/licensing/licenses/gpl.html&quot;&gt;www.fsf.org/licensing/licenses/gpl.html&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Vse informacije s spletne strani &lt;a href=&quot;http://www.bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; so v lasti BrickLink&lt;sup&gt;TM&lt;/sup&gt;, ki je zaščiteno ime Dana Jezka.&lt;/p&gt;&lt;p&gt;Popis imetja (inventar) s spletne strani Peeron Inventories &lt;a href=&quot;http://www.peeron.com&quot;&gt;www.peeron.com&lt;/a&gt; so v lasti Dana in Jennifer Boger.&lt;/p&gt;&lt;p&gt;LEGO&lt;sup&gt;&amp;reg;&lt;/sup&gt; je zaščiteno ime in blagovna znamka skupine LEGO, ki tega programa ne podipira, sponzorira in odobrava.&lt;/p&gt;&lt;p&gt;Vse ostale blagovne znamke so priznane.&lt;/p&gt;&lt;p&gt;Prevod v Francoščino Sylvain Perez (&lt;a href=&quot;mailto:bricklink@1001bricks.com&quot;&gt;bricklink@1001bricks.com&lt;/a&gt;)&lt;br /&gt;Prevod v Nizozemščino Eric van Horssen (&lt;a href=&quot;mailto:horzel@hacktic.nl&quot;&gt;horzel@hacktic.nl&lt;/a&gt;)&lt;br /&gt;Prevod v Slovenščino Sašo Tomat (&lt;a href=&quot;mailto:miskox@hotmail.com&quot;&gt;miskox@hotmail.com&lt;/a&gt;)&lt;/p&gt;</translation>
     </message>
     <message>
-        <source>BrickStore is currently running in &lt;b&gt;Demo&lt;/b&gt; mode.&lt;br /&gt;&lt;br /&gt;The complete functionality is accessible, but this reminder will pop up every 20 minutes.&lt;br /&gt;&lt;br /&gt;You can change the mode of operation at anytime via &lt;b&gt;Help &gt; Registration...&lt;/b&gt;</source>
-        <translation>BrickStore trenutno deluje v &lt;b&gt;DEMO&lt;/b&gt; načinu. &lt;br /&gt;&lt;br /&gt;Program je vseeno polno delujoč, vendar se bo ta opomnik pojavil vsakih 20 minut.&lt;br /&gt;&lt;br /&gt;Način delovanja lahko kadar koli spremenite preko &lt;b&gt;Pomoč &gt; Registracija...&lt;/b&gt;</translation>
+        <source>BrickStock is currently running in &lt;b&gt;Demo&lt;/b&gt; mode.&lt;br /&gt;&lt;br /&gt;The complete functionality is accessible, but this reminder will pop up every 20 minutes.&lt;br /&gt;&lt;br /&gt;You can change the mode of operation at anytime via &lt;b&gt;Help &gt; Registration...&lt;/b&gt;</source>
+        <translation>BrickStock trenutno deluje v &lt;b&gt;DEMO&lt;/b&gt; načinu. &lt;br /&gt;&lt;br /&gt;Program je vseeno polno delujoč, vendar se bo ta opomnik pojavil vsakih 20 minut.&lt;br /&gt;&lt;br /&gt;Način delovanja lahko kadar koli spremenite preko &lt;b&gt;Pomoč &gt; Registracija...&lt;/b&gt;</translation>
     </message>
     <message>
         <source>The program has to be restarted to activate the Demo mode.</source>
@@ -157,8 +159,8 @@
         <translation>Podroben seznam sprememb</translation>
     </message>
     <message>
-        <source>the BrickStore homepage</source>
-        <translation>Domača stran programa BrickStore</translation>
+        <source>the BrickStock homepage</source>
+        <translation>Domača stran programa BrickStock</translation>
     </message>
     <message>
         <source>&lt;b&gt;Please note:&lt;/b&gt; Your currently installed version is flagged as defective. Please visit %1 to find out the exact cause.</source>
@@ -176,8 +178,8 @@
         <translation>Datoteke s popisom imetja</translation>
     </message>
     <message>
-        <source>BrickStore XML Data</source>
-        <translation>Datoteka v BrickStore XML formatu</translation>
+        <source>BrickStock XML Data</source>
+        <translation>Datoteka v BrickStock XML formatu</translation>
     </message>
     <message>
         <source>BrikTrak Inventory</source>
@@ -192,8 +194,8 @@
         <translation>Odpri datoteko</translation>
     </message>
     <message>
-        <source>BrickStore has switched to a new file format (.bsx - BrickStore XML).&lt;br /&gt;&lt;br /&gt;Your document has been automatically imported and it will be converted as soon as you save it.</source>
-        <translation>BrickStore je preklopil na nove datoteke (.bsx - BrickStore XML).&lt;br /&gt;&lt;br /&gt;Vaš dokument je bil samodejno uvožen in bo pretvorjen takoj, ko ga shranite.</translation>
+        <source>BrickStock has switched to a new file format (.bsx - BrickStock XML).&lt;br /&gt;&lt;br /&gt;Your document has been automatically imported and it will be converted as soon as you save it.</source>
+        <translation>BrickStock je preklopil na nove datoteke (.bsx - BrickStock XML).&lt;br /&gt;&lt;br /&gt;Vaš dokument je bil samodejno uvožen in bo pretvorjen takoj, ko ga shranite.</translation>
     </message>
     <message>
         <source>Inventory for %1</source>
@@ -324,7 +326,7 @@
     </message>
     <message>
         <source>Could not load the BrickLink database files.&lt;br /&gt;&lt;br /&gt;The program is not functional without these files.</source>
-        <translation>Datotek z BrickLink podatkov zbirko ne morem naložiti.&lt;br /&gt;&lt;br /&gt;Brez teh datotek program BrickStore ne more delovati.</translation>
+        <translation>Datotek z BrickLink podatkov zbirko ne morem naložiti.&lt;br /&gt;&lt;br /&gt;Brez teh datotek program BrickStock ne more delovati.</translation>
     </message>
     <message>
         <source>Toolbar</source>
@@ -962,6 +964,10 @@
         <source>Copy Remarks from Document...</source>
         <translation>Prenesi Opombe iz dokumenta...</translation>
     </message>
+    <message>
+        <source>Windows</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>CImportBLCart</name>
@@ -1210,52 +1216,28 @@
         <translation>MISB</translation>
     </message>
     <message>
-        <source>contains</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>doesn&apos;t contain</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>is</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>isn&apos;t</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>begins with</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>ends with</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>and</source>
-        <translation>in</translation>
+        <translation type="obsolete">in</translation>
     </message>
     <message>
         <source>or</source>
-        <translation>ali</translation>
+        <translation type="obsolete">ali</translation>
     </message>
     <message>
         <source>All</source>
-        <translation>Vsi</translation>
+        <translation type="obsolete">Vsi</translation>
     </message>
     <message>
         <source>All Prices</source>
-        <translation>Vse cene</translation>
+        <translation type="obsolete">Vse cene</translation>
     </message>
     <message>
         <source>All Texts</source>
-        <translation>Vse besedilo</translation>
+        <translation type="obsolete">Vse besedilo</translation>
     </message>
     <message>
         <source>All Quantities</source>
-        <translation>Vsa količina</translation>
+        <translation type="obsolete">Vsa količina</translation>
     </message>
 </context>
 <context>
@@ -2385,8 +2367,8 @@
         <translation>Registracija</translation>
     </message>
     <message>
-        <source>&lt;b&gt;BrickStore&lt;/b&gt; supports three modes of operation:</source>
-        <translation>&lt;b&gt;BrickStore&lt;b&gt; podpira tri načine delovanja:</translation>
+        <source>&lt;b&gt;BrickStock&lt;/b&gt; supports three modes of operation:</source>
+        <translation>&lt;b&gt;BrickStock&lt;b&gt; podpira tri načine delovanja:</translation>
     </message>
     <message>
         <source>&amp;PRIVATE USE</source>
@@ -2425,8 +2407,8 @@
         <translation>Ključ</translation>
     </message>
     <message>
-        <source>I want to use the full version (no reminders, but you need a &lt;a href=&quot;http://brickforge.de/software/brickstore&quot;&gt;valid registration key&lt;/a&gt;).</source>
-        <translation>Uporabljati želim neokrnjeno različico (brez opomnikov, vendar potrebujete veljaven &lt;a href=&quot;http://brickforge.de/software/brickstore&quot;&gt;ključ&lt;/a&gt;).</translation>
+        <source>I want to use the full version (no reminders, but you need a &lt;a href=&quot;http://brickforge.de/software/brickstock&quot;&gt;valid registration key&lt;/a&gt;).</source>
+        <translation>Uporabljati želim neokrnjeno različico (brez opomnikov, vendar potrebujete veljaven &lt;a href=&quot;http://brickforge.de/software/brickstock&quot;&gt;ključ&lt;/a&gt;).</translation>
     </message>
     <message>
         <source>You can change the mode of operation at anytime via &lt;b&gt;Help &gt; Registration...&lt;/b&gt;</source>
@@ -2752,6 +2734,57 @@
     <message>
         <source>%1</source>
         <translation>%1</translation>
+    </message>
+</context>
+<context>
+    <name>FilterWidget</name>
+    <message>
+        <source>All</source>
+        <translation type="unfinished">Vsi</translation>
+    </message>
+    <message>
+        <source>All Prices</source>
+        <translation type="unfinished">Vse cene</translation>
+    </message>
+    <message>
+        <source>All Texts</source>
+        <translation type="unfinished">Vse besedilo</translation>
+    </message>
+    <message>
+        <source>All Quantities</source>
+        <translation type="unfinished">Vsa količina</translation>
+    </message>
+    <message>
+        <source>contains</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>doesn&apos;t contain</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>is</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>isn&apos;t</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>begins with</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>ends with</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>and</source>
+        <translation type="unfinished">in</translation>
+    </message>
+    <message>
+        <source>or</source>
+        <translation type="unfinished">ali</translation>
     </message>
 </context>
 </TS>

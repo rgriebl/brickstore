@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -16,6 +18,8 @@
 
 #include <qobject.h>
 #include <qdom.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 #include "bricklink.h"
 
@@ -71,7 +75,7 @@ public:
 		PriceOrig,
 		PriceDiff,
 
-		FieldCount,
+        FieldCount,
 	};
 
 	class Item : public BrickLink::InvItem {
@@ -89,9 +93,9 @@ public:
 		Q_UINT64 m_errors;
 	};
 
-	typedef QValueList<Item *>      ItemList;
+	typedef Q3ValueList<Item *>      ItemList;
 	typedef int                     Position;
-	typedef QValueVector<Position>  PositionVector;
+	typedef Q3ValueVector<Position>  PositionVector;
 
 	class Statistics {
 	public:
@@ -120,7 +124,7 @@ public:
 	CDocument ( bool dont_sort = false );
 	virtual ~CDocument ( );
 
-	static const QValueList<CDocument *> &allDocuments ( );
+	static const Q3ValueList<CDocument *> &allDocuments ( );
 
 	void addView ( QWidget *view, IDocumentView *docview = 0 );
 
@@ -156,7 +160,7 @@ public:
 	static CDocument *fileOpen ( );
 	static CDocument *fileOpen ( const QString &name );
 	static CDocument *fileImportBrickLinkInventory ( const BrickLink::Item *preselect = 0 );
-	static QValueList<CDocument *> fileImportBrickLinkOrders ( );
+	static Q3ValueList<CDocument *> fileImportBrickLinkOrders ( );
 	static CDocument *fileImportBrickLinkStore ( );
 	static CDocument *fileImportBrickLinkCart ( );
 	static CDocument *fileImportBrickLinkXML ( );
@@ -226,10 +230,10 @@ private:
 
 	BrickLink::Order *m_order;
 
-	QValueList<IDocumentView *> m_views;
+	Q3ValueList<IDocumentView *> m_views;
 	QDomElement  m_gui_state;
 
-	static QValueList<CDocument *> s_documents;
+	static Q3ValueList<CDocument *> s_documents;
 };
 
 #endif

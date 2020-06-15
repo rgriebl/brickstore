@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -16,10 +18,10 @@
 #include <qspinbox.h>
 #include <qcombobox.h>
 #include <qlineedit.h>
-#include <qfiledialog.h>
+#include <q3filedialog.h>
 #include <qlabel.h>
 #include <qvalidator.h>
-#include <qbuttongroup.h>
+#include <q3buttongroup.h>
 #include <qtabwidget.h>
 
 #include "cmessagebox.h"
@@ -46,7 +48,7 @@ static int day2sec ( int d )
 
 } // namespace
 
-DlgSettingsImpl::DlgSettingsImpl( QWidget *parent, const char *name, bool modal, WFlags fl )
+DlgSettingsImpl::DlgSettingsImpl( QWidget *parent, const char *name, bool modal, Qt::WFlags fl )
 	: DlgSettings ( parent, name, modal, fl )
 {
 	// ---------------------------------------------------------------------
@@ -87,7 +89,7 @@ DlgSettingsImpl::DlgSettingsImpl( QWidget *parent, const char *name, bool modal,
 
 	w_doc_dir-> setText ( QDir::convertSeparators ( CConfig::inst ( )-> documentDir ( )));
 	connect ( w_doc_dir_select, SIGNAL( clicked ( )), this, SLOT( selectDocDir ( )));
-	w_doc_dir_select-> setIconSet ( CResource::inst ( )-> iconSet ( "file_open" ));
+    w_doc_dir_select-> setIcon ( CResource::inst ( )-> icon ( "file_open" ));
 
 	w_doc_close_empty-> setChecked ( CConfig::inst ( )-> closeEmptyDocuments ( ));
 
@@ -107,14 +109,14 @@ DlgSettingsImpl::DlgSettingsImpl( QWidget *parent, const char *name, bool modal,
 
 	w_cache_dir-> setText ( QDir::convertSeparators ( BrickLink::inst ( )-> dataPath ( )));
 	connect ( w_cache_dir_select, SIGNAL( clicked ( )), this, SLOT( selectCacheDir ( )));
-	w_cache_dir_select-> setIconSet ( CResource::inst ( )-> iconSet ( "file_open" ));
+    w_cache_dir_select-> setIcon ( CResource::inst ( )-> icon ( "file_open" ));
 
 	// ---------------------------------------------------------------------
 
 	const BrickLink::ItemType *itype;
 
 	itype = BrickLink::inst ( )-> itemType ( CConfig::inst ( )-> readNumEntry ( "/Defaults/ImportInventory/ItemType", 'S' ));
-	m_def_inv_itemtype = new CItemTypeCombo ( w_def_inv_itemtype, true );
+    m_def_inv_itemtype = new CItemTypeCombo ( w_def_inv_itemtype, true );
 	m_def_inv_itemtype-> setCurrentItemType ( itype ? itype : BrickLink::inst ( )-> itemType ( 'S' ));
 
 	itype = BrickLink::inst ( )-> itemType ( CConfig::inst ( )-> readNumEntry ( "/Defaults/AddItems/ItemType", 'P' ));
@@ -170,7 +172,7 @@ void DlgSettingsImpl::setCurrentPage ( const char *page )
 
 void DlgSettingsImpl::selectCacheDir ( )
 {
-	QString newdir = QFileDialog::getExistingDirectory ( w_cache_dir-> text ( ), this, 0, tr( "Cache directory location" ));
+	QString newdir = Q3FileDialog::getExistingDirectory ( w_cache_dir-> text ( ), this, 0, tr( "Cache directory location" ));
 
 	if ( !newdir. isNull ( ))
 		w_cache_dir-> setText ( QDir::convertSeparators ( newdir ));
@@ -178,7 +180,7 @@ void DlgSettingsImpl::selectCacheDir ( )
 
 void DlgSettingsImpl::selectDocDir ( )
 {
-	QString newdir = QFileDialog::getExistingDirectory ( w_doc_dir-> text ( ), this, 0, tr( "Document directory location" ));
+	QString newdir = Q3FileDialog::getExistingDirectory ( w_doc_dir-> text ( ), this, 0, tr( "Document directory location" ));
 
 	if ( !newdir. isNull ( ))
 		w_doc_dir-> setText ( QDir::convertSeparators ( newdir ));
@@ -258,7 +260,7 @@ bool DlgSettingsImpl::readAvailableLanguages ( )
 	QDomDocument doc;
 	QFile file ( CResource::inst ( )-> locate ( "translations/translations.xml" ));
 
-	if ( file. open ( IO_ReadOnly )) {
+	if ( file. open ( QIODevice::ReadOnly )) {
 		QString err_str;
 		int err_line = 0, err_col = 0;
 	

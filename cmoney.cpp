@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -21,15 +23,13 @@
 #include <qlineedit.h>
 #include <qevent.h>
 #include <qdatastream.h>
+//Added by qt3to4:
+#include <QKeyEvent>
 
 #if defined( Q_OS_MACX )
-
 #include <CoreFoundation/CFLocale.h>
-
-extern QString cfstring2qstring ( CFStringRef str ); // defined in qglobal.cpp
-
+#include <CoreFoundation/CFString.h>
 #endif
-
 
 #include "cconfig.h"
 #include "cmoney.h"
@@ -120,6 +120,21 @@ CMoney *CMoney::inst ( )
 	return s_inst;
 }
 
+QString CMoney::toQString(CFStringRef str)
+{
+    if (!str)
+        return QString();
+
+    CFIndex length = CFStringGetLength(str);
+    if (length == 0)
+        return QString();
+
+    QString string(length, Qt::Uninitialized);
+    CFStringGetCharacters(str, CFRangeMake(0, length), reinterpret_cast<UniChar *>
+        (const_cast<QChar *>(string.unicode())));
+    return string;
+}
+
 CMoney::CMoney ( )
 {
 	d = new CMoneyData;
@@ -142,11 +157,11 @@ CMoney::CMoney ( )
 		CFStringRef cs = (CFStringRef) CFLocaleGetValue ( loc, kCFLocaleCurrencySymbol );
 		CFStringRef cc = (CFStringRef) CFLocaleGetValue ( loc, kCFLocaleCurrencyCode );
  
-		decpoint = cfstring2qstring ( ds );
-		csymbol = cfstring2qstring ( cs );
-		csymbolint = cfstring2qstring ( cc );
+        decpoint = toQString ( ds );
+        csymbol = toQString ( cs );
+        csymbolint = toQString ( cc );
 
-		QString locstr =  cfstring2qstring ((CFStringRef) CFLocaleGetIdentifier ( loc ));
+        QString locstr =  toQString ((CFStringRef) CFLocaleGetIdentifier ( loc ));
 		if (locstr. find ( '.' ) == -1 )
 			locstr += QString( ".UTF-8" );
 

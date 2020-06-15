@@ -1,6 +1,8 @@
-/* Copyright (C) 2004-2008 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2013-2014 Patrick Brans.  All rights reserved.
 **
-** This file is part of BrickStore.
+** This file is part of BrickStock.
+** BrickStock is based heavily on BrickStore (http://www.brickforge.de/software/brickstore/)
+** by Robert Griebl, Copyright (C) 2004-2008.
 **
 ** This file may be distributed and/or modified under the terms of the GNU 
 ** General Public License version 2 as published by the Free Software Foundation 
@@ -15,7 +17,9 @@
 #define __CCHECKFORUPDATES_H__
 
 #include <qbuffer.h>
-#include <qvaluelist.h>
+#include <q3valuelist.h>
+//Added by qt3to4:
+#include <Q3TextStream>
 
 #include "capplication.h"
 #include "cconfig.h"
@@ -57,14 +61,13 @@ private slots:
 		bool ok = false;
 
 		if ( data && data-> size ( )) {
-			QBuffer buf ( *data );
+            QBuffer buf ( data );
 
-			if ( buf. open ( IO_ReadOnly )) {
-				QTextStream ts ( &buf );
+			if ( buf. open ( QIODevice::ReadOnly )) {
+				Q3TextStream ts ( &buf );
 				QString line;
 
 				bool update_possible = false;
-
 
 				while ( !( line = ts. readLine ( )). isNull ( )) {
 					QStringList sl = QStringList::split ( '\t', line, true );
@@ -113,7 +116,7 @@ private slots:
 						str = tr( "A newer version than the one currently installed is available:" );
 						str += "<br /><br /><br /><table>";
 
-						for ( QValueList <VersionRecord>::iterator it = m_versions. begin ( ); it != m_versions. end ( ); ++it ) {
+						for ( Q3ValueList <VersionRecord>::iterator it = m_versions. begin ( ); it != m_versions. end ( ); ++it ) {
 							const VersionRecord &vrr = *it;
 
 							if ( vrr. m_is_newer && !vrr. m_has_errors ) {
@@ -127,9 +130,9 @@ private slots:
 					}
 				
 					if ( m_current_version. m_has_errors ) {
-						QString link = QString( "<a href=\"http://" + cApp-> appURL ( ) + "\">%1</a>" ). arg ( tr( "the BrickStore homepage" ));
+                        QString link = QString( "<a href=\"http://" + cApp-> appURL ( ) + "\">%1</a>" ). arg ( tr( "the BrickStock homepage" ));
 
-						str += "<br /><br /><br /><br /><br /><br /><table><tr><td><img src=\"brickstore-important\" align=\"left\" /></td><td>" + 
+                        str += "<br /><br /><br /><br /><br /><br /><table><tr><td><img src=\"brickstock-important\" align=\"left\" /></td><td>" +
 							   tr( "<b>Please note:</b> Your currently installed version is flagged as defective. Please visit %1 to find out the exact cause." ). arg ( link ) +
 							   "</td></tr></table>";
 					}
@@ -158,7 +161,7 @@ private:
 			if ( !str. isEmpty ( )) {
 				QStringList vl = QStringList::split ( '.', str );
 
-				if ( vl. count ( ) == 3 ) {
+                if ( vl. count ( ) >= 3 ) {
 					m_major    = vl [0]. toInt ( );
 					m_minor    = vl [1]. toInt ( );
 					m_revision = vl [2]. toInt ( );
@@ -200,7 +203,7 @@ private:
 private:
 	CProgressDialog *m_progress;
 	VersionRecord   m_current_version;
-	QValueList <VersionRecord> m_versions;
+	Q3ValueList <VersionRecord> m_versions;
 };
 
 #endif
