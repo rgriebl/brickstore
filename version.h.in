@@ -26,7 +26,7 @@
 #define _BS_STR2(s)  #s
 
 #define BRICKSTOCK_VERSION          _BS_STR( BRICKSTOCK_MAJOR ) "." _BS_STR( BRICKSTOCK_MINOR ) "." _BS_STR( BRICKSTOCK_PATCH )
-#define BRICKSTOCK_COPYRIGHT        "2013-2018 P. Brans"
+#define BRICKSTOCK_COPYRIGHT        "2013-2019 P. Brans"
 #define BRICKSTOCK_BASE_COPYRIGHT   "2004-2008 R. Griebl"
 #define BRICKSTOCK_URL              "brickstock.patrickbrans.com"
 #define BRICKSTOCK_DB_PATH          "/brickstock-data/"

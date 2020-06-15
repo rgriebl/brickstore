@@ -41,7 +41,7 @@ public:
 		pd-> setHeaderText ( tr( "Importing BrickLink Store" ));
 		pd-> setMessageText ( tr( "Download: %1/%2 KB" ));
 		
-		const char *url = "http://www.bricklink.com/invExcelFinal.asp"; 
+        const char *url = "https://www.bricklink.com/invExcelFinal.asp";
 
 		CKeyValueList query;
 		query << CKeyValue ( "itemType",      "" )
@@ -148,7 +148,7 @@ public:
 		m_progress-> setHeaderText ( tr( "Importing BrickLink Order" ));
 		m_progress-> setMessageText ( tr( "Download: %1/%2 KB" ));
 		
-		m_url = "http://www.bricklink.com/orderExcelFinal.asp";
+        m_url = "https://www.bricklink.com/orderExcelFinal.asp";
 
 		m_query << CKeyValue ( "orderType",     m_order_type == BrickLink::Order::Placed ? "placed" : "received" )
 		        << CKeyValue ( "action",        "save" )
@@ -256,7 +256,7 @@ private slots:
 										    order-> setDelivery ( money_t::fromCString ( val ));
 									    else if ( tag == "ORDERCREDIT" )
 										    order-> setCredit ( money_t::fromCString ( val ));
-									    else if ( tag == "GRANDTOTAL" )
+                                        else if ( tag == "BASEGRANDTOTAL" )
 										    order-> setGrandTotal ( money_t::fromCString ( val ));
 									    else if ( tag == "ORDERSTATUS" )
 										    order-> setStatus ( val );
@@ -295,7 +295,7 @@ private slots:
         else if (( m_current_address + 1 ) < int( m_orders. size ( ))) {
             m_current_address++;
 
-            QString url = QString( "http://www.bricklink.com/memberInfo.asp?u=" ) + m_orders [m_current_address]. first-> other( );
+            QString url = QString( "https://www.bricklink.com/memberInfo.asp?u=" ) + m_orders [m_current_address]. first-> other( );
     		m_progress-> setHeaderText ( tr( "Importing address records" ));
             m_progress-> get ( url );
             m_progress-> setSize ( );
@@ -343,7 +343,7 @@ public:
 		pd-> setHeaderText ( tr( "Importing BrickLink Shopping Cart" ));
 		pd-> setMessageText ( tr( "Download: %1/%2 KB" ));
 		
-		const char *url = "http://www.bricklink.com/storeCart.asp"; 
+        const char *url = "https://www.bricklink.com/storeCart.asp";
 
 		CKeyValueList query;
 		query << CKeyValue ( "h", QString::number ( shopid ))

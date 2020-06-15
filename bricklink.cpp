@@ -44,30 +44,30 @@ QString BrickLink::url ( UrlList u, const void *opt, const void *opt2 )
 
 	switch ( u ) {
 		case URL_InventoryRequest:
-            url = "http://www.bricklink.com/catalogInvAdd.asp";
+            url = "https://www.bricklink.com/catalogInvAdd.asp";
 			break;
 			
 		case URL_WantedListUpload:
-			url = "http://www.bricklink.com/wantedXML.asp";
+            url = "https://www.bricklink.com/wantedXML.asp";
 			break;
 			
 		case URL_InventoryUpload:
-			url = "http://www.bricklink.com/invXML.asp";
+            url = "https://www.bricklink.com/invXML.asp";
 			break;
 			
 		case URL_InventoryUpdate:
-			url = "http://www.bricklink.com/invXML.asp#update";
+            url = "https://www.bricklink.com/invXML.asp#update";
 			break;
 			
 		case URL_CatalogInfo:
 			if ( opt )
-				url. sprintf ( "http://www.bricklink.com/catalogItem.asp?%c=%s", static_cast <const Item *> ( opt )-> itemType ( )-> id ( ),
+                url. sprintf ( "https://www.bricklink.com/catalogItem.asp?%c=%s", static_cast <const Item *> ( opt )-> itemType ( )-> id ( ),
 				                                                                 static_cast <const Item *> ( opt )-> id ( ));
 			break;
 		
 		case URL_PriceGuideInfo:
 			if ( opt && opt2 ) {
-                url. sprintf ( "http://www.bricklink.com/catalogPG.asp?%c=%s", static_cast <const Item *> ( opt )-> itemType ( )-> id ( ),
+                url. sprintf ( "https://www.bricklink.com/catalogPG.asp?%c=%s", static_cast <const Item *> ( opt )-> itemType ( )-> id ( ),
 				                                                                       static_cast <const Item *> ( opt )-> id ( ));
 
 				if ( static_cast <const Item *> ( opt )-> itemType ( )-> hasColors ( )) {
@@ -81,7 +81,7 @@ QString BrickLink::url ( UrlList u, const void *opt, const void *opt2 )
 
 		case URL_LotsForSale:
 			if ( opt && opt2 ) {
-				url. sprintf ( "http://www.bricklink.com/search.asp?viewFrom=sa&itemType=%c&q=%s", static_cast <const Item *> ( opt )-> itemType ( )-> id ( ),
+                url. sprintf ( "https://www.bricklink.com/search.asp?viewFrom=sa&itemType=%c&q=%s", static_cast <const Item *> ( opt )-> itemType ( )-> id ( ),
 				                                                                                   static_cast <const Item *> ( opt )-> id ( ));
 				
 				// workaround for BL not accepting the -X suffix for sets, instructions and boxes
@@ -104,7 +104,7 @@ QString BrickLink::url ( UrlList u, const void *opt, const void *opt2 )
 			
 		case URL_AppearsInSets:
 			if ( opt && opt2 ) {
-				url. sprintf ( "http://www.bricklink.com/catalogItemIn.asp?%c=%s&in=S", static_cast <const Item *> ( opt )-> itemType ( )-> id ( ),
+                url. sprintf ( "https://www.bricklink.com/catalogItemIn.asp?%c=%s&in=S", static_cast <const Item *> ( opt )-> itemType ( )-> id ( ),
 				                                                                        static_cast <const Item *> ( opt )-> id ( ));
 				if ( static_cast <const Item *> ( opt )-> itemType ( )-> hasColors ( )) {
                     QString col;
@@ -116,11 +116,11 @@ QString BrickLink::url ( UrlList u, const void *opt, const void *opt2 )
 			break;
 
 		case URL_ColorChangeLog:
-			url = "http://www.bricklink.com/catalogReqList.asp?pg=1&chgUserID=&viewActionType=R";
+            url = "https://www.bricklink.com/catalogReqList.asp?pg=1&chgUserID=&viewActionType=R";
 			break;
 			
 		case URL_ItemChangeLog:
-			url = "http://www.bricklink.com/catalogReqList.asp?pg=1&chgUserID=&viewActionType=I";
+            url = "https://www.bricklink.com/catalogReqList.asp?pg=1&chgUserID=&viewActionType=I";
 
 			if ( opt ) {
 				url. append ( "&q=" );
@@ -135,7 +135,7 @@ QString BrickLink::url ( UrlList u, const void *opt, const void *opt2 )
 
 		case URL_StoreItemDetail:
 			if ( opt )
-				url. sprintf ( "http://www.bricklink.com/inventory_detail.asp?itemID=%u", *static_cast <const unsigned int *> ( opt ));
+                url. sprintf ( "https://www.bricklink.com/inventory_detail.asp?itemID=%u", *static_cast <const unsigned int *> ( opt ));
 			break;
 
 		default:

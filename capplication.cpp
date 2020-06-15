@@ -363,7 +363,7 @@ void CApplication::about ( )
 		"<br />"
 		"See <a href=\"http://fsf.org/licensing/licenses/gpl.html\">www.fsf.org/licensing/licenses/gpl.html</a> for GPL licensing information."
 		"</p><p>"
-		"All data from <a href=\"http://www.bricklink.com\">www.bricklink.com</a> is owned by BrickLink<sup>TM</sup>, "
+        "All data from <a href=\"https://www.bricklink.com\">www.bricklink.com</a> is owned by BrickLink<sup>TM</sup>, "
 		"which is a trademark of Dan Jezek."
 		"</p><p>"
 		"Peeron Inventories from <a href=\"http://www.peeron.com\">www.peeron.com</a> are owned by Dan and Jennifer Boger."

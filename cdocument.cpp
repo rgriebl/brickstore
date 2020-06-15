@@ -556,10 +556,10 @@ CDocument *CDocument::fileImportBrickLinkStore ( )
 CDocument *CDocument::fileImportBrickLinkCart ( )
 {
 	QString url = QApplication::clipboard ( )-> text ( QClipboard::Clipboard );
-    QRegExp rx_valid ( "http://www\\.bricklink\\.com/storeCart\\.asp\\?h=[0-9]+&b=-?[0-9]+" );
+    QRegExp rx_valid ( "https://www\\.bricklink\\.com/storeCart\\.asp\\?h=[0-9]+&b=-?[0-9]+" );
 		
 	if ( !rx_valid. exactMatch ( url ))
-		url = "http://www.bricklink.com/storeCart.asp?h=______&b=______";
+        url = "https://www.bricklink.com/storeCart.asp?h=______&b=______";
 	
 	if ( CMessageBox::getString ( CFrameWork::inst ( ), tr( "Enter the URL of your current BrickLink shopping cart:"
 		                                                    "<br /><br />Right-click on the <b>View Cart</b> button "
