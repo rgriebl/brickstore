@@ -18,7 +18,8 @@
 
 #if !defined(QT_NO_OPENGL)
 
-#include <QGLWidget>
+#include <QOpenGLWidget>
+#include <QOpenGLFunctions_2_1>
 #include <QVector3D>
 
 #ifdef MessageBox
@@ -65,9 +66,9 @@ public:
 
     bool isAnimationActive() const;
 
-    virtual void initializeGL();
-    virtual void resizeGL(int w, int h);
-    virtual void paintGL();
+    void initializeGL(QOpenGLContext *context);
+    void resizeGL(QOpenGLContext *context, int w, int h);
+    void paintGL(QOpenGLContext *context);
 
 signals:
     void updateNeeded();
@@ -104,9 +105,11 @@ private:
     QSize m_size;
     QVector3D m_center;
     QTimer *m_animation;
+    QOpenGLFunctions_2_1 *gl = nullptr;
+    QOpenGLContext *glCurrentContext = nullptr;
 };
 
-class RenderWidget : public QGLWidget {
+class RenderWidget : public QOpenGLWidget {
     Q_OBJECT
 public:
     RenderWidget(QWidget *parent = 0);
@@ -116,8 +119,8 @@ public:
     int color() const   { return m_renderer->color(); }
     void setPartAndColor(Part *part, int basecolor)  { m_renderer->setPartAndColor(part, basecolor); }
 
-    QSize minimumSizeHint() const;
-    QSize sizeHint() const;
+    QSize minimumSizeHint() const override;
+    QSize sizeHint() const override;
 
     bool isAnimationActive() const;
 
@@ -130,14 +133,14 @@ protected slots:
     void slotMakeCurrent();
 
 protected:
-    void mousePressEvent(QMouseEvent *e);
-    void mouseReleaseEvent(QMouseEvent *e);
-    void mouseMoveEvent(QMouseEvent *e);
-    void wheelEvent(QWheelEvent *e);
+    void mousePressEvent(QMouseEvent *e) override;
+    void mouseReleaseEvent(QMouseEvent *e) override;
+    void mouseMoveEvent(QMouseEvent *e) override;
+    void wheelEvent(QWheelEvent *e) override;
 
-    virtual void initializeGL();
-    virtual void resizeGL(int w, int h);
-    virtual void paintGL();
+    void initializeGL() override;
+    void resizeGL(int w, int h) override;
+    void paintGL() override;
 
 private:
     GLRenderer *m_renderer;
@@ -180,8 +183,8 @@ protected slots:
     void slotMakeCurrent();
 
 private:
-    QGLWidget *m_dummy;
-    QGLFramebufferObject *m_fbo;
+    QOpenGLWidget *m_dummy;
+    QOpenGLFramebufferObject *m_fbo;
     bool m_initialized;
     bool m_resize;
     GLRenderer *m_renderer;
