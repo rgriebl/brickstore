@@ -95,7 +95,7 @@ const BrickLink::Item *BrickLink::TextImport::findItem ( char tid, const char *i
 void BrickLink::TextImport::appendCategoryToItemType ( const Category *cat, ItemType *itt )
 {
 	bool found = false;
-	Q_UINT32 catcount = 0;
+    quint32 catcount = 0;
 	for ( const BrickLink::Category **catp = itt-> m_categories; catp && *catp; catp++ ) {
 		if ( *catp == cat ) {
 			found = true;

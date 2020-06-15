@@ -197,11 +197,11 @@ public:
 		const Color *     m_color;
 		time_t            m_last_inv_update;
 		float             m_weight;
-		Q_UINT32          m_index : 24;
-		Q_UINT32          m_year  : 8;
+        quint32           m_index : 24;
+        quint32           m_year  : 8;
 
-		mutable Q_UINT32 *m_appears_in;
-		mutable Q_UINT64 *m_consists_of;
+        mutable quint32 *m_appears_in;
+        mutable quint64 *m_consists_of;
 
 	private:
 		Item ( );
@@ -211,33 +211,33 @@ public:
 
 		struct appears_in_record {
 #if __BYTE_ORDER == __LITTLE_ENDIAN
-			Q_UINT32  m12  : 12;
-			Q_UINT32  m20  : 20;
+            quint32  m12  : 12;
+            quint32  m20  : 20;
 #else
-			Q_UINT32  m20  : 20;
-			Q_UINT32  m12  : 12;
+            quint32  m20  : 20;
+            quint32  m12  : 12;
 #endif
 		};
 
 		struct consists_of_record {
 #if __BYTE_ORDER == __LITTLE_ENDIAN
-			Q_UINT64  m_qty      : 12;
-			Q_UINT64  m_index    : 20;
-			Q_UINT64  m_color    : 12;
-			Q_UINT64  m_extra    : 1;
-			Q_UINT64  m_isalt    : 1;
-			Q_UINT64  m_altid    : 6;
-            Q_UINT64  m_cpart    : 1;
-			Q_UINT64  m_reserved : 11;
+            quint64  m_qty      : 12;
+            quint64  m_index    : 20;
+            quint64  m_color    : 12;
+            quint64  m_extra    : 1;
+            quint64  m_isalt    : 1;
+            quint64  m_altid    : 6;
+            quint64  m_cpart    : 1;
+            quint64  m_reserved : 11;
 #else
-			Q_UINT64  m_reserved : 11;
-            Q_UINT64  m_cpart    : 1;
-			Q_UINT64  m_altid    : 6;
-			Q_UINT64  m_isalt    : 1;
-			Q_UINT64  m_extra    : 1;
-			Q_UINT64  m_color    : 12;
-			Q_UINT64  m_index    : 20;
-			Q_UINT64  m_qty      : 12;
+            quint64  m_reserved : 11;
+            quint64  m_cpart    : 1;
+            quint64  m_altid    : 6;
+            quint64  m_isalt    : 1;
+            quint64  m_extra    : 1;
+            quint64  m_color    : 12;
+            quint64  m_index    : 20;
+            quint64  m_qty      : 12;
 #endif
 		};
 
@@ -334,7 +334,7 @@ public:
 		int origQuantity ( ) const          { return m_orig_quantity; }
 		void setOrigQuantity ( int q )      { m_orig_quantity = q; }
 		int bulkQuantity ( ) const          { return m_bulk_quantity; }
-		void setBulkQuantity ( int q )      { m_bulk_quantity = QMAX( 1, q ); }
+        void setBulkQuantity ( int q )      { m_bulk_quantity = qMax( 1, q ); }
 		int tierQuantity ( uint i ) const   { return m_tier_quantity [i < 3 ? i : 0]; }
 		void setTierQuantity ( uint i, int q ) { m_tier_quantity [i < 3 ? i : 0] = q; }
 		money_t price ( ) const             { return m_price; }
@@ -344,7 +344,7 @@ public:
 		money_t tierPrice ( uint i ) const  { return m_tier_price [i < 3 ? i : 0]; }
 		bool setTierPrice ( uint i, money_t p ) { if ( p < 0 ) return false; m_tier_price [i < 3 ? i : 0] = p; return true; }
 		int sale ( ) const                  { return m_sale; }
-		void setSale ( int s )              { m_sale = QMAX( -99, QMIN( 100, s )); }
+        void setSale ( int s )              { m_sale = qMax( -99, qMin( 100, s )); }
 		money_t total ( ) const             { return m_price * m_quantity; }
 
 		uint lotId ( ) const                { return m_lot_id; }

@@ -656,7 +656,7 @@ public:
 
 private:
 	QFile        m_file;
-	Q_UINT32     m_filesize;
+    quint32     m_filesize;
 	const char * m_memptr;
 	QByteArray   m_mem;
 	QDataStream *m_ds;
@@ -692,70 +692,70 @@ bool BrickLink::readDatabase ( const QString &fname )
 
 	if ( pds ) {
 		QDataStream &ds = *pds;
-		Q_UINT32 magic = 0, filesize = 0, version = 0;
+        quint32 magic = 0, filesize = 0, version = 0;
 
 		ds >> magic >> filesize >> version;
 		
-        if (( magic != Q_UINT32( 0xb91c5703 )) || ( filesize != f. size ( )) || ( version != BRICKSTOCK_DB_VERSION ))
+        if (( magic != quint32( 0xb91c5703 )) || ( filesize != f. size ( )) || ( version != BRICKSTOCK_DB_VERSION ))
 			return false;
 
 		ds. setByteOrder ( QDataStream::LittleEndian );
         ds.setVersion(QDataStream::Qt_3_3);
 
 		// colors
-		Q_UINT32 colc = 0;
+        quint32 colc = 0;
 		ds >> colc;
 
-		for ( Q_UINT32 i = colc; i; i-- ) {
+        for ( quint32 i = colc; i; i-- ) {
 			Color *col = new Color ( );
 			ds >> col;
             m_databases. colors. insert ( col-> id ( ), col );
 		}
 
 		// categories
-		Q_UINT32 catc = 0;
+        quint32 catc = 0;
         ds >> catc;
 
-		for ( Q_UINT32 i = catc; i; i-- ) {
+        for ( quint32 i = catc; i; i-- ) {
 			Category *cat = new Category ( );
 			ds >> cat;
 			m_databases. categories. insert ( cat-> id ( ), cat );
 		}
 
 		// types
-		Q_UINT32 ittc = 0;
+        quint32 ittc = 0;
 		ds >> ittc;
 
-		for ( Q_UINT32 i = ittc; i; i-- ) {
+        for ( quint32 i = ittc; i; i-- ) {
 			ItemType *itt = new ItemType ( );
 			ds >> itt;
 			m_databases. item_types. insert ( itt-> id ( ), itt );
 		}
 
 		// items
-		Q_UINT32 itc = 0;
+        quint32 itc = 0;
 		ds >> itc;
 
 		m_databases. items. resize ( itc );
-		for ( Q_UINT32 i = 0; i < itc; i++ ) {
+        for ( quint32 i = 0; i < itc; i++ ) {
 			Item *item = new Item ( );
 			ds >> item;
 			m_databases. items. insert ( i, item );
 		}
-		Q_UINT32 allc = 0;
+        quint32 allc = 0;
 		ds >> allc >> magic;
 
-		if (( allc == ( colc + ittc + catc + itc )) && ( magic == Q_UINT32( 0xb91c5703 ))) {
+        if (( allc == ( colc + ittc + catc + itc )) && ( magic == quint32( 0xb91c5703 ))) {
 			delete sw;
 #ifdef _MSC_VER
 #define PF_SIZE_T   "I"
 #else
 #define PF_SIZE_T   "z"
 #endif
-			qDebug ( "Color: %8u  (%11" PF_SIZE_T "u bytes)", m_databases. colors. count ( ),     m_databases. colors. count ( )     * ( sizeof( Color )    + 20 ));
-			qDebug ( "Types: %8u  (%11" PF_SIZE_T "u bytes)", m_databases. item_types. count ( ), m_databases. item_types. count ( ) * ( sizeof( ItemType ) + 20 ));
-			qDebug ( "Cats : %8u  (%11" PF_SIZE_T "u bytes)", m_databases. categories. count ( ), m_databases. categories. count ( ) * ( sizeof( Category ) + 20 ));
-			qDebug ( "Items: %8u  (%11" PF_SIZE_T "u bytes)", m_databases. items. count ( ),      m_databases. items. count ( )      * ( sizeof( Item )     + 20 ));
+//			qDebug ( "Color: %8u  (%11" PF_SIZE_T "u bytes)", m_databases. colors. count ( ),     m_databases. colors. count ( )     * ( sizeof( Color )    + 20 ));
+//			qDebug ( "Types: %8u  (%11" PF_SIZE_T "u bytes)", m_databases. item_types. count ( ), m_databases. item_types. count ( ) * ( sizeof( ItemType ) + 20 ));
+//			qDebug ( "Cats : %8u  (%11" PF_SIZE_T "u bytes)", m_databases. categories. count ( ), m_databases. categories. count ( ) * ( sizeof( Category ) + 20 ));
+//			qDebug ( "Items: %8u  (%11" PF_SIZE_T "u bytes)", m_databases. items. count ( ),      m_databases. items. count ( )      * ( sizeof( Item )     + 20 ));
 #undef PF_SIZE_T
 
 			result = true;
@@ -1543,50 +1543,50 @@ bool BrickLink::writeDatabase ( const QString &fname )
 	if ( f. open ( QIODevice::WriteOnly )) {
 		QDataStream ds ( &f );
 
-        ds << Q_UINT32( 0 /*magic*/ ) << Q_UINT32 ( 0 /*filesize*/ ) << Q_UINT32( BRICKSTOCK_DB_VERSION /*version*/ );
+        ds << quint32( 0 /*magic*/ ) << quint32 ( 0 /*filesize*/ ) << quint32( BRICKSTOCK_DB_VERSION /*version*/ );
 		
 		ds. setByteOrder ( QDataStream::LittleEndian );
 
 		// colors
-		Q_UINT32 colc = m_databases. colors. count ( );
+        quint32 colc = m_databases. colors. count ( );
 		ds << colc;
 		
         for ( QHashIterator<int, Color *> it ( m_databases. colors ); it. hasNext ( ); )
             ds << it. next ( ). value ( );
 
 		// categories
-		Q_UINT32 catc = m_databases. categories. count ( );
+        quint32 catc = m_databases. categories. count ( );
 		ds << catc;
 
         for ( QHashIterator<int, Category *> it ( m_databases. categories ); it. hasNext ( ); )
             ds << it. next ( ). value ( );
 		
 		// types
-		Q_UINT32 ittc = m_databases. item_types. count ( );
+        quint32 ittc = m_databases. item_types. count ( );
 		ds << ittc;
 		
         for ( QHashIterator<int, ItemType *> it ( m_databases. item_types ); it. hasNext ( ); )
             ds << it. next ( ). value ( );
 
 		// items
-		Q_UINT32 itc = m_databases. items. count ( );
+        quint32 itc = m_databases. items. count ( );
 		ds << itc;
 
 		Item **itp = m_databases. items. data ( );
-		for ( Q_UINT32 i = itc; i; itp++, i-- )
+        for ( quint32 i = itc; i; itp++, i-- )
 			ds << *itp;
 
 		ds << ( colc + ittc + catc + itc );
-		ds << Q_UINT32( 0xb91c5703 );
+        ds << quint32( 0xb91c5703 );
 
-		Q_UINT32 filesize = f. at ( );
+        quint32 filesize = f. at ( );
 
         if ( f. status ( ) == (int)IO_Ok ) {
 			f. close ( );
 
 			if ( f. open ( QIODevice::ReadWrite )) {
 				QDataStream ds2 ( &f );
-				ds2 << Q_UINT32( 0xb91c5703 ) << filesize;
+                ds2 << quint32( 0xb91c5703 ) << filesize;
 
                 if ( f. status ( ) == (int)IO_Ok ) {
 					f. close ( );

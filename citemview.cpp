@@ -1068,7 +1068,7 @@ QString CItemViewItem::toolTip ( int column ) const
 			break;
 		}
 
-		default                     : if ( m_truncated & (((Q_UINT64) 1ULL ) << column )) str = text ( column ); break;
+		default                     : if ( m_truncated & (((quint64) 1ULL ) << column )) str = text ( column ); break;
 	}
 	return str;
 }
@@ -1258,7 +1258,7 @@ void CItemViewItem::paintCell ( QPainter *p, const QColorGroup &cg, int col, int
 	int x = 0, y = 0;
 	int h = height ( );
 	int margin = listView ( )-> itemMargin ( );
-	Q_UINT64 colmask = 1ULL << col;
+	quint64 colmask = 1ULL << col;
 	CItemView *iv = listView ( );
 	int grayout_right_chars = 0;
     QString bubble_str;

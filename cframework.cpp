@@ -206,8 +206,8 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, Qt::WFlags fl )
 		   << "file_import"
 		   << "file_export"
 		   << "-"
-           //<< "file_print"
-           //<< "-"
+           << "file_print"
+           << "-"
 		   << "file_close"
 		   << "-"
 		   << "file_exit";
@@ -720,31 +720,7 @@ bool CFrameWork::eventFilter ( QObject *o, QEvent *e )
 	}
     return QMainWindow::eventFilter ( o, e );
 }
-/*
-QAction *CFrameWork::findAction ( const char *name )
-{
-    return name ? this->findChild<QAction *>(name) : 0;
-}
 
-QActionGroup *CFrameWork::findActionGroup ( const char *name )
-{
-    return name ? static_cast <QActionGroup *> ( child ( name, "QActionGroup", true )) : 0;
-}
-
-QMenu *CFrameWork::findMenu ( const char *name )
-{
-    return name ? static_cast <QMenu *> ( child ( name, "QMenu", true )) : 0;
-}
-
-QToolButton *CFrameWork::findToolButton ( const char *name ) {
-    return name ? static_cast <QToolButton *> ( child ( name, "QToolButton", true )) : 0;
-}
-
-CListAction *CFrameWork::findCListAction ( const char *name )
-{
-    return name ? static_cast <CListAction *> ( child ( name, "CListAction", true )) : 0;
-}
-*/
 void CFrameWork::createStatusBar ( )
 {
     m_newversion = new QLabel ( statusBar ( ));
@@ -891,7 +867,7 @@ void CFrameWork::createActions ( )
 
         a = new QAction ( this, "file_save" );
         a = new QAction ( this, "file_saveas" );
-        //a = new QAction ( this, "file_print" );
+        a = new QAction ( this, "file_print" );
 
         //ImportMenu
         {
@@ -1327,7 +1303,7 @@ void CFrameWork::connectAllActions ( bool do_connect, CWindow *window )
 
 	connectAction ( do_connect, "file_save", window, SLOT( fileSave ( )));
 	connectAction ( do_connect, "file_saveas", window, SLOT( fileSaveAs ( )));
-    //connectAction ( do_connect, "file_print", window, SLOT( filePrint ( )));
+    connectAction ( do_connect, "file_print", window, SLOT( filePrint ( )));
 	connectAction ( do_connect, "file_export", 0, 0 );
 	connectAction ( do_connect, "file_export_briktrak", window, SLOT( fileExportBrikTrakInventory ( )));
 	connectAction ( do_connect, "file_export_bl_xml", window, SLOT( fileExportBrickLinkXML ( )));

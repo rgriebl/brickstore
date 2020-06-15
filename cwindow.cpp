@@ -31,6 +31,7 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QBoxLayout>
+#include <QPrintDialog>
 //Added by qt3to4:
 #include <QCloseEvent>
 
@@ -1141,7 +1142,7 @@ void CWindow::editReserved ( )
 
 void CWindow::updateErrorMask ( )
 {
-	Q_UINT64 em = 0;
+	quint64 em = 0;
 
 	if ( CConfig::inst ( )-> showInputErrors ( )) {
 		if ( CConfig::inst ( )-> simpleMode ( )) {
@@ -1400,46 +1401,47 @@ void CWindow::filePrint ( )
 	if ( m_doc-> items ( ). isEmpty ( ))
 		return;
 
-//	if ( CReportManager::inst ( )-> reports ( ). isEmpty ( )) {
-//		CReportManager::inst ( )->reload ( );
+    if ( CReportManager::inst ( )-> reports ( ). isEmpty ( )) {
+        CReportManager::inst ( )->reload ( );
 
-//		if ( CReportManager::inst ( )-> reports ( ). isEmpty ( ))
-//			return;
-//	}
+        if ( CReportManager::inst ( )-> reports ( ). isEmpty ( ))
+            return;
+    }
 
-//	QPrinter *prt = CReportManager::inst ( )-> printer ( );
+    QPrinter *prt = CReportManager::inst ( )-> printer ( );
 
-//	if ( !prt )
-//		return;
+    if ( !prt )
+        return;
 
-	//prt-> setOptionEnabled ( QPrinter::PrintToFile, false );
-//	prt-> setOptionEnabled ( QPrinter::PrintSelection, !m_doc->selection ( ). isEmpty ( ));
-//	prt-> setOptionEnabled ( QPrinter::PrintPageRange, false );
-//	prt-> setPrintRange ( m_doc-> selection ( ). isEmpty ( ) ? QPrinter::AllPages : QPrinter::Selection );
+#if !defined( Q_WS_MACX )
+    prt-> setOptionEnabled ( QPrinter::PrintToFile, false );
+    prt-> setOptionEnabled ( QPrinter::PrintSelection, !m_doc->selection ( ). isEmpty ( ));
+    prt-> setOptionEnabled ( QPrinter::PrintPageRange, false );
+    prt-> setPrintRange ( m_doc-> selection ( ). isEmpty ( ) ? QPrinter::AllPages : QPrinter::Selection );
+#endif
 
     QString doctitle = m_doc-> title ( );
     if ( doctitle == m_doc-> fileName ( ))
         doctitle = QFileInfo ( doctitle ). baseName ( );
 
-//  prt-> setDocName ( doctitle );
+    prt-> setDocName ( doctitle );
+    prt-> setFullPage ( true );
 
-//	prt-> setFullPage ( true );
-	
-
-//	if ( !prt-> setup ( CFrameWork::inst ( )))
-//		return;
+    QPrintDialog printDialog(prt, CFrameWork::inst ( ));
+    if (printDialog.exec() != QDialog::Accepted)
+        return;
 
 	DlgSelectReportImpl d ( this );
 
 	if ( d. exec ( ) != QDialog::Accepted )
 		return;
 
-//	const CReport *rep = d. report ( );
+    const CReport *rep = d. report ( );
 
-//	if ( !rep )
-//		return;
+    if ( !rep )
+        return;
 
-//	rep-> print ( prt, m_doc, sortedItems ( prt-> printRange ( ) == QPrinter::Selection ));
+    rep-> print ( prt, m_doc, sortedItems ( prt-> printRange ( ) == QPrinter::Selection ));
 }
 
 void CWindow::fileSave ( )

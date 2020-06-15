@@ -172,7 +172,7 @@ CDocument::Statistics::Statistics ( const CDocument *doc, const ItemList &list )
 			weight_missing = true;	
 
 		if ( item-> errors ( )) {
-			Q_UINT64 errors = item-> errors ( ) & doc-> m_error_mask;
+			quint64 errors = item-> errors ( ) & doc-> m_error_mask;
 
 			for ( uint i = 1ULL << ( FieldCount - 1 ); i;  i >>= 1 ) {
 				if ( errors & i )
@@ -405,7 +405,7 @@ void CDocument::changeItemDirect ( Item *position, Item &item )
 
 void CDocument::updateErrors ( Item *item )
 {
-	Q_UINT64 errors = 0;
+	quint64 errors = 0;
 
 	if ( item-> price ( ) <= 0 )
 		errors |= ( 1ULL << Price );
@@ -934,7 +934,7 @@ bool CDocument::fileSaveTo ( const QString &s, const char *type, bool export_onl
         // directly writing to an QTxtStream would be way more efficient,
 		// but we could not handle any error this way :(
         QString output = doc.toString ( );
-        bool ok = ( f. writeBlock ( output.toUtf8() ) ==  int( output. size ( ) )); // no 0-byte
+        bool ok = ( f. writeBlock ( output. toUtf8 ( ) ) ==  int( output. toUtf8 ( ). size ( ) )); // no 0-byte
 
 		QApplication::restoreOverrideCursor ( );
 
@@ -1060,12 +1060,12 @@ void CDocument::clean2Modified ( bool b )
 	emit modificationChanged ( !b );
 }
 
-Q_UINT64 CDocument::errorMask ( ) const
+quint64 CDocument::errorMask ( ) const
 {
 	return m_error_mask;
 }
 
-void CDocument::setErrorMask ( Q_UINT64 em )
+void CDocument::setErrorMask ( quint64 em )
 {
 	m_error_mask = em;
 	emit statisticsChanged ( );

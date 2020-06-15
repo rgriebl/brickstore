@@ -148,7 +148,7 @@ private:
 
 	CDocument::Item *           m_item;
 	mutable BrickLink::Picture *m_picture;
-	Q_UINT64                    m_truncated;
+	quint64                     m_truncated;
 
     friend class CItemViewToolTip;
 };

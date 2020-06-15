@@ -483,7 +483,7 @@ QByteArray calc ( const char *data, unsigned int len )
    if ( !data || !len )
       return QByteArray ( );
 
-   QByteArray digest ( 20 );
+   QByteArray digest ( 20, '\0' );
    bool ok = true;
 
    SHA1Context ctx;

@@ -38,9 +38,9 @@
 
 namespace {
 
-static inline Q_INT32 mkver ( int a, int b, int c )
+static inline qint32 mkver ( int a, int b, int c )
 { 
-	return ( Q_INT32( a ) << 24 ) | ( Q_INT32( b ) << 16 ) | ( Q_INT32( c ));
+    return ( qint32( a ) << 24 ) | ( qint32( b ) << 16 ) | ( qint32( c ));
 }
 
 } // namespace
@@ -116,7 +116,7 @@ bool CConfig::checkRegistrationKey ( const QString &name, const QString &key )
 		return false;
 	
 	QString result;
-	Q_UINT64 serial = 0;
+    quint64 serial = 0;
     QDataStream ds ( &sha1, QIODevice::ReadOnly );
 	ds >> serial;
 	

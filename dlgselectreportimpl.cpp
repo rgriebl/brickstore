@@ -24,25 +24,25 @@
 
 namespace {
 
-//class ReportListItem : public Q3ListViewItem {
-//public:
-//	ReportListItem ( Q3ListView *list, const CReport *rep )
-//		: Q3ListViewItem ( list ), m_report ( rep )
-//	{ }
+class ReportListItem : public Q3ListViewItem {
+public:
+    ReportListItem ( Q3ListView *list, const CReport *rep )
+        : Q3ListViewItem ( list ), m_report ( rep )
+    { }
 
-//	QString text ( int /*col*/ ) const
-//	{
-//		return m_report-> name ( );
-//	}
+    QString text ( int /*col*/ ) const
+    {
+        return m_report-> name ( );
+    }
 
-//	const CReport *report ( ) const
-//	{
-//		return m_report;
-//	}
+    const CReport *report ( ) const
+    {
+        return m_report;
+    }
 	
-//private:
-//	const CReport *m_report;
-//};
+private:
+    const CReport *m_report;
+};
 
 } //namspace
 
@@ -59,7 +59,7 @@ DlgSelectReportImpl::DlgSelectReportImpl ( QWidget *parent, const char *name, bo
 
 	w_ok-> setEnabled ( false );
 
-//	setReports ( CReportManager::inst ( )-> reports ( ));
+    setReports ( CReportManager::inst ( )-> reports ( ));
 }
 
 DlgSelectReportImpl::~DlgSelectReportImpl ( )
@@ -67,8 +67,8 @@ DlgSelectReportImpl::~DlgSelectReportImpl ( )
 
 void DlgSelectReportImpl::updateList ( )
 {
-//	CReportManager::inst ( )-> reload ( );
-//	setReports ( CReportManager::inst ( )-> reports ( ));
+    CReportManager::inst ( )-> reload ( );
+    setReports ( CReportManager::inst ( )-> reports ( ));
 }
 
 void DlgSelectReportImpl::checkItem ( Q3ListViewItem *it )
@@ -82,21 +82,21 @@ void DlgSelectReportImpl::activateItem ( Q3ListViewItem *it )
 	w_ok-> animateClick ( );
 }
 
-//void DlgSelectReportImpl::setReports ( const Q3PtrList <CReport> &reps )
-//{
-//	w_list-> clear ( );
+void DlgSelectReportImpl::setReports ( const QList <CReport *> &reps )
+{
+    w_list-> clear ( );
 
-//	for ( Q3PtrListIterator <CReport> it ( reps ); it. current ( ); ++it ) {
-//		new ReportListItem ( w_list, it. current ( ));
-//	}
+    for ( QListIterator <CReport *> it ( reps ); it. hasNext ( ); ) {
+        new ReportListItem ( w_list, it. next ( ));
+    }
 
-//	if ( w_list-> childCount ( ))
-//		w_list-> setSelected ( w_list-> firstChild ( ), true );
-//}
+    if ( w_list-> childCount ( ))
+        w_list-> setSelected ( w_list-> firstChild ( ), true );
+}
 
-//const CReport *DlgSelectReportImpl::report ( ) const
-//{
-//	Q3ListViewItem *it = w_list-> selectedItem ( );
+const CReport *DlgSelectReportImpl::report ( ) const
+{
+    Q3ListViewItem *it = w_list-> selectedItem ( );
 
-//	return it ? static_cast <ReportListItem *> ( it )-> report ( ) : 0;
-//}
+    return it ? static_cast <ReportListItem *> ( it )-> report ( ) : 0;
+}

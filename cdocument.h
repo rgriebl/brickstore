@@ -87,10 +87,10 @@ public:
 		Item &operator = ( const Item & );
 		bool operator == ( const Item & ) const;
 
-		Q_UINT64 errors ( ) const          { return m_errors; }
-		void setErrors ( Q_UINT64 errors ) { m_errors = errors; }
+		quint64 errors ( ) const          { return m_errors; }
+		void setErrors ( quint64 errors ) { m_errors = errors; }
 	private:
-		Q_UINT64 m_errors;
+		quint64 m_errors;
 	};
 
 	typedef Q3ValueList<Item *>      ItemList;
@@ -153,8 +153,8 @@ public:
 
 	Statistics statistics ( const ItemList &list ) const;
 
-	Q_UINT64 errorMask ( ) const;
-	void setErrorMask ( Q_UINT64 );
+	quint64 errorMask ( ) const;
+	void setErrorMask ( quint64 );
 
 	static CDocument *fileNew ( );
 	static CDocument *fileOpen ( );
@@ -221,7 +221,7 @@ private:
 	ItemList         m_items;
 	ItemList         m_selection;
 
-	Q_UINT64         m_error_mask;
+	quint64          m_error_mask;
 	QString          m_filename;
 	QString          m_title;
 	bool             m_dont_sort;

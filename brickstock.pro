@@ -12,7 +12,7 @@
 ## See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 
 isEmpty( RELEASE ) {
-  RELEASE    = 1.2.1
+  RELEASE    = 1.2.2
 }
 
 TEMPLATE     = app
@@ -261,13 +261,5 @@ SOURCES += dlgadditemimpl.cpp \
            dlgsettopgimpl.cpp \
            dlgsubtractitemimpl.cpp
 
-unix:!macx {
-  INCLUDEPATH += qsa/src/qsa
-  LIBS += qsa/src/qsa/libqsa.a
-}
-else {
-  load( qsa )
-}
-
-QT += xml qt3support
+QT += xml qt3support script
 CONFIG += static

@@ -13,55 +13,51 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-//#ifndef __CREPORT_H__
-//#define __CREPORT_H__
+#ifndef __CREPORT_H__
+#define __CREPORT_H__
 
-//#include <qobject.h>
-//#include <qstring.h>
-//#include <q3ptrlist.h>
-//#include <qprinter.h>
+#include <qobject.h>
+#include <qstring.h>
+#include <qlist.h>
+#include <qprinter.h>
 
-//#include "cdocument.h"
+#include "cdocument.h"
 
-////typedef QMap <QString, QString>  CReportVariables;
+class CReportPrivate;
 
-//class CReportPrivate;
+class CReport : public QObject {
+    Q_OBJECT
+public:
+    CReport ( );
+    virtual ~CReport ( );
 
-//class CReport : public QObject {
-//    Q_OBJECT
-//public:
-//    CReport ( );
-//    virtual ~CReport ( );
-
-//    bool load ( const QString &file );
-//    QString name ( ) const;
+    bool load ( const QString &file );
+    QString name ( ) const;
 	
-//    void print ( QPaintDevice *pd, const CDocument *doc, const CDocument::ItemList &items ) const;
+    void print ( QPrinter *pd, const CDocument *doc, const CDocument::ItemList &items ) const;
 
-//private:
-//    CReportPrivate *d;
-//};
+private:
+    CReportPrivate *d;
+};
 
-//class CReportManager {
-//private:
-//    CReportManager ( );
-//    static CReportManager *s_inst;
+class CReportManager {
+private:
+    CReportManager ( );
+    static CReportManager *s_inst;
 
-//public:
-//    ~CReportManager ( );
-//    static CReportManager *inst ( );
+public:
+    ~CReportManager ( );
+    static CReportManager *inst ( );
 
-//    bool reload ( );
+    bool reload ( );
 
-//    QPrinter *printer ( ) const;
+    QPrinter *printer ( ) const;
 	
-//    const Q3PtrList <CReport> &reports ( ) const;
+    const QList <CReport *> &reports ( ) const;
 
-//private:
-//    Q3PtrList <CReport> m_reports;
+private:
+    QList <CReport *> m_reports;
+    mutable QPrinter *m_printer; // mutable for delayed initialization
+};
 
-//    mutable QPrinter *m_printer; // mutable for delayed initialization
-//};
-
-//#endif
-
+#endif

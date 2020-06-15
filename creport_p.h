@@ -13,20 +13,19 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-//#ifndef __CREPORT_P_H__
-//#define __CREPORT_P_H__
+#ifndef __CREPORT_P_H__
+#define __CREPORT_P_H__
 
-//#include <time.h>
+#include <qscriptengine.h>
+#include <time.h>
 
-//class QSInterpreter;
+class CReportPrivate {
+public:
+    time_t              m_loaded;
+    QString             m_name;
+    QString             m_code;
+    QString             m_label;
+    QScriptEngine *     m_engine;
+};
 
-//class CReportPrivate {
-//public:
-//    time_t              m_loaded;
-//    QString             m_name;
-//    QString             m_code;
-//    QString             m_label;
-//    QSInterpreter *     m_interpreter;
-//};
-
-//#endif
+#endif

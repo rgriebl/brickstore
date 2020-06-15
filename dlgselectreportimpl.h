@@ -16,9 +16,11 @@
 #ifndef __DLGSELECTREPORTIMPL_H__
 #define __DLGSELECTREPORTIMPL_H__
 
+#include <q3ptrlist.h>
+
 #include "ui_dlgselectreport.h"
 
-//class CReport;
+class CReport;
 class Q3ListViewItem;
 
 class DlgSelectReportImpl : public QDialog, public Ui::DlgSelectReport {
@@ -28,8 +30,8 @@ public:
 	DlgSelectReportImpl ( QWidget *parent = 0, const char * name = 0, bool modal = true );
 	~DlgSelectReportImpl ( );
 
-//	void setReports ( const Q3PtrList <CReport> & );
-//	const CReport *report ( ) const;
+    void setReports (const QList<CReport *> & );
+    const CReport *report ( ) const;
 
 private slots:
 	void updateList ( );
