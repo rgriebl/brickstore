@@ -190,10 +190,6 @@ void BrickLink::Picture::load_from_disk ( )
 	else
 		m_valid = false;
 
-	if ( m_valid && !large && m_image. depth ( ) > 8 ) {
-		m_image = m_image. convertDepth ( 8 );
-	}
-
 	QPixmapCache::remove ( m_key );
 }
 
@@ -264,8 +260,8 @@ void BrickLink::pictureJobFinished ( CTransfer::Job *j )
 			pic-> m_update_status = Ok;
 
             if (( j-> effectiveUrl ( ). toLower( ). find ( "noimage", 0 ) == -1 ) && j-> data ( )-> size ( ) && img. loadFromData ( *j-> data ( ))) {
-				if ( !large )
-					img = img. convertDepth ( 8 );
+                if ( !large )
+                    img = img. convertToFormat ( QImage::Format_ARGB32, Qt::ColorOnly | Qt::DiffuseDither | Qt::DiffuseAlphaDither );
 				img. save ( path, "PNG" );
 			}
 			else {

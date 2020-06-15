@@ -21,6 +21,7 @@
 #include <qdatetime.h>
 
 #if defined( Q_WS_WIN )
+#define _WINSOCKAPI_
 #include <windows.h>
 #include <tchar.h>
 #include <shlobj.h>
@@ -34,6 +35,8 @@
 
 #include "sha1.h"
 #include "cconfig.h"
+#include "cutility.h"
+#include "bricklink.h"
 
 #define QUOTE(string)  _QUOTE(string)
 #define _QUOTE(string) #string
@@ -56,6 +59,7 @@ CConfig::CConfig ( )
 	m_show_input_errors = readBoolEntry ( "/General/ShowInputErrors", true );
 	m_weight_system = ( readEntry ( "/General/WeightSystem", "metric" ) == "metric" ) ? WeightMetric : WeightImperial;
 	m_simple_mode = readBoolEntry ( "/General/SimpleMode", false );
+    m_cleanCache = false;
 
 	m_registration = OpenSource;
 	setRegistration ( registrationName ( ), registrationKey ( ));
@@ -208,7 +212,6 @@ bool CConfig::writePasswordEntry ( const QString &key, const QString &password )
 	return writeEntry ( key, obscure ( password ));
 }
 
-
 void CConfig::upgrade ( int vmajor, int vminor, int vrev )
 {
 	QStringList sl;
@@ -247,6 +250,21 @@ void CConfig::upgrade ( int vmajor, int vminor, int vrev )
 		if ( ok )  writeEntry ( "/Defaults/AddItems/Condition", s );
 		removeEntry ( "/Default/AddItems/Condition" );
 	}
+
+    if ( cfgver < mkver ( 1, 2, 6 ) ) {
+        m_cleanCache = true;
+    }
+}
+
+void CConfig::cleanCacheIfNeeded ( )
+{
+    if ( m_cleanCache ) {
+        //Cache subdirring has changed so we want to clean out the directory!
+        for ( QHashIterator<int, BrickLink::ItemType *> it ( BrickLink::inst ( )-> itemTypes ( )); it. hasNext ( ); ) {
+            it.next ( );
+            CUtility::emptyDir(BrickLink::inst ( )-> dataPath ( it.value ( )), true);
+        }
+    }
 }
 
 QDateTime CConfig::lastDatabaseUpdate ( )

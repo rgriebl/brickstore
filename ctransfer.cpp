@@ -195,6 +195,7 @@ void CTransfer::run ( )
 				 cApp-> sysVersion ( ) + "; http://" + 
 	             cApp-> appURL ( ) + ")";
 
+    ::curl_easy_setopt ( m_curl, CURLOPT_COOKIEFILE, "");
 	::curl_easy_setopt ( m_curl, CURLOPT_VERBOSE, 0 );
 	::curl_easy_setopt ( m_curl, CURLOPT_NOPROGRESS, 0 );
 	::curl_easy_setopt ( m_curl, CURLOPT_PROGRESSFUNCTION, progress_curl );

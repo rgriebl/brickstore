@@ -34,6 +34,7 @@
 #endif
 
 #if defined( Q_WS_WIN )
+#define _WINSOCKAPI_
 #include <windows.h>
 #include <tchar.h>
 #include <shlobj.h>

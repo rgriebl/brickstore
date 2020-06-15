@@ -36,6 +36,7 @@
 #include "cutility.h"
 #include "bricklink.h"
 #include "version.h"
+#include "sha1.h"
 
 QString BrickLink::url ( UrlList u, const void *opt, const void *opt2 )
 {
@@ -333,8 +334,7 @@ QString BrickLink::dataPath ( const ItemType *item_type ) const
 	p += item_type-> id ( );
 	p += '/';
 
-	if ( !check_and_create_path ( p ))
-		return QString ( );
+    if ( !check_and_create_path ( p )) return QString ( );
 
 	return p;
 }
@@ -342,11 +342,22 @@ QString BrickLink::dataPath ( const ItemType *item_type ) const
 QString BrickLink::dataPath ( const Item *item ) const
 {
 	QString p = dataPath ( item-> itemType ( ));
-	p += item-> m_id;
-	p += '/';
 
-	if ( !check_and_create_path ( p ))
-		return QString ( );
+    // Use sub directories based on the first 2 characters of the id's SHA1
+    QByteArray sha1 = sha1::calc ( item-> id (), strlen ( item-> id ( ) )). toHex ( );
+    if ( sha1. length() != 40 ) return QString ( );
+
+    p += sha1.at ( 0 );
+    p += '/';
+    if ( !check_and_create_path ( p )) return QString ( );
+
+    p += sha1.at ( 1 );
+    p += '/';
+    if ( !check_and_create_path ( p )) return QString ( );
+
+    p += item-> id ( );
+    p += '/';
+    if ( !check_and_create_path ( p )) return QString ( );
 
 	return p;
 }
@@ -357,8 +368,7 @@ QString BrickLink::dataPath ( const Item *item, const Color *color ) const
 	p += QString::number ( color-> id ( ));
 	p += '/';
 
-	if ( !check_and_create_path ( p ))
-		return QString ( );
+    if ( !check_and_create_path ( p )) return QString ( );
 
 	return p;
 }

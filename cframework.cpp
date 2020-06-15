@@ -466,6 +466,8 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, Qt::WFlags fl )
 	else
 		CMessageBox::warning ( this, tr( "Could not load the BrickLink database files.<br /><br />The program is not functional without these files." ));
 
+    CConfig::inst ( )-> cleanCacheIfNeeded ( );
+
 	setAcceptDrops ( true );
 
 	m_add_dialog = 0;
@@ -528,7 +530,7 @@ void CFrameWork::languageChange ( )
 		{ "file_export_bl_invreq_clip",     tr( "BrickLink Set Inventory XML to Clipboard" ), tr( "Ctrl+E,Ctrl+I", "File|Import BrickLink Set Inventory" ) },
 		{ "file_export_bl_wantedlist_clip", tr( "BrickLink Wanted List XML to Clipboard" ),   tr( "Ctrl+E,Ctrl+W", "File|Import BrickLink Wanted List" ) },
 		{ "file_export_briktrak",           tr( "BrikTrak Inventory..." ),              0 },
-		{ "file_close",                     tr( "Close" ),                              tr( "Ctrl+W", "File|Close" ) },
+        { "file_close",                     tr( "Close" ),                              0 },
 		{ "file_exit",                      tr( "Exit" ),                               tr( "Ctrl+Q", "File|Quit" ) },
 		{ "edit_undo",                      0,                                          tr( "Ctrl+Z", "Edit|Undo" ) },
 		{ "edit_redo",                      0,                                          tr( "Ctrl+Y", "Edit|Redo" ) },
@@ -900,7 +902,10 @@ void CFrameWork::createActions ( )
             a = new QAction ( this, "file_export_briktrak" );q->addAction(a);
         }
 
-        a = new QAction ( this, "file_close" );connect ( a, SIGNAL( activated ( )), m_mdi, SLOT( closeActiveSubWindow ( )));
+        a = new QAction ( this, "file_close" );
+        a-> setShortcut ( QKeySequence::Close );
+        a-> setShortcutContext ( Qt::WidgetShortcut );
+        connect ( a, SIGNAL( activated ( )), m_mdi, SLOT( closeActiveSubWindow ( )));
         a = new QAction ( this, "file_exit" );connect ( a, SIGNAL( activated ( )), this, SLOT( close ( )));
     }
 

@@ -14,7 +14,7 @@
 ## See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 
 isEmpty( RELEASE ) {
-  RELEASE    = 1.2.5
+  RELEASE    = 1.2.6
 }
 
 TEMPLATE     = app
@@ -119,14 +119,9 @@ unix:!macx {
 macx {
   osx_minor = $$system( sw_vers -productVersion | cut -f2 -d'.' )
 
-  system( test $$osx_minor -ge 4 ) {
-    LIBS += -lcurl
-  }
-  else {
-    # HACK, but we need the abs. path, since MacOS X <10.4 already has 
-    # an old 2.x version in /usr/lib ...
-    LIBS += /usr/local/lib/libcurl.a
-  }
+  DEFINES += CURL_STATICLIB
+# LIBS += -lcurl
+  LIBS += /usr/local/lib/libcurl.a
 
   LIBS += -framework CoreFoundation
   LIBS += -framework Carbon

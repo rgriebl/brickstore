@@ -35,6 +35,7 @@ public:
 	static CConfig *inst ( );
 
 	void upgrade ( int vmajor, int vminor, int vrev );
+    void cleanCacheIfNeeded ( );
 
 	enum WeightSystem {
 		WeightMetric,
@@ -120,6 +121,7 @@ private:
 	WeightSystem m_weight_system;
 	bool         m_simple_mode;
 	Registration m_registration;
+    bool         m_cleanCache;
 };
 
 #endif

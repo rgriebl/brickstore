@@ -282,7 +282,6 @@ void CTaskPaneManager::create ( )
 				
 				item. m_orig_framestyle = f-> frameStyle ( );
                 f-> setFrameStyle ( QFrame::NoFrame );
-                f->show();
             }
 
             d-> m_taskpane-> addItem ( item. m_widget, item. m_icon, item. m_label, item. m_expandible, item. m_special );

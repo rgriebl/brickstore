@@ -706,7 +706,6 @@ const BrickLink::Item *CSelectItem::fillItemListView ( const BrickLink::ItemType
 	return found;
 }
 
-
 void CSelectItem::applyFilter ( )
 {
 	if ( d-> m_viewmode == ViewMode_Thumbnails )
@@ -748,7 +747,7 @@ const BrickLink::Item *CSelectItem::item ( ) const
 void CSelectItem::itemChangedList ( )
 {
 	Q3ListViewItem *lvi = d-> w_items-> selectedItem ( );
-	const BrickLink::Item *newitem = lvi ? static_cast <ItemListItem *> ( lvi )-> item ( ) : 0;
+    const BrickLink::Item *newitem = lvi && lvi->isVisible() ? static_cast <ItemListItem *> ( lvi )-> item ( ) : 0;
 
 	if ( lvi )
 		d-> w_items-> ensureItemVisible ( lvi );
@@ -762,7 +761,7 @@ void CSelectItem::itemChangedList ( )
 void CSelectItem::itemChangedIcon ( )
 {
 	Q3IconViewItem *ivi = QIconView__selectedItem ( d-> w_thumbs );
-	const BrickLink::Item *newitem = ivi ? static_cast <ItemIconItem *> ( ivi )-> item ( ) : 0;
+    const BrickLink::Item *newitem = ivi ? static_cast <ItemIconItem *> ( ivi )-> item ( ) : 0;
 
 	if ( ivi )
 		d-> w_thumbs-> ensureItemVisible ( ivi );
