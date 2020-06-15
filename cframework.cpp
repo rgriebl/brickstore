@@ -579,6 +579,7 @@ void CFrameWork::languageChange ( )
 		{ "edit_qty",                       tr( "Quantity" ),                           0 },
 		{ "edit_qty_multiply",              tr( "Multiply..." ),                        tr( "Ctrl+*", "Edit|Quantity|Multiply" ) },
 		{ "edit_qty_divide",                tr( "Divide..." ),                          tr( "Ctrl+/", "Edit|Quantity|Divide" ) },
+        { "edit_qty_set",                   tr( "Set..."),                              0 },
 		{ "edit_price",                     tr( "Price" ),                              0 },
 		{ "edit_price_round",               tr( "Round to 2 Decimal Places" ),          0 },
 		{ "edit_price_set",                 tr( "Set..." ),                             0 },
@@ -946,6 +947,7 @@ void CFrameWork::createActions ( )
         q->setIcon(CResource::inst ( )-> icon ( "edit_qty" ));
         a = new QAction ( q, "edit_qty_multiply" );a-> setIconSet ( CResource::inst ( )-> pixmap ( "edit_qty_multiply" ));q->addAction( a );
         a = new QAction ( q, "edit_qty_divide" );a-> setIconSet ( CResource::inst ( )-> pixmap ( "edit_qty_divide" ));q->addAction( a );
+        a = new QAction ( q, "edit_qty_set" );q->addAction ( a );
 
         q = new QMenu ("edit_price", this);
         q->setObjectName("edit_price");
@@ -1311,7 +1313,7 @@ void CFrameWork::connectAllActions ( bool do_connect, CWindow *window )
 	connectAction ( do_connect, "file_export_bl_update_clip", window, SLOT( fileExportBrickLinkUpdateClipboard ( )));
 	connectAction ( do_connect, "file_export_bl_invreq_clip", window, SLOT( fileExportBrickLinkInvReqClipboard ( )));
 	connectAction ( do_connect, "file_export_bl_wantedlist_clip", window, SLOT( fileExportBrickLinkWantedListClipboard ( )));
-    connectAction ( do_connect, "file_close", 0, 0 );//window, SLOT( close ( )));
+    connectAction ( do_connect, "file_close", 0, 0);
 
 	connectAction ( do_connect, "edit_cut", window, SLOT( editCut ( )));
 	connectAction ( do_connect, "edit_copy", window, SLOT( editCopy ( )));
@@ -1340,6 +1342,7 @@ void CFrameWork::connectAllActions ( bool do_connect, CWindow *window )
 
     connectAction ( do_connect, "edit_qty_multiply", window, SLOT( editQtyMultiply ( )));
     connectAction ( do_connect, "edit_qty_divide", window, SLOT( editQtyDivide ( )));
+    connectAction ( do_connect, "edit_qty_set", window, SLOT ( editQtySet ( )));
 
     connectAction ( do_connect, "edit_price_set", window, SLOT( editPrice ( )));
     connectAction ( do_connect, "edit_price_round", window, SLOT( editPriceRound ( )));
@@ -1645,6 +1648,7 @@ void CFrameWork::setWindowMode ( QAction *act )
     m_mdi-> setViewMode (tabbed ? QMdiArea::TabbedView : QMdiArea::SubWindowView);
     m_mdi-> setTabPosition ( execllike ? QTabWidget::South : QTabWidget::North );
     m_mdi-> setTabShape ( execllike ? QTabWidget::Triangular : QTabWidget::Rounded );
+    m_mdi-> setTabsClosable ( true );
 	
     if (!tabbed && m_mdi-> currentSubWindow ( ))
         m_mdi-> currentSubWindow ( )-> showMaximized ( );

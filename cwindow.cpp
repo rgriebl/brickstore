@@ -123,7 +123,8 @@ private:
 CWindow::CWindow ( CDocument *doc, QWidget *parent, const char *name )
     : QWidget ( parent ), m_lvitems ( 503 )
 {
-    setObjectName( name );
+    setObjectName ( name );
+    setAttribute ( Qt::WA_DeleteOnClose );
 	m_doc = doc;
 	m_ignore_selection_update = false;
 	
@@ -237,8 +238,7 @@ void CWindow::updateCaption ( )
 
 CWindow::~CWindow ( )
 {
-    //delete m_doc;
-    //m_doc-> deleteLater ( );
+    m_doc-> deleteLater ( );
 }
 
 void CWindow::saveDefaultColumnLayout ( )
@@ -926,6 +926,32 @@ void CWindow::editQtyMultiply ( )
 	}
 }
 
+void CWindow::editQtySet ( )
+{
+    if ( m_doc-> selection ( ). isEmpty ( ))
+        return;
+
+    int quantity = 0;
+
+    if ( CMessageBox::getInteger ( this, tr( "Set the quantities of all selected items to this value." ), QString::null, quantity, new QIntValidator ( -10000, 10000, 0 ))) {
+        uint setCount = 0;
+        CUndoCmd *macro = m_doc-> macroBegin ( );
+
+        CDisableUpdates disupd ( w_list );
+
+        foreach ( CDocument::Item *pos, m_doc-> selection ( )) {
+            CDocument::Item item = *pos;
+
+            item. setQuantity ( quantity );
+            m_doc-> changeItem ( pos, item );
+
+            setCount++;
+        }
+
+        m_doc-> macroEnd ( macro, tr( "Quantity set to %1 on %2 Items" ). arg ( quantity ). arg ( setCount ));
+    }
+}
+
 void CWindow::editSale ( )
 {
 	if ( m_doc-> selection ( ). isEmpty ( ))
@@ -1414,7 +1440,7 @@ void CWindow::filePrint ( )
         return;
 
 #if !defined( Q_WS_MACX )
-    prt-> setOptionEnabled ( QPrinter::PrintToFile, false );
+    //prt-> setOptionEnabled ( QPrinter::PrintToFile, false );
     prt-> setOptionEnabled ( QPrinter::PrintSelection, !m_doc->selection ( ). isEmpty ( ));
     prt-> setOptionEnabled ( QPrinter::PrintPageRange, false );
     prt-> setPrintRange ( m_doc-> selection ( ). isEmpty ( ) ? QPrinter::AllPages : QPrinter::Selection );

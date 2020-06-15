@@ -16,6 +16,7 @@
 #include <qtimer.h>
 #include <qevent.h>
 #include <qdir.h>
+#include <qwindowsstyle.h>
 
 //#include <qsaglobal.h>
 #include <qevent.h>
@@ -69,8 +70,12 @@ CApplication::CApplication ( const char *rebuild_db_only, int _argc, char **_arg
 	m_enable_emit = false;
 	m_rebuild_db_only = rebuild_db_only;
 
-	if ( m_rebuild_db_only. isEmpty ( ))
-		CSplash::inst ( );
+    if ( m_rebuild_db_only. isEmpty ( )) {
+        // try not to look ugly
+        if ( style()-> inherits ( "QMotifStyle" ) || style()-> inherits ( "QMotifPlusStyle" ))
+            setStyle ( new QWindowsStyle ( ) );
+        CSplash::inst ( );
+    }
 
 #if defined( Q_WS_MACX )
 	AEInstallEventHandler( kCoreEventClass, kAEOpenDocuments, appleEventHandler, 0, false );
@@ -80,7 +85,7 @@ CApplication::CApplication ( const char *rebuild_db_only, int _argc, char **_arg
     (void) CConfig::inst ( )-> upgrade ( BRICKSTOCK_MAJOR, BRICKSTOCK_MINOR, BRICKSTOCK_PATCH );
 	(void) CMoney::inst ( );
 	(void) CResource::inst ( );
-//	(void) CReportManager::inst ( );
+    (void) CReportManager::inst ( );
 
 	m_trans_qt = 0;
     m_trans_brickstock = 0;
@@ -133,7 +138,7 @@ CApplication::~CApplication ( )
 
     Q3MimeSourceFactory::defaultFactory ( )-> setData ( "brickstock-icon", 0 );
 
-//	delete CReportManager::inst ( );
+    delete CReportManager::inst ( );
 	delete CResource::inst ( );
 	delete CMoney::inst ( );
 	delete CConfig::inst ( );

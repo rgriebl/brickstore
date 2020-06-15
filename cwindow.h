@@ -123,6 +123,7 @@ public slots:
 	void editConditionToggle ( );
 	void editColor ( );
 	void editQtyMultiply ( );
+    void editQtySet ( );
 	void editQtyDivide( );
 	void editPrice ( );
 	void editPriceRound ( );

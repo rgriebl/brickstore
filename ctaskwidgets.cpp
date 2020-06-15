@@ -171,9 +171,10 @@ void CTaskPriceGuideWidget::setOrientation ( Qt::Orientation o )
 // ----------------------------------------------------------------------
 // ----------------------------------------------------------------------
 
-CTaskInfoWidget::CTaskInfoWidget ( QWidget *parent, const char * )
+CTaskInfoWidget::CTaskInfoWidget ( QWidget *parent, const char *name )
     : QStackedWidget ( parent ), m_doc ( 0 )
 {
+    setObjectName ( name );
     setFrameStyle ( QFrame::StyledPanel | QFrame::Sunken );
     m_pic = new CPictureWidget ( this );
 	m_text = new QLabel ( this );

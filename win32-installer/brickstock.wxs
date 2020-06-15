@@ -95,6 +95,7 @@
       
       <Component Id="c_runtime" Guid="514ECE62-8EB1-11D9-8BDE-F66BAD1E3F3A">
         <File DiskId="1" Id="msvcr100"    Name="msvcr100.dll" Source="C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\redist\x86\Microsoft.VC100.CRT/msvcr100.dll" />
+        <File DiskId="1" Id="msvcp100"    Name="msvcp100.dll" Source="C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\redist\x86\Microsoft.VC100.CRT/msvcp100.dll" />
       </Component>
 
       <Directory Id="translations" Name="translations">

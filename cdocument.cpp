@@ -714,8 +714,12 @@ CDocument *CDocument::fileLoadFrom ( const QString &name, const char *type, bool
 	if ( items ) {
 		CDocument *doc = new CDocument ( import_only );
 
-		if ( invalid_items )
-			CMessageBox::information ( CFrameWork::inst ( ), tr( "This file contains %1 unknown item(s)." ). arg ( CMB_BOLD( QString::number ( invalid_items ))));
+        if ( invalid_items ) {
+            if (CMessageBox::information ( CFrameWork::inst ( ), tr( "This file contains %1 unknown item(s).<br /><br />Do you really want to open this file?" ). arg ( CMB_BOLD( QString::number ( invalid_items ))), QMessageBox::Yes, QMessageBox::No) != QMessageBox::Yes) {
+                delete items;
+                return false;
+            }
+        }
 
 		doc-> setBrickLinkItems ( *items );
 		delete items;
