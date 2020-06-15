@@ -683,7 +683,6 @@ public:
 
 public slots:
 	bool readDatabase ( const QString &fname = QString ( ));
-	bool writeDatabase ( const QString &fname = QString ( ));
 
 	void updatePriceGuide ( PriceGuide *pg, bool high_priority = false );
 	void updatePicture ( Picture *pic, bool high_priority = false );
@@ -709,13 +708,6 @@ private:
 	bool updateNeeded ( bool valid, const QDateTime &last, int iv );
 	bool parseLDrawModelInternal ( QFile &file, const QString &model_name, InvItemList &items, uint *invalid_items, Q3Dict <InvItem> &mergehash, QStringList &recursion_detection );
 	void pictureIdleLoader2 ( );
-
-	void setDatabase_ConsistsOf ( const QMap<const Item *, InvItemList> &map );
-	void setDatabase_AppearsIn ( const QMap<const Item *, Item::AppearsInMap> &map );
-    void setDatabase_Basics (const QHash<int, Color *> &colors,
-                                const QHash<int, Category *> &categories,
-                                const QHash<int, ItemType *> &item_types,
-                                const Q3PtrVector<Item> &items );
 
 private slots:
 	void pictureIdleLoader ( );

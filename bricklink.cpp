@@ -44,7 +44,7 @@ QString BrickLink::url ( UrlList u, const void *opt, const void *opt2 )
 
 	switch ( u ) {
 		case URL_InventoryRequest:
-			url = "http://www.bricklink.com/bbsiXML.asp";
+            url = "http://www.bricklink.com/catalogInvAdd.asp";
 			break;
 			
 		case URL_WantedListUpload:
@@ -1531,115 +1531,4 @@ bool BrickLink::parseLDrawModelInternal ( QFile &f, const QString &model_name, I
 		
     recursion_detection. pop_back ( );
 	return is_mpd ? is_mpd_model_found : true;
-}
-
-
-
-/*
- * Support routines to rebuild the DB from txt files
- */
-void BrickLink::setDatabase_ConsistsOf ( const QMap<const Item *, InvItemList> &map )
-{
-	for ( QMap<const Item *, InvItemList>::const_iterator it = map. begin ( ); it != map. end ( ); ++it )
-		it. key ( )-> setConsistsOf ( it. data ( ));
-}
-
-void BrickLink::setDatabase_AppearsIn ( const QMap<const Item *, Item::AppearsInMap> &map )
-{
-	for ( QMap<const Item *, Item::AppearsInMap>::const_iterator it = map. begin ( ); it != map. end ( ); ++it )
-		it. key ( )-> setAppearsIn ( it. data ( ));
-}
-
-void BrickLink::setDatabase_Basics ( const QHash<int, Color *> &colors,
-                                     const QHash<int, Category *> &categories,
-                                     const QHash<int, ItemType *> &item_types,
-									 const Q3PtrVector<Item> &items )
-{
-	cancelPictureTransfers ( );
-	cancelPriceGuideTransfers ( );
-
-	m_price_guides. cache. clear ( );
-	m_pictures. cache. clear ( );
-	QPixmapCache::clear ( );
-
-	m_databases. colors. clear ( );
-	m_databases. item_types. clear ( );
-	m_databases. categories. clear ( );
-	m_databases. items. clear ( );
-
-	m_databases. colors     = colors;
-	m_databases. item_types = item_types;
-	m_databases. categories = categories;
-	m_databases. items      = items;
-}
-
-bool BrickLink::writeDatabase ( const QString &fname )
-{
-	QString filename = fname. isNull ( ) ? dataPath ( ) + defaultDatabaseName ( ) : fname;
-
-	QFile f ( filename + ".new" );
-	if ( f. open ( QIODevice::WriteOnly )) {
-		QDataStream ds ( &f );
-
-        ds << quint32( 0 /*magic*/ ) << quint32 ( 0 /*filesize*/ ) << quint32( BRICKSTOCK_DB_VERSION /*version*/ );
-		
-		ds. setByteOrder ( QDataStream::LittleEndian );
-
-		// colors
-        quint32 colc = m_databases. colors. count ( );
-		ds << colc;
-		
-        for ( QHashIterator<int, Color *> it ( m_databases. colors ); it. hasNext ( ); )
-            ds << it. next ( ). value ( );
-
-		// categories
-        quint32 catc = m_databases. categories. count ( );
-		ds << catc;
-
-        for ( QHashIterator<int, Category *> it ( m_databases. categories ); it. hasNext ( ); )
-            ds << it. next ( ). value ( );
-		
-		// types
-        quint32 ittc = m_databases. item_types. count ( );
-		ds << ittc;
-		
-        for ( QHashIterator<int, ItemType *> it ( m_databases. item_types ); it. hasNext ( ); )
-            ds << it. next ( ). value ( );
-
-		// items
-        quint32 itc = m_databases. items. count ( );
-		ds << itc;
-
-		Item **itp = m_databases. items. data ( );
-        for ( quint32 i = itc; i; itp++, i-- )
-			ds << *itp;
-
-		ds << ( colc + ittc + catc + itc );
-        ds << quint32( 0xb91c5703 );
-
-        quint32 filesize = f. at ( );
-
-        if ( f. status ( ) == (int)IO_Ok ) {
-			f. close ( );
-
-			if ( f. open ( QIODevice::ReadWrite )) {
-				QDataStream ds2 ( &f );
-                ds2 << quint32( 0xb91c5703 ) << filesize;
-
-                if ( f. status ( ) == (int)IO_Ok ) {
-					f. close ( );
-
-					QString err = CUtility::safeRename ( filename );
-
-					if ( err. isNull ( ))
-						return true;
-				}
-			}
-		}
-	}
-	if ( f. isOpen ( ))
-		f. close ( );
-	
-	QFile::remove ( filename + ".new" );
-	return false;
 }

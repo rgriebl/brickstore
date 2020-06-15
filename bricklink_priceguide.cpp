@@ -187,12 +187,12 @@ bool BrickLink::PriceGuide::parse ( const char *data, uint size )
 	};
 
 	struct keyword kw_dummy [] = {
-		{ "SIZE=\"2\">&nbsp;",  0,  -1, -1 },
-		{ "SIZE=\"2\">&nbsp;",  1,  -1, -1 },
-		{ "SIZE=\"2\">&nbsp;",  2,  -1, -1 },
-		{ "SIZE=\"2\">&nbsp;",  3,  -1, -1 },
-		{ "SIZE=\"2\">&nbsp;",  4,  -1, -1 },
-		{ "SIZE=\"2\">&nbsp;",  5,  -1, -1 },
+        { "BGCOLOR=\"#FFFFFF\">&nbsp;",  0,  -1, -1 },
+        { "BGCOLOR=\"#DDDDDD\">&nbsp;",  1,  -1, -1 },
+        { "BGCOLOR=\"#FFFFFF\">&nbsp;",  2,  -1, -1 },
+        { "BGCOLOR=\"#DDDDDD\">&nbsp;",  3,  -1, -1 },
+        { "BGCOLOR=\"#FFFFFF\">&nbsp;",  4,  -1, -1 },
+        { "BGCOLOR=\"#DDDDDD\">&nbsp;",  5,  -1, -1 },
 		{ 0, 0, 0, 0 }
 	};
 
@@ -225,7 +225,7 @@ bool BrickLink::PriceGuide::parse ( const char *data, uint size )
 					case 3:
 					case 4:
 					case 5: {
-						offset++; // $
+                        offset+=4; // 'US $'
 				        m_prices [tkw-> m_id][ckw-> m_id][i-2] = safe_strtomoney ( data, offset, size - 1 );
 				        break;
 					}
@@ -377,10 +377,11 @@ void BrickLink::updatePriceGuide ( BrickLink::PriceGuide *pg, bool high_priority
     QString url;
 	CKeyValueList query;
 	
-	url = "http://www.bricklink.com/priceGuide.asp"; // ?a=%c&viewType=N&colorID=%d&itemID=%s", tolower ( pg-> item ( )-> itemType ( )-> id ( )), pg-> color ( )-> id ( ), pg-> item ( )-> id ( ));
+    url = "http://www.bricklink.com/priceGuideSummary.asp"; // ?a=%c&viewType=N&colorID=%d&itemID=%s", tolower ( pg-> item ( )-> itemType ( )-> id ( )), pg-> color ( )-> id ( ), pg-> item ( )-> id ( ));
 
-	query << CKeyValue ( "a",        QChar ( pg-> item ( )-> itemType ( )-> id ( )). lower ( ))
-	      << CKeyValue ( "viewType", "N" )
+    query << CKeyValue ( "a",        QChar ( pg-> item ( )-> itemType ( )-> id ( )). lower ( ))
+          << CKeyValue ( "vcID",    "1" )
+          << CKeyValue ( "vatInc",  "N" )
 	      << CKeyValue ( "colorID",  QString::number ( pg-> color ( )-> id ( )))
 	      << CKeyValue ( "itemID",   pg-> item ( )-> id ( ))
 	      << CKeyValue ( "viewDec",  "3" );

@@ -14,7 +14,7 @@
 ## See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 
 isEmpty( RELEASE ) {
-  RELEASE    = 1.2.7
+  RELEASE    = 1.2.8
 }
 
 TEMPLATE     = app
@@ -63,6 +63,7 @@ win32 {
 
   INCLUDEPATH += $$(CURLDIR)\include
   LIBS += $$(CURLDIR)\lib\libcurl.lib
+  LIBS += msvcrt.lib libcmt.lib
   LIBS += wldap32.lib /NODEFAULTLIB:libcmt.lib
   DEFINES += CURL_STATICLIB
   RC_FILE = brickstock.rc
@@ -71,12 +72,12 @@ win32 {
   QMAKE_CXXFLAGS_RELEASE += /O2 /GL
 
   win32-msvc2010 {
-     DEFINES += _CRT_SECURE_NO_DEPRECATE
-
-#    QMAKE_LFLAGS_WINDOWS += "/MANIFEST:NO"
-#    QMAKE_LFLAGS_WINDOWS += "/LTCG"
-
-     QMAKE_CXXFLAGS   += /EHc- /EHs- /GR-
+    DEFINES += _CRT_SECURE_NO_DEPRECATE
+    QMAKE_CXXFLAGS   += /EHc- /EHs- /GR-
+  }
+  win32-msvc2013 {
+    DEFINES += _CRT_SECURE_NO_DEPRECATE
+    QMAKE_LFLAGS +=  /MANIFEST:EMBED
   }
 }
 
@@ -150,7 +151,6 @@ HEADERS += bricklink.h \
            cpicturewidget.h \
            cpriceguidewidget.h \
            cprogressdialog.h \
-           crebuilddatabase.h \
            cref.h \
            creport.h \
            creportobjects.h \
@@ -177,7 +177,6 @@ SOURCES += bricklink.cpp \
            bricklink_data.cpp \
            bricklink_picture.cpp \
            bricklink_priceguide.cpp \
-           bricklink_textimport.cpp \
            capplication.cpp \
            cappearsinwidget.cpp \
            cconfig.cpp \
@@ -194,7 +193,6 @@ SOURCES += bricklink.cpp \
            cpicturewidget.cpp \
            cpriceguidewidget.cpp \
            cprogressdialog.cpp \
-           crebuilddatabase.cpp \
            cref.cpp \
            creport.cpp \
            creportobjects.cpp \

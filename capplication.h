@@ -21,10 +21,6 @@
 #include <qevent.h>
 #include <qtranslator.h>
 
-#if defined( Q_WS_MACX )
-    #include <Carbon/Carbon.h>
-#endif
-
 class CFrameWork;
 class QTranslator;
 
@@ -32,7 +28,7 @@ class CApplication : public QApplication {
 	Q_OBJECT
 
 public:
-	CApplication ( const char *rebuild_db_only, int argc, char **argv );
+    CApplication ( int argc, char **argv );
 	virtual ~CApplication ( );
 
 	void enableEmitOpenDocument ( bool b = true );
@@ -54,25 +50,19 @@ signals:
 	void openDocument ( const QString & );
 
 protected:
-	virtual void customEvent ( QCustomEvent *e );
+    virtual bool event ( QEvent *e );
    	
 private slots:
 	void doEmitOpenDocument ( );
 	void demoVersion ( );
-	void rebuildDatabase ( );
 
 private:
 	bool initBrickLink ( );
 	void exitBrickLink ( );
 
-#if defined( Q_WS_MACX )
-    static OSErr appleEventHandler (const AppleEvent *event, AppleEvent *, void * );
-#endif
-
 private:
 	QStringList m_files_to_open;
 	bool m_enable_emit;
-	QString m_rebuild_db_only;
 
 	QTranslator *m_trans_qt;
 	QTranslator *m_trans_brickstock;

@@ -42,30 +42,22 @@ int main ( int argc, char **argv )
     }
 #endif
 
-	const char *rebuild_db = 0;
 	bool show_usage = false;
 
 	if (( argc == 2 ) && ( !strcmp( argv [1], "-h" ) || !strcmp( argv [1], "--help" ))) {
 		show_usage = true;
 	}
-	else if (( argc >= 2 ) && !strcmp( argv [1], "--rebuild-database" )) {
-		if (( argc != 3 ) || !argv [2][0] )
-			show_usage = true;
-		else
-			rebuild_db = argv [2];
-	}
 	
 	if ( show_usage ) {
 #if defined( Q_OS_WIN32 )
-		QMessageBox::information ( 0, "BrickStock", "<b>Usage:</b><br />brickstock.exe [&lt;files&gt;]<br /><br />brickstock.exe --rebuild-database &lt;dbname&gt;<br />", QMessageBox::Ok );
+        QMessageBox::information ( 0, "BrickStock", "<b>Usage:</b><br />brickstock.exe [&lt;files&gt;]<br />", QMessageBox::Ok );
 #else
 		printf ( "Usage: %s [<files>]\n", argv [0] );
-		printf ( "       %s --rebuild-database <dbname>\n", argv [0] );
 #endif
 		return 1;
 	}
 	else {
-		CApplication a ( rebuild_db, argc, argv );
+        CApplication a (argc, argv );
 		return a. exec ( );
 	}
 }

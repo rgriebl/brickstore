@@ -36,50 +36,37 @@
 #include "version.h"
 #include "dlgmessageimpl.h"
 #include "dlgregistrationimpl.h"
-#include "crebuilddatabase.h"
 #include "cprogressdialog.h"
 #include "ccheckforupdates.h"
 #include "csplash.h"
 
 #include "capplication.h"
 
-
-class COpenEvent : public QCustomEvent {
+class COpenEvent : public QEvent {
 public:
 	enum { Type = QEvent::User + 142 };
 
-	COpenEvent ( const QString &file ) 
-		: QCustomEvent ( Type ), m_file ( file ) 
-	{ }
+    COpenEvent ( const QString &file ) : QEvent ( (QEvent::Type)Type ), m_file ( file ) { }
 	
-	QString fileName ( ) const 
-	{ return m_file; }
+    QString fileName ( ) const { return m_file; }
 	
 private:
 	QString m_file;
 };
 
-
 CApplication *cApp = 0;                
 
-CApplication::CApplication ( const char *rebuild_db_only, int _argc, char **_argv ) 
-	: QApplication ( _argc, _argv, !rebuild_db_only )
+CApplication::CApplication (int _argc, char **_argv )
+    : QApplication ( _argc, _argv )
 {
 	cApp = this;
 
 	m_enable_emit = false;
-	m_rebuild_db_only = rebuild_db_only;
 
-    if ( m_rebuild_db_only. isEmpty ( )) {
-        // try not to look ugly
-        if ( style()-> inherits ( "QMotifStyle" ) || style()-> inherits ( "QMotifPlusStyle" ))
-            setStyle ( new QWindowsStyle ( ) );
-        CSplash::inst ( );
-    }
-
-#if defined( Q_WS_MACX )
-	AEInstallEventHandler( kCoreEventClass, kAEOpenDocuments, appleEventHandler, 0, false );
-#endif
+    // try not to look ugly
+    if ( style()-> inherits ( "QMotifStyle" ) || style()-> inherits ( "QMotifPlusStyle" ))
+        setStyle ( new QWindowsStyle ( ) );
+    CSplash::inst ( );
 
     // initialize config & resource
     (void) CConfig::inst ( )-> upgrade ( BRICKSTOCK_MAJOR, BRICKSTOCK_MINOR, BRICKSTOCK_PATCH );
@@ -95,9 +82,6 @@ CApplication::CApplication ( const char *rebuild_db_only, int _argc, char **_arg
 		// no event loop to quit from...
 		postEvent ( this, new QEvent ( QEvent::Quit ));
 		return;
-	}
-	else if ( !m_rebuild_db_only. isEmpty ( )) {	
-		QTimer::singleShot ( 0, this, SLOT( rebuildDatabase ( )));
 	}
 	else {
 		updateTranslations ( );
@@ -131,9 +115,6 @@ CApplication::CApplication ( const char *rebuild_db_only, int _argc, char **_arg
 	
 CApplication::~CApplication ( )
 {
-#if defined( Q_WS_MACX )
-	AERemoveEventHandler ( kCoreEventClass, kAEOpenDocuments, appleEventHandler, false );
-#endif
 	exitBrickLink ( );
 
     Q3MimeSourceFactory::defaultFactory ( )-> setData ( "brickstock-icon", 0 );
@@ -164,13 +145,6 @@ void CApplication::updateTranslations ( )
     if ( m_trans_brickstock )
         installTranslator ( m_trans_brickstock );
 }
-
-void CApplication::rebuildDatabase ( )
-{
-	CRebuildDatabase rdb ( m_rebuild_db_only );
-	exit ( rdb. exec ( ));
-}
-
 
 QString CApplication::appName ( ) const
 {
@@ -267,37 +241,18 @@ void CApplication::doEmitOpenDocument ( )
 	}
 }
 
-void CApplication::customEvent ( QCustomEvent *e )
+bool CApplication::event(QEvent *e)
 {
-	if ( int( e-> type ( )) == int( COpenEvent::Type )) {
-		m_files_to_open. append ( static_cast <COpenEvent *> ( e )-> fileName ( ));
-		
-		doEmitOpenDocument ( );
-	}
+    switch ( e -> type ( ) ) {
+        case QEvent::FileOpen:
+            m_files_to_open. append ( static_cast <QFileOpenEvent *> ( e )-> file ( ) );
+            doEmitOpenDocument ( );
+
+            return true;
+        default:
+            return QApplication::event ( e );
+    }
 }
-   	
-#if defined( Q_WS_MACX )
-OSErr CApplication::appleEventHandler ( const AppleEvent *event, AppleEvent *, void* )
-{
-	AEDescList docs;
-	
-	if ( AEGetParamDesc ( event, keyDirectObject, typeAEList, &docs ) == noErr ) {
-		long n = 0;
-		AECountItems ( &docs, &n );
-		UInt8 strbuffer [PATH_MAX];
-		for ( long i = 0; i < n; i++ ) {
-			FSRef ref;
-			if ( AEGetNthPtr ( &docs, i + 1, typeFSRef, 0, 0, &ref, sizeof( ref ), 0) != noErr )
-				continue;
-			if ( FSRefMakePath ( &ref, strbuffer, 256 ) == noErr ) {
-				COpenEvent e ( QString::fromUtf8 ( reinterpret_cast <char *> ( strbuffer )));
-				QApplication::sendEvent ( qApp, &e );
-			}
-		}	
-	}
-	return noErr;
-}
-#endif
 
 bool CApplication::initBrickLink ( )
 {

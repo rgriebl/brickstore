@@ -24,8 +24,6 @@
 //Added by qt3to4:
 #include <Q3ValueList>
 
-#include "lzmadec.h"
-
 #include "cconfig.h"
 #include "bricklink.h"
 #include "cprogressdialog.h"
@@ -398,8 +396,8 @@ private slots:
 					BrickLink::InvItem *ii = 0;
 
                     //QRegExp rx_type ( " HREF='/catalogItemPic.asp\?([A-Z]{1,1})=" );
-                    QRegExp rx_ids ( "HEIGHT='60' SRC='http://img.bricklink.com/([A-Z]+)/[0-9]*/([^ ]+).gif' NAME=" );
-                    QRegExp rx_qty_price ( " VALUE=\"([0-9]+)\">(&nbsp;\\(x[0-9]+\\))?<BR>Qty Available: <B>[0-9]+</B><BR>Each:&nbsp;<B>[^0-9]*([0-9.]+)</B>" );
+                    QRegExp rx_ids ( "HEIGHT='[0-9]*' SRC='http://img.bricklink.com/([A-Z]+)/[0-9]*/([^ ]+).gif' NAME=" );
+                    QRegExp rx_qty_price ( " VALUE=\"([0-9]+)\">(&nbsp;\\(x[0-9]+\\))?<BR>Qty Available: <B>[0-9]+</B><BR>Each:&nbsp;<B>[^0-9]*([0-9.]+)" );
                     QRegExp rx_names ( "<TD>(.+)</TD><TD VALIGN=\"TOP\" NOWRAP>" );
 					QString str_cond ( "<B>New</B>" );
 
