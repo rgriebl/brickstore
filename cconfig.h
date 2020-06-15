@@ -56,6 +56,9 @@ public:
 
     QDateTime lastDatabaseUpdate ( );
 
+    QDateTime lastApplicationUpdateCheck ( );
+    void setLastApplicationUpdateCheck ( QDateTime dt );
+
     QString blLoginUsername ( );
     QString blLoginPassword ( );
 	void blUpdateIntervals ( int &pic, int &pg ) const;
@@ -89,7 +92,7 @@ public slots:
 	void setOnlineStatus ( bool b );
 	void setProxy ( bool b, const QString &name, int port );
 
-    void setLastDatabaseUpdate (QDateTime dt );
+    void setLastDatabaseUpdate ( QDateTime dt );
 
 	void setBlLoginUsername ( const QString &name );
 	void setBlLoginPassword ( const QString &pass );

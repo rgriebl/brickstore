@@ -25,8 +25,10 @@
 
 
 DlgIncompleteItemImpl::DlgIncompleteItemImpl ( BrickLink::InvItem *ii, QWidget *parent, const char *name, bool modal )
-	: DlgIncompleteItem ( parent, name, modal )
+    : QDialog ( parent, name, modal )
 {
+    setupUi( this );
+
 	m_ii = ii;
 
 	w_incomplete-> setText ( createDisplayString ( ii ));
@@ -37,14 +39,14 @@ DlgIncompleteItemImpl::DlgIncompleteItemImpl ( BrickLink::InvItem *ii, QWidget *
 	w_item_stack-> setShown ( !itemok );
 
 	if ( !itemok ) {
-		w_item_stack-> raiseWidget ( 1 );
+        w_item_stack-> setCurrentIndex ( 1 );
         w_item_add_info-> setText ( QString( "<a href=\"%1\">%2</a>" ). arg ( BrickLink::inst ( )-> url ( BrickLink::URL_ItemChangeLog, ii-> isIncomplete ( )-> m_item_id. latin1 ( ))). arg ( tr( "BrickLink Item Change Log" )));
 	}
 	
 	w_color_stack-> setShown ( !colorok );
 
 	if ( !colorok ) {
-		w_color_stack-> raiseWidget ( 1 );
+        w_color_stack-> setCurrentIndex ( 1 );
         w_color_add_info-> setText ( QString( "<a href=\"%1\">%2</a>" ). arg ( BrickLink::inst ( )-> url ( BrickLink::URL_ColorChangeLog )). arg ( tr( "BrickLink Color Change Log" )));
 	}
 	
@@ -74,7 +76,7 @@ void DlgIncompleteItemImpl::fixItem ( )
 		m_ii-> setItem ( it );
 		
 		w_item_fixed-> setText ( tr( "New Item is: %1, %2 %3" ). arg ( it-> itemType ( )-> name ( )). arg ( it-> id ( )). arg ( it-> name ( )));		
-		w_item_stack-> raiseWidget ( 0 );
+        w_item_stack-> setCurrentIndex ( 0 );
 
 		checkOk ( );
 	}
@@ -91,7 +93,7 @@ void DlgIncompleteItemImpl::fixColor ( )
 		
 		w_color_fixed-> setText ( tr( "New color is: %1" ). arg ( d. color ( )-> name ( )));
 		
-		w_color_stack-> raiseWidget ( 0 );
+        w_color_stack-> setCurrentIndex ( 0 );
 
 		checkOk ( );
 	}

@@ -25,8 +25,10 @@
 
 
 DlgIncDecPriceImpl::DlgIncDecPriceImpl ( QWidget* parent, const char* name, bool modal, Qt::WFlags fl )
-	: DlgIncDecPrice( parent, name, modal, fl )
+    : QDialog( parent, name, modal, fl )
 {
+    setupUi ( this );
+
 	w_inc_dec-> setButton ( 1 );
 	w_value-> setText ( "0" );
 	w_percent_fixed-> setButton ( 0 );

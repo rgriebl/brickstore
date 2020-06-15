@@ -45,6 +45,7 @@ public:
 
 public slots:
 	void about ( );
+    void checkForUpdates ( const QString & ) { checkForUpdates ( ); }
 	void checkForUpdates ( );
 	void updateTranslations ( );
 	void registration ( );

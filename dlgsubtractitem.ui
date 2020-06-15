@@ -1,235 +1,215 @@
-<!DOCTYPE UI><UI version="3.3" stdsetdef="1">
-<class>DlgSubtractItem</class>
-<widget class="QDialog">
-    <property name="name">
-        <cstring>DlgSubtractItem</cstring>
-    </property>
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0" stdsetdef="1">
+  <author></author>
+  <comment></comment>
+  <exportmacro></exportmacro>
+  <class>DlgSubtractItem</class>
+  <widget class="QDialog" name="DlgSubtractItem">
     <property name="geometry">
-        <rect>
-            <x>0</x>
-            <y>0</y>
-            <width>423</width>
-            <height>218</height>
-        </rect>
+      <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>423</width>
+        <height>218</height>
+      </rect>
     </property>
-    <property name="caption">
-        <string>Document Selector</string>
+    <property name="windowTitle">
+      <string>Document Selector</string>
     </property>
     <property name="sizeGripEnabled">
-        <bool>true</bool>
+      <bool>true</bool>
     </property>
-    <vbox>
-        <property name="name">
-            <cstring>unnamed</cstring>
-        </property>
-        <property name="resizeMode">
-            <enum>FreeResize</enum>
-        </property>
-        <widget class="QLabel">
-            <property name="name">
-                <cstring>w_header</cstring>
-            </property>
-            <property name="sizePolicy">
-                <sizepolicy>
-                    <hsizetype>5</hsizetype>
-                    <vsizetype>3</vsizetype>
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                </sizepolicy>
-            </property>
-            <property name="text">
-                <string>%1</string>
-            </property>
-            <property name="alignment">
-                <set>WordBreak|AlignVCenter</set>
-            </property>
-            <property name="buddy" stdset="0">
-                <cstring>w_clipboard</cstring>
-            </property>
+    <layout class="QVBoxLayout">
+      <property name="resizeMode">
+        <enum>FreeResize</enum>
+      </property>
+      <item>
+        <widget class="QLabel" name="w_header">
+          <property name="sizePolicy">
+            <sizepolicy>
+              <hsizetype>5</hsizetype>
+              <vsizetype>3</vsizetype>
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+            </sizepolicy>
+          </property>
+          <property name="text">
+            <string>%1</string>
+          </property>
+          <property name="alignment">
+            <set>Qt::AlignVCenter</set>
+          </property>
+          <property name="buddy" stdset="0">
+            <cstring>w_clipboard</cstring>
+          </property>
+          <property name="wordWrap">
+            <bool>true</bool>
+          </property>
         </widget>
-        <widget class="QButtonGroup">
-            <property name="name">
-                <cstring>w_type</cstring>
+      </item>
+      <item>
+        <widget class="Q3ButtonGroup" name="w_type">
+          <property name="frameShape">
+            <enum>Q3GroupBox::NoFrame</enum>
+          </property>
+          <property name="title">
+            <string/>
+          </property>
+          <property name="selectedId" stdset="0">
+            <number>-1</number>
+          </property>
+          <layout class="QGridLayout">
+            <property name="margin">
+              <number>0</number>
             </property>
-            <property name="frameShape">
-                <enum>NoFrame</enum>
-            </property>
-            <property name="title">
-                <string></string>
-            </property>
-            <property name="selectedId" stdset="0">
-                <number>-1</number>
-            </property>
-            <grid>
-                <property name="name">
-                    <cstring>unnamed</cstring>
+            <item row="0" column="0" rowspan="1" colspan="2">
+              <widget class="QRadioButton" name="w_clipboard">
+                <property name="text">
+                  <string>Items from Clipboard</string>
                 </property>
-                <property name="margin">
-                    <number>0</number>
+              </widget>
+            </item>
+            <item row="1" column="0" rowspan="1" colspan="2">
+              <widget class="QRadioButton" name="w_document">
+                <property name="text">
+                  <string>Items from an already open document:</string>
                 </property>
-                <widget class="QRadioButton" row="0" column="0" rowspan="1" colspan="2">
-                    <property name="name">
-                        <cstring>w_clipboard</cstring>
-                    </property>
-                    <property name="text">
-                        <string>Items from Clipboard</string>
-                    </property>
-                </widget>
-                <widget class="QRadioButton" row="1" column="0" rowspan="1" colspan="2">
-                    <property name="name">
-                        <cstring>w_document</cstring>
-                    </property>
-                    <property name="text">
-                        <string>Items from an already open document:</string>
-                    </property>
-                </widget>
-                <spacer row="2" column="0">
-                    <property name="name">
-                        <cstring>spacer5</cstring>
-                    </property>
-                    <property name="orientation">
-                        <enum>Horizontal</enum>
-                    </property>
-                    <property name="sizeType">
-                        <enum>Fixed</enum>
-                    </property>
-                    <property name="sizeHint">
-                        <size>
-                            <width>20</width>
-                            <height>16</height>
-                        </size>
-                    </property>
-                </spacer>
-                <widget class="QListView" row="2" column="1">
-                    <column>
-                        <property name="text">
-                            <string></string>
-                        </property>
-                        <property name="clickable">
-                            <bool>true</bool>
-                        </property>
-                        <property name="resizable">
-                            <bool>true</bool>
-                        </property>
-                    </column>
-                    <property name="name">
-                        <cstring>w_doc_list</cstring>
-                    </property>
-                    <property name="enabled">
-                        <bool>false</bool>
-                    </property>
-                    <property name="resizeMode">
-                        <enum>AllColumns</enum>
-                    </property>
-                </widget>
-            </grid>
+              </widget>
+            </item>
+            <item row="2" column="0">
+              <spacer name="spacer5">
+                <property name="sizeHint">
+                  <size>
+                    <width>20</width>
+                    <height>16</height>
+                  </size>
+                </property>
+                <property name="sizeType">
+                  <enum>QSizePolicy::Fixed</enum>
+                </property>
+                <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                </property>
+              </spacer>
+            </item>
+            <item row="2" column="1">
+              <widget class="Q3ListView" name="w_doc_list">
+                <property name="enabled">
+                  <bool>false</bool>
+                </property>
+                <property name="resizeMode">
+                  <enum>Q3ListView::AllColumns</enum>
+                </property>
+                <column>
+                  <property name="text">
+                    <string/>
+                  </property>
+                  <property name="clickable">
+                    <bool>true</bool>
+                  </property>
+                  <property name="resizable">
+                    <bool>true</bool>
+                  </property>
+                </column>
+              </widget>
+            </item>
+          </layout>
         </widget>
-        <widget class="Line">
-            <property name="name">
-                <cstring>line2</cstring>
-            </property>
-            <property name="frameShape">
-                <enum>HLine</enum>
-            </property>
-            <property name="frameShadow">
-                <enum>Sunken</enum>
-            </property>
-            <property name="orientation">
-                <enum>Horizontal</enum>
-            </property>
+      </item>
+      <item>
+        <widget class="Line" name="line2">
+          <property name="frameShape">
+            <enum>QFrame::HLine</enum>
+          </property>
+          <property name="frameShadow">
+            <enum>QFrame::Sunken</enum>
+          </property>
         </widget>
-        <widget class="QLayoutWidget">
-            <property name="name">
-                <cstring>Layout1</cstring>
-            </property>
-            <hbox>
-                <property name="name">
-                    <cstring>unnamed</cstring>
-                </property>
-                <property name="margin">
-                    <number>0</number>
-                </property>
-                <property name="spacing">
-                    <number>6</number>
-                </property>
-                <spacer>
-                    <property name="name">
-                        <cstring>Horizontal Spacing2</cstring>
-                    </property>
-                    <property name="orientation">
-                        <enum>Horizontal</enum>
-                    </property>
-                    <property name="sizeType">
-                        <enum>Expanding</enum>
-                    </property>
-                    <property name="sizeHint">
-                        <size>
-                            <width>20</width>
-                            <height>20</height>
-                        </size>
-                    </property>
-                </spacer>
-                <widget class="QPushButton">
-                    <property name="name">
-                        <cstring>w_ok</cstring>
-                    </property>
-                    <property name="text">
-                        <string>&amp;OK</string>
-                    </property>
-                    <property name="accel">
-                        <string></string>
-                    </property>
-                    <property name="autoDefault">
-                        <bool>true</bool>
-                    </property>
-                    <property name="default">
-                        <bool>true</bool>
-                    </property>
-                </widget>
-                <widget class="QPushButton">
-                    <property name="name">
-                        <cstring>buttonCancel</cstring>
-                    </property>
-                    <property name="text">
-                        <string>&amp;Cancel</string>
-                    </property>
-                    <property name="accel">
-                        <string></string>
-                    </property>
-                    <property name="autoDefault">
-                        <bool>true</bool>
-                    </property>
-                </widget>
-            </hbox>
-        </widget>
-    </vbox>
-</widget>
-<connections>
-    <connection>
-        <sender>w_ok</sender>
-        <signal>clicked()</signal>
-        <receiver>DlgSubtractItem</receiver>
-        <slot>accept()</slot>
-    </connection>
-    <connection>
-        <sender>buttonCancel</sender>
-        <signal>clicked()</signal>
-        <receiver>DlgSubtractItem</receiver>
-        <slot>reject()</slot>
-    </connection>
-    <connection>
-        <sender>w_document</sender>
-        <signal>toggled(bool)</signal>
-        <receiver>w_doc_list</receiver>
-        <slot>setEnabled(bool)</slot>
-    </connection>
-</connections>
-<tabstops>
+      </item>
+      <item>
+        <layout class="QHBoxLayout">
+          <property name="margin">
+            <number>0</number>
+          </property>
+          <property name="spacing">
+            <number>6</number>
+          </property>
+          <item>
+            <spacer name="Horizontal Spacing2">
+              <property name="sizeHint">
+                <size>
+                  <width>20</width>
+                  <height>20</height>
+                </size>
+              </property>
+              <property name="sizeType">
+                <enum>QSizePolicy::Expanding</enum>
+              </property>
+              <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+              </property>
+            </spacer>
+          </item>
+          <item>
+            <widget class="QPushButton" name="w_ok">
+              <property name="text">
+                <string>&amp;OK</string>
+              </property>
+              <property name="shortcut">
+                <string/>
+              </property>
+              <property name="autoDefault">
+                <bool>true</bool>
+              </property>
+              <property name="default">
+                <bool>true</bool>
+              </property>
+            </widget>
+          </item>
+          <item>
+            <widget class="QPushButton" name="buttonCancel">
+              <property name="text">
+                <string>&amp;Cancel</string>
+              </property>
+              <property name="shortcut">
+                <string/>
+              </property>
+              <property name="autoDefault">
+                <bool>true</bool>
+              </property>
+            </widget>
+          </item>
+        </layout>
+      </item>
+    </layout>
+  </widget>
+  <layoutdefault spacing="6" margin="11"/>
+  <pixmapfunction>qPixmapFromMimeSource</pixmapfunction>
+  <tabstops>
     <tabstop>w_clipboard</tabstop>
     <tabstop>w_document</tabstop>
     <tabstop>w_doc_list</tabstop>
     <tabstop>w_ok</tabstop>
     <tabstop>buttonCancel</tabstop>
-</tabstops>
-<layoutdefaults spacing="6" margin="11"/>
-</UI>
+  </tabstops>
+  <connections>
+    <connection>
+      <sender>w_ok</sender>
+      <signal>clicked()</signal>
+      <receiver>DlgSubtractItem</receiver>
+      <slot>accept()</slot>
+    </connection>
+    <connection>
+      <sender>buttonCancel</sender>
+      <signal>clicked()</signal>
+      <receiver>DlgSubtractItem</receiver>
+      <slot>reject()</slot>
+    </connection>
+    <connection>
+      <sender>w_document</sender>
+      <signal>toggled(bool)</signal>
+      <receiver>w_doc_list</receiver>
+      <slot>setEnabled(bool)</slot>
+    </connection>
+  </connections>
+</ui>

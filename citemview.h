@@ -22,13 +22,13 @@
 //Added by qt3to4:
 #include <QPixmap>
 #include <QEvent>
-
+#include <qtooltip.h>
+#include <q3header.h>
 
 class QValidator;
 
 class CItemViewItem;
 class CItemViewPrivate;
-
 
 class CItemView : public CListView {
 	Q_OBJECT
@@ -153,6 +153,55 @@ private:
     friend class CItemViewToolTip;
 };
 
+class CItemViewToolTip : public QObject {
+    Q_OBJECT
+
+public:
+    CItemViewToolTip ( QWidget *parent, CItemView *iv )
+        : QObject( parent ), m_iv ( iv )
+    { }
+
+    virtual ~CItemViewToolTip ( )
+    { }
+
+    bool eventFilter( QObject *, QEvent *e )
+    {
+        bool res = false;
+        if ( !(QWidget *)QObject::parent() || !m_iv /*|| !m_iv-> showToolTips ( )*/ )
+            res = false;
+
+        if (e->type() == QEvent::ToolTip) {
+            QToolTip::remove ( (QWidget *)QObject::parent());
+            QHelpEvent *helpEvent = static_cast<QHelpEvent *>(e);
+            QPoint pos = helpEvent->pos();
+
+            CItemViewItem *item = static_cast <CItemViewItem *> ( m_iv-> itemAt ( pos ));
+            QPoint contentpos = m_iv-> viewportToContents ( pos );
+
+            if ( item ) {
+                int col = m_iv-> header ( )-> sectionAt ( contentpos. x ( ));
+                QString text = item-> toolTip ( col );
+
+                if ( text. isEmpty ( ))
+                    return false;
+
+                QRect r = m_iv-> itemRect ( item );
+                int headerleft = m_iv-> header ( )-> sectionPos ( col ) - m_iv-> contentsX ( );
+                r. setLeft ( headerleft );
+                r. setRight ( headerleft + m_iv-> header ( )-> sectionSize ( col ));
+
+                QToolTip::showText(helpEvent->globalPos(), text, (QWidget *)QObject::parent(), r);
+            }
+
+            res = true;
+        }
+
+        return res;
+    }
+
+private:
+    CItemView *m_iv;
+};
 
 #endif
 

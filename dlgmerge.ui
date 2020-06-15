@@ -1,244 +1,212 @@
-<!DOCTYPE UI><UI version="3.3" stdsetdef="1">
-<class>DlgMerge</class>
-<widget class="QDialog">
-    <property name="name">
-        <cstring>DlgMerge</cstring>
-    </property>
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0" stdsetdef="1">
+  <author></author>
+  <comment></comment>
+  <exportmacro></exportmacro>
+  <class>DlgMerge</class>
+  <widget class="QDialog" name="DlgMerge">
     <property name="geometry">
-        <rect>
-            <x>0</x>
-            <y>0</y>
-            <width>431</width>
-            <height>142</height>
-        </rect>
+      <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>431</width>
+        <height>142</height>
+      </rect>
     </property>
-    <property name="caption">
-        <string>Consolidate Items</string>
+    <property name="windowTitle">
+      <string>Consolidate Items</string>
     </property>
     <property name="sizeGripEnabled">
-        <bool>false</bool>
+      <bool>false</bool>
     </property>
-    <vbox>
-        <property name="name">
-            <cstring>unnamed</cstring>
-        </property>
-        <property name="resizeMode">
-            <enum>Fixed</enum>
-        </property>
-        <widget class="QLabel">
-            <property name="name">
-                <cstring>w_text</cstring>
-            </property>
-            <property name="text">
-                <string>Would you like to consolidate %1 %2 with the already existing lot, containing %3 items?</string>
-            </property>
+    <layout class="QVBoxLayout">
+      <property name="resizeMode">
+        <enum>Fixed</enum>
+      </property>
+      <item>
+        <widget class="QLabel" name="w_text">
+          <property name="text">
+            <string>Would you like to consolidate %1 %2 with the already existing lot, containing %3 items?</string>
+          </property>
+          <property name="wordWrap">
+            <bool>false</bool>
+          </property>
         </widget>
-        <spacer>
-            <property name="name">
-                <cstring>spacer6</cstring>
-            </property>
-            <property name="orientation">
-                <enum>Vertical</enum>
-            </property>
-            <property name="sizeType">
-                <enum>Fixed</enum>
-            </property>
-            <property name="sizeHint">
-                <size>
-                    <width>20</width>
-                    <height>6</height>
-                </size>
-            </property>
+      </item>
+      <item>
+        <spacer name="spacer6">
+          <property name="sizeHint">
+            <size>
+              <width>20</width>
+              <height>6</height>
+            </size>
+          </property>
+          <property name="sizeType">
+            <enum>QSizePolicy::Fixed</enum>
+          </property>
+          <property name="orientation">
+            <enum>Qt::Vertical</enum>
+          </property>
         </spacer>
-        <widget class="QLayoutWidget">
-            <property name="name">
-                <cstring>layout7</cstring>
-            </property>
-            <hbox>
-                <property name="name">
-                    <cstring>unnamed</cstring>
-                </property>
-                <spacer>
-                    <property name="name">
-                        <cstring>spacer5</cstring>
+      </item>
+      <item>
+        <layout class="QHBoxLayout">
+          <item>
+            <spacer name="spacer5">
+              <property name="sizeHint">
+                <size>
+                  <width>22</width>
+                  <height>20</height>
+                </size>
+              </property>
+              <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+              </property>
+              <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+              </property>
+            </spacer>
+          </item>
+          <item>
+            <layout class="QVBoxLayout">
+              <item>
+                <widget class="QLabel" name="textLabel2">
+                  <property name="text">
+                    <string>Preserve the attributes (e.g. remarks, tiered prices, ...) of the</string>
+                  </property>
+                  <property name="wordWrap">
+                    <bool>false</bool>
+                  </property>
+                </widget>
+              </item>
+              <item>
+                <widget class="Q3ButtonGroup" name="w_existing_or_new">
+                  <property name="frameShape">
+                    <enum>Q3GroupBox::NoFrame</enum>
+                  </property>
+                  <property name="title">
+                    <string/>
+                  </property>
+                  <property name="selectedId" stdset="0">
+                    <number>0</number>
+                  </property>
+                  <layout class="QHBoxLayout">
+                    <property name="margin">
+                      <number>0</number>
                     </property>
-                    <property name="orientation">
-                        <enum>Horizontal</enum>
-                    </property>
-                    <property name="sizeType">
-                        <enum>Fixed</enum>
-                    </property>
-                    <property name="sizeHint">
-                        <size>
-                            <width>22</width>
-                            <height>20</height>
-                        </size>
-                    </property>
-                </spacer>
-                <widget class="QLayoutWidget">
-                    <property name="name">
-                        <cstring>layout6</cstring>
-                    </property>
-                    <vbox>
-                        <property name="name">
-                            <cstring>unnamed</cstring>
+                    <item>
+                      <widget class="QRadioButton" name="w_existing">
+                        <property name="text">
+                          <string>&amp;existing lot or the</string>
                         </property>
-                        <widget class="QLabel">
-                            <property name="name">
-                                <cstring>textLabel2</cstring>
-                            </property>
-                            <property name="text">
-                                <string>Preserve the attributes (e.g. remarks, tiered prices, ...) of the</string>
-                            </property>
-                        </widget>
-                        <widget class="QButtonGroup">
-                            <property name="name">
-                                <cstring>w_existing_or_new</cstring>
-                            </property>
-                            <property name="frameShape">
-                                <enum>NoFrame</enum>
-                            </property>
-                            <property name="title">
-                                <string></string>
-                            </property>
-                            <property name="selectedId" stdset="0">
-                                <number>0</number>
-                            </property>
-                            <hbox>
-                                <property name="name">
-                                    <cstring>unnamed</cstring>
-                                </property>
-                                <property name="margin">
-                                    <number>0</number>
-                                </property>
-                                <widget class="QRadioButton">
-                                    <property name="name">
-                                        <cstring>w_existing</cstring>
-                                    </property>
-                                    <property name="text">
-                                        <string>&amp;existing lot or the</string>
-                                    </property>
-                                </widget>
-                                <widget class="QRadioButton">
-                                    <property name="name">
-                                        <cstring>w_new</cstring>
-                                    </property>
-                                    <property name="text">
-                                        <string>ne&amp;w lot</string>
-                                    </property>
-                                </widget>
-                                <spacer>
-                                    <property name="name">
-                                        <cstring>spacer4</cstring>
-                                    </property>
-                                    <property name="orientation">
-                                        <enum>Horizontal</enum>
-                                    </property>
-                                    <property name="sizeType">
-                                        <enum>Expanding</enum>
-                                    </property>
-                                    <property name="sizeHint">
-                                        <size>
-                                            <width>202</width>
-                                            <height>20</height>
-                                        </size>
-                                    </property>
-                                </spacer>
-                            </hbox>
-                        </widget>
-                    </vbox>
-                </widget>
-            </hbox>
-        </widget>
-        <widget class="Line">
-            <property name="name">
-                <cstring>line2</cstring>
-            </property>
-            <property name="frameShape">
-                <enum>HLine</enum>
-            </property>
-            <property name="frameShadow">
-                <enum>Sunken</enum>
-            </property>
-            <property name="orientation">
-                <enum>Horizontal</enum>
-            </property>
-        </widget>
-        <widget class="QLayoutWidget">
-            <property name="name">
-                <cstring>layout3</cstring>
-            </property>
-            <hbox>
-                <property name="name">
-                    <cstring>unnamed</cstring>
-                </property>
-                <widget class="QCheckBox">
-                    <property name="name">
-                        <cstring>w_always</cstring>
-                    </property>
-                    <property name="text">
-                        <string>&amp;Do the same for the remaining lots</string>
-                    </property>
-                </widget>
-                <spacer>
-                    <property name="name">
-                        <cstring>Horizontal Spacing2</cstring>
-                    </property>
-                    <property name="orientation">
-                        <enum>Horizontal</enum>
-                    </property>
-                    <property name="sizeType">
-                        <enum>Expanding</enum>
-                    </property>
-                    <property name="sizeHint">
-                        <size>
-                            <width>20</width>
+                      </widget>
+                    </item>
+                    <item>
+                      <widget class="QRadioButton" name="w_new">
+                        <property name="text">
+                          <string>ne&amp;w lot</string>
+                        </property>
+                      </widget>
+                    </item>
+                    <item>
+                      <spacer name="spacer4">
+                        <property name="sizeHint">
+                          <size>
+                            <width>202</width>
                             <height>20</height>
-                        </size>
-                    </property>
-                </spacer>
-                <widget class="QPushButton">
-                    <property name="name">
-                        <cstring>w_yes</cstring>
-                    </property>
-                    <property name="text">
-                        <string>&amp;Yes</string>
-                    </property>
-                    <property name="autoDefault">
-                        <bool>true</bool>
-                    </property>
-                    <property name="default">
-                        <bool>true</bool>
-                    </property>
+                          </size>
+                        </property>
+                        <property name="sizeType">
+                          <enum>QSizePolicy::Expanding</enum>
+                        </property>
+                        <property name="orientation">
+                          <enum>Qt::Horizontal</enum>
+                        </property>
+                      </spacer>
+                    </item>
+                  </layout>
                 </widget>
-                <widget class="QPushButton">
-                    <property name="name">
-                        <cstring>w_no</cstring>
-                    </property>
-                    <property name="text">
-                        <string>&amp;No</string>
-                    </property>
-                    <property name="autoDefault">
-                        <bool>true</bool>
-                    </property>
-                </widget>
-            </hbox>
+              </item>
+            </layout>
+          </item>
+        </layout>
+      </item>
+      <item>
+        <widget class="Line" name="line2">
+          <property name="frameShape">
+            <enum>QFrame::HLine</enum>
+          </property>
+          <property name="frameShadow">
+            <enum>QFrame::Sunken</enum>
+          </property>
         </widget>
-    </vbox>
-</widget>
-<connections>
+      </item>
+      <item>
+        <layout class="QHBoxLayout">
+          <item>
+            <widget class="QCheckBox" name="w_always">
+              <property name="text">
+                <string>&amp;Do the same for the remaining lots</string>
+              </property>
+            </widget>
+          </item>
+          <item>
+            <spacer name="Horizontal Spacing2">
+              <property name="sizeHint">
+                <size>
+                  <width>20</width>
+                  <height>20</height>
+                </size>
+              </property>
+              <property name="sizeType">
+                <enum>QSizePolicy::Expanding</enum>
+              </property>
+              <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+              </property>
+            </spacer>
+          </item>
+          <item>
+            <widget class="QPushButton" name="w_yes">
+              <property name="text">
+                <string>&amp;Yes</string>
+              </property>
+              <property name="autoDefault">
+                <bool>true</bool>
+              </property>
+              <property name="default">
+                <bool>true</bool>
+              </property>
+            </widget>
+          </item>
+          <item>
+            <widget class="QPushButton" name="w_no">
+              <property name="text">
+                <string>&amp;No</string>
+              </property>
+              <property name="autoDefault">
+                <bool>true</bool>
+              </property>
+            </widget>
+          </item>
+        </layout>
+      </item>
+    </layout>
+  </widget>
+  <layoutdefault spacing="6" margin="11"/>
+  <pixmapfunction>qPixmapFromMimeSource</pixmapfunction>
+  <connections>
     <connection>
-        <sender>w_yes</sender>
-        <signal>clicked()</signal>
-        <receiver>DlgMerge</receiver>
-        <slot>accept()</slot>
+      <sender>w_yes</sender>
+      <signal>clicked()</signal>
+      <receiver>DlgMerge</receiver>
+      <slot>accept()</slot>
     </connection>
     <connection>
-        <sender>w_no</sender>
-        <signal>clicked()</signal>
-        <receiver>DlgMerge</receiver>
-        <slot>reject()</slot>
+      <sender>w_no</sender>
+      <signal>clicked()</signal>
+      <receiver>DlgMerge</receiver>
+      <slot>reject()</slot>
     </connection>
-</connections>
-<layoutdefaults spacing="6" margin="11"/>
-</UI>
+  </connections>
+</ui>

@@ -21,7 +21,6 @@
 
 #include "clistaction.h"
 
-
 CListAction::CListAction ( bool use_numbers, QWidget *parent, const char *name )
     : QMenu ( name, parent )
 {
@@ -29,6 +28,8 @@ CListAction::CListAction ( bool use_numbers, QWidget *parent, const char *name )
 	m_use_numbers = use_numbers;
 	m_list = 0;
 	m_provider = 0;
+
+    connect ( this, SIGNAL( aboutToShow ( )), this, SLOT( itemMenuAboutToShow ( )));
 }
 
 CListAction::~CListAction ( )
@@ -59,7 +60,7 @@ const QStringList *CListAction::list ( ) const
 	return m_list;
 }
 
-void CListAction::refreshMenu ( )
+void CListAction::itemMenuAboutToShow ( )
 {
 	const QObject *o = sender ( );
 

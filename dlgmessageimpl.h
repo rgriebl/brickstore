@@ -16,9 +16,9 @@
 #ifndef __DLGMESSAGEIMPL_H__
 #define __DLGMESSAGEIMPL_H__
 
-#include "dlgmessage.h"
+#include "ui_dlgmessage.h"
 
-class DlgMessageImpl : public DlgMessage {
+class DlgMessageImpl : public QDialog, public Ui::DlgMessage {
 	Q_OBJECT
 
 public:

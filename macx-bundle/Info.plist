@@ -1,79 +1,85 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist SYSTEM "file://localhost/System/Library/DTDs/PropertyList.dtd">
 <plist version="0.9">
-	<dict>
-		<key>CFBundleIconFile</key>
-		<string>application.icns</string>
+        <dict>
+                <key>NSPrincipalClass</key>
+                <string>NSApplication</string>
 
-		<key>CFBundlePackageType</key>
-		<string>APPL</string>
+                <key>CFBundleIconFile</key>
+                <string>application.icns</string>
 
-		<key>CFBundleGetInfoString</key>
-		<string>Bundle for BrickStock</string>
+                <key>CFBundlePackageType</key>
+                <string>APPL</string>
 
-		<key>CFBundleSignature</key>
-		<string>ttxt</string>
+                <key>CFBundleGetInfoString</key>
+                <string>Bundle for BrickStock</string>
 
-		<key>CFBundleExecutable</key>
-		<string>BrickStock</string>
+                <key>CFBundleSignature</key>
+                <string>????</string>
 
-		<key>CFBundleName</key>
-		<string>BrickStock</string>
+                <key>CFBundleExecutable</key>
+                <string>BrickStock</string>
 
-		<key>CFBundleShortVersionString</key>
-		<string>%{version}</string>
+                <key>CFBundleName</key>
+                <string>BrickStock</string>
 
-		<key>CFBundleVersion</key>
-		<string>%{version}</string>
+                <key>CFBundleIdentifier</key>
+                <string>com.patrickbrans.brickstock</string>
 
-		<key>CFBundleDocumentTypes</key>
-		<array>
-			<dict>
-				<key>CFBundleTypeExtensions</key>
-				<array>
-					<string>bti</string>
-				</array>
+                <key>CFBundleShortVersionString</key>
+                <string>%{version}</string>
 
-				<key>CFBundleTypeIconFile</key>
-				<string>document.icns</string>
+                <key>CFBundleVersion</key>
+                <string>%{version}</string>
 
-				<key>CFBundleTypeMIMETypes</key>
-				<array>
-					<string>application/x-brickstock</string>
-				</array>
+                <key>CFBundleDocumentTypes</key>
+                <array>
+                        <dict>
+                                <key>CFBundleTypeExtensions</key>
+                                <array>
+                                        <string>bti</string>
+                                </array>
 
-				<key>CFBundleTypeName</key>
-				<string>BrickStock Data File</string>
+                                <key>CFBundleTypeIconFile</key>
+                                <string>document.icns</string>
 
-				<key>CFBundleTypeRole</key>
-				<string>Editor</string>
+                                <key>CFBundleTypeMIMETypes</key>
+                                <array>
+                                        <string>application/x-brickstock</string>
+                                </array>
 
-				<key>LSIsAppleDefaultForType</key>
-				<true/>
-			</dict>
-			<dict>
-				<key>CFBundleTypeExtensions</key>
-				<array>
-					<string>bsx</string>
-				</array>
+                                <key>CFBundleTypeName</key>
+                                <string>BrickStock Data File</string>
 
-				<key>CFBundleTypeIconFile</key>
-				<string>document.icns</string>
+                                <key>CFBundleTypeRole</key>
+                                <string>Editor</string>
 
-				<key>CFBundleTypeMIMETypes</key>
-				<array>
-					<string>application/x-brickstock-xml</string>
-				</array>
+                                <key>LSIsAppleDefaultForType</key>
+                                <true/>
+                        </dict>
+                        <dict>
+                                <key>CFBundleTypeExtensions</key>
+                                <array>
+                                        <string>bsx</string>
+                                </array>
 
-				<key>CFBundleTypeName</key>
-				<string>BrickStock XML</string>
+                                <key>CFBundleTypeIconFile</key>
+                                <string>document.icns</string>
 
-				<key>CFBundleTypeRole</key>
-				<string>Editor</string>
+                                <key>CFBundleTypeMIMETypes</key>
+                                <array>
+                                        <string>application/x-brickstock-xml</string>
+                                </array>
 
-				<key>LSIsAppleDefaultForType</key>
-				<true/>
-			</dict>
-		</array>
-	</dict>
+                                <key>CFBundleTypeName</key>
+                                <string>BrickStock XML</string>
+
+                                <key>CFBundleTypeRole</key>
+                                <string>Editor</string>
+
+                                <key>LSIsAppleDefaultForType</key>
+                                <true/>
+                        </dict>
+                </array>
+        </dict>
 </plist>

@@ -16,12 +16,12 @@
 #ifndef __DLGSELECTREPORTIMPL_H__
 #define __DLGSELECTREPORTIMPL_H__
 
-#include "dlgselectreport.h"
+#include "ui_dlgselectreport.h"
 
 //class CReport;
 class Q3ListViewItem;
 
-class DlgSelectReportImpl : public DlgSelectReport {
+class DlgSelectReportImpl : public QDialog, public Ui::DlgSelectReport {
 	Q_OBJECT
 
 public:

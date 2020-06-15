@@ -17,13 +17,13 @@
 #define __DLGSUBTRACTITEMIMPL_H__
 
 #include "bricklink.h"
-#include "dlgsubtractitem.h"
+#include "ui_dlgsubtractitem.h"
 
 class Q3ListViewItem;
 class CWindow;
 
 
-class DlgSubtractItemImpl : public DlgSubtractItem {
+class DlgSubtractItemImpl : public QDialog, public Ui::DlgSubtractItem {
 	Q_OBJECT
 
 public:

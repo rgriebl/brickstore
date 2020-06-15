@@ -18,11 +18,11 @@
 
 #include <q3valuelist.h>
 
-#include "dlgsettings.h"
+#include "ui_dlgsettings.h"
 
 class CItemTypeCombo;
 
-class DlgSettingsImpl : public DlgSettings {
+class DlgSettingsImpl : public QDialog, public Ui::DlgSettings {
     Q_OBJECT
 
 public:

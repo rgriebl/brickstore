@@ -35,30 +35,45 @@ public:
 	CCheckForUpdates ( CProgressDialog *pd )
 		: m_progress ( pd )
 	{
-		connect ( pd, SIGNAL( transferFinished ( )), this, SLOT( gotten ( )));
+        m_url = "http://" + cApp-> appURL ( ) + "/RELEASES";
+        m_query << CKeyValue ( "version", cApp-> appVersion ( ));
+        if ( !pd )
+            m_query << CKeyValue ( "check", "startup" );
 
-		pd-> setAutoClose ( false );
-		pd-> setHeaderText ( tr( "Checking for program updates" ));
-		pd-> setMessageText ( tr( "You are currently running %1 %2" ). arg ( cApp-> appName ( ), cApp-> appVersion ( )));
+        m_current_version. fromString ( cApp-> appVersion ( ));
 
-		m_current_version. fromString ( cApp-> appVersion ( ));
+        if ( pd ) {
+            connect ( pd, SIGNAL( transferFinished ( )), this, SLOT( gotten ( )));
 
-	//	m_error = tr( "Could not retrieve version information from server:<br /><br />%1" );
+            pd-> setAutoClose ( false );
+            pd-> setHeaderText ( tr( "Checking for program updates" ));
+            pd-> setMessageText ( tr( "You are currently running %1 %2" ). arg ( cApp-> appName ( ), cApp-> appVersion ( )));
 
-		QString url = "http://" + cApp-> appURL ( ) + "/RELEASES";
-		
-		CKeyValueList query;
-		query << CKeyValue ( "version", cApp-> appVersion ( ));
+            pd-> get ( m_url, m_query );
+        }
+    }
 
-		pd-> get ( url, query );
-	}
+    void checkNow ( ) {
+        if ( !m_progress ) {
+            CTransfer *transfer = new CTransfer ( );
+            connect ( transfer, SIGNAL( finished ( CTransfer::Job * )), this, SLOT( gotten ( CTransfer::Job * )));
+
+            transfer-> setProxy ( CConfig::inst ( )-> useProxy ( ), CConfig::inst ( )-> proxyName ( ), CConfig::inst ( )-> proxyPort ( ));
+            transfer-> init ( );
+            transfer-> getIfNewer ( m_url. latin1 ( ), m_query, QDateTime ( ) );
+        }
+    }
+
+signals:
+    void newVersionAvailable ( );
 
 private slots:
-	void gotten ( )
+    void gotten ( CTransfer::Job *job = 0 )
 	{
-		CTransfer::Job *j = m_progress-> job ( );
+        CTransfer::Job *j = m_progress ? m_progress-> job ( ) : job;
 		QByteArray *data = j-> data ( );
 		bool ok = false;
+        bool update_possible = false;
 
 		if ( data && data-> size ( )) {
             QBuffer buf ( data );
@@ -66,8 +81,6 @@ private slots:
 			if ( buf. open ( QIODevice::ReadOnly )) {
 				Q3TextStream ts ( &buf );
 				QString line;
-
-				bool update_possible = false;
 
 				while ( !( line = ts. readLine ( )). isNull ( )) {
 					QStringList sl = QStringList::split ( '\t', line, true );
@@ -104,7 +117,8 @@ private slots:
 				}
 
 				if ( m_versions. isEmpty ( )) {
-					m_progress-> setErrorText ( tr( "Version information is not available." ));
+                    if ( m_progress )
+                        m_progress-> setErrorText ( tr( "Version information is not available." ));
 				}
 				else {
 					QString str;
@@ -137,17 +151,27 @@ private slots:
 							   "</td></tr></table>";
 					}
 
-					m_progress-> setMessageText ( str );
+                    if ( m_progress )
+                        m_progress-> setMessageText ( str );
 					ok = true;
 				}
 			}
 		}
 		else
-			m_progress-> setErrorText ( tr( "Version information is not available." ));
+            if ( m_progress )
+                m_progress-> setErrorText ( tr( "Version information is not available." ));
 
-		if ( ok )
-			m_progress-> setProgressVisible ( false );
-		m_progress-> setFinished ( ok );
+        if ( ok ) {
+            CConfig::inst ( )-> setLastApplicationUpdateCheck ( QDateTime::currentDateTime ( ));
+
+            if ( m_progress )
+                m_progress-> setProgressVisible ( false );
+            else if ( update_possible )
+                emit newVersionAvailable ( );
+        }
+
+        if ( m_progress )
+            m_progress-> setFinished ( ok );
 	}
 
 private:
@@ -204,6 +228,8 @@ private:
 	CProgressDialog *m_progress;
 	VersionRecord   m_current_version;
 	Q3ValueList <VersionRecord> m_versions;
+    QString m_url;
+    CKeyValueList m_query;
 };
 
 #endif

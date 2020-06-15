@@ -12,7 +12,7 @@
 ## See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 
 isEmpty( RELEASE ) {
-  RELEASE    = 1.2.0
+  RELEASE    = 1.2.1
 }
 
 TEMPLATE     = app
@@ -179,7 +179,7 @@ HEADERS += bricklink.h \
            cwindow.h \
            lzmadec.h \
            sha1.h \
-    version.h
+           version.h
 
 SOURCES += bricklink.cpp \
            bricklink_data.cpp \
@@ -222,10 +222,9 @@ SOURCES += bricklink.cpp \
            main.cpp \
            sha1.cpp
 
-#The following line was changed from FORMS to FORMS3 by qt3to4
-FORMS3   += dlgadditem.ui \
+FORMS   += dlgadditem.ui \
            dlgincdecprice.ui \
-           dlgincompleteitem.ui \
+	       dlgincompleteitem.ui \
            dlgloadinventory.ui \
            dlgloadorder.ui \
            dlgmerge.ui \
@@ -271,4 +270,4 @@ else {
 }
 
 QT += xml qt3support
-CONFIG += uic3 static
+CONFIG += static

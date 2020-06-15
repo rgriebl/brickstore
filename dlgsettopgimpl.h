@@ -17,10 +17,9 @@
 #define __DLGSETTOPGIMPL_H__
 
 #include "bricklink.h"
+#include "ui_dlgsettopg.h"
 
-#include "dlgsettopg.h"
-
-class DlgSetToPGImpl : public DlgSetToPG {
+class DlgSetToPGImpl : public QDialog, public Ui::DlgSetToPG {
 	Q_OBJECT
 
 public:

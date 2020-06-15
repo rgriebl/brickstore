@@ -126,7 +126,7 @@ private:
     mutable BrickLink::Picture *m_picture;
 };
 
-class AppearsInToolTip : public QObject/*, public QToolTip*/ {
+class AppearsInToolTip : public QObject {
     Q_OBJECT
 
 public:

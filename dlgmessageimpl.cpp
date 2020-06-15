@@ -20,8 +20,10 @@
 #include "dlgmessageimpl.h"
 
 DlgMessageImpl::DlgMessageImpl ( const QString &title, const QString &text, bool delayok, QWidget *parent, const char *name, bool modal, int fl )
-    : DlgMessage ( parent, name, modal, (Qt::WindowType)fl )
+    : QDialog ( parent, name, modal, (Qt::WindowType)fl )
 {
+    setupUi ( this );
+
 	setCaption ( title );
     w_label-> setText ( text );
 
@@ -41,5 +43,5 @@ void DlgMessageImpl::enableOk ( )
 void DlgMessageImpl::reject ( )
 {
 	if ( w_ok-> isEnabled ( ))
-		DlgMessage::reject ( );
+		QDialog::reject ( );
 }

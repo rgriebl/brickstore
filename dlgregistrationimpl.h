@@ -18,9 +18,9 @@
 
 #include "bricklink.h"
 
-#include "dlgregistration.h"
+#include "ui_dlgregistration.h"
 
-class DlgRegistrationImpl : public DlgRegistration {
+class DlgRegistrationImpl : public QDialog, public Ui::DlgRegistration {
     Q_OBJECT
 
 public:

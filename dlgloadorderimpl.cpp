@@ -190,8 +190,10 @@ int   DlgLoadOrderImpl::s_last_type     = 1;
 
 
 DlgLoadOrderImpl::DlgLoadOrderImpl ( QWidget *parent, const char *name, bool modal )
-	: DlgLoadOrder ( parent, name, modal )
+    : QDialog ( parent, name, modal )
 {
+    setupUi ( this );
+
 	w_order_number-> setValidator ( new QIntValidator ( 1, 9999999, w_order_number ));
 
 	connect ( w_order_number, SIGNAL( textChanged ( const QString & )), this, SLOT( checkId ( )));
@@ -237,7 +239,7 @@ void DlgLoadOrderImpl::accept ( )
 	s_last_to     = w_order_to-> date ( );
 	s_last_type   = w_order_type-> currentItem ( );
 
-	DlgLoadOrder::accept ( );
+    QDialog::accept ( );
 }
 
 void DlgLoadOrderImpl::start ( )

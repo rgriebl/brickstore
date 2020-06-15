@@ -50,8 +50,7 @@ signals:
 	void activated ( int );
 
 private slots:
-	void refreshMenu ( );
-//	void doEmits ( int );
+    void itemMenuAboutToShow ( );
 
 private:
 	const QStringList *m_list;

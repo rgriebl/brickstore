@@ -16,7 +16,7 @@
 #ifndef __DLGADDITEMIMPL_H__
 #define __DLGADDITEMIMPL_H__
 
-#include "dlgadditem.h"
+#include "ui_dlgadditem.h"
 #include "cmoney.h"
 #include "bricklink.h"
 //Added by qt3to4:
@@ -26,7 +26,7 @@
 class QValidator;
 class CWindow;
 
-class DlgAddItemImpl : public DlgAddItem {
+class DlgAddItemImpl : public QDialog, Ui::DlgAddItem {
 	Q_OBJECT
 public:
 	DlgAddItemImpl ( QWidget *parent, const char *name = 0, bool modal = false, int fl = 0 );

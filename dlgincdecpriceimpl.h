@@ -17,11 +17,11 @@
 #define __DLGINCDECPRICEIMPL_H__
 
 #include "cmoney.h"
-#include "dlgincdecprice.h"
+#include "ui_dlgincdecprice.h"
 
 class QDoubleValidator;
 
-class DlgIncDecPriceImpl : public DlgIncDecPrice {
+class DlgIncDecPriceImpl : public QDialog, public Ui::DlgIncDecPrice {
 	Q_OBJECT
 
 public:

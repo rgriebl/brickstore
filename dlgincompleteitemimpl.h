@@ -18,9 +18,9 @@
 
 #include "bricklink.h"
 
-#include "dlgincompleteitem.h"
+#include "ui_dlgincompleteitem.h"
 
-class DlgIncompleteItemImpl : public DlgIncompleteItem {
+class DlgIncompleteItemImpl : public QDialog, public Ui::DlgIncompleteItem {
 	Q_OBJECT
 
 public:

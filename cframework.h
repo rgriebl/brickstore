@@ -36,8 +36,8 @@
 
 #include "cdocument.h"
 #include "clistaction.h"
+#include "ccheckforupdates.h"
 #include "bricklink.h"
-
 
 class CMultiProgressBar;
 class QLabel;
@@ -74,6 +74,7 @@ public:
 public slots:
 	void selectionUpdate ( const CDocument::ItemList &selection );
 	void statisticsUpdate ( );
+    void newVersionAvailable ( );
 	void modificationUpdate ( );
 	void showContextMenu ( bool onitem, const QPoint &pos );
 
@@ -177,13 +178,6 @@ private:
 private:
 	QIcon *iconSet ( const char *name );
 
-/*
-    QAction *findAction ( const char *name );
-    QActionGroup *findActionGroup ( const char *name );
-    QMenu *findMenu ( const char *name );
-    QToolButton *findToolButton ( const char *name );
-    CListAction *findCListAction ( const char *name );
-*/
     void connectAction ( bool do_connect, const char *name, CWindow *window, const char *slot, bool (CWindow::* is_on_func ) ( ) const = 0 );
 	void connectAllActions ( bool do_connect, CWindow *window );
 	void createActions ( );
@@ -203,6 +197,7 @@ private:
 	CSpinner *m_spinner;
 	QLabel *m_statistics;
 	QLabel *m_errors;
+    QLabel *m_newversion;
 	QLabel *m_modified;
     QToolBar *m_toolbar;
 	CTaskPaneManager *m_taskpanes;

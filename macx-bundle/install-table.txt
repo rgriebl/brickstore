@@ -5,7 +5,7 @@
 brickstock.app/Contents/MacOS/brickstock	Contents/MacOS			BrickStock
 brickstock.app/Contents/Frameworks		Contents
 brickstock.app/Contents/Plugins			Contents
-brickstock.app/Contents/Resources/qt.conf	Contents/Resources/qt.conf
+brickstock.app/Contents/Resources/qt.conf	Contents/Resources
 
 macx-bundle/Info.plist				Contents
 macx-bundle/Resources/*.icns			Contents/Resources

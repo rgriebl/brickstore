@@ -18,11 +18,11 @@
 
 #include "bricklink.h"
 
-#include "dlgloadorder.h"
+#include "ui_dlgloadorder.h"
 //Added by qt3to4:
 #include <Q3ValueList>
 
-class DlgLoadOrderImpl : public DlgLoadOrder {
+class DlgLoadOrderImpl : public QDialog, public Ui::DlgLoadOrder {
     Q_OBJECT
 
 public:

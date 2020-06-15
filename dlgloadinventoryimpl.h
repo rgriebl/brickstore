@@ -16,11 +16,11 @@
 #ifndef __DLGLOADINVENTORYIMPL_H__
 #define __DLGLOADINVENTORYIMPL_H__
 
-#include "dlgloadinventory.h"
+#include "ui_dlgloadinventory.h"
 
 #include "bricklink.h"
 
-class DlgLoadInventoryImpl : public DlgLoadInventory {
+class DlgLoadInventoryImpl : public QDialog, public Ui::DlgLoadInventory {
 	Q_OBJECT
 
 public:

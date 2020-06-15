@@ -22,8 +22,10 @@
 
 
 DlgMergeImpl::DlgMergeImpl ( BrickLink::InvItem *existitem, BrickLink::InvItem *newitem, bool existing_attributes, QWidget *parent, const char *name, bool modal, int fl )
-    : DlgMerge ( parent, name, modal, (Qt::WindowType)fl )
+    : QDialog ( parent, name, modal, (Qt::WindowType)fl )
 {
+    setupUi ( this );
+
 	QString newcnt = QString( "<b>%1</b>" ). arg( newitem-> quantity ( ));
 	QString existcnt = QString( "<b>%1</b>" ). arg( existitem-> quantity ( ));
 	QString desc = "<b>";

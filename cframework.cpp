@@ -473,6 +473,16 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, Qt::WFlags fl )
 
     connectAllActions ( false, 0 ); // init enabled/disabled status of document actions
 	connectWindow ( 0 );
+
+    CCheckForUpdates *m_cfu = new CCheckForUpdates ( 0 );
+    connect (m_cfu, SIGNAL ( newVersionAvailable ( ) ), this, SLOT ( newVersionAvailable ( ) ));
+
+    QDateTime dt = CConfig::inst ( )-> lastApplicationUpdateCheck ( );
+    if ( dt.secsTo( QDateTime::currentDateTime ( ) ) > 24 * 60 * 60 ) {
+        m_cfu->checkNow();
+    }
+
+    connect (m_newversion, SIGNAL ( linkActivated ( const QString & ) ), cApp, SLOT( checkForUpdates ( ) ));
 }
 
 void CFrameWork::languageChange ( )
@@ -737,14 +747,17 @@ CListAction *CFrameWork::findCListAction ( const char *name )
 */
 void CFrameWork::createStatusBar ( )
 {
+    m_newversion = new QLabel ( statusBar ( ));
+    statusBar ( )-> addWidget ( m_newversion, 0 );
+
 	m_errors = new QLabel ( statusBar ( ));
-	statusBar ( )-> addWidget ( m_errors, 0, true );
+    statusBar ( )-> addPermanentWidget ( m_errors, 0 );
 
 	m_statistics = new QLabel ( statusBar ( ));
-	statusBar ( )-> addWidget ( m_statistics, 0, true );
+    statusBar ( )-> addPermanentWidget ( m_statistics, 0 );
 
 	m_modified = new QLabel ( statusBar ( ));
-	statusBar ( )-> addWidget ( m_modified, 0, true );
+    statusBar ( )-> addPermanentWidget ( m_modified, 0 );
 
 	m_progress = new CMultiProgressBar ( statusBar ( ));
 	m_progress-> setFixedWidth ( fontMetrics ( ). height ( ) * 10 );
@@ -760,7 +773,7 @@ void CFrameWork::createStatusBar ( )
 
 	//m_progress-> setProgress ( -1, 100 );
 
-	statusBar ( )-> addWidget ( m_progress, 0, true );
+    statusBar ( )-> addPermanentWidget ( m_progress, 0 );
 
 	connect ( m_progress, SIGNAL( stop ( )), this, SLOT( cancelAllTransfers ( )));
 
@@ -1531,6 +1544,12 @@ void CFrameWork::selectionUpdate ( const CDocument::ItemList &selection )
     findChild<QAction *> ( "edit_stockroom_no" )-> setChecked ( stockroom == 0 );
 }
 
+void CFrameWork::newVersionAvailable  ( ) {
+    m_newversion-> setOpenExternalLinks( false );
+    m_newversion-> setText ( QString ( "<a href=\"#newversion\">%1</a>" ) .arg( tr ( "Update available!" )) );
+    m_newversion->setTextFormat(Qt::RichText);
+}
+
 void CFrameWork::statisticsUpdate ( )
 {
 	QString ss, es;
@@ -1753,7 +1772,7 @@ QList <CWindow *> CFrameWork::allWindows ( ) const
 
 	if ( !wl. isEmpty ( )) {
         for ( int i = 0; i < wl. count ( ); i++ ) {
-            CWindow *w = ::qobject_cast <CWindow *> ( wl. at ( i ));
+            CWindow *w = ::qobject_cast <CWindow *> ( wl. at ( i )->widget ( ));
 			if ( w )
 				list. append ( w );
 		}

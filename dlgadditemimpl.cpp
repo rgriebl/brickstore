@@ -46,8 +46,10 @@
 
 
 DlgAddItemImpl::DlgAddItemImpl ( QWidget *parent, const char *name, bool modal, int fl )
-    : DlgAddItem ( parent, name, modal, (Qt::WindowType)(fl | Qt::WStyle_Customize | Qt::WStyle_Title | Qt::WStyle_ContextHelp | Qt::WStyle_NormalBorder | Qt::WStyle_SysMenu | Qt::WStyle_Maximize) )
+    : QDialog ( parent, name, modal, (Qt::WindowType)(fl | Qt::WStyle_Customize | Qt::WStyle_Title | Qt::WStyle_ContextHelp | Qt::WStyle_NormalBorder | Qt::WStyle_SysMenu | Qt::WStyle_Maximize) )
 {
+    setupUi( this );
+
 	m_window = 0;
 	m_caption_fmt        = caption ( );
 	m_price_label_fmt    = w_label_currency-> text ( );
@@ -135,7 +137,7 @@ DlgAddItemImpl::DlgAddItemImpl ( QWidget *parent, const char *name, bool modal, 
 
 void DlgAddItemImpl::languageChange ( )
 {
-	DlgAddItem::languageChange ( );
+    DlgAddItem::retranslateUi ( this );
 	updateMonetary ( );
 	updateCaption ( );
 }
@@ -177,7 +179,7 @@ void DlgAddItemImpl::wheelEvent ( QWheelEvent *e )
 
 void DlgAddItemImpl::closeEvent ( QCloseEvent *e )
 {
-	DlgAddItem::closeEvent ( e );
+    QDialog::closeEvent ( e );
 
 	if ( e-> isAccepted ( ))
 		emit closed ( );
@@ -185,7 +187,7 @@ void DlgAddItemImpl::closeEvent ( QCloseEvent *e )
 
 void DlgAddItemImpl::reject ( )
 {
-	DlgAddItem::reject ( );
+    QDialog::reject ( );
 	close ( );
 }
 

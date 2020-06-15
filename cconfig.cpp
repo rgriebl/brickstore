@@ -252,6 +252,22 @@ void CConfig::setLastDatabaseUpdate ( QDateTime dt )
 	writeEntry ( "/BrickLink/LastDBUpdate", int( tt ));
 }
 
+QDateTime CConfig::lastApplicationUpdateCheck ( )
+{
+    QDateTime dt;
+
+    time_t tt = readNumEntry ( "/General/lastApplicationUpdateCheck", 0 );
+    if ( tt )
+        dt. setTime_t ( tt );
+    return dt;
+}
+
+void CConfig::setLastApplicationUpdateCheck ( QDateTime dt )
+{
+    time_t tt = dt. isValid ( ) ? dt. toTime_t ( ) : 0;
+    writeEntry ( "/General/lastApplicationUpdateCheck", int( tt ));
+}
+
 bool CConfig::closeEmptyDocuments ( )
 {
 	return readBoolEntry ( "/General/CloseEmptyDocs", false );

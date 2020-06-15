@@ -61,8 +61,10 @@ private:
 };
 
 DlgSubtractItemImpl::DlgSubtractItemImpl ( const QString &headertext, CWindow *parent, const char *name, bool modal, int fl )
-    : DlgSubtractItem ( parent, name, modal, (Qt::WindowType)fl )
+    : QDialog ( parent, name, modal, (Qt::WindowType)fl )
 {
+    setupUi ( this );
+
 	m_window = parent;
 	//setCaption ( caption ( ). arg ( parent-> caption ( )));
 	w_header-> setText ( headertext );

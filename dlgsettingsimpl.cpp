@@ -49,8 +49,9 @@ static int day2sec ( int d )
 } // namespace
 
 DlgSettingsImpl::DlgSettingsImpl( QWidget *parent, const char *name, bool modal, Qt::WFlags fl )
-	: DlgSettings ( parent, name, modal, fl )
+    : QDialog ( parent, name, modal, fl )
 {
+    setupUi ( this );
 	// ---------------------------------------------------------------------
 
 	QLocale l_active;
@@ -249,7 +250,7 @@ void DlgSettingsImpl::done ( int r )
 		CConfig::inst ( )-> setProxy ( w_proxy_enable-> isChecked ( ), w_proxy_name-> text ( ), w_proxy_port-> text ( ). toInt ( ));
 	}
 
-	DlgSettings::done ( r );
+	QDialog::done ( r );
 }
 
 

@@ -26,8 +26,10 @@
 
 
 DlgLoadInventoryImpl::DlgLoadInventoryImpl ( QWidget *parent,  const char *name, bool modal )
-	: DlgLoadInventory ( parent, name, modal )
+    : QDialog ( parent, name, modal )
 {
+    setupUi ( this );
+
 	w_select-> setOnlyWithInventory ( true );
 	w_select-> setItemType ( BrickLink::inst ( )-> itemType ( CConfig::inst ( )-> readNumEntry ( "/Defaults/ImportInventory/ItemType", 'S' )));
 	connect ( w_select, SIGNAL( itemSelected ( const BrickLink::Item *, bool )), this, SLOT( checkItem ( const BrickLink::Item *, bool )));

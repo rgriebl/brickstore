@@ -48,8 +48,10 @@ namespace {
 
 
 DlgSelectReportImpl::DlgSelectReportImpl ( QWidget *parent, const char *name, bool modal )
-	: DlgSelectReport ( parent, name, modal )
+    : QDialog ( parent, name, modal )
 {
+    setupUi ( this );
+
 	connect ( w_list, SIGNAL( selectionChanged ( Q3ListViewItem * )), this, SLOT( checkItem ( Q3ListViewItem * )));
 	connect ( w_list, SIGNAL( doubleClicked ( Q3ListViewItem *, const QPoint &, int )), this, SLOT( activateItem ( Q3ListViewItem * )));
 	connect ( w_list, SIGNAL( returnPressed ( Q3ListViewItem * )), this, SLOT( activateItem ( Q3ListViewItem * )));

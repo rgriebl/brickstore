@@ -444,44 +444,6 @@ public:
 	}
 };
 
-class CItemViewToolTip : public QObject {
-public:
-	CItemViewToolTip ( QWidget *parent, CItemView *iv )
-        : QObject( parent ), m_iv ( iv )
-	{ }
-	
-	virtual ~CItemViewToolTip ( )
-	{ }
-
-    void maybeTip ( const QPoint &pos )
-	{
-        if ( !((QWidget *)QObject::parent()) || !m_iv /*|| !m_iv-> showToolTips ( )*/ )
-			return;
-
-		CItemViewItem *item = static_cast <CItemViewItem *> ( m_iv-> itemAt ( pos ));
-		QPoint contentpos = m_iv-> viewportToContents ( pos );
-	
-		if ( !item )
-			return;
-
-		int col = m_iv-> header ( )-> sectionAt ( contentpos. x ( ));
-		QString text = item-> toolTip ( col );
-
-		if ( text. isEmpty ( ))
-			return;
-
-		QRect r = m_iv-> itemRect ( item );
-		int headerleft = m_iv-> header ( )-> sectionPos ( col ) - m_iv-> contentsX ( );
-		r. setLeft ( headerleft );
-		r. setRight ( headerleft + m_iv-> header ( )-> sectionSize ( col ));
-        QToolTip::add((QWidget *)QObject::parent(), r, text);
-	}
-
-private:
-    CItemView *m_iv;
-};
-
-
 CItemView::CItemView ( CDocument *doc, QWidget *parent, const char *name )
 	: CListView ( parent, name )
 {
@@ -498,7 +460,9 @@ CItemView::CItemView ( CDocument *doc, QWidget *parent, const char *name )
 	setSelectionMode ( Q3ListView::Extended );
 	setAlwaysShowSelection ( true );
 	setShowToolTips ( false );
-    d-> m_tooltips = new CItemViewToolTip ( viewport ( ), this );
+
+    d->m_tooltips = new CItemViewToolTip(viewport(), this );
+    viewport()->installEventFilter(d->m_tooltips);
 
 	for ( int i = 0; i < CDocument::FieldCount; i++ ) {
 		int align = Qt::AlignLeft;
@@ -606,6 +570,7 @@ void CItemView::languageChange ( )
 
 CItemView::~CItemView ( )
 {
+    viewport()->removeEventFilter(d->m_tooltips);
     delete d-> m_tooltips;
 	delete d;
 }
@@ -1437,9 +1402,10 @@ void CItemViewItem::paintCell ( QPainter *p, const QColorGroup &cg, int col, int
 		y = ( h - ih ) / 2;
 
         QStyleOption option;
+        option.rect.setRect(x, y, iw, ih);
+        option.palette = cg;
         option.state = (checkmark > 0 ? QStyle::State_On : QStyle::State_Off) | QStyle::State_Enabled;
-        style. drawPrimitive ( QStyle::PE_IndicatorCheckBox, &option, p);
-        //style. drawPrimitive ( QStyle::PE_IndicatorCheckBox, p, QRect( x, y, iw, ih ), cg, ( checkmark > 0 ? QStyle::State_On : QStyle::State_Off ) | QStyle::State_Enabled );
+        style. drawPrimitive ( QStyle::PE_IndicatorCheckBox, &option, p, iv);
 	}
 	else if ( pix && !pix-> isNull ( )) {
 		// clip the pixmap here .. this is cheaper than a cliprect

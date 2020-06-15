@@ -22,8 +22,10 @@
 
 
 DlgSetToPGImpl::DlgSetToPGImpl( QWidget *parent, const char *name, bool modal, Qt::WFlags fl )
-	: DlgSetToPG ( parent, name, modal, fl )
+    : QDialog ( parent, name, modal, fl )
 {
+    setupUi ( this );
+
 	QStringList timel, pricel;
 
 	timel << tr( "All Time Sales" ) << tr( "Last 6 Months Sales" ) << tr( "Current Inventory" );

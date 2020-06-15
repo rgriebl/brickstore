@@ -17,9 +17,9 @@
 #define __DLGMERGEIMPL_H__
 
 #include "bricklink.h"
-#include "dlgmerge.h"
+#include "ui_dlgmerge.h"
 
-class DlgMergeImpl : public DlgMerge {
+class DlgMergeImpl : public QDialog, public Ui::DlgMerge {
 public:
 	DlgMergeImpl ( BrickLink::InvItem *existitem, BrickLink::InvItem *newitem, bool existing_attributes, QWidget *parent, const char *name = 0, bool modal = true, int fl = 0 );
 	

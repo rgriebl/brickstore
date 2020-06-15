@@ -30,8 +30,10 @@
 
 
 DlgRegistrationImpl::DlgRegistrationImpl ( bool initial, QWidget *parent, const char *name, bool modal )
-	: DlgRegistration ( parent, name, modal )
+    : QDialog ( parent, name, modal )
 {
+    setupUi ( this );
+
 	switch ( CConfig::inst ( )-> registration ( )) {
 		case CConfig::None:
 		case CConfig::Personal:
@@ -99,12 +101,12 @@ void DlgRegistrationImpl::accept ( )
 	}
 	else {
 		CConfig::inst ( )-> setRegistration ( name, key );
-		DlgRegistration::accept ( );
+		QDialog::accept ( );
 	}
 }
 
 void DlgRegistrationImpl::reject ( )
 {
 	if ( w_cancel-> isEnabled ( ))
-		DlgRegistration::reject ( );
+		QDialog::reject ( );
 }
