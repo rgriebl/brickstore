@@ -247,6 +247,7 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, Qt::WFlags fl )
 		   << "-"
 		   << "edit_reset_diffs"
 		   << "edit_copyremarks"
+           << "edit_copyprices"
 		   << "-"
            << "edit_bl_catalog"
            << "edit_bl_priceguide"
@@ -323,6 +324,7 @@ CFrameWork::CFrameWork ( QWidget *parent, const char *name, Qt::WFlags fl )
            << "edit_color"
            << "edit_qty"
            << "edit_price"
+           << "edit_comment"
            << "edit_remark"
 		   << "-"
            << "edit_bl_catalog"
@@ -544,6 +546,7 @@ void CFrameWork::languageChange ( )
 		{ "edit_partoutitems",              tr( "Part out Item..." ),                   0 },
 		{ "edit_reset_diffs",               tr( "Reset Differences" ),                  0 }, 
 		{ "edit_copyremarks",               tr( "Copy Remarks from Document..." ),      0 },
+        { "edit_copyprices",                tr( "Copy Prices from Document..." ),       0 },
 		{ "edit_select_all",                tr( "Select All" ),                         tr( "Ctrl+A", "Edit|SelectAll" ) },
 		{ "edit_select_none",               tr( "Select None" ),                        tr( "Ctrl+Shift+A", "Edit|SelectNone" ) },
 		{ "view_simple_mode",               tr( "Buyer/Collector Mode" ),               0 },
@@ -1001,6 +1004,7 @@ void CFrameWork::createActions ( )
 
         a = new QAction ( this, "edit_reset_diffs" );
         a = new QAction ( this, "edit_copyremarks" );
+        a = new QAction ( this, "edit_copyprices" );
 
         a = new QAction ( this, "edit_bl_catalog" );
         a = new QAction ( this, "edit_bl_priceguide" );
@@ -1333,6 +1337,7 @@ void CFrameWork::connectAllActions ( bool do_connect, CWindow *window )
 	connectAction ( do_connect, "edit_partoutitems", window, SLOT( editPartOutItems ( )));
 	connectAction ( do_connect, "edit_reset_diffs", window, SLOT( editResetDifferences ( )));
 	connectAction ( do_connect, "edit_copyremarks", window, SLOT( editCopyRemarks ( )));
+    connectAction ( do_connect, "edit_copyprices", window, SLOT( editCopyPrices ( )));
 
 	connectAction ( do_connect, "edit_status_include", window, SLOT( editStatusInclude ( )));
 	connectAction ( do_connect, "edit_status_exclude", window, SLOT( editStatusExclude ( )));
@@ -1388,6 +1393,9 @@ void CFrameWork::connectWindow ( QMdiSubWindow *w )
 {
     if ( w && ( w->widget() == m_current_window ))
 		return;
+
+    if ( !w && m_mdi->subWindowList().count() != 0 )
+        return;
 
 	if ( m_current_window ) {
 		CDocument *doc = m_current_window-> document ( );

@@ -17,7 +17,7 @@
 
 #include <qapplication.h>
 #include <qcursor.h>
-#include <q3filedialog.h>
+#include <qfiledialog.h>
 #include <qclipboard.h>
 #include <qprinter.h>
 #include <qpainter.h>
@@ -454,7 +454,7 @@ CDocument *CDocument::fileOpen ( )
 	filters << tr( "BrikTrak Inventory" ) + " (*.bti)";
 	filters << tr( "All Files" ) + "(*.*)";
 
-	return fileOpen ( Q3FileDialog::getOpenFileName ( CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ), CFrameWork::inst ( ), "FileDialog", tr( "Open File" ), 0 ));
+    return fileOpen ( QFileDialog::getOpenFileName ( CFrameWork::inst ( ), tr( "Open File" ), CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ) ));
 }
 
 CDocument *CDocument::fileOpen ( const QString &s )
@@ -596,7 +596,7 @@ CDocument *CDocument::fileImportBrickLinkXML ( )
 	filters << tr( "BrickLink XML File" ) + " (*.xml)";
 	filters << tr( "All Files" ) + "(*.*)";
 
-	QString s = Q3FileDialog::getOpenFileName ( CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ), CFrameWork::inst ( ), "FileDialog", tr( "Import File" ), 0 );
+    QString s = QFileDialog::getOpenFileName ( CFrameWork::inst ( ), tr( "Import File" ), CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ) );
 
 	if ( !s. isEmpty ( )) {
 		CDocument *doc = fileLoadFrom ( s, "xml", true );
@@ -637,7 +637,7 @@ CDocument *CDocument::fileImportBrikTrakInventory ( const QString &fn )
 		filters << tr( "BrikTrak Inventory" ) + " (*.bti)";
 		filters << tr( "All Files" ) + "(*.*)";
 
-		s = Q3FileDialog::getOpenFileName ( CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ), CFrameWork::inst ( ), "FileDialog", tr( "Import File" ), 0 );
+        s = QFileDialog::getOpenFileName ( CFrameWork::inst ( ), tr( "Import File" ), CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ) );
 	}
 
 	if ( !s. isEmpty ( )) {
@@ -744,7 +744,7 @@ CDocument *CDocument::fileImportLDrawModel ( )
 	filters << tr( "LDraw Models" ) + " (*.dat;*.ldr;*.mpd)";
 	filters << tr( "All Files" ) + "(*.*)";
 
-	QString s = Q3FileDialog::getOpenFileName ( CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ), CFrameWork::inst ( ), "FileDialog", tr( "Import File" ), 0 );
+    QString s = QFileDialog::getOpenFileName ( CFrameWork::inst ( ), tr( "Import File" ), CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ) );
 
 	if ( s. isEmpty ( ))
 		return false;
@@ -880,7 +880,7 @@ void CDocument::fileSaveAs ( const ItemList &itemlist )
 	if (( fn. right ( 4 ) == ".xml" ) || ( fn. right ( 4 ) == ".bti" ))
 		fn. truncate ( fn.length ( ) - 4 );
 
-	fn = Q3FileDialog::getSaveFileName ( fn, filters. join ( ";;" ), CFrameWork::inst ( ), "FileDialog", tr( "Save File as" ), 0 );
+    fn = QFileDialog::getSaveFileName ( CFrameWork::inst ( ), tr( "Save File as" ), fn, filters. join ( ";;" ));
 
 	if ( !fn. isNull ( )) {
 		if ( fn. right ( 4 ) != ".bsx" )
@@ -1026,7 +1026,7 @@ void CDocument::fileExportBrickLinkXML ( const ItemList &itemlist )
 	QStringList filters;
 	filters << tr( "BrickLink XML File" ) + " (*.xml)";
 
-	QString s = Q3FileDialog::getSaveFileName ( CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ), CFrameWork::inst ( ), "FileDialog", tr( "Export File" ), 0 );
+    QString s = QFileDialog::getSaveFileName ( CFrameWork::inst ( ), tr( "Export File" ), CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ) );
 
 	if ( !s. isNull ( )) {
 		if ( s. right ( 4 ) != ".xml" )
@@ -1045,7 +1045,7 @@ void CDocument::fileExportBrikTrakInventory ( const ItemList &itemlist )
 	QStringList filters;
 	filters << tr( "BrikTrak Inventory" ) + " (*.bti)";
 
-	QString s = Q3FileDialog::getSaveFileName ( CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ), CFrameWork::inst ( ), "FileDialog", tr( "Export File" ), 0 );
+    QString s = QFileDialog::getSaveFileName ( CFrameWork::inst ( ), tr( "Export File" ), CConfig::inst ( )-> documentDir ( ), filters. join ( ";;" ) );
 
 	if ( !s. isNull ( )) {
 		if ( s. right ( 4 ) != ".bti" )

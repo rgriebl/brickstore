@@ -292,8 +292,8 @@ bool CRebuildDatabase::downloadInventories ( Q3PtrVector<BrickLink::Item> &invs 
 	for ( uint i = 0; i < invs. count ( ); i++ ) {
 		BrickLink::Item *&item = itemp [i];
 
-		if ( item ) {
-			QFile *f = new QFile ( BrickLink::inst ( )-> dataPath ( item ) + "inventory.xml.new" );
+        if ( item ) {
+            QFile *f = new QFile ( BrickLink::inst ( )-> dataPath ( item ) + "inventory.xml.new" );
 
 			if ( !f-> open ( QIODevice::WriteOnly )) {
 				m_error = QString ( "failed to write %1: %2" ). arg( f-> name ( )). arg( f-> errorString ( ));
@@ -307,7 +307,7 @@ bool CRebuildDatabase::downloadInventories ( Q3PtrVector<BrickLink::Item> &invs 
 			      << CKeyValue ( "viewType",     "4" )
 			      << CKeyValue ( "itemTypeInv",  QChar ( item-> itemType ( )-> id ( )))
 			      << CKeyValue ( "itemNo",       item-> id ( ))
-			      << CKeyValue ( "downloadType", "X" );
+                  << CKeyValue ( "downloadType", "X" );
 
 			m_trans-> get ( url, query, f );
 			m_downloads_in_progress++;

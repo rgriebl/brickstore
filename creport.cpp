@@ -223,6 +223,8 @@ QMap<QString, QVariant> documentData ( const CDocument *doc, const CDocument::It
         imap ["retain"]    = item-> retain ( );
         imap ["stockroom"] = item-> stockroom ( );
         imap ["reserved"]  = item-> reserved ( );
+        imap ["weight"]      = ( item-> item ( )-> weight ( ) == 0 ? "-" : CUtility::weightToString ( item-> item ( )-> weight ( ), ( CConfig::inst ( )-> weightSystem ( ) == CConfig::WeightImperial ), true, true ));
+        imap ["totalWeight"] = ( item-> weight ( ) == 0 ? "-" : CUtility::weightToString ( item-> item ( )-> weight ( ), ( CConfig::inst ( )-> weightSystem ( ) == CConfig::WeightImperial ), true, true ));
 
         itemslist << imap;
     }

@@ -142,7 +142,6 @@ CWindow::CWindow ( CDocument *doc, QWidget *parent, const char *name )
 	w_list-> setShowSortIndicator ( true );
 	w_list-> setColumnsHideable ( true );
 	w_list-> setDifferenceMode ( false );
-	w_list-> setSimpleMode ( CConfig::inst ( )-> simpleMode ( ));
 
 	if ( doc-> doNotSortItems ( ))
 		w_list-> setSorting ( w_list-> columns ( ) + 1 );
@@ -186,6 +185,7 @@ CWindow::CWindow ( CDocument *doc, QWidget *parent, const char *name )
 	languageChange ( );
 
 	w_list-> setFocus ( );
+    w_list-> setSimpleMode ( CConfig::inst ( )-> simpleMode ( ));
 }
 
 void CWindow::languageChange ( )
@@ -1247,6 +1247,62 @@ void CWindow::copyRemarks ( const BrickLink::InvItemList &items )
 		}
 	}
 	m_doc-> macroEnd ( macro, tr( "Copied Remarks for %1 Items" ). arg( copy_count ));
+}
+
+void CWindow::editCopyPrices ( )
+{
+    DlgSubtractItemImpl d ( tr( "Please choose the document that should serve as a source to fill in the price fields of the current document:" ), this, "CopyPriceDlg" );
+
+    if ( d. exec ( ) == QDialog::Accepted ) {
+        BrickLink::InvItemList list = d. items ( );
+
+        if ( !list. isEmpty ( ))
+            copyPrices ( list );
+
+        qDeleteAll ( list );
+    }
+}
+
+void CWindow::copyPrices ( const BrickLink::InvItemList &items )
+{
+    if ( items. isEmpty ( ))
+        return;
+
+    CUndoCmd *macro = m_doc-> macroBegin ( );
+
+    CDisableUpdates disupd ( w_list );
+
+    int copy_count = 0;
+
+    foreach ( CDocument::Item *pos, m_doc-> items ( )) {
+        BrickLink::InvItem *match = 0;
+
+        foreach ( BrickLink::InvItem *ii, items ) {
+            const BrickLink::Item *item   = ii-> item ( );
+            const BrickLink::Color *color = ii-> color ( );
+            BrickLink::Condition cond     = ii-> condition ( );
+            int qty                       = ii-> quantity ( );
+
+            if ( !item || !color || !qty )
+                continue;
+
+            if (( pos-> item ( ) == item ) && ( pos-> condition ( ) == cond )) {
+                if ( pos-> color ( ) == color )
+                    match = ii;
+                else if ( !match )
+                    match = ii;
+            }
+        }
+
+        if ( match && match-> price ( ) != 0 ) {
+            CDocument::Item newitem = *pos;
+            newitem. setPrice ( match-> price ( ));
+            m_doc-> changeItem ( pos, newitem );
+
+            copy_count++;
+        }
+    }
+    m_doc-> macroEnd ( macro, tr( "Copied Prices for %1 Items" ). arg( copy_count ));
 }
 
 void CWindow::editSubtractItems ( )

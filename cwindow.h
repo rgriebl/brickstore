@@ -69,6 +69,7 @@ public:
 
 	void subtractItems ( const BrickLink::InvItemList &items );
 	void copyRemarks ( const BrickLink::InvItemList &items );
+    void copyPrices ( const BrickLink::InvItemList &items );
 
 //	bool hasFilter ( ) const;
 //	void setFilter ( const QRegExp &exp, Field f );
@@ -106,6 +107,7 @@ public slots:
 
 	void editSubtractItems ( );
 	void editCopyRemarks ( );
+    void editCopyPrices ( );
 	void editMergeItems ( );
 	void editPartOutItems ( );
 

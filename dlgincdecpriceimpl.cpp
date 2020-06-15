@@ -35,15 +35,18 @@ DlgIncDecPriceImpl::DlgIncDecPriceImpl ( QWidget* parent, const char* name, bool
 	w_apply_to_tiers-> setChecked ( false );
 	w_currency-> setText ( CMoney::inst ( )-> currencySymbol ( ));
 
-	m_pos_percent_validator = new QDoubleValidator ( 0., 1000., 1, this );
-	m_neg_percent_validator = new QDoubleValidator ( 0., 99.,   1, this );
-	m_fixed_validator       = new CMoneyValidator  ( 0,  10000, 3, this );
+    m_pos_percent_validator = new QDoubleValidator ( 0., 1000., 2, this );
+    m_neg_percent_validator = new QDoubleValidator ( 0., 99.99, 2, this );
+    m_fixed_validator       = new CMoneyValidator  ( 0,  10000, 3, this );
 	
 	connect ( w_inc_dec, SIGNAL( clicked ( int )), this, SLOT( slotIncDec ( int )));
 	connect ( w_percent_fixed, SIGNAL( clicked ( int )), this, SLOT( slotPercentFixed ( int )));
 	connect ( w_value, SIGNAL( textChanged ( const QString & )), this, SLOT( checkValue ( )));
 
 	slotIncDec ( 0 );
+
+    w_value-> selectAll ( );
+    w_value-> setFocus ( );
 }
 
 DlgIncDecPriceImpl::~DlgIncDecPriceImpl()
@@ -86,7 +89,7 @@ money_t DlgIncDecPriceImpl::fixed ( )
 double DlgIncDecPriceImpl::percent ( )
 {
 	if ( w_value-> hasAcceptableInput ( ) && ( w_percent_fixed-> selectedId ( ) == 0 )) {
-		double v = w_value-> text ( ). toDouble ( );
+        double v = w_value-> text ( ). replace ( ',', '.' ). toDouble ( );
 		return ( w_inc_dec-> selectedId ( ) == 0 ) ? v : -v;
 	}
 	else
