@@ -93,7 +93,7 @@
                  </sizepolicy>
                 </property>
                 <property name="maxLength">
-                 <number>7</number>
+                 <number>8</number>
                 </property>
                </widget>
               </item>

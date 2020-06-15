@@ -194,7 +194,7 @@ DlgLoadOrderImpl::DlgLoadOrderImpl ( QWidget *parent, const char *name, bool mod
 {
     setupUi ( this );
 
-	w_order_number-> setValidator ( new QIntValidator ( 1, 9999999, w_order_number ));
+	w_order_number-> setValidator ( new QIntValidator ( 1, 99999999, w_order_number ));
 
 	connect ( w_order_number, SIGNAL( textChanged ( const QString & )), this, SLOT( checkId ( )));
 	connect ( w_select_by, SIGNAL( clicked ( int )), this, SLOT( checkId ( )));
@@ -333,7 +333,7 @@ void DlgLoadOrderImpl::checkId ( )
 	bool ok = true;
 
 	if ( w_select_by-> selectedId ( ) == 0 ) 
-		ok = w_order_number-> hasAcceptableInput ( ) && ( w_order_number-> text ( ). length ( ) >= 6 ) && ( w_order_number-> text ( ). length ( ) <= 7 );
+		ok = w_order_number-> hasAcceptableInput ( ) && ( w_order_number-> text ( ). length ( ) >= 6 ) && ( w_order_number-> text ( ). length ( ) <= 8 );
 	else
 		ok = ( w_order_from-> date ( ) <= w_order_to-> date ( )) && ( w_order_to-> date ( ) <= QDate::currentDate ( ));      
 

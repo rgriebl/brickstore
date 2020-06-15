@@ -14,7 +14,7 @@
 ## See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 
 isEmpty( RELEASE ) {
-  RELEASE    = 1.2.11
+  RELEASE    = 1.2.12
 }
 
 TEMPLATE     = app
