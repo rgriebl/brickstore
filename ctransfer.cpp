@@ -72,7 +72,7 @@ void CTransfer::setProxy ( bool enable, const QString &name, int port )
 	m_queue_lock. lock ( );
 
 	m_use_proxy = enable;
-	m_proxy_name = name. latin1 ( );
+    m_proxy_name = name;
 	m_proxy_port = port;
 
 	m_queue_lock. unlock ( );
@@ -98,8 +98,8 @@ QString CTransfer::buildQueryString( const CKeyValueList &kvl )
     QString query;
 
 	for ( CKeyValueList::ConstIterator it = kvl. begin ( ); it != kvl. end ( ); ++it ) {
-		const char *tmp1 = ( *it ). first. latin1 ( );
-		const char *tmp2 = ( *it ). second. latin1 ( );
+        const char *tmp1 = ( *it ). first. ascii ( );
+        const char *tmp2 = ( *it ). second. ascii ( );
 
 		char *etmp1 = curl_escape ( tmp1 ? tmp1 : "", 0 );
 		char *etmp2 = curl_escape ( tmp2 ? tmp2 : "", 0 );
@@ -161,7 +161,7 @@ CTransfer::Job *CTransfer::retrieve ( bool get, const QString &url, const CKeyVa
 bool CTransfer::init ( )
 {
 	if ( !s_global_init ) {
-		if ( ::curl_global_init ( CURL_GLOBAL_WIN32 ) == CURLE_OK ) {
+		if ( ::curl_global_init ( CURL_GLOBAL_DEFAULT ) == CURLE_OK ) {
 			s_curl_share = ::curl_share_init ( );
 
 			if ( s_curl_share ) {
@@ -205,7 +205,7 @@ void CTransfer::run ( )
 	::curl_easy_setopt ( m_curl, CURLOPT_DNS_CACHE_TIMEOUT, 5*60 );
 	::curl_easy_setopt ( m_curl, CURLOPT_WRITEFUNCTION, write_curl );
 	::curl_easy_setopt ( m_curl, CURLOPT_WRITEDATA, this );
-	::curl_easy_setopt ( m_curl, CURLOPT_USERAGENT, ua. latin1 ( ));
+    ::curl_easy_setopt ( m_curl, CURLOPT_USERAGENT, ua. ascii ( ));
 	::curl_easy_setopt ( m_curl, CURLOPT_ENCODING, "" );
 	::curl_easy_setopt ( m_curl, CURLOPT_FILETIME, 1 ); 
 
@@ -226,7 +226,7 @@ void CTransfer::run ( )
 			m_active_job = j;
 
 			if ( m_use_proxy ) {
-				::curl_easy_setopt ( m_curl, CURLOPT_PROXY, m_proxy_name. data ( ));
+				::curl_easy_setopt ( m_curl, CURLOPT_PROXY, m_proxy_name. ascii ( ));
 				::curl_easy_setopt ( m_curl, CURLOPT_PROXYPORT, m_proxy_port );
 			}
 			else
@@ -244,7 +244,7 @@ void CTransfer::run ( )
 				query = "";
 				
 				::curl_easy_setopt ( m_curl, CURLOPT_HTTPGET, 1 );
-                ::curl_easy_setopt ( m_curl, CURLOPT_URL, url.toAscii ( ). constData ( ));
+                ::curl_easy_setopt ( m_curl, CURLOPT_URL, url.ascii ( ));
 				::curl_easy_setopt ( m_curl, CURLOPT_TIMEVALUE, j-> m_ifnewer );
 				::curl_easy_setopt ( m_curl, CURLOPT_TIMECONDITION, j-> m_ifnewer ? CURL_TIMECOND_IFMODSINCE : CURL_TIMECOND_NONE );
 				
@@ -255,8 +255,9 @@ void CTransfer::run ( )
 				query = j-> m_query. copy ( );
 				
 				::curl_easy_setopt ( m_curl, CURLOPT_POST, 1 );
-                ::curl_easy_setopt ( m_curl, CURLOPT_URL, url.toAscii ( ). constData ( ));
-                ::curl_easy_setopt ( m_curl, CURLOPT_POSTFIELDS, query.toAscii ( ). constData ( ));
+                ::curl_easy_setopt ( m_curl, CURLOPT_URL, url.ascii ( ));
+                ::curl_easy_setopt ( m_curl, CURLOPT_POSTFIELDS, query.ascii ( ));
+                ::curl_easy_setopt ( m_curl, CURLOPT_POSTFIELDSIZE, j-> m_query. length ( ) );
 				
 				//qDebug ( "CTransfer::post [%s] - form-data [%s]", url. data ( ), query. data ( ));
 			}
