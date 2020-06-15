@@ -124,13 +124,15 @@ public:
 	virtual QPixmap *pixmap ( ) const
 	{
 		if ( m_viewmode == CSelectItem::ViewMode_Thumbnails ) {
-			if ( m_picture && (( m_picture-> item ( ) != m_item ) || ( m_picture-> color ( ) != m_item-> defaultColor ( )))) {
+            const BrickLink::Color *tColor = m_item-> itemType ( )-> hasColors ( ) ? m_item-> defaultColor ( ) : BrickLink::inst ( )-> color ( 0 );
+
+            if ( m_picture && (( m_picture-> item ( ) != m_item ) || ( m_picture-> color ( ) != tColor))) {
 				m_picture-> release ( );
 				m_picture = 0;
-			}
+            }
 
-			if ( !m_picture && m_item && m_item-> defaultColor ( )) {
-				m_picture = BrickLink::inst ( )-> picture ( m_item, m_item-> defaultColor ( ));
+            if ( !m_picture && m_item && tColor) {
+                m_picture = BrickLink::inst ( )-> picture ( m_item, tColor);
 
 				if ( m_picture ) {
 					m_picture-> addRef ( );
@@ -174,8 +176,6 @@ private:
 	mutable BrickLink::Picture * m_picture;
 };
 
-
-
 class ItemIconToolTip : public QObject {
 public:
 	ItemIconToolTip ( Q3IconView *iv )
@@ -204,7 +204,6 @@ private:
 
 } // namespace
 
-
 class CSelectItemPrivate {
 public:
 	CItemTypeCombo *m_type_combo;
@@ -228,7 +227,6 @@ public:
 	const BrickLink::Item *m_selected;
 	ItemListToolTip *      m_items_tip;
 };
-
 
 CSelectItem::CSelectItem ( QWidget *parent, const char *name, Qt::WFlags fl )
 	: QWidget ( parent, name, fl )
@@ -407,18 +405,19 @@ void CSelectItem::pictureUpdated ( BrickLink::Picture *pic )
 
 	for ( Q3ListViewItemIterator it ( d-> w_items ); it. current ( ); ++it ) {
 		ItemListItem *ii = static_cast <ItemListItem *> ( it. current ( ));
+        const BrickLink::Color *tColor = ii-> item ( )-> itemType ( )-> hasColors ( ) ? ii-> item ( )-> defaultColor ( ) : BrickLink::inst ( )-> color ( 0 );
 
-		if (( pic-> item ( ) == ii-> item ( )) && ( pic-> color ( ) == ii-> item ( )-> defaultColor ( )))
+        if (( pic-> item ( ) == ii-> item ( )) && ( pic-> color ( ) == tColor))
 			ii-> pictureChanged ( );
 	}
 	for ( Q3IconViewItem *it = d-> w_thumbs-> firstItem ( ); it; it = it-> nextItem ( )) {
 		ItemIconItem *ii = static_cast <ItemIconItem *> ( it );
+        const BrickLink::Color *tColor = ii-> item ( )-> itemType ( )-> hasColors ( ) ? ii-> item ( )-> defaultColor ( ) : BrickLink::inst ( )-> color ( 0 );
 
-		if (( pic-> item ( ) == ii-> item ( )) && ( pic-> color ( ) == ii-> item ( )-> defaultColor ( )))
-			ii-> pictureChanged ( );
+        if (( pic-> item ( ) == ii-> item ( )) && ( pic-> color ( ) == tColor))
+            ii-> pictureChanged ( );
 	}
 }
-
 
 void CSelectItem::viewModeChanged ( int ivm )
 {
@@ -503,8 +502,6 @@ public:
 	HackListView ( ) : CListView ( 0 ) { }
 	void hackUpdateContents ( ) { updateContents ( ); }
 };
-
-
 
 void CSelectItem::itemTypeChanged ( )
 {

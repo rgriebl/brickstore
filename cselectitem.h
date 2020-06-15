@@ -158,13 +158,15 @@ public:
 
     BrickLink::Picture *picture ( ) const
     {
-        if ( m_picture && (( m_picture-> item ( ) != m_item ) || ( m_picture-> color ( ) != m_item-> defaultColor ( )))) {
+        const BrickLink::Color *tColor = m_item-> itemType ( )-> hasColors ( ) ? m_item-> defaultColor ( ) : BrickLink::inst ( )-> color ( 0 );
+
+        if ( m_picture && (( m_picture-> item ( ) != m_item ) || ( m_picture-> color ( ) != tColor))) {
             m_picture-> release ( );
             m_picture = 0;
         }
 
-        if ( !m_picture && m_item && m_item-> defaultColor ( )) {
-            m_picture = BrickLink::inst ( )-> picture ( m_item, m_item-> defaultColor ( ), true );
+        if ( !m_picture && m_item && tColor) {
+            m_picture = BrickLink::inst ( )-> picture ( m_item, tColor, true );
 
             if ( m_picture )
                 m_picture-> addRef ( );
