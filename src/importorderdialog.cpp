@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2011 Robert Griebl. All rights reserved.
+/* Copyright (C) 2004-2020 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -127,7 +127,7 @@ public:
                 if (cc.length() == 2)
                     flag = m_flags[cc];
                 if (!flag) {
-                    QString url = QString::fromLatin1("http://www.bricklink.com/images/flagsS/%1.gif").arg(cc);
+                    QString url = QString::fromLatin1("https://www.bricklink.com/images/flagsS/%1.gif").arg(cc);
 
                     TransferJob *job = TransferJob::get(url);
                     int userData = cc[0].unicode() | (cc[1].unicode() << 16);
@@ -305,7 +305,7 @@ ImportOrderDialog::ImportOrderDialog(QWidget *parent, Qt::WindowFlags f)
 {
     setupUi(this);
 
-    w_order_number->setValidator(new QIntValidator(1, 9999999, w_order_number));
+    w_order_number->setValidator(new QIntValidator(1, 99999999, w_order_number));
     w_order_list->setModel(new OrderListModel(this));
     w_order_list->setItemDelegate(new TransHighlightDelegate());
 
@@ -443,7 +443,7 @@ void ImportOrderDialog::checkId()
     bool ok = true;
 
     if (w_by_number->isChecked())
-        ok = w_order_number->hasAcceptableInput() && (w_order_number->text().length() >= 6) && (w_order_number->text().length() <= 7);
+        ok = w_order_number->hasAcceptableInput() && (w_order_number->text().length() >= 6) && (w_order_number->text().length() <= 8);
     else
         ok = (w_order_from->date() <= w_order_to->date()) && (w_order_to->date() <= QDate::currentDate());
 

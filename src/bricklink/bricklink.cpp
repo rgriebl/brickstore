@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2011 Robert Griebl. All rights reserved.
+/* Copyright (C) 2004-2020 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -44,26 +44,26 @@ QUrl BrickLink::Core::url(UrlList u, const void *opt, const void *opt2)
 
     switch (u) {
     case URL_InventoryRequest:
-        url = "http://www.bricklink.com/bbsiXML.asp";
+        url = "https://www.bricklink.com/catalogInvAdd.asp";
         break;
 
     case URL_WantedListUpload:
-        url = "http://www.bricklink.com/wantedXML.asp";
+        url = "https://www.bricklink.com/wantedXML.asp";
         break;
 
     case URL_InventoryUpload:
-        url = "http://www.bricklink.com/invXML.asp";
+        url = "https://www.bricklink.com/invXML.asp";
         break;
 
     case URL_InventoryUpdate:
-        url = "http://www.bricklink.com/invXML.asp#update";
+        url = "https://www.bricklink.com/invXML.asp#update";
         break;
 
     case URL_CatalogInfo:
         if (opt) {
             const Item *item = static_cast <const Item *>(opt);
 
-            url = "http://www.bricklink.com/catalogItem.asp";
+            url = "https://www.bricklink.com/catalogItem.asp";
             QUrlQuery query;
             query.addQueryItem(QChar(item->itemType()->id()), item->id());
             url.setQuery(query);
@@ -74,7 +74,7 @@ QUrl BrickLink::Core::url(UrlList u, const void *opt, const void *opt2)
         if (opt && opt2) {
             const Item *item = static_cast <const Item *>(opt);
 
-            url = "http://www.bricklink.com/catalogPriceGuide.asp";
+            url = "https://www.bricklink.com/catalogPG.asp";
             QUrlQuery query;
             query.addQueryItem(QChar(item->itemType()->id()), item->id());
             if (item->itemType()->hasColors())
@@ -87,7 +87,7 @@ QUrl BrickLink::Core::url(UrlList u, const void *opt, const void *opt2)
         if (opt && opt2) {
             const Item *item = static_cast <const Item *>(opt);
 
-            url = "http://www.bricklink.com/search.asp";
+            url = "https://www.bricklink.com/search.asp";
             QUrlQuery query;
             query.addQueryItem("viewFrom", "sa");
             query.addQueryItem("itemType", QChar(item->itemType()->id()));
@@ -113,7 +113,7 @@ QUrl BrickLink::Core::url(UrlList u, const void *opt, const void *opt2)
         if (opt && opt2) {
             const Item *item = static_cast <const Item *>(opt);
 
-            url = "http://www.bricklink.com/catalogItemIn.asp";
+            url = "https://www.bricklink.com/catalogItemIn.asp";
             QUrlQuery query;
             query.addQueryItem(QChar(item->itemType()->id()), item->id());
             query.addQueryItem("in", "S");
@@ -125,11 +125,11 @@ QUrl BrickLink::Core::url(UrlList u, const void *opt, const void *opt2)
         break;
 
     case URL_ColorChangeLog:
-        url = "http://www.bricklink.com/catalogReqList.asp?pg=1&chgUserID=&viewActionType=R";
+        url = "https://www.bricklink.com/catalogReqList.asp?pg=1&chgUserID=&viewActionType=R";
         break;
 
     case URL_ItemChangeLog: {
-        url = "http://www.bricklink.com/catalogReqList.asp?pg=1&chgUserID=&viewActionType=I";
+        url = "https://www.bricklink.com/catalogReqList.asp?pg=1&chgUserID=&viewActionType=I";
         QUrlQuery query;
         if (opt)
             query.addQueryItem("q", static_cast <const char *>(opt));
@@ -148,7 +148,7 @@ QUrl BrickLink::Core::url(UrlList u, const void *opt, const void *opt2)
     }
     case URL_StoreItemDetail: {
         if (opt) {
-            url = "http://www.bricklink.com/inventory_detail.asp";
+            url = "https://www.bricklink.com/inventory_detail.asp";
             QUrlQuery query;
             query.addQueryItem("invID", QString::number(*static_cast <const unsigned int *>(opt)));
             url.setQuery(query);

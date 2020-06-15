@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2011 Robert Griebl. All rights reserved.
+/* Copyright (C) 2004-2020 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -28,6 +28,7 @@
 #include "utility.h"
 #include "report.h"
 #include "reportobjects.h"
+#include "config.h"
 
 
 ReportUtility::ReportUtility()
@@ -49,6 +50,11 @@ QString ReportUtility::localDateString(const QDateTime &dt) const
 QString ReportUtility::localTimeString(const QDateTime &dt) const
 {
     return dt.time().toString(Qt::LocalDate);
+}
+
+QString ReportUtility::localWeightString(double weight) const
+{
+    return Utility::weightToString(weight, Config::inst()->measurementSystem(), true, true);
 }
 
 QWidget *ReportUtility::loadUiFile(const QString &fileName)

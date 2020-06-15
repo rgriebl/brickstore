@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2011 Robert Griebl. All rights reserved.
+/* Copyright (C) 2004-2020 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -39,6 +39,8 @@ public slots:
 
     QString localDateString(const QDateTime &dt) const;
     QString localTimeString(const QDateTime &dt) const;
+
+    QString localWeightString(double weight) const;
 
     QWidget *loadUiFile(const QString &fileName);
 

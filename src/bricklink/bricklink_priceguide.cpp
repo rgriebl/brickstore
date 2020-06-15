@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2011 Robert Griebl. All rights reserved.
+/* Copyright (C) 2004-2020 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -71,6 +71,8 @@ void BrickLink::PriceGuide::save_to_disk()
 {
     QString path = BrickLink::core()->dataPath(m_item, m_color);
 
+    qWarning() << "SAVING PG for" << m_item->id() << "to" << path;
+
     if (path.isEmpty())
         return;
     path += "priceguide.txt";
@@ -127,6 +129,9 @@ void BrickLink::PriceGuide::parse(const QByteArray &ba)
     QTextStream ts(ba);
     QString line;
     QLocale c = QLocale::c();
+
+    qWarning() << "PG for" << m_item->id();
+    qWarning().noquote() << ba;
 
     while (!(line = ts.readLine()).isNull()) {
         if (!line.length() || (line[0] == '#') || (line[0] == '\r'))         // skip comments fast
@@ -192,7 +197,7 @@ void BrickLink::Core::updatePriceGuide(BrickLink::PriceGuide *pg, bool high_prio
     pg->m_update_status = Updating;
     pg->addRef();
 
-    QUrl url("http://www.bricklink.com/BTpriceSummary.asp"); //?{item type}={item no}&colorID={color ID}&cCode={currency code}&cExc={Y to exclude incomplete sets}
+    QUrl url("https://www.bricklink.com/BTpriceSummary.asp"); //?{item type}={item no}&colorID={color ID}&cCode={currency code}&cExc={Y to exclude incomplete sets}
     QUrlQuery query;
 
     query.addQueryItem(QChar(pg->item()->itemType()->id()).toUpper(),

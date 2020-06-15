@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2011 Robert Griebl. All rights reserved.
+/* Copyright (C) 2004-2020 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -86,6 +86,7 @@ public:
     void abortAllJobs();
 
     QString userAgent() const;
+    QNetworkAccessManager *networkAccessManager();
 
     static void setDefaultUserAgent(const QString &ua);
     static QString defaultUserAgent();

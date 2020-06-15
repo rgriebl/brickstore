@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2011 Robert Griebl. All rights reserved.
+/* Copyright (C) 2004-2020 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -50,6 +50,12 @@ const BrickLink::Item *ImportInventoryDialog::item() const
 int ImportInventoryDialog::quantity() const
 {
     return qMax(1, w_qty->value());
+}
+
+void ImportInventoryDialog::showEvent(QShowEvent *)
+{
+    activateWindow();
+    w_select->setFocus();
 }
 
 void ImportInventoryDialog::checkItem(const BrickLink::Item *it, bool ok)

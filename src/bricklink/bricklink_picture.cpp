@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2011 Robert Griebl. All rights reserved.
+/* Copyright (C) 2004-2020 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -231,13 +231,12 @@ void BrickLink::Core::updatePicture(BrickLink::Picture *pic, bool high_priority)
     QUrl url;
 
     if (large) {
-        url = QString("http://www.bricklink.com/%1L/%2.jpg").arg(pic->item()->itemType()->pictureId()).arg(pic->item()->id());
+        url = QString("https://img.bricklink.com/%1L/%2.jpg").arg(pic->item()->itemType()->pictureId()).arg(pic->item()->id());
     }
     else {
-        url = "http://www.bricklink.com/getPic.asp";
+        url = "https://www.bricklink.com/getPic.asp";
         // ?itemType=%c&colorID=%d&itemNo=%s", pic->item ( )->itemType ( )->pictureId ( ), pic->color ( )->id ( ), pic->item ( )->id ( ));
         QUrlQuery query;
-
         query.addQueryItem("itemType", QChar(pic->item()->itemType()->pictureId()));
         query.addQueryItem("colorID",  QString::number(pic->color()->id()));
         query.addQueryItem("itemNo",   pic->item()->id());
@@ -282,6 +281,8 @@ void BrickLink::Core::pictureJobFinished(ThreadPoolJob *pj)
             path.append(large ? "large.png" : "small.png");
 
             pic->m_update_status = Ok;
+
+            qWarning() << "IMG" << j->data()->size() << j->effectiveUrl();
 
             if ((j->effectiveUrl().path().indexOf("noimage", 0, Qt::CaseInsensitive) == -1) && j->data()->size() && img.loadFromData(*j->data())) {
                 img.save(path, "PNG");

@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2011 Robert Griebl. All rights reserved.
+/* Copyright (C) 2004-2020 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -483,7 +483,7 @@ QVariant BrickLink::ItemModel::data(const QModelIndex &index, int role) const
     if (role == Qt::DisplayRole) {
         switch(index.column()) {
         case 1: res = QString::fromLatin1(i->id()); break;
-        case 2: res = QString::fromLatin1(i->name()); break;
+        case 2: res = QString::fromUtf8(i->name()); break;
         }
     }
     else if (role == Qt::DecorationRole) {

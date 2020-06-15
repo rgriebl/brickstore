@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2011 Robert Griebl. All rights reserved.
+/* Copyright (C) 2004-2020 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -100,6 +100,12 @@ public:
         {
             foreach (const BrickLink::InvItem *ii, iil)
                 append(new Item(*ii));
+        }
+
+        ItemList &operator=(const ItemList &other)
+        {
+            *static_cast<QList<Item *> *>(this) = static_cast<QList<Item *>>(other);
+            return *this;
         }
 
         operator const BrickLink::InvItemList &() const

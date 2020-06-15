@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2011 Robert Griebl. All rights reserved.
+/* Copyright (C) 2004-2020 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -60,6 +60,7 @@ public:
     QComboBox *      w_viewmode;
     bool             m_inv_only;
     ItemDetailPopup *m_details;
+    bool             m_in_setcurrentitem = false;
 };
 
 
@@ -227,7 +228,7 @@ void SelectItem::init()
 
     d->m_stack->setCurrentWidget(d->w_items);
 
-    setFocusProxy(d->w_item_types);
+    setFocusProxy(d->w_filter);
     languageChange();
 }
 
@@ -362,22 +363,35 @@ const BrickLink::Item *SelectItem::currentItem() const
 }
 
 bool SelectItem::setCurrentItem(const BrickLink::Item *item, bool force_items_category)
-{
-    QModelIndex idx = d->itemModel->index(item);
-    if (idx.isValid()) {
-        const BrickLink::ItemType *itt = item->itemType();
-        const BrickLink::Category *cat = item->category();
+{/*
+    if (d->m_in_setcurrentitem)
+        return false;
+    d->m_in_setcurrentitem = true;*/
 
-        if (currentItemType() != itt)
-            setCurrentItemType(itt);
-        if ((currentCategory() != cat) &&
-            (force_items_category || currentCategory() != BrickLink::CategoryModel::AllCategories))
-            setCurrentCategory(cat);
-        d->w_items->setCurrentIndex(idx);
-    }
-    else
+    if (item) {
+        if (force_items_category) {
+            const BrickLink::ItemType *itt = item->itemType();
+            const BrickLink::Category *cat = item->category();
+
+            if (currentItemType() != itt)
+                setCurrentItemType(itt);
+            if ((currentCategory() != cat) &&
+                    (force_items_category || currentCategory() != BrickLink::CategoryModel::AllCategories))
+                setCurrentCategory(cat);
+        }
+        QModelIndex idx = d->itemModel->index(item);
+        if (idx.isValid()) {
+            d->w_items->setCurrentIndex(idx);
+            ensureSelectionVisible();
+        } else {
+            d->w_items->clearSelection();
+        }
+    } else {
         d->w_items->clearSelection();
-    return idx.isValid();
+    }
+
+    //d->m_in_setcurrentitem = false;
+    return (item);
 }
 
 void SelectItem::setViewMode(int mode)
@@ -403,8 +417,7 @@ void SelectItem::findItem()
 
         if (MessageBox::getString(this, tr("Please enter the complete item number:"), str)) {
             if (const BrickLink::Item *item = BrickLink::core()->item(itt->id(), str.toLatin1().constData())) {
-                setCurrentItem(item);
-                ensureSelectionVisible();
+                setCurrentItem(item, true);
             } else {
                 QApplication::beep();
             }
@@ -484,7 +497,6 @@ void SelectItem::showContextMenu(const QPoint &p)
 
                 if (m.exec(iv->mapToGlobal(p)) == gotocat) {
                     setCurrentItem(item, true);
-                    ensureSelectionVisible();
                 }
             }
         }

@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2011 Robert Griebl. All rights reserved.
+/* Copyright (C) 2004-2020 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -17,6 +17,12 @@
 #include <QApplication>
 #include <qlogging.h>
 #include <QUrlQuery>
+#include <QtNetworkAuth/QOAuth1>
+#include <QNetworkReply>
+#include <QJsonDocument>
+#include <QJsonValue>
+#include <QJsonObject>
+#include <QJsonArray>
 
 #if defined(Q_OS_WIN)
 #  include <windows.h>
@@ -84,10 +90,34 @@ int RebuildDatabase::exec()
 
     BrickLink::TextImport blti;
 
-    //qInstallMessageHandler(nirvanaMsgHandler);
+    qInstallMessageHandler(nirvanaMsgHandler);
 
     printf("\n Rebuilding database ");
     printf("\n=====================\n");
+
+    /////////////////////////////////////////////////////////////////////////////////
+    printf("\nSTEP 0: Logging into Bricklink...\n");
+
+    // login hack
+    {
+        QNetworkAccessManager *nam = m_trans->networkAccessManager();
+        QNetworkRequest req(QUrl("https://www.bricklink.com/ajax/renovate/loginandout.ajax"));
+        req.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+        QUrlQuery q;
+        q.addQueryItem("userid", Config::inst()->loginForBrickLink().first);
+        q.addQueryItem("password", Config::inst()->loginForBrickLink().second);
+        q.addQueryItem("keepme_loggedin", "1");
+        QByteArray form = q.query(QUrl::FullyEncoded).toLatin1();
+
+        QNetworkReply *reply = nam->post(req, form);
+        while (reply && !reply->isFinished())
+            qApp->processEvents();
+
+        if ((reply->error() != QNetworkReply::NoError)
+                || (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute) != 200)) {
+            return error(QByteArray("Failed to log into Bricklink:\n") + reply->readAll());
+        }
+    }
 
     /////////////////////////////////////////////////////////////////////////////////
     printf("\nSTEP 1: Downloading (text) database files...\n");
@@ -175,25 +205,99 @@ bool RebuildDatabase::download()
 {
     QString path = BrickLink::core()->dataPath();
 
+#if 0
+    QString baseUrl = "https://api.bricklink.com/api/store/v1";
+
+    QUrl tu = baseUrl + "/colors";
+
+    // User
+    const char *consumerKey = "0C2AEE92FF4244CBAD7F3F2825548C35";
+    const char *consumerSecret = "725833030F554AF9B9BCC9117E88ED70";
+    // Access Token
+    const char *tokenValue = "5AEF00FD7E664A8C86D8A8B61D180FCC";
+    const char *tokenSecret = "9033ECE8CDCC48A484F8B3D85224EFCA";
+
+    QNetworkAccessManager *nam = new QNetworkAccessManager();
+    QOAuth1 oa(nam, this);
+    oa.setSignatureMethod(QOAuth1::SignatureMethod::Hmac_Sha1);
+    oa.setClientCredentials(consumerKey, consumerSecret);
+    oa.setTokenCredentials(tokenValue, tokenSecret);
+
+    QNetworkReply *reply = oa.get(tu);
+
+    while (reply && !reply->isFinished())
+        qApp->processEvents();
+
+    if (reply->error() == QNetworkReply::NoError) {
+
+
+        QJsonDocument json = QJsonDocument::fromJson(reply->readAll());
+        QJsonObject meta = json.object().value("meta").toObject();
+        QJsonArray data = json.object().value("data").toArray();
+
+        if (meta.value("code").toInt() == 200) {
+            for (auto it = data.constBegin(); it != data.constEnd(); ++it) {
+                QJsonObject color = it->toObject();
+
+
+            }
+        }
+    }
+
+
+    exit(2);
+#endif
+
+
+
+//  {
+//      replyHandler = new QOAuthHttpServerReplyHandler(1337, this);
+//      replyHandler->setCallbackPath("callback");
+//      setReplyHandler(replyHandler);
+//      setTemporaryCredentialsUrl(QUrl("https://api.twitter.com/oauth/request_token"));
+//      setAuthorizationUrl(QUrl("https://api.twitter.com/oauth/authenticate"));
+//      setTokenCredentialsUrl(QUrl("https://api.twitter.com/oauth/access_token"));
+
+//      connect(this, &QAbstractOAuth::authorizeWithBrowser, [=](QUrl url) {
+//          QUrlQuery query(url);
+
+//          // Forces the user to enter their credentials to authorize the correct
+//          // user account
+//          query.addQueryItem("force_login", "true");
+
+//          if (!screenName.isEmpty())
+//              query.addQueryItem("screen_name", screenName);
+//          url.setQuery(query);
+//          QDesktopServices::openUrl(url);
+//      });
+
+//      connect(this, &QOAuth1::granted, this, &Twitter::authenticated);
+
+//      if (!clientCredentials.first.isEmpty() && !clientCredentials.second.isEmpty())
+//          grant();
+
+
+
+
     struct {
         const char *m_url;
         const QList<QPair<QString, QString> > m_query;
         const char *m_file;
     } * tptr, table [] = {
-        { "http://www.bricklink.com/catalogDownload.asp", dbQuery(1),     "itemtypes.txt"   },
-        { "http://www.bricklink.com/catalogDownload.asp", dbQuery(2),     "categories.txt"  },
-        { "http://www.bricklink.com/catalogDownload.asp", dbQuery(3),     "colors.txt"      },
-        { "http://www.bricklink.com/catalogDownload.asp", itemQuery('S'), "items_S.txt"     },
-        { "http://www.bricklink.com/catalogDownload.asp", itemQuery('P'), "items_P.txt"     },
-        { "http://www.bricklink.com/catalogDownload.asp", itemQuery('M'), "items_M.txt"     },
-        { "http://www.bricklink.com/catalogDownload.asp", itemQuery('B'), "items_B.txt"     },
-        { "http://www.bricklink.com/catalogDownload.asp", itemQuery('G'), "items_G.txt"     },
-        { "http://www.bricklink.com/catalogDownload.asp", itemQuery('C'), "items_C.txt"     },
-        { "http://www.bricklink.com/catalogDownload.asp", itemQuery('I'), "items_I.txt"     },
-        { "http://www.bricklink.com/catalogDownload.asp", itemQuery('O'), "items_O.txt"     },
+        { "https://www.bricklink.com/catalogDownload.asp", dbQuery(1),     "itemtypes.txt"   },
+        { "https://www.bricklink.com/catalogDownload.asp", dbQuery(2),     "categories.txt"  },
+        { "https://www.bricklink.com/catalogDownload.asp", dbQuery(3),     "colors.txt"      },
+        { "https://www.bricklink.com/catalogDownload.asp", itemQuery('S'), "items_S.txt"     },
+        { "https://www.bricklink.com/catalogDownload.asp", itemQuery('P'), "items_P.txt"     },
+        { "https://www.bricklink.com/catalogDownload.asp", itemQuery('M'), "items_M.txt"     },
+        { "https://www.bricklink.com/catalogDownload.asp", itemQuery('B'), "items_B.txt"     },
+        { "https://www.bricklink.com/catalogDownload.asp", itemQuery('G'), "items_G.txt"     },
+        { "https://www.bricklink.com/catalogDownload.asp", itemQuery('C'), "items_C.txt"     },
+        { "https://www.bricklink.com/catalogDownload.asp", itemQuery('I'), "items_I.txt"     },
+        { "https://www.bricklink.com/catalogDownload.asp", itemQuery('O'), "items_O.txt"     },
         // { "http://www.bricklink.com/catalogDownload.asp", itemQuery('U'), "items_U.txt"     }, // generates a 500 server error
-        { "http://www.bricklink.com/btinvlist.asp",       QList<QPair<QString, QString> >(), "btinvlist.txt"   },
-        { "http://www.bricklink.com/btchglog.asp",        QList<QPair<QString, QString> >(), "btchglog.txt" },
+        { "https://www.bricklink.com/btinvlist.asp",       QList<QPair<QString, QString> >(), "btinvlist.txt"   },
+        { "https://www.bricklink.com/btchglog.asp",        QList<QPair<QString, QString> >(), "btchglog.txt" },
 
         { "http://www.peeron.com/inv/colors",             QList<QPair<QString, QString> >(), "peeron_colors.html" },
 

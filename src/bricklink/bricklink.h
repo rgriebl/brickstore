@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2011 Robert Griebl. All rights reserved.
+/* Copyright (C) 2004-2020 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -56,6 +56,7 @@ class ItemType {
 public:
     char id() const                 { return m_id; }
     const char *name() const        { return m_name; }
+    QString apiName () const          { return QString(m_name).replace(" ", "_"); } //TODO5: brickstock has this
 
     const Category **categories() const { return m_categories; }
     bool hasInventories() const     { return m_has_inventories; }
@@ -898,6 +899,7 @@ public:
     const Item *item(char tid, const char *id) const;
 
     PriceGuide *priceGuide(const Item *item, const Color *color, bool high_priority = false);
+    void flushPriceGuidesToUpdate(); //TODO5: brickstock has this
 
     QSize pictureSize(const ItemType *itt) const;
     Picture *picture(const Item *item, const Color *color, bool high_priority = false);
@@ -969,7 +971,7 @@ private:
     friend class TextImport;
 
 private slots:
-    void pictureJobFinished(ThreadPoolJob *);
+    void pictureJobFinished(ThreadPoolJob *); //TODO5: timeout handling in brickstock updatePicturesTimeOut
     void priceGuideJobFinished(ThreadPoolJob *);
 
     void pictureLoaded(ThreadPoolJob *);

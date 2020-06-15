@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2011 Robert Griebl. All rights reserved.
+/* Copyright (C) 2004-2020 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -39,11 +39,12 @@ public:
 
     int defaultItemHeight(const QWidget *w = 0) const;
 
-    virtual QSize sizeHint(const QStyleOptionViewItem &option1, const QModelIndex &idx) const;
+    QSize sizeHint(const QStyleOptionViewItem &option1, const QModelIndex &idx) const override;
     virtual void paint(QPainter *p, const QStyleOptionViewItem &option1, const QModelIndex &idx) const;
     virtual bool editorEvent(QEvent *e, QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &idx);
     virtual QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
     virtual void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+    bool helpEvent(QHelpEvent *event, QAbstractItemView *view, const QStyleOptionViewItem &option, const QModelIndex &index) override;
 
 protected:
     bool nonInlineEdit(QEvent *e, Document::Item *it, const QStyleOptionViewItem &option, const QModelIndex &idx);
@@ -61,6 +62,7 @@ protected:
     SelectColorDialog *m_select_color;
     mutable QPointer<QLineEdit> m_lineedit;
     bool m_read_only;
+    mutable QList<quint64> m_elided;
 
     static QVector<QColor> s_shades;
     static QHash<BrickLink::Status, QIcon> s_status_icons;

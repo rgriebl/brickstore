@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2011 Robert Griebl. All rights reserved.
+/* Copyright (C) 2004-2020 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -27,6 +27,9 @@ public:
     bool setItem(const BrickLink::Item *item);
     const BrickLink::Item *item() const;
     int quantity() const;
+
+protected:
+    virtual void showEvent(QShowEvent *);
 
 protected slots:
     void checkItem(const BrickLink::Item *it, bool ok);

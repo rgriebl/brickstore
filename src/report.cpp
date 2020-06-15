@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2011 Robert Griebl.All rights reserved.
+/* Copyright (C) 2004-2020 Robert Griebl.All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -205,6 +205,8 @@ void Report::print(QPaintDevice *pd, const Document *doc, const Document::ItemLi
         iVal.setProperty("retain", item->retain());
         iVal.setProperty("stockroom", item->stockroom());
         iVal.setProperty("reserved", item->reserved());
+        iVal.setProperty("weight", item->item()->weight());
+        iVal.setProperty("totalWeight", item->weight());
 
         itemList.setProperty(count++, iVal);
     }

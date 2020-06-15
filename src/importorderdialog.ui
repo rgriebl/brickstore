@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>633</width>
+    <width>670</width>
     <height>309</height>
    </rect>
   </property>
@@ -24,7 +24,16 @@
      </property>
      <widget class="QWidget" name="page">
       <layout class="QVBoxLayout">
-       <property name="margin">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
         <number>0</number>
        </property>
        <item>
@@ -127,7 +136,7 @@
               </sizepolicy>
              </property>
              <property name="maxLength">
-              <number>7</number>
+              <number>8</number>
              </property>
             </widget>
            </item>
@@ -220,7 +229,16 @@
      </widget>
      <widget class="QWidget" name="page_3">
       <layout class="QVBoxLayout">
-       <property name="margin">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
         <number>0</number>
        </property>
        <item>
@@ -246,7 +264,16 @@
      </widget>
      <widget class="QWidget" name="page_4">
       <layout class="QVBoxLayout">
-       <property name="margin">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
         <number>0</number>
        </property>
        <item>

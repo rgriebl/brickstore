@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2011 Robert Griebl. All rights reserved.
+/* Copyright (C) 2004-2020 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -37,7 +37,7 @@ ImportBLStore::ImportBLStore(ProgressDialog *pd)
     pd->setHeaderText(tr("Importing BrickLink Store"));
     pd->setMessageText(tr("Download: %p"));
 
-    QUrl url("http://www.bricklink.com/invExcelFinal.asp");
+    QUrl url("https://www.bricklink.com/invExcelFinal.asp");
     QUrlQuery query;
     query.addQueryItem("itemType",      "");
     query.addQueryItem("catID",         "");
@@ -139,7 +139,7 @@ void ImportBLOrder::init()
     m_progress->setHeaderText(tr("Importing BrickLink Order"));
     m_progress->setMessageText(tr("Download: %p"));
 
-    QUrl url("http://www.bricklink.com/orderExcelFinal.asp");
+    QUrl url("https://www.bricklink.com/orderExcelFinal.asp");
     QUrlQuery query;
     query.addQueryItem("orderType",     m_order_type == BrickLink::Placed ? "placed" : "received");
     query.addQueryItem("action",        "save");
@@ -290,7 +290,7 @@ void ImportBLOrder::gotten()
     else if ((m_current_address + 1) < m_orders.size()) {
         m_current_address++;
 
-        QString url = QLatin1String("http://www.bricklink.com/memberInfo.asp?u=") + m_orders[m_current_address].first->other();
+        QString url = QLatin1String("https://www.bricklink.com/memberInfo.asp?u=") + m_orders[m_current_address].first->other();
         m_progress->setHeaderText(tr("Importing address records"));
         m_progress->get(url);
         m_progress->layout();
@@ -317,7 +317,7 @@ ImportBLCart::ImportBLCart(int shopid, int cartid, ProgressDialog *pd)
     pd->setHeaderText(tr("Importing BrickLink Shopping Cart"));
     pd->setMessageText(tr("Download: %p"));
 
-    QUrl url("http://www.bricklink.com/storeCart.asp");
+    QUrl url("https://www.bricklink.com/storeCart.asp");
     QUrlQuery query;
     query.addQueryItem("h", QString::number(shopid));
     query.addQueryItem("b", QString::number(cartid));
@@ -350,7 +350,7 @@ void ImportBLCart::gotten()
             QTextStream ts(&cart_buffer);
             QString line;
             QString items_line;
-            QString sep = QLatin1String("<TR CLASS=\"tm\"><TD HEIGHT=\"65\" ALIGN=\"CENTER\">");
+            QRegExp sep(QLatin1String("<TR CLASS=\"tm\"( ID=\"row_[0-9]*\")?><TD HEIGHT=\"[0-9]*\" ALIGN=\"CENTER\">"), Qt::CaseInsensitive);
             int invalid_items = 0;
             bool parsing_items = false;
 
@@ -358,7 +358,7 @@ void ImportBLCart::gotten()
                 line = ts.readLine();
                 if (line.isNull())
                     break;
-                if (line.startsWith(sep, Qt::CaseInsensitive) && !parsing_items)
+                if ((sep.indexIn(line) == 0) && !parsing_items)
                     parsing_items = true;
 
                 if (parsing_items)
@@ -373,7 +373,7 @@ void ImportBLCart::gotten()
             foreach(const QString &str, strlist) {
                 BrickLink::InvItem *ii = 0;
 
-                QRegExp rx_ids(QLatin1String("HEIGHT='60' SRC='http://img.bricklink.com/([A-Z])/([^ ]+).gif' NAME="), Qt::CaseInsensitive);
+                QRegExp rx_ids(QLatin1String("HEIGHT='[0-9]*' SRC='http[s]://img.bricklink.com/([A-Z])/([^ ]+).(gif|jpg|png|jpeg)' NAME="), Qt::CaseInsensitive);
                 QRegExp rx_qty_price(QLatin1String(" VALUE=\"([0-9]+)\">(&nbsp;\\(x[0-9]+\\))?<BR>Qty Available: <B>[0-9]+</B><BR>Each:&nbsp;<B>([A-Z $]+)([0-9.]+)</B>"), Qt::CaseInsensitive);
                 QRegExp rx_names(QLatin1String("</TD><TD>(.+)</TD><TD VALIGN=\"TOP\" NOWRAP>"), Qt::CaseInsensitive);
                 QString str_cond(QLatin1String("<B>New</B>"));

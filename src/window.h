@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2011 Robert Griebl. All rights reserved.
+/* Copyright (C) 2004-2020 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -121,6 +121,7 @@ public slots:
     void on_edit_subcond_complete_triggered();
     void on_edit_subcond_incomplete_triggered();
     void on_edit_color_triggered();
+    void on_edit_qty_set_triggered();
     void on_edit_qty_multiply_triggered();
     void on_edit_qty_divide_triggered();
     void on_edit_price_set_triggered();

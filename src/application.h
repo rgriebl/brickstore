@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2011 Robert Griebl. All rights reserved.
+/* Copyright (C) 2004-2020 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -32,8 +32,7 @@ public:
     void enableEmitOpenDocument(bool b = true);
 
     QString applicationUrl() const;
-    QString systemName() const;
-    QString systemVersion() const;
+    QString systemInfo() const;
 
     bool pixmapAlphaSupported() const;
 

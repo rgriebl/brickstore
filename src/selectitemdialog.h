@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2011 Robert Griebl. All rights reserved.
+/* Copyright (C) 2004-2020 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -29,7 +29,7 @@ public:
     void setItem(const BrickLink::Item *);
     const BrickLink::Item *item() const;
 
-    virtual int exec(const QRect &pos = QRect());
+    int exec(const QRect &pos = QRect());
 
 protected:
     virtual void showEvent(QShowEvent *);

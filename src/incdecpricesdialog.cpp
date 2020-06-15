@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2011 Robert Griebl.  All rights reserved.
+/* Copyright (C) 2004-2020 Robert Griebl.  All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -24,8 +24,8 @@ IncDecPricesDialog::IncDecPricesDialog(const QString &currencycode, QWidget *par
     w_value->setText(QLatin1String("0"));
     w_fixed->setText(Currency::localSymbol(currencycode));
 
-    m_pos_percent_validator = new QDoubleValidator (0., 1000., 1, this);
-    m_neg_percent_validator = new QDoubleValidator (0., 99.,   1, this);
+    m_pos_percent_validator = new QDoubleValidator (0., 1000., 2, this);
+    m_neg_percent_validator = new QDoubleValidator (0., 99.99, 2, this);
     m_fixed_validator       = new CurrencyValidator(0,  10000, 3, this);
 
     connect(w_increase, SIGNAL(toggled(bool)), this, SLOT(updateValidators()));
@@ -34,6 +34,8 @@ IncDecPricesDialog::IncDecPricesDialog(const QString &currencycode, QWidget *par
 
     w_buttons->button(QDialogButtonBox::Ok)->setEnabled(false);
     updateValidators();
+
+    w_value->selectAll();
 }
 
 void IncDecPricesDialog::checkValue()
@@ -67,7 +69,7 @@ double IncDecPricesDialog::fixed() const
 double IncDecPricesDialog::percent() const
 {
     if (w_value->hasAcceptableInput() && w_percent->isChecked()) {
-        double v = w_value->text().toDouble();
+        double v = QLocale().toDouble(w_value->text());
         return w_increase->isChecked() ? v : -v;
     } else {
         return 0.;

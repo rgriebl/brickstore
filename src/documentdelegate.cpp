@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2011 Robert Griebl. All rights reserved.
+/* Copyright (C) 2004-2020 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -86,7 +86,7 @@ int DocumentDelegate::defaultItemHeight(const QWidget *w) const
     static QSize picsize = BrickLink::core()->itemType('P')->pictureSize();
     QFontMetrics fm(w ? w->font() : QApplication::font("QTableView"));
 
-    return 4 + qMax(fm.height() * 2, picsize.height() / 2);
+    return 4 + qMax(fm.height() * 1, picsize.height() / 2);
 }
 
 QSize DocumentDelegate::sizeHint(const QStyleOptionViewItem &option1, const QModelIndex &idx) const
@@ -460,6 +460,12 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
         tlp->draw(p, QPoint(x + margin, y + (h - height)/2));
         if (do_elide)
             p->drawText(QPoint(x + margin + int(widthUsed), y + (h - height)/2 + (lcount - 1) * fm.lineSpacing() + fm.ascent()), QLatin1String("..."));
+
+        quint64 elideHash = quint64(idx.row()) << 32 | quint64(idx.column());
+        if (do_elide)
+            m_elided.append(elideHash);
+        else
+            m_elided.removeOne(elideHash);
     }
 }
 
@@ -653,6 +659,23 @@ QWidget *DocumentDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
 void DocumentDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &) const
 {
     editor->setGeometry(option.rect);
+}
+
+bool DocumentDelegate::helpEvent(QHelpEvent *event, QAbstractItemView *view, const QStyleOptionViewItem &option, const QModelIndex &idx)
+{
+    if (!event || !view || (event->type() != QEvent::ToolTip))
+        return QItemDelegate::helpEvent(event, view, option, idx);
+
+    QString text = idx.data(Qt::DisplayRole).toString();
+    QString toolTip = idx.data(Qt::ToolTipRole).toString();
+    quint64 elideHash = quint64(idx.row()) << 32 | quint64(idx.column());
+    if ((text != toolTip) || m_elided.contains(elideHash)) {
+        if (!QToolTip::isVisible() || (QToolTip::text() != toolTip))
+            QToolTip::showText(event->globalPos(), toolTip, view, option.rect);
+    } else {
+        QToolTip::hideText();
+    }
+    return true;
 }
 
 void DocumentDelegate::setReadOnly(bool ro)

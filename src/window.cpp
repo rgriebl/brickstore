@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2011 Robert Griebl. All rights reserved.
+/* Copyright (C) 2004-2020 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -1074,6 +1074,17 @@ void Window::on_edit_color_triggered()
 
     if (d.exec() == QDialog::Accepted)
         setOrToggle<const BrickLink::Color *>::set(this, tr( "Set color on %1 items" ), &Document::Item::color, &Document::Item::setColor, d.color());
+}
+
+void Window::on_edit_qty_set_triggered()
+{
+    if (selection().isEmpty())
+        return;
+
+    int quantity = selection().front()->quantity();
+
+    if (MessageBox::getInteger(this, tr("Enter the new quantities for all selected items:"), QString(), quantity, -100000, 100000))
+        setOrToggle<int>::set(this, tr("Set quantity on %1 items"), &Document::Item::quantity, &Document::Item::setQuantity, quantity);
 }
 
 void Window::on_edit_remark_set_triggered()

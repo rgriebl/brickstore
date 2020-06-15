@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2011 Robert Griebl. All rights reserved.
+/* Copyright (C) 2004-2020 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -22,10 +22,32 @@
 #include "utility.h"
 #include "bricklink.h"
 
+QString decodeEntities(const QString &src)
+{
+    QString ret(src);
+    QRegExp re("&#([0-9]+);");
+    re.setMinimal(true);
+
+    int pos = 0;
+    while( (pos = re.indexIn(src, pos)) != -1 )
+    {
+        ret = ret.replace(re.cap(0), QChar(re.cap(1).toInt(0,10)));
+        pos += re.matchedLength();
+    }
+    return ret;
+}
 
 static char *my_strdup(const char *str)
 {
-    return str ? strcpy(new char [strlen(str) + 1], str) : 0;
+    if (!str) {
+        return nullptr;
+    } else if (!strchr(str, '&')) {
+        return strcpy(new char [strlen(str) + 1], str);
+    } else {
+        QString temp = QString::fromLatin1(str);
+        QByteArray out = decodeEntities(temp).toLatin1();
+        return strcpy(new char [out.length() + 1], out.constData());
+    }
 }
 
 static bool my_strncmp(const char *s1, const char *s2, int len)
@@ -154,6 +176,7 @@ template <> Category *TextImport::parse<Category> (uint count, const char **strs
     Category *cat = new Category();
     cat->m_id   = strtol(strs[0], 0, 10);
     cat->m_name = my_strdup(strs[1]);
+
     return cat;
 }
 

@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2011 Robert Griebl. All rights reserved.
+/* Copyright (C) 2004-2020 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -307,7 +307,7 @@ static QString toString(const QMultiMap<T, QString> &tokens, const QString &befo
                 first_value = false;
             else
                 res += value_separator;
-            res = res + value_before + val + value_after;
+            res = res + value_before + val.toHtmlEscaped() + value_after;
         }
         res += key_after;
     }

@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2011 Robert Griebl. All rights reserved.
+/* Copyright (C) 2004-2020 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -789,10 +789,10 @@ Document *Document::fileImportBrickLinkStore()
 Document *Document::fileImportBrickLinkCart()
 {
     QString url = QApplication::clipboard()->text(QClipboard::Clipboard);
-    QRegExp rx_valid(QLatin1String("http://www\\.bricklink\\.com/storeCart\\.asp\\?h=[0-9]+&b=[-0-9]+"));
+    QRegExp rx_valid(QLatin1String("https://www\\.bricklink\\.com/storeCart\\.asp\\?h=[0-9]+&b=[-0-9]+"));
 
     if (!rx_valid.exactMatch(url))
-        url = QLatin1String("http://www.bricklink.com/storeCart.asp?h=______&b=______");
+        url = QLatin1String("https://www.bricklink.com/storeCart.asp?h=______&b=______");
 
     if (MessageBox::getString(FrameWork::inst(), tr("Enter the URL of your current BrickLink shopping cart:"
                                "<br /><br />Right-click on the <b>View Cart</b> button "
@@ -929,8 +929,15 @@ Document *Document::fileLoadFrom(const QString &name, const char *type, bool imp
         if (result.invalidItemCount) {
             result.invalidItemCount -= BrickLink::core()->applyChangeLogToItems(*result.items);
 
-            if (result.invalidItemCount)
-                MessageBox::information(FrameWork::inst(), tr("This file contains %1 unknown item(s).").arg(CMB_BOLD(QString::number(result.invalidItemCount))));
+            if (result.invalidItemCount) {
+                if (MessageBox::information(FrameWork::inst(),
+                                            tr("This file contains %1 unknown item(s).<br /><br />Do you still want to open this file?")
+                                            .arg(CMB_BOLD(QString::number(result.invalidItemCount))),
+                                            QMessageBox::Yes, QMessageBox::No) != QMessageBox::Yes) {
+                    delete doc;
+                    return 0;
+                }
+            }
         }
 
         doc->setCurrencyCode(result.currencyCode);
@@ -980,8 +987,15 @@ Document *Document::fileImportLDrawModel()
     if (b && !items.isEmpty()) {
         Document *doc = new Document();
 
-        if (invalid_items)
-            MessageBox::information(FrameWork::inst(), tr("This file contains %1 unknown item(s).").arg(CMB_BOLD(QString::number(invalid_items))));
+        if (invalid_items) {
+            if (MessageBox::information(FrameWork::inst(),
+                                        tr("This file contains %1 unknown item(s).<br /><br />Do you still want to open this file?")
+                                        .arg(CMB_BOLD(QString::number(invalid_items))),
+                                        QMessageBox::Yes, QMessageBox::No) != QMessageBox::Yes) {
+                delete doc;
+                return 0;
+            }
+        }
 
         doc->setBrickLinkItems(items);
         doc->setTitle(tr("Import of %1").arg(QFileInfo(s).fileName()));
@@ -1572,8 +1586,7 @@ QString Document::dataForToolTipRole(Item *it, Field f) const
         break;
     }
     default: {
-        // if (truncated)
-        //      return dataForDisplayRole(it, f);
+        return dataForDisplayRole(it, f);
         break;
     }
     }

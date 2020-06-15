@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2011 Robert Griebl. All rights reserved.
+/* Copyright (C) 2004-2020 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -504,14 +504,15 @@ void FrameWork::translateActions()
         const char *m_name;
         QString     m_text;
         QString     m_shortcut;
+        QKeySequence::StandardKey m_standardKey = QKeySequence::UnknownKey;
     } *atptr, actiontable [] = {
         { "file",                           tr("&File"),                              0 },
-        { "file_new",                       tr("New", "File|New"),                    tr("Ctrl+N", "File|New") },
-        { "file_open",                      tr("Open..."),                            tr("Ctrl+O", "File|Open") },
+        { "file_new",                       tr("New", "File|New"),                    0, QKeySequence::New },
+        { "file_open",                      tr("Open..."),                            0, QKeySequence::Open },
         { "file_open_recent",               tr("Open Recent"),                        0 },
-        { "file_save",                      tr("Save"),                               tr("Ctrl+S", "File|Save") },
+        { "file_save",                      tr("Save"),                               0, QKeySequence::Save },
         { "file_saveas",                    tr("Save As..."),                         0 },
-        { "file_print",                     tr("Print..."),                           tr("Ctrl+P", "File|Print") },
+        { "file_print",                     tr("Print..."),                           0, QKeySequence::Print },
         { "file_print_pdf",                 tr("Print to PDF..."),                    0 },
         { "file_import",                    tr("Import"),                             0 },
         { "file_import_bl_inv",             tr("BrickLink Set Inventory..."),         tr("Ctrl+I,Ctrl+I", "File|Import BrickLink Set Inventory") },
@@ -527,14 +528,14 @@ void FrameWork::translateActions()
         { "file_export_bl_update_clip",     tr("BrickLink Mass-Update XML to Clipboard"),   tr("Ctrl+E,Ctrl+P", "File|Import BrickLink Mass-Update") },
         { "file_export_bl_invreq_clip",     tr("BrickLink Set Inventory XML to Clipboard"), tr("Ctrl+E,Ctrl+I", "File|Import BrickLink Set Inventory") },
         { "file_export_bl_wantedlist_clip", tr("BrickLink Wanted List XML to Clipboard"),   tr("Ctrl+E,Ctrl+W", "File|Import BrickLink Wanted List") },
-        { "file_close",                     tr("Close"),                              tr("Ctrl+W", "File|Close") },
-        { "file_exit",                      tr("Exit"),                               tr("Ctrl+Q", "File|Quit") },
+        { "file_close",                     tr("Close"),                              0, QKeySequence::Close },
+        { "file_exit",                      tr("Exit"),                               0, QKeySequence::Quit },
         { "edit",                           tr("&Edit"),                              0 },
-        { "edit_undo",                      0,                                          tr("Ctrl+Z", "Edit|Undo") },
-        { "edit_redo",                      0,                                          tr("Ctrl+Y", "Edit|Redo") },
-        { "edit_cut",                       tr("Cut"),                                tr("Ctrl+X", "Edit|Cut") },
-        { "edit_copy",                      tr("Copy"),                               tr("Ctrl+C", "Edit|Copy") },
-        { "edit_paste",                     tr("Paste"),                              tr("Ctrl+V", "Edit|Paste") },
+        { "edit_undo",                      0,                                        0, QKeySequence::Undo },
+        { "edit_redo",                      0,                                        0, QKeySequence::Redo },
+        { "edit_cut",                       tr("Cut"),                                0, QKeySequence::Cut },
+        { "edit_copy",                      tr("Copy"),                               0, QKeySequence::Copy },
+        { "edit_paste",                     tr("Paste"),                              0, QKeySequence::Paste },
         { "edit_delete",                    tr("Delete"),                             onMac ? tr("Backspace", "Edit|Delete (Mac)") : tr("Delete", "Edit|Delete (Win,Unix)") },
         { "edit_additems",                  tr("Add Items..."),                       tr("Insert", "Edit|AddItems") },
         { "edit_subtractitems",             tr("Subtract Items..."),                  0 },
@@ -543,13 +544,13 @@ void FrameWork::translateActions()
         { "edit_setmatch",                  tr("Match Items against Set Inventories..."),                   0 },
         { "edit_reset_diffs",               tr("Reset Differences"),                  0 },
         { "edit_copyremarks",               tr("Copy Remarks from Document..."),      0 },
-        { "edit_select_all",                tr("Select All"),                         tr("Ctrl+A", "Edit|SelectAll") },
-        { "edit_select_none",               tr("Select None"),                        tr("Ctrl+Shift+A", "Edit|SelectNone") },
+        { "edit_select_all",                tr("Select All"),                         0, QKeySequence::SelectAll },
+        { "edit_select_none",               tr("Select None"),                        0, QKeySequence::Deselect },
         { "view",                           tr("&View"),                              0 },
         { "view_toolbar",                   tr("View Toolbar"),                       0 },
         { "view_infobar",                   tr("View Infobars"),                      0 },
         { "view_statusbar",                 tr("View Statusbar"),                     0 },
-        { "view_fullscreen",                tr("Full Screen"),                        tr("F11") },
+        { "view_fullscreen",                tr("Full Screen"),                        0, QKeySequence::FullScreen },
         { "view_show_input_errors",         tr("Show Input Errors"),                  0 },
         { "view_difference_mode",           tr("Difference Mode"),                    0 },
         { "view_save_default_col",          tr("Save Column Layout as Default"),      0 },
@@ -576,6 +577,7 @@ void FrameWork::translateActions()
         { "edit_subcond_incomplete",        tr("Incomplete", "SubCond|Incomplete"),   0 },
         { "edit_color",                     tr("Color..."),                           0 },
         { "edit_qty",                       tr("Quantity"),                           0 },
+        { "edit_qty_set",                   tr("Set..."),                             0 },
         { "edit_qty_multiply",              tr("Multiply..."),                        tr("Ctrl+*", "Edit|Quantity|Multiply") },
         { "edit_qty_divide",                tr("Divide..."),                          tr("Ctrl+/", "Edit|Quantity|Divide") },
         { "edit_price",                     tr("Price"),                              0 },
@@ -614,8 +616,12 @@ void FrameWork::translateActions()
         if (QAction *a = findAction(atptr->m_name)) {
             if (!atptr->m_text.isNull())
                 a->setText(atptr->m_text);
-            if (!atptr->m_shortcut.isNull()) {
+            if (atptr->m_standardKey != QKeySequence::UnknownKey) {
+                a->setShortcut(QKeySequence(atptr->m_standardKey));
+            } else if (!atptr->m_shortcut.isNull()) {
                 a->setShortcut(QKeySequence(atptr->m_shortcut));
+            }
+            if (!a->shortcut().isEmpty()) {
                 a->setToolTip(QString("%1 <span style=\"color: gray; font-size: small\">%2</span>")
                               .arg(a->toolTip()).arg(a->shortcut().toString(QKeySequence::NativeText)));
             }
@@ -950,6 +956,7 @@ void FrameWork::createActions()
     (void) newQAction(this, "edit_color", NeedSelection(1));
 
     m = newQMenu(this, "edit_qty", NeedSelection(1));
+    m->addAction(newQAction(this, "edit_qty_set", NeedSelection(1)));
     m->addAction(newQAction(this, "edit_qty_multiply", NeedSelection(1)));
     m->addAction(newQAction(this, "edit_qty_divide", NeedSelection(1)));
 
@@ -1192,30 +1199,29 @@ bool FrameWork::updateDatabase()
 void FrameWork::connectAllActions(bool do_connect, Window *window)
 {
     QMetaObject mo = Window::staticMetaObject;
-    QObjectList list = findChildren<QObject *>(QString());
+    QObjectList list = findChildren<QObject *>();
 
     for (int i = 0; i < mo.methodCount(); ++i) {
-        const char *slot = mo.method(i).methodSignature().constData();
-        if (!slot || slot[0] != 'o' || slot[1] != 'n' || slot[2] != '_')
+        QByteArray slot = mo.method(i).methodSignature();
+        if (slot.isEmpty() || !slot.startsWith("on_"))
             continue;
         bool foundIt = false;
-
 
         for (int j = 0; j < list.count(); ++j) {
             QObject *co = list.at(j);
             QByteArray objName = co->objectName().toLatin1();
             int len = objName.length();
-            if (!len || qstrncmp(slot + 3, objName.data(), len) || slot[len+3] != '_')
+            if (!len || qstrncmp(slot.constData() + 3, objName.data(), len) || slot[len+3] != '_')
                 continue;
             const QMetaObject *smo = co->metaObject();
-            int sigIndex = smo->indexOfMethod(slot + len + 4);
+            int sigIndex = smo->indexOfMethod(slot.constData() + len + 4);
             if (sigIndex < 0) { // search for compatible signals
-                int slotlen = qstrlen(slot + len + 4) - 1;
+                int slotlen = qstrlen(slot.constData() + len + 4) - 1;
                 for (int k = 0; k < co->metaObject()->methodCount(); ++k) {
                     if (smo->method(k).methodType() != QMetaMethod::Signal)
                         continue;
 
-                    if (!qstrncmp(smo->method(k).methodSignature().constData(), slot + len + 4, slotlen)) {
+                    if (!qstrncmp(smo->method(k).methodSignature().constData(), slot.constData() + len + 4, slotlen)) {
                         sigIndex = k;
                         break;
                     }
@@ -1240,7 +1246,7 @@ void FrameWork::connectAllActions(bool do_connect, Window *window)
             while (mo.method(i + 1).attributes() & QMetaMethod::Cloned)
                   ++i;
         } else if (window && (!(mo.method(i).attributes() & QMetaMethod::Cloned))) {
-            qWarning("FrameWork::connectAllActions: No matching signal for %s", slot);
+            qWarning("FrameWork::connectAllActions: No matching signal for %s", slot.constData());
         }
     }
 }

@@ -1,4 +1,4 @@
-## Copyright (C) 2004-2011 Robert Griebl.  All rights reserved.
+## Copyright (C) 2004-2020 Robert Griebl.  All rights reserved.
 ##
 ## This file is part of BrickStore.
 ##
@@ -16,7 +16,7 @@ include(../release.pri)
 TEMPLATE     = app
 CONFIG      *= warn_on thread qt # uitools
 # CONFIG      *= modeltest
-QT          *= core gui xml network script scripttools printsupport uitools
+QT          *= core gui xml network script scripttools printsupport uitools networkauth
 
 static:error("ERROR: Static builds are not supported")
 

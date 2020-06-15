@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2011 Robert Griebl. All rights reserved.
+/* Copyright (C) 2004-2020 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -284,18 +284,6 @@ void Transfer::schedule()
         QUrl url = j->url();
         j->m_effective_url = url;
 
-        //TODO5: bad hack to get things started again
-        if (url.host().endsWith("bricklink.com")) {
-            // BL wants a login for DB downloads as well
-            QUrlQuery query(url);
-            qWarning() << Config::inst()->loginForBrickLink();
-            query.addQueryItem("usernameOrEmail", Config::inst()->loginForBrickLink().first);
-            query.addQueryItem("password", Config::inst()->loginForBrickLink().second);
-            url.setQuery(query);
-        }
-
-        qWarning() << "DL" << url;
-
         QNetworkRequest req(url);
         req.setHeader(QNetworkRequest::UserAgentHeader, m_user_agent);
 
@@ -318,6 +306,9 @@ void Transfer::schedule()
             } else {
                 j->m_respcode = j->m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
                 j->m_effective_url = j->m_reply->url();
+
+                qWarning() << "RESPCODE: " << j->m_respcode << j->m_reply->url()
+                << j->m_reply->attribute(QNetworkRequest::RedirectionTargetAttribute);
 
                 switch (j->m_respcode) {
                 case 304:
@@ -371,6 +362,11 @@ void Transfer::schedule()
 QString Transfer::userAgent() const
 {
     return m_user_agent;
+}
+
+QNetworkAccessManager *Transfer::networkAccessManager()
+{
+    return m_nam;
 }
 
 void Transfer::setDefaultUserAgent(const QString &ua)

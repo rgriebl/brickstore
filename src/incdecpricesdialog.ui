@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>269</width>
-    <height>171</height>
+    <width>359</width>
+    <height>207</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,16 @@
    <item>
     <widget class="QWidget" name="widget" native="true">
      <layout class="QHBoxLayout" name="horizontalLayout_2">
-      <property name="margin">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
        <number>0</number>
       </property>
       <item>
@@ -68,7 +77,16 @@
      <item>
       <widget class="QWidget" name="widget_2" native="true">
        <layout class="QHBoxLayout" name="horizontalLayout">
-        <property name="margin">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
          <number>0</number>
         </property>
         <item>
@@ -125,6 +143,14 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>w_value</tabstop>
+  <tabstop>w_increase</tabstop>
+  <tabstop>w_decrease</tabstop>
+  <tabstop>w_percent</tabstop>
+  <tabstop>w_fixed</tabstop>
+  <tabstop>w_apply_to_tiers</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
