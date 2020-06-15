@@ -32,6 +32,7 @@
 #include <q3valuelist.h>
 #include <qmap.h>
 #include <qpair.h>
+#include <qjsonobject.h>
 //Added by qt3to4:
 #include <QPixmap>
 
@@ -73,6 +74,7 @@ public:
 	public:
 		char id ( ) const                 { return m_id; }
 		const char *name ( ) const        { return m_name; }
+        QString apiName () const          { return QString(m_name).replace(" ", "_"); }
 
 		const Category **categories ( ) const { return m_categories; }
 		bool hasInventories ( ) const     { return m_has_inventories; }
@@ -548,8 +550,7 @@ public:
 
 		void load_from_disk ( );
 		void save_to_disk ( );
-
-		bool parse ( const char *data, uint size );
+        bool parse ( QJsonObject data );
 
 		friend class BrickLink;
 	};
@@ -656,6 +657,7 @@ public:
 	const Item *item ( char tid, const char *id ) const;
 
 	PriceGuide *priceGuide ( const Item *item, const Color *color, bool high_priority = false );
+    void flushPriceGuidesToUpdate();
 
 	InvItemList *load ( QIODevice *f, uint *invalid_items = 0 );
 	InvItemList *loadXML ( QIODevice *f, uint *invalid_items = 0 );
@@ -684,9 +686,6 @@ public:
 public slots:
 	bool readDatabase ( const QString &fname = QString ( ));
 
-	void updatePriceGuide ( PriceGuide *pg, bool high_priority = false );
-	void updatePicture ( Picture *pic, bool high_priority = false );
-
 	void setOnlineStatus ( bool on );
 	void setUpdateIntervals ( int pic, int pg );
 	void setHttpProxy ( bool enable, const QString &name, int port );
@@ -707,12 +706,20 @@ private:
 
 	bool updateNeeded ( bool valid, const QDateTime &last, int iv );
 	bool parseLDrawModelInternal ( QFile &file, const QString &model_name, InvItemList &items, uint *invalid_items, Q3Dict <InvItem> &mergehash, QStringList &recursion_detection );
-	void pictureIdleLoader2 ( );
+
+    void addPriceGuideToUpdate (PriceGuide *pg , bool flush = false );
+    void updatePriceGuides ( QVector<BrickLink::PriceGuide *> *priceGuides, bool high_priority = false );
+
+    void pictureIdleLoader2 ( );
+    void addPictureToUpdate ( Picture *pic, bool high_priority = false );
+    void updatePictures(QVector<BrickLink::Picture *> *pictures, bool high_priority = false);
+    void updatePicture ( Picture *pic, QString url, bool high_priority = false );
 
 private slots:
-	void pictureIdleLoader ( );
+    void pictureIdleLoader ( );
+    void updatePicturesTimeOut ( );
 
-	void pictureJobFinished ( CTransfer::Job * );
+    void pictureJobFinished ( CTransfer::Job * );
 	void priceGuideJobFinished ( CTransfer::Job * );
 
 private:
@@ -745,6 +752,10 @@ private:
 
 		CAsciiRefCache<Picture, 503, 500>    cache;
 	} m_pictures;
+
+    QVector<PriceGuide *> *m_price_guides_to_update;
+    QVector<Picture *> *m_pictures_to_update;
+    QTimer *m_pictureTimer;
 };
 
 QDataStream &operator << ( QDataStream &ds, const BrickLink::InvItem &ii );

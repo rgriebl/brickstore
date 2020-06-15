@@ -93,6 +93,11 @@ CTransfer::Job *CTransfer::post ( const QString &url, const CKeyValueList &query
 	return retrieve ( false, url, query, 0, file, userobject, high_priority );
 }
 
+CTransfer::Job *CTransfer::postJson ( const QString &url, const QString &data, void *userobject, bool high_priority )
+{
+    return retrieve ( false, url, data, "application/json", 0, 0, userobject, high_priority );
+}
+
 QString CTransfer::buildQueryString( const CKeyValueList &kvl )
 {
     QString query;
@@ -121,12 +126,19 @@ QString CTransfer::buildQueryString( const CKeyValueList &kvl )
 
 CTransfer::Job *CTransfer::retrieve ( bool get, const QString &url, const CKeyValueList &query, time_t ifnewer, QFile *file, void *userobject, bool high_priority )
 {
+    QString queryString = buildQueryString ( query );
+    return retrieve( get, url, queryString, "", ifnewer, file, userobject, high_priority );
+}
+
+CTransfer::Job *CTransfer::retrieve ( bool get, const QString &url, const QString &query, const QString &contentType, time_t ifnewer, QFile *file, void *userobject, bool high_priority )
+{
 	if ( url. isEmpty ( )) //  || ( file && ( !file-> isOpen ( ) || !file-> isWritable ( ))))
 		return 0;
 
 	Job *j = new Job ( );
 	j-> m_url = url;
-	j-> m_query = buildQueryString ( query );
+    j-> m_query = query;
+    j-> m_contentType = contentType;
 	j-> m_ifnewer = ifnewer;
 
 	j-> m_data = file ? 0 : new QByteArray ( );
@@ -255,6 +267,15 @@ void CTransfer::run ( )
 				url = j-> m_url. copy ( );
 				query = j-> m_query. copy ( );
 				
+                if ( !j-> m_contentType.isEmpty ( ) )
+                {
+                    QString contentTypeHeader = "Content-Type: " + j-> m_contentType;
+
+                    struct curl_slist *headers = NULL;
+                    headers = curl_slist_append(headers, contentTypeHeader.ascii ( ));
+                    ::curl_easy_setopt ( m_curl, CURLOPT_HTTPHEADER, headers );
+                }
+
 				::curl_easy_setopt ( m_curl, CURLOPT_POST, 1 );
                 ::curl_easy_setopt ( m_curl, CURLOPT_URL, url.ascii ( ));
                 ::curl_easy_setopt ( m_curl, CURLOPT_POSTFIELDS, query.ascii ( ));

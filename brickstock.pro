@@ -14,7 +14,7 @@
 ## See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 
 isEmpty( RELEASE ) {
-  RELEASE    = 1.2.10
+  RELEASE    = 1.2.11
 }
 
 TEMPLATE     = app
@@ -57,6 +57,8 @@ exists( .private-key ) {
 else {
   message( Building an OpenSource version )
 }
+
+DEFINES += BS_BLAPIKEY="\"$$system( $$cat_cmd .blapikey )\""
 
 win32 {
   system( cscript.exe //B scripts\\update_version.js $$RELEASE)
@@ -250,6 +252,29 @@ SOURCES += dlgadditemimpl.cpp \
            dlgsettingsimpl.cpp \
            dlgsettopgimpl.cpp \
            dlgsubtractitemimpl.cpp
+
+!greaterThan(QT_MAJOR_VERSION, 4): {
+    INCLUDEPATH += \
+        qjson
+
+    SOURCES += \
+        qjson/qjson.cpp \
+        qjson/qjsonarray.cpp \
+        qjson/qjsondocument.cpp \
+        qjson/qjsonobject.cpp \
+        qjson/qjsonparser.cpp \
+        qjson/qjsonvalue.cpp \
+        qjson/qjsonwriter.cpp
+
+    HEADERS += \
+        qjson/qjson_p.h \
+        qjson/qjsonarray.h \
+        qjson/qjsondocument.h \
+        qjson/qjsonobject.h \
+        qjson/qjsonparser_p.h \
+        qjson/qjsonvalue.h \
+        qjson/qjsonwriter_p.h
+}
 
 QT += xml qt3support script
 CONFIG += static

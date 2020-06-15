@@ -438,6 +438,10 @@ BrickLink::BrickLink ( const QString &datadir )
 	m_pictures. transfer = new CTransfer ( );
 	m_pictures. update_iv = 0;
 
+    m_price_guides_to_update = new QVector<PriceGuide *> ();
+    m_pictures_to_update = new QVector<Picture *>();
+    m_pictureTimer = 0;
+
 	QPixmapCache::setCacheLimit ( 20 * 1024 * 1024 );  // 80 x 60 x 32 (w x h x bpp) == 20kB -> room for ~1000 pixmaps
 
 	connect ( m_price_guides. transfer, SIGNAL( finished ( CTransfer::Job * )), this, SLOT( priceGuideJobFinished ( CTransfer::Job * )));

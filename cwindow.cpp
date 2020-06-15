@@ -771,6 +771,8 @@ void CWindow::editPriceToPG ( )
 			}
 		}
 
+        BrickLink::inst()->flushPriceGuidesToUpdate();
+
 		if ( m_settopg_list && m_settopg_list-> isEmpty ( ))
 			priceGuideUpdated ( 0 );
 	}

@@ -44,14 +44,15 @@ class CTransfer : /*public QObject, */public QThread {
 public:
 	class Job {
 	public:
-        QString url ( ) const           { return m_url; }
-        QString effectiveUrl ( ) const  { return m_effective_url; }
+        QString url ( ) const            { return m_url; }
+        QString effectiveUrl ( ) const   { return m_effective_url; }
 		QString errorString ( ) const    { return failed ( ) ? m_error : QString::null; }
 		bool failed ( ) const            { return m_finished && m_failed; }
 		int responseCode ( ) const       { return m_respcode; }
 		bool finished ( ) const          { return m_finished; }
 		QFile *file ( ) const            { return m_file; }
 		QByteArray *data ( ) const       { return m_data; }
+        QString contentType ( ) const    { return m_contentType; }
 		void *userObject ( ) const       { return m_userobject; }
 		QDateTime lastModified ( ) const { QDateTime d; d.setTime_t ( m_filetime ); return d; }
 		bool notModifiedSince ( ) const  { return m_not_modified; }
@@ -66,6 +67,7 @@ public:
 
         QString     m_url;
         QString     m_query;
+        QString     m_contentType;
         QString     m_effective_url;
 		QByteArray * m_data;
 		QFile *      m_file;
@@ -89,7 +91,8 @@ public:
 
     Job *get ( const QString &url, const CKeyValueList &query, QFile *file = 0, void *userobject = 0, bool high_priority = false );
     Job *getIfNewer ( const QString &url, const CKeyValueList &query, const QDateTime &ifnewer, QFile *file = 0, void *userobject = 0, bool high_priority = false );
-    Job *post (const QString &url, const CKeyValueList &query, QFile *file = 0, void *userobject = 0, bool high_priority = false );
+    Job *post ( const QString &url, const CKeyValueList &query, QFile *file = 0, void *userobject = 0, bool high_priority = false );
+    Job *postJson ( const QString &url, const QString &data, void *userobject = 0, bool high_priority = false );
 
 public slots:
 	void cancelAllJobs ( );
@@ -115,7 +118,8 @@ protected:
 private:
 	virtual void run ( );
     Job *retrieve (bool get, const QString &url, const CKeyValueList &query, time_t ifnewer = 0, QFile *file = 0, void *userobject = 0, bool high_priority = false );
-	void cancel ( Job *j );
+    Job *retrieve (bool get, const QString &url, const QString &query, const QString &contentType, time_t ifnewer = 0, QFile *file = 0, void *userobject = 0, bool high_priority = false );
+    void cancel ( Job *j );
 	void updateProgress ( int delta );
 
     static QString buildQueryString ( const CKeyValueList &kvl );
