@@ -23,6 +23,7 @@
 #include <QDesktopServices>
 #include <QLocalSocket>
 #include <QLocalServer>
+#include <QNetworkProxyFactory>
 
 #if defined(Q_OS_WIN)
 #  include <windows.h>
@@ -405,7 +406,6 @@ bool Application::initBrickLink()
         QMessageBox::critical(0, applicationName(), tr("Could not initialize the BrickLink kernel:<br /><br />%1").arg(errstring), QMessageBox::Ok);
 
     bl->setTransfer(new Transfer(10));
-    bl->transfer()->setProxy(Config::inst()->proxy());
 
     /*LDraw::Core *ld =*/ LDraw::create(QString(), &errstring);
 
@@ -542,7 +542,6 @@ void Application::about()
 void Application::checkForUpdates()
 {
     Transfer trans(1);
-    trans.setProxy(Config::inst()->proxy());
 
     ProgressDialog d(&trans, FrameWork::inst());
     CheckForUpdates cfu(&d);

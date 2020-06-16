@@ -72,7 +72,6 @@ int RebuildDatabase::error(const QString &error)
 int RebuildDatabase::exec()
 {
     m_trans = new Transfer(5);
-    m_trans->setProxy(Config::inst()->proxy());
     connect(m_trans, &Transfer::finished,
             this, &RebuildDatabase::downloadJobFinished);
 

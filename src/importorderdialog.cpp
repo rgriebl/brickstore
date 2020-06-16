@@ -377,8 +377,6 @@ void ImportOrderDialog::start()
 void ImportOrderDialog::download()
 {
     Transfer trans(1);
-    trans.setProxy(Config::inst()->proxy());
-
     ProgressDialog progress(&trans, this);
     ImportBLOrder *import;
 

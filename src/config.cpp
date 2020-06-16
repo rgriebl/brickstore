@@ -30,6 +30,7 @@
 #include <QCryptographicHash>
 #include "config.h"
 #include "currency.h"
+#include "version.h"
 
 #define XSTR(a) #a
 #define STR(a) XSTR(a)
@@ -43,12 +44,24 @@ static inline qint32 mkver(int a, int b, int c)
 
 } // namespace
 
+static const char *organization_v12x = "patrickbrans.com";
+static const char *application_v12x = "BrickStock";
+#if defined(Q_OS_MACOS)
+static const char *organization_v11x = "softforge.de";
+static const char *organization = "brickstore.org";
+#else
+static const char *organization_v11x = "softforge";
+static const char *organization = BRICKSTORE_NAME;
+#endif
+static const char *application_v11x = BRICKSTORE_NAME;
+static const char *application = BRICKSTORE_NAME;
+
 
 Config::Config()
-        : QSettings()
+    : QSettings(organization, application)
 {
-    m_show_input_errors = value("/General/ShowInputErrors", true).toBool();
-    m_measurement = (value("/General/MeasurementSystem").toString() == QLatin1String("imperial")) ? QLocale::ImperialSystem : QLocale::MetricSystem;
+    m_show_input_errors = value("General/ShowInputErrors", true).toBool();
+    m_measurement = (value("General/MeasurementSystem").toString() == QLatin1String("imperial")) ? QLocale::ImperialSystem : QLocale::MetricSystem;
     m_translations_parsed = false;
 }
 
@@ -81,41 +94,56 @@ void Config::upgrade(int vmajor, int vminor, int vrev)
     QStringList sl;
     QString s;
 
-    int cfgver = value("/General/ConfigVersion", 0).toInt();
-    setValue("/General/ConfigVersion", mkver(vmajor, vminor, vrev));
+    //int cfgver = value("General/ConfigVersion", 0).toInt();
+    setValue("General/ConfigVersion", mkver(vmajor, vminor, vrev));
 
-    if (cfgver < mkver(1, 0, 125)) {
-        // convert itemview column info (>= 1.0.25)
-        beginGroup("/ItemView/List");
+    auto copyOldConfig = [this](const char *org, const char *app) -> bool {
+        static const std::vector<const char *> ignore = {
+            "MainWindow/",
+            "General/Registration/",
+            "General/ConfigVersion",
+            "General/SimpleMode",
+            "General/lastApplicationUpdateCheck",
+            "Internet/UseProxy",
+            "Internet/Proxy"
+        };
 
-        sl = value("/ColumnWidths").toStringList();
-        if (!sl.isEmpty())  setValue("/ColumnWidths", sl.join(QLatin1String(",")));
-
-        sl = value("/ColumnWidthsHidden").toStringList();
-        if (!sl.isEmpty())  setValue("/ColumnWidthsHidden", sl.join(QLatin1String(",")));
-
-        sl = value("/ColumnOrder").toStringList();
-        if (!sl.isEmpty())  setValue("/ColumnOrder", sl.join(QLatin1String(",")));
-
-        if (contains("/SortAscending")) {
-            setValue("/SortDirection", value("/SortAscending", true).toBool() ? QLatin1String("A") : QLatin1String("D"));
-            remove("/SortAscending");
+        QSettings old(org, app);
+        if (old.value("General/ConfigVersion", 0).toInt()) {
+            foreach (const QString &key, old.allKeys()) {
+                bool skip = false;
+                for (const char *ign : ignore) {
+                    if (key.startsWith(ign, Qt::CaseInsensitive))
+                        skip = true;
+                }
+                if (!skip)
+                    setValue(key, old.value(key));
+            }
+            return true;
+        } else {
+            return false;
         }
+    };
 
-        endGroup();
-
-        // fix a typo (>= 1.0.125)
-        s = value("/Default/AddItems/Condition").toString();
-        if (!s.isEmpty())  setValue("/Defaults/AddItems/Condition", s);
-        remove("/Default/AddItems/Condition");
+    // import old settings from BrickStore 1.1.x
+    if (!value("General/ImportedV11xSettings", 0).toInt()) {
+        if (copyOldConfig(organization_v11x, application_v11x))
+            setValue("General/ImportedV11xSettings", 1);
     }
+    // import old settings from BrickStock 1.2.x
+    if (!value("General/ImportedV12xSettings", 0).toInt()) {
+        if (copyOldConfig(organization_v12x, application_v12x))
+            setValue("General/ImportedV12xSettings", 1);
+    }
+
+    // if (cfgver < mkver(2, a, b)) { do upgrade }
 }
 
 QDateTime Config::lastDatabaseUpdate() const
 {
     QDateTime dt;
 
-    time_t tt = value("/BrickLink/LastDBUpdate", 0).toInt();
+    time_t tt = value("BrickLink/LastDBUpdate", 0).toInt();
     if (tt)
         dt.setTime_t (tt);
     return dt;
@@ -124,17 +152,17 @@ QDateTime Config::lastDatabaseUpdate() const
 void Config::setLastDatabaseUpdate(const QDateTime &dt)
 {
     time_t tt = dt.isValid() ? dt.toTime_t () : 0;
-    setValue("/BrickLink/LastDBUpdate", int(tt));
+    setValue("BrickLink/LastDBUpdate", int(tt));
 }
 
 bool Config::closeEmptyDocuments() const
 {
-    return value("/General/CloseEmptyDocs", false).toBool();
+    return value("General/CloseEmptyDocs", false).toBool();
 }
 
 void Config::setCloseEmptyDocuments(bool b)
 {
-    setValue("/General/CloseEmptyDocs", b);
+    setValue("General/CloseEmptyDocs", b);
 }
 
 bool Config::showInputErrors() const
@@ -146,7 +174,7 @@ void Config::setShowInputErrors(bool b)
 {
     if (b != m_show_input_errors) {
         m_show_input_errors = b;
-        setValue("/General/ShowInputErrors", b);
+        setValue("General/ShowInputErrors", b);
 
         emit showInputErrorsChanged(b);
     }
@@ -154,12 +182,12 @@ void Config::setShowInputErrors(bool b)
 
 void Config::setLDrawDir(const QString &dir)
 {
-    setValue("/General/LDrawDir", dir);
+    setValue("General/LDrawDir", dir);
 }
 
 QString Config::lDrawDir() const
 {
-    QString dir = value("/General/LDrawDir").toString();
+    QString dir = value("General/LDrawDir").toString();
 
     if (dir.isEmpty())
         dir = QString::fromLocal8Bit(::getenv("LDRAWDIR"));
@@ -198,7 +226,7 @@ QString Config::lDrawDir() const
 
 QString Config::documentDir() const
 {
-    QString dir = value("/General/DocDir", QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)).toString();
+    QString dir = value("General/DocDir", QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)).toString();
 
     if (dir.isEmpty())
         dir = QDir::homePath();
@@ -208,49 +236,24 @@ QString Config::documentDir() const
 
 void Config::setDocumentDir(const QString &dir)
 {
-    setValue("/General/DocDir", dir);
-}
-
-
-QNetworkProxy Config::proxy() const
-{
-    QNetworkProxy proxy;
-
-    proxy.setType(value("/Internet/UseProxy", false).toBool() ? QNetworkProxy::HttpCachingProxy : QNetworkProxy::NoProxy);
-    proxy.setHostName(value("/Internet/ProxyName").toString());
-    proxy.setPort(value("/Internet/ProxyPort", 8080).toInt());
-
-    return proxy;
-}
-
-void Config::setProxy(const QNetworkProxy &np)
-{
-    QNetworkProxy op = proxy();
-
-    if ((op.type() != np.type()) || (op.hostName() != np.hostName()) || (op.port() != np.port())) {
-        setValue("/Internet/UseProxy", (np.type() != QNetworkProxy::NoProxy));
-        setValue("/Internet/ProxyName", np.hostName());
-        setValue("/Internet/ProxyPort", np.port());
-
-        emit proxyChanged(np);
-    }
+    setValue("General/DocDir", dir);
 }
 
 
 QString Config::dataDir() const
 {
     static QString cacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
-    return value("/BrickLink/DatDir", cacheDir).toString();
+    return value("BrickLink/DatDir", cacheDir).toString();
 }
 
 void Config::setDataDir(const QString &dir)
 {
-    setValue("/BrickLink/DataDir", dir);
+    setValue("BrickLink/DataDir", dir);
 }
 
 QString Config::language() const
 {
-    return value("/General/Locale", QLocale::system().name()).toString();
+    return value("General/Locale", QLocale::system().name()).toString();
 }
 
 void Config::setLanguage(const QString &lang)
@@ -258,7 +261,7 @@ void Config::setLanguage(const QString &lang)
     QString old = language();
 
     if (old != lang) {
-        setValue("/General/Locale", lang);
+        setValue("General/Locale", lang);
 
         emit languageChanged();
     }
@@ -273,7 +276,7 @@ void Config::setMeasurementSystem(QLocale::MeasurementSystem ms)
 {
     if (ms != m_measurement) {
         m_measurement= ms;
-        setValue("/General/MeasurementSystem", ms == QLocale::MetricSystem ? QLatin1String("metric") : QLatin1String("imperial"));
+        setValue("General/MeasurementSystem", ms == QLocale::MetricSystem ? QLatin1String("metric") : QLatin1String("imperial"));
 
         emit measurementSystemChanged(ms);
     }
@@ -287,7 +290,7 @@ QMap<QByteArray, int> Config::updateIntervals() const
     const char *lut[] = { "Picture", "PriceGuide", "Database", "LDraw", 0 };
 
     for (const char **ptr = lut; *ptr; ++ptr)
-        uiv[*ptr] = value(QLatin1String("/BrickLink/UpdateInterval/") + QLatin1String(*ptr), uiv[*ptr]).toInt();
+        uiv[*ptr] = value(QLatin1String("BrickLink/UpdateInterval/") + QLatin1String(*ptr), uiv[*ptr]).toInt();
     return uiv;
 }
 
@@ -313,7 +316,7 @@ void Config::setUpdateIntervals(const QMap<QByteArray, int> &uiv)
         it.next();
 
         if (it.value() != old_uiv.value(it.key())) {
-            setValue(QLatin1String("/BrickLink/UpdateInterval/") + it.key(), it.value());
+            setValue(QLatin1String("BrickLink/UpdateInterval/") + it.key(), it.value());
             modified = true;
         }
     }
@@ -325,19 +328,19 @@ void Config::setUpdateIntervals(const QMap<QByteArray, int> &uiv)
 
 QPair<QString, QString> Config::loginForBrickLink() const
 {
-    return qMakePair(value("/BrickLink/Login/Username").toString(), scramble(value("/BrickLink/Login/Password").toString()));
+    return qMakePair(value("BrickLink/Login/Username").toString(), scramble(value("BrickLink/Login/Password").toString()));
 }
 
 void Config::setLoginForBrickLink(const QString &name, const QString &pass)
 {
-    setValue("/BrickLink/Login/Username", name);
-    setValue("/BrickLink/Login/Password", scramble(pass));
+    setValue("BrickLink/Login/Username", name);
+    setValue("BrickLink/Login/Password", scramble(pass));
 }
 
 
 bool Config::onlineStatus() const
 {
-    return value("/Internet/Online", true).toBool();
+    return value("Internet/Online", true).toBool();
 }
 
 void Config::setOnlineStatus(bool b)
@@ -345,7 +348,7 @@ void Config::setOnlineStatus(bool b)
     bool ob = onlineStatus();
 
     if (b != ob) {
-        setValue("/Internet/Online", b);
+        setValue("Internet/Online", b);
 
         emit onlineStatusChanged(b);
     }
@@ -413,12 +416,12 @@ error:
 
 void Config::setDefaultCurrencyCode(const QString &currencyCode)
 {
-    setValue("/Currency/Default", currencyCode);
+    setValue("Currency/Default", currencyCode);
 
     emit defaultCurrencyCodeChanged(currencyCode);
 }
 
 QString Config::defaultCurrencyCode() const
 {
-    return value("/Currency/Default", QLatin1String("USD")).toString();
+    return value("Currency/Default", QLatin1String("USD")).toString();
 }

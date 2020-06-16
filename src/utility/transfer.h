@@ -16,7 +16,6 @@
 
 #include <QDateTime>
 #include <QUrl>
-#include <QNetworkProxy>
 #include <QNetworkAccessManager>
 
 #include "threadpool.h"
@@ -100,7 +99,6 @@ signals:
 protected:
 
 public slots:
-    void setProxy(const QNetworkProxy &proxy);
     void setUserAgent(const QString &ua);
 
 private:

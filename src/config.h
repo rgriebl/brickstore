@@ -16,7 +16,6 @@
 
 #include <QSettings>
 #include <QDateTime>
-#include <QNetworkProxy>
 #include <QLocale>
 
 
@@ -49,7 +48,6 @@ public:
 
     bool showInputErrors() const;
     bool onlineStatus() const;
-    QNetworkProxy proxy() const;
 
     QDateTime lastDatabaseUpdate() const;
 
@@ -78,7 +76,6 @@ public slots:
 
     void setShowInputErrors(bool b);
     void setOnlineStatus(bool b);
-    void setProxy(const QNetworkProxy &proxy);
 
     void setLastDatabaseUpdate(const QDateTime &dt);
 
@@ -92,7 +89,6 @@ signals:
     void showInputErrorsChanged(bool b);
     void updateIntervalsChanged(const QMap<QByteArray, int> &intervals);
     void onlineStatusChanged(bool b);
-    void proxyChanged(const QNetworkProxy &proxy);
 
 protected:
     bool parseTranslations() const;

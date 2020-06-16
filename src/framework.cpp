@@ -396,8 +396,6 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
             this, &FrameWork::onlineStateChanged);
     connect(Config::inst(), &Config::updateIntervalsChanged,
             bl, &BrickLink::Core::setUpdateIntervals);
-    connect(Config::inst(), &Config::proxyChanged,
-            bl->transfer(), &Transfer::setProxy);
     connect(Config::inst(), &Config::measurementSystemChanged,
             this, &FrameWork::statisticsUpdate);
 
@@ -1202,8 +1200,6 @@ bool FrameWork::updateDatabase()
         delete m_add_dialog;
 
         Transfer trans(1);
-        trans.setProxy(Config::inst()->proxy());
-
         ProgressDialog d(&trans, this);
         UpdateDatabase update(&d);
 

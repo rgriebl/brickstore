@@ -123,7 +123,6 @@ protected:
 
 private:
     void setBrickLinkUpdateIntervals();
-    void setBrickLinkHTTPProxy();
 
     bool checkBrickLinkLogin();
     void createAddItemDialog();

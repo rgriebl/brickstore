@@ -249,11 +249,6 @@ Transfer::Transfer(int maxConnections)
     m_user_agent = s_default_user_agent;
 }
 
-void Transfer::setProxy(const QNetworkProxy &proxy)
-{
-    m_nam->setProxy(proxy);
-}
-
 void Transfer::setUserAgent(const QString &ua)
 {
     m_user_agent = ua;
