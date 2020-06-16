@@ -136,16 +136,6 @@ QUrl BrickLink::Core::url(UrlList u, const void *opt, const void *opt2)
         url.setQuery(query);
         break;
     }
-    case URL_PeeronInfo: {
-        if (opt) {
-            url = "http://peeron.com/cgi-bin/invcgis/psearch";
-            QUrlQuery query;
-            query.addQueryItem("query", static_cast <const Item *>(opt)->id());
-            query.addQueryItem("limit", "none");
-            url.setQuery(query);
-        }
-        break;
-    }
     case URL_StoreItemDetail: {
         if (opt) {
             url = "https://www.bricklink.com/inventory_detail.asp";
@@ -506,18 +496,6 @@ const BrickLink::Color *BrickLink::Core::colorFromName(const QString &name) cons
 
     for (const Color *col : m_colors) {
         if (!col->name().compare(name, Qt::CaseInsensitive))
-            return col;
-    }
-    return nullptr;
-}
-
-const BrickLink::Color *BrickLink::Core::colorFromPeeronName(const QString &peeron_name) const
-{
-    if (peeron_name.isEmpty())
-        return nullptr;
-
-    for (const Color *col : m_colors) {
-        if (!col->peeronName().compare(peeron_name, Qt::CaseInsensitive))
             return col;
     }
     return nullptr;

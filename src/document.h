@@ -217,7 +217,6 @@ public:
     static Document *fileImportBrickLinkStore();
     static Document *fileImportBrickLinkCart();
     static Document *fileImportBrickLinkXML();
-    static Document *fileImportPeeronInventory();
     static Document *fileImportLDrawModel();
 
 public slots:

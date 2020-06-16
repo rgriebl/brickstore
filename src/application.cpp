@@ -487,8 +487,6 @@ void Application::about()
         "All data from <a href=\"https://www.bricklink.com\">www.bricklink.com</a> is owned by BrickLink<sup>TM</sup>, "
         "which is a trademark of Dan Jezek."
         "</p><p>"
-        "Peeron Inventories from <a href=\"http://www.peeron.com\">www.peeron.com</a> are owned by Dan and Jennifer Boger."
-        "</p><p>"
         "LEGO<sup>&reg;</sup> is a trademark of the LEGO group of companies, "
         "which does not sponsor, authorize or endorse this software."
         "</p><p>"

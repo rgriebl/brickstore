@@ -104,11 +104,6 @@ void TaskLinksWidget::selectionUpdate(const Document::ItemList &list)
             str += fmt2.arg(tr("Catalog")).       arg(BrickLink::core()->url(BrickLink::URL_CatalogInfo,    item, color).toString());
             str += fmt2.arg(tr("Price Guide")).   arg(BrickLink::core()->url(BrickLink::URL_PriceGuideInfo, item, color).toString());
             str += fmt2.arg(tr("Lots for Sale")). arg(BrickLink::core()->url(BrickLink::URL_LotsForSale,    item, color).toString());
-
-            str += "<br />";
-
-            str += fmt1.arg(tr("Peeron"));
-            str += fmt2.arg(tr("Information")).arg(BrickLink::core()->url(BrickLink::URL_PeeronInfo, item, color).toString());
         }
     }
     setText(str);

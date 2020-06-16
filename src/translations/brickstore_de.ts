@@ -108,7 +108,6 @@
 Die Veröffentlichung dieses Programms erfolgt in der Hoffnung, daß es Ihnen von Nutzen sein wird, aber OHNE IRGENDEINE GARANTIE, sogar ohne die implizite Garantie der MARKTREIFE oder der VERWENDBARKEIT FÜR EINEN BESTIMMTEN ZWECK.&lt;br /&gt;
 Detailierte GPL Lizenzinformationen finden Sie hier: &lt;a href=&quot;http://fsf.org/licensing/licenses/gpl.html&quot;&gt;www.fsf.org/licensing/licenses/gpl.html&lt;/a&gt;.&lt;/p&gt;
 &lt;p&gt;Alle Daten von &lt;a href=&quot;https://www.bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; sind Eigentum von BrickLink&lt;sup&gt;TM&lt;/sup&gt; (ein Warenzeichen von Dan Jezek).&lt;/p&gt;
-&lt;p&gt;Peeron Inventare von &lt;a href=&quot;http://www.peeron.com&quot;&gt;www.peeron.com&lt;/a&gt; sind Eigentum von Dan und Jennifer Boger.&lt;/p&gt;
 &lt;p&gt;LEGO&lt;sup&gt;&amp;reg;&lt;/sup&gt; ist ein Warenzeichen der LEGO Gruppe, welche diese Software weder gesponsort noch autorisiert hat.&lt;/p&gt;
 &lt;p&gt;Alle anderen Warenzeichen, auch wenn nicht explizit erwähnt, werden als solche betrachtet.&lt;/p&gt;
 &lt;p&gt;Französische Übersetzung von Sylvain Perez (&lt;a href=&quot;mailto:bricklink@1001bricks.com&quot;&gt;1001bricks&lt;/a&gt;)&lt;br /&gt;

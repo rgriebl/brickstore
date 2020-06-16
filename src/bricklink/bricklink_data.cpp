@@ -40,9 +40,8 @@ namespace BrickLink {
 
 QDataStream &operator << (QDataStream &ds, const Color *col)
 {
-    ds << col->m_id << col->m_name.toUtf8().constData() << col->m_peeron_name.toUtf8().constData()
-       << col->m_ldraw_id << col->m_color << quint32(col->m_type) << float(col->m_popularity)
-       << col->m_year_from << col->m_year_to;
+    ds << col->m_id << col->m_name.toUtf8() << col->m_ldraw_id << col->m_color
+       << quint32(col->m_type) << float(col->m_popularity) << col->m_year_from << col->m_year_to;
     return ds;
 }
 
@@ -52,15 +51,12 @@ QDataStream &operator >> (QDataStream &ds, BrickLink::Color *col)
 
     quint32 flags;
     float popularity;
-    char *name;
-    char *peeronName;
+    QByteArray name;
 
-    ds >> col->m_id >> name >> peeronName >> col->m_ldraw_id;
-    ds >> col->m_color >> flags >> popularity;
-    ds >> col->m_year_from >> col->m_year_to;
+    ds >> col->m_id >> name >> col->m_ldraw_id >> col->m_color >> flags >> popularity
+       >> col->m_year_from >> col->m_year_to;
 
     col->m_name = QString::fromUtf8(name);
-    col->m_peeron_name = QString::fromUtf8(peeronName);
     col->m_type = static_cast<BrickLink::Color::Type>(flags);
     col->m_popularity = qreal(popularity);
     return ds;
@@ -88,7 +84,7 @@ QDataStream &operator << (QDataStream &ds, const ItemType *itt)
     flags |= (itt->m_has_year          ? 0x08 : 0);
     flags |= (itt->m_has_subconditions ? 0x10 : 0);
 
-    ds << quint8(itt->m_id) << quint8(itt->m_picture_id) << itt->m_name.toUtf8().constData() << flags;
+    ds << quint8(itt->m_id) << quint8(itt->m_picture_id) << itt->m_name.toUtf8() << flags;
 
     ds << quint32(itt->m_categories.size());
     for (const BrickLink::Category *cat : itt->m_categories)
@@ -104,7 +100,7 @@ QDataStream &operator >> (QDataStream &ds, BrickLink::ItemType *itt)
     quint8 flags = 0;
     quint32 catcount = 0;
     quint8 id = 0, picid = 0;
-    char *name;
+    QByteArray name;
     ds >> id >> picid >> name >> flags >> catcount;
 
     itt->m_name = QString::fromUtf8(name);
@@ -134,13 +130,13 @@ namespace BrickLink {
 
 QDataStream &operator << (QDataStream &ds, const BrickLink::Category *cat)
 {
-    return ds << cat->m_id << cat->m_name.toUtf8().constData();
+    return ds << cat->m_id << cat->m_name.toUtf8();
 }
 
 QDataStream &operator >> (QDataStream &ds, BrickLink::Category *cat)
 {
     cat->~Category();
-    char *name;
+    QByteArray name;
     ds >> cat->m_id >> name;
     cat->m_name = QString::fromUtf8(name);
     return ds;
@@ -315,8 +311,7 @@ namespace BrickLink {
 
 QDataStream &operator << (QDataStream &ds, const BrickLink::Item *item)
 {
-    ds << item->m_id.toUtf8().constData() << item->m_name.toUtf8().constData()
-       << quint8(item->m_item_type->id());
+    ds << item->m_id.toUtf8() << item->m_name.toUtf8() << quint8(item->m_item_type->id());
 
     ds << quint32(item->m_categories.size());
     for (const BrickLink::Category *cat : item->m_categories)
@@ -355,8 +350,8 @@ QDataStream &operator >> (QDataStream &ds, BrickLink::Item *item)
 
     quint8 ittid = 0;
     quint32 catcount = 0;
-    char *id;
-    char *name;
+    QByteArray id;
+    QByteArray name;
 
     ds >> id >> name >> ittid >> catcount;
     item->m_id = QString::fromUtf8(id);

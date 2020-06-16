@@ -87,7 +87,6 @@ enum UrlList {
     URL_ItemChangeLog,
     URL_LotsForSale,
     URL_AppearsInSets,
-    URL_PeeronInfo,
     URL_StoreItemDetail
 };
 

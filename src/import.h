@@ -87,26 +87,4 @@ private:
     QString                m_currencycode;
 };
 
-
-class ImportPeeronInventory : public QObject {
-    Q_OBJECT
-
-public:
-    ImportPeeronInventory(const QString &peeronid, ProgressDialog *pd);
-
-    const BrickLink::InvItemList &items() const;
-    QString currencyCode() const;
-
-private slots:
-    virtual void gotten();
-
-private:
-    BrickLink::InvItemList *fromPeeron(QIODevice *peeron);
-
-private:
-    ProgressDialog *       m_progress;
-    BrickLink::InvItemList m_items;
-    QString                m_peeronid;
-};
-
 #endif

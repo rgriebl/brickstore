@@ -840,29 +840,6 @@ Document *Document::fileImportBrickLinkXML()
         return 0;
 }
 
-Document *Document::fileImportPeeronInventory()
-{
-    QString peeronid;
-
-    if (MessageBox::getString(FrameWork::inst(), tr("Enter the set ID of the Peeron inventory:"), peeronid)) {
-        Transfer trans(1);
-        trans.setProxy(Config::inst()->proxy());
-
-        ProgressDialog d(&trans, FrameWork::inst());
-        ImportPeeronInventory import(peeronid, &d);
-
-        if (d.exec() == QDialog::Accepted) {
-            Document *doc = new Document();
-
-            doc->setCurrencyCode(import.currencyCode());
-            doc->setBrickLinkItems(import.items());
-            doc->setTitle(tr("Peeron Inventory for %1").arg(peeronid));
-            return doc;
-        }
-    }
-    return 0;
-}
-
 Document *Document::fileLoadFrom(const QString &name, const char *type, bool import_only)
 {
     BrickLink::ItemListXMLHint hint;

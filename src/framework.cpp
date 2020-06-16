@@ -538,7 +538,6 @@ void FrameWork::translateActions()
         { "file_import_bl_order",           tr("BrickLink Order..."),                 tr("Ctrl+I,Ctrl+O", "File|Import BrickLink Order") },
         { "file_import_bl_store_inv",       tr("BrickLink Store Inventory..."),       tr("Ctrl+I,Ctrl+S", "File|Import BrickLink Store Inventory") },
         { "file_import_bl_cart",            tr("BrickLink Shopping Cart..."),         tr("Ctrl+I,Ctrl+C", "File|Import BrickLink Shopping Cart") },
-        { "file_import_peeron_inv",         tr("Peeron Inventory..."),                tr("Ctrl+I,Ctrl+P", "File|Import Peeron Inventory") },
         { "file_import_ldraw_model",        tr("LDraw Model..."),                     tr("Ctrl+I,Ctrl+L", "File|Import LDraw Model") },
         { "file_export",                    tr("Export"),                             },
         { "file_export_bl_xml",             tr("BrickLink XML..."),                         tr("Ctrl+E,Ctrl+X", "File|Import BrickLink XML") },
@@ -911,7 +910,6 @@ void FrameWork::createActions()
     m->addAction(newQAction(this, "file_import_bl_order", NeedNetwork, false, this, SLOT(fileImportBrickLinkOrder())));
     m->addAction(newQAction(this, "file_import_bl_store_inv", NeedNetwork, false, this, SLOT(fileImportBrickLinkStore())));
     m->addAction(newQAction(this, "file_import_bl_cart", NeedNetwork, false, this, SLOT(fileImportBrickLinkCart())));
-    m->addAction(newQAction(this, "file_import_peeron_inv", 0, false, this, SLOT(fileImportPeeronInventory())));
     m->addAction(newQAction(this, "file_import_ldraw_model", 0, false, this, SLOT(fileImportLDrawModel())));
 
     m = newQMenu(this, "file_export");
@@ -1101,11 +1099,6 @@ void FrameWork::fileOpenRecent(int i)
 
         openDocument(tmp);
     }
-}
-
-void FrameWork::fileImportPeeronInventory()
-{
-    createWindow(Document::fileImportPeeronInventory());
 }
 
 void FrameWork::fileImportBrickLinkInventory()

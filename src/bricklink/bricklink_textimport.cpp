@@ -310,8 +310,6 @@ bool BrickLink::TextImport::import(const QString &path)
 
     calculateColorPopularity();
 
-    ok &= readPeeronColors(path + "peeron_colors.html");
-
     // speed up loading (exactly 137522 items on 16.06.2020)
     m_items.reserve(150000);
 
@@ -493,60 +491,6 @@ template <typename C> bool BrickLink::TextImport::readDB(const QString &name, C 
         return true;
     }
     qWarning().nospace() <<  "ERROR: could not open file \"" << name << "\"";
-    return false;
-}
-
-
-bool BrickLink::TextImport::readPeeronColors(const QString &name)
-{
-    QFile f(name);
-    if (f.open(QIODevice::ReadOnly)) {
-        QTextStream in(&f);
-
-        QString line;
-        int count = 0;
-
-        QRegExp namepattern("<a href=[^>]+>(.+)</a>");
-
-        while (!(line = in.readLine()).isNull()) {
-            if (line.startsWith("<td>") && line.endsWith("</td>")) {
-                QString tmp = line.mid(4, line.length() - 9);
-                QStringList sl = tmp.split("</td><td>", QString::KeepEmptyParts);
-
-                bool line_ok = false;
-
-                if (sl.count() >= 5) {
-                    int ldraw_id = -1, id = -1;
-                    QString peeron_name;
-
-                    if (!sl [3].isEmpty())
-                        id = sl [3].toInt();
-                    if (!sl [4].isEmpty())
-                        ldraw_id = sl [4].toInt();
-
-                    if (namepattern.exactMatch(sl [0]))
-                        peeron_name = namepattern.cap(1);
-
-                    if (id != -1) {
-                        Color *colp = const_cast<Color *>(m_colors.value(id));
-                        if (colp) {
-                            if (!peeron_name.isEmpty())
-                                colp->m_peeron_name = peeron_name;
-                            colp->m_ldraw_id = ldraw_id;
-
-                            count++;
-                        }
-                    }
-                    line_ok = true;
-                }
-
-                if (!line_ok)
-                    qWarning() << "Failed to parse item line: " << line;
-            }
-        }
-
-        return (count > 0);
-    }
     return false;
 }
 

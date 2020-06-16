@@ -115,7 +115,6 @@ public:
     QString name() const      { return m_name; }
     QColor color() const      { return m_color; }
 
-    QString peeronName() const { return m_peeron_name; }
     int ldrawId() const       { return m_ldraw_id; }
 
     enum TypeFlag {
@@ -151,7 +150,6 @@ public:
 
 private:
     QString m_name;
-    QString m_peeron_name;
     uint    m_id;
     int     m_ldraw_id;
     QColor  m_color;
@@ -601,7 +599,6 @@ private:
     struct btchglog_dummy { };
     bool readDB_processLine(btchglog_dummy &, uint count, const char **strs);
 
-    bool readPeeronColors(const QString &name);
     bool readInventory(const QString &path, const Item *item);
 
     const Category *findCategoryByName(const QStringRef &name) const;
@@ -885,7 +882,6 @@ public:
 
     const Color *color(uint id) const;
     const Color *colorFromName(const QString &name) const;
-    const Color *colorFromPeeronName(const QString &peeron_name) const;
     const Color *colorFromLDrawId(int ldraw_id) const;
     const Category *category(uint id) const;
     const Category *categoryFromName(const char *name, int len = -1) const;

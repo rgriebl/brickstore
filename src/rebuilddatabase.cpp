@@ -300,8 +300,6 @@ bool RebuildDatabase::download()
         { "https://www.bricklink.com/btinvlist.asp",       QList<QPair<QString, QString> >(), "btinvlist.txt"   },
         { "https://www.bricklink.com/btchglog.asp",        QList<QPair<QString, QString> >(), "btchglog.txt" },
 
-        { "http://www.peeron.com/inv/colors",             QList<QPair<QString, QString> >(), "peeron_colors.html" },
-
         { 0, QList<QPair<QString, QString> > (), 0 }
     };
 
