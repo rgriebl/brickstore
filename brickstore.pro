@@ -11,10 +11,12 @@
 ##
 ## See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 
-QT_TOO_OLD=$$find(QT_VERSION, "^4\\.[0-5]")
-count(QT_TOO_OLD, 1) {
-  error("BrickStore needs at least Qt version 4.6. You are trying to compile against Qt version " $$QT_VERSION)
+requires(linux|macos|win32:!winrt:!android)
+!versionAtLeast(QT_VERSION, 5.12.0) {
+    log("$$escape_expand(\\n\\n) *** Brickstore needs to be built against Qt 5.12.0+ ***$$escape_expand(\\n\\n)")
+    CONFIG += Qt_version_needs_to_be_at_least_5_12_0
 }
+requires(!Qt_version_needs_to_be_at_least_5_12_0)
 
 TEMPLATE = subdirs
 CONFIG  += ordered
