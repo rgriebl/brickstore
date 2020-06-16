@@ -57,10 +57,9 @@ public:
     QTreeView *      w_itemthumbs;
     QListView *      w_thumbs;
     FilterEdit *     w_filter;
-    QComboBox *      w_viewmode;
+    QButtonGroup *   w_viewmode;
     bool             m_inv_only;
     ItemDetailPopup *m_details;
-    bool             m_in_setcurrentitem = false;
 };
 
 
@@ -128,13 +127,32 @@ void SelectItem::init()
 
     d->w_filter = new FilterEdit(this);
 
-    d->w_viewmode = new QComboBox(this);
-    d->w_viewmode->addItem(QString());
-    d->w_viewmode->addItem(QString());
-    d->w_viewmode->addItem(QString());
+    d->w_viewmode = new QButtonGroup(this);
+    d->w_viewmode->setExclusive(true);
+    connect(d->w_viewmode, QOverload<int>::of(&QButtonGroup::buttonClicked),
+            this, [this]() {
+        setViewMode(d->w_viewmode->checkedId());
+    });
 
-    connect(d->w_viewmode, QOverload<int>::of(&QComboBox::currentIndexChanged),
-            this, &SelectItem::setViewMode);
+    QToolButton *tb;
+    tb = new QToolButton(this);
+    tb->setIcon(QIcon(":/images/viewmode_list"));
+    tb->setAutoRaise(true);
+    tb->setCheckable(true);
+    tb->setChecked(true);
+    d->w_viewmode->addButton(tb, 0);
+
+    tb = new QToolButton(this);
+    tb->setIcon(QIcon(":/images/viewmode_images"));
+    tb->setAutoRaise(true);
+    tb->setCheckable(true);
+    d->w_viewmode->addButton(tb, 1);
+
+    tb = new QToolButton(this);
+    tb->setIcon(QIcon(":/images/viewmode_thumbs"));
+    tb->setAutoRaise(true);
+    tb->setCheckable(true);
+    d->w_viewmode->addButton(tb, 2);
 
     d->w_items = new QTreeView(this);
     d->w_items->setSortingEnabled(true);
@@ -232,7 +250,14 @@ void SelectItem::init()
     lay->addWidget(d->w_categories, 1, 0, 1, 2);
 
     lay->addWidget(d->w_filter, 0, 2);
-    lay->addWidget(d->w_viewmode, 0, 3);
+
+    QHBoxLayout *viewlay = new QHBoxLayout();
+    viewlay->setMargin(0);
+    viewlay->setSpacing(0);
+    viewlay->addWidget(d->w_viewmode->button(0));
+    viewlay->addWidget(d->w_viewmode->button(1));
+    viewlay->addWidget(d->w_viewmode->button(2));
+    lay->addLayout(viewlay, 0, 3);
 
     d->m_stack = new QStackedLayout();
     lay->addLayout(d->m_stack, 1, 2, 1, 2);
@@ -253,9 +278,9 @@ void SelectItem::languageChange()
     d->w_filter->setToolTip(tr("Filter the list using this pattern (wildcards allowed: * ? [])"));
     d->w_filter->setPlaceholderText(tr("Filter"));
 
-    d->w_viewmode->setItemText(0, tr("List"));
-    d->w_viewmode->setItemText(1, tr("List with Images"));
-    d->w_viewmode->setItemText(2, tr("Thumbnails"));
+    d->w_viewmode->button(0)->setToolTip(tr("List"));
+    d->w_viewmode->button(1)->setToolTip(tr("List with Images"));
+    d->w_viewmode->button(2)->setToolTip(tr("Thumbnails"));
 }
 
 bool SelectItem::eventFilter(QObject *o, QEvent *e)
@@ -378,11 +403,7 @@ const BrickLink::Item *SelectItem::currentItem() const
 }
 
 bool SelectItem::setCurrentItem(const BrickLink::Item *item, bool force_items_category)
-{/*
-    if (d->m_in_setcurrentitem)
-        return false;
-    d->m_in_setcurrentitem = true;*/
-
+{
     if (item) {
         if (force_items_category) {
             const BrickLink::ItemType *itt = item->itemType();
@@ -405,7 +426,6 @@ bool SelectItem::setCurrentItem(const BrickLink::Item *item, bool force_items_ca
         d->w_items->clearSelection();
     }
 
-    //d->m_in_setcurrentitem = false;
     return (item);
 }
 
@@ -418,10 +438,8 @@ void SelectItem::setViewMode(int mode)
     case 2 : w = d->w_thumbs; break;
     default: break;
     }
-    if (w) {
+    if (w)
         d->m_stack->setCurrentWidget(w);
-        d->w_viewmode->setCurrentIndex(mode);
-    }
 }
 
 
