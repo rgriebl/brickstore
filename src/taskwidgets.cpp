@@ -240,8 +240,12 @@ TaskInfoWidget::TaskInfoWidget(QWidget *parent)
     m_text = new QLabel(this);
     m_text->setAlignment(Qt::AlignLeft | Qt::AlignTop);
     m_text->setIndent(8);
-    m_text->setBackgroundRole(QPalette::Base);
+
+    m_text->setBackgroundRole(QPalette::Background);
     m_text->setAutoFillBackground(true);
+    QPalette p = m_text->palette();
+    p.setBrush(QPalette::Background, QBrush(QPixmap(":/images/bg_infotext.jpg")));
+    m_text->setPalette(p);
 
     addWidget(m_pic);
     addWidget(m_text);

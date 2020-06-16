@@ -292,7 +292,7 @@ Window::Window(Document *doc, QWidget *parent)
     connect(Config::inst(), &Config::showInputErrorsChanged,
             this, &Window::updateErrorMask);
     connect(Config::inst(), &Config::measurementSystemChanged,
-            w_list->viewport(), QOverload<void>::of(&QWidget::update));
+            w_list->viewport(), QOverload<>::of(&QWidget::update));
 
     //connect(Config::inst(), SIGNAL(localCurrencyChanged()), w_list->viewport(), SLOT(update()));
 
@@ -1482,7 +1482,7 @@ void Window::setMatchProgress(int /*pmax*/, int /*pcur*/)
 void Window::setMatchFinished(QList<const BrickLink::Item *> result)
 {
     foreach (const BrickLink::Item *item, result)
-        qWarning("SetMatch: %s [%s]", item->name(), item->id());
+        qWarning() << "SetMatch:" << item->name() << item->id();
 }
 
 void Window::on_edit_setmatch_triggered()

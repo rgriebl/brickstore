@@ -65,7 +65,7 @@
         <file>images/edit_status_extra.png</file>
         <file>images/edit_status_include.png</file>
         <file>images/edit_status_unknown.png</file>
-        <file>images/logo-text.pic</file>
+        <file>images/bg_infotext.jpg</file>
     </qresource>
 </RCC>
 

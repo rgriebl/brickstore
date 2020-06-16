@@ -681,7 +681,7 @@ LDraw::RenderOffscreenWidget::RenderOffscreenWidget(QWidget *parent)
     resetCamera();
 
     connect(m_renderer, &GLRenderer::makeCurrent, this, &RenderOffscreenWidget::slotMakeCurrent);
-    connect(m_renderer, &GLRenderer::updateNeeded, this, QOverload<void>::of(&QWidget::update));
+    connect(m_renderer, &GLRenderer::updateNeeded, this, QOverload<>::of(&QWidget::update));
 
     setCursor(Qt::OpenHandCursor);
 }
