@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/" >
+    <qresource prefix="/">
         <file>images/edit_additems.png</file>
         <file>images/edit_bl_catalog.png</file>
         <file>images/edit_bl_lotsforsale.png</file>
@@ -33,13 +33,10 @@
         <file>images/file_open.png</file>
         <file>images/file_print.png</file>
         <file>images/file_save.png</file>
-        <file>images/file_save_all.png</file>
         <file>images/file_saveas.png</file>
         <file>images/filter_clear.png</file>
         <file>images/filter_menu.png</file>
-        <file>images/help_contents.png</file>
         <file>images/help_updates.png</file>
-        <file>images/help_whatsthis.png</file>
         <file>images/reload.png</file>
         <file>images/view_compact.png</file>
         <file>images/view_hierarchic.png</file>
@@ -65,4 +62,3 @@
         <file>images/bg_infotext.jpg</file>
     </qresource>
 </RCC>
-
