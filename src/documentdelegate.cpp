@@ -35,12 +35,12 @@
 
 QVector<QColor>                 DocumentDelegate::s_shades;
 QHash<BrickLink::Status, QIcon> DocumentDelegate::s_status_icons;
-QCache<qint64, QPixmap>         DocumentDelegate::s_tag_cache;
+QCache<quint64, QPixmap>        DocumentDelegate::s_tag_cache;
 QCache<int, QPixmap>            DocumentDelegate::s_stripe_cache;
 
 DocumentDelegate::DocumentDelegate(Document *doc, DocumentProxyModel *view, QTableView *table)
     : QItemDelegate(view), m_doc(doc), m_view(view), m_table(table),
-      m_select_item(0), m_select_color(0), m_read_only(false)
+      m_select_item(nullptr), m_select_color(nullptr), m_read_only(false)
 {
     static bool first = true;
     if (first) {
@@ -64,7 +64,7 @@ QColor DocumentDelegate::shadeColor(int idx, qreal alpha)
             s_shades[i] = QColor::fromHsv(i == 0 ? -1 : (i - 1) * 30, 255, 255);
     }
     QColor c = s_shades[idx % s_shades.size()];
-    if (alpha)
+    if (!qFuzzyIsNull(alpha))
         c.setAlphaF(alpha);
     return c;
 }
@@ -121,7 +121,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
     bool noitem = !it->item();
 
     QPalette::ColorGroup cg = (option.state & QStyle::State_Enabled) ? QPalette::Normal : QPalette::Disabled;
-    QColor normalbg = option.palette.color(cg, option.features & QStyleOptionViewItemV2::Alternate ? QPalette::AlternateBase : QPalette::Base);
+    QColor normalbg = option.palette.color(cg, option.features & QStyleOptionViewItem::Alternate ? QPalette::AlternateBase : QPalette::Base);
     QColor bg = normalbg;
     QColor fg = option.palette.color(cg, QPalette::Text);
 
@@ -143,11 +143,11 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
     Qt::Alignment align = Qt::Alignment((idx.data(Qt::TextAlignmentRole).toInt() & ~Qt::AlignVertical_Mask) | Qt::AlignVCenter);
 
     struct Tag {
-        QString text;
-        bool bold;
         QColor foreground;
         QColor background;
-    } tag = { QString(), false, QColor(), QColor() };
+        QString text;
+        bool bold;
+    } tag = { QColor(), QColor(), QString(), false };
 
     QImage image;
     QIcon ico;
@@ -158,66 +158,66 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
         switch (idx.column()) {
         case Document::ItemType:
             if (it->itemType())
-                bg = shadeColor(it->itemType()->id(), 0.1f);
+                bg = shadeColor(it->itemType()->id(), 0.1);
             break;
 
         case Document::Category:
             if (it->category())
-                bg = shadeColor(it->category()->id(), 0.2f);
+                bg = shadeColor(int(it->category()->id()), 0.2);
             break;
 
         case Document::Quantity:
             if (it->quantity() <= 0)
-                bg = (it->quantity() == 0) ? QColor::fromRgbF(1, 1, 0, 0.4f)
-                                           : QColor::fromRgbF(1, 0, 0, 0.4f);
+                bg = (it->quantity() == 0) ? QColor::fromRgbF(1, 1, 0, 0.4)
+                                           : QColor::fromRgbF(1, 0, 0, 0.4);
             break;
 
         case Document::QuantityDiff:
             if (it->origQuantity() < it->quantity())
-                bg = QColor::fromRgbF(0, 1, 0, 0.3f);
+                bg = QColor::fromRgbF(0, 1, 0, 0.3);
             else if (it->origQuantity() > it->quantity())
-                bg = QColor::fromRgbF(1, 0, 0, 0.3f);
+                bg = QColor::fromRgbF(1, 0, 0, 0.3);
             break;
 
         case Document::PriceOrig:
         case Document::QuantityOrig:
-            fg.setAlphaF(0.5f);
+            fg.setAlphaF(0.5);
             break;
 
         case Document::PriceDiff:
             if (it->origPrice() < it->price())
-                bg = QColor::fromRgbF(0, 1, 0, 0.3f);
+                bg = QColor::fromRgbF(0, 1, 0, 0.3);
             else if (it->origPrice() > it->price())
-                bg = QColor::fromRgbF(1, 0, 0, 0.3f);
+                bg = QColor::fromRgbF(1, 0, 0, 0.3);
             break;
 
         case Document::Total:
-            bg = QColor::fromRgbF(1, 1, 0, 0.1f);
+            bg = QColor::fromRgbF(1, 1, 0, 0.1);
             break;
 
         case Document::Condition:
             if (it->condition() != BrickLink::New) {
                 bg = fg;
-                bg.setAlphaF(0.3f);
+                bg.setAlphaF(0.3);
             }
             break;
 
         case Document::TierP1:
         case Document::TierQ1:
             bg = fg;
-            bg.setAlphaF(0.06f);
+            bg.setAlphaF(0.06);
             break;
 
         case Document::TierP2:
         case Document::TierQ2:
             bg = fg;
-            bg.setAlphaF(0.12f);
+            bg.setAlphaF(0.12);
             break;
 
         case Document::TierP3:
         case Document::TierQ3:
             bg = fg;
-            bg.setAlphaF(0.18f);
+            bg.setAlphaF(0.18);
             break;
 
         }
@@ -236,7 +236,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
             s_status_icons.insert(it->status(), ico);
         }
 
-        int altid = it->alternateId();
+        uint altid = it->alternateId();
         bool cp = it->counterPart();
         if (altid || cp) {
             tag.text = cp ? QLatin1String( "CP" ) : QString::number(altid);
@@ -244,9 +244,9 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
             tag.foreground = fg;
             if (cp || selected) {
                 tag.background = fg;
-                tag.background.setAlphaF(0.3f);
+                tag.background.setAlphaF(0.3);
             } else {
-                tag.background = shadeColor(1 + altid, qreal(0.5));
+                tag.background = shadeColor(int(1 + altid), qreal(0.5));
             }
         }
         break;
@@ -256,7 +256,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
             tag.text = tr("Inv");
             tag.foreground = bg;
             tag.background = fg;
-            tag.background.setAlphaF(0.3f);
+            tag.background.setAlphaF(0.3);
         }
         break;
 
@@ -308,7 +308,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
             pixp.end();
             s_stripe_cache.insert(d, pix);
         }
-        int offset = (option.features & QStyleOptionViewItemV2::Alternate) ? d : 0;
+        int offset = (option.features & QStyleOptionViewItem::Alternate) ? d : 0;
         offset -= m_table->horizontalScrollBar()->value();
         p->drawTiledPixmap(option.rect, *pix, QPoint(option.rect.left() - offset, 0));
     }
@@ -318,11 +318,11 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
         font.setBold(tag.bold);
         QFontMetrics fontmetrics(font);
         int itw = qMax(int(1.5f * fontmetrics.height()),
-                       2 * fontmetrics.width(tag.text));
+                       2 * fontmetrics.horizontalAdvance(tag.text));
 
-        union { struct { qint32 i1; qint32 i2; }; qint64 q; } key;
-        key.i1 = itw;
-        key.i2 = tag.background.rgba();
+        union { struct { qint32 i1; quint32 i2; } s; quint64 q; } key;
+        key.s.i1 = itw;
+        key.s.i2 = tag.background.rgba();
 
         QPixmap *pix = s_tag_cache[key.q];
         if (!pix) {
@@ -353,9 +353,9 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
 
 
     if ((it->errors() & m_doc->errorMask() & (1ULL << idx.column()))) {
-        p->setPen(QColor::fromRgbF(1, 0, 0, 0.75f));
+        p->setPen(QColor::fromRgbF(1, 0, 0, 0.75));
         p->drawRect(QRectF(x+.5, y+.5, w-1, h-1));
-        p->setPen(QColor::fromRgbF(1, 0, 0, 0.50f));
+        p->setPen(QColor::fromRgbF(1, 0, 0, 0.50));
         p->drawRect(QRectF(x+1.5, y+1.5, w-3, h-3));
     }
 
@@ -449,7 +449,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
             if ((i == (lcount - 1)) && ((line.textStart() + line.textLength()) < lstr.length())) {
                 do_elide = true;
                 QString elide = QLatin1String("...");
-                int elide_width = fm.width(elide) + 2;
+                int elide_width = fm.horizontalAdvance(elide) + 2;
 
                 line.setLineWidth(rw - elide_width);
                 widthUsed = line.naturalTextWidth();
@@ -482,9 +482,7 @@ bool DocumentDelegate::editorEvent(QEvent *e, QAbstractItemModel *model, const Q
         return false;
 
     switch (e->type()) {
-    case QEvent::KeyPress: {
-        //no break
-    }
+    case QEvent::KeyPress:
     case QEvent::MouseButtonDblClick: {
         if (nonInlineEdit(e, it, option, idx))
             return true;
@@ -587,7 +585,9 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
             }
             m_select_item->setItem(it->item());
 
-            if (m_select_item->exec(QRect(m_table->viewport()->mapToGlobal(option.rect.topLeft()), option.rect.size())) == QDialog::Accepted) {
+            if (m_select_item->execAtPosition(
+                        QRect(m_table->viewport()->mapToGlobal(option.rect.topLeft()),
+                              option.rect.size())) == QDialog::Accepted) {
                 Document::Item item = *it;
                 item.setItem(m_select_item->item());
                 m_doc->changeItem(it, item);
@@ -603,7 +603,7 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
             }
             m_select_color->setColor(it->color());
 
-            if (m_select_color->exec(QRect(m_table->viewport()->mapToGlobal(option.rect.topLeft()), option.rect.size())) == QDialog::Accepted) {
+            if (m_select_color->execAtPosition(QRect(m_table->viewport()->mapToGlobal(option.rect.topLeft()), option.rect.size())) == QDialog::Accepted) {
                 Document::Item item = *it;
                 item.setColor(m_select_color->color());
                 m_doc->changeItem(it, item);
@@ -621,33 +621,34 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
 QWidget *DocumentDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &/*option*/, const QModelIndex &idx) const
 {
     if (m_read_only)
-        return 0;
+        return nullptr;
 
     Document::Item *it = m_view->item(idx);
     if (!it)
-        return 0;
+        return nullptr;
 
-    QValidator *valid = 0;
+    QValidator *valid = nullptr;
     switch (idx.column()) {
-    case Document::Sale        : valid = new QIntValidator(-1000, 99, 0); break;
+    case Document::Sale        : valid = new QIntValidator(-1000, 99, nullptr); break;
     case Document::Quantity    :
-    case Document::QuantityDiff: valid = new QIntValidator(-99999, 99999, 0); break;
-    case Document::Bulk        : valid = new QIntValidator(1, 99999, 0); break;
+    case Document::QuantityDiff: valid = new QIntValidator(-99999, 99999, nullptr); break;
+    case Document::Bulk        : valid = new QIntValidator(1, 99999, nullptr); break;
     case Document::TierQ1      :
     case Document::TierQ2      :
-    case Document::TierQ3      : valid = new QIntValidator(0, 99999, 0); break;
+    case Document::TierQ3      : valid = new QIntValidator(0, 99999, nullptr); break;
     case Document::Price       :
     case Document::TierP1      :
     case Document::TierP2      :
-    case Document::TierP3      : valid = new CurrencyValidator(0, 10000, 3, 0); break;
-    case Document::PriceDiff   : valid = new CurrencyValidator(-10000, 10000, 3, 0); break;
-    case Document::Weight      : valid = new QDoubleValidator(0., 100000., 4, 0); break;
+    case Document::TierP3      : valid = new CurrencyValidator(0, 10000, 3, nullptr); break;
+    case Document::PriceDiff   : valid = new CurrencyValidator(-10000, 10000, 3, nullptr); break;
+    case Document::Weight      : valid = new QDoubleValidator(0., 100000., 4, nullptr); break;
     default                    : break;
     }
 
     if (!m_lineedit) {
         m_lineedit = new QLineEdit(parent);
-        m_lineedit->setFrame(m_lineedit->style()->styleHint(QStyle::SH_ItemView_DrawDelegateFrame, 0, m_lineedit));
+        m_lineedit->setFrame(m_lineedit->style()->styleHint(QStyle::SH_ItemView_DrawDelegateFrame,
+                                                            nullptr, m_lineedit));
     }
     m_lineedit->setAlignment(Qt::Alignment(idx.data(Qt::TextAlignmentRole).toInt()));
     if (valid)

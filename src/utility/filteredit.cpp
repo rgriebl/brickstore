@@ -27,6 +27,7 @@
 #if defined(Q_OS_MAC)
 #include <QProxyStyle>
 #include <Carbon/Carbon.h>
+#include <QtGui/private/qcoregraphics_p.h>
 
 #if (MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_5)
 enum {
@@ -44,7 +45,7 @@ public:
         if (pe == PE_PanelLineEdit) {
             if (const QStyleOptionFrame *frame = qstyleoption_cast<const QStyleOptionFrame *>(opt)) {
                 if (frame->state & State_Sunken) {
-                    QColor baseColor(frame->palette.background().color());
+                    QColor baseColor(frame->palette.window().color());
                     HIThemeFrameDrawInfo fdi;
                     fdi.version = 0;
                     ThemeDrawState tds = kThemeStateActive;
@@ -69,9 +70,9 @@ public:
                                                       frame_size * 2, frame_size * 2));
                     QPixmap pix(frame->rect.size());
                     pix.fill(Qt::transparent);
-                    CGContextRef context = qt_mac_cg_context(&pix);
+                    QMacCGContext context(&pix); //CGContextRef context = qt_mac_cg_context(&pix);
                     HIThemeDrawFrame(&hirect, &fdi, context, kHIThemeOrientationNormal);
-                    CGContextRelease(context);
+                   // CGContextRelease(context);
                     p->drawPixmap(frame->rect.topLeft(), pix);
                     return;
                 }
@@ -198,7 +199,8 @@ void FilterEdit::doLayout()
     if (w_clear->isVisible())
         w_clear->move(rect().right() - fw - cs.width(), (rect().bottom() + 1 - cs.height())/2);
 
-    setTextMargins(m_left + ms.width() + fw, m_top, m_right + w_clear->isVisible() ? (cs.width() + fw) : 0, m_bottom);
+    setTextMargins(m_left + ms.width() + fw, m_top,
+                   m_right + (w_clear->isVisible() ? (cs.width() + fw) : 0), m_bottom);
 }
 
 

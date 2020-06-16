@@ -72,9 +72,11 @@ enum {
     NeedDocument = 16
 };
 
-class NoFrameStatusBar : public QStatusBar {
+
+class NoFrameStatusBar : public QStatusBar
+{
 public:
-    NoFrameStatusBar(QWidget *parent = 0)
+    NoFrameStatusBar(QWidget *parent = nullptr)
         : QStatusBar(parent)
     { }
 
@@ -89,41 +91,45 @@ public:
     }
 
 protected:
-    void paintEvent(QPaintEvent *)
-    {
-        // nearly the same as QStatusBar::paintEvent(), minus those ugly frames
-        QString msg = currentMessage();
-
-        QPainter p(this);
-        QStyleOption opt;
-        opt.initFrom(this);
-        style()->drawPrimitive(QStyle::PE_PanelStatusBar, &opt, &p, this);
-
-        if (!msg.isEmpty()) {
-            p.setPen(palette().foreground().color());
-            QRect msgr = rect().adjusted(6, 0, -6, 0);
-            p.drawText(msgr, Qt::AlignLeading | Qt::AlignVCenter | Qt::TextSingleLine, msg);
-        } else {
-#ifdef Q_OS_MACX
-            QColor lineColor(112, 112, 112);
-            int offset = 0;
-#else
-            QColor lineColor = palette().color(QPalette::Midlight);
-            int offset = 2;
-#endif
-            p.setPen(lineColor);
-
-            foreach (QWidget *w, findChildren<QWidget *>()) {
-                if (qobject_cast<QSizeGrip *>(w))
-                    continue;
-                QRect r = w->geometry();
-                p.drawLine(r.left() - 3, offset, r.left() - 3, height() - offset - 1);
-            }
-        }
-    }
+    void paintEvent(QPaintEvent *) override;
 };
 
-class RecentMenu : public QMenu {
+void NoFrameStatusBar::paintEvent(QPaintEvent *)
+{
+    // nearly the same as QStatusBar::paintEvent(), minus those ugly frames
+    QString msg = currentMessage();
+
+    QPainter p(this);
+    QStyleOption opt;
+    opt.initFrom(this);
+    style()->drawPrimitive(QStyle::PE_PanelStatusBar, &opt, &p, this);
+
+    if (!msg.isEmpty()) {
+        p.setPen(palette().windowText().color());
+        QRect msgr = rect().adjusted(6, 0, -6, 0);
+        p.drawText(msgr, Qt::AlignLeading | Qt::AlignVCenter | Qt::TextSingleLine, msg);
+    } else {
+#ifdef Q_OS_MACX
+        QColor lineColor(112, 112, 112);
+        int offset = 0;
+#else
+        QColor lineColor = palette().color(QPalette::Midlight);
+        int offset = 2;
+#endif
+        p.setPen(lineColor);
+
+        foreach (QWidget *w, findChildren<QWidget *>()) {
+            if (qobject_cast<QSizeGrip *>(w))
+                continue;
+            QRect r = w->geometry();
+            p.drawLine(r.left() - 3, offset, r.left() - 3, height() - offset - 1);
+        }
+    }
+}
+
+
+class RecentMenu : public QMenu
+{
     Q_OBJECT
 public:
     RecentMenu(FrameWork *fw, QWidget *parent)
@@ -166,10 +172,7 @@ private:
 };
 
 
-
-
-
-FrameWork *FrameWork::s_inst = 0;
+FrameWork *FrameWork::s_inst = nullptr;
 
 FrameWork *FrameWork::inst()
 {
@@ -187,8 +190,8 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
     s_inst = this;
 
     m_running = false;
-    m_filter = 0;
-    m_progress = 0;
+    m_filter = nullptr;
+    m_progress = nullptr;
 
     setUnifiedTitleAndToolBarOnMac(true);
     setDocumentMode(true);
@@ -203,7 +206,7 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
     while (m_recent_files.count() > MaxRecentFiles)
         m_recent_files.pop_back();
 
-    m_current_window = 0;
+    m_current_window = nullptr;
 
     m_workspace = new Workspace(this);
     connect(m_workspace, &Workspace::windowActivated,
@@ -211,19 +214,19 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
 
     setCentralWidget(m_workspace);
 
-    m_task_info = new TaskInfoWidget(0);
+    m_task_info = new TaskInfoWidget(nullptr);
     m_task_info->setObjectName(QLatin1String("TaskInfo"));
     addDockWidget(Qt::LeftDockWidgetArea, createDock(m_task_info));
 
-    m_task_priceguide = new TaskPriceGuideWidget(0);
+    m_task_priceguide = new TaskPriceGuideWidget(nullptr);
     m_task_priceguide->setObjectName(QLatin1String("TaskPriceGuide"));
     splitDockWidget(m_dock_widgets.first(), createDock(m_task_priceguide), Qt::Vertical);
 
-    m_task_appears = new TaskAppearsInWidget(0);
+    m_task_appears = new TaskAppearsInWidget(nullptr);
     m_task_appears->setObjectName(QLatin1String("TaskAppears"));
     tabifyDockWidget(m_dock_widgets.at(1), createDock(m_task_appears));
 
-    m_task_links = new TaskLinksWidget(0);
+    m_task_links = new TaskLinksWidget(nullptr);
     m_task_links->setObjectName(QLatin1String("TaskLinks"));
     tabifyDockWidget(m_dock_widgets.first(), createDock(m_task_links));
 
@@ -421,7 +424,7 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
     else
         MessageBox::warning(this, tr("Could not load the BrickLink database files.<br /><br />The program is not functional without these files."));
 
-    m_add_dialog = 0;
+    m_add_dialog = nullptr;
     //createAddItemDialog();
 
     m_running = true;
@@ -510,21 +513,26 @@ void FrameWork::translateActions()
     static bool onMac = false;
 #endif
 
-    struct {
+    struct ActionDefinition {
         const char *m_name;
         QString     m_text;
         QString     m_shortcut;
-        QKeySequence::StandardKey m_standardKey = QKeySequence::UnknownKey;
+        QKeySequence::StandardKey m_standardKey;
+
+        ActionDefinition(const char *n, const QString &t, const QString &s)
+            : m_name(n), m_text(t), m_shortcut(s), m_standardKey(QKeySequence::UnknownKey) { }
+        ActionDefinition(const char *n, const QString &t, QKeySequence::StandardKey k = QKeySequence::UnknownKey)
+            : m_name(n), m_text(t), m_standardKey(k) { }
     } *atptr, actiontable [] = {
-        { "file",                           tr("&File"),                              0 },
-        { "file_new",                       tr("New", "File|New"),                    0, QKeySequence::New },
-        { "file_open",                      tr("Open..."),                            0, QKeySequence::Open },
-        { "file_open_recent",               tr("Open Recent"),                        0 },
-        { "file_save",                      tr("Save"),                               0, QKeySequence::Save },
-        { "file_saveas",                    tr("Save As..."),                         0 },
-        { "file_print",                     tr("Print..."),                           0, QKeySequence::Print },
-        { "file_print_pdf",                 tr("Print to PDF..."),                    0 },
-        { "file_import",                    tr("Import"),                             0 },
+        { "file",                           tr("&File"),                              },
+        { "file_new",                       tr("New", "File|New"),                    QKeySequence::New },
+        { "file_open",                      tr("Open..."),                            QKeySequence::Open },
+        { "file_open_recent",               tr("Open Recent"),                        },
+        { "file_save",                      tr("Save"),                               QKeySequence::Save },
+        { "file_saveas",                    tr("Save As..."),                         },
+        { "file_print",                     tr("Print..."),                           QKeySequence::Print },
+        { "file_print_pdf",                 tr("Print to PDF..."),                    },
+        { "file_import",                    tr("Import"),                             },
         { "file_import_bl_inv",             tr("BrickLink Set Inventory..."),         tr("Ctrl+I,Ctrl+I", "File|Import BrickLink Set Inventory") },
         { "file_import_bl_xml",             tr("BrickLink XML..."),                   tr("Ctrl+I,Ctrl+X", "File|Import BrickLink XML") },
         { "file_import_bl_order",           tr("BrickLink Order..."),                 tr("Ctrl+I,Ctrl+O", "File|Import BrickLink Order") },
@@ -532,94 +540,94 @@ void FrameWork::translateActions()
         { "file_import_bl_cart",            tr("BrickLink Shopping Cart..."),         tr("Ctrl+I,Ctrl+C", "File|Import BrickLink Shopping Cart") },
         { "file_import_peeron_inv",         tr("Peeron Inventory..."),                tr("Ctrl+I,Ctrl+P", "File|Import Peeron Inventory") },
         { "file_import_ldraw_model",        tr("LDraw Model..."),                     tr("Ctrl+I,Ctrl+L", "File|Import LDraw Model") },
-        { "file_export",                    tr("Export"),                             0 },
+        { "file_export",                    tr("Export"),                             },
         { "file_export_bl_xml",             tr("BrickLink XML..."),                         tr("Ctrl+E,Ctrl+X", "File|Import BrickLink XML") },
         { "file_export_bl_xml_clip",        tr("BrickLink Mass-Upload XML to Clipboard"),   tr("Ctrl+E,Ctrl+U", "File|Import BrickLink Mass-Upload") },
         { "file_export_bl_update_clip",     tr("BrickLink Mass-Update XML to Clipboard"),   tr("Ctrl+E,Ctrl+P", "File|Import BrickLink Mass-Update") },
         { "file_export_bl_invreq_clip",     tr("BrickLink Set Inventory XML to Clipboard"), tr("Ctrl+E,Ctrl+I", "File|Import BrickLink Set Inventory") },
         { "file_export_bl_wantedlist_clip", tr("BrickLink Wanted List XML to Clipboard"),   tr("Ctrl+E,Ctrl+W", "File|Import BrickLink Wanted List") },
-        { "file_close",                     tr("Close"),                              0, QKeySequence::Close },
-        { "file_exit",                      tr("Exit"),                               0, QKeySequence::Quit },
-        { "edit",                           tr("&Edit"),                              0 },
-        { "edit_undo",                      0,                                        0, QKeySequence::Undo },
-        { "edit_redo",                      0,                                        0, QKeySequence::Redo },
-        { "edit_cut",                       tr("Cut"),                                0, QKeySequence::Cut },
-        { "edit_copy",                      tr("Copy"),                               0, QKeySequence::Copy },
-        { "edit_paste",                     tr("Paste"),                              0, QKeySequence::Paste },
+        { "file_close",                     tr("Close"),                              QKeySequence::Close },
+        { "file_exit",                      tr("Exit"),                               QKeySequence::Quit },
+        { "edit",                           tr("&Edit"),                              },
+        { "edit_undo",                      nullptr,                                  QKeySequence::Undo },
+        { "edit_redo",                      nullptr,                                  QKeySequence::Redo },
+        { "edit_cut",                       tr("Cut"),                                QKeySequence::Cut },
+        { "edit_copy",                      tr("Copy"),                               QKeySequence::Copy },
+        { "edit_paste",                     tr("Paste"),                              QKeySequence::Paste },
         { "edit_delete",                    tr("Delete"),                             onMac ? tr("Backspace", "Edit|Delete (Mac)") : tr("Delete", "Edit|Delete (Win,Unix)") },
         { "edit_additems",                  tr("Add Items..."),                       tr("Insert", "Edit|AddItems") },
-        { "edit_subtractitems",             tr("Subtract Items..."),                  0 },
-        { "edit_mergeitems",                tr("Consolidate Items..."),               0 },
-        { "edit_partoutitems",              tr("Part out Item..."),                   0 },
-        { "edit_setmatch",                  tr("Match Items against Set Inventories..."),                   0 },
-        { "edit_reset_diffs",               tr("Reset Differences"),                  0 },
-        { "edit_copyremarks",               tr("Copy Remarks from Document..."),      0 },
-        { "edit_select_all",                tr("Select All"),                         0, QKeySequence::SelectAll },
-        { "edit_select_none",               tr("Select None"),                        0, QKeySequence::Deselect },
-        { "view",                           tr("&View"),                              0 },
-        { "view_toolbar",                   tr("View Toolbar"),                       0 },
-        { "view_infobar",                   tr("View Infobars"),                      0 },
-        { "view_statusbar",                 tr("View Statusbar"),                     0 },
-        { "view_fullscreen",                tr("Full Screen"),                        0, QKeySequence::FullScreen },
-        { "view_show_input_errors",         tr("Show Input Errors"),                  0 },
-        { "view_difference_mode",           tr("Difference Mode"),                    0 },
-        { "view_save_default_col",          tr("Save Column Layout as Default"),      0 },
-        { "extras",                         tr("E&xtras"),                            0 },
-        { "extras_update_database",         tr("Update Database"),                    0 },
-        { "extras_configure",               tr("Configure..."),                       0 },
-        { "window",                         tr("&Windows"),                           0 },
-        { "help",                           tr("&Help"),                              0 },
+        { "edit_subtractitems",             tr("Subtract Items..."),                  },
+        { "edit_mergeitems",                tr("Consolidate Items..."),               },
+        { "edit_partoutitems",              tr("Part out Item..."),                   },
+        { "edit_setmatch",                  tr("Match Items against Set Inventories...") },
+        { "edit_reset_diffs",               tr("Reset Differences"),                  },
+        { "edit_copyremarks",               tr("Copy Remarks from Document..."),      },
+        { "edit_select_all",                tr("Select All"),                         QKeySequence::SelectAll },
+        { "edit_select_none",               tr("Select None"),                        QKeySequence::Deselect },
+        { "view",                           tr("&View"),                              },
+        { "view_toolbar",                   tr("View Toolbar"),                       },
+        { "view_infobar",                   tr("View Infobars"),                      },
+        { "view_statusbar",                 tr("View Statusbar"),                     },
+        { "view_fullscreen",                tr("Full Screen"),                        QKeySequence::FullScreen },
+        { "view_show_input_errors",         tr("Show Input Errors"),                  },
+        { "view_difference_mode",           tr("Difference Mode"),                    },
+        { "view_save_default_col",          tr("Save Column Layout as Default"),      },
+        { "extras",                         tr("E&xtras"),                            },
+        { "extras_update_database",         tr("Update Database"),                    },
+        { "extras_configure",               tr("Configure..."),                       },
+        { "window",                         tr("&Windows"),                           },
+        { "help",                           tr("&Help"),                              },
 //        { "help_whatsthis",                 tr("What's this?"),                       tr("Shift+F1", "Help|WhatsThis") },
-        { "help_about",                     tr("About..."),                           0 },
-        { "help_updates",                   tr("Check for Program Updates..."),       0 },
-        { "edit_status",                    tr("Status"),                             0 },
-        { "edit_status_include",            tr("Include"),                            0 },
-        { "edit_status_exclude",            tr("Exclude"),                            0 },
-        { "edit_status_extra",              tr("Extra"),                              0 },
-        { "edit_status_toggle",             tr("Toggle Include/Exclude"),             0 },
-        { "edit_cond",                      tr("Condition"),                          0 },
-        { "edit_cond_new",                  tr("New", "Cond|New"),                    0 },
-        { "edit_cond_used",                 tr("Used"),                               0 },
-        { "edit_cond_toggle",               tr("Toggle New/Used"),                    0 },
-        { "edit_subcond_none",              tr("None", "SubCond|None"),               0 },
-        { "edit_subcond_misb",              tr("MISB", "SubCond|MISB"),               0 },
-        { "edit_subcond_complete",          tr("Complete", "SubCond|Complete"),       0 },
-        { "edit_subcond_incomplete",        tr("Incomplete", "SubCond|Incomplete"),   0 },
-        { "edit_color",                     tr("Color..."),                           0 },
-        { "edit_qty",                       tr("Quantity"),                           0 },
-        { "edit_qty_set",                   tr("Set..."),                             0 },
+        { "help_about",                     tr("About..."),                           },
+        { "help_updates",                   tr("Check for Program Updates..."),       },
+        { "edit_status",                    tr("Status"),                             },
+        { "edit_status_include",            tr("Include"),                            },
+        { "edit_status_exclude",            tr("Exclude"),                            },
+        { "edit_status_extra",              tr("Extra"),                              },
+        { "edit_status_toggle",             tr("Toggle Include/Exclude"),             },
+        { "edit_cond",                      tr("Condition"),                          },
+        { "edit_cond_new",                  tr("New", "Cond|New"),                    },
+        { "edit_cond_used",                 tr("Used"),                               },
+        { "edit_cond_toggle",               tr("Toggle New/Used"),                    },
+        { "edit_subcond_none",              tr("None", "SubCond|None"),               },
+        { "edit_subcond_misb",              tr("MISB", "SubCond|MISB"),               },
+        { "edit_subcond_complete",          tr("Complete", "SubCond|Complete"),       },
+        { "edit_subcond_incomplete",        tr("Incomplete", "SubCond|Incomplete"),   },
+        { "edit_color",                     tr("Color..."),                           },
+        { "edit_qty",                       tr("Quantity"),                           },
+        { "edit_qty_set",                   tr("Set..."),                             },
         { "edit_qty_multiply",              tr("Multiply..."),                        tr("Ctrl+*", "Edit|Quantity|Multiply") },
         { "edit_qty_divide",                tr("Divide..."),                          tr("Ctrl+/", "Edit|Quantity|Divide") },
-        { "edit_price",                     tr("Price"),                              0 },
-        { "edit_price_round",               tr("Round to 2 Decimal Places"),          0 },
-        { "edit_price_set",                 tr("Set..."),                             0 },
+        { "edit_price",                     tr("Price"),                              },
+        { "edit_price_round",               tr("Round to 2 Decimal Places"),          },
+        { "edit_price_set",                 tr("Set..."),                             },
         { "edit_price_to_priceguide",       tr("Set to Price Guide..."),              tr("Ctrl+G", "Edit|Price|Set to PriceGuide") },
         { "edit_price_inc_dec",             tr("Inc- or Decrease..."),                tr("Ctrl++", "Edit|Price|Inc/Dec") },
-        { "edit_bulk",                      tr("Bulk Quantity..."),                   0 },
+        { "edit_bulk",                      tr("Bulk Quantity..."),                   },
         { "edit_sale",                      tr("Sale..."),                            tr("Ctrl+%", "Edit|Sale") },
-        { "edit_comment",                   tr("Comment"),                            0 },
-        { "edit_comment_set",               tr("Set..."),                             0 },
-        { "edit_comment_add",               tr("Add to..."),                          0 },
-        { "edit_comment_rem",               tr("Remove from..."),                     0 },
-        { "edit_remark",                    tr("Remark"),                             0 },
-        { "edit_remark_set",                tr("Set..."),                             0 },
-        { "edit_remark_add",                tr("Add to..."),                          0 },
-        { "edit_remark_rem",                tr("Remove from..."),                     0 },
-        { "edit_retain",                    tr("Retain in Inventory"),                0 },
-        { "edit_retain_yes",                tr("Yes"),                                0 },
-        { "edit_retain_no",                 tr("No"),                                 0 },
-        { "edit_retain_toggle",             tr("Toggle Yes/No"),                      0 },
-        { "edit_stockroom",                 tr("Stockroom Item"),                     0 },
-        { "edit_stockroom_yes",             tr("Yes"),                                0 },
-        { "edit_stockroom_no",              tr("No"),                                 0 },
-        { "edit_stockroom_toggle",          tr("Toggle Yes/No"),                      0 },
-        { "edit_reserved",                  tr("Reserved for..."),                    0 },
-        { "edit_bl_catalog",                tr("Show BrickLink Catalog Info..."),     0 },
-        { "edit_bl_priceguide",             tr("Show BrickLink Price Guide Info..."), 0 },
-        { "edit_bl_lotsforsale",            tr("Show Lots for Sale on BrickLink..."), 0 },
-        { "edit_bl_myinventory",            tr("Show in my Store on BrickLink..."),   0 },
+        { "edit_comment",                   tr("Comment"),                            },
+        { "edit_comment_set",               tr("Set..."),                             },
+        { "edit_comment_add",               tr("Add to..."),                          },
+        { "edit_comment_rem",               tr("Remove from..."),                     },
+        { "edit_remark",                    tr("Remark"),                             },
+        { "edit_remark_set",                tr("Set..."),                             },
+        { "edit_remark_add",                tr("Add to..."),                          },
+        { "edit_remark_rem",                tr("Remove from..."),                     },
+        { "edit_retain",                    tr("Retain in Inventory"),                },
+        { "edit_retain_yes",                tr("Yes"),                                },
+        { "edit_retain_no",                 tr("No"),                                 },
+        { "edit_retain_toggle",             tr("Toggle Yes/No"),                      },
+        { "edit_stockroom",                 tr("Stockroom Item"),                     },
+        { "edit_stockroom_yes",             tr("Yes"),                                },
+        { "edit_stockroom_no",              tr("No"),                                 },
+        { "edit_stockroom_toggle",          tr("Toggle Yes/No"),                      },
+        { "edit_reserved",                  tr("Reserved for..."),                    },
+        { "edit_bl_catalog",                tr("Show BrickLink Catalog Info..."),     },
+        { "edit_bl_priceguide",             tr("Show BrickLink Price Guide Info..."), },
+        { "edit_bl_lotsforsale",            tr("Show Lots for Sale on BrickLink..."), },
+        { "edit_bl_myinventory",            tr("Show in my Store on BrickLink..."),   },
 
-        { 0, 0, 0 }
+        { nullptr, nullptr }
     };
 
     for (atptr = actiontable; atptr->m_name; atptr++) {
@@ -651,7 +659,7 @@ FrameWork::~FrameWork()
         Config::inst()->setValue("/MainWindow/AddItemDialog/Geometry", m_add_dialog->saveGeometry());
 
     delete m_workspace;
-    s_inst = 0;
+    s_inst = nullptr;
 }
 
 
@@ -674,7 +682,7 @@ void FrameWork::dropEvent(QDropEvent *e)
 
 QAction *FrameWork::findAction(const char *name)
 {
-    return !name || !name[0] ? 0 : static_cast <QAction *>(findChild<QAction *>(QLatin1String(name)));
+    return !name || !name[0] ? nullptr : static_cast <QAction *>(findChild<QAction *>(QLatin1String(name)));
 }
 
 QDockWidget *FrameWork::createDock(QWidget *widget)
@@ -692,7 +700,7 @@ void FrameWork::createStatusBar()
     NoFrameStatusBar *st = new NoFrameStatusBar(this);
     setStatusBar(st);
 
-    int margin = 2 * st->fontMetrics().width(QLatin1Char(' '));
+    int margin = 2 * st->fontMetrics().horizontalAdvance(QLatin1Char(' '));
 
     m_st_errors = new QLabel();
     m_st_lots = new QLabel();
@@ -753,7 +761,7 @@ void FrameWork::updateCurrencyRates()
 QMenu *FrameWork::createMenu(const QByteArray &name, const QList<QByteArray> &a_names)
 {
     if (a_names.isEmpty())
-        return 0;
+        return nullptr;
 
     QMenu *m = new QMenu(this);
     m->menuAction()->setObjectName(QLatin1String(name.constData()));
@@ -856,7 +864,8 @@ static inline quint32 NeedSelection(quint8 minSel, quint8 maxSel = 0)
     return NeedDocument | (quint32(minSel) << 24) | (quint32(maxSel) << 16);
 }
 
-inline static QAction *newQAction(QObject *parent, const char *name, quint32 flags = 0, bool toggle = false, QObject *receiver = 0, const char *slot = 0)
+inline static QAction *newQAction(QObject *parent, const char *name, quint32 flags = 0, bool toggle = false,
+                                  QObject *receiver = nullptr, const char *slot = nullptr)
 {
     QAction *a = new QAction(parent);
     a->setObjectName(QLatin1String(name));
@@ -923,13 +932,13 @@ void FrameWork::createActions()
     a->setObjectName("edit_redo");
 
     a = newQAction(this, "edit_cut", NeedSelection(1));
-    connect(new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Delete), this, 0, 0, Qt::WindowShortcut),
+    connect(new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Delete), this, nullptr, nullptr, Qt::WindowShortcut),
             &QShortcut::activated, a, &QAction::trigger);
     a = newQAction(this, "edit_copy", NeedSelection(1));
-    connect(new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Insert), this, 0, 0, Qt::WindowShortcut),
+    connect(new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Insert), this, nullptr, nullptr, Qt::WindowShortcut),
             &QShortcut::activated, a, &QAction::trigger);
     a = newQAction(this, "edit_paste", NeedDocument);
-    connect(new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Insert), this, 0, 0, Qt::WindowShortcut),
+    connect(new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Insert), this, nullptr, nullptr, Qt::WindowShortcut),
             &QShortcut::activated, a, &QAction::trigger);
     (void) newQAction(this, "edit_delete", NeedSelection(1));
 
@@ -946,7 +955,7 @@ void FrameWork::createActions()
     (void) newQAction(this, "edit_select_none", NeedDocument);
 
     m = newQMenu(this, "edit_status", NeedSelection(1));
-    g = newQActionGroup(this, 0, true);
+    g = newQActionGroup(this, nullptr, true);
     m->addAction(newQAction(g, "edit_status_include", NeedSelection(1), true));
     m->addAction(newQAction(g, "edit_status_exclude", NeedSelection(1), true));
     m->addAction(newQAction(g, "edit_status_extra",   NeedSelection(1), true));
@@ -954,13 +963,13 @@ void FrameWork::createActions()
     m->addAction(newQAction(this, "edit_status_toggle", NeedSelection(1)));
 
     m = newQMenu(this, "edit_cond", NeedSelection(1));
-    g = newQActionGroup(this, 0, true);
+    g = newQActionGroup(this, nullptr, true);
     m->addAction(newQAction(g, "edit_cond_new", NeedSelection(1), true));
     m->addAction(newQAction(g, "edit_cond_used", NeedSelection(1), true));
     m->addSeparator();
     m->addAction(newQAction(this, "edit_cond_toggle", NeedSelection(1)));
     m->addSeparator();
-    g = newQActionGroup(this, 0, true);
+    g = newQActionGroup(this, nullptr, true);
     m->addAction(newQAction(g, "edit_subcond_none", NeedSelection(1) | NeedSubCondition, true));
     m->addAction(newQAction(g, "edit_subcond_misb", NeedSelection(1) | NeedSubCondition, true));
     m->addAction(newQAction(g, "edit_subcond_complete", NeedSelection(1) | NeedSubCondition, true));
@@ -995,14 +1004,14 @@ void FrameWork::createActions()
     m->addAction(newQAction(this, "edit_remark_rem", NeedSelection(1)));
 
     m = newQMenu(this, "edit_retain", NeedSelection(1));
-    g = newQActionGroup(this, 0, true);
+    g = newQActionGroup(this, nullptr, true);
     m->addAction(newQAction(g, "edit_retain_yes", NeedSelection(1), true));
     m->addAction(newQAction(g, "edit_retain_no", NeedSelection(1), true));
     m->addSeparator();
     m->addAction(newQAction(this, "edit_retain_toggle", NeedSelection(1)));
 
     m = newQMenu(this, "edit_stockroom", NeedSelection(1));
-    g = newQActionGroup(this, 0, true);
+    g = newQActionGroup(this, nullptr, true);
     m->addAction(newQAction(g, "edit_stockroom_yes", NeedSelection(1), true));
     m->addAction(newQAction(g, "edit_stockroom_no", NeedSelection(1), true));
     m->addSeparator();
@@ -1101,7 +1110,7 @@ void FrameWork::fileImportPeeronInventory()
 
 void FrameWork::fileImportBrickLinkInventory()
 {
-    fileImportBrickLinkInventory(0);
+    fileImportBrickLinkInventory(nullptr);
 }
 
 
@@ -1172,7 +1181,7 @@ bool FrameWork::createWindow(Document *doc)
     if (!doc)
         return false;
 
-    Window *window = 0;
+    Window *window = nullptr;
     foreach(QWidget *w, m_workspace->windowList()) {
         Window *ww = qobject_cast<Window *>(w);
 
@@ -1183,7 +1192,7 @@ bool FrameWork::createWindow(Document *doc)
     }
     if (!window) {
         m_undogroup->addStack(doc->undoStack());
-        window = new Window(doc, 0);
+        window = new Window(doc, nullptr);
         m_workspace->addWindow(window);
     }
 
@@ -1223,13 +1232,13 @@ void FrameWork::connectAllActions(bool do_connect, Window *window)
         for (int j = 0; j < list.count(); ++j) {
             QObject *co = list.at(j);
             QByteArray objName = co->objectName().toLatin1();
-            int len = objName.length();
+            uint len = uint(objName.length());
             if (!len || qstrncmp(slot.constData() + 3, objName.data(), len) || slot[len+3] != '_')
                 continue;
             const QMetaObject *smo = co->metaObject();
             int sigIndex = smo->indexOfMethod(slot.constData() + len + 4);
             if (sigIndex < 0) { // search for compatible signals
-                int slotlen = qstrlen(slot.constData() + len + 4) - 1;
+                uint slotlen = qstrlen(slot.constData() + len + 4) - 1;
                 for (int k = 0; k < co->metaObject()->methodCount(); ++k) {
                     if (smo->method(k).methodType() != QMetaMethod::Signal)
                         continue;
@@ -1287,11 +1296,11 @@ void FrameWork::connectWindow(QWidget *w)
         if (m_details) {
             disconnect(m_current_window.data(), &Window::currentChanged,
                        this, &FrameWork::setItemDetailHelper);
-            setItemDetailHelper(0);
+            setItemDetailHelper(nullptr);
         }
-        m_undogroup->setActiveStack(0);
+        m_undogroup->setActiveStack(nullptr);
 
-        m_current_window = 0;
+        m_current_window = nullptr;
     }
 
     if (Window *window = qobject_cast<Window *>(w)) {
@@ -1446,7 +1455,7 @@ void FrameWork::statisticsUpdate()
         Document::Statistics stat = m_current_window->document()->statistics(not_exclude);
         ccode = m_current_window->document()->currencyCode();
 
-        if (stat.value() != stat.minValue()) {
+        if (!qFuzzyCompare(stat.value(), stat.minValue())) {
             valstr = tr("Value: %1 (min. %2)").
                      arg(Currency::toString(stat.value(), ccode, Currency::NoSymbol)).
                      arg(Currency::toString(stat.minValue(), ccode, Currency::NoSymbol));
@@ -1454,7 +1463,7 @@ void FrameWork::statisticsUpdate()
             valstr = tr("Value: %1").arg(Currency::toString(stat.value(), ccode, Currency::NoSymbol));
         }
 
-        if (stat.weight() == -DBL_MIN) {
+        if (qFuzzyCompare(stat.weight(), -DBL_MIN)) {
             wgtstr = tr("Weight: -");
         } else {
             double weight = stat.weight();
@@ -1531,7 +1540,7 @@ void FrameWork::transferJobProgressUpdate(int p, int t)
 
 void FrameWork::configure()
 {
-    configure(0);
+    configure(nullptr);
 }
 
 void FrameWork::configure(const char *page)
@@ -1646,10 +1655,10 @@ void FrameWork::toggleItemDetailPopup()
 
     if (!m_details->isVisible()) {
         m_details->show();
-        setItemDetailHelper(m_current_window ? m_current_window->current() : 0);
+        setItemDetailHelper(m_current_window ? m_current_window->current() : nullptr);
     } else {
         m_details->hide();
-        setItemDetailHelper(0);
+        setItemDetailHelper(nullptr);
     }
 }
 
@@ -1657,7 +1666,7 @@ void FrameWork::setItemDetailHelper(Document::Item *docitem)
 {
     if (m_details) {
         if (!docitem)
-            m_details->setItem(0, 0);
+            m_details->setItem(nullptr, nullptr);
         else if (m_details->isVisible())
             m_details->setItem(docitem->item(), docitem->color());
     }

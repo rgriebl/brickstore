@@ -27,9 +27,9 @@
 #  define MODELTEST_ATTACH(x)   ;
 #endif
 
-namespace {
 
-class ReportModel : public QAbstractListModel {
+class ReportModel : public QAbstractListModel
+{
     Q_OBJECT
 
 public:
@@ -50,16 +50,11 @@ public slots:
     }
 
 public:
-    QModelIndex index(int row, int column, const QModelIndex &parent) const
-    {
-        if (hasIndex(row, column, parent))
-            return parent.isValid() ? QModelIndex() : createIndex(row, column, const_cast<Report *>(m_reports.at(row)));
-        return QModelIndex();
-    }
+    QModelIndex index(int row, int column, const QModelIndex &parent) const override;
 
     const Report *report(const QModelIndex &index) const
     {
-        return index.isValid() ? static_cast<const Report *>(index.internalPointer()) : 0;
+        return index.isValid() ? static_cast<const Report *>(index.internalPointer()) : nullptr;
     }
 
     QModelIndex index(Report *report) const
@@ -67,38 +62,47 @@ public:
         return report ? createIndex(m_reports.indexOf(report), 0, report) : QModelIndex();
     }
 
-    virtual int rowCount(const QModelIndex &parent) const
-    {
-        return parent.isValid() ? 0 : m_reports.count();
-    }
-
-    QVariant data(const QModelIndex &index, int role) const
-    {
-        if (!index.isValid() || index.column() != 0 || !report(index))
-            return QVariant();
-
-        QVariant res;
-        const Report *r = report(index);
-
-        if (role == Qt:: DisplayRole) {
-            res = r->name();
-        }
-
-        return res;
-    }
-
-    QVariant headerData(int section, Qt::Orientation orient, int role) const
-    {
-        if ((orient == Qt::Horizontal) && (role == Qt::DisplayRole) && (section == 0))
-            return tr("Name");
-        return QVariant();
-    }
+    int rowCount(const QModelIndex &parent) const override;\
+    QVariant data(const QModelIndex &index, int role) const override;
+    QVariant headerData(int section, Qt::Orientation orient, int role) const override;
 
 private:
     QList<Report *> m_reports;
 };
 
-} // namespace
+QModelIndex ReportModel::index(int row, int column, const QModelIndex &parent) const
+{
+    if (hasIndex(row, column, parent))
+        return parent.isValid() ? QModelIndex() : createIndex(row, column, const_cast<Report *>(m_reports.at(row)));
+    return QModelIndex();
+}
+
+int ReportModel::rowCount(const QModelIndex &parent) const
+{
+    return parent.isValid() ? 0 : m_reports.count();
+}
+
+QVariant ReportModel::data(const QModelIndex &index, int role) const
+{
+    if (!index.isValid() || index.column() != 0 || !report(index))
+        return QVariant();
+
+    QVariant res;
+    const Report *r = report(index);
+
+    if (role == Qt:: DisplayRole) {
+        res = r->name();
+    }
+
+    return res;
+}
+
+QVariant ReportModel::headerData(int section, Qt::Orientation orient, int role) const
+{
+    if ((orient == Qt::Horizontal) && (role == Qt::DisplayRole) && (section == 0))
+        return tr("Name");
+    return QVariant();
+}
 
 
 SelectReportDialog::SelectReportDialog(QWidget *parent, Qt::WindowFlags f)
@@ -139,7 +143,7 @@ const Report *SelectReportDialog::report() const
         return static_cast<ReportModel *>(w_list->model())->report(idx);
     }
     else
-        return 0;
+        return nullptr;
 }
 
 #include "selectreportdialog.moc"

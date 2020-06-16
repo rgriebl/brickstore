@@ -254,7 +254,7 @@ Window::Window(Document *doc, QWidget *parent)
     w_list->verticalHeader()->setDefaultSectionSize(dd->defaultItemHeight(w_list));
     w_list->installEventFilter(this);
 
-    int em = w_list->fontMetrics().width(QChar('m'));
+    int em = w_list->fontMetrics().horizontalAdvance(QChar('m'));
     for (int i = 0; i < w_list->model()->columnCount(); i++) {
         int width = w_list->model()->headerData(i, Qt::Horizontal, Qt::UserRole).toInt();
         if (width)
@@ -993,7 +993,7 @@ void Window::on_edit_qty_divide_triggered()
 
     int divisor = 1;
 
-    if (MessageBox::getInteger(this, tr("Divide the quantities of all selected items by this number.<br /><br />(A check is made if all quantites are exactly divisible without reminder, before this operation is performed.)"), QString::null, divisor, 1, 1000)) {
+    if (MessageBox::getInteger(this, tr("Divide the quantities of all selected items by this number.<br /><br />(A check is made if all quantites are exactly divisible without reminder, before this operation is performed.)"), QString(), divisor, 1, 1000)) {
         if (divisor > 1) {
             int lots_with_errors = 0;
 

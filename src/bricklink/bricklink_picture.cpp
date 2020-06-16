@@ -32,17 +32,14 @@
 
 namespace BrickLink {
 
-class PictureLoaderJob : public ThreadPoolJob {
+class PictureLoaderJob : public ThreadPoolJob
+{
 public:
     PictureLoaderJob(Picture *pic)
         : ThreadPoolJob(), m_pic(pic)
     { }
 
-    virtual void run()
-    {
-        if (m_pic && !m_pic->valid())
-            m_pic->load_from_disk();
-    }
+    void run() override;
 
     Picture *picture() const
     {
@@ -53,6 +50,12 @@ private:
     Picture *m_pic;
 };
 
+void PictureLoaderJob::run()
+{
+    if (m_pic && !m_pic->valid())
+        m_pic->load_from_disk();
+}
+
 }
 
 const QPixmap BrickLink::Picture::pixmap() const
@@ -60,7 +63,7 @@ const QPixmap BrickLink::Picture::pixmap() const
     QPixmap p;
     QString k = key();
 
-    if (!QPixmapCache::find(k, p)) {
+    if (!QPixmapCache::find(k, &p)) {
         p = QPixmap::fromImage(m_image);
         QPixmapCache::insert(k, p);
     }
@@ -77,7 +80,7 @@ QSize BrickLink::Core::pictureSize(const ItemType *itt) const
 BrickLink::Picture *BrickLink::Core::picture(const Item *item, const BrickLink::Color *color, bool high_priority)
 {
     if (!item)
-        return 0;
+        return nullptr;
 
     quint64 key = quint64(color ? color->id() : uint(-1)) << 32 | quint64(item->itemType()->id()) << 24 | quint64(item->index() + 1);
 
@@ -91,7 +94,7 @@ BrickLink::Picture *BrickLink::Core::picture(const Item *item, const BrickLink::
         pic = new Picture(item, color);
         if (!m_pic_cache.insert(key, pic, pic->cost())) {
             qWarning("Can not add picture to cache (cache max/cur: %d/%d, cost: %d)", m_pic_cache.maxCost(), m_pic_cache.totalCost(), pic->cost());
-            return 0;
+            return nullptr;
         }
         need_to_load = true;
     }
@@ -114,8 +117,8 @@ BrickLink::Picture *BrickLink::Core::picture(const Item *item, const BrickLink::
 BrickLink::Picture *BrickLink::Core::largePicture(const Item *item, bool high_priority)
 {
     if (!item)
-        return 0;
-    return picture(item, 0, high_priority);
+        return nullptr;
+    return picture(item, nullptr, high_priority);
 }
 
 BrickLink::Picture::Picture(const Item *item, const Color *color)

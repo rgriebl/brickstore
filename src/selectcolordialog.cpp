@@ -50,7 +50,7 @@ void SelectColorDialog::checkColor(const BrickLink::Color *col, bool ok)
         p->animateClick();
 }
 
-int SelectColorDialog::exec(const QRect &pos)
+int SelectColorDialog::execAtPosition(const QRect &pos)
 {
     if (pos.isValid())
         Utility::setPopupPos(this, pos);

@@ -58,45 +58,49 @@ public:
     QListView *      w_thumbs;
     FilterEdit *     w_filter;
     QButtonGroup *   w_viewmode;
-    bool             m_inv_only;
     ItemDetailPopup *m_details;
+    bool             m_inv_only;
 };
 
 
-
-class CategoryDelegate : public BrickLink::ItemDelegate {
+class CategoryDelegate : public BrickLink::ItemDelegate
+{
 public:
-    CategoryDelegate(QObject *parent = 0)
+    CategoryDelegate(QObject *parent = nullptr)
         : BrickLink::ItemDelegate(parent, BrickLink::ItemDelegate::AlwaysShowSelection)
     { }
 
-    virtual void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
-    {
-        QStyleOptionViewItem myoption(option);
-        if (index.isValid() && qvariant_cast<const BrickLink::Category *>(index.data(BrickLink::CategoryPointerRole)) == BrickLink::CategoryModel::AllCategories)
-            myoption.font.setBold(true);
-        BrickLink::ItemDelegate::paint(painter, myoption, index);
-    }
+    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 };
 
+void CategoryDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
+{
+    QStyleOptionViewItem myoption(option);
+    if (index.isValid() && qvariant_cast<const BrickLink::Category *>(index.data(BrickLink::CategoryPointerRole)) == BrickLink::CategoryModel::AllCategories)
+        myoption.font.setBold(true);
+    BrickLink::ItemDelegate::paint(painter, myoption, index);
+}
 
-class ItemThumbsDelegate : public BrickLink::ItemDelegate {
+
+class ItemThumbsDelegate : public BrickLink::ItemDelegate
+{
 public:
-    ItemThumbsDelegate(QObject *parent = 0)
+    ItemThumbsDelegate(QObject *parent = nullptr)
         : BrickLink::ItemDelegate(parent, BrickLink::ItemDelegate::AlwaysShowSelection)
     { }
 
-    virtual QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
-    {
-        if (index.column() == 0) {
-            const BrickLink::Item *item = qvariant_cast<const BrickLink::Item *>(index.data(BrickLink::ItemPointerRole));
-            return item ? item->itemType()->pictureSize() : QSize(80, 60);
-        }
-        else
-            return BrickLink::ItemDelegate::sizeHint(option, index);
-    }
+    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 };
 
+QSize ItemThumbsDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
+{
+    if (index.column() == 0) {
+        const BrickLink::Item *item = qvariant_cast<const BrickLink::Item *>(index.data(BrickLink::ItemPointerRole));
+        return item ? item->itemType()->pictureSize() : QSize(80, 60);
+    } else {
+        return BrickLink::ItemDelegate::sizeHint(option, index);
+    }
+}
 
 
 SelectItem::SelectItem(QWidget *parent)
@@ -109,7 +113,7 @@ SelectItem::SelectItem(QWidget *parent)
 
 void SelectItem::init()
 {
-    d->m_details = 0;
+    d->m_details = nullptr;
 
     d->w_item_types_label = new QLabel(this);
     d->w_item_types = new QComboBox(this);
@@ -296,7 +300,7 @@ bool SelectItem::eventFilter(QObject *o, QEvent *e)
                 d->m_details->show();
             } else {
                 d->m_details->hide();
-                d->m_details->setItem(0);
+                d->m_details->setItem(nullptr);
             }
             e->accept();
             return true;
@@ -356,7 +360,7 @@ const BrickLink::ItemType *SelectItem::currentItemType() const
         QModelIndex idx = d->itemTypeModel->index(d->w_item_types->currentIndex(), 0);
         return d->itemTypeModel->itemType(idx);
     } else {
-        return 0;
+        return nullptr;
     }
 }
 
@@ -383,7 +387,7 @@ void SelectItem::categoryChanged()
 const BrickLink::Category *SelectItem::currentCategory() const
 {
     QModelIndexList idxlst = d->w_categories->selectionModel()->selectedRows();
-    return idxlst.isEmpty() ? 0 : d->categoryModel->category(idxlst.front());
+    return idxlst.isEmpty() ? nullptr : d->categoryModel->category(idxlst.front());
 }
 
 bool SelectItem::setCurrentCategory(const BrickLink::Category *cat)
@@ -399,7 +403,7 @@ bool SelectItem::setCurrentCategory(const BrickLink::Category *cat)
 const BrickLink::Item *SelectItem::currentItem() const
 {
     QModelIndexList idxlst = d->w_items->selectionModel()->selectedRows();
-    return idxlst.isEmpty() ? 0 : d->itemModel->item(idxlst.front());
+    return idxlst.isEmpty() ? nullptr : d->itemModel->item(idxlst.front());
 }
 
 bool SelectItem::setCurrentItem(const BrickLink::Item *item, bool force_items_category)
@@ -431,7 +435,7 @@ bool SelectItem::setCurrentItem(const BrickLink::Item *item, bool force_items_ca
 
 void SelectItem::setViewMode(int mode)
 {
-    QWidget *w = 0;
+    QWidget *w = nullptr;
     switch (mode) {
     case 0 : w = d->w_items; break;
     case 1 : w = d->w_itemthumbs; break;
@@ -513,7 +517,7 @@ void SelectItem::applyFilter()
 QSize SelectItem::sizeHint() const
 {
     QFontMetrics fm = fontMetrics();
-    return QSize(120 * fm.width('x'), 20 * fm.height());
+    return QSize(120 * fm.horizontalAdvance('x'), 20 * fm.height());
 }
 
 void SelectItem::showContextMenu(const QPoint &p)

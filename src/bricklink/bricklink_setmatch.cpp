@@ -260,7 +260,7 @@ class MatchThread : public QThread {
     Q_OBJECT
 public:
     MatchThread(bool all, BrickLink::SetMatch *sm, const BrickLink::InvItemList &list)
-        : QThread(sm), m_all(all), m_sm(sm), m_list(list)
+        : QThread(sm), m_sm(sm), m_list(list), m_all(all)
     { }
 
     void run()
@@ -281,9 +281,9 @@ signals:
     void progress(int, int);
 
 private:
-    bool m_all;
     BrickLink::SetMatch *m_sm;
     BrickLink::InvItemList m_list;
+    bool m_all;
 };
 
 } // namespace BrickLink
@@ -417,9 +417,9 @@ QPair<int, QList<const BrickLink::Item *> > BrickLink::SetMatch::set_match_recur
     // check parts left, when not taking this one
     result_do_not_take = set_match_recursive(next, parts);
 
-    int idx = (it - m_inventories.begin());
+    auto idx = (it - m_inventories.begin());
 
-    if (!m_doesnotfit[idx]) {
+    if (!m_doesnotfit[int(idx)]) {
         InvMatchList parts_copy = parts;
 
         // check parts left, when taking this one
@@ -430,7 +430,7 @@ QPair<int, QList<const BrickLink::Item *> > BrickLink::SetMatch::set_match_recur
         // if it doesn't fit into the starting set, it won't fit in a smaller set
         if (!ok && (parts.count() == m_startcount)) {
             //qWarning("does not fit: %d:  %s", idx, it->first->id());
-            m_doesnotfit[idx] = true;
+            m_doesnotfit[int(idx)] = true;
         }
     }
 
@@ -474,7 +474,7 @@ void BrickLink::SetMatch::create_inventory_list()
 
     if (m_algorithm == Greedy) {
         GreedyComparePairs gpc(m_prefer == PreferSmallerSets);
-        qSort(m_inventories.begin(), m_inventories.end(), gpc);
+        std::sort(m_inventories.begin(), m_inventories.end(), gpc);
     }
     qWarning("InvMatchList has %d entries", m_inventories.count());
 }

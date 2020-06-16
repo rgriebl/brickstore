@@ -25,9 +25,6 @@
 #include "itemdetailpopup.h"
 #include "ldraw/renderwidget.h"
 
-#if defined(Q_OS_MAC)
-#  include "macx.h"
-#endif
 
 class GlassButton : public QToolButton {
 public:
@@ -177,10 +174,10 @@ ItemDetailPopup::ItemDetailPopup(QWidget *parent)
     connect(m_view, &QAbstractButton::clicked,
             m_ldraw, &LDraw::RenderOffscreenWidget::resetCamera);
 #endif
-#if defined(Q_OS_MAC)
-    createWinId();
-    MacExtra::setWindowShadow(this, false);
-#endif
+//TODO5 #if defined(Q_OS_MAC)
+//    createWinId();
+//    MacExtra::setWindowShadow(this, false);
+//#endif
 }
 
 ItemDetailPopup::~ItemDetailPopup()
@@ -260,7 +257,7 @@ void ItemDetailPopup::redraw()
             m_blpic->setPixmap(m_pic->pixmap());
         }
         else
-            m_blpic->setText(QString::null);
+            m_blpic->setText(QString());
     }
 }
 

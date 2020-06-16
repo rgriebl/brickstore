@@ -23,16 +23,16 @@ class SelectItemDialog : public QDialog, private Ui::SelectItemDialog {
     Q_OBJECT
 
 public:
-    SelectItemDialog(bool only_with_inventory, QWidget *parent = 0, Qt::WindowFlags f = 0);
+    SelectItemDialog(bool only_with_inventory, QWidget *parent = nullptr, Qt::WindowFlags f = nullptr);
 
     void setItemType(const BrickLink::ItemType *);
     void setItem(const BrickLink::Item *);
     const BrickLink::Item *item() const;
 
-    int exec(const QRect &pos = QRect());
+    int execAtPosition(const QRect &pos = QRect());
 
 protected:
-    virtual void showEvent(QShowEvent *);
+    void showEvent(QShowEvent *) override;
 
 private slots:
     void checkItem(const BrickLink::Item *, bool);

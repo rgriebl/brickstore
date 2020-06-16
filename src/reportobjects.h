@@ -82,7 +82,7 @@ public:
     { }
 
     Size &operator=(const Size &) = default;
-    Size &operator=(const QSizeF &sf) { *this = sf; return *this; }
+    Size &operator=(const QSizeF &sf) { QSizeF::operator=(sf); return *this; }
 
     static QScriptValue toScriptValue(QScriptEngine *engine, const Size &s)
     {
@@ -236,17 +236,17 @@ public:
     }
 
 public slots:
-    void setRgb(int value) { d.setRgb(value); }
+    void setRgb(uint value) { d.setRgb(value); }
     void setRgb(int r, int g, int b) { d.setRgb(r, g, b); }
-    Color *light() const { return new Color(d.light()); }
-    Color *dark() const { return new Color(d.dark()); }
+    Color *light() const { return new Color(d.lighter()); }
+    Color *dark() const { return new Color(d.darker()); }
 
 private:
     int red() const        { return d.red(); }
     int green() const      { return d.green(); }
     int blue() const       { return d.blue(); }
     QString name() const   { return d.name(); }
-    int rgb() const        { return d.rgb(); }
+    uint rgb() const       { return d.rgb(); }
     int hue() const        { return d.hue(); }
     int saturation() const { return d.saturation(); }
     int value() const      { return d.value(); }

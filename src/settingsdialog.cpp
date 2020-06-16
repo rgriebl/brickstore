@@ -67,7 +67,7 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent, Qt
 
     w_upd_reset->setAttribute(Qt::WA_MacSmallSize);
 #if defined(Q_OS_MAC)
-    w_currency_update->setStyle(new QWindowsStyle());
+  //TODO5  w_currency_update->setStyle(new QWindowsStyle());
 #endif
 
     w_docdir->insertItem(0, style()->standardIcon(QStyle::SP_DirIcon), QString());

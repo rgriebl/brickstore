@@ -374,7 +374,7 @@ void ImportBLCart::gotten()
             QStringList strlist = items_line.split(sep, QString::SkipEmptyParts);
 
             foreach(const QString &str, strlist) {
-                BrickLink::InvItem *ii = 0;
+                BrickLink::InvItem *ii = nullptr;
 
                 QRegExp rx_ids(QLatin1String("HEIGHT='[0-9]*' SRC='http[s]://img.bricklink.com/([A-Z])/([^ ]+).(gif|jpg|png|jpeg)' NAME="), Qt::CaseInsensitive);
                 QRegExp rx_qty_price(QLatin1String(" VALUE=\"([0-9]+)\">(&nbsp;\\(x[0-9]+\\))?<BR>Qty Available: <B>[0-9]+</B><BR>Each:&nbsp;<B>([A-Z $]+)([0-9.]+)</B>"), Qt::CaseInsensitive);
@@ -547,7 +547,7 @@ BrickLink::InvItemList *ImportPeeronInventory::fromPeeron(QIODevice *peeron)
 
     QTextStream in(peeron);
 
-    QDomDocument doc(QString::null);
+    QDomDocument doc;
     QDomElement root = BrickLink::core()->createItemListXML(doc, BrickLink::XMLHint_Inventory, BrickLink::InvItemList());
     doc.appendChild(root);
 

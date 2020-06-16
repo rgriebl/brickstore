@@ -58,7 +58,7 @@ void SelectItemDialog::checkItem(const BrickLink::Item *item, bool ok)
         p->animateClick();
 }
 
-int SelectItemDialog::exec(const QRect &pos)
+int SelectItemDialog::execAtPosition(const QRect &pos)
 {
     if (pos.isValid())
         Utility::setPopupPos(this, pos);

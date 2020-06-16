@@ -1,6 +1,7 @@
 RELPWD = $$replace(PWD,$$_PRO_FILE_PWD_,.)
 
 QT *= core_private concurrent
+macos:QT *= gui_private
 
 INCLUDEPATH += $$RELPWD
 DEPENDPATH  += $$RELPWD
@@ -48,7 +49,7 @@ SOURCES += \
 
 
 macx {
-  HEADERS += macx.h
-  OBJECTIVE_SOURCES += macx.mm
+#  HEADERS +=
+#  OBJECTIVE_SOURCES +=
   LIBS += -framework Cocoa -framework Carbon
 }

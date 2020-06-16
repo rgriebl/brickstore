@@ -1301,7 +1301,7 @@ bool BrickLink::Core::parseLDrawModel(QFile &f, InvItemList &items, uint *invali
     QHash<QString, InvItem *> mergehash;
     QStringList recursion_detection;
 
-    return parseLDrawModelInternal(f, QString::null, items, invalid_items, mergehash, recursion_detection);
+    return parseLDrawModelInternal(f, QString(), items, invalid_items, mergehash, recursion_detection);
 }
 
 bool BrickLink::Core::parseLDrawModelInternal(QFile &f, const QString &model_name, InvItemList &items, uint *invalid_items, QHash<QString, InvItem *> &mergehash, QStringList &recursion_detection)

@@ -297,18 +297,18 @@ void PriceGuideWidget::recalcLayoutNormal(const QSize &s, const QFontMetrics &fm
     cw [0] = 0; // not used
     cw [1] = 0;
     for (int i = 0; i < BrickLink::ConditionCount; i++)
-        cw [1] = qMax(cw [1], fm.width(d->m_str_cond [i]));
-    cw [2] = qMax(fm.width(d->m_str_qty), fm.width("0000 (000000)"));
-    cw [3] = fm.width(Currency::toString(9000, d->m_ccode, Currency::LocalSymbol));
+        cw [1] = qMax(cw [1], fm.horizontalAdvance(d->m_str_cond [i]));
+    cw [2] = qMax(fm.horizontalAdvance(d->m_str_qty), fm.horizontalAdvance("0000 (000000)"));
+    cw [3] = fm.horizontalAdvance(Currency::toString(9000, d->m_ccode, Currency::LocalSymbol));
     for (int i = 0; i < BrickLink::PriceCount; i++)
-        cw [3] = qMax(cw [3], fm.width(d->m_str_price [i]));
+        cw [3] = qMax(cw [3], fm.horizontalAdvance(d->m_str_price [i]));
 
     for (int i = 1; i < 4; i++)
         cw [i] += (2 * hborder);
 
     dx = 0;
     for (int i = 0; i < BrickLink::TimeCount; i++)
-        dx = qMax(dx, fmb.width(d->m_str_vtime [i]));
+        dx = qMax(dx, fmb.horizontalAdvance(d->m_str_vtime [i]));
 
     if ((cw [1] + cw [2] + BrickLink::PriceCount * cw [3]) < dx)
         cw [1] = dx - (cw [2] + BrickLink::PriceCount * cw [3]);
@@ -329,7 +329,7 @@ void PriceGuideWidget::recalcLayoutNormal(const QSize &s, const QFontMetrics &fm
         dx += cw [3];
     }
 
-    d->m_cells << cell(cell::Header, dx, 0, s.width() - dx, ch, 0, QString::null);
+    d->m_cells << cell(cell::Header, dx, 0, s.width() - dx, ch, 0, QString());
 
     dx = cw [1] + cw [2] + cw [3] * BrickLink::PriceCount;
     dy = ch;
@@ -341,11 +341,11 @@ void PriceGuideWidget::recalcLayoutNormal(const QSize &s, const QFontMetrics &fm
         for (int j = 0; j < BrickLink::ConditionCount; j++)
             d->m_cells << cell(cell::Header, 0, dy + j * ch, cw [1], ch, Qt::AlignCenter, d->m_str_cond [j]);
 
-        d->m_cells << cell(cell::Update, cw [1], dy, dx - cw [1], ch * BrickLink::ConditionCount, Qt::AlignCenter | Qt::TextWordWrap, QString::null);
+        d->m_cells << cell(cell::Update, cw [1], dy, dx - cw [1], ch * BrickLink::ConditionCount, Qt::AlignCenter | Qt::TextWordWrap, QString());
         dy += (BrickLink::ConditionCount * ch);
     }
 
-    d->m_cells << cell(cell::Header, 0, dy, cw [1], s.height() - dy, 0, QString::null);
+    d->m_cells << cell(cell::Header, 0, dy, cw [1], s.height() - dy, 0, QString());
 
     dy = ch;
     bool flip = false;
@@ -356,7 +356,7 @@ void PriceGuideWidget::recalcLayoutNormal(const QSize &s, const QFontMetrics &fm
         for (BrickLink::Condition j = BrickLink::Condition(0); j < BrickLink::ConditionCount; j = BrickLink::Condition(j+1)) {
             dx = cw [1];
 
-            cell c(cell::Quantity, dx, dy, cw [2], ch, Qt::AlignRight | Qt::AlignVCenter, QString::null, flip);
+            cell c(cell::Quantity, dx, dy, cw [2], ch, Qt::AlignRight | Qt::AlignVCenter, QString(), flip);
             c.m_time      = i;
             c.m_condition = j;
             d->m_cells << c;
@@ -364,7 +364,7 @@ void PriceGuideWidget::recalcLayoutNormal(const QSize &s, const QFontMetrics &fm
             dx += cw [2];
 
             for (BrickLink::Price k = BrickLink::Price(0); k < BrickLink::PriceCount; k = BrickLink::Price(k+1)) {
-                cell c(cell::Price, dx, dy, cw [3], ch, Qt::AlignRight  | Qt::AlignVCenter, QString::null, flip);
+                cell c(cell::Price, dx, dy, cw [3], ch, Qt::AlignRight  | Qt::AlignVCenter, QString(), flip);
                 c.m_time      = i;
                 c.m_condition = j;
                 c.m_price     = k;
@@ -388,14 +388,15 @@ void PriceGuideWidget::recalcLayoutHorizontal(const QSize &s, const QFontMetrics
 
     cw [0] = 0;
     for (int i = 0; i < BrickLink::TimeCount; i++)
-        cw [0] = qMax(cw [0], qMax(fmb.width(d->m_str_htime [i][0]), fmb.width(d->m_str_htime [i][1])));
+        cw [0] = qMax(cw [0], qMax(fmb.horizontalAdvance(d->m_str_htime [i][0]),
+                fmb.horizontalAdvance(d->m_str_htime [i][1])));
     cw [1] = 0;
     for (int i = 0; i < BrickLink::ConditionCount; i++)
-        cw [1] = qMax(cw [1], fm.width(d->m_str_cond [i]));
-    cw [2] = qMax(fm.width(d->m_str_qty), fm.width("0000 (000000)"));
-    cw [3] = fm.width(Currency::toString(9000, d->m_ccode, Currency::NoSymbol));
+        cw [1] = qMax(cw [1], fm.horizontalAdvance(d->m_str_cond [i]));
+    cw [2] = qMax(fm.horizontalAdvance(d->m_str_qty), fm.horizontalAdvance("0000 (000000)"));
+    cw [3] = fm.horizontalAdvance(Currency::toString(9000, d->m_ccode, Currency::NoSymbol));
     for (int i = 0; i < BrickLink::PriceCount; i++)
-        cw [3] = qMax(cw [3], fm.width(d->m_str_price [i]));
+        cw [3] = qMax(cw [3], fm.horizontalAdvance(d->m_str_price [i]));
 
     for (int i = 0; i < 4; i++)
         cw [i] += (2 * hborder);
@@ -416,7 +417,7 @@ void PriceGuideWidget::recalcLayoutHorizontal(const QSize &s, const QFontMetrics
         dx += cw [3];
     }
 
-    d->m_cells << cell(cell::Header, dx, dy, s.width() - dx, ch, 0, QString::null);
+    d->m_cells << cell(cell::Header, dx, dy, s.width() - dx, ch, 0, QString());
 
     dx = 0;
     dy = ch;
@@ -430,9 +431,9 @@ void PriceGuideWidget::recalcLayoutHorizontal(const QSize &s, const QFontMetrics
         }
     }
 
-    d->m_cells << cell(cell::Header, dx, dy, cw [0] + cw [1], s.height() - dy, 0, QString::null);
+    d->m_cells << cell(cell::Header, dx, dy, cw [0] + cw [1], s.height() - dy, 0, QString());
 
-    d->m_cells << cell(cell::Update, cw [0] + cw [1], ch, cw [2] + BrickLink::PriceCount * cw [3], BrickLink::TimeCount * BrickLink::ConditionCount * ch, Qt::AlignCenter | Qt::TextWordWrap, QString::null);
+    d->m_cells << cell(cell::Update, cw [0] + cw [1], ch, cw [2] + BrickLink::PriceCount * cw [3], BrickLink::TimeCount * BrickLink::ConditionCount * ch, Qt::AlignCenter | Qt::TextWordWrap, QString());
 
     dy = ch;
     bool flip = false;
@@ -441,14 +442,14 @@ void PriceGuideWidget::recalcLayoutHorizontal(const QSize &s, const QFontMetrics
         for (BrickLink::Condition j = BrickLink::Condition(0); j < BrickLink::ConditionCount; j = BrickLink::Condition(j+1)) {
             dx = cw [0] + cw [1];
 
-            cell c(cell::Quantity, dx, dy, cw [2], ch, Qt::AlignRight | Qt::AlignVCenter, QString::null, flip);
+            cell c(cell::Quantity, dx, dy, cw [2], ch, Qt::AlignRight | Qt::AlignVCenter, QString(), flip);
             c.m_time      = i;
             c.m_condition = j;
             d->m_cells << c;
             dx += cw [2];
 
             for (BrickLink::Price k = BrickLink::Price(0); k < BrickLink::PriceCount; k = BrickLink::Price(k+1)) {
-                cell c(cell::Price, dx, dy, cw [3], ch, Qt::AlignRight  | Qt::AlignVCenter, QString::null, flip);
+                cell c(cell::Price, dx, dy, cw [3], ch, Qt::AlignRight  | Qt::AlignVCenter, QString(), flip);
                 c.m_time      = i;
                 c.m_condition = j;
                 c.m_price     = k;
@@ -469,20 +470,21 @@ void PriceGuideWidget::recalcLayoutVertical(const QSize &s, const QFontMetrics &
 
     int dx, dy;
 
-    cw [0] = fm.width(d->m_str_qty);
+    cw [0] = fm.horizontalAdvance(d->m_str_qty);
 
     for (int i = 0; i < BrickLink::PriceCount; i++)
-        cw [0] = qMax(cw [0], fm.width(d->m_str_price [i]));
+        cw [0] = qMax(cw [0], fm.horizontalAdvance(d->m_str_price [i]));
     cw [0] += 2 * hborder;
 
-    cw [1] = qMax(fm.width(Currency::toString(9000, d->m_ccode, Currency::NoSymbol)), fm.width("0000 (000000)"));
+    cw [1] = qMax(fm.horizontalAdvance(Currency::toString(9000, d->m_ccode, Currency::NoSymbol)),
+                  fm.horizontalAdvance("0000 (000000)"));
     for (int i = 0; i < BrickLink::ConditionCount; i++)
-        cw [1] = qMax(cw [1], fm.width(d->m_str_cond [i]));
+        cw [1] = qMax(cw [1], fm.horizontalAdvance(d->m_str_cond [i]));
     cw [1] += 2 * hborder;
 
     dx = 0;
     for (int i = 0; i < BrickLink::TimeCount; i++)
-        dx = qMax(dx, fmb.width(d->m_str_vtime [i]));
+        dx = qMax(dx, fmb.horizontalAdvance(d->m_str_vtime [i]));
 
     if (dx > (cw [0] + BrickLink::ConditionCount * cw [1])) {
         dx -= (cw [0] + BrickLink::ConditionCount * cw [1]);
@@ -505,10 +507,10 @@ void PriceGuideWidget::recalcLayoutVertical(const QSize &s, const QFontMetrics &
         dx += cw [1];
     }
 
-    d->m_cells << cell(cell::Header, dx, dy, s.width() - dx, ch, 0, QString::null);
+    d->m_cells << cell(cell::Header, dx, dy, s.width() - dx, ch, 0, QString());
     dy += ch;
 
-    d->m_cells << cell(cell::Empty, dx, dy, s.width() - dx, s.height() - dy, 0, QString::null);
+    d->m_cells << cell(cell::Empty, dx, dy, s.width() - dx, s.height() - dy, 0, QString());
 
     dx = 0;
     dy = ch;
@@ -519,7 +521,7 @@ void PriceGuideWidget::recalcLayoutVertical(const QSize &s, const QFontMetrics &
 
         d->m_cells << cell(cell::Header, dx, dy, cw [0], ch, Qt::AlignLeft | Qt::AlignVCenter, d->m_str_qty, false);
 
-        d->m_cells << cell(cell::Update, dx + cw [0], dy, BrickLink::ConditionCount * cw [1], (1 + BrickLink::PriceCount) * ch, Qt::AlignCenter | Qt::TextWordWrap, QString::null);
+        d->m_cells << cell(cell::Update, dx + cw [0], dy, BrickLink::ConditionCount * cw [1], (1 + BrickLink::PriceCount) * ch, Qt::AlignCenter | Qt::TextWordWrap, QString());
         dy += ch;
 
         for (int j = 0; j < BrickLink::PriceCount; j++) {
@@ -527,9 +529,9 @@ void PriceGuideWidget::recalcLayoutVertical(const QSize &s, const QFontMetrics &
             dy += ch;
         }
     }
-    d->m_cells << cell(cell::Header, dx, dy, cw [0], s.height() - dy, 0, QString::null);
+    d->m_cells << cell(cell::Header, dx, dy, cw [0], s.height() - dy, 0, QString());
 
-    d->m_cells << cell(cell::Empty, dx + cw [0], dy, BrickLink::ConditionCount * cw [1], s.height() - dy, 0, QString::null);
+    d->m_cells << cell(cell::Empty, dx + cw [0], dy, BrickLink::ConditionCount * cw [1], s.height() - dy, 0, QString());
 
 
     dx = cw [0];
@@ -540,7 +542,7 @@ void PriceGuideWidget::recalcLayoutVertical(const QSize &s, const QFontMetrics &
         for (BrickLink::Time i = BrickLink::Time(0); i < BrickLink::TimeCount; i = BrickLink::Time(i+1)) {
             dy += ch;
 
-            cell c(cell::Quantity, dx, dy, cw [1], ch, Qt::AlignRight | Qt::AlignVCenter, QString::null, false);
+            cell c(cell::Quantity, dx, dy, cw [1], ch, Qt::AlignRight | Qt::AlignVCenter, QString(), false);
             c.m_time = i;
             c.m_condition = j;
             d->m_cells << c;
@@ -549,7 +551,7 @@ void PriceGuideWidget::recalcLayoutVertical(const QSize &s, const QFontMetrics &
             bool flip = true;
 
             for (BrickLink::Price k = BrickLink::Price(0); k < BrickLink::PriceCount; k = BrickLink::Price(k+1)) {
-                cell c(cell::Price, dx, dy, cw [1], ch, Qt::AlignRight | Qt::AlignVCenter, QString::null, flip);
+                cell c(cell::Price, dx, dy, cw [1], ch, Qt::AlignRight | Qt::AlignVCenter, QString(), flip);
                 c.m_time = i;
                 c.m_condition = j;
                 c.m_price = k;
@@ -593,7 +595,7 @@ void PriceGuideWidget::paintCell(QPainter *p, const QRect &r, Qt::Alignment alig
     r2.adjust(hborder, 0, -hborder, 0);
 
     p->setPen(palette().color(QPalette::Text));
-    p->drawText(r2, align, str);
+    p->drawText(r2, int(align), str);
 }
 
 void PriceGuideWidget::paintEvent(QPaintEvent *e)

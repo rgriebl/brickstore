@@ -190,7 +190,7 @@ public:
     virtual void sort(int section, Qt::SortOrder so)
     {
         emit layoutAboutToBeChanged();
-        qStableSort(m_orderlist.begin(), m_orderlist.end(), orderCompare(section, so));
+        std::sort(m_orderlist.begin(), m_orderlist.end(), orderCompare(section, so));
         emit layoutChanged();
     }
 

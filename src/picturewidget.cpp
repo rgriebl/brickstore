@@ -231,7 +231,7 @@ void PictureWidget::redraw()
         d->m_img_height = d->m_pic->image().height();
     }
     else {
-        d->m_tlabel->setText(QString::null);
+        d->m_tlabel->setText(QString());
         d->m_img = QImage();
     }
     update();
@@ -347,7 +347,7 @@ void LargePictureWidget::redraw()
         else if (d->m_pic->valid())
             setPixmap(d->m_pic->pixmap());
         else
-            setText(QString::null);
+            setText(QString());
     }
 }
 

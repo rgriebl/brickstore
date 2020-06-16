@@ -30,7 +30,7 @@
 
 
 TaskLinksWidget::TaskLinksWidget(QWidget *parent)
-        : QLabel(parent), m_win(0)
+        : QLabel(parent), m_win(nullptr)
 {
     connect(FrameWork::inst(), &FrameWork::windowActivated,
             this, &TaskLinksWidget::windowUpdate);
@@ -125,7 +125,7 @@ void TaskLinksWidget::languageChange()
 // ----------------------------------------------------------------------
 
 TaskPriceGuideWidget::TaskPriceGuideWidget(QWidget *parent)
-        : PriceGuideWidget(parent), m_win(0), m_dock(0)
+        : PriceGuideWidget(parent), m_win(nullptr), m_dock(nullptr)
 {
     setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
@@ -166,7 +166,8 @@ void TaskPriceGuideWidget::selectionUpdate(const Document::ItemList &list)
 {
     bool ok = (m_win && (list.count() == 1));
 
-    setPriceGuide(ok ? BrickLink::core()->priceGuide(list.front()->item(), list.front()->color(), true) : 0);
+    setPriceGuide(ok ? BrickLink::core()->priceGuide(list.front()->item(),
+                                                     list.front()->color(), true) : nullptr);
 }
 
 void TaskPriceGuideWidget::setPrice(double p)
@@ -197,7 +198,7 @@ void TaskPriceGuideWidget::fixParentDockWindow()
                    this, &TaskPriceGuideWidget::topLevelChanged);
     }
 
-    m_dock = 0;
+    m_dock = nullptr;
 
     for (QObject *p = parent(); p; p = p->parent()) {
         if (qobject_cast<QDockWidget *>(p)) {
@@ -231,7 +232,7 @@ void TaskPriceGuideWidget::dockLocationChanged(Qt::DockWidgetArea area)
 // ----------------------------------------------------------------------
 
 TaskInfoWidget::TaskInfoWidget(QWidget *parent)
-        : QStackedWidget(parent), m_win(0)
+        : QStackedWidget(parent), m_win(nullptr)
 {
     setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
@@ -283,7 +284,7 @@ void TaskInfoWidget::currencyUpdate()
 void TaskInfoWidget::selectionUpdate(const Document::ItemList &list)
 {
     if (!m_win || (list.count() == 0)) {
-        m_pic->setPicture(0);
+        m_pic->setPicture(nullptr);
         setCurrentWidget(m_pic);
     }
     else if (list.count() == 1) {
@@ -297,7 +298,7 @@ void TaskInfoWidget::selectionUpdate(const Document::ItemList &list)
         QString valstr, wgtstr;
         QString ccode = m_win->document()->currencyCode();
 
-        if (stat.value() != stat.minValue()) {
+        if (!qFuzzyCompare(stat.value(), stat.minValue())) {
             valstr = QString("%1 (%2 %3)").
                      arg(Currency::toString(stat.value(), ccode, Currency::LocalSymbol)).
                      arg(tr("min.")).
@@ -306,7 +307,7 @@ void TaskInfoWidget::selectionUpdate(const Document::ItemList &list)
         else
             valstr = Currency::toString(stat.value(), ccode, Currency::LocalSymbol);
 
-        if (stat.weight() == -DBL_MIN) {
+        if (qFuzzyCompare(stat.weight(), -DBL_MIN)) {
             wgtstr = "-";
         }
         else {
@@ -330,7 +331,7 @@ void TaskInfoWidget::selectionUpdate(const Document::ItemList &list)
 //  if (( stat.errors ( ) > 0 ) && Config::inst ( )->showInputErrors ( ))
 //   s += QString ( "<br /><br />&nbsp;&nbsp;%1: %2" ).arg ( tr( "Errors" )).arg ( stat.errors ( ));
 
-        m_pic->setPicture(0);
+        m_pic->setPicture(nullptr);
         m_text->setText(s);
         setCurrentWidget(m_text);
     }
@@ -353,7 +354,7 @@ void TaskInfoWidget::refresh()
 // ----------------------------------------------------------------------
 
 TaskAppearsInWidget::TaskAppearsInWidget(QWidget *parent)
-    : AppearsInWidget(parent), m_win(0)
+    : AppearsInWidget(parent), m_win(nullptr)
 {
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 
@@ -364,7 +365,7 @@ QSize TaskAppearsInWidget::minimumSizeHint() const
 {
     const QFontMetrics &fm = fontMetrics();
 
-    return QSize(fm.width('m') * 20, fm.height() * 10);
+    return QSize(fm.horizontalAdvance('m') * 20, fm.height() * 10);
 }
 
 QSize TaskAppearsInWidget::sizeHint() const
@@ -390,7 +391,7 @@ void TaskAppearsInWidget::windowUpdate(Window *win)
 void TaskAppearsInWidget::selectionUpdate(const Document::ItemList &list)
 {
     if (!m_win || list.isEmpty())
-        setItem(0, 0);
+        setItem(nullptr, nullptr);
     else if (list.count() == 1)
         setItem(list.first()->item(), list.first()->color());
     else

@@ -145,13 +145,13 @@ Q_OUTOFLINE_TEMPLATE void qParallelSortHelper(RandomAccessIterator begin, Random
 
     int threadCount = QThread::idealThreadCount();
     if (threadCount == 1 || span < 1000) {
-        qSort(begin, end, lessThan);
+        std::sort(begin, end, lessThan);
         return;
     }
 
     T *tmp = new T[span];
     qParallelSortThread(begin, end, lessThan, tmp, threadCount);
-    delete tmp;
+    delete [] tmp;
 }
 
 template <typename RandomAccessIterator, typename T>
@@ -179,10 +179,6 @@ inline void qParallelSort(RandomAccessIterator start, RandomAccessIterator end, 
 template<typename Container>
 inline void qParallelSort(Container &c)
 {
-#ifdef Q_CC_BOR
-    // Work around Borland 5.5 optimizer bug
-    c.detach();
-#endif
     if (!c.empty())
         QAlgorithmsPrivate::qParallelSortHelper(c.begin(), c.end(), *c.begin());
 }

@@ -37,13 +37,13 @@ public:
     void setReadOnly(bool ro);
     bool isReadOnly() const;
 
-    int defaultItemHeight(const QWidget *w = 0) const;
+    int defaultItemHeight(const QWidget *w = nullptr) const;
 
     QSize sizeHint(const QStyleOptionViewItem &option1, const QModelIndex &idx) const override;
-    virtual void paint(QPainter *p, const QStyleOptionViewItem &option1, const QModelIndex &idx) const;
-    virtual bool editorEvent(QEvent *e, QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &idx);
-    virtual QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
-    virtual void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+    void paint(QPainter *p, const QStyleOptionViewItem &option1, const QModelIndex &idx) const override;
+    bool editorEvent(QEvent *e, QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &idx) override;
+    QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+    void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
     bool helpEvent(QHelpEvent *event, QAbstractItemView *view, const QStyleOptionViewItem &option, const QModelIndex &index) override;
 
 protected:
@@ -66,7 +66,7 @@ protected:
 
     static QVector<QColor> s_shades;
     static QHash<BrickLink::Status, QIcon> s_status_icons;
-    static QCache<qint64, QPixmap> s_tag_cache;
+    static QCache<quint64, QPixmap> s_tag_cache;
     static QCache<int, QPixmap> s_stripe_cache;
 
     static void clearCaches();

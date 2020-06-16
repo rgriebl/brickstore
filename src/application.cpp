@@ -221,7 +221,7 @@ void Application::updateTranslations()
     m_trans_brickstore = new QTranslator(this);
 
     QStringList spath = externalResourceSearchPath("/translations");
-    if (qSharedBuild() && (isDeveloperBuild || isUnix))
+    if (qSharedBuild() && (isDeveloperBuild | isUnix))
         spath << QLibraryInfo::location(QLibraryInfo::TranslationsPath);
 
     bool qtLoaded = false, bsLoaded = false;

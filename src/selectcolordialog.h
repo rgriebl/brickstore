@@ -23,15 +23,15 @@ class SelectColorDialog : public QDialog, private Ui::SelectColorDialog {
     Q_OBJECT
 
 public:
-    SelectColorDialog(QWidget *parent = 0, Qt::WindowFlags f = 0);
+    SelectColorDialog(QWidget *parent = nullptr, Qt::WindowFlags f = nullptr);
 
     void setColor(const BrickLink::Color *);
     const BrickLink::Color *color() const;
 
-    virtual int exec(const QRect &pos = QRect());
+    int execAtPosition(const QRect &pos = QRect());
 
 protected:
-    virtual void showEvent(QShowEvent *);
+    void showEvent(QShowEvent *) override;
 
 private slots:
     void checkColor(const BrickLink::Color *, bool);

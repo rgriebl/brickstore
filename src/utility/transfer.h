@@ -37,7 +37,7 @@ public:
 
     QUrl url() const                 { return m_url; }
     QUrl effectiveUrl() const        { return m_effective_url; }
-    QString errorString() const      { return isFailed() ? m_error_string : QString::null; }
+    QString errorString() const      { return isFailed() ? m_error_string : QString(); }
     int responseCode() const         { return m_respcode; }
     QIODevice *file() const          { return m_file; }
     QByteArray *data() const         { return m_data; }

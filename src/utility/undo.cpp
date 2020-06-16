@@ -179,7 +179,7 @@ public:
             QString s = UndoAction::tr(m_strings[i]);
             if (!(i & 1))
                 s = s.arg(1000);
-            int ws = fm.width(s);
+            int ws = fm.horizontalAdvance(s);
             w = qMax(w, ws);
         }
         s.setWidth(w + 2*fw + 8);

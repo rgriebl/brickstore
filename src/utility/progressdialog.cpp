@@ -40,7 +40,7 @@ ProgressDialog::ProgressDialog(Transfer *trans, QWidget *parent, Qt::WindowFlags
 
     setWindowTitle(qApp->applicationName());
 
-    int minwidth = fontMetrics().width('m') * 40;
+    int minwidth = fontMetrics().horizontalAdvance('m') * 40;
 
     QVBoxLayout *lay = new QVBoxLayout(this);
 

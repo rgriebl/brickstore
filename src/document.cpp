@@ -938,7 +938,7 @@ Document *Document::fileLoadFrom(const QString &name, const char *type, bool imp
         doc->setBrickLinkItems(*result.items);
         delete result.items;
 
-        doc->setFileName(import_only ? QString::null : name);
+        doc->setFileName(import_only ? QString() : name);
 
         if (!import_only)
             FrameWork::inst()->addToRecentFiles(name);
@@ -1131,7 +1131,7 @@ bool Document::fileSaveTo(const QString &s, const char *type, bool export_only, 
     if (f.open(QIODevice::WriteOnly)) {
         QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-        QDomDocument doc((hint == BrickLink::XMLHint_BrickStore) ? QString("BrickStoreXML") : QString::null);
+        QDomDocument doc((hint == BrickLink::XMLHint_BrickStore) ? QString("BrickStoreXML") : QString());
         doc.appendChild(doc.createProcessingInstruction("xml", "version=\"1.0\" encoding=\"UTF-8\""));
 
         QDomElement item_elem = BrickLink::core()->createItemListXML(doc, hint, itemlist, m_currencycode);
@@ -1174,7 +1174,7 @@ bool Document::fileSaveTo(const QString &s, const char *type, bool export_only, 
 
 void Document::fileExportBrickLinkInvReqClipboard(const ItemList &itemlist)
 {
-    QDomDocument doc(QString::null);
+    QDomDocument doc;
     doc.appendChild(BrickLink::core()->createItemListXML(doc, BrickLink::XMLHint_Inventory, itemlist, m_currencycode));
 
     QApplication::clipboard()->setText(doc.toString(), QClipboard::Clipboard);
@@ -1192,7 +1192,7 @@ void Document::fileExportBrickLinkWantedListClipboard(const ItemList &itemlist)
         if (!wantedlist.isEmpty())
             extra.insert("WANTEDLISTID", wantedlist);
 
-        QDomDocument doc(QString::null);
+        QDomDocument doc;
         doc.appendChild(BrickLink::core()->createItemListXML(doc, BrickLink::XMLHint_WantedList, itemlist, m_currencycode, extra.isEmpty() ? 0 : &extra));
 
         QApplication::clipboard()->setText(doc.toString(), QClipboard::Clipboard);
@@ -1204,7 +1204,7 @@ void Document::fileExportBrickLinkWantedListClipboard(const ItemList &itemlist)
 
 void Document::fileExportBrickLinkXMLClipboard(const ItemList &itemlist)
 {
-    QDomDocument doc(QString::null);
+    QDomDocument doc;
     doc.appendChild(BrickLink::core()->createItemListXML(doc, BrickLink::XMLHint_MassUpload, itemlist, m_currencycode));
 
     QApplication::clipboard()->setText(doc.toString(), QClipboard::Clipboard);
@@ -1224,7 +1224,7 @@ void Document::fileExportBrickLinkUpdateClipboard(const ItemList &itemlist)
         }
     }
 
-    QDomDocument doc(QString::null);
+    QDomDocument doc;
     doc.appendChild(BrickLink::core()->createItemListXML(doc, BrickLink::XMLHint_MassUpdate, itemlist, m_currencycode));
 
     QApplication::clipboard()->setText(doc.toString(), QClipboard::Clipboard);
@@ -1940,7 +1940,7 @@ Document::ItemList DocumentProxyModel::sortItemList(const Document::ItemList &li
 {
     //qWarning("sort in: %d", list.count());
     Document::ItemList result(list);
-    qStableSort(result.begin(), result.end(), SortItemListCompare(this, sortColumn(), sortOrder()));
+    std::sort(result.begin(), result.end(), SortItemListCompare(this, sortColumn(), sortOrder()));
     //qWarning("sort out: %d", result.count());
     return result;
 }
