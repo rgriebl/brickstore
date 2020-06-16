@@ -98,7 +98,7 @@ int Utility::naturalCompare(const QString &name1, const QString &name2)
 
         // 4) naturally the same -> let the unicode order decide
         if (n1->isNull() && n2->isNull())
-            return special ? name1.compare(name2) : 0;
+            return special ? name1.localeAwareCompare(name2) : 0;
 
         // 5) found a difference
         if (*n1 != *n2)

@@ -230,7 +230,7 @@ public:
     QColor color(int id, int baseid = -1) const;
     QColor edgeColor(int id) const;
 
-    Part *partFromId(const char *id);
+    Part *partFromId(const QString &id);
     Part *partFromFile(const QString &filename);
 
 private:

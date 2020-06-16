@@ -55,10 +55,10 @@ namespace BrickLink {
 class ItemType {
 public:
     char id() const                 { return m_id; }
-    const char *name() const        { return m_name; }
-    QString apiName () const          { return QString(m_name).replace(" ", "_"); } //TODO5: brickstock has this
+    QString name() const            { return m_name; }
+    QString apiName () const        { return QString(m_name).replace(" ", "_"); } //TODO5: brickstock has this
 
-    const Category **categories() const { return m_categories; }
+    const QVector<const Category *> categories() const  { return m_categories; }
     bool hasInventories() const     { return m_has_inventories; }
     bool hasColors() const          { return m_has_colors; }
     bool hasYearReleased() const    { return m_has_year; }
@@ -66,8 +66,6 @@ public:
     bool hasSubConditions() const   { return m_has_subconditions; }
     char pictureId() const          { return m_picture_id; }
     QSize pictureSize() const;
-
-    ~ItemType();
 
 private:
     char  m_id;
@@ -79,12 +77,12 @@ private:
     bool  m_has_year          : 1;
     bool  m_has_subconditions : 1;
 
-    char *m_name;
+    QString m_name;
 
-    const Category **m_categories;
+    QVector<const Category *> m_categories;
 
 private:
-    ItemType();
+    ItemType() = default;
 
     friend class Core;
     friend class TextImport;
@@ -95,17 +93,15 @@ private:
 
 class Category {
 public:
-    uint id() const           { return m_id; }
-    const char *name() const  { return m_name; }
-
-    ~Category();
+    uint id() const       { return m_id; }
+    QString name() const  { return m_name; }
 
 private:
     uint     m_id;
-    char *   m_name;
+    QString  m_name;
 
 private:
-    Category();
+    Category() = default;
 
     friend class Core;
     friend class TextImport;
@@ -116,11 +112,11 @@ private:
 class Color {
 public:
     uint id() const           { return m_id; }
-    const char *name() const  { return m_name; }
+    QString name() const      { return m_name; }
     QColor color() const      { return m_color; }
 
-    const char *peeronName() const { return m_peeron_name; }
-    int ldrawId() const            { return m_ldraw_id; }
+    QString peeronName() const { return m_peeron_name; }
+    int ldrawId() const       { return m_ldraw_id; }
 
     enum TypeFlag {
         Solid        = 0x0001,
@@ -151,23 +147,21 @@ public:
 
     qreal popularity() const   { return m_popularity < 0 ? 0 : m_popularity; }
 
-    ~Color();
-
-    static const char *typeName(TypeFlag t);
+    static QString typeName(TypeFlag t);
 
 private:
+    QString m_name;
+    QString m_peeron_name;
     uint    m_id;
-    char *  m_name;
-    char *  m_peeron_name;
     int     m_ldraw_id;
     QColor  m_color;
     Type    m_type;
-    qreal   m_popularity;
-    quint16 m_year_from;
-    quint16 m_year_to;
+    qreal   m_popularity = 0;
+    quint16 m_year_from = 0;
+    quint16 m_year_to = 0;
 
 private:
-    Color();
+    Color() = default;
 
     friend class Core;
     friend class TextImport;
@@ -179,11 +173,11 @@ Q_DECLARE_OPERATORS_FOR_FLAGS(Color::Type)
 
 class Item {
 public:
-    const char *id() const                 { return m_id; }
-    const char *name() const               { return m_name; }
+    QString id() const                     { return m_id; }
+    QString name() const                   { return m_name; }
     const ItemType *itemType() const       { return m_item_type; }
-    const Category *category() const       { return m_categories [0]; }
-    const Category **allCategories() const { return m_categories; }
+    const Category *category() const       { return m_categories.isEmpty() ? nullptr : m_categories.constFirst(); }
+    const QVector<const Category *> allCategories() const  { return m_categories; }
     bool hasCategory(const Category *cat) const;
     bool hasInventory() const              { return (m_last_inv_update >= 0); }
     QDateTime inventoryUpdated() const     { QDateTime dt; if (m_last_inv_update >= 0) dt.setTime_t (m_last_inv_update); return dt; }
@@ -199,21 +193,21 @@ public:
     uint index() const { return m_index; }   // only for internal use (picture/priceguide hashes)
 
 private:
-    char *            m_id;
-    char *            m_name;
-    const ItemType *  m_item_type;
-    const Category ** m_categories;
+    QString           m_name;
+    QString           m_id;
+    const ItemType *  m_item_type = nullptr;
+    QVector<const Category *> m_categories;
     const Color *     m_color;
-    time_t            m_last_inv_update;
+    time_t            m_last_inv_update = -1;
     float             m_weight;
     quint32           m_index : 24;
     quint32           m_year  : 8;
 
-    mutable quint32 * m_appears_in;
-    mutable quint64 * m_consists_of;
+    mutable quint32 * m_appears_in = nullptr;
+    mutable quint64 * m_consists_of = nullptr;
 
 private:
-    Item();
+    Item() = default;
 
     void setAppearsIn(const AppearsIn &hash) const;
     void setConsistsOf(const InvItemList &items) const;
@@ -251,6 +245,7 @@ private:
     };
 
     static int compare(const Item **a, const Item **b);
+    static bool lessThan(const Item *a, const Item *b);
 
     friend class Core;
     friend class TextImport;
@@ -318,11 +313,11 @@ public:
     const Color *color() const         { return m_color; }
     void setColor(const Color *c)      { m_color = c; }
 
-    const char *itemId() const         { return m_item ? m_item->id() : (m_incomplete ? m_incomplete->m_item_id.constData() : 0); }
-    const char *itemName() const       { return m_item ? m_item->name() : (m_incomplete ? m_incomplete->m_item_name.constData() : 0); }
-    const char *colorName() const      { return m_color ? m_color->name() : (m_incomplete ? m_incomplete->m_color_name.constData() : 0); }
-    const char *categoryName() const   { return category() ? category()->name() : (m_incomplete ? m_incomplete->m_category_name.constData() : 0); }
-    const char *itemTypeName() const   { return itemType() ? itemType()->name() : (m_incomplete ? m_incomplete->m_itemtype_name.constData() : 0); }
+    QString itemId() const             { return m_item ? m_item->id() : (m_incomplete ? m_incomplete->m_item_id : QString()); }
+    QString itemName() const           { return m_item ? m_item->name() : (m_incomplete ? m_incomplete->m_item_name : QString()); }
+    QString colorName() const          { return m_color ? m_color->name() : (m_incomplete ? m_incomplete->m_color_name : QString()); }
+    QString categoryName() const       { return category() ? category()->name() : (m_incomplete ? m_incomplete->m_category_name : QString()); }
+    QString itemTypeName() const       { return itemType() ? itemType()->name() : (m_incomplete ? m_incomplete->m_itemtype_name : QString()); }
     int itemYearReleased() const       { return m_item ? m_item->yearReleased() : 0; }
 
     Status status() const              { return m_status; }
@@ -377,11 +372,11 @@ public:
     void setCounterPart(bool b)        { m_cpart = b; }
 
     struct Incomplete {
-        QByteArray m_item_id;
-        QByteArray m_item_name;
-        QByteArray m_itemtype_name;
-        QByteArray m_color_name;
-        QByteArray m_category_name;
+        QString m_item_id;
+        QString m_item_name;
+        QString m_itemtype_name;
+        QString m_color_name;
+        QString m_category_name;
     };
 
     const Incomplete *isIncomplete() const { return m_incomplete; }
@@ -609,9 +604,8 @@ private:
     bool readPeeronColors(const QString &name);
     bool readInventory(const QString &path, const Item *item);
 
-    const Category *findCategoryByName(const char *name, int len = -1);
-    const Item *findItem(char type, const char *id);
-    void appendCategoryToItemType(const Category *cat, ItemType *itt);
+    const Category *findCategoryByName(const QStringRef &name) const;
+    const Item *findItem(char type, const QString &id);
 
     void calculateColorPopularity();
 
@@ -635,28 +629,28 @@ class ColorModel : public StaticPointerModel {
 public:
     ColorModel(QObject *parent);
 
-    virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
+    virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
-    virtual QVariant data(const QModelIndex &index, int role) const;
-    virtual QVariant headerData(int section, Qt::Orientation orient, int role) const;
+    virtual QVariant data(const QModelIndex &index, int role) const override;
+    virtual QVariant headerData(int section, Qt::Orientation orient, int role) const override;
 
     using StaticPointerModel::index;
     QModelIndex index(const Color *color) const;
     const Color *color(const QModelIndex &index) const;
 
-    bool isFiltered() const;
+    bool isFiltered() const override;
     void setFilterItemType(const ItemType *it);
     void setFilterType(Color::Type type);
     void unsetFilterType();
     void setFilterPopularity(qreal p);
 
 protected:
-    int pointerCount() const;
-    const void *pointerAt(int index) const;
-    int pointerIndexOf(const void *pointer) const;
+    int pointerCount() const override;
+    const void *pointerAt(int index) const override;
+    int pointerIndexOf(const void *pointer) const override;
 
-    bool filterAccepts(const void *pointer) const;
-    bool lessThan(const void *pointer1, const void *pointer2, int column) const;
+    bool filterAccepts(const void *pointer) const override;
+    bool lessThan(const void *pointer1, const void *pointer2, int column) const override;
 
 private:
     const ItemType *m_itemtype_filter;
@@ -675,26 +669,26 @@ public:
 
     static const Category *AllCategories;
 
-    virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
+    virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
-    virtual QVariant data(const QModelIndex &index, int role) const;
-    virtual QVariant headerData(int section, Qt::Orientation orient, int role) const;
+    virtual QVariant data(const QModelIndex &index, int role) const override;
+    virtual QVariant headerData(int section, Qt::Orientation orient, int role) const override;
 
     using StaticPointerModel::index;
     QModelIndex index(const Category *category) const;
     const Category *category(const QModelIndex &index) const;
 
-    bool isFiltered() const;
+    bool isFiltered() const override;
     void setFilterItemType(const ItemType *it);
     void setFilterAllCategories(bool);
 
 protected:
-    int pointerCount() const;
-    const void *pointerAt(int index) const;
-    int pointerIndexOf(const void *pointer) const;
+    int pointerCount() const override;
+    const void *pointerAt(int index) const override;
+    int pointerIndexOf(const void *pointer) const override;
 
-    bool filterAccepts(const void *pointer) const;
-    bool lessThan(const void *pointer1, const void *pointer2, int column) const;
+    bool filterAccepts(const void *pointer) const override;
+    bool lessThan(const void *pointer1, const void *pointer2, int column) const override;
 
 private:
     const ItemType *m_itemtype_filter;
@@ -890,13 +884,13 @@ public:
     const QImage colorImage(const Color *col, int w, int h) const;
 
     const Color *color(uint id) const;
-    const Color *colorFromName(const char *name) const;
-    const Color *colorFromPeeronName(const char *peeron_name) const;
+    const Color *colorFromName(const QString &name) const;
+    const Color *colorFromPeeronName(const QString &peeron_name) const;
     const Color *colorFromLDrawId(int ldraw_id) const;
     const Category *category(uint id) const;
     const Category *categoryFromName(const char *name, int len = -1) const;
     const ItemType *itemType(char id) const;
-    const Item *item(char tid, const char *id) const;
+    const Item *item(char tid, const QString &id) const;
 
     PriceGuide *priceGuide(const Item *item, const Color *color, bool high_priority = false);
     void flushPriceGuidesToUpdate(); //TODO5: brickstock has this

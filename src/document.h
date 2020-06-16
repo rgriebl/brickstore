@@ -277,15 +277,15 @@ private:
     ItemList         m_items;
 
     QString          m_currencycode;
-    quint64          m_error_mask;
+    quint64          m_error_mask = 0;
     QString          m_filename;
     QString          m_title;
     QUuid            m_uuid;  // for autosave
     QTimer           m_autosave_timer;
 
-    UndoStack *      m_undo;
+    UndoStack *      m_undo = nullptr;
 
-    BrickLink::Order *m_order;
+    BrickLink::Order *m_order = nullptr;
 
     static QList<Document *> s_documents;
 };

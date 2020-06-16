@@ -1566,15 +1566,15 @@ QString Document::dataForToolTipRole(Item *it, Field f) const
         if (!it->item())
             break;
 
-        const BrickLink::Category **catpp = it->item()->allCategories();
+        const auto allcats = it->item()->allCategories();
 
-        if (!catpp[1]) {
-            return catpp[0]->name();
+        if (allcats.size() == 1) {
+            return allcats[0]->name();
         }
         else {
-            QString str = QLatin1String("<b>") + QLatin1String(catpp[0]->name()) + QLatin1String("</b>");
-            while (*++catpp)
-                str = str + QLatin1String("<br />") + QLatin1String(catpp [0]->name());
+            QString str = QLatin1String("<b>") + allcats[0]->name() + QLatin1String("</b>");
+            for (int i = 1; i < allcats.size(); ++i)
+                str = str + QLatin1String("<br />") + allcats[i]->name();
             return str;
         }
         break;
@@ -1874,17 +1874,17 @@ int DocumentProxyModel::compare(const Document::Item *i1, const Document::Item *
             return i1->status() - i2->status();
     }
     case Document::Picture     :
-    case Document::PartNo      : return Utility::naturalCompare(QLatin1String(i1->itemId()),
-                                                                QLatin1String(i2->itemId()));
-    case Document::Description : return Utility::naturalCompare(QLatin1String(i1->itemName()),
-                                                                QLatin1String(i2->itemName()));
+    case Document::PartNo      : return Utility::naturalCompare(i1->itemId(),
+                                                                i2->itemId());
+    case Document::Description : return Utility::naturalCompare(i1->itemName(),
+                                                                i2->itemName());
 
-    case Document::Color       : return qstrcmp(i1->colorName(), i2->colorName());
-    case Document::Category    : return qstrcmp(i1->categoryName(), i2->categoryName());
-    case Document::ItemType    : return qstrcmp(i1->itemTypeName(), i2->itemTypeName());
+    case Document::Color       : return i1->colorName().localeAwareCompare(i2->colorName());
+    case Document::Category    : return i1->categoryName().localeAwareCompare(i2->categoryName());
+    case Document::ItemType    : return i1->itemTypeName().localeAwareCompare(i2->itemTypeName());
 
-    case Document::Comments    : return i1->comments().compare(i2->comments());
-    case Document::Remarks     : return i1->remarks().compare(i2->remarks());
+    case Document::Comments    : return i1->comments().localeAwareCompare(i2->comments());
+    case Document::Remarks     : return i1->remarks().localeAwareCompare(i2->remarks());
 
     case Document::LotId       : return i1->lotId() - i2->lotId();
     case Document::Quantity    : return i1->quantity() - i2->quantity();

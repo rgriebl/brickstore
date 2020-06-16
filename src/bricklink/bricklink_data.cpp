@@ -19,12 +19,9 @@
 #include "bricklink.h"
 
 
-BrickLink::Color::Color() : m_name(0), m_peeron_name(0), m_popularity(0), m_year_from(0), m_year_to(0) { }
-BrickLink::Color::~Color() { delete [] m_name; delete [] m_peeron_name; }
-
-const char *BrickLink::Color::typeName(TypeFlag t)
+QString BrickLink::Color::typeName(TypeFlag t)
 {
-    static QMap<TypeFlag, const char *> colortypes;
+    static QMap<TypeFlag, QString> colortypes;
     if (colortypes.isEmpty()) {
         colortypes.insert(Solid,    "Solid");
         colortypes.insert(Transparent, "Transparent");
@@ -43,9 +40,9 @@ namespace BrickLink {
 
 QDataStream &operator << (QDataStream &ds, const Color *col)
 {
-    ds << col->m_id << col->m_name << col->m_peeron_name << col->m_ldraw_id;
-    ds << col->m_color << quint32(col->m_type) << float(col->m_popularity);
-    ds << col->m_year_from << col->m_year_to;
+    ds << col->m_id << col->m_name.toUtf8().constData() << col->m_peeron_name.toUtf8().constData()
+       << col->m_ldraw_id << col->m_color << quint32(col->m_type) << float(col->m_popularity)
+       << col->m_year_from << col->m_year_to;
     return ds;
 }
 
@@ -55,10 +52,15 @@ QDataStream &operator >> (QDataStream &ds, BrickLink::Color *col)
 
     quint32 flags;
     float popularity;
-    ds >> col->m_id >> col->m_name >> col->m_peeron_name >> col->m_ldraw_id;
+    char *name;
+    char *peeronName;
+
+    ds >> col->m_id >> name >> peeronName >> col->m_ldraw_id;
     ds >> col->m_color >> flags >> popularity;
     ds >> col->m_year_from >> col->m_year_to;
 
+    col->m_name = QString::fromUtf8(name);
+    col->m_peeron_name = QString::fromUtf8(peeronName);
     col->m_type = static_cast<BrickLink::Color::Type>(flags);
     col->m_popularity = qreal(popularity);
     return ds;
@@ -66,8 +68,6 @@ QDataStream &operator >> (QDataStream &ds, BrickLink::Color *col)
 
 } // namespace BrickLink
 
-BrickLink::ItemType::ItemType() : m_name(0), m_categories(0) { }
-BrickLink::ItemType::~ItemType() { delete [] m_name; delete [] m_categories; }
 
 QSize BrickLink::ItemType::pictureSize() const
 {
@@ -88,18 +88,11 @@ QDataStream &operator << (QDataStream &ds, const ItemType *itt)
     flags |= (itt->m_has_year          ? 0x08 : 0);
     flags |= (itt->m_has_subconditions ? 0x10 : 0);
 
-    ds << quint8(itt->m_id) << quint8(itt->m_picture_id) << itt->m_name << flags;
+    ds << quint8(itt->m_id) << quint8(itt->m_picture_id) << itt->m_name.toUtf8().constData() << flags;
 
-    quint32 catcount = 0;
-    if (itt->m_categories) {
-        for (const BrickLink::Category **catp = itt->m_categories; *catp; catp++)
-            catcount++;
-    }
-    ds << catcount;
-    if (catcount) {
-        for (const BrickLink::Category **catp = itt->m_categories; *catp; catp++)
-            ds << qint32((*catp)->id());
-    }
+    ds << quint32(itt->m_categories.size());
+    for (const BrickLink::Category *cat : itt->m_categories)
+        ds << qint32(cat->id());
 
     return ds;
 }
@@ -111,19 +104,20 @@ QDataStream &operator >> (QDataStream &ds, BrickLink::ItemType *itt)
     quint8 flags = 0;
     quint32 catcount = 0;
     quint8 id = 0, picid = 0;
-    ds >> id >> picid >> itt->m_name >> flags >> catcount;
+    char *name;
+    ds >> id >> picid >> name >> flags >> catcount;
 
+    itt->m_name = QString::fromUtf8(name);
     itt->m_id = id;
     itt->m_picture_id = id;
 
-    itt->m_categories = new const BrickLink::Category * [catcount + 1];
+    itt->m_categories.resize(catcount);
 
     for (quint32 i = 0; i < catcount; i++) {
         qint32 id = 0;
         ds >> id;
-        itt->m_categories [i] = BrickLink::core()->category(id);
+        itt->m_categories[i] = BrickLink::core()->category(id);
     }
-    itt->m_categories [catcount] = 0;
 
     itt->m_has_inventories   = flags & 0x01;
     itt->m_has_colors        = flags & 0x02;
@@ -135,41 +129,45 @@ QDataStream &operator >> (QDataStream &ds, BrickLink::ItemType *itt)
 
 } // namespace BrickLink
 
-BrickLink::Category::Category() : m_name(0) { }
-BrickLink::Category::~Category() { delete [] m_name; }
 
 namespace BrickLink {
 
 QDataStream &operator << (QDataStream &ds, const BrickLink::Category *cat)
 {
-    return ds << cat->m_id << cat->m_name;
+    return ds << cat->m_id << cat->m_name.toUtf8().constData();
 }
 
 QDataStream &operator >> (QDataStream &ds, BrickLink::Category *cat)
 {
     cat->~Category();
-    return ds >> cat->m_id >> cat->m_name;
+    char *name;
+    ds >> cat->m_id >> name;
+    cat->m_name = QString::fromUtf8(name);
+    return ds;
 }
 
 } // namespace BrickLink
 
-BrickLink::Item::Item() : m_id(0), m_name(0), m_categories(0), m_last_inv_update(-1), m_appears_in(0), m_consists_of(0) { }
-BrickLink::Item::~Item() { delete [] m_id; delete [] m_name; delete [] m_categories; delete [] m_appears_in; delete [] m_consists_of; }
+BrickLink::Item::~Item()
+{
+    delete [] m_appears_in;
+    delete [] m_consists_of;
+}
 
 bool BrickLink::Item::hasCategory(const BrickLink::Category *cat) const
 {
-    for (const Category **catp = m_categories; *catp; catp++) {
-        if (*catp == cat)
+    for (const Category *c: m_categories) {
+        if (c == cat)
             return true;
     }
     return false;
 }
 
-int BrickLink::Item::compare(const BrickLink::Item **a, const BrickLink::Item **b)
+bool BrickLink::Item::lessThan(const BrickLink::Item *a, const BrickLink::Item *b)
 {
-    int d = ((*a)->m_item_type->id() - (*b)->m_item_type->id());
+    int d = (a->m_item_type->id() - b->m_item_type->id());
 
-    return d ? d : qstrcmp((*a)->m_id, (*b)->m_id);
+    return d == 0 ? (a->m_id.compare(b->m_id) < 0) : (d < 0);
 }
 
 
@@ -317,21 +315,16 @@ namespace BrickLink {
 
 QDataStream &operator << (QDataStream &ds, const BrickLink::Item *item)
 {
-    ds << item->m_id << item->m_name << quint8(item->m_item_type->id());
+    ds << item->m_id.toUtf8().constData() << item->m_name.toUtf8().constData()
+       << quint8(item->m_item_type->id());
 
-    quint32 catcount = 0;
-    if (item->m_categories) {
-        for (const BrickLink::Category **catp = item->m_categories; *catp; catp++)
-            catcount++;
-    }
-    ds << catcount;
-    if (catcount) {
-        for (const BrickLink::Category **catp = item->m_categories; *catp; catp++)
-            ds << qint32((*catp)->id());
-    }
+    ds << quint32(item->m_categories.size());
+    for (const BrickLink::Category *cat : item->m_categories)
+        ds << qint32(cat->id());
 
     qint32 colorid = item->m_color ? qint32(item->m_color->id()) : -1;
-    ds << colorid << qint64(item->m_last_inv_update) << item->m_weight << quint32(item->m_index) << quint32(item->m_year);
+    ds << colorid << qint64(item->m_last_inv_update) << item->m_weight
+       << quint32(item->m_index) << quint32(item->m_year);
 
     if (item->m_appears_in && item->m_appears_in [0] && item->m_appears_in [1]) {
         quint32 *ptr = item->m_appears_in;
@@ -362,18 +355,21 @@ QDataStream &operator >> (QDataStream &ds, BrickLink::Item *item)
 
     quint8 ittid = 0;
     quint32 catcount = 0;
+    char *id;
+    char *name;
 
-    ds >> item->m_id >> item->m_name >> ittid >> catcount;
+    ds >> id >> name >> ittid >> catcount;
+    item->m_id = QString::fromUtf8(id);
+    item->m_name = QString::fromUtf8(name);
     item->m_item_type = BrickLink::core()->itemType(ittid);
 
-    item->m_categories = new const BrickLink::Category * [catcount + 1];
+    item->m_categories.resize(catcount);
 
     for (quint32 i = 0; i < catcount; i++) {
         qint32 id = 0;
         ds >> id;
-        item->m_categories [i] = BrickLink::core()->category(id);
+        item->m_categories[i] = BrickLink::core()->category(id);
     }
-    item->m_categories [catcount] = 0;
 
     qint32 colorid = 0;
     quint32 index = 0, year = 0;
@@ -613,7 +609,7 @@ namespace BrickLink {
 
 QDataStream &operator << (QDataStream &ds, const BrickLink::InvItem &ii)
 {
-    ds << QByteArray(ii.itemId());
+    ds << ii.itemId().toUtf8();
     ds << qint8(ii.itemType() ? ii.itemType()->id() : -1);
     ds << qint32(ii.color() ? ii.color()->id() : 0xffffffff);
 
@@ -636,7 +632,7 @@ QDataStream &operator >> (QDataStream &ds, BrickLink::InvItem &ii)
     ds >> itemtypeid;
     ds >> colorid;
 
-    const BrickLink::Item *item = BrickLink::core()->item(itemtypeid, itemid);
+    const BrickLink::Item *item = BrickLink::core()->item(itemtypeid, QString::fromUtf8(itemid));
     const BrickLink::Color *color = BrickLink::core()->color(colorid);
 
     ii.setItem(item);
@@ -647,10 +643,10 @@ QDataStream &operator >> (QDataStream &ds, BrickLink::InvItem &ii)
         inc = new BrickLink::InvItem::Incomplete;
         if (!item) {
             inc->m_item_id = itemid;
-            inc->m_itemtype_name = QByteArray(1, itemtypeid);
+            inc->m_itemtype_name = QLatin1Char(itemtypeid);
         }
         if (!color)
-            inc->m_color_name = QByteArray::number(colorid);
+            inc->m_color_name = QString::number(colorid);
     }
     ii.setIncomplete(inc);
 

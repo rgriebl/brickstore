@@ -18,6 +18,7 @@
 #include <QFileInfo>
 #include <QTextStream>
 #include <QtDebug>
+#include <QTimeZone>
 
 #include "utility.h"
 #include "bricklink.h"
@@ -37,27 +38,35 @@ QString decodeEntities(const QString &src)
     return ret;
 }
 
-static char *my_strdup(const char *str)
+QString decodeEntities(const char *src)
 {
-    if (!str) {
-        return nullptr;
-    } else if (!strchr(str, '&')) {
-        return strcpy(new char [strlen(str) + 1], str);
-    } else {
-        QString temp = QString::fromLatin1(str);
-        QByteArray out = decodeEntities(temp).toLatin1();
-        return strcpy(new char [out.length() + 1], out.constData());
-    }
+    // Regular Expressions would be easier, but too slow here
+
+    QString decoded(src);
+
+    int pos = decoded.indexOf(QLatin1String("&#"));
+    if (pos < 0)
+        return decoded;
+
+    do {
+        int endpos = decoded.indexOf(QLatin1Char(';'), pos + 2);
+        if (endpos < 0) {
+            pos += 2;
+        } else {
+            int unicode = decoded.midRef(pos + 2, endpos - pos - 2).toInt();
+            if (unicode > 0) {
+                decoded.replace(pos, endpos - pos + 1, QChar(unicode));
+                pos++;
+            } else {
+                pos = endpos + 1;
+            }
+        }
+        pos = decoded.indexOf(QLatin1String("&#"), pos);
+    } while (pos >= 0);
+
+    return decoded;
 }
 
-static bool my_strncmp(const char *s1, const char *s2, int len)
-{
-    while (*s1 && (len-- > 0)) {
-        if (*s1++ != *s2++)
-            return false;
-    }
-    return (len == 0) && (*s1 == 0);
-}
 
 void set_tz(const char *tz)
 {
@@ -109,58 +118,32 @@ time_t toUTC(const QDateTime &dt, const char *settz)
 }
 
 
-const BrickLink::Category *BrickLink::TextImport::findCategoryByName(const char *name, int len)
+const BrickLink::Category *BrickLink::TextImport::findCategoryByName(const QStringRef &name) const
 {
-    if (!name || !name [0])
-        return 0;
-    if (len < 0)
-        len = strlen(name);
-
-    foreach(const Category *cat, m_categories) {
-        if (my_strncmp(cat->name(), name, len))
+    if (name.isEmpty())
+        return nullptr;
+    for (const Category *cat : m_categories) {
+        if (cat->name() == name)
             return cat;
     }
-    return 0;
+    return nullptr;
 }
 
-const BrickLink::Item *BrickLink::TextImport::findItem(char tid, const char *id)
+const BrickLink::Item *BrickLink::TextImport::findItem(char tid, const QString &id)
 {
     Item key;
     key.m_item_type = m_item_types.value(tid);
-    key.m_id = const_cast<char *>(id);
+    key.m_id = id;
 
-    Item *keyp = &key;
+    if (!key.m_item_type || key.m_id.isEmpty())
+        return nullptr;
 
-    Item **itp = (Item **) bsearch(&keyp, m_items.data(), m_items.count(), sizeof(Item *), (int (*)(const void *, const void *)) Item::compare);
+    // Finds the lower bound in at most log(last - first) + 1 comparisons
+    auto it = std::lower_bound(m_items.constBegin(), m_items.constEnd(), &key, Item::lessThan);
+    if (it != m_items.constEnd() && !Item::lessThan(&key, *it))
+        return *it;
 
-    key.m_id = 0;
-    key.m_item_type = 0;
-
-    return itp ? *itp : 0;
-}
-
-void BrickLink::TextImport::appendCategoryToItemType(const Category *cat, ItemType *itt)
-{
-    bool found = false;
-    quint32 catcount = 0;
-    for (const Category **catp = itt->m_categories; catp && *catp; catp++) {
-        if (*catp == cat) {
-            found = true;
-            break;
-        }
-        catcount++;
-    }
-
-    if (found)
-        return;
-
-    const Category **catarr = new const Category * [catcount + 2];
-    memcpy(catarr, itt->m_categories, catcount * sizeof(const Category *));
-    catarr [catcount] = cat;
-    catarr [catcount + 1] = 0;
-
-    delete [] itt->m_categories;
-    itt->m_categories = catarr;
+    return nullptr;
 }
 
 namespace BrickLink {
@@ -175,7 +158,7 @@ template <> Category *TextImport::parse<Category> (uint count, const char **strs
 
     Category *cat = new Category();
     cat->m_id   = strtol(strs[0], 0, 10);
-    cat->m_name = my_strdup(strs[1]);
+    cat->m_name = decodeEntities(strs[1]);
 
     return cat;
 }
@@ -187,7 +170,7 @@ template <> Color *TextImport::parse<Color> (uint count, const char **strs)
 
     Color *col = new Color();
     col->m_id          = strtol(strs[0], 0, 10);
-    col->m_name        = my_strdup(strs[1]);
+    col->m_name        = strs[1];
     col->m_ldraw_id    = -1;
     col->m_color       = QColor(QString('#') + strs[2]);
     col->m_type        = 0;
@@ -228,7 +211,7 @@ template <> ItemType *TextImport::parse<ItemType> (uint count, const char **strs
     ItemType *itt = new ItemType();
     itt->m_id                = c;
     itt->m_picture_id        = (c == 'I') ? 'S' : c;
-    itt->m_name              = my_strdup(strs[1]);
+    itt->m_name              = strs[1];
     itt->m_has_inventories   = false;
     itt->m_has_colors        = (c == 'P' || c == 'G');
     itt->m_has_weight        = (c == 'B' || c == 'P' || c == 'G' || c == 'S' || c == 'I');
@@ -244,71 +227,61 @@ template <> Item *TextImport::parse<Item> (uint count, const char **strs)
         return 0;
 
     Item *item = new Item();
-    item->m_id        = my_strdup(strs[2]);
-    item->m_name      = my_strdup(strs[3]);
+    item->m_id        = strs[2];
+    item->m_name      = decodeEntities(strs[3]);
     item->m_item_type = m_current_item_type;
+    item->m_categories.clear();
 
-    // only allocate one block for name, id and category to speed up things
-
-    const char *pos = strs[1];
     const Category *maincat = m_categories.value(strtol(strs[0], 0, 10));
+    const QString allcats = decodeEntities(strs[1]);
+    QVector<QStringRef> auxcats = allcats.splitRef(QLatin1String(" / "));
 
-    if (maincat && pos [0]) {
-        pos += strlen(maincat->name());
-
-        if (*pos)
-            pos += 3;
-    }
-    const char *auxcat = pos;
-
-    uint catcount = 1;
-    const Category *catlist[256] = { maincat };
-
-    while ((pos = strstr(pos, " / "))) {
-        if (auxcat[0]) {
-            const Category *cat = findCategoryByName(auxcat, pos - auxcat);
-            if (cat)
-                catlist[catcount++] = cat;
-            else {
-                // The field separator ' / ' also appears in category names !!!
-                pos += 3;
-                continue;
-            }
+    int span = 0;
+    for (int i = 0; i < auxcats.size(); ++i) {
+        const QStringRef &current = auxcats.at(i);
+        const Category *cat;
+        if (!span) {
+            cat = findCategoryByName(current);
+        } else {
+            int start = auxcats.at(i - span).position();
+            int end = current.position() + current.length();
+            cat = findCategoryByName(current.string()->midRef(start, end - start));
         }
-        pos += 3;
-        auxcat = pos;
+        if (cat) {
+            item->m_categories.append(cat);
+            span = 0;
+        } else {
+            // The field separator ' / ' also appears in category names !!!
+            ++span;
+        }
     }
-    if (auxcat[0]) {
-        const Category *cat = findCategoryByName(auxcat);
-        if (cat)
-            catlist[catcount++] = cat;
-        else
-            qWarning() << "Invalid category name:" << auxcat;
+    if (span || item->m_categories.isEmpty()) {
+        qWarning() << "Not all categories could be resolved for item" << item->m_id << endl
+                   << "   " << allcats;
+    } else if (*item->m_categories.constBegin() != maincat) {
+        qWarning() << "The main category did not match for item" << item->m_id << endl
+                   << "   id=" << maincat->id() << "name=" << (*item->m_categories.constBegin())->name();
     }
-
-    item->m_categories = new const Category * [catcount + 1];
-    memcpy(item->m_categories, catlist, catcount * sizeof(const Category *));
-    item->m_categories[catcount] = 0;
 
     uint parsedfields = 4;
 
     if ((parsedfields < count) && (item->m_item_type->hasYearReleased())) {
-        int y = strtol(strs[parsedfields], 0, 10) - 1900;
+        int y = strtol(strs[parsedfields++], 0, 10) - 1900;
         item->m_year = ((y > 0) && (y < 255)) ? y : 0; // we only have 8 bits for the year
         parsedfields++;
-    }
-    else
+    } else {
         item->m_year = 0;
+    }
 
     if ((parsedfields < count) && (item->m_item_type->hasWeight())) {
-        item->m_weight = QLocale::c().toFloat(strs[parsedfields]);
-        parsedfields++;
-    }
-    else
+        static QLocale c = QLocale::c();
+        item->m_weight = c.toFloat(strs[parsedfields++]);
+    } else {
         item->m_weight = 0;
+    }
 
     if (parsedfields < count)
-        item->m_color = m_colors.value(strtol(strs[parsedfields], 0, 10));
+        item->m_color = m_colors.value(strtol(strs[parsedfields++], 0, 10));
     else
         item->m_color = 0;
 
@@ -339,8 +312,8 @@ bool BrickLink::TextImport::import(const QString &path)
 
     ok &= readPeeronColors(path + "peeron_colors.html");
 
-    // speed up loading (exactly 55746 items on 26.01.2010)
-    m_items.reserve(65000);
+    // speed up loading (exactly 137522 items on 16.06.2020)
+    m_items.reserve(150000);
 
     foreach(const ItemType *itt, m_item_types) {
         m_current_item_type = itt;
@@ -348,7 +321,7 @@ bool BrickLink::TextImport::import(const QString &path)
     }
     m_current_item_type = 0;
 
-    qsort(m_items.data(), m_items.count(), sizeof(Item *), (int (*)(const void *, const void *)) Item::compare);
+    std::sort(m_items.begin(), m_items.end(), Item::lessThan);
 
     Item **itp = const_cast<Item **>(m_items.data());
 
@@ -358,8 +331,10 @@ bool BrickLink::TextImport::import(const QString &path)
         ItemType *itt = const_cast<ItemType *>((*itp)->m_item_type);
 
         if (itt) {
-            for (const Category **catp = (*itp)->m_categories; *catp; catp++)
-                appendCategoryToItemType(*catp, itt);
+            for (const Category *cat : (*itp)->m_categories) {
+                if (!itt->m_categories.contains(cat))
+                    itt->m_categories.append(cat);
+            }
         }
     }
 
@@ -406,35 +381,25 @@ bool BrickLink::TextImport::readDB_processLine(btinvlist_dummy & /*dummy*/, uint
     if (count < 2 || !strs [0][0] || !strs [1][0])
         return false;
 
-    const Item *itm = findItem(strs [0][0], strs [1]);
+    const Item *itm = findItem(strs[0][0], decodeEntities(strs[1]));
 
     if (itm) {
-        time_t t = time_t (0);   // 1.1.1970 00:00
+        time_t t = time_t(0);   // 1.1.1970 00:00
 
-        if (strs [2][0]) {
-#if DAN_FIXED_BTINVLIST_TO_USE_UTC
-            t = QDateTime::fromString(QLatin1String(strs[2][0]), QLatin1String("%mm/%dd/%yyyy %hh:%mm:%ss %ap")).toTime_t();
-#else         
-            char ampm;
-            int d, m, y, hh, mm, ss;
-
-            if (sscanf(strs [2], "%d/%d/%d %d:%d:%d %cM", &m, &d, &y, &hh, &mm, &ss, &ampm) == 7) {
-                QDateTime dt;
-                dt.setDate(QDate(y, m, d));
-                if (ampm == 'P')
-                    hh += (hh == 12) ? -12 : 12;
-                dt.setTime(QTime(hh, mm, ss));
-
-                // !!! These dates are in EST (-0500), not UTC !!!
-                t = toUTC(dt, "EST5EDT");
-            }
-        }
+        if (strs[2][0]) {
+            QDateTime dt = QDateTime::fromString(QLatin1String(strs[2]), QLatin1String("%mm/%dd/%yyyy %hh:%mm:%ss %ap"));
+#if !defined(DAN_FIXED_BTINVLIST_TO_USE_UTC)
+            static QTimeZone tzEST = QTimeZone("EST5EDT");
+            dt.setTimeZone(tzEST);
+            dt = dt.toUTC();
 #endif
+            t = dt.toTime_t();
+        }
         const_cast <Item *>(itm)->m_last_inv_update = t;
         const_cast <ItemType *>(itm->m_item_type)->m_has_inventories = true;
     }
     else
-        qWarning() << "WARNING: parsing btinvlist: item " << strs [1] << " [" << strs [0][0] << "] doesn't exist!";
+        qWarning() << "WARNING: parsing btinvlist: item" << strs[1] << "[" << strs[0][0] << "] doesn't exist!";
 
     return true;
 }
@@ -566,7 +531,7 @@ bool BrickLink::TextImport::readPeeronColors(const QString &name)
                         Color *colp = const_cast<Color *>(m_colors.value(id));
                         if (colp) {
                             if (!peeron_name.isEmpty())
-                                colp->m_peeron_name = my_strdup(peeron_name.toLatin1());
+                                colp->m_peeron_name = peeron_name;
                             colp->m_ldraw_id = ldraw_id;
 
                             count++;

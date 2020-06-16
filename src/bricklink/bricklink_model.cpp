@@ -163,9 +163,8 @@ bool BrickLink::ColorModel::lessThan(const void *p1, const void *p2, int /*colum
         return false;
     else {
         if (sortOrder() == Qt::AscendingOrder) {
-            return (strcmp(c1->name(), c2->name()) < 0);
-        }
-        else {
+            return (c1->name().localeAwareCompare(c2->name()) < 0);
+        } else {
             int lh, rh, ls, rs, lv, rv, d;
 
             c1->color().getHsv(&lh, &ls, &lv);
@@ -305,7 +304,7 @@ bool BrickLink::CategoryModel::lessThan(const void *p1, const void *p2, int /*co
     else if (!c2 || c2 == AllCategories)
         return false;
     else
-        return strcmp(c1->name(), c2->name()) < 0;
+        return c1->name().localeAwareCompare(c2->name()) < 0;
 }
 
 bool BrickLink::CategoryModel::filterAccepts(const void *pointer) const
@@ -317,13 +316,8 @@ bool BrickLink::CategoryModel::filterAccepts(const void *pointer) const
             return false;
         else if (c == AllCategories)
             return !m_all_filter;
-        else if (m_itemtype_filter) {
-            for (const Category **cp = m_itemtype_filter->categories(); *cp; cp++) {
-                if (c == *cp)
-                    return true;
-            }
-            return false;
-        }
+        else if (m_itemtype_filter)
+            return m_itemtype_filter->categories().contains(c);
     }
     return true;
 }
@@ -417,7 +411,7 @@ bool BrickLink::ItemTypeModel::lessThan(const void *p1, const void *p2, int /*co
     const ItemType *i1 = static_cast<const ItemType *>(p1);
     const ItemType *i2 = static_cast<const ItemType *>(p2);
 
-    return !i1 ? true : (!i2 ? false : strcmp(i1->name(), i2->name()) < 0);
+    return !i1 ? true : (!i2 ? false : i1->name().localeAwareCompare(i2->name()) < 0);
 }
 
 bool BrickLink::ItemTypeModel::filterAccepts(const void *pointer) const
@@ -480,8 +474,8 @@ QVariant BrickLink::ItemModel::data(const QModelIndex &index, int role) const
 
     if (role == Qt::DisplayRole) {
         switch(index.column()) {
-        case 1: res = QString::fromLatin1(i->id()); break;
-        case 2: res = QString::fromUtf8(i->name()); break;
+        case 1: res = i->id(); break;
+        case 2: res = i->name(); break;
         }
     }
     else if (role == Qt::DecorationRole) {
@@ -494,7 +488,7 @@ QVariant BrickLink::ItemModel::data(const QModelIndex &index, int role) const
     }
     else if (role == Qt::ToolTipRole) {
         if (index.column() == 0)
-            res = QString::fromLatin1(i->name());
+            res = i->name();
     }
     else if (role == ItemPointerRole) {
         res.setValue(i);
@@ -574,8 +568,8 @@ bool BrickLink::ItemModel::lessThan(const void *p1, const void *p2, int column) 
     const Item *i1 = static_cast<const Item *>(p1);
     const Item *i2 = static_cast<const Item *>(p2);
 
-    return !i1 ? true : (!i2 ? false : Utility::naturalCompare(QLatin1String((column == 2) ? i1->name() : i1->id()),
-                                                               QLatin1String((column == 2) ? i2->name() : i2->id())) < 0);
+    return Utility::naturalCompare((column == 2) ? i1->name() : i1->id(),
+                                   (column == 2) ? i2->name() : i2->id()) < 0;
 }
 
 namespace BrickLink {
@@ -607,8 +601,8 @@ bool BrickLink::ItemModel::filterAccepts(const void *pointer) const
                     re->setPattern(m_text_filter);
                 }
             }
-            return ((re->indexIn(QLatin1String(item->id())) >= 0) ||
-                    (re->indexIn(QLatin1String(item->name())) >= 0));
+            return ((re->indexIn(item->id()) >= 0) ||
+                    (re->indexIn(item->name()) >= 0));
 
         }
     }
@@ -790,10 +784,10 @@ bool BrickLink::AppearsInModel::lessThan(const QModelIndex &left, const QModelIn
         switch (left.column()) {
         default:
         case  0: return ai1->first < ai2->first;
-        case  1: return (Utility::naturalCompare(QLatin1String(ai1->second->id()),
-                                                 QLatin1String(ai2->second->id())) < 0);
-        case  2: return (Utility::naturalCompare(QLatin1String(ai1->second->name()),
-                                                 QLatin1String(ai2->second->name())) < 0);
+        case  1: return (Utility::naturalCompare(ai1->second->id(),
+                                                 ai2->second->id()) < 0);
+        case  2: return (Utility::naturalCompare(ai1->second->name(),
+                                                 ai2->second->name()) < 0);
         }
     }
 }

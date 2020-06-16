@@ -165,7 +165,7 @@ void Report::print(QPaintDevice *pd, const Document *doc, const Document::ItemLi
 
         QScriptValue colorVal = d->m_engine->newObject();
         colorVal.setProperty("id", item->color() ? (int) item->color()->id() : -1);
-        colorVal.setProperty("name", QLatin1String(item->color() ? item->color()->name() : ""));
+        colorVal.setProperty("name", (item->color() ? item->color()->name() : QString()));
         colorVal.setProperty("rgb", qScriptValueFromValue(d->m_engine, item->color() ? item->color()->color() : QColor()));
         colorVal.setProperty("picture", qScriptValueFromValue(d->m_engine, QPixmap::fromImage(BrickLink::core()->colorImage(item->color(), 20, 20))));
         iVal.setProperty("color", colorVal);

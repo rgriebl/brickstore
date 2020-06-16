@@ -235,16 +235,16 @@ const QImage BrickLink::Core::colorImage(const Color *col, int w, int h) const
             QColor c2;
 
             if (!c.isValid()) {
-                QByteArray name = col->name();
+                QString name = col->name();
                 int dash = name.indexOf('-');
                 if (dash > 0) {
-                    QByteArray basename = name.mid(8, dash - 8);
+                    QString basename = name.mid(8, dash - 8);
                     if (basename.startsWith("DB"))
                         basename.replace(0, 2, "Dark Bluish ");
-                    QByteArray speckname = name.mid(dash + 1);
+                    QString speckname = name.mid(dash + 1);
 
-                    const BrickLink::Color *basec = colorFromName(basename.constData());
-                    const BrickLink::Color *speckc = colorFromName(speckname.constData());
+                    const BrickLink::Color *basec = colorFromName(basename);
+                    const BrickLink::Color *speckc = colorFromName(speckname);
 
                     if (basec)
                         c = basec->color();
@@ -499,38 +499,38 @@ const BrickLink::Color *BrickLink::Core::color(uint id) const
     return m_colors.value(id);
 }
 
-const BrickLink::Color *BrickLink::Core::colorFromName(const char *name) const
+const BrickLink::Color *BrickLink::Core::colorFromName(const QString &name) const
 {
-    if (!name || !name[0])
-        return 0;
+    if (name.isEmpty())
+        return nullptr;
 
-    foreach(const Color *col, m_colors) {
-        if (!qstricmp(col->name(), name))
+    for (const Color *col : m_colors) {
+        if (!col->name().compare(name, Qt::CaseInsensitive))
             return col;
     }
-    return 0;
+    return nullptr;
 }
 
-const BrickLink::Color *BrickLink::Core::colorFromPeeronName(const char *peeron_name) const
+const BrickLink::Color *BrickLink::Core::colorFromPeeronName(const QString &peeron_name) const
 {
-    if (!peeron_name || !peeron_name[0])
-        return 0;
+    if (peeron_name.isEmpty())
+        return nullptr;
 
-    foreach(const Color *col, m_colors) {
-        if (!qstricmp(col->peeronName(), peeron_name))
+    for (const Color *col : m_colors) {
+        if (!col->peeronName().compare(peeron_name, Qt::CaseInsensitive))
             return col;
     }
-    return 0;
+    return nullptr;
 }
 
 
 const BrickLink::Color *BrickLink::Core::colorFromLDrawId(int ldraw_id) const
 {
-    foreach(const Color *col, m_colors) {
+    for (const Color *col : m_colors) {
         if (col->ldrawId() == ldraw_id)
             return col;
     }
-    return 0;
+    return nullptr;
 }
 
 
@@ -539,23 +539,21 @@ const BrickLink::ItemType *BrickLink::Core::itemType(char id) const
     return m_item_types.value(id);
 }
 
-const BrickLink::Item *BrickLink::Core::item(char tid, const char *id) const
+const BrickLink::Item *BrickLink::Core::item(char tid, const QString &id) const
 {
     Item key;
     key.m_item_type = itemType(tid);
-    key.m_id = const_cast <char *>(id);
+    key.m_id = id;
 
-    Item **itp = 0;
+    if (!key.m_item_type || key.m_id.isEmpty())
+        return nullptr;
 
-    if (key.m_item_type && key.m_id && key.m_id[0]) {
-        Item *keyp = &key;
+    // Finds the lower bound in at most log(last - first) + 1 comparisons
+    auto it = std::lower_bound(m_items.constBegin(), m_items.constEnd(), &key, Item::lessThan);
+    if (it != m_items.constEnd() && !Item::lessThan(&key, *it))
+        return *it;
 
-        itp = (Item **) bsearch(&keyp, m_items.data(), m_items.count(), sizeof(Item *), (int (*)(const void *, const void *)) Item::compare);
-    }
-    key.m_id = 0;
-    key.m_item_type = 0;
-
-    return itp ? *itp : 0;
+    return nullptr;
 }
 
 void BrickLink::Core::cancelPictureTransfers()
