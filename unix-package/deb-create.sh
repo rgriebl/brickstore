@@ -15,7 +15,7 @@
 
 set -e
 
-if [ ! -d rpm ]; then
+if [ ! -d unix-package ]; then
 	echo "Error: this script needs to be called from the base directory!"
 	exit 1
 fi
@@ -26,6 +26,11 @@ pkg_ver=`awk '/^ *RELEASE *=/ { print $3; }' <brickstore.pro `
 if [ -z $pkg_ver ]; then
 	echo "Error: no package version supplied!"
 	exit 2
+fi
+
+if [ ! -x "`which dpkg-buildpackage`" ]; then
+	echo "Error: the dpkg-buildpackage utility can not be found!"
+	exit 3
 fi
 
 dist="unknown"
@@ -43,6 +48,10 @@ elif [ -e /etc/debian_version ]; then
 			;;
 		4.0) dist=etch
 			;;
+		*/*) dist=`sed </etc/debian_version -e 's,/.*$,,'`
+			;;
+		sid*) dist=sid
+			;;
 	esac
 fi
 
@@ -53,7 +62,7 @@ echo " > Creating tarball..."
 scripts/mkdist.sh "$pkg_ver"
 
 echo " > Creating DEB build directories..."
-cd debian
+cd unix-package
 rm -rf tmp
 mkdir tmp
 tar -xjf "../brickstore-$pkg_ver.tar.bz2" -C tmp
@@ -66,12 +75,15 @@ cp -aH ../../../qsa .
 
 ## -----------------------------------------------------
 
+mkdir debian
+cp unix-package/rules debian
+
 cat >debian/control <<EOF
 Source: brickstore
 Section: x11
 Priority: optional
 Maintainer: Robert Griebl <rg@softforge.de>
-Build-Depends: debhelper (>= 4.0.0), qt3-dev-tools (>= 3.3), libqt3-mt-dev (>= 3.3), libcurl3-dev (>= 7.13)
+Build-Depends: debhelper (>= 4.0.0), qt3-dev-tools (>= 3.3), libqt3-mt-dev (>= 3.3), libcurl3-dev | libcurl4-openssl-dev
 Standards-Version: 3.6.1
 
 Package: brickstore
@@ -112,6 +124,22 @@ On Debian GNU/Linux systems, the complete text of the GNU General
 Public License can be found in '/usr/share/common-licenses/GPL'.
 EOF
 
+cat >debian/postinst <<EOF
+#!/bin/sh
+set -e
+#DEBHELPER#
+# update icon cache
+touch /usr/share/icons/hicolor
+EOF
+
+cat >debian/postrm <<EOF
+#!/bin/sh
+set -e
+#DEBHELPER#
+# update icon cache
+touch /usr/share/icons/hicolor
+EOF
+
 echo >debian/compat '4'
 
 ## -----------------------------------------------------
@@ -122,8 +150,8 @@ chmod +x debian/rules
 BRICKSTORE_VERSION=$pkg_ver dpkg-buildpackage -b -D -rfakeroot -us -uc
 
 cd ../..
-rm -rf "$pkg_ver"
-mkdir "$pkg_ver"
+#rm -rf "$pkg_ver"
+mkdir -p "$pkg_ver"
 
 for i in `ls -1 tmp/*.deb`; do
 	j=`basename "$i" .deb`

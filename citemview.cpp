@@ -229,26 +229,27 @@ void FilterWidget::languageChange()
     int i, j;
     for ( i = 0; i < CItemView::FilterCountSpecial; i++ ) {
         QString s;
+        //TODO: the original translations are in CDocument - these should be moved eventually
         switch ( -i - 1 ) {
-            case CItemView::All       : s = tr( "All" ); break;
-            case CItemView::Prices    : s = tr( "All Prices" ); break;
-            case CItemView::Texts     : s = tr( "All Texts" ); break;
-            case CItemView::Quantities: s = tr( "All Quantities" ); break;
+            case CItemView::All       : s = CItemView::tr( "All" ); break;
+            case CItemView::Prices    : s = CItemView::tr( "All Prices" ); break;
+            case CItemView::Texts     : s = CItemView::tr( "All Texts" ); break;
+            case CItemView::Quantities: s = CItemView::tr( "All Quantities" ); break;
         }
         f-> w_fields-> changeItem ( s, i );
     }
     for ( j = 0; j < CDocument::FieldCount; j++ )
         f-> w_fields-> changeItem ( m_iv-> header ( )-> label ( j ), i + j );
         
-    f-> w_comparison-> changeItem ( tr( "contains" ), Filter::Contains );
-    f-> w_comparison-> changeItem ( tr( "doesn't contain" ), Filter::DoesNotContain );
-    f-> w_comparison-> changeItem ( tr( "is" ), Filter::Is );
-    f-> w_comparison-> changeItem ( tr( "isn't" ), Filter::IsNot );
-    f-> w_comparison-> changeItem ( tr( "begins with" ), Filter::BeginsWith );
-    f-> w_comparison-> changeItem ( tr( "ends with" ), Filter::EndsWith );
+    f-> w_comparison-> changeItem ( CItemView::tr( "contains" ), Filter::Contains );
+    f-> w_comparison-> changeItem ( CItemView::tr( "doesn't contain" ), Filter::DoesNotContain );
+    f-> w_comparison-> changeItem ( CItemView::tr( "is" ), Filter::Is );
+    f-> w_comparison-> changeItem ( CItemView::tr( "isn't" ), Filter::IsNot );
+    f-> w_comparison-> changeItem ( CItemView::tr( "begins with" ), Filter::BeginsWith );
+    f-> w_comparison-> changeItem ( CItemView::tr( "ends with" ), Filter::EndsWith );
 
-    f-> w_and_combination-> setText ( QString( " %1  " ). arg( tr( "and" )));
-    f-> w_or_combination-> setText ( QString( " %1  " ). arg( tr( "or" )));
+    f-> w_and_combination-> setText ( QString( " %1  " ). arg( CItemView::tr( "and" )));
+    f-> w_or_combination-> setText ( QString( " %1  " ). arg( CItemView::tr( "or" )));
 
     for ( int i = 1; i < int( m_filters. count ( )); ++i )
         copyUiTexts ( m_filters. first ( ), m_filters. at ( i ));
@@ -1192,7 +1193,7 @@ template <typename T> static int cmp ( const T &a, const T &b )
 		return 1;
 }
 
-template <> static int cmp<QString> ( const QString &a, const QString &b )
+template <> int cmp<QString> ( const QString &a, const QString &b )
 {
     bool ann = !a. isNull ( );
     bool bnn = !b. isNull ( );

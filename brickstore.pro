@@ -12,7 +12,7 @@
 ## See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 
 isEmpty( RELEASE ) {
-  RELEASE    = 1.1.15
+  RELEASE    = 1.1.16
 }
 
 TEMPLATE     = app
@@ -35,12 +35,16 @@ res_print_templates = print-templates/standard.qs
 
 dist_extra          = version.h.in icon.png
 dist_scripts        = scripts/*.sh scripts/*.pl scripts/*.js
-dist_unix_rpm       = rpm/create.sh rpm/brickstore.spec
-dist_unix_deb       = debian/create.sh debian/rules
+dist_unix           = unix-package/create.sh unix-package/???-create.sh unix-package/brickstore.spec unix-package/rules \
+                      unix-package/share/mimelnk/application/x-brickstore-xml.desktop \
+                      unix-package/share/icons/hicolor/48x48/mimetypes/application-x-brickstore-xml.png \
+                      unix-package/share/icons/hicolor/64x64/apps/brickstore.png \
+                      unix-package/share/mime/packages/brickstore-mime.xml \
+                      unix-package/share/applications/brickstore.desktop
 dist_macx           = macx-bundle/create.sh macx-bundle/install-table.txt macx-bundle/*.plist macx-bundle/Resources/*.icns macx-bundle/Resources/??.lproj/*.plist
 dist_win32          = win32-installer/*.wx?
 
-DISTFILES += $$res_images $$res_images_16 $$res_images_22 $$res_images_status $$res_images_sidebar $$res_translations $$res_print_templates $$dist_extra $$dist_scripts $$dist_unix_rpm $$dist_unix_deb $$dist_macx $$dist_win32
+DISTFILES += $$res_images $$res_images_16 $$res_images_22 $$res_images_status $$res_images_sidebar $$res_translations $$res_print_templates $$dist_extra $$dist_scripts $$dist_unix $$dist_macx $$dist_win32
 
 MOC_DIR   = .moc
 UI_DIR    = .uic

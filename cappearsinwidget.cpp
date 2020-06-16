@@ -287,7 +287,7 @@ void CAppearsInWidget::setItem ( const BrickLink::InvItemList &list )
             first_item = false;
 	    }
         for ( QMap<const BrickLink::Item *, int>::iterator unique_it = unique. begin ( ); unique_it != unique. end ( ); ++unique_it ) {
-            if ( unique_it. data ( ) == list. count ( ))
+            if ( unique_it. data ( ) == int( list. count ( )))
         	    (void) new AppearsInListItem ( this, -1, unique_it. key ( ));
         }
     }

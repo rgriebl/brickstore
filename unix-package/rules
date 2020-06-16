@@ -54,6 +54,7 @@ install: build
 
 	# Add here commands to install the package into debian/brickstore.
 	$(MAKE) install INSTALL_ROOT=$(CURDIR)/debian/brickstore
+	cp -aH unix-package/share $(CURDIR)/debian/brickstore/usr/
 
 
 # Build architecture-independent files here.
@@ -69,11 +70,12 @@ binary-arch: build install
 	dh_installexamples
 #	dh_install
 	dh_installmenu
+	dh_desktop
 #	dh_installdebconf	
 #	dh_installlogrotate
 #	dh_installemacsen
 #	dh_installpam
-#	dh_installmime
+	dh_installmime
 #	dh_installinit
 #	dh_installcron
 #	dh_installinfo

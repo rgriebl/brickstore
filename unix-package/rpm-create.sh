@@ -15,7 +15,7 @@
 
 set -e
 
-if [ ! -d rpm ]; then
+if [ ! -d unix-package ]; then
 	echo "Error: this script needs to be called from the base directory!"
 	exit 1
 fi
@@ -26,6 +26,11 @@ pkg_ver=`awk '/^ *RELEASE *=/ { print $3; }' <brickstore.pro `
 if [ -z $pkg_ver ]; then
 	echo "Error: no package version supplied!"
 	exit 2
+fi
+
+if [ ! -x "`which rpmbuild`" ]; then
+	echo "Error: the rpmbuild utility can not be found!"
+	exit 3
 fi
 
 dist="(unknown distribution)"
@@ -56,10 +61,13 @@ echo " > Creating tarball..."
 scripts/mkdist.sh "$pkg_ver"
 
 echo " > Creating RPM build directories..."
-cd rpm
+cd unix-package
 rm -rf SPECS RPMS BUILD SRPMS SOURCES
 mkdir SPECS RPMS BUILD SRPMS SOURCES
 cp ../brickstore-$pkg_ver.tar.bz2 SOURCES
+cp -aH share SOURCES
+cp -aH ../qsa SOURCES
+[ -f ../.private-key ] && cp -H ../.private-key SOURCES
 cp brickstore.spec SPECS
 
 echo " > Building package..."
@@ -68,10 +76,10 @@ echo " > Building package..."
            --define="_brickstore_version $pkg_ver" \
            --define="_brickstore_qtdir $QTDIR" \
            --define="_brickstore_buildreq $BUILDREQ" \
-           SPECS/brickstore.spec ) >/dev/null 2>/dev/null
+           SPECS/brickstore.spec ) # >/dev/null 2>/dev/null
 
-rm -rf "$pkg_ver"
-mkdir "$pkg_ver"
+#rm -rf "$pkg_ver"
+mkdir -p "$pkg_ver"
 for i in `find RPMS -name "*.rpm"`; do cp "$i" "$pkg_ver"; done
 
 echo " > Cleaning RPM build directories..."

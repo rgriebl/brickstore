@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Brickstore
+TryExec=brickstore
+Exec=brickstore %F
+MimeType=application/x-brickstore-xml;
+Icon=brickstore
+Categories=Qt;Network;
+Type=Application
+Terminal=0

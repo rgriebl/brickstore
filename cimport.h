@@ -195,7 +195,7 @@ private slots:
 
 		if ( data && data-> size ( )) {
             if ( m_current_address >= 0 ) {
-                QString s = QString::fromLatin1 ( data-> data ( ), data-> size ( ));
+                QString s = QString::fromUtf8 ( data-> data ( ), data-> size ( ));
 
                 QRegExp rx1 ( "<B>Name:</B></FONT></TD>\\s*<TD NOWRAP><FONT FACE=\"Tahoma, Arial\" SIZE=\"2\">(.+)</FONT></TD>" );
                 QRegExp rx2 ( "<B>Address:</B></FONT></TD>\\s*<TD NOWRAP><FONT FACE=\"Tahoma, Arial\" SIZE=\"2\">(.+)</FONT></TD>" );

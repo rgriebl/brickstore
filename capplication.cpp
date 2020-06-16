@@ -14,6 +14,7 @@
 #include <qtimer.h>
 #include <qevent.h>
 #include <qdir.h>
+#include <qwindowsstyle.h>
 
 #include <qsaglobal.h>
 
@@ -61,12 +62,17 @@ CApplication::CApplication ( const char *rebuild_db_only, int _argc, char **_arg
 	: QApplication ( _argc, _argv, !rebuild_db_only )
 {
 	cApp = this;
+	
 
 	m_enable_emit = false;
 	m_rebuild_db_only = rebuild_db_only;
 
-	if ( m_rebuild_db_only. isEmpty ( ))
+	if ( m_rebuild_db_only. isEmpty ( )) {
+		// try not to look ugly
+		if ( style(). inherits ( "QMotifStyle" ) || style(). inherits ( "QMotifPlusStyle" ))
+			setStyle ( new QWindowsStyle ( ));
 		CSplash::inst ( );
+	}
 
 #if defined( Q_WS_MACX )
 	AEInstallEventHandler( kCoreEventClass, kAEOpenDocuments, appleEventHandler, 0, false );
@@ -345,7 +351,7 @@ void CApplication::about ( )
    	QDomDocument doc;
 	QFile file ( CResource::inst ( )-> locate ( "translations/translations.xml" ));
 
-    qWarning(QLocale::languageToString(QLocale().language()).ascii());
+    //qWarning(QLocale::languageToString(QLocale().language()).ascii());
 	if ( file. open ( IO_ReadOnly )) {
 		QString err_str;
 		int err_line = 0, err_col = 0;

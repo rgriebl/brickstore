@@ -595,6 +595,7 @@ bool BrickLink::InvItem::mergeFrom ( const InvItem &from, bool prefer_from )
 		setStatus ( from. status ( ));
 		setRetain ( from. retain ( ));
 		setStockroom ( from. stockroom ( ));
+		setLotId ( from. lotId ( ));
 	}
 
 	setQuantity ( quantity ( ) + from. quantity ( ));
