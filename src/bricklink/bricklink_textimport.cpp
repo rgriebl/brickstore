@@ -379,13 +379,16 @@ bool BrickLink::TextImport::readDB_processLine(btinvlist_dummy & /*dummy*/, uint
     if (count < 2 || !strs [0][0] || !strs [1][0])
         return false;
 
-    const Item *itm = findItem(strs[0][0], decodeEntities(strs[1]));
-
-    if (itm) {
+    if (const Item *itm = findItem(strs[0][0], decodeEntities(strs[1]))) {
         time_t t = time_t(0);   // 1.1.1970 00:00
 
-        if (strs[2][0]) {
-            QDateTime dt = QDateTime::fromString(QLatin1String(strs[2]), QLatin1String("%mm/%dd/%yyyy %hh:%mm:%ss %ap"));
+        if (count >= 2 && strs[2][0]) {
+            static QString fmtFull = QStringLiteral("M/d/yyyy h:mm:ss AP");
+            static QString fmtShort = QStringLiteral("M/d/yyyy");
+
+            QString dtStr = QString::fromLatin1(strs[2]);
+
+            QDateTime dt = QDateTime::fromString(dtStr, dtStr.length() <= 10 ? fmtShort : fmtFull);
 #if !defined(DAN_FIXED_BTINVLIST_TO_USE_UTC)
             static QTimeZone tzEST = QTimeZone("EST5EDT");
             dt.setTimeZone(tzEST);
@@ -396,9 +399,9 @@ bool BrickLink::TextImport::readDB_processLine(btinvlist_dummy & /*dummy*/, uint
         const_cast <Item *>(itm)->m_last_inv_update = t;
         const_cast <ItemType *>(itm->m_item_type)->m_has_inventories = true;
     }
-    else
-        qWarning() << "WARNING: parsing btinvlist: item" << strs[1] << "[" << strs[0][0] << "] doesn't exist!";
-
+    else {
+        qWarning() << "WARNING: parsing btinvlist: item" << strs[0][0] << strs[1] << "doesn't exist!";
+    }
     return true;
 }
 

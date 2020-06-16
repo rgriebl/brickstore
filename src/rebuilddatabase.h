@@ -25,7 +25,7 @@ class RebuildDatabase : public QObject {
     Q_OBJECT
 
 public:
-    RebuildDatabase();
+    RebuildDatabase(bool skipDownload = false);
     ~RebuildDatabase();
 
     int exec();
@@ -42,6 +42,7 @@ private:
 private:
     Transfer *m_trans;
     QString m_error;
+    bool m_skip_download;
     int m_downloads_in_progress;
     int m_downloads_failed;
     int m_processed;

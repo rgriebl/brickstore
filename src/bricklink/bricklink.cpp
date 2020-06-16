@@ -1428,9 +1428,11 @@ bool BrickLink::Core::writeDatabase(const QString &filename, DatabaseVersion ver
 
             ok &= cw.startChunk(ChunkId('B','S','D','B'), version);
 
-            ok &= cw.startChunk(ChunkId('I','N','F','O'), version);
-            ds << QString("Info text");
-            ok &= cw.endChunk();
+            if (!infoText.isEmpty()) {
+                ok &= cw.startChunk(ChunkId('I','N','F','O'), version);
+                ds << infoText;
+                ok &= cw.endChunk();
+            }
 
             ok &= cw.startChunk(ChunkId('C','O','L',' '), version);
             ds << m_colors.count();

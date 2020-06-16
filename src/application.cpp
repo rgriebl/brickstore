@@ -78,7 +78,7 @@ enum {
 
 Application *Application::s_inst = 0;
 
-Application::Application(bool rebuild_db_only, int _argc, char **_argv)
+Application::Application(bool rebuild_db_only, bool skip_download, int _argc, char **_argv)
     : QApplication(_argc, _argv, !rebuild_db_only)
 {
     s_inst = this;
@@ -101,7 +101,7 @@ Application::Application(bool rebuild_db_only, int _argc, char **_argv)
         if (isClient()) {
             // we cannot call quit directly, since there is
             // no event loop to quit from...
-            QTimer::singleShot(0, this, SLOT(quit()));
+            QMetaObject::invokeMethod(this, &Application::quit, Qt::QueuedConnection);
             return;
         }
     }
@@ -133,9 +133,12 @@ Application::Application(bool rebuild_db_only, int _argc, char **_argv)
         // no event loop to quit from...
         QTimer::singleShot(0, this, SLOT(quit()));
         return;
-    }
-    else if (rebuild_db_only) {
-        QTimer::singleShot(0, this, SLOT(rebuildDatabase()));
+
+    } else if (rebuild_db_only) {
+        QMetaObject::invokeMethod(this, [skip_download]() {
+            RebuildDatabase rdb(skip_download);
+            exit(rdb.exec());
+        }, Qt::QueuedConnection);
     }
     else {
 #if defined(Q_WS_X11)
@@ -235,13 +238,6 @@ void Application::updateTranslations()
     if (bsLoaded)
         installTranslator(m_trans_brickstore);
 }
-
-void Application::rebuildDatabase()
-{
-    RebuildDatabase rdb;
-    exit(rdb.exec());
-}
-
 
 QString Application::applicationUrl() const
 {

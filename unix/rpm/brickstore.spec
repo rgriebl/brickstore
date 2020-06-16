@@ -30,7 +30,7 @@ BuildRequires: %{_brickstore_buildreq}
 # long description
 %description
 BrickStore is an offline tool to manage your online store on
-http://www.bricklink.com
+https://www.bricklink.com
 
 # Prep Stanza begins here
 #

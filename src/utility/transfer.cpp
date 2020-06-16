@@ -307,9 +307,6 @@ void Transfer::schedule()
                 j->m_respcode = j->m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
                 j->m_effective_url = j->m_reply->url();
 
-                qWarning() << "RESPCODE: " << j->m_respcode << j->m_reply->url()
-                << j->m_reply->attribute(QNetworkRequest::RedirectionTargetAttribute);
-
                 switch (j->m_respcode) {
                 case 304:
                     if (j->m_only_if_newer.isValid()) {

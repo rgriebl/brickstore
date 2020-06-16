@@ -35,8 +35,9 @@
 #include "rebuilddatabase.h"
 
 
-RebuildDatabase::RebuildDatabase()
+RebuildDatabase::RebuildDatabase(bool skipDownload)
     : QObject(0)
+    , m_skip_download(skipDownload)
 {
     m_trans = 0;
 
@@ -68,17 +69,6 @@ int RebuildDatabase::error(const QString &error)
 }
 
 
-namespace {
-
-static void nirvanaMsgHandler(QtMsgType type, const QMessageLogContext &, const QString &)
-{
-    if (type == QtFatalMsg)
-        abort();
-}
-
-} // namespace
-
-
 int RebuildDatabase::exec()
 {
     m_trans = new Transfer(5);
@@ -91,13 +81,11 @@ int RebuildDatabase::exec()
 
     BrickLink::TextImport blti;
 
-    qInstallMessageHandler(nirvanaMsgHandler);
-
     printf("\n Rebuilding database ");
     printf("\n=====================\n");
 
     /////////////////////////////////////////////////////////////////////////////////
-    printf("\nSTEP 0: Logging into Bricklink...\n");
+    printf("\nSTEP 1: Logging into Bricklink...\n");
 
     // login hack
     {
@@ -121,13 +109,15 @@ int RebuildDatabase::exec()
     }
 
     /////////////////////////////////////////////////////////////////////////////////
-    printf("\nSTEP 1: Downloading (text) database files...\n");
+    if (!m_skip_download) {
+        printf("\nSTEP 2: Downloading (text) database files...\n");
 
-    if (!download())
-        return error(m_error);
+        if (!download())
+            return error(m_error);
+    }
 
     /////////////////////////////////////////////////////////////////////////////////
-    printf("\nSTEP 2: Parsing downloaded files...\n");
+    printf("\nSTEP 3: Parsing downloaded files...\n");
 
     if (!blti.import(bl->dataPath()))
         return error("failed to parse database files.");
@@ -135,19 +125,19 @@ int RebuildDatabase::exec()
     blti.exportTo(bl);
 
     /////////////////////////////////////////////////////////////////////////////////
-    printf("\nSTEP 3: Parsing inventories (part I)...\n");
+    printf("\nSTEP 4: Parsing inventories (part I)...\n");
 
     QVector<const BrickLink::Item *> invs = blti.items();
     blti.importInventories(bl->dataPath(), invs);
 
     /////////////////////////////////////////////////////////////////////////////////
-    printf("\nSTEP 4: Downloading missing/updated inventories...\n");
+    printf("\nSTEP 5: Downloading missing/updated inventories...\n");
 
     if (!downloadInventories(invs))
         return error(m_error);
 
     /////////////////////////////////////////////////////////////////////////////////
-    printf("\nSTEP 5: Parsing inventories (part II)...\n");
+    printf("\nSTEP 6: Parsing inventories (part II)...\n");
 
     blti.importInventories(bl->dataPath(), invs);
 
@@ -155,7 +145,7 @@ int RebuildDatabase::exec()
         return error("more than 2% of all inventories had errors.");
 
     /////////////////////////////////////////////////////////////////////////////////
-    printf("\nSTEP 6: Computing the database...\n");
+    printf("\nSTEP 7: Computing the database...\n");
 
     blti.exportInventoriesTo(bl);
 
@@ -165,10 +155,6 @@ int RebuildDatabase::exec()
     printf("  > consists-of: %11u bytes\n", _qwords_for_consists * 8);
 
     /////////////////////////////////////////////////////////////////////////////////
-    printf("\nSTEP 7: Writing the new v0 (BS 1.1) database to disk...\n");
-    if (!bl->writeDatabase(bl->dataPath() + bl->defaultDatabaseName(BrickLink::Core::BrickStore_1_1), BrickLink::Core::BrickStore_1_1))
-        return error("failed to write the v0 (BS 1.1) database file.");
-
     printf("\nSTEP 8: Writing the new v1 (BS 2.0) database to disk...\n");
     if (!bl->writeDatabase(bl->dataPath() + bl->defaultDatabaseName(BrickLink::Core::BrickStore_2_0), BrickLink::Core::BrickStore_2_0))
         return error("failed to write the v1 (BS 2.0) database file.");
@@ -296,7 +282,7 @@ bool RebuildDatabase::download()
         { "https://www.bricklink.com/catalogDownload.asp", itemQuery('C'), "items_C.txt"     },
         { "https://www.bricklink.com/catalogDownload.asp", itemQuery('I'), "items_I.txt"     },
         { "https://www.bricklink.com/catalogDownload.asp", itemQuery('O'), "items_O.txt"     },
-        // { "http://www.bricklink.com/catalogDownload.asp", itemQuery('U'), "items_U.txt"     }, // generates a 500 server error
+        // { "https://www.bricklink.com/catalogDownload.asp", itemQuery('U'), "items_U.txt"     }, // generates a 500 server error
         { "https://www.bricklink.com/btinvlist.asp",       QList<QPair<QString, QString> >(), "btinvlist.txt"   },
         { "https://www.bricklink.com/btchglog.asp",        QList<QPair<QString, QString> >(), "btchglog.txt" },
 
@@ -393,7 +379,7 @@ bool RebuildDatabase::downloadInventories(QVector<const BrickLink::Item *> &invs
     m_downloads_in_progress = 0;
     m_downloads_failed = 0;
 
-    QUrl url("http://www.bricklink.com/catalogDownload.asp");
+    QUrl url("https://www.bricklink.com/catalogDownload.asp");
 
     const BrickLink::Item **itemp = invs.data();
     for (int i = 0; i < invs.count(); i++) {

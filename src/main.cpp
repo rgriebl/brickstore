@@ -33,6 +33,7 @@ Q_IMPORT_PLUGIN(qgif)
 int main(int argc, char **argv)
 {
     bool rebuild_db = false;
+    bool skip_download = false;
     bool show_usage = false;
 
     if ((argc == 2) && (!strcmp(argv [1], "-h") || !strcmp(argv [1], "--help"))) {
@@ -40,21 +41,24 @@ int main(int argc, char **argv)
     }
     else if ((argc >= 2) && !strcmp(argv [1], "--rebuild-database")) {
         rebuild_db = true;
-        show_usage = (argc != 2); // bail out if a db name is specified on the cmd line (BS1.1)
+        if ((argc == 3) && !strcmp(argv[2], "--skip-download"))
+            skip_download = true;
+        else if (argc >= 3)
+            show_usage = true;
     }
 
     if (show_usage) {
 #if defined(Q_OS_WIN)
         QApplication a(argc, argv);
-        QMessageBox::information(0, QLatin1String("BrickStore"), QLatin1String("<b>Usage:</b><br />brickstore.exe [&lt;files&gt;]<br /><br />brickstore.exe --rebuild-database<br />"));
+        QMessageBox::information(0, QLatin1String("BrickStore"), QLatin1String("<b>Usage:</b><br />brickstore.exe [&lt;files&gt;]<br /><br />brickstore.exe --rebuild-database [--skip-download]<br />"));
 #else
         printf("Usage: %s [<files>]\n", argv [0]);
-        printf("       %s --rebuild-database\n", argv [0]);
+        printf("       %s --rebuild-database [--skip-download]\n", argv [0]);
 #endif
         return 1;
     }
     else {
-        Application a(rebuild_db, argc, argv);
+        Application a(rebuild_db, skip_download, argc, argv);
         return a.exec();
     }
 }
