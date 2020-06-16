@@ -239,7 +239,8 @@ void Config::setProxy(const QNetworkProxy &np)
 
 QString Config::dataDir() const
 {
-    return value("/BrickLink/DataDir", QStandardPaths::writableLocation(QStandardPaths::CacheLocation)).toString();
+    static QString cacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+    return value("/BrickLink/DatDir", cacheDir).toString();
 }
 
 void Config::setDataDir(const QString &dir)

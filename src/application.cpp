@@ -106,8 +106,6 @@ Application::Application(bool rebuild_db_only, bool skip_download, int _argc, ch
         }
     }
 
-    setOrganizationName(QLatin1String("Softforge"));
-    setOrganizationDomain(QLatin1String("softforge.de"));
     setApplicationName(QLatin1String(BRICKSTORE_NAME));
     setApplicationVersion(QLatin1String(BRICKSTORE_VERSION));
 
@@ -401,7 +399,7 @@ bool Application::initBrickLink()
     defdatadir += QLatin1String("/.brickstore-cache/");
 #endif
 
-    BrickLink::Core *bl = BrickLink::create(Config::inst()->value(QLatin1String("/BrickLink/DataDir"), defdatadir).toString(), &errstring);
+    BrickLink::Core *bl = BrickLink::create(Config::inst()->dataDir(), &errstring);
 
     if (!bl)
         QMessageBox::critical(0, applicationName(), tr("Could not initialize the BrickLink kernel:<br /><br />%1").arg(errstring), QMessageBox::Ok);

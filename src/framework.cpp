@@ -235,6 +235,7 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
 
     m_toolbar = new QToolBar(this);
     m_toolbar->setObjectName(QLatin1String("toolbar"));
+    m_toolbar->setMovable(false);
 
     createActions();
 

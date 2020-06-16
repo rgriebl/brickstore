@@ -135,7 +135,6 @@ private:
     QIcon *icon(const char *name);
 
     QAction *findAction(const char *name);
-//    void connectAction(bool do_connect, const char *name, Window *window, const char *slot, bool (Window::* is_on_func)() const = 0);
     void connectAllActions(bool do_connect, Window *window);
     void createActions();
     void translateActions();

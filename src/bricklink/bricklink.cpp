@@ -363,6 +363,8 @@ BrickLink::Core *BrickLink::Core::s_inst = 0;
 
 BrickLink::Core *BrickLink::Core::create(const QString &datadir, QString *errstring)
 {
+    qDebug() << "Loading database from" << datadir;
+
     if (!s_inst) {
         s_inst = new Core(datadir);
 
