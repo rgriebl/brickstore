@@ -554,7 +554,7 @@ QString BrickLink::Core::defaultDatabaseName(DatabaseVersion version) const
     return QString("database-v%1").arg(version);
 }
 
-bool BrickLink::Core::readDatabase(const QString &fname)
+bool BrickLink::Core::readDatabase(QString *infoText, const QString &fname)
 {
     QMutexLocker lock(&m_corelock);
 
@@ -579,8 +579,7 @@ bool BrickLink::Core::readDatabase(const QString &fname)
     bool result = false;
     stopwatch *sw = 0; //new stopwatch("BrickLink::Core::readDatabase()");
 
-    QString message;
-
+    QString info;
     QString filename = fname.isNull() ? dataPath() + defaultDatabaseName() : fname;
 
     QFile f;
@@ -608,7 +607,7 @@ bool BrickLink::Core::readDatabase(const QString &fname)
                     while (cr.startChunk()) {
                         switch (cr.chunkId() | quint64(cr.chunkVersion()) << 32) {
                             case ChunkId('I','N','F','O') | 1ULL << 32: {
-                                ds >> message;
+                                ds >> info;
                                 break;
                             }
                             case ChunkId('C','O','L',' ') | 1ULL << 32: {
@@ -684,79 +683,7 @@ bool BrickLink::Core::readDatabase(const QString &fname)
 
                     result = true;
                 }
-            } 
-            else if (f.size() >= 4 && data[0] == char(0xb9) && data[1] == 0x1c && data[2] == 0x57 && data[3] == 0x03) {
-                QDataStream ds(ba);
-
-                ds.setVersion(QDataStream::Qt_3_3);
-
-                quint32 magic = 0, filesize = 0, version = 0;
-
-                ds >> magic >> filesize >> version;
-
-                if ((magic != quint32(0xb91c5703)) || (filesize != f.size()) || (version != BrickStore_1_1))
-                    return false;
-
-                ds.setByteOrder(QDataStream::LittleEndian);
-
-                // colors
-                quint32 colc = 0;
-                ds >> colc;
-
-                for (quint32 i = colc; i; i--) {
-                    Color *col = new Color();
-
-                    // the format has changed, so we have to do it manually here
-                    quint8 flags;
-                    ds >> col->m_id >> col->m_name >> col->m_peeron_name >> col->m_ldraw_id;
-                    ds >> col->m_color;
-                    ds >> flags;
-
-                    col->m_type = static_cast<BrickLink::Color::Type>(quint32(flags) << 1);
-                    if (!col->m_type)
-                        col->m_type = Color::Solid;
-
-                    m_colors.insert(col->id(), col);
-                }
-
-                // categories
-                quint32 catc = 0;
-                ds >> catc;
-
-                for (quint32 i = catc; i; i--) {
-                    Category *cat = new Category();
-                    ds >> cat;
-                    m_categories.insert(cat->id(), cat);
-                }
-
-                // types
-                quint32 ittc = 0;
-                ds >> ittc;
-
-                for (quint32 i = ittc; i; i--) {
-                    ItemType *itt = new ItemType();
-                    ds >> itt;
-                    m_item_types.insert(itt->id(), itt);
-                }
-
-                // items
-                quint32 itc = 0;
-                ds >> itc;
-
-                m_items.reserve(itc);
-                for (quint32 i = itc; i; i--) {
-                    Item *item = new Item();
-                    ds >> item;
-                    m_items.append(item);
-                }
-                quint32 allc = 0;
-                ds >> allc >> magic;
-
-                if ((allc == (colc + ittc + catc + itc)) && (magic == quint32(0xb91c5703))) {
-                    result = true;
-                }
-            } 
-            else {
+            } else {
                 qWarning("readDatabase(): Unknown database format!");
             }
         }
@@ -770,6 +697,8 @@ out:
         qDebug("Types: %8u  (%11d bytes)", m_item_types.count(), int(m_item_types.count() * (sizeof(ItemType) + 20)));
         qDebug("Cats : %8u  (%11d bytes)", m_categories.count(), int(m_categories.count() * (sizeof(Category) + 20)));
         qDebug("Items: %8u  (%11d bytes)", m_items.count(),      int(m_items.count()      * (sizeof(Item)     + 20)));
+        if (!info.isEmpty())
+            qDebug() << "Info :" << info;
     }
     else {
         m_colors.clear();
@@ -779,6 +708,8 @@ out:
 
         qWarning("Error reading databases!");
     }
+    if (infoText)
+        *infoText = info;
     return result;
 }
 
@@ -1480,74 +1411,17 @@ void BrickLink::Core::setDatabase_ChangeLog(const QVector<const char *> &changel
     m_changelog = changelog;
 }
 
-bool BrickLink::Core::writeDatabase(const QString &filename, DatabaseVersion version)
+bool BrickLink::Core::writeDatabase(const QString &filename, DatabaseVersion version,
+                                    const QString &infoText)
 {
-    if (filename.isEmpty() || (version != BrickStore_1_1 && version != BrickStore_2_0))
+    if (filename.isEmpty() || (version != BrickStore_2_0))
         return false;
 
     QMutexLocker lock(&m_corelock);
 
     QFile f(filename + QLatin1String(".new"));
     if (f.open(QIODevice::WriteOnly)) {
-        if (version == BrickStore_1_1) {
-            QDataStream ds(&f);
-            ds.setVersion(QDataStream::Qt_3_3);
-
-            ds << quint32(0 /*magic*/) << quint32(0 /*filesize*/) << quint32(BrickStore_1_1 /*version*/);
-
-            ds.setByteOrder(QDataStream::LittleEndian);
-
-            // colors
-            quint32 colc = m_colors.count();
-            ds << colc;
-            foreach(const Color *col, m_colors) {
-                // the format has changed, so we have to do it manually here
-                ds << col->m_id << col->m_name << col->m_peeron_name << col->m_ldraw_id;
-                ds << col->m_color << quint8(quint32(col->m_type) >> 1);
-            }
-            // categories
-            quint32 catc = m_categories.count();
-            ds << catc;
-            foreach(const Category *cat, m_categories)
-                ds << cat;
-
-            // types
-            quint32 ittc = m_item_types.count();
-            ds << ittc;
-            foreach(const ItemType *itt, m_item_types)
-                ds << itt;
-
-            // items
-            quint32 itc = m_items.count();
-            ds << itc;
-            const Item **itp = m_items.data();
-            for (quint32 i = itc; i; ++itp, --i)
-                ds << *itp;
-
-            ds << (colc + ittc + catc + itc);
-            ds << quint32(0xb91c5703);
-
-            quint32 filesize = quint32(f.pos());
-
-            if (f.error() == QFile::NoError) {
-                f.close();
-
-                if (f.open(QIODevice::ReadWrite)) {
-                    QDataStream ds2(&f);
-                    ds2 << quint32(0xb91c5703) << filesize;
-
-                    if (f.error() == QFile::NoError) {
-                        f.close();
-
-                        QString err = Utility::safeRename(filename);
-
-                        if (err.isNull())
-                            return true;
-                    }
-                }
-            }
-        }
-        else if (version == BrickStore_2_0) {
+        if (version == BrickStore_2_0) {
             ChunkWriter cw(&f, QDataStream::LittleEndian);
             QDataStream &ds = cw.dataStream();
             bool ok = true;

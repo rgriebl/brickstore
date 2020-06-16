@@ -918,8 +918,9 @@ public:
     void setTransfer(Transfer *trans);
 
 public slots:
-    bool readDatabase(const QString &filename = QString());
-    bool writeDatabase(const QString &filename, DatabaseVersion version);
+    bool readDatabase(QString *infoText = nullptr, const QString &filename = QString());
+    bool writeDatabase(const QString &filename, DatabaseVersion version,
+                       const QString &infoText = QString());
 
     void updatePriceGuide(PriceGuide *pg, bool high_priority = false);
     void updatePicture(Picture *pic, bool high_priority = false);
