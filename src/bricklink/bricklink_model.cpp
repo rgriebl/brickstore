@@ -437,7 +437,7 @@ BrickLink::ItemModel::ItemModel(QObject *parent)
     : StaticPointerModel(parent), m_itemtype_filter(0), m_category_filter(0), m_inv_filter(false)
 {
     MODELTEST_ATTACH(this)
-    connect(core(), SIGNAL(pictureUpdated(BrickLink::Picture *)), this, SLOT(pictureUpdated(BrickLink::Picture *)));
+    connect(core(), &Core::pictureUpdated, this, &ItemModel::pictureUpdated);
 }
 
 int BrickLink::ItemModel::columnCount(const QModelIndex &parent) const
@@ -808,7 +808,7 @@ bool BrickLink::AppearsInModel::lessThan(const QModelIndex &left, const QModelIn
 BrickLink::ItemDelegate::ItemDelegate(QObject *parent, Options options)
     : QStyledItemDelegate(parent), m_options(options), m_tooltip_pic(0)
 {
-    connect(BrickLink::core(), SIGNAL(pictureUpdated(BrickLink::Picture *)), this, SLOT(pictureUpdated(BrickLink::Picture *)));
+    connect(BrickLink::core(), &Core::pictureUpdated, this, &ItemDelegate::pictureUpdated);
 }
 
 void BrickLink::ItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const

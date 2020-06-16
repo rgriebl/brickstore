@@ -92,7 +92,8 @@ Application::Application(bool rebuild_db_only, int _argc, char **_argv)
     checkNetwork();
 
     QTimer *netcheck = new QTimer(this);
-    connect(netcheck, SIGNAL(timeout()), this, SLOT(checkNetwork()));
+    connect(netcheck, &QTimer::timeout,
+            this, &Application::checkNetwork);
     netcheck->start(5000);
 
     // check for an already running instance
@@ -146,7 +147,8 @@ Application::Application(bool rebuild_db_only, int _argc, char **_argv)
         setAttribute(Qt::AA_DontShowIconsInMenus);
 #endif
         updateTranslations();
-        connect(Config::inst(), SIGNAL(languageChanged()), this, SLOT(updateTranslations()));
+        connect(Config::inst(), &Config::languageChanged,
+                this, &Application::updateTranslations);
 
         MessageBox::setDefaultTitle(applicationName());
 
@@ -305,7 +307,8 @@ bool Application::isClient(int timeout)
         }
 #endif
         if (res) {
-            connect(server, SIGNAL(newConnection()), this, SLOT(clientMessage()));
+            connect(server, &QLocalServer::newConnection,
+                    this, &Application::clientMessage);
             state = Server;
         }
     }

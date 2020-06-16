@@ -22,9 +22,11 @@ ThreadPoolEngine::ThreadPoolEngine(ThreadPool *pool)
 {
     setObjectName("Engine");
 
-    connect(this, SIGNAL(jobProgress(ThreadPoolJob *, int, int)), m_threadpool, SIGNAL(jobProgress(ThreadPoolJob *, int, int)), Qt::QueuedConnection);
-    connect(this, SIGNAL(jobFinished(QThread *, ThreadPoolJob *)), m_threadpool, SLOT(internalJobFinished(QThread *, ThreadPoolJob *)), Qt::QueuedConnection);
-    QTimer::singleShot(0, this, SLOT(ready()));
+    connect(this, &ThreadPoolEngine::jobProgress,
+            m_threadpool, &ThreadPool::jobProgress, Qt::QueuedConnection);
+    connect(this, &ThreadPoolEngine::jobFinished,
+            m_threadpool, &ThreadPool::internalJobFinished, Qt::QueuedConnection);
+    QMetaObject::invokeMethod(this, &ThreadPoolEngine::ready, Qt::QueuedConnection);
 }
 
 void ThreadPoolEngine::ready()
@@ -84,10 +86,11 @@ signals:
     void engineExecute(ThreadPoolJob *);
 
 protected:
-    virtual void run()
+    void run() override
     {
         ThreadPoolEngine *engine = qobject_cast<ThreadPool *>(parent())->createThreadPoolEngine();
-        connect(this, SIGNAL(engineExecute(ThreadPoolJob *)), engine, SLOT(execute(ThreadPoolJob *)), Qt::QueuedConnection);
+        connect(this, &ThreadPoolThread::engineExecute,
+                engine, &ThreadPoolEngine::execute, Qt::QueuedConnection);
         exec();
     }
 };

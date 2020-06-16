@@ -32,7 +32,8 @@
 TaskLinksWidget::TaskLinksWidget(QWidget *parent)
         : QLabel(parent), m_win(0)
 {
-    connect(FrameWork::inst(), SIGNAL(windowActivated(Window *)), this, SLOT(windowUpdate(Window *)));
+    connect(FrameWork::inst(), &FrameWork::windowActivated,
+            this, &TaskLinksWidget::windowUpdate);
 
     setAlignment(Qt::AlignLeft | Qt::AlignTop);
     setIndent(8);
@@ -44,8 +45,10 @@ TaskLinksWidget::TaskLinksWidget(QWidget *parent)
     setMinimumSize(minimumSizeHint());
     setText(QString());
 
-    connect(this, SIGNAL(linkActivated(const QString &)), this, SLOT(linkActivate(const QString &)));
-    connect(this, SIGNAL(linkHovered(const QString &)), this, SLOT(linkHover(const QString &)));
+    connect(this, &QLabel::linkActivated,
+            this, &TaskLinksWidget::linkActivate);
+    connect(this, &QLabel::linkHovered,
+            this, &TaskLinksWidget::linkHover);
 }
 
 void TaskLinksWidget::linkActivate(const QString &url)
@@ -67,11 +70,15 @@ void TaskLinksWidget::linkHover(const QString &url)
 
 void TaskLinksWidget::windowUpdate(Window *win)
 {
-    if (m_win)
-        disconnect(m_win, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
+    if (m_win) {
+        disconnect(m_win.data(), &Window::selectionChanged,
+                   this, &TaskLinksWidget::selectionUpdate);
+    }
     m_win = win;
-    if (m_win)
-        connect(m_win, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
+    if (m_win) {
+        connect(m_win.data(), &Window::selectionChanged,
+                this, &TaskLinksWidget::selectionUpdate);
+    }
 
     selectionUpdate(m_win ? m_win->selection() : Document::ItemList());
 }
@@ -123,21 +130,27 @@ TaskPriceGuideWidget::TaskPriceGuideWidget(QWidget *parent)
     setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
-    connect(FrameWork::inst(), SIGNAL(windowActivated(Window *)), this, SLOT(windowUpdate(Window *)));
-    connect(this, SIGNAL(priceDoubleClicked(double)), this, SLOT(setPrice(double)));
+    connect(FrameWork::inst(), &FrameWork::windowActivated,
+            this, &TaskPriceGuideWidget::windowUpdate);
+    connect(this, &PriceGuideWidget::priceDoubleClicked,
+            this, &TaskPriceGuideWidget::setPrice);
     fixParentDockWindow();
 }
 
 void TaskPriceGuideWidget::windowUpdate(Window *win)
 {
     if (m_win) {
-        disconnect(m_win, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
-        disconnect(m_win->document(), SIGNAL(currencyCodeChanged(QString)), this, SLOT(currencyUpdate(const QString &)));
+        disconnect(m_win.data(), &Window::selectionChanged,
+                   this, &TaskPriceGuideWidget::selectionUpdate);
+        disconnect(m_win->document(), &Document::currencyCodeChanged,
+                   this, &TaskPriceGuideWidget::currencyUpdate);
     }
     m_win = win;
     if (m_win) {
-        connect(m_win, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
-        connect(m_win->document(), SIGNAL(currencyCodeChanged(QString)), this, SLOT(currencyUpdate(const QString &)));
+        connect(m_win.data(), &Window::selectionChanged,
+                this, &TaskPriceGuideWidget::selectionUpdate);
+        connect(m_win->document(), &Document::currencyCodeChanged,
+                this, &TaskPriceGuideWidget::currencyUpdate);
     }
 
     setCurrencyCode(m_win ? m_win->document()->currencyCode() : Config::inst()->defaultCurrencyCode());
@@ -178,8 +191,10 @@ bool TaskPriceGuideWidget::event(QEvent *e)
 void TaskPriceGuideWidget::fixParentDockWindow()
 {
     if (m_dock) {
-        disconnect(m_dock, SIGNAL(dockLocationChanged(Qt::DockWidgetArea)), this, SLOT(dockLocationChanged(Qt::DockWidgetArea)));
-        disconnect(m_dock, SIGNAL(topLevelChanged(bool)), this, SLOT(topLevelChanged(bool)));
+        disconnect(m_dock, &QDockWidget::dockLocationChanged,
+                   this, &TaskPriceGuideWidget::dockLocationChanged);
+        disconnect(m_dock, &QDockWidget::topLevelChanged,
+                   this, &TaskPriceGuideWidget::topLevelChanged);
     }
 
     m_dock = 0;
@@ -192,8 +207,10 @@ void TaskPriceGuideWidget::fixParentDockWindow()
     }
 
     if (m_dock) {
-        connect(m_dock, SIGNAL(dockLocationChanged(Qt::DockWidgetArea)), this, SLOT(dockLocationChanged(Qt::DockWidgetArea)));
-        connect(m_dock, SIGNAL(topLevelChanged(bool)), this, SLOT(topLevelChanged(bool)));
+        connect(m_dock, &QDockWidget::dockLocationChanged,
+                this, &TaskPriceGuideWidget::dockLocationChanged);
+        connect(m_dock, &QDockWidget::topLevelChanged,
+                this, &TaskPriceGuideWidget::topLevelChanged);
     }
 }
 
@@ -229,20 +246,26 @@ TaskInfoWidget::TaskInfoWidget(QWidget *parent)
     addWidget(m_pic);
     addWidget(m_text);
 
-    connect(FrameWork::inst(), SIGNAL(windowActivated(Window *)), this, SLOT(windowUpdate(Window *)));
-    connect(Config::inst(), SIGNAL(measurementSystemChanged(QLocale::MeasurementSystem)), this, SLOT(refresh()));
+    connect(FrameWork::inst(), &FrameWork::windowActivated,
+            this, &TaskInfoWidget::windowUpdate);
+    connect(Config::inst(), &Config::measurementSystemChanged,
+            this, &TaskInfoWidget::refresh);
 }
 
 void TaskInfoWidget::windowUpdate(Window *win)
 {
     if (m_win) {
-        disconnect(m_win, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
-        disconnect(m_win->document(), SIGNAL(currencyCodeChanged(QString)), this, SLOT(currencyUpdate()));
+        disconnect(m_win.data(), &Window::selectionChanged,
+                   this, &TaskInfoWidget::selectionUpdate);
+        disconnect(m_win->document(), &Document::currencyCodeChanged,
+                   this, &TaskInfoWidget::currencyUpdate);
     }
     m_win = win;
     if (m_win) {
-        connect(m_win, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
-        connect(m_win->document(), SIGNAL(currencyCodeChanged(QString)), this, SLOT(currencyUpdate()));
+        connect(m_win.data(), &Window::selectionChanged,
+                this, &TaskInfoWidget::selectionUpdate);
+        connect(m_win->document(), &Document::currencyCodeChanged,
+                this, &TaskInfoWidget::currencyUpdate);
     }
 
     selectionUpdate(m_win ? m_win->selection() : Document::ItemList());
@@ -330,7 +353,7 @@ TaskAppearsInWidget::TaskAppearsInWidget(QWidget *parent)
 {
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 
-    connect(FrameWork::inst(), SIGNAL(windowActivated(Window *)), this, SLOT(windowUpdate(Window *)));
+    connect(FrameWork::inst(), &FrameWork::windowActivated, this, &TaskAppearsInWidget::windowUpdate);
 }
 
 QSize TaskAppearsInWidget::minimumSizeHint() const
@@ -347,11 +370,15 @@ QSize TaskAppearsInWidget::sizeHint() const
 
 void TaskAppearsInWidget::windowUpdate(Window *win)
 {
-    if (m_win)
-        disconnect(m_win, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
+    if (m_win) {
+        disconnect(m_win.data(), &Window::selectionChanged,
+                   this, &TaskAppearsInWidget::selectionUpdate);
+    }
     m_win = win;
-    if (m_win)
-        connect(m_win, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
+    if (m_win) {
+        connect(m_win.data(), &Window::selectionChanged,
+                this, &TaskAppearsInWidget::selectionUpdate);
+    }
 
     selectionUpdate(m_win ? m_win->selection() : Document::ItemList());
 }

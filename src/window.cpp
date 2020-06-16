@@ -276,25 +276,36 @@ Window::Window(Document *doc, QWidget *parent)
     toplay->setMargin(0);
     toplay->addWidget(w_list, 10);
 
-    connect(m_latest_timer, SIGNAL(timeout()), this, SLOT(ensureLatestVisible()));
-    connect(w_list, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(contextMenu(const QPoint &)));
+    connect(m_latest_timer, &QTimer::timeout,
+            this, &Window::ensureLatestVisible);
+    connect(w_list, &QWidget::customContextMenuRequested,
+            this, &Window::contextMenu);
 
-    connect(m_selection_model, SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(updateSelection()));
-    connect(m_selection_model, SIGNAL(currentChanged(const QModelIndex &, const QModelIndex &)), this, SLOT(updateCurrent()));
+    connect(m_selection_model, &QItemSelectionModel::selectionChanged,
+            this, &Window::updateSelection);
+    connect(m_selection_model, &QItemSelectionModel::currentChanged,
+            this, &Window::updateCurrent);
 
-    connect(BrickLink::core(), SIGNAL(priceGuideUpdated(BrickLink::PriceGuide *)), this, SLOT(priceGuideUpdated(BrickLink::PriceGuide *)));
+    connect(BrickLink::core(), &BrickLink::Core::priceGuideUpdated,
+            this, &Window::priceGuideUpdated);
 
-    connect(Config::inst(), SIGNAL(showInputErrorsChanged(bool)), this, SLOT(updateErrorMask()));
-    connect(Config::inst(), SIGNAL(measurementSystemChanged(QLocale::MeasurementSystem)), w_list->viewport(), SLOT(update()));
+    connect(Config::inst(), &Config::showInputErrorsChanged,
+            this, &Window::updateErrorMask);
+    connect(Config::inst(), &Config::measurementSystemChanged,
+            w_list->viewport(), QOverload<void>::of(&QWidget::update));
 
     //connect(Config::inst(), SIGNAL(localCurrencyChanged()), w_list->viewport(), SLOT(update()));
 
-    connect(m_doc, SIGNAL(titleChanged(const QString &)), this, SLOT(updateCaption()));
-    connect(m_doc, SIGNAL(modificationChanged(bool)), this, SLOT(updateCaption()));
+    connect(m_doc, &Document::titleChanged,
+            this, &Window::updateCaption);
+    connect(m_doc, &Document::modificationChanged,
+            this, &Window::updateCaption);
 
-    connect(m_doc, SIGNAL(rowsInserted(const QModelIndex &, int, int)), this, SLOT(documentRowsInserted(const QModelIndex &, int, int)));
+    connect(m_doc, &QAbstractItemModel::rowsInserted,
+            this, &Window::documentRowsInserted);
 
-    connect(m_doc, SIGNAL(itemsChanged(const Document::ItemList &, bool)), this, SLOT(documentItemsChanged(const Document::ItemList &, bool)));
+    connect(m_doc, &Document::itemsChanged,
+            this, &Window::documentItemsChanged);
 
     updateErrorMask();
     updateCaption();

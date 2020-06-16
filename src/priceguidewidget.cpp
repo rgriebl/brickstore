@@ -126,7 +126,8 @@ PriceGuideWidget::PriceGuideWidget(QWidget *parent, Qt::WindowFlags f)
     a = new QAction(this);
     a->setObjectName("priceguide_reload");
     a->setIcon(QIcon(":/images/reload.png"));
-    connect(a, SIGNAL(triggered()), this, SLOT(doUpdate()));
+    connect(a, &QAction::triggered,
+            this, &PriceGuideWidget::doUpdate);
     addAction(a);
 
     a = new QAction(this);
@@ -136,17 +137,20 @@ PriceGuideWidget::PriceGuideWidget(QWidget *parent, Qt::WindowFlags f)
     a = new QAction(this);
     a->setObjectName("priceguide_bl_catalog");
     a->setIcon(QIcon(":/images/edit_bl_catalog.png"));
-    connect(a, SIGNAL(triggered()), this, SLOT(showBLCatalogInfo()));
+    connect(a, &QAction::triggered,
+            this, &PriceGuideWidget::showBLCatalogInfo);
     addAction(a);
     a = new QAction(this);
     a->setObjectName("priceguide_bl_priceguide");
     a->setIcon(QIcon(":/images/edit_bl_priceguide.png"));
-    connect(a, SIGNAL(triggered()), this, SLOT(showBLPriceGuideInfo()));
+    connect(a, &QAction::triggered,
+            this, &PriceGuideWidget::showBLPriceGuideInfo);
     addAction(a);
     a = new QAction(this);
     a->setObjectName("priceguide_bl_lotsforsale");
     a->setIcon(QIcon(":/images/edit_bl_lotsforsale.png"));
-    connect(a, SIGNAL(triggered()), this, SLOT(showBLLotsForSale()));
+    connect(a, &QAction::triggered,
+            this, &PriceGuideWidget::showBLLotsForSale);
     addAction(a);
 
 
@@ -235,9 +239,10 @@ void PriceGuideWidget::setPriceGuide(BrickLink::PriceGuide *pg)
     if (pg)
         pg->addRef();
 
-    if (!d->m_connected && pg)
-        d->m_connected = connect(BrickLink::core(), SIGNAL(priceGuideUpdated(BrickLink::PriceGuide *)), this, SLOT(gotUpdate(BrickLink::PriceGuide *)));
-
+    if (!d->m_connected && pg) {
+        d->m_connected = connect(BrickLink::core(), &BrickLink::Core::priceGuideUpdated,
+                                 this, &PriceGuideWidget::gotUpdate);
+    }
     d->m_pg = pg;
     update(nonStaticCells());
 }

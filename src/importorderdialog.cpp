@@ -60,7 +60,8 @@ public:
         MODELTEST_ATTACH(this)
 
         m_trans = new Transfer(6);
-        connect(m_trans, SIGNAL(finished(ThreadPoolJob *)), this, SLOT(flagReceived(ThreadPoolJob*)));
+        connect(m_trans, &Transfer::finished,
+                this, &OrderListModel::flagReceived);
     }
 
     ~OrderListModel()
@@ -309,15 +310,22 @@ ImportOrderDialog::ImportOrderDialog(QWidget *parent, Qt::WindowFlags f)
     w_order_list->setModel(new OrderListModel(this));
     w_order_list->setItemDelegate(new TransHighlightDelegate());
 
-    connect(w_order_number, SIGNAL(textChanged(const QString &)), this, SLOT(checkId()));
-    connect(w_by_number, SIGNAL(toggled(bool)), this, SLOT(checkId()));
-    connect(w_order_from, SIGNAL(dateChanged(const QDate &)), this, SLOT(checkId()));
-    connect(w_order_to, SIGNAL(dateChanged(const QDate &)), this, SLOT(checkId()));
+    connect(w_order_number, &QLineEdit::textChanged,
+            this, &ImportOrderDialog::checkId);
+    connect(w_by_number, &QAbstractButton::toggled,
+            this, &ImportOrderDialog::checkId);
+    connect(w_order_from, &QDateTimeEdit::dateChanged,
+            this, &ImportOrderDialog::checkId);
+    connect(w_order_to, &QDateTimeEdit::dateChanged,
+            this, &ImportOrderDialog::checkId);
 
-    connect(w_order_list->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(checkSelected()));
+    connect(w_order_list->selectionModel(), &QItemSelectionModel::selectionChanged,
+            this, &ImportOrderDialog::checkSelected);
 
-    connect(w_next, SIGNAL(clicked()), this, SLOT(download()));
-    connect(w_back, SIGNAL(clicked()), this, SLOT(start()));
+    connect(w_next, &QAbstractButton::clicked,
+            this, &ImportOrderDialog::download);
+    connect(w_back, &QAbstractButton::clicked,
+            this, &ImportOrderDialog::start);
 
     w_order_from->setDate(s_last_from);
     w_order_to->setDate(s_last_to);

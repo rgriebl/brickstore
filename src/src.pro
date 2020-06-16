@@ -46,8 +46,8 @@ SOURCES += \
   reportobjects.cpp \
   selectcolor.cpp \
   selectitem.cpp \
-  splash.cpp \
   taskwidgets.cpp \
+  updatedatabase.cpp \
   window.cpp
 
 HEADERS += \
@@ -70,7 +70,6 @@ HEADERS += \
   reportobjects.h \
   selectcolor.h \
   selectitem.h \
-  splash.h \
   taskwidgets.h \
   updatedatabase.h \
   window.h \

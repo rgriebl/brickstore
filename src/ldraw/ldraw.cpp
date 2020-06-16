@@ -450,14 +450,14 @@ LDraw::Part *LDraw::Core::partFromFile(const QString &file)
     return findPart(file, QDir::current());
 }
 
-LDraw::Part *LDraw::Core::partFromId(const char *id)
+LDraw::Part *LDraw::Core::partFromId(const QString &id)
 {
     QDir parts(dataPath());
     if (parts.cd(QLatin1String("parts")) || parts.cd(QLatin1String("PARTS"))) {
-        QString filename = QLatin1String(id) + QLatin1String(".dat");
+        QString filename = id + QLatin1String(".dat");
         return findPart(parts.absoluteFilePath(filename), QDir::root());
     }
-    return 0;
+    return nullptr;
 }
 
 QString LDraw::Core::dataPath() const

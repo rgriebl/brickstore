@@ -48,9 +48,12 @@ SelectColor::SelectColor(QWidget *parent, Qt::WindowFlags f)
 
     setFocusProxy(w_colors);
 
-    connect(w_colors->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(colorChanged()));
-    connect(w_colors, SIGNAL(activated(const QModelIndex &)), this, SLOT(colorConfirmed()));
-    connect(w_filter, SIGNAL(currentIndexChanged(int)), this, SLOT(updateColorFilter(int)));
+    connect(w_colors->selectionModel(), &QItemSelectionModel::selectionChanged,
+            this, &SelectColor::colorChanged);
+    connect(w_colors, &QAbstractItemView::activated,
+            this, &SelectColor::colorConfirmed);
+    connect(w_filter, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            this, &SelectColor::updateColorFilter);
 
     QGridLayout *lay = new QGridLayout(this);
     lay->setMargin(0);

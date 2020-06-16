@@ -68,8 +68,8 @@ public:
             if (si)
                 m_list->addItem(si);
         }
-        connect(m_buttons, SIGNAL(accepted()), this, SLOT(accept()));
-        connect(m_buttons, SIGNAL(rejected()), this, SLOT(reject()));
+        connect(m_buttons, &QDialogButtonBox::accepted, this, &SectionConfigDialog::accept);
+        connect(m_buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
 
         retranslateUi();
     }
@@ -133,14 +133,14 @@ void HeaderView::setModel(QAbstractItemModel *m)
 
     bool horiz = (orientation() == Qt::Horizontal);
     if (oldm) {
-        disconnect(oldm, horiz ? SIGNAL(columnsRemoved(QModelIndex,int,int)) : SIGNAL(rowsRemoved(QModelIndex,int,int)),
-                   this, SLOT(sectionsRemoved(QModelIndex,int,int)));
+        disconnect(oldm, horiz ? &QAbstractItemModel::columnsRemoved : &QAbstractItemModel::rowsRemoved,
+                   this, &HeaderView::sectionsRemoved);
     }
 
 
     if (m) {
-        connect(m, horiz ? SIGNAL(columnsRemoved(QModelIndex,int,int)) : SIGNAL(rowsRemoved(QModelIndex,int,int)),
-                this, SLOT(sectionsRemoved(QModelIndex,int,int)));
+        connect(m, horiz ? &QAbstractItemModel::columnsRemoved : &QAbstractItemModel::rowsRemoved,
+                this, &HeaderView::sectionsRemoved);
     }
 
     QHeaderView::setModel(m);

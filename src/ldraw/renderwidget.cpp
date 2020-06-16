@@ -85,7 +85,7 @@ LDraw::GLRenderer::GLRenderer(QObject *parent)
     m_animation = new QTimer(this);
     m_animation->setInterval(50);
 
-    connect(m_animation, SIGNAL(timeout()), this, SLOT(animationStep()));
+    connect(m_animation, &QTimer::timeout, this, &GLRenderer::animationStep);
 }
 
 LDraw::GLRenderer::~GLRenderer()
@@ -571,8 +571,8 @@ LDraw::RenderWidget::RenderWidget(QWidget *parent)
 
     resetCamera();
 
-    connect(m_renderer, SIGNAL(makeCurrent()), this, SLOT(slotMakeCurrent()));
-    connect(m_renderer, SIGNAL(updateNeeded()), this, SLOT(updateGL()));
+    connect(m_renderer, &GLRenderer::makeCurrent, this, &RenderWidget::slotMakeCurrent);
+    connect(m_renderer, &GLRenderer::updateNeeded, this, &RenderWidget::paintGL);
 
     setCursor(Qt::OpenHandCursor);
 }
@@ -680,8 +680,8 @@ LDraw::RenderOffscreenWidget::RenderOffscreenWidget(QWidget *parent)
 
     resetCamera();
 
-    connect(m_renderer, SIGNAL(makeCurrent()), this, SLOT(slotMakeCurrent()));
-    connect(m_renderer, SIGNAL(updateNeeded()), this, SLOT(update()));
+    connect(m_renderer, &GLRenderer::makeCurrent, this, &RenderOffscreenWidget::slotMakeCurrent);
+    connect(m_renderer, &GLRenderer::updateNeeded, this, QOverload<void>::of(&QWidget::update));
 
     setCursor(Qt::OpenHandCursor);
 }

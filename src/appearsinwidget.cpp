@@ -52,7 +52,8 @@ AppearsInWidget::AppearsInWidget(QWidget *parent)
     a = new QAction(this);
     a->setObjectName(QLatin1String("appearsin_partoutitems"));
     a->setIcon(QIcon(QLatin1String(":/images/edit_partoutitems.png")));
-    connect(a, SIGNAL(triggered()), this, SLOT(partOut()));
+    connect(a, &QAction::triggered,
+            this, &AppearsInWidget::partOut);
     addAction(a);
 
     a = new QAction(this);
@@ -62,7 +63,8 @@ AppearsInWidget::AppearsInWidget(QWidget *parent)
     a = new QAction(this);
     a->setObjectName(QLatin1String("appearsin_magnify"));
     a->setIcon(QIcon(QLatin1String(":/images/viewmagp.png")));
-    connect(a, SIGNAL(triggered()), this, SLOT(viewLargeImage()));
+    connect(a, &QAction::triggered,
+            this, &AppearsInWidget::viewLargeImage);
     addAction(a);
 
     a = new QAction(this);
@@ -72,22 +74,28 @@ AppearsInWidget::AppearsInWidget(QWidget *parent)
     a = new QAction(this);
     a->setObjectName(QLatin1String("appearsin_bl_catalog"));
     a->setIcon(QIcon(QLatin1String(":/images/edit_bl_catalog.png")));
-    connect(a, SIGNAL(triggered()), this, SLOT(showBLCatalogInfo()));
+    connect(a, &QAction::triggered,
+            this, &AppearsInWidget::showBLCatalogInfo);
     addAction(a);
     a = new QAction(this);
     a->setObjectName(QLatin1String("appearsin_bl_priceguide"));
     a->setIcon(QIcon(QLatin1String(":/images/edit_bl_priceguide.png")));
-    connect(a, SIGNAL(triggered()), this, SLOT(showBLPriceGuideInfo()));
+    connect(a, &QAction::triggered,
+            this, &AppearsInWidget::showBLPriceGuideInfo);
     addAction(a);
     a = new QAction(this);
     a->setObjectName(QLatin1String("appearsin_bl_lotsforsale"));
     a->setIcon(QIcon(QLatin1String(":/images/edit_bl_lotsforsale.png")));
-    connect(a, SIGNAL(triggered()), this, SLOT(showBLLotsForSale()));
+    connect(a, &QAction::triggered,
+            this, &AppearsInWidget::showBLLotsForSale);
     addAction(a);
 
-    connect(d->m_resize_timer, SIGNAL(timeout()), this, SLOT(resizeColumns()));
-    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(showContextMenu(const QPoint &)));
-    connect(this, SIGNAL(activated(const QModelIndex &)), this, SLOT(partOut()));
+    connect(d->m_resize_timer, &QTimer::timeout,
+            this, &AppearsInWidget::resizeColumns);
+    connect(this, &QWidget::customContextMenuRequested,
+            this, &AppearsInWidget::showContextMenu);
+    connect(this, &QAbstractItemView::activated,
+            this, &AppearsInWidget::partOut);
 
     languageChange();
     setItem(0, 0);

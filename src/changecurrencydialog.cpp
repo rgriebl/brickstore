@@ -20,9 +20,12 @@ ChangeCurrencyDialog::ChangeCurrencyDialog(const QString &from, const QString &t
     m_labelEcbFormat = w_labelEcb->text().arg(from);
     m_labelCustomFormat = w_labelCustom->text().arg(from);
 
-    connect(w_updateEcb, SIGNAL(clicked()), Currency::inst(), SLOT(updateRates()));
-    connect(Currency::inst(), SIGNAL(ratesChanged()), this, SLOT(ratesUpdated()));
-    connect(w_newCurrency, SIGNAL(currentIndexChanged(QString)), this, SLOT(currencyChanged(QString)));
+    connect(w_updateEcb, &QAbstractButton::clicked,
+            Currency::inst(), &Currency::updateRates);
+    connect(Currency::inst(), &Currency::ratesChanged,
+            this, &ChangeCurrencyDialog::ratesUpdated);
+    connect(w_newCurrency, QOverload<const QString &>::of(&QComboBox::currentIndexChanged),
+            this, &ChangeCurrencyDialog::currencyChanged);
 
     QButtonGroup *grp = new QButtonGroup(this);
     grp->addButton(w_radioEcb);

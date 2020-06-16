@@ -109,26 +109,37 @@ AddItemDialog::AddItemDialog(QWidget *parent)
         w_tier_qty [i]->setValue(0);
         w_tier_price [i]->setText(QString());
 
-        connect(w_tier_qty [i], SIGNAL(valueChanged(int)), this, SLOT(checkTieredPrices()));
-        connect(w_tier_price [i], SIGNAL(textChanged(const QString &)), this, SLOT(checkTieredPrices()));
+        connect(w_tier_qty [i], QOverload<int>::of(&QSpinBox::valueChanged),
+                this, &AddItemDialog::checkTieredPrices);
+        connect(w_tier_price [i], &QLineEdit::textChanged,
+                this, &AddItemDialog::checkTieredPrices);
     }
 
     m_percent_validator = new QIntValidator(1, 99, this);
     m_money_validator = new CurrencyValidator(0.001, 10000, 3, this);
 
-    connect(w_select_item, SIGNAL(hasColors(bool)), w_select_color, SLOT(setEnabled(bool)));
-    connect(w_select_item, SIGNAL(itemSelected(const BrickLink::Item *, bool)), this, SLOT(updateItemAndColor()));
-    connect(w_select_color, SIGNAL(colorSelected(const BrickLink::Color *, bool)), this, SLOT(updateItemAndColor()));
-    connect(w_price, SIGNAL(textChanged(const QString &)), this, SLOT(showTotal()));
-    connect(w_qty, SIGNAL(valueChanged(int)), this, SLOT(showTotal()));
-    connect(m_tier_type, SIGNAL(buttonClicked(int)), this, SLOT(setTierType(int)));
-    connect(w_bulk, SIGNAL(valueChanged(int)), this, SLOT(checkAddPossible()));
+    connect(w_select_item, &SelectItem::hasColors,
+            w_select_color, &QWidget::setEnabled);
+    connect(w_select_item, &SelectItem::itemSelected,
+            this, &AddItemDialog::updateItemAndColor);
+    connect(w_select_color, &SelectColor::colorSelected,
+            this, &AddItemDialog::updateItemAndColor);
+    connect(w_price, &QLineEdit::textChanged,
+            this, &AddItemDialog::showTotal);
+    connect(w_qty, QOverload<int>::of(&QSpinBox::valueChanged),
+            this, &AddItemDialog::showTotal);
+    connect(m_tier_type, QOverload<int>::of(&QButtonGroup::buttonClicked),
+            this, &AddItemDialog::setTierType);
+    connect(w_bulk, QOverload<int>::of(&QSpinBox::valueChanged),
+            this, &AddItemDialog::checkAddPossible);
 
-    connect(w_add, SIGNAL(clicked()), this, SLOT(addClicked()));
+    connect(w_add, &QAbstractButton::clicked,
+            this, &AddItemDialog::addClicked);
 
-    connect(w_price_guide, SIGNAL(priceDoubleClicked(double)), this, SLOT(setPrice(double)));
+    connect(w_price_guide, &PriceGuideWidget::priceDoubleClicked,
+            this, &AddItemDialog::setPrice);
 
-    connect(Config::inst(), SIGNAL(simpleModeChanged(bool)), this, SLOT(setSimpleMode(bool)));
+    //TODO5 ??? connect(Config::inst(), &Config::simpleModeChanged, this, &AddItemDialog::setSimpleMode);
 
     new QShortcut(Qt::Key_Escape, this, SLOT(close()));
 
@@ -181,13 +192,17 @@ void AddItemDialog::updateCurrencyCode()
 void AddItemDialog::attach(Window *w)
 {
     if (m_window) {
-        disconnect(m_window->document(), SIGNAL(titleChanged(const QString &)), this, SLOT(updateCaption()));
-        disconnect(m_window->document(), SIGNAL(currencyCodeChanged(const QString &)), this, SLOT(updateCurrencyCode()));
+        disconnect(m_window->document(), &Document::titleChanged,
+                   this, &AddItemDialog::updateCaption);
+        disconnect(m_window->document(), &Document::currencyCodeChanged,
+                   this, &AddItemDialog::updateCurrencyCode);
     }
     m_window = w;
     if (m_window) {
-        connect(m_window->document(), SIGNAL(titleChanged(const QString &)), this, SLOT(updateCaption()));
-        connect(m_window->document(), SIGNAL(currencyCodeChanged(const QString &)), this, SLOT(updateCurrencyCode()));
+        connect(m_window->document(), &Document::titleChanged,
+                this, &AddItemDialog::updateCaption);
+        connect(m_window->document(), &Document::currencyCodeChanged,
+                this, &AddItemDialog::updateCurrencyCode);
     }
     setEnabled(m_window);
 

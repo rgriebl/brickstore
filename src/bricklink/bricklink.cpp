@@ -411,7 +411,7 @@ BrickLink::Core::Core(const QString &datadir)
     m_pg_cache.setMaxCost(500);          // each priceguide has a cost of 1
     m_pic_cache.setMaxCost(cachemem);    // each pic has a cost of (w*h*d/8 + 1024)
 
-    connect(&m_pic_diskload, SIGNAL(finished(ThreadPoolJob *)), this, SLOT(pictureLoaded(ThreadPoolJob *)));
+    connect(&m_pic_diskload, &ThreadPool::finished, this, &Core::pictureLoaded);
 }
 
 BrickLink::Core::~Core()
@@ -429,16 +429,16 @@ void BrickLink::Core::setTransfer(Transfer *trans)
     m_transfer = trans;
 
     if (old) { // disconnect
-        disconnect(old, SIGNAL(finished(ThreadPoolJob *)), this, SLOT(priceGuideJobFinished(ThreadPoolJob *)));
-        disconnect(old, SIGNAL(finished(ThreadPoolJob *)), this, SLOT(pictureJobFinished(ThreadPoolJob *)));
+        disconnect(old, &Transfer::finished, this, &Core::priceGuideJobFinished);
+        disconnect(old, &Transfer::finished, this, &Core::pictureJobFinished);
 
-        disconnect(old, SIGNAL(progress(int, int)), this, SIGNAL(transferJobProgress(int, int)));
+        disconnect(old, &Transfer::progress, this, &Core::transferJobProgress);
     }
     if (trans) { // connect
-        connect(trans, SIGNAL(finished(ThreadPoolJob *)), this, SLOT(priceGuideJobFinished(ThreadPoolJob *)));
-        connect(trans, SIGNAL(finished(ThreadPoolJob *)), this, SLOT(pictureJobFinished(ThreadPoolJob *)));
+        connect(trans, &Transfer::finished, this, &Core::priceGuideJobFinished);
+        connect(trans, &Transfer::finished, this, &Core::pictureJobFinished);
 
-        connect(trans, SIGNAL(progress(int, int)), this, SIGNAL(transferJobProgress(int, int)));
+        connect(trans, &Transfer::progress, this, &Core::transferJobProgress);
     }
 }
 

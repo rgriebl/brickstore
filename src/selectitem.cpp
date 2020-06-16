@@ -132,7 +132,9 @@ void SelectItem::init()
     d->w_viewmode->addItem(QString());
     d->w_viewmode->addItem(QString());
     d->w_viewmode->addItem(QString());
-    connect(d->w_viewmode, SIGNAL(currentIndexChanged(int)), this, SLOT(setViewMode(int)));
+
+    connect(d->w_viewmode, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            this, &SelectItem::setViewMode);
 
     d->w_items = new QTreeView(this);
     d->w_items->setSortingEnabled(true);
@@ -188,21 +190,34 @@ void SelectItem::init()
     d->w_itemthumbs->setSelectionModel(d->w_items->selectionModel());
     d->w_thumbs->setSelectionModel(d->w_items->selectionModel());
 
-    connect(d->w_filter, SIGNAL(textChanged(const QString &)), this, SLOT(applyFilter()));
+    connect(d->w_filter, &QLineEdit::textChanged,
+            this, &SelectItem::applyFilter);
 
-    connect(d->w_item_types, SIGNAL(currentIndexChanged(int)), this, SLOT(itemTypeChanged()));
-    connect(d->w_categories->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(categoryChanged()));
+    connect(d->w_item_types, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            this, &SelectItem::itemTypeChanged);
+    connect(d->w_categories->selectionModel(), &QItemSelectionModel::selectionChanged,
+            this, &SelectItem::categoryChanged);
 
-    connect(d->w_items->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(itemChanged()));
-    connect(d->w_items, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(itemConfirmed()));
-    connect(d->w_itemthumbs, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(itemConfirmed()));
-    connect(d->w_thumbs, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(itemConfirmed()));
-    connect(d->w_items, SIGNAL(activated(const QModelIndex &)), this, SLOT(itemConfirmed()));
-    connect(d->w_itemthumbs, SIGNAL(activated(const QModelIndex &)), this, SLOT(itemConfirmed()));
-    connect(d->w_thumbs, SIGNAL(activated(const QModelIndex &)), this, SLOT(itemConfirmed()));
-    connect(d->w_items, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(showContextMenu(const QPoint &)));
-    connect(d->w_itemthumbs, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(showContextMenu(const QPoint &)));
-    connect(d->w_thumbs, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(showContextMenu(const QPoint &)));
+    connect(d->w_items->selectionModel(), &QItemSelectionModel::selectionChanged,
+            this, &SelectItem::itemChanged);
+    connect(d->w_items, &QAbstractItemView::doubleClicked,
+            this, &SelectItem::itemConfirmed);
+    connect(d->w_itemthumbs, &QAbstractItemView::doubleClicked,
+            this, &SelectItem::itemConfirmed);
+    connect(d->w_thumbs, &QAbstractItemView::doubleClicked,
+            this, &SelectItem::itemConfirmed);
+    connect(d->w_items, &QAbstractItemView::activated,
+            this, &SelectItem::itemConfirmed);
+    connect(d->w_itemthumbs, &QAbstractItemView::activated,
+            this, &SelectItem::itemConfirmed);
+    connect(d->w_thumbs, &QAbstractItemView::activated,
+            this, &SelectItem::itemConfirmed);
+    connect(d->w_items, &QWidget::customContextMenuRequested,
+            this, &SelectItem::showContextMenu);
+    connect(d->w_itemthumbs, &QWidget::customContextMenuRequested,
+            this, &SelectItem::showContextMenu);
+    connect(d->w_thumbs, &QWidget::customContextMenuRequested,
+            this, &SelectItem::showContextMenu);
 
     QGridLayout *lay = new QGridLayout(this);
     lay->setMargin(0);

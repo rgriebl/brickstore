@@ -28,7 +28,8 @@ InformationDialog::InformationDialog(const QString &title, const QMap<QString, Q
 //    w_browser->setMaximumWidth(500);
 
     gotoPage("index");
-    connect(w_browser, SIGNAL(linkActivated(const QString &)), this, SLOT(gotoPage(const QString &)));
+    connect(w_browser, &QLabel::linkActivated,
+            this, &InformationDialog::gotoPage);
 
     if (delayok) {
         w_buttons->button(QDialogButtonBox::Ok)->setEnabled(false);

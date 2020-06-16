@@ -110,9 +110,12 @@ SelectReportDialog::SelectReportDialog(QWidget *parent, Qt::WindowFlags f)
 
     w_list->setModel(model);
 
-    connect(w_list->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(reportChanged()));
-    connect(w_list, SIGNAL(activated(const QModelIndex &)), this, SLOT(reportConfirmed()));
-    connect(w_update, SIGNAL(clicked()), model, SLOT(reload()));
+    connect(w_list->selectionModel(), &QItemSelectionModel::selectionChanged,
+            this, &SelectReportDialog::reportChanged);
+    connect(w_list, &QAbstractItemView::activated,
+            this, &SelectReportDialog::reportConfirmed);
+    connect(w_update, &QAbstractButton::clicked,
+            model, &ReportModel::reload);
 
     w_buttons->button(QDialogButtonBox::Ok)->setEnabled(false);
 }

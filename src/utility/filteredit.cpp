@@ -157,8 +157,8 @@ FilterEdit::FilterEdit(QWidget *parent)
     w_clear = new FilterEditButton(QIcon(":/images/filter_edit_clear.png"), this);
     w_clear->hide();
 
-    connect(w_clear, SIGNAL(clicked()), this, SLOT(clear()));
-    connect(this, SIGNAL(textChanged(const QString&)), this, SLOT(checkText(const QString&)));
+    connect(w_clear, &QAbstractButton::clicked, this, &QLineEdit::clear);
+    connect(this, &QLineEdit::textChanged, this, &FilterEdit::checkText);
 
     getTextMargins(&m_left, &m_top, &m_right, &m_bottom);
     doLayout();

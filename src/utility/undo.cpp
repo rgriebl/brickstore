@@ -22,6 +22,7 @@
 #include <QWidgetAction>
 #include <QMouseEvent>
 #include <QStyle>
+#include <QtDebug>
 
 #include "undo.h"
 
@@ -41,10 +42,10 @@ signals:
     void triggered(int);
 
 protected:
-    virtual bool eventFilter(QObject *o, QEvent *e);
-    virtual bool event(QEvent *);
+    bool eventFilter(QObject *o, QEvent *e) override;
+    bool event(QEvent *) override;
 
-    virtual QWidget *createWidget(QWidget *parent);
+    QWidget *createWidget(QWidget *parent) override;
 
 protected slots:
     void updateDescriptions();
@@ -199,17 +200,21 @@ const char *UndoAction::s_strings [] = {
 };
 
 template <typename T>
-QAction *UndoAction::create(UndoAction::Type type, const T *stack, QObject *parent)
+QAction *UndoAction::create(UndoAction::Type type, const T *stackOrGroup, QObject *parent)
 {
     bool un = (type == Undo);
 
-    QAction *a = new UndoAction(type, parent);
-    a->setEnabled(un ? stack->canUndo() : stack->canRedo());
+    UndoAction *a = new UndoAction(type, parent);
+    a->setEnabled(un ? stackOrGroup->canUndo() : stackOrGroup->canRedo());
 
-    connect(stack, un ? SIGNAL(undoTextChanged(const QString &)) : SIGNAL(redoTextChanged(const QString &)), a, SLOT(updateDescriptions()));
-    connect(stack, un ? SIGNAL(canUndoChanged(bool))             : SIGNAL(canRedoChanged(bool)),             a, SLOT(setEnabled(bool)));
-    connect(a, SIGNAL(triggered(int)), stack, un ? SLOT(undo(int)) : SLOT(redo(int)));
-    connect(a, SIGNAL(triggered()),    stack, un ? SLOT(undo())    : SLOT(redo()));
+    connect(stackOrGroup, un ? &T::undoTextChanged : &T::redoTextChanged,
+            a, &UndoAction::updateDescriptions);
+    connect(stackOrGroup, un ? &T::canUndoChanged  : &T::canRedoChanged,
+            a, &QAction::setEnabled);
+    connect(a, QOverload<int>::of(&UndoAction::triggered),
+            stackOrGroup, QOverload<int>::of(un ? &T::undo : &T::redo));
+    connect(a, &QAction::triggered,
+            stackOrGroup, un ? &T::undo : &T::redo);
 
     return a;
 }
@@ -230,7 +235,7 @@ QWidget *UndoAction::createWidget(QWidget *parent)
     if (QToolBar *tb = qobject_cast<QToolBar *>(parent)) {
         if (m_menu) {
             qWarning("Each UndoAction should only be added once to a single QToolBar");
-            return 0;
+            return nullptr;
         }
 
         // straight from QToolBar
@@ -239,13 +244,12 @@ QWidget *UndoAction::createWidget(QWidget *parent)
         button->setFocusPolicy(Qt::NoFocus);
         button->setIconSize(tb->iconSize());
         button->setToolButtonStyle(tb->toolButtonStyle());
-        QObject::connect(tb, SIGNAL(iconSizeChanged(QSize)),
-                         button, SLOT(setIconSize(QSize)));
-        QObject::connect(tb, SIGNAL(toolButtonStyleChanged(Qt::ToolButtonStyle)),
-                         button, SLOT(setToolButtonStyle(Qt::ToolButtonStyle)));
+        connect(tb, &QToolBar::iconSizeChanged,
+                button, &QToolButton::setIconSize);
+        connect(tb, &QToolBar::toolButtonStyleChanged,
+                button, &QToolButton::setToolButtonStyle);
         button->setDefaultAction(this);
         button->installEventFilter(this);
-
 
         m_menu = new QMenu(button);
         button->setMenu(m_menu);
@@ -273,12 +277,17 @@ QWidget *UndoAction::createWidget(QWidget *parent)
 
         m_menu->setFocusProxy(m_list);
 
-        connect(m_list, SIGNAL(itemEntered(QListWidgetItem *)), this, SLOT(setCurrentItemSlot(QListWidgetItem *)));
-        connect(m_list, SIGNAL(currentItemChanged(QListWidgetItem *, QListWidgetItem *)), this, SLOT(selectRange(QListWidgetItem *)));
-        connect(m_list, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(itemSelected(QListWidgetItem *)));
-        connect(m_list, SIGNAL(itemActivated(QListWidgetItem *)), this, SLOT(itemSelected(QListWidgetItem *)));
+        connect(m_list, &QListWidget::itemEntered,
+                this, &UndoAction::setCurrentItemSlot);
+        connect(m_list, &QListWidget::currentItemChanged,
+                this, &UndoAction::selectRange);
+        connect(m_list, &QListWidget::itemClicked,
+                this, &UndoAction::itemSelected);
+        connect(m_list, &QListWidget::itemActivated,
+                this, &UndoAction::itemSelected);
 
-        connect(m_menu, SIGNAL(aboutToShow()), this, SLOT(fixMenu()));
+        connect(m_menu, &QMenu::aboutToShow,
+                this, &UndoAction::fixMenu);
 
         return button;
     }
@@ -314,8 +323,8 @@ void UndoAction::languageChange ( )
 bool UndoAction::eventFilter(QObject *o, QEvent *e)
 {
     if ((o == m_label) &&
-        (e->type() == QEvent::MouseButtonPress) &&
-        (static_cast<QMouseEvent *>(e)->button() == Qt::LeftButton)) {
+            (e->type() == QEvent::MouseButtonPress) &&
+            (static_cast<QMouseEvent *>(e)->button() == Qt::LeftButton)) {
         m_menu->close();
     }
     else if (qobject_cast<QToolButton *>(o) &&
@@ -329,7 +338,7 @@ bool UndoAction::eventFilter(QObject *o, QEvent *e)
         }
     }
 
-    return QAction::eventFilter(o, e);
+    return QWidgetAction::eventFilter(o, e);
 }
 
 void UndoAction::setCurrentItemSlot(QListWidgetItem *item)

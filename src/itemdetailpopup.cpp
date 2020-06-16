@@ -166,12 +166,16 @@ ItemDetailPopup::ItemDetailPopup(QWidget *parent)
     lay->addWidget(m_bar);
     lay->addWidget(m_stack);
 
-    connect(m_close, SIGNAL(clicked()), this, SLOT(close()));
+    connect(m_close, &QAbstractButton::clicked,
+            this, &QWidget::close);
 
 #if !defined(QT_NO_OPENGL)
-    connect(m_play, SIGNAL(clicked()), m_ldraw, SLOT(startAnimation()));
-    connect(m_stop, SIGNAL(clicked()), m_ldraw, SLOT(stopAnimation()));
-    connect(m_view, SIGNAL(clicked()), m_ldraw, SLOT(resetCamera()));
+    connect(m_play, &QAbstractButton::clicked,
+            m_ldraw, &LDraw::RenderOffscreenWidget::startAnimation);
+    connect(m_stop, &QAbstractButton::clicked,
+            m_ldraw, &LDraw::RenderOffscreenWidget::stopAnimation);
+    connect(m_view, &QAbstractButton::clicked,
+            m_ldraw, &LDraw::RenderOffscreenWidget::resetCamera);
 #endif
 #if defined(Q_OS_MAC)
     createWinId();
@@ -225,9 +229,10 @@ void ItemDetailPopup::setItem(const BrickLink::Item *item, const BrickLink::Colo
 #endif
     }
 
-    if (!m_connected && item)
-        m_connected = connect(BrickLink::core(), SIGNAL(pictureUpdated(BrickLink::Picture *)), this, SLOT(gotUpdate(BrickLink::Picture *)));
-
+    if (!m_connected && item) {
+        m_connected = connect(BrickLink::core(), &BrickLink::Core::pictureUpdated,
+                              this, &ItemDetailPopup::gotUpdate);
+    }
 }
 
 void ItemDetailPopup::gotUpdate(BrickLink::Picture *pic)

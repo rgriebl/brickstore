@@ -75,8 +75,10 @@ public:
     WindowMenu(Workspace *ws, bool shortcut = false, QWidget *parent = 0)
         : QMenu(parent), m_ws(ws), m_shortcut(shortcut)
     {
-        connect(this, SIGNAL(aboutToShow()), this, SLOT(buildMenu()));
-        connect(this, SIGNAL(triggered(QAction *)), this, SLOT(activateWindow(QAction *)));
+        connect(this, &QMenu::aboutToShow,
+                this, &WindowMenu::buildMenu);
+        connect(this, &QMenu::triggered,
+                this, &WindowMenu::activateWindow);
 
         setEnabled(false);
     }
@@ -277,11 +279,16 @@ Workspace::Workspace(QWidget *parent, Qt::WindowFlags f)
     layout->addLayout(m_stack, 10);
     setLayout(layout);
 
-    connect(m_tabbar, SIGNAL(currentChanged(int)), this, SLOT(activateTab(int)));
-    connect(m_tabbar, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTab(int)));
-    connect(m_tabbar, SIGNAL(tabCountChanged(int)), this, SLOT(updateVisibility()));
-    connect(m_tabbar, SIGNAL(tabMoved(int, int)), this, SLOT(moveTab(int, int)));
-    connect(m_stack, SIGNAL(widgetRemoved(int)), this, SLOT(removeTab(int)));
+    connect(m_tabbar, &QTabBar::currentChanged,
+            this, &Workspace::activateTab);
+    connect(m_tabbar, &QTabBar::tabCloseRequested,
+            this, &Workspace::closeTab);
+    connect(m_tabbar, &TabBar::tabCountChanged,
+            this, &Workspace::updateVisibility);
+    connect(m_tabbar, &QTabBar::tabMoved,
+            this, &Workspace::moveTab);
+    connect(m_stack, &QStackedLayout::widgetRemoved,
+            this, &Workspace::removeTab);
 
     updateVisibility();
 }
@@ -289,7 +296,8 @@ Workspace::Workspace(QWidget *parent, Qt::WindowFlags f)
 QMenu *Workspace::windowMenu(bool hasShortcut, QWidget *parent)
 {
     WindowMenu *m = new WindowMenu(this, hasShortcut, parent);
-    connect(m_tabbar, SIGNAL(tabCountChanged(int)), m, SLOT(checkEnabledStatus(int)));
+    connect(m_tabbar, &TabBar::tabCountChanged,
+            m, &WindowMenu::checkEnabledStatus);
     return m;
 }
 

@@ -33,8 +33,8 @@ ProgressDialog::ProgressDialog(Transfer *trans, QWidget *parent, Qt::WindowFlags
     m_job = 0;
     m_trans = trans;
 
-    connect(m_trans, SIGNAL(finished(ThreadPoolJob *)), this, SLOT(transferDone(ThreadPoolJob *)));
-    connect(m_trans, SIGNAL(jobProgress(ThreadPoolJob *, int, int)), this, SLOT(transferProgress(ThreadPoolJob *, int, int)));
+    connect(m_trans, &Transfer::finished, this, &ProgressDialog::transferDone);
+    connect(m_trans, &Transfer::jobProgress, this, &ProgressDialog::transferProgress);
 
     m_message_progress = false;
 
@@ -80,7 +80,7 @@ ProgressDialog::ProgressDialog(Transfer *trans, QWidget *parent, Qt::WindowFlags
     m_buttons = new QDialogButtonBox(QDialogButtonBox::Cancel, Qt::Horizontal, this);
     m_buttons->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
     lay->addWidget(m_buttons);
-    connect(m_buttons, SIGNAL(rejected()), this, SLOT(reject()));
+    connect(m_buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     m_override = true;
@@ -142,7 +142,8 @@ void ProgressDialog::setFinished(bool ok)
     }
     else {
         m_buttons->setStandardButtons(QDialogButtonBox::Ok);
-        connect(m_buttons, SIGNAL(accepted()), this, ok ? SLOT(accept()) : SLOT(reject()));
+        connect(m_buttons, &QDialogButtonBox::accepted,
+                this, ok ? &QDialog::accept : &QDialog::reject);
         layout();
     }
 }

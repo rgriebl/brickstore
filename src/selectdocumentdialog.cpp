@@ -42,9 +42,12 @@ SelectDocumentDialog::SelectDocumentDialog(const Document *self, const QString &
     if (w_document_list->count())
         w_document_list->setCurrentRow(0);
     
-    connect(w_clipboard, SIGNAL(toggled(bool)), this, SLOT(updateButtons()));
-    connect(w_document_list, SIGNAL(currentItemChanged(QListWidgetItem *. QListWidgetItem *)), this, SLOT(updateButtons()));
-    connect(w_document_list, SIGNAL(itemActivated(QListWidgetItem *)), this, SLOT(itemActivated(QListWidgetItem *)));
+    connect(w_clipboard, &QAbstractButton::toggled,
+            this, &SelectDocumentDialog::updateButtons);
+    connect(w_document_list, &QListWidget::currentItemChanged,
+            this, &SelectDocumentDialog::updateButtons);
+    connect(w_document_list, &QListWidget::itemActivated,
+            this, &SelectDocumentDialog::itemActivated);
 
     updateButtons();
 }

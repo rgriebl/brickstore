@@ -32,7 +32,8 @@
 ImportBLStore::ImportBLStore(ProgressDialog *pd)
     : m_progress(pd)
 {
-    connect(pd, SIGNAL(transferFinished()), this, SLOT(gotten()));
+    connect(pd, &ProgressDialog::transferFinished,
+            this, &ImportBLStore::gotten);
 
     pd->setHeaderText(tr("Importing BrickLink Store"));
     pd->setMessageText(tr("Download: %p"));
@@ -134,7 +135,8 @@ void ImportBLOrder::init()
         m_order_from = m_order_to.addDays(-1);
     }
 
-    connect(m_progress, SIGNAL(transferFinished()), this, SLOT(gotten()));
+    connect(m_progress, &ProgressDialog::transferFinished,
+            this, &ImportBLOrder::gotten);
 
     m_progress->setHeaderText(tr("Importing BrickLink Order"));
     m_progress->setMessageText(tr("Download: %p"));
@@ -312,7 +314,8 @@ QDate ImportBLOrder::ymd2date(const QString &ymd)
 ImportBLCart::ImportBLCart(int shopid, int cartid, ProgressDialog *pd)
     : m_progress(pd)
 {
-    connect(pd, SIGNAL(transferFinished()), this, SLOT(gotten()));
+    connect(pd, &ProgressDialog::transferFinished,
+            this, &ImportBLCart::gotten);
 
     pd->setHeaderText(tr("Importing BrickLink Shopping Cart"));
     pd->setMessageText(tr("Download: %p"));
@@ -491,7 +494,8 @@ void ImportBLCart::gotten()
 ImportPeeronInventory::ImportPeeronInventory(const QString &peeronid, ProgressDialog *pd)
     : m_progress(pd), m_peeronid(peeronid)
 {
-    connect(pd, SIGNAL(transferFinished()), this, SLOT(gotten()));
+    connect(pd, &ProgressDialog::transferFinished,
+            this, &ImportPeeronInventory::gotten);
 
     pd->setHeaderText(tr("Importing Peeron Inventory"));
     pd->setMessageText(tr("Download: %p"));

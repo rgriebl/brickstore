@@ -77,11 +77,16 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent, Qt
     int is = fontMetrics().height();
     w_currency_update->setIconSize(QSize(is, is));
 
-    connect(w_docdir, SIGNAL(activated(int)), this, SLOT(selectDocDir(int)));
-    connect(w_upd_reset, SIGNAL(clicked()), this, SLOT(resetUpdateIntervals()));
-    connect(w_currency, SIGNAL(currentIndexChanged(QString)), this, SLOT(currentCurrencyChanged(QString)));
-    connect(w_currency_update, SIGNAL(clicked()), Currency::inst(), SLOT(updateRates()));
-    connect(Currency::inst(), SIGNAL(ratesChanged()), this, SLOT(currenciesUpdated()));
+    connect(w_docdir, QOverload<int>::of(&QComboBox::activated),
+            this, &SettingsDialog::selectDocDir);
+    connect(w_upd_reset, &QAbstractButton::clicked,
+            this, &SettingsDialog::resetUpdateIntervals);
+    connect(w_currency, QOverload<const QString &>::of(&QComboBox::currentIndexChanged),
+            this, &SettingsDialog::currentCurrencyChanged);
+    connect(w_currency_update, &QAbstractButton::clicked,
+            Currency::inst(), &Currency::updateRates);
+    connect(Currency::inst(), &Currency::ratesChanged,
+            this, &SettingsDialog::currenciesUpdated);
 
     load();
 
@@ -261,7 +266,7 @@ void SettingsDialog::save()
     Config::inst()->setMeasurementSystem(w_imperial->isChecked() ? QLocale::ImperialSystem : QLocale::MetricSystem);
     Config::inst()->setDefaultCurrencyCode(m_preferedCurrency);
 
-    QDir dd(w_docdir->itemText(0));
+    QDir dd(w_docdir->itemData(0).toString());
     if (dd.exists() && dd.isReadable())
         Config::inst()->setDocumentDir(w_docdir->itemText(0));
     else

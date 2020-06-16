@@ -28,9 +28,12 @@ IncDecPricesDialog::IncDecPricesDialog(const QString &currencycode, QWidget *par
     m_neg_percent_validator = new QDoubleValidator (0., 99.99, 2, this);
     m_fixed_validator       = new CurrencyValidator(0,  10000, 3, this);
 
-    connect(w_increase, SIGNAL(toggled(bool)), this, SLOT(updateValidators()));
-    connect(w_percent, SIGNAL(toggled(bool)), this, SLOT(updateValidators()));
-    connect(w_value, SIGNAL(textChanged(const QString &)), this, SLOT(checkValue()));
+    connect(w_increase, &QAbstractButton::toggled,
+            this, &IncDecPricesDialog::updateValidators);
+    connect(w_percent, &QAbstractButton::toggled,
+            this, &IncDecPricesDialog::updateValidators);
+    connect(w_value, &QLineEdit::textChanged,
+            this, &IncDecPricesDialog::checkValue);
 
     w_buttons->button(QDialogButtonBox::Ok)->setEnabled(false);
     updateValidators();

@@ -16,6 +16,7 @@
 #include "selectcolordialog.h"
 #include "selectcolor.h"
 #include "utility.h"
+#include "bricklink.h"
 
 
 SelectColorDialog::SelectColorDialog(QWidget *parent, Qt::WindowFlags f)
@@ -23,7 +24,8 @@ SelectColorDialog::SelectColorDialog(QWidget *parent, Qt::WindowFlags f)
 {
     setupUi(this);
 
-    connect(w_sc, SIGNAL(colorSelected(const BrickLink::Color *, bool)), this, SLOT(checkColor(const BrickLink::Color *, bool)));
+    connect(w_sc, &SelectColor::colorSelected,
+            this, &SelectColorDialog::checkColor);
 
     w_buttons->button(QDialogButtonBox::Ok)->setEnabled(false);
     setFocusProxy(w_sc);

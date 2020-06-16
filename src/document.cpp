@@ -341,32 +341,26 @@ Document *Document::createTemporary(const BrickLink::InvItemList &list)
 }
 
 Document::Document(int /*is temporary*/)
-    : m_currencycode(QLatin1String("USD")), m_uuid(QUuid::createUuid())
-{
-    MODELTEST_ATTACH(this)
-
-    m_undo = 0;
-    m_order = 0;
-    m_error_mask = 0;
-
-    connect(BrickLink::core(), SIGNAL(pictureUpdated(BrickLink::Picture *)), this, SLOT(pictureUpdated(BrickLink::Picture *)));
-}
-
-Document::Document()
-    : m_currencycode(Config::inst()->defaultCurrencyCode())
+    : m_currencycode(QLatin1String("USD"))
     , m_uuid(QUuid::createUuid())
 {
     MODELTEST_ATTACH(this)
 
+    connect(BrickLink::core(), &BrickLink::Core::pictureUpdated,
+            this, &Document::pictureUpdated);
+}
+
+Document::Document()
+    : Document(0)
+{
+    m_currencycode = Config::inst()->defaultCurrencyCode();
+
     m_undo = new UndoStack(this);
-    m_order = 0;
-    m_error_mask = 0;
+    connect(m_undo, &QUndoStack::cleanChanged,
+            this, &Document::clean2Modified);
 
-    connect(BrickLink::core(), SIGNAL(pictureUpdated(BrickLink::Picture *)), this, SLOT(pictureUpdated(BrickLink::Picture *)));
-
-    connect(m_undo, SIGNAL(cleanChanged(bool)), this, SLOT(clean2Modified(bool)));
-
-    connect(&m_autosave_timer, SIGNAL(timeout()), this, SLOT(autosave()));
+    connect(&m_autosave_timer, &QTimer::timeout,
+            this, &Document::autosave);
     m_autosave_timer.start(5000);
 
     s_documents.append(this);

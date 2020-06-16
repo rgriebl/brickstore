@@ -61,13 +61,15 @@ PictureWidget::PictureWidget(QWidget *parent, Qt::WindowFlags f)
     QPalette pal = d->m_tlabel->palette();
     pal.setColor(QPalette::Base, Qt::transparent);
     d->m_tlabel->setPalette(pal);
-    connect(d->m_tlabel, SIGNAL(copyAvailable(bool)), this, SLOT(checkContextMenu(bool)));
+    connect(d->m_tlabel, &QTextEdit::copyAvailable,
+            this, &PictureWidget::checkContextMenu);
 
     QAction *a;
     a = new QAction(this);
     a->setObjectName("picture_reload");
     a->setIcon(QIcon(":/images/reload.png"));
-    connect(a, SIGNAL(triggered()), this, SLOT(doUpdate()));
+    connect(a, &QAction::triggered,
+            this, &PictureWidget::doUpdate);
     addAction(a);
 
     a = new QAction(this);
@@ -77,7 +79,8 @@ PictureWidget::PictureWidget(QWidget *parent, Qt::WindowFlags f)
     a = new QAction(this);
     a->setObjectName("picture_magnify");
     a->setIcon(QIcon(":/images/viewmagp.png"));
-    connect(a, SIGNAL(triggered()), this, SLOT(viewLargeImage()));
+    connect(a, &QAction::triggered,
+            this, &PictureWidget::viewLargeImage);
     addAction(a);
 
     a = new QAction(this);
@@ -87,17 +90,20 @@ PictureWidget::PictureWidget(QWidget *parent, Qt::WindowFlags f)
     a = new QAction(this);
     a->setObjectName("picture_bl_catalog");
     a->setIcon(QIcon(":/images/edit_bl_catalog.png"));
-    connect(a, SIGNAL(triggered()), this, SLOT(showBLCatalogInfo()));
+    connect(a, &QAction::triggered,
+            this, &PictureWidget::showBLCatalogInfo);
     addAction(a);
     a = new QAction(this);
     a->setObjectName("picture_bl_priceguide");
     a->setIcon(QIcon(":/images/edit_bl_priceguide.png"));
-    connect(a, SIGNAL(triggered()), this, SLOT(showBLPriceGuideInfo()));
+    connect(a, &QAction::triggered,
+            this, &PictureWidget::showBLPriceGuideInfo);
     addAction(a);
     a = new QAction(this);
     a->setObjectName("picture_bl_lotsforsale");
     a->setIcon(QIcon(":/images/edit_bl_lotsforsale.png"));
-    connect(a, SIGNAL(triggered()), this, SLOT(showBLLotsForSale()));
+    connect(a, &QAction::triggered,
+            this, &PictureWidget::showBLLotsForSale);
     addAction(a);
 
     languageChange();
@@ -185,8 +191,10 @@ void PictureWidget::setPicture(BrickLink::Picture *pic)
     if (d->m_pic)
         d->m_pic->addRef();
 
-    if (!d->m_connected && pic)
-        d->m_connected = connect(BrickLink::core(), SIGNAL(pictureUpdated(BrickLink::Picture *)), this, SLOT(gotUpdate(BrickLink::Picture *)));
+    if (!d->m_connected && pic) {
+        d->m_connected = connect(BrickLink::core(), &BrickLink::Core::pictureUpdated,
+                                 this, &PictureWidget::gotUpdate);
+    }
 
     setToolTip(pic ? tr("Double-click to view the large image.") : QString());
     setContextMenuPolicy(pic ? Qt::ActionsContextMenu : Qt::NoContextMenu);
@@ -281,13 +289,15 @@ LargePictureWidget::LargePictureWidget(BrickLink::Picture *lpic, QWidget *parent
     if (d->m_pic)
         d->m_pic->addRef();
 
-    connect(BrickLink::core(), SIGNAL(pictureUpdated(BrickLink::Picture *)), this, SLOT(gotUpdate(BrickLink::Picture *)));
+    connect(BrickLink::core(), &BrickLink::Core::pictureUpdated,
+            this, &LargePictureWidget::gotUpdate);
 
     QAction *a;
     a = new QAction(this);
     a->setObjectName("picture_reload");
     a->setIcon(QIcon(":/images/reload.png"));
-    connect(a, SIGNAL(triggered()), this, SLOT(doUpdate()));
+    connect(a, &QAction::triggered, this,
+            &LargePictureWidget::doUpdate);
     addAction(a);
 
     a = new QAction(this);
@@ -297,7 +307,8 @@ LargePictureWidget::LargePictureWidget(BrickLink::Picture *lpic, QWidget *parent
     a = new QAction(this);
     a->setObjectName("picture_close");
     a->setIcon(QIcon(":/images/file_close.png"));
-    connect(a, SIGNAL(triggered()), this, SLOT(close()));
+    connect(a, &QAction::triggered,
+            this, &QWidget::close);
     addAction(a);
 
     languageChange();

@@ -25,7 +25,8 @@ SelectItemDialog::SelectItemDialog(bool only_with_inventory, QWidget *parent, Qt
     setupUi(this);
     w_si->setExcludeWithoutInventoryFilter(only_with_inventory);
 
-    connect(w_si, SIGNAL(itemSelected(const BrickLink::Item *, bool)), this, SLOT(checkItem(const BrickLink::Item *, bool)));
+    connect(w_si, &SelectItem::itemSelected,
+            this, &SelectItemDialog::checkItem);
 
     w_buttons->button(QDialogButtonBox::Ok)->setEnabled(false);
     setFocusProxy(w_si);

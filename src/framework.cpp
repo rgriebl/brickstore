@@ -129,8 +129,10 @@ public:
     RecentMenu(FrameWork *fw, QWidget *parent)
         : QMenu(parent), m_fw(fw)
     {
-        connect(this, SIGNAL(aboutToShow()), this, SLOT(buildMenu()));
-        connect(this, SIGNAL(triggered(QAction *)), this, SLOT(openRecentAction(QAction *)));
+        connect(this, &QMenu::aboutToShow,
+                this, &RecentMenu::buildMenu);
+        connect(this, &QMenu::triggered,
+                this, &RecentMenu::openRecentAction);
     }
 
 signals:
@@ -194,7 +196,8 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
 
     m_undogroup = new UndoGroup(this);
 
-    connect(Application::inst(), SIGNAL(openDocument(const QString &)), this, SLOT(openDocument(const QString &)));
+    connect(Application::inst(), &Application::openDocument,
+            this, &FrameWork::openDocument);
 
     m_recent_files = Config::inst()->value("/Files/Recent").toStringList();
     while (m_recent_files.count() > MaxRecentFiles)
@@ -203,7 +206,8 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
     m_current_window = 0;
 
     m_workspace = new Workspace(this);
-    connect(m_workspace, SIGNAL(windowActivated(QWidget *)), this, SLOT(connectWindow(QWidget *)));
+    connect(m_workspace, &Workspace::windowActivated,
+            this, &FrameWork::connectWindow);
 
     setCentralWidget(m_workspace);
 
@@ -384,10 +388,14 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
 
     BrickLink::Core *bl = BrickLink::core();
 
-    connect(Application::inst(), SIGNAL(onlineStateChanged(bool)), this, SLOT(onlineStateChanged(bool)));
-    connect(Config::inst(), SIGNAL(updateIntervalsChanged(QMap<QByteArray,int>)), bl, SLOT(setUpdateIntervals(QMap<QByteArray,int>)));
-    connect(Config::inst(), SIGNAL(proxyChanged(QNetworkProxy)), bl->transfer(), SLOT(setProxy(QNetworkProxy)));
-    connect(Config::inst(), SIGNAL(measurementSystemChanged(QLocale::MeasurementSystem)), this, SLOT(statisticsUpdate()));
+    connect(Application::inst(), &Application::onlineStateChanged,
+            this, &FrameWork::onlineStateChanged);
+    connect(Config::inst(), &Config::updateIntervalsChanged,
+            bl, &BrickLink::Core::setUpdateIntervals);
+    connect(Config::inst(), &Config::proxyChanged,
+            bl->transfer(), &Transfer::setProxy);
+    connect(Config::inst(), &Config::measurementSystemChanged,
+            this, &FrameWork::statisticsUpdate);
 
     findAction("view_show_input_errors")->setChecked(Config::inst()->showInputErrors());
 
@@ -395,9 +403,11 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
 
     bl->setUpdateIntervals(Config::inst()->updateIntervals());
 
-    connect(bl, SIGNAL(transferJobProgress(int,int)), this, SLOT(transferJobProgressUpdate(int,int)));
+    connect(bl, &BrickLink::Core::transferJobProgress,
+            this, &FrameWork::transferJobProgressUpdate);
 
-    connect(m_undogroup, SIGNAL(cleanChanged(bool)), this, SLOT(modificationUpdate()));
+    connect(m_undogroup, &QUndoGroup::cleanChanged,
+            this, &FrameWork::modificationUpdate);
 
     bool dbok = BrickLink::core()->readDatabase();
 
@@ -417,7 +427,7 @@ FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
     m_running = true;
 
     updateActions();    // init enabled/disabled status of document actions
-    connectWindow(0);
+    connectWindow(nullptr);
 
     // we need to show now, since most X11 window managers and Mac OS X with
     // unified-toolbar look won't get the position right otherwise
@@ -700,8 +710,10 @@ void FrameWork::createStatusBar()
     l->addWidget(m_st_value);
     l->addWidget(m_st_currency);
 
-    connect(m_st_currency, SIGNAL(triggered(QAction*)), this, SLOT(changeDocumentCurrency(QAction *)));
-    connect(Currency::inst(), SIGNAL(ratesChanged()), this, SLOT(updateCurrencyRates()));
+    connect(m_st_currency, &QToolButton::triggered,
+            this, &FrameWork::changeDocumentCurrency);
+    connect(Currency::inst(), &Currency::ratesChanged,
+            this, &FrameWork::updateCurrencyRates);
     updateCurrencyRates();
 
     st->addPermanentWidget(m_st_errors, 0, margin);
@@ -871,13 +883,13 @@ void FrameWork::createActions()
     QActionGroup *g;
     QMenu *m;
 
-
     a = newQAction(this, "file_new", 0, false, this, SLOT(fileNew()));
     a = newQAction(this, "file_open", 0, false, this, SLOT(fileOpen()));
 
-    m = new RecentMenu(this, this);
-    m->menuAction()->setObjectName("file_open_recent");
-    connect(m, SIGNAL(openRecent(int)), this, SLOT(fileOpenRecent(int)));
+    auto rm = new RecentMenu(this, this);
+    rm->menuAction()->setObjectName("file_open_recent");
+    connect(rm, &RecentMenu::openRecent,
+            this, &FrameWork::fileOpenRecent);
 
     (void) newQAction(this, "file_save", NeedDocument);
     (void) newQAction(this, "file_saveas", NeedDocument);
@@ -907,17 +919,18 @@ void FrameWork::createActions()
 
     a = m_undogroup->createUndoAction(this);
     a->setObjectName("edit_undo");
-    a->setProperty("bsFlags", NeedDocument);
     a = m_undogroup->createRedoAction(this);
     a->setObjectName("edit_redo");
-    a->setProperty("bsFlags", NeedDocument);
 
     a = newQAction(this, "edit_cut", NeedSelection(1));
-    connect(new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Delete), this, 0, 0, Qt::WindowShortcut), SIGNAL(activated()), a, SLOT(trigger()));
+    connect(new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Delete), this, 0, 0, Qt::WindowShortcut),
+            &QShortcut::activated, a, &QAction::trigger);
     a = newQAction(this, "edit_copy", NeedSelection(1));
-    connect(new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Insert), this, 0, 0, Qt::WindowShortcut), SIGNAL(activated()), a, SLOT(trigger()));
+    connect(new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Insert), this, 0, 0, Qt::WindowShortcut),
+            &QShortcut::activated, a, &QAction::trigger);
     a = newQAction(this, "edit_paste", NeedDocument);
-    connect(new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Insert), this, 0, 0, Qt::WindowShortcut), SIGNAL(activated()), a, SLOT(trigger()));
+    connect(new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Insert), this, 0, 0, Qt::WindowShortcut),
+            &QShortcut::activated, a, &QAction::trigger);
     (void) newQAction(this, "edit_delete", NeedSelection(1));
 
     a = newQAction(this, "edit_additems", NeedDocument, false, this, SLOT(showAddItemDialog()));
@@ -1261,16 +1274,19 @@ void FrameWork::connectWindow(QWidget *w)
 
         connectAllActions(false, m_current_window);
 
-        disconnect(doc, SIGNAL(statisticsChanged()), this, SLOT(statisticsUpdate()));
-//        disconnect(doc, SIGNAL(currencyCodeChanged(QString)), this, SLOT(updateCurrencyButton()));
-        disconnect(m_current_window, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
+        disconnect(doc, &Document::statisticsChanged,
+                   this, &FrameWork::statisticsUpdate);
+        disconnect(m_current_window.data(), &Window::selectionChanged,
+                   this, &FrameWork::selectionUpdate);
         if (m_filter) {
-            disconnect(m_filter, SIGNAL(textChanged(const QString &)), m_current_window, SLOT(setFilter(const QString &)));
+            disconnect(m_filter, &QLineEdit::textChanged,
+                       m_current_window.data(), &Window::setFilter);
             m_filter->setText(QString());
             m_filter->setToolTip(QString());
         }
         if (m_details) {
-            disconnect(m_current_window, SIGNAL(currentChanged(Document::Item *)), this, SLOT(setItemDetailHelper(Document::Item *)));
+            disconnect(m_current_window.data(), &Window::currentChanged,
+                       this, &FrameWork::setItemDetailHelper);
             setItemDetailHelper(0);
         }
         m_undogroup->setActiveStack(0);
@@ -1283,17 +1299,20 @@ void FrameWork::connectWindow(QWidget *w)
 
         connectAllActions(true, window);
 
-        connect(doc, SIGNAL(statisticsChanged()), this, SLOT(statisticsUpdate()));
-//        connect(doc, SIGNAL(currencyCodeChanged(QString)), this, SLOT(updateCurrencyButton()));
-        connect(window, SIGNAL(selectionChanged(const Document::ItemList &)), this, SLOT(selectionUpdate(const Document::ItemList &)));
+        connect(doc, &Document::statisticsChanged,
+                this, &FrameWork::statisticsUpdate);
+        connect(window, &Window::selectionChanged,
+                this, &FrameWork::selectionUpdate);
         if (m_filter) {
             m_filter->setText(window->filter());
             m_filter->setToolTip(window->filterToolTip());
-            connect(m_filter, SIGNAL(textChanged(const QString &)), window, SLOT(setFilter(const QString &)));
+            connect(m_filter, &QLineEdit::textChanged,
+                    window, &Window::setFilter);
         }
         if (m_details) {
             setItemDetailHelper(window->current());
-            connect(window, SIGNAL(currentChanged(Document::Item *)), this, SLOT(setItemDetailHelper(Document::Item *)));
+            connect(window, &Window::currentChanged,
+                    this, &FrameWork::setItemDetailHelper);
         }
 
         m_undogroup->setActiveStack(doc->undoStack());
@@ -1619,8 +1638,10 @@ void FrameWork::toggleItemDetailPopup()
     if (!m_details) {
         m_details = new ItemDetailPopup(this);
 
-        if (m_current_window)
-            connect(m_current_window, SIGNAL(currentChanged(Document::Item *)), this, SLOT(setItemDetailHelper(Document::Item *)));
+        if (m_current_window) {
+            connect(m_current_window.data(), &Window::currentChanged,
+                    this, &FrameWork::setItemDetailHelper);
+        }
     }
 
     if (!m_details->isVisible()) {

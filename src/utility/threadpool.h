@@ -80,6 +80,7 @@ class ThreadPoolEngine : public QObject {
 
 public:
     ThreadPoolEngine(ThreadPool *pool);
+    void execute(ThreadPoolJob *job);
 
 protected:
     virtual void run();
@@ -95,7 +96,6 @@ signals:
 
 private slots:
     void ready();
-    void execute(ThreadPoolJob *job);
 
 private:
     ThreadPool *   m_threadpool;
