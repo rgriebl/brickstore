@@ -18,6 +18,8 @@
 
 #include "application.h"
 
+//#define QPARALLELSORT_TESTING
+//#include "qparallelsort.h"
 
 // needed for themed common controls (e.g. file open dialogs)
 #if defined(Q_CC_MSVC)
@@ -64,6 +66,9 @@ int main(int argc, char **argv)
     }
     else {
         Application a(rebuild_db, skip_download, argc, argv);
+#ifdef QPARALLELSORT_TESTING
+        test_par_sort();
+#endif
         return a.exec();
     }
 }

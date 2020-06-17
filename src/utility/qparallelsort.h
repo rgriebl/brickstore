@@ -182,7 +182,7 @@ inline void qParallelSort(Container &c)
         QAlgorithmsPrivate::qParallelSortHelper(c.begin(), c.end(), *c.begin());
 }
 
-#if 0 // benchmarking
+#ifdef QPARALLELSORT_TESTING // benchmarking
 #include "stopwatch.h"
 
 void test_par_sort()
@@ -191,7 +191,7 @@ void test_par_sort()
         const char *which = (k == 0 ? "Stable Sort  " :
                             (k == 1 ? "Quick Sort   " :
                                       "Parallel Sort"));
-        int maxloop = 21;
+        int maxloop = 25;
         int *src = new int[1 << maxloop];
         for (int j = 0; j < (1 << maxloop); ++j)
             src[j] = rand();
