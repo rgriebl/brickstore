@@ -11,8 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __FILTEREDIT_H__
-#define __FILTEREDIT_H__
+#pragma once
 
 #include <QLineEdit>
 
@@ -23,7 +22,7 @@ class FilterEdit : public QLineEdit {
     Q_OBJECT
 
 public:
-    FilterEdit(QWidget *parent = 0);
+    FilterEdit(QWidget *parent = nullptr);
 
     void setMenu(QMenu *);
     QMenu *menu() const;
@@ -43,22 +42,4 @@ private:
     int               m_top;
     int               m_right;
     int               m_bottom;
-
-#if (QT_VERSION < 0x407000) && !defined(Q_WS_MAEMO_5)
-public:
-    QString placeholderText() const;
-
-public slots:
-    void setPlaceholderText(const QString &str);
-
-protected:
-    void paintEvent(QPaintEvent *e);
-    void focusInEvent(QFocusEvent *e);
-    void focusOutEvent(QFocusEvent *e);
-
-private:
-    QString m_placeholdertext;
-#endif
 };
-
-#endif
