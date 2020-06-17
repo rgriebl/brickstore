@@ -79,7 +79,7 @@ enum {
 
 Application *Application::s_inst = 0;
 
-Application::Application(bool rebuild_db_only, bool skip_download, int _argc, char **_argv)
+Application::Application(bool rebuild_db_only, bool skip_download, int &_argc, char **_argv)
     : QApplication(_argc, _argv, !rebuild_db_only)
 {
     s_inst = this;
