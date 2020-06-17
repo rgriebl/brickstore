@@ -127,7 +127,7 @@ int RebuildDatabase::exec()
     printf("\nSTEP 4: Parsing inventories (part I)...\n");
 
     QVector<const BrickLink::Item *> invs = blti.items();
-    blti.importInventories(bl->dataPath(), invs);
+    blti.importInventories(invs);
 
     /////////////////////////////////////////////////////////////////////////////////
     printf("\nSTEP 5: Downloading missing/updated inventories...\n");
@@ -138,7 +138,7 @@ int RebuildDatabase::exec()
     /////////////////////////////////////////////////////////////////////////////////
     printf("\nSTEP 6: Parsing inventories (part II)...\n");
 
-    blti.importInventories(bl->dataPath(), invs);
+    blti.importInventories(invs);
 
     if ((invs.size() - invs.count(0)) > (blti.items().count() / 50))             // more than 2% have failed
         return error("more than 2% of all inventories had errors.");
@@ -372,8 +372,6 @@ void RebuildDatabase::downloadJobFinished(ThreadPoolJob *pj)
 
 bool RebuildDatabase::downloadInventories(QVector<const BrickLink::Item *> &invs)
 {
-    QString path = BrickLink::core()->dataPath();
-
     bool failed = false;
     m_downloads_in_progress = 0;
     m_downloads_failed = 0;

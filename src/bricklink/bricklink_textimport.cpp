@@ -497,7 +497,7 @@ template <typename C> bool BrickLink::TextImport::readDB(const QString &name, C 
     return false;
 }
 
-bool BrickLink::TextImport::importInventories(const QString &path, QVector<const Item *> &invs)
+bool BrickLink::TextImport::importInventories(QVector<const Item *> &invs)
 {
     const Item **itemp = invs.data();
     for (int i = 0; i < invs.count(); i++) {
@@ -511,16 +511,16 @@ bool BrickLink::TextImport::importInventories(const QString &path, QVector<const
             continue;
         }
 
-        if (readInventory(path, item)) {
+        if (readInventory(item)) {
             item = 0;
         }
     }
     return true;
 }
 
-bool BrickLink::TextImport::readInventory(const QString &path, const Item *item)
+bool BrickLink::TextImport::readInventory(const Item *item)
 {
-    QString filename = QString("%1/%2/%3/inventory.xml").arg(path).arg(QChar(item->itemType()->id())).arg(item->id());
+    QString filename = BrickLink::core()->dataPath(item) + "inventory.xml";
 
     QFileInfo fi(filename);
     if (fi.exists() && (fi.lastModified() < item->inventoryUpdated()))

@@ -336,6 +336,20 @@ QString BrickLink::Core::dataPath(const ItemType *item_type) const
 QString BrickLink::Core::dataPath(const Item *item) const
 {
     QString p = dataPath(item->itemType());
+    const QString id = item->id();
+
+    // Avoid huge directories with 1000s of entries.
+    uchar hash = qHash(id, 42) & 0xff; // sse4.2 is only used if a seed value is supplied
+    QString hashStr = QString::number(hash, 16);
+    if (hash < 0x10)
+        hashStr.prepend(QLatin1Char('0'));
+
+    p += hashStr;
+    p += QDir::separator();
+
+    if (!check_and_create_path(p))
+        return QString();
+
     p += item->m_id;
     p += QDir::separator();
 

@@ -587,7 +587,7 @@ public:
     bool import(const QString &path);
     void exportTo(Core *);
 
-    bool importInventories(const QString &path, QVector<const Item *> &items);
+    bool importInventories(QVector<const Item *> &items);
     void exportInventoriesTo(Core *);
 
     const QMap<int, const Color *>    &colors() const      { return m_colors; }
@@ -609,7 +609,7 @@ private:
     struct btchglog_dummy { };
     bool readDB_processLine(btchglog_dummy &, uint count, const char **strs);
 
-    bool readInventory(const QString &path, const Item *item);
+    bool readInventory(const Item *item);
 
     const Category *findCategoryByName(const QStringRef &name) const;
     const Item *findItem(char type, const QString &id);
