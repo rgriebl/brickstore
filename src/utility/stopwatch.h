@@ -14,7 +14,7 @@
 #pragma once
 
 #include <QtDebug>
-#include <ctime>
+#include <QElapsedTimer>
 
 
 class stopwatch
@@ -23,14 +23,24 @@ public:
     stopwatch(const char *desc)
     {
         m_label = desc;
-        m_start = std::clock();
+        m_timer.start();
     }
     ~stopwatch()
     {
-        uint msec = uint(std::clock() - m_start) * 1000 / CLOCKS_PER_SEC;
-        qWarning("%s: %d'%d [sec]", m_label, msec / 1000, msec % 1000);
+        qint64 micros = m_timer.nsecsElapsed() / 1000;
+
+        int sec = 0;
+        if (micros > 1000 * 1000) {
+            sec = int(micros / (1000 * 1000));
+            micros %= (1000 * 1000);
+        }
+        int msec = int(micros / 1000);
+        int usec = micros % 1000;
+
+        qWarning("%s: %d'%03d.%03d", m_label, sec, msec, usec);
+        m_timer.restart();
     }
 private:
     const char *m_label;
-    clock_t m_start;
+    QElapsedTimer m_timer;
 };

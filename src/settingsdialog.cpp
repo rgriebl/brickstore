@@ -292,12 +292,12 @@ void SettingsDialog::save()
     BrickLink::ItemTypeModel *model;
 
     model = static_cast<BrickLink::ItemTypeModel *>(w_def_import_type->model());
-    itype = model->itemType(model->index(w_def_import_type->currentIndex(), 0));
-    Config::inst()->setValue("/Defaults/ImportInventory/ItemType", itype->id());
+    if ((itype = model->itemType(model->index(w_def_import_type->currentIndex(), 0))))
+        Config::inst()->setValue("/Defaults/ImportInventory/ItemType", itype->id());
 
     model = static_cast<BrickLink::ItemTypeModel *>(w_def_add_type->model());
-    itype = model->itemType(model->index(w_def_add_type->currentIndex(), 0));
-    Config::inst()->setValue("/Defaults/AddItems/ItemType", itype->id());
+    if ((itype = model->itemType(model->index(w_def_add_type->currentIndex(), 0))))
+        Config::inst()->setValue("/Defaults/AddItems/ItemType", itype->id());
 
     Config::inst()->setValue("/Defaults/AddItems/Condition", QLatin1String(w_def_add_cond_new->isChecked() ? "new" : "used"));
     Config::inst()->setValue("/Defaults/SetToPG/Time", w_def_setpg_time->itemData(w_def_setpg_time->currentIndex()));
