@@ -78,7 +78,7 @@ class Transfer : public QObject
 {
     Q_OBJECT
 public:
-    Transfer(int maxConnections);
+    Transfer();
 
     bool retrieve(TransferJob *job, bool high_priority = false);
 

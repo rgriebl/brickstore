@@ -1198,7 +1198,7 @@ bool FrameWork::updateDatabase()
     if (closeAllWindows()) {
         delete m_add_dialog;
 
-        Transfer trans(1);
+        Transfer trans;
         ProgressDialog d(&trans, this);
         UpdateDatabase update(&d);
 

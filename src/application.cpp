@@ -400,7 +400,7 @@ bool Application::initBrickLink()
     if (!bl)
         QMessageBox::critical(0, applicationName(), tr("Could not initialize the BrickLink kernel:<br /><br />%1").arg(errstring), QMessageBox::Ok);
 
-    bl->setTransfer(new Transfer(10));
+    bl->setTransfer(new Transfer);
 
     /*LDraw::Core *ld =*/ LDraw::create(QString(), &errstring);
 
@@ -537,7 +537,7 @@ void Application::about()
 
 void Application::checkForUpdates()
 {
-    Transfer trans(1);
+    Transfer trans;
 
     ProgressDialog d(&trans, FrameWork::inst());
     CheckForUpdates cfu(&d);

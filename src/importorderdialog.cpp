@@ -59,7 +59,7 @@ public:
     {
         MODELTEST_ATTACH(this)
 
-        m_trans = new Transfer(6);
+        m_trans = new Transfer;
         connect(m_trans, &Transfer::finished,
                 this, &OrderListModel::flagReceived);
     }
@@ -376,7 +376,7 @@ void ImportOrderDialog::start()
 
 void ImportOrderDialog::download()
 {
-    Transfer trans(1);
+    Transfer trans;
     ProgressDialog progress(&trans, this);
     ImportBLOrder *import;
 

@@ -238,8 +238,8 @@ TransferJob *TransferJob::create(HttpMethod method, const QUrl &url, const QDate
 
 QString Transfer::s_default_user_agent;
 
-Transfer::Transfer(int maxConnections)
-    : m_maxConnections(maxConnections)
+Transfer::Transfer()
+    : m_maxConnections(6) // mirror the internal QNAM setting
     , m_nam(new QNetworkAccessManager(this))
 {
     m_nam->setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
@@ -272,7 +272,7 @@ void Transfer::abortAllJobs()
 
 void Transfer::schedule()
 {
-    if ((m_currentJobs.size() <= m_maxConnections) && !m_jobs.isEmpty()) {
+    while ((m_currentJobs.size() <= m_maxConnections) && !m_jobs.isEmpty()) {
         auto j = m_jobs.takeFirst();
 
         bool isget = (j->m_http_method == TransferJob::HttpGet);

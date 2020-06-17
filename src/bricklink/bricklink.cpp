@@ -410,7 +410,7 @@ BrickLink::Core::~Core()
 {
     cancelPictureTransfers();
     cancelPriceGuideTransfers();
-
+    delete m_transfer;
     s_inst = 0;
 }
 

@@ -763,7 +763,7 @@ QList<Document *> Document::fileImportBrickLinkOrders()
 
 Document *Document::fileImportBrickLinkStore()
 {
-    Transfer trans(1);
+    Transfer trans;
     ProgressDialog d(&trans, FrameWork::inst());
     ImportBLStore import(&d);
 
@@ -798,7 +798,7 @@ Document *Document::fileImportBrickLinkCart()
         int cartid = rx.cap(2).toInt();
 
         if (shopid && cartid) {
-            Transfer trans(1);
+            Transfer trans;
             ProgressDialog d(&trans, FrameWork::inst());
             ImportBLCart import(shopid, cartid, &d);
 
