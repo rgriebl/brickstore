@@ -27,7 +27,8 @@
 
 #define QT_NO_OPENGL 1 // TODO5 until the OpenGL renderer is fixed
 
-class GlassButton : public QToolButton {
+class GlassButton : public QToolButton
+{
 public:
     enum Type {
         Close,
@@ -43,85 +44,93 @@ public:
     }
 
 protected:
-    void enterEvent(QEvent *)
-    {
-        m_hovered = true;
-        update();
-    }
-
-    void leaveEvent(QEvent *)
-    {
-        m_hovered = false;
-        update();
-    }
-
-    void paintEvent(QPaintEvent *)
-    {
-        QPainter p(this);
-        p.setRenderHint(QPainter::Antialiasing);
-
-        int side = qMin(width(), height());
-        QRectF r = QRectF((width() - side)/2, (height() - side)/2, side, side);
-
-        QPainterPath iconpath;
-
-        switch(m_type) {
-        case Close: {
-            qreal s3  = side/3;
-            qreal s18 = side/18;
-            iconpath.setFillRule(Qt::WindingFill);
-            iconpath.addRect(-s3, -s18, 2*s3, 2*s18);
-            iconpath.addRect(-s18, -s3, 2*s18, 2*s3);
-            QTransform rot45;
-            rot45.translate(side/2, side/2).rotate(45, Qt::ZAxis);
-            iconpath = rot45.map(iconpath);
-            break;
-        }
-        case Play: {
-            QPolygonF poly;
-            qreal d = side/6;
-            poly << QPointF(d+d, d) << QPointF(side-d, side/2) << QPointF(d+d, side-d);
-            iconpath.addPolygon(poly);
-            iconpath.closeSubpath();
-            break;
-        }
-        case Stop: {
-            qreal d = side / 4;
-            iconpath.addRect(r.adjusted(d, d, -d, -d));
-            break;
-        }
-        case View: {
-            qreal s10 = side/10;
-            qreal d = s10*1.5;
-            qreal s2 = side/2;
-            qreal s3 = side*0.35;
-            iconpath.setFillRule(Qt::OddEvenFill);
-            iconpath.addEllipse(r.adjusted(s3, s3, -s3, -s3));
-            iconpath.moveTo(QPointF(s10, s2));
-            iconpath.cubicTo(QPointF(s2-s10, d), QPointF(s2+s10, d), QPointF(side-s10, s2));
-            iconpath.cubicTo(QPointF(s2+s10, side-d), QPointF(s2-s10, side-d), QPointF(s10, s2));
-            iconpath.closeSubpath();
-            break;
-        }
-        }
-
-        int alpha = isDown() ? 172 : m_hovered ? 128 : 64;
-        p.setBrush(QColor(255, 255, 255, alpha));
-        p.setPen(Qt::NoPen);
-
-        QPainterPath path;
-        path.addEllipse(r);
-        p.drawPath(path.subtracted(iconpath));
-    }
+    void enterEvent(QEvent *) override;
+    void leaveEvent(QEvent *) override;
+    void paintEvent(QPaintEvent *) override;
 
 private:
     Type m_type;
-    bool m_hovered : 1;
+    bool m_hovered;
 };
+
+void GlassButton::enterEvent(QEvent *)
+{
+    m_hovered = true;
+    update();
+}
+
+void GlassButton::leaveEvent(QEvent *)
+{
+    m_hovered = false;
+    update();
+}
+
+void GlassButton::paintEvent(QPaintEvent *)
+{
+    QPainter p(this);
+    p.setRenderHint(QPainter::Antialiasing);
+
+    int side = qMin(width(), height());
+    QRectF r = QRectF((width() - side)/2, (height() - side)/2, side, side);
+
+    QPainterPath iconpath;
+
+    switch(m_type) {
+    case Close: {
+        qreal s3  = side/3;
+        qreal s18 = side/18;
+        iconpath.setFillRule(Qt::WindingFill);
+        iconpath.addRect(-s3, -s18, 2*s3, 2*s18);
+        iconpath.addRect(-s18, -s3, 2*s18, 2*s3);
+        QTransform rot45;
+        rot45.translate(side/2, side/2).rotate(45, Qt::ZAxis);
+        iconpath = rot45.map(iconpath);
+        break;
+    }
+    case Play: {
+        QPolygonF poly;
+        qreal d = side/6;
+        poly << QPointF(d+d, d) << QPointF(side-d, side/2) << QPointF(d+d, side-d);
+        iconpath.addPolygon(poly);
+        iconpath.closeSubpath();
+        break;
+    }
+    case Stop: {
+        qreal d = side / 4;
+        iconpath.addRect(r.adjusted(d, d, -d, -d));
+        break;
+    }
+    case View: {
+        qreal s10 = side/10;
+        qreal d = s10*1.5;
+        qreal s2 = side/2;
+        qreal s3 = side*0.35;
+        iconpath.setFillRule(Qt::OddEvenFill);
+        iconpath.addEllipse(r.adjusted(s3, s3, -s3, -s3));
+        iconpath.moveTo(QPointF(s10, s2));
+        iconpath.cubicTo(QPointF(s2-s10, d), QPointF(s2+s10, d), QPointF(side-s10, s2));
+        iconpath.cubicTo(QPointF(s2+s10, side-d), QPointF(s2-s10, side-d), QPointF(s10, s2));
+        iconpath.closeSubpath();
+        break;
+    }
+    }
+
+    int alpha = isDown() ? 172 : m_hovered ? 128 : 64;
+    p.setBrush(QColor(255, 255, 255, alpha));
+    p.setPen(Qt::NoPen);
+
+    QPainterPath path;
+    path.addEllipse(r);
+    p.drawPath(path.subtracted(iconpath));
+}
 
 
 ItemDetailPopup::ItemDetailPopup(QWidget *parent)
-    : QDialog(parent, Qt::FramelessWindowHint), m_part(0), m_pic(0), m_pressed(false), m_connected(false)
+    : QDialog(parent, Qt::FramelessWindowHint),
+      m_part(nullptr),
+      m_pic(nullptr),
+      m_pressed(false),
+      m_connected(false)
 {
     setAttribute(Qt::WA_TranslucentBackground);
 
@@ -189,15 +198,15 @@ void ItemDetailPopup::setItem(const BrickLink::Item *item, const BrickLink::Colo
 {
     if (m_pic)
         m_pic->release();
-    m_pic = 0;
+    m_pic = nullptr;
     if (m_part)
         m_part->release();
-    m_part = 0;
+    m_part = nullptr;
 
     if (item) {
         m_pic = BrickLink::core()->largePicture(item, true);
         m_pic->addRef();
-        m_part = LDraw::core() ? LDraw::core()->partFromId(item->id()) : 0;
+        m_part = LDraw::core() ? LDraw::core()->partFromId(item->id()) : nullptr;
         if (m_part)
             m_part->addRef();
         m_blpic->setText(QString());
@@ -214,6 +223,8 @@ void ItemDetailPopup::setItem(const BrickLink::Item *item, const BrickLink::Colo
             m_stack->setCurrentWidget(m_blpic);
 #if !defined(QT_NO_OPENGL)
             m_ldraw->setPartAndColor(0, -1);
+#else
+            Q_UNUSED(color)
 #endif
         }
     } else {
