@@ -25,7 +25,7 @@
 #include "itemdetailpopup.h"
 #include "ldraw/renderwidget.h"
 
-#define QT_NO_OPENGL 1
+#define QT_NO_OPENGL 1 // TODO5 until the OpenGL renderer is fixed
 
 class GlassButton : public QToolButton {
 public:
@@ -146,7 +146,7 @@ ItemDetailPopup::ItemDetailPopup(QWidget *parent)
     m_stack->addWidget(m_blpic);
 
 #if defined(QT_NO_OPENGL)
-    m_ldraw = 0;
+    m_ldraw = nullptr;
 #else
     m_ldraw = new LDraw::RenderOffscreenWidget(this);
     m_stack->addWidget(m_ldraw);
@@ -175,10 +175,6 @@ ItemDetailPopup::ItemDetailPopup(QWidget *parent)
     connect(m_view, &QAbstractButton::clicked,
             m_ldraw, &LDraw::RenderOffscreenWidget::resetCamera);
 #endif
-//TODO5 #if defined(Q_OS_MAC)
-//    createWinId();
-//    MacExtra::setWindowShadow(this, false);
-//#endif
 }
 
 ItemDetailPopup::~ItemDetailPopup()
