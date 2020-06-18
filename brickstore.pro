@@ -21,3 +21,10 @@ requires(!Qt_version_needs_to_be_at_least_5_12_0)
 TEMPLATE = subdirs
 CONFIG  += ordered
 SUBDIRS  = src
+
+
+win32 {
+  deploy.CONFIG += recursive
+  installer.CONFIG += recursive
+  QMAKE_EXTRA_TARGETS += deploy installer
+}

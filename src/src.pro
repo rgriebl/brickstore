@@ -14,14 +14,16 @@
 include(../release.pri)
 
 TEMPLATE     = app
-CONFIG      *= warn_on thread qt # uitools
+CONFIG      *= no_private_qt_headers_warning
 # CONFIG      *= modeltest
-QT          *= core gui xml network script scripttools printsupport uitools networkauth
+QT          *= core gui xml network script scripttools printsupport uitools # networkauth
 
 static:error("ERROR: Static builds are not supported")
 
 TARGET            = BrickStore
 unix:!macx:TARGET = brickstore
+
+DESTDIR = bin
 
 LANGUAGES    = de fr nl sl
 RESOURCES   += brickstore.qrc
@@ -117,6 +119,31 @@ win32 {
 
     LIBS += user32.lib advapi32.lib wininet.lib
   }
+
+  INNO_PATH=$$(INNO_SETUP_PATH)
+  !exists("$$INNO_PATH\\iscc.exe") {
+    INNO_PATH="$$getenv(ProgramFiles(x86))\\Inno Setup 5"
+    !exists("$$INNO_PATH\\iscc.exe"):error("Please set %INNO_SETUP_PATH% to point to the directory containing the 'iscc.exe' binary.")
+  }
+  #BUILD_BASE="$$system_path($$OUT_PWD)"
+
+  build_pass:CONFIG(release, debug|release) {
+    deploy.depends += $(DESTDIR_TARGET)
+    deploy.commands += $$[QT_HOST_BINS]/windeployqt $(DESTDIR_TARGET)
+    deploy.commands += & $$QMAKE_COPY $$shell_path($$[QT_HOST_PREFIX]/../../Tools/OpenSSL/Win_x86/bin/libcrypto-1_1.dll) $(DESTDIR)
+    deploy.commands += & $$QMAKE_COPY $$shell_path($$[QT_HOST_PREFIX]/../../Tools/OpenSSL/Win_x86/bin/libssl-1_1.dll) $(DESTDIR)
+
+    installer.depends += deploy
+    installer.commands += $$system_path($$INNO_PATH/iscc.exe) \
+                            /DSOURCE_DIR=$$shell_quote($$shell_path($$OUT_PWD/$$DESTDIR)) \
+                            /O$$shell_quote($$shell_path($$OUT_PWD)) \
+                            $$shell_quote($$shell_path($$PWD\\..\\win32\\brickstore.iss))
+  } else {
+    deploy.CONFIG += recursive
+    installer.CONFIG += recursive
+  }
+
+  QMAKE_EXTRA_TARGETS += deploy installer
 }
 
 
