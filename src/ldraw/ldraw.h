@@ -11,8 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __LDRAW_H__
-#define __LDRAW_H__
+#pragma once
 
 #include <QHash>
 #include <QString>
@@ -34,7 +33,9 @@ namespace LDraw {
 class Element;
 class PartElement;
 
-class Part : public Ref {
+
+class Part : public Ref
+{
 public:
     virtual ~Part();
 
@@ -61,7 +62,8 @@ protected:
 };
 
 
-class Element {
+class Element
+{
 public:
     enum Type {
         Comment,
@@ -89,13 +91,14 @@ private:
 };
 
 
-class CommentElement : public Element {
+class CommentElement : public Element
+{
 public:
     QByteArray comment() const  { return m_comment; }
 
     static CommentElement *create(const QByteArray &text);
 
-    virtual void dump() const;
+    void dump() const override;
 
 protected:
     CommentElement(const QByteArray &);
@@ -104,75 +107,80 @@ protected:
 };
 
 
-class LineElement : public Element {
+class LineElement : public Element
+{
 public:
     int color() const               { return m_color; }
     const QVector3D *points() const { return m_points;}
 
     static LineElement *create(int color, const QVector3D *points);
 
-    virtual void dump() const;
+    void dump() const override;
 
 protected:
     LineElement(int color, const QVector3D *points);
 
-    int    m_color;
+    int       m_color;
     QVector3D m_points[2];
 };
 
 
-class CondLineElement : public Element {
+class CondLineElement : public Element
+{
 public:
     int color() const               { return m_color; }
     const QVector3D *points() const { return m_points;}
 
     static CondLineElement *create(int color, const QVector3D *points);
 
-    virtual void dump() const;
+    void dump() const override;
 
 protected:
     CondLineElement(int color, const QVector3D *points);
 
-    int    m_color;
+    int       m_color;
     QVector3D m_points[4];
 };
 
 
-class TriangleElement : public Element {
+class TriangleElement : public Element
+{
 public:
     int color() const               { return m_color; }
     const QVector3D *points() const { return m_points;}
 
     static TriangleElement *create(int color, const QVector3D *points);
 
-    virtual void dump() const;
+    void dump() const override;
 
 protected:
     TriangleElement(int color, const QVector3D *points);
 
-    int    m_color;
+    int       m_color;
     QVector3D m_points[3];
 };
 
 
-class QuadElement : public Element {
+class QuadElement : public Element
+{
 public:
     int color() const               { return m_color; }
     const QVector3D *points() const { return m_points;}
 
     static QuadElement *create(int color, const QVector3D *points);
 
-    virtual void dump() const;
+    void dump() const override;
 
 protected:
     QuadElement(int color, const QVector3D *points);
 
-    int    m_color;
+    int       m_color;
     QVector3D m_points[4];
 };
 
 
-class PartElement : public Element {
+class PartElement : public Element
+{
 public:
     int color() const              { return m_color; }
     const QMatrix4x4 &matrix() const { return m_matrix; }
@@ -180,15 +188,15 @@ public:
 
     static PartElement *create(int color, const QMatrix4x4 &m, const QString &filename, const QDir &parentdir);
 
-    virtual ~PartElement();
-    virtual void dump() const;
+    ~PartElement() override;
+    void dump() const override;
 
 protected:
     PartElement(int color, const QMatrix4x4 &m, LDraw::Part *part);
 
-    int           m_color;
-    QMatrix4x4    m_matrix;
-    LDraw::Part * m_part;
+    int          m_color;
+    QMatrix4x4   m_matrix;
+    LDraw::Part *m_part;
 };
 
 /*
@@ -223,7 +231,8 @@ private:
 
 */
 
-class Core {
+class Core
+{
 public:
     QString dataPath() const;
 
@@ -252,7 +261,6 @@ private:
     static bool check_ldrawdir(const QString &dir);
     static QString get_platform_ldrawdir();
 
-
 private:
     QString m_datadir;
     QList<QDir> m_searchpath;
@@ -274,5 +282,3 @@ inline Core *create(const QString &datadir, QString *errstring) { return Core::c
 // (QCache will use that function to determine what can really be purged from the cache)
 
 //TODO5 REMOVED template<> inline bool qIsDetached<LDraw::Part>(LDraw::Part &p) { return p.refCount() == 0; }
-
-#endif

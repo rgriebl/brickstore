@@ -11,6 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
+#pragma once
 
 #include <QAbstractItemModel>
 #include <QVector>
@@ -18,17 +19,18 @@
 
 class QTimer;
 
+
 class StaticPointerModel : public QAbstractItemModel
 {
     Q_OBJECT
 public:
     StaticPointerModel(QObject *parent);
 
-    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
-    QModelIndex parent(const QModelIndex &) const;
-    int rowCount(const QModelIndex &parent = QModelIndex()) const;
+    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
+    QModelIndex parent(const QModelIndex &) const override;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
-    void sort(int column, Qt::SortOrder order);
+    void sort(int column, Qt::SortOrder order) override;
 
     int sortColumn() const;
     Qt::SortOrder sortOrder() const;
@@ -90,4 +92,3 @@ private:
     int lastSortColumn;
     Qt::SortOrder lastSortOrder;
 };
-

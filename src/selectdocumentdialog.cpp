@@ -21,8 +21,9 @@
 Q_DECLARE_METATYPE(const Document *)
 
 
-SelectDocumentDialog::SelectDocumentDialog(const Document *self, const QString &headertext, QWidget *parent, Qt::WindowFlags fl)
-    : QDialog(parent, fl)
+SelectDocumentDialog::SelectDocumentDialog(const Document *self, const QString &headertext,
+                                           QWidget *parent)
+    : QDialog(parent)
 {
     setupUi(this);
     

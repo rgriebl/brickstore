@@ -104,8 +104,8 @@ private:
     QString m_str_wait;
 };
 
-PriceGuideWidget::PriceGuideWidget(QWidget *parent, Qt::WindowFlags f)
-    : QFrame(parent, f)
+PriceGuideWidget::PriceGuideWidget(QWidget *parent)
+    : QFrame(parent)
 {
     d = new PriceGuideWidgetPrivate(this);
 

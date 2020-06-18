@@ -11,8 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __UTILITY_H__
-#define __UTILITY_H__
+#pragma once
 
 #include <QString>
 #include <QColor>
@@ -28,8 +27,8 @@ namespace Utility {
 
 int naturalCompare(const QString &s1, const QString &s2);
 
-QColor gradientColor(const QColor &c1, const QColor &c2, qreal f = 0.5f);
-QColor contrastColor(const QColor &c, qreal f = 0.04f);
+QColor gradientColor(const QColor &c1, const QColor &c2, qreal f = 0.5);
+QColor contrastColor(const QColor &c, qreal f = 0.04);
 qreal colorDifference(const QColor &c1, const QColor &c2);
 
 void setPopupPos(QWidget *w, const QRect &pos);
@@ -42,7 +41,5 @@ QString weightToString(double gramm, QLocale::MeasurementSystem ms, bool optimiz
 double stringToWeight(const QString &s, QLocale::MeasurementSystem ms);
 
 QString localForInternationalCurrencySymbol(const QString &international_symbol);
+
 } // namespace Utility
-
-#endif
-

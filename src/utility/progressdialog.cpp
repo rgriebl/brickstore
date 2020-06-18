@@ -25,8 +25,8 @@
 
 #include "progressdialog.h"
 
-ProgressDialog::ProgressDialog(Transfer *trans, QWidget *parent, Qt::WindowFlags f)
-    : QDialog(parent, f)
+ProgressDialog::ProgressDialog(Transfer *trans, QWidget *parent)
+    : QDialog(parent)
 {
     m_has_errors = false;
     m_autoclose = true;

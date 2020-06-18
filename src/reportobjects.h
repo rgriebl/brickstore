@@ -11,8 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __REPORTOBJECTS_H__
-#define __REPORTOBJECTS_H__
+#pragma once
 
 #include <QObject>
 #include <QFont>
@@ -31,7 +30,8 @@ class QPainter;
 class QScriptEngine;
 
 
-class ReportUtility : public QObject, public QScriptable {
+class ReportUtility : public QObject, public QScriptable
+{
     Q_OBJECT
 
 public slots:
@@ -49,7 +49,8 @@ public:
 };
 
 
-class ReportMoneyStatic : public QObject {
+class ReportMoneyStatic : public QObject
+{
     Q_OBJECT
     Q_OVERRIDE(QString objectName SCRIPTABLE false)
 
@@ -109,7 +110,8 @@ Q_DECLARE_METATYPE(Size)
 
 class ReportPage;
 
-class ReportJob : public QObject {
+class ReportJob : public QObject
+{
     Q_OBJECT
     Q_OVERRIDE(QString objectName   SCRIPTABLE false)
 
@@ -265,7 +267,8 @@ private:
 
 Q_DECLARE_METATYPE(Color *)
 
-class ReportPage : public QObject {
+class ReportPage : public QObject
+{
     Q_OBJECT
     Q_OVERRIDE(QString objectName       SCRIPTABLE false)
 
@@ -343,7 +346,7 @@ private:
         } m_cmd;
     };
 
-struct AttrCmd : public Cmd {
+    struct AttrCmd : public Cmd {
         Font  * m_font;
         Color * m_color;
         Color * m_bgcolor;
@@ -351,7 +354,7 @@ struct AttrCmd : public Cmd {
         double  m_linewidth;
     };
 
-struct DrawCmd : public Cmd {
+    struct DrawCmd : public Cmd {
         double    m_x, m_y, m_w, m_h;
         QVariant  m_p1;
         QVariant  m_p2;
@@ -364,6 +367,3 @@ private:
     const ReportJob *m_job;
     AttrCmd m_attr;
 };
-
-#endif
-

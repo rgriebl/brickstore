@@ -11,8 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __DOCUMENT_H__
-#define __DOCUMENT_H__
+#pragma once
 
 #include <QAbstractTableModel>
 #include <QDomDocument>
@@ -29,9 +28,9 @@ class AddRemoveCmd;
 class ChangeCmd;
 
 
-class Document : public QAbstractTableModel {
+class Document : public QAbstractTableModel
+{
     Q_OBJECT
-
 public:
     enum Field {
         Status = 0,
@@ -70,7 +69,8 @@ public:
         FieldCount
     };
 
-    class Item : public BrickLink::InvItem {
+    class Item : public BrickLink::InvItem
+    {
     public:
         Item();
         Item(const BrickLink::InvItem &);
@@ -92,7 +92,8 @@ public:
         friend class Document;
     };
 
-    class ItemList : public QList<Item *> {
+    class ItemList : public QList<Item *>
+    {
     public:
         ItemList() { }
         ItemList(const ItemList &copy) : QList<Item *>(copy) { }
@@ -114,7 +115,8 @@ public:
         }
     };
 
-    class Statistics {
+    class Statistics
+    {
     public:
         uint lots() const            { return m_lots; }
         uint items() const           { return m_items; }
@@ -212,7 +214,7 @@ public:
     static Document *fileNew();
     static Document *fileOpen();
     static Document *fileOpen(const QString &name);
-    static Document *fileImportBrickLinkInventory(const BrickLink::Item *preselect = 0);
+    static Document *fileImportBrickLinkInventory(const BrickLink::Item *preselect = nullptr);
     static QList<Document *> fileImportBrickLinkOrders();
     static Document *fileImportBrickLinkStore();
     static Document *fileImportBrickLinkCart();
@@ -290,7 +292,8 @@ private:
 };
 
 
-class DocumentProxyModel : public QSortFilterProxyModel {
+class DocumentProxyModel : public QSortFilterProxyModel
+{
     Q_OBJECT
 
 public:
@@ -302,11 +305,6 @@ public:
     using QSortFilterProxyModel::index;
 
     Document::ItemList sortItemList(const Document::ItemList &list) const;
-
-
-//    using QSortFilterProxyModel::index;
-//    const AppearsInItem *appearsIn(const QModelIndex &idx) const;
-//    QModelIndex index(const AppearsInItem *const_ai) const;
 
     void setFilterExpression(const QString &filter);
     QString filterExpression() const;
@@ -331,8 +329,5 @@ private:
     friend class SortItemListCompare;
 };
 
-
 QDataStream &operator << (QDataStream &ds, const Document::Item &item);
 QDataStream &operator >> (QDataStream &ds, Document::Item &item);
-
-#endif

@@ -11,29 +11,28 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __APPEARSINWIDGET_H__
-#define __APPEARSINWIDGET_H__
+#pragma once
 
 #include <QTreeView>
 
 #include "bricklinkfwd.h"
 
-
 class AppearsInWidgetPrivate;
 class QAction;
 
-class AppearsInWidget : public QTreeView {
-    Q_OBJECT
 
+class AppearsInWidget : public QTreeView
+{
+    Q_OBJECT
 public:
-    AppearsInWidget(QWidget *parent = 0);
+    AppearsInWidget(QWidget *parent = nullptr);
     virtual ~AppearsInWidget();
 
-    void setItem(const BrickLink::Item *item, const BrickLink::Color *color = 0);
+    void setItem(const BrickLink::Item *item, const BrickLink::Color *color = nullptr);
     void setItems(const BrickLink::InvItemList &list);
 
-    virtual QSize minimumSizeHint() const;
-    virtual QSize sizeHint() const;
+    QSize minimumSizeHint() const override;
+    QSize sizeHint() const override;
 
 protected slots:
     void viewLargeImage();
@@ -54,5 +53,3 @@ private:
 private:
     AppearsInWidgetPrivate *d;
 };
-
-#endif

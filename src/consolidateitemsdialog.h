@@ -11,8 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef CONSOLIDATEITEMSDIALOG_H
-#define CONSOLIDATEITEMSDIALOG_H
+#pragma once
 
 #include "bricklinkfwd.h"
 #include "ui_consolidateitemsdialog.h"
@@ -21,14 +20,13 @@ class QAbstractButton;
 class Document;
 class DocumentProxyModel;
 
-class ConsolidateItemsDialog : public QDialog, private Ui::ConsolidateItemsDialog {
-    Q_OBJECT
 
+class ConsolidateItemsDialog : public QDialog, private Ui::ConsolidateItemsDialog
+{
+    Q_OBJECT
 public:
-    ConsolidateItemsDialog(BrickLink::InvItem *existitem, BrickLink::InvItem *newitem, bool existing_attributes, QWidget *parent = 0, Qt::WindowFlags f = 0);
+    ConsolidateItemsDialog(BrickLink::InvItem *existitem, BrickLink::InvItem *newitem, bool existing_attributes, QWidget *parent = nullptr);
 
     bool yesNoToAll() const;
     bool attributesFromExisting() const;
 };
-
-#endif

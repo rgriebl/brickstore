@@ -11,8 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __REPORT_H__
-#define __REPORT_H__
+#pragma once
 
 #include <QObject>
 #include <QString>
@@ -23,7 +22,9 @@
 class ReportPrivate;
 class QPrinter;
 
-class Report : public QObject {
+
+class Report : public QObject
+{
     Q_OBJECT
 public:
     static Report *load(const QString &file);
@@ -39,7 +40,8 @@ private:
     ReportPrivate *d;
 };
 
-class ReportManager {
+class ReportManager
+{
 private:
     ReportManager();
     static ReportManager *s_inst;
@@ -59,6 +61,4 @@ private:
 
     mutable QPrinter *m_printer; // mutable for delayed initialization
 };
-
-#endif
 

@@ -11,21 +11,22 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __MESSAGEBOX_H__
-#define __MESSAGEBOX_H__
+#pragma once
 
 #include <QMessageBox>
+
+class QValidator;
+
 
 inline QString CMB_BOLD(const QString &str)
 {
     return QLatin1String("<b>") + str + QLatin1String("</b>");
 }
 
-class QValidator;
 
-class MessageBox : public QMessageBox {
+class MessageBox : public QMessageBox
+{
     Q_OBJECT
-
 public:
     static void setDefaultTitle(const QString &s);
     static QString defaultTitle();
@@ -47,5 +48,3 @@ private:
 private:
     static QString s_deftitle;
 };
-
-#endif

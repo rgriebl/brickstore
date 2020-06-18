@@ -19,8 +19,8 @@
 #include "bricklink.h"
 
 
-SelectItemDialog::SelectItemDialog(bool only_with_inventory, QWidget *parent, Qt::WindowFlags f)
-    : QDialog(parent, f)
+SelectItemDialog::SelectItemDialog(bool only_with_inventory, QWidget *parent)
+    : QDialog(parent)
 {
     setupUi(this);
     w_si->setExcludeWithoutInventoryFilter(only_with_inventory);

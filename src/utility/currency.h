@@ -11,8 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __CURRENCY_H__
-#define __CURRENCY_H__
+#pragma once
 
 #include <QString>
 #include <QValidator>
@@ -23,6 +22,7 @@ class QKeyEvent;
 class QLineEdit;
 class QNetworkAccessManager;
 class QBuffer;
+
 
 class Currency : public QObject
 {
@@ -81,12 +81,10 @@ public:
     CurrencyValidator(QObject *parent);
     CurrencyValidator(double bottom, double top, int decimals, QObject *parent);
 
-    virtual QValidator::State validate(QString &input, int &) const;
+    QValidator::State validate(QString &input, int &) const override;
 
 protected:
     bool filterInput(QLineEdit *edit, QKeyEvent *ke) const;
 
     static bool s_once;
 };
-
-#endif

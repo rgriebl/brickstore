@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2005 Robert Griebl. All rights reserved.
+/* Copyright (C) 2004-2020 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -238,8 +238,8 @@ private:
 };
 
 
-Workspace::Workspace(QWidget *parent, Qt::WindowFlags f)
-    : QWidget(parent, f)
+Workspace::Workspace(QWidget *parent)
+    : QWidget(parent)
 {
 
     m_tabbar = new TabBar(this);

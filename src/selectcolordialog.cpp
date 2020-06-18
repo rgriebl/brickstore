@@ -19,8 +19,8 @@
 #include "bricklink.h"
 
 
-SelectColorDialog::SelectColorDialog(QWidget *parent, Qt::WindowFlags f)
-    : QDialog(parent, f)
+SelectColorDialog::SelectColorDialog(QWidget *parent)
+    : QDialog(parent)
 {
     setupUi(this);
 

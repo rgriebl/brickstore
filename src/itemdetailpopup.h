@@ -11,8 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef ITEMDETAILPOPUP_H
-#define ITEMDETAILPOPUP_H
+#pragma once
 
 #include <QDialog>
 
@@ -30,22 +29,22 @@ class QLabel;
 class QTableView;
 
 
-class ItemDetailPopup : public QDialog {
+class ItemDetailPopup : public QDialog
+{
     Q_OBJECT
-
 public:
     ItemDetailPopup(QWidget *parent);
     virtual ~ItemDetailPopup();
 
 public slots:
-    void setItem(const BrickLink::Item *item, const BrickLink::Color *color = 0);
+    void setItem(const BrickLink::Item *item, const BrickLink::Color *color = nullptr);
 
 protected:
-    void paintEvent(QPaintEvent *e);
-    void keyPressEvent(QKeyEvent *e);
-    void mousePressEvent(QMouseEvent *e);
-    void mouseReleaseEvent(QMouseEvent *e);
-    void mouseMoveEvent(QMouseEvent *e);
+    void paintEvent(QPaintEvent *e) override;
+    void keyPressEvent(QKeyEvent *e) override;
+    void mousePressEvent(QMouseEvent *e) override;
+    void mouseReleaseEvent(QMouseEvent *e) override;
+    void mouseMoveEvent(QMouseEvent *e) override;
 
 private slots:
     void gotUpdate(BrickLink::Picture *pic);
@@ -70,6 +69,3 @@ private:
 
     bool m_connected;
 };
-
-#endif
-

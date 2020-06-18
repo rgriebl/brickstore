@@ -25,7 +25,8 @@
 #include "picturewidget.h"
 
 
-class PictureWidgetPrivate {
+class PictureWidgetPrivate
+{
 public:
     BrickLink::Picture *m_pic;
     QTextBrowser *      m_tlabel;
@@ -34,13 +35,14 @@ public:
     QImage              m_img;
 };
 
-class LargePictureWidgetPrivate {
+class LargePictureWidgetPrivate
+{
 public:
     BrickLink::Picture *m_pic;
 };
 
-PictureWidget::PictureWidget(QWidget *parent, Qt::WindowFlags f)
-        : QFrame(parent, f)
+PictureWidget::PictureWidget(QWidget *parent)
+    : QFrame(parent)
 {
     d = new PictureWidgetPrivate();
 

@@ -11,23 +11,23 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef CHANGECURRENCYDIALOG_H
-#define CHANGECURRENCYDIALOG_H
+#pragma once
 
 #include <QDialog>
 
 #include "ui_changecurrencydialog.h"
 
+
 class ChangeCurrencyDialog : public QDialog, private Ui::ChangeCurrencyDialog
 {
     Q_OBJECT
 public:
-    explicit ChangeCurrencyDialog(const QString &from, const QString &to, QWidget *parent = 0);
+    explicit ChangeCurrencyDialog(const QString &from, const QString &to, QWidget *parent = nullptr);
 
     double exchangeRate() const;
 
 protected:
-    bool eventFilter(QObject *, QEvent *);
+    bool eventFilter(QObject *, QEvent *) override;
 
 private slots:
     void currencyChanged(const QString &);
@@ -41,4 +41,3 @@ private:
     QString m_labelCustomFormat;
 };
 
-#endif // CHANGECURRENCYDIALOG_H

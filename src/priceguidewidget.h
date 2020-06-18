@@ -11,26 +11,25 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __PRICEGUIDEWIDGET_H__
-#define __PRICEGUIDEWIDGET_H__
+#pragma once
 
 #include <QFrame>
 
 #include "currency.h"
 #include "bricklinkfwd.h"
 
-
 class QAction;
 class PriceGuideWidgetPrivate;
 
 
-class PriceGuideWidget : public QFrame {
+class PriceGuideWidget : public QFrame
+{
     Q_OBJECT
 public:
-    PriceGuideWidget(QWidget *parent = 0, Qt::WindowFlags f = 0);
+    PriceGuideWidget(QWidget *parent = nullptr);
     virtual ~PriceGuideWidget();
 
-    virtual BrickLink::PriceGuide *priceGuide() const;
+    BrickLink::PriceGuide *priceGuide() const;
 
     enum Layout {
         Normal,
@@ -38,13 +37,13 @@ public:
         Vertical
     };
 
-    virtual QSize sizeHint() const;
+    QSize sizeHint() const override;
 
     QString currencyCode() const;
 
 public slots:
     void setLayout(Layout l);
-    virtual void setPriceGuide(BrickLink::PriceGuide *pg);
+    void setPriceGuide(BrickLink::PriceGuide *pg);
     void setCurrencyCode(const QString &code);
 
 signals:
@@ -56,12 +55,12 @@ protected:
     void recalcLayoutHorizontal(const QSize &s, const QFontMetrics &fm, const QFontMetrics &fmb);
     void recalcLayoutVertical(const QSize &s, const QFontMetrics &fm, const QFontMetrics &fmb);
 
-    virtual void resizeEvent(QResizeEvent *);
-    virtual void mouseDoubleClickEvent(QMouseEvent *);
-    virtual void mouseMoveEvent(QMouseEvent *);
-    virtual void leaveEvent(QEvent *);
-    virtual void paintEvent(QPaintEvent *);
-    virtual bool event(QEvent *);
+    void resizeEvent(QResizeEvent *) override;
+    void mouseDoubleClickEvent(QMouseEvent *) override;
+    void mouseMoveEvent(QMouseEvent *) override;
+    void leaveEvent(QEvent *) override;
+    void paintEvent(QPaintEvent *) override;
+    bool event(QEvent *) override;
 
 protected slots:
     void doUpdate();
@@ -79,6 +78,3 @@ private:
 private:
     PriceGuideWidgetPrivate *d;
 };
-
-#endif
-

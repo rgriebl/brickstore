@@ -11,24 +11,25 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __INFODIALOG_H__
-#define __INFODIALOG_H__
+#pragma once
 
 #include <QDialog>
 #include <QMap>
 
 #include "ui_informationdialog.h"
 
-class InformationDialog : public QDialog, private Ui::InformationDialog {
-    Q_OBJECT
 
+class InformationDialog : public QDialog, private Ui::InformationDialog
+{
+    Q_OBJECT
 public:
-    InformationDialog(const QString &title, const QMap<QString, QString> &pages, bool delayok = false, QWidget *parent = 0, Qt::WindowFlags f = 0);
+    InformationDialog(const QString &title, const QMap<QString, QString> &pages,
+                      QWidget *parent = nullptr);
 
 protected:
-    virtual void reject();
-    virtual void closeEvent(QCloseEvent *);
-    virtual void changeEvent(QEvent *e);
+    void reject() override;
+    void closeEvent(QCloseEvent *) override;
+    void changeEvent(QEvent *e) override;
 
 private slots:
     void enableOk();
@@ -37,5 +38,3 @@ private slots:
 private:
     QMap<QString, QString> m_pages;
 };
-
-#endif

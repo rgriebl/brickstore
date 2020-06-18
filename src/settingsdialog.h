@@ -11,8 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __SETTINGSDIALOG_H__
-#define __SETTINGSDIALOG_H__
+#pragma once
 
 #include <QDialog>
 
@@ -22,14 +21,14 @@ class QHttp;
 class QBuffer;
 
 
-class SettingsDialog : public QDialog, private Ui::SettingsDialog {
+class SettingsDialog : public QDialog, private Ui::SettingsDialog
+{
     Q_OBJECT
-
 public:
-    SettingsDialog(const QString &goto_page, QWidget *parent = 0, Qt::WindowFlags f = 0);
+    SettingsDialog(const QString &goto_page, QWidget *parent = nullptr);
 
 public slots:
-    virtual void accept();
+    void accept() override;
 
 protected slots:
     void selectDocDir(int);
@@ -44,5 +43,3 @@ protected:
 private:
     QString m_preferedCurrency;
 };
-
-#endif

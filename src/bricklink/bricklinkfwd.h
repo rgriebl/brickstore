@@ -11,8 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __BRICKLINK_FWD_H__
-#define __BRICKLINK_FWD_H__
+#pragma once
 
 #include <QPair>
 #include <QHash>
@@ -115,6 +114,3 @@ enum ModelRoles {
 
 Q_DECLARE_METATYPE(BrickLink::Time)
 Q_DECLARE_METATYPE(BrickLink::Price)
-
-#endif
-

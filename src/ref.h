@@ -11,12 +11,13 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __REF_H__
-#define __REF_H__
+#pragma once
 
 #include <QtCore/qbasicatomic.h>
 
-class Ref {
+
+class Ref
+{
 public:
     inline Ref()                 { ref = 0; }
     inline void addRef() const   { ref.ref(); }
@@ -37,6 +38,4 @@ private:
 // (QCache will use that function to determine what can really be purged from the cache)
 
 //TODO5 REMOVED template<> inline bool qIsDetached<Ref>(Ref &r) { return r.refCount() == 0; }
-
-#endif
 

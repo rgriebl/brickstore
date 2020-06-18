@@ -11,8 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef QTEMPORARYRESOURCE_H
-#define QTEMPORARYRESOURCE_H
+#pragma once
 
 #include <QtGlobal>
 
@@ -45,5 +44,3 @@ protected:
 };
 
 QT_END_HEADER
-
-#endif // QTEMPORARYRESOURCE_H

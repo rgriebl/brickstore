@@ -25,8 +25,8 @@
 
 
 
-ImportInventoryDialog::ImportInventoryDialog(QWidget *parent, Qt::WindowFlags f)
-    : QDialog(parent, f)
+ImportInventoryDialog::ImportInventoryDialog(QWidget *parent)
+    : QDialog(parent)
 {
     setupUi(this);
 

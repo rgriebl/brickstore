@@ -11,8 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __BRICKLINK_H__
-#define __BRICKLINK_H__
+#pragma once
 
 #include "bricklinkfwd.h"
 
@@ -52,7 +51,8 @@ class QFile;
 
 namespace BrickLink {
 
-class ItemType {
+class ItemType
+{
 public:
     char id() const                 { return m_id; }
     QString name() const            { return m_name; }
@@ -91,7 +91,8 @@ private:
 };
 
 
-class Category {
+class Category
+{
 public:
     uint id() const       { return m_id; }
     QString name() const  { return m_name; }
@@ -109,7 +110,8 @@ private:
     friend QDataStream &operator >> (QDataStream &ds, Category *cat);
 };
 
-class Color {
+class Color
+{
 public:
     uint id() const           { return m_id; }
     QString name() const      { return m_name; }
@@ -169,7 +171,8 @@ private:
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(Color::Type)
 
-class Item {
+class Item
+{
 public:
     QString id() const                     { return m_id; }
     QString name() const                   { return m_name; }
@@ -185,7 +188,7 @@ public:
 
     ~Item();
 
-    AppearsIn appearsIn(const Color *color = 0) const;
+    AppearsIn appearsIn(const Color *color = nullptr) const;
     InvItemList  consistsOf() const;
 
     uint index() const { return m_index; }   // only for internal use (picture/priceguide hashes)
@@ -252,7 +255,8 @@ private:
 };
 
 
-class Picture : public Ref {
+class Picture : public Ref
+{
 public:
     const Item *item() const          { return m_item; }
     const Color *color() const        { return m_color; }
@@ -295,9 +299,10 @@ private:
     friend class PictureLoaderJob;
 };
 
-class InvItem {
+class InvItem
+{
 public:
-    InvItem(const Color *color = 0, const Item *item = 0);
+    InvItem(const Color *color = nullptr, const Item *item = nullptr);
     InvItem(const InvItem &copy);
     ~InvItem();
 
@@ -427,12 +432,13 @@ private:
     friend class Core;
 };
 
-class InvItemMimeData : public QMimeData {
+class InvItemMimeData : public QMimeData
+{
 public:
     InvItemMimeData(const InvItemList &items);
 
-    virtual QStringList formats() const;
-    virtual bool hasFormat(const QString & mimeType) const;
+    QStringList formats() const override;
+    bool hasFormat(const QString & mimeType) const override;
 
     void setItems(const InvItemList &items);
     static InvItemList items(const QMimeData *md);
@@ -441,7 +447,8 @@ private:
     static const char *s_mimetype;
 };
 
-class Order {
+class Order
+{
 public:
     Order(const QString &id, OrderType type);
 
@@ -502,7 +509,8 @@ private:
     QChar     m_countryCode[2];
 };
 
-class PriceGuide : public Ref {
+class PriceGuide : public Ref
+{
 public:
     const Item *item() const          { return m_item; }
     const Color *color() const        { return m_color; }
@@ -543,7 +551,8 @@ private:
     friend class Core;
 };
 
-class ChangeLogEntry : public QByteArray {
+class ChangeLogEntry : public QByteArray
+{
 public:
     enum Type {
         Invalid,
@@ -570,7 +579,8 @@ private:
     friend class Core;
 };
 
-class TextImport {
+class TextImport
+{
 public:
     TextImport();
 
@@ -620,16 +630,16 @@ private:
 };
 
 
-class ColorModel : public StaticPointerModel {
+class ColorModel : public StaticPointerModel
+{
     Q_OBJECT
-
 public:
     ColorModel(QObject *parent);
 
-    virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
-    virtual QVariant data(const QModelIndex &index, int role) const override;
-    virtual QVariant headerData(int section, Qt::Orientation orient, int role) const override;
+    QVariant data(const QModelIndex &index, int role) const override;
+    QVariant headerData(int section, Qt::Orientation orient, int role) const override;
 
     using StaticPointerModel::index;
     QModelIndex index(const Color *color) const;
@@ -658,18 +668,18 @@ private:
 };
 
 
-class CategoryModel : public StaticPointerModel {
+class CategoryModel : public StaticPointerModel
+{
     Q_OBJECT
-
 public:
     CategoryModel(QObject *parent);
 
     static const Category *AllCategories;
 
-    virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
-    virtual QVariant data(const QModelIndex &index, int role) const override;
-    virtual QVariant headerData(int section, Qt::Orientation orient, int role) const override;
+    QVariant data(const QModelIndex &index, int role) const override;
+    QVariant headerData(int section, Qt::Orientation orient, int role) const override;
 
     using StaticPointerModel::index;
     QModelIndex index(const Category *category) const;
@@ -695,31 +705,31 @@ private:
 };
 
 
-class ItemTypeModel : public StaticPointerModel {
+class ItemTypeModel : public StaticPointerModel
+{
     Q_OBJECT
-
 public:
     ItemTypeModel(QObject *parent);
 
-    virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
+    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
-    virtual QVariant data(const QModelIndex &index, int role) const;
-    virtual QVariant headerData(int section, Qt::Orientation orient, int role) const;
+    QVariant data(const QModelIndex &index, int role) const override;
+    QVariant headerData(int section, Qt::Orientation orient, int role) const override;
 
     using StaticPointerModel::index;
     QModelIndex index(const ItemType *itemtype) const;
     const ItemType *itemType(const QModelIndex &index) const;
 
-    bool isFiltered() const;
+    bool isFiltered() const override;
     void setFilterWithoutInventory(bool on);
 
 protected:
-    int pointerCount() const;
-    const void *pointerAt(int index) const;
-    int pointerIndexOf(const void *pointer) const;
+    int pointerCount() const override;
+    const void *pointerAt(int index) const override;
+    int pointerIndexOf(const void *pointer) const override;
 
-    bool filterAccepts(const void *pointer) const;
-    bool lessThan(const void *pointer1, const void *pointer2, int column) const;
+    bool filterAccepts(const void *pointer) const override;
+    bool lessThan(const void *pointer1, const void *pointer2, int column) const override;
 
 private:
     bool m_inv_filter;
@@ -728,22 +738,22 @@ private:
 };
 
 
-class ItemModel : public StaticPointerModel {
+class ItemModel : public StaticPointerModel
+{
     Q_OBJECT
-
 public:
     ItemModel(QObject *parent);
 
-    int columnCount(const QModelIndex &parent = QModelIndex()) const;
+    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
-    QVariant data(const QModelIndex &index, int role) const;
-    QVariant headerData(int section, Qt::Orientation orient, int role) const;
+    QVariant data(const QModelIndex &index, int role) const override;
+    QVariant headerData(int section, Qt::Orientation orient, int role) const override;
 
     using StaticPointerModel::index;
     QModelIndex index(const Item *item) const;
     const Item *item(const QModelIndex &index) const;
 
-    bool isFiltered() const;
+    bool isFiltered() const override;
     void setFilterItemType(const ItemType *it);
     void setFilterCategory(const Category *cat);
     void setFilterText(const QString &str);
@@ -753,12 +763,12 @@ protected slots:
     void pictureUpdated(BrickLink::Picture *);
 
 protected:
-    int pointerCount() const;
-    const void *pointerAt(int index) const;
-    int pointerIndexOf(const void *pointer) const;
+    int pointerCount() const override;
+    const void *pointerAt(int index) const override;
+    int pointerIndexOf(const void *pointer) const override;
 
-    bool filterAccepts(const void *pointer) const;
-    bool lessThan(const void *pointer1, const void *pointer2, int column) const;
+    bool filterAccepts(const void *pointer) const override;
+    bool lessThan(const void *pointer1, const void *pointer2, int column) const override;
 
 private:
     const ItemType *m_itemtype_filter;
@@ -772,17 +782,18 @@ private:
 
 class AppearsInsModel;
 
-class InternalAppearsInModel : public QAbstractTableModel {
+class InternalAppearsInModel : public QAbstractTableModel
+{
     Q_OBJECT
 public:
     ~InternalAppearsInModel();
 
-    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
-    virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
-    virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
+    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
-    virtual QVariant data(const QModelIndex &index, int role) const;
-    virtual QVariant headerData(int section, Qt::Orientation orient, int role) const;
+    QVariant data(const QModelIndex &index, int role) const override;
+    QVariant headerData(int section, Qt::Orientation orient, int role) const override;
 
     const AppearsInItem *appearsIn(const QModelIndex &idx) const;
     QModelIndex index(const AppearsInItem *const_ai) const;
@@ -801,9 +812,9 @@ protected:
     friend class AppearsInModel;
 };
 
-class AppearsInModel : public QSortFilterProxyModel {
+class AppearsInModel : public QSortFilterProxyModel
+{
     Q_OBJECT
-
 public:
     AppearsInModel(const BrickLink::InvItemList &list, QObject *parent);
     AppearsInModel(const Item *item, const Color *color, QObject *parent);
@@ -813,11 +824,12 @@ public:
     QModelIndex index(const AppearsInItem *const_ai) const;
 
 protected:
-    virtual bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
+    bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
 };
 
 
-class ItemDelegate : public QStyledItemDelegate {
+class ItemDelegate : public QStyledItemDelegate
+{
     Q_OBJECT
 public:
     enum Option {
@@ -826,14 +838,15 @@ public:
     };
     Q_DECLARE_FLAGS(Options, Option);
 
-    ItemDelegate(QObject *parent = 0, Options options = None);
+    ItemDelegate(QObject *parent = nullptr, Options options = None);
 
-    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
-    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const;
+    void paint(QPainter *painter, const QStyleOptionViewItem &option,
+               const QModelIndex &index) const override;
+    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 
 public slots:
-    // this really is a faked virtual
-    bool helpEvent(QHelpEvent *event, QAbstractItemView *view, const QStyleOptionViewItem &option, const QModelIndex &index);
+    bool helpEvent(QHelpEvent *event, QAbstractItemView *view, const QStyleOptionViewItem &option,
+                   const QModelIndex &index) override;
 
 private:
     QString createToolTip(const BrickLink::Item *item, BrickLink::Picture *pic) const;
@@ -850,12 +863,13 @@ Q_DECLARE_OPERATORS_FOR_FLAGS(ItemDelegate::Options)
 
 
 
-class Core : public QObject {
+class Core : public QObject
+{
     Q_OBJECT
 public:
-    virtual ~Core();
+    ~Core();
 
-    QUrl url(UrlList u, const void *opt = 0, const void *opt2 = 0);
+    QUrl url(UrlList u, const void *opt = nullptr, const void *opt2 = nullptr);
 
     enum DatabaseVersion {
         BrickStore_1_1,
@@ -906,9 +920,9 @@ public:
     };
 
     ParseItemListXMLResult parseItemListXML(QDomElement root, ItemListXMLHint hint);
-    QDomElement createItemListXML(QDomDocument doc, ItemListXMLHint hint, const InvItemList &items, const QString &currencyCode = QString(), QMap<QString, QString> *extra = 0);
+    QDomElement createItemListXML(QDomDocument doc, ItemListXMLHint hint, const InvItemList &items, const QString &currencyCode = QString(), QMap<QString, QString> *extra = nullptr);
 
-    bool parseLDrawModel(QFile &file, InvItemList &items, uint *invalid_items = 0);
+    bool parseLDrawModel(QFile &file, InvItemList &items, uint *invalid_items = nullptr);
 
     int applyChangeLogToItems(BrickLink::InvItemList &bllist);
 
@@ -1015,5 +1029,4 @@ Q_DECLARE_METATYPE(const BrickLink::AppearsInItem *)
 //TODO5 REMOVED template<> inline bool qIsDetached<BrickLink::Picture>(BrickLink::Picture &c) { return c.refCount() == 0; }
 //TODO5 REMOVED template<> inline bool qIsDetached<BrickLink::PriceGuide>(BrickLink::PriceGuide &c) { return c.refCount() == 0; }
 
-#endif
 

@@ -11,8 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __REBUILDDATABASE_H__
-#define __REBUILDDATABASE_H__
+#pragma once
 
 #include <QObject>
 #include <QDateTime>
@@ -21,9 +20,9 @@
 #include "transfer.h"
 
 
-class RebuildDatabase : public QObject {
+class RebuildDatabase : public QObject
+{
     Q_OBJECT
-
 public:
     RebuildDatabase(bool skipDownload = false);
     ~RebuildDatabase();
@@ -49,5 +48,3 @@ private:
     int m_ptotal;
     QDateTime m_date;
 };
-
-#endif

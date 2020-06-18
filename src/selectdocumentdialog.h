@@ -11,8 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __SELECTDOCUMENTDIALOG_H__
-#define __SELECTDOCUMENTDIALOG_H__
+#pragma once
 
 #include <QDialog>
 #include "bricklinkfwd.h"
@@ -21,11 +20,13 @@
 class Document;
 class QListWidgetItem;
 
-class SelectDocumentDialog : public QDialog, private Ui::SelectDocumentDialog {
-    Q_OBJECT
 
+class SelectDocumentDialog : public QDialog, private Ui::SelectDocumentDialog
+{
+    Q_OBJECT
 public:
-    SelectDocumentDialog(const Document *self, const QString &headertext, QWidget *parent = 0, Qt::WindowFlags f = 0);
+    SelectDocumentDialog(const Document *self, const QString &headertext,
+                         QWidget *parent = nullptr);
     ~SelectDocumentDialog();
 
     BrickLink::InvItemList items() const;
@@ -37,6 +38,4 @@ private slots:
 private:
     BrickLink::InvItemList m_clipboard_list;
 };
-
-#endif
 

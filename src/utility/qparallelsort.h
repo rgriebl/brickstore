@@ -46,14 +46,13 @@
  * $Id: $
  *
  */
-
-#ifndef QPARALLELSORT_H
-#define QPARALLELSORT_H
+#pragma once
 
 #include <QtConcurrentRun>
 #include <QtAlgorithms>
 
 namespace QAlgorithmsPrivate {
+
 
 template <typename RandomAccessIterator, typename T, typename LessThan>
 static inline void qParallelSortJoin(RandomAccessIterator begin, RandomAccessIterator end, LessThan lessThan, T *tmp, int a_span, int b_span)
@@ -218,5 +217,3 @@ void test_par_sort()
     }
 }
 #endif
-
-#endif // QPARALLELSort_H

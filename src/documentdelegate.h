@@ -11,8 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef DOCUMENTDELEGATE_H
-#define DOCUMENTDELEGATE_H
+#pragma once
 
 #include <QItemDelegate>
 #include <QPointer>
@@ -30,7 +29,8 @@ class QLineEdit;
 class QTableView;
 
 
-class DocumentDelegate : public QItemDelegate {
+class DocumentDelegate : public QItemDelegate
+{
 public:
     DocumentDelegate(Document *doc, DocumentProxyModel *view, QTableView *table);
 
@@ -71,5 +71,3 @@ protected:
 
     static void clearCaches();
 };
-
-#endif

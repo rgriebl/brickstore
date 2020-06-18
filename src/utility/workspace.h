@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2005 Robert Griebl. All rights reserved.
+/* Copyright (C) 2004-2020 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -11,8 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __WORKSPACE_H__
-#define __WORKSPACE_H__
+#pragma once
 
 #include <QWidget>
 
@@ -21,18 +20,18 @@ class QStackedLayout;
 class QMenu;
 
 
-class Workspace : public QWidget {
+class Workspace : public QWidget
+{
     Q_OBJECT
-
 public:
-    Workspace(QWidget *parent = 0, Qt::WindowFlags f = 0);
+    Workspace(QWidget *parent = nullptr);
 
     void addWindow(QWidget *w);
 
     QWidget *activeWindow() const;
     QList<QWidget *> windowList() const;
 
-    QMenu *windowMenu(bool hasShortcuts = false, QWidget *parent = 0);
+    QMenu *windowMenu(bool hasShortcuts = false, QWidget *parent = nullptr);
 
 signals:
     void windowActivated(QWidget *);
@@ -41,7 +40,7 @@ public slots:
     void setActiveWindow(QWidget *);
 
 protected:
-    virtual bool eventFilter(QObject *o, QEvent *e);
+    bool eventFilter(QObject *o, QEvent *e) override;
 
 private slots:
     void closeTab(int idx);
@@ -56,6 +55,3 @@ private:
     QWidget *       m_left;
     QWidget *       m_right;
 };
-
-#endif
-

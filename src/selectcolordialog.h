@@ -11,19 +11,18 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __SELECTCOLORDIALOG_H__
-#define __SELECTCOLORDIALOG_H__
+#pragma once
 
 #include <QDialog>
 #include "bricklinkfwd.h"
 #include "ui_selectcolordialog.h"
 
 
-class SelectColorDialog : public QDialog, private Ui::SelectColorDialog {
+class SelectColorDialog : public QDialog, private Ui::SelectColorDialog
+{
     Q_OBJECT
-
 public:
-    SelectColorDialog(QWidget *parent = nullptr, Qt::WindowFlags f = nullptr);
+    SelectColorDialog(QWidget *parent = nullptr);
 
     void setColor(const BrickLink::Color *);
     const BrickLink::Color *color() const;
@@ -36,5 +35,3 @@ protected:
 private slots:
     void checkColor(const BrickLink::Color *, bool);
 };
-
-#endif

@@ -580,7 +580,8 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
     case Document::Description:
         if (dblclick || (keypress && editkey)) {
             if (!m_select_item) {
-                m_select_item = new SelectItemDialog(false, m_table, Qt::Tool);
+                m_select_item = new SelectItemDialog(false, m_table);
+                m_select_item->setWindowFlag(Qt::Tool);
                 m_select_item->setWindowTitle(tr("Modify Item"));
             }
             m_select_item->setItem(it->item());
@@ -598,7 +599,8 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
     case Document::Color:
         if (dblclick || (keypress && editkey)) {
             if (!m_select_color) {
-                m_select_color = new SelectColorDialog(m_table, Qt::Tool);
+                m_select_color = new SelectColorDialog(m_table);
+                m_select_color->setWindowFlag(Qt::Tool);
                 m_select_color->setWindowTitle(tr("Modify Color"));
             }
             m_select_color->setColor(it->color());

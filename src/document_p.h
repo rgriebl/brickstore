@@ -11,25 +11,26 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __DOCUMENT_P_H__
-#define __DOCUMENT_P_H__
+#pragma once
 
 #include <QUndoCommand>
 #include "document.h"
 
 
-class AddRemoveCmd : public QUndoCommand {
+class AddRemoveCmd : public QUndoCommand
+{
 public:
     enum Type { Add, Remove };
 
-    AddRemoveCmd(Type t, Document *doc, const QVector<int> &positions, const Document::ItemList &items, bool merge_allowed = false);
-    ~AddRemoveCmd();
+    AddRemoveCmd(Type t, Document *doc, const QVector<int> &positions,
+                 const Document::ItemList &items, bool merge_allowed = false);
+    ~AddRemoveCmd() override;
 
-    int id() const;
+    int id() const override;
 
-    void redo();
-    void undo();
-    bool mergeWith(const QUndoCommand *other);
+    void redo() override;
+    void undo() override;
+    bool mergeWith(const QUndoCommand *other) override;
 
     static QString genDesc(bool is_add, uint count);
 
@@ -41,16 +42,17 @@ private:
     bool               m_merge_allowed;
 };
 
-class ChangeCmd : public QUndoCommand {
+class ChangeCmd : public QUndoCommand
+{
 public:
     ChangeCmd(Document *doc, int position, const Document::Item &item, bool merge_allowed = false);
-    ~ChangeCmd();
+    ~ChangeCmd() override;
 
-    int id() const;
+    int id() const override;
 
-    void redo();
-    void undo();
-    bool mergeWith(const QUndoCommand *other);
+    void redo() override;
+    void undo() override;
+    bool mergeWith(const QUndoCommand *other) override;
 
 private:
     Document *      m_doc;
@@ -59,15 +61,16 @@ private:
     bool            m_merge_allowed;
 };
 
-class CurrencyCmd : public QUndoCommand {
+class CurrencyCmd : public QUndoCommand
+{
 public:
     CurrencyCmd(Document *doc, const QString &ccode, qreal crate);
-    ~CurrencyCmd();
+    ~CurrencyCmd() override;
 
-    virtual int id() const;
+    virtual int id() const override;
 
-    void redo();
-    void undo();
+    void redo() override;
+    void undo() override;
 
 private:
     Document * m_doc;
@@ -75,5 +78,3 @@ private:
     qreal      m_crate;
     double *   m_prices; // m_items.count() * 5 (price, origPrice, tierPrice * 3)
 };
-
-#endif

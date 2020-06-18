@@ -11,13 +11,14 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __STOPWATCH_H__
-#define __STOPWATCH_H__
+#pragma once
 
 #include <QtDebug>
 #include <ctime>
 
-class stopwatch {
+
+class stopwatch
+{
 public:
     stopwatch(const char *desc)
     {
@@ -33,5 +34,3 @@ private:
     const char *m_label;
     clock_t m_start;
 };
-
-#endif

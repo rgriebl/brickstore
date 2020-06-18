@@ -11,8 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __FRAMEWORK_H__
-#define __FRAMEWORK_H__
+#pragma once
 
 #include <QMainWindow>
 #include <QMap>
@@ -41,11 +40,11 @@ class AddItemDialog;
 class ItemDetailPopup;
 
 
-class FrameWork : public QMainWindow {
+class FrameWork : public QMainWindow
+{
     Q_OBJECT
-
 private:
-    FrameWork(QWidget *parent = 0, Qt::WindowFlags f = 0);
+    FrameWork(QWidget *parent = nullptr);
     static FrameWork *s_inst;
 
 public:
@@ -58,8 +57,6 @@ public:
     bool closeAllWindows();
 
     QList<Window *> allWindows() const;
-
-//    void updateAllToggleActions(Window *window);
 
 public slots:
     void selectionUpdate(const Document::ItemList &selection);
@@ -116,10 +113,10 @@ private slots:
     void updateCurrencyRates();
 
 protected:
-   virtual void dragEnterEvent(QDragEnterEvent *e);
-   virtual void dropEvent(QDropEvent *e);
+   void dragEnterEvent(QDragEnterEvent *e) override;
+   void dropEvent(QDropEvent *e) override;
 
-   virtual void closeEvent(QCloseEvent *e);
+   void closeEvent(QCloseEvent *e) override;
 
 private:
     void setBrickLinkUpdateIntervals();
@@ -174,5 +171,3 @@ private:
 
     UndoGroup *m_undogroup;
 };
-
-#endif

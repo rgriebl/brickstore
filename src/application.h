@@ -11,8 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __APPLICATION_H__
-#define __APPLICATION_H__
+#pragma once
 
 #include <QApplication>
 #include <QStringList>
@@ -21,7 +20,8 @@ class FrameWork;
 class QTranslator;
 
 
-class Application : public QApplication {
+class Application : public QApplication
+{
     Q_OBJECT
 public:
     Application(bool rebuild_db_only, bool skip_download, int argc, char **argv);
@@ -49,7 +49,7 @@ signals:
     void onlineStateChanged(bool isOnline);
 
 protected:
-    virtual bool event(QEvent *e);
+    bool event(QEvent *e) override;
 
 private slots:
     void doEmitOpenDocument();
@@ -74,5 +74,3 @@ private:
 
     static Application *s_inst;
 };
-
-#endif

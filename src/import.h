@@ -11,8 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __IMPORT_H__
-#define __IMPORT_H__
+#pragma once
 
 #include <QDate>
 #include <QUrl>
@@ -21,9 +20,10 @@
 
 class ProgressDialog;
 
-class ImportBLStore : public QObject {
-    Q_OBJECT
 
+class ImportBLStore : public QObject
+{
+    Q_OBJECT
 public:
     ImportBLStore(ProgressDialog *pd);
 
@@ -40,9 +40,9 @@ private:
 };
 
 
-class ImportBLOrder : public QObject {
+class ImportBLOrder : public QObject
+{
     Q_OBJECT
-
 public:
     ImportBLOrder(const QDate &from, const QDate &to, BrickLink::OrderType type, ProgressDialog *pd);
     ImportBLOrder(const QString &order, BrickLink::OrderType type, ProgressDialog *pd);
@@ -69,9 +69,9 @@ private:
 };
 
 
-class ImportBLCart : public QObject {
+class ImportBLCart : public QObject
+{
     Q_OBJECT
-
 public:
     ImportBLCart(int shopid, int cartid, ProgressDialog *pd);
 
@@ -86,5 +86,3 @@ private:
     BrickLink::InvItemList m_items;
     QString                m_currencycode;
 };
-
-#endif

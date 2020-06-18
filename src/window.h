@@ -11,8 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __WINDOW_H__
-#define __WINDOW_H__
+#pragma once
 
 #include <QWidget>
 #include <QRegExp>
@@ -31,11 +30,12 @@ class FrameWork;
 class UndoStack;
 class QItemSelectionModel;
 
-class Window : public QWidget {
-    Q_OBJECT
 
+class Window : public QWidget
+{
+    Q_OBJECT
 public:
-    Window(Document *doc, QWidget *parent = 0);
+    Window(Document *doc, QWidget *parent = nullptr);
     ~Window();
 
     Document *document() { return m_doc; }
@@ -67,8 +67,8 @@ public:
     QString filter() const;
     QString filterToolTip() const;
 
-    virtual QDomElement createGuiStateXML(QDomDocument doc);
-    virtual bool parseGuiStateXML(QDomElement root);
+    QDomElement createGuiStateXML(QDomDocument doc);
+    bool parseGuiStateXML(QDomElement root);
 
     bool isDifferenceMode() const;
     bool isSimpleMode() const;
@@ -160,9 +160,9 @@ signals:
     void currentChanged(Document::Item *);
 
 protected:
-    virtual void closeEvent(QCloseEvent *e);
-    virtual void changeEvent(QEvent *e);
-    virtual bool eventFilter(QObject *o, QEvent *e);
+    void closeEvent(QCloseEvent *e) override;
+    void changeEvent(QEvent *e) override;
+    bool eventFilter(QObject *o, QEvent *e) override;
 
     void print(bool aspdf);
 
@@ -202,5 +202,3 @@ private:
     BrickLink::Price     m_settopg_price;
     QMultiHash<BrickLink::PriceGuide *, Document::Item *> *m_settopg_list;
 };
-
-#endif

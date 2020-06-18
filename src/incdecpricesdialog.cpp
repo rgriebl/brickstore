@@ -16,8 +16,9 @@
 #include "incdecpricesdialog.h"
 
 
-IncDecPricesDialog::IncDecPricesDialog(const QString &currencycode, QWidget *parent, Qt::WindowFlags fl)
-    : QDialog(parent, fl), m_currencycode(currencycode)
+IncDecPricesDialog::IncDecPricesDialog(const QString &currencycode, QWidget *parent)
+    : QDialog(parent)
+    , m_currencycode(currencycode)
 {
     setupUi(this);
     

@@ -184,8 +184,8 @@ FrameWork *FrameWork::inst()
 
 
 
-FrameWork::FrameWork(QWidget *parent, Qt::WindowFlags f)
-    : QMainWindow(parent, f)
+FrameWork::FrameWork(QWidget *parent)
+    : QMainWindow(parent)
 {
     s_inst = this;
 

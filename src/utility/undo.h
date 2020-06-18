@@ -11,8 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __UNDO_H__
-#define __UNDO_H__
+#pragma once
 
 #include <QUndoStack>
 #include <QUndoGroup>
@@ -20,14 +19,15 @@
 class QAction;
 
 
-class UndoStack : public QUndoStack {
+class UndoStack : public QUndoStack
+{
     Q_OBJECT
 
 public:
-    UndoStack(QObject *parent = 0);
+    UndoStack(QObject *parent = nullptr);
 
-    QAction *createRedoAction(QObject *parent = 0) const;
-    QAction *createUndoAction(QObject *parent = 0) const;
+    QAction *createRedoAction(QObject *parent = nullptr) const;
+    QAction *createUndoAction(QObject *parent = nullptr) const;
 
     // workaround as long as I haven't add that to Qt (4.6 hopefully)
     void endMacro(const QString &str);
@@ -37,18 +37,18 @@ public slots:
     void undo(int count);
 };
 
-class UndoGroup : public QUndoGroup {
+
+class UndoGroup : public QUndoGroup
+{
     Q_OBJECT
 
 public:
-    UndoGroup(QObject *parent = 0);
+    UndoGroup(QObject *parent = nullptr);
 
-    QAction *createRedoAction(QObject *parent = 0) const;
-    QAction *createUndoAction(QObject *parent = 0) const;
+    QAction *createRedoAction(QObject *parent = nullptr) const;
+    QAction *createUndoAction(QObject *parent = nullptr) const;
 
 public slots:
     void redo(int count);
     void undo(int count);
 };
-
-#endif

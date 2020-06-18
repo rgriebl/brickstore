@@ -19,22 +19,15 @@
 
 #include "informationdialog.h"
 
-InformationDialog::InformationDialog(const QString &title, const QMap<QString, QString> &pages, bool delayok, QWidget *parent, Qt::WindowFlags f)
-    : QDialog(parent, f), m_pages(pages)
+InformationDialog::InformationDialog(const QString &title, const QMap<QString, QString> &pages, QWidget *parent)
+    : QDialog(parent), m_pages(pages)
 {
     setupUi(this);
     setWindowTitle(title);
 
-//    w_browser->setMaximumWidth(500);
-
     gotoPage("index");
     connect(w_browser, &QLabel::linkActivated,
             this, &InformationDialog::gotoPage);
-
-    if (delayok) {
-        w_buttons->button(QDialogButtonBox::Ok)->setEnabled(false);
-        QTimer::singleShot(3 * 1000, this, SLOT(enableOk()));
-    }
 
     setFixedSize(sizeHint());
 }

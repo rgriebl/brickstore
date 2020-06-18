@@ -11,8 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __CHECKFORUPDATES_H__
-#define __CHECKFORUPDATES_H__
+#pragma once
 
 #include <QBuffer>
 #include <QTextStream>
@@ -24,7 +23,8 @@
 #include "progressdialog.h"
 
 
-class CheckForUpdates : public QObject {
+class CheckForUpdates : public QObject
+{
     Q_OBJECT
 
     struct VersionRecord;
@@ -204,5 +204,3 @@ private:
     VersionRecord   m_current_version;
     QList <VersionRecord> m_versions;
 };
-
-#endif

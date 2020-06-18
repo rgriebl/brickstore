@@ -11,8 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __SELECTCOLOR_H__
-#define __SELECTCOLOR_H__
+#pragma once
 
 #include <QDialog>
 
@@ -21,14 +20,16 @@
 class QTreeView;
 class QComboBox;
 
-class SelectColor : public QWidget {
+
+class SelectColor : public QWidget
+{
     Q_OBJECT
 public:
-    SelectColor(QWidget *parent = 0, Qt::WindowFlags f = 0);
+    SelectColor(QWidget *parent = nullptr);
 
     void setWidthToContents(bool b);
 
-    void setCurrentColor(const BrickLink::Color *);
+    void setCurrentColor(const BrickLink::Color *color);
     const BrickLink::Color *currentColor() const;
 
 signals:
@@ -41,14 +42,10 @@ protected slots:
     void languageChange();
 
 protected:
-    virtual void changeEvent(QEvent *);
-    virtual void showEvent(QShowEvent *);
+    void changeEvent(QEvent *) override;
+    void showEvent(QShowEvent *) override;
 
 protected:
     QComboBox *w_filter;
     QTreeView *w_colors;
-
-//    friend class SelectColor;Dialog
 };
-
-#endif

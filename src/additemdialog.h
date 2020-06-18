@@ -11,14 +11,12 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __ADDITEMDIALOG_H__
-#define __ADDITEMDIALOG_H__
+#pragma once
 
 #include <QWidget>
 #include <QPointer>
 
 #include "ui_additemdialog.h"
-
 #include "currency.h"
 #include "bricklinkfwd.h"
 
@@ -27,10 +25,11 @@ class QPushButton;
 class Window;
 
 
-class AddItemDialog : public QWidget, private Ui::AddItemDialog {
+class AddItemDialog : public QWidget, private Ui::AddItemDialog
+{
     Q_OBJECT
 public:
-    AddItemDialog(QWidget *parent = 0);
+    AddItemDialog(QWidget *parent = nullptr);
     virtual ~AddItemDialog();
 
     void attach(Window *window);
@@ -39,11 +38,11 @@ signals:
     void closed();
 
 protected slots:
-    virtual void languageChange();
+    void languageChange();
 
 protected:
-    virtual void wheelEvent(QWheelEvent *e);
-    virtual void closeEvent(QCloseEvent *e);
+    void wheelEvent(QWheelEvent *e) override;
+    void closeEvent(QCloseEvent *e) override;
 
 private slots:
     void updateCaption();
@@ -80,5 +79,3 @@ private:
 
     QString m_currency_code;
 };
-
-#endif

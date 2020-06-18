@@ -11,17 +11,16 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __CONFIG_H__
-#define __CONFIG_H__
+#pragma once
 
 #include <QSettings>
 #include <QDateTime>
 #include <QLocale>
 
 
-class Config : public QSettings {
+class Config : public QSettings
+{
     Q_OBJECT
-
 private:
     Config();
     static Config *s_inst;
@@ -99,5 +98,3 @@ private:
     mutable bool               m_translations_parsed;
     mutable QList<Translation> m_translations;
 };
-
-#endif

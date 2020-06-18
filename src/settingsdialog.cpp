@@ -60,8 +60,8 @@ static QString systemDirName(const QString &path)
 }
 
 
-SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent, Qt::WindowFlags f)
-    : QDialog(parent, f)
+SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
+    : QDialog(parent)
 {
     setupUi(this);
 

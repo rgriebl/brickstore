@@ -11,8 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __TASKWIDGETS_H__
-#define __TASKWIDGETS_H__
+#pragma once
 
 #include <QStackedWidget>
 #include <QLabel>
@@ -26,7 +25,8 @@ class QLabel;
 class QDockWidget;
 
 
-class TaskLinksWidget : public QLabel {
+class TaskLinksWidget : public QLabel
+{
     Q_OBJECT
 
 public:
@@ -50,7 +50,8 @@ private:
 // ----------------------------------------------------------------------
 
 
-class TaskPriceGuideWidget : public PriceGuideWidget {
+class TaskPriceGuideWidget : public PriceGuideWidget
+{
     Q_OBJECT
 
 public:
@@ -66,7 +67,7 @@ protected slots:
     void setPrice(double p);
 
 protected:
-    virtual bool event(QEvent *e);
+    bool event(QEvent *e) override;
     void fixParentDockWindow();
 
 private:
@@ -80,7 +81,8 @@ private:
 // ----------------------------------------------------------------------
 
 
-class TaskInfoWidget : public QStackedWidget {
+class TaskInfoWidget : public QStackedWidget
+{
     Q_OBJECT
 
 public:
@@ -105,7 +107,8 @@ private:
 // ----------------------------------------------------------------------
 // ----------------------------------------------------------------------
 
-class TaskAppearsInWidget : public AppearsInWidget {
+class TaskAppearsInWidget : public AppearsInWidget
+{
     Q_OBJECT
 
 public:
@@ -121,5 +124,3 @@ protected slots:
 private:
     QPointer<Window> m_win;
 };
-
-#endif

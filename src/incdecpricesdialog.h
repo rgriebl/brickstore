@@ -11,18 +11,18 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __INCDECPRICESDIALOG_H__
-#define __INCDECPRICESDIALOG_H__
+#pragma once
 
 #include <QDialog>
 #include "currency.h"
 #include "ui_incdecpricesdialog.h"
 
-class IncDecPricesDialog : public QDialog, private Ui::IncDecPricesDialog {
-    Q_OBJECT
 
+class IncDecPricesDialog : public QDialog, private Ui::IncDecPricesDialog
+{
+    Q_OBJECT
 public:
-    IncDecPricesDialog(const QString &currencycode, QWidget *parent = 0, Qt::WindowFlags f = 0);
+    IncDecPricesDialog(const QString &currencycode, QWidget *parent = nullptr);
 
     double fixed() const;
     double percent() const;
@@ -38,6 +38,3 @@ private:
     QDoubleValidator *m_fixed_validator;
     QString m_currencycode;
 };
-
-#endif
-

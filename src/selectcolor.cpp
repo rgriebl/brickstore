@@ -21,8 +21,8 @@
 #include "selectcolor.h"
 
 
-SelectColor::SelectColor(QWidget *parent, Qt::WindowFlags f)
-    : QWidget(parent, f)
+SelectColor::SelectColor(QWidget *parent)
+    : QWidget(parent)
 {
     w_filter = new QComboBox();
     w_filter->addItem(QString(), 0);

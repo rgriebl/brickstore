@@ -20,7 +20,6 @@
 #include "filter.h"
 
 
-
 Filter::Filter()
     : m_field(-1), m_comparison(Matches), m_combination(And)
 { }

@@ -11,19 +11,18 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __SELECTITEMDIALOG_H__
-#define __SELECTITEMDIALOG_H__
+#pragma once
 
 #include <QDialog>
 #include "bricklinkfwd.h"
 #include "ui_selectitemdialog.h"
 
 
-class SelectItemDialog : public QDialog, private Ui::SelectItemDialog {
+class SelectItemDialog : public QDialog, private Ui::SelectItemDialog
+{
     Q_OBJECT
-
 public:
-    SelectItemDialog(bool only_with_inventory, QWidget *parent = nullptr, Qt::WindowFlags f = nullptr);
+    SelectItemDialog(bool only_with_inventory, QWidget *parent = nullptr);
 
     void setItemType(const BrickLink::ItemType *);
     void setItem(const BrickLink::Item *);
@@ -37,5 +36,3 @@ protected:
 private slots:
     void checkItem(const BrickLink::Item *, bool);
 };
-
-#endif

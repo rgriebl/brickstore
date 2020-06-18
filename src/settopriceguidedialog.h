@@ -11,22 +11,21 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __SETTOPRICEGUIDEDIALOG_H__
-#define __SETTOPRICEGUIDEDIALOG_H__
+#pragma once
 
 #include <QDialog>
+
 #include "bricklinkfwd.h"
 #include "ui_settopriceguidedialog.h"
 
-class SetToPriceGuideDialog : public QDialog, private Ui::SetToPriceGuideDialog {
-    Q_OBJECT
 
+class SetToPriceGuideDialog : public QDialog, private Ui::SetToPriceGuideDialog
+{
+    Q_OBJECT
 public:
-    SetToPriceGuideDialog(QWidget *parent = 0, Qt::WindowFlags f = 0);
+    SetToPriceGuideDialog(QWidget *parent = nullptr);
     
     BrickLink::Time  time() const;
     BrickLink::Price price() const;
     bool forceUpdate() const;
 };
-
-#endif

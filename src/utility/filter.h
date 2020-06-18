@@ -1,5 +1,17 @@
-#ifndef __FILTER_H__
-#define __FILTER_H__
+/* Copyright (C) 2004-2020 Robert Griebl. All rights reserved.
+**
+** This file is part of BrickStore.
+**
+** This file may be distributed and/or modified under the terms of the GNU
+** General Public License version 2 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
+*/
+#pragma once
 
 #include <QString>
 #include <QMultiMap>
@@ -7,7 +19,9 @@
 #include <QPair>
 #include <QCoreApplication>
 
-class Filter {
+
+class Filter
+{
     Q_DECLARE_TR_FUNCTIONS(Filter)
 
 public:
@@ -67,7 +81,7 @@ public:
     private:
         bool eatWhiteSpace(int &pos, const QString &str);
 
-        template<typename T> T matchTokens(int &pos, const QString &str, const QMultiMap<T, QString> &tokens, const T default_result, int *start_of_token = 0);
+        template<typename T> T matchTokens(int &pos, const QString &str, const QMultiMap<T, QString> &tokens, const T default_result, int *start_of_token = nullptr);
         QPair<QString, Filter::Combination> matchFilterAndCombination(int &pos, const QString &str);
 
         QMultiMap<Filter::Comparison, QString> standardComparisonTokens(Filter::Comparisons mask);
@@ -87,5 +101,3 @@ private:
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(Filter::Comparisons)
 Q_DECLARE_OPERATORS_FOR_FLAGS(Filter::Combinations)
-
-#endif

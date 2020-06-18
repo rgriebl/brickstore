@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2005 Robert Griebl. All rights reserved.
+/* Copyright (C) 2004-2020 Robert Griebl. All rights reserved.
 **
 ** This file is part of BrickStore.
 **
@@ -11,22 +11,23 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __PROGRESSCIRCLE_H__
-#define __PROGRESSCIRCLE_H__
+#pragma once
 
 #include <QWidget>
 #include <QIcon>
 
 class QGradient;
 
-class ProgressCircle : public QWidget {
+
+class ProgressCircle : public QWidget
+{
     Q_OBJECT
 public:
-    ProgressCircle(QWidget *parent = 0);
+    ProgressCircle(QWidget *parent = nullptr);
 
-    QSize sizeHint() const;
-    QSize minimumSizeHint() const;
-    int heightForWidth(int w) const;
+    QSize sizeHint() const override;
+    QSize minimumSizeHint() const override;
+    int heightForWidth(int w) const override;
 
     int maximum() const;
     int minimum() const;
@@ -50,8 +51,8 @@ signals:
     void valueChanged(int value);
 
 protected:
-    void paintEvent(QPaintEvent *e);
-    void resizeEvent(QResizeEvent *e);
+    void paintEvent(QPaintEvent *e) override;
+    void resizeEvent(QResizeEvent *e) override;
 
 private:
     QString toolTip() const;
@@ -66,5 +67,3 @@ private:
     QIcon m_icon;
     QGradient *m_fill;
 };
-
-#endif

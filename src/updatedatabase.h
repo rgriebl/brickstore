@@ -11,22 +11,21 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __UPDATEDATABASE_H__
-#define __UPDATEDATABASE_H__
+#pragma once
 
 #include <QObject>
 
 class ProgressDialog;
 
+
 class UpdateDatabase : public QObject
 {
     Q_OBJECT
-
 public:
     UpdateDatabase(ProgressDialog *pd);
 
 private slots:
-    virtual void gotten();
+    void gotten();
 
 private:
     QString decompress(const QString &src, const QString &dst);
@@ -34,5 +33,3 @@ private:
 private:
     ProgressDialog *m_progress;
 };
-
-#endif

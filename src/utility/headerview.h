@@ -11,24 +11,25 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef HEADERVIEW_H
-#define HEADERVIEW_H
+#pragma once
 
 #include <QHeaderView>
 
-class HeaderView : public QHeaderView {
+
+class HeaderView : public QHeaderView
+{
     Q_OBJECT
 public:
-    HeaderView(Qt::Orientation orientation, QWidget *parent = 0);
+    HeaderView(Qt::Orientation orientation, QWidget *parent = nullptr);
     
     bool isSectionAvailable(int section) const;
     void setSectionAvailable(int section, bool b);
     int availableSectionCount() const;
 
-    void setModel(QAbstractItemModel*);
+    void setModel(QAbstractItemModel*) override;
 
 protected:
-    bool viewportEvent(QEvent *e);
+    bool viewportEvent(QEvent *e) override;
 
 private:
     void showMenu(const QPoint &pos);
@@ -39,5 +40,3 @@ private slots:
 private:
     QList<int> m_unavailable;
 };
-
-#endif

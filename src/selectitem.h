@@ -11,8 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __SELECTITEM_H__
-#define __SELECTITEM_H__
+#pragma once
 
 #include <QDialog>
 
@@ -21,18 +20,19 @@
 class QListViewItem;
 class QIconViewItem;
 
+
 class SelectItemPrivate;
 
-
-class SelectItem : public QWidget {
+class SelectItem : public QWidget
+{
     Q_OBJECT
 public:
-    SelectItem(QWidget *parent = 0);
+    SelectItem(QWidget *parent = nullptr);
 
     bool hasExcludeWithoutInventoryFilter() const;
     void setExcludeWithoutInventoryFilter(bool b);
 
-    virtual QSize sizeHint() const;
+    QSize sizeHint() const override;
 
     const BrickLink::Category *currentCategory() const;
     const BrickLink::ItemType *currentItemType() const;
@@ -63,8 +63,8 @@ protected slots:
     void setViewMode(int);
 
 protected:
-    virtual void showEvent(QShowEvent *);
-    virtual bool eventFilter(QObject *o, QEvent *e);
+    void showEvent(QShowEvent *) override;
+    bool eventFilter(QObject *o, QEvent *e) override;
 
 private:
     void init();
@@ -73,7 +73,3 @@ private:
 protected:
     SelectItemPrivate *d;
 };
-
-
-
-#endif

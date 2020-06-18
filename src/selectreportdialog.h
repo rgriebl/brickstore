@@ -11,8 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __SELECTREPORTDIALOG_H__
-#define __SELECTREPORTDIALOG_H__
+#pragma once
 
 #include <QDialog>
 
@@ -20,11 +19,12 @@
 
 class Report;
 
-class SelectReportDialog : public QDialog, private Ui::SelectReportDialog {
-    Q_OBJECT
 
+class SelectReportDialog : public QDialog, private Ui::SelectReportDialog
+{
+    Q_OBJECT
 public:
-	SelectReportDialog(QWidget *parent = 0, Qt::WindowFlags f = 0);
+    SelectReportDialog(QWidget *parent = nullptr);
 
 	const Report *report() const;
 
@@ -32,5 +32,3 @@ private slots:
 	void reportChanged();
 	void reportConfirmed();
 };
-
-#endif

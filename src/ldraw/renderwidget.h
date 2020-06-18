@@ -11,8 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __LDRAW_RENDERWIDGET_GL_H__
-#define __LDRAW_RENDERWIDGET_GL_H__
+#pragma once
 
 #include <qglobal.h>
 
@@ -28,16 +27,16 @@
 
 class QOpenGLFramebufferObject;
 
-
 namespace LDraw {
 
 class Part;
 
-class GLRenderer : public QObject {
-    Q_OBJECT
 
+class GLRenderer : public QObject
+{
+    Q_OBJECT
 public:
-    GLRenderer(QObject *parent = 0);
+    GLRenderer(QObject *parent = nullptr);
     virtual ~GLRenderer();
 
     Part *part() const;
@@ -109,10 +108,11 @@ private:
     QOpenGLContext *glCurrentContext = nullptr;
 };
 
-class RenderWidget : public QOpenGLWidget {
+class RenderWidget : public QOpenGLWidget
+{
     Q_OBJECT
 public:
-    RenderWidget(QWidget *parent = 0);
+    RenderWidget(QWidget *parent = nullptr);
     virtual ~RenderWidget();
 
     Part *part() const  { return m_renderer->part(); }
@@ -148,10 +148,11 @@ private:
 };
 
 
-class RenderOffscreenWidget : public QWidget {
+class RenderOffscreenWidget : public QWidget
+{
     Q_OBJECT
 public:
-    RenderOffscreenWidget(QWidget *parent = 0);
+    RenderOffscreenWidget(QWidget *parent = nullptr);
     virtual ~RenderOffscreenWidget();
 
     Part *part() const  { return m_renderer->part(); }
@@ -195,4 +196,3 @@ private:
 
 #endif //!QT_NO_OPENGL
 
-#endif

@@ -11,8 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __TRANSFER_H__
-#define __TRANSFER_H__
+#pragma once
 
 #include <QDateTime>
 #include <QUrl>
@@ -20,19 +19,19 @@
 
 #include "threadpool.h"
 
-
 class QIODevice;
 class Transfer;
 class TransferThread;
 
-class TransferJob : public ThreadPoolJob // no correct anymore, but it keeps the API straight
+
+class TransferJob : public ThreadPoolJob // not correct anymore, but it keeps the API straight
 {
 public:
     ~TransferJob();
 
-    static TransferJob *get(const QUrl &url, QIODevice *file = 0);
-    static TransferJob *getIfNewer(const QUrl &url, const QDateTime &dt, QIODevice *file = 0);
-    static TransferJob *post(const QUrl &url, QIODevice *file = 0);
+    static TransferJob *get(const QUrl &url, QIODevice *file = nullptr);
+    static TransferJob *getIfNewer(const QUrl &url, const QDateTime &dt, QIODevice *file = nullptr);
+    static TransferJob *post(const QUrl &url, QIODevice *file = nullptr);
 
     QUrl url() const                 { return m_url; }
     QUrl effectiveUrl() const        { return m_effective_url; }
@@ -75,7 +74,8 @@ private:
 };
 
 
-class Transfer : public QObject {
+class Transfer : public QObject
+{
     Q_OBJECT
 public:
     Transfer(int maxConnections);
@@ -111,7 +111,3 @@ private:
     static QString s_default_user_agent;
     void schedule();
 };
-
-
-
-#endif

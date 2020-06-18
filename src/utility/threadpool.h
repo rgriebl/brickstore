@@ -11,8 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __THREADPOOL_H__
-#define __THREADPOOL_H__
+#pragma once
 
 #include <QObject>
 #include <QList>
@@ -22,7 +21,9 @@
 class ThreadPoolJob;
 class ThreadPoolEngine;
 
-class ThreadPool : public QObject {
+
+class ThreadPool : public QObject
+{
     Q_OBJECT
 public:
     ThreadPool();
@@ -75,7 +76,8 @@ private:
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 
-class ThreadPoolEngine : public QObject {
+class ThreadPoolEngine : public QObject
+{
     Q_OBJECT
 
 public:
@@ -106,7 +108,8 @@ private:
 /////////////////////////////////////////////////////////////////////////////////////
 
 
-class ThreadPoolJob {
+class ThreadPoolJob
+{
 public:
     virtual ~ThreadPoolJob();
 
@@ -150,5 +153,3 @@ private:
     friend class ThreadPool;
     friend class ThreadPoolEngine;
 };
-
-#endif

@@ -301,8 +301,8 @@ QDate ImportOrderDialog::s_last_to        = QDate::currentDate();
 int   ImportOrderDialog::s_last_type      = 1;
 
 
-ImportOrderDialog::ImportOrderDialog(QWidget *parent, Qt::WindowFlags f)
-    : QDialog(parent, f)
+ImportOrderDialog::ImportOrderDialog(QWidget *parent)
+    : QDialog(parent)
 {
     setupUi(this);
 

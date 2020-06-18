@@ -21,8 +21,8 @@
 #include "documentdelegate.h"
 
 
-ConsolidateItemsDialog::ConsolidateItemsDialog(BrickLink::InvItem *existitem, BrickLink::InvItem *newitem, bool existing_attributes, QWidget *parent, Qt::WindowFlags f)
-    : QDialog(parent, f)
+ConsolidateItemsDialog::ConsolidateItemsDialog(BrickLink::InvItem *existitem, BrickLink::InvItem *newitem, bool existing_attributes, QWidget *parent)
+    : QDialog(parent)
 {
     setupUi(this);
 

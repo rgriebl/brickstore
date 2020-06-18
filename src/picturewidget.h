@@ -11,29 +11,28 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __PICTUREWIDGET_H__
-#define __PICTUREWIDGET_H__
+#pragma once
 
 #include <QFrame>
 #include <QLabel>
 
 #include "bricklinkfwd.h"
 
-
 class PictureWidgetPrivate;
 class QAction;
 
 
-class PictureWidget : public QFrame {
+class PictureWidget : public QFrame
+{
     Q_OBJECT
 public:
-    PictureWidget(QWidget *parent = 0, Qt::WindowFlags f = 0);
+    PictureWidget(QWidget *parent = nullptr);
     virtual ~PictureWidget();
 
     void setPicture(BrickLink::Picture *pic);
     BrickLink::Picture *picture() const;
 
-    virtual QSize sizeHint() const;
+    QSize sizeHint() const override;
 
 protected slots:
     void doUpdate();
@@ -47,9 +46,9 @@ protected slots:
     void checkContextMenu(bool b);
 
 protected:
-    virtual void mouseDoubleClickEvent(QMouseEvent *e);
-    virtual void paintEvent(QPaintEvent *e);
-    virtual void resizeEvent(QResizeEvent *e);
+    void mouseDoubleClickEvent(QMouseEvent *e) override;
+    void paintEvent(QPaintEvent *e) override;
+    void resizeEvent(QResizeEvent *e) override;
 
 private:
     PictureWidgetPrivate *d;
@@ -58,9 +57,9 @@ private:
 
 class LargePictureWidgetPrivate;
 
-class LargePictureWidget : public QLabel {
+class LargePictureWidget : public QLabel
+{
     Q_OBJECT
-
 public:
     LargePictureWidget(BrickLink::Picture *lpic, QWidget *parent);
     virtual ~LargePictureWidget();
@@ -72,11 +71,9 @@ protected slots:
     void languageChange();
 
 protected:
-    virtual void mouseDoubleClickEvent(QMouseEvent *e);
-    virtual void keyPressEvent(QKeyEvent *e);
+    void mouseDoubleClickEvent(QMouseEvent *e) override;
+    void keyPressEvent(QKeyEvent *e) override;
 
 private:
     LargePictureWidgetPrivate *d;
 };
-
-#endif

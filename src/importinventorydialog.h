@@ -11,28 +11,26 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __IMPORTINVENTORYDIALOG_H__
-#define __IMPORTINVENTORYDIALOG_H__
+#pragma once
 
 #include <QDialog>
 
 #include "ui_importinventorydialog.h"
 
-class ImportInventoryDialog : public QDialog, private Ui::ImportInventoryDialog {
-    Q_OBJECT
 
+class ImportInventoryDialog : public QDialog, private Ui::ImportInventoryDialog
+{
+    Q_OBJECT
 public:
-    ImportInventoryDialog(QWidget *parent = 0, Qt::WindowFlags f = 0);
+    ImportInventoryDialog(QWidget *parent = nullptr);
 
     bool setItem(const BrickLink::Item *item);
     const BrickLink::Item *item() const;
     int quantity() const;
 
 protected:
-    virtual void showEvent(QShowEvent *);
+    void showEvent(QShowEvent *) override;
 
 protected slots:
     void checkItem(const BrickLink::Item *it, bool ok);
 };
-
-#endif

@@ -11,8 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __PROGRESSDIALOG_H__
-#define __PROGRESSDIALOG_H__
+#pragma once
 
 #include <QDialog>
 
@@ -25,11 +24,11 @@ class QWidget;
 class QDialogButtonBox;
 
 
-class ProgressDialog : public QDialog {
+class ProgressDialog : public QDialog
+{
     Q_OBJECT
-
 public:
-    ProgressDialog(Transfer *trans, QWidget *parent = 0, Qt::WindowFlags f = 0);
+    ProgressDialog(Transfer *trans, QWidget *parent = nullptr);
     virtual ~ProgressDialog();
 
     void setAutoClose(bool ac);
@@ -40,8 +39,8 @@ public:
     void setProgress(int steps, int total);
     void setProgressVisible(bool b);
 
-    bool post(const QUrl &url, QIODevice *file = 0);
-    bool get(const QUrl &url, const QDateTime &ifnewer = QDateTime(), QIODevice *file = 0);
+    bool post(const QUrl &url, QIODevice *file = nullptr);
+    bool get(const QUrl &url, const QDateTime &ifnewer = QDateTime(), QIODevice *file = nullptr);
 
     TransferJob *job() const;
     bool hasErrors() const;
@@ -52,7 +51,7 @@ signals:
     void transferFinished();
 
 protected slots:
-    virtual void done(int r);
+    void done(int r) override;
 
 private slots:
     void transferProgress(ThreadPoolJob *job, int, int);
@@ -77,5 +76,3 @@ private:
     Transfer *m_trans;
     TransferJob *m_job;
 };
-
-#endif

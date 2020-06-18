@@ -105,8 +105,8 @@ QVariant ReportModel::headerData(int section, Qt::Orientation orient, int role) 
 }
 
 
-SelectReportDialog::SelectReportDialog(QWidget *parent, Qt::WindowFlags f)
-	: QDialog(parent, f)
+SelectReportDialog::SelectReportDialog(QWidget *parent)
+	: QDialog(parent)
 {
     setupUi(this);
 

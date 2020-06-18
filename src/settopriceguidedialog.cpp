@@ -15,8 +15,8 @@
 #include "settopriceguidedialog.h"
 
 
-SetToPriceGuideDialog::SetToPriceGuideDialog(QWidget *parent, Qt::WindowFlags fl)
-    : QDialog(parent, fl)
+SetToPriceGuideDialog::SetToPriceGuideDialog(QWidget *parent)
+    : QDialog(parent)
 {
     setupUi(this);
     

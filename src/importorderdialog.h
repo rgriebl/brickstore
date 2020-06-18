@@ -11,20 +11,19 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __IMPORTORDERDIALOG_H__
-#define __IMPORTORDERDIALOG_H__
+#pragma once
 
 #include <QDialog>
 
 #include "bricklinkfwd.h"
-
 #include "ui_importorderdialog.h"
 
-class ImportOrderDialog : public QDialog, private Ui::ImportOrderDialog {
-    Q_OBJECT
 
+class ImportOrderDialog : public QDialog, private Ui::ImportOrderDialog
+{
+    Q_OBJECT
 public:
-    ImportOrderDialog(QWidget *parent = 0, Qt::WindowFlags f = 0);
+    ImportOrderDialog(QWidget *parent = nullptr);
     ~ImportOrderDialog();
 
     QList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > orders() const;
@@ -49,5 +48,3 @@ private:
     static QDate s_last_to;
     static int   s_last_type;
 };
-
-#endif

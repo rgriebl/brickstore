@@ -18,9 +18,9 @@
 class QMenu;
 class FilterEditButton;
 
-class FilterEdit : public QLineEdit {
+class FilterEdit : public QLineEdit
+{
     Q_OBJECT
-
 public:
     FilterEdit(QWidget *parent = nullptr);
 
@@ -28,7 +28,7 @@ public:
     QMenu *menu() const;
 
 protected:
-    void resizeEvent(QResizeEvent *e);
+    void resizeEvent(QResizeEvent *e) override;
 
 private slots:
     void checkText(const QString &);
