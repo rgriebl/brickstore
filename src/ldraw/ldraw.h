@@ -19,11 +19,11 @@
 #include <QVector>
 #include <QList>
 #include <QColor>
-#include <QCache>
 #include <QVector3D>
 #include <QMatrix4x4>
 
 #include "ref.h"
+#include "q3cache.h"
 
 class QFile;
 class QDir;
@@ -267,7 +267,7 @@ private:
 
     QHash<int, QPair<QColor, QColor> > m_colors;  // ldraw color -> [color, edge color]
     QMap<QByteArray, QByteArray>       m_items;   // ldraw id -> ldraw name
-    QCache<QString, Part>              m_cache;   // path -> part
+    Q3Cache<QString, Part>             m_cache;   // path -> part
 
     friend class PartElement;
 };
@@ -281,4 +281,4 @@ inline Core *create(const QString &datadir, QString *errstring) { return Core::c
 // tell Qt that Parts are shared and can't simply be deleted
 // (QCache will use that function to determine what can really be purged from the cache)
 
-//TODO5 REMOVED template<> inline bool qIsDetached<LDraw::Part>(LDraw::Part &p) { return p.refCount() == 0; }
+template<> inline bool q3IsDetached<LDraw::Part>(LDraw::Part &p) { return p.refCount() == 0; }

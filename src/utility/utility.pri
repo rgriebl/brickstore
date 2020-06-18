@@ -18,6 +18,7 @@ HEADERS += \
     $$PWD/messagebox.h \
     $$PWD/progresscircle.h \
     $$PWD/progressdialog.h \
+    $$PWD/q3cache.h \
     $$PWD/qparallelsort.h \
     $$PWD/qtemporaryresource.h \
     $$PWD/qtemporaryresource_p.h \

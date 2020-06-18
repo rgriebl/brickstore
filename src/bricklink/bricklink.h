@@ -33,7 +33,6 @@
 #include <QSortFilterProxyModel>
 #include <QMutex>
 #include <QTimer>
-#include <QCache>
 #include <QPointer>
 #include <QStyledItemDelegate>
 
@@ -44,6 +43,7 @@
 #include "threadpool.h"
 #include "transfer.h"
 #include "staticpointermodel.h"
+#include "q3cache.h"
 
 class QIODevice;
 class QFile;
@@ -998,16 +998,14 @@ private:
 
     QPointer<Transfer>  m_transfer;
 
-    //Transfer                  m_pg_transfer;
-    int                        m_pg_update_iv;
-    QCache<quint64, PriceGuide> m_pg_cache;
+    //Transfer                   m_pg_transfer;
+    int                          m_pg_update_iv;
+    Q3Cache<quint64, PriceGuide> m_pg_cache;
 
-    //Transfer                 m_pic_transfer;
-    int                       m_pic_update_iv;
-
-    ThreadPool               m_pic_diskload;
-
-    QCache<quint64, Picture>  m_pic_cache;
+    //Transfer                   m_pic_transfer;
+    int                          m_pic_update_iv;
+    ThreadPool                   m_pic_diskload;
+    Q3Cache<quint64, Picture>    m_pic_cache;
 };
 
 inline Core *core() { return Core::inst(); }
@@ -1026,7 +1024,5 @@ Q_DECLARE_METATYPE(const BrickLink::AppearsInItem *)
 // tell Qt that Pictures and PriceGuides are shared and can't simply be deleted
 // (QCache will use that function to determine what can really be purged from the cache)
 
-//TODO5 REMOVED template<> inline bool qIsDetached<BrickLink::Picture>(BrickLink::Picture &c) { return c.refCount() == 0; }
-//TODO5 REMOVED template<> inline bool qIsDetached<BrickLink::PriceGuide>(BrickLink::PriceGuide &c) { return c.refCount() == 0; }
-
-
+template<> inline bool q3IsDetached<BrickLink::Picture>(BrickLink::Picture &c) { return c.refCount() == 0; }
+template<> inline bool q3IsDetached<BrickLink::PriceGuide>(BrickLink::PriceGuide &c) { return c.refCount() == 0; }

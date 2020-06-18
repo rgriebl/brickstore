@@ -15,6 +15,8 @@
 
 #include <QtCore/qbasicatomic.h>
 
+#include "q3cache.h"
+
 
 class Ref
 {
@@ -37,5 +39,5 @@ private:
 // tell Qt that Refs are shared and can't simply be deleted
 // (QCache will use that function to determine what can really be purged from the cache)
 
-//TODO5 REMOVED template<> inline bool qIsDetached<Ref>(Ref &r) { return r.refCount() == 0; }
+template<> inline bool q3IsDetached<Ref>(Ref &r) { return r.refCount() == 0; }
 
