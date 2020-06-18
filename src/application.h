@@ -32,7 +32,6 @@ public:
     void enableEmitOpenDocument(bool b = true);
 
     QString applicationUrl() const;
-    QString systemInfo() const;
 
     bool pixmapAlphaSupported() const;
 

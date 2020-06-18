@@ -243,11 +243,6 @@ QString Application::applicationUrl() const
     return QLatin1String(BRICKSTORE_URL);
 }
 
-QString Application::systemInfo() const
-{
-    return QSysInfo::prettyProductName();
-}
-
 void Application::enableEmitOpenDocument(bool b)
 {
     if (b != m_enable_emit) {
@@ -428,15 +423,16 @@ void Application::about()
     QString layout = QLatin1String(
         "<center>"
         "<table border=\"0\"><tr>"
-        "<td valign=\"middle\" align=\"right\" width=\"30%\"><img src=\":/images/icon.png\" /></td>"
-        "<td align=\"left\" width=\"70%\"><big>"
-        "<big><strong>%1</strong></big>"
-        "<br />%2<br />"
-        "<strong>%3</strong>"
-        "</big></td>"
+        "<td valign=\"middle\" align=\"center\" width=\"20%\">"
+        "<img src=\":/images/icon_big.png\" style=\"margin-right: 20\"/></td>"
+        "<td align=\"left\" width=\"80%\">"
+        "<strong style=\"font-size: x-large\">%1</strong><br>"
+        "<strong style=\"font-size: large\">%3</strong><br>"
+        "<span style=\"font-size: large\">%2</strong><br>"
+        "<br>%4</td>"
         "</tr></table>"
         "</center><center>"
-        "<br />%4<br /><br />%5"
+        "<br><big>%5</big>"
         "</center>%6<p>%7</p>");
 
 
@@ -472,10 +468,10 @@ void Application::about()
         "under the terms of the GNU General Public License version 2 as published "
         "by the Free Software Foundation and appearing in the file LICENSE.GPL "
         "included in this software package."
-        "<br />"
+        "<br>"
         "This program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE "
         "WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE."
-        "<br />"
+        "<br>"
         "See <a href=\"http://fsf.org/licensing/licenses/gpl.html\">www.fsf.org/licensing/licenses/gpl.html</a> for GPL licensing information."
         "</p><p>"
         "All data from <a href=\"https://www.bricklink.com\">www.bricklink.com</a> is owned by BrickLink<sup>TM</sup>, "
@@ -488,7 +484,7 @@ void Application::about()
         "</p>");
 
     QString technical = QLatin1String(
-        "<p>"
+        //"<p>"
         "<table>"
         "<th colspan=\"2\" align=\"left\">Build Info</th>"
         "<tr><td>User     </td><td>%1</td></tr>"
@@ -496,7 +492,7 @@ void Application::about()
         "<tr><td>Date     </td><td>%3</td></tr>"
         "<tr><td>Architecture  </td><td>%4</td></tr>"
         "<tr><td>Compiler </td><td>%5</td></tr>"
-        "</table><br />"
+        "</table><br>"
         "<table>"
         "<th colspan=\"2\" align=\"left\">Runtime Info</th>"
         "<tr><td>OS     </td><td>%6</td></tr>"
@@ -504,16 +500,16 @@ void Application::about()
         "<tr><td>Memory </td><td>%L8 MB</td></tr>"
         "<tr><td>Qt     </td><td>%9</td></tr>"
         "</table>"
-        "</p>");
+        /*"</p>"*/);
 
     technical = technical.arg(STR(__USER__), STR(__HOST__), __DATE__ " " __TIME__)
             .arg(QSysInfo::buildCpuArchitecture()).arg(
 #if defined(_MSC_VER)
                 "Microsoft Visual-C++ "
 #  if _MSC_VER >= 1920
-                "2019 (16." _BS_STR(_MSC_VER - 1920) ")"
+                "2019 (16." _BS_STR(_MSC_VER) ")"
 #  elif _MSC_VER >= 1910
-                "2017 (15." _BS_STR(_MSC_VER - 1910 - 7) ")"
+                "2017 (15." _BS_STR(_MSC_VER) ")"
 #  elif _MSC_VER >= 1900
                 "2015 (14.0)"
 #  else
@@ -535,7 +531,7 @@ void Application::about()
     pages ["index"]  = page1;
     pages ["system"] = page2;
 
-    InformationDialog d(applicationName(), pages, false, FrameWork::inst());
+    InformationDialog d(applicationName(), pages, FrameWork::inst());
     d.exec();
 }
 
