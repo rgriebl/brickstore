@@ -32,7 +32,6 @@
 #include <QToolButton>
 #include <QToolTip>
 #include <QCursor>
-#include <QStyleFactory>
 #include <QShortcut>
 #include <QDockWidget>
 #include <QSizeGrip>

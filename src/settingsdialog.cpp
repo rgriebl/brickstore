@@ -15,7 +15,7 @@
 #include <QFileDialog>
 #include <QComboBox>
 #include <QStandardPaths>
-#include <QProxyStyle>
+#include <QStyleFactory>
 
 #include "settingsdialog.h"
 #include "config.h"
@@ -67,7 +67,7 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
 
     w_upd_reset->setAttribute(Qt::WA_MacSmallSize);
 #if defined(Q_OS_MAC)
-  //TODO5  w_currency_update->setStyle(new QWindowsStyle());
+    w_currency_update->setStyle(QStyleFactory::create("fusion"));
 #endif
 
     w_docdir->insertItem(0, style()->standardIcon(QStyle::SP_DirIcon), QString());

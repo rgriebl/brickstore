@@ -25,6 +25,7 @@
 #include "itemdetailpopup.h"
 #include "ldraw/renderwidget.h"
 
+#define QT_NO_OPENGL 1
 
 class GlassButton : public QToolButton {
 public:
