@@ -6,14 +6,11 @@ macos:QT *= gui_private
 INCLUDEPATH += $$RELPWD
 DEPENDPATH  += $$RELPWD
 
-RESOURCES += $$RELPWD/utility.qrc
-
 HEADERS += \
     $$PWD/chunkreader.h \
     $$PWD/chunkwriter.h \
     $$PWD/currency.h \
     $$PWD/filter.h \
-    $$PWD/filteredit.h \
     $$PWD/headerview.h \
     $$PWD/messagebox.h \
     $$PWD/progresscircle.h \
@@ -35,7 +32,6 @@ SOURCES += \
     $$PWD/chunkreader.cpp \
     $$PWD/currency.cpp \
     $$PWD/filter.cpp \
-    $$PWD/filteredit.cpp \
     $$PWD/headerview.cpp \
     $$PWD/messagebox.cpp \
     $$PWD/progresscircle.cpp \

@@ -35,6 +35,7 @@
 #include <QShortcut>
 #include <QDockWidget>
 #include <QSizeGrip>
+#include <QLineEdit>
 
 #include "application.h"
 #include "messagebox.h"
@@ -44,7 +45,6 @@
 #include "currency.h"
 #include "progresscircle.h"
 #include "undo.h"
-#include "filteredit.h"
 #include "workspace.h"
 #include "taskwidgets.h"
 #include "progressdialog.h"
@@ -302,7 +302,7 @@ FrameWork::FrameWork(QWidget *parent)
 
     menuBar()->addMenu(createMenu("view", QList<QByteArray>()
         << "view_toolbar"
-        << "view_infobar"
+        << "view_docks"
         << "view_statusbar"
         << "-"
         << "view_fullscreen"
@@ -563,7 +563,7 @@ void FrameWork::translateActions()
         { "edit_select_none",               tr("Select None"),                        QKeySequence::Deselect },
         { "view",                           tr("&View"),                              },
         { "view_toolbar",                   tr("View Toolbar"),                       },
-        { "view_infobar",                   tr("View Infobars"),                      },
+        { "view_docks",                     tr("View Info Docks"),                    },
         { "view_statusbar",                 tr("View Statusbar"),                     },
         { "view_fullscreen",                tr("Full Screen"),                        QKeySequence::FullScreen },
         { "view_show_input_errors",         tr("Show Input Errors"),                  },
@@ -801,28 +801,10 @@ bool FrameWork::setupToolBar(QToolBar *t, const QList<QByteArray> &a_names)
                     continue;
                 }
 
-                m_filter = new FilterEdit();
-
-                QMenu *m = new QMenu(this);
-             //   QActionGroup *ag = new QActionGroup(m);
-             /*   for (int i = 0; i < (Window::FilterCountSpecial + Document::FieldCount); i++) {
-                    QAction *a = new QAction(ag);
-                    a->setCheckable(true);
-
-                    if (i < Window::FilterCountSpecial)
-                        a->setData(-i - 1);
-                    else
-                        a->setData(i - Window::FilterCountSpecial);
-
-                    if (i == Window::FilterCountSpecial) */
-                        m->addSeparator(); /*
-                    else if (i == 0)
-                        a->setChecked(true);
-
-                    m->addAction(a);
-                }
-                */
-                m_filter->setMenu(m);
+                m_filter = new QLineEdit(this);
+                m_filter->setClearButtonEnabled(true);
+                m_filter->addAction(new QAction(QIcon(":/images/filter.png"), QString(), this),
+                                    QLineEdit::LeadingPosition);
                 t->addWidget(m_filter);
             } else if (an == "widget_progress") {
                 if (m_progress) {
@@ -830,7 +812,7 @@ bool FrameWork::setupToolBar(QToolBar *t, const QList<QByteArray> &a_names)
                     continue;
                 }
                 m_progress = new ProgressCircle();
-                m_progress->setIcon(QIcon(":/images/icon.png"));
+                m_progress->setIcon(QIcon(":/images/brickstore.png"));
                 t->addWidget(m_progress);
             }
         } else if (QAction *a = findAction(an)) {
@@ -1023,7 +1005,7 @@ void FrameWork::createActions()
     (void) newQAction(this, "view_fullscreen", 0, true, this, SLOT(viewFullScreen(bool)));
 
     m_toolbar->toggleViewAction()->setObjectName("view_toolbar");
-    m = newQMenu(this, "view_infobar");
+    m = newQMenu(this, "view_docks");
     foreach (QDockWidget *dock, m_dock_widgets)
         m->addAction(dock->toggleViewAction());
 

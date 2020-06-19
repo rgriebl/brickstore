@@ -34,9 +34,9 @@
 #include <QStyledItemDelegate>
 #include <QFormLayout>
 #include <QContextMenuEvent>
+#include <QLineEdit>
 
 #include "bricklink.h"
-#include "filteredit.h"
 #include "selectitem.h"
 #include "utility.h"
 #include "messagebox.h"
@@ -56,7 +56,7 @@ public:
     QTreeView *      w_items;
     QTreeView *      w_itemthumbs;
     QListView *      w_thumbs;
-    FilterEdit *     w_filter;
+    QLineEdit *      w_filter;
     QButtonGroup *   w_viewmode;
     ItemDetailPopup *m_details;
     bool             m_inv_only;
@@ -129,7 +129,10 @@ void SelectItem::init()
     d->w_categories->setSelectionMode(QAbstractItemView::SingleSelection);
     d->w_categories->setItemDelegate(new CategoryDelegate);
 
-    d->w_filter = new FilterEdit(this);
+    d->w_filter = new QLineEdit(this);
+    d->w_filter->setClearButtonEnabled(true);
+    d->w_filter->addAction(new QAction(QIcon(":/images/filter.png"), QString(), this),
+                           QLineEdit::LeadingPosition);
 
     d->w_viewmode = new QButtonGroup(this);
     d->w_viewmode->setExclusive(true);

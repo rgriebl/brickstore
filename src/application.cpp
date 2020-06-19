@@ -52,13 +52,9 @@
 #include "report.h"
 #include "currency.h"
 
-#include "filteredit.h"
-
 #include "utility.h"
 #include "version.h"
-
 #include "application.h"
-
 
 #define XSTR(a) #a
 #define STR(a) XSTR(a)
@@ -141,7 +137,7 @@ Application::Application(bool rebuild_db_only, bool skip_download, int &_argc, c
     }
     else {
 #if defined(Q_WS_X11)
-        QPixmap pix(":/images/icon.png");
+        QPixmap pix(":/images/brickstore.png");
         if (!pix.isNull())
             setWindowIcon(pix);
 #endif
@@ -424,7 +420,7 @@ void Application::about()
         "<center>"
         "<table border=\"0\"><tr>"
         "<td valign=\"middle\" align=\"center\" width=\"20%\">"
-        "<img src=\":/images/icon_big.png\" style=\"margin-right: 20\"/></td>"
+        "<img src=\":/images/brickstore.png\" style=\"margin-right: 20\"/></td>"
         "<td align=\"left\" width=\"80%\">"
         "<strong style=\"font-size: x-large\">%1</strong><br>"
         "<strong style=\"font-size: large\">%3</strong><br>"

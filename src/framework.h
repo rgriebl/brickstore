@@ -25,11 +25,11 @@
 class QLabel;
 class QMdiSubWindow;
 class QToolButton;
+class QLineEdit;
 
 class Workspace;
 class ProgressCircle;
 class Window;
-class FilterEdit;
 class UndoGroup;
 class TaskInfoWidget;
 class TaskPriceGuideWidget;
@@ -149,7 +149,7 @@ private:
     QPointer<Window> m_current_window;
 
     ProgressCircle *m_progress;
-    FilterEdit *m_filter;
+    QLineEdit *m_filter;
     QLabel *m_st_weight;
     QLabel *m_st_lots;
     QLabel *m_st_items;
