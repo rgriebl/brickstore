@@ -98,41 +98,46 @@ private:
 };
 
 
-class TabBarSide : public QWidget {
+class TabBarSide : public QWidget
+{
     Q_OBJECT
 public:
-    TabBarSide(QTabBar *tabbar, QWidget *parent = 0)
+    TabBarSide(QTabBar *tabbar, QWidget *parent = nullptr)
         : QWidget(parent), m_tabbar(tabbar)
     { }
 
 protected:
-    void paintEvent(QPaintEvent *)
-    {
-        QPainter p(this);
-        QStyleOptionTabBarBase option;
-        option.initFrom(this);
-        option.tabBarRect = option.rect;
-        if (m_tabbar) {
-            option.shape = m_tabbar->shape();
-            option.documentMode = m_tabbar->documentMode();
-
-            QStyleOptionTab tabOverlap;
-            tabOverlap.shape = m_tabbar->shape();
-            int overlap = m_tabbar->style()->pixelMetric(QStyle::PM_TabBarBaseOverlap, &tabOverlap, m_tabbar);
-            option.rect.setTop(option.rect.bottom() - overlap + 1);
-            option.rect.setHeight(overlap);
-        }
-        style()->drawPrimitive(QStyle::PE_FrameTabBarBase, &option, &p, this);
-    }
+    void paintEvent(QPaintEvent *) override;
 
 private:
     QTabBar *m_tabbar;
 };
 
-class TabBar : public QTabBar {
+void TabBarSide::paintEvent(QPaintEvent *)
+{
+    QPainter p(this);
+    QStyleOptionTabBarBase option;
+    option.initFrom(this);
+    option.tabBarRect = option.rect;
+    if (m_tabbar) {
+        option.shape = m_tabbar->shape();
+        option.documentMode = m_tabbar->documentMode();
+
+        QStyleOptionTab tabOverlap;
+        tabOverlap.shape = m_tabbar->shape();
+        int overlap = m_tabbar->style()->pixelMetric(QStyle::PM_TabBarBaseOverlap, &tabOverlap, m_tabbar);
+        option.rect.setTop(option.rect.bottom() - overlap + 1);
+        option.rect.setHeight(overlap);
+    }
+    style()->drawPrimitive(QStyle::PE_FrameTabBarBase, &option, &p, this);
+}
+
+
+class TabBar : public QTabBar
+{
     Q_OBJECT
 public:
-    TabBar(QWidget *parent = 0)
+    TabBar(QWidget *parent = nullptr)
         : QTabBar(parent)
     {
         setSelectionBehaviorOnRemove(QTabBar::SelectPreviousTab);
@@ -143,78 +148,51 @@ signals:
 
 protected:
     // QTabBar's count property doesn't define a NOTIFY signals, so we have generate one ourselves
-    void tabInserted(int index)
-    {
-        QTabBar::tabInserted(index);
-        emit countChanged(count());
-    }
-    void tabRemoved(int index)
-    {
-        QTabBar::tabRemoved(index);
-        emit countChanged(count());
-    }
+    void tabInserted(int index) override;
+    void tabRemoved(int index) override;
 };
 
-class TabBarSideButton : public QToolButton {
+void TabBar::tabInserted(int index)
+{
+    QTabBar::tabInserted(index);
+    emit countChanged(count());
+}
+
+void TabBar::tabRemoved(int index)
+{
+    QTabBar::tabRemoved(index);
+    emit countChanged(count());
+}
+
+
+class TabBarSideButton : public QToolButton
+{
     Q_OBJECT
 
 public:
-    TabBarSideButton(QTabBar *tabbar, QWidget *parent = 0)
+    TabBarSideButton(QTabBar *tabbar, QWidget *parent = nullptr)
         : QToolButton(parent), m_tabbar(tabbar)
     {
         setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
     }
 
-    QSize sizeHint() const
-    {
-        QSize sb = QToolButton::sizeHint();
-        QSize st = m_tabbar->sizeHint();
-        return QSize(sb.width(), st.height());
-    }
-
-#ifdef Q_OS_MAC
-    void setIcon(const QIcon &icon)
-    {
-        QPixmap pnormal = icon.pixmap(iconSize());
-        QPixmap pactive = pnormal;
-        QColor textColor = palette().color(QPalette::Text);
-        {
-            QPainter p(&pnormal);
-            p.setCompositionMode(QPainter::CompositionMode_SourceIn);
-            p.fillRect(pnormal.rect(), textColor);
-        }
-        {
-            QPainter p(&pactive);
-            p.setCompositionMode(QPainter::CompositionMode_SourceIn);
-            p.fillRect(pactive.rect(), Utility::contrastColor(textColor, 0.2f));
-        }
-        QIcon icon2(pnormal);
-        icon2.addPixmap(pactive, QIcon::Active, QIcon::Off);
-        icon2.addPixmap(pactive, QIcon::Active, QIcon::On);
-        icon2.addPixmap(pactive, QIcon::Normal, QIcon::On);
-        QToolButton::setIcon(icon2);
-    }
-
-protected:
-    void paintEvent(QPaintEvent *)
-    {
-        QPainter p(this);
-        QIcon::Mode mode = isEnabled() ? (underMouse() || isDown() ? QIcon::Active : QIcon::Normal ) : QIcon::Disabled;
-        QIcon::State state = isDown() ? QIcon::On : QIcon::Off;
-
-        icon().paint(&p, rect(), Qt::AlignCenter, mode, state);
-    }
-#endif
+    QSize sizeHint() const override;
 
 private:
     QTabBar *m_tabbar;
 };
 
+QSize TabBarSideButton::sizeHint() const
+{
+    QSize sb = QToolButton::sizeHint();
+    QSize st = m_tabbar->sizeHint();
+    return QSize(sb.width(), st.height());
+}
+
 
 Workspace::Workspace(QWidget *parent)
     : QWidget(parent)
 {
-
     m_tabbar = new TabBar(this);
     m_tabbar->setElideMode(Qt::ElideMiddle);
     m_tabbar->setDocumentMode(true);
