@@ -419,9 +419,9 @@ void Application::about()
     QString layout = QLatin1String(
         "<center>"
         "<table border=\"0\"><tr>"
-        "<td valign=\"middle\" align=\"center\" width=\"20%\">"
-        "<img src=\":/images/brickstore_icon.png\" width=\"128\" style=\"margin-right: 20\"/></td>"
-        "<td align=\"left\" width=\"80%\">"
+        "<td valign=\"middle\" align=\"center\" width=\"168\">"
+        "<img src=\":/images/brickstore_icon.png\" width=\"128\" style=\"margin: 20\"/></td>"
+        "<td align=\"left\">"
         "<strong style=\"font-size: x-large\">%1</strong><br>"
         "<strong style=\"font-size: large\">%3</strong><br>"
         "<span style=\"font-size: large\">%2</strong><br>"

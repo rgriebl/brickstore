@@ -28,8 +28,8 @@
 
 #define BRICKSTORE_VERSIONINFO   _BS_STR(BRICKSTORE_MAJOR) ", " _BS_STR(BRICKSTORE_MINOR) ", " _BS_STR(BRICKSTORE_PATCH) ", 0"
 
-IDI_ICON1               ICON         "assets/icons/brickstore.ico"
-IDI_ICON2               ICON         "assets/icons/brickstore_doc.ico"
+IDI_ICON1               ICON         "../assets/icons/brickstore.ico"
+IDI_ICON2               ICON         "../assets/icons/brickstore_doc.ico"
 
 VS_VERSION_INFO VERSIONINFO
   FILEVERSION    BRICKSTORE_MAJOR,BRICKSTORE_MINOR,BRICKSTORE_PATCH,0
