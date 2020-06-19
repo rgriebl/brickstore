@@ -284,7 +284,11 @@ void Transfer::schedule()
 
         if (isget) {
             if (j->m_only_if_newer.isValid())
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
                 req.setHeader(QNetworkRequest::IfModifiedSinceHeader, j->m_only_if_newer);
+#else
+                req.setRawHeader("if-modified-since", QVariant(j->m_only_if_newer).toByteArray());
+#endif
             j->m_reply = m_nam->get(req);
         }
         else {

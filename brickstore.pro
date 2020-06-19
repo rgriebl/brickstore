@@ -12,11 +12,11 @@
 ## See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 
 requires(linux|macos|win32:!winrt:!android)
-!versionAtLeast(QT_VERSION, 5.12.0) {
-    log("$$escape_expand(\\n\\n) *** Brickstore needs to be built against Qt 5.12.0+ ***$$escape_expand(\\n\\n)")
-    CONFIG += Qt_version_needs_to_be_at_least_5_12_0
+!versionAtLeast(QT_VERSION, 5.11.0) {
+    log("$$escape_expand(\\n\\n) *** Brickstore needs to be built against Qt 5.11.0+ ***$$escape_expand(\\n\\n)")
+    CONFIG += Qt_version_needs_to_be_at_least_5_11_0
 }
-requires(!Qt_version_needs_to_be_at_least_5_12_0)
+requires(!Qt_version_needs_to_be_at_least_5_11_0)
 
 TEMPLATE = subdirs
 CONFIG  += ordered

@@ -187,17 +187,12 @@ unix:!macx {
     share_appicon.files  = $$sharedir/icons/hicolor/64x64/apps/brickstore.png
     share_mime.path      = $$PREFIX/share/mime/packages
     share_mime.files     = $$sharedir/mime/packages/brickstore-mime.xml
-    share_trans.path     = $$PREFIX/share/brickstore2/translations
+    share_trans.path     = $$PREFIX/share/brickstore/translations
     share_trans.files    = $$PWD/translations/translations.xml \
                            $$PWD/translations/qt_nl.qm \
                            $$replace(QMS, '^', '$$PWD/')
 
     INSTALLS += share_desktop share_mimelnk share_mimeicon share_appicon share_mime share_trans
-
-    # avoid useless dependencies (and warnings from dpkg-buildpackage)
-#    QMAKE_LIBS_X11 -= -lXext -lX11
-#    QMAKE_LIBS_OPENGL -= -lGLU
-  }
 }
 
 

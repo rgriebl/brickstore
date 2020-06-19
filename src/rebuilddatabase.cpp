@@ -17,7 +17,7 @@
 #include <QApplication>
 #include <qlogging.h>
 #include <QUrlQuery>
-#include <QtNetworkAuth/QOAuth1>
+//// #include <QtNetworkAuth/QOAuth1>
 #include <QNetworkReply>
 #include <QJsonDocument>
 #include <QJsonValue>
