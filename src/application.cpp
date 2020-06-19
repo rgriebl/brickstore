@@ -80,6 +80,19 @@ Application::Application(bool rebuild_db_only, bool skip_download, int &_argc, c
 {
     s_inst = this;
 
+    m_default_fontsize = font().pointSizeF();
+    setProperty("_bs_defaultFontSize", m_default_fontsize); // the settings dialog needs this
+
+    auto setFontSizePercentLambda = [this](int p) {
+        QFont f = font();
+        f.setPointSizeF(m_default_fontsize * qreal(qBound(50, p, 200)) / 100.);
+        setFont(f);
+    };
+    connect(Config::inst(), &Config::fontSizePercentChanged, this, setFontSizePercentLambda);
+    int fsp = Config::inst()->fontSizePercent();
+    if (fsp != 100)
+        setFontSizePercentLambda(fsp);
+
     m_enable_emit = false;
     m_has_alpha = rebuild_db_only ? false : (QPixmap::defaultDepth() >= 15);
     m_trans_qt = 0;

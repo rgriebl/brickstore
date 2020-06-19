@@ -68,6 +68,7 @@ private:
     bool m_has_alpha;
 
     bool m_online;
+    qreal m_default_fontsize;
 
     QTranslator *m_trans_qt;
     QTranslator *m_trans_brickstore;

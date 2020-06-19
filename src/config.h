@@ -63,6 +63,9 @@ public:
 
     QList<Translation> translations() const;
 
+    int fontSizePercent() const;
+    QSize iconSize() const;
+
 public slots:
     void setLanguage(const QString &lang);
     void setMeasurementSystem(QLocale::MeasurementSystem ms);
@@ -81,6 +84,9 @@ public slots:
     void setLoginForBrickLink(const QString &user, const QString &pass);
     void setUpdateIntervals(const QMap<QByteArray, int> &intervals);
 
+    void setFontSizePercent(int p);
+    void setIconSize(const QSize &iconSize);
+
 signals:
     void languageChanged();
     void measurementSystemChanged(QLocale::MeasurementSystem ms);
@@ -88,6 +94,8 @@ signals:
     void showInputErrorsChanged(bool b);
     void updateIntervalsChanged(const QMap<QByteArray, int> &intervals);
     void onlineStatusChanged(bool b);
+    void fontSizePercentChanged(int p);
+    void iconSizeChanged(const QSize &iconSize);
 
 protected:
     bool parseTranslations() const;

@@ -20,6 +20,7 @@
 #include <QDir>
 #include <QDomDocument>
 #include <QStandardPaths>
+#include <QSize>
 
 #if defined(Q_OS_WINDOWS)
 #  include <windows.h>
@@ -325,6 +326,29 @@ void Config::setUpdateIntervals(const QMap<QByteArray, int> &uiv)
         emit updateIntervalsChanged(updateIntervals());
 }
 
+void Config::setFontSizePercent(int p)
+{
+    auto oldp = fontSizePercent();
+
+    if (oldp != p) {
+        setValue("Interface/FontSizePercent", qBound(50, p, 200));
+        emit fontSizePercentChanged(p);
+    }
+}
+
+void Config::setIconSize(const QSize &iconSize)
+{
+    if (!iconSize.isValid() || (iconSize.width() != iconSize.height()))
+        return;
+
+    auto oldIconSize = this->iconSize();
+
+    if (oldIconSize != iconSize) {
+        setValue("Interface/IconSize", iconSize.width());
+        emit iconSizeChanged(iconSize);
+    }
+}
+
 
 QPair<QString, QString> Config::loginForBrickLink() const
 {
@@ -359,6 +383,17 @@ QList<Config::Translation> Config::translations() const
     if (!m_translations_parsed)
         m_translations_parsed = parseTranslations();
     return m_translations;
+}
+
+int Config::fontSizePercent() const
+{
+    return qreal(value("Interface/FontSizePercent", 100).toInt());
+}
+
+QSize Config::iconSize() const
+{
+    int s = value("Interface/IconSize", 0).toInt();
+    return QSize(s, s);
 }
 
 bool Config::parseTranslations() const

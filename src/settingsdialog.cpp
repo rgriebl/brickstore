@@ -65,13 +65,30 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
 {
     setupUi(this);
 
+    connect(w_font_size, &QAbstractSlider::valueChanged,
+            this, [this](int v) {
+        w_font_size_percent->setText(QString("%1 %").arg(v * 10));
+        QFont f = font();
+        qreal defaultFontSize = qApp->property("_bs_defaultFontSize").toReal();
+        if (defaultFontSize <= 0)
+            defaultFontSize = 10;
+        f.setPointSizeF(defaultFontSize * qreal(v) / 10.);
+        w_font_example->setFont(f);
+    });
+
+    connect(w_font_size_reset, &QToolButton::clicked,
+            this, [this]() { w_font_size->setValue(10); });
+
+    connect(w_row_size_reset, &QToolButton::clicked,
+            this, [this]() { w_row_size->setValue(10); });
+
     w_upd_reset->setAttribute(Qt::WA_MacSmallSize);
 #if defined(Q_OS_MACOS)
     w_currency_update->setStyle(QStyleFactory::create("fusion"));
 #endif
 
     w_docdir->insertItem(0, style()->standardIcon(QStyle::SP_DirIcon), QString());
-    w_docdir->insertItem(1, QIcon(), tr("Other.."));
+    w_docdir->insertItem(1, QIcon(), tr("Other..."));
     w_docdir->insertSeparator(1);
 
     int is = fontMetrics().height();
@@ -200,6 +217,18 @@ void SettingsDialog::load()
     w_docdir->setItemData(0, docdir);
     w_docdir->setItemText(0, systemDirName(docdir));
 
+    // --[ INTERFACE ]-----------------------------------------------------------------
+
+    int iconSizeIndex = 0;
+    auto iconSize = Config::inst()->iconSize();
+    if (iconSize == QSize(22, 22))
+        iconSizeIndex = 1;
+    else if (iconSize == QSize(32, 32))
+        iconSizeIndex = 2;
+
+    w_icon_size->setCurrentIndex(iconSizeIndex);
+    w_font_size->setValue(Config::inst()->fontSizePercent() / 10);
+
     // --[ UPDATES ]-------------------------------------------------------------------
 
     QMap<QByteArray, int> intervals = Config::inst()->updateIntervals();
@@ -274,6 +303,18 @@ void SettingsDialog::save()
 
     Config::inst()->setCloseEmptyDocuments(w_closeempty->isChecked ());
     Config::inst()->setValue("/General/Export/OpenBrowser", w_openbrowser->isChecked());
+
+    // --[ INTERFACE ]-----------------------------------------------------------------
+
+    int iconWidth = 0;
+    switch (w_icon_size->currentIndex()) {
+    case 1: iconWidth = 22; break;
+    case 2: iconWidth = 32; break;
+    default: break;
+    }
+
+    Config::inst()->setIconSize(QSize(iconWidth, iconWidth));
+    Config::inst()->setFontSizePercent(w_font_size->value() * 10);
 
     // --[ UPDATES ]-------------------------------------------------------------------
 

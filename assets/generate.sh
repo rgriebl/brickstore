@@ -58,6 +58,10 @@ convert -resize $s $c/status_plus.png $g/status_extra.png
 convert -resize $s $c/status_unknown.png $g/status_unknown.png
 
 convert -size ${s}x${s} canvas:transparent \
+        \( $a/search.png -scale $((s*3/4)) \) -geometry +$((s/8))+$((s/8)) -composite \
+        $g/filter.png
+
+convert -size ${s}x${s} canvas:transparent \
         \( $m/spreadsheet.png -scale $((s*3/4)) \) -geometry +$((s/4))+$((s/4)) -composite \
         \( $c/overlay_import_export.png -scale $((s*3/4)) \) -geometry +0+0 -composite \
         $g/file_import.png

@@ -36,6 +36,7 @@
 #include <QDockWidget>
 #include <QSizeGrip>
 #include <QLineEdit>
+#include <QFont>
 
 #include "application.h"
 #include "messagebox.h"
@@ -235,6 +236,17 @@ FrameWork::FrameWork(QWidget *parent)
     m_toolbar = new QToolBar(this);
     m_toolbar->setObjectName(QLatin1String("toolbar"));
     m_toolbar->setMovable(false);
+
+    auto setIconSizeLambda = [this](const QSize &iconSize) {
+        if (iconSize.isNull()) {
+            int s = style()->pixelMetric(QStyle::PM_ToolBarIconSize, nullptr, this);
+            m_toolbar->setIconSize(QSize(s, s));
+        } else {
+            m_toolbar->setIconSize(iconSize);
+        }
+    };
+    connect(Config::inst(), &Config::iconSizeChanged, this, setIconSizeLambda);
+    setIconSizeLambda(Config::inst()->iconSize());
 
     createActions();
 

@@ -32,7 +32,7 @@
         <file alias="file_print.png">../assets/crystal-clear-32x32/actions/fileprint.png</file>
         <file alias="file_save.png">../assets/crystal-clear-32x32/actions/filesave.png</file>
         <file alias="file_saveas.png">../assets/crystal-clear-32x32/actions/filesaveas.png</file>
-        <file alias="filter.png">../assets/crystal-clear-32x32/actions/search.png</file>
+        <file alias="filter.png">../assets/generated-32x32/filter.png</file>
         <file alias="help_updates.png">../assets/crystal-clear-32x32/filesystems/connect_to_network.png</file>
         <file alias="reload.png">../assets/crystal-clear-32x32/actions/reload.png</file>
         <file alias="viewmagp.png">../assets/crystal-clear-32x32/actions/viewmag+.png</file>
