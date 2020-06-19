@@ -22,7 +22,7 @@ CloseApplications=yes
 RestartApplications=yes
 ChangesAssociations=yes
 
-WizardSmallImageFile={#SourcePath}\logo.bmp
+WizardSmallImageFile={#SourcePath}\installer-logo.bmp
 
 [Languages]
 Name: "german"; MessagesFile: "compiler:Languages\German.isl"

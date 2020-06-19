@@ -1,0 +1,114 @@
+name: QMake Build Matrix
+
+on: [push]
+
+jobs:
+  build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      matrix:
+        config:
+        - {
+            name: "Windows 32bit",
+            artifact: "Windows-x86.exe",
+            os: windows-latest,
+            qt_version: '5.12.9',
+            qt_arch: 'win32_msvc2017',
+            environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars32.bat"
+          }
+        - {
+            name: "Ubuntu 20.04 64bit",
+            artifact: "Ubuntu-20.04-amd64.deb",
+            os: ubuntu-20.04,
+          }
+        - {
+            name: "macOS 64bit",
+            artifact: "macOS.dmg",
+            os: macos-latest,
+            qt_version: '5.12.9',
+            qt_arch: ''
+          }
+
+    steps:
+    - name: Install OpenSSL on Windows
+      if: startsWith(matrix.config.os, 'windows')
+      run: |
+        curl.exe --output openssl.msi "https://slproweb.com/download/Win32OpenSSL_Light-1_1_1g.msi"
+        msiexec /i openssl.msi /quiet /qn /norestart
+      shell: cmd
+
+    - uses: actions/checkout@v1
+
+    - name: Install Qt from qt.io
+      if: (!startsWith(matrix.config.os, 'ubuntu'))
+      uses: jurplel/install-qt-action@v2
+      with:
+        version: ${{ matrix.config.qt_version }}
+        modules: 'qtscript qtscripttools qtsvg qttools'
+        arch: ${{ matrix.config.qt_arch }}
+
+    - name: Install Qt from Ubuntu
+      if: startsWith(matrix.config.os, 'ubuntu')
+      run: |
+        sudo apt install debhelper qt5-default libqt5opengl5-dev qttools5-dev qtscript5-dev qtbase5-private-dev
+      shell: bash
+
+
+    - name: Build on Windows
+      if: startsWith(matrix.config.os, 'windows')
+      run: |
+        call "${{ matrix.config.environment_script }}"
+        qmake CONFIG+=release
+        nmake
+        nmake installer
+      shell: cmd
+
+    - uses: actions/upload-artifact@v2
+      if: startsWith(matrix.config.os, 'windows')
+      with:
+        name: ${{ matrix.config.artifact }}
+        path: src/*.exe
+
+
+    - name: Build on Linux
+      if: (startsWith(matrix.config.os, 'ubuntu'))
+      run: |
+        maintainer=$(grep ^Maintainer: debian/control | sed -e 's,^.*:[ ]*,,g')
+        package=$(grep ^Package: debian/control | head -n1 | sed -e 's,^.*:[ ]*,,g')
+        release=$(cat RELEASE)
+        dist=$(lsb_release -c -s)
+
+        cat >debian/changelog <<EOF
+        $package ($release) $dist; urgency=low
+
+          * Current Release
+
+         -- $maintainer  `date -R`
+
+        EOF
+        dpkg-buildpackage --build=binary --check-builddeps --jobs=auto --root-command=fakeroot \
+                          --unsigned-source --unsigned-changes --compression=xz
+        mv ../*.deb src
+      shell: bash
+
+    - uses: actions/upload-artifact@v2
+      if: startsWith(matrix.config.os, 'ubuntu')
+      with:
+        name: ${{ matrix.config.artifact }}
+        path: src/*.deb
+
+
+    - name: Build on macOS
+      if: (startsWith(matrix.config.os, 'mac'))
+      run: |
+        qmake CONFIG+=release
+        make
+        make installer
+      shell: bash
+
+    - uses: actions/upload-artifact@v2
+      if: startsWith(matrix.config.os, 'mac')
+      with:
+        name: ${{ matrix.config.artifact }}
+        path: src/*.dmg

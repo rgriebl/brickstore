@@ -22,8 +22,9 @@ TEMPLATE = subdirs
 CONFIG  += ordered
 SUBDIRS  = src
 
+OTHER_FILES += .github/workflows/*.yml
 
-win32 {
+macos|win32 {
   deploy.CONFIG += recursive
   installer.CONFIG += recursive
   QMAKE_EXTRA_TARGETS += deploy installer

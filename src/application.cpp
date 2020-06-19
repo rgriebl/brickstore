@@ -200,7 +200,7 @@ QStringList Application::externalResourceSearchPath(const QString &subdir) const
 #elif defined(Q_OS_MACOS)
         baseSearchPath << appdir + QLatin1String("/../Resources");
 #elif defined(Q_OS_UNIX)
-        baseSearchPath << QLatin1String(STR(INSTALL_PREFIX) "/share/brickstore2");
+        baseSearchPath << QLatin1String(STR(INSTALL_PREFIX) "/share/brickstore");
 
         if (isDeveloperBuild)
             baseSearchPath << appdir;
@@ -516,9 +516,9 @@ void Application::about()
 #if defined(_MSC_VER)
                 "Microsoft Visual-C++ "
 #  if _MSC_VER >= 1920
-                "2019 (16." _BS_STR(_MSC_VER) ")"
+                "2019 (16." BS_STR(_MSC_VER) ")"
 #  elif _MSC_VER >= 1910
-                "2017 (15." _BS_STR(_MSC_VER) ")"
+                "2017 (15." BS_STR(_MSC_VER) ")"
 #  elif _MSC_VER >= 1900
                 "2015 (14.0)"
 #  else

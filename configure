@@ -16,7 +16,7 @@
 # set -e -x
 
 qmake_bin=""
-qmake_bin_test=("$(which qmake-qt4)" "$(which qmake)" "$QTDIR/bin/qmake")
+qmake_bin_test=("$(which qmake-qt5)" "$(which qmake)" "$QTDIR/bin/qmake")
 prefix="/usr/local"
 debug_release=""
 

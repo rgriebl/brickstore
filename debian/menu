@@ -1,0 +1,1 @@
+?package(brickstore):needs="X11" section="Applications/Data Management" title="Brickstore" command="/usr/bin/brickstore" icon="/usr/share/brickstore/images/icon.png"

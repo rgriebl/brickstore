@@ -11,18 +11,17 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#ifndef __BRICKSTORE__VERSION_H__
-#define __BRICKSTORE__VERSION_H__
+#pragma once
 
 #if !defined(BRICKSTORE_MAJOR) || !defined(BRICKSTORE_MINOR) || !defined(BRICKSTORE_PATCH)
 #  error "You forgot to define BRICKSTORE_(MAJOR,MINOR,PATCH) before including version.h"
 #endif
 
 // stringification sucks :)
-#define _BS_STR(s)   _BS_STR2(s)
-#define _BS_STR2(s)  #s
+#define BS_STR(s)   BS_STR2(s)
+#define BS_STR2(s)  #s
 
-#define BRICKSTORE_VERSION   _BS_STR( BRICKSTORE_MAJOR ) "." _BS_STR( BRICKSTORE_MINOR ) "." _BS_STR( BRICKSTORE_PATCH )
+#define BRICKSTORE_VERSION   BS_STR(BRICKSTORE_MAJOR) "." BS_STR(BRICKSTORE_MINOR) "." BS_STR(BRICKSTORE_PATCH)
 #define BRICKSTORE_COPYRIGHT "2004-2020 Robert Griebl"
 #define BRICKSTORE_URL       "www.brickforge.de/software/brickstore"
 #define BRICKSTORE_MAIL      "brickstore@brickforge.de"
@@ -31,7 +30,5 @@
 
 // Win32 FILEVERSION resource
 #ifdef RC_INVOKED
-#  define BRICKSTORE_VERSIONINFO   _BS_STR( BRICKSTORE_MAJOR ) ", " _BS_STR( BRICKSTORE_MINOR ) ", " _BS_STR( BRICKSTORE_PATCH ) ", 0"
-#endif
-
+#  define BRICKSTORE_VERSIONINFO  BS_STR(BRICKSTORE_MAJOR) ", " BS_STR(BRICKSTORE_MINOR) ", " BS_STR(BRICKSTORE_PATCH) ", 0"
 #endif
