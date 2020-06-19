@@ -31,34 +31,7 @@
 #include "utility.h"
 #include "workspace.h"
 
-
 Q_DECLARE_METATYPE(QWidget *)
-
-/* XPM */
-static const char * const tablist_xpm[] = {
-"12 12 2 1",
-"  c None",
-"# c #000000",
-"            ",
-#if !defined(Q_OS_MAC)
-"  ########  ",
-#else
-"############",
-#endif
-" ########## ",
-" ########## ",
-" ########## ",
-" ########## ",
-" ########## ",
-#if !defined(Q_OS_MAC)
-"############",
-#else
-"  ########  ",
-#endif
-"            ",
-"            ",
-"            ",
-"            "};
 
 
 static QString cleanWindowTitle(QWidget *window)
@@ -166,19 +139,19 @@ public:
     }
 
 signals:
-    void tabCountChanged(int);
+    void countChanged(int);
 
 protected:
+    // QTabBar's count property doesn't define a NOTIFY signals, so we have generate one ourselves
     void tabInserted(int index)
     {
         QTabBar::tabInserted(index);
-        emit tabCountChanged(count());
+        emit countChanged(count());
     }
-
     void tabRemoved(int index)
     {
         QTabBar::tabRemoved(index);
-        emit tabCountChanged(count());
+        emit countChanged(count());
     }
 };
 
@@ -248,14 +221,13 @@ Workspace::Workspace(QWidget *parent)
     m_tabbar->setUsesScrollButtons(true);
     m_tabbar->setMovable(true);
     m_tabbar->setTabsClosable(true);
+    m_tabbar->setAutoHide(true);
 
-
-    m_left = new TabBarSide(m_tabbar);
     m_right = new TabBarSide(m_tabbar);
     m_stack = new QStackedLayout();
 
     TabBarSideButton *tabList = new TabBarSideButton(m_tabbar);
-    tabList->setIcon(QIcon(QPixmap(tablist_xpm)));
+    tabList->setIcon(QIcon(":/images/tab.png")); //QPixmap(tablist_xpm)));
     tabList->setAutoRaise(true);
     tabList->setPopupMode(QToolButton::InstantPopup);
     tabList->setToolButtonStyle(Qt::ToolButtonIconOnly);
@@ -269,7 +241,6 @@ Workspace::Workspace(QWidget *parent)
     QHBoxLayout *tabbox = new QHBoxLayout();
     tabbox->setMargin(0);
     tabbox->setSpacing(0);
-    tabbox->addWidget(m_left);
     tabbox->addWidget(m_tabbar, 10);
     tabbox->addWidget(m_right);
     QVBoxLayout *layout = new QVBoxLayout();
@@ -283,33 +254,18 @@ Workspace::Workspace(QWidget *parent)
             this, &Workspace::activateTab);
     connect(m_tabbar, &QTabBar::tabCloseRequested,
             this, &Workspace::closeTab);
-    connect(m_tabbar, &TabBar::tabCountChanged,
-            this, &Workspace::updateVisibility);
     connect(m_tabbar, &QTabBar::tabMoved,
             this, &Workspace::moveTab);
     connect(m_stack, &QStackedLayout::widgetRemoved,
             this, &Workspace::removeTab);
-
-    updateVisibility();
 }
 
 QMenu *Workspace::windowMenu(bool hasShortcut, QWidget *parent)
 {
     WindowMenu *m = new WindowMenu(this, hasShortcut, parent);
-    connect(m_tabbar, &TabBar::tabCountChanged,
+    connect(m_tabbar, &TabBar::countChanged,
             m, &WindowMenu::checkEnabledStatus);
     return m;
-}
-
-void Workspace::updateVisibility()
-{
-    bool b = (m_tabbar->count() > 1);
-
-    // showing/hiding a tabbar in document mode conflicts with the border
-    // metric changes in QTabBarPrivate::updateMacBorderMetrics()
-    m_tabbar->setMaximumHeight(b ? QWIDGETSIZE_MAX : 0);
-    m_left->setMaximumHeight(b ? QWIDGETSIZE_MAX : 0);
-    m_right->setMaximumHeight(b ? QWIDGETSIZE_MAX : 0);
 }
 
 void Workspace::addWindow(QWidget *w)
@@ -319,8 +275,6 @@ void Workspace::addWindow(QWidget *w)
 
     int idx = m_stack->addWidget(w);
     m_tabbar->insertTab(idx, cleanWindowTitle(w));
-    if (!w->windowIcon().isNull())
-        m_tabbar->setTabIcon(idx, w->windowIcon());
 
     w->installEventFilter(this);
 }

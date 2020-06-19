@@ -136,8 +136,8 @@ Application::Application(bool rebuild_db_only, bool skip_download, int &_argc, c
         }, Qt::QueuedConnection);
     }
     else {
-#if defined(Q_WS_X11)
-        QPixmap pix(":/images/brickstore.png");
+#if !defined(Q_OS_WINDOWS) && !defined(Q_OS_MACOS)
+        QPixmap pix(":/images/brickstore_icon.png");
         if (!pix.isNull())
             setWindowIcon(pix);
 #endif
@@ -420,7 +420,7 @@ void Application::about()
         "<center>"
         "<table border=\"0\"><tr>"
         "<td valign=\"middle\" align=\"center\" width=\"20%\">"
-        "<img src=\":/images/brickstore.png\" style=\"margin-right: 20\"/></td>"
+        "<img src=\":/images/brickstore_icon.png\" width=\"128\" style=\"margin-right: 20\"/></td>"
         "<td align=\"left\" width=\"80%\">"
         "<strong style=\"font-size: x-large\">%1</strong><br>"
         "<strong style=\"font-size: large\">%3</strong><br>"

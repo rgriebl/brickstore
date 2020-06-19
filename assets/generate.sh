@@ -37,7 +37,9 @@ echo "done"
 
 echo -n "Generating action icons..."
 
-convert brickstore.png -resize $((s*2)) $g/brickstore.png  # double size
+convert brickstore.png -resize $((s)) $g/brickstore.png
+
+convert $c/tab.png -resize $((s)) $g/tab.png
 
 convert $c/brick_1x1.png -scale $s $c/overlay_plus.png -scale $s -composite $g/items_add.png
 convert $c/brick_1x1.png -scale $s $c/overlay_divide.png -scale $s -composite $g/items_divide.png
