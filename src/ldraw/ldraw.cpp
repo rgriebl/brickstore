@@ -22,7 +22,7 @@
 #include <QDateTime>
 #include <QtDebug>
 
-#if defined(Q_OS_WIN)
+#if defined(Q_OS_WINDOWS)
 #  include <windows.h>
 #  include <tchar.h>
 #  include <shlobj.h>
@@ -489,7 +489,7 @@ QString LDraw::Core::get_platform_ldrawdir()
 {
     QString dir = QString::fromLocal8Bit(::getenv("LDRAWDIR"));
 
-#if defined(Q_OS_WIN)
+#if defined(Q_OS_WINDOWS)
     if (dir.isEmpty() || !check_ldrawdir(dir)) {
         wchar_t inidir [MAX_PATH];
 
@@ -517,7 +517,7 @@ QString LDraw::Core::get_platform_ldrawdir()
             RegCloseKey(skey);
         }
     }
-#elif defined(Q_OS_MAC)
+#elif defined(Q_OS_MACOS)
     if (dir.isEmpty() || !check_ldrawdir(dir)) {
         QStringList macdirs;
         macdirs << QLatin1String("/Library/LDRAW")
@@ -585,7 +585,7 @@ LDraw::Core::Core(const QString &datadir)
     : m_datadir(datadir)
 {
     const char *subdirs[] =
-#if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
+#if defined(Q_OS_UNIX) && !defined(Q_OS_MACOS)
         { "P", "p", "PARTS", "parts", "MODELS", "models", 0 };
 #else
         { "P", "PARTS", "MODELS", 0 };

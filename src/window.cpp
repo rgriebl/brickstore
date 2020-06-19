@@ -164,7 +164,7 @@ protected:
     void keyPressEvent(QKeyEvent *e)
     {
         QTableView::keyPressEvent(e);
-#if !defined(Q_OS_MAC)
+#if !defined(Q_OS_MACOS)
         if (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter) {
             if (state() != EditingState) {
                 if (edit(currentIndex(), EditKeyPressed, e))

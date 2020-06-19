@@ -509,7 +509,7 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
         if (key == Qt::Key_Space ||
             key == Qt::Key_Return ||
             key == Qt::Key_Enter ||
-#if defined(Q_OS_MAC)
+#if defined(Q_OS_MACOS)
             (key == Qt::Key_O && static_cast<QKeyEvent *>(e)->modifiers() & Qt::ControlModifier)
 #else
             key == Qt::Key_F2

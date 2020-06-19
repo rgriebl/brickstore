@@ -25,13 +25,13 @@
 #include <QLocalServer>
 #include <QNetworkProxyFactory>
 
-#if defined(Q_OS_WIN)
+#if defined(Q_OS_WINDOWS)
 #  include <windows.h>
 #  ifdef MessageBox
 #    undef MessageBox
 #  endif
 #  include <wininet.h>
-#elif defined(Q_OS_MAC)
+#elif defined(Q_OS_MACOS)
 #  include <netinet/in.h>
 #  include <arpa/inet.h>
 #  include <SystemConfiguration/SCNetwork.h>
@@ -65,7 +65,7 @@ enum {
 #else
     isDeveloperBuild = 1,
 #endif
-#if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
+#if defined(Q_OS_UNIX) && !defined(Q_OS_MACOS)
     isUnix = 1,
 #else
     isUnix = 0,
@@ -141,7 +141,7 @@ Application::Application(bool rebuild_db_only, bool skip_download, int &_argc, c
         if (!pix.isNull())
             setWindowIcon(pix);
 #endif
-#if defined(Q_OS_MAC)
+#if defined(Q_OS_MACOS)
         setAttribute(Qt::AA_DontShowIconsInMenus);
 #endif
         updateTranslations();
@@ -153,7 +153,7 @@ Application::Application(bool rebuild_db_only, bool skip_download, int &_argc, c
         m_files_to_open << arguments().mid(1);
 
         FrameWork::inst()->show();
-#if defined(Q_OS_MAC)
+#if defined(Q_OS_MACOS)
         FrameWork::inst()->raise();
 #endif
     }
@@ -179,12 +179,12 @@ QStringList Application::externalResourceSearchPath(const QString &subdir) const
 
     if (baseSearchPath.isEmpty()) {
         QString appdir = applicationDirPath();
-#if defined(Q_OS_WIN)
+#if defined(Q_OS_WINDOWS)
         baseSearchPath << appdir;
 
         if (isDeveloperBuild)
             baseSearchPath << appdir + QLatin1String("/..");
-#elif defined(Q_OS_MAC)
+#elif defined(Q_OS_MACOS)
         baseSearchPath << appdir + QLatin1String("/../Resources");
 #elif defined(Q_OS_UNIX)
         baseSearchPath << QLatin1String(STR(INSTALL_PREFIX) "/share/brickstore2");
@@ -277,7 +277,7 @@ bool Application::isClient(int timeout)
     QString socketName = QLatin1String("BrickStore");
     QLocalServer *server = 0;
 
-#if defined(Q_OS_WIN)
+#if defined(Q_OS_WINDOWS)
     // QLocalServer::listen() would succeed for any number of callers
     HANDLE semaphore = ::CreateSemaphore(0, 0, 1, L"Local\\BrickStore");
     state = (semaphore && (::GetLastError() == ERROR_ALREADY_EXISTS)) ? Client : Server;
@@ -306,7 +306,7 @@ bool Application::isClient(int timeout)
             if (client.waitForConnected(timeout / 2) || i) {
                 break;
             } else {
-#if defined(Q_OS_WIN)
+#if defined(Q_OS_WINDOWS)
                 Sleep(timeout / 4);
 #else
                 struct timespec ts = { (timeout / 4) / 1000, ((timeout / 4) % 1000) * 1000 * 1000 };
@@ -385,7 +385,7 @@ bool Application::initBrickLink()
     QString errstring;
     QString defdatadir = QDir::homePath();
 
-#if defined(Q_OS_WIN)
+#if defined(Q_OS_WINDOWS)
     defdatadir += QLatin1String("/brickstore-cache/");
 #else
     defdatadir += QLatin1String("/.brickstore-cache/");
@@ -553,7 +553,7 @@ void Application::checkNetwork()
     if (!WIFEXITED(res) || (WEXITSTATUS(res) == 0 || WEXITSTATUS(res) == 127))
         online = true;
 
-#elif defined(Q_OS_MAC)
+#elif defined(Q_OS_MACOS)
     struct ::sockaddr_in sock;
     sock.sin_family = AF_INET;
     sock.sin_port = htons(80);
@@ -565,7 +565,7 @@ void Application::checkNetwork()
     if (!result || (flags & (kSCNetworkFlagsReachable | kSCNetworkFlagsConnectionRequired)) == kSCNetworkFlagsReachable)
         online = true;
 
-#elif defined(Q_OS_WIN)
+#elif defined(Q_OS_WINDOWS)
     // this function is buggy/unreliable
     //online = InternetCheckConnectionW(L"http://" TEXT(CHECK_IP), 0, 0);
     DWORD flags;

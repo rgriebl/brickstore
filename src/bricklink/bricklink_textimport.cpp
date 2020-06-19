@@ -74,7 +74,7 @@ void set_tz(const char *tz)
     if (tz)
         strcat(pebuf, tz);
 
-#if defined(Q_OS_WIN)
+#if defined(Q_OS_WINDOWS)
     _putenv(pebuf);
     _tzset();
 #else

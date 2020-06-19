@@ -66,7 +66,7 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
     setupUi(this);
 
     w_upd_reset->setAttribute(Qt::WA_MacSmallSize);
-#if defined(Q_OS_MAC)
+#if defined(Q_OS_MACOS)
     w_currency_update->setStyle(QStyleFactory::create("fusion"));
 #endif
 

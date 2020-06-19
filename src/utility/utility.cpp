@@ -20,7 +20,7 @@
 #include <QDir>
 #include <QWidget>
 
-#if defined(Q_OS_WIN)
+#if defined(Q_OS_WINDOWS)
 #  if defined(Q_CC_MINGW)
 #    define _WIN32_WINNT 0x0500
 #  endif
@@ -227,7 +227,7 @@ quint64 Utility::physicalMemory()
     if (sysctl(sctl, 2, &ram, &ramsize, 0, 0) == 0)
         physmem = quint64(ram);
 
-#elif defined(Q_OS_WIN)
+#elif defined(Q_OS_WINDOWS)
     if ((QSysInfo::WindowsVersion & QSysInfo::WV_NT_based) >= QSysInfo::WV_2000) {
         MEMORYSTATUSEX memstatex = { sizeof(memstatex) };
         GlobalMemoryStatusEx(&memstatex);

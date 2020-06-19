@@ -250,7 +250,7 @@ FrameWork::FrameWork(QWidget *parent)
         << "file_export"
         << "-"
         << "file_print"
-//#if !defined(Q_OS_MAC)
+//#if !defined(Q_OS_MACOS)
         << "file_print_pdf"
 //#endif
         << "-"
@@ -505,7 +505,7 @@ void FrameWork::languageChange()
 
 void FrameWork::translateActions()
 {
-#if defined(Q_OS_MAC)
+#if defined(Q_OS_MACOS)
     static bool onMac = true;
 #else
     static bool onMac = false;

@@ -26,7 +26,7 @@
 // directly use C-library str* functions instead of Qt's qstr* function
 // to improve runtime performance
 
-#if defined(Q_OS_WIN)
+#if defined(Q_OS_WINDOWS)
 #  define strdup _strdup
 #endif
 

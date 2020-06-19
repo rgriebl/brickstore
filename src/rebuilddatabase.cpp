@@ -24,7 +24,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 
-#if defined(Q_OS_WIN)
+#if defined(Q_OS_WINDOWS)
 #  include <windows.h>
 #endif
 
@@ -41,7 +41,7 @@ RebuildDatabase::RebuildDatabase(bool skipDownload)
 {
     m_trans = 0;
 
-#if defined(Q_OS_WIN)
+#if defined(Q_OS_WINDOWS)
     AllocConsole();
     SetConsoleTitleW(L"BrickStore - Rebuilding Database");
     freopen("CONIN$", "r", stdin);
@@ -51,7 +51,7 @@ RebuildDatabase::RebuildDatabase(bool skipDownload)
 
 RebuildDatabase::~RebuildDatabase()
 {
-#if defined(Q_OS_WIN)
+#if defined(Q_OS_WINDOWS)
     printf("\n\nPress RETURN to quit...\n\n");
     getchar();
 #endif

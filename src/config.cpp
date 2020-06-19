@@ -21,7 +21,7 @@
 #include <QDomDocument>
 #include <QStandardPaths>
 
-#if defined(Q_OS_WIN)
+#if defined(Q_OS_WINDOWS)
 #  include <windows.h>
 #  include <tchar.h>
 #  include <shlobj.h>
@@ -192,7 +192,7 @@ QString Config::lDrawDir() const
     if (dir.isEmpty())
         dir = QString::fromLocal8Bit(::getenv("LDRAWDIR"));
 
-#if defined(Q_OS_WIN)
+#if defined(Q_OS_WINDOWS)
     if (dir.isEmpty()) {
         wchar_t inidir [MAX_PATH];
 
