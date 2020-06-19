@@ -195,8 +195,8 @@ unix:!macx {
     INSTALLS += share_desktop share_mimelnk share_mimeicon share_appicon share_mime share_trans
 
     # avoid useless dependencies (and warnings from dpkg-buildpackage)
-    QMAKE_LIBS_X11 -= -lXext -lX11
-    QMAKE_LIBS_OPENGL -= -lGLU
+#    QMAKE_LIBS_X11 -= -lXext -lX11
+#    QMAKE_LIBS_OPENGL -= -lGLU
   }
 }
 

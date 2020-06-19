@@ -2,8 +2,8 @@ Source: brickstore
 Section: x11
 Priority: extra
 Maintainer: Robert Griebl <rg@softforge.de>
-Build-Depends: debhelper (>= 7.0.50~), libqt4-dev (>= 4.6), libqt4-opengl-dev (>= 4.6), libxext-dev
-Standards-Version: 3.9.1
+Build-Depends: debhelper (>= 7.0.50~), qt5-default (>= 5.12), libqt5opengl5-dev (>= 5.12)
+Standards-Version: 4.5.0
 
 Package: brickstore
 Architecture: any
