@@ -20,15 +20,15 @@ echo -n "Generating app and doc icons..."
 
 # Unix icons
 convert brickstore.png -resize 256 $i/brickstore.png
-composite -geometry 88x88+20+4 brickstore.png $m/spreadsheet.png $i/brickstore-doc.png
+composite -geometry 88x88+20+4 brickstore.png $m/spreadsheet.png $i/brickstore_doc.png
 
 # Windows icons
 convert $i/brickstore.png -define icon:auto-resize=256,48,32,16 $i/brickstore.ico
-convert $i/brickstore-doc.png -define icon:auto-resize=128,48,32,16 $i/brickstore-doc.ico
+convert $i/brickstore_doc.png -define icon:auto-resize=128,48,32,16 $i/brickstore_doc.ico
 
 # macOS icons
 png2icns $i/brickstore.icns $i/brickstore.png >/dev/null
-png2icns $i/brickstore-doc.icns $i/brickstore-doc.png >/dev/null
+png2icns $i/brickstore_doc.icns $i/brickstore_doc.png >/dev/null
 
 echo "done"
 
