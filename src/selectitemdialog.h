@@ -35,4 +35,7 @@ protected:
 
 private slots:
     void checkItem(const BrickLink::Item *, bool);
+
+private:
+    QRect m_pos;
 };

@@ -34,4 +34,7 @@ protected:
 
 private slots:
     void checkColor(const BrickLink::Color *, bool);
+
+private:
+    QRect m_pos;
 };

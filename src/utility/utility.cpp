@@ -33,10 +33,6 @@
 #  include <QByteArray>
 #endif
 
-#if defined(Q_WS_X11)
-#  include <QMainWindow>
-#endif
-
 #include "utility.h"
 
 
@@ -152,16 +148,6 @@ void Utility::setPopupPos(QWidget *w, const QRect &pos)
 
     if ((y + sh.height()) > desktop.height()) {
         int d = w->frameSize().height() - w->size().height();
-#if defined(Q_WS_X11)
-        if (d <= 0) {
-            foreach (QWidget *tlw, qApp->topLevelWidgets()) {
-                if (qobject_cast<QMainWindow *>(tlw)) {
-                    d = tlw->frameSize().height() - tlw->size().height();
-                    break;
-                }
-            }
-        }
-#endif
         y = pos.y() - sh.height() - d;
     }
     if (y < 0)
@@ -175,8 +161,6 @@ void Utility::setPopupPos(QWidget *w, const QRect &pos)
     w->move(x, y);
     w->resize(sh);
 }
-
-
 
 QString Utility::safeRename(const QString &basepath)
 {

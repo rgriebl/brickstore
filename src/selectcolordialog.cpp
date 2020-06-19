@@ -52,14 +52,17 @@ void SelectColorDialog::checkColor(const BrickLink::Color *col, bool ok)
 
 int SelectColorDialog::execAtPosition(const QRect &pos)
 {
-    if (pos.isValid())
-        Utility::setPopupPos(this, pos);
-
+    m_pos = pos; // we need to delay the positioning, because X11 doesn't know the frame size yet
     return QDialog::exec();
+
 }
 
 void SelectColorDialog::showEvent(QShowEvent *)
 {
     activateWindow();
     w_sc->setFocus();
+    if (m_pos.isValid()) {
+        Utility::setPopupPos(this, m_pos);
+        m_pos = QRect();
+    }
 }

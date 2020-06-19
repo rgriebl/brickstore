@@ -60,9 +60,7 @@ void SelectItemDialog::checkItem(const BrickLink::Item *item, bool ok)
 
 int SelectItemDialog::execAtPosition(const QRect &pos)
 {
-    if (pos.isValid())
-        Utility::setPopupPos(this, pos);
-
+    m_pos = pos; // we need to delay the positioning, because X11 doesn't know the frame size yet
     return QDialog::exec();
 }
 
@@ -70,4 +68,9 @@ void SelectItemDialog::showEvent(QShowEvent *)
 {
     activateWindow();
     w_si->setFocus();
+
+    if (m_pos.isValid()) {
+        Utility::setPopupPos(this, m_pos);
+        m_pos = QRect();
+    }
 }
