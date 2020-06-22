@@ -43,7 +43,6 @@ public:
     bool setCurrentItemType(const BrickLink::ItemType *it);
     bool setCurrentItem(const BrickLink::Item *item, bool force_items_category = false);
 
-
 signals:
     void hasColors(bool);
     void itemSelected(const BrickLink::Item *, bool);

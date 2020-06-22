@@ -294,7 +294,7 @@ const QImage BrickLink::Core::colorImage(const Color *col, int w, int h) const
             gradient.setColorAt(1,   QColor(255, 255, 255, 100));
 
             p.fillRect(r, gradient);
-	    }
+        }
         p.end();
 
         m_colimages.insert(key, img);

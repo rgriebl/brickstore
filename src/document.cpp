@@ -1584,46 +1584,47 @@ QString Document::headerDataForDisplayRole(Field f)
 
 int Document::headerDataForTextAlignmentRole(Field f) const
 {
-    return dataForTextAlignmentRole(0, f);
+    return dataForTextAlignmentRole(nullptr, f);
 }
 
 int Document::headerDataForDefaultWidthRole(Field f) const
 {
     int width = 0;
+    static QSize picsize = BrickLink::core()->itemType('P')->pictureSize();
 
     switch (f) {
-	case Status      : width = 6; break;
-	case Picture     : width = -40; break;
-	case PartNo      : width = 10; break;
-	case Description : width = 28; break;
-	case Comments    : width = 8; break;
-	case Remarks     : width = 8; break;
-	case QuantityOrig: width = 5; break;
-	case QuantityDiff: width = 5; break;
-	case Quantity    : width = 5; break;
-	case Bulk        : width = 5; break;
-	case PriceOrig   : width = 8; break;
-	case PriceDiff   : width = 8; break;
-	case Price       : width = 8; break;
-	case Total       : width = 8; break;
-	case Sale        : width = 5; break;
-	case Condition   : width = 5; break;
-	case Color       : width = 15; break;
-	case Category    : width = 12; break;
-	case ItemType    : width = 12; break;
-	case TierQ1      : width = 5; break;
-	case TierP1      : width = 8; break;
-	case TierQ2      : width = 5; break;
-	case TierP2      : width = 8; break;
-	case TierQ3      : width = 5; break;
-	case TierP3      : width = 8; break;
-	case LotId       : width = 8; break;
-	case Retain      : width = 8; break;
-	case Stockroom   : width = 8; break;
-	case Reserved    : width = 8; break;
-	case Weight      : width = 10; break;
-	case YearReleased: width = 5; break;
-	default          : break;
+    case Status      : width = 6; break;
+    case Picture     : width = -picsize.width(); break;
+    case PartNo      : width = 10; break;
+    case Description : width = 28; break;
+    case Comments    : width = 8; break;
+    case Remarks     : width = 8; break;
+    case QuantityOrig: width = 5; break;
+    case QuantityDiff: width = 5; break;
+    case Quantity    : width = 5; break;
+    case Bulk        : width = 5; break;
+    case PriceOrig   : width = 8; break;
+    case PriceDiff   : width = 8; break;
+    case Price       : width = 8; break;
+    case Total       : width = 8; break;
+    case Sale        : width = 5; break;
+    case Condition   : width = 5; break;
+    case Color       : width = 15; break;
+    case Category    : width = 12; break;
+    case ItemType    : width = 12; break;
+    case TierQ1      : width = 5; break;
+    case TierP1      : width = 8; break;
+    case TierQ2      : width = 5; break;
+    case TierP2      : width = 8; break;
+    case TierQ3      : width = 5; break;
+    case TierP3      : width = 8; break;
+    case LotId       : width = 8; break;
+    case Retain      : width = 8; break;
+    case Stockroom   : width = 8; break;
+    case Reserved    : width = 8; break;
+    case Weight      : width = 10; break;
+    case YearReleased: width = 5; break;
+    default          : break;
     }
     return width;
 }

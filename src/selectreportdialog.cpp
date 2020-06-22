@@ -106,7 +106,7 @@ QVariant ReportModel::headerData(int section, Qt::Orientation orient, int role) 
 
 
 SelectReportDialog::SelectReportDialog(QWidget *parent)
-	: QDialog(parent)
+    : QDialog(parent)
 {
     setupUi(this);
 
@@ -131,8 +131,8 @@ void SelectReportDialog::reportChanged()
 
 void SelectReportDialog::reportConfirmed()
 {
-	reportChanged();
-	w_buttons->button(QDialogButtonBox::Ok)->animateClick();
+    reportChanged();
+    w_buttons->button(QDialogButtonBox::Ok)->animateClick();
 }
 
 const Report *SelectReportDialog::report() const

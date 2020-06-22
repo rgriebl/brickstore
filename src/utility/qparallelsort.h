@@ -98,10 +98,10 @@ static inline void qParallelSortSerial(RandomAccessIterator begin, RandomAccessI
         int a_span = (span + 1) / 2;  // bigger half of array if array-size is uneven
         int b_span = span / 2;        // smaller half of array if array-size is uneven
 
-        if (a_span > 1)	// no sorting necessary if size == 1
+        if (a_span > 1) // no sorting necessary if size == 1
             qParallelSortSerial(begin, begin + a_span, lessThan, tmp);
 
-        if (b_span > 1)	// no sorting necessary if size == 1
+        if (b_span > 1) // no sorting necessary if size == 1
             qParallelSortSerial(begin + a_span, end, lessThan, tmp + a_span);
 
         qParallelSortJoin(begin, end, lessThan, tmp, a_span, b_span);
@@ -123,7 +123,7 @@ void qParallelSortThread(RandomAccessIterator begin, RandomAccessIterator end, L
         int a_span = (span + 1) / 2; // bigger half of array if array-size is uneven
         int b_span = span - a_span;  // smaller half of array if array-size is uneven
 
-        if (b_span > 1) {	// prepare thread only if sorting is necessary
+        if (b_span > 1) { // prepare thread only if sorting is necessary
             QFuture<void> future = QtConcurrent::run(qParallelSortThread<RandomAccessIterator, T, LessThan>, begin + a_span, end, lessThan, tmp + a_span, threadCount / 2);
             qParallelSortThread(begin, begin + a_span, lessThan, tmp, (threadCount + 1) / 2);
             future.waitForFinished();

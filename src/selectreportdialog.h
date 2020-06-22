@@ -26,9 +26,9 @@ class SelectReportDialog : public QDialog, private Ui::SelectReportDialog
 public:
     SelectReportDialog(QWidget *parent = nullptr);
 
-	const Report *report() const;
+    const Report *report() const;
 
 private slots:
-	void reportChanged();
-	void reportConfirmed();
+    void reportChanged();
+    void reportConfirmed();
 };
