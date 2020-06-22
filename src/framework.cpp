@@ -171,6 +171,41 @@ private:
     FrameWork *m_fw;
 };
 
+class FancyDockTitleBar : public QLabel
+{
+public:
+    FancyDockTitleBar(QDockWidget *parent)
+        : QLabel(parent)
+        , m_dock(parent)
+    {
+        if (m_dock) {
+            setText(m_dock->windowTitle());
+            connect(m_dock, &QDockWidget::windowTitleChanged,
+                    this, &QLabel::setText);
+        }
+        setAutoFillBackground(true);
+        setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
+
+        QPalette p = palette();
+        QLinearGradient g(0, 0, 1, 0.5);
+        g.setCoordinateMode(QGradient::ObjectMode);
+        g.setStops({ { 0, p.color(QPalette::Highlight) },
+                     { .65, Utility::gradientColor(p.color(QPalette::Highlight), p.color(QPalette::Window), 0.5) },
+                     { 1, p.color(QPalette::Window) } });
+        p.setBrush(QPalette::Window, g);
+        p.setColor(QPalette::WindowText, p.color(QPalette::HighlightedText));
+        setPalette(p);
+    }
+
+protected:
+    void mousePressEvent(QMouseEvent *ev) override { if (ev) ev->ignore(); }
+    void mouseMoveEvent(QMouseEvent *ev) override { if (ev) ev->ignore(); }
+    void mouseReleaseEvent(QMouseEvent *ev) override { if (ev) ev->ignore(); }
+
+private:
+    QDockWidget *m_dock;
+};
+
 
 FrameWork *FrameWork::s_inst = nullptr;
 
@@ -684,7 +719,9 @@ QDockWidget *FrameWork::createDock(QWidget *widget)
 {
     QDockWidget *dock = new QDockWidget(QString(), this);
     dock->setObjectName(QLatin1String("Dock-") + widget->objectName());
-    dock->setFeatures(QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable);
+    dock->setFeatures(QDockWidget::DockWidgetClosable);
+    dock->setTitleBarWidget(new FancyDockTitleBar(dock));
+    dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     dock->setWidget(widget);
     m_dock_widgets.append(dock);
     return dock;
