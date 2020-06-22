@@ -38,42 +38,16 @@ protected slots:
     void doUpdate();
     void gotUpdate(BrickLink::Picture *);
     void redraw();
-    void viewLargeImage();
     void showBLCatalogInfo();
     void showBLPriceGuideInfo();
     void showBLLotsForSale();
     void languageChange();
-    void checkContextMenu(bool b);
 
 protected:
-    void mouseDoubleClickEvent(QMouseEvent *e) override;
     void paintEvent(QPaintEvent *e) override;
     void resizeEvent(QResizeEvent *e) override;
+    bool event(QEvent *e) override;
 
 private:
     PictureWidgetPrivate *d;
-};
-
-
-class LargePictureWidgetPrivate;
-
-class LargePictureWidget : public QLabel
-{
-    Q_OBJECT
-public:
-    LargePictureWidget(BrickLink::Picture *lpic, QWidget *parent);
-    virtual ~LargePictureWidget();
-
-protected slots:
-    void doUpdate();
-    void gotUpdate(BrickLink::Picture *);
-    void redraw();
-    void languageChange();
-
-protected:
-    void mouseDoubleClickEvent(QMouseEvent *e) override;
-    void keyPressEvent(QKeyEvent *e) override;
-
-private:
-    LargePictureWidgetPrivate *d;
 };

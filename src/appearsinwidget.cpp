@@ -61,17 +61,6 @@ AppearsInWidget::AppearsInWidget(QWidget *parent)
     addAction(a);
 
     a = new QAction(this);
-    a->setObjectName(QLatin1String("appearsin_magnify"));
-    a->setIcon(QIcon(QLatin1String(":/images/viewmagp.png")));
-    connect(a, &QAction::triggered,
-            this, &AppearsInWidget::viewLargeImage);
-    addAction(a);
-
-    a = new QAction(this);
-    a->setSeparator(true);
-    addAction(a);
-
-    a = new QAction(this);
     a->setObjectName(QLatin1String("appearsin_bl_catalog"));
     a->setIcon(QIcon(QLatin1String(":/images/edit_bl_catalog.png")));
     connect(a, &QAction::triggered,
@@ -104,7 +93,6 @@ AppearsInWidget::AppearsInWidget(QWidget *parent)
 void AppearsInWidget::languageChange()
 {
     findChild<QAction *>(QLatin1String("appearsin_partoutitems"))->setText(tr("Part out Item..."));
-    findChild<QAction *>(QLatin1String("appearsin_magnify"))->setText(tr("View large image..."));
     findChild<QAction *>(QLatin1String("appearsin_bl_catalog"))->setText(tr("Show BrickLink Catalog Info..."));
     findChild<QAction *>(QLatin1String("appearsin_bl_priceguide"))->setText(tr("Show BrickLink Price Guide Info..."));
     findChild<QAction *>(QLatin1String("appearsin_bl_lotsforsale"))->setText(tr("Show Lots for Sale on BrickLink..."));
@@ -188,23 +176,6 @@ void AppearsInWidget::resizeColumns()
     resizeColumnToContents(0);
     resizeColumnToContents(1);
     setUpdatesEnabled(true);
-}
-
-void AppearsInWidget::viewLargeImage()
-{
-    const BrickLink::AppearsInItem *ai = appearsIn();
-
-    if (ai && ai->second) {
-        BrickLink::Picture *lpic = BrickLink::core()->largePicture(ai->second, true);
-
-        if (lpic) {
-            LargePictureWidget *l = new LargePictureWidget(lpic, this);
-            l->show();
-            l->raise();
-            l->activateWindow();
-            l->setFocus();
-        }
-    }
 }
 
 void AppearsInWidget::showBLCatalogInfo()

@@ -35,7 +35,6 @@ public:
     QSize sizeHint() const override;
 
 protected slots:
-    void viewLargeImage();
     void showBLCatalogInfo();
     void showBLPriceGuideInfo();
     void showBLLotsForSale();

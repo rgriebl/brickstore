@@ -81,17 +81,6 @@ PictureWidget::PictureWidget(QWidget *parent)
     addAction(a);
 
     a = new QAction(this);
-    a->setObjectName("picture_magnify");
-    a->setIcon(QIcon(":/images/viewmagp.png"));
-    connect(a, &QAction::triggered,
-            this, &PictureWidget::viewLargeImage);
-    addAction(a);
-
-    a = new QAction(this);
-    a->setSeparator(true);
-    addAction(a);
-
-    a = new QAction(this);
     a->setObjectName("picture_bl_catalog");
     a->setIcon(QIcon(":/images/edit_bl_catalog.png"));
     connect(a, &QAction::triggered,
@@ -117,7 +106,6 @@ PictureWidget::PictureWidget(QWidget *parent)
 void PictureWidget::languageChange()
 {
     findChild<QAction *> ("picture_reload")->setText(tr("Update"));
-    findChild<QAction *> ("picture_magnify")->setText(tr("View large image..."));
     findChild<QAction *> ("picture_bl_catalog")->setText(tr("Show BrickLink Catalog Info..."));
     findChild<QAction *> ("picture_bl_priceguide")->setText(tr("Show BrickLink Price Guide Info..."));
     findChild<QAction *> ("picture_bl_lotsforsale")->setText(tr("Show Lots for Sale on BrickLink..."));
@@ -134,12 +122,7 @@ PictureWidget::~PictureWidget()
 QSize PictureWidget::sizeHint() const
 {
     QFontMetrics fm = fontMetrics();
-    return QSize(4 + 2*80 + 4, 4 + 80 + 4 + 5 * (fm.height() + 1) + 4);
-}
-
-void PictureWidget::mouseDoubleClickEvent(QMouseEvent *)
-{
-    viewLargeImage();
+    return { 4 + 2 * d->m_default_size + 4, 4 + d->m_default_size + 4 + 5 * (fm.height() + 1) + 4 };
 }
 
 void PictureWidget::doUpdate()
@@ -147,22 +130,6 @@ void PictureWidget::doUpdate()
     if (d->m_pic) {
         d->m_pic->update(true);
         redraw();
-    }
-}
-
-void PictureWidget::viewLargeImage()
-{
-    if (!d->m_pic)
-        return;
-
-    BrickLink::Picture *lpic = BrickLink::core()->largePicture(d->m_pic->item(), true);
-
-    if (lpic) {
-        LargePictureWidget *l = new LargePictureWidget(lpic, this);
-        l->show();
-        l->raise();
-        l->activateWindow();
-        l->setFocus();
     }
 }
 
@@ -200,7 +167,6 @@ void PictureWidget::setPicture(BrickLink::Picture *pic)
                                  this, &PictureWidget::gotUpdate);
     }
 
-    setToolTip(pic ? tr("Double-click to view the large image.") : QString());
     setContextMenuPolicy(pic ? Qt::ActionsContextMenu : Qt::NoContextMenu);
 
     redraw();
@@ -263,117 +229,13 @@ void PictureWidget::resizeEvent(QResizeEvent *e)
     d->m_tlabel->setGeometry(cr.left() + 4, cr.top() + 4 + 80 + 4, cr.width() - 2*4, cr.height() - (4 + 80 + 4 + 4));
 }
 
-void PictureWidget::checkContextMenu(bool b)
+bool PictureWidget::event(QEvent *e)
 {
-    d->m_tlabel->setContextMenuPolicy(b ? Qt::DefaultContextMenu : Qt::NoContextMenu);
-}
-
-// -------------------------------------------------------------------------
-
-
-LargePictureWidget::LargePictureWidget(BrickLink::Picture *lpic, QWidget *parent)
-        : QLabel(parent)
-{
-    d = new LargePictureWidgetPrivate();
-
-    setWindowFlags(Qt::Tool | Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowStaysOnTopHint);
-    //setWindowModality(Qt::ApplicationModal);
-    setAttribute(Qt::WA_DeleteOnClose);
-
-
-    setBackgroundRole(QPalette::Base);
-    setAutoFillBackground(true);
-    setFrameStyle(QFrame::NoFrame);
-    setAlignment(Qt::AlignCenter);
-    setFixedSize(640, 480);
-    setContextMenuPolicy(Qt::ActionsContextMenu);
-    setWordWrap(true);
-
-    d->m_pic = lpic;
-    if (d->m_pic)
-        d->m_pic->addRef();
-
-    connect(BrickLink::core(), &BrickLink::Core::pictureUpdated,
-            this, &LargePictureWidget::gotUpdate);
-
-    QAction *a;
-    a = new QAction(this);
-    a->setObjectName("picture_reload");
-    a->setIcon(QIcon(":/images/reload.png"));
-    connect(a, &QAction::triggered, this,
-            &LargePictureWidget::doUpdate);
-    addAction(a);
-
-    a = new QAction(this);
-    a->setSeparator(true);
-    addAction(a);
-
-    a = new QAction(this);
-    a->setObjectName("picture_close");
-    a->setIcon(QIcon(":/images/file_close.png"));
-    connect(a, &QAction::triggered,
-            this, &QWidget::close);
-    addAction(a);
-
-    languageChange();
-    redraw();
-}
-
-void LargePictureWidget::languageChange()
-{
-    findChild<QAction *> ("picture_reload")->setText(tr("Update"));
-    findChild<QAction *> ("picture_close")->setText(tr("Close"));
-    setToolTip(tr("Double-click to close this window."));
-}
-
-LargePictureWidget::~LargePictureWidget()
-{
-    if (d->m_pic)
-        d->m_pic->release();
-    delete d;
-}
-
-void LargePictureWidget::gotUpdate(BrickLink::Picture *pic)
-{
-    if (pic == d->m_pic)
-        redraw();
-}
-
-void LargePictureWidget::redraw()
-{
-    if (d->m_pic) {
-        setWindowTitle(QString(d->m_pic->item()->id()) + " " + d->m_pic->item()->name());
-
-        if (d->m_pic->updateStatus() == BrickLink::Updating)
-            setText(QLatin1String("<center><i>") +
-                    tr("Please wait ...updating") +
-                    QLatin1String("</i></center>"));
-        else if (d->m_pic->valid())
-            setPixmap(d->m_pic->pixmap());
-        else
-            setText(QString());
+    if (d->m_pic && e && e->type() == QEvent::ToolTip) {
+        return BrickLink::ToolTip::inst()->show(d->m_pic->item(), d->m_pic->color(),
+                                                static_cast<QHelpEvent *>(e)->globalPos(), this);
     }
+    return QFrame::event(e);
 }
 
-void LargePictureWidget::mouseDoubleClickEvent(QMouseEvent *e)
-{
-    e->accept();
-    close();
-}
-
-void LargePictureWidget::keyPressEvent(QKeyEvent *e)
-{
-    if (e->key() == Qt::Key_Escape || e->key() == Qt::Key_Return) {
-        e->accept();
-        close();
-    }
-}
-
-void LargePictureWidget::doUpdate()
-{
-    if (d->m_pic)
-        d->m_pic->update(true);
-    redraw();
-}
-
-
+#include "moc_picturewidget.cpp"
