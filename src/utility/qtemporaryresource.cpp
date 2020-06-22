@@ -31,7 +31,7 @@ public:
     QHash<QString, QByteArray> contents;
 };
 
-QTemporaryResourcePrivate *QTemporaryResource::d_ptr = 0;
+QTemporaryResourcePrivate *QTemporaryResource::d_ptr = nullptr;
 
 QTemporaryResourcePrivate *QTemporaryResource::d_inst()
 {
@@ -100,15 +100,19 @@ bool QTemporaryResource::isRegisteredResource(const QString &key)
 class QTemporaryResourceFileEngineHandler : public QAbstractFileEngineHandler
 {
 public:
-    QTemporaryResourceFileEngineHandler() { }
-    ~QTemporaryResourceFileEngineHandler() { }
-    QAbstractFileEngine *create(const QString &path) const;
+    QTemporaryResourceFileEngineHandler() = default;
+    ~QTemporaryResourceFileEngineHandler() override = default;
+    QAbstractFileEngine *create(const QString &path) const override;
+
+private:
+    Q_DISABLE_COPY(QTemporaryResourceFileEngineHandler)
 };
+
 QAbstractFileEngine *QTemporaryResourceFileEngineHandler::create(const QString &path) const
 {
     if (path.size() > 0 && path.startsWith(QLatin1String("#/")))
         return new QTemporaryResourceFileEngine(path);
-    return 0;
+    return nullptr;
 }
 
 //resource engine
@@ -120,10 +124,10 @@ protected:
 private:
     QString key;
     QByteArray value;
-    qint64 offset;
-    bool valid;
+    qint64 offset = 0;
+    bool valid = false;
 protected:
-    QTemporaryResourceFileEnginePrivate() : offset(0), valid(false) { }
+    QTemporaryResourceFileEnginePrivate() = default;
 };
 
 bool QTemporaryResourceFileEngine::mkdir(const QString &, bool) const
@@ -155,12 +159,11 @@ QTemporaryResourceFileEngine::QTemporaryResourceFileEngine(const QString &file) 
 //    QAbstractFileEngine(*new QTemporaryResourceFileEnginePrivate)
     QAbstractFileEngine(), d(new QTemporaryResourceFileEnginePrivate)
 {
-    setFileName(file);
+    QTemporaryResourceFileEngine::setFileName(file);
 }
 
 QTemporaryResourceFileEngine::~QTemporaryResourceFileEngine()
-{
-}
+= default;
 
 void QTemporaryResourceFileEngine::setFileName(const QString &file)
 {
@@ -277,7 +280,7 @@ bool QTemporaryResourceFileEngine::isSequential() const
 QAbstractFileEngine::FileFlags QTemporaryResourceFileEngine::fileFlags(QAbstractFileEngine::FileFlags type) const
 {
 //    Q_D(const QTemporaryResourceFileEngine);
-    QAbstractFileEngine::FileFlags ret = 0;
+    QAbstractFileEngine::FileFlags ret = nullptr;
     if(!d->valid)
         return ret;
 

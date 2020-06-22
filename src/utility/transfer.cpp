@@ -180,10 +180,6 @@ protected:
 // ===========================================================================
 // ===========================================================================
 
-TransferJob::TransferJob()
-{
-}
-
 TransferJob::~TransferJob()
 {
     delete m_file;
@@ -214,16 +210,16 @@ bool TransferJob::abort()
 TransferJob *TransferJob::create(HttpMethod method, const QUrl &url, const QDateTime &ifnewer, QIODevice *file)
 {
     if (url.isEmpty())
-        return 0;
+        return nullptr;
 
-    TransferJob *j = new TransferJob();
+    auto *j = new TransferJob();
 
     j->m_url = url;
     if (j->m_url.scheme().isEmpty())
         j->m_url.setScheme("http");
     j->m_only_if_newer = ifnewer;
-    j->m_data = file ? 0 : new QByteArray();
-    j->m_file = file ? file : 0;
+    j->m_data = file ? nullptr : new QByteArray();
+    j->m_file = file ? file : nullptr;
     j->m_http_method = method;
 
     j->m_respcode = 0;
@@ -245,7 +241,7 @@ Transfer::Transfer()
     m_nam->setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
 
     if (s_default_user_agent.isEmpty())
-        s_default_user_agent = QString("%1/%2").arg(qApp->applicationName()).arg(qApp->applicationVersion());
+        s_default_user_agent = QString("%1/%2").arg(qApp->applicationName(), qApp->applicationVersion());
     m_user_agent = s_default_user_agent;
 }
 
@@ -375,3 +371,5 @@ QString Transfer::defaultUserAgent()
     return s_default_user_agent;
 }
 
+
+#include "moc_transfer.cpp"

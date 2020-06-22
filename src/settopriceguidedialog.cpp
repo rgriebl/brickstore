@@ -50,3 +50,5 @@ bool SetToPriceGuideDialog::forceUpdate() const
     return w_force_update->isChecked();
 }
 
+
+#include "moc_settopriceguidedialog.cpp"

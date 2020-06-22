@@ -227,7 +227,7 @@ void TaskPriceGuideWidget::dockLocationChanged(Qt::DockWidgetArea area)
 // ----------------------------------------------------------------------
 
 TaskInfoWidget::TaskInfoWidget(QWidget *parent)
-        : QStackedWidget(parent), m_win(nullptr)
+    : QStackedWidget(parent), m_win(nullptr)
 {
     setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
@@ -281,8 +281,7 @@ void TaskInfoWidget::selectionUpdate(const Document::ItemList &list)
     if (!m_win || (list.count() == 0)) {
         m_pic->setPicture(nullptr);
         setCurrentWidget(m_pic);
-    }
-    else if (list.count() == 1) {
+    } else if (list.count() == 1) {
         m_pic->setPicture(BrickLink::core()->picture(list.front()->item(), list.front()->color(), true));
         setCurrentWidget(m_pic);
     }
@@ -294,18 +293,16 @@ void TaskInfoWidget::selectionUpdate(const Document::ItemList &list)
         QString ccode = m_win->document()->currencyCode();
 
         if (!qFuzzyCompare(stat.value(), stat.minValue())) {
-            valstr = QString("%1 (%2 %3)").
-                     arg(Currency::toString(stat.value(), ccode, Currency::LocalSymbol)).
-                     arg(tr("min.")).
-                     arg(Currency::toString(stat.minValue(), ccode, Currency::LocalSymbol));
-        }
-        else
+            valstr = QString("%1 (%2 %3)").arg(Currency::toString(stat.value(), ccode, Currency::LocalSymbol),
+                                               tr("min."),
+                                               Currency::toString(stat.minValue(), ccode, Currency::LocalSymbol));
+        } else {
             valstr = Currency::toString(stat.value(), ccode, Currency::LocalSymbol);
+        }
 
         if (qFuzzyCompare(stat.weight(), -DBL_MIN)) {
             wgtstr = "-";
-        }
-        else {
+        } else {
             double weight = stat.weight();
 
             if (weight < 0) {
@@ -317,11 +314,11 @@ void TaskInfoWidget::selectionUpdate(const Document::ItemList &list)
         }
 
         s = QString("<h3>%1</h3>&nbsp;&nbsp;%2: %3<br />&nbsp;&nbsp;%4: %5<br /><br />&nbsp;&nbsp;%6: %7<br /><br />&nbsp;&nbsp;%8: %9").
-            arg(tr("Multiple lots selected")).
-            arg(tr("Lots")).arg(stat.lots()).
-            arg(tr("Items")).arg(stat.items()).
-            arg(tr("Value")).arg(valstr).
-            arg(tr("Weight")).arg(wgtstr);
+                arg(tr("Multiple lots selected")).
+                arg(tr("Lots")).arg(stat.lots()).
+                arg(tr("Items")).arg(stat.items()).
+                arg(tr("Value")).arg(valstr).
+                arg(tr("Weight")).arg(wgtstr);
 
 //  if (( stat.errors ( ) > 0 ) && Config::inst ( )->showInputErrors ( ))
 //   s += QString ( "<br /><br />&nbsp;&nbsp;%1: %2" ).arg ( tr( "Errors" )).arg ( stat.errors ( ));
@@ -360,7 +357,7 @@ QSize TaskAppearsInWidget::minimumSizeHint() const
 {
     const QFontMetrics &fm = fontMetrics();
 
-    return QSize(fm.horizontalAdvance('m') * 20, fm.height() * 10);
+    return { fm.horizontalAdvance('m') * 20, fm.height() * 10 };
 }
 
 QSize TaskAppearsInWidget::sizeHint() const
@@ -392,3 +389,5 @@ void TaskAppearsInWidget::selectionUpdate(const Document::ItemList &list)
     else
         setItems(list);
 }
+
+#include "moc_taskwidgets.cpp"

@@ -65,6 +65,7 @@ public:
 
 class CategoryDelegate : public BrickLink::ItemDelegate
 {
+        Q_OBJECT
 public:
     CategoryDelegate(QObject *parent = nullptr)
         : BrickLink::ItemDelegate(parent, BrickLink::ItemDelegate::AlwaysShowSelection)
@@ -84,6 +85,7 @@ void CategoryDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
 
 class ItemThumbsDelegate : public BrickLink::ItemDelegate
 {
+    Q_OBJECT
 public:
     ItemThumbsDelegate(QObject *parent = nullptr)
         : BrickLink::ItemDelegate(parent, BrickLink::ItemDelegate::AlwaysShowSelection)
@@ -95,7 +97,7 @@ public:
 QSize ItemThumbsDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
     if (index.column() == 0) {
-        const BrickLink::Item *item = qvariant_cast<const BrickLink::Item *>(index.data(BrickLink::ItemPointerRole));
+        const auto *item = qvariant_cast<const BrickLink::Item *>(index.data(BrickLink::ItemPointerRole));
         return item ? item->itemType()->pictureSize() : QSize(80, 60);
     } else {
         return BrickLink::ItemDelegate::sizeHint(option, index);
@@ -244,7 +246,7 @@ void SelectItem::init()
     connect(d->w_thumbs, &QWidget::customContextMenuRequested,
             this, &SelectItem::showContextMenu);
 
-    QGridLayout *lay = new QGridLayout(this);
+    auto *lay = new QGridLayout(this);
     lay->setMargin(0);
     lay->setColumnStretch(1, 25);
     lay->setColumnStretch(2, 75);
@@ -258,7 +260,7 @@ void SelectItem::init()
 
     lay->addWidget(d->w_filter, 0, 2);
 
-    QHBoxLayout *viewlay = new QHBoxLayout();
+    auto *viewlay = new QHBoxLayout();
     viewlay->setMargin(0);
     viewlay->setSpacing(0);
     viewlay->addWidget(d->w_viewmode->button(0));
@@ -520,16 +522,22 @@ void SelectItem::applyFilter()
 QSize SelectItem::sizeHint() const
 {
     QFontMetrics fm = fontMetrics();
-    return QSize(120 * fm.horizontalAdvance('x'), 20 * fm.height());
+    return { 120 * fm.horizontalAdvance('x'), 20 * fm.height() };
+}
+
+QSize SelectItem::minimumSizeHint() const
+{
+    QFontMetrics fm = fontMetrics();
+    return { 80 * fm.horizontalAdvance('x'), 12 * fm.height() };
 }
 
 void SelectItem::showContextMenu(const QPoint &p)
 {
-    if (QAbstractItemView *iv = qobject_cast<QAbstractItemView *>(sender())) {
+    if (auto *iv = qobject_cast<QAbstractItemView *>(sender())) {
         QModelIndex idx = iv->indexAt(p);
 
         if (idx.isValid()) {
-            const BrickLink::Item *item = idx.model()->data(idx, BrickLink::ItemPointerRole).value<const BrickLink::Item *>();
+            const auto *item = idx.model()->data(idx, BrickLink::ItemPointerRole).value<const BrickLink::Item *>();
 
             if (item && item->category() != currentCategory()) {
                 QMenu m(this);
@@ -542,3 +550,6 @@ void SelectItem::showContextMenu(const QPoint &p)
         }
     }
 }
+
+#include "selectitem.moc"
+#include "moc_selectitem.cpp"

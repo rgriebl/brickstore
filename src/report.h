@@ -35,6 +35,7 @@ public:
     void print(QPaintDevice *pd, const Document *doc, const Document::ItemList &items) const;
 
 private:
+    Q_DISABLE_COPY(Report)
     Report();
 
     ReportPrivate *d;
@@ -57,6 +58,8 @@ public:
     QList<Report *> reports() const;
 
 private:
+    Q_DISABLE_COPY(ReportManager)
+
     QList<Report *> m_reports;
 
     mutable QPrinter *m_printer; // mutable for delayed initialization

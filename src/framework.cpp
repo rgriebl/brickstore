@@ -401,22 +401,16 @@ FrameWork::FrameWork(QWidget *parent)
 
     languageChange();
 
-    BrickLink::Core *bl = BrickLink::core();
-
     connect(Application::inst(), &Application::onlineStateChanged,
             this, &FrameWork::onlineStateChanged);
-    connect(Config::inst(), &Config::updateIntervalsChanged,
-            bl, &BrickLink::Core::setUpdateIntervals);
+    onlineStateChanged(Application::inst()->isOnline());
+
     connect(Config::inst(), &Config::measurementSystemChanged,
             this, &FrameWork::statisticsUpdate);
 
     findAction("view_show_input_errors")->setChecked(Config::inst()->showInputErrors());
 
-    onlineStateChanged(Application::inst()->isOnline());
-
-    bl->setUpdateIntervals(Config::inst()->updateIntervals());
-
-    connect(bl, &BrickLink::Core::transferJobProgress,
+    connect(BrickLink::core(), &BrickLink::Core::transferJobProgress,
             this, &FrameWork::transferJobProgressUpdate);
 
     connect(m_undogroup, &QUndoGroup::cleanChanged,
@@ -428,7 +422,6 @@ FrameWork::FrameWork(QWidget *parent)
         if (MessageBox::warning(this, tr("Could not load the BrickLink database files.<br /><br />Should these files be updated now?"), MessageBox::Yes | MessageBox::No) == MessageBox::Yes)
             dbok = updateDatabase();
     }
-
     if (dbok)
         Application::inst()->enableEmitOpenDocument();
     else
@@ -855,8 +848,10 @@ static inline quint32 NeedSelection(quint8 minSel, quint8 maxSel = 0)
     return NeedDocument | (quint32(minSel) << 24) | (quint32(maxSel) << 16);
 }
 
-inline static QAction *newQAction(QObject *parent, const char *name, quint32 flags = 0, bool toggle = false,
-                                  QObject *receiver = nullptr, const char *slot = nullptr)
+template <typename Func>
+inline static QAction *newQAction(QObject *parent, const char *name, quint32 flags, bool toggle,
+                                  const typename QtPrivate::FunctionPointer<Func>::Object *receiver,
+                                  Func slot)
 {
     QAction *a = new QAction(parent);
     a->setObjectName(QLatin1String(name));
@@ -864,9 +859,19 @@ inline static QAction *newQAction(QObject *parent, const char *name, quint32 fla
         a->setProperty("bsFlags", flags);
     if (toggle)
         a->setCheckable(true);
-    if (receiver && slot)
-        QObject::connect(a, toggle ? SIGNAL(toggled(bool)) : SIGNAL(triggered()), receiver, slot);
+    if (receiver && slot) {
+        if (toggle)
+            QObject::connect(a, &QAction::toggled, receiver, slot);
+        else
+            QObject::connect(a, &QAction::triggered, receiver, slot);
+//        QObject::connect(a, toggle ? SIGNAL(toggled(bool)) : SIGNAL(triggered()), receiver, slot);
+    }
     return a;
+}
+
+inline static QAction *newQAction(QObject *parent, const char *name, quint32 flags = 0, bool toggle = false)
+{
+    return newQAction(parent, name, flags, toggle, static_cast<QObject *>(nullptr), &QObject::userData);
 }
 
 inline static QActionGroup *newQActionGroup(QObject *parent, const char *name, bool exclusive = false)
@@ -883,8 +888,8 @@ void FrameWork::createActions()
     QActionGroup *g;
     QMenu *m;
 
-    a = newQAction(this, "file_new", 0, false, this, SLOT(fileNew()));
-    a = newQAction(this, "file_open", 0, false, this, SLOT(fileOpen()));
+    a = newQAction(this, "file_new", 0, false, this, &FrameWork::fileNew);
+    a = newQAction(this, "file_open", 0, false, this, &FrameWork::fileOpen);
 
     auto rm = new RecentMenu(this, this);
     rm->menuAction()->setObjectName("file_open_recent");
@@ -897,12 +902,12 @@ void FrameWork::createActions()
     (void) newQAction(this, "file_print_pdf", NeedDocument);
 
     m = newQMenu(this, "file_import");
-    m->addAction(newQAction(this, "file_import_bl_inv", 0, false, this, SLOT(fileImportBrickLinkInventory())));
-    m->addAction(newQAction(this, "file_import_bl_xml", 0, false, this, SLOT(fileImportBrickLinkXML())));
-    m->addAction(newQAction(this, "file_import_bl_order", NeedNetwork, false, this, SLOT(fileImportBrickLinkOrder())));
-    m->addAction(newQAction(this, "file_import_bl_store_inv", NeedNetwork, false, this, SLOT(fileImportBrickLinkStore())));
-    m->addAction(newQAction(this, "file_import_bl_cart", NeedNetwork, false, this, SLOT(fileImportBrickLinkCart())));
-    m->addAction(newQAction(this, "file_import_ldraw_model", 0, false, this, SLOT(fileImportLDrawModel())));
+    m->addAction(newQAction(this, "file_import_bl_inv", 0, false, this, QOverload<void>::of(&FrameWork::fileImportBrickLinkInventory)));
+    m->addAction(newQAction(this, "file_import_bl_xml", 0, false, this, &FrameWork::fileImportBrickLinkXML));
+    m->addAction(newQAction(this, "file_import_bl_order", NeedNetwork, false, this, &FrameWork::fileImportBrickLinkOrder));
+    m->addAction(newQAction(this, "file_import_bl_store_inv", NeedNetwork, false, this, &FrameWork::fileImportBrickLinkStore));
+    m->addAction(newQAction(this, "file_import_bl_cart", NeedNetwork, false, this, &FrameWork::fileImportBrickLinkCart));
+    m->addAction(newQAction(this, "file_import_ldraw_model", 0, false, this, &FrameWork::fileImportLDrawModel));
 
     m = newQMenu(this, "file_export");
     m->addAction(newQAction(this, "file_export_bl_xml", NeedDocument));
@@ -913,7 +918,7 @@ void FrameWork::createActions()
 
     (void) newQAction(this, "file_close", NeedDocument);
 
-    a = newQAction(this, "file_exit", 0, false, this, SLOT(close()));
+    a = newQAction(this, "file_exit", 0, false, this, &FrameWork::close);
     a->setMenuRole(QAction::QuitRole);
 
     a = m_undogroup->createUndoAction(this);
@@ -932,7 +937,7 @@ void FrameWork::createActions()
             &QShortcut::activated, a, &QAction::trigger);
     (void) newQAction(this, "edit_delete", NeedSelection(1));
 
-    a = newQAction(this, "edit_additems", NeedDocument, false, this, SLOT(showAddItemDialog()));
+    a = newQAction(this, "edit_additems", NeedDocument, false, this, &FrameWork::showAddItemDialog);
     a->setShortcutContext(Qt::ApplicationShortcut);
 
     (void) newQAction(this, "edit_subtractitems", NeedDocument);
@@ -1014,28 +1019,28 @@ void FrameWork::createActions()
     (void) newQAction(this, "edit_bl_lotsforsale", NeedSelection(1, 1) | NeedNetwork);
     (void) newQAction(this, "edit_bl_myinventory", NeedSelection(1, 1) | NeedLotId | NeedNetwork);
 
-    (void) newQAction(this, "view_fullscreen", 0, true, this, SLOT(viewFullScreen(bool)));
+    (void) newQAction(this, "view_fullscreen", 0, true, this, &FrameWork::viewFullScreen);
 
     m_toolbar->toggleViewAction()->setObjectName("view_toolbar");
     m = newQMenu(this, "view_docks");
     foreach (QDockWidget *dock, m_dock_widgets)
         m->addAction(dock->toggleViewAction());
 
-    (void) newQAction(this, "view_statusbar", 0, true, this, SLOT(viewStatusBar(bool)));
-    (void) newQAction(this, "view_show_input_errors", 0, true, Config::inst(), SLOT(setShowInputErrors(bool)));
+    (void) newQAction(this, "view_statusbar", 0, true, this, &FrameWork::viewStatusBar);
+    (void) newQAction(this, "view_show_input_errors", 0, true, Config::inst(), &Config::setShowInputErrors);
     (void) newQAction(this, "view_difference_mode", 0, true);
     (void) newQAction(this, "view_save_default_col");
-    (void) newQAction(this, "extras_update_database", NeedNetwork, false, this, SLOT(updateDatabase()));
+    (void) newQAction(this, "extras_update_database", NeedNetwork, false, this, &FrameWork::updateDatabase);
 
-    a = newQAction(this, "extras_configure", 0, false, this, SLOT(configure()));
+    a = newQAction(this, "extras_configure", 0, false, this, QOverload<void>::of(&FrameWork::configure));
     a->setMenuRole(QAction::PreferencesRole);
 
-    //(void) newQAction(this, "help_whatsthis", 0, false, this, SLOT(whatsThis()));
+    //(void) newQAction(this, "help_whatsthis", 0, false, this, &FrameWork::whatsThis);
 
-    a = newQAction(this, "help_about", 0, false, Application::inst(), SLOT(about()));
+    a = newQAction(this, "help_about", 0, false, Application::inst(), &Application::about);
     a->setMenuRole(QAction::AboutRole);
 
-    a = newQAction(this, "help_updates", NeedNetwork, false, Application::inst(), SLOT(checkForUpdates()));
+    a = newQAction(this, "help_updates", NeedNetwork, false, Application::inst(), &Application::checkForUpdates);
     a->setMenuRole(QAction::ApplicationSpecificRole);
 
     // set all icons that have a pixmap corresponding to name()
@@ -1520,7 +1525,6 @@ void FrameWork::transferJobProgressUpdate(int p, int t)
     }
 }
 
-
 void FrameWork::configure()
 {
     configure(nullptr);
@@ -1656,3 +1660,5 @@ void FrameWork::setItemDetailHelper(Document::Item *docitem)
 }
 
 #include "framework.moc"
+
+#include "moc_framework.cpp"

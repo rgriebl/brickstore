@@ -36,10 +36,10 @@ ConsolidateItemsDialog::ConsolidateItemsDialog(BrickLink::InvItem *existitem, Br
     w_list->setContextMenuPolicy(Qt::NoContextMenu);
     setFocusProxy(w_list);
 
-    DocumentProxyModel *view = new DocumentProxyModel(doc);
+    auto *view = new DocumentProxyModel(doc);
     w_list->setModel(view);
 
-    DocumentDelegate *dd = new DocumentDelegate(doc, view, w_list);
+    auto *dd = new DocumentDelegate(doc, view, w_list);
     dd->setReadOnly(true);
     w_list->setItemDelegate(dd);
     w_list->verticalHeader()->setDefaultSectionSize(dd->defaultItemHeight(w_list));
@@ -62,3 +62,5 @@ bool ConsolidateItemsDialog::attributesFromExisting() const
 {
     return w_list->selectionModel()->isRowSelected(0, QModelIndex());
 }
+
+#include "moc_consolidateitemsdialog.cpp"

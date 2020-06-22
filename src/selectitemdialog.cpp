@@ -74,3 +74,5 @@ void SelectItemDialog::showEvent(QShowEvent *)
         m_pos = QRect();
     }
 }
+
+#include "moc_selectitemdialog.cpp"

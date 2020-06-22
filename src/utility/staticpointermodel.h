@@ -89,6 +89,6 @@ private:
 
     mutable QVector<int> sorted; // this needs to initialized in the first init() call
     QList<int> filtered;
-    int lastSortColumn;
-    Qt::SortOrder lastSortOrder;
+    int lastSortColumn = -1;
+    Qt::SortOrder lastSortOrder = Qt::AscendingOrder;
 };

@@ -51,7 +51,7 @@ AddItemDialog::AddItemDialog(QWidget *parent)
 {
     setupUi(this);
 
-    m_window = 0;
+    m_window = nullptr;
     m_caption_fmt        = windowTitle();
     m_price_label_fmt    = w_label_currency->text();
     m_currency_label_fmt = w_radio_currency->text();
@@ -160,9 +160,9 @@ void AddItemDialog::languageChange()
 
 AddItemDialog::~AddItemDialog()
 {
-    w_picture->setPicture(0);
-    w_price_guide->setPriceGuide(0);
-    w_appears_in->setItem(0, 0);
+    w_picture->setPicture(nullptr);
+    w_price_guide->setPriceGuide(nullptr);
+    w_appears_in->setItem(nullptr, nullptr);
 }
 
 void AddItemDialog::updateCaption()
@@ -241,7 +241,7 @@ void AddItemDialog::setSimpleMode(bool b)
         w_comments,
         w_comments_label,
 
-        0
+        nullptr
     };
 
     for (QWidget **wpp = wl; *wpp; wpp++) {
@@ -272,9 +272,9 @@ void AddItemDialog::showItemInColor(const BrickLink::Item *it, const BrickLink::
         w_appears_in->setItem(it, col);
     }
     else {
-        w_picture->setPicture(0);
-        w_price_guide->setPriceGuide(0);
-        w_appears_in->setItem(0, 0);
+        w_picture->setPicture(nullptr);
+        w_price_guide->setPriceGuide(nullptr);
+        w_appears_in->setItem(nullptr, nullptr);
     }
     checkAddPossible();
 }
@@ -296,9 +296,9 @@ void AddItemDialog::setTierType(int type)
     QValidator *valid = (type == 0) ? m_percent_validator : m_money_validator;
     QString text = (type == 0) ? QString("0") : Currency::toString(0, m_currency_code);
 
-    for (int i = 0; i < 3; i++) {
-        w_tier_price [i]->setValidator(valid);
-        w_tier_price [i]->setText(text);
+    for (const auto &tp : w_tier_price) {
+        tp->setValidator(valid);
+        tp->setText(text);
     }
 }
 
@@ -365,7 +365,7 @@ void AddItemDialog::addClicked()
     if (!checkAddPossible() || !m_window)
         return;
 
-    BrickLink::InvItem *ii = new BrickLink::InvItem(w_select_color->currentColor(), w_select_item->currentItem());
+    auto *ii = new BrickLink::InvItem(w_select_color->currentColor(), w_select_item->currentItem());
 
     ii->setQuantity(w_qty->text().toInt());
     ii->setPrice(Currency::fromString(w_price->text()));
@@ -390,3 +390,5 @@ void AddItemDialog::setPrice(double d)
     w_price->setText(Currency::toString(d, m_currency_code));
     checkAddPossible();
 }
+
+#include "moc_additemdialog.cpp"

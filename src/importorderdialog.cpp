@@ -64,7 +64,7 @@ public:
                 this, &OrderListModel::flagReceived);
     }
 
-    ~OrderListModel()
+    ~OrderListModel() override
     {
         setOrderList(QList<QPair<BrickLink::Order *, BrickLink::InvItemList *> >());
         delete m_trans;
@@ -73,20 +73,20 @@ public:
     void setOrderList(const QList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > &orderlist)
     {
         beginResetModel();
-        for (QList<QPair<BrickLink::Order *, BrickLink::InvItemList *> >::iterator it = m_orderlist.begin(); it != m_orderlist.end(); ++it) {
-            delete it->first;
-            delete it->second;
+        for (auto &order : qAsConst(m_orderlist)) {
+            delete order.first;
+            delete order.second;
         }
         m_orderlist = orderlist;
         endResetModel();
     }
 
-    virtual int rowCount(const QModelIndex &parent) const
+    int rowCount(const QModelIndex &parent) const override
     {
         return parent.isValid() ? 0 : m_orderlist.size();
     }
 
-    virtual int columnCount(const QModelIndex &parent) const
+    int columnCount(const QModelIndex &parent) const override
     {
         return parent.isValid() ? 0 : 5;
     }
@@ -96,7 +96,7 @@ public:
         return (order.first->type() == BrickLink::Received);
     }
 
-    virtual QVariant data(const QModelIndex &index, int role) const
+    QVariant data(const QModelIndex &index, int role) const override
     {
         if (!index.isValid())
             return QVariant();
@@ -116,14 +116,14 @@ public:
                 if (firstline <= 0)
                     return order.first->other();
                 else
-                    return QString("%1 (%2)").arg(order.first->address().left(firstline)).arg(order.first->other());
+                    return QString("%1 (%2)").arg(order.first->address().left(firstline), order.first->other());
             }
             case 4: res = Currency::toString(order.first->grandTotal(), order.first->currencyCode(), Currency::InternationalSymbol, 2); break;
             }
         } else if (role == Qt::DecorationRole) {
             switch (col) {
             case 3:
-                QImage *flag = 0;
+                QImage *flag = nullptr;
                 QString cc = order.first->countryCode();
                 if (cc.length() == 2)
                     flag = m_flags[cc];
@@ -132,7 +132,7 @@ public:
 
                     TransferJob *job = TransferJob::get(url);
                     int userData = cc[0].unicode() | (cc[1].unicode() << 16);
-                    job->setUserData<void>(userData, 0);
+                    job->setUserData<void>(userData, nullptr);
                     m_trans->retrieve(job);
                 }
                 if (flag)
@@ -166,7 +166,7 @@ public:
         return res;
     }
 
-    virtual QVariant headerData(int section, Qt::Orientation orient, int role) const
+    QVariant headerData(int section, Qt::Orientation orient, int role) const override
     {
         QVariant res;
 
@@ -187,7 +187,7 @@ public:
         return res;
     }
 
-    virtual void sort(int section, Qt::SortOrder so)
+    void sort(int section, Qt::SortOrder so) override
     {
         emit layoutAboutToBeChanged();
         std::sort(m_orderlist.begin(), m_orderlist.end(), orderCompare(section, so));
@@ -221,7 +221,7 @@ public:
 private slots:
     void flagReceived(ThreadPoolJob *pj)
     {
-        TransferJob *j = static_cast<TransferJob *>(pj);
+        auto *j = static_cast<TransferJob *>(pj);
 
         if (!j || !j->data())
             return;
@@ -231,13 +231,13 @@ private slots:
         cc.append(QChar(ud.first & 0x0000ffff));
         cc.append(QChar(ud.first >> 16));
 
-        QImage *img = new QImage;
+        auto *img = new QImage;
         if (img->loadFromData(*j->data())) {
             m_flags.insert(cc, img);
 
             for (int r = 0; r < rowCount(QModelIndex()); ++r) {
                 QModelIndex idx = index(r, 3, QModelIndex());
-                BrickLink::Order *order = qvariant_cast<BrickLink::Order *>(data(idx, OrderPointerRole));
+                auto *order = qvariant_cast<BrickLink::Order *>(data(idx, OrderPointerRole));
 
                 if (order->countryCode() == cc)
                     emit dataChanged(idx, idx);
@@ -254,9 +254,11 @@ private:
 };
 
 
-class TransHighlightDelegate : public QStyledItemDelegate {
+class TransHighlightDelegate : public QStyledItemDelegate
+{
+    Q_OBJECT
 public:
-    TransHighlightDelegate(QObject *parent = 0)
+    TransHighlightDelegate(QObject *parent = nullptr)
             : QStyledItemDelegate(parent)
     { }
 
@@ -271,7 +273,7 @@ public:
         pal.setColor(cg, cr, th);
     }
 
-    virtual void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
+    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override
     {
         QStyleOptionViewItem myoption(option);
 
@@ -337,7 +339,7 @@ ImportOrderDialog::ImportOrderDialog(QWidget *parent)
 }
 
 ImportOrderDialog::~ImportOrderDialog()
-{ }
+= default;
 
 void ImportOrderDialog::changeEvent(QEvent *e)
 {
@@ -468,3 +470,4 @@ void ImportOrderDialog::activateItem()
 }
 
 #include "importorderdialog.moc"
+#include "moc_importorderdialog.cpp"

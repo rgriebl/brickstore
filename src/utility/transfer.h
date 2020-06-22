@@ -54,9 +54,10 @@ private:
     };
 
     static TransferJob *create(HttpMethod method, const QUrl &url, const QDateTime &ifnewer, QIODevice *file);
-    TransferJob();
 
-private:
+    TransferJob() = default;
+    Q_DISABLE_COPY(TransferJob)
+
     QUrl         m_url;
     QUrl         m_effective_url;
     QByteArray * m_data;

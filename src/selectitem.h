@@ -33,6 +33,7 @@ public:
     void setExcludeWithoutInventoryFilter(bool b);
 
     QSize sizeHint() const override;
+    QSize minimumSizeHint() const override;
 
     const BrickLink::Category *currentCategory() const;
     const BrickLink::ItemType *currentItemType() const;

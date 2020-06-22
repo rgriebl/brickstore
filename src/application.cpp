@@ -73,7 +73,7 @@ enum {
     is64Bit = (sizeof(void *) / 8)
 };
 
-Application *Application::s_inst = 0;
+Application *Application::s_inst = nullptr;
 
 Application::Application(bool rebuild_db_only, bool skip_download, int &_argc, char **_argv)
     : QApplication(_argc, _argv, !rebuild_db_only)
@@ -95,13 +95,13 @@ Application::Application(bool rebuild_db_only, bool skip_download, int &_argc, c
 
     m_enable_emit = false;
     m_has_alpha = rebuild_db_only ? false : (QPixmap::defaultDepth() >= 15);
-    m_trans_qt = 0;
-    m_trans_brickstore = 0;
+    m_trans_qt = nullptr;
+    m_trans_brickstore = nullptr;
 
     m_online = true;
     checkNetwork();
 
-    QTimer *netcheck = new QTimer(this);
+    auto *netcheck = new QTimer(this);
     connect(netcheck, &QTimer::timeout,
             this, &Application::checkNetwork);
     netcheck->start(5000);
@@ -210,7 +210,7 @@ QStringList Application::externalResourceSearchPath(const QString &subdir) const
         return baseSearchPath;
     } else {
         QStringList searchPath;
-        foreach (const QString &bsp, baseSearchPath)
+        for (const QString &bsp : qAsConst(baseSearchPath))
             searchPath << bsp + QDir::separator() + subdir;
         return searchPath;
     }
@@ -237,7 +237,7 @@ void Application::updateTranslations()
 
     bool qtLoaded = false, bsLoaded = false;
 
-    foreach (const QString &sp, spath) {
+    for (const QString &sp : qAsConst(spath)) {
         qtLoaded |= m_trans_qt->load(QLatin1String("qt_") + locale, sp);
         bsLoaded |= m_trans_brickstore->load(QLatin1String("brickstore_") + locale, sp);
     }
@@ -264,12 +264,8 @@ void Application::enableEmitOpenDocument(bool b)
 
 void Application::doEmitOpenDocument()
 {
-    while (m_enable_emit && !m_files_to_open.isEmpty()) {
-        QString file = m_files_to_open.front();
-        m_files_to_open.pop_front();
-
-        emit openDocument(file);
-    }
+    while (m_enable_emit && !m_files_to_open.isEmpty())
+        emit openDocument(m_files_to_open.takeFirst());
 }
 
 bool Application::event(QEvent *e)
@@ -288,11 +284,11 @@ bool Application::isClient(int timeout)
 {
     enum { Undecided, Server, Client } state = Undecided;
     QString socketName = QLatin1String("BrickStore");
-    QLocalServer *server = 0;
+    QLocalServer *server = nullptr;
 
 #if defined(Q_OS_WINDOWS)
     // QLocalServer::listen() would succeed for any number of callers
-    HANDLE semaphore = ::CreateSemaphore(0, 0, 1, L"Local\\BrickStore");
+    HANDLE semaphore = ::CreateSemaphore(nullptr, 0, 1, L"Local\\BrickStore");
     state = (semaphore && (::GetLastError() == ERROR_ALREADY_EXISTS)) ? Client : Server;
 #endif
     if (state != Client) {
@@ -357,7 +353,7 @@ bool Application::isClient(int timeout)
 
 void Application::clientMessage()
 {
-    QLocalServer *server = qobject_cast<QLocalServer *>(sender());
+    auto *server = qobject_cast<QLocalServer *>(sender());
     if (!server)
         return;
     QLocalSocket *client = server->nextPendingConnection();
@@ -461,8 +457,9 @@ void Application::about()
 
     QString translators = QLatin1String("<b>") + tr("Translators") + QLatin1String("</b><table border=\"0\">");
 
-    QString translators_html = QLatin1String("<tr><td>%1</td><td width=\"2em\"></td><td>%2 &lt;<a href=\"mailto:%3\">%4</a>&gt;</td></tr>");
-    foreach (const Config::Translation &trans, Config::inst()->translations()) {
+    QString translators_html = QLatin1String(R"(<tr><td>%1</td><td width="2em"></td><td>%2 &lt;<a href="mailto:%3">%4</a>&gt;</td></tr>)");
+    const auto translations = Config::inst()->translations();
+    for (const Config::Translation &trans : translations) {
         if (trans.language != QLatin1String("en")) {
             QString langname = trans.languageName.value(QLocale().name().left(2), trans.languageName[QLatin1String("en")]);
             translators += translators_html.arg(langname, trans.author, trans.authorEMail, trans.authorEMail);
@@ -530,11 +527,11 @@ void Application::about()
                 "???"
 #endif
                 )
-            .arg(QSysInfo::prettyProductName()).arg(QSysInfo::currentCpuArchitecture())
+            .arg(QSysInfo::prettyProductName(), QSysInfo::currentCpuArchitecture())
             .arg(Utility::physicalMemory()/(1024ULL*1024ULL)).arg(qt);
 
-    QString page1 = layout.arg(applicationName(), copyright, version, support).arg(page1_link, legal, translators);
-    QString page2 = layout.arg(applicationName(), copyright, version, support).arg(page2_link, technical, QString());
+    QString page1 = layout.arg(applicationName(), copyright, version, support, page1_link, legal, translators);
+    QString page2 = layout.arg(applicationName(), copyright, version, support, page2_link, technical, QString());
 
     QMap<QString, QString> pages;
     pages ["index"]  = page1;
@@ -582,7 +579,7 @@ void Application::checkNetwork()
     // this function is buggy/unreliable
     //online = InternetCheckConnectionW(L"http://" TEXT(CHECK_IP), 0, 0);
     DWORD flags;
-    online = InternetGetConnectedStateEx(&flags, 0, 0, 0);
+    online = InternetGetConnectedStateEx(&flags, nullptr, 0, 0);
     //qWarning() << "Win NET change: " << online;
 
 #else
@@ -599,3 +596,5 @@ bool Application::isOnline() const
 {
     return m_online;
 }
+
+#include "moc_application.cpp"

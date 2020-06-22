@@ -18,7 +18,7 @@
 
 
 ThreadPoolEngine::ThreadPoolEngine(ThreadPool *pool)
-    : QObject(), m_threadpool(pool), m_job(0)
+    : QObject(), m_threadpool(pool), m_job(nullptr)
 {
     setObjectName("Engine");
 
@@ -62,7 +62,7 @@ void ThreadPoolEngine::progress(int done, int total)
 void ThreadPoolEngine::finish()
 {
     emit jobFinished(thread(), m_job);
-    m_job = 0;
+    m_job = nullptr;
 }
 
 
@@ -99,11 +99,11 @@ protected:
 ////////////////////////////////////////////////////////////////
 
 ThreadPoolJob::ThreadPoolJob()
-    : m_threadpool(0), m_user_ptr(0), m_user_tag(0), m_status(Inactive)
+    : m_threadpool(nullptr), m_user_ptr(nullptr), m_user_tag(0), m_status(Inactive)
 { }
 
 ThreadPoolJob::~ThreadPoolJob()
-{ }
+= default;
 
 bool ThreadPoolJob::abort()
 {
@@ -145,7 +145,7 @@ ThreadPool::~ThreadPool()
 {
     abortAllJobs();
 
-    foreach(QThread *thread, m_threads) {
+    for (QThread *thread : qAsConst(m_threads)) {
         thread->quit();
         thread->wait();
     }
@@ -237,7 +237,7 @@ void ThreadPool::abortAllJobs()
     m_jobs.clear();
     m_mutex.unlock();
 
-    foreach(ThreadPoolJob *job, inactive) {
+    foreach (ThreadPoolJob *job, inactive) {
         job->m_status = ThreadPoolJob::Aborted;
         emit finished(job);
         delete job;
@@ -269,3 +269,5 @@ ThreadPoolEngine *ThreadPool::createThreadPoolEngine()
 }
 
 #include "threadpool.moc"
+
+#include "moc_threadpool.cpp"

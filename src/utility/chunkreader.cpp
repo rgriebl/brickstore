@@ -48,7 +48,7 @@ example:
 #endif
 
 ChunkReader::ChunkReader(QIODevice *dev, QDataStream::ByteOrder bo)
-    : m_file(0), m_stream(0)
+    : m_file(nullptr), m_stream(nullptr)
 {
     if (dev->isSequential()) {
         qWarning("ChunkReader: device does not support direct access!");
@@ -65,8 +65,7 @@ ChunkReader::ChunkReader(QIODevice *dev, QDataStream::ByteOrder bo)
 }
 
 ChunkReader::~ChunkReader()
-{
-}
+= default;
 
 QDataStream &ChunkReader::dataStream()
 {
@@ -83,7 +82,7 @@ bool ChunkReader::startChunk()
         return false;
 
     if (!m_chunks.isEmpty()) {
-        chunk_info parent = m_chunks.top();
+        const chunk_info &parent = m_chunks.top();
 
         if (m_file->pos() >= qint64(parent.startpos + parent.size))
             return false;
@@ -105,7 +104,7 @@ bool ChunkReader::skipChunk()
     if (!m_file || m_chunks.isEmpty())
         return false;
 
-    chunk_info ci = m_chunks.top();
+    const chunk_info &ci = m_chunks.top();
 
     m_stream.skipRawData(ci.size);
     return endChunk();
@@ -161,7 +160,7 @@ quint64 ChunkReader::chunkSize() const
 
 
 ChunkWriter::ChunkWriter(QIODevice *dev, QDataStream::ByteOrder bo)
-    : m_file(0), m_stream(0)
+    : m_file(nullptr), m_stream(nullptr)
 {
     if (dev->isSequential()) {
         qWarning("ChunkWriter: device does not support direct access!");

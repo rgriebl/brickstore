@@ -42,7 +42,7 @@ public:
     QString currencyCode() const;
 
 public slots:
-    void setLayout(Layout l);
+    void setLayout(PriceGuideWidget::Layout l);
     void setPriceGuide(BrickLink::PriceGuide *pg);
     void setCurrencyCode(const QString &code);
 

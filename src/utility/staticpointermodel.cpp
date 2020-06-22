@@ -15,22 +15,18 @@
 #include <QtConcurrentFilter>
 
 #include "qparallelsort.h"
-
 #include "staticpointermodel.h"
 
+
 StaticPointerModel::StaticPointerModel(QObject *parent)
-    : QAbstractItemModel(parent), lastSortColumn(-1), lastSortOrder(Qt::AscendingOrder)
-{
-}
+    : QAbstractItemModel(parent)
+{ }
 
 void StaticPointerModel::init() const
 {
     if (sorted.isEmpty()) {
-        int n = pointerCount();
-        sorted.resize(n);
-        int *ptr = sorted.data();
-        for	(int i = 0; i < n; ++i)
-            *ptr++ = i;
+        sorted.resize(pointerCount());
+        std::iota(sorted.begin(), sorted.end(), 0);
     }
 }
 
@@ -40,12 +36,12 @@ QModelIndex StaticPointerModel::index(int row, int column, const QModelIndex &pa
         const void *pointer = pointerAt(isFiltered() ? filtered.at(row) : sorted.at(row));
         return parent.isValid() ? QModelIndex() : createIndex(row, column, const_cast<void *>(pointer));
     }
-    return QModelIndex();
+    return {};
 }
 
 QModelIndex StaticPointerModel::parent(const QModelIndex &) const
 {
-    return QModelIndex();
+    return {};
 }
 
 
@@ -63,7 +59,7 @@ int StaticPointerModel::rowCount(const QModelIndex &parent) const
 
 const void *StaticPointerModel::pointer(const QModelIndex &index) const
 {
-    return index.isValid() ? static_cast<const void *>(index.internalPointer()) : 0;
+    return index.isValid() ? static_cast<const void *>(index.internalPointer()) : nullptr;
 }
 
 QModelIndex StaticPointerModel::index(const void *pointer, int column) const
@@ -162,3 +158,5 @@ Qt::SortOrder StaticPointerModel::sortOrder() const
     return lastSortOrder;
 }
 
+
+#include "moc_staticpointermodel.cpp"

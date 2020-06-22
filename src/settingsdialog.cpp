@@ -35,7 +35,7 @@ static int day2sec(int d)
 
 static QString systemDirName(const QString &path)
 {
-    QStandardPaths::StandardLocation locations[] = {
+    static const QStandardPaths::StandardLocation locations[] = {
         QStandardPaths::DesktopLocation,
         QStandardPaths::DocumentsLocation,
         QStandardPaths::MusicLocation,
@@ -47,9 +47,9 @@ static QString systemDirName(const QString &path)
         QStandardPaths::CacheLocation
     };
 
-    for (uint i = 0; i < sizeof(locations)/sizeof(locations[0]); ++i) {
-        if (QDir(QStandardPaths::writableLocation(locations[i])) == QDir(path)) {
-            QString name = QStandardPaths::displayName(locations[i]);
+    for (auto &location : locations) {
+        if (QDir(QStandardPaths::writableLocation(location)) == QDir(path)) {
+            QString name = QStandardPaths::displayName(location);
             if (!name.isEmpty())
                 return name;
             else
@@ -185,7 +185,7 @@ void SettingsDialog::load()
         bool localematch = false;
         QLocale l_active;
 
-        foreach (const Config::Translation &trans, translations) {
+        for (const auto &trans : translations) {
             if (trans.language == QLatin1String("en"))
                 w_language->addItem(trans.languageName[QLatin1String("en")], trans.language);
             else
@@ -243,7 +243,7 @@ void SettingsDialog::load()
     const BrickLink::ItemType *itype;
 
     itype = BrickLink::core()->itemType(Config::inst()->value("/Defaults/ImportInventory/ItemType", 'S').toInt());
-    BrickLink::ItemTypeModel *importmodel = new BrickLink::ItemTypeModel(this);
+    auto *importmodel = new BrickLink::ItemTypeModel(this);
     importmodel->setFilterWithoutInventory(true);
     w_def_import_type->setModel(importmodel);
 
@@ -251,7 +251,7 @@ void SettingsDialog::load()
     w_def_import_type->setCurrentIndex(importdef);
 
     itype = BrickLink::core()->itemType(Config::inst()->value("/Defaults/AddItems/ItemType", 'P').toInt());
-    BrickLink::ItemTypeModel *addmodel = new BrickLink::ItemTypeModel(this);
+    auto *addmodel = new BrickLink::ItemTypeModel(this);
     w_def_add_type->setModel(addmodel);
 
     int adddef = addmodel->index(itype ? itype : BrickLink::core()->itemType('P')).row();
@@ -348,3 +348,5 @@ void SettingsDialog::save()
 
     Config::inst()->setLoginForBrickLink(w_bl_username->text(), w_bl_password->text());
 }
+
+#include "moc_settingsdialog.cpp"

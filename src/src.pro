@@ -34,6 +34,7 @@ DEFINES += __USER__=\"$$RELEASE_USER\" __HOST__=\"$$RELEASE_HOST\"
 SOURCES += \
   appearsinwidget.cpp \
   application.cpp \
+  checkforupdates.cpp \
   config.cpp \
   document.cpp \
   documentdelegate.cpp \

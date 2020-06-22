@@ -28,7 +28,7 @@
 class PictureWidgetPrivate
 {
 public:
-    BrickLink::Picture *m_pic;
+    BrickLink::Picture *m_pic = nullptr;
     QTextBrowser *      m_tlabel;
     bool                m_connected;
     int                 m_img_height;
@@ -64,7 +64,9 @@ PictureWidget::PictureWidget(QWidget *parent)
     pal.setColor(QPalette::Base, Qt::transparent);
     d->m_tlabel->setPalette(pal);
     connect(d->m_tlabel, &QTextEdit::copyAvailable,
-            this, &PictureWidget::checkContextMenu);
+            this, [this](bool b) {
+        d->m_tlabel->setContextMenuPolicy(b ? Qt::DefaultContextMenu : Qt::NoContextMenu);
+    });
 
     QAction *a;
     a = new QAction(this);

@@ -41,6 +41,8 @@ public:
         m_timer.restart();
     }
 private:
+    Q_DISABLE_COPY(stopwatch)
+
     const char *m_label;
     QElapsedTimer m_timer;
 };

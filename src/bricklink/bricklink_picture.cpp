@@ -47,6 +47,8 @@ public:
     }
 
 private:
+    Q_DISABLE_COPY(PictureLoaderJob)
+
     Picture *m_pic;
 };
 
@@ -93,7 +95,8 @@ BrickLink::Picture *BrickLink::Core::picture(const Item *item, const BrickLink::
     if (!pic) {
         pic = new Picture(item, color);
         if (!m_pic_cache.insert(key, pic, pic->cost())) {
-            qWarning("Can not add picture to cache (cache max/cur: %d/%d, cost: %d)", m_pic_cache.maxCost(), m_pic_cache.totalCost(), pic->cost());
+            qWarning("Can not add picture to cache (cache max/cur: %d/%d, item: %s)",
+                     m_pic_cache.maxCost(), m_pic_cache.totalCost(), qPrintable(item->id()));
             return nullptr;
         }
         need_to_load = true;
@@ -255,12 +258,12 @@ void BrickLink::Core::updatePicture(BrickLink::Picture *pic, bool high_priority)
 
 void BrickLink::Core::pictureJobFinished(ThreadPoolJob *pj)
 {
-    TransferJob *j = static_cast<TransferJob *>(pj);
+    auto *j = static_cast<TransferJob *>(pj);
 
     if (!j || !j->data())
         return;
 
-    Picture *pic = j->userData<Picture>('P');
+    auto *pic = j->userData<Picture>('P');
 
     if (!pic)
         return;
@@ -285,9 +288,11 @@ void BrickLink::Core::pictureJobFinished(ThreadPoolJob *pj)
 
             pic->m_update_status = Ok;
 
-            qWarning() << "IMG" << j->data()->size() << j->effectiveUrl();
+            // qWarning() << "IMG" << j->data()->size() << j->effectiveUrl();
 
-            if ((j->effectiveUrl().path().indexOf("noimage", 0, Qt::CaseInsensitive) == -1) && j->data()->size() && img.loadFromData(*j->data())) {
+            if ((j->effectiveUrl().path().indexOf("noimage", 0, Qt::CaseInsensitive) == -1)
+                    && !j->data()->isEmpty()
+                    && img.loadFromData(*j->data())) {
                 img.save(path, "PNG");
             }
             else {

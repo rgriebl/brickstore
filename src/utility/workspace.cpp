@@ -27,6 +27,9 @@
 #include <QPainter>
 #include <QStyle>
 #include <QStyleOption>
+#include <QPaintEvent>
+#include <QTextDocument>
+#include <QDebug>
 
 #include "utility.h"
 #include "workspace.h"
@@ -45,7 +48,7 @@ static QString cleanWindowTitle(QWidget *window)
 class WindowMenu : public QMenu {
     Q_OBJECT
 public:
-    WindowMenu(Workspace *ws, bool shortcut = false, QWidget *parent = 0)
+    WindowMenu(Workspace *ws, bool shortcut = false, QWidget *parent = nullptr)
         : QMenu(parent), m_ws(ws), m_shortcut(shortcut)
     {
         connect(this, &QMenu::aboutToShow,
@@ -69,10 +72,11 @@ private slots:
         QWidget *active = m_ws->activeWindow();
 
         int i = 0;
-        foreach (QWidget *w, m_ws->windowList()) {
+        const auto wl = m_ws->windowList();
+        for (auto *w : wl) {
             QString s = cleanWindowTitle(w);
-            if (m_shortcut && i < 10)
-                s.prepend(QString("&%1   ").arg((i+1)%10));
+            if (m_shortcut && (i < 10))
+                s.prepend(QString("&%1   ").arg((i + 1) % 10));
 
             QAction *a = addAction(s);
             a->setCheckable(true);
@@ -87,7 +91,7 @@ private slots:
     void activateWindow(QAction *a)
     {
         if (a) {
-            if (QWidget *w = qvariant_cast<QWidget *>(a->data()))
+            if (auto *w = qvariant_cast<QWidget *>(a->data()))
                 m_ws->setActiveWindow(w);
         }
     }
@@ -186,7 +190,7 @@ QSize TabBarSideButton::sizeHint() const
 {
     QSize sb = QToolButton::sizeHint();
     QSize st = m_tabbar->sizeHint();
-    return QSize(sb.width(), st.height());
+    return { sb.width(), st.height() };
 }
 
 
@@ -202,30 +206,30 @@ Workspace::Workspace(QWidget *parent)
     m_tabbar->setAutoHide(true);
 
     m_right = new TabBarSide(m_tabbar);
-    m_stack = new QStackedLayout();
+    m_windowStack = new QStackedLayout();
 
-    TabBarSideButton *tabList = new TabBarSideButton(m_tabbar);
-    tabList->setIcon(QIcon(":/images/tab.png")); //QPixmap(tablist_xpm)));
+    auto *tabList = new TabBarSideButton(m_tabbar);
+    tabList->setIcon(QIcon(":/images/tab.png"));
     tabList->setAutoRaise(true);
     tabList->setPopupMode(QToolButton::InstantPopup);
     tabList->setToolButtonStyle(Qt::ToolButtonIconOnly);
     tabList->setToolTip(tr("Show a list of all open documents"));
     tabList->setMenu(windowMenu(false, this));
 
-    QHBoxLayout *rightlay = new QHBoxLayout(m_right);
+    auto *rightlay = new QHBoxLayout(m_right);
     rightlay->setMargin(0);
     rightlay->addWidget(tabList);
 
-    QHBoxLayout *tabbox = new QHBoxLayout();
+    auto *tabbox = new QHBoxLayout();
     tabbox->setMargin(0);
     tabbox->setSpacing(0);
     tabbox->addWidget(m_tabbar, 10);
     tabbox->addWidget(m_right);
-    QVBoxLayout *layout = new QVBoxLayout();
+    auto *layout = new QVBoxLayout();
     layout->setMargin(0);
     layout->setSpacing(0);
     layout->addLayout(tabbox);
-    layout->addLayout(m_stack, 10);
+    layout->addLayout(m_windowStack, 10);
     setLayout(layout);
 
     connect(m_tabbar, &QTabBar::currentChanged,
@@ -234,13 +238,27 @@ Workspace::Workspace(QWidget *parent)
             this, &Workspace::closeTab);
     connect(m_tabbar, &QTabBar::tabMoved,
             this, &Workspace::moveTab);
-    connect(m_stack, &QStackedLayout::widgetRemoved,
+    connect(m_windowStack, &QStackedLayout::widgetRemoved,
             this, &Workspace::removeTab);
+}
+
+QString Workspace::backgroundText() const
+{
+    return m_backgroundText;
+}
+
+void Workspace::setBackgroundText(const QString &text)
+{
+    m_backgroundText = text;
+    delete m_backgroundTextDocument;
+    m_backgroundTextDocument = new QTextDocument(this);
+    m_backgroundTextDocument->setHtml(text);
+    update();
 }
 
 QMenu *Workspace::windowMenu(bool hasShortcut, QWidget *parent)
 {
-    WindowMenu *m = new WindowMenu(this, hasShortcut, parent);
+    auto *m = new WindowMenu(this, hasShortcut, parent);
     connect(m_tabbar, &TabBar::countChanged,
             m, &WindowMenu::checkEnabledStatus);
     return m;
@@ -251,50 +269,60 @@ void Workspace::addWindow(QWidget *w)
     if (!w)
         return;
 
-    int idx = m_stack->addWidget(w);
+    int idx = m_windowStack->addWidget(w);
     m_tabbar->insertTab(idx, cleanWindowTitle(w));
 
     w->installEventFilter(this);
+
+    emit windowCountChanged(windowCount());
 }
 
 void Workspace::removeTab(int idx)
 {
     m_tabbar->removeTab(idx);
+    emit windowCountChanged(windowCount());
 }
 
 void Workspace::moveTab(int from, int to)
 {
-    m_stack->blockSignals(true);
-    QWidget *w = m_stack->widget(from);
-    m_stack->removeWidget(w);
-    m_stack->insertWidget(to, w);
-    m_stack->blockSignals(false);
+    m_windowStack->blockSignals(true);
+    QWidget *w = m_windowStack->widget(from);
+    m_windowStack->removeWidget(w);
+    m_windowStack->insertWidget(to, w);
+    m_windowStack->blockSignals(false);
 }
 
 void Workspace::activateTab(int idx)
 {
-    m_stack->setCurrentIndex(idx);
-    emit windowActivated(m_stack->widget(idx));
+    m_windowStack->setCurrentIndex(idx);
+    emit windowActivated(m_windowStack->widget(idx));
 }
 
 void Workspace::setActiveWindow(QWidget *w)
 {
-    m_tabbar->setCurrentIndex(m_stack->indexOf(w));
+    m_tabbar->setCurrentIndex(m_windowStack->indexOf(w));
 }
 
 QList<QWidget *> Workspace::windowList() const
 {
     QList<QWidget *> res;
+    int count = m_windowStack->count();
+    res.reserve(count);
 
-    for (int i = 0; i < m_stack->count(); i++)
-        res << m_stack->widget(i);
+    for (int i = 0; i < count; i++)
+        res << m_windowStack->widget(i);
 
     return res;
 }
 
 QWidget *Workspace::activeWindow() const
 {
-    return m_stack->currentWidget();
+    return m_windowStack->currentWidget();
+}
+
+int Workspace::windowCount() const
+{
+    return m_windowStack->count();
 }
 
 bool Workspace::eventFilter(QObject *o, QEvent *e)
@@ -303,10 +331,10 @@ bool Workspace::eventFilter(QObject *o, QEvent *e)
         switch (e->type()) {
         case QEvent::WindowTitleChange:
         case QEvent::ModifiedChange:
-            m_tabbar->setTabText(m_stack->indexOf(w), cleanWindowTitle(w));
+            m_tabbar->setTabText(m_windowStack->indexOf(w), cleanWindowTitle(w));
             break;
         case QEvent::WindowIconChange:
-            m_tabbar->setTabIcon(m_stack->indexOf(w), w->windowIcon());
+            m_tabbar->setTabIcon(m_windowStack->indexOf(w), w->windowIcon());
             break;
         default:
             break;
@@ -316,9 +344,33 @@ bool Workspace::eventFilter(QObject *o, QEvent *e)
     return QWidget::eventFilter(o, e);
 }
 
+void Workspace::paintEvent(QPaintEvent *)
+{
+    if (!windowCount() && m_backgroundTextDocument) {
+        QPainter p(this);
+        int h = m_backgroundTextDocument->size().height();
+        QRectF r = rect();
+        p.translate(0, (r.height() - h) / 2);
+        r.setHeight(h);
+        m_backgroundTextDocument->drawContents(&p, r);
+    }
+}
+
+void Workspace::resizeEvent(QResizeEvent *event)
+{
+    if (m_backgroundTextDocument) {
+        int w = event->size().width();
+
+        m_backgroundTextDocument->setDocumentMargin(w / 16);
+        m_backgroundTextDocument->setTextWidth(w);
+    }
+}
+
 void Workspace::closeTab(int idx)
 {
-    m_stack->widget(idx)->close();
+    m_windowStack->widget(idx)->close();
 }
 
 #include "workspace.moc"
+
+#include "moc_workspace.cpp"

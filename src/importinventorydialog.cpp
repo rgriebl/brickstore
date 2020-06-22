@@ -68,3 +68,5 @@ void ImportInventoryDialog::checkItem(const BrickLink::Item *it, bool ok)
     if (b && ok)
         w_buttons->button(QDialogButtonBox::Ok)->animateClick();
 }
+
+#include "moc_importinventorydialog.cpp"

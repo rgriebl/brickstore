@@ -68,10 +68,10 @@ Config::Config()
 
 Config::~Config()
 {
-    s_inst = 0;
+    s_inst = nullptr;
 }
 
-Config *Config::s_inst = 0;
+Config *Config::s_inst = nullptr;
 
 Config *Config::inst()
 {
@@ -93,7 +93,6 @@ QString Config::scramble(const QString &str)
 void Config::upgrade(int vmajor, int vminor, int vrev)
 {
     QStringList sl;
-    QString s;
 
     //int cfgver = value("General/ConfigVersion", 0).toInt();
     setValue("General/ConfigVersion", mkver(vmajor, vminor, vrev));
@@ -111,7 +110,8 @@ void Config::upgrade(int vmajor, int vminor, int vrev)
 
         QSettings old(org, app);
         if (old.value("General/ConfigVersion", 0).toInt()) {
-            foreach (const QString &key, old.allKeys()) {
+            const auto allOldKeys = old.allKeys();
+            for (const QString &key : allOldKeys) {
                 bool skip = false;
                 for (const char *ign : ignore) {
                     if (key.startsWith(ign, Qt::CaseInsensitive))
@@ -212,7 +212,7 @@ QString Config::lDrawDir() const
                 wchar_t regdir [MAX_PATH + 1];
                 DWORD regdirsize = MAX_PATH * sizeof(WCHAR);
 
-                if (RegQueryValueExW(lkey, L"InstallDir", 0, 0, (LPBYTE) &regdir, &regdirsize) == ERROR_SUCCESS) {
+                if (RegQueryValueExW(lkey, L"InstallDir", nullptr, nullptr, (LPBYTE) &regdir, &regdirsize) == ERROR_SUCCESS) {
                     regdir [regdirsize / sizeof(WCHAR)] = 0;
                     dir = QString::fromUtf16(reinterpret_cast<const ushort *>(regdir));
                 }
@@ -288,10 +288,10 @@ QMap<QByteArray, int> Config::updateIntervals() const
 {
     QMap<QByteArray, int> uiv = updateIntervalsDefault();
 
-    const char *lut[] = { "Picture", "PriceGuide", "Database", "LDraw", 0 };
+    static const char *lut[] = { "Picture", "PriceGuide", "Database", "LDraw" };
 
-    for (const char **ptr = lut; *ptr; ++ptr)
-        uiv[*ptr] = value(QLatin1String("BrickLink/UpdateInterval/") + QLatin1String(*ptr), uiv[*ptr]).toInt();
+    for (const auto &iv : lut)
+        uiv[iv] = value(QLatin1String("BrickLink/UpdateInterval/") + QLatin1String(iv), uiv[iv]).toInt();
     return uiv;
 }
 
@@ -393,7 +393,7 @@ int Config::fontSizePercent() const
 QSize Config::iconSize() const
 {
     int s = value("Interface/IconSize", 0).toInt();
-    return QSize(s, s);
+    return { s, s };
 }
 
 bool Config::parseTranslations() const
@@ -460,3 +460,5 @@ QString Config::defaultCurrencyCode() const
 {
     return value("Currency/Default", QLatin1String("USD")).toString();
 }
+
+#include "moc_config.cpp"

@@ -55,7 +55,7 @@ SelectColor::SelectColor(QWidget *parent)
     connect(w_filter, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, &SelectColor::updateColorFilter);
 
-    QGridLayout *lay = new QGridLayout(this);
+    auto *lay = new QGridLayout(this);
     lay->setMargin(0);
     lay->setRowStretch(0, 0);
     lay->setRowStretch(1, 1);
@@ -81,7 +81,9 @@ void SelectColor::languageChange()
 void SelectColor::setWidthToContents(bool b)
 {
     if (b) {
-        int w1 = static_cast<QAbstractItemView *>(w_colors)->sizeHintForColumn(0) + 2 * w_colors->frameWidth() + w_colors->style()->pixelMetric(QStyle::PM_ScrollBarExtent) + 4;
+        int w1 = w_colors->QAbstractItemView::sizeHintForColumn(0)
+                + 2 * w_colors->frameWidth()
+                + w_colors->style()->pixelMetric(QStyle::PM_ScrollBarExtent) + 4;
         int w2 = w_filter->minimumSizeHint().width();
         w_filter->setFixedWidth(qMax(w1, w2));
         w_colors->setFixedWidth(qMax(w1, w2));
@@ -95,7 +97,7 @@ void SelectColor::setWidthToContents(bool b)
 void SelectColor::updateColorFilter(int index)
 {
     int filter = w_filter->itemData(index < 0 ? 0 : index).toInt();
-    BrickLink::ColorModel *model = qobject_cast<BrickLink::ColorModel *>(w_colors->model());
+    auto *model = qobject_cast<BrickLink::ColorModel *>(w_colors->model());
 
     if (filter > 0) {
         model->setFilterType(static_cast<BrickLink::Color::TypeFlag>(filter));
@@ -107,7 +109,7 @@ void SelectColor::updateColorFilter(int index)
         else if (filter == -2)
             popularity = qreal(0.05);
 
-        model->setFilterType(0);
+        model->setFilterType(nullptr);
         model->setFilterPopularity(popularity);
     }
 }
@@ -119,12 +121,12 @@ const BrickLink::Color *SelectColor::currentColor() const
         return qvariant_cast<const BrickLink::Color *>(w_colors->model()->data(idx, BrickLink::ColorPointerRole));
     }
     else
-        return 0;
+        return nullptr;
 }
 
 void SelectColor::setCurrentColor(const BrickLink::Color *color)
 {
-    BrickLink::ColorModel *model = qobject_cast<BrickLink::ColorModel *>(w_colors->model());
+    auto *model = qobject_cast<BrickLink::ColorModel *>(w_colors->model());
 
     w_colors->setCurrentIndex(model->index(color));
 }
@@ -144,7 +146,7 @@ void SelectColor::showEvent(QShowEvent *)
     const BrickLink::Color *color = currentColor();
 
     if (color) {
-        BrickLink::ColorModel *model = qobject_cast<BrickLink::ColorModel *>(w_colors->model());
+        auto *model = qobject_cast<BrickLink::ColorModel *>(w_colors->model());
 
         w_colors->scrollTo(model->index(color), QAbstractItemView::PositionAtCenter);
     }
@@ -158,3 +160,5 @@ void SelectColor::changeEvent(QEvent *e)
     }
     QWidget::changeEvent(e);
 }
+
+#include "moc_selectcolor.cpp"

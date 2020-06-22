@@ -22,18 +22,19 @@
 #include "headerview.h"
 
 
-class SectionConfigDialog : public QDialog {
+class SectionConfigDialog : public QDialog
+{
     Q_OBJECT
 
     class SectionItem : public QListWidgetItem {
     public:
-        SectionItem() : QListWidgetItem(), m_lidx(-1) { }
+        SectionItem() = default;
 
         int logicalIndex() const { return m_lidx; }
         void setLogicalIndex(int idx) { m_lidx = idx; }
 
     private:
-        int m_lidx;
+        int m_lidx = -1;
     };
 
 public:
@@ -47,14 +48,14 @@ public:
         m_list->setDragDropMode(QAbstractItemView::InternalMove);
         m_buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, this);
 
-        QVBoxLayout *lay = new QVBoxLayout(this);
+        auto *lay = new QVBoxLayout(this);
         lay->addWidget(m_label);
         lay->addWidget(m_list);
         lay->addWidget(m_buttons);
 
         QVector<SectionItem *> v(m_header->count());
         for (int i = 0; i < m_header->count(); ++i) {
-            SectionItem *it = 0;
+            SectionItem *it = nullptr;
 
             if (m_header->isSectionAvailable(i)) {
                 it = new SectionItem();
@@ -80,10 +81,10 @@ public:
         m_label->setText(tr("Drag the columns into the order you prefer and show/hide them using the check mark."));
     }
 
-    void accept()
+    void accept() override
     {
         for (int vi = 0; vi < m_list->count(); ++vi) {
-            SectionItem *si = static_cast<SectionItem *>(m_list->item(vi));
+            auto *si = static_cast<SectionItem *>(m_list->item(vi));
             int li = si->logicalIndex();
 
             int oldvi = m_header->visualIndex(li);
@@ -101,7 +102,7 @@ public:
         QDialog::accept();
     }
 
-    void changeEvent(QEvent *e)
+    void changeEvent(QEvent *e) override
     {
         if (e->type() == QEvent::LanguageChange)
             retranslateUi();
@@ -109,6 +110,8 @@ public:
     }
 
 private:
+    Q_DISABLE_COPY(SectionConfigDialog)
+
     HeaderView *      m_header;
     QLabel *          m_label;
     QListWidget *     m_list;
@@ -204,7 +207,7 @@ void HeaderView::showMenu(const QPoint &pos)
 
     QVector<QAction *> actions(count());
     for (int li = 0; li < count(); ++li) {
-        QAction *a = 0;
+        QAction *a = nullptr;
 
         if (isSectionAvailable(li)) {
             a = new QAction(&m);
@@ -238,3 +241,4 @@ void HeaderView::showMenu(const QPoint &pos)
 }
 
 #include "headerview.moc"
+#include "moc_headerview.cpp"

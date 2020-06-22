@@ -72,10 +72,10 @@ public:
     class Item : public BrickLink::InvItem
     {
     public:
-        Item();
+        Item() = default;
         Item(const BrickLink::InvItem &);
-        Item(const Item &);
-        ~Item();
+        Item(const Item &) = default;
+        ~Item() = default;
 
         Item &operator = (const Item &);
         bool operator == (const Item &) const;
@@ -84,10 +84,9 @@ public:
         void setErrors(quint64 errors) { m_errors = errors; }
 
         QImage image() const;
-        QPixmap pixmap() const;
 
     private:
-        quint64 m_errors;
+        quint64 m_errors = 0;
 
         friend class Document;
     };
@@ -95,11 +94,12 @@ public:
     class ItemList : public QList<Item *>
     {
     public:
-        ItemList() { }
+        ItemList() = default;
+        ~ItemList() = default;
         ItemList(const ItemList &copy) : QList<Item *>(copy) { }
         ItemList(const BrickLink::InvItemList &iil)
         {
-            foreach (const BrickLink::InvItem *ii, iil)
+            for (const BrickLink::InvItem *ii : iil)
                 append(new Item(*ii));
         }
 
@@ -227,11 +227,11 @@ public slots:
 
     void fileSave();
     void fileSaveAs();
-    void fileExportBrickLinkXML(const ItemList &itemlist);
-    void fileExportBrickLinkXMLClipboard(const ItemList &itemlist);
-    void fileExportBrickLinkUpdateClipboard(const ItemList &itemlist);
-    void fileExportBrickLinkInvReqClipboard(const ItemList &itemlist);
-    void fileExportBrickLinkWantedListClipboard(const ItemList &itemlist);
+    void fileExportBrickLinkXML(const Document::ItemList &itemlist);
+    void fileExportBrickLinkXMLClipboard(const Document::ItemList &itemlist);
+    void fileExportBrickLinkUpdateClipboard(const Document::ItemList &itemlist);
+    void fileExportBrickLinkInvReqClipboard(const Document::ItemList &itemlist);
+    void fileExportBrickLinkWantedListClipboard(const Document::ItemList &itemlist);
 
 public:
     void beginMacro(const QString &label = QString());
@@ -254,7 +254,7 @@ signals:
 
 private slots:
     void clean2Modified(bool);
-    void autosave();
+    void autosave() const;
 
 private:
     Document(int dummy);

@@ -108,6 +108,7 @@ private:
     QOpenGLContext *glCurrentContext = nullptr;
 };
 
+
 class RenderWidget : public QOpenGLWidget
 {
     Q_OBJECT
@@ -153,7 +154,6 @@ class RenderOffscreenWidget : public QWidget
     Q_OBJECT
 public:
     RenderOffscreenWidget(QWidget *parent = nullptr);
-    virtual ~RenderOffscreenWidget();
 
     Part *part() const  { return m_renderer->part(); }
     int color() const   { return m_renderer->color(); }

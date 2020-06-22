@@ -15,7 +15,7 @@
 #include <QToolTip>
 #include <QPainter>
 #include <QConicalGradient>
-#include <limits.h>
+#include <climits>
 
 #include "progresscircle.h"
 
@@ -27,7 +27,7 @@ ProgressCircle::ProgressCircle(QWidget *parent)
     , m_value(-1)
     , m_online(false)
     , m_tt_normal(QLatin1String("%p%"))
-    , m_fill(0)
+    , m_fill(nullptr)
 {
     QSizePolicy sp;
     sp.setHorizontalPolicy(QSizePolicy::Preferred);
@@ -44,12 +44,12 @@ int ProgressCircle::heightForWidth(int w) const
 
 QSize ProgressCircle::minimumSizeHint() const
 {
-    return QSize(22, 22);
+    return { 22, 22 };
 }
 
 QSize ProgressCircle::sizeHint() const
 {
-    return QSize(32, 32);
+    return { 32, 32 };
 }
 
 int ProgressCircle::minimum() const
@@ -108,7 +108,7 @@ void ProgressCircle::reset()
 void ProgressCircle::resizeEvent(QResizeEvent *)
 {
     delete m_fill;
-    m_fill = 0;
+    m_fill = nullptr;
 }
 
 void ProgressCircle::paintEvent(QPaintEvent *)
@@ -230,3 +230,5 @@ void ProgressCircle::setOnlineState(bool isOnline)
         setToolTip(toolTip());
     }
 }
+
+#include "moc_progresscircle.cpp"

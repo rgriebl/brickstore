@@ -56,8 +56,6 @@ public:
 
     bool closeAllWindows();
 
-    QList<Window *> allWindows() const;
-
 public slots:
     void selectionUpdate(const Document::ItemList &selection);
     void statisticsUpdate();
@@ -100,7 +98,7 @@ private slots:
     void transferJobProgressUpdate(int p, int t);
 
     void configure();
-    void configure(const char *);
+    void configure(const char *page);
 
     void cancelAllTransfers(bool force = false);
     void showAddItemDialog();
@@ -131,6 +129,7 @@ private:
     QIcon *icon(const char *name);
 
     QAction *findAction(const char *name);
+    QList<QAction *> findActions(const char *startsWithName);
     void connectAllActions(bool do_connect, Window *window);
     void createActions();
     void translateActions();
@@ -163,7 +162,7 @@ private:
     TaskLinksWidget *m_task_links;
     TaskAppearsInWidget *m_task_appears;
     QMenu *m_contextmenu;
-    QPointer <AddItemDialog> m_add_dialog;
+    QPointer<AddItemDialog> m_add_dialog;
     QPointer<ItemDetailPopup> m_details;
 
     QStringList m_recent_files;

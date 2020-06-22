@@ -69,3 +69,5 @@ void InformationDialog::gotoPage(const QString &url)
         QDesktopServices::openUrl(url);
     }
 }
+
+#include "moc_informationdialog.cpp"

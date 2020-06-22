@@ -27,7 +27,7 @@ ChangeCurrencyDialog::ChangeCurrencyDialog(const QString &from, const QString &t
     connect(w_newCurrency, QOverload<const QString &>::of(&QComboBox::currentIndexChanged),
             this, &ChangeCurrencyDialog::currencyChanged);
 
-    QButtonGroup *grp = new QButtonGroup(this);
+    auto *grp = new QButtonGroup(this);
     grp->addButton(w_radioEcb);
     grp->addButton(w_radioCustom);
 
@@ -90,3 +90,5 @@ double ChangeCurrencyDialog::exchangeRate() const
         rate = w_editCustom->text().toDouble();
     return rate;
 }
+
+#include "moc_changecurrencydialog.cpp"

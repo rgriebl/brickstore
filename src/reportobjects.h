@@ -34,15 +34,14 @@ class ReportUtility : public QObject, public QScriptable
 {
     Q_OBJECT
 
-public slots:
-    QString translate(const QString &context, const QString &text) const;
+    Q_INVOKABLE QString translate(const QString &context, const QString &text) const;
 
-    QString localDateString(const QDateTime &dt) const;
-    QString localTimeString(const QDateTime &dt) const;
+    Q_INVOKABLE QString localDateString(const QDateTime &dt) const;
+    Q_INVOKABLE QString localTimeString(const QDateTime &dt) const;
 
-    QString localWeightString(double weight) const;
+    Q_INVOKABLE QString localWeightString(double weight) const;
 
-    QWidget *loadUiFile(const QString &fileName);
+    Q_INVOKABLE QWidget *loadUiFile(const QString &fileName);
 
 public:
     ReportUtility();
@@ -57,17 +56,16 @@ class ReportMoneyStatic : public QObject
 public:
     ReportMoneyStatic(QScriptEngine *eng);
 
-public slots:
-    double fromValue(double d);
-    double fromLocalValue(double d);
+    Q_INVOKABLE double fromValue(double d);
+    Q_INVOKABLE double fromLocalValue(double d);
 
-    double value(double d) const;
-    double localValue(double d) const;
+    Q_INVOKABLE double value(double d) const;
+    Q_INVOKABLE double localValue(double d) const;
 
-    QString localCurrencySymbol() const;
+    Q_INVOKABLE QString localCurrencySymbol() const;
 
-    QString toString(double d, bool with_currency_symbol = false, int precision = 3);
-    QString toLocalString(double d, bool with_currency_symbol = false, int precision = 3);
+    Q_INVOKABLE QString toString(double d, bool with_currency_symbol = false, int precision = 3);
+    Q_INVOKABLE QString toLocalString(double d, bool with_currency_symbol = false, int precision = 3);
 
 private:
     QScriptEngine *m_engine;
@@ -78,31 +76,14 @@ class Size : public QSizeF
 public:
     Size() = default;
     Size(const Size &) = default;
-    Size(const QSizeF &sf)
-        : QSizeF(sf)
-    { }
+    Size(const QSizeF &sf) : QSizeF(sf) { }
 
     Size &operator=(const Size &) = default;
-    Size &operator=(const QSizeF &sf) { QSizeF::operator=(sf); return *this; }
+    Size &operator=(const QSizeF &sf);
 
-    static QScriptValue toScriptValue(QScriptEngine *engine, const Size &s)
-    {
-        QScriptValue obj = engine->newObject();
-        obj.setProperty("width", s.width());
-        obj.setProperty("height", s.height());
-        return obj;
-    }
-
-    static void fromScriptValue(const QScriptValue &obj, Size &s)
-    {
-        s.setWidth(obj.property("width").toNumber());
-        s.setHeight(obj.property("height").toNumber());
-    }
-
-    static QScriptValue createScriptValue(QScriptContext *, QScriptEngine *engine)
-    {
-        return engine->toScriptValue(Size());
-    }
+    static QScriptValue toScriptValue(QScriptEngine *engine, const Size &s);
+    static void fromScriptValue(const QScriptValue &obj, Size &s);
+    static QScriptValue createScriptValue(QScriptContext *, QScriptEngine *engine);
 };
 
 Q_DECLARE_METATYPE(Size)
@@ -115,22 +96,25 @@ class ReportJob : public QObject
     Q_OBJECT
     Q_OVERRIDE(QString objectName   SCRIPTABLE false)
 
-    Q_PROPERTY(uint    pageCount    READ pageCount)
+    Q_PROPERTY(int    pageCount    READ pageCount NOTIFY pageCountChanged)
 // Q_PROPERTY( int     paperFormat  READ paperFormat)
-    Q_PROPERTY(Size    paperSize    READ paperSize)
-    Q_PROPERTY(double  scaling      READ scaling WRITE setScaling)
-
-public slots:
-    QObject *addPage();
-    QObject *getPage(uint i) const;
-    void abort();
+    Q_PROPERTY(Size    paperSize    READ paperSize CONSTANT)
+    Q_PROPERTY(double  scaling      READ scaling WRITE setScaling NOTIFY scalingChanged)
 
 public:
+    Q_INVOKABLE QObject *addPage();
+    Q_INVOKABLE QObject *getPage(uint i) const;
+    Q_INVOKABLE void abort();
+
     uint pageCount() const;
     Size paperSize() const;
     bool isAborted() const;
     double scaling() const;
     void setScaling(double s);
+
+signals:
+    void pageCountChanged(int pages);
+    void scalingChanged(double s);
 
 public:
     ReportJob(QPaintDevice *pd);
@@ -151,53 +135,50 @@ private:
 class Font : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QString family     READ family     WRITE setFamily)
-    Q_PROPERTY(qreal   pointSize  READ pointSize  WRITE setPointSize)
-    Q_PROPERTY(int     pixelSize  READ pixelSize  WRITE setPixelSize)
-    Q_PROPERTY(bool    bold       READ bold       WRITE setBold)
-    Q_PROPERTY(bool    italic     READ italic     WRITE setItalic)
-    Q_PROPERTY(bool    underline  READ underline  WRITE setUnderline)
-    Q_PROPERTY(bool    strikeout  READ strikeout  WRITE setStrikeout)
+    Q_PROPERTY(QString family     READ family     WRITE setFamily     NOTIFY familyChanged)
+    Q_PROPERTY(qreal   pointSize  READ pointSize  WRITE setPointSize  NOTIFY pointSizeChanged)
+    Q_PROPERTY(int     pixelSize  READ pixelSize  WRITE setPixelSize  NOTIFY pixelSizeChanged)
+    Q_PROPERTY(bool    bold       READ bold       WRITE setBold       NOTIFY boldChanged)
+    Q_PROPERTY(bool    italic     READ italic     WRITE setItalic     NOTIFY italicChanged)
+    Q_PROPERTY(bool    underline  READ underline  WRITE setUnderline  NOTIFY underlineChanged)
+    Q_PROPERTY(bool    strikeout  READ strikeout  WRITE setStrikeout  NOTIFY strikeoutChanged)
 
 public:
-    Font() { }
-    Font(const QFont &qf) : d(qf) { }
+    Font() = default;
+    Font(const QFont &qf);
 
-    QFont toQFont() const { return d; }
-    void fromQFont(const QFont &qf) { d = qf; }
+    QFont toQFont() const;
+    void fromQFont(const QFont &qf);
 
-    static QScriptValue toScriptValue(QScriptEngine *engine, Font * const &in)
-    {
-        return engine->newQObject(in);
-    }
-
-    static void fromScriptValue(const QScriptValue &object, Font * &out)
-    {
-        out = qobject_cast<Font *>(object.toQObject());
-    }
-
-    static QScriptValue createScriptValue(QScriptContext *, QScriptEngine *engine)
-    {
-        Font *f = new Font();
-        return engine->newQObject(f);
-    }
+    static QScriptValue toScriptValue(QScriptEngine *engine, Font * const &in);
+    static void fromScriptValue(const QScriptValue &object, Font * &out);
+    static QScriptValue createScriptValue(QScriptContext *, QScriptEngine *engine);
 
 private:
-    QString family() const  { return d.family(); }
-    qreal pointSize() const { return d.pointSizeF(); }
-    int pixelSize() const   { return d.pixelSize(); }
-    bool bold() const       { return d.bold(); }
-    bool italic() const     { return d.italic(); }
-    bool underline() const  { return d.underline(); }
-    bool strikeout() const  { return d.strikeOut(); }
+    QString family() const;
+    qreal pointSize() const;
+    int pixelSize() const;
+    bool bold() const;
+    bool italic() const;
+    bool underline() const;
+    bool strikeout() const;
 
-    void setFamily(const QString &f) { d.setFamily(f); }
-    void setPointSize(qreal ps) { d.setPointSizeF(ps); }
-    void setPixelSize(int ps) { d.setPixelSize(ps); }
-    void setBold(bool b) { d.setBold(b); }
-    void setItalic(bool i) { d.setItalic(i); }
-    void setUnderline(bool u) { d.setUnderline(u); }
-    void setStrikeout(bool s) { d.setStrikeOut(s); }
+    void setFamily(const QString &f);
+    void setPointSize(qreal ps);
+    void setPixelSize(int ps);
+    void setBold(bool b);
+    void setItalic(bool i);
+    void setUnderline(bool u);
+    void setStrikeout(bool s);
+
+signals:
+    void familyChanged(const QString &family);
+    void pointSizeChanged(qreal ps);
+    void pixelSizeChanged(int ps);
+    void boldChanged(bool b);
+    void italicChanged(bool i);
+    void underlineChanged(bool u);
+    void strikeoutChanged(bool s);
 
 private:
     QFont d;
@@ -213,35 +194,28 @@ class Color : public QObject
     Q_PROPERTY(int     green       READ green       WRITE setGreen)
     Q_PROPERTY(int     blue        READ blue        WRITE setBlue)
     Q_PROPERTY(QString name        READ name        WRITE setName)
-    Q_PROPERTY(int     rgb         READ rgb         WRITE setRgb)
+    Q_PROPERTY(uint    rgb         READ rgb         WRITE setRgb)
     Q_PROPERTY(int     hue         READ hue         WRITE setHue)
     Q_PROPERTY(int     saturation  READ saturation  WRITE setSaturation)
     Q_PROPERTY(int     value       READ value       WRITE setValue)
 
 public:
-    Color() { }
-    Color(const QColor &qc) : d(qc) { }
+    Color() = default;
+    Color(const QColor &qc);
 
-    QColor toQColor() const { return d; }
-    void fromQColor(const QColor &qc) { d = qc; }
+    QColor toQColor() const;
+    void fromQColor(const QColor &qc);
 
-    static QScriptValue toScriptValue(QScriptEngine *engine, Color * const &in)
-    { return engine->newQObject(in); }
+    static QScriptValue toScriptValue(QScriptEngine *engine, Color * const &in);
 
-    static void fromScriptValue(const QScriptValue &object, Color * &out)
-    { out = qobject_cast<Color *>(object.toQObject()); }
+    static void fromScriptValue(const QScriptValue &object, Color * &out);
 
-    static QScriptValue createScriptValue(QScriptContext *, QScriptEngine *engine)
-    {
-        Color *c = new Color();
-        return engine->newQObject(c); // ###ScriptOwnership ???
-    }
+    static QScriptValue createScriptValue(QScriptContext *, QScriptEngine *engine);
 
-public slots:
-    void setRgb(uint value) { d.setRgb(value); }
-    void setRgb(int r, int g, int b) { d.setRgb(r, g, b); }
-    Color *light() const { return new Color(d.lighter()); }
-    Color *dark() const { return new Color(d.darker()); }
+    Q_INVOKABLE void setRgb(uint value);
+    Q_INVOKABLE void setRgb(int r, int g, int b);
+    Q_INVOKABLE Color *light() const;
+    Q_INVOKABLE Color *dark() const;
 
 private:
     int red() const        { return d.red(); }
@@ -272,9 +246,6 @@ class ReportPage : public QObject
     Q_OBJECT
     Q_OVERRIDE(QString objectName       SCRIPTABLE false)
 
-    Q_ENUMS(LineStyle)
-    Q_FLAGS(Alignment)
-
     Q_PROPERTY(int     number           READ pageNumber)
     Q_PROPERTY(Font *  font             READ font       WRITE setFont)
     Q_PROPERTY(Color * color            READ color      WRITE setColor)
@@ -301,18 +272,22 @@ public:
         AlignBottom   = Qt::AlignBottom,
         AlignCenter   = Qt::AlignCenter
     };
-
+    Q_ENUM(LineStyle)
     Q_DECLARE_FLAGS(Alignment, AlignmentFlag)
+    Q_FLAG(Alignment)
 
-public slots:
-    Size textSize(const QString &text);
+    Q_INVOKABLE Size textSize(const QString &text);
 
-    void drawText(double x, double y, const QString &text);
-    void drawText(double left, double top, double width, double height, Alignment align, const QString &text);
-    void drawLine(double x1, double y1, double x2, double y2);
-    void drawRect(double left, double top, double width, double height);
-    void drawEllipse(double left, double top, double width, double height);
-    void drawPixmap(double left, double top, double width, double height, const QPixmap &pixmap);
+    Q_INVOKABLE void drawText(double x, double y, const QString &text);
+    Q_INVOKABLE void drawText(double left, double top, double width, double height, ReportPage::Alignment align, const QString &text);
+    Q_INVOKABLE void drawLine(double x1, double y1, double x2, double y2);
+    Q_INVOKABLE void drawRect(double left, double top, double width, double height);
+    Q_INVOKABLE void drawEllipse(double left, double top, double width, double height);
+    Q_INVOKABLE void drawImage(double left, double top, double width, double height, const QImage &image);
+
+    // 1.1 compatibility
+    Q_INVOKABLE void drawPixmap(double left, double top, double width, double height, const QImage &image)
+    { drawImage(left, top, width, height, image); }
 
 public:
     int pageNumber() const;
@@ -332,7 +307,7 @@ public:
     ReportPage(const ReportJob *job);
 
     void dump();
-    void print(QPainter *p, double scale [2]);
+    void print(QPainter *p, double scale [2]) const;
 
 private:
     struct Cmd {
@@ -342,7 +317,7 @@ private:
             Line,
             Rect,
             Ellipse,
-            Pixmap
+            Image
         } m_cmd;
     };
 

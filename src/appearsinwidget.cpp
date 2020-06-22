@@ -98,7 +98,7 @@ AppearsInWidget::AppearsInWidget(QWidget *parent)
             this, &AppearsInWidget::partOut);
 
     languageChange();
-    setItem(0, 0);
+    setItem(nullptr, nullptr);
 }
 
 void AppearsInWidget::languageChange()
@@ -124,12 +124,12 @@ void AppearsInWidget::showContextMenu(const QPoint &pos)
 
 const BrickLink::AppearsInItem *AppearsInWidget::appearsIn() const
 {
-    BrickLink::AppearsInModel *m = qobject_cast<BrickLink::AppearsInModel *>(model());
+    auto *m = qobject_cast<BrickLink::AppearsInModel *>(model());
 
     if (m && !selectionModel()->selectedIndexes().isEmpty())
         return m->appearsIn(selectionModel()->selectedIndexes().front());
     else
-        return 0;
+        return nullptr;
 }
 
 void AppearsInWidget::partOut()
@@ -144,7 +144,7 @@ QSize AppearsInWidget::minimumSizeHint() const
 {
     const QFontMetrics &fm = fontMetrics();
 
-    return QSize(fm.horizontalAdvance(QLatin1Char('m')) * 20, fm.height() * 6);
+    return { fm.horizontalAdvance(QLatin1Char('m')) * 20, fm.height() * 6 };
 }
 
 QSize AppearsInWidget::sizeHint() const
@@ -230,3 +230,5 @@ void AppearsInWidget::showBLLotsForSale()
     if (ai && ai->second)
         QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_LotsForSale, ai->second, BrickLink::core()->color(0)));
 }
+
+#include "moc_appearsinwidget.cpp"

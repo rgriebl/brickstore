@@ -36,10 +36,10 @@
 
 
 RebuildDatabase::RebuildDatabase(bool skipDownload)
-    : QObject(0)
+    : QObject(nullptr)
     , m_skip_download(skipDownload)
 {
-    m_trans = 0;
+    m_trans = nullptr;
 
 #if defined(Q_OS_WINDOWS)
     AllocConsole();
@@ -285,7 +285,7 @@ bool RebuildDatabase::download()
         { "https://www.bricklink.com/btinvlist.asp",       QList<QPair<QString, QString> >(), "btinvlist.txt"   },
         { "https://www.bricklink.com/btchglog.asp",        QList<QPair<QString, QString> >(), "btchglog.txt" },
 
-        { 0, QList<QPair<QString, QString> > (), 0 }
+        { nullptr, QList<QPair<QString, QString> > (), nullptr }
     };
 
     bool failed = false;
@@ -301,7 +301,7 @@ bool RebuildDatabase::download()
         QFile *f = new QFile(path + tptr->m_file + ".new");
 
         if (!f->open(QIODevice::WriteOnly)) {
-            m_error = QString("failed to write %1: %2").arg(tptr->m_file).arg(f->errorString());
+            m_error = QString("failed to write %1: %2").arg(tptr->m_file, f->errorString());
             delete f;
             failed = true;
             break;
@@ -333,9 +333,9 @@ bool RebuildDatabase::download()
 void RebuildDatabase::downloadJobFinished(ThreadPoolJob *pj)
 {
     if (pj) {
-        TransferJob *job = static_cast<TransferJob *>(pj);
+        auto *job = static_cast<TransferJob *>(pj);
 
-        QFile *f = qobject_cast<QFile *>(job->file());
+        auto *f = qobject_cast<QFile *>(job->file());
 
         m_downloads_in_progress--;
         bool ok = false;
@@ -359,7 +359,7 @@ void RebuildDatabase::downloadJobFinished(ThreadPoolJob *pj)
         if (!ok)
             m_downloads_failed++;
 
-        QString fname = f->fileName();
+        QString fname = f ? f->fileName() : job->effectiveUrl().toString();
         fname.remove(0, BrickLink::core()->dataPath().length());
         printf("%c > %s", ok ? ' ' : '*', qPrintable(fname));
         if (ok)
@@ -386,7 +386,7 @@ bool RebuildDatabase::downloadInventories(QVector<const BrickLink::Item *> &invs
             QFile *f = new QFile(BrickLink::core()->dataPath(item) + "inventory.xml.new");
 
             if (!f->open(QIODevice::WriteOnly)) {
-                m_error = QString("failed to write %1: %2").arg(f->fileName()).arg(f->errorString());
+                m_error = QString("failed to write %1: %2").arg(f->fileName(), f->errorString());
                 delete f;
                 failed = true;
                 break;
@@ -428,3 +428,5 @@ bool RebuildDatabase::downloadInventories(QVector<const BrickLink::Item *> &invs
 
     return true;
 }
+
+#include "moc_rebuilddatabase.cpp"

@@ -66,3 +66,5 @@ void SelectColorDialog::showEvent(QShowEvent *)
         m_pos = QRect();
     }
 }
+
+#include "moc_selectcolordialog.cpp"

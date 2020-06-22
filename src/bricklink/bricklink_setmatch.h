@@ -35,11 +35,11 @@ private:
     class InvMatchList
     {
     public:
-        InvMatchList();
+        InvMatchList() = default;
         InvMatchList(const InvItemList &list);
-        InvMatchList(const InvMatchList &copy);
+        InvMatchList(const InvMatchList &copy) = default;
 
-        InvMatchList &operator=(const InvMatchList &copy);
+        InvMatchList &operator=(const InvMatchList &copy) = default;
 
         void add(const InvItemList &list);
         //bool subtract(const InvItemList &list);
@@ -52,7 +52,7 @@ private:
 
     private:
         QList<InvMatchItem> m_list;
-        int m_count;
+        int m_count = 0;
     };
 
 
@@ -85,7 +85,7 @@ public:
     void setRecursiveBound(float unmatched);
 
 signals:
-    void finished(QList<const Item *> &);
+    void finished(const QList<const BrickLink::Item *> &);
     void progress(int, int);
 
 protected:

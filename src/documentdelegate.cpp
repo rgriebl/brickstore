@@ -27,6 +27,7 @@
 #include <QStyle>
 #include <QApplication>
 #include <QScrollBar>
+#include <QtMath>
 
 #include "documentdelegate.h"
 #include "selectitemdialog.h"
@@ -39,8 +40,10 @@ QCache<quint64, QPixmap>        DocumentDelegate::s_tag_cache;
 QCache<int, QPixmap>            DocumentDelegate::s_stripe_cache;
 
 DocumentDelegate::DocumentDelegate(Document *doc, DocumentProxyModel *view, QTableView *table)
-    : QItemDelegate(view), m_doc(doc), m_view(view), m_table(table),
-      m_select_item(nullptr), m_select_color(nullptr), m_read_only(false)
+    : QItemDelegate(view)
+    , m_doc(doc)
+    , m_view(view)
+    , m_table(table)
 {
     static bool first = true;
     if (first) {
@@ -63,7 +66,7 @@ QColor DocumentDelegate::shadeColor(int idx, qreal alpha)
         for (int i = 0; i < 13; i++)
             s_shades[i] = QColor::fromHsv(i == 0 ? -1 : (i - 1) * 30, 255, 255);
     }
-    QColor c = s_shades[idx % s_shades.size()];
+    QColor c = s_shades.at(idx % s_shades.size());
     if (!qFuzzyIsNull(alpha))
         c.setAlphaF(alpha);
     return c;
@@ -86,24 +89,24 @@ int DocumentDelegate::defaultItemHeight(const QWidget *w) const
     static QSize picsize = BrickLink::core()->itemType('P')->pictureSize();
     QFontMetrics fm(w ? w->font() : QApplication::font("QTableView"));
 
-    return 4 + qMax(fm.height() * 1, picsize.height() / 2);
+    return qMax(2 + fm.height(), picsize.height());
 }
 
 QSize DocumentDelegate::sizeHint(const QStyleOptionViewItem &option1, const QModelIndex &idx) const
 {
     if (!idx.isValid())
-        return QSize();
+        return {};
 
     static QSize picsize = BrickLink::core()->itemType('P')->pictureSize();
     int w = -1;
 
     if (idx.column() == Document::Picture)
-        w = picsize.width() / 2 + 4;
+        w = 4 + picsize.width();
     else
         w = QItemDelegate::sizeHint(option1, idx).width();
 
     QStyleOptionViewItem option(option1);
-    return QSize(w, defaultItemHeight(option.widget));
+    return { w, defaultItemHeight(option.widget) };
 }
 
 void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, const QModelIndex &idx) const
@@ -262,7 +265,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
 
     case Document::Picture: {
         if (!it->image().isNull())
-            image = it->image().scaled(it->image().size() / 2, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+            image = it->image();
         break;
     }
     case Document::Color: {

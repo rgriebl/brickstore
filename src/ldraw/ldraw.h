@@ -87,6 +87,7 @@ protected:
         : m_type(t) { }
 
 private:
+    Q_DISABLE_COPY(Element)
     Type m_type;
 };
 
@@ -104,6 +105,9 @@ protected:
     CommentElement(const QByteArray &);
 
     QByteArray m_comment;
+
+private:
+    Q_DISABLE_COPY(CommentElement)
 };
 
 
@@ -122,6 +126,9 @@ protected:
 
     int       m_color;
     QVector3D m_points[2];
+
+private:
+    Q_DISABLE_COPY(LineElement)
 };
 
 
@@ -140,6 +147,9 @@ protected:
 
     int       m_color;
     QVector3D m_points[4];
+
+private:
+    Q_DISABLE_COPY(CondLineElement)
 };
 
 
@@ -158,6 +168,9 @@ protected:
 
     int       m_color;
     QVector3D m_points[3];
+
+private:
+    Q_DISABLE_COPY(TriangleElement)
 };
 
 
@@ -176,6 +189,9 @@ protected:
 
     int       m_color;
     QVector3D m_points[4];
+
+private:
+    Q_DISABLE_COPY(QuadElement)
 };
 
 
@@ -197,6 +213,9 @@ protected:
     int          m_color;
     QMatrix4x4   m_matrix;
     LDraw::Part *m_part;
+
+private:
+    Q_DISABLE_COPY(PartElement)
 };
 
 /*

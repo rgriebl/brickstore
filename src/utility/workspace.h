@@ -18,6 +18,7 @@
 class TabBar;
 class QStackedLayout;
 class QMenu;
+class QTextDocument;
 
 
 class Workspace : public QWidget
@@ -26,21 +27,28 @@ class Workspace : public QWidget
 public:
     Workspace(QWidget *parent = nullptr);
 
+    QString backgroundText() const;
+    void setBackgroundText(const QString &text);
+
     void addWindow(QWidget *w);
 
     QWidget *activeWindow() const;
+    int windowCount() const;
     QList<QWidget *> windowList() const;
 
     QMenu *windowMenu(bool hasShortcuts = false, QWidget *parent = nullptr);
 
 signals:
     void windowActivated(QWidget *);
+    void windowCountChanged(int count);
 
 public slots:
     void setActiveWindow(QWidget *);
 
 protected:
     bool eventFilter(QObject *o, QEvent *e) override;
+    void paintEvent(QPaintEvent *event) override;
+    void resizeEvent(QResizeEvent *event) override;
 
 private slots:
     void closeTab(int idx);
@@ -50,6 +58,8 @@ private slots:
 
 private:
     TabBar *        m_tabbar;
-    QStackedLayout *m_stack;
+    QStackedLayout *m_windowStack;
     QWidget *       m_right;
+    QString         m_backgroundText;
+    QTextDocument * m_backgroundTextDocument = nullptr;
 };

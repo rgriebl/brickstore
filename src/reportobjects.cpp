@@ -13,7 +13,7 @@
 */
 
 #include <QApplication>
-#include <QPixmap>
+#include <QImage>
 #include <QPrinter>
 #include <QFontMetrics>
 #include <QPainter>
@@ -32,7 +32,7 @@
 
 
 ReportUtility::ReportUtility()
-    : QObject(0)
+    : QObject(nullptr)
 {
     setObjectName(QLatin1String("Utility"));
 }
@@ -65,7 +65,7 @@ QWidget *ReportUtility::loadUiFile(const QString &fileName)
         QString scriptPath(engine()->property("bsScriptPath").toString());
 
         if (scriptPath.isEmpty())
-            return 0;
+            return nullptr;
 
         QFileInfo scriptInfo(scriptPath);
         pathName = scriptInfo.dir().absoluteFilePath(fileName);
@@ -76,13 +76,13 @@ QWidget *ReportUtility::loadUiFile(const QString &fileName)
         QUiLoader loader;
         return loader.load(&f, FrameWork::inst());
     } else {
-        return 0;
+        return nullptr;
     }
 }
 
 
 ReportJob::ReportJob(QPaintDevice *pd)
-    : QObject(0), m_pd(pd), m_aborted(false), m_scaling(1.0f)
+    : QObject(nullptr), m_pd(pd), m_aborted(false), m_scaling(1.0f)
 {
     setObjectName(QLatin1String("Job"));
 }
@@ -99,8 +99,9 @@ QPaintDevice *ReportJob::paintDevice() const
 
 QObject *ReportJob::addPage()
 {
-    ReportPage *page = new ReportPage(this);
+    auto *page = new ReportPage(this);
     m_pages.append(page);
+    emit pageCountChanged(m_pages.size());
     return page;
 }
 
@@ -109,7 +110,7 @@ QObject *ReportJob::getPage(uint i) const
     if (int(i) < m_pages.count())
         return m_pages [i];
     else
-        return 0;
+        return nullptr;
 }
 
 void ReportJob::abort()
@@ -129,7 +130,10 @@ double ReportJob::scaling() const
 
 void ReportJob::setScaling(double s)
 {
-    m_scaling = s;
+    if (!qFuzzyCompare(m_scaling, s)) {
+        m_scaling = s;
+        emit scalingChanged(s);
+    }
 }
 
 uint ReportJob::pageCount() const
@@ -150,20 +154,20 @@ void ReportJob::dump()
 
     for (int i = 0; i < m_pages.count(); ++i) {
         qDebug("Page #%d", i);
-        m_pages [i]->dump();
+        m_pages.at(i)->dump();
     }
 }
 
 bool ReportJob::print(uint from, uint to)
 {
-    if (!m_pages.count() || (from > to) || (int(to) >= m_pages.count()))
+    if (m_pages.isEmpty() || (from > to) || (int(to) >= m_pages.count()))
         return false;
 
     QPainter p;
     if (!p.begin(m_pd))
         return false;
 
-    QPrinter *prt = (m_pd->devType() == QInternal::Printer) ? static_cast<QPrinter *>(m_pd) : 0;
+    QPrinter *prt = (m_pd->devType() == QInternal::Printer) ? static_cast<QPrinter *>(m_pd) : nullptr;
 
     double scaling [2];
     scaling [0] = m_scaling * double(m_pd->logicalDpiX()) / 25.4f;
@@ -171,7 +175,7 @@ bool ReportJob::print(uint from, uint to)
     bool no_new_page = true;
 
     for (uint i = from; i <= to; i++) {
-        ReportPage *page = m_pages [i];
+        ReportPage *page = m_pages.at(i);
 
         if (!no_new_page && prt)
             prt->newPage();
@@ -187,7 +191,7 @@ bool ReportJob::print(uint from, uint to)
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
 ReportPage::ReportPage(const ReportJob *job)
-        : QObject(const_cast <ReportJob *>(job)), m_job(job)
+    : QObject(const_cast <ReportJob *>(job)), m_job(job)
 {
     setObjectName(QString("Page%1").arg(job->pageCount() + 1));
 
@@ -219,13 +223,13 @@ void ReportPage::dump()
     for (int i = 0; i < m_cmds.count(); ++i) {
         switch (m_cmds.at(i)->m_cmd) {
         case Cmd::Attributes: {
-            AttrCmd *ac = static_cast<AttrCmd *>(m_cmds.at(i));
+            auto *ac = static_cast<AttrCmd *>(m_cmds.at(i));
 
             qDebug(" [%d] Attributes (Font: %s | Color: %s | BgColor: %s | Line: %f | LineStyle: %d", i, qPrintable(ac->m_font->toQFont().toString()), qPrintable(ac->m_color->toQColor().name()), qPrintable(ac->m_bgcolor->toQColor().name()), ac->m_linewidth, ac->m_linestyle);
             break;
         }
         case Cmd::Text:  {
-            DrawCmd *dc = static_cast<DrawCmd *>(m_cmds.at(i));
+            auto *dc = static_cast<DrawCmd *>(m_cmds.at(i));
 
             if (dc->m_w == -1 && dc->m_h == -1)
                 qDebug(" [%d] Text (%f,%f), \"%s\"", i, dc->m_x, dc->m_y, qPrintable(dc->m_p2.toString()));
@@ -235,38 +239,38 @@ void ReportPage::dump()
             break;
         }
         case Cmd::Line: {
-            DrawCmd *dc = static_cast<DrawCmd *>(m_cmds.at(i));
+            auto *dc = static_cast<DrawCmd *>(m_cmds.at(i));
 
             qDebug(" [%d] Line (%f,%f - %f,%f)", i, dc->m_x, dc->m_y, dc->m_w, dc->m_h);
             break;
         }
         case Cmd::Rect: {
-            DrawCmd *dc = static_cast<DrawCmd *>(m_cmds.at(i));
+            auto *dc = static_cast<DrawCmd *>(m_cmds.at(i));
 
             qDebug(" [%d] Rectangle (%f,%f - %fx%f)", i, dc->m_x, dc->m_y, dc->m_w, dc->m_h);
             break;
         }
         case Cmd::Ellipse: {
-            DrawCmd *dc = static_cast<DrawCmd *>(m_cmds.at(i));
+            auto *dc = static_cast<DrawCmd *>(m_cmds.at(i));
 
             qDebug(" [%d] Ellipse (%f,%f - %fx%f)", i, dc->m_x, dc->m_y, dc->m_w, dc->m_h);
             break;
         }
-        case Cmd::Pixmap: {
-            DrawCmd *dc = static_cast<DrawCmd *>(m_cmds.at(i));
+        case Cmd::Image: {
+            auto *dc = static_cast<DrawCmd *>(m_cmds.at(i));
 
-            qDebug(" [%d] Pixmap (%f,%f - %fx%f)", i, dc->m_x, dc->m_y, dc->m_w, dc->m_h);
+            qDebug(" [%d] Image (%f,%f - %fx%f)", i, dc->m_x, dc->m_y, dc->m_w, dc->m_h);
             break;
         }
         }
     }
 }
 
-void ReportPage::print(QPainter *p, double scale [2])
+void ReportPage::print(QPainter *p, double scale [2]) const
 {
-    foreach (const Cmd *c, m_cmds) {
+    for (const Cmd *c : m_cmds) {
         if (c->m_cmd == Cmd::Attributes) {
-            const AttrCmd *ac = static_cast<const AttrCmd *>(c);
+            const auto *ac = static_cast<const AttrCmd *>(c);
 
             // QFont f = ac->m_font;
             // f.setPointSizeFloat ( f.pointSizeFloat ( ) * scale [1] );
@@ -283,7 +287,7 @@ void ReportPage::print(QPainter *p, double scale [2])
                 p->setBrush(QBrush(Qt::NoBrush));
         }
         else {
-            const DrawCmd *dc = static_cast<const DrawCmd *>(c);
+            const auto *dc = static_cast<const DrawCmd *>(c);
 
             int x = int(dc->m_x * scale [0]);
             int y = int(dc->m_y * scale [1]);
@@ -310,21 +314,21 @@ void ReportPage::print(QPainter *p, double scale [2])
                 p->drawEllipse(x, y, w, h);
                 break;
 
-            case Cmd::Pixmap: {
-                QPixmap pix = dc->m_p1.value<QPixmap>();
+            case Cmd::Image: {
+                QImage img = dc->m_p1.value<QImage>();
 
-                if (!pix.isNull()) {
+                if (!img.isNull()) {
                     QRect dr = QRect(x, y, w, h);
 
                     QSize oldsize = dr.size();
-                    QSize newsize = pix.size();
+                    QSize newsize = img.size();
                     newsize.scale(oldsize, Qt::KeepAspectRatio);
 
                     dr.setSize(newsize);
                     dr.translate((oldsize.width() - newsize.width()) / 2,
                                  (oldsize.height() - newsize.height()) / 2);
 
-                    p->drawPixmap(dr, pix);
+                    p->drawImage(dr, img);
                 }
                 break;
             }
@@ -364,7 +368,7 @@ double ReportPage::lineWidth() const
 
 void ReportPage::attr_cmd()
 {
-    AttrCmd *ac = new AttrCmd();
+    auto *ac = new AttrCmd();
     *ac = m_attr;
     ac->m_cmd = Cmd::Attributes;
     m_cmds.append(ac);
@@ -412,7 +416,7 @@ Size ReportPage::textSize(const QString &text)
 
 void ReportPage::drawText(double x, double y, const QString &text)
 {
-    DrawCmd *dc = new DrawCmd();
+    auto *dc = new DrawCmd();
     dc->m_cmd = Cmd::Text;
     dc->m_x = x;
     dc->m_y = y;
@@ -423,7 +427,7 @@ void ReportPage::drawText(double x, double y, const QString &text)
 
 void ReportPage::drawText(double left, double top, double width, double height, Alignment align, const QString &text)
 {
-    DrawCmd *dc = new DrawCmd();
+    auto *dc = new DrawCmd();
     dc->m_cmd = Cmd::Text;
     dc->m_x = left;
     dc->m_y = top;
@@ -436,7 +440,7 @@ void ReportPage::drawText(double left, double top, double width, double height, 
 
 void ReportPage::drawLine(double x1, double y1, double x2, double y2)
 {
-    DrawCmd *dc = new DrawCmd();
+    auto *dc = new DrawCmd();
     dc->m_cmd = Cmd::Line;
     dc->m_x = x1;
     dc->m_y = y1;
@@ -447,7 +451,7 @@ void ReportPage::drawLine(double x1, double y1, double x2, double y2)
 
 void ReportPage::drawRect(double left, double top, double width, double height)
 {
-    DrawCmd *dc = new DrawCmd();
+    auto *dc = new DrawCmd();
     dc->m_cmd = Cmd::Rect;
     dc->m_x = left;
     dc->m_y = top;
@@ -458,7 +462,7 @@ void ReportPage::drawRect(double left, double top, double width, double height)
 
 void ReportPage::drawEllipse(double left, double top, double width, double height)
 {
-    DrawCmd *dc = new DrawCmd();
+    auto *dc = new DrawCmd();
     dc->m_cmd = Cmd::Ellipse;
     dc->m_x = left;
     dc->m_y = top;
@@ -467,15 +471,15 @@ void ReportPage::drawEllipse(double left, double top, double width, double heigh
     m_cmds.append(dc);
 }
 
-void ReportPage::drawPixmap(double left, double top, double width, double height, const QPixmap &pixmap)
+void ReportPage::drawImage(double left, double top, double width, double height, const QImage &image)
 {
-    DrawCmd *dc = new DrawCmd();
-    dc->m_cmd = Cmd::Pixmap;
+    auto *dc = new DrawCmd();
+    dc->m_cmd = Cmd::Image;
     dc->m_x = left;
     dc->m_y = top;
     dc->m_w = width;
     dc->m_h = height;
-    dc->m_p1 = pixmap;
+    dc->m_p1 = image;
     m_cmds.append(dc);
 }
 
@@ -533,3 +537,209 @@ QString ReportMoneyStatic::toLocalString(double /*d*/, bool /*with_currency_symb
     }
     return QString(); //TODO: Currency(d).toLocal(with_currency_symbol ? Currency::LocalSymbol : Currency::NoSymbol, precision);
 }
+
+
+Font::Font(const QFont &qf)
+    : d(qf)
+{ }
+
+QFont Font::toQFont() const
+{
+    return d;
+}
+
+void Font::fromQFont(const QFont &qf)
+{
+    d = qf;
+}
+
+QScriptValue Font::toScriptValue(QScriptEngine *engine, Font * const &in)
+{
+    return engine->newQObject(in);
+}
+
+void Font::fromScriptValue(const QScriptValue &object, Font *&out)
+{
+    out = qobject_cast<Font *>(object.toQObject());
+}
+
+QScriptValue Font::createScriptValue(QScriptContext *, QScriptEngine *engine)
+{
+    Font *f = new Font();
+    return engine->newQObject(f);
+}
+
+QString Font::family() const
+{
+    return d.family();
+}
+
+qreal Font::pointSize() const
+{
+    return d.pointSizeF();
+}
+
+int Font::pixelSize() const
+{
+    return d.pixelSize();
+}
+
+bool Font::bold() const
+{
+    return d.bold();
+}
+
+bool Font::italic() const
+{
+    return d.italic();
+}
+
+bool Font::underline() const
+{
+    return d.underline();
+}
+
+bool Font::strikeout() const
+{
+    return d.strikeOut();
+}
+
+void Font::setFamily(const QString &f)
+{
+    if (f != family()) {
+        d.setFamily(f);
+        emit familyChanged(f);
+    }
+}
+
+void Font::setPointSize(qreal ps)
+{
+    if (!qFuzzyCompare(ps, pointSize())) {
+        int oldPixelSize = pixelSize();
+        d.setPointSizeF(ps);
+        emit pointSizeChanged(ps);
+        if (pixelSize() != oldPixelSize)
+            emit pixelSizeChanged(pixelSize());
+    }
+}
+
+void Font::setPixelSize(int ps)
+{
+    if (ps != pixelSize()) {
+        qreal oldPointSize = pointSize();
+        d.setPixelSize(ps);
+        emit pixelSizeChanged(ps);
+        if (!qFuzzyCompare(pointSize(), oldPointSize))
+            emit pointSizeChanged(pointSize());
+    }
+}
+
+void Font::setBold(bool b)
+{
+    if (b != bold()) {
+        d.setBold(b);
+        emit boldChanged(b);
+    }
+}
+
+void Font::setItalic(bool i)
+{
+    if (i != italic()) {
+        d.setItalic(i);
+        emit italicChanged(i);
+    }
+}
+
+void Font::setUnderline(bool u)
+{
+    if (u != underline()) {
+        d.setUnderline(u);
+        emit underlineChanged(u);
+    }
+}
+
+void Font::setStrikeout(bool s)
+{
+    if (s != strikeout()) {
+        d.setStrikeOut(s);
+        emit strikeoutChanged(s);
+    }
+}
+
+
+Size &Size::operator=(const QSizeF &sf)
+{
+    QSizeF::operator=(sf); return *this;
+}
+
+QScriptValue Size::toScriptValue(QScriptEngine *engine, const Size &s)
+{
+    QScriptValue obj = engine->newObject();
+    obj.setProperty("width", s.width());
+    obj.setProperty("height", s.height());
+    return obj;
+}
+
+void Size::fromScriptValue(const QScriptValue &obj, Size &s)
+{
+    s.setWidth(obj.property("width").toNumber());
+    s.setHeight(obj.property("height").toNumber());
+}
+
+QScriptValue Size::createScriptValue(QScriptContext *, QScriptEngine *engine)
+{
+    return engine->toScriptValue(Size());
+}
+
+
+Color::Color(const QColor &qc)
+    : d(qc)
+{ }
+
+QColor Color::toQColor() const
+{
+    return d;
+}
+
+void Color::fromQColor(const QColor &qc)
+{
+    d = qc;
+}
+
+QScriptValue Color::toScriptValue(QScriptEngine *engine, Color * const &in)
+{
+    return engine->newQObject(in);
+}
+
+void Color::fromScriptValue(const QScriptValue &object, Color *&out)
+{
+    out = qobject_cast<Color *>(object.toQObject());
+}
+
+QScriptValue Color::createScriptValue(QScriptContext *, QScriptEngine *engine)
+{
+    auto *c = new Color();
+    return engine->newQObject(c); // ###ScriptOwnership ???
+}
+
+void Color::setRgb(uint value)
+{
+    d.setRgb(value);
+}
+
+void Color::setRgb(int r, int g, int b)
+{
+    d.setRgb(r, g, b);
+}
+
+Color *Color::light() const
+{
+    return new Color(d.lighter());
+}
+
+Color *Color::dark() const
+{
+    return new Color(d.darker());
+}
+
+#include "moc_reportobjects.cpp"

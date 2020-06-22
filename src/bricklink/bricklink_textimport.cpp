@@ -32,7 +32,7 @@ QString decodeEntities(const QString &src)
     int pos = 0;
     while( (pos = re.indexIn(src, pos)) != -1 )
     {
-        ret = ret.replace(re.cap(0), QChar(re.cap(1).toInt(0,10)));
+        ret = ret.replace(re.cap(0), QChar(re.cap(1).toInt(nullptr,10)));
         pos += re.matchedLength();
     }
     return ret;
@@ -65,56 +65,6 @@ QString decodeEntities(const char *src)
     } while (pos >= 0);
 
     return decoded;
-}
-
-
-void set_tz(const char *tz)
-{
-    char pebuf [256] = "TZ=";
-    if (tz)
-        strcat(pebuf, tz);
-
-#if defined(Q_OS_WINDOWS)
-    _putenv(pebuf);
-    _tzset();
-#else
-    putenv(pebuf);
-    tzset();
-#endif
-}
-
-time_t toUTC(const QDateTime &dt, const char *settz)
-{
-    QByteArray oldtz;
-
-    if (settz) {
-        oldtz = getenv("TZ");
-        set_tz(settz);
-    }
-
-    // get a tm structure from the system to get the correct tz_name
-    time_t t = time(0);
-    struct tm *lt = localtime(&t);
-
-    lt->tm_sec   = dt.time().second();
-    lt->tm_min   = dt.time().minute();
-    lt->tm_hour  = dt.time().hour();
-    lt->tm_mday  = dt.date().day();
-    lt->tm_mon   = dt.date().month() - 1;       // 0-11 instead of 1-12
-    lt->tm_year  = dt.date().year() - 1900;     // year - 1900
-    lt->tm_wday  = -1;
-    lt->tm_yday  = -1;
-    lt->tm_isdst = -1; // tm_isdst negative ->mktime will find out about DST
-
-    // keep tm_zone and tm_gmtoff
-    t = mktime(lt);
-
-    if (settz)
-        set_tz(oldtz.data());
-
-    //time_t t2 = dt.toTime_t();
-
-    return t;
 }
 
 
@@ -154,10 +104,10 @@ namespace BrickLink {
 template <> Category *TextImport::parse<Category> (uint count, const char **strs)
 {
     if (count < 2)
-        return 0;
+        return nullptr;
 
-    Category *cat = new Category();
-    cat->m_id   = strtol(strs[0], 0, 10);
+    auto *cat = new Category();
+    cat->m_id   = strtol(strs[0], nullptr, 10);
     cat->m_name = decodeEntities(strs[1]);
 
     return cat;
@@ -166,14 +116,14 @@ template <> Category *TextImport::parse<Category> (uint count, const char **strs
 template <> Color *TextImport::parse<Color> (uint count, const char **strs)
 {
     if (count < 4)
-        return 0;
+        return nullptr;
 
-    Color *col = new Color();
-    col->m_id          = strtol(strs[0], 0, 10);
+    auto *col = new Color();
+    col->m_id          = strtol(strs[0], nullptr, 10);
     col->m_name        = strs[1];
     col->m_ldraw_id    = -1;
     col->m_color       = QColor(QString('#') + strs[2]);
-    col->m_type        = 0;
+    col->m_type        = nullptr;
 
     if (!strcmp(strs[3], "Transparent"))  col->m_type |= Color::Transparent;
     if (!strcmp(strs[3], "Glitter"))  col->m_type |= Color::Glitter;
@@ -187,17 +137,17 @@ template <> Color *TextImport::parse<Color> (uint count, const char **strs)
         col->m_type = Color::Solid;
 
     if (count >= 8) {
-        col->m_popularity = strtol(strs[4], 0, 10) // parts
-                          + strtol(strs[5], 0, 10) // in sets
-                          + strtol(strs[6], 0, 10) // wanted
-                          + strtol(strs[7], 0, 10); // for sale
+        col->m_popularity = strtol(strs[4], nullptr, 10) // parts
+                          + strtol(strs[5], nullptr, 10) // in sets
+                          + strtol(strs[6], nullptr, 10) // wanted
+                          + strtol(strs[7], nullptr, 10); // for sale
         // needs to be divided by the max. after all colors are parsed!
         // mark it as raw data meanwhile:
         col->m_popularity = -col->m_popularity;
     }
     if (count >= 10) {
-        col->m_year_from = strtol(strs[8], 0, 10);
-        col->m_year_to   = strtol(strs[9], 0, 10);
+        col->m_year_from = strtol(strs[8], nullptr, 10);
+        col->m_year_to   = strtol(strs[9], nullptr, 10);
     }
     return col;
 }
@@ -205,10 +155,10 @@ template <> Color *TextImport::parse<Color> (uint count, const char **strs)
 template <> ItemType *TextImport::parse<ItemType> (uint count, const char **strs)
 {
     if (count < 2)
-        return 0;
+        return nullptr;
 
     char c = strs [0][0];
-    ItemType *itt = new ItemType();
+    auto *itt = new ItemType();
     itt->m_id                = c;
     itt->m_picture_id        = (c == 'I') ? 'S' : c;
     itt->m_name              = strs[1];
@@ -224,7 +174,7 @@ template <> ItemType *TextImport::parse<ItemType> (uint count, const char **strs
 template <> Item *TextImport::parse<Item> (uint count, const char **strs)
 {
     if (count < 4)
-        return 0;
+        return nullptr;
 
     Item *item = new Item();
     item->m_id        = strs[2];
@@ -232,7 +182,7 @@ template <> Item *TextImport::parse<Item> (uint count, const char **strs)
     item->m_item_type = m_current_item_type;
     item->m_categories.clear();
 
-    const Category *maincat = m_categories.value(strtol(strs[0], 0, 10));
+    const Category *maincat = m_categories.value(strtol(strs[0], nullptr, 10));
     const QString allcats = decodeEntities(strs[1]);
     QVector<QStringRef> auxcats = allcats.splitRef(QLatin1String(" / "));
 
@@ -266,7 +216,7 @@ template <> Item *TextImport::parse<Item> (uint count, const char **strs)
     uint parsedfields = 4;
 
     if ((parsedfields < count) && (item->m_item_type->hasYearReleased())) {
-        int y = strtol(strs[parsedfields++], 0, 10) - 1900;
+        int y = strtol(strs[parsedfields++], nullptr, 10) - 1900;
         item->m_year = ((y > 0) && (y < 255)) ? y : 0; // we only have 8 bits for the year
         parsedfields++;
     } else {
@@ -281,9 +231,9 @@ template <> Item *TextImport::parse<Item> (uint count, const char **strs)
     }
 
     if (parsedfields < count)
-        item->m_color = m_colors.value(strtol(strs[parsedfields++], 0, 10));
+        item->m_color = m_colors.value(strtol(strs[parsedfields++], nullptr, 10));
     else
-        item->m_color = 0;
+        item->m_color = nullptr;
 
     return item;
 }
@@ -297,7 +247,7 @@ template <> Item *TextImport::parse<Item> (uint count, const char **strs)
 
 BrickLink::TextImport::TextImport()
 {
-    m_current_item_type = 0;
+    m_current_item_type = nullptr;
 }
 
 bool BrickLink::TextImport::import(const QString &path)
@@ -313,23 +263,23 @@ bool BrickLink::TextImport::import(const QString &path)
     // speed up loading (exactly 137522 items on 16.06.2020)
     m_items.reserve(150000);
 
-    foreach(const ItemType *itt, m_item_types) {
+    for (const ItemType *itt : qAsConst(m_item_types)) {
         m_current_item_type = itt;
         ok &= readDB<>(path + "items_" + char(itt->m_id) + ".txt", m_items, true);
     }
-    m_current_item_type = 0;
+    m_current_item_type = nullptr;
 
     std::sort(m_items.begin(), m_items.end(), Item::lessThan);
 
-    Item **itp = const_cast<Item **>(m_items.data());
+    Item **itp = const_cast<Item **>(m_items.constData());
 
     for (int i = 0; i < m_items.count(); itp++, i++) {
         (*itp)->m_index = i;
 
-        ItemType *itt = const_cast<ItemType *>((*itp)->m_item_type);
+        auto *itt = const_cast<ItemType *>((*itp)->m_item_type);
 
         if (itt) {
-            for (const Category *cat : (*itp)->m_categories) {
+            for (const Category *cat : qAsConst((*itp)->m_categories)) {
                 if (!itt->m_categories.contains(cat))
                     itt->m_categories.append(cat);
             }
@@ -341,7 +291,7 @@ bool BrickLink::TextImport::import(const QString &path)
     btchglog_dummy btchglog_dummy;
     ok &= readDB<>(path + "btchglog.txt", btchglog_dummy);
 
-    m_current_item_type = 0;
+    m_current_item_type = nullptr;
 
     if (!ok)
         qWarning() << "Error importing databases!";
@@ -349,28 +299,22 @@ bool BrickLink::TextImport::import(const QString &path)
     return ok;
 }
 
-template <typename T> bool BrickLink::TextImport::readDB_processLine(QMap<int, const T *> &h, uint tokencount, const char **tokens)
+template <typename T> bool BrickLink::TextImport::readDB_processLine(QHash<int, const T *> &h, uint tokencount, const char **tokens)
 {
     T *t = parse<T> (tokencount, (const char **) tokens);
 
-    if (t) {
+    if (t)
         h.insert(t->id(), t);
-        return true;
-    }
-    else
-        return false;
+    return t;
 }
 
 template <typename T> bool BrickLink::TextImport::readDB_processLine(QVector<const T *> &v, uint tokencount, const char **tokens)
 {
     T *t = parse<T> (tokencount, (const char **) tokens);
 
-    if (t) {
+    if (t)
         v.append(t);
-        return true;
-    }
-    else
-        return false;
+    return t;
 }
 
 
@@ -380,7 +324,7 @@ bool BrickLink::TextImport::readDB_processLine(btinvlist_dummy & /*dummy*/, uint
         return false;
 
     if (const Item *itm = findItem(strs[0][0], decodeEntities(strs[1]))) {
-        time_t t = time_t(0);   // 1.1.1970 00:00
+        auto t = time_t(0);   // 1.1.1970 00:00
 
         if (count >= 2 && strs[2][0]) {
             static QString fmtFull = QStringLiteral("M/d/yyyy h:mm:ss AP");
@@ -507,12 +451,12 @@ bool BrickLink::TextImport::importInventories(QVector<const Item *> &invs)
             continue;
 
         if (!item->hasInventory()) {
-            item = 0;  // no inv at all ->yank it
+            item = nullptr;  // no inv at all ->yank it
             continue;
         }
 
         if (readInventory(item)) {
-            item = 0;
+            item = nullptr;
         }
     }
     return true;
@@ -537,11 +481,11 @@ bool BrickLink::TextImport::readInventory(const Item *item)
         if (doc.setContent(&f, &emsg, &eline, &ecol)) {
             QDomElement root = doc.documentElement();
 
-            Core::ParseItemListXMLResult result = BrickLink::core()->parseItemListXML(doc.documentElement().toElement(), BrickLink::XMLHint_Inventory);
+            const Core::ParseItemListXMLResult result = BrickLink::core()->parseItemListXML(doc.documentElement().toElement(), BrickLink::XMLHint_Inventory);
 
             if (result.items) {
                 if (!result.invalidItemCount) {
-                    foreach(const BrickLink::InvItem *ii, *result.items) {
+                    for (const BrickLink::InvItem *ii : *result.items) {
                         if (!ii->item() || !ii->color() || !ii->quantity())
                             continue;
 
@@ -574,10 +518,10 @@ void BrickLink::TextImport::exportInventoriesTo(Core *bl)
 void BrickLink::TextImport::calculateColorPopularity()
 {
     qreal maxpop = 0;
-    for (QMap<int, const Color *>::const_iterator it = m_colors.constBegin(); it != m_colors.constEnd(); ++it)
-        maxpop = qMin(maxpop, it.value()->m_popularity);
-    for (QMap<int, const Color *>::const_iterator it = m_colors.constBegin(); it != m_colors.constEnd(); ++it) {
-        qreal &pop = const_cast<Color *>(it.value())->m_popularity;
+    for (const auto &col : qAsConst(m_colors))
+        maxpop = qMin(maxpop, col->m_popularity);
+    for (const auto &col : qAsConst(m_colors)) {
+        qreal &pop = const_cast<Color *>(col)->m_popularity;
 
         if (maxpop)
             pop /= maxpop;

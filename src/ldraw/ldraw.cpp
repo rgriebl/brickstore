@@ -33,7 +33,7 @@
 
 LDraw::Element *LDraw::Element::fromByteArray(const QByteArray &line, const QDir &dir)
 {
-    Element *e = 0;
+    Element *e = nullptr;
     int t = -1;
 
     static const int element_count_lut[] = {
@@ -260,7 +260,7 @@ LDraw::PartElement::~PartElement()
 
 LDraw::PartElement *LDraw::PartElement::create(int color, const QMatrix4x4 &matrix, const QString &filename, const QDir &parentdir)
 {
-    PartElement *e = 0;
+    PartElement *e = nullptr;
     if (LDraw::Part *p = Core::inst()->findPart(filename, parentdir))
         e = new PartElement(color, matrix, p);
     return e;
@@ -318,7 +318,7 @@ LDraw::Part *LDraw::Part::parse(QFile &file, const QDir &dir)
 
     if (p->m_elements.isEmpty()) {
         delete p;
-        p = 0;
+        p = nullptr;
     }
     return p;
 }
@@ -356,28 +356,29 @@ void LDraw::Part::check_bounding(int cnt, const QVector3D *v, const QMatrix4x4 &
 
 void LDraw::Part::calc_bounding_box(const Part *part, const QMatrix4x4 &matrix, QVector3D &vmin, QVector3D &vmax)
 {
-    foreach (Element *e, part->elements()) {
+    const auto elements = part->elements();
+    for (const Element *e : elements) {
         switch (e->type()) {
         case Element::Line: {
-            const LineElement *le = static_cast<const LineElement *>(e);
+            const auto *le = static_cast<const LineElement *>(e);
 
             check_bounding(2, le->points(), matrix, vmin, vmax);
             break;
         }
         case Element::Triangle: {
-            const TriangleElement *te = static_cast<const TriangleElement *>(e);
+            const auto *te = static_cast<const TriangleElement *>(e);
 
             check_bounding(3, te->points(), matrix, vmin, vmax);
             break;
         }
         case Element::Quad: {
-            const QuadElement *qe = static_cast<const QuadElement *>(e);
+            const auto *qe = static_cast<const QuadElement *>(e);
 
             check_bounding(4, qe->points(), matrix, vmin, vmax);
             break;
         }
         case Element::Part: {
-            const PartElement *pe = static_cast<const PartElement *>(e);
+            const auto *pe = static_cast<const PartElement *>(e);
 
             calc_bounding_box(pe->part(), matrix * pe->matrix(), vmin, vmax);
             break;
@@ -393,9 +394,8 @@ void LDraw::Part::calc_bounding_box(const Part *part, const QMatrix4x4 &matrix, 
 
 void LDraw::Part::dump() const
 {
-    foreach (Element *e, m_elements) {
+    for (const Element *e : m_elements)
         e->dump();
-    }
 }
 
 LDraw::Part *LDraw::Core::findPart(const QString &_filename, const QDir &parentdir)
@@ -410,7 +410,7 @@ LDraw::Part *LDraw::Core::findPart(const QString &_filename, const QDir &parentd
         QList<QDir> searchpath = m_searchpath;
         searchpath.prepend(parentdir);
 
-        foreach (QDir sp, searchpath) {
+        for (const QDir &sp : qAsConst(searchpath)) {
             QString testname = sp.absolutePath() + QLatin1Char('/') + filename;
             if (QFile::exists(testname)) {
                 filename = testname;
@@ -424,7 +424,7 @@ LDraw::Part *LDraw::Core::findPart(const QString &_filename, const QDir &parentd
     }
 
     if (!found)
-        return 0;
+        return nullptr;
 
     filename = QFileInfo(filename).canonicalFilePath();
 
@@ -438,7 +438,7 @@ LDraw::Part *LDraw::Core::findPart(const QString &_filename, const QDir &parentd
         if (p) {
             if (!m_cache.insert(filename, p)) {
                 qWarning("Unable to cache LDraw file %s", qPrintable(filename));
-                p = 0;
+                p = nullptr;
             }
         }
     }
@@ -487,7 +487,7 @@ bool LDraw::Core::check_ldrawdir(const QString &ldir)
 
 QString LDraw::Core::get_platform_ldrawdir()
 {
-    QString dir = QString::fromLocal8Bit(::getenv("LDRAWDIR"));
+    QString dir = QString::fromLocal8Bit(qgetenv("LDRAWDIR"));
 
 #if defined(Q_OS_WINDOWS)
     if (dir.isEmpty() || !check_ldrawdir(dir)) {
@@ -508,7 +508,7 @@ QString LDraw::Core::get_platform_ldrawdir()
                 wchar_t regdir [MAX_PATH + 1];
                 DWORD regdirsize = MAX_PATH * sizeof(wchar_t);
 
-                if (RegQueryValueExW(lkey, L"InstallDir", 0, 0, (LPBYTE) &regdir, &regdirsize) == ERROR_SUCCESS) {
+                if (RegQueryValueExW(lkey, L"InstallDir", nullptr, nullptr, (LPBYTE) &regdir, &regdirsize) == ERROR_SUCCESS) {
                     regdir [regdirsize / sizeof(WCHAR)] = 0;
                     dir = QString::fromUtf16(reinterpret_cast<ushort *>(regdir));
                 }
@@ -540,7 +540,7 @@ QString LDraw::Core::get_platform_ldrawdir()
 }
 
 
-LDraw::Core *LDraw::Core::s_inst = 0;
+LDraw::Core *LDraw::Core::s_inst = nullptr;
 
 LDraw::Core *LDraw::Core::create(const QString &datadir, QString *errstring)
 {
@@ -571,7 +571,7 @@ LDraw::Core *LDraw::Core::create(const QString &datadir, QString *errstring)
 
         if (!error.isEmpty()) {
             delete s_inst;
-            s_inst = 0;
+            s_inst = nullptr;
 
             if (errstring)
                 *errstring = error;
@@ -584,17 +584,17 @@ LDraw::Core *LDraw::Core::create(const QString &datadir, QString *errstring)
 LDraw::Core::Core(const QString &datadir)
     : m_datadir(datadir)
 {
-    const char *subdirs[] =
+    static const char *subdirs[] =
 #if defined(Q_OS_UNIX) && !defined(Q_OS_MACOS)
-        { "P", "p", "PARTS", "parts", "MODELS", "models", 0 };
+        { "P", "p", "PARTS", "parts", "MODELS", "models", };
 #else
-        { "P", "PARTS", "MODELS", 0 };
+        { "P", "PARTS", "MODELS" };
 #endif
 
-    for (const char **ptr = subdirs; *ptr; ++ptr) {
+    for (auto subdir : subdirs) {
         QDir sdir(m_datadir);
 
-        if (sdir.cd(QLatin1String(*ptr)))
+        if (sdir.cd(QLatin1String(subdir)))
             m_searchpath << sdir;
     }
 }
@@ -674,9 +674,9 @@ QColor LDraw::Core::parse_color_string(const QString &cstr)
     if (str.startsWith(QLatin1String("0x")))
         str.replace(0, 2, QLatin1String("#"));
     if (str.startsWith(QLatin1String("#")))
-        return QColor(str);
+        return { str };
     else
-        return QColor();
+        return {};
 }
 
 bool LDraw::Core::parse_ldconfig(const char *filename)
@@ -749,7 +749,7 @@ bool LDraw::Core::parse_ldconfig(const char *filename)
                 }
             }
         }
-        for (QMap<int, int>::const_iterator it = edge_ids.begin(); it != edge_ids.end(); ++it) {
+        for (auto it = edge_ids.constBegin(); it != edge_ids.constEnd(); ++it) {
             if (m_colors.contains(it.key()) && m_colors.contains(it.value())) {
                 m_colors[it.key()].second = m_colors[it.value()].first;
                 //qDebug() << "Fixed Edge " << it.key() << " : " << m_colors[it.key()].first << " // " << m_colors[it.key()].second;
@@ -805,7 +805,7 @@ QColor LDraw::Core::color(int id, int baseid) const
     }
     else if (baseid < 0 && (id == 16 || id == 24)) {
         qWarning("Called Core::color() with meta color id 16 or 24 without specifing the meta color");
-        return QColor();
+        return {};
     }
     else if (id == 16) {
         return color(baseid);

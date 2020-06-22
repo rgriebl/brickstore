@@ -36,7 +36,7 @@ public:
     static QAction *create(Type type, const T *stack, QObject *parent);
 
 public slots:
-    virtual void setDescription(const QString &str);
+    void setDescription(const QString &str);
 
 signals:
     void triggered(int);
@@ -140,13 +140,15 @@ QAction *UndoGroup::createUndoAction(QObject *parent) const
 
 // --------------------------------------------------------------------------
 
-class UndoActionListWidget : public QListWidget {
+class UndoActionListWidget : public QListWidget
+{
+    Q_OBJECT
 public:
     UndoActionListWidget(QWidget *parent)
         : QListWidget(parent)
     { }
 
-    virtual QSize sizeHint() const
+    QSize sizeHint() const override
     {
         int fw = 2* style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
 
@@ -158,15 +160,20 @@ public:
 
         return s2.expandedTo(QSize(60, 60)) + QSize(fw, fw);
     }
+private:
+    Q_DISABLE_COPY(UndoActionListWidget)
 };
 
-class UndoActionLabel : public QLabel {
+class UndoActionLabel : public QLabel
+{
+    Q_OBJECT
 public:
     UndoActionLabel(QWidget *parent, const char **strings)
-        : QLabel(parent), m_strings(strings)
+        : QLabel(parent)
+        , m_strings(strings)
     { }
 
-    virtual QSize sizeHint() const
+    QSize sizeHint() const override
     {
         QSize s = QLabel::sizeHint();
 
@@ -187,6 +194,8 @@ public:
     }
 
 private:
+    Q_DISABLE_COPY(UndoActionLabel)
+
     const char **m_strings;
 };
 
@@ -204,7 +213,7 @@ QAction *UndoAction::create(UndoAction::Type type, const T *stackOrGroup, QObjec
 {
     bool un = (type == Undo);
 
-    UndoAction *a = new UndoAction(type, parent);
+    auto *a = new UndoAction(type, parent);
     a->setEnabled(un ? stackOrGroup->canUndo() : stackOrGroup->canRedo());
 
     connect(stackOrGroup, un ? &T::undoTextChanged : &T::redoTextChanged,
@@ -223,23 +232,23 @@ UndoAction::UndoAction(Type t, QObject *parent)
     : QWidgetAction(parent)
 {
     m_type = t;
-    m_menu = 0;
-    m_list = 0;
-    m_label = 0;
+    m_menu = nullptr;
+    m_list = nullptr;
+    m_label = nullptr;
 
     languageChange();
 }
 
 QWidget *UndoAction::createWidget(QWidget *parent)
 {
-    if (QToolBar *tb = qobject_cast<QToolBar *>(parent)) {
+    if (auto *tb = qobject_cast<QToolBar *>(parent)) {
         if (m_menu) {
             qWarning("Each UndoAction should only be added once to a single QToolBar");
             return nullptr;
         }
 
         // straight from QToolBar
-        QToolButton *button = new QToolButton(tb);
+        auto *button = new QToolButton(tb);
         button->setAutoRaise(true);
         button->setFocusPolicy(Qt::NoFocus);
         button->setIconSize(tb->iconSize());
@@ -261,7 +270,7 @@ QWidget *UndoAction::createWidget(QWidget *parent)
         m_list->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         m_list->setMouseTracking(true);
 
-        QWidgetAction *listaction = new QWidgetAction(this);
+        auto *listaction = new QWidgetAction(this);
         listaction->setDefaultWidget(m_list);
         m_menu->addAction(listaction);
 
@@ -271,7 +280,7 @@ QWidget *UndoAction::createWidget(QWidget *parent)
         m_label->setPalette(QApplication::palette(m_menu));
         m_label->setBackgroundRole(m_menu->backgroundRole());
 
-        QWidgetAction *labelaction = new QWidgetAction(this);
+        auto *labelaction = new QWidgetAction(this);
         labelaction->setDefaultWidget(m_label);
         m_menu->addAction(labelaction);
 
@@ -291,7 +300,7 @@ QWidget *UndoAction::createWidget(QWidget *parent)
 
         return button;
     }
-    return 0;
+    return nullptr;
 }
 
 void UndoAction::setDescription(const QString &desc)
@@ -403,8 +412,8 @@ void UndoAction::updateDescriptions()
     QStringList sl;
 
     if (s) {
-        QUndoGroup *group = qobject_cast<QUndoGroup *>(s);
-        QUndoStack *stack = qobject_cast<QUndoStack *>(s);
+        auto *group = qobject_cast<QUndoGroup *>(s);
+        auto *stack = qobject_cast<QUndoStack *>(s);
 
         if (!stack && group)
             stack = group->activeStack();
@@ -414,7 +423,7 @@ void UndoAction::updateDescriptions()
 
     if (m_list) {
         m_list->clear();
-        foreach (const QString &str, sl)
+        for (const auto &str : qAsConst(sl))
             (void) new QListWidgetItem(str, m_list);
     }
 
@@ -422,3 +431,5 @@ void UndoAction::updateDescriptions()
 }
 
 #include "undo.moc"
+
+#include "moc_undo.cpp"

@@ -145,6 +145,8 @@ protected:
     virtual void run()               { }
 
 private:
+    Q_DISABLE_COPY(ThreadPoolJob)
+
     ThreadPool *m_threadpool;
     void *       m_user_ptr;
     int          m_user_tag;

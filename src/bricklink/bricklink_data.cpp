@@ -181,14 +181,14 @@ void BrickLink::Item::setAppearsIn(const AppearsIn &map) const
 
     _dwords_for_appears += s;
 
-    quint32 *ptr = new quint32 [s];
+    auto *ptr = new quint32 [s];
     m_appears_in = ptr;
 
     *ptr++ = map.size();   // how many colors
     *ptr++ = s;             // only useful in save/restore ->size in DWORDs
 
     for (AppearsIn::const_iterator it = map.begin(); it != map.end(); ++it) {
-        appears_in_record *color_header = reinterpret_cast <appears_in_record *>(ptr);
+        auto *color_header = reinterpret_cast <appears_in_record *>(ptr);
 
         color_header->m12 = it.key()->id();        // color id
         color_header->m20 = it.value().size();      // # of entries
@@ -196,7 +196,7 @@ void BrickLink::Item::setAppearsIn(const AppearsIn &map) const
         ptr++;
 
         for (AppearsInColor::const_iterator itvec = it.value().begin(); itvec != it.value().end(); ++itvec) {
-            appears_in_record *color_entry = reinterpret_cast <appears_in_record *>(ptr);
+            auto *color_entry = reinterpret_cast <appears_in_record *>(ptr);
 
             color_entry->m12 = itvec->first;            // qty
             color_entry->m20 = itvec->second->m_index; // item index
@@ -217,7 +217,7 @@ BrickLink::AppearsIn BrickLink::Item::appearsIn(const Color *only_color) const
         quint32 *ptr = m_appears_in + 2;
 
         for (quint32 i = 0; i < m_appears_in [0]; i++) {
-            appears_in_record *color_header = reinterpret_cast <appears_in_record *>(ptr);
+            auto *color_header = reinterpret_cast <appears_in_record *>(ptr);
             ptr++;
 
             const BrickLink::Color *color = BrickLink::core()->color(color_header->m12);
@@ -226,7 +226,7 @@ BrickLink::AppearsIn BrickLink::Item::appearsIn(const Color *only_color) const
                 AppearsInColor &vec = map [color];
 
                 for (quint32 j = 0; j < color_header->m20; j++, ptr++) {
-                    appears_in_record *color_entry = reinterpret_cast <appears_in_record *>(ptr);
+                    auto *color_entry = reinterpret_cast <appears_in_record *>(ptr);
 
                     uint qty = color_entry->m12;    // qty
                     uint index = color_entry->m20;  // item index
@@ -249,13 +249,13 @@ void BrickLink::Item::setConsistsOf(const InvItemList &items) const
 
     _qwords_for_consists += (items.count() + 1);
 
-    quint64 *ptr = new quint64 [items.count() + 1];
+    auto *ptr = new quint64 [items.count() + 1];
     m_consists_of = ptr;
 
     *ptr++ = items.count();     // how many entries
 
-    foreach(const InvItem *item, items) {
-        consists_of_record *entry = reinterpret_cast <consists_of_record *>(ptr);
+    for (const InvItem *item : items) {
+        auto *entry = reinterpret_cast <consists_of_record *>(ptr);
 
         if (item->item() && item->color() && item->quantity()) {
             entry->m_qty      = item->quantity();
@@ -284,14 +284,14 @@ BrickLink::InvItemList BrickLink::Item::consistsOf() const
         quint64 *ptr = m_consists_of + 1;
 
         for (uint i = 0; i < uint(m_consists_of [0]); i++) {
-            consists_of_record *entry = reinterpret_cast <consists_of_record *>(ptr);
+            auto *entry = reinterpret_cast <consists_of_record *>(ptr);
             ptr++;
 
             const BrickLink::Color *color = BrickLink::core()->color(entry->m_color);
-            const BrickLink::Item *item = (entry->m_index < count) ? items [entry->m_index] : 0;
+            const BrickLink::Item *item = (entry->m_index < count) ? items [entry->m_index] : nullptr;
 
             if (color && item) {
-                InvItem *ii = new InvItem(color, item);
+                auto *ii = new InvItem(color, item);
                 ii->setQuantity(entry->m_qty);
                 if (entry->m_extra)
                     ii->setStatus(BrickLink::Extra);
@@ -381,7 +381,7 @@ QDataStream &operator >> (QDataStream &ds, BrickLink::Item *item)
         ds >> appears_size;
 
     if (appears && appears_size) {
-        quint32 *ptr = new quint32 [appears_size];
+        auto *ptr = new quint32 [appears_size];
         item->m_appears_in = ptr;
 
         *ptr++ = appears;
@@ -391,13 +391,13 @@ QDataStream &operator >> (QDataStream &ds, BrickLink::Item *item)
             ds >> *ptr++;
     }
     else
-        item->m_appears_in = 0;
+        item->m_appears_in = nullptr;
 
     quint32 consists = 0;
     ds >> consists;
 
     if (consists) {
-        quint64 *ptr = new quint64 [consists + 1];
+        auto *ptr = new quint64 [consists + 1];
         item->m_consists_of = ptr;
 
         *ptr++ = consists;
@@ -406,7 +406,7 @@ QDataStream &operator >> (QDataStream &ds, BrickLink::Item *item)
             ds >> *ptr++;
     }
     else
-        item->m_consists_of = 0;
+        item->m_consists_of = nullptr;
 
     return ds;
 }
@@ -439,20 +439,20 @@ BrickLink::InvItem::InvItem(const Color *color, const Item *item)
         m_tier_price [i] = .0;
     }
 
-    m_incomplete = 0;
+    m_incomplete = nullptr;
     m_lot_id = 0;
 }
 
 BrickLink::InvItem::InvItem(const BrickLink::InvItem &copy)
 {
-    m_incomplete = 0;
+    m_incomplete = nullptr;
     *this = copy;
 }
 
 BrickLink::InvItem &BrickLink::InvItem::operator = (const InvItem &copy)
 {
     delete m_incomplete;
-    m_incomplete = 0;
+    m_incomplete = nullptr;
 
     m_item           = copy.m_item;
     m_color          = copy.m_color;
@@ -633,7 +633,7 @@ QDataStream &operator >> (QDataStream &ds, BrickLink::InvItem &ii)
     ii.setItem(item);
     ii.setColor(color);
 
-    BrickLink::InvItem::Incomplete *inc = 0;
+    BrickLink::InvItem::Incomplete *inc = nullptr;
     if (!item || !color) {
         inc = new BrickLink::InvItem::Incomplete;
         if (!item) {
@@ -680,7 +680,7 @@ void BrickLink::InvItemMimeData::setItems(const InvItemList &items)
     QDataStream ds(&data, QIODevice::WriteOnly);
 
     ds << items.count();
-    foreach (const InvItem *ii, items) {
+    for (const InvItem *ii : items) {
         ds << *ii;
         if (!text.isEmpty())
             text.append("\n");
@@ -698,12 +698,12 @@ BrickLink::InvItemList BrickLink::InvItemMimeData::items(const QMimeData *md)
         QByteArray data = md->data(s_mimetype);
         QDataStream ds(data);
 
-        if (data.size()) {
+        if (!data.isEmpty()) {
             quint32 count = 0;
             ds >> count;
 
             for (; count && !ds.atEnd(); count--) {
-                InvItem *ii = new InvItem();
+                auto *ii = new InvItem();
                 ds >> *ii;
                 items.append(ii);
             }
@@ -1000,8 +1000,8 @@ void BrickLink::Order::setCountryName(const QString &str)
 {
     if (str.isEmpty())
         return;
-    for (uint i = 0; i < sizeof(countryList) / sizeof(*countryList); ++i) {
-        QString istr = QString::fromLatin1(countryList[i]);
+    for (const auto &i : countryList) {
+        QString istr = QString::fromLatin1(i);
         if (istr.mid(3) == str) {
             setCountryCode(istr.left(2));
             break;
@@ -1016,8 +1016,8 @@ QString BrickLink::Order::countryCode() const
 
 QString BrickLink::Order::countryName() const
 {
-    for (uint i = 0; i < sizeof(countryList) / sizeof(*countryList); ++i) {
-        QString istr = QString::fromLatin1(countryList[i]);
+    for (const auto &country : countryList) {
+        QString istr = QString::fromLatin1(country);
         if (istr[0] == m_countryCode[0] && istr[1] == m_countryCode[1])
             return istr.mid(3);
     }

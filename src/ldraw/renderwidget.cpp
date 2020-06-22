@@ -77,7 +77,7 @@ static inline void qVertex(QOpenGLFunctions_2_1 *gl, int count, const QVector3D 
 
 
 LDraw::GLRenderer::GLRenderer(QObject *parent)
-    : QObject(parent), m_part(0), m_color(-1), m_zoom(1), m_surfaces_list(0), m_initialized(false), m_resized(false)
+    : QObject(parent), m_part(nullptr), m_color(-1), m_zoom(1), m_surfaces_list(0), m_initialized(false), m_resized(false)
 {
     memset(&m_rx, 0, sizeof(qreal) * 3);
     memset(&m_tx, 0, sizeof(qreal) * 3);
@@ -90,7 +90,7 @@ LDraw::GLRenderer::GLRenderer(QObject *parent)
 
 LDraw::GLRenderer::~GLRenderer()
 {
-    setPartAndColor(0, -1);
+    setPartAndColor(nullptr, -1);
 }
 
 void LDraw::GLRenderer::setPartAndColor(Part *part, int color)
@@ -101,7 +101,7 @@ void LDraw::GLRenderer::setPartAndColor(Part *part, int color)
     if (m_initialized && m_resized) {
         resizeGL(glCurrentContext, m_size.width(), m_size.height());
         createSurfacesList();
-        updateNeeded();
+        emit updateNeeded();
     }
 }
 
@@ -120,7 +120,7 @@ void LDraw::GLRenderer::setXRotation(qreal r)
 {
     if (qAbs(m_rx - r) > 0.00001f) {
         m_rx = r;
-        updateNeeded();
+        emit updateNeeded();
     }
 }
 
@@ -128,7 +128,7 @@ void LDraw::GLRenderer::setYRotation(qreal r)
 {
     if (qAbs(m_ry - r) > 0.00001f) {
         m_ry = r;
-        updateNeeded();
+        emit updateNeeded();
     }
 }
 
@@ -136,7 +136,7 @@ void LDraw::GLRenderer::setZRotation(qreal r)
 {
     if (qAbs(m_rz - r) > 0.00001f) {
         m_rz = r;
-        updateNeeded();
+        emit updateNeeded();
     }
 }
 
@@ -144,7 +144,7 @@ void LDraw::GLRenderer::setXTranslation(qreal t)
 {
     if (qAbs(m_tx - t) > 0.00001f) {
         m_tx = t;
-        updateNeeded();
+        emit updateNeeded();
     }
 }
 
@@ -152,7 +152,7 @@ void LDraw::GLRenderer::setYTranslation(qreal t)
 {
     if (qAbs(m_ty - t) > 0.00001f) {
         m_ty = t;
-        updateNeeded();
+        emit updateNeeded();
     }
 }
 
@@ -160,7 +160,7 @@ void LDraw::GLRenderer::setZTranslation(qreal t)
 {
     if (qAbs(m_tz - t) > 0.00001f) {
         m_tz = t;
-        updateNeeded();
+        emit updateNeeded();
     }
 }
 
@@ -168,7 +168,7 @@ void LDraw::GLRenderer::setZoom(qreal z)
 {
     if (qAbs(m_zoom - z) > 0.00001f) {
         m_zoom = z;
-        updateNeeded();
+        emit updateNeeded();
     }
 }
 
@@ -275,7 +275,7 @@ void LDraw::GLRenderer::paintGL(QOpenGLContext *context)
 void LDraw::GLRenderer::createSurfacesList()
 {
     if (m_surfaces_list) {
-        makeCurrent();
+        emit makeCurrent();
         gl->glDeleteLists(m_surfaces_list, 1);
         m_surfaces_list = 0;
     }
@@ -301,7 +301,7 @@ void LDraw::GLRenderer::renderSurfaces(Part *part, int ldraw_basecolor)
 
         switch (e->type()) {
         case Element::Triangle: {
-            const TriangleElement *te = static_cast<const TriangleElement *>(e);
+            const auto *te = static_cast<const TriangleElement *>(e);
 
             QColor col = core()->color(te->color(), ldraw_basecolor);
             gl->glColor4f(col.redF(), col.greenF(), col.blueF(), col.alphaF());
@@ -315,7 +315,7 @@ void LDraw::GLRenderer::renderSurfaces(Part *part, int ldraw_basecolor)
             break;
         }
         case Element::Quad: {
-            const QuadElement *qe = static_cast<const QuadElement *>(e);
+            const auto *qe = static_cast<const QuadElement *>(e);
 
             QColor col = core()->color(qe->color(), ldraw_basecolor);
             gl->glColor4f(col.redF(), col.greenF(), col.blueF(), col.alphaF());
@@ -329,7 +329,7 @@ void LDraw::GLRenderer::renderSurfaces(Part *part, int ldraw_basecolor)
             break;
         }
         case Element::Part: {
-            const PartElement *pe = static_cast<const PartElement *>(e);
+            const auto *pe = static_cast<const PartElement *>(e);
 
             if (began >= 0) {
                 gl->glEnd();
@@ -368,14 +368,14 @@ void LDraw::GLRenderer::renderLines(Part *part, int ldraw_basecolor)
 
         switch (e->type()) {
         case Element::Line: {
-            const LineElement *le = static_cast<const LineElement *>(e);
+            const auto *le = static_cast<const LineElement *>(e);
 
             linebuffer lb = { le->points(), le->color() };
             buffer.append(lb);
             break;
         }
         case Element::CondLine: {
-            const CondLineElement *le = static_cast<const CondLineElement *>(e);
+            const auto *le = static_cast<const CondLineElement *>(e);
             const QVector3D *v = le->points();
 
             if (!proj_movi_init) {
@@ -405,7 +405,7 @@ void LDraw::GLRenderer::renderLines(Part *part, int ldraw_basecolor)
             break;
         }
         case Element::Part: {
-            const PartElement *pe = static_cast<const PartElement *>(e);
+            const auto *pe = static_cast<const PartElement *>(e);
             gl->glPushMatrix();
             qMultMatrix(gl, pe->matrix());
 
@@ -578,17 +578,16 @@ LDraw::RenderWidget::RenderWidget(QWidget *parent)
 }
 
 LDraw::RenderWidget::~RenderWidget()
-{
-}
+= default;
 
 QSize LDraw::RenderWidget::minimumSizeHint() const
 {
-    return QSize(50, 50);
+    return { 50, 50 };
 }
 
 QSize LDraw::RenderWidget::sizeHint() const
 {
-    return QSize(400, 400);
+    return { 400, 400 };
 }
 
 void LDraw::RenderWidget::mousePressEvent(QMouseEvent *e)
@@ -669,7 +668,7 @@ void LDraw::RenderWidget::paintGL()
 
 
 LDraw::RenderOffscreenWidget::RenderOffscreenWidget(QWidget *parent)
-    : QWidget(parent), m_fbo(0), m_initialized(false), m_resize(false)
+    : QWidget(parent), m_fbo(nullptr), m_initialized(false), m_resize(false)
 {
     //m_dummy = new QGLWidget(QGLFormat(QGL::SampleBuffers | QGL::Rgba | QGL::AlphaChannel));
 
@@ -686,19 +685,14 @@ LDraw::RenderOffscreenWidget::RenderOffscreenWidget(QWidget *parent)
     setCursor(Qt::OpenHandCursor);
 }
 
-LDraw::RenderOffscreenWidget::~RenderOffscreenWidget()
-{
-    //delete m_dummy;
-}
-
 QSize LDraw::RenderOffscreenWidget::minimumSizeHint() const
 {
-    return QSize(50, 50);
+    return { 50, 50 };
 }
 
 QSize LDraw::RenderOffscreenWidget::sizeHint() const
 {
-    return QSize(400, 400);
+    return { 400, 400 };
 }
 
 void LDraw::RenderOffscreenWidget::resizeEvent(QResizeEvent *)
@@ -863,3 +857,5 @@ void LDraw::RenderOffscreenWidget::stopAnimation()
 }
 
 #endif // !QT_NO_OPENGL
+
+#include "moc_renderwidget.cpp"

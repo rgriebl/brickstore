@@ -176,10 +176,10 @@ QString Utility::safeRename(const QString &basepath)
                 if (cwd.rename(newpath, basepath))
                     error = QString();
                 else
-                    error = qApp->translate("Utility", "Could not rename %1 to %2.").arg(newpath).arg(basepath);
+                    error = qApp->translate("Utility", "Could not rename %1 to %2.").arg(newpath, basepath);
             }
             else
-                error = qApp->translate("Utility", "Could not backup %1 to %2.").arg(basepath).arg(oldpath);
+                error = qApp->translate("Utility", "Could not backup %1 to %2.").arg(basepath, oldpath);
         }
         else
             error = qApp->translate("Utility", "Could not delete %1.").arg(oldpath);
@@ -250,7 +250,7 @@ QString Utility::weightToString(double w, QLocale::MeasurementSystem ms, bool op
     static QLocale loc(QLocale::system());
 
     int prec = 0;
-    const char *unit = 0;
+    const char *unit = nullptr;
 
     if (ms != QLocale::MetricSystem) {
         w *= 0.035273961949580412915675808215204;
@@ -300,8 +300,8 @@ double Utility::stringToWeight(const QString &s, QLocale::MeasurementSystem ms)
 
 QString Utility::localForInternationalCurrencySymbol(const QString &international_symbol)
 {
-    QList<QLocale> allLocales = QLocale::matchingLocales(QLocale::AnyLanguage, QLocale::AnyScript,
-                                                         QLocale::AnyCountry);
+    const QList<QLocale> allLocales = QLocale::matchingLocales(QLocale::AnyLanguage, QLocale::AnyScript,
+                                                               QLocale::AnyCountry);
 
     for (const auto &locale : allLocales) {
         if (locale.currencySymbol(QLocale::CurrencyIsoCode) == international_symbol)

@@ -30,7 +30,7 @@ ProgressDialog::ProgressDialog(Transfer *trans, QWidget *parent)
 {
     m_has_errors = false;
     m_autoclose = true;
-    m_job = 0;
+    m_job = nullptr;
     m_trans = trans;
 
     connect(m_trans, &Transfer::finished, this, &ProgressDialog::transferDone);
@@ -42,7 +42,7 @@ ProgressDialog::ProgressDialog(Transfer *trans, QWidget *parent)
 
     int minwidth = fontMetrics().horizontalAdvance('m') * 40;
 
-    QVBoxLayout *lay = new QVBoxLayout(this);
+    auto *lay = new QVBoxLayout(this);
 
     m_header = new QLabel(this);
     m_header->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
@@ -64,7 +64,7 @@ ProgressDialog::ProgressDialog(Transfer *trans, QWidget *parent)
 
     m_progress_container = new QWidget(this);
     lay->addWidget(m_progress_container);
-    QHBoxLayout *play = new QHBoxLayout(m_progress_container);
+    auto *play = new QHBoxLayout(m_progress_container);
 
     m_progress = new QProgressBar(m_progress_container);
     m_progress->setTextVisible(false);
@@ -87,8 +87,7 @@ ProgressDialog::ProgressDialog(Transfer *trans, QWidget *parent)
 }
 
 ProgressDialog::~ProgressDialog()
-{
-}
+= default;
 
 void ProgressDialog::done(int r)
 {
@@ -122,7 +121,7 @@ void ProgressDialog::setMessageText(const QString &str)
 
 void ProgressDialog::setErrorText(const QString &str)
 {
-    m_message->setText(QString("<b>%1</b>: %2").arg(tr("Error")).arg(str));
+    m_message->setText(QString("<b>%1</b>: %2").arg(tr("Error"), str));
     setFinished(false);
 
     syncRepaint(m_message);
@@ -198,7 +197,7 @@ void ProgressDialog::transferProgress(ThreadPoolJob *j, int s, int t)
 
 void ProgressDialog::transferDone(ThreadPoolJob *pj)
 {
-    TransferJob *j = static_cast<TransferJob *>(pj);
+    auto *j = static_cast<TransferJob *>(pj);
 
     if (!j || (j != m_job))
         return;
@@ -251,3 +250,5 @@ void ProgressDialog::setAutoClose(bool ac)
     m_autoclose = ac;
 }
 
+
+#include "moc_progressdialog.cpp"

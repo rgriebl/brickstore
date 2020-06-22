@@ -31,6 +31,7 @@ class QTableView;
 
 class DocumentDelegate : public QItemDelegate
 {
+    Q_OBJECT
 public:
     DocumentDelegate(Document *doc, DocumentProxyModel *view, QTableView *table);
 
@@ -56,12 +57,12 @@ protected:
 
 protected:
     Document *m_doc;
-    DocumentProxyModel *   m_view;
-    QTableView *  m_table;
-    SelectItemDialog * m_select_item;
-    SelectColorDialog *m_select_color;
+    DocumentProxyModel *m_view;
+    QTableView *m_table;
+    SelectItemDialog * m_select_item = nullptr;
+    SelectColorDialog *m_select_color = nullptr;
     mutable QPointer<QLineEdit> m_lineedit;
-    bool m_read_only;
+    bool m_read_only = false;
     mutable QList<quint64> m_elided;
 
     static QVector<QColor> s_shades;

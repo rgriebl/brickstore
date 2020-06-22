@@ -63,30 +63,15 @@ Select algorithm to use [Greedy             v] (i)
 
 //QVector<QPair<const BrickLink::Item *, BrickLink::SetMatch::InvMatchList> > BrickLink::SetMatch::s_inventories;
 
-BrickLink::SetMatch::InvMatchList::InvMatchList()
-    : m_count(0)
-{ }
-
 BrickLink::SetMatch::InvMatchList::InvMatchList(const InvItemList &list)
-    : m_count(0)
+    : InvMatchList()
 {
     add(list);
 }
 
-BrickLink::SetMatch::InvMatchList::InvMatchList(const InvMatchList &copy)
-    : m_list(copy.m_list), m_count(copy.m_count)
-{ }
-
-BrickLink::SetMatch::InvMatchList &BrickLink::SetMatch::InvMatchList::operator=(const InvMatchList &copy)
-{
-    m_list = copy.m_list;
-    m_count = copy.m_count;
-    return *this;
-}
-
 void BrickLink::SetMatch::InvMatchList::add(const InvItemList &list)
 {
-    foreach (const InvItem *ii, list) {
+    for (const InvItem *ii : list) {
         if (!ii->isIncomplete() &&
             (ii->quantity() > 0) &&
             !ii->counterPart() &&
@@ -150,9 +135,9 @@ bool BrickLink::SetMatch::InvMatchList::subtract(const InvMatchList &list)
         return false;
 
     // for every item in the given set inventory
-    for (QList<InvMatchItem>::const_iterator ii = list.m_list.begin(); ii != list.m_list.end(); ++ii) {
+    for (const auto &item : list.m_list) {
         // we need that many parts in this step
-        int qty_to_match = ii->qty;
+        int qty_to_match = item.qty;
 
         // quick check if there are at least those many parts left (regardless of type and color)
         if (m_count < qty_to_match)
@@ -160,18 +145,16 @@ bool BrickLink::SetMatch::InvMatchList::subtract(const InvMatchList &list)
 
         // for every item in the inventory
         //foreach (InvMatchItem &mi, m_list) {
-        for (QList<InvMatchItem>::iterator it = m_list.begin(); it != m_list.end(); ++it) {
-            InvMatchItem &mi = *it;
-
+        for (auto &matchItem : m_list) {
             // check if type and color matches
-            if (ii->item == mi.item && ii->color == mi.color) {
+            if (item.item == matchItem.item && item.color == matchItem.color) {
                 // can we satisfy this request with a single lot?
-                if (qty_to_match > mi.qty) { // no
-                    qty_to_match -= mi.qty;
-                    m_count -= mi.qty;
-                    mi.qty = 0; // only a partial match, try again
+                if (qty_to_match > matchItem.qty) { // no
+                    qty_to_match -= matchItem.qty;
+                    m_count -= matchItem.qty;
+                    matchItem.qty = 0; // only a partial match, try again
                 } else { // yes
-                    mi.qty -= qty_to_match;
+                    matchItem.qty -= qty_to_match;
                     m_count -= qty_to_match;
                     qty_to_match = 0;
                     break; // we matched this item completely
@@ -220,7 +203,7 @@ BrickLink::SetMatch::SetMatch(QObject *parent)
 }
 
 BrickLink::SetMatch::~SetMatch()
-{ }
+= default;
 
 bool BrickLink::SetMatch::isActive() const
 {
@@ -276,7 +259,7 @@ public:
         : QThread(sm), m_sm(sm), m_list(list), m_all(all)
     { }
 
-    void run()
+    void run() override
     {
         QList<const BrickLink::Item *> result;
 
@@ -309,7 +292,7 @@ bool BrickLink::SetMatch::startMaximumPossibleSetMatch(const InvItemList &list, 
 
     m_algorithm = a;
 
-    MatchThread *mt = new MatchThread(false, this, list);
+    auto *mt = new MatchThread(false, this, list);
     mt->run();
     return true;
 }
@@ -320,7 +303,7 @@ bool BrickLink::SetMatch::startAllPossibleSetMatch(const InvItemList &list)
         return false;
     m_active = true;
 
-    MatchThread *mt = new MatchThread(true, this, list);
+    auto *mt = new MatchThread(true, this, list);
     mt->run();
     return true;
 }
@@ -331,7 +314,7 @@ QList<const BrickLink::Item *> BrickLink::SetMatch::allPossibleSetMatch(const In
     QList<const Item *> result;
     int p = 0, pmax = m_inventories.count(), pstep = pmax / 100;
 
-    for (QVector<QPair<const Item *, InvMatchList> >::const_iterator it = m_inventories.begin(); it != m_inventories.end(); ++it) {
+    for (auto it = m_inventories.constBegin(); it != m_inventories.constEnd(); ++it) {
         InvMatchList parts_copy = parts;
 
         if (parts_copy.subtract(it->second))
@@ -361,7 +344,7 @@ QList<const BrickLink::Item *> BrickLink::SetMatch::maximumPossibleSetMatch(cons
         m_doesnotfit.fill(false);
         m_startcount = parts.count();
 
-        result = set_match_recursive(m_inventories.begin(), parts);
+        result = set_match_recursive(m_inventories.constBegin(), parts);
 
         m_doesnotfit.resize(0);
     }
@@ -383,8 +366,8 @@ QPair<int, QList<const BrickLink::Item *> > BrickLink::SetMatch::set_match_greed
     // pass == 1: fill up with as many copies as possible
     for (int pass = 0; pass < 2; ++pass) {
         // try to get one of each
-        for (QVector<QPair<const Item *, InvMatchList> >::const_iterator it = m_inventories.begin(); it != m_inventories.end(); ++it) {
-            forever {
+        for (auto it = m_inventories.constBegin(); it != m_inventories.constEnd(); ++it) {
+            while (true) {
                 InvMatchList parts_copy = parts;
 
                 // can we take this one?
@@ -412,7 +395,7 @@ QPair<int, QList<const BrickLink::Item *> > BrickLink::SetMatch::set_match_recur
     if ((++m_step & 0x3ff) == 0)
         emit progress(m_step >> 10, -1);
 
-    if (it == m_inventories.end()) // no more sets to match against
+    if (it == m_inventories.constEnd()) // no more sets to match against
         return qMakePair(parts.count(), QList<const Item *>());
     if (parts.count() == 0) // all parts matched
         return qMakePair(0, QList<const Item *>());
@@ -430,7 +413,7 @@ QPair<int, QList<const BrickLink::Item *> > BrickLink::SetMatch::set_match_recur
     // check parts left, when not taking this one
     result_do_not_take = set_match_recursive(next, parts);
 
-    auto idx = (it - m_inventories.begin());
+    auto idx = (it - m_inventories.constBegin());
 
     if (!m_doesnotfit[int(idx)]) {
         InvMatchList parts_copy = parts;
@@ -460,28 +443,28 @@ void BrickLink::SetMatch::create_inventory_list()
     clear_inventory_list();
     const QVector<const Item *> &items = core()->items();
 
-    for (QVector<const Item *>::const_iterator it = items.begin(); it != items.end(); ++it) {
+    for (auto item : items) {
         bool ok = true;
 
-        ok &= ((*it)->itemType()->hasInventories() && (*it)->hasInventory());
-        ok &= ((m_year_min == -1) || ((*it)->yearReleased() >= m_year_min));
-        ok &= ((m_year_max == -1) || ((*it)->yearReleased() <= m_year_max));
+        ok &= (item->itemType()->hasInventories() && item->hasInventory());
+        ok &= ((m_year_min == -1) || (item->yearReleased() >= m_year_min));
+        ok &= ((m_year_max == -1) || (item->yearReleased() <= m_year_max));
 
-        ok &= (m_itemtypes.isEmpty() || m_itemtypes.contains((*it)->itemType()));
+        ok &= (m_itemtypes.isEmpty() || m_itemtypes.contains(item->itemType()));
 
         if (ok && !m_categories.isEmpty()) {
             ok = false;
-            for (QList<const Category *>::const_iterator cat_it = m_categories.begin(); !ok && cat_it != m_categories.end(); ++cat_it)
-                ok = (*it)->hasCategory(*cat_it);
+            for (auto cat_it = m_categories.constBegin(); !ok && cat_it != m_categories.constEnd(); ++cat_it)
+                ok = item->hasCategory(*cat_it);
         }
         if (ok) {
-            InvMatchList iml((*it)->consistsOf());
+            InvMatchList iml(item->consistsOf());
             ok &= !iml.isEmpty();
             ok &= ((m_part_min == -1) || (iml.count() >= m_part_min));
             ok &= ((m_part_max == -1) || (iml.count() <= m_part_max));
 
             if (ok)
-                m_inventories.append(qMakePair(*it, iml));
+                m_inventories.append(qMakePair(item, iml));
         }
     }
 
@@ -499,3 +482,5 @@ void BrickLink::SetMatch::clear_inventory_list()
 }
 
 #include "bricklink_setmatch.moc"
+
+#include "moc_bricklink_setmatch.cpp"

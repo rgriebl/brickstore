@@ -84,3 +84,5 @@ bool IncDecPricesDialog::applyToTiers() const
 {
     return w_apply_to_tiers->isChecked();
 }
+
+#include "moc_incdecpricesdialog.cpp"

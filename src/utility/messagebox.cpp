@@ -122,7 +122,7 @@ bool MessageBox::getDouble(QWidget *parent, const QString &text, const QString &
     dlg.setDoubleDecimals(decimals);
 
     if (!unit.isEmpty()) {
-        if (QDoubleSpinBox *sp = dlg.findChild<QDoubleSpinBox *>())
+        if (auto *sp = dlg.findChild<QDoubleSpinBox *>())
             sp->setSuffix(QLatin1Char(' ') + unit);
     }
     bool b = (dlg.exec() == QDialog::Accepted);
@@ -142,7 +142,7 @@ bool MessageBox::getInteger(QWidget *parent, const QString &text, const QString 
     dlg.setIntMaximum(maxValue);
 
     if (!unit.isEmpty()) {
-        if (QSpinBox *sp = dlg.findChild<QSpinBox *>())
+        if (auto *sp = dlg.findChild<QSpinBox *>())
             sp->setSuffix(QLatin1Char(' ') + unit);
     }
     bool b = (dlg.exec() == QDialog::Accepted);
@@ -151,3 +151,5 @@ bool MessageBox::getInteger(QWidget *parent, const QString &text, const QString 
     return b;
 }
 
+
+#include "moc_messagebox.cpp"

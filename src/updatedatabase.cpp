@@ -56,7 +56,7 @@ UpdateDatabase::UpdateDatabase(ProgressDialog *pd)
 void UpdateDatabase::gotten()
 {
     TransferJob *job = m_progress->job();
-    QFile *file = qobject_cast<QFile *>(job->file());
+    auto *file = qobject_cast<QFile *>(job->file());
 
     if (job->wasNotModifiedSince()) {
         file->remove();
@@ -103,11 +103,11 @@ QString UpdateDatabase::decompress(const QString &src, const QString &dst)
     char *buffer_out = new char [CHUNKSIZE_OUT];
 
     lzmadec_stream strm;
-    strm.lzma_alloc = 0;
-    strm.lzma_free = 0;
-    strm.opaque = 0;
+    strm.lzma_alloc = nullptr;
+    strm.lzma_free = nullptr;
+    strm.opaque = nullptr;
     strm.avail_in = 0;
-    strm.next_in = 0;
+    strm.next_in = nullptr;
 
     if (lzmadec_init(&strm) != LZMADEC_OK)
         return tr("Could not initialize the LZMA decompressor");
@@ -149,3 +149,5 @@ QString UpdateDatabase::decompress(const QString &src, const QString &dst)
 
     return loop_error;
 }
+
+#include "moc_updatedatabase.cpp"

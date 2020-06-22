@@ -29,6 +29,7 @@
 
 class GlassButton : public QToolButton
 {
+    Q_OBJECT
 public:
     enum Type {
         Close,
@@ -160,9 +161,9 @@ ItemDetailPopup::ItemDetailPopup(QWidget *parent)
     m_ldraw = new LDraw::RenderOffscreenWidget(this);
     m_stack->addWidget(m_ldraw);
 #endif
-    QVBoxLayout *lay = new QVBoxLayout(this);
+    auto *lay = new QVBoxLayout(this);
     lay->setContentsMargins(0, 0, 0, 0);
-    QHBoxLayout *hor = new QHBoxLayout(m_bar);
+    auto *hor = new QHBoxLayout(m_bar);
     hor->addWidget(m_close);
     hor->addStretch(10);
     hor->addWidget(m_play);
@@ -317,3 +318,6 @@ void ItemDetailPopup::mouseMoveEvent(QMouseEvent *e)
        m_movepos = e->globalPos();
     }
 }
+
+#include "itemdetailpopup.moc"
+#include "moc_itemdetailpopup.cpp"

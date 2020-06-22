@@ -209,6 +209,7 @@ private:
 
 private:
     Item() = default;
+    Q_DISABLE_COPY(Item);
 
     void setAppearsIn(const AppearsIn &hash) const;
     void setConsistsOf(const InvItemList &items) const;
@@ -434,6 +435,7 @@ private:
 
 class InvItemMimeData : public QMimeData
 {
+    Q_OBJECT
 public:
     InvItemMimeData(const InvItemList &items);
 
@@ -481,7 +483,7 @@ public:
     void setInsurance(double m)               { m_insurance = m; }
     void setDelivery(double m)                { m_delivery = m; }
     void setCredit(double m)                  { m_credit = m; }
-    void setGrandTotal(const double &m)       { m_grand_total = m; }
+    void setGrandTotal(double m)              { m_grand_total = m; }
     void setStatus(const QString &str)        { m_status = str; }
     void setPayment(const QString &str)       { m_payment = str; }
     void setRemarks(const QString &str)       { m_remarks = str; }
@@ -525,8 +527,6 @@ public:
     int lots(Time t, Condition c) const                { return m_lots [t < TimeCount ? t : 0][c < ConditionCount ? c : 0]; }
     double price(Time t, Condition c, Price p) const { return m_prices [t < TimeCount ? t : 0][c < ConditionCount ? c : 0][p < PriceCount ? p : 0]; }
 
-    virtual ~PriceGuide();
-
 private:
     const Item *  m_item;
     const Color * m_color;
@@ -566,13 +566,14 @@ public:
     };
 
     ChangeLogEntry(const char *data) { m_data = QByteArray::fromRawData(data, qstrlen(data)); }
+    ~ChangeLogEntry() = default;
 
     Type type() const              { return m_data.isEmpty() ? Invalid : Type(m_data.at(0)); }
     QByteArray from(int idx) const { return (idx < 0 || idx >= 2) ? QByteArray() : m_data.split('\t')[idx+1]; }
     QByteArray to(int idx) const   { return (idx < 0 || idx >= 2) ? QByteArray() : m_data.split('\t')[idx+3]; }
 
 private:
-    ChangeLogEntry(const ChangeLogEntry &copy);
+    Q_DISABLE_COPY(ChangeLogEntry)
 
     QByteArray m_data;
 
@@ -590,16 +591,16 @@ public:
     bool importInventories(QVector<const Item *> &items);
     void exportInventoriesTo(Core *);
 
-    const QMap<int, const Color *>    &colors() const      { return m_colors; }
-    const QMap<int, const Category *> &categories() const  { return m_categories; }
-    const QMap<int, const ItemType *> &itemTypes() const   { return m_item_types; }
+    const QHash<int, const Color *>    &colors() const     { return m_colors; }
+    const QHash<int, const Category *> &categories() const { return m_categories; }
+    const QHash<int, const ItemType *> &itemTypes() const  { return m_item_types; }
     const QVector<const Item *>       &items() const       { return m_items; }
 
 private:
     template <typename T> T *parse(uint count, const char **strs);
 
     template <typename C> bool readDB(const QString &name, C &container, bool skip_header = false);
-    template <typename T> bool readDB_processLine(QMap<int, const T *> &d, uint tokencount, const char **tokens);
+    template <typename T> bool readDB_processLine(QHash<int, const T *> &d, uint tokencount, const char **tokens);
     template <typename T> bool readDB_processLine(QVector<const T *> &v, uint tokencount, const char **tokens);
 
     struct btinvlist_dummy { };
@@ -617,9 +618,9 @@ private:
     void calculateColorPopularity();
 
 private:
-    QMap<int, const Color *>    m_colors;
-    QMap<int, const ItemType *> m_item_types;
-    QMap<int, const Category *> m_categories;
+    QHash<int, const Color *>    m_colors;
+    QHash<int, const ItemType *> m_item_types;
+    QHash<int, const Category *> m_categories;
     QVector<const Item *>       m_items;
 
     QHash<const Item *, AppearsIn>   m_appears_in_hash;
@@ -885,10 +886,10 @@ public:
     QString dataPath(const Item *) const;
     QString dataPath(const Item *, const Color *) const;
 
-    const QMap<int, const Color *>    &colors() const;
-    const QMap<int, const Category *> &categories() const;
-    const QMap<int, const ItemType *> &itemTypes() const;
-    const QVector<const Item *>       &items() const;
+    const QHash<int, const Color *>    &colors() const;
+    const QHash<int, const Category *> &categories() const;
+    const QHash<int, const ItemType *> &itemTypes() const;
+    const QVector<const Item *>        &items() const;
 
     const QImage noImage(const QSize &s) const;
 
@@ -919,7 +920,7 @@ public:
         QString currencyCode;
     };
 
-    ParseItemListXMLResult parseItemListXML(QDomElement root, ItemListXMLHint hint);
+    ParseItemListXMLResult parseItemListXML(const QDomElement &root, ItemListXMLHint hint);
     QDomElement createItemListXML(QDomDocument doc, ItemListXMLHint hint, const InvItemList &items, const QString &currencyCode = QString(), QMap<QString, QString> *extra = nullptr);
 
     bool parseLDrawModel(QFile &file, InvItemList &items, uint *invalid_items = nullptr);
@@ -931,13 +932,13 @@ public:
     Transfer *transfer() const;
     void setTransfer(Transfer *trans);
 
-public slots:
     bool readDatabase(QString *infoText = nullptr, const QString &filename = QString());
-    bool writeDatabase(const QString &filename, DatabaseVersion version,
-                       const QString &infoText = QString());
+    bool writeDatabase(const QString &filename, BrickLink::Core::DatabaseVersion version,
+                       const QString &infoText = QString()) const;
 
-    void updatePriceGuide(PriceGuide *pg, bool high_priority = false);
-    void updatePicture(Picture *pic, bool high_priority = false);
+public slots:
+    void updatePriceGuide(BrickLink::PriceGuide *pg, bool high_priority = false);
+    void updatePicture(BrickLink::Picture *pic, bool high_priority = false);
 
     void setOnlineStatus(bool on);
     void setUpdateIntervals(const QMap<QByteArray, int> &intervals);
@@ -967,9 +968,9 @@ private:
 
     void setDatabase_ConsistsOf(const QHash<const Item *, InvItemList> &hash);
     void setDatabase_AppearsIn(const QHash<const Item *, AppearsIn> &hash);
-    void setDatabase_Basics(const QMap<int, const Color *> &colors,
-                            const QMap<int, const Category *> &categories,
-                            const QMap<int, const ItemType *> &item_types,
+    void setDatabase_Basics(const QHash<int, const Color *> &colors,
+                            const QHash<int, const Category *> &categories,
+                            const QHash<int, const ItemType *> &item_types,
                             const QVector<const Item *> &items);
     void setDatabase_ChangeLog(const QVector<const char *> &changelog);
 
@@ -990,9 +991,9 @@ private:
     mutable QHash<QString, QImage>  m_noimages;
     mutable QHash<QString, QImage>  m_colimages;
 
-    QMap<int, const Color *>        m_colors;      // id ->Color *
-    QMap<int, const Category *>     m_categories;  // id ->Category *
-    QMap<int, const ItemType *>     m_item_types;  // id ->ItemType *
+    QHash<int, const Color *>       m_colors;      // id ->Color *
+    QHash<int, const Category *>    m_categories;  // id ->Category *
+    QHash<int, const ItemType *>    m_item_types;  // id ->ItemType *
     QVector<const Item *>           m_items;       // sorted array of Item *
     QVector<const char *>           m_changelog;
 

@@ -106,12 +106,13 @@ private:
     }
 };
 
-class WindowProgress {
+class WindowProgress
+{
 public:
     WindowProgress(QWidget *w, const QString &title = QString(), int total = 0)
         : m_w(w), m_reenabled(false)
     {
-        QScrollArea *sa = qobject_cast<QScrollArea *>(w);
+        auto *sa = qobject_cast<QScrollArea *>(w);
         m_w = sa ? sa->viewport() : w;
         m_upd_enabled = m_w->updatesEnabled();
         m_w->setUpdatesEnabled(false);
@@ -122,7 +123,7 @@ public:
             m_progress->setMinimumDuration(1500);
             m_progress->setValue(0);
         } else {
-            m_progress = 0;
+            m_progress = nullptr;
         }
     }
 
@@ -135,7 +136,7 @@ public:
     {
         if (!m_reenabled) {
             delete m_progress;
-            m_progress = 0;
+            m_progress = nullptr;
             QApplication::restoreOverrideCursor();
             m_w->setUpdatesEnabled(m_upd_enabled);
             m_reenabled = true;
@@ -149,6 +150,8 @@ public:
     }
 
 private:
+    Q_DISABLE_COPY(WindowProgress)
+
     QWidget * m_w;
     bool      m_upd_enabled : 1;
     bool      m_reenabled   : 1;
@@ -156,12 +159,16 @@ private:
 };
 
 
-class TableView : public QTableView {
+class TableView : public QTableView
+{
+    Q_OBJECT
 public:
-    TableView(QWidget *parent) : QTableView(parent) { }
+    TableView(QWidget *parent)
+        : QTableView(parent)
+    { }
 
 protected:
-    void keyPressEvent(QKeyEvent *e)
+    void keyPressEvent(QKeyEvent *e) override
     {
         QTableView::keyPressEvent(e);
 #if !defined(Q_OS_MACOS)
@@ -173,10 +180,14 @@ protected:
         }
 #endif
     }
+
+private:
+    Q_DISABLE_COPY(TableView)
 };
 
 
-class WindowBar : public QWidget {
+class WindowBar : public QWidget
+{
     Q_OBJECT
 public:
     WindowBar(QWidget *parent);
@@ -188,12 +199,11 @@ public:
     bool isWidgetVisible(QWidget *w) const;
 
 protected:
-    void paintEvent(QPaintEvent *e);
-
-private slots:
-    void widgetWasDestroyed();
+    void paintEvent(QPaintEvent *e) override;
 
 private:
+    Q_DISABLE_COPY(WindowBar)
+
     QList<QWidget *> widgets;
 };
 
@@ -218,10 +228,10 @@ Window::Window(Document *doc, QWidget *parent)
     m_latest_timer = new QTimer(this);
     m_latest_timer->setSingleShot(true);
     m_latest_timer->setInterval(400);
-    m_current = 0;
+    m_current = nullptr;
 
     m_settopg_failcnt = 0;
-    m_settopg_list = 0;
+    m_settopg_list = nullptr;
     m_settopg_time = BrickLink::PastSix;
     m_settopg_price = BrickLink::Average;
     m_simple_mode = false;
@@ -249,7 +259,7 @@ Window::Window(Document *doc, QWidget *parent)
     m_selection_model = new QItemSelectionModel(m_view, this);
     w_list->setSelectionModel(m_selection_model);
 
-    DocumentDelegate *dd = new DocumentDelegate(doc, m_view, w_list);
+    auto *dd = new DocumentDelegate(doc, m_view, w_list);
     w_list->setItemDelegate(dd);
     w_list->verticalHeader()->setDefaultSectionSize(dd->defaultItemHeight(w_list));
     w_list->installEventFilter(this);
@@ -336,8 +346,7 @@ void Window::updateCaption()
 }
 
 Window::~Window()
-{
-}
+= default;
 
 bool Window::isSimpleMode() const
 {
@@ -346,7 +355,7 @@ bool Window::isSimpleMode() const
 
 void Window::setSimpleMode(bool b)
 {
-    HeaderView *header = qobject_cast<HeaderView *>(w_list->horizontalHeader());
+    auto *header = qobject_cast<HeaderView *>(w_list->horizontalHeader());
 
     if (!header)
         return;
@@ -376,7 +385,7 @@ bool Window::isDifferenceMode() const
 
 void Window::setDifferenceMode(bool b)
 {
-    HeaderView *header = qobject_cast<HeaderView *>(w_list->horizontalHeader());
+    auto *header = qobject_cast<HeaderView *>(w_list->horizontalHeader());
 
     if (!header)
         return;
@@ -410,7 +419,7 @@ void Window::setDifferenceMode(bool b)
 
 void Window::on_view_save_default_col_triggered()
 {
-    //TODO w_list->saveDefaultLayout ( );
+    // w_list->saveDefaultLayout ( );
 }
 
 void Window::documentRowsInserted(const QModelIndex &parent, int /*start*/, int end)
@@ -469,8 +478,8 @@ uint Window::addItems(const BrickLink::InvItemList &items, int multiply, uint gl
     foreach(const BrickLink::InvItem *origitem, items) {
         uint mergeflags = globalmergeflags;
 
-        Document::Item *newitem = new Document::Item(*origitem);
-        Document::Item *olditem = 0;
+        auto *newitem = new Document::Item(*origitem);
+        Document::Item *olditem = nullptr;
 
         if (mergeflags != MergeAction_None) {
             foreach(Document::Item *item, m_doc->items()) {
@@ -565,7 +574,7 @@ void Window::mergeItems(const Document::ItemList &items, int globalmergeflags)
     WindowProgress wp(w_list);
 
     foreach(Document::Item *from, items) {
-        Document::Item *to = 0;
+        Document::Item *to = nullptr;
 
         foreach(Document::Item *find_to, items) {
             if ((from != find_to) &&
@@ -633,14 +642,14 @@ QDomElement Window::createGuiStateXML(QDomDocument doc)
         QDomElement e = doc.createElement("ItemView");
         root.appendChild(e);
 
-        for (QMap <QString, QString>::const_iterator it = list_map.begin(); it != list_map.end(); ++it)
+        for (auto it = list_map.constBegin(); it != list_map.constEnd(); ++it)
             e.appendChild(doc.createElement(it.key()).appendChild(doc.createTextNode(it.value())).parentNode());
     }
 
     return root;
 }
 
-bool Window::parseGuiStateXML(QDomElement root)
+bool Window::parseGuiStateXML(const QDomElement &root)
 {
     bool ok = true;
 
@@ -691,7 +700,7 @@ void Window::on_edit_paste_triggered()
 {
     BrickLink::InvItemList bllist = BrickLink::InvItemMimeData::items(QApplication::clipboard()->mimeData());
 
-    if (bllist.count()) {
+    if (!bllist.isEmpty()) {
         if (!selection().isEmpty()) {
             if (MessageBox::question(this, tr("Overwrite the currently selected items?"), QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes) == QMessageBox::Yes)
                 m_doc->removeItems(selection());
@@ -903,14 +912,15 @@ void Window::on_edit_price_to_priceguide_triggered()
         wp.stop();
 
         if (m_settopg_list && m_settopg_list->isEmpty())
-            priceGuideUpdated(0);
+            priceGuideUpdated(nullptr);
     }
 }
 
 void Window::priceGuideUpdated(BrickLink::PriceGuide *pg)
 {
     if (m_settopg_list && pg) {
-        foreach(Document::Item *item, m_settopg_list->values(pg)) {
+        for (auto it = m_settopg_list->constBegin(); it != m_settopg_list->constEnd(); ++it) {
+            Document::Item *item = it.value();
             double p = pg->valid() ? pg->price(m_settopg_time, item->condition(), m_settopg_price) : 0;
 
             p *= Currency::inst()->rate(m_doc->currencyCode());
@@ -935,7 +945,7 @@ void Window::priceGuideUpdated(BrickLink::PriceGuide *pg)
 
         m_settopg_failcnt = 0;
         delete m_settopg_list;
-        m_settopg_list = 0;
+        m_settopg_list = nullptr;
     }
 }
 
@@ -1319,7 +1329,7 @@ void Window::copyRemarks(const BrickLink::InvItemList &items)
     int copy_count = 0;
 
     foreach(Document::Item *pos, m_doc->items()) {
-        BrickLink::InvItem *match = 0;
+        BrickLink::InvItem *match = nullptr;
 
         foreach(BrickLink::InvItem *ii, items) {
             const BrickLink::Item *item   = ii->item();
@@ -1383,7 +1393,7 @@ void Window::subtractItems(const BrickLink::InvItemList &items)
             continue;
         }
 
-        Document::Item *last_match = 0;
+        Document::Item *last_match = nullptr;
 
         foreach(Document::Item *pos, m_doc->items()) {
             if ((pos->item() == item) && (pos->color() == color) && (pos->condition() == cond)) {
@@ -1410,7 +1420,7 @@ void Window::subtractItems(const BrickLink::InvItemList &items)
                 m_doc->changeItem(last_match, newitem);
             }
             else {
-                Document::Item *newitem = new Document::Item();
+                auto *newitem = new Document::Item();
                 newitem->setItem(item);
                 newitem->setColor(color);
                 newitem->setCondition(cond);
@@ -1761,7 +1771,7 @@ bool Window::eventFilter(QObject *o, QEvent *e)
 void Window::updateCurrent()
 {
     QModelIndex idx = m_selection_model->currentIndex();
-    m_current = idx.isValid() ? m_view->item(idx) : 0;
+    m_current = idx.isValid() ? m_view->item(idx) : nullptr;
     emit currentChanged(m_current);
 }
 
@@ -1799,3 +1809,6 @@ void Window::documentItemsChanged(const Document::ItemList &items, bool grave)
         }
     }
 }
+
+#include "window.moc"
+#include "moc_window.cpp"

@@ -122,8 +122,7 @@ enum State {
 };
 
 Filter::Parser::Parser()
-{
-}
+= default;
 
 
 QList<Filter> Filter::Parser::parse(const QString &str_)
@@ -324,18 +323,21 @@ QString Filter::Parser::toolTip() const
        "<p>E.g. to search for anything resembling an brick in blue, you could use: <b>brick and color is blue</b></p>");
 
     QString block = QLatin1String("<b><u>%1</u></b>%2");
-    tt += block.arg(Filter::tr("Field names:")).arg(toString(m_field_tokens,
-                                                    QLatin1String("<ul><li>"), QLatin1String("</li></ul>"),
-                                                    QString(),  QString(), QLatin1String(", "),
-                                                    QLatin1String("<b>"), QLatin1String("</b>"), QLatin1String(" / ")));
-    tt += block.arg(Filter::tr("Comparisons:")).arg(toString(m_comparison_tokens,
-                                                    QLatin1String("<ul>"), QLatin1String("</ul>"),
-                                                    QLatin1String("<li>"), QLatin1String("</li>"), QString(),
-                                                    QLatin1String("<b>"), QLatin1String("</b>"), QLatin1String(" / ")));
-    tt += block.arg(Filter::tr("Combinations:")).arg(toString(m_combination_tokens,
-                                                     QLatin1String("<ul>"), QLatin1String("</ul>"),
-                                                     QLatin1String("<li>"), QLatin1String("</li>"), QString(),
-                                                     QLatin1String("<b>"), QLatin1String("</b>"), QLatin1String(" / ")));
+    tt += block.arg(Filter::tr("Field names:"),
+                    toString(m_field_tokens,
+                             QLatin1String("<ul><li>"), QLatin1String("</li></ul>"),
+                             QString(),  QString(), QLatin1String(", "),
+                             QLatin1String("<b>"), QLatin1String("</b>"), QLatin1String(" / ")));
+    tt += block.arg(Filter::tr("Comparisons:"),
+                    toString(m_comparison_tokens,
+                             QLatin1String("<ul>"), QLatin1String("</ul>"),
+                             QLatin1String("<li>"), QLatin1String("</li>"), QString(),
+                             QLatin1String("<b>"), QLatin1String("</b>"), QLatin1String(" / ")));
+    tt += block.arg(Filter::tr("Combinations:"),
+                    toString(m_combination_tokens,
+                             QLatin1String("<ul>"), QLatin1String("</ul>"),
+                             QLatin1String("<li>"), QLatin1String("</li>"), QString(),
+                             QLatin1String("<b>"), QLatin1String("</b>"), QLatin1String(" / ")));
     return tt;
 }
 
@@ -374,7 +376,7 @@ QMultiMap<Filter::Combination, QString> Filter::Parser::standardCombinationToken
         { Filter::And, "&,&&", QT_TR_NOOP( "and" ) },
         { Filter::Or,  "|,||", QT_TR_NOOP( "or" ) },
         
-        { Filter::And, 0, 0 }
+        { Filter::And, nullptr, nullptr }
     };
     
     QMultiMap<Filter::Combination, QString> dct;
@@ -415,7 +417,7 @@ QMultiMap<Filter::Comparison, QString> Filter::Parser::standardComparisonTokens(
         { Filter::EndsWith,         "$,$=,=$",          QT_TR_NOOP( "ends with" ) },
         { Filter::DoesNotEndWith,   "!$,$!=,!=$",       QT_TR_NOOP( "doesn't end with,does not end with" ) },
         
-        { Filter::Is, 0, 0 }
+        { Filter::Is, nullptr, nullptr }
     };
     
     QMultiMap<Filter::Comparison, QString> dct;

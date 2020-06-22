@@ -78,7 +78,7 @@ void ImportBLStore::gotten()
     QByteArray *data = j->data();
     bool ok = false;
 
-    if (data && data->size()) {
+    if (data && !data->isEmpty()) {
         QBuffer store_buffer(data);
 
         if (store_buffer.open(QIODevice::ReadOnly)) {
@@ -178,13 +178,13 @@ void ImportBLOrder::gotten()
     TransferJob *j = m_progress->job();
     QByteArray *data = j->data();
 
-    if (data && data->size()) {
+    if (data && !data->isEmpty()) {
         if (m_current_address >= 0) {
             QString s = QString::fromUtf8(data->data(), data->size());
 
-            QRegExp rx1(QLatin1String("<B>Name:</B></FONT></TD>\\s*<TD NOWRAP><FONT FACE=\"Tahoma, Arial\" SIZE=\"2\">(.+)</FONT></TD>"));
-            QRegExp rx2(QLatin1String("<B>Address:</B></FONT></TD>\\s*<TD NOWRAP><FONT FACE=\"Tahoma, Arial\" SIZE=\"2\">(.+)</FONT></TD>"));
-            QRegExp rx3(QLatin1String("<B>Country:</B></FONT></TD>\\s*<TD NOWRAP><FONT FACE=\"Tahoma, Arial\" SIZE=\"2\">(.+)</FONT></TD>"));
+            QRegExp rx1(R"(<B>Name:</B></FONT></TD>\s*<TD NOWRAP><FONT FACE="Tahoma, Arial" SIZE="2">(.+)</FONT></TD>)");
+            QRegExp rx2(R"(<B>Address:</B></FONT></TD>\s*<TD NOWRAP><FONT FACE="Tahoma, Arial" SIZE="2">(.+)</FONT></TD>)");
+            QRegExp rx3(R"(<B>Country:</B></FONT></TD>\s*<TD NOWRAP><FONT FACE="Tahoma, Arial" SIZE="2">(.+)</FONT></TD>)");
 
             rx1.setMinimal(true);
             rx1.indexIn(s);
@@ -346,14 +346,14 @@ void ImportBLCart::gotten()
     QByteArray *data = j->data();
     bool ok = false;
 
-    if (data && data->size()) {
+    if (data && !data->isEmpty()) {
         QBuffer cart_buffer(data);
 
         if (cart_buffer.open(QIODevice::ReadOnly)) {
             QTextStream ts(&cart_buffer);
             QString line;
             QString items_line;
-            QRegExp sep(QLatin1String("<TR CLASS=\"tm\"( ID=\"row_[0-9]*\")?><TD HEIGHT=\"[0-9]*\" ALIGN=\"CENTER\">"), Qt::CaseInsensitive);
+            QRegExp sep(R"(<TR CLASS="tm"( ID="row_[0-9]*")?><TD HEIGHT="[0-9]*" ALIGN="CENTER">)", Qt::CaseInsensitive);
             int invalid_items = 0;
             bool parsing_items = false;
 
@@ -371,9 +371,9 @@ void ImportBLCart::gotten()
                     break;
             }
 
-            QStringList strlist = items_line.split(sep, QString::SkipEmptyParts);
+            const QStringList strlist = items_line.split(sep, QString::SkipEmptyParts);
 
-            foreach(const QString &str, strlist) {
+            for (const QString &str : strlist) {
                 BrickLink::InvItem *ii = nullptr;
 
                 QRegExp rx_ids(QLatin1String("HEIGHT='[0-9]*' SRC='http[s]://img.bricklink.com/([A-Z])/([^ ]+).(gif|jpg|png|jpeg)' NAME="), Qt::CaseInsensitive);
@@ -384,18 +384,18 @@ void ImportBLCart::gotten()
                 rx_ids.indexIn(str);
                 rx_names.indexIn(str);
 
-                const BrickLink::Item *item = 0;
-                const BrickLink::Color *col = 0;
+                const BrickLink::Item *item = nullptr;
+                const BrickLink::Color *col = nullptr;
 
                 if (rx_ids.cap(1).length() == 1) {
                     int slash = rx_ids.cap(2).indexOf(QLatin1Char('/'));
 
                     if (slash >= 0) {   // with color
-                        item = BrickLink::core()->item(rx_ids.cap(1)[0].toLatin1(), rx_ids.cap(2).mid(slash + 1).toLatin1());
-                        col = BrickLink::core()->color(rx_ids.cap(2).left(slash).toInt());
+                        item = BrickLink::core()->item(rx_ids.cap(1).at(0).toLatin1(), rx_ids.cap(2).mid(slash + 1));
+                        col = BrickLink::core()->color(rx_ids.cap(2).leftRef(slash).toInt());
                     }
                     else {
-                        item = BrickLink::core()->item(rx_ids.cap(1)[0].toLatin1(), rx_ids.cap(2).toLatin1().constData());
+                        item = BrickLink::core()->item(rx_ids.cap(1).at(0).toLatin1(), rx_ids.cap(2));
                         col = BrickLink::core()->color(0);
                     }
                 }
@@ -405,7 +405,8 @@ void ImportBLCart::gotten()
                 if (!col || !color_and_item.startsWith(col->name())) {
                     int longest_match = 0;
 
-                    foreach(const BrickLink::Color *blcolor, BrickLink::core()->colors()) {
+                    const auto colors = BrickLink::core()->colors();
+                    for (const BrickLink::Color *blcolor : colors) {
                         QString n(blcolor->name());
 
                         if ((n.length() > longest_match) &&
@@ -436,7 +437,7 @@ void ImportBLCart::gotten()
                     }
 
                     if (!longest_match)
-                        item = 0;
+                        item = nullptr;
                 }
 
                 if (item && col) {
@@ -489,3 +490,5 @@ void ImportBLCart::gotten()
     }
     m_progress->setFinished(ok);
 }
+
+#include "moc_import.cpp"

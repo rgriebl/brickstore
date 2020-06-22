@@ -24,10 +24,13 @@
 #include <QPixmap>
 #include <QPainter>
 #include <QPainterPath>
-#include <QPixmapCache>
 #include <QDebug>
 #include <QThread>
 #include <QUrlQuery>
+#include <QToolTip>
+#include <QApplication>
+#include <QLabel>
+#include <QDesktopWidget>
 
 #include "config.h"
 #include "utility.h"
@@ -35,7 +38,7 @@
 #include "bricklink.h"
 #include "chunkreader.h"
 #include "chunkwriter.h"
-
+#include "qtemporaryresource.h"
 
 
 QUrl BrickLink::Core::url(UrlList u, const void *opt, const void *opt2)
@@ -181,10 +184,10 @@ const QImage BrickLink::Core::noImage(const QSize &s) const
             QColor(0xff, 0x7f, 0x7f)
         };
 
-        for (int i = 0; i < 3; i++) {
+        for (const auto & i : coltable) {
             r.adjust(-1, -1, -1, -1);
 
-            p.setPen(QPen(coltable [i], 12, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+            p.setPen(QPen(i, 12, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
             p.drawLine(r.x(), r.y(), r.right(), r.bottom());
             p.drawLine(r.right(), r.y(), r.x(), r.bottom());
         }
@@ -373,7 +376,7 @@ QString BrickLink::Core::dataPath(const Item *item, const Color *color) const
 
 
 
-BrickLink::Core *BrickLink::Core::s_inst = 0;
+BrickLink::Core *BrickLink::Core::s_inst = nullptr;
 
 BrickLink::Core *BrickLink::Core::create(const QString &datadir, QString *errstring)
 {
@@ -385,7 +388,7 @@ BrickLink::Core *BrickLink::Core::create(const QString &datadir, QString *errstr
         QString test = s_inst->dataPath();
         if (test.isNull() || !check_and_create_path(test)) {
             delete s_inst;
-            s_inst = 0;
+            s_inst = nullptr;
 
             if (errstring)
                 *errstring = tr("Data directory \'%1\' is not both read- and writable.").arg(datadir);
@@ -396,7 +399,7 @@ BrickLink::Core *BrickLink::Core::create(const QString &datadir, QString *errstr
 
 BrickLink::Core::Core(const QString &datadir)
     : m_datadir(datadir), m_c_locale(QLocale::c()), m_corelock(QMutex::Recursive),
-      m_transfer(0), m_pg_update_iv(0), m_pic_update_iv(0),
+      m_transfer(nullptr), m_pg_update_iv(0), m_pic_update_iv(0),
       m_pic_diskload(QThread::idealThreadCount() * 3)
 {
     if (m_datadir.isEmpty())
@@ -425,7 +428,7 @@ BrickLink::Core::~Core()
     cancelPictureTransfers();
     cancelPriceGuideTransfers();
     delete m_transfer;
-    s_inst = 0;
+    s_inst = nullptr;
 }
 
 void BrickLink::Core::setTransfer(Transfer *trans)
@@ -475,17 +478,17 @@ bool BrickLink::Core::onlineStatus() const
 }
 
 
-const QMap<int, const BrickLink::Color *> &BrickLink::Core::colors() const
+const QHash<int, const BrickLink::Color *> &BrickLink::Core::colors() const
 {
     return m_colors;
 }
 
-const QMap<int, const BrickLink::Category *> &BrickLink::Core::categories() const
+const QHash<int, const BrickLink::Category *> &BrickLink::Core::categories() const
 {
     return m_categories;
 }
 
-const QMap<int, const BrickLink::ItemType *> &BrickLink::Core::itemTypes() const
+const QHash<int, const BrickLink::ItemType *> &BrickLink::Core::itemTypes() const
 {
     return m_item_types;
 }
@@ -593,10 +596,9 @@ bool BrickLink::Core::readDatabase(QString *infoText, const QString &fname)
     m_items.clear();
 
     bool result = false;
-    stopwatch *sw = 0; //new stopwatch("BrickLink::Core::readDatabase()");
+    stopwatch *sw = nullptr; //new stopwatch("BrickLink::Core::readDatabase()");
 
     QString info;
-    QString filename = fname.isNull() ? dataPath() + defaultDatabaseName() : fname;
 
     QFile f;
     if (!fname.isEmpty())
@@ -631,7 +633,7 @@ bool BrickLink::Core::readDatabase(QString *infoText, const QString &fname)
                                 ds >> colc;
 
                                 for (quint32 i = colc; i; i--) {
-                                    Color *col = new Color();
+                                    auto *col = new Color();
                                     ds >> col;
                                     m_colors.insert(col->id(), col);
                                 }
@@ -642,7 +644,7 @@ bool BrickLink::Core::readDatabase(QString *infoText, const QString &fname)
                                 ds >> catc;
 
                                 for (quint32 i = catc; i; i--) {
-                                    Category *cat = new Category();
+                                    auto *cat = new Category();
                                     ds >> cat;
                                     m_categories.insert(cat->id(), cat);
                                 }
@@ -653,7 +655,7 @@ bool BrickLink::Core::readDatabase(QString *infoText, const QString &fname)
                                 ds >> ittc;
 
                                 for (quint32 i = ittc; i; i--) {
-                                    ItemType *itt = new ItemType();
+                                    auto *itt = new ItemType();
                                     ds >> itt;
                                     m_item_types.insert(itt->id(), itt);
                                 }
@@ -730,7 +732,7 @@ out:
 }
 
 
-BrickLink::Core::ParseItemListXMLResult BrickLink::Core::parseItemListXML(QDomElement root, ItemListXMLHint hint)
+BrickLink::Core::ParseItemListXMLResult BrickLink::Core::parseItemListXML(const QDomElement &root, ItemListXMLHint hint)
 {
     ParseItemListXMLResult result;
     QString roottag, itemtag;
@@ -760,7 +762,7 @@ BrickLink::Core::ParseItemListXMLResult BrickLink::Core::parseItemListXML(QDomEl
         if (itemn.nodeName() != itemtag)
             continue;
 
-        InvItem *ii = new InvItem();
+        auto *ii = new InvItem();
 
         QString itemid, itemname;
         QString itemtypeid, itemtypename;
@@ -973,7 +975,7 @@ BrickLink::Core::ParseItemListXMLResult BrickLink::Core::parseItemListXML(QDomEl
         if (!ok) {
             qWarning() << "failed: insufficient data (item=" << itemid << ", itemtype=" << itemtypeid [0] << ", category=" << categoryid << ", color=" << colorid << ")";
 
-            InvItem::Incomplete *inc = new InvItem::Incomplete;
+            auto *inc = new InvItem::Incomplete;
 
             if (!ii->item()) {
                 inc->m_item_id = itemid.toLatin1();
@@ -1027,7 +1029,7 @@ QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint
     if (hint == XMLHint_BrickStore)
         root.setAttribute(QLatin1String("Currency"), currencyCode);
 
-    foreach(const InvItem *ii, items) {
+    for (const InvItem *ii : items) {
         if (ii->isIncomplete())
             continue;
 
@@ -1315,8 +1317,8 @@ bool BrickLink::Core::parseLDrawModelInternal(QFile &f, const QString &model_nam
                         }
 
                         if (!got_subfile) {
-                            for (QStringList::iterator it = searchpath.begin(); it != searchpath.end(); ++it) {
-                                QFile subf(*it + QDir::separator() + partname);
+                            for (const auto &path : qAsConst(searchpath)) {
+                                QFile subf(path + QDir::separator() + partname);
 
                                 if (subf.open(QIODevice::ReadOnly)) {
                                     uint sub_invalid_items = 0;
@@ -1345,7 +1347,7 @@ bool BrickLink::Core::parseLDrawModelInternal(QFile &f, const QString &model_nam
                         ii->m_quantity = 1;
 
                         if (!colp || !itemp) {
-                            InvItem::Incomplete *inc = new InvItem::Incomplete;
+                            auto *inc = new InvItem::Incomplete;
 
                             if (!itemp) {
                                 inc->m_item_id = partid.toLatin1();
@@ -1396,9 +1398,9 @@ void BrickLink::Core::setDatabase_AppearsIn(const QHash<const Item *, AppearsIn>
         it.key()->setAppearsIn(it.value());
 }
 
-void BrickLink::Core::setDatabase_Basics(const QMap<int, const Color *> &colors,
-        const QMap<int, const Category *> &categories,
-        const QMap<int, const ItemType *> &item_types,
+void BrickLink::Core::setDatabase_Basics(const QHash<int, const Color *> &colors,
+        const QHash<int, const Category *> &categories,
+        const QHash<int, const ItemType *> &item_types,
         const QVector<const Item *> &items)
 {
     QMutexLocker lock(&m_corelock);
@@ -1428,7 +1430,7 @@ void BrickLink::Core::setDatabase_ChangeLog(const QVector<const char *> &changel
 }
 
 bool BrickLink::Core::writeDatabase(const QString &filename, DatabaseVersion version,
-                                    const QString &infoText)
+                                    const QString &infoText) const
 {
     if (filename.isEmpty() || (version != BrickStore_2_0))
         return false;
@@ -1452,36 +1454,34 @@ bool BrickLink::Core::writeDatabase(const QString &filename, DatabaseVersion ver
 
             ok &= cw.startChunk(ChunkId('C','O','L',' '), version);
             ds << m_colors.count();
-            foreach(const Color *col, m_colors)
+            for (const Color *col : m_colors)
                 ds << col;
             ok &= cw.endChunk();
 
             ok &= cw.startChunk(ChunkId('C','A','T',' '), version);
             ds << m_categories.count();
-            foreach(const Category *cat, m_categories)
+            for (const Category *cat : m_categories)
                 ds << cat;
             ok &= cw.endChunk();
 
             ok &= cw.startChunk(ChunkId('T','Y','P','E'), version);
             ds << m_item_types.count();
-            foreach(const ItemType *itt, m_item_types)
+            for (const ItemType *itt : m_item_types)
                 ds << itt;
             ok &= cw.endChunk();
 
             ok &= cw.startChunk(ChunkId('I','T','E','M'), version);
             quint32 itc = m_items.count();
             ds << itc;
-            const Item **itp = m_items.data();
-            for (quint32 i = itc; i; ++itp, --i)
-                ds << *itp;
+            for (const Item *item : m_items)
+                ds << item;
             ok &= cw.endChunk();
 
             ok &= cw.startChunk(ChunkId('C','H','G','L'), version);
             quint32 clc = m_changelog.count();
             ds << clc;
-            const char **clp = m_changelog.data();
-            for (quint32 i = clc; i; ++clp, --i)
-                ds << *clp;
+            for (const char *cl : m_changelog)
+                ds << cl;
             ok &= cw.endChunk();
 
             ok &= cw.endChunk();
@@ -1507,7 +1507,7 @@ int BrickLink::Core::applyChangeLogToItems(InvItemList &bllist)
 {
     int count = 0;
 
-    foreach (InvItem *blitem, bllist) {
+    for (InvItem *blitem : qAsConst(bllist)) {
         const InvItem::Incomplete *incpl = blitem->isIncomplete();
         if (incpl) {
             const Item *fixed_item = blitem->item();
@@ -1518,7 +1518,7 @@ int BrickLink::Core::applyChangeLogToItems(InvItemList &bllist)
             QString colorid    = incpl->m_color_name;
 
             for (int i = m_changelog.count() - 1; i >= 0 && !(fixed_color && fixed_item); --i) {
-                const ChangeLogEntry cl = ChangeLogEntry(m_changelog[i]);
+                const ChangeLogEntry &cl = ChangeLogEntry(m_changelog.at(i));
 
                 if (!fixed_item) {
                     if ((cl.type() == BrickLink::ChangeLogEntry::ItemId) ||
@@ -1554,7 +1554,7 @@ int BrickLink::Core::applyChangeLogToItems(InvItemList &bllist)
                 blitem->setColor(fixed_color);
 
             if (fixed_item && fixed_color) {
-                blitem->setIncomplete(0);
+                blitem->setIncomplete(nullptr);
                 count++;
             }
         }

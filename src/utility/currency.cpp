@@ -54,7 +54,7 @@ static void baseConvert(QMap<QString, qreal> &rates)
 }
 
 
-Currency *Currency::s_inst = 0;
+Currency *Currency::s_inst = nullptr;
 
 Currency::Currency()
     : m_nam(nullptr)
@@ -72,21 +72,20 @@ Currency::~Currency()
     Config::inst()->setValue("/Rates/LastUpdate", m_lastUpdate);
 
     QStringList sl;
-    QMap<QString, qreal>::const_iterator it;
-    for (it = m_rates.begin(); it != m_rates.end(); ++it) {
+    for (auto it = m_rates.constBegin(); it != m_rates.constEnd(); ++it) {
         QString s = QLatin1String("%1|%2");
         sl << s.arg(it.key()).arg(it.value());
     }
     Config::inst()->setValue("/Rates/Normal", sl.join(QLatin1String(",")));
 
     sl.clear();
-    for (it = m_customRates.begin(); it != m_customRates.end(); ++it) {
+    for (auto it = m_customRates.constBegin(); it != m_customRates.constEnd(); ++it) {
         QString s = QLatin1String("%1|%2");
         sl << s.arg(it.key()).arg(it.value());
     }
     Config::inst()->setValue("/Rates/Custom", sl.join(QLatin1String(",")));
 
-    s_inst = 0;
+    s_inst = nullptr;
 }
 
 Currency *Currency::inst()
@@ -98,7 +97,7 @@ Currency *Currency::inst()
 
 void Currency::parseRates(const QStringList &ratesList, QMap<QString, double> &ratesMap)
 {
-    foreach (QString s, ratesList) {
+    for (const QString &s : ratesList) {
         QStringList sl = s.split(QLatin1Char('|'));
         if (sl.count() == 2) {
             QString sym = sl[0];
@@ -235,20 +234,22 @@ QString Currency::localSymbol(const QString &intSymbol)
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
 
-class DotCommaFilter : public QObject {
+class DotCommaFilter : public QObject
+{
+    Q_OBJECT
 public:
     DotCommaFilter(QObject *parent)
         : QObject(parent)
     { }
 
 protected:
-    bool eventFilter(QObject *o, QEvent *e)
+    bool eventFilter(QObject *o, QEvent *e) override
     {
         if (((e->type() == QEvent::KeyPress) || (e->type() == QEvent::KeyRelease)) && qobject_cast<QLineEdit *>(o)) {
-            const CurrencyValidator *val = qobject_cast<const CurrencyValidator *>(static_cast<QLineEdit *>(o)->validator());
+            const auto *val = qobject_cast<const CurrencyValidator *>(static_cast<QLineEdit *>(o)->validator());
 
             if (val) {
-                QKeyEvent *ke = static_cast<QKeyEvent *>(e);
+                auto *ke = static_cast<QKeyEvent *>(e);
 
                 QString text = ke->text();
                 bool fixed = false;
@@ -301,7 +302,7 @@ QValidator::State CurrencyValidator::validate(QString &input, int &pos) const
 
     QChar dp = QLocale().decimalPoint();
 
-    QRegExp r(QString(QLatin1String(" *-?\\d*\\%1?\\d* *")).arg(dp));
+    QRegExp r(QString(R"( *-?\d*\%1?\d* *)").arg(dp));
 
     if (b >= 0 && input.simplified().startsWith(QLatin1Char('-')))
         return Invalid;
@@ -343,3 +344,5 @@ QValidator::State CurrencyValidator::validate(QString &input, int &pos) const
     }
 }
 
+#include "currency.moc"
+#include "moc_currency.cpp"

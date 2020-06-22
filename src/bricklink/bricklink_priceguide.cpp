@@ -25,7 +25,7 @@
 BrickLink::PriceGuide *BrickLink::Core::priceGuide(const BrickLink::Item *item, const BrickLink::Color *color, bool high_priority)
 {
     if (!item || !color)
-        return 0;
+        return nullptr;
 
     quint64 key = quint64(color->id()) << 32 | quint64(item->itemType()->id()) << 24 | quint64(item->index());
 
@@ -35,7 +35,7 @@ BrickLink::PriceGuide *BrickLink::Core::priceGuide(const BrickLink::Item *item, 
         pg = new PriceGuide(item, color);
         if (!m_pg_cache.insert(key, pg)) {
             qWarning("Can not add priceguide to cache (cache max/cur: %d/%d, cost: %d)", m_pic_cache.maxCost(), m_pic_cache.totalCost(), 1);
-            return 0;
+            return nullptr;
         }
     }
 
@@ -59,12 +59,6 @@ BrickLink::PriceGuide::PriceGuide(const BrickLink::Item *item, const BrickLink::
     memset(m_prices, 0, sizeof(m_prices));
 
     load_from_disk();
-}
-
-
-BrickLink::PriceGuide::~PriceGuide()
-{
-    //qDebug ( "Deleting PG %p for %c_%s_%d", this, m_item->itemType ( )->id ( ), m_item->id ( ), m_color->id ( ));
 }
 
 void BrickLink::PriceGuide::save_to_disk()
@@ -134,7 +128,7 @@ void BrickLink::PriceGuide::parse(const QByteArray &ba)
     qWarning().noquote() << ba;
 
     while (!(line = ts.readLine()).isNull()) {
-        if (!line.length() || (line[0] == '#') || (line[0] == '\r'))         // skip comments fast
+        if (line.isEmpty() || (line[0] == '#') || (line[0] == '\r'))         // skip comments fast
             continue;
 
         QStringList sl = line.split('\t', QString::KeepEmptyParts);
@@ -216,12 +210,12 @@ void BrickLink::Core::updatePriceGuide(BrickLink::PriceGuide *pg, bool high_prio
 
 void BrickLink::Core::priceGuideJobFinished(ThreadPoolJob *pj)
 {
-    TransferJob *j = static_cast<TransferJob *>(pj);
+    auto *j = static_cast<TransferJob *>(pj);
 
     if (!j || !j->data())
         return;
 
-    PriceGuide *pg = j->userData<PriceGuide>('G');
+    auto *pg = j->userData<PriceGuide>('G');
 
     if (!pg)
         return;

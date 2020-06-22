@@ -74,17 +74,20 @@ BrickLink::InvItemList SelectDocumentDialog::items() const
     BrickLink::InvItemList list;
 
     if (w_clipboard->isChecked()) {
-        foreach (BrickLink::InvItem *item, m_clipboard_list)
+        for (const BrickLink::InvItem *item : m_clipboard_list)
             list.append(new BrickLink::InvItem(*item));
     } else {
         if (w_document_list->currentItem()) {
-            const Document *doc = w_document_list->currentItem()->data(Qt::UserRole).value<const Document *>();
+            const auto *doc = w_document_list->currentItem()->data(Qt::UserRole).value<const Document *>();
             
             if (doc) {
-                foreach (Document::Item *item, doc->items())
+                const auto items = doc->items();
+                for (const Document::Item *item : items)
                     list.append(new BrickLink::InvItem(*item));
             }
         }
     }
     return list;
 }
+
+#include "moc_selectdocumentdialog.cpp"

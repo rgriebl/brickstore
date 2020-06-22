@@ -74,7 +74,7 @@ QModelIndex ReportModel::index(int row, int column, const QModelIndex &parent) c
 {
     if (hasIndex(row, column, parent))
         return parent.isValid() ? QModelIndex() : createIndex(row, column, const_cast<Report *>(m_reports.at(row)));
-    return QModelIndex();
+    return {};
 }
 
 int ReportModel::rowCount(const QModelIndex &parent) const
@@ -110,7 +110,7 @@ SelectReportDialog::SelectReportDialog(QWidget *parent)
 {
     setupUi(this);
 
-    ReportModel *model = new ReportModel();
+    auto *model = new ReportModel();
 
     w_list->setModel(model);
 
@@ -147,3 +147,5 @@ const Report *SelectReportDialog::report() const
 }
 
 #include "selectreportdialog.moc"
+
+#include "moc_selectreportdialog.cpp"

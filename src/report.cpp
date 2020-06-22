@@ -11,9 +11,9 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <stdlib.h>
-#include <limits.h>
-#include <locale.h>
+#include <cstdlib>
+#include <climits>
+#include <clocale>
 
 #include <QApplication>
 #include <QFile>
@@ -39,7 +39,7 @@
 Report::Report()
 {
     d = new ReportPrivate();
-    d->m_engine = 0;
+    d->m_engine = nullptr;
 }
 
 Report::~Report()
@@ -55,7 +55,7 @@ QString Report::name() const
 
 Report *Report::load(const QString &filename)
 {
-    Report *r = new Report;
+    auto *r = new Report;
 
     QFileInfo fi(filename);
 
@@ -64,11 +64,11 @@ Report *Report::load(const QString &filename)
         QTextStream ts(&f);
         r->d->m_code = ts.readAll();
 
-        QScriptEngine *eng = new QScriptEngine(r);
+        auto *eng = new QScriptEngine(r);
         r->d->m_engine = eng;
         r->d->m_engine->setProperty("bsScriptPath", fi.absoluteFilePath());
 
-        QScriptEngineDebugger *dbg = new QScriptEngineDebugger(r);
+        auto *dbg = new QScriptEngineDebugger(r);
         dbg->attachTo(eng);
 
         eng->evaluate(r->d->m_code, fi.baseName());
@@ -97,7 +97,7 @@ Report *Report::load(const QString &filename)
         qDebug() << "Report::load() - failed to open " << filename;
 
     delete r;
-    return 0;
+    return nullptr;
 }
 
 void Report::print(QPaintDevice *pd, const Document *doc, const Document::ItemList &items) const
@@ -105,7 +105,6 @@ void Report::print(QPaintDevice *pd, const Document *doc, const Document::ItemLi
     Document::Statistics stat = doc->statistics(items);
 
     QScriptValue docVal = d->m_engine->newObject();
-    QVariantMap docmap;
     docVal.setProperty("fileName", doc->fileName());
     docVal.setProperty("title", doc->title());
 
@@ -146,7 +145,7 @@ void Report::print(QPaintDevice *pd, const Document *doc, const Document::ItemLi
     QScriptValue itemList = d->m_engine->newArray();
     int count = 0;
 
-    foreach (Document::Item *item, items) {
+    for (const Document::Item *item : items) {
         QScriptValue iVal = d->m_engine->newObject();
 
         iVal.setProperty("id", item->item()->id());
@@ -213,9 +212,9 @@ void Report::print(QPaintDevice *pd, const Document *doc, const Document::ItemLi
     docVal.setProperty("items", itemList);
 
 
-    ReportJob *job = new ReportJob(pd);
-    ReportUtility *ru = new ReportUtility();
-    ReportMoneyStatic *ms = new ReportMoneyStatic(d->m_engine);
+    auto *job = new ReportJob(pd);
+    auto *ru = new ReportUtility();
+    auto *ms = new ReportMoneyStatic(d->m_engine);
 
     d->m_engine->globalObject().setProperty("Document", docVal);
     d->m_engine->globalObject().setProperty(job->objectName(), d->m_engine->newQObject(job));
@@ -258,17 +257,17 @@ void Report::print(QPaintDevice *pd, const Document *doc, const Document::ItemLi
 
 ReportManager::ReportManager()
 {
-    m_printer = 0;
+    m_printer = nullptr;
 }
 
 ReportManager::~ReportManager()
 {
     delete m_printer;
     qDeleteAll(m_reports);
-    s_inst = 0;
+    s_inst = nullptr;
 }
 
-ReportManager *ReportManager::s_inst = 0;
+ReportManager *ReportManager::s_inst = nullptr;
 
 ReportManager *ReportManager::inst()
 {
@@ -287,9 +286,9 @@ bool ReportManager::reload()
     if (!dataloc.isEmpty())
         spath.prepend(dataloc + QLatin1String("/print-templates"));
 
-    QFileInfoList files;
-    foreach (const QString &dir, spath) {
-        foreach (const QFileInfo &fi, QDir(dir).entryInfoList(QStringList("*.qs"), QDir::Files | QDir::Readable)) {
+    for (const QString &dir : qAsConst(spath)) {
+        const QFileInfoList fis = QDir(dir).entryInfoList(QStringList("*.qs"), QDir::Files | QDir::Readable);
+        for (const QFileInfo &fi : fis) {
             Report *rep = Report::load(fi.absoluteFilePath());
 
             if (rep)
@@ -311,3 +310,5 @@ QPrinter *ReportManager::printer() const
 
     return m_printer;
 }
+
+#include "moc_report.cpp"
