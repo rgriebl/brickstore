@@ -879,7 +879,8 @@ void Window::on_edit_price_to_priceguide_triggered()
         m_settopg_price   = dlg.price();
         bool force_update = dlg.forceUpdate();
 
-        foreach(Document::Item *item, selection()) {
+        const auto sel = selection();
+        for (Document::Item *item : sel) {
             BrickLink::PriceGuide *pg = BrickLink::core()->priceGuide(item->item(), item->color());
 
             if (force_update && pg && (pg->updateStatus() != BrickLink::Updating))
