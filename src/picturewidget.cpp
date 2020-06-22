@@ -30,24 +30,26 @@ class PictureWidgetPrivate
 public:
     BrickLink::Picture *m_pic = nullptr;
     QTextBrowser *      m_tlabel;
-    bool                m_connected;
+    bool                m_connected = false;
+    int                 m_default_size;
     int                 m_img_height;
     QImage              m_img;
 };
 
-class LargePictureWidgetPrivate
-{
-public:
-    BrickLink::Picture *m_pic;
-};
 
 PictureWidget::PictureWidget(QWidget *parent)
     : QFrame(parent)
 {
     d = new PictureWidgetPrivate();
 
-    d->m_pic = 0;
-    d->m_connected = false;
+    auto setDefaultSize = [this]() {
+        QSize s = BrickLink::core()->standardPictureSize();
+        d->m_default_size = qMax(s.width(), s.height());
+        updateGeometry();
+    };
+    setDefaultSize();
+    connect(BrickLink::core(), &BrickLink::Core::itemImageScaleFactorChanged,
+            this, setDefaultSize);
 
     setBackgroundRole(QPalette::Base);
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
@@ -212,11 +214,12 @@ void PictureWidget::paintEvent(QPaintEvent *e)
     QFrame::paintEvent(e);
 
     QRect cr = contentsRect();
-    if (cr.width() >= 80 && !d->m_img.isNull()) {
+    if (cr.width() >= d->m_default_size && !d->m_img.isNull()) {
         QPainter p(this);
         p.setClipRect(e->rect());
 
-        QPoint tl = cr.topLeft() + QPoint((cr.width() - d->m_img.width()) / 2, 4 + (80 - d->m_img_height) / 2);
+        QPoint tl = cr.topLeft() + QPoint((cr.width() - d->m_img.width()) / 2,
+                                          4 + (d->m_default_size - d->m_img_height) / 2);
         p.drawImage(tl, d->m_img);
     }
 }
@@ -226,7 +229,8 @@ void PictureWidget::resizeEvent(QResizeEvent *e)
     QFrame::resizeEvent(e);
 
     QRect cr = contentsRect();
-    d->m_tlabel->setGeometry(cr.left() + 4, cr.top() + 4 + 80 + 4, cr.width() - 2*4, cr.height() - (4 + 80 + 4 + 4));
+    d->m_tlabel->setGeometry(cr.left() + 4, cr.top() + 4 + d->m_default_size + 4,
+                             cr.width() - 2*4, cr.height() - (4 + d->m_default_size + 4 + 4));
 }
 
 bool PictureWidget::event(QEvent *e)

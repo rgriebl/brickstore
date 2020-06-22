@@ -67,6 +67,15 @@ QDataStream &operator >> (QDataStream &ds, BrickLink::Color *col)
 
 QSize BrickLink::ItemType::pictureSize() const
 {
+    QSize s = rawPictureSize();
+    qreal f = BrickLink::core()->itemImageScaleFactor();
+    if (!qFuzzyCompare(f, 1))
+        s *= f;
+    return s;
+}
+
+QSize BrickLink::ItemType::rawPictureSize() const
+{
     QSize s(80, 60);
     if (m_id == 'M')
         s.transpose();

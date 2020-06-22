@@ -152,7 +152,7 @@ void Report::print(QPaintDevice *pd, const Document *doc, const Document::ItemLi
         iVal.setProperty("name", item->item()->name());
 
         BrickLink::Picture *pic = BrickLink::core()->picture(item->item(), item->color(), true);
-        iVal.setProperty("picture", qScriptValueFromValue(d->m_engine, pic ? pic->pixmap() : QPixmap()));
+        iVal.setProperty("picture", qScriptValueFromValue(d->m_engine, pic ? pic->image() : QImage()));
 
         QScriptValue statusVal = d->m_engine->newObject();
         statusVal.setProperty("include", (item->status() == BrickLink::Include));
@@ -166,7 +166,7 @@ void Report::print(QPaintDevice *pd, const Document *doc, const Document::ItemLi
         colorVal.setProperty("id", item->color() ? (int) item->color()->id() : -1);
         colorVal.setProperty("name", (item->color() ? item->color()->name() : QString()));
         colorVal.setProperty("rgb", qScriptValueFromValue(d->m_engine, item->color() ? item->color()->color() : QColor()));
-        colorVal.setProperty("picture", qScriptValueFromValue(d->m_engine, QPixmap::fromImage(BrickLink::core()->colorImage(item->color(), 20, 20))));
+        colorVal.setProperty("picture", qScriptValueFromValue(d->m_engine, BrickLink::core()->colorImage(item->color(), 20, 20)));
         iVal.setProperty("color", colorVal);
 
         QScriptValue condVal = d->m_engine->newObject();

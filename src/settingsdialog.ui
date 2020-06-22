@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>807</width>
-    <height>524</height>
+    <width>927</width>
+    <height>512</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -366,7 +366,7 @@
        <item row="3" column="0">
         <widget class="QLabel" name="label_18">
          <property name="text">
-          <string>Item row size</string>
+          <string>Item image size</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
@@ -382,7 +382,7 @@
           <number>0</number>
          </property>
          <item row="0" column="0" colspan="3">
-          <widget class="QSlider" name="w_row_size">
+          <widget class="QSlider" name="w_item_image_size">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
              <horstretch>5</horstretch>
@@ -416,7 +416,7 @@
           </widget>
          </item>
          <item row="0" column="3">
-          <widget class="QLabel" name="w_row_size_percent">
+          <widget class="QLabel" name="w_item_image_size_percent">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
              <horstretch>0</horstretch>
@@ -439,7 +439,7 @@
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="QToolButton" name="w_row_size_reset">
+          <widget class="QToolButton" name="w_item_image_size_reset">
            <property name="text">
             <string>Reset to 100%</string>
            </property>
@@ -456,6 +456,44 @@
           </widget>
          </item>
         </layout>
+       </item>
+       <item row="5" column="1">
+        <spacer name="verticalSpacer_6">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Expanding</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="4" column="1">
+        <widget class="QLabel" name="w_item_image_example">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Sunken</enum>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="scaledContents">
+          <bool>false</bool>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>

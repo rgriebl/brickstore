@@ -66,6 +66,7 @@ public:
     bool hasSubConditions() const   { return m_has_subconditions; }
     char pictureId() const          { return m_picture_id; }
     QSize pictureSize() const;
+    QSize rawPictureSize() const;
 
 private:
     char  m_id;
@@ -268,12 +269,9 @@ public:
     bool valid() const                { return m_valid; }
     int updateStatus() const          { return m_update_status; }
 
-    const QPixmap pixmap() const;
+    //static int maximumSize()
 
-    virtual ~Picture();
-
-    const QImage image() const        { return m_image; }
-    QString key() const               { return QString::number(m_image.cacheKey()); }
+    const QImage image() const;
 
     int cost() const;
 
@@ -906,9 +904,12 @@ public:
     PriceGuide *priceGuide(const Item *item, const Color *color, bool high_priority = false);
     void flushPriceGuidesToUpdate(); //TODO5: brickstock has this
 
-    QSize pictureSize(const ItemType *itt) const;
+    QSize standardPictureSize() const;
     Picture *picture(const Item *item, const Color *color, bool high_priority = false);
     Picture *largePicture(const Item *item, bool high_priority = false);
+
+    qreal itemImageScaleFactor() const;
+    void setItemImageScaleFactor(qreal f);
 
     struct ParseItemListXMLResult {
         ParseItemListXMLResult()
@@ -949,6 +950,7 @@ public slots:
 signals:
     void priceGuideUpdated(BrickLink::PriceGuide *pg);
     void pictureUpdated(BrickLink::Picture *inv);
+    void itemImageScaleFactorChanged(qreal f);
 
     void transferJobProgress(int, int);
 
@@ -1007,6 +1009,8 @@ private:
     int                          m_pic_update_iv;
     ThreadPool                   m_pic_diskload;
     Q3Cache<quint64, Picture>    m_pic_cache;
+
+    qreal m_item_image_scale_factor = 1.;
 };
 
 inline Core *core() { return Core::inst(); }

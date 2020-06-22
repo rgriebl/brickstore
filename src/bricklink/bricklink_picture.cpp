@@ -60,23 +60,13 @@ void PictureLoaderJob::run()
 
 }
 
-const QPixmap BrickLink::Picture::pixmap() const
+QSize BrickLink::Core::standardPictureSize() const
 {
-    QPixmap p;
-    QString k = key();
-
-    if (!QPixmapCache::find(k, &p)) {
-        p = QPixmap::fromImage(m_image);
-        QPixmapCache::insert(k, p);
-    }
-    return p;
-}
-
-QSize BrickLink::Core::pictureSize(const ItemType *itt) const
-{
-    if (!itt)
-        itt = itemType('P');
-    return itt ? itt->pictureSize() : QSize();
+    QSize s(80, 60);
+    qreal f = BrickLink::core()->itemImageScaleFactor();
+    if (!qFuzzyCompare(f, 1))
+        s *= f;
+    return s;
 }
 
 BrickLink::Picture *BrickLink::Core::picture(const Item *item, const BrickLink::Color *color, bool high_priority)
@@ -133,9 +123,13 @@ BrickLink::Picture::Picture(const Item *item, const Color *color)
     m_update_status = Ok;
 }
 
-BrickLink::Picture::~Picture()
+const QImage BrickLink::Picture::image() const
 {
-    QPixmapCache::remove(key());
+    auto f = core()->itemImageScaleFactor();
+    if (qFuzzyCompare(f, 1))
+        return m_image;
+    else
+        return m_image.scaled(m_image.size() * f, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 }
 
 int BrickLink::Picture::cost() const
@@ -173,7 +167,7 @@ void BrickLink::Picture::load_from_disk()
         }
         else {
             if (!large && m_item && m_item->itemType())
-                image = BrickLink::core()->noImage(m_item->itemType()->pictureSize());
+                image = BrickLink::core()->noImage(m_item->itemType()->rawPictureSize());
 
             is_valid = true;
         }
@@ -210,8 +204,6 @@ void BrickLink::Core::pictureLoaded(ThreadPoolJob *pj)
             updatePicture(pic, false);
         else
             emit pictureUpdated(pic);
-
-        QPixmapCache::remove(pic->key());
         pic->release();
     }
 }
@@ -300,11 +292,10 @@ void BrickLink::Core::pictureJobFinished(ThreadPoolJob *pj)
                 f.open(QIODevice::WriteOnly | QIODevice::Truncate);
                 f.close();
 
-                qWarning("No image !");
+                // qWarning("No image !");
             }
 
             pic->load_from_disk();
-            QPixmapCache::remove(pic->key());
         }
         else {
             qWarning("Couldn't get path to save image");

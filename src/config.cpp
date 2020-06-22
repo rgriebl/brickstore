@@ -349,6 +349,16 @@ void Config::setIconSize(const QSize &iconSize)
     }
 }
 
+void Config::setItemImageSizePercent(int p)
+{
+    auto oldp = itemImageSizePercent();
+
+    if (oldp != p) {
+        setValue("Interface/ItemImageSizePercent", qBound(50, p, 200));
+        emit itemImageSizePercentChanged(p);
+    }
+}
+
 
 QPair<QString, QString> Config::loginForBrickLink() const
 {
@@ -388,6 +398,11 @@ QList<Config::Translation> Config::translations() const
 int Config::fontSizePercent() const
 {
     return qreal(value("Interface/FontSizePercent", 100).toInt());
+}
+
+int Config::itemImageSizePercent() const
+{
+    return qreal(value("Interface/ItemImageSizePercent", 100).toInt());
 }
 
 QSize Config::iconSize() const

@@ -257,14 +257,8 @@ void ItemDetailPopup::redraw()
             m_blpic->setText(QLatin1String("<center><i>") +
                     tr("Please wait ...updating") +
                     QLatin1String("</i></center>"));
-        else if (m_pic->valid()) {
-        //    // unfortunately, this looks very crappy for most of BLs pictures
-        //    QPixmap pix = m_pic->pixmap();
-        //    if (!m_pic->image().hasAlphaChannel())
-        //        pix.setMask(QBitmap::fromImage(m_pic->image().createHeuristicMask()));
-        //    m_blpic->setPixmap(pix);
-            m_blpic->setPixmap(m_pic->pixmap());
-        }
+        else if (m_pic->valid())
+            m_blpic->setPixmap(QPixmap::fromImage(m_pic->image(), Qt::NoFormatConversion));
         else
             m_blpic->setText(QString());
     }

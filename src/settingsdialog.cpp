@@ -16,6 +16,7 @@
 #include <QComboBox>
 #include <QStandardPaths>
 #include <QStyleFactory>
+#include <QImage>
 
 #include "settingsdialog.h"
 #include "config.h"
@@ -79,8 +80,22 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
     connect(w_font_size_reset, &QToolButton::clicked,
             this, [this]() { w_font_size->setValue(10); });
 
-    connect(w_row_size_reset, &QToolButton::clicked,
-            this, [this]() { w_row_size->setValue(10); });
+    auto setImageSize = [this](int v) {
+        w_item_image_size_percent->setText(QString("%1 %").arg(v * 10));
+        int s = 80 * v / 10;
+        QImage img(":/images/brickstore_icon.png");
+        img = img.scaled(s, s);
+        w_item_image_example->setPixmap(QPixmap::fromImage(img));
+    };
+
+    connect(w_item_image_size, &QAbstractSlider::valueChanged,
+            this, setImageSize);
+    setImageSize(10);
+
+    connect(w_item_image_size_reset, &QToolButton::clicked,
+            this, [this]() { w_item_image_size->setValue(10); });
+
+
 
     w_upd_reset->setAttribute(Qt::WA_MacSmallSize);
 #if defined(Q_OS_MACOS)
@@ -229,6 +244,8 @@ void SettingsDialog::load()
     w_icon_size->setCurrentIndex(iconSizeIndex);
     w_font_size->setValue(Config::inst()->fontSizePercent() / 10);
 
+    w_item_image_size->setValue(Config::inst()->itemImageSizePercent() / 10);
+
     // --[ UPDATES ]-------------------------------------------------------------------
 
     QMap<QByteArray, int> intervals = Config::inst()->updateIntervals();
@@ -315,6 +332,8 @@ void SettingsDialog::save()
 
     Config::inst()->setIconSize(QSize(iconWidth, iconWidth));
     Config::inst()->setFontSizePercent(w_font_size->value() * 10);
+
+    Config::inst()->setItemImageSizePercent(w_item_image_size->value() * 10);
 
     // --[ UPDATES ]-------------------------------------------------------------------
 

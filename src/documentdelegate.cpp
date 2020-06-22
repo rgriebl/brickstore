@@ -45,11 +45,17 @@ DocumentDelegate::DocumentDelegate(Document *doc, DocumentProxyModel *view, QTab
     , m_view(view)
     , m_table(table)
 {
-    static bool first = true;
-    if (first) {
+    static bool once = false;
+    if (!once) {
         qAddPostRoutine(clearCaches);
-        first = false;
+        once = false;
     }
+
+    connect(BrickLink::core(), &BrickLink::Core::itemImageScaleFactorChanged,
+            this, [this]() {
+        m_table->resizeRowsToContents();
+        m_table->resizeColumnToContents(Document::Picture);
+    });
 }
 
 void DocumentDelegate::clearCaches()
@@ -327,6 +333,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
         key.s.i1 = itw;
         key.s.i2 = tag.background.rgba();
 
+        QPixmap noCacheFallbackPix;
         QPixmap *pix = s_tag_cache[key.q];
         if (!pix) {
             pix = new QPixmap(itw, itw);
@@ -340,7 +347,9 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
 
             pixp.fillRect(pix->rect(), grad);
             pixp.end();
-            s_tag_cache.insert(key.q, pix);
+            noCacheFallbackPix = *pix;
+            if (!s_tag_cache.insert(key.q, pix))
+                pix = &noCacheFallbackPix;
         }
 
         int w = qMin(pix->width(), option.rect.width());

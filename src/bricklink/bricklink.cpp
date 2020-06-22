@@ -416,7 +416,6 @@ BrickLink::Core::Core(const QString &datadir)
     quint64 cachemem = qBound(64ULL *1024*1024, Utility::physicalMemory() / 4, 256ULL *1024*1024);
     //quint64 cachemem = 1024*1024; // DEBUG
 
-    QPixmapCache::setCacheLimit(20 * 1024);     // 80 x 60 x 32 (w x h x bpp) == 20kB ->room for ~1000 pixmaps
     m_pg_cache.setMaxCost(500);          // each priceguide has a cost of 1
     m_pic_cache.setMaxCost(cachemem);    // each pic has a cost of (w*h*d/8 + 1024)
 
@@ -582,7 +581,6 @@ bool BrickLink::Core::readDatabase(QString *infoText, const QString &fname)
 
     m_pg_cache.clear();
     m_pic_cache.clear();
-    QPixmapCache::clear();
 
     qDeleteAll(m_colors);
     qDeleteAll(m_item_types);
@@ -1410,7 +1408,6 @@ void BrickLink::Core::setDatabase_Basics(const QHash<int, const Color *> &colors
 
     m_pg_cache.clear();
     m_pic_cache.clear();
-    QPixmapCache::clear();
 
     m_colors.clear();
     m_item_types.clear();
