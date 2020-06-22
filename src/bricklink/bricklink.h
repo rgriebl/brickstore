@@ -848,18 +848,30 @@ public slots:
                    const QModelIndex &index) override;
 
 private:
-    QString createToolTip(const BrickLink::Item *item, BrickLink::Picture *pic) const;
+    Options m_options;
+};
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(ItemDelegate::Options)
+
+
+class ToolTip : public QObject
+{
+    Q_OBJECT
+public:
+    static ToolTip *inst();
+
+    bool show(const Item *item, const BrickLink::Color *color, const QPoint &globalPos,
+              QWidget *parent);
 
 private slots:
     void pictureUpdated(BrickLink::Picture *pic);
 
 private:
-    Options m_options;
-    BrickLink::Picture *m_tooltip_pic;
+    QString createToolTip(const BrickLink::Item *item, BrickLink::Picture *pic) const;
+
+    static ToolTip *s_inst;
+    BrickLink::Picture *m_tooltip_pic = nullptr;
 };
-
-Q_DECLARE_OPERATORS_FOR_FLAGS(ItemDelegate::Options)
-
 
 
 class Core : public QObject

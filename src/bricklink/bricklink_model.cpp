@@ -12,18 +12,13 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 #include <QFontMetrics>
-#include <QApplication>
 #include <QPixmap>
 #include <QImage>
 #include <QIcon>
 #include <QThreadStorage>
 #include <QHelpEvent>
-#include <QToolTip>
-#include <QLabel>
 #include <QAbstractItemView>
-#include <QDesktopWidget>
-
-#include "qtemporaryresource.h"
+#include <QApplication>
 
 #include "bricklink.h"
 #include "utility.h"
@@ -823,62 +818,11 @@ QSize BrickLink::ItemDelegate::sizeHint(const QStyleOptionViewItem &option, cons
 bool BrickLink::ItemDelegate::helpEvent(QHelpEvent *event, QAbstractItemView *view, const QStyleOptionViewItem &option, const QModelIndex &index)
 {
     if (event->type() == QEvent::ToolTip && index.isValid()) {
-        if (BrickLink::Picture *pic = BrickLink::core()->picture(index.data(BrickLink::ItemPointerRole).value<const BrickLink::Item *>(),
-                                                                 0 /*index.data(BrickLink::ColorPointerRole).value<const BrickLink::Color *>()*/, true)) {
-            QTemporaryResource::registerResource("#/tooltip_picture.png", pic->valid() ? pic->image() : QImage());
-            m_tooltip_pic = (pic->updateStatus() == BrickLink::Updating) ? pic : 0;
-
-            // need to 'clear' to reset the image cache of the QTextDocument
-            foreach (QWidget *w, QApplication::topLevelWidgets()) {
-                if (w->inherits("QTipLabel")) {
-                    qobject_cast<QLabel *>(w)->clear();
-                    break;
-                }
-            }
-            QString tt = createToolTip(pic->item(), pic);
-            if (!tt.isEmpty()) {
-                QToolTip::showText(event->globalPos(), tt, view);
-                return true;
-            }
-        }
-    }
-    return QStyledItemDelegate::helpEvent(event, view, option, index);
-}
-
-QString BrickLink::ItemDelegate::createToolTip(const BrickLink::Item *item, BrickLink::Picture *pic) const
-{
-    QString str = QLatin1String("<div class=\"tooltip_picture\"><table><tr><td rowspan=\"2\">%1</td><td><b>%2</b></td></tr><tr><td>%3</td></tr></table></div>");
-    QString img_left = QLatin1String("<img src=\"#/tooltip_picture.png\" />");
-    QString note_left = QLatin1String("<i>") + BrickLink::ItemDelegate::tr("[Image is loading]") + QLatin1String("</i>");
-
-    if (pic && (pic->updateStatus() == BrickLink::Updating))
-        return str.arg(note_left).arg(item->id()).arg(item->name());
-    else
-        return str.arg(img_left).arg(item->id()).arg(item->name());
-}
-
-void BrickLink::ItemDelegate::pictureUpdated(BrickLink::Picture *pic)
-{
-    if (!pic || pic != m_tooltip_pic)
-        return;
-
-    m_tooltip_pic = 0;
-
-    if (QToolTip::isVisible() && QToolTip::text().startsWith("<div class=\"tooltip_picture\">")) {
-        QTemporaryResource::registerResource("#/tooltip_picture.png", pic->image());
-
-        foreach (QWidget *w, QApplication::topLevelWidgets()) {
-            if (w->inherits("QTipLabel")) {
-                qobject_cast<QLabel *>(w)->clear();
-                qobject_cast<QLabel *>(w)->setText(createToolTip(pic->item(), pic));
-
-                QRect r(w->pos(), w->sizeHint());
-                QRect desktop = QApplication::desktop()->screenGeometry(w);
-                r.translate(r.right() > desktop.right() ? desktop.right() - r.right() : 0,
-                            r.bottom() > desktop.bottom() ? desktop.bottom() - r.bottom() : 0);
-                w->setGeometry(r);
-                break;
-            }
-        }
+        ToolTip::inst()->show(index.data(BrickLink::ItemPointerRole).value<const BrickLink::Item *>(),
+                              index.data(BrickLink::ColorPointerRole).value<const BrickLink::Color *>(),
+                              event->globalPos(), view);
+        return true;
+    } else {
+        return QStyledItemDelegate::helpEvent(event, view, option, index);
     }
 }
