@@ -401,18 +401,21 @@ bool Application::initBrickLink()
 #endif
 
     BrickLink::Core *bl = BrickLink::create(Config::inst()->dataDir(), &errstring);
+    if (!bl) {
+        QMessageBox::critical(nullptr, applicationName(), tr("Could not initialize the BrickLink kernel:<br /><br />%1").arg(errstring), QMessageBox::Ok);
+    } else {
+        bl->setItemImageScaleFactor(Config::inst()->itemImageSizePercent() / 100.);
+        connect(Config::inst(), &Config::itemImageSizePercentChanged,
+                this, [](qreal p) { BrickLink::core()->setItemImageScaleFactor(p / 100.); });
+        bl->setTransfer(new Transfer);
 
-    if (!bl)
-        QMessageBox::critical(0, applicationName(), tr("Could not initialize the BrickLink kernel:<br /><br />%1").arg(errstring), QMessageBox::Ok);
+        connect(Config::inst(), &Config::updateIntervalsChanged,
+                BrickLink::core(), &BrickLink::Core::setUpdateIntervals);
+        BrickLink::core()->setUpdateIntervals(Config::inst()->updateIntervals());
+    }
+    LDraw::create(QString(), &errstring);
 
-    bl->setTransfer(new Transfer);
-
-    /*LDraw::Core *ld =*/ LDraw::create(QString(), &errstring);
-
-//    if (!ld)
-//        MessageBox::critical(0, tr("Could not initialize the LDraw kernel:<br /><br />%1").arg(errstring));
-
-    return (bl != 0); // && (ld != 0);
+    return bl;
 }
 
 
