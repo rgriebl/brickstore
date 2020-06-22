@@ -920,7 +920,7 @@ void Window::on_edit_price_to_priceguide_triggered()
 void Window::priceGuideUpdated(BrickLink::PriceGuide *pg)
 {
     if (m_settopg_list && pg) {
-        for (auto it = m_settopg_list->constBegin(); it != m_settopg_list->constEnd(); ++it) {
+        for (auto it = m_settopg_list->constFind(pg); it != m_settopg_list->constEnd() && it.key() == pg; ++it) {
             Document::Item *item = it.value();
             double p = pg->valid() ? pg->price(m_settopg_time, item->condition(), m_settopg_price) : 0;
 
