@@ -218,20 +218,13 @@ FrameWork::FrameWork(QWidget *parent)
     m_task_info->setObjectName(QLatin1String("TaskInfo"));
     addDockWidget(Qt::LeftDockWidgetArea, createDock(m_task_info));
 
+    m_task_appears = new TaskAppearsInWidget(nullptr);
+    m_task_appears->setObjectName(QLatin1String("TaskAppears"));
+    splitDockWidget(m_dock_widgets.first(), createDock(m_task_appears), Qt::Vertical);
+
     m_task_priceguide = new TaskPriceGuideWidget(nullptr);
     m_task_priceguide->setObjectName(QLatin1String("TaskPriceGuide"));
     splitDockWidget(m_dock_widgets.first(), createDock(m_task_priceguide), Qt::Vertical);
-
-    m_task_appears = new TaskAppearsInWidget(nullptr);
-    m_task_appears->setObjectName(QLatin1String("TaskAppears"));
-    tabifyDockWidget(m_dock_widgets.at(1), createDock(m_task_appears));
-
-    m_task_links = new TaskLinksWidget(nullptr);
-    m_task_links->setObjectName(QLatin1String("TaskLinks"));
-    tabifyDockWidget(m_dock_widgets.first(), createDock(m_task_links));
-
-    m_dock_widgets.at(0)->raise();
-    m_dock_widgets.at(1)->raise();
 
     m_toolbar = new QToolBar(this);
     m_toolbar->setObjectName(QLatin1String("toolbar"));

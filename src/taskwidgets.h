@@ -25,31 +25,6 @@ class QLabel;
 class QDockWidget;
 
 
-class TaskLinksWidget : public QLabel
-{
-    Q_OBJECT
-
-public:
-    TaskLinksWidget(QWidget *parent);
-
-protected slots:
-    void windowUpdate(Window *win);
-    void selectionUpdate(const Document::ItemList &list);
-
-    void languageChange();
-    void linkActivate(const QString &url);
-    void linkHover(const QString &url);
-
-private:
-    QPointer<Window> m_win;
-};
-
-
-// ----------------------------------------------------------------------
-// ----------------------------------------------------------------------
-// ----------------------------------------------------------------------
-
-
 class TaskPriceGuideWidget : public PriceGuideWidget
 {
     Q_OBJECT

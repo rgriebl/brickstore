@@ -159,7 +159,6 @@ private:
     QList<QDockWidget *> m_dock_widgets;
     TaskInfoWidget *m_task_info;
     TaskPriceGuideWidget *m_task_priceguide;
-    TaskLinksWidget *m_task_links;
     TaskAppearsInWidget *m_task_appears;
     QMenu *m_contextmenu;
     QPointer<AddItemDialog> m_add_dialog;
