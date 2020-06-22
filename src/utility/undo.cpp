@@ -27,13 +27,14 @@
 #include "undo.h"
 
 
-class UndoAction : public QWidgetAction {
+class UndoAction : public QWidgetAction
+{
     Q_OBJECT
 public:
     enum Type { Undo, Redo };
 
     template<typename T>
-    static QAction *create(Type type, const T *stack, QObject *parent);
+    static QAction *create(Type type, T *stack, QObject *parent);
 
 public slots:
     void setDescription(const QString &str);
@@ -48,24 +49,24 @@ protected:
     QWidget *createWidget(QWidget *parent) override;
 
 protected slots:
-    void updateDescriptions();
-    void fixMenu();
     void itemSelected(QListWidgetItem *);
     void selectRange(QListWidgetItem *);
     void setCurrentItemSlot(QListWidgetItem *item);
     void languageChange();
 
 private:
-    UndoAction(Type t, QObject *parent);
+    UndoAction(Type t, QUndoStack *stack, QObject *parent);
+    UndoAction(Type t, QUndoGroup *group, QObject *parent);
 
     QStringList descriptionList(QUndoStack *stack) const;
 
 private:
     Type         m_type;
-    QMenu      * m_menu;
-    QListWidget *m_list;
-    QLabel *     m_label;
+    QMenu      * m_menu = nullptr;
+    QListWidget *m_list = nullptr;
+    QLabel *     m_label = nullptr;
     QString      m_desc;
+    QUndoStack * m_undoStack;
 
     static const char *s_strings [];
 };
@@ -77,22 +78,22 @@ UndoStack::UndoStack(QObject *parent)
     : QUndoStack(parent)
 { }
 
-void UndoStack::redo(int count)
+void UndoStack::redoMultiple(int count)
 {
     setIndex(index() + count);
 }
 
-void UndoStack::undo(int count)
+void UndoStack::undoMultiple(int count)
 {
     setIndex(index() - count);
 }
 
-QAction *UndoStack::createRedoAction(QObject *parent) const
+QAction *UndoStack::createRedoAction(QObject *parent)
 {
     return UndoAction::create(UndoAction::Redo, this, parent);
 }
 
-QAction *UndoStack::createUndoAction(QObject *parent) const
+QAction *UndoStack::createUndoAction(QObject *parent)
 {
     return UndoAction::create(UndoAction::Undo, this, parent);
 }
@@ -113,24 +114,24 @@ UndoGroup::UndoGroup(QObject *parent)
     : QUndoGroup(parent)
 { }
 
-void UndoGroup::redo(int count)
+void UndoGroup::redoMultiple(int count)
 {
     if (QUndoStack *st = activeStack())
         st->setIndex(st->index() + count);
 }
 
-void UndoGroup::undo(int count)
+void UndoGroup::undoMultiple(int count)
 {
     if (QUndoStack *st = activeStack())
         st->setIndex(st->index() - count);
 }
 
-QAction *UndoGroup::createRedoAction(QObject *parent) const
+QAction *UndoGroup::createRedoAction(QObject *parent)
 {
     return UndoAction::create(UndoAction::Redo, this, parent);
 }
 
-QAction *UndoGroup::createUndoAction(QObject *parent) const
+QAction *UndoGroup::createUndoAction(QObject *parent)
 {
     return UndoAction::create(UndoAction::Undo, this, parent);
 }
@@ -209,34 +210,39 @@ const char *UndoAction::s_strings [] = {
 };
 
 template <typename T>
-QAction *UndoAction::create(UndoAction::Type type, const T *stackOrGroup, QObject *parent)
+QAction *UndoAction::create(UndoAction::Type type, T *stackOrGroup, QObject *parent)
 {
     bool un = (type == Undo);
 
-    auto *a = new UndoAction(type, parent);
+    auto *a = new UndoAction(type, stackOrGroup, parent);
     a->setEnabled(un ? stackOrGroup->canUndo() : stackOrGroup->canRedo());
 
     connect(stackOrGroup, un ? &T::undoTextChanged : &T::redoTextChanged,
-            a, &UndoAction::updateDescriptions);
+            a, &UndoAction::setDescription);
     connect(stackOrGroup, un ? &T::canUndoChanged  : &T::canRedoChanged,
             a, &QAction::setEnabled);
+
     connect(a, QOverload<int>::of(&UndoAction::triggered),
-            stackOrGroup, QOverload<int>::of(un ? &T::undo : &T::redo));
+            stackOrGroup, un ? &T::undoMultiple : &T::redoMultiple);
     connect(a, &QAction::triggered,
             stackOrGroup, un ? &T::undo : &T::redo);
 
     return a;
 }
 
-UndoAction::UndoAction(Type t, QObject *parent)
+UndoAction::UndoAction(Type t, QUndoStack *stack, QObject *parent)
     : QWidgetAction(parent)
+    , m_type(t)
+    , m_undoStack(stack)
 {
-    m_type = t;
-    m_menu = nullptr;
-    m_list = nullptr;
-    m_label = nullptr;
-
     languageChange();
+}
+
+UndoAction::UndoAction(Type t, QUndoGroup *group, QObject *parent)
+    : UndoAction(t, group->activeStack(), parent)
+{
+    connect(group, &QUndoGroup::activeStackChanged,
+            this, [this](QUndoStack *stack) { m_undoStack = stack; });
 }
 
 QWidget *UndoAction::createWidget(QWidget *parent)
@@ -296,7 +302,24 @@ QWidget *UndoAction::createWidget(QWidget *parent)
                 this, &UndoAction::itemSelected);
 
         connect(m_menu, &QMenu::aboutToShow,
-                this, &UndoAction::fixMenu);
+                this, [this]() {
+            m_list->clear();
+
+            if (m_undoStack) {
+                const QStringList dl = descriptionList(m_undoStack);
+                for (const auto &desc : dl)
+                    (void) new QListWidgetItem(desc, m_list);
+            }
+
+            if (m_list->count()) {
+                m_list->setCurrentItem(m_list->item(0));
+                selectRange(m_list->item(0));
+            }
+
+#if defined(Q_OS_MACOS)
+            m_list->setFocus();
+#endif
+        });
 
         return button;
     }
@@ -356,16 +379,6 @@ void UndoAction::setCurrentItemSlot(QListWidgetItem *item)
         m_list->setCurrentItem(item);
 }
 
-void UndoAction::fixMenu()
-{
-    m_list->setCurrentItem(m_list->item(0));
-    selectRange(m_list->item(0));
-
-#if defined(Q_OS_MACOS)
-    m_list->setFocus();
-#endif
-}
-
 void UndoAction::selectRange(QListWidgetItem *item)
 {
     if (item) {
@@ -402,32 +415,6 @@ QStringList UndoAction::descriptionList(QUndoStack *stack) const
             sl.append(stack->text(i));
     }
     return sl;
-}
-
-
-void UndoAction::updateDescriptions()
-{
-    QObject *s = sender();
-
-    QStringList sl;
-
-    if (s) {
-        auto *group = qobject_cast<QUndoGroup *>(s);
-        auto *stack = qobject_cast<QUndoStack *>(s);
-
-        if (!stack && group)
-            stack = group->activeStack();
-        if (stack)
-            sl = descriptionList(stack);
-    }
-
-    if (m_list) {
-        m_list->clear();
-        for (const auto &str : qAsConst(sl))
-            (void) new QListWidgetItem(str, m_list);
-    }
-
-    setDescription(sl.isEmpty() ? QString() : sl.front());
 }
 
 #include "undo.moc"

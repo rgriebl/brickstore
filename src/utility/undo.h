@@ -26,15 +26,15 @@ class UndoStack : public QUndoStack
 public:
     UndoStack(QObject *parent = nullptr);
 
-    QAction *createRedoAction(QObject *parent = nullptr) const;
-    QAction *createUndoAction(QObject *parent = nullptr) const;
+    QAction *createRedoAction(QObject *parent = nullptr);
+    QAction *createUndoAction(QObject *parent = nullptr);
 
     // workaround as long as I haven't add that to Qt (4.6 hopefully)
     void endMacro(const QString &str);
 
 public slots:
-    void redo(int count);
-    void undo(int count);
+    void redoMultiple(int count);
+    void undoMultiple(int count);
 };
 
 
@@ -45,10 +45,10 @@ class UndoGroup : public QUndoGroup
 public:
     UndoGroup(QObject *parent = nullptr);
 
-    QAction *createRedoAction(QObject *parent = nullptr) const;
-    QAction *createUndoAction(QObject *parent = nullptr) const;
+    QAction *createRedoAction(QObject *parent = nullptr);
+    QAction *createUndoAction(QObject *parent = nullptr);
 
 public slots:
-    void redo(int count);
-    void undo(int count);
+    void redoMultiple(int count);
+    void undoMultiple(int count);
 };
