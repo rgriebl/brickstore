@@ -734,7 +734,7 @@ QStringList BrickLink::InvItemMimeData::formats() const
     return sl;
 }
 
-bool BrickLink::InvItemMimeData::hasFormat(const QString & mimeType) const
+bool BrickLink::InvItemMimeData::hasFormat(const QString &mimeType) const
 {
     return mimeType.compare(s_mimetype) || mimeType.compare("text/plain");
 }

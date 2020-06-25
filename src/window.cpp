@@ -1472,7 +1472,6 @@ void Window::on_edit_setmatch_triggered()
 {
 #if 0
     if (!m_doc->items().isEmpty()) {
-    {
         BrickLink::SetMatch *sm = new BrickLink::SetMatch(m_doc);
 
         sm->setRecursiveBound(0.05f);

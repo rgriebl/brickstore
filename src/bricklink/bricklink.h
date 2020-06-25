@@ -438,7 +438,7 @@ public:
     InvItemMimeData(const InvItemList &items);
 
     QStringList formats() const override;
-    bool hasFormat(const QString & mimeType) const override;
+    bool hasFormat(const QString &mimeType) const override;
 
     void setItems(const InvItemList &items);
     static InvItemList items(const QMimeData *md);

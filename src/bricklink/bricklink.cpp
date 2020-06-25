@@ -176,13 +176,13 @@ const QImage BrickLink::Core::noImage(const QSize &s) const
         int w4 = r.width() / 4;
         r.adjust(w4, w4, -w4, -w4);
 
-        QColor coltable [] = {
+        static const QColor coltable [] = {
             QColor(0x00, 0x00, 0x00),
             QColor(0x3f, 0x3f, 0x3f),
             QColor(0xff, 0x7f, 0x7f)
         };
 
-        for (const auto & i : coltable) {
+        for (const auto &i : coltable) {
             r.adjust(-1, -1, -1, -1);
 
             p.setPen(QPen(i, 12, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
