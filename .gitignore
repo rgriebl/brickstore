@@ -20,7 +20,7 @@ vc80.pdb
 version.h
 Makefile*
 brickstore
-brickstore.exe
+BrickStore.exe
 BrickStore.app
 qrc_brickstore.cpp
 brickstore.xcodeproj

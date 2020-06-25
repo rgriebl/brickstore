@@ -2,21 +2,21 @@
 #define SOURCE_DIR "."
 #endif
 
-#define ApplicationVersionFull GetFileVersion(SOURCE_DIR + "\Brickstore.exe")
+#define ApplicationVersionFull GetFileVersion(SOURCE_DIR + "\BrickStore.exe")
 #define ApplicationVersion RemoveFileExt(ApplicationVersionFull)
 
 [Setup]
-AppName=Brickstore
+AppName=BrickStore
 AppVersion={#ApplicationVersion}
 VersionInfoVersion={#ApplicationVersionFull}
-DefaultDirName={pf}\Brickstore
-DefaultGroupName=Brickstore
-UninstallDisplayIcon={app}\brickstore.exe
+DefaultDirName={pf}\BrickStore
+DefaultGroupName=BrickStore
+UninstallDisplayIcon={app}\BrickStore.exe
 ; Since no icons will be created in "{group}", we do not need the wizard
 ; to ask for a Start Menu folder name:
 DisableProgramGroupPage=yes
 SourceDir={#SOURCE_DIR}
-OutputBaseFilename=Brickstore Installer
+OutputBaseFilename=BrickStore Installer
 CloseApplications=yes
 RestartApplications=yes
 ChangesAssociations=yes
@@ -30,8 +30,7 @@ Name: "french"; MessagesFile: "compiler:Languages\French.isl"
 Name: "slovenian"; MessagesFile: "compiler:Languages\Slovenian.isl"
 
 [Files]
-Source: "brickstore.exe"; DestDir: "{app}"
-Source: "translations\*.qm"; DestDir: "{app}\translations"
+Source: "BrickStore.exe"; DestDir: "{app}"
 Source: "*.dll"; DestDir: "{app}"; Flags: recursesubdirs
 ; MSVC
 Source: "vc_redist.x86.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall
@@ -41,13 +40,13 @@ Filename: "{tmp}\vc_redist.x86.exe"; StatusMsg: "Microsoft C/C++ runtime"; Param
 
 
 [Icons]
-Name: "{commonprograms}\Brickstore"; Filename: "{app}\brickstore.exe";
+Name: "{commonprograms}\BrickStore"; Filename: "{app}\BrickStore.exe";
 
 [Registry]
 ; Definition
-Root: HKCR; Subkey: "Brickstore.Document"; ValueType: string; ValueData: "Brickstore Document"; Flags: uninsdeletekey
-Root: HKCR; Subkey: "Brickstore.Document\DefaultIcon"; ValueType: string; ValueData: "{app}\brickstore.exe,1"; Flags: uninsdeletekey
-Root: HKCR; Subkey: "Brickstore.Document\shell\open\command"; ValueType: string; ValueData: """{app}\brickstore.exe"" ""%1"""; Flags: uninsdeletekey
+Root: HKCR; Subkey: "BrickStore.Document"; ValueType: string; ValueData: "BrickStore Document"; Flags: uninsdeletekey
+Root: HKCR; Subkey: "BrickStore.Document\DefaultIcon"; ValueType: string; ValueData: "{app}\BrickStore.exe,1"; Flags: uninsdeletekey
+Root: HKCR; Subkey: "BrickStore.Document\shell\open\command"; ValueType: string; ValueData: """{app}\BrickStore.exe"" ""%1"""; Flags: uninsdeletekey
 
 ; Association
-Root: HKCR; Subkey: ".bsx"; ValueType: string; ValueData: "Brickstore.Document"; Flags: uninsdeletevalue uninsdeletekeyifempty
+Root: HKCR; Subkey: ".bsx"; ValueType: string; ValueData: "BrickStore.Document"; Flags: uninsdeletevalue uninsdeletekeyifempty
