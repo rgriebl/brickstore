@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 ## Copyright (C) 2004-2020 Robert Griebl.  All rights reserved.
 ##
@@ -15,7 +15,8 @@
 
 #set +x
 
-b="$(realpath --relative-to=. $(dirname $0)/../assets)"
+b="$(dirname $0)/../assets"
+which -s realpath >/dev/null && b="$(realpath --relative-to=. $b)"
 
 i="$b/generated-icons"
 g="$b/generated-32x32"
@@ -37,15 +38,25 @@ echo -n "Generating app and doc icons..."
 
 # Unix icons
 convert $b/brickstore.png -resize 256 $i/brickstore.png
-composite -geometry 88x88+20+4 $b/brickstore.png $m/spreadsheet.png $i/brickstore_doc.png
+convert -size 128x128 canvas:transparent \
+        $m/spreadsheet.png -composite \
+        $b/brickstore.png -geometry 88x88+20+4 -composite \
+        $i/brickstore_doc.png
 
 # Windows icons
 convert $i/brickstore.png -define icon:auto-resize=256,48,32,16 $i/brickstore.ico
 convert $i/brickstore_doc.png -define icon:auto-resize=128,48,32,16 $i/brickstore_doc.ico
 
 # macOS icons
-png2icns $i/brickstore.icns $i/brickstore.png >/dev/null
-png2icns $i/brickstore_doc.icns $i/brickstore_doc.png >/dev/null
+## png2icns is broken for icons >= 256x256
+#png2icns $i/brickstore.icns $i/brickstore.png >/dev/null
+#png2icns $i/brickstore_doc.icns $i/brickstore_doc.png >/dev/null
+
+## and makeicns is only available on macOS via brew
+if which -s makeicns >/dev/null; then
+  makeicns -256 $i/brickstore.png -32 $i/brickstore.png -out $i/brickstore.icns
+  makeicns -128 $i/brickstore_doc.png -32 $i/brickstore_doc.png -out $i/brickstore_doc.icns
+fi
 
 echo "done"
 
@@ -112,11 +123,15 @@ echo "done"
 #######################################
 # optimize sizes
 
-echo "Optimizing..."
+if which -s zopflipng >/dev/null; then
+  echo "Optimizing..."
 
-for png in $(ls -1 $g/*.png $i/*.png $m/*.png); do
-  echo -n " > ${png}... "
-  zopflipng -my "$png" "$png" >/dev/null
-  #optipng -o7 "$1"
-  echo "done"
-done
+  for png in $(ls -1 $g/*.png $i/*.png $m/*.png); do
+    echo -n " > ${png}... "
+    zopflipng -my "$png" "$png" >/dev/null
+    #optipng -o7 "$1"
+    echo "done"
+  done
+else
+  echo "Not optimizing: zopflipng is not available"
+fi
