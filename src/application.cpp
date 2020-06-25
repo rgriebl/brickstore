@@ -239,7 +239,7 @@ void Application::updateTranslations()
     bool qtLoaded = false, bsLoaded = false;
 
     for (const QString &sp : qAsConst(spath)) {
-        qtLoaded = qtLoaded || m_trans_qt->load(QLatin1String("qt_") + locale, sp);
+        qtLoaded = qtLoaded || m_trans_qt->load(QLatin1String("qtbase_") + locale, sp);
         bsLoaded = bsLoaded || m_trans_brickstore->load(QLatin1String("brickstore_") + locale, sp);
     }
     if (qtLoaded)

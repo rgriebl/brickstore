@@ -80,7 +80,7 @@ jobs:
         dist=$(lsb_release -c -s)
 
         cat >debian/changelog <<EOF
-        $package ($release) $dist; urgency=low
+        $package ($version) $dist; urgency=low
 
           * Current Release
 

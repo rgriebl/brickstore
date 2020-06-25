@@ -14,7 +14,7 @@
 
 MIN_QT_VERSION = 5.11.0
 
-TARGET      = "BrickStore"
+NAME        = "BrickStore"
 DESCRIPTION = "An offline BrickLink inventory management tool."
 COPYRIGHT   = "2004-2020 Robert Griebl"
 GITHUB_URL  = "github.com/rgriebl/brickstore"
@@ -28,13 +28,15 @@ requires(linux|macos|win32:!winrt:!android)
     error("$$escape_expand(\\n\\n) *** BrickStore needs to be built against $$MIN_QT_VERSION or higher ***$$escape_expand(\\n\\n)")
 }
 
-TEMPLATE     = app
+TEMPLATE = app
 
-CONFIG      *= no_private_qt_headers_warning
-CONFIG      *= lrelease embed_translations
-# CONFIG    *= modeltest
+TARGET = $$NAME
+unix:!macos:TARGET = $$lower($$TARGET)
 
-unix:!macos:TARGET = $$lower(TARGET)
+CONFIG *= no_private_qt_headers_warning
+CONFIG *= lrelease embed_translations
+# CONFIG *= modeltest
+
 
 DESTDIR = bin
 
@@ -61,10 +63,19 @@ OTHER_FILES += \
   unix/brickstore-mime.xml \
   windows/brickstore.iss \
 
-RESOURCES   += brickstore.qrc
+RESOURCES += brickstore.qrc
 
-LANGUAGES    = de fr nl sl
-for(l, LANGUAGES):TRANSLATIONS += translations/brickstore_$${l}.ts
+LANGUAGES = de fr nl sl
+
+for(l, LANGUAGES) {
+  TRANSLATIONS += translations/brickstore_$${l}.ts
+  qt_qm = $$[QT_INSTALL_TRANSLATIONS]/qtbase_$${l}.qm
+  exists($$qt_qm):qt_translations.files += $$qt_qm
+}
+qt_translations.base = $$[QT_INSTALL_TRANSLATIONS]
+qt_translations.prefix = i18n
+RESOURCES += qt_translations
+
 
 include(src/src.pri)
 include(src/utility/utility.pri)
@@ -77,6 +88,7 @@ qtPrepareTool(LUPDATE, lupdate)
 
 lupdate.commands = $$QMAKE_CD $$system_quote($$system_path($$PWD)) && $$LUPDATE $$_PRO_FILE_
 QMAKE_EXTRA_TARGETS += lupdate-all
+
 
 #
 # Windows specific
@@ -192,17 +204,16 @@ macos {
   bundle_icons.path = Contents/Resources
   bundle_icons.files = $$files("assets/generated-icons/*.icns")
   bundle_printtemplates.path = Contents/Resources/print-templates
-  bundle_printtemplates.files = $$system(find $$PWD/print-templates -name \'*.qs\' -or -name \'*.ui\') #TODO5: $$files ???
+  bundle_printtemplates.files = $$files("print-templates/*.qs") \
+                                $$files("print-templates/*.ui")
 
-#  bundle_locversions.path = Contents/Resources
-#  for(l, LANGUAGES) {
-#    cp $$PWD/macos/locversion.plist.in
-#    bundle_locversions.files += $$system(find $$PWD/../macos/Resources/ -name \'*.lproj\')
-#  }
-
-
-  bundle_locversions.path = Contents/Resources ## TODO5: generate lproj from template
-  bundle_locversions.files = $$system(find $$PWD/../macos/Resources/ -name \'*.lproj\')
+  bundle_locversions.path = Contents/Resources
+  for(l, LANGUAGES) {
+    outpath = $$OUT_PWD/.locversions/$${l}.lproj
+    mkpath($$outpath)
+    system(sed -e "s,@LANG@,$$l," < "$$PWD/macos/locversion.plist.in" > "$$outpath/locversion.plist")
+    bundle_locversions.files += $$outpath
+  }
 
   QMAKE_BUNDLE_DATA += bundle_icons bundle_locversions bundle_printtemplates
 
@@ -214,8 +225,8 @@ macos {
     installer.commands += rm -rf $$OUT_PWD/dmg
     installer.commands += && mkdir $$OUT_PWD/dmg
     installer.commands += && mkdir $$OUT_PWD/dmg/.background
-    installer.commands += && cp macos/dmg-background.png $$OUT_PWD/dmg/.background/background.png
-    installer.commands += && cp macos/dmg-ds_store $$OUT_PWD/dmg/.DS_Store
+    installer.commands += && cp $$PWD/macos/dmg-background.png $$OUT_PWD/dmg/.background/background.png
+    installer.commands += && cp $$PWD/macos/dmg-ds_store $$OUT_PWD/dmg/.DS_Store
     installer.commands += && cp -a $$OUT_PWD/$$DESTDIR/$${TARGET}.app $$OUT_PWD/dmg/
     installer.commands += && ln -s /Applications "$$OUT_PWD/dmg/"
     installer.commands += && hdiutil create \"$$OUT_PWD/$${TARGET}-$${VERSION}.dmg\" -volname \"$$TARGET $$VERSION\" -fs \"HFS+\" -srcdir \"$$OUT_PWD/dmg\" -quiet -format UDBZ -ov
