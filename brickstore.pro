@@ -11,15 +11,22 @@
 ##
 ## See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 
-MIN_QT_VERSION=5.12.0
+
+MIN_QT_VERSION = 5.11.0
+
+TARGET      = "BrickStore"
+DESCRIPTION = "An offline BrickLink inventory management tool."
+COPYRIGHT   = "2004-2020 Robert Griebl"
+GITHUB_URL  = "github.com/rgriebl/brickstore"
+
+
+##NOTE: The VERSION is set in the file "VERSION" and pre-processed in .qmake.conf
+
 
 requires(linux|macos|win32:!winrt:!android)
 !versionAtLeast(QT_VERSION, $$MIN_QT_VERSION) {
     error("$$escape_expand(\\n\\n) *** BrickStore needs to be built against $$MIN_QT_VERSION or higher ***$$escape_expand(\\n\\n)")
 }
-
-##NOTE: The VERSION is set in the file "VERSION" and pre-processed in .qmake.conf
-
 
 TEMPLATE     = app
 
@@ -27,8 +34,7 @@ CONFIG      *= no_private_qt_headers_warning
 CONFIG      *= lrelease embed_translations
 # CONFIG    *= modeltest
 
-TARGET             = BrickStore
-unix:!macos:TARGET = brickstore
+unix:!macos:TARGET = $$lower(TARGET)
 
 DESTDIR = bin
 
@@ -54,7 +60,6 @@ OTHER_FILES += \
   unix/brickstore.desktop \
   unix/brickstore-mime.xml \
   windows/brickstore.iss \
-  windows/brickstore.rc \
 
 RESOURCES   += brickstore.qrc
 
@@ -78,7 +83,14 @@ QMAKE_EXTRA_TARGETS += lupdate-all
 #
 
 win32 {
-  RC_FILE = windows/brickstore.rc
+  RC_ICONS = \
+    assets/generated-icons/brickstore.ico \
+    assets/generated-icons/brickstore_doc.ico \
+
+  # qmake uses these to generate a FILEVERSION record
+  QMAKE_TARGET_COPYRIGHT   = "Copyright (c) $$COPYRIGHT"
+  QMAKE_TARGET_COMPANY     = "https://$$GITHUB_URL"
+  QMAKE_TARGET_DESCRIPTION = "$$DESCRIPTION"
 
   win32-msvc* {
 #    QMAKE_CXXFLAGS_DEBUG   += /Od /GL-

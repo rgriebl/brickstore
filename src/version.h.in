@@ -25,16 +25,15 @@
 #define BS_STR(s)   BS_STR2(s)
 #define BS_STR2(s)  #s
 
-#if defined(_MSC_VER) //TODO5: check
+#if defined(_MSC_VER)
 #  if _MSC_VER >= 1920
-#    define MSVC_SUB   '"2019 (16."' BS_STR(_MSC_VER) '")"'
+#    define BRICKSTORE_COMPILER_VERSION_SUB   '"2019 (16."' BS_STR(_MSC_VER) '")"'
 #  elif _MSC_VER >= 1910
-#    define MSVC_SUB   '"2017 (15."' BS_STR(_MSC_VER) '")"'
+#    define BRICKSTORE_COMPILER_VERSION_SUB   '"2017 (15."' BS_STR(_MSC_VER) '")"'
 #  elif _MSC_VER >= 1900
-#    define MSVC_SUB   '"2015 (14.0)"'
+#    define BRICKSTORE_COMPILER_VERSION_SUB   '"2015 (14.0)"'
 #  endif
-#  define BRICKSTORE_COMPILER_VERSION  '"Microsoft Visual-C++"' MSVC_SUB
-#  undef MSVC_SUB
+#  define BRICKSTORE_COMPILER_VERSION  '"Microsoft Visual-C++"' BRICKSTORE_COMPILER_VERSION_SUB
 #elif defined(__GNUC__)
 #  define BRICKSTORE_COMPILER_VERSION  '"GCC "' __VERSION__
 #else
@@ -42,6 +41,6 @@
 #endif
 
 #define BRICKSTORE_VERSION   BS_STR(BRICKSTORE_MAJOR) '"."' BS_STR(BRICKSTORE_MINOR) '"."' BS_STR(BRICKSTORE_PATCH)
-#define BRICKSTORE_COPYRIGHT '"2004-2020 Robert Griebl"'
-#define BRICKSTORE_URL       '"github.com/rgriebl/brickstore"'
-#define BRICKSTORE_NAME      '"BrickStore"'
+#define BRICKSTORE_COPYRIGHT '"$$QMAKE_TARGET_COPYRIGHT"'
+#define BRICKSTORE_URL       '"$$QMAKE_TARGET_COMPANY"'
+#define BRICKSTORE_NAME      '"$$QMAKE_TARGET_PRODUCT"'

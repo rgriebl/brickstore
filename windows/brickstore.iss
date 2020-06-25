@@ -21,7 +21,7 @@ CloseApplications=yes
 RestartApplications=yes
 ChangesAssociations=yes
 
-WizardSmallImageFile={#SourcePath}\assets\generated-misc\windows-installer.bmp
+WizardSmallImageFile={#SourcePath}\..\assets\generated-misc\windows-installer.bmp
 
 [Languages]
 Name: "german"; MessagesFile: "compiler:Languages\German.isl"
