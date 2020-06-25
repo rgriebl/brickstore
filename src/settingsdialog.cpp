@@ -313,8 +313,9 @@ void SettingsDialog::save()
     Config::inst()->setDefaultCurrencyCode(m_preferedCurrency);
 
     QDir dd(w_docdir->itemData(0).toString());
+
     if (dd.exists() && dd.isReadable())
-        Config::inst()->setDocumentDir(w_docdir->itemText(0));
+        Config::inst()->setDocumentDir(dd.absolutePath());
     else
         MessageBox::warning(this, tr("The specified document directory does not exist or is not read- and writeable.<br />The document directory setting will not be changed."));
 
