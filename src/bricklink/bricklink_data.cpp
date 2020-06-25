@@ -747,7 +747,7 @@ BrickLink::Order::Order(const QString &id, OrderType type)
     m_countryCode[1] = QLatin1Char('S');
 }
 
-// Bricklink doesn't use the standard ISO country names...
+// BrickLink doesn't use the standard ISO country names...
 static const char *countryList[] = {
     "AF Afghanistan",
     "AX ",

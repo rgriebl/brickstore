@@ -84,7 +84,7 @@ int RebuildDatabase::exec()
     printf("\n=====================\n");
 
     /////////////////////////////////////////////////////////////////////////////////
-    printf("\nSTEP 1: Logging into Bricklink...\n");
+    printf("\nSTEP 1: Logging into BrickLink...\n");
 
     // login hack
     {
@@ -103,7 +103,7 @@ int RebuildDatabase::exec()
 
         if ((reply->error() != QNetworkReply::NoError)
                 || (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute) != 200)) {
-            return error(QByteArray("Failed to log into Bricklink:\n") + reply->readAll());
+            return error(QByteArray("Failed to log into BrickLink:\n") + reply->readAll());
         }
     }
 
