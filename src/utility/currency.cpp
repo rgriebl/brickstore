@@ -264,7 +264,7 @@ protected:
                 }
 
                 if (fixed)
-                    *ke = QKeyEvent(ke->type(), ke->key(), ke->modifiers(), text, ke->isAutoRepeat(), ke->count());
+                    *ke = QKeyEvent(ke->type(), ke->key(), ke->modifiers(), text, ke->isAutoRepeat(), ushort(ke->count()));
             }
         }
         return false;
@@ -335,7 +335,7 @@ QValidator::State CurrencyValidator::validate(QString &input, int &pos) const
         else
             return Acceptable;
     }
-    else if (r.matchedLength() == (int) input.length()) {
+    else if (r.matchedLength() == input.length()) {
         return Intermediate;
     }
     else {

@@ -80,9 +80,9 @@ bool Filter::matches(const QVariant &v) const
 
     switch (comparison()) {
     case Is:
-        return isint ? i2 == i1 : isdbl ? d2 == d1 : s2.compare(s1, Qt::CaseInsensitive) == 0;
+        return isint ? i2 == i1 : isdbl ? qFuzzyCompare(d2, d1) : s2.compare(s1, Qt::CaseInsensitive) == 0;
     case IsNot:
-        return isint ? i2 != i1 : isdbl ? d2 != d1 : s2.compare(s1, Qt::CaseInsensitive) != 0;
+        return isint ? i2 != i1 : isdbl ? !qFuzzyCompare(d2, d1) : s2.compare(s1, Qt::CaseInsensitive) != 0;
     case Less:
         return isint ? i2 < i1 : isdbl ? d2 < d1 : false;
     case LessEqual:

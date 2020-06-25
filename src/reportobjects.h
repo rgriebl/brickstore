@@ -103,10 +103,10 @@ class ReportJob : public QObject
 
 public:
     Q_INVOKABLE QObject *addPage();
-    Q_INVOKABLE QObject *getPage(uint i) const;
+    Q_INVOKABLE QObject *getPage(int i) const;
     Q_INVOKABLE void abort();
 
-    uint pageCount() const;
+    int pageCount() const;
     Size paperSize() const;
     bool isAborted() const;
     double scaling() const;
@@ -122,14 +122,14 @@ public:
 
     QPaintDevice *paintDevice() const;
 
-    bool print(uint from, uint to);
+    bool print(int from, int to);
     void dump();
 
 private:
     QList<ReportPage *> m_pages;
     QPaintDevice *m_pd;
-    bool m_aborted;
-    double m_scaling;
+    bool m_aborted = false;
+    double m_scaling = 1.;
 };
 
 class Font : public QObject

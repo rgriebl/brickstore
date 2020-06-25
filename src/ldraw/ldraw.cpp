@@ -61,20 +61,20 @@ LDraw::Element *LDraw::Element::fromByteArray(const QByteArray &line, const QDir
                 case 1: {
                     int color = bal[0].toInt();
                     QMatrix4x4 m(
-                        bal[4].toDouble(),
-                        bal[5].toDouble(),
-                        bal[6].toDouble(),
-                        bal[1].toDouble(),
+                        bal[4].toFloat(),
+                        bal[5].toFloat(),
+                        bal[6].toFloat(),
+                        bal[1].toFloat(),
 
-                        bal[7].toDouble(),
-                        bal[8].toDouble(),
-                        bal[9].toDouble(),
-                        bal[2].toDouble(),
+                        bal[7].toFloat(),
+                        bal[8].toFloat(),
+                        bal[9].toFloat(),
+                        bal[2].toFloat(),
 
-                        bal[10].toDouble(),
-                        bal[11].toDouble(),
-                        bal[12].toDouble(),
-                        bal[3].toDouble(),
+                        bal[10].toFloat(),
+                        bal[11].toFloat(),
+                        bal[12].toFloat(),
+                        bal[3].toFloat(),
 
                         0, 0, 0, 1
                     );
@@ -88,7 +88,7 @@ LDraw::Element *LDraw::Element::fromByteArray(const QByteArray &line, const QDir
                     QVector3D v[2];
 
                     for (int i = 0; i < 2; ++i)
-                        v[i] = QVector3D(bal[3*i + 1].toDouble(), bal[3*i + 2].toDouble(), bal[3*i + 3].toDouble());
+                        v[i] = QVector3D(bal[3*i + 1].toFloat(), bal[3*i + 2].toFloat(), bal[3*i + 3].toFloat());
                     e = LineElement::create(color, v);
                     break;
                 }
@@ -97,7 +97,7 @@ LDraw::Element *LDraw::Element::fromByteArray(const QByteArray &line, const QDir
                     QVector3D v[3];
 
                     for (int i = 0; i < 3; ++i)
-                        v[i] = QVector3D(bal[3*i + 1].toDouble(), bal[3*i + 2].toDouble(), bal[3*i + 3].toDouble());
+                        v[i] = QVector3D(bal[3*i + 1].toFloat(), bal[3*i + 2].toFloat(), bal[3*i + 3].toFloat());
                     e = TriangleElement::create(color, v);
                     break;
                 }
@@ -106,7 +106,7 @@ LDraw::Element *LDraw::Element::fromByteArray(const QByteArray &line, const QDir
                     QVector3D v[4];
 
                     for (int i = 0; i < 4; ++i)
-                        v[i] = QVector3D(bal[3*i + 1].toDouble(), bal[3*i + 2].toDouble(), bal[3*i + 3].toDouble());
+                        v[i] = QVector3D(bal[3*i + 1].toFloat(), bal[3*i + 2].toFloat(), bal[3*i + 3].toFloat());
                     e = QuadElement::create(color, v);
                     break;
                 }
@@ -115,7 +115,7 @@ LDraw::Element *LDraw::Element::fromByteArray(const QByteArray &line, const QDir
                     QVector3D v[4];
 
                     for (int i = 0; i < 4; ++i)
-                        v[i] = QVector3D(bal[3*i + 1].toDouble(), bal[3*i + 2].toDouble(), bal[3*i + 3].toDouble());
+                        v[i] = QVector3D(bal[3*i + 1].toFloat(), bal[3*i + 2].toFloat(), bal[3*i + 3].toFloat());
                     e = CondLineElement::create(color, v);
                     break;
                 }
@@ -127,6 +127,9 @@ LDraw::Element *LDraw::Element::fromByteArray(const QByteArray &line, const QDir
     return e;
 }
 
+
+void LDraw::Element::dump() const
+{ }
 
 
 LDraw::CommentElement::CommentElement(const QByteArray &text)
@@ -140,7 +143,7 @@ LDraw::CommentElement *LDraw::CommentElement::create(const QByteArray &text)
 
 void LDraw::CommentElement::dump() const
 {
-    printf("0 %s\n", m_comment.constData());
+    qDebug() << 0 << m_comment.constData();
 }
 
 
@@ -157,10 +160,9 @@ LDraw::LineElement *LDraw::LineElement::create(int color, const QVector3D *v)
 
 void LDraw::LineElement::dump() const
 {
-    printf("2 %d %.f %.f %.f %.f %.f %.f\n",
-        m_color,
-        m_points[0].x(), m_points[0].y(), m_points[0].z(),
-        m_points[1].x(), m_points[1].y(), m_points[1].z());
+    qDebug() << 2 << m_color
+             << m_points[0].x() << m_points[0].y() << m_points[0].z()
+             << m_points[1].x() << m_points[1].y() << m_points[1].z();
 }
 
 
@@ -177,12 +179,11 @@ LDraw::CondLineElement *LDraw::CondLineElement::create(int color, const QVector3
 
 void LDraw::CondLineElement::dump() const
 {
-    printf("5 %d %.f %.f %.f %.f %.f %.f %.f %.f %.f %.f %.f %.f\n",
-        m_color,
-        m_points[0].x(), m_points[0].y(), m_points[0].z(),
-        m_points[1].x(), m_points[1].y(), m_points[1].z(),
-        m_points[2].x(), m_points[2].y(), m_points[2].z(),
-        m_points[3].x(), m_points[3].y(), m_points[3].z());
+    qDebug() << 5 << m_color
+             << m_points[0].x() << m_points[0].y() << m_points[0].z()
+             << m_points[1].x() << m_points[1].y() << m_points[1].z()
+             << m_points[2].x() << m_points[2].y() << m_points[2].z()
+             << m_points[3].x() << m_points[3].y() << m_points[3].z();
 }
 
 
@@ -199,11 +200,10 @@ LDraw::TriangleElement *LDraw::TriangleElement::create(int color, const QVector3
 
 void LDraw::TriangleElement::dump() const
 {
-    printf("3 %d %.f %.f %.f %.f %.f %.f %.f %.f %.f\n",
-        m_color,
-        m_points[0].x(), m_points[0].y(), m_points[0].z(),
-        m_points[1].x(), m_points[1].y(), m_points[1].z(),
-        m_points[2].x(), m_points[2].y(), m_points[2].z());
+    qDebug() << 3 << m_color
+             << m_points[0].x() << m_points[0].y() << m_points[0].z()
+             << m_points[1].x() << m_points[1].y() << m_points[1].z()
+             << m_points[2].x() << m_points[2].y() << m_points[2].z();
 }
 
 
@@ -236,12 +236,11 @@ LDraw::QuadElement *LDraw::QuadElement::create(int color, const QVector3D *v)
 
 void LDraw::QuadElement::dump() const
 {
-    printf("4 %d %.f %.f %.f %.f %.f %.f %.f %.f %.f %.f %.f %.f\n",
-        m_color,
-        m_points[0].x(), m_points[0].y(), m_points[0].z(),
-        m_points[1].x(), m_points[1].y(), m_points[1].z(),
-        m_points[2].x(), m_points[2].y(), m_points[2].z(),
-        m_points[3].x(), m_points[3].y(), m_points[3].z());
+    qDebug() << 4 << m_color
+             << m_points[0].x() << m_points[0].y() << m_points[0].z()
+             << m_points[1].x() << m_points[1].y() << m_points[1].z()
+             << m_points[2].x() << m_points[2].y() << m_points[2].z()
+             << m_points[3].x() << m_points[3].y() << m_points[3].z();
 }
 
 
@@ -268,19 +267,18 @@ LDraw::PartElement *LDraw::PartElement::create(int color, const QMatrix4x4 &matr
 
 void LDraw::PartElement::dump() const
 {
-    printf("1 %d %.f %.f %.f %.f %.f %.f %.f %.f %.f %.f %.f %.f\n",
-        m_color,
-        m_matrix(3, 0), m_matrix(3, 1), m_matrix(3, 2),
-        m_matrix(0, 0), m_matrix(1, 0), m_matrix(2, 0),
-        m_matrix(0, 1), m_matrix(1, 1), m_matrix(2, 1),
-        m_matrix(0, 2), m_matrix(1, 2), m_matrix(2, 2));
+    qDebug() << 1 << m_color
+             << m_matrix(3, 0) << m_matrix(3, 1) << m_matrix(3, 2)
+             << m_matrix(0, 0) << m_matrix(1, 0) << m_matrix(2, 0)
+             << m_matrix(0, 1) << m_matrix(1, 1) << m_matrix(2, 1)
+             << m_matrix(0, 2) << m_matrix(1, 2) << m_matrix(2, 2);
 
     if (m_part) {
-        printf(">> start of sub-part >>\n");
+        qDebug(">> start of sub-part >>");
         m_part->dump();
-        printf("<< end of sub-part <<\n");
+        qDebug("<< end of sub-part <<\n");
     } else {
-        printf(">> invalid sub-part <<\n");
+        qDebug(">> invalid sub-part <<\n");
     }
 }
 
@@ -558,7 +556,7 @@ LDraw::Core *LDraw::Core::create(const QString &datadir, QString *errstring)
                 s_inst->parse_ldconfig("ldconfig_missing.ldr");
 
                 if (s_inst->create_part_list()) {
-                    ;
+                    qt_noop();
                 }
                 else
                     error = qApp->translate("LDraw", "Can not create part list.");
@@ -638,10 +636,10 @@ bool LDraw::Core::create_part_list()
             char *p = reinterpret_cast<char *>(f.map(0, l));
 
             if (p && l >= 3 && p[0] == '0' && (p[1] == ' ' || p[1] == '\t')) {
-                char *nl = reinterpret_cast<char *>(memchr(p, '\n', l));
+                char *nl = reinterpret_cast<char *>(memchr(p, '\n', size_t(l)));
                 if (nl)
                     l = nl - p;
-                name = QByteArray(p + 2, l - 2).simplified();
+                name = QByteArray(p + 2, int(l - 2)).simplified();
             }
         }
 
@@ -728,7 +726,7 @@ bool LDraw::Core::parse_ldconfig(const char *filename)
                     }
                     else if (sl[idx] == QLatin1String("LUMINANCE")) {
                         int lum = sl[idx+1].toInt();
-                        Q_UNUSED(lum);
+                        Q_UNUSED(lum)
                         idx++;
                     }
                     else if (sl[idx] == QLatin1String("CHROME")) {
@@ -830,6 +828,3 @@ QColor LDraw::Core::color(int id, int baseid) const
         return QColor::fromRgbF(qreal(qrand()) / RAND_MAX, qreal(qrand()) / RAND_MAX, qreal(qrand()) / RAND_MAX);
     }
 }
-
-
-

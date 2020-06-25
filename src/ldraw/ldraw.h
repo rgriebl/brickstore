@@ -78,9 +78,9 @@ public:
 
     inline Type type() const  { return m_type; }
 
-    virtual ~Element() { };
+    virtual ~Element() = default;
 
-    virtual void dump() const { };
+    virtual void dump() const;
 
 protected:
     Element(Type t)

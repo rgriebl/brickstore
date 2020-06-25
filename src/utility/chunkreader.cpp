@@ -84,7 +84,7 @@ bool ChunkReader::startChunk()
     if (!m_chunks.isEmpty()) {
         const chunk_info &parent = m_chunks.top();
 
-        if (m_file->pos() >= qint64(parent.startpos + parent.size))
+        if (m_file->pos() >= (parent.startpos + parent.size))
             return false;
     }
 
@@ -106,7 +106,7 @@ bool ChunkReader::skipChunk()
 
     const chunk_info &ci = m_chunks.top();
 
-    m_stream.skipRawData(ci.size);
+    m_stream.skipRawData(int(ci.size));
     return endChunk();
 }
 
@@ -117,7 +117,7 @@ bool ChunkReader::endChunk()
 
     chunk_info ci = m_chunks.pop();
 
-    quint64 endpos = m_file->pos();
+    qint64 endpos = m_file->pos();
     if (ci.startpos + ci.size != endpos) {
         qWarning("ChunkReader: called endChunk() on a position %llu bytes from the chunk end.", ci.startpos + ci.size - endpos);
         m_file->seek(ci.startpos + ci.size);
@@ -148,7 +148,7 @@ quint32 ChunkReader::chunkVersion() const
     return m_chunks.top().version;
 }
 
-quint64 ChunkReader::chunkSize() const
+qint64 ChunkReader::chunkSize() const
 {
     if (m_chunks.isEmpty())
         return 0;
@@ -214,9 +214,9 @@ bool ChunkWriter::endChunk()
         return false;
 
     chunk_info ci = m_chunks.pop();
-    quint64 endpos = m_file->pos();
-    quint64 len = endpos - ci.startpos;
-    m_file->seek(ci.startpos - sizeof(quint64));
+    qint64 endpos = m_file->pos();
+    qint64 len = endpos - ci.startpos;
+    m_file->seek(ci.startpos - int(sizeof(qint64)));
     m_stream << len;
     m_file->seek(endpos);
 

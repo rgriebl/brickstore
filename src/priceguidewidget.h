@@ -27,7 +27,7 @@ class PriceGuideWidget : public QFrame
     Q_OBJECT
 public:
     PriceGuideWidget(QWidget *parent = nullptr);
-    virtual ~PriceGuideWidget();
+    ~PriceGuideWidget() override;
 
     BrickLink::PriceGuide *priceGuide() const;
 

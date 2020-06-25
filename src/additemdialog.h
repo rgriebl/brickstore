@@ -30,7 +30,7 @@ class AddItemDialog : public QWidget, private Ui::AddItemDialog
     Q_OBJECT
 public:
     AddItemDialog(QWidget *parent = nullptr);
-    virtual ~AddItemDialog();
+    ~AddItemDialog() override;
 
     void attach(Window *window);
 

@@ -86,9 +86,6 @@ ProgressDialog::ProgressDialog(Transfer *trans, QWidget *parent)
     m_override = true;
 }
 
-ProgressDialog::~ProgressDialog()
-= default;
-
 void ProgressDialog::done(int r)
 {
     if (m_job && m_job->isActive())
@@ -103,7 +100,7 @@ void ProgressDialog::done(int r)
 void ProgressDialog::setHeaderText(const QString &str)
 {
     m_header->setText(QString("<b>%1</b>").arg(str));
-    syncRepaint(m_header);;
+    syncRepaint(m_header);
 }
 
 void ProgressDialog::setMessageText(const QString &str)

@@ -140,7 +140,7 @@ int RebuildDatabase::exec()
 
     blti.importInventories(invs);
 
-    if ((invs.size() - invs.count(0)) > (blti.items().count() / 50))             // more than 2% have failed
+    if ((invs.size() - invs.count(nullptr)) > (blti.items().count() / 50))             // more than 2% have failed
         return error("more than 2% of all inventories had errors.");
 
     /////////////////////////////////////////////////////////////////////////////////
@@ -148,10 +148,10 @@ int RebuildDatabase::exec()
 
     blti.exportInventoriesTo(bl);
 
-    extern uint _dwords_for_appears, _qwords_for_consists;
+    extern int _dwords_for_appears, _qwords_for_consists;
 
-    printf("  > appears-in : %11u bytes\n", _dwords_for_appears * 4);
-    printf("  > consists-of: %11u bytes\n", _qwords_for_consists * 8);
+    printf("  > appears-in : %11d bytes\n", _dwords_for_appears * 4);
+    printf("  > consists-of: %11d bytes\n", _qwords_for_consists * 8);
 
     /////////////////////////////////////////////////////////////////////////////////
     printf("\nSTEP 8: Writing the new v1 (BS 2.0) database to disk...\n");

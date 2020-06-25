@@ -120,10 +120,10 @@ QString UpdateDatabase::decompress(const QString &src, const QString &dst)
 
     while (true) {
         if (strm.avail_in == 0) {
-            strm.next_in  = (unsigned char *) buffer_in;
-            strm.avail_in = sf.read(buffer_in, CHUNKSIZE_IN);
+            strm.next_in  = reinterpret_cast<unsigned char *>(buffer_in);
+            strm.avail_in = static_cast<size_t>(sf.read(buffer_in, CHUNKSIZE_IN));
         }
-        strm.next_out  = (unsigned char *) buffer_out;
+        strm.next_out  = reinterpret_cast<unsigned char *>(buffer_out);
         strm.avail_out = CHUNKSIZE_OUT;
 
         int ret = lzmadec_decode(&strm, strm.avail_in == 0);
@@ -132,7 +132,7 @@ QString UpdateDatabase::decompress(const QString &src, const QString &dst)
             break;
         }
 
-        qint64 write_size = CHUNKSIZE_OUT - strm.avail_out;
+        qint64 write_size = qint64(CHUNKSIZE_OUT - strm.avail_out);
         if (write_size != df.write(buffer_out, write_size)) {
             loop_error = tr("Error writing to file %1: %2").arg(dst, df.errorString());
             break;
@@ -141,7 +141,7 @@ QString UpdateDatabase::decompress(const QString &src, const QString &dst)
             lzmadec_end(&strm);
             break;
         }
-        m_progress->setProgress(sf.pos(), sf.size());
+        m_progress->setProgress(int(sf.pos()), int(sf.size()));
     }
 
     delete [] buffer_in;

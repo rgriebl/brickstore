@@ -162,9 +162,6 @@ QTemporaryResourceFileEngine::QTemporaryResourceFileEngine(const QString &file) 
     QTemporaryResourceFileEngine::setFileName(file);
 }
 
-QTemporaryResourceFileEngine::~QTemporaryResourceFileEngine()
-= default;
-
 void QTemporaryResourceFileEngine::setFileName(const QString &file)
 {
 //    Q_D(QTemporaryResourceFileEngine);
@@ -208,7 +205,7 @@ qint64 QTemporaryResourceFileEngine::read(char *data, qint64 len)
         len = d->value.size()-d->offset;
     if(len <= 0)
         return 0;
-    memcpy(data, d->value.constData()+d->offset, len);
+    memcpy(data, d->value.constData()+d->offset, size_t(len));
     d->offset += len;
     return len;
 }
@@ -311,7 +308,7 @@ bool QTemporaryResourceFileEngine::isRelativePath() const
 
 uint QTemporaryResourceFileEngine::ownerId(FileOwner) const
 {
-    static const uint nobodyID = (uint) -2;
+    static const uint nobodyID = uint(-2);
     return nobodyID;
 }
 
@@ -327,15 +324,15 @@ QDateTime QTemporaryResourceFileEngine::fileTime(FileTime) const
 
 bool QTemporaryResourceFileEngine::extension(Extension extension, const ExtensionOption *option, ExtensionReturn *output)
 {
-    Q_UNUSED(extension);
-    Q_UNUSED(option);
-    Q_UNUSED(output);
+    Q_UNUSED(extension)
+    Q_UNUSED(option)
+    Q_UNUSED(output)
     return false;
 }
 
 bool QTemporaryResourceFileEngine::supportsExtension(Extension extension) const
 {
-    Q_UNUSED(extension);
+    Q_UNUSED(extension)
     return false;
 }
 

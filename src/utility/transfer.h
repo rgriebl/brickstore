@@ -27,7 +27,7 @@ class TransferThread;
 class TransferJob : public ThreadPoolJob // not correct anymore, but it keeps the API straight
 {
 public:
-    ~TransferJob();
+    ~TransferJob() override;
 
     static TransferJob *get(const QUrl &url, QIODevice *file = nullptr);
     static TransferJob *getIfNewer(const QUrl &url, const QDateTime &dt, QIODevice *file = nullptr);
@@ -48,7 +48,7 @@ private:
     friend class Transfer;
     friend class TransferThread;
 
-    enum HttpMethod {
+    enum HttpMethod : uint {
         HttpGet = 0,
         HttpPost = 1
     };

@@ -118,13 +118,13 @@ public:
     class Statistics
     {
     public:
-        uint lots() const            { return m_lots; }
-        uint items() const           { return m_items; }
+        int lots() const             { return m_lots; }
+        int items() const            { return m_items; }
         double value() const         { return m_val; }
         double minValue() const      { return m_minval; }
         double weight() const        { return m_weight; }
-        uint errors() const          { return m_errors; }
-        uint incomplete() const      { return m_incomplete; }
+        int errors() const           { return m_errors; }
+        int incomplete() const       { return m_incomplete; }
         QString currencyCode() const { return m_ccode; }
 
     private:
@@ -132,13 +132,13 @@ public:
 
         Statistics(const Document *doc, const ItemList &list);
 
-        uint m_lots;
-        uint m_items;
+        int m_lots;
+        int m_items;
         double m_val;
         double m_minval;
         double m_weight;
-        uint m_errors;
-        uint m_incomplete;
+        int m_errors;
+        int m_incomplete;
         QString m_ccode;
     };
 

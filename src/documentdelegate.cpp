@@ -140,7 +140,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
         } else {
             bg = option.palette.color(cg, QPalette::Highlight);
             if (!(option.state & QStyle::State_HasFocus))
-                bg.setAlphaF(0.7f);
+                bg.setAlphaF(0.7);
             fg = option.palette.color(cg, QPalette::HighlightedText);
         }
     }

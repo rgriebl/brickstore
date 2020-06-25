@@ -112,7 +112,7 @@ QVariant BrickLink::ColorModel::headerData(int section, Qt::Orientation orient, 
 
 bool BrickLink::ColorModel::isFiltered() const
 {
-    return m_itemtype_filter || m_type_filter || m_popularity_filter;
+    return m_itemtype_filter || m_type_filter || !qFuzzyIsNull(m_popularity_filter);
 }
 
 void BrickLink::ColorModel::setFilterItemType(const ItemType *it)
@@ -141,7 +141,7 @@ void BrickLink::ColorModel::unsetFilterType()
 
 void BrickLink::ColorModel::setFilterPopularity(qreal p)
 {
-    if (p == m_popularity_filter)
+    if (qFuzzyCompare(p, m_popularity_filter))
         return;
     m_popularity_filter = p;
     invalidateFilter();
@@ -185,7 +185,7 @@ bool BrickLink::ColorModel::filterAccepts(const void *pointer) const
         return m_itemtype_filter->hasColors() || (color && color->id() == 0);
     else if (m_type_filter)
         return color->type() & m_type_filter;
-    else if (m_popularity_filter)
+    else if (!qFuzzyIsNull(m_popularity_filter))
         return color->popularity() >= m_popularity_filter;
     else
         return true;
@@ -568,7 +568,7 @@ bool BrickLink::ItemModel::lessThan(const void *p1, const void *p2, int column) 
 
 namespace BrickLink {
 // QRegExp is not thread-safe, so we need per-thread copies of the QRegExp object
-QThreadStorage<QRegExp *> regexpCache;
+static QThreadStorage<QRegExp *> regexpCache;
 }
 
 bool BrickLink::ItemModel::filterAccepts(const void *pointer) const

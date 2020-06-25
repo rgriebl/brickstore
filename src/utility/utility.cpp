@@ -208,7 +208,7 @@ quint64 Utility::physicalMemory()
      int sctl[] = { CTL_HW, sctl2 };
      size_t ramsize = sizeof(ram);
 
-    if (sysctl(sctl, 2, &ram, &ramsize, 0, 0) == 0)
+    if (sysctl(sctl, 2, &ram, &ramsize, nullptr, 0) == 0)
         physmem = quint64(ram);
 
 #elif defined(Q_OS_WINDOWS)
@@ -281,7 +281,7 @@ QString Utility::weightToString(double w, QLocale::MeasurementSystem ms, bool op
 
     if (show_unit) {
         s.append(QLatin1Char(' '));
-        s.append(QLatin1String(unit));;
+        s.append(QLatin1String(unit));
     }
     return s;
 }

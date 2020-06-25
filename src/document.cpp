@@ -133,7 +133,8 @@ bool ChangeCmd::mergeWith(const QUndoCommand *other)
         return true;
     }
 #else
-    Q_UNUSED(other);
+    Q_UNUSED(other)
+    Q_UNUSED(m_merge_allowed)
 #endif
     return false;
 }
@@ -197,7 +198,7 @@ bool AddRemoveCmd::mergeWith(const QUndoCommand *other)
     return false;
 }
 
-QString AddRemoveCmd::genDesc(bool is_add, uint count)
+QString AddRemoveCmd::genDesc(bool is_add, int count)
 {
     if (is_add)
         return Document::tr("Added %n item(s)", nullptr, count);
@@ -230,7 +231,7 @@ Document::Statistics::Statistics(const Document *doc, const ItemList &list)
         m_val += (qty * price);
 
         for (int i = 0; i < 3; i++) {
-            if (item->tierQuantity(i) && (item->tierPrice(i) != 0))
+            if (item->tierQuantity(i) && !qFuzzyIsNull(item->tierPrice(i)))
                 price = item->tierPrice(i);
         }
         m_minval += (qty * price * (1.0 - double(item->sale()) / 100.0));
@@ -405,7 +406,7 @@ QList<Document::ItemList> Document::restoreAutosave()
             int count = 0;
 
             QDataStream ds(&f);
-            ds >> magic >> count;;
+            ds >> magic >> count;
 
             if (count > 0 && magic == QByteArray(autosavemagic)) {
                 for (int i = 0; i < count; ++i) {
@@ -470,7 +471,7 @@ int Document::positionOf(Item *item) const
 
 const Document::Item *Document::itemAt(int position) const
 {
-    return (position >= 0 && position < m_items.count()) ? m_items.at(position) : 0;
+    return (position >= 0 && position < m_items.count()) ? m_items.at(position) : nullptr;
 }
 
 bool Document::insertItems(const QVector<int> &positions, const ItemList &items)
@@ -567,7 +568,7 @@ void Document::changeCurrencyDirect(const QString &ccode, qreal crate, double *&
 {
     m_currencycode = ccode;
 
-    if (crate != qreal(1)) {
+    if (!qFuzzyCompare(crate, qreal(1))) {
         bool createPrices = (prices == nullptr);
         if (createPrices)
             prices = new double[5 * m_items.count()];
@@ -705,7 +706,7 @@ Document *Document::fileImportBrickLinkInventory(const BrickLink::Item *item)
             if (!items.isEmpty()) {
                 auto *doc = new Document();
 
-                doc->setBrickLinkItems(items, qty);
+                doc->setBrickLinkItems(items, uint(qty));
                 doc->setTitle(tr("Inventory for %1").arg(item->id()));
                 return doc;
             }
@@ -877,7 +878,7 @@ Document *Document::fileLoadFrom(const QString &name, const char *type, bool imp
         auto *doc = new Document();
 
         if (result.invalidItemCount) {
-            result.invalidItemCount -= BrickLink::core()->applyChangeLogToItems(*result.items);
+            result.invalidItemCount -= uint(BrickLink::core()->applyChangeLogToItems(*result.items));
 
             if (result.invalidItemCount) {
                 if (MessageBox::information(FrameWork::inst(),
@@ -981,7 +982,7 @@ void Document::setBrickLinkItems(const BrickLink::InvItemList &bllist, uint mult
             if (drop_this)
                 continue;
         }
-        item->setQuantity(item->quantity() * multiply);
+        item->setQuantity(item->quantity() * int(multiply));
         items.append(item);
     }
     insertItemsDirect(items, positions);
@@ -990,8 +991,7 @@ void Document::setBrickLinkItems(const BrickLink::InvItemList &bllist, uint mult
 
     for (Item *pos : qAsConst(m_items)) {
         if ((pos->origQuantity() != pos->quantity()) ||
-            (pos->origPrice() != pos->price()))
-        {
+            (!qFuzzyCompare(pos->origPrice(), pos->price()))) {
             pos->setOrigQuantity(pos->quantity());
             pos->setOrigPrice(pos->price());
         }
@@ -1236,8 +1236,7 @@ void Document::resetDifferences(const ItemList &items)
 
     for (Item *pos : items) {
         if ((pos->origQuantity() != pos->quantity()) ||
-            (pos->origPrice() != pos->price()))
-        {
+                (!qFuzzyCompare(pos->origPrice(), pos->price()))) {
             Item item = *pos;
 
             item.setOrigQuantity(item.quantity());
@@ -1396,22 +1395,22 @@ QVariant Document::dataForEditRole(Item *it, Field f) const
 {
     switch (f) {
     case PartNo      : return it->itemId();
-    case Comments    : return it->comments(); break;
-    case Remarks     : return it->remarks(); break;
-    case Reserved    : return it->reserved(); break;
-    case Sale        : return it->sale(); break;
-    case Bulk        : return it->bulkQuantity(); break;
-    case TierQ1      : return it->tierQuantity(0); break;
-    case TierQ2      : return it->tierQuantity(1); break;
-    case TierQ3      : return it->tierQuantity(2); break;
-    case TierP1      : return Currency::toString(it->tierPrice(0) != 0 ? it->tierPrice(0) : it->price(),      currencyCode()); break;
-    case TierP2      : return Currency::toString(it->tierPrice(1) != 0 ? it->tierPrice(1) : it->tierPrice(0), currencyCode()); break;
-    case TierP3      : return Currency::toString(it->tierPrice(2) != 0 ? it->tierPrice(2) : it->tierPrice(1), currencyCode()); break;
-    case Weight      : return Utility::weightToString(it->weight(), Config::inst()->measurementSystem(), false); break;
-    case Quantity    : return it->quantity(); break;
-    case QuantityDiff: return it->quantity() - it->origQuantity(); break;
-    case Price       : return Currency::toString(it->price(), currencyCode()); break;
-    case PriceDiff   : return Currency::toString(it->price() - it->origPrice(), currencyCode()); break;
+    case Comments    : return it->comments();
+    case Remarks     : return it->remarks();
+    case Reserved    : return it->reserved();
+    case Sale        : return it->sale();
+    case Bulk        : return it->bulkQuantity();
+    case TierQ1      : return it->tierQuantity(0);
+    case TierQ2      : return it->tierQuantity(1);
+    case TierQ3      : return it->tierQuantity(2);
+    case TierP1      : return Currency::toString(!qFuzzyIsNull(it->tierPrice(0)) ? it->tierPrice(0) : it->price(),      currencyCode());
+    case TierP2      : return Currency::toString(!qFuzzyIsNull(it->tierPrice(1)) ? it->tierPrice(1) : it->tierPrice(0), currencyCode());
+    case TierP3      : return Currency::toString(!qFuzzyIsNull(it->tierPrice(2)) ? it->tierPrice(2) : it->tierPrice(1), currencyCode());
+    case Weight      : return Utility::weightToString(it->weight(), Config::inst()->measurementSystem(), false);
+    case Quantity    : return it->quantity();
+    case QuantityDiff: return it->quantity() - it->origQuantity();
+    case Price       : return Currency::toString(it->price(), currencyCode());
+    case PriceDiff   : return Currency::toString(it->price() - it->origPrice(), currencyCode());
     default          : return QString();
     }
 }
@@ -1442,7 +1441,7 @@ QString Document::dataForDisplayRole(Item *it, Field f) const
     case TierP2      : return Currency::toString(it->tierPrice(1), currencyCode());
     case TierP3      : return Currency::toString(it->tierPrice(2), currencyCode());
     case Reserved    : return it->reserved();
-    case Weight      : return (it->weight() == 0 ? dash : Utility::weightToString(it->weight(), Config::inst()->measurementSystem(), true, true));
+    case Weight      : return qFuzzyIsNull(it->weight()) ? dash : Utility::weightToString(it->weight(), Config::inst()->measurementSystem(), true, true);
     case YearReleased: return (it->itemYearReleased() == 0) ? dash : QString::number(it->itemYearReleased());
 
     case PriceOrig   : return Currency::toString(it->origPrice(), currencyCode());
@@ -1533,11 +1532,9 @@ QString Document::dataForToolTipRole(Item *it, Field f) const
                 str = str + QLatin1String("<br />") + allcats[i]->name();
             return str;
         }
-        break;
     }
     default: {
         return dataForDisplayRole(it, f);
-        break;
     }
     }
     return QString();
@@ -1811,10 +1808,14 @@ static inline int boolCompare(bool b1, bool b2)
     return (b1 ? 1 : 0) - (b2 ? 1 : 0);
 }
 
+static inline int uintCompare(uint u1, uint u2)
+{
+    return (u1 == u2) ? 0 : ((u1 < u2) ? -1 : 1);
+}
+
 static inline int doubleCompare(double d1, double d2)
 {
-    double d = d1 - d2;
-    return d < 0 ? -1 : (d > 0 ? 1 : 0);
+    return qFuzzyCompare(d1, d2) ? 0 : ((d1 < d2) ? -1 : 1);
 }
 
 int DocumentProxyModel::compare(const Document::Item *i1, const Document::Item *i2, int sortColumn)
@@ -1824,7 +1825,7 @@ int DocumentProxyModel::compare(const Document::Item *i1, const Document::Item *
         if (i1->counterPart() != i2->counterPart())
             return boolCompare(i1->counterPart(), i2->counterPart());
         else if (i1->alternateId() != i2->alternateId())
-            return i1->alternateId() - i2->alternateId();
+            return uintCompare(i1->alternateId(), i2->alternateId());
         else if (i1->alternate() != i2->alternate())
             return boolCompare(i1->alternate(), i2->alternate());
         else
@@ -1843,7 +1844,7 @@ int DocumentProxyModel::compare(const Document::Item *i1, const Document::Item *
     case Document::Comments    : return i1->comments().localeAwareCompare(i2->comments());
     case Document::Remarks     : return i1->remarks().localeAwareCompare(i2->remarks());
 
-    case Document::LotId       : return i1->lotId() - i2->lotId();
+    case Document::LotId       : return uintCompare(i1->lotId(), i2->lotId());
     case Document::Quantity    : return i1->quantity() - i2->quantity();
     case Document::Bulk        : return i1->bulkQuantity() - i2->bulkQuantity();
     case Document::Price       : return doubleCompare(i1->price(), i2->price());

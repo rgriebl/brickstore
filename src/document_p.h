@@ -32,7 +32,7 @@ public:
     void undo() override;
     bool mergeWith(const QUndoCommand *other) override;
 
-    static QString genDesc(bool is_add, uint count);
+    static QString genDesc(bool is_add, int count);
 
 private:
     Document *         m_doc;

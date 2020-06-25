@@ -22,20 +22,25 @@
 #include "headerview.h"
 
 
+class SectionItem : public QListWidgetItem
+{
+public:
+    SectionItem() = default;
+    ~SectionItem() override;
+
+    int logicalIndex() const { return m_lidx; }
+    void setLogicalIndex(int idx) { m_lidx = idx; }
+
+private:
+    int m_lidx = -1;
+};
+
+SectionItem::~SectionItem()
+{ }
+
 class SectionConfigDialog : public QDialog
 {
     Q_OBJECT
-
-    class SectionItem : public QListWidgetItem {
-    public:
-        SectionItem() = default;
-
-        int logicalIndex() const { return m_lidx; }
-        void setLogicalIndex(int idx) { m_lidx = idx; }
-
-    private:
-        int m_lidx = -1;
-    };
 
 public:
     SectionConfigDialog(HeaderView *header)

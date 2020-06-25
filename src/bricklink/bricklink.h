@@ -182,9 +182,9 @@ public:
     const QVector<const Category *> allCategories() const  { return m_categories; }
     bool hasCategory(const Category *cat) const;
     bool hasInventory() const              { return (m_last_inv_update >= 0); }
-    QDateTime inventoryUpdated() const     { QDateTime dt; if (m_last_inv_update >= 0) dt.setTime_t (m_last_inv_update); return dt; }
+    QDateTime inventoryUpdated() const     { QDateTime dt; if (m_last_inv_update >= 0) dt.setTime_t(uint(m_last_inv_update)); return dt; }
     const Color *defaultColor() const      { return m_color; }
-    double weight() const                  { return m_weight; }
+    double weight() const                  { return double(m_weight); }
     int yearReleased() const               { return m_year ? m_year + 1900 : 0; }
 
     ~Item();
@@ -210,7 +210,7 @@ private:
 
 private:
     Item() = default;
-    Q_DISABLE_COPY(Item);
+    Q_DISABLE_COPY(Item)
 
     void setAppearsIn(const AppearsIn &hash) const;
     void setConsistsOf(const InvItemList &items) const;
@@ -310,8 +310,8 @@ public:
 
     const Item *item() const           { return m_item; }
     void setItem(const Item *i)        { /*can be 0*/ m_item = i; }
-    const Category *category() const   { return m_item ? m_item->category() : 0; }
-    const ItemType *itemType() const   { return m_item ? m_item->itemType() : 0; }
+    const Category *category() const   { return m_item ? m_item->category() : nullptr; }
+    const ItemType *itemType() const   { return m_item ? m_item->itemType() : nullptr; }
     const Color *color() const         { return m_color; }
     void setColor(const Color *c)      { m_color = c; }
 
@@ -339,14 +339,14 @@ public:
     void setOrigQuantity(int q)        { m_orig_quantity = q; }
     int bulkQuantity() const           { return m_bulk_quantity; }
     void setBulkQuantity(int q)        { m_bulk_quantity = qMax(1, q); }
-    int tierQuantity(uint i) const     { return m_tier_quantity [i < 3 ? i : 0]; }
-    void setTierQuantity(uint i, int q){ m_tier_quantity [i < 3 ? i : 0] = q; }
+    int tierQuantity(int i) const      { return m_tier_quantity [qBound(0, i, 2)]; }
+    void setTierQuantity(int i, int q) { m_tier_quantity [qBound(0, i, 2)] = q; }
     double price() const               { return m_price; }
     void setPrice(double p)            { m_price = p; }
     double origPrice() const           { return m_orig_price; }
     void setOrigPrice(double p)        { m_orig_price = p; }
-    double tierPrice(uint i) const     { return m_tier_price [i < 3 ? i : 0]; }
-    bool setTierPrice(uint i, double p){ if (p < 0) return false; m_tier_price [i < 3 ? i : 0] = p; return true; }
+    double tierPrice(int i) const      { return m_tier_price [qBound(0, i, 2)]; }
+    bool setTierPrice(int i, double p) { if (p < 0) return false; m_tier_price [qBound(0, i, 2)] = p; return true; }
     int sale() const                   { return m_sale; }
     void setSale(int s)                { m_sale = qMax(-99, qMin(100, s)); }
     double total() const               { return m_price * m_quantity; }
@@ -359,8 +359,8 @@ public:
     bool stockroom() const             { return m_stockroom; }
     void setStockroom(bool s)          { m_stockroom = s; }
 
-    double weight() const              { return m_weight ? m_weight : (m_item ? m_item->weight() * m_quantity : 0); }
-    void setWeight(double w)           { m_weight = (float) w; }
+    double weight() const              { return !qFuzzyIsNull(m_weight) ? m_weight : (m_item ? m_item->weight() * m_quantity : 0); }
+    void setWeight(double w)           { m_weight = w; }
 
     QString reserved() const           { return m_reserved; }
     void setReserved(const QString &r) { m_reserved = r; }
@@ -413,13 +413,13 @@ private:
 
     int              m_quantity;
     int              m_bulk_quantity;
-    int              m_tier_quantity [3];
+    int              m_tier_quantity[3];
     int              m_sale;
 
     double           m_price;
-    double           m_tier_price [3];
+    double           m_tier_price[3];
 
-    float            m_weight;
+    double           m_weight;
     uint             m_lot_id;
 
     double           m_orig_price;
@@ -563,7 +563,10 @@ public:
         ColorMerge
     };
 
-    ChangeLogEntry(const char *data) { m_data = QByteArray::fromRawData(data, qstrlen(data)); }
+    ChangeLogEntry(const char *data)
+    {
+        m_data = QByteArray::fromRawData(data, int(qstrlen(data)));
+    }
     ~ChangeLogEntry() = default;
 
     Type type() const              { return m_data.isEmpty() ? Invalid : Type(m_data.at(0)); }
@@ -589,16 +592,17 @@ public:
     bool importInventories(QVector<const Item *> &items);
     void exportInventoriesTo(Core *);
 
-    const QHash<int, const Color *>    &colors() const     { return m_colors; }
-    const QHash<int, const Category *> &categories() const { return m_categories; }
-    const QHash<int, const ItemType *> &itemTypes() const  { return m_item_types; }
-    const QVector<const Item *>       &items() const       { return m_items; }
+    const QHash<uint, const Color *>    &colors() const     { return m_colors; }
+    const QHash<uint, const Category *> &categories() const { return m_categories; }
+    const QHash<char, const ItemType *> &itemTypes() const  { return m_item_types; }
+    const QVector<const Item *>       &items() const        { return m_items; }
 
 private:
     template <typename T> T *parse(uint count, const char **strs);
 
     template <typename C> bool readDB(const QString &name, C &container, bool skip_header = false);
-    template <typename T> bool readDB_processLine(QHash<int, const T *> &d, uint tokencount, const char **tokens);
+    template <typename T> bool readDB_processLine(QHash<uint, const T *> &d, uint tokencount, const char **tokens);
+    template <typename T> bool readDB_processLine(QHash<char, const T *> &d, uint tokencount, const char **tokens);
     template <typename T> bool readDB_processLine(QVector<const T *> &v, uint tokencount, const char **tokens);
 
     struct btinvlist_dummy { };
@@ -616,9 +620,9 @@ private:
     void calculateColorPopularity();
 
 private:
-    QHash<int, const Color *>    m_colors;
-    QHash<int, const ItemType *> m_item_types;
-    QHash<int, const Category *> m_categories;
+    QHash<uint, const Color *>    m_colors;
+    QHash<char, const ItemType *> m_item_types;
+    QHash<uint, const Category *> m_categories;
     QVector<const Item *>       m_items;
 
     QHash<const Item *, AppearsIn>   m_appears_in_hash;
@@ -785,7 +789,7 @@ class InternalAppearsInModel : public QAbstractTableModel
 {
     Q_OBJECT
 public:
-    ~InternalAppearsInModel();
+    ~InternalAppearsInModel() override;
 
     QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -835,7 +839,7 @@ public:
         None,
         AlwaysShowSelection,
     };
-    Q_DECLARE_FLAGS(Options, Option);
+    Q_DECLARE_FLAGS(Options, Option)
 
     ItemDelegate(QObject *parent = nullptr, Options options = None);
 
@@ -896,10 +900,10 @@ public:
     QString dataPath(const Item *) const;
     QString dataPath(const Item *, const Color *) const;
 
-    const QHash<int, const Color *>    &colors() const;
-    const QHash<int, const Category *> &categories() const;
-    const QHash<int, const ItemType *> &itemTypes() const;
-    const QVector<const Item *>        &items() const;
+    const QHash<uint, const Color *>    &colors() const;
+    const QHash<uint, const Category *> &categories() const;
+    const QHash<char, const ItemType *> &itemTypes() const;
+    const QVector<const Item *>         &items() const;
 
     const QImage noImage(const QSize &s) const;
 
@@ -923,13 +927,12 @@ public:
     qreal itemImageScaleFactor() const;
     void setItemImageScaleFactor(qreal f);
 
-    struct ParseItemListXMLResult {
-        ParseItemListXMLResult()
-            : items(0), invalidItemCount(0)
-        { }
+    struct ParseItemListXMLResult
+    {
+        ParseItemListXMLResult() = default;
 
-        InvItemList *items;
-        uint invalidItemCount;
+        InvItemList *items = nullptr;
+        uint invalidItemCount = 0;
         QString currencyCode;
     };
 
@@ -982,9 +985,9 @@ private:
 
     void setDatabase_ConsistsOf(const QHash<const Item *, InvItemList> &hash);
     void setDatabase_AppearsIn(const QHash<const Item *, AppearsIn> &hash);
-    void setDatabase_Basics(const QHash<int, const Color *> &colors,
-                            const QHash<int, const Category *> &categories,
-                            const QHash<int, const ItemType *> &item_types,
+    void setDatabase_Basics(const QHash<uint, const Color *> &colors,
+                            const QHash<uint, const Category *> &categories,
+                            const QHash<char, const ItemType *> &item_types,
                             const QVector<const Item *> &items);
     void setDatabase_ChangeLog(const QVector<const char *> &changelog);
 
@@ -1005,9 +1008,9 @@ private:
     mutable QHash<QString, QImage>  m_noimages;
     mutable QHash<QString, QImage>  m_colimages;
 
-    QHash<int, const Color *>       m_colors;      // id ->Color *
-    QHash<int, const Category *>    m_categories;  // id ->Category *
-    QHash<int, const ItemType *>    m_item_types;  // id ->ItemType *
+    QHash<uint, const Color *>      m_colors;      // id ->Color *
+    QHash<uint, const Category *>   m_categories;  // id ->Category *
+    QHash<char, const ItemType *>   m_item_types;  // id ->ItemType *
     QVector<const Item *>           m_items;       // sorted array of Item *
     QVector<const char *>           m_changelog;
 

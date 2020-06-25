@@ -577,9 +577,6 @@ LDraw::RenderWidget::RenderWidget(QWidget *parent)
     setCursor(Qt::OpenHandCursor);
 }
 
-LDraw::RenderWidget::~RenderWidget()
-= default;
-
 QSize LDraw::RenderWidget::minimumSizeHint() const
 {
     return { 50, 50 };

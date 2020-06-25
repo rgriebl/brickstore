@@ -67,11 +67,11 @@ QDataStream &operator >> (QDataStream &ds, Color *col);
 enum Time      { PastSix, Current, TimeCount };
 enum Price     { Lowest, Average, WAverage, Highest, PriceCount };
 enum Condition { New, Used, ConditionCount };
-enum SubCondition { None, Complete, Incomplete, MISB, SubConditionCount };
+enum SubCondition  { None, Complete, Incomplete, MISB, SubConditionCount };
 
-enum Status    { Include, Exclude, Extra, Unknown };
+enum Status        { Include, Exclude, Extra, Unknown };
 
-enum UpdateStatus { Ok, Updating, UpdateFailed };
+enum UpdateStatus  { Ok, Updating, UpdateFailed };
 
 enum OrderType { Received, Placed, Any };
 

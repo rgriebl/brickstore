@@ -392,7 +392,7 @@ void ImportBLCart::gotten()
 
                     if (slash >= 0) {   // with color
                         item = BrickLink::core()->item(rx_ids.cap(1).at(0).toLatin1(), rx_ids.cap(2).mid(slash + 1));
-                        col = BrickLink::core()->color(rx_ids.cap(2).leftRef(slash).toInt());
+                        col = BrickLink::core()->color(rx_ids.cap(2).leftRef(slash).toUInt());
                     }
                     else {
                         item = BrickLink::core()->item(rx_ids.cap(1).at(0).toLatin1(), rx_ids.cap(2));
@@ -460,7 +460,7 @@ void ImportBLCart::gotten()
                     if (comment_pos >= 0)
                         comment = color_and_item.mid(comment_pos + QString(item->name()).length() + 1);
 
-                    if (qty && (price != 0)) {
+                    if (qty && !qFuzzyIsNull(price)) {
                         ii = new BrickLink::InvItem(col, item);
                         ii->setCondition(cond);
                         ii->setQuantity(qty);

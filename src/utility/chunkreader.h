@@ -34,14 +34,14 @@ public:
 
     quint32 chunkId() const;
     quint32 chunkVersion() const;
-    quint64 chunkSize() const;
+    qint64 chunkSize() const;
 
 private:
     struct chunk_info {
         quint32 id;
         quint32 version;
-        quint64 startpos;
-        quint64 size;
+        qint64 startpos;
+        qint64 size;
     };
 
     QStack<chunk_info> m_chunks;
@@ -63,7 +63,7 @@ private:
     struct chunk_info {
         quint32 id;
         quint32 version;
-        quint64 startpos;
+        qint64 startpos;
     };
 
     QStack<chunk_info> m_chunks;

@@ -114,7 +114,6 @@ class RenderWidget : public QOpenGLWidget
     Q_OBJECT
 public:
     RenderWidget(QWidget *parent = nullptr);
-    virtual ~RenderWidget();
 
     Part *part() const  { return m_renderer->part(); }
     int color() const   { return m_renderer->color(); }

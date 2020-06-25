@@ -133,9 +133,9 @@ void SettingsDialog::currentCurrencyChanged(const QString &ccode)
     qreal rate = Currency::inst()->rate(ccode);
 
     QString s;
-    if (!rate)
+    if (qFuzzyIsNull(rate))
         s = tr("could not find a cross rate for %1").arg(ccode);
-    else if (rate != qreal(1))
+    else if (!qFuzzyCompare(rate, 1))
         s = tr("1 %1 equals %2 USD").arg(ccode).arg(qreal(1) / rate, 0, 'f', 3);
 
     w_currency_status->setText(s);
@@ -259,7 +259,7 @@ void SettingsDialog::load()
 
     const BrickLink::ItemType *itype;
 
-    itype = BrickLink::core()->itemType(Config::inst()->value("/Defaults/ImportInventory/ItemType", 'S').toInt());
+    itype = BrickLink::core()->itemType(Config::inst()->value("/Defaults/ImportInventory/ItemType", 'S').toChar().toLatin1());
     auto *importmodel = new BrickLink::ItemTypeModel(this);
     importmodel->setFilterWithoutInventory(true);
     w_def_import_type->setModel(importmodel);
@@ -267,7 +267,7 @@ void SettingsDialog::load()
     int importdef = importmodel->index(itype ? itype : BrickLink::core()->itemType('S')).row();
     w_def_import_type->setCurrentIndex(importdef);
 
-    itype = BrickLink::core()->itemType(Config::inst()->value("/Defaults/AddItems/ItemType", 'P').toInt());
+    itype = BrickLink::core()->itemType(Config::inst()->value("/Defaults/AddItems/ItemType", 'P').toChar().toLatin1());
     auto *addmodel = new BrickLink::ItemTypeModel(this);
     w_def_add_type->setModel(addmodel);
 

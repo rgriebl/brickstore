@@ -45,6 +45,7 @@ SOURCES += \
   picturewidget.cpp \
   priceguidewidget.cpp \
   rebuilddatabase.cpp \
+  ref.cpp \
   report.cpp \
   reportobjects.cpp \
   selectcolor.cpp \

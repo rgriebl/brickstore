@@ -11,30 +11,11 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#pragma once
-
-#include <QtCore/qbasicatomic.h>
-
-#include "q3cache.h"
+#include "ref.h"
 
 
-class Ref
+Ref::~Ref()
 {
-public:
-    inline Ref()                 { ref = 0; }
-    inline void addRef() const   { ref.ref(); }
-    inline void release() const  { ref.deref(); }
-    inline int refCount() const  { return ref; }
-
-    virtual ~Ref();
-
-private:
-    mutable QBasicAtomicInt ref;
-};
-
-// tell Qt that Refs are shared and can't simply be deleted
-// (QCache will use that function to determine what can really be purged from the cache)
-
-template<> inline bool q3IsDetached<Ref>(Ref &r) { return r.refCount() == 0; }
-
-
+    if (ref != 0)
+        qWarning("Deleting %p, although refCount=%d", static_cast<void *>(this), int(ref));
+}

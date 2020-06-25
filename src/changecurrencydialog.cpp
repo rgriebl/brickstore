@@ -76,7 +76,7 @@ void ChangeCurrencyDialog::currencyChanged(const QString &to)
     qreal rateFrom = Currency::inst()->rate(m_from);
     qreal rateTo = Currency::inst()->rate(to);
     m_rate = 1;
-    if (rateFrom && rateTo)
+    if (!qFuzzyIsNull(rateFrom) && !qFuzzyIsNull(rateTo))
         m_rate = rateTo / rateFrom;
 
     w_labelEcb->setText(m_labelEcbFormat.arg(to).arg(m_rate, 0, 'f', 3));

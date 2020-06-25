@@ -143,7 +143,7 @@ void Report::print(QPaintDevice *pd, const Document *doc, const Document::ItemLi
     }
 
     QScriptValue itemList = d->m_engine->newArray();
-    int count = 0;
+    uint count = 0;
 
     for (const Document::Item *item : items) {
         QScriptValue iVal = d->m_engine->newObject();
@@ -163,7 +163,7 @@ void Report::print(QPaintDevice *pd, const Document *doc, const Document::ItemLi
         iVal.setProperty("quantity", item->quantity());
 
         QScriptValue colorVal = d->m_engine->newObject();
-        colorVal.setProperty("id", item->color() ? (int) item->color()->id() : -1);
+        colorVal.setProperty("id", item->color() ? int(item->color()->id()) : -1);
         colorVal.setProperty("name", (item->color() ? item->color()->name() : QString()));
         colorVal.setProperty("rgb", qScriptValueFromValue(d->m_engine, item->color() ? item->color()->color() : QColor()));
         colorVal.setProperty("picture", qScriptValueFromValue(d->m_engine, BrickLink::core()->colorImage(item->color(), 20, 20)));
@@ -194,8 +194,8 @@ void Report::print(QPaintDevice *pd, const Document *doc, const Document::ItemLi
         QScriptValue tqVal = d->m_engine->newArray(3);
         QScriptValue tpVal = d->m_engine->newArray(3);
         for (int i = 0; i < 3; i++) {
-            tqVal.setProperty(i, item->tierQuantity(i));
-            tpVal.setProperty(i, item->tierPrice(i));
+            tqVal.setProperty(uint(i), item->tierQuantity(i));
+            tpVal.setProperty(uint(i), item->tierPrice(i));
         }
         iVal.setProperty("tierQuantity", tqVal);
         iVal.setProperty("tierPrice", tpVal);

@@ -107,7 +107,7 @@ template <> Category *TextImport::parse<Category> (uint count, const char **strs
         return nullptr;
 
     auto *cat = new Category();
-    cat->m_id   = strtol(strs[0], nullptr, 10);
+    cat->m_id   = uint(strtoul(strs[0], nullptr, 10));
     cat->m_name = decodeEntities(strs[1]);
 
     return cat;
@@ -119,11 +119,11 @@ template <> Color *TextImport::parse<Color> (uint count, const char **strs)
         return nullptr;
 
     auto *col = new Color();
-    col->m_id          = strtol(strs[0], nullptr, 10);
-    col->m_name        = strs[1];
-    col->m_ldraw_id    = -1;
-    col->m_color       = QColor(QString('#') + strs[2]);
-    col->m_type        = nullptr;
+    col->m_id       = uint(strtoul(strs[0], nullptr, 10));
+    col->m_name     = strs[1];
+    col->m_ldraw_id = -1;
+    col->m_color    = QColor(QString('#') + strs[2]);
+    col->m_type     = nullptr;
 
     if (!strcmp(strs[3], "Transparent"))  col->m_type |= Color::Transparent;
     if (!strcmp(strs[3], "Glitter"))  col->m_type |= Color::Glitter;
@@ -146,8 +146,8 @@ template <> Color *TextImport::parse<Color> (uint count, const char **strs)
         col->m_popularity = -col->m_popularity;
     }
     if (count >= 10) {
-        col->m_year_from = strtol(strs[8], nullptr, 10);
-        col->m_year_to   = strtol(strs[9], nullptr, 10);
+        col->m_year_from = quint16(strtoul(strs[8], nullptr, 10));
+        col->m_year_to   = quint16(strtoul(strs[9], nullptr, 10));
     }
     return col;
 }
@@ -182,7 +182,7 @@ template <> Item *TextImport::parse<Item> (uint count, const char **strs)
     item->m_item_type = m_current_item_type;
     item->m_categories.clear();
 
-    const Category *maincat = m_categories.value(strtol(strs[0], nullptr, 10));
+    const Category *maincat = m_categories.value(uint(strtoul(strs[0], nullptr, 10)));
     const QString allcats = decodeEntities(strs[1]);
     QVector<QStringRef> auxcats = allcats.splitRef(QLatin1String(" / "));
 
@@ -216,7 +216,7 @@ template <> Item *TextImport::parse<Item> (uint count, const char **strs)
     uint parsedfields = 4;
 
     if ((parsedfields < count) && (item->m_item_type->hasYearReleased())) {
-        int y = strtol(strs[parsedfields++], nullptr, 10) - 1900;
+        uint y = uint(strtoul(strs[parsedfields++], nullptr, 10)) - 1900;
         item->m_year = ((y > 0) && (y < 255)) ? y : 0; // we only have 8 bits for the year
         parsedfields++;
     } else {
@@ -231,7 +231,7 @@ template <> Item *TextImport::parse<Item> (uint count, const char **strs)
     }
 
     if (parsedfields < count)
-        item->m_color = m_colors.value(strtol(strs[parsedfields++], nullptr, 10));
+        item->m_color = m_colors.value(uint(strtoul(strs[parsedfields++], nullptr, 10)));
     else
         item->m_color = nullptr;
 
@@ -274,7 +274,7 @@ bool BrickLink::TextImport::import(const QString &path)
     Item **itp = const_cast<Item **>(m_items.constData());
 
     for (int i = 0; i < m_items.count(); itp++, i++) {
-        (*itp)->m_index = i;
+        (*itp)->m_index = uint(i);
 
         auto *itt = const_cast<ItemType *>((*itp)->m_item_type);
 
@@ -299,9 +299,18 @@ bool BrickLink::TextImport::import(const QString &path)
     return ok;
 }
 
-template <typename T> bool BrickLink::TextImport::readDB_processLine(QHash<int, const T *> &h, uint tokencount, const char **tokens)
+template <typename T> bool BrickLink::TextImport::readDB_processLine(QHash<uint, const T *> &h, uint tokencount, const char **tokens)
 {
-    T *t = parse<T> (tokencount, (const char **) tokens);
+    T *t = parse<T> (tokencount, tokens);
+
+    if (t)
+        h.insert(t->id(), t);
+    return t;
+}
+
+template <typename T> bool BrickLink::TextImport::readDB_processLine(QHash<char, const T *> &h, uint tokencount, const char **tokens)
+{
+    T *t = parse<T> (tokencount, tokens);
 
     if (t)
         h.insert(t->id(), t);
@@ -310,7 +319,7 @@ template <typename T> bool BrickLink::TextImport::readDB_processLine(QHash<int, 
 
 template <typename T> bool BrickLink::TextImport::readDB_processLine(QVector<const T *> &v, uint tokencount, const char **tokens)
 {
-    T *t = parse<T> (tokencount, (const char **) tokens);
+    T *t = parse<T> (tokencount, tokens);
 
     if (t)
         v.append(t);
@@ -391,12 +400,12 @@ template <typename C> bool BrickLink::TextImport::readDB(const QString &name, C 
 
     FILE *f = fopen(name.toLatin1(), "r");
     if (f) {
-        char line [1000];
+        char line[1000];
         int lineno = 1;
 
         if (skip_header) {
             char *gcc_supress_warning = fgets(line, 1000, f);
-            Q_UNUSED(gcc_supress_warning);
+            Q_UNUSED(gcc_supress_warning)
         }
 
         while (!feof(f)) {
@@ -408,27 +417,27 @@ template <typename C> bool BrickLink::TextImport::readDB(const QString &name, C 
             if (!line [0] || line [0] == '#' || line [0] == '\r' || line [0] == '\n')
                 continue;
 
-            char *tokens [20];
+            const char *tokens[20];
             uint tokencount = 0;
 
-            for (char *pos = line; tokencount < 20;) {
-                char *newpos = pos;
+            for (const char *pos = line; tokencount < 20;) {
+                const char *newpos = pos;
 
                 while (*newpos && (*newpos != '\t') && (*newpos != '\r') && (*newpos != '\n'))
                     newpos++;
 
                 bool stop = (*newpos != '\t');
 
-                tokens [tokencount++] = pos;
+                tokens[tokencount++] = pos;
 
-                *newpos = 0;
+                line[newpos - line] = 0;
                 pos = newpos + 1;
 
                 if (stop)
                     break;
             }
 
-            if (!readDB_processLine(container, tokencount, (const char **) tokens)) {
+            if (!readDB_processLine(container, tokencount, tokens)) {
                 qWarning().nospace() << "ERROR: parse error in file \"" << name << "\", line " << lineno << ": \"" << line << "\"";
                 return false;
             }
@@ -523,7 +532,7 @@ void BrickLink::TextImport::calculateColorPopularity()
     for (const auto &col : qAsConst(m_colors)) {
         qreal &pop = const_cast<Color *>(col)->m_popularity;
 
-        if (maxpop)
+        if (!qFuzzyIsNull(maxpop))
             pop /= maxpop;
         else
             pop = 0;

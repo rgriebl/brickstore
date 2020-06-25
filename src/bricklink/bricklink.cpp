@@ -148,8 +148,6 @@ QUrl BrickLink::Core::url(UrlList u, const void *opt, const void *opt2)
         }
         break;
     }
-    default:
-        break;
     }
     return url;
 }
@@ -221,7 +219,7 @@ const QImage BrickLink::Core::colorImage(const Color *col, int w, int h) const
         QBrush brush;
 
         if (col->isGlitter()) {
-            brush = QBrush(Utility::contrastColor(c, 0.25f), Qt::Dense6Pattern);
+            brush = QBrush(Utility::contrastColor(c, 0.25), Qt::Dense6Pattern);
         }
         else if (col->isSpeckle()) {
             // hack for speckled colors
@@ -247,7 +245,7 @@ const QImage BrickLink::Core::colorImage(const Color *col, int w, int h) const
             }
             if (c.isValid()) {
                 if (!c2.isValid()) // fake
-                    c2 = Utility::contrastColor(c, 0.20f);
+                    c2 = Utility::contrastColor(c, 0.2);
                 brush = QBrush(c2, Qt::Dense7Pattern);
             }
         }
@@ -417,7 +415,7 @@ BrickLink::Core::Core(const QString &datadir)
     //quint64 cachemem = 1024*1024; // DEBUG
 
     m_pg_cache.setMaxCost(500);          // each priceguide has a cost of 1
-    m_pic_cache.setMaxCost(cachemem);    // each pic has a cost of (w*h*d/8 + 1024)
+    m_pic_cache.setMaxCost(int(cachemem));    // each pic has a cost of (w*h*d/8 + 1024)
 
     connect(&m_pic_diskload, &ThreadPool::finished, this, &Core::pictureLoaded);
 }
@@ -477,17 +475,17 @@ bool BrickLink::Core::onlineStatus() const
 }
 
 
-const QHash<int, const BrickLink::Color *> &BrickLink::Core::colors() const
+const QHash<uint, const BrickLink::Color *> &BrickLink::Core::colors() const
 {
     return m_colors;
 }
 
-const QHash<int, const BrickLink::Category *> &BrickLink::Core::categories() const
+const QHash<uint, const BrickLink::Category *> &BrickLink::Core::categories() const
 {
     return m_categories;
 }
 
-const QHash<int, const BrickLink::ItemType *> &BrickLink::Core::itemTypes() const
+const QHash<char, const BrickLink::ItemType *> &BrickLink::Core::itemTypes() const
 {
     return m_item_types;
 }
@@ -610,7 +608,7 @@ bool BrickLink::Core::readDatabase(QString *infoText, const QString &fname)
         const char *data = reinterpret_cast<char *>(f.map(0, f.size()));
 
         if (data) {
-            QByteArray ba = QByteArray::fromRawData(data, f.size());
+            QByteArray ba = QByteArray::fromRawData(data, int(f.size()));
 
             if (ba.size() >= 4 && data[0] == 'B' && data[1] == 'S' && data[2] == 'D' && data[3] == 'B') {
                 QBuffer buf(&ba);
@@ -663,7 +661,7 @@ bool BrickLink::Core::readDatabase(QString *infoText, const QString &fname)
                                 quint32 itc = 0;
                                 ds >> itc;
 
-                                m_items.reserve(itc);
+                                m_items.reserve(int(itc));
                                 for (quint32 i = itc; i; i--) {
                                     Item *item = new Item();
                                     ds >> item;
@@ -674,14 +672,12 @@ bool BrickLink::Core::readDatabase(QString *infoText, const QString &fname)
                             case ChunkId('C','H','G','L') | 1ULL << 32: {
                                 quint32 clc = 0;
                                 ds >> clc;
-                                int xxx= 0;
 
-                                m_changelog.reserve(clc);
+                                m_changelog.reserve(int(clc));
                                 for (quint32 i = clc; i; i--) {
                                     char *entry;
                                     ds >> entry;
                                     m_changelog.append(entry);
-                                    xxx += (4+qstrlen(entry) + 1);
                                 }
                                 break;
                             }
@@ -709,10 +705,10 @@ out:
     if (result) {
         delete sw;
 
-        qDebug("Color: %8u  (%11d bytes)", m_colors.count(),     int(m_colors.count()     * (sizeof(Color)    + 20)));
-        qDebug("Types: %8u  (%11d bytes)", m_item_types.count(), int(m_item_types.count() * (sizeof(ItemType) + 20)));
-        qDebug("Cats : %8u  (%11d bytes)", m_categories.count(), int(m_categories.count() * (sizeof(Category) + 20)));
-        qDebug("Items: %8u  (%11d bytes)", m_items.count(),      int(m_items.count()      * (sizeof(Item)     + 20)));
+        qDebug("Color: %8u  (%11d bytes)", m_colors.count(),     m_colors.count()     * int(sizeof(Color)    + 20));
+        qDebug("Types: %8u  (%11d bytes)", m_item_types.count(), m_item_types.count() * int(sizeof(ItemType) + 20));
+        qDebug("Cats : %8u  (%11d bytes)", m_categories.count(), m_categories.count() * int(sizeof(Category) + 20));
+        qDebug("Items: %8u  (%11d bytes)", m_items.count(),      m_items.count()      * int(sizeof(Item)     + 20));
         if (!info.isEmpty())
             qDebug() << "Info :" << info;
     }
@@ -852,7 +848,7 @@ BrickLink::Core::ParseItemListXMLResult BrickLink::Core::parseItemListXML(const 
                 else if (tag == QLatin1String("ALTERNATE"))
                      ii->setAlternate((val == QLatin1String("Y")));
                 else if (tag == QLatin1String("MATCHID"))
-                     ii->setAlternateId(c.toInt(val));
+                     ii->setAlternateId(c.toUInt(val));
                 else if (tag == QLatin1String("ITEMNAME"))    // BrickStore extension for Peeron inventories
                     itemname = val;
                 else if (tag == QLatin1String("COLORNAME"))   // BrickStore extension for Peeron inventories
@@ -960,7 +956,7 @@ BrickLink::Core::ParseItemListXMLResult BrickLink::Core::parseItemListXML(const 
                 ok = false;
             }
 
-            ii->setColor(color(colorid.toInt()));
+            ii->setColor(color(colorid.toUInt()));
 
             if (!ii->color()) {
                 qWarning() << "failed: invalid color (" << colorid << ")";
@@ -1035,7 +1031,7 @@ QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint
             continue;
 
         if (hint == XMLHint_MassUpdate) {
-            bool diffs = ((ii->quantity() != ii->origQuantity()) || (ii->price() != ii->origPrice()));
+            bool diffs = ((ii->quantity() != ii->origQuantity()) || !qFuzzyCompare(ii->price(), ii->origPrice()));
 
             if (!ii->lotId() || !diffs)
                 continue;
@@ -1052,7 +1048,7 @@ QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint
             int qdiff = ii->quantity() - ii->origQuantity();
             double pdiff = ii->price() - ii->origPrice();
 
-            if (pdiff != 0)
+            if (!qFuzzyIsNull(pdiff))
                 item.appendChild(doc.createElement(QLatin1String("PRICE")).appendChild(doc.createTextNode(c.toString(ii->price()))).parentNode());
             if (qdiff && (ii->quantity() > 0))
                 item.appendChild(doc.createElement(QLatin1String("QTY")).appendChild(doc.createTextNode(QLatin1String(qdiff > 0 ? "+" : "") + c.toString(qdiff))).parentNode());
@@ -1080,8 +1076,7 @@ QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint
                     case Unknown: st = "?"; break;
                     case Extra  : st = "E"; break;
                     case Exclude: st = "X"; break;
-                    case Include:
-                    default     : st = "I"; break;
+                    case Include: st = "I"; break;
                 }
                 item.appendChild(doc.createElement(QLatin1String("Status")).appendChild(doc.createTextNode(QLatin1String(st))).parentNode());
             }
@@ -1129,7 +1124,7 @@ QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint
 
             if (ii->m_weight > 0)
                 item.appendChild(doc.createElement(QLatin1String("TotalWeight")).appendChild(doc.createTextNode(c.toString(ii->weight(), 'f', 4))).parentNode());
-            if (ii->origPrice() != ii->price())
+            if (!qFuzzyCompare(ii->origPrice(), ii->price()))
                 item.appendChild(doc.createElement(QLatin1String("OrigPrice")).appendChild(doc.createTextNode(c.toString(ii->origPrice()))).parentNode());
             if (ii->origQuantity() != ii->quantity())
                 item.appendChild(doc.createElement(QLatin1String("OrigQty")).appendChild(doc.createTextNode(c.toString(ii->origQuantity()))).parentNode());
@@ -1190,7 +1185,7 @@ QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint
 
             if (ii->quantity())
                 item.appendChild(doc.createElement(QLatin1String("MINQTY")).appendChild(doc.createTextNode(c.toString(ii->quantity()))).parentNode());
-            if (ii->price() != 0)
+            if (!qFuzzyIsNull(ii->price()))
                 item.appendChild(doc.createElement(QLatin1String("MAXPRICE")).appendChild(doc.createTextNode(c.toString(ii->price()))).parentNode());
             if (!ii->remarks().isEmpty())
                 item.appendChild(doc.createElement(QLatin1String("REMARKS")).appendChild(doc.createTextNode(ii->remarks())).parentNode());
@@ -1396,9 +1391,9 @@ void BrickLink::Core::setDatabase_AppearsIn(const QHash<const Item *, AppearsIn>
         it.key()->setAppearsIn(it.value());
 }
 
-void BrickLink::Core::setDatabase_Basics(const QHash<int, const Color *> &colors,
-        const QHash<int, const Category *> &categories,
-        const QHash<int, const ItemType *> &item_types,
+void BrickLink::Core::setDatabase_Basics(const QHash<uint, const Color *> &colors,
+        const QHash<uint, const Category *> &categories,
+        const QHash<char, const ItemType *> &item_types,
         const QVector<const Item *> &items)
 {
     QMutexLocker lock(&m_corelock);
@@ -1450,33 +1445,31 @@ bool BrickLink::Core::writeDatabase(const QString &filename, DatabaseVersion ver
             }
 
             ok &= cw.startChunk(ChunkId('C','O','L',' '), version);
-            ds << m_colors.count();
+            ds << quint32(m_colors.count());
             for (const Color *col : m_colors)
                 ds << col;
             ok &= cw.endChunk();
 
             ok &= cw.startChunk(ChunkId('C','A','T',' '), version);
-            ds << m_categories.count();
+            ds << quint32(m_categories.count());
             for (const Category *cat : m_categories)
                 ds << cat;
             ok &= cw.endChunk();
 
             ok &= cw.startChunk(ChunkId('T','Y','P','E'), version);
-            ds << m_item_types.count();
+            ds << quint32(m_item_types.count());
             for (const ItemType *itt : m_item_types)
                 ds << itt;
             ok &= cw.endChunk();
 
             ok &= cw.startChunk(ChunkId('I','T','E','M'), version);
-            quint32 itc = m_items.count();
-            ds << itc;
+            ds << quint32(m_items.count());
             for (const Item *item : m_items)
                 ds << item;
             ok &= cw.endChunk();
 
             ok &= cw.startChunk(ChunkId('C','H','G','L'), version);
-            quint32 clc = m_changelog.count();
-            ds << clc;
+            ds << quint32(m_changelog.count());
             for (const char *cl : m_changelog)
                 ds << cl;
             ok &= cw.endChunk();
@@ -1537,7 +1530,7 @@ int BrickLink::Core::applyChangeLogToItems(InvItemList &bllist)
                             colorid = QLatin1String(cl.to(0));
 
                             bool ok;
-                            int cid = colorid.toInt(&ok);
+                            uint cid = colorid.toUInt(&ok);
                             if (ok)
                                 fixed_color = BrickLink::core()->color(cid);
                         }

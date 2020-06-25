@@ -102,9 +102,6 @@ ThreadPoolJob::ThreadPoolJob()
     : m_threadpool(nullptr), m_user_ptr(nullptr), m_user_tag(0), m_status(Inactive)
 { }
 
-ThreadPoolJob::~ThreadPoolJob()
-= default;
-
 bool ThreadPoolJob::abort()
 {
     if (!threadPool())

@@ -348,7 +348,7 @@ void Workspace::paintEvent(QPaintEvent *)
 {
     if (!windowCount() && m_backgroundTextDocument) {
         QPainter p(this);
-        int h = m_backgroundTextDocument->size().height();
+        int h = int(m_backgroundTextDocument->size().height());
         QRectF r = rect();
         p.translate(0, (r.height() - h) / 2);
         r.setHeight(h);

@@ -43,9 +43,6 @@ struct cell : public QRect {
         Empty
     };
 
-    cell() : QRect()
-    { }
-
     cell(cell_type t, int x, int y, int w, int h, int tfl, const QString &str, bool flag = false)
             : QRect(x, y, w, h), m_type(t), m_text_flags(tfl), m_text(str), m_flag(flag)
     { }
@@ -62,13 +59,12 @@ struct cell : public QRect {
 
 } // namespace
 
-class PriceGuideWidgetPrivate {
+class PriceGuideWidgetPrivate
+{
 public:
     PriceGuideWidgetPrivate(PriceGuideWidget *parent)
         : m_widget(parent)
     { }
-
-    virtual ~PriceGuideWidgetPrivate() = default;
 
     QList<cell>::const_iterator cellAtPos(const QPoint &fpos)
     {
@@ -85,12 +81,12 @@ private:
 
     PriceGuideWidget *        m_widget;
     BrickLink::PriceGuide *   m_pg;
-    PriceGuideWidget::Layout  m_layout;
     QList<cell>               m_cells;
-    bool                      m_connected;
-    bool                      m_on_price;
     QString                   m_ccode;
     qreal                     m_crate;
+    PriceGuideWidget::Layout  m_layout;
+    bool                      m_connected;
+    bool                      m_on_price;
 
     QString m_str_qty;
     QString m_str_cond [BrickLink::ConditionCount];

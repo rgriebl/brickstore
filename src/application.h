@@ -25,7 +25,7 @@ class Application : public QApplication
     Q_OBJECT
 public:
     Application(bool rebuild_db_only, bool skip_download, int &argc, char **argv);
-    virtual ~Application();
+    ~Application() override;
 
     static Application *inst() { return s_inst; }
 

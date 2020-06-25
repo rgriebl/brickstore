@@ -29,7 +29,6 @@ class ProgressDialog : public QDialog
     Q_OBJECT
 public:
     ProgressDialog(Transfer *trans, QWidget *parent = nullptr);
-    virtual ~ProgressDialog();
 
     void setAutoClose(bool ac);
     void setHeaderText(const QString &str);

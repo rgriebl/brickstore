@@ -144,9 +144,9 @@ QDateTime Config::lastDatabaseUpdate() const
 {
     QDateTime dt;
 
-    time_t tt = value("BrickLink/LastDBUpdate", 0).toInt();
+    uint tt = value("BrickLink/LastDBUpdate", 0).toUInt();
     if (tt)
-        dt.setTime_t (tt);
+        dt.setTime_t(tt);
     return dt;
 }
 
@@ -397,12 +397,12 @@ QList<Config::Translation> Config::translations() const
 
 int Config::fontSizePercent() const
 {
-    return qreal(value("Interface/FontSizePercent", 100).toInt());
+    return value("Interface/FontSizePercent", 100).toInt();
 }
 
 int Config::itemImageSizePercent() const
 {
-    return qreal(value("Interface/ItemImageSizePercent", 100).toInt());
+    return value("Interface/ItemImageSizePercent", 100).toInt();
 }
 
 QSize Config::iconSize() const

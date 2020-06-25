@@ -186,35 +186,6 @@ private:
 };
 
 
-class WindowBar : public QWidget
-{
-    Q_OBJECT
-public:
-    WindowBar(QWidget *parent);
-
-    void addWidget(QWidget *w);
-    void removeWidget(QWidget *w);
-
-    void setWidgetVisible(QWidget *w, bool show);
-    bool isWidgetVisible(QWidget *w) const;
-
-protected:
-    void paintEvent(QPaintEvent *e) override;
-
-private:
-    Q_DISABLE_COPY(WindowBar)
-
-    QList<QWidget *> widgets;
-};
-
-
-/////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////
-
-
-
-
 Window::Window(Document *doc, QWidget *parent)
     : QWidget(parent)
 {
@@ -345,9 +316,6 @@ void Window::updateCaption()
     setWindowModified(m_doc->isModified());
 }
 
-Window::~Window()
-= default;
-
 bool Window::isSimpleMode() const
 {
     return m_simple_mode;
@@ -454,12 +422,12 @@ QString Window::filterToolTip() const
     return m_view->filterToolTip();
 }
 
-uint Window::addItems(const BrickLink::InvItemList &items, int multiply, uint globalmergeflags, bool /*dont_change_sorting*/)
+int Window::addItems(const BrickLink::InvItemList &items, int multiply, uint globalmergeflags, bool /*dont_change_sorting*/)
 {
     bool waitcursor = (items.count() > 100);
     bool was_empty = (w_list->model()->rowCount() == 0);
-    uint dropped = 0;
-    int merge_action_yes_no_to_all = MergeAction_Ask;
+    int dropped = 0;
+    uint merge_action_yes_no_to_all = MergeAction_Ask;
     int mergecount = 0, addcount = 0;
 
     if (items.count() > 1)
@@ -561,12 +529,12 @@ void Window::addItem(BrickLink::InvItem *item, uint mergeflags)
 }
 
 
-void Window::mergeItems(const Document::ItemList &items, int globalmergeflags)
+void Window::mergeItems(const Document::ItemList &items, uint globalmergeflags)
 {
     if ((items.count() < 2) || (globalmergeflags & MergeAction_Mask) == MergeAction_None)
         return;
 
-    int merge_action_yes_no_to_all = MergeAction_Ask;
+    uint merge_action_yes_no_to_all = MergeAction_Ask;
     uint mergecount = 0;
 
     m_doc->beginMacro();
@@ -845,7 +813,7 @@ void Window::on_edit_price_round_triggered()
     foreach(Document::Item *pos, selection()) {
         double p = ((pos->price() + double(0.005)) / 10) * 10;
 
-        if (p != pos->price()) {
+        if (!qFuzzyCompare(p, pos->price())) {
             Document::Item item = *pos;
 
             item.setPrice(p);
@@ -895,7 +863,7 @@ void Window::on_edit_price_to_priceguide_triggered()
 
                 p *= Currency::inst()->rate(m_doc->currencyCode());
 
-                if (p != item->price()) {
+                if (!qFuzzyCompare(p, item->price())) {
                     Document::Item newitem = *item;
                     newitem.setPrice(p);
                     m_doc->changeItem(item, newitem);
@@ -926,7 +894,7 @@ void Window::priceGuideUpdated(BrickLink::PriceGuide *pg)
 
             p *= Currency::inst()->rate(m_doc->currencyCode());
 
-            if (p != item->price()) {
+            if (!qFuzzyCompare(p, item->price())) {
                 Document::Item newitem = *item;
                 newitem.setPrice(p);
                 m_doc->changeItem(item, newitem);
@@ -974,17 +942,21 @@ void Window::on_edit_price_inc_dec_triggered()
 
             double p = item.price();
 
-            if (percent != 0)     p *= factor;
-            else if (fixed != 0)  p += fixed;
+            if (!qFuzzyIsNull(percent))
+                p *= factor;
+            else if (!qFuzzyIsNull(fixed))
+                p += fixed;
 
             item.setPrice(p);
 
             if (tiers) {
-                for (uint i = 0; i < 3; i++) {
+                for (int i = 0; i < 3; i++) {
                     p = item.tierPrice(i);
 
-                    if (percent != 0)     p *= factor;
-                    else if (fixed != 0)  p += fixed;
+                    if (!qFuzzyIsNull(percent))
+                        p *= factor;
+                    else if (!qFuzzyIsNull(fixed))
+                        p += fixed;
 
                     item.setTierPrice(i, p);
                 }

@@ -36,7 +36,6 @@ class Window : public QWidget
     Q_OBJECT
 public:
     Window(Document *doc, QWidget *parent = nullptr);
-    ~Window();
 
     Document *document() { return m_doc; }
 
@@ -56,10 +55,10 @@ public:
     Document::Item *current() const              { return m_current; }
 
     uint setItems(const BrickLink::InvItemList &items, int multiply = 1);
-    uint addItems(const BrickLink::InvItemList &items, int multiply = 1, uint mergeflags = MergeAction_None, bool dont_change_sorting = false);
+    int addItems(const BrickLink::InvItemList &items, int multiply = 1, uint mergeflags = MergeAction_None, bool dont_change_sorting = false);
     void deleteItems(const BrickLink::InvItemList &items);
 
-    void mergeItems(const Document::ItemList &items, int globalmergeflags = MergeAction_Ask);
+    void mergeItems(const Document::ItemList &items, uint globalmergeflags = MergeAction_Ask);
 
     void subtractItems(const BrickLink::InvItemList &items);
     void copyRemarks(const BrickLink::InvItemList &items);

@@ -198,13 +198,31 @@ public:
     }
 
 protected:
-    void mousePressEvent(QMouseEvent *ev) override { if (ev) ev->ignore(); }
-    void mouseMoveEvent(QMouseEvent *ev) override { if (ev) ev->ignore(); }
-    void mouseReleaseEvent(QMouseEvent *ev) override { if (ev) ev->ignore(); }
+    void mousePressEvent(QMouseEvent *ev) override;
+    void mouseMoveEvent(QMouseEvent *ev) override;
+    void mouseReleaseEvent(QMouseEvent *ev) override;
 
 private:
     QDockWidget *m_dock;
 };
+
+void FancyDockTitleBar::mousePressEvent(QMouseEvent *ev)
+{
+    if (ev)
+        ev->ignore();
+}
+
+void FancyDockTitleBar::mouseMoveEvent(QMouseEvent *ev)
+{
+    if (ev)
+        ev->ignore();
+}
+
+void FancyDockTitleBar::mouseReleaseEvent(QMouseEvent *ev)
+{
+    if (ev)
+        ev->ignore();
+}
 
 
 FrameWork *FrameWork::s_inst = nullptr;
@@ -932,7 +950,7 @@ void FrameWork::createActions()
     (void) newQAction(this, "file_print_pdf", NeedDocument);
 
     m = newQMenu(this, "file_import");
-    m->addAction(newQAction(this, "file_import_bl_inv", 0, false, this, QOverload<void>::of(&FrameWork::fileImportBrickLinkInventory)));
+    m->addAction(newQAction(this, "file_import_bl_inv", 0, false, this, QOverload<>::of(&FrameWork::fileImportBrickLinkInventory)));
     m->addAction(newQAction(this, "file_import_bl_xml", 0, false, this, &FrameWork::fileImportBrickLinkXML));
     m->addAction(newQAction(this, "file_import_bl_order", NeedNetwork, false, this, &FrameWork::fileImportBrickLinkOrder));
     m->addAction(newQAction(this, "file_import_bl_store_inv", NeedNetwork, false, this, &FrameWork::fileImportBrickLinkStore));
@@ -1062,7 +1080,7 @@ void FrameWork::createActions()
     (void) newQAction(this, "view_save_default_col");
     (void) newQAction(this, "extras_update_database", NeedNetwork, false, this, &FrameWork::updateDatabase);
 
-    a = newQAction(this, "extras_configure", 0, false, this, QOverload<void>::of(&FrameWork::configure));
+    a = newQAction(this, "extras_configure", 0, false, this, QOverload<>::of(&FrameWork::configure));
     a->setMenuRole(QAction::PreferencesRole);
 
     //(void) newQAction(this, "help_whatsthis", 0, false, this, &FrameWork::whatsThis);

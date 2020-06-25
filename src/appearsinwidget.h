@@ -26,7 +26,7 @@ class AppearsInWidget : public QTreeView
     Q_OBJECT
 public:
     AppearsInWidget(QWidget *parent = nullptr);
-    virtual ~AppearsInWidget();
+    ~AppearsInWidget() override;
 
     void setItem(const BrickLink::Item *item, const BrickLink::Color *color = nullptr);
     void setItems(const BrickLink::InvItemList &list);

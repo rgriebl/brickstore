@@ -111,7 +111,7 @@ private:
 class ThreadPoolJob
 {
 public:
-    virtual ~ThreadPoolJob();
+    virtual ~ThreadPoolJob() = default;
 
     ThreadPool *threadPool() const  { return m_threadpool; }
 

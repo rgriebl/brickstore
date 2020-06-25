@@ -44,7 +44,5 @@ private:
     bool m_skip_download;
     int m_downloads_in_progress;
     int m_downloads_failed;
-    int m_processed;
-    int m_ptotal;
     QDateTime m_date;
 };

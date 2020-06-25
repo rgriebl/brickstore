@@ -82,7 +82,8 @@ QWidget *ReportUtility::loadUiFile(const QString &fileName)
 
 
 ReportJob::ReportJob(QPaintDevice *pd)
-    : QObject(nullptr), m_pd(pd), m_aborted(false), m_scaling(1.0f)
+    : QObject(nullptr)
+    , m_pd(pd)
 {
     setObjectName(QLatin1String("Job"));
 }
@@ -105,10 +106,10 @@ QObject *ReportJob::addPage()
     return page;
 }
 
-QObject *ReportJob::getPage(uint i) const
+QObject *ReportJob::getPage(int i) const
 {
     if (int(i) < m_pages.count())
-        return m_pages [i];
+        return m_pages.at(i);
     else
         return nullptr;
 }
@@ -136,7 +137,7 @@ void ReportJob::setScaling(double s)
     }
 }
 
-uint ReportJob::pageCount() const
+int ReportJob::pageCount() const
 {
     return m_pages.count();
 }
@@ -158,9 +159,9 @@ void ReportJob::dump()
     }
 }
 
-bool ReportJob::print(uint from, uint to)
+bool ReportJob::print(int from, int to)
 {
-    if (m_pages.isEmpty() || (from > to) || (int(to) >= m_pages.count()))
+    if (m_pages.isEmpty() || (from < 0) || (from > to) || (int(to) >= m_pages.count()))
         return false;
 
     QPainter p;
@@ -170,11 +171,11 @@ bool ReportJob::print(uint from, uint to)
     QPrinter *prt = (m_pd->devType() == QInternal::Printer) ? static_cast<QPrinter *>(m_pd) : nullptr;
 
     double scaling [2];
-    scaling [0] = m_scaling * double(m_pd->logicalDpiX()) / 25.4f;
-    scaling [1] = m_scaling * double(m_pd->logicalDpiY()) / 25.4f;
+    scaling [0] = m_scaling * double(m_pd->logicalDpiX()) / 25.4;
+    scaling [1] = m_scaling * double(m_pd->logicalDpiY()) / 25.4;
     bool no_new_page = true;
 
-    for (uint i = from; i <= to; i++) {
+    for (int i = from; i <= to; i++) {
         ReportPage *page = m_pages.at(i);
 
         if (!no_new_page && prt)
@@ -204,15 +205,11 @@ ReportPage::ReportPage(const ReportJob *job)
 
 int ReportPage::pageNumber() const
 {
-    int res = -1;
-
-    for (uint i = 0; i < m_job->pageCount(); i++) {
-        if (m_job->getPage(i) == this) {
-            res = int(i);
-            break;
-        }
+    for (int i = 0; i < m_job->pageCount(); i++) {
+        if (m_job->getPage(i) == this)
+            return i;
     }
-    return res;
+    return -1;
 }
 
 void ReportPage::dump()
@@ -231,7 +228,7 @@ void ReportPage::dump()
         case Cmd::Text:  {
             auto *dc = static_cast<DrawCmd *>(m_cmds.at(i));
 
-            if (dc->m_w == -1 && dc->m_h == -1)
+            if (qFuzzyCompare(dc->m_w, -1) && qFuzzyCompare(dc->m_h, -1))
                 qDebug(" [%d] Text (%f,%f), \"%s\"", i, dc->m_x, dc->m_y, qPrintable(dc->m_p2.toString()));
             else
                 qDebug(" [%d] Text (%f,%f - %fx%f), align: %d, \"%s\"", i, dc->m_x, dc->m_y, dc->m_w, dc->m_h, dc->m_p1.toInt(), qPrintable(dc->m_p2.toString()));
@@ -277,7 +274,7 @@ void ReportPage::print(QPainter *p, double scale [2]) const
             p->setFont(ac->m_font->toQFont());
 
             if (ac->m_color->toQColor().isValid())
-                p->setPen(QPen(ac->m_color->toQColor(), int(ac->m_linewidth * (scale [0] + scale [1]) / 2.f), Qt::PenStyle(ac->m_linestyle)));
+                p->setPen(QPen(ac->m_color->toQColor(), int(ac->m_linewidth * (scale [0] + scale [1]) / 2.), Qt::PenStyle(ac->m_linestyle)));
             else
                 p->setPen(QPen(Qt::NoPen));
 

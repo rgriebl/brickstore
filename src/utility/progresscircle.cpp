@@ -162,7 +162,7 @@ void ProgressCircle::paintEvent(QPaintEvent *)
         p.drawEllipse(r.center(), s / 2 - 2, s / 2 - 2);
     }
     if (!m_icon.isNull()) {
-        int d = inactive ? 0 : s / 4 - 1;
+        int d = inactive ? 0 : int(s / 4 - 1);
         m_icon.paint(&p, r.adjusted(d, d, -d, -d).toRect(), Qt::AlignCenter,
                      m_online ? QIcon::Normal : QIcon::Disabled, QIcon::On);
     }
@@ -212,7 +212,7 @@ QString ProgressCircle::toolTip() const
         return result;
     }
 
-    int progress = (qreal(m_value) - m_min) * 100.0 / totalSteps;
+    int progress = (m_value - m_min) * 100 / totalSteps;
     result.replace(QLatin1String("%p"), QString::number(progress));
     return result;
 }

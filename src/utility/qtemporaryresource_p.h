@@ -34,7 +34,6 @@ private:
     QTemporaryResourceFileEnginePrivate *d;
 public:
     explicit QTemporaryResourceFileEngine(const QString &path);
-    ~QTemporaryResourceFileEngine();
 
     void setFileName(const QString &file) override;
 
