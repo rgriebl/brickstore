@@ -416,7 +416,7 @@ bool Config::parseTranslations() const
     m_translations.clear();
 
     QDomDocument doc;
-    QFile file(QLatin1String("translations/translations.xml"));
+    QFile file(":/i18n/translations.xml");
 
     if (file.open(QIODevice::ReadOnly)) {
         QString err_str;

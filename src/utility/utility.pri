@@ -43,10 +43,3 @@ SOURCES += \
     $$PWD/undo.cpp \
     $$PWD/utility.cpp \
     $$PWD/workspace.cpp \
-
-
-macx {
-#  HEADERS +=
-#  OBJECTIVE_SOURCES +=
-  LIBS += -framework Cocoa -framework Carbon
-}

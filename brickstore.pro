@@ -11,21 +11,205 @@
 ##
 ## See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 
+MIN_QT_VERSION=5.12.0
+
 requires(linux|macos|win32:!winrt:!android)
-!versionAtLeast(QT_VERSION, 5.11.0) {
-    log("$$escape_expand(\\n\\n) *** Brickstore needs to be built against Qt 5.11.0+ ***$$escape_expand(\\n\\n)")
-    CONFIG += Qt_version_needs_to_be_at_least_5_11_0
+!versionAtLeast(QT_VERSION, $$MIN_QT_VERSION) {
+    error("$$escape_expand(\\n\\n) *** BrickStore needs to be built against $$MIN_QT_VERSION or higher ***$$escape_expand(\\n\\n)")
 }
-requires(!Qt_version_needs_to_be_at_least_5_11_0)
 
-TEMPLATE = subdirs
-CONFIG  += ordered
-SUBDIRS  = src
+##NOTE: The VERSION is set in the file "VERSION" and pre-processed in .qmake.conf
 
-OTHER_FILES += .github/workflows/*.yml
 
-macos|win32 {
-  deploy.CONFIG += recursive
-  installer.CONFIG += recursive
+TEMPLATE     = app
+
+CONFIG      *= no_private_qt_headers_warning
+CONFIG      *= lrelease embed_translations
+# CONFIG    *= modeltest
+
+TARGET             = BrickStore
+unix:!macos:TARGET = brickstore
+
+DESTDIR = bin
+
+version_subst.input  = src/version.h.in
+version_subst.output = src/version.h
+QMAKE_SUBSTITUTES    = version_subst
+
+INCLUDEPATH += $$OUT_PWD/src  # for version.h
+
+OTHER_FILES += \
+  .gitignore \
+  .gitattributes \
+  .tag \
+  .github/workflows/*.yml \
+  .qmake.conf \
+  VERSION \
+  LICENSE.GPL \
+  configure \
+  scripts/generate-assets.sh \
+  print-templates/*.qs \
+  debian/* \
+  unix/brickstore.desktop \
+  unix/brickstore-mime.xml \
+  windows/brickstore.iss \
+  windows/brickstore.rc \
+
+RESOURCES   += brickstore.qrc
+
+LANGUAGES    = de fr nl sl
+for(l, LANGUAGES):TRANSLATIONS += translations/brickstore_$${l}.ts
+
+include(src/src.pri)
+include(src/utility/utility.pri)
+include(src/bricklink/bricklink.pri)
+include(src/ldraw/ldraw.pri)
+include(src/lzma/lzma.pri)
+modeltest:debug:include(modeltest/modeltest.pri)
+
+qtPrepareTool(LUPDATE, lupdate)
+
+lupdate.commands = $$QMAKE_CD $$system_quote($$system_path($$PWD)) && $$LUPDATE $$_PRO_FILE_
+QMAKE_EXTRA_TARGETS += lupdate-all
+
+#
+# Windows specific
+#
+
+win32 {
+  RC_FILE = windows/brickstore.rc
+
+  win32-msvc* {
+#    QMAKE_CXXFLAGS_DEBUG   += /Od /GL-
+#    QMAKE_CXXFLAGS_RELEASE += /O2 /GL
+#    release:QMAKE_LFLAGS_WINDOWS += "/LTCG"
+#    DEFINES += _CRT_SECURE_NO_DEPRECATE
+
+    LIBS += user32.lib advapi32.lib wininet.lib
+  }
+
+  build_pass:CONFIG(release, debug|release) {
+    ISCC="iscc.exe"
+    !system(where $$ISCC >NUL) {
+      INNO_PATH=$$(INNO_SETUP_PATH)
+      !exists("$$INNO_PATH\\$$ISCC") {
+        INNO_PATH="$$getenv(ProgramFiles(x86))\\Inno Setup 5"
+        !exists("$$INNO_PATH\\$$ISCC") {
+          INNO_PATH="$$getenv(ProgramFiles(x86))\\Inno Setup 6"
+          !exists("$$INNO_PATH\\$$ISCC"):error("Please set %INNO_SETUP_PATH% to point to the directory containing the '$$ISCC' binary.")
+        }
+      }
+      ISCC="$$INNO_PATH\\$$ISCC"
+    }
+
+
+    contains(QMAKE_TARGET.arch, x86_64) {
+      TARCH=x64
+      OPENSSL_ARCH="-x64"
+    } else {
+      TARCH=x86
+      OPENSSL_ARCH=""
+    }
+
+    OPENSSL="openssl.exe"
+    OPENSSL_PATH="$$[QT_HOST_PREFIX]/../../Tools/OpenSSL/Win_$$TARCH/bin"
+    !exists("$$OPENSSL_PATH/$$OPENSSL") {
+      equals(TARCH, x64):OPENSSL_PATH="$$getenv(ProgramFiles)/OpenSSL-Win64/bin"
+      equals(TARCH, x86):OPENSSL_PATH="$$getenv(ProgramFiles(x86))/OpenSSL-Win32/bin"
+    }
+    !exists("$$OPENSSL_PATH/$$OPENSSL"):error("Please install the matching OpenSSL version from https://slproweb.com/products/Win32OpenSSL.html.")
+
+    OPENSSL_PATH=$$clean_path($$OPENSSL_PATH)
+    message("Using OpenSSL libraries at: $$shell_path($$OPENSSL_PATH)")
+
+    deploy.depends += $(DESTDIR_TARGET)
+    deploy.commands += $$shell_path($$[QT_HOST_BINS]/windeployqt.exe) $(DESTDIR_TARGET)
+    deploy.commands += & $$QMAKE_COPY $$shell_quote($$shell_path($$OPENSSL_PATH/libcrypto-1_1$${OPENSSL_ARCH}.dll)) $(DESTDIR)
+    deploy.commands += & $$QMAKE_COPY $$shell_quote($$shell_path($$OPENSSL_PATH/libssl-1_1$${OPENSSL_ARCH}.dll)) $(DESTDIR)
+
+    installer.depends += deploy
+    installer.commands += $$shell_path($$ISCC) \
+                            /DSOURCE_DIR=$$shell_quote($$shell_path($$OUT_PWD/$$DESTDIR)) \
+                            /O$$shell_quote($$shell_path($$OUT_PWD)) \
+                            /F$$shell_quote($${TARGET}-$${VERSION}) \
+                            $$shell_quote($$shell_path($$PWD/windows/brickstore.iss))
+  } else {
+    deploy.CONFIG += recursive
+    installer.CONFIG += recursive
+  }
+
+  QMAKE_EXTRA_TARGETS += deploy installer
+}
+
+
+#
+# Unix/X11 specific
+#
+
+unix:!macos {
+  isEmpty(PREFIX):PREFIX = /usr/local
+  DEFINES += INSTALL_PREFIX=\"$$PREFIX\"
+  target.path = $$PREFIX/bin
+  INSTALLS += target
+
+  linux* {
+    share_desktop.path   = $$PREFIX/share/applications
+    share_desktop.files  = unix/brickstore.desktop
+    share_mime.path      = $$PREFIX/share/mime/packages
+    share_mime.files     = unix/brickstore-mime.xml
+    share_appicon.path   = $$PREFIX/share/icons/hicolor/256x256/apps
+    share_appicon.files  = assets/generated-icons/brickstore.png
+    share_mimeicon.path  = $$PREFIX/share/icons/hicolor/128x128/mimetypes
+    share_mimeicon.files = assets/generated-icons/brickstore_doc.png
+
+    INSTALLS += share_desktop share_mime share_appicon share_mimeicon
+  }
+}
+
+
+#
+# Mac OS X specific
+#
+
+macos {
+  LIBS += -framework SystemConfiguration
+
+  QMAKE_FULL_VERSION = $$VERSION
+  QMAKE_INFO_PLIST = macos/Info.plist
+  bundle_icons.path = Contents/Resources
+  bundle_icons.files = $$files("assets/generated-icons/*.icns")
+  bundle_printtemplates.path = Contents/Resources/print-templates
+  bundle_printtemplates.files = $$system(find $$PWD/print-templates -name \'*.qs\' -or -name \'*.ui\') #TODO5: $$files ???
+
+#  bundle_locversions.path = Contents/Resources
+#  for(l, LANGUAGES) {
+#    cp $$PWD/macos/locversion.plist.in
+#    bundle_locversions.files += $$system(find $$PWD/../macos/Resources/ -name \'*.lproj\')
+#  }
+
+
+  bundle_locversions.path = Contents/Resources ## TODO5: generate lproj from template
+  bundle_locversions.files = $$system(find $$PWD/../macos/Resources/ -name \'*.lproj\')
+
+  QMAKE_BUNDLE_DATA += bundle_icons bundle_locversions bundle_printtemplates
+
+  CONFIG(release, debug|release) {
+    deploy.depends += $(DESTDIR_TARGET)
+    deploy.commands += $$shell_path($$[QT_HOST_BINS]/macdeployqt) $$OUT_PWD/$$DESTDIR/$${TARGET}.app
+
+    installer.depends += deploy
+    installer.commands += rm -rf $$OUT_PWD/dmg
+    installer.commands += && mkdir $$OUT_PWD/dmg
+    installer.commands += && mkdir $$OUT_PWD/dmg/.background
+    installer.commands += && cp macos/dmg-background.png $$OUT_PWD/dmg/.background/background.png
+    installer.commands += && cp macos/dmg-ds_store $$OUT_PWD/dmg/.DS_Store
+    installer.commands += && cp -a $$OUT_PWD/$$DESTDIR/$${TARGET}.app $$OUT_PWD/dmg/
+    installer.commands += && ln -s /Applications "$$OUT_PWD/dmg/"
+    installer.commands += && hdiutil create \"$$OUT_PWD/$${TARGET}-$${VERSION}.dmg\" -volname \"$$TARGET $$VERSION\" -fs \"HFS+\" -srcdir \"$$OUT_PWD/dmg\" -quiet -format UDBZ -ov
+  } else {
+    deploy.CONFIG += recursive
+    installer.CONFIG += recursive
+  }
+
   QMAKE_EXTRA_TARGETS += deploy installer
 }

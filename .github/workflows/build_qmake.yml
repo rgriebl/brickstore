@@ -76,7 +76,7 @@ jobs:
       run: |
         maintainer=$(grep ^Maintainer: debian/control | sed -e 's,^.*:[ ]*,,g')
         package=$(grep ^Package: debian/control | head -n1 | sed -e 's,^.*:[ ]*,,g')
-        release=$(cat RELEASE)
+        version=$(cat VERSION)
         dist=$(lsb_release -c -s)
 
         cat >debian/changelog <<EOF
