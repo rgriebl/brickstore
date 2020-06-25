@@ -34,7 +34,7 @@
 #elif defined(Q_OS_MACOS)
 #  include <netinet/in.h>
 #  include <arpa/inet.h>
-#  include <SystemConfiguration/SCNetwork.h>
+#  include <SystemConfiguration/SCNetworkReachability.h>
 #elif defined(Q_OS_UNIX)
 #  include <sys/utsname.h>
 #endif
@@ -320,7 +320,7 @@ bool Application::isClient(int timeout)
                 Sleep(timeout / 4);
 #else
                 struct timespec ts = { (timeout / 4) / 1000, ((timeout / 4) % 1000) * 1000 * 1000 };
-                ::nanosleep(&ts, 0);
+                ::nanosleep(&ts, nullptr);
 #endif
             }
         }
@@ -336,7 +336,7 @@ bool Application::isClient(int timeout)
             QDataStream ds(&data, QIODevice::WriteOnly);
             ds << qint32(0) << files;
             ds.device()->seek(0);
-            ds << qint32(data.size() - sizeof(qint32));
+            ds << qint32(data.size() - int(sizeof(qint32)));
 
             bool res = (client.write(data) == data.size());
             res = res && client.waitForBytesWritten(timeout / 2);
@@ -366,7 +366,7 @@ void Application::clientMessage()
     bool header = true;
     int need = sizeof(qint32);
     while (need) {
-        int got = client->bytesAvailable();
+        auto got = client->bytesAvailable();
         if (got < need) {
             client->waitForReadyRead();
         } else if (header) {
@@ -549,16 +549,24 @@ void Application::checkNetwork()
         online = true;
 
 #elif defined(Q_OS_MACOS)
-    struct ::sockaddr_in sock;
-    sock.sin_family = AF_INET;
-    sock.sin_port = htons(80);
-    sock.sin_addr.s_addr = inet_addr(CHECK_IP);
-    SCNetworkConnectionFlags flags = 0;
-    bool result = SCNetworkCheckReachabilityByAddress(reinterpret_cast<sockaddr *>(&sock), sizeof(sock), &flags);
+    static SCNetworkReachabilityRef target = nullptr;
 
-    //qWarning() << "Mac NET change: " << result << flags;
-    if (!result || (flags & (kSCNetworkFlagsReachable | kSCNetworkFlagsConnectionRequired)) == kSCNetworkFlagsReachable)
+    if (!target) {
+        struct ::sockaddr_in sock;
+        sock.sin_family = AF_INET;
+        sock.sin_port = htons(80);
+        sock.sin_addr.s_addr = inet_addr(CHECK_IP);
+
+        target = SCNetworkReachabilityCreateWithAddress(nullptr, reinterpret_cast<sockaddr *>(&sock));
+        // in theory we should CFRelease(target) when exitting
+    }
+
+    SCNetworkReachabilityFlags flags = 0;
+    if (!target || !SCNetworkReachabilityGetFlags(target, &flags)
+            || ((flags & (kSCNetworkReachabilityFlagsReachable | kSCNetworkReachabilityFlagsConnectionRequired))
+                         == kSCNetworkReachabilityFlagsReachable)) {
         online = true;
+    }
 
 #elif defined(Q_OS_WINDOWS)
     // this function is buggy/unreliable
