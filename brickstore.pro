@@ -47,6 +47,7 @@ OTHER_FILES += \
   VERSION \
   LICENSE.GPL \
   configure \
+  translations/translations.xml \
   scripts/generate-assets.sh \
   print-templates/*.qs \
   debian/* \
