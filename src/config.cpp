@@ -54,7 +54,7 @@ static const char *organization = "brickstore.org";
 static const char *organization_v11x = "softforge";
 static const char *organization = BRICKSTORE_NAME;
 #endif
-static const char *application_v11x = BRICKSTORE_NAME;
+static const char *application_v11x = "BrickStore";
 static const char *application = BRICKSTORE_NAME;
 
 

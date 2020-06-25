@@ -1,44 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <translations>
 
-	<translation lang="en" default="true">
-		<name>English</name>
-		<name lang="de">Englisch</name>
-		<name lang="fr">Anglais</name>
-		<name lang="nl">Engels</name>
-		<name lang="sl">Angleščina</name>
-	</translation>
+  <translation lang="en" default="true">
+    <name>English</name>
+    <name lang="de">Englisch</name>
+    <name lang="fr">Anglais</name>
+    <name lang="nl">Engels</name>
+    <name lang="sl">Angleščina</name>
+  </translation>
 
-	<translation lang="de" author="Robert Griebl" authoremail="rg@softforge.de">
-		<name>German</name>
-		<name lang="de">Deutsch</name>
-		<name lang="fr">Allemand</name>
-		<name lang="nl">Duits</name>
-		<name lang="sl">Nemščina</name>
-	</translation>
+  <translation lang="de" author="Robert Griebl" authoremail="robert@griebl.org">
+    <name>German</name>
+    <name lang="de">Deutsch</name>
+    <name lang="fr">Allemand</name>
+    <name lang="nl">Duits</name>
+    <name lang="sl">Nemščina</name>
+  </translation>
 
-	<translation lang="fr" author="Sylvain Perez" authoremail="bricklink@1001bricks.com">
-		<name>French</name>
-		<name lang="de">Französisch</name>
-		<name lang="fr">Français</name>
-		<name lang="nl">Frans</name>
-		<name lang="sl">Francoščina</name>
-	</translation>
+  <translation lang="fr" author="Sylvain Perez" authoremail="bricklink@1001bricks.com">
+    <name>French</name>
+    <name lang="de">Französisch</name>
+    <name lang="fr">Français</name>
+    <name lang="nl">Frans</name>
+    <name lang="sl">Francoščina</name>
+  </translation>
 
-	<translation lang="nl" author="Eric van Horssen" authoremail="horzel@hacktic.nl">
-		<name>Dutch</name>
-		<name lang="de">Holländisch</name>
-		<name lang="fr">Hollandais</name>
-		<name lang="nl">Nederlands</name>
-		<name lang="sl">Nizozemščina</name>
-	</translation>
+  <translation lang="nl" author="Eric van Horssen" authoremail="horzel@hacktic.nl">
+    <name>Dutch</name>
+    <name lang="de">Holländisch</name>
+    <name lang="fr">Hollandais</name>
+    <name lang="nl">Nederlands</name>
+    <name lang="sl">Nizozemščina</name>
+  </translation>
 
-	<translation lang="sl" author="Sašo Tomat" authoremail="miskox@hotmail.com">
-		<name>Slovene</name>
-		<name lang="de">Slowenisch</name>
-		<name lang="fr">Slovène</name>
-		<name lang="nl">Sloveens</name>
-		<name lang="sl">Slovenščina</name>
-	</translation>
+  <translation lang="sl" author="Sašo Tomat" authoremail="miskox@hotmail.com">
+    <name>Slovene</name>
+    <name lang="de">Slowenisch</name>
+    <name lang="fr">Slovène</name>
+    <name lang="nl">Sloveens</name>
+    <name lang="sl">Slovenščina</name>
+  </translation>
 
 </translations>

@@ -154,7 +154,7 @@ void Currency::updateRates()
                 this, [this](QNetworkReply *reply) {
             if (reply->error() != QNetworkReply::NoError) {
                 if (Application::inst()->isOnline())
-                    MessageBox::warning(FrameWork::inst(), tr("There was an error downloading the exchange rates from the ECB server:<br>%2").arg(reply->errorString()));
+                    MessageBox::warning(FrameWork::inst(), tr("There was an error downloading the exchange rates from the ECB server:<br>%1").arg(reply->errorString()));
             } else {
                 auto r = reply->readAll();
                 QXmlStreamReader reader(r);

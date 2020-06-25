@@ -231,7 +231,8 @@ void Application::updateTranslations()
     m_trans_qt = new QTranslator(this);
     m_trans_brickstore = new QTranslator(this);
 
-    QStringList spath = externalResourceSearchPath("/translations");
+    QStringList spath = { QString(":/i18n") };
+    spath << externalResourceSearchPath("/translations");
     if (qSharedBuild() && (isDeveloperBuild | isUnix))
         spath << QLibraryInfo::location(QLibraryInfo::TranslationsPath);
 
@@ -451,12 +452,11 @@ void Application::about()
 
     QString copyright = tr("Copyright &copy; %1").arg(BRICKSTORE_COPYRIGHT);
     QString version   = tr("Version %1").arg(BRICKSTORE_VERSION);
-    QString support   = tr("Visit %1, or send an email to %2").arg("<a href=\"http://" BRICKSTORE_URL "\">" BRICKSTORE_URL "</a>",
-                                                                   "<a href=\"mailto:" BRICKSTORE_MAIL "\">" BRICKSTORE_MAIL "</a>");
+    QString support   = tr("Visit %1").arg("<a href=\"https://" BRICKSTORE_URL "\">" BRICKSTORE_URL "</a>");
 
     QString qt = QLibraryInfo::version().toString();
     if (QLibraryInfo::isDebugBuild())
-        qt += QLatin1String(" (") + tr("debug build") + QLatin1String(")");
+        qt += QLatin1String(" (debug build)");
 
     QString translators = QLatin1String("<b>") + tr("Translators") + QLatin1String("</b><table border=\"0\">");
 
@@ -493,43 +493,25 @@ void Application::about()
         "</p>");
 
     QString technical = QLatin1String(
-        //"<p>"
         "<table>"
         "<th colspan=\"2\" align=\"left\">Build Info</th>"
-        "<tr><td>User     </td><td>%1</td></tr>"
-        "<tr><td>Host     </td><td>%2</td></tr>"
-        "<tr><td>Date     </td><td>%3</td></tr>"
-        "<tr><td>Architecture  </td><td>%4</td></tr>"
-        "<tr><td>Compiler </td><td>%5</td></tr>"
+        "<tr><td>Git version   </td><td>%1</td></tr>"
+        "<tr><td>User          </td><td>%2</td></tr>"
+        "<tr><td>Host          </td><td>%3</td></tr>"
+        "<tr><td>Date          </td><td>%4</td></tr>"
+        "<tr><td>Architecture  </td><td>%5</td></tr>"
+        "<tr><td>Compiler      </td><td>%6</td></tr>"
         "</table><br>"
         "<table>"
         "<th colspan=\"2\" align=\"left\">Runtime Info</th>"
-        "<tr><td>OS     </td><td>%6</td></tr>"
-        "<tr><td>Architecture  </td><td>%7</td></tr>"
-        "<tr><td>Memory </td><td>%L8 MB</td></tr>"
-        "<tr><td>Qt     </td><td>%9</td></tr>"
-        "</table>"
-        /*"</p>"*/);
+        "<tr><td>OS            </td><td>%7</td></tr>"
+        "<tr><td>Architecture  </td><td>%8</td></tr>"
+        "<tr><td>Memory        </td><td>%L9 MB</td></tr>"
+        "<tr><td>Qt            </td><td>%10</td></tr>"
+        "</table>");
 
-    technical = technical.arg(STR(__USER__), STR(__HOST__), __DATE__ " " __TIME__)
-            .arg(QSysInfo::buildCpuArchitecture()).arg(
-#if defined(_MSC_VER)
-                "Microsoft Visual-C++ "
-#  if _MSC_VER >= 1920
-                "2019 (16." BS_STR(_MSC_VER) ")"
-#  elif _MSC_VER >= 1910
-                "2017 (15." BS_STR(_MSC_VER) ")"
-#  elif _MSC_VER >= 1900
-                "2015 (14.0)"
-#  else
-                "???"
-#  endif
-#elif defined(__GNUC__)
-                "GCC " __VERSION__
-#else
-                "???"
-#endif
-                )
+    technical = technical.arg(BRICKSTORE_GIT_VERSION, BRICKSTORE_BUILD_USER, BRICKSTORE_BUILD_HOST, __DATE__ " " __TIME__)
+            .arg(QSysInfo::buildCpuArchitecture()).arg(BRICKSTORE_COMPILER_VERSION)
             .arg(QSysInfo::prettyProductName(), QSysInfo::currentCpuArchitecture())
             .arg(Utility::physicalMemory()/(1024ULL*1024ULL)).arg(qt);
 

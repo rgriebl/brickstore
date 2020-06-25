@@ -255,7 +255,7 @@ void ItemDetailPopup::redraw()
 
         if (m_pic->updateStatus() == BrickLink::Updating)
             m_blpic->setText(QLatin1String("<center><i>") +
-                    tr("Please wait ...updating") +
+                    tr("Please wait... updating") +
                     QLatin1String("</i></center>"));
         else if (m_pic->valid())
             m_blpic->setPixmap(QPixmap::fromImage(m_pic->image(), Qt::NoFormatConversion));

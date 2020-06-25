@@ -169,7 +169,7 @@ void PriceGuideWidget::languageChange()
     d->m_str_htime [BrickLink::Current][1] = tr("Inventory");
     d->m_str_vtime [BrickLink::PastSix]    = tr("Last 6 Months Sales");
     d->m_str_vtime [BrickLink::Current]    = tr("Current Inventory");
-    d->m_str_wait                          = tr("Please wait ...updating");
+    d->m_str_wait                          = tr("Please wait... updating");
 
     recalcLayout();
     update();

@@ -189,7 +189,7 @@ void PictureWidget::redraw()
 {
     if (d->m_pic && (d->m_pic->updateStatus() == BrickLink::Updating)) {
         d->m_tlabel->setHtml(QLatin1String("<center><i>") +
-                                           tr("Please wait ...updating") +
+                                           tr("Please wait... updating") +
                                            QLatin1String("</i></center>"));
         d->m_img = QImage();
     }
