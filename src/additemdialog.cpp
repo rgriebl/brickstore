@@ -309,7 +309,7 @@ void AddItemDialog::checkTieredPrices()
     for (int i = 0; i < 3; i++) {
         w_tier_qty [i]->setEnabled(valid);
 
-        valid &= (w_tier_qty [i]->text().toInt() > 0);
+        valid = valid && (w_tier_qty [i]->text().toInt() > 0);
 
         w_tier_price [i]->setEnabled(valid);
     }
@@ -343,16 +343,15 @@ bool AddItemDialog::checkAddPossible()
         if (!w_tier_price [i]->isEnabled())
             break;
 
-        acceptable &= w_tier_qty [i]->hasAcceptableInput() &&
-                      w_tier_price [i]->hasAcceptableInput();
+        acceptable = acceptable && w_tier_qty[i]->hasAcceptableInput()
+                && w_tier_price[i]->hasAcceptableInput();
 
-
-
-        if (i > 0)
-            acceptable &= (w_tier_qty [i-1]->text().toInt() < w_tier_qty [i]->text().toInt()) &&
-                          (tierPriceValue(i - 1) > tierPriceValue(i));
-        else
-            acceptable &= (Currency::fromString(w_price->text()) > tierPriceValue(i));
+        if (i > 0) {
+            acceptable = acceptable && (tierPriceValue(i - 1) > tierPriceValue(i))
+                    && (w_tier_qty[i - 1]->text().toInt() < w_tier_qty[i]->text().toInt());
+        } else {
+            acceptable = acceptable && (Currency::fromString(w_price->text()) > tierPriceValue(i));
+        }
     }
 
 

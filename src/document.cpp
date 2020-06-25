@@ -1773,9 +1773,9 @@ bool DocumentProxyModel::filterAcceptsRow(int source_row, const QModelIndex &sou
                 localresult = f.matches(v);
         }
         if (nextcomb == Filter::And)
-            result &= localresult;
+            result = result && localresult;
         else
-            result |= localresult;
+            result = result || localresult;
 
         nextcomb = f.combination();
     }

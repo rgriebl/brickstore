@@ -254,9 +254,9 @@ bool BrickLink::TextImport::import(const QString &path)
 {
     bool ok = true;
 
-    ok &= readDB<>(path + "colors.txt",     m_colors, true);
-    ok &= readDB<>(path + "categories.txt", m_categories, true);
-    ok &= readDB<>(path + "itemtypes.txt",  m_item_types, true);
+    ok = ok && readDB<>(path + "colors.txt",     m_colors, true);
+    ok = ok && readDB<>(path + "categories.txt", m_categories, true);
+    ok = ok && readDB<>(path + "itemtypes.txt",  m_item_types, true);
 
     calculateColorPopularity();
 
@@ -265,7 +265,7 @@ bool BrickLink::TextImport::import(const QString &path)
 
     for (const ItemType *itt : qAsConst(m_item_types)) {
         m_current_item_type = itt;
-        ok &= readDB<>(path + "items_" + char(itt->m_id) + ".txt", m_items, true);
+        ok = ok && readDB<>(path + "items_" + char(itt->m_id) + ".txt", m_items, true);
     }
     m_current_item_type = nullptr;
 
@@ -287,9 +287,9 @@ bool BrickLink::TextImport::import(const QString &path)
     }
 
     btinvlist_dummy btinvlist_dummy;
-    ok &= readDB<>(path + "btinvlist.txt", btinvlist_dummy);
+    ok = ok && readDB<>(path + "btinvlist.txt", btinvlist_dummy);
     btchglog_dummy btchglog_dummy;
-    ok &= readDB<>(path + "btchglog.txt", btchglog_dummy);
+    ok = ok && readDB<>(path + "btchglog.txt", btchglog_dummy);
 
     m_current_item_type = nullptr;
 

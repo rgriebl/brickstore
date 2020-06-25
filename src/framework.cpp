@@ -1208,7 +1208,7 @@ bool FrameWork::createWindows(const QList<Document *> &docs)
     bool ok = true;
 
     foreach (Document *doc, docs)
-        ok &= createWindow(doc);
+        ok = ok && createWindow(doc);
     return ok;
 }
 

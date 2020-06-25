@@ -238,8 +238,8 @@ void Application::updateTranslations()
     bool qtLoaded = false, bsLoaded = false;
 
     for (const QString &sp : qAsConst(spath)) {
-        qtLoaded |= m_trans_qt->load(QLatin1String("qt_") + locale, sp);
-        bsLoaded |= m_trans_brickstore->load(QLatin1String("brickstore_") + locale, sp);
+        qtLoaded = qtLoaded || m_trans_qt->load(QLatin1String("qt_") + locale, sp);
+        bsLoaded = bsLoaded || m_trans_brickstore->load(QLatin1String("brickstore_") + locale, sp);
     }
     if (qtLoaded)
         installTranslator(m_trans_qt);
@@ -338,9 +338,9 @@ bool Application::isClient(int timeout)
             ds << qint32(data.size() - sizeof(qint32));
 
             bool res = (client.write(data) == data.size());
-            res &= client.waitForBytesWritten(timeout / 2);
-            res &= client.waitForReadyRead(timeout / 2);
-            res &= (client.read(1) == QByteArray(1, 'X'));
+            res = res && client.waitForBytesWritten(timeout / 2);
+            res = res && client.waitForReadyRead(timeout / 2);
+            res = res && (client.read(1) == QByteArray(1, 'X'));
 
             if (res) {
                 delete server;

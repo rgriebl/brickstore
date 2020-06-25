@@ -446,11 +446,11 @@ void BrickLink::SetMatch::create_inventory_list()
     for (auto item : items) {
         bool ok = true;
 
-        ok &= (item->itemType()->hasInventories() && item->hasInventory());
-        ok &= ((m_year_min == -1) || (item->yearReleased() >= m_year_min));
-        ok &= ((m_year_max == -1) || (item->yearReleased() <= m_year_max));
+        ok = ok && (item->itemType()->hasInventories() && item->hasInventory());
+        ok = ok && ((m_year_min == -1) || (item->yearReleased() >= m_year_min));
+        ok = ok && ((m_year_max == -1) || (item->yearReleased() <= m_year_max));
 
-        ok &= (m_itemtypes.isEmpty() || m_itemtypes.contains(item->itemType()));
+        ok = ok && (m_itemtypes.isEmpty() || m_itemtypes.contains(item->itemType()));
 
         if (ok && !m_categories.isEmpty()) {
             ok = false;
@@ -459,9 +459,9 @@ void BrickLink::SetMatch::create_inventory_list()
         }
         if (ok) {
             InvMatchList iml(item->consistsOf());
-            ok &= !iml.isEmpty();
-            ok &= ((m_part_min == -1) || (iml.count() >= m_part_min));
-            ok &= ((m_part_max == -1) || (iml.count() <= m_part_max));
+            ok = ok && !iml.isEmpty();
+            ok = ok && ((m_part_min == -1) || (iml.count() >= m_part_min));
+            ok = ok && ((m_part_max == -1) || (iml.count() <= m_part_max));
 
             if (ok)
                 m_inventories.append(qMakePair(item, iml));

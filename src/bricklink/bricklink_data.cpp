@@ -511,31 +511,31 @@ bool BrickLink::InvItem::operator == (const InvItem &cmp) const
 {
     bool same = true;
 
-    same &= (m_incomplete         == cmp.m_incomplete);
-    same &= (m_item               == cmp.m_item);
-    same &= (m_color              == cmp.m_color);
-    same &= (m_status             == cmp.m_status);
-    same &= (m_condition          == cmp.m_condition);
-    same &= (m_scondition         == cmp.m_scondition);
-    same &= (m_retain             == cmp.m_retain);
-    same &= (m_stockroom          == cmp.m_stockroom);
-    same &= (m_comments           == cmp.m_comments);
-    same &= (m_remarks            == cmp.m_remarks);
-    same &= (m_reserved           == cmp.m_reserved);
-    same &= (m_quantity           == cmp.m_quantity);
-    same &= (m_bulk_quantity      == cmp.m_bulk_quantity);
-    same &= (m_tier_quantity [0]  == cmp.m_tier_quantity [0]);
-    same &= (m_tier_quantity [1]  == cmp.m_tier_quantity [1]);
-    same &= (m_tier_quantity [2]  == cmp.m_tier_quantity [2]);
-    same &= (m_sale               == cmp.m_sale);
-    same &= qFuzzyCompare(m_price,          cmp.m_price);
-    same &= qFuzzyCompare(m_tier_price [0], cmp.m_tier_price [0]);
-    same &= qFuzzyCompare(m_tier_price [1], cmp.m_tier_price [1]);
-    same &= qFuzzyCompare(m_tier_price [2], cmp.m_tier_price [2]);
-    same &= qFuzzyCompare(m_weight,         cmp.m_weight);
-    same &= (m_lot_id             == cmp.m_lot_id);
-    same &= qFuzzyCompare(m_orig_price,     cmp.m_orig_price);
-    same &= (m_orig_quantity      == cmp.m_orig_quantity);
+    same = same && (m_incomplete         == cmp.m_incomplete);
+    same = same && (m_item               == cmp.m_item);
+    same = same && (m_color              == cmp.m_color);
+    same = same && (m_status             == cmp.m_status);
+    same = same && (m_condition          == cmp.m_condition);
+    same = same && (m_scondition         == cmp.m_scondition);
+    same = same && (m_retain             == cmp.m_retain);
+    same = same && (m_stockroom          == cmp.m_stockroom);
+    same = same && (m_comments           == cmp.m_comments);
+    same = same && (m_remarks            == cmp.m_remarks);
+    same = same && (m_reserved           == cmp.m_reserved);
+    same = same && (m_quantity           == cmp.m_quantity);
+    same = same && (m_bulk_quantity      == cmp.m_bulk_quantity);
+    same = same && (m_tier_quantity [0]  == cmp.m_tier_quantity [0]);
+    same = same && (m_tier_quantity [1]  == cmp.m_tier_quantity [1]);
+    same = same && (m_tier_quantity [2]  == cmp.m_tier_quantity [2]);
+    same = same && (m_sale               == cmp.m_sale);
+    same = same && qFuzzyCompare(m_price,          cmp.m_price);
+    same = same && qFuzzyCompare(m_tier_price [0], cmp.m_tier_price [0]);
+    same = same && qFuzzyCompare(m_tier_price [1], cmp.m_tier_price [1]);
+    same = same && qFuzzyCompare(m_tier_price [2], cmp.m_tier_price [2]);
+    same = same && qFuzzyCompare(m_weight,         cmp.m_weight);
+    same = same && (m_lot_id             == cmp.m_lot_id);
+    same = same && qFuzzyCompare(m_orig_price,     cmp.m_orig_price);
+    same = same && (m_orig_quantity      == cmp.m_orig_quantity);
 
     return same;
 }

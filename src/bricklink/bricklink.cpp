@@ -1436,45 +1436,45 @@ bool BrickLink::Core::writeDatabase(const QString &filename, DatabaseVersion ver
             QDataStream &ds = cw.dataStream();
             bool ok = true;
 
-            ok &= cw.startChunk(ChunkId('B','S','D','B'), version);
+            ok = ok && cw.startChunk(ChunkId('B','S','D','B'), version);
 
             if (!infoText.isEmpty()) {
-                ok &= cw.startChunk(ChunkId('I','N','F','O'), version);
+                ok = ok && cw.startChunk(ChunkId('I','N','F','O'), version);
                 ds << infoText;
-                ok &= cw.endChunk();
+                ok = ok && cw.endChunk();
             }
 
-            ok &= cw.startChunk(ChunkId('C','O','L',' '), version);
+            ok = ok && cw.startChunk(ChunkId('C','O','L',' '), version);
             ds << quint32(m_colors.count());
             for (const Color *col : m_colors)
                 ds << col;
-            ok &= cw.endChunk();
+            ok = ok && cw.endChunk();
 
-            ok &= cw.startChunk(ChunkId('C','A','T',' '), version);
+            ok = ok && cw.startChunk(ChunkId('C','A','T',' '), version);
             ds << quint32(m_categories.count());
             for (const Category *cat : m_categories)
                 ds << cat;
-            ok &= cw.endChunk();
+            ok = ok && cw.endChunk();
 
-            ok &= cw.startChunk(ChunkId('T','Y','P','E'), version);
+            ok = ok && cw.startChunk(ChunkId('T','Y','P','E'), version);
             ds << quint32(m_item_types.count());
             for (const ItemType *itt : m_item_types)
                 ds << itt;
-            ok &= cw.endChunk();
+            ok = ok && cw.endChunk();
 
-            ok &= cw.startChunk(ChunkId('I','T','E','M'), version);
+            ok = ok && cw.startChunk(ChunkId('I','T','E','M'), version);
             ds << quint32(m_items.count());
             for (const Item *item : m_items)
                 ds << item;
-            ok &= cw.endChunk();
+            ok = ok && cw.endChunk();
 
-            ok &= cw.startChunk(ChunkId('C','H','G','L'), version);
+            ok = ok && cw.startChunk(ChunkId('C','H','G','L'), version);
             ds << quint32(m_changelog.count());
             for (const char *cl : m_changelog)
                 ds << cl;
-            ok &= cw.endChunk();
+            ok = ok && cw.endChunk();
 
-            ok &= cw.endChunk();
+            ok = ok && cw.endChunk();
 
             if (ok && f.error() == QFile::NoError) {
                 f.close();
