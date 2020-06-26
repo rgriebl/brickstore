@@ -74,6 +74,7 @@ jobs:
     - name: Build on Linux
       if: (startsWith(matrix.config.os, 'ubuntu'))
       run: |
+        qmake CONFIG+=release
         make package
       shell: bash
 
