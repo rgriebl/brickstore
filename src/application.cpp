@@ -398,13 +398,6 @@ void Application::clientMessage()
 bool Application::initBrickLink()
 {
     QString errstring;
-    QString defdatadir = QDir::homePath();
-
-#if defined(Q_OS_WINDOWS)
-    defdatadir += QLatin1String("/brickstore-cache/");
-#else
-    defdatadir += QLatin1String("/.brickstore-cache/");
-#endif
 
     BrickLink::Core *bl = BrickLink::create(Config::inst()->dataDir(), &errstring);
     if (!bl) {

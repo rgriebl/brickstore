@@ -88,12 +88,23 @@ int RebuildDatabase::exec()
 
     // login hack
     {
+        QString username = Config::inst()->loginForBrickLink().first;
+        QString password = Config::inst()->loginForBrickLink().second;
+
+        if (username.isEmpty())
+            username = qgetenv("BRICKSTORE_USERNAME");
+        if (password.isEmpty())
+            password = qgetenv("BRICKSTORE_PASSWORD");
+
+        if (username.isEmpty() || password.isEmpty())
+            printf("  > Missing BrickLink login credentials: please set $BRICKLINK_USERNAME and $BRICKLINK_PASSWORD.\n");
+
         QNetworkAccessManager *nam = m_trans->networkAccessManager();
         QNetworkRequest req(QUrl("https://www.bricklink.com/ajax/renovate/loginandout.ajax"));
         req.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
         QUrlQuery q;
-        q.addQueryItem("userid", Config::inst()->loginForBrickLink().first);
-        q.addQueryItem("password", Config::inst()->loginForBrickLink().second);
+        q.addQueryItem("userid", username);
+        q.addQueryItem("password", password);
         q.addQueryItem("keepme_loggedin", "1");
         QByteArray form = q.query(QUrl::FullyEncoded).toLatin1();
 
