@@ -168,6 +168,20 @@ win32 {
 
 
 #
+# Unix specific
+#
+
+unix {
+  debug:OBJECTS_DIR   = $$OUT_PWD/.obj/debug
+  release:OBJECTS_DIR = $$OUT_PWD/.obj/release
+  debug:MOC_DIR       = $$OUT_PWD/.moc/debug
+  release:MOC_DIR     = $$OUT_PWD/.moc/release
+  UI_DIR              = $$OUT_PWD/.uic
+  RCC_DIR             = $$OUT_PWD/.rcc
+}
+
+
+#
 # Unix/X11 specific
 #
 
@@ -190,7 +204,7 @@ unix:!macos {
     INSTALLS += share_desktop share_mime share_appicon share_mimeicon
 
     package.depends = $(DESTDIR_TARGET)
-    package.commands = unix/create-debian-changelog.sh > debian/changelog
+    package.commands = scripts/create-debian-changelog.sh > debian/changelog
     package.commands += && dpkg-buildpackage --build=binary --check-builddeps --jobs=auto --root-command=fakeroot \
                                              --unsigned-source --unsigned-changes --compression=xz
     package.commands += && mv ../brickstore*.deb .
