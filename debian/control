@@ -1,7 +1,7 @@
 Source: brickstore
 Section: x11
 Priority: extra
-Maintainer: Robert Griebl <rg@softforge.de>
+Maintainer: Robert Griebl <robert@griebl.org>
 Build-Depends: debhelper (>= 7.0.50~), qt5-default (>= 5.11), libqt5opengl5-dev (>= 5.11), qtscript5-dev (>= 5.11), qttools5-dev (>= 5.11)
 Standards-Version: 4.5.0
 

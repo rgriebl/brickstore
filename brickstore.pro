@@ -188,6 +188,14 @@ unix:!macos {
     share_mimeicon.files = assets/generated-icons/brickstore_doc.png
 
     INSTALLS += share_desktop share_mime share_appicon share_mimeicon
+
+    package.depends = $(DESTDIR_TARGET)
+    package.commands = unix/create-debian-changelog.sh > debian/changelog
+    package.commands += && dpkg-buildpackage --build=binary --check-builddeps --jobs=auto --root-command=fakeroot \
+                                             --unsigned-source --unsigned-changes --compression=xz
+    package.commands += && mv ../brickstore*.deb .
+
+    QMAKE_EXTRA_TARGETS += package
   }
 }
 

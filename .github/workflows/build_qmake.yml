@@ -74,22 +74,7 @@ jobs:
     - name: Build on Linux
       if: (startsWith(matrix.config.os, 'ubuntu'))
       run: |
-        maintainer=$(grep ^Maintainer: debian/control | sed -e 's,^.*:[ ]*,,g')
-        package=$(grep ^Package: debian/control | head -n1 | sed -e 's,^.*:[ ]*,,g')
-        version=$(cat VERSION)
-        dist=$(lsb_release -c -s)
-
-        cat >debian/changelog <<EOF
-        $package ($version) $dist; urgency=low
-
-          * Current Release
-
-         -- $maintainer  `date -R`
-
-        EOF
-        dpkg-buildpackage --build=binary --check-builddeps --jobs=auto --root-command=fakeroot \
-                          --unsigned-source --unsigned-changes --compression=xz
-        mv ../*.deb .
+        make package
       shell: bash
 
     - name: Upload DEB on Linux
