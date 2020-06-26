@@ -68,7 +68,7 @@ private:
     QNetworkReply *m_reply = nullptr;
 
     int          m_respcode         : 16;
-    HttpMethod   m_http_method      : 1;
+    uint         m_http_method      : 1;
     bool         m_was_not_modified : 1;
 
     friend class TransferEngine;
