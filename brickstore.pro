@@ -145,7 +145,7 @@ win32 {
     !exists("$$OPENSSL_PATH/$$OPENSSL"):error("Please install the matching OpenSSL version from https://slproweb.com/products/Win32OpenSSL.html.")
 
     OPENSSL_PATH=$$clean_path($$OPENSSL_PATH)
-    message("Using OpenSSL libraries at: $$shell_path($$OPENSSL_PATH)")
+    log("Deploying OpenSSL libraries at: $$shell_path($$OPENSSL_PATH)")
 
     deploy.depends += $(DESTDIR_TARGET)
     deploy.commands += $$shell_path($$[QT_HOST_BINS]/windeployqt.exe) $(DESTDIR_TARGET)

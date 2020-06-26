@@ -64,12 +64,12 @@ jobs:
         nmake installer
       shell: cmd
 
-    - uses: actions/upload-artifact@v2
+    - name: Upload Installer on Windows
+      uses: actions/upload-artifact@v2
       if: startsWith(matrix.config.os, 'windows')
       with:
         name: ${{ matrix.config.artifact }}
-        path: src/*.exe
-
+        path: "*.exe"
 
     - name: Build on Linux
       if: (startsWith(matrix.config.os, 'ubuntu'))
@@ -89,14 +89,15 @@ jobs:
         EOF
         dpkg-buildpackage --build=binary --check-builddeps --jobs=auto --root-command=fakeroot \
                           --unsigned-source --unsigned-changes --compression=xz
-        mv ../*.deb src
+        mv ../*.deb .
       shell: bash
 
-    - uses: actions/upload-artifact@v2
+    - name: Upload DEB on Linux
+      uses: actions/upload-artifact@v2
       if: startsWith(matrix.config.os, 'ubuntu')
       with:
         name: ${{ matrix.config.artifact }}
-        path: src/*.deb
+        path: "*.deb"
 
 
     - name: Build on macOS
@@ -107,8 +108,9 @@ jobs:
         make installer
       shell: bash
 
-    - uses: actions/upload-artifact@v2
+    - name: Upload DMG on macOS
+      uses: actions/upload-artifact@v2
       if: startsWith(matrix.config.os, 'mac')
       with:
         name: ${{ matrix.config.artifact }}
-        path: src/*.dmg
+        path: "*.dmg"
