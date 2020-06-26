@@ -71,7 +71,7 @@ int main(int argc, char **argv)
 #ifdef QPARALLELSORT_TESTING
         test_par_sort();
 #endif
-        return a.exec();
+        return qApp->exec();
     }
 }
 

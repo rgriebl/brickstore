@@ -20,7 +20,7 @@ class FrameWork;
 class QTranslator;
 
 
-class Application : public QApplication
+class Application : public QObject
 {
     Q_OBJECT
 public:
@@ -49,7 +49,7 @@ signals:
     void onlineStateChanged(bool isOnline);
 
 protected:
-    bool event(QEvent *e) override;
+    bool eventFilter(QObject *o, QEvent *e) override;
 
 private slots:
     void doEmitOpenDocument();
@@ -64,14 +64,14 @@ private:
 
 private:
     QStringList m_files_to_open;
-    bool m_enable_emit;
-    bool m_has_alpha;
+    bool m_enable_emit = false;
+    bool m_has_alpha = false;
 
-    bool m_online;
-    qreal m_default_fontsize;
+    bool m_online = true;
+    qreal m_default_fontsize = 0;
 
-    QTranslator *m_trans_qt;
-    QTranslator *m_trans_brickstore;
+    QTranslator *m_trans_qt = nullptr;
+    QTranslator *m_trans_brickstore = nullptr;
 
     static Application *s_inst;
 };

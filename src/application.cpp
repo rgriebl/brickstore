@@ -76,48 +76,58 @@ enum {
 Application *Application::s_inst = nullptr;
 
 Application::Application(bool rebuild_db_only, bool skip_download, int &_argc, char **_argv)
-    : QApplication(_argc, _argv, !rebuild_db_only)
+    : QObject()
 {
     s_inst = this;
 
-    m_default_fontsize = font().pointSizeF();
-    setProperty("_bs_defaultFontSize", m_default_fontsize); // the settings dialog needs this
+    QCoreApplication::setApplicationName(QLatin1String(BRICKSTORE_NAME));
+    QCoreApplication::setApplicationVersion(QLatin1String(BRICKSTORE_VERSION));
 
-    auto setFontSizePercentLambda = [this](int p) {
-        QFont f = font();
-        f.setPointSizeF(m_default_fontsize * qreal(qBound(50, p, 200)) / 100.);
-        setFont(f);
-    };
-    connect(Config::inst(), &Config::fontSizePercentChanged, this, setFontSizePercentLambda);
-    int fsp = Config::inst()->fontSizePercent();
-    if (fsp != 100)
-        setFontSizePercentLambda(fsp);
+    if (rebuild_db_only) {
+        new QCoreApplication(_argc, _argv);
+    } else {
+        new QApplication(_argc, _argv);
 
-    m_enable_emit = false;
-    m_has_alpha = rebuild_db_only ? false : (QPixmap::defaultDepth() >= 15);
-    m_trans_qt = nullptr;
-    m_trans_brickstore = nullptr;
+        qApp->installEventFilter(this);
 
-    m_online = true;
-    checkNetwork();
+        m_default_fontsize = QGuiApplication::font().pointSizeF();
+        setProperty("_bs_defaultFontSize", m_default_fontsize); // the settings dialog needs this
 
-    auto *netcheck = new QTimer(this);
-    connect(netcheck, &QTimer::timeout,
-            this, &Application::checkNetwork);
-    netcheck->start(5000);
+        auto setFontSizePercentLambda = [this](int p) {
+            QFont f = QGuiApplication::font();
+            f.setPointSizeF(m_default_fontsize * qreal(qBound(50, p, 200)) / 100.);
+            QGuiApplication::setFont(f);
+        };
+        connect(Config::inst(), &Config::fontSizePercentChanged, this, setFontSizePercentLambda);
+        int fsp = Config::inst()->fontSizePercent();
+        if (fsp != 100)
+            setFontSizePercentLambda(fsp);
 
-    // check for an already running instance
-    if (!rebuild_db_only) {
+        m_has_alpha = (QPixmap::defaultDepth() >= 15);
+
+#if !defined(Q_OS_WINDOWS) && !defined(Q_OS_MACOS)
+        QPixmap pix(":/images/brickstore_icon.png");
+        if (!pix.isNull())
+            QGuiApplication::setWindowIcon(pix);
+#endif
+#if defined(Q_OS_MACOS)
+        QGuiApplication::setAttribute(Qt::AA_DontShowIconsInMenus);
+#endif
+
+        // check for an already running instance
         if (isClient()) {
             // we cannot call quit directly, since there is
             // no event loop to quit from...
-            QMetaObject::invokeMethod(this, &Application::quit, Qt::QueuedConnection);
+            QMetaObject::invokeMethod(this, &QCoreApplication::quit, Qt::QueuedConnection);
             return;
         }
     }
 
-    setApplicationName(QLatin1String(BRICKSTORE_NAME));
-    setApplicationVersion(QLatin1String(BRICKSTORE_VERSION));
+    checkNetwork();
+    auto *netcheck = new QTimer(this);
+    connect(netcheck, &QTimer::timeout,
+            this, &Application::checkNetwork);
+    netcheck->start(5000);
 
     QNetworkProxyFactory::setUseSystemConfiguration(true);
 
@@ -126,7 +136,7 @@ Application::Application(bool rebuild_db_only, bool skip_download, int &_argc, c
 //                                  QLatin1String("; http://") + applicationUrl() + QLatin1Char(')'));
 
     //TODO5: find out why we are blacklisted ... for now, fake the UA
-    Transfer::setDefaultUserAgent("Br1ckstore" + QLatin1Char('/') + applicationVersion() +
+    Transfer::setDefaultUserAgent("Br1ckstore" + QLatin1Char('/') + QCoreApplication::applicationVersion() +
                                   QLatin1String(" (") + QSysInfo::prettyProductName() +
                                   QLatin1Char(')'));
 
@@ -149,21 +159,13 @@ Application::Application(bool rebuild_db_only, bool skip_download, int &_argc, c
         }, Qt::QueuedConnection);
     }
     else {
-#if !defined(Q_OS_WINDOWS) && !defined(Q_OS_MACOS)
-        QPixmap pix(":/images/brickstore_icon.png");
-        if (!pix.isNull())
-            setWindowIcon(pix);
-#endif
-#if defined(Q_OS_MACOS)
-        setAttribute(Qt::AA_DontShowIconsInMenus);
-#endif
         updateTranslations();
         connect(Config::inst(), &Config::languageChanged,
                 this, &Application::updateTranslations);
 
-        MessageBox::setDefaultTitle(applicationName());
+        MessageBox::setDefaultTitle(QCoreApplication::applicationName());
 
-        m_files_to_open << arguments().mid(1);
+        m_files_to_open << QCoreApplication::arguments().mid(1);
 
         FrameWork::inst()->show();
 #if defined(Q_OS_MACOS)
@@ -191,7 +193,7 @@ QStringList Application::externalResourceSearchPath(const QString &subdir) const
     static QStringList baseSearchPath;
 
     if (baseSearchPath.isEmpty()) {
-        QString appdir = applicationDirPath();
+        QString appdir = QCoreApplication::applicationDirPath();
 #if defined(Q_OS_WINDOWS)
         baseSearchPath << appdir;
 
@@ -224,9 +226,9 @@ void Application::updateTranslations()
     QLocale::setDefault(QLocale(locale));
 
     if (m_trans_qt)
-        removeTranslator(m_trans_qt);
+        QCoreApplication::removeTranslator(m_trans_qt);
     if (m_trans_brickstore)
-        removeTranslator(m_trans_brickstore);
+        QCoreApplication::removeTranslator(m_trans_brickstore);
 
     m_trans_qt = new QTranslator(this);
     m_trans_brickstore = new QTranslator(this);
@@ -243,9 +245,9 @@ void Application::updateTranslations()
         bsLoaded = bsLoaded || m_trans_brickstore->load(QLatin1String("brickstore_") + locale, sp);
     }
     if (qtLoaded)
-        installTranslator(m_trans_qt);
+        QCoreApplication::installTranslator(m_trans_qt);
     if (bsLoaded)
-        installTranslator(m_trans_brickstore);
+        QCoreApplication::installTranslator(m_trans_brickstore);
 }
 
 QString Application::applicationUrl() const
@@ -269,15 +271,18 @@ void Application::doEmitOpenDocument()
         emit openDocument(m_files_to_open.takeFirst());
 }
 
-bool Application::event(QEvent *e)
+bool Application::eventFilter(QObject *o, QEvent *e)
 {
+    if ((o != qApp) || !e)
+        return false;
+
     switch (e->type()) {
     case QEvent::FileOpen:
         m_files_to_open.append(static_cast<QFileOpenEvent *>(e)->file());
         doEmitOpenDocument();
         return true;
     default:
-        return QApplication::event(e);
+        return QObject::eventFilter(o, e);
     }
 }
 
@@ -327,7 +332,7 @@ bool Application::isClient(int timeout)
 
         if (client.state() == QLocalSocket::ConnectedState) {
             QStringList files;
-            Q_FOREACH(const QString &arg, arguments()) {
+            foreach (const QString &arg, QCoreApplication::arguments()) {
                 QFileInfo fi(arg);
                 if (fi.exists() && fi.isFile())
                     files << fi.absoluteFilePath();
@@ -403,7 +408,7 @@ bool Application::initBrickLink()
 
     BrickLink::Core *bl = BrickLink::create(Config::inst()->dataDir(), &errstring);
     if (!bl) {
-        QMessageBox::critical(nullptr, applicationName(), tr("Could not initialize the BrickLink kernel:<br /><br />%1").arg(errstring), QMessageBox::Ok);
+        QMessageBox::critical(nullptr, QCoreApplication::applicationName(), tr("Could not initialize the BrickLink kernel:<br /><br />%1").arg(errstring), QMessageBox::Ok);
     } else {
         bl->setItemImageScaleFactor(Config::inst()->itemImageSizePercent() / 100.);
         connect(Config::inst(), &Config::itemImageSizePercentChanged,
@@ -515,14 +520,14 @@ void Application::about()
             .arg(QSysInfo::prettyProductName(), QSysInfo::currentCpuArchitecture())
             .arg(Utility::physicalMemory()/(1024ULL*1024ULL)).arg(qt);
 
-    QString page1 = layout.arg(applicationName(), copyright, version, support, page1_link, legal, translators);
-    QString page2 = layout.arg(applicationName(), copyright, version, support, page2_link, technical, QString());
+    QString page1 = layout.arg(QCoreApplication::applicationName(), copyright, version, support, page1_link, legal, translators);
+    QString page2 = layout.arg(QCoreApplication::applicationName(), copyright, version, support, page2_link, technical, QString());
 
     QMap<QString, QString> pages;
     pages ["index"]  = page1;
     pages ["system"] = page2;
 
-    InformationDialog d(applicationName(), pages, FrameWork::inst());
+    InformationDialog d(QCoreApplication::applicationName(), pages, FrameWork::inst());
     d.exec();
 }
 

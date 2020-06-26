@@ -14,6 +14,7 @@
 #include <QBuffer>
 #include <QTextStream>
 #include <QUrlQuery>
+#include <QCoreApplication>
 
 #include "application.h"
 #include "config.h"
@@ -26,17 +27,19 @@ CheckForUpdates::CheckForUpdates(ProgressDialog *pd)
 {
     connect(pd, SIGNAL(transferFinished()), this, SLOT(gotten()));
 
+    const QString &appver = QCoreApplication::applicationVersion();
+
     pd->setAutoClose(false);
     pd->setHeaderText(tr("Checking for program updates"));
-    pd->setMessageText(tr("You are currently running %1 %2").arg(Application::inst()->applicationName(), Application::inst()->applicationVersion()));
+    pd->setMessageText(tr("You are currently running %1 %2").arg(QCoreApplication::applicationName(), appver));
 
-    m_current_version.fromString(Application::inst()->applicationVersion());
+    m_current_version.fromString(appver);
 
     // m_error = tr( "Could not retrieve version information from server:<br /><br />%1" );
 
     QUrl url = QString("http://") + Application::inst()->applicationUrl() + QString("/RELEASES");
     QUrlQuery query;
-    query.addQueryItem("version", Application::inst()->applicationVersion());
+    query.addQueryItem("version", appver);
     url.setQuery(query);
 
     pd->get(url);
