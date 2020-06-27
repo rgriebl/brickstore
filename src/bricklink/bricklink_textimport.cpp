@@ -123,7 +123,7 @@ template <> Color *TextImport::parse<Color> (uint count, const char **strs)
     col->m_name     = strs[1];
     col->m_ldraw_id = -1;
     col->m_color    = QColor(QString('#') + strs[2]);
-    col->m_type     = nullptr;
+    col->m_type     = 0;
 
     if (!strcmp(strs[3], "Transparent"))  col->m_type |= Color::Transparent;
     if (!strcmp(strs[3], "Glitter"))  col->m_type |= Color::Glitter;
@@ -389,7 +389,7 @@ bool BrickLink::TextImport::readDB_processLine(btchglog_dummy & /*dummy*/, uint 
         ba.append(strs[3+i]);
     }
 
-    m_changelog.append(qstrdup(ba.constData()));
+    m_changelog.append(ba);
     return true;
 }
 
@@ -504,6 +504,7 @@ bool BrickLink::TextImport::readInventory(const Item *item)
                     m_consists_of_hash.insert(item, *result.items);
                     ok = true;
                 }
+                qDeleteAll(*result.items);
                 delete result.items;
             }
         }

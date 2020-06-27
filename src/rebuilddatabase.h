@@ -30,7 +30,7 @@ public:
     int exec();
 
 private slots:
-    void downloadJobFinished(ThreadPoolJob *job);
+    void downloadJobFinished(TransferJob *job);
 
 private:
     int error(const QString &);

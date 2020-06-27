@@ -63,7 +63,6 @@ public:
     };
 
     SetMatch(QObject *parent = nullptr);
-    ~SetMatch();
 
     bool isActive() const;
 

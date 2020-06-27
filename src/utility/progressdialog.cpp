@@ -186,16 +186,14 @@ TransferJob *ProgressDialog::job() const
     return m_job;
 }
 
-void ProgressDialog::transferProgress(ThreadPoolJob *j, int s, int t)
+void ProgressDialog::transferProgress(TransferJob *j, int s, int t)
 {
     if (j && (j == m_job))
         setProgress(s / 1024, t / 1024);
 }
 
-void ProgressDialog::transferDone(ThreadPoolJob *pj)
+void ProgressDialog::transferDone(TransferJob *j)
 {
-    auto *j = static_cast<TransferJob *>(pj);
-
     if (!j || (j != m_job))
         return;
 

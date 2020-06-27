@@ -121,9 +121,6 @@ enum State {
     StateInvalid
 };
 
-Filter::Parser::Parser()
-= default;
-
 
 QList<Filter> Filter::Parser::parse(const QString &str_)
 {

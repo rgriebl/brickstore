@@ -64,9 +64,6 @@ ChunkReader::ChunkReader(QIODevice *dev, QDataStream::ByteOrder bo)
     m_stream.setByteOrder(bo);
 }
 
-ChunkReader::~ChunkReader()
-= default;
-
 QDataStream &ChunkReader::dataStream()
 {
     static QDataStream nullstream;

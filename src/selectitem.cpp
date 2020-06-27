@@ -107,8 +107,8 @@ QSize ItemThumbsDelegate::sizeHint(const QStyleOptionViewItem &option, const QMo
 
 SelectItem::SelectItem(QWidget *parent)
     : QWidget(parent)
+    , d(new SelectItemPrivate())
 {
-    d = new SelectItemPrivate();
     d->m_inv_only = false;
     init();
 }
@@ -129,7 +129,7 @@ void SelectItem::init()
     d->w_categories->setRootIsDecorated(false);
     d->w_categories->setSelectionBehavior(QAbstractItemView::SelectRows);
     d->w_categories->setSelectionMode(QAbstractItemView::SingleSelection);
-    d->w_categories->setItemDelegate(new CategoryDelegate);
+    d->w_categories->setItemDelegate(new CategoryDelegate(this));
 
     d->w_filter = new QLineEdit(this);
     d->w_filter->setClearButtonEnabled(true);
@@ -184,7 +184,7 @@ void SelectItem::init()
     d->w_itemthumbs->setRootIsDecorated(false);
     d->w_itemthumbs->setSelectionBehavior(QAbstractItemView::SelectRows);
     d->w_itemthumbs->setSelectionMode(QAbstractItemView::SingleSelection);
-    d->w_itemthumbs->setItemDelegate(new ItemThumbsDelegate);
+    d->w_itemthumbs->setItemDelegate(new ItemThumbsDelegate(this));
     d->w_itemthumbs->setContextMenuPolicy(Qt::CustomContextMenu);
     d->w_itemthumbs->installEventFilter(this);
 
@@ -196,7 +196,7 @@ void SelectItem::init()
     d->w_thumbs->setSelectionBehavior(QAbstractItemView::SelectRows);
     d->w_thumbs->setSelectionMode(QAbstractItemView::SingleSelection);
     d->w_thumbs->setTextElideMode(Qt::ElideRight);
-    d->w_thumbs->setItemDelegate(new ItemThumbsDelegate);
+    d->w_thumbs->setItemDelegate(new ItemThumbsDelegate(this));
     d->w_thumbs->setContextMenuPolicy(Qt::CustomContextMenu);
     d->w_thumbs->installEventFilter(this);
 

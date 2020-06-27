@@ -207,7 +207,7 @@ void AddItemDialog::attach(Window *w)
 void AddItemDialog::wheelEvent(QWheelEvent *e)
 {
     if (e->modifiers() == Qt::ControlModifier) {
-        double o = windowOpacity() + double(e->delta()) / 1200.0;
+        double o = windowOpacity() + double(e->angleDelta().y()) / 1200.0;
         setWindowOpacity(double(qMin(qMax(o, 0.2), 1.0)));
 
         e->accept();

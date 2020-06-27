@@ -17,17 +17,14 @@
 #include <QUrl>
 #include <QNetworkAccessManager>
 
-#include "threadpool.h"
-
 class QIODevice;
 class Transfer;
-class TransferThread;
 
 
-class TransferJob : public ThreadPoolJob // not correct anymore, but it keeps the API straight
+class TransferJob
 {
 public:
-    ~TransferJob() override;
+    ~TransferJob();
 
     static TransferJob *get(const QUrl &url, QIODevice *file = nullptr);
     static TransferJob *getIfNewer(const QUrl &url, const QDateTime &dt, QIODevice *file = nullptr);
@@ -42,11 +39,33 @@ public:
     QDateTime lastModified() const   { return m_last_modified; }
     bool wasNotModifiedSince() const { return m_was_not_modified; }
 
-    bool abort() override;
+    bool abort();
+
+    bool isActive() const            { return m_status == Active; }
+    bool isCompleted() const         { return m_status == Completed; }
+    bool isFailed() const            { return m_status == Failed; }
+    bool isAborted() const           { return m_status == Aborted; }
+
+    template<typename T>
+    void setUserData(int tag, T *t)  { m_user_tag = tag; m_user_ptr = static_cast<void *>(t); }
+
+    template<typename T>
+    QPair<int, T *> userData() const { return qMakePair(m_user_tag, static_cast<T *>(m_user_ptr)); }
+
+    template<typename T>
+    T *userData(int tag) const       { return tag == m_user_tag ? static_cast<T *>(m_user_ptr) : 0; }
 
 private:
     friend class Transfer;
     friend class TransferThread;
+
+    enum Status : uint {
+        Inactive = 0,
+        Active,
+        Completed,
+        Failed,
+        Aborted
+    };
 
     enum HttpMethod : uint {
         HttpGet = 0,
@@ -55,19 +74,25 @@ private:
 
     static TransferJob *create(HttpMethod method, const QUrl &url, const QDateTime &ifnewer, QIODevice *file);
 
+    void setStatus(Status st)  { m_status = st; }
+
     TransferJob() = default;
     Q_DISABLE_COPY(TransferJob)
 
+    Transfer *   m_transfer = nullptr;
+    void *       m_user_ptr = nullptr;
+    int          m_user_tag = 0;
     QUrl         m_url;
     QUrl         m_effective_url;
-    QByteArray * m_data;
-    QIODevice *  m_file;
+    QByteArray * m_data = nullptr;
+    QIODevice *  m_file = nullptr;
     QString      m_error_string;
     QDateTime    m_only_if_newer;
     QDateTime    m_last_modified;
     QNetworkReply *m_reply = nullptr;
 
     int          m_respcode         : 16;
+    int          m_status           : 4;
     uint         m_http_method      : 1;
     bool         m_was_not_modified : 1;
 
@@ -80,6 +105,7 @@ class Transfer : public QObject
     Q_OBJECT
 public:
     Transfer();
+    ~Transfer() override;
 
     bool retrieve(TransferJob *job, bool high_priority = false);
 
@@ -93,9 +119,9 @@ public:
 
 signals:
     void progress(int done, int total);
-    void finished(ThreadPoolJob *);
+    void finished(TransferJob *);
     //void started(TransferJob *);
-    void jobProgress(ThreadPoolJob *, int done, int total);
+    void jobProgress(TransferJob *, int done, int total);
 
 protected:
 

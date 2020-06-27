@@ -341,11 +341,9 @@ bool RebuildDatabase::download()
     return true;
 }
 
-void RebuildDatabase::downloadJobFinished(ThreadPoolJob *pj)
+void RebuildDatabase::downloadJobFinished(TransferJob *job)
 {
-    if (pj) {
-        auto *job = static_cast<TransferJob *>(pj);
-
+    if (job) {
         auto *f = qobject_cast<QFile *>(job->file());
 
         m_downloads_in_progress--;

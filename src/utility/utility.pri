@@ -21,7 +21,6 @@ HEADERS += \
     $$PWD/qtemporaryresource_p.h \
     $$PWD/stopwatch.h \
     $$PWD/staticpointermodel.h \
-    $$PWD/threadpool.h \
     $$PWD/transfer.h \
     $$PWD/undo.h \
     $$PWD/utility.h \
@@ -38,7 +37,6 @@ SOURCES += \
     $$PWD/progressdialog.cpp \
     $$PWD/qtemporaryresource.cpp \
     $$PWD/staticpointermodel.cpp \
-    $$PWD/threadpool.cpp \
     $$PWD/transfer.cpp \
     $$PWD/undo.cpp \
     $$PWD/utility.cpp \

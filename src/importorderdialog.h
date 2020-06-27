@@ -24,7 +24,6 @@ class ImportOrderDialog : public QDialog, private Ui::ImportOrderDialog
     Q_OBJECT
 public:
     ImportOrderDialog(QWidget *parent = nullptr);
-    ~ImportOrderDialog();
 
     QList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > orders() const;
 

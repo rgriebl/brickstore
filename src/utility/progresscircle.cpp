@@ -27,7 +27,6 @@ ProgressCircle::ProgressCircle(QWidget *parent)
     , m_value(-1)
     , m_online(false)
     , m_tt_normal(QLatin1String("%p%"))
-    , m_fill(nullptr)
 {
     QSizePolicy sp;
     sp.setHorizontalPolicy(QSizePolicy::Preferred);
@@ -107,8 +106,7 @@ void ProgressCircle::reset()
 
 void ProgressCircle::resizeEvent(QResizeEvent *)
 {
-    delete m_fill;
-    m_fill = nullptr;
+    m_fill.reset();
 }
 
 void ProgressCircle::paintEvent(QPaintEvent *)
@@ -142,7 +140,7 @@ void ProgressCircle::paintEvent(QPaintEvent *)
 
     if (sweepAngle) {
         if (!m_fill) {
-            m_fill = new QConicalGradient(r.center(), qreal(45));
+            m_fill.reset(new QConicalGradient(r.center(), qreal(45)));
             m_fill->setColorAt(0, inColor);
             m_fill->setColorAt(0.25, inColor.lighter());
             m_fill->setColorAt(0.5, inColor);
@@ -150,7 +148,6 @@ void ProgressCircle::paintEvent(QPaintEvent *)
             m_fill->setColorAt(1, inColor);
         }
         p.setBrush(*m_fill);
-        //p.setBrush(inColor);
         p.drawPie(r, fromAngle, -sweepAngle);
     }
 

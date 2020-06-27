@@ -53,8 +53,8 @@ protected slots:
     void done(int r) override;
 
 private slots:
-    void transferProgress(ThreadPoolJob *job, int, int);
-    void transferDone(ThreadPoolJob *job);
+    void transferProgress(TransferJob *job, int, int);
+    void transferDone(TransferJob *j);
 
 private:
     void syncRepaint(QWidget *w);

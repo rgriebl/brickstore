@@ -610,7 +610,7 @@ bool BrickLink::ItemModel::filterAccepts(const void *pointer) const
 
 
 BrickLink::InternalAppearsInModel::InternalAppearsInModel(const Item *item, const Color *color, QObject *parent)
-    : QAbstractTableModel(parent), m_item(item), m_color(color)
+    : QAbstractTableModel(parent)
 {
     InvItemList list;
     InvItem invitem(color, item);
@@ -619,7 +619,7 @@ BrickLink::InternalAppearsInModel::InternalAppearsInModel(const Item *item, cons
 }
 
 BrickLink::InternalAppearsInModel::InternalAppearsInModel(const InvItemList &list, QObject *parent)
-    : QAbstractTableModel(parent), m_item(nullptr), m_color(nullptr)
+    : QAbstractTableModel(parent)
 {
     init(list);
 }
@@ -660,8 +660,7 @@ void BrickLink::InternalAppearsInModel::init(const InvItemList &list)
 
 BrickLink::InternalAppearsInModel::~InternalAppearsInModel()
 {
-    if (!m_item && !m_color && !m_items.isEmpty())
-        qDeleteAll(m_items);
+    qDeleteAll(m_items);
 }
 
 QModelIndex BrickLink::InternalAppearsInModel::index(int row, int column, const QModelIndex &parent) const

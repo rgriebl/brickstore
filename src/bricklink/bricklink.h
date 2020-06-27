@@ -35,12 +35,12 @@
 #include <QTimer>
 #include <QPointer>
 #include <QStyledItemDelegate>
+#include <QThreadPool>
 
 #include <ctime>
 
 #include "ref.h"
 #include "currency.h"
-#include "threadpool.h"
 #include "transfer.h"
 #include "staticpointermodel.h"
 #include "q3cache.h"
@@ -549,7 +549,7 @@ private:
     friend class Core;
 };
 
-class ChangeLogEntry : public QByteArray
+class ChangeLogEntry
 {
 public:
     enum Type {
@@ -564,9 +564,8 @@ public:
     };
 
     ChangeLogEntry(const char *data)
-    {
-        m_data = QByteArray::fromRawData(data, int(qstrlen(data)));
-    }
+        : m_data(QByteArray::fromRawData(data, int(qstrlen(data))))
+    { }
     ~ChangeLogEntry() = default;
 
     Type type() const              { return m_data.isEmpty() ? Invalid : Type(m_data.at(0)); }
@@ -576,7 +575,7 @@ public:
 private:
     Q_DISABLE_COPY(ChangeLogEntry)
 
-    QByteArray m_data;
+    const QByteArray m_data;
 
     friend class Core;
 };
@@ -627,7 +626,7 @@ private:
 
     QHash<const Item *, AppearsIn>   m_appears_in_hash;
     QHash<const Item *, InvItemList> m_consists_of_hash;
-    QVector<const char *>            m_changelog;
+    QVector<QByteArray>              m_changelog;
 
     const ItemType *m_current_item_type;
 };
@@ -807,9 +806,7 @@ protected:
 
     void init(const InvItemList &list);
 
-    const Item *        m_item;
-    const Color *       m_color;
-    AppearsIn     m_appearsin;
+    AppearsIn m_appearsin;
     QList<AppearsInItem *> m_items;
 
     friend class AppearsInModel;
@@ -989,17 +986,21 @@ private:
                             const QHash<uint, const Category *> &categories,
                             const QHash<char, const ItemType *> &item_types,
                             const QVector<const Item *> &items);
-    void setDatabase_ChangeLog(const QVector<const char *> &changelog);
+    void setDatabase_ChangeLog(const QVector<QByteArray> &changelog);
 
     friend class TextImport;
 
 private slots:
-    void pictureJobFinished(ThreadPoolJob *); //TODO5: timeout handling in brickstock updatePicturesTimeOut
-    void priceGuideJobFinished(ThreadPoolJob *);
+    void pictureJobFinished(TransferJob *j); //TODO5: timeout handling in brickstock updatePicturesTimeOut
+    void priceGuideJobFinished(TransferJob *j);
 
-    void pictureLoaded(ThreadPoolJob *);
+    void pictureLoaded(Picture *pic);
+
+    friend class PictureLoaderJob;
 
 private:
+    void clear();
+
     QString  m_datadir;
     bool     m_online;
     QLocale  m_c_locale;
@@ -1012,17 +1013,17 @@ private:
     QHash<uint, const Category *>   m_categories;  // id ->Category *
     QHash<char, const ItemType *>   m_item_types;  // id ->ItemType *
     QVector<const Item *>           m_items;       // sorted array of Item *
-    QVector<const char *>           m_changelog;
+    QVector<QByteArray>             m_changelog;
 
-    QPointer<Transfer>  m_transfer;
+    QPointer<Transfer>  m_transfer = nullptr;
 
     //Transfer                   m_pg_transfer;
-    int                          m_pg_update_iv;
+    int                          m_pg_update_iv = 0;
     Q3Cache<quint64, PriceGuide> m_pg_cache;
 
     //Transfer                   m_pic_transfer;
-    int                          m_pic_update_iv;
-    ThreadPool                   m_pic_diskload;
+    int                          m_pic_update_iv = 0;
+    QThreadPool                  m_pic_diskload;
     Q3Cache<quint64, Picture>    m_pic_cache;
 
     qreal m_item_image_scale_factor = 1.;

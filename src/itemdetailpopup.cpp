@@ -20,6 +20,7 @@
 #include <QMouseEvent>
 #include <QTableView>
 #include <QBitmap>
+#include <QPainterPath>
 
 #include "window.h"
 #include "itemdetailpopup.h"

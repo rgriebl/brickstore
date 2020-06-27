@@ -15,6 +15,7 @@
 
 #include <QFrame>
 #include <QLabel>
+#include <QScopedPointer>
 
 #include "bricklinkfwd.h"
 
@@ -27,7 +28,7 @@ class PictureWidget : public QFrame
     Q_OBJECT
 public:
     PictureWidget(QWidget *parent = nullptr);
-    virtual ~PictureWidget();
+    ~PictureWidget() override;
 
     void setPicture(BrickLink::Picture *pic);
     BrickLink::Picture *picture() const;
@@ -49,5 +50,5 @@ protected:
     bool event(QEvent *e) override;
 
 private:
-    PictureWidgetPrivate *d;
+    QScopedPointer<PictureWidgetPrivate> d;
 };

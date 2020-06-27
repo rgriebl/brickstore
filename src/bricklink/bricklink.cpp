@@ -396,10 +396,12 @@ BrickLink::Core *BrickLink::Core::create(const QString &datadir, QString *errstr
 }
 
 BrickLink::Core::Core(const QString &datadir)
-    : m_datadir(datadir), m_c_locale(QLocale::c()), m_corelock(QMutex::Recursive),
-      m_transfer(nullptr), m_pg_update_iv(0), m_pic_update_iv(0),
-      m_pic_diskload(QThread::idealThreadCount() * 3)
+    : m_datadir(datadir)
+    , m_c_locale(QLocale::c())
+    , m_corelock(QMutex::Recursive)
 {
+    m_pic_diskload.setMaxThreadCount(QThread::idealThreadCount() * 3);
+
     if (m_datadir.isEmpty())
         m_datadir = QLatin1String("./");
 
@@ -416,14 +418,12 @@ BrickLink::Core::Core(const QString &datadir)
 
     m_pg_cache.setMaxCost(500);          // each priceguide has a cost of 1
     m_pic_cache.setMaxCost(int(cachemem));    // each pic has a cost of (w*h*d/8 + 1024)
-
-    connect(&m_pic_diskload, &ThreadPool::finished, this, &Core::pictureLoaded);
 }
 
 BrickLink::Core::~Core()
 {
-    cancelPictureTransfers();
-    cancelPriceGuideTransfers();
+    clear();
+
     delete m_transfer;
     s_inst = nullptr;
 }
@@ -554,7 +554,8 @@ void BrickLink::Core::cancelPictureTransfers()
 {
     QMutexLocker lock(&m_corelock);
 
-    m_pic_diskload.abortAllJobs();
+    m_pic_diskload.clear();
+    m_pic_diskload.waitForDone();
     m_transfer->abortAllJobs();
 }
 
@@ -570,7 +571,7 @@ QString BrickLink::Core::defaultDatabaseName(DatabaseVersion version) const
     return QString("database-v%1").arg(version);
 }
 
-bool BrickLink::Core::readDatabase(QString *infoText, const QString &fname)
+void BrickLink::Core::clear()
 {
     QMutexLocker lock(&m_corelock);
 
@@ -584,12 +585,19 @@ bool BrickLink::Core::readDatabase(QString *infoText, const QString &fname)
     qDeleteAll(m_item_types);
     qDeleteAll(m_categories);
     qDeleteAll(m_items);
-    qDeleteAll(m_changelog);
 
     m_colors.clear();
     m_item_types.clear();
     m_categories.clear();
     m_items.clear();
+    m_changelog.clear();
+}
+
+bool BrickLink::Core::readDatabase(QString *infoText, const QString &fname)
+{
+    QMutexLocker lock(&m_corelock);
+
+    clear();
 
     bool result = false;
     stopwatch *sw = nullptr; //new stopwatch("BrickLink::Core::readDatabase()");
@@ -675,7 +683,7 @@ bool BrickLink::Core::readDatabase(QString *infoText, const QString &fname)
 
                                 m_changelog.reserve(int(clc));
                                 for (quint32 i = clc; i; i--) {
-                                    char *entry;
+                                    QByteArray entry;
                                     ds >> entry;
                                     m_changelog.append(entry);
                                 }
@@ -713,10 +721,7 @@ out:
             qDebug() << "Info :" << info;
     }
     else {
-        m_colors.clear();
-        m_item_types.clear();
-        m_categories.clear();
-        m_items.clear();
+        clear();
 
         qWarning("Error reading databases!");
     }
@@ -1415,7 +1420,7 @@ void BrickLink::Core::setDatabase_Basics(const QHash<uint, const Color *> &color
     m_items      = items;
 }
 
-void BrickLink::Core::setDatabase_ChangeLog(const QVector<const char *> &changelog)
+void BrickLink::Core::setDatabase_ChangeLog(const QVector<QByteArray> &changelog)
 {
     QMutexLocker lock(&m_corelock);
     m_changelog = changelog;
@@ -1470,7 +1475,7 @@ bool BrickLink::Core::writeDatabase(const QString &filename, DatabaseVersion ver
 
             ok = ok && cw.startChunk(ChunkId('C','H','G','L'), version);
             ds << quint32(m_changelog.count());
-            for (const char *cl : m_changelog)
+            for (const QByteArray &cl : m_changelog)
                 ds << cl;
             ok = ok && cw.endChunk();
 

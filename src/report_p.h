@@ -14,6 +14,7 @@
 #pragma once
 
 #include <QString>
+#include <QScopedPointer>
 
 #include <time.h>
 
@@ -23,9 +24,9 @@ class QScriptEngine;
 class ReportPrivate
 {
 public:
-    time_t              m_loaded;
-    QString             m_name;
-    QString             m_code;
-    QString             m_label;
-    QScriptEngine *     m_engine;
+    time_t m_loaded = 0;
+    QString m_name;
+    QString m_code;
+    QString m_label;
+    QScopedPointer<QScriptEngine> m_engine;
 };

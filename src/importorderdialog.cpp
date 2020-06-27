@@ -219,10 +219,8 @@ public:
     };
 
 private slots:
-    void flagReceived(ThreadPoolJob *pj)
+    void flagReceived(TransferJob *j)
     {
-        auto *j = static_cast<TransferJob *>(pj);
-
         if (!j || !j->data())
             return;
 
@@ -337,9 +335,6 @@ ImportOrderDialog::ImportOrderDialog(QWidget *parent)
     start();
     //resize(sizeHint());
 }
-
-ImportOrderDialog::~ImportOrderDialog()
-= default;
 
 void ImportOrderDialog::changeEvent(QEvent *e)
 {

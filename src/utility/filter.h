@@ -65,7 +65,7 @@ public:
     
     class Parser {
     public:
-        Parser();
+        Parser() = default;
 
         QList<Filter> parse(const QString &str);
 

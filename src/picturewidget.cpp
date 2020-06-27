@@ -39,9 +39,8 @@ public:
 
 PictureWidget::PictureWidget(QWidget *parent)
     : QFrame(parent)
+    , d(new PictureWidgetPrivate())
 {
-    d = new PictureWidgetPrivate();
-
     auto setDefaultSize = [this]() {
         QSize s = BrickLink::core()->standardPictureSize();
         d->m_default_size = qMax(s.width(), s.height());
@@ -117,8 +116,6 @@ PictureWidget::~PictureWidget()
 {
     if (d->m_pic)
         d->m_pic->release();
-
-    delete d;
 }
 
 QSize PictureWidget::sizeHint() const

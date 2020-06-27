@@ -14,6 +14,7 @@
 #pragma once
 
 #include <QFrame>
+#include <QScopedPointer>
 
 #include "currency.h"
 #include "bricklinkfwd.h"
@@ -76,5 +77,5 @@ private:
     QRegion nonStaticCells() const;
 
 private:
-    PriceGuideWidgetPrivate *d;
+    QScopedPointer<PriceGuideWidgetPrivate> d;
 };

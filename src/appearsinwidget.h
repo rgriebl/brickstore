@@ -14,6 +14,7 @@
 #pragma once
 
 #include <QTreeView>
+#include <QScopedPointer>
 
 #include "bricklinkfwd.h"
 
@@ -50,5 +51,5 @@ private:
     void triggerColumnResize();
 
 private:
-    AppearsInWidgetPrivate *d;
+    QScopedPointer<AppearsInWidgetPrivate> d;
 };

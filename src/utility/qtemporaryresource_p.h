@@ -25,13 +25,14 @@
 //
 
 #include "QtCore/private/qabstractfileengine_p.h"
+#include <QScopedPointer>
 
 class QTemporaryResourceFileEnginePrivate;
 class QTemporaryResourceFileEngine : public QAbstractFileEngine
 {
 private:
 //    Q_DECLARE_PRIVATE(QTemporaryResourceFileEngine)
-    QTemporaryResourceFileEnginePrivate *d;
+    QScopedPointer<QTemporaryResourceFileEnginePrivate> d;
 public:
     explicit QTemporaryResourceFileEngine(const QString &path);
 

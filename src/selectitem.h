@@ -14,6 +14,7 @@
 #pragma once
 
 #include <QDialog>
+#include <QScopedPointer>
 
 #include "bricklinkfwd.h"
 
@@ -71,5 +72,5 @@ private:
     void ensureSelectionVisible();
 
 protected:
-    SelectItemPrivate *d;
+    QScopedPointer<SelectItemPrivate> d;
 };

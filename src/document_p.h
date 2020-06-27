@@ -46,7 +46,6 @@ class ChangeCmd : public QUndoCommand
 {
 public:
     ChangeCmd(Document *doc, int position, const Document::Item &item, bool merge_allowed = false);
-    ~ChangeCmd() override;
 
     int id() const override;
 

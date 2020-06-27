@@ -202,9 +202,6 @@ BrickLink::SetMatch::SetMatch(QObject *parent)
 {
 }
 
-BrickLink::SetMatch::~SetMatch()
-= default;
-
 bool BrickLink::SetMatch::isActive() const
 {
     return m_active;

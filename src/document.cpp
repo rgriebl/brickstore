@@ -102,9 +102,6 @@ ChangeCmd::ChangeCmd(Document *doc, int pos, const Document::Item &item, bool me
     : QUndoCommand(qApp->translate("ChangeCmd", "Modified item")), m_doc(doc), m_position(pos), m_item(item), m_merge_allowed(merge_allowed)
 { }
 
-ChangeCmd::~ChangeCmd()
-= default;
-
 int ChangeCmd::id() const
 {
     return CID_Change;
@@ -322,7 +319,7 @@ QList<Document *> Document::s_documents;
 Document *Document::createTemporary(const BrickLink::InvItemList &list)
 {
     auto *doc = new Document(1 /*dummy*/);
-    doc->setBrickLinkItems(list, 1);
+    doc->setBrickLinkItems(list, 1); // the caller owns the items
     return doc;
 }
 
@@ -359,6 +356,8 @@ Document::~Document()
 
     delete m_order;
     qDeleteAll(m_items);
+
+    qWarning() << "deleted" << m_items.size() << "items";
 
     s_documents.removeAll(this);
 }
@@ -706,7 +705,8 @@ Document *Document::fileImportBrickLinkInventory(const BrickLink::Item *item)
             if (!items.isEmpty()) {
                 auto *doc = new Document();
 
-                doc->setBrickLinkItems(items, uint(qty));
+                doc->setBrickLinkItems(items, uint(qty)); // we own the items
+                qDeleteAll(items);
                 doc->setTitle(tr("Inventory for %1").arg(item->id()));
                 return doc;
             }
@@ -736,7 +736,7 @@ QList<Document *> Document::fileImportBrickLinkOrders()
 
                 doc->setTitle(tr("Order #%1").arg(order.first->id()));
                 doc->setCurrencyCode(order.first->currencyCode());
-                doc->setBrickLinkItems(*order.second);
+                doc->setBrickLinkItems(*order.second); // ImportOrderDialog owns the items
                 doc->m_order = new BrickLink::Order(*order. first);
                 docs.append(doc);
             }
@@ -756,7 +756,7 @@ Document *Document::fileImportBrickLinkStore()
 
         doc->setTitle(tr("Store %1").arg(QDate::currentDate().toString(Qt::LocalDate)));
         doc->setCurrencyCode(import.currencyCode());
-        doc->setBrickLinkItems(import.items());
+        doc->setBrickLinkItems(import.items()); // ImportBLStore owns the items
         return doc;
     }
     return nullptr;
@@ -790,7 +790,7 @@ Document *Document::fileImportBrickLinkCart()
                 auto *doc = new Document();
 
                 doc->setCurrencyCode(import.currencyCode());
-                doc->setBrickLinkItems(import.items());
+                doc->setBrickLinkItems(import.items()); // ImportBLCart owns the items
                 doc->setTitle(tr("Cart in Shop %1").arg(shopid));
                 return doc;
             }
@@ -845,10 +845,10 @@ Document *Document::fileLoadFrom(const QString &name, const char *type, bool imp
 
     QString emsg;
     int eline = 0, ecol = 0;
-    QDomDocument doc;
+    QDomDocument domdoc;
 
-    if (doc.setContent(&f, &emsg, &eline, &ecol)) {
-        QDomElement root = doc.documentElement();
+    if (domdoc.setContent(&f, &emsg, &eline, &ecol)) {
+        QDomElement root = domdoc.documentElement();
         QDomElement item_elem;
 
         if (hint == BrickLink::XMLHint_BrickStore) {
@@ -864,7 +864,7 @@ Document *Document::fileLoadFrom(const QString &name, const char *type, bool imp
             item_elem = root;
         }
 
-        result = BrickLink::core()->parseItemListXML(item_elem, hint);
+        result = BrickLink::core()->parseItemListXML(item_elem, hint); // we own the items now
     }
     else {
         MessageBox::warning(FrameWork::inst(), tr("Could not parse the XML data in file %1:<br /><i>Line %2, column %3: %4</i>").arg(CMB_BOLD(name)).arg(eline).arg(ecol).arg(emsg));
@@ -874,9 +874,9 @@ Document *Document::fileLoadFrom(const QString &name, const char *type, bool imp
 
     QApplication::restoreOverrideCursor();
 
-    if (result.items) {
-        auto *doc = new Document();
+    Document *doc = nullptr;
 
+    if (result.items) {
         if (result.invalidItemCount) {
             result.invalidItemCount -= uint(BrickLink::core()->applyChangeLogToItems(*result.items));
 
@@ -884,28 +884,29 @@ Document *Document::fileLoadFrom(const QString &name, const char *type, bool imp
                 if (MessageBox::information(FrameWork::inst(),
                                             tr("This file contains %1 unknown item(s).<br /><br />Do you still want to open this file?")
                                             .arg(CMB_BOLD(QString::number(result.invalidItemCount))),
-                                            QMessageBox::Yes, QMessageBox::No) != QMessageBox::Yes) {
-                    delete doc;
-                    return nullptr;
+                                            QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
+                    result.invalidItemCount = 0;
                 }
             }
         }
 
-        doc->setCurrencyCode(result.currencyCode);
-        doc->setBrickLinkItems(*result.items);
-        delete result.items;
+        if (!result.invalidItemCount) {
+            doc = new Document();
+            doc->setCurrencyCode(result.currencyCode); // we own the items
+            doc->setBrickLinkItems(*result.items);
 
-        doc->setFileName(import_only ? QString() : name);
-
-        if (!import_only)
-            FrameWork::inst()->addToRecentFiles(name);
-
-        return doc;
-    }
-    else {
+            doc->setFileName(import_only ? QString() : name);
+            if (!import_only)
+                FrameWork::inst()->addToRecentFiles(name);
+        }
+    } else {
         MessageBox::warning(FrameWork::inst(), tr("Could not parse the XML data in file %1.").arg(CMB_BOLD(name)));
-        return nullptr;
     }
+
+    qDeleteAll(*result.items);
+    delete result.items;
+
+    return doc;
 }
 
 Document *Document::fileImportLDrawModel()
@@ -929,33 +930,34 @@ Document *Document::fileImportLDrawModel()
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     uint invalid_items = 0;
-    BrickLink::InvItemList items;
+    BrickLink::InvItemList items; // we own the items
 
     bool b = BrickLink::core()->parseLDrawModel(f, items, &invalid_items);
+    Document *doc = nullptr;
 
     QApplication::restoreOverrideCursor();
 
     if (b && !items.isEmpty()) {
-        auto *doc = new Document();
-
         if (invalid_items) {
             if (MessageBox::information(FrameWork::inst(),
                                         tr("This file contains %1 unknown item(s).<br /><br />Do you still want to open this file?")
                                         .arg(CMB_BOLD(QString::number(invalid_items))),
-                                        QMessageBox::Yes, QMessageBox::No) != QMessageBox::Yes) {
-                delete doc;
-                return nullptr;
+                                        QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
+                invalid_items = 0;
             }
         }
 
-        doc->setBrickLinkItems(items);
-        doc->setTitle(tr("Import of %1").arg(QFileInfo(s).fileName()));
-        return doc;
-    }
-    else
+        if (!invalid_items) {
+            doc = new Document();
+            doc->setBrickLinkItems(items); // we own the items
+            doc->setTitle(tr("Import of %1").arg(QFileInfo(s).fileName()));
+        }
+    } else {
         MessageBox::warning(FrameWork::inst(), tr("Could not parse the LDraw model in file %1.").arg(CMB_BOLD(s)));
+    }
 
-    return nullptr;
+    qDeleteAll(items);
+    return doc;
 }
 
 
@@ -1295,7 +1297,7 @@ int Document::columnCount(const QModelIndex &parent) const
 Qt::ItemFlags Document::flags(const QModelIndex &index) const
 {
     if (!index.isValid())
-        return nullptr;
+        return Qt::ItemFlags();
 
     Qt::ItemFlags ifs = QAbstractItemModel::flags(index);
 
@@ -1686,7 +1688,7 @@ QString Document::subConditionLabel(BrickLink::SubCondition sc) const
 
 
 DocumentProxyModel::DocumentProxyModel(Document *model)
-    : QSortFilterProxyModel(nullptr)
+    : QSortFilterProxyModel(model)
 {
     m_lastSortColumn[0] = m_lastSortColumn[1] = -1;
 

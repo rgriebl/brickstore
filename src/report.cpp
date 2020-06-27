@@ -37,16 +37,8 @@
 
 
 Report::Report()
-{
-    d = new ReportPrivate();
-    d->m_engine = nullptr;
-}
-
-Report::~Report()
-{
-    delete d->m_engine;
-    delete d;
-}
+    : d(new ReportPrivate())
+{ }
 
 QString Report::name() const
 {
@@ -65,7 +57,7 @@ Report *Report::load(const QString &filename)
         r->d->m_code = ts.readAll();
 
         auto *eng = new QScriptEngine(r);
-        r->d->m_engine = eng;
+        r->d->m_engine.reset(eng);
         r->d->m_engine->setProperty("bsScriptPath", fi.absoluteFilePath());
 
         auto *dbg = new QScriptEngineDebugger(r);
@@ -152,7 +144,7 @@ void Report::print(QPaintDevice *pd, const Document *doc, const Document::ItemLi
         iVal.setProperty("name", item->item()->name());
 
         BrickLink::Picture *pic = BrickLink::core()->picture(item->item(), item->color(), true);
-        iVal.setProperty("picture", qScriptValueFromValue(d->m_engine, pic ? pic->image() : QImage()));
+        iVal.setProperty("picture", qScriptValueFromValue(d->m_engine.data(), pic ? pic->image() : QImage()));
 
         QScriptValue statusVal = d->m_engine->newObject();
         statusVal.setProperty("include", (item->status() == BrickLink::Include));
@@ -165,8 +157,8 @@ void Report::print(QPaintDevice *pd, const Document *doc, const Document::ItemLi
         QScriptValue colorVal = d->m_engine->newObject();
         colorVal.setProperty("id", item->color() ? int(item->color()->id()) : -1);
         colorVal.setProperty("name", (item->color() ? item->color()->name() : QString()));
-        colorVal.setProperty("rgb", qScriptValueFromValue(d->m_engine, item->color() ? item->color()->color() : QColor()));
-        colorVal.setProperty("picture", qScriptValueFromValue(d->m_engine, BrickLink::core()->colorImage(item->color(), 20, 20)));
+        colorVal.setProperty("rgb", qScriptValueFromValue(d->m_engine.data(), item->color() ? item->color()->color() : QColor()));
+        colorVal.setProperty("picture", qScriptValueFromValue(d->m_engine.data(), BrickLink::core()->colorImage(item->color(), 20, 20)));
         iVal.setProperty("color", colorVal);
 
         QScriptValue condVal = d->m_engine->newObject();
@@ -214,22 +206,22 @@ void Report::print(QPaintDevice *pd, const Document *doc, const Document::ItemLi
 
     auto *job = new ReportJob(pd);
     auto *ru = new ReportUtility();
-    auto *ms = new ReportMoneyStatic(d->m_engine);
+    auto *ms = new ReportMoneyStatic(d->m_engine.data());
 
     d->m_engine->globalObject().setProperty("Document", docVal);
     d->m_engine->globalObject().setProperty(job->objectName(), d->m_engine->newQObject(job));
     d->m_engine->globalObject().setProperty(ru->objectName(), d->m_engine->newQObject(ru));
     d->m_engine->globalObject().setProperty(ms->objectName(), d->m_engine->newQObject(ms));
 
-    qScriptRegisterMetaType(d->m_engine, Font::toScriptValue, Font::fromScriptValue);
+    qScriptRegisterMetaType(d->m_engine.data(), Font::toScriptValue, Font::fromScriptValue);
     QScriptValue fontCtor = d->m_engine->newFunction(Font::createScriptValue);
     d->m_engine->globalObject().setProperty("Font", fontCtor);
 
-    qScriptRegisterMetaType(d->m_engine, Color::toScriptValue, Color::fromScriptValue);
+    qScriptRegisterMetaType(d->m_engine.data(), Color::toScriptValue, Color::fromScriptValue);
     QScriptValue colorCtor = d->m_engine->newFunction(Color::createScriptValue);
     d->m_engine->globalObject().setProperty("Color", colorCtor);
 
-    qScriptRegisterMetaType(d->m_engine, Size::toScriptValue, Size::fromScriptValue);
+    qScriptRegisterMetaType(d->m_engine.data(), Size::toScriptValue, Size::fromScriptValue);
     QScriptValue sizeCtor = d->m_engine->newFunction(Size::createScriptValue);
     d->m_engine->globalObject().setProperty("Size", sizeCtor);
 

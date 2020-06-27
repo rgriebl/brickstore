@@ -33,8 +33,8 @@ public:
 
 AppearsInWidget::AppearsInWidget(QWidget *parent)
     : QTreeView(parent)
+    , d(new AppearsInWidgetPrivate())
 {
-    d = new AppearsInWidgetPrivate();
     d->m_resize_timer = new QTimer(this);
     d->m_resize_timer->setSingleShot(true);
 
@@ -90,17 +90,15 @@ AppearsInWidget::AppearsInWidget(QWidget *parent)
     setItem(nullptr, nullptr);
 }
 
+AppearsInWidget::~AppearsInWidget()
+{ /* needed to use QScopedPointer on d */ }
+
 void AppearsInWidget::languageChange()
 {
     findChild<QAction *>(QLatin1String("appearsin_partoutitems"))->setText(tr("Part out Item..."));
     findChild<QAction *>(QLatin1String("appearsin_bl_catalog"))->setText(tr("Show BrickLink Catalog Info..."));
     findChild<QAction *>(QLatin1String("appearsin_bl_priceguide"))->setText(tr("Show BrickLink Price Guide Info..."));
     findChild<QAction *>(QLatin1String("appearsin_bl_lotsforsale"))->setText(tr("Show Lots for Sale on BrickLink..."));
-}
-
-AppearsInWidget::~AppearsInWidget()
-{
-    delete d;
 }
 
 void AppearsInWidget::showContextMenu(const QPoint &pos)

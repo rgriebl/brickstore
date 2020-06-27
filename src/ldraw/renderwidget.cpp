@@ -11,9 +11,9 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <qglobal.h>
+#include <qtguiglobal.h>
 
-#if !defined(QT_NO_OPENGL)
+#if !defined(QT_NO_OPENGL) && !defined(QT_OPENGL_ES_2)
 
 #include <QMouseEvent>
 #include <QOpenGLFramebufferObject>

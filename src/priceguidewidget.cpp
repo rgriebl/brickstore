@@ -98,9 +98,8 @@ private:
 
 PriceGuideWidget::PriceGuideWidget(QWidget *parent)
     : QFrame(parent)
+    , d(new PriceGuideWidgetPrivate(this))
 {
-    d = new PriceGuideWidgetPrivate(this);
-
     d->m_pg = nullptr;
     d->m_layout = Normal;
     d->m_on_price = false;
@@ -179,8 +178,6 @@ PriceGuideWidget::~PriceGuideWidget()
 {
     if (d->m_pg)
         d->m_pg->release();
-
-    delete d;
 }
 
 void PriceGuideWidget::showBLCatalogInfo()

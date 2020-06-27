@@ -131,7 +131,7 @@ void BrickLink::PriceGuide::parse(const QByteArray &ba)
         if (line.isEmpty() || (line[0] == '#') || (line[0] == '\r'))         // skip comments fast
             continue;
 
-        QStringList sl = line.split('\t', QString::KeepEmptyParts);
+        QStringList sl = line.split('\t', Qt::KeepEmptyParts);
 
         if ((sl.count() != 8) || (sl[0].length() != 1) || (sl[1].length() != 1)) {             // sanity check
             continue;
@@ -208,10 +208,8 @@ void BrickLink::Core::updatePriceGuide(BrickLink::PriceGuide *pg, bool high_prio
 }
 
 
-void BrickLink::Core::priceGuideJobFinished(ThreadPoolJob *pj)
+void BrickLink::Core::priceGuideJobFinished(TransferJob *j)
 {
-    auto *j = static_cast<TransferJob *>(pj);
-
     if (!j || !j->data())
         return;
 

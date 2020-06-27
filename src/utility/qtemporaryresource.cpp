@@ -277,7 +277,7 @@ bool QTemporaryResourceFileEngine::isSequential() const
 QAbstractFileEngine::FileFlags QTemporaryResourceFileEngine::fileFlags(QAbstractFileEngine::FileFlags type) const
 {
 //    Q_D(const QTemporaryResourceFileEngine);
-    QAbstractFileEngine::FileFlags ret = nullptr;
+    QAbstractFileEngine::FileFlags ret;
     if(!d->valid)
         return ret;
 

@@ -26,6 +26,7 @@ class ImportBLStore : public QObject
     Q_OBJECT
 public:
     ImportBLStore(ProgressDialog *pd);
+    ~ImportBLStore();
 
     const BrickLink::InvItemList &items() const;
     QString currencyCode() const;
@@ -74,6 +75,7 @@ class ImportBLCart : public QObject
     Q_OBJECT
 public:
     ImportBLCart(int shopid, int cartid, ProgressDialog *pd);
+    ~ImportBLCart() override;
 
     const BrickLink::InvItemList &items() const;
     QString currencyCode() const;

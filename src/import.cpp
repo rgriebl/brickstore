@@ -62,6 +62,11 @@ ImportBLStore::ImportBLStore(ProgressDialog *pd)
     pd->layout();
 }
 
+ImportBLStore::~ImportBLStore()
+{
+    qDeleteAll(m_items);
+}
+
 const BrickLink::InvItemList &ImportBLStore::items() const
 {
     return m_items;
@@ -328,6 +333,11 @@ ImportBLCart::ImportBLCart(int shopid, int cartid, ProgressDialog *pd)
 
     pd->get(url);
     pd->layout();
+}
+
+ImportBLCart::~ImportBLCart()
+{
+    qDeleteAll(m_items);
 }
 
 const BrickLink::InvItemList &ImportBLCart::items() const

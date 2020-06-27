@@ -18,25 +18,18 @@
 #include <QPixmapCache>
 #include <QImage>
 #include <QUrlQuery>
-
-#include "threadpool.h"
+#include <QRunnable>
 
 #include "bricklink.h"
 
-// directly use C-library str* functions instead of Qt's qstr* function
-// to improve runtime performance
-
-#if defined(Q_OS_WINDOWS)
-#  define strdup _strdup
-#endif
 
 namespace BrickLink {
 
-class PictureLoaderJob : public ThreadPoolJob
+class PictureLoaderJob : public QRunnable
 {
 public:
     PictureLoaderJob(Picture *pic)
-        : ThreadPoolJob(), m_pic(pic)
+        : QRunnable(), m_pic(pic)
     { }
 
     void run() override;
@@ -54,8 +47,17 @@ private:
 
 void PictureLoaderJob::run()
 {
-    if (m_pic && !m_pic->valid())
+    if (m_pic && !m_pic->valid()) {
         m_pic->load_from_disk();
+
+        if (m_pic->valid()) {
+            auto blcore = BrickLink::core();
+            auto pic = m_pic;
+            QMetaObject::invokeMethod(blcore, [pic, blcore]() {
+                blcore->pictureLoaded(pic);
+            }, Qt::QueuedConnection);
+        }
+    }
 }
 
 }
@@ -101,7 +103,7 @@ BrickLink::Picture *BrickLink::Core::picture(const Item *item, const BrickLink::
     }
     else if (need_to_load) {
         pic->addRef();
-        m_pic_diskload.execute(new PictureLoaderJob(pic));
+        m_pic_diskload.start(new PictureLoaderJob(pic));
     }
 
     return pic;
@@ -195,10 +197,8 @@ void BrickLink::Picture::update(bool high_priority)
     BrickLink::core()->updatePicture(this, high_priority);
 }
 
-void BrickLink::Core::pictureLoaded(ThreadPoolJob *pj)
+void BrickLink::Core::pictureLoaded(Picture *pic)
 {
-    Picture *pic = static_cast<PictureLoaderJob *>(pj)->picture();
-
    if (pic) {
         if (updateNeeded(pic->valid(), pic->lastUpdate(), m_pic_update_iv))
             updatePicture(pic, false);
@@ -248,10 +248,8 @@ void BrickLink::Core::updatePicture(BrickLink::Picture *pic, bool high_priority)
 }
 
 
-void BrickLink::Core::pictureJobFinished(ThreadPoolJob *pj)
+void BrickLink::Core::pictureJobFinished(TransferJob *j)
 {
-    auto *j = static_cast<TransferJob *>(pj);
-
     if (!j || !j->data())
         return;
 

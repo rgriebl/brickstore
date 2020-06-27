@@ -24,7 +24,6 @@ class QIODevice;
 class ChunkReader {
 public:
     ChunkReader(QIODevice *dev, QDataStream::ByteOrder bo);
-    ~ChunkReader();
 
     QDataStream &dataStream();
 

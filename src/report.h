@@ -16,6 +16,7 @@
 #include <QObject>
 #include <QString>
 #include <QList>
+#include <QScopedPointer>
 
 #include "document.h"
 
@@ -28,7 +29,6 @@ class Report : public QObject
     Q_OBJECT
 public:
     static Report *load(const QString &file);
-    virtual ~Report();
 
     QString name() const;
 
@@ -38,7 +38,7 @@ private:
     Q_DISABLE_COPY(Report)
     Report();
 
-    ReportPrivate *d;
+    QScopedPointer<ReportPrivate> d;
 };
 
 class ReportManager

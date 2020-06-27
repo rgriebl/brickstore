@@ -15,6 +15,7 @@
 
 #include <QWidget>
 #include <QIcon>
+#include <QScopedPointer>
 
 class QGradient;
 
@@ -65,5 +66,5 @@ private:
     QString m_tt_nothing;
     QString m_tt_normal;
     QIcon m_icon;
-    QGradient *m_fill;
+    QScopedPointer<QGradient> m_fill;
 };
