@@ -123,7 +123,7 @@ template <> Color *TextImport::parse<Color> (uint count, const char **strs)
     col->m_name     = strs[1];
     col->m_ldraw_id = -1;
     col->m_color    = QColor(QString('#') + strs[2]);
-    col->m_type     = 0;
+    col->m_type     = Color::Type();
 
     if (!strcmp(strs[3], "Transparent"))  col->m_type |= Color::Transparent;
     if (!strcmp(strs[3], "Glitter"))  col->m_type |= Color::Glitter;
@@ -206,11 +206,11 @@ template <> Item *TextImport::parse<Item> (uint count, const char **strs)
         }
     }
     if (span || item->m_categories.isEmpty()) {
-        qWarning() << "Not all categories could be resolved for item" << item->m_id << endl
-                   << "   " << allcats;
+        qWarning() << "Not all categories could be resolved for item" << item->m_id
+                   << "\n   " << allcats;
     } else if (*item->m_categories.constBegin() != maincat) {
-        qWarning() << "The main category did not match for item" << item->m_id << endl
-                   << "   id=" << maincat->id() << "name=" << (*item->m_categories.constBegin())->name();
+        qWarning() << "The main category did not match for item" << item->m_id
+                   << "\n   id=" << maincat->id() << "name=" << (*item->m_categories.constBegin())->name();
     }
 
     uint parsedfields = 4;

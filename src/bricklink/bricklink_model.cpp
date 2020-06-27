@@ -37,7 +37,7 @@
 /////////////////////////////////////////////////////////////
 
 BrickLink::ColorModel::ColorModel(QObject *parent)
-    : StaticPointerModel(parent), m_itemtype_filter(nullptr), m_type_filter(nullptr), m_popularity_filter(0)
+    : StaticPointerModel(parent)
 {
     MODELTEST_ATTACH(this)
 }
@@ -135,7 +135,7 @@ void BrickLink::ColorModel::unsetFilterType()
 {
     if (!m_type_filter)
         return;
-    m_type_filter = nullptr;
+    m_type_filter = Color::Type();
     invalidateFilter();
 }
 

@@ -131,7 +131,7 @@ void BrickLink::PriceGuide::parse(const QByteArray &ba)
         if (line.isEmpty() || (line[0] == '#') || (line[0] == '\r'))         // skip comments fast
             continue;
 
-        QStringList sl = line.split('\t', Qt::KeepEmptyParts);
+        QStringList sl = line.split('\t', QString::KeepEmptyParts);
 
         if ((sl.count() != 8) || (sl[0].length() != 1) || (sl[1].length() != 1)) {             // sanity check
             continue;

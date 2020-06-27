@@ -662,9 +662,9 @@ protected:
     bool lessThan(const void *pointer1, const void *pointer2, int column) const override;
 
 private:
-    const ItemType *m_itemtype_filter;
-    Color::Type m_type_filter;
-    qreal m_popularity_filter;
+    const ItemType *m_itemtype_filter = nullptr;
+    Color::Type m_type_filter {};
+    qreal m_popularity_filter = 0;
 
     friend class Core;
 };

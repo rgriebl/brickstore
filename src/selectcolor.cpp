@@ -109,7 +109,7 @@ void SelectColor::updateColorFilter(int index)
         else if (filter == -2)
             popularity = qreal(0.05);
 
-        model->setFilterType(nullptr);
+        model->setFilterType(BrickLink::Color::Type());
         model->setFilterPopularity(popularity);
     }
 }
