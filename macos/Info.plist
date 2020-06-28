@@ -9,7 +9,7 @@
     <string>True</string>
 
     <key>CFBundleIconFile</key>
-    <string>application.icns</string>
+    <string>brickstore.icns</string>
 
     <key>CFBundlePackageType</key>
     <string>APPL</string>
@@ -40,34 +40,11 @@
       <dict>
         <key>CFBundleTypeExtensions</key>
         <array>
-          <string>bti</string>
-        </array>
-
-        <key>CFBundleTypeIconFile</key>
-        <string>document.icns</string>
-
-        <key>CFBundleTypeMIMETypes</key>
-        <array>
-          <string>application/x-brickstore</string>
-        </array>
-
-        <key>CFBundleTypeName</key>
-        <string>BrickStore Data File</string>
-
-        <key>CFBundleTypeRole</key>
-        <string>Editor</string>
-
-        <key>LSIsAppleDefaultForType</key>
-        <true/>
-      </dict>
-      <dict>
-        <key>CFBundleTypeExtensions</key>
-        <array>
           <string>bsx</string>
         </array>
 
         <key>CFBundleTypeIconFile</key>
-        <string>document.icns</string>
+        <string>brickstore_doc.icns</string>
 
         <key>CFBundleTypeMIMETypes</key>
         <array>

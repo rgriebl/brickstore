@@ -29,3 +29,4 @@ ldtest
 *.rej
 ui_*.h
 *.pr?.user
+.DS_Store
