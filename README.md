@@ -1,4 +1,5 @@
 ![](https://github.com/rgriebl/brickstore/workflows/QMake%20Build%20Matrix/badge.svg)
+![Custom badge](https://img.shields.io/endpoint?url=https%3A%2F%2Fbrickforge.de%2Fbrickstore-data%2Fdatabase-last-update.py)
 
 Download
 ========
