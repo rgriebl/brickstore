@@ -18,8 +18,16 @@
 #if !defined(QT_NO_OPENGL) && !defined(QT_OPENGL_ES_2)
 
 #include <QOpenGLWidget>
-#include <QOpenGLFunctions_2_1>
+#include <QOpenGLWindow>
+#include <QOpenGLFunctions>
+#include <QOpenGLVertexArrayObject>
+#include <QOpenGLBuffer>
+#include <QMatrix4x4>
 #include <QVector3D>
+
+#include <vector>
+
+QT_FORWARD_DECLARE_CLASS(QOpenGLShaderProgram)
 
 #ifdef MessageBox
 #undef MessageBox
@@ -32,16 +40,19 @@ namespace LDraw {
 class Part;
 
 
-class GLRenderer : public QObject
+class GLRenderer : public QObject, protected QOpenGLFunctions
 {
     Q_OBJECT
 public:
     GLRenderer(QObject *parent = nullptr);
     virtual ~GLRenderer();
 
+    void cleanup();
+
     Part *part() const;
     int color() const;
     void setPartAndColor(Part *part, int basecolor);
+    void setPartAndColor(Part *part, const QColor &color);
 
     void setXTranslation(qreal t);
     void setYTranslation(qreal t);
@@ -72,6 +83,7 @@ public:
 signals:
     void updateNeeded();
     void makeCurrent();
+    void doneCurrent();
 
 public slots:
     void startAnimation();
@@ -81,31 +93,48 @@ private slots:
     void animationStep();
 
 private:
-    void createSurfacesList();
-    void renderSurfaces(Part *part, int ldraw_basecolor);
-    void renderLines(Part *part, int ldraw_basecolor);
+    void updateWorldMatrix();
+    void recreateVBOs();
 
-    struct linebuffer {
-        const QVector3D *v;
-        int color;
-    };
+    void createSurfacesVBO();
 
-    void renderLineBuffer(const QVector<linebuffer> &buffer, int ldraw_basecolor);
-    void renderLineBufferSegment(const QVector<linebuffer> &buffer, int s, int e, int mode, int ldraw_basecolor);
+    void createLinesVBO();
+    void renderLines(Part *part, int ldrawBaseColor, const QMatrix4x4 &matrix, std::vector<float> &buffer);
 
-    Part *m_part;
-    int m_color;
-    qreal m_rx, m_ry, m_rz;
-    qreal m_tx, m_ty, m_tz;
-    qreal m_zoom;
-    GLuint m_surfaces_list;
-    bool m_initialized;
-    bool m_resized;
-    QSize m_size;
+    enum VBOIndex { Surfaces, Lines, ConditionalLines, Count };
+    int m_dirty = 0;
+
+    void renderVBOs(Part *part, int ldrawBaseColor, const QMatrix4x4 &matrix, int dirty, std::vector<float> *buffers[Count]);
+
+    bool m_initialized = false;
+    bool m_resized = false;
+
+    QTimer *m_animation = nullptr;
+
+
+    Part *m_part = nullptr;
+    int m_color = -1;
+    QColor m_baseColor;
+    QColor m_edgeColor;
+
+    qreal m_rx = 0, m_ry = 0, m_rz = 0;
+    qreal m_tx = 0, m_ty = 0, m_tz = 0;
+    qreal m_zoom = 1;
     QVector3D m_center;
-    QTimer *m_animation;
-    QOpenGLFunctions_2_1 *gl = nullptr;
-    QOpenGLContext *glCurrentContext = nullptr;
+    QRect m_viewport;
+    QMatrix4x4 m_proj;
+    QMatrix4x4 m_camera;
+    QMatrix4x4 m_world;
+
+    QOpenGLVertexArrayObject m_vao;
+    QOpenGLBuffer m_vbos[Count];
+    int m_vboSizes[Count];
+
+    QOpenGLShaderProgram *m_program = nullptr;
+    int m_projMatrixLoc;
+    int m_mvMatrixLoc;
+    int m_normalMatrixLoc;
+    int m_lightPosLoc;
 };
 
 
@@ -114,9 +143,11 @@ class RenderWidget : public QOpenGLWidget
     Q_OBJECT
 public:
     RenderWidget(QWidget *parent = nullptr);
+    ~RenderWidget() override;
 
     Part *part() const  { return m_renderer->part(); }
     int color() const   { return m_renderer->color(); }
+    void setPartAndColor(Part *part, const QColor &color)  { m_renderer->setPartAndColor(part, color); }
     void setPartAndColor(Part *part, int basecolor)  { m_renderer->setPartAndColor(part, basecolor); }
 
     QSize minimumSizeHint() const override;
@@ -131,6 +162,7 @@ public slots:
 
 protected slots:
     void slotMakeCurrent();
+    void slotDoneCurrent();
 
 protected:
     void mousePressEvent(QMouseEvent *e) override;
@@ -153,13 +185,15 @@ class RenderOffscreenWidget : public QWidget
     Q_OBJECT
 public:
     RenderOffscreenWidget(QWidget *parent = nullptr);
+    ~RenderOffscreenWidget() override;
 
     Part *part() const  { return m_renderer->part(); }
     int color() const   { return m_renderer->color(); }
+    void setPartAndColor(Part *part, const QColor &color)  { m_renderer->setPartAndColor(part, color); }
     void setPartAndColor(Part *part, int basecolor)  { m_renderer->setPartAndColor(part, basecolor); }
 
-    virtual QSize minimumSizeHint() const;
-    virtual QSize sizeHint() const;
+    virtual QSize minimumSizeHint() const override;
+    virtual QSize sizeHint() const override;
 
     void setImageSize(int w, int h);
     QImage renderImage();
@@ -172,18 +206,20 @@ public slots:
     void stopAnimation();
 
 protected:
-    void resizeEvent(QResizeEvent *e);
-    void paintEvent(QPaintEvent *e);
-    void mousePressEvent(QMouseEvent *e);
-    void mouseReleaseEvent(QMouseEvent *e);
-    void mouseMoveEvent(QMouseEvent *e);
-    void wheelEvent(QWheelEvent *e);
+    void resizeEvent(QResizeEvent *e) override;
+    void paintEvent(QPaintEvent *e) override;
+    void mousePressEvent(QMouseEvent *e) override;
+    void mouseReleaseEvent(QMouseEvent *e) override;
+    void mouseMoveEvent(QMouseEvent *e) override;
+    void wheelEvent(QWheelEvent *e) override;
 
 protected slots:
     void slotMakeCurrent();
+    void slotDoneCurrent();
 
 private:
-    QOpenGLWidget *m_dummy;
+    QOpenGLWindow *m_dummy = nullptr;
+    QOpenGLContext *m_context = nullptr;
     QOpenGLFramebufferObject *m_fbo;
     bool m_initialized;
     bool m_resize;

@@ -20,6 +20,7 @@
 
 namespace LDraw {
 class Model;
+class RenderWidget;
 class RenderOffscreenWidget;
 }
 

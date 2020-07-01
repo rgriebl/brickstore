@@ -26,7 +26,7 @@
 #include "itemdetailpopup.h"
 #include "ldraw/renderwidget.h"
 
-#define QT_NO_OPENGL 1 // TODO5 until the OpenGL renderer is fixed
+//#define QT_NO_OPENGL 1 // TODO5 until the OpenGL renderer is fixed
 
 class GlassButton : public QToolButton
 {
@@ -134,7 +134,7 @@ ItemDetailPopup::ItemDetailPopup(QWidget *parent)
       m_pressed(false),
       m_connected(false)
 {
-    setAttribute(Qt::WA_TranslucentBackground);
+//    setAttribute(Qt::WA_TranslucentBackground);
 
     m_bar = new QWidget(this);
     m_stack = new QStackedWidget(this);

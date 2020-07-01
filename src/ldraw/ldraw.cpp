@@ -410,6 +410,10 @@ LDraw::Part *LDraw::Core::findPart(const QString &_filename, const QDir &parentd
 
         for (const QDir &sp : qAsConst(searchpath)) {
             QString testname = sp.absolutePath() + QLatin1Char('/') + filename;
+#if defined(Q_OS_LINUX)
+            if (!QFile::exists(testname))
+                testname = testname.toLower();
+#endif
             if (QFile::exists(testname)) {
                 filename = testname;
                 found = true;
@@ -417,6 +421,10 @@ LDraw::Part *LDraw::Core::findPart(const QString &_filename, const QDir &parentd
             }
         }
     } else {
+#if defined(Q_OS_LINUX)
+        if (!QFile::exists(filename))
+            filename = filename.toLower();
+#endif
         if (QFile::exists(filename))
             found = true;
     }
@@ -515,16 +523,21 @@ QString LDraw::Core::get_platform_ldrawdir()
             RegCloseKey(skey);
         }
     }
-#elif defined(Q_OS_MACOS)
+#elif defined(Q_OS_UNIX)
     if (dir.isEmpty() || !check_ldrawdir(dir)) {
-        QStringList macdirs;
-        macdirs << QLatin1String("/Library/LDRAW")
-                << QLatin1String("/Library/ldraw")
-                << QLatin1String("~/Library/LDRAW")
-                << QLatin1String("~/Library/ldraw");
+        QStringList unixdirs;
+#  if defined(Q_OS_MACOS)
+        unixdirs << QLatin1String("/Library/LDRAW")
+                 << QLatin1String("/Library/ldraw")
+                 << QLatin1String("~/Library/LDRAW")
+                 << QLatin1String("~/Library/ldraw");
+#  else
+        unixdirs << "~/ldraw"
+                 << "/usr/share/ldraw";
+#  endif
         QString homepath = QDir::homePath();
 
-        foreach (QString d, macdirs) {
+        foreach (QString d, unixdirs) {
             d.replace(QLatin1String("~"), homepath);
 
             if (check_ldrawdir(d)) {
@@ -552,10 +565,11 @@ LDraw::Core *LDraw::Core::create(const QString &datadir, QString *errstring)
         if (check_ldrawdir(ldrawdir)) {
             s_inst = new Core(ldrawdir);
 
-            if (s_inst->parse_ldconfig("ldconfig.ldr")) {
-                s_inst->parse_ldconfig("ldconfig_missing.ldr");
+            if (s_inst->parse_ldconfig("LDConfig.ldr")) {
+                s_inst->parse_ldconfig("LDConfig_missing.ldr");
 
                 if (s_inst->create_part_list()) {
+                    qWarning() << "Found" << s_inst->m_items.size() << "LDraw parts";
                     qt_noop();
                 }
                 else
@@ -684,11 +698,7 @@ bool LDraw::Core::parse_ldconfig(const char *filename)
     QDir ldrawdir(dataPath());
     QFile f(ldrawdir.filePath(QLatin1String(filename)));
 
-    qWarning("trying file: %s", qPrintable(f.fileName()));
-
     if (f.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qWarning("got file");
-
         QTextStream ts(&f);
         QMap<int, int> edge_ids;
 
