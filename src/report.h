@@ -28,6 +28,7 @@ class Report : public QObject
 {
     Q_OBJECT
 public:
+    ~Report() override;
     static Report *load(const QString &file);
 
     QString name() const;

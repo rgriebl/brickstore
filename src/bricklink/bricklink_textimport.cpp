@@ -335,7 +335,7 @@ bool BrickLink::TextImport::readDB_processLine(btinvlist_dummy & /*dummy*/, uint
     if (const Item *itm = findItem(strs[0][0], decodeEntities(strs[1]))) {
         auto t = time_t(0);   // 1.1.1970 00:00
 
-        if (count >= 2 && strs[2][0]) {
+        if (strs[2][0]) {
             static QString fmtFull = QStringLiteral("M/d/yyyy h:mm:ss AP");
             static QString fmtShort = QStringLiteral("M/d/yyyy");
 

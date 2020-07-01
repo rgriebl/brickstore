@@ -442,9 +442,9 @@ bool Config::parseTranslations() const
                     for (QDomNode name = node.firstChild(); !name.isNull(); name = name.nextSibling()) {
                         if (!name.isElement() || (name.nodeName() != QLatin1String("name")))
                             continue;
-                        QDomNamedNodeMap map = name.attributes();
+                        QDomNamedNodeMap nameAttribs = name.attributes();
 
-                        QString tr_id = map.namedItem(QLatin1String("lang")).toAttr().value();
+                        QString tr_id = nameAttribs.namedItem(QLatin1String("lang")).toAttr().value();
                         QString tr_name = name.toElement().text();
 
                         if (!tr_name.isEmpty())

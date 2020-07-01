@@ -113,6 +113,9 @@ SelectItem::SelectItem(QWidget *parent)
     init();
 }
 
+SelectItem::~SelectItem()
+{ /* needed to use QScopedPointer on d */ }
+
 void SelectItem::init()
 {
     d->m_details = nullptr;

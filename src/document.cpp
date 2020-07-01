@@ -550,7 +550,7 @@ void Document::removeItemsDirect(ItemList &items, QVector<int> &positions)
 void Document::changeItemDirect(int position, Item &item)
 {
     Item *olditem = m_items[position];
-    qSwap(*olditem, item);
+    std::swap(*olditem, item);
 
     QModelIndex idx1 = index(olditem);
     QModelIndex idx2 = createIndex(idx1.row(), columnCount(idx1.parent()) - 1, idx1.internalPointer());
@@ -1104,10 +1104,8 @@ bool Document::fileSaveTo(const QString &s, const char *type, bool export_only, 
             doc.appendChild(item_elem);
         }
 
-        // directly writing to an QTextStream would be way more efficient,
-        // but we could not handle any error this way :(
         QByteArray output = doc.toByteArray();
-        bool ok = (f.write(output.data(), output.size() - 1) == qint64(output.size() - 1));             // no 0-byte
+        bool ok = (f.write(output.data(), output.size()) == qint64(output.size()));
 
         QApplication::restoreOverrideCursor();
 

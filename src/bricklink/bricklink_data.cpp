@@ -118,9 +118,9 @@ QDataStream &operator >> (QDataStream &ds, BrickLink::ItemType *itt)
     itt->m_categories.resize(catcount);
 
     for (int i = 0; i < catcount; i++) {
-        quint32 id = 0;
-        ds >> id;
-        itt->m_categories[i] = BrickLink::core()->category(id);
+        quint32 catid = 0;
+        ds >> catid;
+        itt->m_categories[i] = BrickLink::core()->category(catid);
     }
 
     itt->m_has_inventories   = flags & 0x01;
@@ -373,9 +373,9 @@ QDataStream &operator >> (QDataStream &ds, BrickLink::Item *item)
     item->m_categories.resize(int(catcount));
 
     for (int i = 0; i < int(catcount); i++) {
-        quint32 id = 0;
-        ds >> id;
-        item->m_categories[i] = BrickLink::core()->category(id);
+        quint32 catid = 0;
+        ds >> catid;
+        item->m_categories[i] = BrickLink::core()->category(catid);
     }
 
     quint32 colorid = 0;
@@ -463,6 +463,9 @@ BrickLink::InvItem::InvItem(const BrickLink::InvItem &copy)
 
 BrickLink::InvItem &BrickLink::InvItem::operator = (const InvItem &copy)
 {
+    if (this == &copy)
+        return *this;
+
     delete m_incomplete;
     m_incomplete = nullptr;
 

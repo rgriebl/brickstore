@@ -29,6 +29,7 @@ class SelectItem : public QWidget
     Q_OBJECT
 public:
     SelectItem(QWidget *parent = nullptr);
+    ~SelectItem() override;
 
     bool hasExcludeWithoutInventoryFilter() const;
     void setExcludeWithoutInventoryFilter(bool b);

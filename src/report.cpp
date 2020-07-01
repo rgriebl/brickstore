@@ -45,6 +45,9 @@ QString Report::name() const
     return d->m_label.isEmpty() ? d->m_name : d->m_label;
 }
 
+Report::~Report()
+{ /* needed to use QScopedPointer on d */ }
+
 Report *Report::load(const QString &filename)
 {
     auto *r = new Report;

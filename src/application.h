@@ -33,8 +33,6 @@ public:
 
     QString applicationUrl() const;
 
-    bool pixmapAlphaSupported() const;
-
     bool isOnline() const;
 
     QStringList externalResourceSearchPath(const QString &subdir = QString()) const;
@@ -65,7 +63,6 @@ private:
 private:
     QStringList m_files_to_open;
     bool m_enable_emit = false;
-    bool m_has_alpha = false;
 
     bool m_online = true;
     qreal m_default_fontsize = 0;

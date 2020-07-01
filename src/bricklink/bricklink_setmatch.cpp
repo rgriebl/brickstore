@@ -198,7 +198,7 @@ bool BrickLink::SetMatch::GreedyComparePairs::operator()(const QPair<const Brick
 
 BrickLink::SetMatch::SetMatch(QObject *parent)
     : QObject(parent), m_algorithm(Recursive), m_part_min(-1), m_part_max(-1), m_year_min(-1), m_year_max(-1),
-      m_prefer(PreferLargerSets), m_stopvalue(0), m_step(0), m_active(false)
+      m_prefer(PreferLargerSets), m_stopvalue(0), m_startcount(0), m_step(0), m_active(false)
 {
 }
 

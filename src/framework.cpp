@@ -921,7 +921,7 @@ inline static QAction *newQAction(QObject *parent, const char *name, quint32 fla
 
 inline static QAction *newQAction(QObject *parent, const char *name, quint32 flags = 0, bool toggle = false)
 {
-    return newQAction(parent, name, flags, toggle, static_cast<QObject *>(nullptr), &QObject::userData);
+    return newQAction(parent, name, flags, toggle, static_cast<QObject *>(nullptr), &QObject::objectName);
 }
 
 inline static QActionGroup *newQActionGroup(QObject *parent, const char *name, bool exclusive = false)

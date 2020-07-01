@@ -103,8 +103,6 @@ Application::Application(bool rebuild_db_only, bool skip_download, int &_argc, c
         if (fsp != 100)
             setFontSizePercentLambda(fsp);
 
-        m_has_alpha = (QPixmap::defaultDepth() >= 15);
-
 #if !defined(Q_OS_WINDOWS) && !defined(Q_OS_MACOS)
         QPixmap pix(":/images/brickstore_icon.png");
         if (!pix.isNull())
@@ -181,11 +179,6 @@ Application::~Application()
     delete ReportManager::inst();
     delete Currency::inst();
     delete Config::inst();
-}
-
-bool Application::pixmapAlphaSupported() const
-{
-    return m_has_alpha;
 }
 
 QStringList Application::externalResourceSearchPath(const QString &subdir) const

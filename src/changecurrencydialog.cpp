@@ -13,8 +13,6 @@ ChangeCurrencyDialog::ChangeCurrencyDialog(const QString &from, const QString &t
 {
     setupUi(this);
 
-    QString s;
-    s = w_oldCurrency->text();
     w_oldCurrency->setText(w_oldCurrency->text().arg(from));
 
     m_labelEcbFormat = w_labelEcb->text().arg(from);
