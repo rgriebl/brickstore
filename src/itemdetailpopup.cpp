@@ -134,7 +134,7 @@ ItemDetailPopup::ItemDetailPopup(QWidget *parent)
       m_pressed(false),
       m_connected(false)
 {
-//    setAttribute(Qt::WA_TranslucentBackground);
+    setAttribute(Qt::WA_TranslucentBackground);
 
     m_bar = new QWidget(this);
     m_stack = new QStackedWidget(this);

@@ -301,8 +301,7 @@ private:
     };
 
     QHash<int, Color> m_colors;  // id -> color struct
-    QMap<QByteArray, QByteArray>       m_items;   // ldraw id -> ldraw name
-    Q3Cache<QString, Part>             m_cache;   // path -> part
+    Q3Cache<QString, Part> m_cache;  // path -> part
 
     friend class PartElement;
 };

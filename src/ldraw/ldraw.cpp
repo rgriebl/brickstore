@@ -573,13 +573,6 @@ LDraw::Core *LDraw::Core::create(const QString &datadir, QString *errstring)
 
             if (s_inst->parse_ldconfig("LDConfig.ldr")) {
                 s_inst->parse_ldconfig("LDConfig_missing.ldr");
-
-                if (s_inst->create_part_list()) {
-                    qWarning() << "Found" << s_inst->m_items.size() << "LDraw parts";
-                    qt_noop();
-                }
-                else
-                    error = qApp->translate("LDraw", "Can not create part list.");
             }
             else
                 error = qApp->translate("LDraw", "The file ldcondig.ldr is not readable.");
@@ -615,74 +608,6 @@ LDraw::Core::Core(const QString &datadir)
         if (sdir.cd(QLatin1String(subdir)))
             m_searchpath << sdir;
     }
-}
-
-
-bool LDraw::Core::create_part_list()
-{
-    stopwatch sw("LDraw: create_part_list");
-
-    QDir ldrawdir(dataPath());
-    if (!ldrawdir.cd(QLatin1String("parts")) && !ldrawdir.cd(QLatin1String("PARTS")))
-        return false;
-
-    QDirIterator it(ldrawdir.path(), QDir::Files | QDir::Readable);
-
-    m_items.clear();
-
-    QDateTime lastmod;
-
-    // TODO: caching !!!
-    // set lastmod to cache file's mod time
-
-    while (it.hasNext()) {
-        it.next();
-        QByteArray id = it.fileName().toLatin1().toLower();
-
-        if (id.right(4) != ".dat")
-            continue;
-        if (lastmod.isValid() && it.fileInfo().lastModified() <= lastmod)
-            continue;
-
-        id.chop(4);
-        QByteArray name;
-#if 1
-        // 0'970s on MacBookPro
-
-        QFile f(it.filePath());
-
-        if (f.open(QIODevice::ReadOnly)) {
-            qint64 l = qMin(qint64(4096) /* get page size*/, f.size());
-            char *p = reinterpret_cast<char *>(f.map(0, l));
-
-            if (p && l >= 3 && p[0] == '0' && (p[1] == ' ' || p[1] == '\t')) {
-                char *nl = reinterpret_cast<char *>(memchr(p, '\n', size_t(l)));
-                if (nl)
-                    l = nl - p;
-                name = QByteArray(p + 2, int(l - 2)).simplified();
-            }
-        }
-
-#else
-        // 1'000s on MacBookPro
-
-        QFile f(it.filePath());
-
-        if (f.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            QByteArray ba = f.readLine().simplified();
-
-            if (ba.size() >= 3 && ba[0] == '0' && ba[1] == ' ') {
-                name = ba.right(ba.size() - 2);
-            }
-        }
-#endif
-
-        if (!name.isEmpty() && name[0] != '~') {
-            m_items[id] = name;
-//            printf("%s\t->\t%s\n", id.constData(), name.constData());
-        }
-    }
-    return !m_items.isEmpty();
 }
 
 QColor LDraw::Core::parse_color_string(const QString &cstr)
