@@ -399,6 +399,9 @@ template <typename C> bool BrickLink::TextImport::readDB(const QString &name, C 
     // plain C is way faster than Qt on top of C++
     // and this routine has to be fast to reduce the startup time
 
+    // TODO5: since this is only ever run by a daily cron job on a server, speed is not so
+    //        important here as is maintainability
+
     FILE *f = fopen(name.toLatin1(), "r");
     if (f) {
         char line[1000];

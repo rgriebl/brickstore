@@ -65,8 +65,6 @@ void BrickLink::PriceGuide::save_to_disk()
 {
     QString path = BrickLink::core()->dataPath(m_item, m_color);
 
-    qWarning() << "SAVING PG for" << m_item->id() << "to" << path;
-
     if (path.isEmpty())
         return;
     path += "priceguide.txt";
@@ -123,9 +121,6 @@ void BrickLink::PriceGuide::parse(const QByteArray &ba)
     QTextStream ts(ba);
     QString line;
     QLocale c = QLocale::c();
-
-    qWarning() << "PG for" << m_item->id();
-    qWarning().noquote() << ba;
 
     while (!(line = ts.readLine()).isNull()) {
         if (line.isEmpty() || (line[0] == '#') || (line[0] == '\r'))         // skip comments fast
