@@ -357,8 +357,6 @@ Document::~Document()
     delete m_order;
     qDeleteAll(m_items);
 
-    qWarning() << "deleted" << m_items.size() << "items";
-
     s_documents.removeAll(this);
 }
 
