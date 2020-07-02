@@ -64,8 +64,10 @@ int SelectItemDialog::execAtPosition(const QRect &pos)
     return QDialog::exec();
 }
 
-void SelectItemDialog::showEvent(QShowEvent *)
+void SelectItemDialog::showEvent(QShowEvent *e)
 {
+    QDialog::showEvent(e);
+
     activateWindow();
     w_si->setFocus();
 

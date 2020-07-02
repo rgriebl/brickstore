@@ -30,6 +30,7 @@ public:
 
 protected:
     void showEvent(QShowEvent *) override;
+    QSize sizeHint() const override;
 
 protected slots:
     void checkItem(const BrickLink::Item *it, bool ok);

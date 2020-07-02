@@ -57,8 +57,10 @@ int SelectColorDialog::execAtPosition(const QRect &pos)
 
 }
 
-void SelectColorDialog::showEvent(QShowEvent *)
+void SelectColorDialog::showEvent(QShowEvent *e)
 {
+    QDialog::showEvent(e);
+
     activateWindow();
     w_sc->setFocus();
     if (m_pos.isValid()) {

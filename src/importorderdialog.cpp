@@ -334,6 +334,12 @@ ImportOrderDialog::ImportOrderDialog(QWidget *parent)
 
     start();
     //resize(sizeHint());
+
+#if defined(Q_OS_WINDOWS)
+    // Qt bug: the sizeHint() is a little bit too small with the popup enabled
+    w_order_from->setMinimumSize(w_order_from->minimumSizeHint() + QSize(fontMetrics().horizontalAdvance('x') * 2, 0));
+    w_order_to->setMinimumSize(w_order_to->minimumSizeHint() + QSize(fontMetrics().horizontalAdvance('x') * 2, 0));
+#endif
 }
 
 void ImportOrderDialog::changeEvent(QEvent *e)

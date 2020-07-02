@@ -684,35 +684,38 @@ Document *Document::fileOpen(const QString &s)
 
 Document *Document::fileImportBrickLinkInventory(const BrickLink::Item *item)
 {
-    ImportInventoryDialog dlg(FrameWork::inst());
-
     if (item && !item->hasInventory())
         return nullptr;
 
-    if (item || (dlg.exec() == QDialog::Accepted)) {
-        int qty = 1;
+    int qty = 1;
 
-        if (!item) {
+    if (!item) {
+        ImportInventoryDialog dlg(FrameWork::inst());
+
+        QByteArray ba = Config::inst()->value(QLatin1String("/MainWindow/ImportInventoryDialog/Geometry")).toByteArray();
+        if (!ba.isEmpty())
+            dlg.restoreGeometry(ba);
+
+        if (dlg.exec() == QDialog::Accepted) {
             item = dlg.item();
             qty = dlg.quantity();
         }
+        Config::inst()->setValue("/MainWindow/ImportInventoryDialog/Geometry", dlg.saveGeometry());
+    }
 
-        if (item && (qty > 0)) {
-            BrickLink::InvItemList items = item->consistsOf();
+    if (item && (qty > 0)) {
+        BrickLink::InvItemList items = item->consistsOf();
 
-            if (!items.isEmpty()) {
-                auto *doc = new Document();
+        if (!items.isEmpty()) {
+            auto *doc = new Document();
 
-                doc->setBrickLinkItems(items, uint(qty)); // we own the items
-                qDeleteAll(items);
-                doc->setTitle(tr("Inventory for %1").arg(item->id()));
-                return doc;
-            }
-            else
-                MessageBox::warning(FrameWork::inst(), tr("Internal error: Could not create an Inventory object for item %1").arg(CMB_BOLD(item->id())));
+            doc->setBrickLinkItems(items, uint(qty)); // we own the items
+            qDeleteAll(items);
+            doc->setTitle(tr("Inventory for %1").arg(item->id()));
+            return doc;
+        } else {
+            MessageBox::warning(FrameWork::inst(), tr("Internal error: Could not create an Inventory object for item %1").arg(CMB_BOLD(item->id())));
         }
-        else
-            MessageBox::warning(FrameWork::inst(), tr("Requested item was not found in the database."));
     }
     return nullptr;
 }

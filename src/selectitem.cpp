@@ -486,8 +486,9 @@ void SelectItem::itemConfirmed()
 
 
 
-void SelectItem::showEvent(QShowEvent *)
+void SelectItem::showEvent(QShowEvent *e)
 {
+    QWidget::showEvent(e);
     ensureSelectionVisible();
 }
 

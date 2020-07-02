@@ -2,14 +2,6 @@
 <ui version="4.0">
  <class>ImportInventoryDialog</class>
  <widget class="QDialog" name="ImportInventoryDialog">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>566</width>
-    <height>344</height>
-   </rect>
-  </property>
   <property name="windowTitle">
    <string>Import BrickLink Inventory</string>
   </property>

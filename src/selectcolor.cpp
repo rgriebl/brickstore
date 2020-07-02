@@ -141,8 +141,10 @@ void SelectColor::colorConfirmed()
     emit colorSelected(currentColor(), true);
 }
 
-void SelectColor::showEvent(QShowEvent *)
+void SelectColor::showEvent(QShowEvent *e)
 {
+    QWidget::showEvent(e);
+
     const BrickLink::Color *color = currentColor();
 
     if (color) {

@@ -53,10 +53,17 @@ int ImportInventoryDialog::quantity() const
     return qMax(1, w_qty->value());
 }
 
-void ImportInventoryDialog::showEvent(QShowEvent *)
+void ImportInventoryDialog::showEvent(QShowEvent *e)
 {
+    QDialog::showEvent(e);
     activateWindow();
     w_select->setFocus();
+}
+
+QSize ImportInventoryDialog::sizeHint() const
+{
+    QFontMetrics fm(font());
+    return QSize(fm.horizontalAdvance("m") * 120, fm.height() * 30);
 }
 
 void ImportInventoryDialog::checkItem(const BrickLink::Item *it, bool ok)

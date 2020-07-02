@@ -31,7 +31,7 @@ UpdateDatabase::UpdateDatabase(ProgressDialog *pd)
     connect(pd, &ProgressDialog::transferFinished,
             this, &UpdateDatabase::gotten);
 
-    pd->setAutoClose(false);
+    //pd->setAutoClose(false);
     pd->setHeaderText(tr("Updating BrickLink Database"));
     pd->setMessageText(tr("Download: %p"));
 
