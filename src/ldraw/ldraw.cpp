@@ -816,20 +816,16 @@ QColor LDraw::Core::edgeColor(int id) const
 
 QColor LDraw::Core::color(int id, int baseid) const
 {
-    if (m_colors.contains(id)) {
-        return m_colors.value(id).color;
-    }
-    else if (baseid < 0 && (id == 16 || id == 24)) {
+    if (baseid < 0 && (id == 16 || id == 24)) {
         qWarning("Called Core::color() with meta color id 16 or 24 without specifing the meta color");
         return {};
-    }
-    else if (id == 16) {
+    } else if (id == 16) {
         return color(baseid);
-    }
-    else if (id == 24) {
+    } else if (id == 24) {
         return edgeColor(baseid);
-    }
-    else if (id >= 256) {
+    } else if (m_colors.contains(id)) {
+        return m_colors.value(id).color;
+    } else if (id >= 256) {
         // dithered color (do a normal blend - DOS times are over by now)
 
         QColor c1 = color((id - 256) & 0x0f);
@@ -840,9 +836,8 @@ QColor LDraw::Core::color(int id, int baseid) const
         c2.getRgb(&r2, &g2, &b2, &a2);
 
         return QColor::fromRgb((r1+r2) >> 1, (g1+g2) >> 1, (b1+b2) >> 1, (a1+a2) >> 1);
-    }
-    else {
+    } else {
         //qWarning("Called Core::color() with an invalid LDraw color id: %d", id);
-        return QColor::fromRgbF(qreal(qrand()) / RAND_MAX, qreal(qrand()) / RAND_MAX, qreal(qrand()) / RAND_MAX);
+        return Qt::yellow;
     }
 }
