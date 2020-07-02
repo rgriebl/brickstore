@@ -29,6 +29,8 @@ class QStackedWidget;
 class QLabel;
 class QTableView;
 
+typedef LDraw::RenderOffscreenWidget LDrawWidget;
+
 
 class ItemDetailPopup : public QDialog
 {
@@ -54,7 +56,7 @@ private:
     void redraw();
 
 private:
-    LDraw::RenderOffscreenWidget *m_ldraw;
+    LDrawWidget *m_ldraw;
     QLabel *m_blpic;
 
     QWidget *m_bar;

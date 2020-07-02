@@ -159,7 +159,7 @@ ItemDetailPopup::ItemDetailPopup(QWidget *parent)
 #if defined(QT_NO_OPENGL)
     m_ldraw = nullptr;
 #else
-    m_ldraw = new LDraw::RenderOffscreenWidget(this);
+    m_ldraw = new LDrawWidget(this);
     m_stack->addWidget(m_ldraw);
 #endif
     auto *lay = new QVBoxLayout(this);
@@ -180,11 +180,11 @@ ItemDetailPopup::ItemDetailPopup(QWidget *parent)
 
 #if !defined(QT_NO_OPENGL)
     connect(m_play, &QAbstractButton::clicked,
-            m_ldraw, &LDraw::RenderOffscreenWidget::startAnimation);
+            m_ldraw, &LDrawWidget::startAnimation);
     connect(m_stop, &QAbstractButton::clicked,
-            m_ldraw, &LDraw::RenderOffscreenWidget::stopAnimation);
+            m_ldraw, &LDrawWidget::stopAnimation);
     connect(m_view, &QAbstractButton::clicked,
-            m_ldraw, &LDraw::RenderOffscreenWidget::resetCamera);
+            m_ldraw, &LDrawWidget::resetCamera);
 #endif
 }
 
@@ -229,7 +229,7 @@ void ItemDetailPopup::setItem(const BrickLink::Item *item, const BrickLink::Colo
             redraw();
             m_stack->setCurrentWidget(m_blpic);
 #if !defined(QT_NO_OPENGL)
-            m_ldraw->setPartAndColor(0, -1);
+            m_ldraw->setPartAndColor(nullptr, -1);
 #else
             Q_UNUSED(color)
 #endif
@@ -237,7 +237,7 @@ void ItemDetailPopup::setItem(const BrickLink::Item *item, const BrickLink::Colo
     } else {
         m_blpic->setText(QString());
 #if !defined(QT_NO_OPENGL)
-        m_ldraw->setPartAndColor(0, -1);
+        m_ldraw->setPartAndColor(nullptr, -1);
 #endif
     }
 
