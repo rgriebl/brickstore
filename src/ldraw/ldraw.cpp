@@ -466,6 +466,12 @@ LDraw::Part *LDraw::Core::partFromId(const QString &id)
     return nullptr;
 }
 
+LDraw::Core::~Core()
+{
+    // the parts in cache are referencing each other, so a plain clear will not work
+    m_cache.clearRecursive();
+}
+
 QString LDraw::Core::dataPath() const
 {
     return m_datadir;

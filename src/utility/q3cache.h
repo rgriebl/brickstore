@@ -121,6 +121,8 @@ public:
     bool remove(const Key &key);
     T *take(const Key &key);
 
+    void clearRecursive();
+
 private:
     void trim(int m);
 };
@@ -204,5 +206,20 @@ void Q3Cache<Key,T>::trim(int m)
             unlink(*u);
     }
 }
+
+template<class Key, class T>
+void Q3Cache<Key, T>::clearRecursive()
+{
+    int s = size();
+    while (s) {
+        trim(0);
+        int new_s = size();
+        if (new_s == s)
+            break;
+        s = new_s;
+    }
+    clear();
+}
+
 
 QT_END_NAMESPACE

@@ -37,7 +37,7 @@ class PartElement;
 class Part : public Ref
 {
 public:
-    virtual ~Part();
+    ~Part() override;
 
     inline const QVector<Element *> &elements() const  { return m_elements; }
 
@@ -253,6 +253,8 @@ private:
 class Core
 {
 public:
+    ~Core();
+
     QString dataPath() const;
 
     QColor color(int id, int baseid = -1) const;

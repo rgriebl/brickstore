@@ -250,6 +250,12 @@ BrickLink::TextImport::TextImport()
     m_current_item_type = nullptr;
 }
 
+BrickLink::TextImport::~TextImport()
+{
+    for (auto &&items : m_consists_of_hash)
+        qDeleteAll(items);
+}
+
 bool BrickLink::TextImport::import(const QString &path)
 {
     bool ok = true;
@@ -505,10 +511,10 @@ bool BrickLink::TextImport::readInventory(const Item *item)
                         BrickLink::AppearsInColor &vec = m_appears_in_hash[ii->item()][ii->color()];
                         vec.append(QPair<int, const BrickLink::Item *>(ii->quantity(), item));
                     }
+                    // the hash owns the items now
                     m_consists_of_hash.insert(item, *result.items);
                     ok = true;
                 }
-                qDeleteAll(*result.items);
                 delete result.items;
             }
         }

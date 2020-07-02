@@ -584,6 +584,7 @@ class TextImport
 {
 public:
     TextImport();
+    ~TextImport();
 
     bool import(const QString &path);
     void exportTo(Core *);
