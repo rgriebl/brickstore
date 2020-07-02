@@ -24,6 +24,7 @@
 #include <QOpenGLBuffer>
 #include <QMatrix4x4>
 #include <QVector3D>
+#include <QScopedPointer>
 
 #include <vector>
 
@@ -105,9 +106,6 @@ private:
     int m_dirty = 0;
 
     void renderVBOs(Part *part, int ldrawBaseColor, const QMatrix4x4 &matrix, int dirty, std::vector<float> *buffers[Count]);
-
-    bool m_initialized = false;
-    bool m_resized = false;
 
     QTimer *m_animation = nullptr;
 
@@ -218,11 +216,11 @@ protected slots:
     void slotDoneCurrent();
 
 private:
-    QOpenGLWindow *m_dummy = nullptr;
-    QOpenGLContext *m_context = nullptr;
-    QOpenGLFramebufferObject *m_fbo;
-    bool m_initialized;
-    bool m_resize;
+    QScopedPointer<QOpenGLWindow> m_dummy;
+    QScopedPointer<QOpenGLContext> m_context;
+    QScopedPointer<QOpenGLFramebufferObject> m_fbo;
+    bool m_initialized = false;
+    bool m_resize = false;
     GLRenderer *m_renderer;
     QPoint m_last_pos;
 };

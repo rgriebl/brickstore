@@ -100,8 +100,7 @@ void LDraw::GLRenderer::setPartAndColor(LDraw::Part *part, int basecolor)
                  -m_center.z() - 2 * radius, -m_center.z() + 2 * radius);
     updateWorldMatrix();
 
-    if (m_initialized && m_resized)
-        emit updateNeeded();
+    emit updateNeeded();
 }
 
 LDraw::Part *LDraw::GLRenderer::part() const
@@ -247,11 +246,9 @@ void LDraw::GLRenderer::resizeGL(QOpenGLContext *context, int w, int h)
 {
     Q_UNUSED(context);
 
-    int side = qMin(w, h);
-    m_viewport.setRect((w - side) / 2, (h - side) / 2, side, side);
+    m_viewport.setRect(0, 0, w, h);
     glViewport(m_viewport.x(), m_viewport.y(), m_viewport.width(), m_viewport.height());
     updateWorldMatrix();
-    m_resized = true;
 }
 
 void LDraw::GLRenderer::paintGL(QOpenGLContext *context)
@@ -264,6 +261,8 @@ void LDraw::GLRenderer::paintGL(QOpenGLContext *context)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
     //glEnable(GL_CULL_FACE);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     QOpenGLVertexArrayObject::Binder vaoBinder(&m_vao);
     m_program->bind();
@@ -542,9 +541,24 @@ void LDraw::RenderWidget::paintGL()
 
 
 LDraw::RenderOffscreenWidget::RenderOffscreenWidget(QWidget *parent)
-    : QWidget(parent), m_fbo(nullptr), m_initialized(false), m_resize(false)
+    : QWidget(parent)
+    , m_renderer(new GLRenderer(this))
 {
-    m_renderer = new GLRenderer(this);
+    QSurfaceFormat fmt;
+    fmt.setAlphaBufferSize(8);
+    fmt.setDepthBufferSize(24);
+
+    m_dummy.reset(new QOpenGLWindow());
+    m_dummy->setFormat(fmt);
+    m_dummy->create();
+
+    m_context.reset(new QOpenGLContext());
+    m_context->setFormat(fmt);
+    if (!m_context->create()) {
+        qWarning() << "Could not create an offscreen OpenGL context";
+        m_context.reset();
+        m_dummy.reset();
+    }
 
     resetCamera();
 
@@ -556,9 +570,7 @@ LDraw::RenderOffscreenWidget::RenderOffscreenWidget(QWidget *parent)
 }
 
 LDraw::RenderOffscreenWidget::~RenderOffscreenWidget()
-{
-    delete m_dummy;
-}
+{ }
 
 QSize LDraw::RenderOffscreenWidget::minimumSizeHint() const
 {
@@ -623,12 +635,14 @@ void LDraw::RenderOffscreenWidget::wheelEvent(QWheelEvent *e)
 
 void LDraw::RenderOffscreenWidget::slotMakeCurrent()
 {
-    m_context->makeCurrent(m_dummy);
+    if (m_context && m_dummy)
+        m_context->makeCurrent(m_dummy.data());
 }
 
 void LDraw::RenderOffscreenWidget::slotDoneCurrent()
 {
-    m_context->doneCurrent();
+    if (m_context)
+        m_context->doneCurrent();
 }
 
 void LDraw::RenderOffscreenWidget::setImageSize(int, int)
@@ -639,50 +653,37 @@ void LDraw::RenderOffscreenWidget::setImageSize(int, int)
 
 QImage LDraw::RenderOffscreenWidget::renderImage()
 {
-    if (!m_dummy) {
-        m_dummy = new QOpenGLWindow();
-        m_dummy->create();
-    }
-    if (!m_context) {
-        QSurfaceFormat format;
+    if (!m_dummy || !m_context)
+        return {};
 
-        m_context = new QOpenGLContext(this);
-        m_context->setFormat(format);
-        if (!m_context->create())
-            qWarning() << "Could not create context";
-    }
-
-    if (m_fbo && m_resize) {
-        delete m_fbo;
-        m_fbo = nullptr;
-    }
+    if (m_fbo && m_resize)
+        m_fbo.reset();
 
     if (!m_fbo) {
-        m_context->makeCurrent(m_dummy);
-
-        m_fbo = new QOpenGLFramebufferObject(size(), QOpenGLFramebufferObject::Depth);
-
+        m_context->makeCurrent(m_dummy.data());
+        m_fbo.reset(new QOpenGLFramebufferObject(size(), QOpenGLFramebufferObject::Depth));
         m_context->doneCurrent();
     }
 
-    m_context->makeCurrent(m_dummy);
+    m_context->makeCurrent(m_dummy.data());
     m_fbo->bind();
+
     if (!m_initialized) {
-        m_renderer->initializeGL(m_context);
-//        m_dummy->qglClearColor(QColor(255, 255, 255, 0));
+        m_renderer->initializeGL(m_context.data());
         m_initialized = true;
     }
+    if (m_resize) {
+        m_renderer->resizeGL(m_context.data(), m_fbo->size().width(), m_fbo->size().height());
+        m_resize = false;
+    }
 
-    if (m_resize)
-        m_renderer->resizeGL(m_context, m_fbo->size().width(), m_fbo->size().height());
-    m_resize = false;
+    m_renderer->paintGL(m_context.data());
+    auto img = m_fbo->toImage();
 
-    m_renderer->paintGL(m_context);
     m_fbo->release();
-    //m_context->doneCurrent();
+    m_context->doneCurrent();
 
-
-    return m_fbo->toImage();
+    return img;
 }
 
 void LDraw::GLRenderer::startAnimation()
