@@ -284,7 +284,21 @@ private:
     QString m_datadir;
     QList<QDir> m_searchpath;
 
-    QHash<int, QPair<QColor, QColor> > m_colors;  // ldraw color -> [color, edge color]
+    struct Color
+    {
+        int id;
+        QString name;
+        QColor color;
+        QColor edgeColor;
+        int luminance;
+        bool chrome : 1;
+        bool metal : 1;
+        bool matteMetallic : 1;
+        bool rubber : 1;
+        bool pearlescent : 1;
+    };
+
+    QHash<int, Color> m_colors;  // id -> color struct
     QMap<QByteArray, QByteArray>       m_items;   // ldraw id -> ldraw name
     Q3Cache<QString, Part>             m_cache;   // path -> part
 

@@ -255,6 +255,7 @@ bool BrickLink::TextImport::import(const QString &path)
     bool ok = true;
 
     ok = ok && readDB<>(path + "colors.txt",     m_colors, true);
+    ok = ok && readLDrawColors(path + "ldconfig.ldr");
     ok = ok && readDB<>(path + "categories.txt", m_categories, true);
     ok = ok && readDB<>(path + "itemtypes.txt",  m_item_types, true);
 
@@ -510,6 +511,53 @@ bool BrickLink::TextImport::readInventory(const Item *item)
         }
     }
     return ok;
+}
+
+bool BrickLink::TextImport::readLDrawColors(const QString &path)
+{
+    QFile f(path);
+    if (f.open(QFile::ReadOnly)) {
+        QTextStream in(&f);
+        QString line;
+        int matchCount = 0;
+
+        while (!(line = in.readLine()).isNull()) {
+            if (!line.isEmpty() && line.at(0) == '0') {
+                const QStringList sl = line.simplified().split(' ');
+
+                if ((sl.count() >= 9)
+                        && (sl[1] == "!COLOUR")
+                        && (sl[3] == "CODE")
+                        && (sl[5] == "VALUE")
+                        && (sl[7] == "EDGE")) {
+                    QString name = sl[2];
+                    int id = sl[4].toInt();
+
+                    name = name.toLower();
+                    if (name.startsWith("rubber"))
+                        continue;
+
+                    bool found = false;
+
+                    for (auto it = m_colors.begin(); !found && (it != m_colors.end()); ++it) {
+                        Color *color = const_cast<Color *>(it.value());
+                        QString blname = color->name()
+                                .toLower()
+                                .replace(' ', '_')
+                                .replace('-', '_')
+                                .replace("gray", "grey");
+                        if (blname == name) {
+                            color->m_ldraw_id = id;
+                            matchCount++;
+                            found = true;
+                        }
+                    }
+                }
+            }
+        }
+        return true;
+    }
+    return  false;
 }
 
 void BrickLink::TextImport::exportTo(Core *bl)

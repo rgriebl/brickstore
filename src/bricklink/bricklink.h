@@ -606,12 +606,11 @@ private:
 
     struct btinvlist_dummy { };
     bool readDB_processLine(btinvlist_dummy &, uint count, const char **strs);
-    struct btpriceguide_dummy { };
-    bool readDB_processLine(btpriceguide_dummy &, uint count, const char **strs);
     struct btchglog_dummy { };
     bool readDB_processLine(btchglog_dummy &, uint count, const char **strs);
 
     bool readInventory(const Item *item);
+    bool readLDrawColors(const QString &path);
 
     const Category *findCategoryByName(const QStringRef &name) const;
     const Item *findItem(char type, const QString &id);

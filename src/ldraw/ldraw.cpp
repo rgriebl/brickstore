@@ -717,50 +717,52 @@ bool LDraw::Core::parse_ldconfig(const char *filename)
                 sl[7] == QLatin1String("EDGE")) {
                 // 0 !COLOUR name CODE x VALUE v EDGE e [ALPHA a] [LUMINANCE l] [ CHROME | PEARLESCENT | RUBBER | MATTE_METALLIC | METAL | MATERIAL <params> ]</params>
 
-                int id = sl[4].toInt();
-                QColor main = parse_color_string(sl[6]);
-                QColor edge = parse_color_string(sl[8]);
+                Color c;
+
+                c.id = sl[4].toInt();
+                c.name = sl[2];
+                c.color = parse_color_string(sl[6]);
+                c.edgeColor = parse_color_string(sl[8]);
 
                 // edge is not a RGB color, but a color index (which could be not parsed yet...)
-                if (!edge.isValid()) {
-                    edge_ids.insert(id, sl[8].toInt());
-                    edge = Qt::green;
+                if (!c.edgeColor.isValid()) {
+                    edge_ids.insert(c.id, sl[8].toInt());
+                    c.edgeColor = Qt::green;
                 }
 
                 for (int idx = 9; idx < sl.count(); ++idx) {
                     if (sl[idx] == QLatin1String("ALPHA")) {
-                        int alpha = sl[idx+1].toInt();
-                        main.setAlpha(alpha);
-                        edge.setAlpha(alpha);
-                        idx++;
-                    }
-                    else if (sl[idx] == QLatin1String("LUMINANCE")) {
-                        int lum = sl[idx+1].toInt();
-                        Q_UNUSED(lum)
-                        idx++;
-                    }
-                    else if (sl[idx] == QLatin1String("CHROME")) {
-                    }
-                    else if (sl[idx] == QLatin1String("PEARLESCENT")) {
-                    }
-                    else if (sl[idx] == QLatin1String("RUBBER")) {
-                    }
-                    else if (sl[idx] == QLatin1String("MATTE_METALLIC")) {
-                    }
-                    else if (sl[idx] == QLatin1String("METAL")) {
+                        int alpha = sl[++idx].toInt();
+                        c.color.setAlpha(alpha);
+                        c.edgeColor.setAlpha(alpha);
+                    } else if (sl[idx] == QLatin1String("LUMINANCE")) {
+                        c.luminance = sl[++idx].toInt();
+                    } else if (sl[idx] == QLatin1String("CHROME")) {
+                        c.chrome = true;
+                    } else if (sl[idx] == QLatin1String("PEARLESCENT")) {
+                        c.pearlescent = true;
+                    } else if (sl[idx] == QLatin1String("RUBBER")) {
+                        c.rubber = true;
+                    } else if (sl[idx] == QLatin1String("MATTE_METALLIC")) {
+                        c.matteMetallic = true;
+                    } else if (sl[idx] == QLatin1String("METAL")) {
+                        c.metal = true;
                     }
                 }
-                if (main.isValid() && edge.isValid()) {
-                    m_colors.insert(id, qMakePair<QColor, QColor>(main, edge));
+                if (c.color.isValid() && c.edgeColor.isValid()) {
+                    m_colors.insert(c.id, c);
 
                     //qDebug() << "Got Color " << id << " : " << main << " // " << edge;
                 }
             }
         }
         for (auto it = edge_ids.constBegin(); it != edge_ids.constEnd(); ++it) {
-            if (m_colors.contains(it.key()) && m_colors.contains(it.value())) {
-                m_colors[it.key()].second = m_colors[it.value()].first;
-                //qDebug() << "Fixed Edge " << it.key() << " : " << m_colors[it.key()].first << " // " << m_colors[it.key()].second;
+            auto set_edge = m_colors.find(it.key());
+            auto get_main = m_colors.constFind(it.value());
+
+            if ((set_edge != m_colors.end()) && (get_main != m_colors.constEnd())) {
+                set_edge.value().edgeColor = get_main.value().color;
+                // qDebug() << "Fixed edge color of" << it.key() << "to" << get_main.value().color;
             }
         }
 
@@ -773,7 +775,7 @@ bool LDraw::Core::parse_ldconfig(const char *filename)
 QColor LDraw::Core::edgeColor(int id) const
 {
     if (m_colors.contains(id)) {
-        return m_colors.value(id).second;
+        return m_colors.value(id).edgeColor;
     }
     else if (id >= 0 && id <= 15) {
         // legacy ldraw mapping
@@ -809,7 +811,7 @@ QColor LDraw::Core::edgeColor(int id) const
 QColor LDraw::Core::color(int id, int baseid) const
 {
     if (m_colors.contains(id)) {
-        return m_colors.value(id).first;
+        return m_colors.value(id).color;
     }
     else if (baseid < 0 && (id == 16 || id == 24)) {
         qWarning("Called Core::color() with meta color id 16 or 24 without specifing the meta color");

@@ -215,7 +215,12 @@ void ItemDetailPopup::setItem(const BrickLink::Item *item, const BrickLink::Colo
 
 #if !defined(QT_NO_OPENGL)
         if (m_part && m_ldraw) {
-            m_ldraw->setPartAndColor(m_part, color ? color->ldrawId() : 7 /* light gray */);
+            int colorId = -1;
+            if (color)
+                colorId = color->ldrawId();
+            if (colorId < 0)
+                colorId = 7; // light gray
+            m_ldraw->setPartAndColor(m_part, colorId);
             m_stack->setCurrentWidget(m_ldraw);
             m_blpic->setText(QString());
         } else

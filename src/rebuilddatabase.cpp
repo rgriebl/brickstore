@@ -295,7 +295,7 @@ bool RebuildDatabase::download()
         // { "https://www.bricklink.com/catalogDownload.asp", itemQuery('U'), "items_U.txt"     }, // generates a 500 server error
         { "https://www.bricklink.com/btinvlist.asp",       QList<QPair<QString, QString> >(), "btinvlist.txt"   },
         { "https://www.bricklink.com/btchglog.asp",        QList<QPair<QString, QString> >(), "btchglog.txt" },
-
+        { "https://www.ldraw.org/library/official/ldconfig.ldr", QList<QPair<QString, QString> >(), "ldconfig.ldr" },
         { nullptr, QList<QPair<QString, QString> > (), nullptr }
     };
 
