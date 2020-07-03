@@ -69,7 +69,8 @@ enum {
     NeedInventory = 2,
     NeedSubCondition = 4,
     NeedNetwork = 8,
-    NeedDocument = 16
+    NeedModification = 16,
+    NeedDocument = 32
 };
 
 
@@ -947,7 +948,7 @@ void FrameWork::createActions()
     connect(rm, &RecentMenu::openRecent,
             this, &FrameWork::fileOpenRecent);
 
-    (void) newQAction(this, "file_save", NeedDocument);
+    (void) newQAction(this, "file_save", NeedDocument | NeedModification);
     (void) newQAction(this, "file_saveas", NeedDocument);
     (void) newQAction(this, "file_print", NeedDocument);
     (void) newQAction(this, "file_print_pdf", NeedDocument);
@@ -1322,6 +1323,8 @@ void FrameWork::connectWindow(QWidget *w)
 
         connectAllActions(false, m_current_window);
 
+        disconnect(m_current_window.data(), &Window::windowTitleChanged,
+                   this, &FrameWork::titleUpdate);
         disconnect(doc, &Document::statisticsChanged,
                    this, &FrameWork::statisticsUpdate);
         disconnect(m_current_window.data(), &Window::selectionChanged,
@@ -1347,6 +1350,8 @@ void FrameWork::connectWindow(QWidget *w)
 
         connectAllActions(true, window);
 
+        connect(window, &Window::windowTitleChanged,
+                this, &FrameWork::titleUpdate);
         connect(doc, &Document::statisticsChanged,
                 this, &FrameWork::statisticsUpdate);
         connect(window, &Window::selectionChanged,
@@ -1400,6 +1405,11 @@ void FrameWork::updateActions(const Document::ItemList &selection)
 
         if (flags & NeedNetwork)
             b = b && isOnline;
+
+        if (flags & NeedModification) {
+            b = b && m_current_window && m_current_window->document()
+                    && m_current_window->document()->isModified();
+        }
 
         if (flags & NeedDocument) {
             b = b && m_current_window;
