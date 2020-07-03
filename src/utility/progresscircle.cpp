@@ -15,6 +15,7 @@
 #include <QToolTip>
 #include <QPainter>
 #include <QConicalGradient>
+
 #include <climits>
 
 #include "progresscircle.h"

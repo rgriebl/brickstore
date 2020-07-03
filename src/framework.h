@@ -22,10 +22,10 @@
 #include "document.h"
 #include "bricklinkfwd.h"
 
-class QLabel;
-class QMdiSubWindow;
-class QToolButton;
-class QLineEdit;
+QT_FORWARD_DECLARE_CLASS(QLabel);
+QT_FORWARD_DECLARE_CLASS(QMdiSubWindow);
+QT_FORWARD_DECLARE_CLASS(QToolButton);
+QT_FORWARD_DECLARE_CLASS(QLineEdit);
 
 class Workspace;
 class ProgressCircle;

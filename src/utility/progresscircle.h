@@ -17,7 +17,7 @@
 #include <QIcon>
 #include <QScopedPointer>
 
-class QGradient;
+QT_FORWARD_DECLARE_CLASS(QGradient);
 
 
 class ProgressCircle : public QWidget

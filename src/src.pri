@@ -4,6 +4,7 @@ INCLUDEPATH += $$RELPWD
 DEPENDPATH  += $$RELPWD
 
 QT *= core gui xml network script scripttools printsupport uitools # networkauth
+win32:QT *= winextras
 
 OTHER_FILES += \
   $$PWD/version.h.in \

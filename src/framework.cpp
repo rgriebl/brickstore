@@ -37,6 +37,10 @@
 #include <QSizeGrip>
 #include <QLineEdit>
 #include <QFont>
+#if defined(Q_OS_WINDOWS)
+#  include <QWinTaskbarButton>
+#  include <QWinTaskbarProgress>
+#endif
 
 #include "application.h"
 #include "messagebox.h"
@@ -484,9 +488,27 @@ FrameWork::FrameWork(QWidget *parent)
     updateActions();    // init enabled/disabled status of document actions
     connectWindow(nullptr);
 
-    // we need to show now, since most X11 window managers and Mac OS X with
+    // we need to show now, since most X11 window managers and macOS with
     // unified-toolbar look won't get the position right otherwise
+    // plus, on Windows, we need the window handle for the progress indicator
     show();
+
+#if defined(Q_OS_WINDOWS)
+    auto winTaskbarButton = new QWinTaskbarButton(this);
+    winTaskbarButton->setWindow(windowHandle());
+
+    connect(BrickLink::core(), &BrickLink::Core::transferJobProgress, this, [winTaskbarButton](int p, int t) {
+        QWinTaskbarProgress *progress = winTaskbarButton->progress();
+        if (p == t) {
+            progress->reset();
+        } else {
+            if (progress->maximum() != t)
+                progress->setMaximum(t);
+            progress->setValue(p);
+        }
+        progress->setVisible(p != t);
+    });
+#endif
 
     QByteArray ba;
 
