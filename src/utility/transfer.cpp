@@ -113,6 +113,8 @@ bool Transfer::retrieve(TransferJob *job, bool high_priority)
     else
         m_jobs.append(job);
 
+    emit progress(m_progressDone, ++m_progressTotal);
+
     schedule();
     return true;
 }
@@ -199,7 +201,9 @@ void Transfer::schedule()
             m_currentJobs.removeAll(j);
             delete j;
 
-            emit progress(m_currentJobs.size(), m_jobs.size() + m_currentJobs.size());
+            emit progress(++m_progressDone, m_progressTotal);
+            if (m_progressDone == m_progressTotal)
+                m_progressDone = m_progressTotal = 0;
 
             QMetaObject::invokeMethod(this, &Transfer::schedule, Qt::QueuedConnection);
 

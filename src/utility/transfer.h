@@ -120,7 +120,6 @@ public:
 signals:
     void progress(int done, int total);
     void finished(TransferJob *);
-    //void started(TransferJob *);
     void jobProgress(TransferJob *, int done, int total);
 
 protected:
@@ -134,6 +133,8 @@ private:
     QNetworkAccessManager *m_nam;
     QList<TransferJob *>   m_jobs;
     QList<TransferJob *>   m_currentJobs;
+    int                    m_progressDone = 0;
+    int                    m_progressTotal = 0;
 
     static QString s_default_user_agent;
     void schedule();
