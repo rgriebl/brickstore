@@ -634,13 +634,13 @@ void FrameWork::translateActions()
         { "edit_status_include",            tr("Include"),                            },
         { "edit_status_exclude",            tr("Exclude"),                            },
         { "edit_status_extra",              tr("Extra"),                              },
-        { "edit_status_toggle",             tr("Toggle Include/Exclude"),             },
+        { "edit_status_toggle",             tr("Toggle Status::Include/Status::Exclude"),             },
         { "edit_cond",                      tr("Condition"),                          },
         { "edit_cond_new",                  tr("New", "Cond|New"),                    },
         { "edit_cond_used",                 tr("Used"),                               },
         { "edit_cond_toggle",               tr("Toggle New/Used"),                    },
         { "edit_subcond_none",              tr("None", "SubCond|None"),               },
-        { "edit_subcond_misb",              tr("MISB", "SubCond|MISB"),               },
+        { "edit_subcond_sealed",            tr("Sealed", "SubCond|Sealed"),           },
         { "edit_subcond_complete",          tr("Complete", "SubCond|Complete"),       },
         { "edit_subcond_incomplete",        tr("Incomplete", "SubCond|Incomplete"),   },
         { "edit_color",                     tr("Color..."),                           },
@@ -668,9 +668,10 @@ void FrameWork::translateActions()
         { "edit_retain_no",                 tr("No"),                                 },
         { "edit_retain_toggle",             tr("Toggle Yes/No"),                      },
         { "edit_stockroom",                 tr("Stockroom Item"),                     },
-        { "edit_stockroom_yes",             tr("Yes"),                                },
         { "edit_stockroom_no",              tr("No"),                                 },
-        { "edit_stockroom_toggle",          tr("Toggle Yes/No"),                      },
+        { "edit_stockroom_a",               tr("A"),                                  },
+        { "edit_stockroom_b",               tr("B"),                                  },
+        { "edit_stockroom_c",               tr("C"),                                  },
         { "edit_reserved",                  tr("Reserved for..."),                    },
         { "edit_bl_catalog",                tr("Show BrickLink Catalog Info..."),     },
         { "edit_bl_priceguide",             tr("Show BrickLink Price Guide Info..."), },
@@ -1016,7 +1017,7 @@ void FrameWork::createActions()
     m->addSeparator();
     g = newQActionGroup(this, nullptr, true);
     m->addAction(newQAction(g, "edit_subcond_none", NeedSelection(1) | NeedSubCondition, true));
-    m->addAction(newQAction(g, "edit_subcond_misb", NeedSelection(1) | NeedSubCondition, true));
+    m->addAction(newQAction(g, "edit_subcond_sealed", NeedSelection(1) | NeedSubCondition, true));
     m->addAction(newQAction(g, "edit_subcond_complete", NeedSelection(1) | NeedSubCondition, true));
     m->addAction(newQAction(g, "edit_subcond_incomplete", NeedSelection(1) | NeedSubCondition, true));
 
@@ -1057,10 +1058,10 @@ void FrameWork::createActions()
 
     m = newQMenu(this, "edit_stockroom", NeedSelection(1));
     g = newQActionGroup(this, nullptr, true);
-    m->addAction(newQAction(g, "edit_stockroom_yes", NeedSelection(1), true));
     m->addAction(newQAction(g, "edit_stockroom_no", NeedSelection(1), true));
-    m->addSeparator();
-    m->addAction(newQAction(this, "edit_stockroom_toggle", NeedSelection(1)));
+    m->addAction(newQAction(g, "edit_stockroom_a", NeedSelection(1), true));
+    m->addAction(newQAction(g, "edit_stockroom_b", NeedSelection(1), true));
+    m->addAction(newQAction(g, "edit_stockroom_c", NeedSelection(1), true));
 
     (void) newQAction(this, "edit_reserved", NeedSelection(1));
 
@@ -1439,42 +1440,44 @@ void FrameWork::selectionUpdate(const Document::ItemList &selection)
     int stockroom  = -1;
 
     if (cnt) {
-        status     = selection.front()->status();
-        condition  = selection.front()->condition();
-        scondition = selection.front()->subCondition();
+        status     = int(selection.front()->status());
+        condition  = int(selection.front()->condition());
+        scondition = int(selection.front()->subCondition());
         retain     = selection.front()->retain()    ? 1 : 0;
-        stockroom  = selection.front()->stockroom() ? 1 : 0;
+        stockroom  = int(selection.front()->stockroom());
 
         foreach (Document::Item *item, selection) {
-            if ((status >= 0) && (status != item->status()))
+            if ((status >= 0) && (status != int(item->status())))
                 status = -1;
-            if ((condition >= 0) && (condition != item->condition()))
+            if ((condition >= 0) && (condition != int(item->condition())))
                 condition = -1;
-            if ((scondition >= 0) && (scondition != item->subCondition()))
+            if ((scondition >= 0) && (scondition != int(item->subCondition())))
                 scondition = -1;
             if ((retain >= 0) && (retain != (item->retain() ? 1 : 0)))
                 retain = -1;
-            if ((stockroom >= 0) && (stockroom != (item->stockroom() ? 1 : 0)))
+            if ((stockroom >= 0) && (stockroom != int(item->stockroom())))
                 stockroom = -1;
         }
     }
-    findAction("edit_status_include")->setChecked(status == BrickLink::Include);
-    findAction("edit_status_exclude")->setChecked(status == BrickLink::Exclude);
-    findAction("edit_status_extra")->setChecked(status == BrickLink::Extra);
+    findAction("edit_status_include")->setChecked(status == int(BrickLink::Status::Include));
+    findAction("edit_status_exclude")->setChecked(status == int(BrickLink::Status::Exclude));
+    findAction("edit_status_extra")->setChecked(status == int(BrickLink::Status::Extra));
 
-    findAction("edit_cond_new")->setChecked(condition == BrickLink::New);
-    findAction("edit_cond_used")->setChecked(condition == BrickLink::Used);
+    findAction("edit_cond_new")->setChecked(condition == int(BrickLink::Condition::New));
+    findAction("edit_cond_used")->setChecked(condition == int(BrickLink::Condition::Used));
 
-    findAction("edit_subcond_none")->setChecked(scondition == BrickLink::None);
-    findAction("edit_subcond_misb")->setChecked(scondition == BrickLink::MISB);
-    findAction("edit_subcond_complete")->setChecked(scondition == BrickLink::Complete);
-    findAction("edit_subcond_incomplete")->setChecked(scondition == BrickLink::Incomplete);
+    findAction("edit_subcond_none")->setChecked(scondition == int(BrickLink::SubCondition::None));
+    findAction("edit_subcond_sealed")->setChecked(scondition == int(BrickLink::SubCondition::Sealed));
+    findAction("edit_subcond_complete")->setChecked(scondition == int(BrickLink::SubCondition::Complete));
+    findAction("edit_subcond_incomplete")->setChecked(scondition == int(BrickLink::SubCondition::Incomplete));
 
     findAction("edit_retain_yes")->setChecked(retain == 1);
     findAction("edit_retain_no")->setChecked(retain == 0);
 
-    findAction("edit_stockroom_yes")->setChecked(stockroom == 1);
-    findAction("edit_stockroom_no")->setChecked(stockroom == 0);
+    findAction("edit_stockroom_no")->setChecked(stockroom == int(BrickLink::Stockroom::None));
+    findAction("edit_stockroom_a")->setChecked(stockroom == int(BrickLink::Stockroom::A));
+    findAction("edit_stockroom_b")->setChecked(stockroom == int(BrickLink::Stockroom::B));
+    findAction("edit_stockroom_c")->setChecked(stockroom == int(BrickLink::Stockroom::C));
 }
 
 void FrameWork::statisticsUpdate()
@@ -1486,7 +1489,7 @@ void FrameWork::statisticsUpdate()
         Document::ItemList not_exclude;
 
         foreach(Document::Item *item, m_current_window->document()->items()) {
-            if (item->status() != BrickLink::Exclude)
+            if (item->status() != BrickLink::Status::Exclude)
                 not_exclude.append(item);
         }
 

@@ -52,7 +52,7 @@ BrickLink::PriceGuide::PriceGuide(const BrickLink::Item *item, const BrickLink::
     m_color = color;
 
     m_valid = false;
-    m_update_status = Ok;
+    m_update_status = UpdateStatus::Ok;
 
     memset(m_quantities, 0, sizeof(m_quantities));
     memset(m_lots, 0, sizeof(m_lots));
@@ -77,15 +77,15 @@ void BrickLink::PriceGuide::save_to_disk()
         ts << "# Price Guide for part #" << m_item->id() << " (" << m_item->name() << "), color #" << m_color->id() << " (" << m_color->name() << ")\n";
         ts << "# last update: " << m_fetched.toString() << "\n#\n";
 
-        for (int ti = 0; ti < TimeCount; ti++) {
-            for (int ci = 0; ci < ConditionCount; ci++) {
-                ts << (ti == PastSix ? 'O' : 'I') << '\t' << (ci == New ? 'N' : 'U') << '\t'
+        for (int ti = 0; ti < int(Time::Count); ti++) {
+            for (int ci = 0; ci < int(Condition::Count); ci++) {
+                ts << (ti == int(Time::PastSix) ? 'O' : 'I') << '\t' << (ci == int(Condition::New) ? 'N' : 'U') << '\t'
                    << m_lots[ti][ci] << '\t'
                    << m_quantities[ti][ci] << '\t'
-                   << c.toString(m_prices[ti][ci][Lowest]) << '\t'
-                   << c.toString(m_prices[ti][ci][Average]) << '\t'
-                   << c.toString(m_prices[ti][ci][WAverage]) << '\t'
-                   << c.toString(m_prices[ti][ci][Highest]) << '\n';
+                   << c.toString(m_prices[ti][ci][int(Price::Lowest)]) << '\t'
+                   << c.toString(m_prices[ti][ci][int(Price::Average)]) << '\t'
+                   << c.toString(m_prices[ti][ci][int(Price::WAverage)]) << '\t'
+                   << c.toString(m_prices[ti][ci][int(Price::Highest)]) << '\n';
             }
         }
     }
@@ -139,26 +139,26 @@ void BrickLink::PriceGuide::parse(const QByteArray &ba)
         switch (sl[0][0].toLatin1()) {
         case 'P': oldformat = true;
                   Q_FALLTHROUGH();
-        case 'O': ti = PastSix;
+        case 'O': ti = int(Time::PastSix);
                   break;
         case 'C': oldformat = true;
                   Q_FALLTHROUGH();
-        case 'I': ti = Current;
+        case 'I': ti = int(Time::Current);
                   break;
         }
 
         switch (sl[1][0].toLatin1()) {
-        case 'N': ci = New;  break;
-        case 'U': ci = Used; break;
+        case 'N': ci = int(Condition::New);  break;
+        case 'U': ci = int(Condition::Used); break;
         }
 
         if ((ti != -1) && (ci != -1)) {
             m_lots[ti][ci]             = sl[oldformat ? 3 : 2].toInt();
             m_quantities[ti][ci]       = sl[oldformat ? 2 : 3].toInt();
-            m_prices[ti][ci][Lowest]   = c.toDouble(sl[4]);
-            m_prices[ti][ci][Average]  = c.toDouble(sl[5]);
-            m_prices[ti][ci][WAverage] = c.toDouble(sl[6]);
-            m_prices[ti][ci][Highest]  = c.toDouble(sl[7]);
+            m_prices[ti][ci][int(Price::Lowest)]   = c.toDouble(sl[4]);
+            m_prices[ti][ci][int(Price::Average)]  = c.toDouble(sl[5]);
+            m_prices[ti][ci][int(Price::WAverage)] = c.toDouble(sl[6]);
+            m_prices[ti][ci][int(Price::Highest)]  = c.toDouble(sl[7]);
         }
     }
 
@@ -174,16 +174,16 @@ void BrickLink::PriceGuide::update(bool high_priority)
 
 void BrickLink::Core::updatePriceGuide(BrickLink::PriceGuide *pg, bool high_priority)
 {
-    if (!pg || (pg->m_update_status == Updating))
+    if (!pg || (pg->m_update_status == UpdateStatus::Updating))
         return;
 
     if (!m_online || !m_transfer) {
-        pg->m_update_status = UpdateFailed;
+        pg->m_update_status = UpdateStatus::UpdateFailed;
         emit priceGuideUpdated(pg);
         return;
     }
 
-    pg->m_update_status = Updating;
+    pg->m_update_status = UpdateStatus::Updating;
     pg->addRef();
 
     QUrl url("https://www.bricklink.com/BTpriceSummary.asp"); //?{item type}={item no}&colorID={color ID}&cCode={currency code}&cExc={Y to exclude incomplete sets}
@@ -213,14 +213,14 @@ void BrickLink::Core::priceGuideJobFinished(TransferJob *j)
     if (!pg)
         return;
 
-    pg->m_update_status = UpdateFailed;
+    pg->m_update_status = UpdateStatus::UpdateFailed;
 
     if (j->isCompleted()) {
         pg->parse(*j->data());
         if (pg->m_valid) {
             pg->m_fetched = QDateTime::currentDateTime();
             pg->save_to_disk();
-            pg->m_update_status = Ok;
+            pg->m_update_status = UpdateStatus::Ok;
         }
     }
 

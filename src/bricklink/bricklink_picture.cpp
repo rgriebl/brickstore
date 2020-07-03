@@ -122,7 +122,7 @@ BrickLink::Picture::Picture(const Item *item, const Color *color)
     m_color = color;
 
     m_valid = false;
-    m_update_status = Ok;
+    m_update_status = UpdateStatus::Ok;
 }
 
 const QImage BrickLink::Picture::image() const
@@ -210,18 +210,18 @@ void BrickLink::Core::pictureLoaded(Picture *pic)
 
 void BrickLink::Core::updatePicture(BrickLink::Picture *pic, bool high_priority)
 {
-    if (!pic || (pic->m_update_status == Updating))
+    if (!pic || (pic->m_update_status == UpdateStatus::Updating))
         return;
 
     QMutexLocker lock(&m_corelock);
 
     if (!m_online || !m_transfer) {
-        pic->m_update_status = UpdateFailed;
+        pic->m_update_status = UpdateStatus::UpdateFailed;
         emit pictureUpdated(pic);
         return;
     }
 
-    pic->m_update_status = Updating;
+    pic->m_update_status = UpdateStatus::Updating;
     pic->addRef();
 
     bool large = (!pic->color());
@@ -262,7 +262,7 @@ void BrickLink::Core::pictureJobFinished(TransferJob *j)
 
     QMutexLocker lock(&m_corelock);
 
-    pic->m_update_status = UpdateFailed;
+    pic->m_update_status = UpdateStatus::UpdateFailed;
 
     if (j->isCompleted()) {
         QString path;
@@ -276,7 +276,7 @@ void BrickLink::Core::pictureJobFinished(TransferJob *j)
         if (!path.isEmpty()) {
             path.append(large ? "large.png" : "small.png");
 
-            pic->m_update_status = Ok;
+            pic->m_update_status = UpdateStatus::Ok;
 
             // qWarning() << "IMG" << j->data()->size() << j->effectiveUrl();
 
@@ -303,11 +303,11 @@ void BrickLink::Core::pictureJobFinished(TransferJob *j)
         // no large JPG image ->try a GIF image instead
 
         if (!m_transfer) {
-            pic->m_update_status = UpdateFailed;
+            pic->m_update_status = UpdateStatus::UpdateFailed;
             return;
         }
 
-        pic->m_update_status = Updating;
+        pic->m_update_status = UpdateStatus::Updating;
 
         QUrl url = j->url();
         QString path = url.path();

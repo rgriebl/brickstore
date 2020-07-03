@@ -20,16 +20,16 @@ SetToPriceGuideDialog::SetToPriceGuideDialog(QWidget *parent)
 {
     setupUi(this);
     
-    w_type_time->addItem(tr("Last 6 Months Sales"), BrickLink::PastSix);
-    w_type_time->addItem(tr("Current Inventory"), BrickLink::Current);
+    w_type_time->addItem(tr("Last 6 Months Sales"), int(BrickLink::Time::PastSix));
+    w_type_time->addItem(tr("Current Inventory"), int(BrickLink::Time::Current));
     
-    w_type_price->addItem(tr("Minimum"), BrickLink::Lowest);
-    w_type_price->addItem(tr("Average"), BrickLink::Average);
-    w_type_price->addItem(tr("Quantity Average"), BrickLink::WAverage);
-    w_type_price->addItem(tr("Maximum"), BrickLink::Highest);
+    w_type_price->addItem(tr("Minimum"), int(BrickLink::Price::Lowest));
+    w_type_price->addItem(tr("Average"), int(BrickLink::Price::Average));
+    w_type_price->addItem(tr("Quantity Average"), int(BrickLink::Price::WAverage));
+    w_type_price->addItem(tr("Maximum"), int(BrickLink::Price::Highest));
 
-    BrickLink::Time timedef = static_cast<BrickLink::Time>(Config::inst()->value(QLatin1String("/Defaults/SetToPG/Time"), BrickLink::PastSix).toInt());
-    BrickLink::Price pricedef = static_cast<BrickLink::Price>(Config::inst()->value(QLatin1String("/Defaults/SetToPG/Price"), BrickLink::Average).toInt());
+    int timedef = Config::inst()->value(QLatin1String("/Defaults/SetToPG/Time"), int(BrickLink::Time::PastSix)).toInt();
+    int pricedef = Config::inst()->value(QLatin1String("/Defaults/SetToPG/Price"), int(BrickLink::Price::Average)).toInt();
 
     w_type_time->setCurrentIndex(w_type_time->findData(timedef));
     w_type_price->setCurrentIndex(w_type_price->findData(pricedef));

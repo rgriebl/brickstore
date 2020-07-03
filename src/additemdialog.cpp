@@ -63,8 +63,8 @@ AddItemDialog::AddItemDialog(QWidget *parent)
 
     m_condition = new QButtonGroup(this);
     m_condition->setExclusive(true);
-    m_condition->addButton(w_radio_new, BrickLink::New);
-    m_condition->addButton(w_radio_used, BrickLink::Used);
+    m_condition->addButton(w_radio_new, int(BrickLink::Condition::New));
+    m_condition->addButton(w_radio_used, int(BrickLink::Condition::Used));
 
     w_select_color->setWidthToContents(true);
 

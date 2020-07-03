@@ -133,7 +133,7 @@ void ImportBLOrder::init()
 {
     m_current_address = -1;
 
-    m_retry_placed = (m_order_type == BrickLink::Any);
+    m_retry_placed = (m_order_type == BrickLink::OrderType::Any);
 
     if (!m_order_id.isEmpty()) {
         m_order_to = QDate::currentDate();
@@ -148,7 +148,7 @@ void ImportBLOrder::init()
 
     QUrl url("https://www.bricklink.com/orderExcelFinal.asp");
     QUrlQuery query;
-    query.addQueryItem("orderType",     m_order_type == BrickLink::Placed ? "placed" : "received");
+    query.addQueryItem("orderType",     m_order_type == BrickLink::OrderType::Placed ? "placed" : "received");
     query.addQueryItem("action",        "save");
     query.addQueryItem("orderID",       m_order_id);
     query.addQueryItem("viewType",      "X");    // XML
@@ -222,7 +222,7 @@ void ImportBLOrder::gotten()
                             BrickLink::Core::ParseItemListXMLResult result = BrickLink::core()->parseItemListXML(ordernode.toElement(), BrickLink::XMLHint_Order);
 
                             if (result.items) {
-                                BrickLink::Order *order = new BrickLink::Order(QLatin1String(""), BrickLink::Placed);
+                                BrickLink::Order *order = new BrickLink::Order(QLatin1String(""), BrickLink::OrderType::Placed);
 
                                 for (QDomNode node = ordernode.firstChild(); !node.isNull(); node = node.nextSibling()) {
                                     if (!node. isElement())
@@ -462,7 +462,8 @@ void ImportBLCart::gotten()
                     }
                     double price = QLocale::c().toDouble(rx_qty_price.cap(4));
 
-                    BrickLink::Condition cond = (str.indexOf(str_cond, 0, Qt::CaseInsensitive) >= 0 ? BrickLink::New : BrickLink::Used);
+                    BrickLink::Condition cond = (str.indexOf(str_cond, 0, Qt::CaseInsensitive) >= 0
+                                                 ? BrickLink::Condition::New : BrickLink::Condition::Used);
 
                     QString comment;
                     int comment_pos = color_and_item.indexOf(item->name());

@@ -259,7 +259,7 @@ void ItemDetailPopup::redraw()
     if (m_pic) {
         //setWindowTitle(QString(d->m_pic->item()->id()) + " " + d->m_pic->item()->name());
 
-        if (m_pic->updateStatus() == BrickLink::Updating)
+        if (m_pic->updateStatus() == BrickLink::UpdateStatus::Updating)
             m_blpic->setText(QLatin1String("<center><i>") +
                     tr("Please wait... updating") +
                     QLatin1String("</i></center>"));

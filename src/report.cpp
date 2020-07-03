@@ -118,12 +118,12 @@ void Report::print(QPaintDevice *pd, const Document *doc, const Document::ItemLi
         QScriptValue orderVal = d->m_engine->newObject();
 
         orderVal.setProperty("id", order->id());
-        orderVal.setProperty("type", (order->type() == BrickLink::Placed ? "P" : "R"));
+        orderVal.setProperty("type", (order->type() == BrickLink::OrderType::Placed ? "P" : "R"));
         orderVal.setProperty("date", d->m_engine->newDate(order->date()));
         orderVal.setProperty("statusChange", d->m_engine->newDate(order->statusChange()));
         orderVal.setProperty("other", order->other());
-        orderVal.setProperty("buyer", (order->type() == BrickLink::Placed ? Config::inst()->loginForBrickLink().first : order->other()));
-        orderVal.setProperty("seller", (order->type() == BrickLink::Placed ? order->other() : Config::inst()->loginForBrickLink().first));
+        orderVal.setProperty("buyer", (order->type() == BrickLink::OrderType::Placed ? Config::inst()->loginForBrickLink().first : order->other()));
+        orderVal.setProperty("seller", (order->type() == BrickLink::OrderType::Placed ? order->other() : Config::inst()->loginForBrickLink().first));
         orderVal.setProperty("shipping", order->shipping());
         orderVal.setProperty("insurance", order->insurance());
         orderVal.setProperty("delivery", order->delivery());
@@ -150,9 +150,9 @@ void Report::print(QPaintDevice *pd, const Document *doc, const Document::ItemLi
         iVal.setProperty("picture", qScriptValueFromValue(d->m_engine.data(), pic ? pic->image() : QImage()));
 
         QScriptValue statusVal = d->m_engine->newObject();
-        statusVal.setProperty("include", (item->status() == BrickLink::Include));
-        statusVal.setProperty("exclude", (item->status() == BrickLink::Exclude));
-        statusVal.setProperty("extra", (item->status() == BrickLink::Extra));
+        statusVal.setProperty("include", (item->status() == BrickLink::Status::Include));
+        statusVal.setProperty("exclude", (item->status() == BrickLink::Status::Exclude));
+        statusVal.setProperty("extra", (item->status() == BrickLink::Status::Extra));
         iVal.setProperty("status", statusVal);
 
         iVal.setProperty("quantity", item->quantity());
@@ -165,8 +165,8 @@ void Report::print(QPaintDevice *pd, const Document *doc, const Document::ItemLi
         iVal.setProperty("color", colorVal);
 
         QScriptValue condVal = d->m_engine->newObject();
-        condVal.setProperty("new", (item->condition() == BrickLink::New));
-        condVal.setProperty("used", (item->condition() == BrickLink::Used));
+        condVal.setProperty("new", (item->condition() == BrickLink::Condition::New));
+        condVal.setProperty("used", (item->condition() == BrickLink::Condition::Used));
         iVal.setProperty("condition", condVal);
 
         iVal.setProperty("price", item->price());
@@ -197,7 +197,16 @@ void Report::print(QPaintDevice *pd, const Document *doc, const Document::ItemLi
 
         iVal.setProperty("lotId", item->lotId());
         iVal.setProperty("retain", item->retain());
-        iVal.setProperty("stockroom", item->stockroom());
+
+        QString stockroom;
+        switch (item->stockroom()) {
+        case BrickLink::Stockroom::A: stockroom = "A"; break;
+        case BrickLink::Stockroom::B: stockroom = "B"; break;
+        case BrickLink::Stockroom::C: stockroom = "C"; break;
+        default: break;
+        }
+        iVal.setProperty("stockroom", stockroom);
+
         iVal.setProperty("reserved", item->reserved());
         iVal.setProperty("weight", item->item()->weight());
         iVal.setProperty("totalWeight", item->weight());

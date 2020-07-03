@@ -203,8 +203,8 @@ Window::Window(Document *doc, QWidget *parent)
 
     m_settopg_failcnt = 0;
     m_settopg_list = nullptr;
-    m_settopg_time = BrickLink::PastSix;
-    m_settopg_price = BrickLink::Average;
+    m_settopg_time = BrickLink::Time::PastSix;
+    m_settopg_price = BrickLink::Price::Average;
     m_simple_mode = false;
     m_diff_mode = false;
 
@@ -549,7 +549,7 @@ void Window::mergeItems(const Document::ItemList &items, uint globalmergeflags)
                 (from->item() == find_to->item()) &&
                 (from->color() == find_to->color())&&
                 (from->condition() == find_to->condition()) &&
-                ((from->status() == BrickLink::Exclude) == (find_to->status() == BrickLink::Exclude)) &&
+                ((from->status() == BrickLink::Status::Exclude) == (find_to->status() == BrickLink::Status::Exclude)) &&
                 (m_doc->items().indexOf(find_to) != -1)) {
                 to = find_to;
                 break;
@@ -704,57 +704,57 @@ void Window::on_edit_reset_diffs_triggered()
 
 void Window::on_edit_status_include_triggered()
 {
-    setOrToggle<BrickLink::Status>::set(this, tr("Set 'include' status on %1 items"), &Document::Item::status, &Document::Item::setStatus, BrickLink::Include);
+    setOrToggle<BrickLink::Status>::set(this, tr("Set 'include' status on %1 items"), &Document::Item::status, &Document::Item::setStatus, BrickLink::Status::Include);
 }
 
 void Window::on_edit_status_exclude_triggered()
 {
-    setOrToggle<BrickLink::Status>::set(this, tr("Set 'exclude' status on %1 items"), &Document::Item::status, &Document::Item::setStatus, BrickLink::Exclude);
+    setOrToggle<BrickLink::Status>::set(this, tr("Set 'exclude' status on %1 items"), &Document::Item::status, &Document::Item::setStatus, BrickLink::Status::Exclude);
 }
 
 void Window::on_edit_status_extra_triggered()
 {
-    setOrToggle<BrickLink::Status>::set(this, tr("Set 'extra' status on %1 items"), &Document::Item::status, &Document::Item::setStatus, BrickLink::Extra);
+    setOrToggle<BrickLink::Status>::set(this, tr("Set 'extra' status on %1 items"), &Document::Item::status, &Document::Item::setStatus, BrickLink::Status::Extra);
 }
 
 void Window::on_edit_status_toggle_triggered()
 {
-    setOrToggle<BrickLink::Status>::toggle(this, tr("Toggled status on %1 items"), &Document::Item::status, &Document::Item::setStatus, BrickLink::Include, BrickLink::Exclude);
+    setOrToggle<BrickLink::Status>::toggle(this, tr("Toggled status on %1 items"), &Document::Item::status, &Document::Item::setStatus, BrickLink::Status::Include, BrickLink::Status::Exclude);
 }
 
 void Window::on_edit_cond_new_triggered()
 {
-    setOrToggle<BrickLink::Condition>::set(this, tr("Set 'new' condition on %1 items"), &Document::Item::condition, &Document::Item::setCondition, BrickLink::New);
+    setOrToggle<BrickLink::Condition>::set(this, tr("Set 'new' condition on %1 items"), &Document::Item::condition, &Document::Item::setCondition, BrickLink::Condition::New);
 }
 
 void Window::on_edit_cond_used_triggered()
 {
-    setOrToggle<BrickLink::Condition>::set(this, tr("Set 'used' condition on %1 items"), &Document::Item::condition, &Document::Item::setCondition, BrickLink::Used);
+    setOrToggle<BrickLink::Condition>::set(this, tr("Set 'used' condition on %1 items"), &Document::Item::condition, &Document::Item::setCondition, BrickLink::Condition::Used);
 }
 
 void Window::on_edit_cond_toggle_triggered()
 {
-    setOrToggle<BrickLink::Condition>::toggle(this, tr("Toggled condition on %1 items"), &Document::Item::condition, &Document::Item::setCondition, BrickLink::New, BrickLink::Used);
+    setOrToggle<BrickLink::Condition>::toggle(this, tr("Toggled condition on %1 items"), &Document::Item::condition, &Document::Item::setCondition, BrickLink::Condition::New, BrickLink::Condition::Used);
 }
 
 void Window::on_edit_subcond_none_triggered()
 {
-    setOrToggle<BrickLink::SubCondition>::set(this, tr("Set 'none' sub-condition on %1 items"), &Document::Item::subCondition, &Document::Item::setSubCondition, BrickLink::None);
+    setOrToggle<BrickLink::SubCondition>::set(this, tr("Set 'none' sub-condition on %1 items"), &Document::Item::subCondition, &Document::Item::setSubCondition, BrickLink::SubCondition::None);
 }
 
-void Window::on_edit_subcond_misb_triggered()
+void Window::on_edit_subcond_sealed_triggered()
 {
-    setOrToggle<BrickLink::SubCondition>::set(this, tr("Set 'MISB' sub-condition on %1 items"), &Document::Item::subCondition, &Document::Item::setSubCondition, BrickLink::MISB);
+    setOrToggle<BrickLink::SubCondition>::set(this, tr("Set 'SubCondition::Sealed' sub-condition on %1 items"), &Document::Item::subCondition, &Document::Item::setSubCondition, BrickLink::SubCondition::Sealed);
 }
 
 void Window::on_edit_subcond_complete_triggered()
 {
-    setOrToggle<BrickLink::SubCondition>::set(this, tr("Set 'complete' sub-condition on %1 items"), &Document::Item::subCondition, &Document::Item::setSubCondition, BrickLink::Complete);
+    setOrToggle<BrickLink::SubCondition>::set(this, tr("Set 'complete' sub-condition on %1 items"), &Document::Item::subCondition, &Document::Item::setSubCondition, BrickLink::SubCondition::Complete);
 }
 
 void Window::on_edit_subcond_incomplete_triggered()
 {
-    setOrToggle<BrickLink::SubCondition>::set(this, tr("Set 'incomplete' sub-condition on %1 items"), &Document::Item::subCondition, &Document::Item::setSubCondition, BrickLink::Incomplete);
+    setOrToggle<BrickLink::SubCondition>::set(this, tr("Set 'incomplete' sub-condition on %1 items"), &Document::Item::subCondition, &Document::Item::setSubCondition, BrickLink::SubCondition::Incomplete);
 }
 
 void Window::on_edit_retain_yes_triggered()
@@ -772,19 +772,24 @@ void Window::on_edit_retain_toggle_triggered()
     setOrToggle<bool>::toggle(this, tr("Toggled 'retain' flag on %1 items"), &Document::Item::retain, &Document::Item::setRetain, true, false);
 }
 
-void Window::on_edit_stockroom_yes_triggered()
-{
-    setOrToggle<bool>::set(this, tr("Set 'stockroom' flag on %1 items"), &Document::Item::stockroom, &Document::Item::setStockroom, true);
-}
-
 void Window::on_edit_stockroom_no_triggered()
 {
-    setOrToggle<bool>::set(this, tr("Cleared 'stockroom' flag on %1 items"), &Document::Item::stockroom, &Document::Item::setStockroom, false);
+    setOrToggle<BrickLink::Stockroom>::set(this, tr("Cleared 'stockroom' flag on %1 items"), &Document::Item::stockroom, &Document::Item::setStockroom, BrickLink::Stockroom::None);
 }
 
-void Window::on_edit_stockroom_toggle_triggered()
+void Window::on_edit_stockroom_a_triggered()
 {
-    setOrToggle<bool>::toggle(this, tr("Toggled 'stockroom' flag on %1 items"), &Document::Item::stockroom, &Document::Item::setStockroom, true, false);
+    setOrToggle<BrickLink::Stockroom>::set(this, tr("Set stockroom to 'A' on %1 items"), &Document::Item::stockroom, &Document::Item::setStockroom, BrickLink::Stockroom::A);
+}
+
+void Window::on_edit_stockroom_b_triggered()
+{
+    setOrToggle<BrickLink::Stockroom>::set(this, tr("Set stockroom to 'B' flag on %1 items"), &Document::Item::stockroom, &Document::Item::setStockroom, BrickLink::Stockroom::B);
+}
+
+void Window::on_edit_stockroom_c_triggered()
+{
+    setOrToggle<BrickLink::Stockroom>::set(this, tr("Set stockroom to 'C' flag on %1 items"), &Document::Item::stockroom, &Document::Item::setStockroom, BrickLink::Stockroom::C);
 }
 
 
@@ -851,10 +856,10 @@ void Window::on_edit_price_to_priceguide_triggered()
         for (Document::Item *item : sel) {
             BrickLink::PriceGuide *pg = BrickLink::core()->priceGuide(item->item(), item->color());
 
-            if (force_update && pg && (pg->updateStatus() != BrickLink::Updating))
+            if (force_update && pg && (pg->updateStatus() != BrickLink::UpdateStatus::Updating))
                 pg->update();
 
-            if (pg && (pg->updateStatus() == BrickLink::Updating)) {
+            if (pg && (pg->updateStatus() == BrickLink::UpdateStatus::Updating)) {
                 m_settopg_list->insert(pg, item);
                 pg->addRef();
             }

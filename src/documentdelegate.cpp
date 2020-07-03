@@ -35,7 +35,7 @@
 #include "utility.h"
 
 QVector<QColor>                 DocumentDelegate::s_shades;
-QHash<BrickLink::Status, QIcon> DocumentDelegate::s_status_icons;
+QHash<int, QIcon>               DocumentDelegate::s_status_icons;
 QCache<quint64, QPixmap>        DocumentDelegate::s_tag_cache;
 QCache<int, QPixmap>            DocumentDelegate::s_stripe_cache;
 
@@ -205,7 +205,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
             break;
 
         case Document::Condition:
-            if (it->condition() != BrickLink::New) {
+            if (it->condition() != BrickLink::Condition::New) {
                 bg = fg;
                 bg.setAlphaF(0.3);
             }
@@ -234,21 +234,21 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
 
     switch (idx.column()) {
     case Document::Status: {
-        ico = s_status_icons[it->status()];
+        ico = s_status_icons[int(it->status())];
         if (ico.isNull()) {
             switch (it->status()) {
-            case BrickLink::Exclude: ico = QIcon(":/images/edit_status_exclude.png"); break;
-            case BrickLink::Extra  : ico = QIcon(":/images/edit_status_extra.png"); break;
-            default                :
-            case BrickLink::Include: ico = QIcon(":/images/edit_status_include.png"); break;
+            case BrickLink::Status::Exclude: ico = QIcon(":/images/edit_status_exclude.png"); break;
+            case BrickLink::Status::Extra  : ico = QIcon(":/images/edit_status_extra.png"); break;
+            default                        :
+            case BrickLink::Status::Include: ico = QIcon(":/images/edit_status_include.png"); break;
             }
-            s_status_icons.insert(it->status(), ico);
+            s_status_icons.insert(int(it->status()), ico);
         }
 
         uint altid = it->alternateId();
         bool cp = it->counterPart();
         if (altid || cp) {
-            tag.text = cp ? QLatin1String( "CP" ) : QString::number(altid);
+            tag.text = cp ? QLatin1String("CP") : QString::number(altid);
             tag.bold = (cp || !it->alternate());
             tag.foreground = fg;
             if (cp || selected) {
@@ -279,7 +279,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
         break;
     }
     case Document::Condition:
-        if (it->itemType() && it->itemType()->hasSubConditions() && it->subCondition() != BrickLink::None)
+        if (it->itemType() && it->itemType()->hasSubConditions() && it->subCondition() != BrickLink::SubCondition::None)
             str = QString("%1<br /><i>%2</i>" ).arg(str, m_doc->subConditionLabel(it->subCondition()));
         break;
 
@@ -288,7 +288,10 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
         break;
 
     case Document::Stockroom:
-        checkmark = it->stockroom() ? 1 : -1;
+        if (it->stockroom() == BrickLink::Stockroom::None)
+            checkmark = -1;
+        else
+            str = ('A' + int(it->stockroom()) - int(BrickLink::Stockroom::A));
         break;
     }
 
@@ -542,9 +545,27 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
         break;
 
     case Document::Stockroom:
-        if (dblclick || (keypress && editkey)) {
+        if (dblclick || (keypress && (editkey || key == Qt::Key_A || key == Qt::Key_B || key == Qt::Key_C  || key == Qt::Key_N))) {
+            BrickLink::Stockroom st = it->stockroom();
+            if (key == Qt::Key_A)
+                st = BrickLink::Stockroom::A;
+            else if (key == Qt::Key_B)
+                st = BrickLink::Stockroom::B;
+            else if (key == Qt::Key_C)
+                st = BrickLink::Stockroom::C;
+            else if (key == Qt::Key_N)
+                st = BrickLink::Stockroom::None;
+            else
+                switch (st) {
+                case BrickLink::Stockroom::None: st = BrickLink::Stockroom::A; break;
+                case BrickLink::Stockroom::A   : st = BrickLink::Stockroom::B; break;
+                case BrickLink::Stockroom::B   : st = BrickLink::Stockroom::C; break;
+                default                        :
+                case BrickLink::Stockroom::C   : st = BrickLink::Stockroom::None; break;
+                }
+
             Document::Item item = *it;
-            item.setStockroom(!it->stockroom());
+            item.setStockroom(st);
             m_doc->changeItem(it, item);
         }
         break;
@@ -553,11 +574,11 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
         if (dblclick || (keypress && (editkey || key == Qt::Key_N || key == Qt::Key_U))) {
             BrickLink::Condition cond;
             if (key == Qt::Key_N)
-                cond = BrickLink::New;
+                cond = BrickLink::Condition::New;
             else if (key == Qt::Key_U)
-                cond = BrickLink::Used;
+                cond = BrickLink::Condition::Used;
             else
-                cond = (it->condition() == BrickLink::New) ? BrickLink::Used : BrickLink::New;
+                cond = (it->condition() == BrickLink::Condition::New) ? BrickLink::Condition::Used : BrickLink::Condition::New;
 
             Document::Item item = *it;
             item.setCondition(cond);
@@ -569,17 +590,17 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
         if (dblclick || (keypress && (editkey || key == Qt::Key_I || key == Qt::Key_E || key == Qt::Key_X))) {
             BrickLink::Status st = it->status();
             if (key == Qt::Key_I)
-                st = BrickLink::Include;
+                st = BrickLink::Status::Include;
             else if (key == Qt::Key_E)
-                st = BrickLink::Exclude;
+                st = BrickLink::Status::Exclude;
             else if (key == Qt::Key_X)
-                st = BrickLink::Extra;
+                st = BrickLink::Status::Extra;
             else
                 switch (st) {
-                        case BrickLink::Include: st = BrickLink::Exclude; break;
-                        case BrickLink::Exclude: st = BrickLink::Extra; break;
-                        case BrickLink::Extra  :
-                        default                : st = BrickLink::Include; break;
+                        case BrickLink::Status::Include: st = BrickLink::Status::Exclude; break;
+                        case BrickLink::Status::Exclude: st = BrickLink::Status::Extra; break;
+                        case BrickLink::Status::Extra  :
+                        default                        : st = BrickLink::Status::Include; break;
                 }
 
             Document::Item item = *it;

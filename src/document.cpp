@@ -1306,7 +1306,6 @@ Qt::ItemFlags Document::flags(const QModelIndex &index) const
     case Category    :
     case YearReleased:
     case LotId       : break;
-    case Stockroom   :
     case Retain      : ifs |= Qt::ItemIsUserCheckable; Q_FALLTHROUGH();
     default          : ifs |= Qt::ItemIsEditable; break;
     }
@@ -1431,7 +1430,7 @@ QString Document::dataForDisplayRole(Item *it, Field f) const
     case Price       : return Currency::toString(it->price(), currencyCode());
     case Total       : return Currency::toString(it->total(), currencyCode());
     case Sale        : return (it->sale() == 0 ? dash : QString::number(it->sale()) + QLatin1Char('%'));
-    case Condition   : return (it->condition() == BrickLink::New ? tr("N", "New") : tr("U", "Used"));
+    case Condition   : return (it->condition() == BrickLink::Condition::New ? tr("N", "New") : tr("U", "Used"));
     case Color       : return it->colorName();
     case Category    : return it->category() ? it->category()->name() : dash;
     case ItemType    : return it->itemType() ? it->itemType()->name() : dash;
@@ -1465,7 +1464,6 @@ Qt::CheckState Document::dataForCheckStateRole(Item *it, Field f) const
 {
     switch (f) {
     case Retain   : return it->retain() ? Qt::Checked : Qt::Unchecked;
-    case Stockroom: return it->stockroom() ? Qt::Checked : Qt::Unchecked;
     default       : return Qt::Unchecked;
     }
 }
@@ -1496,9 +1494,9 @@ QString Document::dataForToolTipRole(Item *it, Field f) const
     case Status: {
         QString str;
         switch (it->status()) {
-        case BrickLink::Exclude: str = tr("Exclude"); break;
-        case BrickLink::Extra  : str = tr("Extra"); break;
-        case BrickLink::Include: str = tr("Include"); break;
+        case BrickLink::Status::Exclude: str = tr("Exclude"); break;
+        case BrickLink::Status::Extra  : str = tr("Extra"); break;
+        case BrickLink::Status::Include: str = tr("Include"); break;
         default                : break;
         }
         if (it->counterPart())
@@ -1512,9 +1510,9 @@ QString Document::dataForToolTipRole(Item *it, Field f) const
     }
     case Condition: {
         switch (it->condition()) {
-        case BrickLink::New : return tr("New");
-        case BrickLink::Used: return tr("Used");
-        default             : break;
+        case BrickLink::Condition::New : return tr("New");
+        case BrickLink::Condition::Used: return tr("Used");
+        default                        : break;
         }
         break;
     }
@@ -1647,11 +1645,11 @@ void Document::pictureUpdated(BrickLink::Picture *pic)
 QString Document::subConditionLabel(BrickLink::SubCondition sc) const
 {
     switch (sc) {
-    case BrickLink::None      : return tr("-", "no subcondition");
-    case BrickLink::MISB      : return tr("MISB");
-    case BrickLink::Complete  : return tr("Complete");
-    case BrickLink::Incomplete: return tr("Incomplete");
-    default                   : return QString();
+    case BrickLink::SubCondition::None      : return tr("-", "no subcondition");
+    case BrickLink::SubCondition::Sealed    : return tr("Sealed");
+    case BrickLink::SubCondition::Complete  : return tr("Complete");
+    case BrickLink::SubCondition::Incomplete: return tr("Incomplete");
+    default                                 : return QString();
     }
 }
 
@@ -1830,7 +1828,7 @@ int DocumentProxyModel::compare(const Document::Item *i1, const Document::Item *
         else if (i1->alternate() != i2->alternate())
             return boolCompare(i1->alternate(), i2->alternate());
         else
-            return i1->status() - i2->status();
+            return int(i1->status()) - int(i2->status());
     }
     case Document::Picture     :
     case Document::PartNo      : return Utility::naturalCompare(i1->itemId(),
@@ -1853,9 +1851,9 @@ int DocumentProxyModel::compare(const Document::Item *i1, const Document::Item *
     case Document::Sale        : return i1->sale() - i2->sale();
     case Document::Condition   : {
         if (i1->condition() == i2->condition())
-            return i1->subCondition() - i2->subCondition();
+            return int(i1->subCondition()) - int(i2->subCondition());
         else
-            return i1->condition() - i2->condition();
+            return int(i1->condition()) - int(i2->condition());
     }
     case Document::TierQ1      : return i1->tierQuantity(0) - i2->tierQuantity(0);
     case Document::TierQ2      : return i1->tierQuantity(1) - i2->tierQuantity(1);
@@ -1864,7 +1862,7 @@ int DocumentProxyModel::compare(const Document::Item *i1, const Document::Item *
     case Document::TierP2      : return doubleCompare(i1->tierPrice(1), i2->tierPrice(1));
     case Document::TierP3      : return doubleCompare(i1->tierPrice(2), i2->tierPrice(2));
     case Document::Retain      : return boolCompare(i1->retain(), i2->retain());
-    case Document::Stockroom   : return boolCompare(i1->stockroom(), i2->stockroom());
+    case Document::Stockroom   : return int(i1->stockroom()) - int(i2->stockroom());
     case Document::Reserved    : return i1->reserved().compare(i2->reserved());
     case Document::Weight      : return doubleCompare(i1->weight(), i2->weight());
     case Document::YearReleased: return i1->itemYearReleased() - i2->itemYearReleased();

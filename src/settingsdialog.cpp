@@ -278,16 +278,16 @@ void SettingsDialog::load()
     w_def_add_cond_new->setChecked(addnew);
     w_def_add_cond_used->setChecked(!addnew);
 
-    w_def_setpg_time->addItem(tr("Last 6 Months Sales"), BrickLink::PastSix);
-    w_def_setpg_time->addItem(tr("Current Inventory"), BrickLink::Current);
+    w_def_setpg_time->addItem(tr("Last 6 Months Sales"), int(BrickLink::Time::PastSix));
+    w_def_setpg_time->addItem(tr("Current Inventory"), int(BrickLink::Time::Current));
     
-    w_def_setpg_price->addItem(tr("Minimum"), BrickLink::Lowest);
-    w_def_setpg_price->addItem(tr("Average"), BrickLink::Average);
-    w_def_setpg_price->addItem(tr("Quantity Average"), BrickLink::WAverage);
-    w_def_setpg_price->addItem(tr("Maximum"), BrickLink::Highest);
+    w_def_setpg_price->addItem(tr("Minimum"), int(BrickLink::Price::Lowest));
+    w_def_setpg_price->addItem(tr("Average"), int(BrickLink::Price::Average));
+    w_def_setpg_price->addItem(tr("Quantity Average"), int(BrickLink::Price::WAverage));
+    w_def_setpg_price->addItem(tr("Maximum"), int(BrickLink::Price::Highest));
 
-    BrickLink::Time timedef = static_cast<BrickLink::Time>(Config::inst()->value(QLatin1String("/Defaults/SetToPG/Time"), BrickLink::PastSix).toInt());
-    BrickLink::Price pricedef = static_cast<BrickLink::Price>(Config::inst()->value(QLatin1String("/Defaults/SetToPG/Price"), BrickLink::Average).toInt());
+    int timedef = Config::inst()->value(QLatin1String("/Defaults/SetToPG/Time"), int(BrickLink::Time::PastSix)).toInt();
+    int pricedef = Config::inst()->value(QLatin1String("/Defaults/SetToPG/Price"), int(BrickLink::Price::Average)).toInt();
 
     w_def_setpg_time->setCurrentIndex(w_def_setpg_time->findData(timedef));
     w_def_setpg_price->setCurrentIndex(w_def_setpg_price->findData(pricedef));

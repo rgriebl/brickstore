@@ -66,7 +66,7 @@ protected:
     mutable QList<quint64> m_elided;
 
     static QVector<QColor> s_shades;
-    static QHash<BrickLink::Status, QIcon> s_status_icons;
+    static QHash<int, QIcon> s_status_icons;
     static QCache<quint64, QPixmap> s_tag_cache;
     static QCache<int, QPixmap> s_stripe_cache;
 

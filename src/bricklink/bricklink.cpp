@@ -802,11 +802,11 @@ BrickLink::Core::ParseItemListXMLResult BrickLink::Core::parseItemListXML(const 
                 else if (tag == QLatin1String("SALE"))
                     ii->setSale(c.toInt(val));
                 else if (tag == QLatin1String("CONDITION"))
-                    ii->setCondition(val == QLatin1String("N") ? New : Used);
+                    ii->setCondition(val == QLatin1String("N") ? Condition::New : Condition::Used);
                 else if (tag == QLatin1String("SUBCONDITION")) {
-                    ii->setSubCondition(val == QLatin1String("C") ? Complete : \
-                                        val == QLatin1String("I") ? Incomplete : \
-                                        val == QLatin1String("M") ? MISB : None);
+                    ii->setSubCondition(val == QLatin1String("C") ? SubCondition::Complete : \
+                                        val == QLatin1String("I") ? SubCondition::Incomplete : \
+                                        val == QLatin1String("M") ? SubCondition::Sealed : SubCondition::None);
                 }
                 else if (tag == QLatin1String("DESCRIPTION"))
                     ii->setComments(val);
@@ -828,9 +828,14 @@ BrickLink::Core::ParseItemListXMLResult BrickLink::Core::parseItemListXML(const 
                     ii->setLotId(c.toUInt(val));
                 else if (tag == QLatin1String("RETAIN"))
                     ii->setRetain(val == QLatin1String("Y"));
-                else if (tag == QLatin1String("STOCKROOM"))
-                    ii->setStockroom(val == QLatin1String("Y"));
-                else if (tag == QLatin1String("BUYERUSERNAME"))
+                else if (tag == QLatin1String("STOCKROOM")) {
+                    if (ii->stockroom() == Stockroom::None)
+                        ii->setStockroom(val == QLatin1String("Y") ? Stockroom::A : Stockroom::None);
+                } else if (tag == QLatin1String("STOCKROOMID")) {
+                    ii->setStockroom(val == "A" ? Stockroom::A : \
+                                     val == "B" ? Stockroom::B : \
+                                     val == "C" ? Stockroom::C : Stockroom::None);
+                } else if (tag == QLatin1String("BUYERUSERNAME"))
                     ii->setReserved(val);
             }
 
@@ -847,7 +852,7 @@ BrickLink::Core::ParseItemListXMLResult BrickLink::Core::parseItemListXML(const 
             // ### Inventory Request ###
             else if (hint == XMLHint_Inventory) {
                 if ((tag == QLatin1String("EXTRA")) && (val == QLatin1String("Y")))
-                    ii->setStatus(Extra);
+                    ii->setStatus(Status::Extra);
                 else if (tag == QLatin1String("COUNTERPART"))
                      ii->setCounterPart((val == QLatin1String("Y")));
                 else if (tag == QLatin1String("ALTERNATE"))
@@ -887,11 +892,11 @@ BrickLink::Core::ParseItemListXMLResult BrickLink::Core::parseItemListXML(const 
                 else if (tag == QLatin1String("Sale"))
                     ii->setSale(c.toInt(val));
                 else if (tag == QLatin1String("Condition"))
-                    ii->setCondition(val == QLatin1String("N") ? New : Used);
+                    ii->setCondition(val == QLatin1String("N") ? Condition::New : Condition::Used);
                 else if (tag == QLatin1String("SubCondition")) {
-                    ii->setSubCondition(val == QLatin1String("C") ? Complete : \
-                                        val == QLatin1String("I") ? Incomplete : \
-                                        val == QLatin1String("M") ? MISB : None);
+                    ii->setSubCondition(val == QLatin1String("C") ? SubCondition::Complete : \
+                                        val == QLatin1String("I") ? SubCondition::Incomplete : \
+                                        val == QLatin1String("M") ? SubCondition::Sealed : SubCondition::None);
                 }
                 else if (tag == QLatin1String("Comments"))
                     ii->setComments(val);
@@ -910,16 +915,16 @@ BrickLink::Core::ParseItemListXMLResult BrickLink::Core::parseItemListXML(const 
                 else if (tag == QLatin1String("TP3"))
                     ii->setTierPrice(2, c.toDouble(val));
                 else if (tag == QLatin1String("Status")) {
-                    Status st = Include;
+                    Status st = Status::Include;
 
                     if (val == QLatin1String("X"))
-                        st = Exclude;
+                        st = Status::Exclude;
                     else if (val == QLatin1String("I"))
-                        st = Include;
+                        st = Status::Include;
                     else if (val == QLatin1String("E"))
-                        st = Extra;
+                        st = Status::Extra;
                     else if (val == QLatin1String("?"))
-                        st = Unknown;
+                        st = Status::Unknown;
 
                     ii->setStatus(st);
                 }
@@ -927,9 +932,16 @@ BrickLink::Core::ParseItemListXMLResult BrickLink::Core::parseItemListXML(const 
                     ii->setLotId(c.toUInt(val));
                 else if (tag == QLatin1String("Retain"))
                     ii->setRetain(true);
-                else if (tag == QLatin1String("Stockroom"))
-                    ii->setStockroom(true);
-                else if (tag == QLatin1String("Reserved"))
+                else if (tag == QLatin1String("Stockroom")) {
+                    Stockroom st = Stockroom::None;
+                    if (val.isEmpty() || val == "A")
+                        st = Stockroom::A;
+                    else if (val == "B")
+                        st = Stockroom::B;
+                    else if (val == "C")
+                        st = Stockroom::C;
+                    ii->setStockroom(st);
+                } else if (tag == QLatin1String("Reserved"))
                     ii->setReserved(val);
                 else if (tag == QLatin1String("TotalWeight"))
                     ii->setWeight(c.toDouble(val));
@@ -1032,7 +1044,7 @@ QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint
         if (ii->isIncomplete())
             continue;
 
-        if ((ii->status() == Exclude) && (hint != XMLHint_BrickStore))
+        if ((ii->status() == Status::Exclude) && (hint != XMLHint_BrickStore))
             continue;
 
         if (hint == XMLHint_MassUpdate) {
@@ -1078,25 +1090,25 @@ QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint
             {
                 const char *st;
                 switch (ii->status()) {
-                    case Unknown: st = "?"; break;
-                    case Extra  : st = "E"; break;
-                    case Exclude: st = "X"; break;
-                    case Include: st = "I"; break;
+                case Status::Unknown: st = "?"; break;
+                case Status::Extra  : st = "E"; break;
+                case Status::Exclude: st = "X"; break;
+                case Status::Include: st = "I"; break;
                 }
                 item.appendChild(doc.createElement(QLatin1String("Status")).appendChild(doc.createTextNode(QLatin1String(st))).parentNode());
             }
 
             item.appendChild(doc.createElement(QLatin1String("Qty")).appendChild(doc.createTextNode(c.toString(ii->quantity()))).parentNode());
             item.appendChild(doc.createElement(QLatin1String("Price")).appendChild(doc.createTextNode(c.toString(ii->price()))).parentNode());
-            item.appendChild(doc.createElement(QLatin1String("Condition")).appendChild(doc.createTextNode(QLatin1String((ii->condition() == New) ? "N" : "U"))).parentNode());
+            item.appendChild(doc.createElement(QLatin1String("Condition")).appendChild(doc.createTextNode(QLatin1String((ii->condition() == Condition::New) ? "N" : "U"))).parentNode());
 
-            if (ii->subCondition() != None) {
+            if (ii->subCondition() != SubCondition::None) {
                 const char *st;
                 switch (ii->subCondition()) {
-                    case Incomplete: st = "I"; break;
-                    case Complete  : st = "C"; break;
-                    case MISB      : st = "M"; break;
-                    default        : st = "?"; break;
+                case SubCondition::Incomplete: st = "I"; break;
+                case SubCondition::Complete  : st = "C"; break;
+                case SubCondition::Sealed    : st = "M"; break;
+                default                      : st = "?"; break;
                 }
                 item.appendChild(doc.createElement(QLatin1String("SubCondition")).appendChild(doc.createTextNode(QLatin1String(st))).parentNode());
             }
@@ -1111,8 +1123,16 @@ QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint
                 item.appendChild(doc.createElement(QLatin1String("Remarks")).appendChild(doc.createTextNode(ii->remarks())).parentNode());
             if (ii->retain())
                 item.appendChild(doc.createElement(QLatin1String("Retain")));
-            if (ii->stockroom())
-                item.appendChild(doc.createElement(QLatin1String("Stockroom")));
+            if (ii->stockroom() != Stockroom::None) {
+                const char *st;
+                switch (ii->stockroom()) {
+                case Stockroom::A: st = "A"; break;
+                case Stockroom::B: st = "B"; break;
+                case Stockroom::C: st = "C"; break;
+                default          : st = ""; break;
+                }
+                item.appendChild(doc.createElement(QLatin1String("Stockroom")).appendChild(doc.createTextNode(QLatin1String(st))).parentNode());
+            }
             if (!ii->reserved().isEmpty())
                 item.appendChild(doc.createElement(QLatin1String("Reserved")).appendChild(doc.createTextNode(ii->reserved())).parentNode());
             if (ii->lotId())
@@ -1144,14 +1164,14 @@ QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint
 
             item.appendChild(doc.createElement(QLatin1String("QTY")).appendChild(doc.createTextNode(c.toString(ii->quantity()))).parentNode());
             item.appendChild(doc.createElement(QLatin1String("PRICE")).appendChild(doc.createTextNode(c.toString(ii->price(), 'f', 3))).parentNode());
-            item.appendChild(doc.createElement(QLatin1String("CONDITION")).appendChild(doc.createTextNode(QLatin1String((ii->condition() == New) ? "N" : "U"))).parentNode());
+            item.appendChild(doc.createElement(QLatin1String("CONDITION")).appendChild(doc.createTextNode(QLatin1String((ii->condition() == Condition::New) ? "N" : "U"))).parentNode());
 
-            if (ii->subCondition() != None) {
+            if (ii->subCondition() != SubCondition::None) {
                 const char *st;
                 switch (ii->subCondition()) {
-                    case Incomplete: st = "I"; break;
-                    case Complete  : st = "C"; break;
-                    case MISB      : st = "M"; break;
+                    case SubCondition::Incomplete: st = "I"; break;
+                    case SubCondition::Complete  : st = "C"; break;
+                    case SubCondition::Sealed      : st = "M"; break;
                     default        : st = "?"; break;
                 }
                 item.appendChild(doc.createElement(QLatin1String("SUBCONDITION")).appendChild(doc.createTextNode(QLatin1String(st))).parentNode());
@@ -1167,8 +1187,18 @@ QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint
                 item.appendChild(doc.createElement(QLatin1String("REMARKS")).appendChild(doc.createTextNode(ii->remarks())).parentNode());
             if (ii->retain())
                 item.appendChild(doc.createElement(QLatin1String("RETAIN")).appendChild(doc.createTextNode(QLatin1String("Y"))).parentNode());
-            if (ii->stockroom())
+            if (ii->stockroom() != Stockroom::None) {
+                const char *st;
+                switch (ii->stockroom()) {
+                case Stockroom::A: st = "A"; break;
+                case Stockroom::B: st = "B"; break;
+                case Stockroom::C: st = "C"; break;
+                default          : st = nullptr; break;
+                }
                 item.appendChild(doc.createElement(QLatin1String("STOCKROOM")).appendChild(doc.createTextNode(QLatin1String("Y"))).parentNode());
+                if (st)
+                    item.appendChild(doc.createElement(QLatin1String("STOCKROOMID")).appendChild(doc.createTextNode(QLatin1String(st))).parentNode());
+            }
             if (!ii->reserved().isEmpty())
                 item.appendChild(doc.createElement(QLatin1String("BUYERUSERNAME")).appendChild(doc.createTextNode(ii->reserved())).parentNode());
 
@@ -1194,7 +1224,7 @@ QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint
                 item.appendChild(doc.createElement(QLatin1String("MAXPRICE")).appendChild(doc.createTextNode(c.toString(ii->price()))).parentNode());
             if (!ii->remarks().isEmpty())
                 item.appendChild(doc.createElement(QLatin1String("REMARKS")).appendChild(doc.createTextNode(ii->remarks())).parentNode());
-            if (ii->condition() == New)
+            if (ii->condition() == Condition::New)
                 item.appendChild(doc.createElement(QLatin1String("CONDITION")).appendChild(doc.createTextNode(QLatin1String("N"))).parentNode());
         }
 
@@ -1205,7 +1235,7 @@ QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint
             item.appendChild(doc.createElement(QLatin1String("COLOR")).appendChild(doc.createTextNode(c.toString(ii->color()->id()))).parentNode());
             item.appendChild(doc.createElement(QLatin1String("QTY")).appendChild(doc.createTextNode(c.toString(ii->quantity()))).parentNode());
 
-            if (ii->status() == Extra)
+            if (ii->status() == Status::Extra)
                 item.appendChild(doc.createElement(QLatin1String("EXTRA")).appendChild(doc.createTextNode(QLatin1String("Y"))).parentNode());
         }
 
@@ -1590,7 +1620,7 @@ bool BrickLink::ToolTip::show(const BrickLink::Item *item, const BrickLink::Colo
 
     if (BrickLink::Picture *pic = BrickLink::core()->picture(item, nullptr, true)) {
         QTemporaryResource::registerResource("#/tooltip_picture.png", pic->valid() ? pic->image() : QImage());
-        m_tooltip_pic = (pic->updateStatus() == BrickLink::Updating) ? pic : nullptr;
+        m_tooltip_pic = (pic->updateStatus() == UpdateStatus::Updating) ? pic : nullptr;
 
         // need to 'clear' to reset the image cache of the QTextDocument
         const auto tlwidgets = QApplication::topLevelWidgets();
@@ -1615,7 +1645,7 @@ QString BrickLink::ToolTip::createToolTip(const BrickLink::Item *item, BrickLink
     QString img_left = QLatin1String("<img src=\"#/tooltip_picture.png\" />");
     QString note_left = QLatin1String("<i>") + BrickLink::ItemDelegate::tr("[Image is loading]") + QLatin1String("</i>");
 
-    if (pic && (pic->updateStatus() == BrickLink::Updating))
+    if (pic && (pic->updateStatus() == UpdateStatus::Updating))
         return str.arg(note_left, item->id(), item->name());
     else
         return str.arg(img_left, item->id(), item->name());

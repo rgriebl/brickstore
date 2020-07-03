@@ -273,7 +273,7 @@ void BrickLink::Item::setConsistsOf(const InvItemList &items) const
             entry->m_qty      = uint(item->quantity());
             entry->m_index    = item->item()->m_index;
             entry->m_color    = item->color()->id();
-            entry->m_extra    = (item->status() == BrickLink::Extra) ? 1 : 0;
+            entry->m_extra    = (item->status() == BrickLink::Status::Extra) ? 1 : 0;
             entry->m_isalt    = item->alternate();
             entry->m_altid    = item->alternateId();
             entry->m_cpart    = item->counterPart();
@@ -306,7 +306,7 @@ BrickLink::InvItemList BrickLink::Item::consistsOf() const
                 auto *ii = new InvItem(color, item);
                 ii->setQuantity(entry->m_qty);
                 if (entry->m_extra)
-                    ii->setStatus(BrickLink::Extra);
+                    ii->setStatus(BrickLink::Status::Extra);
                 ii->setAlternate(entry->m_isalt);
                 ii->setAlternateId(entry->m_altid);
                 ii->setCounterPart(entry->m_cpart);
@@ -430,10 +430,11 @@ BrickLink::InvItem::InvItem(const Color *color, const Item *item)
 {
     m_item = item;
     m_color = color;
-    m_status = Include;
-    m_condition = New;
-    m_scondition = None;
-    m_retain = m_stockroom = false;
+    m_status = Status::Include;
+    m_condition = Condition::New;
+    m_scondition = SubCondition::None;
+    m_retain = false;
+    m_stockroom = Stockroom::None;
     m_alternate = false;
     m_alt_id = 0;
     m_cpart = false;
@@ -626,7 +627,7 @@ QDataStream &operator << (QDataStream &ds, const BrickLink::InvItem &ii)
     ds << qint32(ii.status()) << qint32(ii.condition()) << ii.comments() << ii.remarks()
        << ii.quantity() << ii.bulkQuantity() << ii.tierQuantity(0) << ii.tierQuantity(1) << ii.tierQuantity(2)
        << ii.price() << ii.tierPrice(0) << ii.tierPrice(1) << ii.tierPrice(2) << ii.sale()
-       << qint8(ii.retain() ? 1 : 0) << qint8(ii.stockroom() ? 1 : 0) << ii.m_reserved << quint32(ii.m_lot_id)
+       << qint8(ii.retain() ? 1 : 0) << qint8(ii.stockroom()) << ii.m_reserved << quint32(ii.m_lot_id)
        << ii.origQuantity() << ii.origPrice() << qint32(ii.subCondition());
     return ds;
 }
@@ -672,7 +673,7 @@ QDataStream &operator >> (QDataStream &ds, BrickLink::InvItem &ii)
     ii.m_condition = static_cast<BrickLink::Condition>(cond);
     ii.m_scondition = static_cast<BrickLink::SubCondition>(scond);
     ii.m_retain = (retain);
-    ii.m_stockroom = (stockroom);
+    ii.m_stockroom = static_cast<BrickLink::Stockroom>(stockroom);
 
     return ds;
 }

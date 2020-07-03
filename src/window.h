@@ -116,7 +116,7 @@ public slots:
     void on_edit_cond_used_triggered();
     void on_edit_cond_toggle_triggered();
     void on_edit_subcond_none_triggered();
-    void on_edit_subcond_misb_triggered();
+    void on_edit_subcond_sealed_triggered();
     void on_edit_subcond_complete_triggered();
     void on_edit_subcond_incomplete_triggered();
     void on_edit_color_triggered();
@@ -132,9 +132,10 @@ public slots:
     void on_edit_retain_yes_triggered();
     void on_edit_retain_no_triggered();
     void on_edit_retain_toggle_triggered();
-    void on_edit_stockroom_yes_triggered();
     void on_edit_stockroom_no_triggered();
-    void on_edit_stockroom_toggle_triggered();
+    void on_edit_stockroom_a_triggered();
+    void on_edit_stockroom_b_triggered();
+    void on_edit_stockroom_c_triggered();
     void on_edit_reserved_triggered();
     void on_edit_remark_add_triggered();
     void on_edit_remark_rem_triggered();

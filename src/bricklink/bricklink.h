@@ -267,7 +267,7 @@ public:
     QDateTime lastUpdate() const      { return m_fetched; }
 
     bool valid() const                { return m_valid; }
-    int updateStatus() const          { return m_update_status; }
+    UpdateStatus updateStatus() const { return m_update_status; }
 
     //static int maximumSize()
 
@@ -282,7 +282,7 @@ private:
     QDateTime     m_fetched;
 
     bool          m_valid         : 1;
-    int           m_update_status : 7;
+    UpdateStatus  m_update_status : 7;
 
     QImage        m_image;
 
@@ -356,8 +356,8 @@ public:
 
     bool retain() const                { return m_retain; }
     void setRetain(bool r)             { m_retain = r; }
-    bool stockroom() const             { return m_stockroom; }
-    void setStockroom(bool s)          { m_stockroom = s; }
+    Stockroom stockroom() const        { return m_stockroom; }
+    void setStockroom(Stockroom sr)    { m_stockroom = sr; }
 
     double weight() const              { return !qFuzzyIsNull(m_weight) ? m_weight : (m_item ? m_item->weight() * m_quantity : 0); }
     void setWeight(double w)           { m_weight = w; }
@@ -404,8 +404,8 @@ private:
     bool             m_cpart     : 1;
     uint             m_alt_id    : 6;
     bool             m_retain    : 1;
-    bool             m_stockroom : 1;
-    int              m_xreserved : 14;
+    Stockroom        m_stockroom : 5;
+    int              m_xreserved : 10;
 
     QString          m_comments;
     QString          m_remarks;
@@ -456,8 +456,8 @@ public:
     OrderType type() const      { return m_type; }
     QDateTime date() const      { return m_date; }
     QDateTime statusChange() const  { return m_status_change; }
-    //QString buyer() const     { return m_type == Received ? m_other : QString(); }
-    //QString seller() const    { return m_type == Placed ? m_other : QString(); }
+    //QString buyer() const     { return m_type == OrderType::Received ? m_other : QString(); }
+    //QString seller() const    { return m_type == OrderType::Placed ? m_other : QString(); }
     QString other() const       { return m_other; }
     double shipping() const     { return m_shipping; }
     double insurance() const    { return m_insurance; }
@@ -475,8 +475,8 @@ public:
     void setId(const QString &id)             { m_id = id; }
     void setDate(const QDateTime &dt)         { m_date = dt; }
     void setStatusChange(const QDateTime &dt) { m_status_change = dt; }
-    void setBuyer(const QString &str)         { m_other = str; m_type = Received; }
-    void setSeller(const QString &str)        { m_other = str; m_type = Placed; }
+    void setBuyer(const QString &str)         { m_other = str; m_type = OrderType::Received; }
+    void setSeller(const QString &str)        { m_other = str; m_type = OrderType::Placed; }
     void setShipping(double m)                { m_shipping = m; }
     void setInsurance(double m)               { m_insurance = m; }
     void setDelivery(double m)                { m_delivery = m; }
@@ -519,11 +519,11 @@ public:
     QDateTime lastUpdate() const      { return m_fetched; }
 
     bool valid() const                { return m_valid; }
-    int updateStatus() const          { return m_update_status; }
+    UpdateStatus updateStatus() const { return m_update_status; }
 
-    int quantity(Time t, Condition c) const            { return m_quantities [t < TimeCount ? t : 0][c < ConditionCount ? c : 0]; }
-    int lots(Time t, Condition c) const                { return m_lots [t < TimeCount ? t : 0][c < ConditionCount ? c : 0]; }
-    double price(Time t, Condition c, Price p) const { return m_prices [t < TimeCount ? t : 0][c < ConditionCount ? c : 0][p < PriceCount ? p : 0]; }
+    int quantity(Time t, Condition c) const           { return m_quantities[int(t)][int(c)]; }
+    int lots(Time t, Condition c) const               { return m_lots[int(t)][int(c)]; }
+    double price(Time t, Condition c, Price p) const  { return m_prices[int(t)][int(c)][int(p)]; }
 
 private:
     const Item *  m_item;
@@ -532,11 +532,11 @@ private:
     QDateTime     m_fetched;
 
     bool          m_valid         : 1;
-    int           m_update_status : 7;
+    UpdateStatus  m_update_status : 7;
 
-    int           m_quantities [TimeCount][ConditionCount];
-    int           m_lots       [TimeCount][ConditionCount];
-    double        m_prices     [TimeCount][ConditionCount][PriceCount];
+    int           m_quantities [int(Time::Count)][int(Condition::Count)];
+    int           m_lots       [int(Time::Count)][int(Condition::Count)];
+    double        m_prices     [int(Time::Count)][int(Condition::Count)][int(Price::Count)];
 
 private:
     PriceGuide(const Item *item, const Color *color);

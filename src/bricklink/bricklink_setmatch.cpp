@@ -75,7 +75,7 @@ void BrickLink::SetMatch::InvMatchList::add(const InvItemList &list)
         if (!ii->isIncomplete() &&
             (ii->quantity() > 0) &&
             !ii->counterPart() &&
-            (ii->status() == BrickLink::Include) &&
+            (ii->status() == BrickLink::Status::Include) &&
             (!ii->alternateId() || !ii->alternate())) {
             InvMatchItem mi = { ii->item(), ii->color(), ii->quantity() };
             m_list << mi;

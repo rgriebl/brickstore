@@ -93,7 +93,7 @@ public:
 
     bool isReceived(const QPair<BrickLink::Order *, BrickLink::InvItemList *> &order) const
     {
-        return (order.first->type() == BrickLink::Received);
+        return (order.first->type() == BrickLink::OrderType::Received);
     }
 
     QVariant data(const QModelIndex &index, int role) const override
@@ -440,10 +440,10 @@ QList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > ImportOrderDialog::o
 BrickLink::OrderType ImportOrderDialog::orderType() const
 {
     switch (w_order_type->currentIndex()) {
-    case 2 : return BrickLink::Placed;
-    case 1 : return BrickLink::Received;
+    case 2 : return BrickLink::OrderType::Placed;
+    case 1 : return BrickLink::OrderType::Received;
     case 0 :
-    default: return BrickLink::Any;
+    default: return BrickLink::OrderType::Any;
     }
 }
 

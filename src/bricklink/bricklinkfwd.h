@@ -64,16 +64,16 @@ QDataStream &operator >> (QDataStream &ds, Category *cat);
 QDataStream &operator << (QDataStream &ds, const Color *col);
 QDataStream &operator >> (QDataStream &ds, Color *col);
 
-enum Time      { PastSix, Current, TimeCount };
-enum Price     { Lowest, Average, WAverage, Highest, PriceCount };
-enum Condition { New, Used, ConditionCount };
-enum SubCondition  { None, Complete, Incomplete, MISB, SubConditionCount };
+enum class Time      { PastSix, Current, Count };
+enum class Price     { Lowest, Average, WAverage, Highest, Count };
+enum class Condition { New, Used, Count };
+enum class SubCondition  { None, Complete, Incomplete, Sealed, Count };
+enum class Stockroom { None, A, B, C };
+enum class Status    { Include, Exclude, Extra, Unknown };
 
-enum Status        { Include, Exclude, Extra, Unknown };
+enum class UpdateStatus  { Ok, Updating, UpdateFailed };
 
-enum UpdateStatus  { Ok, Updating, UpdateFailed };
-
-enum OrderType { Received, Placed, Any };
+enum class OrderType { Received, Placed, Any };
 
 enum UrlList {
     URL_InventoryRequest,
