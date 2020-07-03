@@ -1131,7 +1131,7 @@ bool Document::fileSaveTo(const QString &s, const char *type, bool export_only, 
 
 void Document::fileExportBrickLinkInvReqClipboard(const ItemList &itemlist)
 {
-    QDomDocument doc;
+    QDomDocument doc(QString {});
     doc.appendChild(BrickLink::core()->createItemListXML(doc, BrickLink::XMLHint_Inventory, itemlist, m_currencycode));
 
     QApplication::clipboard()->setText(doc.toString(), QClipboard::Clipboard);
@@ -1149,7 +1149,7 @@ void Document::fileExportBrickLinkWantedListClipboard(const ItemList &itemlist)
         if (!wantedlist.isEmpty())
             extra.insert("WANTEDLISTID", wantedlist);
 
-        QDomDocument doc;
+        QDomDocument doc(QString {});
         doc.appendChild(BrickLink::core()->createItemListXML(doc, BrickLink::XMLHint_WantedList, itemlist, m_currencycode, extra.isEmpty() ? nullptr : &extra));
 
         QApplication::clipboard()->setText(doc.toString(), QClipboard::Clipboard);
@@ -1161,7 +1161,7 @@ void Document::fileExportBrickLinkWantedListClipboard(const ItemList &itemlist)
 
 void Document::fileExportBrickLinkXMLClipboard(const ItemList &itemlist)
 {
-    QDomDocument doc;
+    QDomDocument doc(QString {});
     doc.appendChild(BrickLink::core()->createItemListXML(doc, BrickLink::XMLHint_MassUpload, itemlist, m_currencycode));
 
     QApplication::clipboard()->setText(doc.toString(), QClipboard::Clipboard);
@@ -1181,7 +1181,7 @@ void Document::fileExportBrickLinkUpdateClipboard(const ItemList &itemlist)
         }
     }
 
-    QDomDocument doc;
+    QDomDocument doc(QString {});
     doc.appendChild(BrickLink::core()->createItemListXML(doc, BrickLink::XMLHint_MassUpdate, itemlist, m_currencycode));
 
     QApplication::clipboard()->setText(doc.toString(), QClipboard::Clipboard);
