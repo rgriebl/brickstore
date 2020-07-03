@@ -142,7 +142,7 @@
              <string>Reload</string>
             </property>
             <property name="icon">
-             <iconset resource="brickstore.qrc">
+             <iconset resource="../brickstore.qrc">
               <normaloff>:/images/reload.png</normaloff>:/images/reload.png</iconset>
             </property>
             <property name="iconSize">
@@ -868,7 +868,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="brickstore.qrc"/>
+  <include location="../brickstore.qrc"/>
  </resources>
  <connections>
   <connection>

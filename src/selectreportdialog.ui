@@ -32,7 +32,7 @@
         <string>...</string>
        </property>
        <property name="icon">
-        <iconset resource="brickstore.qrc">
+        <iconset resource="../brickstore.qrc">
          <normaloff>:/images/extras_update_database.png</normaloff>:/images/extras_update_database.png</iconset>
        </property>
        <property name="autoRaise">
@@ -65,7 +65,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="brickstore.qrc"/>
+  <include location="../brickstore.qrc"/>
  </resources>
  <connections>
   <connection>
