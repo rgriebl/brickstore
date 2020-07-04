@@ -152,8 +152,38 @@ QDateTime Config::lastDatabaseUpdate() const
 
 void Config::setLastDatabaseUpdate(const QDateTime &dt)
 {
-    time_t tt = dt.isValid() ? dt.toTime_t () : 0;
-    setValue("BrickLink/LastDBUpdate", int(tt));
+    if (dt != lastDatabaseUpdate()) {
+        time_t tt = dt.isValid() ? dt.toTime_t () : 0;
+        setValue("BrickLink/LastDBUpdate", int(tt));
+
+        emit lastDatabaseUpdateChanged(dt);
+    }
+}
+
+QStringList Config::recentFiles() const
+{
+    return value("/Files/Recent").toStringList();
+}
+
+void Config::setRecentFiles(const QStringList &recent)
+{
+    if (recent != recentFiles()) {
+        setValue("/Files/Recent", recent);
+        emit recentFilesChanged(recent);
+    }
+}
+
+void Config::addToRecentFiles(const QString &file)
+{
+    QString name = QDir::toNativeSeparators(QFileInfo(file).absoluteFilePath());
+
+    auto recent = recentFiles();
+    recent.removeAll(name);
+    recent.prepend(name);
+    if (recent.size() > MaxRecentFiles)
+        recent = recent.mid(0, MaxRecentFiles);
+
+    setRecentFiles(recent);
 }
 
 bool Config::closeEmptyDocuments() const

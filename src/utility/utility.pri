@@ -12,6 +12,7 @@ HEADERS += \
     $$PWD/currency.h \
     $$PWD/filter.h \
     $$PWD/headerview.h \
+    $$PWD/humanreadabletimedelta.h \
     $$PWD/messagebox.h \
     $$PWD/progresscircle.h \
     $$PWD/progressdialog.h \
@@ -32,6 +33,7 @@ SOURCES += \
     $$PWD/currency.cpp \
     $$PWD/filter.cpp \
     $$PWD/headerview.cpp \
+    $$PWD/humanreadabletimedelta.cpp \
     $$PWD/messagebox.cpp \
     $$PWD/progresscircle.cpp \
     $$PWD/progressdialog.cpp \

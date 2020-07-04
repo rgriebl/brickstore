@@ -36,6 +36,8 @@
 #include <QSizeGrip>
 #include <QLineEdit>
 #include <QFont>
+#include <QCommandLinkButton>
+#include <QStyle>
 #if defined(Q_OS_WINDOWS)
 #  include <QWinTaskbarButton>
 #  include <QWinTaskbarProgress>
@@ -58,6 +60,7 @@
 #include "settingsdialog.h"
 #include "itemdetailpopup.h"
 #include "changecurrencydialog.h"
+#include "humanreadabletimedelta.h"
 
 #include "framework.h"
 
@@ -136,44 +139,33 @@ class RecentMenu : public QMenu
 {
     Q_OBJECT
 public:
-    RecentMenu(FrameWork *fw, QWidget *parent)
-        : QMenu(parent), m_fw(fw)
+    RecentMenu(QWidget *parent)
+        : QMenu(parent)
     {
-        connect(this, &QMenu::aboutToShow,
-                this, &RecentMenu::buildMenu);
-        connect(this, &QMenu::triggered,
-                this, &RecentMenu::openRecentAction);
+        connect(this, &QMenu::aboutToShow, this, [this]() {
+            clear();
+
+            int cnt = 0;
+            auto recent =  Config::inst()->recentFiles();
+            for (const auto &f : recent) {
+                QString s = f;
+                if (++cnt < 10)
+                    s.prepend(QString("&%1   ").arg(cnt));
+                addAction(s)->setData(f);
+            }
+            if (!cnt)
+                addAction(tr("No recent files"))->setEnabled(false);
+        });
+        connect(this, &QMenu::triggered, this, [this](QAction *a) {
+            if (a && !a->data().isNull())
+                emit openRecent(a->data().toString());
+        });
     }
 
 signals:
-    void openRecent(int);
-
-private slots:
-    void buildMenu()
-    {
-        clear();
-
-        int i = 0;
-        foreach (QString s, m_fw->recentFiles()) {
-            if (i < 10)
-                s.prepend(QString("&%1   ").arg((i+1)%10));
-            addAction(s)->setData(i++);
-        }
-        if (!i)
-            addAction(tr("No recent files"))->setEnabled(false);
-    }
-
-    void openRecentAction(QAction *a)
-    {
-        if (a && !a->data().isNull()) {
-            int idx = qvariant_cast<int>(a->data());
-            emit openRecent(idx);
-        }
-    }
-
-private:
-    FrameWork *m_fw;
+    void openRecent(const QString &file);
 };
+
 
 class FancyDockTitleBar : public QLabel
 {
@@ -231,6 +223,179 @@ void FancyDockTitleBar::mouseReleaseEvent(QMouseEvent *ev)
 }
 
 
+class WelcomeWidget : public QWidget
+{
+    Q_OBJECT
+
+public:
+    WelcomeWidget(QWidget *parent = nullptr)
+        : QWidget(parent)
+    {
+        int spacing = style()->pixelMetric(QStyle::PM_LayoutHorizontalSpacing);
+        int lmargin = style()->pixelMetric(QStyle::PM_LayoutLeftMargin);
+        int rmargin = style()->pixelMetric(QStyle::PM_LayoutRightMargin);
+
+        auto *layout = new QGridLayout();
+        layout->setRowStretch(0, 10);
+        layout->setRowStretch(4, 10);
+        layout->setColumnStretch(0, 5);
+        layout->setColumnStretch(1, 10);
+        layout->setColumnStretch(2, 10);
+        layout->setColumnStretch(3, 5);
+        layout->setSpacing(2 * spacing);
+
+        auto buttonFromAction = [](const char *name) -> QCommandLinkButton * {
+            FrameWork *fw = FrameWork::inst();
+            QAction *a = fw->findAction(name);
+            QCommandLinkButton *b = nullptr;
+            if (a) {
+                b = new QCommandLinkButton();
+                if (!a->icon().isNull())
+                    b->setIcon(a->icon());
+
+                static auto languageChange = [](QCommandLinkButton *b, QAction *a) {
+                    b->setText(a->text());
+                    if (a->shortcut().isEmpty())
+                        qt_noop(); // b->setDescription(" ");
+                    else
+                        b->setDescription(WelcomeWidget::tr("(Shortcut: %1)").arg(a->shortcut().toString()));
+                    b->setToolTip(a->toolTip());
+                };
+                // adding fw-> doesn't make sense here, but MSVC needs it
+                fw->connect(b, &QCommandLinkButton::clicked, a, &QAction::trigger);
+                fw->connect(a, &QAction::changed, fw, [a, b]() {
+                    languageChange(b, a);
+                });
+                languageChange(b, a);
+            }
+            return b;
+        };
+
+        // recent
+
+        m_recent_frame = new QGroupBox();
+        auto recent_layout = new QVBoxLayout();
+        recent_layout->addStretch();
+        m_recent_frame->setLayout(recent_layout);
+        layout->addWidget(m_recent_frame, 1, 1, 2, 1);
+
+        auto recreateRecentGroup = [this, recent_layout]() {
+            while (recent_layout->count() > 1) {
+                auto li = recent_layout->takeAt(0);
+                delete li->widget();
+                delete li;
+            }
+
+            auto recent = Config::inst()->recentFiles();
+            if (recent.isEmpty()) {
+                auto l = new QLabel("No recent files");
+                recent_layout->insertWidget(0, l);
+            }
+
+            int cnt = 0;
+            for (const auto &f : recent) {
+                auto b = new QCommandLinkButton(QFileInfo(f).fileName(), f);
+                b->setIcon(QIcon(":/images/brickstore_doc_icon"));
+                recent_layout->insertWidget(cnt++, b);
+                connect(b, &QCommandLinkButton::clicked,
+                        this, [b]() { FrameWork::inst()->openDocument(b->description()); });
+            }
+        };
+        recreateRecentGroup();
+        connect(Config::inst(), &Config::recentFilesChanged,
+                this, recreateRecentGroup);
+
+        // document
+
+        m_file_frame = new QGroupBox();
+        auto file_layout = new QVBoxLayout();
+        for (const auto &name : { "file_new", "file_open" }) {
+            if (auto b = buttonFromAction(name))
+                file_layout->addWidget(b);
+        }
+        m_file_frame->setLayout(file_layout);
+        layout->addWidget(m_file_frame, 1, 2);
+
+        // import
+
+        m_import_frame = new QGroupBox();
+        auto import_layout = new QVBoxLayout();
+        for (const auto &name : { "file_import_bl_inv", "file_import_bl_xml", "file_import_bl_order",
+             "file_import_bl_store_inv", "file_import_bl_cart", "file_import_ldraw_model" }) {
+            if (auto b = buttonFromAction(name))
+                import_layout->addWidget(b);
+        }
+        import_layout->addStretch();
+        m_import_frame->setLayout(import_layout);
+        layout->addWidget(m_import_frame, 2, 2);
+
+        // update
+
+        m_update_frame = new QGroupBox();
+        auto update_layout = new QHBoxLayout();
+        update_layout->setSpacing(2 * spacing + lmargin + rmargin
+                                  + m_update_frame->contentsMargins().left()
+                                  + m_update_frame->contentsMargins().right());
+
+        auto b = m_db_update = buttonFromAction("extras_update_database");
+        update_layout->addWidget(b, 1);
+        connect(Config::inst(), &Config::lastDatabaseUpdateChanged,
+                this, &WelcomeWidget::updateLastDBUpdateDescription);
+        auto dbLabelTimer = new QTimer(this);
+        dbLabelTimer->setInterval(1000 * 60);
+        dbLabelTimer->start();
+        connect(dbLabelTimer, &QTimer::timeout,
+                this, &WelcomeWidget::updateLastDBUpdateDescription);
+
+        b = m_bs_update = buttonFromAction("help_updates");
+        update_layout->addWidget(b, 1);
+
+        m_update_frame->setLayout(update_layout);
+        layout->addWidget(m_update_frame, 3, 1, 1, 2);
+
+        languageChange();
+        setLayout(layout);
+    }
+
+protected:
+    void changeEvent(QEvent *e) override;
+
+private:
+    void updateLastDBUpdateDescription()
+    {
+        auto delta = HumanReadableTimeDelta::toString(QDateTime::currentDateTime(),
+                                                      Config::inst()->lastDatabaseUpdate());
+        m_db_update->setDescription(tr("Last Database update: %1").arg(delta));
+    };
+
+    void languageChange()
+    {
+        m_recent_frame->setTitle(tr("Open recent files"));
+        m_file_frame->setTitle(tr("Document"));
+        m_import_frame->setTitle(tr("Import items"));
+        m_update_frame->setTitle(tr("Updates"));
+
+        m_bs_update->setDescription(tr("Current version: %1").arg(QCoreApplication::applicationVersion()));
+        updateLastDBUpdateDescription();
+    }
+
+private:
+    QGroupBox *m_recent_frame;
+    QGroupBox *m_file_frame;
+    QGroupBox *m_import_frame;
+    QGroupBox *m_update_frame;
+    QCommandLinkButton *m_db_update;
+    QCommandLinkButton *m_bs_update;
+};
+
+void WelcomeWidget::changeEvent(QEvent *e)
+{
+    if (e->type() == QEvent::LanguageChange)
+        languageChange();
+    QWidget::changeEvent(e);
+}
+
+
 FrameWork *FrameWork::s_inst = nullptr;
 
 FrameWork *FrameWork::inst()
@@ -260,10 +425,6 @@ FrameWork::FrameWork(QWidget *parent)
 
     connect(Application::inst(), &Application::openDocument,
             this, &FrameWork::openDocument);
-
-    m_recent_files = Config::inst()->value("/Files/Recent").toStringList();
-    while (m_recent_files.count() > MaxRecentFiles)
-        m_recent_files.pop_back();
 
     m_current_window = nullptr;
 
@@ -451,7 +612,10 @@ FrameWork::FrameWork(QWidget *parent)
     createStatusBar();
     findAction("view_statusbar")->setChecked(Config::inst()->value(QLatin1String("/MainWindow/Statusbar/Visible"), true).toBool());
 
+    m_workspace->setWelcomeWidget(new WelcomeWidget());
+
     languageChange();
+
 
     connect(Application::inst(), &Application::onlineStateChanged,
             this, &FrameWork::onlineStateChanged);
@@ -710,8 +874,6 @@ void FrameWork::translateActions()
 
 FrameWork::~FrameWork()
 {
-    Config::inst()->setValue("/Files/Recent", m_recent_files);
-
     Config::inst()->setValue("/MainWindow/Statusbar/Visible", statusBar()->isVisibleTo(this));
     Config::inst()->setValue("/MainWindow/Layout/State", saveState());
     Config::inst()->setValue("/MainWindow/Layout/Geometry", saveGeometry());
@@ -959,10 +1121,10 @@ void FrameWork::createActions()
     a = newQAction(this, "file_new", 0, false, this, &FrameWork::fileNew);
     a = newQAction(this, "file_open", 0, false, this, &FrameWork::fileOpen);
 
-    auto rm = new RecentMenu(this, this);
+    auto rm = new RecentMenu(this);
     rm->menuAction()->setObjectName("file_open_recent");
     connect(rm, &RecentMenu::openRecent,
-            this, &FrameWork::fileOpenRecent);
+            this, &FrameWork::openDocument);
 
     (void) newQAction(this, "file_save", NeedDocument | NeedModification);
     (void) newQAction(this, "file_saveas", NeedDocument);
@@ -1153,17 +1315,6 @@ void FrameWork::fileNew()
 void FrameWork::fileOpen()
 {
     createWindow(Document::fileOpen());
-}
-
-void FrameWork::fileOpenRecent(int i)
-{
-    if (i < int(m_recent_files.count())) {
-        // we need to copy the string here, because we delete it later
-        // (this seems to work on Linux, but XP crashes in m_recent_files.remove ( ...)
-        QString tmp = m_recent_files [i];
-
-        openDocument(tmp);
-    }
 }
 
 void FrameWork::fileImportBrickLinkInventory()
@@ -1632,22 +1783,6 @@ void FrameWork::onlineStateChanged(bool isOnline)
 void FrameWork::showContextMenu(bool /*onitem*/, const QPoint &pos)
 {
     m_contextmenu->popup(pos);
-}
-
-QStringList FrameWork::recentFiles() const
-{
-    return m_recent_files;
-}
-
-void FrameWork::addToRecentFiles(const QString &s)
-{
-    QString name = QDir::toNativeSeparators(QFileInfo(s).absoluteFilePath());
-
-    m_recent_files.removeAll(name);
-    m_recent_files.prepend(name);
-
-    while (m_recent_files.count() > MaxRecentFiles)
-        m_recent_files.pop_back();
 }
 
 void FrameWork::closeEvent(QCloseEvent *e)

@@ -26,6 +26,7 @@
 #include <QNetworkProxyFactory>
 
 #if defined(Q_OS_WINDOWS)
+#  include <QStyleFactory>
 #  include <windows.h>
 #  ifdef MessageBox
 #    undef MessageBox
@@ -110,6 +111,10 @@ Application::Application(bool rebuild_db_only, bool skip_download, int &_argc, c
 #endif
 #if defined(Q_OS_MACOS)
         QGuiApplication::setAttribute(Qt::AA_DontShowIconsInMenus);
+#endif
+#if defined(Q_OS_WINDOWS)
+        if (auto s = QStyleFactory::create("fusion"))
+            QApplication::setStyle(s);
 #endif
 
         // check for an already running instance

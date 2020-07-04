@@ -50,9 +50,6 @@ public:
     ~FrameWork();
     static FrameWork *inst();
 
-    void addToRecentFiles(const QString &s);
-    QStringList recentFiles() const;
-
     bool closeAllWindows();
 
 public slots:
@@ -77,7 +74,6 @@ private slots:
 
     void fileNew();
     void fileOpen();
-    void fileOpenRecent(int);
 
     void fileImportBrickLinkInventory();
     void fileImportBrickLinkOrder();
@@ -139,7 +135,6 @@ private:
     void createStatusBar();
     bool createWindow(Document *doc);
     bool createWindows(const QList<Document *> &docs);
-
     QMap<QAction *, bool (Window::*)() const> m_toggle_updates;
 
     Workspace *m_workspace;
@@ -163,8 +158,9 @@ private:
     QPointer<AddItemDialog> m_add_dialog;
     QPointer<ItemDetailPopup> m_details;
 
-    QStringList m_recent_files;
     bool m_running;
 
     UndoGroup *m_undogroup;
+
+    friend class WelcomeWidget;
 };

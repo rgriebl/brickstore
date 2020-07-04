@@ -14,7 +14,7 @@
 #include <cstdlib>
 
 #include <QLayout>
-#include <QStackedLayout>
+#include <QStackedWidget>
 #include <QTabBar>
 #include <QTabWidget>
 #include <QEvent>
@@ -206,7 +206,7 @@ Workspace::Workspace(QWidget *parent)
     m_tabbar->setAutoHide(true);
 
     m_right = new TabBarSide(m_tabbar);
-    m_windowStack = new QStackedLayout();
+    m_windowStack = new QStackedWidget();
 
     m_tablist = new TabBarSideButton(m_tabbar);
     m_tablist->setIcon(QIcon(":/images/tab.png"));
@@ -228,7 +228,7 @@ Workspace::Workspace(QWidget *parent)
     layout->setMargin(0);
     layout->setSpacing(0);
     layout->addLayout(tabbox);
-    layout->addLayout(m_windowStack, 10);
+    layout->addWidget(m_windowStack, 10);
     setLayout(layout);
 
     connect(m_tabbar, &QTabBar::currentChanged,
@@ -237,22 +237,34 @@ Workspace::Workspace(QWidget *parent)
             this, &Workspace::closeTab);
     connect(m_tabbar, &QTabBar::tabMoved,
             this, &Workspace::moveTab);
-    connect(m_windowStack, &QStackedLayout::widgetRemoved,
+    connect(m_windowStack, &QStackedWidget::widgetRemoved,
             this, &Workspace::removeTab);
+
+    connect(this, &Workspace::windowCountChanged,
+            this, [this](int count) {
+        m_windowStack->setVisible(count != 0);
+        m_welcomeWidget->setVisible(count == 0);
+    });
 }
 
-QString Workspace::backgroundText() const
+QWidget *Workspace::welcomeWidget() const
 {
-    return m_backgroundText;
+    return m_welcomeWidget;
 }
 
-void Workspace::setBackgroundText(const QString &text)
+void Workspace::setWelcomeWidget(QWidget *welcomeWidget)
 {
-    m_backgroundText = text;
-    delete m_backgroundTextDocument;
-    m_backgroundTextDocument = new QTextDocument(this);
-    m_backgroundTextDocument->setHtml(text);
-    update();
+    if (welcomeWidget == m_welcomeWidget)
+        return;
+    if (m_welcomeWidget) {
+        layout()->removeWidget(m_welcomeWidget);
+        delete m_welcomeWidget;
+    }
+    m_welcomeWidget = welcomeWidget;
+    m_welcomeWidget->setParent(this);
+    m_welcomeWidget->setVisible(windowCount() == 0);
+    m_windowStack->setVisible(windowCount() != 0);
+    static_cast<QVBoxLayout *>(layout())->addWidget(m_welcomeWidget, 10);
 }
 
 QMenu *Workspace::windowMenu(bool hasShortcut, QWidget *parent)

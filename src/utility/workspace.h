@@ -16,7 +16,8 @@
 #include <QWidget>
 
 class TabBar;
-class QStackedLayout;
+class TabBarSideButton;
+class QStackedWidget;
 class QMenu;
 class QTextDocument;
 
@@ -27,8 +28,8 @@ class Workspace : public QWidget
 public:
     Workspace(QWidget *parent = nullptr);
 
-    QString backgroundText() const;
-    void setBackgroundText(const QString &text);
+    QWidget *welcomeWidget() const;
+    void setWelcomeWidget(QWidget *welcomeWidget);
 
     void addWindow(QWidget *w);
 
@@ -56,9 +57,13 @@ private slots:
     void removeTab(int idx);
 
 private:
-    TabBar *        m_tabbar;
-    QStackedLayout *m_windowStack;
-    QWidget *       m_right;
-    QString         m_backgroundText;
-    QTextDocument * m_backgroundTextDocument = nullptr;
+    void languageChange();
+
+private:
+    TabBar *          m_tabbar;
+    TabBarSideButton *m_tablist;
+    QStackedWidget *  m_windowStack;
+    QWidget *         m_right;
+    QString           m_backgroundText;
+    QWidget *         m_welcomeWidget = nullptr;
 };

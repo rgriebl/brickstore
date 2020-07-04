@@ -898,7 +898,7 @@ Document *Document::fileLoadFrom(const QString &name, const char *type, bool imp
 
             doc->setFileName(import_only ? QString() : name);
             if (!import_only)
-                FrameWork::inst()->addToRecentFiles(name);
+                Config::inst()->addToRecentFiles(name);
         }
     } else {
         MessageBox::warning(FrameWork::inst(), tr("Could not parse the XML data in file %1.").arg(CMB_BOLD(name)));
@@ -1116,7 +1116,7 @@ bool Document::fileSaveTo(const QString &s, const char *type, bool export_only, 
                 m_undo->setClean();
                 setFileName(s);
 
-                FrameWork::inst()->addToRecentFiles(s);
+                Config::inst()->addToRecentFiles(s);
             }
             return true;
         }

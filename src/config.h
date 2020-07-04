@@ -49,6 +49,9 @@ public:
     bool onlineStatus() const;
 
     QDateTime lastDatabaseUpdate() const;
+    QStringList recentFiles() const;
+
+    static constexpr int MaxRecentFiles = 9;
 
     QPair<QString, QString> loginForBrickLink() const;
     QMap<QByteArray, int> updateIntervals() const;
@@ -81,6 +84,8 @@ public slots:
     void setOnlineStatus(bool b);
 
     void setLastDatabaseUpdate(const QDateTime &dt);
+    void setRecentFiles(const QStringList &recent);
+    void addToRecentFiles(const QString &file);
 
     void setLoginForBrickLink(const QString &user, const QString &pass);
     void setUpdateIntervals(const QMap<QByteArray, int> &intervals);
@@ -96,6 +101,8 @@ signals:
     void showInputErrorsChanged(bool b);
     void updateIntervalsChanged(const QMap<QByteArray, int> &intervals);
     void onlineStatusChanged(bool b);
+    void lastDatabaseUpdateChanged(const QDateTime &dt);
+    void recentFilesChanged(const QStringList &recent);
     void iconSizeChanged(const QSize &iconSize);
     void fontSizePercentChanged(int p);
     void itemImageSizePercentChanged(int p);
