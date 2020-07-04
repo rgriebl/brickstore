@@ -984,13 +984,14 @@ void FrameWork::createStatusBar()
 void FrameWork::changeDocumentCurrency(QAction *a)
 {
     if (m_current_window) {
-        ChangeCurrencyDialog d(m_current_window->document()->currencyCode(), a->text(), this);
+        QString ccode = a->text();
+
+        ChangeCurrencyDialog d(m_current_window->document()->currencyCode(), ccode, this);
         if (d.exec() == QDialog::Accepted) {
             double rate = d.exchangeRate();
 
-            if (rate > 0) {
-                m_current_window->document()->setCurrencyCode(a->text(), rate);
-            }
+            if (rate > 0)
+                m_current_window->document()->setCurrencyCode(ccode, rate);
         }
     }
 }
