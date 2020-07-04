@@ -180,7 +180,7 @@ public:
                     this, &QLabel::setText);
         }
         setAutoFillBackground(true);
-        setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
+        //setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
 
         QPalette p = palette();
         QLinearGradient g(0, 0, 1, 0.5);
@@ -193,9 +193,20 @@ public:
         p.setBrush(QPalette::Window, g);
         p.setColor(QPalette::WindowText, p.color(QPalette::HighlightedText));
         setPalette(p);
+
+        QFont f = font();
+        f.setBold(true);
+        setFont(f);
     }
 
 protected:
+    QSize sizeHint() const override
+    {
+        QSize s = QLabel::sizeHint();
+        s.rheight() *= 1.5;
+        return s;
+    }
+
     void mousePressEvent(QMouseEvent *ev) override;
     void mouseMoveEvent(QMouseEvent *ev) override;
     void mouseReleaseEvent(QMouseEvent *ev) override;

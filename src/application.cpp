@@ -87,17 +87,21 @@ Application::Application(bool rebuild_db_only, bool skip_download, int &_argc, c
     if (rebuild_db_only) {
         new QCoreApplication(_argc, _argv);
     } else {
+#if defined(Q_OS_WINDOWS)
+        if (auto s = QStyleFactory::create("fusion"))
+            QApplication::setStyle(s);
+#endif
         new QApplication(_argc, _argv);
 
         qApp->installEventFilter(this);
 
         m_default_fontsize = QGuiApplication::font().pointSizeF();
-        setProperty("_bs_defaultFontSize", m_default_fontsize); // the settings dialog needs this
+        qApp->setProperty("_bs_defaultFontSize", m_default_fontsize); // the settings dialog needs this
 
         auto setFontSizePercentLambda = [this](int p) {
-            QFont f = QGuiApplication::font();
+            QFont f = QApplication::font();
             f.setPointSizeF(m_default_fontsize * qreal(qBound(50, p, 200)) / 100.);
-            QGuiApplication::setFont(f);
+            QApplication::setFont(f);
         };
         connect(Config::inst(), &Config::fontSizePercentChanged, this, setFontSizePercentLambda);
         int fsp = Config::inst()->fontSizePercent();
@@ -111,10 +115,6 @@ Application::Application(bool rebuild_db_only, bool skip_download, int &_argc, c
 #endif
 #if defined(Q_OS_MACOS)
         QGuiApplication::setAttribute(Qt::AA_DontShowIconsInMenus);
-#endif
-#if defined(Q_OS_WINDOWS)
-        if (auto s = QStyleFactory::create("fusion"))
-            QApplication::setStyle(s);
 #endif
 
         // check for an already running instance
