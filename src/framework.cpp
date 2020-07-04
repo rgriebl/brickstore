@@ -19,7 +19,6 @@
 #include <QCloseEvent>
 #include <QMetaObject>
 #include <QMetaMethod>
-#include <QMdiSubWindow>
 #include <QMenuBar>
 #include <QToolBar>
 #include <QStatusBar>
@@ -544,8 +543,6 @@ void FrameWork::languageChange()
             dock->setWindowTitle(tr("Price Guide"));
         if (name == QLatin1String("Dock-TaskAppears"))
             dock->setWindowTitle(tr("Appears In Sets"));
-        if (name == QLatin1String("Dock-TaskLinks"))
-            dock->setWindowTitle(tr("Links"));
     }
     if (m_filter) {
         m_filter->setPlaceholderText(tr("Filter"));
@@ -561,22 +558,6 @@ void FrameWork::languageChange()
                                         tr("No outstanding jobs"),
                                         tr("Downloading...<br><b>%p%</b> finished<br>(%v of %m)"));
     }
-/*
-    foreach (QAction *a, m_filter->menu()->actions()) {
-        QString s;
-        int i = qvariant_cast<int>(a->data());
-
-        switch(i) {
-        case Window::All       : s = tr("All"); break;
-        case Window::Prices    : s = tr("All Prices"); break;
-        case Window::Texts     : s = tr("All Texts"); break;
-        case Window::Quantities: s = tr("All Quantities"); break;
-        default                 : s = Document::headerDataForDisplayRole(static_cast<Document::Field>(i)); break;
-        }
-        a->setText(s);
-    }
-
-*/
 
     translateActions();
 

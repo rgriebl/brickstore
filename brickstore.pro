@@ -15,7 +15,7 @@
 MIN_QT_VERSION = 5.11.0
 
 NAME        = "BrickStore"
-DESCRIPTION = "An offline BrickLink inventory management tool."
+DESCRIPTION = "$$NAME - an offline BrickLink inventory management tool."
 COPYRIGHT   = "2004-2020 Robert Griebl"
 GITHUB_URL  = "github.com/rgriebl/brickstore"
 

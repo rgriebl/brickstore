@@ -23,7 +23,6 @@
 #include "bricklinkfwd.h"
 
 QT_FORWARD_DECLARE_CLASS(QLabel);
-QT_FORWARD_DECLARE_CLASS(QMdiSubWindow);
 QT_FORWARD_DECLARE_CLASS(QToolButton);
 QT_FORWARD_DECLARE_CLASS(QLineEdit);
 

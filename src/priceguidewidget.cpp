@@ -237,6 +237,9 @@ void PriceGuideWidget::setPriceGuide(BrickLink::PriceGuide *pg)
                                  this, &PriceGuideWidget::gotUpdate);
     }
     d->m_pg = pg;
+
+    setContextMenuPolicy(pg ? Qt::ActionsContextMenu : Qt::NoContextMenu);
+
     update(nonStaticCells());
 }
 

@@ -323,21 +323,15 @@ bool Application::isClient(int timeout)
 
         for (int i = 0; i < 2; ++i) { // try twice
             client.connectToServer(socketName);
-            if (client.waitForConnected(timeout / 2) || i) {
+            if (client.waitForConnected(timeout / 2) || i)
                 break;
-            } else {
-#if defined(Q_OS_WINDOWS)
-                Sleep(timeout / 4);
-#else
-                struct timespec ts = { (timeout / 4) / 1000, ((timeout / 4) % 1000) * 1000 * 1000 };
-                ::nanosleep(&ts, nullptr);
-#endif
-            }
+            else
+                QThread::sleep(timeout / 4);
         }
 
         if (client.state() == QLocalSocket::ConnectedState) {
             QStringList files;
-            foreach (const QString &arg, QCoreApplication::arguments()) {
+            foreach (const QString &arg, QCoreApplication::arguments().mid(1)) {
                 QFileInfo fi(arg);
                 if (fi.exists() && fi.isFile())
                     files << fi.absoluteFilePath();
