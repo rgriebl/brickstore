@@ -288,8 +288,9 @@ public:
 
             auto recent = Config::inst()->recentFiles();
             if (recent.isEmpty()) {
-                auto l = new QLabel("No recent files");
-                recent_layout->insertWidget(0, l);
+                if (!m_no_recent)
+                    m_no_recent = new QLabel();
+                recent_layout->insertWidget(0, m_no_recent);
             }
 
             int cnt = 0;
@@ -377,6 +378,9 @@ private:
 
         m_bs_update->setDescription(tr("Current version: %1").arg(QCoreApplication::applicationVersion()));
         updateLastDBUpdateDescription();
+
+        if (m_no_recent)
+            m_no_recent->setText(tr("No recent files"));
     }
 
 private:
@@ -386,6 +390,7 @@ private:
     QGroupBox *m_update_frame;
     QCommandLinkButton *m_db_update;
     QCommandLinkButton *m_bs_update;
+    QPointer<QLabel> m_no_recent;
 };
 
 void WelcomeWidget::changeEvent(QEvent *e)

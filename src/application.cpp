@@ -223,11 +223,6 @@ void Application::updateTranslations()
         locale = QLocale::system().name();
     QLocale::setDefault(QLocale(locale));
 
-    QStringList spath = { QString(":/i18n") };
-    spath << externalResourceSearchPath("/translations");
-    if (qSharedBuild() && (isDeveloperBuild | isUnix))
-        spath << QLibraryInfo::location(QLibraryInfo::TranslationsPath);
-
     if (m_trans_qt)
         QCoreApplication::removeTranslator(m_trans_qt.data());
     if (m_trans_brickstore)
@@ -237,23 +232,22 @@ void Application::updateTranslations()
     if (!m_trans_brickstore_en)
         m_trans_brickstore_en.reset(new QTranslator());
 
-    static bool bsEnLoaded = false; // always loaded, provides the base plural forms
-    for (const QString &sp : qAsConst(spath))
-        bsEnLoaded = bsEnLoaded || m_trans_brickstore_en->load("brickstore_en", sp);
-    if (bsEnLoaded)
-        QCoreApplication::installTranslator(m_trans_brickstore_en.data());
+    QString i18n = ":/i18n";
+
+    static bool once = false; // always load the english plural forms
+    if (!once) {
+        if (m_trans_brickstore_en->load("brickstore_en", i18n))
+            QCoreApplication::installTranslator(m_trans_brickstore_en.data());
+        once = true;
+    }
 
     if (locale != "en") {
-        bool qtLoaded = false, bsLoaded = false;
-        for (const QString &sp : qAsConst(spath)) {
-            qtLoaded = qtLoaded || m_trans_qt->load(QLatin1String("qtbase_") + locale, sp);
-            bsLoaded = bsLoaded || m_trans_brickstore->load(QLatin1String("brickstore_") + locale, sp);
-        }
-        if (qtLoaded)
+        if (m_trans_qt->load(QLatin1String("qtbase_") + locale, i18n))
             QCoreApplication::installTranslator(m_trans_qt.data());
         else
             m_trans_qt.reset();
-        if (bsLoaded)
+
+        if (m_trans_brickstore->load(QLatin1String("brickstore_") + locale, i18n))
             QCoreApplication::installTranslator(m_trans_brickstore.data());
         else
             m_trans_brickstore.reset();

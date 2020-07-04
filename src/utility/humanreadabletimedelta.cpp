@@ -18,6 +18,8 @@ QString HumanReadableTimeDelta::toString(const QDateTime &from, const QDateTime 
 {
     qint64 delta = from.secsTo(to);
 
+    if (!to.isValid() || !from.isValid())
+        return tr("never");
     if (delta == 0)
         return tr("right now");
 

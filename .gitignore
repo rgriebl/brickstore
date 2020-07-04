@@ -30,3 +30,4 @@ ldtest
 ui_*.h
 *.pr?.user
 .DS_Store
+translations/*.qm
