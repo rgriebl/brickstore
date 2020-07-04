@@ -230,6 +230,13 @@ void PictureWidget::resizeEvent(QResizeEvent *e)
                              cr.width() - 2*4, cr.height() - (4 + d->m_default_size + 4 + 4));
 }
 
+void PictureWidget::changeEvent(QEvent *e)
+{
+    if (e->type() == QEvent::LanguageChange)
+        languageChange();
+    QFrame::changeEvent(e);
+}
+
 bool PictureWidget::event(QEvent *e)
 {
     if (d->m_pic && e && e->type() == QEvent::ToolTip) {

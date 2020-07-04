@@ -15,6 +15,7 @@
 
 #include <QApplication>
 #include <QStringList>
+#include <QScopedPointer>
 
 class FrameWork;
 class QTranslator;
@@ -67,8 +68,9 @@ private:
     bool m_online = true;
     qreal m_default_fontsize = 0;
 
-    QTranslator *m_trans_qt = nullptr;
-    QTranslator *m_trans_brickstore = nullptr;
+    QScopedPointer<QTranslator> m_trans_qt;
+    QScopedPointer<QTranslator> m_trans_brickstore_en;
+    QScopedPointer<QTranslator> m_trans_brickstore;
 
     static Application *s_inst;
 };

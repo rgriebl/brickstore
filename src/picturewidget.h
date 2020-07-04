@@ -47,7 +47,10 @@ protected slots:
 protected:
     void paintEvent(QPaintEvent *e) override;
     void resizeEvent(QResizeEvent *e) override;
+    void changeEvent(QEvent *e) override;
     bool event(QEvent *e) override;
+
+
 
 private:
     QScopedPointer<PictureWidgetPrivate> d;

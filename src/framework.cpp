@@ -548,8 +548,13 @@ void FrameWork::languageChange()
             dock->setWindowTitle(tr("Links"));
     }
     if (m_filter) {
-        m_filter->setToolTip(tr("Filter the list using this pattern (wildcards allowed: * ? [])"));
         m_filter->setPlaceholderText(tr("Filter"));
+        // DocumentProxyModel hasn't received the LanguageChange event yet,
+        // so we need to skip this event loop round
+        QMetaObject::invokeMethod(this, [this]() {
+            if (m_current_window)
+                m_filter->setToolTip(m_current_window->filterToolTip());
+        }, Qt::QueuedConnection);
     }
     if (m_progress) {
         m_progress->setToolTipTemplates(tr("Offline"),
@@ -657,7 +662,7 @@ void FrameWork::translateActions()
         { "edit_status_include",            tr("Include"),                            },
         { "edit_status_exclude",            tr("Exclude"),                            },
         { "edit_status_extra",              tr("Extra"),                              },
-        { "edit_status_toggle",             tr("Toggle Status::Include/Status::Exclude"),             },
+        { "edit_status_toggle",             tr("Toggle Include/Exclude"),             },
         { "edit_cond",                      tr("Condition"),                          },
         { "edit_cond_new",                  tr("New", "Cond|New"),                    },
         { "edit_cond_used",                 tr("Used"),                               },
@@ -709,13 +714,14 @@ void FrameWork::translateActions()
             if (!atptr->m_text.isNull())
                 a->setText(atptr->m_text);
             if (atptr->m_standardKey != QKeySequence::UnknownKey) {
-                a->setShortcut(QKeySequence(atptr->m_standardKey));
+
+                a->setShortcuts(atptr->m_standardKey);
             } else if (!atptr->m_shortcut.isNull()) {
-                a->setShortcut(QKeySequence(atptr->m_shortcut));
+                a->setShortcuts({ QKeySequence(atptr->m_shortcut) });
             }
             if (!a->shortcut().isEmpty()) {
                 a->setToolTip(QString("%1 <span style=\"color: gray; font-size: small\">%2</span>")
-                              .arg(a->toolTip()).arg(a->shortcut().toString(QKeySequence::NativeText)));
+                              .arg(a->text()).arg(a->shortcut().toString(QKeySequence::NativeText)));
             }
         }
     }
@@ -752,6 +758,13 @@ void FrameWork::dropEvent(QDropEvent *e)
 
     e->setDropAction(Qt::CopyAction);
     e->accept();
+}
+
+void FrameWork::changeEvent(QEvent *e)
+{
+    if (e->type() == QEvent::LanguageChange)
+        languageChange();
+    QMainWindow::changeEvent(e);
 }
 
 QAction *FrameWork::findAction(const char *name)

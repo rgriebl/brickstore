@@ -159,6 +159,8 @@ void SelectColor::changeEvent(QEvent *e)
     if (e->type() == QEvent::EnabledChange) {
         if (!isEnabled())
             setCurrentColor(BrickLink::core()->color(0));
+    } else if (e->type() == QEvent::LanguageChange) {
+        languageChange();
     }
     QWidget::changeEvent(e);
 }

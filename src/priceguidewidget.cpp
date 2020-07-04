@@ -696,6 +696,13 @@ bool PriceGuideWidget::event(QEvent *e)
         return QWidget::event(e);
 }
 
+void PriceGuideWidget::changeEvent(QEvent *e)
+{
+    if (e->type() == QEvent::LanguageChange)
+        languageChange();
+    QFrame::changeEvent(e);
+}
+
 QRegion PriceGuideWidget::nonStaticCells() const
 {
     QRegion r;

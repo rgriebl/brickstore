@@ -65,7 +65,7 @@ OTHER_FILES += \
 
 RESOURCES += brickstore.qrc
 
-LANGUAGES = de fr nl sl
+LANGUAGES = en de fr nl sl
 
 for(l, LANGUAGES) {
   TRANSLATIONS += translations/brickstore_$${l}.ts

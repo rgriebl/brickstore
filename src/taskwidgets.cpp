@@ -250,6 +250,13 @@ void TaskInfoWidget::refresh()
         selectionUpdate(m_win->selection());
 }
 
+void TaskInfoWidget::changeEvent(QEvent *e)
+{
+    if (e->type() == QEvent::LanguageChange)
+        languageChange();
+    QStackedWidget::changeEvent(e);
+}
+
 
 // ----------------------------------------------------------------------
 // ----------------------------------------------------------------------

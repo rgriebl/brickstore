@@ -297,7 +297,7 @@ class DocumentProxyModel : public QSortFilterProxyModel
     Q_OBJECT
 
 public:
-    DocumentProxyModel(Document *model);
+    DocumentProxyModel(Document *model, QObject *parent = nullptr);
     ~DocumentProxyModel();
 
     inline Document::Item *item(const QModelIndex &idx) const  { return static_cast<Document *>(sourceModel())->item(mapToSource(idx)); }
@@ -310,14 +310,16 @@ public:
     QString filterExpression() const;
     QString filterToolTip() const;
 
-    void sort(int column, Qt::SortOrder order = Qt::AscendingOrder);
+    void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
 
 protected:
-    virtual bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
-    virtual bool filterAcceptsColumn(int source_column, const QModelIndex &source_parent) const;
-    virtual bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const;
+    bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
+    bool filterAcceptsColumn(int source_column, const QModelIndex &source_parent) const override;
+    bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const override;
+    bool event(QEvent *e) override;
 
 private:
+    void languageChange();
     static int compare(const Document::Item *i1, const Document::Item *i2, int sortColumn);
 
     QString         m_filter_expression;

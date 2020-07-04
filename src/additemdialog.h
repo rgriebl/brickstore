@@ -43,6 +43,7 @@ protected slots:
 protected:
     void wheelEvent(QWheelEvent *e) override;
     void closeEvent(QCloseEvent *e) override;
+    void changeEvent(QEvent *e) override;
 
 private slots:
     void updateCaption();
@@ -75,7 +76,6 @@ private:
 
     QString m_caption_fmt;
     QString m_price_label_fmt;
-    QString m_currency_label_fmt;
 
     QString m_currency_code;
 };

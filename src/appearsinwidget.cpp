@@ -176,6 +176,13 @@ void AppearsInWidget::resizeColumns()
     setUpdatesEnabled(true);
 }
 
+void AppearsInWidget::changeEvent(QEvent *e)
+{
+    if (e->type() == QEvent::LanguageChange)
+        languageChange();
+    QTreeView::changeEvent(e);
+}
+
 void AppearsInWidget::showBLCatalogInfo()
 {
     const BrickLink::AppearsInItem *ai = appearsIn();

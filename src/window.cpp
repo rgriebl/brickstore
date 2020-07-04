@@ -194,7 +194,7 @@ Window::Window(Document *doc, QWidget *parent)
     m_doc = doc;
     m_doc->setParent(this);
 
-    m_view = new DocumentProxyModel(doc);
+    m_view = new DocumentProxyModel(doc, this);
     m_latest_row = -1;
     m_latest_timer = new QTimer(this);
     m_latest_timer->setSingleShot(true);
@@ -296,9 +296,9 @@ Window::Window(Document *doc, QWidget *parent)
 
 void Window::changeEvent(QEvent *e)
 {
-    if (e->type() == QEvent::LanguageChange) {
+    if (e->type() == QEvent::LanguageChange)
         updateCaption();
-    }
+    QWidget::changeEvent(e);
 }
 
 void Window::updateCaption()
@@ -744,7 +744,7 @@ void Window::on_edit_subcond_none_triggered()
 
 void Window::on_edit_subcond_sealed_triggered()
 {
-    setOrToggle<BrickLink::SubCondition>::set(this, tr("Set 'SubCondition::Sealed' sub-condition on %1 items"), &Document::Item::subCondition, &Document::Item::setSubCondition, BrickLink::SubCondition::Sealed);
+    setOrToggle<BrickLink::SubCondition>::set(this, tr("Set 'sealed' sub-condition on %1 items"), &Document::Item::subCondition, &Document::Item::setSubCondition, BrickLink::SubCondition::Sealed);
 }
 
 void Window::on_edit_subcond_complete_triggered()
@@ -784,12 +784,12 @@ void Window::on_edit_stockroom_a_triggered()
 
 void Window::on_edit_stockroom_b_triggered()
 {
-    setOrToggle<BrickLink::Stockroom>::set(this, tr("Set stockroom to 'B' flag on %1 items"), &Document::Item::stockroom, &Document::Item::setStockroom, BrickLink::Stockroom::B);
+    setOrToggle<BrickLink::Stockroom>::set(this, tr("Set stockroom to 'B' on %1 items"), &Document::Item::stockroom, &Document::Item::setStockroom, BrickLink::Stockroom::B);
 }
 
 void Window::on_edit_stockroom_c_triggered()
 {
-    setOrToggle<BrickLink::Stockroom>::set(this, tr("Set stockroom to 'C' flag on %1 items"), &Document::Item::stockroom, &Document::Item::setStockroom, BrickLink::Stockroom::C);
+    setOrToggle<BrickLink::Stockroom>::set(this, tr("Set stockroom to 'C' on %1 items"), &Document::Item::stockroom, &Document::Item::setStockroom, BrickLink::Stockroom::C);
 }
 
 

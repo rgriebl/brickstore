@@ -50,6 +50,13 @@ bool ChangeCurrencyDialog::eventFilter(QObject *o, QEvent *e)
     return QDialog::eventFilter(o, e);
 }
 
+void ChangeCurrencyDialog::changeEvent(QEvent *e)
+{
+    if (e->type() == QEvent::LanguageChange)
+        languageChange();
+    QDialog::changeEvent(e);
+}
+
 void ChangeCurrencyDialog::ratesUpdated()
 {
     QString oldto = m_to;
@@ -67,6 +74,11 @@ void ChangeCurrencyDialog::ratesUpdated()
     if (!wasUSD && currencies.count() > 1)
         w_newCurrency->insertSeparator(1);
     w_newCurrency->setCurrentIndex(qMax(0, w_newCurrency->findText(oldto)));
+}
+
+void ChangeCurrencyDialog::languageChange()
+{
+    retranslateUi(this);
 }
 
 void ChangeCurrencyDialog::currencyChanged(const QString &to)

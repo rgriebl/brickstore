@@ -47,8 +47,7 @@ public slots:
 
 protected:
     bool eventFilter(QObject *o, QEvent *e) override;
-    void paintEvent(QPaintEvent *event) override;
-    void resizeEvent(QResizeEvent *event) override;
+    void changeEvent(QEvent *e) override;
 
 private slots:
     void closeTab(int idx);

@@ -53,8 +53,6 @@ AddItemDialog::AddItemDialog(QWidget *parent)
 
     m_window = nullptr;
     m_caption_fmt        = windowTitle();
-    m_price_label_fmt    = w_label_currency->text();
-    m_currency_label_fmt = w_radio_currency->text();
 
     m_tier_type = new QButtonGroup(this);
     m_tier_type->setExclusive(true);
@@ -153,7 +151,10 @@ AddItemDialog::AddItemDialog(QWidget *parent)
 void AddItemDialog::languageChange()
 {
     Ui::AddItemDialog::retranslateUi(this);
+    m_price_label_fmt = w_label_currency->text();
+
     w_add->setText(tr("Add"));
+
     updateCurrencyCode();
     updateCaption();
 }
@@ -179,7 +180,7 @@ void AddItemDialog::updateCurrencyCode()
     QString local = Currency::localSymbol(m_currency_code);
 
     w_label_currency->setText(m_price_label_fmt.arg(local));
-    w_radio_currency->setText(m_currency_label_fmt.arg(local));
+    w_radio_currency->setText(local);
     //w_price->setText(Currency::toString(0, m_currencycode));
 }
 
@@ -222,6 +223,13 @@ void AddItemDialog::closeEvent(QCloseEvent *e)
         hide();
         emit closed();
     }
+}
+
+void AddItemDialog::changeEvent(QEvent *e)
+{
+    if (e->type() == QEvent::LanguageChange)
+        languageChange();
+    QWidget::changeEvent(e);
 }
 
 void AddItemDialog::setSimpleMode(bool b)

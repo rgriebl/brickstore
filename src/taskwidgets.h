@@ -71,6 +71,9 @@ protected slots:
     void languageChange();
     void refresh();
 
+protected:
+    void changeEvent(QEvent *e) override;
+
 private:
     QLabel *m_text;
     PictureWidget *m_pic;

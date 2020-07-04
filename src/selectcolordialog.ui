@@ -1,7 +1,8 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>SelectColorDialog</class>
- <widget class="QDialog" name="SelectColorDialog" >
-  <property name="geometry" >
+ <widget class="QDialog" name="SelectColorDialog">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
@@ -9,19 +10,22 @@
     <height>284</height>
    </rect>
   </property>
-  <property name="sizeGripEnabled" >
+  <property name="windowTitle">
+   <string>Select Color</string>
+  </property>
+  <property name="sizeGripEnabled">
    <bool>true</bool>
   </property>
-  <property name="modal" >
+  <property name="modal">
    <bool>true</bool>
   </property>
-  <layout class="QVBoxLayout" >
+  <layout class="QVBoxLayout">
    <item>
-    <widget class="SelectColor" native="1" name="w_sc" />
+    <widget class="SelectColor" name="w_sc" native="true"/>
    </item>
    <item>
-    <widget class="QDialogButtonBox" name="w_buttons" >
-     <property name="standardButtons" >
+    <widget class="QDialogButtonBox" name="w_buttons">
+     <property name="standardButtons">
       <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
      </property>
     </widget>
@@ -44,11 +48,11 @@
    <receiver>SelectColorDialog</receiver>
    <slot>accept()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>103</x>
      <y>260</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>5</x>
      <y>271</y>
     </hint>
@@ -60,11 +64,11 @@
    <receiver>SelectColorDialog</receiver>
    <slot>reject()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>99</x>
      <y>263</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>7</x>
      <y>236</y>
     </hint>

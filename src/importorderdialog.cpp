@@ -346,8 +346,7 @@ void ImportOrderDialog::changeEvent(QEvent *e)
 {
     if (e->type() == QEvent::LanguageChange)
         retranslateUi(this);
-    else
-        QDialog::changeEvent(e);
+    QDialog::changeEvent(e);
 }
 
 void ImportOrderDialog::accept()
@@ -409,7 +408,7 @@ void ImportOrderDialog::download()
         checkSelected();
     }
     else {
-        w_message->setText(tr("There was a problem downloading the data for the specified order(s).This could have been caused by three things:<ul><li>a network error occured.</li><li>the order number and/or type you entered is invalid.</li><li>there are no orders of the specified type in the given time period.</li></ul>"));
+        w_message->setText(tr("There was a problem downloading the data for the specified order(s). This could have been caused by three things:<ul><li>a network error occured.</li><li>the order number and/or type you entered is invalid.</li><li>there are no orders of the specified type in the given time period.</li></ul>"));
         w_stack->setCurrentIndex(1);
 
         w_ok->hide();

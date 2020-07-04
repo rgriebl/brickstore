@@ -883,8 +883,8 @@ Document *Document::fileLoadFrom(const QString &name, const char *type, bool imp
 
             if (result.invalidItemCount) {
                 if (MessageBox::information(FrameWork::inst(),
-                                            tr("This file contains %1 unknown item(s).<br /><br />Do you still want to open this file?")
-                                            .arg(CMB_BOLD(QString::number(result.invalidItemCount))),
+                                            tr("This file contains %n unknown item(s).<br /><br />Do you still want to open this file?",
+                                               nullptr, result.invalidItemCount),
                                             QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
                     result.invalidItemCount = 0;
                 }
@@ -941,8 +941,8 @@ Document *Document::fileImportLDrawModel()
     if (b && !items.isEmpty()) {
         if (invalid_items) {
             if (MessageBox::information(FrameWork::inst(),
-                                        tr("This file contains %1 unknown item(s).<br /><br />Do you still want to open this file?")
-                                        .arg(CMB_BOLD(QString::number(invalid_items))),
+                                        tr("This file contains %n unknown item(s).<br /><br />Do you still want to open this file?",
+                                           nullptr, invalid_items),
                                         QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
                 invalid_items = 0;
             }
@@ -1656,36 +1656,8 @@ QString Document::subConditionLabel(BrickLink::SubCondition sc) const
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-DocumentProxyModel::DocumentProxyModel(Document *model)
-    : QSortFilterProxyModel(model)
+DocumentProxyModel::DocumentProxyModel(Document *model, QObject *parent)
+    : QSortFilterProxyModel(parent)
 {
     m_lastSortColumn[0] = m_lastSortColumn[1] = -1;
 
@@ -1694,24 +1666,7 @@ DocumentProxyModel::DocumentProxyModel(Document *model)
 
     m_parser = new Filter::Parser();
 
-    m_parser->setStandardCombinationTokens(Filter::And | Filter::Or);
-    m_parser->setStandardComparisonTokens(Filter::Matches | Filter::DoesNotMatch |
-                                          Filter::Is | Filter::IsNot |
-                                          Filter::Less | Filter::LessEqual |
-                                          Filter::Greater | Filter::GreaterEqual |
-                                          Filter::StartsWith | Filter::DoesNotStartWith |
-                                          Filter::EndsWith | Filter::DoesNotEndWith);
-
-    QMultiMap<int, QString> fields;
-    QString str;
-    for (int i = 0; i < model->columnCount(QModelIndex()); ++i) {
-        str = model->headerData(i, Qt::Horizontal, Qt::DisplayRole).toString();
-        if (!str.isEmpty())
-            fields.insert(i, str);
-    }
-    fields.insert(-1, tr("Any"));
-
-    m_parser->setFieldTokens(fields);
+    languageChange();
 }
 
 DocumentProxyModel::~DocumentProxyModel()
@@ -1779,6 +1734,37 @@ bool DocumentProxyModel::filterAcceptsRow(int source_row, const QModelIndex &sou
         nextcomb = f.combination();
     }
     return result;
+}
+
+bool DocumentProxyModel::event(QEvent *e)
+{
+    if (e->type() == QEvent::LanguageChange)
+        languageChange();
+    return QSortFilterProxyModel::event(e);
+}
+
+void DocumentProxyModel::languageChange()
+{
+    auto model = sourceModel();
+
+    m_parser->setStandardCombinationTokens(Filter::And | Filter::Or);
+    m_parser->setStandardComparisonTokens(Filter::Matches | Filter::DoesNotMatch |
+                                          Filter::Is | Filter::IsNot |
+                                          Filter::Less | Filter::LessEqual |
+                                          Filter::Greater | Filter::GreaterEqual |
+                                          Filter::StartsWith | Filter::DoesNotStartWith |
+                                          Filter::EndsWith | Filter::DoesNotEndWith);
+
+    QMultiMap<int, QString> fields;
+    QString str;
+    for (int i = 0; i < model->columnCount(QModelIndex()); ++i) {
+        str = model->headerData(i, Qt::Horizontal, Qt::DisplayRole).toString();
+        if (!str.isEmpty())
+            fields.insert(i, str);
+    }
+    fields.insert(-1, tr("Any"));
+
+    m_parser->setFieldTokens(fields);
 }
 
 void DocumentProxyModel::sort(int column, Qt::SortOrder order)

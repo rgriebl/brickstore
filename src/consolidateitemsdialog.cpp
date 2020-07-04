@@ -36,7 +36,7 @@ ConsolidateItemsDialog::ConsolidateItemsDialog(BrickLink::InvItem *existitem, Br
     w_list->setContextMenuPolicy(Qt::NoContextMenu);
     setFocusProxy(w_list);
 
-    auto *view = new DocumentProxyModel(doc);
+    auto *view = new DocumentProxyModel(doc, this);
     w_list->setModel(view);
 
     auto *dd = new DocumentDelegate(doc, view, w_list);

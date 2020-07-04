@@ -46,6 +46,9 @@ private slots:
     void partOut();
     void resizeColumns();
 
+protected:
+    void changeEvent(QEvent *e) override;
+
 private:
     const BrickLink::AppearsInItem *appearsIn() const;
     void triggerColumnResize();

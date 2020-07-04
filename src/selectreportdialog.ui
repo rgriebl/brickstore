@@ -28,9 +28,6 @@
      </item>
      <item>
       <widget class="QToolButton" name="w_update">
-       <property name="text">
-        <string>...</string>
-       </property>
        <property name="icon">
         <iconset resource="../brickstore.qrc">
          <normaloff>:/images/extras_update_database.png</normaloff>:/images/extras_update_database.png</iconset>

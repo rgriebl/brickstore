@@ -313,10 +313,10 @@ static QString toString(const QMultiMap<T, QString> &tokens, const QString &befo
 
 QString Filter::Parser::toolTip() const
 {
-    QString tt = Filter::tr("<p>Enter the filter expression(s) in either (near) natural language or with logical operators.<br />"
+    QString tt = Filter::tr("<p>Enter the filter expression in either (near) natural language or with logical operators.<br />"
        "A single expression looks like <b><i>FIELDNAME COMPARSION</i> TEXT</b>. <b><i>FIELDNAME</i></b> and "
        "<b><i>COMPARISON</i></b> are optional and default to <b>in any field</b> and <b>contains</b> respectively.</p>"
-       "<p>Multiple filters can be combined by separating them with a <b>COMBINATION</b> token.</p>"
+       "<p>Multiple expressions can be combined by separating them with a <b>COMBINATION</b> token.</p>"
        "<p>E.g. to search for anything resembling an brick in blue, you could use: <b>brick and color is blue</b></p>");
 
     QString block = QLatin1String("<b><u>%1</u></b>%2");
@@ -385,10 +385,7 @@ QMultiMap<Filter::Combination, QString> Filter::Parser::standardCombinationToken
         foreach (QString symbol, QString::fromLatin1(tt->m_symbols).split(QLatin1Char(',')))
             dct.insert(tt->m_combination, symbol); 
 
-//        foreach (QString word, QString::fromLatin1(tt->m_words).split(QLatin1Char(',')))
-//            dct.insert(tt->m_combination, word);
-
-        foreach (QString word, qApp->translate("Filter::Parser", tt->m_words).split(QLatin1Char(',')))
+        foreach (QString word, Filter::tr(tt->m_words).split(QLatin1Char(',')))
             dct.insert(tt->m_combination, word);
     }
     return dct;
@@ -426,10 +423,7 @@ QMultiMap<Filter::Comparison, QString> Filter::Parser::standardComparisonTokens(
         foreach (QString symbol, QString::fromLatin1(tt->m_symbols).split(QLatin1Char(',')))
             dct.insert(tt->m_comparison, symbol); 
 
-//        foreach (QString word, QString::fromLatin1(tt->m_words).split(QLatin1Char(',')))
-//            dct.insert(tt->m_comparison, word);
-
-        foreach (QString word, qApp->translate("Filter::Parser", tt->m_words).split(QLatin1Char(',')))
+        foreach (QString word, Filter::tr(tt->m_words).split(QLatin1Char(',')))
             dct.insert(tt->m_comparison, word);
     }
     return dct;

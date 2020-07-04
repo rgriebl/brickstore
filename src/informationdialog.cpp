@@ -36,8 +36,7 @@ void InformationDialog::changeEvent(QEvent *e)
 {
     if (e->type() == QEvent::LanguageChange)
         retranslateUi(this);
-    else
-        QDialog::changeEvent(e);
+    QDialog::changeEvent(e);
 }
 
 void InformationDialog::enableOk()

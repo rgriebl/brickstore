@@ -62,6 +62,7 @@ protected:
     void leaveEvent(QEvent *) override;
     void paintEvent(QPaintEvent *) override;
     bool event(QEvent *) override;
+    void changeEvent(QEvent *e) override;
 
 protected slots:
     void doUpdate();

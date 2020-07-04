@@ -208,17 +208,16 @@ Workspace::Workspace(QWidget *parent)
     m_right = new TabBarSide(m_tabbar);
     m_windowStack = new QStackedLayout();
 
-    auto *tabList = new TabBarSideButton(m_tabbar);
-    tabList->setIcon(QIcon(":/images/tab.png"));
-    tabList->setAutoRaise(true);
-    tabList->setPopupMode(QToolButton::InstantPopup);
-    tabList->setToolButtonStyle(Qt::ToolButtonIconOnly);
-    tabList->setToolTip(tr("Show a list of all open documents"));
-    tabList->setMenu(windowMenu(false, this));
+    m_tablist = new TabBarSideButton(m_tabbar);
+    m_tablist->setIcon(QIcon(":/images/tab.png"));
+    m_tablist->setAutoRaise(true);
+    m_tablist->setPopupMode(QToolButton::InstantPopup);
+    m_tablist->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    m_tablist->setMenu(windowMenu(false, this));
 
     auto *rightlay = new QHBoxLayout(m_right);
     rightlay->setMargin(0);
-    rightlay->addWidget(tabList);
+    rightlay->addWidget(m_tablist);
 
     auto *tabbox = new QHBoxLayout();
     tabbox->setMargin(0);
@@ -283,6 +282,11 @@ void Workspace::removeTab(int idx)
     emit windowCountChanged(windowCount());
 }
 
+void Workspace::languageChange()
+{
+    m_tablist->setToolTip(tr("Show a list of all open documents"));
+}
+
 void Workspace::moveTab(int from, int to)
 {
     m_windowStack->blockSignals(true);
@@ -344,26 +348,11 @@ bool Workspace::eventFilter(QObject *o, QEvent *e)
     return QWidget::eventFilter(o, e);
 }
 
-void Workspace::paintEvent(QPaintEvent *)
+void Workspace::changeEvent(QEvent *e)
 {
-    if (!windowCount() && m_backgroundTextDocument) {
-        QPainter p(this);
-        int h = int(m_backgroundTextDocument->size().height());
-        QRectF r = rect();
-        p.translate(0, (r.height() - h) / 2);
-        r.setHeight(h);
-        m_backgroundTextDocument->drawContents(&p, r);
-    }
-}
-
-void Workspace::resizeEvent(QResizeEvent *event)
-{
-    if (m_backgroundTextDocument) {
-        int w = event->size().width();
-
-        m_backgroundTextDocument->setDocumentMargin(w / 16);
-        m_backgroundTextDocument->setTextWidth(w);
-    }
+    if (e->type() == QEvent::LanguageChange)
+        languageChange();
+    QWidget::changeEvent(e);
 }
 
 void Workspace::closeTab(int idx)

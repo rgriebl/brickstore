@@ -67,6 +67,7 @@ protected slots:
 protected:
     void showEvent(QShowEvent *) override;
     bool eventFilter(QObject *o, QEvent *e) override;
+    void changeEvent(QEvent *e) override;
 
 private:
     void init();

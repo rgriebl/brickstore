@@ -28,10 +28,14 @@ public:
 
 protected:
     bool eventFilter(QObject *, QEvent *) override;
+    void changeEvent(QEvent *e) override;
 
 private slots:
     void currencyChanged(const QString &);
     void ratesUpdated();
+
+private:
+    void languageChange();
 
 private:
     QString m_from;

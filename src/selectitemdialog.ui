@@ -1,7 +1,8 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>SelectItemDialog</class>
- <widget class="QDialog" name="SelectItemDialog" >
-  <property name="geometry" >
+ <widget class="QDialog" name="SelectItemDialog">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
@@ -9,19 +10,22 @@
     <height>284</height>
    </rect>
   </property>
-  <property name="sizeGripEnabled" >
+  <property name="windowTitle">
+   <string>Select Item</string>
+  </property>
+  <property name="sizeGripEnabled">
    <bool>true</bool>
   </property>
-  <property name="modal" >
+  <property name="modal">
    <bool>true</bool>
   </property>
-  <layout class="QVBoxLayout" >
+  <layout class="QVBoxLayout">
    <item>
-    <widget class="SelectItem" native="1" name="w_si" />
+    <widget class="SelectItem" name="w_si" native="true"/>
    </item>
    <item>
-    <widget class="QDialogButtonBox" name="w_buttons" >
-     <property name="standardButtons" >
+    <widget class="QDialogButtonBox" name="w_buttons">
+     <property name="standardButtons">
       <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
      </property>
     </widget>
@@ -44,11 +48,11 @@
    <receiver>SelectItemDialog</receiver>
    <slot>accept()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>119</x>
      <y>261</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>6</x>
      <y>278</y>
     </hint>
@@ -60,11 +64,11 @@
    <receiver>SelectItemDialog</receiver>
    <slot>reject()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>196</x>
      <y>259</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>189</x>
      <y>279</y>
     </hint>

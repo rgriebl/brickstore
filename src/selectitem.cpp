@@ -317,6 +317,13 @@ bool SelectItem::eventFilter(QObject *o, QEvent *e)
     return QWidget::eventFilter(o, e);
 }
 
+void SelectItem::changeEvent(QEvent *e)
+{
+    if (e->type() == QEvent::LanguageChange)
+        languageChange();
+    QWidget::changeEvent(e);
+}
+
 bool SelectItem::hasExcludeWithoutInventoryFilter() const
 {
     return d->m_inv_only;
