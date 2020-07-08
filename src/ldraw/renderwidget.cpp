@@ -13,7 +13,7 @@
 */
 #include <qtguiglobal.h>
 
-#if !defined(QT_NO_OPENGL) && !defined(QT_OPENGL_ES_2)
+#if !defined(QT_NO_OPENGL)
 
 #include <QMouseEvent>
 #include <QOpenGLWindow>
@@ -293,8 +293,10 @@ void LDraw::GLRenderer::paintGL(QOpenGLContext *context)
 
     glDisable(GL_POLYGON_OFFSET_FILL);
     glDepthMask(GL_FALSE);
+#if defined(GL_LINE_SMOOTH)
     glEnable(GL_LINE_SMOOTH);
     glLineWidth(2.5);
+#endif
 
     renderVBO(Lines, GL_LINES);
     renderVBO(ConditionalLines, GL_LINES);

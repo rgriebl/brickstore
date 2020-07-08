@@ -15,7 +15,7 @@
 
 #include <qtguiglobal.h>
 
-#if !defined(QT_NO_OPENGL) && !defined(QT_OPENGL_ES_2)
+#if !defined(QT_NO_OPENGL)
 
 #include <QOpenGLWidget>
 #include <QOpenGLWindow>

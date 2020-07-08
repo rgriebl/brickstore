@@ -15,6 +15,7 @@
 
 #include <QDate>
 #include <QUrl>
+#include <QObject>
 
 #include "bricklinkfwd.h"
 
