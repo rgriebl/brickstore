@@ -736,7 +736,7 @@ QList<Document *> Document::fileImportBrickLinkOrders()
                 auto *doc = new Document();
 
                 doc->setTitle(tr("Order #%1").arg(order.first->id()));
-                doc->setCurrencyCode(order.first->currencyCode());
+                doc->m_currencycode = order.first->currencyCode();
                 doc->setBrickLinkItems(*order.second); // ImportOrderDialog owns the items
                 doc->m_order = new BrickLink::Order(*order. first);
                 docs.append(doc);
@@ -756,7 +756,7 @@ Document *Document::fileImportBrickLinkStore()
         auto *doc = new Document();
 
         doc->setTitle(tr("Store %1").arg(QDate::currentDate().toString(Qt::LocalDate)));
-        doc->setCurrencyCode(import.currencyCode());
+        doc->m_currencycode = import.currencyCode();
         doc->setBrickLinkItems(import.items()); // ImportBLStore owns the items
         return doc;
     }
@@ -790,7 +790,7 @@ Document *Document::fileImportBrickLinkCart()
             if (d.exec() == QDialog::Accepted) {
                 auto *doc = new Document();
 
-                doc->setCurrencyCode(import.currencyCode());
+                doc->m_currencycode = import.currencyCode();
                 doc->setBrickLinkItems(import.items()); // ImportBLCart owns the items
                 doc->setTitle(tr("Cart in Shop %1").arg(shopid));
                 return doc;
@@ -893,7 +893,7 @@ Document *Document::fileLoadFrom(const QString &name, const char *type, bool imp
 
         if (!result.invalidItemCount) {
             doc = new Document();
-            doc->setCurrencyCode(result.currencyCode); // we own the items
+            doc->m_currencycode = result.currencyCode; // we own the items
             doc->setBrickLinkItems(*result.items);
 
             doc->setFileName(import_only ? QString() : name);

@@ -932,6 +932,7 @@ public:
         InvItemList *items = nullptr;
         uint invalidItemCount = 0;
         QString currencyCode;
+        bool multipleCurrencies = false;
     };
 
     ParseItemListXMLResult parseItemListXML(const QDomElement &root, ItemListXMLHint hint);
