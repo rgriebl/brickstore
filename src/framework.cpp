@@ -1365,7 +1365,8 @@ void FrameWork::fileImportBrickLinkOrder()
     if (!checkBrickLinkLogin())
         return;
 
-    createWindows(Document::fileImportBrickLinkOrders());
+    foreach (Document *doc, Document::fileImportBrickLinkOrders())
+        createWindow(doc);
 }
 
 void FrameWork::fileImportBrickLinkStore()
@@ -1390,17 +1391,6 @@ void FrameWork::fileImportLDrawModel()
 {
     createWindow(Document::fileImportLDrawModel());
 }
-
-bool FrameWork::createWindows(const QList<Document *> &docs)
-{
-    bool ok = true;
-
-    foreach (Document *doc, docs)
-        ok = ok && createWindow(doc);
-    return ok;
-}
-
-
 
 bool FrameWork::createWindow(Document *doc)
 {

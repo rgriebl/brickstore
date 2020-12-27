@@ -25,7 +25,7 @@ GITHUB_URL  = "github.com/rgriebl/brickstore"
 
 requires(linux|macos|win32:!winrt:!android)
 !versionAtLeast(QT_VERSION, $$MIN_QT_VERSION) {
-    error("$$escape_expand(\\n\\n) *** BrickStore needs to be built against $$MIN_QT_VERSION or higher ***$$escape_expand(\\n\\n)")
+    error("$$escape_expand(\\n\\n) *** $$NAME needs to be built against $$MIN_QT_VERSION or higher ***$$escape_expand(\\n\\n)")
 }
 
 TEMPLATE = app

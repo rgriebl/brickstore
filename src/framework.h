@@ -134,7 +134,6 @@ private:
     QDockWidget *createDock(QWidget *widget);
     void createStatusBar();
     bool createWindow(Document *doc);
-    bool createWindows(const QList<Document *> &docs);
     QMap<QAction *, bool (Window::*)() const> m_toggle_updates;
 
     Workspace *m_workspace;

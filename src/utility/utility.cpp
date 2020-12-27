@@ -38,21 +38,20 @@
 
 static int naturalCompareNumbers(const QChar *&n1, const QChar *&n2)
 {
-    bool d1 = true, d2 = true;
     int result = 0;
 
-    forever {
-        if (!d1 && !d2)
-            return result;
-        else if (!d1)
-            return -1;
-        else if (!d2)
-            return 1;
-        else if (n1->digitValue() != n2->digitValue() && !result)
-            result = n1->digitValue() - n2->digitValue();
+    while (true) {
+        const auto d1 = (n1++)->digitValue();
+        const auto d2 = (n2++)->digitValue();
 
-        d1 = (++n1)->isDigit();
-        d2 = (++n2)->isDigit();
+        if (d1 == -1 && d2 == -1)
+            return result;
+        else if (d1 == -1)
+            return -1;
+        else if (d2 == -1)
+            return 1;
+        else if (d1 != d2 && !result)
+            result = d1 - d2;
     }
 }
 

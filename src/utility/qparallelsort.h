@@ -89,11 +89,8 @@ static inline void qParallelSortSerial(RandomAccessIterator begin, RandomAccessI
     if (span < 2) {
         return;
     } else if (span == 2) {
-        if (!lessThan(*begin, *(begin + 1))) {
-            *tmp = *begin;
-            *begin = *(begin + 1);
-            *(begin + 1) = *tmp;
-        }
+        if (!lessThan(*begin, *(begin + 1)))
+            std::swap(*begin, *(begin + 1));
     } else {
         int a_span = (span + 1) / 2;  // bigger half of array if array-size is uneven
         int b_span = span / 2;        // smaller half of array if array-size is uneven
