@@ -50,13 +50,11 @@ void PictureLoaderJob::run()
     if (m_pic && !m_pic->valid()) {
         m_pic->load_from_disk();
 
-        if (m_pic->valid()) {
-            auto blcore = BrickLink::core();
-            auto pic = m_pic;
-            QMetaObject::invokeMethod(blcore, [pic, blcore]() {
-                blcore->pictureLoaded(pic);
-            }, Qt::QueuedConnection);
-        }
+        auto blcore = BrickLink::core();
+        auto pic = m_pic;
+        QMetaObject::invokeMethod(blcore, [pic, blcore]() {
+            blcore->pictureLoaded(pic);
+        }, Qt::QueuedConnection);
     }
 }
 
