@@ -30,6 +30,9 @@ public:
     QModelIndex parent(const QModelIndex &) const override;
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
+    enum SortingAlgorithm { StableSort, QuickSort, ParallelSort, ParallelSort_Cxx17 };
+    void setSortingAlgorithm(SortingAlgorithm sa);
+
     void sort(int column, Qt::SortOrder order) override;
 
     int sortColumn() const;
@@ -68,27 +71,28 @@ private:
 
     void invalidateFilterInternal();
 
-    template<Qt::SortOrder SortOrder>
     struct StaticPointerModelCompare
     {
-        inline StaticPointerModelCompare(int column, const StaticPointerModel *model)
-            : sortColumn(column), pointerModel(model) { }
+        inline StaticPointerModelCompare(int column, Qt::SortOrder order, const StaticPointerModel *model)
+            : sortColumn(column), sortOrder(order), pointerModel(model) { }
 
         inline bool operator()(int r1, int r2) const
         {
-            const void *pointer1 = pointerModel->pointerAt(SortOrder == Qt::AscendingOrder ? r1 : r2);
-            const void *pointer2 = pointerModel->pointerAt(SortOrder == Qt::AscendingOrder ? r2 : r1);
+            const void *pointer1 = pointerModel->pointerAt(sortOrder == Qt::AscendingOrder ? r1 : r2);
+            const void *pointer2 = pointerModel->pointerAt(sortOrder == Qt::AscendingOrder ? r2 : r1);
             return pointerModel->lessThan(pointer1, pointer2, sortColumn);
         }
 
     private:
-        int sortColumn;
+        const int sortColumn;
+        const Qt::SortOrder sortOrder;
         const StaticPointerModel *pointerModel;
     };
-    template<Qt::SortOrder> friend struct StaticPointerModelCompare;
+    friend struct StaticPointerModelCompare;
 
     mutable QVector<int> sorted; // this needs to initialized in the first init() call
     QList<int> filtered;
     int lastSortColumn = -1;
     Qt::SortOrder lastSortOrder = Qt::AscendingOrder;
+    SortingAlgorithm sortingAlgorithm = QuickSort;
 };

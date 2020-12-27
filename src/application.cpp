@@ -56,6 +56,7 @@
 #include "utility.h"
 #include "version.h"
 #include "application.h"
+#include "stopwatch.h"
 
 #define XSTR(a) #a
 #define STR(a) XSTR(a)

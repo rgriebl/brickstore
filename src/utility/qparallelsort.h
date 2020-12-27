@@ -51,6 +51,10 @@
 #include <QtConcurrentRun>
 #include <QtAlgorithms>
 
+#if __cplusplus >= 201703L
+#  include <execution>
+#endif
+
 namespace QAlgorithmsPrivate {
 
 
@@ -111,7 +115,7 @@ void qParallelSortThread(RandomAccessIterator begin, RandomAccessIterator end, L
     int span = end - begin;
 
     // stop if there are no threads left OR if size of array is at most 3
-    if (threadCount < 2 || span <= 3) {
+    if (threadCount == 1 || span <= 100 /* 3 */) {
         // let's just sort this in serial
         qParallelSortSerial(begin, end, lessThan, tmp);
         return;
@@ -181,14 +185,19 @@ inline void qParallelSort(Container &c)
 
 #ifdef QPARALLELSORT_TESTING // benchmarking
 #include "stopwatch.h"
+#include <execution>
 
 void test_par_sort()
 {
-    for (int k = 0; k < 3; ++k) {
+    for (int k = 0; k < 4; ++k) {
         const char *which = (k == 0 ? "Stable Sort  " :
                             (k == 1 ? "Quick Sort   " :
-                                      "Parallel Sort"));
-        int maxloop = 25;
+                            (k == 2 ? "Parallel Sort" :
+                                      "C++17 ParSort")));
+        if (k == 0)
+            continue;
+
+        int maxloop = 24;
         int *src = new int[1 << maxloop];
         for (int j = 0; j < (1 << maxloop); ++j)
             src[j] = rand();
@@ -205,8 +214,10 @@ void test_par_sort()
                     qStableSort(array, array + count);
                 else if (k == 1)
                     qSort(array, array + count);
-                else
+                else if (k == 2)
                     qParallelSort(array, array + count);
+                else
+                    sort(std::execution::par_unseq, array, array + count);
             }
             delete [] array;
         }

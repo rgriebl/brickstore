@@ -776,6 +776,7 @@ private:
     const ItemType *m_itemtype_filter;
     const Category *m_category_filter;
     QString         m_text_filter;
+    bool            m_text_filter_is_regexp = false;
     bool            m_inv_filter;
 
     friend class Core;

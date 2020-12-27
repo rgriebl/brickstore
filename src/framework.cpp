@@ -63,7 +63,7 @@
 #include "humanreadabletimedelta.h"
 
 #include "framework.h"
-
+#include "stopwatch.h"
 
 enum ProgressItem {
     PGI_PriceGuide,
@@ -658,6 +658,38 @@ FrameWork::FrameWork(QWidget *parent)
         Application::inst()->enableEmitOpenDocument();
     else
         MessageBox::warning(this, tr("Could not load the BrickLink database files.<br /><br />The program is not functional without these files."));
+
+#if 1 // timing test on different sorting/filtering algos
+    {
+        BrickLink::ItemModel m(nullptr);
+        {
+            qWarning() << m.rowCount() << "items to sort:";
+
+            for (auto t : { StaticPointerModel::StableSort, StaticPointerModel::QuickSort, StaticPointerModel::ParallelSort, StaticPointerModel::ParallelSort_Cxx17 }) {
+
+                for (int c = 0; c < m.columnCount(); ++c) {
+                    m.setSortingAlgorithm(t);
+                    QByteArray what = "10x TYPE " + QByteArray::number(t) + " Col " + qPrintable(m.headerData(c, Qt::Horizontal, Qt::DisplayRole).toString()) + " ASC";
+                    stopwatch sw(what.constData());
+                    for (int i = 0; i < 10; ++i) {
+                        m.sort(c, Qt::AscendingOrder);
+                        m.sort(c, Qt::DescendingOrder);
+                    }
+                }
+            }
+            qWarning() << m.rowCount() << "items to filter:";
+
+            for (auto f : { "3372", "973pb", "973pb3424", "....", "as*" }) {
+                QByteArray what = "10x Filter \"" + QByteArray(f) + "\"";
+                stopwatch sw(what.constData());
+                for (int i = 0; i < 10; ++i) {
+                    m.setFilterText(f);
+                    m.setFilterText(QString());
+                }
+            }
+        }
+    }
+#endif
 
     m_add_dialog = nullptr;
     //createAddItemDialog();

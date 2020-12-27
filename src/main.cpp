@@ -18,9 +18,6 @@
 
 #include "application.h"
 
-//#define QPARALLELSORT_TESTING
-//#include "qparallelsort.h"
-
 // needed for themed common controls (e.g. file open dialogs)
 #if defined(Q_CC_MSVC)
 #  pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
@@ -68,9 +65,6 @@ int main(int argc, char **argv)
     }
     else {
         Application a(rebuild_db, skip_download, argc, argv);
-#ifdef QPARALLELSORT_TESTING
-        test_par_sort();
-#endif
         return qApp->exec();
     }
 }

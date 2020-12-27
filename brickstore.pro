@@ -33,7 +33,7 @@ TEMPLATE = app
 TARGET = $$NAME
 unix:!macos:TARGET = $$lower($$TARGET)
 
-CONFIG *= no_private_qt_headers_warning
+CONFIG *= no_private_qt_headers_warning c++17
 CONFIG *= lrelease embed_translations
 # CONFIG *= modeltest
 

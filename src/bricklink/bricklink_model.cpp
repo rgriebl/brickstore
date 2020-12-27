@@ -19,6 +19,7 @@
 #include <QHelpEvent>
 #include <QAbstractItemView>
 #include <QApplication>
+#include <QRegularExpression>
 
 #include "bricklink.h"
 #include "utility.h"
@@ -544,7 +545,13 @@ void BrickLink::ItemModel::setFilterText(const QString &str)
 {
     if (str == m_text_filter)
         return;
-    m_text_filter = str;
+    if (str.contains('?') || str.contains('*')) {
+        m_text_filter_is_regexp = true;
+        m_text_filter = QRegularExpression::wildcardToRegularExpression(str);
+    } else {
+        m_text_filter_is_regexp = false;
+        m_text_filter = str;
+    }
     invalidateFilter();
 }
 
@@ -567,8 +574,8 @@ bool BrickLink::ItemModel::lessThan(const void *p1, const void *p2, int column) 
 }
 
 namespace BrickLink {
-// QRegExp is not thread-safe, so we need per-thread copies of the QRegExp object
-static QThreadStorage<QRegExp *> regexpCache;
+// QRegularExpression is not thread-safe, so we need per-thread copies of the QRegularExpression object
+static QThreadStorage<QRegularExpression *> regexpCache;
 }
 
 bool BrickLink::ItemModel::filterAccepts(const void *pointer) const
@@ -585,19 +592,21 @@ bool BrickLink::ItemModel::filterAccepts(const void *pointer) const
         return false;
     else {
         if (!m_text_filter.isEmpty()) {
-            QRegExp *re = nullptr;
-            if (!regexpCache.hasLocalData()) {
-                re = new QRegExp(m_text_filter, Qt::CaseInsensitive, QRegExp::Wildcard);
-                regexpCache.setLocalData(re);
+            if (!m_text_filter_is_regexp) {
+                return item->id().startsWith(m_text_filter, Qt::CaseInsensitive)
+                        || item->name().startsWith(m_text_filter, Qt::CaseInsensitive);
             } else {
-                re = regexpCache.localData();
-                if (re->pattern() != m_text_filter) {
-                    re->setPattern(m_text_filter);
+                QRegularExpression *re = nullptr;
+                if (!regexpCache.hasLocalData()) {
+                    re = new QRegularExpression(QString(), QRegularExpression::CaseInsensitiveOption);
+                    regexpCache.setLocalData(re);
                 }
+                re = regexpCache.localData();
+                if (re->pattern() != m_text_filter)
+                    re->setPattern(m_text_filter);
+                return (re->match(item->id()).hasMatch() ||
+                        re->match(item->name()).hasMatch());
             }
-            return ((re->indexIn(item->id()) >= 0) ||
-                    (re->indexIn(item->name()) >= 0));
-
         }
     }
     return true;
