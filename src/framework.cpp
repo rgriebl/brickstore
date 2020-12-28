@@ -659,30 +659,30 @@ FrameWork::FrameWork(QWidget *parent)
     else
         MessageBox::warning(this, tr("Could not load the BrickLink database files.<br /><br />The program is not functional without these files."));
 
-#if 1 // timing test on different sorting/filtering algos
+//#define PARALLEL_TEST_RUNS 10
+#if (PARALLEL_TEST_RUNS-0) > 0 // timing test on different sorting/filtering algos
     {
         BrickLink::ItemModel m(nullptr);
         {
-            qWarning() << m.rowCount() << "items to sort:";
+            qWarning() << m.rowCount() << "items to sort (x" << PARALLEL_TEST_RUNS << "):";
 
             for (auto t : { StaticPointerModel::StableSort, StaticPointerModel::QuickSort, StaticPointerModel::ParallelSort, StaticPointerModel::ParallelSort_Cxx17 }) {
-
                 for (int c = 0; c < m.columnCount(); ++c) {
                     m.setSortingAlgorithm(t);
-                    QByteArray what = "10x TYPE " + QByteArray::number(t) + " Col " + qPrintable(m.headerData(c, Qt::Horizontal, Qt::DisplayRole).toString()) + " ASC";
+                    QByteArray what = "TYPE " + QByteArray::number(t) + " Col " + qPrintable(m.headerData(c, Qt::Horizontal, Qt::DisplayRole).toString()) + " ASC";
                     stopwatch sw(what.constData());
-                    for (int i = 0; i < 10; ++i) {
+                    for (int i = 0; i < PARALLEL_TEST_RUNS; ++i) {
                         m.sort(c, Qt::AscendingOrder);
                         m.sort(c, Qt::DescendingOrder);
                     }
                 }
             }
-            qWarning() << m.rowCount() << "items to filter:";
+            qWarning() << m.rowCount() << "items to filter (x" << PARALLEL_TEST_RUNS << "):";
 
             for (auto f : { "3372", "973pb", "973pb3424", "....", "as*" }) {
-                QByteArray what = "10x Filter \"" + QByteArray(f) + "\"";
+                QByteArray what = "Filter \"" + QByteArray(f) + "\"";
                 stopwatch sw(what.constData());
-                for (int i = 0; i < 10; ++i) {
+                for (int i = 0; i < PARALLEL_TEST_RUNS; ++i) {
                     m.setFilterText(f);
                     m.setFilterText(QString());
                 }
