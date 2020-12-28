@@ -69,7 +69,8 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     w_add = new QPushButton();
     w_buttons->addButton(w_add, QDialogButtonBox::ActionRole);
 
-    w_select_item->setCurrentItemType(BrickLink::core()->itemType(Config::inst()->value("/Defaults/AddItems/ItemType", 'P').toChar().toLatin1()));
+    auto itId = Config::inst()->value("/Defaults/AddItems/ItemType", 'P').value<char>();
+    w_select_item->setCurrentItemType(BrickLink::core()->itemType(itId));
     w_select_item->setCurrentCategory(BrickLink::CategoryModel::AllCategories);
 
     w_picture->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);

@@ -31,7 +31,8 @@ ImportInventoryDialog::ImportInventoryDialog(QWidget *parent)
     setupUi(this);
 
     w_select->setExcludeWithoutInventoryFilter(true);
-    w_select->setCurrentItemType(BrickLink::core()->itemType(Config::inst()->value("/Defaults/ImportInventory/ItemType", 'S').toChar().toLatin1()));
+    auto itId = Config::inst()->value("/Defaults/ImportInventory/ItemType", 'S').value<char>();
+    w_select->setCurrentItemType(BrickLink::core()->itemType(itId));
     connect(w_select, &SelectItem::itemSelected,
             this, &ImportInventoryDialog::checkItem);
     w_qty->setValue(1);
