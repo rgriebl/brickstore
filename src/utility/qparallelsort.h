@@ -114,8 +114,8 @@ void qParallelSortThread(RandomAccessIterator begin, RandomAccessIterator end, L
 {
     int span = end - begin;
 
-    // stop if there are no threads left OR if size of array is at most 3
-    if (threadCount == 1 || span <= 100 /* 3 */) {
+    // stop if there are no threads left OR if size of array is at most 100 (to avoid overhead)
+    if (threadCount == 1 || span <= 100) {
         // let's just sort this in serial
         qParallelSortSerial(begin, end, lessThan, tmp);
         return;
@@ -157,7 +157,7 @@ Q_OUTOFLINE_TEMPLATE void qParallelSortHelper(RandomAccessIterator begin, Random
 template <typename RandomAccessIterator, typename T>
 inline void qParallelSortHelper(RandomAccessIterator begin, RandomAccessIterator end, const T &dummy)
 {
-    qParallelSortHelper(begin, end, dummy, qLess<T>());
+    qParallelSortHelper(begin, end, dummy, std::less<T>());
 }
 
 } // namespace QAlgorithmsPrivate
