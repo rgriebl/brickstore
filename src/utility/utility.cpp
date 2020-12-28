@@ -69,21 +69,23 @@ int Utility::naturalCompare(const QString &name1, const QString &name2)
 
     bool special = false;
     const QChar *n1 = name1.constData();
+    const QChar *n1e = n1 + name1.size();
     const QChar *n2 = name2.constData();
+    const QChar *n2e = n2 + name2.size();
 
     while (true) {
         // 1) skip white space
-        while (n1->isSpace()) {
+        while ((n1 < n1e) && n1->isSpace()) {
             n1++;
             special = true;
         }
-        while (n2->isSpace()) {
+        while ((n2 < n2e) && n2->isSpace()) {
             n2++;
             special = true;
         }
 
         // 2) check for numbers
-        if (n1->isDigit() && n2->isDigit()) {
+        if ((n1 < n1e) && n1->isDigit() && (n2 < n2e) && n2->isDigit()) {
             int d = naturalCompareNumbers(n1, n2);
             if (d)
                 return d;
@@ -92,11 +94,15 @@ int Utility::naturalCompare(const QString &name1, const QString &name2)
 
 
         // 4) naturally the same -> let the unicode order decide
-        if (n1->isNull() && n2->isNull())
+        if ((n1 >= n1e) && (n2 >= n2e))
             return special ? name1.localeAwareCompare(name2) : 0;
 
         // 5) found a difference
-        if (*n1 != *n2)
+        if (n1 >= n1e)
+            return -1;
+        else if (n2 >= n2e)
+            return 1;
+        else if (*n1 != *n2)
             return n1->unicode() - n2->unicode();
 
         n1++; n2++;
