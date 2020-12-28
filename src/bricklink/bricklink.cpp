@@ -309,7 +309,7 @@ static bool check_and_create_path(const QString &p)
     QFileInfo fi(p);
 
     if (!fi.exists()) {
-        QDir::current().mkdir(p);
+        QDir::current().mkpath(p);
         fi.refresh();
     }
     return (fi.exists() && fi.isDir() && fi.isReadable() && fi.isWritable());
@@ -556,14 +556,16 @@ void BrickLink::Core::cancelPictureTransfers()
 
     m_pic_diskload.clear();
     m_pic_diskload.waitForDone();
-    m_transfer->abortAllJobs();
+    if (m_transfer)
+        m_transfer->abortAllJobs();
 }
 
 void BrickLink::Core::cancelPriceGuideTransfers()
 {
     QMutexLocker lock(&m_corelock);
 
-    m_transfer->abortAllJobs();
+    if (m_transfer)
+        m_transfer->abortAllJobs();
 }
 
 QString BrickLink::Core::defaultDatabaseName(DatabaseVersion version) const

@@ -151,9 +151,8 @@ Application::Application(bool rebuild_db_only, bool skip_download, int &_argc, c
     (void) ReportManager::inst();
 
     if (!initBrickLink()) {
-        // we cannot call quit directly, since there is
-        // no event loop to quit from...
-        QTimer::singleShot(0, this, SLOT(quit()));
+        // we cannot call quit directly, since there is no event loop to quit from...
+        QMetaObject::invokeMethod(qApp, &QCoreApplication::quit, Qt::QueuedConnection);
         return;
 
     } else if (rebuild_db_only) {
