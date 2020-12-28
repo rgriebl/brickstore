@@ -31,6 +31,7 @@ SOURCES += \
   $$PWD/selectitem.cpp \
   $$PWD/taskwidgets.cpp \
   $$PWD/updatedatabase.cpp \
+  $$PWD/welcomewidget.cpp \
   $$PWD/window.cpp
 
 HEADERS += \
@@ -55,6 +56,7 @@ HEADERS += \
   $$PWD/selectitem.h \
   $$PWD/taskwidgets.h \
   $$PWD/updatedatabase.h \
+  $$PWD/welcomewidget.h \
   $$PWD/window.h \
 
 FORMS = \

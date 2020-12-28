@@ -51,6 +51,7 @@
         <file alias="brickstore_icon.png">assets/generated-icons/brickstore.png</file>
         <file alias="brickstore_doc_icon.png">assets/generated-icons/brickstore_doc.png</file>
         <file alias="tab.png">assets/generated-32x32/tab.png</file>
+        <file alias="right_arrow.png">assets/crystal-clear-32x32/actions/1rightarrow.png</file>
     </qresource>
     <qresource prefix="/i18n">
         <file alias="translations.xml">translations/translations.xml</file>
