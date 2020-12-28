@@ -47,6 +47,10 @@ int main(int argc, char **argv)
             show_usage = true;
     }
 
+#if defined(SANITIZER_ENABLED)
+    QThreadPool::globalInstance()->setExpiryTimeout(0);
+#endif
+
 #if !defined(Q_OS_WINDOWS) // HighDPI work fine, but only without this setting
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #  if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)

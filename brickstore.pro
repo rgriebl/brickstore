@@ -37,6 +37,10 @@ CONFIG *= no_private_qt_headers_warning c++17
 CONFIG *= lrelease embed_translations
 # CONFIG *= modeltest
 
+sanitize:debug:unix {
+  CONFIG *= sanitizer sanitize_address sanitize_undefined
+  DEFINES += SANITIZER_ENABLED
+}
 
 DESTDIR = bin
 
