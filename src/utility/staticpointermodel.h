@@ -30,9 +30,6 @@ public:
     QModelIndex parent(const QModelIndex &) const override;
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
-    enum SortingAlgorithm { StableSort, QuickSort, ParallelSort };
-    void setSortingAlgorithm(SortingAlgorithm sa);
-
     void sort(int column, Qt::SortOrder order) override;
 
     int sortColumn() const;
@@ -94,5 +91,4 @@ private:
     QList<int> filtered;
     int lastSortColumn = -1;
     Qt::SortOrder lastSortOrder = Qt::AscendingOrder;
-    SortingAlgorithm sortingAlgorithm = ParallelSort;
 };

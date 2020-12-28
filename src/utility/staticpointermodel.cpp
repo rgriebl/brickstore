@@ -18,10 +18,6 @@
 #include "qparallelsort.h"
 #include "staticpointermodel.h"
 
-#if __cplusplus >= 201703L
-#  include <execution>
-#endif
-
 
 StaticPointerModel::StaticPointerModel(QObject *parent)
     : QAbstractItemModel(parent)
@@ -60,11 +56,6 @@ int StaticPointerModel::rowCount(const QModelIndex &parent) const
         return filtered.count();
     else
         return pointerCount();
-}
-
-void StaticPointerModel::setSortingAlgorithm(StaticPointerModel::SortingAlgorithm sa)
-{
-    sortingAlgorithm = sa;
 }
 
 const void *StaticPointerModel::pointer(const QModelIndex &index) const
@@ -142,25 +133,12 @@ void StaticPointerModel::sort(int column, Qt::SortOrder order)
     if (column >= 0 && column < columnCount()) {
         auto sorter = StaticPointerModelCompare(column, order, this);
 
-        switch (sortingAlgorithm) {
-        case StableSort:
-#if __cpp_lib_execution
-            std::stable_sort(std::execution::par_unseq, sorted.begin(), sorted.end(), sorter);
-            break;
-#else
-            Q_FALLTHROUGH();
-#endif
-        case QuickSort:
-#if __cpp_lib_execution
-            std::sort(std::execution::par_unseq, sorted.begin(), sorted.end(), sorter);
-            break;
-#else
-            Q_FALLTHROUGH();
-#endif
-        case ParallelSort:
-            qParallelSort(sorted.begin(), sorted.end(), sorter);
-            break;
-        }
+        qParallelSort(sorted.begin(), sorted.end(), sorter);
+
+        // c++17 alternatives, but not supported everywhere yet:
+        //std::stable_sort(std::execution::par_unseq, sorted.begin(), sorted.end(), sorter);
+        //std::sort(std::execution::par_unseq, sorted.begin(), sorted.end(), sorter);
+
     } else { // restore the source model order
         for (int i = 0; i < n; ++i)
             sorted[i] = i;
