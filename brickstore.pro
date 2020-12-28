@@ -109,11 +109,6 @@ win32 {
   QMAKE_TARGET_DESCRIPTION = "$$DESCRIPTION"
 
   win32-msvc* {
-#    QMAKE_CXXFLAGS_DEBUG   += /Od /GL-
-#    QMAKE_CXXFLAGS_RELEASE += /O2 /GL
-#    release:QMAKE_LFLAGS_WINDOWS += "/LTCG"
-#    DEFINES += _CRT_SECURE_NO_DEPRECATE
-
     LIBS += user32.lib advapi32.lib wininet.lib
   }
 
@@ -122,15 +117,11 @@ win32 {
     !system(where $$ISCC >NUL) {
       INNO_PATH=$$(INNO_SETUP_PATH)
       !exists("$$INNO_PATH\\$$ISCC") {
-        INNO_PATH="$$getenv(ProgramFiles(x86))\\Inno Setup 5"
-        !exists("$$INNO_PATH\\$$ISCC") {
-          INNO_PATH="$$getenv(ProgramFiles(x86))\\Inno Setup 6"
-          !exists("$$INNO_PATH\\$$ISCC"):error("Please set %INNO_SETUP_PATH% to point to the directory containing the '$$ISCC' binary.")
-        }
+        INNO_PATH="$$getenv(ProgramFiles(x86))\\Inno Setup 6"
+        !exists("$$INNO_PATH\\$$ISCC"):error("Please set %INNO_SETUP_PATH% to point to the directory containing the '$$ISCC' binary.")
       }
       ISCC="$$INNO_PATH\\$$ISCC"
     }
-
 
     contains(QMAKE_TARGET.arch, x86_64) {
       TARCH=x64
@@ -149,7 +140,7 @@ win32 {
     !exists("$$OPENSSL_PATH/$$OPENSSL"):error("Please install the matching OpenSSL version from https://slproweb.com/products/Win32OpenSSL.html.")
 
     OPENSSL_PATH=$$clean_path($$OPENSSL_PATH)
-    log("Deploying OpenSSL libraries at: $$shell_path($$OPENSSL_PATH)")
+    #log("Deploying OpenSSL libraries at: $$shell_path($$OPENSSL_PATH)")
 
     deploy.depends += $(DESTDIR_TARGET)
     deploy.commands += $$shell_path($$[QT_HOST_BINS]/windeployqt.exe) $(DESTDIR_TARGET)

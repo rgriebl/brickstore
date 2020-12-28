@@ -232,10 +232,10 @@ void LDraw::GLRenderer::recreateVBOs()
 
     for (int i = 0; i < Count; ++i) {
         if (m_dirty & (1 << i)) {
-            m_vboSizes[i] = buffer[i].size() / 7;
+            m_vboSizes[i] = int(buffer[i].size()) / 7;
 
             m_vbos[i].bind();
-            m_vbos[i].allocate(buffer[i].data(), buffer[i].size() * sizeof(GLfloat));
+            m_vbos[i].allocate(buffer[i].data(), int(buffer[i].size()) * sizeof(GLfloat));
             m_vbos[i].release();
         }
     }

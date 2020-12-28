@@ -9,7 +9,7 @@
 AppName=BrickStore
 AppVersion={#ApplicationVersion}
 VersionInfoVersion={#ApplicationVersionFull}
-DefaultDirName={pf}\BrickStore
+DefaultDirName={commonpf}\BrickStore
 DefaultGroupName=BrickStore
 UninstallDisplayIcon={app}\BrickStore.exe
 ; Since no icons will be created in "{group}", we do not need the wizard
@@ -33,11 +33,12 @@ Name: "slovenian"; MessagesFile: "compiler:Languages\Slovenian.isl"
 Source: "BrickStore.exe"; DestDir: "{app}"
 Source: "*.dll"; DestDir: "{app}"; Flags: recursesubdirs
 ; MSVC
-Source: "vc_redist.x86.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall
+Source: "vc_redist.x86.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall skipifsourcedoesntexist
+Source: "vc_redist.x64.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall skipifsourcedoesntexist
 
 [Run]
-Filename: "{tmp}\vc_redist.x86.exe"; StatusMsg: "Microsoft C/C++ runtime"; Parameters: "/quiet"; Flags: waituntilterminated
-
+Filename: "{tmp}\vc_redist.x86.exe"; StatusMsg: "Microsoft C/C++ runtime"; Parameters: "/quiet /norestart"; Flags: waituntilterminated skipifdoesntexist
+Filename: "{tmp}\vc_redist.x64.exe"; StatusMsg: "Microsoft C/C++ runtime"; Parameters: "/quiet /norestart"; Flags: waituntilterminated skipifdoesntexist
 
 [Icons]
 Name: "{commonprograms}\BrickStore"; Filename: "{app}\BrickStore.exe";
