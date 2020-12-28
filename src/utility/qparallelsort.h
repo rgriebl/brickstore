@@ -51,9 +51,6 @@
 #include <QtConcurrentRun>
 #include <QtAlgorithms>
 
-#if __cplusplus >= 201703L
-#  include <execution>
-#endif
 
 namespace QAlgorithmsPrivate {
 
@@ -183,20 +180,16 @@ inline void qParallelSort(Container &c)
         QAlgorithmsPrivate::qParallelSortHelper(c.begin(), c.end(), *c.begin());
 }
 
+
 #ifdef QPARALLELSORT_TESTING // benchmarking
 #include "stopwatch.h"
-#include <execution>
 
 void test_par_sort()
 {
     for (int k = 0; k < 4; ++k) {
         const char *which = (k == 0 ? "Stable Sort  " :
                             (k == 1 ? "Quick Sort   " :
-                            (k == 2 ? "Parallel Sort" :
-                                      "C++17 ParSort")));
-        if (k == 0)
-            continue;
-
+                                      "Parallel Sort"));
         int maxloop = 24;
         int *src = new int[1 << maxloop];
         for (int j = 0; j < (1 << maxloop); ++j)
@@ -214,10 +207,8 @@ void test_par_sort()
                     qStableSort(array, array + count);
                 else if (k == 1)
                     qSort(array, array + count);
-                else if (k == 2)
-                    qParallelSort(array, array + count);
                 else
-                    sort(std::execution::par_unseq, array, array + count);
+                    qParallelSort(array, array + count);
             }
             delete [] array;
         }

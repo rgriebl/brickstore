@@ -13,10 +13,15 @@
 */
 
 #include <QtConcurrentFilter>
+#include <QtAlgorithms>
 
 #include "qparallelsort.h"
 #include "staticpointermodel.h"
-#include <QtAlgorithms>
+
+#if __cplusplus >= 201703L
+#  include <execution>
+#endif
+
 
 StaticPointerModel::StaticPointerModel(QObject *parent)
     : QAbstractItemModel(parent)
@@ -139,16 +144,21 @@ void StaticPointerModel::sort(int column, Qt::SortOrder order)
 
         switch (sortingAlgorithm) {
         case StableSort:
+#if __cpp_lib_execution
             std::stable_sort(std::execution::par_unseq, sorted.begin(), sorted.end(), sorter);
             break;
+#else
+            Q_FALLTHROUGH();
+#endif
         case QuickSort:
+#if __cpp_lib_execution
             std::sort(std::execution::par_unseq, sorted.begin(), sorted.end(), sorter);
             break;
+#else
+            Q_FALLTHROUGH();
+#endif
         case ParallelSort:
             qParallelSort(sorted.begin(), sorted.end(), sorter);
-            break;
-        case ParallelSort_Cxx17:
-            std::sort(std::execution::par, sorted.begin(), sorted.end(), sorter);
             break;
         }
     } else { // restore the source model order

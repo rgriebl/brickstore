@@ -666,7 +666,7 @@ FrameWork::FrameWork(QWidget *parent)
         {
             qWarning() << m.rowCount() << "items to sort (x" << PARALLEL_TEST_RUNS << "):";
 
-            for (auto t : { StaticPointerModel::StableSort, StaticPointerModel::QuickSort, StaticPointerModel::ParallelSort, StaticPointerModel::ParallelSort_Cxx17 }) {
+            for (auto t : { StaticPointerModel::StableSort, StaticPointerModel::QuickSort, StaticPointerModel::ParallelSort }) {
                 for (int c = 0; c < m.columnCount(); ++c) {
                     m.setSortingAlgorithm(t);
                     QByteArray what = "TYPE " + QByteArray::number(t) + " Col " + qPrintable(m.headerData(c, Qt::Horizontal, Qt::DisplayRole).toString()) + " ASC";
