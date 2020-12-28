@@ -15,12 +15,15 @@ UninstallDisplayIcon={app}\BrickStore.exe
 ; Since no icons will be created in "{group}", we do not need the wizard
 ; to ask for a Start Menu folder name:
 DisableProgramGroupPage=yes
+DisableReadyPage=yes
+DisableWelcomePage=yes
 SourceDir={#SOURCE_DIR}
 OutputBaseFilename=BrickStore Installer
 CloseApplications=yes
 RestartApplications=yes
 ChangesAssociations=yes
 
+WizardImageAlphaFormat=defined
 WizardSmallImageFile={#SourcePath}\..\assets\generated-misc\windows-installer.bmp
 
 [Languages]

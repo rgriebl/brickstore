@@ -116,7 +116,7 @@ echo "done"
 
 echo "Generating images for installers..."
 
-convert $i/brickstore.png -resize 96x96 $x/windows-installer.bmp
+convert $i/brickstore.png -resize 96x96 -define bmp3:alpha=true bmp3:$x/windows-installer.bmp
 
 echo "done"
 
