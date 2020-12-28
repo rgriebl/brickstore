@@ -35,7 +35,7 @@ jobs:
     - name: Install OpenSSL on Windows
       if: startsWith(matrix.config.os, 'windows')
       run: |
-        curl.exe --output openssl.msi "https://slproweb.com/download/Win32OpenSSL_Light-1_1_1g.msi"
+        curl.exe --output openssl.msi "https://slproweb.com/download/Win32OpenSSL_Light-1_1_1i.msi"
         msiexec /i openssl.msi /quiet /qn /norestart
       shell: cmd
 
@@ -52,6 +52,7 @@ jobs:
     - name: Install Qt from Ubuntu
       if: startsWith(matrix.config.os, 'ubuntu')
       run: |
+        sudo apt update
         sudo apt install debhelper qt5-default libqt5opengl5-dev qttools5-dev qtscript5-dev qtbase5-private-dev
       shell: bash
 
