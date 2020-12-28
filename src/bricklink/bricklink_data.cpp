@@ -477,6 +477,7 @@ BrickLink::InvItem &BrickLink::InvItem::operator = (const InvItem &copy)
     m_scondition     = copy.m_scondition;
     m_retain         = copy.m_retain;
     m_stockroom      = copy.m_stockroom;
+    m_xreserved      = copy.m_xreserved;
     m_alternate      = copy.m_alternate;
     m_alt_id         = copy.m_alt_id;
     m_cpart          = copy.m_cpart;

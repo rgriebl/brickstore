@@ -3,7 +3,8 @@ RELPWD = $$replace(PWD,$$_PRO_FILE_PWD_,.)
 INCLUDEPATH += $$RELPWD
 DEPENDPATH  += $$RELPWD
 
-QT *= core gui xml network script scripttools printsupport uitools # networkauth
+QT *= core gui widgets xml network script scripttools printsupport uitools \ # networkauth
+
 win32:QT *= winextras
 
 OTHER_FILES += \

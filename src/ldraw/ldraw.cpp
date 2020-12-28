@@ -34,7 +34,6 @@
 LDraw::Element *LDraw::Element::fromByteArray(const QByteArray &line, const QDir &dir)
 {
     Element *e = nullptr;
-    int t = -1;
 
     static const int element_count_lut[] = {
         -1,
@@ -48,7 +47,7 @@ LDraw::Element *LDraw::Element::fromByteArray(const QByteArray &line, const QDir
     QList<QByteArray> bal = line.simplified().split(' ');
 
     if (!bal.isEmpty()) {
-        t = bal[0].toInt();
+        int t = bal[0].toInt();
         bal.removeFirst();
 
         if (t >= 0 && t <= 5) {

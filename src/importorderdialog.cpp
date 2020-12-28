@@ -54,7 +54,7 @@ class OrderListModel : public QAbstractTableModel
 {
     Q_OBJECT
 public:
-    OrderListModel(QObject *parent)
+    explicit OrderListModel(QObject *parent)
         : QAbstractTableModel(parent)
     {
         MODELTEST_ATTACH(this)
@@ -142,7 +142,7 @@ public:
         } else if (role == Qt::TextAlignmentRole) {
             res = (col == 4) ? Qt::AlignRight : Qt::AlignLeft;
         }
-        else if (role == Qt::BackgroundColorRole) {
+        else if (role == Qt::BackgroundRole) {
             if (col == 0) {
                 QColor c = isReceived(order) ? Qt::green : Qt::blue;
                 c.setAlphaF(0.2);
@@ -273,10 +273,8 @@ public:
 
     void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override
     {
-        QStyleOptionViewItem myoption(option);
-
         if (option.state & QStyle::State_Selected) {
-            QVariant v = index.data(Qt::BackgroundColorRole);
+            QVariant v = index.data(Qt::BackgroundRole);
             QColor c = qvariant_cast<QColor> (v);
             if (v.isValid() && c.isValid()) {
                 QStyleOptionViewItem myoption(option);

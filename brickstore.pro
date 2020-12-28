@@ -173,6 +173,8 @@ unix {
   release:MOC_DIR     = $$OUT_PWD/.moc/release
   UI_DIR              = $$OUT_PWD/.uic
   RCC_DIR             = $$OUT_PWD/.rcc
+
+  QMAKE_CXXFLAGS *= -Wno-deprecated-declarations
 }
 
 

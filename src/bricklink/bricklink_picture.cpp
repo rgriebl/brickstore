@@ -28,7 +28,7 @@ namespace BrickLink {
 class PictureLoaderJob : public QRunnable
 {
 public:
-    PictureLoaderJob(Picture *pic)
+    explicit PictureLoaderJob(Picture *pic)
         : QRunnable(), m_pic(pic)
     { }
 

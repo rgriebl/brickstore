@@ -238,7 +238,7 @@ class DotCommaFilter : public QObject
 {
     Q_OBJECT
 public:
-    DotCommaFilter(QObject *parent)
+    explicit DotCommaFilter(QObject *parent)
         : QObject(parent)
     { }
 

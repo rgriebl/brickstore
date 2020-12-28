@@ -431,7 +431,7 @@ bool SelectItem::setCurrentItem(const BrickLink::Item *item, bool force_items_ca
             if (currentItemType() != itt)
                 setCurrentItemType(itt);
             if ((currentCategory() != cat) &&
-                    (force_items_category || currentCategory() != BrickLink::CategoryModel::AllCategories))
+                    (currentCategory() != BrickLink::CategoryModel::AllCategories))
                 setCurrentCategory(cat);
         }
         QModelIndex idx = d->itemModel->index(item);

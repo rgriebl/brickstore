@@ -87,7 +87,7 @@ QIcon::Mode DocumentDelegate::iconMode(QStyle::State state) const
 
 QIcon::State DocumentDelegate::iconState(QStyle::State state) const
 {
-    return state & QStyle::State_Open ? QIcon::On : QIcon::Off;
+    return (state & QStyle::State_Open) ? QIcon::On : QIcon::Off;
 }
 
 int DocumentDelegate::defaultItemHeight(const QWidget *w) const
@@ -130,7 +130,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
     bool noitem = !it->item();
 
     QPalette::ColorGroup cg = (option.state & QStyle::State_Enabled) ? QPalette::Normal : QPalette::Disabled;
-    QColor normalbg = option.palette.color(cg, option.features & QStyleOptionViewItem::Alternate ? QPalette::AlternateBase : QPalette::Base);
+    QColor normalbg = option.palette.color(cg, (option.features & QStyleOptionViewItem::Alternate) ? QPalette::AlternateBase : QPalette::Base);
     QColor bg = normalbg;
     QColor fg = option.palette.color(cg, QPalette::Text);
 
@@ -355,10 +355,11 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
                 pix = &noCacheFallbackPix;
         }
 
-        int w = qMin(pix->width(), option.rect.width());
-        int h = qMin(pix->height(), option.rect.height());
+        int pw = qMin(pix->width(), option.rect.width());
+        int ph = qMin(pix->height(), option.rect.height());
 
-        p->drawPixmap(option.rect.right() - w + 1, option.rect.bottom() - h + 1, *pix, pix->width() - w, pix->height() - h, w, h);
+        p->drawPixmap(option.rect.right() - pw + 1, option.rect.bottom() - ph + 1, *pix,
+                      pix->width() - pw, pix->height() - ph, pw, ph);
         p->setPen(tag.foreground);
         QFont oldfont = p->font();
         p->setFont(font);

@@ -48,7 +48,7 @@ static QString cleanWindowTitle(QWidget *window)
 class WindowMenu : public QMenu {
     Q_OBJECT
 public:
-    WindowMenu(Workspace *ws, bool shortcut = false, QWidget *parent = nullptr)
+    explicit WindowMenu(Workspace *ws, bool shortcut = false, QWidget *parent = nullptr)
         : QMenu(parent), m_ws(ws), m_shortcut(shortcut)
     {
         connect(this, &QMenu::aboutToShow,
@@ -106,7 +106,7 @@ class TabBarSide : public QWidget
 {
     Q_OBJECT
 public:
-    TabBarSide(QTabBar *tabbar, QWidget *parent = nullptr)
+    explicit TabBarSide(QTabBar *tabbar, QWidget *parent = nullptr)
         : QWidget(parent), m_tabbar(tabbar)
     { }
 
@@ -174,7 +174,7 @@ class TabBarSideButton : public QToolButton
     Q_OBJECT
 
 public:
-    TabBarSideButton(QTabBar *tabbar, QWidget *parent = nullptr)
+    explicit TabBarSideButton(QTabBar *tabbar, QWidget *parent = nullptr)
         : QToolButton(parent), m_tabbar(tabbar)
     {
         setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);

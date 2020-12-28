@@ -192,11 +192,11 @@ void ImportBLOrder::gotten()
             QRegExp rx3(R"(<B>Country:</B></FONT></TD>\s*<TD NOWRAP><FONT FACE="Tahoma, Arial" SIZE="2">(.+)</FONT></TD>)");
 
             rx1.setMinimal(true);
-            rx1.indexIn(s);
+            (void) rx1.indexIn(s);
             rx2.setMinimal(true);
-            rx2.indexIn(s);
+            (void) rx2.indexIn(s);
             rx3.setMinimal(true);
-            rx3.indexIn(s);
+            (void) rx3.indexIn(s);
 
             QString a = rx1.cap(1) + QLatin1Char('\n') + rx2.cap(1) + QLatin1Char('\n') + rx3.cap(1);
             a.replace(QLatin1String("<BR>"), QLatin1String("\n"));
@@ -391,8 +391,8 @@ void ImportBLCart::gotten()
                 QRegExp rx_names(QLatin1String("</TD><TD>(.+)</TD><TD VALIGN=\"TOP\" NOWRAP>"), Qt::CaseInsensitive);
                 QString str_cond(QLatin1String("<B>New</B>"));
 
-                rx_ids.indexIn(str);
-                rx_names.indexIn(str);
+                (void) rx_ids.indexIn(str);
+                (void) rx_names.indexIn(str);
 
                 const BrickLink::Item *item = nullptr;
                 const BrickLink::Color *col = nullptr;
@@ -451,7 +451,7 @@ void ImportBLCart::gotten()
                 }
 
                 if (item && col) {
-                    rx_qty_price.indexIn(str);
+                    (void) rx_qty_price.indexIn(str);
 
                     int qty = rx_qty_price.cap(1).toInt();
                     if (m_currencycode.isEmpty()) {

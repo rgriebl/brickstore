@@ -79,13 +79,13 @@ bool ChunkReader::startChunk()
         return false;
 
     if (!m_chunks.isEmpty()) {
-        const chunk_info &parent = m_chunks.top();
+        const read_chunk_info &parent = m_chunks.top();
 
         if (m_file->pos() >= (parent.startpos + parent.size))
             return false;
     }
 
-    chunk_info ci;
+    read_chunk_info ci;
 
     m_stream >> ci.id >> ci.version >> ci.size;
     if (m_stream.status() == QDataStream::Ok) {
@@ -101,7 +101,7 @@ bool ChunkReader::skipChunk()
     if (!m_file || m_chunks.isEmpty())
         return false;
 
-    const chunk_info &ci = m_chunks.top();
+    const read_chunk_info &ci = m_chunks.top();
 
     m_stream.skipRawData(int(ci.size));
     return endChunk();
@@ -112,7 +112,7 @@ bool ChunkReader::endChunk()
     if (!m_file || m_chunks.isEmpty())
         return false;
 
-    chunk_info ci = m_chunks.pop();
+    read_chunk_info ci = m_chunks.pop();
 
     qint64 endpos = m_file->pos();
     if (ci.startpos + ci.size != endpos) {
@@ -123,7 +123,7 @@ bool ChunkReader::endChunk()
     if (ci.size % 16)
         m_stream.skipRawData(16 - ci.size % 16);
 
-    chunk_info ciend;
+    read_chunk_info ciend;
     m_stream >> ciend.size >> ciend.version >> ciend.id;
     return (m_stream.status() == QDataStream::Ok) &&
            (ci.id == ciend.id) &&
@@ -196,7 +196,7 @@ bool ChunkWriter::startChunk(quint32 id, quint32 version)
 {
     m_stream << id << version << quint64(0);
 
-    chunk_info ci;
+    write_chunk_info ci;
     ci.id = id;
     ci.version = version;
     ci.startpos = m_file->pos();
@@ -210,7 +210,7 @@ bool ChunkWriter::endChunk()
     if (!m_file || m_chunks.isEmpty())
         return false;
 
-    chunk_info ci = m_chunks.pop();
+    write_chunk_info ci = m_chunks.pop();
     qint64 endpos = m_file->pos();
     qint64 len = endpos - ci.startpos;
     m_file->seek(ci.startpos - int(sizeof(qint64)));

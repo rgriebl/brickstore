@@ -185,6 +185,8 @@ Application::~Application()
     delete ReportManager::inst();
     delete Currency::inst();
     delete Config::inst();
+
+    delete qApp;
 }
 
 QStringList Application::externalResourceSearchPath(const QString &subdir) const

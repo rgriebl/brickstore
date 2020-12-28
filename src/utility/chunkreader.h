@@ -36,14 +36,14 @@ public:
     qint64 chunkSize() const;
 
 private:
-    struct chunk_info {
+    struct read_chunk_info {
         quint32 id;
         quint32 version;
         qint64 startpos;
         qint64 size;
     };
 
-    QStack<chunk_info> m_chunks;
+    QStack<read_chunk_info> m_chunks;
     QIODevice * m_file;
     QDataStream m_stream;
 };
@@ -59,13 +59,13 @@ public:
     bool endChunk();
 
 private:
-    struct chunk_info {
+    struct write_chunk_info {
         quint32 id;
         quint32 version;
         qint64 startpos;
     };
 
-    QStack<chunk_info> m_chunks;
+    QStack<write_chunk_info> m_chunks;
     QIODevice * m_file;
     QDataStream m_stream;
 };

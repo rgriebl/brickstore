@@ -109,7 +109,7 @@ private:
 class WindowProgress
 {
 public:
-    WindowProgress(QWidget *w, const QString &title = QString(), int total = 0)
+    explicit WindowProgress(QWidget *w, const QString &title = QString(), int total = 0)
         : m_w(w), m_reenabled(false)
     {
         auto *sa = qobject_cast<QScrollArea *>(w);
@@ -163,7 +163,7 @@ class TableView : public QTableView
 {
     Q_OBJECT
 public:
-    TableView(QWidget *parent)
+    explicit TableView(QWidget *parent)
         : QTableView(parent)
     { }
 

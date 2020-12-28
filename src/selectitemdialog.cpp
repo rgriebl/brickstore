@@ -49,12 +49,12 @@ const BrickLink::Item *SelectItemDialog::item() const
 
 void SelectItemDialog::checkItem(const BrickLink::Item *item, bool ok)
 {
-    bool b = w_si->hasExcludeWithoutInventoryFilter() ? item->hasInventory() : true;
+    bool b = item && (w_si->hasExcludeWithoutInventoryFilter() ? item->hasInventory() : true);
 
     QPushButton *p = w_buttons->button(QDialogButtonBox::Ok);
-    p->setEnabled(item && b);
+    p->setEnabled(b);
 
-    if (item && b && ok)
+    if (b && ok)
         p->animateClick();
 }
 

@@ -44,8 +44,8 @@ RebuildDatabase::RebuildDatabase(bool skipDownload)
 #if defined(Q_OS_WINDOWS)
     AllocConsole();
     SetConsoleTitleW(L"BrickStore - Rebuilding Database");
-    freopen("CONIN$", "r", stdin);
-    freopen("CONOUT$", "w", stdout);
+    (void) freopen("CONIN$", "r", stdin);
+    (void) freopen("CONOUT$", "w", stdout);
 #endif
 }
 

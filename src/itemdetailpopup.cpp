@@ -229,7 +229,8 @@ void ItemDetailPopup::setItem(const BrickLink::Item *item, const BrickLink::Colo
             redraw();
             m_stack->setCurrentWidget(m_blpic);
 #if !defined(QT_NO_OPENGL)
-            m_ldraw->setPartAndColor(nullptr, -1);
+            if (m_ldraw)
+                m_ldraw->setPartAndColor(nullptr, -1);
 #else
             Q_UNUSED(color)
 #endif
@@ -237,7 +238,8 @@ void ItemDetailPopup::setItem(const BrickLink::Item *item, const BrickLink::Colo
     } else {
         m_blpic->setText(QString());
 #if !defined(QT_NO_OPENGL)
-        m_ldraw->setPartAndColor(nullptr, -1);
+        if (m_ldraw)
+            m_ldraw->setPartAndColor(nullptr, -1);
 #endif
     }
 
@@ -249,9 +251,8 @@ void ItemDetailPopup::setItem(const BrickLink::Item *item, const BrickLink::Colo
 
 void ItemDetailPopup::gotUpdate(BrickLink::Picture *pic)
 {
-    if (pic == m_pic) {
+    if (pic == m_pic)
         redraw();
-    }
 }
 
 void ItemDetailPopup::redraw()

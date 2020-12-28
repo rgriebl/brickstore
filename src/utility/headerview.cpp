@@ -43,7 +43,7 @@ class SectionConfigDialog : public QDialog
     Q_OBJECT
 
 public:
-    SectionConfigDialog(HeaderView *header)
+    explicit SectionConfigDialog(HeaderView *header)
         : QDialog(header), m_header(header)
     {
         m_label = new QLabel(this);

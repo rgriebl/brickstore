@@ -99,10 +99,8 @@ QString UpdateDatabase::decompress(const QString &src, const QString &dst)
     static const int CHUNKSIZE_IN = 4096;
     static const int CHUNKSIZE_OUT = 512 * 1024;
 
-    char *buffer_in  = new char [CHUNKSIZE_IN];
-    char *buffer_out = new char [CHUNKSIZE_OUT];
-
     lzmadec_stream strm;
+
     strm.lzma_alloc = nullptr;
     strm.lzma_free = nullptr;
     strm.opaque = nullptr;
@@ -112,6 +110,8 @@ QString UpdateDatabase::decompress(const QString &src, const QString &dst)
     if (lzmadec_init(&strm) != LZMADEC_OK)
         return tr("Could not initialize the LZMA decompressor");
 
+    char *buffer_in  = new char [CHUNKSIZE_IN];
+    char *buffer_out = new char [CHUNKSIZE_OUT];
 
     QString loop_error;
 

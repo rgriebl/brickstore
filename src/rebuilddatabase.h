@@ -42,7 +42,7 @@ private:
     Transfer *m_trans;
     QString m_error;
     bool m_skip_download;
-    int m_downloads_in_progress;
-    int m_downloads_failed;
+    int m_downloads_in_progress = 0;
+    int m_downloads_failed = 0;
     QDateTime m_date;
 };

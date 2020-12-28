@@ -34,10 +34,9 @@ class ReportModel : public QAbstractListModel
 
 public:
     ReportModel()
+        : m_reports(ReportManager::inst()->reports())
     {
         MODELTEST_ATTACH(this)
-
-        m_reports = ReportManager::inst()->reports();
     }
 
 public slots:

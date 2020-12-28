@@ -324,7 +324,7 @@ Document *Document::createTemporary(const BrickLink::InvItemList &list)
 }
 
 Document::Document(int /*is temporary*/)
-    : m_currencycode(QLatin1String("USD"))
+    : m_currencycode(Config::inst()->defaultCurrencyCode())
     , m_uuid(QUuid::createUuid())
 {
     MODELTEST_ATTACH(this)
@@ -336,8 +336,6 @@ Document::Document(int /*is temporary*/)
 Document::Document()
     : Document(0)
 {
-    m_currencycode = Config::inst()->defaultCurrencyCode();
-
     m_undo = new UndoStack(this);
     connect(m_undo, &QUndoStack::cleanChanged,
             this, &Document::clean2Modified);
@@ -778,7 +776,7 @@ Document *Document::fileImportBrickLinkCart()
                                "or <b>Copy Shortcut</b> (Internet Explorer).<br /><br />"
                                "<em>Super-lots and custom items are <b>not</b> supported</em>."), url)) {
         QRegExp rx(QLatin1String("\\?h=([0-9]+)&b=([-0-9]+)"));
-        rx.indexIn(url);
+        (void) rx.indexIn(url);
         int shopid = rx.cap(1).toInt();
         int cartid = rx.cap(2).toInt();
 
@@ -900,12 +898,12 @@ Document *Document::fileLoadFrom(const QString &name, const char *type, bool imp
             if (!import_only)
                 Config::inst()->addToRecentFiles(name);
         }
+
+        qDeleteAll(*result.items);
+        delete result.items;
     } else {
         MessageBox::warning(FrameWork::inst(), tr("Could not parse the XML data in file %1.").arg(CMB_BOLD(name)));
     }
-
-    qDeleteAll(*result.items);
-    delete result.items;
 
     return doc;
 }

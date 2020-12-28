@@ -71,12 +71,12 @@ enum ProgressItem {
 };
 
 enum {
-    NeedLotId = 1,
-    NeedInventory = 2,
-    NeedSubCondition = 4,
-    NeedNetwork = 8,
-    NeedModification = 16,
-    NeedDocument = 32
+    NeedLotId = 0x01,
+    NeedInventory = 0x02,
+    NeedSubCondition = 0x04,
+    NeedNetwork = 0x08,
+    NeedModification = 0x10,
+    NeedDocument = 0x20
 };
 
 
@@ -139,7 +139,7 @@ class RecentMenu : public QMenu
 {
     Q_OBJECT
 public:
-    RecentMenu(QWidget *parent)
+    explicit RecentMenu(QWidget *parent)
         : QMenu(parent)
     {
         connect(this, &QMenu::aboutToShow, this, [this]() {
@@ -170,7 +170,7 @@ signals:
 class FancyDockTitleBar : public QLabel
 {
 public:
-    FancyDockTitleBar(QDockWidget *parent)
+    explicit FancyDockTitleBar(QDockWidget *parent)
         : QLabel(parent)
         , m_dock(parent)
     {
@@ -1136,8 +1136,8 @@ void FrameWork::createActions()
     QActionGroup *g;
     QMenu *m;
 
-    a = newQAction(this, "file_new", 0, false, this, &FrameWork::fileNew);
-    a = newQAction(this, "file_open", 0, false, this, &FrameWork::fileOpen);
+    (void) newQAction(this, "file_new", 0, false, this, &FrameWork::fileNew);
+    (void) newQAction(this, "file_open", 0, false, this, &FrameWork::fileOpen);
 
     auto rm = new RecentMenu(this);
     rm->menuAction()->setObjectName("file_open_recent");
@@ -1294,12 +1294,12 @@ void FrameWork::createActions()
     // set all icons that have a pixmap corresponding to name()
 
     QList<QAction *> alist = findChildren<QAction *>();
-    foreach (QAction *a, alist) {
-        if (!a->objectName().isEmpty()) {
-            QString path = QLatin1String(":/images/") + a->objectName() + QLatin1String(".png");
+    foreach (QAction *act, alist) {
+        if (!act->objectName().isEmpty()) {
+            QString path = QLatin1String(":/images/") + act->objectName() + QLatin1String(".png");
 
             if (QFile::exists(path))
-                a->setIcon(QIcon(path));
+                act->setIcon(QIcon(path));
         }
     }
 }
@@ -1589,7 +1589,7 @@ void FrameWork::updateActions(const Document::ItemList &selection)
         if (flags & NeedDocument) {
             b = b && m_current_window;
 
-            quint8 minSelection = flags >> 24;
+            quint8 minSelection = (flags >> 24) & 0xff;
             quint8 maxSelection = (flags >> 16) & 0xff;
 
             if (minSelection)

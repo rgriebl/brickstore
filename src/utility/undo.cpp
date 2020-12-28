@@ -145,7 +145,7 @@ class UndoActionListWidget : public QListWidget
 {
     Q_OBJECT
 public:
-    UndoActionListWidget(QWidget *parent)
+    explicit UndoActionListWidget(QWidget *parent)
         : QListWidget(parent)
     { }
 
@@ -184,10 +184,10 @@ public:
         const QFontMetrics &fm = fontMetrics();
 
         for (int i = 0; i < 4; i++) {
-            QString s = UndoAction::tr(m_strings[i]);
+            QString str = UndoAction::tr(m_strings[i]);
             if (!(i & 1))
-                s = s.arg(1000);
-            int ws = fm.horizontalAdvance(s);
+                str = str.arg(1000);
+            int ws = fm.horizontalAdvance(str);
             w = qMax(w, ws);
         }
         s.setWidth(w + 2*fw + 8);
