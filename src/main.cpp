@@ -15,6 +15,7 @@
 #include <cstring>
 
 #include <QMessageBox>
+#include <QThreadPool>
 
 #include "application.h"
 
@@ -65,7 +66,14 @@ int main(int argc, char **argv)
     }
     else {
         Application a(rebuild_db, skip_download, argc, argv);
-        return qApp->exec();
+        auto ret = qApp->exec();
+
+        // we are using QThreadStorage in thread-pool threads, so we have to make sure they are
+        // all joined before destroying the static QThreadStorage objects.
+        QThreadPool::globalInstance()->clear();
+        QThreadPool::globalInstance()->waitForDone();
+
+        return ret;
     }
 }
 
