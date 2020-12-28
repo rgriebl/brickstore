@@ -180,6 +180,7 @@ public:
                     this, &QLabel::setText);
         }
         setAutoFillBackground(true);
+        setIndent(style()->pixelMetric(QStyle::PM_DockWidgetTitleBarButtonMargin));
         //setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
 
         QPalette p = palette();
