@@ -209,8 +209,13 @@ template <> Item *TextImport::parse<Item> (uint count, const char **strs)
         qWarning() << "Not all categories could be resolved for item" << item->m_id
                    << "\n   " << allcats;
     } else if (*item->m_categories.constBegin() != maincat) {
-        qWarning() << "The main category did not match for item" << item->m_id
-                   << "\n   id=" << maincat->id() << "name=" << (*item->m_categories.constBegin())->name();
+        if (!maincat) {
+            qWarning() << "The main category did not resolve for item" << item->m_id
+                       << "\n   id=" << strs[0];
+        } else {
+            qWarning() << "The main category did not match for item" << item->m_id
+                       << "\n   id=" << maincat->id() << "name=" << (*item->m_categories.constBegin())->name();
+        }
     }
 
     uint parsedfields = 4;
