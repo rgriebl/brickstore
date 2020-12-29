@@ -82,7 +82,7 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
 
     auto setImageSize = [this](int v) {
         w_item_image_size_percent->setText(QString("%1 %").arg(v * 10));
-        int s = 80 * v / 10;
+        int s = BrickLink::core()->standardPictureSize().height() * v / 10 / BrickLink::core()->itemImageScaleFactor();
         QImage img(":/images/brickstore_icon.png");
         img = img.scaled(s, s);
         w_item_image_example->setPixmap(QPixmap::fromImage(img));

@@ -45,6 +45,7 @@ PictureWidget::PictureWidget(QWidget *parent)
         QSize s = BrickLink::core()->standardPictureSize();
         d->m_default_size = qMax(s.width(), s.height());
         updateGeometry();
+        redraw();
     };
     setDefaultSize();
     connect(BrickLink::core(), &BrickLink::Core::itemImageScaleFactorChanged,
@@ -184,6 +185,13 @@ void PictureWidget::gotUpdate(BrickLink::Picture *pic)
 
 void PictureWidget::redraw()
 {
+    if (!d->m_tlabel)
+        return;
+
+    QRect cr = contentsRect();
+    d->m_tlabel->setGeometry(cr.left() + 4, cr.top() + 4 + d->m_default_size + 4,
+                             cr.width() - 2*4, cr.height() - (4 + d->m_default_size + 4 + 4));
+
     if (d->m_pic && (d->m_pic->updateStatus() == BrickLink::UpdateStatus::Updating)) {
         d->m_tlabel->setHtml(QLatin1String("<center><i>") +
                                            tr("Please wait... updating") +
@@ -224,10 +232,7 @@ void PictureWidget::paintEvent(QPaintEvent *e)
 void PictureWidget::resizeEvent(QResizeEvent *e)
 {
     QFrame::resizeEvent(e);
-
-    QRect cr = contentsRect();
-    d->m_tlabel->setGeometry(cr.left() + 4, cr.top() + 4 + d->m_default_size + 4,
-                             cr.width() - 2*4, cr.height() - (4 + d->m_default_size + 4 + 4));
+    redraw();
 }
 
 void PictureWidget::changeEvent(QEvent *e)

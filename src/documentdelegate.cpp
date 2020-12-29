@@ -92,7 +92,7 @@ QIcon::State DocumentDelegate::iconState(QStyle::State state) const
 
 int DocumentDelegate::defaultItemHeight(const QWidget *w) const
 {
-    static QSize picsize = BrickLink::core()->itemType('P')->pictureSize();
+    QSize picsize = BrickLink::core()->standardPictureSize();
     QFontMetrics fm(w ? w->font() : QApplication::font("QTableView"));
 
     return qMax(2 + fm.height(), picsize.height());
@@ -103,11 +103,10 @@ QSize DocumentDelegate::sizeHint(const QStyleOptionViewItem &option1, const QMod
     if (!idx.isValid())
         return {};
 
-    static QSize picsize = BrickLink::core()->itemType('P')->pictureSize();
     int w = -1;
 
     if (idx.column() == Document::Picture)
-        w = 4 + picsize.width();
+        w = 4 + BrickLink::core()->standardPictureSize().width();
     else
         w = QItemDelegate::sizeHint(option1, idx).width();
 

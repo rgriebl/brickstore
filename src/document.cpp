@@ -1584,7 +1584,7 @@ int Document::headerDataForTextAlignmentRole(Field f) const
 int Document::headerDataForDefaultWidthRole(Field f) const
 {
     int width = 0;
-    static QSize picsize = BrickLink::core()->itemType('P')->pictureSize();
+    QSize picsize = BrickLink::core()->standardPictureSize();
 
     switch (f) {
     case Status      : width = 6; break;

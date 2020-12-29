@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>927</width>
+    <width>682</width>
     <height>512</height>
    </rect>
   </property>
@@ -40,14 +40,14 @@
        <item row="0" column="1">
         <widget class="QComboBox" name="w_language"/>
        </item>
-       <item row="2" column="0">
+       <item row="1" column="0">
         <widget class="QLabel" name="label_9">
          <property name="text">
           <string>Weights</string>
          </property>
         </widget>
        </item>
-       <item row="2" column="1">
+       <item row="1" column="1">
         <widget class="QWidget" name="widget" native="true">
          <property name="minimumSize">
           <size>
@@ -101,7 +101,14 @@
          </layout>
         </widget>
        </item>
-       <item row="5" column="1">
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_27">
+         <property name="text">
+          <string>Default currency</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
         <widget class="QWidget" name="widget_2" native="true">
          <layout class="QHBoxLayout" name="horizontalLayout">
           <property name="leftMargin">
@@ -159,55 +166,35 @@
          </layout>
         </widget>
        </item>
-       <item row="6" column="0">
+       <item row="3" column="0">
         <widget class="QLabel" name="label_28">
          <property name="text">
           <string>Interface</string>
          </property>
         </widget>
        </item>
-       <item row="6" column="1">
+       <item row="3" column="1">
         <widget class="QCheckBox" name="w_openbrowser">
          <property name="text">
           <string>Open a Web-Browser window when exporting to the clipboard</string>
          </property>
         </widget>
        </item>
-       <item row="7" column="1">
+       <item row="4" column="1">
         <widget class="QCheckBox" name="w_closeempty">
          <property name="text">
           <string>Close empty documents without confirmation</string>
          </property>
         </widget>
        </item>
-       <item row="8" column="0">
+       <item row="5" column="0">
         <widget class="QLabel" name="label_30">
          <property name="text">
           <string>Document Directory</string>
          </property>
         </widget>
        </item>
-       <item row="9" column="1">
-        <spacer name="verticalSpacer_4">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="5" column="0">
-        <widget class="QLabel" name="label_27">
-         <property name="text">
-          <string>Default currency</string>
-         </property>
-        </widget>
-       </item>
-       <item row="8" column="1">
+       <item row="5" column="1">
         <widget class="QComboBox" name="w_docdir">
          <property name="sizeAdjustPolicy">
           <enum>QComboBox::AdjustToContents</enum>
@@ -269,7 +256,7 @@
           <widget class="QSlider" name="w_font_size">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-             <horstretch>5</horstretch>
+             <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
@@ -341,29 +328,7 @@
          </item>
         </layout>
        </item>
-       <item row="2" column="1">
-        <widget class="QLabel" name="w_font_example">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Sunken</enum>
-         </property>
-         <property name="text">
-          <string>The quick brown fox jumps over the lazy dog.</string>
-         </property>
-         <property name="wordWrap">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0">
+       <item row="2" column="0">
         <widget class="QLabel" name="label_18">
          <property name="text">
           <string>Item image size</string>
@@ -373,7 +338,7 @@
          </property>
         </widget>
        </item>
-       <item row="3" column="1">
+       <item row="2" column="1">
         <layout class="QGridLayout" name="gridLayout_2">
          <property name="horizontalSpacing">
           <number>11</number>
@@ -385,7 +350,7 @@
           <widget class="QSlider" name="w_item_image_size">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-             <horstretch>5</horstretch>
+             <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
@@ -457,7 +422,63 @@
          </item>
         </layout>
        </item>
-       <item row="5" column="1">
+       <item row="3" column="1">
+        <widget class="QFrame" name="frame">
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="QLabel" name="w_item_image_example">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>30</width>
+              <height>120</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>120</height>
+             </size>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="scaledContents">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="w_font_example">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>The quick brown fox jumps over the lazy dog.</string>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="4" column="1">
         <spacer name="verticalSpacer_6">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -472,28 +493,6 @@
           </size>
          </property>
         </spacer>
-       </item>
-       <item row="4" column="1">
-        <widget class="QLabel" name="w_item_image_example">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Sunken</enum>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="scaledContents">
-          <bool>false</bool>
-         </property>
-        </widget>
        </item>
       </layout>
      </widget>
