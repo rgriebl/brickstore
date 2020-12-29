@@ -28,6 +28,7 @@
 #include "config.h"
 #include "humanreadabletimedelta.h"
 #include "framework.h"
+#include "version.h"
 
 // Based on QCommandLinkButton, but this one scales with font size, supports richtext and can be
 // associated with a QAction
@@ -374,7 +375,9 @@ void WelcomeWidget::languageChange()
     m_import_frame->setTitle(tr("Import items"));
     m_update_frame->setTitle(tr("Updates"));
 
-    m_bs_update->setDescription(tr("Current version: %1").arg(QCoreApplication::applicationVersion()));
+    m_bs_update->setDescription(tr("Current version: %1 (build: %2)")
+                                .arg(BRICKSTORE_VERSION)
+                                .arg(*BRICKSTORE_BUILD_NUMBER ? BRICKSTORE_BUILD_NUMBER : "custom"));
     updateLastDBUpdateDescription();
 
     if (m_no_recent)
