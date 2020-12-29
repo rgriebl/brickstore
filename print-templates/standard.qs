@@ -29,7 +29,7 @@ function print()
 
     var pagestat = new Array();
 
-    debugger
+    //debugger
 
     while (items_left || !rfooter) {
         page = Job.addPage();

@@ -42,6 +42,11 @@ Report::Report()
 
 QString Report::name() const
 {
+    return d->m_name;
+}
+
+QString Report::label() const
+{
     return d->m_label.isEmpty() ? d->m_name : d->m_label;
 }
 
@@ -242,9 +247,10 @@ void Report::print(QPaintDevice *pd, const Document *doc, const Document::ItemLi
 
     if (!d->m_engine->hasUncaughtException()) {
         if (!job->isAborted()) {
-            job->dump();
+            //job->dump();
 
-            job->print(0, job->pageCount() - 1);
+            if (!job->print(0, job->pageCount() - 1))
+                MessageBox::warning(FrameWork::inst(), tr("Failed to start the print job."));
         }
     } else {
         QString msg = tr("Print script aborted with error:") +
@@ -260,13 +266,10 @@ void Report::print(QPaintDevice *pd, const Document *doc, const Document::ItemLi
 
 
 ReportManager::ReportManager()
-{
-    m_printer = nullptr;
-}
+{ }
 
 ReportManager::~ReportManager()
 {
-    delete m_printer;
     qDeleteAll(m_reports);
     s_inst = nullptr;
 }
@@ -308,14 +311,6 @@ bool ReportManager::reload()
 QList<Report *> ReportManager::reports() const
 {
     return m_reports;
-}
-
-QPrinter *ReportManager::printer() const
-{
-    if (!m_printer)
-        m_printer = new QPrinter(QPrinter::HighResolution);
-
-    return m_printer;
 }
 
 #include "moc_report.cpp"

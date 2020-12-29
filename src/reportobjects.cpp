@@ -196,9 +196,9 @@ ReportPage::ReportPage(const ReportJob *job)
 {
     setObjectName(QString("Page%1").arg(job->pageCount() + 1));
 
-    m_attr.m_font = new Font(QFont("Arial", 10));
-    m_attr.m_color = new Color(QColor(Qt::black));
-    m_attr.m_bgcolor = new Color(QColor(Qt::white));
+    m_attr.m_font = QFont("Arial", 10);
+    m_attr.m_color = QColor(Qt::black);
+    m_attr.m_bgcolor = QColor(Qt::white);
     m_attr.m_linewidth = 0.1;
     m_attr.m_linestyle = SolidLine;
 }
@@ -222,7 +222,7 @@ void ReportPage::dump()
         case Cmd::Attributes: {
             auto *ac = static_cast<AttrCmd *>(m_cmds.at(i));
 
-            qDebug(" [%d] Attributes (Font: %s | Color: %s | BgColor: %s | Line: %f | LineStyle: %d", i, qPrintable(ac->m_font->toQFont().toString()), qPrintable(ac->m_color->toQColor().name()), qPrintable(ac->m_bgcolor->toQColor().name()), ac->m_linewidth, ac->m_linestyle);
+            qDebug(" [%d] Attributes (Font: %s | Color: %s | BgColor: %s | Line: %f | LineStyle: %d", i, qPrintable(ac->m_font.toString()), qPrintable(ac->m_color.name()), qPrintable(ac->m_bgcolor.name()), ac->m_linewidth, ac->m_linestyle);
             break;
         }
         case Cmd::Text:  {
@@ -271,15 +271,15 @@ void ReportPage::print(QPainter *p, double scale [2]) const
 
             // QFont f = ac->m_font;
             // f.setPointSizeFloat ( f.pointSizeFloat ( ) * scale [1] );
-            p->setFont(ac->m_font->toQFont());
+            p->setFont(ac->m_font);
 
-            if (ac->m_color->toQColor().isValid())
-                p->setPen(QPen(ac->m_color->toQColor(), int(ac->m_linewidth * (scale [0] + scale [1]) / 2.), Qt::PenStyle(ac->m_linestyle)));
+            if (ac->m_color.isValid())
+                p->setPen(QPen(ac->m_color, int(ac->m_linewidth * (scale [0] + scale [1]) / 2.), Qt::PenStyle(ac->m_linestyle)));
             else
                 p->setPen(QPen(Qt::NoPen));
 
-            if (ac->m_bgcolor->toQColor().isValid())
-                p->setBrush(QBrush(ac->m_bgcolor->toQColor()));
+            if (ac->m_bgcolor.isValid())
+                p->setBrush(QBrush(ac->m_bgcolor));
             else
                 p->setBrush(QBrush(Qt::NoBrush));
         }
@@ -340,17 +340,17 @@ void ReportPage::print(QPainter *p, double scale [2]) const
 
 Font *ReportPage::font() const
 {
-    return m_attr.m_font;
+    return new Font(m_attr.m_font);
 }
 
 Color *ReportPage::color() const
 {
-    return m_attr.m_color;
+    return new Color(m_attr.m_color);
 }
 
 Color *ReportPage::bgColor() const
 {
-    return m_attr.m_bgcolor;
+    return new Color(m_attr.m_bgcolor);
 }
 
 int ReportPage::lineStyle() const
@@ -373,19 +373,19 @@ void ReportPage::attr_cmd()
 
 void ReportPage::setFont(Font *font)
 {
-    m_attr.m_font->fromQFont(font->toQFont());
+    m_attr.m_font = font->toQFont();
     attr_cmd();
 }
 
 void ReportPage::setColor(Color *color)
 {
-    m_attr.m_color->fromQColor(color->toQColor());
+    m_attr.m_color = color->toQColor();
     attr_cmd();
 }
 
 void ReportPage::setBgColor(Color *color)
 {
-    m_attr.m_bgcolor->fromQColor(color->toQColor());
+    m_attr.m_bgcolor = color->toQColor();
     attr_cmd();
 }
 
@@ -404,7 +404,7 @@ void ReportPage::setLineWidth(double linewidth)
 
 Size ReportPage::textSize(const QString &text)
 {
-    QFontMetrics fm(m_attr.m_font->toQFont());
+    QFontMetrics fm(m_attr.m_font);
     QPaintDevice *pd = m_job->paintDevice();
     QSize s = fm.size(0, text);
     return QSizeF(s.width() * pd->widthMM() / pd->width(),
@@ -551,7 +551,7 @@ void Font::fromQFont(const QFont &qf)
 
 QScriptValue Font::toScriptValue(QScriptEngine *engine, Font * const &in)
 {
-    return engine->newQObject(in);
+    return engine->newQObject(in, QScriptEngine::ScriptOwnership);
 }
 
 void Font::fromScriptValue(const QScriptValue &object, Font *&out)
@@ -562,7 +562,7 @@ void Font::fromScriptValue(const QScriptValue &object, Font *&out)
 QScriptValue Font::createScriptValue(QScriptContext *, QScriptEngine *engine)
 {
     Font *f = new Font();
-    return engine->newQObject(f);
+    return engine->newQObject(f, QScriptEngine::ScriptOwnership);
 }
 
 QString Font::family() const
@@ -704,7 +704,7 @@ void Color::fromQColor(const QColor &qc)
 
 QScriptValue Color::toScriptValue(QScriptEngine *engine, Color * const &in)
 {
-    return engine->newQObject(in);
+    return engine->newQObject(in, QScriptEngine::ScriptOwnership);
 }
 
 void Color::fromScriptValue(const QScriptValue &object, Color *&out)
@@ -712,10 +712,18 @@ void Color::fromScriptValue(const QScriptValue &object, Color *&out)
     out = qobject_cast<Color *>(object.toQObject());
 }
 
-QScriptValue Color::createScriptValue(QScriptContext *, QScriptEngine *engine)
+QScriptValue Color::createScriptValue(QScriptContext *context, QScriptEngine *engine)
 {
     auto *c = new Color();
-    return engine->newQObject(c); // ###ScriptOwnership ???
+    switch (context->argumentCount()) {
+    case 1:
+        c->setName(context->argument(0).toString());
+        break;
+    case 3:
+        c->setRgb(context->argument(0).toInt32(), context->argument(1).toInt32(), context->argument(2).toInt32());
+        break;
+    }
+    return engine->newQObject(c, QScriptEngine::ScriptOwnership);
 }
 
 void Color::setRgb(uint value)

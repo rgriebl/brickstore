@@ -49,7 +49,7 @@ public slots:
     }
 
 public:
-    QModelIndex index(int row, int column, const QModelIndex &parent) const override;
+    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
 
     const Report *report(const QModelIndex &index) const
     {
@@ -61,7 +61,7 @@ public:
         return report ? createIndex(m_reports.indexOf(report), 0, report) : QModelIndex();
     }
 
-    int rowCount(const QModelIndex &parent) const override;\
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
     QVariant headerData(int section, Qt::Orientation orient, int role) const override;
 
@@ -89,9 +89,8 @@ QVariant ReportModel::data(const QModelIndex &index, int role) const
     QVariant res;
     const Report *r = report(index);
 
-    if (role == Qt:: DisplayRole) {
-        res = r->name();
-    }
+    if (role == Qt::DisplayRole)
+        res = r->label();
 
     return res;
 }
@@ -121,6 +120,20 @@ SelectReportDialog::SelectReportDialog(QWidget *parent)
             model, &ReportModel::reload);
 
     w_buttons->button(QDialogButtonBox::Ok)->setEnabled(false);
+
+    int selectionIndex = -1;
+    for (int i = 0; i < model->rowCount(); ++i) {
+        auto report = model->report(model->index(i, 0));
+        if (report && report->name() == "standard") {
+            selectionIndex = i;
+            break;
+        }
+    }
+    if (selectionIndex < 0 && model->rowCount() == 1)
+        selectionIndex = 0;
+    if (selectionIndex >= 0)
+        w_list->selectionModel()->select(model->index(selectionIndex, 0), QItemSelectionModel::SelectCurrent);
+    w_list->setFocus();
 }
 
 void SelectReportDialog::reportChanged()

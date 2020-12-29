@@ -47,6 +47,8 @@ public:
     Q_INVOKABLE QWidget *loadUiFile(const QString &fileName);
 };
 
+Q_DECLARE_METATYPE(ReportUtility *)
+
 
 class ReportMoney : public QObject, public QScriptable
 {
@@ -67,6 +69,9 @@ public:
     Q_INVOKABLE QString toString(double d, bool with_currency_symbol = false, int precision = 3);
     Q_INVOKABLE QString toLocalString(double d, bool with_currency_symbol = false, int precision = 3);
 };
+
+Q_DECLARE_METATYPE(ReportMoney *)
+
 
 class Size : public QSizeF
 {
@@ -128,6 +133,9 @@ private:
     bool m_aborted = false;
     double m_scaling = 1.;
 };
+
+Q_DECLARE_METATYPE(ReportJob *)
+
 
 class Font : public QObject
 {
@@ -238,7 +246,8 @@ private:
 
 Q_DECLARE_METATYPE(Color *)
 
-class ReportPage : public QObject
+
+class ReportPage : public QObject, public QScriptable
 {
     Q_OBJECT
     Q_OVERRIDE(QString objectName       SCRIPTABLE false)
@@ -267,7 +276,10 @@ public:
         AlignTop      = Qt::AlignTop,
         AlignVCenter  = Qt::AlignVCenter,
         AlignBottom   = Qt::AlignBottom,
-        AlignCenter   = Qt::AlignCenter
+        AlignCenter   = Qt::AlignCenter,
+        TextDontClip  = Qt::TextDontClip,
+        TextWordWrap  = Qt::TextWordWrap,
+        TextWrapAnywhere = Qt::TextWrapAnywhere
     };
     Q_ENUM(LineStyle)
     Q_DECLARE_FLAGS(Alignment, AlignmentFlag)
@@ -319,9 +331,9 @@ private:
     };
 
     struct AttrCmd : public Cmd {
-        Font  * m_font;
-        Color * m_color;
-        Color * m_bgcolor;
+        QFont   m_font;
+        QColor  m_color;
+        QColor  m_bgcolor;
         int     m_linestyle;
         double  m_linewidth;
     };
@@ -339,3 +351,5 @@ private:
     const ReportJob *m_job;
     AttrCmd m_attr;
 };
+
+Q_DECLARE_METATYPE(ReportPage *)

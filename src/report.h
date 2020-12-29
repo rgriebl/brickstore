@@ -32,6 +32,7 @@ public:
     static Report *load(const QString &file);
 
     QString name() const;
+    QString label() const;
 
     void print(QPaintDevice *pd, const Document *doc, const Document::ItemList &items) const;
 
@@ -54,15 +55,11 @@ public:
 
     bool reload();
 
-    QPrinter *printer() const;
-
     QList<Report *> reports() const;
 
 private:
     Q_DISABLE_COPY(ReportManager)
 
     QList<Report *> m_reports;
-
-    mutable QPrinter *m_printer; // mutable for delayed initialization
 };
 

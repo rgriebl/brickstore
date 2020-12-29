@@ -1613,27 +1613,35 @@ void Window::print(bool as_pdf)
         }
     }
 
-    QPrinter *prt = ReportManager::inst()->printer();
-
-    if (!prt )
-        return;
-
     QString doctitle = m_doc->title();
     if (doctitle == m_doc->fileName())
         doctitle = QFileInfo(doctitle).baseName();
 
+    QPrinter prt(QPrinter::HighResolution);
+
     if (as_pdf) {
         QString pdfname = doctitle + QLatin1String(".pdf");
+
+        QDir d(Config::inst()->documentDir());
+        if (d.exists())
+            pdfname = d.filePath(pdfname);
+
         pdfname = QFileDialog::getSaveFileName(FrameWork::inst(), tr("Save PDF as"), pdfname, tr("PDF Documents (*.pdf)"));
 
         if (pdfname.isEmpty())
             return;
 
-        prt->setOutputFileName(pdfname);
-        prt->setOutputFormat(QPrinter::PdfFormat);
+        // check if the file is actually writable - otherwise QPainter::begin() will fail
+        if (QFile::exists(pdfname) && !QFile(pdfname).open(QFile::ReadWrite)) {
+            MessageBox::warning(this, tr("The PDF document already exists and is not writable."), MessageBox::Ok);
+            return;
+        }
+
+        prt.setOutputFileName(pdfname);
+        prt.setOutputFormat(QPrinter::PdfFormat);
     }
     else {
-        QPrintDialog pd(prt, FrameWork::inst());
+        QPrintDialog pd(&prt, FrameWork::inst());
 
         pd.addEnabledOption(QAbstractPrintDialog::PrintToFile);
         pd.addEnabledOption(QAbstractPrintDialog::PrintCollateCopies);
@@ -1648,8 +1656,8 @@ void Window::print(bool as_pdf)
             return;
     }
 
-    prt->setDocName(doctitle);
-    prt->setFullPage(true);
+    prt.setDocName(doctitle);
+    prt.setFullPage(true);
 
     SelectReportDialog d(this);
 
@@ -1661,7 +1669,7 @@ void Window::print(bool as_pdf)
     if (!rep)
         return;
 
-    rep->print(prt, m_doc, m_view->sortItemList(prt->printRange() == QPrinter::Selection ? selection() : m_doc->items()));
+    rep->print(&prt, m_doc, m_view->sortItemList(prt.printRange() == QPrinter::Selection ? selection() : m_doc->items()));
 }
 
 void Window::on_file_save_triggered()
