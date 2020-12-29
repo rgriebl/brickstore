@@ -616,7 +616,7 @@ void FrameWork::translateActions()
         { "edit_cut",                       tr("Cut"),                                QKeySequence::Cut },
         { "edit_copy",                      tr("Copy"),                               QKeySequence::Copy },
         { "edit_paste",                     tr("Paste"),                              QKeySequence::Paste },
-        { "edit_delete",                    tr("Delete"),                             onMac ? tr("Backspace", "Edit|Delete (Mac)") : tr("Delete", "Edit|Delete (Win,Unix)") },
+        { "edit_delete",                    tr("Delete"),                             onMac ? QKeySequence::Backspace : QKeySequence::Delete },
         { "edit_additems",                  tr("Add Items..."),                       tr("Insert", "Edit|AddItems") },
         { "edit_subtractitems",             tr("Subtract Items..."),                  },
         { "edit_mergeitems",                tr("Consolidate Items..."),               },

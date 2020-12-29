@@ -85,6 +85,15 @@ Application::Application(bool rebuild_db_only, bool skip_download, int &_argc, c
     QCoreApplication::setApplicationName(QLatin1String(BRICKSTORE_NAME));
     QCoreApplication::setApplicationVersion(QLatin1String(BRICKSTORE_VERSION));
 
+    QCoreApplication::setAttribute(Qt::AA_DisableWindowContextHelpButton);
+
+#if !defined(Q_OS_WINDOWS) // HighDPI work fine, but only without this setting
+    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+#  if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+    QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
+#  endif
+#endif
+
     if (rebuild_db_only) {
         new QCoreApplication(_argc, _argv);
     } else {
