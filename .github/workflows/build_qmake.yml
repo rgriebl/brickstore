@@ -6,6 +6,8 @@ jobs:
   build:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
+    env:
+      BUILD_NUMBER: ${{ github.run_number }}
     strategy:
       fail-fast: false
       matrix:
@@ -14,7 +16,7 @@ jobs:
             name: "Windows 32bit",
             artifact: "Windows-x86.exe",
             os: windows-latest,
-            qt_version: '5.12.9',
+            qt_version: '5.15.2',
             qt_arch: 'win32_msvc2017',
             environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars32.bat"
           }
@@ -27,7 +29,7 @@ jobs:
             name: "macOS 64bit",
             artifact: "macOS.dmg",
             os: macos-latest,
-            qt_version: '5.12.9',
+            qt_version: '5.15.2',
             qt_arch: ''
           }
 

@@ -90,12 +90,12 @@ QString Config::scramble(const QString &str)
     return result;
 }
 
-void Config::upgrade(int vmajor, int vminor, int vrev)
+void Config::upgrade(int vmajor, int vminor)
 {
     QStringList sl;
 
     //int cfgver = value("General/ConfigVersion", 0).toInt();
-    setValue("General/ConfigVersion", mkver(vmajor, vminor, vrev));
+    setValue("General/ConfigVersion", mkver(vmajor, vminor, 0));
 
     auto copyOldConfig = [this](const char *org, const char *app) -> bool {
         static const std::vector<const char *> ignore = {

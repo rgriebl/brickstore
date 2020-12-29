@@ -146,7 +146,7 @@ Application::Application(bool rebuild_db_only, bool skip_download, int &_argc, c
 
 
     // initialize config & resource
-    (void) Config::inst()->upgrade(BRICKSTORE_MAJOR, BRICKSTORE_MINOR, BRICKSTORE_PATCH);
+    (void) Config::inst()->upgrade(BRICKSTORE_MAJOR, BRICKSTORE_MINOR);
     (void) Currency::inst();
     (void) ReportManager::inst();
 
@@ -449,7 +449,8 @@ void Application::about()
     page2_link = page2_link.arg(tr("Legal Info"), tr("System Info"));
 
     QString copyright = tr("Copyright &copy; %1").arg(BRICKSTORE_COPYRIGHT);
-    QString version   = tr("Version %1").arg(BRICKSTORE_VERSION);
+    QString version   = tr("Version %1 (build: %2)").arg(BRICKSTORE_VERSION)
+            .arg(*BRICKSTORE_BUILD_NUMBER ? BRICKSTORE_BUILD_NUMBER : "custom");
     QString support   = tr("Visit %1").arg("<a href=\"https://" BRICKSTORE_URL "\">" BRICKSTORE_URL "</a>");
 
     QString qt = QLibraryInfo::version().toString();

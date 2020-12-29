@@ -31,7 +31,7 @@ public:
     ~Config();
     static Config *inst();
 
-    void upgrade(int vmajor, int vminor, int vrev);
+    void upgrade(int vmajor, int vminor);
 
     QString language() const;
     QLocale::MeasurementSystem measurementSystem() const;
