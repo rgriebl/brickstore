@@ -309,7 +309,7 @@ static bool check_and_create_path(const QString &p)
     QFileInfo fi(p);
 
     if (!fi.exists()) {
-        QDir::current().mkpath(p);
+        QDir(p).mkpath(QStringLiteral("."));
         fi.refresh();
     }
     return (fi.exists() && fi.isDir() && fi.isReadable() && fi.isWritable());
@@ -378,12 +378,12 @@ BrickLink::Core *BrickLink::Core::s_inst = nullptr;
 
 BrickLink::Core *BrickLink::Core::create(const QString &datadir, QString *errstring)
 {
-    qDebug() << "Loading database from" << datadir;
-
     if (!s_inst) {
         s_inst = new Core(datadir);
-
         QString test = s_inst->dataPath();
+
+        qDebug() << "Loading database from" << test;
+
         if (test.isNull() || !check_and_create_path(test)) {
             delete s_inst;
             s_inst = nullptr;
@@ -396,20 +396,11 @@ BrickLink::Core *BrickLink::Core::create(const QString &datadir, QString *errstr
 }
 
 BrickLink::Core::Core(const QString &datadir)
-    : m_datadir(datadir)
+    : m_datadir(QDir::cleanPath(QDir(datadir).absolutePath()) + QStringLiteral("/"))
     , m_c_locale(QLocale::c())
     , m_corelock(QMutex::Recursive)
 {
     m_pic_diskload.setMaxThreadCount(QThread::idealThreadCount() * 3);
-
-    if (m_datadir.isEmpty())
-        m_datadir = QLatin1String("./");
-
-    m_datadir = QDir::cleanPath(datadir);
-
-    if (m_datadir.right(1) != QDir::separator())
-        m_datadir += QDir::separator();
-
     m_online = true;
 
     // cache size is physical memory * 0.25, at least 64MB, at most 256MB
@@ -605,6 +596,8 @@ bool BrickLink::Core::readDatabase(QString *infoText, const QString &fname)
     stopwatch *sw = nullptr; //new stopwatch("BrickLink::Core::readDatabase()");
 
     QString info;
+    if (infoText)
+        infoText->clear();
 
     QFile f;
     if (!fname.isEmpty())
@@ -613,6 +606,8 @@ bool BrickLink::Core::readDatabase(QString *infoText, const QString &fname)
         f.setFileName(dataPath() + defaultDatabaseName());
     else if (QFile::exists(dataPath() + defaultDatabaseName(BrickStore_1_1)))
         f.setFileName(dataPath() + defaultDatabaseName(BrickStore_1_1));
+    else
+        return false;
 
     if (f.open(QFile::ReadOnly)) {
         const char *data = reinterpret_cast<char *>(f.map(0, f.size()));
@@ -725,7 +720,7 @@ out:
     else {
         clear();
 
-        qWarning("Error reading databases!");
+        qWarning("Error reading database!");
     }
     if (infoText)
         *infoText = info;

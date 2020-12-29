@@ -1004,7 +1004,7 @@ private:
     void clear();
 
     QString  m_datadir;
-    bool     m_online;
+    bool     m_online = false;
     QLocale  m_c_locale;
     mutable QMutex m_corelock;
 
