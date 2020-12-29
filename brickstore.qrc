@@ -56,4 +56,8 @@
     <qresource prefix="/i18n">
         <file alias="translations.xml">translations/translations.xml</file>
     </qresource>
+    <qresource prefix="/print-templates">
+        <file alias="rechnung.qs">print-templates/rechnung.qs</file>
+        <file alias="standard.qs">print-templates/standard.qs</file>
+    </qresource>
 </RCC>

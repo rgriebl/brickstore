@@ -218,7 +218,7 @@ void Report::print(QPaintDevice *pd, const Document *doc, const Document::ItemLi
 
     auto *job = new ReportJob(pd);
     auto *ru = new ReportUtility();
-    auto *ms = new ReportMoneyStatic(d->m_engine.data());
+    auto *ms = new ReportMoney();
 
     d->m_engine->globalObject().setProperty("Document", docVal);
     d->m_engine->globalObject().setProperty(job->objectName(), d->m_engine->newQObject(job));
@@ -285,7 +285,10 @@ bool ReportManager::reload()
     qDeleteAll(m_reports);
     m_reports.clear();
 
-    QStringList spath = Application::inst()->externalResourceSearchPath("print-templates");
+    QStringList spath = { QStringLiteral(":/print-templates") };
+
+    spath << Application::inst()->externalResourceSearchPath("print-templates");
+
     QString dataloc = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
     if (!dataloc.isEmpty())
         spath.prepend(dataloc + QLatin1String("/print-templates"));

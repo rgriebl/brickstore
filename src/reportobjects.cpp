@@ -487,49 +487,48 @@ void ReportPage::drawImage(double left, double top, double width, double height,
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
 
-ReportMoneyStatic::ReportMoneyStatic(QScriptEngine *eng)
-    : m_engine(eng)
+ReportMoney::ReportMoney()
 {
     setObjectName(QLatin1String("Money"));
 }
 
-double ReportMoneyStatic::fromValue(double d)
+double ReportMoney::fromValue(double d)
 {
     return d;
 }
 
-double ReportMoneyStatic::fromLocalValue(double d)
+double ReportMoney::fromLocalValue(double d)
 {
     return d; //TODO: / Currency::rate();
 }
 
-double ReportMoneyStatic::value(double d) const
+double ReportMoney::value(double d) const
 {
     return d;
 }
-double ReportMoneyStatic::localValue(double d) const
+double ReportMoney::localValue(double d) const
 {
     return d; //TODO: * Currency::rate();
 }
 
-QString ReportMoneyStatic::localCurrencySymbol() const
+QString ReportMoney::localCurrencySymbol() const
 {
     return QString(); //TODO: Currency::symbol();
 }
 
-QString ReportMoneyStatic::toString(double /*d*/, bool /*with_currency_symbol*/, int precision)
+QString ReportMoney::toString(double /*d*/, bool /*with_currency_symbol*/, int precision)
 {
     if (precision > 3 || precision < 0) {
-        m_engine->currentContext()->throwError("Money.toString(): precision has to be in the range [0 ..3]");
+        engine()->currentContext()->throwError("Money.toString(): precision has to be in the range [0 ..3]");
         return QString();
     }
     return QString(); //TODO: Currency(d).toUSD(with_currency_symbol ? Currency::LocalSymbol : Currency::NoSymbol, precision);
 }
 
-QString ReportMoneyStatic::toLocalString(double /*d*/, bool /*with_currency_symbol*/, int precision)
+QString ReportMoney::toLocalString(double /*d*/, bool /*with_currency_symbol*/, int precision)
 {
     if (precision > 3 || precision < 0) {
-        m_engine->currentContext()->throwError("Money.toLocalString(): precision has to be in the range [0 ..3]");
+        engine()->currentContext()->throwError("Money.toLocalString(): precision has to be in the range [0 ..3]");
         return QString();
     }
     return QString(); //TODO: Currency(d).toLocal(with_currency_symbol ? Currency::LocalSymbol : Currency::NoSymbol, precision);

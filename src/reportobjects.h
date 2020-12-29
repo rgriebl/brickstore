@@ -34,6 +34,9 @@ class ReportUtility : public QObject, public QScriptable
 {
     Q_OBJECT
 
+public:
+    ReportUtility();
+
     Q_INVOKABLE QString translate(const QString &context, const QString &text) const;
 
     Q_INVOKABLE QString localDateString(const QDateTime &dt) const;
@@ -42,19 +45,16 @@ class ReportUtility : public QObject, public QScriptable
     Q_INVOKABLE QString localWeightString(double weight) const;
 
     Q_INVOKABLE QWidget *loadUiFile(const QString &fileName);
-
-public:
-    ReportUtility();
 };
 
 
-class ReportMoneyStatic : public QObject
+class ReportMoney : public QObject, public QScriptable
 {
     Q_OBJECT
     Q_OVERRIDE(QString objectName SCRIPTABLE false)
 
 public:
-    ReportMoneyStatic(QScriptEngine *eng);
+    ReportMoney();
 
     Q_INVOKABLE double fromValue(double d);
     Q_INVOKABLE double fromLocalValue(double d);
@@ -66,9 +66,6 @@ public:
 
     Q_INVOKABLE QString toString(double d, bool with_currency_symbol = false, int precision = 3);
     Q_INVOKABLE QString toLocalString(double d, bool with_currency_symbol = false, int precision = 3);
-
-private:
-    QScriptEngine *m_engine;
 };
 
 class Size : public QSizeF
