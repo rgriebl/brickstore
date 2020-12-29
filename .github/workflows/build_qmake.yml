@@ -18,12 +18,28 @@ jobs:
             os: windows-latest,
             qt_version: '5.15.2',
             qt_arch: 'win32_msvc2019',
+            qt_tools: 'tools_openssl_x86,1.1.1,qt.tools.openssl.win_x86',
             environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars32.bat"
+          }
+        - {
+            name: "Windows 64bit",
+            artifact: "Windows-amd64.exe",
+            os: windows-latest,
+            qt_version: '5.15.2',
+            qt_arch: 'win64_msvc2019_64',
+            qt_tools: 'tools_openssl_x64,1.1.1,qt.tools.openssl.win_x64',
+            environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
           }
         - {
             name: "Ubuntu 20.04 64bit",
             artifact: "Ubuntu-20.04-amd64.deb",
             os: ubuntu-20.04,
+          }
+        - {
+            name: "Debian 10 64bit",
+            artifact: "Debian-10-amd64.deb",
+            os: ubuntu-20.04,
+            debian_container: "buildpack-deps:buster"
           }
         - {
             name: "macOS 64bit",
@@ -34,13 +50,6 @@ jobs:
           }
 
     steps:
-    - name: Install OpenSSL on Windows
-      if: startsWith(matrix.config.os, 'windows')
-      run: |
-        curl.exe --output openssl.msi "https://slproweb.com/download/Win32OpenSSL_Light-1_1_1i.msi"
-        msiexec /i openssl.msi /quiet /qn /norestart
-      shell: cmd
-
     - uses: actions/checkout@v1
 
     - name: Install Qt from qt.io
@@ -50,14 +59,22 @@ jobs:
         version: ${{ matrix.config.qt_version }}
         modules: 'qtscript qtscripttools qtsvg qttools'
         arch: ${{ matrix.config.qt_arch }}
+        tools: ${{ matrix.config.qt_tools }}
 
-    - name: Install Qt from Ubuntu
-      if: startsWith(matrix.config.os, 'ubuntu')
+    - name: Install Qt on Linux (native)
+      if: startsWith(matrix.config.os, 'ubuntu') && !matrix.config.debian_container
       run: |
         sudo apt update
-        sudo apt install debhelper qt5-default libqt5opengl5-dev qttools5-dev qtscript5-dev qtbase5-private-dev
+        sudo apt -y install debhelper qt5-default libqt5opengl5-dev qttools5-dev qtscript5-dev qtbase5-private-dev lsb-release fakeroot build-essential
       shell: bash
 
+    - name: Install Qt on Linux (container)
+      if: startsWith(matrix.config.os, 'ubuntu') && matrix.config.debian_container
+      run: |
+        sudo docker run -v `pwd`:/build --rm --name "debian-build" -d "${{ matrix.config.debian_container }}" sleep 1d
+        sudo docker exec "debian-build" apt update
+        sudo docker exec "debian-build" apt -y install debhelper qt5-default libqt5opengl5-dev qttools5-dev qtscript5-dev qtbase5-private-dev lsb-release fakeroot build-essential
+      shell: bash
 
     - name: Build on Windows
       if: startsWith(matrix.config.os, 'windows')
@@ -75,11 +92,18 @@ jobs:
         name: ${{ matrix.config.artifact }}
         path: "*.exe"
 
-    - name: Build on Linux
-      if: (startsWith(matrix.config.os, 'ubuntu'))
+    - name: Build on Linux (native)
+      if: startsWith(matrix.config.os, 'ubuntu') && !matrix.config.debian_container
       run: |
         qmake CONFIG+=release
         make package
+      shell: bash
+
+    - name: Build on Linux (container)
+      if: startsWith(matrix.config.os, 'ubuntu') && matrix.config.debian_container
+      run: |
+        sudo docker exec -w /build "debian-build" qmake CONFIG+=release
+        sudo docker exec -w /build "debian-build" make package
       shell: bash
 
     - name: Upload DEB on Linux
