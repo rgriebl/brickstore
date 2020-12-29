@@ -229,6 +229,7 @@ void Report::print(QPaintDevice *pd, const Document *doc, const Document::ItemLi
     d->m_engine->globalObject().setProperty(job->objectName(), d->m_engine->newQObject(job));
     d->m_engine->globalObject().setProperty(ru->objectName(), d->m_engine->newQObject(ru));
     d->m_engine->globalObject().setProperty(ms->objectName(), d->m_engine->newQObject(ms));
+    d->m_engine->globalObject().setProperty("Page", d->m_engine->newQMetaObject(&ReportPage::staticMetaObject));
 
     qScriptRegisterMetaType(d->m_engine.data(), Font::toScriptValue, Font::fromScriptValue);
     QScriptValue fontCtor = d->m_engine->newFunction(Font::createScriptValue);

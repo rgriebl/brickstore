@@ -103,7 +103,7 @@ function pageHeader(page, ps)
     f1.bold = true;
 
     page.font = f1;
-    page.drawText(ps.x, y, ps.w / 2, h, page.AlignLeft | page.AlignVCenter, "BrickStore");
+    page.drawText(ps.x, y, ps.w / 2, h, Page.AlignLeft | Page.AlignVCenter, "BrickStore");
 
     var f2 = new Font();
     f2.family = "Arial";
@@ -111,7 +111,7 @@ function pageHeader(page, ps)
 
     page.font = f2;
     var d = new Date();
-    page.drawText(ps.x + ps.w / 2, y, ps.w / 2, h, page.AlignRight | page.AlignVCenter, Utility.localDateString(d));
+    page.drawText(ps.x + ps.w / 2, y, ps.w / 2, h, Page.AlignRight | Page.AlignVCenter, Utility.localDateString(d));
 
     page.font = oldfont;
 
@@ -131,8 +131,8 @@ function pageFooter(page, ps)
     f3.italic = true;
 
     page.font = f3;
-    page.drawText(ps.x             , y, ps.w * .75, h, page.AlignLeft  | page.AlignVCenter, Document.fileName);
-    page.drawText(ps.x + ps.w * .75, y, ps.w * .25, h, page.AlignRight | page.AlignVCenter, "Page " + (page.number + 1));
+    page.drawText(ps.x             , y, ps.w * .75, h, Page.AlignLeft  | Page.AlignVCenter, Document.fileName);
+    page.drawText(ps.x + ps.w * .75, y, ps.w * .25, h, Page.AlignRight | Page.AlignVCenter, "Page " + (page.number + 1));
 
     page.font = oldfont;
 
@@ -157,14 +157,14 @@ function reportFooter(page, ps)
     page.drawRect(ps.x, y, ps.w, h);
 
     page.color = new Color("#ffffff");
-    page.drawText(ps.x + xs(ps.w, 110), y, xs(ps.w, 10)    , h, page.AlignHCenter | page.AlignVCenter, Document.statistics.lots);
-    page.drawText(ps.x + xs(ps.w, 120), y, xs(ps.w, 10)    , h, page.AlignHCenter | page.AlignVCenter, Document.statistics.items);
-    page.drawText(ps.x + xs(ps.w, 130), y, xs(ps.w, 40) - 2, h, page.AlignRight   | page.AlignVCenter, Money.toLocalString(Document.statistics.value, true));
+    page.drawText(ps.x + xs(ps.w, 110), y, xs(ps.w, 10)    , h, Page.AlignHCenter | Page.AlignVCenter, Document.statistics.lots);
+    page.drawText(ps.x + xs(ps.w, 120), y, xs(ps.w, 10)    , h, Page.AlignHCenter | Page.AlignVCenter, Document.statistics.items);
+    page.drawText(ps.x + xs(ps.w, 130), y, xs(ps.w, 40) - 2, h, Page.AlignRight   | Page.AlignVCenter, Money.toLocalString(Document.statistics.value, true));
 
     var fb = oldfont;
     fb.bold = true;
     page.font = fb;
-    page.drawText(ps.x + 2, y, xs(ps.w, 100), h, page.AlignLeft | page.AlignVCenter, "Grand Total");
+    page.drawText(ps.x + 2, y, xs(ps.w, 100), h, Page.AlignLeft | Page.AlignVCenter, "Grand Total");
 
     page.color = oldfg;
     page.backgroundColor = oldbg;
@@ -186,13 +186,13 @@ function listHeader(page, ps)
     page.drawRect(ps.x, y, ps.w, h);
 
     page.color = new Color("#ffffff");
-    page.drawText(ps.x                , y, xs(ps.w, 20), h, page.AlignCenter, "Image");
-    page.drawText(ps.x + xs(ps.w,  20), y, xs(ps.w, 15), h, page.AlignCenter, "Cond.");
-    page.drawText(ps.x + xs(ps.w,  35), y, xs(ps.w, 75), h, page.AlignCenter, "Part");
-    page.drawText(ps.x + xs(ps.w, 110), y, xs(ps.w, 10), h, page.AlignCenter, "Lots");
-    page.drawText(ps.x + xs(ps.w, 120), y, xs(ps.w, 10), h, page.AlignCenter, "Qty");
-    page.drawText(ps.x + xs(ps.w, 130), y, xs(ps.w, 20), h, page.AlignCenter, "Price");
-    page.drawText(ps.x + xs(ps.w, 150), y, xs(ps.w, 20), h, page.AlignCenter, "Total");
+    page.drawText(ps.x                , y, xs(ps.w, 20), h, Page.AlignCenter, "Image");
+    page.drawText(ps.x + xs(ps.w,  20), y, xs(ps.w, 15), h, Page.AlignCenter, "Cond.");
+    page.drawText(ps.x + xs(ps.w,  35), y, xs(ps.w, 75), h, Page.AlignCenter, "Part");
+    page.drawText(ps.x + xs(ps.w, 110), y, xs(ps.w, 10), h, Page.AlignCenter, "Lots");
+    page.drawText(ps.x + xs(ps.w, 120), y, xs(ps.w, 10), h, Page.AlignCenter, "Qty");
+    page.drawText(ps.x + xs(ps.w, 130), y, xs(ps.w, 20), h, Page.AlignCenter, "Price");
+    page.drawText(ps.x + xs(ps.w, 150), y, xs(ps.w, 20), h, Page.AlignCenter, "Total");
 
     page.color = oldfg;
     page.backgroundColor = oldbg;
@@ -214,14 +214,14 @@ function listFooter(page, ps, pagestat)
     page.drawRect(ps.x, y, ps.w, h);
 
     page.color = new Color("#ffffff");
-    page.drawText(ps.x + xs(ps.w, 110), y, xs(ps.w, 10),     h, page.AlignHCenter | page.AlignVCenter, pagestat.lots);
-    page.drawText(ps.x + xs(ps.w, 120), y, xs(ps.w, 10),     h, page.AlignHCenter | page.AlignVCenter, pagestat.items);
-    page.drawText(ps.x + xs(ps.w, 130), y, xs(ps.w, 40) - 2, h, page.AlignRight   | page.AlignVCenter, Money.toLocalString(pagestat.total, true));
+    page.drawText(ps.x + xs(ps.w, 110), y, xs(ps.w, 10),     h, Page.AlignHCenter | Page.AlignVCenter, pagestat.lots);
+    page.drawText(ps.x + xs(ps.w, 120), y, xs(ps.w, 10),     h, Page.AlignHCenter | Page.AlignVCenter, pagestat.items);
+    page.drawText(ps.x + xs(ps.w, 130), y, xs(ps.w, 40) - 2, h, Page.AlignRight   | Page.AlignVCenter, Money.toLocalString(pagestat.total, true));
 
     var fb = oldfont;
     fb.bold = true;
     page.font = fb;
-    page.drawText(ps.x + 2, y, xs(ps.w, 100), h, page.AlignLeft | page.AlignVCenter, "Total");
+    page.drawText(ps.x + 2, y, xs(ps.w, 100), h, Page.AlignLeft | Page.AlignVCenter, "Total");
 
     page.color = oldfg;
     page.backgroundColor = oldbg;
@@ -245,11 +245,11 @@ function listItem(page, ps, item, odd)
     page.color = new Color("#000000");
     page.drawPixmap(ps.x + 2, y, xs(ps.w, 15), h, item.picture);
 
-    page.drawText(ps.x + xs(ps.w,  20), y, xs(ps.w, 15), h, page.AlignHCenter | page.AlignVCenter, item.condition.used ? "Used" : "New");
-    page.drawText(ps.x + xs(ps.w,  35), y, xs(ps.w, 85), h, page.AlignLeft    | page.AlignVCenter | page.TextWordWrap, item.color.name + " " + item.name + " [" + item.id + "]");
-    page.drawText(ps.x + xs(ps.w, 120), y, xs(ps.w, 10), h, page.AlignHCenter | page.AlignVCenter, item.quantity);
-    page.drawText(ps.x + xs(ps.w, 130), y, xs(ps.w, 18), h, page.AlignRight   | page.AlignVCenter, Money.toLocalString(item.price, true));
-    page.drawText(ps.x + xs(ps.w, 149), y, xs(ps.w, 20), h, page.AlignRight   | page.AlignVCenter, Money.toLocalString(item.total, true));
+    page.drawText(ps.x + xs(ps.w,  20), y, xs(ps.w, 15), h, Page.AlignHCenter | Page.AlignVCenter, item.condition.used ? "Used" : "New");
+    page.drawText(ps.x + xs(ps.w,  35), y, xs(ps.w, 85), h, Page.AlignLeft    | Page.AlignVCenter | Page.TextWordWrap, item.color.name + " " + item.name + " [" + item.id + "]");
+    page.drawText(ps.x + xs(ps.w, 120), y, xs(ps.w, 10), h, Page.AlignHCenter | Page.AlignVCenter, item.quantity);
+    page.drawText(ps.x + xs(ps.w, 130), y, xs(ps.w, 18), h, Page.AlignRight   | Page.AlignVCenter, Money.toLocalString(item.price, true));
+    page.drawText(ps.x + xs(ps.w, 149), y, xs(ps.w, 20), h, Page.AlignRight   | Page.AlignVCenter, Money.toLocalString(item.total, true));
 
     page.color = oldfg;
     page.backgroundColor = oldbg;
