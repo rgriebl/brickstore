@@ -203,7 +203,6 @@ Workspace::Workspace(QWidget *parent)
     m_tabbar->setUsesScrollButtons(true);
     m_tabbar->setMovable(true);
     m_tabbar->setTabsClosable(true);
-    m_tabbar->setAutoHide(true);
 
     m_right = new TabBarSide(m_tabbar);
     m_windowStack = new QStackedWidget();
@@ -244,6 +243,8 @@ Workspace::Workspace(QWidget *parent)
             this, [this](int count) {
         m_windowStack->setVisible(count != 0);
         m_welcomeWidget->setVisible(count == 0);
+        m_tabbar->setVisible(count > 1);
+        m_right->setVisible(count > 1);
     });
 }
 
