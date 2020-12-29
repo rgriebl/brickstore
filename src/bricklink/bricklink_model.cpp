@@ -545,10 +545,13 @@ void BrickLink::ItemModel::setFilterText(const QString &str)
 {
     if (str == m_text_filter)
         return;
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
     if (str.contains('?') || str.contains('*')) {
         m_text_filter_is_regexp = true;
         m_text_filter = QRegularExpression::wildcardToRegularExpression(str);
-    } else {
+    } else
+#endif
+    {
         m_text_filter_is_regexp = false;
         m_text_filter = str;
     }
