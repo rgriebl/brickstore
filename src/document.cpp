@@ -876,8 +876,11 @@ Document *Document::fileLoadFrom(const QString &name, const char *type, bool imp
     Document *doc = nullptr;
 
     if (result.items) {
+        uint fixedCount = 0;
+
         if (result.invalidItemCount) {
-            result.invalidItemCount -= uint(BrickLink::core()->applyChangeLogToItems(*result.items));
+            fixedCount = uint(BrickLink::core()->applyChangeLogToItems(*result.items));
+            result.invalidItemCount -= fixedCount;
 
             if (result.invalidItemCount) {
                 if (MessageBox::information(FrameWork::inst(),
@@ -897,6 +900,22 @@ Document *Document::fileLoadFrom(const QString &name, const char *type, bool imp
             doc->setFileName(import_only ? QString() : name);
             if (!import_only)
                 Config::inst()->addToRecentFiles(name);
+
+            if (fixedCount) {
+                QString fixedMsg = tr("While loading, the item and color ids of %n item(s) have been adjusted automatically according to the current BrickLink catalog change log.",
+                                      nullptr, fixedCount);
+
+                if (!import_only) {
+                    if (MessageBox::question(FrameWork::inst(),
+                                             fixedMsg + "<br><br>" + tr("Do you want to save these changes now?"),
+                                             MessageBox::Yes | MessageBox::No) == MessageBox::Yes) {
+                        doc->fileSaveTo(name, type, true, *result.items);
+                    }
+                } else {
+                    MessageBox::information(FrameWork::inst(), fixedMsg);
+
+                }
+            }
         }
 
         qDeleteAll(*result.items);

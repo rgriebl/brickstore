@@ -988,7 +988,8 @@ BrickLink::Core::ParseItemListXMLResult BrickLink::Core::parseItemListXML(const 
             if (!ii->item()) {
                 inc->m_item_id = itemid.toLatin1();
                 inc->m_item_name = itemname.toLatin1();
-                inc->m_itemtype_name = (itemtypename.isEmpty() ? itemtypeid : itemtypename).toLatin1();
+                inc->m_itemtype_id = itemtypeid;
+                inc->m_itemtype_name = itemtypename;
                 inc->m_category_name = (categoryname.isEmpty() ? categoryid : categoryname).toLatin1();
             }
             if (!ii->color())
@@ -1377,6 +1378,7 @@ bool BrickLink::Core::parseLDrawModelInternal(QFile &f, const QString &model_nam
                             if (!itemp) {
                                 inc->m_item_id = partid.toLatin1();
                                 inc->m_item_name = QByteArray();
+                                inc->m_itemtype_id = "P";
                                 inc->m_itemtype_name = "Part";
                             }
                             if (!colp) {
@@ -1535,9 +1537,12 @@ int BrickLink::Core::applyChangeLogToItems(InvItemList &bllist)
             const Item *fixed_item = blitem->item();
             const Color *fixed_color = blitem->color();
 
-            QString itemtypeid = incpl->m_itemtype_name;
+            QString itemtypeid = incpl->m_itemtype_id;
             QString itemid     = incpl->m_item_id;
             QString colorid    = incpl->m_color_name;
+
+            if (itemtypeid.isEmpty() && !incpl->m_itemtype_name.isEmpty())
+                itemtypeid = incpl->m_itemtype_name.at(0).toUpper();
 
             for (int i = m_changelog.count() - 1; i >= 0 && !(fixed_color && fixed_item); --i) {
                 const ChangeLogEntry &cl = ChangeLogEntry(m_changelog.at(i));

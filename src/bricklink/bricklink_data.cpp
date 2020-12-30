@@ -504,7 +504,7 @@ BrickLink::InvItem &BrickLink::InvItem::operator = (const InvItem &copy)
 
         m_incomplete->m_item_id       = copy.m_incomplete->m_item_id;
         m_incomplete->m_item_name     = copy.m_incomplete->m_item_name;
-        m_incomplete->m_itemtype_name = copy.m_incomplete->m_itemtype_name;
+        m_incomplete->m_itemtype_id   = copy.m_incomplete->m_itemtype_id;
         m_incomplete->m_category_name = copy.m_incomplete->m_category_name;
         m_incomplete->m_color_name    = copy.m_incomplete->m_color_name;
     }
@@ -655,7 +655,7 @@ QDataStream &operator >> (QDataStream &ds, BrickLink::InvItem &ii)
         inc = new BrickLink::InvItem::Incomplete;
         if (!item) {
             inc->m_item_id = itemid;
-            inc->m_itemtype_name = QLatin1Char(itemtypeid);
+            inc->m_itemtype_id = QLatin1Char(itemtypeid);
         }
         if (!color)
             inc->m_color_name = QString::number(colorid);

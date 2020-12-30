@@ -376,6 +376,7 @@ public:
     struct Incomplete {
         QString m_item_id;
         QString m_item_name;
+        QString m_itemtype_id;
         QString m_itemtype_name;
         QString m_color_name;
         QString m_category_name;
