@@ -23,6 +23,7 @@
 #include <QTextLayout>
 #include <QtMath>
 #include <QStaticText>
+#include <QMenu>
 
 #include "welcomewidget.h"
 #include "config.h"
@@ -95,8 +96,17 @@ WelcomeButton::WelcomeButton(QAction *a, QWidget *parent)
     if (!a)
         return;
 
-    if (!a->icon().isNull())
+    if (!a->icon().isNull()) {
         setIcon(a->icon());
+    } else {
+        const auto containers = a->associatedWidgets();
+        for (auto *widget : containers) {
+            if (QMenu *menu = qobject_cast<QMenu *>(widget)) {
+                if (!menu->icon().isNull())
+                    setIcon(menu->icon());
+            }
+        }
+    }
 
     auto languageChange = [this](QAction *a) {
         setText(a->text());
