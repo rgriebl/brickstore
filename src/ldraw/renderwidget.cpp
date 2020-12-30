@@ -35,7 +35,7 @@ LDraw::GLRenderer::GLRenderer(QObject *parent)
     : QObject(parent)
 {
     m_animation = new QTimer(this);
-    m_animation->setInterval(50);
+    m_animation->setInterval(1000/60);
 
     connect(m_animation, &QTimer::timeout, this, &GLRenderer::animationStep);
 }
@@ -635,6 +635,20 @@ void LDraw::RenderOffscreenWidget::wheelEvent(QWheelEvent *e)
     m_renderer->setZoom(m_renderer->zoom() * d);
 }
 
+void LDraw::RenderOffscreenWidget::showEvent(QShowEvent *)
+{
+    if (m_restart_animation_when_visible) {
+        m_restart_animation_when_visible = false;
+        m_renderer->startAnimation();
+    }
+}
+
+void LDraw::RenderOffscreenWidget::hideEvent(QHideEvent *)
+{
+    m_restart_animation_when_visible = m_renderer->isAnimationActive();
+    m_renderer->stopAnimation();
+}
+
 void LDraw::RenderOffscreenWidget::slotMakeCurrent()
 {
     if (m_context && m_dummy)
@@ -663,7 +677,10 @@ QImage LDraw::RenderOffscreenWidget::renderImage()
 
     if (!m_fbo) {
         m_context->makeCurrent(m_dummy.data());
-        m_fbo.reset(new QOpenGLFramebufferObject(size(), QOpenGLFramebufferObject::Depth));
+        QOpenGLFramebufferObjectFormat format;
+        format.setAttachment(QOpenGLFramebufferObject::Depth);
+        format.setSamples(4);
+        m_fbo.reset(new QOpenGLFramebufferObject(size(), format));
         m_context->doneCurrent();
     }
 
@@ -707,9 +724,9 @@ bool LDraw::GLRenderer::isAnimationActive() const
 
 void LDraw::GLRenderer::animationStep()
 {
-    setXRotation(xRotation()+1.5);
-    setYRotation(yRotation()+1);
-    setZRotation(zRotation()+0.75);
+    setXRotation(xRotation() + 0.5);
+    setYRotation(yRotation() + 0.375);
+    setZRotation(zRotation() + 0.25);
 }
 
 void LDraw::GLRenderer::updateWorldMatrix()

@@ -210,6 +210,8 @@ protected:
     void mouseReleaseEvent(QMouseEvent *e) override;
     void mouseMoveEvent(QMouseEvent *e) override;
     void wheelEvent(QWheelEvent *e) override;
+    void showEvent(QShowEvent *event) override;
+    void hideEvent(QHideEvent *event) override;
 
 protected slots:
     void slotMakeCurrent();
@@ -221,6 +223,7 @@ private:
     QScopedPointer<QOpenGLFramebufferObject> m_fbo;
     bool m_initialized = false;
     bool m_resize = false;
+    bool m_restart_animation_when_visible = false;
     GLRenderer *m_renderer;
     QPoint m_last_pos;
 };
