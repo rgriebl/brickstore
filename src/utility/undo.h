@@ -26,10 +26,7 @@ class UndoStack : public QUndoStack
 public:
     UndoStack(QObject *parent = nullptr);
 
-    QAction *createRedoAction(QObject *parent = nullptr);
-    QAction *createUndoAction(QObject *parent = nullptr);
-
-    // workaround as long as I haven't add that to Qt (4.6 hopefully)
+    // workaround as long as I haven't added that to Qt
     void endMacro(const QString &str);
 
 public slots:

@@ -22,6 +22,7 @@
 #include <QWidgetAction>
 #include <QMouseEvent>
 #include <QStyle>
+#include <QLayout>
 #include <QtDebug>
 
 #include "undo.h"
@@ -49,9 +50,6 @@ protected:
     QWidget *createWidget(QWidget *parent) override;
 
 protected slots:
-    void itemSelected(QListWidgetItem *);
-    void selectRange(QListWidgetItem *);
-    void setCurrentItemSlot(QListWidgetItem *item);
     void languageChange();
 
 private:
@@ -59,6 +57,7 @@ private:
     UndoAction(Type t, QUndoGroup *group, QObject *parent);
 
     QStringList descriptionList(QUndoStack *stack) const;
+    QString listLabel(int count) const;
 
 private:
     Type         m_type;
@@ -67,8 +66,6 @@ private:
     QLabel *     m_label = nullptr;
     QString      m_desc;
     QUndoStack * m_undoStack;
-
-    static const char *s_strings [];
 };
 
 
@@ -86,16 +83,6 @@ void UndoStack::redoMultiple(int count)
 void UndoStack::undoMultiple(int count)
 {
     setIndex(index() - count);
-}
-
-QAction *UndoStack::createRedoAction(QObject *parent)
-{
-    return UndoAction::create(UndoAction::Redo, this, parent);
-}
-
-QAction *UndoStack::createUndoAction(QObject *parent)
-{
-    return UndoAction::create(UndoAction::Undo, this, parent);
 }
 
 void UndoStack::endMacro(const QString &str)
@@ -136,78 +123,6 @@ QAction *UndoGroup::createUndoAction(QObject *parent)
     return UndoAction::create(UndoAction::Undo, this, parent);
 }
 
-
-
-
-// --------------------------------------------------------------------------
-
-class UndoActionListWidget : public QListWidget
-{
-    Q_OBJECT
-public:
-    explicit UndoActionListWidget(QWidget *parent)
-        : QListWidget(parent)
-    { }
-
-    QSize sizeHint() const override
-    {
-        int fw = 2* style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
-
-        QSize s1 = QListWidget::sizeHint();
-        QSize s2 = s1.boundedTo(QSize(300, 300));
-
-        if ((s2.height() < s1.height()) && (s1.width() <= s2.width()))
-            s2.setWidth(s1.width() + style()->pixelMetric(QStyle::PM_ScrollBarExtent));
-
-        return s2.expandedTo(QSize(60, 60)) + QSize(fw, fw);
-    }
-private:
-    Q_DISABLE_COPY(UndoActionListWidget)
-};
-
-class UndoActionLabel : public QLabel
-{
-    Q_OBJECT
-public:
-    UndoActionLabel(QWidget *parent, const char **strings)
-        : QLabel(parent)
-        , m_strings(strings)
-    { }
-
-    QSize sizeHint() const override
-    {
-        QSize s = QLabel::sizeHint();
-
-        int fw = 2* style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
-        int w = s.width() - 2*fw;
-
-        const QFontMetrics &fm = fontMetrics();
-
-        for (int i = 0; i < 4; i++) {
-            QString str = UndoAction::tr(m_strings[i]);
-            if (!(i & 1))
-                str = str.arg(1000);
-            int ws = fm.horizontalAdvance(str);
-            w = qMax(w, ws);
-        }
-        s.setWidth(w + 2*fw + 8);
-        return s;
-    }
-
-private:
-    Q_DISABLE_COPY(UndoActionLabel)
-
-    const char **m_strings;
-};
-
-
-
-const char *UndoAction::s_strings [] = {
-    QT_TRANSLATE_NOOP( "UndoManager", "Undo %1 Actions" ),
-    QT_TRANSLATE_NOOP( "UndoManager", "Undo Action" ),
-    QT_TRANSLATE_NOOP( "UndoManager", "Redo %1 Actions" ),
-    QT_TRANSLATE_NOOP( "UndoManager", "Redo Action" )
-};
 
 template <typename T>
 QAction *UndoAction::create(UndoAction::Type type, T *stackOrGroup, QObject *parent)
@@ -270,55 +185,84 @@ QWidget *UndoAction::createWidget(QWidget *parent)
         button->setMenu(m_menu);
         button->setPopupMode(QToolButton::MenuButtonPopup);
 
-        m_list = new UndoActionListWidget(m_menu);
+        // we need a margin - otherwise the list will paint over the menu's border
+        QWidget *w = new QWidget();
+        QVBoxLayout *l = new QVBoxLayout(w);
+        int fw = m_menu->style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
+        l->setContentsMargins(fw, fw, fw, fw);
+
+        m_list = new QListWidget();
         m_list->setFrameShape(QFrame::NoFrame);
         m_list->setSelectionMode(QAbstractItemView::MultiSelection);
         m_list->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         m_list->setMouseTracking(true);
+        m_list->setResizeMode(QListView::Adjust);
 
-        auto *listaction = new QWidgetAction(this);
-        listaction->setDefaultWidget(m_list);
-        m_menu->addAction(listaction);
-
-        m_label = new UndoActionLabel(m_menu, s_strings);
+        m_label = new QLabel();
         m_label->setAlignment(Qt::AlignCenter);
-        m_label->installEventFilter(this);
         m_label->setPalette(QApplication::palette(m_menu));
         m_label->setBackgroundRole(m_menu->backgroundRole());
 
-        auto *labelaction = new QWidgetAction(this);
-        labelaction->setDefaultWidget(m_label);
-        m_menu->addAction(labelaction);
+        l->addWidget(m_list);
+        l->addWidget(m_label);
+        auto *widgetaction = new QWidgetAction(this);
+        widgetaction->setDefaultWidget(w);
+        m_menu->addAction(widgetaction);
 
         m_menu->setFocusProxy(m_list);
 
-        connect(m_list, &QListWidget::itemEntered,
-                this, &UndoAction::setCurrentItemSlot);
-        connect(m_list, &QListWidget::currentItemChanged,
-                this, &UndoAction::selectRange);
-        connect(m_list, &QListWidget::itemClicked,
-                this, &UndoAction::itemSelected);
-        connect(m_list, &QListWidget::itemActivated,
-                this, &UndoAction::itemSelected);
+        connect(m_list, &QListWidget::itemEntered, this, [this](QListWidgetItem *item) {
+            if (m_list->currentItem() != item)
+                m_list->setCurrentItem(item);
+        });
 
-        connect(m_menu, &QMenu::aboutToShow,
-                this, [this]() {
+        connect(m_list, &QListWidget::currentItemChanged, this, [this](QListWidgetItem *item) {
+            if (item) {
+                int currentIndex = m_list->row(item);
+                for (int i = 0; i < m_list->count(); i++)
+                    m_list->item(i)->setSelected(i <= currentIndex);
+                m_label->setText(listLabel(currentIndex + 1));
+            }
+        });
+
+        connect(m_list, &QListWidget::itemClicked, m_list, &QListWidget::itemActivated);
+        connect(m_list, &QListWidget::itemActivated, this, [this](QListWidgetItem *item) {
+            if (item) {
+                m_menu->close();
+                emit triggered(m_list->row(item) + 1);
+            }
+        });
+
+        connect(m_menu, &QMenu::aboutToShow, this, [this]() {
             m_list->clear();
 
             if (m_undoStack) {
+                int maxw = 0;
+                QFontMetrics fm = m_list->fontMetrics();
+                const auto style = m_list->style();
+
                 const QStringList dl = descriptionList(m_undoStack);
-                for (const auto &desc : dl)
+                for (const auto &desc : dl) {
                     (void) new QListWidgetItem(desc, m_list);
+                    maxw = std::max(maxw, fm.horizontalAdvance(desc));
+                }
+
+                m_list->setMinimumWidth(maxw
+                                        + style->pixelMetric(QStyle::PM_ScrollBarExtent, nullptr, m_list)
+                                        + 2 * style->pixelMetric(QStyle::PM_DefaultFrameWidth, nullptr, m_list)
+                                        + 2 * (style->pixelMetric(QStyle::PM_FocusFrameHMargin, nullptr, m_list) + 1));
+
+                if (m_list->count()) {
+                    m_list->setCurrentItem(m_list->item(0));
+                    m_list->setFocus();
+                }
             }
 
-            if (m_list->count()) {
-                m_list->setCurrentItem(m_list->item(0));
-                selectRange(m_list->item(0));
-            }
-
-#if defined(Q_OS_MACOS)
-            m_list->setFocus();
-#endif
+            // we cannot resize the menu dynamically, so we need to set a minimum width now
+            const auto fm = m_label->fontMetrics();
+            m_label->setMinimumWidth(std::max(fm.horizontalAdvance(listLabel(1)),
+                                              fm.horizontalAdvance(listLabel(100000)))
+                                     + 2 * m_label->style()->pixelMetric(QStyle::PM_DefaultLayoutSpacing));
         });
 
         return button;
@@ -330,7 +274,7 @@ void UndoAction::setDescription(const QString &desc)
 {
     m_desc = desc;
     QString str = (m_type == Undo) ? tr("Undo") : tr("Redo");
-    if (!desc. isEmpty())
+    if (!desc.isEmpty())
         str.append(QString(" (%1)").arg(desc));
     setText(str);
 }
@@ -346,20 +290,12 @@ bool UndoAction::event(QEvent *e)
 void UndoAction::languageChange ( )
 {
     setDescription(m_desc);
-
-    if (m_menu)
-        m_menu->resize(m_menu->sizeHint());
 }
 
 
 bool UndoAction::eventFilter(QObject *o, QEvent *e)
 {
-    if ((o == m_label) &&
-            (e->type() == QEvent::MouseButtonPress) &&
-            (static_cast<QMouseEvent *>(e)->button() == Qt::LeftButton)) {
-        m_menu->close();
-    }
-    else if (qobject_cast<QToolButton *>(o) &&
+    if (qobject_cast<QToolButton *>(o) &&
              (e->type() == QEvent::EnabledChange)) {
         bool b = static_cast<QWidget *>(o)->isEnabled();
         // don't disable the widgets - this will lead to an empty menu on the Mac!
@@ -373,34 +309,10 @@ bool UndoAction::eventFilter(QObject *o, QEvent *e)
     return QWidgetAction::eventFilter(o, e);
 }
 
-void UndoAction::setCurrentItemSlot(QListWidgetItem *item)
+QString UndoAction::listLabel(int count) const
 {
-    if (m_list->currentItem() != item)
-        m_list->setCurrentItem(item);
-}
-
-void UndoAction::selectRange(QListWidgetItem *item)
-{
-    if (item) {
-        int hl = m_list->row(item);
-
-        for (int i = 0; i < m_list->count(); i++)
-            m_list->item(i)->setSelected(i <= hl);
-
-        QString s = tr(s_strings[((m_type == Undo) ? 0 : 2) + ((hl > 0) ? 0 : 1)]);
-        if (hl > 0)
-            s = s.arg(hl+1);
-        m_label->setText(s);
-    }
-}
-
-
-void UndoAction::itemSelected(QListWidgetItem *item)
-{
-    if (item) {
-        m_menu->close();
-        emit triggered(m_list->row(item) + 1);
-    }
+    return (m_type == Undo) ? tr("Undo %n action(s)", nullptr, count)
+                            : tr("Redo %n action(s)", nullptr, count);
 }
 
 QStringList UndoAction::descriptionList(QUndoStack *stack) const
