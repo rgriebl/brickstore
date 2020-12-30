@@ -30,6 +30,8 @@
 #include "humanreadabletimedelta.h"
 #include "framework.h"
 #include "version.h"
+#include "ldraw.h"
+#include "ldraw/renderwidget.h"
 
 // Based on QCommandLinkButton, but this one scales with font size, supports richtext and can be
 // associated with a QAction
@@ -284,6 +286,39 @@ WelcomeWidget::WelcomeWidget(QWidget *parent)
     layout->setColumnStretch(3, 5);
     layout->setSpacing(2 * spacing);
 
+    // info
+
+    auto *info = new QWidget();
+    auto info_layout = new QHBoxLayout();
+
+    LDraw::Part *part = nullptr;
+
+    if (LDraw::core())
+        part = LDraw::core()->partFromId("3833");
+
+    int iconSize = fontMetrics().height() * 4;
+
+    if (part) {
+        m_ldraw_icon = new LDraw::RenderOffscreenWidget();
+        m_ldraw_icon->setPartAndColor(part, QColor("#F36100"));
+        m_ldraw_icon->setFixedSize(iconSize, iconSize);
+        m_ldraw_icon->startAnimation();
+        info_layout->addWidget(m_ldraw_icon, 0, Qt::AlignCenter);
+    } else {
+        auto iconWidget = new QLabel();
+        iconWidget->setPixmap(QPixmap(":/images/brickstore_icon.png"));
+        iconWidget->setScaledContents(true);
+        iconWidget->setFixedSize(iconSize, iconSize);
+        info_layout->addWidget(iconWidget, 0, Qt::AlignCenter);
+    }
+
+    m_info_label = new QLabel();
+    m_info_label->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    info_layout->addWidget(m_info_label, 1);
+
+    info->setLayout(info_layout);
+    layout->addWidget(info, 0, 1, 1, 2, Qt::AlignTop | Qt::AlignHCenter);
+
     // recent
 
     m_recent_frame = new QGroupBox();
@@ -389,6 +424,13 @@ void WelcomeWidget::languageChange()
                                 .arg(BRICKSTORE_VERSION)
                                 .arg(*BRICKSTORE_BUILD_NUMBER ? BRICKSTORE_BUILD_NUMBER : "custom"));
     updateLastDBUpdateDescription();
+
+    QString infoText = QLatin1String("<strong style=\"font-size: x-large\">%1</strong><br>%2")
+            .arg(QCoreApplication::applicationName())
+            .arg(m_ldraw_icon ? tr("Using the LDraw installation at:")
+                                + QLatin1String("<br><i>%1</i>").arg(LDraw::core()->dataPath())
+                              : tr("No LDraw installation was found."));
+    m_info_label->setText(infoText);
 
     if (m_no_recent)
         m_no_recent->setText(tr("No recent files"));

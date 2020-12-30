@@ -19,6 +19,10 @@
 QT_FORWARD_DECLARE_CLASS(QGroupBox);
 QT_FORWARD_DECLARE_CLASS(QLabel);
 
+namespace LDraw {
+class RenderOffscreenWidget;
+}
+
 class WelcomeButton;
 
 
@@ -45,6 +49,8 @@ private:
     WelcomeButton *m_db_update;
     WelcomeButton *m_bs_update;
     QPointer<QLabel> m_no_recent;
+    QLabel *m_info_label;
+    LDraw::RenderOffscreenWidget *m_ldraw_icon = nullptr;
 };
 
 
