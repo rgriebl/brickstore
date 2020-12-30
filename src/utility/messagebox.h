@@ -32,7 +32,7 @@ public:
     static QString defaultTitle();
 
     static StandardButton information(QWidget *parent, const QString & text, StandardButtons buttons = Ok, StandardButton defaultButton = NoButton);
-    static StandardButton question(QWidget *parent, const QString &text, StandardButtons buttons = Ok, StandardButton defaultButton = NoButton);
+    static StandardButton question(QWidget *parent, const QString &text, StandardButtons buttons = Yes | No, StandardButton defaultButton = NoButton);
     static StandardButton warning(QWidget *parent, const QString &text, StandardButtons buttons = Ok, StandardButton defaultButton = NoButton);
     static StandardButton critical(QWidget *parent, const QString &text, StandardButtons buttons = Ok, StandardButton defaultButton = NoButton);
 

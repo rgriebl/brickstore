@@ -33,7 +33,7 @@ protected:
     void changeEvent(QEvent *e) override;
 
 private:
-    void updateLastDBUpdateDescription();;
+    void updateLastDBUpdateDescription();
 
     void languageChange();
 
