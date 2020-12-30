@@ -185,8 +185,6 @@ void LDraw::GLRenderer::initializeGL(QOpenGLContext *context)
     glClearColor(0, 0, 0, 0);
 
     m_program = new QOpenGLShaderProgram;
-//    m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, m_core ? vertexShaderSourceCore : vertexShaderSource);
-//    m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, m_core ? fragmentShaderSourceCore : fragmentShaderSource);
     m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexShaderSourceSimple);
     m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentShaderSourceSimple);
     m_program->bindAttributeLocation("vertex", 0);
@@ -196,8 +194,6 @@ void LDraw::GLRenderer::initializeGL(QOpenGLContext *context)
     m_program->bind();
     m_projMatrixLoc = m_program->uniformLocation("projMatrix");
     m_mvMatrixLoc = m_program->uniformLocation("mvMatrix");
-    //m_normalMatrixLoc = m_program->uniformLocation("normalMatrix");
-    //m_lightPosLoc = m_program->uniformLocation("lightPos");
 
     // Create a vertex array object. In OpenGL ES 2.0 and OpenGL 2.x
     // implementations this is optional and support may not be present
@@ -217,9 +213,6 @@ void LDraw::GLRenderer::initializeGL(QOpenGLContext *context)
     // Our camera never changes in this example.
     m_camera.setToIdentity();
     m_camera.translate(0, 0, -1);
-
-    // Light position is fixed.
-    //m_program->setUniformValue(m_lightPosLoc, QVector3D(0, 0, 70));
 
     m_program->release();
 }
