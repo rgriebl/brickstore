@@ -425,10 +425,10 @@ void WelcomeWidget::languageChange()
                                 .arg(*BRICKSTORE_BUILD_NUMBER ? BRICKSTORE_BUILD_NUMBER : "custom"));
     updateLastDBUpdateDescription();
 
-    QString infoText = QLatin1String("<strong style=\"font-size: x-large\">%1</strong><br>%2")
+    QString infoText = QString::fromLatin1("<strong style=\"font-size: x-large\">%1</strong><br>%2")
             .arg(QCoreApplication::applicationName())
             .arg(m_ldraw_icon ? tr("Using the LDraw installation at:")
-                                + QLatin1String("<br><i>%1</i>").arg(LDraw::core()->dataPath())
+                                + QString::fromLatin1("<br><i>%1</i>").arg(LDraw::core()->dataPath())
                               : tr("No LDraw installation was found."));
     m_info_label->setText(infoText);
 
