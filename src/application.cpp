@@ -336,7 +336,7 @@ bool Application::isClient(int timeout)
             if (client.waitForConnected(timeout / 2) || i)
                 break;
             else
-                QThread::sleep(timeout / 4);
+                QThread::msleep(timeout / 4);
         }
 
         if (client.state() == QLocalSocket::ConnectedState) {
