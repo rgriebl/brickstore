@@ -325,21 +325,21 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <message numerus="yes">
         <source>Added %n item(s)</source>
         <translation>
-            <numerusform>Added %n item</numerusform>
+            <numerusform>Added one item</numerusform>
             <numerusform>Added %n items</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>Removed %n item(s)</source>
         <translation>
-            <numerusform>Removed %n item</numerusform>
+            <numerusform>Removed one item</numerusform>
             <numerusform>Removed %n items</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>This file contains %n unknown item(s).&lt;br /&gt;&lt;br /&gt;Do you still want to open this file?</source>
         <translation>
-            <numerusform>This file contains %n unknown item.&lt;br /&gt;&lt;br /&gt;Do you still want to open this file?</numerusform>
+            <numerusform>This file contains one unknown item.&lt;br /&gt;&lt;br /&gt;Do you still want to open this file?</numerusform>
             <numerusform>This file contains %n unknown items.&lt;br /&gt;&lt;br /&gt;Do you still want to open this file?</numerusform>
         </translation>
     </message>
@@ -624,6 +624,17 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Incomplete</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>While loading, the item and color ids of %n item(s) have been adjusted automatically according to the current BrickLink catalog change log.</source>
+        <translation>
+            <numerusform>While loading, the item and color ids of one item has been adjusted automatically according to the current BrickLink catalog change log.</numerusform>
+            <numerusform>While loading, the item and color ids of %n items have been adjusted automatically according to the current BrickLink catalog change log.</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Do you want to save these changes now?</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2084,24 +2095,19 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <source>Redo</source>
         <translation type="unfinished"></translation>
     </message>
-</context>
-<context>
-    <name>UndoManager</name>
-    <message>
-        <source>Undo %1 Actions</source>
-        <translation type="unfinished"></translation>
+    <message numerus="yes">
+        <source>Undo %n action(s)</source>
+        <translation>
+            <numerusform>Undo one action</numerusform>
+            <numerusform>Undo %n actions</numerusform>
+        </translation>
     </message>
-    <message>
-        <source>Undo Action</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Redo %1 Actions</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Redo Action</source>
-        <translation type="unfinished"></translation>
+    <message numerus="yes">
+        <source>Redo %n action(s)</source>
+        <translation>
+            <numerusform>Redo one action</numerusform>
+            <numerusform>Redo %n actions</numerusform>
+        </translation>
     </message>
 </context>
 <context>
@@ -2215,6 +2221,14 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <source>Current version: %1 (build: %2)</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Using the LDraw installation at:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No LDraw installation was found.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>Window</name>
@@ -2227,95 +2241,11 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Merged %1 items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Overwrite the currently selected items?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Set &apos;include&apos; status on %1 items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Set &apos;exclude&apos; status on %1 items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Set &apos;extra&apos; status on %1 items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Toggled status on %1 items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Set &apos;new&apos; condition on %1 items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Set &apos;used&apos; condition on %1 items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Toggled condition on %1 items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Set &apos;none&apos; sub-condition on %1 items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Set &apos;sealed&apos; sub-condition on %1 items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Set &apos;complete&apos; sub-condition on %1 items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Set &apos;incomplete&apos; sub-condition on %1 items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Set &apos;retain&apos; flag on %1 items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Cleared &apos;retain&apos; flag on %1 items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Toggled &apos;retain&apos; flag on %1 items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Cleared &apos;stockroom&apos; flag on %1 items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Set stockroom to &apos;A&apos; on %1 items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Set stockroom to &apos;B&apos; on %1 items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Set stockroom to &apos;C&apos; on %1 items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Enter the new price for all selected items:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Set price on %1 items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Price change on %1 items</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2339,23 +2269,11 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>The quantities of %1 lots are not divisible without remainder by %2.&lt;br /&gt;&lt;br /&gt;Nothing has been modified.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Quantity divide by %1 on %2 Items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Multiply the quantities of all selected items with this factor.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>x</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Quantity multiply by %1 on %2 Items</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2367,15 +2285,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Set sale on %1 items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Set bulk quantity for the selected items:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Set bulk quantity on %1 items</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2383,23 +2293,11 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Set color on %1 items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Enter the new quantities for all selected items:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Set quantity on %1 items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Enter the new remark for all selected items:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Set remark on %1 items</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2411,19 +2309,11 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Modified remark on %1 items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Enter the text, that should be removed from the remarks of all selected items:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Enter the new comment for all selected items:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Set comment on %1 items</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2435,10 +2325,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Modified comment on %1 items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Enter the text, that should be removed from the comments of all selected items:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2447,15 +2333,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Set reservation on %1 items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Please choose the document that should serve as a source to fill in the remarks fields of the current document:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Copied Remarks for %1 Items</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2467,19 +2345,11 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Subtracted %1 Items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Should the selected items be parted out into the current document, replacing the selected items?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Parting out items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Parted out %1 Items</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2507,12 +2377,267 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>There are %1 items selected.&lt;br /&gt;&lt;br /&gt;Do you want to export only these items?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>This list contains items with errors.&lt;br /&gt;&lt;br /&gt;Do you really want to export this list?</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>Merged %n item(s)</source>
+        <translation>
+            <numerusform>Merged one items</numerusform>
+            <numerusform>Merged %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Set &apos;include&apos; status on %n item(s)</source>
+        <translation>
+            <numerusform>Set &apos;include&apos; status on one item</numerusform>
+            <numerusform>Set &apos;include&apos; status on %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Set &apos;exclude&apos; status on %n item(s)</source>
+        <translation>
+            <numerusform>Set &apos;exclude&apos; status on one item</numerusform>
+            <numerusform>Set &apos;exclude&apos; status on %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Set &apos;extra&apos; status on %n item(s)</source>
+        <translation>
+            <numerusform>Set &apos;extra&apos; status on one item</numerusform>
+            <numerusform>Set &apos;extra&apos; status on %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Toggled status on %n item(s)</source>
+        <translation>
+            <numerusform>Toggled status on one item</numerusform>
+            <numerusform>Toggled status on %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Set &apos;new&apos; condition on %n item(s)</source>
+        <translation>
+            <numerusform>Set &apos;new&apos; condition on one item</numerusform>
+            <numerusform>Set &apos;new&apos; condition on %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Set &apos;used&apos; condition on %n item(s)</source>
+        <translation>
+            <numerusform>Set &apos;used&apos; condition on one item</numerusform>
+            <numerusform>Set &apos;used&apos; condition on %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Toggled condition on %n item(s)</source>
+        <translation>
+            <numerusform>Toggled condition on one item</numerusform>
+            <numerusform>Toggled condition on %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Set &apos;none&apos; sub-condition on %n item(s)</source>
+        <translation>
+            <numerusform>Set &apos;none&apos; sub-condition on one item</numerusform>
+            <numerusform>Set &apos;none&apos; sub-condition on %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Set &apos;sealed&apos; sub-condition on %n item(s)</source>
+        <translation>
+            <numerusform>Set &apos;sealed&apos; sub-condition on one item</numerusform>
+            <numerusform>Set &apos;sealed&apos; sub-condition on %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Set &apos;complete&apos; sub-condition on %n item(s)</source>
+        <translation>
+            <numerusform>Set &apos;complete&apos; sub-condition on one item</numerusform>
+            <numerusform>Set &apos;complete&apos; sub-condition on %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Set &apos;incomplete&apos; sub-condition on %n item(s)</source>
+        <translation>
+            <numerusform>Set &apos;incomplete&apos; sub-condition on one item</numerusform>
+            <numerusform>Set &apos;incomplete&apos; sub-condition on %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Set &apos;retain&apos; flag on %n item(s)</source>
+        <translation>
+            <numerusform>Set &apos;retain&apos; flag on one item</numerusform>
+            <numerusform>Set &apos;retain&apos; flag on %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Cleared &apos;retain&apos; flag on %n item(s)</source>
+        <translation>
+            <numerusform>Cleared &apos;retain&apos; flag on one item</numerusform>
+            <numerusform>Cleared &apos;retain&apos; flag on %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Toggled &apos;retain&apos; flag on %n item(s)</source>
+        <translation>
+            <numerusform>Toggled &apos;retain&apos; flag on one item</numerusform>
+            <numerusform>Toggled &apos;retain&apos; flag on %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Cleared &apos;stockroom&apos; flag on %n item(s)</source>
+        <translation>
+            <numerusform>Cleared &apos;stockroom&apos; flag on one item</numerusform>
+            <numerusform>Cleared &apos;stockroom&apos; flag on %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Set stockroom to &apos;A&apos; on %n item(s)</source>
+        <translation>
+            <numerusform>Set stockroom to &apos;A&apos; on one item</numerusform>
+            <numerusform>Set stockroom to &apos;A&apos; on %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Set stockroom to &apos;B&apos; on %n item(s)</source>
+        <translation>
+            <numerusform>Set stockroom to &apos;B&apos; on one item</numerusform>
+            <numerusform>Set stockroom to &apos;B&apos; on %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Set stockroom to &apos;C&apos; on %n item(s)</source>
+        <translation>
+            <numerusform>Set stockroom to &apos;C&apos; on one item</numerusform>
+            <numerusform>Set stockroom to &apos;C&apos; on %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Set price on %n item(s)</source>
+        <translation>
+            <numerusform>Set price on one item</numerusform>
+            <numerusform>Set price on %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Price change on %n item(s)</source>
+        <translation>
+            <numerusform>Price change on one item</numerusform>
+            <numerusform>Price change on %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Set sale on %n item(s)</source>
+        <translation>
+            <numerusform>Set sale on one item</numerusform>
+            <numerusform>Set sale on %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Set bulk quantity on %n item(s)</source>
+        <translation>
+            <numerusform>Set bulk quantity on one item</numerusform>
+            <numerusform>Set bulk quantity on %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Set color on %n item(s)</source>
+        <translation>
+            <numerusform>Set color on one item</numerusform>
+            <numerusform>Set color on %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Set quantity on %n item(s)</source>
+        <translation>
+            <numerusform>Set quantity on one item</numerusform>
+            <numerusform>Set quantity on %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Set remark on %n item(s)</source>
+        <translation>
+            <numerusform>Set remark on one item</numerusform>
+            <numerusform>Set remark on %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Modified remark on %n item(s)</source>
+        <translation>
+            <numerusform>Modified remark on one item</numerusform>
+            <numerusform>Modified remark on %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Set comment on %n item(s)</source>
+        <translation>
+            <numerusform>Set comment on one item</numerusform>
+            <numerusform>Set comment on %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Modified comment on %n item(s)</source>
+        <translation>
+            <numerusform>Modified comment on one item</numerusform>
+            <numerusform>Modified comment on %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Set reservation on %n item(s)</source>
+        <translation>
+            <numerusform>Set reservation on one item</numerusform>
+            <numerusform>Set reservation on %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Copied Remarks for %n item(s)</source>
+        <translation>
+            <numerusform>Copied Remarks for one item</numerusform>
+            <numerusform>Copied Remarks for %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Subtracted %n item(s)</source>
+        <translation>
+            <numerusform>Subtracted one item</numerusform>
+            <numerusform>Subtracted %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Parted out %n item(s)</source>
+        <translation>
+            <numerusform>Parted out one item</numerusform>
+            <numerusform>Parted out %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>There are %n item(s) selected.&lt;br /&gt;&lt;br /&gt;Do you want to export only these items?</source>
+        <translation>
+            <numerusform>There is one item selected.&lt;br /&gt;&lt;br /&gt;Do you want to export only this item?</numerusform>
+            <numerusform>There are %n items selected.&lt;br /&gt;&lt;br /&gt;Do you want to export only these items?</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>The quantities of %n lot(s) are not divisible without remainder by %1.&lt;br /&gt;&lt;br /&gt;Nothing has been modified.</source>
+        <translation>
+            <numerusform>The quantity of one lot is not divisible without remainder by %1.&lt;br /&gt;&lt;br /&gt;Nothing has been modified.</numerusform>
+            <numerusform>The quantities of %n lots are not divisible without remainder by %1.&lt;br /&gt;&lt;br /&gt;Nothing has been modified.</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Quantity divide by %1 on %n item(s)</source>
+        <translation>
+            <numerusform>Quantity divide by %1 on one item</numerusform>
+            <numerusform>Quantity divide by %1 on %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Quantity multiply by %1 on %n items</source>
+        <translation>
+            <numerusform>Quantity multiply by %1 on %n item</numerusform>
+            <numerusform>Quantity multiply by %1 on %n items</numerusform>
+        </translation>
     </message>
 </context>
 <context>
