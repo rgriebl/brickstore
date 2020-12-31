@@ -56,13 +56,22 @@
 
 template <typename TG, typename TS = TG> class setOrToggle {
 public:
-    static void toggle(Window *w, const QString &actiontext, TG(Document::Item::* getter)() const, void (Document::Item::* setter)(TS t), TS val1, TS val2)
-    { set_or_toggle(w, true, actiontext, getter, setter, val1, val2); }
-    static void set(Window *w, const QString &actiontext, TG(Document::Item::* getter)() const, void (Document::Item::* setter)(TS t), TS val)
-    { set_or_toggle(w, false, actiontext, getter, setter, val, TG()); }
+    static void toggle(Window *w, const char *actiontext, TG(Document::Item::* getter)() const,
+                       void (Document::Item::* setter)(TS t), TS val1, TS val2)
+    {
+        set_or_toggle(w, true, actiontext, getter, setter, val1, val2);
+    }
+
+    static void set(Window *w, const char *actiontext, TG(Document::Item::* getter)() const,
+                    void (Document::Item::* setter)(TS t), TS val)
+    {
+        set_or_toggle(w, false, actiontext, getter, setter, val, TG());
+    }
 
 private:
-    static void set_or_toggle(Window *w, bool toggle, const QString &actiontext, TG(Document::Item::* getter)() const, void (Document::Item::* setter)(TS t), TS val1, TS val2 = TG())
+    static void set_or_toggle(Window *w, bool toggle, const char *actiontext,
+                              TG(Document::Item::* getter)() const,
+                              void (Document::Item::* setter)(TS t), TS val1, TS val2 = TG())
     {
         Document *doc = w->document();
 
@@ -102,7 +111,9 @@ private:
                 }
             }
         }
-        doc->endMacro(actiontext.arg(count));
+
+
+        doc->endMacro(Window::tr(actiontext, nullptr, count));
     }
 };
 
@@ -590,7 +601,7 @@ void Window::mergeItems(const Document::ItemList &items, uint globalmergeflags)
             mergecount++;
         }
     }
-    m_doc->endMacro(tr("Merged %1 items").arg(mergecount));
+    m_doc->endMacro(tr("Merged %n item(s)", nullptr, mergecount));
 }
 
 QDomElement Window::createGuiStateXML(QDomDocument doc)
@@ -704,92 +715,92 @@ void Window::on_edit_reset_diffs_triggered()
 
 void Window::on_edit_status_include_triggered()
 {
-    setOrToggle<BrickLink::Status>::set(this, tr("Set 'include' status on %1 items"), &Document::Item::status, &Document::Item::setStatus, BrickLink::Status::Include);
+    setOrToggle<BrickLink::Status>::set(this, QT_TR_N_NOOP("Set 'include' status on %n item(s)"), &Document::Item::status, &Document::Item::setStatus, BrickLink::Status::Include);
 }
 
 void Window::on_edit_status_exclude_triggered()
 {
-    setOrToggle<BrickLink::Status>::set(this, tr("Set 'exclude' status on %1 items"), &Document::Item::status, &Document::Item::setStatus, BrickLink::Status::Exclude);
+    setOrToggle<BrickLink::Status>::set(this, QT_TR_N_NOOP("Set 'exclude' status on %n item(s)"), &Document::Item::status, &Document::Item::setStatus, BrickLink::Status::Exclude);
 }
 
 void Window::on_edit_status_extra_triggered()
 {
-    setOrToggle<BrickLink::Status>::set(this, tr("Set 'extra' status on %1 items"), &Document::Item::status, &Document::Item::setStatus, BrickLink::Status::Extra);
+    setOrToggle<BrickLink::Status>::set(this, QT_TR_N_NOOP("Set 'extra' status on %n item(s)"), &Document::Item::status, &Document::Item::setStatus, BrickLink::Status::Extra);
 }
 
 void Window::on_edit_status_toggle_triggered()
 {
-    setOrToggle<BrickLink::Status>::toggle(this, tr("Toggled status on %1 items"), &Document::Item::status, &Document::Item::setStatus, BrickLink::Status::Include, BrickLink::Status::Exclude);
+    setOrToggle<BrickLink::Status>::toggle(this, QT_TR_N_NOOP("Toggled status on %n item(s)"), &Document::Item::status, &Document::Item::setStatus, BrickLink::Status::Include, BrickLink::Status::Exclude);
 }
 
 void Window::on_edit_cond_new_triggered()
 {
-    setOrToggle<BrickLink::Condition>::set(this, tr("Set 'new' condition on %1 items"), &Document::Item::condition, &Document::Item::setCondition, BrickLink::Condition::New);
+    setOrToggle<BrickLink::Condition>::set(this, QT_TR_N_NOOP("Set 'new' condition on %n item(s)"), &Document::Item::condition, &Document::Item::setCondition, BrickLink::Condition::New);
 }
 
 void Window::on_edit_cond_used_triggered()
 {
-    setOrToggle<BrickLink::Condition>::set(this, tr("Set 'used' condition on %1 items"), &Document::Item::condition, &Document::Item::setCondition, BrickLink::Condition::Used);
+    setOrToggle<BrickLink::Condition>::set(this, QT_TR_N_NOOP("Set 'used' condition on %n item(s)"), &Document::Item::condition, &Document::Item::setCondition, BrickLink::Condition::Used);
 }
 
 void Window::on_edit_cond_toggle_triggered()
 {
-    setOrToggle<BrickLink::Condition>::toggle(this, tr("Toggled condition on %1 items"), &Document::Item::condition, &Document::Item::setCondition, BrickLink::Condition::New, BrickLink::Condition::Used);
+    setOrToggle<BrickLink::Condition>::toggle(this, QT_TR_N_NOOP("Toggled condition on %n item(s)"), &Document::Item::condition, &Document::Item::setCondition, BrickLink::Condition::New, BrickLink::Condition::Used);
 }
 
 void Window::on_edit_subcond_none_triggered()
 {
-    setOrToggle<BrickLink::SubCondition>::set(this, tr("Set 'none' sub-condition on %1 items"), &Document::Item::subCondition, &Document::Item::setSubCondition, BrickLink::SubCondition::None);
+    setOrToggle<BrickLink::SubCondition>::set(this, QT_TR_N_NOOP("Set 'none' sub-condition on %n item(s)"), &Document::Item::subCondition, &Document::Item::setSubCondition, BrickLink::SubCondition::None);
 }
 
 void Window::on_edit_subcond_sealed_triggered()
 {
-    setOrToggle<BrickLink::SubCondition>::set(this, tr("Set 'sealed' sub-condition on %1 items"), &Document::Item::subCondition, &Document::Item::setSubCondition, BrickLink::SubCondition::Sealed);
+    setOrToggle<BrickLink::SubCondition>::set(this, QT_TR_N_NOOP("Set 'sealed' sub-condition on %n item(s)"), &Document::Item::subCondition, &Document::Item::setSubCondition, BrickLink::SubCondition::Sealed);
 }
 
 void Window::on_edit_subcond_complete_triggered()
 {
-    setOrToggle<BrickLink::SubCondition>::set(this, tr("Set 'complete' sub-condition on %1 items"), &Document::Item::subCondition, &Document::Item::setSubCondition, BrickLink::SubCondition::Complete);
+    setOrToggle<BrickLink::SubCondition>::set(this, QT_TR_N_NOOP("Set 'complete' sub-condition on %n item(s)"), &Document::Item::subCondition, &Document::Item::setSubCondition, BrickLink::SubCondition::Complete);
 }
 
 void Window::on_edit_subcond_incomplete_triggered()
 {
-    setOrToggle<BrickLink::SubCondition>::set(this, tr("Set 'incomplete' sub-condition on %1 items"), &Document::Item::subCondition, &Document::Item::setSubCondition, BrickLink::SubCondition::Incomplete);
+    setOrToggle<BrickLink::SubCondition>::set(this, QT_TR_N_NOOP("Set 'incomplete' sub-condition on %n item(s)"), &Document::Item::subCondition, &Document::Item::setSubCondition, BrickLink::SubCondition::Incomplete);
 }
 
 void Window::on_edit_retain_yes_triggered()
 {
-    setOrToggle<bool>::set(this, tr("Set 'retain' flag on %1 items"), &Document::Item::retain, &Document::Item::setRetain, true);
+    setOrToggle<bool>::set(this, QT_TR_N_NOOP("Set 'retain' flag on %n item(s)"), &Document::Item::retain, &Document::Item::setRetain, true);
 }
 
 void Window::on_edit_retain_no_triggered()
 {
-    setOrToggle<bool>::set(this, tr("Cleared 'retain' flag on %1 items"), &Document::Item::retain, &Document::Item::setRetain, false);
+    setOrToggle<bool>::set(this, QT_TR_N_NOOP("Cleared 'retain' flag on %n item(s)"), &Document::Item::retain, &Document::Item::setRetain, false);
 }
 
 void Window::on_edit_retain_toggle_triggered()
 {
-    setOrToggle<bool>::toggle(this, tr("Toggled 'retain' flag on %1 items"), &Document::Item::retain, &Document::Item::setRetain, true, false);
+    setOrToggle<bool>::toggle(this, QT_TR_N_NOOP("Toggled 'retain' flag on %n item(s)"), &Document::Item::retain, &Document::Item::setRetain, true, false);
 }
 
 void Window::on_edit_stockroom_no_triggered()
 {
-    setOrToggle<BrickLink::Stockroom>::set(this, tr("Cleared 'stockroom' flag on %1 items"), &Document::Item::stockroom, &Document::Item::setStockroom, BrickLink::Stockroom::None);
+    setOrToggle<BrickLink::Stockroom>::set(this, QT_TR_N_NOOP("Cleared 'stockroom' flag on %n item(s)"), &Document::Item::stockroom, &Document::Item::setStockroom, BrickLink::Stockroom::None);
 }
 
 void Window::on_edit_stockroom_a_triggered()
 {
-    setOrToggle<BrickLink::Stockroom>::set(this, tr("Set stockroom to 'A' on %1 items"), &Document::Item::stockroom, &Document::Item::setStockroom, BrickLink::Stockroom::A);
+    setOrToggle<BrickLink::Stockroom>::set(this, QT_TR_N_NOOP("Set stockroom to 'A' on %n item(s)"), &Document::Item::stockroom, &Document::Item::setStockroom, BrickLink::Stockroom::A);
 }
 
 void Window::on_edit_stockroom_b_triggered()
 {
-    setOrToggle<BrickLink::Stockroom>::set(this, tr("Set stockroom to 'B' on %1 items"), &Document::Item::stockroom, &Document::Item::setStockroom, BrickLink::Stockroom::B);
+    setOrToggle<BrickLink::Stockroom>::set(this, QT_TR_N_NOOP("Set stockroom to 'B' on %n item(s)"), &Document::Item::stockroom, &Document::Item::setStockroom, BrickLink::Stockroom::B);
 }
 
 void Window::on_edit_stockroom_c_triggered()
 {
-    setOrToggle<BrickLink::Stockroom>::set(this, tr("Set stockroom to 'C' on %1 items"), &Document::Item::stockroom, &Document::Item::setStockroom, BrickLink::Stockroom::C);
+    setOrToggle<BrickLink::Stockroom>::set(this, QT_TR_N_NOOP("Set stockroom to 'C' on %n item(s)"), &Document::Item::stockroom, &Document::Item::setStockroom, BrickLink::Stockroom::C);
 }
 
 
@@ -801,7 +812,7 @@ void Window::on_edit_price_set_triggered()
     double price = selection().front()->price();
 
     if (MessageBox::getDouble(this, tr("Enter the new price for all selected items:"), Currency::localSymbol(m_doc->currencyCode()), price, 0, 10000, 3)) {
-        setOrToggle<double>::set(this, tr("Set price on %1 items"), &Document::Item::price, &Document::Item::setPrice, price);
+        setOrToggle<double>::set(this, QT_TR_N_NOOP("Set price on %n item(s)"), &Document::Item::price, &Document::Item::setPrice, price);
     }
 }
 
@@ -827,7 +838,7 @@ void Window::on_edit_price_round_triggered()
             roundcount++;
         }
     }
-    m_doc->endMacro(tr("Price change on %1 items").arg(roundcount));
+    m_doc->endMacro(tr("Price change on %n item(s)", nullptr, roundcount));
 }
 
 
@@ -970,7 +981,7 @@ void Window::on_edit_price_inc_dec_triggered()
             incdeccount++;
         }
 
-        m_doc->endMacro(tr("Price change on %1 items").arg(incdeccount));
+        m_doc->endMacro(tr("Price change on %n item(s)", nullptr, incdeccount));
     }
 }
 
@@ -991,7 +1002,7 @@ void Window::on_edit_qty_divide_triggered()
             }
 
             if (lots_with_errors) {
-                MessageBox::information(this, tr("The quantities of %1 lots are not divisible without remainder by %2.<br /><br />Nothing has been modified.").arg(lots_with_errors).arg(divisor));
+                MessageBox::information(this, tr("The quantities of %n lot(s) are not divisible without remainder by %1.<br /><br />Nothing has been modified.", nullptr, lots_with_errors).arg(divisor));
             }
             else {
                 uint divcount = 0;
@@ -1007,7 +1018,7 @@ void Window::on_edit_qty_divide_triggered()
 
                     divcount++;
                 }
-                m_doc->endMacro(tr("Quantity divide by %1 on %2 Items").arg(divisor).arg(divcount));
+                m_doc->endMacro(tr("Quantity divide by %1 on %n item(s)", nullptr, divcount).arg(divisor));
             }
         }
     }
@@ -1035,7 +1046,7 @@ void Window::on_edit_qty_multiply_triggered()
 
                 mulcount++;
             }
-            m_doc->endMacro(tr("Quantity multiply by %1 on %2 Items").arg(factor).arg(mulcount));
+            m_doc->endMacro(tr("Quantity multiply by %1 on %n items", nullptr, mulcount).arg(factor));
         }
     }
 }
@@ -1048,7 +1059,7 @@ void Window::on_edit_sale_triggered()
     int sale = selection().front()->sale();
 
     if (MessageBox::getInteger(this, tr("Set sale in percent for the selected items (this will <u>not</u> change any prices).<br />Negative values are also allowed."), tr("%"), sale, -1000, 99))
-        setOrToggle<int>::set(this, tr("Set sale on %1 items"), &Document::Item::sale, &Document::Item::setSale, sale);
+        setOrToggle<int>::set(this, QT_TR_N_NOOP("Set sale on %n item(s)"), &Document::Item::sale, &Document::Item::setSale, sale);
 }
 
 void Window::on_edit_bulk_triggered()
@@ -1059,7 +1070,7 @@ void Window::on_edit_bulk_triggered()
     int bulk = selection().front()->bulkQuantity();
 
     if (MessageBox::getInteger(this, tr("Set bulk quantity for the selected items:"), QString(), bulk, 1, 99999))
-        setOrToggle<int>::set(this, tr("Set bulk quantity on %1 items"), &Document::Item::bulkQuantity, &Document::Item::setBulkQuantity, bulk);
+        setOrToggle<int>::set(this, QT_TR_N_NOOP("Set bulk quantity on %n item(s)"), &Document::Item::bulkQuantity, &Document::Item::setBulkQuantity, bulk);
 }
 
 void Window::on_edit_color_triggered()
@@ -1072,7 +1083,7 @@ void Window::on_edit_color_triggered()
     d.setColor(selection().front()->color());
 
     if (d.exec() == QDialog::Accepted)
-        setOrToggle<const BrickLink::Color *>::set(this, tr( "Set color on %1 items" ), &Document::Item::color, &Document::Item::setColor, d.color());
+        setOrToggle<const BrickLink::Color *>::set(this, QT_TR_N_NOOP( "Set color on %n item(s)" ), &Document::Item::color, &Document::Item::setColor, d.color());
 }
 
 void Window::on_edit_qty_set_triggered()
@@ -1083,7 +1094,7 @@ void Window::on_edit_qty_set_triggered()
     int quantity = selection().front()->quantity();
 
     if (MessageBox::getInteger(this, tr("Enter the new quantities for all selected items:"), QString(), quantity, -100000, 100000))
-        setOrToggle<int>::set(this, tr("Set quantity on %1 items"), &Document::Item::quantity, &Document::Item::setQuantity, quantity);
+        setOrToggle<int>::set(this, QT_TR_N_NOOP("Set quantity on %n item(s)"), &Document::Item::quantity, &Document::Item::setQuantity, quantity);
 }
 
 void Window::on_edit_remark_set_triggered()
@@ -1094,7 +1105,7 @@ void Window::on_edit_remark_set_triggered()
     QString remarks = selection().front()->remarks();
 
     if (MessageBox::getString(this, tr("Enter the new remark for all selected items:"), remarks))
-        setOrToggle<QString, const QString &>::set(this, tr("Set remark on %1 items"), &Document::Item::remarks, &Document::Item::setRemarks, remarks);
+        setOrToggle<QString, const QString &>::set(this, QT_TR_N_NOOP("Set remark on %n item(s)"), &Document::Item::remarks, &Document::Item::setRemarks, remarks);
 }
 
 void Window::on_edit_remark_add_triggered()
@@ -1134,7 +1145,7 @@ void Window::on_edit_remark_add_triggered()
             }
             wp.step();
         }
-        m_doc->endMacro(tr("Modified remark on %1 items").arg(remarkcount));
+        m_doc->endMacro(tr("Modified remark on %n item(s)", nullptr, remarkcount));
     }
 }
 
@@ -1168,7 +1179,7 @@ void Window::on_edit_remark_rem_triggered()
             }
             wp.step();
         }
-        m_doc->endMacro(tr("Modified remark on %1 items").arg(remarkcount));
+        m_doc->endMacro(tr("Modified remark on %n item(s)", nullptr, remarkcount));
     }
 }
 
@@ -1181,7 +1192,7 @@ void Window::on_edit_comment_set_triggered()
     QString comments = selection().front()->comments();
 
     if (MessageBox::getString(this, tr("Enter the new comment for all selected items:"), comments))
-        setOrToggle<QString, const QString &>::set(this, tr("Set comment on %1 items"), &Document::Item::comments, &Document::Item::setComments, comments);
+        setOrToggle<QString, const QString &>::set(this, QT_TR_N_NOOP("Set comment on %n item(s)"), &Document::Item::comments, &Document::Item::setComments, comments);
 }
 
 void Window::on_edit_comment_add_triggered()
@@ -1221,7 +1232,7 @@ void Window::on_edit_comment_add_triggered()
             }
             wp.step();
         }
-        m_doc->endMacro(tr("Modified comment on %1 items").arg(commentcount));
+        m_doc->endMacro(tr("Modified comment on %n item(s)", nullptr, commentcount));
     }
 }
 
@@ -1255,7 +1266,7 @@ void Window::on_edit_comment_rem_triggered()
             }
             wp.step();
         }
-        m_doc->endMacro(tr("Modified comment on %1 items").arg(commentcount));
+        m_doc->endMacro(tr("Modified comment on %n item(s)", nullptr, commentcount));
     }
 }
 
@@ -1268,7 +1279,7 @@ void Window::on_edit_reserved_triggered()
     QString reserved = selection().front()->reserved();
 
     if (MessageBox::getString(this, tr("Reserve all selected items for this specific buyer (BrickLink username):"), reserved))
-        setOrToggle<QString, const QString &>::set(this, tr("Set reservation on %1 items"), &Document::Item::reserved, &Document::Item::setReserved, reserved);
+        setOrToggle<QString, const QString &>::set(this, QT_TR_N_NOOP("Set reservation on %n item(s)"), &Document::Item::reserved, &Document::Item::setReserved, reserved);
 }
 
 void Window::updateErrorMask()
@@ -1334,7 +1345,7 @@ void Window::copyRemarks(const BrickLink::InvItemList &items)
             copy_count++;
         }
     }
-    m_doc->endMacro(tr("Copied Remarks for %1 Items").arg(copy_count));
+    m_doc->endMacro(tr("Copied Remarks for %n item(s)", nullptr, copy_count));
 }
 
 void Window::on_edit_subtractitems_triggered()
@@ -1409,7 +1420,7 @@ void Window::subtractItems(const BrickLink::InvItemList &items)
             }
         }
     }
-    m_doc->endMacro(tr("Subtracted %1 Items").arg(items.count()));
+    m_doc->endMacro(tr("Subtracted %n item(s)", nullptr, items.count()));
 }
 
 void Window::on_edit_mergeitems_triggered()
@@ -1456,7 +1467,7 @@ void Window::on_edit_partoutitems_triggered()
             wp.step();
         }
         if (inplace)
-            m_doc->endMacro(tr("Parted out %1 Items").arg(partcount));
+            m_doc->endMacro(tr("Parted out %n item(s)", nullptr, partcount));
     }
     else
         QApplication::beep();
@@ -1727,13 +1738,18 @@ Document::ItemList Window::exportCheck() const
     Document::ItemList items = m_doc->items();
 
     if (!selection().isEmpty() && (selection().count() != m_doc->items().count())) {
-        if (MessageBox::question(FrameWork::inst(), tr("There are %1 items selected.<br /><br />Do you want to export only these items?").arg(selection().count()), MessageBox::Yes | MessageBox::No, MessageBox::No) == MessageBox::Yes) {
+        if (MessageBox::question(FrameWork::inst(),
+                                 tr("There are %n item(s) selected.<br /><br />Do you want to export only these items?",
+                                    nullptr, selection().count()),
+                                 MessageBox::Yes | MessageBox::No, MessageBox::No) == MessageBox::Yes) {
             items = selection();
         }
     }
 
     if (m_doc->statistics(items).errors()) {
-        if (MessageBox::warning(FrameWork::inst(), tr("This list contains items with errors.<br /><br />Do you really want to export this list?"), MessageBox::Yes | MessageBox::No, MessageBox::No) != MessageBox::Yes)
+        if (MessageBox::warning(FrameWork::inst(),
+                                tr("This list contains items with errors.<br /><br />Do you really want to export this list?"),
+                                MessageBox::Yes | MessageBox::No, MessageBox::No) != MessageBox::Yes)
             items.clear();
     }
 
