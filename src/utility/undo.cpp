@@ -197,11 +197,14 @@ QWidget *UndoAction::createWidget(QWidget *parent)
         m_list->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         m_list->setMouseTracking(true);
         m_list->setResizeMode(QListView::Adjust);
+        auto pal = QApplication::palette(m_menu);
+//        pal.setColor(QPalette::Base, pal.color(QPalette::Window));
+//        pal.setColor(QPalette::Text, pal.color(QPalette::WindowText));
+        m_list->setPalette(pal);
 
         m_label = new QLabel();
         m_label->setAlignment(Qt::AlignCenter);
-        m_label->setPalette(QApplication::palette(m_menu));
-        m_label->setBackgroundRole(m_menu->backgroundRole());
+        m_label->setPalette(pal);
 
         l->addWidget(m_list);
         l->addWidget(m_label);
