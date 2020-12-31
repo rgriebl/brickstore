@@ -65,8 +65,8 @@ public:
         }
     }
 
-    QSize minimumSizeHint() const override;
     QSize sizeHint() const override;
+    bool hasHeightForWidth() const override;
     int heightForWidth(int) const override;
 
 protected:
@@ -171,17 +171,7 @@ int WelcomeButton::descriptionHeight(int widgetWidth) const
     int lineWidth = widgetWidth - textOffset() - m_margin;
     QStaticText copy(m_description);
     copy.setTextWidth(lineWidth);
-    return m_description.size().height();
-}
-
-
-QSize WelcomeButton::minimumSizeHint() const
-{
-    QSize size = sizeHint();
-    int minimumHeight = qMax(descriptionOffset() + m_margin,
-                             m_margin + icon().actualSize(iconSize()).height() + m_margin);
-    size.setHeight(minimumHeight);
-    return size;
+    return copy.size().height();
 }
 
 QSize WelcomeButton::sizeHint() const
@@ -196,6 +186,11 @@ QSize WelcomeButton::sizeHint() const
     size.setHeight(qMax(m_description.text().isEmpty() ? 41 : 60,
                         heightWithoutDescription + descriptionHeight(buttonWidth)));
     return size;
+}
+
+bool WelcomeButton::hasHeightForWidth() const
+{
+    return true;
 }
 
 int WelcomeButton::heightForWidth(int width) const
