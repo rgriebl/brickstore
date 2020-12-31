@@ -21,6 +21,7 @@
 #include "settingsdialog.h"
 #include "config.h"
 #include "bricklink.h"
+#include "bricklink_model.h"
 #include "utility.h"
 #include "messagebox.h"
 

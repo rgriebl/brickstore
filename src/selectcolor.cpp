@@ -17,7 +17,7 @@
 #include <QEvent>
 #include <QComboBox>
 
-#include "bricklink.h"
+#include "bricklink_model.h"
 #include "selectcolor.h"
 
 

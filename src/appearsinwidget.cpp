@@ -21,7 +21,7 @@
 
 #include "framework.h"
 #include "picturewidget.h"
-#include "bricklink.h"
+#include "bricklink_model.h"
 
 #include "appearsinwidget.h"
 

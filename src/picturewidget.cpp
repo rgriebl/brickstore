@@ -22,6 +22,7 @@
 #include <QPainter>
 
 #include "bricklink.h"
+#include "bricklink_model.h"
 #include "picturewidget.h"
 
 

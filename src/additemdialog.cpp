@@ -29,6 +29,7 @@
 #include "config.h"
 #include "currency.h"
 #include "bricklink.h"
+#include "bricklink_model.h"
 #include "window.h"
 #include "document.h"
 #include "picturewidget.h"

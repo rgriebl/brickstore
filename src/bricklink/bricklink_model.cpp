@@ -20,9 +20,14 @@
 #include <QAbstractItemView>
 #include <QApplication>
 #include <QRegularExpression>
+#include <QToolTip>
+#include <QLabel>
+#include <QDesktopWidget>
 
 #include "bricklink.h"
+#include "bricklink_model.h"
 #include "utility.h"
+#include "qtemporaryresource.h"
 
 #if defined(MODELTEST)
 #  include "modeltest.h"
@@ -835,5 +840,82 @@ bool BrickLink::ItemDelegate::helpEvent(QHelpEvent *event, QAbstractItemView *vi
         return true;
     } else {
         return QStyledItemDelegate::helpEvent(event, view, option, index);
+    }
+}
+
+
+
+BrickLink::ToolTip *BrickLink::ToolTip::s_inst = nullptr;
+
+BrickLink::ToolTip *BrickLink::ToolTip::inst()
+{
+    if (!s_inst) {
+        s_inst = new ToolTip();
+        connect(core(), &Core::pictureUpdated, s_inst, &ToolTip::pictureUpdated);
+    }
+    return s_inst;
+}
+
+bool BrickLink::ToolTip::show(const BrickLink::Item *item, const BrickLink::Color *color, const QPoint &globalPos, QWidget *parent)
+{
+    Q_UNUSED(color)
+
+    if (BrickLink::Picture *pic = BrickLink::core()->picture(item, nullptr, true)) {
+        QTemporaryResource::registerResource("#/tooltip_picture.png", pic->valid() ? pic->image() : QImage());
+        m_tooltip_pic = (pic->updateStatus() == UpdateStatus::Updating) ? pic : nullptr;
+
+        // need to 'clear' to reset the image cache of the QTextDocument
+        const auto tlwidgets = QApplication::topLevelWidgets();
+        for (QWidget *w : tlwidgets) {
+            if (w->inherits("QTipLabel")) {
+                qobject_cast<QLabel *>(w)->clear();
+                break;
+            }
+        }
+        QString tt = createToolTip(pic->item(), pic);
+        if (!tt.isEmpty()) {
+            QToolTip::showText(globalPos, tt, parent);
+            return true;
+        }
+    }
+    return false;
+}
+
+QString BrickLink::ToolTip::createToolTip(const BrickLink::Item *item, BrickLink::Picture *pic) const
+{
+    QString str = QLatin1String(R"(<div class="tooltip_picture"><table><tr><td rowspan="2">%1</td><td><b>%2</b></td></tr><tr><td>%3</td></tr></table></div>)");
+    QString img_left = QLatin1String("<img src=\"#/tooltip_picture.png\" />");
+    QString note_left = QLatin1String("<i>") + BrickLink::ItemDelegate::tr("[Image is loading]") + QLatin1String("</i>");
+
+    if (pic && (pic->updateStatus() == UpdateStatus::Updating))
+        return str.arg(note_left, item->id(), item->name());
+    else
+        return str.arg(img_left, item->id(), item->name());
+}
+
+void BrickLink::ToolTip::pictureUpdated(BrickLink::Picture *pic)
+{
+    if (!pic || pic != m_tooltip_pic)
+        return;
+
+    m_tooltip_pic = nullptr;
+
+    if (QToolTip::isVisible() && QToolTip::text().startsWith("<div class=\"tooltip_picture\">")) {
+        QTemporaryResource::registerResource("#/tooltip_picture.png", pic->image());
+
+        const auto tlwidgets = QApplication::topLevelWidgets();
+        for (QWidget *w : tlwidgets) {
+            if (w->inherits("QTipLabel")) {
+                qobject_cast<QLabel *>(w)->clear();
+                qobject_cast<QLabel *>(w)->setText(createToolTip(pic->item(), pic));
+
+                QRect r(w->pos(), w->sizeHint());
+                QRect desktop = QApplication::desktop()->screenGeometry(w);
+                r.translate(r.right() > desktop.right() ? desktop.right() - r.right() : 0,
+                            r.bottom() > desktop.bottom() ? desktop.bottom() - r.bottom() : 0);
+                w->setGeometry(r);
+                break;
+            }
+        }
     }
 }

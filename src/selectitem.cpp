@@ -36,7 +36,7 @@
 #include <QContextMenuEvent>
 #include <QLineEdit>
 
-#include "bricklink.h"
+#include "bricklink_model.h"
 #include "selectitem.h"
 #include "utility.h"
 #include "messagebox.h"
