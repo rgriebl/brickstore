@@ -12,7 +12,8 @@
 ## See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 
 
-MIN_QT_VERSION = 5.11.0
+backend-only:MIN_QT_VERSION = 5.11.0
+else:MIN_QT_VERSION = 5.12.0
 
 NAME        = "BrickStore"
 DESCRIPTION = "$$NAME - an offline BrickLink inventory management tool."
@@ -80,6 +81,7 @@ qt_translations.base = $$[QT_INSTALL_TRANSLATIONS]
 qt_translations.prefix = i18n
 RESOURCES += qt_translations
 
+backend-only:DEFINES *= BRICKSTORE_BACKEND_ONLY
 
 include(src/src.pri)
 include(src/utility/utility.pri)
@@ -202,6 +204,8 @@ unix:!macos {
 
     package.depends = $(DESTDIR_TARGET)
     package.commands = scripts/create-debian-changelog.sh $$VERSION > debian/changelog
+    package.commands += && export QMAKE_BIN=\"$$QMAKE_QMAKE\"
+    backend-only:package.commands += && export QMAKE_EXTRA_CONFIG=\"CONFIG+=backend-only\"
     package.commands += && dpkg-buildpackage --build=binary --check-builddeps --jobs=auto --root-command=fakeroot \
                                              --unsigned-source --unsigned-changes --compression=xz
     package.commands += && mv ../brickstore*.deb .

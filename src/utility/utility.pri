@@ -1,7 +1,7 @@
 RELPWD = $$replace(PWD,$$_PRO_FILE_PWD_,.)
 
 QT *= core_private concurrent
-macos:QT *= gui_private
+macos:!backend-only:QT *= gui_private
 
 INCLUDEPATH += $$RELPWD
 DEPENDPATH  += $$RELPWD
@@ -9,6 +9,21 @@ DEPENDPATH  += $$RELPWD
 HEADERS += \
     $$PWD/chunkreader.h \
     $$PWD/chunkwriter.h \
+    $$PWD/q3cache.h \
+    $$PWD/staticpointermodel.h \
+    $$PWD/stopwatch.h \
+    $$PWD/transfer.h \
+    $$PWD/utility.h \
+
+SOURCES += \
+    $$PWD/chunkreader.cpp \
+    $$PWD/staticpointermodel.cpp \
+    $$PWD/transfer.cpp \
+    $$PWD/utility.cpp \
+
+!backend-only {
+
+HEADERS += \
     $$PWD/currency.h \
     $$PWD/filter.h \
     $$PWD/headerview.h \
@@ -16,20 +31,14 @@ HEADERS += \
     $$PWD/messagebox.h \
     $$PWD/progresscircle.h \
     $$PWD/progressdialog.h \
-    $$PWD/q3cache.h \
     $$PWD/qparallelsort.h \
     $$PWD/qtemporaryresource.h \
     $$PWD/qtemporaryresource_p.h \
-    $$PWD/stopwatch.h \
-    $$PWD/staticpointermodel.h \
-    $$PWD/transfer.h \
     $$PWD/undo.h \
-    $$PWD/utility.h \
     $$PWD/workspace.h \
 
 
 SOURCES += \
-    $$PWD/chunkreader.cpp \
     $$PWD/currency.cpp \
     $$PWD/filter.cpp \
     $$PWD/headerview.cpp \
@@ -38,8 +47,7 @@ SOURCES += \
     $$PWD/progresscircle.cpp \
     $$PWD/progressdialog.cpp \
     $$PWD/qtemporaryresource.cpp \
-    $$PWD/staticpointermodel.cpp \
-    $$PWD/transfer.cpp \
     $$PWD/undo.cpp \
-    $$PWD/utility.cpp \
     $$PWD/workspace.cpp \
+
+}

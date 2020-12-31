@@ -403,8 +403,8 @@ BrickLink::Core::Core(const QString &datadir)
     m_pic_diskload.setMaxThreadCount(QThread::idealThreadCount() * 3);
     m_online = true;
 
-    // cache size is physical memory * 0.25, at least 64MB, at most 256MB
-    quint64 cachemem = qBound(64ULL *1024*1024, Utility::physicalMemory() / 4, 256ULL *1024*1024);
+    // cache size is physical memory * 0.25, at least 128MB, at most 1GB
+    quint64 cachemem = qBound(128ULL *1024*1024, Utility::physicalMemory() / 4, 1024ULL *1024*1024);
     //quint64 cachemem = 1024*1024; // DEBUG
 
     m_pg_cache.setMaxCost(500);          // each priceguide has a cost of 1
@@ -1264,7 +1264,6 @@ bool BrickLink::Core::parseLDrawModelInternal(QFile &f, const QString &model_nam
     recursion_detection.append(model_name);
 
     QStringList searchpath;
-    QString ldrawdir = Config::inst()->lDrawDir();
     uint invalid = 0;
     int linecount = 0;
 
@@ -1275,8 +1274,8 @@ bool BrickLink::Core::parseLDrawModelInternal(QFile &f, const QString &model_nam
 
 
     searchpath.append(QFileInfo(f).dir().absolutePath());
-    if (!ldrawdir.isEmpty()) {
-        searchpath.append(ldrawdir + QLatin1String("/models"));
+    if (!m_ldraw_datadir.isEmpty()) {
+        searchpath.append(m_ldraw_datadir + QLatin1String("/models"));
     }
 
     if (f.isOpen()) {
@@ -1604,6 +1603,16 @@ void BrickLink::Core::setItemImageScaleFactor(qreal f)
     }
 }
 
+bool BrickLink::Core::isLDrawEnabled() const
+{
+    return !m_ldraw_datadir.isEmpty();
+}
+
+void BrickLink::Core::setLDrawDataPath(const QString &ldrawDataPath)
+{
+    m_ldraw_datadir = ldrawDataPath;
+}
+
 
 BrickLink::ToolTip *BrickLink::ToolTip::s_inst = nullptr;
 
@@ -1620,6 +1629,7 @@ bool BrickLink::ToolTip::show(const BrickLink::Item *item, const BrickLink::Colo
 {
     Q_UNUSED(color)
 
+#if !defined(BRICKSTORE_BACKEND_ONLY)
     if (BrickLink::Picture *pic = BrickLink::core()->picture(item, nullptr, true)) {
         QTemporaryResource::registerResource("#/tooltip_picture.png", pic->valid() ? pic->image() : QImage());
         m_tooltip_pic = (pic->updateStatus() == UpdateStatus::Updating) ? pic : nullptr;
@@ -1638,6 +1648,11 @@ bool BrickLink::ToolTip::show(const BrickLink::Item *item, const BrickLink::Colo
             return true;
         }
     }
+#else
+    Q_UNUSED(parent)
+    Q_UNUSED(globalPos)
+    Q_UNUSED(item)
+#endif
     return false;
 }
 
@@ -1660,6 +1675,7 @@ void BrickLink::ToolTip::pictureUpdated(BrickLink::Picture *pic)
 
     m_tooltip_pic = nullptr;
 
+#if !defined(BRICKSTORE_BACKEND_ONLY)
     if (QToolTip::isVisible() && QToolTip::text().startsWith("<div class=\"tooltip_picture\">")) {
         QTemporaryResource::registerResource("#/tooltip_picture.png", pic->image());
 
@@ -1678,6 +1694,7 @@ void BrickLink::ToolTip::pictureUpdated(BrickLink::Picture *pic)
             }
         }
     }
+#endif
 }
 
 #include "moc_bricklink.cpp"

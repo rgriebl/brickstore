@@ -8,12 +8,13 @@
 
 # Uncomment this to turn on verbose mode.
 export DH_VERBOSE=1
+QMAKE_BIN ?= "qmake-qt5"
 
 %:
 	dh $@ --parallel
 
 override_dh_auto_configure:
-	./configure --release --prefix=/usr
+	$(QMAKE_BIN) CONFIG+=release PREFIX=/usr $(QMAKE_EXTRA_CONFIG)
 
 override_dh_builddeb:
 	dh_builddeb -- -Zxz

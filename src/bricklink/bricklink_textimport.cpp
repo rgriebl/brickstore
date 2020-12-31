@@ -20,7 +20,6 @@
 #include <QtDebug>
 #include <QTimeZone>
 
-#include "utility.h"
 #include "bricklink.h"
 
 QString decodeEntities(const QString &src)

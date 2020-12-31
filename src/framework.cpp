@@ -185,9 +185,7 @@ public:
 
         QPalette p = palette();
         QLinearGradient g(0, 0, 1, 0.5);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        g.setCoordinateMode(QGradient::ObjectMode); // TODO5
-#endif
+        g.setCoordinateMode(QGradient::ObjectMode);
         g.setStops({ { 0, p.color(QPalette::Highlight) },
                      { .65, Utility::gradientColor(p.color(QPalette::Highlight), p.color(QPalette::Window), 0.5) },
                      { 1, p.color(QPalette::Window) } });

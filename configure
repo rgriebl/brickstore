@@ -42,9 +42,12 @@ while [ $# -gt 0 ]; do
     --release)
         debug_release="release"
         ;;
+    --backend-only)
+        backend_only="CONFIG+=backend_only"
+        ;;
     *)
         echo "Usage: configure [options]"
-        echo "  --qmake=<qmake path>   (default: search $$PATH)"
+        echo "  --qmake=<qmake path>   (default: search in \$PATH)"
         echo "  --prefix=<prefix>      (default: /usr/local)"
         echo "  --release"
         echo "  --debug"
@@ -76,11 +79,10 @@ fi
 
 echo
 echo "Running $qmake_bin with the following options:"
-echo "  PREFIX  = $prefix"
-echo "  CONFIG += $debug_release"
+echo "  PREFIX=$prefix CONFIG+=$debug_release $backend_onlyd"
 echo
 
-qmake_out=$("$qmake_bin" -r "PREFIX=$prefix" "CONFIG+=$debug_release" 2>&1)
+qmake_out=$("$qmake_bin" -r "PREFIX=$prefix" "CONFIG+=$debug_release" "$backend_only" 2>&1)
 qmake_res="$?"
 
 if [ "$qmake_res" != "0" ]; then

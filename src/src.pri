@@ -3,12 +3,24 @@ RELPWD = $$replace(PWD,$$_PRO_FILE_PWD_,.)
 INCLUDEPATH += $$RELPWD
 DEPENDPATH  += $$RELPWD
 
-QT *= core gui widgets xml network script scripttools printsupport uitools \ # networkauth
+QT *= core gui xml network # networkauth
+!backend-only:QT *= widgets script scripttools printsupport uitools
 
-win32:QT *= winextras
+win32:QT *= winextras widgets
 
 OTHER_FILES += \
   $$PWD/version.h.in \
+
+SOURCES += \
+  $$PWD/main.cpp \
+  $$PWD/rebuilddatabase.cpp \
+  $$PWD/ref.cpp \
+
+HEADERS += \
+  $$PWD/rebuilddatabase.h \
+  $$PWD/ref.h \
+
+!backend-only {
 
 SOURCES += \
   $$PWD/appearsinwidget.cpp \
@@ -20,11 +32,8 @@ SOURCES += \
   $$PWD/framework.cpp \
   $$PWD/import.cpp \
   $$PWD/itemdetailpopup.cpp \
-  $$PWD/main.cpp \
   $$PWD/picturewidget.cpp \
   $$PWD/priceguidewidget.cpp \
-  $$PWD/rebuilddatabase.cpp \
-  $$PWD/ref.cpp \
   $$PWD/report.cpp \
   $$PWD/reportobjects.cpp \
   $$PWD/selectcolor.cpp \
@@ -47,8 +56,6 @@ HEADERS += \
   $$PWD/itemdetailpopup.h \
   $$PWD/picturewidget.h \
   $$PWD/priceguidewidget.h \
-  $$PWD/rebuilddatabase.h \
-  $$PWD/ref.h \
   $$PWD/report.h \
   $$PWD/report_p.h \
   $$PWD/reportobjects.h \
@@ -76,3 +83,5 @@ FORMS = \
 
 HEADERS += $$replace(FORMS, '\\.ui', '.h')
 SOURCES += $$replace(FORMS, '\\.ui', '.cpp')
+
+}

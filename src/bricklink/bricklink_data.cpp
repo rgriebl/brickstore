@@ -15,7 +15,6 @@
 
 #include <QString>
 
-#include "utility.h"
 #include "bricklink.h"
 
 

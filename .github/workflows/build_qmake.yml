@@ -12,42 +12,37 @@ jobs:
       fail-fast: false
       matrix:
         config:
-        - {
-            name: "Windows 32bit",
-            artifact: "Windows-x86.exe",
-            os: windows-latest,
-            qt_version: '5.15.2',
-            qt_arch: 'win32_msvc2019',
-            qt_tools: 'tools_openssl_x86,1.1.1,qt.tools.openssl.win_x86',
-            environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars32.bat"
-          }
-        - {
-            name: "Windows 64bit",
-            artifact: "Windows-amd64.exe",
-            os: windows-latest,
-            qt_version: '5.15.2',
-            qt_arch: 'win64_msvc2019_64',
-            qt_tools: 'tools_openssl_x64,1.1.1,qt.tools.openssl.win_x64',
-            environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
-          }
-        - {
-            name: "Ubuntu 20.04 64bit",
-            artifact: "Ubuntu-20.04-amd64.deb",
-            os: ubuntu-20.04,
-          }
-        - {
-            name: "Debian 10 64bit",
-            artifact: "Debian-10-amd64.deb",
-            os: ubuntu-20.04,
-            debian_container: "buildpack-deps:buster"
-          }
-        - {
-            name: "macOS 64bit",
-            artifact: "macOS.dmg",
-            os: macos-latest,
-            qt_version: '5.15.2',
-            qt_arch: ''
-          }
+        - name: "Windows 32bit"
+          artifact: "Windows-x86.exe"
+          os: windows-latest
+          qt_version: '5.15.2'
+          qt_arch: 'win32_msvc2019'
+          qt_tools: 'tools_openssl_x86,1.1.1,qt.tools.openssl.win_x86'
+          environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars32.bat"
+
+        - name: "Windows 64bit"
+          artifact: "Windows-amd64.exe"
+          os: windows-latest
+          qt_version: '5.15.2'
+          qt_arch: 'win64_msvc2019_64'
+          qt_tools: 'tools_openssl_x64,1.1.1,qt.tools.openssl.win_x64'
+          environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
+
+        - name: "Ubuntu 20.04 64bit"
+          artifact: "Ubuntu-20.04-amd64.deb"
+          os: ubuntu-20.04
+
+        - name: "Debian 10 Backend 64bit"
+          artifact: "Debian-10-Backend-amd64.deb"
+          os: ubuntu-20.04
+          debian_container: "buildpack-deps:buster"
+          qmake_extra_config: "CONFIG+=backend-only"
+
+        - name: "macOS 64bit"
+          artifact: "macOS.dmg"
+          os: macos-latest
+          qt_version: '5.15.2'
+          qt_arch: ''
 
     steps:
     - uses: actions/checkout@v1
@@ -80,7 +75,7 @@ jobs:
       if: startsWith(matrix.config.os, 'windows')
       run: |
         call "${{ matrix.config.environment_script }}"
-        qmake CONFIG+=release
+        qmake CONFIG+=release ${{ matrix.config.qmake_extra_config }}
         nmake
         nmake installer
       shell: cmd
@@ -95,14 +90,14 @@ jobs:
     - name: Build on Linux (native)
       if: startsWith(matrix.config.os, 'ubuntu') && !matrix.config.debian_container
       run: |
-        qmake CONFIG+=release
+        qmake CONFIG+=release ${{ matrix.config.qmake_extra_config }}
         make package
       shell: bash
 
     - name: Build on Linux (container)
       if: startsWith(matrix.config.os, 'ubuntu') && matrix.config.debian_container
       run: |
-        sudo docker exec -w /build "debian-build" qmake CONFIG+=release
+        sudo docker exec -w /build "debian-build" qmake CONFIG+=release "${{ matrix.config.qmake_extra_config }}"
         sudo docker exec -w /build "debian-build" make package
       shell: bash
 
@@ -117,7 +112,7 @@ jobs:
     - name: Build on macOS
       if: (startsWith(matrix.config.os, 'mac'))
       run: |
-        qmake CONFIG+=release
+        qmake CONFIG+=release ${{ matrix.config.qmake_extra_config }}
         make
         make installer
       shell: bash

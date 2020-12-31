@@ -14,10 +14,21 @@
 #include <cstdio>
 #include <cstring>
 
-#include <QMessageBox>
 #include <QThreadPool>
+#include <QStandardPaths>
+#if defined(Q_OS_WINDOWS)
+#  include <QMessageBox>
+#  include <QApplication>
+#else
+#  include <QCoreApplication>
+#endif
 
-#include "application.h"
+#include "bricklink.h"
+#include "rebuilddatabase.h"
+
+#if !defined(BRICKSTORE_BACKEND_ONLY)
+#  include "application.h"
+#endif
 
 // needed for themed common controls (e.g. file open dialogs)
 #if defined(Q_CC_MSVC)
@@ -47,30 +58,58 @@ int main(int argc, char **argv)
             show_usage = true;
     }
 
+#if defined(BRICKSTORE_BACKEND_ONLY)
+    if (!rebuild_db)
+        show_usage = true;
+#endif
+
 #if defined(SANITIZER_ENABLED)
     QThreadPool::globalInstance()->setExpiryTimeout(0);
 #endif
 
+    int res = 0;
+
     if (show_usage) {
 #if defined(Q_OS_WINDOWS)
         QApplication a(argc, argv);
-        QMessageBox::information(nullptr, QLatin1String("BrickStore"), QLatin1String("<b>Usage:</b><br />BrickStore.exe [&lt;files&gt;]<br /><br />BrickStore.exe --rebuild-database [--skip-download]<br />"));
+        QMessageBox::information(nullptr, QLatin1String("BrickStore"), QLatin1String(
+                                     "<b>Usage:</b><br/>"
+                                     "BrickStore.exe [&lt;files&gt;]<br/>"
+                                     "BrickStore.exe --rebuild-database [--skip-download]<br/>"));
 #else
-        printf("Usage: %s [<files>]\n", argv [0]);
-        printf("       %s --rebuild-database [--skip-download]\n", argv [0]);
+        printf("Usage: %s [<files>]\n", argv[0]);
+        printf("       %s --rebuild-database [--skip-download]\n", argv[0]);
 #endif
-        return 1;
-    }
-    else {
-        Application a(rebuild_db, skip_download, argc, argv);
-        auto ret = qApp->exec();
+        res = 1;
+    } else if (rebuild_db) {
+        QCoreApplication a(argc, argv);
+
+        QString errstring;
+        BrickLink::Core *bl = BrickLink::create(QStandardPaths::writableLocation(QStandardPaths::CacheLocation), &errstring);
+
+        if (!bl) {
+            fprintf(stderr, "Could not initialize the BrickLink kernel:\n%s\n", qPrintable(errstring));
+            return 2;
+        }
+
+        RebuildDatabase rdb(skip_download);
+
+        QMetaObject::invokeMethod(&a, [&rdb]() {
+            exit(rdb.exec());
+        }, Qt::QueuedConnection);
+
+        res = a.exec();
+    } else {
+#if !defined(BRICKSTORE_BACKEND_ONLY)
+        Application a(argc, argv);
+        res = qApp->exec();
 
         // we are using QThreadStorage in thread-pool threads, so we have to make sure they are
         // all joined before destroying the static QThreadStorage objects.
         QThreadPool::globalInstance()->clear();
         QThreadPool::globalInstance()->waitForDone();
-
-        return ret;
+#endif
     }
-}
 
+    return res;
+}

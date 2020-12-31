@@ -13,10 +13,6 @@
 */
 #include "humanreadabletimedelta.h"
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 12, 0)
-#  define QT_TR_N_NOOP(x) x
-#endif
-
 
 QString HumanReadableTimeDelta::toString(const QDateTime &from, const QDateTime &to)
 {

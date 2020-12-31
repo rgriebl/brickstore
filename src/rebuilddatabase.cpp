@@ -29,10 +29,12 @@
 #endif
 
 #include "bricklink.h"
-#include "config.h"
 #include "utility.h"
-
 #include "rebuilddatabase.h"
+
+#if !defined(BRICKSTORE_BACKEND_ONLY)
+#  include "config.h"
+#endif
 
 
 RebuildDatabase::RebuildDatabase(bool skipDownload)
@@ -88,13 +90,13 @@ int RebuildDatabase::exec()
 
     // login hack
     {
+#if defined(BRICKSTORE_BACKEND_ONLY)
+        QString username = qgetenv("BRICKSTORE_USERNAME");
+        QString password = qgetenv("BRICKSTORE_PASSWORD");
+#else
         QString username = Config::inst()->loginForBrickLink().first;
         QString password = Config::inst()->loginForBrickLink().second;
-
-        if (username.isEmpty())
-            username = qgetenv("BRICKSTORE_USERNAME");
-        if (password.isEmpty())
-            password = qgetenv("BRICKSTORE_PASSWORD");
+#endif
 
         if (username.isEmpty() || password.isEmpty())
             printf("  > Missing BrickLink login credentials: please set $BRICKLINK_USERNAME and $BRICKLINK_PASSWORD.\n");

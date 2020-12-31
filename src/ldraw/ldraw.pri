@@ -7,10 +7,18 @@ DEPENDPATH  += $$RELPWD
 
 HEADERS += \
   $$PWD/ldraw.h \
-  $$PWD/renderwidget.h \
-  $$PWD/shaders.h \
 
 SOURCES += \
   $$PWD/ldraw.cpp \
+
+!backend-only {
+
+HEADERS += \
+  $$PWD/renderwidget.h \
+  $$PWD/shaders.h \
+
+
+SOURCES += \
   $$PWD/renderwidget.cpp \
 
+}

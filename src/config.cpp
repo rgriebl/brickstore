@@ -14,19 +14,12 @@
 #include <cstdlib>
 #include <ctime>
 
-
 #include <QGlobalStatic>
 #include <QStringList>
 #include <QDir>
 #include <QDomDocument>
 #include <QStandardPaths>
 #include <QSize>
-
-#if defined(Q_OS_WINDOWS)
-#  include <windows.h>
-#  include <tchar.h>
-#  include <shlobj.h>
-#endif
 
 #include <QCryptographicHash>
 #include "config.h"
@@ -218,41 +211,7 @@ void Config::setLDrawDir(const QString &dir)
 
 QString Config::lDrawDir() const
 {
-    QString dir = value("General/LDrawDir").toString();
-
-    if (dir.isEmpty())
-        dir = QString::fromLocal8Bit(::getenv("LDRAWDIR"));
-
-#if defined(Q_OS_WINDOWS)
-    if (dir.isEmpty()) {
-        wchar_t inidir [MAX_PATH];
-
-        DWORD l = GetPrivateProfileStringW(L"LDraw", L"BaseDirectory", L"", inidir, MAX_PATH, L"ldraw.ini");
-        if (l >= 0) {
-            inidir [l] = 0;
-            dir = QString::fromUtf16(reinterpret_cast<const ushort *>(inidir));
-        }
-    }
-
-    if (dir.isEmpty()) {
-        HKEY skey, lkey;
-
-        if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"Software", 0, KEY_READ, &skey) == ERROR_SUCCESS) {
-            if (RegOpenKeyExW(skey, L"LDraw", 0, KEY_READ, &lkey) == ERROR_SUCCESS) {
-                wchar_t regdir [MAX_PATH + 1];
-                DWORD regdirsize = MAX_PATH * sizeof(WCHAR);
-
-                if (RegQueryValueExW(lkey, L"InstallDir", nullptr, nullptr, (LPBYTE) &regdir, &regdirsize) == ERROR_SUCCESS) {
-                    regdir [regdirsize / sizeof(WCHAR)] = 0;
-                    dir = QString::fromUtf16(reinterpret_cast<const ushort *>(regdir));
-                }
-                RegCloseKey(lkey);
-            }
-            RegCloseKey(skey);
-        }
-    }
-#endif
-    return dir;
+    return value("General/LDrawDir").toString();
 }
 
 QString Config::documentDir() const

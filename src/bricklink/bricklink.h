@@ -926,6 +926,9 @@ public:
     qreal itemImageScaleFactor() const;
     void setItemImageScaleFactor(qreal f);
 
+    bool isLDrawEnabled() const;
+    void setLDrawDataPath(const QString &ldrawDataPath);
+
     struct ParseItemListXMLResult
     {
         ParseItemListXMLResult() = default;
@@ -1030,6 +1033,8 @@ private:
     Q3Cache<quint64, Picture>    m_pic_cache;
 
     qreal m_item_image_scale_factor = 1.;
+
+    QString m_ldraw_datadir;
 };
 
 inline Core *core() { return Core::inst(); }

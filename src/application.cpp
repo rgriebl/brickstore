@@ -44,7 +44,6 @@
 #include "progressdialog.h"
 #include "checkforupdates.h"
 #include "config.h"
-#include "rebuilddatabase.h"
 #include "bricklink.h"
 #include "ldraw.h"
 #include "messagebox.h"
@@ -77,7 +76,7 @@ enum {
 
 Application *Application::s_inst = nullptr;
 
-Application::Application(bool rebuild_db_only, bool skip_download, int &_argc, char **_argv)
+Application::Application(int &_argc, char **_argv)
     : QObject()
 {
     s_inst = this;
@@ -94,46 +93,42 @@ Application::Application(bool rebuild_db_only, bool skip_download, int &_argc, c
 #  endif
 #endif
 
-    if (rebuild_db_only) {
-        new QCoreApplication(_argc, _argv);
-    } else {
 #if defined(Q_OS_WINDOWS)
-        if (auto s = QStyleFactory::create("fusion"))
-            QApplication::setStyle(s);
+    if (auto s = QStyleFactory::create("fusion"))
+        QApplication::setStyle(s);
 #endif
-        new QApplication(_argc, _argv);
+    new QApplication(_argc, _argv);
 
-        qApp->installEventFilter(this);
+    qApp->installEventFilter(this);
 
-        m_default_fontsize = QGuiApplication::font().pointSizeF();
-        qApp->setProperty("_bs_defaultFontSize", m_default_fontsize); // the settings dialog needs this
+    m_default_fontsize = QGuiApplication::font().pointSizeF();
+    qApp->setProperty("_bs_defaultFontSize", m_default_fontsize); // the settings dialog needs this
 
-        auto setFontSizePercentLambda = [this](int p) {
-            QFont f = QApplication::font();
-            f.setPointSizeF(m_default_fontsize * qreal(qBound(50, p, 200)) / 100.);
-            QApplication::setFont(f);
-        };
-        connect(Config::inst(), &Config::fontSizePercentChanged, this, setFontSizePercentLambda);
-        int fsp = Config::inst()->fontSizePercent();
-        if (fsp != 100)
-            setFontSizePercentLambda(fsp);
+    auto setFontSizePercentLambda = [this](int p) {
+        QFont f = QApplication::font();
+        f.setPointSizeF(m_default_fontsize * qreal(qBound(50, p, 200)) / 100.);
+        QApplication::setFont(f);
+    };
+    connect(Config::inst(), &Config::fontSizePercentChanged, this, setFontSizePercentLambda);
+    int fsp = Config::inst()->fontSizePercent();
+    if (fsp != 100)
+        setFontSizePercentLambda(fsp);
 
 #if !defined(Q_OS_WINDOWS) && !defined(Q_OS_MACOS)
-        QPixmap pix(":/images/brickstore_icon.png");
-        if (!pix.isNull())
-            QGuiApplication::setWindowIcon(pix);
+    QPixmap pix(":/images/brickstore_icon.png");
+    if (!pix.isNull())
+        QGuiApplication::setWindowIcon(pix);
 #endif
 #if defined(Q_OS_MACOS)
-        QGuiApplication::setAttribute(Qt::AA_DontShowIconsInMenus);
+    QGuiApplication::setAttribute(Qt::AA_DontShowIconsInMenus);
 #endif
 
-        // check for an already running instance
-        if (isClient()) {
-            // we cannot call quit directly, since there is
-            // no event loop to quit from...
-            QMetaObject::invokeMethod(this, &QCoreApplication::quit, Qt::QueuedConnection);
-            return;
-        }
+    // check for an already running instance
+    if (isClient()) {
+        // we cannot call quit directly, since there is
+        // no event loop to quit from...
+        QMetaObject::invokeMethod(this, &QCoreApplication::quit, Qt::QueuedConnection);
+        return;
     }
 
     checkNetwork();
@@ -153,7 +148,6 @@ Application::Application(bool rebuild_db_only, bool skip_download, int &_argc, c
                                   QLatin1String(" (") + QSysInfo::prettyProductName() +
                                   QLatin1Char(')'));
 
-
     // initialize config & resource
     (void) Config::inst()->upgrade(BRICKSTORE_MAJOR, BRICKSTORE_MINOR);
     (void) Currency::inst();
@@ -163,27 +157,24 @@ Application::Application(bool rebuild_db_only, bool skip_download, int &_argc, c
         // we cannot call quit directly, since there is no event loop to quit from...
         QMetaObject::invokeMethod(qApp, &QCoreApplication::quit, Qt::QueuedConnection);
         return;
-
-    } else if (rebuild_db_only) {
-        QMetaObject::invokeMethod(this, [skip_download]() {
-            RebuildDatabase rdb(skip_download);
-            exit(rdb.exec());
-        }, Qt::QueuedConnection);
     }
-    else {
-        updateTranslations();
-        connect(Config::inst(), &Config::languageChanged,
-                this, &Application::updateTranslations);
+    if (LDraw::create(QString(), nullptr)) {
+        BrickLink::core()->setLDrawDataPath(LDraw::core()->dataPath());
+    }
 
-        MessageBox::setDefaultTitle(QCoreApplication::applicationName());
 
-        m_files_to_open << QCoreApplication::arguments().mid(1);
+    updateTranslations();
+    connect(Config::inst(), &Config::languageChanged,
+            this, &Application::updateTranslations);
 
-        FrameWork::inst()->show();
+    MessageBox::setDefaultTitle(QCoreApplication::applicationName());
+
+    m_files_to_open << QCoreApplication::arguments().mid(1);
+
+    FrameWork::inst()->show();
 #if defined(Q_OS_MACOS)
-        FrameWork::inst()->raise();
+    FrameWork::inst()->raise();
 #endif
-    }
 }
 
 Application::~Application()
@@ -421,8 +412,6 @@ bool Application::initBrickLink()
                 BrickLink::core(), &BrickLink::Core::setUpdateIntervals);
         BrickLink::core()->setUpdateIntervals(Config::inst()->updateIntervals());
     }
-    LDraw::create(QString(), &errstring);
-
     return bl;
 }
 
