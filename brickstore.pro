@@ -1,4 +1,4 @@
-## Copyright (C) 2004-2020 Robert Griebl.  All rights reserved.
+## Copyright (C) 2004-2021 Robert Griebl. All rights reserved.
 ##
 ## This file is part of BrickStore.
 ##
@@ -17,7 +17,7 @@ else:MIN_QT_VERSION = 5.12.0
 
 NAME        = "BrickStore"
 DESCRIPTION = "$$NAME - an offline BrickLink inventory management tool."
-COPYRIGHT   = "2004-2020 Robert Griebl"
+COPYRIGHT   = "2004-2021 Robert Griebl"
 GITHUB_URL  = "github.com/rgriebl/brickstore"
 
 
