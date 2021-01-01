@@ -58,6 +58,7 @@ OTHER_FILES += \
   .github/workflows/*.yml \
   .qmake.conf \
   VERSION \
+  CHANGELOG.md \
   LICENSE.GPL \
   configure \
   translations/translations.xml \

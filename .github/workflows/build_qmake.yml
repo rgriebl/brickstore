@@ -13,7 +13,7 @@ jobs:
       matrix:
         config:
         - name: "Windows 32bit"
-          artifact: "Windows-x86.exe"
+          artifact: "Windows-x86"
           os: windows-latest
           qt_version: '5.15.2'
           qt_arch: 'win32_msvc2019'
@@ -21,7 +21,7 @@ jobs:
           environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars32.bat"
 
         - name: "Windows 64bit"
-          artifact: "Windows-amd64.exe"
+          artifact: "Windows-x64"
           os: windows-latest
           qt_version: '5.15.2'
           qt_arch: 'win64_msvc2019_64'
@@ -29,17 +29,17 @@ jobs:
           environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
 
         - name: "Ubuntu 20.04 64bit"
-          artifact: "Ubuntu-20.04-amd64.deb"
+          artifact: "Ubuntu-20.04"
           os: ubuntu-20.04
 
         - name: "Debian 10 Backend 64bit"
-          artifact: "Debian-10-Backend-amd64.deb"
+          artifact: "Debian-10-Backend"
           os: ubuntu-20.04
           debian_container: "buildpack-deps:buster"
           qmake_extra_config: "CONFIG+=backend-only"
 
         - name: "macOS 64bit"
-          artifact: "macOS.dmg"
+          artifact: "macOS"
           os: macos-latest
           qt_version: '5.15.2'
           qt_arch: ''
@@ -123,3 +123,36 @@ jobs:
       with:
         name: ${{ matrix.config.artifact }}
         path: "*.dmg"
+
+  release:
+    needs: [ build ]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Download Artifacts to Release
+      uses: actions/download-artifact@v2
+      with:
+        path: 'artifacts'
+
+    - name: Rename Artifacts
+      run: |
+        find artifacts -mindepth 2 -type f -print0 | while read -d $'\0' a; do
+          d="$(dirname $a)"
+          mv "$a" "${d}-$(basename $a)"
+          rm -rf "$d"
+        done
+        echo "Artifacts after flattening:"
+        find artifacts
+      shell: bash
+
+    - name: Release
+      uses: rgriebl/git-release@testing
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        CHANGELOG_FILE: 'CHANGELOG.md'
+        ALLOW_EMPTY_CHANGELOG: "false"
+        ALLOW_TAG_PREFIX: "true"
+      with:
+        args: artifacts/*

@@ -416,8 +416,7 @@ void WelcomeWidget::languageChange()
     m_update_frame->setTitle(tr("Updates"));
 
     m_bs_update->setDescription(tr("Current version: %1 (build: %2)")
-                                .arg(BRICKSTORE_VERSION)
-                                .arg(*BRICKSTORE_BUILD_NUMBER ? BRICKSTORE_BUILD_NUMBER : "custom"));
+                                .arg(BRICKSTORE_VERSION).arg(BRICKSTORE_BUILD_NUMBER));
     updateLastDBUpdateDescription();
 
     QString infoText = QString::fromLatin1("<strong style=\"font-size: x-large\">%1</strong><br>%2")
