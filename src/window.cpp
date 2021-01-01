@@ -1486,11 +1486,9 @@ void Window::setMatchFinished(QList<const BrickLink::Item *> result)
 
 void Window::on_edit_setmatch_triggered()
 {
-#if 0
     if (!m_doc->items().isEmpty()) {
         BrickLink::SetMatch *sm = new BrickLink::SetMatch(m_doc);
 
-        sm->setRecursiveBound(0.05f);
         sm->setGreedyPreference(BrickLink::SetMatch::PreferLargerSets);
 
         sm->setItemTypeConstraint(QList<const BrickLink::ItemType *>() << BrickLink::core()->itemType('S'));
@@ -1500,11 +1498,9 @@ void Window::on_edit_setmatch_triggered()
         connect(sm, SIGNAL(finished(QList<const BrickLink::Item *>)), this, SLOT(setMatchFinished(QList<const BrickLink::Item *>)));
         connect(sm, SIGNAL(progress(int, int)), this, SLOT(setMatchProgress(int, int)));
 
-        if (!sm->startMaximumPossibleSetMatch(selection().isEmpty() ? m_doc->items() : selection(), BrickLink::SetMatch::Recursive))
+        if (!sm->startMaximumPossibleSetMatch(selection().isEmpty() ? m_doc->items() : selection(), BrickLink::SetMatch::Greedy))
             qWarning("SetMatch (Recursive): error.");
-    } else
-#endif
-    {
+    } else {
         QApplication::beep();
     }
 }

@@ -58,8 +58,7 @@ private:
 
 public:
     enum Algorithm {
-        Greedy,
-        Recursive
+        Greedy
     };
 
     SetMatch(QObject *parent = nullptr);
@@ -81,8 +80,6 @@ public:
 
     void setGreedyPreference(GreedyPreference p);
 
-    void setRecursiveBound(float unmatched);
-
 signals:
     void finished(const QList<const BrickLink::Item *> &);
     void progress(int, int);
@@ -94,46 +91,32 @@ protected:
     friend class MatchThread;
 
 private:
-    QPair<int, QList<const Item *> > set_match_greedy(InvMatchList &parts);
-    QPair<int, QList<const Item *> > set_match_recursive(QVector<QPair<const Item *, InvMatchList> >::const_iterator it, InvMatchList &parts);
+    QPair<int, QList<const Item *>> set_match_greedy(InvMatchList &parts);
 
     void clear_inventory_list();
     void create_inventory_list();
 
     bool compare_pairs(const QPair<const Item *, InvMatchList> &p1, const QPair<const Item *, InvMatchList> &p2);
 
-    class GreedyComparePairs {
-    public:
-        GreedyComparePairs(bool prefer_small);
-        bool operator()(const QPair<const Item *, InvMatchList> &p1, const QPair<const Item *, InvMatchList> &p2);
-
-    private:
-        bool m_prefer_small;
-    };
 
 private:
-    Algorithm m_algorithm;
+    Algorithm m_algorithm = Greedy;
 
     // constraints
-    int m_part_min;
-    int m_part_max;
-    int m_year_min;
-    int m_year_max;
+    int m_part_min = -1;
+    int m_part_max = -1;
+    int m_year_min = -1;
+    int m_year_max = -1;
     QList<const Category *> m_categories;
     QList<const ItemType *> m_itemtypes;
 
     // greedy preferences
-    GreedyPreference m_prefer;
-
-    // recursive stop value
-    float m_stopvalue;
-    QBitArray m_doesnotfit;
-    int m_startcount;
+    GreedyPreference m_prefer = PreferLargerSets;
 
     // state
-    int m_step;
-    QVector<QPair<const Item *, InvMatchList> > m_inventories;
-    bool m_active;
+    int m_step = 0;
+    QVector<QPair<const Item *, InvMatchList>> m_inventories;
+    bool m_active = false;
 };
 
 } //namespace BrickLink

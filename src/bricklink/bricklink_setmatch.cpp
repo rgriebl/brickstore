@@ -34,7 +34,7 @@ Greedy:
 
 Recursive:
     No Preferences possible
-
+    NOT POSSIBLE anymore, because BL has too many items.
 
 
 Constraints:
@@ -84,50 +84,6 @@ void BrickLink::SetMatch::InvMatchList::add(const InvItemList &list)
         }
     }
 }
-#if 0
-bool BrickLink::SetMatch::InvMatchList::subtract(const InvItemList &list)
-{
-    if (list.isEmpty())
-        return false;
-
-    // for every item in the given set inventory
-    foreach (const InvItem *ii, list) {
-        // we need that many parts in this step
-        int qty_to_match = ii->quantity();
-
-        // quick check if there are at least those many parts left (regardless of type and color)
-        if (m_count < qty_to_match)
-            return false;
-
-        // for every item in the inventory
-        //foreach (InvMatchItem &mi, m_list) {
-        for (QList<InvMatchItem>::iterator it = m_list.begin(); it != m_list.end(); ++it) {
-            InvMatchItem &mi = *it;
-
-            // check if type and color matches
-            if (ii->item() == mi.item && ii->color() == mi.color) {
-                // can we satisfy this request with a single lot?
-                if (qty_to_match > mi.qty) { // no
-                    qty_to_match -= mi.qty;
-                    m_count -= mi.qty;
-                    mi.qty = 0; // only a partial match, try again
-                } else { // yes
-                    mi.qty -= qty_to_match;
-                    m_count -= qty_to_match;
-                    qty_to_match = 0;
-                    break; // we matched this item completl
-                }
-            }
-        }
-        // we couldn't match one of the items completely -> failure
-        if (qty_to_match > 0)
-            return false;
-    }
-
-    // we matched all items completely -> success
-    return true;
-}
-#endif
 
 bool BrickLink::SetMatch::InvMatchList::subtract(const InvMatchList &list)
 {
@@ -181,26 +137,14 @@ bool BrickLink::SetMatch::InvMatchList::isEmpty() const
 }
 
 
-
-BrickLink::SetMatch::GreedyComparePairs::GreedyComparePairs(bool prefer_small)
-   : m_prefer_small(prefer_small)
-{ }
-
-bool BrickLink::SetMatch::GreedyComparePairs::operator()(const QPair<const BrickLink::Item *, BrickLink::SetMatch::InvMatchList> &p1, const QPair<const BrickLink::Item *, BrickLink::SetMatch::InvMatchList> &p2)
-{
-    return m_prefer_small ? p1.second.count() < p2.second.count() : p1.second.count() > p2.second.count();
-}
-
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
 
 
 BrickLink::SetMatch::SetMatch(QObject *parent)
-    : QObject(parent), m_algorithm(Recursive), m_part_min(-1), m_part_max(-1), m_year_min(-1), m_year_max(-1),
-      m_prefer(PreferLargerSets), m_stopvalue(0), m_startcount(0), m_step(0), m_active(false)
-{
-}
+    : QObject(parent)
+{ }
 
 bool BrickLink::SetMatch::isActive() const
 {
@@ -241,19 +185,16 @@ void BrickLink::SetMatch::setGreedyPreference(GreedyPreference p)
         m_prefer = p;
 }
 
-void BrickLink::SetMatch::setRecursiveBound(float f)
-{
-    if (!isActive())
-        m_stopvalue = f;
-}
-
 namespace BrickLink {
 
 class MatchThread : public QThread {
     Q_OBJECT
 public:
     MatchThread(bool all, BrickLink::SetMatch *sm, const BrickLink::InvItemList &list)
-        : QThread(sm), m_sm(sm), m_list(list), m_all(all)
+        : QThread(sm)
+        , m_sm(sm)
+        , m_list(list)
+        , m_all(all)
     { }
 
     void run() override
@@ -275,7 +216,7 @@ signals:
 
 private:
     BrickLink::SetMatch *m_sm;
-    BrickLink::InvItemList m_list;
+    const BrickLink::InvItemList m_list;
     bool m_all;
 };
 
@@ -329,24 +270,14 @@ QList<const BrickLink::Item *> BrickLink::SetMatch::maximumPossibleSetMatch(cons
     create_inventory_list();
 
     InvMatchList parts(list);
-    QPair<int, QList<const Item *> > result(list.count(), QList<const Item *>());
+    QPair<int, QList<const Item *>> result(list.count(), QList<const Item *>());
 
     m_step = 0;
 
-    qWarning("Starting set match using algorithm \'%s\'", m_algorithm == Recursive ? "recursive" : "greedy");
+    qWarning("Starting set match using algorithm \'%s\'", m_algorithm == Greedy ? "greedy" : "???");
 
-    // simple Knapsack algorithm O(2^n)
-    if (m_algorithm == Recursive) {
-        m_doesnotfit.resize(m_inventories.count());
-        m_doesnotfit.fill(false);
-        m_startcount = parts.count();
-
-        result = set_match_recursive(m_inventories.constBegin(), parts);
-
-        m_doesnotfit.resize(0);
-    }
     // greedy Knapsack algorithm O(n)
-    else if (m_algorithm == Greedy) {
+    if (m_algorithm == Greedy) {
         result = set_match_greedy(parts);
     }
 
@@ -354,7 +285,7 @@ QList<const BrickLink::Item *> BrickLink::SetMatch::maximumPossibleSetMatch(cons
     return result.second;
 }
 
-QPair<int, QList<const BrickLink::Item *> > BrickLink::SetMatch::set_match_greedy(InvMatchList &parts)
+QPair<int, QList<const BrickLink::Item *>> BrickLink::SetMatch::set_match_greedy(InvMatchList &parts)
 {
     QList<const Item *> result;
     int p = 0, pmax = m_inventories.count() * 2, pstep = pmax / 100;
@@ -386,54 +317,6 @@ QPair<int, QList<const BrickLink::Item *> > BrickLink::SetMatch::set_match_greed
     return qMakePair(parts.count(), result);
 }
 
-QPair<int, QList<const BrickLink::Item *> > BrickLink::SetMatch::set_match_recursive(QVector<QPair<const Item *, InvMatchList> >::const_iterator it, InvMatchList &parts)
-{
-    // emit progress every 1024 (0x400) steps
-    if ((++m_step & 0x3ff) == 0)
-        emit progress(m_step >> 10, -1);
-
-    if (it == m_inventories.constEnd()) // no more sets to match against
-        return qMakePair(parts.count(), QList<const Item *>());
-    if (parts.count() == 0) // all parts matched
-        return qMakePair(0, QList<const Item *>());
-
-//    qWarning("Recursing at %d - %s [%s], %d", i, core()->items()[i]->name(), core()->items()[i]->id(), core()->items()[i]->hasInventory() ? 1 : 0);
-
-    QVector<QPair<const Item *, InvMatchList> >::const_iterator next = it;
-    ++next;
-
-    QPair<int, QList<const BrickLink::Item *> > result_take;
-    QPair<int, QList<const BrickLink::Item *> > result_do_not_take;
-
-    result_take.first = INT_MAX;
-
-    // check parts left, when not taking this one
-    result_do_not_take = set_match_recursive(next, parts);
-
-    auto idx = (it - m_inventories.constBegin());
-
-    if (!m_doesnotfit[int(idx)]) {
-        InvMatchList parts_copy = parts;
-
-        // check parts left, when taking this one
-        bool ok = parts_copy.subtract(it->second);
-        if (ok)
-            result_take = set_match_recursive(next, parts_copy);
-
-        // if it doesn't fit into the starting set, it won't fit in a smaller set
-        if (!ok && (parts.count() == m_startcount)) {
-            //qWarning("does not fit: %d:  %s", idx, it->first->id());
-            m_doesnotfit[int(idx)] = true;
-        }
-    }
-
-    if (result_take.first < result_do_not_take.first) {
-        result_take.second.append(it->first);
-        return result_take;
-    } else {
-        return result_do_not_take;
-    }
-}
 
 void BrickLink::SetMatch::create_inventory_list()
 {
@@ -460,14 +343,19 @@ void BrickLink::SetMatch::create_inventory_list()
             ok = ok && ((m_part_min == -1) || (iml.count() >= m_part_min));
             ok = ok && ((m_part_max == -1) || (iml.count() <= m_part_max));
 
-            if (ok)
+            if (ok) {
                 m_inventories.append(qMakePair(item, iml));
+            }
         }
     }
 
     if (m_algorithm == Greedy) {
-        GreedyComparePairs gpc(m_prefer == PreferSmallerSets);
-        std::sort(m_inventories.begin(), m_inventories.end(), gpc);
+        qWarning() << "Sorting inventories for greedy matching";
+        std::sort(m_inventories.begin(), m_inventories.end(), [this](const auto &p1, const auto &p2) {
+            return m_prefer == PreferSmallerSets ? p1.second.count() < p2.second.count()
+                                                 : p1.second.count() > p2.second.count();
+
+        });
     }
     qWarning("InvMatchList has %d entries", m_inventories.count());
 }

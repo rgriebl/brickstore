@@ -1011,7 +1011,7 @@ void FrameWork::createActions()
     (void) newQAction(this, "edit_subtractitems", NeedDocument);
     (void) newQAction(this, "edit_mergeitems", NeedSelection(2));
     (void) newQAction(this, "edit_partoutitems", NeedInventory | NeedSelection(1));
-    (void) newQAction(this, "edit_setmatch", NeedSelection(1));
+    (void) newQAction(this, "edit_setmatch", NeedDocument);
     (void) newQAction(this, "edit_reset_diffs", NeedSelection(1));
     (void) newQAction(this, "edit_copyremarks", NeedDocument);
     (void) newQAction(this, "edit_select_all", NeedDocument);
