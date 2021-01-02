@@ -23,11 +23,11 @@
 #include <QToolTip>
 #include <QLabel>
 #include <QDesktopWidget>
+#include <QBuffer>
 
 #include "bricklink.h"
 #include "bricklink_model.h"
 #include "utility.h"
-#include "qtemporaryresource.h"
 
 #if defined(MODELTEST)
 #  include "modeltest.h"
@@ -858,7 +858,6 @@ bool BrickLink::ToolTip::show(const BrickLink::Item *item, const BrickLink::Colo
     Q_UNUSED(color)
 
     if (BrickLink::Picture *pic = BrickLink::core()->picture(item, nullptr, true)) {
-        QTemporaryResource::registerResource("#/tooltip_picture.png", pic->valid() ? pic->image() : QImage());
         m_tooltip_pic = (pic->updateStatus() == UpdateStatus::Updating) ? pic : nullptr;
 
         // need to 'clear' to reset the image cache of the QTextDocument
@@ -880,14 +879,20 @@ bool BrickLink::ToolTip::show(const BrickLink::Item *item, const BrickLink::Colo
 
 QString BrickLink::ToolTip::createToolTip(const BrickLink::Item *item, BrickLink::Picture *pic) const
 {
-    QString str = QLatin1String(R"(<div class="tooltip_picture"><table><tr><td rowspan="2">%1</td><td><b>%2</b></td></tr><tr><td>%3</td></tr></table></div>)");
-    QString img_left = QLatin1String("<img src=\"#/tooltip_picture.png\" />");
+    QString str = QLatin1String(R"(<div class="tooltip_picture"><table><tr><td>%2</td></tr><tr><td><b>%3</b></td></tr><tr><td>%1</td></tr></table></div>)");
+    QString img_left = QLatin1String(R"(<img src="data:image/png;base64,%1" />)");
     QString note_left = QLatin1String("<i>") + BrickLink::ItemDelegate::tr("[Image is loading]") + QLatin1String("</i>");
 
-    if (pic && (pic->updateStatus() == UpdateStatus::Updating))
+    if (pic && (pic->updateStatus() == UpdateStatus::Updating)) {
         return str.arg(note_left, item->id(), item->name());
-    else
-        return str.arg(img_left, item->id(), item->name());
+    } else {
+        QByteArray ba;
+        QBuffer buffer(&ba);
+        buffer.open(QIODevice::WriteOnly);
+        pic->image().save(&buffer, "PNG");
+
+        return str.arg(img_left.arg(QString::fromLatin1(ba.toBase64())), item->id(), item->name());
+    }
 }
 
 void BrickLink::ToolTip::pictureUpdated(BrickLink::Picture *pic)
@@ -897,9 +902,7 @@ void BrickLink::ToolTip::pictureUpdated(BrickLink::Picture *pic)
 
     m_tooltip_pic = nullptr;
 
-    if (QToolTip::isVisible() && QToolTip::text().startsWith("<div class=\"tooltip_picture\">")) {
-        QTemporaryResource::registerResource("#/tooltip_picture.png", pic->image());
-
+    if (QToolTip::isVisible() && QToolTip::text().startsWith(R"(<div class="tooltip_picture">)")) {
         const auto tlwidgets = QApplication::topLevelWidgets();
         for (QWidget *w : tlwidgets) {
             if (w->inherits("QTipLabel")) {

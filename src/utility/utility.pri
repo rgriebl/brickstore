@@ -32,8 +32,6 @@ HEADERS += \
     $$PWD/progresscircle.h \
     $$PWD/progressdialog.h \
     $$PWD/qparallelsort.h \
-    $$PWD/qtemporaryresource.h \
-    $$PWD/qtemporaryresource_p.h \
     $$PWD/undo.h \
     $$PWD/workspace.h \
 
@@ -46,7 +44,6 @@ SOURCES += \
     $$PWD/messagebox.cpp \
     $$PWD/progresscircle.cpp \
     $$PWD/progressdialog.cpp \
-    $$PWD/qtemporaryresource.cpp \
     $$PWD/undo.cpp \
     $$PWD/workspace.cpp \
 
