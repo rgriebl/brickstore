@@ -79,10 +79,10 @@ fi
 
 echo
 echo "Running $qmake_bin with the following options:"
-echo "  PREFIX=$prefix CONFIG+=$debug_release $backend_onlyd"
+echo "  PREFIX=$prefix CONFIG+=$debug_release $backend_onlyd
 echo
 
-qmake_out=$("$qmake_bin" -r "PREFIX=$prefix" "CONFIG+=$debug_release" "$backend_only" 2>&1)
+qmake_out=$("$qmake_bin" -r "PREFIX=$prefix" "CONFIG+=$debug_release" $backend_only 2>&1)
 qmake_res="$?"
 
 if [ "$qmake_res" != "0" ]; then
