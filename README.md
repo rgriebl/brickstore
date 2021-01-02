@@ -6,14 +6,14 @@ Download
 
 [Official releases](https://github.com/rgriebl/brickstore/releases)
 
-[Development builds](https://github.com/rgriebl/brickstore/actions) These are only accessible when
-logged in (this is a Github limitation).
+[Development builds](https://github.com/rgriebl/brickstore/actions) - these are only accessible when
+logged in (this is a GitHub limitation).
 
 Installation
 ============
 Please note: the installers are **not** digitally signed, so both Windows and macOS will complain
 and you will have to jump through some hoops on installation (getting the necessary signing
-certiciates would cost around 200 EUR/year).
+certificates would cost around 200 EUR/year).
 These unblocking procedures are necessary on each update you install!
 
 #### Windows
@@ -40,9 +40,9 @@ software yourself using the classic Unix command: `./configure && make && sudo m
 About
 =====
 BrickStore is a BrickLink offline management tool. It is **multi-platform** (Windows, macOS and
-Linux), **multilingual** (currently english, german, french and dutch), **fast** and **stable**.
+Linux), **multilingual** (currently English, German, French and Dutch), **fast** and **stable**.
 
-Some things you can do with BrickStore much more efficently than with any web based interface:
+Some things you can do with BrickStore much more efficiently than with any web based interface:
 
 * Browse and search the BrickLink catalog using a live, as-you-type filter. It is using all the
   cores in your machine to be as fast as possible.
