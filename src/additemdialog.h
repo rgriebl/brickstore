@@ -44,6 +44,7 @@ protected:
     void wheelEvent(QWheelEvent *e) override;
     void closeEvent(QCloseEvent *e) override;
     void changeEvent(QEvent *e) override;
+    void keyPressEvent(QKeyEvent *e) override;
 
 private slots:
     void updateCaption();

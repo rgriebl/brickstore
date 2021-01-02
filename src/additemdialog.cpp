@@ -25,6 +25,7 @@
 #include <QToolButton>
 #include <QWheelEvent>
 #include <QShortcut>
+#include <QToolTip>
 
 #include "config.h"
 #include "currency.h"
@@ -72,6 +73,7 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     w_select_color->setWidthToContents(true);
 
     w_add = new QPushButton();
+    w_add->setDefault(true);
     w_buttons->addButton(w_add, QDialogButtonBox::ActionRole);
 
     auto itId = Config::inst()->value("/Defaults/AddItems/ItemType", 'P').value<char>();
@@ -138,8 +140,6 @@ AddItemDialog::AddItemDialog(QWidget *parent)
             this, &AddItemDialog::setPrice);
 
     //TODO5 ??? connect(Config::inst(), &Config::simpleModeChanged, this, &AddItemDialog::setSimpleMode);
-
-    new QShortcut(Qt::Key_Escape, this, SLOT(close()));
 
     if (Config::inst()->value("/Defaults/AddItems/Condition", "new").toString() != "new")
         w_radio_used->setChecked(true);
@@ -236,6 +236,22 @@ void AddItemDialog::changeEvent(QEvent *e)
     if (e->type() == QEvent::LanguageChange)
         languageChange();
     QWidget::changeEvent(e);
+}
+
+void AddItemDialog::keyPressEvent(QKeyEvent *e)
+{
+    // simulate QDialog behavior
+    if (e->matches(QKeySequence::Cancel)) {
+        close();
+        return;
+    } else if ((!e->modifiers() && (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter))
+               || ((e->modifiers() & Qt::KeypadModifier) && (e->key() == Qt::Key_Enter))) {
+        if (w_add->isVisible() && w_add->isEnabled())
+            w_add->animateClick();
+        return;
+    }
+
+    QWidget::keyPressEvent(e);
 }
 
 void AddItemDialog::setSimpleMode(bool b)
@@ -395,7 +411,20 @@ void AddItemDialog::addClicked()
         ii->setTierPrice(i, tierPriceValue(i));
     }
 
-    m_window->addItem(ii, w_merge->isChecked() ? Window::MergeAction_Force | Window::MergeKeep_Old : Window::MergeAction_None);
+    // the user cannot see the full main window right now
+    if (isMaximized() || isFullScreen()
+            || frameGeometry().intersects(m_window->window()->frameGeometry())) {
+        QWidget *relativeTo = w_remarks_label;
+
+        QToolTip::hideText();
+        QToolTip::showText(relativeTo->mapToGlobal(QPoint(0, fontMetrics().xHeight())),
+                           tr("Added %n %1 %2 [%3]", nullptr, ii->quantity())
+                           .arg(ii->colorName(), ii->itemName(), ii->itemId()),
+                           this, QRect(), 20000);
+    }
+
+    m_window->addItem(ii, w_merge->isChecked() ? Window::MergeAction_Force | Window::MergeKeep_Old
+                                               : Window::MergeAction_None);
 }
 
 void AddItemDialog::setPrice(double d)
