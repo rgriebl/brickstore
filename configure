@@ -37,10 +37,10 @@ while [ $# -gt 0 ]; do
         fi
         ;;
     --debug)
-        debug_release="debug"
+        debug_release="CONFIG+=debug"
         ;;
     --release)
-        debug_release="release"
+        debug_release="CONFIG+=release"
         ;;
     --backend-only)
         backend_only="CONFIG+=backend_only"
@@ -51,6 +51,7 @@ while [ $# -gt 0 ]; do
         echo "  --prefix=<prefix>      (default: /usr/local)"
         echo "  --release"
         echo "  --debug"
+        echo "  --backend-only"
         exit 1
         ;;
     esac
@@ -79,10 +80,10 @@ fi
 
 echo
 echo "Running $qmake_bin with the following options:"
-echo "  PREFIX=$prefix CONFIG+=$debug_release $backend_onlyd
+echo "  PREFIX=$prefix $debug_release $backend_only"
 echo
 
-qmake_out=$("$qmake_bin" -r "PREFIX=$prefix" "CONFIG+=$debug_release" $backend_only 2>&1)
+qmake_out=$("$qmake_bin" -r "PREFIX=$prefix" $debug_release $backend_only 2>&1)
 qmake_res="$?"
 
 if [ "$qmake_res" != "0" ]; then
