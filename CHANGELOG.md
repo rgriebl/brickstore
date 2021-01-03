@@ -2,6 +2,18 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2021.1.1] - 2021-01-03
+This deals with the most annoying bugs in the first release.
+### Fixed
+- Images in tool-tips should no longer overlap the text.
+- Pressing 'Return' anywhere in the add item dialog now adds the current item.
+- The Unix ./configure build script was broken.
+- The Windows installer now comes with an English translation.
+- Order imports by date range should work again.
+- Implemented checking for new releases, now that there are releases available.
+- Fixed the weird sorting behavior when adding new items to a sorted document.
+
+
 ## [2021.1.0] - 2021-01-01
 This is nearly a complete rewrite over many years, porting from Qt 3 to Qt 5. BrickLink also
 changed a lot over the years, so a few things aren't supported right now, because I need to find
@@ -196,5 +208,6 @@ MacOS X versions 116 and 119, as well as all Linux versions linked against Qt 3.
 - Changed/Fixed some aspects of the user interface.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.1.0...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.1.1...HEAD
+[2021.1.0]: https://github.com/rgriebl/brickstore/releases/tag/v2021.1.1
 [2021.1.0]: https://github.com/rgriebl/brickstore/releases/tag/v2021.1.0
