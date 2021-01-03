@@ -148,7 +148,8 @@ jobs:
       shell: bash
 
     - name: Release
-      uses: rgriebl/git-release@testing
+      uses: docker://antonyurchenko/git-release:latest
+      # uses: rgriebl/git-release@testing
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         CHANGELOG_FILE: 'CHANGELOG.md'
