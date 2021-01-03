@@ -12,9 +12,9 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 #include <QBuffer>
-#include <QTextStream>
-#include <QUrlQuery>
 #include <QCoreApplication>
+#include <QJsonDocument>
+#include <QJsonValue>
 
 #include "application.h"
 #include "config.h"
@@ -28,20 +28,18 @@ CheckForUpdates::CheckForUpdates(ProgressDialog *pd)
     connect(pd, SIGNAL(transferFinished()), this, SLOT(gotten()));
 
     const QString &appver = QCoreApplication::applicationVersion();
+    m_current_version = QVersionNumber::fromString(appver);
 
     pd->setAutoClose(false);
     pd->setHeaderText(tr("Checking for program updates"));
     pd->setMessageText(tr("You are currently running %1 %2").arg(QCoreApplication::applicationName(), appver));
 
-    m_current_version.fromString(appver);
 
     // m_error = tr( "Could not retrieve version information from server:<br /><br />%1" );
 
-    QUrl url = QString("http://") + Application::inst()->applicationUrl() + QString("/RELEASES");
-    QUrlQuery query;
-    query.addQueryItem("version", appver);
-    url.setQuery(query);
-
+    QString url = Application::inst()->applicationUrl();
+    url.replace("github.com", "https://api.github.com/repos");
+    url.append("/releases/latest");
     pd->get(url);
 }
 
@@ -52,126 +50,41 @@ void CheckForUpdates::gotten()
     bool ok = false;
 
     if (data && !data->isEmpty()) {
-        QBuffer buf(data);
-
-        if (buf.open(QIODevice::ReadOnly)) {
-            QTextStream ts(&buf);
-            QString line;
-
-            bool update_possible = false;
-
-
-            while (!(line = ts.readLine()).isNull()) {
-                QStringList sl = line.split('\t', QString::KeepEmptyParts);
-
-                if ((sl.count() < 2) || (sl [0].length() != 1) || sl [1].isEmpty())
-                    continue;
-
-                VersionRecord vr;
-
-                switch (sl [0][0].toLatin1()) {
-                case 'S': vr.m_type = VersionRecord::Stable; break;
-                case 'B': vr.m_type = VersionRecord::Beta; break;
-                default : continue;
-                }
-
-                if (!vr.fromString(sl [1]))
-                    continue;
-
-                if ((sl.count() >= 3) && (sl [2].length() == 1))
-                    vr.m_has_errors = (sl [2][0] == 'E');
-
-                int diff = m_current_version.compare(vr);
-
-                vr.m_is_newer = (diff < 0);
-                vr.m_is_current = (diff == 0);
-
-                if (vr.m_is_current && vr.m_has_errors)
-                    m_current_version.m_has_errors = true;
-
-                if (vr.m_is_newer && !vr.m_has_errors)
-                    update_possible = true;
-
-                m_versions << vr;
-            }
-
-            if (m_versions.isEmpty()) {
+        QJsonParseError error;
+        auto doc = QJsonDocument::fromJson(*data, &error);
+        if (doc.isNull()) {
+            qWarning() << data->constData();
+            qWarning() << "\nCould not parse GitHub JSON reply:" << error.errorString();
+            m_progress->setErrorText(tr("Could not parse server response."));
+        } else {
+            QString tag = doc["tag_name"].toString();
+            if (tag.startsWith('v'))
+                tag.remove(0, 1);
+            QVersionNumber version = QVersionNumber::fromString(tag);
+            if (version.isNull()) {
+                qWarning() << "Cannot parse GitHub's latest tag_name:" << tag;
                 m_progress->setErrorText(tr("Version information is not available."));
-            }
-            else {
+            } else {
+                m_latest_version = version;
                 QString str;
-
-                if (!update_possible) {
+                if (m_latest_version <= m_current_version) {
                     str = tr("Your currently installed version is up-to-date.");
-                }
-                else {
+                } else {
                     str = tr("A newer version than the one currently installed is available:");
-                    str += "<br /><br /><br /><table>";
-
-                    for (const VersionRecord &vrr : m_versions) {
-                        if (vrr.m_is_newer && !vrr.m_has_errors) {
-                            str += QString("<tr><td><b>%1</b></td><td>%2</td></tr>").
-                                    arg(vrr.m_type == VersionRecord::Stable ? tr("Stable release") : tr("Beta release"),
-                                        vrr.toString());
-                        }
-                    }
-                    str += "</table><br />";
-                    str += QString("<a href=\"http://" + Application::inst()->applicationUrl() + "/changes\">%1</a>").arg(tr("Detailed list of changes"));
+                    str += QString::fromLatin1("<br/><br/><strong>%1</strong><br/><br/>")
+                            .arg(m_latest_version.toString());
+                    str += QString::fromLatin1(R"(<a href="https://%1/blob/master/CHANGELOG.md">%2</a>)")
+                            .arg(Application::inst()->applicationUrl())
+                            .arg(tr("Detailed list of changes"));
                 }
-
-                if (m_current_version.m_has_errors) {
-                    QString link = QString("<a href=\"http://" + Application::inst()->applicationUrl() + "\">%1</a>").arg(tr("the BrickStore homepage"));
-
-                    str += "<br /><br /><br /><br /><br /><br /><table><tr><td><img src=\":/images/important.png\" align=\"left\" /></td><td>" +
-                            tr("<b>Please note:</b> Your currently installed version is flagged as defective.Please visit %1 to find out the exact cause.").arg(link) +
-                            "</td></tr></table>";
-                }
-
                 m_progress->setMessageText(str);
                 ok = true;
             }
         }
     }
-    else
-        m_progress->setErrorText(tr("Version information is not available."));
-
     if (ok)
         m_progress->setProgressVisible(false);
     m_progress->setFinished(ok);
-}
-
-CheckForUpdates::VersionRecord::VersionRecord()
-    : m_major(0), m_minor(0), m_revision(0), m_type(Stable), m_has_errors(false), m_is_newer(false), m_is_current(false)
-{ }
-
-bool CheckForUpdates::VersionRecord::fromString(const QString &str)
-{
-    if (!str.isEmpty()) {
-        QStringList vl = str.split('.');
-
-        if (vl.count() == 3) {
-            m_major    = vl [0].toInt();
-            m_minor    = vl [1].toInt();
-            m_revision = vl [2].toInt();
-
-            return true;
-        }
-    }
-    return false;
-}
-
-QString CheckForUpdates::VersionRecord::toString() const
-{
-    return QString("%1.%2.%3").arg(m_major).arg(m_minor).arg(m_revision);
-}
-
-int CheckForUpdates::VersionRecord::compare(const CheckForUpdates::VersionRecord &vr) const
-{
-    int d1 = m_major    - vr.m_major;
-    int d2 = m_minor    - vr.m_minor;
-    int d3 = m_revision - vr.m_revision;
-
-    return d1 ? d1 : (d2 ? d2 : d3);
 }
 
 #include "moc_checkforupdates.cpp"

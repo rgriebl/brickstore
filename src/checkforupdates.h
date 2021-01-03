@@ -15,6 +15,7 @@
 
 #include <QList>
 #include <QObject>
+#include <QVersionNumber>
 
 class ProgressDialog;
 
@@ -29,29 +30,8 @@ private slots:
     void gotten();
 
 private:
-    struct VersionRecord
-    {
-        VersionRecord();
-        bool fromString(const QString &str);
-        QString toString() const;
-        int compare(const VersionRecord &vr) const;
-
-        int m_major;
-        int m_minor;
-        int m_revision;
-
-        enum Type {
-            Stable,
-            Beta
-        } m_type;
-
-        bool m_has_errors;
-        bool m_is_newer;
-        bool m_is_current;
-    };
-
 private:
     ProgressDialog *m_progress;
-    VersionRecord   m_current_version;
-    QList<VersionRecord> m_versions;
+    QVersionNumber m_current_version;
+    QVersionNumber m_latest_version;
 };
