@@ -284,9 +284,7 @@ QImage Document::Item::image() const
         return pic->image();
     } else {
         QSize s = BrickLink::core()->standardPictureSize();
-        QImage img(s, QImage::Format_Mono);
-        img.fill(Qt::white);
-        return img;
+        return BrickLink::core()->noImage(s);
     }
 }
 
