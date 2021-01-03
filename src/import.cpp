@@ -148,22 +148,21 @@ void ImportBLOrder::init()
 
     QUrl url("https://www.bricklink.com/orderExcelFinal.asp");
     QUrlQuery query;
-    query.addQueryItem("orderType",     m_order_type == BrickLink::OrderType::Placed ? "placed" : "received");
     query.addQueryItem("action",        "save");
-    query.addQueryItem("orderID",       m_order_id);
-    query.addQueryItem("viewType",      "X");    // XML
-    query.addQueryItem("getDateFormat", "1");    // YYYY/MM/DD
+    query.addQueryItem("orderType",     m_order_type == BrickLink::OrderType::Placed ? "placed" : "received");
+    query.addQueryItem("viewType",      "X");    // XML - this has to go last, otherwise we get HTML
     query.addQueryItem("getOrders",     m_order_id.isEmpty() ? "date" : "");
-    query.addQueryItem("fDD",           QString::number(m_order_from.day()));
     query.addQueryItem("fMM",           QString::number(m_order_from.month()));
+    query.addQueryItem("fDD",           QString::number(m_order_from.day()));
     query.addQueryItem("fYY",           QString::number(m_order_from.year()));
-    query.addQueryItem("tDD",           QString::number(m_order_to.day()));
     query.addQueryItem("tMM",           QString::number(m_order_to.month()));
+    query.addQueryItem("tDD",           QString::number(m_order_to.day()));
     query.addQueryItem("tYY",           QString::number(m_order_to.year()));
-    query.addQueryItem("getDetail",     "y");    // get items (that's why we do this in the first place...)
+    query.addQueryItem("getStatusSel",  "I");
     query.addQueryItem("getFiled",      "Y");    // regardless of filed state
-    query.addQueryItem("getStatus",     "");     // regardless of status
-    query.addQueryItem("statusID",      "");
+    query.addQueryItem("getDetail",     "y");    // get items (that's why we do this in the first place...)
+    query.addQueryItem("orderID",       m_order_id);
+    query.addQueryItem("getDateFormat", "0");    // MM/DD/YYYY
     query.addQueryItem("frmUsername",   Config::inst()->loginForBrickLink().first);
     query.addQueryItem("frmPassword",   Config::inst()->loginForBrickLink().second);
     url.setQuery(query);
@@ -181,6 +180,7 @@ const QList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > &ImportBLOrder
 void ImportBLOrder::gotten()
 {
     TransferJob *j = m_progress->job();
+
     QByteArray *data = j->data();
 
     if (data && !data->isEmpty()) {
@@ -238,9 +238,9 @@ void ImportBLOrder::gotten()
                                     else if (tag == QLatin1String("ORDERID"))
                                         order->setId(val);
                                     else if (tag == QLatin1String("ORDERDATE"))
-                                        order->setDate(QDateTime(ymd2date(val)));
+                                        order->setDate(QDateTime(mdy2date(val)));
                                     else if (tag == QLatin1String("ORDERSTATUSCHANGED"))
-                                        order->setStatusChange(QDateTime(ymd2date(val)));
+                                        order->setStatusChange(QDateTime(mdy2date(val)));
                                     else if (tag == QLatin1String("ORDERSHIPPING"))
                                         order->setShipping(QLocale::c().toDouble(val));
                                     else if (tag == QLatin1String("ORDERINSURANCE"))
@@ -307,11 +307,11 @@ void ImportBLOrder::gotten()
     }
 }
 
-QDate ImportBLOrder::ymd2date(const QString &ymd)
+QDate ImportBLOrder::mdy2date(const QString &mdy)
 {
     QDate d;
-    QStringList sl = ymd.split(QLatin1Char('/'));
-    d.setDate(sl [0].toInt(), sl [1].toInt(), sl [2].toInt());
+    QStringList sl = mdy.split(QLatin1Char('/'));
+    d.setDate(sl[2].toInt(), sl[0].toInt(), sl[1].toInt());
     return d;
 }
 

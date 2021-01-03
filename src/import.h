@@ -56,7 +56,7 @@ private slots:
 
 private:
     void init();
-    static QDate ymd2date(const QString &ymd);
+    static QDate mdy2date(const QString &mdy);
 
 private:
     ProgressDialog *       m_progress;

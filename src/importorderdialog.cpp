@@ -190,33 +190,33 @@ public:
     void sort(int section, Qt::SortOrder so) override
     {
         emit layoutAboutToBeChanged();
-        std::sort(m_orderlist.begin(), m_orderlist.end(), orderCompare(section, so));
+        m_orderlist;
+        std::sort(m_orderlist.begin(), m_orderlist.end(), [section, so](const auto &op1, const auto &op2) {
+            int d = 0;
+
+            BrickLink::Order *o1 = op1.first;
+            BrickLink::Order *o2 = op2.first;
+
+            switch (section) {
+            case  0: d = int(o1->type()) - int(o2->type()); break;
+            case  1: d = o1->id().compare(o2->id()); break;
+            case  2: d = o1->date().secsTo(o2->date()); break;
+            case  3: d = o1->other().compare(o2->other(), Qt::CaseInsensitive); break;
+            case  4: d = qFuzzyCompare(o1->grandTotal(), o2->grandTotal())
+                        ? 0
+                        : ((o1->grandTotal() < o2->grandTotal()) ? -1 : 1); break;
+            }
+
+            // this predicate needs to establish a strict weak order:
+            // if you return true for (o1, o2), you are not allowed to also return true for (o2, o1)
+
+            if (d == 0)
+                return false;
+            else
+                return (so == Qt::DescendingOrder) ? (d > 0) : (d < 0);
+        });
         emit layoutChanged();
     }
-
-
-    class orderCompare {
-    public:
-        orderCompare(int section, Qt::SortOrder so) : m_section(section), m_so(so) { }
-
-        bool operator()(const QPair<BrickLink::Order *, BrickLink::InvItemList *> &o1, const QPair<BrickLink::Order *, BrickLink::InvItemList *> &o2)
-        {
-            bool d = false;
-
-            switch (m_section) {
-            case  0: d = (o1.first->type() < o2.first->type()); break;
-            case  1: d = (o1.first->id() <  o2.first->id()); break;
-            case  2: d = (o1.first->date() < o2.first->date()); break;
-            case  3: d = (o1.first->other().toLower() < o2.first->other().toLower()); break;
-            case  4: d = (o1.first->grandTotal() < o2.first->grandTotal()); break;
-            }
-            return m_so == Qt::DescendingOrder ? d : !d;
-        }
-
-    private:
-        int m_section;
-        Qt::SortOrder m_so;
-    };
 
 private slots:
     void flagReceived(TransferJob *j)
