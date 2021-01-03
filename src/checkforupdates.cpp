@@ -71,11 +71,11 @@ void CheckForUpdates::gotten()
                     str = tr("Your currently installed version is up-to-date.");
                 } else {
                     str = tr("A newer version than the one currently installed is available:");
-                    str += QString::fromLatin1("<br/><br/><strong>%1</strong><br/><br/>")
-                            .arg(m_latest_version.toString());
-                    str += QString::fromLatin1(R"(<a href="https://%1/blob/master/CHANGELOG.md">%2</a>)")
+                    str += QString::fromLatin1(R"(<br/><br/><strong>%1</strong> <a href="https://%2/releases/tag/v%3">%4</a><br/>)")
+                            .arg(m_latest_version.toString())
                             .arg(Application::inst()->applicationUrl())
-                            .arg(tr("Detailed list of changes"));
+                            .arg(m_latest_version.toString())
+                            .arg(tr("Download"));
                 }
                 m_progress->setMessageText(str);
                 ok = true;
