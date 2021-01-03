@@ -627,7 +627,7 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
             else
                 switch (st) {
                         case BrickLink::Status::Include: st = BrickLink::Status::Exclude; break;
-                        case BrickLink::Status::Exclude: st = BrickLink::Status::Extra; break;
+                        case BrickLink::Status::Exclude:
                         case BrickLink::Status::Extra  :
                         default                        : st = BrickLink::Status::Include; break;
                 }
