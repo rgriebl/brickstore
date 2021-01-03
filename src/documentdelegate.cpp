@@ -28,6 +28,7 @@
 #include <QApplication>
 #include <QScrollBar>
 #include <QtMath>
+#include <QScopeGuard>
 
 #include "documentdelegate.h"
 #include "selectitemdialog.h"
@@ -114,7 +115,7 @@ QSize DocumentDelegate::sizeHint(const QStyleOptionViewItem &option1, const QMod
     return { w, defaultItemHeight(option.widget) };
 }
 
-void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, const QModelIndex &idx) const
+void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, const QModelIndex &idx) const
 {
     if (!idx.isValid())
         return;
@@ -123,7 +124,36 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
     if (!it)
         return;
 
-    QStyleOptionViewItem option(option1);
+    p->save();
+    auto restorePainter = qScopeGuard([p] { p->restore(); });
+
+    Qt::Alignment align = (Qt::Alignment(idx.data(Qt::TextAlignmentRole).toInt()) & ~Qt::AlignVertical_Mask) | Qt::AlignVCenter;
+
+    if (idx.column() == Document::Index) {
+        QStyle *style = option.widget ? option.widget->style() : QApplication::style();
+        QStyleOptionHeader headerOption;
+        headerOption.init(option.widget);
+        headerOption.text = idx.data().toString();
+        headerOption.state = option.state;
+        headerOption.textAlignment = align;
+        headerOption.orientation = Qt::Vertical;
+        headerOption.section = idx.row();
+        headerOption.rect = option.rect;
+        switch (option.viewItemPosition) {
+        case QStyleOptionViewItem::Beginning:
+            headerOption.position = QStyleOptionHeader::Beginning; break;
+        case QStyleOptionViewItem::Middle:
+            headerOption.position = QStyleOptionHeader::Middle; break;
+        case QStyleOptionViewItem::End:
+            headerOption.position = QStyleOptionHeader::End; break;
+        default:
+        case QStyleOptionViewItem::OnlyOne:
+            headerOption.position = QStyleOptionHeader::OnlyOneSection; break;
+        }
+        style->drawControl(QStyle::CE_Header, &headerOption, p, option.widget);
+        return;
+    }
+
     bool selected = (option.state & QStyle::State_Selected);
     bool nocolor = !it->color();
     bool noitem = !it->item();
@@ -148,7 +178,6 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option1, c
     int w = option.rect.width();
     int h = option.rect.height();
     int margin = 2;
-    Qt::Alignment align = Qt::Alignment((idx.data(Qt::TextAlignmentRole).toInt() & ~Qt::AlignVertical_Mask) | Qt::AlignVCenter);
 
     struct Tag {
         QColor foreground;

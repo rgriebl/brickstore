@@ -47,13 +47,6 @@
 #include "document_p.h"
 
 
-template <typename T> static inline T pack(typename T::const_reference item)
-{
-    T list;
-    list.append(item);
-    return list;
-}
-
 enum {
     CID_Change,
     CID_AddRemove,
@@ -477,7 +470,7 @@ bool Document::insertItems(const QVector<int> &positions, const ItemList &items)
 
 bool Document::removeItem(Item *item)
 {
-    return removeItems(pack<ItemList>(item));
+    return removeItems({ item });
 }
 
 bool Document::removeItems(const ItemList &items)
@@ -488,7 +481,12 @@ bool Document::removeItems(const ItemList &items)
 
 bool Document::insertItem(int position, Item *item)
 {
-    return insertItems(pack<QVector<int> > (position), pack<ItemList> (item));
+    return insertItems({ position }, { item });
+}
+
+bool Document::appendItem(Item *item)
+{
+    return insertItems({ }, { item });
 }
 
 bool Document::changeItem(Item *item, const Item &value)
@@ -556,7 +554,7 @@ void Document::changeItemDirect(int position, Item &item)
     emit statisticsChanged();
 
     bool grave = (olditem->item() != item.item()) || (olditem->color() != item.color());
-    emit itemsChanged(pack<ItemList>(olditem), grave);
+    emit itemsChanged({ olditem }, grave);
 }
 
 void Document::changeCurrencyDirect(const QString &ccode, qreal crate, double *&prices)
@@ -1318,6 +1316,7 @@ Qt::ItemFlags Document::flags(const QModelIndex &index) const
     Qt::ItemFlags ifs = QAbstractItemModel::flags(index);
 
     switch (index.column()) {
+    case Index       :
     case Total       :
     case ItemType    :
     case Category    :
@@ -1374,21 +1373,22 @@ bool Document::setData(const QModelIndex &index, const QVariant &value, int role
 
 QVariant Document::data(const QModelIndex &index, int role) const
 {
-    //if (role == Qt::DecorationRole)
-    //qDebug() << "data() for row " << index.row() << "(picture: " << items().at(index.row())->m_picture << ", item: "<< items().at(index.row())->item()->name();
-
-
     if (index.isValid()) {
         Item *it = items().at(index.row());
         auto f = static_cast<Field>(index.column());
 
-        switch (role) {
-        case Qt::DisplayRole      : return dataForDisplayRole(it, f);
-        case Qt::DecorationRole   : return dataForDecorationRole(it, f);
-        case Qt::ToolTipRole      : return dataForToolTipRole(it, f);
-        case Qt::TextAlignmentRole: return dataForTextAlignmentRole(it, f);
-        case Qt::EditRole         : return dataForEditRole(it, f);
-        case Qt::CheckStateRole   : return dataForCheckStateRole(it, f);
+        if (f == Index) {
+            if (role == Qt::DisplayRole)
+                return QString::number(index.row() + 1);
+        } else {
+            switch (role) {
+            case Qt::DisplayRole      : return dataForDisplayRole(it, f);
+            case Qt::DecorationRole   : return dataForDecorationRole(it, f);
+            case Qt::ToolTipRole      : return dataForToolTipRole(it, f);
+            case Qt::TextAlignmentRole: return dataForTextAlignmentRole(it, f);
+            case Qt::EditRole         : return dataForEditRole(it, f);
+            case Qt::CheckStateRole   : return dataForCheckStateRole(it, f);
+            }
         }
     }
     return QVariant();
@@ -1488,6 +1488,7 @@ Qt::CheckState Document::dataForCheckStateRole(Item *it, Field f) const
 int Document::dataForTextAlignmentRole(Item *, Field f) const
 {
     switch (f) {
+    case Status      :
     case Retain      :
     case Stockroom   :
     case Picture     :
@@ -1560,6 +1561,7 @@ QString Document::dataForToolTipRole(Item *it, Field f) const
 QString Document::headerDataForDisplayRole(Field f)
 {
     switch (f) {
+    case Index       : return tr("Index");
     case Status      : return tr("Status");
     case Picture     : return tr("Image");
     case PartNo      : return tr("Part #");
@@ -1606,6 +1608,7 @@ int Document::headerDataForDefaultWidthRole(Field f) const
     QSize picsize = BrickLink::core()->standardPictureSize();
 
     switch (f) {
+    case Index       : width = 3; break;
     case Status      : width = 6; break;
     case Picture     : width = -picsize.width(); break;
     case PartNo      : width = 10; break;
@@ -1678,7 +1681,7 @@ DocumentProxyModel::DocumentProxyModel(Document *model, QObject *parent)
 {
     m_lastSortColumn[0] = m_lastSortColumn[1] = -1;
 
-    setDynamicSortFilter(true);
+    setDynamicSortFilter(false);
     setSourceModel(model);
 
     m_parser = new Filter::Parser();
@@ -1786,8 +1789,12 @@ void DocumentProxyModel::languageChange()
 
 void DocumentProxyModel::sort(int column, Qt::SortOrder order)
 {
-    m_lastSortColumn[1] = m_lastSortColumn[0];
-    m_lastSortColumn[0] = sortColumn();
+    if (column == -1) {
+        m_lastSortColumn[0] = m_lastSortColumn[1] = -1;
+    } else {
+        m_lastSortColumn[1] = m_lastSortColumn[0];
+        m_lastSortColumn[0] = sortColumn();
+    }
 
     QSortFilterProxyModel::sort(column, order);
 }
@@ -1820,9 +1827,11 @@ static inline int doubleCompare(double d1, double d2)
     return qFuzzyCompare(d1, d2) ? 0 : ((d1 < d2) ? -1 : 1);
 }
 
-int DocumentProxyModel::compare(const Document::Item *i1, const Document::Item *i2, int sortColumn)
+int DocumentProxyModel::compare(const Document::Item *i1, const Document::Item *i2, int sortColumn) const
 {
     switch (sortColumn) {
+    case Document::Index       : return static_cast<Document *>(sourceModel())->index(i1).row()
+                                        - static_cast<Document *>(sourceModel())->index(i2).row();
     case Document::Status      : {
         if (i1->counterPart() != i2->counterPart())
             return boolCompare(i1->counterPart(), i2->counterPart());

@@ -255,9 +255,10 @@ Window::Window(Document *doc, QWidget *parent)
 
     setDifferenceMode(false);
 
-    /*
-    w_list->setShowSortIndicator ( true );
+    // start with the physical document sort order
+    w_list->sortByColumn(-1, Qt::AscendingOrder);
 
+    /*
     if ( doc->doNotSortItems ( ))
      w_list->setSorting ( w_list->columns ( ) + 1 );
 */
@@ -444,11 +445,6 @@ int Window::addItems(const BrickLink::InvItemList &items, int multiply, uint glo
     if (items.count() > 1)
         m_doc->beginMacro();
 
-    // disable sorting: new items should appear at the end of the list
-    /*
-     if ( !dont_change_sorting )
-    //TODO  w_list->setSorting ( w_list->columns ( ) + 1 ); // +1 because of Qt-bug !!
-    */
     if (waitcursor)
         QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
@@ -508,7 +504,7 @@ int Window::addItems(const BrickLink::InvItemList &items, int multiply, uint glo
             if (multiply > 1)
                 newitem->setQuantity(newitem->quantity() * multiply);
 
-            m_doc->insertItem(0, newitem);
+            m_doc->appendItem(newitem);
             addcount++;
             break;
         }
@@ -1416,7 +1412,7 @@ void Window::subtractItems(const BrickLink::InvItemList &items)
                 newitem->setOrigQuantity(0);
                 newitem->setQuantity(-qty);
 
-                m_doc->insertItem(0, newitem);
+                m_doc->appendItem(newitem);
             }
         }
     }

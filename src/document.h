@@ -33,7 +33,8 @@ class Document : public QAbstractTableModel
     Q_OBJECT
 public:
     enum Field {
-        Status = 0,
+        Index = 0,
+        Status,
         Picture,
         PartNo,
         Description,
@@ -96,6 +97,7 @@ public:
     public:
         ItemList() = default;
         ~ItemList() = default;
+        ItemList(std::initializer_list<Item *> list) : QList<Item *>(list) { }
         ItemList(const ItemList &copy) : QList<Item *>(copy) { }
         ItemList(const BrickLink::InvItemList &iil)
         {
@@ -191,6 +193,7 @@ public:
 
     bool insertItems(const QVector<int> &positions, const ItemList &items);
     bool insertItem(int position, Item *item);
+    bool appendItem(Item *item);
 
     bool removeItems(const ItemList &items);
     bool removeItem(Item *item);
@@ -320,7 +323,7 @@ protected:
 
 private:
     void languageChange();
-    static int compare(const Document::Item *i1, const Document::Item *i2, int sortColumn);
+    int compare(const Document::Item *i1, const Document::Item *i2, int sortColumn) const;
 
     QString         m_filter_expression;
     Filter::Parser *m_parser;
