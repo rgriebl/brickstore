@@ -24,6 +24,7 @@
 #include <QtMath>
 #include <QStaticText>
 #include <QMenu>
+#include <QStyleFactory>
 
 #include "welcomewidget.h"
 #include "config.h"
@@ -127,6 +128,11 @@ WelcomeButton::WelcomeButton(const QString &text, const QString &description, QW
     , m_description(description)
 {
     setAttribute(Qt::WA_Hover);
+
+#if defined(Q_OS_MACOS) || defined(Q_OS_WINDOWS)
+    if (auto s = QStyleFactory::create("fusion"))
+        setStyle(s);
+#endif
 
     QSizePolicy policy(QSizePolicy::Preferred, QSizePolicy::Preferred, QSizePolicy::PushButton);
     policy.setHeightForWidth(true);

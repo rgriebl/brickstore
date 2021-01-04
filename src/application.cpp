@@ -25,7 +25,6 @@
 #include <QNetworkProxyFactory>
 
 #if defined(Q_OS_WINDOWS)
-#  include <QStyleFactory>
 #  include <windows.h>
 #  ifdef MessageBox
 #    undef MessageBox
@@ -92,10 +91,6 @@ Application::Application(int &_argc, char **_argv)
 #  endif
 #endif
 
-#if defined(Q_OS_WINDOWS)
-    if (auto s = QStyleFactory::create("fusion"))
-        QApplication::setStyle(s);
-#endif
     new QApplication(_argc, _argv);
 
     qApp->installEventFilter(this);
