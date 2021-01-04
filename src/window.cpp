@@ -1430,7 +1430,18 @@ void Window::on_edit_mergeitems_triggered()
 void Window::on_edit_partoutitems_triggered()
 {
     if (selection().count() >= 1) {
-        bool inplace = (MessageBox::question(this, tr("Should the selected items be parted out into the current document, replacing the selected items?"), QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes) == QMessageBox::Yes);
+        bool inplace = false;
+
+        switch (MessageBox::question(this,
+                                     tr("Should the selected items be parted out into the current document, replacing the selected items?"),
+                                     QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, QMessageBox::Yes)) {
+        case QMessageBox::Cancel:
+            return;
+        case QMessageBox::Yes:
+            inplace = true;
+            break;
+        default: break;
+        }
 
         if (inplace)
             m_doc->beginMacro();

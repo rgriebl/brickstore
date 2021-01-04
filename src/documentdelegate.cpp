@@ -34,6 +34,7 @@
 #include "selectitemdialog.h"
 #include "selectcolordialog.h"
 #include "utility.h"
+#include "framework.h"
 
 QVector<QColor>                 DocumentDelegate::s_shades;
 QHash<int, QIcon>               DocumentDelegate::s_status_icons;
@@ -638,8 +639,20 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
         }
         break;
 
-    case Document::Picture:
     case Document::Description:
+        if (dblclick && it->item() && it->item()->hasInventory()) {
+            auto me = static_cast<QMouseEvent *>(e);
+            int d = option.rect.height() / 2;
+
+            if ((me->x() > (option.rect.right() - d)) && (me->y() > (option.rect.bottom() - d))) {
+                if (auto a = FrameWork::inst()->findAction("edit_partoutitems")) {
+                    a->trigger();
+                    break;
+                }
+            }
+        }
+        Q_FALLTHROUGH();
+    case Document::Picture:
         if (dblclick || (keypress && editkey)) {
             if (!m_select_item) {
                 m_select_item = new SelectItemDialog(false, m_table);

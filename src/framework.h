@@ -162,4 +162,5 @@ private:
     UndoGroup *m_undogroup;
 
     friend class WelcomeWidget;
+    friend class DocumentDelegate;
 };
