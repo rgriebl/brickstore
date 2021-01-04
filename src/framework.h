@@ -65,6 +65,7 @@ public slots:
 
 signals:
     void windowActivated(Window *);
+    void filterTextChanged(const QString &filter);
 
 protected slots:
     void languageChange();
@@ -156,9 +157,8 @@ private:
     QMenu *m_contextmenu;
     QPointer<AddItemDialog> m_add_dialog;
     QPointer<ItemDetailPopup> m_details;
-
+    QTimer *m_filter_delay = nullptr;
     bool m_running;
-
     UndoGroup *m_undogroup;
 
     friend class WelcomeWidget;

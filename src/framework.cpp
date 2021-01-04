@@ -878,6 +878,17 @@ bool FrameWork::setupToolBar(QToolBar *t, const QList<QByteArray> &a_names)
                 m_filter->setClearButtonEnabled(true);
                 m_filter->addAction(new QAction(QIcon(":/images/filter.png"), QString(), this),
                                     QLineEdit::LeadingPosition);
+                m_filter_delay = new QTimer(this);
+                m_filter_delay->setInterval(800);
+                m_filter_delay->setSingleShot(true);
+                connect(m_filter, &QLineEdit::textChanged, [this]() {
+                    m_filter_delay->start();
+                });
+                connect(m_filter_delay, &QTimer::timeout, [this]() {
+                    if (m_filter)
+                        emit filterTextChanged(m_filter->text());
+                });
+
                 t->addWidget(m_filter);
             } else if (an == "widget_progress") {
                 if (m_progress) {
@@ -1325,7 +1336,7 @@ void FrameWork::connectWindow(QWidget *w)
         disconnect(m_current_window.data(), &Window::selectionChanged,
                    this, &FrameWork::selectionUpdate);
         if (m_filter) {
-            disconnect(m_filter, &QLineEdit::textChanged,
+            disconnect(this, &FrameWork::filterTextChanged,
                        m_current_window.data(), &Window::setFilter);
             m_filter->setText(QString());
             m_filter->setToolTip(QString());
@@ -1354,7 +1365,7 @@ void FrameWork::connectWindow(QWidget *w)
         if (m_filter) {
             m_filter->setText(window->filter());
             m_filter->setToolTip(window->filterToolTip());
-            connect(m_filter, &QLineEdit::textChanged,
+            connect(this, &FrameWork::filterTextChanged,
                     window, &Window::setFilter);
         }
         if (m_details) {

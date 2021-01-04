@@ -60,6 +60,7 @@ public:
     QButtonGroup *   w_viewmode;
     ItemDetailPopup *m_details;
     bool             m_inv_only;
+    QTimer *         m_filter_delay;
 };
 
 
@@ -138,6 +139,10 @@ void SelectItem::init()
     d->w_filter->setClearButtonEnabled(true);
     d->w_filter->addAction(new QAction(QIcon(":/images/filter.png"), QString(), this),
                            QLineEdit::LeadingPosition);
+
+    d->m_filter_delay = new QTimer(this);
+    d->m_filter_delay->setInterval(400);
+    d->m_filter_delay->setSingleShot(true);
 
     d->w_viewmode = new QButtonGroup(this);
     d->w_viewmode->setExclusive(true);
@@ -220,7 +225,10 @@ void SelectItem::init()
     d->w_itemthumbs->setSelectionModel(d->w_items->selectionModel());
     d->w_thumbs->setSelectionModel(d->w_items->selectionModel());
 
-    connect(d->w_filter, &QLineEdit::textChanged,
+    connect(d->w_filter, &QLineEdit::textChanged, this, [this]() {
+        d->m_filter_delay->start();
+    });
+    connect(d->m_filter_delay, &QTimer::timeout,
             this, &SelectItem::applyFilter);
 
     connect(d->w_item_types, QOverload<int>::of(&QComboBox::currentIndexChanged),
