@@ -151,7 +151,7 @@ public:
     bool isFiltered() const override;
     void setFilterItemType(const ItemType *it);
     void setFilterCategory(const Category *cat);
-    void setFilterText(const QString &str);
+    void setFilterText(const QString &str, bool caseSensitive = false, bool useRegExp = false);
     void setFilterWithoutInventory(bool on);
 
 protected slots:
@@ -169,6 +169,7 @@ private:
     const ItemType *m_itemtype_filter;
     const Category *m_category_filter;
     QString         m_text_filter;
+    bool            m_text_filter_is_cs = false;
     bool            m_text_filter_is_regexp = false;
     bool            m_inv_filter;
 

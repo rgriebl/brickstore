@@ -564,17 +564,15 @@ void BrickLink::ItemModel::setFilterCategory(const Category *cat)
     invalidateFilter();
 }
 
-void BrickLink::ItemModel::setFilterText(const QString &str)
+void BrickLink::ItemModel::setFilterText(const QString &str, bool caseSensitive, bool useRegExp)
 {
-    if (str == m_text_filter)
+    if ((str == m_text_filter) && (m_text_filter_is_regexp == useRegExp)
+            && (m_text_filter_is_cs == caseSensitive)) {
         return;
-    if (str.contains('?') || str.contains('*')) {
-        m_text_filter_is_regexp = true;
-        m_text_filter = QRegularExpression::wildcardToRegularExpression(str);
-    } else {
-        m_text_filter_is_regexp = false;
-        m_text_filter = str;
     }
+    m_text_filter_is_cs = caseSensitive;
+    m_text_filter_is_regexp = useRegExp;
+    m_text_filter = str;
     invalidateFilter();
 }
 
@@ -616,17 +614,26 @@ bool BrickLink::ItemModel::filterAccepts(const void *pointer) const
     else {
         if (!m_text_filter.isEmpty()) {
             if (!m_text_filter_is_regexp) {
-                return item->id().startsWith(m_text_filter, Qt::CaseInsensitive)
-                        || item->name().startsWith(m_text_filter, Qt::CaseInsensitive);
+                return item->id().contains(m_text_filter, m_text_filter_is_cs ? Qt::CaseSensitive : Qt::CaseInsensitive)
+                        || item->name().contains(m_text_filter,  m_text_filter_is_cs ? Qt::CaseSensitive : Qt::CaseInsensitive);
             } else {
                 QRegularExpression *re = nullptr;
                 if (!regexpCache.hasLocalData()) {
-                    re = new QRegularExpression(QString(), QRegularExpression::CaseInsensitiveOption);
+                    re = new QRegularExpression(QString(), QRegularExpression::CaseInsensitiveOption
+                                                | QRegularExpression::UseUnicodePropertiesOption);
                     regexpCache.setLocalData(re);
                 }
                 re = regexpCache.localData();
                 if (re->pattern() != m_text_filter)
                     re->setPattern(m_text_filter);
+                if ((re->patternOptions() & QRegularExpression::CaseInsensitiveOption) != (!m_text_filter_is_cs)) {
+                    if (m_text_filter_is_cs)
+                        re->setPatternOptions(re->patternOptions() & ~QRegularExpression::CaseInsensitiveOption);
+                    else
+                        re->setPatternOptions(re->patternOptions() | QRegularExpression::CaseInsensitiveOption);
+                }
+                if (!re->isValid())
+                    return false;
                 return (re->match(item->id()).hasMatch() ||
                         re->match(item->name()).hasMatch());
             }

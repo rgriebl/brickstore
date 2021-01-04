@@ -61,6 +61,8 @@ public:
     ItemDetailPopup *m_details;
     bool             m_inv_only;
     QTimer *         m_filter_delay;
+    bool             m_filter_cs = false;
+    bool             m_filter_use_re = false;
 };
 
 
@@ -137,8 +139,25 @@ void SelectItem::init()
 
     d->w_filter = new QLineEdit(this);
     d->w_filter->setClearButtonEnabled(true);
-    d->w_filter->addAction(new QAction(QIcon(":/images/filter.png"), QString(), this),
-                           QLineEdit::LeadingPosition);
+
+    auto *popupMenu = new QMenu(this);
+    auto acs = new QAction(tr("Case Sensitive"));
+    acs->setCheckable(true);
+    connect(acs, &QAction::toggled, this, [this](bool caseSensitive) {
+        d->m_filter_cs = caseSensitive; applyFilter();
+    });
+    popupMenu->addAction(acs);
+    auto are = new QAction(tr("Use Regular Expression"));
+    are->setCheckable(true);
+    connect(are, &QAction::toggled, this, [this](bool useRE) {
+        d->m_filter_use_re = useRE; applyFilter();
+    });
+    popupMenu->addAction(are);
+
+    auto *a = d->w_filter->addAction(QIcon(":/images/filter.png"), QLineEdit::LeadingPosition);
+    connect(a, &QAction::triggered, this, [this, popupMenu]() {
+        popupMenu->popup(d->w_filter->mapToGlobal(d->w_filter->rect().bottomLeft()));
+    });
 
     d->m_filter_delay = new QTimer(this);
     d->m_filter_delay->setInterval(400);
@@ -531,7 +550,7 @@ void SelectItem::applyFilter()
     const BrickLink::Item *oldItem = currentItem();
     d->w_items->clearSelection();
 
-    d->itemModel->setFilterText(d->w_filter->text());
+    d->itemModel->setFilterText(d->w_filter->text(), d->m_filter_cs, d->m_filter_use_re);
 
     setCurrentItem(oldItem);
     QApplication::restoreOverrideCursor();
