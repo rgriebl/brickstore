@@ -334,5 +334,8 @@ private:
     friend class SortItemListCompare;
 };
 
+Q_DECLARE_METATYPE(Document *)
+Q_DECLARE_METATYPE(const Document *)
+
 QDataStream &operator << (QDataStream &ds, const Document::Item &item);
 QDataStream &operator >> (QDataStream &ds, Document::Item &item);

@@ -18,8 +18,6 @@
 #include "document.h"
 #include "selectdocumentdialog.h"
 
-Q_DECLARE_METATYPE(const Document *)
-
 
 SelectDocumentDialog::SelectDocumentDialog(const Document *self, const QString &headertext,
                                            QWidget *parent)
@@ -28,21 +26,29 @@ SelectDocumentDialog::SelectDocumentDialog(const Document *self, const QString &
     setupUi(this);
     
     w_header->setText(headertext);
-
     m_clipboard_list = BrickLink::InvItemMimeData::items(QApplication::clipboard()->mimeData());
-    
-    w_document->setChecked(m_clipboard_list.isEmpty());
-    w_clipboard->setEnabled(!m_clipboard_list.isEmpty());
 
     foreach (const Document *doc, Document::allDocuments()) {
         if (doc != self) {
             QListWidgetItem *item = new QListWidgetItem(doc->title(), w_document_list);
-            item->setData(Qt::UserRole, doc);
+            item->setData(Qt::UserRole, QVariant::fromValue(doc));
         }
     }
-    if (w_document_list->count())
+
+    bool hasClip = !m_clipboard_list.isEmpty();
+    bool hasDocs = w_document_list->count();
+
+    w_clipboard->setEnabled(hasClip);
+    w_document->setEnabled(hasDocs);
+    w_document_list->setEnabled(hasDocs);
+
+    if (hasDocs) {
+        w_document->setChecked(true);
         w_document_list->setCurrentRow(0);
-    
+    } else if (hasClip) {
+        w_clipboard->setChecked(true);
+    }
+
     connect(w_clipboard, &QAbstractButton::toggled,
             this, &SelectDocumentDialog::updateButtons);
     connect(w_document_list, &QListWidget::currentItemChanged,
@@ -61,7 +67,7 @@ SelectDocumentDialog::~SelectDocumentDialog()
 void SelectDocumentDialog::updateButtons()
 {
     bool b = w_clipboard->isChecked() || w_document_list->currentItem();
-    setEnabled(b);
+    w_buttons->button(QDialogButtonBox::Ok)->setEnabled(b);
 }
 
 void SelectDocumentDialog::itemActivated(QListWidgetItem *)
