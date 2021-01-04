@@ -30,8 +30,6 @@
 #include "humanreadabletimedelta.h"
 #include "framework.h"
 #include "version.h"
-#include "ldraw.h"
-#include "ldraw/renderwidget.h"
 
 // Based on QCommandLinkButton, but this one scales with font size, supports richtext and can be
 // associated with a QAction
@@ -78,7 +76,7 @@ private:
     void resetTitleFont()
     {
         m_titleFont = font();
-        m_titleFont.setPointSizeF(m_titleFont.pointSizeF() * 1.5);
+        m_titleFont.setPointSizeF(m_titleFont.pointSizeF() * 1.25);
     }
 
     int textOffset() const;
@@ -275,44 +273,11 @@ WelcomeWidget::WelcomeWidget(QWidget *parent)
     auto *layout = new QGridLayout();
     layout->setRowStretch(0, 10);
     layout->setRowStretch(4, 10);
-    layout->setColumnStretch(0, 5);
+    layout->setColumnStretch(0, 1);
     layout->setColumnStretch(1, 10);
     layout->setColumnStretch(2, 10);
-    layout->setColumnStretch(3, 5);
+    layout->setColumnStretch(3, 1);
     layout->setSpacing(2 * spacing);
-
-    // info
-
-    auto *info = new QWidget();
-    auto info_layout = new QHBoxLayout();
-
-    LDraw::Part *part = nullptr;
-
-    if (LDraw::core())
-        part = LDraw::core()->partFromId("3833");
-
-    int iconSize = fontMetrics().height() * 4;
-
-    if (part) {
-        m_ldraw_icon = new LDraw::RenderOffscreenWidget();
-        m_ldraw_icon->setPartAndColor(part, QColor("#F36100"));
-        m_ldraw_icon->setFixedSize(iconSize, iconSize);
-        m_ldraw_icon->startAnimation();
-        info_layout->addWidget(m_ldraw_icon, 0, Qt::AlignCenter);
-    } else {
-        auto iconWidget = new QLabel();
-        iconWidget->setPixmap(QPixmap(":/images/brickstore_icon.png"));
-        iconWidget->setScaledContents(true);
-        iconWidget->setFixedSize(iconSize, iconSize);
-        info_layout->addWidget(iconWidget, 0, Qt::AlignCenter);
-    }
-
-    m_info_label = new QLabel();
-    m_info_label->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-    info_layout->addWidget(m_info_label, 1);
-
-    info->setLayout(info_layout);
-    layout->addWidget(info, 0, 1, 1, 2, Qt::AlignTop | Qt::AlignHCenter);
 
     // recent
 
@@ -343,6 +308,9 @@ WelcomeWidget::WelcomeWidget(QWidget *parent)
             recent_layout->insertWidget(cnt++, b);
             connect(b, &WelcomeButton::clicked,
                     this, [b]() { FrameWork::inst()->openDocument(b->description()); });
+
+            if (cnt == 6)
+                break;
         }
     };
     recreateRecentGroup();
@@ -365,7 +333,7 @@ WelcomeWidget::WelcomeWidget(QWidget *parent)
     m_import_frame = new QGroupBox();
     auto import_layout = new QVBoxLayout();
     for (const auto &name : { "file_import_bl_inv", "file_import_bl_xml", "file_import_bl_order",
-         "file_import_bl_store_inv", "file_import_bl_cart", "file_import_ldraw_model" }) {
+         "file_import_bl_store_inv" /*, "file_import_bl_cart", "file_import_ldraw_model"*/ }) {
         auto b = new WelcomeButton(FrameWork::inst()->findAction(name));
         import_layout->addWidget(b);
     }
@@ -418,13 +386,6 @@ void WelcomeWidget::languageChange()
     m_bs_update->setDescription(tr("Current version: %1 (build: %2)")
                                 .arg(BRICKSTORE_VERSION).arg(BRICKSTORE_BUILD_NUMBER));
     updateLastDBUpdateDescription();
-
-    QString infoText = QString::fromLatin1("<strong style=\"font-size: x-large\">%1</strong><br>%2")
-            .arg(QCoreApplication::applicationName())
-            .arg(m_ldraw_icon ? tr("Using the LDraw installation at:")
-                                + QString::fromLatin1("<br><i>%1</i>").arg(LDraw::core()->dataPath())
-                              : tr("No LDraw installation was found."));
-    m_info_label->setText(infoText);
 
     if (m_no_recent)
         m_no_recent->setText(tr("No recent files"));

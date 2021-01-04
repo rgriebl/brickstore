@@ -67,13 +67,13 @@ HEADERS += \
   $$PWD/window.h \
 
 FORMS = \
+  $$PWD/aboutdialog.ui \
   $$PWD/additemdialog.ui \
   $$PWD/changecurrencydialog.ui \
   $$PWD/consolidateitemsdialog.ui \
   $$PWD/importinventorydialog.ui \
   $$PWD/importorderdialog.ui \
   $$PWD/incdecpricesdialog.ui \
-  $$PWD/informationdialog.ui \
   $$PWD/selectcolordialog.ui \
   $$PWD/selectdocumentdialog.ui \
   $$PWD/selectitemdialog.ui \

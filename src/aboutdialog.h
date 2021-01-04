@@ -16,15 +16,14 @@
 #include <QDialog>
 #include <QMap>
 
-#include "ui_informationdialog.h"
+#include "ui_aboutdialog.h"
 
 
-class InformationDialog : public QDialog, private Ui::InformationDialog
+class AboutDialog : public QDialog, private Ui::AboutDialog
 {
     Q_OBJECT
 public:
-    InformationDialog(const QString &title, const QMap<QString, QString> &pages,
-                      QWidget *parent = nullptr);
+    AboutDialog(const QString &title, QWidget *parent = nullptr);
 
 protected:
     void reject() override;

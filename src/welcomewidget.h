@@ -49,8 +49,6 @@ private:
     WelcomeButton *m_db_update;
     WelcomeButton *m_bs_update;
     QPointer<QLabel> m_no_recent;
-    QLabel *m_info_label;
-    LDraw::RenderOffscreenWidget *m_ldraw_icon = nullptr;
 };
 
 
