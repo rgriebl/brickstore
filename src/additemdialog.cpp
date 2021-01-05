@@ -141,7 +141,11 @@ AddItemDialog::AddItemDialog(QWidget *parent)
             this, &AddItemDialog::addClicked);
 
     connect(w_price_guide, &PriceGuideWidget::priceDoubleClicked,
-            this, &AddItemDialog::setPrice);
+            this, [this](double p) {
+        p *= Currency::inst()->rate(m_currency_code);
+        w_price->setText(Currency::toString(p, m_currency_code));
+        checkAddPossible();
+    });
 
     //TODO5 ??? connect(Config::inst(), &Config::simpleModeChanged, this, &AddItemDialog::setSimpleMode);
 
@@ -429,12 +433,6 @@ void AddItemDialog::addClicked()
 
     m_window->addItem(ii, w_merge->isChecked() ? Window::MergeAction_Force | Window::MergeKeep_Old
                                                : Window::MergeAction_None);
-}
-
-void AddItemDialog::setPrice(double d)
-{
-    w_price->setText(Currency::toString(d, m_currency_code));
-    checkAddPossible();
 }
 
 #include "moc_additemdialog.cpp"

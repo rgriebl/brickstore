@@ -53,7 +53,6 @@ private slots:
     void showTotal();
     bool checkAddPossible();
     void addClicked();
-    void setPrice(double d);
     void checkTieredPrices();
     void setTierType(int type);
     void setSimpleMode(bool);

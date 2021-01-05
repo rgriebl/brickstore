@@ -81,8 +81,11 @@ void TaskPriceGuideWidget::setPrice(double p)
         Document::Item *pos = m_win->selection().front();
         Document::Item item = *pos;
 
+        auto doc = m_win->document();
+        p *= Currency::inst()->rate(doc->currencyCode());
         item.setPrice(p);
-        m_win->document()->changeItem(pos, item);
+
+        doc->changeItem(pos, item);
     }
 }
 
