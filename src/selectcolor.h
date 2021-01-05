@@ -30,6 +30,7 @@ public:
     void setWidthToContents(bool b);
 
     void setCurrentColor(const BrickLink::Color *color);
+    void setCurrentColorAndItem(const BrickLink::Color *color, const BrickLink::Item *item);
     const BrickLink::Color *currentColor() const;
 
 signals:
@@ -45,7 +46,11 @@ protected:
     void changeEvent(QEvent *) override;
     void showEvent(QShowEvent *) override;
 
+    void populateFilter(const BrickLink::Color *color);
+
 protected:
     QComboBox *w_filter;
     QTreeView *w_colors;
+    BrickLink::ColorModel *m_colorModel;
+    const BrickLink::Item *m_item = nullptr;
 };

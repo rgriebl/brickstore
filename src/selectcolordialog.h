@@ -24,7 +24,8 @@ class SelectColorDialog : public QDialog, private Ui::SelectColorDialog
 public:
     SelectColorDialog(QWidget *parent = nullptr);
 
-    void setColor(const BrickLink::Color *);
+    void setColor(const BrickLink::Color *color);
+    void setColorAndItem(const BrickLink::Color *color, const BrickLink::Item *item);
     const BrickLink::Color *color() const;
 
     int execAtPosition(const QRect &pos = QRect());

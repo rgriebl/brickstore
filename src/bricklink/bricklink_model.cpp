@@ -118,7 +118,8 @@ QVariant BrickLink::ColorModel::headerData(int section, Qt::Orientation orient, 
 
 bool BrickLink::ColorModel::isFiltered() const
 {
-    return m_itemtype_filter || m_type_filter || !qFuzzyIsNull(m_popularity_filter);
+    return m_itemtype_filter || m_type_filter || !qFuzzyIsNull(m_popularity_filter)
+            || !m_color_filter.isEmpty();
 }
 
 void BrickLink::ColorModel::setFilterItemType(const ItemType *it)
@@ -126,6 +127,7 @@ void BrickLink::ColorModel::setFilterItemType(const ItemType *it)
     if (it == m_itemtype_filter)
         return;
     m_itemtype_filter = it;
+    m_color_filter.clear();
     invalidateFilter();
 }
 
@@ -134,14 +136,16 @@ void BrickLink::ColorModel::setFilterType(Color::Type type)
     if (type == m_type_filter)
         return;
     m_type_filter = type;
+    m_color_filter.clear();
     invalidateFilter();
 }
 
-void BrickLink::ColorModel::unsetFilterType()
+void BrickLink::ColorModel::unsetFilter()
 {
-    if (!m_type_filter)
-        return;
+    m_popularity_filter = 0;
     m_type_filter = Color::Type();
+    m_itemtype_filter = nullptr;
+    m_color_filter.clear();
     invalidateFilter();
 }
 
@@ -150,6 +154,18 @@ void BrickLink::ColorModel::setFilterPopularity(qreal p)
     if (qFuzzyCompare(p, m_popularity_filter))
         return;
     m_popularity_filter = p;
+    m_color_filter.clear();
+    invalidateFilter();
+}
+
+void BrickLink::ColorModel::setColorListFilter(const QVector<const BrickLink::Color *> &colorList)
+{
+    if (colorList == m_color_filter)
+        return;
+    m_popularity_filter = 0;
+    m_type_filter = Color::Type();
+    m_itemtype_filter = nullptr;
+    m_color_filter = colorList;
     invalidateFilter();
 }
 
@@ -192,6 +208,8 @@ bool BrickLink::ColorModel::filterAccepts(const void *pointer) const
     if (m_type_filter && !(color->type() & m_type_filter))
         return false;
     if (!qFuzzyIsNull(m_popularity_filter) && (color->popularity() < m_popularity_filter))
+        return false;
+    if (!m_color_filter.isEmpty() && !m_color_filter.contains(color))
         return false;
 
     return true;

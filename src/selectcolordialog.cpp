@@ -31,9 +31,14 @@ SelectColorDialog::SelectColorDialog(QWidget *parent)
     setFocusProxy(w_sc);
 }
 
-void SelectColorDialog::setColor(const BrickLink::Color *col)
+void SelectColorDialog::setColor(const BrickLink::Color *color)
 {
-    w_sc->setCurrentColor(col);
+    w_sc->setCurrentColor(color);
+}
+
+void SelectColorDialog::setColorAndItem(const BrickLink::Color *color, const BrickLink::Item *item)
+{
+    w_sc->setCurrentColorAndItem(color, item);
 }
 
 const BrickLink::Color *SelectColorDialog::color() const

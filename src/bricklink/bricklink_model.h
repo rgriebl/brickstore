@@ -39,10 +39,11 @@ public:
     const Color *color(const QModelIndex &index) const;
 
     bool isFiltered() const override;
+    void unsetFilter();
     void setFilterItemType(const ItemType *it);
     void setFilterType(Color::Type type);
-    void unsetFilterType();
     void setFilterPopularity(qreal p);
+    void setColorListFilter(const QVector<const Color *> &colorList);
 
 protected:
     int pointerCount() const override;
@@ -56,6 +57,7 @@ private:
     const ItemType *m_itemtype_filter = nullptr;
     Color::Type m_type_filter {};
     qreal m_popularity_filter = 0;
+    QVector<const Color *> m_color_filter;
 
     friend class Core;
 };

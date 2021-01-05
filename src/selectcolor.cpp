@@ -20,22 +20,44 @@
 #include "bricklink_model.h"
 #include "selectcolor.h"
 
+class ColorTreeView : public QTreeView
+{
+    Q_OBJECT
+public:
+    QSize sizeHint() const override
+    {
+        QSize s = QTreeView::sizeHint();
+        s.rheight() *= 2;
+        return s;
+    }
+};
+
+enum {
+    KnownColors = 0,
+    AllColors = -1,
+    PopularColors = -2,
+    MostPopularColors = -3,
+};
+
 
 SelectColor::SelectColor(QWidget *parent)
     : QWidget(parent)
 {
     w_filter = new QComboBox();
-    w_filter->addItem(QString(), 0);
-    w_filter->addItem(QString(), -1);
-    w_filter->addItem(QString(), -2);
+    w_filter->addItem({ }, KnownColors);
+    w_filter->insertSeparator(w_filter->count());
+    w_filter->addItem({ }, AllColors);
+    w_filter->addItem({ }, PopularColors);
+    w_filter->addItem({ }, MostPopularColors);
     w_filter->insertSeparator(w_filter->count());
 
-    for (int i = 0; (1 << i) & BrickLink::Color::Mask; ++i) {
-        if (!BrickLink::Color::typeName(static_cast<BrickLink::Color::TypeFlag>(1 << i)).isEmpty())
-            w_filter->addItem(QString(), 1 << i);
+    for (auto ct = BrickLink::Color::Solid; ct & BrickLink::Color::Mask; ct = decltype(ct)(ct << 1)) {
+        if (!BrickLink::Color::typeName(ct).isEmpty())
+            w_filter->addItem({ }, ct);
     }
+    w_filter->setMaxVisibleItems(w_filter->count());
 
-    w_colors = new QTreeView();
+    w_colors = new ColorTreeView();
     w_colors->setAlternatingRowColors(true);
     w_colors->setAllColumnsShowFocus(true);
     w_colors->setUniformRowHeights(true);
@@ -43,7 +65,9 @@ SelectColor::SelectColor(QWidget *parent)
     w_colors->setSortingEnabled(true);
     w_colors->setItemDelegate(new BrickLink::ItemDelegate(this, BrickLink::ItemDelegate::AlwaysShowSelection));
 
-    w_colors->setModel(new BrickLink::ColorModel(this));
+    m_colorModel = new BrickLink::ColorModel(this);
+    m_colorModel->setFilterDelayEnabled(true);
+    w_colors->setModel(m_colorModel);
     w_colors->sortByColumn(0, Qt::AscendingOrder);
 
     setFocusProxy(w_colors);
@@ -67,14 +91,15 @@ SelectColor::SelectColor(QWidget *parent)
 
 void SelectColor::languageChange()
 {
-    w_filter->setItemText(0, tr("All Colors"));
-    w_filter->setItemText(1, tr("Popular Colors"));
-    w_filter->setItemText(2, tr("Most Popular Colors"));
+    w_filter->setItemText(w_filter->findData(KnownColors), tr("Known Colors"));
+    w_filter->setItemText(w_filter->findData(AllColors), tr("All Colors"));
+    w_filter->setItemText(w_filter->findData(PopularColors), tr("Popular Colors"));
+    w_filter->setItemText(w_filter->findData(MostPopularColors), tr("Most Popular Colors"));
 
-    for (int i = 0, j = 4; (1 << i) & BrickLink::Color::Mask; ++i) {
-        const QString type = BrickLink::Color::typeName(static_cast<BrickLink::Color::TypeFlag>(1 << i));
-        if (!type.isEmpty())
-            w_filter->setItemText(j++, tr("Only \"%1\" Colors").arg(type));
+    for (auto ct = BrickLink::Color::Solid; ct & BrickLink::Color::Mask; ct = decltype(ct)(ct << 1)) {
+        const QString ctName = BrickLink::Color::typeName(ct);
+        if (!ctName.isEmpty())
+            w_filter->setItemText(w_filter->findData(int(ct)), tr("Only \"%1\" Colors").arg(ctName));
     }
 }
 
@@ -96,22 +121,28 @@ void SelectColor::setWidthToContents(bool b)
 
 void SelectColor::updateColorFilter(int index)
 {
-    int filter = w_filter->itemData(index < 0 ? 0 : index).toInt();
-    auto *model = qobject_cast<BrickLink::ColorModel *>(w_colors->model());
+    int filter = index < 0 ? -1 : w_filter->itemData(index).toInt();
+
+    m_colorModel->unsetFilter();
 
     if (filter > 0) {
-        model->setFilterType(static_cast<BrickLink::Color::TypeFlag>(filter));
-        model->setFilterPopularity(0);
-    } else {
+        m_colorModel->setFilterType(static_cast<BrickLink::Color::TypeFlag>(filter));
+        m_colorModel->setFilterPopularity(0);
+    } else if (filter < 0){
         qreal popularity = 0;
-        if (filter == -1)
+        if (filter == -2)
             popularity = qreal(0.005);
-        else if (filter == -2)
+        else if (filter == -3)
             popularity = qreal(0.05);
 
-        model->setFilterType(BrickLink::Color::Type());
-        model->setFilterPopularity(popularity);
+        // Modulex colors are fine in their own category, but not in the 'all' lists
+        m_colorModel->setFilterType(BrickLink::Color::Type(BrickLink::Color::Mask) & ~BrickLink::Color::Modulex);
+        m_colorModel->setFilterPopularity(popularity);
+    } else if (filter == 0 && m_item) {
+        m_colorModel->setColorListFilter(m_item->knownColors());
     }
+
+    m_colorModel->invalidateFilterNow();
 }
 
 const BrickLink::Color *SelectColor::currentColor() const
@@ -120,15 +151,24 @@ const BrickLink::Color *SelectColor::currentColor() const
         QModelIndex idx = w_colors->selectionModel()->selectedIndexes().front();
         return qvariant_cast<const BrickLink::Color *>(w_colors->model()->data(idx, BrickLink::ColorPointerRole));
     }
-    else
-        return nullptr;
+    return nullptr;
 }
 
 void SelectColor::setCurrentColor(const BrickLink::Color *color)
 {
-    auto *model = qobject_cast<BrickLink::ColorModel *>(w_colors->model());
+    setCurrentColorAndItem(color, nullptr);
+}
 
-    w_colors->setCurrentIndex(model->index(color));
+void SelectColor::setCurrentColorAndItem(const BrickLink::Color *color, const BrickLink::Item *item)
+{
+    m_item = item;
+
+    w_colors->clearSelection();
+    updateColorFilter(w_filter->currentIndex());
+
+    auto colorIndex = m_colorModel->index(color);
+    w_colors->setCurrentIndex(colorIndex);
+    w_colors->scrollTo(colorIndex);
 }
 
 void SelectColor::colorChanged()
@@ -145,13 +185,8 @@ void SelectColor::showEvent(QShowEvent *e)
 {
     QWidget::showEvent(e);
 
-    const BrickLink::Color *color = currentColor();
-
-    if (color) {
-        auto *model = qobject_cast<BrickLink::ColorModel *>(w_colors->model());
-
-        w_colors->scrollTo(model->index(color), QAbstractItemView::PositionAtCenter);
-    }
+    if (const BrickLink::Color *color = currentColor())
+        w_colors->scrollTo(m_colorModel->index(color), QAbstractItemView::PositionAtCenter);
 }
 
 void SelectColor::changeEvent(QEvent *e)
@@ -166,3 +201,4 @@ void SelectColor::changeEvent(QEvent *e)
 }
 
 #include "moc_selectcolor.cpp"
+#include "selectcolor.moc"

@@ -665,7 +665,7 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
                 m_select_color->setWindowFlag(Qt::Tool);
                 m_select_color->setWindowTitle(tr("Modify Color"));
             }
-            m_select_color->setColor(it->color());
+            m_select_color->setColorAndItem(it->color(), it->item());
 
             if (m_select_color->execAtPosition(QRect(m_table->viewport()->mapToGlobal(option.rect.topLeft()), option.rect.size())) == QDialog::Accepted) {
                 Document::Item item = *it;

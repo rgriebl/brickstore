@@ -122,6 +122,10 @@ AddItemDialog::AddItemDialog(QWidget *parent)
             w_select_color, &QWidget::setEnabled);
     connect(w_select_item, &SelectItem::itemSelected,
             this, &AddItemDialog::updateItemAndColor);
+    connect(w_select_item, &SelectItem::itemSelected,
+            this, [this](const BrickLink::Item *item) {
+            w_select_color->setCurrentColorAndItem(w_select_color->currentColor(), item);
+    });
     connect(w_select_color, &SelectColor::colorSelected,
             this, &AddItemDialog::updateItemAndColor);
     connect(w_price, &QLineEdit::textChanged,

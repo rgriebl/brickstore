@@ -370,7 +370,8 @@ void BrickLink::TextImport::readPartColorCodes(const QString &path)
             bool found = false;
             for (const Color *color : qAsConst(m_colors)) {
                 if (color->name() == colorId) {
-                    const_cast<Item *>(itm)->m_known_colors << color->id();
+                    if (!itm->m_known_colors.contains(color->id()))
+                        const_cast<Item *>(itm)->m_known_colors << color->id();
                     found = true;
                     break;
                 }
