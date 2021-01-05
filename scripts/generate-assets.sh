@@ -69,16 +69,16 @@ convert $b/brickstore.png -resize $((s)) $g/brickstore.png
 
 convert $c/tab.png -resize $((s)) $g/tab.png
 
-convert $c/brick_1x1.png -scale $s $c/overlay_plus.png -scale $s -composite $g/items_add.png
-convert $c/brick_1x1.png -scale $s $c/overlay_divide.png -scale $s -composite $g/items_divide.png
-convert $c/brick_1x1.png -scale $s $c/overlay_multiply.png -scale $s -composite $g/items_multiply.png
-convert $c/brick_1x1.png -scale $s $c/overlay_minus.png -scale $s -composite $g/items_subtract.png
-convert $c/brick_1x1.png -scale $s $c/overlay_merge.png -scale $s -composite $g/items_merge.png
-convert $c/brick_1x1.png -scale $s $c/overlay_split.png -scale $s -composite $g/items_part_out.png
+convert $c/brick_1x1.png -colorspace sRGB -scale $s $c/overlay_plus.png -scale $s -composite $g/items_add.png
+convert $c/brick_1x1.png -colorspace sRGB -scale $s $c/overlay_divide.png -scale $s -composite $g/items_divide.png
+convert $c/brick_1x1.png -colorspace sRGB -scale $s $c/overlay_multiply.png -scale $s -composite $g/items_multiply.png
+convert $c/brick_1x1.png -colorspace sRGB -scale $s $c/overlay_minus.png -scale $s -composite $g/items_subtract.png
+convert $c/brick_1x1.png -colorspace sRGB -scale $s $c/overlay_merge.png -scale $s -composite $g/items_merge.png
+convert $c/brick_1x1.png -colorspace sRGB -scale $s $c/overlay_split.png -scale $s -composite $g/items_part_out.png
 
-convert $c/dollar.png -scale $s $c/overlay_plusminus.png -scale $s -composite $g/price_inc_dec.png
-convert $c/dollar.png -scale $s $c/overlay_equals.png -scale $s -composite $g/price_set.png
-convert $c/dollar.png -scale $s $c/overlay_percent.png -scale $s -composite $g/price_sale.png
+convert $c/dollar.png -colorspace sRGB -scale $s $c/overlay_plusminus.png -scale $s -composite $g/price_inc_dec.png
+convert $c/dollar.png -colorspace sRGB -scale $s $c/overlay_equals.png -scale $s -composite $g/price_set.png
+convert $c/dollar.png -colorspace sRGB -scale $s $c/overlay_percent.png -scale $s -composite $g/price_sale.png
 
 convert -resize $s $c/ldraw.png $g/ldraw.png
 convert -resize $s $c/bricklink.png $g/bricklink.png

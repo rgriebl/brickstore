@@ -41,7 +41,7 @@ AboutDialog::AboutDialog(QWidget *parent)
 
     if (part) {
         auto ldraw_icon = new LDraw::RenderOffscreenWidget();
-        ldraw_icon->setPartAndColor(part, QColor("#F36100"));
+        ldraw_icon->setPartAndColor(part, 321);
         ldraw_icon->startAnimation();
         auto layout = new QHBoxLayout(w_icon);
         layout->setMargin(0);
