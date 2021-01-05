@@ -187,14 +187,14 @@ bool BrickLink::ColorModel::filterAccepts(const void *pointer) const
 {
     const auto *color = static_cast<const Color *>(pointer);
 
-    if (m_itemtype_filter)
-        return m_itemtype_filter->hasColors() || (color && color->id() == 0);
-    else if (m_type_filter)
-        return color->type() & m_type_filter;
-    else if (!qFuzzyIsNull(m_popularity_filter))
-        return color->popularity() >= m_popularity_filter;
-    else
-        return true;
+    if (m_itemtype_filter && !(m_itemtype_filter->hasColors() || (color && color->id() == 0)))
+        return false;
+    if (m_type_filter && !(color->type() & m_type_filter))
+        return false;
+    if (!qFuzzyIsNull(m_popularity_filter) && (color->popularity() < m_popularity_filter))
+        return false;
+
+    return true;
 }
 
 
