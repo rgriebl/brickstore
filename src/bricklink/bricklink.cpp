@@ -34,9 +34,12 @@
 #include "bricklink.h"
 #include "chunkreader.h"
 #include "chunkwriter.h"
+#include "exception.h"
 
 
-QUrl BrickLink::Core::url(UrlList u, const void *opt, const void *opt2)
+namespace BrickLink {
+
+QUrl Core::url(UrlList u, const void *opt, const void *opt2)
 {
     QUrl url;
 
@@ -148,7 +151,7 @@ QUrl BrickLink::Core::url(UrlList u, const void *opt, const void *opt2)
 }
 
 
-const QImage BrickLink::Core::noImage(const QSize &s) const
+const QImage Core::noImage(const QSize &s) const
 {
     QString key = QString("%1x%2").arg(s.width()).arg(s.height());
 
@@ -192,7 +195,7 @@ const QImage BrickLink::Core::noImage(const QSize &s) const
 }
 
 
-const QImage BrickLink::Core::colorImage(const Color *col, int w, int h) const
+const QImage Core::colorImage(const Color *col, int w, int h) const
 {
     if (!col || w <= 0 || h <= 0)
         return QImage();
@@ -229,8 +232,8 @@ const QImage BrickLink::Core::colorImage(const Color *col, int w, int h) const
                         basename.replace(0, 2, "Dark Bluish ");
                     QString speckname = name.mid(dash + 1);
 
-                    const BrickLink::Color *basec = colorFromName(basename);
-                    const BrickLink::Color *speckc = colorFromName(speckname);
+                    const Color *basec = colorFromName(basename);
+                    const Color *speckc = colorFromName(speckname);
 
                     if (basec)
                         c = basec->color();
@@ -312,12 +315,12 @@ static bool check_and_create_path(const QString &p)
 
 } // namespace
 
-QString BrickLink::Core::dataPath() const
+QString Core::dataPath() const
 {
     return m_datadir;
 }
 
-QString BrickLink::Core::dataPath(const ItemType *item_type) const
+QString Core::dataPath(const ItemType *item_type) const
 {
     QString p = dataPath();
     p += item_type->id();
@@ -329,7 +332,7 @@ QString BrickLink::Core::dataPath(const ItemType *item_type) const
     return p;
 }
 
-QString BrickLink::Core::dataPath(const Item *item) const
+QString Core::dataPath(const Item *item) const
 {
     QString p = dataPath(item->itemType());
     const QString id = item->id();
@@ -355,7 +358,7 @@ QString BrickLink::Core::dataPath(const Item *item) const
     return p;
 }
 
-QString BrickLink::Core::dataPath(const Item *item, const Color *color) const
+QString Core::dataPath(const Item *item, const Color *color) const
 {
     QString p = dataPath(item);
     p += QString::number(color->id());
@@ -369,9 +372,9 @@ QString BrickLink::Core::dataPath(const Item *item, const Color *color) const
 
 
 
-BrickLink::Core *BrickLink::Core::s_inst = nullptr;
+Core *Core::s_inst = nullptr;
 
-BrickLink::Core *BrickLink::Core::create(const QString &datadir, QString *errstring)
+Core *Core::create(const QString &datadir, QString *errstring)
 {
     if (!s_inst) {
         s_inst = new Core(datadir);
@@ -390,7 +393,7 @@ BrickLink::Core *BrickLink::Core::create(const QString &datadir, QString *errstr
     return s_inst;
 }
 
-BrickLink::Core::Core(const QString &datadir)
+Core::Core(const QString &datadir)
     : m_datadir(QDir::cleanPath(QDir(datadir).absolutePath()) + QStringLiteral("/"))
     , m_c_locale(QLocale::c())
     , m_corelock(QMutex::Recursive)
@@ -406,7 +409,7 @@ BrickLink::Core::Core(const QString &datadir)
     m_pic_cache.setMaxCost(int(cachemem));    // each pic has a cost of (w*h*d/8 + 1024)
 }
 
-BrickLink::Core::~Core()
+Core::~Core()
 {
     clear();
 
@@ -414,7 +417,7 @@ BrickLink::Core::~Core()
     s_inst = nullptr;
 }
 
-void BrickLink::Core::setTransfer(Transfer *trans)
+void Core::setTransfer(Transfer *trans)
 {
     Transfer *old = m_transfer;
 
@@ -434,64 +437,64 @@ void BrickLink::Core::setTransfer(Transfer *trans)
     }
 }
 
-Transfer *BrickLink::Core::transfer() const
+Transfer *Core::transfer() const
 {
     return m_transfer;
 }
 
-void BrickLink::Core::setUpdateIntervals(const QMap<QByteArray, int> &intervals)
+void Core::setUpdateIntervals(const QMap<QByteArray, int> &intervals)
 {
     m_pic_update_iv = intervals["Picture"];
     m_pg_update_iv = intervals["PriceGuide"];
 }
 
-bool BrickLink::Core::updateNeeded(bool valid, const QDateTime &last, int iv)
+bool Core::updateNeeded(bool valid, const QDateTime &last, int iv)
 {
     return (iv > 0) && (!valid || (last.secsTo(QDateTime::currentDateTime()) > iv));
 }
 
-void BrickLink::Core::setOnlineStatus(bool on)
+void Core::setOnlineStatus(bool on)
 {
     m_online = on;
 }
 
-bool BrickLink::Core::onlineStatus() const
+bool Core::onlineStatus() const
 {
     return m_online;
 }
 
 
-const QHash<uint, const BrickLink::Color *> &BrickLink::Core::colors() const
+const QHash<uint, const Color *> &Core::colors() const
 {
     return m_colors;
 }
 
-const QHash<uint, const BrickLink::Category *> &BrickLink::Core::categories() const
+const QHash<uint, const Category *> &Core::categories() const
 {
     return m_categories;
 }
 
-const QHash<char, const BrickLink::ItemType *> &BrickLink::Core::itemTypes() const
+const QHash<char, const ItemType *> &Core::itemTypes() const
 {
     return m_item_types;
 }
 
-const QVector<const BrickLink::Item *> &BrickLink::Core::items() const
+const QVector<const Item *> &Core::items() const
 {
     return m_items;
 }
 
-const BrickLink::Category *BrickLink::Core::category(uint id) const
+const Category *Core::category(uint id) const
 {
     return m_categories.value(id);
 }
 
-const BrickLink::Color *BrickLink::Core::color(uint id) const
+const Color *Core::color(uint id) const
 {
     return m_colors.value(id);
 }
 
-const BrickLink::Color *BrickLink::Core::colorFromName(const QString &name) const
+const Color *Core::colorFromName(const QString &name) const
 {
     if (name.isEmpty())
         return nullptr;
@@ -504,7 +507,7 @@ const BrickLink::Color *BrickLink::Core::colorFromName(const QString &name) cons
 }
 
 
-const BrickLink::Color *BrickLink::Core::colorFromLDrawId(int ldraw_id) const
+const Color *Core::colorFromLDrawId(int ldraw_id) const
 {
     for (const Color *col : m_colors) {
         if (col->ldrawId() == ldraw_id)
@@ -514,12 +517,12 @@ const BrickLink::Color *BrickLink::Core::colorFromLDrawId(int ldraw_id) const
 }
 
 
-const BrickLink::ItemType *BrickLink::Core::itemType(char id) const
+const ItemType *Core::itemType(char id) const
 {
     return m_item_types.value(id);
 }
 
-const BrickLink::Item *BrickLink::Core::item(char tid, const QString &id) const
+const Item *Core::item(char tid, const QString &id) const
 {
     Item key;
     key.m_item_type = itemType(tid);
@@ -536,7 +539,7 @@ const BrickLink::Item *BrickLink::Core::item(char tid, const QString &id) const
     return nullptr;
 }
 
-void BrickLink::Core::cancelPictureTransfers()
+void Core::cancelPictureTransfers()
 {
     QMutexLocker lock(&m_corelock);
 
@@ -546,7 +549,7 @@ void BrickLink::Core::cancelPictureTransfers()
         m_transfer->abortAllJobs();
 }
 
-void BrickLink::Core::cancelPriceGuideTransfers()
+void Core::cancelPriceGuideTransfers()
 {
     QMutexLocker lock(&m_corelock);
 
@@ -554,12 +557,12 @@ void BrickLink::Core::cancelPriceGuideTransfers()
         m_transfer->abortAllJobs();
 }
 
-QString BrickLink::Core::defaultDatabaseName(DatabaseVersion version) const
+QString Core::defaultDatabaseName(DatabaseVersion version) const
 {
     return QString("database-v%1").arg(int(version));
 }
 
-void BrickLink::Core::clear()
+void Core::clear()
 {
     QMutexLocker lock(&m_corelock);
 
@@ -581,148 +584,9 @@ void BrickLink::Core::clear()
     m_changelog.clear();
 }
 
-bool BrickLink::Core::readDatabase(QString *infoText, const QString &fname)
-{
-    QMutexLocker lock(&m_corelock);
-
-    clear();
-
-    bool result = false;
-    stopwatch *sw = nullptr; //new stopwatch("BrickLink::Core::readDatabase()");
-
-    QString info;
-    if (infoText)
-        infoText->clear();
-
-    QFile f;
-    if (!fname.isEmpty())
-        f.setFileName(fname);
-    else if (QFile::exists(dataPath() + defaultDatabaseName()))
-        f.setFileName(dataPath() + defaultDatabaseName());
-    else
-        return false;
-
-    if (f.open(QFile::ReadOnly)) {
-        const char *data = reinterpret_cast<char *>(f.map(0, f.size()));
-
-        if (data) {
-            QByteArray ba = QByteArray::fromRawData(data, int(f.size()));
-
-            if (ba.size() >= 4 && data[0] == 'B' && data[1] == 'S' && data[2] == 'D' && data[3] == 'B') {
-                QBuffer buf(&ba);
-                buf.open(QIODevice::ReadOnly);
-
-                ChunkReader cr(&buf, QDataStream::LittleEndian);
-                QDataStream &ds = cr.dataStream();
-
-                if (cr.startChunk() && cr.chunkId() == ChunkId('B','S','D','B')
-                        && cr.chunkVersion() == int(DatabaseVersion::Version_3)) {
-                    while (cr.startChunk()) {
-                        switch (cr.chunkId() | quint64(cr.chunkVersion()) << 32) {
-                            case ChunkId('I','N','F','O') | 1ULL << 32: {
-                                ds >> info;
-                                break;
-                            }
-                            case ChunkId('C','O','L',' ') | 1ULL << 32: {
-                                quint32 colc = 0;
-                                ds >> colc;
-
-                                for (quint32 i = colc; i; i--) {
-                                    auto *col = new Color();
-                                    ds >> col;
-                                    m_colors.insert(col->id(), col);
-                                }
-                                break;
-                            }
-                            case ChunkId('C','A','T',' ') | 1ULL << 32: {
-                                quint32 catc = 0;
-                                ds >> catc;
-
-                                for (quint32 i = catc; i; i--) {
-                                    auto *cat = new Category();
-                                    ds >> cat;
-                                    m_categories.insert(cat->id(), cat);
-                                }
-                                break;
-                            }
-                            case ChunkId('T','Y','P','E') | 1ULL << 32: {
-                                quint32 ittc = 0;
-                                ds >> ittc;
-
-                                for (quint32 i = ittc; i; i--) {
-                                    auto *itt = new ItemType();
-                                    ds >> itt;
-                                    m_item_types.insert(itt->id(), itt);
-                                }
-                                break;
-                            }
-                            case ChunkId('I','T','E','M') | 1ULL << 32: {
-                                quint32 itc = 0;
-                                ds >> itc;
-
-                                m_items.reserve(int(itc));
-                                for (quint32 i = itc; i; i--) {
-                                    Item *item = new Item();
-                                    ds >> item;
-                                    m_items.append(item);
-                                }
-                                break;
-                            }
-                            case ChunkId('C','H','G','L') | 1ULL << 32: {
-                                quint32 clc = 0;
-                                ds >> clc;
-
-                                m_changelog.reserve(int(clc));
-                                for (quint32 i = clc; i; i--) {
-                                    QByteArray entry;
-                                    ds >> entry;
-                                    m_changelog.append(entry);
-                                }
-                                break;
-                            }
-                            default: {
-                                if (!cr.skipChunk())
-                                    goto out;
-                                break;
-                            }
-                        }
-                        if (!cr.endChunk())
-                            goto out;
-                    }
-                    if (!cr.endChunk())
-                        goto out;
-
-                    result = true;
-                }
-            } else {
-                qWarning("readDatabase(): Unknown database format!");
-            }
-        }
-    }
-
-out:
-    if (result) {
-        delete sw;
-
-        qDebug("Color: %8u  (%11d bytes)", m_colors.count(),     m_colors.count()     * int(sizeof(Color)    + 20));
-        qDebug("Types: %8u  (%11d bytes)", m_item_types.count(), m_item_types.count() * int(sizeof(ItemType) + 20));
-        qDebug("Cats : %8u  (%11d bytes)", m_categories.count(), m_categories.count() * int(sizeof(Category) + 20));
-        qDebug("Items: %8u  (%11d bytes)", m_items.count(),      m_items.count()      * int(sizeof(Item)     + 20));
-        if (!info.isEmpty())
-            qDebug() << "Info :" << info;
-    }
-    else {
-        clear();
-
-        qWarning("Error reading database!");
-    }
-    if (infoText)
-        *infoText = info;
-    return result;
-}
 
 
-BrickLink::Core::ParseItemListXMLResult BrickLink::Core::parseItemListXML(const QDomElement &root, ItemListXMLHint hint)
+Core::ParseItemListXMLResult Core::parseItemListXML(const QDomElement &root, ItemListXMLHint hint)
 {
     ParseItemListXMLResult result;
     QString roottag, itemtag;
@@ -1011,7 +875,7 @@ BrickLink::Core::ParseItemListXMLResult BrickLink::Core::parseItemListXML(const 
 
 
 
-QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint hint, const InvItemList &items, const QString &currencyCode, QMap <QString, QString> *extra)
+QDomElement Core::createItemListXML(QDomDocument doc, ItemListXMLHint hint, const InvItemList &items, const QString &currencyCode, QMap <QString, QString> *extra)
 {
     QString roottag, itemtag;
 
@@ -1243,7 +1107,7 @@ QDomElement BrickLink::Core::createItemListXML(QDomDocument doc, ItemListXMLHint
 
 
 
-bool BrickLink::Core::parseLDrawModel(QFile &f, InvItemList &items, uint *invalid_items)
+bool Core::parseLDrawModel(QFile &f, InvItemList &items, uint *invalid_items)
 {
     QHash<QString, InvItem *> mergehash;
     QStringList recursion_detection;
@@ -1251,7 +1115,7 @@ bool BrickLink::Core::parseLDrawModel(QFile &f, InvItemList &items, uint *invali
     return parseLDrawModelInternal(f, QString(), items, invalid_items, mergehash, recursion_detection);
 }
 
-bool BrickLink::Core::parseLDrawModelInternal(QFile &f, const QString &model_name, InvItemList &items, uint *invalid_items, QHash<QString, InvItem *> &mergehash, QStringList &recursion_detection)
+bool Core::parseLDrawModelInternal(QFile &f, const QString &model_name, InvItemList &items, uint *invalid_items, QHash<QString, InvItem *> &mergehash, QStringList &recursion_detection)
 {
     if (recursion_detection.contains(model_name))
         return false;
@@ -1398,128 +1262,463 @@ bool BrickLink::Core::parseLDrawModelInternal(QFile &f, const QString &model_nam
 }
 
 
+//
+// Database (de)serialization
+//
 
-/*
- * Support routines to rebuild the DB from txt files
- */
-void BrickLink::Core::setDatabase_ConsistsOf(const QHash<const Item *, InvItemList> &hash)
+bool Core::readDatabase(QString *infoText, const QString &filename)
 {
     QMutexLocker lock(&m_corelock);
 
-    for (QHash<const Item *, InvItemList>::const_iterator it = hash.begin(); it != hash.end(); ++it)
-        it.key()->setConsistsOf(it.value());
-}
+    try {
+        clear();
 
-void BrickLink::Core::setDatabase_AppearsIn(const QHash<const Item *, AppearsIn> &hash)
-{
-    QMutexLocker lock(&m_corelock);
+        stopwatch *sw = nullptr; //new stopwatch("Core::readDatabase()");
 
-    for (QHash<const Item *, AppearsIn>::const_iterator it = hash.begin(); it != hash.end(); ++it)
-        it.key()->setAppearsIn(it.value());
-}
+        QString info;
+        if (infoText)
+            infoText->clear();
 
-void BrickLink::Core::setDatabase_Basics(const QHash<uint, const Color *> &colors,
-        const QHash<uint, const Category *> &categories,
-        const QHash<char, const ItemType *> &item_types,
-        const QVector<const Item *> &items)
-{
-    QMutexLocker lock(&m_corelock);
+        QFile f(!filename.isEmpty() ? filename : dataPath() + defaultDatabaseName());
 
-    cancelPictureTransfers();
-    cancelPriceGuideTransfers();
+        if (!f.open(QFile::ReadOnly))
+            throw Exception(&f, "could not open database for reading");
 
-    m_pg_cache.clear();
-    m_pic_cache.clear();
+        const char *data = reinterpret_cast<char *>(f.map(0, f.size()));
 
-    m_colors.clear();
-    m_item_types.clear();
-    m_categories.clear();
-    m_items.clear();
+        if (!data)
+            throw Exception("could not memory map the database (%1)").arg(f.fileName());
 
-    m_colors     = colors;
-    m_item_types = item_types;
-    m_categories = categories;
-    m_items      = items;
-}
+        QByteArray ba = QByteArray::fromRawData(data, int(f.size()));
+        QBuffer buf(&ba);
+        buf.open(QIODevice::ReadOnly);
+        ChunkReader cr(&buf, QDataStream::LittleEndian);
+        QDataStream &ds = cr.dataStream();
 
-void BrickLink::Core::setDatabase_ChangeLog(const QVector<QByteArray> &changelog)
-{
-    QMutexLocker lock(&m_corelock);
-    m_changelog = changelog;
-}
+        if (!cr.startChunk() || cr.chunkId() != ChunkId('B','S','D','B'))
+            throw Exception("invalid database format - wrong magic (%1)").arg(f.fileName());
 
-bool BrickLink::Core::writeDatabase(const QString &filename, DatabaseVersion version,
-                                    const QString &infoText) const
-{
-    if (filename.isEmpty() || (version != DatabaseVersion::Version_3))
-        return false;
-
-    QMutexLocker lock(&m_corelock);
-
-    QFile f(filename + QLatin1String(".new"));
-    if (f.open(QIODevice::WriteOnly)) {
-        ChunkWriter cw(&f, QDataStream::LittleEndian);
-        QDataStream &ds = cw.dataStream();
-        bool ok = true;
-
-        ok = ok && cw.startChunk(ChunkId('B','S','D','B'), int(version));
-
-        if (!infoText.isEmpty()) {
-            ok = ok && cw.startChunk(ChunkId('I','N','F','O'), 1);
-            ds << infoText;
-            ok = ok && cw.endChunk();
+        if (cr.chunkVersion() != int(DatabaseVersion::Latest)) {
+            throw Exception("invalid database version: expected %1, but got %2")
+                .arg(int(DatabaseVersion::Latest)).arg(cr.chunkVersion());
         }
 
-        ok = ok && cw.startChunk(ChunkId('C','O','L',' '), 1);
+        bool gotColors = false, gotCategories = false, gotItemTypes = false, gotItems = false;
+        bool gotChangeLog = false;
+
+        auto check = [&ds, &f]() {
+            if (ds.status() != QDataStream::Ok)
+                throw Exception("failed to read from database (%1) at position %2")
+                    .arg(f.fileName()).arg(f.pos());
+        };
+
+        while (cr.startChunk()) {
+            switch (cr.chunkId() | quint64(cr.chunkVersion()) << 32) {
+            case ChunkId('I','N','F','O') | 1ULL << 32: {
+                ds >> info;
+                break;
+            }
+            case ChunkId('C','O','L',' ') | 1ULL << 32: {
+                quint32 colc = 0;
+                ds >> colc;
+                check();
+
+                for (quint32 i = colc; i; i--) {
+                    auto *col = readColorFromDatabase(ds, DatabaseVersion::Latest);
+                    check();
+                    m_colors.insert(col->id(), col);
+                }
+                gotColors = true;
+                break;
+            }
+            case ChunkId('C','A','T',' ') | 1ULL << 32: {
+                quint32 catc = 0;
+                ds >> catc;
+                check();
+
+                for (quint32 i = catc; i; i--) {
+                    auto *cat = readCategoryFromDatabase(ds, DatabaseVersion::Latest);
+                    check();
+                    m_categories.insert(cat->id(), cat);
+                }
+                gotCategories = true;
+                break;
+            }
+            case ChunkId('T','Y','P','E') | 1ULL << 32: {
+                quint32 ittc = 0;
+                ds >> ittc;
+                check();
+
+                for (quint32 i = ittc; i; i--) {
+                    auto *itt = readItemTypeFromDatabase(ds, DatabaseVersion::Latest);
+                    check();
+                    m_item_types.insert(itt->id(), itt);
+                }
+                gotItemTypes = true;
+                break;
+            }
+            case ChunkId('I','T','E','M') | 1ULL << 32: {
+                quint32 itc = 0;
+                ds >> itc;
+                check();
+
+                m_items.reserve(int(itc));
+                for (quint32 i = itc; i; i--) {
+                    auto *item = readItemFromDatabase(ds, DatabaseVersion::Latest);
+                    check();
+                    m_items.append(item);
+                }
+                gotItems = true;
+                break;
+            }
+            case ChunkId('C','H','G','L') | 1ULL << 32: {
+                quint32 clc = 0;
+                ds >> clc;
+                check();
+
+                m_changelog.reserve(int(clc));
+                for (quint32 i = clc; i; i--) {
+                    QByteArray entry;
+                    ds >> entry;
+                    check();
+                    m_changelog.append(entry);
+                }
+                gotChangeLog = true;
+                break;
+            }
+            default: {
+                cr.skipChunk();
+                check();
+                break;
+            }
+            }
+            if (!cr.endChunk()) {
+                throw Exception("missed the end of a chunk when reading from database (%1) at position %2")
+                    .arg(f.fileName()).arg(f.pos());
+            }
+        }
+        if (!cr.endChunk()) {
+            throw Exception("missed the end of the root chunk when reading from database (%1) at position %2")
+                .arg(f.fileName()).arg(f.pos());
+        }
+
+        delete sw;
+
+        if (!gotColors || !gotCategories || !gotItemTypes || !gotItems || !gotChangeLog) {
+            throw Exception("not all required data chunks were found in the database (%1)")
+                .arg(f.fileName());
+        }
+
+        qDebug("Color: %8u  (%11d bytes)", m_colors.count(),     m_colors.count()     * int(sizeof(Color)    + 20));
+        qDebug("Types: %8u  (%11d bytes)", m_item_types.count(), m_item_types.count() * int(sizeof(ItemType) + 20));
+        qDebug("Cats : %8u  (%11d bytes)", m_categories.count(), m_categories.count() * int(sizeof(Category) + 20));
+        qDebug("Items: %8u  (%11d bytes)", m_items.count(),      m_items.count()      * int(sizeof(Item)     + 20));
+        if (!info.isEmpty())
+            qDebug() << "Info :" << info;
+        if (infoText)
+            *infoText = info;
+        return true;
+
+    } catch (const Exception &e) {
+        qWarning() << "Error reading database:" << e.what();
+        clear();
+        return false;
+    }
+}
+
+
+bool Core::writeDatabase(const QString &filename, DatabaseVersion version,
+                         const QString &infoText) const
+{
+    if (version <= DatabaseVersion::Invalid)
+        return false; // too old
+
+    QMutexLocker lock(&m_corelock);
+
+    QString fn(!filename.isEmpty() ? filename : dataPath() + defaultDatabaseName(version));
+
+    try {
+        QFile f(fn + QLatin1String(".new"));
+        if (!f.open(QIODevice::WriteOnly))
+            throw Exception(&f, "could not open database for writing");
+
+        ChunkWriter cw(&f, QDataStream::LittleEndian);
+        QDataStream &ds = cw.dataStream();
+
+        auto check = [&ds, &f](bool ok) {
+            if (!ok || (ds.status() != QDataStream::Ok))
+                throw Exception("failed to write to database (%1) at position %2")
+                    .arg(f.fileName()).arg(f.pos());
+        };
+
+        check(cw.startChunk(ChunkId('B','S','D','B'), int(version)));
+
+        if (!infoText.isEmpty()) {
+            check(cw.startChunk(ChunkId('I','N','F','O'), 1));
+            ds << infoText;
+            check(cw.endChunk());
+        }
+
+        check(cw.startChunk(ChunkId('C','O','L',' '), 1));
         ds << quint32(m_colors.count());
         for (const Color *col : m_colors)
-            ds << col;
-        ok = ok && cw.endChunk();
+            writeColorToDatabase(col, ds, version);
+        check(cw.endChunk());
 
-        ok = ok && cw.startChunk(ChunkId('C','A','T',' '), 1);
+        check(cw.startChunk(ChunkId('C','A','T',' '), 1));
         ds << quint32(m_categories.count());
         for (const Category *cat : m_categories)
-            ds << cat;
-        ok = ok && cw.endChunk();
+            writeCategoryToDatabase(cat, ds, version);
+        check(cw.endChunk());
 
-        ok = ok && cw.startChunk(ChunkId('T','Y','P','E'), 1);
+        check(cw.startChunk(ChunkId('T','Y','P','E'), 1));
         ds << quint32(m_item_types.count());
         for (const ItemType *itt : m_item_types)
-            ds << itt;
-        ok = ok && cw.endChunk();
+            writeItemTypeToDatabase(itt, ds, version);
+        check(cw.endChunk());
 
-        ok = ok && cw.startChunk(ChunkId('I','T','E','M'), 1);
+        check(cw.startChunk(ChunkId('I','T','E','M'), 1));
         ds << quint32(m_items.count());
         for (const Item *item : m_items)
-            ds << item;
-        ok = ok && cw.endChunk();
+            writeItemToDatabase(item, ds, version);
+        check(cw.endChunk());
 
-        ok = ok && cw.startChunk(ChunkId('C','H','G','L'), 1);
+        check(cw.startChunk(ChunkId('C','H','G','L'), 1));
         ds << quint32(m_changelog.count());
         for (const QByteArray &cl : m_changelog)
             ds << cl;
-        ok = ok && cw.endChunk();
+        check(cw.endChunk());
 
-        ok = ok && cw.endChunk();
+        check(cw.endChunk()); // BSDB root chunk
 
-        if (ok && f.error() == QFile::NoError) {
-            f.close();
+        f.close();
+        QString err = Utility::safeRename(filename);
+        if (!err.isNull())
+            throw Exception(err);
 
-            QString err = Utility::safeRename(filename);
+        return true;
 
-            if (err.isNull())
-                return true;
+    } catch (const Exception &e) {
+        qWarning() << "Error writing database:" << e.what();
+        QFile::remove(fn + ".new");
+        return false;
+    }
+}
+
+
+Color *Core::readColorFromDatabase(QDataStream &dataStream, DatabaseVersion)
+{
+    QScopedPointer<Color> col(new Color);
+
+    quint32 flags;
+    float popularity;
+    QByteArray name;
+
+    dataStream >> col->m_id >> name >> col->m_ldraw_id >> col->m_color >> flags >> popularity
+            >> col->m_year_from >> col->m_year_to;
+
+    col->m_name = QString::fromUtf8(name);
+    col->m_type = static_cast<Color::Type>(flags);
+    col->m_popularity = qreal(popularity);
+
+    return col.take();
+}
+
+void Core::writeColorToDatabase(const Color *col, QDataStream &dataStream, DatabaseVersion)
+{
+    dataStream << col->m_id << col->m_name.toUtf8() << col->m_ldraw_id << col->m_color
+               << quint32(col->m_type) << float(col->m_popularity)
+               << col->m_year_from << col->m_year_to;
+}
+
+
+Category *Core::readCategoryFromDatabase(QDataStream &dataStream, DatabaseVersion)
+{
+    QScopedPointer<Category> cat(new Category);
+
+    QByteArray name;
+    quint32 id;
+    dataStream >> id >> name;
+    cat->m_id = id;
+    cat->m_name = QString::fromUtf8(name);
+
+    return cat.take();
+}
+
+void Core::writeCategoryToDatabase(const Category *cat, QDataStream &dataStream, DatabaseVersion)
+{
+    dataStream << quint32(cat->m_id) << cat->m_name.toUtf8();
+}
+
+
+ItemType *Core::readItemTypeFromDatabase(QDataStream &dataStream, DatabaseVersion)
+{
+    QScopedPointer<ItemType> itt(new ItemType);
+
+    quint8 flags = 0;
+    qint32 catcount = 0;
+    qint8 id = 0, picid = 0;
+    QByteArray name;
+    dataStream >> id >> picid >> name >> flags >> catcount;
+
+    itt->m_name = QString::fromUtf8(name);
+    itt->m_id = id;
+    itt->m_picture_id = id;
+
+    itt->m_categories.resize(catcount);
+
+    for (int i = 0; i < catcount; i++) {
+        quint32 catid = 0;
+        dataStream >> catid;
+        itt->m_categories[i] = BrickLink::core()->category(catid);
+    }
+
+    itt->m_has_inventories   = flags & 0x01;
+    itt->m_has_colors        = flags & 0x02;
+    itt->m_has_weight        = flags & 0x04;
+    itt->m_has_year          = flags & 0x08;
+    itt->m_has_subconditions = (id == 'S'); //flags & 0x10;
+
+    return itt.take();
+}
+
+void Core::writeItemTypeToDatabase(const ItemType *itt, QDataStream &dataStream, DatabaseVersion)
+{
+    quint8 flags = 0;
+    flags |= (itt->m_has_inventories   ? 0x01 : 0);
+    flags |= (itt->m_has_colors        ? 0x02 : 0);
+    flags |= (itt->m_has_weight        ? 0x04 : 0);
+    flags |= (itt->m_has_year          ? 0x08 : 0);
+    flags |= (itt->m_has_subconditions ? 0x10 : 0);
+
+    dataStream << qint8(itt->m_id) << qint8(itt->m_picture_id) << itt->m_name.toUtf8() << flags;
+
+    dataStream << qint32(itt->m_categories.size());
+    for (const BrickLink::Category *cat : itt->m_categories)
+        dataStream << quint32(cat->id());
+}
+
+
+Item *Core::readItemFromDatabase(QDataStream &dataStream, DatabaseVersion v)
+{
+    QScopedPointer<Item> item(new Item);
+
+    qint8 ittid = 0;
+    quint32 catcount = 0;
+    QByteArray id;
+    QByteArray name;
+
+    dataStream >> id >> name >> ittid >> catcount;
+    item->m_id = QString::fromUtf8(id);
+    item->m_name = QString::fromUtf8(name);
+    item->m_item_type = BrickLink::core()->itemType(ittid);
+
+    item->m_categories.resize(int(catcount));
+
+    for (int i = 0; i < int(catcount); i++) {
+        quint32 catid = 0;
+        dataStream >> catid;
+        item->m_categories[i] = BrickLink::core()->category(catid);
+    }
+
+    quint32 colorid = 0;
+    quint32 index = 0, year = 0;
+    qint64 invupd = 0;
+    dataStream >> colorid >> invupd >> item->m_weight >> index >> year;
+    item->m_color = BrickLink::core()->color(colorid == quint32(-1) ? 0 : colorid);
+    item->m_index = index;
+    item->m_year = year;
+    item->m_last_inv_update = invupd;
+
+    quint32 appears = 0, appears_size = 0;
+    dataStream >> appears;
+    if (appears)
+        dataStream >> appears_size;
+
+    if (appears && appears_size) {
+        auto *ptr = new quint32 [appears_size];
+        item->m_appears_in = ptr;
+
+        *ptr++ = appears;
+        *ptr++ = appears_size;
+
+        for (quint32 i = 2; i < appears_size; i++)
+            dataStream >> *ptr++;
+    }
+    else
+        item->m_appears_in = nullptr;
+
+    quint32 consists = 0;
+    dataStream >> consists;
+
+    if (consists) {
+        auto *ptr = new quint64 [consists + 1];
+        item->m_consists_of = ptr;
+
+        *ptr++ = consists;
+
+        for (quint32 i = 0; i < consists; i++)
+            dataStream >> *ptr++;
+    }
+    else
+        item->m_consists_of = nullptr;
+
+    if (v >= DatabaseVersion::Version_2) {
+        quint32 known_colors_count;
+        dataStream >> known_colors_count;
+        item->m_known_colors.resize(int(known_colors_count));
+
+        for (int i = 0; i < int(known_colors_count); i++) {
+            quint32 colid = 0;
+            dataStream >> colid;
+            item->m_known_colors[i] = colid;
         }
     }
 
-    if (f.isOpen())
-        f.close();
-
-    QFile::remove(filename + ".new");
-    return false;
+    return item.take();
 }
 
-int BrickLink::Core::applyChangeLogToItems(InvItemList &bllist)
+void Core::writeItemToDatabase(const Item *item, QDataStream &dataStream, DatabaseVersion v)
+{
+    dataStream << item->m_id.toUtf8() << item->m_name.toUtf8() << qint8(item->m_item_type->id());
+
+    dataStream << quint32(item->m_categories.size());
+    for (const BrickLink::Category *cat : item->m_categories)
+        dataStream << quint32(cat->id());
+
+    quint32 colorid = item->m_color ? item->m_color->id() : quint32(-1);
+    dataStream << colorid << qint64(item->m_last_inv_update) << item->m_weight
+       << quint32(item->m_index) << quint32(item->m_year);
+
+    if (item->m_appears_in && item->m_appears_in [0] && item->m_appears_in [1]) {
+        quint32 *ptr = item->m_appears_in;
+
+        for (quint32 i = 0; i < item->m_appears_in [1]; i++)
+            dataStream << *ptr++;
+    }
+    else
+        dataStream << quint32(0);
+
+    if (item->m_consists_of && item->m_consists_of [0]) {
+        dataStream << quint32(item->m_consists_of [0]);
+
+        quint64 *ptr = item->m_consists_of + 1;
+
+        for (quint32 i = 0; i < quint32(item->m_consists_of [0]); i++)
+            dataStream << *ptr++;
+    }
+    else
+        dataStream << quint32(0);
+
+    if (v >= DatabaseVersion::Version_2) {
+        dataStream << quint32(item->m_known_colors.size());
+        for (auto cid : qAsConst(item->m_known_colors))
+            dataStream << quint32(cid);
+    }
+}
+
+
+int Core::applyChangeLogToItems(InvItemList &bllist)
 {
     int count = 0;
 
@@ -1540,28 +1739,28 @@ int BrickLink::Core::applyChangeLogToItems(InvItemList &bllist)
                 const ChangeLogEntry &cl = ChangeLogEntry(m_changelog.at(i));
 
                 if (!fixed_item) {
-                    if ((cl.type() == BrickLink::ChangeLogEntry::ItemId) ||
-                        (cl.type() == BrickLink::ChangeLogEntry::ItemMerge) ||
-                        (cl.type() == BrickLink::ChangeLogEntry::ItemType)) {
+                    if ((cl.type() == ChangeLogEntry::ItemId) ||
+                        (cl.type() == ChangeLogEntry::ItemMerge) ||
+                        (cl.type() == ChangeLogEntry::ItemType)) {
                         if ((itemtypeid == QLatin1String(cl.from(0))) &&
                             (itemid == QLatin1String(cl.from(1)))) {
                             itemtypeid = QLatin1String(cl.to(0));
                             itemid = QLatin1String(cl.to(1));
 
                             if (itemtypeid.length() == 1 && !itemid.isEmpty())
-                                fixed_item = BrickLink::core()->item(itemtypeid[0].toLatin1(), itemid.toLatin1().constData());
+                                fixed_item = core()->item(itemtypeid[0].toLatin1(), itemid.toLatin1().constData());
                         }
                     }
                 }
                 if (!fixed_color) {
-                    if (cl.type() == BrickLink::ChangeLogEntry::ColorMerge) {
+                    if (cl.type() == ChangeLogEntry::ColorMerge) {
                         if (colorid == QLatin1String(cl.from(0))) {
                             colorid = QLatin1String(cl.to(0));
 
                             bool ok;
                             uint cid = colorid.toUInt(&ok);
                             if (ok)
-                                fixed_color = BrickLink::core()->color(cid);
+                                fixed_color = core()->color(cid);
                         }
                     }
                 }
@@ -1581,12 +1780,12 @@ int BrickLink::Core::applyChangeLogToItems(InvItemList &bllist)
     return count;
 }
 
-qreal BrickLink::Core::itemImageScaleFactor() const
+qreal Core::itemImageScaleFactor() const
 {
     return m_item_image_scale_factor;
 }
 
-void BrickLink::Core::setItemImageScaleFactor(qreal f)
+void Core::setItemImageScaleFactor(qreal f)
 {
     if (!qFuzzyCompare(f, m_item_image_scale_factor)) {
         m_item_image_scale_factor = f;
@@ -1596,26 +1795,28 @@ void BrickLink::Core::setItemImageScaleFactor(qreal f)
     }
 }
 
-bool BrickLink::Core::isLDrawEnabled() const
+bool Core::isLDrawEnabled() const
 {
     return !m_ldraw_datadir.isEmpty();
 }
 
-void BrickLink::Core::setLDrawDataPath(const QString &ldrawDataPath)
+void Core::setLDrawDataPath(const QString &ldrawDataPath)
 {
     m_ldraw_datadir = ldrawDataPath;
 }
 
-const QVector<const BrickLink::Color *> BrickLink::Item::knownColors() const
+const QVector<const Color *> Item::knownColors() const
 {
-    QVector<const BrickLink::Color *> result;
+    QVector<const Color *> result;
     for (auto colId : m_known_colors) {
-        auto color = BrickLink::core()->color(colId);
+        auto color = core()->color(colId);
         if (color)
             result << color;
     }
     return result;
 }
+
+} // namespace BrickLink
 
 #include "moc_bricklink.cpp"
 

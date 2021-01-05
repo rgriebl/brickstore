@@ -166,8 +166,6 @@ private:
 
     friend class Core;
     friend class TextImport;
-    friend QDataStream &operator << (QDataStream &ds, const Color *col);
-    friend QDataStream &operator >> (QDataStream &ds, Color *col);
 };
 
 
@@ -641,14 +639,14 @@ public:
     QUrl url(UrlList u, const void *opt = nullptr, const void *opt2 = nullptr);
 
     enum class DatabaseVersion {
+        Invalid,
         Version_1,
         Version_2,
-        Version_3,
 
-        Default = Version_3
+        Latest = Version_2
     };
 
-    QString defaultDatabaseName(DatabaseVersion version = DatabaseVersion::Default) const;
+    QString defaultDatabaseName(DatabaseVersion version = DatabaseVersion::Latest) const;
 
     QString dataPath() const;
     QString dataPath(const ItemType *) const;
@@ -742,15 +740,17 @@ private:
     bool updateNeeded(bool valid, const QDateTime &last, int iv);
     bool parseLDrawModelInternal(QFile &file, const QString &model_name, InvItemList &items, uint *invalid_items, QHash<QString, InvItem *> &mergehash, QStringList &recursion_detection);
 
-    void setDatabase_ConsistsOf(const QHash<const Item *, InvItemList> &hash);
-    void setDatabase_AppearsIn(const QHash<const Item *, AppearsIn> &hash);
-    void setDatabase_Basics(const QHash<uint, const Color *> &colors,
-                            const QHash<uint, const Category *> &categories,
-                            const QHash<char, const ItemType *> &item_types,
-                            const QVector<const Item *> &items);
-    void setDatabase_ChangeLog(const QVector<QByteArray> &changelog);
+    static Color *readColorFromDatabase(QDataStream &dataStream, DatabaseVersion v);
+    static void writeColorToDatabase(const Color *color, QDataStream &dataStream, DatabaseVersion v);
 
-    friend class TextImport;
+    static Category *readCategoryFromDatabase(QDataStream &dataStream, DatabaseVersion v);
+    static void writeCategoryToDatabase(const Category *category, QDataStream &dataStream, DatabaseVersion v);
+
+    static ItemType *readItemTypeFromDatabase(QDataStream &dataStream, DatabaseVersion v);
+    static void writeItemTypeToDatabase(const ItemType *itemType, QDataStream &dataStream, DatabaseVersion v);
+
+    static Item *readItemFromDatabase(QDataStream &dataStream, DatabaseVersion v);
+    static void writeItemToDatabase(const Item *item, QDataStream &dataStream, DatabaseVersion v);
 
 private slots:
     void pictureJobFinished(TransferJob *j); //TODO5: timeout handling in brickstock updatePicturesTimeOut
@@ -791,6 +791,8 @@ private:
     qreal m_item_image_scale_factor = 1.;
 
     QString m_ldraw_datadir;
+
+    friend class TextImport;
 };
 
 inline Core *core() { return Core::inst(); }

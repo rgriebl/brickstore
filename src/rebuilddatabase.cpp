@@ -167,10 +167,18 @@ int RebuildDatabase::exec()
     printf("  > consists-of: %11d bytes\n", _qwords_for_consists * 8);
 
     /////////////////////////////////////////////////////////////////////////////////
-    BrickLink::Core::DatabaseVersion dbVersion = BrickLink::Core::DatabaseVersion::Default;
-    printf("\nSTEP 8: Writing the database (version: %d) to disk...\n", int(dbVersion));
-    if (!bl->writeDatabase(bl->dataPath() + bl->defaultDatabaseName(dbVersion), dbVersion))
-        return error("failed to write the database file.");
+    BrickLink::Core::DatabaseVersion dbVersion = BrickLink::Core::DatabaseVersion::Latest;
+    printf("\nSTEP 8: Writing the database to disk...\n");
+
+    while (dbVersion != BrickLink::Core::DatabaseVersion::Invalid) {
+        printf("  > version %d... ", int(dbVersion));
+        if (bl->writeDatabase(bl->dataPath() + bl->defaultDatabaseName(dbVersion), dbVersion))
+            printf("done\n");
+        else
+            printf("failed\n");
+
+        dbVersion = static_cast<BrickLink::Core::DatabaseVersion>(int(dbVersion) - 1);
+    }
 
     printf("\nFINISHED.\n\n");
 

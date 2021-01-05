@@ -19,46 +19,22 @@
 #include <QTextStream>
 #include <QtDebug>
 #include <QTimeZone>
-#include <QException>
 
 #include "bricklink.h"
+#include "exception.h"
 
 
-class ParseException : public QException
+class ParseException : public Exception
 {
 public:
     ParseException(const char *message)
-        : QException()
-    {
-        msg = QString::fromLatin1(message);
-    }
+        : Exception(QLatin1String("Parse error: ") + QLatin1String(message))
+    { }
 
     ParseException(const QString &path, const char *message)
-        : QException()
-    {
-        msg = QLatin1String("Failed to parse file %1: %2").arg(path).arg(message);
-    }
-
-    template <typename T> ParseException &arg(const T &t)
-    {
-        msg = msg.arg(t);
-        return *this;
-    }
-
-    QString error() const
-    {
-        return msg;
-    }
-
-    const char *what() const
-    {
-        whatBuffer = msg.toLocal8Bit();
-        return whatBuffer.constData();
-    }
-
-private:
-    QString msg;
-    mutable QByteArray whatBuffer;
+        : Exception(QString::fromLatin1("Failed to parse file %1: %2")
+                    .arg(path).arg(QLatin1String(message)))
+    { }
 };
 
 
@@ -633,14 +609,25 @@ void BrickLink::TextImport::readChangeLog(const QString &path)
 
 void BrickLink::TextImport::exportTo(Core *bl)
 {
-    bl->setDatabase_Basics(m_colors, m_categories, m_item_types, m_items);
-    bl->setDatabase_ChangeLog(m_changelog);
+    /// QMutexLocker lock(&m_corelock);
+
+    bl->m_colors     = m_colors;
+    bl->m_item_types = m_item_types;
+    bl->m_categories = m_categories;
+    bl->m_items      = m_items;
+
+    bl->m_changelog = m_changelog;
 }
 
-void BrickLink::TextImport::exportInventoriesTo(Core *bl)
+void BrickLink::TextImport::exportInventoriesTo(Core * /*bl*/)
 {
-    bl->setDatabase_ConsistsOf(m_consists_of_hash);
-    bl->setDatabase_AppearsIn(m_appears_in_hash);
+    //QMutexLocker lock(&m_corelock);
+
+    for (auto it = m_consists_of_hash.cbegin(); it != m_consists_of_hash.cend(); ++it)
+        it.key()->setConsistsOf(it.value());
+
+    for (auto it = m_appears_in_hash.cbegin(); it != m_appears_in_hash.cend(); ++it)
+        it.key()->setAppearsIn(it.value());
 }
 
 

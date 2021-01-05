@@ -48,7 +48,8 @@ example:
 #endif
 
 ChunkReader::ChunkReader(QIODevice *dev, QDataStream::ByteOrder bo)
-    : m_file(nullptr), m_stream(nullptr)
+    : m_file(nullptr)
+    , m_stream(nullptr)
 {
     if (dev->isSequential()) {
         qWarning("ChunkReader: device does not support direct access!");
@@ -60,6 +61,7 @@ ChunkReader::ChunkReader(QIODevice *dev, QDataStream::ByteOrder bo)
         return;
     }
     m_file = dev;
+    m_stream.setVersion(QDataStream::Qt_5_11);
     m_stream.setDevice(dev);
     m_stream.setByteOrder(bo);
 }
@@ -75,7 +77,7 @@ QDataStream &ChunkReader::dataStream()
 
 bool ChunkReader::startChunk()
 {
-    if (!m_file)
+    if (!m_file || (m_stream.status() != QDataStream::Ok))
         return false;
 
     if (!m_chunks.isEmpty()) {
@@ -98,13 +100,13 @@ bool ChunkReader::startChunk()
 
 bool ChunkReader::skipChunk()
 {
-    if (!m_file || m_chunks.isEmpty())
+    if (!m_file || m_chunks.isEmpty() || (m_stream.status() != QDataStream::Ok))
         return false;
 
     const read_chunk_info &ci = m_chunks.top();
 
     m_stream.skipRawData(int(ci.size));
-    return endChunk();
+    return (m_stream.status() == QDataStream::Ok);
 }
 
 bool ChunkReader::endChunk()
@@ -169,6 +171,7 @@ ChunkWriter::ChunkWriter(QIODevice *dev, QDataStream::ByteOrder bo)
         return;
     }
     m_file = dev;
+    m_stream.setVersion(QDataStream::Qt_5_11);
     m_stream.setDevice(dev);
     m_stream.setByteOrder(bo);
 }
@@ -207,7 +210,7 @@ bool ChunkWriter::startChunk(quint32 id, quint32 version)
 
 bool ChunkWriter::endChunk()
 {
-    if (!m_file || m_chunks.isEmpty())
+    if (!m_file || m_chunks.isEmpty() || (m_stream.status() != QDataStream::Ok))
         return false;
 
     write_chunk_info ci = m_chunks.pop();

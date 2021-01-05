@@ -9,6 +9,7 @@ DEPENDPATH  += $$RELPWD
 HEADERS += \
     $$PWD/chunkreader.h \
     $$PWD/chunkwriter.h \
+    $$PWD/exception.h \
     $$PWD/q3cache.h \
     $$PWD/staticpointermodel.h \
     $$PWD/stopwatch.h \
