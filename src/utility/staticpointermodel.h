@@ -37,8 +37,12 @@ public:
 
     virtual bool isFiltered() const;
 
+    bool isFilterDelayEnabled() const;
+    void setFilterDelayEnabled(bool enabled);
+
 public slots:
     void invalidateFilter();
+    void invalidateFilterNow();
 
 protected:
     virtual int pointerCount() const = 0;
@@ -53,42 +57,13 @@ protected:
 
 private:
     void init() const;
-
-    struct StaticPointerModelFilter
-    {
-        inline StaticPointerModelFilter(StaticPointerModel *model)
-            : pointerModel(model) { }
-
-        inline bool operator()(int row)
-        { return pointerModel->filterAccepts(pointerModel->pointerAt(row)); }
-
-        StaticPointerModel *pointerModel;
-    };
-    friend struct StaticPointerModelFilter;
-
+    void invalidateFilterDelayed();
     void invalidateFilterInternal();
-
-    struct StaticPointerModelCompare
-    {
-        inline StaticPointerModelCompare(int column, Qt::SortOrder order, const StaticPointerModel *model)
-            : sortColumn(column), sortOrder(order), pointerModel(model) { }
-
-        inline bool operator()(int r1, int r2) const
-        {
-            const void *pointer1 = pointerModel->pointerAt(sortOrder == Qt::AscendingOrder ? r1 : r2);
-            const void *pointer2 = pointerModel->pointerAt(sortOrder == Qt::AscendingOrder ? r2 : r1);
-            return pointerModel->lessThan(pointer1, pointer2, sortColumn);
-        }
-
-    private:
-        const int sortColumn;
-        const Qt::SortOrder sortOrder;
-        const StaticPointerModel *pointerModel;
-    };
-    friend struct StaticPointerModelCompare;
 
     mutable QVector<int> sorted; // this needs to initialized in the first init() call
     QList<int> filtered;
     int lastSortColumn = -1;
     Qt::SortOrder lastSortOrder = Qt::AscendingOrder;
+    bool filterDelayEnabled = false;
+    QTimer *filterDelayTimer = nullptr;
 };
