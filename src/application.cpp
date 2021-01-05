@@ -81,6 +81,7 @@ Application::Application(int &_argc, char **_argv)
 
     QCoreApplication::setApplicationName(QLatin1String(BRICKSTORE_NAME));
     QCoreApplication::setApplicationVersion(QLatin1String(BRICKSTORE_VERSION));
+    QGuiApplication::setApplicationDisplayName(QCoreApplication::applicationName());
 
     QCoreApplication::setAttribute(Qt::AA_DisableWindowContextHelpButton);
 
@@ -419,7 +420,7 @@ void Application::exitBrickLink()
 
 void Application::about()
 {
-    AboutDialog d(QCoreApplication::applicationName(), FrameWork::inst());
+    AboutDialog d(FrameWork::inst());
     d.exec();
 }
 
@@ -427,7 +428,7 @@ void Application::checkForUpdates()
 {
     Transfer trans;
 
-    ProgressDialog d(&trans, FrameWork::inst());
+    ProgressDialog d(tr("Check for Program Updates"), &trans, FrameWork::inst());
     CheckForUpdates cfu(&d);
     d.exec();
 }

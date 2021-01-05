@@ -377,7 +377,7 @@ void ImportOrderDialog::start()
 void ImportOrderDialog::download()
 {
     Transfer trans;
-    ProgressDialog progress(&trans, this);
+    ProgressDialog progress(tr("Import BrickLink Order"), &trans, this);
     ImportBLOrder *import;
 
     if (w_by_number->isChecked())

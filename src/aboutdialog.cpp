@@ -26,11 +26,10 @@
 #include "utility.h"
 
 
-AboutDialog::AboutDialog(const QString &title, QWidget *parent)
+AboutDialog::AboutDialog(QWidget *parent)
     : QDialog(parent)
 {
     setupUi(this);
-    setWindowTitle(title);
 
     int iconSize = fontMetrics().height() * 7;
     w_icon->setFixedSize(iconSize, iconSize);

@@ -743,7 +743,7 @@ QList<Document *> Document::fileImportBrickLinkOrders()
 Document *Document::fileImportBrickLinkStore()
 {
     Transfer trans;
-    ProgressDialog d(&trans, FrameWork::inst());
+    ProgressDialog d(tr("Import BrickLink Store Inventory"), &trans, FrameWork::inst());
     ImportBLStore import(&d);
 
     if (d.exec() == QDialog::Accepted) {
@@ -778,7 +778,7 @@ Document *Document::fileImportBrickLinkCart()
 
         if (shopid && cartid) {
             Transfer trans;
-            ProgressDialog d(&trans, FrameWork::inst());
+            ProgressDialog d(tr("Import BrickLink Shopping Cart"), &trans, FrameWork::inst());
             ImportBLCart import(shopid, cartid, &d);
 
             if (d.exec() == QDialog::Accepted) {

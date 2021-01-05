@@ -23,7 +23,7 @@ class AboutDialog : public QDialog, private Ui::AboutDialog
 {
     Q_OBJECT
 public:
-    AboutDialog(const QString &title, QWidget *parent = nullptr);
+    AboutDialog(QWidget *parent = nullptr);
 
 protected:
     void reject() override;

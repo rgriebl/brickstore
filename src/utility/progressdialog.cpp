@@ -25,7 +25,7 @@
 
 #include "progressdialog.h"
 
-ProgressDialog::ProgressDialog(Transfer *trans, QWidget *parent)
+ProgressDialog::ProgressDialog(const QString &title, Transfer *trans, QWidget *parent)
     : QDialog(parent)
 {
     m_has_errors = false;
@@ -38,7 +38,7 @@ ProgressDialog::ProgressDialog(Transfer *trans, QWidget *parent)
 
     m_message_progress = false;
 
-    setWindowTitle(qApp->applicationName());
+    setWindowTitle(title);
 
     int minwidth = fontMetrics().horizontalAdvance('m') * 40;
 

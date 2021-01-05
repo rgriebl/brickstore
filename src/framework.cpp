@@ -1256,7 +1256,7 @@ bool FrameWork::updateDatabase()
         delete m_add_dialog;
 
         Transfer trans;
-        ProgressDialog d(&trans, this);
+        ProgressDialog d(tr("Update Database"), &trans, this);
         UpdateDatabase update(&d);
 
         return d.exec();
