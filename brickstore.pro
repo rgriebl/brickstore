@@ -117,7 +117,7 @@ win32 {
 
   build_pass:CONFIG(release, debug|release) {
     ISCC="iscc.exe"
-    !system(where $$ISCC >NUL) {
+    !system(where /Q $$ISCC) {
       INNO_PATH=$$(INNO_SETUP_PATH)
       !exists("$$INNO_PATH\\$$ISCC") {
         INNO_PATH="$$getenv(ProgramFiles(x86))\\Inno Setup 6"
