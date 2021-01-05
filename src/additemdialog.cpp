@@ -89,10 +89,10 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     w_appears_in->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
     w_appears_in->setLineWidth(2);
 
-    ValidatorSpinBox::setValidator(w_qty, new QIntValidator(1, 99999, w_qty));
+    ValidatorSpinBox::setValidator(w_qty, new QIntValidator(1, 999999, w_qty));
     w_qty->setValue(1);
 
-    ValidatorSpinBox::setValidator(w_bulk, new QIntValidator(1, 99999, w_bulk));
+    ValidatorSpinBox::setValidator(w_bulk, new QIntValidator(1, 999999, w_bulk));
     w_bulk->setValue(1);
 
     w_price->setValidator(new CurrencyValidator(0.000, 10000, 3, w_price));
@@ -105,7 +105,7 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     w_tier_price [2] = w_tier_price_2;
 
     for (int i = 0; i < 3; i++) {
-        ValidatorSpinBox::setValidator(w_tier_qty[i], new QIntValidator(1, 99999, w_tier_qty[i]));
+        ValidatorSpinBox::setValidator(w_tier_qty[i], new QIntValidator(1, 999999, w_tier_qty[i]));
         w_tier_qty [i]->setValue(0);
         w_tier_price [i]->setText(QString());
 

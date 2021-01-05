@@ -708,11 +708,11 @@ QWidget *DocumentDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
     switch (idx.column()) {
     case Document::Sale        : valid = new QIntValidator(-1000, 99, nullptr); break;
     case Document::Quantity    :
-    case Document::QuantityDiff: valid = new QIntValidator(-99999, 99999, nullptr); break;
-    case Document::Bulk        : valid = new QIntValidator(1, 99999, nullptr); break;
+    case Document::QuantityDiff: valid = new QIntValidator(-999999, 999999, nullptr); break;
+    case Document::Bulk        : valid = new QIntValidator(1, 999999, nullptr); break;
     case Document::TierQ1      :
     case Document::TierQ2      :
-    case Document::TierQ3      : valid = new QIntValidator(0, 99999, nullptr); break;
+    case Document::TierQ3      : valid = new QIntValidator(0, 999999, nullptr); break;
     case Document::Price       :
     case Document::TierP1      :
     case Document::TierP2      :
