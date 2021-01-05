@@ -16,7 +16,7 @@
 #set +x
 
 b="$(dirname $0)/../assets"
-which -s realpath >/dev/null && b="$(realpath --relative-to=. $b)"
+which realpath >/dev/null && b="$(realpath --relative-to=. $b)"
 
 i="$b/generated-icons"
 g="$b/generated-32x32"
@@ -53,7 +53,7 @@ convert $i/brickstore_doc.png -define icon:auto-resize=128,48,32,16 $i/brickstor
 #png2icns $i/brickstore_doc.icns $i/brickstore_doc.png >/dev/null
 
 ## and makeicns is only available on macOS via brew
-if which -s makeicns >/dev/null; then
+if which makeicns >/dev/null; then
   makeicns -256 $i/brickstore.png -32 $i/brickstore.png -out $i/brickstore.icns
   makeicns -128 $i/brickstore_doc.png -32 $i/brickstore_doc.png -out $i/brickstore_doc.icns
 fi
@@ -123,7 +123,7 @@ echo "done"
 #######################################
 # optimize sizes
 
-if which -s zopflipng >/dev/null; then
+if which zopflipng >/dev/null; then
   echo "Optimizing..."
 
   for png in $(ls -1 $g/*.png $i/*.png $m/*.png); do
