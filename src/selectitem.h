@@ -47,7 +47,7 @@ public:
 
 signals:
     void hasColors(bool);
-    void itemSelected(const BrickLink::Item *, bool);
+    void itemSelected(const BrickLink::Item *, bool confirmed);
 
 public slots:
     void itemTypeChanged();
@@ -55,8 +55,6 @@ public slots:
     void itemChanged();
 
     void itemConfirmed();
-
-    void findItem();
 
 protected slots:
     void applyFilter();

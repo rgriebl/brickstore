@@ -128,7 +128,6 @@ void SelectItem::init()
     d->w_item_types->setEditable(false);
 
     d->w_categories = new QTreeView(this);
-    d->w_categories->setSortingEnabled(true);
     d->w_categories->setAlternatingRowColors(true);
     d->w_categories->setAllColumnsShowFocus(true);
     d->w_categories->setUniformRowHeights(true);
@@ -191,7 +190,6 @@ void SelectItem::init()
     d->w_viewmode->addButton(tb, 2);
 
     d->w_items = new QTreeView(this);
-    d->w_items->setSortingEnabled(true);
     d->w_items->setAlternatingRowColors(true);
     d->w_items->setAllColumnsShowFocus(true);
     d->w_items->setUniformRowHeights(true);
@@ -203,7 +201,6 @@ void SelectItem::init()
     d->w_items->installEventFilter(this);
 
     d->w_itemthumbs = new QTreeView(this);
-    d->w_itemthumbs->setSortingEnabled(true);
     d->w_itemthumbs->setAlternatingRowColors(true);
     d->w_itemthumbs->setAllColumnsShowFocus(true);
     d->w_itemthumbs->setUniformRowHeights(true);
@@ -233,9 +230,7 @@ void SelectItem::init()
 
     d->w_item_types->setModel(d->itemTypeModel);
     d->w_categories->setModel(d->categoryModel);
-    d->w_categories->sortByColumn(0, Qt::AscendingOrder);
     d->w_items->setModel(d->itemModel);
-    d->w_items->sortByColumn(2, Qt::AscendingOrder);
     d->w_items->hideColumn(0);
     d->w_itemthumbs->setModel(d->itemModel);
     d->w_thumbs->setModel(d->itemModel);
@@ -243,6 +238,54 @@ void SelectItem::init()
 
     d->w_itemthumbs->setSelectionModel(d->w_items->selectionModel());
     d->w_thumbs->setSelectionModel(d->w_items->selectionModel());
+
+    // setSorting(true) is a bit weird: it defaults to descending, (re)sorts on activation and
+    // doesn't keep the current item in view. Plus it cannot deal with dependencies between the
+    // items and itemthumbs view.
+
+    d->w_categories->header()->setSortIndicatorShown(true);
+    d->w_categories->header()->setSectionsClickable(true);
+    d->w_categories->sortByColumn(0, Qt::AscendingOrder);
+
+    QObject::connect(d->w_categories->header(), &QHeaderView::sectionClicked,
+                     this, [this](int section) {
+        d->w_categories->sortByColumn(section, d->w_categories->header()->sortIndicatorOrder());
+        d->w_categories->scrollTo(d->w_categories->currentIndex());
+    });
+
+    d->w_items->header()->setSortIndicatorShown(true);
+    d->w_items->header()->setSectionsClickable(true);
+    d->w_items->sortByColumn(2, Qt::AscendingOrder);
+
+    QObject::connect(d->w_items->header(), &QHeaderView::sectionClicked,
+                     this, [this](int section) {
+        auto order = d->w_items->header()->sortIndicatorOrder();
+        d->w_items->sortByColumn(section, order);
+        d->w_items->scrollTo(d->w_items->currentIndex());
+
+        d->w_itemthumbs->header()->setSortIndicator(section, order);
+        d->w_itemthumbs->scrollTo(d->w_itemthumbs->currentIndex());
+
+        d->w_thumbs->scrollTo(d->w_thumbs->currentIndex());
+    });
+
+    d->w_itemthumbs->header()->setSortIndicator(2, Qt::AscendingOrder); // the model is sorted already
+    d->w_itemthumbs->header()->setSortIndicatorShown(true);
+    d->w_itemthumbs->header()->setSectionsClickable(true);
+
+    QObject::connect(d->w_itemthumbs->header(), &QHeaderView::sectionClicked,
+                     this, [this](int section) {
+        auto order = d->w_itemthumbs->header()->sortIndicatorOrder();
+        d->w_itemthumbs->sortByColumn(section, order);
+        d->w_itemthumbs->scrollTo(d->w_itemthumbs->currentIndex());
+
+        d->w_items->header()->setSortIndicator(section ? section : 1, order);
+        d->w_items->scrollTo(d->w_items->currentIndex());
+
+        d->w_thumbs->scrollTo(d->w_thumbs->currentIndex());
+    });
+
+    d->w_categories->setCurrentIndex(d->categoryModel->index(BrickLink::CategoryModel::AllCategories));
 
     connect(d->w_filter, &QLineEdit::textChanged, this, [this]() {
         d->m_filter_delay->start();
@@ -307,6 +350,8 @@ void SelectItem::init()
 
     d->m_stack->setCurrentWidget(d->w_items);
 
+    itemTypeChanged();
+
     setFocusProxy(d->w_filter);
     languageChange();
 }
@@ -359,9 +404,10 @@ bool SelectItem::hasExcludeWithoutInventoryFilter() const
 void SelectItem::setExcludeWithoutInventoryFilter(bool b)
 {
     if (b != d->m_inv_only) {
-        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
         const BrickLink::ItemType *oldType = currentItemType();
+        const BrickLink::Category *oldCategory = currentCategory();
         const BrickLink::Item *oldItem = currentItem();
+
         d->w_categories->clearSelection();
         d->w_items->clearSelection();
 
@@ -369,8 +415,11 @@ void SelectItem::setExcludeWithoutInventoryFilter(bool b)
         d->itemModel->setFilterWithoutInventory(b);
 
         setCurrentItemType(oldType);
-        setCurrentItem(oldItem, true);
-        QApplication::restoreOverrideCursor();
+        if (!d->categoryModel->index(oldCategory).isValid())
+            oldCategory = BrickLink::CategoryModel::AllCategories;
+        setCurrentCategory(oldCategory);
+        if (!d->itemModel->index(oldItem).isValid())
+            setCurrentItem(oldItem, false);
 
         d->m_inv_only = b;
     }
@@ -380,7 +429,6 @@ void SelectItem::itemTypeChanged()
 {
     const BrickLink::ItemType *itemtype = currentItemType();
 
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     const BrickLink::Category *oldCat = currentCategory();
     const BrickLink::Item *oldItem = currentItem();
     d->w_categories->clearSelection();
@@ -393,7 +441,6 @@ void SelectItem::itemTypeChanged()
     setCurrentItem(oldItem);
 
     emit hasColors(itemtype ? itemtype->hasColors() : false);
-    QApplication::restoreOverrideCursor();
 }
 
 const BrickLink::ItemType *SelectItem::currentItemType() const
@@ -488,21 +535,6 @@ void SelectItem::setViewMode(int mode)
         d->m_stack->setCurrentWidget(w);
 }
 
-
-void SelectItem::findItem()
-{
-    if (const BrickLink::ItemType *itt = currentItemType()) {
-        QString str;
-
-        if (MessageBox::getString(this, tr("Please enter the complete item number:"), str)) {
-            if (const BrickLink::Item *item = BrickLink::core()->item(itt->id(), str.toLatin1().constData())) {
-                setCurrentItem(item, true);
-            } else {
-                QApplication::beep();
-            }
-        }
-    }
-}
 
 void SelectItem::itemChanged()
 {
