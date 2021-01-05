@@ -286,6 +286,7 @@ bool RebuildDatabase::download()
         { "https://www.bricklink.com/catalogDownload.asp", dbQuery(1),     "itemtypes.txt"   },
         { "https://www.bricklink.com/catalogDownload.asp", dbQuery(2),     "categories.txt"  },
         { "https://www.bricklink.com/catalogDownload.asp", dbQuery(3),     "colors.txt"      },
+        { "https://www.bricklink.com/catalogDownload.asp", dbQuery(5),     "part_color_codes.txt" },
         { "https://www.bricklink.com/catalogDownload.asp", itemQuery('S'), "items_S.txt"     },
         { "https://www.bricklink.com/catalogDownload.asp", itemQuery('P'), "items_P.txt"     },
         { "https://www.bricklink.com/catalogDownload.asp", itemQuery('M'), "items_M.txt"     },

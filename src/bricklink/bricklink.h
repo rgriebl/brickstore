@@ -170,7 +170,6 @@ private:
     friend QDataStream &operator >> (QDataStream &ds, Color *col);
 };
 
-Q_DECLARE_OPERATORS_FOR_FLAGS(Color::Type)
 
 class Item
 {
@@ -186,6 +185,8 @@ public:
     const Color *defaultColor() const      { return m_color; }
     double weight() const                  { return double(m_weight); }
     int yearReleased() const               { return m_year ? m_year + 1900 : 0; }
+    bool hasKnownColors() const            { return !m_known_colors.isEmpty(); }
+    const QVector<const Color *> knownColors() const;
 
     ~Item();
 
@@ -204,6 +205,7 @@ private:
     float             m_weight;
     quint32           m_index : 24;
     quint32           m_year  : 8;
+    QVector<uint>     m_known_colors;
 
     mutable quint32 * m_appears_in = nullptr;
     mutable quint64 * m_consists_of = nullptr;
@@ -610,6 +612,8 @@ private:
     bool readDB_processLine(btinvlist_dummy &, uint count, const char **strs);
     struct btchglog_dummy { };
     bool readDB_processLine(btchglog_dummy &, uint count, const char **strs);
+    struct known_colors_dummy { };
+    bool readDB_processLine(known_colors_dummy &, uint count, const char **strs);
 
     bool readInventory(const Item *item);
     bool readLDrawColors(const QString &path);
@@ -804,6 +808,8 @@ Q_DECLARE_METATYPE(const BrickLink::Category *)
 Q_DECLARE_METATYPE(const BrickLink::ItemType *)
 Q_DECLARE_METATYPE(const BrickLink::Item *)
 Q_DECLARE_METATYPE(const BrickLink::AppearsInItem *)
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(BrickLink::Color::Type)
 
 
 // tell Qt that Pictures and PriceGuides are shared and can't simply be deleted

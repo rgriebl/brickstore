@@ -301,6 +301,8 @@ bool BrickLink::TextImport::import(const QString &path)
     ok = ok && readDB<>(path + "btinvlist.txt", btinvlist_dummy);
     btchglog_dummy btchglog_dummy;
     ok = ok && readDB<>(path + "btchglog.txt", btchglog_dummy);
+    known_colors_dummy known_colors_dummy;
+    ok = ok && readDB<>(path + "part_color_codes.txt", known_colors_dummy);
 
     m_current_item_type = nullptr;
 
@@ -401,6 +403,28 @@ bool BrickLink::TextImport::readDB_processLine(btchglog_dummy & /*dummy*/, uint 
     }
 
     m_changelog.append(ba);
+    return true;
+}
+
+bool BrickLink::TextImport::readDB_processLine(BrickLink::TextImport::known_colors_dummy &, uint count, const char **strs)
+{
+    if (count < 3 || !strs[0][0] || !strs[1][0])
+        return false;
+
+    if (const Item *itm = findItem('P', decodeEntities(strs[0]))) {
+        bool found = false;
+        for (const Color *color : qAsConst(m_colors)) {
+            if (color->name() == QLatin1String(strs[1])) {
+                const_cast<Item *>(itm)->m_known_colors << color->id();
+                found = true;
+                break;
+            }
+        }
+        if (!found)
+            qWarning("Parsing part_color_codes: skipping invalid color %s on item %s", strs[1], strs[0]);
+    } else {
+        qWarning("Parsing part_color_codes: skipping invalid item %s", strs[0]);
+    }
     return true;
 }
 

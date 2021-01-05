@@ -352,6 +352,10 @@ QDataStream &operator << (QDataStream &ds, const BrickLink::Item *item)
     else
         ds << quint32(0);
 
+    ds << quint32(item->m_known_colors.size());
+    for (auto cid : qAsConst(item->m_known_colors))
+        ds << quint32(cid);
+
     return ds;
 }
 
@@ -418,6 +422,16 @@ QDataStream &operator >> (QDataStream &ds, BrickLink::Item *item)
     }
     else
         item->m_consists_of = nullptr;
+
+    quint32 known_colors_count;
+    ds >> known_colors_count;
+    item->m_known_colors.resize(int(known_colors_count));
+
+    for (int i = 0; i < int(known_colors_count); i++) {
+        quint32 colid = 0;
+        ds >> colid;
+        item->m_known_colors[i] = colid;
+    }
 
     return ds;
 }

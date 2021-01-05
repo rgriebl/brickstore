@@ -1608,4 +1608,16 @@ void BrickLink::Core::setLDrawDataPath(const QString &ldrawDataPath)
     m_ldraw_datadir = ldrawDataPath;
 }
 
+const QVector<const BrickLink::Color *> BrickLink::Item::knownColors() const
+{
+    QVector<const BrickLink::Color *> result;
+    for (auto colId : m_known_colors) {
+        auto color = BrickLink::core()->color(colId);
+        if (color)
+            result << color;
+    }
+    return result;
+}
+
 #include "moc_bricklink.cpp"
+
