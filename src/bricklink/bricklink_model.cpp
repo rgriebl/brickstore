@@ -763,7 +763,7 @@ QVariant BrickLink::InternalAppearsInModel::headerData(int section, Qt::Orientat
 {
     if ((orient == Qt::Horizontal) && (role == Qt::DisplayRole)) {
         switch (section) {
-        case 0: return tr("#");
+        case 0: return tr("Qty.");
         case 1: return tr("Set");
         case 2: return tr("Name");
         }

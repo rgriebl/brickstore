@@ -43,7 +43,7 @@ AppearsInWidget::AppearsInWidget(QWidget *parent)
     setUniformRowHeights(true);
     setRootIsDecorated(false);
     setSortingEnabled(true);
-    sortByColumn(0, Qt::AscendingOrder);
+    sortByColumn(0, Qt::DescendingOrder);
     header()->setSortIndicatorShown(false);
     setContextMenuPolicy(Qt::CustomContextMenu);
     setItemDelegate(new BrickLink::ItemDelegate(this));
