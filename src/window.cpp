@@ -1744,7 +1744,7 @@ Document::ItemList Window::exportCheck() const
         if (MessageBox::question(FrameWork::inst(),
                                  tr("There are %n item(s) selected.<br /><br />Do you want to export only these items?",
                                     nullptr, selection().count()),
-                                 MessageBox::Yes | MessageBox::No, MessageBox::No) == MessageBox::Yes) {
+                                 MessageBox::Yes | MessageBox::No, MessageBox::Yes) == MessageBox::Yes) {
             items = selection();
         }
     }
