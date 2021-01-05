@@ -19,25 +19,50 @@
 #include <QTextStream>
 #include <QtDebug>
 #include <QTimeZone>
+#include <QException>
 
 #include "bricklink.h"
 
-QString decodeEntities(const QString &src)
+
+class ParseException : public QException
 {
-    QString ret(src);
-    QRegExp re("&#([0-9]+);");
-    re.setMinimal(true);
-
-    int pos = 0;
-    while( (pos = re.indexIn(src, pos)) != -1 )
+public:
+    ParseException(const char *message)
+        : QException()
     {
-        ret = ret.replace(re.cap(0), QChar(re.cap(1).toInt(nullptr,10)));
-        pos += re.matchedLength();
+        msg = QString::fromLatin1(message);
     }
-    return ret;
-}
 
-QString decodeEntities(const char *src)
+    ParseException(const QString &path, const char *message)
+        : QException()
+    {
+        msg = QLatin1String("Failed to parse file %1: %2").arg(path).arg(message);
+    }
+
+    template <typename T> ParseException &arg(const T &t)
+    {
+        msg = msg.arg(t);
+        return *this;
+    }
+
+    QString error() const
+    {
+        return msg;
+    }
+
+    const char *what() const
+    {
+        whatBuffer = msg.toLocal8Bit();
+        return whatBuffer.constData();
+    }
+
+private:
+    QString msg;
+    mutable QByteArray whatBuffer;
+};
+
+
+static QString decodeEntities(const QString &src)
 {
     // Regular Expressions would be easier, but too slow here
 
@@ -64,6 +89,11 @@ QString decodeEntities(const char *src)
     } while (pos >= 0);
 
     return decoded;
+}
+
+static char firstCharInString(const QString &str)
+{
+    return (str.size() == 1) ? str.at(0).toLatin1() : 0;
 }
 
 
@@ -100,147 +130,6 @@ namespace BrickLink {
 // within namespaces:
 // template <> BrickLink::Category *BrickLink::TextImport::parse<BrickLink::Category> ( uint count, const char **strs )
 
-template <> Category *TextImport::parse<Category> (uint count, const char **strs)
-{
-    if (count < 2)
-        return nullptr;
-
-    auto *cat = new Category();
-    cat->m_id   = uint(strtoul(strs[0], nullptr, 10));
-    cat->m_name = decodeEntities(strs[1]);
-
-    return cat;
-}
-
-template <> Color *TextImport::parse<Color> (uint count, const char **strs)
-{
-    if (count < 4)
-        return nullptr;
-
-    auto *col = new Color();
-    col->m_id       = uint(strtoul(strs[0], nullptr, 10));
-    col->m_name     = strs[1];
-    col->m_ldraw_id = -1;
-    col->m_color    = QColor(QString('#') + strs[2]);
-    col->m_type     = Color::Type();
-
-    if (!strcmp(strs[3], "Transparent"))  col->m_type |= Color::Transparent;
-    if (!strcmp(strs[3], "Glitter"))  col->m_type |= Color::Glitter;
-    if (!strcmp(strs[3], "Speckle"))  col->m_type |= Color::Speckle;
-    if (!strcmp(strs[3], "Metallic"))  col->m_type |= Color::Metallic;
-    if (!strcmp(strs[3], "Chrome"))  col->m_type |= Color::Chrome;
-    if (!strcmp(strs[3], "Pearl"))  col->m_type |= Color::Pearl;
-    if (!strcmp(strs[3], "Milky"))  col->m_type |= Color::Milky;
-    if (!strcmp(strs[3], "Modulex"))  col->m_type |= Color::Modulex;
-    if (!col->m_type)
-        col->m_type = Color::Solid;
-
-    if (count >= 8) {
-        col->m_popularity = strtol(strs[4], nullptr, 10) // parts
-                          + strtol(strs[5], nullptr, 10) // in sets
-                          + strtol(strs[6], nullptr, 10) // wanted
-                          + strtol(strs[7], nullptr, 10); // for sale
-        // needs to be divided by the max. after all colors are parsed!
-        // mark it as raw data meanwhile:
-        col->m_popularity = -col->m_popularity;
-    }
-    if (count >= 10) {
-        col->m_year_from = quint16(strtoul(strs[8], nullptr, 10));
-        col->m_year_to   = quint16(strtoul(strs[9], nullptr, 10));
-    }
-    return col;
-}
-
-template <> ItemType *TextImport::parse<ItemType> (uint count, const char **strs)
-{
-    if (count < 2)
-        return nullptr;
-
-    char c = strs [0][0];
-    auto *itt = new ItemType();
-    itt->m_id                = c;
-    itt->m_picture_id        = (c == 'I') ? 'S' : c;
-    itt->m_name              = strs[1];
-    itt->m_has_inventories   = false;
-    itt->m_has_colors        = (c == 'P' || c == 'G');
-    itt->m_has_weight        = (c == 'B' || c == 'P' || c == 'G' || c == 'S' || c == 'I');
-    itt->m_has_year          = (c == 'B' || c == 'C' || c == 'G' || c == 'S' || c == 'I');
-    itt->m_has_subconditions = (c == 'S');
-
-    return itt;
-}
-
-template <> Item *TextImport::parse<Item> (uint count, const char **strs)
-{
-    if (count < 4)
-        return nullptr;
-
-    Item *item = new Item();
-    item->m_id        = strs[2];
-    item->m_name      = decodeEntities(strs[3]);
-    item->m_item_type = m_current_item_type;
-    item->m_categories.clear();
-
-    const Category *maincat = m_categories.value(uint(strtoul(strs[0], nullptr, 10)));
-    const QString allcats = decodeEntities(strs[1]);
-    QVector<QStringRef> auxcats = allcats.splitRef(QLatin1String(" / "));
-
-    int span = 0;
-    for (int i = 0; i < auxcats.size(); ++i) {
-        const QStringRef &current = auxcats.at(i);
-        const Category *cat;
-        if (!span) {
-            cat = findCategoryByName(current);
-        } else {
-            int start = auxcats.at(i - span).position();
-            int end = current.position() + current.length();
-            cat = findCategoryByName(current.string()->midRef(start, end - start));
-        }
-        if (cat) {
-            item->m_categories.append(cat);
-            span = 0;
-        } else {
-            // The field separator ' / ' also appears in category names !!!
-            ++span;
-        }
-    }
-    if (span || item->m_categories.isEmpty()) {
-        qWarning() << "Not all categories could be resolved for item" << item->m_id
-                   << "\n   " << allcats;
-    } else if (*item->m_categories.constBegin() != maincat) {
-        if (!maincat) {
-            qWarning() << "The main category did not resolve for item" << item->m_id
-                       << "\n   id=" << strs[0];
-        } else {
-            qWarning() << "The main category did not match for item" << item->m_id
-                       << "\n   id=" << maincat->id() << "name=" << (*item->m_categories.constBegin())->name();
-        }
-    }
-
-    uint parsedfields = 4;
-
-    if ((parsedfields < count) && (item->m_item_type->hasYearReleased())) {
-        uint y = uint(strtoul(strs[parsedfields++], nullptr, 10)) - 1900;
-        item->m_year = ((y > 0) && (y < 255)) ? y : 0; // we only have 8 bits for the year
-        parsedfields++;
-    } else {
-        item->m_year = 0;
-    }
-
-    if ((parsedfields < count) && (item->m_item_type->hasWeight())) {
-        static QLocale c = QLocale::c();
-        item->m_weight = c.toFloat(strs[parsedfields++]);
-    } else {
-        item->m_weight = 0;
-    }
-
-    if (parsedfields < count)
-        item->m_color = m_colors.value(uint(strtoul(strs[parsedfields++], nullptr, 10)));
-    else
-        item->m_color = nullptr;
-
-    return item;
-}
 
 } // namespace BrickLink
 
@@ -250,9 +139,7 @@ template <> Item *TextImport::parse<Item> (uint count, const char **strs)
 /////////////////////////////////////////////////////////////////////////////////////////
 
 BrickLink::TextImport::TextImport()
-{
-    m_current_item_type = nullptr;
-}
+{ }
 
 BrickLink::TextImport::~TextImport()
 {
@@ -262,231 +149,279 @@ BrickLink::TextImport::~TextImport()
 
 bool BrickLink::TextImport::import(const QString &path)
 {
-    bool ok = true;
+    try {
+        // colors
+        readColors(path + "colors.xml");
+        readLDrawColors(path + "ldconfig.ldr");
+        calculateColorPopularity();
 
-    ok = ok && readDB<>(path + "colors.txt",     m_colors, true);
-    ok = ok && readLDrawColors(path + "ldconfig.ldr");
-    ok = ok && readDB<>(path + "categories.txt", m_categories, true);
-    ok = ok && readDB<>(path + "itemtypes.txt",  m_item_types, true);
+        // categories
+        readCategories(path + "categories.xml");
 
-    calculateColorPopularity();
+        // itemtypes
+        readItemTypes(path + "itemtypes.xml");
 
-    // speed up loading (exactly 137522 items on 16.06.2020)
-    m_items.reserve(150000);
+        // speed up loading (exactly 137522 items on 16.06.2020)
+        m_items.reserve(200000);
 
-    for (const ItemType *itt : qAsConst(m_item_types)) {
-        m_current_item_type = itt;
-        ok = ok && readDB<>(path + "items_" + char(itt->m_id) + ".txt", m_items, true);
-    }
-    m_current_item_type = nullptr;
+        for (const ItemType *itt : qAsConst(m_item_types))
+            readItems(path + "items_" + char(itt->m_id) + ".xml", itt);
 
-    std::sort(m_items.begin(), m_items.end(), Item::lessThan);
+        std::sort(m_items.begin(), m_items.end(), Item::lessThan);
 
-    Item **itp = const_cast<Item **>(m_items.constData());
+        Item **itp = const_cast<Item **>(m_items.constData());
 
-    for (int i = 0; i < m_items.count(); itp++, i++) {
-        (*itp)->m_index = uint(i);
+        for (int i = 0; i < m_items.count(); itp++, i++) {
+            (*itp)->m_index = uint(i);
 
-        auto *itt = const_cast<ItemType *>((*itp)->m_item_type);
-
-        if (itt) {
-            for (const Category *cat : qAsConst((*itp)->m_categories)) {
-                if (!itt->m_categories.contains(cat))
-                    itt->m_categories.append(cat);
+            if (auto *itt = const_cast<ItemType *>((*itp)->m_item_type)) {
+                for (const Category *cat : qAsConst((*itp)->m_categories)) {
+                    if (!itt->m_categories.contains(cat))
+                        itt->m_categories.append(cat);
+                }
             }
         }
-    }
 
-    btinvlist_dummy btinvlist_dummy;
-    ok = ok && readDB<>(path + "btinvlist.txt", btinvlist_dummy);
-    btchglog_dummy btchglog_dummy;
-    ok = ok && readDB<>(path + "btchglog.txt", btchglog_dummy);
-    known_colors_dummy known_colors_dummy;
-    ok = ok && readDB<>(path + "part_color_codes.txt", known_colors_dummy);
+        readPartColorCodes(path + "part_color_codes.xml");
+        readInventoryList(path + "btinvlist.csv");
+        readChangeLog(path + "btchglog.csv");
 
-    m_current_item_type = nullptr;
-
-    if (!ok)
-        qWarning() << "Error importing databases!";
-
-    return ok;
-}
-
-template <typename T> bool BrickLink::TextImport::readDB_processLine(QHash<uint, const T *> &h, uint tokencount, const char **tokens)
-{
-    T *t = parse<T> (tokencount, tokens);
-
-    if (t)
-        h.insert(t->id(), t);
-    return t;
-}
-
-template <typename T> bool BrickLink::TextImport::readDB_processLine(QHash<char, const T *> &h, uint tokencount, const char **tokens)
-{
-    T *t = parse<T> (tokencount, tokens);
-
-    if (t)
-        h.insert(t->id(), t);
-    return t;
-}
-
-template <typename T> bool BrickLink::TextImport::readDB_processLine(QVector<const T *> &v, uint tokencount, const char **tokens)
-{
-    T *t = parse<T> (tokencount, tokens);
-
-    if (t)
-        v.append(t);
-    return t;
-}
-
-
-bool BrickLink::TextImport::readDB_processLine(btinvlist_dummy & /*dummy*/, uint count, const char **strs)
-{
-    if (count < 2 || !strs [0][0] || !strs [1][0])
+        return true;
+    } catch (const ParseException &e) {
+        qWarning() << "Error importing database:" << e.what();
         return false;
+    }
+}
 
-    if (const Item *itm = findItem(strs[0][0], decodeEntities(strs[1]))) {
-        auto t = time_t(0);   // 1.1.1970 00:00
 
-        if ((count > 2) && strs[2][0]) {
-            static QString fmtFull = QStringLiteral("M/d/yyyy h:mm:ss AP");
-            static QString fmtShort = QStringLiteral("M/d/yyyy");
+static QString elementText(QDomElement parent, const char *tagName)
+{
+    auto dnl = parent.elementsByTagName(QString::fromLatin1(tagName));
+    if (dnl.size() != 1) {
+        throw ParseException("Expected a single %1 tag, but found %2")
+                .arg(tagName).arg(dnl.size());
+    }
+    // the contents are double XML escaped. QDom unescaped once already, now have to do one more
+    return decodeEntities(dnl.at(0).toElement().text().simplified());
+}
 
-            QString dtStr = QString::fromLatin1(strs[2]);
+void BrickLink::TextImport::readColors(const QString &path)
+{
+    parseXML(path, "CATALOG", "ITEM", [this](QDomElement e) {
+        QScopedPointer<Color> col(new Color);
+        uint colid = elementText(e, "COLOR").toUInt();
 
-            QDateTime dt = QDateTime::fromString(dtStr, dtStr.length() <= 10 ? fmtShort : fmtFull);
-#if !defined(DAN_FIXED_BTINVLIST_TO_USE_UTC)
-            static QTimeZone tzEST = QTimeZone("EST5EDT");
-            dt.setTimeZone(tzEST);
-            dt = dt.toUTC();
+        col->m_id       = colid;
+        col->m_name     = elementText(e, "COLORNAME");
+        col->m_color    = QColor(QString('#') + elementText(e, "COLORRGB"));
+
+        col->m_ldraw_id = -1;
+        col->m_type     = Color::Type();
+
+        auto type = elementText(e, "COLORTYPE");
+        if (type.contains("Transparent")) col->m_type |= Color::Transparent;
+        if (type.contains("Glitter"))     col->m_type |= Color::Glitter;
+        if (type.contains("Speckle"))     col->m_type |= Color::Speckle;
+        if (type.contains("Metallic"))    col->m_type |= Color::Metallic;
+        if (type.contains("Chrome"))      col->m_type |= Color::Chrome;
+        if (type.contains("Pearl"))       col->m_type |= Color::Pearl;
+        if (type.contains("Milky"))       col->m_type |= Color::Milky;
+        if (type.contains("Modulex"))     col->m_type |= Color::Modulex;
+        if (!col->m_type)
+            col->m_type = Color::Solid;
+
+        int partCnt    = elementText(e, "COLORCNTPARTS").toInt();
+        int setCnt     = elementText(e, "COLORCNTSETS").toInt();
+        int wantedCnt  = elementText(e, "COLORCNTWANTED").toInt();
+        int forSaleCnt = elementText(e, "COLORCNTINV").toInt();
+
+        col->m_popularity = partCnt + setCnt + wantedCnt + forSaleCnt;
+
+        // needs to be divided by the max. after all colors are parsed!
+        // mark it as raw data meanwhile:
+        col->m_popularity = -col->m_popularity;
+
+        col->m_year_from = elementText(e, "COLORYEARFROM").toInt();
+        col->m_year_to   = elementText(e, "COLORYEARTO").toInt();
+
+        m_colors.insert(colid, col.take());
+    });
+}
+
+void BrickLink::TextImport::readCategories(const QString &path)
+{
+    parseXML(path, "CATALOG", "ITEM", [this](QDomElement e) {
+        QScopedPointer<Category> cat(new Category);
+        uint catid = elementText(e, "CATEGORY").toUInt();
+
+        cat->m_id   = catid;
+        cat->m_name = elementText(e, "CATEGORYNAME");
+
+        m_categories.insert(catid, cat.take());
+    });
+}
+
+void BrickLink::TextImport::readItemTypes(const QString &path)
+{
+    parseXML(path, "CATALOG", "ITEM", [this](QDomElement e) {
+        QScopedPointer<ItemType> itt(new ItemType);
+        char c = firstCharInString(elementText(e, "ITEMTYPE"));
+
+        if (c == 'U')
+            return;
+
+        itt->m_id   = c;
+        itt->m_name = elementText(e, "ITEMTYPENAME");
+
+        itt->m_picture_id        = (c == 'I') ? 'S' : c;
+        itt->m_has_inventories   = false;
+        itt->m_has_colors        = (c == 'P' || c == 'G');
+        itt->m_has_weight        = (c == 'B' || c == 'P' || c == 'G' || c == 'S' || c == 'I');
+        itt->m_has_year          = (c == 'B' || c == 'C' || c == 'G' || c == 'S' || c == 'I');
+        itt->m_has_subconditions = (c == 'S');
+
+        m_item_types.insert(c, itt.take());
+    });
+}
+
+void BrickLink::TextImport::readItems(const QString &path, const BrickLink::ItemType *itt)
+{
+    parseXML(path, "CATALOG", "ITEM", [this, itt](QDomElement e) {
+        QScopedPointer<Item> item(new Item);
+        item->m_id        = elementText(e, "ITEMID");
+        item->m_name      = elementText(e, "ITEMNAME");
+        item->m_item_type = itt;
+        item->m_categories.clear();
+
+        const Category *maincat = m_categories.value(elementText(e, "CATEGORY").toUInt());
+        if (!maincat)
+            throw ParseException("item %1 has no category").arg(item->m_id);
+        item->m_categories << maincat;
+
+#if 0 //TODO the aux categories are not available in the XML download!
+        const QString allcats = decodeEntities(strs[1]);
+        QVector<QStringRef> auxcats = allcats.splitRef(QLatin1String(" / "));
+
+        int span = 0;
+        for (int i = 0; i < auxcats.size(); ++i) {
+            const QStringRef &current = auxcats.at(i);
+            const Category *cat;
+            if (!span) {
+                cat = findCategoryByName(current);
+            } else {
+                int start = auxcats.at(i - span).position();
+                int end = current.position() + current.length();
+                cat = findCategoryByName(current.string()->midRef(start, end - start));
+            }
+            if (cat) {
+                item->m_categories.append(cat);
+                span = 0;
+            } else {
+                // The field separator ' / ' also appears in category names !!!
+                ++span;
+            }
+        }
+        if (span || item->m_categories.isEmpty()) {
+            qWarning() << "Not all categories could be resolved for item" << item->m_id
+                       << "\n   " << allcats;
+        } else if (*item->m_categories.constBegin() != maincat) {
+            if (!maincat) {
+                qWarning() << "The main category did not resolve for item" << item->m_id
+                           << "\n   id=" << strs[0];
+            } else {
+                qWarning() << "The main category did not match for item" << item->m_id
+                           << "\n   id=" << maincat->id() << "name=" << (*item->m_categories.constBegin())->name();
+            }
+        }
 #endif
-            t = dt.toTime_t();
-        }
-        const_cast <Item *>(itm)->m_last_inv_update = t;
-        const_cast <ItemType *>(itm->m_item_type)->m_has_inventories = true;
-    }
-    else {
-        qWarning() << "WARNING: parsing btinvlist: item" << strs[0][0] << strs[1] << "doesn't exist!";
-    }
-    return true;
-}
 
-bool BrickLink::TextImport::readDB_processLine(btchglog_dummy & /*dummy*/, uint count, const char **strs)
-{
-    if (count < 7 || !strs[2][0])
-        return false;
-
-    ChangeLogEntry::Type t;
-
-    switch (strs[2][0]) {
-    case 'I': t = ChangeLogEntry::ItemId; break;
-    case 'T': t = ChangeLogEntry::ItemType; break;
-    case 'M': t = ChangeLogEntry::ItemMerge; break;
-    case 'E': t = ChangeLogEntry::CategoryName; break;
-    case 'G': t = ChangeLogEntry::CategoryMerge; break;
-    case 'C': t = ChangeLogEntry::ColorName; break;
-    case 'A': t = ChangeLogEntry::ColorMerge; break;
-    default : qWarning("Parsing btchglog: skipping invalid change code %c", strs[2][0]);
-              return true;
-    }
-
-    if (t == ChangeLogEntry::CategoryName || t == ChangeLogEntry::CategoryMerge || t == ChangeLogEntry::ColorName)
-        return true;
-
-    //QDate::fromString(QLatin1String(strs[1]), QLatin1String("M/d/yyyy"));
-
-    QByteArray ba;
-    ba.append(char(t));
-    for (int i = 0; i < 4; ++i) {
-        ba.append('\t');
-        ba.append(strs[3+i]);
-    }
-
-    m_changelog.append(ba);
-    return true;
-}
-
-bool BrickLink::TextImport::readDB_processLine(BrickLink::TextImport::known_colors_dummy &, uint count, const char **strs)
-{
-    if (count < 3 || !strs[0][0] || !strs[1][0])
-        return false;
-
-    if (const Item *itm = findItem('P', decodeEntities(strs[0]))) {
-        bool found = false;
-        for (const Color *color : qAsConst(m_colors)) {
-            if (color->name() == QLatin1String(strs[1])) {
-                const_cast<Item *>(itm)->m_known_colors << color->id();
-                found = true;
-                break;
-            }
-        }
-        if (!found)
-            qWarning("Parsing part_color_codes: skipping invalid color %s on item %s", strs[1], strs[0]);
-    } else {
-        qWarning("Parsing part_color_codes: skipping invalid item %s", strs[0]);
-    }
-    return true;
-}
-
-template <typename C> bool BrickLink::TextImport::readDB(const QString &name, C &container, bool skip_header)
-{
-    // plain C is way faster than Qt on top of C++
-    // and this routine has to be fast to reduce the startup time
-
-    // TODO5: since this is only ever run by a daily cron job on a server, speed is not so
-    //        important here as is maintainability
-
-    FILE *f = fopen(name.toLatin1(), "r");
-    if (f) {
-        char line[1000];
-        int lineno = 1;
-
-        if (skip_header) {
-            char *gcc_supress_warning = fgets(line, 1000, f);
-            Q_UNUSED(gcc_supress_warning)
+        if (itt->hasYearReleased()) {
+            uint y = elementText(e, "ITEMYEAR").toUInt() - 1900;
+            item->m_year = ((y > 0) && (y < 255)) ? y : 0; // we only have 8 bits for the year
+        } else {
+            item->m_year = 0;
         }
 
-        while (!feof(f)) {
-            if (!fgets(line, 1000, f))
-                break;
+        if (itt->hasWeight()) {
+            static QLocale c = QLocale::c();
+            item->m_weight = c.toFloat(elementText(e, "ITEMWEIGHT"));
+        } else {
+            item->m_weight = 0;
+        }
 
-            lineno++;
+        try {
+            item->m_color = m_colors.value(elementText(e, "IMAGECOLOR").toUInt());
+        } catch (...) {
+            item->m_color = nullptr;
+        }
 
-            if (!line [0] || line [0] == '#' || line [0] == '\r' || line [0] == '\n')
-                continue;
+        m_items.append(item.take());
+    });
+}
 
-            const char *tokens[20];
-            uint tokencount = 0;
+void BrickLink::TextImport::readPartColorCodes(const QString &path)
+{
+    parseXML(path, "CODES", "ITEM", [this](QDomElement e) {
+        char itemTypeId = firstCharInString(elementText(e, "ITEMTYPE"));
+        const QString itemId = elementText(e, "ITEMID");
+        const QString colorId = elementText(e, "COLOR");
 
-            for (const char *pos = line; tokencount < 20;) {
-                const char *newpos = pos;
-
-                while (*newpos && (*newpos != '\t') && (*newpos != '\r') && (*newpos != '\n'))
-                    newpos++;
-
-                bool stop = (*newpos != '\t');
-
-                tokens[tokencount++] = pos;
-
-                line[newpos - line] = 0;
-                pos = newpos + 1;
-
-                if (stop)
+        if (const Item *itm = findItem(itemTypeId, itemId)) {
+            bool found = false;
+            for (const Color *color : qAsConst(m_colors)) {
+                if (color->name() == colorId) {
+                    const_cast<Item *>(itm)->m_known_colors << color->id();
+                    found = true;
                     break;
+                }
             }
+            if (!found)
+                qWarning() << "Parsing part_color_codes: skipping invalid color" << colorId
+                           << "on item" << itemTypeId << itemId;
+        } else {
+            qWarning() << "Parsing part_color_codes: skipping invalid item" << itemTypeId << itemId;
+        }
+    });
+}
 
-            if (!readDB_processLine(container, tokencount, tokens)) {
-                qWarning().nospace() << "ERROR: parse error in file \"" << name << "\", line " << lineno << ": \"" << line << "\"";
-                return false;
+
+void BrickLink::TextImport::parseXML(const QString &path, const char *rootNodeName,
+                                     const char *elementNodeName,
+                                     std::function<void(QDomElement node)> callback)
+{
+    QFile f(path);
+    if (!f.open(QFile::ReadOnly))
+        throw ParseException(path, "could not open file: %1").arg(f.errorString());
+
+    QDomDocument doc;
+    QString emsg;
+    int eline = 0;
+    int ecolumn = 0;
+    if (!doc.setContent(&f, false, &emsg, &eline, &ecolumn)) {
+        throw ParseException(path, "%1 at line %2, column %3")
+                .arg(emsg).arg(eline).arg(ecolumn);
+    }
+
+    QDomElement root = doc.documentElement().toElement();
+    if (root.nodeName() != QLatin1String(rootNodeName)) {
+        throw ParseException(path, "expected root node %1, but got %2")
+                .arg(rootNodeName).arg(root.nodeName());
+    }
+
+    int nodeCount = 0;
+    for (QDomNode node = root.firstChild(); !node.isNull(); node = node.nextSibling()) {
+        ++nodeCount;
+        if (node.nodeName() == elementNodeName) {
+            try {
+                callback(node.toElement());
+            } catch (const ParseException &e) {
+                throw ParseException(path, e.what());
             }
         }
-
-        fclose(f);
-        return true;
     }
-    qWarning().nospace() <<  "ERROR: could not open file \"" << name << "\"";
-    return false;
 }
+
+
 
 bool BrickLink::TextImport::importInventories(QVector<const Item *> &invs)
 {
@@ -550,51 +485,149 @@ bool BrickLink::TextImport::readInventory(const Item *item)
     return ok;
 }
 
-bool BrickLink::TextImport::readLDrawColors(const QString &path)
+void BrickLink::TextImport::readLDrawColors(const QString &path)
 {
     QFile f(path);
-    if (f.open(QFile::ReadOnly)) {
-        QTextStream in(&f);
-        QString line;
-        int matchCount = 0;
+    if (!f.open(QFile::ReadOnly))
+        throw ParseException(path, "could not open file: %1").arg(f.errorString());
 
-        while (!(line = in.readLine()).isNull()) {
-            if (!line.isEmpty() && line.at(0) == '0') {
-                const QStringList sl = line.simplified().split(' ');
+    QTextStream in(&f);
+    QString line;
+    int matchCount = 0;
 
-                if ((sl.count() >= 9)
-                        && (sl[1] == "!COLOUR")
-                        && (sl[3] == "CODE")
-                        && (sl[5] == "VALUE")
-                        && (sl[7] == "EDGE")) {
-                    QString name = sl[2];
-                    int id = sl[4].toInt();
+    while (!(line = in.readLine()).isNull()) {
+        if (!line.isEmpty() && line.at(0) == '0') {
+            const QStringList sl = line.simplified().split(' ');
 
-                    name = name.toLower();
-                    if (name.startsWith("rubber"))
-                        continue;
+            if ((sl.count() >= 9)
+                    && (sl[1] == "!COLOUR")
+                    && (sl[3] == "CODE")
+                    && (sl[5] == "VALUE")
+                    && (sl[7] == "EDGE")) {
+                QString name = sl[2];
+                int id = sl[4].toInt();
 
-                    bool found = false;
+                name = name.toLower();
+                if (name.startsWith("rubber"))
+                    continue;
 
-                    for (auto it = m_colors.begin(); !found && (it != m_colors.end()); ++it) {
-                        Color *color = const_cast<Color *>(it.value());
-                        QString blname = color->name()
-                                .toLower()
-                                .replace(' ', '_')
-                                .replace('-', '_')
-                                .replace("gray", "grey");
-                        if (blname == name) {
-                            color->m_ldraw_id = id;
-                            matchCount++;
-                            found = true;
-                        }
+                bool found = false;
+
+                for (auto it = m_colors.begin(); !found && (it != m_colors.end()); ++it) {
+                    Color *color = const_cast<Color *>(it.value());
+                    QString blname = color->name()
+                            .toLower()
+                            .replace(' ', '_')
+                            .replace('-', '_')
+                            .replace("gray", "grey");
+                    if (blname == name) {
+                        color->m_ldraw_id = id;
+                        matchCount++;
+                        found = true;
                     }
                 }
             }
         }
-        return true;
     }
-    return  false;
+}
+
+void BrickLink::TextImport::readInventoryList(const QString &path)
+{
+    QFile f(path);
+    if (!f.open(QFile::ReadOnly))
+        throw ParseException(path, "could not open file: %1").arg(f.errorString());
+
+    QTextStream ts(&f);
+    int line = 0;
+    while (!ts.atEnd()) {
+        ++line;
+        QString line = ts.readLine();
+        if (line.isEmpty())
+            continue;
+        QStringList strs = line.split('\t');
+
+        if (strs.count() < 2)
+            throw ParseException(path, "expected at least 2 fields in line %1").arg(line);
+
+        char itemTypeId = firstCharInString(strs.at(0));
+        const QString itemId = strs.at(1);
+
+        if (!itemTypeId || itemId.isEmpty())
+            throw ParseException(path, "expected a valid item-type and an item-id field in line %1").arg(line);
+
+        if (const Item *itm = findItem(itemTypeId, itemId)) {
+            auto t = time_t(0);   // 1.1.1970 00:00
+
+            if (strs.count() > 2) {
+                QString dtStr = strs.at(2);
+                if (!dtStr.isEmpty()) {
+                    static QString fmtFull = QStringLiteral("M/d/yyyy h:mm:ss AP");
+                    static QString fmtShort = QStringLiteral("M/d/yyyy");
+
+
+                    QDateTime dt = QDateTime::fromString(dtStr, dtStr.length() <= 10 ? fmtShort : fmtFull);
+#if !defined(DAN_FIXED_BTINVLIST_TO_USE_UTC)
+                    static QTimeZone tzEST = QTimeZone("EST5EDT");
+                    dt.setTimeZone(tzEST);
+                    dt = dt.toUTC();
+#endif
+                    t = dt.toTime_t();
+                }
+            }
+            const_cast <Item *>(itm)->m_last_inv_update = t;
+            const_cast <ItemType *>(itm->m_item_type)->m_has_inventories = true;
+        } else {
+            qWarning() << "WARNING: parsing btinvlist: item" << itemTypeId << itemId << "doesn't exist!";
+        }
+    }
+}
+
+void BrickLink::TextImport::readChangeLog(const QString &path)
+{
+    QFile f(path);
+    if (!f.open(QFile::ReadOnly))
+        throw ParseException(path, "could not open file: %1").arg(f.errorString());
+
+    QTextStream ts(&f);
+    int line = 0;
+    while (!ts.atEnd()) {
+        ++line;
+        QString line = ts.readLine();
+        if (line.isEmpty())
+            continue;
+        QStringList strs = line.split('\t');
+
+        if (strs.count() < 7)
+            throw ParseException(path, "expected at least 7 fields in line %1").arg(line);
+
+        ChangeLogEntry::Type t;
+        char c =firstCharInString(strs.at(2));
+
+        switch (c) {
+        case 'I': t = ChangeLogEntry::ItemId; break;
+        case 'T': t = ChangeLogEntry::ItemType; break;
+        case 'M': t = ChangeLogEntry::ItemMerge; break;
+        case 'E': t = ChangeLogEntry::CategoryName; break;
+        case 'G': t = ChangeLogEntry::CategoryMerge; break;
+        case 'C': t = ChangeLogEntry::ColorName; break;
+        case 'A': t = ChangeLogEntry::ColorMerge; break;
+        default:
+            qWarning("Parsing btchglog: skipping invalid change code %x", uint(c));
+            continue;
+        }
+
+        if (t == ChangeLogEntry::CategoryName || t == ChangeLogEntry::CategoryMerge || t == ChangeLogEntry::ColorName)
+            continue;
+
+        QByteArray ba;
+        ba.append(char(t));
+        for (int i = 0; i < 4; ++i) {
+            ba.append('\t');
+            ba.append(strs.at(3+i).toLatin1());
+        }
+
+        m_changelog.append(ba);
+    }
 }
 
 void BrickLink::TextImport::exportTo(Core *bl)
@@ -624,3 +657,4 @@ void BrickLink::TextImport::calculateColorPopularity()
             pop = 0;
     }
 }
+

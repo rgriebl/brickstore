@@ -36,14 +36,14 @@ QString BrickLink::Color::typeName(TypeFlag t)
 
 namespace BrickLink {
 
-QDataStream &operator << (QDataStream &ds, const Color *col)
+QDataStream &operator<<(QDataStream &ds, const Color *col)
 {
     ds << col->m_id << col->m_name.toUtf8() << col->m_ldraw_id << col->m_color
        << quint32(col->m_type) << float(col->m_popularity) << col->m_year_from << col->m_year_to;
     return ds;
 }
 
-QDataStream &operator >> (QDataStream &ds, BrickLink::Color *col)
+QDataStream &operator>>(QDataStream &ds, BrickLink::Color *col)
 {
     col->~Color();
 
@@ -82,7 +82,7 @@ QSize BrickLink::ItemType::rawPictureSize() const
 
 namespace BrickLink {
 
-QDataStream &operator << (QDataStream &ds, const ItemType *itt)
+QDataStream &operator<<(QDataStream &ds, const ItemType *itt)
 {
     quint8 flags = 0;
     flags |= (itt->m_has_inventories   ? 0x01 : 0);
@@ -100,7 +100,7 @@ QDataStream &operator << (QDataStream &ds, const ItemType *itt)
     return ds;
 }
 
-QDataStream &operator >> (QDataStream &ds, BrickLink::ItemType *itt)
+QDataStream &operator>>(QDataStream &ds, BrickLink::ItemType *itt)
 {
     itt->~ItemType();
 
@@ -135,12 +135,12 @@ QDataStream &operator >> (QDataStream &ds, BrickLink::ItemType *itt)
 
 namespace BrickLink {
 
-QDataStream &operator << (QDataStream &ds, const BrickLink::Category *cat)
+QDataStream &operator<<(QDataStream &ds, const BrickLink::Category *cat)
 {
     return ds << quint32(cat->m_id) << cat->m_name.toUtf8();
 }
 
-QDataStream &operator >> (QDataStream &ds, BrickLink::Category *cat)
+QDataStream &operator>>(QDataStream &ds, BrickLink::Category *cat)
 {
     cat->~Category();
     QByteArray name;
@@ -320,7 +320,7 @@ BrickLink::InvItemList BrickLink::Item::consistsOf() const
 
 namespace BrickLink {
 
-QDataStream &operator << (QDataStream &ds, const BrickLink::Item *item)
+QDataStream &operator<<(QDataStream &ds, const BrickLink::Item *item)
 {
     ds << item->m_id.toUtf8() << item->m_name.toUtf8() << qint8(item->m_item_type->id());
 
@@ -359,7 +359,7 @@ QDataStream &operator << (QDataStream &ds, const BrickLink::Item *item)
     return ds;
 }
 
-QDataStream &operator >> (QDataStream &ds, BrickLink::Item *item)
+QDataStream &operator>>(QDataStream &ds, BrickLink::Item *item)
 {
     item->~Item();
 

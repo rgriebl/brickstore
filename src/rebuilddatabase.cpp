@@ -167,9 +167,10 @@ int RebuildDatabase::exec()
     printf("  > consists-of: %11d bytes\n", _qwords_for_consists * 8);
 
     /////////////////////////////////////////////////////////////////////////////////
-    printf("\nSTEP 8: Writing the new v1 (BS 2.0) database to disk...\n");
-    if (!bl->writeDatabase(bl->dataPath() + bl->defaultDatabaseName(BrickLink::Core::BrickStore_2_0), BrickLink::Core::BrickStore_2_0))
-        return error("failed to write the v1 (BS 2.0) database file.");
+    BrickLink::Core::DatabaseVersion dbVersion = BrickLink::Core::DatabaseVersion::Default;
+    printf("\nSTEP 8: Writing the database (version: %d) to disk...\n", int(dbVersion));
+    if (!bl->writeDatabase(bl->dataPath() + bl->defaultDatabaseName(dbVersion), dbVersion))
+        return error("failed to write the database file.");
 
     printf("\nFINISHED.\n\n");
 
@@ -182,11 +183,12 @@ static QList<QPair<QString, QString> > itemQuery(char item_type)
 {
     QList<QPair<QString, QString> > query;   //?a=a&viewType=0&itemType=X
     query << QPair<QString, QString>("a", "a")
-    << QPair<QString, QString>("viewType", "0")
-    << QPair<QString, QString>("itemType", QChar(item_type))
-    << QPair<QString, QString>("selItemColor", "Y")  // special BrickStore flag to get default color - thanks Dan
-    << QPair<QString, QString>("selWeight", "Y")
-    << QPair<QString, QString>("selYear", "Y");
+            << QPair<QString, QString>("viewType", "0")
+            << QPair<QString, QString>("itemType", QChar(item_type))
+            << QPair<QString, QString>("selItemColor", "Y")  // special BrickStore flag to get default color - thanks Dan
+            << QPair<QString, QString>("selWeight", "Y")
+            << QPair<QString, QString>("selYear", "Y")
+            << QPair<QString, QString>("downloadType", "X");
 
     return query;
 }
@@ -195,7 +197,8 @@ static QList<QPair<QString, QString> > dbQuery(int which)
 {
     QList<QPair<QString, QString> > query; //?a=a&viewType=X
     query << QPair<QString, QString>("a", "a")
-          << QPair<QString, QString>("viewType", QString::number(which));
+            << QPair<QString, QString>("viewType", QString::number(which))
+            << QPair<QString, QString>("downloadType", "X");
 
     return query;
 }
@@ -283,23 +286,22 @@ bool RebuildDatabase::download()
         const QList<QPair<QString, QString> > m_query;
         const char *m_file;
     } * tptr, table [] = {
-        { "https://www.bricklink.com/catalogDownload.asp", dbQuery(1),     "itemtypes.txt"   },
-        { "https://www.bricklink.com/catalogDownload.asp", dbQuery(2),     "categories.txt"  },
-        { "https://www.bricklink.com/catalogDownload.asp", dbQuery(3),     "colors.txt"      },
-        { "https://www.bricklink.com/catalogDownload.asp", dbQuery(5),     "part_color_codes.txt" },
-        { "https://www.bricklink.com/catalogDownload.asp", itemQuery('S'), "items_S.txt"     },
-        { "https://www.bricklink.com/catalogDownload.asp", itemQuery('P'), "items_P.txt"     },
-        { "https://www.bricklink.com/catalogDownload.asp", itemQuery('M'), "items_M.txt"     },
-        { "https://www.bricklink.com/catalogDownload.asp", itemQuery('B'), "items_B.txt"     },
-        { "https://www.bricklink.com/catalogDownload.asp", itemQuery('G'), "items_G.txt"     },
-        { "https://www.bricklink.com/catalogDownload.asp", itemQuery('C'), "items_C.txt"     },
-        { "https://www.bricklink.com/catalogDownload.asp", itemQuery('I'), "items_I.txt"     },
-        { "https://www.bricklink.com/catalogDownload.asp", itemQuery('O'), "items_O.txt"     },
-        // { "https://www.bricklink.com/catalogDownload.asp", itemQuery('U'), "items_U.txt"     }, // generates a 500 server error
-        { "https://www.bricklink.com/btinvlist.asp",       QList<QPair<QString, QString> >(), "btinvlist.txt"   },
-        { "https://www.bricklink.com/btchglog.asp",        QList<QPair<QString, QString> >(), "btchglog.txt" },
-        { "https://www.ldraw.org/library/official/ldconfig.ldr", QList<QPair<QString, QString> >(), "ldconfig.ldr" },
-        { nullptr, QList<QPair<QString, QString> > (), nullptr }
+        { "https://www.bricklink.com/catalogDownload.asp", dbQuery(1),     "itemtypes.xml"   },
+        { "https://www.bricklink.com/catalogDownload.asp", dbQuery(2),     "categories.xml"  },
+        { "https://www.bricklink.com/catalogDownload.asp", dbQuery(3),     "colors.xml"      },
+        { "https://www.bricklink.com/catalogDownload.asp", dbQuery(5),     "part_color_codes.xml" },
+        { "https://www.bricklink.com/catalogDownload.asp", itemQuery('S'), "items_S.xml"     },
+        { "https://www.bricklink.com/catalogDownload.asp", itemQuery('P'), "items_P.xml"     },
+        { "https://www.bricklink.com/catalogDownload.asp", itemQuery('M'), "items_M.xml"     },
+        { "https://www.bricklink.com/catalogDownload.asp", itemQuery('B'), "items_B.xml"     },
+        { "https://www.bricklink.com/catalogDownload.asp", itemQuery('G'), "items_G.xml"     },
+        { "https://www.bricklink.com/catalogDownload.asp", itemQuery('C'), "items_C.xml"     },
+        { "https://www.bricklink.com/catalogDownload.asp", itemQuery('I'), "items_I.xml"     },
+        { "https://www.bricklink.com/catalogDownload.asp", itemQuery('O'), "items_O.xml"     },
+        { "https://www.bricklink.com/btinvlist.asp",       { },            "btinvlist.csv"   },
+        { "https://www.bricklink.com/btchglog.asp",        { },            "btchglog.csv" },
+        { "https://www.ldraw.org/library/official/ldconfig.ldr", { },      "ldconfig.ldr" },
+        { nullptr, { }, nullptr }
     };
 
     bool failed = false;

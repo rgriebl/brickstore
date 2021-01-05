@@ -556,7 +556,7 @@ void BrickLink::Core::cancelPriceGuideTransfers()
 
 QString BrickLink::Core::defaultDatabaseName(DatabaseVersion version) const
 {
-    return QString("database-v%1").arg(version);
+    return QString("database-v%1").arg(int(version));
 }
 
 void BrickLink::Core::clear()
@@ -599,8 +599,6 @@ bool BrickLink::Core::readDatabase(QString *infoText, const QString &fname)
         f.setFileName(fname);
     else if (QFile::exists(dataPath() + defaultDatabaseName()))
         f.setFileName(dataPath() + defaultDatabaseName());
-    else if (QFile::exists(dataPath() + defaultDatabaseName(BrickStore_1_1)))
-        f.setFileName(dataPath() + defaultDatabaseName(BrickStore_1_1));
     else
         return false;
 
@@ -617,7 +615,8 @@ bool BrickLink::Core::readDatabase(QString *infoText, const QString &fname)
                 ChunkReader cr(&buf, QDataStream::LittleEndian);
                 QDataStream &ds = cr.dataStream();
 
-                if (cr.startChunk() && cr.chunkId() == ChunkId('B','S','D','B') && cr.chunkVersion() == 1) {
+                if (cr.startChunk() && cr.chunkId() == ChunkId('B','S','D','B')
+                        && cr.chunkVersion() == int(DatabaseVersion::Version_3)) {
                     while (cr.startChunk()) {
                         switch (cr.chunkId() | quint64(cr.chunkVersion()) << 32) {
                             case ChunkId('I','N','F','O') | 1ULL << 32: {
@@ -1452,68 +1451,67 @@ void BrickLink::Core::setDatabase_ChangeLog(const QVector<QByteArray> &changelog
 bool BrickLink::Core::writeDatabase(const QString &filename, DatabaseVersion version,
                                     const QString &infoText) const
 {
-    if (filename.isEmpty() || (version != BrickStore_2_0))
+    if (filename.isEmpty() || (version != DatabaseVersion::Version_3))
         return false;
 
     QMutexLocker lock(&m_corelock);
 
     QFile f(filename + QLatin1String(".new"));
     if (f.open(QIODevice::WriteOnly)) {
-        if (version == BrickStore_2_0) {
-            ChunkWriter cw(&f, QDataStream::LittleEndian);
-            QDataStream &ds = cw.dataStream();
-            bool ok = true;
+        ChunkWriter cw(&f, QDataStream::LittleEndian);
+        QDataStream &ds = cw.dataStream();
+        bool ok = true;
 
-            ok = ok && cw.startChunk(ChunkId('B','S','D','B'), version);
+        ok = ok && cw.startChunk(ChunkId('B','S','D','B'), int(version));
 
-            if (!infoText.isEmpty()) {
-                ok = ok && cw.startChunk(ChunkId('I','N','F','O'), version);
-                ds << infoText;
-                ok = ok && cw.endChunk();
-            }
-
-            ok = ok && cw.startChunk(ChunkId('C','O','L',' '), version);
-            ds << quint32(m_colors.count());
-            for (const Color *col : m_colors)
-                ds << col;
+        if (!infoText.isEmpty()) {
+            ok = ok && cw.startChunk(ChunkId('I','N','F','O'), 1);
+            ds << infoText;
             ok = ok && cw.endChunk();
+        }
 
-            ok = ok && cw.startChunk(ChunkId('C','A','T',' '), version);
-            ds << quint32(m_categories.count());
-            for (const Category *cat : m_categories)
-                ds << cat;
-            ok = ok && cw.endChunk();
+        ok = ok && cw.startChunk(ChunkId('C','O','L',' '), 1);
+        ds << quint32(m_colors.count());
+        for (const Color *col : m_colors)
+            ds << col;
+        ok = ok && cw.endChunk();
 
-            ok = ok && cw.startChunk(ChunkId('T','Y','P','E'), version);
-            ds << quint32(m_item_types.count());
-            for (const ItemType *itt : m_item_types)
-                ds << itt;
-            ok = ok && cw.endChunk();
+        ok = ok && cw.startChunk(ChunkId('C','A','T',' '), 1);
+        ds << quint32(m_categories.count());
+        for (const Category *cat : m_categories)
+            ds << cat;
+        ok = ok && cw.endChunk();
 
-            ok = ok && cw.startChunk(ChunkId('I','T','E','M'), version);
-            ds << quint32(m_items.count());
-            for (const Item *item : m_items)
-                ds << item;
-            ok = ok && cw.endChunk();
+        ok = ok && cw.startChunk(ChunkId('T','Y','P','E'), 1);
+        ds << quint32(m_item_types.count());
+        for (const ItemType *itt : m_item_types)
+            ds << itt;
+        ok = ok && cw.endChunk();
 
-            ok = ok && cw.startChunk(ChunkId('C','H','G','L'), version);
-            ds << quint32(m_changelog.count());
-            for (const QByteArray &cl : m_changelog)
-                ds << cl;
-            ok = ok && cw.endChunk();
+        ok = ok && cw.startChunk(ChunkId('I','T','E','M'), 1);
+        ds << quint32(m_items.count());
+        for (const Item *item : m_items)
+            ds << item;
+        ok = ok && cw.endChunk();
 
-            ok = ok && cw.endChunk();
+        ok = ok && cw.startChunk(ChunkId('C','H','G','L'), 1);
+        ds << quint32(m_changelog.count());
+        for (const QByteArray &cl : m_changelog)
+            ds << cl;
+        ok = ok && cw.endChunk();
 
-            if (ok && f.error() == QFile::NoError) {
-                f.close();
+        ok = ok && cw.endChunk();
 
-                QString err = Utility::safeRename(filename);
+        if (ok && f.error() == QFile::NoError) {
+            f.close();
 
-                if (err.isNull())
-                    return true;
-            }
+            QString err = Utility::safeRename(filename);
+
+            if (err.isNull())
+                return true;
         }
     }
+
     if (f.isOpen())
         f.close();
 

@@ -254,8 +254,8 @@ private:
 
     friend class Core;
     friend class TextImport;
-    friend QDataStream &operator << (QDataStream &ds, const Item *item);
-    friend QDataStream &operator >> (QDataStream &ds, Item *item);
+    friend QDataStream &operator<<(QDataStream &ds, const Item *item);
+    friend QDataStream &operator>>(QDataStream &ds, Item *item);
 };
 
 
@@ -601,25 +601,21 @@ public:
     const QVector<const Item *>       &items() const        { return m_items; }
 
 private:
-    template <typename T> T *parse(uint count, const char **strs);
-
-    template <typename C> bool readDB(const QString &name, C &container, bool skip_header = false);
-    template <typename T> bool readDB_processLine(QHash<uint, const T *> &d, uint tokencount, const char **tokens);
-    template <typename T> bool readDB_processLine(QHash<char, const T *> &d, uint tokencount, const char **tokens);
-    template <typename T> bool readDB_processLine(QVector<const T *> &v, uint tokencount, const char **tokens);
-
-    struct btinvlist_dummy { };
-    bool readDB_processLine(btinvlist_dummy &, uint count, const char **strs);
-    struct btchglog_dummy { };
-    bool readDB_processLine(btchglog_dummy &, uint count, const char **strs);
-    struct known_colors_dummy { };
-    bool readDB_processLine(known_colors_dummy &, uint count, const char **strs);
-
+    void readColors(const QString &path);
+    void readCategories(const QString &path);
+    void readItemTypes(const QString &path);
+    void readItems(const QString &path, const ItemType *itt);
+    void readPartColorCodes(const QString &path);
     bool readInventory(const Item *item);
-    bool readLDrawColors(const QString &path);
+    void readLDrawColors(const QString &path);
+    void readInventoryList(const QString &path);
+    void readChangeLog(const QString &path);
 
     const Category *findCategoryByName(const QStringRef &name) const;
     const Item *findItem(char type, const QString &id);
+
+    void parseXML(const QString &path, const char *rootNodeName, const char *elementNodeName,
+                  std::function<void (QDomElement)> callback);
 
     void calculateColorPopularity();
 
@@ -627,13 +623,12 @@ private:
     QHash<uint, const Color *>    m_colors;
     QHash<char, const ItemType *> m_item_types;
     QHash<uint, const Category *> m_categories;
-    QVector<const Item *>       m_items;
+    QVector<const Item *>         m_items;
 
     QHash<const Item *, AppearsIn>   m_appears_in_hash;
     QHash<const Item *, InvItemList> m_consists_of_hash;
     QVector<QByteArray>              m_changelog;
 
-    const ItemType *m_current_item_type;
 };
 
 
@@ -645,14 +640,15 @@ public:
 
     QUrl url(UrlList u, const void *opt = nullptr, const void *opt2 = nullptr);
 
-    enum DatabaseVersion {
-        BrickStore_1_1,
-        BrickStore_2_0,
+    enum class DatabaseVersion {
+        Version_1,
+        Version_2,
+        Version_3,
 
-        Default = BrickStore_2_0
+        Default = Version_3
     };
 
-    QString defaultDatabaseName(DatabaseVersion version = Default) const;
+    QString defaultDatabaseName(DatabaseVersion version = DatabaseVersion::Default) const;
 
     QString dataPath() const;
     QString dataPath(const ItemType *) const;
@@ -800,6 +796,7 @@ private:
 inline Core *core() { return Core::inst(); }
 
 inline Core *create(const QString &datadir, QString *errstring) { return Core::create(datadir, errstring); }
+
 
 } // namespace BrickLink
 
