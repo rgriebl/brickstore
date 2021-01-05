@@ -204,6 +204,7 @@ void ProgressDialog::transferDone(TransferJob *j)
         setErrorText(tr("Download failed: %1").arg(j->errorString()));
     else
         emit transferFinished();
+    m_job = nullptr;
 }
 
 bool ProgressDialog::hasErrors() const

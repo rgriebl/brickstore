@@ -129,10 +129,9 @@ WelcomeButton::WelcomeButton(const QString &text, const QString &description, QW
 {
     setAttribute(Qt::WA_Hover);
 
-#if defined(Q_OS_MACOS) || defined(Q_OS_WINDOWS)
+    // only Fusion seems to be able to draw QCommandLink buttons correctly
     if (auto s = QStyleFactory::create("fusion"))
         setStyle(s);
-#endif
 
     QSizePolicy policy(QSizePolicy::Preferred, QSizePolicy::Preferred, QSizePolicy::PushButton);
     policy.setHeightForWidth(true);

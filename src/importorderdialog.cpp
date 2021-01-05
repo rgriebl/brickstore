@@ -190,7 +190,7 @@ public:
     void sort(int section, Qt::SortOrder so) override
     {
         emit layoutAboutToBeChanged();
-        m_orderlist;
+
         std::sort(m_orderlist.begin(), m_orderlist.end(), [section, so](const auto &op1, const auto &op2) {
             int d = 0;
 

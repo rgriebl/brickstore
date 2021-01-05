@@ -30,7 +30,7 @@
 
 
 TaskPriceGuideWidget::TaskPriceGuideWidget(QWidget *parent)
-        : PriceGuideWidget(parent), m_win(nullptr), m_dock(nullptr)
+    : PriceGuideWidget(parent), m_win(nullptr), m_dock(nullptr)
 {
     setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
@@ -122,14 +122,21 @@ void TaskPriceGuideWidget::fixParentDockWindow()
 
 void TaskPriceGuideWidget::topLevelChanged(bool b)
 {
-    if (b)
+    if (b) {
         setLayout(PriceGuideWidget::Normal);
+        setMaximumSize(minimumSize());
+    }
 }
 
 void TaskPriceGuideWidget::dockLocationChanged(Qt::DockWidgetArea area)
 {
-    bool horiz = (area ==  Qt::LeftDockWidgetArea) || (area == Qt::RightDockWidgetArea);
-    setLayout(horiz ? PriceGuideWidget::Vertical : PriceGuideWidget::Horizontal);
+    bool vertical = (area ==  Qt::LeftDockWidgetArea) || (area == Qt::RightDockWidgetArea);
+
+    setLayout(vertical ? PriceGuideWidget::Vertical : PriceGuideWidget::Horizontal);
+    if (vertical)
+        setMaximumSize(QWIDGETSIZE_MAX, minimumHeight());
+    else
+        setMaximumSize(minimumWidth(), QWIDGETSIZE_MAX);
 }
 
 // ----------------------------------------------------------------------

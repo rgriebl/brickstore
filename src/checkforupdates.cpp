@@ -25,7 +25,8 @@
 CheckForUpdates::CheckForUpdates(ProgressDialog *pd)
     : m_progress(pd)
 {
-    connect(pd, SIGNAL(transferFinished()), this, SLOT(gotten()));
+    connect(pd, &ProgressDialog::transferFinished,
+            this, &CheckForUpdates::gotten);
 
     const QString &appver = QCoreApplication::applicationVersion();
     m_current_version = QVersionNumber::fromString(appver);
