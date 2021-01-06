@@ -2,6 +2,45 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="en_US">
 <context>
+    <name>AboutDialog</name>
+    <message>
+        <source>About</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No LDraw installation was found.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Legal Info</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>System Info</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Copyright &amp;copy; %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Version %1 (build: %2)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Visit %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Translators</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;This program is free software; it may be distributed and/or modified under the terms of the GNU General Public License version 2 as published by the Free Software Foundation and appearing in the file LICENSE.GPL included in this software package.&lt;br&gt;This program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.&lt;br&gt;See &lt;a href=&quot;http://fsf.org/licensing/licenses/gpl.html&quot;&gt;www.fsf.org/licensing/licenses/gpl.html&lt;/a&gt; for GPL licensing information.&lt;/p&gt;&lt;p&gt;All data from &lt;a href=&quot;https://www.bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; is owned by BrickLink&lt;sup&gt;TM&lt;/sup&gt;, which is a trademark of Dan Jezek.&lt;/p&gt;&lt;p&gt;LEGO&lt;sup&gt;&amp;reg;&lt;/sup&gt; is a trademark of the LEGO group of companies, which does not sponsor, authorize or endorse this software.&lt;/p&gt;&lt;p&gt;All other trademarks recognised.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>AddItemDialog</name>
     <message>
         <source>Add Items to %1</source>
@@ -59,6 +98,13 @@
         <source>Add</source>
         <translation type="unfinished"></translation>
     </message>
+    <message numerus="yes">
+        <source>Added %n %1 %2 [%3]</source>
+        <translation>
+            <numerusform>Added %n %1 %2 [%3]</numerusform>
+            <numerusform>Added %n %1 %2 [%3]</numerusform>
+        </translation>
+    </message>
 </context>
 <context>
     <name>AppearsInWidget</name>
@@ -86,31 +132,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Legal Info</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>System Info</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Copyright &amp;copy; %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Version %1 (build: %2)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Visit %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Translators</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&lt;p&gt;This program is free software; it may be distributed and/or modified under the terms of the GNU General Public License version 2 as published by the Free Software Foundation and appearing in the file LICENSE.GPL included in this software package.&lt;br&gt;This program is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.&lt;br&gt;See &lt;a href=&quot;http://fsf.org/licensing/licenses/gpl.html&quot;&gt;www.fsf.org/licensing/licenses/gpl.html&lt;/a&gt; for GPL licensing information.&lt;/p&gt;&lt;p&gt;All data from &lt;a href=&quot;https://www.bricklink.com&quot;&gt;www.bricklink.com&lt;/a&gt; is owned by BrickLink&lt;sup&gt;TM&lt;/sup&gt;, which is a trademark of Dan Jezek.&lt;/p&gt;&lt;p&gt;LEGO&lt;sup&gt;&amp;reg;&lt;/sup&gt; is a trademark of the LEGO group of companies, which does not sponsor, authorize or endorse this software.&lt;/p&gt;&lt;p&gt;All other trademarks recognised.&lt;/p&gt;</source>
+        <source>Check for Program Updates</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -154,15 +176,15 @@
 <context>
     <name>BrickLink::InternalAppearsInModel</name>
     <message>
-        <source>#</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Set</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Qty.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -256,23 +278,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Stable release</source>
+        <source>Could not parse server response.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Beta release</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Detailed list of changes</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>the BrickStore homepage</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&lt;b&gt;Please note:&lt;/b&gt; Your currently installed version is flagged as defective.Please visit %1 to find out the exact cause.</source>
+        <source>Download</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -635,6 +645,18 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Do you want to save these changes now?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Import BrickLink Store Inventory</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Import BrickLink Shopping Cart</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Index</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1724,6 +1746,10 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <source>Only &quot;%1&quot; Colors</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Known Colors</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>SelectColorDialog</name>
@@ -1735,15 +1761,15 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
 <context>
     <name>SelectDocumentDialog</name>
     <message>
-        <source>Select Document</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Items from Clipboard</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Items from an already open document:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Select Item Source</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1774,11 +1800,15 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Please enter the complete item number:</source>
+        <source>View item&apos;s category</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>View item&apos;s category</source>
+        <source>Case Sensitive</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Use Regular Expression</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2219,14 +2249,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Current version: %1 (build: %2)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Using the LDraw installation at:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>No LDraw installation was found.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
