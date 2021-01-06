@@ -35,6 +35,7 @@
 #include <QFormLayout>
 #include <QContextMenuEvent>
 #include <QLineEdit>
+#include <QPainter>
 
 #include "bricklink_model.h"
 #include "selectitem.h"
@@ -153,7 +154,20 @@ void SelectItem::init()
     });
     popupMenu->addAction(are);
 
-    auto *a = d->w_filter->addAction(QIcon(":/images/filter.png"), QLineEdit::LeadingPosition);
+    QPixmap filterPix(":/images/filter.png");
+    {
+        // add a drop-down arrow via the style
+
+        QPainter p(&filterPix);
+        QStyleOption so;
+        so.initFrom(d->w_filter);
+        so.rect = filterPix.rect();
+        int mbi = d->w_filter->style()->pixelMetric(QStyle::PM_MenuButtonIndicator, &so, d->w_filter);
+        so.rect = QRect(0, so.rect.bottom() - mbi + 4, mbi - 6, mbi - 6);
+        d->w_filter->style()->drawPrimitive(QStyle::PE_IndicatorArrowDown, &so, &p, d->w_filter);
+    }
+
+    auto *a = d->w_filter->addAction(QIcon(filterPix), QLineEdit::LeadingPosition);
     connect(a, &QAction::triggered, this, [this, popupMenu]() {
         popupMenu->popup(d->w_filter->mapToGlobal(d->w_filter->rect().bottomLeft()));
     });

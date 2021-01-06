@@ -47,6 +47,8 @@ DocumentDelegate::DocumentDelegate(Document *doc, DocumentProxyModel *view, QTab
     , m_view(view)
     , m_table(table)
 {
+    m_table->viewport()->setAttribute(Qt::WA_Hover);
+
     static bool once = false;
     if (!once) {
         qAddPostRoutine(clearCaches);
@@ -295,6 +297,11 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
             tag.foreground = bg;
             tag.background = fg;
             tag.background.setAlphaF(0.3);
+
+            if (option.state & QStyle::State_MouseOver) {
+                tag.foreground = option.palette.color(QPalette::HighlightedText);
+                tag.background = option.palette.color(QPalette::Highlight);
+            }
         }
         break;
 
