@@ -55,7 +55,8 @@ Config::Config()
     : QSettings(organization, application)
 {
     m_show_input_errors = value("General/ShowInputErrors", true).toBool();
-    m_measurement = (value("General/MeasurementSystem").toString() == QLatin1String("imperial")) ? QLocale::ImperialSystem : QLocale::MetricSystem;
+    m_measurement = (value("General/MeasurementSystem").toString() == QLatin1String("imperial"))
+            ? QLocale::ImperialSystem : QLocale::MetricSystem;
     m_translations_parsed = false;
 }
 
@@ -194,6 +195,11 @@ bool Config::showInputErrors() const
     return m_show_input_errors;
 }
 
+bool Config::simpleMode() const
+{
+    return m_simple_mode;
+}
+
 void Config::setShowInputErrors(bool b)
 {
     if (b != m_show_input_errors) {
@@ -201,6 +207,16 @@ void Config::setShowInputErrors(bool b)
         setValue("General/ShowInputErrors", b);
 
         emit showInputErrorsChanged(b);
+    }
+}
+
+void Config::setSimpleMode(bool b)
+{
+    if (b != m_simple_mode) {
+        m_simple_mode = b;
+        setValue("General/SimpleMode", b);
+
+        emit simpleModeChanged(b);
     }
 }
 
@@ -266,8 +282,8 @@ void Config::setMeasurementSystem(QLocale::MeasurementSystem ms)
 {
     if (ms != m_measurement) {
         m_measurement= ms;
-        setValue("General/MeasurementSystem", ms == QLocale::MetricSystem ? QLatin1String("metric") : QLatin1String("imperial"));
-
+        setValue("General/MeasurementSystem", ms == QLocale::MetricSystem ? QLatin1String("metric")
+                                                                          : QLatin1String("imperial"));
         emit measurementSystemChanged(ms);
     }
 }
@@ -351,7 +367,8 @@ void Config::setItemImageSizePercent(int p)
 
 QPair<QString, QString> Config::loginForBrickLink() const
 {
-    return qMakePair(value("BrickLink/Login/Username").toString(), scramble(value("BrickLink/Login/Password").toString()));
+    return qMakePair(value("BrickLink/Login/Username").toString(),
+                     scramble(value("BrickLink/Login/Password").toString()));
 }
 
 void Config::setLoginForBrickLink(const QString &name, const QString &pass)

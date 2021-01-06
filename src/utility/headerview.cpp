@@ -182,6 +182,7 @@ void HeaderView::setSectionAvailable(int section, bool avail)
         m_unavailable.append(section);
     } else {
         m_unavailable.removeOne(section);
+        showSection(section);
     }
 }
 

@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Added
+- The Buyer/Collector mode is working again.
 
 ## [2021.1.2] - 2021-01-06
 ### Added

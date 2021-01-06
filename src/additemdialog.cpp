@@ -147,7 +147,8 @@ AddItemDialog::AddItemDialog(QWidget *parent)
         checkAddPossible();
     });
 
-    //TODO5 ??? connect(Config::inst(), &Config::simpleModeChanged, this, &AddItemDialog::setSimpleMode);
+    connect(Config::inst(), &Config::simpleModeChanged,
+            this, &AddItemDialog::setSimpleMode);
 
     if (Config::inst()->value("/Defaults/AddItems/Condition", "new").toString() != "new")
         w_radio_used->setChecked(true);

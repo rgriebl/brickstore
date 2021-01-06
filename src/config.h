@@ -46,6 +46,7 @@ public:
     QString dataDir() const;
 
     bool showInputErrors() const;
+    bool simpleMode() const;
     bool onlineStatus() const;
 
     QDateTime lastDatabaseUpdate() const;
@@ -81,6 +82,7 @@ public slots:
     void setDataDir(const QString &dir);
 
     void setShowInputErrors(bool b);
+    void setSimpleMode(bool b);
     void setOnlineStatus(bool b);
 
     void setLastDatabaseUpdate(const QDateTime &dt);
@@ -99,6 +101,7 @@ signals:
     void measurementSystemChanged(QLocale::MeasurementSystem ms);
     void defaultCurrencyCodeChanged(const QString &ccode);
     void showInputErrorsChanged(bool b);
+    void simpleModeChanged(bool b);
     void updateIntervalsChanged(const QMap<QByteArray, int> &intervals);
     void onlineStatusChanged(bool b);
     void lastDatabaseUpdateChanged(const QDateTime &dt);
@@ -111,8 +114,9 @@ protected:
     bool parseTranslations() const;
 
 private:
-    bool                       m_show_input_errors;
-    QLocale::MeasurementSystem m_measurement;
-    mutable bool               m_translations_parsed;
+    bool                       m_show_input_errors = false;
+    bool                       m_simple_mode = false;
+    QLocale::MeasurementSystem m_measurement = QLocale::MetricSystem;
+    mutable bool               m_translations_parsed = false;
     mutable QList<Translation> m_translations;
 };

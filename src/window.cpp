@@ -282,6 +282,8 @@ Window::Window(Document *doc, QWidget *parent)
     connect(BrickLink::core(), &BrickLink::Core::priceGuideUpdated,
             this, &Window::priceGuideUpdated);
 
+    connect(Config::inst(), &Config::simpleModeChanged,
+            this, &Window::setSimpleMode);
     connect(Config::inst(), &Config::showInputErrorsChanged,
             this, &Window::updateErrorMask);
     connect(Config::inst(), &Config::measurementSystemChanged,
@@ -300,6 +302,7 @@ Window::Window(Document *doc, QWidget *parent)
     connect(m_doc, &Document::itemsChanged,
             this, &Window::documentItemsChanged);
 
+    setSimpleMode(Config::inst()->simpleMode());
     updateErrorMask();
     updateCaption();
 

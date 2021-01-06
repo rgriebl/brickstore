@@ -369,6 +369,7 @@ FrameWork::FrameWork(QWidget *parent)
         << "-"
         << "view_fullscreen"
         << "-"
+        << "view_simple_mode"
         << "view_show_input_errors"
         << "view_difference_mode"
         << "-"
@@ -461,6 +462,7 @@ FrameWork::FrameWork(QWidget *parent)
     connect(Config::inst(), &Config::measurementSystemChanged,
             this, &FrameWork::statisticsUpdate);
 
+    findAction("view_simple_mode")->setChecked(Config::inst()->simpleMode());
     findAction("view_show_input_errors")->setChecked(Config::inst()->showInputErrors());
 
     connect(BrickLink::core(), &BrickLink::Core::transferJobProgress,
@@ -629,6 +631,7 @@ void FrameWork::translateActions()
         { "view_docks",                     tr("View Info Docks"),                    },
         { "view_statusbar",                 tr("View Statusbar"),                     },
         { "view_fullscreen",                tr("Full Screen"),                        QKeySequence::FullScreen },
+        { "view_simple_mode",               tr("Buyer/Collector Mode"),               },
         { "view_show_input_errors",         tr("Show Input Errors"),                  },
         { "view_difference_mode",           tr("Difference Mode"),                    },
         { "view_save_default_col",          tr("Save Column Layout as Default"),      },
@@ -1106,6 +1109,7 @@ void FrameWork::createActions()
         m->addAction(dock->toggleViewAction());
 
     (void) newQAction(this, "view_statusbar", 0, true, this, &FrameWork::viewStatusBar);
+    (void) newQAction(this, "view_simple_mode", 0, true, Config::inst(), &Config::setSimpleMode);
     (void) newQAction(this, "view_show_input_errors", 0, true, Config::inst(), &Config::setShowInputErrors);
     (void) newQAction(this, "view_difference_mode", 0, true);
     (void) newQAction(this, "view_save_default_col");
