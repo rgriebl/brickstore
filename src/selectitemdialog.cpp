@@ -39,7 +39,7 @@ void SelectItemDialog::setItemType(const BrickLink::ItemType *itt)
 
 void SelectItemDialog::setItem(const BrickLink::Item *item)
 {
-    w_si->setCurrentItem(item);
+    w_si->setCurrentItem(item, true);
 }
 
 const BrickLink::Item *SelectItemDialog::item() const
