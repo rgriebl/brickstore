@@ -237,7 +237,18 @@ QString Currency::localSymbol(const QString &intSymbol)
 class DotCommaFilter : public QObject
 {
     Q_OBJECT
+
 public:
+    static void install()
+    {
+        static bool once = false;
+        if (!once) {
+            once = true;
+            qApp->installEventFilter(new DotCommaFilter(qApp));
+        }
+    }
+
+private:
     explicit DotCommaFilter(QObject *parent)
         : QObject(parent)
     { }
@@ -253,12 +264,11 @@ protected:
 
                 QString text = ke->text();
                 bool fixed = false;
-                QLocale loc;
 
                 for (int i = 0; i < text.length(); ++i) {
                     QCharRef ir = text[i];
                     if (ir == QLatin1Char('.') || ir == QLatin1Char(',')) {
-                        ir = loc.decimalPoint();
+                        ir = val->locale().decimalPoint();
                         fixed = true;
                     }
                 }
@@ -271,78 +281,27 @@ protected:
     }
 };
 
-bool CurrencyValidator::s_once = false;
-
 CurrencyValidator::CurrencyValidator(QObject *parent)
     : QDoubleValidator(parent)
 {
-    if (!s_once) {
-        s_once = true;
-        qApp->installEventFilter(new DotCommaFilter(qApp));
-    }
+    DotCommaFilter::install();
 }
 
 CurrencyValidator::CurrencyValidator(double bottom, double top, int decimals, QObject *parent)
     : QDoubleValidator(bottom, top, decimals, parent)
 {
-    if (!s_once) {
-        s_once = true;
-        qApp->installEventFilter(new DotCommaFilter(qApp));
-    }
+    DotCommaFilter::install();
 }
 
-QValidator::State CurrencyValidator::validate(QString &input, int &pos) const
+bool CurrencyValidator::event(QEvent *e)
 {
-    double b = bottom(), t = top();
-    int d = decimals();
-
-//    double f = Currency::rate();
-//    b *= f;
-//    t *= f;
-
-    QChar dp = QLocale().decimalPoint();
-
-    QRegExp r(QString(R"( *-?\d*\%1?\d* *)").arg(dp));
-
-    if (b >= 0 && input.simplified().startsWith(QLatin1Char('-')))
-        return Invalid;
-
-    if (r.exactMatch(input)) {
-        QString s = input;
-        s.replace(dp, QLatin1Char('.'));
-
-        int i = s.indexOf(QLatin1Char('.'));
-        if (i >= 0) {
-            // has decimal point, now count digits after that
-            i++;
-            int j = i;
-            while (s [j].isDigit())
-                j++;
-            if (j > i) {
-                while (s [j - 1] == QLatin1Char('0'))
-                    j--;
-            }
-
-            if (j - i > d) {
-                return Intermediate;
-            }
-        }
-
-        double entered = s.toDouble();
-
-        if (entered < b || entered > t)
-            return Intermediate;
-        else
-            return Acceptable;
+    if (e && (e->type() == QEvent::LanguageChange)) {
+        setLocale(QLocale());
+        emit changed();
     }
-    else if (r.matchedLength() == input.length()) {
-        return Intermediate;
-    }
-    else {
-        pos = input.length();
-        return Invalid;
-    }
+    return QDoubleValidator::event(e);
 }
+
 
 #include "currency.moc"
 #include "moc_currency.cpp"

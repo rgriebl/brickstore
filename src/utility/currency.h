@@ -81,10 +81,6 @@ public:
     CurrencyValidator(QObject *parent);
     CurrencyValidator(double bottom, double top, int decimals, QObject *parent);
 
-    QValidator::State validate(QString &input, int &) const override;
-
 protected:
-    bool filterInput(QLineEdit *edit, QKeyEvent *ke) const;
-
-    static bool s_once;
+    bool event(QEvent *event) override;
 };
