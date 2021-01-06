@@ -320,9 +320,13 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         if (it->stockroom() == BrickLink::Stockroom::None)
             checkmark = -1;
         else
-            str = ('A' + int(it->stockroom()) - int(BrickLink::Stockroom::A));
+            str = QLatin1Char('A' + char(it->stockroom()) - char(BrickLink::Stockroom::A));
         break;
     }
+
+    // on macOS, the dark mode alternate base color is white with alpha, making it a medium gray
+    // since we need an opaque color for filling, we need to premultiply it:
+    normalbg = Utility::premultiplyAlpha(normalbg);
 
     // we only want to do a single, opaque color fill, so we calculate the
     // final fill color using the normal bg color and our special bg color
@@ -330,6 +334,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
     bg = Utility::gradientColor(normalbg, bg, bg.alphaF());
     bg.setAlpha(255);
     p->fillRect(option.rect, bg);
+
     if (nocolor || noitem) {
         int d = option.rect.height();
         QPixmap *pix = s_stripe_cache[d];
@@ -358,7 +363,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         QFont font = option.font;
         font.setBold(tag.bold);
         QFontMetrics fontmetrics(font);
-        int itw = qMax(int(1.5f * fontmetrics.height()),
+        int itw = qMax(int(1.5 * fontmetrics.height()),
                        2 * fontmetrics.horizontalAdvance(tag.text));
 
         union { struct { qint32 i1; quint32 i2; } s; quint64 q; } key;

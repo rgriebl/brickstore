@@ -22,10 +22,12 @@
 #include <QPaintEvent>
 #include <QStyleOptionHeader>
 #include <QDesktopServices>
+#include <QApplication>
 
 #include "bricklink.h"
 #include "config.h"
 #include "currency.h"
+#include "utility.h"
 
 #include "priceguidewidget.h"
 
@@ -111,6 +113,7 @@ PriceGuideWidget::PriceGuideWidget(QWidget *parent)
     setMouseTracking(true);
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
     setContextMenuPolicy(Qt::ActionsContextMenu);
+    setPalette(QApplication::palette("QAbstractItemView"));
 
     QAction *a;
     a = new QAction(this);
@@ -570,6 +573,7 @@ void PriceGuideWidget::paintHeader(QPainter *p, const QRect &r, Qt::Alignment al
     opt.sortIndicator    = QStyleOptionHeader::None;
     opt.text             = str;
     opt.textAlignment    = align;
+    opt.palette          = QApplication::palette("QHeaderView");
 
     p->save();
     if (bold)
@@ -580,7 +584,8 @@ void PriceGuideWidget::paintHeader(QPainter *p, const QRect &r, Qt::Alignment al
 
 void PriceGuideWidget::paintCell(QPainter *p, const QRect &r, Qt::Alignment align, const QString &str, bool alternate)
 {
-    p->fillRect(r, palette().color(alternate ? QPalette::AlternateBase : QPalette::Base));
+    QColor bg = palette().color(alternate ? QPalette::AlternateBase : QPalette::Base);
+    p->fillRect(r, bg);
 
     QRect r2(r);
     r2.adjust(hborder, 0, -hborder, 0);

@@ -315,3 +315,14 @@ QString Utility::localForInternationalCurrencySymbol(const QString &internationa
     return international_symbol;
 }
 
+
+QColor Utility::premultiplyAlpha(const QColor &c)
+{
+    if (c.alpha()) {
+        QColor r = QColor(qPremultiply(c.rgba()));
+        r.setAlpha(255);
+        return r;
+    }
+    return c;
+
+}
