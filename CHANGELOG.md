@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+## [2021.1.2] - 2021-01-06
 ### Added
 - First try at *Known Colors* support using the Parts/Codes catalog download. This is not perfect, but a nice start.
 - Big backend refactoring: switched from CSV to XML downloads to deal with the ever increasing number of broken non-ASCII descriptions.
@@ -11,6 +13,7 @@ All notable changes to this project will be documented in this file.
 - Filter responsivness and speed have improved.
 - The minimum window size should now also fit smaller screens.
 - Various small fixes and updates throughout the UI.
+- Fixed macOS dark mode glitches.
 
 ## [2021.1.1] - 2021-01-03
 This deals with the most annoying bugs in the first release.
@@ -51,6 +54,7 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
   are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.1.1...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.1.2...HEAD
+[2021.1.2]: https://github.com/rgriebl/brickstore/releases/tag/v2021.1.2
 [2021.1.1]: https://github.com/rgriebl/brickstore/releases/tag/v2021.1.1
 [2021.1.0]: https://github.com/rgriebl/brickstore/releases/tag/v2021.1.0
