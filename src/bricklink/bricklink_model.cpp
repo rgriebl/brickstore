@@ -97,8 +97,13 @@ QVariant BrickLink::ColorModel::data(const QModelIndex &index, int role) const
     else if (role == Qt::DecorationRole) {
         QFontMetrics fm = QApplication::fontMetrics();
         QImage img = core()->colorImage(c, fm.height(), fm.height());
-        if (!img.isNull())
-            res = img;
+        if (!img.isNull()) {
+            QPixmap pix = QPixmap::fromImage(img);
+            QIcon ico;
+            ico.addPixmap(pix, QIcon::Normal);
+            ico.addPixmap(pix, QIcon::Selected);
+            res = ico;
+        }
     }
     else if (role == Qt::ToolTipRole) {
         res = QString(R"(<table width="100%" border="0" bgcolor="%3"><tr><td><br><br></td></tr></table><br />%1: %2)").arg(tr("RGB"), c->color().name(), c->color().name()); //%
