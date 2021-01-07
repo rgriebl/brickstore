@@ -29,6 +29,7 @@
 #include <QStyleOption>
 #include <QPaintEvent>
 #include <QTextDocument>
+#include <QShortcut>
 #include <QDebug>
 
 #include "utility.h"
@@ -246,6 +247,19 @@ Workspace::Workspace(QWidget *parent)
         m_tabbar->setVisible(count > 1);
         m_right->setVisible(count > 1);
     });
+
+    for (int i = 0; i < 9; ++i) {
+        //: Shortcut to activate window 0-9
+        auto sc = new QShortcut(tr("Alt+%1").arg(i), this);
+        connect(sc, &QShortcut::activated, this, [this, i]() {
+            int j = (i == 0) ? 9 : i - 1;
+            if (m_windowStack->count() > j) {
+                auto w = m_windowStack->widget(j);
+                if (activeWindow() != w)
+                    setActiveWindow(w);
+            }
+        });
+    }
 }
 
 QWidget *Workspace::welcomeWidget() const
