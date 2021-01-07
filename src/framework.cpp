@@ -166,6 +166,35 @@ signals:
     void openRecent(const QString &file);
 };
 
+class LoadColumnLayoutMenu : public QMenu
+{
+    Q_OBJECT
+public:
+    explicit LoadColumnLayoutMenu(QWidget *parent)
+        : QMenu(parent)
+    {
+        connect(this, &QMenu::aboutToShow, this, [this]() {
+            clear();
+
+            addAction(tr("User Default"))->setData(QLatin1String("user-default"));
+            addAction(tr("BrickStore Default"))->setData(QLatin1String("default"));
+            addAction(tr("Auto Resize Once"))->setData(QLatin1String("auto-resize"));
+            auto layoutIds =  Config::inst()->columnLayoutIds();
+            if (!layoutIds.isEmpty())
+                addSeparator();
+            for (const auto &l : layoutIds)
+                addAction(Config::inst()->columnLayoutName(l))->setData(l);
+        });
+        connect(this, &QMenu::triggered, this, [this](QAction *a) {
+            if (a && !a->data().isNull())
+                emit load(a->data().toString());
+        });
+    }
+
+signals:
+    void load(const QString &id);
+};
+
 
 class FancyDockTitleBar : public QLabel
 {
@@ -370,10 +399,12 @@ FrameWork::FrameWork(QWidget *parent)
         << "view_fullscreen"
         << "-"
         << "view_simple_mode"
-        << "view_show_input_errors"
         << "view_difference_mode"
+        << "view_show_input_errors"
         << "-"
-        << "view_save_default_col"
+        << "view_column_layout_save"
+        << "view_column_layout_manage"
+        << "view_column_layout_load"
     ));
 
     menuBar()->addMenu(createMenu("extras", QList<QByteArray>()
@@ -438,6 +469,8 @@ FrameWork::FrameWork(QWidget *parent)
         << "-"
         << "edit_price_to_priceguide"
         << "edit_price_inc_dec"
+        << "-"
+        << "view_column_layout_load"
         << "|"
         << "widget_filter"
         << "|"
@@ -634,7 +667,9 @@ void FrameWork::translateActions()
         { "view_simple_mode",               tr("Buyer/Collector Mode"),               },
         { "view_show_input_errors",         tr("Show Input Errors"),                  },
         { "view_difference_mode",           tr("Difference Mode"),                    },
-        { "view_save_default_col",          tr("Save Column Layout as Default"),      },
+        { "view_column_layout_save",        tr("Save Column Layout..."),              },
+        { "view_column_layout_manage",      tr("Manage Column Layouts..."),           },
+        { "view_column_layout_load",        tr("Load Column Layout"),                 },
         { "extras",                         tr("E&xtras"),                            },
         { "extras_update_database",         tr("Update Database"),                    },
         { "extras_configure",               tr("Configure..."),                       },
@@ -916,9 +951,10 @@ bool FrameWork::setupToolBar(QToolBar *t, const QList<QByteArray> &a_names)
     return true;
 }
 
+template <typename M = QMenu>
 inline static QMenu *newQMenu(QWidget *parent, const char *name, quint32 flags = 0)
 {
-    QMenu *m = new QMenu(parent);
+    M *m = new M(parent);
     m->menuAction()->setObjectName(QLatin1String(name));
     if (flags)
         m->menuAction()->setProperty("bsFlags", flags);
@@ -941,19 +977,27 @@ inline static QAction *newQAction(QObject *parent, const char *name, quint32 fla
         a->setProperty("bsFlags", flags);
     if (toggle)
         a->setCheckable(true);
-    if (receiver && slot) {
-        if (toggle)
-            QObject::connect(a, &QAction::toggled, receiver, slot);
-        else
-            QObject::connect(a, &QAction::triggered, receiver, slot);
-//        QObject::connect(a, toggle ? SIGNAL(toggled(bool)) : SIGNAL(triggered()), receiver, slot);
-    }
+    if (receiver && slot)
+        QObject::connect(a, toggle ? &QAction::toggled : &QAction::triggered, receiver, slot);
     return a;
 }
 
 inline static QAction *newQAction(QObject *parent, const char *name, quint32 flags = 0, bool toggle = false)
 {
     return newQAction(parent, name, flags, toggle, static_cast<QObject *>(nullptr), &QObject::objectName);
+}
+
+template <typename Func>
+inline static typename std::enable_if<!QtPrivate::FunctionPointer<Func>::IsPointerToMemberFunction &&
+                                      !std::is_same<const char*, Func>::value, QAction *>::type
+newQAction(QObject *parent, const char *name, quint32 flags, bool toggle, const QObject *context,
+           Func slot)
+{
+    if (auto a = newQAction(parent, name, flags, toggle)) {
+        QObject::connect(a, toggle ? &QAction::toggled : &QAction::triggered, context, slot);
+        return a;
+    }
+    return nullptr;
 }
 
 inline static QActionGroup *newQActionGroup(QObject *parent, const char *name, bool exclusive = false)
@@ -1112,7 +1156,14 @@ void FrameWork::createActions()
     (void) newQAction(this, "view_simple_mode", 0, true, Config::inst(), &Config::setSimpleMode);
     (void) newQAction(this, "view_show_input_errors", 0, true, Config::inst(), &Config::setShowInputErrors);
     (void) newQAction(this, "view_difference_mode", 0, true);
-    (void) newQAction(this, "view_save_default_col");
+    (void) newQAction(this, "view_column_layout_save", NeedDocument, false);
+    (void) newQAction(this, "view_column_layout_manage", 0, false, this, [this]() {
+        qWarning() << "COLUMN MANAGER";
+    });
+    auto lclm = newQMenu<LoadColumnLayoutMenu>(this, "view_column_layout_load", NeedDocument);
+    lclm->menuAction()->setIcon(QIcon(":/images/viewmode_images.png"));
+    lclm->setObjectName("view_column_layout_list");
+
     (void) newQAction(this, "extras_update_database", NeedNetwork, false, this, &FrameWork::updateDatabase);
 
     a = newQAction(this, "extras_configure", 0, false, this, QOverload<>::of(&FrameWork::configure));

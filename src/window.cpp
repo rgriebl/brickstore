@@ -220,7 +220,8 @@ Window::Window(Document *doc, QWidget *parent)
     m_diff_mode = false;
 
     w_list = new TableView(this);
-    w_list->setHorizontalHeader(new HeaderView(Qt::Horizontal, w_list));
+    w_header = new HeaderView(Qt::Horizontal, w_list);
+    w_list->setHorizontalHeader(w_header);
     w_list->setSelectionMode(QAbstractItemView::ExtendedSelection);
     w_list->setSelectionBehavior(QAbstractItemView::SelectRows);
     w_list->setSortingEnabled(true);
@@ -245,24 +246,6 @@ Window::Window(Document *doc, QWidget *parent)
     w_list->setItemDelegate(dd);
     w_list->verticalHeader()->setDefaultSectionSize(dd->defaultItemHeight(w_list));
     w_list->installEventFilter(this);
-
-    int em = w_list->fontMetrics().horizontalAdvance(QChar('m'));
-    for (int i = 0; i < w_list->model()->columnCount(); i++) {
-        int width = w_list->model()->headerData(i, Qt::Horizontal, Qt::UserRole).toInt();
-        if (width)
-            w_list->horizontalHeader()->resizeSection(i, (width < 0 ? -width : width * em) + 8);
-    }
-
-    setDifferenceMode(false);
-
-    // start with the physical document sort order
-    w_list->sortByColumn(-1, Qt::AscendingOrder);
-
-    /*
-    if ( doc->doNotSortItems ( ))
-     w_list->setSorting ( w_list->columns ( ) + 1 );
-*/
-
 
     QBoxLayout *toplay = new QVBoxLayout(this);
     toplay->setSpacing(0);
@@ -302,7 +285,17 @@ Window::Window(Document *doc, QWidget *parent)
     connect(m_doc, &Document::itemsChanged,
             this, &Window::documentItemsChanged);
 
+    // don't save the hidden status of these
+    w_header->setSectionInternal(Document::PriceOrig, true);
+    w_header->setSectionInternal(Document::PriceDiff, true);
+    w_header->setSectionInternal(Document::QuantityOrig, true);
+    w_header->setSectionInternal(Document::QuantityDiff, true);
+
+    setDifferenceMode(false);
     setSimpleMode(Config::inst()->simpleMode());
+
+    on_view_column_layout_list_load("user-default");
+
     updateErrorMask();
     updateCaption();
 
@@ -338,25 +331,21 @@ bool Window::isSimpleMode() const
 
 void Window::setSimpleMode(bool b)
 {
-    auto *header = qobject_cast<HeaderView *>(w_list->horizontalHeader());
-
-    if (!header)
-        return;
     m_simple_mode = b;
 
-    header->setSectionAvailable(Document::Bulk, !b);
-    header->setSectionAvailable(Document::Sale, !b);
-    header->setSectionAvailable(Document::TierQ1, !b);
-    header->setSectionAvailable(Document::TierQ2, !b);
-    header->setSectionAvailable(Document::TierQ3, !b);
-    header->setSectionAvailable(Document::TierP1, !b);
-    header->setSectionAvailable(Document::TierP2, !b);
-    header->setSectionAvailable(Document::TierP3, !b);
-    header->setSectionAvailable(Document::Reserved, !b);
-    header->setSectionAvailable(Document::Stockroom, !b);
-    header->setSectionAvailable(Document::Retain, !b);
-    header->setSectionAvailable(Document::LotId, !b);
-    header->setSectionAvailable(Document::Comments, !b);
+    w_header->setSectionAvailable(Document::Bulk, !b);
+    w_header->setSectionAvailable(Document::Sale, !b);
+    w_header->setSectionAvailable(Document::TierQ1, !b);
+    w_header->setSectionAvailable(Document::TierQ2, !b);
+    w_header->setSectionAvailable(Document::TierQ3, !b);
+    w_header->setSectionAvailable(Document::TierP1, !b);
+    w_header->setSectionAvailable(Document::TierP2, !b);
+    w_header->setSectionAvailable(Document::TierP3, !b);
+    w_header->setSectionAvailable(Document::Reserved, !b);
+    w_header->setSectionAvailable(Document::Stockroom, !b);
+    w_header->setSectionAvailable(Document::Retain, !b);
+    w_header->setSectionAvailable(Document::LotId, !b);
+    w_header->setSectionAvailable(Document::Comments, !b);
 
     updateErrorMask();
 }
@@ -368,42 +357,32 @@ bool Window::isDifferenceMode() const
 
 void Window::setDifferenceMode(bool b)
 {
-    auto *header = qobject_cast<HeaderView *>(w_list->horizontalHeader());
-
-    if (!header)
-        return;
-
     m_diff_mode = b;
 
-    header->setSectionAvailable(Document::PriceOrig, b);
-    header->setSectionAvailable(Document::PriceDiff, b);
-    header->setSectionAvailable(Document::QuantityOrig, b);
-    header->setSectionAvailable(Document::QuantityDiff, b);
+    w_header->setSectionAvailable(Document::PriceOrig, b);
+    w_header->setSectionAvailable(Document::PriceDiff, b);
+    w_header->setSectionAvailable(Document::QuantityOrig, b);
+    w_header->setSectionAvailable(Document::QuantityDiff, b);
 
     if (b) {
-        if (!header->isSectionHidden(Document::Quantity)) {
-            header->showSection(Document::QuantityDiff);
-            header->showSection(Document::QuantityOrig);
+        if (!w_header->isSectionHidden(Document::Quantity)) {
+            w_header->showSection(Document::QuantityDiff);
+            w_header->showSection(Document::QuantityOrig);
 
-            header->moveSection(header->visualIndex(Document::QuantityDiff), header->visualIndex(Document::Quantity));
-            header->moveSection(header->visualIndex(Document::QuantityOrig), header->visualIndex(Document::QuantityDiff));
+            w_header->moveSection(w_header->visualIndex(Document::QuantityDiff), w_header->visualIndex(Document::Quantity));
+            w_header->moveSection(w_header->visualIndex(Document::QuantityOrig), w_header->visualIndex(Document::QuantityDiff));
         }
 
-        if (!header->isSectionHidden(Document::Price)) {
-            header->showSection(Document::PriceDiff);
-            header->showSection(Document::PriceOrig);
+        if (!w_header->isSectionHidden(Document::Price)) {
+            w_header->showSection(Document::PriceDiff);
+            w_header->showSection(Document::PriceOrig);
 
-            header->moveSection(header->visualIndex(Document::PriceDiff), header->visualIndex(Document::Price));
-            header->moveSection(header->visualIndex(Document::PriceOrig), header->visualIndex(Document::PriceDiff));
+            w_header->moveSection(w_header->visualIndex(Document::PriceDiff), w_header->visualIndex(Document::Price));
+            w_header->moveSection(w_header->visualIndex(Document::PriceOrig), w_header->visualIndex(Document::PriceDiff));
         }
     }
 }
 
-
-void Window::on_view_save_default_col_triggered()
-{
-    // w_list->saveDefaultLayout ( );
-}
 
 void Window::documentRowsInserted(const QModelIndex &parent, int /*start*/, int end)
 {
@@ -1601,6 +1580,48 @@ void Window::on_edit_bl_myinventory_triggered()
     }
 }
 
+void Window::on_view_column_layout_save_triggered()
+{
+    QString name;
+
+    if (MessageBox::getString(this,
+                              tr("Enter an unique name for this column layout. Leave empty to change the user default layout."),
+                              name)) {
+        QString layoutId;
+        if (name.isEmpty()) {
+            layoutId = "user-default";
+        } else {
+            const auto allIds = Config::inst()->columnLayoutIds();
+            for (auto id : allIds) {
+                if (Config::inst()->columnLayoutName(id) == name) {
+                    layoutId = id;
+                    break;
+                }
+            }
+        }
+
+        QString newId = Config::inst()->setColumnLayout(layoutId, w_header->saveLayout());
+        if (layoutId.isEmpty() && !newId.isEmpty())
+            Config::inst()->renameColumnLayout(newId, name);
+    }
+}
+
+void Window::on_view_column_layout_list_load(const QString &layoutId)
+{
+    if (layoutId == "default") {
+        resizeColumnsToDefault();
+    } else if (layoutId == "auto-resize") {
+        w_list->resizeColumnsToContents();
+    } else {
+        auto layout = Config::inst()->columnLayout(layoutId);
+
+        if (!layout.isEmpty())
+            w_header->restoreLayout(layout);
+        else if (layoutId == "user-default")
+            resizeColumnsToDefault();
+    }
+}
+
 void Window::on_view_difference_mode_toggled(bool b)
 {
     setDifferenceMode(b);
@@ -1762,6 +1783,21 @@ Document::ItemList Window::exportCheck() const
     return m_view->sortItemList(items);
 }
 
+void Window::resizeColumnsToDefault()
+{
+    int em = w_list->fontMetrics().averageCharWidth();
+    for (int i = 0; i < w_list->model()->columnCount(); i++) {
+        int width = w_list->model()->headerData(i, Qt::Horizontal, Qt::UserRole).toInt();
+        if (width)
+            w_header->resizeSection(i, (width < 0 ? -width : width * em) + 8);
+
+        if (w_header->visualIndex(i) != i)
+            w_header->moveSection(w_header->visualIndex(i), i);
+    }
+
+    // start with the physical document sort order
+    w_list->sortByColumn(-1, Qt::AscendingOrder);
+}
 
 bool Window::eventFilter(QObject *o, QEvent *e)
 {

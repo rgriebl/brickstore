@@ -20,8 +20,10 @@
 #include <QDomDocument>
 #include <QStandardPaths>
 #include <QSize>
-
+#include <QUuid>
+#include <QDebug>
 #include <QCryptographicHash>
+
 #include "config.h"
 #include "currency.h"
 #include "version.h"
@@ -362,6 +364,114 @@ void Config::setItemImageSizePercent(int p)
         setValue("Interface/ItemImageSizePercent", qBound(50, p, 200));
         emit itemImageSizePercentChanged(p);
     }
+}
+
+QByteArray Config::columnLayout(const QString &id) const
+{
+    if (id.isEmpty())
+        return { };
+    return value("ColumnLayouts/" + id + "/Layout").value<QByteArray>();
+}
+
+QString Config::columnLayoutName(const QString &id) const
+{
+    if (id.isEmpty())
+        return { };
+    return value("ColumnLayouts/" + id + "/Name").toString();
+}
+
+int Config::columnLayoutOrder(const QString &id) const
+{
+    if (id.isEmpty())
+        return -1;
+    return value("ColumnLayouts/" + id + "/Order", -1).toInt();
+}
+
+QStringList Config::columnLayoutIds() const
+{
+    const_cast<Config *>(this)->beginGroup("ColumnLayouts");
+    auto sl = childGroups();
+    sl.removeOne("user-default");
+    const_cast<Config *>(this)->endGroup();
+    return sl;
+}
+
+QString Config::setColumnLayout(const QString &id, const QByteArray &layout)
+{
+    bool isNew = id.isEmpty();
+
+    if (isNew || (layout != columnLayout(id))) {
+        QString nid = id;
+
+        if (isNew) {
+            nid = QUuid::createUuid().toString();
+        } else {
+            if (id != "user-default") {
+                beginGroup("ColumnLayouts");
+                bool hasLayout = childGroups().contains(id);
+                endGroup();
+                if (!hasLayout)
+                    return { };
+            }
+        }
+        setValue("ColumnLayouts/" + nid + "/Layout", layout);
+
+        if (isNew)
+            emit columnLayoutIdsChanged(columnLayoutIds());
+        emit columnLayoutChanged(nid, layout);
+        return nid;
+    }
+    return { };
+}
+
+bool Config::deleteColumnLayout(const QString &id)
+{
+    if (!id.isEmpty()) {
+        beginGroup("ColumnLayouts");
+        bool hasLayout = childGroups().contains(id);
+        endGroup();
+        if (hasLayout) {
+            remove("ColumnLayouts/" + id);
+            emit columnLayoutIdsChanged(columnLayoutIds());
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Config::renameColumnLayout(const QString &id, const QString &name)
+{
+    if (!id.isEmpty()) {
+        beginGroup("ColumnLayouts");
+        bool hasLayout = childGroups().contains(id);
+        endGroup();
+
+        if (hasLayout) {
+            QString oldname = value("ColumnLayouts/" + id + "/Name").toString();
+            if (oldname != name) {
+                setValue("ColumnLayouts/" + id + "/Name", name);
+                emit columnLayoutNameChanged(id, name);
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool Config::reorderColumnLayouts(const QStringList &ids)
+{
+    auto newIds = ids;
+    auto oldIds = columnLayoutIds();
+    newIds.sort();
+    oldIds.sort();
+
+    if (oldIds == newIds) {
+        for (int i = 0; i < ids.count(); ++i)
+            setValue("ColumnLayouts/" + ids.at(i) + "/Order", i);
+        emit columnLayoutIdsOrderChanged(ids);
+        return true;
+    }
+    return false;
 }
 
 

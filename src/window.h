@@ -29,6 +29,7 @@ class QTableView;
 class FrameWork;
 class UndoStack;
 class QItemSelectionModel;
+class HeaderView;
 
 
 class Window : public QWidget
@@ -149,8 +150,8 @@ public slots:
     void on_edit_bl_lotsforsale_triggered();
     void on_edit_bl_myinventory_triggered();
 
-    void on_view_save_default_col_triggered();
-
+    void on_view_column_layout_save_triggered();
+    void on_view_column_layout_list_load(const QString &layoutId);
     void addItem(BrickLink::InvItem *, uint);
 
     void setPrice(double);
@@ -183,6 +184,7 @@ private slots:
 
 private:
     Document::ItemList exportCheck() const;
+    void resizeColumnsToDefault();
 
 private:
     Document *           m_doc;
@@ -191,6 +193,7 @@ private:
     Document::ItemList   m_selection;
     Document::Item *     m_current;
     QTableView *         w_list;
+    HeaderView *         w_header;
     bool                 m_diff_mode;
     bool                 m_simple_mode;
 

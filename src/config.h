@@ -71,6 +71,11 @@ public:
     int fontSizePercent() const;
     int itemImageSizePercent() const;
 
+    QByteArray columnLayout(const QString &id) const;
+    QString columnLayoutName(const QString &id) const;
+    int columnLayoutOrder(const QString &id) const;
+    QStringList columnLayoutIds() const;
+
 public slots:
     void setLanguage(const QString &lang);
     void setMeasurementSystem(QLocale::MeasurementSystem ms);
@@ -96,6 +101,11 @@ public slots:
     void setFontSizePercent(int p);
     void setItemImageSizePercent(int p);
 
+    QString setColumnLayout(const QString &id, const QByteArray &layout);
+    bool deleteColumnLayout(const QString &id);
+    bool renameColumnLayout(const QString &id, const QString &name);
+    bool reorderColumnLayouts(const QStringList &ids);
+
 signals:
     void languageChanged();
     void measurementSystemChanged(QLocale::MeasurementSystem ms);
@@ -109,6 +119,11 @@ signals:
     void iconSizeChanged(const QSize &iconSize);
     void fontSizePercentChanged(int p);
     void itemImageSizePercentChanged(int p);
+    void columnLayoutChanged(const QString &id, const QByteArray &layout);
+    void columnLayoutNameChanged(const QString &id, const QString &name);
+    void columnLayoutIdsOrderChanged(const QStringList &ids);
+    void columnLayoutIdsChanged(const QStringList &ids);
+
 
 protected:
     bool parseTranslations() const;

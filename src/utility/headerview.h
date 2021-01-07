@@ -24,9 +24,18 @@ public:
     
     bool isSectionAvailable(int section) const;
     void setSectionAvailable(int section, bool b);
-    int availableSectionCount() const;
+
+    bool isSectionInternal(int section) const;
+    void setSectionInternal(int section, bool internal);
+
+    void setSectionHidden(int logicalIndex, bool hide);
+    void showSection(int logicalIndex) { setSectionHidden(logicalIndex, false); }
+    void hideSection(int logicalIndex) { setSectionHidden(logicalIndex, true); }
 
     void setModel(QAbstractItemModel*) override;
+
+    bool restoreLayout(const QByteArray &config);
+    QByteArray saveLayout() const;
 
 protected:
     bool viewportEvent(QEvent *e) override;
@@ -34,9 +43,15 @@ protected:
 private:
     void showMenu(const QPoint &pos);
 
+    using QHeaderView::setSectionHidden;
+    using QHeaderView::showSection;
+    using QHeaderView::hideSection;
+
 private slots:
-    void sectionsRemoved(const QModelIndex&, int, int);
+    void sectionsRemoved(const QModelIndex &parent, int logicalFirst, int logicalLast);
 
 private:
-    QList<int> m_unavailable;
+    QVector<int> m_unavailable;
+    QVector<int> m_internal;
+    QHash<int, int> m_hiddenSizes;
 };

@@ -18,6 +18,7 @@
 #include <QListWidget>
 #include <QLabel>
 #include <QDialog>
+#include <QHeaderView>
 
 #include "headerview.h"
 
@@ -156,14 +157,96 @@ void HeaderView::setModel(QAbstractItemModel *m)
     m_unavailable.clear();
 }
 
-void HeaderView::sectionsRemoved(const QModelIndex &parent, int logicalFirst, int logicalLast)
-{
-    if (parent.isValid())
-        return;
+#define CONFIG_HEADER qint32(0x3b285931)
 
-    for (int i = logicalFirst; i <= logicalLast; ++i)
-        m_unavailable.removeOne(i);
+bool HeaderView::restoreLayout(const QByteArray &config)
+{
+    //TODO: we are missing the lastSortColumn[] history here, as this is kept in DocumentProxyModel
+
+    if (config.isEmpty())
+        return false;
+
+    QDataStream ds(config);
+    qint32 magic = 0, version = 0, count = -1;
+
+    ds >> magic >> version >> count;
+
+    if ((ds.status() != QDataStream::Ok)
+            || (magic != CONFIG_HEADER)
+            || (version != 2)
+            || (count != this->count())) {
+        return false;
+    }
+
+    qint32 sortIndicator = -1;
+    bool sortAscending = false;
+    ds >> sortIndicator >> sortAscending;
+
+    QVector<qint32> sizes;
+    QVector<qint32> positions;
+    QVector<bool> isHiddens;
+
+    for (int i = 0; i < count; ++i) {
+        qint32 size, position;
+        bool isHidden;
+        ds >> size >> position >> isHidden;
+
+        sizes << size;
+        positions << position;
+        isHiddens << isHidden;
+    }
+
+    // sanity checks...
+    if (ds.status() != QDataStream::Ok)
+        return false;
+    if ((sortIndicator < -1) || (sortIndicator >= count))
+        return false;
+    for (int i = 0; i < count; ++i) {
+        if ((sizes.at(i) < 0)
+                || (sizes.at(i) > 5000)
+                || (positions.at(i) < 0)
+                || (positions.at(i) >= count))
+            return false;
+    }
+
+    for (int i = 0; i < count; ++i) {
+        if (!isSectionInternal(i))
+            setSectionHidden(i, isHiddens.at(i));
+        moveSection(visualIndex(i), positions.at(i));
+        resizeSection(i, sizes.at(i));
+    }
+
+    setSortIndicator(sortIndicator, sortAscending ? Qt::AscendingOrder : Qt::DescendingOrder);
+    return true;
 }
+
+QByteArray HeaderView::saveLayout() const
+{
+    //TODO: we are missing the lastSortColumn[] history here, as this is kept in DocumentProxyModel
+
+    QByteArray config;
+    QDataStream ds(&config, QIODevice::WriteOnly);
+
+    ds << CONFIG_HEADER << qint32(2) /*version*/
+       << qint32(count())
+       << qint32(sortIndicatorSection())
+       << (sortIndicatorOrder() == Qt::AscendingOrder);
+
+    for (int i = 0; i < count(); ++i ) {
+        bool hidden = isSectionHidden(i);
+        int size = hidden ? m_hiddenSizes.value(i) : sectionSize(i);
+
+        ds << qint32(size)
+           << qint32(visualIndex(i))
+           << hidden;
+
+//        qWarning("C%02d: @ %02d %c%c %d", i, visualIndex(i),
+//                 hidden ? 'H' : ' ', isSectionAvailable(i) ? ' ' : 'X', size);
+    }
+    return config;
+}
+
+
 
 bool HeaderView::isSectionAvailable(int section) const
 {
@@ -172,9 +255,7 @@ bool HeaderView::isSectionAvailable(int section) const
 
 void HeaderView::setSectionAvailable(int section, bool avail)
 {
-    bool oldavail = isSectionAvailable(section);
-
-    if (avail == oldavail)
+    if (isSectionAvailable(section) == avail)
         return;
 
     if (!avail) {
@@ -186,9 +267,37 @@ void HeaderView::setSectionAvailable(int section, bool avail)
     }
 }
 
-int HeaderView::availableSectionCount() const
+bool HeaderView::isSectionInternal(int section) const
 {
-    return count() - m_unavailable.count();
+    return m_internal.contains(section);
+}
+
+void HeaderView::setSectionInternal(int section, bool internal)
+{
+    if (isSectionInternal(section) == internal)
+        return;
+    if (internal)
+        m_internal.append(section);
+    else
+        m_internal.removeOne(section);
+}
+
+void HeaderView::setSectionHidden(int logicalIndex, bool hide)
+{
+    bool hidden = isSectionHidden(logicalIndex);
+
+    if (hide && !hidden)
+        m_hiddenSizes.insert(logicalIndex, sectionSize(logicalIndex));
+
+    QHeaderView::setSectionHidden(logicalIndex, hide);
+
+    if (!hide && hidden) {
+        auto it = m_hiddenSizes.constFind(logicalIndex);
+        if (it != m_hiddenSizes.constEnd()) {
+            resizeSection(logicalIndex, it.value());
+            m_hiddenSizes.erase(it);
+        }
+    }
 }
 
 bool HeaderView::viewportEvent(QEvent *e)
@@ -237,12 +346,24 @@ void HeaderView::showMenu(const QPoint &pos)
     bool on = action->isChecked();
 
     if (idx >= 0 && idx < count()) {
-        on ? showSection(idx) : hideSection(idx);
+        setSectionHidden(idx, !on);
     } else if (idx == -1) {
         SectionConfigDialog d(this);
         d.exec();
     } else {
         qWarning("HeaderView::menuActivated returned an invalid action");
+    }
+}
+
+void HeaderView::sectionsRemoved(const QModelIndex &parent, int logicalFirst, int logicalLast)
+{
+    if (parent.isValid())
+        return;
+
+    for (int i = logicalFirst; i <= logicalLast; ++i) {
+        m_unavailable.removeOne(i);
+        m_internal.removeOne(i);
+        m_hiddenSizes.remove(i);
     }
 }
 
