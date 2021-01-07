@@ -805,7 +805,7 @@ void Window::on_edit_price_round_triggered()
     WindowProgress wp(w_list);
 
     foreach(Document::Item *pos, selection()) {
-        double p = ((pos->price() + double(0.005)) / 10) * 10;
+        double p = int(pos->price() * 100 + .5) / 100.;
 
         if (!qFuzzyCompare(p, pos->price())) {
             Document::Item item = *pos;
