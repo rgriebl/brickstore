@@ -1,55 +1,48 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>SetToPriceGuideDialog</class>
- <widget class="QDialog" name="SetToPriceGuideDialog" >
-  <property name="geometry" >
+ <widget class="QDialog" name="SetToPriceGuideDialog">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>384</width>
-    <height>153</height>
+    <width>477</width>
+    <height>160</height>
    </rect>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>Set To Price Guide</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" >
+  <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QLabel" name="label" >
-     <property name="text" >
-      <string>The prices of all selected items will be set to Price Guide values.&lt;br />&lt;br />Select which part of the price guide should be used:</string>
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>The prices of all selected items will be set to Price Guide values.&lt;br /&gt;&lt;br /&gt;Select which part of the price guide should be used:</string>
      </property>
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout" >
+    <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QComboBox" name="w_type_time" />
+      <widget class="QComboBox" name="w_type_time"/>
      </item>
      <item>
-      <widget class="QComboBox" name="w_type_price" />
+      <widget class="QComboBox" name="w_type_price"/>
      </item>
     </layout>
    </item>
    <item>
-    <widget class="QCheckBox" name="w_force_update" >
-     <property name="text" >
-      <string>Download even if already in cache</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QDialogButtonBox" name="w_buttons" >
-     <property name="orientation" >
+    <widget class="QDialogButtonBox" name="w_buttons">
+     <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
-     <property name="standardButtons" >
+     <property name="standardButtons">
       <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
      </property>
     </widget>
    </item>
   </layout>
  </widget>
- <includes/>
  <resources/>
  <connections>
   <connection>
@@ -58,11 +51,11 @@
    <receiver>SetToPriceGuideDialog</receiver>
    <slot>accept()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>248</x>
      <y>254</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>157</x>
      <y>274</y>
     </hint>
@@ -74,11 +67,11 @@
    <receiver>SetToPriceGuideDialog</receiver>
    <slot>reject()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>316</x>
      <y>260</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>286</x>
      <y>274</y>
     </hint>

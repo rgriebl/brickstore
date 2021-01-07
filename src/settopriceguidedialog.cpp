@@ -45,10 +45,4 @@ BrickLink::Price SetToPriceGuideDialog::price() const
     return static_cast<BrickLink::Price>(w_type_price->itemData(w_type_price->currentIndex()).toInt());
 }
 
-bool SetToPriceGuideDialog::forceUpdate() const
-{
-    return w_force_update->isChecked();
-}
-
-
 #include "moc_settopriceguidedialog.cpp"
