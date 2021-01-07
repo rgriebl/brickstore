@@ -119,12 +119,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/additemdialog.cpp" line="170"/>
+        <location filename="../src/additemdialog.cpp" line="171"/>
         <source>Add</source>
         <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/additemdialog.cpp" line="429"/>
+        <location filename="../src/additemdialog.cpp" line="430"/>
         <source>Added %n %1 %2 [%3]</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -197,12 +197,12 @@
 <context>
     <name>Application</name>
     <message>
-        <location filename="../src/application.cpp" line="399"/>
+        <location filename="../src/application.cpp" line="398"/>
         <source>Could not initialize the BrickLink kernel:&lt;br /&gt;&lt;br /&gt;%1</source>
         <translation>De BrickLink kernel kon niet worden gestart:&lt;br /&gt;&lt;br /&gt;%1</translation>
     </message>
     <message>
-        <location filename="../src/application.cpp" line="431"/>
+        <location filename="../src/application.cpp" line="424"/>
         <source>Check for Program Updates</source>
         <translation type="unfinished"></translation>
     </message>
@@ -253,12 +253,12 @@
 <context>
     <name>BrickLink::CategoryModel</name>
     <message>
-        <location filename="../src/bricklink/bricklink_model.cpp" line="281"/>
+        <location filename="../src/bricklink/bricklink_model.cpp" line="286"/>
         <source>All Items</source>
         <translation type="unfinished">Alle items</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/bricklink_model.cpp" line="290"/>
+        <location filename="../src/bricklink/bricklink_model.cpp" line="295"/>
         <source>Category</source>
         <translation type="unfinished">Categorie</translation>
     </message>
@@ -266,22 +266,22 @@
 <context>
     <name>BrickLink::ColorModel</name>
     <message>
-        <location filename="../src/bricklink/bricklink_model.cpp" line="104"/>
+        <location filename="../src/bricklink/bricklink_model.cpp" line="109"/>
         <source>RGB</source>
         <translation type="unfinished">RGB</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/bricklink_model.cpp" line="115"/>
+        <location filename="../src/bricklink/bricklink_model.cpp" line="120"/>
         <source>Color by %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/bricklink_model.cpp" line="115"/>
+        <location filename="../src/bricklink/bricklink_model.cpp" line="120"/>
         <source>Name</source>
         <translation type="unfinished">Naam</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/bricklink_model.cpp" line="115"/>
+        <location filename="../src/bricklink/bricklink_model.cpp" line="120"/>
         <source>Hue</source>
         <translation type="unfinished"></translation>
     </message>
@@ -297,17 +297,17 @@
 <context>
     <name>BrickLink::InternalAppearsInModel</name>
     <message>
-        <location filename="../src/bricklink/bricklink_model.cpp" line="766"/>
+        <location filename="../src/bricklink/bricklink_model.cpp" line="771"/>
         <source>Qty.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/bricklink/bricklink_model.cpp" line="767"/>
+        <location filename="../src/bricklink/bricklink_model.cpp" line="772"/>
         <source>Set</source>
         <translation type="unfinished">Set</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/bricklink_model.cpp" line="768"/>
+        <location filename="../src/bricklink/bricklink_model.cpp" line="773"/>
         <source>Name</source>
         <translation type="unfinished">Naam</translation>
     </message>
@@ -315,7 +315,7 @@
 <context>
     <name>BrickLink::ItemDelegate</name>
     <message>
-        <location filename="../src/bricklink/bricklink_model.cpp" line="909"/>
+        <location filename="../src/bricklink/bricklink_model.cpp" line="914"/>
         <source>[Image is loading]</source>
         <translation type="unfinished">[Afbeelding wordt geladen]</translation>
     </message>
@@ -323,12 +323,12 @@
 <context>
     <name>BrickLink::ItemModel</name>
     <message>
-        <location filename="../src/bricklink/bricklink_model.cpp" line="528"/>
+        <location filename="../src/bricklink/bricklink_model.cpp" line="533"/>
         <source>Part #</source>
         <translation type="unfinished">Onderdeel #</translation>
     </message>
     <message>
-        <location filename="../src/bricklink/bricklink_model.cpp" line="529"/>
+        <location filename="../src/bricklink/bricklink_model.cpp" line="534"/>
         <source>Description</source>
         <translation type="unfinished">Omschrijving</translation>
     </message>
@@ -336,7 +336,7 @@
 <context>
     <name>BrickLink::ItemTypeModel</name>
     <message>
-        <location filename="../src/bricklink/bricklink_model.cpp" line="410"/>
+        <location filename="../src/bricklink/bricklink_model.cpp" line="415"/>
         <source>Name</source>
         <translation type="unfinished">Naam</translation>
     </message>
@@ -1649,230 +1649,235 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation>Reset wijzigingen</translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1448"/>
+        <location filename="../src/document.cpp" line="1445"/>
         <source>N</source>
         <comment>New</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1448"/>
+        <location filename="../src/document.cpp" line="1445"/>
         <source>U</source>
         <comment>Used</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1513"/>
+        <location filename="../src/document.cpp" line="1475"/>
+        <location filename="../src/document.cpp" line="1542"/>
         <source>Exclude</source>
         <translation type="unfinished">Exclusief</translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1514"/>
+        <location filename="../src/document.cpp" line="1473"/>
+        <location filename="../src/document.cpp" line="1543"/>
         <source>Extra</source>
         <translation type="unfinished">Extra</translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1515"/>
+        <location filename="../src/document.cpp" line="1472"/>
+        <location filename="../src/document.cpp" line="1544"/>
         <source>Include</source>
         <translation type="unfinished">Inclusief</translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1519"/>
+        <location filename="../src/document.cpp" line="1548"/>
         <source>Counter part</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1521"/>
+        <location filename="../src/document.cpp" line="1550"/>
         <source>Alternate match id: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1529"/>
+        <location filename="../src/document.cpp" line="1479"/>
+        <location filename="../src/document.cpp" line="1558"/>
         <source>New</source>
         <translation type="unfinished">Nieuw</translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1530"/>
+        <location filename="../src/document.cpp" line="1481"/>
+        <location filename="../src/document.cpp" line="1559"/>
         <source>Used</source>
         <translation type="unfinished">Gebruikt</translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1562"/>
+        <location filename="../src/document.cpp" line="1591"/>
         <source>Index</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1563"/>
+        <location filename="../src/document.cpp" line="1592"/>
         <source>Status</source>
         <translation type="unfinished">Status</translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1564"/>
+        <location filename="../src/document.cpp" line="1593"/>
         <source>Image</source>
         <translation type="unfinished">Afbeelding</translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1565"/>
+        <location filename="../src/document.cpp" line="1594"/>
         <source>Part #</source>
         <translation type="unfinished">Onderdeel #</translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1566"/>
+        <location filename="../src/document.cpp" line="1595"/>
         <source>Description</source>
         <translation type="unfinished">Omschrijving</translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1567"/>
+        <location filename="../src/document.cpp" line="1596"/>
         <source>Comments</source>
         <translation type="unfinished">Commentaren</translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1568"/>
+        <location filename="../src/document.cpp" line="1597"/>
         <source>Remarks</source>
         <translation type="unfinished">Opmerkingen</translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1569"/>
+        <location filename="../src/document.cpp" line="1598"/>
         <source>Qty.Orig</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1570"/>
+        <location filename="../src/document.cpp" line="1599"/>
         <source>Qty.Diff</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1571"/>
+        <location filename="../src/document.cpp" line="1600"/>
         <source>Qty.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1572"/>
+        <location filename="../src/document.cpp" line="1601"/>
         <source>Bulk</source>
         <translation type="unfinished">Bulk</translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1573"/>
+        <location filename="../src/document.cpp" line="1602"/>
         <source>Pr.Orig</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1574"/>
+        <location filename="../src/document.cpp" line="1603"/>
         <source>Pr.Diff</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1575"/>
+        <location filename="../src/document.cpp" line="1604"/>
         <source>Price</source>
         <translation type="unfinished">Prijs</translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1576"/>
+        <location filename="../src/document.cpp" line="1605"/>
         <source>Total</source>
         <translation type="unfinished">Totaal</translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1577"/>
+        <location filename="../src/document.cpp" line="1606"/>
         <source>Sale</source>
         <translation type="unfinished">Uitverkoop</translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1578"/>
+        <location filename="../src/document.cpp" line="1607"/>
         <source>Cond.</source>
         <translation type="unfinished">Cond.</translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1579"/>
+        <location filename="../src/document.cpp" line="1608"/>
         <source>Color</source>
         <translation type="unfinished">Kleur</translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1580"/>
+        <location filename="../src/document.cpp" line="1609"/>
         <source>Category</source>
         <translation type="unfinished">Categorie</translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1581"/>
+        <location filename="../src/document.cpp" line="1610"/>
         <source>Item Type</source>
         <translation type="unfinished">Item type</translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1582"/>
+        <location filename="../src/document.cpp" line="1611"/>
         <source>Tier Q1</source>
         <translation type="unfinished">Staffel A1</translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1583"/>
+        <location filename="../src/document.cpp" line="1612"/>
         <source>Tier P1</source>
         <translation type="unfinished">Staffel P1</translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1584"/>
+        <location filename="../src/document.cpp" line="1613"/>
         <source>Tier Q2</source>
         <translation type="unfinished">Staffel A2</translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1585"/>
+        <location filename="../src/document.cpp" line="1614"/>
         <source>Tier P2</source>
         <translation type="unfinished">Staffel P2</translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1586"/>
+        <location filename="../src/document.cpp" line="1615"/>
         <source>Tier Q3</source>
         <translation type="unfinished">Staffel A3</translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1587"/>
+        <location filename="../src/document.cpp" line="1616"/>
         <source>Tier P3</source>
         <translation type="unfinished">Staffel P3</translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1588"/>
+        <location filename="../src/document.cpp" line="1617"/>
         <source>Lot Id</source>
         <translation type="unfinished">Kavel id</translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1589"/>
+        <location filename="../src/document.cpp" line="1618"/>
         <source>Retain</source>
         <translation type="unfinished">Vasthouden</translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1590"/>
+        <location filename="../src/document.cpp" line="1619"/>
         <source>Stockroom</source>
         <translation type="unfinished">Magazijn</translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1591"/>
+        <location filename="../src/document.cpp" line="1620"/>
         <source>Reserved</source>
         <translation type="unfinished">Gereserveerd</translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1592"/>
+        <location filename="../src/document.cpp" line="1621"/>
         <source>Weight</source>
         <translation type="unfinished">Gewicht</translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1593"/>
+        <location filename="../src/document.cpp" line="1622"/>
         <source>Year</source>
         <translation type="unfinished">Jaar</translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1666"/>
+        <location filename="../src/document.cpp" line="1695"/>
         <source>-</source>
         <comment>no subcondition</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1667"/>
+        <location filename="../src/document.cpp" line="1696"/>
         <source>Sealed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1668"/>
+        <location filename="../src/document.cpp" line="1697"/>
         <source>Complete</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/document.cpp" line="1669"/>
+        <location filename="../src/document.cpp" line="1698"/>
         <source>Incomplete</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1908,17 +1913,53 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
 <context>
     <name>DocumentDelegate</name>
     <message>
-        <location filename="../src/documentdelegate.cpp" line="294"/>
+        <location filename="../src/documentdelegate.cpp" line="301"/>
         <source>Inv</source>
         <translation type="unfinished">Inv</translation>
     </message>
     <message>
-        <location filename="../src/documentdelegate.cpp" line="660"/>
+        <location filename="../src/documentdelegate.cpp" line="595"/>
+        <source>-</source>
+        <comment>set stockroom to none</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/documentdelegate.cpp" line="624"/>
+        <source>N</source>
+        <comment>set condition to new</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/documentdelegate.cpp" line="625"/>
+        <source>U</source>
+        <comment>set condition to used</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/documentdelegate.cpp" line="643"/>
+        <source>I</source>
+        <comment>set status to include</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/documentdelegate.cpp" line="644"/>
+        <source>E</source>
+        <comment>set status to exclude</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/documentdelegate.cpp" line="645"/>
+        <source>X</source>
+        <comment>set status to extra</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/documentdelegate.cpp" line="687"/>
         <source>Modify Item</source>
         <translation type="unfinished">Item wijzigen</translation>
     </message>
     <message>
-        <location filename="../src/documentdelegate.cpp" line="679"/>
+        <location filename="../src/documentdelegate.cpp" line="706"/>
         <source>Modify Color</source>
         <translation type="unfinished">Kleur wijzigen</translation>
     </message>
@@ -1926,7 +1967,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
 <context>
     <name>DocumentProxyModel</name>
     <message>
-        <location filename="../src/document.cpp" line="1783"/>
+        <location filename="../src/document.cpp" line="1812"/>
         <source>Any</source>
         <translation type="unfinished">Elke</translation>
     </message>
@@ -2027,32 +2068,32 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
 <context>
     <name>FrameWork</name>
     <message>
-        <location filename="../src/framework.cpp" line="475"/>
+        <location filename="../src/framework.cpp" line="513"/>
         <source>Could not load the BrickLink database files.&lt;br /&gt;&lt;br /&gt;Should these files be updated now?</source>
         <translation>De BrickLink database bestanden konden niet worden geladen.&lt;br /&gt;&lt;br /&gt;Deze bestanden nu bijwerken?</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="481"/>
+        <location filename="../src/framework.cpp" line="519"/>
         <source>Could not load the BrickLink database files.&lt;br /&gt;&lt;br /&gt;The program is not functional without these files.</source>
         <translation>De BrickLink database bestanden konden niet worden geladen..&lt;br /&gt;&lt;br /&gt;Het programma functioneert niet zonder deze bestanden.</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="536"/>
+        <location filename="../src/framework.cpp" line="574"/>
         <source>Toolbar</source>
         <translation>Werkbalk</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="542"/>
+        <location filename="../src/framework.cpp" line="580"/>
         <source>Info</source>
         <translation>Info</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="544"/>
+        <location filename="../src/framework.cpp" line="582"/>
         <source>Price Guide</source>
         <translation>Richtprijslijst</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="546"/>
+        <location filename="../src/framework.cpp" line="584"/>
         <source>Appears In Sets</source>
         <translation>Komt voor in sets</translation>
     </message>
@@ -2065,648 +2106,667 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="obsolete">Filter de lijst mbv dit patroon (jokers toegestaan: * ? [])</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="549"/>
+        <location filename="../src/framework.cpp" line="587"/>
         <source>Filter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="558"/>
+        <location filename="../src/framework.cpp" line="596"/>
         <source>Offline</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="559"/>
+        <location filename="../src/framework.cpp" line="597"/>
         <source>No outstanding jobs</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="560"/>
+        <location filename="../src/framework.cpp" line="598"/>
         <source>Downloading...&lt;br&gt;&lt;b&gt;%p%&lt;/b&gt; finished&lt;br&gt;(%v of %m)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="588"/>
+        <location filename="../src/framework.cpp" line="626"/>
         <source>&amp;File</source>
         <translation>&amp;Bestand</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="589"/>
+        <location filename="../src/framework.cpp" line="627"/>
         <source>New</source>
         <comment>File|New</comment>
         <translation>Nieuw</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="590"/>
+        <location filename="../src/framework.cpp" line="628"/>
         <source>Open...</source>
         <translation>Openen...</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="591"/>
+        <location filename="../src/framework.cpp" line="629"/>
         <source>Open Recent</source>
         <translation>Laatst geopende bestanden</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="592"/>
+        <location filename="../src/framework.cpp" line="630"/>
         <source>Save</source>
         <translation>Opslaan</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="593"/>
+        <location filename="../src/framework.cpp" line="631"/>
         <source>Save As...</source>
         <translation>Opslaan als...</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="594"/>
+        <location filename="../src/framework.cpp" line="632"/>
         <source>Print...</source>
         <translation>Afdrukken...</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="595"/>
+        <location filename="../src/framework.cpp" line="633"/>
         <source>Print to PDF...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="596"/>
+        <location filename="../src/framework.cpp" line="634"/>
         <source>Import</source>
         <translation>Importeren</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="597"/>
+        <location filename="../src/framework.cpp" line="635"/>
         <source>BrickLink Set Inventory...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="597"/>
+        <location filename="../src/framework.cpp" line="635"/>
         <source>Ctrl+I,Ctrl+I</source>
         <comment>File|Import BrickLink Set Inventory</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="598"/>
-        <location filename="../src/framework.cpp" line="604"/>
+        <location filename="../src/framework.cpp" line="636"/>
+        <location filename="../src/framework.cpp" line="642"/>
         <source>BrickLink XML...</source>
         <translation>BrickLink XML...</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="598"/>
+        <location filename="../src/framework.cpp" line="636"/>
         <source>Ctrl+I,Ctrl+X</source>
         <comment>File|Import BrickLink XML</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="599"/>
+        <location filename="../src/framework.cpp" line="637"/>
         <source>BrickLink Order...</source>
         <translation>BrickLink bestelling...</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="599"/>
+        <location filename="../src/framework.cpp" line="637"/>
         <source>Ctrl+I,Ctrl+O</source>
         <comment>File|Import BrickLink Order</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="600"/>
+        <location filename="../src/framework.cpp" line="638"/>
         <source>BrickLink Store Inventory...</source>
         <translation>BrickLink winkelinventaris...</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="600"/>
+        <location filename="../src/framework.cpp" line="638"/>
         <source>Ctrl+I,Ctrl+S</source>
         <comment>File|Import BrickLink Store Inventory</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="601"/>
+        <location filename="../src/framework.cpp" line="639"/>
         <source>BrickLink Shopping Cart...</source>
         <translation>BrickLink winkelwagen...</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="601"/>
+        <location filename="../src/framework.cpp" line="639"/>
         <source>Ctrl+I,Ctrl+C</source>
         <comment>File|Import BrickLink Shopping Cart</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="602"/>
+        <location filename="../src/framework.cpp" line="640"/>
         <source>LDraw Model...</source>
         <translation>LDraw model...</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="602"/>
+        <location filename="../src/framework.cpp" line="640"/>
         <source>Ctrl+I,Ctrl+L</source>
         <comment>File|Import LDraw Model</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="603"/>
+        <location filename="../src/framework.cpp" line="641"/>
         <source>Export</source>
         <translation>Exporteren</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="604"/>
+        <location filename="../src/framework.cpp" line="642"/>
         <source>Ctrl+E,Ctrl+X</source>
         <comment>File|Import BrickLink XML</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="605"/>
+        <location filename="../src/framework.cpp" line="643"/>
         <source>BrickLink Mass-Upload XML to Clipboard</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="605"/>
+        <location filename="../src/framework.cpp" line="643"/>
         <source>Ctrl+E,Ctrl+U</source>
         <comment>File|Import BrickLink Mass-Upload</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="606"/>
+        <location filename="../src/framework.cpp" line="644"/>
         <source>BrickLink Mass-Update XML to Clipboard</source>
         <translation>BrickLink Mass-Update XML naar klembord</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="606"/>
+        <location filename="../src/framework.cpp" line="644"/>
         <source>Ctrl+E,Ctrl+P</source>
         <comment>File|Import BrickLink Mass-Update</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="607"/>
+        <location filename="../src/framework.cpp" line="645"/>
         <source>BrickLink Set Inventory XML to Clipboard</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="607"/>
+        <location filename="../src/framework.cpp" line="645"/>
         <source>Ctrl+E,Ctrl+I</source>
         <comment>File|Import BrickLink Set Inventory</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="608"/>
+        <location filename="../src/framework.cpp" line="646"/>
         <source>BrickLink Wanted List XML to Clipboard</source>
         <translation>BrickLink Gezochte Onderdelen Lijst XML naar klembord</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="608"/>
+        <location filename="../src/framework.cpp" line="646"/>
         <source>Ctrl+E,Ctrl+W</source>
         <comment>File|Import BrickLink Wanted List</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="609"/>
+        <location filename="../src/framework.cpp" line="647"/>
         <source>Close</source>
         <translation>Sluiten</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="610"/>
+        <location filename="../src/framework.cpp" line="648"/>
         <source>Exit</source>
         <translation>Afsluiten</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="611"/>
+        <location filename="../src/framework.cpp" line="649"/>
         <source>&amp;Edit</source>
         <translation>Be&amp;werken</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="614"/>
+        <location filename="../src/framework.cpp" line="652"/>
         <source>Cut</source>
         <translation>Knippen</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="615"/>
+        <location filename="../src/framework.cpp" line="653"/>
         <source>Copy</source>
         <translation>Kopiëren</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="616"/>
+        <location filename="../src/framework.cpp" line="654"/>
         <source>Paste</source>
         <translation>Plakken</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="617"/>
+        <location filename="../src/framework.cpp" line="655"/>
         <source>Delete</source>
         <translation>Verwijderen</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="618"/>
+        <location filename="../src/framework.cpp" line="656"/>
         <source>Add Items...</source>
         <translation>Items toevoegen...</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="618"/>
+        <location filename="../src/framework.cpp" line="656"/>
         <source>Insert</source>
         <comment>Edit|AddItems</comment>
         <translation>Insert</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="619"/>
+        <location filename="../src/framework.cpp" line="657"/>
         <source>Subtract Items...</source>
         <translation>Items aftrekken...</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="620"/>
+        <location filename="../src/framework.cpp" line="658"/>
         <source>Consolidate Items...</source>
         <translation>Items samenvoegen...</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="621"/>
+        <location filename="../src/framework.cpp" line="659"/>
         <source>Part out Item...</source>
         <translation>Item opsplitsen...</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="622"/>
+        <location filename="../src/framework.cpp" line="660"/>
         <source>Match Items against Set Inventories...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="623"/>
+        <location filename="../src/framework.cpp" line="661"/>
         <source>Reset Differences</source>
         <translation>Reset wijzigingen</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="624"/>
+        <location filename="../src/framework.cpp" line="662"/>
         <source>Copy Remarks from Document...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="625"/>
+        <location filename="../src/framework.cpp" line="663"/>
         <source>Select All</source>
         <translation>Alles selecteren</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="626"/>
+        <location filename="../src/framework.cpp" line="664"/>
+        <source>Create a Filter from the Selection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/framework.cpp" line="665"/>
         <source>Select None</source>
         <translation>Selectie opheffen</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="627"/>
+        <location filename="../src/framework.cpp" line="666"/>
         <source>&amp;View</source>
         <translation>Bee&amp;ld</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="628"/>
+        <location filename="../src/framework.cpp" line="667"/>
         <source>View Toolbar</source>
         <translation>Toon Werkbalk</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="629"/>
+        <location filename="../src/framework.cpp" line="668"/>
         <source>View Info Docks</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="630"/>
+        <location filename="../src/framework.cpp" line="669"/>
         <source>View Statusbar</source>
         <translation>Toon Statusbalk</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="631"/>
+        <location filename="../src/framework.cpp" line="670"/>
         <source>Full Screen</source>
         <translation>Volledig scherm</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="632"/>
+        <location filename="../src/framework.cpp" line="672"/>
         <source>Show Input Errors</source>
         <translation>Toon invoer fouten</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="633"/>
+        <location filename="../src/framework.cpp" line="673"/>
         <source>Difference Mode</source>
         <translation>Wijzigingen modus</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="634"/>
         <source>Save Column Layout as Default</source>
-        <translation>Kolom indeling opslaan als standaard</translation>
+        <translation type="vanished">Kolom indeling opslaan als standaard</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="635"/>
+        <location filename="../src/framework.cpp" line="677"/>
         <source>E&amp;xtras</source>
         <translation>E&amp;xtra</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="636"/>
-        <location filename="../src/framework.cpp" line="1259"/>
+        <location filename="../src/framework.cpp" line="678"/>
+        <location filename="../src/framework.cpp" line="1283"/>
         <source>Update Database</source>
         <translation>Database bijwerken</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="637"/>
+        <location filename="../src/framework.cpp" line="679"/>
         <source>Configure...</source>
         <translation>Configureer...</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="638"/>
+        <location filename="../src/framework.cpp" line="680"/>
         <source>&amp;Windows</source>
         <translation>&amp;Venster</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="639"/>
+        <location filename="../src/framework.cpp" line="681"/>
         <source>&amp;Help</source>
         <translation>&amp;Help</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="641"/>
+        <location filename="../src/framework.cpp" line="683"/>
         <source>About...</source>
         <translation>Info...</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="642"/>
+        <location filename="../src/framework.cpp" line="684"/>
         <source>Check for Program Updates...</source>
         <translation>Controleer op programma updates...</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="643"/>
+        <location filename="../src/framework.cpp" line="685"/>
         <source>Status</source>
         <translation>Status</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="644"/>
+        <location filename="../src/framework.cpp" line="686"/>
         <source>Include</source>
         <translation>Inclusief</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="645"/>
+        <location filename="../src/framework.cpp" line="687"/>
         <source>Exclude</source>
         <translation>Exclusief</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="646"/>
+        <location filename="../src/framework.cpp" line="688"/>
         <source>Extra</source>
         <translation>Extra</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="653"/>
+        <location filename="../src/framework.cpp" line="695"/>
         <source>Sealed</source>
         <comment>SubCond|Sealed</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="647"/>
+        <location filename="../src/framework.cpp" line="689"/>
         <source>Toggle Include/Exclude</source>
         <translation>Tussen in- en exclusief omschakelen</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="648"/>
+        <location filename="../src/framework.cpp" line="674"/>
+        <source>Save Column Layout...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/framework.cpp" line="675"/>
+        <source>Manage Column Layouts...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/framework.cpp" line="676"/>
+        <source>Load Column Layout</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/framework.cpp" line="690"/>
         <source>Condition</source>
         <translation>Conditie</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="649"/>
+        <location filename="../src/framework.cpp" line="691"/>
         <source>New</source>
         <comment>Cond|New</comment>
         <translation>Nieuw</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="650"/>
+        <location filename="../src/framework.cpp" line="692"/>
         <source>Used</source>
         <translation>Gebruikt</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="651"/>
+        <location filename="../src/framework.cpp" line="693"/>
         <source>Toggle New/Used</source>
         <translation>Tussen nieuw en gebruikt omschakelen</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="652"/>
+        <location filename="../src/framework.cpp" line="694"/>
         <source>None</source>
         <comment>SubCond|None</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="654"/>
+        <location filename="../src/framework.cpp" line="696"/>
         <source>Complete</source>
         <comment>SubCond|Complete</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="655"/>
+        <location filename="../src/framework.cpp" line="697"/>
         <source>Incomplete</source>
         <comment>SubCond|Incomplete</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="656"/>
+        <location filename="../src/framework.cpp" line="698"/>
         <source>Color...</source>
         <translation>Kleur...</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="657"/>
+        <location filename="../src/framework.cpp" line="699"/>
         <source>Quantity</source>
         <translation>Aantal</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="658"/>
-        <location filename="../src/framework.cpp" line="663"/>
-        <location filename="../src/framework.cpp" line="669"/>
-        <location filename="../src/framework.cpp" line="673"/>
+        <location filename="../src/framework.cpp" line="700"/>
+        <location filename="../src/framework.cpp" line="705"/>
+        <location filename="../src/framework.cpp" line="711"/>
+        <location filename="../src/framework.cpp" line="715"/>
         <source>Set...</source>
         <translation>Instellen...</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="659"/>
+        <location filename="../src/framework.cpp" line="701"/>
         <source>Multiply...</source>
         <translation>Vermenigvuldigen...</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="659"/>
+        <location filename="../src/framework.cpp" line="701"/>
         <source>Ctrl+*</source>
         <comment>Edit|Quantity|Multiply</comment>
         <translation>Ctrl+*</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="660"/>
+        <location filename="../src/framework.cpp" line="702"/>
         <source>Divide...</source>
         <translation>Delen...</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="660"/>
+        <location filename="../src/framework.cpp" line="702"/>
         <source>Ctrl+/</source>
         <comment>Edit|Quantity|Divide</comment>
         <translation>Ctrl+/</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="661"/>
+        <location filename="../src/framework.cpp" line="703"/>
         <source>Price</source>
         <translation>Prijs</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="662"/>
+        <location filename="../src/framework.cpp" line="704"/>
         <source>Round to 2 Decimal Places</source>
         <translation>Op 2 decimalen afronden</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="664"/>
+        <location filename="../src/framework.cpp" line="706"/>
         <source>Set to Price Guide...</source>
         <translation>Instellen met de richtprijslijst...</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="664"/>
+        <location filename="../src/framework.cpp" line="706"/>
         <source>Ctrl+G</source>
         <comment>Edit|Price|Set to PriceGuide</comment>
         <translation>Ctrl+G</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="665"/>
+        <location filename="../src/framework.cpp" line="707"/>
         <source>Inc- or Decrease...</source>
         <translation>Verhogen / verlagen...</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="665"/>
+        <location filename="../src/framework.cpp" line="707"/>
         <source>Ctrl++</source>
         <comment>Edit|Price|Inc/Dec</comment>
         <translation>Ctrl++</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="666"/>
+        <location filename="../src/framework.cpp" line="708"/>
         <source>Bulk Quantity...</source>
         <translation>Bulk aantal...</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="667"/>
+        <location filename="../src/framework.cpp" line="709"/>
         <source>Sale...</source>
         <translation>Uitverkoop...</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="667"/>
+        <location filename="../src/framework.cpp" line="709"/>
         <source>Ctrl+%</source>
         <comment>Edit|Sale</comment>
         <translation>Ctrl+%</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="668"/>
+        <location filename="../src/framework.cpp" line="710"/>
         <source>Comment</source>
         <translation>Commentaar</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="670"/>
-        <location filename="../src/framework.cpp" line="674"/>
+        <location filename="../src/framework.cpp" line="712"/>
+        <location filename="../src/framework.cpp" line="716"/>
         <source>Add to...</source>
         <translation>Toevoegen...</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="671"/>
-        <location filename="../src/framework.cpp" line="675"/>
+        <location filename="../src/framework.cpp" line="713"/>
+        <location filename="../src/framework.cpp" line="717"/>
         <source>Remove from...</source>
         <translation>Verwijderen van...</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="672"/>
+        <location filename="../src/framework.cpp" line="714"/>
         <source>Remark</source>
         <translation>Opmerking</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="676"/>
+        <location filename="../src/framework.cpp" line="718"/>
         <source>Retain in Inventory</source>
         <translation>Behouden in inventaries</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="677"/>
+        <location filename="../src/framework.cpp" line="719"/>
         <source>Yes</source>
         <translation>Ja</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="678"/>
-        <location filename="../src/framework.cpp" line="681"/>
+        <location filename="../src/framework.cpp" line="720"/>
+        <location filename="../src/framework.cpp" line="723"/>
         <source>No</source>
         <translation>Nee</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="679"/>
+        <location filename="../src/framework.cpp" line="721"/>
         <source>Toggle Yes/No</source>
         <translation>Tussen ja en nee omschakelen</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="680"/>
+        <location filename="../src/framework.cpp" line="722"/>
         <source>Stockroom Item</source>
         <translation>Magazijn item</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="682"/>
+        <location filename="../src/framework.cpp" line="724"/>
         <source>A</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="683"/>
+        <location filename="../src/framework.cpp" line="725"/>
         <source>B</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="684"/>
+        <location filename="../src/framework.cpp" line="726"/>
         <source>C</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="685"/>
+        <location filename="../src/framework.cpp" line="727"/>
         <source>Reserved for...</source>
         <translation>Gereserveerd voor...</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="686"/>
+        <location filename="../src/framework.cpp" line="728"/>
         <source>Show BrickLink Catalog Info...</source>
         <translation>Toon BrickLink catalogus info...</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="687"/>
+        <location filename="../src/framework.cpp" line="729"/>
         <source>Show BrickLink Price Guide Info...</source>
         <translation>Toon BrickLink richtprijslijst info...</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="688"/>
+        <location filename="../src/framework.cpp" line="730"/>
         <source>Show Lots for Sale on BrickLink...</source>
         <translation>Toon kavels te koop op BrickLink...</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="689"/>
+        <location filename="../src/framework.cpp" line="731"/>
         <source>Show in my Store on BrickLink...</source>
         <translation>Toon in mijn winkel op BrickLink...</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="1188"/>
+        <location filename="../src/framework.cpp" line="1244"/>
         <source>No valid BrickLink login settings found.&lt;br /&gt;&lt;br /&gt;Do you want to change the settings now?</source>
         <translation>Geen geldige BrickLink login instellingen gevonden.&lt;br /&gt;&lt;br /&gt;Wilt U de instellingen nu wijzigen?</translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="1516"/>
+        <location filename="../src/framework.cpp" line="1541"/>
         <source>Value: %1 (min. %2)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="1520"/>
+        <location filename="../src/framework.cpp" line="1545"/>
         <source>Value: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="1524"/>
+        <location filename="../src/framework.cpp" line="1549"/>
         <source>Weight: -</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="1530"/>
+        <location filename="../src/framework.cpp" line="1555"/>
         <source>Weight: min. %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="1532"/>
+        <location filename="../src/framework.cpp" line="1557"/>
         <source>Weight: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="1538"/>
+        <location filename="../src/framework.cpp" line="1563"/>
         <source>Lots: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="1539"/>
+        <location filename="../src/framework.cpp" line="1564"/>
         <source>Items: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="1542"/>
+        <location filename="../src/framework.cpp" line="1567"/>
         <source>Errors: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/framework.cpp" line="1649"/>
+        <location filename="../src/framework.cpp" line="1674"/>
         <source>Do you want to cancel all outstanding inventory, image and Price Guide transfers?</source>
         <translation>Wilt U alle openstaande inventaris-, afbeeldingen- en richtprijslijstoverdrachten afbreken?</translation>
     </message>
@@ -2806,8 +2866,9 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="vanished">Ctrl+Shift+A</translation>
     </message>
     <message>
+        <location filename="../src/framework.cpp" line="671"/>
         <source>Buyer/Collector Mode</source>
-        <translation type="vanished">Koper/Verzamelaar modus</translation>
+        <translation>Koper/Verzamelaar modus</translation>
     </message>
     <message>
         <source>View Infobars</source>
@@ -2902,7 +2963,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
 <context>
     <name>HeaderView</name>
     <message>
-        <location filename="../src/utility/headerview.cpp" line="210"/>
+        <location filename="../src/utility/headerview.cpp" line="320"/>
         <source>Configure columns...</source>
         <translation type="unfinished">Kolommen aanpassen...</translation>
     </message>
@@ -3268,6 +3329,24 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
 </context>
 <context>
+    <name>LoadColumnLayoutMenu</name>
+    <message>
+        <location filename="../src/framework.cpp" line="180"/>
+        <source>User Default</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/framework.cpp" line="181"/>
+        <source>BrickStore Default</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/framework.cpp" line="182"/>
+        <source>Auto Resize Once</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>MessageBox</name>
     <message>
         <source>&amp;OK</source>
@@ -3328,97 +3407,97 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
 <context>
     <name>PriceGuideWidget</name>
     <message>
-        <location filename="../src/priceguidewidget.cpp" line="152"/>
+        <location filename="../src/priceguidewidget.cpp" line="155"/>
         <source>Update</source>
         <translation>Bijwerken</translation>
     </message>
     <message>
-        <location filename="../src/priceguidewidget.cpp" line="153"/>
+        <location filename="../src/priceguidewidget.cpp" line="156"/>
         <source>Show BrickLink Catalog Info...</source>
         <translation>Toon BrickLink catalogus info...</translation>
     </message>
     <message>
-        <location filename="../src/priceguidewidget.cpp" line="154"/>
+        <location filename="../src/priceguidewidget.cpp" line="157"/>
         <source>Show BrickLink Price Guide Info...</source>
         <translation>Toon BrickLink richtprijslijst info...</translation>
     </message>
     <message>
-        <location filename="../src/priceguidewidget.cpp" line="155"/>
+        <location filename="../src/priceguidewidget.cpp" line="158"/>
         <source>Show Lots for Sale on BrickLink...</source>
         <translation>Toon kavels te koop op BrickLink...</translation>
     </message>
     <message>
-        <location filename="../src/priceguidewidget.cpp" line="157"/>
+        <location filename="../src/priceguidewidget.cpp" line="160"/>
         <source>Qty.</source>
         <translation>Aant.</translation>
     </message>
     <message>
-        <location filename="../src/priceguidewidget.cpp" line="158"/>
+        <location filename="../src/priceguidewidget.cpp" line="161"/>
         <source>New</source>
         <translation>Nieuw</translation>
     </message>
     <message>
-        <location filename="../src/priceguidewidget.cpp" line="159"/>
+        <location filename="../src/priceguidewidget.cpp" line="162"/>
         <source>Used</source>
         <translation>Gebruikt</translation>
     </message>
     <message>
-        <location filename="../src/priceguidewidget.cpp" line="160"/>
+        <location filename="../src/priceguidewidget.cpp" line="163"/>
         <source>Min.</source>
         <translation>Min.</translation>
     </message>
     <message>
-        <location filename="../src/priceguidewidget.cpp" line="161"/>
+        <location filename="../src/priceguidewidget.cpp" line="164"/>
         <source>Avg.</source>
         <translation>Gem.</translation>
     </message>
     <message>
-        <location filename="../src/priceguidewidget.cpp" line="162"/>
+        <location filename="../src/priceguidewidget.cpp" line="165"/>
         <source>Q.Avg.</source>
         <translation>Gew.Gem.</translation>
     </message>
     <message>
-        <location filename="../src/priceguidewidget.cpp" line="163"/>
+        <location filename="../src/priceguidewidget.cpp" line="166"/>
         <source>Max.</source>
         <translation>Max.</translation>
     </message>
     <message>
-        <location filename="../src/priceguidewidget.cpp" line="164"/>
+        <location filename="../src/priceguidewidget.cpp" line="167"/>
         <source>Last 6</source>
         <translation>Laatste 6</translation>
     </message>
     <message>
-        <location filename="../src/priceguidewidget.cpp" line="165"/>
+        <location filename="../src/priceguidewidget.cpp" line="168"/>
         <source>Months Sales</source>
         <translation>laatste 6 maanden</translation>
     </message>
     <message>
-        <location filename="../src/priceguidewidget.cpp" line="166"/>
+        <location filename="../src/priceguidewidget.cpp" line="169"/>
         <source>Current</source>
         <translation>Huidig</translation>
     </message>
     <message>
-        <location filename="../src/priceguidewidget.cpp" line="167"/>
+        <location filename="../src/priceguidewidget.cpp" line="170"/>
         <source>Inventory</source>
         <translation>Inventaris</translation>
     </message>
     <message>
-        <location filename="../src/priceguidewidget.cpp" line="168"/>
+        <location filename="../src/priceguidewidget.cpp" line="171"/>
         <source>Last 6 Months Sales</source>
         <translation>Laatste 6 maanden verkoop</translation>
     </message>
     <message>
-        <location filename="../src/priceguidewidget.cpp" line="169"/>
+        <location filename="../src/priceguidewidget.cpp" line="172"/>
         <source>Current Inventory</source>
         <translation>Huidige inventaris</translation>
     </message>
     <message>
-        <location filename="../src/priceguidewidget.cpp" line="170"/>
+        <location filename="../src/priceguidewidget.cpp" line="173"/>
         <source>Please wait... updating</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/priceguidewidget.cpp" line="689"/>
+        <location filename="../src/priceguidewidget.cpp" line="694"/>
         <source>Double-click to set the price of the current item.</source>
         <translation>Dubbelklik om een prijs aan het huidige item te geven.</translation>
     </message>
@@ -3463,7 +3542,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
 <context>
     <name>RecentMenu</name>
     <message>
-        <location filename="../src/framework.cpp" line="157"/>
+        <location filename="../src/framework.cpp" line="158"/>
         <source>No recent files</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3492,12 +3571,12 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
 <context>
     <name>SectionConfigDialog</name>
     <message>
-        <location filename="../src/utility/headerview.cpp" line="85"/>
+        <location filename="../src/utility/headerview.cpp" line="86"/>
         <source>Configure Columns</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/utility/headerview.cpp" line="86"/>
+        <location filename="../src/utility/headerview.cpp" line="87"/>
         <source>Drag the columns into the order you prefer and show/hide them using the check mark.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3575,42 +3654,42 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
 <context>
     <name>SelectItem</name>
     <message>
-        <location filename="../src/selectitem.cpp" line="143"/>
+        <location filename="../src/selectitem.cpp" line="144"/>
         <source>Case Sensitive</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/selectitem.cpp" line="149"/>
+        <location filename="../src/selectitem.cpp" line="150"/>
         <source>Use Regular Expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/selectitem.cpp" line="361"/>
+        <location filename="../src/selectitem.cpp" line="375"/>
         <source>Item type:</source>
         <translation>Item type:</translation>
     </message>
     <message>
-        <location filename="../src/selectitem.cpp" line="362"/>
+        <location filename="../src/selectitem.cpp" line="376"/>
         <source>Filter the list using this pattern (wildcards allowed: * ? [])</source>
         <translation>Filter de lijst mbv dit patroon (jokers toegestaan: * ? [])</translation>
     </message>
     <message>
-        <location filename="../src/selectitem.cpp" line="363"/>
+        <location filename="../src/selectitem.cpp" line="377"/>
         <source>Filter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/selectitem.cpp" line="365"/>
+        <location filename="../src/selectitem.cpp" line="379"/>
         <source>List</source>
         <translation>Lijst</translation>
     </message>
     <message>
-        <location filename="../src/selectitem.cpp" line="366"/>
+        <location filename="../src/selectitem.cpp" line="380"/>
         <source>List with Images</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/selectitem.cpp" line="367"/>
+        <location filename="../src/selectitem.cpp" line="381"/>
         <source>Thumbnails</source>
         <translation>Thumbnails</translation>
     </message>
@@ -3619,7 +3698,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="vanished">Geef alstublieft het gehele onderdeel nummer in:</translation>
     </message>
     <message>
-        <location filename="../src/selectitem.cpp" line="614"/>
+        <location filename="../src/selectitem.cpp" line="627"/>
         <source>View item&apos;s category</source>
         <translation>Toon item&apos;s categorie</translation>
     </message>
@@ -4282,37 +4361,37 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
 <context>
     <name>WelcomeWidget</name>
     <message>
-        <location filename="../src/welcomewidget.cpp" line="381"/>
+        <location filename="../src/welcomewidget.cpp" line="383"/>
         <source>Last Database update: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/welcomewidget.cpp" line="386"/>
+        <location filename="../src/welcomewidget.cpp" line="388"/>
         <source>Open recent files</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/welcomewidget.cpp" line="387"/>
+        <location filename="../src/welcomewidget.cpp" line="389"/>
         <source>Document</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/welcomewidget.cpp" line="388"/>
+        <location filename="../src/welcomewidget.cpp" line="390"/>
         <source>Import items</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/welcomewidget.cpp" line="389"/>
+        <location filename="../src/welcomewidget.cpp" line="391"/>
         <source>Updates</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/welcomewidget.cpp" line="391"/>
+        <location filename="../src/welcomewidget.cpp" line="393"/>
         <source>Current version: %1 (build: %2)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/welcomewidget.cpp" line="396"/>
+        <location filename="../src/welcomewidget.cpp" line="398"/>
         <source>No recent files</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4320,12 +4399,12 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
 <context>
     <name>Window</name>
     <message>
-        <location filename="../src/window.cpp" line="323"/>
+        <location filename="../src/window.cpp" line="319"/>
         <source>Untitled</source>
         <translation>naamloos</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="519"/>
+        <location filename="../src/window.cpp" line="501"/>
         <source>Added %1, merged %2 items</source>
         <translation>%1 toegevoegde, %2 samengevoegde items</translation>
     </message>
@@ -4334,7 +4413,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="vanished">%1 items samengevoegd</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="680"/>
+        <location filename="../src/window.cpp" line="662"/>
         <source>Overwrite the currently selected items?</source>
         <translation>De reeds geslecteerde items overschrijven?</translation>
     </message>
@@ -4391,7 +4470,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="vanished">&apos;Magazijn&apos; vlag voor %1 items omgeschakeld</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="810"/>
+        <location filename="../src/window.cpp" line="804"/>
         <source>Enter the new price for all selected items:</source>
         <translation>Geef de nieuwe prijs voor alle geselecteerde items:</translation>
     </message>
@@ -4404,7 +4483,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="vanished">Prijs van %1 items gewijzigd</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/window.cpp" line="600"/>
+        <location filename="../src/window.cpp" line="582"/>
         <source>Merged %n item(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -4412,7 +4491,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/window.cpp" line="714"/>
+        <location filename="../src/window.cpp" line="708"/>
         <source>Set &apos;include&apos; status on %n item(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -4420,7 +4499,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/window.cpp" line="719"/>
+        <location filename="../src/window.cpp" line="713"/>
         <source>Set &apos;exclude&apos; status on %n item(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -4428,7 +4507,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/window.cpp" line="724"/>
+        <location filename="../src/window.cpp" line="718"/>
         <source>Set &apos;extra&apos; status on %n item(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -4436,7 +4515,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/window.cpp" line="729"/>
+        <location filename="../src/window.cpp" line="723"/>
         <source>Toggled status on %n item(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -4444,7 +4523,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/window.cpp" line="734"/>
+        <location filename="../src/window.cpp" line="728"/>
         <source>Set &apos;new&apos; condition on %n item(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -4452,7 +4531,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/window.cpp" line="739"/>
+        <location filename="../src/window.cpp" line="733"/>
         <source>Set &apos;used&apos; condition on %n item(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -4460,7 +4539,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/window.cpp" line="744"/>
+        <location filename="../src/window.cpp" line="738"/>
         <source>Toggled condition on %n item(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -4468,7 +4547,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/window.cpp" line="749"/>
+        <location filename="../src/window.cpp" line="743"/>
         <source>Set &apos;none&apos; sub-condition on %n item(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -4476,7 +4555,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/window.cpp" line="754"/>
+        <location filename="../src/window.cpp" line="748"/>
         <source>Set &apos;sealed&apos; sub-condition on %n item(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -4484,7 +4563,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/window.cpp" line="759"/>
+        <location filename="../src/window.cpp" line="753"/>
         <source>Set &apos;complete&apos; sub-condition on %n item(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -4492,7 +4571,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/window.cpp" line="764"/>
+        <location filename="../src/window.cpp" line="758"/>
         <source>Set &apos;incomplete&apos; sub-condition on %n item(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -4500,7 +4579,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/window.cpp" line="769"/>
+        <location filename="../src/window.cpp" line="763"/>
         <source>Set &apos;retain&apos; flag on %n item(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -4508,7 +4587,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/window.cpp" line="774"/>
+        <location filename="../src/window.cpp" line="768"/>
         <source>Cleared &apos;retain&apos; flag on %n item(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -4516,7 +4595,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/window.cpp" line="779"/>
+        <location filename="../src/window.cpp" line="773"/>
         <source>Toggled &apos;retain&apos; flag on %n item(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -4524,7 +4603,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/window.cpp" line="784"/>
+        <location filename="../src/window.cpp" line="778"/>
         <source>Cleared &apos;stockroom&apos; flag on %n item(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -4532,7 +4611,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/window.cpp" line="789"/>
+        <location filename="../src/window.cpp" line="783"/>
         <source>Set stockroom to &apos;A&apos; on %n item(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -4540,7 +4619,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/window.cpp" line="794"/>
+        <location filename="../src/window.cpp" line="788"/>
         <source>Set stockroom to &apos;B&apos; on %n item(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -4548,7 +4627,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/window.cpp" line="799"/>
+        <location filename="../src/window.cpp" line="793"/>
         <source>Set stockroom to &apos;C&apos; on %n item(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -4556,7 +4635,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/window.cpp" line="811"/>
+        <location filename="../src/window.cpp" line="805"/>
         <source>Set price on %n item(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -4564,8 +4643,8 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/window.cpp" line="837"/>
-        <location filename="../src/window.cpp" line="980"/>
+        <location filename="../src/window.cpp" line="831"/>
+        <location filename="../src/window.cpp" line="974"/>
         <source>Price change on %n item(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -4573,32 +4652,32 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         </translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="847"/>
+        <location filename="../src/window.cpp" line="841"/>
         <source>Prices are currently updated to Price Guide values.&lt;br /&gt;&lt;br /&gt;Please wait until this operation has finished.</source>
         <translation>Prijzen worden op dit moment bijgewerkt met de richtprijslijst.&lt;br /&gt;&lt;br /&gt;Wacht U alstublieft tot deze taak klaar is.</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="854"/>
+        <location filename="../src/window.cpp" line="848"/>
         <source>Verifying Price Guide data</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="920"/>
+        <location filename="../src/window.cpp" line="914"/>
         <source>Prices of the selected items have been updated to Price Guide values.</source>
         <translation>Prijzen van de geselecteerde items zijn bijgewerkt met de richtprijslijst.</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="923"/>
+        <location filename="../src/window.cpp" line="917"/>
         <source>%1 have been skipped, because of missing Price Guide records and/or network errors.</source>
         <translation>%1 zijn overgeslagen, omdat de gegevens in de richtprijslijst ontbraken en/of door netwerk fouten.</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="991"/>
+        <location filename="../src/window.cpp" line="985"/>
         <source>Divide the quantities of all selected items by this number.&lt;br /&gt;&lt;br /&gt;(A check is made if all quantites are exactly divisible without reminder, before this operation is performed.)</source>
         <translation>Deel de aantallen van alle geselecteerde items door dit getal..&lt;br /&gt;&lt;br /&gt;(Eerst word gecontroleerd of alle aantallen zonder rest deelbaar zijn.)</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/window.cpp" line="1001"/>
+        <location filename="../src/window.cpp" line="995"/>
         <source>The quantities of %n lot(s) are not divisible without remainder by %1.&lt;br /&gt;&lt;br /&gt;Nothing has been modified.</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -4606,7 +4685,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/window.cpp" line="1017"/>
+        <location filename="../src/window.cpp" line="1011"/>
         <source>Quantity divide by %1 on %n item(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -4614,7 +4693,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/window.cpp" line="1045"/>
+        <location filename="../src/window.cpp" line="1039"/>
         <source>Quantity multiply by %1 on %n items</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -4626,7 +4705,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="vanished">De aantallen van %1 kavels zijn niet deelbaar, zonder rest, door %2.&lt;br /&gt;&lt;br /&gt;Er is niets aangepast.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/window.cpp" line="1058"/>
+        <location filename="../src/window.cpp" line="1052"/>
         <source>Set sale on %n item(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -4634,7 +4713,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/window.cpp" line="1069"/>
+        <location filename="../src/window.cpp" line="1063"/>
         <source>Set bulk quantity on %n item(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -4642,7 +4721,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/window.cpp" line="1082"/>
+        <location filename="../src/window.cpp" line="1076"/>
         <source>Set color on %n item(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -4650,7 +4729,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/window.cpp" line="1093"/>
+        <location filename="../src/window.cpp" line="1087"/>
         <source>Set quantity on %n item(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -4658,7 +4737,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/window.cpp" line="1104"/>
+        <location filename="../src/window.cpp" line="1098"/>
         <source>Set remark on %n item(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -4666,8 +4745,8 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/window.cpp" line="1144"/>
-        <location filename="../src/window.cpp" line="1178"/>
+        <location filename="../src/window.cpp" line="1138"/>
+        <location filename="../src/window.cpp" line="1172"/>
         <source>Modified remark on %n item(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -4675,7 +4754,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/window.cpp" line="1191"/>
+        <location filename="../src/window.cpp" line="1185"/>
         <source>Set comment on %n item(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -4683,8 +4762,8 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/window.cpp" line="1231"/>
-        <location filename="../src/window.cpp" line="1265"/>
+        <location filename="../src/window.cpp" line="1225"/>
+        <location filename="../src/window.cpp" line="1259"/>
         <source>Modified comment on %n item(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -4692,7 +4771,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/window.cpp" line="1278"/>
+        <location filename="../src/window.cpp" line="1272"/>
         <source>Set reservation on %n item(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -4700,7 +4779,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/window.cpp" line="1344"/>
+        <location filename="../src/window.cpp" line="1338"/>
         <source>Copied Remarks for %n item(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -4708,7 +4787,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/window.cpp" line="1419"/>
+        <location filename="../src/window.cpp" line="1413"/>
         <source>Subtracted %n item(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -4716,15 +4795,20 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/window.cpp" line="1477"/>
+        <location filename="../src/window.cpp" line="1471"/>
         <source>Parted out %n item(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
             <numerusform></numerusform>
         </translation>
     </message>
+    <message>
+        <location filename="../src/window.cpp" line="1600"/>
+        <source>Enter an unique name for this column layout. Leave empty to change the user default layout.</source>
+        <translation type="unfinished"></translation>
+    </message>
     <message numerus="yes">
-        <location filename="../src/window.cpp" line="1745"/>
+        <location filename="../src/window.cpp" line="1781"/>
         <source>There are %n item(s) selected.&lt;br /&gt;&lt;br /&gt;Do you want to export only these items?</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -4736,12 +4820,12 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="vanished">Aantallen door %1 gedeeld bij %2 items</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="1030"/>
+        <location filename="../src/window.cpp" line="1024"/>
         <source>Multiply the quantities of all selected items with this factor.</source>
         <translation>Vermenigvuldig de aantallen van alle geslecteerde items met deze factor.</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="1030"/>
+        <location filename="../src/window.cpp" line="1024"/>
         <source>x</source>
         <translation>x</translation>
     </message>
@@ -4750,12 +4834,12 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="vanished">Aantallen met %1 vermenigvuldigd bij %2 items</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="1057"/>
+        <location filename="../src/window.cpp" line="1051"/>
         <source>Set sale in percent for the selected items (this will &lt;u&gt;not&lt;/u&gt; change any prices).&lt;br /&gt;Negative values are also allowed.</source>
         <translation>Stel uitverkoop, in procenten, voor de geselecteerde items in. (de prijzen zelf worden &lt;u&gt;niet&lt;/u&gt; veranderd).&lt;br /&gt;Negatieve waardes zijn ook mogelijk.</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="1057"/>
+        <location filename="../src/window.cpp" line="1051"/>
         <source>%</source>
         <translation>%</translation>
     </message>
@@ -4764,7 +4848,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="vanished">Uitverkoop op %1 items ingesteld</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="1068"/>
+        <location filename="../src/window.cpp" line="1062"/>
         <source>Set bulk quantity for the selected items:</source>
         <translation>Bulk hoeveelheid voor de geselecteerde items instellen:</translation>
     </message>
@@ -4773,7 +4857,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="vanished">Bulk hoeveelheid voor %1 items ingesteld</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="1078"/>
+        <location filename="../src/window.cpp" line="1072"/>
         <source>Modify Color</source>
         <translation type="unfinished">Kleur wijzigen</translation>
     </message>
@@ -4782,12 +4866,12 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="vanished">Kleur voor %1 item ingesteld</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="1092"/>
+        <location filename="../src/window.cpp" line="1086"/>
         <source>Enter the new quantities for all selected items:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="1103"/>
+        <location filename="../src/window.cpp" line="1097"/>
         <source>Enter the new remark for all selected items:</source>
         <translation>Geef de nieuwe opmerking voor alle geselecteerde items:</translation>
     </message>
@@ -4796,13 +4880,13 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="vanished">Opmerking voor %1 items ingesteld</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="1114"/>
+        <location filename="../src/window.cpp" line="1108"/>
         <source>Enter the text, that should be added to the remarks of all selected items:</source>
         <translation>Geef de tekst, die toegevoegd dient te worden aan de opmerkingen van alle geselecteerde items:</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="1120"/>
-        <location filename="../src/window.cpp" line="1161"/>
+        <location filename="../src/window.cpp" line="1114"/>
+        <location filename="../src/window.cpp" line="1155"/>
         <source>Changing remarks</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4811,12 +4895,12 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="vanished">Opmerkingen van %1 items aangepast</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="1155"/>
+        <location filename="../src/window.cpp" line="1149"/>
         <source>Enter the text, that should be removed from the remarks of all selected items:</source>
         <translation>Geef de tekst, die verwijderd dient te worden van de opmerkingen van alle geselecteerde items:</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="1190"/>
+        <location filename="../src/window.cpp" line="1184"/>
         <source>Enter the new comment for all selected items:</source>
         <translation>Geef het nieuwe commentaar voor alle geselecteerde items:</translation>
     </message>
@@ -4825,13 +4909,13 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="vanished">Commentaar bij %1 items ingesteld</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="1201"/>
+        <location filename="../src/window.cpp" line="1195"/>
         <source>Enter the text, that should be added to the comments of all selected items:</source>
         <translation>Geef de tekst, die toegevoegd dient te worden aan het commentaar van alle geselecteerde items:</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="1207"/>
-        <location filename="../src/window.cpp" line="1248"/>
+        <location filename="../src/window.cpp" line="1201"/>
+        <location filename="../src/window.cpp" line="1242"/>
         <source>Changing comments</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4840,12 +4924,12 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="vanished">Commentaar van %1 items aangepast</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="1242"/>
+        <location filename="../src/window.cpp" line="1236"/>
         <source>Enter the text, that should be removed from the comments of all selected items:</source>
         <translation>Geef de tekst, die verwijderd dient te worden van het commentaar van alle geselecteerde items:</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="1277"/>
+        <location filename="../src/window.cpp" line="1271"/>
         <source>Reserve all selected items for this specific buyer (BrickLink username):</source>
         <translation>Reserveer alle geselecteerde items voor deze specifieke koper (BrickLink gebruikersnaam):</translation>
     </message>
@@ -4854,17 +4938,17 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="vanished">Reservering voor %1 items ingesteld</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="1293"/>
+        <location filename="../src/window.cpp" line="1287"/>
         <source>Please choose the document that should serve as a source to fill in the remarks fields of the current document:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="1349"/>
+        <location filename="../src/window.cpp" line="1343"/>
         <source>Which items should be subtracted from the current document:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="1368"/>
+        <location filename="../src/window.cpp" line="1362"/>
         <source>Subtracting items</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4873,42 +4957,42 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="vanished">%1 items afgetrokken</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="1436"/>
+        <location filename="../src/window.cpp" line="1430"/>
         <source>Should the selected items be parted out into the current document, replacing the selected items?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="1449"/>
+        <location filename="../src/window.cpp" line="1443"/>
         <source>Parting out items</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="1544"/>
+        <location filename="../src/window.cpp" line="1538"/>
         <source>The document %1 has been modified.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="1545"/>
+        <location filename="../src/window.cpp" line="1539"/>
         <source>Do you want to save your changes?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="1625"/>
+        <location filename="../src/window.cpp" line="1661"/>
         <source>Couldn&apos;t find any print templates.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="1643"/>
+        <location filename="../src/window.cpp" line="1679"/>
         <source>Save PDF as</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="1643"/>
+        <location filename="../src/window.cpp" line="1679"/>
         <source>PDF Documents (*.pdf)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="1650"/>
+        <location filename="../src/window.cpp" line="1686"/>
         <source>The PDF document already exists and is not writable.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4917,7 +5001,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="vanished">Er zijn %1 items geselecteerd.&lt;br /&gt;&lt;br /&gt;Wilt U alleen deze items exporteren?</translation>
     </message>
     <message>
-        <location filename="../src/window.cpp" line="1754"/>
+        <location filename="../src/window.cpp" line="1790"/>
         <source>This list contains items with errors.&lt;br /&gt;&lt;br /&gt;Do you really want to export this list?</source>
         <translation>De lijst bevat items met fouten.&lt;br /&gt;&lt;br /&gt;Wilt U deze lijst toch exporteren?</translation>
     </message>
@@ -4965,7 +5049,13 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
 <context>
     <name>Workspace</name>
     <message>
-        <location filename="../src/utility/workspace.cpp" line="300"/>
+        <location filename="../src/utility/workspace.cpp" line="253"/>
+        <source>Alt+%1</source>
+        <extracomment>Shortcut to activate window 0-9</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/utility/workspace.cpp" line="314"/>
         <source>Show a list of all open documents</source>
         <translation type="unfinished"></translation>
     </message>

@@ -674,6 +674,36 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <source>Modify Color</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>-</source>
+        <comment>set stockroom to none</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>N</source>
+        <comment>set condition to new</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>U</source>
+        <comment>set condition to used</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>I</source>
+        <comment>set status to include</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>E</source>
+        <comment>set status to exclude</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>X</source>
+        <comment>set status to extra</comment>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>DocumentProxyModel</name>
@@ -1033,10 +1063,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Save Column Layout as Default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>E&amp;xtras</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1296,6 +1322,26 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Do you want to cancel all outstanding inventory, image and Price Guide transfers?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Create a Filter from the Selection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Buyer/Collector Mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Save Column Layout...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Manage Column Layouts...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Load Column Layout</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1576,6 +1622,21 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Data directory &apos;%1&apos; is not readable.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>LoadColumnLayoutMenu</name>
+    <message>
+        <source>User Default</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>BrickStore Default</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Auto Resize Once</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2661,11 +2722,20 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
             <numerusform>Quantity multiply by %1 on %n items</numerusform>
         </translation>
     </message>
+    <message>
+        <source>Enter an unique name for this column layout. Leave empty to change the user default layout.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>Workspace</name>
     <message>
         <source>Show a list of all open documents</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Alt+%1</source>
+        <extracomment>Shortcut to activate window 0-9</extracomment>
         <translation type="unfinished"></translation>
     </message>
 </context>
