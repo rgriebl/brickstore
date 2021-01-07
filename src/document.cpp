@@ -1375,18 +1375,14 @@ QVariant Document::data(const QModelIndex &index, int role) const
         Item *it = items().at(index.row());
         auto f = static_cast<Field>(index.column());
 
-        if (f == Index) {
-            if (role == Qt::DisplayRole)
-                return QString::number(index.row() + 1);
-        } else {
-            switch (role) {
-            case Qt::DisplayRole      : return dataForDisplayRole(it, f);
-            case Qt::DecorationRole   : return dataForDecorationRole(it, f);
-            case Qt::ToolTipRole      : return dataForToolTipRole(it, f);
-            case Qt::TextAlignmentRole: return dataForTextAlignmentRole(it, f);
-            case Qt::EditRole         : return dataForEditRole(it, f);
-            case Qt::CheckStateRole   : return dataForCheckStateRole(it, f);
-            }
+        switch (role) {
+        case Qt::DisplayRole      : return dataForDisplayRole(it, f, index.row());
+        case Qt::DecorationRole   : return dataForDecorationRole(it, f);
+        case Qt::ToolTipRole      : return dataForToolTipRole(it, f);
+        case Qt::TextAlignmentRole: return dataForTextAlignmentRole(it, f);
+        case Qt::EditRole         : return dataForEditRole(it, f);
+        case Qt::CheckStateRole   : return dataForCheckStateRole(it, f);
+        case Document::FilterRole : return dataForFilterRole(it, f, index.row());
         }
     }
     return QVariant();
@@ -1430,11 +1426,12 @@ QVariant Document::dataForEditRole(Item *it, Field f) const
     }
 }
 
-QString Document::dataForDisplayRole(Item *it, Field f) const
+QString Document::dataForDisplayRole(Item *it, Field f, int row) const
 {
     QString dash = QLatin1String("-");
 
     switch (f) {
+    case Index       : return QString::number(row + 1);
     case LotId       : return (it->lotId() == 0 ? dash : QString::number(it->lotId()));
     case PartNo      : return it->itemId();
     case Description : return it->itemName();
@@ -1464,6 +1461,38 @@ QString Document::dataForDisplayRole(Item *it, Field f) const
     case QuantityOrig: return QString::number(it->origQuantity());
     case QuantityDiff: return QString::number(it->quantity() - it->origQuantity());
     default          : return QString();
+    }
+}
+
+QString Document::dataForFilterRole(Item *it, Field f, int row) const
+{
+    switch (f) {
+    case Status:
+        switch (it->status()) {
+        case BrickLink::Status::Include: return tr("Include"); break;
+        case BrickLink::Status::Extra  : return tr("Extra"); break;
+        default:
+        case BrickLink::Status::Exclude: return tr("Exclude"); break;
+        }
+    case Condition:
+        switch (it->condition()) {
+        case BrickLink::Condition::New : return tr("New");
+        default:
+        case BrickLink::Condition::Used: return tr("Used");
+        }
+    case Stockroom:
+        switch (it->stockroom()) {
+        case BrickLink::Stockroom::A: return QString("A");
+        case BrickLink::Stockroom::B: return QString("B");
+        case BrickLink::Stockroom::C: return QString("C");
+        default                     : return QString("-");
+        }
+    default: {
+        QVariant v = dataForEditRole(it, f);
+        if (v.isNull())
+            v = dataForDisplayRole(it, f, row);
+        return v.toString();
+    }
     }
 }
 
@@ -1738,7 +1767,7 @@ bool DocumentProxyModel::filterAcceptsRow(int source_row, const QModelIndex &sou
 
         bool localresult = false;
         for (int c = firstcol; c <= lastcol && !localresult; ++c) {
-            QVariant v = sourceModel()->data(sourceModel()->index(source_row, c), Qt::EditRole);
+            QVariant v = sourceModel()->data(sourceModel()->index(source_row, c), Document::FilterRole);
             if (v.isNull())
                 v = sourceModel()->data(sourceModel()->index(source_row, c), Qt::DisplayRole);
             if (!v.isNull())

@@ -109,6 +109,8 @@ public slots:
     void on_edit_select_all_triggered();
     void on_edit_select_none_triggered();
 
+    void on_edit_filter_from_selection_triggered();
+
     void on_edit_status_include_triggered();
     void on_edit_status_exclude_triggered();
     void on_edit_status_extra_triggered();

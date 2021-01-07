@@ -70,6 +70,10 @@ public:
         FieldCount
     };
 
+    enum ExtraRoles {
+        FilterRole = Qt::UserRole
+    };
+
     class Item : public BrickLink::InvItem
     {
     public:
@@ -158,7 +162,8 @@ public:
     Qt::ItemFlags flags(const QModelIndex&) const;
     bool setData(const QModelIndex&, const QVariant&, int);
     QVariant dataForEditRole(Item *it, Field f) const;
-    QString dataForDisplayRole(Item *it, Field f) const;
+    QString dataForDisplayRole(Item *it, Field f, int row = -1) const;
+    QString dataForFilterRole(Item *it, Field f, int row = -1) const;
     QVariant dataForDecorationRole(Item *it, Field f) const;
     Qt::CheckState dataForCheckStateRole(Item *it, Field f) const;
     int dataForTextAlignmentRole(Item *it, Field f) const;

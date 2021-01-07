@@ -683,6 +683,18 @@ void Window::on_edit_select_none_triggered()
     w_list->clearSelection();
 }
 
+void Window::on_edit_filter_from_selection_triggered()
+{
+    if (selection().count() == 1) {
+        auto idx = m_selection_model->currentIndex();
+        if (idx.isValid() && idx.column() >= 0) {
+            FrameWork::inst()->setFilter(m_view->headerData(idx.column(), Qt::Horizontal).toString()
+                                         + QLatin1String(" == ")
+                                         + m_view->data(idx, Document::FilterRole).toString());
+        }
+    }
+}
+
 void Window::on_edit_reset_diffs_triggered()
 {
     WindowProgress wp(w_list);

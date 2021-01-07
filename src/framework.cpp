@@ -432,6 +432,8 @@ FrameWork::FrameWork(QWidget *parent)
         << "-"
         << "edit_select_all"
         << "-"
+        << "edit_filter_from_selection"
+        << "-"
         << "edit_mergeitems"
         << "edit_partoutitems"
         << "-"
@@ -659,6 +661,7 @@ void FrameWork::translateActions()
         { "edit_reset_diffs",               tr("Reset Differences"),                  },
         { "edit_copyremarks",               tr("Copy Remarks from Document..."),      },
         { "edit_select_all",                tr("Select All"),                         QKeySequence::SelectAll },
+        { "edit_filter_from_selection",     tr("Create a Filter from the Selection"), },
         { "edit_select_none",               tr("Select None"),                        QKeySequence::Deselect },
         { "view",                           tr("&View"),                              },
         { "view_toolbar",                   tr("View Toolbar"),                       },
@@ -1096,6 +1099,7 @@ void FrameWork::createActions()
     (void) newQAction(this, "edit_copyremarks", NeedDocument);
     (void) newQAction(this, "edit_select_all", NeedDocument);
     (void) newQAction(this, "edit_select_none", NeedDocument);
+    (void) newQAction(this, "edit_filter_from_selection", NeedSelection(1));
 
     m = newQMenu(this, "edit_status", NeedSelection(1));
     g = newQActionGroup(this, nullptr, true);
@@ -1638,6 +1642,11 @@ void FrameWork::onlineStateChanged(bool isOnline)
 void FrameWork::showContextMenu(bool /*onitem*/, const QPoint &pos)
 {
     m_contextmenu->popup(pos);
+}
+
+void FrameWork::setFilter(const QString &filterText)
+{
+    m_filter->setText(filterText);
 }
 
 void FrameWork::closeEvent(QCloseEvent *e)
