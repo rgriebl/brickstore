@@ -39,7 +39,6 @@ public:
     QStringList externalResourceSearchPath(const QString &subdir = QString()) const;
 
 public slots:
-    void about();
     void checkForUpdates();
     void updateTranslations();
 

@@ -61,6 +61,7 @@
 #include "itemdetailpopup.h"
 #include "changecurrencydialog.h"
 #include "welcomewidget.h"
+#include "aboutdialog.h"
 
 #include "framework.h"
 #include "stopwatch.h"
@@ -880,7 +881,7 @@ QMenu *FrameWork::createMenu(const QByteArray &name, const QList<QByteArray> &a_
         else if (QAction *a = findAction(an))
             m->addAction(a);
         else
-            qWarning("Couldn't find action '%s'", an.constData());
+            qWarning("Couldn't find action '%s' when creating menu '%s'", an.constData(), name.constData());
     }
     return m;
 }
@@ -1014,8 +1015,12 @@ void FrameWork::createActions()
     QActionGroup *g;
     QMenu *m;
 
-    (void) newQAction(this, "file_new", 0, false, this, &FrameWork::fileNew);
-    (void) newQAction(this, "file_open", 0, false, this, &FrameWork::fileOpen);
+    (void) newQAction(this, "file_new", 0, false, this, [this]() {
+        createWindow(Document::fileNew());
+    });
+    (void) newQAction(this, "file_open", 0, false, this, [this]() {
+        createWindow(Document::fileOpen());
+    });
 
     auto rm = new RecentMenu(this);
     rm->menuAction()->setObjectName("file_open_recent");
@@ -1028,12 +1033,29 @@ void FrameWork::createActions()
     (void) newQAction(this, "file_print_pdf", NeedDocument);
 
     m = newQMenu(this, "file_import");
-    m->addAction(newQAction(this, "file_import_bl_inv", 0, false, this, QOverload<>::of(&FrameWork::fileImportBrickLinkInventory)));
-    m->addAction(newQAction(this, "file_import_bl_xml", 0, false, this, &FrameWork::fileImportBrickLinkXML));
-    m->addAction(newQAction(this, "file_import_bl_order", NeedNetwork, false, this, &FrameWork::fileImportBrickLinkOrder));
-    m->addAction(newQAction(this, "file_import_bl_store_inv", NeedNetwork, false, this, &FrameWork::fileImportBrickLinkStore));
-    m->addAction(newQAction(this, "file_import_bl_cart", NeedNetwork, false, this, &FrameWork::fileImportBrickLinkCart));
-    m->addAction(newQAction(this, "file_import_ldraw_model", 0, false, this, &FrameWork::fileImportLDrawModel));
+    m->addAction(newQAction(this, "file_import_bl_inv", 0, false, this, [this]() {
+        fileImportBrickLinkInventory(nullptr);
+    }));
+    m->addAction(newQAction(this, "file_import_bl_xml", 0, false, this, [this]() {
+        createWindow(Document::fileImportBrickLinkXML());
+    }));
+    m->addAction(newQAction(this, "file_import_bl_order", NeedNetwork, false, this, [this]() {
+        if (checkBrickLinkLogin()) {
+            foreach (Document *doc, Document::fileImportBrickLinkOrders())
+                createWindow(doc);
+        }
+    }));
+    m->addAction(newQAction(this, "file_import_bl_store_inv", NeedNetwork, false, this, [this]() {
+        if (checkBrickLinkLogin())
+            createWindow(Document::fileImportBrickLinkStore());
+    }));
+    m->addAction(newQAction(this, "file_import_bl_cart", NeedNetwork, false, this, [this]() {
+        createWindow(Document::fileImportBrickLinkCart());
+    }));
+    m->addAction(newQAction(this, "file_import_ldraw_model", 0, false, this, [this]() {
+        createWindow(Document::fileImportLDrawModel());
+    }));
+
 
     m = newQMenu(this, "file_export");
     m->addAction(newQAction(this, "file_export_bl_xml", NeedDocument));
@@ -1145,14 +1167,18 @@ void FrameWork::createActions()
     (void) newQAction(this, "edit_bl_lotsforsale", NeedSelection(1, 1) | NeedNetwork);
     (void) newQAction(this, "edit_bl_myinventory", NeedSelection(1, 1) | NeedLotId | NeedNetwork);
 
-    (void) newQAction(this, "view_fullscreen", 0, true, this, &FrameWork::viewFullScreen);
+    (void) newQAction(this, "view_fullscreen", 0, true, this, [this](bool fullScreen) {
+        setWindowState(windowState().setFlag(Qt::WindowFullScreen, fullScreen));
+    });
 
     m_toolbar->toggleViewAction()->setObjectName("view_toolbar");
     m = newQMenu(this, "view_docks");
     foreach (QDockWidget *dock, m_dock_widgets)
         m->addAction(dock->toggleViewAction());
 
-    (void) newQAction(this, "view_statusbar", 0, true, this, &FrameWork::viewStatusBar);
+    (void) newQAction(this, "view_statusbar", 0, true, this, [this](bool visible) {
+        statusBar()->setVisible(visible);
+    });
     (void) newQAction(this, "view_simple_mode", 0, true, Config::inst(), &Config::setSimpleMode);
     (void) newQAction(this, "view_show_input_errors", 0, true, Config::inst(), &Config::setShowInputErrors);
     (void) newQAction(this, "view_difference_mode", 0, true);
@@ -1166,12 +1192,14 @@ void FrameWork::createActions()
 
     (void) newQAction(this, "extras_update_database", NeedNetwork, false, this, &FrameWork::updateDatabase);
 
-    a = newQAction(this, "extras_configure", 0, false, this, QOverload<>::of(&FrameWork::configure));
+    a = newQAction(this, "extras_configure", 0, false, this, [this]() { configure(); });
     a->setMenuRole(QAction::PreferencesRole);
 
     //(void) newQAction(this, "help_whatsthis", 0, false, this, &FrameWork::whatsThis);
 
-    a = newQAction(this, "help_about", 0, false, Application::inst(), &Application::about);
+    a = newQAction(this, "help_about", 0, false, Application::inst(), [this]() {
+        AboutDialog(this).exec();
+    });
     a->setMenuRole(QAction::AboutRole);
 
     a = newQAction(this, "help_updates", NeedNetwork, false, Application::inst(), &Application::checkForUpdates);
@@ -1190,42 +1218,11 @@ void FrameWork::createActions()
     }
 }
 
-void FrameWork::viewStatusBar(bool b)
-{
-    statusBar()->setVisible(b);
-}
-
-void FrameWork::viewToolBar(bool b)
-{
-    m_toolbar->setVisible(b);
-}
-
-void FrameWork::viewFullScreen(bool b)
-{
-    QFlags<Qt::WindowState> ws = windowState();
-    setWindowState(b ? ws | Qt::WindowFullScreen : ws & ~Qt::WindowFullScreen);
-}
 
 void FrameWork::openDocument(const QString &file)
 {
     createWindow(Document::fileOpen(file));
 }
-
-void FrameWork::fileNew()
-{
-    createWindow(Document::fileNew());
-}
-
-void FrameWork::fileOpen()
-{
-    createWindow(Document::fileOpen());
-}
-
-void FrameWork::fileImportBrickLinkInventory()
-{
-    fileImportBrickLinkInventory(nullptr);
-}
-
 
 void FrameWork::fileImportBrickLinkInventory(const BrickLink::Item *item)
 {
@@ -1245,38 +1242,6 @@ bool FrameWork::checkBrickLinkLogin()
         else
             return false;
     }
-}
-
-void FrameWork::fileImportBrickLinkOrder()
-{
-    if (!checkBrickLinkLogin())
-        return;
-
-    foreach (Document *doc, Document::fileImportBrickLinkOrders())
-        createWindow(doc);
-}
-
-void FrameWork::fileImportBrickLinkStore()
-{
-    if (!checkBrickLinkLogin())
-        return;
-
-    createWindow(Document::fileImportBrickLinkStore());
-}
-
-void FrameWork::fileImportBrickLinkXML()
-{
-    createWindow(Document::fileImportBrickLinkXML());
-}
-
-void FrameWork::fileImportBrickLinkCart()
-{
-    createWindow(Document::fileImportBrickLinkCart());
-}
-
-void FrameWork::fileImportLDrawModel()
-{
-    createWindow(Document::fileImportLDrawModel());
 }
 
 bool FrameWork::createWindow(Document *doc)
@@ -1336,6 +1301,7 @@ void FrameWork::connectAllActions(bool do_connect, Window *window)
             uint len = uint(objName.length());
             if (!len || qstrncmp(slot.constData() + 3, objName.data(), len) || slot[len+3] != '_')
                 continue;
+
             const QMetaObject *smo = co->metaObject();
             int sigIndex = smo->indexOfMethod(slot.constData() + len + 4);
             if (sigIndex < 0) { // search for compatible signals
@@ -1647,11 +1613,6 @@ void FrameWork::transferJobProgressUpdate(int p, int t)
             m_progress->setMaximum(t);
         m_progress->setValue(p);
     }
-}
-
-void FrameWork::configure()
-{
-    configure(nullptr);
 }
 
 void FrameWork::configure(const char *page)

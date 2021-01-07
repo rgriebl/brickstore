@@ -73,28 +73,12 @@ protected slots:
 private slots:
     void openDocument(const QString &);
 
-    void fileNew();
-    void fileOpen();
-
-    void fileImportBrickLinkInventory();
-    void fileImportBrickLinkOrder();
-    void fileImportBrickLinkStore();
-    void fileImportBrickLinkCart();
-    void fileImportBrickLinkXML();
-    void fileImportLDrawModel();
-
-    void viewToolBar(bool);
-    void viewStatusBar(bool);
-    void viewFullScreen(bool);
-
     bool updateDatabase();
 
     void connectWindow(QWidget *w);
-
     void transferJobProgressUpdate(int p, int t);
 
-    void configure();
-    void configure(const char *page);
+    void configure(const char *page = nullptr);
 
     void cancelAllTransfers(bool force = false);
     void showAddItemDialog();

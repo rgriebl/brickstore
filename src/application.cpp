@@ -38,7 +38,6 @@
 #  include <sys/utsname.h>
 #endif
 
-#include "aboutdialog.h"
 #include "progressdialog.h"
 #include "checkforupdates.h"
 #include "config.h"
@@ -417,12 +416,6 @@ void Application::exitBrickLink()
     delete LDraw::core();
 }
 
-
-void Application::about()
-{
-    AboutDialog d(FrameWork::inst());
-    d.exec();
-}
 
 void Application::checkForUpdates()
 {
