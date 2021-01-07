@@ -114,6 +114,11 @@ QSize DocumentDelegate::sizeHint(const QStyleOptionViewItem &option1, const QMod
     else
         w = QItemDelegate::sizeHint(option1, idx).width();
 
+    if ((idx.column() == Document::Description)
+            && (w > (m_doc->headerDataForDefaultWidthRole(Document::Description) * option1.fontMetrics.averageCharWidth()))) {
+        w = int(w / 1.9);  // we can wrap to two lines (plus 10% security margin)
+    }
+
     QStyleOptionViewItem option(option1);
     return { w, defaultItemHeight(option.widget) };
 }
