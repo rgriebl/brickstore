@@ -67,7 +67,7 @@ public:
     QString filter() const;
     QString filterToolTip() const;
 
-    QDomElement createGuiStateXML(QDomDocument doc);
+    QDomElement createGuiStateXML();
     bool parseGuiStateXML(const QDomElement &root);
 
     bool isDifferenceMode() const;

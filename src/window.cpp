@@ -292,9 +292,14 @@ Window::Window(Document *doc, QWidget *parent)
     w_header->setSectionInternal(Document::QuantityDiff, true);
 
     setDifferenceMode(false);
-    setSimpleMode(Config::inst()->simpleMode());
 
     on_view_column_layout_list_load("user-default");
+
+    if (m_doc->hasGuiState()) {
+        parseGuiStateXML(m_doc->guiState());
+        m_doc->clearGuiState();;
+    }
+    setSimpleMode(Config::inst()->simpleMode());
 
     updateErrorMask();
     updateCaption();
@@ -582,9 +587,10 @@ void Window::mergeItems(const Document::ItemList &items, uint globalmergeflags)
     m_doc->endMacro(tr("Merged %n item(s)", nullptr, mergecount));
 }
 
-QDomElement Window::createGuiStateXML(QDomDocument doc)
+QDomElement Window::createGuiStateXML()
 {
-    int version = 1;
+    QDomDocument doc; // dummy
+    int version = 2;
 
     QDomElement root = doc.createElement("GuiState");
     root.setAttribute("Application", "BrickStore");
@@ -593,17 +599,11 @@ QDomElement Window::createGuiStateXML(QDomDocument doc)
     if (isDifferenceMode())
         root.appendChild(doc.createElement("DifferenceMode"));
 
-    QMap <QString, QString> list_map; //TODO: = w_list->saveSettings ( );
+    auto cl = doc.createElement("ColumnLayout");
+    cl.appendChild(doc.createCDATASection(w_header->saveLayout().toBase64()));
+    root.appendChild(cl);
 
-    if (!list_map.isEmpty()) {
-        QDomElement e = doc.createElement("ItemView");
-        root.appendChild(e);
-
-        for (auto it = list_map.constBegin(); it != list_map.constEnd(); ++it)
-            e.appendChild(doc.createElement(it.key()).appendChild(doc.createTextNode(it.value())).parentNode());
-    }
-
-    return root;
+    return root.cloneNode(true).toElement();
 }
 
 bool Window::parseGuiStateXML(const QDomElement &root)
@@ -612,31 +612,18 @@ bool Window::parseGuiStateXML(const QDomElement &root)
 
     if ((root.nodeName() == "GuiState") &&
         (root.attribute("Application") == "BrickStore") &&
-        (root.attribute("Version").toInt() == 1)) {
+        (root.attribute("Version").toInt() == 2)) {
         for (QDomNode n = root.firstChild(); !n.isNull(); n = n.nextSibling()) {
             if (!n.isElement())
                 continue;
             QString tag = n.toElement().tagName();
 
-            if (tag == "DifferenceMode") {
+            if (tag == "DifferenceMode")
                 on_view_difference_mode_toggled(true);
-            }
-            else if (tag == "ItemView") {
-                QMap <QString, QString> list_map;
-
-                for (QDomNode niv = n.firstChild(); !niv.isNull(); niv = niv.nextSibling()) {
-                    if (!niv.isElement())
-                        continue;
-                    list_map [niv.toElement().tagName()] = niv.toElement().text();
-                }
-
-                //if (!list_map.isEmpty())
-                //TODO: w_list->loadSettings ( list_map );
-            }
+            else if (tag == "ColumnLayout")
+                w_header->restoreLayout(QByteArray::fromBase64(n.toElement().text().toLatin1()));
         }
-
     }
-
     return ok;
 }
 
@@ -1543,7 +1530,7 @@ void Window::closeEvent(QCloseEvent *e)
 
         switch (msgBox.exec()) {
         case MessageBox::Save:
-            m_doc->fileSave();
+            on_file_save_triggered();
 
             if (!m_doc->isModified())
                 e->accept();
@@ -1724,12 +1711,17 @@ void Window::print(bool as_pdf)
 
 void Window::on_file_save_triggered()
 {
+    m_doc->setGuiState(createGuiStateXML());
     m_doc->fileSave();
+    m_doc->clearGuiState();
+
 }
 
 void Window::on_file_saveas_triggered()
 {
+    m_doc->setGuiState(createGuiStateXML());
     m_doc->fileSaveAs();
+    m_doc->clearGuiState();
 }
 
 void Window::on_file_export_bl_xml_triggered()

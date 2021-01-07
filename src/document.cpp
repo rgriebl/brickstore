@@ -645,6 +645,26 @@ void Document::setCurrencyCode(const QString &ccode, qreal crate)
         m_undo->push(new CurrencyCmd(this, ccode, crate));
 }
 
+bool Document::hasGuiState() const
+{
+    return !m_gui_state.isNull();
+}
+
+QDomElement Document::guiState() const
+{
+    return m_gui_state;
+}
+
+void Document::setGuiState(QDomElement dom)
+{
+    m_gui_state = dom;
+}
+
+void Document::clearGuiState()
+{
+    m_gui_state.clear();
+}
+
 Document *Document::fileNew()
 {
     auto *doc = new Document();
@@ -841,6 +861,7 @@ Document *Document::fileLoadFrom(const QString &name, const char *type, bool imp
     QString emsg;
     int eline = 0, ecol = 0;
     QDomDocument domdoc;
+    QDomElement gui_state;
 
     if (domdoc.setContent(&f, &emsg, &eline, &ecol)) {
         QDomElement root = domdoc.documentElement();
@@ -853,6 +874,8 @@ Document *Document::fileLoadFrom(const QString &name, const char *type, bool imp
 
                 if (n.nodeName() == QLatin1String("Inventory"))
                     item_elem = n.toElement();
+                else if (n.nodeName() == QLatin1String("GuiState"))
+                    gui_state = n.cloneNode(true).toElement();
             }
         }
         else {
@@ -891,6 +914,7 @@ Document *Document::fileLoadFrom(const QString &name, const char *type, bool imp
         if (!result.invalidItemCount) {
             doc = new Document();
             doc->m_currencycode = result.currencyCode; // we own the items
+            doc->setGuiState(gui_state);
             doc->setBrickLinkItems(*result.items);
 
             doc->setFileName(import_only ? QString() : name);
@@ -1110,8 +1134,11 @@ bool Document::fileSaveTo(const QString &s, const char *type, bool export_only, 
 
         if (hint == BrickLink::XMLHint_BrickStore) {
             QDomElement root = doc.createElement("BrickStoreXML");
-
             root.appendChild(item_elem);
+
+            if (hasGuiState())
+                root.appendChild(guiState());
+
             doc.appendChild(root);
         }
         else {

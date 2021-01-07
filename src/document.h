@@ -219,6 +219,11 @@ public:
     QString currencyCode() const;
     void setCurrencyCode(const QString &code, qreal crate = qreal(1));
 
+    bool hasGuiState() const;
+    QDomElement guiState() const;
+    void setGuiState(QDomElement dom);
+    void clearGuiState();
+
     static Document *fileNew();
     static Document *fileOpen();
     static Document *fileOpen(const QString &name);
@@ -295,6 +300,8 @@ private:
     UndoStack *      m_undo = nullptr;
 
     BrickLink::Order *m_order = nullptr;
+
+    QDomElement       m_gui_state;
 
     static QList<Document *> s_documents;
 };
