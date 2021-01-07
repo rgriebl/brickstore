@@ -591,8 +591,11 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
         }
         break;
 
-    case Document::Stockroom:
-        if (dblclick || (keypress && (editkey || key == Qt::Key_A || key == Qt::Key_B || key == Qt::Key_C  || key == Qt::Key_N))) {
+    case Document::Stockroom: {
+        bool noneKey = (QKeySequence(key) == QKeySequence(tr("-", "set stockroom to none")));
+
+        if (dblclick || (keypress && (editkey || key == Qt::Key_A || key == Qt::Key_B
+                                      || key == Qt::Key_C  || noneKey))) {
             BrickLink::Stockroom st = it->stockroom();
             if (key == Qt::Key_A)
                 st = BrickLink::Stockroom::A;
@@ -600,7 +603,7 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
                 st = BrickLink::Stockroom::B;
             else if (key == Qt::Key_C)
                 st = BrickLink::Stockroom::C;
-            else if (key == Qt::Key_N)
+            else if (noneKey)
                 st = BrickLink::Stockroom::None;
             else
                 switch (st) {
@@ -616,13 +619,16 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
             m_doc->changeItem(it, item);
         }
         break;
+    }
+    case Document::Condition: {
+        bool newKey = (QKeySequence(key) == QKeySequence(tr("N", "set condition to new")));
+        bool usedKey = (QKeySequence(key) == QKeySequence(tr("U", "set condition to used")));
 
-    case Document::Condition:
-        if (dblclick || (keypress && (editkey || key == Qt::Key_N || key == Qt::Key_U))) {
+        if (dblclick || (keypress && (editkey || newKey || usedKey))) {
             BrickLink::Condition cond;
-            if (key == Qt::Key_N)
+            if (newKey)
                 cond = BrickLink::Condition::New;
-            else if (key == Qt::Key_U)
+            else if (usedKey)
                 cond = BrickLink::Condition::Used;
             else
                 cond = (it->condition() == BrickLink::Condition::New) ? BrickLink::Condition::Used : BrickLink::Condition::New;
@@ -632,15 +638,19 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
             m_doc->changeItem(it, item);
         }
         break;
+    }
+    case Document::Status: {
+        bool includeKey = (QKeySequence(key) == QKeySequence(tr("I", "set status to include")));
+        bool excludeKey = (QKeySequence(key) == QKeySequence(tr("E", "set status to exclude")));
+        bool extraKey = (QKeySequence(key) == QKeySequence(tr("X", "set status to extra")));
 
-    case Document::Status:
-        if (dblclick || (keypress && (editkey || key == Qt::Key_I || key == Qt::Key_E || key == Qt::Key_X))) {
+        if (dblclick || (keypress && (editkey || includeKey || excludeKey || extraKey))) {
             BrickLink::Status st = it->status();
-            if (key == Qt::Key_I)
+            if (includeKey)
                 st = BrickLink::Status::Include;
-            else if (key == Qt::Key_E)
+            else if (excludeKey)
                 st = BrickLink::Status::Exclude;
-            else if (key == Qt::Key_X)
+            else if (extraKey)
                 st = BrickLink::Status::Extra;
             else
                 switch (st) {
@@ -655,7 +665,7 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
             m_doc->changeItem(it, item);
         }
         break;
-
+    }
     case Document::Description:
         if (dblclick && it->item() && it->item()->hasInventory()) {
             auto me = static_cast<QMouseEvent *>(e);
