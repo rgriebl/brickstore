@@ -18,8 +18,8 @@
 
 #include "bricklinkfwd.h"
 
-class QListViewItem;
-class QIconViewItem;
+QT_FORWARD_DECLARE_CLASS(QListViewItem)
+QT_FORWARD_DECLARE_CLASS(QIconViewItem)
 
 
 class SelectItemPrivate;

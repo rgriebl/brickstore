@@ -17,9 +17,9 @@
 
 class TabBar;
 class TabBarSideButton;
-class QStackedWidget;
-class QMenu;
-class QTextDocument;
+QT_FORWARD_DECLARE_CLASS(QStackedWidget)
+QT_FORWARD_DECLARE_CLASS(QMenu)
+QT_FORWARD_DECLARE_CLASS(QTextDocument)
 
 
 class Workspace : public QWidget

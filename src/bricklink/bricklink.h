@@ -45,8 +45,8 @@
 #include "staticpointermodel.h"
 #include "q3cache.h"
 
-class QIODevice;
-class QFile;
+QT_FORWARD_DECLARE_CLASS(QIODevice)
+QT_FORWARD_DECLARE_CLASS(QFile)
 
 
 namespace BrickLink {

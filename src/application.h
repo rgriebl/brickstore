@@ -18,7 +18,7 @@
 #include <QScopedPointer>
 
 class FrameWork;
-class QTranslator;
+QT_FORWARD_DECLARE_CLASS(QTranslator)
 
 
 class Application : public QObject

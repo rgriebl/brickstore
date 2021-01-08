@@ -17,7 +17,7 @@
 #include <QDataStream>
 #include <QStack>
 
-class QIODevice;
+QT_FORWARD_DECLARE_CLASS(QIODevice)
 
 #define ChunkId(a,b,c,d)    quint32((quint32(d & 0x7f) << 24) | (quint32(c & 0x7f) << 16) | (quint32(b & 0x7f) << 8) | quint32(a & 0x7f))
 

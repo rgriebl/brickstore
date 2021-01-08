@@ -18,7 +18,7 @@
 #include "ui_selectdocumentdialog.h"
 
 class Document;
-class QListWidgetItem;
+QT_FORWARD_DECLARE_CLASS(QListWidgetItem)
 
 
 class SelectDocumentDialog : public QDialog, private Ui::SelectDocumentDialog

@@ -22,9 +22,9 @@
 #include "document.h"
 #include "bricklinkfwd.h"
 
-QT_FORWARD_DECLARE_CLASS(QLabel);
-QT_FORWARD_DECLARE_CLASS(QToolButton);
-QT_FORWARD_DECLARE_CLASS(QLineEdit);
+QT_FORWARD_DECLARE_CLASS(QLabel)
+QT_FORWARD_DECLARE_CLASS(QToolButton)
+QT_FORWARD_DECLARE_CLASS(QLineEdit)
 
 class Workspace;
 class ProgressCircle;

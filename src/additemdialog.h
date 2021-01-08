@@ -20,8 +20,8 @@
 #include "currency.h"
 #include "bricklinkfwd.h"
 
-class QValidator;
-class QPushButton;
+QT_FORWARD_DECLARE_CLASS(QValidator)
+QT_FORWARD_DECLARE_CLASS(QPushButton)
 class Window;
 
 

@@ -16,7 +16,7 @@
 #include "bricklinkfwd.h"
 #include "ui_consolidateitemsdialog.h"
 
-class QAbstractButton;
+QT_FORWARD_DECLARE_CLASS(QAbstractButton)
 class Document;
 class DocumentProxyModel;
 

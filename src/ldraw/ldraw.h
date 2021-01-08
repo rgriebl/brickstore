@@ -25,8 +25,8 @@
 #include "ref.h"
 #include "q3cache.h"
 
-class QFile;
-class QDir;
+QT_FORWARD_DECLARE_CLASS(QFile)
+QT_FORWARD_DECLARE_CLASS(QDir)
 
 namespace LDraw {
 

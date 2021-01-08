@@ -15,7 +15,7 @@
 
 #include <QMessageBox>
 
-class QValidator;
+QT_FORWARD_DECLARE_CLASS(QValidator)
 
 
 inline QString CMB_BOLD(const QString &str)

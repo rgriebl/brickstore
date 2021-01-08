@@ -23,11 +23,11 @@
 #include <QScriptValue>
 #include <QScriptEngine>
 
-class QPaintDevice;
-class QPixmap;
+QT_FORWARD_DECLARE_CLASS(QPaintDevice)
+QT_FORWARD_DECLARE_CLASS(QPixmap)
 class CReportPage;
-class QPainter;
-class QScriptEngine;
+QT_FORWARD_DECLARE_CLASS(QPainter)
+QT_FORWARD_DECLARE_CLASS(QScriptEngine)
 
 
 class ReportUtility : public QObject, public QScriptable

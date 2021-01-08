@@ -17,7 +17,7 @@
 #include <QVector>
 #include <QList>
 
-class QTimer;
+QT_FORWARD_DECLARE_CLASS(QTimer)
 
 
 class StaticPointerModel : public QAbstractItemModel

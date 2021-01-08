@@ -17,8 +17,8 @@
 
 #include "ui_settingsdialog.h"
 
-class QHttp;
-class QBuffer;
+QT_FORWARD_DECLARE_CLASS(QHttp)
+QT_FORWARD_DECLARE_CLASS(QBuffer)
 
 
 class SettingsDialog : public QDialog, private Ui::SettingsDialog

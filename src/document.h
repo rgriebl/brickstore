@@ -21,9 +21,9 @@
 #include "bricklink.h"
 #include "filter.h"
 
-class QUndoStack;
+QT_FORWARD_DECLARE_CLASS(QUndoStack)
 class UndoStack;
-class QUndoCommand;
+QT_FORWARD_DECLARE_CLASS(QUndoCommand)
 class AddRemoveCmd;
 class ChangeCmd;
 

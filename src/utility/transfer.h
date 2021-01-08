@@ -17,7 +17,7 @@
 #include <QUrl>
 #include <QNetworkAccessManager>
 
-class QIODevice;
+QT_FORWARD_DECLARE_CLASS(QIODevice)
 class Transfer;
 
 

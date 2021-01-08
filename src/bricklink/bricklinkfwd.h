@@ -19,7 +19,7 @@
 #include <QList>
 #include <QMetaType>
 
-class QDataStream;
+QT_FORWARD_DECLARE_CLASS(QDataStream)
 
 namespace BrickLink {
 class Color;

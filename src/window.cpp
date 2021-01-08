@@ -11,9 +11,6 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <cfloat>
-#include <cmath>
-
 #include <QLayout>
 #include <QLabel>
 #include <QApplication>

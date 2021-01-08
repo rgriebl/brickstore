@@ -21,7 +21,7 @@
 #include "document.h"
 
 class ReportPrivate;
-class QPrinter;
+QT_FORWARD_DECLARE_CLASS(QPrinter)
 
 
 class Report : public QObject

@@ -34,7 +34,7 @@ QT_FORWARD_DECLARE_CLASS(QOpenGLShaderProgram)
 #undef MessageBox
 #endif
 
-class QOpenGLFramebufferObject;
+QT_FORWARD_DECLARE_CLASS(QOpenGLFramebufferObject)
 
 namespace LDraw {
 

@@ -16,7 +16,7 @@
 #include <QUndoStack>
 #include <QUndoGroup>
 
-class QAction;
+QT_FORWARD_DECLARE_CLASS(QAction)
 
 
 class UndoStack : public QUndoStack

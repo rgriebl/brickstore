@@ -21,8 +21,8 @@
 #include "priceguidewidget.h"
 #include "picturewidget.h"
 
-class QLabel;
-class QDockWidget;
+QT_FORWARD_DECLARE_CLASS(QLabel)
+QT_FORWARD_DECLARE_CLASS(QDockWidget)
 
 
 class TaskPriceGuideWidget : public PriceGuideWidget

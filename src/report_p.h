@@ -18,7 +18,7 @@
 
 #include <time.h>
 
-class QScriptEngine;
+QT_FORWARD_DECLARE_CLASS(QScriptEngine)
 
 
 class ReportPrivate

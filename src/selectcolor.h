@@ -17,8 +17,8 @@
 
 #include "bricklinkfwd.h"
 
-class QTreeView;
-class QComboBox;
+QT_FORWARD_DECLARE_CLASS(QTreeView)
+QT_FORWARD_DECLARE_CLASS(QComboBox)
 
 
 class SelectColor : public QWidget

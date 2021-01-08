@@ -25,8 +25,8 @@
 class SelectItemDialog;
 class SelectColorDialog;
 
-class QLineEdit;
-class QTableView;
+QT_FORWARD_DECLARE_CLASS(QLineEdit)
+QT_FORWARD_DECLARE_CLASS(QTableView)
 
 
 class DocumentDelegate : public QItemDelegate

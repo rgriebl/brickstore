@@ -23,12 +23,12 @@
 #include "config.h"
 #include "currency.h"
 
-class QToolButton;
-class QComboBox;
-class QTableView;
+QT_FORWARD_DECLARE_CLASS(QToolButton)
+QT_FORWARD_DECLARE_CLASS(QComboBox)
+QT_FORWARD_DECLARE_CLASS(QTableView)
 class FrameWork;
 class UndoStack;
-class QItemSelectionModel;
+QT_FORWARD_DECLARE_CLASS(QItemSelectionModel)
 class HeaderView;
 
 

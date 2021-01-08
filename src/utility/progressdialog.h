@@ -17,11 +17,11 @@
 
 #include "transfer.h"
 
-class QIODevice;
-class QLabel;
-class QProgressBar;
-class QWidget;
-class QDialogButtonBox;
+QT_FORWARD_DECLARE_CLASS(QIODevice)
+QT_FORWARD_DECLARE_CLASS(QLabel)
+QT_FORWARD_DECLARE_CLASS(QProgressBar)
+QT_FORWARD_DECLARE_CLASS(QWidget)
+QT_FORWARD_DECLARE_CLASS(QDialogButtonBox)
 
 
 class ProgressDialog : public QDialog

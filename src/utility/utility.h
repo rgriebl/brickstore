@@ -18,9 +18,9 @@
 #include <QLocale>
 #include <QPair>
 
-class QFontMetrics;
-class QRect;
-class QWidget;
+QT_FORWARD_DECLARE_CLASS(QFontMetrics)
+QT_FORWARD_DECLARE_CLASS(QRect)
+QT_FORWARD_DECLARE_CLASS(QWidget)
 
 
 namespace Utility {

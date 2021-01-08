@@ -17,9 +17,9 @@
 #include <QMap>
 #include <QDateTime>
 
-class QKeyEvent;
-class QNetworkAccessManager;
-class QBuffer;
+QT_FORWARD_DECLARE_CLASS(QKeyEvent)
+QT_FORWARD_DECLARE_CLASS(QNetworkAccessManager)
+QT_FORWARD_DECLARE_CLASS(QBuffer)
 
 
 class Currency : public QObject

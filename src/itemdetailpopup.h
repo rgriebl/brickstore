@@ -24,10 +24,10 @@ class RenderWidget;
 class RenderOffscreenWidget;
 }
 
-class QToolButton;
-class QStackedWidget;
-class QLabel;
-class QTableView;
+QT_FORWARD_DECLARE_CLASS(QToolButton)
+QT_FORWARD_DECLARE_CLASS(QStackedWidget)
+QT_FORWARD_DECLARE_CLASS(QLabel)
+QT_FORWARD_DECLARE_CLASS(QTableView)
 
 typedef LDraw::RenderOffscreenWidget LDrawWidget;
 

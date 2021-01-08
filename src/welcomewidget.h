@@ -16,8 +16,8 @@
 #include <QWidget>
 #include <QPointer>
 
-QT_FORWARD_DECLARE_CLASS(QGroupBox);
-QT_FORWARD_DECLARE_CLASS(QLabel);
+QT_FORWARD_DECLARE_CLASS(QGroupBox)
+QT_FORWARD_DECLARE_CLASS(QLabel)
 
 namespace LDraw {
 class RenderOffscreenWidget;

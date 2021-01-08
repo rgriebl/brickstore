@@ -20,7 +20,7 @@
 #include "bricklinkfwd.h"
 
 class PictureWidgetPrivate;
-class QAction;
+QT_FORWARD_DECLARE_CLASS(QAction)
 
 
 class PictureWidget : public QFrame

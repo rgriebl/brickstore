@@ -19,7 +19,7 @@
 #include "currency.h"
 #include "bricklinkfwd.h"
 
-class QAction;
+QT_FORWARD_DECLARE_CLASS(QAction)
 class PriceGuideWidgetPrivate;
 
 
