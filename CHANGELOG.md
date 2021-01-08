@@ -2,8 +2,18 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+## [2021.1.3] - 2021-01-08
 ### Added
 - The Buyer/Collector mode is working again.
+- Column layouts are now saved to documents again.
+- Column layouts can also be named, so you can easily apply them to other documents.
+- Right-clicking on a cell now gives you the option to create a filter from this cell's contents.
+
+### Fixed
+- All of the reported rounding and decimal places related errors should be fixed now.
+- Better selection visibility in the image-only item browser view.
+
 
 ## [2021.1.2] - 2021-01-06
 ### Added
@@ -56,7 +66,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
   are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.1.2...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.1.3...HEAD
+[2021.1.3]: https://github.com/rgriebl/brickstore/releases/tag/v2021.1.3
 [2021.1.2]: https://github.com/rgriebl/brickstore/releases/tag/v2021.1.2
 [2021.1.1]: https://github.com/rgriebl/brickstore/releases/tag/v2021.1.1
 [2021.1.0]: https://github.com/rgriebl/brickstore/releases/tag/v2021.1.0
