@@ -13,6 +13,7 @@
 */
 #include <QPushButton>
 
+#include "smartvalidator.h"
 #include "incdecpricesdialog.h"
 
 
@@ -25,9 +26,9 @@ IncDecPricesDialog::IncDecPricesDialog(const QString &currencycode, QWidget *par
     w_value->setText(QLatin1String("0"));
     w_fixed->setText(Currency::localSymbol(currencycode));
 
-    m_pos_percent_validator = new QDoubleValidator (0., 1000., 2, this);
-    m_neg_percent_validator = new QDoubleValidator (0., 99.99, 2, this);
-    m_fixed_validator       = new CurrencyValidator(0,  10000, 3, this);
+    m_pos_percent_validator = new SmartDoubleValidator(0., 1000., 2, 0, this);
+    m_neg_percent_validator = new SmartDoubleValidator(0., 99.99, 2, 0, this);
+    m_fixed_validator       = new SmartDoubleValidator(0,  10000, 3, 0, this);
 
     connect(w_increase, &QAbstractButton::toggled,
             this, &IncDecPricesDialog::updateValidators);

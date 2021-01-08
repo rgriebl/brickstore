@@ -5,7 +5,7 @@
 #include <QButtonGroup>
 
 #include "currency.h"
-
+#include "smartvalidator.h"
 #include "changecurrencydialog.h"
 
 ChangeCurrencyDialog::ChangeCurrencyDialog(const QString &from, const QString &to, QWidget *parent)
@@ -34,8 +34,8 @@ ChangeCurrencyDialog::ChangeCurrencyDialog(const QString &from, const QString &t
     w_labelEcb->installEventFilter(this);
     w_labelCustom->installEventFilter(this);
 
-    w_editCustom->setValidator(new QDoubleValidator(0, 100000, 3, w_editCustom));
-    w_editCustom->setText(QString::number(double(1), 'f', 3));
+    w_editCustom->setValidator(new SmartDoubleValidator(0, 100000, 3, 1, w_editCustom));
+    w_editCustom->setText(Currency::toString(1));
 
     ratesUpdated();
 }

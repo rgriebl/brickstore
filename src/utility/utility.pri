@@ -11,6 +11,7 @@ HEADERS += \
     $$PWD/chunkwriter.h \
     $$PWD/exception.h \
     $$PWD/q3cache.h \
+    $$PWD/smartvalidator.h \
     $$PWD/staticpointermodel.h \
     $$PWD/stopwatch.h \
     $$PWD/transfer.h \
@@ -18,6 +19,7 @@ HEADERS += \
 
 SOURCES += \
     $$PWD/chunkreader.cpp \
+    $$PWD/smartvalidator.cpp \
     $$PWD/staticpointermodel.cpp \
     $$PWD/transfer.cpp \
     $$PWD/utility.cpp \

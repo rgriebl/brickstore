@@ -14,12 +14,10 @@
 #pragma once
 
 #include <QString>
-#include <QValidator>
 #include <QMap>
 #include <QDateTime>
 
 class QKeyEvent;
-class QLineEdit;
 class QNetworkAccessManager;
 class QBuffer;
 
@@ -71,16 +69,4 @@ private:
     QMap<QString, qreal> m_rates;
     QMap<QString, qreal> m_customRates;
     QDateTime m_lastUpdate;
-};
-
-
-class CurrencyValidator : public QDoubleValidator {
-    Q_OBJECT
-
-public:
-    CurrencyValidator(QObject *parent);
-    CurrencyValidator(double bottom, double top, int decimals, QObject *parent);
-
-protected:
-    bool event(QEvent *event) override;
 };

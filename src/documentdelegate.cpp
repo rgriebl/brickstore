@@ -35,6 +35,8 @@
 #include "selectcolordialog.h"
 #include "utility.h"
 #include "framework.h"
+#include "smartvalidator.h"
+
 
 QVector<QColor>                 DocumentDelegate::s_shades;
 QHash<int, QIcon>               DocumentDelegate::s_status_icons;
@@ -733,19 +735,19 @@ QWidget *DocumentDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
 
     QValidator *valid = nullptr;
     switch (idx.column()) {
-    case Document::Sale        : valid = new QIntValidator(-1000, 99, nullptr); break;
+    case Document::Sale        : valid = new SmartIntValidator(-1000, 99, 0, nullptr); break;
     case Document::Quantity    :
-    case Document::QuantityDiff: valid = new QIntValidator(-999999, 999999, nullptr); break;
-    case Document::Bulk        : valid = new QIntValidator(1, 999999, nullptr); break;
+    case Document::QuantityDiff: valid = new SmartIntValidator(-999999, 999999, 0, nullptr); break;
+    case Document::Bulk        : valid = new SmartIntValidator(1, 999999, 1, nullptr); break;
     case Document::TierQ1      :
     case Document::TierQ2      :
-    case Document::TierQ3      : valid = new QIntValidator(0, 999999, nullptr); break;
+    case Document::TierQ3      : valid = new SmartIntValidator(0, 999999, 0, nullptr); break;
     case Document::Price       :
     case Document::TierP1      :
     case Document::TierP2      :
-    case Document::TierP3      : valid = new CurrencyValidator(0, 10000, 3, nullptr); break;
-    case Document::PriceDiff   : valid = new CurrencyValidator(-10000, 10000, 3, nullptr); break;
-    case Document::Weight      : valid = new QDoubleValidator(0., 100000., 4, nullptr); break;
+    case Document::TierP3      : valid = new SmartDoubleValidator(0, 10000, 3, 0, nullptr); break;
+    case Document::PriceDiff   : valid = new SmartDoubleValidator(-10000, 10000, 3, 0, nullptr); break;
+    case Document::Weight      : valid = new SmartDoubleValidator(0., 100000., 4, 0, nullptr); break;
     default                    : break;
     }
 

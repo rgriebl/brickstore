@@ -27,6 +27,7 @@
 #include <QShortcut>
 #include <QToolTip>
 
+#include "smartvalidator.h"
 #include "config.h"
 #include "currency.h"
 #include "bricklink.h"
@@ -89,13 +90,17 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     w_appears_in->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
     w_appears_in->setLineWidth(2);
 
-    ValidatorSpinBox::setValidator(w_qty, new QIntValidator(1, 999999, w_qty));
+    ValidatorSpinBox::setValidator(w_qty, new SmartIntValidator(1, 999999, 1, w_qty));
     w_qty->setValue(1);
+    w_qty->installEventFilter(this);
 
-    ValidatorSpinBox::setValidator(w_bulk, new QIntValidator(1, 999999, w_bulk));
+    ValidatorSpinBox::setValidator(w_bulk, new SmartIntValidator(1, 999999, 1, w_bulk));
     w_bulk->setValue(1);
+    w_bulk->installEventFilter(this);
 
-    w_price->setValidator(new CurrencyValidator(0.000, 10000, 3, w_price));
+    w_price->setValidator(new SmartDoubleValidator(0, 10000, 3, 0, w_price));
+    w_price->setText("0");
+    w_price->installEventFilter(this);
 
     w_tier_qty [0] = w_tier_qty_0;
     w_tier_qty [1] = w_tier_qty_1;
@@ -105,9 +110,11 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     w_tier_price [2] = w_tier_price_2;
 
     for (int i = 0; i < 3; i++) {
-        ValidatorSpinBox::setValidator(w_tier_qty[i], new QIntValidator(1, 999999, w_tier_qty[i]));
+        ValidatorSpinBox::setValidator(w_tier_qty[i], new SmartIntValidator(1, 999999, 1, w_tier_qty[i]));
         w_tier_qty [i]->setValue(0);
         w_tier_price [i]->setText(QString());
+        w_tier_qty [i]->installEventFilter(this);
+        w_tier_price [i]->installEventFilter(this);
 
         connect(w_tier_qty [i], QOverload<int>::of(&QSpinBox::valueChanged),
                 this, &AddItemDialog::checkTieredPrices);
@@ -115,8 +122,8 @@ AddItemDialog::AddItemDialog(QWidget *parent)
                 this, &AddItemDialog::checkTieredPrices);
     }
 
-    m_percent_validator = new QIntValidator(1, 99, this);
-    m_money_validator = new CurrencyValidator(0.001, 10000, 3, this);
+    m_percent_validator = new SmartIntValidator(1, 99, 1, this);
+    m_money_validator = new SmartDoubleValidator(0.001, 10000, 3, 1, this);
 
     connect(w_select_item, &SelectItem::hasColors,
             w_select_color, &QWidget::setEnabled);
@@ -261,6 +268,18 @@ void AddItemDialog::keyPressEvent(QKeyEvent *e)
     }
 
     QWidget::keyPressEvent(e);
+}
+
+bool AddItemDialog::eventFilter(QObject *watched, QEvent *event)
+{
+    bool res = QWidget::eventFilter(watched, event);
+    if (event->type() == QEvent::FocusIn) {
+        if (auto *le = qobject_cast<QLineEdit *>(watched))
+            QMetaObject::invokeMethod(le, &QLineEdit::selectAll, Qt::QueuedConnection);
+        else if (auto *sb = qobject_cast<QSpinBox *>(watched))
+            QMetaObject::invokeMethod(sb, &QSpinBox::selectAll, Qt::QueuedConnection);
+    }
+    return res;
 }
 
 void AddItemDialog::setSimpleMode(bool b)
