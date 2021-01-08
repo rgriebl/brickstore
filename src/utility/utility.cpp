@@ -326,3 +326,20 @@ QColor Utility::premultiplyAlpha(const QColor &c)
     return c;
 
 }
+
+QString Utility::sanitizeFileName(const QString &name)
+{
+    static QVector<char> illegal { '<', '>', ':', '"', '/', '\\', '|', '?', '*' };
+    QString result;
+
+    for (int i = 0; i < name.count(); ++i) {
+        auto c = name.at(i);
+        auto u = c.unicode();
+
+        if ((u <= 31) || ((u < 128) && illegal.contains(char(u))))
+            c = QLatin1Char('_');
+
+        result.append(c);
+    }
+    return result.simplified();
+}

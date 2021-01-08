@@ -1087,11 +1087,12 @@ void Document::fileSaveAs()
 
     QString fn = fileName();
 
-    if (fn.isEmpty()) {
+    if (fn.isEmpty() && !title().isEmpty()) {
         QDir d(Config::inst()->documentDir());
-
-        if (d.exists())
-            fn = d.filePath(m_title);
+        if (d.exists()) {
+            QString t = Utility::sanitizeFileName(title());
+            fn = d.filePath(t);
+        }
     }
     if (fn.right(4) == ".xml")
         fn.truncate(fn.length() - 4);
