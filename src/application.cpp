@@ -168,6 +168,10 @@ Application::Application(int &_argc, char **_argv)
     FrameWork::inst()->show();
 #if defined(Q_OS_MACOS)
     FrameWork::inst()->raise();
+
+#else if defined(Q_OS_WIN)
+    RegisterApplicationRestart(nullptr, 0); // make us restart-able by installers
+
 #endif
 }
 
