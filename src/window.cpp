@@ -1790,6 +1790,9 @@ void Window::resizeColumnsToDefault()
 
         if (w_header->visualIndex(i) != i)
             w_header->moveSection(w_header->visualIndex(i), i);
+
+        if (w_header->isSectionAvailable(i))
+            w_header->setSectionHidden(i, false);
     }
 
     // start with the physical document sort order

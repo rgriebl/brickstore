@@ -32,7 +32,9 @@ public:
     void showSection(int logicalIndex) { setSectionHidden(logicalIndex, false); }
     void hideSection(int logicalIndex) { setSectionHidden(logicalIndex, true); }
 
-    void setModel(QAbstractItemModel*) override;
+    void resizeSection(int logicalIndex, int size);
+
+    void setModel(QAbstractItemModel *model) override;
 
     bool restoreLayout(const QByteArray &config);
     QByteArray saveLayout() const;
@@ -46,6 +48,7 @@ private:
     using QHeaderView::setSectionHidden;
     using QHeaderView::showSection;
     using QHeaderView::hideSection;
+    using QHeaderView::resizeSection;
 
 private slots:
     void sectionsRemoved(const QModelIndex &parent, int logicalFirst, int logicalLast);

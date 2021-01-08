@@ -19,6 +19,7 @@
 #include <QLabel>
 #include <QDialog>
 #include <QHeaderView>
+#include <QDebug>
 
 #include "headerview.h"
 
@@ -294,10 +295,18 @@ void HeaderView::setSectionHidden(int logicalIndex, bool hide)
     if (!hide && hidden) {
         auto it = m_hiddenSizes.constFind(logicalIndex);
         if (it != m_hiddenSizes.constEnd()) {
-            resizeSection(logicalIndex, it.value());
+            QHeaderView::resizeSection(logicalIndex, it.value());
             m_hiddenSizes.erase(it);
         }
     }
+}
+
+void HeaderView::resizeSection(int logicalIndex, int size)
+{
+    if (isSectionHidden(logicalIndex))
+        m_hiddenSizes[logicalIndex] = size;
+    else
+        QHeaderView::resizeSection(logicalIndex, size);
 }
 
 bool HeaderView::viewportEvent(QEvent *e)
