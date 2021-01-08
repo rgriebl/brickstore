@@ -101,7 +101,7 @@ int DocumentDelegate::defaultItemHeight(const QWidget *w) const
     QSize picsize = BrickLink::core()->standardPictureSize();
     QFontMetrics fm(w ? w->font() : QApplication::font("QTableView"));
 
-    return qMax(2 + fm.height(), picsize.height());
+    return qMax(2 + fm.height(), picsize.height() + 1 /* the grid lines */);
 }
 
 QSize DocumentDelegate::sizeHint(const QStyleOptionViewItem &option1, const QModelIndex &idx) const
@@ -122,7 +122,7 @@ QSize DocumentDelegate::sizeHint(const QStyleOptionViewItem &option1, const QMod
     }
 
     QStyleOptionViewItem option(option1);
-    return { w, defaultItemHeight(option.widget) };
+    return { w + 1 /* the grid lines*/, defaultItemHeight(option.widget) };
 }
 
 void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, const QModelIndex &idx) const
@@ -446,8 +446,8 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
     else if (!image.isNull()) {
         // clip the image here ..this is cheaper than a cliprect
 
-        int rw = w - 2 * margin;
-        int rh = h; // - 2 * margin;
+        int rw = w;
+        int rh = h;
 
         int sw, sh;
 
@@ -459,8 +459,8 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
             sh = rh;
         }
 
-        int px = x + margin;
-        int py = y + /*margin +*/ (rh - sh) / 2;
+        int px = x;
+        int py = y + (rh - sh) / 2;
 
         if (align & Qt::AlignHCenter)
             px += (rw - sw) / 2;
