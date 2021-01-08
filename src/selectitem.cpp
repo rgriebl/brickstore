@@ -96,6 +96,7 @@ public:
     { }
 
     QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 };
 
 QSize ItemThumbsDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
@@ -105,6 +106,28 @@ QSize ItemThumbsDelegate::sizeHint(const QStyleOptionViewItem &option, const QMo
         return item ? item->itemType()->pictureSize() : QSize(80, 60);
     } else {
         return BrickLink::ItemDelegate::sizeHint(option, index);
+    }
+}
+
+void ItemThumbsDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
+{
+    QStyleOptionViewItem myoption(option);
+
+    bool useFrameSelection = (index.column() == 0) && (option.state & QStyle::State_Selected);
+    if (useFrameSelection)
+        myoption.state &= ~QStyle::State_Selected;
+
+    BrickLink::ItemDelegate::paint(painter, myoption, index);
+
+    if (useFrameSelection) {
+        painter->save();
+        QColor c = option.palette.color(QPalette::Highlight);
+        for (int i = 0; i < 6; ++i) {
+            c.setAlphaF(1. - i * .1);
+            painter->setPen(c);
+            painter->drawRect(option.rect.adjusted(i, i, -i - 1, -i - 1));
+        }
+        painter->restore();
     }
 }
 
@@ -231,6 +254,7 @@ void SelectItem::init()
     d->w_thumbs->setViewMode(QListView::IconMode);
     d->w_thumbs->setLayoutMode(QListView::Batched);
     d->w_thumbs->setResizeMode(QListView::Adjust);
+    d->w_thumbs->setSpacing(5);
     d->w_thumbs->setSelectionBehavior(QAbstractItemView::SelectRows);
     d->w_thumbs->setSelectionMode(QAbstractItemView::SingleSelection);
     d->w_thumbs->setTextElideMode(Qt::ElideRight);
@@ -453,6 +477,8 @@ void SelectItem::itemTypeChanged()
 
     setCurrentCategory(oldCat);
     setCurrentItem(oldItem);
+
+    d->w_itemthumbs->resizeColumnToContents(0);
 
     emit hasColors(itemtype ? itemtype->hasColors() : false);
 }
