@@ -922,7 +922,7 @@ QDomElement Core::createItemListXML(QDomDocument doc, ItemListXMLHint hint, cons
             double pdiff = ii->price() - ii->origPrice();
 
             if (!qFuzzyIsNull(pdiff))
-                item.appendChild(doc.createElement(QLatin1String("PRICE")).appendChild(doc.createTextNode(c.toString(ii->price()))).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("PRICE")).appendChild(doc.createTextNode(c.toCurrencyString(ii->price(), {}, 3))).parentNode());
             if (qdiff && (ii->quantity() > 0))
                 item.appendChild(doc.createElement(QLatin1String("QTY")).appendChild(doc.createTextNode(QLatin1String(qdiff > 0 ? "+" : "") + c.toString(qdiff))).parentNode());
             else if (qdiff && (ii->quantity() <= 0))
@@ -955,7 +955,7 @@ QDomElement Core::createItemListXML(QDomDocument doc, ItemListXMLHint hint, cons
             }
 
             item.appendChild(doc.createElement(QLatin1String("Qty")).appendChild(doc.createTextNode(c.toString(ii->quantity()))).parentNode());
-            item.appendChild(doc.createElement(QLatin1String("Price")).appendChild(doc.createTextNode(c.toString(ii->price()))).parentNode());
+            item.appendChild(doc.createElement(QLatin1String("Price")).appendChild(doc.createTextNode(c.toCurrencyString(ii->price(), { }, 3))).parentNode());
             item.appendChild(doc.createElement(QLatin1String("Condition")).appendChild(doc.createTextNode(QLatin1String((ii->condition() == Condition::New) ? "N" : "U"))).parentNode());
 
             if (ii->subCondition() != SubCondition::None) {
@@ -996,17 +996,17 @@ QDomElement Core::createItemListXML(QDomDocument doc, ItemListXMLHint hint, cons
 
             if (ii->tierQuantity(0)) {
                 item.appendChild(doc.createElement(QLatin1String("TQ1")).appendChild(doc.createTextNode(c.toString(ii->tierQuantity(0)))).parentNode());
-                item.appendChild(doc.createElement(QLatin1String("TP1")).appendChild(doc.createTextNode(c.toString(ii->tierPrice(0)))).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("TP1")).appendChild(doc.createTextNode(c.toCurrencyString(ii->tierPrice(0), { }, 3))).parentNode());
                 item.appendChild(doc.createElement(QLatin1String("TQ2")).appendChild(doc.createTextNode(c.toString(ii->tierQuantity(1)))).parentNode());
-                item.appendChild(doc.createElement(QLatin1String("TP2")).appendChild(doc.createTextNode(c.toString(ii->tierPrice(1)))).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("TP2")).appendChild(doc.createTextNode(c.toCurrencyString(ii->tierPrice(1), { }, 3))).parentNode());
                 item.appendChild(doc.createElement(QLatin1String("TQ3")).appendChild(doc.createTextNode(c.toString(ii->tierQuantity(2)))).parentNode());
-                item.appendChild(doc.createElement(QLatin1String("TP3")).appendChild(doc.createTextNode(c.toString(ii->tierPrice(2)))).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("TP3")).appendChild(doc.createTextNode(c.toCurrencyString(ii->tierPrice(2), { }, 3))).parentNode());
             }
 
             if (ii->m_weight > 0)
                 item.appendChild(doc.createElement(QLatin1String("TotalWeight")).appendChild(doc.createTextNode(c.toString(ii->weight(), 'f', 4))).parentNode());
             if (!qFuzzyCompare(ii->origPrice(), ii->price()))
-                item.appendChild(doc.createElement(QLatin1String("OrigPrice")).appendChild(doc.createTextNode(c.toString(ii->origPrice()))).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("OrigPrice")).appendChild(doc.createTextNode(c.toCurrencyString(ii->origPrice(), { }, 3))).parentNode());
             if (ii->origQuantity() != ii->quantity())
                 item.appendChild(doc.createElement(QLatin1String("OrigQty")).appendChild(doc.createTextNode(c.toString(ii->origQuantity()))).parentNode());
         }
@@ -1019,7 +1019,7 @@ QDomElement Core::createItemListXML(QDomDocument doc, ItemListXMLHint hint, cons
             item.appendChild(doc.createElement(QLatin1String("ITEMTYPE")).appendChild(doc.createTextNode(QChar(ii->itemType()->id()))).parentNode());
 
             item.appendChild(doc.createElement(QLatin1String("QTY")).appendChild(doc.createTextNode(c.toString(ii->quantity()))).parentNode());
-            item.appendChild(doc.createElement(QLatin1String("PRICE")).appendChild(doc.createTextNode(c.toString(ii->price(), 'f', 3))).parentNode());
+            item.appendChild(doc.createElement(QLatin1String("PRICE")).appendChild(doc.createTextNode(c.toCurrencyString(ii->price(), { }, 3))).parentNode());
             item.appendChild(doc.createElement(QLatin1String("CONDITION")).appendChild(doc.createTextNode(QLatin1String((ii->condition() == Condition::New) ? "N" : "U"))).parentNode());
 
             if (ii->subCondition() != SubCondition::None) {
@@ -1027,8 +1027,8 @@ QDomElement Core::createItemListXML(QDomDocument doc, ItemListXMLHint hint, cons
                 switch (ii->subCondition()) {
                     case SubCondition::Incomplete: st = "I"; break;
                     case SubCondition::Complete  : st = "C"; break;
-                    case SubCondition::Sealed      : st = "M"; break;
-                    default        : st = "?"; break;
+                    case SubCondition::Sealed    : st = "M"; break;
+                    default                      : st = "?"; break;
                 }
                 item.appendChild(doc.createElement(QLatin1String("SUBCONDITION")).appendChild(doc.createTextNode(QLatin1String(st))).parentNode());
             }
@@ -1060,11 +1060,11 @@ QDomElement Core::createItemListXML(QDomDocument doc, ItemListXMLHint hint, cons
 
             if (ii->tierQuantity(0)) {
                 item.appendChild(doc.createElement(QLatin1String("TQ1")).appendChild(doc.createTextNode(c.toString(ii->tierQuantity(0)))).parentNode());
-                item.appendChild(doc.createElement(QLatin1String("TP1")).appendChild(doc.createTextNode(c.toString(ii->tierPrice(0)))).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("TP1")).appendChild(doc.createTextNode(c.toCurrencyString(ii->tierPrice(0), { }, 3))).parentNode());
                 item.appendChild(doc.createElement(QLatin1String("TQ2")).appendChild(doc.createTextNode(c.toString(ii->tierQuantity(1)))).parentNode());
-                item.appendChild(doc.createElement(QLatin1String("TP2")).appendChild(doc.createTextNode(c.toString(ii->tierPrice(1)))).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("TP2")).appendChild(doc.createTextNode(c.toCurrencyString(ii->tierPrice(1), { }, 3))).parentNode());
                 item.appendChild(doc.createElement(QLatin1String("TQ3")).appendChild(doc.createTextNode(c.toString(ii->tierQuantity(2)))).parentNode());
-                item.appendChild(doc.createElement(QLatin1String("TP3")).appendChild(doc.createTextNode(c.toString(ii->tierPrice(2)))).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("TP3")).appendChild(doc.createTextNode(c.toCurrencyString(ii->tierPrice(2), { }, 3))).parentNode());
             }
         }
 
@@ -1077,7 +1077,7 @@ QDomElement Core::createItemListXML(QDomDocument doc, ItemListXMLHint hint, cons
             if (ii->quantity())
                 item.appendChild(doc.createElement(QLatin1String("MINQTY")).appendChild(doc.createTextNode(c.toString(ii->quantity()))).parentNode());
             if (!qFuzzyIsNull(ii->price()))
-                item.appendChild(doc.createElement(QLatin1String("MAXPRICE")).appendChild(doc.createTextNode(c.toString(ii->price()))).parentNode());
+                item.appendChild(doc.createElement(QLatin1String("MAXPRICE")).appendChild(doc.createTextNode(c.toCurrencyString(ii->price(), { }, 3))).parentNode());
             if (!ii->remarks().isEmpty())
                 item.appendChild(doc.createElement(QLatin1String("REMARKS")).appendChild(doc.createTextNode(ii->remarks())).parentNode());
             if (ii->condition() == Condition::New)

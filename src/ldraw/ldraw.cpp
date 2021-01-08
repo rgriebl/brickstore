@@ -623,7 +623,7 @@ QColor LDraw::Core::parse_color_string(const QString &cstr)
 
 bool LDraw::Core::parse_ldconfig(const char *filename)
 {
-    stopwatch sw("LDraw: parse_ldconfig");
+    //stopwatch sw("LDraw: parse_ldconfig");
 
     QDir ldrawdir(dataPath());
     QFile f(ldrawdir.filePath(QLatin1String(filename)));
