@@ -1902,10 +1902,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Download even if already in cache</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Last 6 Months Sales</source>
         <translation type="unfinished"></translation>
     </message>
