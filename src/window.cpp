@@ -886,22 +886,26 @@ void Window::priceGuideUpdated(BrickLink::PriceGuide *pg)
                 newitem.setPrice(p);
                 m_doc->changeItem(item, newitem);
             }
+            pg->release();
         }
         m_settopg_list->remove(pg);
-        pg->release();
     }
 
     if (m_settopg_list && m_settopg_list->isEmpty()) {
-        QString s = tr("Prices of the selected items have been updated to Price Guide values.");
-
-        if (m_settopg_failcnt)
-            s += "<br /><br />" + tr("%1 have been skipped, because of missing Price Guide records and/or network errors.").arg(CMB_BOLD(QString::number(m_settopg_failcnt)));
-
-        MessageBox::information(this, s);
+        int fails = m_settopg_failcnt;
 
         m_settopg_failcnt = 0;
         delete m_settopg_list;
         m_settopg_list = nullptr;
+
+        QString s = tr("Prices of the selected items have been updated to Price Guide values.");
+        if (fails) {
+            s += "<br /><br />" + tr("%1 have been skipped, because of missing Price Guide records and/or network errors.")
+                    .arg(CMB_BOLD(QString::number(fails)));
+        }
+
+        MessageBox::information(this, s);
+
     }
 }
 
