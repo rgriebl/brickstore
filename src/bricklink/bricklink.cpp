@@ -946,6 +946,7 @@ QDomElement Core::createItemListXML(QDomDocument doc, ItemListXMLHint hint, cons
             {
                 const char *st;
                 switch (ii->status()) {
+                default             :
                 case Status::Unknown: st = "?"; break;
                 case Status::Extra  : st = "E"; break;
                 case Status::Exclude: st = "X"; break;
