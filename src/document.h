@@ -17,6 +17,7 @@
 #include <QDomDocument>
 #include <QPixmap>
 #include <QUuid>
+#include <QElapsedTimer>
 
 #include "bricklink.h"
 #include "filter.h"
@@ -279,6 +280,8 @@ private:
     void changeItemDirect(int position, Item &item);
     void changeCurrencyDirect(const QString &ccode, qreal crate, double *&prices);
 
+    void emitStatisticsChanged();
+
     friend class AddRemoveCmd;
     friend class ChangeCmd;
     friend class CurrencyCmd;
@@ -300,6 +303,8 @@ private:
     BrickLink::Order *m_order = nullptr;
 
     QDomElement       m_gui_state;
+
+    QElapsedTimer     m_lastEmitOfStatisticsChanged;
 
     static QList<Document *> s_documents;
 };

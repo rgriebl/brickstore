@@ -604,6 +604,17 @@ void Document::changeCurrencyDirect(const QString &ccode, qreal crate, double *&
     emit currencyCodeChanged(m_currencycode);
 }
 
+void Document::emitStatisticsChanged()
+{
+    if (!m_lastEmitOfStatisticsChanged.isValid()
+            || (m_lastEmitOfStatisticsChanged.elapsed() > 500)) {
+        emit statisticsChanged();
+    } else {
+        m_lastEmitOfStatisticsChanged.start();
+        QTimer::singleShot(500, this, &Document::statisticsChanged);
+    }
+}
+
 void Document::updateErrors(Item *item)
 {
     quint64 errors = 0;
