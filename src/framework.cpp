@@ -1527,14 +1527,7 @@ void FrameWork::statisticsUpdate()
 
     if (m_current_window)
     {
-        Document::ItemList not_exclude;
-
-        foreach(Document::Item *item, m_current_window->document()->items()) {
-            if (item->status() != BrickLink::Status::Exclude)
-                not_exclude.append(item);
-        }
-
-        Document::Statistics stat = m_current_window->document()->statistics(not_exclude);
+        Document::Statistics stat(m_current_window->document(), m_current_window->document()->items(), true);
         ccode = m_current_window->document()->currencyCode();
 
         if (!qFuzzyCompare(stat.value(), stat.minValue())) {

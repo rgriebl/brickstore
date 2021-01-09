@@ -204,9 +204,9 @@ QString AddRemoveCmd::genDesc(bool is_add, int count)
 // *****************************************************************************************
 // *****************************************************************************************
 
-Document::Statistics::Statistics(const Document *doc, const ItemList &list)
+Document::Statistics::Statistics(const Document *doc, const ItemList &list, bool ignoreExcluded)
 {
-    m_lots = list.count();
+    m_lots = 0;
     m_items = 0;
     m_val = m_minval = 0.;
     m_weight = .0;
@@ -215,6 +215,11 @@ Document::Statistics::Statistics(const Document *doc, const ItemList &list)
     bool weight_missing = false;
 
     for (const Item *item : list) {
+        if (ignoreExcluded && (item->status() == BrickLink::Status::Exclude))
+            continue;
+
+        ++m_lots;
+
         int qty = item->quantity();
         double price = item->price();
 

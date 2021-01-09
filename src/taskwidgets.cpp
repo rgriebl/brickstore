@@ -203,7 +203,7 @@ void TaskInfoWidget::selectionUpdate(const Document::ItemList &list)
         setCurrentWidget(m_pic);
     }
     else {
-        Document::Statistics stat = m_win->document()->statistics(list);
+        Document::Statistics stat(m_win->document(), list);
 
         QString s;
         QString valstr, wgtstr;

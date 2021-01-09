@@ -124,6 +124,8 @@ public:
     class Statistics
     {
     public:
+        Statistics(const Document *doc, const ItemList &list, bool ignoreExcluded = false);
+
         int lots() const             { return m_lots; }
         int items() const            { return m_items; }
         double value() const         { return m_val; }
@@ -134,10 +136,6 @@ public:
         QString currencyCode() const { return m_ccode; }
 
     private:
-        friend class Document;
-
-        Statistics(const Document *doc, const ItemList &list);
-
         int m_lots;
         int m_items;
         double m_val;
