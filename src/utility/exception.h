@@ -54,8 +54,9 @@ public:
         return whatBuffer.constData();
     }
 
-private:
+protected:
     QString m_message;
+private:
     mutable QByteArray whatBuffer;
 
 };

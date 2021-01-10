@@ -6,7 +6,7 @@ DEPENDPATH  += $$RELPWD
 HEADERS += \
   $$PWD/bricklink.h \
   $$PWD/bricklinkfwd.h \
-  $$PWD/bricklink_setmatch.h \
+  $$PWD/bricklink_setmatch.h
 
 SOURCES += \
   $$PWD/bricklink.cpp \

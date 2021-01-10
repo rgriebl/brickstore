@@ -194,7 +194,7 @@ public:
 
 public slots:
     void setFileName(const QString &str);
-    void setTitle(const QString &str);
+    void setTitle(const QString &title);
 
     void fileSave();
     void fileSaveAs();
@@ -289,6 +289,11 @@ public:
     QString filterToolTip() const;
 
     void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
+
+signals:
+    void titleChanged(const QString &title);
+    void fileNameChanged(const QString &fileName);
+    void filterExpressionChanged(const QString &filterExpression);
 
 protected:
     bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;

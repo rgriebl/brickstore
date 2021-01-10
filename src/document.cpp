@@ -45,7 +45,7 @@
 
 #include "document.h"
 #include "document_p.h"
-
+#include "qml_bricklink_wrapper.h"
 
 enum {
     CID_Change,
@@ -1007,14 +1007,15 @@ QString Document::fileName() const
 
 void Document::setFileName(const QString &str)
 {
-    m_filename = str;
+    if (str != m_filename) {
+        m_filename = str;
 
-    QFileInfo fi(str);
+        emit fileNameChanged(str);
 
-    if (fi.exists())
-        setTitle(QDir::toNativeSeparators(fi.absoluteFilePath()));
-
-    emit fileNameChanged(m_filename);
+        QFileInfo fi(str);
+        if (fi.exists())
+            setTitle(QDir::toNativeSeparators(fi.absoluteFilePath()));
+    }
 }
 
 QString Document::title() const
@@ -1024,8 +1025,10 @@ QString Document::title() const
 
 void Document::setTitle(const QString &str)
 {
-    m_title = str;
-    emit titleChanged(m_title);
+    if (str != title()) {
+        m_title = str;
+        emit titleChanged(m_title);
+    }
 }
 
 bool Document::isModified() const
@@ -1735,6 +1738,9 @@ DocumentProxyModel::~DocumentProxyModel()
 
 void DocumentProxyModel::setFilterExpression(const QString &str)
 {
+    if (str == m_filter_expression)
+        return;
+
     bool had_filter = !m_filter.isEmpty();
 
     m_filter_expression = str;
@@ -1742,6 +1748,8 @@ void DocumentProxyModel::setFilterExpression(const QString &str)
 
     if (had_filter || !m_filter.isEmpty())
         invalidateFilter();
+
+    emit filterExpressionChanged(str);
 }
 
 QString DocumentProxyModel::filterExpression() const

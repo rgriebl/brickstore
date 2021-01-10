@@ -39,6 +39,7 @@ public:
     Window(Document *doc, QWidget *parent = nullptr);
 
     Document *document() { return m_doc; }
+    DocumentProxyModel *documentView() { return m_view; } // for scripting
 
     enum MergeFlags {
         MergeAction_None         = 0x00000000,

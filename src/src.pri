@@ -4,7 +4,7 @@ INCLUDEPATH += $$RELPWD
 DEPENDPATH  += $$RELPWD
 
 QT *= core gui xml network # networkauth
-!backend-only:QT *= widgets script scripttools printsupport uitools
+!backend-only:QT *= widgets script scripttools printsupport uitools qml quick
 
 win32:QT *= winextras widgets
 
@@ -34,6 +34,7 @@ SOURCES += \
   $$PWD/itemdetailpopup.cpp \
   $$PWD/picturewidget.cpp \
   $$PWD/priceguidewidget.cpp \
+  $$PWD/qml_bricklink_wrapper.cpp \
   $$PWD/report.cpp \
   $$PWD/reportobjects.cpp \
   $$PWD/selectcolor.cpp \
@@ -56,6 +57,7 @@ HEADERS += \
   $$PWD/itemdetailpopup.h \
   $$PWD/picturewidget.h \
   $$PWD/priceguidewidget.h \
+  $$PWD/qml_bricklink_wrapper.h \
   $$PWD/report.h \
   $$PWD/report_p.h \
   $$PWD/reportobjects.h \

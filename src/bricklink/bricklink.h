@@ -68,9 +68,11 @@ public:
     QSize pictureSize() const;
     QSize rawPictureSize() const;
 
+    ItemType(std::nullptr_t) : ItemType() { } // for scripting only!
+
 private:
-    char  m_id;
-    char  m_picture_id;
+    char  m_id = 0;
+    char  m_picture_id = 0;
 
     bool  m_has_inventories   : 1;
     bool  m_has_colors        : 1;
@@ -98,8 +100,10 @@ public:
     uint id() const       { return m_id; }
     QString name() const  { return m_name; }
 
+    Category(std::nullptr_t) : Category() { } // for scripting only!
+
 private:
-    uint     m_id;
+    uint     m_id = 0;
     QString  m_name;
 
 private:
@@ -151,12 +155,14 @@ public:
 
     static QString typeName(TypeFlag t);
 
+    Color(std::nullptr_t) : Color() { } // for scripting only!
+
 private:
     QString m_name;
-    uint    m_id;
-    int     m_ldraw_id;
+    uint    m_id = 0;
+    int     m_ldraw_id = 0;
     QColor  m_color;
-    Type    m_type;
+    Type    m_type = 0;
     qreal   m_popularity = 0;
     quint16 m_year_from = 0;
     quint16 m_year_to = 0;
@@ -193,14 +199,16 @@ public:
 
     uint index() const { return m_index; }   // only for internal use (picture/priceguide hashes)
 
+    Item(std::nullptr_t) : Item() { } // for scripting only!
+
 private:
     QString           m_name;
     QString           m_id;
     const ItemType *  m_item_type = nullptr;
     QVector<const Category *> m_categories;
-    const Color *     m_color;
+    const Color *     m_color = nullptr;
     time_t            m_last_inv_update = -1;
-    float             m_weight;
+    float             m_weight = 0;
     quint32           m_index : 24;
     quint32           m_year  : 8;
     QVector<uint>     m_known_colors;
@@ -274,6 +282,8 @@ public:
     const QImage image() const;
 
     int cost() const;
+
+    Picture(std::nullptr_t) : Picture(nullptr, nullptr) { } // for scripting only!
 
 private:
     const Item *  m_item;
@@ -523,6 +533,8 @@ public:
     int lots(Time t, Condition c) const               { return m_lots[int(t)][int(c)]; }
     double price(Time t, Condition c, Price p) const  { return m_prices[int(t)][int(c)][int(p)]; }
 
+    PriceGuide(std::nullptr_t) : PriceGuide(nullptr, nullptr) { } // for scripting only!
+
 private:
     const Item *  m_item;
     const Color * m_color;
@@ -663,7 +675,6 @@ public:
     const Color *colorFromName(const QString &name) const;
     const Color *colorFromLDrawId(int ldraw_id) const;
     const Category *category(uint id) const;
-    const Category *categoryFromName(const char *name, int len = -1) const;
     const ItemType *itemType(char id) const;
     const Item *item(char tid, const QString &id) const;
 
@@ -678,6 +689,7 @@ public:
     void setItemImageScaleFactor(qreal f);
 
     bool isLDrawEnabled() const;
+    QString ldrawDataPath() const;
     void setLDrawDataPath(const QString &ldrawDataPath);
 
     struct ParseItemListXMLResult
@@ -707,9 +719,6 @@ public:
                        const QString &infoText = QString()) const;
 
 public slots:
-    void updatePriceGuide(BrickLink::PriceGuide *pg, bool high_priority = false);
-    void updatePicture(BrickLink::Picture *pic, bool high_priority = false);
-
     void setOnlineStatus(bool on);
     void setUpdateIntervals(const QMap<QByteArray, int> &intervals);
 
@@ -734,6 +743,12 @@ private:
     friend Core *create(const QString &, QString *);
 
 private:
+    void updatePriceGuide(BrickLink::PriceGuide *pg, bool high_priority = false);
+    void updatePicture(BrickLink::Picture *pic, bool high_priority = false);
+
+    friend void PriceGuide::update(bool);
+    friend void Picture::update(bool);
+
     bool updateNeeded(bool valid, const QDateTime &last, int iv);
     bool parseLDrawModelInternal(QFile &file, const QString &model_name, InvItemList &items, uint *invalid_items, QHash<QString, InvItem *> &mergehash, QStringList &recursion_detection);
 

@@ -51,6 +51,9 @@ public:
     static FrameWork *inst();
 
     bool closeAllWindows();
+    QVector<Window *> allWindows() const;
+    Window *createWindow(Document *doc);
+    Window *activeWindow() const;
 
 public slots:
     void selectionUpdate(const Document::ItemList &selection);
@@ -66,6 +69,7 @@ public slots:
 
 signals:
     void windowActivated(Window *);
+    void windowListChanged();
     void filterTextChanged(const QString &filter);
 
 protected slots:
@@ -119,7 +123,6 @@ private:
     bool setupToolBar(QToolBar *, const QList<QByteArray> &);
     QDockWidget *createDock(QWidget *widget);
     void createStatusBar();
-    bool createWindow(Document *doc);
     QMap<QAction *, bool (Window::*)() const> m_toggle_updates;
 
     Workspace *m_workspace;

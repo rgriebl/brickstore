@@ -66,6 +66,8 @@
 #include "framework.h"
 #include "stopwatch.h"
 
+#include "qml_bricklink_wrapper.h"
+
 enum ProgressItem {
     PGI_PriceGuide,
     PGI_Picture
@@ -298,6 +300,9 @@ FrameWork::FrameWork(QWidget *parent)
     m_workspace = new Workspace(this);
     connect(m_workspace, &Workspace::windowActivated,
             this, &FrameWork::connectWindow);
+
+    connect(m_workspace, &Workspace::windowCountChanged,
+            this, &FrameWork::windowListChanged);
 
     setCentralWidget(m_workspace);
 
@@ -566,7 +571,34 @@ FrameWork::FrameWork(QWidget *parent)
 
     QDateTime rateUpdate = Currency::inst()->lastUpdate();
     //if (!rateUpdate.isValid() || rateUpdate.daysTo(QDateTime::currentDateTime()) >= 1)
-        Currency::inst()->updateRates();
+    Currency::inst()->updateRates();
+
+
+    auto sm = QmlWrapper::ScriptManager::inst();
+    sm->initialize(BrickLink::core());
+    const auto scripts = sm->scripts();
+
+    auto extrasMenu = findChild<QAction *>("extras")->menu();
+    auto contextMenu = findChild<QAction *>("context")->menu();
+
+    bool addedToExtras = false;
+    bool addedToContext = false;
+
+    for (auto script : scripts) {
+        const auto menuEntries = script->menuEntries();
+        for (auto menuEntry : menuEntries) {
+            bool c = (menuEntry->location() == QmlWrapper::ScriptMenuAction::Location::ContextMenu);
+            QMenu *menu = c ? contextMenu : extrasMenu;
+            bool &addedTo = c ? addedToContext : addedToExtras;
+
+            if (!addedTo) {
+                addedTo = true;
+                menu->addSeparator();
+            }
+            menu->addAction(menuEntry->text(), menuEntry,
+                            &QmlWrapper::ScriptMenuAction::triggered);
+        }
+    }
 }
 
 void FrameWork::languageChange()
@@ -1248,10 +1280,10 @@ bool FrameWork::checkBrickLinkLogin()
     }
 }
 
-bool FrameWork::createWindow(Document *doc)
+Window *FrameWork::createWindow(Document *doc)
 {
     if (!doc)
-        return false;
+        return nullptr;
 
     Window *window = nullptr;
     foreach(QWidget *w, m_workspace->windowList()) {
@@ -1270,7 +1302,12 @@ bool FrameWork::createWindow(Document *doc)
 
     m_workspace->setActiveWindow(window);
     window->setFocus();
-    return true;
+    return window;
+}
+
+Window *FrameWork::activeWindow() const
+{
+    return m_current_window;
 }
 
 
@@ -1660,6 +1697,14 @@ bool FrameWork::closeAllWindows()
             return false;
     }
     return true;
+}
+
+QVector<Window *> FrameWork::allWindows() const
+{
+    QVector<Window *> all;
+    foreach(QWidget *w, m_workspace->windowList())
+        all << static_cast<Window *>(w);
+    return all;
 }
 
 void FrameWork::cancelAllTransfers(bool force)
