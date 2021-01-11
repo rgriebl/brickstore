@@ -23,6 +23,7 @@
 #include <QLocalSocket>
 #include <QLocalServer>
 #include <QNetworkProxyFactory>
+#include <QPlainTextEdit>
 
 #if defined(Q_OS_WINDOWS)
 #  include <windows.h>
@@ -92,6 +93,8 @@ Application::Application(int &_argc, char **_argv)
 #endif
 
     new QApplication(_argc, _argv);
+
+    setupLogging();
 
     qApp->installEventFilter(this);
 
@@ -214,6 +217,11 @@ QStringList Application::externalResourceSearchPath(const QString &subdir) const
             searchPath << bsp + QDir::separator() + subdir;
         return searchPath;
     }
+}
+
+QPlainTextEdit *Application::logWidget() const
+{
+    return m_logWidget;
 }
 
 void Application::updateTranslations()
@@ -391,6 +399,46 @@ void Application::clientMessage()
         FrameWork::inst()->raise();
         FrameWork::inst()->activateWindow();
     }
+}
+
+void Application::setupLogging()
+{
+    m_logWidget = new QPlainTextEdit();
+    m_logWidget->setObjectName("LogWidget");
+    m_logWidget->setReadOnly(true);
+    m_logWidget->setMaximumBlockCount(1000);
+    m_logWidget->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
+
+    auto msgHandler = [](QtMsgType msgType, const QMessageLogContext &msgCtx, const QString &msg) {
+        if (s_inst->m_defaultMessageHandler)
+            (*s_inst->m_defaultMessageHandler)(msgType, msgCtx, msg);
+
+        static const char *msgTypeNames[] = { "DBG ", "WARN", "CRIT", "FATL", "INFO" };
+
+        QString filename;
+        if (msgCtx.file && msgCtx.file[0] && msgCtx.line > 1) {
+            filename = QString::fromLocal8Bit(msgCtx.file);
+            int pos = -1;
+#if defined(Q_OS_WIN)
+            pos = filename.lastIndexOf('\\');
+#endif
+            if (pos < 0)
+                pos = filename.lastIndexOf('/');
+            filename = filename.mid(pos + 1);
+        }
+
+        QString str = QStringLiteral("[")
+                + QLatin1String(msgTypeNames[qBound(QtDebugMsg, msgType, QtInfoMsg)])
+                + QStringLiteral(" | ") + QLatin1String(msgCtx.category)
+                + QStringLiteral("] ") + msg
+                + (!filename.isEmpty()
+                ? (QStringLiteral(" at ") + filename + QStringLiteral(", line ") + QString::number(msgCtx.line))
+                : QString());
+
+        QMetaObject::invokeMethod(s_inst->m_logWidget, "appendPlainText", Qt::QueuedConnection,
+                                  Q_ARG(QString, str));
+    };
+    m_defaultMessageHandler = qInstallMessageHandler(msgHandler);
 }
 
 bool Application::initBrickLink()

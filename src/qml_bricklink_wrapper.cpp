@@ -19,6 +19,8 @@
 #include <QQmlComponent>
 #include <QQmlContext>
 #include <QQmlInfo>
+#include <QMessageLogger>
+#include <QLoggingCategory>
 
 #include "application.h"
 #include "exception.h"
@@ -268,7 +270,29 @@ QVector<Category> ItemType::categories() const
 
 ScriptManager::ScriptManager()
     : m_engine(new QQmlEngine(this))
-{ }
+{
+    connect(m_engine, &QQmlEngine::warnings,
+            this, [this](const QList<QQmlError> &list) {
+        static QLoggingCategory logQml("qml");
+
+        if (!logQml.isWarningEnabled())
+            return;
+
+        for (auto err : list) {
+            QByteArray func;
+            if (err.object())
+                func = err.object()->objectName().toLocal8Bit();
+            QByteArray file;
+            if (err.url().scheme() == "file")
+                file = err.url().toLocalFile().toLocal8Bit();
+            else
+                file = err.url().toDisplayString().toLocal8Bit();
+
+            QMessageLogger ml(file, err.line(), func, logQml.categoryName());
+            ml.warning().nospace().noquote() << err.description();
+        }
+    });
+}
 
 ScriptManager::~ScriptManager()
 {

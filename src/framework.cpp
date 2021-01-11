@@ -35,6 +35,7 @@
 #include <QDockWidget>
 #include <QSizeGrip>
 #include <QLineEdit>
+#include <QPlainTextEdit>
 #include <QFont>
 #include <QCommandLinkButton>
 #include <QStyle>
@@ -67,6 +68,10 @@
 #include "stopwatch.h"
 
 #include "qml_bricklink_wrapper.h"
+
+enum {
+    DockStateVersion = 1 // increase if you change the dock/toolbar setup
+};
 
 enum ProgressItem {
     PGI_PriceGuide,
@@ -306,6 +311,13 @@ FrameWork::FrameWork(QWidget *parent)
 
     setCentralWidget(m_workspace);
 
+    // vvv increase DockStateVersion if you change the dock/toolbar setup
+
+    setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
+    setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
+    setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
+    setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
+
     m_task_info = new TaskInfoWidget(nullptr);
     m_task_info->setObjectName(QLatin1String("TaskInfo"));
     addDockWidget(Qt::LeftDockWidgetArea, createDock(m_task_info));
@@ -318,9 +330,16 @@ FrameWork::FrameWork(QWidget *parent)
     m_task_priceguide->setObjectName(QLatin1String("TaskPriceGuide"));
     splitDockWidget(m_dock_widgets.first(), createDock(m_task_priceguide), Qt::Vertical);
 
+    auto logDock = createDock(Application::inst()->logWidget());
+    logDock->setAllowedAreas(Qt::BottomDockWidgetArea);
+    logDock->setVisible(false);
+    addDockWidget(Qt::BottomDockWidgetArea, logDock, Qt::Horizontal);
+
     m_toolbar = new QToolBar(this);
     m_toolbar->setObjectName(QLatin1String("toolbar"));
     m_toolbar->setMovable(false);
+
+    // ^^^ increase DockStateVersion if you change the dock/toolbar setup
 
     auto setIconSizeLambda = [this](const QSize &iconSize) {
         if (iconSize.isNull()) {
@@ -564,7 +583,7 @@ FrameWork::FrameWork(QWidget *parent)
         setWindowState(Qt::WindowMaximized);
     }
     ba = Config::inst()->value(QLatin1String("/MainWindow/Layout/State")).toByteArray();
-    if (ba.isEmpty() || !restoreState(ba))
+    if (ba.isEmpty() || !restoreState(ba, DockStateVersion))
         m_toolbar->show();
 
     findAction("view_fullscreen")->setChecked(windowState() & Qt::WindowFullScreen);
@@ -576,6 +595,7 @@ FrameWork::FrameWork(QWidget *parent)
 
     auto sm = QmlWrapper::ScriptManager::inst();
     sm->initialize(BrickLink::core());
+
     const auto scripts = sm->scripts();
 
     auto extrasMenu = findChild<QAction *>("extras")->menu();
@@ -614,6 +634,8 @@ void FrameWork::languageChange()
             dock->setWindowTitle(tr("Price Guide"));
         if (name == QLatin1String("Dock-TaskAppears"))
             dock->setWindowTitle(tr("Appears In Sets"));
+        if (name == QLatin1String("Dock-LogWidget"))
+            dock->setWindowTitle(tr("Error Log"));
     }
     if (m_filter) {
         m_filter->setPlaceholderText(tr("Filter"));
@@ -786,7 +808,7 @@ void FrameWork::translateActions()
 FrameWork::~FrameWork()
 {
     Config::inst()->setValue("/MainWindow/Statusbar/Visible", statusBar()->isVisibleTo(this));
-    Config::inst()->setValue("/MainWindow/Layout/State", saveState());
+    Config::inst()->setValue("/MainWindow/Layout/State", saveState(DockStateVersion));
     Config::inst()->setValue("/MainWindow/Layout/Geometry", saveGeometry());
 
     if (m_add_dialog)

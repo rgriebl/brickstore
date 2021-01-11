@@ -19,6 +19,7 @@
 
 class FrameWork;
 QT_FORWARD_DECLARE_CLASS(QTranslator)
+QT_FORWARD_DECLARE_CLASS(QPlainTextEdit)
 
 
 class Application : public QObject
@@ -38,6 +39,8 @@ public:
 
     QStringList externalResourceSearchPath(const QString &subdir = QString()) const;
 
+    QPlainTextEdit *logWidget() const;
+
 public slots:
     void checkForUpdates();
     void updateTranslations();
@@ -56,6 +59,7 @@ private slots:
 
 private:
     bool isClient(int timeout = 1000);
+    void setupLogging();
 
     bool initBrickLink();
     void exitBrickLink();
@@ -70,6 +74,9 @@ private:
     QScopedPointer<QTranslator> m_trans_qt;
     QScopedPointer<QTranslator> m_trans_brickstore_en;
     QScopedPointer<QTranslator> m_trans_brickstore;
+
+    QPlainTextEdit *m_logWidget = nullptr;
+    QtMessageHandler m_defaultMessageHandler = nullptr;
 
     static Application *s_inst;
 };
