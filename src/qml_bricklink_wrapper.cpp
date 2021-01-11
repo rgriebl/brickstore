@@ -321,8 +321,23 @@ bool ScriptManager::initialize(::BrickLink::Core *core)
 
     QString cannotCreate = tr("Cannot create objects of type %1");
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     qmlRegisterSingletonInstance("BrickStore", 1, 0, "BrickLink", m_bricklink);
     qmlRegisterSingletonInstance("BrickStore", 1, 0, "BrickStore", m_brickstore);
+#else
+    static auto staticBrickLink = m_bricklink;
+    static auto staticBrickStore = m_brickstore;
+    qmlRegisterSingletonType<QmlWrapper::BrickLink>("BrickStore", 1, 0, "BrickLink",
+                             [](QQmlEngine *, QJSEngine *) -> QObject * {
+        QQmlEngine::setObjectOwnership(staticBrickLink, QQmlEngine::CppOwnership);
+        return staticBrickLink;
+    });
+    qmlRegisterSingletonType<QmlWrapper::BrickStore>("BrickStore", 1, 0, "BrickStore",
+                             [](QQmlEngine *, QJSEngine *) -> QObject * {
+        QQmlEngine::setObjectOwnership(staticBrickStore, QQmlEngine::CppOwnership);
+        return staticBrickStore;
+    });
+#endif
 
     qRegisterMetaType<Color>();
     qRegisterMetaType<ItemType>();
