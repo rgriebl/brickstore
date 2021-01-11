@@ -44,7 +44,7 @@ class AppearsInModel;
 class InternalAppearsInModel;
 class ItemDelegate;
 
-typedef QList<InvItem *>                      InvItemList;
+typedef QVector<InvItem *>                    InvItemList;
 typedef QPair<int, const Item *>              AppearsInItem;
 typedef QVector<AppearsInItem>                AppearsInColor;
 typedef QHash<const Color *, AppearsInColor>  AppearsIn;

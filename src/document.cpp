@@ -237,9 +237,7 @@ Document::Statistics::Statistics(const Document *doc, const ItemList &list, bool
         else
             weight_missing = true;
 
-        if (item->errors()) {
-            quint64 errors = item->errors() & doc->m_error_mask;
-
+        if (quint64 errors = doc->itemErrors(item)) {
             for (uint i = 1ULL << (FieldCount - 1); i;  i >>= 1) {
                 if (errors & i)
                     m_errors++;
@@ -254,54 +252,6 @@ Document::Statistics::Statistics(const Document *doc, const ItemList &list, bool
     m_ccode = doc->currencyCode();
 }
 
-
-// *****************************************************************************************
-// *****************************************************************************************
-// *****************************************************************************************
-// *****************************************************************************************
-// *****************************************************************************************
-// *****************************************************************************************
-
-
-Document::Item::Item(const BrickLink::InvItem &copy)
-    : BrickLink::InvItem(copy)
-{ }
-
-Document::Item &Document::Item::operator = (const Item &copy)
-{
-    BrickLink::InvItem::operator = (copy);
-
-    m_errors = copy.m_errors;
-    return *this;
-}
-
-bool Document::Item::operator == (const Item &cmp) const
-{
-    // ignore errors for now!
-    return BrickLink::InvItem::operator == (cmp);
-}
-
-QImage Document::Item::image() const
-{
-    BrickLink::Picture *pic = BrickLink::core()->picture(item(), color());
-
-    if (pic && pic->valid()) {
-        return pic->image();
-    } else {
-        QSize s = BrickLink::core()->standardPictureSize();
-        return BrickLink::core()->noImage(s);
-    }
-}
-
-QDataStream &operator << (QDataStream &ds, const Document::Item &item)
-{
-    return operator<<(ds, static_cast<const BrickLink::InvItem &>(item));
-}
-
-QDataStream &operator >> (QDataStream &ds, Document::Item &item)
-{
-    return operator>>(ds, static_cast<BrickLink::InvItem &>(item));
-}
 
 // *****************************************************************************************
 // *****************************************************************************************
@@ -643,11 +593,7 @@ void Document::updateErrors(Item *item)
     if (item->tierQuantity(2) && (item->tierQuantity(2) <= item->tierQuantity(1)))
         errors |= (1ULL << TierQ3);
 
-    if (errors != item->errors()) {
-        item->setErrors(errors);
-        emit errorsChanged(item);
-        emit statisticsChanged();
-    }
+    setItemErrors(item, errors);
 }
 
 QString Document::currencyCode() const
@@ -1281,6 +1227,28 @@ void Document::setErrorMask(quint64 em)
     m_error_mask = em;
     emit statisticsChanged();
     emit itemsChanged(items(), false);
+}
+
+quint64 Document::itemErrors(const Item *item) const
+{
+    return m_errors.value(item, 0) & m_error_mask;
+}
+
+void Document::setItemErrors(Item *item, quint64 errors)
+{
+    if (!item)
+        return;
+
+    quint64 oldErrors = m_errors.value(item, 0);
+    if (oldErrors != errors) {
+        if (errors)
+            m_errors.insert(item, errors);
+        else
+            m_errors.remove(item);
+
+        emit errorsChanged(item);
+        emit statisticsChanged();
+    }
 }
 
 const BrickLink::Order *Document::order() const

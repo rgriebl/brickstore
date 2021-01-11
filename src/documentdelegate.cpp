@@ -416,7 +416,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
     }
 
 
-    if ((it->errors() & m_doc->errorMask() & (1ULL << idx.column()))) {
+    if (m_doc->itemErrors(it) & (1ULL << idx.column())) {
         p->setPen(QColor::fromRgbF(1, 0, 0, 0.75));
         p->drawRect(QRectF(x+.5, y+.5, w-1, h-1));
         p->setPen(QColor::fromRgbF(1, 0, 0, 0.50));

@@ -409,6 +409,17 @@ bool BrickLink::InvItem::mergeFrom(const InvItem &from, bool prefer_from)
     return true;
 }
 
+QImage BrickLink::InvItem::image() const
+{
+    BrickLink::Picture *pic = BrickLink::core()->picture(item(), color());
+
+    if (pic && pic->valid()) {
+        return pic->image();
+    } else {
+        QSize s = BrickLink::core()->standardPictureSize();
+        return BrickLink::core()->noImage(s);
+    }
+}
 
 namespace BrickLink {
 

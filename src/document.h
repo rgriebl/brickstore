@@ -75,52 +75,8 @@ public:
         FilterRole = Qt::UserRole
     };
 
-    class Item : public BrickLink::InvItem
-    {
-    public:
-        Item() = default;
-        Item(const BrickLink::InvItem &);
-        Item(const Item &) = default;
-        ~Item() = default;
-
-        Item &operator = (const Item &);
-        bool operator == (const Item &) const;
-
-        quint64 errors() const          { return m_errors; }
-        void setErrors(quint64 errors) { m_errors = errors; }
-
-        QImage image() const;
-
-    private:
-        quint64 m_errors = 0;
-
-        friend class Document;
-    };
-
-    class ItemList : public QList<Item *>
-    {
-    public:
-        ItemList() = default;
-        ~ItemList() = default;
-        ItemList(std::initializer_list<Item *> list) : QList<Item *>(list) { }
-        ItemList(const ItemList &copy) : QList<Item *>(copy) { }
-        ItemList(const BrickLink::InvItemList &iil)
-        {
-            for (const BrickLink::InvItem *ii : iil)
-                append(new Item(*ii));
-        }
-
-        ItemList &operator=(const ItemList &other)
-        {
-            *static_cast<QList<Item *> *>(this) = static_cast<QList<Item *>>(other);
-            return *this;
-        }
-
-        operator const BrickLink::InvItemList &() const
-        {
-            return reinterpret_cast<const BrickLink::InvItemList &>(*this);
-        }
-    };
+    typedef BrickLink::InvItem Item;
+    typedef QVector<BrickLink::InvItem *> ItemList;
 
     class Statistics
     {
@@ -215,6 +171,9 @@ public:
     quint64 errorMask() const;
     void setErrorMask(quint64);
 
+    quint64 itemErrors(const Item *item) const;
+    void setItemErrors(Item *item, quint64 errors);
+
     QString currencyCode() const;
     void setCurrencyCode(const QString &code, qreal crate = qreal(1));
 
@@ -290,6 +249,7 @@ private:
 
 private:
     ItemList         m_items;
+    QHash<const Item *, quint64> m_errors;
 
     QString          m_currencycode;
     quint64          m_error_mask = 0;
@@ -351,6 +311,3 @@ private:
 
 Q_DECLARE_METATYPE(Document *)
 Q_DECLARE_METATYPE(const Document *)
-
-QDataStream &operator << (QDataStream &ds, const Document::Item &item);
-QDataStream &operator >> (QDataStream &ds, Document::Item &item);

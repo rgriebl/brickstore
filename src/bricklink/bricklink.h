@@ -387,10 +387,7 @@ public:
 
     bool mergeFrom(const InvItem &merge, bool prefer_from = false);
 
-    typedef void *Diff; // opaque handle
-
-    Diff *createDiff(const InvItem &diffto) const;
-    bool applyDiff(Diff *diff);
+    QImage image() const;
 
 private:
     const Item *     m_item;
