@@ -24,6 +24,7 @@
 #include <QLocalServer>
 #include <QNetworkProxyFactory>
 #include <QPlainTextEdit>
+#include <QSyntaxHighlighter>
 
 #if defined(Q_OS_WINDOWS)
 #  include <windows.h>
@@ -401,6 +402,87 @@ void Application::clientMessage()
     }
 }
 
+static const char *msgTypeNames[] = { "DBG ", "WARN", "CRIT", "FATL", "INFO" };
+
+class LogHighlighter : public QSyntaxHighlighter
+{
+public:
+    explicit LogHighlighter(QTextDocument *parent)
+        : QSyntaxHighlighter(parent)
+    {
+        m_lvlFmt[QtDebugMsg].setForeground(Qt::black);
+        m_lvlFmt[QtDebugMsg].setBackground(Qt::green);
+        m_lvlFmt[QtWarningMsg].setForeground(Qt::black);
+        m_lvlFmt[QtWarningMsg].setBackground(Qt::yellow);
+        m_lvlFmt[QtCriticalMsg].setForeground(Qt::red);
+        m_lvlFmt[QtCriticalMsg].setBackground(Qt::black);
+        m_lvlFmt[QtFatalMsg].setForeground(Qt::white);
+        m_lvlFmt[QtFatalMsg].setBackground(Qt::red);
+        m_lvlFmt[QtInfoMsg].setForeground(Qt::black);
+        m_lvlFmt[QtInfoMsg].setBackground(Qt::blue);
+        for (int i = 0; i < 6; ++i) {
+            QColor c = QColor::fromHsl(60 *i, 210, 128);
+            m_catFmt[i].setForeground(c);
+            m_catFmt[i].clearBackground();
+            m_catFmt[i].setFontWeight(QFont::Bold);
+        }
+        m_atFmt.setForeground(Qt::darkMagenta);
+        m_atFmt.setFontWeight(QFont::Bold);
+        m_lineFmt.setForeground(Qt::magenta);
+        m_lineFmt.setFontWeight(QFont::Bold);
+    }
+
+    void highlightBlock(const QString &text) override
+    {
+        ++Application::s_inst->m_logGuiLock;
+
+        int colonPos = text.indexOf(':', 1);
+        if (colonPos > 0) {
+            int atPos = text.lastIndexOf(" at ");
+            int linePos = text.lastIndexOf(", line ");
+
+            int atLen = 0;
+            int lineLen = 0;
+            bool hasLocation = (atPos > 0 && linePos > atPos);
+
+            if (hasLocation) {
+                atPos += 4;
+                atLen = linePos - atPos;
+                linePos += 7;
+                lineLen = text.length() - linePos;
+            }
+
+            static const int lvlPos = 0;
+            static const int lvlLen = 4;
+            static const int catPos = lvlPos + lvlLen + 1;
+
+            int catLen = colonPos - catPos;
+
+            int msgType = QtInfoMsg;
+            for (int i = 0; i < sizeof(msgTypeNames) / sizeof(*msgTypeNames); ++i) {
+                if (text.midRef(lvlPos, lvlLen) == msgTypeNames[i])
+                    msgType = i;
+            }
+            int catType = qHash(text.midRef(catPos, catLen)) % 6;
+
+            setFormat(lvlPos, lvlLen, m_lvlFmt[msgType]);
+            setFormat(catPos, catLen, m_catFmt[catType]);
+
+            if (hasLocation) {
+                setFormat(linePos, lineLen, m_lineFmt);
+                setFormat(atPos, atLen, m_atFmt);
+            }
+        }
+
+        --Application::s_inst->m_logGuiLock;
+    }
+private:
+    QTextCharFormat m_lvlFmt[QtInfoMsg];
+    QTextCharFormat m_catFmt[6];
+    QTextCharFormat m_atFmt;
+    QTextCharFormat m_lineFmt;
+};
+
 void Application::setupLogging()
 {
     m_logWidget = new QPlainTextEdit();
@@ -408,12 +490,14 @@ void Application::setupLogging()
     m_logWidget->setReadOnly(true);
     m_logWidget->setMaximumBlockCount(1000);
     m_logWidget->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
+    new LogHighlighter(m_logWidget->document());
 
     auto msgHandler = [](QtMsgType msgType, const QMessageLogContext &msgCtx, const QString &msg) {
         if (s_inst->m_defaultMessageHandler)
             (*s_inst->m_defaultMessageHandler)(msgType, msgCtx, msg);
 
-        static const char *msgTypeNames[] = { "DBG ", "WARN", "CRIT", "FATL", "INFO" };
+        if (s_inst->m_logGuiLock)
+            return;
 
         QString filename;
         if (msgCtx.file && msgCtx.file[0] && msgCtx.line > 1) {
@@ -427,10 +511,9 @@ void Application::setupLogging()
             filename = filename.mid(pos + 1);
         }
 
-        QString str = QStringLiteral("[")
-                + QLatin1String(msgTypeNames[qBound(QtDebugMsg, msgType, QtInfoMsg)])
-                + QStringLiteral(" | ") + QLatin1String(msgCtx.category)
-                + QStringLiteral("] ") + msg
+        QString str = QLatin1String(msgTypeNames[qBound(QtDebugMsg, msgType, QtInfoMsg)])
+                + QStringLiteral(" ") + QLatin1String(msgCtx.category)
+                + QStringLiteral(": ") + msg
                 + (!filename.isEmpty()
                 ? (QStringLiteral(" at ") + filename + QStringLiteral(", line ") + QString::number(msgCtx.line))
                 : QString());

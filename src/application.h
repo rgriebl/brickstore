@@ -77,6 +77,9 @@ private:
 
     QPlainTextEdit *m_logWidget = nullptr;
     QtMessageHandler m_defaultMessageHandler = nullptr;
+    int m_logGuiLock = 0;
 
     static Application *s_inst;
+
+    friend class LogHighlighter;
 };
