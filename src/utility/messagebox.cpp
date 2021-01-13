@@ -29,26 +29,35 @@
 #include "messagebox.h"
 
 
+QPointer<QWidget> MessageBox::s_defaultParent;
+
+
 MessageBox::MessageBox()
     : QMessageBox()
 { }
 
-QString MessageBox::s_deftitle;
-
-void MessageBox::setDefaultTitle(const QString &s)
-{
-    s_deftitle = s;
-}
-
 QString MessageBox::defaultTitle()
 {
-    return s_deftitle;
+    return QCoreApplication::applicationName();
 }
 
-QMessageBox::StandardButton MessageBox::msgbox(QWidget *parent, const QString &msg, QMessageBox::Icon icon, StandardButtons buttons, StandardButton defaultButton)
+void MessageBox::setDefaultParent(QWidget *parent)
+{
+    s_defaultParent = parent;
+}
+
+QWidget *MessageBox::defaultParent()
+{
+    return s_defaultParent.data();
+}
+
+QMessageBox::StandardButton MessageBox::msgbox(QWidget *parent, const QString &title, const QString &msg,
+                                               QMessageBox::Icon icon, StandardButtons buttons,
+                                               StandardButton defaultButton)
 {
     if (qobject_cast<QApplication *>(qApp)) {
-        QMessageBox *mb = new QMessageBox(icon, s_deftitle, msg, NoButton, parent);
+        QMessageBox *mb = new QMessageBox(icon, !title.isEmpty() ? title : defaultTitle(), msg,
+                                          NoButton, parent ? parent : defaultParent());
         mb->setAttribute(Qt::WA_DeleteOnClose);
         mb->setObjectName("messagebox");
         mb->setStandardButtons(buttons);
@@ -76,29 +85,38 @@ QMessageBox::StandardButton MessageBox::msgbox(QWidget *parent, const QString &m
     }
 }
 
-QMessageBox::StandardButton MessageBox::information(QWidget *parent, const QString &text, StandardButtons buttons, StandardButton defaultButton)
+QMessageBox::StandardButton MessageBox::information(QWidget *parent, const QString &title,
+                                                    const QString &text, StandardButtons buttons,
+                                                    StandardButton defaultButton)
 {
-    return msgbox(parent, text, QMessageBox::Information, buttons, defaultButton);
+    return msgbox(parent, title, text, QMessageBox::Information, buttons, defaultButton);
 }
 
-QMessageBox::StandardButton MessageBox::question(QWidget *parent, const QString &text, StandardButtons buttons, StandardButton defaultButton)
+QMessageBox::StandardButton MessageBox::question(QWidget *parent, const QString &title,
+                                                 const QString &text, StandardButtons buttons,
+                                                 StandardButton defaultButton)
 {
-    return msgbox(parent, text, Question, buttons, defaultButton);
+    return msgbox(parent, title, text, Question, buttons, defaultButton);
 }
 
-QMessageBox::StandardButton MessageBox::warning(QWidget *parent, const QString &text, StandardButtons buttons, StandardButton defaultButton)
+QMessageBox::StandardButton MessageBox::warning(QWidget *parent, const QString &title,
+                                                const QString &text, StandardButtons buttons,
+                                                StandardButton defaultButton)
 {
-    return msgbox(parent, text, Warning, buttons, defaultButton);
+    return msgbox(parent, title, text, Warning, buttons, defaultButton);
 }
 
-QMessageBox::StandardButton MessageBox::critical(QWidget *parent, const QString &text, StandardButtons buttons, StandardButton defaultButton)
+QMessageBox::StandardButton MessageBox::critical(QWidget *parent, const QString &title,
+                                                 const QString &text, StandardButtons buttons,
+                                                 StandardButton defaultButton)
 {
-    return msgbox(parent, text, Critical, buttons, defaultButton);
+    return msgbox(parent, title, text, Critical, buttons, defaultButton);
 }
 
-bool MessageBox::getString(QWidget *parent, const QString &text, QString &value)
+bool MessageBox::getString(QWidget *parent, const QString &title, const QString &text, QString &value)
 {
-    QInputDialog dlg(parent, Qt::Sheet);
+    QInputDialog dlg(parent ? parent : defaultParent(), Qt::Sheet);
+    dlg.setWindowTitle(!title.isEmpty() ? title : defaultTitle());
     dlg.setWindowModality(Qt::WindowModal);
     dlg.setInputMode(QInputDialog::TextInput);
     dlg.setLabelText(text);
@@ -110,9 +128,12 @@ bool MessageBox::getString(QWidget *parent, const QString &text, QString &value)
     return b;
 }
 
-bool MessageBox::getDouble(QWidget *parent, const QString &text, const QString &unit, double &value, double minValue, double maxValue, int decimals)
+bool MessageBox::getDouble(QWidget *parent, const QString &title, const QString &text,
+                           const QString &unit, double &value, double minValue, double maxValue,
+                           int decimals)
 {
-    QInputDialog dlg(parent, Qt::Sheet);
+    QInputDialog dlg(parent ? parent : defaultParent(), Qt::Sheet);
+    dlg.setWindowTitle(!title.isEmpty() ? title : defaultTitle());
     dlg.setWindowModality(Qt::WindowModal);
     dlg.setInputMode(QInputDialog::DoubleInput);
     dlg.setLabelText(text);
@@ -131,9 +152,11 @@ bool MessageBox::getDouble(QWidget *parent, const QString &text, const QString &
     return b;
 }
 
-bool MessageBox::getInteger(QWidget *parent, const QString &text, const QString &unit, int &value, int minValue, int maxValue)
+bool MessageBox::getInteger(QWidget *parent, const QString &title, const QString &text,
+                            const QString &unit, int &value, int minValue, int maxValue)
 {
-    QInputDialog dlg(parent, Qt::Sheet);
+    QInputDialog dlg(parent ? parent : defaultParent(), Qt::Sheet);
+    dlg.setWindowTitle(!title.isEmpty() ? title : defaultTitle());
     dlg.setWindowModality(Qt::WindowModal);
     dlg.setInputMode(QInputDialog::IntInput);
     dlg.setLabelText(text);

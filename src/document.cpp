@@ -690,7 +690,7 @@ Document *Document::fileImportBrickLinkInventory(const BrickLink::Item *item)
             doc->setTitle(tr("Inventory for %1").arg(item->id()));
             return doc;
         } else {
-            MessageBox::warning(FrameWork::inst(), tr("Internal error: Could not create an Inventory object for item %1").arg(CMB_BOLD(item->id())));
+            MessageBox::warning(nullptr, { }, tr("Internal error: Could not create an Inventory object for item %1").arg(CMB_BOLD(item->id())));
         }
     }
     return nullptr;
@@ -747,7 +747,7 @@ Document *Document::fileImportBrickLinkCart()
     if (!rx_valid.exactMatch(url))
         url = QLatin1String("https://www.bricklink.com/storeCart.asp?h=______&b=______");
 
-    if (MessageBox::getString(FrameWork::inst(), tr("Enter the URL of your current BrickLink shopping cart:"
+    if (MessageBox::getString(nullptr, { }, tr("Enter the URL of your current BrickLink shopping cart:"
                                "<br /><br />Right-click on the <b>View Cart</b> button "
                                "in your browser and copy the URL to the clipboard by choosing "
                                "<b>Copy Link Location</b> (Firefox), <b>Copy Link</b> (Safari) "
@@ -812,7 +812,7 @@ Document *Document::fileLoadFrom(const QString &name, const char *type, bool imp
     QFile f(name);
 
     if (!f.open(QIODevice::ReadOnly)) {
-        MessageBox::warning(FrameWork::inst(), tr("Could not open file %1 for reading.").arg(CMB_BOLD(name)));
+        MessageBox::warning(nullptr, { }, tr("Could not open file %1 for reading.").arg(CMB_BOLD(name)));
         return nullptr;
     }
 
@@ -847,7 +847,7 @@ Document *Document::fileLoadFrom(const QString &name, const char *type, bool imp
         result = BrickLink::core()->parseItemListXML(item_elem, hint); // we own the items now
     }
     else {
-        MessageBox::warning(FrameWork::inst(), tr("Could not parse the XML data in file %1:<br /><i>Line %2, column %3: %4</i>").arg(CMB_BOLD(name)).arg(eline).arg(ecol).arg(emsg));
+        MessageBox::warning(nullptr, { }, tr("Could not parse the XML data in file %1:<br /><i>Line %2, column %3: %4</i>").arg(CMB_BOLD(name)).arg(eline).arg(ecol).arg(emsg));
         QApplication::restoreOverrideCursor();
         return nullptr;
     }
@@ -864,7 +864,7 @@ Document *Document::fileLoadFrom(const QString &name, const char *type, bool imp
             result.invalidItemCount -= fixedCount;
 
             if (result.invalidItemCount) {
-                if (MessageBox::information(FrameWork::inst(),
+                if (MessageBox::information(nullptr, { },
                                             tr("This file contains %n unknown item(s).<br /><br />Do you still want to open this file?",
                                                nullptr, result.invalidItemCount),
                                             QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
@@ -888,13 +888,13 @@ Document *Document::fileLoadFrom(const QString &name, const char *type, bool imp
                                       nullptr, fixedCount);
 
                 if (!import_only) {
-                    if (MessageBox::question(FrameWork::inst(),
-                                             fixedMsg + "<br><br>" + tr("Do you want to save these changes now?"),
-                                             MessageBox::Yes | MessageBox::No) == MessageBox::Yes) {
+                    if (MessageBox::question(nullptr, { },
+                                             fixedMsg + "<br><br>" + tr("Do you want to save these changes now?")
+                                             ) == MessageBox::Yes) {
                         doc->fileSaveTo(name, type, true, *result.items);
                     }
                 } else {
-                    MessageBox::information(FrameWork::inst(), fixedMsg);
+                    MessageBox::information(nullptr, { }, fixedMsg);
 
                 }
             }
@@ -903,7 +903,7 @@ Document *Document::fileLoadFrom(const QString &name, const char *type, bool imp
         qDeleteAll(*result.items);
         delete result.items;
     } else {
-        MessageBox::warning(FrameWork::inst(), tr("Could not parse the XML data in file %1.").arg(CMB_BOLD(name)));
+        MessageBox::warning(nullptr, { }, tr("Could not parse the XML data in file %1.").arg(CMB_BOLD(name)));
     }
 
     return doc;
@@ -923,7 +923,7 @@ Document *Document::fileImportLDrawModel()
     QFile f(s);
 
     if (!f.open(QIODevice::ReadOnly)) {
-        MessageBox::warning(FrameWork::inst(), tr("Could not open file %1 for reading.").arg(CMB_BOLD(s)));
+        MessageBox::warning(nullptr, { }, tr("Could not open file %1 for reading.").arg(CMB_BOLD(s)));
         return nullptr;
     }
 
@@ -939,7 +939,7 @@ Document *Document::fileImportLDrawModel()
 
     if (b && !items.isEmpty()) {
         if (invalid_items) {
-            if (MessageBox::information(FrameWork::inst(),
+            if (MessageBox::information(nullptr, { },
                                         tr("This file contains %n unknown item(s).<br /><br />Do you still want to open this file?",
                                            nullptr, invalid_items),
                                         QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
@@ -953,7 +953,7 @@ Document *Document::fileImportLDrawModel()
             doc->setTitle(tr("Import of %1").arg(QFileInfo(s).fileName()));
         }
     } else {
-        MessageBox::warning(FrameWork::inst(), tr("Could not parse the LDraw model in file %1.").arg(CMB_BOLD(s)));
+        MessageBox::warning(nullptr, { }, tr("Could not parse the LDraw model in file %1.").arg(CMB_BOLD(s)));
     }
 
     qDeleteAll(items);
@@ -1069,10 +1069,11 @@ void Document::fileSaveAs()
             fn += ".bsx";
 
         if (QFile::exists(fn) &&
-            MessageBox::question(FrameWork::inst(), tr("A file named %1 already exists.Are you sure you want to overwrite it?").arg(CMB_BOLD(fn)), MessageBox::Yes, MessageBox::No) != MessageBox::Yes)
-            return;
-
-        fileSaveTo(fn, "bsx", false, items());
+            MessageBox::question(nullptr, { },
+                                 tr("A file named %1 already exists. Are you sure you want to overwrite it?").arg(CMB_BOLD(fn))
+                                 ) == MessageBox::Yes) {
+            fileSaveTo(fn, "bsx", false, items());
+        }
     }
 }
 
@@ -1127,10 +1128,10 @@ bool Document::fileSaveTo(const QString &s, const char *type, bool export_only, 
             return true;
         }
         else
-            MessageBox::warning(FrameWork::inst(), tr("Failed to save data in file %1.").arg(CMB_BOLD(s)));
+            MessageBox::warning(nullptr, { }, tr("Failed to save data in file %1.").arg(CMB_BOLD(s)));
     }
     else
-        MessageBox::warning(FrameWork::inst(), tr("Failed to open file %1 for writing.").arg(CMB_BOLD(s)));
+        MessageBox::warning(nullptr, { }, tr("Failed to open file %1 for writing.").arg(CMB_BOLD(s)));
 
     return false;
 }
@@ -1150,7 +1151,7 @@ void Document::fileExportBrickLinkWantedListClipboard(const ItemList &itemlist)
 {
     QString wantedlist;
 
-    if (MessageBox::getString(FrameWork::inst(), tr("Enter the ID number of Wanted List (leave blank for the default Wanted List)"), wantedlist)) {
+    if (MessageBox::getString(nullptr, { }, tr("Enter the ID number of Wanted List (leave blank for the default Wanted List)"), wantedlist)) {
         QMap <QString, QString> extra;
         if (!wantedlist.isEmpty())
             extra.insert("WANTEDLISTID", wantedlist);
@@ -1180,7 +1181,7 @@ void Document::fileExportBrickLinkUpdateClipboard(const ItemList &itemlist)
 {
     for (const Item *item : itemlist) {
         if (!item->lotId()) {
-            if (MessageBox::warning(FrameWork::inst(), tr("This list contains items without a BrickLink Lot-ID.<br /><br />Do you really want to export this list?"), MessageBox::Yes, MessageBox::No) != MessageBox::Yes)
+            if (MessageBox::warning(nullptr, { }, tr("This list contains items without a BrickLink Lot-ID.<br /><br />Do you really want to export this list?"), MessageBox::Yes, MessageBox::No) != MessageBox::Yes)
                 return;
             else
                 break;
@@ -1208,10 +1209,11 @@ void Document::fileExportBrickLinkXML(const ItemList &itemlist)
             s += QLatin1String(".xml");
 
         if (QFile::exists(s) &&
-            MessageBox::question(FrameWork::inst(), tr("A file named %1 already exists.Are you sure you want to overwrite it?").arg(CMB_BOLD(s)), MessageBox::Yes, MessageBox::No) != MessageBox::Yes)
-            return;
-
-        fileSaveTo(s, "xml", true, itemlist);
+            MessageBox::question(nullptr, { },
+                                 tr("A file named %1 already exists. Are you sure you want to overwrite it?").arg(CMB_BOLD(s))
+                                 ) == MessageBox::Yes) {
+            fileSaveTo(s, "xml", true, itemlist);
+        }
     }
 }
 

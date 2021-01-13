@@ -534,13 +534,13 @@ FrameWork::FrameWork(QWidget *parent)
     bool dbok = BrickLink::core()->readDatabase();
 
     if (!dbok) {
-        if (MessageBox::warning(this, tr("Could not load the BrickLink database files.<br /><br />Should these files be updated now?"), MessageBox::Yes | MessageBox::No) == MessageBox::Yes)
+        if (MessageBox::warning(nullptr, { }, tr("Could not load the BrickLink database files.<br /><br />Should these files be updated now?"), MessageBox::Yes | MessageBox::No) == MessageBox::Yes)
             dbok = updateDatabase();
     }
     if (dbok)
         Application::inst()->enableEmitOpenDocument();
     else
-        MessageBox::warning(this, tr("Could not load the BrickLink database files.<br /><br />The program is not functional without these files."));
+        MessageBox::warning(nullptr, { }, tr("Could not load the BrickLink database files.<br /><br />The program is not functional without these files."));
 
     m_add_dialog = nullptr;
     //createAddItemDialog();
@@ -1296,7 +1296,9 @@ bool FrameWork::checkBrickLinkLogin()
         if (!auth.first.isEmpty() && !auth.second.isEmpty())
             return true;
 
-        if (MessageBox::question(this, tr("No valid BrickLink login settings found.<br /><br />Do you want to change the settings now?"), MessageBox::Yes | MessageBox::No) == MessageBox::Yes)
+        if (MessageBox::question(this, { },
+                                 tr("No valid BrickLink login settings found.<br /><br />Do you want to change the settings now?")
+                                 ) == MessageBox::Yes)
             configure("network");
         else
             return false;
@@ -1732,7 +1734,9 @@ QVector<Window *> FrameWork::allWindows() const
 
 void FrameWork::cancelAllTransfers(bool force)
 {
-    if (force || MessageBox::question(this, tr("Do you want to cancel all outstanding inventory, image and Price Guide transfers?"), MessageBox::Yes | MessageBox::No) == MessageBox::Yes) {
+    if (force || (MessageBox::question(nullptr, { },
+                                       tr("Do you want to cancel all outstanding inventory, image and Price Guide transfers?")
+                                       ) == MessageBox::Yes)) {
         BrickLink::core()->cancelPictureTransfers();
         BrickLink::core()->cancelPriceGuideTransfers();
     }
@@ -1744,7 +1748,8 @@ void FrameWork::createAddItemDialog()
         m_add_dialog = new AddItemDialog();
         m_add_dialog->setObjectName(QLatin1String("additems"));
 
-        QByteArray ba = Config::inst()->value(QLatin1String("/MainWindow/AddItemDialog/Geometry")).toByteArray();
+        QByteArray ba = Config::inst()->value(QLatin1String("/MainWindow/AddItemDialog/Geometry"))
+                .toByteArray();
 
         if (!ba.isEmpty())
             m_add_dialog->restoreGeometry(ba);

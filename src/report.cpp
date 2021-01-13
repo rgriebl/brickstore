@@ -251,7 +251,7 @@ void Report::print(QPaintDevice *pd, const Document *doc, const Document::ItemLi
             //job->dump();
 
             if (!job->print(0, job->pageCount() - 1))
-                MessageBox::warning(FrameWork::inst(), tr("Failed to start the print job."));
+                MessageBox::warning(nullptr, { }, tr("Failed to start the print job."));
         }
     } else {
         QString msg = tr("Print script aborted with error:") +
@@ -259,7 +259,7 @@ void Report::print(QPaintDevice *pd, const Document *doc, const Document::ItemLi
                       d->m_engine->uncaughtException().toString() +
                       QLatin1String("<br><br>Backtrace:<br><br>") +
                       d->m_engine->uncaughtExceptionBacktrace().join("<br>");
-        MessageBox::warning(FrameWork::inst(), msg);
+        MessageBox::warning(nullptr, { }, msg);
     }
 
     delete job;

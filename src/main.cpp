@@ -72,7 +72,7 @@ int main(int argc, char **argv)
     if (show_usage) {
 #if defined(Q_OS_WINDOWS)
         QApplication a(argc, argv);
-        QMessageBox::information(nullptr, QLatin1String("BrickStore"), QLatin1String(
+        QMessageBox::information(nullptr, QLatin1String("Usage"), QLatin1String(
                                      "<b>Usage:</b><br/>"
                                      "BrickStore.exe [&lt;files&gt;]<br/>"
                                      "BrickStore.exe --rebuild-database [--skip-download]<br/>"));

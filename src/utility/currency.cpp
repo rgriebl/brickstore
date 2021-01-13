@@ -154,7 +154,7 @@ void Currency::updateRates()
                 this, [this](QNetworkReply *reply) {
             if (reply->error() != QNetworkReply::NoError) {
                 if (Application::inst()->isOnline())
-                    MessageBox::warning(FrameWork::inst(), tr("There was an error downloading the exchange rates from the ECB server:<br>%1").arg(reply->errorString()));
+                    MessageBox::warning(nullptr, { }, tr("There was an error downloading the exchange rates from the ECB server:<br>%1").arg(reply->errorString()));
             } else {
                 auto r = reply->readAll();
                 QXmlStreamReader reader(r);
@@ -181,7 +181,7 @@ void Currency::updateRates()
                         err = tr("%1 (line %2, column %3)").arg(reader.errorString()).arg(reader.lineNumber()).arg(reader.columnNumber());
                     else
                         err = tr("no currency data found");
-                    MessageBox::warning(FrameWork::inst(), tr("There was an error parsing the exchange rates from the ECB server:\n%1").arg(err));
+                    MessageBox::warning(nullptr, { }, tr("There was an error parsing the exchange rates from the ECB server:\n%1").arg(err));
                 } else {
                     m_rates = newRates;
                     m_lastUpdate = QDateTime::currentDateTime();

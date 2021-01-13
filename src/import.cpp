@@ -277,7 +277,7 @@ void ImportBLOrder::gotten()
                 }
                 // find a better way - we shouldn't display widgets here
                 //else
-                //    MessageBox::warning ( 0, tr( "Could not parse the XML data for your orders:<br /><i>Line %1, column %2: %3</i>" ). arg ( eline ). arg ( ecol ). arg ( emsg ));
+                //    MessageBox::warning(nullptr, { }, tr( "Could not parse the XML data for your orders:<br /><i>Line %1, column %2: %3</i>" ). arg ( eline ). arg ( ecol ). arg ( emsg ));
             }
         }
     }

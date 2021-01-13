@@ -14,6 +14,7 @@
 #pragma once
 
 #include <QMessageBox>
+#include <QPointer>
 
 QT_FORWARD_DECLARE_CLASS(QValidator)
 
@@ -28,23 +29,40 @@ class MessageBox : public QMessageBox
 {
     Q_OBJECT
 public:
-    static void setDefaultTitle(const QString &s);
     static QString defaultTitle();
 
-    static StandardButton information(QWidget *parent, const QString & text, StandardButtons buttons = Ok, StandardButton defaultButton = NoButton);
-    static StandardButton question(QWidget *parent, const QString &text, StandardButtons buttons = Yes | No, StandardButton defaultButton = NoButton);
-    static StandardButton warning(QWidget *parent, const QString &text, StandardButtons buttons = Ok, StandardButton defaultButton = NoButton);
-    static StandardButton critical(QWidget *parent, const QString &text, StandardButtons buttons = Ok, StandardButton defaultButton = NoButton);
+    static void setDefaultParent(QWidget *parent);
+    static QWidget *defaultParent();
 
-    static bool getString(QWidget *parent, const QString &text, QString &value);
-    static bool getDouble(QWidget *parent, const QString &text, const QString &unit, double &value, double minValue = -2147483647, double maxValue = 2147483647, int decimals = 1);
-    static bool getInteger(QWidget *parent, const QString &text, const QString &unit, int &value, int minValue = -2147483647, int maxValue = 2147483647);
+    static StandardButton information(QWidget *parent, const QString &title, const QString &text,
+                                      StandardButtons buttons = Ok,
+                                      StandardButton defaultButton = NoButton);
+    static StandardButton question(QWidget *parent, const QString &title, const QString &text,
+                                   StandardButtons buttons = Yes | No,
+                                   StandardButton defaultButton = NoButton);
+    static StandardButton warning(QWidget *parent, const QString &title, const QString &text,
+                                  StandardButtons buttons = Ok,
+                                  StandardButton defaultButton = NoButton);
+    static StandardButton critical(QWidget *parent, const QString &title, const QString &text,
+                                   StandardButtons buttons = Ok,
+                                   StandardButton defaultButton = NoButton);
+
+    static bool getString(QWidget *parent, const QString &title, const QString &text,
+                          QString &value);
+    static bool getDouble(QWidget *parent, const QString &title, const QString &text,
+                          const QString &unit, double &value, double minValue = -2147483647,
+                          double maxValue = 2147483647, int decimals = 1);
+    static bool getInteger(QWidget *parent, const QString &title, const QString &text,
+                           const QString &unit, int &value,
+                           int minValue = -2147483647, int maxValue = 2147483647);
 
 private:
     MessageBox();
 
-    static StandardButton msgbox(QWidget *parent, const QString &msg, QMessageBox::Icon icon, StandardButtons buttons, StandardButton defaultButton);
+    static StandardButton msgbox(QWidget *parent, const QString &title, const QString &msg,
+                                 QMessageBox::Icon icon, StandardButtons buttons,
+                                 StandardButton defaultButton);
 
 private:
-    static QString s_deftitle;
+    static QPointer<QWidget> s_defaultParent;
 };

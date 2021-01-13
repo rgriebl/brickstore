@@ -165,9 +165,9 @@ Application::Application(int &_argc, char **_argv)
     connect(Config::inst(), &Config::languageChanged,
             this, &Application::updateTranslations);
 
-    MessageBox::setDefaultTitle(QCoreApplication::applicationName());
-
     m_files_to_open << QCoreApplication::arguments().mid(1);
+
+    MessageBox::setDefaultParent(FrameWork::inst());
 
     FrameWork::inst()->show();
 #if defined(Q_OS_MACOS)
@@ -530,7 +530,7 @@ bool Application::initBrickLink()
 
     BrickLink::Core *bl = BrickLink::create(Config::inst()->dataDir(), &errstring);
     if (!bl) {
-        QMessageBox::critical(nullptr, QCoreApplication::applicationName(), tr("Could not initialize the BrickLink kernel:<br /><br />%1").arg(errstring), QMessageBox::Ok);
+        MessageBox::critical(nullptr, { }, tr("Could not initialize the BrickLink kernel:<br /><br />%1").arg(errstring));
     } else {
         bl->setItemImageScaleFactor(Config::inst()->itemImageSizePercent() / 100.);
         connect(Config::inst(), &Config::itemImageSizePercentChanged,

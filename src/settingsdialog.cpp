@@ -318,7 +318,7 @@ void SettingsDialog::save()
     if (dd.exists() && dd.isReadable())
         Config::inst()->setDocumentDir(dd.absolutePath());
     else
-        MessageBox::warning(this, tr("The specified document directory does not exist or is not read- and writeable.<br />The document directory setting will not be changed."));
+        MessageBox::warning(this, { }, tr("The specified document directory does not exist or is not read- and writeable.<br />The document directory setting will not be changed."));
 
     Config::inst()->setCloseEmptyDocuments(w_closeempty->isChecked ());
     Config::inst()->setValue("/General/Export/OpenBrowser", w_openbrowser->isChecked());
