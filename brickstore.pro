@@ -134,11 +134,17 @@ win32 {
       OPENSSL_ARCH=""
     }
 
-    OPENSSL="openssl.exe"
-    equals(TARCH, x64):OPENSSL_PATH="$$getenv(ProgramFiles)/OpenSSL-Win64/bin"
-    equals(TARCH, x86):OPENSSL_PATH="$$getenv(ProgramFiles(x86))/OpenSSL-Win32/bin"
+    OPENSSL_LIB="libssl-1_1$${OPENSSL_ARCH}.dll"
+    equals(TARCH, x64) {
+      OPENSSL_PATH="$$getenv(ProgramFiles)/OpenSSL-Win64/bin"
+      !exists("$$OPENSSL_PATH/$$OPENSSL_LIB"):OPENSSL_PATH="$$getenv(ProgramFiles)/OpenSSL/bin"
+    }
+    equals(TARCH, x86) {
+      OPENSSL_PATH="$$getenv(ProgramFiles(x86))/OpenSSL-Win32/bin"
+      !exists("$$OPENSSL_PATH/$$OPENSSL_LIB"):OPENSSL_PATH="$$getenv(ProgramFiles(x86))/OpenSSL/bin"
+    }
 
-    !exists("$$OPENSSL_PATH/$$OPENSSL"):error("Please install the matching OpenSSL version from https://slproweb.com/products/Win32OpenSSL.html.")
+    !exists("$$OPENSSL_PATH/$$OPENSSL_LIB"):error("Please install the matching OpenSSL version from https://slproweb.com/products/Win32OpenSSL.html.")
 
     OPENSSL_PATH=$$clean_path($$OPENSSL_PATH)
 
