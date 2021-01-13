@@ -16,9 +16,10 @@
 #include <QAbstractListModel>
 #include <QToolButton>
 
-#include "report.h"
+#include "script.h"
+#include "scriptmanager.h"
 
-#include "selectreportdialog.h"
+#include "selectprintingtemplatedialog.h"
 
 #if defined(MODELTEST)
 #  include "modeltest.h"
@@ -28,37 +29,37 @@
 #endif
 
 
-class ReportModel : public QAbstractListModel
+class PrintingScriptModel : public QAbstractListModel
 {
     Q_OBJECT
 
 public:
-    ReportModel()
-        : m_reports(ReportManager::inst()->reports())
+    PrintingScriptModel()
     {
         MODELTEST_ATTACH(this)
+        refreshScripts();
     }
 
 public slots:
     void reload()
     {
         beginResetModel();
-        ReportManager::inst()->reload();
-        m_reports = ReportManager::inst()->reports();
+        ScriptManager::inst()->reload();
+        refreshScripts();
         endResetModel();
     }
 
 public:
     QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
 
-    const Report *report(const QModelIndex &index) const
+    PrintingScriptTemplate *script(const QModelIndex &index) const
     {
-        return index.isValid() ? static_cast<const Report *>(index.internalPointer()) : nullptr;
+        return index.isValid() ? static_cast<PrintingScriptTemplate *>(index.internalPointer()) : nullptr;
     }
 
-    QModelIndex index(Report *report) const
+    QModelIndex index(PrintingScriptTemplate *script) const
     {
-        return report ? createIndex(m_reports.indexOf(report), 0, report) : QModelIndex();
+        return script ? createIndex(m_prtScripts.indexOf(script), 0, script) : QModelIndex();
     }
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -66,36 +67,48 @@ public:
     QVariant headerData(int section, Qt::Orientation orient, int role) const override;
 
 private:
-    QList<Report *> m_reports;
+    void refreshScripts()
+    {
+        m_prtScripts.clear();
+        auto scripts = ScriptManager::inst()->printingScripts();
+        for (auto script : scripts) {
+            const auto printingTemplates = script->printingTemplates();
+            for (auto printingTemplate : printingTemplates) {
+                m_prtScripts.append(printingTemplate);
+            }
+        }
+    }
+
+    QVector<PrintingScriptTemplate *> m_prtScripts;
 };
 
-QModelIndex ReportModel::index(int row, int column, const QModelIndex &parent) const
+QModelIndex PrintingScriptModel::index(int row, int column, const QModelIndex &parent) const
 {
     if (hasIndex(row, column, parent))
-        return parent.isValid() ? QModelIndex() : createIndex(row, column, const_cast<Report *>(m_reports.at(row)));
+        return parent.isValid() ? QModelIndex() : createIndex(row, column, const_cast<PrintingScriptTemplate *>(m_prtScripts.at(row)));
     return {};
 }
 
-int ReportModel::rowCount(const QModelIndex &parent) const
+int PrintingScriptModel::rowCount(const QModelIndex &parent) const
 {
-    return parent.isValid() ? 0 : m_reports.count();
+    return parent.isValid() ? 0 : m_prtScripts.count();
 }
 
-QVariant ReportModel::data(const QModelIndex &index, int role) const
+QVariant PrintingScriptModel::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid() || index.column() != 0 || !report(index))
+    if (!index.isValid() || index.column() != 0 || !script(index))
         return QVariant();
 
     QVariant res;
-    const Report *r = report(index);
+    const PrintingScriptTemplate *s = script(index);
 
     if (role == Qt::DisplayRole)
-        res = r->label();
+        res = s->text();
 
     return res;
 }
 
-QVariant ReportModel::headerData(int section, Qt::Orientation orient, int role) const
+QVariant PrintingScriptModel::headerData(int section, Qt::Orientation orient, int role) const
 {
     if ((orient == Qt::Horizontal) && (role == Qt::DisplayRole) && (section == 0))
         return tr("Name");
@@ -103,28 +116,28 @@ QVariant ReportModel::headerData(int section, Qt::Orientation orient, int role) 
 }
 
 
-SelectReportDialog::SelectReportDialog(QWidget *parent)
+SelectPrintingTemplateDialog::SelectPrintingTemplateDialog(QWidget *parent)
     : QDialog(parent)
 {
     setupUi(this);
 
-    auto *model = new ReportModel();
+    auto *model = new PrintingScriptModel();
 
     w_list->setModel(model);
 
     connect(w_list->selectionModel(), &QItemSelectionModel::selectionChanged,
-            this, &SelectReportDialog::reportChanged);
+            this, &SelectPrintingTemplateDialog::scriptChanged);
     connect(w_list, &QAbstractItemView::activated,
-            this, &SelectReportDialog::reportConfirmed);
+            this, &SelectPrintingTemplateDialog::scriptConfirmed);
     connect(w_update, &QAbstractButton::clicked,
-            model, &ReportModel::reload);
+            model, &PrintingScriptModel::reload);
 
     w_buttons->button(QDialogButtonBox::Ok)->setEnabled(false);
 
     int selectionIndex = -1;
     for (int i = 0; i < model->rowCount(); ++i) {
-        auto report = model->report(model->index(i, 0));
-        if (report && report->name() == "standard") {
+        auto script = model->script(model->index(i, 0));
+        if (script && script->text() == "standard") {
             selectionIndex = i;
             break;
         }
@@ -136,28 +149,28 @@ SelectReportDialog::SelectReportDialog(QWidget *parent)
     w_list->setFocus();
 }
 
-void SelectReportDialog::reportChanged()
+void SelectPrintingTemplateDialog::scriptChanged()
 {
-    w_buttons->button(QDialogButtonBox::Ok)->setEnabled((report()));
+    w_buttons->button(QDialogButtonBox::Ok)->setEnabled((script()));
 }
 
-void SelectReportDialog::reportConfirmed()
+void SelectPrintingTemplateDialog::scriptConfirmed()
 {
-    reportChanged();
+    scriptChanged();
     w_buttons->button(QDialogButtonBox::Ok)->animateClick();
 }
 
-const Report *SelectReportDialog::report() const
+PrintingScriptTemplate *SelectPrintingTemplateDialog::script() const
 {
     if (w_list->selectionModel()->hasSelection()) {
         QModelIndex idx = w_list->selectionModel()->selectedIndexes().front();
 
-        return static_cast<ReportModel *>(w_list->model())->report(idx);
+        return static_cast<PrintingScriptModel *>(w_list->model())->script(idx);
     }
     else
         return nullptr;
 }
 
-#include "selectreportdialog.moc"
+#include "selectprintingtemplatedialog.moc"
 
-#include "moc_selectreportdialog.cpp"
+#include "moc_selectprintingtemplatedialog.cpp"

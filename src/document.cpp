@@ -45,7 +45,7 @@
 
 #include "document.h"
 #include "document_p.h"
-#include "qml_bricklink_wrapper.h"
+
 
 enum {
     CID_Change,

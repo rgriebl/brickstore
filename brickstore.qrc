@@ -56,7 +56,7 @@
     <qresource prefix="/i18n">
         <file alias="translations.xml">translations/translations.xml</file>
     </qresource>
-    <qresource prefix="/print-templates">
-        <file alias="standard.qs">print-templates/standard.qs</file>
+    <qresource prefix="/extensions">
+        <file alias="standard-print-template.bs.qml">extensions/standard-print-template.bs.qml</file>
     </qresource>
 </RCC>

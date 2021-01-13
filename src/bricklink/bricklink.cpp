@@ -1410,10 +1410,10 @@ bool Core::readDatabase(QString *infoText, const QString &filename)
                 .arg(f.fileName());
         }
 
-        qDebug("Color: %8u  (%11d bytes)", m_colors.count(),     m_colors.count()     * int(sizeof(Color)    + 20));
-        qDebug("Types: %8u  (%11d bytes)", m_item_types.count(), m_item_types.count() * int(sizeof(ItemType) + 20));
-        qDebug("Cats : %8u  (%11d bytes)", m_categories.count(), m_categories.count() * int(sizeof(Category) + 20));
-        qDebug("Items: %8u  (%11d bytes)", m_items.count(),      m_items.count()      * int(sizeof(Item)     + 20));
+        qDebug("Colors    : %8u  (%11d bytes)", m_colors.count(),     m_colors.count()     * int(sizeof(Color)    + 20));
+        qDebug("Types     : %8u  (%11d bytes)", m_item_types.count(), m_item_types.count() * int(sizeof(ItemType) + 20));
+        qDebug("Categories: %8u  (%11d bytes)", m_categories.count(), m_categories.count() * int(sizeof(Category) + 20));
+        qDebug("Items     : %8u  (%11d bytes)", m_items.count(),      m_items.count()      * int(sizeof(Item)     + 20));
         if (!info.isEmpty())
             qDebug() << "Info :" << info;
         if (infoText)

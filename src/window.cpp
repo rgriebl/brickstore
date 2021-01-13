@@ -36,7 +36,9 @@
 #include "window.h"
 #include "headerview.h"
 #include "documentdelegate.h"
-#include "report.h"
+#include "scriptmanager.h"
+#include "script.h"
+#include "exception.h"
 #include "bricklink/bricklink_setmatch.h"
 
 #include "selectcolordialog.h"
@@ -44,7 +46,7 @@
 #include "settopriceguidedialog.h"
 #include "incdecpricesdialog.h"
 #include "consolidateitemsdialog.h"
-#include "selectreportdialog.h"
+#include "selectprintingtemplatedialog.h"
 
 
 
@@ -1713,11 +1715,11 @@ void Window::print(bool as_pdf)
     if (m_doc->items().isEmpty())
         return;
 
-    if (ReportManager::inst()->reports().isEmpty()) {
-        ReportManager::inst()->reload();
+    if (ScriptManager::inst()->printingScripts().isEmpty()) {
+        ScriptManager::inst()->reload();
 
-        if (ReportManager::inst()->reports().isEmpty()) {
-            MessageBox::warning(this, tr("Couldn't find any print templates."), MessageBox::Ok);
+        if (ScriptManager::inst()->printingScripts().isEmpty()) {
+            MessageBox::warning(this, { }, tr("Couldn't find any print scripts."));
             return;
         }
     }
@@ -1768,17 +1770,24 @@ void Window::print(bool as_pdf)
     prt.setDocName(doctitle);
     prt.setFullPage(true);
 
-    SelectReportDialog d(this);
+    SelectPrintingTemplateDialog d(this);
 
     if (d.exec() != QDialog::Accepted)
         return;
 
-    const Report *rep = d.report();
+    PrintingScriptTemplate *prtTemplate = d.script();
 
-    if (!rep)
+    if (!prtTemplate)
         return;
 
-    rep->print(&prt, m_doc, m_view->sortItemList(prt.printRange() == QPrinter::Selection ? selection() : m_doc->items()));
+    try {
+        prtTemplate->executePrint(&prt, this, prt.printRange() == QPrinter::Selection);
+    } catch (const Exception &e) {
+        QString msg = e.error();
+        if (msg.isEmpty())
+            msg = tr("Printing failed.");
+        MessageBox::warning(nullptr, { }, msg);
+    }
 }
 
 void Window::on_file_save_triggered()

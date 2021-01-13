@@ -12,40 +12,25 @@
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
 
-#include <QStandardPaths>
-#include <QFileInfo>
-#include <QDir>
 #include <QQmlEngine>
-#include <QQmlComponent>
 #include <QQmlContext>
-#include <QQmlInfo>
-#include <QMessageLogger>
-#include <QLoggingCategory>
 
-#include "application.h"
-#include "exception.h"
 #include "framework.h"
-#include "document.h"
 #include "window.h"
 
-#include "qml_bricklink_wrapper.h"
-
-
-class QmlException : public Exception
-{
-public:
-    QmlException(const QList<QQmlError> &errors, const char *msg)
-        : Exception(msg)
-    {
-        for (auto error : errors) {
-            m_message.append("\n");
-            m_message.append(error.toString());
-        }
-    }
-};
+#include "bricklink_wrapper.h"
 
 
 namespace QmlWrapper {
+
+static bool isReadOnly(QObject *obj)
+{
+    //TODO: engine == null for Document, which makes this mostly useless
+    //      BrickStore does have an engine and a context, so maybe we can have two sets of
+    //      Document wrappers: one read-write and the other read-only?
+    auto engine = obj ? qmlEngine(obj) : nullptr;
+    return engine ? engine->rootContext()->property("readOnlyContext").toBool() : false;
+}
 
 
 BrickLink::BrickLink(::BrickLink::Core *core)
@@ -334,9 +319,9 @@ InvItem::Setter::Setter(InvItem *invItem)
         m_to = *m_invItem->wrapped;
 }
 
-::BrickLink::InvItem &InvItem::Setter::to()
+::BrickLink::InvItem *InvItem::Setter::to()
 {
-    return m_to;
+    return &m_to;
 }
 
 InvItem::Setter::~Setter()
@@ -361,23 +346,31 @@ InvItem::Setter InvItem::set()
 ///////////////////////////////////////////////////////////////////////
 
 
-Document::Document(::Document *doc, ::DocumentProxyModel *view)
+Document::Document(::Document *doc)
     : d(doc)
-    , dpm(view)
 {
+    connect(doc, &::Document::fileNameChanged,
+            this, &Document::fileNameChanged);
+    connect(doc, &::Document::titleChanged,
+            this, &Document::titleChanged);
+    connect(doc, &::Document::currencyCodeChanged,
+            this, &Document::currencyCodeChanged);
+
     connect(doc, &::Document::itemsAdded, this,
             [this]() { emit countChanged(d->rowCount()); });
     connect(doc, &::Document::itemsRemoved, this,
             [this]() { emit countChanged(d->rowCount()); });
 }
 
-bool Document::isWrapperFor(::Document *doc, ::DocumentProxyModel *view) const
+bool Document::isWrapperFor(::Document *doc) const
 {
-    return (d == doc) && (dpm == view);
+    return (d == doc);
 }
 
 bool Document::changeItem(InvItem *from, ::BrickLink::InvItem &to)
 {
+    if (isReadOnly(this))
+        return false;
     if (this != from->doc)
         return false;
     return d->changeItem(from->wrapped, to);
@@ -397,13 +390,18 @@ InvItem Document::invItem(int index)
 
 void Document::deleteInvItem(InvItem ii)
 {
-    if (!ii.isNull() && ii.doc == this) {
+    if (isReadOnly(this))
+        return;
+
+    if (!ii.isNull() && ii.doc == this)
         d->removeItem(static_cast<::Document::Item *>(ii.wrapped));
-    }
 }
 
 InvItem Document::addInvItem(Item item, Color color)
 {
+    if (isReadOnly(this))
+        return InvItem { };
+
     auto di = new ::Document::Item();
     di->setItem(item.wrappedObject());
     di->setColor(color.wrappedObject());
@@ -417,13 +415,59 @@ InvItem Document::addInvItem(Item item, Color color)
 ///////////////////////////////////////////////////////////////////////
 
 
+DocumentView::DocumentView(Document *wrappedDoc, ::DocumentProxyModel *view)
+    : m_wrappedDoc(wrappedDoc)
+    , m_view(view)
+{
+    m_wrappedDoc->setParent(this);
+
+    connect(m_view, &::DocumentProxyModel::filterExpressionChanged,
+            this, &DocumentView::filterExpressionChanged);
+
+    connect(m_view, &QAbstractItemModel::rowsInserted,
+            this, [this]() { emit countChanged(m_view->rowCount()); });
+    connect(m_view, &QAbstractItemModel::rowsInserted,
+            this, [this]() { emit countChanged(m_view->rowCount()); });
+}
+
+bool DocumentView::isWrapperFor(DocumentProxyModel *view) const
+{
+    return (view == m_view);
+}
+
+int DocumentView::toDocumentIndex(int viewIndex) const
+{
+    return m_view->mapToSource(m_view->index(viewIndex, 0)).row();
+}
+
+int DocumentView::toViewIndex(int documentIndex) const
+{
+    return m_view->mapFromSource(m_view->sourceModel()->index(documentIndex, 0)).row();
+}
+
+int DocumentView::count() const
+{
+    return m_view->rowCount();
+}
+
+Document *DocumentView::document() const
+{
+    return m_wrappedDoc;
+}
+
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+
 BrickStore::BrickStore()
 {
     auto checkActiveWindow = [this](Window *win) {
-        Document *doc = documentForWindow(win);
-        if (doc != m_currentDocument) {
-            m_currentDocument = doc;
-            emit currentDocumentChanged(doc);
+        DocumentView *view = documentViewForWindow(win);
+        if (view != m_currentDocumentView) {
+            m_currentDocumentView = view;
+            emit currentDocumentViewChanged(view);
         }
     };
 
@@ -432,26 +476,26 @@ BrickStore::BrickStore()
 
     connect(FrameWork::inst(), &FrameWork::windowListChanged,
             this, [this, checkActiveWindow]() {
-        QVector<Document *> newDocs;
-        QVector<Document *> oldDocs = m_documents;
+        QVector<DocumentView *> newViews;
+        QVector<DocumentView *> oldViews = m_documentViews;
         const auto allWindows = FrameWork::inst()->allWindows();
         for (auto win : allWindows) {
-            auto doc = documentForWindow(win);
-            if (doc) {
-                oldDocs.removeOne(doc);
-                newDocs.append(doc);
+            auto view = documentViewForWindow(win);
+            if (view) {
+                oldViews.removeOne(view);
+                newViews.append(view);
             } else {
-                doc = new Document(win->document(), win->documentView());
-                QQmlEngine::setObjectOwnership(doc, QQmlEngine::CppOwnership);
-                newDocs.append(doc);
+                view = new DocumentView(new Document(win->document()), win->documentView());
+                QQmlEngine::setObjectOwnership(view, QQmlEngine::CppOwnership);
+                newViews.append(view);
             }
         }
-        while (!oldDocs.isEmpty()) {
-            delete oldDocs.takeLast();
+        while (!oldViews.isEmpty()) {
+            delete oldViews.takeLast();
         }
-        if (newDocs != m_documents) {
-            m_documents = newDocs;
-            emit documentsChanged(m_documents);
+        if (newViews != m_documentViews) {
+            m_documentViews = newViews;
+            emit documentViewsChanged(m_documentViews);
         }
 
         // the windowActivated signal for new documents is sent way too early
@@ -461,29 +505,38 @@ BrickStore::BrickStore()
 }
 
 
-QVector<Document *> BrickStore::documents() const
+QVector<DocumentView *> BrickStore::documentViews() const
 {
-    return m_documents;
+    return m_documentViews;
 }
 
-Document *BrickStore::currentDocument() const
+DocumentView *BrickStore::currentDocumentView() const
 {
-    return m_currentDocument;
+    return m_currentDocumentView;
 }
 
-Document *BrickStore::newDocument(const QString &title)
+DocumentView *BrickStore::newDocument(const QString &title)
 {
-    return setupDocument(::Document::fileNew(), title);
+    if (isReadOnly(this))
+        return nullptr;
+
+    return setupDocumentView(::Document::fileNew(), title);
 }
 
-Document *BrickStore::openDocument(const QString &fileName)
+DocumentView *BrickStore::openDocument(const QString &fileName)
 {
-    return setupDocument(::Document::fileOpen(fileName));
+    if (isReadOnly(this))
+        return nullptr;
+
+    return setupDocumentView(::Document::fileOpen(fileName));
 }
 
-Document *BrickStore::importBrickLinkStore(const QString &title)
+DocumentView *BrickStore::importBrickLinkStore(const QString &title)
 {
-    return setupDocument(::Document::fileImportBrickLinkStore(), title);
+    if (isReadOnly(this))
+        return nullptr;
+
+    return setupDocumentView(::Document::fileImportBrickLinkStore(), title);
 }
 
 void BrickStore::classBegin()
@@ -492,306 +545,34 @@ void BrickStore::classBegin()
 void BrickStore::componentComplete()
 { }
 
-Document *BrickStore::documentForWindow(Window *win) const
+DocumentView *BrickStore::documentViewForWindow(Window *win) const
 {
     if (win) {
-        for (auto doc : m_documents) {
-            if (doc->isWrapperFor(win->document(), win->documentView()))
-                return doc;
+        for (auto view : m_documentViews) {
+            if (view->isWrapperFor(win->documentView()))
+                return view;
         }
     }
     return nullptr;
 }
 
-Document *BrickStore::setupDocument(::Document *doc, const QString &title)
+DocumentView *BrickStore::setupDocumentView(::Document *doc, const QString &title)
 {
     if (doc) {
         auto win = FrameWork::inst()->createWindow(doc);
         if (!title.isEmpty())
             doc->setTitle(title);
 
-        Q_ASSERT(currentDocument());
-        Q_ASSERT(currentDocument()->isWrapperFor(doc, win->documentView()));
+        Q_ASSERT(currentDocumentView());
+        Q_ASSERT(currentDocumentView()->isWrapperFor(win->documentView()));
 
-        return currentDocument();
+        return currentDocumentView();
     }
     return nullptr;
 }
 
-
-///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-
-
-QString ScriptMenuAction::text() const
-{
-    return m_text;
-}
-
-void ScriptMenuAction::setText(const QString &text)
-{
-    if (text == m_text)
-        return;
-    m_text = text;
-    emit textChanged(text);
-
-    if (m_action)
-        m_action->setText(text);
-}
-
-ScriptMenuAction::Location ScriptMenuAction::location() const
-{
-    return m_type;
-}
-
-void ScriptMenuAction::setLocation(ScriptMenuAction::Location type)
-{
-    if (type == m_type)
-        return;
-    m_type = type;
-    emit locationChanged(type);
-}
-
-void ScriptMenuAction::classBegin()
-{ }
-
-void ScriptMenuAction::componentComplete()
-{
-    if (auto *script = qobject_cast<Script *>(parent())) {
-        script->m_menuEntries << this;
-    } else {
-        qmlWarning(this) << "ScriptMenuAction objects need to be nested inside Script objects";
-    }
-}
-
-
-///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-
-
-QString Script::name() const
-{
-    return m_name;
-}
-
-void Script::setName(QString name)
-
-{
-    if (m_name != name) {
-        m_name = name;
-        emit nameChanged(m_name);
-    }
-}
-
-QString Script::author() const
-{
-    return m_author;
-}
-
-void Script::setAuthor(QString author)
-{
-    if (m_author != author) {
-        m_author = author;
-        emit authorChanged(m_author);
-    }
-}
-
-QString Script::version() const
-{
-    return m_version;
-}
-
-void Script::setVersion(QString version)
-{
-    if (m_version != version) {
-        m_version = version;
-        emit versionChanged(m_version);
-    }
-}
-
-Script::Type Script::type() const
-{
-    return m_type;
-}
-
-void Script::setType(Type type)
-{
-    if (m_type != type) {
-        m_type = type;
-        emit typeChanged(m_type);
-    }
-}
-
-Script *Script::load(QQmlEngine *engine, const QString &filename)
-
-{
-    QScopedPointer<QQmlComponent> comp(new QQmlComponent(engine, filename));
-    QScopedPointer<QQmlContext> ctx(new QQmlContext(engine));
-    QScopedPointer<QObject> root(comp->create(ctx.data()));
-    if (!root)
-        throw QmlException(comp->errors(), "Could not load QML file %1").arg(filename);
-    if (root && !qobject_cast<Script *>(root.data()))
-        throw Exception("The root element of the script %1 is not 'Script'").arg(filename);
-
-    auto script = static_cast<Script *>(root.take());
-    script->m_component = comp.take();
-    script->m_context = ctx.take();
-    script->m_fileName = filename;
-
-    return script;
-}
-
-QList<ScriptMenuAction *> Script::menuEntries() const
-{
-    return m_menuEntries;
-}
-
-
-///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-
-
-ScriptManager::ScriptManager()
-    : m_engine(new QQmlEngine(this))
-{
-    connect(m_engine, &QQmlEngine::warnings,
-            this, [this](const QList<QQmlError> &list) {
-        static QLoggingCategory logQml("qml");
-
-        if (!logQml.isWarningEnabled())
-            return;
-
-        for (auto err : list) {
-            QByteArray func;
-            if (err.object())
-                func = err.object()->objectName().toLocal8Bit();
-            QByteArray file;
-            if (err.url().scheme() == "file")
-                file = err.url().toLocalFile().toLocal8Bit();
-            else
-                file = err.url().toDisplayString().toLocal8Bit();
-
-            QMessageLogger ml(file, err.line(), func, logQml.categoryName());
-            ml.warning().nospace().noquote() << err.description();
-        }
-    });
-}
-
-ScriptManager::~ScriptManager()
-{
-    qDeleteAll(m_scripts);
-    s_inst = nullptr;
-}
-
-ScriptManager *ScriptManager::s_inst = nullptr;
-
-ScriptManager *ScriptManager::inst()
-{
-    if (!s_inst) {
-        s_inst = new ScriptManager();
-
-    }
-    return s_inst;
-}
-
-bool ScriptManager::initialize(::BrickLink::Core *core)
-{
-    if (m_bricklink || !core)
-        return false;
-
-    m_bricklink = new BrickLink(core);
-    m_brickstore = new BrickStore();
-
-    QString cannotCreate = tr("Cannot create objects of type %1");
-
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-    qmlRegisterSingletonInstance("BrickStore", 1, 0, "BrickLink", m_bricklink);
-    qmlRegisterSingletonInstance("BrickStore", 1, 0, "BrickStore", m_brickstore);
-#else
-    static auto staticBrickLink = m_bricklink;
-    QQmlEngine::setObjectOwnership(staticBrickLink, QQmlEngine::CppOwnership);
-    qmlRegisterSingletonType<QmlWrapper::BrickLink>("BrickStore", 1, 0, "BrickLink",
-                             [](QQmlEngine *, QJSEngine *) -> QObject * {
-        return staticBrickLink;
-    });
-    static auto staticBrickStore = m_brickstore;
-    QQmlEngine::setObjectOwnership(staticBrickStore, QQmlEngine::CppOwnership);
-    qmlRegisterSingletonType<QmlWrapper::BrickStore>("BrickStore", 1, 0, "BrickStore",
-                             [](QQmlEngine *, QJSEngine *) -> QObject * {
-        return staticBrickStore;
-    });
-#endif
-
-    qRegisterMetaType<QmlWrapper::Color>("Color");
-    qRegisterMetaType<QmlWrapper::ItemType>("ItemType");
-    qRegisterMetaType<QmlWrapper::Category>("Category");
-    qRegisterMetaType<QmlWrapper::Item>("Item");
-    qRegisterMetaType<QmlWrapper::InvItem>("InvItem");
-    qRegisterMetaType<QmlWrapper::PriceGuide>("PriceGuide");
-    qRegisterMetaType<QmlWrapper::Picture>("Picture");
-    qRegisterMetaType<QmlWrapper::BrickLink::UpdateStatus>("BrickLink::Time");
-    qRegisterMetaType<QmlWrapper::BrickLink::UpdateStatus>("BrickLink::Price");
-    qRegisterMetaType<QmlWrapper::BrickLink::UpdateStatus>("BrickLink::Condition");
-    qRegisterMetaType<QmlWrapper::BrickLink::UpdateStatus>("BrickLink::SubCondition");
-    qRegisterMetaType<QmlWrapper::BrickLink::UpdateStatus>("BrickLink::Stockroom");
-    qRegisterMetaType<QmlWrapper::BrickLink::UpdateStatus>("BrickLink::Status");
-    qRegisterMetaType<QmlWrapper::BrickLink::UpdateStatus>("BrickLink::UpdateStatus");
-    qRegisterMetaType<QmlWrapper::BrickLink::UpdateStatus>("BrickLink::OrderType");
-
-    qmlRegisterUncreatableType<QmlWrapper::Document>("BrickStore", 1, 0, "Document",
-                                                     cannotCreate.arg("Document"));
-
-    qmlRegisterType<QmlWrapper::Script>("BrickStore", 1, 0, "Script");
-    qmlRegisterType<QmlWrapper::ScriptMenuAction>("BrickStore", 1, 0, "ScriptMenuAction");
-
-    reload();
-    return true;
-}
-
-bool ScriptManager::reload()
-{
-    qDeleteAll(m_scripts);
-    m_scripts.clear();
-
-    QStringList spath = { QStringLiteral(":/scripts") };
-
-    spath << Application::inst()->externalResourceSearchPath("scripts");
-
-    QString dataloc = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
-    if (!dataloc.isEmpty())
-        spath.prepend(dataloc + QLatin1String("/scripts"));
-
-    for (const QString &dir : qAsConst(spath)) {
-        qDebug() << "Loading scripts in directory" << dir;
-
-        const QFileInfoList fis = QDir(dir).entryInfoList(QStringList("*.bs.qml"), QDir::Files | QDir::Readable);
-        for (const QFileInfo &fi : fis) {
-            try {
-
-                Script *script = Script::load(m_engine, fi.absoluteFilePath());
-                if (script)
-                    m_scripts.append(script);
-
-                qDebug() << "Loaded script" << fi.absoluteFilePath();
-
-            } catch (const Exception &e) {
-                qWarning() << "Could not load script:\n" << e.what();
-            }
-        }
-    }
-    return !m_scripts.isEmpty();
-}
-
-QList<Script *> ScriptManager::scripts() const
-{
-    return m_scripts;
-}
-
 } // namespace QmlWrapper
 
-#include "moc_qml_bricklink_wrapper.cpp"
+#include "moc_bricklink_wrapper.cpp"
 
 

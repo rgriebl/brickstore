@@ -48,9 +48,8 @@
 #include "messagebox.h"
 #include "framework.h"
 #include "transfer.h"
-#include "report.h"
 #include "currency.h"
-
+#include "scriptmanager.h"
 #include "utility.h"
 #include "version.h"
 #include "application.h"
@@ -149,7 +148,7 @@ Application::Application(int &_argc, char **_argv)
     // initialize config & resource
     (void) Config::inst()->upgrade(BRICKSTORE_MAJOR, BRICKSTORE_MINOR);
     (void) Currency::inst();
-    (void) ReportManager::inst();
+    (void) ScriptManager::inst();
 
     if (!initBrickLink()) {
         // we cannot call quit directly, since there is no event loop to quit from...
@@ -159,7 +158,6 @@ Application::Application(int &_argc, char **_argv)
     if (LDraw::create(QString(), nullptr)) {
         BrickLink::core()->setLDrawDataPath(LDraw::core()->dataPath());
     }
-
 
     updateTranslations();
     connect(Config::inst(), &Config::languageChanged,
@@ -183,7 +181,7 @@ Application::~Application()
 {
     exitBrickLink();
 
-    delete ReportManager::inst();
+    delete ScriptManager::inst();
     delete Currency::inst();
     delete Config::inst();
 

@@ -67,7 +67,9 @@
 #include "framework.h"
 #include "stopwatch.h"
 
-#include "qml_bricklink_wrapper.h"
+#include "scriptmanager.h"
+#include "script.h"
+#include "exception.h"
 
 enum {
     DockStateVersion = 1 // increase if you change the dock/toolbar setup
@@ -592,12 +594,17 @@ FrameWork::FrameWork(QWidget *parent)
     //if (!rateUpdate.isValid() || rateUpdate.daysTo(QDateTime::currentDateTime()) >= 1)
     Currency::inst()->updateRates();
 
+    setupScripts();
+}
 
-    auto sm = QmlWrapper::ScriptManager::inst();
-    sm->setParent(this);
-    sm->initialize(BrickLink::core());
+void FrameWork::setupScripts()
+{
+    if (!ScriptManager::inst()->initialize(BrickLink::core())) {
+        MessageBox::warning(nullptr, { }, tr("Could not initialize the JavaScript scripting environment."));
+        return;
+    }
 
-    const auto scripts = sm->scripts();
+    const auto scripts = ScriptManager::inst()->extensionScripts();
 
     auto extrasMenu = findChild<QAction *>("extras")->menu();
     auto contextMenu = findChild<QAction *>("context")->menu();
@@ -606,9 +613,9 @@ FrameWork::FrameWork(QWidget *parent)
     bool addedToContext = false;
 
     for (auto script : scripts) {
-        const auto menuEntries = script->menuEntries();
-        for (auto menuEntry : menuEntries) {
-            bool c = (menuEntry->location() == QmlWrapper::ScriptMenuAction::Location::ContextMenu);
+        const auto extensionActions = script->extensionActions();
+        for (auto extensionAction : extensionActions) {
+            bool c = (extensionAction->location() == ExtensionScriptAction::Location::ContextMenu);
             QMenu *menu = c ? contextMenu : extrasMenu;
             bool &addedTo = c ? addedToContext : addedToExtras;
 
@@ -616,8 +623,14 @@ FrameWork::FrameWork(QWidget *parent)
                 addedTo = true;
                 menu->addSeparator();
             }
-            menu->addAction(menuEntry->text(), menuEntry,
-                            &QmlWrapper::ScriptMenuAction::triggered);
+            menu->addAction(extensionAction->text(), extensionAction,
+                            [extensionAction]() {
+                try {
+                    extensionAction->executeAction();
+                } catch (const Exception &e) {
+                    MessageBox::warning(nullptr, { }, e.error());
+                }
+            });
         }
     }
 }

@@ -37,6 +37,7 @@ class TaskAppearsInWidget;
 class Document;
 class AddItemDialog;
 class ItemDetailPopup;
+class ScriptManager;
 
 
 class FrameWork : public QMainWindow
@@ -113,6 +114,7 @@ private:
 private:
     QIcon *icon(const char *name);
 
+    void setupScripts();
     QAction *findAction(const char *name);
     QList<QAction *> findActions(const char *startsWithName);
     void connectAllActions(bool do_connect, Window *window);

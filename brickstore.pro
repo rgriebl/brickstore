@@ -63,7 +63,7 @@ OTHER_FILES += \
   configure \
   translations/translations.xml \
   scripts/generate-assets.sh \
-  print-templates/*.qs \
+  extensions/*.bs.qml \
   debian/* \
   unix/brickstore.desktop \
   unix/brickstore-mime.xml \
@@ -88,6 +88,7 @@ include(src/src.pri)
 include(src/utility/utility.pri)
 include(src/bricklink/bricklink.pri)
 include(src/ldraw/ldraw.pri)
+include(src/script/script.pri)
 include(src/lzma/lzma.pri)
 modeltest:debug:include(modeltest/modeltest.pri)
 
@@ -234,10 +235,6 @@ macos {
   QMAKE_INFO_PLIST = macos/Info.plist
   bundle_icons.path = Contents/Resources
   bundle_icons.files = $$files("assets/generated-icons/*.icns")
-  bundle_printtemplates.path = Contents/Resources/print-templates
-  bundle_printtemplates.files = $$files("print-templates/*.qs") \
-                                $$files("print-templates/*.ui")
-
   bundle_locversions.path = Contents/Resources
   for(l, LANGUAGES) {
     outpath = $$OUT_PWD/.locversions/$${l}.lproj
@@ -246,7 +243,7 @@ macos {
     bundle_locversions.files += $$outpath
   }
 
-  QMAKE_BUNDLE_DATA += bundle_icons bundle_locversions bundle_printtemplates
+  QMAKE_BUNDLE_DATA += bundle_icons bundle_locversions
 
   CONFIG(release, debug|release) {
     deploy.depends += $(DESTDIR_TARGET)

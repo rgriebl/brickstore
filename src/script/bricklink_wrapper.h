@@ -14,16 +14,11 @@
 #pragma once
 
 #include <QQmlParserStatus>
-#include <QQmlListProperty>
-#include <QQuickItem>
-#include <QAction>
 
 #include "bricklink.h"
 #include "document.h"
 
-QT_FORWARD_DECLARE_CLASS(QQmlEngine)
-QT_FORWARD_DECLARE_CLASS(QQmlComponent)
-QT_FORWARD_DECLARE_CLASS(QQmlContext)
+class Window;
 
 namespace QmlWrapper {
 
@@ -293,7 +288,9 @@ class InvItem : WrapperBase<::BrickLink::InvItem>
     Q_PROPERTY(Category category READ category)
     Q_PROPERTY(ItemType itemType READ itemType)
     Q_PROPERTY(QString itemId READ itemId)
+    Q_PROPERTY(QString id READ itemId)
     Q_PROPERTY(QString itemName READ itemName)
+    Q_PROPERTY(QString name READ itemName)
     Q_PROPERTY(QString colorName READ colorName)
     Q_PROPERTY(QString categoryName READ categoryName)
     Q_PROPERTY(QString itemTypeName READ itemTypeName)
@@ -334,13 +331,15 @@ class InvItem : WrapperBase<::BrickLink::InvItem>
 
     Q_PROPERTY(bool incomplete READ incomplete)
 
+    Q_PROPERTY(QImage image READ image)
+
 public:
     InvItem(::BrickLink::InvItem *invItem = nullptr, Document *document = nullptr);
 
     Item item() const                  { return get()->item(); }
-    void setItem(Item item)            { set().to().setItem(item.wrappedObject()); }
+    void setItem(Item item)            { set().to()->setItem(item.wrappedObject()); }
     Color color() const                { return get()->color(); }
-    void setColor(Color color)         { set().to().setColor(color.wrappedObject()); }
+    void setColor(Color color)         { set().to()->setColor(color.wrappedObject()); }
     Category category() const          { return get()->category(); }
     ItemType itemType() const          { return get()->itemType(); }
 
@@ -352,74 +351,76 @@ public:
     int itemYearReleased() const       { return get()->itemYearReleased(); }
 
     BrickLink::Status status() const                { return static_cast<BrickLink::Status>(get()->status()); }
-    void setStatus(BrickLink::Status s)             { set().to().setStatus(static_cast<::BrickLink::Status>(s)); }
+    void setStatus(BrickLink::Status s)             { set().to()->setStatus(static_cast<::BrickLink::Status>(s)); }
     BrickLink::Condition condition() const          { return static_cast<BrickLink::Condition>(get()->condition()); }
-    void setCondition(BrickLink::Condition c)       { set().to().setCondition(static_cast<::BrickLink::Condition>(c)); }
+    void setCondition(BrickLink::Condition c)       { set().to()->setCondition(static_cast<::BrickLink::Condition>(c)); }
     BrickLink::SubCondition subCondition() const    { return static_cast<BrickLink::SubCondition>(get()->subCondition()); }
-    void setSubCondition(BrickLink::SubCondition c) { set().to().setSubCondition(static_cast<::BrickLink::SubCondition>(c)); }
+    void setSubCondition(BrickLink::SubCondition c) { set().to()->setSubCondition(static_cast<::BrickLink::SubCondition>(c)); }
     QString comments() const           { return get()->comments(); }
-    void setComments(const QString &n) { set().to().setComments(n); }
+    void setComments(const QString &n) { set().to()->setComments(n); }
     QString remarks() const            { return get()->remarks(); }
-    void setRemarks(const QString &r)  { set().to().setComments(r); }
+    void setRemarks(const QString &r)  { set().to()->setComments(r); }
 
     int quantity() const               { return get()->quantity(); }
-    void setQuantity(int q)            { set().to().setQuantity(q); }
+    void setQuantity(int q)            { set().to()->setQuantity(q); }
     int origQuantity() const           { return get()->origQuantity(); }
-    void setOrigQuantity(int q)        { set().to().setOrigQuantity(q); }
+    void setOrigQuantity(int q)        { set().to()->setOrigQuantity(q); }
     int bulkQuantity() const           { return get()->bulkQuantity(); }
-    void setBulkQuantity(int q)        { set().to().setBulkQuantity(q); }
+    void setBulkQuantity(int q)        { set().to()->setBulkQuantity(q); }
     int tier1Quantity() const          { return get()->tierQuantity(0); }
-    void setTier1Quantity(int q)       { set().to().setTierQuantity(0, q); }
+    void setTier1Quantity(int q)       { set().to()->setTierQuantity(0, q); }
     int tier2Quantity() const          { return get()->tierQuantity(1); }
-    void setTier2Quantity(int q)       { set().to().setTierQuantity(1, q); }
+    void setTier2Quantity(int q)       { set().to()->setTierQuantity(1, q); }
     int tier3Quantity() const          { return get()->tierQuantity(2); }
-    void setTier3Quantity(int q)       { set().to().setTierQuantity(2, q); }
+    void setTier3Quantity(int q)       { set().to()->setTierQuantity(2, q); }
 
     double price() const               { return get()->price(); }
-    void setPrice(double p)            { set().to().setPrice(p); }
+    void setPrice(double p)            { set().to()->setPrice(p); }
     double origPrice() const           { return get()->origPrice(); }
-    void setOrigPrice(double p)        { set().to().setOrigPrice(p); }
+    void setOrigPrice(double p)        { set().to()->setOrigPrice(p); }
     double tier1Price() const          { return get()->tierPrice(0); }
-    void setTier1Price(double p)       { set().to().setTierPrice(0, p); }
+    void setTier1Price(double p)       { set().to()->setTierPrice(0, p); }
     double tier2Price() const          { return get()->tierPrice(1); }
-    void setTier2Price(double p)       { set().to().setTierPrice(1, p); }
+    void setTier2Price(double p)       { set().to()->setTierPrice(1, p); }
     double tier3Price() const          { return get()->tierPrice(2); }
-    void setTier3Price(double p)       { set().to().setTierPrice(2, p); }
+    void setTier3Price(double p)       { set().to()->setTierPrice(2, p); }
 
     int sale() const                   { return get()->sale(); }
-    void setSale(int s)                { set().to().setSale(s); }
+    void setSale(int s)                { set().to()->setSale(s); }
     double total() const               { return get()->total(); }
 
     uint lotId() const                 { return get()->lotId(); }
-    void setLotId(uint lid)            { set().to().setLotId(lid); }
+    void setLotId(uint lid)            { set().to()->setLotId(lid); }
 
     bool retain() const                { return get()->retain(); }
-    void setRetain(bool r)             { set().to().setRetain(r); }
+    void setRetain(bool r)             { set().to()->setRetain(r); }
     BrickLink::Stockroom stockroom() const     { return static_cast<BrickLink::Stockroom>(get()->stockroom()); }
-    void setStockroom(BrickLink::Stockroom sr) { set().to().setStockroom(static_cast<::BrickLink::Stockroom>(sr)); }
+    void setStockroom(BrickLink::Stockroom sr) { set().to()->setStockroom(static_cast<::BrickLink::Stockroom>(sr)); }
 
     double weight() const              { return get()->weight(); }
-    void setWeight(double w)           { set().to().setWeight(w); }
+    void setWeight(double w)           { set().to()->setWeight(w); }
 
     QString reserved() const           { return get()->reserved(); }
-    void setReserved(const QString &r) { set().to().setReserved(r); }
+    void setReserved(const QString &r) { set().to()->setReserved(r); }
 
     bool alternate() const             { return get()->alternate(); }
-    void setAlternate(bool a)          { set().to().setAlternate(a); }
+    void setAlternate(bool a)          { set().to()->setAlternate(a); }
     uint alternateId() const           { return get()->alternateId(); }
-    void setAlternateId(uint aid)      { set().to().setAlternateId(aid); }
+    void setAlternateId(uint aid)      { set().to()->setAlternateId(aid); }
 
     bool counterPart() const           { return get()->counterPart(); }
-    void setCounterPart(bool b)        { set().to().setCounterPart(b); }
+    void setCounterPart(bool b)        { set().to()->setCounterPart(b); }
 
     bool incomplete() const            { return get()->isIncomplete(); }
+
+    QImage image() const               { return get()->image(); }
 
 private:
     class Setter
     {
     public:
         Setter(InvItem *invItem);
-        ::BrickLink::InvItem &to();
+        ::BrickLink::InvItem *to();
         ~Setter();
 
     private:
@@ -441,12 +442,14 @@ class Document : public QObject
     Q_OBJECT
     Q_PRIVATE_PROPERTY(d, QString title READ title WRITE setTitle NOTIFY titleChanged)
     Q_PRIVATE_PROPERTY(d, QString fileName READ fileName WRITE setFileName NOTIFY fileNameChanged)
-    Q_PRIVATE_PROPERTY(dpm, QString filter READ filterExpression WRITE setFilterExpression NOTIFY filterExpressionChanged)
     Q_PROPERTY(int count READ count NOTIFY countChanged)
+    Q_PRIVATE_PROPERTY(d, QString currencyCode READ currencyCode NOTIFY currencyCodeChanged)
+
+    //TODO: missing: statistics & order
 
 public:
-    Document(::Document *doc, ::DocumentProxyModel *view);
-    bool isWrapperFor(::Document *doc, ::DocumentProxyModel *view) const;
+    Document(::Document *doc);
+    bool isWrapperFor(::Document *doc) const;
 
     bool changeItem(InvItem *from, ::BrickLink::InvItem &to);
 
@@ -466,162 +469,75 @@ public:
 signals:
     void titleChanged(const QString &title);
     void fileNameChanged(const QString &fileName);
+    void countChanged(int count);
+    void currencyCodeChanged(const QString &currencyCode);
+
+private:
+    ::Document *d;
+};
+
+class DocumentView : public QObject
+{
+    Q_OBJECT
+    Q_PRIVATE_PROPERTY(m_view, QString filter READ filterExpression NOTIFY filterExpressionChanged)
+    Q_PROPERTY(int count READ count NOTIFY countChanged)
+    Q_PROPERTY(Document *document READ document CONSTANT)
+
+    //TODO: missing: selection handling (and statistics for selection)
+
+public:
+    DocumentView(Document *wrappedDoc, ::DocumentProxyModel *view);
+    bool isWrapperFor(::DocumentProxyModel *view) const;
+
+    Q_INVOKABLE int toDocumentIndex(int viewIndex) const;
+    Q_INVOKABLE int toViewIndex(int documentIndex) const;
+
+    int count() const;
+    Document *document() const;
+
+signals:
     void filterExpressionChanged(const QString &filterExpression);
     void countChanged(int count);
 
 private:
-    ::Document *d;
-    ::DocumentProxyModel *dpm;
+    Document *m_wrappedDoc;
+    ::DocumentProxyModel *m_view;
 };
+
 
 class BrickStore : public QObject, public QQmlParserStatus
 {
     Q_OBJECT
     Q_INTERFACES(QQmlParserStatus)
-    Q_PROPERTY(QVector<Document *> documents READ documents NOTIFY documentsChanged)
-    Q_PROPERTY(Document *currentDocument READ currentDocument NOTIFY currentDocumentChanged)
+    Q_PROPERTY(QVector<DocumentView *> documentViews READ documentViews NOTIFY documentViewsChanged)
+    Q_PROPERTY(DocumentView *currentDocumentView READ currentDocumentView NOTIFY currentDocumentViewChanged)
 
 public:
     BrickStore();
 
-    QVector<Document *> documents() const;
-    Document * currentDocument() const;
+    QVector<DocumentView *> documentViews() const;
+    DocumentView *currentDocumentView() const;
+
+    DocumentView *documentViewForWindow(Window *win) const;
 
     // the QmlWrapper:: prefix is needed, otherwise moc/qml get the return type wrong
-    Q_INVOKABLE QmlWrapper::Document *newDocument(const QString &title);
-    Q_INVOKABLE QmlWrapper::Document *openDocument(const QString &fileName);
-    Q_INVOKABLE QmlWrapper::Document *importBrickLinkStore(const QString &title = { });
+    Q_INVOKABLE QmlWrapper::DocumentView *newDocument(const QString &title);
+    Q_INVOKABLE QmlWrapper::DocumentView *openDocument(const QString &fileName);
+    Q_INVOKABLE QmlWrapper::DocumentView *importBrickLinkStore(const QString &title = { });
 
 signals:
-    void documentsChanged(QVector<Document *> documents);
-    void currentDocumentChanged(Document * currentDocument);
+    void documentViewsChanged(QVector<DocumentView *> documents);
+    void currentDocumentViewChanged(DocumentView *currentDocument);
 
 protected:
     void classBegin() override;
     void componentComplete() override;
 
 private:
-    Document *documentForWindow(Window *win) const;
-    Document *setupDocument(::Document *doc, const QString &title = { });
+    DocumentView *setupDocumentView(::Document *doc, const QString &title = { });
 
-    QVector<Document *> m_documents;
-    Document * m_currentDocument = nullptr;
-};
-
-
-class ScriptMenuAction : public QObject, public QQmlParserStatus
-{
-    Q_OBJECT
-    Q_INTERFACES(QQmlParserStatus)
-    Q_PROPERTY(QString text READ text WRITE setText NOTIFY textChanged)
-    Q_PROPERTY(Location location READ location WRITE setLocation NOTIFY locationChanged)
-
-public:
-    enum class Location {
-        ExtrasMenu,
-        ContextMenu,
-    };
-    Q_ENUM(Location)
-
-    QString text() const;
-    void setText(const QString &text);
-    Location location() const;
-    void setLocation(Location type);
-
-signals:
-    void textChanged(const QString &text);
-    void locationChanged(Location type);
-
-    void triggered();
-
-protected:
-    void classBegin() override;
-    void componentComplete() override;
-
-private:
-    QString m_text;
-    Location m_type = Location::ExtrasMenu;
-    QAction *m_action = nullptr;
-};
-
-
-class Script : public QQuickItem
-{
-    Q_OBJECT
-    Q_INTERFACES(QQmlParserStatus)
-    Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
-    Q_PROPERTY(QString author READ author WRITE setAuthor NOTIFY authorChanged)
-    Q_PROPERTY(QString version READ version WRITE setVersion NOTIFY versionChanged)
-    Q_PROPERTY(Type type READ type WRITE setType NOTIFY typeChanged)
-
-public:
-    enum class Type {
-        ExtensionScript,
-        PrintingScript,
-    };
-    Q_ENUM(Type)
-
-    QString name() const;
-    QString author() const;
-    void setName(QString name);
-    void setAuthor(QString author);
-    QString version() const;
-    void setVersion(QString version);
-    Type type() const;
-    void setType(Type type);
-
-    static Script *load(QQmlEngine *engine, const QString &filename);
-
-    QList<ScriptMenuAction *> menuEntries() const;
-
-signals:
-    void nameChanged(QString name);
-    void authorChanged(QString author);
-    void versionChanged(QString version);
-    void typeChanged(Type type);
-
-private:
-    QString m_name;
-    QString m_author;
-    QString m_version;
-    Type m_type;
-
-    // C++ side
-    QQmlContext *m_context = nullptr;
-    QQmlComponent *m_component = nullptr;
-    QString m_fileName;
-
-    QList<ScriptMenuAction *> m_menuEntries;
-    friend class ScriptMenuAction;
-};
-
-
-class ScriptManager : public QObject
-{
-    Q_OBJECT
-
-private:
-    ScriptManager();
-    static ScriptManager *s_inst;
-
-public:
-    ~ScriptManager();
-    static ScriptManager *inst();
-
-    bool initialize(::BrickLink::Core *core);
-
-    bool reload();
-
-    QList<Script *> scripts() const;
-
-private:
-    Q_DISABLE_COPY(ScriptManager)
-
-    QQmlEngine *m_engine;
-    QList<Script *> m_scripts;
-
-    BrickLink *m_bricklink = nullptr;
-    BrickStore *m_brickstore = nullptr;
+    QVector<DocumentView *> m_documentViews;
+    DocumentView *m_currentDocumentView = nullptr;
 };
 
 } // namespace QmlWrapper
@@ -642,5 +558,4 @@ Q_DECLARE_METATYPE(QmlWrapper::BrickLink::UpdateStatus)
 Q_DECLARE_METATYPE(QmlWrapper::BrickLink::OrderType)
 Q_DECLARE_METATYPE(QmlWrapper::BrickLink *)
 Q_DECLARE_METATYPE(QmlWrapper::Document *)
-Q_DECLARE_METATYPE(QmlWrapper::ScriptMenuAction *)
-Q_DECLARE_METATYPE(QmlWrapper::Script *)
+Q_DECLARE_METATYPE(QmlWrapper::DocumentView *)

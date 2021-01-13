@@ -34,9 +34,6 @@ SOURCES += \
   $$PWD/itemdetailpopup.cpp \
   $$PWD/picturewidget.cpp \
   $$PWD/priceguidewidget.cpp \
-  $$PWD/qml_bricklink_wrapper.cpp \
-  $$PWD/report.cpp \
-  $$PWD/reportobjects.cpp \
   $$PWD/selectcolor.cpp \
   $$PWD/selectitem.cpp \
   $$PWD/taskwidgets.cpp \
@@ -57,10 +54,6 @@ HEADERS += \
   $$PWD/itemdetailpopup.h \
   $$PWD/picturewidget.h \
   $$PWD/priceguidewidget.h \
-  $$PWD/qml_bricklink_wrapper.h \
-  $$PWD/report.h \
-  $$PWD/report_p.h \
-  $$PWD/reportobjects.h \
   $$PWD/selectcolor.h \
   $$PWD/selectitem.h \
   $$PWD/taskwidgets.h \
@@ -79,7 +72,7 @@ FORMS = \
   $$PWD/selectcolordialog.ui \
   $$PWD/selectdocumentdialog.ui \
   $$PWD/selectitemdialog.ui \
-  $$PWD/selectreportdialog.ui \
+  $$PWD/selectprintingtemplatedialog.ui \
   $$PWD/settingsdialog.ui \
   $$PWD/settopriceguidedialog.ui
 

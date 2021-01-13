@@ -15,20 +15,20 @@
 
 #include <QDialog>
 
-#include "ui_selectreportdialog.h"
+#include "ui_selectprintingtemplatedialog.h"
 
-class Report;
+class PrintingScriptTemplate;
 
 
-class SelectReportDialog : public QDialog, private Ui::SelectReportDialog
+class SelectPrintingTemplateDialog : public QDialog, private Ui::SelectPrintingTemplateDialog
 {
     Q_OBJECT
 public:
-    SelectReportDialog(QWidget *parent = nullptr);
+    SelectPrintingTemplateDialog(QWidget *parent = nullptr);
 
-    const Report *report() const;
+    PrintingScriptTemplate *script() const;
 
 private slots:
-    void reportChanged();
-    void reportConfirmed();
+    void scriptChanged();
+    void scriptConfirmed();
 };
