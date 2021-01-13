@@ -93,6 +93,8 @@ void BrickLink::PriceGuide::save_to_disk()
 
 void BrickLink::PriceGuide::load_from_disk()
 {
+    if (!m_item || !m_color)
+        return;
     QString path = BrickLink::core()->dataPath(m_item, m_color);
 
     if (path.isEmpty())

@@ -36,12 +36,40 @@ class PriceGuide;
 class Picture;
 class Document;
 
+
+template <typename T> class WrapperBase
+{
+public:
+    inline T *wrappedObject() const
+    {
+        return (wrapped == wrappedNull()) ? nullptr : wrapped;
+    }
+
+protected:
+    WrapperBase(T *_wrappedObject)
+        : wrapped(_wrappedObject ? _wrappedObject : wrappedNull())
+    { }
+
+    static T *wrappedNull()
+    {
+        static T t_null(nullptr);
+        return &t_null;
+    }
+
+    bool isNull() const
+    {
+        return !wrappedObject();
+    }
+
+    T *wrapped;
+};
+
+
 class BrickLink : public QObject
 {
     Q_OBJECT
     Q_PRIVATE_PROPERTY(d, QString cachePath READ dataPath CONSTANT)
     Q_PRIVATE_PROPERTY(d, QSize standardPictureSize READ standardPictureSize CONSTANT)
-    Q_PRIVATE_PROPERTY(d, qreal itemImageScaleFactor READ itemImageScaleFactor NOTIFY itemImageScaleFactorChanged)
     Q_PRIVATE_PROPERTY(d, bool ldrawEnabled READ isLDrawEnabled CONSTANT)
     Q_PRIVATE_PROPERTY(d, QString ldrawPath READ ldrawDataPath)
     Q_PRIVATE_PROPERTY(d, bool online READ onlineStatus)
@@ -55,13 +83,27 @@ class BrickLink : public QObject
 public:
     BrickLink(::BrickLink::Core *core);
 
+    // copied from namespace BrickLink
+    enum class Time      { PastSix, Current, Count };
+    enum class Price     { Lowest, Average, WAverage, Highest, Count };
+    enum class Condition { New, Used, Count };
+    enum class SubCondition  { None, Complete, Incomplete, Sealed, Count };
+    enum class Stockroom { None, A, B, C };
+    enum class Status    { Include, Exclude, Extra, Unknown };
     enum class UpdateStatus  { Ok, Updating, UpdateFailed };
+    enum class OrderType { Received, Placed, Any };
+
+    Q_ENUM(Time)
+    Q_ENUM(Price)
+    Q_ENUM(Condition)
+    Q_ENUM(SubCondition)
+    Q_ENUM(Stockroom)
+    Q_ENUM(Status)
     Q_ENUM(UpdateStatus)
+    Q_ENUM(OrderType)
 
     Item noItem() const;
     Color noColor() const;
-
-    //Q_ENUM(::BrickLink::UpdateStatus)
 
     Q_INVOKABLE Color color(int id) const;
     Q_INVOKABLE Color colorFromName(const QString &name) const;
@@ -76,9 +118,8 @@ public:
     Q_INVOKABLE Picture largePicture(Item item, bool highPriority = false);
 
 signals:
-    void itemImageScaleFactorChanged(qreal scaleFactor);
-    void priceGuideUpdated(PriceGuide pg);
-    void pictureUpdated(Picture inv);
+    void priceGuideUpdated(QmlWrapper::PriceGuide pg);
+    void pictureUpdated(QmlWrapper::Picture inv);
 
 private:
     static char firstCharInString(const QString &str);
@@ -86,304 +127,294 @@ private:
     ::BrickLink::Core *d;
 };
 
-class Category
+
+class Category : public WrapperBase<const ::BrickLink::Category>
 {
     Q_GADGET
     Q_PROPERTY(bool isNull READ isNull)
 
-    Q_PRIVATE_PROPERTY(d, QString id READ id CONSTANT)
-    Q_PRIVATE_PROPERTY(d, QString name READ name CONSTANT)
+    Q_PRIVATE_PROPERTY(wrappedObject(), QString id READ id CONSTANT)
+    Q_PRIVATE_PROPERTY(wrappedObject(), QString name READ name CONSTANT)
 
 public:
-    Category(const ::BrickLink::Category *cat = nullptr)
-        : d(cat ? cat : dummyD())
-    { }
+    Category(const ::BrickLink::Category *cat = nullptr);
 
-private:
-    bool isNull() const { return d == dummyD(); }
-    static ::BrickLink::Category *dummyD()
-    {
-        static ::BrickLink::Category dd(nullptr);
-        return &dd;
-    }
-
-private:
-    const ::BrickLink::Category *d;
-    friend class BrickLink;
-};
-
-class ItemType
-{
-    Q_GADGET
-    Q_PROPERTY(bool isNull READ isNull)
-
-    Q_PRIVATE_PROPERTY(d, QString id READ id CONSTANT)
-    Q_PRIVATE_PROPERTY(d, QString name READ name CONSTANT)
-    Q_PROPERTY(QVector<Category> categories READ categories CONSTANT)
-    Q_PRIVATE_PROPERTY(d, bool hasInventories READ hasInventories CONSTANT)
-    Q_PRIVATE_PROPERTY(d, bool hasColors READ hasColors CONSTANT)
-    Q_PRIVATE_PROPERTY(d, bool hasYearReleased READ hasYearReleased CONSTANT)
-    Q_PRIVATE_PROPERTY(d, bool hasWeight READ hasWeight CONSTANT)
-    Q_PRIVATE_PROPERTY(d, bool hasSubConditions READ hasSubConditions CONSTANT)
-    Q_PRIVATE_PROPERTY(d, char pictureId READ pictureId CONSTANT)
-    Q_PRIVATE_PROPERTY(d, QSize pictureSize READ pictureSize CONSTANT)
-
-public:
-    ItemType(const ::BrickLink::ItemType *itt = nullptr)
-        : d(itt ? itt : dummyD())
-    { }
-
-private:
-    QVector<Category> categories() const;
-
-    bool isNull() const { return d == dummyD(); }
-    static ::BrickLink::ItemType *dummyD()
-    {
-        static ::BrickLink::ItemType dd(nullptr);
-        return &dd;
-    }
-
-private:
-    const ::BrickLink::ItemType *d;
     friend class BrickLink;
 };
 
 
-class Color
+class ItemType : public WrapperBase<const ::BrickLink::ItemType>
 {
     Q_GADGET
     Q_PROPERTY(bool isNull READ isNull)
 
-    Q_PRIVATE_PROPERTY(d, int id READ id CONSTANT)
-    Q_PRIVATE_PROPERTY(d, QString name READ name CONSTANT)
-    Q_PRIVATE_PROPERTY(d, QColor color READ color CONSTANT)
-    Q_PRIVATE_PROPERTY(d, int ldrawId READ ldrawId CONSTANT)
-    Q_PRIVATE_PROPERTY(d, bool solid READ isSolid CONSTANT)
-    Q_PRIVATE_PROPERTY(d, bool transparent READ isTransparent CONSTANT)
-    Q_PRIVATE_PROPERTY(d, bool glitter READ isGlitter CONSTANT)
-    Q_PRIVATE_PROPERTY(d, bool speckle READ isSpeckle CONSTANT)
-    Q_PRIVATE_PROPERTY(d, bool metallic READ isMetallic CONSTANT)
-    Q_PRIVATE_PROPERTY(d, bool chrome READ isChrome CONSTANT)
-    Q_PRIVATE_PROPERTY(d, bool milky READ isMilky CONSTANT)
-    Q_PRIVATE_PROPERTY(d, bool modulex READ isModulex CONSTANT)
-    Q_PRIVATE_PROPERTY(d, double popularity READ popularity CONSTANT)
+    Q_PRIVATE_PROPERTY(wrappedObject(), QString id READ id CONSTANT)
+    Q_PRIVATE_PROPERTY(wrappedObject(), QString name READ name CONSTANT)
+    Q_PROPERTY(QVariantList categories READ categories CONSTANT)
+    Q_PRIVATE_PROPERTY(wrappedObject(), bool hasInventories READ hasInventories CONSTANT)
+    Q_PRIVATE_PROPERTY(wrappedObject(), bool hasColors READ hasColors CONSTANT)
+    Q_PRIVATE_PROPERTY(wrappedObject(), bool hasYearReleased READ hasYearReleased CONSTANT)
+    Q_PRIVATE_PROPERTY(wrappedObject(), bool hasWeight READ hasWeight CONSTANT)
+    Q_PRIVATE_PROPERTY(wrappedObject(), bool hasSubConditions READ hasSubConditions CONSTANT)
+    Q_PRIVATE_PROPERTY(wrappedObject(), char pictureId READ pictureId CONSTANT)
+    Q_PRIVATE_PROPERTY(wrappedObject(), QSize pictureSize READ pictureSize CONSTANT)
 
 public:
-    inline const ::BrickLink::Color *d_ptr() const { return isNull() ? nullptr : d; }
+    ItemType(const ::BrickLink::ItemType *itt = nullptr);
 
-    Color(const ::BrickLink::Color *col = nullptr)
-        : d(col ? col : dummyD())
-    { }
+    QVariantList categories() const;
 
-private:
-    bool isNull() const { return d == dummyD(); }
-    static ::BrickLink::Color *dummyD()
-    {
-        static ::BrickLink::Color dd(nullptr);
-        return &dd;
-    }
+    friend class BrickLink;
+};
 
-private:
-    const ::BrickLink::Color *d;
+
+class Color : public WrapperBase<const ::BrickLink::Color>
+{
+    Q_GADGET
+    Q_PROPERTY(bool isNull READ isNull)
+
+    Q_PRIVATE_PROPERTY(wrappedObject(), int id READ id CONSTANT)
+    Q_PRIVATE_PROPERTY(wrappedObject(), QString name READ name CONSTANT)
+    Q_PRIVATE_PROPERTY(wrappedObject(), QColor color READ color CONSTANT)
+    Q_PRIVATE_PROPERTY(wrappedObject(), int ldrawId READ ldrawId CONSTANT)
+    Q_PRIVATE_PROPERTY(wrappedObject(), bool solid READ isSolid CONSTANT)
+    Q_PRIVATE_PROPERTY(wrappedObject(), bool transparent READ isTransparent CONSTANT)
+    Q_PRIVATE_PROPERTY(wrappedObject(), bool glitter READ isGlitter CONSTANT)
+    Q_PRIVATE_PROPERTY(wrappedObject(), bool speckle READ isSpeckle CONSTANT)
+    Q_PRIVATE_PROPERTY(wrappedObject(), bool metallic READ isMetallic CONSTANT)
+    Q_PRIVATE_PROPERTY(wrappedObject(), bool chrome READ isChrome CONSTANT)
+    Q_PRIVATE_PROPERTY(wrappedObject(), bool milky READ isMilky CONSTANT)
+    Q_PRIVATE_PROPERTY(wrappedObject(), bool modulex READ isModulex CONSTANT)
+    Q_PRIVATE_PROPERTY(wrappedObject(), double popularity READ popularity CONSTANT)
+
+public:
+    Color(const ::BrickLink::Color *col = nullptr);
+
     friend class BrickLink;
     friend class Document;
+    friend class InvItem;
 };
 
-class InvItem;
 
-class Item
+class Item : public WrapperBase<const ::BrickLink::Item>
 {
     Q_GADGET
     Q_PROPERTY(bool isNull READ isNull)
 
-    Q_PRIVATE_PROPERTY(d, QString id READ id CONSTANT)
-    Q_PRIVATE_PROPERTY(d, QString name READ name CONSTANT)
-    Q_PRIVATE_PROPERTY(d, ItemType itemType READ itemType CONSTANT)
-    Q_PRIVATE_PROPERTY(d, Category category READ category CONSTANT)
-    Q_PRIVATE_PROPERTY(d, bool hasInventory READ hasInventory CONSTANT)
-    Q_PRIVATE_PROPERTY(d, QDateTime inventoryUpdated READ inventoryUpdated CONSTANT)
-    Q_PRIVATE_PROPERTY(d, Color defaultColor READ defaultColor CONSTANT)
-    Q_PRIVATE_PROPERTY(d, double weight READ weight CONSTANT)
-    Q_PRIVATE_PROPERTY(d, int yearReleased READ yearReleased CONSTANT)
-    Q_PRIVATE_PROPERTY(d, bool hasKnownColors READ hasKnownColors CONSTANT)
-    Q_PROPERTY(QVector<Color> knownColors READ knownColors CONSTANT)
+    Q_PRIVATE_PROPERTY(wrappedObject(), QString id READ id CONSTANT)
+    Q_PRIVATE_PROPERTY(wrappedObject(), QString name READ name CONSTANT)
+    Q_PRIVATE_PROPERTY(wrappedObject(), ItemType itemType READ itemType CONSTANT)
+    Q_PRIVATE_PROPERTY(wrappedObject(), Category category READ category CONSTANT)
+    Q_PRIVATE_PROPERTY(wrappedObject(), bool hasInventory READ hasInventory CONSTANT)
+    Q_PRIVATE_PROPERTY(wrappedObject(), QDateTime inventoryUpdated READ inventoryUpdated CONSTANT)
+    Q_PRIVATE_PROPERTY(wrappedObject(), Color defaultColor READ defaultColor CONSTANT)
+    Q_PRIVATE_PROPERTY(wrappedObject(), double weight READ weight CONSTANT)
+    Q_PRIVATE_PROPERTY(wrappedObject(), int yearReleased READ yearReleased CONSTANT)
+    Q_PRIVATE_PROPERTY(wrappedObject(), bool hasKnownColors READ hasKnownColors CONSTANT)
+    Q_PROPERTY(QVariantList knownColors READ knownColors CONSTANT)
 
-    // tough .. BrickLink::AppearsIn appearsIn(const Color *color = nullptr) const;
+public:
+    Item(const ::BrickLink::Item *item = nullptr);
+
+    QVariantList knownColors() const;
+
     Q_INVOKABLE QVariantList consistsOf() const;
 
-    QVector<Color> knownColors() const;
+    // tough .. BrickLink::AppearsIn appearsIn(const Color *color = nullptr) const;
 
-public:
-    inline const ::BrickLink::Item *d_ptr() const { return isNull() ? nullptr : d; }
-
-    Item(const ::BrickLink::Item *item = nullptr)
-        : d(item ? item : dummyD())
-    { }
-
-private:
-    bool isNull() const { return d == dummyD(); }
-    static ::BrickLink::Item *dummyD()
-    {
-        static ::BrickLink::Item dd(nullptr);
-        return &dd;
-    }
-
-private:
-    const ::BrickLink::Item *d;
     friend class BrickLink;
     friend class Document;
 };
 
 
-class Picture
+class Picture : public WrapperBase<::BrickLink::Picture>
 {
     Q_GADGET
     Q_PROPERTY(bool isNull READ isNull)
 
-    Q_PRIVATE_PROPERTY(d, Item item READ item CONSTANT)
-    Q_PRIVATE_PROPERTY(d, Color color READ color CONSTANT)
-    Q_PRIVATE_PROPERTY(d, QDateTime lastUpdate READ lastUpdate)
+    Q_PRIVATE_PROPERTY(wrappedObject(), Item item READ item CONSTANT)
+    Q_PRIVATE_PROPERTY(wrappedObject(), Color color READ color CONSTANT)
+    Q_PRIVATE_PROPERTY(wrappedObject(), QDateTime lastUpdate READ lastUpdate)
     Q_PROPERTY(BrickLink::UpdateStatus updateStatus READ updateStatus)
-    Q_PRIVATE_PROPERTY(d, bool valid READ valid)
-    Q_PRIVATE_PROPERTY(d, QImage image READ image)
-
-    BrickLink::UpdateStatus updateStatus() const
-    {
-        return static_cast<BrickLink::UpdateStatus>(d->updateStatus());
-    }
+    Q_PRIVATE_PROPERTY(wrappedObject(), bool valid READ valid)
+    Q_PRIVATE_PROPERTY(wrappedObject(), QImage image READ image)
 
 public:
-    Q_INVOKABLE void update(bool highPriority = false)
-    {
-        d->update(highPriority);
-    }
+    explicit Picture(::BrickLink::Picture *pic = nullptr);
+    Picture(const Picture &copy);
+    Picture &operator=(const Picture &assign);
+    virtual ~Picture();
 
-    explicit Picture(::BrickLink::Picture *pic = nullptr)
-        : d(pic ? pic : dummyD())
-    {
-        if (!isNull())
-            d->addRef();
-    }
+    BrickLink::UpdateStatus updateStatus() const;
 
-    virtual ~Picture()
-    {
-        if (!isNull())
-            d->release();
-    }
+    Q_INVOKABLE void update(bool highPriority = false);
 
-private:
-    bool isNull() const { return d == dummyD(); }
-    static ::BrickLink::Picture *dummyD()
-    {
-        static ::BrickLink::Picture dd(nullptr);
-        return &dd;
-    }
-
-private:
-    ::BrickLink::Picture *d;
+    friend class BrickLink;
 };
 
 
-
-class PriceGuide
+class PriceGuide : public WrapperBase<::BrickLink::PriceGuide>
 {
     Q_GADGET
     Q_PROPERTY(bool isNull READ isNull)
 
-    Q_PRIVATE_PROPERTY(d, Item item READ item CONSTANT)
-    Q_PRIVATE_PROPERTY(d, Color color READ color CONSTANT)
-    Q_PRIVATE_PROPERTY(d, QDateTime lastUpdate READ lastUpdate)
+    Q_PRIVATE_PROPERTY(wrappedObject(), Item item READ item CONSTANT)
+    Q_PRIVATE_PROPERTY(wrappedObject(), Color color READ color CONSTANT)
+    Q_PRIVATE_PROPERTY(wrappedObject(), QDateTime lastUpdate READ lastUpdate)
     Q_PROPERTY(BrickLink::UpdateStatus updateStatus READ updateStatus)
-    Q_PRIVATE_PROPERTY(d, bool valid READ valid)
-
-    BrickLink::UpdateStatus updateStatus() const
-    {
-        return static_cast<BrickLink::UpdateStatus>(d->updateStatus());
-    }
+    Q_PRIVATE_PROPERTY(wrappedObject(), bool valid READ valid)
 
 public:
-    Q_INVOKABLE void update(bool highPriority = false)
-    {
-        d->update(highPriority);
-    }
+    explicit PriceGuide(::BrickLink::PriceGuide *pg = nullptr);
+    PriceGuide(const PriceGuide &copy);
+    PriceGuide &operator=(const PriceGuide &assign);
+    virtual ~PriceGuide();
 
-    Q_INVOKABLE int quantity(::BrickLink::Time time, ::BrickLink::Condition condition) const
-    {
-        return d->quantity(time, condition);
-    }
+    BrickLink::UpdateStatus updateStatus() const;
 
-    Q_INVOKABLE int lots(::BrickLink::Time time, ::BrickLink::Condition condition) const
-    {
-        return d->lots(time, condition);
-    }
+    Q_INVOKABLE void update(bool highPriority = false);
 
+    Q_INVOKABLE int quantity(::BrickLink::Time time, ::BrickLink::Condition condition) const;
+    Q_INVOKABLE int lots(::BrickLink::Time time, ::BrickLink::Condition condition) const;
     Q_INVOKABLE double price(::BrickLink::Time time, ::BrickLink::Condition condition,
-                             ::BrickLink::Price price) const
-    {
-        return d->price(time, condition, price);
-    }
+                             ::BrickLink::Price price) const;
 
-    explicit PriceGuide(::BrickLink::PriceGuide *pic = nullptr)
-        : d(pic ? pic : dummyD())
-    {
-        if (!isNull())
-            d->addRef();
-    }
-
-    virtual ~PriceGuide()
-    {
-        if (!isNull())
-            d->release();
-    }
-
-private:
-    bool isNull() const { return d == dummyD(); }
-    static ::BrickLink::PriceGuide *dummyD()
-    {
-        static ::BrickLink::PriceGuide dd(nullptr);
-        return &dd;
-    }
-
-private:
-    ::BrickLink::PriceGuide *d;
+    friend class BrickLink;
 };
 
 
-class InvItem
+class InvItem : WrapperBase<::BrickLink::InvItem>
 {
     Q_GADGET
     Q_PROPERTY(bool isNull READ isNull)
 
     Q_PROPERTY(Item item READ item WRITE setItem)
     Q_PROPERTY(Color color READ color WRITE setColor)
+    Q_PROPERTY(Category category READ category)
+    Q_PROPERTY(ItemType itemType READ itemType)
+    Q_PROPERTY(QString itemId READ itemId)
+    Q_PROPERTY(QString itemName READ itemName)
+    Q_PROPERTY(QString colorName READ colorName)
+    Q_PROPERTY(QString categoryName READ categoryName)
+    Q_PROPERTY(QString itemTypeName READ itemTypeName)
+    Q_PROPERTY(int itemYearReleased READ itemYearReleased)
+
+    Q_PROPERTY(BrickLink::Status status READ status WRITE setStatus)
+    Q_PROPERTY(BrickLink::Condition condition READ condition WRITE setCondition)
+    Q_PROPERTY(BrickLink::SubCondition subCondition READ subCondition WRITE setSubCondition)
+
+    Q_PROPERTY(QString comments READ comments WRITE setComments)
+    Q_PROPERTY(QString remarks READ remarks WRITE setRemarks)
 
     Q_PROPERTY(int quantity READ quantity WRITE setQuantity)
+    Q_PROPERTY(int origQuantity READ origQuantity WRITE setOrigQuantity)
+    Q_PROPERTY(int bulkQuantity READ bulkQuantity WRITE setBulkQuantity)
+    Q_PROPERTY(int tier1Quantity READ tier1Quantity WRITE setTier1Quantity)
+    Q_PROPERTY(int tier2Quantity READ tier2Quantity WRITE setTier2Quantity)
+    Q_PROPERTY(int tier3Quantity READ tier3Quantity WRITE setTier3Quantity)
 
+    Q_PROPERTY(double price READ price WRITE setPrice)
+    Q_PROPERTY(double origPrice READ origPrice WRITE setOrigPrice)
+    Q_PROPERTY(double tier1Price READ tier1Price WRITE setTier1Price)
+    Q_PROPERTY(double tier2Price READ tier2Price WRITE setTier2Price)
+    Q_PROPERTY(double tier3Price READ tier3Price WRITE setTier3Price)
 
+    Q_PROPERTY(int sale READ sale WRITE setSale)
+    Q_PROPERTY(double total READ total)
+
+    Q_PROPERTY(uint lotId READ lotId WRITE setLotId)
+    Q_PROPERTY(bool retain READ retain WRITE setRetain)
+    Q_PROPERTY(BrickLink::Stockroom stockroom READ stockroom WRITE setStockroom)
+
+    Q_PROPERTY(double weight READ weight WRITE setWeight)
+    Q_PROPERTY(QString reserved READ reserved WRITE setReserved)
+    Q_PROPERTY(bool alternate READ alternate WRITE setAlternate)
+    Q_PROPERTY(uint alternateId READ alternateId WRITE setAlternateId)
+    Q_PROPERTY(bool counterPart READ counterPart WRITE setCounterPart)
+
+    Q_PROPERTY(bool incomplete READ incomplete)
 
 public:
-    InvItem(::BrickLink::InvItem *invItem = nullptr, Document *document = nullptr)
-        : d(invItem ? invItem : dummyD())
-        , doc(document)
-    { }
+    InvItem(::BrickLink::InvItem *invItem = nullptr, Document *document = nullptr);
 
-    inline Item item() const  { return d->item(); }
-    inline Color color() const  { return d->color(); }
+    Item item() const                  { return get()->item(); }
+    void setItem(Item item)            { set().to().setItem(item.wrappedObject()); }
+    Color color() const                { return get()->color(); }
+    void setColor(Color color)         { set().to().setColor(color.wrappedObject()); }
+    Category category() const          { return get()->category(); }
+    ItemType itemType() const          { return get()->itemType(); }
 
-    inline int quantity() const { return d->quantity(); }
+    QString itemId() const             { return get()->itemId(); }
+    QString itemName() const           { return get()->itemName(); }
+    QString colorName() const          { return get()->colorName(); }
+    QString categoryName() const       { return get()->categoryName(); }
+    QString itemTypeName() const       { return get()->itemTypeName(); }
+    int itemYearReleased() const       { return get()->itemYearReleased(); }
 
-public slots:
-    void setItem(Item item);
-    void setColor(Color item);
-    void setQuantity(int q);
+    BrickLink::Status status() const                { return static_cast<BrickLink::Status>(get()->status()); }
+    void setStatus(BrickLink::Status s)             { set().to().setStatus(static_cast<::BrickLink::Status>(s)); }
+    BrickLink::Condition condition() const          { return static_cast<BrickLink::Condition>(get()->condition()); }
+    void setCondition(BrickLink::Condition c)       { set().to().setCondition(static_cast<::BrickLink::Condition>(c)); }
+    BrickLink::SubCondition subCondition() const    { return static_cast<BrickLink::SubCondition>(get()->subCondition()); }
+    void setSubCondition(BrickLink::SubCondition c) { set().to().setSubCondition(static_cast<::BrickLink::SubCondition>(c)); }
+    QString comments() const           { return get()->comments(); }
+    void setComments(const QString &n) { set().to().setComments(n); }
+    QString remarks() const            { return get()->remarks(); }
+    void setRemarks(const QString &r)  { set().to().setComments(r); }
+
+    int quantity() const               { return get()->quantity(); }
+    void setQuantity(int q)            { set().to().setQuantity(q); }
+    int origQuantity() const           { return get()->origQuantity(); }
+    void setOrigQuantity(int q)        { set().to().setOrigQuantity(q); }
+    int bulkQuantity() const           { return get()->bulkQuantity(); }
+    void setBulkQuantity(int q)        { set().to().setBulkQuantity(q); }
+    int tier1Quantity() const          { return get()->tierQuantity(0); }
+    void setTier1Quantity(int q)       { set().to().setTierQuantity(0, q); }
+    int tier2Quantity() const          { return get()->tierQuantity(1); }
+    void setTier2Quantity(int q)       { set().to().setTierQuantity(1, q); }
+    int tier3Quantity() const          { return get()->tierQuantity(2); }
+    void setTier3Quantity(int q)       { set().to().setTierQuantity(2, q); }
+
+    double price() const               { return get()->price(); }
+    void setPrice(double p)            { set().to().setPrice(p); }
+    double origPrice() const           { return get()->origPrice(); }
+    void setOrigPrice(double p)        { set().to().setOrigPrice(p); }
+    double tier1Price() const          { return get()->tierPrice(0); }
+    void setTier1Price(double p)       { set().to().setTierPrice(0, p); }
+    double tier2Price() const          { return get()->tierPrice(1); }
+    void setTier2Price(double p)       { set().to().setTierPrice(1, p); }
+    double tier3Price() const          { return get()->tierPrice(2); }
+    void setTier3Price(double p)       { set().to().setTierPrice(2, p); }
+
+    int sale() const                   { return get()->sale(); }
+    void setSale(int s)                { set().to().setSale(s); }
+    double total() const               { return get()->total(); }
+
+    uint lotId() const                 { return get()->lotId(); }
+    void setLotId(uint lid)            { set().to().setLotId(lid); }
+
+    bool retain() const                { return get()->retain(); }
+    void setRetain(bool r)             { set().to().setRetain(r); }
+    BrickLink::Stockroom stockroom() const     { return static_cast<BrickLink::Stockroom>(get()->stockroom()); }
+    void setStockroom(BrickLink::Stockroom sr) { set().to().setStockroom(static_cast<::BrickLink::Stockroom>(sr)); }
+
+    double weight() const              { return get()->weight(); }
+    void setWeight(double w)           { set().to().setWeight(w); }
+
+    QString reserved() const           { return get()->reserved(); }
+    void setReserved(const QString &r) { set().to().setReserved(r); }
+
+    bool alternate() const             { return get()->alternate(); }
+    void setAlternate(bool a)          { set().to().setAlternate(a); }
+    uint alternateId() const           { return get()->alternateId(); }
+    void setAlternateId(uint aid)      { set().to().setAlternateId(aid); }
+
+    bool counterPart() const           { return get()->counterPart(); }
+    void setCounterPart(bool b)        { set().to().setCounterPart(b); }
+
+    bool incomplete() const            { return get()->isIncomplete(); }
 
 private:
-    bool isNull() const { return d == dummyD(); }
-    static ::Document::Item *dummyD()
-    {
-        static ::Document::Item dd;
-        return &dd;
-    }
     class Setter
     {
     public:
@@ -395,99 +426,15 @@ private:
         InvItem *m_invItem;
         ::BrickLink::InvItem m_to;
     };
-    Setter setter();
+    Setter set();
+    ::BrickLink::InvItem *get() const;
 
-private:
-    ::BrickLink::InvItem *d;
     Document *doc = nullptr;
 
     friend class Document;
     friend class Setter;
 };
 
-
-
-
-
-#if 0
-    const Category *category() const   { return m_item ? m_item->category() : nullptr; }
-    const ItemType *itemType() const   { return m_item ? m_item->itemType() : nullptr; }
-
-    QString itemId() const             { return m_item ? m_item->id() : (m_incomplete ? m_incomplete->m_item_id : QString()); }
-    QString itemName() const           { return m_item ? m_item->name() : (m_incomplete ? m_incomplete->m_item_name : QString()); }
-    QString colorName() const          { return m_color ? m_color->name() : (m_incomplete ? m_incomplete->m_color_name : QString()); }
-    QString categoryName() const       { return category() ? category()->name() : (m_incomplete ? m_incomplete->m_category_name : QString()); }
-    QString itemTypeName() const       { return itemType() ? itemType()->name() : (m_incomplete ? m_incomplete->m_itemtype_name : QString()); }
-    int itemYearReleased() const       { return m_item ? m_item->yearReleased() : 0; }
-
-    Status status() const              { return m_status; }
-    void setStatus(Status s)           { m_status = s; }
-    Condition condition() const        { return m_condition; }
-    void setCondition(Condition c)     { m_condition = c; }
-    SubCondition subCondition() const  { return m_scondition; }
-    void setSubCondition(SubCondition c) { m_scondition = c; }
-    QString comments() const           { return m_comments; }
-    void setComments(const QString &n) { m_comments = n; }
-    QString remarks() const            { return m_remarks; }
-    void setRemarks(const QString &r)  { m_remarks = r; }
-
-    int origQuantity() const           { return m_orig_quantity; }
-    void setOrigQuantity(int q)        { m_orig_quantity = q; }
-    int bulkQuantity() const           { return m_bulk_quantity; }
-    void setBulkQuantity(int q)        { m_bulk_quantity = qMax(1, q); }
-    int tierQuantity(int i) const      { return m_tier_quantity [qBound(0, i, 2)]; }
-    void setTierQuantity(int i, int q) { m_tier_quantity [qBound(0, i, 2)] = q; }
-    double price() const               { return m_price; }
-    void setPrice(double p)            { m_price = p; }
-    double origPrice() const           { return m_orig_price; }
-    void setOrigPrice(double p)        { m_orig_price = p; }
-    double tierPrice(int i) const      { return m_tier_price [qBound(0, i, 2)]; }
-    bool setTierPrice(int i, double p) { if (p < 0) return false; m_tier_price [qBound(0, i, 2)] = p; return true; }
-    int sale() const                   { return m_sale; }
-    void setSale(int s)                { m_sale = qMax(-99, qMin(100, s)); }
-    double total() const               { return m_price * m_quantity; }
-
-    uint lotId() const                 { return m_lot_id; }
-    void setLotId(uint lid)            { m_lot_id = lid; }
-
-    bool retain() const                { return m_retain; }
-    void setRetain(bool r)             { m_retain = r; }
-    Stockroom stockroom() const        { return m_stockroom; }
-    void setStockroom(Stockroom sr)    { m_stockroom = sr; }
-
-    double weight() const              { return !qFuzzyIsNull(m_weight) ? m_weight : (m_item ? m_item->weight() * m_quantity : 0); }
-    void setWeight(double w)           { m_weight = w; }
-
-    QString reserved() const           { return m_reserved; }
-    void setReserved(const QString &r) { m_reserved = r; }
-
-    bool alternate() const             { return m_alternate; }
-    void setAlternate(bool a)          { m_alternate = a; }
-    uint alternateId() const           { return m_alt_id; }
-    void setAlternateId(uint aid)      { m_alt_id = aid; }
-
-    bool counterPart() const           { return m_cpart; }
-    void setCounterPart(bool b)        { m_cpart = b; }
-
-    struct Incomplete {
-        QString m_item_id;
-        QString m_item_name;
-        QString m_itemtype_id;
-        QString m_itemtype_name;
-        QString m_color_name;
-        QString m_category_name;
-    };
-
-    const Incomplete *isIncomplete() const { return m_incomplete; }
-    void setIncomplete(Incomplete *inc)    { delete m_incomplete; m_incomplete = inc; }
-
-    bool mergeFrom(const InvItem &merge, bool prefer_from = false);
-
-    typedef void *Diff; // opaque handle
-
-    Diff *createDiff(const InvItem &diffto) const;
-    bool applyDiff(Diff *diff);
-#endif
 
 class Document : public QObject
 {
@@ -555,11 +502,12 @@ protected:
 
 private:
     Document *documentForWindow(Window *win) const;
-    Document *setupDocument(::Document *doc, const QString &title);
+    Document *setupDocument(::Document *doc, const QString &title = { });
 
     QVector<Document *> m_documents;
     Document * m_currentDocument = nullptr;
 };
+
 
 class ScriptMenuAction : public QObject, public QQmlParserStatus
 {
@@ -580,7 +528,6 @@ public:
     Location location() const;
     void setLocation(Location type);
 
-
 signals:
     void textChanged(const QString &text);
     void locationChanged(Location type);
@@ -590,9 +537,6 @@ signals:
 protected:
     void classBegin() override;
     void componentComplete() override;
-
-private:
-    void attachAction();
 
 private:
     QString m_text;
@@ -680,19 +624,22 @@ private:
     BrickStore *m_brickstore = nullptr;
 };
 
-Q_DECLARE_METATYPE(Color)
-Q_DECLARE_METATYPE(Category)
-Q_DECLARE_METATYPE(ItemType)
-Q_DECLARE_METATYPE(Item)
-Q_DECLARE_METATYPE(InvItem)
-Q_DECLARE_METATYPE(QmlWrapper::Picture)
-Q_DECLARE_METATYPE(QmlWrapper::PriceGuide)
-
 } // namespace QmlWrapper
 
-
-
-
+Q_DECLARE_METATYPE(QmlWrapper::Color)
+Q_DECLARE_METATYPE(QmlWrapper::Category)
+Q_DECLARE_METATYPE(QmlWrapper::ItemType)
+Q_DECLARE_METATYPE(QmlWrapper::Item)
+Q_DECLARE_METATYPE(QmlWrapper::InvItem)
+Q_DECLARE_METATYPE(QmlWrapper::Picture)
+Q_DECLARE_METATYPE(QmlWrapper::PriceGuide)
+Q_DECLARE_METATYPE(QmlWrapper::BrickLink::Time)
+Q_DECLARE_METATYPE(QmlWrapper::BrickLink::Price)
+Q_DECLARE_METATYPE(QmlWrapper::BrickLink::Condition)
+Q_DECLARE_METATYPE(QmlWrapper::BrickLink::Stockroom)
+Q_DECLARE_METATYPE(QmlWrapper::BrickLink::Status)
+Q_DECLARE_METATYPE(QmlWrapper::BrickLink::UpdateStatus)
+Q_DECLARE_METATYPE(QmlWrapper::BrickLink::OrderType)
 Q_DECLARE_METATYPE(QmlWrapper::BrickLink *)
 Q_DECLARE_METATYPE(QmlWrapper::Document *)
 Q_DECLARE_METATYPE(QmlWrapper::ScriptMenuAction *)

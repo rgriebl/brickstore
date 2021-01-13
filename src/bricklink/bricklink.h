@@ -317,6 +317,7 @@ public:
 
     InvItem &operator = (const InvItem &copy);
     bool operator == (const InvItem &cmp) const;
+    bool operator != (const InvItem &cmp) const;
 
     const Item *item() const           { return m_item; }
     void setItem(const Item *i)        { /*can be 0*/ m_item = i; }

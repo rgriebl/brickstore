@@ -305,6 +305,11 @@ BrickLink::InvItem &BrickLink::InvItem::operator = (const InvItem &copy)
     return *this;
 }
 
+bool BrickLink::InvItem::operator!=(const InvItem &cmp) const
+{
+    return !operator==(cmp);
+}
+
 bool BrickLink::InvItem::operator == (const InvItem &cmp) const
 {
     bool same = true;
