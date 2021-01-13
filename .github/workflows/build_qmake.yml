@@ -17,7 +17,7 @@ jobs:
           os: windows-latest
           qt_version: '5.15.2'
           qt_arch: 'win32_msvc2019'
-          qt_tools: 'tools_openssl_x86,1.1.1,qt.tools.openssl.win_x86'
+          openssl_version: 'Win32OpenSSL_Light-1_1_1i'
           environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars32.bat"
 
         - name: "Windows 64bit"
@@ -25,7 +25,7 @@ jobs:
           os: windows-latest
           qt_version: '5.15.2'
           qt_arch: 'win64_msvc2019_64'
-          qt_tools: 'tools_openssl_x64,1.1.1,qt.tools.openssl.win_x64'
+          openssl_version: 'Win64OpenSSL_Light-1_1_1i'
           environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
 
         - name: "Ubuntu 20.04 64bit"
@@ -70,6 +70,13 @@ jobs:
         sudo docker exec "debian-build" apt update
         sudo docker exec "debian-build" apt -y install debhelper qt5-default libqt5opengl5-dev qttools5-dev qtscript5-dev qtbase5-private-dev lsb-release fakeroot build-essential
       shell: bash
+
+    - name: Install OpenSSL on Windows
+      if: startsWith(matrix.config.os, 'windows')
+      run: |
+        curl.exe --output openssl.msi "https://slproweb.com/download/${{ matrix.config.openssl_version }}.msi"
+        msiexec /i openssl.msi /quiet /qn /norestart
+      shell: cmd
 
     - name: Build on Windows
       if: startsWith(matrix.config.os, 'windows')

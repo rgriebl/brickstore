@@ -135,17 +135,21 @@ win32 {
     }
 
     OPENSSL="openssl.exe"
-    OPENSSL_PATH="$$[QT_HOST_PREFIX]/../../Tools/OpenSSL/Win_$$TARCH/bin"
-    !exists("$$OPENSSL_PATH/$$OPENSSL"):error("Please install the OpenSSL package from the Qt installer")
+    equals(TARCH, x64):OPENSSL_PATH="$$getenv(ProgramFiles)/OpenSSL-Win64/bin"
+    equals(TARCH, x86):OPENSSL_PATH="$$getenv(ProgramFiles(x86))/OpenSSL-Win32/bin"
+
+    !exists("$$OPENSSL_PATH/$$OPENSSL"):error("Please install the matching OpenSSL version from https://slproweb.com/products/Win32OpenSSL.html.")
 
     OPENSSL_PATH=$$clean_path($$OPENSSL_PATH)
-    #log("Deploying OpenSSL libraries at: $$shell_path($$OPENSSL_PATH)")
 
+    # The OpenSSL libs from the Qt installer require an ancient MSVC2010 C runtimes, but the
+    # installer doesn't install them by default, plus there's no package for the x86 version anyway.
+    # The build from slwebpro.com on the other hand are built against a recent v14 runtime, which
+    # we are installing anyway.
     deploy.depends += $(DESTDIR_TARGET)
     deploy.commands += $$shell_path($$[QT_HOST_BINS]/windeployqt.exe) $(DESTDIR_TARGET)
     deploy.commands += & $$QMAKE_COPY $$shell_quote($$shell_path($$OPENSSL_PATH/libcrypto-1_1$${OPENSSL_ARCH}.dll)) $(DESTDIR)
     deploy.commands += & $$QMAKE_COPY $$shell_quote($$shell_path($$OPENSSL_PATH/libssl-1_1$${OPENSSL_ARCH}.dll)) $(DESTDIR)
-    deploy.commands += & $$QMAKE_COPY $$shell_quote($$shell_path($$[QT_HOST_PREFIX]/../../vcredist/vcredist_$${TARCH}.exe)) $(DESTDIR)
 
     installer.depends += deploy
     installer.commands += $$shell_path($$ISCC) \
