@@ -493,10 +493,10 @@ void Application::setupLogging()
     new LogHighlighter(m_logWidget->document());
 
     auto msgHandler = [](QtMsgType msgType, const QMessageLogContext &msgCtx, const QString &msg) {
-        if (s_inst->m_defaultMessageHandler)
+        if (s_inst && s_inst->m_defaultMessageHandler)
             (*s_inst->m_defaultMessageHandler)(msgType, msgCtx, msg);
 
-        if (s_inst->m_logGuiLock)
+        if (!s_inst || s_inst->m_logGuiLock || !s_inst->m_logWidget)
             return;
 
         QString filename;

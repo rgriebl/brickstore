@@ -16,6 +16,7 @@
 #include <QApplication>
 #include <QStringList>
 #include <QScopedPointer>
+#include <QPointer>
 
 class FrameWork;
 QT_FORWARD_DECLARE_CLASS(QTranslator)
@@ -75,7 +76,7 @@ private:
     QScopedPointer<QTranslator> m_trans_brickstore_en;
     QScopedPointer<QTranslator> m_trans_brickstore;
 
-    QPlainTextEdit *m_logWidget = nullptr;
+    QPointer<QPlainTextEdit> m_logWidget = nullptr;
     QtMessageHandler m_defaultMessageHandler = nullptr;
     int m_logGuiLock = 0;
 

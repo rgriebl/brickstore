@@ -594,6 +594,7 @@ FrameWork::FrameWork(QWidget *parent)
 
 
     auto sm = QmlWrapper::ScriptManager::inst();
+    sm->setParent(this);
     sm->initialize(BrickLink::core());
 
     const auto scripts = sm->scripts();
