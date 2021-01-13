@@ -17,10 +17,10 @@
 #include <QStringList>
 #include <QScopedPointer>
 #include <QPointer>
+#include <QPlainTextEdit>
 
 class FrameWork;
 QT_FORWARD_DECLARE_CLASS(QTranslator)
-QT_FORWARD_DECLARE_CLASS(QPlainTextEdit)
 
 
 class Application : public QObject
