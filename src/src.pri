@@ -32,6 +32,7 @@ SOURCES += \
   $$PWD/framework.cpp \
   $$PWD/import.cpp \
   $$PWD/itemdetailpopup.cpp \
+  $$PWD/managecolumnlayoutsdialog.cpp \
   $$PWD/picturewidget.cpp \
   $$PWD/priceguidewidget.cpp \
   $$PWD/selectcolor.cpp \
@@ -52,6 +53,7 @@ HEADERS += \
   $$PWD/framework.h \
   $$PWD/import.h \
   $$PWD/itemdetailpopup.h \
+  $$PWD/managecolumnlayoutsdialog.h \
   $$PWD/picturewidget.h \
   $$PWD/priceguidewidget.h \
   $$PWD/selectcolor.h \

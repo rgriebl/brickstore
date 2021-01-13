@@ -96,6 +96,8 @@ private slots:
     void changeDocumentCurrency(QAction *a);
     void updateCurrencyRates();
 
+    void manageLayouts();
+
 protected:
    void dragEnterEvent(QDragEnterEvent *e) override;
    void dropEvent(QDropEvent *e) override;

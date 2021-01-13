@@ -416,8 +416,11 @@ QString Config::setColumnLayout(const QString &id, const QByteArray &layout)
         }
         setValue("ColumnLayouts/" + nid + "/Layout", layout);
 
-        if (isNew)
-            emit columnLayoutIdsChanged(columnLayoutIds());
+        if (isNew) {
+            auto newIds = columnLayoutIds();
+            setValue("ColumnLayouts/" + nid + "/Order", newIds.count() - 1);
+            emit columnLayoutIdsChanged(newIds);
+        }
         emit columnLayoutChanged(nid, layout);
         return nid;
     }

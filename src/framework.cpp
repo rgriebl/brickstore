@@ -63,7 +63,7 @@
 #include "changecurrencydialog.h"
 #include "welcomewidget.h"
 #include "aboutdialog.h"
-
+#include "managecolumnlayoutsdialog.h"
 #include "framework.h"
 #include "stopwatch.h"
 
@@ -189,11 +189,18 @@ public:
             addAction(tr("User Default"))->setData(QLatin1String("user-default"));
             addAction(tr("BrickStore Default"))->setData(QLatin1String("default"));
             addAction(tr("Auto Resize Once"))->setData(QLatin1String("auto-resize"));
-            auto layoutIds =  Config::inst()->columnLayoutIds();
-            if (!layoutIds.isEmpty())
+
+            auto ids = Config::inst()->columnLayoutIds();
+            if (!ids.isEmpty()) {
                 addSeparator();
-            for (const auto &l : layoutIds)
-                addAction(Config::inst()->columnLayoutName(l))->setData(l);
+
+                QMap<int, QString> pos;
+                for (const auto &id : ids)
+                    pos.insert(Config::inst()->columnLayoutOrder(id), id);
+
+                for (auto id : qAsConst(pos))
+                    addAction(Config::inst()->columnLayoutName(id))->setData(id);
+            }
         });
         connect(this, &QMenu::triggered, this, [this](QAction *a) {
             if (a && !a->data().isNull())
@@ -938,6 +945,12 @@ void FrameWork::updateCurrencyRates()
         m_st_currency->addAction(new QAction(c, m_st_currency));
 }
 
+void FrameWork::manageLayouts()
+{
+    ManageColumnLayoutsDialog d(this);
+    d.exec();
+}
+
 QMenu *FrameWork::createMenu(const QByteArray &name, const QList<QByteArray> &a_names)
 {
     if (a_names.isEmpty())
@@ -1255,9 +1268,7 @@ void FrameWork::createActions()
     (void) newQAction(this, "view_show_input_errors", 0, true, Config::inst(), &Config::setShowInputErrors);
     (void) newQAction(this, "view_difference_mode", 0, true);
     (void) newQAction(this, "view_column_layout_save", NeedDocument, false);
-    (void) newQAction(this, "view_column_layout_manage", 0, false, this, [this]() {
-        qWarning() << "COLUMN MANAGER";
-    });
+    (void) newQAction(this, "view_column_layout_manage", 0, false, this, &FrameWork::manageLayouts);
     auto lclm = newQMenu<LoadColumnLayoutMenu>(this, "view_column_layout_load", NeedDocument);
     lclm->menuAction()->setIcon(QIcon(":/images/viewmode_images.png"));
     lclm->setObjectName("view_column_layout_list");
