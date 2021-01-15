@@ -167,7 +167,7 @@ void ImportBLOrder::init()
     url.setQuery(query);
 
     m_url = url;
-    m_progress->post(url);
+    m_progress->post(url, nullptr, true /* no redirects allowed */);
     m_progress->layout();
 }
 
@@ -185,22 +185,20 @@ void ImportBLOrder::gotten()
     if (data && !data->isEmpty()) {
         if (m_current_address >= 0) {
             QString s = QString::fromUtf8(data->data(), data->size());
+            QString a;
 
-            QRegExp rx1(R"(<B>Name:</B></FONT></TD>\s*<TD NOWRAP><FONT FACE="Tahoma, Arial" SIZE="2">(.+)</FONT></TD>)");
-            QRegExp rx2(R"(<B>Address:</B></FONT></TD>\s*<TD NOWRAP><FONT FACE="Tahoma, Arial" SIZE="2">(.+)</FONT></TD>)");
-            QRegExp rx3(R"(<B>Country:</B></FONT></TD>\s*<TD NOWRAP><FONT FACE="Tahoma, Arial" SIZE="2">(.+)</FONT></TD>)");
+            QRegularExpression regExp(R"(<TD WIDTH="25%" VALIGN="TOP">&nbsp;Name & Address:</TD>\s*<TD WIDTH="75%">(.*?)</TD>)");
+            auto matches = regExp.globalMatch(s);
+            if (matches.hasNext()) {
+                matches.next();
+                if (matches.hasNext()) { // skip our own address
+                    QRegularExpressionMatch match = matches.next();
+                    a = match.captured(1);
+                    a.replace(QRegularExpression(R"(<[bB][rR] ?/?>)"), QLatin1String("\n"));
+                    m_orders[m_current_address].first->setAddress(a);
 
-            rx1.setMinimal(true);
-            (void) rx1.indexIn(s);
-            rx2.setMinimal(true);
-            (void) rx2.indexIn(s);
-            rx3.setMinimal(true);
-            (void) rx3.indexIn(s);
-
-            QString a = rx1.cap(1) + QLatin1Char('\n') + rx2.cap(1) + QLatin1Char('\n') + rx3.cap(1);
-            a.replace(QLatin1String("<BR>"), QLatin1String("\n"));
-
-            m_orders[m_current_address].first->setAddress(a);
+                }
+            }
         }
         else {
             QBuffer order_buffer(data);
@@ -296,7 +294,7 @@ void ImportBLOrder::gotten()
     else if ((m_current_address + 1) < m_orders.size()) {
         m_current_address++;
 
-        QString url = QLatin1String("https://www.bricklink.com/memberInfo.asp?u=") + m_orders[m_current_address].first->other();
+        QString url = QLatin1String("https://www.bricklink.com/orderDetail.asp?ID=") + m_orders[m_current_address].first->id();
         m_progress->setHeaderText(tr("Importing address records"));
         m_progress->get(url);
         m_progress->layout();

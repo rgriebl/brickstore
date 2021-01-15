@@ -25,7 +25,7 @@ class ImportOrderDialog : public QDialog, private Ui::ImportOrderDialog
 public:
     ImportOrderDialog(QWidget *parent = nullptr);
 
-    QVector<QPair<BrickLink::Order *, BrickLink::InvItemList *> > orders() const;
+    QVector<QPair<BrickLink::Order *, BrickLink::InvItemList *>> orders() const;
 
 protected:
     virtual void accept();

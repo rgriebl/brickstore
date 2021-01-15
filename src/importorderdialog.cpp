@@ -65,11 +65,11 @@ public:
 
     ~OrderListModel() override
     {
-        setOrderList(QVector<QPair<BrickLink::Order *, BrickLink::InvItemList *> >());
+        setOrderList(QVector<QPair<BrickLink::Order *, BrickLink::InvItemList *>>());
         delete m_trans;
     }
 
-    void setOrderList(const QVector<QPair<BrickLink::Order *, BrickLink::InvItemList *> > &orderlist)
+    void setOrderList(const QVector<QPair<BrickLink::Order *, BrickLink::InvItemList *>> &orderlist)
     {
         beginResetModel();
         for (auto &order : qAsConst(m_orderlist)) {
@@ -256,7 +256,7 @@ class TransHighlightDelegate : public QStyledItemDelegate
     Q_OBJECT
 public:
     TransHighlightDelegate(QObject *parent = nullptr)
-            : QStyledItemDelegate(parent)
+        : QStyledItemDelegate(parent)
     { }
 
     void makeTrans(QPalette &pal, QPalette::ColorGroup cg, QPalette::ColorRole cr, const QColor &bg, qreal factor) const
@@ -419,7 +419,7 @@ void ImportOrderDialog::download()
 
 QVector<QPair<BrickLink::Order *, BrickLink::InvItemList *> > ImportOrderDialog::orders() const
 {
-    QVector<QPair<BrickLink::Order *, BrickLink::InvItemList *> > list;
+    QVector<QPair<BrickLink::Order *, BrickLink::InvItemList *>> list;
 
     foreach (const QModelIndex &idx, w_order_list->selectionModel()->selectedRows()) {
         QPair<BrickLink::Order *, BrickLink::InvItemList *> pair;
@@ -435,11 +435,13 @@ QVector<QPair<BrickLink::Order *, BrickLink::InvItemList *> > ImportOrderDialog:
 
 BrickLink::OrderType ImportOrderDialog::orderType() const
 {
+    // Any doesn't work at the moment, because the BrickLink XML API reports an
+    // error if no orders are available instead of sending an empty list
+
     switch (w_order_type->currentIndex()) {
-    case 2 : return BrickLink::OrderType::Placed;
-    case 1 : return BrickLink::OrderType::Received;
+    case 1 : return BrickLink::OrderType::Placed;
     case 0 :
-    default: return BrickLink::OrderType::Any;
+    default: return BrickLink::OrderType::Received;
     }
 }
 

@@ -28,7 +28,7 @@ public:
 
     static TransferJob *get(const QUrl &url, QIODevice *file = nullptr);
     static TransferJob *getIfNewer(const QUrl &url, const QDateTime &dt, QIODevice *file = nullptr);
-    static TransferJob *post(const QUrl &url, QIODevice *file = nullptr);
+    static TransferJob *post(const QUrl &url, QIODevice *file = nullptr, bool noRedirects = false);
 
     QUrl url() const                 { return m_url; }
     QUrl effectiveUrl() const        { return m_effective_url; }
@@ -72,7 +72,8 @@ private:
         HttpPost = 1
     };
 
-    static TransferJob *create(HttpMethod method, const QUrl &url, const QDateTime &ifnewer, QIODevice *file);
+    static TransferJob *create(HttpMethod method, const QUrl &url, const QDateTime &ifnewer,
+                               QIODevice *file, bool noRedirects);
 
     void setStatus(Status st)  { m_status = st; }
 
@@ -95,6 +96,7 @@ private:
     int          m_status           : 4;
     uint         m_http_method      : 1;
     bool         m_was_not_modified : 1;
+    bool         m_no_redirects     : 1;
 
     friend class TransferEngine;
 };

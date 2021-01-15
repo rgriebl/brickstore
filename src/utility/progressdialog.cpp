@@ -204,7 +204,9 @@ void ProgressDialog::transferDone(TransferJob *j)
         setErrorText(tr("Download failed: %1").arg(j->errorString()));
     else
         emit transferFinished();
-    m_job = nullptr;
+
+    if (m_job == j) // if we didn't immediately get a new job, then clear the pointer
+        m_job = nullptr;
 }
 
 bool ProgressDialog::hasErrors() const
@@ -212,9 +214,9 @@ bool ProgressDialog::hasErrors() const
     return m_has_errors;
 }
 
-bool ProgressDialog::post(const QUrl &url, QIODevice *file)
+bool ProgressDialog::post(const QUrl &url, QIODevice *file, bool noRedirects)
 {
-    m_job = TransferJob::post(url, file);
+    m_job = TransferJob::post(url, file, noRedirects);
     m_trans->retrieve(m_job);
     return true;
 }

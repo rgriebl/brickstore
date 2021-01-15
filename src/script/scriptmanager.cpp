@@ -158,8 +158,8 @@ bool ScriptManager::reload()
 void ScriptManager::loadScript(const QString &fileName)
 {
     QScopedPointer<QQmlEngine> engine(new QQmlEngine(this));
-    auto comp = new QQmlComponent(engine.data(), fileName);
-    auto ctx = new QQmlContext(engine.data());
+    auto comp = new QQmlComponent(engine.data(), fileName, engine.data());
+    auto ctx = new QQmlContext(engine.data(), engine.data());
     QScopedPointer<QObject> root(comp->create(ctx));
     if (!root)
         throw QmlException(comp->errors(), "Could not load QML file %1").arg(fileName);

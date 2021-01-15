@@ -35,17 +35,17 @@ TransferJob::~TransferJob()
 
 TransferJob *TransferJob::get(const QUrl &url, QIODevice *file)
 {
-    return create(HttpGet, url, QDateTime(), file);
+    return create(HttpGet, url, QDateTime(), file, false);
 }
 
 TransferJob *TransferJob::getIfNewer(const QUrl &url, const QDateTime &ifnewer, QIODevice *file)
 {
-    return create(HttpGet, url, ifnewer, file);
+    return create(HttpGet, url, ifnewer, file, false);
 }
 
-TransferJob *TransferJob::post(const QUrl &url, QIODevice *file)
+TransferJob *TransferJob::post(const QUrl &url, QIODevice *file, bool noRedirects)
 {
-    return create(HttpPost, url, QDateTime(), file);
+    return create(HttpPost, url, QDateTime(), file, noRedirects);
 }
 
 bool TransferJob::abort()
@@ -55,7 +55,8 @@ bool TransferJob::abort()
     return true;
 }
 
-TransferJob *TransferJob::create(HttpMethod method, const QUrl &url, const QDateTime &ifnewer, QIODevice *file)
+TransferJob *TransferJob::create(HttpMethod method, const QUrl &url, const QDateTime &ifnewer,
+                                 QIODevice *file, bool noRedirects)
 {
     if (url.isEmpty())
         return nullptr;
@@ -69,9 +70,10 @@ TransferJob *TransferJob::create(HttpMethod method, const QUrl &url, const QDate
     j->m_data = file ? nullptr : new QByteArray();
     j->m_file = file ? file : nullptr;
     j->m_http_method = method;
-
+    j->m_status = Inactive;
     j->m_respcode = 0;
     j->m_was_not_modified = false;
+    j->m_no_redirects = noRedirects;
 
     return j;
 }
@@ -138,7 +140,10 @@ void Transfer::schedule()
 
         QNetworkRequest req(url);
         req.setHeader(QNetworkRequest::UserAgentHeader, m_user_agent);
+        if (j->m_no_redirects)
+            req.setAttribute(QNetworkRequest::FollowRedirectsAttribute, false);
 
+        j->setStatus(TransferJob::Active);
         if (isget) {
             if (j->m_only_if_newer.isValid())
 #if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)

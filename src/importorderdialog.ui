@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>613</width>
+    <width>662</width>
     <height>287</height>
    </rect>
   </property>
@@ -174,11 +174,6 @@
          </item>
          <item>
           <widget class="QComboBox" name="w_order_type">
-           <item>
-            <property name="text">
-             <string>Any</string>
-            </property>
-           </item>
            <item>
             <property name="text">
              <string>Received</string>

@@ -38,7 +38,7 @@ public:
     void setProgress(int steps, int total);
     void setProgressVisible(bool b);
 
-    bool post(const QUrl &url, QIODevice *file = nullptr);
+    bool post(const QUrl &url, QIODevice *file = nullptr, bool noRedirects = false);
     bool get(const QUrl &url, const QDateTime &ifnewer = QDateTime(), QIODevice *file = nullptr);
 
     TransferJob *job() const;
