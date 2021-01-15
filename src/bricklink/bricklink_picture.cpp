@@ -48,7 +48,7 @@ private:
 void PictureLoaderJob::run()
 {
     if (m_pic && !m_pic->valid()) {
-        m_pic->load_from_disk();
+        m_pic->loadFromDisk();
 
         auto blcore = BrickLink::core();
         auto pic = m_pic;
@@ -94,7 +94,7 @@ BrickLink::Picture *BrickLink::Core::picture(const Item *item, const BrickLink::
 
     if (high_priority) {
         if (!pic->valid())
-            pic->load_from_disk();
+            pic->loadFromDisk();
 
         if (updateNeeded(pic->valid(), pic->lastUpdate(), m_pic_update_iv))
             updatePicture(pic, high_priority);
@@ -140,55 +140,44 @@ int BrickLink::Picture::cost() const
         return 640*480*4 / 2;    // max. 640*480 32bpp + data, most are smaller
 }
 
-void BrickLink::Picture::load_from_disk()
+QFile *BrickLink::Picture::file(QIODevice::OpenMode openMode) const
 {
-    QString path;
-
     bool large = (!m_color);
+    bool hasColors = m_item->itemType()->hasColors();
 
-    if (!large && m_item->itemType()->hasColors())
-        path = BrickLink::core()->dataPath(m_item, m_color);
-    else
-        path = BrickLink::core()->dataPath(m_item);
-
-    if (path.isEmpty())
-        return;
-    path += large ? "large.png" : "small.png";
-
-    QFileInfo fi(path);
-
-    bool is_valid = false;
-    QImage image;
-    QDateTime lastmod;
-
-    if (fi.exists()) {
-        if (fi.size() > 0) {
-            is_valid = image.load(path);
-        }
-        else {
-            if (!large && m_item && m_item->itemType())
-                image = BrickLink::core()->noImage(m_item->itemType()->rawPictureSize());
-
-            is_valid = true;
-        }
-
-        lastmod = fi.lastModified();
-    }
-    else
-        is_valid = false;
-
-    // this will decrease the image a quality a bit (8bit/channel -> 5bit/channel),
-    // but it will only use half the ram (read: you can cache twice as many images)
-    if (is_valid && !large && image.depth() > 16)
-        image = image.convertToFormat(QImage::Format_RGB16);
-
-    if (is_valid) {
-        m_image = image;
-        m_fetched = lastmod;
-    }
-    m_valid = is_valid;
+    return BrickLink::core()->dataFile(large ? u"large.png" : u"small.png", openMode,
+                                       m_item, (!large && hasColors) ? m_color : nullptr);
 }
 
+void BrickLink::Picture::loadFromDisk()
+{
+    if (!m_item)
+        return;
+
+    QScopedPointer<QFile> f(file(QIODevice::ReadOnly));
+
+    bool isValid = false;
+    QDateTime lastModified;
+    QImage image;
+
+    if (f && f->isOpen()) {
+        if (f->size() > 0) {
+            isValid = image.load(f.data(), "PNG");
+        } else {
+            if (!m_color && m_item && m_item->itemType())
+                image = BrickLink::core()->noImage(m_item->itemType()->rawPictureSize());
+
+            isValid = true;
+        }
+        lastModified = f->fileTime(QFileDevice::FileModificationTime);
+    }
+
+    if (isValid) {
+        m_image = image;
+        m_fetched = lastModified;
+    }
+    m_valid = isValid;
+}
 
 void BrickLink::Picture::update(bool high_priority)
 {
@@ -263,41 +252,26 @@ void BrickLink::Core::pictureJobFinished(TransferJob *j)
     pic->m_update_status = UpdateStatus::UpdateFailed;
 
     if (j->isCompleted()) {
-        QString path;
         QImage img;
 
-        if (!large && pic->item()->itemType()->hasColors())
-            path = BrickLink::core()->dataPath(pic->item(), pic->color());
-        else
-            path = BrickLink::core()->dataPath(pic->item());
+        QScopedPointer<QFile> f(pic->file(QIODevice::WriteOnly | QIODevice::Truncate));
 
-        if (!path.isEmpty()) {
-            path.append(large ? "large.png" : "small.png");
-
+        if (f && f->isOpen()) {
             pic->m_update_status = UpdateStatus::Ok;
-
-            // qWarning() << "IMG" << j->data()->size() << j->effectiveUrl();
 
             if ((j->effectiveUrl().path().indexOf("noimage", 0, Qt::CaseInsensitive) == -1)
                     && !j->data()->isEmpty()
                     && img.loadFromData(*j->data())) {
-                img.save(path, "PNG");
+                img.save(f.data(), "PNG");
+            } else {
+                // no image ... "write" a 0-byte file
             }
-            else {
-                QFile f(path);
-                f.open(QIODevice::WriteOnly | QIODevice::Truncate);
-                f.close();
-
-                // qWarning("No image !");
-            }
-
-            pic->load_from_disk();
-        }
-        else {
+            f->reset();
+            pic->loadFromDisk();
+        } else {
             qWarning("Couldn't get path to save image");
         }
-    }
-    else if (large && (j->responseCode() == 404) && (j->url().path().endsWith(".jpg"))) {
+    } else if (large && (j->responseCode() == 404) && (j->url().path().endsWith(".jpg"))) {
         // no large JPG image ->try a GIF image instead
 
         if (!m_transfer) {

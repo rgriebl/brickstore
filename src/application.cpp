@@ -25,6 +25,7 @@
 #include <QNetworkProxyFactory>
 #include <QPlainTextEdit>
 #include <QSyntaxHighlighter>
+#include <QStringBuilder>
 
 #if defined(Q_OS_WINDOWS)
 #  include <windows.h>
@@ -400,7 +401,7 @@ void Application::clientMessage()
     }
 }
 
-static const char *msgTypeNames[] = { "DBG ", "WARN", "CRIT", "FATL", "INFO" };
+static const char16_t msgTypeNames[][5] = { u"DBG ", u"WARN", u"CRIT", u"FATL", u"INFO" };
 
 class LogHighlighter : public QSyntaxHighlighter
 {
@@ -457,7 +458,7 @@ public:
             int catLen = colonPos - catPos;
 
             int msgType = QtInfoMsg;
-            for (int i = 0; i < sizeof(msgTypeNames) / sizeof(*msgTypeNames); ++i) {
+            for (int i = 0; i < int(sizeof(msgTypeNames) / sizeof(*msgTypeNames)); ++i) {
                 if (text.midRef(lvlPos, lvlLen) == msgTypeNames[i])
                     msgType = i;
             }
@@ -509,12 +510,11 @@ void Application::setupLogging()
             filename = filename.mid(pos + 1);
         }
 
-        QString str = QLatin1String(msgTypeNames[qBound(QtDebugMsg, msgType, QtInfoMsg)])
-                + QStringLiteral(" ") + QLatin1String(msgCtx.category)
-                + QStringLiteral(": ") + msg
-                + (!filename.isEmpty()
-                ? (QStringLiteral(" at ") + filename + QStringLiteral(", line ") + QString::number(msgCtx.line))
-                : QString());
+        QString str = QString() % msgTypeNames[qBound(QtDebugMsg, msgType, QtInfoMsg)]
+                % u" " % QLatin1String(msgCtx.category)
+                % u": " % msg;
+        if (!filename.isEmpty())
+            str = str % u" at " % filename % u", line " % QString::number(msgCtx.line);
 
         QMetaObject::invokeMethod(s_inst->m_logWidget, "appendPlainText", Qt::QueuedConnection,
                                   Q_ARG(QString, str));

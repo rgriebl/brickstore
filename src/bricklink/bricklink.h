@@ -299,10 +299,8 @@ private:
 private:
     Picture(const Item *item, const Color *color);
 
-    void load_from_disk();
-    void save_to_disk();
-
-    void parse(const char *data, uint size);
+    QFile *file(QIODevice::OpenMode openMode) const;
+    void loadFromDisk();
 
     friend class Core;
     friend class PictureLoaderJob;
@@ -552,8 +550,9 @@ private:
 private:
     PriceGuide(const Item *item, const Color *color);
 
-    void load_from_disk();
-    void save_to_disk();
+    QFile *file(QIODevice::OpenMode openMode) const;
+    void loadFromDisk();
+    void saveToDisk();
 
     void parse(const QByteArray &ba);
 
@@ -659,9 +658,8 @@ public:
     QString defaultDatabaseName(DatabaseVersion version = DatabaseVersion::Latest) const;
 
     QString dataPath() const;
-    QString dataPath(const ItemType *) const;
-    QString dataPath(const Item *) const;
-    QString dataPath(const Item *, const Color *) const;
+    QFile *dataFile(QStringView fileName, QIODevice::OpenMode openMode, const Item *item,
+                    const Color *color = nullptr) const;
 
     const QHash<uint, const Color *>    &colors() const;
     const QHash<uint, const Category *> &categories() const;

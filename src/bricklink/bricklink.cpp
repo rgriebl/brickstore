@@ -27,6 +27,7 @@
 #include <QDebug>
 #include <QThread>
 #include <QUrlQuery>
+#include <QStringBuilder>
 
 #include "config.h"
 #include "utility.h"
@@ -320,54 +321,24 @@ QString Core::dataPath() const
     return m_datadir;
 }
 
-QString Core::dataPath(const ItemType *item_type) const
+QFile *Core::dataFile(QStringView fileName, QIODevice::OpenMode openMode,
+                       const Item *item, const Color *color) const
 {
-    QString p = dataPath();
-    p += item_type->id();
-    p += QDir::separator();
-
-    if (!check_and_create_path(p))
-        return QString();
-
-    return p;
-}
-
-QString Core::dataPath(const Item *item) const
-{
-    QString p = dataPath(item->itemType());
-    const QString id = item->id();
-
     // Avoid huge directories with 1000s of entries.
-    uchar hash = qHash(id, 42) & 0xff; // sse4.2 is only used if a seed value is supplied
-    QString hashStr = QString::number(hash, 16);
-    if (hash < 0x10)
-        hashStr.prepend(QLatin1Char('0'));
+    uchar hash = qHash(item->id(), 42) & 0xff; // sse4.2 is only used if a seed value is supplied
 
-    p += hashStr;
-    p += QDir::separator();
+    QString p = m_datadir % QChar(item->itemType()->id()) % u'/' % (hash < 0x10 ? u"0" : u"")
+            % QString::number(hash, 16) % u'/' % item->id() % u'/'
+            % (color ? QString::number(color->id()) : QString()) % (color ? u"/" : u"")
+            % fileName;
 
-    if (!check_and_create_path(p))
-        return QString();
-
-    p += item->m_id;
-    p += QDir::separator();
-
-    if (!check_and_create_path(p))
-        return QString();
-
-    return p;
-}
-
-QString Core::dataPath(const Item *item, const Color *color) const
-{
-    QString p = dataPath(item);
-    p += QString::number(color->id());
-    p += QDir::separator();
-
-    if (!check_and_create_path(p))
-        return QString();
-
-    return p;
+    if (openMode != QIODevice::ReadOnly) {
+        if (!QDir(fileName.isEmpty() ? p : p.left(p.size() - fileName.size())).mkpath("."))
+            return nullptr;
+    }
+    auto f = new QFile(p);
+    f->open(openMode);
+    return f;
 }
 
 
@@ -394,7 +365,7 @@ Core *Core::create(const QString &datadir, QString *errstring)
 }
 
 Core::Core(const QString &datadir)
-    : m_datadir(QDir::cleanPath(QDir(datadir).absolutePath()) + QStringLiteral("/"))
+    : m_datadir(QDir::cleanPath(QDir(datadir).absolutePath()) + u'/')
     , m_c_locale(QLocale::c())
     , m_corelock(QMutex::Recursive)
 {

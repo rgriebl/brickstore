@@ -423,40 +423,35 @@ bool BrickLink::TextImport::importInventories(QVector<const Item *> &invs)
 
 bool BrickLink::TextImport::readInventory(const Item *item)
 {
-    QString filename = BrickLink::core()->dataPath(item) + "inventory.xml";
+    QScopedPointer<QFile> f(BrickLink::core()->dataFile(u"inventory.xml", QIODevice::ReadOnly, item));
 
-    QFileInfo fi(filename);
-    if (fi.exists() && (fi.lastModified() < item->inventoryUpdated()))
+    if (!f || !f->isOpen() || (f->fileTime(QFileDevice::FileModificationTime) < item->inventoryUpdated()))
         return false;
 
     bool ok = false;
+    QString emsg;
+    int eline = 0, ecol = 0;
+    QDomDocument doc;
 
-    QFile f(filename);
-    if (f.open(QIODevice::ReadOnly)) {
-        QString emsg;
-        int eline = 0, ecol = 0;
-        QDomDocument doc;
+    if (doc.setContent(f.data(), &emsg, &eline, &ecol)) {
+        QDomElement root = doc.documentElement();
 
-        if (doc.setContent(&f, &emsg, &eline, &ecol)) {
-            QDomElement root = doc.documentElement();
+        const Core::ParseItemListXMLResult result = BrickLink::core()->parseItemListXML(doc.documentElement().toElement(), BrickLink::XMLHint_Inventory);
 
-            const Core::ParseItemListXMLResult result = BrickLink::core()->parseItemListXML(doc.documentElement().toElement(), BrickLink::XMLHint_Inventory);
+        if (result.items) {
+            if (!result.invalidItemCount) {
+                for (const BrickLink::InvItem *ii : *result.items) {
+                    if (!ii->item() || !ii->color() || !ii->quantity())
+                        continue;
 
-            if (result.items) {
-                if (!result.invalidItemCount) {
-                    for (const BrickLink::InvItem *ii : *result.items) {
-                        if (!ii->item() || !ii->color() || !ii->quantity())
-                            continue;
-
-                        BrickLink::AppearsInColor &vec = m_appears_in_hash[ii->item()][ii->color()];
-                        vec.append(QPair<int, const BrickLink::Item *>(ii->quantity(), item));
-                    }
-                    // the hash owns the items now
-                    m_consists_of_hash.insert(item, *result.items);
-                    ok = true;
+                    BrickLink::AppearsInColor &vec = m_appears_in_hash[ii->item()][ii->color()];
+                    vec.append(QPair<int, const BrickLink::Item *>(ii->quantity(), item));
                 }
-                delete result.items;
+                // the hash owns the items now
+                m_consists_of_hash.insert(item, *result.items);
+                ok = true;
             }
+            delete result.items;
         }
     }
     return ok;

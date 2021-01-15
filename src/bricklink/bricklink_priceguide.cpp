@@ -58,20 +58,15 @@ BrickLink::PriceGuide::PriceGuide(const BrickLink::Item *item, const BrickLink::
     memset(m_lots, 0, sizeof(m_lots));
     memset(m_prices, 0, sizeof(m_prices));
 
-    load_from_disk();
+    loadFromDisk();
 }
 
-void BrickLink::PriceGuide::save_to_disk()
+void BrickLink::PriceGuide::saveToDisk()
 {
-    QString path = BrickLink::core()->dataPath(m_item, m_color);
+    QScopedPointer<QFile> f(file(QIODevice::WriteOnly));
 
-    if (path.isEmpty())
-        return;
-    path += "priceguide.txt";
-
-    QFile f(path);
-    if (f.open(QIODevice::WriteOnly)) {
-        QTextStream ts(&f);
+    if (f && f->isOpen()) {
+        QTextStream ts(f.data());
         QLocale c = QLocale::c();
 
         ts << "# Price Guide for part #" << m_item->id() << " (" << m_item->name() << "), color #" << m_color->id() << " (" << m_color->name() << ")\n";
@@ -91,27 +86,24 @@ void BrickLink::PriceGuide::save_to_disk()
     }
 }
 
-void BrickLink::PriceGuide::load_from_disk()
+QFile *BrickLink::PriceGuide::file(QIODevice::OpenMode openMode) const
+{
+    return BrickLink::core()->dataFile(u"priceguide.txt", openMode, m_item, m_color);
+}
+
+void BrickLink::PriceGuide::loadFromDisk()
 {
     if (!m_item || !m_color)
         return;
-    QString path = BrickLink::core()->dataPath(m_item, m_color);
 
-    if (path.isEmpty())
-        return;
-    path += "priceguide.txt";
+    QScopedPointer<QFile> f(file(QIODevice::ReadOnly));
 
     m_valid = false;
-    QFile f(path);
-    if (f.open(QIODevice::ReadOnly)) {
-        parse(f.readAll());
-        f.close();
-    }
+    if (f && f->isOpen())
+        parse(f->readAll());
 
-    if (m_valid) {
-        QFileInfo fi(path);
-        m_fetched = fi.lastModified();
-    }
+    if (f && m_valid)
+        m_fetched = f->fileTime(QFileDevice::FileModificationTime);
 }
 
 void BrickLink::PriceGuide::parse(const QByteArray &ba)
@@ -221,7 +213,7 @@ void BrickLink::Core::priceGuideJobFinished(TransferJob *j)
         pg->parse(*j->data());
         if (pg->m_valid) {
             pg->m_fetched = QDateTime::currentDateTime();
-            pg->save_to_disk();
+            pg->saveToDisk();
             pg->m_update_status = UpdateStatus::Ok;
         }
     }
