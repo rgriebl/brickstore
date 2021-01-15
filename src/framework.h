@@ -118,13 +118,13 @@ private:
 
     void setupScripts();
     QAction *findAction(const char *name);
-    QList<QAction *> findActions(const char *startsWithName);
+    QVector<QAction *> findActions(const char *startsWithName);
     void connectAllActions(bool do_connect, Window *window);
     void createActions();
     void translateActions();
     void updateActions(const Document::ItemList &selection = Document::ItemList());
-    QMenu *createMenu(const QByteArray &, const QList<QByteArray> &);
-    bool setupToolBar(QToolBar *, const QList<QByteArray> &);
+    QMenu *createMenu(const QByteArray &, const QVector<QByteArray> &);
+    bool setupToolBar(QToolBar *, const QVector<QByteArray> &);
     QDockWidget *createDock(QWidget *widget);
     void createStatusBar();
     QMap<QAction *, bool (Window::*)() const> m_toggle_updates;
@@ -142,7 +142,7 @@ private:
     QLabel *m_st_errors;
     QToolButton *m_st_currency;
     QToolBar *m_toolbar;
-    QList<QDockWidget *> m_dock_widgets;
+    QVector<QDockWidget *> m_dock_widgets;
     TaskInfoWidget *m_task_info;
     TaskPriceGuideWidget *m_task_priceguide;
     TaskAppearsInWidget *m_task_appears;

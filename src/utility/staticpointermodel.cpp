@@ -144,9 +144,9 @@ void StaticPointerModel::invalidateFilterDelayed()
 void StaticPointerModel::invalidateFilterInternal()
 {
     if (isFiltered()) {
-        filtered = QtConcurrent::filtered(sorted, [this](int row) {
+        filtered = QtConcurrent::blockingFiltered(sorted, [this](int row) {
             return filterAccepts(pointerAt(row));
-        }).results();
+        });
     } else {
         filtered.clear();
     }

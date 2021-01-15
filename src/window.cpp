@@ -1538,7 +1538,7 @@ void Window::setMatchProgress(int /*pmax*/, int /*pcur*/)
     fputc('.', stderr);
 }
 
-void Window::setMatchFinished(QList<const BrickLink::Item *> result)
+void Window::setMatchFinished(QVector<const BrickLink::Item *> result)
 {
     foreach (const BrickLink::Item *item, result)
         qWarning() << "SetMatch:" << item->name() << item->id();
@@ -1551,12 +1551,12 @@ void Window::on_edit_setmatch_triggered()
 
         sm->setGreedyPreference(BrickLink::SetMatch::PreferLargerSets);
 
-        sm->setItemTypeConstraint(QList<const BrickLink::ItemType *>() << BrickLink::core()->itemType('S'));
+        sm->setItemTypeConstraint(QVector<const BrickLink::ItemType *>() << BrickLink::core()->itemType('S'));
         sm->setPartCountConstraint(100, -1);
         sm->setYearReleasedConstraint(1995, -1);
 
-        connect(sm, SIGNAL(finished(QList<const BrickLink::Item *>)),
-                this, SLOT(setMatchFinished(QList<const BrickLink::Item *>)));
+        connect(sm, SIGNAL(finished(QVector<const BrickLink::Item *>)),
+                this, SLOT(setMatchFinished(QVector<const BrickLink::Item *>)));
         connect(sm, SIGNAL(progress(int, int)), this, SLOT(setMatchProgress(int, int)));
 
         if (!sm->startMaximumPossibleSetMatch(selection().isEmpty() ? m_doc->items()

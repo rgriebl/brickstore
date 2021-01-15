@@ -16,7 +16,6 @@
 #include <QPair>
 #include <QHash>
 #include <QVector>
-#include <QList>
 #include <QMetaType>
 
 QT_FORWARD_DECLARE_CLASS(QDataStream)

@@ -172,7 +172,7 @@ void ImportBLOrder::init()
     m_progress->layout();
 }
 
-const QList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > &ImportBLOrder::orders() const
+const QVector<QPair<BrickLink::Order *, BrickLink::InvItemList *> > &ImportBLOrder::orders() const
 {
     return m_orders;
 }

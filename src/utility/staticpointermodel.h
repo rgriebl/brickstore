@@ -15,7 +15,6 @@
 
 #include <QAbstractItemModel>
 #include <QVector>
-#include <QList>
 
 QT_FORWARD_DECLARE_CLASS(QTimer)
 
@@ -61,7 +60,7 @@ private:
     void invalidateFilterInternal();
 
     mutable QVector<int> sorted; // this needs to initialized in the first init() call
-    QList<int> filtered;
+    QVector<int> filtered;
     int lastSortColumn = -1;
     Qt::SortOrder lastSortOrder = Qt::AscendingOrder;
     bool filterDelayEnabled = false;

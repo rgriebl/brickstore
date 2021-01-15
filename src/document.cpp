@@ -260,7 +260,7 @@ Document::Statistics::Statistics(const Document *doc, const ItemList &list, bool
 // *****************************************************************************************
 // *****************************************************************************************
 
-QList<Document *> Document::s_documents;
+QVector<Document *> Document::s_documents;
 
 Document *Document::createTemporary(const BrickLink::InvItemList &list)
 {
@@ -332,9 +332,9 @@ void Document::autosave() const
     }
 }
 
-QList<Document::ItemList> Document::restoreAutosave()
+QVector<Document::ItemList> Document::restoreAutosave()
 {
-    QList<ItemList> restored;
+    QVector<ItemList> restored;
 
     QDir temp(QStandardPaths::writableLocation(QStandardPaths::TempLocation));
     const QStringList ondisk = temp.entryList(QStringList(QLatin1String("brickstore_*.autosave")));
@@ -368,7 +368,7 @@ QList<Document::ItemList> Document::restoreAutosave()
 }
 
 
-const QList<Document *> &Document::allDocuments()
+const QVector<Document *> &Document::allDocuments()
 {
     return s_documents;
 }
@@ -696,14 +696,14 @@ Document *Document::fileImportBrickLinkInventory(const BrickLink::Item *item)
     return nullptr;
 }
 
-QList<Document *> Document::fileImportBrickLinkOrders()
+QVector<Document *> Document::fileImportBrickLinkOrders()
 {
-    QList<Document *> docs;
+    QVector<Document *> docs;
 
     ImportOrderDialog dlg(FrameWork::inst());
 
     if (dlg.exec() == QDialog::Accepted) {
-        QList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > orders = dlg.orders();
+        QVector<QPair<BrickLink::Order *, BrickLink::InvItemList *> > orders = dlg.orders();
 
         for (auto it = orders.constBegin(); it != orders.constEnd(); ++it) {
             const auto &order = *it;

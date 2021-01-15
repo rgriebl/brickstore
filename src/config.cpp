@@ -508,7 +508,7 @@ void Config::setOnlineStatus(bool b)
     }
 }
 
-QList<Config::Translation> Config::translations() const
+QVector<Config::Translation> Config::translations() const
 {
     if (!m_translations_parsed)
         m_translations_parsed = parseTranslations();

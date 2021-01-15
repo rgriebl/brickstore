@@ -24,7 +24,6 @@
 #include <QLocale>
 #include <QHash>
 #include <QVector>
-#include <QList>
 #include <QMap>
 #include <QPair>
 #include <QUrl>

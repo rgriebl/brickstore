@@ -202,7 +202,7 @@ protected:
     void init(const InvItemList &list);
 
     AppearsIn m_appearsin;
-    QList<AppearsInItem *> m_items;
+    QVector<AppearsInItem *> m_items;
 
     friend class AppearsInModel;
 };

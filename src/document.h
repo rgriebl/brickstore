@@ -138,8 +138,8 @@ public:
 
     static Document *createTemporary(const BrickLink::InvItemList &list);
 
-    static const QList<Document *> &allDocuments();
-    static QList<ItemList> restoreAutosave();
+    static const QVector<Document *> &allDocuments();
+    static QVector<ItemList> restoreAutosave();
 
     QString fileName() const;
     QString title() const;
@@ -186,7 +186,7 @@ public:
     static Document *fileOpen();
     static Document *fileOpen(const QString &name);
     static Document *fileImportBrickLinkInventory(const BrickLink::Item *preselect = nullptr);
-    static QList<Document *> fileImportBrickLinkOrders();
+    static QVector<Document *> fileImportBrickLinkOrders();
     static Document *fileImportBrickLinkStore();
     static Document *fileImportBrickLinkCart();
     static Document *fileImportBrickLinkXML();
@@ -266,7 +266,7 @@ private:
 
     QElapsedTimer     m_lastEmitOfStatisticsChanged;
 
-    static QList<Document *> s_documents;
+    static QVector<Document *> s_documents;
 };
 
 
@@ -307,7 +307,7 @@ private:
 
     QString         m_filter_expression;
     Filter::Parser *m_parser;
-    QList<Filter>   m_filter;
+    QVector<Filter> m_filter;
 
     int             m_lastSortColumn[2];
 

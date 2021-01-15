@@ -183,7 +183,7 @@ private slots:
     void updateErrorMask();
 
     void setMatchProgress(int, int);
-    void setMatchFinished(QList<const BrickLink::Item *>);
+    void setMatchFinished(QVector<const BrickLink::Item *>);
 
 private:
     Document::ItemList exportCheck() const;

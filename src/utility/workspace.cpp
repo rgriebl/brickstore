@@ -334,9 +334,9 @@ void Workspace::setActiveWindow(QWidget *w)
     m_tabbar->setCurrentIndex(m_windowStack->indexOf(w));
 }
 
-QList<QWidget *> Workspace::windowList() const
+QVector<QWidget *> Workspace::windowList() const
 {
-    QList<QWidget *> res;
+    QVector<QWidget *> res;
     int count = m_windowStack->count();
     res.reserve(count);
 

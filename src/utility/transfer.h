@@ -131,8 +131,8 @@ private:
     QString                m_user_agent;
     int                    m_maxConnections;
     QNetworkAccessManager *m_nam;
-    QList<TransferJob *>   m_jobs;
-    QList<TransferJob *>   m_currentJobs;
+    QVector<TransferJob *> m_jobs;
+    QVector<TransferJob *> m_currentJobs;
     int                    m_progressDone = 0;
     int                    m_progressTotal = 0;
 

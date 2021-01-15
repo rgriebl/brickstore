@@ -363,156 +363,155 @@ FrameWork::FrameWork(QWidget *parent)
 
     createActions();
 
-    menuBar()->addMenu(createMenu("file", QList<QByteArray>()
-        << "file_new"
-        << "file_open"
-        << "file_open_recent"
-        << "-"
-        << "file_save"
-        << "file_saveas"
-        << "-"
-        << "file_import"
-        << "file_export"
-        << "-"
-        << "file_print"
-//#if !defined(Q_OS_MACOS)
-        << "file_print_pdf"
-//#endif
-        << "-"
-        << "file_close"
-        << "-"
-        << "file_exit"
-    ));
+    menuBar()->addMenu(createMenu("file", {
+                                      "file_new",
+                                      "file_open",
+                                      "file_open_recent",
+                                      "-",
+                                      "file_save",
+                                      "file_saveas",
+                                      "-",
+                                      "file_import",
+                                      "file_export",
+                                      "-",
+                                      "file_print",
+                                      //#if !defined(Q_OS_MACOS)
+                                      "file_print_pdf",
+                                      //#endif
+                                      "-",
+                                      "file_close",
+                                      "-",
+                                      "file_exit"
+                                  }));
 
-    menuBar()->addMenu(createMenu("edit", QList<QByteArray>()
-        << "edit_undo"
-        << "edit_redo"
-        << "-"
-        << "edit_cut"
-        << "edit_copy"
-        << "edit_paste"
-        << "edit_delete"
-        << "-"
-        << "edit_select_all"
-        << "edit_select_none"
-        << "-"
-        << "edit_additems"
-        << "edit_subtractitems"
-        << "edit_mergeitems"
-        << "edit_partoutitems"
-        << "edit_setmatch"
-        << "-"
-        << "edit_status"
-        << "edit_cond"
-        << "edit_color"
-        << "edit_qty"
-        << "edit_price"
-        << "edit_bulk"
-        << "edit_sale"
-        << "edit_comment"
-        << "edit_remark"
-        << "edit_retain"
-        << "edit_stockroom"
-        << "edit_reserved"
-        << "-"
-        << "edit_reset_diffs"
-        << "edit_copyremarks"
-        << "-"
-        << "edit_bl_catalog"
-        << "edit_bl_priceguide"
-        << "edit_bl_lotsforsale"
-        << "edit_bl_myinventory"
-    ));
+    menuBar()->addMenu(createMenu("edit", {
+                                      "edit_undo",
+                                      "edit_redo",
+                                      "-",
+                                      "edit_cut",
+                                      "edit_copy",
+                                      "edit_paste",
+                                      "edit_delete",
+                                      "-",
+                                      "edit_select_all",
+                                      "edit_select_none",
+                                      "-",
+                                      "edit_additems",
+                                      "edit_subtractitems",
+                                      "edit_mergeitems",
+                                      "edit_partoutitems",
+                                      "edit_setmatch",
+                                      "-",
+                                      "edit_status",
+                                      "edit_cond",
+                                      "edit_color",
+                                      "edit_qty",
+                                      "edit_price",
+                                      "edit_bulk",
+                                      "edit_sale",
+                                      "edit_comment",
+                                      "edit_remark",
+                                      "edit_retain",
+                                      "edit_stockroom",
+                                      "edit_reserved",
+                                      "-",
+                                      "edit_reset_diffs",
+                                      "edit_copyremarks",
+                                      "-",
+                                      "edit_bl_catalog",
+                                      "edit_bl_priceguide",
+                                      "edit_bl_lotsforsale",
+                                      "edit_bl_myinventory"
+                                  }));
 
+    menuBar()->addMenu(createMenu("view", {
+                                      "view_toolbar",
+                                      "view_docks",
+                                      "view_statusbar",
+                                      "-",
+                                      "view_fullscreen",
+                                      "-",
+                                      "view_simple_mode",
+                                      "view_difference_mode",
+                                      "view_show_input_errors",
+                                      "-",
+                                      "view_column_layout_save",
+                                      "view_column_layout_manage",
+                                      "view_column_layout_load"
+                                  }));
 
-    menuBar()->addMenu(createMenu("view", QList<QByteArray>()
-        << "view_toolbar"
-        << "view_docks"
-        << "view_statusbar"
-        << "-"
-        << "view_fullscreen"
-        << "-"
-        << "view_simple_mode"
-        << "view_difference_mode"
-        << "view_show_input_errors"
-        << "-"
-        << "view_column_layout_save"
-        << "view_column_layout_manage"
-        << "view_column_layout_load"
-    ));
-
-    menuBar()->addMenu(createMenu("extras", QList<QByteArray>()
-        << "extras_update_database"
-        << "-"
-        << "extras_configure"
-    ));
+    menuBar()->addMenu(createMenu("extras", {
+                                      "extras_update_database",
+                                      "-",
+                                      "extras_configure"
+                                  }));
 
     QMenu *m = m_workspace->windowMenu(true, this);
     m->menuAction()->setObjectName(QLatin1String("window"));
     menuBar()->addMenu(m);
 
-    menuBar()->addMenu(createMenu("help", QList<QByteArray>()
-        << "help_updates"
-        << "-"
-        << "help_about"
-    ));
+    menuBar()->addMenu(createMenu("help", {
+                                      "help_updates",
+                                      "-",
+                                      "help_about"
+                                  }));
 
-    m_contextmenu = createMenu("context", QList<QByteArray>()
-        << "edit_cut"
-        << "edit_copy"
-        << "edit_paste"
-        << "edit_delete"
-        << "-"
-        << "edit_select_all"
-        << "-"
-        << "edit_filter_from_selection"
-        << "-"
-        << "edit_mergeitems"
-        << "edit_partoutitems"
-        << "-"
-        << "edit_status"
-        << "edit_cond"
-        << "edit_color"
-        << "edit_qty"
-        << "edit_price"
-        << "edit_remark"
-        << "-"
-        << "edit_bl_catalog"
-        << "edit_bl_priceguide"
-        << "edit_bl_lotsforsale"
-        << "edit_bl_myinventory"
-    );
+    m_contextmenu = createMenu("context", {
+                                   "edit_cut",
+                                   "edit_copy",
+                                   "edit_paste",
+                                   "edit_delete",
+                                   "-",
+                                   "edit_select_all",
+                                   "-",
+                                   "edit_filter_from_selection",
+                                   "-",
+                                   "edit_mergeitems",
+                                   "edit_partoutitems",
+                                   "-",
+                                   "edit_status",
+                                   "edit_cond",
+                                   "edit_color",
+                                   "edit_qty",
+                                   "edit_price",
+                                   "edit_remark",
+                                   "-",
+                                   "edit_bl_catalog",
+                                   "edit_bl_priceguide",
+                                   "edit_bl_lotsforsale",
+                                   "edit_bl_myinventory"
+                               });
 
-    setupToolBar(m_toolbar, QList<QByteArray>()
-        << "file_new"
-        << "file_open"
-        << "file_save"
-        << "-"
-        << "file_import"
-        << "file_export"
-        << "-"
-        << "edit_undo"
-        << "edit_redo"
-        << "-"
-        << "edit_cut"
-        << "edit_copy"
-        << "edit_paste"
-        << "-"
-        << "edit_additems"
-        << "edit_subtractitems"
-        << "edit_mergeitems"
-        << "edit_partoutitems"
-        << "-"
-        << "edit_price_to_priceguide"
-        << "edit_price_inc_dec"
-        << "-"
-        << "view_column_layout_load"
-        << "|"
-        << "widget_filter"
-        << "|"
-        << "widget_progress"
-        << "|"
-    );
+    setupToolBar(m_toolbar, {
+                     "file_new",
+                     "file_open",
+                     "file_save",
+                     "-",
+                     "file_import",
+                     "file_export",
+                     "-",
+                     "edit_undo",
+                     "edit_redo",
+                     "-",
+                     "edit_cut",
+                     "edit_copy",
+                     "edit_paste",
+                     "-",
+                     "edit_additems",
+                     "edit_subtractitems",
+                     "edit_mergeitems",
+                     "edit_partoutitems",
+                     "-",
+                     "edit_price_to_priceguide",
+                     "edit_price_inc_dec",
+                     "-",
+                     "view_column_layout_load",
+                     "|",
+                     "widget_filter",
+                     "|",
+                     "widget_progress",
+                     "|"
+                 });
 
     addToolBar(m_toolbar);
 
@@ -952,7 +951,7 @@ void FrameWork::manageLayouts()
     d.exec();
 }
 
-QMenu *FrameWork::createMenu(const QByteArray &name, const QList<QByteArray> &a_names)
+QMenu *FrameWork::createMenu(const QByteArray &name, const QVector<QByteArray> &a_names)
 {
     if (a_names.isEmpty())
         return nullptr;
@@ -972,7 +971,7 @@ QMenu *FrameWork::createMenu(const QByteArray &name, const QList<QByteArray> &a_
 }
 
 
-bool FrameWork::setupToolBar(QToolBar *t, const QList<QByteArray> &a_names)
+bool FrameWork::setupToolBar(QToolBar *t, const QVector<QByteArray> &a_names)
 {
     if (!t || a_names.isEmpty())
         return false;

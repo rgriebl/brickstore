@@ -404,7 +404,7 @@ LDraw::Part *LDraw::Core::findPart(const QString &_filename, const QDir &parentd
     if (QFileInfo(filename).isRelative()) {
         // search order is parentdir => p => parts => models
 
-        QList<QDir> searchpath = m_searchpath;
+        QVector<QDir> searchpath = m_searchpath;
         searchpath.prepend(parentdir);
 
         for (const QDir &sp : qAsConst(searchpath)) {

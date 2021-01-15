@@ -66,11 +66,11 @@ public:
 
     ~OrderListModel() override
     {
-        setOrderList(QList<QPair<BrickLink::Order *, BrickLink::InvItemList *> >());
+        setOrderList(QVector<QPair<BrickLink::Order *, BrickLink::InvItemList *> >());
         delete m_trans;
     }
 
-    void setOrderList(const QList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > &orderlist)
+    void setOrderList(const QVector<QPair<BrickLink::Order *, BrickLink::InvItemList *> > &orderlist)
     {
         beginResetModel();
         for (auto &order : qAsConst(m_orderlist)) {
@@ -246,7 +246,7 @@ private slots:
     }
 
 private:
-    QList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > m_orderlist;
+    QVector<QPair<BrickLink::Order *, BrickLink::InvItemList *> > m_orderlist;
     QCache<QString, QImage> m_flags;
     Transfer *m_trans;
 };
@@ -418,9 +418,9 @@ void ImportOrderDialog::download()
     delete import;
 }
 
-QList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > ImportOrderDialog::orders() const
+QVector<QPair<BrickLink::Order *, BrickLink::InvItemList *> > ImportOrderDialog::orders() const
 {
-    QList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > list;
+    QVector<QPair<BrickLink::Order *, BrickLink::InvItemList *> > list;
 
     foreach (const QModelIndex &idx, w_order_list->selectionModel()->selectedRows()) {
         QPair<BrickLink::Order *, BrickLink::InvItemList *> pair;

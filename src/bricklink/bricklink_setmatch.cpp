@@ -167,13 +167,13 @@ void BrickLink::SetMatch::setYearReleasedConstraint(int _min, int _max)
     }
 }
 
-void BrickLink::SetMatch::setCategoryConstraint(const QList<const Category *> &list)
+void BrickLink::SetMatch::setCategoryConstraint(const QVector<const Category *> &list)
 {
     if (!isActive())
         m_categories = list;
 }
 
-void BrickLink::SetMatch::setItemTypeConstraint(const QList<const ItemType *> &list)
+void BrickLink::SetMatch::setItemTypeConstraint(const QVector<const ItemType *> &list)
 {
     if (!isActive())
         m_itemtypes = list;
@@ -199,7 +199,7 @@ public:
 
     void run() override
     {
-        QList<const BrickLink::Item *> result;
+        QVector<const BrickLink::Item *> result;
 
         if (m_all)
             result = m_sm->allPossibleSetMatch(m_list);
@@ -211,7 +211,7 @@ public:
     }
 
 signals:
-    void finished(int, QList<const BrickLink::Item *> &);
+    void finished(int, QVector<const BrickLink::Item *> &);
     void progress(int, int);
 
 private:
@@ -246,10 +246,10 @@ bool BrickLink::SetMatch::startAllPossibleSetMatch(const InvItemList &list)
     return true;
 }
 
-QList<const BrickLink::Item *> BrickLink::SetMatch::allPossibleSetMatch(const InvItemList &list)
+QVector<const BrickLink::Item *> BrickLink::SetMatch::allPossibleSetMatch(const InvItemList &list)
 {
     InvMatchList parts(list);
-    QList<const Item *> result;
+    QVector<const Item *> result;
     int p = 0, pmax = m_inventories.count(), pstep = pmax / 100;
 
     for (auto it = m_inventories.constBegin(); it != m_inventories.constEnd(); ++it) {
@@ -265,12 +265,12 @@ QList<const BrickLink::Item *> BrickLink::SetMatch::allPossibleSetMatch(const In
 }
 
 
-QList<const BrickLink::Item *> BrickLink::SetMatch::maximumPossibleSetMatch(const InvItemList &list)
+QVector<const BrickLink::Item *> BrickLink::SetMatch::maximumPossibleSetMatch(const InvItemList &list)
 {
     create_inventory_list();
 
     InvMatchList parts(list);
-    QPair<int, QList<const Item *>> result(list.count(), QList<const Item *>());
+    QPair<int, QVector<const Item *>> result(list.count(), QVector<const Item *>());
 
     m_step = 0;
 
@@ -285,9 +285,9 @@ QList<const BrickLink::Item *> BrickLink::SetMatch::maximumPossibleSetMatch(cons
     return result.second;
 }
 
-QPair<int, QList<const BrickLink::Item *>> BrickLink::SetMatch::set_match_greedy(InvMatchList &parts)
+QPair<int, QVector<const BrickLink::Item *>> BrickLink::SetMatch::set_match_greedy(InvMatchList &parts)
 {
-    QList<const Item *> result;
+    QVector<const Item *> result;
     int p = 0, pmax = m_inventories.count() * 2, pstep = pmax / 100;
 
     // pass == 0: try to match one of each set

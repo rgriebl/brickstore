@@ -35,7 +35,7 @@ public:
 
     QWidget *activeWindow() const;
     int windowCount() const;
-    QList<QWidget *> windowList() const;
+    QVector<QWidget *> windowList() const;
 
     QMenu *windowMenu(bool hasShortcuts = false, QWidget *parent = nullptr);
 

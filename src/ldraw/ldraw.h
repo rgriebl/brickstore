@@ -17,7 +17,6 @@
 #include <QString>
 #include <QByteArray>
 #include <QVector>
-#include <QList>
 #include <QColor>
 #include <QVector3D>
 #include <QMatrix4x4>
@@ -284,7 +283,7 @@ private:
 
 private:
     QString m_datadir;
-    QList<QDir> m_searchpath;
+    QVector<QDir> m_searchpath;
 
     struct Color
     {

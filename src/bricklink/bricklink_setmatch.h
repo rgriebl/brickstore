@@ -51,7 +51,7 @@ private:
         friend class SetMatch;
 
     private:
-        QList<InvMatchItem> m_list;
+        QVector<InvMatchItem> m_list;
         int m_count = 0;
     };
 
@@ -70,8 +70,8 @@ public:
 
     void setPartCountConstraint(int _min, int _max);
     void setYearReleasedConstraint(int _min, int _max);
-    void setCategoryConstraint(const QList<const Category *> &list);
-    void setItemTypeConstraint(const QList<const ItemType *> &list);
+    void setCategoryConstraint(const QVector<const Category *> &list);
+    void setItemTypeConstraint(const QVector<const ItemType *> &list);
 
     enum GreedyPreference {
         PreferLargerSets  = 0,
@@ -81,17 +81,17 @@ public:
     void setGreedyPreference(GreedyPreference p);
 
 signals:
-    void finished(const QList<const BrickLink::Item *> &);
+    void finished(const QVector<const BrickLink::Item *> &);
     void progress(int, int);
 
 protected:
-    QList<const Item *> allPossibleSetMatch(const InvItemList &list);
-    QList<const Item *> maximumPossibleSetMatch(const InvItemList &list);
+    QVector<const Item *> allPossibleSetMatch(const InvItemList &list);
+    QVector<const Item *> maximumPossibleSetMatch(const InvItemList &list);
 
     friend class MatchThread;
 
 private:
-    QPair<int, QList<const Item *>> set_match_greedy(InvMatchList &parts);
+    QPair<int, QVector<const Item *>> set_match_greedy(InvMatchList &parts);
 
     void clear_inventory_list();
     void create_inventory_list();
@@ -107,8 +107,8 @@ private:
     int m_part_max = -1;
     int m_year_min = -1;
     int m_year_max = -1;
-    QList<const Category *> m_categories;
-    QList<const ItemType *> m_itemtypes;
+    QVector<const Category *> m_categories;
+    QVector<const ItemType *> m_itemtypes;
 
     // greedy preferences
     GreedyPreference m_prefer = PreferLargerSets;

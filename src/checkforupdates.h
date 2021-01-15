@@ -13,7 +13,6 @@
 */
 #pragma once
 
-#include <QList>
 #include <QObject>
 #include <QVersionNumber>
 

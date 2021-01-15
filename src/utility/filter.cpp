@@ -122,9 +122,9 @@ enum State {
 };
 
 
-QList<Filter> Filter::Parser::parse(const QString &str_)
+QVector<Filter> Filter::Parser::parse(const QString &str_)
 {
-    QList<Filter> filters;
+    QVector<Filter> filters;
     int pos = 0;
     Filter f;
     State state = StateStart;

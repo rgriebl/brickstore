@@ -192,7 +192,7 @@ void SettingsDialog::load()
 {
     // --[ GENERAL ]-------------------------------------------------------------------
 
-    QList<Config::Translation> translations = Config::inst()->translations();
+    QVector<Config::Translation> translations = Config::inst()->translations();
 
     if (translations.isEmpty()) {
         w_language->setEnabled(false);

@@ -15,7 +15,7 @@
 
 #include <QString>
 #include <QMultiMap>
-#include <QList>
+#include <QVector>
 #include <QPair>
 #include <QCoreApplication>
 
@@ -67,7 +67,7 @@ public:
     public:
         Parser() = default;
 
-        QList<Filter> parse(const QString &str);
+        QVector<Filter> parse(const QString &str);
 
         void setFieldTokens(const QMultiMap<int, QString> &idToName);
         void setComparisonTokens(const QMultiMap<Filter::Comparison, QString> &comparisonToName);

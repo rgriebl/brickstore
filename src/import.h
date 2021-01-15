@@ -49,7 +49,7 @@ public:
     ImportBLOrder(const QDate &from, const QDate &to, BrickLink::OrderType type, ProgressDialog *pd);
     ImportBLOrder(const QString &order, BrickLink::OrderType type, ProgressDialog *pd);
 
-    const QList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > &orders() const;
+    const QVector<QPair<BrickLink::Order *, BrickLink::InvItemList *> > &orders() const;
 
 private slots:
     virtual void gotten();
@@ -67,7 +67,7 @@ private:
     QUrl                   m_url;
     bool                   m_retry_placed;
     int                    m_current_address;
-    QList<QPair<BrickLink::Order *, BrickLink::InvItemList *> > m_orders;
+    QVector<QPair<BrickLink::Order *, BrickLink::InvItemList *> > m_orders;
 };
 
 

@@ -16,6 +16,7 @@
 #include <QSettings>
 #include <QDateTime>
 #include <QLocale>
+#include <QVector>
 
 
 class Config : public QSettings
@@ -65,7 +66,7 @@ public:
         QMap<QString, QString> languageName;
     };
 
-    QList<Translation> translations() const;
+    QVector<Translation> translations() const;
 
     QSize iconSize() const;
     int fontSizePercent() const;
@@ -133,5 +134,5 @@ private:
     bool                       m_simple_mode = false;
     QLocale::MeasurementSystem m_measurement = QLocale::MetricSystem;
     mutable bool               m_translations_parsed = false;
-    mutable QList<Translation> m_translations;
+    mutable QVector<Translation> m_translations;
 };
