@@ -433,8 +433,9 @@ FrameWork::FrameWork(QWidget *parent)
                                       "view_fullscreen",
                                       "-",
                                       "view_simple_mode",
-                                      "view_difference_mode",
                                       "view_show_input_errors",
+                                      "-",
+                                      "view_difference_mode",
                                       "-",
                                       "view_column_layout_save",
                                       "view_column_layout_manage",
@@ -1487,6 +1488,9 @@ void FrameWork::connectWindow(QWidget *w)
         }
 
         m_undogroup->setActiveStack(doc->undoStack());
+
+        // update per-document action states
+        findAction("view_difference_mode")->setChecked(window->isDifferenceMode());
 
         m_current_window = window;
     }

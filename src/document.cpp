@@ -972,16 +972,6 @@ void Document::setBrickLinkItems(const BrickLink::InvItemList &bllist, uint mult
         items.append(item);
     }
     insertItemsDirect(items, positions);
-
-    // reset difference WITHOUT a command
-
-    for (Item *pos : qAsConst(m_items)) {
-        if ((pos->origQuantity() != pos->quantity()) ||
-            (!qFuzzyCompare(pos->origPrice(), pos->price()))) {
-            pos->setOrigQuantity(pos->quantity());
-            pos->setOrigPrice(pos->price());
-        }
-    }
 }
 
 QString Document::fileName() const

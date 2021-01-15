@@ -41,7 +41,11 @@ public:
         Description,
         Condition,
         Color,
+        QuantityOrig,
+        QuantityDiff,
         Quantity,
+        PriceOrig,
+        PriceDiff,
         Price,
         Total,
         Bulk,
@@ -62,11 +66,6 @@ public:
         Reserved,
         Weight,
         YearReleased,
-
-        QuantityOrig,
-        QuantityDiff,
-        PriceOrig,
-        PriceDiff,
 
         FieldCount
     };

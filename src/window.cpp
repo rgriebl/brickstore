@@ -368,26 +368,7 @@ void Window::setDifferenceMode(bool b)
     w_header->setSectionAvailable(Document::PriceDiff, b);
     w_header->setSectionAvailable(Document::QuantityOrig, b);
     w_header->setSectionAvailable(Document::QuantityDiff, b);
-
-    if (b) {
-        if (!w_header->isSectionHidden(Document::Quantity)) {
-            w_header->showSection(Document::QuantityDiff);
-            w_header->showSection(Document::QuantityOrig);
-
-            w_header->moveSection(w_header->visualIndex(Document::QuantityDiff), w_header->visualIndex(Document::Quantity));
-            w_header->moveSection(w_header->visualIndex(Document::QuantityOrig), w_header->visualIndex(Document::QuantityDiff));
-        }
-
-        if (!w_header->isSectionHidden(Document::Price)) {
-            w_header->showSection(Document::PriceDiff);
-            w_header->showSection(Document::PriceOrig);
-
-            w_header->moveSection(w_header->visualIndex(Document::PriceDiff), w_header->visualIndex(Document::Price));
-            w_header->moveSection(w_header->visualIndex(Document::PriceOrig), w_header->visualIndex(Document::PriceDiff));
-        }
-    }
 }
-
 
 void Window::documentRowsInserted(const QModelIndex &parent, int /*start*/, int end)
 {
