@@ -18,8 +18,8 @@
 
 #include "bricklinkfwd.h"
 
-class AppearsInWidgetPrivate;
 QT_FORWARD_DECLARE_CLASS(QAction)
+class AppearsInWidgetPrivate;
 
 
 class AppearsInWidget : public QTreeView

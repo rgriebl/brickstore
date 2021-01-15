@@ -305,8 +305,8 @@ double Utility::stringToWeight(const QString &s, QLocale::MeasurementSystem ms)
 
 QString Utility::localForInternationalCurrencySymbol(const QString &international_symbol)
 {
-    const QList<QLocale> allLocales = QLocale::matchingLocales(QLocale::AnyLanguage, QLocale::AnyScript,
-                                                               QLocale::AnyCountry);
+    const auto allLocales = QLocale::matchingLocales(QLocale::AnyLanguage, QLocale::AnyScript,
+                                                     QLocale::AnyCountry);
 
     for (const auto &locale : allLocales) {
         if (locale.currencySymbol(QLocale::CurrencyIsoCode) == international_symbol)

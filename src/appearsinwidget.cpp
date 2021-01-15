@@ -142,7 +142,7 @@ void AppearsInWidget::setItem(const BrickLink::Item *item, const BrickLink::Colo
 {
     QAbstractItemModel *old_model = model();
 
-    setModel(new BrickLink::AppearsInModel(item , color, this));
+    setModel(new BrickLink::AppearsInModel(item, color, this));
     triggerColumnResize();
 
     delete old_model;

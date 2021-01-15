@@ -697,7 +697,8 @@ void FrameWork::translateActions()
             : m_name(n), m_text(t), m_shortcut(s), m_standardKey(QKeySequence::UnknownKey) { }
         ActionDefinition(const char *n, const QString &t, QKeySequence::StandardKey k = QKeySequence::UnknownKey)
             : m_name(n), m_text(t), m_standardKey(k) { }
-    } *atptr, actiontable [] = {
+    };
+    static const ActionDefinition actiontable[] = {
         { "file",                           tr("&File"),                              },
         { "file_new",                       tr("New", "File|New"),                    QKeySequence::New },
         { "file_open",                      tr("Open..."),                            QKeySequence::Open },
@@ -808,7 +809,7 @@ void FrameWork::translateActions()
         { nullptr, nullptr }
     };
 
-    for (atptr = actiontable; atptr->m_name; atptr++) {
+    for (auto atptr = actiontable; atptr->m_name; ++atptr) {
         if (QAction *a = findAction(atptr->m_name)) {
             if (!atptr->m_text.isNull())
                 a->setText(atptr->m_text);
@@ -1423,7 +1424,7 @@ void FrameWork::connectAllActions(bool do_connect, Window *window)
         if (foundIt) {
             // we found our slot, now skip all overloads
             while (mo.method(i + 1).attributes() & QMetaMethod::Cloned)
-                  ++i;
+                ++i;
         } else if (window && (!(mo.method(i).attributes() & QMetaMethod::Cloned))) {
             qWarning("FrameWork::connectAllActions: No matching signal for %s", slot.constData());
         }
@@ -1617,9 +1618,9 @@ void FrameWork::statisticsUpdate()
         ccode = m_current_window->document()->currencyCode();
 
         if (!qFuzzyCompare(stat.value(), stat.minValue())) {
-            valstr = tr("Value: %1 (min. %2)").
-                     arg(Currency::toString(stat.value(), ccode, Currency::NoSymbol)).
-                     arg(Currency::toString(stat.minValue(), ccode, Currency::NoSymbol));
+            valstr = tr("Value: %1 (min. %2)")
+                    .arg(Currency::toString(stat.value(), ccode, Currency::NoSymbol))
+                    .arg(Currency::toString(stat.minValue(), ccode, Currency::NoSymbol));
         } else {
             valstr = tr("Value: %1").arg(Currency::toString(stat.value(), ccode, Currency::NoSymbol));
         }
@@ -1657,13 +1658,6 @@ void FrameWork::statisticsUpdate()
 
 void FrameWork::titleUpdate()
 {
-/*    QString t = Application::inst()->applicationName();
-
-    if (m_current_window) {
-        t.append(QString(" - %1 [*]").arg(m_current_window->windowTitle()));
-    }
-    setWindowTitle(t); */
-
     QString title = QApplication::applicationName();
     QString file;
 

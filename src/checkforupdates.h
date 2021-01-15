@@ -30,7 +30,6 @@ private slots:
     void gotten();
 
 private:
-private:
     ProgressDialog *m_progress;
     QVersionNumber m_current_version;
     QVersionNumber m_latest_version;

@@ -34,7 +34,7 @@ QString HumanReadableTimeDelta::toString(const QDateTime &from, const QDateTime 
     };
     auto d = std::abs(delta);
 
-    for (const auto p : table) {
+    for (const auto &p : table) {
         if (d < p.first || !p.first) {
             s = p.second;
             break;
