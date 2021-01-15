@@ -216,13 +216,16 @@ void ImportBLOrder::gotten()
                             if (!ordernode.isElement())
                                 continue;
 
-                            BrickLink::Core::ParseItemListXMLResult result = BrickLink::core()->parseItemListXML(ordernode.toElement(), BrickLink::XMLHint_Order);
+                            // we own the items now
+                            BrickLink::Core::ParseItemListXMLResult result =
+                                    BrickLink::core()->parseItemListXML(ordernode.toElement(),
+                                                                        BrickLink::XMLHint_Order);
 
                             if (result.items) {
                                 BrickLink::Order *order = new BrickLink::Order(QLatin1String(""), BrickLink::OrderType::Placed);
 
                                 for (QDomNode node = ordernode.firstChild(); !node.isNull(); node = node.nextSibling()) {
-                                    if (!node. isElement())
+                                    if (!node.isElement())
                                         continue;
 
                                     QString tag = node.toElement().tagName();
@@ -266,6 +269,7 @@ void ImportBLOrder::gotten()
                                     m_orders << qMakePair(order, result.items);
                                 }
                                 else {
+                                    qDeleteAll(*result.items);
                                     delete result.items;
                                 }
                             }

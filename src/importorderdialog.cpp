@@ -74,6 +74,8 @@ public:
         beginResetModel();
         for (auto &order : qAsConst(m_orderlist)) {
             delete order.first;
+            if (order.second)
+                qDeleteAll(*order.second);
             delete order.second;
         }
         m_orderlist = orderlist;
@@ -305,7 +307,7 @@ ImportOrderDialog::ImportOrderDialog(QWidget *parent)
 
     w_order_number->setValidator(new QIntValidator(1, 99999999, w_order_number));
     w_order_list->setModel(new OrderListModel(this));
-    w_order_list->setItemDelegate(new TransHighlightDelegate());
+    w_order_list->setItemDelegate(new TransHighlightDelegate(this));
 
     connect(w_order_number, &QLineEdit::textChanged,
             this, &ImportOrderDialog::checkId);
