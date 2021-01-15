@@ -17,6 +17,7 @@
 #include <QLabel>
 
 #include "window.h"
+#include "document.h"
 #include "appearsinwidget.h"
 #include "priceguidewidget.h"
 #include "picturewidget.h"
@@ -48,6 +49,8 @@ protected:
 private:
     QPointer<Window> m_win;
     QDockWidget *m_dock;
+    QTimer m_delayTimer;
+    Document::ItemList m_selection;
 };
 
 
@@ -75,9 +78,13 @@ protected:
     void changeEvent(QEvent *e) override;
 
 private:
+    void delayedSelectionUpdate(const Document::ItemList &list);
+
     QLabel *m_text;
     PictureWidget *m_pic;
     QPointer<Window> m_win;
+    QTimer m_delayTimer;
+    Document::ItemList m_selection;
 };
 
 
@@ -101,4 +108,6 @@ protected slots:
 
 private:
     QPointer<Window> m_win;
+    QTimer m_delayTimer;
+    Document::ItemList m_selection;
 };

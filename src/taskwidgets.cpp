@@ -35,6 +35,18 @@ TaskPriceGuideWidget::TaskPriceGuideWidget(QWidget *parent)
     setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
+    m_delayTimer.setSingleShot(true);
+    m_delayTimer.setInterval(120);
+
+    connect(&m_delayTimer, &QTimer::timeout, this, [this]() {
+        bool ok = (m_win && (m_selection.count() == 1));
+
+        setPriceGuide(ok ? BrickLink::core()->priceGuide(m_selection.front()->item(),
+                                                         m_selection.front()->color(), true)
+                         : nullptr);
+    });
+
+
     connect(FrameWork::inst(), &FrameWork::windowActivated,
             this, &TaskPriceGuideWidget::windowUpdate);
     connect(this, &PriceGuideWidget::priceDoubleClicked,
@@ -69,10 +81,8 @@ void TaskPriceGuideWidget::currencyUpdate(const QString &ccode)
 
 void TaskPriceGuideWidget::selectionUpdate(const Document::ItemList &list)
 {
-    bool ok = (m_win && (list.count() == 1));
-
-    setPriceGuide(ok ? BrickLink::core()->priceGuide(list.front()->item(),
-                                                     list.front()->color(), true) : nullptr);
+    m_selection = list;
+    m_delayTimer.start();
 }
 
 void TaskPriceGuideWidget::setPrice(double p)
@@ -163,6 +173,13 @@ TaskInfoWidget::TaskInfoWidget(QWidget *parent)
     addWidget(m_pic);
     addWidget(m_text);
 
+    m_delayTimer.setSingleShot(true);
+    m_delayTimer.setInterval(120);
+
+    connect(&m_delayTimer, &QTimer::timeout, this, [this]() {
+        delayedSelectionUpdate(m_selection);
+    });
+
     connect(FrameWork::inst(), &FrameWork::windowActivated,
             this, &TaskInfoWidget::windowUpdate);
     connect(Config::inst(), &Config::measurementSystemChanged,
@@ -194,6 +211,12 @@ void TaskInfoWidget::currencyUpdate()
 }
 
 void TaskInfoWidget::selectionUpdate(const Document::ItemList &list)
+{
+    m_selection = list;
+    m_delayTimer.start();
+}
+
+void TaskInfoWidget::delayedSelectionUpdate(const Document::ItemList &list)
 {
     if (!m_win || (list.count() == 0)) {
         m_pic->setPicture(nullptr);
@@ -275,6 +298,18 @@ TaskAppearsInWidget::TaskAppearsInWidget(QWidget *parent)
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 
     connect(FrameWork::inst(), &FrameWork::windowActivated, this, &TaskAppearsInWidget::windowUpdate);
+
+    m_delayTimer.setSingleShot(true);
+    m_delayTimer.setInterval(120);
+
+    connect(&m_delayTimer, &QTimer::timeout, this, [this]() {
+        if (!m_win || m_selection.isEmpty())
+            setItem(nullptr, nullptr);
+        else if (m_selection.count() == 1)
+            setItem(m_selection.first()->item(), m_selection.first()->color());
+        else
+            setItems(m_selection);
+    });
 }
 
 QSize TaskAppearsInWidget::minimumSizeHint() const
@@ -306,12 +341,8 @@ void TaskAppearsInWidget::windowUpdate(Window *win)
 
 void TaskAppearsInWidget::selectionUpdate(const Document::ItemList &list)
 {
-    if (!m_win || list.isEmpty())
-        setItem(nullptr, nullptr);
-    else if (list.count() == 1)
-        setItem(list.first()->item(), list.first()->color());
-    else
-        setItems(list);
+    m_selection = list;
+    m_delayTimer.start();
 }
 
 #include "moc_taskwidgets.cpp"
