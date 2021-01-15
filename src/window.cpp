@@ -227,6 +227,7 @@ Window::Window(Document *doc, QWidget *parent)
     w_list->horizontalHeader()->setSectionsClickable(true);
     w_list->horizontalHeader()->setSectionsMovable(true);
     w_list->setAlternatingRowColors(true);
+    w_list->setAutoFillBackground(false);
     w_list->setTabKeyNavigation(true);
     w_list->setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
     w_list->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
