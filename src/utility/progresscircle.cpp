@@ -92,7 +92,7 @@ void ProgressCircle::setValue(int value)
     m_value = value;
     emit valueChanged(value);
     setToolTip(toolTip());
-    repaint();
+    update();
 }
 
 void ProgressCircle::reset()
@@ -102,7 +102,7 @@ void ProgressCircle::reset()
     else
         m_value = m_min - 1;
     setToolTip(toolTip());
-    repaint();
+    update();
 }
 
 void ProgressCircle::resizeEvent(QResizeEvent *)
@@ -224,7 +224,7 @@ void ProgressCircle::setOnlineState(bool isOnline)
 {
     if (m_online != isOnline) {
         m_online = isOnline;
-        repaint();
+        update();
         setToolTip(toolTip());
     }
 }
