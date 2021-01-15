@@ -3,6 +3,27 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+
+## [2021.1.4] - 2021-01-15
+Performance improvements across the board, especially in the table rendering.
+
+### Added
+- First implementation of a generic JavaScript extension interface, not public yet.
+  As a side effect, the old JavaScript printing was replaced with the new one. Any old printing
+  scripts for BrickStore 1.x are not compatible anymore, but porting will be simple once the new
+  API is stable and documented.
+- The new column layout load/save mechanism got its missing management dialog.
+
+### Fixed
+- BrickStore can now be properly restarted by its installer on Windows.
+- Problems with "TLS initialization" on Windows should hopefully be fixed.
+- Fixed a crash that occured when setting prices to price guide in two documents in parallel.
+- Difference mode is now a per-document setting and survives saving and re-loading the document.
+- Order imports now cope with changes to the BrickLink interface. The `Any` order type had to be
+  removed for the time being though.
+- A lot of small fixes all over the place.
+
+
 ## [2021.1.3] - 2021-01-08
 ### Added
 - The Buyer/Collector mode is working again.
@@ -66,7 +87,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
   are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.1.3...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.1.4...HEAD
+[2021.1.4]: https://github.com/rgriebl/brickstore/releases/tag/v2021.1.4
 [2021.1.3]: https://github.com/rgriebl/brickstore/releases/tag/v2021.1.3
 [2021.1.2]: https://github.com/rgriebl/brickstore/releases/tag/v2021.1.2
 [2021.1.1]: https://github.com/rgriebl/brickstore/releases/tag/v2021.1.1
