@@ -32,7 +32,6 @@
 #include <QShortcut>
 #include <QDebug>
 
-#include "utility.h"
 #include "workspace.h"
 
 Q_DECLARE_METATYPE(QWidget *)

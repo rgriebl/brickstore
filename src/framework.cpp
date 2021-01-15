@@ -39,6 +39,7 @@
 #include <QFont>
 #include <QCommandLinkButton>
 #include <QStyle>
+#include <QLinearGradient>
 #if defined(Q_OS_WINDOWS)
 #  include <QWinTaskbarButton>
 #  include <QWinTaskbarProgress>
@@ -198,7 +199,7 @@ public:
                 for (const auto &id : ids)
                     pos.insert(Config::inst()->columnLayoutOrder(id), id);
 
-                for (auto id : qAsConst(pos))
+                for (const auto &id : qAsConst(pos))
                     addAction(Config::inst()->columnLayoutName(id))->setData(id);
             }
         });

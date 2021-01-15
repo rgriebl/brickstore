@@ -22,7 +22,6 @@
 #include "config.h"
 #include "bricklink.h"
 #include "bricklink_model.h"
-#include "utility.h"
 #include "messagebox.h"
 
 static int sec2day(int s)

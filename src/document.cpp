@@ -960,8 +960,6 @@ Document *Document::fileImportLDrawModel()
     return doc;
 }
 
-
-
 void Document::setBrickLinkItems(const BrickLink::InvItemList &bllist, uint multiply)
 {
     ItemList items;
@@ -970,20 +968,6 @@ void Document::setBrickLinkItems(const BrickLink::InvItemList &bllist, uint mult
     for (const BrickLink::InvItem *blitem : bllist) {
         Item *item = new Item(*blitem);
 
-        if (item->isIncomplete()) {
-            //IncompleteItemDialog dlg(item, FrameWork::inst());
-
-            //if (waitcursor)
-            //    QApplication::restoreOverrideCursor();
-
-            bool drop_this = false; //(dlg.exec() != QDialog::Accepted);
-
-            //if (waitcursor)
-            //    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
-            if (drop_this)
-                continue;
-        }
         item->setQuantity(item->quantity() * int(multiply));
         items.append(item);
     }
@@ -1068,7 +1052,7 @@ void Document::fileSaveAs()
         if (fn.right(4) != ".bsx")
             fn += ".bsx";
 
-        if (QFile::exists(fn) &&
+        if (!QFile::exists(fn) ||
             MessageBox::question(nullptr, { },
                                  tr("A file named %1 already exists. Are you sure you want to overwrite it?").arg(CMB_BOLD(fn))
                                  ) == MessageBox::Yes) {

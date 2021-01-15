@@ -297,7 +297,7 @@ Window::Window(Document *doc, QWidget *parent)
 
     if (m_doc->hasGuiState()) {
         parseGuiStateXML(m_doc->guiState());
-        m_doc->clearGuiState();;
+        m_doc->clearGuiState();
     }
     setSimpleMode(Config::inst()->simpleMode());
 

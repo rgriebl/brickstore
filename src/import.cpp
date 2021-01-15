@@ -25,7 +25,6 @@
 #include "config.h"
 #include "bricklink.h"
 #include "progressdialog.h"
-#include "utility.h"
 #include "import.h"
 
 

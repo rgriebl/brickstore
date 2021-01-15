@@ -51,7 +51,6 @@
 #include "transfer.h"
 #include "currency.h"
 #include "scriptmanager.h"
-#include "utility.h"
 #include "version.h"
 #include "application.h"
 #include "stopwatch.h"
@@ -476,7 +475,7 @@ public:
         --Application::s_inst->m_logGuiLock;
     }
 private:
-    QTextCharFormat m_lvlFmt[QtInfoMsg];
+    QTextCharFormat m_lvlFmt[QtInfoMsg + 1];
     QTextCharFormat m_catFmt[6];
     QTextCharFormat m_atFmt;
     QTextCharFormat m_lineFmt;

@@ -36,7 +36,7 @@ namespace {
 
 static inline qint32 mkver(int a, int b, int c)
 {
-    return (qint32(a) << 24) | (qint32(b) << 16) | (qint32(c));
+    return (qint32(a) << 16) | (qint32(b) << 8) | (qint32(c));
 }
 
 } // namespace
@@ -91,6 +91,7 @@ void Config::upgrade(int vmajor, int vminor)
 {
     QStringList sl;
 
+    // no upgrades available, uncomment if needed later on
     //int cfgver = value("General/ConfigVersion", 0).toInt();
     setValue("General/ConfigVersion", mkver(vmajor, vminor, 0));
 
@@ -134,7 +135,9 @@ void Config::upgrade(int vmajor, int vminor)
             setValue("General/ImportedV12xSettings", 1);
     }
 
-    // if (cfgver < mkver(2, a, b)) { do upgrade }
+    // do config upgrades as needed
+//    if (cfgver < mkver(2021, 1, 1)) {
+//    }
 }
 
 QDateTime Config::lastDatabaseUpdate() const

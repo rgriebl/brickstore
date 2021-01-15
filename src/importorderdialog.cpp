@@ -35,7 +35,6 @@
 #include "bricklink.h"
 #include "import.h"
 #include "progressdialog.h"
-#include "utility.h"
 #include "config.h"
 #include "transfer.h"
 

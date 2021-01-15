@@ -19,7 +19,6 @@
 #include "config.h"
 #include "import.h"
 #include "progressdialog.h"
-#include "utility.h"
 
 #include "importinventorydialog.h"
 
