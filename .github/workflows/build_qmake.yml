@@ -52,7 +52,7 @@ jobs:
       uses: jurplel/install-qt-action@v2
       with:
         version: ${{ matrix.config.qt_version }}
-        modules: 'qtscript qtscripttools qtsvg qttools'
+        modules: 'qtsvg qttools'
         arch: ${{ matrix.config.qt_arch }}
         tools: ${{ matrix.config.qt_tools }}
 
@@ -60,7 +60,7 @@ jobs:
       if: startsWith(matrix.config.os, 'ubuntu') && !matrix.config.debian_container
       run: |
         sudo apt update
-        sudo apt -y install debhelper qt5-default libqt5opengl5-dev qttools5-dev qtscript5-dev qtbase5-private-dev qtdeclarative5-dev lsb-release fakeroot build-essential
+        sudo apt -y install debhelper qt5-default libqt5opengl5-dev qttools5-dev qtbase5-private-dev qtdeclarative5-dev lsb-release fakeroot build-essential
       shell: bash
 
     - name: Install Qt on Linux (container)
@@ -68,7 +68,7 @@ jobs:
       run: |
         sudo docker run -v `pwd`:/build --rm --name "debian-build" -d "${{ matrix.config.debian_container }}" sleep 1d
         sudo docker exec "debian-build" apt update
-        sudo docker exec "debian-build" apt -y install debhelper qt5-default libqt5opengl5-dev qttools5-dev qtscript5-dev qtbase5-private-dev qtdeclarative5-dev lsb-release fakeroot build-essential
+        sudo docker exec "debian-build" apt -y install debhelper qt5-default libqt5opengl5-dev qttools5-dev qtbase5-private-dev qtdeclarative5-dev lsb-release fakeroot build-essential
       shell: bash
 
     - name: Install OpenSSL on Windows

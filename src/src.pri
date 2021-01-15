@@ -4,7 +4,7 @@ INCLUDEPATH += $$RELPWD
 DEPENDPATH  += $$RELPWD
 
 QT *= core gui xml network # networkauth
-!backend-only:QT *= widgets script scripttools printsupport uitools qml quick
+!backend-only:QT *= widgets printsupport uitools qml quick
 
 win32:QT *= winextras widgets
 
