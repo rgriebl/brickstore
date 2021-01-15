@@ -42,6 +42,8 @@ QVector<QColor>                 DocumentDelegate::s_shades;
 QHash<int, QIcon>               DocumentDelegate::s_status_icons;
 QCache<quint64, QPixmap>        DocumentDelegate::s_tag_cache;
 QCache<int, QPixmap>            DocumentDelegate::s_stripe_cache;
+QCache<QPair<QString, QSize>, QTextLayout> DocumentDelegate::s_textLayoutCache(5000);
+
 
 DocumentDelegate::DocumentDelegate(Document *doc, DocumentProxyModel *view, QTableView *table)
     : QItemDelegate(view)
@@ -123,6 +125,12 @@ QSize DocumentDelegate::sizeHint(const QStyleOptionViewItem &option1, const QMod
 
     QStyleOptionViewItem option(option1);
     return { w + 1 /* the grid lines*/, defaultItemHeight(option.widget) };
+}
+
+
+inline uint qHash(const QSize &key, uint seed)
+{
+    return qHash(qint64(key.width()) << 32 | key.height(), seed);
 }
 
 void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, const QModelIndex &idx) const
@@ -479,57 +487,79 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         ico.paint(p, x + margin, y, w - 2 * margin, h, align, iconMode(option.state), iconState(option.state));
     }
 
+    static const QVector<int> richTextColumns = {
+        Document::Description,
+        Document::Color,
+        Document::Comments,
+        Document::Remarks,
+        Document::Category,
+        Document::ItemType,
+        Document::Reserved
+    };
+
     if (!str.isEmpty()) {
         int rw = w - 2 * margin;
         const QFontMetrics &fm = p->fontMetrics();
 
-        bool do_elide = false;
-        int lcount = (h + fm.leading()) / fm.lineSpacing();
-        int height = 0;
-        qreal widthUsed = 0;
+        if (!richTextColumns.contains(idx.column())) {
+            p->drawText(x + margin, y, rw, h, align, str);
+            return;
+        }
 
-        QTextDocument td;
-        td.setHtml(str);
-        td.setDefaultFont(option.font);
-        QTextLayout *tlp = td.firstBlock().layout();
-        QTextOption to = tlp->textOption();
-        to.setAlignment(align);
-        tlp->setTextOption(to);
-        tlp->beginLayout();
+        static const QString elide = QLatin1String("...");
+        auto key = qMakePair(str, QSize(rw, h));
+        QTextLayout *tlp = s_textLayoutCache.object(key);
 
-        QString lstr = td.firstBlock().text();
+        if (tlp && tlp->text() != str) // an unlikely hash collision
+            tlp = nullptr;
 
-        for (int i = 0; i < lcount; i++) {
-            QTextLine line = tlp->createLine();
-            if (!line.isValid())
-                break;
+        if (!tlp) {
+            tlp = new QTextLayout(str, option.font, nullptr);
+            tlp->setCacheEnabled(true);
+            tlp->setTextOption(QTextOption(align));
 
-            line.setLineWidth(rw);
-            height += fm.leading();
-            line.setPosition(QPoint(0, height));
-            height += int(line.height());
-            widthUsed = line.naturalTextWidth();
+            int lineCount = (h + fm.leading()) / fm.lineSpacing();
+            int height = 0;
 
-            if ((i == (lcount - 1)) && ((line.textStart() + line.textLength()) < lstr.length())) {
-                do_elide = true;
-                QString elide = QLatin1String("...");
-                int elide_width = fm.horizontalAdvance(elide) + 2;
+            tlp->beginLayout();
+            for (int i = 0; i < lineCount; i++) {
+                QTextLine line = tlp->createLine();
+                if (!line.isValid())
+                    break;
 
-                line.setLineWidth(rw - elide_width);
-                widthUsed = line.naturalTextWidth();
+                line.setLineWidth(rw);
+                height += fm.leading();
+                line.setPosition(QPoint(0, height));
+                height += int(line.height());
+
+                if ((i == (lineCount - 1)) && ((line.textStart() + line.textLength()) < str.length())) {
+                    int elide_width = fm.horizontalAdvance(elide) + margin;
+                    line.setLineWidth(rw - elide_width);
+                }
+            }
+            tlp->endLayout();
+
+            if (!s_textLayoutCache.insert(key, tlp))
+                tlp = nullptr;
+        }
+
+        if (tlp && tlp->lineCount()) {
+            const auto lastLine = tlp->lineAt(tlp->lineCount() - 1);
+            int height = tlp->lineCount() * (fm.leading() + lastLine.height());
+
+            quint64 elideHash = quint64(idx.row()) << 32 | quint64(idx.column());
+
+            tlp->draw(p, QPoint(x + margin, y + (h - height)/2));
+            if (lastLine.textStart() + lastLine.textLength() < str.length()) {
+                int elidePos = int(lastLine.naturalTextWidth());
+                p->drawText(QPoint(x + margin + int(elidePos),
+                                   y + (h - height)/2 + (tlp->lineCount() - 1) * fm.lineSpacing() + fm.ascent()),
+                            elide);
+                m_elided.insert(elideHash);
+            } else {
+                m_elided.remove(elideHash);
             }
         }
-        tlp->endLayout();
-
-        tlp->draw(p, QPoint(x + margin, y + (h - height)/2));
-        if (do_elide)
-            p->drawText(QPoint(x + margin + int(widthUsed), y + (h - height)/2 + (lcount - 1) * fm.lineSpacing() + fm.ascent()), QLatin1String("..."));
-
-        quint64 elideHash = quint64(idx.row()) << 32 | quint64(idx.column());
-        if (do_elide)
-            m_elided.append(elideHash);
-        else
-            m_elided.removeOne(elideHash);
     }
 }
 

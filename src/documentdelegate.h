@@ -18,6 +18,7 @@
 #include <QVector>
 #include <QColor>
 #include <QHash>
+#include <QSet>
 #include <QCache>
 
 #include "document.h"
@@ -27,6 +28,7 @@ class SelectColorDialog;
 
 QT_FORWARD_DECLARE_CLASS(QLineEdit)
 QT_FORWARD_DECLARE_CLASS(QTableView)
+QT_FORWARD_DECLARE_CLASS(QTextLayout)
 
 
 class DocumentDelegate : public QItemDelegate
@@ -63,12 +65,13 @@ protected:
     SelectColorDialog *m_select_color = nullptr;
     mutable QPointer<QLineEdit> m_lineedit;
     bool m_read_only = false;
-    mutable QList<quint64> m_elided;
+    mutable QSet<quint64> m_elided;
 
     static QVector<QColor> s_shades;
     static QHash<int, QIcon> s_status_icons;
     static QCache<quint64, QPixmap> s_tag_cache;
     static QCache<int, QPixmap> s_stripe_cache;
+    static QCache<QPair<QString, QSize>, QTextLayout> s_textLayoutCache;
 
     static void clearCaches();
 };
