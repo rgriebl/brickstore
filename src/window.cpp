@@ -1501,7 +1501,6 @@ void Window::on_edit_partoutitems_triggered()
                         m_doc->removeItem(item);
                         partcount++;
                     }
-                    qDeleteAll(items);
                 }
             } else {
                 FrameWork::inst()->fileImportBrickLinkInventory(item->item());
