@@ -40,7 +40,7 @@ AboutDialog::AboutDialog(QWidget *parent)
         part = LDraw::core()->partFromId("3833");
 
     if (part) {
-        auto ldraw_icon = new LDraw::RenderOffscreenWidget();
+        auto ldraw_icon = new LDraw::RenderWidget();
         ldraw_icon->setPartAndColor(part, 321);
         ldraw_icon->startAnimation();
         auto layout = new QHBoxLayout(w_icon);

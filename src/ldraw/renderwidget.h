@@ -94,6 +94,7 @@ private slots:
     void animationStep();
 
 private:
+    void updateProjectionMatrix();
     void updateWorldMatrix();
     void recreateVBOs();
 
@@ -119,6 +120,7 @@ private:
     qreal m_tx = 0, m_ty = 0, m_tz = 0;
     qreal m_zoom = 1;
     QVector3D m_center;
+    qreal m_radius = 0;
     QRect m_viewport;
     QMatrix4x4 m_proj;
     QMatrix4x4 m_camera;
@@ -173,57 +175,6 @@ protected:
     void paintGL() override;
 
 private:
-    GLRenderer *m_renderer;
-    QPoint m_last_pos;
-};
-
-
-class RenderOffscreenWidget : public QWidget
-{
-    Q_OBJECT
-public:
-    RenderOffscreenWidget(QWidget *parent = nullptr);
-    ~RenderOffscreenWidget() override;
-
-    Part *part() const  { return m_renderer->part(); }
-    int color() const   { return m_renderer->color(); }
-    void setPartAndColor(Part *part, const QColor &color)  { m_renderer->setPartAndColor(part, color); }
-    void setPartAndColor(Part *part, int basecolor)  { m_renderer->setPartAndColor(part, basecolor); }
-
-    virtual QSize minimumSizeHint() const override;
-    virtual QSize sizeHint() const override;
-
-    void setImageSize(int w, int h);
-    QImage renderImage();
-
-    bool isAnimationActive() const;
-
-public slots:
-    void resetCamera();
-    void startAnimation();
-    void stopAnimation();
-
-protected:
-    void resizeEvent(QResizeEvent *e) override;
-    void paintEvent(QPaintEvent *e) override;
-    void mousePressEvent(QMouseEvent *e) override;
-    void mouseReleaseEvent(QMouseEvent *e) override;
-    void mouseMoveEvent(QMouseEvent *e) override;
-    void wheelEvent(QWheelEvent *e) override;
-    void showEvent(QShowEvent *event) override;
-    void hideEvent(QHideEvent *event) override;
-
-protected slots:
-    void slotMakeCurrent();
-    void slotDoneCurrent();
-
-private:
-    QScopedPointer<QOpenGLWindow> m_dummy;
-    QScopedPointer<QOpenGLContext> m_context;
-    QScopedPointer<QOpenGLFramebufferObject> m_fbo;
-    bool m_initialized = false;
-    bool m_resize = false;
-    bool m_restart_animation_when_visible = false;
     GLRenderer *m_renderer;
     QPoint m_last_pos;
 };

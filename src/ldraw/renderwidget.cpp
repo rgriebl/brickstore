@@ -79,25 +79,19 @@ void LDraw::GLRenderer::setPartAndColor(LDraw::Part *part, int basecolor)
     m_dirty = (1 << Surfaces) | (1 << Lines) | (1 << ConditionalLines);
 
     m_proj.setToIdentity();
-
-    qreal radius = 1.0;
+    m_center = { };
+    m_radius = 1.0;
 
     if (m_part) {
         QVector3D vmin, vmax;
 
         if (m_part->boundingBox(vmin, vmax)) {
-            //qWarning("resizeGL - ortho: [%.f ..  %.f] x [%.f .. %.f] x [%.f .. %.f]", vmin.x(), vmax.x(), vmin.y(), vmax.y(), vmin.z(), vmax.z());
-
             m_center = (vmin + vmax) / 2;
-            radius = (vmax - vmin).length() / 2;
-
-            //qWarning(" --> center: (%.f, %.f, %.f)  radius: %.f", m_center.x(), m_center.y(), m_center.z(), radius);
+            m_radius = (vmax - vmin).length() / 2;
         }
     }
 
-    m_proj.ortho(m_center.x() - radius, m_center.x() + radius,
-                 m_center.y() - radius, m_center.y() + radius,
-                 -m_center.z() - 2 * radius, -m_center.z() + 2 * radius);
+    updateProjectionMatrix();
     updateWorldMatrix();
 
     emit updateNeeded();
@@ -182,7 +176,7 @@ void LDraw::GLRenderer::initializeGL(QOpenGLContext *context)
     connect(context, &QOpenGLContext::aboutToBeDestroyed, this, &GLRenderer::cleanup);
 
     initializeOpenGLFunctions();
-    glClearColor(0, 0, 0, 0);
+    glClearColor(.5, .5, .5, 0);
 
     m_program = new QOpenGLShaderProgram;
     m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexShaderSourceSimple);
@@ -219,6 +213,9 @@ void LDraw::GLRenderer::initializeGL(QOpenGLContext *context)
 
 void LDraw::GLRenderer::recreateVBOs()
 {
+    if (!m_part)
+        return;
+
     std::vector<GLfloat> buffer[Count];
     std::vector<GLfloat> *buffer_ptr[3] = { &buffer[0], &buffer[1], &buffer[2] };
     renderVBOs(m_part, m_color, QMatrix4x4(), m_dirty, buffer_ptr);
@@ -241,6 +238,8 @@ void LDraw::GLRenderer::resizeGL(QOpenGLContext *context, int w, int h)
 
     m_viewport.setRect(0, 0, w, h);
     glViewport(m_viewport.x(), m_viewport.y(), m_viewport.width(), m_viewport.height());
+
+    updateProjectionMatrix();
     updateWorldMatrix();
 }
 
@@ -248,12 +247,11 @@ void LDraw::GLRenderer::paintGL(QOpenGLContext *context)
 {
     Q_UNUSED(context);
 
-    //qWarning("paintGL - rotate: %.f / %.f / %.f", m_rx, m_ry, m_rz);
-
-    glClearColor(0, 0, 0, 0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     glEnable(GL_DEPTH_TEST);
     //glEnable(GL_CULL_FACE);
+    glEnable(GL_MULTISAMPLE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -286,10 +284,8 @@ void LDraw::GLRenderer::paintGL(QOpenGLContext *context)
 
     glDisable(GL_POLYGON_OFFSET_FILL);
     glDepthMask(GL_FALSE);
-#if defined(GL_LINE_SMOOTH)
-    glEnable(GL_LINE_SMOOTH);
-    glLineWidth(2.5);
-#endif
+
+    glLineWidth(2.5); // not supported on VMware's Linux driver
 
     renderVBO(Lines, GL_LINES);
     renderVBO(ConditionalLines, GL_LINES);
@@ -421,12 +417,15 @@ void LDraw::GLRenderer::renderVBOs(Part *part, int ldrawBaseColor, const QMatrix
 
 
 LDraw::RenderWidget::RenderWidget(QWidget *parent)
-    : QOpenGLWidget(/*QGLFormat(QGL::SampleBuffers | QGL::Rgba | QGL::AlphaChannel),*/ parent)
+    : QOpenGLWidget(parent)
 {
+    setAttribute(Qt::WA_AlwaysStackOnTop);
 
-    // transparent clear color / background
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
     QSurfaceFormat fmt = format();
     fmt.setAlphaBufferSize(8);
+    fmt.setSamples(4);
     setFormat(fmt);
 
     m_renderer = new GLRenderer(this);
@@ -450,7 +449,7 @@ QSize LDraw::RenderWidget::minimumSizeHint() const
 
 QSize LDraw::RenderWidget::sizeHint() const
 {
-    return { 400, 400 };
+    return { 100, 100 };
 }
 
 void LDraw::RenderWidget::mousePressEvent(QMouseEvent *e)
@@ -519,184 +518,10 @@ void LDraw::RenderWidget::paintGL()
 }
 
 
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-LDraw::RenderOffscreenWidget::RenderOffscreenWidget(QWidget *parent)
-    : QWidget(parent)
-    , m_renderer(new GLRenderer(this))
-{
-    QSurfaceFormat fmt;
-    fmt.setAlphaBufferSize(8);
-    fmt.setDepthBufferSize(24);
-
-    m_dummy.reset(new QOpenGLWindow());
-    m_dummy->setFormat(fmt);
-    m_dummy->create();
-
-    m_context.reset(new QOpenGLContext());
-    m_context->setFormat(fmt);
-    if (!m_context->create()) {
-        qWarning() << "Could not create an offscreen OpenGL context";
-        m_context.reset();
-        m_dummy.reset();
-    }
-
-    resetCamera();
-
-    connect(m_renderer, &GLRenderer::makeCurrent, this, &RenderOffscreenWidget::slotMakeCurrent);
-    connect(m_renderer, &GLRenderer::doneCurrent, this, &RenderOffscreenWidget::slotDoneCurrent);
-    connect(m_renderer, &GLRenderer::updateNeeded, this, QOverload<>::of(&QWidget::update));
-
-    setCursor(Qt::OpenHandCursor);
-}
-
-LDraw::RenderOffscreenWidget::~RenderOffscreenWidget()
-{ }
-
-QSize LDraw::RenderOffscreenWidget::minimumSizeHint() const
-{
-    return { 50, 50 };
-}
-
-QSize LDraw::RenderOffscreenWidget::sizeHint() const
-{
-    return { 400, 400 };
-}
-
-void LDraw::RenderOffscreenWidget::resizeEvent(QResizeEvent *)
-{
-    setImageSize(width(), height());
-}
-
-void LDraw::RenderOffscreenWidget::paintEvent(QPaintEvent *)
-{
-    QPainter p(this);
-    p.drawImage(0, 0, renderImage());
-}
-
-void LDraw::RenderOffscreenWidget::mousePressEvent(QMouseEvent *e)
-{
-    m_last_pos = e->pos();
-    setCursor(Qt::ClosedHandCursor);
-}
-
-void LDraw::RenderOffscreenWidget::mouseReleaseEvent(QMouseEvent *)
-{
-    setCursor(Qt::OpenHandCursor);
-}
-
-void LDraw::RenderOffscreenWidget::mouseMoveEvent(QMouseEvent *e)
-{
-    qreal dx = e->x() - m_last_pos.x();
-    qreal dy = e->y() - m_last_pos.y();
-
-    if ((e->buttons() & Qt::LeftButton) && (e->modifiers() == Qt::NoModifier)) {
-        m_renderer->setXRotation(m_renderer->xRotation() + dy / 2);
-        m_renderer->setYRotation(m_renderer->yRotation() + dx / 2);
-    }
-    else if ((e->buttons() & Qt::LeftButton) && (e->modifiers() == Qt::ControlModifier)) {
-        m_renderer->setXRotation(m_renderer->xRotation() + dy / 2);
-        m_renderer->setZRotation(m_renderer->zRotation() + dx / 2);
-    }
-    else if ((e->buttons() & Qt::LeftButton) && (e->modifiers() == Qt::ShiftModifier)) {
-        m_renderer->setXTranslation(m_renderer->xTranslation() + dx);
-        m_renderer->setYTranslation(m_renderer->yTranslation() - dy);
-    }
-    else if ((e->buttons() & Qt::LeftButton) && (e->modifiers() == Qt::AltModifier)) {
-        m_renderer->setZoom(m_renderer->zoom() * (dy < 0 ? 0.9 : 1.1));
-    }
-    m_last_pos = e->pos();
-}
-
-void LDraw::RenderOffscreenWidget::wheelEvent(QWheelEvent *e)
-{
-    qreal d = 1.0 + (e->delta() / 1200.0);
-    m_renderer->setZoom(m_renderer->zoom() * d);
-}
-
-void LDraw::RenderOffscreenWidget::showEvent(QShowEvent *)
-{
-    if (m_restart_animation_when_visible) {
-        m_restart_animation_when_visible = false;
-        m_renderer->startAnimation();
-    }
-}
-
-void LDraw::RenderOffscreenWidget::hideEvent(QHideEvent *)
-{
-    m_restart_animation_when_visible = m_renderer->isAnimationActive();
-    m_renderer->stopAnimation();
-}
-
-void LDraw::RenderOffscreenWidget::slotMakeCurrent()
-{
-    if (m_context && m_dummy)
-        m_context->makeCurrent(m_dummy.data());
-}
-
-void LDraw::RenderOffscreenWidget::slotDoneCurrent()
-{
-    if (m_context)
-        m_context->doneCurrent();
-}
-
-void LDraw::RenderOffscreenWidget::setImageSize(int, int)
-{
-    m_resize = true;
-    update();
-}
-
-QImage LDraw::RenderOffscreenWidget::renderImage()
-{
-    if (!m_dummy || !m_context)
-        return {};
-
-    if (m_fbo && m_resize)
-        m_fbo.reset();
-
-    if (!m_fbo) {
-        m_context->makeCurrent(m_dummy.data());
-        QOpenGLFramebufferObjectFormat format;
-        format.setAttachment(QOpenGLFramebufferObject::Depth);
-        format.setSamples(4);
-        m_fbo.reset(new QOpenGLFramebufferObject(size(), format));
-        m_context->doneCurrent();
-    }
-
-    m_context->makeCurrent(m_dummy.data());
-    m_fbo->bind();
-
-    if (!m_initialized) {
-        m_renderer->initializeGL(m_context.data());
-        m_initialized = true;
-    }
-    if (m_resize) {
-        m_renderer->resizeGL(m_context.data(), m_fbo->size().width(), m_fbo->size().height());
-        m_resize = false;
-    }
-
-    m_renderer->paintGL(m_context.data());
-    auto img = m_fbo->toImage();
-
-    m_fbo->release();
-    m_context->doneCurrent();
-
-    return img;
-}
 
 void LDraw::GLRenderer::startAnimation()
 {
@@ -722,6 +547,20 @@ void LDraw::GLRenderer::animationStep()
     setZRotation(zRotation() + 0.25);
 }
 
+void LDraw::GLRenderer::updateProjectionMatrix()
+{
+    qreal w = m_viewport.width();
+    qreal h = m_viewport.height();
+
+    qreal ax = (h < w && h) ? w / h : 1;
+    qreal ay = (w < h && w) ? h / w : 1;
+
+    m_proj.setToIdentity();
+    m_proj.ortho((m_center.x() - m_radius) * ax, (m_center.x() + m_radius) * ax,
+                 (m_center.y() - m_radius) * ay, (m_center.y() + m_radius) * ay,
+                 -m_center.z() - 2 * m_radius, -m_center.z() + 2 * m_radius);
+}
+
 void LDraw::GLRenderer::updateWorldMatrix()
 {
     m_world.setToIdentity();
@@ -733,19 +572,6 @@ void LDraw::GLRenderer::updateWorldMatrix()
     m_world.translate(-m_center.x(), -m_center.y(), -m_center.z());
     m_world.scale(m_zoom);
     m_dirty |= (1 << ConditionalLines);
-}
-
-void LDraw::RenderOffscreenWidget::resetCamera()
-{
-    m_renderer->setXRotation(-180+30);
-    m_renderer->setYRotation(45);
-    m_renderer->setZRotation(0);
-
-    m_renderer->setXTranslation(0);
-    m_renderer->setYTranslation(0);
-    m_renderer->setZTranslation(0);
-
-    m_renderer->setZoom(1);
 }
 
 void LDraw::RenderWidget::resetCamera()
@@ -767,16 +593,6 @@ void LDraw::RenderWidget::startAnimation()
 }
 
 void LDraw::RenderWidget::stopAnimation()
-{
-    m_renderer->stopAnimation();
-}
-
-void LDraw::RenderOffscreenWidget::startAnimation()
-{
-    m_renderer->startAnimation();
-}
-
-void LDraw::RenderOffscreenWidget::stopAnimation()
 {
     m_renderer->stopAnimation();
 }

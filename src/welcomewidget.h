@@ -19,10 +19,6 @@
 QT_FORWARD_DECLARE_CLASS(QGroupBox)
 QT_FORWARD_DECLARE_CLASS(QLabel)
 
-namespace LDraw {
-class RenderOffscreenWidget;
-}
-
 class WelcomeButton;
 
 

@@ -21,7 +21,6 @@
 namespace LDraw {
 class Model;
 class RenderWidget;
-class RenderOffscreenWidget;
 }
 
 QT_FORWARD_DECLARE_CLASS(QToolButton)
@@ -29,7 +28,7 @@ QT_FORWARD_DECLARE_CLASS(QStackedWidget)
 QT_FORWARD_DECLARE_CLASS(QLabel)
 QT_FORWARD_DECLARE_CLASS(QTableView)
 
-typedef LDraw::RenderOffscreenWidget LDrawWidget;
+typedef LDraw::RenderWidget LDrawWidget;
 
 
 class ItemDetailPopup : public QDialog
