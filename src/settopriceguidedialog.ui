@@ -7,13 +7,13 @@
     <x>0</x>
     <y>0</y>
     <width>477</width>
-    <height>160</height>
+    <height>254</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Set To Price Guide</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
     <widget class="QLabel" name="label">
      <property name="text">
@@ -30,6 +30,54 @@
       <widget class="QComboBox" name="w_type_price"/>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="QToolButton" name="w_advanced_button">
+     <property name="text">
+      <string>Advanced options</string>
+     </property>
+     <property name="checkable">
+      <bool>false</bool>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+     <property name="toolButtonStyle">
+      <enum>Qt::ToolButtonTextBesideIcon</enum>
+     </property>
+     <property name="autoRaise">
+      <bool>true</bool>
+     </property>
+     <property name="arrowType">
+      <enum>Qt::UpArrow</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="w_advanced" native="true">
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <property name="leftMargin">
+       <number>26</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QCheckBox" name="w_force_update">
+        <property name="text">
+         <string>Download even if already in cache.
+Only use this if you know what you are doing!</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="w_buttons">
@@ -52,8 +100,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
+     <x>201</x>
+     <y>240</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -68,8 +116,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
+     <x>201</x>
+     <y>240</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>

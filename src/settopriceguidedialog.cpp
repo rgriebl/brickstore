@@ -11,6 +11,8 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
+#include <QDebug>
+
 #include "config.h"
 #include "settopriceguidedialog.h"
 
@@ -33,6 +35,19 @@ SetToPriceGuideDialog::SetToPriceGuideDialog(QWidget *parent)
 
     w_type_time->setCurrentIndex(w_type_time->findData(timedef));
     w_type_price->setCurrentIndex(w_type_price->findData(pricedef));
+
+    auto toggleAdvancedOptions = [this](bool initialize = false) {
+        bool visible = w_advanced->isVisible() || initialize;
+
+        w_advanced->setVisible(!visible);
+        w_advanced_button->setArrowType(!visible ? Qt::UpArrow : Qt::DownArrow);
+
+        QDialog::layout()->activate();
+        resize(minimumSizeHint());
+    };
+    connect(w_advanced_button, &QToolButton::clicked,
+            this, toggleAdvancedOptions);
+    toggleAdvancedOptions(true /* initialize */);
 }
 
 BrickLink::Time SetToPriceGuideDialog::time() const
@@ -43,6 +58,11 @@ BrickLink::Time SetToPriceGuideDialog::time() const
 BrickLink::Price SetToPriceGuideDialog::price() const
 {
     return static_cast<BrickLink::Price>(w_type_price->itemData(w_type_price->currentIndex()).toInt());
+}
+
+bool SetToPriceGuideDialog::forceUpdate() const
+{
+    return w_force_update->isChecked();
 }
 
 #include "moc_settopriceguidedialog.cpp"

@@ -860,9 +860,13 @@ void Window::on_edit_price_to_priceguide_triggered()
         m_settopg_todocnt = sel.count();
         m_settopg_time    = dlg.time();
         m_settopg_price   = dlg.price();
+        bool force_update = dlg.forceUpdate();
 
         for (Document::Item *item : sel) {
             BrickLink::PriceGuide *pg = BrickLink::core()->priceGuide(item->item(), item->color());
+
+            if (force_update && pg && (pg->updateStatus() != BrickLink::UpdateStatus::Updating))
+                pg->update();
 
             if (pg && (pg->updateStatus() == BrickLink::UpdateStatus::Updating)) {
                 m_settopg_list->insert(pg, item);

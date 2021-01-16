@@ -27,4 +27,5 @@ public:
     
     BrickLink::Time  time() const;
     BrickLink::Price price() const;
+    bool forceUpdate() const;
 };
