@@ -376,8 +376,8 @@ Core::Core(const QString &datadir)
     quint64 cachemem = qBound(128ULL *1024*1024, Utility::physicalMemory() / 4, 1024ULL *1024*1024);
     //quint64 cachemem = 1024*1024; // DEBUG
 
-    m_pg_cache.setMaxCost(500);          // each priceguide has a cost of 1
-    m_pic_cache.setMaxCost(int(cachemem));    // each pic has a cost of (w*h*d/8 + 1024)
+    m_pg_cache.setMaxCost(10000);            // each priceguide has a cost of 1
+    m_pic_cache.setMaxCost(int(cachemem));   // each pic has roughly the cost of memory used
 }
 
 Core::~Core()
