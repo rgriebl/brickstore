@@ -125,8 +125,8 @@ void Transfer::abortAllJobs()
 {
     qDeleteAll(m_jobs);
     m_jobs.clear();
-    for (TransferJob *job : m_currentJobs)
-        job->abort();
+    while (!m_currentJobs.isEmpty())
+        m_currentJobs.first()->abort();
 }
 
 void Transfer::schedule()
