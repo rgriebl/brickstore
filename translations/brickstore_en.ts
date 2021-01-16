@@ -105,6 +105,10 @@
             <numerusform>Added %n %1 %2 [%3]</numerusform>
         </translation>
     </message>
+    <message>
+        <source>0</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>AppearsInWidget</name>
@@ -430,10 +434,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>A file named %1 already exists.Are you sure you want to overwrite it?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Failed to save data in file %1.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -659,6 +659,10 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <source>Index</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>A file named %1 already exists. Are you sure you want to overwrite it?</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>DocumentDelegate</name>
@@ -709,6 +713,17 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <name>DocumentProxyModel</name>
     <message>
         <source>Any</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>ExtensionScriptAction</name>
+    <message>
+        <source>The extension script does not define an &apos;actionFunction&apos;.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Extension script aborted with error:</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1344,6 +1359,14 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <source>Load Column Layout</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Could not initialize the JavaScript scripting environment.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error Log</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>HeaderView</name>
@@ -1508,10 +1531,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Any</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Received</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1641,6 +1660,17 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
 </context>
 <context>
+    <name>ManageColumnLayoutsDialog</name>
+    <message>
+        <source>Configure Column Layouts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Drag the column layouts into the order you prefer, double-click to rename them and delete them by removing the check mark.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>PictureWidget</name>
     <message>
         <source>Update</source>
@@ -1743,6 +1773,36 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
 </context>
 <context>
+    <name>PrintingScriptModel</name>
+    <message>
+        <source>Name</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>PrintingScriptTemplate</name>
+    <message>
+        <source>The printing script does not define a &apos;printFunction&apos;.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cannot print without a document.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Print script aborted with error:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Print job was aborted.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Failed to start the print job.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>ProgressDialog</name>
     <message>
         <source>Error</source>
@@ -1761,20 +1821,9 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
 </context>
 <context>
-    <name>Report</name>
+    <name>ScriptManager</name>
     <message>
-        <source>Failed to start the print job.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Print script aborted with error:</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>ReportModel</name>
-    <message>
-        <source>Name</source>
+        <source>Cannot create objects of type %1</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1881,7 +1930,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
 </context>
 <context>
-    <name>SelectReportDialog</name>
+    <name>SelectPrintingTemplateDialog</name>
     <message>
         <source>Select Print Template</source>
         <translation type="unfinished"></translation>
@@ -2440,10 +2489,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Couldn&apos;t find any print templates.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Save PDF as</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2720,6 +2765,14 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Enter an unique name for this column layout. Leave empty to change the user default layout.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Couldn&apos;t find any print scripts.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Printing failed.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
