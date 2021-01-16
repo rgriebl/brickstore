@@ -31,7 +31,8 @@ public slots:
     void accept() override;
 
 protected slots:
-    void selectDocDir(int);
+    void selectDocDir(int index);
+    void selectLDrawDir(int index);
     void resetUpdateIntervals();
     void currenciesUpdated();
     void currentCurrencyChanged(const QString &);
@@ -39,6 +40,8 @@ protected slots:
 protected:
     void load();
     void save();
+
+    void checkLDrawDir();
 
 private:
     QString m_preferedCurrency;

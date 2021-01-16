@@ -22,6 +22,7 @@
 #include "config.h"
 #include "bricklink.h"
 #include "bricklink_model.h"
+#include "ldraw.h"
 #include "messagebox.h"
 
 static int sec2day(int s)
@@ -109,6 +110,13 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
     int is = fontMetrics().height();
     w_currency_update->setIconSize(QSize(is, is));
 
+    w_ldraw_dir->insertItem(0, style()->standardIcon(QStyle::SP_DirIcon), QString());
+    w_ldraw_dir->insertItem(1, QIcon(), tr("Auto Detect"));
+    w_ldraw_dir->insertItem(2, QIcon(), tr("Other..."));
+    w_ldraw_dir->insertSeparator(1);
+
+    connect(w_ldraw_dir, QOverload<int>::of(&QComboBox::activated),
+            this, &SettingsDialog::selectLDrawDir);
     connect(w_docdir, QOverload<int>::of(&QComboBox::activated),
             this, &SettingsDialog::selectDocDir);
     connect(w_upd_reset, &QAbstractButton::clicked,
@@ -145,14 +153,32 @@ void SettingsDialog::currentCurrencyChanged(const QString &ccode)
 void SettingsDialog::selectDocDir(int index)
 {
     if (index > 0) {
-        QString newdir = QFileDialog::getExistingDirectory(this, tr("Document directory location"), w_docdir->itemData(0).toString());
-
+        QString newdir = QFileDialog::getExistingDirectory(this, tr("Document directory location"),
+                                                           w_docdir->itemData(0).toString());
         if (!newdir.isNull()) {
             w_docdir->setItemData(0, QDir::toNativeSeparators(newdir));
             w_docdir->setItemText(0, systemDirName(newdir));
         }
     }
     w_docdir->setCurrentIndex(0);
+}
+
+void SettingsDialog::selectLDrawDir(int index)
+{
+    if (index == 2) {
+        // auto detect
+        w_ldraw_dir->setItemData(0, QString());
+        w_ldraw_dir->setItemText(0, w_ldraw_dir->itemText(2));
+    } if (index == 3) {
+        QString newdir = QFileDialog::getExistingDirectory(this, tr("LDraw directory location"),
+                                                           w_ldraw_dir->itemData(0).toString());
+        if (!newdir.isNull()) {
+            w_ldraw_dir->setItemData(0, QDir::toNativeSeparators(newdir));
+            w_ldraw_dir->setItemText(0, systemDirName(newdir));
+        }
+    }
+    w_ldraw_dir->setCurrentIndex(0);
+    checkLDrawDir();
 }
 
 void SettingsDialog::resetUpdateIntervals()
@@ -292,12 +318,19 @@ void SettingsDialog::load()
     w_def_setpg_time->setCurrentIndex(w_def_setpg_time->findData(timedef));
     w_def_setpg_price->setCurrentIndex(w_def_setpg_price->findData(pricedef));
 
-    // --[ NETWORK ]-------------------------------------------------------------------
+    // --[ BRICKLINK ]---------------------------------------------------------------
 
     QPair<QString, QString> blcred = Config::inst()->loginForBrickLink();
 
     w_bl_username->setText(blcred.first);
     w_bl_password->setText(blcred.second);
+
+    // --[ LDRAW ]-------------------------------------------------------------------
+
+    QString ldrawdir = QDir::toNativeSeparators(Config::inst()->ldrawDir());
+    w_ldraw_dir->setItemData(0, ldrawdir.isEmpty() ? QString() : ldrawdir);
+    w_ldraw_dir->setItemText(0, ldrawdir.isEmpty() ? w_ldraw_dir->itemText(2) : systemDirName(ldrawdir));
+    checkLDrawDir();
 
     // ---------------------------------------------------------------------
 }
@@ -364,9 +397,49 @@ void SettingsDialog::save()
     Config::inst()->setValue("/Defaults/SetToPG/Time", w_def_setpg_time->itemData(w_def_setpg_time->currentIndex()));
     Config::inst()->setValue("/Defaults/SetToPG/Price", w_def_setpg_price->itemData(w_def_setpg_price->currentIndex()));
 
-    // --[ NETWORK ]-------------------------------------------------------------------
+    // --[ BRICKLINK ]-----------------------------------------------------------------
 
     Config::inst()->setLoginForBrickLink(w_bl_username->text(), w_bl_password->text());
+
+    // --[ LDRAW ]---------------------------------------------------------------------
+
+    QString ldrawdir = QDir::toNativeSeparators(Config::inst()->ldrawDir());
+    if (ldrawdir.isEmpty())
+        ldrawdir = LDraw::core()->dataPath();
+
+    const QString ldrawDir = w_ldraw_dir->itemData(0).toString();
+    if (ldrawDir != Config::inst()->ldrawDir()) {
+        MessageBox::information(nullptr, { }, tr("You have changed the LDraw directory. Please restart BrickStore to apply this setting."));
+        Config::inst()->setLDrawDir(ldrawDir);
+    }
+}
+
+void SettingsDialog::checkLDrawDir()
+{
+    QString path = w_ldraw_dir->itemData(0).toString();
+
+    static QString iconOk = QLatin1String(R"(<table><tr><td><img src=":/images/edit_status_include.png"/></td><td>&nbsp;%1<br/><i>%2</i></td></tr></table>)");
+    static QString iconFail = QLatin1String(R"(<img src=":/images/edit_status_exclude.png"/>&nbsp;%1)");
+
+    if (path.isEmpty()) {
+        const auto ldrawDirs = LDraw::Core::potentialDrawDirs();
+        QString ldrawDir;
+        for (auto ld : ldrawDirs) {
+            if (LDraw::Core::isValidLDrawDir(ld)) {
+                ldrawDir = ld;
+                break;
+            }
+        }
+        if (!ldrawDir.isEmpty())
+            w_ldraw_status->setText(iconOk.arg(tr("Auto-detected an LDraw installation at:")).arg(ldrawDir));
+        else
+            w_ldraw_status->setText(iconFail.arg(tr("No LDraw installation could be auto-detected.")));
+    } else {
+        if (LDraw::Core::isValidLDrawDir(path))
+            w_ldraw_status->setText(iconOk.arg(tr("Valid LDraw installation at")).arg(path));
+        else
+            w_ldraw_status->setText(iconFail.arg(tr("Not a valid LDraw installation.")));
+    }
 }
 
 #include "moc_settingsdialog.cpp"

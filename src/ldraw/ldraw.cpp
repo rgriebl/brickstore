@@ -476,7 +476,7 @@ QString LDraw::Core::dataPath() const
     return m_datadir;
 }
 
-bool LDraw::Core::check_ldrawdir(const QString &ldir)
+bool LDraw::Core::isValidLDrawDir(const QString &ldir)
 {
     QFileInfo fi(ldir);
 
@@ -496,22 +496,23 @@ bool LDraw::Core::check_ldrawdir(const QString &ldir)
     return false;
 }
 
-QString LDraw::Core::get_platform_ldrawdir()
+QStringList LDraw::Core::potentialDrawDirs()
 {
-    QString dir = QString::fromLocal8Bit(qgetenv("LDRAWDIR"));
+    QStringList dirs;
+    dirs << QString::fromLocal8Bit(qgetenv("LDRAWDIR"));
 
 #if defined(Q_OS_WINDOWS)
-    if (dir.isEmpty() || !check_ldrawdir(dir)) {
+    {
         wchar_t inidir [MAX_PATH];
 
         DWORD l = GetPrivateProfileStringW(L"LDraw", L"BaseDirectory", L"", inidir, MAX_PATH, L"ldraw.ini");
         if (l >= 0) {
             inidir [l] = 0;
-            dir = QString::fromUtf16(reinterpret_cast<ushort *>(inidir));
+            dirs << QString::fromUtf16(reinterpret_cast<ushort *>(inidir));
         }
     }
 
-    if (dir.isEmpty() || !check_ldrawdir(dir)) {
+    {
         HKEY skey, lkey;
 
         if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"Software", 0, KEY_READ, &skey) == ERROR_SUCCESS) {
@@ -521,7 +522,7 @@ QString LDraw::Core::get_platform_ldrawdir()
 
                 if (RegQueryValueExW(lkey, L"InstallDir", nullptr, nullptr, (LPBYTE) &regdir, &regdirsize) == ERROR_SUCCESS) {
                     regdir [regdirsize / sizeof(WCHAR)] = 0;
-                    dir = QString::fromUtf16(reinterpret_cast<ushort *>(regdir));
+                    dirs << QString::fromUtf16(reinterpret_cast<ushort *>(regdir));
                 }
                 RegCloseKey(lkey);
             }
@@ -529,30 +530,31 @@ QString LDraw::Core::get_platform_ldrawdir()
         }
     }
 #elif defined(Q_OS_UNIX)
-    if (dir.isEmpty() || !check_ldrawdir(dir)) {
+    {
         QStringList unixdirs;
-#  if defined(Q_OS_MACOS)
-        unixdirs << QLatin1String("/Library/LDRAW")
-                 << QLatin1String("/Library/ldraw")
-                 << QLatin1String("~/Library/LDRAW")
-                 << QLatin1String("~/Library/ldraw");
-#  else
         unixdirs << "~/ldraw"
-                 << "/usr/share/ldraw";
+
+#  if defined(Q_OS_MACOS)
+        unixdirs << QLatin1String("~/Library/ldraw")
+                 << QLatin1String("~/Library/LDRAW")
+                 << QLatin1String("/Library/LDRAW")
+                 << QLatin1String("/Library/ldraw");
+#  else
+        unixdirs << "/usr/share/ldraw";
+        unixdirs << "/var/lib/ldraw";
+        unixdirs << "/var/ldraw";
 #  endif
+
         QString homepath = QDir::homePath();
 
         foreach (QString d, unixdirs) {
             d.replace(QLatin1String("~"), homepath);
-
-            if (check_ldrawdir(d)) {
-                dir = d;
-                break;
-            }
+            dirs << d;
         }
     }
 #endif
-    return dir;
+    dirs.removeAll(QString()); // remove empty strings
+    return dirs;
 }
 
 
@@ -564,20 +566,26 @@ LDraw::Core *LDraw::Core::create(const QString &datadir, QString *errstring)
         QString error;
         QString ldrawdir = datadir;
 
-        if (ldrawdir.isEmpty())
-            ldrawdir = get_platform_ldrawdir();
+        if (ldrawdir.isEmpty()) {
+            const auto ldawDirs = potentialDrawDirs();
+            for (auto ld : ldawDirs) {
+                if (isValidLDrawDir(ld)) {
+                    ldrawdir = ld;
+                    break;
+                }
+            }
+        }
 
-        if (check_ldrawdir(ldrawdir)) {
+        if (!ldrawdir.isEmpty()) {
             s_inst = new Core(ldrawdir);
 
-            if (s_inst->parse_ldconfig("LDConfig.ldr")) {
+            if (s_inst->parse_ldconfig("LDConfig.ldr"))
                 s_inst->parse_ldconfig("LDConfig_missing.ldr");
-            }
             else
-                error = qApp->translate("LDraw", "The file ldcondig.ldr is not readable.");
+                error = qApp->translate("LDraw", "LDraws's ldcondig.ldr is not readable.");
+        } else {
+            error = qApp->translate("LDraw", "The LDraw directory \'%1\' is not readable.").arg(datadir);
         }
-        else
-            error = qApp->translate("LDraw", "Data directory \'%1\' is not readable.").arg(datadir);
 
         if (!error.isEmpty()) {
             delete s_inst;

@@ -155,7 +155,7 @@ Application::Application(int &_argc, char **_argv)
         QMetaObject::invokeMethod(qApp, &QCoreApplication::quit, Qt::QueuedConnection);
         return;
     }
-    if (LDraw::create(QString(), nullptr)) {
+    if (LDraw::create(Config::inst()->ldrawDir(), nullptr)) {
         BrickLink::core()->setLDrawDataPath(LDraw::core()->dataPath());
     }
 

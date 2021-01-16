@@ -43,7 +43,7 @@ public:
 
     bool closeEmptyDocuments() const;
     QString documentDir() const;
-    QString lDrawDir() const;
+    QString ldrawDir() const;
     QString dataDir() const;
 
     bool showInputErrors() const;

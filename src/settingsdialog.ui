@@ -22,6 +22,9 @@
      <property name="currentIndex">
       <number>0</number>
      </property>
+     <property name="usesScrollButtons">
+      <bool>false</bool>
+     </property>
      <widget class="QWidget" name="general">
       <attribute name="title">
        <string>&amp;General</string>
@@ -801,7 +804,7 @@
      </widget>
      <widget class="QWidget" name="network">
       <attribute name="title">
-       <string>Network</string>
+       <string>BrickLink</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
@@ -852,6 +855,43 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="ldraw">
+      <attribute name="title">
+       <string>LDraw</string>
+      </attribute>
+      <layout class="QFormLayout" name="formLayout_9">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_21">
+         <property name="text">
+          <string>LDraw Directory</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QComboBox" name="w_ldraw_dir"/>
+       </item>
+       <item row="2" column="1">
+        <spacer name="verticalSpacer_4">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLabel" name="w_ldraw_status">
+         <property name="text">
+          <string notr="true">Status</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
    <item>
@@ -877,8 +917,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>507</x>
-     <y>415</y>
+     <x>520</x>
+     <y>498</y>
     </hint>
     <hint type="destinationlabel">
      <x>399</x>
@@ -893,8 +933,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>567</x>
-     <y>414</y>
+     <x>580</x>
+     <y>498</y>
     </hint>
     <hint type="destinationlabel">
      <x>567</x>

@@ -262,6 +262,9 @@ public:
     Part *partFromId(const QString &id);
     Part *partFromFile(const QString &filename);
 
+    static QStringList potentialDrawDirs();
+    static bool isValidLDrawDir(const QString &dir);
+
 private:
     bool create_part_list();
     bool parse_ldconfig(const char *file);
@@ -277,9 +280,6 @@ private:
 
     friend Core *core();
     friend Core *create(const QString &, QString *);
-
-    static bool check_ldrawdir(const QString &dir);
-    static QString get_platform_ldrawdir();
 
 private:
     QString m_datadir;

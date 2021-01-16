@@ -231,7 +231,7 @@ void Config::setLDrawDir(const QString &dir)
     setValue("General/LDrawDir", dir);
 }
 
-QString Config::lDrawDir() const
+QString Config::ldrawDir() const
 {
     return value("General/LDrawDir").toString();
 }
