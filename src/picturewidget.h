@@ -14,13 +14,16 @@
 #pragma once
 
 #include <QFrame>
-#include <QLabel>
-#include <QScopedPointer>
+#include <QImage>
 
 #include "bricklinkfwd.h"
 
-class PictureWidgetPrivate;
+namespace LDraw {
+class Part;
+class RenderWidget;
+}
 QT_FORWARD_DECLARE_CLASS(QAction)
+QT_FORWARD_DECLARE_CLASS(QLabel)
 
 
 class PictureWidget : public QFrame
@@ -30,14 +33,11 @@ public:
     PictureWidget(QWidget *parent = nullptr);
     ~PictureWidget() override;
 
-    void setPicture(BrickLink::Picture *pic);
-    BrickLink::Picture *picture() const;
-
-    QSize sizeHint() const override;
+    void setItemAndColor(const BrickLink::Item *item, const BrickLink::Color *color = nullptr);
 
 protected slots:
     void doUpdate();
-    void gotUpdate(BrickLink::Picture *);
+    void pictureWasUpdated(BrickLink::Picture *);
     void redraw();
     void showBLCatalogInfo();
     void showBLPriceGuideInfo();
@@ -45,13 +45,20 @@ protected slots:
     void languageChange();
 
 protected:
-    void paintEvent(QPaintEvent *e) override;
     void resizeEvent(QResizeEvent *e) override;
     void changeEvent(QEvent *e) override;
     bool event(QEvent *e) override;
 
-
-
 private:
-    QScopedPointer<PictureWidgetPrivate> d;
+    const BrickLink::Item * m_item = nullptr;
+    const BrickLink::Color *m_color = nullptr;
+    BrickLink::Picture *m_pic = nullptr;
+    QLabel *w_text;
+    QLabel *w_image;
+#if !defined(QT_NO_OPENGL)
+    LDraw::RenderWidget *w_ldraw = nullptr;
+    LDraw::Part *m_part = nullptr;
+    int m_colorId = 0;
+#endif
+    QImage m_image;
 };

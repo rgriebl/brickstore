@@ -219,10 +219,10 @@ void TaskInfoWidget::selectionUpdate(const Document::ItemList &list)
 void TaskInfoWidget::delayedSelectionUpdate(const Document::ItemList &list)
 {
     if (!m_win || (list.count() == 0)) {
-        m_pic->setPicture(nullptr);
+        m_pic->setItemAndColor(nullptr);
         setCurrentWidget(m_pic);
     } else if (list.count() == 1) {
-        m_pic->setPicture(BrickLink::core()->picture(list.front()->item(), list.front()->color(), true));
+        m_pic->setItemAndColor(list.front()->item(), list.front()->color());
         setCurrentWidget(m_pic);
     }
     else {
@@ -263,7 +263,7 @@ void TaskInfoWidget::delayedSelectionUpdate(const Document::ItemList &list)
 //  if (( stat.errors ( ) > 0 ) && Config::inst ( )->showInputErrors ( ))
 //   s += QString ( "<br /><br />&nbsp;&nbsp;%1: %2" ).arg ( tr( "Errors" )).arg ( stat.errors ( ));
 
-        m_pic->setPicture(nullptr);
+        m_pic->setItemAndColor(nullptr);
         m_text->setText(s);
         setCurrentWidget(m_text);
     }

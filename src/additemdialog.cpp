@@ -183,7 +183,7 @@ void AddItemDialog::languageChange()
 
 AddItemDialog::~AddItemDialog()
 {
-    w_picture->setPicture(nullptr);
+    w_picture->setItemAndColor(nullptr);
     w_price_guide->setPriceGuide(nullptr);
     w_appears_in->setItem(nullptr, nullptr);
 }
@@ -325,12 +325,12 @@ void AddItemDialog::updateItemAndColor()
 void AddItemDialog::showItemInColor(const BrickLink::Item *it, const BrickLink::Color *col)
 {
     if (it && col) {
-        w_picture->setPicture(BrickLink::core()->picture(it, col, true));
+        w_picture->setItemAndColor(it, col);
         w_price_guide->setPriceGuide(BrickLink::core()->priceGuide(it, col, true));
         w_appears_in->setItem(it, col);
     }
     else {
-        w_picture->setPicture(nullptr);
+        w_picture->setItemAndColor(nullptr);
         w_price_guide->setPriceGuide(nullptr);
         w_appears_in->setItem(nullptr, nullptr);
     }

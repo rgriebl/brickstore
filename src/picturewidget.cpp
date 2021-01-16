@@ -11,65 +11,58 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <QTextBrowser>
+#include <QLabel>
 #include <QPalette>
 #include <QMenu>
 #include <QLayout>
 #include <QApplication>
 #include <QAction>
 #include <QDesktopServices>
-#include <QMouseEvent>
-#include <QPainter>
+#include <QHelpEvent>
 
 #include "bricklink.h"
 #include "bricklink_model.h"
 #include "picturewidget.h"
-
-
-class PictureWidgetPrivate
-{
-public:
-    BrickLink::Picture *m_pic = nullptr;
-    QTextBrowser *      m_tlabel;
-    bool                m_connected = false;
-    int                 m_default_size;
-    int                 m_img_height;
-    QImage              m_img;
-};
+#include "ldraw.h"
+#include "renderwidget.h"
 
 
 PictureWidget::PictureWidget(QWidget *parent)
     : QFrame(parent)
-    , d(new PictureWidgetPrivate())
 {
-    auto setDefaultSize = [this]() {
-        QSize s = BrickLink::core()->standardPictureSize();
-        d->m_default_size = qMax(s.width(), s.height());
-        updateGeometry();
-        redraw();
-    };
-    setDefaultSize();
-    connect(BrickLink::core(), &BrickLink::Core::itemImageScaleFactorChanged,
-            this, setDefaultSize);
-
     setBackgroundRole(QPalette::Base);
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
     setAutoFillBackground(true);
     setContextMenuPolicy(Qt::NoContextMenu);
 
-    d->m_tlabel = new QTextBrowser(this);
-    d->m_tlabel->setFrameStyle(QFrame::NoFrame);
-    d->m_tlabel->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
-    d->m_tlabel->setLineWrapMode(QTextEdit::WidgetWidth);
-    d->m_tlabel->setTextInteractionFlags(Qt::TextBrowserInteraction);
-    d->m_tlabel->setContextMenuPolicy(Qt::NoContextMenu);
-    QPalette pal = d->m_tlabel->palette();
-    pal.setColor(QPalette::Base, Qt::transparent);
-    d->m_tlabel->setPalette(pal);
-    connect(d->m_tlabel, &QTextEdit::copyAvailable,
-            this, [this](bool b) {
-        d->m_tlabel->setContextMenuPolicy(b ? Qt::DefaultContextMenu : Qt::NoContextMenu);
-    });
+    w_text = new QLabel();
+    w_text->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
+    w_text->setWordWrap(true);
+    w_text->setTextInteractionFlags(Qt::TextBrowserInteraction);
+    w_text->setContextMenuPolicy(Qt::NoContextMenu);
+    QPalette pal = w_text->palette();
+    pal.setColor(QPalette::Base, Qt::red);
+    w_text->setPalette(pal);
+    //    connect(w_text, &QLabel::copyAvailable,
+    //            this, [this](bool b) {
+    //        w_text->setContextMenuPolicy(b ? Qt::DefaultContextMenu : Qt::NoContextMenu);
+    //    });
+
+    w_image = new QLabel();
+    w_image->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+    w_image->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    w_image->setMinimumSize(BrickLink::core()->standardPictureSize() * 2);
+
+#if !defined(QT_NO_OPENGL)
+    w_ldraw = new LDraw::RenderWidget(this);
+    w_ldraw->hide();
+#endif
+
+    auto layout = new QVBoxLayout(this);
+    layout->addWidget(w_text);
+    layout->addWidget(w_image, 10);
+    if (w_ldraw)
+        layout->addWidget(w_ldraw, 10);
 
     QAction *a;
     a = new QAction(this);
@@ -102,6 +95,9 @@ PictureWidget::PictureWidget(QWidget *parent)
             this, &PictureWidget::showBLLotsForSale);
     addAction(a);
 
+    connect(BrickLink::core(), &BrickLink::Core::pictureUpdated,
+            this, &PictureWidget::pictureWasUpdated);
+
     languageChange();
     redraw();
 }
@@ -114,126 +110,131 @@ void PictureWidget::languageChange()
     findChild<QAction *> ("picture_bl_lotsforsale")->setText(tr("Show Lots for Sale on BrickLink..."));
 }
 
-PictureWidget::~PictureWidget()
+void PictureWidget::resizeEvent(QResizeEvent *e)
 {
-    if (d->m_pic)
-        d->m_pic->release();
+    QFrame::resizeEvent(e);
+    redraw();
 }
 
-QSize PictureWidget::sizeHint() const
+PictureWidget::~PictureWidget()
 {
-    QFontMetrics fm = fontMetrics();
-    return { 4 + 2 * d->m_default_size + 4, 4 + d->m_default_size + 4 + 5 * (fm.height() + 1) + 4 };
+    if (m_pic)
+        m_pic->release();
+    if (m_part)
+        m_part->release();
 }
 
 void PictureWidget::doUpdate()
 {
-    if (d->m_pic) {
-        d->m_pic->update(true);
+    if (m_pic) {
+        m_pic->update(true);
         redraw();
     }
 }
 
 void PictureWidget::showBLCatalogInfo()
 {
-    if (d->m_pic && d->m_pic->item())
-        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_CatalogInfo, d->m_pic->item()));
+    if (m_item)
+        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_CatalogInfo, m_item));
 }
 
 void PictureWidget::showBLPriceGuideInfo()
 {
-    if (d->m_pic && d->m_pic->item() && d->m_pic->color())
-        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_PriceGuideInfo, d->m_pic->item(), d->m_pic->color()));
+    if (m_item && m_color)
+        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_PriceGuideInfo, m_item, m_color));
 }
 
 void PictureWidget::showBLLotsForSale()
 {
-    if (d->m_pic && d->m_pic->item() && d->m_pic->color())
-        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_LotsForSale, d->m_pic->item(), d->m_pic->color()));
+    if (m_item && m_color)
+        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_LotsForSale, m_item, m_color));
 }
 
-void PictureWidget::setPicture(BrickLink::Picture *pic)
+void PictureWidget::setItemAndColor(const BrickLink::Item *item, const BrickLink::Color *color)
 {
-    if (pic == d->m_pic)
+    if ((item == m_item) && (color == m_color))
         return;
 
-    if (d->m_pic)
-        d->m_pic->release();
-    d->m_pic = pic;
-    if (d->m_pic)
-        d->m_pic->addRef();
+    m_item = item;
+    m_color = color;
+    m_image = { };
 
-    if (!d->m_connected && pic) {
-        d->m_connected = connect(BrickLink::core(), &BrickLink::Core::pictureUpdated,
-                                 this, &PictureWidget::gotUpdate);
+    if (m_pic)
+        m_pic->release();
+    m_pic = item ? BrickLink::core()->largePicture(item, true) : nullptr;
+    if (m_pic) {
+        m_pic->addRef();
+        if (m_pic->valid())
+            m_image = m_pic->image();
     }
 
-    setContextMenuPolicy(pic ? Qt::ActionsContextMenu : Qt::NoContextMenu);
+    if (m_part)
+        m_part->release();
+    m_part = (LDraw::core() && item) ? LDraw::core()->partFromId(item->id()) : nullptr;
+    if (m_part) {
+        m_part->addRef();
 
+        m_colorId = -1;
+        if (color)
+            m_colorId = color->ldrawId();
+        if (m_colorId < 0)
+            m_colorId = 7; // light gray
+    }
+
+    setContextMenuPolicy(item ? Qt::ActionsContextMenu : Qt::NoContextMenu);
     redraw();
 }
 
-BrickLink::Picture *PictureWidget::picture() const
+void PictureWidget::pictureWasUpdated(BrickLink::Picture *pic)
 {
-    return d->m_pic;
-}
-
-void PictureWidget::gotUpdate(BrickLink::Picture *pic)
-{
-    if (pic == d->m_pic)
+    if (pic == m_pic && pic->valid()) {
+        m_image = pic->image();
         redraw();
+    }
 }
 
 void PictureWidget::redraw()
 {
-    if (!d->m_tlabel)
-        return;
+    w_image->setPixmap({ });
 
-    QRect cr = contentsRect();
-    d->m_tlabel->setGeometry(cr.left() + 4, cr.top() + 4 + d->m_default_size + 4,
-                             cr.width() - 2*4, cr.height() - (4 + d->m_default_size + 4 + 4));
-
-    if (d->m_pic && (d->m_pic->updateStatus() == BrickLink::UpdateStatus::Updating)) {
-        d->m_tlabel->setHtml(QLatin1String("<center><i>") +
-                                           tr("Please wait... updating") +
-                                           QLatin1String("</i></center>"));
-        d->m_img = QImage();
+    if (m_item) {
+        w_text->setText(QLatin1String("<center><b>") +
+                        m_item->id() +
+                        QLatin1String("</b>&nbsp; ") +
+                        m_item->name() +
+                        QLatin1String("</center>"));
     }
-    else if (d->m_pic && d->m_pic->valid()) {
-        d->m_tlabel->setHtml(QLatin1String("<center><b>") +
-                             d->m_pic->item()->id() +
-                             QLatin1String("</b>&nbsp; ") +
-                             d->m_pic->item()->name() +
-                             QLatin1String("</center>"));
-        d->m_img = d->m_pic->image();
-        d->m_img_height = d->m_pic->image().height();
+
+    if (m_pic && (m_pic->updateStatus() == BrickLink::UpdateStatus::Updating)) {
+        w_image->setText(QLatin1String("<center><i>") +
+                         tr("Please wait... updating") +
+                         QLatin1String("</i></center>"));
+    } else if (!m_image.isNull()) {
+        QPixmap p = QPixmap::fromImage(m_image, Qt::NoFormatConversion);
+        QSize s = w_image->contentsRect().size();
+        w_image->setPixmap(p.scaled(s, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    } else {
+        w_image->setText({ });
     }
-    else {
-        d->m_tlabel->setText(QString());
-        d->m_img = QImage();
+
+#if !defined(QT_NO_OPENGL)
+    if (m_part && w_ldraw) {
+        w_image->hide();
+
+        w_ldraw->setPartAndColor(m_part, m_colorId);
+        w_ldraw->show();
+        w_ldraw->startAnimation();
+    } else
+#endif
+    {
+#if !defined(QT_NO_OPENGL)
+        if (w_ldraw)
+            w_ldraw->setPartAndColor(nullptr, -1);
+        w_ldraw->hide();
+        w_ldraw->stopAnimation();
+#endif
+        w_image->show();
     }
-    update();
-}
-
-void PictureWidget::paintEvent(QPaintEvent *e)
-{
-    QFrame::paintEvent(e);
-
-    QRect cr = contentsRect();
-    if (cr.width() >= d->m_default_size && !d->m_img.isNull()) {
-        QPainter p(this);
-        p.setClipRect(e->rect());
-
-        QPoint tl = cr.topLeft() + QPoint((cr.width() - d->m_img.width()) / 2,
-                                          4 + (d->m_default_size - d->m_img_height) / 2);
-        p.drawImage(tl, d->m_img);
-    }
-}
-
-void PictureWidget::resizeEvent(QResizeEvent *e)
-{
-    QFrame::resizeEvent(e);
-    redraw();
 }
 
 void PictureWidget::changeEvent(QEvent *e)
@@ -245,8 +246,8 @@ void PictureWidget::changeEvent(QEvent *e)
 
 bool PictureWidget::event(QEvent *e)
 {
-    if (d->m_pic && e && e->type() == QEvent::ToolTip) {
-        return BrickLink::ToolTip::inst()->show(d->m_pic->item(), d->m_pic->color(),
+    if (m_item && e && e->type() == QEvent::ToolTip) {
+        return BrickLink::ToolTip::inst()->show(m_item, m_color,
                                                 static_cast<QHelpEvent *>(e)->globalPos(), this);
     }
     return QFrame::event(e);
