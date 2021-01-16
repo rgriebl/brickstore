@@ -542,9 +542,9 @@ bool LDraw::GLRenderer::isAnimationActive() const
 
 void LDraw::GLRenderer::animationStep()
 {
-    setXRotation(xRotation() + 0.5);
-    setYRotation(yRotation() + 0.375);
-    setZRotation(zRotation() + 0.25);
+    setXRotation(xRotation() + 0.5 / 4);
+    setYRotation(yRotation() + 0.375 / 4);
+    setZRotation(zRotation() + 0.25 / 4);
 }
 
 void LDraw::GLRenderer::updateProjectionMatrix()
