@@ -203,7 +203,8 @@ private:
     int                  m_latest_row;
     QTimer *             m_latest_timer;
 
-    uint                 m_settopg_failcnt;
+    uint                 m_settopg_failcnt = 0;
+    uint                 m_settopg_todocnt = 0;
     BrickLink::Time      m_settopg_time;
     BrickLink::Price     m_settopg_price;
     QMultiHash<BrickLink::PriceGuide *, Document::Item *> *m_settopg_list;

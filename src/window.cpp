@@ -843,7 +843,7 @@ void Window::on_edit_price_to_priceguide_triggered()
     if (selection().isEmpty())
         return;
 
-    if (m_settopg_list) {
+    if (m_settopg_list || m_settopg_todocnt) {
         MessageBox::information(this, { }, tr("Prices are currently updated to Price Guide values.<br /><br />Please wait until this operation has finished."));
         return;
     }
@@ -851,14 +851,16 @@ void Window::on_edit_price_to_priceguide_triggered()
     SetToPriceGuideDialog dlg(this);
 
     if (dlg.exec() == QDialog::Accepted) {
-        WindowProgress wp(w_list, tr("Verifying Price Guide data"), selection().count());
+        const auto sel = selection();
+
+        WindowProgress wp(w_list, tr("Verifying Price Guide data"), sel.count());
 
         m_settopg_list    = new QMultiHash<BrickLink::PriceGuide *, Document::Item *>();
         m_settopg_failcnt = 0;
+        m_settopg_todocnt = sel.count();
         m_settopg_time    = dlg.time();
         m_settopg_price   = dlg.price();
 
-        const auto sel = selection();
         for (Document::Item *item : sel) {
             BrickLink::PriceGuide *pg = BrickLink::core()->priceGuide(item->item(), item->color());
 
@@ -876,13 +878,15 @@ void Window::on_edit_price_to_priceguide_triggered()
                     newitem.setPrice(p);
                     m_doc->changeItem(item, newitem);
                 }
+                --m_settopg_todocnt;
             }
             else {
                 Document::Item newitem = *item;
                 newitem.setPrice(0);
                 m_doc->changeItem(item, newitem);
 
-                m_settopg_failcnt++;
+                ++m_settopg_failcnt;
+                --m_settopg_todocnt;
             }
             wp.step();
         }
@@ -909,11 +913,12 @@ void Window::priceGuideUpdated(BrickLink::PriceGuide *pg)
                 m_doc->changeItem(item, newitem);
             }
             pg->release();
+            --m_settopg_todocnt;
         }
         m_settopg_list->remove(pg);
     }
 
-    if (m_settopg_list && m_settopg_list->isEmpty()) {
+    if (m_settopg_list && m_settopg_list->isEmpty() && !m_settopg_todocnt) {
         int fails = m_settopg_failcnt;
 
         m_settopg_failcnt = 0;
