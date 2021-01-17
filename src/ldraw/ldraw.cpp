@@ -532,7 +532,7 @@ QStringList LDraw::Core::potentialDrawDirs()
 #elif defined(Q_OS_UNIX)
     {
         QStringList unixdirs;
-        unixdirs << "~/ldraw"
+        unixdirs << "~/ldraw";
 
 #  if defined(Q_OS_MACOS)
         unixdirs << QLatin1String("~/Library/ldraw")
