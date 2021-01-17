@@ -301,7 +301,11 @@ FrameWork::FrameWork(QWidget *parent)
     m_filter = nullptr;
     m_progress = nullptr;
 
+#if defined(QT_NO_OPENGL)
+    // QTBUG-39781
     setUnifiedTitleAndToolBarOnMac(true);
+#endif
+
     setDocumentMode(true);
     setAcceptDrops(true);
 
