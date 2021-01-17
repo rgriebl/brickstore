@@ -24,11 +24,13 @@ class RenderWidget;
 }
 QT_FORWARD_DECLARE_CLASS(QAction)
 QT_FORWARD_DECLARE_CLASS(QLabel)
+QT_FORWARD_DECLARE_CLASS(QToolButton)
 
 
 class PictureWidget : public QFrame
 {
     Q_OBJECT
+
 public:
     PictureWidget(QWidget *parent = nullptr);
     ~PictureWidget() override;
@@ -48,17 +50,30 @@ protected:
     void resizeEvent(QResizeEvent *e) override;
     void changeEvent(QEvent *e) override;
     bool event(QEvent *e) override;
+    bool eventFilter(QObject *o, QEvent *e);
 
 private:
+    void updateButtons();
+    bool canShow3D() const;
+    bool prefer3D() const;
+    bool isShowing3D() const;
+
     const BrickLink::Item * m_item = nullptr;
     const BrickLink::Color *m_color = nullptr;
     BrickLink::Picture *m_pic = nullptr;
     QLabel *w_text;
     QLabel *w_image;
+    QImage m_image;
 #if !defined(QT_NO_OPENGL)
+    bool m_prefer3D = true;
+    bool m_animationActive = true;
     LDraw::RenderWidget *w_ldraw = nullptr;
     LDraw::Part *m_part = nullptr;
     int m_colorId = 0;
+    QToolButton *w_2d = nullptr;
+    QToolButton *w_3d = nullptr;
+    QToolButton *w_playPause = nullptr;
+    QToolButton *w_pause = nullptr;
+    QToolButton *w_home = nullptr;
 #endif
-    QImage m_image;
 };

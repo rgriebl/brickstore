@@ -576,6 +576,8 @@ void LDraw::GLRenderer::updateWorldMatrix()
 
 void LDraw::RenderWidget::resetCamera()
 {
+    stopAnimation();
+
     m_renderer->setXRotation(-180+30);
     m_renderer->setYRotation(45);
     m_renderer->setZRotation(0);

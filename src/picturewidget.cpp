@@ -19,6 +19,8 @@
 #include <QAction>
 #include <QDesktopServices>
 #include <QHelpEvent>
+#include <QToolButton>
+#include <QStyle>
 
 #include "bricklink.h"
 #include "bricklink_model.h"
@@ -38,31 +40,78 @@ PictureWidget::PictureWidget(QWidget *parent)
     w_text = new QLabel();
     w_text->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
     w_text->setWordWrap(true);
-    w_text->setTextInteractionFlags(Qt::TextBrowserInteraction);
-    w_text->setContextMenuPolicy(Qt::NoContextMenu);
+    w_text->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    w_text->setContextMenuPolicy(Qt::DefaultContextMenu);
     QPalette pal = w_text->palette();
     pal.setColor(QPalette::Base, Qt::red);
     w_text->setPalette(pal);
-    //    connect(w_text, &QLabel::copyAvailable,
-    //            this, [this](bool b) {
-    //        w_text->setContextMenuPolicy(b ? Qt::DefaultContextMenu : Qt::NoContextMenu);
-    //    });
+    w_text->installEventFilter(this);
 
     w_image = new QLabel();
     w_image->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     w_image->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     w_image->setMinimumSize(BrickLink::core()->standardPictureSize() * 2);
 
-#if !defined(QT_NO_OPENGL)
-    w_ldraw = new LDraw::RenderWidget(this);
-    w_ldraw->hide();
-#endif
-
     auto layout = new QVBoxLayout(this);
     layout->addWidget(w_text);
     layout->addWidget(w_image, 10);
+    layout->setContentsMargins(2, 6, 2, 2);
+
+#if !defined(QT_NO_OPENGL)
+    w_ldraw = new LDraw::RenderWidget(this);
+    w_ldraw->hide();
+
+    w_2d = new QToolButton();
+    w_2d->setText("2D");
+    w_2d->setAutoRaise(true);
+    w_2d->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
+    connect(w_2d, &QToolButton::clicked, this, [this]() {
+        m_prefer3D = false;
+        redraw();
+    });
+
+    w_3d = new QToolButton();
+    w_3d->setText("3D");
+    w_3d->setAutoRaise(true);
+    w_3d->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
+    connect(w_3d, &QToolButton::clicked, this, [this]() {
+        m_prefer3D = true;
+        redraw();
+    });
+
+    auto font = w_2d->font();
+    font.setBold(true);
+    w_2d->setFont(font);
+    w_3d->setFont(font);
+
+    w_playPause = new QToolButton();
+    w_playPause->setAutoRaise(true);
+    w_playPause->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
+    auto toggleAnimation = [this]() {
+        m_animationActive = !m_animationActive;
+        w_playPause->setIcon(w_playPause->style()->standardIcon(
+                                 m_animationActive ? QStyle::SP_MediaStop : QStyle::SP_MediaPlay));
+        if (m_animationActive)
+            w_ldraw->startAnimation();
+        else
+            w_ldraw->resetCamera();
+    };
+    connect(w_playPause, &QToolButton::clicked,
+            w_ldraw, toggleAnimation);
+    m_animationActive = true;
+    toggleAnimation();
+    updateButtons();
+
     if (w_ldraw)
         layout->addWidget(w_ldraw, 10);
+
+    auto buttons = new QHBoxLayout();
+    buttons->setContentsMargins(0, 0, 0, 0);
+    buttons->addWidget(w_2d, 10);
+    buttons->addWidget(w_3d, 10);
+    buttons->addWidget(w_playPause, 10);
+    layout->addLayout(buttons);
+#endif
 
     QAction *a;
     a = new QAction(this);
@@ -203,6 +252,8 @@ void PictureWidget::redraw()
                         QLatin1String("</b>&nbsp; ") +
                         m_item->name() +
                         QLatin1String("</center>"));
+    } else {
+        w_text->setText({ });
     }
 
     if (m_pic && (m_pic->updateStatus() == BrickLink::UpdateStatus::Updating)) {
@@ -217,16 +268,16 @@ void PictureWidget::redraw()
         w_image->setText({ });
     }
 
+    if (canShow3D() && prefer3D()) {
 #if !defined(QT_NO_OPENGL)
-    if (m_part && w_ldraw) {
         w_image->hide();
 
         w_ldraw->setPartAndColor(m_part, m_colorId);
         w_ldraw->show();
-        w_ldraw->startAnimation();
-    } else
+        if (m_animationActive)
+            w_ldraw->startAnimation();
 #endif
-    {
+    } else {
 #if !defined(QT_NO_OPENGL)
         if (w_ldraw)
             w_ldraw->setPartAndColor(nullptr, -1);
@@ -235,6 +286,8 @@ void PictureWidget::redraw()
 #endif
         w_image->show();
     }
+
+    updateButtons();
 }
 
 void PictureWidget::changeEvent(QEvent *e)
@@ -251,6 +304,56 @@ bool PictureWidget::event(QEvent *e)
                                                 static_cast<QHelpEvent *>(e)->globalPos(), this);
     }
     return QFrame::event(e);
+}
+
+bool PictureWidget::eventFilter(QObject *o, QEvent *e)
+{
+    if ((o == w_text) && (e->type() == QEvent::ContextMenu)) {
+        w_text->setContextMenuPolicy(w_text->hasSelectedText() ? Qt::DefaultContextMenu
+                                                               : Qt::NoContextMenu);
+    } else if ((o == w_text) && (e->type() == QEvent::Resize)) {
+        // workaround for layouts breaking, if a rich-text label with word-wrap has
+        // more than one line
+        QMetaObject::invokeMethod(w_text, [this]() {
+            w_text->setMinimumHeight(0);
+            int h = w_text->heightForWidth(w_text->width());
+            if (h > 0)
+                w_text->setMinimumHeight(h);
+        }, Qt::QueuedConnection);
+    }
+    return QFrame::eventFilter(o, e);
+}
+
+void PictureWidget::updateButtons()
+{
+    bool is3d = isShowing3D();
+
+    w_2d->setEnabled(is3d);
+    w_3d->setEnabled(!is3d && canShow3D());
+    w_playPause->setEnabled(is3d);
+}
+
+bool PictureWidget::canShow3D() const
+{
+#if !defined(QT_NO_OPENGL)
+    return m_part && w_ldraw;
+#else
+    return false;
+#endif
+}
+
+bool PictureWidget::prefer3D() const
+{
+    return m_prefer3D;
+}
+
+bool PictureWidget::isShowing3D() const
+{
+#if !defined(QT_NO_OPENGL)
+    return canShow3D() && w_ldraw->isVisible();
+#else
+    return false;
+#endif
 }
 
 #include "moc_picturewidget.cpp"
