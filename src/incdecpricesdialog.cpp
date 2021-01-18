@@ -15,6 +15,7 @@
 
 #include "smartvalidator.h"
 #include "incdecpricesdialog.h"
+#include "framework.h"
 
 
 IncDecPricesDialog::IncDecPricesDialog(const QString &currencycode, QWidget *parent)
@@ -28,7 +29,7 @@ IncDecPricesDialog::IncDecPricesDialog(const QString &currencycode, QWidget *par
 
     m_pos_percent_validator = new SmartDoubleValidator(0., 1000., 2, 0, this);
     m_neg_percent_validator = new SmartDoubleValidator(0., 99.99, 2, 0, this);
-    m_fixed_validator       = new SmartDoubleValidator(0,  10000, 3, 0, this);
+    m_fixed_validator       = new SmartDoubleValidator(0, FrameWork::maxPrice, 3, 0, this);
 
     connect(w_increase, &QAbstractButton::toggled,
             this, &IncDecPricesDialog::updateValidators);

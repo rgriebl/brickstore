@@ -56,6 +56,9 @@ public:
     Window *createWindow(Document *doc);
     Window *activeWindow() const;
 
+    static constexpr int maxQuantity = 9999999;
+    static constexpr double maxPrice = 99999;
+
 public slots:
     void selectionUpdate(const Document::ItemList &selection);
     void statisticsUpdate();

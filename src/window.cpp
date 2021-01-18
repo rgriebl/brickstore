@@ -815,7 +815,8 @@ void Window::on_edit_price_set_triggered()
     double price = selection().front()->price();
 
     if (MessageBox::getDouble(this, { }, tr("Enter the new price for all selected items:"),
-                              Currency::localSymbol(m_doc->currencyCode()), price, 0, 10000, 3)) {
+                              Currency::localSymbol(m_doc->currencyCode()), price, 0,
+                              FrameWork::maxPrice, 3)) {
         setOrToggle<double>::set(this, QT_TR_N_NOOP("Set price on %n item(s)"),
                                  &Document::Item::price, &Document::Item::setPrice, price);
     }
@@ -1053,20 +1054,34 @@ void Window::on_edit_qty_multiply_triggered()
     if (MessageBox::getInteger(this, { }, tr("Multiply the quantities of all selected items with this factor."),
                                tr("x"), factor, -1000, 1000)) {
         if ((factor <= -1) || (factor > 1)) {
-            uint mulcount = 0;
-            m_doc->beginMacro();
+            int lots_with_errors = 0;
+            int maxQty = FrameWork::maxQuantity / qAbs(factor);
 
-            WindowProgress wp(w_list);
-
-            foreach(Document::Item *pos, selection()) {
-                Document::Item item = *pos;
-
-                item.setQuantity(item.quantity() * factor);
-                m_doc->changeItem(pos, item);
-
-                mulcount++;
+            foreach(Document::Item *item, selection()) {
+                if (qAbs(item->quantity()) > maxQty)
+                    lots_with_errors++;
             }
-            m_doc->endMacro(tr("Quantity multiply by %1 on %n items", nullptr, mulcount).arg(factor));
+
+            if (lots_with_errors) {
+                MessageBox::information(this, { },
+                                        tr("The quantities of %n lot(s) will exceed the maximum allowed value (%2) when multiplied by %1.<br /><br />Nothing has been modified.",
+                                           nullptr, lots_with_errors).arg(factor).arg(FrameWork::maxQuantity));
+            } else {
+                uint mulcount = 0;
+                m_doc->beginMacro();
+
+                WindowProgress wp(w_list);
+
+                foreach(Document::Item *pos, selection()) {
+                    Document::Item item = *pos;
+
+                    item.setQuantity(item.quantity() * factor);
+                    m_doc->changeItem(pos, item);
+
+                    mulcount++;
+                }
+                m_doc->endMacro(tr("Quantity multiply by %1 on %n items", nullptr, mulcount).arg(factor));
+            }
         }
     }
 }
@@ -1123,7 +1138,7 @@ void Window::on_edit_qty_set_triggered()
     int quantity = selection().front()->quantity();
 
     if (MessageBox::getInteger(this, { }, tr("Enter the new quantities for all selected items:"),
-                               QString(), quantity, -100000, 100000)) {
+                               QString(), quantity, -FrameWork::maxQuantity, FrameWork::maxQuantity)) {
         setOrToggle<int>::set(this, QT_TR_N_NOOP("Set quantity on %n item(s)"),
                               &Document::Item::quantity, &Document::Item::setQuantity, quantity);
     }

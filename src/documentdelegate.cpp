@@ -774,16 +774,18 @@ QWidget *DocumentDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
     switch (idx.column()) {
     case Document::Sale        : valid = new SmartIntValidator(-1000, 99, 0, nullptr); break;
     case Document::Quantity    :
-    case Document::QuantityDiff: valid = new SmartIntValidator(-999999, 999999, 0, nullptr); break;
-    case Document::Bulk        : valid = new SmartIntValidator(1, 999999, 1, nullptr); break;
+    case Document::QuantityDiff: valid = new SmartIntValidator(-FrameWork::maxQuantity,
+                                                               FrameWork::maxQuantity, 0, nullptr); break;
+    case Document::Bulk        : valid = new SmartIntValidator(1, FrameWork::maxQuantity, 1, nullptr); break;
     case Document::TierQ1      :
     case Document::TierQ2      :
-    case Document::TierQ3      : valid = new SmartIntValidator(0, 999999, 0, nullptr); break;
+    case Document::TierQ3      : valid = new SmartIntValidator(0, FrameWork::maxQuantity, 0, nullptr); break;
     case Document::Price       :
     case Document::TierP1      :
     case Document::TierP2      :
-    case Document::TierP3      : valid = new SmartDoubleValidator(0, 10000, 3, 0, nullptr); break;
-    case Document::PriceDiff   : valid = new SmartDoubleValidator(-10000, 10000, 3, 0, nullptr); break;
+    case Document::TierP3      : valid = new SmartDoubleValidator(0, FrameWork::maxPrice, 3, 0, nullptr); break;
+    case Document::PriceDiff   : valid = new SmartDoubleValidator(-FrameWork::maxPrice,
+                                                                  FrameWork::maxPrice, 3, 0, nullptr); break;
     case Document::Weight      : valid = new SmartDoubleValidator(0., 100000., 4, 0, nullptr); break;
     default                    : break;
     }

@@ -39,6 +39,7 @@
 #include "appearsinwidget.h"
 #include "selectitem.h"
 #include "selectcolor.h"
+#include "framework.h"
 #include "additemdialog.h"
 
 
@@ -90,15 +91,15 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     w_appears_in->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
     w_appears_in->setLineWidth(2);
 
-    ValidatorSpinBox::setValidator(w_qty, new SmartIntValidator(1, 999999, 1, w_qty));
+    ValidatorSpinBox::setValidator(w_qty, new SmartIntValidator(1, FrameWork::maxQuantity, 1, w_qty));
     w_qty->setValue(1);
     w_qty->installEventFilter(this);
 
-    ValidatorSpinBox::setValidator(w_bulk, new SmartIntValidator(1, 999999, 1, w_bulk));
+    ValidatorSpinBox::setValidator(w_bulk, new SmartIntValidator(1, FrameWork::maxQuantity, 1, w_bulk));
     w_bulk->setValue(1);
     w_bulk->installEventFilter(this);
 
-    w_price->setValidator(new SmartDoubleValidator(0, 10000, 3, 0, w_price));
+    w_price->setValidator(new SmartDoubleValidator(0, FrameWork::maxPrice, 3, 0, w_price));
     w_price->setText("0");
     w_price->installEventFilter(this);
 
@@ -110,7 +111,8 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     w_tier_price [2] = w_tier_price_2;
 
     for (int i = 0; i < 3; i++) {
-        ValidatorSpinBox::setValidator(w_tier_qty[i], new SmartIntValidator(1, 999999, 1, w_tier_qty[i]));
+        ValidatorSpinBox::setValidator(w_tier_qty[i], new SmartIntValidator(1, FrameWork::maxQuantity,
+                                                                            1, w_tier_qty[i]));
         w_tier_qty [i]->setValue(0);
         w_tier_price [i]->setText(QString());
         w_tier_qty [i]->installEventFilter(this);
@@ -123,7 +125,7 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     }
 
     m_percent_validator = new SmartIntValidator(1, 99, 1, this);
-    m_money_validator = new SmartDoubleValidator(0.001, 10000, 3, 1, this);
+    m_money_validator = new SmartDoubleValidator(0.001, FrameWork::maxPrice, 3, 1, this);
 
     connect(w_select_item, &SelectItem::hasColors,
             w_select_color, &QWidget::setEnabled);
