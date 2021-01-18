@@ -154,7 +154,7 @@ win32 {
     # The build from slwebpro.com on the other hand are built against a recent v14 runtime, which
     # we are installing anyway.
     deploy.depends += $(DESTDIR_TARGET)
-    deploy.commands += $$shell_path($$[QT_HOST_BINS]/windeployqt.exe) $(DESTDIR_TARGET)
+    deploy.commands += $$shell_path($$[QT_HOST_BINS]/windeployqt.exe) --qmldir $$shell_quote($$shell_path($$PWD/extensions)) $(DESTDIR_TARGET)
     deploy.commands += & $$QMAKE_COPY $$shell_quote($$shell_path($$OPENSSL_PATH/libcrypto-1_1$${OPENSSL_ARCH}.dll)) $(DESTDIR)
     deploy.commands += & $$QMAKE_COPY $$shell_quote($$shell_path($$OPENSSL_PATH/libssl-1_1$${OPENSSL_ARCH}.dll)) $(DESTDIR)
 
