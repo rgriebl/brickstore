@@ -57,12 +57,14 @@ protected:
 
     static QColor shadeColor(int idx, qreal alpha = 0);
 
+    bool eventFilter(QObject *o, QEvent *e) override;
+
 protected:
     Document *m_doc;
     DocumentProxyModel *m_view;
     QTableView *m_table;
-    SelectItemDialog * m_select_item = nullptr;
-    SelectColorDialog *m_select_color = nullptr;
+    QPointer<SelectItemDialog> m_select_item;
+    QPointer<SelectColorDialog> m_select_color;
     mutable QPointer<QLineEdit> m_lineedit;
     bool m_read_only = false;
     mutable QSet<quint64> m_elided;

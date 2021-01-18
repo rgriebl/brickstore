@@ -86,6 +86,16 @@ QColor DocumentDelegate::shadeColor(int idx, qreal alpha)
     return c;
 }
 
+bool DocumentDelegate::eventFilter(QObject *o, QEvent *e)
+{
+    if (e->type() == QEvent::LanguageChange) {
+        // these get recreated on the next use with the correct title
+        delete m_select_color.data();
+        delete m_select_item.data();
+    }
+    return QItemDelegate::eventFilter(o, e);
+}
+
 QIcon::Mode DocumentDelegate::iconMode(QStyle::State state) const
 {
     if (!(state & QStyle::State_Enabled)) return QIcon::Disabled;
@@ -724,6 +734,7 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
                 m_select_item = new SelectItemDialog(false, m_table);
                 m_select_item->setWindowFlag(Qt::Tool);
                 m_select_item->setWindowTitle(tr("Modify Item"));
+                m_select_item->installEventFilter(this); // retranslation
             }
             m_select_item->setItem(it->item());
 
@@ -743,6 +754,7 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
                 m_select_color = new SelectColorDialog(m_table);
                 m_select_color->setWindowFlag(Qt::Tool);
                 m_select_color->setWindowTitle(tr("Modify Color"));
+                m_select_color->installEventFilter(this); // retranslation
             }
             m_select_color->setColorAndItem(it->color(), it->item());
 

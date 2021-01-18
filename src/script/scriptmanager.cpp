@@ -20,6 +20,7 @@
 #include <QQmlComponent>
 #include <QQmlEngine>
 #include <QQmlInfo>
+#include <QStringBuilder>
 
 #include "scriptmanager.h"
 #include "script.h"
@@ -142,13 +143,17 @@ bool ScriptManager::reload()
 
         const QFileInfoList fis = QDir(dir).entryInfoList(QStringList("*.bs.qml"), QDir::Files | QDir::Readable);
         for (const QFileInfo &fi : fis) {
-            try {
-                loadScript(fi.absoluteFilePath());
+            QString filePath = fi.absoluteFilePath();
+            if (filePath.startsWith(u":"))
+                filePath = u"qrc://" % filePath.mid(1);
 
-                qDebug() << "  [ ok ]" << fi.absoluteFilePath();
+            try {
+                loadScript(filePath);
+
+                qDebug() << "  [ ok ]" << filePath;
 
             } catch (const Exception &e) {
-                qWarning() << "  [fail]" << fi.absoluteFilePath() << ":" << e.what();
+                qWarning() << "  [fail]" << filePath << ":" << e.what();
             }
         }
     }

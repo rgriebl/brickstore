@@ -488,6 +488,13 @@ void PriceGuideWidget::recalcLayoutVertical(const QSize &s, const QFontMetrics &
     setMinimumSize(2 * frameWidth() + cw[0] + d->s_cond_count * cw[1],
                    2 * frameWidth() + (1 + d->s_time_count * (2 + d->s_price_count)) * ch);
 
+    if (minimumWidth() < s.width()) {
+        int freeSpace = s.width() - minimumWidth();
+        int delta = freeSpace / (d->s_cond_count * 2 + 1);
+        cw[0] += (freeSpace - delta * d->s_cond_count * 2);
+        cw[1] += delta * 2;
+    }
+
     dx = 0;
     dy = 0;
 

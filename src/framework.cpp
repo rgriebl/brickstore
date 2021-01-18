@@ -411,7 +411,7 @@ FrameWork::FrameWork(QWidget *parent)
                                       "edit_subtractitems",
                                       "edit_mergeitems",
                                       "edit_partoutitems",
-                                      "edit_setmatch",
+                                      //"edit_setmatch",
                                       "-",
                                       "edit_status",
                                       "edit_cond",
@@ -486,6 +486,7 @@ FrameWork::FrameWork(QWidget *parent)
                                    "edit_color",
                                    "edit_qty",
                                    "edit_price",
+                                   "edit_comment",
                                    "edit_remark",
                                    "-",
                                    "edit_bl_catalog",
@@ -800,10 +801,12 @@ void FrameWork::translateActions()
         { "edit_comment_set",               tr("Set..."),                             },
         { "edit_comment_add",               tr("Add to..."),                          },
         { "edit_comment_rem",               tr("Remove from..."),                     },
+        { "edit_comment_clear",             tr("Clear"),                              },
         { "edit_remark",                    tr("Remark"),                             },
         { "edit_remark_set",                tr("Set..."),                             },
         { "edit_remark_add",                tr("Add to..."),                          },
         { "edit_remark_rem",                tr("Remove from..."),                     },
+        { "edit_remark_clear",              tr("Clear"),                              },
         { "edit_retain",                    tr("Retain in Inventory"),                },
         { "edit_retain_yes",                tr("Yes"),                                },
         { "edit_retain_no",                 tr("No"),                                 },
@@ -1025,6 +1028,8 @@ bool FrameWork::setupToolBar(QToolBar *t, const QVector<QByteArray> &a_names)
                     if (m_filter)
                         emit filterTextChanged(m_filter->text());
                 });
+                connect(new QShortcut(QKeySequence::Find, m_filter), &QShortcut::activated,
+                        m_filter, [this]() { m_filter->setFocus(); });
 
                 t->addWidget(m_filter);
             } else if (an == "widget_progress") {
@@ -1235,12 +1240,14 @@ void FrameWork::createActions()
 
     m = newQMenu(this, "edit_comment", NeedSelection(1));
     m->addAction(newQAction(this, "edit_comment_set", NeedSelection(1)));
+    m->addAction(newQAction(this, "edit_comment_clear", NeedSelection(1)));
     m->addSeparator();
     m->addAction(newQAction(this, "edit_comment_add", NeedSelection(1)));
     m->addAction(newQAction(this, "edit_comment_rem", NeedSelection(1)));
 
     m = newQMenu(this, "edit_remark", NeedSelection(1));
     m->addAction(newQAction(this, "edit_remark_set", NeedSelection(1)));
+    m->addAction(newQAction(this, "edit_remark_clear", NeedSelection(1)));
     m->addSeparator();
     m->addAction(newQAction(this, "edit_remark_add", NeedSelection(1)));
     m->addAction(newQAction(this, "edit_remark_rem", NeedSelection(1)));

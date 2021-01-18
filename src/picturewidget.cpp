@@ -210,7 +210,7 @@ void PictureWidget::setItemAndColor(const BrickLink::Item *item, const BrickLink
 
     if (m_pic)
         m_pic->release();
-    m_pic = item ? BrickLink::core()->largePicture(item, true) : nullptr;
+    m_pic = item ? BrickLink::core()->picture(item, color, true) : nullptr;
     if (m_pic) {
         m_pic->addRef();
         if (m_pic->valid())

@@ -1159,6 +1159,16 @@ void Window::on_edit_remark_set_triggered()
     }
 }
 
+void Window::on_edit_remark_clear_triggered()
+{
+    if (selection().isEmpty())
+        return;
+
+    setOrToggle<QString, const QString &>::set(this, QT_TR_NOOP("Clear remark on %n item(s)"),
+                                               &Document::Item::remarks, &Document::Item::setRemarks,
+                                               QString { });
+}
+
 void Window::on_edit_remark_add_triggered()
 {
     if (selection().isEmpty())
@@ -1248,6 +1258,16 @@ void Window::on_edit_comment_set_triggered()
         setOrToggle<QString, const QString &>::set(this, QT_TR_N_NOOP("Set comment on %n item(s)"),
                                                    &Document::Item::comments, &Document::Item::setComments,
                                                    comments);
+}
+
+void Window::on_edit_comment_clear_triggered()
+{
+    if (selection().isEmpty())
+        return;
+
+    setOrToggle<QString, const QString &>::set(this, QT_TR_NOOP("Clear comment on %n item(s)"),
+                                               &Document::Item::comments, &Document::Item::setComments,
+                                               QString { });
 }
 
 void Window::on_edit_comment_add_triggered()

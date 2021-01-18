@@ -164,7 +164,7 @@ void BrickLink::Picture::loadFromDisk()
         if (f->size() > 0) {
             isValid = image.load(f.data(), "PNG");
         } else {
-            if (!m_color && m_item && m_item->itemType())
+            if (m_color && m_item && m_item->itemType())
                 image = BrickLink::core()->noImage(m_item->itemType()->rawPictureSize());
 
             isValid = true;

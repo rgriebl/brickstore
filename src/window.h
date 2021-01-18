@@ -144,9 +144,11 @@ public slots:
     void on_edit_remark_add_triggered();
     void on_edit_remark_rem_triggered();
     void on_edit_remark_set_triggered();
+    void on_edit_remark_clear_triggered();
     void on_edit_comment_add_triggered();
     void on_edit_comment_rem_triggered();
     void on_edit_comment_set_triggered();
+    void on_edit_comment_clear_triggered();
 
     void on_edit_bl_catalog_triggered();
     void on_edit_bl_priceguide_triggered();
