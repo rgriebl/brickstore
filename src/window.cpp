@@ -159,6 +159,16 @@ public:
             m_progress->setValue(m_progress->value() + d);
     }
 
+    void setOverrideCursor()
+    {
+        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+    }
+
+    void restoreOverrideCursor()
+    {
+        QApplication::restoreOverrideCursor();
+    }
+
 private:
     Q_DISABLE_COPY(WindowProgress)
 
@@ -404,7 +414,6 @@ QString Window::filterToolTip() const
 
 int Window::addItems(const BrickLink::InvItemList &items, int multiply, uint globalmergeflags, bool /*dont_change_sorting*/)
 {
-    bool waitcursor = (items.count() > 100);
     bool was_empty = (w_list->model()->rowCount() == 0);
     int dropped = 0;
     uint merge_action_yes_no_to_all = MergeAction_Ask;
@@ -412,9 +421,6 @@ int Window::addItems(const BrickLink::InvItemList &items, int multiply, uint glo
 
     if (items.count() > 1)
         m_doc->beginMacro();
-
-    if (waitcursor)
-        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     WindowProgress wp(w_list);
 
@@ -444,9 +450,12 @@ int Window::addItems(const BrickLink::InvItemList &items, int multiply, uint glo
                 mergeflags = merge_action_yes_no_to_all;
             }
             else {
-                ConsolidateItemsDialog dlg(olditem, newitem, ((mergeflags & MergeKeep_Mask) == MergeKeep_Old), this);
+                wp.restoreOverrideCursor();
 
+                ConsolidateItemsDialog dlg(olditem, newitem, ((mergeflags & MergeKeep_Mask) == MergeKeep_Old), this);
                 int res = dlg.exec();
+
+                wp.setOverrideCursor();
 
                 mergeflags = (res == QDialog::Accepted) ? MergeAction_Force : MergeAction_None;
 
@@ -479,9 +488,6 @@ int Window::addItems(const BrickLink::InvItemList &items, int multiply, uint glo
         }
     }
     wp.stop();
-
-    if (waitcursor)
-        QApplication::restoreOverrideCursor();
 
     if (items.count() > 1)
         m_doc->endMacro(tr("Added %1, merged %2 items").arg(addcount).arg(mergecount));
@@ -540,9 +546,12 @@ void Window::mergeItems(const Document::ItemList &items, uint globalmergeflags)
                 mergeflags = merge_action_yes_no_to_all;
             }
             else {
-                ConsolidateItemsDialog dlg(to, from, ((mergeflags & MergeKeep_Mask) == MergeKeep_Old), this);
+                wp.restoreOverrideCursor();
 
+                ConsolidateItemsDialog dlg(to, from, ((mergeflags & MergeKeep_Mask) == MergeKeep_Old), this);
                 int res = dlg.exec();
+
+                wp.setOverrideCursor();
 
                 mergeflags = (res ? MergeAction_Force : MergeAction_None);
 
