@@ -66,6 +66,7 @@ class Element
 public:
     enum Type {
         Comment,
+        BfcCommand,
         Line,
         Part,
         Triangle,
@@ -101,12 +102,43 @@ public:
     void dump() const override;
 
 protected:
+    CommentElement(Type t, const QByteArray &text);
     CommentElement(const QByteArray &);
 
     QByteArray m_comment;
 
 private:
     Q_DISABLE_COPY(CommentElement)
+};
+
+
+class BfcCommandElement : public CommentElement
+{
+public:
+    bool certify() const { return m_certify; }
+    bool noCertify() const { return m_nocertify; }
+    bool clip() const { return m_clip; }
+    bool noClip() const { return m_noclip; }
+    bool ccw() const { return m_ccw; }
+    bool cw() const { return m_cw; }
+    bool invertNext() const { return m_invertNext; }
+
+    static BfcCommandElement *create(const QByteArray &text);
+
+protected:
+    BfcCommandElement(const QByteArray &);
+
+    bool m_certify = false;
+    bool m_nocertify = false;
+    bool m_clip = false;
+    bool m_noclip = false;
+    bool m_ccw = false;
+    bool m_cw = false;
+    bool m_invertNext = false;
+
+private:
+    Q_DISABLE_COPY(BfcCommandElement)
+    friend class CommentElement;
 };
 
 

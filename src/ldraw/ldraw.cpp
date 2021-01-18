@@ -54,7 +54,7 @@ LDraw::Element *LDraw::Element::fromByteArray(const QByteArray &line, const QDir
             if (!t || element_count_lut[t] == bal.size()) {
                 switch (t) {
                 case 0: {
-                    e = CommentElement::create(line.trimmed().mid(1).trimmed());
+                    e = CommentElement::create(line.simplified().mid(2));
                     break;
                 }
                 case 1: {
@@ -132,17 +132,52 @@ void LDraw::Element::dump() const
 
 
 LDraw::CommentElement::CommentElement(const QByteArray &text)
-    : Element(Comment), m_comment(text)
+    : Element(Comment)
+    , m_comment(text)
+{ }
+
+LDraw::CommentElement::CommentElement(LDraw::Element::Type t, const QByteArray &text)
+    : Element(t)
+    , m_comment(text)
 { }
 
 LDraw::CommentElement *LDraw::CommentElement::create(const QByteArray &text)
 {
-    return new CommentElement(text);
+    if (text.startsWith("BFC "))
+        return new BfcCommandElement(text);
+    else
+        return new CommentElement(text);
 }
 
 void LDraw::CommentElement::dump() const
 {
     qDebug() << 0 << m_comment.constData();
+}
+
+
+
+LDraw::BfcCommandElement::BfcCommandElement(const QByteArray &text)
+    : CommentElement(BfcCommand, text)
+{
+    QList<QByteArray> c = text.split(' ');
+    if ((c.count() >= 2) && (c.at(0) == "BFC")) {
+        for (int i = 1; i < c.length(); ++i) {
+            QByteArray bfcCommand = c.at(i);
+
+            if (bfcCommand == "INVERTNEXT") {
+                m_invertNext = true;
+            } else if (bfcCommand == "CW") {
+                m_cw = true;
+            } else if (bfcCommand == "CCW") {
+                m_ccw = true;
+            }
+        }
+    }
+}
+
+LDraw::BfcCommandElement *LDraw::BfcCommandElement::create(const QByteArray &text)
+{
+    return new BfcCommandElement(text);
 }
 
 

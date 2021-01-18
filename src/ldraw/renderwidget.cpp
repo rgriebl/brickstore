@@ -48,7 +48,7 @@ LDraw::GLRenderer::~GLRenderer()
 void LDraw::GLRenderer::cleanup()
 {
     emit makeCurrent();
-    for (int i = 0; i < Count; ++i)
+    for (int i = 0; i < VBO_Count; ++i)
         m_vbos[i].destroy();
     delete m_program;
     m_program = nullptr;
@@ -76,7 +76,7 @@ void LDraw::GLRenderer::setPartAndColor(LDraw::Part *part, int basecolor)
 {
     m_part = part;
     m_color = basecolor;
-    m_dirty = (1 << Surfaces) | (1 << Lines) | (1 << ConditionalLines);
+    m_dirty = (1 << VBO_Surfaces) | (1 << VBO_Lines) | (1 << VBO_ConditionalLines);
 
     m_proj.setToIdentity();
     m_center = { };
@@ -171,6 +171,33 @@ void LDraw::GLRenderer::setZoom(qreal z)
     }
 }
 
+void LDraw::GLRenderer::updateProjectionMatrix()
+{
+    qreal w = m_viewport.width();
+    qreal h = m_viewport.height();
+
+    qreal ax = (h < w && h) ? w / h : 1;
+    qreal ay = (w < h && w) ? h / w : 1;
+
+    m_proj.setToIdentity();
+    m_proj.ortho((m_center.x() - m_radius) * ax, (m_center.x() + m_radius) * ax,
+                 (m_center.y() - m_radius) * ay, (m_center.y() + m_radius) * ay,
+                 -m_center.z() - 2 * m_radius, -m_center.z() + 2 * m_radius);
+}
+
+void LDraw::GLRenderer::updateWorldMatrix()
+{
+    m_model.setToIdentity();
+    m_model.translate(m_tx, m_ty, m_tz);
+    m_model.translate(m_center.x(), m_center.y(), m_center.z());
+    m_model.rotate(m_rx, 1, 0, 0);
+    m_model.rotate(m_ry, 0, 1, 0);
+    m_model.rotate(m_rz, 0, 0, 1);
+    m_model.translate(-m_center.x(), -m_center.y(), -m_center.z());
+    m_model.scale(m_zoom);
+    m_dirty |= (1 << VBO_ConditionalLines);
+}
+
 void LDraw::GLRenderer::initializeGL(QOpenGLContext *context)
 {
     connect(context, &QOpenGLContext::aboutToBeDestroyed, this, &GLRenderer::cleanup);
@@ -179,57 +206,41 @@ void LDraw::GLRenderer::initializeGL(QOpenGLContext *context)
     glClearColor(.5, .5, .5, 0);
 
     m_program = new QOpenGLShaderProgram;
-    m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexShaderSourceSimple);
-    m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentShaderSourceSimple);
+    m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexShaderSourcePhong20);
+    m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentShaderSourcePhong20);
     m_program->bindAttributeLocation("vertex", 0);
-    m_program->bindAttributeLocation("color", 1);
+    m_program->bindAttributeLocation("normal", 1);
+    m_program->bindAttributeLocation("color", 2);
     m_program->link();
 
     m_program->bind();
     m_projMatrixLoc = m_program->uniformLocation("projMatrix");
-    m_mvMatrixLoc = m_program->uniformLocation("mvMatrix");
+    m_modelMatrixLoc = m_program->uniformLocation("modelMatrix");
+    m_viewMatrixLoc = m_program->uniformLocation("viewMatrix");
+    m_normalMatrixLoc = m_program->uniformLocation("normalMatrix");
+    m_lightPosLoc = m_program->uniformLocation("lightPos");
+    m_cameraPosLoc = m_program->uniformLocation("cameraPos");
 
-    // Create a vertex array object. In OpenGL ES 2.0 and OpenGL 2.x
-    // implementations this is optional and support may not be present
-    // at all. Nonetheless the below code works in all cases and makes
-    // sure there is a VAO when one is needed.
     m_vao.create();
     QOpenGLVertexArrayObject::Binder vaoBinder(&m_vao);
 
-    // Setup our vertex buffer object.
-
-    for (int i = 0; i < 3; ++i)
+    for (int i = 0; i < VBO_Count; ++i)
         m_vbos[i].create();
 
     if (m_part && m_dirty)
         recreateVBOs();
 
-    // Our camera never changes in this example.
-    m_camera.setToIdentity();
-    m_camera.translate(0, 0, -1);
+    // Fixed camera / viewMatrix
+    QVector3D cameraPos = { 0, 0, -1 };
+    m_view.setToIdentity();
+    m_view.translate(cameraPos);
+    m_program->setUniformValue(m_cameraPosLoc, cameraPos);
+
+    // Fixed light position (very far away, because we can scale the model up quite a bit)
+    QVector3D lightPos = { -1, .2f, 1 };
+    m_program->setUniformValue(m_lightPosLoc, lightPos * 10000);
 
     m_program->release();
-}
-
-void LDraw::GLRenderer::recreateVBOs()
-{
-    if (!m_part)
-        return;
-
-    std::vector<GLfloat> buffer[Count];
-    std::vector<GLfloat> *buffer_ptr[3] = { &buffer[0], &buffer[1], &buffer[2] };
-    renderVBOs(m_part, m_color, QMatrix4x4(), m_dirty, buffer_ptr);
-
-    for (int i = 0; i < Count; ++i) {
-        if (m_dirty & (1 << i)) {
-            m_vboSizes[i] = int(buffer[i].size()) / 7;
-
-            m_vbos[i].bind();
-            m_vbos[i].allocate(buffer[i].data(), int(buffer[i].size()) * sizeof(GLfloat));
-            m_vbos[i].release();
-        }
-    }
-    m_dirty = 0;
 }
 
 void LDraw::GLRenderer::resizeGL(QOpenGLContext *context, int w, int h)
@@ -250,7 +261,6 @@ void LDraw::GLRenderer::paintGL(QOpenGLContext *context)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glEnable(GL_DEPTH_TEST);
-    //glEnable(GL_CULL_FACE);
     glEnable(GL_MULTISAMPLE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -258,10 +268,13 @@ void LDraw::GLRenderer::paintGL(QOpenGLContext *context)
     QOpenGLVertexArrayObject::Binder vaoBinder(&m_vao);
     m_program->bind();
     m_program->setUniformValue(m_projMatrixLoc, m_proj);
-    m_program->setUniformValue(m_mvMatrixLoc, m_camera * m_world);
-    QMatrix3x3 normalMatrix = m_world.normalMatrix();
+    m_program->setUniformValue(m_modelMatrixLoc, m_model);
+    m_program->setUniformValue(m_viewMatrixLoc, m_view);
+    QMatrix3x3 normalMatrix = m_model.normalMatrix();
     m_program->setUniformValue(m_normalMatrixLoc, normalMatrix);
 
+    // we need to offset the surfaces in the depth buffer, so that the lines are always
+    // rendered on top, even though the technically have the same Z coordinate
     glEnable(GL_POLYGON_OFFSET_FILL);
     glPolygonOffset(1, 1);
 
@@ -272,34 +285,65 @@ void LDraw::GLRenderer::paintGL(QOpenGLContext *context)
         m_vbos[index].bind();
 
         glEnableVertexAttribArray(0); // vertex
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), reinterpret_cast<void *>(0));
-        glEnableVertexAttribArray(1); // color
-        glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), reinterpret_cast<void *>(3 * sizeof(GLfloat)));
+        glVertexAttribPointer(0, VBO_Size_Vertex, GL_FLOAT, GL_FALSE, VBO_Stride * sizeof(GLfloat),
+                              reinterpret_cast<void *>(VBO_Offset_Vertex * sizeof(GLfloat)));
+        glEnableVertexAttribArray(1); // normals
+        glVertexAttribPointer(1, VBO_Size_Normal, GL_FLOAT, GL_FALSE, VBO_Stride * sizeof(GLfloat),
+                              reinterpret_cast<void *>(VBO_Offset_Normal * sizeof(GLfloat)));
+        glEnableVertexAttribArray(2); // color
+        glVertexAttribPointer(2, VBO_Size_Color, GL_FLOAT, GL_FALSE, VBO_Stride * sizeof(GLfloat),
+                              reinterpret_cast<void *>(VBO_Offset_Color * sizeof(GLfloat)));
 
         glDrawArrays(mode, 0, m_vboSizes[index]);
         m_vbos[index].release();
     };
 
-    renderVBO(Surfaces, GL_TRIANGLES);
+    renderVBO(VBO_Surfaces, GL_TRIANGLES);
 
     glDisable(GL_POLYGON_OFFSET_FILL);
     glDepthMask(GL_FALSE);
 
     glLineWidth(2.5); // not supported on VMware's Linux driver
 
-    renderVBO(Lines, GL_LINES);
-    renderVBO(ConditionalLines, GL_LINES);
+    renderVBO(VBO_Lines, GL_LINES);
+    renderVBO(VBO_ConditionalLines, GL_LINES);
 
     glDepthMask(GL_TRUE);
 
     m_program->release();
 }
 
+void LDraw::GLRenderer::recreateVBOs()
+{
+    std::vector<GLfloat> buffer[VBO_Count];
+    std::vector<GLfloat> *buffer_ptr[VBO_Count];
+    for (int i = 0; i < VBO_Count; ++i)
+        buffer_ptr[i] = &buffer[i];
+
+    renderVBOs(m_part, m_color, QMatrix4x4(), false, m_dirty, buffer_ptr);
+
+    for (int i = 0; i < VBO_Count; ++i) {
+        if (m_dirty & (1 << i)) {
+            m_vboSizes[i] = int(buffer[i].size()) / VBO_Stride;
+
+            m_vbos[i].bind();
+            m_vbos[i].allocate(buffer[i].data(), int(buffer[i].size()) * sizeof(GLfloat));
+            m_vbos[i].release();
+        }
+    }
+    m_dirty = 0;
+}
 
 void LDraw::GLRenderer::renderVBOs(Part *part, int ldrawBaseColor, const QMatrix4x4 &matrix,
-                                  int dirty, std::vector<float> *buffers[])
+                                   bool inverted, int dirty, std::vector<float> *buffers[])
 {
-    // 1 element == vec3 vector + vec4 color
+    if (!part)
+        return;
+
+    bool invertNext = false;
+    bool ccw = true;
+
+    // 1 element == vec3 vector + vec3 normal + vec4 color
 
     auto addTriangle = [&buffers](const QVector3D &p0, const QVector3D &p1,
             const QVector3D &p2, const QColor &color, const QMatrix4x4 &matrix)
@@ -309,9 +353,16 @@ void LDraw::GLRenderer::renderVBOs(Part *part, int ldrawBaseColor, const QMatrix
         float b = color.blueF();
         float a = color.alphaF();
 
-        for (const auto &p : { p0, p1, p2 }) {
-            auto mp = matrix.map(p);
-            buffers[Surfaces]->insert(buffers[Surfaces]->end(), { mp.x(), mp.y(), mp.z(), r, g, b, a });
+        auto p0m = matrix.map(p0);
+        auto p1m = matrix.map(p1);
+        auto p2m = matrix.map(p2);
+
+        auto n = QVector3D::normal(p0m, p1m, p2m);
+
+        for (const auto &p : { p0m, p1m, p2m }) {
+            buffers[VBO_Surfaces]->insert(buffers[VBO_Surfaces]->end(), {
+                                          p.x(), p.y(), p.z(), n.x(), n.y(), n.z(), r, g, b, a
+                                      });
         }
     };
 
@@ -322,11 +373,13 @@ void LDraw::GLRenderer::renderVBOs(Part *part, int ldrawBaseColor, const QMatrix
         float g = color.greenF();
         float b = color.blueF();
         float a = color.alphaF();
-        int index = isConditional ? ConditionalLines : Lines;
+        int index = isConditional ? VBO_ConditionalLines : VBO_Lines;
 
         for (const auto &p : { p0, p1 }) {
             auto mp = matrix.map(p);
-            buffers[index]->insert(buffers[index]->end(), { mp.x(), mp.y(), mp.z(), r, g, b, a });
+            buffers[index]->insert(buffers[index]->end(), {
+                                       mp.x(), mp.y(), mp.z(), 0, 0, 0, r, g, b, a
+                                   });
         }
     };
 
@@ -343,31 +396,54 @@ void LDraw::GLRenderer::renderVBOs(Part *part, int ldrawBaseColor, const QMatrix
     Element * const *ep = part->elements().constData();
     int lastind = part->elements().count() - 1;
 
+    bool gotFirstNonComment = false;
+
     for (int i = 0; i <= lastind; ++i, ++ep) {
         const Element *e = *ep;
 
+        if (e->type() != Element::Comment)
+            gotFirstNonComment = true;
+
+        bool isBFCCommand = false;
+        bool isBFCInvertNext = false;
+
         switch (e->type()) {
+        case Element::BfcCommand: {
+            const auto *be = static_cast<const BfcCommandElement *>(e);
+
+            if (be->invertNext()) {
+                invertNext = true;
+                isBFCInvertNext = true;
+            }
+            if (be->cw())
+                ccw = inverted ? false : true;
+            if (be->ccw())
+                ccw = inverted ? true : false;
+
+            isBFCCommand = true;
+            break;
+        }
         case Element::Triangle: {
-            if (dirty & (1 << Surfaces)) {
+            if (dirty & (1 << VBO_Surfaces)) {
                 const auto *te = static_cast<const TriangleElement *>(e);
                 const QColor col = color(te->color(), ldrawBaseColor);
                 const auto p = te->points();
-                addTriangle(p[0], p[1], p[2], col, matrix);
+                addTriangle(p[0], ccw ? p[2] : p[1], ccw ? p[1] : p[2], col, matrix);
             }
             break;
         }
         case Element::Quad: {
-            if (dirty & (1 << Surfaces)) {
+            if (dirty & (1 << VBO_Surfaces)) {
                 const auto *qe = static_cast<const QuadElement *>(e);
                 const QColor col = color(qe->color(), ldrawBaseColor);
                 const auto p = qe->points();
-                addTriangle(p[0], p[1], p[2], col, matrix);
-                addTriangle(p[0], p[2], p[3], col, matrix);
+                addTriangle(p[0], ccw ? p[3] : p[1], p[2], col, matrix);
+                addTriangle(p[2], ccw ? p[1] : p[3], p[0], col, matrix);
             }
             break;
         }
         case Element::Line: {
-            if (dirty & (1 << Lines)) {
+            if (dirty & (1 << VBO_Lines)) {
                 const auto *le = static_cast<const LineElement *>(e);
                 const QColor col = color(le->color(), ldrawBaseColor);
                 const auto p = le->points();
@@ -376,13 +452,13 @@ void LDraw::GLRenderer::renderVBOs(Part *part, int ldrawBaseColor, const QMatrix
             break;
         }
         case Element::CondLine: {
-            if (dirty & (1 << ConditionalLines)) {
+            if (dirty & (1 << VBO_ConditionalLines)) {
                 const auto *cle = static_cast<const CondLineElement *>(e);
                 const QVector3D *v = cle->points();
 
                 QVector3D pv[4];
                 for (int j = 0; j < 4; j++)
-                    pv[j] = matrix.map(v[j]).project(m_camera * m_world, m_proj, m_viewport);
+                    pv[j] = matrix.map(v[j]).project(m_view * m_model, m_proj, m_viewport);
 
                 QVector3D line_norm = QVector3D::crossProduct(pv[1] - pv[0], QVector3D(0, 0, -1));
 
@@ -397,23 +473,51 @@ void LDraw::GLRenderer::renderVBOs(Part *part, int ldrawBaseColor, const QMatrix
         }
         case Element::Part: {
             const auto *pe = static_cast<const PartElement *>(e);
+            bool matrixReversed = (pe->matrix().determinant() < 0);
+
             renderVBOs(pe->part(), pe->color() == 16 ? ldrawBaseColor : pe->color(),
-                           matrix * pe->matrix(), dirty, buffers);
+                       matrix * pe->matrix(), inverted ^ invertNext ^ matrixReversed, dirty, buffers);
             break;
         }
         default: {
             break;
         }
         }
+
+        if (!isBFCCommand || !isBFCInvertNext)
+            invertNext = false;
     }
 }
 
 
+void LDraw::GLRenderer::startAnimation()
+{
+    if (!m_animation->isActive())
+        m_animation->start();
+}
+
+void LDraw::GLRenderer::stopAnimation()
+{
+    if (m_animation->isActive())
+        m_animation->stop();
+}
+
+bool LDraw::GLRenderer::isAnimationActive() const
+{
+    return m_animation->isActive();
+}
+
+void LDraw::GLRenderer::animationStep()
+{
+    setXRotation(xRotation() + 0.5 / 4);
+    setYRotation(yRotation() + 0.375 / 4);
+    setZRotation(zRotation() + 0.25 / 4);
+}
 
 
-
-
-
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
 
 
 LDraw::RenderWidget::RenderWidget(QWidget *parent)
@@ -517,63 +621,6 @@ void LDraw::RenderWidget::paintGL()
     m_renderer->paintGL(context());
 }
 
-
-///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-
-
-void LDraw::GLRenderer::startAnimation()
-{
-    if (!m_animation->isActive())
-        m_animation->start();
-}
-
-void LDraw::GLRenderer::stopAnimation()
-{
-    if (m_animation->isActive())
-        m_animation->stop();
-}
-
-bool LDraw::GLRenderer::isAnimationActive() const
-{
-    return m_animation->isActive();
-}
-
-void LDraw::GLRenderer::animationStep()
-{
-    setXRotation(xRotation() + 0.5 / 4);
-    setYRotation(yRotation() + 0.375 / 4);
-    setZRotation(zRotation() + 0.25 / 4);
-}
-
-void LDraw::GLRenderer::updateProjectionMatrix()
-{
-    qreal w = m_viewport.width();
-    qreal h = m_viewport.height();
-
-    qreal ax = (h < w && h) ? w / h : 1;
-    qreal ay = (w < h && w) ? h / w : 1;
-
-    m_proj.setToIdentity();
-    m_proj.ortho((m_center.x() - m_radius) * ax, (m_center.x() + m_radius) * ax,
-                 (m_center.y() - m_radius) * ay, (m_center.y() + m_radius) * ay,
-                 -m_center.z() - 2 * m_radius, -m_center.z() + 2 * m_radius);
-}
-
-void LDraw::GLRenderer::updateWorldMatrix()
-{
-    m_world.setToIdentity();
-    m_world.translate(m_tx, m_ty, m_tz);
-    m_world.translate(m_center.x(), m_center.y(), m_center.z());
-    m_world.rotate(m_rx, 1, 0, 0);
-    m_world.rotate(m_ry, 0, 1, 0);
-    m_world.rotate(m_rz, 0, 0, 1);
-    m_world.translate(-m_center.x(), -m_center.y(), -m_center.z());
-    m_world.scale(m_zoom);
-    m_dirty |= (1 << ConditionalLines);
-}
-
 void LDraw::RenderWidget::resetCamera()
 {
     stopAnimation();
@@ -598,6 +645,7 @@ void LDraw::RenderWidget::stopAnimation()
 {
     m_renderer->stopAnimation();
 }
+
 
 #endif // !QT_NO_OPENGL
 

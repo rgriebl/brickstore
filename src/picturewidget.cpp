@@ -272,17 +272,18 @@ void PictureWidget::redraw()
 #if !defined(QT_NO_OPENGL)
         w_image->hide();
 
-        w_ldraw->setPartAndColor(m_part, m_colorId);
         w_ldraw->show();
+        w_ldraw->setPartAndColor(m_part, m_colorId);
         if (m_animationActive)
             w_ldraw->startAnimation();
 #endif
     } else {
 #if !defined(QT_NO_OPENGL)
-        if (w_ldraw)
+        if (w_ldraw) {
             w_ldraw->setPartAndColor(nullptr, -1);
-        w_ldraw->hide();
-        w_ldraw->stopAnimation();
+            w_ldraw->hide();
+            w_ldraw->stopAnimation();
+        }
 #endif
         w_image->show();
     }
