@@ -358,7 +358,7 @@ WelcomeWidget::WelcomeWidget(QWidget *parent)
 
     auto b = m_db_update = new WelcomeButton(FrameWork::inst()->findAction("extras_update_database"));
     update_layout->addWidget(b, 1);
-    connect(Config::inst(), &Config::lastDatabaseUpdateChanged,
+    connect(BrickLink::core(), &BrickLink::Core::databaseDateChanged,
             this, &WelcomeWidget::updateLastDBUpdateDescription);
     auto dbLabelTimer = new QTimer(this);
     dbLabelTimer->setInterval(1000 * 60);
@@ -379,7 +379,7 @@ WelcomeWidget::WelcomeWidget(QWidget *parent)
 void WelcomeWidget::updateLastDBUpdateDescription()
 {
     auto delta = HumanReadableTimeDelta::toString(QDateTime::currentDateTime(),
-                                                  Config::inst()->lastDatabaseUpdate());
+                                                  BrickLink::core()->databaseDate());
     m_db_update->setDescription(tr("Last Database update: %1").arg(delta));
 }
 

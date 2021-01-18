@@ -547,14 +547,14 @@ FrameWork::FrameWork(QWidget *parent)
 
     bool dbok = BrickLink::core()->readDatabase();
 
-    if (!dbok) {
-        if (MessageBox::warning(nullptr, { }, tr("Could not load the BrickLink database files.<br /><br />Should these files be updated now?"), MessageBox::Yes | MessageBox::No) == MessageBox::Yes)
-            dbok = updateDatabase();
-    }
-    if (dbok)
+    if (!dbok || BrickLink::core()->isDatabaseUpdateNeeded())
+        dbok = updateDatabase();
+
+    if (dbok) {
         Application::inst()->enableEmitOpenDocument();
-    else
+    } else {
         MessageBox::warning(nullptr, { }, tr("Could not load the BrickLink database files.<br /><br />The program is not functional without these files."));
+    }
 
     m_add_dialog = nullptr;
     //createAddItemDialog();

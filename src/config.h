@@ -50,7 +50,6 @@ public:
     bool simpleMode() const;
     bool onlineStatus() const;
 
-    QDateTime lastDatabaseUpdate() const;
     QStringList recentFiles() const;
 
     static constexpr int MaxRecentFiles = 9;
@@ -91,7 +90,6 @@ public slots:
     void setSimpleMode(bool b);
     void setOnlineStatus(bool b);
 
-    void setLastDatabaseUpdate(const QDateTime &dt);
     void setRecentFiles(const QStringList &recent);
     void addToRecentFiles(const QString &file);
 
@@ -115,7 +113,6 @@ signals:
     void simpleModeChanged(bool b);
     void updateIntervalsChanged(const QMap<QByteArray, int> &intervals);
     void onlineStatusChanged(bool b);
-    void lastDatabaseUpdateChanged(const QDateTime &dt);
     void recentFilesChanged(const QStringList &recent);
     void iconSizeChanged(const QSize &iconSize);
     void fontSizePercentChanged(int p);

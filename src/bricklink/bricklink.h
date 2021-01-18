@@ -641,6 +641,8 @@ private:
 class Core : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(QDateTime databaseDate READ databaseDate NOTIFY databaseDateChanged)
+
 public:
     ~Core();
 
@@ -655,6 +657,8 @@ public:
     };
 
     QString defaultDatabaseName(DatabaseVersion version = DatabaseVersion::Latest) const;
+    QDateTime databaseDate() const;
+    bool isDatabaseUpdateNeeded() const;
 
     QString dataPath() const;
     QFile *dataFile(QStringView fileName, QIODevice::OpenMode openMode, const Item *item,
@@ -724,6 +728,7 @@ public slots:
     void cancelPriceGuideTransfers();
 
 signals:
+    void databaseDateChanged(const QDateTime &date);
     void priceGuideUpdated(BrickLink::PriceGuide *pg);
     void pictureUpdated(BrickLink::Picture *inv);
     void itemImageScaleFactorChanged(qreal f);
@@ -747,7 +752,7 @@ private:
     friend void PriceGuide::update(bool);
     friend void Picture::update(bool);
 
-    bool updateNeeded(bool valid, const QDateTime &last, int iv);
+    static bool updateNeeded(bool valid, const QDateTime &last, int iv);
     bool parseLDrawModelInternal(QFile &file, const QString &model_name, InvItemList &items, uint *invalid_items, QHash<QString, InvItem *> &mergehash, QStringList &recursion_detection);
 
     static Color *readColorFromDatabase(QDataStream &dataStream, DatabaseVersion v);
@@ -789,11 +794,12 @@ private:
 
     QPointer<Transfer>  m_transfer = nullptr;
 
-    //Transfer                   m_pg_transfer;
+    int                          m_db_update_iv = 0;
+    QDateTime                    m_databaseDate;
+
     int                          m_pg_update_iv = 0;
     Q3Cache<quint64, PriceGuide> m_pg_cache;
 
-    //Transfer                   m_pic_transfer;
     int                          m_pic_update_iv = 0;
     QThreadPool                  m_pic_diskload;
     Q3Cache<quint64, Picture>    m_pic_cache;

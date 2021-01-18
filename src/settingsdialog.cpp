@@ -188,7 +188,6 @@ void SettingsDialog::resetUpdateIntervals()
     w_upd_picture->setValue(sec2day(intervals["Picture"]));
     w_upd_priceguide->setValue(sec2day(intervals["PriceGuide"]));
     w_upd_database->setValue(sec2day(intervals["Database"]));
-    w_upd_ldraw->setValue(sec2day(intervals["LDraw"]));
 }
 
 void SettingsDialog::accept()
@@ -279,7 +278,6 @@ void SettingsDialog::load()
     w_upd_picture->setValue(sec2day(intervals["Picture"]));
     w_upd_priceguide->setValue(sec2day(intervals["PriceGuide"]));
     w_upd_database->setValue(sec2day(intervals["Database"]));
-    w_upd_ldraw->setValue(sec2day(intervals["LDraw"]));
 
     // --[ DEFAULTS ]-------------------------------------------------------------------
 
@@ -376,7 +374,6 @@ void SettingsDialog::save()
     intervals.insert("Picture", day2sec(w_upd_picture->value()));
     intervals.insert("PriceGuide", day2sec(w_upd_priceguide->value()));
     intervals.insert("Database", day2sec(w_upd_database->value()));
-    intervals.insert("LDraw", day2sec(w_upd_ldraw->value()));
 
     Config::inst()->setUpdateIntervals(intervals);
 

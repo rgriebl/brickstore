@@ -140,26 +140,6 @@ void Config::upgrade(int vmajor, int vminor)
 //    }
 }
 
-QDateTime Config::lastDatabaseUpdate() const
-{
-    QDateTime dt;
-
-    uint tt = value("BrickLink/LastDBUpdate", 0).toUInt();
-    if (tt)
-        dt.setTime_t(tt);
-    return dt;
-}
-
-void Config::setLastDatabaseUpdate(const QDateTime &dt)
-{
-    if (dt != lastDatabaseUpdate()) {
-        time_t tt = dt.isValid() ? dt.toTime_t () : 0;
-        setValue("BrickLink/LastDBUpdate", int(tt));
-
-        emit lastDatabaseUpdateChanged(dt);
-    }
-}
-
 QStringList Config::recentFiles() const
 {
     return value("/Files/Recent").toStringList();

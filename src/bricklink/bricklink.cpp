@@ -415,6 +415,7 @@ Transfer *Core::transfer() const
 
 void Core::setUpdateIntervals(const QMap<QByteArray, int> &intervals)
 {
+    m_db_update_iv = intervals["Database"];
     m_pic_update_iv = intervals["Picture"];
     m_pg_update_iv = intervals["PriceGuide"];
 }
@@ -531,6 +532,16 @@ void Core::cancelPriceGuideTransfers()
 QString Core::defaultDatabaseName(DatabaseVersion version) const
 {
     return QString("database-v%1").arg(int(version));
+}
+
+QDateTime Core::databaseDate() const
+{
+    return m_databaseDate;
+}
+
+bool Core::isDatabaseUpdateNeeded() const
+{
+    return updateNeeded(m_databaseDate.isValid(), m_databaseDate, m_db_update_iv);
 }
 
 void Core::clear()
@@ -1247,6 +1258,7 @@ bool Core::readDatabase(QString *infoText, const QString &filename)
 
         stopwatch *sw = nullptr; //new stopwatch("Core::readDatabase()");
 
+        QDateTime generationDate;
         QString info;
         if (infoText)
             infoText->clear();
@@ -1288,6 +1300,10 @@ bool Core::readDatabase(QString *infoText, const QString &filename)
             switch (cr.chunkId() | quint64(cr.chunkVersion()) << 32) {
             case ChunkId('I','N','F','O') | 1ULL << 32: {
                 ds >> info;
+                break;
+            }
+            case ChunkId('D','A','T','E') | 1ULL << 32: {
+                ds >> generationDate;
                 break;
             }
             case ChunkId('C','O','L',' ') | 1ULL << 32: {
@@ -1381,10 +1397,16 @@ bool Core::readDatabase(QString *infoText, const QString &filename)
                 .arg(f.fileName());
         }
 
+        qDebug("Generated : %s", generationDate.isValid() ? qPrintable(generationDate.toLocalTime().toString())
+                                                          : "(no date found in database)");
         qDebug("Colors    : %8u  (%11d bytes)", m_colors.count(),     m_colors.count()     * int(sizeof(Color)    + 20));
         qDebug("Types     : %8u  (%11d bytes)", m_item_types.count(), m_item_types.count() * int(sizeof(ItemType) + 20));
         qDebug("Categories: %8u  (%11d bytes)", m_categories.count(), m_categories.count() * int(sizeof(Category) + 20));
         qDebug("Items     : %8u  (%11d bytes)", m_items.count(),      m_items.count()      * int(sizeof(Item)     + 20));
+
+        m_databaseDate = generationDate;
+        emit databaseDateChanged(generationDate);
+
         if (!info.isEmpty())
             qDebug() << "Info :" << info;
         if (infoText)
@@ -1430,6 +1452,10 @@ bool Core::writeDatabase(const QString &filename, DatabaseVersion version,
             ds << infoText;
             check(cw.endChunk());
         }
+
+        check(cw.startChunk(ChunkId('D','A','T','E'), 1));
+        ds << QDateTime::currentDateTime().toUTC();
+        check(cw.endChunk());
 
         check(cw.startChunk(ChunkId('C','O','L',' '), 1));
         ds << quint32(m_colors.count());

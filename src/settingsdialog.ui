@@ -20,7 +20,7 @@
    <item>
     <widget class="QTabWidget" name="w_tabs">
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <property name="usesScrollButtons">
       <bool>false</bool>
@@ -515,7 +515,7 @@
             <item row="0" column="0">
              <widget class="QLabel" name="label_13">
               <property name="text">
-               <string>Part database, if older than</string>
+               <string>BrickLink database, if older than</string>
               </property>
              </widget>
             </item>
@@ -578,32 +578,6 @@
               </property>
               <property name="value">
                <number>14</number>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="0">
-             <widget class="QLabel" name="label_12">
-              <property name="text">
-               <string>LDraw parts, if older than</string>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="1">
-             <widget class="QSpinBox" name="w_upd_ldraw">
-              <property name="suffix">
-               <string> days</string>
-              </property>
-              <property name="minimum">
-               <number>1</number>
-              </property>
-              <property name="maximum">
-               <number>365</number>
-              </property>
-              <property name="singleStep">
-               <number>1</number>
-              </property>
-              <property name="value">
-               <number>31</number>
               </property>
              </widget>
             </item>

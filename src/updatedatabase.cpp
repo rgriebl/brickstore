@@ -40,7 +40,7 @@ UpdateDatabase::UpdateDatabase(ProgressDialog *pd)
 
     QDateTime dt;
     if (QFile::exists(localfile))
-        dt = Config::inst()->lastDatabaseUpdate();
+        dt = BrickLink::core()->databaseDate();
 
     QFile *file = new QFile(localfile + ".lzma");
 
@@ -71,8 +71,6 @@ void UpdateDatabase::gotten()
 
         if (error.isNull()) {
             if (BrickLink::core()->readDatabase()) {
-                Config::inst()->setLastDatabaseUpdate(QDateTime::currentDateTime());
-
                 m_progress->setMessageText(tr("Finished."));
                 m_progress->setFinished(true);
             }
