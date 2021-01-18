@@ -407,7 +407,7 @@ bool RebuildDatabase::downloadInventories(QVector<const BrickLink::Item *> &invs
         if (item) {
             QFile *f = BrickLink::core()->dataFile(u"inventory.xml.new", QIODevice::WriteOnly, item);
 
-            if (f && f->isOpen()) {
+            if (!f || !f->isOpen()) {
                 m_error = QString("failed to write %1: %2").arg(f->fileName(), f->errorString());
                 delete f;
                 failed = true;
