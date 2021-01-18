@@ -42,7 +42,6 @@
 #endif
 
 #include "progressdialog.h"
-#include "checkforupdates.h"
 #include "config.h"
 #include "bricklink.h"
 #include "ldraw.h"
@@ -548,15 +547,6 @@ void Application::exitBrickLink()
     delete LDraw::core();
 }
 
-
-void Application::checkForUpdates()
-{
-    Transfer trans;
-
-    ProgressDialog d(tr("Check for Program Updates"), &trans, FrameWork::inst());
-    CheckForUpdates cfu(&d);
-    d.exec();
-}
 
 #define CHECK_IP "178.63.92.134" // brickforge.de
 

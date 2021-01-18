@@ -67,7 +67,8 @@ echo -n "Generating action icons..."
 
 convert $b/brickstore.png -resize $((s)) $g/brickstore.png
 
-convert $c/tab.png -resize $((s)) $g/tab.png
+convert $c/tab_home.png -resize $((s)) $g/tab_home.png
+convert $c/tab_list.png -resize $((s)) $g/tab_list.png
 
 convert $c/brick_1x1.png -colorspace sRGB -scale $s $c/overlay_plus.png -scale $s -composite $g/items_add.png
 convert $c/brick_1x1.png -colorspace sRGB -scale $s $c/overlay_divide.png -scale $s -composite $g/items_divide.png

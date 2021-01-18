@@ -43,7 +43,6 @@ public:
     QPlainTextEdit *logWidget() const;
 
 public slots:
-    void checkForUpdates();
     void updateTranslations();
 
 signals:

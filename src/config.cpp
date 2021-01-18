@@ -279,7 +279,7 @@ QMap<QByteArray, int> Config::updateIntervals() const
 {
     QMap<QByteArray, int> uiv = updateIntervalsDefault();
 
-    static const char *lut[] = { "Picture", "PriceGuide", "Database", "LDraw" };
+    static const char *lut[] = { "Picture", "PriceGuide", "Database" };
 
     for (const auto &iv : lut)
         uiv[iv] = value(QLatin1String("BrickLink/UpdateInterval/") + QLatin1String(iv), uiv[iv]).toInt();
@@ -294,7 +294,6 @@ QMap<QByteArray, int> Config::updateIntervalsDefault() const
     uiv.insert("Picture",   180 * day2sec);
     uiv.insert("PriceGuide", 14 * day2sec);
     uiv.insert("Database",    7 * day2sec);
-    uiv.insert("LDraw",      31 * day2sec);
 
     return uiv;
 }

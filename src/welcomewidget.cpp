@@ -25,6 +25,7 @@
 #include <QStaticText>
 #include <QMenu>
 #include <QStyleFactory>
+#include <QStringBuilder>
 
 #include "welcomewidget.h"
 #include "config.h"
@@ -274,8 +275,6 @@ WelcomeWidget::WelcomeWidget(QWidget *parent)
     : QWidget(parent)
 {
     int spacing = style()->pixelMetric(QStyle::PM_LayoutHorizontalSpacing);
-    int lmargin = style()->pixelMetric(QStyle::PM_LayoutLeftMargin);
-    int rmargin = style()->pixelMetric(QStyle::PM_LayoutRightMargin);
 
     auto *layout = new QGridLayout();
     layout->setRowStretch(0, 10);
@@ -348,39 +347,29 @@ WelcomeWidget::WelcomeWidget(QWidget *parent)
     m_import_frame->setLayout(import_layout);
     layout->addWidget(m_import_frame, 2, 2);
 
-    // update
-
-    m_update_frame = new QGroupBox();
-    auto update_layout = new QHBoxLayout();
-    update_layout->setSpacing(2 * spacing + lmargin + rmargin
-                              + m_update_frame->contentsMargins().left()
-                              + m_update_frame->contentsMargins().right());
-
-    auto b = m_db_update = new WelcomeButton(FrameWork::inst()->findAction("extras_update_database"));
-    update_layout->addWidget(b, 1);
+    m_versions = new QLabel();
+    m_versions->setAlignment(Qt::AlignCenter);
     connect(BrickLink::core(), &BrickLink::Core::databaseDateChanged,
-            this, &WelcomeWidget::updateLastDBUpdateDescription);
-    auto dbLabelTimer = new QTimer(this);
-    dbLabelTimer->setInterval(1000 * 60);
-    dbLabelTimer->start();
-    connect(dbLabelTimer, &QTimer::timeout,
-            this, &WelcomeWidget::updateLastDBUpdateDescription);
-
-    b = m_bs_update = new WelcomeButton(FrameWork::inst()->findAction("help_updates"));
-    update_layout->addWidget(b, 1);
-
-    m_update_frame->setLayout(update_layout);
-    layout->addWidget(m_update_frame, 3, 1, 1, 2);
+            this, &WelcomeWidget::updateVersionsText);
+    layout->addWidget(m_versions, 3, 1, 1, 2);
 
     languageChange();
     setLayout(layout);
 }
 
-void WelcomeWidget::updateLastDBUpdateDescription()
+void WelcomeWidget::updateVersionsText()
 {
     auto delta = HumanReadableTimeDelta::toString(QDateTime::currentDateTime(),
                                                   BrickLink::core()->databaseDate());
-    m_db_update->setDescription(tr("Last Database update: %1").arg(delta));
+
+    QString dbd = u"<b>" % delta % u"</b>";
+    QString ver = u"<b>" % QLatin1String(BRICKSTORE_VERSION) % u"</b>";
+
+    QString s = QCoreApplication::applicationName() % u" " %
+            tr("version: %1 (build: %2)").arg(ver).arg(QLatin1String(BRICKSTORE_BUILD_NUMBER)) %
+            u"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&middot;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" %
+            tr("Using a database that was generated: %1").arg(dbd);
+    m_versions->setText(s);
 }
 
 void WelcomeWidget::languageChange()
@@ -388,11 +377,8 @@ void WelcomeWidget::languageChange()
     m_recent_frame->setTitle(tr("Open recent files"));
     m_file_frame->setTitle(tr("Document"));
     m_import_frame->setTitle(tr("Import items"));
-    m_update_frame->setTitle(tr("Updates"));
 
-    m_bs_update->setDescription(tr("Current version: %1 (build: %2)")
-                                .arg(BRICKSTORE_VERSION).arg(BRICKSTORE_BUILD_NUMBER));
-    updateLastDBUpdateDescription();
+    updateVersionsText();
 
     if (m_no_recent)
         m_no_recent->setText(tr("No recent files"));

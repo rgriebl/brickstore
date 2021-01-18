@@ -40,6 +40,12 @@
 #include <QCommandLinkButton>
 #include <QStyle>
 #include <QLinearGradient>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QVersionNumber>
+#include <QBuffer>
+#include <QJsonDocument>
+#include <QJsonValue>
 #if defined(Q_OS_WINDOWS)
 #  include <QWinTaskbarButton>
 #  include <QWinTaskbarProgress>
@@ -607,6 +613,8 @@ FrameWork::FrameWork(QWidget *parent)
     Currency::inst()->updateRates();
 
     setupScripts();
+
+    checkForUpdates(true /* silent */);
 }
 
 void FrameWork::setupScripts()
@@ -1291,7 +1299,7 @@ void FrameWork::createActions()
     });
     a->setMenuRole(QAction::AboutRole);
 
-    a = newQAction(this, "help_updates", NeedNetwork, false, Application::inst(), &Application::checkForUpdates);
+    a = newQAction(this, "help_updates", NeedNetwork, false, this, &FrameWork::checkForUpdates);
     a->setMenuRole(QAction::ApplicationSpecificRole);
 
     // set all icons that have a pixmap corresponding to name()
@@ -1379,6 +1387,68 @@ bool FrameWork::updateDatabase()
         return d.exec();
     }
     return false;
+}
+
+
+void FrameWork::checkForUpdates(bool silent)
+{
+    QNetworkAccessManager *nam = new QNetworkAccessManager(this);
+
+    QString url = Application::inst()->applicationUrl();
+    url.replace("github.com", "https://api.github.com/repos");
+    url.append("/releases/latest");
+    QNetworkReply *reply = nam->get(QNetworkRequest(url));
+
+    connect(reply, &QNetworkReply::finished, this, [this, reply, silent]() {
+        reply->deleteLater();
+        reply->manager()->deleteLater();
+
+        QByteArray data = reply->readAll();
+        auto currentVersion = QVersionNumber::fromString(QCoreApplication::applicationVersion());
+        bool succeeded = false;
+        bool hasUpdate = false;
+        QString message;
+
+        QJsonParseError jsonError;
+        auto doc = QJsonDocument::fromJson(data, &jsonError);
+        if (doc.isNull()) {
+            qWarning() << data.constData();
+            qWarning() << "\nCould not parse GitHub JSON reply:" << jsonError.errorString();
+            message = tr("Could not parse server response.");
+        } else {
+            QString tag = doc["tag_name"].toString();
+            if (tag.startsWith('v'))
+                tag.remove(0, 1);
+            QVersionNumber version = QVersionNumber::fromString(tag);
+            if (version.isNull()) {
+                qWarning() << "Cannot parse GitHub's latest tag_name:" << tag;
+                message = tr("Version information is not available.");
+            } else {
+                if (version <= currentVersion) {
+                    message = tr("Your currently installed version is up-to-date.");
+                } else {
+                    message = tr("A newer version than the one currently installed is available:");
+                    message += QString::fromLatin1(R"(<br/><br/><strong>%1</strong> <a href="https://%2/releases/tag/v%3">%4</a><br/>)")
+                            .arg(version.toString())
+                            .arg(Application::inst()->applicationUrl())
+                            .arg(version.toString())
+                            .arg(tr("Download"));
+                    hasUpdate = true;
+                }
+                succeeded = true;
+            }
+        }
+
+        if (!message.isEmpty() && (!silent || hasUpdate)) {
+            QMetaObject::invokeMethod(this, [succeeded, message]() {
+                auto title = FrameWork::tr("Program Update");
+                if (succeeded)
+                    MessageBox::information(FrameWork::inst(), title, message);
+                else
+                    MessageBox::warning(FrameWork::inst(), title, message);
+            });
+        }
+    });
 }
 
 void FrameWork::connectAllActions(bool do_connect, Window *window)

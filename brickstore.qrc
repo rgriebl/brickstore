@@ -50,7 +50,8 @@
         <file alias="edit_status_unknown.png">assets/generated-32x32/status_unknown.png</file>
         <file alias="brickstore_icon.png">assets/generated-icons/brickstore.png</file>
         <file alias="brickstore_doc_icon.png">assets/generated-icons/brickstore_doc.png</file>
-        <file alias="tab.png">assets/generated-32x32/tab.png</file>
+        <file alias="tab_list.png">assets/generated-32x32/tab_list.png</file>
+        <file alias="tab_home.png">assets/generated-32x32/tab_home.png</file>
         <file alias="right_arrow.png">assets/crystal-clear-32x32/actions/1rightarrow.png</file>
     </qresource>
     <qresource prefix="/i18n">

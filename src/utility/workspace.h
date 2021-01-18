@@ -50,20 +50,13 @@ protected:
     bool eventFilter(QObject *o, QEvent *e) override;
     void changeEvent(QEvent *e) override;
 
-private slots:
-    void closeTab(int idx);
-    void activateTab(int idx);
-    void moveTab(int from, int to);
-    void removeTab(int idx);
-
 private:
     void languageChange();
 
 private:
     TabBar *          m_tabbar;
+    TabBarSideButton *m_tabhome;
     TabBarSideButton *m_tablist;
     QStackedWidget *  m_windowStack;
-    QWidget *         m_right;
-    QString           m_backgroundText;
     QWidget *         m_welcomeWidget = nullptr;
 };

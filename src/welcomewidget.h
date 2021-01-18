@@ -33,7 +33,7 @@ protected:
     void changeEvent(QEvent *e) override;
 
 private:
-    void updateLastDBUpdateDescription();
+    void updateVersionsText();
 
     void languageChange();
 
@@ -41,10 +41,8 @@ private:
     QGroupBox *m_recent_frame;
     QGroupBox *m_file_frame;
     QGroupBox *m_import_frame;
-    QGroupBox *m_update_frame;
-    WelcomeButton *m_db_update;
-    WelcomeButton *m_bs_update;
     QPointer<QLabel> m_no_recent;
+    QLabel *m_versions;
 };
 
 

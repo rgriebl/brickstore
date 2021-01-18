@@ -84,6 +84,7 @@ private slots:
     void openDocument(const QString &);
 
     bool updateDatabase();
+    void checkForUpdates(bool silent = false);
 
     void connectWindow(QWidget *w);
     void transferJobProgressUpdate(int p, int t);
