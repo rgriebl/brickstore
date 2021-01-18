@@ -34,7 +34,6 @@ ImportInventoryDialog::ImportInventoryDialog(QWidget *parent)
     w_select->setCurrentItemType(BrickLink::core()->itemType(itId));
     connect(w_select, &SelectItem::itemSelected,
             this, &ImportInventoryDialog::checkItem);
-    w_qty->setValue(1);
     w_buttons->button(QDialogButtonBox::Ok)->setEnabled(false);
 }
 
@@ -51,6 +50,11 @@ const BrickLink::Item *ImportInventoryDialog::item() const
 int ImportInventoryDialog::quantity() const
 {
     return qMax(1, w_qty->value());
+}
+
+BrickLink::Condition ImportInventoryDialog::condition() const
+{
+    return w_condition_used->isChecked() ? BrickLink::Condition::Used : BrickLink::Condition::New;
 }
 
 void ImportInventoryDialog::showEvent(QShowEvent *e)

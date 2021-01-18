@@ -27,6 +27,7 @@ public:
     bool setItem(const BrickLink::Item *item);
     const BrickLink::Item *item() const;
     int quantity() const;
+    BrickLink::Condition condition() const;
 
 protected:
     void showEvent(QShowEvent *) override;

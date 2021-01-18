@@ -265,7 +265,7 @@ QVector<Document *> Document::s_documents;
 Document *Document::createTemporary(const BrickLink::InvItemList &list)
 {
     auto *doc = new Document(1 /*dummy*/);
-    doc->setBrickLinkItems(list, 1); // the caller owns the items
+    doc->setBrickLinkItems(list); // the caller owns the items
     return doc;
 }
 
@@ -658,12 +658,11 @@ Document *Document::fileOpen(const QString &s)
     return fileLoadFrom(s, "bsx");
 }
 
-Document *Document::fileImportBrickLinkInventory(const BrickLink::Item *item)
+Document *Document::fileImportBrickLinkInventory(const BrickLink::Item *item, int quantity,
+                                                 BrickLink::Condition condition)
 {
     if (item && !item->hasInventory())
         return nullptr;
-
-    int qty = 1;
 
     if (!item) {
         ImportInventoryDialog dlg(FrameWork::inst());
@@ -674,18 +673,24 @@ Document *Document::fileImportBrickLinkInventory(const BrickLink::Item *item)
 
         if (dlg.exec() == QDialog::Accepted) {
             item = dlg.item();
-            qty = dlg.quantity();
+            quantity = dlg.quantity();
+            condition = dlg.condition();
         }
         Config::inst()->setValue("/MainWindow/ImportInventoryDialog/Geometry", dlg.saveGeometry());
     }
 
-    if (item && (qty > 0)) {
+    if (item && (quantity > 0)) {
         BrickLink::InvItemList items = item->consistsOf();
 
         if (!items.isEmpty()) {
             auto *doc = new Document();
 
-            doc->setBrickLinkItems(items, uint(qty)); // we own the items
+            for (BrickLink::InvItem *item : items) {
+                item->setQuantity(item->quantity() * quantity);
+                item->setCondition(condition);
+            }
+
+            doc->setBrickLinkItems(items); // we own the items
             qDeleteAll(items);
             doc->setTitle(tr("Inventory for %1").arg(item->id()));
             return doc;
@@ -960,18 +965,15 @@ Document *Document::fileImportLDrawModel()
     return doc;
 }
 
-void Document::setBrickLinkItems(const BrickLink::InvItemList &bllist, uint multiply)
+void Document::setBrickLinkItems(const BrickLink::InvItemList &bllist)
 {
     ItemList items;
-    QVector<int> positions;
+    QVector<int> pos;
 
-    for (const BrickLink::InvItem *blitem : bllist) {
-        Item *item = new Item(*blitem);
+    for (const BrickLink::InvItem *blitem : bllist)
+        items.append(new Item(*blitem));
 
-        item->setQuantity(item->quantity() * int(multiply));
-        items.append(item);
-    }
-    insertItemsDirect(items, positions);
+    insertItemsDirect(items, pos);
 }
 
 QString Document::fileName() const

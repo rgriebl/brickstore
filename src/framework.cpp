@@ -1313,9 +1313,10 @@ void FrameWork::openDocument(const QString &file)
     createWindow(Document::fileOpen(file));
 }
 
-void FrameWork::fileImportBrickLinkInventory(const BrickLink::Item *item)
+void FrameWork::fileImportBrickLinkInventory(const BrickLink::Item *item, int quantity,
+                                             BrickLink::Condition condition)
 {
-    createWindow(Document::fileImportBrickLinkInventory(item));
+    createWindow(Document::fileImportBrickLinkInventory(item, quantity, condition));
 }
 
 bool FrameWork::checkBrickLinkLogin()

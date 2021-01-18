@@ -64,7 +64,8 @@ public slots:
     void showContextMenu(bool onitem, const QPoint &pos);
     void setFilter(const QString &filterText);
 
-    void fileImportBrickLinkInventory(const BrickLink::Item *item);
+    void fileImportBrickLinkInventory(const BrickLink::Item *item, int quantity = 1,
+                                      BrickLink::Condition condition = BrickLink::Condition::New);
 
     void toggleItemDetailPopup();
 

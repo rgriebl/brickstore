@@ -184,7 +184,9 @@ public:
     static Document *fileNew();
     static Document *fileOpen();
     static Document *fileOpen(const QString &name);
-    static Document *fileImportBrickLinkInventory(const BrickLink::Item *preselect = nullptr);
+    static Document *fileImportBrickLinkInventory(const BrickLink::Item *preselect = nullptr,
+                                                  int quantity = 1,
+                                                  BrickLink::Condition condition = BrickLink::Condition::New);
     static QVector<Document *> fileImportBrickLinkOrders();
     static Document *fileImportBrickLinkStore();
     static Document *fileImportBrickLinkCart();
@@ -231,7 +233,7 @@ private:
     void deleteAutosave();
     static Document *fileLoadFrom(const QString &s, const char *type, bool import_only = false);
     bool fileSaveTo(const QString &s, const char *type, bool export_only, const ItemList &itemlist);
-    void setBrickLinkItems(const BrickLink::InvItemList &bllist, uint multiply = 1);
+    void setBrickLinkItems(const BrickLink::InvItemList &bllist);
 
     void insertItemsDirect(ItemList &items, QVector<int> &positions);
     void removeItemsDirect(ItemList &items, QVector<int> &positions);

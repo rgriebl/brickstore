@@ -1505,6 +1505,7 @@ void Window::on_edit_partoutitems_triggered()
                             positions[i] = startpos + i;
                             if (multiply != 1)
                                 items[i]->setQuantity(items[i]->quantity() * multiply);
+                            items[i]->setCondition(item->condition());
                         }
                         m_doc->insertItems(positions, Document::ItemList(items));
                         m_doc->removeItem(item);
@@ -1512,7 +1513,7 @@ void Window::on_edit_partoutitems_triggered()
                     }
                 }
             } else {
-                FrameWork::inst()->fileImportBrickLinkInventory(item->item());
+                FrameWork::inst()->fileImportBrickLinkInventory(item->item(), item->quantity(), item->condition());
             }
             wp.step();
         }
