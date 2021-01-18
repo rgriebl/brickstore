@@ -210,13 +210,13 @@ void SelectItem::init()
     tb->setIcon(QIcon(":/images/viewmode_list"));
     tb->setAutoRaise(true);
     tb->setCheckable(true);
-    tb->setChecked(true);
     d->w_viewmode->addButton(tb, 0);
 
     tb = new QToolButton(this);
     tb->setIcon(QIcon(":/images/viewmode_images"));
     tb->setAutoRaise(true);
     tb->setCheckable(true);
+    tb->setChecked(true);
     d->w_viewmode->addButton(tb, 1);
 
     tb = new QToolButton(this);
@@ -390,6 +390,12 @@ void SelectItem::init()
     itemTypeChanged();
 
     setFocusProxy(d->w_filter);
+    setTabOrder(d->w_item_types, d->w_categories);
+    setTabOrder(d->w_categories, d->w_filter);
+    setTabOrder(d->w_filter, d->w_items);
+    setTabOrder(d->w_items, d->w_itemthumbs);
+    setTabOrder(d->w_itemthumbs, d->w_thumbs);
+
     languageChange();
 }
 
@@ -623,6 +629,9 @@ void SelectItem::applyFilter()
     d->itemModel->setFilterText(d->w_filter->text(), d->m_filter_cs, d->m_filter_use_re);
 
     setCurrentItem(oldItem);
+    if (!currentItem() && d->itemModel->rowCount() == 1)
+        setCurrentItem(d->itemModel->item(d->itemModel->index(0, 0)));
+
     QApplication::restoreOverrideCursor();
 }
 
