@@ -461,6 +461,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         QStyleOptionViewItem opt(option);
         opt.state &= ~QStyle::State_HasFocus;
         opt.state |= ((checkmark > 0) ? QStyle::State_On : QStyle::State_Off);
+        opt.features |= QStyleOptionViewItem::HasCheckIndicator;
 
         QStyle *style = option.widget ? option.widget->style() : QApplication::style();
         QRect r = style->subElementRect(QStyle::SE_ViewItemCheckIndicator, &opt, option.widget);
