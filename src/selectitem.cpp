@@ -36,6 +36,7 @@
 #include <QContextMenuEvent>
 #include <QLineEdit>
 #include <QPainter>
+#include <QShortcut>
 
 #include "bricklink_model.h"
 #include "selectitem.h"
@@ -57,12 +58,16 @@ public:
     QTreeView *      w_itemthumbs;
     QListView *      w_thumbs;
     QLineEdit *      w_filter;
+    QToolButton *    w_zoomIn;
+    QToolButton *    w_zoomOut;
+    QLabel *         w_zoomLevel;
     QButtonGroup *   w_viewmode;
     ItemDetailPopup *m_details;
     bool             m_inv_only;
     QTimer *         m_filter_delay;
     bool             m_filter_cs = false;
     bool             m_filter_use_re = false;
+    double           m_zoom = 0;
 };
 
 
@@ -205,14 +210,34 @@ void SelectItem::init()
         setViewMode(d->w_viewmode->checkedId());
     });
 
+    d->w_zoomOut = new QToolButton();
+    d->w_zoomOut->setShortcut(QKeySequence::ZoomOut);
+    d->w_zoomOut->setIcon(QIcon(":/images/zoom_minus"));
+    d->w_zoomOut->setAutoRaise(true);
+    d->w_zoomOut->setAutoRepeat(true);
+    connect(d->w_zoomOut, &QToolButton::clicked, this, [this]() {
+        setZoomFactor(d->m_zoom * std::pow(1.001, -120));
+    });
+    d->w_zoomLevel = new QLabel();
+    d->w_zoomIn = new QToolButton();
+    d->w_zoomIn->setShortcut(QKeySequence::ZoomIn);
+    d->w_zoomIn->setIcon(QIcon(":/images/zoom_plus"));
+    d->w_zoomIn->setAutoRaise(true);
+    d->w_zoomIn->setAutoRepeat(true);
+    connect(d->w_zoomIn, &QToolButton::clicked, this, [this]() {
+        setZoomFactor(d->m_zoom * std::pow(1.001, 120));
+    });
+
     QToolButton *tb;
     tb = new QToolButton(this);
+    tb->setShortcut(tr("Ctrl+1"));
     tb->setIcon(QIcon(":/images/viewmode_list"));
     tb->setAutoRaise(true);
     tb->setCheckable(true);
     d->w_viewmode->addButton(tb, 0);
 
     tb = new QToolButton(this);
+    tb->setShortcut(tr("Ctrl+2"));
     tb->setIcon(QIcon(":/images/viewmode_images"));
     tb->setAutoRaise(true);
     tb->setCheckable(true);
@@ -220,6 +245,7 @@ void SelectItem::init()
     d->w_viewmode->addButton(tb, 1);
 
     tb = new QToolButton(this);
+    tb->setShortcut(tr("Ctrl+3"));
     tb->setIcon(QIcon(":/images/viewmode_thumbs"));
     tb->setAutoRaise(true);
     tb->setCheckable(true);
@@ -373,6 +399,12 @@ void SelectItem::init()
     auto *viewlay = new QHBoxLayout();
     viewlay->setMargin(0);
     viewlay->setSpacing(0);
+    viewlay->addWidget(d->w_zoomOut);
+    viewlay->addSpacing(6);
+    viewlay->addWidget(d->w_zoomLevel);
+    viewlay->addSpacing(6);
+    viewlay->addWidget(d->w_zoomIn);
+    viewlay->addSpacing(6);
     viewlay->addWidget(d->w_viewmode->button(0));
     viewlay->addWidget(d->w_viewmode->button(1));
     viewlay->addWidget(d->w_viewmode->button(2));
@@ -385,7 +417,7 @@ void SelectItem::init()
     d->m_stack->addWidget(d->w_itemthumbs);
     d->m_stack->addWidget(d->w_thumbs);
 
-    d->m_stack->setCurrentWidget(d->w_items);
+    d->m_stack->setCurrentWidget(d->w_itemthumbs);
 
     itemTypeChanged();
 
@@ -396,6 +428,8 @@ void SelectItem::init()
     setTabOrder(d->w_items, d->w_itemthumbs);
     setTabOrder(d->w_itemthumbs, d->w_thumbs);
 
+    setZoomFactor(2);
+
     languageChange();
 }
 
@@ -405,9 +439,19 @@ void SelectItem::languageChange()
     d->w_filter->setToolTip(tr("Filter the list using this pattern (wildcards allowed: * ? [])"));
     d->w_filter->setPlaceholderText(tr("Filter"));
 
-    d->w_viewmode->button(0)->setToolTip(tr("List"));
-    d->w_viewmode->button(1)->setToolTip(tr("List with Images"));
-    d->w_viewmode->button(2)->setToolTip(tr("Thumbnails"));
+    auto setToolTipOnButton = [](QAbstractButton *b, const QString &text) {
+        if (!b->shortcut().isEmpty()) {
+            b->setToolTip(QString("%1 <span style=\"color: gray; font-size: small\">%2</span>")
+                      .arg(text).arg(b->shortcut().toString(QKeySequence::NativeText)));
+        }
+    };
+
+    setToolTipOnButton(d->w_viewmode->button(0), tr("List"));
+    setToolTipOnButton(d->w_viewmode->button(2), tr("Thumbnails"));
+    setToolTipOnButton(d->w_viewmode->button(1), tr("List with Images"));
+
+    setToolTipOnButton(d->w_zoomIn, tr("Zoom in"));
+    setToolTipOnButton(d->w_zoomOut, tr("Zoom out"));
 }
 
 bool SelectItem::eventFilter(QObject *o, QEvent *e)
@@ -566,6 +610,9 @@ bool SelectItem::setCurrentItem(const BrickLink::Item *item, bool force_items_ca
     return (item);
 }
 
+
+        d->w_zoomLevel->setText(QString::fromLatin1("%1 %").arg(int(zoom * 100)));
+        d->w_itemthumbs->resizeColumnToContents(0);
 void SelectItem::setViewMode(int mode)
 {
     QWidget *w = nullptr;

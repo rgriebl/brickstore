@@ -135,7 +135,7 @@ QSize AppearsInWidget::minimumSizeHint() const
 
 QSize AppearsInWidget::sizeHint() const
 {
-    return minimumSizeHint() * 2;
+    return minimumSizeHint();
 }
 
 void AppearsInWidget::setItem(const BrickLink::Item *item, const BrickLink::Color *color)

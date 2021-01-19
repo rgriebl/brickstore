@@ -35,6 +35,18 @@ ImportInventoryDialog::ImportInventoryDialog(QWidget *parent)
     connect(w_select, &SelectItem::itemSelected,
             this, &ImportInventoryDialog::checkItem);
     w_buttons->button(QDialogButtonBox::Ok)->setEnabled(false);
+
+    QByteArray ba = Config::inst()->value(QLatin1String("/MainWindow/ImportInventoryDialog/Geometry")).toByteArray();
+    if (!ba.isEmpty())
+        restoreGeometry(ba);
+    double zoom = Config::inst()->value("/MainWindow/ImportInventoryDialog/ItemZoom", 2.).toDouble();
+    w_select->setZoomFactor(zoom);
+}
+
+ImportInventoryDialog::~ImportInventoryDialog()
+{
+    Config::inst()->setValue("/MainWindow/ImportInventoryDialog/Geometry", saveGeometry());
+    Config::inst()->setValue("/MainWindow/ImportInventoryDialog/ItemZoom", w_select->zoomFactor());
 }
 
 bool ImportInventoryDialog::setItem(const BrickLink::Item *item)

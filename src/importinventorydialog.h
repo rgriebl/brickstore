@@ -23,6 +23,7 @@ class ImportInventoryDialog : public QDialog, private Ui::ImportInventoryDialog
     Q_OBJECT
 public:
     ImportInventoryDialog(QWidget *parent = nullptr);
+    ~ImportInventoryDialog() override;
 
     bool setItem(const BrickLink::Item *item);
     const BrickLink::Item *item() const;

@@ -166,8 +166,42 @@ AddItemDialog::AddItemDialog(QWidget *parent)
 
     w_radio_percent->click();
 
+    w_toggles[0] = w_toggle_picture;
+    w_toggles[1] = w_toggle_appears_in;
+    w_toggles[2] = w_toggle_price_guide;
+    w_splitter_bottom->setStretchFactor(0, 2);
+    w_splitter_bottom->setStretchFactor(1, 1);
+    w_splitter_bottom->setStretchFactor(2, 0);
+    w_splitter_bottom->setStretchFactor(3, 1);
+
     showTotal();
     checkTieredPrices();
+
+    QByteArray ba = Config::inst()->value(QLatin1String("/MainWindow/AddItemDialog/Geometry"))
+            .toByteArray();
+    if (!ba.isEmpty()) {
+
+        restoreGeometry(ba);
+    }
+
+    ba = Config::inst()->value(QLatin1String("/MainWindow/AddItemDialog/VSplitter"))
+            .toByteArray();
+    if (!ba.isEmpty())
+        w_splitter_vertical->restoreState(ba);
+    ba = Config::inst()->value(QLatin1String("/MainWindow/AddItemDialog/HSplitter"))
+            .toByteArray();
+    if (!ba.isEmpty()) {
+        char hidden = ba.at(0);
+        for (int i = 0; i < 3; ++i) {
+            if (hidden & (1 << i)) {
+                w_splitter_bottom->widget(i)->hide();
+                w_toggles[i]->setChecked(false);
+            }
+        }
+        w_splitter_bottom->restoreState(ba.mid(1));
+    }
+    double zoom = Config::inst()->value("/MainWindow/AddItemDialog/ItemZoom", 2.).toDouble();
+    w_select_item->setZoomFactor(zoom);
 
     languageChange();
 }
@@ -185,6 +219,19 @@ void AddItemDialog::languageChange()
 
 AddItemDialog::~AddItemDialog()
 {
+    Config::inst()->setValue("/MainWindow/AddItemDialog/Geometry", saveGeometry());
+    Config::inst()->setValue("/MainWindow/AddItemDialog/VSplitter", w_splitter_vertical->saveState());
+
+    QByteArray ba = w_splitter_bottom->saveState();
+    char hidden = 0;
+    for (int i = 0; i < 3; ++i) {
+        if (!w_toggles[i]->isChecked())
+            hidden |= (1 << i);
+    }
+    ba.prepend(hidden);
+    Config::inst()->setValue("/MainWindow/AddItemDialog/HSplitter", ba);
+    Config::inst()->setValue("/MainWindow/AddItemDialog/ItemZoom", w_select_item->zoomFactor());
+
     w_picture->setItemAndColor(nullptr);
     w_price_guide->setPriceGuide(nullptr);
     w_appears_in->setItem(nullptr, nullptr);

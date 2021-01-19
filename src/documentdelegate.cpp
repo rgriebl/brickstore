@@ -343,7 +343,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         break;
     }
     case Document::Color: {
-        image = BrickLink::core()->colorImage(it->color(), option.decorationSize.width(), option.rect.height());
+        image = BrickLink::core()->colorImage(it->color(), option.decorationSize.width() * 1.5, option.rect.height());
         break;
     }
     case Document::Condition:

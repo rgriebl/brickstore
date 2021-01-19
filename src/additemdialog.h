@@ -79,4 +79,6 @@ private:
     QString m_price_label_fmt;
 
     QString m_currency_code;
+
+    QCheckBox *w_toggles[3];
 };

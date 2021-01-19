@@ -291,7 +291,7 @@ void PriceGuideWidget::recalcLayoutNormal(const QSize &s, const QFontMetrics &fm
     cw[1] = 0;
     for (const auto &cond : d->m_str_cond)
         cw[1] = qMax(cw[1], fm.horizontalAdvance(cond));
-    cw[2] = qMax(fm.horizontalAdvance(d->m_str_qty), fm.horizontalAdvance("0000 (000000)"));
+    cw[2] = qMax(fm.horizontalAdvance(d->m_str_qty), fm.horizontalAdvance("0000000 (00000)"));
     cw[3] = fm.horizontalAdvance(Currency::toString(9000, d->m_ccode, Currency::LocalSymbol));
     for (const auto &price : d->m_str_price)
         cw[3] = qMax(cw[3], fm.horizontalAdvance(price));
@@ -384,7 +384,7 @@ void PriceGuideWidget::recalcLayoutHorizontal(const QSize &s, const QFontMetrics
     cw[1] = 0;
     for (const auto &cond : d->m_str_cond)
         cw[1] = qMax(cw[1], fm.horizontalAdvance(cond));
-    cw[2] = qMax(fm.horizontalAdvance(d->m_str_qty), fm.horizontalAdvance("0000 (000000)"));
+    cw[2] = qMax(fm.horizontalAdvance(d->m_str_qty), fm.horizontalAdvance("0000000 (00000)"));
     cw[3] = fm.horizontalAdvance(Currency::toString(9000, d->m_ccode, Currency::NoSymbol));
     for (const auto &price : d->m_str_price)
         cw[3] = qMax(cw[3], fm.horizontalAdvance(price));
@@ -394,6 +394,8 @@ void PriceGuideWidget::recalcLayoutHorizontal(const QSize &s, const QFontMetrics
 
     setMinimumSize(2 * frameWidth() + cw[0] + cw[1] + cw[2] + d->s_price_count * cw[3],
                    2 * frameWidth() + (1 + d->s_cond_count * d->s_time_count) * ch);
+    setMaximumWidth(minimumWidth());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
 
     dx = cw[0] + cw[1];
     dy = 0;
@@ -469,7 +471,7 @@ void PriceGuideWidget::recalcLayoutVertical(const QSize &s, const QFontMetrics &
     cw[0] += 2 * hborder;
 
     cw[1] = qMax(fm.horizontalAdvance(Currency::toString(9000, d->m_ccode, Currency::NoSymbol)),
-                  fm.horizontalAdvance("0000 (000000)"));
+                  fm.horizontalAdvance("0000000 (00000)"));
     for (const auto &cond : d->m_str_cond)
         cw[1] = qMax(cw[1], fm.horizontalAdvance(cond));
     cw[1] += 2 * hborder;

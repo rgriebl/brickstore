@@ -53,6 +53,8 @@
         <file alias="tab_list.png">assets/generated-32x32/tab_list.png</file>
         <file alias="tab_home.png">assets/generated-32x32/tab_home.png</file>
         <file alias="right_arrow.png">assets/crystal-clear-32x32/actions/1rightarrow.png</file>
+        <file alias="zoom_plus.png">assets/generated-32x32/zoom_plus.png</file>
+        <file alias="zoom_minus.png">assets/generated-32x32/zoom_minus.png</file>
     </qresource>
     <qresource prefix="/i18n">
         <file alias="translations.xml">translations/translations.xml</file>

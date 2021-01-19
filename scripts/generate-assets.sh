@@ -86,6 +86,9 @@ convert -resize $s $c/bricklink.png $g/bricklink.png
 convert -resize $s $c/status_plus.png $g/status_extra.png
 convert -resize $s $c/status_unknown.png $g/status_unknown.png
 
+convert $c/overlay_minus.png -trim -resize $s -fx '(r+g+b)/3' -brightness-contrast -10x0 $g/zoom_minus.png 
+convert $c/overlay_plus.png  -trim -resize $s -fx '(r+g+b)/3' -brightness-contrast -10x0 $g/zoom_plus.png 
+
 convert -size ${s}x${s} canvas:transparent \
         \( $a/search.png -scale $((s*3/4)) \) -geometry +$((s/8))+$((s/8)) -composite \
         $g/filter.png

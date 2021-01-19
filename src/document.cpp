@@ -667,16 +667,11 @@ Document *Document::fileImportBrickLinkInventory(const BrickLink::Item *item, in
     if (!item) {
         ImportInventoryDialog dlg(FrameWork::inst());
 
-        QByteArray ba = Config::inst()->value(QLatin1String("/MainWindow/ImportInventoryDialog/Geometry")).toByteArray();
-        if (!ba.isEmpty())
-            dlg.restoreGeometry(ba);
-
         if (dlg.exec() == QDialog::Accepted) {
             item = dlg.item();
             quantity = dlg.quantity();
             condition = dlg.condition();
         }
-        Config::inst()->setValue("/MainWindow/ImportInventoryDialog/Geometry", dlg.saveGeometry());
     }
 
     if (item && (quantity > 0)) {

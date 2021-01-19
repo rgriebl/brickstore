@@ -845,8 +845,7 @@ FrameWork::~FrameWork()
     Config::inst()->setValue("/MainWindow/Layout/State", saveState(DockStateVersion));
     Config::inst()->setValue("/MainWindow/Layout/Geometry", saveGeometry());
 
-    if (m_add_dialog)
-        Config::inst()->setValue("/MainWindow/AddItemDialog/Geometry", m_add_dialog->saveGeometry());
+    delete m_add_dialog.data();
 
     delete m_workspace;
     s_inst = nullptr;
@@ -1847,13 +1846,6 @@ void FrameWork::createAddItemDialog()
     if (!m_add_dialog) {
         m_add_dialog = new AddItemDialog();
         m_add_dialog->setObjectName(QLatin1String("additems"));
-
-        QByteArray ba = Config::inst()->value(QLatin1String("/MainWindow/AddItemDialog/Geometry"))
-                .toByteArray();
-
-        if (!ba.isEmpty())
-            m_add_dialog->restoreGeometry(ba);
-
         m_add_dialog->attach(m_current_window);
     }
 }
