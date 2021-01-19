@@ -1164,7 +1164,7 @@ void Window::on_edit_remark_clear_triggered()
     if (selection().isEmpty())
         return;
 
-    setOrToggle<QString, const QString &>::set(this, QT_TR_NOOP("Clear remark on %n item(s)"),
+    setOrToggle<QString, const QString &>::set(this, QT_TR_N_NOOP("Clear remark on %n item(s)"),
                                                &Document::Item::remarks, &Document::Item::setRemarks,
                                                QString { });
 }
@@ -1265,7 +1265,7 @@ void Window::on_edit_comment_clear_triggered()
     if (selection().isEmpty())
         return;
 
-    setOrToggle<QString, const QString &>::set(this, QT_TR_NOOP("Clear comment on %n item(s)"),
+    setOrToggle<QString, const QString &>::set(this, QT_TR_N_NOOP("Clear comment on %n item(s)"),
                                                &Document::Item::comments, &Document::Item::setComments,
                                                QString { });
 }

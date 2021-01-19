@@ -366,9 +366,9 @@ void WelcomeWidget::updateVersionsText()
     QString ver = u"<b>" % QLatin1String(BRICKSTORE_VERSION) % u"</b>";
 
     QString s = QCoreApplication::applicationName() % u" " %
-            tr("version: %1 (build: %2)").arg(ver).arg(QLatin1String(BRICKSTORE_BUILD_NUMBER)) %
+            tr("version %1 (build: %2)").arg(ver).arg(QLatin1String(BRICKSTORE_BUILD_NUMBER)) %
             u"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&middot;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" %
-            tr("Using a database that was generated: %1").arg(dbd);
+            tr("Using a database that was generated %1").arg(dbd);
     m_versions->setText(s);
 }
 
