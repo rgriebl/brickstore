@@ -1630,6 +1630,8 @@ void Window::closeEvent(QCloseEvent *e)
     bool close_empty = (m_doc->items().isEmpty() && Config::inst()->closeEmptyDocuments());
 
     if (m_doc->isModified() && !close_empty) {
+        FrameWork::inst()->setActiveWindow(this);
+
         QMessageBox msgBox(this);
         msgBox.setText(tr("The document %1 has been modified.").arg(CMB_BOLD(windowTitle().replace(QLatin1String("[*]"), QString()))));
         msgBox.setInformativeText(tr("Do you want to save your changes?"));

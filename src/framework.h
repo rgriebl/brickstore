@@ -55,6 +55,7 @@ public:
     QVector<Window *> allWindows() const;
     Window *createWindow(Document *doc);
     Window *activeWindow() const;
+    void setActiveWindow(Window *window);
 
     static constexpr int maxQuantity = 9999999;
     static constexpr double maxPrice = 99999;

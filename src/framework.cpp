@@ -1366,8 +1366,7 @@ Window *FrameWork::createWindow(Document *doc)
         m_workspace->addWindow(window);
     }
 
-    m_workspace->setActiveWindow(window);
-    window->setFocus();
+    setActiveWindow(window);
     return window;
 }
 
@@ -1376,6 +1375,11 @@ Window *FrameWork::activeWindow() const
     return m_current_window;
 }
 
+void FrameWork::setActiveWindow(Window *window)
+{
+    m_workspace->setActiveWindow(window);
+    window->setFocus();
+}
 
 bool FrameWork::updateDatabase()
 {
