@@ -141,7 +141,7 @@ QFile *BrickLink::Picture::file(QIODevice::OpenMode openMode) const
     bool large = (!m_color);
     bool hasColors = m_item->itemType()->hasColors();
 
-    return BrickLink::core()->dataFile(large ? u"large.png" : u"small.png", openMode,
+    return BrickLink::core()->dataFile(large ? u"large.png" : u"normal.png", openMode,
                                        m_item, (!large && hasColors) ? m_color : nullptr);
 }
 

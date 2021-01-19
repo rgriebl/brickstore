@@ -65,7 +65,7 @@ private:
     QLabel *w_image;
     QImage m_image;
 #if !defined(QT_NO_OPENGL)
-    bool m_prefer3D = true;
+    bool m_prefer3D = false;
     bool m_animationActive = true;
     LDraw::RenderWidget *w_ldraw = nullptr;
     LDraw::Part *m_part = nullptr;
