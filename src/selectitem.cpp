@@ -11,6 +11,7 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
+#include <cmath>
 
 #include <QAbstractListModel>
 #include <QAbstractTableModel>
