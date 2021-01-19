@@ -614,6 +614,7 @@ Core::ParseItemListXMLResult Core::parseItemListXML(const QDomElement &root, Ite
             QString tag = n.toElement().tagName();
             QString val = n.toElement().text();
 
+
             // ### BrickLink XML ###
             if (hint != XMLHint_BrickStore) {
                 if (tag == QLatin1String("ITEMID"))
@@ -896,192 +897,200 @@ QDomElement Core::createItemListXML(QDomDocument doc, ItemListXMLHint hint, cons
         root.appendChild(item);
         QLocale c = QLocale::c();
 
+        auto create = [&item, &doc](QStringView tagName, QStringView value) {
+            item.appendChild(doc.createElement(tagName.toString())
+                             .appendChild(doc.createTextNode(value.toString())).parentNode());
+        };
+        auto createEmpty = [&item, &doc](QStringView tagName) {
+            item.appendChild(doc.createElement(tagName.toString()));
+        };
+
         // ### MASS UPDATE ###
         if (hint == XMLHint_MassUpdate) {
-            item.appendChild(doc.createElement(QLatin1String("LOTID")).appendChild(doc.createTextNode(c.toString(ii->lotId()))).parentNode());
+            create(u"LOTID", c.toString(ii->lotId()));
 
             int qdiff = ii->quantity() - ii->origQuantity();
             double pdiff = ii->price() - ii->origPrice();
 
             if (!qFuzzyIsNull(pdiff))
-                item.appendChild(doc.createElement(QLatin1String("PRICE")).appendChild(doc.createTextNode(c.toCurrencyString(ii->price(), {}, 3))).parentNode());
+                create(u"PRICE", c.toCurrencyString(ii->price(), {}, 3));
             if (qdiff && (ii->quantity() > 0))
-                item.appendChild(doc.createElement(QLatin1String("QTY")).appendChild(doc.createTextNode(QLatin1String(qdiff > 0 ? "+" : "") + c.toString(qdiff))).parentNode());
+                create(u"QTY", c.toString(qdiff).prepend(qdiff > 0 ? "+" : ""));
             else if (qdiff && (ii->quantity() <= 0))
-                item.appendChild(doc.createElement(QLatin1String("DELETE")));
+                createEmpty(u"DELETE");
         }
 
         // ### BrickStore BSX ###
         else if (hint == XMLHint_BrickStore) {
-            item.appendChild(doc.createElement(QLatin1String("ItemID")).appendChild(doc.createTextNode(QString(ii->item()->id()))).parentNode());
-            item.appendChild(doc.createElement(QLatin1String("ItemTypeID")).appendChild(doc.createTextNode(QChar(ii->itemType()->id()))).parentNode());
-            item.appendChild(doc.createElement(QLatin1String("ColorID")).appendChild(doc.createTextNode(c.toString(ii->color()->id()))).parentNode());
+            create(u"ItemID", ii->item()->id());
+            create(u"ItemTypeID", QString(ii->itemType()->id()));
+            create(u"ColorID", c.toString(ii->color()->id()));
 
             // this extra information is useful, if the e.g.the color- or item-id
             // are no longer available after a database update
-            item.appendChild(doc.createElement(QLatin1String("ItemName")).appendChild(doc.createTextNode(ii->item()->name())).parentNode());
-            item.appendChild(doc.createElement(QLatin1String("ItemTypeName")).appendChild(doc.createTextNode(ii->itemType()->name())).parentNode());
-            item.appendChild(doc.createElement(QLatin1String("ColorName")).appendChild(doc.createTextNode(ii->color()->name())).parentNode());
-            item.appendChild(doc.createElement(QLatin1String("CategoryID")).appendChild(doc.createTextNode(c.toString(ii->category()->id()))).parentNode());
-            item.appendChild(doc.createElement(QLatin1String("CategoryName")).appendChild(doc.createTextNode(ii->category()->name())).parentNode());
+            create(u"ItemName", ii->item()->name());
+            create(u"ItemTypeName", ii->itemType()->name());
+            create(u"ColorName", ii->color()->name());
+            create(u"CategoryID", c.toString(ii->category()->id()));
+            create(u"CategoryName", ii->category()->name());
 
             {
-                const char *st;
+                const char16_t *st;
                 switch (ii->status()) {
                 default             :
-                case Status::Unknown: st = "?"; break;
-                case Status::Extra  : st = "E"; break;
-                case Status::Exclude: st = "X"; break;
-                case Status::Include: st = "I"; break;
+                case Status::Unknown: st = u"?"; break;
+                case Status::Extra  : st = u"E"; break;
+                case Status::Exclude: st = u"X"; break;
+                case Status::Include: st = u"I"; break;
                 }
-                item.appendChild(doc.createElement(QLatin1String("Status")).appendChild(doc.createTextNode(QLatin1String(st))).parentNode());
+                create(u"Status", st);
             }
 
-            item.appendChild(doc.createElement(QLatin1String("Qty")).appendChild(doc.createTextNode(c.toString(ii->quantity()))).parentNode());
-            item.appendChild(doc.createElement(QLatin1String("Price")).appendChild(doc.createTextNode(c.toCurrencyString(ii->price(), { }, 3))).parentNode());
-            item.appendChild(doc.createElement(QLatin1String("Condition")).appendChild(doc.createTextNode(QLatin1String((ii->condition() == Condition::New) ? "N" : "U"))).parentNode());
+            create(u"Qty", c.toString(ii->quantity()));
+            create(u"Price", c.toCurrencyString(ii->price(), { }, 3));
+            create(u"Condition", (ii->condition() == Condition::New) ? u"N" : u"U");
 
             if (ii->subCondition() != SubCondition::None) {
-                const char *st;
+                const char16_t *st;
                 switch (ii->subCondition()) {
-                case SubCondition::Incomplete: st = "I"; break;
-                case SubCondition::Complete  : st = "C"; break;
-                case SubCondition::Sealed    : st = "M"; break;
-                default                      : st = "?"; break;
+                case SubCondition::Incomplete: st = u"I"; break;
+                case SubCondition::Complete  : st = u"C"; break;
+                case SubCondition::Sealed    : st = u"M"; break;
+                default                      : st = u"?"; break;
                 }
-                item.appendChild(doc.createElement(QLatin1String("SubCondition")).appendChild(doc.createTextNode(QLatin1String(st))).parentNode());
+                create(u"SubCondition", st);
             }
 
             if (ii->bulkQuantity() != 1)
-                item.appendChild(doc.createElement(QLatin1String("Bulk")).appendChild(doc.createTextNode(c.toString(ii->bulkQuantity()))).parentNode());
+                create(u"Bulk", c.toString(ii->bulkQuantity()));
             if (ii->sale())
-                item.appendChild(doc.createElement(QLatin1String("Sale")).appendChild(doc.createTextNode(c.toString(ii->sale()))).parentNode());
+                create(u"Sale", c.toString(ii->sale()));
             if (!ii->comments().isEmpty())
-                item.appendChild(doc.createElement(QLatin1String("Comments")).appendChild(doc.createTextNode(ii->comments())).parentNode());
+                create(u"Comments", ii->comments());
             if (!ii->remarks().isEmpty())
-                item.appendChild(doc.createElement(QLatin1String("Remarks")).appendChild(doc.createTextNode(ii->remarks())).parentNode());
+                create(u"Remarks", ii->remarks());
             if (ii->retain())
-                item.appendChild(doc.createElement(QLatin1String("Retain")));
+                createEmpty(u"Retain");
             if (ii->stockroom() != Stockroom::None) {
-                const char *st;
+                const char16_t *st;
                 switch (ii->stockroom()) {
-                case Stockroom::A: st = "A"; break;
-                case Stockroom::B: st = "B"; break;
-                case Stockroom::C: st = "C"; break;
-                default          : st = ""; break;
+                case Stockroom::A: st = u"A"; break;
+                case Stockroom::B: st = u"B"; break;
+                case Stockroom::C: st = u"C"; break;
+                default          : st = u""; break;
                 }
-                item.appendChild(doc.createElement(QLatin1String("Stockroom")).appendChild(doc.createTextNode(QLatin1String(st))).parentNode());
+                create(u"Stockroom", st);
             }
             if (!ii->reserved().isEmpty())
-                item.appendChild(doc.createElement(QLatin1String("Reserved")).appendChild(doc.createTextNode(ii->reserved())).parentNode());
+                create(u"Reserved", ii->reserved());
             if (ii->lotId())
-                item.appendChild(doc.createElement(QLatin1String("LotID")).appendChild(doc.createTextNode(c.toString(ii->lotId()))).parentNode());
+                create(u"LotID", c.toString(ii->lotId()));
 
             if (ii->tierQuantity(0)) {
-                item.appendChild(doc.createElement(QLatin1String("TQ1")).appendChild(doc.createTextNode(c.toString(ii->tierQuantity(0)))).parentNode());
-                item.appendChild(doc.createElement(QLatin1String("TP1")).appendChild(doc.createTextNode(c.toCurrencyString(ii->tierPrice(0), { }, 3))).parentNode());
-                item.appendChild(doc.createElement(QLatin1String("TQ2")).appendChild(doc.createTextNode(c.toString(ii->tierQuantity(1)))).parentNode());
-                item.appendChild(doc.createElement(QLatin1String("TP2")).appendChild(doc.createTextNode(c.toCurrencyString(ii->tierPrice(1), { }, 3))).parentNode());
-                item.appendChild(doc.createElement(QLatin1String("TQ3")).appendChild(doc.createTextNode(c.toString(ii->tierQuantity(2)))).parentNode());
-                item.appendChild(doc.createElement(QLatin1String("TP3")).appendChild(doc.createTextNode(c.toCurrencyString(ii->tierPrice(2), { }, 3))).parentNode());
+                create(u"TQ1", c.toString(ii->tierQuantity(0)));
+                create(u"TP1", c.toCurrencyString(ii->tierPrice(0), { }, 3));
+                create(u"TQ2", c.toString(ii->tierQuantity(1)));
+                create(u"TP2", c.toCurrencyString(ii->tierPrice(1), { }, 3));
+                create(u"TQ3", c.toString(ii->tierQuantity(2)));
+                create(u"TP3", c.toCurrencyString(ii->tierPrice(2), { }, 3));
             }
 
             if (ii->m_weight > 0)
-                item.appendChild(doc.createElement(QLatin1String("TotalWeight")).appendChild(doc.createTextNode(c.toString(ii->weight(), 'f', 4))).parentNode());
+                create(u"TotalWeight", c.toString(ii->weight(), 'f', 4));
             if (!qFuzzyCompare(ii->origPrice(), ii->price()))
-                item.appendChild(doc.createElement(QLatin1String("OrigPrice")).appendChild(doc.createTextNode(c.toCurrencyString(ii->origPrice(), { }, 3))).parentNode());
+                create(u"OrigPrice", c.toCurrencyString(ii->origPrice(), { }, 3));
             if (ii->origQuantity() != ii->quantity())
-                item.appendChild(doc.createElement(QLatin1String("OrigQty")).appendChild(doc.createTextNode(c.toString(ii->origQuantity()))).parentNode());
+                create(u"OrigQty", c.toString(ii->origQuantity()));
         }
 
         // ### MASS UPLOAD ###
         else if (hint == XMLHint_MassUpload) {
-            item.appendChild(doc.createElement(QLatin1String("ITEMID")).appendChild(doc.createTextNode(QString(ii->item()->id()))).parentNode());
-            item.appendChild(doc.createElement(QLatin1String("COLOR")).appendChild(doc.createTextNode(c.toString(ii->color()->id()))).parentNode());
-            item.appendChild(doc.createElement(QLatin1String("CATEGORY")).appendChild(doc.createTextNode(c.toString(ii->category()->id()))).parentNode());
-            item.appendChild(doc.createElement(QLatin1String("ITEMTYPE")).appendChild(doc.createTextNode(QChar(ii->itemType()->id()))).parentNode());
+            create(u"ITEMID", ii->item()->id());
+            create(u"COLOR", c.toString(ii->color()->id()));
+            create(u"CATEGORY", c.toString(ii->category()->id()));
+            create(u"ITEMTYPE", QString(ii->itemType()->id()));
 
-            item.appendChild(doc.createElement(QLatin1String("QTY")).appendChild(doc.createTextNode(c.toString(ii->quantity()))).parentNode());
-            item.appendChild(doc.createElement(QLatin1String("PRICE")).appendChild(doc.createTextNode(c.toCurrencyString(ii->price(), { }, 3))).parentNode());
-            item.appendChild(doc.createElement(QLatin1String("CONDITION")).appendChild(doc.createTextNode(QLatin1String((ii->condition() == Condition::New) ? "N" : "U"))).parentNode());
+            create(u"QTY", c.toString(ii->quantity()));
+            create(u"PRICE", c.toCurrencyString(ii->price(), { }, 3));
+            create(u"CONDITION", (ii->condition() == Condition::New) ? u"N" : u"U");
 
             if (ii->subCondition() != SubCondition::None) {
-                const char *st;
+                const char16_t *st;
                 switch (ii->subCondition()) {
-                    case SubCondition::Incomplete: st = "I"; break;
-                    case SubCondition::Complete  : st = "C"; break;
-                    case SubCondition::Sealed    : st = "M"; break;
-                    default                      : st = "?"; break;
+                    case SubCondition::Incomplete: st = u"I"; break;
+                    case SubCondition::Complete  : st = u"C"; break;
+                    case SubCondition::Sealed    : st = u"M"; break;
+                    default                      : st = u"?"; break;
                 }
-                item.appendChild(doc.createElement(QLatin1String("SUBCONDITION")).appendChild(doc.createTextNode(QLatin1String(st))).parentNode());
+                create(u"SUBCONDITION", st);
             }
 
             if (ii->bulkQuantity() != 1)
-                item.appendChild(doc.createElement(QLatin1String("BULK")).appendChild(doc.createTextNode(c.toString(ii->bulkQuantity()))).parentNode());
+                create(u"BULK", c.toString(ii->bulkQuantity()));
             if (ii->sale())
-                item.appendChild(doc.createElement(QLatin1String("SALE")).appendChild(doc.createTextNode(c.toString(ii->sale()))).parentNode());
+                create(u"SALE", c.toString(ii->sale()));
             if (!ii->comments().isEmpty())
-                item.appendChild(doc.createElement(QLatin1String("DESCRIPTION")).appendChild(doc.createTextNode(ii->comments())).parentNode());
+                create(u"DESCRIPTION", ii->comments());
             if (!ii->remarks().isEmpty())
-                item.appendChild(doc.createElement(QLatin1String("REMARKS")).appendChild(doc.createTextNode(ii->remarks())).parentNode());
+                create(u"REMARKS", ii->remarks());
             if (ii->retain())
-                item.appendChild(doc.createElement(QLatin1String("RETAIN")).appendChild(doc.createTextNode(QLatin1String("Y"))).parentNode());
+                create(u"RETAIN", u"Y");
             if (ii->stockroom() != Stockroom::None) {
-                const char *st;
+                const char16_t *st;
                 switch (ii->stockroom()) {
-                case Stockroom::A: st = "A"; break;
-                case Stockroom::B: st = "B"; break;
-                case Stockroom::C: st = "C"; break;
+                case Stockroom::A: st = u"A"; break;
+                case Stockroom::B: st = u"B"; break;
+                case Stockroom::C: st = u"C"; break;
                 default          : st = nullptr; break;
                 }
-                item.appendChild(doc.createElement(QLatin1String("STOCKROOM")).appendChild(doc.createTextNode(QLatin1String("Y"))).parentNode());
+                create(u"STOCKROOM", u"Y");
                 if (st)
-                    item.appendChild(doc.createElement(QLatin1String("STOCKROOMID")).appendChild(doc.createTextNode(QLatin1String(st))).parentNode());
+                    create(u"STOCKROOMID", st);
             }
             if (!ii->reserved().isEmpty())
-                item.appendChild(doc.createElement(QLatin1String("BUYERUSERNAME")).appendChild(doc.createTextNode(ii->reserved())).parentNode());
+                create(u"BUYERUSERNAME", ii->reserved());
 
             if (ii->tierQuantity(0)) {
-                item.appendChild(doc.createElement(QLatin1String("TQ1")).appendChild(doc.createTextNode(c.toString(ii->tierQuantity(0)))).parentNode());
-                item.appendChild(doc.createElement(QLatin1String("TP1")).appendChild(doc.createTextNode(c.toCurrencyString(ii->tierPrice(0), { }, 3))).parentNode());
-                item.appendChild(doc.createElement(QLatin1String("TQ2")).appendChild(doc.createTextNode(c.toString(ii->tierQuantity(1)))).parentNode());
-                item.appendChild(doc.createElement(QLatin1String("TP2")).appendChild(doc.createTextNode(c.toCurrencyString(ii->tierPrice(1), { }, 3))).parentNode());
-                item.appendChild(doc.createElement(QLatin1String("TQ3")).appendChild(doc.createTextNode(c.toString(ii->tierQuantity(2)))).parentNode());
-                item.appendChild(doc.createElement(QLatin1String("TP3")).appendChild(doc.createTextNode(c.toCurrencyString(ii->tierPrice(2), { }, 3))).parentNode());
+                create(u"TQ1", c.toString(ii->tierQuantity(0)));
+                create(u"TP1", c.toCurrencyString(ii->tierPrice(0), { }, 3));
+                create(u"TQ2", c.toString(ii->tierQuantity(1)));
+                create(u"TP2", c.toCurrencyString(ii->tierPrice(1), { }, 3));
+                create(u"TQ3", c.toString(ii->tierQuantity(2)));
+                create(u"TP3", c.toCurrencyString(ii->tierPrice(2), { }, 3));
             }
         }
 
         // ### WANTED LIST ###
         else if (hint == XMLHint_WantedList) {
-            item.appendChild(doc.createElement(QLatin1String("ITEMID")).appendChild(doc.createTextNode(QString(ii->item()->id()))).parentNode());
-            item.appendChild(doc.createElement(QLatin1String("ITEMTYPE")).appendChild(doc.createTextNode(QChar(ii->itemType()->id()))).parentNode());
-            item.appendChild(doc.createElement(QLatin1String("COLOR")).appendChild(doc.createTextNode(c.toString(ii->color()->id()))).parentNode());
+            create(u"ITEMID", ii->item()->id());
+            create(u"ITEMTYPE", QString(ii->itemType()->id()));
+            create(u"COLOR", c.toString(ii->color()->id()));
 
             if (ii->quantity())
-                item.appendChild(doc.createElement(QLatin1String("MINQTY")).appendChild(doc.createTextNode(c.toString(ii->quantity()))).parentNode());
+                create(u"MINQTY", c.toString(ii->quantity()));
             if (!qFuzzyIsNull(ii->price()))
-                item.appendChild(doc.createElement(QLatin1String("MAXPRICE")).appendChild(doc.createTextNode(c.toCurrencyString(ii->price(), { }, 3))).parentNode());
+                create(u"MAXPRICE", c.toCurrencyString(ii->price(), { }, 3));
             if (!ii->remarks().isEmpty())
-                item.appendChild(doc.createElement(QLatin1String("REMARKS")).appendChild(doc.createTextNode(ii->remarks())).parentNode());
+                create(u"REMARKS", ii->remarks());
             if (ii->condition() == Condition::New)
-                item.appendChild(doc.createElement(QLatin1String("CONDITION")).appendChild(doc.createTextNode(QLatin1String("N"))).parentNode());
+                create(u"CONDITION", u"N");
         }
 
         // ### INVENTORY REQUEST ###
         else if (hint == XMLHint_Inventory) {
-            item.appendChild(doc.createElement(QLatin1String("ITEMID")).appendChild(doc.createTextNode(QString(ii->item()->id()))).parentNode());
-            item.appendChild(doc.createElement(QLatin1String("ITEMTYPE")).appendChild(doc.createTextNode(QChar(ii->itemType()->id()))).parentNode());
-            item.appendChild(doc.createElement(QLatin1String("COLOR")).appendChild(doc.createTextNode(c.toString(ii->color()->id()))).parentNode());
-            item.appendChild(doc.createElement(QLatin1String("QTY")).appendChild(doc.createTextNode(c.toString(ii->quantity()))).parentNode());
+            create(u"ITEMID", ii->item()->id());
+            create(u"ITEMTYPE", QString(ii->itemType()->id()));
+            create(u"COLOR", c.toString(ii->color()->id()));
+            create(u"QTY", c.toString(ii->quantity()));
 
             if (ii->status() == Status::Extra)
-                item.appendChild(doc.createElement(QLatin1String("EXTRA")).appendChild(doc.createTextNode(QLatin1String("Y"))).parentNode());
+                create(u"EXTRA", u"Y");
         }
 
         // optional: additonal tags
         if (extra) {
             for (QMap <QString, QString>::iterator it = extra->begin(); it != extra->end(); ++it)
-                item.appendChild(doc.createElement(it.key()).appendChild(doc.createTextNode(it.value())).parentNode());
+                create(it.key(), it.value());
         }
     }
 
