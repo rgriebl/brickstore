@@ -125,11 +125,7 @@ BrickLink::Picture::Picture(const Item *item, const Color *color)
 
 const QImage BrickLink::Picture::image() const
 {
-    auto f = core()->itemImageScaleFactor();
-    if (qFuzzyCompare(f, 1))
-        return m_image;
-    else
-        return m_image.scaled(m_image.size() * f, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    return m_image;
 }
 
 int BrickLink::Picture::cost() const
@@ -219,16 +215,10 @@ void BrickLink::Core::updatePicture(BrickLink::Picture *pic, bool high_priority)
         url = QString("https://img.bricklink.com/%1L/%2.jpg").arg(pic->item()->itemType()->pictureId()).arg(pic->item()->id());
     }
     else {
-        url = "https://www.bricklink.com/getPic.asp";
-        // ?itemType=%c&colorID=%d&itemNo=%s", pic->item ( )->itemType ( )->pictureId ( ), pic->color ( )->id ( ), pic->item ( )->id ( ));
-        QUrlQuery query;
-        query.addQueryItem("itemType", QChar(pic->item()->itemType()->pictureId()));
-        query.addQueryItem("colorID",  QString::number(pic->color()->id()));
-        query.addQueryItem("itemNo",   pic->item()->id());
-        url.setQuery(query);
+        url = QString("https://img.bricklink.com/ItemImage/%1N/%3/%2.png").arg(pic->item()->itemType()->pictureId()).arg(pic->item()->id()).arg(pic->color()->id());
     }
 
-    //qDebug ( "PIC request started for %s", (const char *) url );
+    //qDebug() << "PIC request started for" << url;
     TransferJob *job = TransferJob::get(url);
     job->setUserData<Picture>('P', pic);
     m_transfer->retrieve(job, high_priority);
@@ -287,7 +277,6 @@ void BrickLink::Core::pictureJobFinished(TransferJob *j)
         path.append("gif");
         url.setPath(path);
 
-        //qDebug ( "PIC request started for %s", (const char *) url );
         TransferJob *job = TransferJob::get(url);
         job->setUserData<Picture>('P', pic);
         m_transfer->retrieve(job);

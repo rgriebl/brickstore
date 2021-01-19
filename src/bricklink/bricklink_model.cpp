@@ -15,6 +15,7 @@
 #include <QPixmap>
 #include <QImage>
 #include <QIcon>
+#include <QPainter>
 #include <QThreadStorage>
 #include <QHelpEvent>
 #include <QAbstractItemView>
@@ -106,7 +107,12 @@ QVariant BrickLink::ColorModel::data(const QModelIndex &index, int role) const
         }
     }
     else if (role == Qt::ToolTipRole) {
-        res = QString(R"(<table width="100%" border="0" bgcolor="%3"><tr><td><br><br></td></tr></table><br />%1: %2)").arg(tr("RGB"), c->color().name(), c->color().name()); //%
+        if (c->id()) {
+            res = QString(R"(<table width="100%" border="0" bgcolor="%3"><tr><td><br><br></td></tr></table><br />%1: %2)")
+                    .arg(tr("RGB"), c->color().name(), c->color().name());
+        } else {
+            res = c->name();
+        }
     }
     else if (role == ColorPointerRole) {
         res.setValue(c);
@@ -502,12 +508,9 @@ QVariant BrickLink::ItemModel::data(const QModelIndex &index, int role) const
         case 2: res = i->name(); break;
         }
     }
-    else if (role == Qt::DecorationRole) {
+    else if (role == Qt::TextAlignmentRole) {
         if (index.column() == 0) {
-            Picture *pic = core()->picture(i, i->defaultColor());
-
-            if (pic && pic->valid())
-                res = pic->image();
+            return Qt::AlignCenter;
         }
     }
     else if (role == Qt::ToolTipRole) {
@@ -844,12 +847,54 @@ BrickLink::ItemDelegate::ItemDelegate(QObject *parent, Options options)
 
 void BrickLink::ItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-    if (m_options & AlwaysShowSelection) {
-        QStyleOptionViewItem myoption(option);
+    QStyleOptionViewItem myoption(option);
+
+    bool firstColumnImageOnly = (m_options & FirstColumnImageOnly) && (index.column() == 0);
+
+    bool useFrameHover = false;
+    bool useFrameSelection = false;
+
+    if (firstColumnImageOnly) {
+        useFrameSelection = (option.state & QStyle::State_Selected);
+        useFrameHover = (option.state & QStyle::State_MouseOver);
+        if (useFrameSelection)
+            myoption.state &= ~QStyle::State_Selected;
+    }
+
+    if (m_options & AlwaysShowSelection)
         myoption.state |= QStyle::State_Active;
-        QStyledItemDelegate::paint(painter, myoption, index);
-    } else {
-        QStyledItemDelegate::paint(painter, option, index);
+
+    QStyledItemDelegate::paint(painter, myoption, index);
+
+    if (firstColumnImageOnly) {
+        if (auto *item = index.data(BrickLink::ItemPointerRole).value<const BrickLink::Item *>()) {
+            QImage image;
+
+            Picture *pic = core()->picture(item, item->defaultColor());
+
+            if (pic && pic->valid())
+                image = pic->image();
+            else
+                image = BrickLink::core()->noImage(option.rect.size());
+
+            if (!image.isNull()) {
+                image = image.scaled(option.rect.size(), Qt::KeepAspectRatio, Qt::FastTransformation);
+                auto offset = (option.rect.size() - image.size()) / 2;
+                painter->drawImage(option.rect.x() + offset.width(),
+                                   option.rect.y() + offset.height(), image);
+            }
+        }
+    }
+
+    if (firstColumnImageOnly && (useFrameSelection || useFrameHover)) {
+        painter->save();
+        QColor c = option.palette.color(QPalette::Highlight);
+        for (int i = 0; i < 6; ++i) {
+            c.setAlphaF((useFrameHover && !useFrameSelection ? 0.6 : 1.) - i * .1);
+            painter->setPen(c);
+            painter->drawRect(option.rect.adjusted(i, i, -i - 1, -i - 1));
+        }
+        painter->restore();
     }
 }
 
@@ -861,13 +906,12 @@ QSize BrickLink::ItemDelegate::sizeHint(const QStyleOptionViewItem &option, cons
 bool BrickLink::ItemDelegate::helpEvent(QHelpEvent *event, QAbstractItemView *view, const QStyleOptionViewItem &option, const QModelIndex &index)
 {
     if (event->type() == QEvent::ToolTip && index.isValid()) {
-        ToolTip::inst()->show(index.data(BrickLink::ItemPointerRole).value<const BrickLink::Item *>(),
-                              index.data(BrickLink::ColorPointerRole).value<const BrickLink::Color *>(),
-                              event->globalPos(), view);
-        return true;
-    } else {
-        return QStyledItemDelegate::helpEvent(event, view, option, index);
+        if (auto item = index.data(BrickLink::ItemPointerRole).value<const BrickLink::Item *>()) {
+            ToolTip::inst()->show(item, nullptr, event->globalPos(), view);
+            return true;
+        }
     }
+    return QStyledItemDelegate::helpEvent(event, view, option, index);
 }
 
 

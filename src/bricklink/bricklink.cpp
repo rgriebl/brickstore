@@ -184,7 +184,7 @@ const QImage Core::noImage(const QSize &s) const
         for (const auto &i : coltable) {
             r.adjust(-1, -1, -1, -1);
 
-            p.setPen(QPen(i, 12, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+            p.setPen(QPen(i, w / 7, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
             p.drawLine(r.x(), r.y(), r.right(), r.bottom());
             p.drawLine(r.right(), r.y(), r.x(), r.bottom());
         }

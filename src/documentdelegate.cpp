@@ -36,6 +36,7 @@
 #include "utility.h"
 #include "framework.h"
 #include "smartvalidator.h"
+#include "bricklink_model.h"
 
 
 QVector<QColor>                 DocumentDelegate::s_shades;
@@ -139,6 +140,9 @@ QSize DocumentDelegate::sizeHint(const QStyleOptionViewItem &option1, const QMod
                      * option1.fontMetrics.averageCharWidth()))) {
         w = int(w / 1.9);  // we can wrap to two lines (plus 10% security margin)
     }
+
+    if (idx.column() == Document::Color)
+        w += (option1.decorationSize.width() * 2 + 4);
 
     QStyleOptionViewItem option(option1);
     return { w + 1 /* the grid lines*/, defaultItemHeight(option.widget) };
@@ -339,7 +343,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
 
     case Document::Picture: {
         if (!it->image().isNull())
-            image = it->image();
+            image = it->image().scaled(option.rect.size(), Qt::KeepAspectRatio, Qt::FastTransformation);
         break;
     }
     case Document::Color: {
@@ -469,36 +473,19 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         style->drawPrimitive(QStyle::PE_IndicatorViewItemCheck, &opt, p, option.widget);
     }
     else if (!image.isNull()) {
-        // clip the image here ..this is cheaper than a cliprect
-
-        int rw = w;
-        int rh = h;
-
-        int sw, sh;
-
-        if (image.height() <= rh) {
-            sw = qMin(rw, image.width());
-            sh = qMin(rh, image.height());
-        } else {
-            sw = image.width() * rh / image.height();
-            sh = rh;
-        }
-
         int px = x;
-        int py = y + (rh - sh) / 2;
+        int py = y;
 
         if (align & Qt::AlignHCenter)
-            px += (rw - sw) / 2;
-        else if (align & Qt::AlignRight)
-            px += (rw - sw);
+            px += (option.rect.width() - image.width()) / 2;
+        if (align & Qt::AlignVCenter)
+            py += (option.rect.height() - image.height()) / 2;
 
-        if (image.height() <= rh)
-            p->drawImage(px, py, image, 0, 0, sw, sh);
-        else
-            p->drawImage(QRect(px, py, sw, sh), image);
+        p->drawImage(px, py, image);
 
-        w -= (margin + sw);
-        x += (margin + sw);
+        int delta = px + image.width() + margin;
+        w -= (delta - x);
+        x = delta;
     }
     else if (!ico.isNull()) {
         ico.paint(p, x + margin, y, w - 2 * margin, h, align, iconMode(option.state), iconState(option.state));
@@ -824,14 +811,20 @@ bool DocumentDelegate::helpEvent(QHelpEvent *event, QAbstractItemView *view, con
     if (!event || !view || (event->type() != QEvent::ToolTip))
         return QItemDelegate::helpEvent(event, view, option, idx);
 
-    QString text = idx.data(Qt::DisplayRole).toString();
-    QString toolTip = idx.data(Qt::ToolTipRole).toString();
-    quint64 elideHash = quint64(idx.row()) << 32 | quint64(idx.column());
-    if ((text != toolTip) || m_elided.contains(elideHash)) {
-        if (!QToolTip::isVisible() || (QToolTip::text() != toolTip))
-            QToolTip::showText(event->globalPos(), toolTip, view, option.rect);
+    if (idx.isValid() && (idx.column() == Document::Picture)) {
+        Document::Item *it = m_view->item(idx);
+        if (it && it->item())
+            BrickLink::ToolTip::inst()->show(it->item(), nullptr, event->globalPos(), view);
     } else {
-        QToolTip::hideText();
+        QString text = idx.data(Qt::DisplayRole).toString();
+        QString toolTip = idx.data(Qt::ToolTipRole).toString();
+        quint64 elideHash = quint64(idx.row()) << 32 | quint64(idx.column());
+        if ((text != toolTip) || m_elided.contains(elideHash)) {
+            if (!QToolTip::isVisible() || (QToolTip::text() != toolTip))
+                QToolTip::showText(event->globalPos(), toolTip, view, option.rect);
+        } else {
+            QToolTip::hideText();
+        }
     }
     return true;
 }

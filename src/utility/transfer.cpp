@@ -161,13 +161,13 @@ void Transfer::schedule()
         connect(j->m_reply, &QNetworkReply::finished, this, [this, j]() {
             auto error = j->m_reply->error();
 
+            j->m_respcode = j->m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+            j->m_effective_url = j->m_reply->url();
+
             if (error != QNetworkReply::NoError) {
                 j->m_error_string = j->m_reply->errorString();
                 j->setStatus(TransferJob::Failed);
             } else {
-                j->m_respcode = j->m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-                j->m_effective_url = j->m_reply->url();
-
                 switch (j->m_respcode) {
                 case 304:
                     if (j->m_only_if_newer.isValid()) {

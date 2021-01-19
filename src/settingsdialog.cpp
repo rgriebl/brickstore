@@ -433,7 +433,7 @@ void SettingsDialog::checkLDrawDir()
             w_ldraw_status->setText(iconFail.arg(tr("No LDraw installation could be auto-detected.")));
     } else {
         if (LDraw::Core::isValidLDrawDir(path))
-            w_ldraw_status->setText(iconOk.arg(tr("Valid LDraw installation at")).arg(path));
+            w_ldraw_status->setText(iconOk.arg(tr("Valid LDraw installation at:")).arg(path));
         else
             w_ldraw_status->setText(iconFail.arg(tr("Not a valid LDraw installation.")));
     }

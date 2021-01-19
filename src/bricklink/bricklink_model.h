@@ -230,6 +230,7 @@ public:
     enum Option {
         None,
         AlwaysShowSelection,
+        FirstColumnImageOnly
     };
     Q_DECLARE_FLAGS(Options, Option)
 

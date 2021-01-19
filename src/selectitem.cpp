@@ -95,43 +95,30 @@ class ItemThumbsDelegate : public BrickLink::ItemDelegate
 {
     Q_OBJECT
 public:
-    ItemThumbsDelegate(QObject *parent = nullptr)
-        : BrickLink::ItemDelegate(parent, BrickLink::ItemDelegate::AlwaysShowSelection)
+    ItemThumbsDelegate(double initialZoom, QObject *parent = nullptr)
+        : BrickLink::ItemDelegate(parent, BrickLink::ItemDelegate::AlwaysShowSelection
+                                  | BrickLink::ItemDelegate::FirstColumnImageOnly)
+        , m_zoom(initialZoom)
     { }
 
     QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override;
-    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+
+    void setZoomFactor(double zoom)
+    {
+        m_zoom = zoom;
+    }
+
+private:
+    double m_zoom;
 };
 
 QSize ItemThumbsDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
     if (index.column() == 0) {
         const auto *item = qvariant_cast<const BrickLink::Item *>(index.data(BrickLink::ItemPointerRole));
-        return item ? item->itemType()->pictureSize() : QSize(80, 60);
+        return (item ? item->itemType()->rawPictureSize() : QSize(80, 60)) * m_zoom;
     } else {
         return BrickLink::ItemDelegate::sizeHint(option, index);
-    }
-}
-
-void ItemThumbsDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
-{
-    QStyleOptionViewItem myoption(option);
-
-    bool useFrameSelection = (index.column() == 0) && (option.state & QStyle::State_Selected);
-    if (useFrameSelection)
-        myoption.state &= ~QStyle::State_Selected;
-
-    BrickLink::ItemDelegate::paint(painter, myoption, index);
-
-    if (useFrameSelection) {
-        painter->save();
-        QColor c = option.palette.color(QPalette::Highlight);
-        for (int i = 0; i < 6; ++i) {
-            c.setAlphaF(1. - i * .1);
-            painter->setPen(c);
-            painter->drawRect(option.rect.adjusted(i, i, -i - 1, -i - 1));
-        }
-        painter->restore();
     }
 }
 
@@ -260,7 +247,7 @@ void SelectItem::init()
     d->w_items->setSelectionMode(QAbstractItemView::SingleSelection);
     d->w_items->setItemDelegate(new BrickLink::ItemDelegate(this, BrickLink::ItemDelegate::AlwaysShowSelection));
     d->w_items->setContextMenuPolicy(Qt::CustomContextMenu);
-    d->w_items->installEventFilter(this);
+    d->w_items->viewport()->installEventFilter(this);
 
     d->w_itemthumbs = new QTreeView(this);
     d->w_itemthumbs->setAlternatingRowColors(true);
@@ -270,11 +257,12 @@ void SelectItem::init()
     d->w_itemthumbs->setRootIsDecorated(false);
     d->w_itemthumbs->setSelectionBehavior(QAbstractItemView::SelectRows);
     d->w_itemthumbs->setSelectionMode(QAbstractItemView::SingleSelection);
-    d->w_itemthumbs->setItemDelegate(new ItemThumbsDelegate(this));
+    d->w_itemthumbs->setItemDelegate(new ItemThumbsDelegate(d->m_zoom, this));
     d->w_itemthumbs->setContextMenuPolicy(Qt::CustomContextMenu);
-    d->w_itemthumbs->installEventFilter(this);
+    d->w_itemthumbs->viewport()->installEventFilter(this);
 
     d->w_thumbs = new QListView(this);
+    d->w_thumbs->setUniformItemSizes(true);
     d->w_thumbs->setMovement(QListView::Static);
     d->w_thumbs->setViewMode(QListView::IconMode);
     d->w_thumbs->setLayoutMode(QListView::Batched);
@@ -283,9 +271,9 @@ void SelectItem::init()
     d->w_thumbs->setSelectionBehavior(QAbstractItemView::SelectRows);
     d->w_thumbs->setSelectionMode(QAbstractItemView::SingleSelection);
     d->w_thumbs->setTextElideMode(Qt::ElideRight);
-    d->w_thumbs->setItemDelegate(new ItemThumbsDelegate(this));
+    d->w_thumbs->setItemDelegate(new ItemThumbsDelegate(d->m_zoom, this));
     d->w_thumbs->setContextMenuPolicy(Qt::CustomContextMenu);
-    d->w_thumbs->installEventFilter(this);
+    d->w_thumbs->viewport()->installEventFilter(this);
 
     d->itemTypeModel = new BrickLink::ItemTypeModel(this);
     d->categoryModel = new BrickLink::CategoryModel(this);
@@ -456,8 +444,8 @@ void SelectItem::languageChange()
 
 bool SelectItem::eventFilter(QObject *o, QEvent *e)
 {
-    if ((o == d->w_items || o == d->w_itemthumbs || o == d->w_thumbs) &&
-        (e->type() == QEvent::KeyPress)) {
+    if ((o == d->w_items->viewport() || o == d->w_itemthumbs->viewport() || o == d->w_thumbs->viewport())
+            && (e->type() == QEvent::KeyPress)) {
         if (static_cast<QKeyEvent *>(e)->key() == Qt::Key_Space) {
             if (!d->m_details)
                 d->m_details = new ItemDetailPopup(this);
@@ -469,6 +457,16 @@ bool SelectItem::eventFilter(QObject *o, QEvent *e)
                 d->m_details->hide();
                 d->m_details->setItem(nullptr);
             }
+            e->accept();
+            return true;
+        }
+    }
+    if ((o == d->w_itemthumbs->viewport() || o == d->w_thumbs->viewport())
+            && (e->type() == QEvent::Wheel)) {
+        const auto *we = static_cast<QWheelEvent *>(e);
+        if (we->modifiers() & Qt::ControlModifier) {
+            double z = std::pow(1.001, we->angleDelta().y());
+            setZoomFactor(d->m_zoom * z);
             e->accept();
             return true;
         }
@@ -610,9 +608,32 @@ bool SelectItem::setCurrentItem(const BrickLink::Item *item, bool force_items_ca
     return (item);
 }
 
+double SelectItem::zoomFactor() const
+{
+    return d->m_zoom;
+}
 
+void SelectItem::setZoomFactor(double zoom)
+{
+    zoom = qBound(.5, zoom, 5.);
+
+    if (!qFuzzyCompare(zoom, d->m_zoom)) {
+        d->m_zoom = zoom;
+
+        auto d1 = static_cast<ItemThumbsDelegate *>(d->w_thumbs->itemDelegate());
+        auto d2 = static_cast<ItemThumbsDelegate *>(d->w_itemthumbs->itemDelegate());
+
+        d1->setZoomFactor(zoom);
+        d2->setZoomFactor(zoom);
+
+        emit d1->sizeHintChanged(d->itemModel->index(0, 0));
+        emit d2->sizeHintChanged(d->itemModel->index(0, 0));
+        
         d->w_zoomLevel->setText(QString::fromLatin1("%1 %").arg(int(zoom * 100)));
         d->w_itemthumbs->resizeColumnToContents(0);
+    }
+}
+
 void SelectItem::setViewMode(int mode)
 {
     QWidget *w = nullptr;
@@ -703,13 +724,21 @@ void SelectItem::showContextMenu(const QPoint &p)
         if (idx.isValid()) {
             const auto *item = idx.model()->data(idx, BrickLink::ItemPointerRole).value<const BrickLink::Item *>();
 
-            if (item && item->category() != currentCategory()) {
-                QMenu m(this);
-                QAction *gotocat = m.addAction(tr("View item's category"));
+            QMenu m(this);
+            QAction *gotoItemCat = nullptr;
+            QAction *gotoAllCat = nullptr;
 
-                if (m.exec(iv->mapToGlobal(p)) == gotocat) {
+            if (item && item->category() != currentCategory())
+                gotoItemCat = m.addAction(tr("View item's category"));
+            if (currentCategory() != BrickLink::CategoryModel::AllCategories)
+                gotoAllCat = m.addAction(tr("View the [All Items] category"));
+
+            if (!m.isEmpty()) {
+                auto action = m.exec(iv->mapToGlobal(p));
+                if (action == gotoItemCat)
                     setCurrentItem(item, true);
-                }
+                else if (action == gotoAllCat)
+                    setCurrentCategory(BrickLink::CategoryModel::AllCategories);
             }
         }
     }

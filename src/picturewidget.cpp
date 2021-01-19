@@ -210,7 +210,12 @@ void PictureWidget::setItemAndColor(const BrickLink::Item *item, const BrickLink
 
     if (m_pic)
         m_pic->release();
-    m_pic = item ? BrickLink::core()->picture(item, color, true) : nullptr;
+    if (!item) {
+        m_pic = nullptr;
+    } else {
+        m_pic = item->itemType()->hasColors() ? BrickLink::core()->picture(item, color, true)
+                                              : BrickLink::core()->largePicture(item, true);
+    }
     if (m_pic) {
         m_pic->addRef();
         if (m_pic->valid())
@@ -263,7 +268,8 @@ void PictureWidget::redraw()
     } else if (!m_image.isNull()) {
         QPixmap p = QPixmap::fromImage(m_image, Qt::NoFormatConversion);
         QSize s = w_image->contentsRect().size();
-        w_image->setPixmap(p.scaled(s, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        QSize ps = p.size().scaled(s, Qt::KeepAspectRatio).boundedTo(p.size() * 2);
+        w_image->setPixmap(p.scaled(ps, Qt::KeepAspectRatio, Qt::SmoothTransformation));
     } else {
         w_image->setText({ });
     }

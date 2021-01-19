@@ -276,16 +276,6 @@ void AddItemDialog::attach(Window *w)
     updateCurrencyCode();
 }
 
-void AddItemDialog::wheelEvent(QWheelEvent *e)
-{
-    if (e->modifiers() == Qt::ControlModifier) {
-        double o = windowOpacity() + double(e->angleDelta().y()) / 1200.0;
-        setWindowOpacity(double(qMin(qMax(o, 0.2), 1.0)));
-
-        e->accept();
-    }
-}
-
 void AddItemDialog::closeEvent(QCloseEvent *e)
 {
     QWidget::closeEvent(e);
