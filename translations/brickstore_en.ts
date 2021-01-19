@@ -105,10 +105,6 @@
             <numerusform>Added %n %1 %2 [%3]</numerusform>
         </translation>
     </message>
-    <message>
-        <source>0</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>AppearsInWidget</name>
@@ -133,10 +129,6 @@
     <name>Application</name>
     <message>
         <source>Could not initialize the BrickLink kernel:&lt;br /&gt;&lt;br /&gt;%1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Check for Program Updates</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -256,37 +248,6 @@
     </message>
     <message>
         <source>Custom: %1 1 equals %2</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>CheckForUpdates</name>
-    <message>
-        <source>Checking for program updates</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>You are currently running %1 %2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Version information is not available.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Your currently installed version is up-to-date.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>A newer version than the one currently installed is available:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Could not parse server response.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Download</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -805,10 +766,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
 <context>
     <name>FrameWork</name>
     <message>
-        <source>Could not load the BrickLink database files.&lt;br /&gt;&lt;br /&gt;Should these files be updated now?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Could not load the BrickLink database files.&lt;br /&gt;&lt;br /&gt;The program is not functional without these files.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -849,11 +806,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>New</source>
-        <comment>File|New</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Open...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -886,17 +838,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Ctrl+I,Ctrl+I</source>
-        <comment>File|Import BrickLink Set Inventory</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>BrickLink XML...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Ctrl+I,Ctrl+X</source>
-        <comment>File|Import BrickLink XML</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -904,17 +846,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Ctrl+I,Ctrl+O</source>
-        <comment>File|Import BrickLink Order</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>BrickLink Store Inventory...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Ctrl+I,Ctrl+S</source>
-        <comment>File|Import BrickLink Store Inventory</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -922,17 +854,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Ctrl+I,Ctrl+C</source>
-        <comment>File|Import BrickLink Shopping Cart</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>LDraw Model...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Ctrl+I,Ctrl+L</source>
-        <comment>File|Import LDraw Model</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -940,17 +862,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Ctrl+E,Ctrl+X</source>
-        <comment>File|Import BrickLink XML</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>BrickLink Mass-Upload XML to Clipboard</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Ctrl+E,Ctrl+U</source>
-        <comment>File|Import BrickLink Mass-Upload</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -958,26 +870,11 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Ctrl+E,Ctrl+P</source>
-        <comment>File|Import BrickLink Mass-Update</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>BrickLink Set Inventory XML to Clipboard</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Ctrl+E,Ctrl+I</source>
-        <comment>File|Import BrickLink Set Inventory</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>BrickLink Wanted List XML to Clipboard</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Ctrl+E,Ctrl+W</source>
-        <comment>File|Import BrickLink Wanted List</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1010,11 +907,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Add Items...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Insert</source>
-        <comment>Edit|AddItems</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1130,36 +1022,11 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>New</source>
-        <comment>Cond|New</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Used</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Toggle New/Used</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>None</source>
-        <comment>SubCond|None</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Sealed</source>
-        <comment>SubCond|Sealed</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Complete</source>
-        <comment>SubCond|Complete</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Incomplete</source>
-        <comment>SubCond|Incomplete</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1179,17 +1046,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Ctrl+*</source>
-        <comment>Edit|Quantity|Multiply</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Divide...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Ctrl+/</source>
-        <comment>Edit|Quantity|Divide</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1205,17 +1062,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Ctrl+G</source>
-        <comment>Edit|Price|Set to PriceGuide</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Inc- or Decrease...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Ctrl++</source>
-        <comment>Edit|Price|Inc/Dec</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1224,11 +1071,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Sale...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Ctrl+%</source>
-        <comment>Edit|Sale</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1367,6 +1209,149 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <source>Error Log</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Clear</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not parse server response.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Version information is not available.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Your currently installed version is up-to-date.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>A newer version than the one currently installed is available:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Download</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Program Update</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>New</source>
+        <comment>File|New</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ctrl+I,Ctrl+I</source>
+        <comment>File|Import BrickLink Set Inventory</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ctrl+I,Ctrl+X</source>
+        <comment>File|Import BrickLink XML</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ctrl+I,Ctrl+O</source>
+        <comment>File|Import BrickLink Order</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ctrl+I,Ctrl+S</source>
+        <comment>File|Import BrickLink Store Inventory</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ctrl+I,Ctrl+C</source>
+        <comment>File|Import BrickLink Shopping Cart</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ctrl+I,Ctrl+L</source>
+        <comment>File|Import LDraw Model</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ctrl+E,Ctrl+X</source>
+        <comment>File|Import BrickLink XML</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ctrl+E,Ctrl+U</source>
+        <comment>File|Import BrickLink Mass-Upload</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ctrl+E,Ctrl+P</source>
+        <comment>File|Import BrickLink Mass-Update</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ctrl+E,Ctrl+I</source>
+        <comment>File|Import BrickLink Set Inventory</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ctrl+E,Ctrl+W</source>
+        <comment>File|Import BrickLink Wanted List</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Insert</source>
+        <comment>Edit|AddItems</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>New</source>
+        <comment>Cond|New</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>None</source>
+        <comment>SubCond|None</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Sealed</source>
+        <comment>SubCond|Sealed</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Complete</source>
+        <comment>SubCond|Complete</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Incomplete</source>
+        <comment>SubCond|Incomplete</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ctrl+*</source>
+        <comment>Edit|Quantity|Multiply</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ctrl+/</source>
+        <comment>Edit|Quantity|Divide</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ctrl+G</source>
+        <comment>Edit|Price|Set to PriceGuide</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ctrl++</source>
+        <comment>Edit|Price|Inc/Dec</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ctrl+%</source>
+        <comment>Edit|Sale</comment>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>HeaderView</name>
@@ -1503,6 +1488,18 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <source>&amp;Quantity:</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Condition:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;New</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;Used</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ImportOrderDialog</name>
@@ -1636,11 +1633,11 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
 <context>
     <name>LDraw</name>
     <message>
-        <source>The file ldcondig.ldr is not readable.</source>
+        <source>LDraws&apos;s ldcondig.ldr is not readable.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Data directory &apos;%1&apos; is not readable.</source>
+        <source>The LDraw directory &apos;%1&apos; is not readable.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1921,6 +1918,10 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <source>Use Regular Expression</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>View the [All Items] category</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>SelectItemDialog</name>
@@ -1972,6 +1973,15 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Maximum</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Advanced options</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Download even if already in cache.
+Only use this if you know what you are doing!</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2070,10 +2080,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Part database, if older than</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source> days</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2083,10 +2089,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>BrickLink Price Guides, if older than</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>LDraw parts, if older than</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2131,10 +2133,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Price</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Network</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2191,6 +2189,50 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>The specified document directory does not exist or is not read- and writeable.&lt;br /&gt;The document directory setting will not be changed.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>BrickLink database, if older than</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>BrickLink</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>LDraw</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>LDraw Directory</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Auto Detect</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>LDraw directory location</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>You have changed the LDraw directory. Please restart BrickStore to apply this setting.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Auto-detected an LDraw installation at:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No LDraw installation could be auto-detected.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Not a valid LDraw installation.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Valid LDraw installation at:</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2330,10 +2372,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
 <context>
     <name>WelcomeWidget</name>
     <message>
-        <source>Last Database update: %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Open recent files</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2346,15 +2384,15 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Updates</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>No recent files</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Current version: %1 (build: %2)</source>
+        <source>version %1 (build: %2)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Using a database that was generated %1</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2775,6 +2813,27 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <source>Printing failed.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message numerus="yes">
+        <source>The quantities of %n lot(s) will exceed the maximum allowed value (%2) when multiplied by %1.&lt;br /&gt;&lt;br /&gt;Nothing has been modified.</source>
+        <translation>
+            <numerusform>The quantity of one lot will exceed the maximum allowed value (%2) when multiplied by %1.&lt;br /&gt;&lt;br /&gt;Nothing has been modified.</numerusform>
+            <numerusform>The quantities of %n lots will exceed the maximum allowed value (%2) when multiplied by %1.&lt;br /&gt;&lt;br /&gt;Nothing has been modified.</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Clear remark on %n item(s)</source>
+        <translation>
+            <numerusform>Clear remark on one item</numerusform>
+            <numerusform>Clear remark on %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Clear comment on %n item(s)</source>
+        <translation>
+            <numerusform>Clear comment on one item</numerusform>
+            <numerusform>Clear comment on %n items</numerusform>
+        </translation>
+    </message>
 </context>
 <context>
     <name>Workspace</name>
@@ -2785,6 +2844,10 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <message>
         <source>Alt+%1</source>
         <extracomment>Shortcut to activate window 0-9</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Go to the Quickstart page</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
