@@ -695,12 +695,6 @@ void FrameWork::languageChange()
 
 void FrameWork::translateActions()
 {
-#if defined(Q_OS_MACOS)
-    static bool onMac = true;
-#else
-    static bool onMac = false;
-#endif
-
     struct ActionDefinition {
         const char *m_name;
         QString     m_text;
@@ -712,7 +706,11 @@ void FrameWork::translateActions()
         ActionDefinition(const char *n, const QString &t, QKeySequence::StandardKey k = QKeySequence::UnknownKey)
             : m_name(n), m_text(t), m_standardKey(k) { }
     };
-    static const ActionDefinition actiontable[] = {
+
+    // recreating this whole table on each invocation is far from ideal, but QT_TR_NOOP doesn't
+    // support the disambiguate parameter, which we need (e.g. New)
+
+    const ActionDefinition actiontable[] = {
         { "file",                           tr("&File"),                              },
         { "file_new",                       tr("New", "File|New"),                    QKeySequence::New },
         { "file_open",                      tr("Open..."),                            QKeySequence::Open },
@@ -742,7 +740,7 @@ void FrameWork::translateActions()
         { "edit_cut",                       tr("Cut"),                                QKeySequence::Cut },
         { "edit_copy",                      tr("Copy"),                               QKeySequence::Copy },
         { "edit_paste",                     tr("Paste"),                              QKeySequence::Paste },
-        { "edit_delete",                    tr("Delete"),                             onMac ? QKeySequence::Backspace : QKeySequence::Delete },
+        { "edit_delete",                    tr("Delete"),                             QKeySequence::Delete },
         { "edit_additems",                  tr("Add Items..."),                       tr("Insert", "Edit|AddItems") },
         { "edit_subtractitems",             tr("Subtract Items..."),                  },
         { "edit_mergeitems",                tr("Consolidate Items..."),               },
@@ -769,7 +767,6 @@ void FrameWork::translateActions()
         { "extras_configure",               tr("Configure..."),                       },
         { "window",                         tr("&Windows"),                           },
         { "help",                           tr("&Help"),                              },
-//        { "help_whatsthis",                 tr("What's this?"),                       tr("Shift+F1", "Help|WhatsThis") },
         { "help_about",                     tr("About..."),                           },
         { "help_updates",                   tr("Check for Program Updates..."),       },
         { "edit_status",                    tr("Status"),                             },
@@ -829,12 +826,11 @@ void FrameWork::translateActions()
         if (QAction *a = findAction(atptr->m_name)) {
             if (!atptr->m_text.isNull())
                 a->setText(atptr->m_text);
-            if (atptr->m_standardKey != QKeySequence::UnknownKey) {
-
+            if (atptr->m_standardKey != QKeySequence::UnknownKey)
                 a->setShortcuts(atptr->m_standardKey);
-            } else if (!atptr->m_shortcut.isNull()) {
+            else if (!atptr->m_shortcut.isNull())
                 a->setShortcuts({ QKeySequence(atptr->m_shortcut) });
-            }
+
             if (!a->shortcut().isEmpty()) {
                 a->setToolTip(QString("%1 <span style=\"color: gray; font-size: small\">%2</span>")
                               .arg(a->text()).arg(a->shortcut().toString(QKeySequence::NativeText)));
