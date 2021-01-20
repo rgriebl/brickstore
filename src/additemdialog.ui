@@ -34,8 +34,8 @@
      <property name="childrenCollapsible">
       <bool>false</bool>
      </property>
-     <widget class="QWidget" name="layoutWidget">
-      <layout class="QHBoxLayout">
+     <widget class="QWidget" name="layoutWidget2">
+      <layout class="QHBoxLayout" name="topLayout">
        <item>
         <widget class="SelectItem" name="w_select_item" native="true">
          <property name="sizePolicy">
@@ -88,7 +88,7 @@
         <enum>QFrame::Raised</enum>
        </property>
       </widget>
-      <widget class="QWidget" name="layoutWidget">
+      <widget class="QWidget" name="layoutWidget1">
        <layout class="QGridLayout">
         <item row="0" column="3">
          <widget class="QSpinBox" name="w_bulk">

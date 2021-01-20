@@ -16,8 +16,6 @@
 #if !defined(QT_NO_OPENGL)
 
 #include <QMouseEvent>
-#include <QOpenGLWindow>
-#include <QOpenGLFramebufferObject>
 #include <QOpenGLShaderProgram>
 #include <QPainter>
 #include <QTimer>
@@ -261,7 +259,11 @@ void LDraw::GLRenderer::paintGL(QOpenGLContext *context)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_MULTISAMPLE);
+
+#if !defined(GL_MULTISAMPLE) && defined(GL_MULTISAMPLE_EXT) // ES vs Desktop
+#  define GL_MULTISAMPLE GL_MULTISAMPLE_EXT
+#endif
+    glEnable(GL_MULTISAMPLE_EXT);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 

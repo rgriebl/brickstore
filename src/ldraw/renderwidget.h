@@ -18,7 +18,6 @@
 #if !defined(QT_NO_OPENGL)
 
 #include <QOpenGLWidget>
-#include <QOpenGLWindow>
 #include <QOpenGLFunctions>
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLBuffer>
