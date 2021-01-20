@@ -37,6 +37,7 @@
 #  include <netinet/in.h>
 #  include <arpa/inet.h>
 #  include <SystemConfiguration/SCNetworkReachability.h>
+#  include <QVersionNumber>
 #elif defined(Q_OS_UNIX)
 #  include <sys/utsname.h>
 #endif
@@ -97,6 +98,24 @@ Application::Application(int &_argc, char **_argv)
 
     qApp->installEventFilter(this);
 
+#if !defined(Q_OS_WINDOWS) && !defined(Q_OS_MACOS)
+    QPixmap pix(":/images/brickstore_icon.png");
+    if (!pix.isNull())
+        QGuiApplication::setWindowIcon(pix);
+#endif
+#if defined(Q_OS_MACOS)
+    QGuiApplication::setAttribute(Qt::AA_DontShowIconsInMenus);
+
+#  if QT_VERSION <= QT_VERSION_CHECK(5, 15, 2)
+    // the new default font San Francisco has rendering problems: QTBUG-88495
+    if (QVersionNumber::fromString(QSysInfo::productVersion()).majorVersion() >= 11) {
+        QFont f = QApplication::font();
+        f.setFamily("Helvetica Neue");
+        QApplication::setFont(f);
+    }
+#  endif
+#endif
+
     m_default_fontsize = QGuiApplication::font().pointSizeF();
     qApp->setProperty("_bs_defaultFontSize", m_default_fontsize); // the settings dialog needs this
 
@@ -109,15 +128,6 @@ Application::Application(int &_argc, char **_argv)
     int fsp = Config::inst()->fontSizePercent();
     if (fsp != 100)
         setFontSizePercentLambda(fsp);
-
-#if !defined(Q_OS_WINDOWS) && !defined(Q_OS_MACOS)
-    QPixmap pix(":/images/brickstore_icon.png");
-    if (!pix.isNull())
-        QGuiApplication::setWindowIcon(pix);
-#endif
-#if defined(Q_OS_MACOS)
-    QGuiApplication::setAttribute(Qt::AA_DontShowIconsInMenus);
-#endif
 
     // check for an already running instance
     if (isClient()) {

@@ -235,16 +235,7 @@ public:
         setAutoFillBackground(true);
         setIndent(style()->pixelMetric(QStyle::PM_DockWidgetTitleBarButtonMargin));
         //setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
-
-        QPalette p = palette();
-        QLinearGradient g(0, 0, 1, 0.5);
-        g.setCoordinateMode(QGradient::ObjectMode);
-        g.setStops({ { 0, p.color(QPalette::Highlight) },
-                     { .65, Utility::gradientColor(p.color(QPalette::Highlight), p.color(QPalette::Window), 0.5) },
-                     { 1, p.color(QPalette::Window) } });
-        p.setBrush(QPalette::Window, g);
-        p.setColor(QPalette::WindowText, p.color(QPalette::HighlightedText));
-        setPalette(p);
+        m_gradient.setCoordinateMode(QGradient::ObjectMode);
 
         QFont f = font();
         f.setBold(true);
@@ -252,10 +243,31 @@ public:
     }
 
 protected:
+    void paintEvent(QPaintEvent *e) override
+    {
+        QPalette p = palette();
+        QColor high = p.color(QPalette::Highlight);
+        QColor text = p.color(QPalette::HighlightedText);
+        QColor win = QApplication::palette(this).color(QPalette::Window);
+
+        if (m_gradient.stops().count() != 3
+                || m_gradient.stops().at(0).second != high
+                || m_gradient.stops().at(2).second != win) {
+            QLinearGradient g(0, 0, 1, 0.5);
+            m_gradient.setStops({ { 0, high },
+                         { .65, Utility::gradientColor(high, win, 0.5) },
+                         { 1, win } });
+            p.setBrush(QPalette::Window, m_gradient);
+            p.setColor(QPalette::WindowText, text);
+            setPalette(p);
+        }
+        QLabel::paintEvent(e);
+    }
+
     QSize sizeHint() const override
     {
         QSize s = QLabel::sizeHint();
-        s.rheight() *= 1.5;
+        s.rheight() += s.height() / 2;
         return s;
     }
 
@@ -264,6 +276,7 @@ protected:
     void mouseReleaseEvent(QMouseEvent *ev) override;
 
 private:
+    QLinearGradient m_gradient;
     QDockWidget *m_dock;
 };
 
@@ -1034,6 +1047,7 @@ bool FrameWork::setupToolBar(QToolBar *t, const QVector<QByteArray> &a_names)
                 }
                 m_progress = new ProgressCircle();
                 m_progress->setIcon(QIcon(":/images/brickstore.png"));
+                m_progress->setColor("#4ba2d8");
                 t->addWidget(m_progress);
             }
         } else if (QAction *a = findAction(an)) {

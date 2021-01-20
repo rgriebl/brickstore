@@ -200,15 +200,15 @@ void Transfer::schedule()
             j->m_reply->deleteLater();
             j->m_reply = nullptr;
 
+            emit progress(++m_progressDone, m_progressTotal);
+            if (m_progressDone == m_progressTotal)
+                m_progressDone = m_progressTotal = 0;
+
             if (!j->isActive())
                 emit finished(j);
 
             m_currentJobs.removeAll(j);
             delete j;
-
-            emit progress(++m_progressDone, m_progressTotal);
-            if (m_progressDone == m_progressTotal)
-                m_progressDone = m_progressTotal = 0;
 
             QMetaObject::invokeMethod(this, &Transfer::schedule, Qt::QueuedConnection);
 

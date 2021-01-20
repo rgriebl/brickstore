@@ -472,6 +472,16 @@ bool SelectItem::eventFilter(QObject *o, QEvent *e)
             return true;
         }
     }
+    if ((o == d->w_itemthumbs->viewport() || o == d->w_thumbs->viewport())
+            && (e->type() == QEvent::NativeGesture)) {
+        const auto *nge = static_cast<QNativeGestureEvent *>(e);
+        if (nge->gestureType() == Qt::ZoomNativeGesture) {
+            double z = 1 + nge->value();
+            setZoomFactor(d->m_zoom * z);
+            e->accept();
+            return true;
+        }
+    }
     return QWidget::eventFilter(o, e);
 }
 

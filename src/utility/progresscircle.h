@@ -40,6 +40,9 @@ public:
     void setIcon(const QIcon &icon);
     QIcon icon() const;
 
+    void setColor(const QColor &color);
+    QColor color() const;
+
 public slots:
     void reset();
     void setMaximum(int maximum);
@@ -66,5 +69,6 @@ private:
     QString m_tt_nothing;
     QString m_tt_normal;
     QIcon m_icon;
+    QColor m_color;
     QScopedPointer<QGradient> m_fill;
 };

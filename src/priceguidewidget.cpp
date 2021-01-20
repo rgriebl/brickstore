@@ -590,16 +590,21 @@ void PriceGuideWidget::paintHeader(QPainter *p, const QRect &r, Qt::Alignment al
     p->restore();
 }
 
-void PriceGuideWidget::paintCell(QPainter *p, const QRect &r, Qt::Alignment align, const QString &str, bool alternate)
+void PriceGuideWidget::paintCell(QPainter *p, const QRect &r, Qt::Alignment align,
+                                 const QString &str, bool alternate)
 {
-    QColor bg = palette().color(alternate ? QPalette::AlternateBase : QPalette::Base);
-    p->fillRect(r, bg);
-
-    QRect r2(r);
-    r2.adjust(hborder, 0, -hborder, 0);
-
-    p->setPen(palette().color(QPalette::Text));
-    p->drawText(r2, int(align), str);
+    QStyleOptionViewItem opt;
+    opt.initFrom(this);
+    opt.palette = QApplication::palette("QAbstractItemView");
+    opt.text = str;
+    opt.displayAlignment = align;
+    opt.rect = r;
+    opt.features = QStyleOptionViewItem::HasDisplay;
+    if (alternate)
+        opt.features |= QStyleOptionViewItem::Alternate;
+    style()->drawPrimitive(QStyle::PE_PanelItemViewRow, &opt, p, this);
+    if (!str.isEmpty())
+        style()->drawControl(QStyle::CE_ItemViewItem, &opt, p, this);
 }
 
 void PriceGuideWidget::paintEvent(QPaintEvent *e)
@@ -607,11 +612,8 @@ void PriceGuideWidget::paintEvent(QPaintEvent *e)
     QFrame::paintEvent(e);
 
     const QPoint offset = contentsRect().topLeft();
-
-    QPalette pal = palette();
     QPainter p(this);
-
-    p.fillRect(contentsRect() & e->rect(), pal.base());
+    p.fillRect(contentsRect() & e->rect(), QApplication::palette("QAbstractItemView").base());
     p.translate(offset.x(), offset.y());
 
     bool valid = d->m_pg && d->m_pg->valid();
@@ -652,7 +654,7 @@ void PriceGuideWidget::paintEvent(QPaintEvent *e)
             break;
 
         case cell::Empty:
-            p.fillRect(c, pal.base());
+            paintCell(&p, c, Qt::AlignCenter, QString(), false);
             break;
         }
     }

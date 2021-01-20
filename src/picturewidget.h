@@ -50,7 +50,7 @@ protected:
     void resizeEvent(QResizeEvent *e) override;
     void changeEvent(QEvent *e) override;
     bool event(QEvent *e) override;
-    bool eventFilter(QObject *o, QEvent *e);
+    bool eventFilter(QObject *o, QEvent *e) override;
 
 private:
     void updateButtons();
@@ -73,7 +73,5 @@ private:
     QToolButton *w_2d = nullptr;
     QToolButton *w_3d = nullptr;
     QToolButton *w_playPause = nullptr;
-    QToolButton *w_pause = nullptr;
-    QToolButton *w_home = nullptr;
 #endif
 };

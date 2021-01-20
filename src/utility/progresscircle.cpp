@@ -118,10 +118,10 @@ void ProgressCircle::paintEvent(QPaintEvent *)
     QRectF r(dx, dy, s, s);
     r.adjust(1, 1, -1, -1);
 
-    QColor outColor = palette().color(m_online ? QPalette::Active : QPalette::Disabled, QPalette::Text);
-    QColor inColor = palette().color(m_online ? QPalette::Active : QPalette::Disabled, QPalette::Highlight);
-    inColor.setAlphaF(inColor.alphaF() * qreal(0.8));
+    const QPalette pal(palette());
 
+    QColor outColor = palette().color(m_online ? QPalette::Active
+                                               : QPalette::Disabled, QPalette::Text);
     int fromAngle = 0, sweepAngle = 0;
     bool inactive = false;
 
@@ -142,11 +142,11 @@ void ProgressCircle::paintEvent(QPaintEvent *)
     if (sweepAngle) {
         if (!m_fill) {
             m_fill.reset(new QConicalGradient(r.center(), qreal(45)));
-            m_fill->setColorAt(0, inColor);
-            m_fill->setColorAt(0.25, inColor.lighter());
-            m_fill->setColorAt(0.5, inColor);
-            m_fill->setColorAt(0.75, inColor.darker());
-            m_fill->setColorAt(1, inColor);
+            m_fill->setColorAt(0, m_color);
+            m_fill->setColorAt(0.25, m_color.lighter());
+            m_fill->setColorAt(0.5, m_color);
+            m_fill->setColorAt(0.75, m_color.darker());
+            m_fill->setColorAt(1, m_color);
         }
         p.setBrush(*m_fill);
         p.drawPie(r, fromAngle, -sweepAngle);
@@ -175,6 +175,17 @@ void ProgressCircle::setIcon(const QIcon &icon)
 QIcon ProgressCircle::icon() const
 {
     return m_icon;
+}
+
+void ProgressCircle::setColor(const QColor &color)
+{
+    m_color = color;
+    update();
+}
+
+QColor ProgressCircle::color() const
+{
+    return m_color;
 }
 
 void ProgressCircle::setToolTipTemplates(const QString &offline, const QString &nothing, const QString &normal)
