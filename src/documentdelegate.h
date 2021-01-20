@@ -73,7 +73,19 @@ protected:
     static QHash<int, QIcon> s_status_icons;
     static QCache<quint64, QPixmap> s_tag_cache;
     static QCache<int, QPixmap> s_stripe_cache;
-    static QCache<QPair<QString, QSize>, QTextLayout> s_textLayoutCache;
+
+    struct TextLayoutCacheKey {
+        QString text;
+        QSize size;
+        QFont font;
+
+        bool operator==(const TextLayoutCacheKey &other) const
+        {
+            return (text == other.text) && (size == other.size) && (font == other.font);
+        }
+    };
+    friend uint qHash(const DocumentDelegate::TextLayoutCacheKey &key, uint seed);
+    static QCache<TextLayoutCacheKey, QTextLayout> s_textLayoutCache;
 
     static void clearCaches();
 };

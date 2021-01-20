@@ -43,7 +43,7 @@ QVector<QColor>                 DocumentDelegate::s_shades;
 QHash<int, QIcon>               DocumentDelegate::s_status_icons;
 QCache<quint64, QPixmap>        DocumentDelegate::s_tag_cache;
 QCache<int, QPixmap>            DocumentDelegate::s_stripe_cache;
-QCache<QPair<QString, QSize>, QTextLayout> DocumentDelegate::s_textLayoutCache(5000);
+QCache<DocumentDelegate::TextLayoutCacheKey, QTextLayout> DocumentDelegate::s_textLayoutCache(5000);
 
 
 DocumentDelegate::DocumentDelegate(Document *doc, DocumentProxyModel *view, QTableView *table)
@@ -151,9 +151,10 @@ QSize DocumentDelegate::sizeHint(const QStyleOptionViewItem &option1, const QMod
 }
 
 
-inline uint qHash(const QSize &key, uint seed)
+inline uint qHash(const DocumentDelegate::TextLayoutCacheKey &key, uint seed)
 {
-    return qHash(qint64(key.width()) << 32 | key.height(), seed);
+    auto sizeHash = qHash((key.size.width() << 16) ^ key.size.height(), seed);
+    return qHash(key.text) ^ sizeHash ^ qHash(key.font) ^ seed;
 }
 
 void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, const QModelIndex &idx) const
@@ -514,7 +515,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         }
 
         static const QString elide = QLatin1String("...");
-        auto key = qMakePair(str, QSize(rw, h));
+        auto key = TextLayoutCacheKey { str, QSize(rw, h), option.font };
         QTextLayout *tlp = s_textLayoutCache.object(key);
 
         if (tlp && tlp->text() != str) // an unlikely hash collision
