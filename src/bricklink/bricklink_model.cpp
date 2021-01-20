@@ -25,6 +25,7 @@
 #include <QLabel>
 #include <QDesktopWidget>
 #include <QBuffer>
+#include <QStringBuilder>
 
 #include "bricklink.h"
 #include "bricklink_model.h"
@@ -953,9 +954,9 @@ bool BrickLink::ToolTip::show(const BrickLink::Item *item, const BrickLink::Colo
 
 QString BrickLink::ToolTip::createToolTip(const BrickLink::Item *item, BrickLink::Picture *pic) const
 {
-    QString str = QLatin1String(R"(<div class="tooltip_picture"><table><tr><td>%2</td></tr><tr><td><b>%3</b></td></tr><tr><td>%1</td></tr></table></div>)");
-    QString img_left = QLatin1String(R"(<img src="data:image/png;base64,%1" />)");
-    QString note_left = QLatin1String("<i>") + BrickLink::ItemDelegate::tr("[Image is loading]") + QLatin1String("</i>");
+    static const QString str = QLatin1String(R"(<div class="tooltip_picture">%2<br><b>%3</b><br>%1</div>)");
+    static const QString img_left = QLatin1String(R"(<center><img src="data:image/png;base64,%1" width="%2" height="%3"/></center>)");
+    QString note_left = u"<i>" % BrickLink::ItemDelegate::tr("[Image is loading]") % u"</i>";
 
     if (pic && (pic->updateStatus() == UpdateStatus::Updating)) {
         return str.arg(note_left, item->id(), item->name());
@@ -963,9 +964,11 @@ QString BrickLink::ToolTip::createToolTip(const BrickLink::Item *item, BrickLink
         QByteArray ba;
         QBuffer buffer(&ba);
         buffer.open(QIODevice::WriteOnly);
-        pic->image().save(&buffer, "PNG");
+        const QImage img = pic->image();
+        img.save(&buffer, "PNG");
 
-        return str.arg(img_left.arg(QString::fromLatin1(ba.toBase64())), item->id(), item->name());
+        return str.arg(img_left.arg(QString::fromLatin1(ba.toBase64())).arg(img.width()).arg(img.height()),
+                       item->id(), item->name());
     }
 }
 

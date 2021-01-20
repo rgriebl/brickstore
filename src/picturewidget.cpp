@@ -241,8 +241,9 @@ void PictureWidget::setItemAndColor(const BrickLink::Item *item, const BrickLink
 
 void PictureWidget::pictureWasUpdated(BrickLink::Picture *pic)
 {
-    if (pic == m_pic && pic->valid()) {
-        m_image = pic->image();
+    if (pic == m_pic) {
+        if (pic->valid())
+            m_image = pic->image();
         redraw();
     }
 }

@@ -60,6 +60,8 @@ DocumentDelegate::DocumentDelegate(Document *doc, DocumentProxyModel *view, QTab
         once = false;
     }
 
+    table->installEventFilter(this); // retranslation
+
     connect(BrickLink::core(), &BrickLink::Core::itemImageScaleFactorChanged,
             this, [this]() {
         m_table->resizeRowsToContents();
@@ -722,7 +724,6 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
                 m_select_item = new SelectItemDialog(false, m_table);
                 m_select_item->setWindowFlag(Qt::Tool);
                 m_select_item->setWindowTitle(tr("Modify Item"));
-                m_select_item->installEventFilter(this); // retranslation
             }
             m_select_item->setItem(it->item());
 
@@ -742,7 +743,6 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
                 m_select_color = new SelectColorDialog(m_table);
                 m_select_color->setWindowFlag(Qt::Tool);
                 m_select_color->setWindowTitle(tr("Modify Color"));
-                m_select_color->installEventFilter(this); // retranslation
             }
             m_select_color->setColorAndItem(it->color(), it->item());
 
