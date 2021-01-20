@@ -33,6 +33,10 @@
    </item>
    <item>
     <widget class="QToolButton" name="w_advanced_button">
+     <property name="styleSheet">
+      <string notr="true">QToolButton {  border: none; backgroundColor: &quot;transparent&quot; }
+</string>
+     </property>
      <property name="text">
       <string>Advanced options</string>
      </property>

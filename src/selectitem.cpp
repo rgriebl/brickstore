@@ -169,16 +169,21 @@ void SelectItem::init()
     });
     popupMenu->addAction(are);
 
+    // Adding a menuAction() to a QLineEdit leads to a strange activation behvior:
+    // only the right side of the icon will react to mouse clicks
     QPixmap filterPix(":/images/filter.png");
     {
-        // add a drop-down arrow via the style
-
         QPainter p(&filterPix);
         QStyleOption so;
         so.initFrom(d->w_filter);
         so.rect = filterPix.rect();
         int mbi = d->w_filter->style()->pixelMetric(QStyle::PM_MenuButtonIndicator, &so, d->w_filter);
-        so.rect = QRect(0, so.rect.bottom() - mbi + 4, mbi - 6, mbi - 6);
+#if defined(Q_OS_MACOS)
+        mbi += 2;
+#else
+        mbi -= 6;
+#endif
+        so.rect = QRect(0, so.rect.bottom() - mbi, mbi, mbi);
         d->w_filter->style()->drawPrimitive(QStyle::PE_IndicatorArrowDown, &so, &p, d->w_filter);
     }
 
