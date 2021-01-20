@@ -465,15 +465,18 @@ public:
 
             int catLen = colonPos - catPos;
 
-            int msgType = QtInfoMsg;
+            int msgType = -1;
             for (int i = 0; i < int(sizeof(msgTypeNames) / sizeof(*msgTypeNames)); ++i) {
                 if (text.midRef(lvlPos, lvlLen) == msgTypeNames[i])
                     msgType = i;
             }
-            int catType = qHash(text.midRef(catPos, catLen)) % 6;
 
-            setFormat(lvlPos, lvlLen, m_lvlFmt[msgType]);
-            setFormat(catPos, catLen, m_catFmt[catType]);
+            if (msgType >= 0) {
+                int catType = qHash(text.midRef(catPos, catLen)) % 6;
+
+                setFormat(lvlPos, lvlLen, m_lvlFmt[msgType]);
+                setFormat(catPos, catLen, m_catFmt[catType]);
+            }
 
             if (hasLocation) {
                 setFormat(linePos, lineLen, m_lineFmt);

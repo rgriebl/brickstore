@@ -283,7 +283,7 @@ void BrickLink::Core::pictureJobFinished(TransferJob *j)
         return;
     }
     else
-        qWarning() << "Image download failed:" << j->errorString() << "/ url:" << j->effectiveUrl();
+        qWarning() << "Image download failed:" << j->errorString() << "(" << j->responseCode() << ")";
 
     emit pictureUpdated(pic);
     pic->release();

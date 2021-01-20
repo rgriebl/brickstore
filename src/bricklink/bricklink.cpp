@@ -351,8 +351,6 @@ Core *Core::create(const QString &datadir, QString *errstring)
         s_inst = new Core(datadir);
         QString test = s_inst->dataPath();
 
-        qDebug() << "Loading database from" << test;
-
         if (test.isNull() || !check_and_create_path(test)) {
             delete s_inst;
             s_inst = nullptr;
@@ -1406,12 +1404,12 @@ bool Core::readDatabase(QString *infoText, const QString &filename)
                 .arg(f.fileName());
         }
 
-        qDebug("Generated : %s", generationDate.isValid() ? qPrintable(generationDate.toLocalTime().toString())
-                                                          : "(no date found in database)");
-        qDebug("Colors    : %8u  (%11d bytes)", m_colors.count(),     m_colors.count()     * int(sizeof(Color)    + 20));
-        qDebug("Types     : %8u  (%11d bytes)", m_item_types.count(), m_item_types.count() * int(sizeof(ItemType) + 20));
-        qDebug("Categories: %8u  (%11d bytes)", m_categories.count(), m_categories.count() * int(sizeof(Category) + 20));
-        qDebug("Items     : %8u  (%11d bytes)", m_items.count(),      m_items.count()      * int(sizeof(Item)     + 20));
+        qDebug() << "Loaded database from" << f.fileName() << endl
+                 << "  Generated at:" << generationDate << endl
+                 << "  Colors      :" << m_colors.count() << endl
+                 << "  Item Types  :" << m_item_types.count() << endl
+                 << "  Categories  :" << m_categories.count() << endl
+                 << "  Items       :" << m_items.count();
 
         m_databaseDate = generationDate;
         emit databaseDateChanged(generationDate);
