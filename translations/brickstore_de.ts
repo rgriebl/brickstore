@@ -1872,7 +1872,7 @@ Cond|New</extracomment>
         <location filename="../src/utility/humanreadabletimedelta.cpp" line="28"/>
         <source>%n second(s)</source>
         <translation>
-            <numerusform>%n Sekunde</numerusform>
+            <numerusform>einer Sekunde</numerusform>
             <numerusform>%n Sekunden</numerusform>
         </translation>
     </message>
@@ -1880,7 +1880,7 @@ Cond|New</extracomment>
         <location filename="../src/utility/humanreadabletimedelta.cpp" line="29"/>
         <source>%n minute(s)</source>
         <translation>
-            <numerusform>%n Minute</numerusform>
+            <numerusform>einer Minute</numerusform>
             <numerusform>%n Minuten</numerusform>
         </translation>
     </message>
@@ -1888,7 +1888,7 @@ Cond|New</extracomment>
         <location filename="../src/utility/humanreadabletimedelta.cpp" line="30"/>
         <source>%n hour(s)</source>
         <translation>
-            <numerusform>%n Stunde</numerusform>
+            <numerusform>einer Stunde</numerusform>
             <numerusform>%n Stunden</numerusform>
         </translation>
     </message>
@@ -1896,24 +1896,24 @@ Cond|New</extracomment>
         <location filename="../src/utility/humanreadabletimedelta.cpp" line="31"/>
         <source>%n day(s)</source>
         <translation>
-            <numerusform>%n Tag</numerusform>
-            <numerusform>%n Tage</numerusform>
+            <numerusform>einem Tag</numerusform>
+            <numerusform>%n Tagen</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <location filename="../src/utility/humanreadabletimedelta.cpp" line="32"/>
         <source>%n month(s)</source>
         <translation>
-            <numerusform>%n Monat</numerusform>
-            <numerusform>%n Monate</numerusform>
+            <numerusform>einem Monat</numerusform>
+            <numerusform>%n Monaten</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <location filename="../src/utility/humanreadabletimedelta.cpp" line="33"/>
         <source>%n year(s)</source>
         <translation>
-            <numerusform>%n Jahr</numerusform>
-            <numerusform>%n Jahre</numerusform>
+            <numerusform>einem Jahr</numerusform>
+            <numerusform>%n Jahren</numerusform>
         </translation>
     </message>
     <message>
