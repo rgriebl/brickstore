@@ -154,7 +154,7 @@ QSize DocumentDelegate::sizeHint(const QStyleOptionViewItem &option1, const QMod
 inline uint qHash(const DocumentDelegate::TextLayoutCacheKey &key, uint seed)
 {
     auto sizeHash = qHash((key.size.width() << 16) ^ key.size.height(), seed);
-    return qHash(key.text) ^ sizeHash ^ qHash(key.font) ^ seed;
+    return qHash(key.text) ^ sizeHash ^ key.fontSize ^ seed;
 }
 
 void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, const QModelIndex &idx) const
@@ -232,6 +232,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
     QIcon ico;
     QString str = idx.model()->data(idx, Qt::DisplayRole).toString();
     int checkmark = 0;
+    bool selectionFrame = false;
 
     if (!selected) {
         switch (idx.column()) {
@@ -345,8 +346,10 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         break;
 
     case Document::Picture: {
-        if (!it->image().isNull())
+        if (!it->image().isNull()) {
             image = it->image().scaled(option.rect.size(), Qt::KeepAspectRatio, Qt::FastTransformation);
+            selectionFrame = selected;
+        }
         break;
     }
     case Document::Color: {
@@ -379,7 +382,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
     // (which most likely has an alpha component)
     bg = Utility::gradientColor(normalbg, bg, bg.alphaF());
     bg.setAlpha(255);
-    p->fillRect(option.rect, bg);
+    p->fillRect(option.rect, selectionFrame ? Qt::white : bg);
 
     if (nocolor || noitem) {
         int d = option.rect.height();
@@ -515,11 +518,14 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         }
 
         static const QString elide = QLatin1String("...");
-        auto key = TextLayoutCacheKey { str, QSize(rw, h), option.font };
+        auto key = TextLayoutCacheKey { str, QSize(rw, h), option.font.pixelSize() };
         QTextLayout *tlp = s_textLayoutCache.object(key);
 
-        if (tlp && tlp->text() != str) // an unlikely hash collision
+        // an unlikely hash collision
+        if (tlp && !(tlp->text() == str && tlp->font().pixelSize() == option.font.pixelSize())) {
+            qDebug() << "TextLayoutCache: hash collision on:" << str;
             tlp = nullptr;
+        }
 
         if (!tlp) {
             tlp = new QTextLayout(str, option.font, nullptr);
@@ -567,6 +573,15 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
             } else {
                 m_elided.remove(elideHash);
             }
+        }
+    }
+    if (selectionFrame) {
+        int lines = qMax(4, option.rect.height() / 20);
+        QColor c = bg;
+        for (int i = 0; i < lines; ++i) {
+            c.setAlphaF(1. - i / double(lines + lines - 2));
+            p->setPen(c);
+            p->drawRect(option.rect.adjusted(i, i, -i - 1, -i -1));
         }
     }
 }

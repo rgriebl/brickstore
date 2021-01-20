@@ -77,11 +77,11 @@ protected:
     struct TextLayoutCacheKey {
         QString text;
         QSize size;
-        QFont font;
+        int fontSize;
 
         bool operator==(const TextLayoutCacheKey &other) const
         {
-            return (text == other.text) && (size == other.size) && (font == other.font);
+            return (text == other.text) && (size == other.size) && (fontSize == other.fontSize);
         }
     };
     friend uint qHash(const DocumentDelegate::TextLayoutCacheKey &key, uint seed);
