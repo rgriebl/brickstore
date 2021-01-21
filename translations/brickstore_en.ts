@@ -91,19 +91,27 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>&amp;Consolidate with list</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Add</source>
         <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
         <source>Added %n %1 %2 [%3]</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Added %n %1 %2 [%3]</numerusform>
             <numerusform>Added %n %1 %2 [%3]</numerusform>
         </translation>
+    </message>
+    <message>
+        <source>&amp;Consolidate</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Your recently added items will be listed here</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Added %1</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1352,6 +1360,10 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <comment>Edit|Sale</comment>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Filter the Item List</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>HeaderView</name>
@@ -1922,6 +1934,26 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <source>View the [All Items] category</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Ctrl+1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ctrl+2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ctrl+3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Zoom in</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Zoom out</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>SelectItemDialog</name>
@@ -1980,8 +2012,11 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Download even if already in cache.
-Only use this if you know what you are doing!</source>
+        <source>Only use these options if you know what you are doing!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Download even if already in cache.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
