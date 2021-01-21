@@ -26,6 +26,8 @@
 #include <QWheelEvent>
 #include <QShortcut>
 #include <QToolTip>
+#include <QStringBuilder>
+#include <QTimer>
 
 #include "smartvalidator.h"
 #include "config.h"
@@ -41,6 +43,8 @@
 #include "selectcolor.h"
 #include "framework.h"
 #include "additemdialog.h"
+#include "humanreadabletimedelta.h"
+#include "utility.h"
 
 
 class ValidatorSpinBox : public QSpinBox
@@ -169,6 +173,12 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     w_toggles[0] = w_toggle_picture;
     w_toggles[1] = w_toggle_appears_in;
     w_toggles[2] = w_toggle_price_guide;
+    for (int i = 0; i < 3; ++i) {
+        connect(w_toggles[i], &QToolButton::toggled, [this, i](bool on) {
+            w_splitter_bottom->widget(i)->setVisible(on);
+        });
+    }
+
     w_splitter_bottom->setStretchFactor(0, 2);
     w_splitter_bottom->setStretchFactor(1, 1);
     w_splitter_bottom->setStretchFactor(2, 0);
@@ -179,10 +189,8 @@ AddItemDialog::AddItemDialog(QWidget *parent)
 
     QByteArray ba = Config::inst()->value(QLatin1String("/MainWindow/AddItemDialog/Geometry"))
             .toByteArray();
-    if (!ba.isEmpty()) {
-
+    if (!ba.isEmpty())
         restoreGeometry(ba);
-    }
 
     ba = Config::inst()->value(QLatin1String("/MainWindow/AddItemDialog/VSplitter"))
             .toByteArray();
@@ -203,6 +211,13 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     double zoom = Config::inst()->value("/MainWindow/AddItemDialog/ItemZoom", 2.).toDouble();
     w_select_item->setZoomFactor(zoom);
 
+    w_last_added->installEventFilter(this); // dynamic tooltip
+
+    auto historyTimer = new QTimer(this);
+    historyTimer->setInterval(30 * 1000);
+    historyTimer->start();
+    connect(historyTimer, &QTimer::timeout, this, &AddItemDialog::updateHistoryText);
+
     languageChange();
 }
 
@@ -215,6 +230,7 @@ void AddItemDialog::languageChange()
 
     updateCurrencyCode();
     updateCaption();
+    updateHistoryText();
 }
 
 AddItemDialog::~AddItemDialog()
@@ -317,6 +333,20 @@ bool AddItemDialog::eventFilter(QObject *watched, QEvent *event)
             QMetaObject::invokeMethod(le, &QLineEdit::selectAll, Qt::QueuedConnection);
         else if (auto *sb = qobject_cast<QSpinBox *>(watched))
             QMetaObject::invokeMethod(sb, &QSpinBox::selectAll, Qt::QueuedConnection);
+
+    } else if (event->type() == QEvent::ToolTip && watched == w_last_added) {
+        const auto *he = static_cast<QHelpEvent *>(event);
+        if (m_addHistory.size() > 1) {
+            static const QString pre = QLatin1String("<p style='white-space:pre'>");
+            static const QString post = QLatin1String("</p>");
+            QString tips;
+
+            for (const auto entry : m_addHistory)
+                tips = tips % pre % historyTextFor(entry.first, entry.second) % post;
+
+            QToolTip::showText(he->globalPos(), tips, w_last_added, w_last_added->geometry());
+        }
+        return true;
     }
     return res;
 }
@@ -428,6 +458,34 @@ double AddItemDialog::tierPriceValue(int i)
     return val;
 }
 
+void AddItemDialog::updateHistoryText()
+{
+    if (m_addHistory.empty()) {
+        w_last_added->setText(tr("Your recently added items will be listed here"));
+    } else {
+        const auto &hist = *m_addHistory.crbegin();
+        w_last_added->setText(historyTextFor(hist.first, hist.second));
+    }
+}
+
+QString AddItemDialog::historyTextFor(const QDateTime &when, const BrickLink::InvItem &item)
+{
+    auto now = QDateTime::currentDateTime();
+    QString cs;
+    if (item.color() && item.color()->id()) {
+        QColor color = item.color()->color();
+        cs = u"<b><font color=\"" % Utility::contrastColor(color, 1.).name() %
+                "\" style=\"background-color: " % color.name() % u" ;\">&nbsp;" %
+                item.colorName() % u"&nbsp;</font></b>&nbsp;&nbsp;";
+    }
+
+    QString s = tr("Added %1").arg(HumanReadableTimeDelta::toString(now, when)) %
+            u":&nbsp;&nbsp;<b>" % QString::number(item.quantity()) % u"</b>&nbsp;&nbsp;" % cs %
+            item.itemName() % u" <i>[" + item.itemId() % u"]</i>";
+
+    return s;
+}
+
 bool AddItemDialog::checkAddPossible()
 {
     bool acceptable = w_select_item->currentItem() &&
@@ -478,17 +536,10 @@ void AddItemDialog::addClicked()
         ii->setTierPrice(i, tierPriceValue(i));
     }
 
-    // the user cannot see the full main window right now
-    if (isMaximized() || isFullScreen()
-            || frameGeometry().intersects(m_window->window()->frameGeometry())) {
-        QWidget *relativeTo = w_remarks_label;
-
-        QToolTip::hideText();
-        QToolTip::showText(relativeTo->mapToGlobal(QPoint(0, fontMetrics().xHeight())),
-                           tr("Added %n %1 %2 [%3]", nullptr, ii->quantity())
-                           .arg(ii->colorName(), ii->itemName(), ii->itemId()),
-                           this, QRect(), 20000);
-    }
+    m_addHistory.emplace_back(qMakePair(QDateTime::currentDateTime(), *ii));
+    while (m_addHistory.size() > 6)
+        m_addHistory.pop_front();
+    updateHistoryText();
 
     m_window->addItem(ii, w_merge->isChecked() ? Window::MergeAction_Force | Window::MergeKeep_Old
                                                : Window::MergeAction_None);

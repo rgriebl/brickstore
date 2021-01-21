@@ -132,15 +132,15 @@ QColor Utility::gradientColor(const QColor &c1, const QColor &c2, qreal f)
 
 QColor Utility::contrastColor(const QColor &c, qreal f)
 {
-    qreal h, s, v, a;
-    c.getHsvF(&h, &s, &v, &a);
+    qreal h, s, l, a;
+    c.getHslF(&h, &s, &l, &a);
 
     f = qBound(qreal(0), f, qreal(1));
 
-    v += f * ((v < qreal(0.5)) ? qreal(1) : qreal(-1));
-    v = qBound(qreal(0), v, qreal(1));
+    l += f * ((l <= qreal(0.55)) ? qreal(1) : qreal(-1));
+    l = qBound(qreal(0), l, qreal(1));
 
-    return QColor::fromHsvF(h, s, v, a);
+    return QColor::fromHslF(h, s, l, a);
 }
 
 void Utility::setPopupPos(QWidget *w, const QRect &pos)

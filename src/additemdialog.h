@@ -15,13 +15,15 @@
 
 #include <QWidget>
 #include <QPointer>
+#include <QDateTime>
 
 #include "ui_additemdialog.h"
 #include "currency.h"
-#include "bricklinkfwd.h"
+#include "bricklink.h"
 
 QT_FORWARD_DECLARE_CLASS(QValidator)
 QT_FORWARD_DECLARE_CLASS(QPushButton)
+
 class Window;
 
 
@@ -60,6 +62,8 @@ private slots:
 private:
     void showItemInColor(const BrickLink::Item *it, const BrickLink::Color *col);
     double tierPriceValue(int i);
+    void updateHistoryText();
+    static QString historyTextFor(const QDateTime &when, const BrickLink::InvItem &item);
 
 private:
     QPointer<Window> m_window;
@@ -79,5 +83,7 @@ private:
 
     QString m_currency_code;
 
-    QCheckBox *w_toggles[3];
+    QToolButton *w_toggles[3];
+
+    std::list<QPair<QDateTime, const BrickLink::InvItem>> m_addHistory;
 };
