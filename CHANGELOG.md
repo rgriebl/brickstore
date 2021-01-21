@@ -3,6 +3,23 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2021.1.5] - 2021-01-20
+A lot of bug-fixing all over the place, too much to mention all in here. 
+
+### Added
+- Switched from using the classic 80x60 small images to BrickLink's newer *normal* format. This
+  should make all item images nice to look at, even on Hi-Dpi screens.
+- This change made it possible to have zoom controls in all catalog item views (e.g. the add-item
+  and import-inventory dialogs). Use the `+`/`-` buttons, `Control` + scroll wheel or a touchpad
+  gesture to zoom seamlessly between 50% and 500%.
+- The add-item dialog is now more customizable with splitters between elements and these
+  customizations are saved and restored.
+- The LDraw detection has been improved, but even if does not work, you can now also specify your
+  LDraw directory in the settings.
+- The database update is now honoring the expiration time from the settings dialog and will update
+  automatically on startup, if the database is past its expiry date.
+- BrickStore will also check for newer versions on startup automatically.
+
 
 ## [2021.1.4] - 2021-01-15
 Performance improvements across the board, especially in the table rendering.
@@ -87,7 +104,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
   are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.1.4...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.1.5...HEAD
+[2021.1.5]: https://github.com/rgriebl/brickstore/releases/tag/v2021.1.5
 [2021.1.4]: https://github.com/rgriebl/brickstore/releases/tag/v2021.1.4
 [2021.1.3]: https://github.com/rgriebl/brickstore/releases/tag/v2021.1.3
 [2021.1.2]: https://github.com/rgriebl/brickstore/releases/tag/v2021.1.2
