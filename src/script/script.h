@@ -148,7 +148,7 @@ private:
     QString m_name;
     QString m_author;
     QString m_version;
-    Type m_type;
+    Type m_type = Type::ExtensionScript;
 
     QmlWrapper::BrickStore *m_brickStore = nullptr;
 

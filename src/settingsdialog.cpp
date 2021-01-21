@@ -104,16 +104,16 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
 #endif
 
     w_docdir->insertItem(0, style()->standardIcon(QStyle::SP_DirIcon), QString());
-    w_docdir->insertItem(1, QIcon(), tr("Other..."));
     w_docdir->insertSeparator(1);
+    w_docdir->insertItem(2, QIcon(), tr("Other..."));
 
     int is = fontMetrics().height();
     w_currency_update->setIconSize(QSize(is, is));
 
     w_ldraw_dir->insertItem(0, style()->standardIcon(QStyle::SP_DirIcon), QString());
-    w_ldraw_dir->insertItem(1, QIcon(), tr("Auto Detect"));
-    w_ldraw_dir->insertItem(2, QIcon(), tr("Other..."));
     w_ldraw_dir->insertSeparator(1);
+    w_ldraw_dir->insertItem(2, QIcon(), tr("Auto Detect"));
+    w_ldraw_dir->insertItem(3, QIcon(), tr("Other..."));
 
     connect(w_ldraw_dir, QOverload<int>::of(&QComboBox::activated),
             this, &SettingsDialog::selectLDrawDir);
@@ -399,10 +399,6 @@ void SettingsDialog::save()
     Config::inst()->setLoginForBrickLink(w_bl_username->text(), w_bl_password->text());
 
     // --[ LDRAW ]---------------------------------------------------------------------
-
-    QString ldrawdir = QDir::toNativeSeparators(Config::inst()->ldrawDir());
-    if (ldrawdir.isEmpty())
-        ldrawdir = LDraw::core()->dataPath();
 
     const QString ldrawDir = w_ldraw_dir->itemData(0).toString();
     if (ldrawDir != Config::inst()->ldrawDir()) {
