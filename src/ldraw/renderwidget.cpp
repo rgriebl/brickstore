@@ -263,7 +263,7 @@ void LDraw::GLRenderer::paintGL(QOpenGLContext *context)
 #if !defined(GL_MULTISAMPLE) && defined(GL_MULTISAMPLE_EXT) // ES vs Desktop
 #  define GL_MULTISAMPLE GL_MULTISAMPLE_EXT
 #endif
-    glEnable(GL_MULTISAMPLE_EXT);
+    glEnable(GL_MULTISAMPLE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
