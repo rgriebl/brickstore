@@ -690,8 +690,10 @@ void FrameWork::languageChange()
         // DocumentProxyModel hasn't received the LanguageChange event yet,
         // so we need to skip this event loop round
         QMetaObject::invokeMethod(this, [this]() {
+            QString tt = findAction("edit_filter_focus")->toolTip();
             if (m_current_window)
-                m_filter->setToolTip(m_current_window->filterToolTip());
+                tt.append(m_current_window->filterToolTip());
+            m_filter->setToolTip(tt);
         }, Qt::QueuedConnection);
     }
     if (m_progress) {
@@ -763,6 +765,7 @@ void FrameWork::translateActions()
         { "edit_copyremarks",               tr("Copy Remarks from Document..."),      },
         { "edit_select_all",                tr("Select All"),                         QKeySequence::SelectAll },
         { "edit_filter_from_selection",     tr("Create a Filter from the Selection"), },
+        { "edit_filter_focus",              tr("Filter the Item List"),               QKeySequence::Find },
         { "edit_select_none",               tr("Select None"),                        QKeySequence::Deselect },
         { "view",                           tr("&View"),                              },
         { "view_toolbar",                   tr("View Toolbar"),                       },
@@ -845,7 +848,7 @@ void FrameWork::translateActions()
                 a->setShortcuts({ QKeySequence(atptr->m_shortcut) });
 
             if (!a->shortcut().isEmpty()) {
-                a->setToolTip(QString("%1 <span style=\"color: gray; font-size: small\">%2</span>")
+                a->setToolTip(QString::fromLatin1("%1 <span style=\"color: gray; font-size: small\">%2</span>")
                               .arg(a->text()).arg(a->shortcut().toString(QKeySequence::NativeText)));
             }
         }
@@ -1036,8 +1039,6 @@ bool FrameWork::setupToolBar(QToolBar *t, const QVector<QByteArray> &a_names)
                     if (m_filter)
                         emit filterTextChanged(m_filter->text());
                 });
-                connect(new QShortcut(QKeySequence::Find, m_filter), &QShortcut::activated,
-                        m_filter, [this]() { m_filter->setFocus(); });
 
                 t->addWidget(m_filter);
             } else if (an == "widget_progress") {
@@ -1209,6 +1210,9 @@ void FrameWork::createActions()
     (void) newQAction(this, "edit_select_all", NeedDocument);
     (void) newQAction(this, "edit_select_none", NeedDocument);
     (void) newQAction(this, "edit_filter_from_selection", NeedSelection(1));
+    (void) newQAction(this, "edit_filter_focus", NeedDocument, false, this, [this]() {
+        m_filter->setFocus();
+    });
 
     m = newQMenu(this, "edit_status", NeedSelection(1));
     g = newQActionGroup(this, nullptr, true);
@@ -1532,6 +1536,8 @@ void FrameWork::connectWindow(QWidget *w)
     if (w && w == m_current_window)
         return;
 
+    QString filterToolTip;
+
     if (m_current_window) {
         Document *doc = m_current_window->document();
 
@@ -1547,7 +1553,6 @@ void FrameWork::connectWindow(QWidget *w)
             disconnect(this, &FrameWork::filterTextChanged,
                        m_current_window.data(), &Window::setFilter);
             m_filter->setText(QString());
-            m_filter->setToolTip(QString());
         }
         if (m_details) {
             disconnect(m_current_window.data(), &Window::currentChanged,
@@ -1572,7 +1577,7 @@ void FrameWork::connectWindow(QWidget *w)
                 this, &FrameWork::selectionUpdate);
         if (m_filter) {
             m_filter->setText(window->filter());
-            m_filter->setToolTip(window->filterToolTip());
+            filterToolTip = window->filterToolTip();
             connect(this, &FrameWork::filterTextChanged,
                     window, &Window::setFilter);
         }
@@ -1586,6 +1591,8 @@ void FrameWork::connectWindow(QWidget *w)
 
         // update per-document action states
         findAction("view_difference_mode")->setChecked(window->isDifferenceMode());
+
+        m_filter->setToolTip(findAction("edit_filter_focus")->toolTip() + filterToolTip);
 
         m_current_window = window;
     }
