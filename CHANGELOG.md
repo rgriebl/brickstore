@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2021.1.6] - 2021-01-22
+Fixed a crash when closing the settings dialog.
+
 ## [2021.1.5] - 2021-01-21
 A lot of bug-fixing all over the place, too much to mention all in here. 
 
@@ -104,7 +107,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
   are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.1.5...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.1.6...HEAD
+[2021.1.6]: https://github.com/rgriebl/brickstore/releases/tag/v2021.1.5
 [2021.1.5]: https://github.com/rgriebl/brickstore/releases/tag/v2021.1.5
 [2021.1.4]: https://github.com/rgriebl/brickstore/releases/tag/v2021.1.4
 [2021.1.3]: https://github.com/rgriebl/brickstore/releases/tag/v2021.1.3
