@@ -450,6 +450,7 @@ void SelectItem::languageChange()
 
 bool SelectItem::eventFilter(QObject *o, QEvent *e)
 {
+#ifdef ENABLE_ITEM_DETAIL_POPUP
     if ((o == d->w_items->viewport() || o == d->w_itemthumbs->viewport() || o == d->w_thumbs->viewport())
             && (e->type() == QEvent::KeyPress)) {
         if (static_cast<QKeyEvent *>(e)->key() == Qt::Key_Space) {
@@ -467,6 +468,7 @@ bool SelectItem::eventFilter(QObject *o, QEvent *e)
             return true;
         }
     }
+#endif
     if ((o == d->w_itemthumbs->viewport() || o == d->w_thumbs->viewport())
             && (e->type() == QEvent::Wheel)) {
         const auto *we = static_cast<QWheelEvent *>(e);

@@ -1928,6 +1928,7 @@ void Window::resizeColumnsToDefault()
 
 bool Window::eventFilter(QObject *o, QEvent *e)
 {
+#ifdef ENABLE_ITEM_DETAIL_POPUP
     if (o == w_list && e->type() == QEvent::KeyPress) {
         if (static_cast<QKeyEvent *>(e)->key() == Qt::Key_Space) {
             FrameWork::inst()->toggleItemDetailPopup();
@@ -1935,6 +1936,7 @@ bool Window::eventFilter(QObject *o, QEvent *e)
             return true;
         }
     }
+#endif
     return QWidget::eventFilter(o, e);
 }
 
