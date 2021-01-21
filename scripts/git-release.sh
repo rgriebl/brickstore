@@ -39,7 +39,7 @@ grep -s -q CHANGELOG.md -e "^## \\[$version\\]"
 status "ok" "not found"
 
 echo -n "Checking CHANGELOG main entry date... "
-grep -s -q CHANGELOG.md -e "^## \\[$version\\] - $(date +%Y-%m-%d)\$" || fail "not from today!"
+grep -s -q CHANGELOG.md -e "^## \\[$version\\] - $(date +%Y-%m-%d)\$"
 status "ok" "not from today"
 
 echo -n "Checking CHANGELOG link entry... "
