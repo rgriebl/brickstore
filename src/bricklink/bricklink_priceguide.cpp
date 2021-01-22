@@ -18,6 +18,7 @@
 #include <QTextStream>
 #include <QLocale>
 #include <QUrlQuery>
+#include <QRegularExpression>
 
 #include "bricklink.h"
 
@@ -45,6 +46,8 @@ BrickLink::PriceGuide *BrickLink::Core::priceGuide(const BrickLink::Item *item, 
     return pg;
 }
 
+
+bool BrickLink::PriceGuide::s_scrapeHtml = true;
 
 BrickLink::PriceGuide::PriceGuide(const BrickLink::Item *item, const BrickLink::Color *color)
 {
@@ -159,6 +162,46 @@ void BrickLink::PriceGuide::parse(const QByteArray &ba)
     m_valid = true;
 }
 
+void BrickLink::PriceGuide::parseHtml(const QByteArray &ba)
+{
+    static const QRegularExpression re(R"(> (\d+) <.*?> (\d+) <.*?> US \$([0-9.]+) <.*?> US \$([0-9.]+) <.*?> US \$([0-9.]+) <.*?> US \$([0-9.]+) <)");
+    QLocale c = QLocale::c();
+
+    QString s = QString::fromUtf8(ba).replace("&nbsp;", " ");
+
+//    qWarning() << "===================================================";
+//    qWarning() << s.toLocal8Bit().constData();
+//    qWarning() << "===================================================";
+
+    memset(m_quantities, 0, sizeof(m_quantities));
+    memset(m_lots, 0, sizeof(m_lots));
+    memset(m_prices, 0, sizeof(m_prices));
+
+    int matchCounter = 0;
+    int startPos = 0;
+
+    for (int i = 0; i < 4; ++i) {
+        auto m = re.match(s, startPos);
+        if (m.hasMatch()) {
+            int ti = i / 2;
+            int ci = i % 2;
+
+            qWarning() << i << startPos << m.capturedTexts().mid(1) << m.capturedLength(0);
+
+            m_lots[ti][ci]             = m.captured(1).toInt();
+            m_quantities[ti][ci]       = m.captured(2).toInt();
+            m_prices[ti][ci][int(Price::Lowest)]   = c.toDouble(m.captured(3));
+            m_prices[ti][ci][int(Price::Average)]  = c.toDouble(m.captured(4));
+            m_prices[ti][ci][int(Price::WAverage)] = c.toDouble(m.captured(5));
+            m_prices[ti][ci][int(Price::Highest)]  = c.toDouble(m.captured(6));
+
+            ++matchCounter;
+            startPos = m.capturedEnd(0);
+        }
+    }
+    m_valid = (matchCounter == 4);
+}
+
 
 void BrickLink::PriceGuide::update(bool high_priority)
 {
@@ -180,14 +223,30 @@ void BrickLink::Core::updatePriceGuide(BrickLink::PriceGuide *pg, bool high_prio
     pg->m_update_status = UpdateStatus::Updating;
     pg->addRef();
 
-    QUrl url("https://www.bricklink.com/BTpriceSummary.asp"); //?{item type}={item no}&colorID={color ID}&cCode={currency code}&cExc={Y to exclude incomplete sets}
     QUrlQuery query;
+    QUrl url;
 
-    query.addQueryItem(QChar(pg->item()->itemType()->id()).toUpper(),
-                                 pg->item()->id());
-    query.addQueryItem("colorID",  QString::number(pg->color()->id()));
-    query.addQueryItem("cCode",    "USD");
-    query.addQueryItem("cExc",     "Y"); //  Y == exclude incomplete sets
+    pg->m_scrapedHtml = PriceGuide::s_scrapeHtml;
+
+    if (pg->m_scrapedHtml) {
+        url = QUrl("https://www.bricklink.com/priceGuideSummary.asp");
+        query.addQueryItem("a",       QChar(pg->item()->itemType()->id()));
+        query.addQueryItem("vcID",    "1"); // USD
+        query.addQueryItem("vatInc",  "Y");
+        query.addQueryItem("ajView",  "Y"); // only the AJAX snippet
+        query.addQueryItem("colorID", QString::number(pg->color()->id()));
+        query.addQueryItem("itemID",  pg->item()->id());
+        query.addQueryItem("uncache", QString::number(QDateTime::currentSecsSinceEpoch()));
+    } else {
+        //?{item type}={item no}&colorID={color ID}&cCode={currency code}&cExc={Y to exclude incomplete sets}
+        url = QUrl("https://www.bricklink.com/BTpriceSummary.asp");
+
+        query.addQueryItem(QChar(pg->item()->itemType()->id()).toUpper(),
+                           pg->item()->id());
+        query.addQueryItem("colorID",  QString::number(pg->color()->id()));
+        query.addQueryItem("cCode",    "USD");
+        query.addQueryItem("cExc",     "Y"); //  Y == exclude incomplete sets
+    }
     url.setQuery(query);
 
     //qDebug ( "PG request started for %s", (const char *) url );
@@ -210,7 +269,10 @@ void BrickLink::Core::priceGuideJobFinished(TransferJob *j)
     pg->m_update_status = UpdateStatus::UpdateFailed;
 
     if (j->isCompleted()) {
-        pg->parse(*j->data());
+        if (pg->m_scrapedHtml)
+            pg->parseHtml(*j->data());
+        else
+            pg->parse(*j->data());
         if (pg->m_valid) {
             pg->m_fetched = QDateTime::currentDateTime();
             pg->saveToDisk();

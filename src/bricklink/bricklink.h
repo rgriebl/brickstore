@@ -546,6 +546,9 @@ private:
     int           m_lots       [int(Time::Count)][int(Condition::Count)];
     double        m_prices     [int(Time::Count)][int(Condition::Count)][int(Price::Count)];
 
+    bool          m_scrapedHtml;
+    static bool   s_scrapeHtml;
+
 private:
     PriceGuide(const Item *item, const Color *color);
 
@@ -554,6 +557,7 @@ private:
     void saveToDisk();
 
     void parse(const QByteArray &ba);
+    void parseHtml(const QByteArray &ba);
 
     friend class Core;
 };
