@@ -57,6 +57,7 @@ static const char *application = BRICKSTORE_NAME;
 Config::Config()
     : QSettings(organization, application)
 {
+    m_simple_mode = value("General/SimpleMode", false).toBool();
     m_show_input_errors = value("General/ShowInputErrors", true).toBool();
     m_measurement = (value("General/MeasurementSystem").toString() == QLatin1String("imperial"))
             ? QLocale::ImperialSystem : QLocale::MetricSystem;
