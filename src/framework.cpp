@@ -758,7 +758,7 @@ void FrameWork::translateActions()
         { "edit_delete",                    tr("Delete"),                             QKeySequence::Delete },
         { "edit_additems",                  tr("Add Items..."),                       tr("Insert", "Edit|AddItems") },
         { "edit_subtractitems",             tr("Subtract Items..."),                  },
-        { "edit_mergeitems",                tr("Consolidate Items..."),               },
+        { "edit_mergeitems",                tr("Consolidate Items..."),               tr("Ctrl+L", "Edit|Consolidate Items") },
         { "edit_partoutitems",              tr("Part out Item..."),                   },
         { "edit_setmatch",                  tr("Match Items against Set Inventories...") },
         { "edit_reset_diffs",               tr("Reset Differences"),                  },
