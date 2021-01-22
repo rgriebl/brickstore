@@ -108,7 +108,7 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
 
 
 [Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.1.6...HEAD
-[2021.1.6]: https://github.com/rgriebl/brickstore/releases/tag/v2021.1.5
+[2021.1.6]: https://github.com/rgriebl/brickstore/releases/tag/v2021.1.6
 [2021.1.5]: https://github.com/rgriebl/brickstore/releases/tag/v2021.1.5
 [2021.1.4]: https://github.com/rgriebl/brickstore/releases/tag/v2021.1.4
 [2021.1.3]: https://github.com/rgriebl/brickstore/releases/tag/v2021.1.3
