@@ -164,7 +164,9 @@ void BrickLink::PriceGuide::parse(const QByteArray &ba)
 
 void BrickLink::PriceGuide::parseHtml(const QByteArray &ba)
 {
-    static const QRegularExpression re(R"(> (\d+) <.*?> (\d+) <.*?> US \$([0-9.]+) <.*?> US \$([0-9.]+) <.*?> US \$([0-9.]+) <.*?> US \$([0-9.]+) <)");
+//    static const QRegularExpression re(R"(> (\d+) <.*?> (\d+) <.*?> US \$([0-9.]+) <.*?> US \$([0-9.]+) <.*?> US \$([0-9.]+) <.*?> US \$([0-9.]+) <)");
+
+    static const QRegularExpression re(R"(<B>([A-Za-z-]*?): </B><.*?> (\d+) <.*?> (\d+) <.*?> US \$([0-9.]+) <.*?> US \$([0-9.]+) <.*?> US \$([0-9.]+) <.*?> US \$([0-9.]+) <)");
     QLocale c = QLocale::c();
 
     QString s = QString::fromUtf8(ba).replace("&nbsp;", " ");
@@ -180,26 +182,54 @@ void BrickLink::PriceGuide::parseHtml(const QByteArray &ba)
     int matchCounter = 0;
     int startPos = 0;
 
+    int currentPos = s.indexOf("Current Items for Sale");
+    bool hasCurrent = (currentPos > 0);
+    int pastSixPos = s.indexOf("Past 6 Months Sales");
+    bool hasPastSix = (pastSixPos > 0);
+//    QPair<int, int> currentRange;
+//    QPair<int, int> pastSixRange;
+
+    if (currentPos >= 0 && currentPos > pastSixPos)
+
     for (int i = 0; i < 4; ++i) {
         auto m = re.match(s, startPos);
         if (m.hasMatch()) {
-            int ti = i / 2;
-            int ci = i % 2;
+            int ti = -1;
+            int ci = -1;
 
-            qWarning() << i << startPos << m.capturedTexts().mid(1) << m.capturedLength(0);
+            int matchPos = m.capturedStart(0);
+            int matchEnd = m.capturedEnd(0);
 
-            m_lots[ti][ci]             = m.captured(1).toInt();
-            m_quantities[ti][ci]       = m.captured(2).toInt();
-            m_prices[ti][ci][int(Price::Lowest)]   = c.toDouble(m.captured(3));
-            m_prices[ti][ci][int(Price::Average)]  = c.toDouble(m.captured(4));
-            m_prices[ti][ci][int(Price::WAverage)] = c.toDouble(m.captured(5));
-            m_prices[ti][ci][int(Price::Highest)]  = c.toDouble(m.captured(6));
+            // if both pastSix and current are available, pastSix comes first
+            if (hasCurrent && (matchPos > currentPos))
+                ti = int(Time::Current);
+            else if (hasPastSix && (matchPos > pastSixPos))
+                ti = int(Time::PastSix);
+
+            const QString condStr = m.captured(1);
+            if (condStr == "Used")
+                ci = int(Condition::Used);
+            else if (condStr == "New")
+                ci = int(Condition::New);
+
+            qWarning() << i << ti << ci << m.capturedTexts().mid(1);
+            qWarning() << "   start:" << startPos << "match start:" << matchPos << "match end:" << matchEnd;
+
+            if ((ti == -1) || (ci == -1))
+                continue;
+
+            m_lots[ti][ci]             = m.captured(2).toInt();
+            m_quantities[ti][ci]       = m.captured(3).toInt();
+            m_prices[ti][ci][int(Price::Lowest)]   = c.toDouble(m.captured(4));
+            m_prices[ti][ci][int(Price::Average)]  = c.toDouble(m.captured(5));
+            m_prices[ti][ci][int(Price::WAverage)] = c.toDouble(m.captured(6));
+            m_prices[ti][ci][int(Price::Highest)]  = c.toDouble(m.captured(7));
 
             ++matchCounter;
-            startPos = m.capturedEnd(0);
+            startPos = matchEnd;
         }
     }
-    m_valid = (matchCounter == 4);
+    m_valid = (matchCounter > 0);
 }
 
 
