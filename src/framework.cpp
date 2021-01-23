@@ -834,10 +834,10 @@ void FrameWork::translateActions()
         { "edit_stockroom_b",               tr("B"),                                  },
         { "edit_stockroom_c",               tr("C"),                                  },
         { "edit_reserved",                  tr("Reserved for..."),                    },
-        { "edit_bl_catalog",                tr("Show BrickLink Catalog Info..."),     },
-        { "edit_bl_priceguide",             tr("Show BrickLink Price Guide Info..."), },
-        { "edit_bl_lotsforsale",            tr("Show Lots for Sale on BrickLink..."), },
-        { "edit_bl_myinventory",            tr("Show in my Store on BrickLink..."),   },
+        { "edit_bl_catalog",                tr("Show BrickLink Catalog Info..."),     tr("Ctrl+B,Ctrl+C", "Edit|Show BL Catalog Info") },
+        { "edit_bl_priceguide",             tr("Show BrickLink Price Guide Info..."), tr("Ctrl+B,Ctrl+P", "Edit|Show BL Price Guide") },
+        { "edit_bl_lotsforsale",            tr("Show Lots for Sale on BrickLink..."), tr("Ctrl+B,Ctrl+L", "Edit|Show BL Lots for Sale") },
+        { "edit_bl_myinventory",            tr("Show in my Store on BrickLink..."),   tr("Ctrl+B,Ctrl+I", "Edit|Show BL my Inventory") },
 
         { nullptr, nullptr }
     };

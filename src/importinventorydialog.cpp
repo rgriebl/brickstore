@@ -14,14 +14,15 @@
 #include <QSpinBox>
 #include <QDialogButtonBox>
 #include <QPushButton>
+#include <QShortcut>
+#include <QDesktopServices>
 
 #include "bricklink.h"
 #include "config.h"
 #include "import.h"
 #include "progressdialog.h"
-
+#include "framework.h"
 #include "importinventorydialog.h"
-
 
 
 ImportInventoryDialog::ImportInventoryDialog(QWidget *parent)
@@ -41,6 +42,28 @@ ImportInventoryDialog::ImportInventoryDialog(QWidget *parent)
         restoreGeometry(ba);
     double zoom = Config::inst()->value("/MainWindow/ImportInventoryDialog/ItemZoom", 2.).toDouble();
     w_select->setZoomFactor(zoom);
+
+    if (QAction *a = FrameWork::inst()->findAction("edit_bl_catalog")) {
+        connect(new QShortcut(a->shortcut(), this), &QShortcut::activated, this, [this]() {
+            const auto item = w_select->currentItem();
+            if (item)
+                QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_CatalogInfo, item));
+        });
+    }
+    if (QAction *a = FrameWork::inst()->findAction("edit_bl_priceguide")) {
+        connect(new QShortcut(a->shortcut(), this), &QShortcut::activated, this, [this]() {
+            const auto item = w_select->currentItem();
+            if (item && !item->itemType()->hasColors())
+                QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_PriceGuideInfo, item));
+        });
+    }
+    if (QAction *a = FrameWork::inst()->findAction("edit_bl_lotsforsale")) {
+        connect(new QShortcut(a->shortcut(), this), &QShortcut::activated, this, [this]() {
+            const auto item = w_select->currentItem();
+            if (item && !item->itemType()->hasColors())
+                QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_LotsForSale, item));
+        });
+    }
 }
 
 ImportInventoryDialog::~ImportInventoryDialog()

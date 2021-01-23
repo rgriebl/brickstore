@@ -120,11 +120,13 @@ private:
 private:
     enum { MaxRecentFiles = 9 };
 
+public:
+    QAction *findAction(const char *name);
+
 private:
     QIcon *icon(const char *name);
 
     void setupScripts();
-    QAction *findAction(const char *name);
     QVector<QAction *> findActions(const char *startsWithName);
     void connectAllActions(bool do_connect, Window *window);
     void createActions();

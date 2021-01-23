@@ -37,11 +37,11 @@
 #include <QContextMenuEvent>
 #include <QLineEdit>
 #include <QPainter>
-#include <QShortcut>
 
 #include "bricklink_model.h"
 #include "selectitem.h"
 #include "messagebox.h"
+#include "framework.h"
 #include "itemdetailpopup.h"
 
 
