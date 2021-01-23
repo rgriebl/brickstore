@@ -19,6 +19,7 @@
 
 #include "filter.h"
 
+QStringList Filter::empty_value_keywords = { "empty", "blank", "null" };
 
 Filter::Filter()
     : m_field(-1), m_comparison(Matches), m_combination(And)
@@ -50,6 +51,17 @@ bool Filter::matches(const QVariant &v) const
     double d1 = 0, d2 = 0;
     QString s1, s2;
     
+    bool is_null_expression = empty_value_keywords.contains(m_expression, Qt::CaseInsensitive);
+    bool is_null_value = v.isNull();
+    bool equality_comparison = (comparison() == Is || comparison() == IsNot);
+
+    if (is_null_expression && equality_comparison) {
+        return (comparison() == Is) ? is_null_value : !is_null_value;        
+    } else if (is_null_value) {
+        // In all other cases, return no match if value is null.
+        return false;
+    }
+
     switch (v.type()) {
     case QVariant::Int:
     case QVariant::UInt:

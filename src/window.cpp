@@ -722,9 +722,14 @@ void Window::on_edit_filter_from_selection_triggered()
     if (selection().count() == 1) {
         auto idx = m_selection_model->currentIndex();
         if (idx.isValid() && idx.column() >= 0) {
+            QString value = m_view->data(idx, Document::FilterRole).toString();
+
+            if (value.isNull())
+                value = QString("empty");
+
             FrameWork::inst()->setFilter(m_view->headerData(idx.column(), Qt::Horizontal).toString()
                                          + QLatin1String(" == ")
-                                         + m_view->data(idx, Document::FilterRole).toString());
+                                         + value);
         }
     }
 }

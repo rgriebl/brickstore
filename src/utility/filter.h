@@ -97,6 +97,7 @@ private:
     Comparison  m_comparison;
     Combination m_combination;
     QString     m_expression;
+    static QStringList empty_value_keywords;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(Filter::Comparisons)
