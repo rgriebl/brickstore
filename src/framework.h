@@ -38,6 +38,7 @@ class Document;
 class AddItemDialog;
 class ItemDetailPopup;
 class ScriptManager;
+class ImportInventoryDialog;
 
 
 class FrameWork : public QMainWindow
@@ -154,6 +155,7 @@ private:
     TaskAppearsInWidget *m_task_appears;
     QMenu *m_contextmenu;
     QPointer<AddItemDialog> m_add_dialog;
+    QPointer<ImportInventoryDialog> m_importinventory_dialog;
     QPointer<ItemDetailPopup> m_details;
     QTimer *m_filter_delay = nullptr;
     bool m_running;
