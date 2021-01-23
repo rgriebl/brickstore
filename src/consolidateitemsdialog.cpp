@@ -18,6 +18,7 @@
 #include <QHeaderView>
 #include <QScrollBar>
 #include <QScreen>
+#include <QWindow>
 
 #include "bricklink.h"
 #include "consolidateitemsdialog.h"
@@ -133,7 +134,8 @@ QSize ConsolidateItemsDialog::sizeHint() const
     auto s = QDialog::sizeHint();
     auto w = w_list->viewport()->width() + w_list->horizontalScrollBar()->maximum()
             - w_list->horizontalScrollBar()->minimum() + 50;
-    s.rwidth() = qMin(w, screen()->availableSize().width() * 7 / 8);
+    if (windowHandle() && windowHandle()->screen())
+        s.rwidth() = qMin(w, windowHandle()->screen()->availableSize().width() * 7 / 8);
     return s;
 }
 
