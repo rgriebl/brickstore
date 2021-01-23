@@ -1123,7 +1123,7 @@ void Window::on_edit_qty_multiply_triggered()
 
                     mulcount++;
                 }
-                m_doc->endMacro(tr("Quantity multiply by %1 on %n items", nullptr, mulcount).arg(factor));
+                m_doc->endMacro(tr("Quantity multiply by %1 on %n item(s)", nullptr, mulcount).arg(factor));
             }
         }
     }
