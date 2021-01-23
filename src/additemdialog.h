@@ -23,6 +23,7 @@
 
 QT_FORWARD_DECLARE_CLASS(QValidator)
 QT_FORWARD_DECLARE_CLASS(QPushButton)
+QT_FORWARD_DECLARE_CLASS(QTimer)
 
 class Window;
 
@@ -85,5 +86,6 @@ private:
 
     QToolButton *w_toggles[3];
 
+    QTimer *m_historyTimer;
     std::list<QPair<QDateTime, const BrickLink::InvItem>> m_addHistory;
 };

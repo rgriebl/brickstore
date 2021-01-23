@@ -213,10 +213,9 @@ AddItemDialog::AddItemDialog(QWidget *parent)
 
     w_last_added->installEventFilter(this); // dynamic tooltip
 
-    auto historyTimer = new QTimer(this);
-    historyTimer->setInterval(30 * 1000);
-    historyTimer->start();
-    connect(historyTimer, &QTimer::timeout, this, &AddItemDialog::updateHistoryText);
+    m_historyTimer = new QTimer(this);
+    m_historyTimer->setInterval(30 * 1000);
+    connect(m_historyTimer, &QTimer::timeout, this, &AddItemDialog::updateHistoryText);
 
     languageChange();
 }
@@ -445,7 +444,7 @@ void AddItemDialog::checkTieredPrices()
 
 double AddItemDialog::tierPriceValue(int i)
 {
-    if (i < 0 || i > 2)
+    if ((i < 0) || (i > 2))
         return 0.;
 
     double val;
@@ -462,9 +461,11 @@ void AddItemDialog::updateHistoryText()
 {
     if (m_addHistory.empty()) {
         w_last_added->setText(tr("Your recently added items will be listed here"));
+        m_historyTimer->stop();
     } else {
         const auto &hist = *m_addHistory.crbegin();
         w_last_added->setText(historyTextFor(hist.first, hist.second));
+        m_historyTimer->start();
     }
 }
 
