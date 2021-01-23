@@ -46,6 +46,30 @@ QCache<int, QPixmap>            DocumentDelegate::s_stripe_cache;
 QCache<DocumentDelegate::TextLayoutCacheKey, QTextLayout> DocumentDelegate::s_textLayoutCache(5000);
 
 
+// we can't use eventFilter() from anything derived from QAbstractItemDelegate:
+// the eventFilter() function there will filter ANY events, because it thinks
+// everything is an editor widget.
+class LanguageChangeHelper : public QObject
+{
+public:
+    LanguageChangeHelper(DocumentDelegate *dd, QWidget *watch)
+        : QObject(dd)
+        , m_dd(dd)
+    {
+        watch->installEventFilter(this);
+    }
+
+protected:
+    bool eventFilter(QObject *o, QEvent *e) override
+    {
+        if (e->type() == QEvent::LanguageChange)
+            m_dd->languageChange();
+        return QObject::eventFilter(o, e);
+    }
+private:
+    DocumentDelegate *m_dd;
+};
+
 DocumentDelegate::DocumentDelegate(Document *doc, DocumentProxyModel *view, QTableView *table)
     : QItemDelegate(view)
     , m_doc(doc)
@@ -60,7 +84,7 @@ DocumentDelegate::DocumentDelegate(Document *doc, DocumentProxyModel *view, QTab
         once = false;
     }
 
-    table->installEventFilter(this); // retranslation
+    new LanguageChangeHelper(this, table);
 
     connect(BrickLink::core(), &BrickLink::Core::itemImageScaleFactorChanged,
             this, [this]() {
@@ -87,16 +111,6 @@ QColor DocumentDelegate::shadeColor(int idx, qreal alpha)
     if (!qFuzzyIsNull(alpha))
         c.setAlphaF(alpha);
     return c;
-}
-
-bool DocumentDelegate::eventFilter(QObject *o, QEvent *e)
-{
-    if (e->type() == QEvent::LanguageChange) {
-        // these get recreated on the next use with the correct title
-        delete m_select_color.data();
-        delete m_select_item.data();
-    }
-    return QItemDelegate::eventFilter(o, e);
 }
 
 QIcon::Mode DocumentDelegate::iconMode(QStyle::State state) const
@@ -348,7 +362,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
     case Document::Picture: {
         if (!it->image().isNull()) {
             image = it->image().scaled(option.rect.size(), Qt::KeepAspectRatio, Qt::FastTransformation);
-            selectionFrame = selected;
+            selectionFrame = true;
         }
         break;
     }
@@ -575,7 +589,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
             }
         }
     }
-    if (selectionFrame) {
+    if (selectionFrame && selected) {
         int lines = qMax(4, option.rect.height() / 20);
         QColor c = bg;
         for (int i = 0; i < lines; ++i) {
@@ -847,6 +861,13 @@ bool DocumentDelegate::helpEvent(QHelpEvent *event, QAbstractItemView *view, con
         }
     }
     return true;
+}
+
+void DocumentDelegate::languageChange()
+{
+    // these get recreated on the next use with the correct title
+    delete m_select_color.data();
+    delete m_select_item.data();
 }
 
 void DocumentDelegate::setReadOnly(bool ro)
