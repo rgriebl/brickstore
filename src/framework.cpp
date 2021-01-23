@@ -622,9 +622,12 @@ FrameWork::FrameWork(QWidget *parent)
 
     findAction("view_fullscreen")->setChecked(windowState() & Qt::WindowFullScreen);
 
-    QDateTime rateUpdate = Currency::inst()->lastUpdate();
-    //if (!rateUpdate.isValid() || rateUpdate.daysTo(QDateTime::currentDateTime()) >= 1)
     Currency::inst()->updateRates();
+    auto *currencyUpdateTimer = new QTimer(this);
+    currencyUpdateTimer->setInterval(4 * 60 * 60 * 1000); // 4 hours
+    currencyUpdateTimer->start();
+    connect(currencyUpdateTimer, &QTimer::timeout,
+            Currency::inst(), &Currency::updateRates);
 
     setupScripts();
 
