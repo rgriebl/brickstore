@@ -344,23 +344,31 @@ bool Window::isSimpleMode() const
     return m_simple_mode;
 }
 
+QByteArray Window::currentColumnLayout() const
+{
+    return w_header->saveLayout();
+}
+
 void Window::setSimpleMode(bool b)
 {
     m_simple_mode = b;
 
-    w_header->setSectionAvailable(Document::Bulk, !b);
-    w_header->setSectionAvailable(Document::Sale, !b);
-    w_header->setSectionAvailable(Document::TierQ1, !b);
-    w_header->setSectionAvailable(Document::TierQ2, !b);
-    w_header->setSectionAvailable(Document::TierQ3, !b);
-    w_header->setSectionAvailable(Document::TierP1, !b);
-    w_header->setSectionAvailable(Document::TierP2, !b);
-    w_header->setSectionAvailable(Document::TierP3, !b);
-    w_header->setSectionAvailable(Document::Reserved, !b);
-    w_header->setSectionAvailable(Document::Stockroom, !b);
-    w_header->setSectionAvailable(Document::Retain, !b);
-    w_header->setSectionAvailable(Document::LotId, !b);
-    w_header->setSectionAvailable(Document::Comments, !b);
+    for (const auto col : {
+         Document::Bulk,
+         Document::Sale,
+         Document::TierQ1,
+         Document::TierQ2,
+         Document::TierQ3,
+         Document::TierP1,
+         Document::TierP2,
+         Document::TierP3,
+         Document::Reserved,
+         Document::Stockroom,
+         Document::Retain,
+         Document::LotId,
+         Document::Comments }) {
+        w_header->setSectionAvailable(col, !b);
+    }
 
     updateErrorMask();
 }
