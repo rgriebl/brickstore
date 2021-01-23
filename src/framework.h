@@ -38,6 +38,7 @@ class Document;
 class AddItemDialog;
 class ItemDetailPopup;
 class ScriptManager;
+class ImportInventoryDialog;
 
 
 class FrameWork : public QMainWindow
@@ -119,11 +120,13 @@ private:
 private:
     enum { MaxRecentFiles = 9 };
 
+public:
+    QAction *findAction(const char *name);
+
 private:
     QIcon *icon(const char *name);
 
     void setupScripts();
-    QAction *findAction(const char *name);
     QVector<QAction *> findActions(const char *startsWithName);
     void connectAllActions(bool do_connect, Window *window);
     void createActions();
@@ -154,6 +157,7 @@ private:
     TaskAppearsInWidget *m_task_appears;
     QMenu *m_contextmenu;
     QPointer<AddItemDialog> m_add_dialog;
+    QPointer<ImportInventoryDialog> m_importinventory_dialog;
     QPointer<ItemDetailPopup> m_details;
     QTimer *m_filter_delay = nullptr;
     bool m_running;

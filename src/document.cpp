@@ -37,8 +37,6 @@
 #include "progressdialog.h"
 
 #include "importorderdialog.h"
-#include "importinventorydialog.h"
-//#include "incompleteitemdialog.h"
 
 #include "import.h"
 #include "currency.h"
@@ -664,16 +662,6 @@ Document *Document::fileImportBrickLinkInventory(const BrickLink::Item *item, in
 {
     if (item && !item->hasInventory())
         return nullptr;
-
-    if (!item) {
-        ImportInventoryDialog dlg(FrameWork::inst());
-
-        if (dlg.exec() == QDialog::Accepted) {
-            item = dlg.item();
-            quantity = dlg.quantity();
-            condition = dlg.condition();
-        }
-    }
 
     if (item && (quantity > 0)) {
         BrickLink::InvItemList items = item->consistsOf();

@@ -73,20 +73,20 @@ QUrl Core::url(UrlList u, const void *opt, const void *opt2)
         break;
 
     case URL_PriceGuideInfo:
-        if (opt && opt2) {
+        if (opt) {
             const Item *item = static_cast <const Item *>(opt);
 
             url = "https://www.bricklink.com/catalogPG.asp";
             QUrlQuery query;
             query.addQueryItem(QChar(item->itemType()->id()), item->id());
-            if (item->itemType()->hasColors())
+            if (item->itemType()->hasColors() && opt2)
                 query.addQueryItem("colorID", QString::number(static_cast <const Color *>(opt2)->id()));
             url.setQuery(query);
         }
         break;
 
     case URL_LotsForSale:
-        if (opt && opt2) {
+        if (opt) {
             const Item *item = static_cast <const Item *>(opt);
 
             url = "https://www.bricklink.com/search.asp";
@@ -105,14 +105,14 @@ QUrl Core::url(UrlList u, const void *opt, const void *opt2)
             }
             query.addQueryItem("q", id);
 
-            if (item->itemType()->hasColors())
+            if (item->itemType()->hasColors() && opt2)
                 query.addQueryItem("colorID", QString::number(static_cast <const Color *>(opt2)->id()));
             url.setQuery(query);
         }
         break;
 
     case URL_AppearsInSets:
-        if (opt && opt2) {
+        if (opt) {
             const Item *item = static_cast <const Item *>(opt);
 
             url = "https://www.bricklink.com/catalogItemIn.asp";
@@ -120,7 +120,7 @@ QUrl Core::url(UrlList u, const void *opt, const void *opt2)
             query.addQueryItem(QChar(item->itemType()->id()), item->id());
             query.addQueryItem("in", "S");
 
-            if (item->itemType()->hasColors())
+            if (item->itemType()->hasColors() && opt2)
                 query.addQueryItem("colorID", QString::number(static_cast <const Color *>(opt2)->id()));
             url.setQuery(query);
         }

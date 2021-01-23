@@ -28,6 +28,8 @@
 #include <QToolTip>
 #include <QStringBuilder>
 #include <QTimer>
+#include <QAction>
+#include <QDesktopServices>
 
 #include "smartvalidator.h"
 #include "config.h"
@@ -216,6 +218,31 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     m_historyTimer = new QTimer(this);
     m_historyTimer->setInterval(30 * 1000);
     connect(m_historyTimer, &QTimer::timeout, this, &AddItemDialog::updateHistoryText);
+
+
+    if (QAction *a = FrameWork::inst()->findAction("edit_bl_catalog")) {
+        connect(new QShortcut(a->shortcut(), this), &QShortcut::activated, this, [this]() {
+            const auto item = w_select_item->currentItem();
+            if (item)
+                QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_CatalogInfo, item));
+        });
+    }
+    if (QAction *a = FrameWork::inst()->findAction("edit_bl_priceguide")) {
+        connect(new QShortcut(a->shortcut(), this), &QShortcut::activated, this, [this]() {
+            const auto item = w_select_item->currentItem();
+            const auto color = w_select_color->currentColor();
+            if (item && (color || !item->itemType()->hasColors()))
+                QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_PriceGuideInfo, item, color));
+        });
+    }
+    if (QAction *a = FrameWork::inst()->findAction("edit_bl_lotsforsale")) {
+        connect(new QShortcut(a->shortcut(), this), &QShortcut::activated, this, [this]() {
+            const auto item = w_select_item->currentItem();
+            const auto color = w_select_color->currentColor();
+            if (item && (color || !item->itemType()->hasColors()))
+                QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_LotsForSale, item, color));
+        });
+    }
 
     languageChange();
 }
