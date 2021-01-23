@@ -49,6 +49,8 @@ public:
     void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
     bool helpEvent(QHelpEvent *event, QAbstractItemView *view, const QStyleOptionViewItem &option, const QModelIndex &index) override;
 
+    void languageChange();
+
 protected:
     bool nonInlineEdit(QEvent *e, Document::Item *it, const QStyleOptionViewItem &option, const QModelIndex &idx);
 
@@ -56,8 +58,6 @@ protected:
     QIcon::State iconState(QStyle::State state) const;
 
     static QColor shadeColor(int idx, qreal alpha = 0);
-
-    bool eventFilter(QObject *o, QEvent *e) override;
 
 protected:
     Document *m_doc;

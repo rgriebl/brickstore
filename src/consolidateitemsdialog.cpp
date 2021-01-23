@@ -100,6 +100,9 @@ ConsolidateItemsDialog::ConsolidateItemsDialog(const Window *win,
         case QDialogButtonBox::YesToAll:
         case QDialogButtonBox::NoToAll:
             m_forAll = true;
+            break;
+        default:
+            break;
         }
     });
 

@@ -443,6 +443,7 @@ int Window::addItems(const BrickLink::InvItemList &items, int multiply, Consolid
             for (int j = documentItems.count() - 1; j >= 0; --j) {
                 Document::Item *otherItem = documentItems.at(j);
                 if ((!item->isIncomplete() && !otherItem->isIncomplete())
+                        && (item->item() == otherItem->item())
                         && (item->color() == otherItem->color())
                         && (item->condition() == otherItem->condition())
                         && ((item->status() == BrickLink::Status::Exclude) ==
@@ -606,24 +607,26 @@ void Window::consolidateItems(const Document::ItemList &items)
 int Window::consolidateItemsHelper(const Document::ItemList &items, Consolidate conMode) const
 {
     switch (conMode) {
-    case Window::Consolidate::ToTopSorted:
+    case Consolidate::ToTopSorted:
         return 0;
-    case Window::Consolidate::ToBottomSorted:
+    case Consolidate::ToBottomSorted:
         return items.count() - 1;
-    case Window::Consolidate::ToLowestIndex: {
+    case Consolidate::ToLowestIndex: {
         const auto di = document()->items();
         auto it = std::min_element(items.cbegin(), items.cend(), [di](const auto &a, const auto &b) {
             return di.indexOf(a) < di.indexOf(b);
         });
         return std::distance(items.cbegin(), it);
     }
-    case Window::Consolidate::ToHighestIndex: {
+    case Consolidate::ToHighestIndex: {
         const auto di = document()->items();
         auto it = std::max_element(items.cbegin(), items.cend(), [di](const auto &a, const auto &b) {
             return di.indexOf(a) < di.indexOf(b);
         });
         return std::distance(items.cbegin(), it);
     }
+    default:
+        break;
     }
     return -1;
 }
