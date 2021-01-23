@@ -11,29 +11,62 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
+#include <algorithm>
+
 #include <QPushButton>
 #include <QTableView>
 #include <QHeaderView>
+#include <QScrollBar>
+#include <QScreen>
 
 #include "bricklink.h"
 #include "consolidateitemsdialog.h"
+#include "headerview.h"
+#include "window.h"
 #include "document.h"
 #include "documentdelegate.h"
+#include "config.h"
 
 
-ConsolidateItemsDialog::ConsolidateItemsDialog(BrickLink::InvItem *existitem, BrickLink::InvItem *newitem, bool existing_attributes, QWidget *parent)
+ConsolidateItemsDialog::ConsolidateItemsDialog(const Window *win,
+                                               const BrickLink::InvItemList &items,
+                                               int preselectedIndex, Window::Consolidate mode,
+                                               int current, int total, QWidget *parent)
     : QDialog(parent)
 {
     setupUi(this);
 
-    BrickLink::InvItemList list;
-    list << existitem << newitem;
-    Document *doc = Document::createTemporary(list);
+    if (total > 1)
+        w_counter->setText(QString::fromLatin1("%1/%2").arg(current).arg(total));
+    else
+        w_counter->hide();
 
+    bool newItems = (items.count() == 2) && win->document()->items().contains(items.at(0))
+                     && !win->document()->items().contains(items.at(items.count() - 1));
+
+    Q_ASSERT(newItems == (int(mode) >= int(Window::Consolidate::ToExisting)));
+
+    for (int i = int(Window::Consolidate::ToNew); i > int(Window::Consolidate::Not); --i) {
+        w_prefer_remaining->setItemData(i, QVariant::fromValue(static_cast<Window::Consolidate>(i)));
+
+        bool forNewOnly = (i >= int(Window::Consolidate::ToExisting));
+        if (newItems != forNewOnly)
+            w_prefer_remaining->removeItem(i);
+    }
+
+    QVector<int> fakeIndexes;
+    for (int i = 0; i < items.size(); ++i)
+        fakeIndexes << win->document()->index(items.at(i)).row();
+
+    Document *doc = Document::createTemporary(items, fakeIndexes);
     doc->setParent(this);
-    w_list->horizontalHeader()->setSectionsMovable(true);
+
+    auto *headerView = new HeaderView(Qt::Horizontal, w_list);
+    w_list->setHorizontalHeader(headerView);
+
     w_list->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     w_list->setContextMenuPolicy(Qt::NoContextMenu);
+
     setFocusProxy(w_list);
 
     auto *view = new DocumentProxyModel(doc, this);
@@ -43,24 +76,62 @@ ConsolidateItemsDialog::ConsolidateItemsDialog(BrickLink::InvItem *existitem, Br
     dd->setReadOnly(true);
     w_list->setItemDelegate(dd);
     w_list->verticalHeader()->setDefaultSectionSize(dd->defaultItemHeight(w_list));
-
     w_list->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
+
+    headerView->restoreLayout(win->currentColumnLayout());
+
     w_list->setMinimumHeight(8 + w_list->frameWidth() * 2 +
                              w_list->horizontalHeader()->height() +
                              w_list->verticalHeader()->length() +
                              w_list->style()->pixelMetric(QStyle::PM_ScrollBarExtent));
 
-    w_list->selectionModel()->setCurrentIndex(view->index(existing_attributes ? 0 : 1, 0), QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
+    w_list->selectionModel()->setCurrentIndex(view->index(preselectedIndex, 0),
+                                              QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
+
+    if (current == total) {
+        w_buttons->button(QDialogButtonBox::YesToAll)->setDisabled(true);
+        w_buttons->button(QDialogButtonBox::NoToAll)->setDisabled(true);
+        w_prefer_remaining->hide();
+        w_label_remaining->hide();
+    }
+
+    connect(w_buttons, &QDialogButtonBox::clicked, this, [this](QAbstractButton *b) {
+        switch (w_buttons->standardButton(b)) {
+        case QDialogButtonBox::YesToAll:
+        case QDialogButtonBox::NoToAll:
+            m_forAll = true;
+        }
+    });
+
+    QMetaObject::invokeMethod(this, [this]() { resize(sizeHint()); }, Qt::QueuedConnection);
 }
 
-bool ConsolidateItemsDialog::yesNoToAll() const
+Window::Consolidate ConsolidateItemsDialog::consolidateRemaining() const
 {
-    return w_for_all->isChecked();
+    if (m_forAll)
+        return static_cast<Window::Consolidate>(w_prefer_remaining->currentIndex());
+    else
+        return Window::Consolidate::Not;
 }
 
-bool ConsolidateItemsDialog::attributesFromExisting() const
+int ConsolidateItemsDialog::consolidateToIndex() const
 {
-    return w_list->selectionModel()->isRowSelected(0, QModelIndex());
+    return w_list->selectionModel()->currentIndex().row();
+}
+
+bool ConsolidateItemsDialog::repeatForAll() const
+{
+    return m_forAll;
+}
+
+QSize ConsolidateItemsDialog::sizeHint() const
+{
+    // try to fit as much information on the screen as possible
+    auto s = QDialog::sizeHint();
+    auto w = w_list->viewport()->width() + w_list->horizontalScrollBar()->maximum()
+            - w_list->horizontalScrollBar()->minimum() + 50;
+    s.rwidth() = qMin(w, screen()->availableSize().width() * 7 / 8);
+    return s;
 }
 
 #include "moc_consolidateitemsdialog.cpp"

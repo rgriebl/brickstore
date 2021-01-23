@@ -262,10 +262,11 @@ Document::Statistics::Statistics(const Document *doc, const ItemList &list, bool
 
 QVector<Document *> Document::s_documents;
 
-Document *Document::createTemporary(const BrickLink::InvItemList &list)
+Document *Document::createTemporary(const BrickLink::InvItemList &list, const QVector<int> &fakeIndexes)
 {
     auto *doc = new Document(1 /*dummy*/);
     doc->setBrickLinkItems(list); // the caller owns the items
+    doc->setFakeIndexes(fakeIndexes);
     return doc;
 }
 
@@ -971,6 +972,11 @@ void Document::setBrickLinkItems(const BrickLink::InvItemList &bllist)
     insertItemsDirect(items, pos);
 }
 
+void Document::setFakeIndexes(const QVector<int> &fakeIndexes)
+{
+    m_fakeIndexes = fakeIndexes;
+}
+
 QString Document::fileName() const
 {
     return m_filename;
@@ -1419,7 +1425,13 @@ QString Document::dataForDisplayRole(Item *it, Field f, int row) const
     QString dash = QLatin1String("-");
 
     switch (f) {
-    case Index       : return QString::number(row + 1);
+    case Index       :
+        if (m_fakeIndexes.isEmpty()) {
+            return QString::number(row + 1);
+        } else {
+            auto fi = m_fakeIndexes.at(row);
+            return fi >= 0 ? QString::number(fi + 1) : QString::fromLatin1("+");
+        }
     case LotId       : return (it->lotId() == 0 ? dash : QString::number(it->lotId()));
     case PartNo      : return it->itemId();
     case Description : return it->itemName();

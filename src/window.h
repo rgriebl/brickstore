@@ -38,29 +38,28 @@ class Window : public QWidget
 public:
     Window(Document *doc, QWidget *parent = nullptr);
 
-    Document *document() { return m_doc; }
-    DocumentProxyModel *documentView() { return m_view; } // for scripting
+    Document *document() const { return m_doc; }
+    DocumentProxyModel *documentView() const { return m_view; } // for scripting
 
-    enum MergeFlags {
-        MergeAction_None         = 0x00000000,
-        MergeAction_Force        = 0x00000001,
-        MergeAction_Ask          = 0x00000002,
-        MergeAction_Mask         = 0x0000ffff,
-
-        MergeKeep_Old            = 0x00000000,
-        MergeKeep_New            = 0x00010000,
-        MergeKeep_Mask           = 0xffff0000
+    enum class Consolidate {
+        Not = -1,
+        ToTopSorted = 0,
+        ToBottomSorted = 1,
+        ToLowestIndex = 2,
+        ToHighestIndex = 3,
+        ToExisting = 4,
+        ToNew = 5
     };
 
-//    const Document::ItemList &items() const      { return m_doc->items(); }
+
     const Document::ItemList &selection() const  { return m_selection; }
     Document::Item *current() const              { return m_current; }
 
     uint setItems(const BrickLink::InvItemList &items, int multiply = 1);
-    int addItems(const BrickLink::InvItemList &items, int multiply = 1, uint mergeflags = MergeAction_None, bool dont_change_sorting = false);
+    int addItems(const BrickLink::InvItemList &items, int multiply = 1, Consolidate conMode = Consolidate::Not);
     void deleteItems(const BrickLink::InvItemList &items);
 
-    void mergeItems(const Document::ItemList &items, uint globalmergeflags = MergeAction_Ask);
+    void consolidateItems(const Document::ItemList &items);
 
     void subtractItems(const BrickLink::InvItemList &items);
     void copyRemarks(const BrickLink::InvItemList &items);
@@ -73,6 +72,8 @@ public:
 
     bool isDifferenceMode() const;
     bool isSimpleMode() const;
+
+    QByteArray currentColumnLayout() const;
 
 public slots:
     void setFilter(const QString &str);
@@ -157,7 +158,7 @@ public slots:
 
     void on_view_column_layout_save_triggered();
     void on_view_column_layout_list_load(const QString &layoutId);
-    void addItem(BrickLink::InvItem *, uint);
+    void addItem(BrickLink::InvItem *item, Consolidate conMode = Consolidate::Not);
 
     void setPrice(double);
 
@@ -190,6 +191,7 @@ private slots:
 private:
     Document::ItemList exportCheck() const;
     void resizeColumnsToDefault();
+    int consolidateItemsHelper(const Document::ItemList &items, Consolidate conMode) const;
 
 private:
     Document *           m_doc;
@@ -211,3 +213,5 @@ private:
     BrickLink::Price     m_settopg_price;
     QMultiHash<BrickLink::PriceGuide *, Document::Item *> *m_settopg_list;
 };
+
+Q_DECLARE_METATYPE(Window::Consolidate)

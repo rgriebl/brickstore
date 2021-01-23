@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>615</width>
-    <height>201</height>
+    <width>798</width>
+    <height>259</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,15 +18,29 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QLabel" name="label">
-     <property name="text">
-      <string>Would you like to consolidate those two lots?
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Would you like to consolidate these lots?
 Please also select which item's attributes (e.g. remarks, tiered prices, ...) are to be preserved:</string>
-     </property>
-     <property name="buddy">
-      <cstring>w_list</cstring>
-     </property>
-    </widget>
+       </property>
+       <property name="buddy">
+        <cstring>w_list</cstring>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="w_counter">
+       <property name="text">
+        <string notr="true">8/42</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
     <widget class="QTableView" name="w_list">
@@ -68,12 +82,58 @@ Please also select which item's attributes (e.g. remarks, tiered prices, ...) ar
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QCheckBox" name="w_for_all">
+      <widget class="QLabel" name="w_label_remaining">
        <property name="text">
-        <string>&amp;Do the same for the remaining lots
-(Always preserve the first item's attributes)</string>
+        <string>If 'Yes to All', prefer:</string>
        </property>
       </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="w_prefer_remaining">
+       <item>
+        <property name="text">
+         <string>Topmost in Sort Order</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Bottommost in Sort Order</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Lowest Index</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Highest Index</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Existing Item</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>New Item</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
      <item>
       <widget class="QDialogButtonBox" name="w_buttons">
@@ -81,7 +141,7 @@ Please also select which item's attributes (e.g. remarks, tiered prices, ...) ar
         <enum>Qt::Horizontal</enum>
        </property>
        <property name="standardButtons">
-        <set>QDialogButtonBox::No|QDialogButtonBox::Yes</set>
+        <set>QDialogButtonBox::No|QDialogButtonBox::NoToAll|QDialogButtonBox::Yes|QDialogButtonBox::YesToAll</set>
        </property>
       </widget>
      </item>
@@ -91,27 +151,10 @@ Please also select which item's attributes (e.g. remarks, tiered prices, ...) ar
  </widget>
  <tabstops>
   <tabstop>w_list</tabstop>
-  <tabstop>w_for_all</tabstop>
   <tabstop>w_buttons</tabstop>
  </tabstops>
  <resources/>
  <connections>
-  <connection>
-   <sender>w_buttons</sender>
-   <signal>accepted()</signal>
-   <receiver>ConsolidateItemsDialog</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>552</x>
-     <y>86</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>606</x>
-     <y>40</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>w_buttons</sender>
    <signal>rejected()</signal>
@@ -119,12 +162,28 @@ Please also select which item's attributes (e.g. remarks, tiered prices, ...) ar
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>500</x>
-     <y>85</y>
+     <x>812</x>
+     <y>221</y>
     </hint>
     <hint type="destinationlabel">
-     <x>607</x>
-     <y>12</y>
+     <x>811</x>
+     <y>1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>w_buttons</sender>
+   <signal>accepted()</signal>
+   <receiver>ConsolidateItemsDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>736</x>
+     <y>236</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>730</x>
+     <y>6</y>
     </hint>
    </hints>
   </connection>

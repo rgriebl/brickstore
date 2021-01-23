@@ -14,19 +14,26 @@
 #pragma once
 
 #include "bricklinkfwd.h"
+#include "window.h"
 #include "ui_consolidateitemsdialog.h"
-
-QT_FORWARD_DECLARE_CLASS(QAbstractButton)
-class Document;
-class DocumentProxyModel;
 
 
 class ConsolidateItemsDialog : public QDialog, private Ui::ConsolidateItemsDialog
 {
     Q_OBJECT
-public:
-    ConsolidateItemsDialog(BrickLink::InvItem *existitem, BrickLink::InvItem *newitem, bool existing_attributes, QWidget *parent = nullptr);
 
-    bool yesNoToAll() const;
-    bool attributesFromExisting() const;
+public:
+    ConsolidateItemsDialog(const Window *win, const BrickLink::InvItemList &items,
+                           int preselectedIndex, Window::Consolidate mode, int current, int total,
+                           QWidget *parent = nullptr);
+
+    int consolidateToIndex() const;
+    bool repeatForAll() const;
+    Window::Consolidate consolidateRemaining() const;
+
+protected:
+    QSize sizeHint() const override;
+
+private:
+    bool m_forAll = false;
 };

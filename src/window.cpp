@@ -412,169 +412,212 @@ QString Window::filterToolTip() const
     return m_view->filterToolTip();
 }
 
-int Window::addItems(const BrickLink::InvItemList &items, int multiply, uint globalmergeflags, bool /*dont_change_sorting*/)
+int Window::addItems(const BrickLink::InvItemList &items, int multiply, Consolidate conMode)
 {
-    bool was_empty = (w_list->model()->rowCount() == 0);
-    int dropped = 0;
-    uint merge_action_yes_no_to_all = MergeAction_Ask;
-    int mergecount = 0, addcount = 0;
+    if (items.isEmpty() || (multiply == 0))
+        return 0;
 
-    if (items.count() > 1)
-        m_doc->beginMacro();
+    m_doc->beginMacro();
 
-    WindowProgress wp(w_list);
+    const auto &documentItems = document()->items();
+    bool wasEmpty = documentItems.isEmpty();
+    int addCount = 0;
+    int consolidateCount = 0;
+    bool repeatForRemaining = false;
 
-    foreach(const BrickLink::InvItem *origitem, items) {
-        uint mergeflags = globalmergeflags;
+    for (int i = 0; i < items.count(); ++i) {
+        Document::Item *item = items.at(i);
+        bool justAdd = true;
 
-        auto *newitem = new Document::Item(*origitem);
-        Document::Item *olditem = nullptr;
+        if (conMode != Consolidate::Not) {
+            Document::Item *mergeItem = nullptr;
 
-        if (mergeflags != MergeAction_None) {
-            foreach(Document::Item *item, m_doc->items()) {
-                if ((!newitem->isIncomplete() && !item->isIncomplete()) &&
-                    (newitem->item() == item->item()) &&
-                    (newitem->color() == item->color()) &&
-                    (newitem->status() == item->status()) &&
-                    (newitem->condition() == item->condition())) {
-                    olditem = item;
+            for (int j = documentItems.count() - 1; j >= 0; --j) {
+                Document::Item *otherItem = documentItems.at(j);
+                if ((!item->isIncomplete() && !otherItem->isIncomplete())
+                        && (item->color() == otherItem->color())
+                        && (item->condition() == otherItem->condition())
+                        && ((item->status() == BrickLink::Status::Exclude) ==
+                            (otherItem->status() == BrickLink::Status::Exclude))) {
+                    mergeItem = otherItem;
                     break;
                 }
             }
-            if (!olditem)
-                mergeflags = MergeAction_None;
-        }
 
-        if ((mergeflags & MergeAction_Mask) == MergeAction_Ask) {
-            if (merge_action_yes_no_to_all != MergeAction_Ask) {
-                mergeflags = merge_action_yes_no_to_all;
+            if (mergeItem) {
+                int mergeIndex = -1;
+
+                if (!repeatForRemaining) {
+                    BrickLink::InvItemList list { mergeItem, item };
+
+                    ConsolidateItemsDialog dlg(this, list,
+                                               conMode == Consolidate::ToExisting ? 0 : 1,
+                                               conMode, i + 1, items.count(), this);
+                    bool yesClicked = (dlg.exec() == QDialog::Accepted);
+                    repeatForRemaining = dlg.repeatForAll();
+
+                    if (yesClicked) {
+                        mergeIndex = dlg.consolidateToIndex();
+
+                        if (repeatForRemaining)
+                            conMode = dlg.consolidateRemaining();
+                    }
+                } else {
+                    mergeIndex = (conMode == Consolidate::ToExisting) ? 0 : 1;
+                }
+
+                if (mergeIndex >= 0) {
+                    justAdd = false;
+
+                    if (mergeIndex == 0) {
+                        // merge new into existing
+                        Document::Item changedItem = *mergeItem;
+                        Document::Item tempItem = *item;
+                        if (multiply > 1)
+                            tempItem.setQuantity(tempItem.quantity() * multiply);
+                        changedItem.mergeFrom(tempItem);
+                        m_doc->changeItem(mergeItem, changedItem);
+                    } else {
+                        // merge existing into new, add new, remove existing
+                        auto *newItem = new Document::Item(*item);
+                        if (multiply > 1)
+                            newItem->setQuantity(newItem->quantity() * multiply);
+                        newItem->mergeFrom(*mergeItem);
+                        m_doc->appendItem(newItem);
+                        m_doc->removeItem(mergeItem);
+                    }
+
+                    ++consolidateCount;
+                }
             }
-            else {
-                wp.restoreOverrideCursor();
-
-                ConsolidateItemsDialog dlg(olditem, newitem, ((mergeflags & MergeKeep_Mask) == MergeKeep_Old), this);
-                int res = dlg.exec();
-
-                wp.setOverrideCursor();
-
-                mergeflags = (res == QDialog::Accepted) ? MergeAction_Force : MergeAction_None;
-
-                if (mergeflags != MergeAction_None)
-                    mergeflags |= (dlg.attributesFromExisting() ? MergeKeep_Old : MergeKeep_New);
-
-                if (dlg.yesNoToAll())
-                    merge_action_yes_no_to_all = mergeflags;
-            }
         }
 
-        switch (mergeflags & MergeAction_Mask) {
-        case MergeAction_Force: {
-            newitem->mergeFrom(*olditem, ((mergeflags & MergeKeep_Mask) != MergeKeep_New));
-
-            m_doc->changeItem(olditem, *newitem);
-            delete newitem;
-            mergecount++;
-            break;
-        }
-        case MergeAction_None:
-        default: {
+        if (justAdd) {
+            auto *newItem = new Document::Item(*item);
             if (multiply > 1)
-                newitem->setQuantity(newitem->quantity() * multiply);
-
-            m_doc->appendItem(newitem);
-            addcount++;
-            break;
-        }
+                newItem->setQuantity(newItem->quantity() * multiply);
+            m_doc->appendItem(newItem);
+            ++addCount;
         }
     }
-    wp.stop();
 
-    if (items.count() > 1)
-        m_doc->endMacro(tr("Added %1, merged %2 items").arg(addcount).arg(mergecount));
+    m_doc->endMacro(tr("Added %1, consolidated %2 items").arg(addCount).arg(consolidateCount));
 
-    if (was_empty)
+    if (wasEmpty)
         w_list->selectRow(0);
 
-    return items.count() - dropped;
+    return items.count();
 }
 
 
-void Window::addItem(BrickLink::InvItem *item, uint mergeflags)
+void Window::addItem(BrickLink::InvItem *item, Consolidate conMode)
 {
-    BrickLink::InvItemList tmplist;
-    tmplist.append(item);
-
-    addItems(tmplist, 1, mergeflags);
-
+    addItems({ item }, 1, conMode);
     delete item;
 }
 
 
-void Window::mergeItems(const Document::ItemList &items, uint globalmergeflags)
+void Window::consolidateItems(const Document::ItemList &items)
 {
-    if ((items.count() < 2) || (globalmergeflags & MergeAction_Mask) == MergeAction_None)
+    if (items.count() < 2)
         return;
 
-    uint merge_action_yes_no_to_all = MergeAction_Ask;
-    uint mergecount = 0;
+    QVector<Document::ItemList> mergeList;
+    Document::ItemList sourceItems = items;
+
+    for (int i = 0; i < sourceItems.count(); ++i) {
+        Document::Item *item = sourceItems.at(i);
+        Document::ItemList mergeItems;
+
+        for (int j = i + 1; j < sourceItems.count(); ++j) {
+            Document::Item *otherItem = sourceItems.at(j);
+            if ((!item->isIncomplete() && !otherItem->isIncomplete())
+                    && (item->item() == otherItem->item())
+                    && (item->color() == otherItem->color())
+                    && (item->condition() == otherItem->condition())
+                    && ((item->status() == BrickLink::Status::Exclude) ==
+                        (otherItem->status() == BrickLink::Status::Exclude))) {
+                mergeItems << sourceItems.takeAt(j--);
+            }
+        }
+        if (mergeItems.isEmpty())
+            continue;
+
+        mergeItems.prepend(sourceItems.at(i));
+        mergeList << mergeItems;
+    }
+
+    if (mergeList.isEmpty())
+        return;
 
     m_doc->beginMacro();
 
-    WindowProgress wp(w_list);
+    auto conMode = Consolidate::ToLowestIndex;
+    bool repeatForRemaining = false;
+    int consolidateCount = 0;
 
-    foreach(Document::Item *from, items) {
-        Document::Item *to = nullptr;
+    for (int mi = 0; mi < mergeList.count(); ++mi) {
+        const Document::ItemList &mergeItems = mergeList.at(mi);
+        int mergeIndex = -1;
 
-        foreach(Document::Item *find_to, items) {
-            if ((from != find_to) &&
-                (from->item() == find_to->item()) &&
-                (from->color() == find_to->color())&&
-                (from->condition() == find_to->condition()) &&
-                ((from->status() == BrickLink::Status::Exclude) == (find_to->status() == BrickLink::Status::Exclude)) &&
-                (m_doc->items().indexOf(find_to) != -1)) {
-                to = find_to;
-                break;
+        if (!repeatForRemaining) {
+            ConsolidateItemsDialog dlg(this, mergeItems, consolidateItemsHelper(mergeItems, conMode),
+                                       conMode, mi + 1, mergeList.count(), this);
+            bool yesClicked = (dlg.exec() == QDialog::Accepted);
+            repeatForRemaining = dlg.repeatForAll();
+
+            if (yesClicked) {
+                mergeIndex = dlg.consolidateToIndex();
+
+                if (repeatForRemaining)
+                    conMode = dlg.consolidateRemaining();
+            } else {
+                if (repeatForRemaining)
+                    break;
+                else
+                    continue; // TODO: we may end up with an empty macro
             }
-        }
-        if (!to)
-            continue;
-
-        uint mergeflags = globalmergeflags;
-
-        if ((mergeflags & MergeAction_Mask) == MergeAction_Ask) {
-            if (merge_action_yes_no_to_all != MergeAction_Ask) {
-                mergeflags = merge_action_yes_no_to_all;
-            }
-            else {
-                wp.restoreOverrideCursor();
-
-                ConsolidateItemsDialog dlg(to, from, ((mergeflags & MergeKeep_Mask) == MergeKeep_Old), this);
-                int res = dlg.exec();
-
-                wp.setOverrideCursor();
-
-                mergeflags = (res ? MergeAction_Force : MergeAction_None);
-
-                if (mergeflags != MergeAction_None)
-                    mergeflags |= (dlg.attributesFromExisting() ? MergeKeep_Old : MergeKeep_New);
-
-                if (dlg.yesNoToAll())
-                    merge_action_yes_no_to_all = mergeflags;
-            }
+        } else {
+            mergeIndex = consolidateItemsHelper(mergeItems, conMode);
         }
 
-        if ((mergeflags & MergeAction_Mask) == MergeAction_Force) {
-            bool prefer_from = ((mergeflags & MergeKeep_Mask) == MergeKeep_New);
-
-            Document::Item newitem = *to;
-            newitem.mergeFrom(*from, prefer_from);
-            m_doc->changeItem(to, newitem);
-            m_doc->removeItem(from);
-
-            mergecount++;
+        Document::Item newitem = *mergeItems.at(mergeIndex);
+        for (int i = 0; i < mergeItems.count(); ++i) {
+            if (i != mergeIndex) {
+                newitem.mergeFrom(*mergeItems.at(i));
+                m_doc->removeItem(mergeItems.at(i));
+            }
         }
+        m_doc->changeItem(mergeItems.at(mergeIndex), newitem);
+
+        ++consolidateCount;
     }
-    m_doc->endMacro(tr("Merged %n item(s)", nullptr, mergecount));
+    m_doc->endMacro(tr("Consolidated %n item(s)", nullptr, consolidateCount));
+}
+
+int Window::consolidateItemsHelper(const Document::ItemList &items, Consolidate conMode) const
+{
+    switch (conMode) {
+    case Window::Consolidate::ToTopSorted:
+        return 0;
+    case Window::Consolidate::ToBottomSorted:
+        return items.count() - 1;
+    case Window::Consolidate::ToLowestIndex: {
+        const auto di = document()->items();
+        auto it = std::min_element(items.cbegin(), items.cend(), [di](const auto &a, const auto &b) {
+            return di.indexOf(a) < di.indexOf(b);
+        });
+        return std::distance(items.cbegin(), it);
+    }
+    case Window::Consolidate::ToHighestIndex: {
+        const auto di = document()->items();
+        auto it = std::max_element(items.cbegin(), items.cend(), [di](const auto &a, const auto &b) {
+            return di.indexOf(a) < di.indexOf(b);
+        });
+        return std::distance(items.cbegin(), it);
+    }
+    }
+    return -1;
 }
 
 QDomElement Window::createGuiStateXML()
@@ -642,7 +685,7 @@ void Window::on_edit_paste_triggered()
                 m_doc->removeItems(selection());
             }
         }
-        addItems(bllist, 1, MergeAction_Ask | MergeKeep_New);
+        addItems(bllist, 1, Consolidate::ToExisting);
         qDeleteAll(bllist);
     }
 }
@@ -1508,9 +1551,9 @@ void Window::subtractItems(const BrickLink::InvItemList &items)
 void Window::on_edit_mergeitems_triggered()
 {
     if (!selection().isEmpty())
-        mergeItems(selection());
+        consolidateItems(selection());
     else
-        mergeItems(m_doc->items());
+        consolidateItems(m_doc->items());
 }
 
 void Window::on_edit_partoutitems_triggered()

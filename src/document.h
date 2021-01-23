@@ -135,7 +135,8 @@ public:
     Document();
     virtual ~Document();
 
-    static Document *createTemporary(const BrickLink::InvItemList &list);
+    static Document *createTemporary(const BrickLink::InvItemList &list,
+                                     const QVector<int> &fakeIndexes = { });
 
     static const QVector<Document *> &allDocuments();
     static QVector<ItemList> restoreAutosave();
@@ -234,6 +235,7 @@ private:
     static Document *fileLoadFrom(const QString &s, const char *type, bool import_only = false);
     bool fileSaveTo(const QString &s, const char *type, bool export_only, const ItemList &itemlist);
     void setBrickLinkItems(const BrickLink::InvItemList &bllist);
+    void setFakeIndexes(const QVector<int> &fakeIndexes);
 
     void insertItemsDirect(ItemList &items, QVector<int> &positions);
     void removeItemsDirect(ItemList &items, QVector<int> &positions);
@@ -250,6 +252,7 @@ private:
 
 private:
     ItemList         m_items;
+    QVector<int>     m_fakeIndexes; // for the consolidate dialogs
     QHash<const Item *, quint64> m_errors;
 
     QString          m_currencycode;
