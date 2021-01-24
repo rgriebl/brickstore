@@ -40,7 +40,7 @@
 
 #include "import.h"
 #include "currency.h"
-
+#include "qparallelsort.h"
 #include "document.h"
 #include "document_p.h"
 
@@ -1906,31 +1906,12 @@ int DocumentProxyModel::compare(const Document::Item *i1, const Document::Item *
     return false;
 }
 
-class SortItemListCompare {
-public:
-    SortItemListCompare(const DocumentProxyModel *view, int sortcol, Qt::SortOrder sortorder)
-        : m_doc(static_cast<Document *>(view->sourceModel())), m_view(view),
-          m_sortcol(sortcol), m_sortasc(sortorder == Qt::AscendingOrder)
-    { }
-
-    bool operator()(const Document::Item *i1, const Document::Item *i2)
-    {
-        bool b = m_view->lessThan(m_doc->index(i1, m_sortcol), m_doc->index(i2, m_sortcol));
-        return m_sortasc ? b : !b;
-    }
-private:
-    const Document *m_doc;
-    const DocumentProxyModel *m_view;
-    int m_sortcol;
-    bool m_sortasc;
-};
-
 Document::ItemList DocumentProxyModel::sortItemList(const Document::ItemList &list) const
 {
-    //qWarning("sort in: %d", list.count());
     Document::ItemList result(list);
-    std::sort(result.begin(), result.end(), SortItemListCompare(this, sortColumn(), sortOrder()));
-    //qWarning("sort out: %d", result.count());
+    qParallelSort(result.begin(), result.end(), [this](const auto &i1, const auto &i2) {
+        return index(i1).row() < index(i2).row();
+    });
     return result;
 }
 

@@ -1952,7 +1952,8 @@ Document::ItemList Window::exportCheck() const
 
     if (m_doc->statistics(items).errors()) {
         if (MessageBox::warning(nullptr, { },
-                                tr("This list contains items with errors.<br /><br />Do you really want to export this list?")
+                                tr("This list contains items with errors.<br /><br />Do you really want to export this list?"),
+                                MessageBox::Yes | MessageBox::No, MessageBox::No
                                 ) != MessageBox::Yes) {
             items.clear();
         }
