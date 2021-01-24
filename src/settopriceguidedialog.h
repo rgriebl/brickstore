@@ -24,6 +24,7 @@ class SetToPriceGuideDialog : public QDialog, private Ui::SetToPriceGuideDialog
     Q_OBJECT
 public:
     SetToPriceGuideDialog(QWidget *parent = nullptr);
+    ~SetToPriceGuideDialog() override;
     
     BrickLink::Time  time() const;
     BrickLink::Price price() const;

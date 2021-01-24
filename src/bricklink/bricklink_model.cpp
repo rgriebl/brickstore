@@ -862,7 +862,7 @@ void BrickLink::ItemDelegate::paint(QPainter *painter, const QStyleOptionViewIte
             myoption.state &= ~QStyle::State_Selected;
     }
 
-    if (m_options & AlwaysShowSelection)
+    if ((m_options & AlwaysShowSelection) && (option.state & QStyle::State_Enabled))
         myoption.state |= QStyle::State_Active;
 
     QStyledItemDelegate::paint(painter, myoption, index);

@@ -279,43 +279,6 @@ void SettingsDialog::load()
     w_upd_priceguide->setValue(sec2day(intervals["PriceGuide"]));
     w_upd_database->setValue(sec2day(intervals["Database"]));
 
-    // --[ DEFAULTS ]-------------------------------------------------------------------
-
-    const BrickLink::ItemType *itype;
-
-    itype = BrickLink::core()->itemType(Config::inst()->value("/Defaults/ImportInventory/ItemType", 'S').value<char>());
-    auto *importmodel = new BrickLink::ItemTypeModel(this);
-    importmodel->setFilterWithoutInventory(true);
-    w_def_import_type->setModel(importmodel);
-
-    int importdef = importmodel->index(itype ? itype : BrickLink::core()->itemType('S')).row();
-    w_def_import_type->setCurrentIndex(importdef);
-
-    itype = BrickLink::core()->itemType(Config::inst()->value("/Defaults/AddItems/ItemType", 'P').value<char>());
-    auto *addmodel = new BrickLink::ItemTypeModel(this);
-    w_def_add_type->setModel(addmodel);
-
-    int adddef = addmodel->index(itype ? itype : BrickLink::core()->itemType('P')).row();
-    w_def_add_type->setCurrentIndex(adddef);
-
-    bool addnew = Config::inst()->value("/Defaults/AddItems/Condition", "new").toString() == QLatin1String("new");
-    w_def_add_cond_new->setChecked(addnew);
-    w_def_add_cond_used->setChecked(!addnew);
-
-    w_def_setpg_time->addItem(tr("Last 6 Months Sales"), int(BrickLink::Time::PastSix));
-    w_def_setpg_time->addItem(tr("Current Inventory"), int(BrickLink::Time::Current));
-    
-    w_def_setpg_price->addItem(tr("Minimum"), int(BrickLink::Price::Lowest));
-    w_def_setpg_price->addItem(tr("Average"), int(BrickLink::Price::Average));
-    w_def_setpg_price->addItem(tr("Quantity Average"), int(BrickLink::Price::WAverage));
-    w_def_setpg_price->addItem(tr("Maximum"), int(BrickLink::Price::Highest));
-
-    int timedef = Config::inst()->value(QLatin1String("/Defaults/SetToPG/Time"), int(BrickLink::Time::PastSix)).toInt();
-    int pricedef = Config::inst()->value(QLatin1String("/Defaults/SetToPG/Price"), int(BrickLink::Price::Average)).toInt();
-
-    w_def_setpg_time->setCurrentIndex(w_def_setpg_time->findData(timedef));
-    w_def_setpg_price->setCurrentIndex(w_def_setpg_price->findData(pricedef));
-
     // --[ BRICKLINK ]---------------------------------------------------------------
 
     QPair<QString, QString> blcred = Config::inst()->loginForBrickLink();
@@ -376,23 +339,6 @@ void SettingsDialog::save()
     intervals.insert("Database", day2sec(w_upd_database->value()));
 
     Config::inst()->setUpdateIntervals(intervals);
-
-    // --[ DEFAULTS ]-------------------------------------------------------------------
-
-    const BrickLink::ItemType *itype;
-    BrickLink::ItemTypeModel *model;
-
-    model = static_cast<BrickLink::ItemTypeModel *>(w_def_import_type->model());
-    if ((itype = model->itemType(model->index(w_def_import_type->currentIndex(), 0))))
-        Config::inst()->setValue("/Defaults/ImportInventory/ItemType", itype->id());
-
-    model = static_cast<BrickLink::ItemTypeModel *>(w_def_add_type->model());
-    if ((itype = model->itemType(model->index(w_def_add_type->currentIndex(), 0))))
-        Config::inst()->setValue("/Defaults/AddItems/ItemType", itype->id());
-
-    Config::inst()->setValue("/Defaults/AddItems/Condition", QLatin1String(w_def_add_cond_new->isChecked() ? "new" : "used"));
-    Config::inst()->setValue("/Defaults/SetToPG/Time", w_def_setpg_time->itemData(w_def_setpg_time->currentIndex()));
-    Config::inst()->setValue("/Defaults/SetToPG/Price", w_def_setpg_price->itemData(w_def_setpg_price->currentIndex()));
 
     // --[ BRICKLINK ]-----------------------------------------------------------------
 

@@ -33,6 +33,10 @@ public:
     void setCurrentColorAndItem(const BrickLink::Color *color, const BrickLink::Item *item);
     const BrickLink::Color *currentColor() const;
 
+    QByteArray saveState() const;
+    bool restoreState(const QByteArray &ba);
+    static QByteArray defaultState();
+
 signals:
     void colorSelected(const BrickLink::Color *, bool);
 

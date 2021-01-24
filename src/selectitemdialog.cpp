@@ -25,6 +25,8 @@ SelectItemDialog::SelectItemDialog(bool only_with_inventory, QWidget *parent)
     setupUi(this);
     w_si->setExcludeWithoutInventoryFilter(only_with_inventory);
 
+    w_si->restoreState(SelectItem::defaultState());
+
     connect(w_si, &SelectItem::itemSelected,
             this, &SelectItemDialog::checkItem);
 

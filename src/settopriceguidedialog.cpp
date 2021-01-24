@@ -30,11 +30,11 @@ SetToPriceGuideDialog::SetToPriceGuideDialog(QWidget *parent)
     w_type_price->addItem(tr("Quantity Average"), int(BrickLink::Price::WAverage));
     w_type_price->addItem(tr("Maximum"), int(BrickLink::Price::Highest));
 
-    int timedef = Config::inst()->value(QLatin1String("/Defaults/SetToPG/Time"), int(BrickLink::Time::PastSix)).toInt();
-    int pricedef = Config::inst()->value(QLatin1String("/Defaults/SetToPG/Price"), int(BrickLink::Price::Average)).toInt();
+    w_type_time->setCurrentIndex(Config::inst()->value(QLatin1String("/MainWindow/SetToPriceGuideDialog/Time"),
+                                                       int(BrickLink::Time::PastSix)).toInt());
 
-    w_type_time->setCurrentIndex(w_type_time->findData(timedef));
-    w_type_price->setCurrentIndex(w_type_price->findData(pricedef));
+    w_type_price->setCurrentIndex(Config::inst()->value(QLatin1String("/MainWindow/SetToPriceGuideDialog/Price"),
+                                                        int(BrickLink::Price::Average)).toInt());
 
     auto toggleAdvancedOptions = [this](bool initialize = false) {
         bool visible = w_advanced->isVisible() || initialize;
@@ -48,6 +48,12 @@ SetToPriceGuideDialog::SetToPriceGuideDialog(QWidget *parent)
     connect(w_advanced_button, &QToolButton::clicked,
             this, toggleAdvancedOptions);
     toggleAdvancedOptions(true /* initialize */);
+}
+
+SetToPriceGuideDialog::~SetToPriceGuideDialog()
+{
+    Config::inst()->setValue("/MainWindow/SetToPriceGuideDialog/Time", w_type_time->currentIndex());
+    Config::inst()->setValue("/MainWindow/SetToPriceGuideDialog/Price", w_type_price->currentIndex());
 }
 
 BrickLink::Time SetToPriceGuideDialog::time() const

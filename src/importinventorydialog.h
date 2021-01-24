@@ -34,6 +34,9 @@ protected:
     void showEvent(QShowEvent *) override;
     QSize sizeHint() const override;
 
+    QByteArray saveState() const;
+    bool restoreState(const QByteArray &ba);
+
 protected slots:
     void checkItem(const BrickLink::Item *it, bool ok);
 };

@@ -66,6 +66,9 @@ private:
     void updateHistoryText();
     static QString historyTextFor(const QDateTime &when, const BrickLink::InvItem &item);
 
+    QByteArray saveState() const;
+    bool restoreState(const QByteArray &ba);
+
 private:
     QPointer<Window> m_window;
 

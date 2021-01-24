@@ -242,6 +242,9 @@
             <property name="text">
              <string>&amp;New</string>
             </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
            </widget>
           </item>
           <item>
@@ -256,13 +259,41 @@
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::MinimumExpanding</enum>
+            </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>271</width>
+              <width>11</width>
               <height>20</height>
              </size>
             </property>
            </spacer>
+          </item>
+          <item>
+           <widget class="QComboBox" name="w_subcondition">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="currentIndex">
+             <number>0</number>
+            </property>
+            <item>
+             <property name="text">
+              <string>Complete</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Incomplete</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Sealed</string>
+             </property>
+            </item>
+           </widget>
           </item>
          </layout>
         </item>

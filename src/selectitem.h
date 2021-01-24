@@ -48,8 +48,13 @@ public:
     double zoomFactor() const;
     void setZoomFactor(double zoom);
 
+    QByteArray saveState() const;
+    bool restoreState(const QByteArray &ba);
+    static QByteArray defaultState();
+
 signals:
     void hasColors(bool);
+    void hasSubConditions(bool);
     void itemSelected(const BrickLink::Item *, bool confirmed);
 
 public slots:
@@ -73,6 +78,7 @@ protected:
 private:
     void init();
     void ensureSelectionVisible();
+    void sortItems(int section, Qt::SortOrder order);
 
 protected:
     QScopedPointer<SelectItemPrivate> d;

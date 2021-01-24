@@ -84,10 +84,6 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     w_add->setDefault(true);
     w_buttons->addButton(w_add, QDialogButtonBox::ActionRole);
 
-    auto itId = Config::inst()->value("/Defaults/AddItems/ItemType", 'P').value<char>();
-    w_select_item->setCurrentItemType(BrickLink::core()->itemType(itId));
-    w_select_item->setCurrentCategory(BrickLink::CategoryModel::AllCategories);
-
     w_picture->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
     w_picture->setLineWidth(2);
 
@@ -135,6 +131,8 @@ AddItemDialog::AddItemDialog(QWidget *parent)
 
     connect(w_select_item, &SelectItem::hasColors,
             w_select_color, &QWidget::setEnabled);
+    connect(w_select_item, &SelectItem::hasSubConditions,
+            w_subcondition, &QWidget::setEnabled);
     connect(w_select_item, &SelectItem::itemSelected,
             this, &AddItemDialog::updateItemAndColor);
     connect(w_select_item, &SelectItem::itemSelected,
@@ -164,11 +162,6 @@ AddItemDialog::AddItemDialog(QWidget *parent)
 
     connect(Config::inst(), &Config::simpleModeChanged,
             this, &AddItemDialog::setSimpleMode);
-
-    if (Config::inst()->value("/Defaults/AddItems/Condition", "new").toString() != "new")
-        w_radio_used->setChecked(true);
-    else
-        w_radio_new->setChecked(true);
 
     w_radio_percent->click();
 
@@ -210,8 +203,20 @@ AddItemDialog::AddItemDialog(QWidget *parent)
         }
         w_splitter_bottom->restoreState(ba.mid(1));
     }
-    double zoom = Config::inst()->value("/MainWindow/AddItemDialog/ItemZoom", 2.).toDouble();
-    w_select_item->setZoomFactor(zoom);
+
+    ba = Config::inst()->value(QLatin1String("/MainWindow/AddItemDialog/SelectItem"))
+            .toByteArray();
+    if (!w_select_item->restoreState(ba))
+        w_select_item->restoreState(SelectItem::defaultState());
+
+    ba = Config::inst()->value(QLatin1String("/MainWindow/AddItemDialog/SelectColor"))
+            .toByteArray();
+    if (!w_select_color->restoreState(ba))
+        w_select_color->restoreState(SelectColor::defaultState());
+
+    ba = Config::inst()->value(QLatin1String("/MainWindow/AddItemDialog/ItemDetails"))
+            .toByteArray();
+    restoreState(ba);
 
     w_last_added->installEventFilter(this); // dynamic tooltip
 
@@ -272,7 +277,9 @@ AddItemDialog::~AddItemDialog()
     }
     ba.prepend(hidden);
     Config::inst()->setValue("/MainWindow/AddItemDialog/HSplitter", ba);
-    Config::inst()->setValue("/MainWindow/AddItemDialog/ItemZoom", w_select_item->zoomFactor());
+    Config::inst()->setValue("/MainWindow/AddItemDialog/SelectItem", w_select_item->saveState());
+    Config::inst()->setValue("/MainWindow/AddItemDialog/SelectColor", w_select_color->saveState());
+    Config::inst()->setValue("/MainWindow/AddItemDialog/ItemDetails", saveState());
 
     w_picture->setItemAndColor(nullptr);
     w_price_guide->setPriceGuide(nullptr);
@@ -449,6 +456,8 @@ void AddItemDialog::setTierType(int type)
     QValidator *valid = (type == 0) ? m_percent_validator : m_money_validator;
     QString text = (type == 0) ? QString("0") : Currency::toString(0, m_currency_code);
 
+    (type == 0 ? w_radio_percent : w_radio_currency)->setChecked(true);
+
     for (const auto &tp : w_tier_price) {
         tp->setValidator(valid);
         tp->setText(text);
@@ -514,6 +523,79 @@ QString AddItemDialog::historyTextFor(const QDateTime &when, const BrickLink::In
     return s;
 }
 
+QByteArray AddItemDialog::saveState() const
+{
+    bool tierCurrency = w_radio_currency->isChecked();
+
+    QByteArray ba;
+    QDataStream ds(&ba, QIODevice::WriteOnly);
+    ds << QByteArray("AI") << qint32(1)
+       << w_qty->value()
+       << w_bulk->value()
+       << Currency::fromString(w_price->text())
+       << tierCurrency;
+
+    for (int i = 0; i < 3; ++i) {
+        const QString s = w_tier_price[i]->text();
+        ds << w_tier_qty[i]->value() << (tierCurrency ? Currency::fromString(s) : s.toDouble());
+    }
+
+    ds << w_radio_new->isChecked()
+       << w_subcondition->currentIndex()
+       << w_comments->text()
+       << w_remarks->text()
+       << w_merge->isChecked();
+    return ba;
+}
+
+bool AddItemDialog::restoreState(const QByteArray &ba)
+{
+    QDataStream ds(ba);
+    QByteArray tag;
+    qint32 version;
+    ds >> tag >> version;
+    if ((ds.status() != QDataStream::Ok) || (tag != "AI") || (version != 1))
+        return false;
+
+    int qty;
+    int bulk;
+    double price;
+    int tierQty[3];
+    double tierPrice[3];
+    bool tierCurrency;
+    bool isNew;
+    int subConditionIndex;
+    QString comments;
+    QString remarks;
+    bool consolidate;
+
+    ds >> qty >> bulk >> price >> tierCurrency;
+    for (int i = 0; i < 3; ++i)
+        ds >> tierQty[i] >> tierPrice[i];
+    ds >> isNew >> subConditionIndex >> comments >> remarks >> consolidate;
+
+    if (ds.status() != QDataStream::Ok)
+        return false;
+
+    w_qty->setValue(qty);
+    w_bulk->setValue(bulk);
+    w_price->setText(Currency::toString(price));
+    setTierType(tierCurrency ? 1 : 0);
+    for (int i = 0; i < 3; ++i) {
+        w_tier_qty[i]->setValue(tierQty[i]);
+        w_tier_price[i]->setText(tierCurrency ? Currency::toString(tierPrice[i])
+                                              : QString::number(tierPrice[i]));
+    }
+    w_radio_new->setChecked(isNew);
+    w_radio_used->setChecked(!isNew);
+    w_subcondition->setCurrentIndex(subConditionIndex);
+    w_comments->setText(comments);
+    w_remarks->setText(remarks);
+    w_merge->setChecked(consolidate);
+    checkAddPossible();
+    return true;
+}
+
 bool AddItemDialog::checkAddPossible()
 {
     bool acceptable = w_select_item->currentItem() &&
@@ -553,6 +635,8 @@ void AddItemDialog::addClicked()
     ii->setPrice(Currency::fromString(w_price->text()));
     ii->setBulkQuantity(w_bulk->text().toInt());
     ii->setCondition(static_cast <BrickLink::Condition>(m_condition->checkedId()));
+    if (ii->itemType() && ii->itemType()->hasSubConditions())
+        ii->setSubCondition(static_cast<BrickLink::SubCondition>(1 + w_subcondition->currentIndex()));
     ii->setRemarks(w_remarks->text());
     ii->setComments(w_comments->text());
 

@@ -29,6 +29,7 @@
 #include <QScrollBar>
 #include <QtMath>
 #include <QScopeGuard>
+#include <QStringBuilder>
 
 #include "documentdelegate.h"
 #include "selectitemdialog.h"
@@ -372,7 +373,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
     }
     case Document::Condition:
         if (it->itemType() && it->itemType()->hasSubConditions() && it->subCondition() != BrickLink::SubCondition::None)
-            str = QString("%1<br /><i>%2</i>" ).arg(str, m_doc->subConditionLabel(it->subCondition()));
+            str = str % u" (" % m_doc->subConditionLabel(it->subCondition()) % u")";
         break;
 
     case Document::Retain:
@@ -515,6 +516,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
     static const QVector<int> richTextColumns = {
         Document::Description,
         Document::Color,
+        Document::Condition,
         Document::Comments,
         Document::Remarks,
         Document::Category,

@@ -24,6 +24,8 @@ SelectColorDialog::SelectColorDialog(QWidget *parent)
 {
     setupUi(this);
 
+    w_sc->restoreState(SelectColor::defaultState());
+
     connect(w_sc, &SelectColor::colorSelected,
             this, &SelectColorDialog::checkColor);
 

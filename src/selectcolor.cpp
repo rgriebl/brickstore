@@ -62,13 +62,20 @@ SelectColor::SelectColor(QWidget *parent)
     w_colors->setAllColumnsShowFocus(true);
     w_colors->setUniformRowHeights(true);
     w_colors->setRootIsDecorated(false);
-    w_colors->setSortingEnabled(true);
     w_colors->setItemDelegate(new BrickLink::ItemDelegate(this, BrickLink::ItemDelegate::AlwaysShowSelection));
 
     m_colorModel = new BrickLink::ColorModel(this);
     m_colorModel->setFilterDelayEnabled(true);
     w_colors->setModel(m_colorModel);
-    w_colors->sortByColumn(0, Qt::AscendingOrder);
+
+    w_colors->header()->setSortIndicatorShown(true);
+    w_colors->header()->setSectionsClickable(true);
+
+    QObject::connect(w_colors->header(), &QHeaderView::sectionClicked,
+                     this, [this](int section) {
+        w_colors->sortByColumn(section, w_colors->header()->sortIndicatorOrder());
+        w_colors->scrollTo(w_colors->currentIndex());
+    });
 
     setFocusProxy(w_colors);
 
@@ -151,6 +158,63 @@ const BrickLink::Color *SelectColor::currentColor() const
     return nullptr;
 }
 
+QByteArray SelectColor::saveState() const
+{
+    auto col = currentColor();
+
+    QByteArray ba;
+    QDataStream ds(&ba, QIODevice::WriteOnly);
+    ds << QByteArray("SC") << qint32(1)
+       << (col ? col->id() : uint(-1))
+       << qint8(m_item && m_item->itemType() ? m_item->itemType()->id() : char(-1))
+       << (m_item ? m_item->id() : QString())
+       << w_filter->currentIndex()
+       << (w_colors->header()->sortIndicatorOrder() == Qt::AscendingOrder);
+
+    return ba;
+}
+
+bool SelectColor::restoreState(const QByteArray &ba)
+{
+    QDataStream ds(ba);
+    QByteArray tag;
+    qint32 version;
+    ds >> tag >> version;
+    if ((ds.status() != QDataStream::Ok) || (tag != "SC") || (version != 1))
+        return false;
+
+    uint col;
+    qint8 itt;
+    QString itemid;
+    int filterIndex;
+    bool colSortAsc;
+
+    ds >> col >> itt >> itemid >> filterIndex >> colSortAsc;
+
+    if (ds.status() != QDataStream::Ok)
+        return false;
+
+    if (col != -1)
+        setCurrentColorAndItem(BrickLink::core()->color(col), BrickLink::core()->item(itt, itemid));
+    w_filter->setCurrentIndex(filterIndex);
+
+    w_colors->sortByColumn(0, colSortAsc ? Qt::AscendingOrder : Qt::DescendingOrder);
+    return true;
+}
+
+QByteArray SelectColor::defaultState()
+{
+    QByteArray ba;
+    QDataStream ds(&ba, QIODevice::WriteOnly);
+    ds << QByteArray("SC") << qint32(1)
+       << uint(0)
+       << qint8(-1)
+       << QString()
+       << int(0)
+       << true;
+    return ba;
+}
+
 void SelectColor::setCurrentColor(const BrickLink::Color *color)
 {
     setCurrentColorAndItem(color, nullptr);
@@ -188,12 +252,8 @@ void SelectColor::showEvent(QShowEvent *e)
 
 void SelectColor::changeEvent(QEvent *e)
 {
-    if (e->type() == QEvent::EnabledChange) {
-        if (!isEnabled())
-            setCurrentColor(BrickLink::core()->color(0));
-    } else if (e->type() == QEvent::LanguageChange) {
+    if (e->type() == QEvent::LanguageChange)
         languageChange();
-    }
     QWidget::changeEvent(e);
 }
 

@@ -59,6 +59,8 @@ public:
     QTreeView *      w_itemthumbs;
     QListView *      w_thumbs;
     QLineEdit *      w_filter;
+    QAction *        m_filterCaseSensitive;
+    QAction *        m_filterRegularExpression;
     QToolButton *    w_zoomIn;
     QToolButton *    w_zoomOut;
     QLabel *         w_zoomLevel;
@@ -66,8 +68,6 @@ public:
     ItemDetailPopup *m_details;
     bool             m_inv_only;
     QTimer *         m_filter_delay;
-    bool             m_filter_cs = false;
-    bool             m_filter_use_re = false;
     double           m_zoom = 0;
 };
 
@@ -156,18 +156,15 @@ void SelectItem::init()
     d->w_filter->setClearButtonEnabled(true);
 
     auto *popupMenu = new QMenu(this);
-    auto acs = new QAction(tr("Case Sensitive"));
-    acs->setCheckable(true);
-    connect(acs, &QAction::toggled, this, [this](bool caseSensitive) {
-        d->m_filter_cs = caseSensitive; applyFilter();
-    });
-    popupMenu->addAction(acs);
-    auto are = new QAction(tr("Use Regular Expression"));
-    are->setCheckable(true);
-    connect(are, &QAction::toggled, this, [this](bool useRE) {
-        d->m_filter_use_re = useRE; applyFilter();
-    });
-    popupMenu->addAction(are);
+    d->m_filterCaseSensitive = new QAction(tr("Case Sensitive"));
+    d->m_filterCaseSensitive->setCheckable(true);
+    connect(d->m_filterCaseSensitive, &QAction::toggled, this, &SelectItem::applyFilter);
+    popupMenu->addAction(d->m_filterCaseSensitive);
+
+    d->m_filterRegularExpression = new QAction(tr("Use Regular Expression"));
+    d->m_filterRegularExpression->setCheckable(true);
+    connect(d->m_filterRegularExpression, &QAction::toggled, this, &SelectItem::applyFilter);
+    popupMenu->addAction(d->m_filterRegularExpression);
 
     // Adding a menuAction() to a QLineEdit leads to a strange activation behvior:
     // only the right side of the icon will react to mouse clicks
@@ -296,13 +293,12 @@ void SelectItem::init()
     d->w_itemthumbs->setSelectionModel(d->w_items->selectionModel());
     d->w_thumbs->setSelectionModel(d->w_items->selectionModel());
 
-    // setSorting(true) is a bit weird: it defaults to descending, (re)sorts on activation and
-    // doesn't keep the current item in view. Plus it cannot deal with dependencies between the
+    // setSortingEnabled(true) is a bit weird: it defaults to descending, (re)sorts on activation
+    // and doesn't keep the current item in view. Plus it cannot deal with dependencies between the
     // items and itemthumbs view.
 
     d->w_categories->header()->setSortIndicatorShown(true);
     d->w_categories->header()->setSectionsClickable(true);
-    d->w_categories->sortByColumn(0, Qt::AscendingOrder);
 
     QObject::connect(d->w_categories->header(), &QHeaderView::sectionClicked,
                      this, [this](int section) {
@@ -312,18 +308,10 @@ void SelectItem::init()
 
     d->w_items->header()->setSortIndicatorShown(true);
     d->w_items->header()->setSectionsClickable(true);
-    d->w_items->sortByColumn(2, Qt::AscendingOrder);
 
     QObject::connect(d->w_items->header(), &QHeaderView::sectionClicked,
                      this, [this](int section) {
-        auto order = d->w_items->header()->sortIndicatorOrder();
-        d->w_items->sortByColumn(section, order);
-        d->w_items->scrollTo(d->w_items->currentIndex());
-
-        d->w_itemthumbs->header()->setSortIndicator(section, order);
-        d->w_itemthumbs->scrollTo(d->w_itemthumbs->currentIndex());
-
-        d->w_thumbs->scrollTo(d->w_thumbs->currentIndex());
+        sortItems(section, d->w_items->header()->sortIndicatorOrder());
     });
 
     d->w_itemthumbs->header()->setSortIndicator(2, Qt::AscendingOrder); // the model is sorted already
@@ -332,17 +320,8 @@ void SelectItem::init()
 
     QObject::connect(d->w_itemthumbs->header(), &QHeaderView::sectionClicked,
                      this, [this](int section) {
-        auto order = d->w_itemthumbs->header()->sortIndicatorOrder();
-        d->w_itemthumbs->sortByColumn(section, order);
-        d->w_itemthumbs->scrollTo(d->w_itemthumbs->currentIndex());
-
-        d->w_items->header()->setSortIndicator(section ? section : 1, order);
-        d->w_items->scrollTo(d->w_items->currentIndex());
-
-        d->w_thumbs->scrollTo(d->w_thumbs->currentIndex());
+        sortItems(section, d->w_itemthumbs->header()->sortIndicatorOrder());
     });
-
-    d->w_categories->setCurrentIndex(d->categoryModel->index(BrickLink::CategoryModel::AllCategories));
 
     connect(d->w_filter, &QLineEdit::textChanged, this, [this]() {
         d->m_filter_delay->start();
@@ -412,8 +391,6 @@ void SelectItem::init()
     d->m_stack->addWidget(d->w_thumbs);
 
     d->m_stack->setCurrentWidget(d->w_itemthumbs);
-
-    itemTypeChanged();
 
     setFocusProxy(d->w_filter);
     setTabOrder(d->w_item_types, d->w_categories);
@@ -499,6 +476,17 @@ void SelectItem::changeEvent(QEvent *e)
     QWidget::changeEvent(e);
 }
 
+void SelectItem::sortItems(int section, Qt::SortOrder order)
+{
+    d->w_itemthumbs->sortByColumn(section, order);
+    d->w_itemthumbs->scrollTo(d->w_itemthumbs->currentIndex());
+
+    d->w_items->header()->setSortIndicator(section ? section : 1, order);
+    d->w_items->scrollTo(d->w_items->currentIndex());
+
+    d->w_thumbs->scrollTo(d->w_thumbs->currentIndex());
+}
+
 bool SelectItem::hasExcludeWithoutInventoryFilter() const
 {
     return d->m_inv_only;
@@ -546,6 +534,7 @@ void SelectItem::itemTypeChanged()
     d->w_itemthumbs->resizeColumnToContents(0);
 
     emit hasColors(itemtype ? itemtype->hasColors() : false);
+    emit hasSubConditions(itemtype ? itemtype->hasSubConditions() : false);
 }
 
 const BrickLink::ItemType *SelectItem::currentItemType() const
@@ -652,6 +641,95 @@ void SelectItem::setZoomFactor(double zoom)
     }
 }
 
+QByteArray SelectItem::saveState() const
+{
+    auto itt = currentItemType();
+    auto cat = currentCategory();
+    auto item = currentItem();
+
+    QByteArray ba;
+    QDataStream ds(&ba, QIODevice::WriteOnly);
+    ds << QByteArray("SI") << qint32(1)
+       << qint8(itt ? itt->id() : char(-1))
+       << (cat ? (cat == BrickLink::CategoryModel::AllCategories ? uint(-2) : cat->id()) : uint(-1))
+       << (item ? item->id() : QString())
+       << d->w_filter->text()
+       << d->m_filterCaseSensitive->isChecked()
+       << d->m_filterRegularExpression->isChecked()
+       << zoomFactor()
+       << d->w_viewmode->checkedId()
+       << (d->w_categories->header()->sortIndicatorOrder() == Qt::AscendingOrder)
+       << (d->w_itemthumbs->header()->sortIndicatorOrder() == Qt::AscendingOrder)
+       << d->w_itemthumbs->header()->sortIndicatorSection();
+
+    return ba;
+}
+
+bool SelectItem::restoreState(const QByteArray &ba)
+{
+    QDataStream ds(ba);
+    QByteArray tag;
+    qint32 version;
+    ds >> tag >> version;
+    if ((ds.status() != QDataStream::Ok) || (tag != "SI") || (version != 1))
+        return false;
+
+    qint8 itt;
+    uint cat;
+    QString itemid;
+    QString filter;
+    bool filter_cs;
+    bool filter_use_re;
+    double zoom;
+    int viewMode;
+    bool catSortAsc;
+    bool itemSortAsc;
+    int itemSortColumn;
+
+    ds >> itt >> cat >> itemid >> filter >> filter_cs >> filter_use_re >> zoom >> viewMode
+            >> catSortAsc >> itemSortAsc >> itemSortColumn;
+
+    if (ds.status() != QDataStream::Ok)
+        return false;
+
+    if (itt != -1)
+        setCurrentItemType(BrickLink::core()->itemType(itt));
+    if (cat != uint(-1)) {
+        setCurrentCategory(cat == uint(-2) ? BrickLink::CategoryModel::AllCategories
+                                           : BrickLink::core()->category(cat));
+    }
+    if (!itemid.isEmpty())
+        setCurrentItem(BrickLink::core()->item(itt, itemid), false);
+    d->m_filterCaseSensitive->setChecked(filter_cs);
+    d->m_filterRegularExpression->setChecked(filter_use_re);
+    d->w_filter->setText(filter);
+    applyFilter();
+    setZoomFactor(zoom);
+    setViewMode(viewMode);
+    d->w_categories->sortByColumn(0, catSortAsc ? Qt::AscendingOrder : Qt::DescendingOrder);
+    sortItems(itemSortColumn, itemSortAsc ? Qt::AscendingOrder : Qt::DescendingOrder);
+    return true;
+}
+
+QByteArray SelectItem::defaultState()
+{
+    QByteArray ba;
+    QDataStream ds(&ba, QIODevice::WriteOnly);
+    ds << QByteArray("SI") << qint32(1)
+       << qint8('P')
+       << uint(-2)
+       << QString()
+       << QString()
+       << false
+       << false
+       << double(2)
+       << int(1)
+       << true
+       << true
+       << int(2);
+    return ba;
+}
+
 void SelectItem::setViewMode(int mode)
 {
     QWidget *w = nullptr;
@@ -659,10 +737,10 @@ void SelectItem::setViewMode(int mode)
     case 0 : w = d->w_items; break;
     case 1 : w = d->w_itemthumbs; break;
     case 2 : w = d->w_thumbs; break;
-    default: break;
+    default: return;
     }
-    if (w)
-        d->m_stack->setCurrentWidget(w);
+    d->m_stack->setCurrentWidget(w);
+    d->w_viewmode->button(mode)->setChecked(true);
 }
 
 
@@ -712,7 +790,8 @@ void SelectItem::applyFilter()
     const BrickLink::Item *oldItem = currentItem();
     d->w_items->clearSelection();
 
-    d->itemModel->setFilterText(d->w_filter->text(), d->m_filter_cs, d->m_filter_use_re);
+    d->itemModel->setFilterText(d->w_filter->text(), d->m_filterCaseSensitive->isChecked(),
+                                d->m_filterRegularExpression->isChecked());
 
     setCurrentItem(oldItem);
     if (!currentItem() && d->itemModel->rowCount() == 1)
