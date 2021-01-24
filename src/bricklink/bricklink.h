@@ -133,8 +133,9 @@ public:
         Pearl        = 0x0040,
         Milky        = 0x0080,
         Modulex      = 0x0100,
+        Satin        = 0x0200,
 
-        Mask         = 0x01ff
+        Mask         = 0x03ff
     };
 
     Q_DECLARE_FLAGS(Type, TypeFlag)
@@ -149,6 +150,7 @@ public:
     bool isPearl() const       { return m_type & Pearl; }
     bool isMilky() const       { return m_type & Milky; }
     bool isModulex() const     { return m_type & Modulex; }
+    bool isSatin() const       { return m_type & Satin; }
 
     qreal popularity() const   { return m_popularity < 0 ? 0 : m_popularity; }
 

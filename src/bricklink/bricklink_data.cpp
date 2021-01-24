@@ -29,7 +29,8 @@ QString BrickLink::Color::typeName(TypeFlag t)
         { Chrome,      "Chrome" },
         { Pearl,       "Pearl" },
         { Milky,       "Milky" },
-        { Modulex,     "Modulex" }
+        { Modulex,     "Modulex" },
+        { Satin,       "Satin" },
     };
     return colortypes.value(t);
 }

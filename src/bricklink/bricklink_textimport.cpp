@@ -203,6 +203,7 @@ void BrickLink::TextImport::readColors(const QString &path)
         if (type.contains("Pearl"))       col->m_type |= Color::Pearl;
         if (type.contains("Milky"))       col->m_type |= Color::Milky;
         if (type.contains("Modulex"))     col->m_type |= Color::Modulex;
+        if (type.contains("Satin"))       col->m_type |= Color::Satin;
         if (!col->m_type)
             col->m_type = Color::Solid;
 
