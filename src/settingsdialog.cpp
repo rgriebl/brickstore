@@ -67,6 +67,9 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
 {
     setupUi(this);
 
+    w_font_size_percent->setFixedWidth(w_font_size_percent->width());
+    w_item_image_size_percent->setFixedWidth(w_item_image_size_percent->width());
+
     connect(w_font_size, &QAbstractSlider::valueChanged,
             this, [this](int v) {
         w_font_size_percent->setText(QString("%1 %").arg(v * 10));

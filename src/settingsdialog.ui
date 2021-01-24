@@ -298,7 +298,10 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string notr="true">100%</string>
+            <string notr="true">1000%</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
           </widget>
          </item>
@@ -392,7 +395,10 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string notr="true">100%</string>
+            <string notr="true">1000%</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
           </widget>
          </item>
@@ -437,7 +443,7 @@
           <item>
            <widget class="QLabel" name="w_item_image_example">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -465,7 +471,7 @@
           <item>
            <widget class="QLabel" name="w_font_example">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+             <sizepolicy hsizetype="Ignored" vsizetype="MinimumExpanding">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
