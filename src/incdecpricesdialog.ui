@@ -72,7 +72,11 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
-      <widget class="QLineEdit" name="w_value"/>
+      <widget class="QLineEdit" name="w_value">
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QWidget" name="widget_2" native="true">

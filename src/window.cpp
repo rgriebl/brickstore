@@ -2041,15 +2041,16 @@ void Window::resizeColumnsToDefault()
 {
     int em = w_list->fontMetrics().averageCharWidth();
     for (int i = 0; i < w_list->model()->columnCount(); i++) {
-        int width = w_list->model()->headerData(i, Qt::Horizontal, Qt::UserRole).toInt();
-        if (width)
-            w_header->resizeSection(i, (width < 0 ? -width : width * em) + 8);
-
         if (w_header->visualIndex(i) != i)
             w_header->moveSection(w_header->visualIndex(i), i);
 
         if (w_header->isSectionAvailable(i))
             w_header->setSectionHidden(i, false);
+
+        int mw = w_list->model()->headerData(i, Qt::Horizontal, Qt::UserRole).toInt();
+        int width = qMax((mw < 0 ? -mw : mw * em) + 8, w_header->sectionSizeHint(i));
+        if (width)
+            w_header->resizeSection(i, width);
     }
 
     // start with the physical document sort order

@@ -1530,6 +1530,14 @@ int Document::dataForTextAlignmentRole(Item *, Field f) const
     case TierP1      :
     case TierP2      :
     case TierP3      :
+    case Quantity    :
+    case Bulk        :
+    case QuantityOrig:
+    case QuantityDiff:
+    case TierQ1      :
+    case TierQ2      :
+    case TierQ3      :
+    case YearReleased:
     case Weight      : return Qt::AlignRight | Qt::AlignVCenter;
     default          : return Qt::AlignLeft | Qt::AlignVCenter;
     }
