@@ -90,8 +90,15 @@ ConsolidateItemsDialog::ConsolidateItemsDialog(const Window *win,
                                               QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
 
     if (current == total) {
-        w_buttons->button(QDialogButtonBox::YesToAll)->setDisabled(true);
-        w_buttons->button(QDialogButtonBox::NoToAll)->setDisabled(true);
+        // if we just hid the buttons on the last of a series, the "Yes" button would
+        // suddenly be in the same position where the "No" button was before...
+        if (total == 1) {
+            w_buttons->button(QDialogButtonBox::YesToAll)->hide();
+            w_buttons->button(QDialogButtonBox::NoToAll)->hide();
+        } else {
+            w_buttons->button(QDialogButtonBox::YesToAll)->setDisabled(true);
+            w_buttons->button(QDialogButtonBox::NoToAll)->setDisabled(true);
+        }
         w_prefer_remaining->hide();
         w_label_remaining->hide();
     }
