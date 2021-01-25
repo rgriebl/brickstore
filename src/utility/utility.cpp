@@ -15,10 +15,11 @@
 #include <cmath>
 
 #include <QColor>
-#include <QDesktopWidget>
 #include <QApplication>
 #include <QDir>
 #include <QWidget>
+#include <QWindow>
+#include <QScreen>
 
 #if defined(Q_OS_WINDOWS)
 #  if defined(Q_CC_MINGW)
@@ -146,22 +147,23 @@ QColor Utility::contrastColor(const QColor &c, qreal f)
 void Utility::setPopupPos(QWidget *w, const QRect &pos)
 {
     QSize sh = w->sizeHint();
-    QSize desktop = qApp->desktop()->size();
+    QRect screenRect = w->window()->windowHandle()->screen()->availableGeometry();
 
+    // center below pos
     int x = pos.x() + (pos.width() - sh.width()) / 2;
     int y = pos.y() + pos.height();
 
-    if ((y + sh.height()) > desktop.height()) {
-        int d = w->frameSize().height() - w->size().height();
-        y = pos.y() - sh.height() - d;
+    if ((y + sh.height()) > (screenRect.bottom() + 1)) {
+        int frameHeight = (w->frameSize().height() - w->size().height());
+        y = pos.y() - sh.height() - frameHeight;
     }
-    if (y < 0)
-        y = 0;
+    if (y < screenRect.top())
+        y = screenRect.top();
 
-    if ((x + sh.width()) > desktop.width())
-        x = desktop.width() - sh.width();
-    if (x < 0)
-        x = 0;
+    if ((x + sh.width()) > (screenRect.right() + 1))
+        x = (screenRect.right() + 1) - sh.width();
+    if (x < screenRect.left())
+        x = screenRect.left();
 
     w->move(x, y);
     w->resize(sh);
