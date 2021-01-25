@@ -432,6 +432,7 @@ FrameWork::FrameWork(QWidget *parent)
                                       "edit_color",
                                       "edit_qty",
                                       "edit_price",
+                                      "edit_cost",
                                       "edit_bulk",
                                       "edit_sale",
                                       "edit_comment",
@@ -500,6 +501,7 @@ FrameWork::FrameWork(QWidget *parent)
                                    "edit_color",
                                    "edit_qty",
                                    "edit_price",
+                                   "edit_cost",
                                    "edit_comment",
                                    "edit_remark",
                                    "-",
@@ -812,6 +814,10 @@ void FrameWork::translateActions()
         { "edit_price_set",                 tr("Set..."),                             },
         { "edit_price_to_priceguide",       tr("Set to Price Guide..."),              tr("Ctrl+G", "Edit|Price|Set to PriceGuide") },
         { "edit_price_inc_dec",             tr("Inc- or Decrease..."),                tr("Ctrl++", "Edit|Price|Inc/Dec") },
+        { "edit_cost",                      tr("Cost"),                               },
+        { "edit_cost_round",                tr("Round to 2 Decimal Places"),          },
+        { "edit_cost_set",                  tr("Set..."),                             },
+        { "edit_cost_inc_dec",              tr("Inc- or Decrease..."),                },
         { "edit_bulk",                      tr("Bulk Quantity..."),                   },
         { "edit_sale",                      tr("Sale..."),                            tr("Ctrl+%", "Edit|Sale") },
         { "edit_comment",                   tr("Comment"),                            },
@@ -1252,6 +1258,11 @@ void FrameWork::createActions()
     m->addAction(newQAction(this, "edit_price_inc_dec", NeedSelection(1)));
     m->addAction(newQAction(this, "edit_price_to_priceguide", NeedSelection(1)));
     m->addAction(newQAction(this, "edit_price_round", NeedSelection(1)));
+
+    m = newQMenu(this, "edit_cost", NeedSelection(1));
+    m->addAction(newQAction(this, "edit_cost_set", NeedSelection(1)));
+    m->addAction(newQAction(this, "edit_cost_inc_dec", NeedSelection(1)));
+    m->addAction(newQAction(this, "edit_cost_round", NeedSelection(1)));
 
     (void) newQAction(this, "edit_bulk", NeedSelection(1));
     (void) newQAction(this, "edit_sale", NeedSelection(1));

@@ -810,6 +810,7 @@ QWidget *DocumentDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
     case Document::TierQ2      :
     case Document::TierQ3      : valid = new SmartIntValidator(0, FrameWork::maxQuantity, 0, nullptr); break;
     case Document::Price       :
+    case Document::Cost        :
     case Document::TierP1      :
     case Document::TierP2      :
     case Document::TierP3      : valid = new SmartDoubleValidator(0, FrameWork::maxPrice, 3, 0, nullptr); break;

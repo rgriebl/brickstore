@@ -360,6 +360,8 @@ public:
     int sale() const                   { return m_sale; }
     void setSale(int s)                { m_sale = qMax(-99, qMin(100, s)); }
     double total() const               { return m_price * m_quantity; }
+    void setCost(double c)             { m_cost = c; }
+    double cost() const                { return m_cost; }
 
     uint lotId() const                 { return m_lot_id; }
     void setLotId(uint lid)            { m_lot_id = lid; }
@@ -432,6 +434,8 @@ private:
 
     double           m_orig_price;
     int              m_orig_quantity;
+
+    double           m_cost;
 
     friend QDataStream &operator << (QDataStream &ds, const InvItem &ii);
     friend QDataStream &operator >> (QDataStream &ds, InvItem &ii);

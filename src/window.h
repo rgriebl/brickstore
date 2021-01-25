@@ -132,6 +132,9 @@ public slots:
     void on_edit_price_round_triggered();
     void on_edit_price_to_priceguide_triggered();
     void on_edit_price_inc_dec_triggered();
+    void on_edit_cost_set_triggered();
+    void on_edit_cost_round_triggered();
+    void on_edit_cost_inc_dec_triggered();
     void on_edit_bulk_triggered();
     void on_edit_sale_triggered();
     void on_edit_retain_yes_triggered();

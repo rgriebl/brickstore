@@ -248,6 +248,8 @@ BrickLink::InvItem::InvItem(const Color *color, const Item *item)
 
     m_incomplete = nullptr;
     m_lot_id = 0;
+
+    m_cost = 0;
 }
 
 BrickLink::InvItem::InvItem(const BrickLink::InvItem &copy)
@@ -292,6 +294,7 @@ BrickLink::InvItem &BrickLink::InvItem::operator = (const InvItem &copy)
     m_lot_id         = copy.m_lot_id;
     m_orig_price     = copy.m_orig_price;
     m_orig_quantity  = copy.m_orig_quantity;
+    m_cost           = copy.m_cost;
 
     if (copy.m_incomplete) {
         m_incomplete = new Incomplete;
@@ -340,6 +343,7 @@ bool BrickLink::InvItem::operator == (const InvItem &cmp) const
     same = same && (m_lot_id             == cmp.m_lot_id);
     same = same && qFuzzyCompare(m_orig_price,     cmp.m_orig_price);
     same = same && (m_orig_quantity      == cmp.m_orig_quantity);
+    same = same && (m_cost               == cmp.m_cost);
 
     return same;
 }
@@ -361,6 +365,8 @@ bool BrickLink::InvItem::mergeFrom(const InvItem &from, bool prefer_from)
 
     if (!qFuzzyIsNull(from.price()) && (qFuzzyIsNull(price()) || prefer_from))
         setPrice(from.price());
+    if (!qFuzzyIsNull(from.cost()) && (qFuzzyIsNull(cost()) || prefer_from))
+        setCost(from.cost());
     if ((from.bulkQuantity() != 1) && ((bulkQuantity() == 1) || prefer_from))
         setBulkQuantity(from.bulkQuantity());
     if ((from.sale()) && (!(sale()) || prefer_from))
@@ -439,7 +445,7 @@ QDataStream &operator << (QDataStream &ds, const BrickLink::InvItem &ii)
        << ii.quantity() << ii.bulkQuantity() << ii.tierQuantity(0) << ii.tierQuantity(1) << ii.tierQuantity(2)
        << ii.price() << ii.tierPrice(0) << ii.tierPrice(1) << ii.tierPrice(2) << ii.sale()
        << qint8(ii.retain() ? 1 : 0) << qint8(ii.stockroom()) << ii.m_reserved << quint32(ii.m_lot_id)
-       << ii.origQuantity() << ii.origPrice() << qint32(ii.subCondition());
+       << ii.origQuantity() << ii.origPrice() << qint32(ii.subCondition()) << ii.cost();
     return ds;
 }
 
@@ -478,7 +484,7 @@ QDataStream &operator >> (QDataStream &ds, BrickLink::InvItem &ii)
        >> ii.m_quantity >> ii.m_bulk_quantity >> ii.m_tier_quantity [0] >> ii.m_tier_quantity [1] >> ii.m_tier_quantity [2]
        >> ii.m_price >> ii.m_tier_price [0] >> ii.m_tier_price [1] >> ii.m_tier_price [2] >> ii.m_sale
        >> retain >> stockroom >> ii.m_reserved >> ii.m_lot_id
-       >> ii.m_orig_quantity >> ii.m_orig_price >> scond;
+       >> ii.m_orig_quantity >> ii.m_orig_price >> scond >> ii.m_cost;
 
     ii.m_status = static_cast<BrickLink::Status>(status);
     ii.m_condition = static_cast<BrickLink::Condition>(cond);

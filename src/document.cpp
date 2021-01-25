@@ -207,7 +207,7 @@ Document::Statistics::Statistics(const Document *doc, const ItemList &list, bool
 {
     m_lots = 0;
     m_items = 0;
-    m_val = m_minval = 0.;
+    m_val = m_minval = m_cost = 0.;
     m_weight = .0;
     m_errors = 0;
     m_incomplete = 0;
@@ -223,6 +223,7 @@ Document::Statistics::Statistics(const Document *doc, const ItemList &list, bool
         double price = item->price();
 
         m_val += (qty * price);
+        m_cost += (qty * item->cost());
 
         for (int i = 0; i < 3; i++) {
             if (item->tierQuantity(i) && !qFuzzyIsNull(item->tierPrice(i)))
@@ -237,7 +238,7 @@ Document::Statistics::Statistics(const Document *doc, const ItemList &list, bool
             weight_missing = true;
 
         if (quint64 errors = doc->itemErrors(item)) {
-            for (uint i = 1ULL << (FieldCount - 1); i;  i >>= 1) {
+            for (quint64 i = 1ULL << (FieldCount - 1); i;  i >>= 1) {
                 if (errors & i)
                     m_errors++;
             }
@@ -1340,6 +1341,7 @@ bool Document::setData(const QModelIndex &index, const QVariant &value, int role
         case QuantityDiff: item.setQuantity(itemp->origQuantity() + value.toInt()); break;
         case Price       : item.setPrice(Currency::fromString(value.toString())); break;
         case PriceDiff   : item.setPrice(itemp->origPrice() + Currency::fromString(value.toString())); break;
+        case Cost        : item.setCost(Currency::fromString(value.toString())); break;
         default          : break;
         }
         if (!(item == *itemp)) {
@@ -1405,6 +1407,7 @@ QVariant Document::dataForEditRole(Item *it, Field f) const
     case QuantityDiff: return it->quantity() - it->origQuantity();
     case Price       : return Currency::toString(it->price(), currencyCode());
     case PriceDiff   : return Currency::toString(it->price() - it->origPrice(), currencyCode());
+    case Cost        : return Currency::toString(it->cost(), currencyCode());
     default          : return QString();
     }
 }
@@ -1454,13 +1457,14 @@ QString Document::dataForDisplayRole(Item *it, Field f, int row) const
 
     case PriceOrig   : return Currency::toString(it->origPrice(), currencyCode());
     case PriceDiff   : return Currency::toString(it->price() - it->origPrice(), currencyCode());
+    case Cost        : return Currency::toString(it->cost(), currencyCode());
     case QuantityOrig: return QString::number(it->origQuantity());
     case QuantityDiff: return QString::number(it->quantity() - it->origQuantity());
     default          : return QString();
     }
 }
 
-QString Document::dataForFilterRole(Item *it, Field f, int row) const
+QVariant Document::dataForFilterRole(Item *it, Field f, int row) const
 {
     switch (f) {
     case Status:
@@ -1477,6 +1481,13 @@ QString Document::dataForFilterRole(Item *it, Field f, int row) const
         case BrickLink::Stockroom::C: return QString("C");
         default                     : return QString("-");
         }
+    case Price       : return it->price();
+    case PriceDiff   : return it->price() - it->origPrice();
+    case Cost        : return it->cost();
+    case TierP1      : return !qFuzzyIsNull(it->tierPrice(0)) ? it->tierPrice(0) : it->price();
+    case TierP2      : return !qFuzzyIsNull(it->tierPrice(1)) ? it->tierPrice(1) : it->tierPrice(0);
+    case TierP3      : return !qFuzzyIsNull(it->tierPrice(2)) ? it->tierPrice(2) : it->tierPrice(1);
+
     default: {
         QVariant v = dataForEditRole(it, f);
         if (v.isNull())
@@ -1512,6 +1523,7 @@ int Document::dataForTextAlignmentRole(Item *, Field f) const
     case Condition   : return Qt::AlignVCenter | Qt::AlignHCenter;
     case PriceOrig   :
     case PriceDiff   :
+    case Cost        :
     case Price       :
     case Total       :
     case Sale        :
@@ -1591,6 +1603,7 @@ QString Document::headerDataForDisplayRole(Field f)
     case Bulk        : return tr("Bulk");
     case PriceOrig   : return tr("Pr.Orig");
     case PriceDiff   : return tr("Pr.Diff");
+    case Cost        : return tr("Cost");
     case Price       : return tr("Price");
     case Total       : return tr("Total");
     case Sale        : return tr("Sale");
@@ -1638,6 +1651,7 @@ int Document::headerDataForDefaultWidthRole(Field f) const
     case Bulk        : width = 5; break;
     case PriceOrig   : width = 8; break;
     case PriceDiff   : width = 8; break;
+    case Cost        : width = 8; break;
     case Price       : width = 8; break;
     case Total       : width = 8; break;
     case Sale        : width = 5; break;

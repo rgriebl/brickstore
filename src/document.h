@@ -48,6 +48,7 @@ public:
         PriceDiff,
         Price,
         Total,
+        Cost,
         Bulk,
         Sale,
         Comments,
@@ -86,6 +87,7 @@ public:
         int items() const            { return m_items; }
         double value() const         { return m_val; }
         double minValue() const      { return m_minval; }
+        double cost() const          { return m_cost; }
         double weight() const        { return m_weight; }
         int errors() const           { return m_errors; }
         int incomplete() const       { return m_incomplete; }
@@ -96,6 +98,7 @@ public:
         int m_items;
         double m_val;
         double m_minval;
+        double m_cost;
         double m_weight;
         int m_errors;
         int m_incomplete;
@@ -117,7 +120,7 @@ public:
     bool setData(const QModelIndex&, const QVariant&, int);
     QVariant dataForEditRole(Item *it, Field f) const;
     QString dataForDisplayRole(Item *it, Field f, int row = -1) const;
-    QString dataForFilterRole(Item *it, Field f, int row = -1) const;
+    QVariant dataForFilterRole(Item *it, Field f, int row = -1) const;
     QVariant dataForDecorationRole(Item *it, Field f) const;
     Qt::CheckState dataForCheckStateRole(Item *it, Field f) const;
     int dataForTextAlignmentRole(Item *it, Field f) const;

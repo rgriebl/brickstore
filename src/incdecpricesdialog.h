@@ -22,7 +22,7 @@ class IncDecPricesDialog : public QDialog, private Ui::IncDecPricesDialog
 {
     Q_OBJECT
 public:
-    IncDecPricesDialog(const QString &currencycode, QWidget *parent = nullptr);
+    IncDecPricesDialog(bool showTiers, const QString &currencycode, QWidget *parent = nullptr);
 
     double fixed() const;
     double percent() const;

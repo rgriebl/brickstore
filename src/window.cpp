@@ -1010,7 +1010,7 @@ void Window::on_edit_price_inc_dec_triggered()
     if (selection().isEmpty())
         return;
 
-    IncDecPricesDialog dlg(m_doc->currencyCode(), this);
+    IncDecPricesDialog dlg(!isSimpleMode(), m_doc->currencyCode(), this);
 
     if (dlg.exec() == QDialog::Accepted) {
         double fixed     = dlg.fixed();
@@ -1052,6 +1052,84 @@ void Window::on_edit_price_inc_dec_triggered()
         }
 
         m_doc->endMacro(tr("Price change on %n item(s)", nullptr, incdeccount));
+    }
+}
+
+void Window::on_edit_cost_set_triggered()
+{
+    if (selection().isEmpty())
+        return;
+
+    double cost = selection().front()->cost();
+
+    if (MessageBox::getDouble(this, { }, tr("Enter the new cost for all selected items:"),
+                              Currency::localSymbol(m_doc->currencyCode()), cost, 0,
+                              FrameWork::maxPrice, 3)) {
+        setOrToggle<double>::set(this, QT_TR_N_NOOP("Set cost on %n item(s)"),
+                                 &Document::Item::cost, &Document::Item::setCost, cost);
+    }
+
+}
+
+void Window::on_edit_cost_round_triggered()
+{
+    if (selection().isEmpty())
+        return;
+
+    uint roundcount = 0;
+    m_doc->beginMacro();
+
+    WindowProgress wp(w_list);
+
+    foreach(Document::Item *pos, selection()) {
+        double c = int(pos->cost() * 100 + .5) / 100.;
+
+        if (!qFuzzyCompare(c, pos->cost())) {
+            Document::Item item = *pos;
+
+            item.setCost(c);
+            m_doc->changeItem(pos, item);
+
+            roundcount++;
+        }
+    }
+    m_doc->endMacro(tr("Cost change on %n item(s)", nullptr, roundcount));
+}
+
+void Window::on_edit_cost_inc_dec_triggered()
+{
+    if (selection().isEmpty())
+        return;
+
+    IncDecPricesDialog dlg(false, m_doc->currencyCode(), this);
+
+    if (dlg.exec() == QDialog::Accepted) {
+        double fixed     = dlg.fixed();
+        double percent   = dlg.percent();
+        double factor    = (1.+ percent / 100.);
+        uint incdeccount = 0;
+
+        m_doc->beginMacro();
+
+        WindowProgress wp(w_list);
+
+        foreach(Document::Item *pos, selection()) {
+            Document::Item item = *pos;
+
+            double c = item.cost();
+
+            if (!qFuzzyIsNull(percent))
+                c *= factor;
+            else if (!qFuzzyIsNull(fixed))
+                c += fixed;
+
+            item.setCost(c);
+
+            m_doc->changeItem(pos, item);
+            incdeccount++;
+        }
+
+        m_doc->endMacro(tr("Cost change on %n item(s)", nullptr, incdeccount));
     }
 }
 

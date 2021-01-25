@@ -18,12 +18,14 @@
 #include "framework.h"
 
 
-IncDecPricesDialog::IncDecPricesDialog(const QString &currencycode, QWidget *parent)
+IncDecPricesDialog::IncDecPricesDialog(bool showTiers, const QString &currencycode, QWidget *parent)
     : QDialog(parent)
     , m_currencycode(currencycode)
 {
     setupUi(this);
     
+    w_apply_to_tiers->setVisible(showTiers);
+
     w_value->setText(QLatin1String("0"));
     w_fixed->setText(Currency::localSymbol(currencycode));
 

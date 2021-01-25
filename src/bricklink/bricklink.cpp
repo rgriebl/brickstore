@@ -673,6 +673,8 @@ Core::ParseItemListXMLResult Core::parseItemListXML(const QDomElement &root, Ite
                                      val == "C" ? Stockroom::C : Stockroom::None);
                 } else if (tag == QLatin1String("BUYERUSERNAME"))
                     ii->setReserved(val);
+                else if (tag == QLatin1String("MYCOST"))
+                    ii->setCost(c.toDouble(val));
             }
 
             // ### BrickLink Order (workaround for broken BL script) ###
@@ -788,6 +790,8 @@ Core::ParseItemListXMLResult Core::parseItemListXML(const QDomElement &root, Ite
                 else if (tag == QLatin1String("OrigQty")) {
                     ii->setOrigQuantity(c.toInt(val));
                     has_orig_qty = true;
+                } else if (tag == QLatin1String("Cost")) {
+                    ii->setCost(c.toDouble(val));
                 }
             }
         }
@@ -999,6 +1003,8 @@ QDomElement Core::createItemListXML(QDomDocument doc, ItemListXMLHint hint, cons
                 create(u"OrigPrice", c.toCurrencyString(ii->origPrice(), { }, 3));
             if (ii->origQuantity() != ii->quantity())
                 create(u"OrigQty", c.toString(ii->origQuantity()));
+            if (!qFuzzyIsNull(ii->cost()))
+                create(u"Cost", c.toCurrencyString(ii->cost(), { }, 3));
         }
 
         // ### MASS UPLOAD ###
@@ -1056,6 +1062,9 @@ QDomElement Core::createItemListXML(QDomDocument doc, ItemListXMLHint hint, cons
                 create(u"TQ3", c.toString(ii->tierQuantity(2)));
                 create(u"TP3", c.toCurrencyString(ii->tierPrice(2), { }, 3));
             }
+
+            if (!qFuzzyIsNull(ii->cost()))
+                create(u"MYCOST", c.toCurrencyString(ii->cost(), { }, 3));
         }
 
         // ### WANTED LIST ###
