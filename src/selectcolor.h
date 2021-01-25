@@ -38,7 +38,7 @@ public:
     static QByteArray defaultState();
 
 signals:
-    void colorSelected(const BrickLink::Color *, bool);
+    void colorSelected(const BrickLink::Color *color, bool confirmed);
 
 protected slots:
     void colorChanged();

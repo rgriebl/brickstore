@@ -61,7 +61,6 @@ private slots:
     void setSimpleMode(bool);
 
 private:
-    void showItemInColor(const BrickLink::Item *it, const BrickLink::Color *col);
     double tierPriceValue(int i);
     void updateHistoryText();
     static QString historyTextFor(const QDateTime &when, const BrickLink::InvItem &item);

@@ -134,13 +134,18 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     connect(w_select_item, &SelectItem::hasSubConditions,
             w_subcondition, &QWidget::setEnabled);
     connect(w_select_item, &SelectItem::itemSelected,
-            this, &AddItemDialog::updateItemAndColor);
-    connect(w_select_item, &SelectItem::itemSelected,
-            this, [this](const BrickLink::Item *item) {
-            w_select_color->setCurrentColorAndItem(w_select_color->currentColor(), item);
+            this, [this](const BrickLink::Item *item, bool confirmed) {
+        updateItemAndColor();
+        w_select_color->setCurrentColorAndItem(w_select_color->currentColor(), item);
+        if (confirmed)
+            w_add->animateClick();
     });
     connect(w_select_color, &SelectColor::colorSelected,
-            this, &AddItemDialog::updateItemAndColor);
+            this, [this](const BrickLink::Color *, bool confirmed) {
+        updateItemAndColor();
+        if (confirmed)
+            w_add->animateClick();
+    });
     connect(w_price, &QLineEdit::textChanged,
             this, &AddItemDialog::showTotal);
     connect(w_qty, QOverload<int>::of(&QSpinBox::valueChanged),
@@ -421,15 +426,13 @@ void AddItemDialog::setSimpleMode(bool b)
 
 void AddItemDialog::updateItemAndColor()
 {
-    showItemInColor(w_select_item->currentItem(), w_select_color->currentColor());
-}
+    auto item = w_select_item->currentItem();
+    auto color = w_select_color->currentColor();
 
-void AddItemDialog::showItemInColor(const BrickLink::Item *it, const BrickLink::Color *col)
-{
-    if (it && col) {
-        w_picture->setItemAndColor(it, col);
-        w_price_guide->setPriceGuide(BrickLink::core()->priceGuide(it, col, true));
-        w_appears_in->setItem(it, col);
+    if (item && color) {
+        w_picture->setItemAndColor(item, color);
+        w_price_guide->setPriceGuide(BrickLink::core()->priceGuide(item, color, true));
+        w_appears_in->setItem(item, color);
     }
     else {
         w_picture->setItemAndColor(nullptr);
