@@ -1778,11 +1778,8 @@ void Window::on_view_column_layout_list_load(const QString &layoutId)
         w_list->resizeColumnsToContents();
     } else {
         auto layout = Config::inst()->columnLayout(layoutId);
-
         if (!layout.isEmpty())
             w_header->restoreLayout(layout);
-        else if (layoutId == "user-default")
-            resizeColumnsToDefault();
     }
 }
 

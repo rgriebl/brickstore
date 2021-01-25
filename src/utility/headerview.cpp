@@ -202,6 +202,7 @@ bool HeaderView::restoreLayout(const QByteArray &config)
         return false;
     if ((sortIndicator < -1) || (sortIndicator >= count))
         return false;
+
     for (int i = 0; i < count; ++i) {
         if ((sizes.at(i) < 0)
                 || (sizes.at(i) > 5000)
@@ -210,11 +211,13 @@ bool HeaderView::restoreLayout(const QByteArray &config)
             return false;
     }
 
-    for (int i = 0; i < count; ++i) {
-        if (!isSectionInternal(i))
-            setSectionHidden(i, isHiddens.at(i));
-        moveSection(visualIndex(i), positions.at(i));
-        resizeSection(i, sizes.at(i));
+    // we need to move the columns into their (visual) place from left to right
+    for (int vi = 0; vi < count; ++vi) {
+        int li = positions.indexOf(vi);
+        if (!isSectionInternal(li))
+            setSectionHidden(li, isHiddens.at(li));
+        moveSection(visualIndex(li), vi);
+        resizeSection(li, sizes.at(li));
     }
 
     setSortIndicator(sortIndicator, sortAscending ? Qt::AscendingOrder : Qt::DescendingOrder);
@@ -233,16 +236,16 @@ QByteArray HeaderView::saveLayout() const
        << qint32(sortIndicatorSection())
        << (sortIndicatorOrder() == Qt::AscendingOrder);
 
-    for (int i = 0; i < count(); ++i ) {
-        bool hidden = isSectionHidden(i);
-        int size = hidden ? m_hiddenSizes.value(i) : sectionSize(i);
+    for (int li = 0; li < count(); ++li ) {
+        bool hidden = isSectionHidden(li);
+        int size = hidden ? m_hiddenSizes.value(li) : sectionSize(li);
 
         ds << qint32(size)
-           << qint32(visualIndex(i))
+           << qint32(visualIndex(li))
            << hidden;
 
-//        qWarning("C%02d: @ %02d %c%c %d", i, visualIndex(i),
-//                 hidden ? 'H' : ' ', isSectionAvailable(i) ? ' ' : 'X', size);
+//        qWarning("C%02d: @ %02d %c%c %d", li, visualIndex(li),
+//                 hidden ? 'H' : ' ', isSectionAvailable(li) ? ' ' : 'X', size);
     }
     return config;
 }
