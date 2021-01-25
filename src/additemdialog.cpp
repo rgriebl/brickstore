@@ -601,11 +601,14 @@ bool AddItemDialog::restoreState(const QByteArray &ba)
 
 bool AddItemDialog::checkAddPossible()
 {
-    bool acceptable = w_select_item->currentItem() &&
-                      w_select_color->currentColor() &&
-                      w_price->hasAcceptableInput() &&
-                      w_qty->hasAcceptableInput() &&
-                      w_bulk->hasAcceptableInput();
+
+    bool acceptable = w_select_item->currentItem() &&  w_price->hasAcceptableInput()
+            && w_qty->hasAcceptableInput() && w_bulk->hasAcceptableInput();
+
+    if (auto currentType = w_select_item->currentItemType()) {
+        if (currentType->hasColors())
+            acceptable = acceptable && (w_select_color->currentColor());
+    }
 
     for (int i = 0; i < 3; i++) {
         if (!w_tier_price [i]->isEnabled())
@@ -632,7 +635,14 @@ void AddItemDialog::addClicked()
     if (!checkAddPossible() || !m_window)
         return;
 
-    auto *ii = new BrickLink::InvItem(w_select_color->currentColor(), w_select_item->currentItem());
+    const BrickLink::Item *item = w_select_item->currentItem();
+    const BrickLink::Color *color;
+    if (item && item->itemType() && item->itemType()->hasColors())
+        color = w_select_color->currentColor();
+    else
+        color = BrickLink::core()->color(0);
+
+    auto *ii = new BrickLink::InvItem(color, item);
 
     ii->setQuantity(w_qty->text().toInt());
     ii->setPrice(Currency::fromString(w_price->text()));
