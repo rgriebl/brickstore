@@ -114,7 +114,19 @@ ConsolidateItemsDialog::ConsolidateItemsDialog(const Window *win,
         }
     });
 
-    QMetaObject::invokeMethod(this, [this]() { resize(sizeHint()); }, Qt::QueuedConnection);
+    QMetaObject::invokeMethod(this, [this]() {
+        QSize sh = sizeHint();
+        QRect screenRect = windowHandle()->screen()->availableGeometry();
+        int maxWidth = (screenRect.width() * 7 / 8);
+
+        if (sh.width() > maxWidth)
+            sh.setWidth(maxWidth);
+
+        int x = screenRect.x() + (screenRect.width() - sh.width()) / 2;
+        int y = screenRect.y() + (screenRect.height() - sh.height()) / 2;
+        move(x, y);
+        resize(sh);
+    }, Qt::QueuedConnection);
 }
 
 Window::Consolidate ConsolidateItemsDialog::consolidateRemaining() const
@@ -144,10 +156,9 @@ QSize ConsolidateItemsDialog::sizeHint() const
 {
     // try to fit as much information on the screen as possible
     auto s = QDialog::sizeHint();
-    auto w = w_list->viewport()->width() + w_list->horizontalScrollBar()->maximum()
-            - w_list->horizontalScrollBar()->minimum() + 50;
-    if (windowHandle() && windowHandle()->screen())
-        s.rwidth() = qMin(w, windowHandle()->screen()->availableSize().width() * 7 / 8);
+    int listWidth = w_list->viewport()->width() + w_list->horizontalScrollBar()->maximum()
+            - w_list->horizontalScrollBar()->minimum();
+    s.setWidth(qMax(s.width(), listWidth + 50));
     return s;
 }
 
