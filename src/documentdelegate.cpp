@@ -371,11 +371,6 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         image = BrickLink::core()->colorImage(it->color(), option.decorationSize.width() * 1.5, option.rect.height());
         break;
     }
-    case Document::Condition:
-        if (it->itemType() && it->itemType()->hasSubConditions() && it->subCondition() != BrickLink::SubCondition::None)
-            str = str % u" (" % m_doc->subConditionLabel(it->subCondition()) % u")";
-        break;
-
     case Document::Retain:
         checkmark = it->retain() ? 1 : -1;
         break;
@@ -579,6 +574,8 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
 
             quint64 elideHash = quint64(idx.row()) << 32 | quint64(idx.column());
 
+            if (align & Qt::AlignHCenter) // QTextLayout doesn't clip in this case
+                p->setClipRect(option.rect);
             tlp->draw(p, QPoint(x + margin, y + (h - height)/2));
             if (lastLine.textStart() + lastLine.textLength() < str.length()) {
                 int elidePos = int(lastLine.naturalTextWidth());

@@ -21,6 +21,7 @@
 #include <QDesktopServices>
 #include <QStandardPaths>
 #include <QtMath>
+#include <QStringBuilder>
 
 #if defined( MODELTEST )
 #  include "modeltest.h"
@@ -1430,7 +1431,14 @@ QString Document::dataForDisplayRole(Item *it, Field f, int row) const
     case Price       : return Currency::toString(it->price(), currencyCode());
     case Total       : return Currency::toString(it->total(), currencyCode());
     case Sale        : return (it->sale() == 0 ? dash : QString::number(it->sale()) + QLatin1Char('%'));
-    case Condition   : return (it->condition() == BrickLink::Condition::New ? tr("N", "New") : tr("U", "Used"));
+    case Condition   : {
+        QString c = (it->condition() == BrickLink::Condition::New) ? tr("N", "New") : tr("U", "Used");
+        if (it->itemType() && it->itemType()->hasSubConditions()
+                && (it->subCondition() != BrickLink::SubCondition::None)) {
+            c = c % u" / " % subConditionLabel(it->subCondition());
+        }
+        return c;
+    }
     case Color       : return it->colorName();
     case Category    : return it->category() ? it->category()->name() : dash;
     case ItemType    : return it->itemType() ? it->itemType()->name() : dash;
@@ -1461,12 +1469,6 @@ QString Document::dataForFilterRole(Item *it, Field f, int row) const
         case BrickLink::Status::Extra  : return tr("Extra"); break;
         default:
         case BrickLink::Status::Exclude: return tr("Exclude"); break;
-        }
-    case Condition:
-        switch (it->condition()) {
-        case BrickLink::Condition::New : return tr("New");
-        default:
-        case BrickLink::Condition::Used: return tr("Used");
         }
     case Stockroom:
         switch (it->stockroom()) {
@@ -1542,12 +1544,12 @@ QString Document::dataForToolTipRole(Item *it, Field f) const
         return dataForDisplayRole(it, PartNo) + QLatin1Char(' ') + dataForDisplayRole(it, Description);
     }
     case Condition: {
-        switch (it->condition()) {
-        case BrickLink::Condition::New : return tr("New");
-        case BrickLink::Condition::Used: return tr("Used");
-        default                        : break;
+        QString c = (it->condition() == BrickLink::Condition::New) ? tr("New") : tr("Used");
+        if (it->itemType() && it->itemType()->hasSubConditions()
+                && (it->subCondition() != BrickLink::SubCondition::None)) {
+            c = c % u" / " % subConditionLabel(it->subCondition());
         }
-        break;
+        return c;
     }
     case Category: {
         if (!it->item())
