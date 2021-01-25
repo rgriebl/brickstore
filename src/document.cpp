@@ -1764,9 +1764,8 @@ bool DocumentProxyModel::filterAcceptsRow(int source_row, const QModelIndex &sou
         for (int c = firstcol; c <= lastcol && !localresult; ++c) {
             QVariant v = sourceModel()->data(sourceModel()->index(source_row, c), Document::FilterRole);
             if (v.isNull())
-                v = sourceModel()->data(sourceModel()->index(source_row, c), Qt::DisplayRole);
-            if (!v.isNull())
-                localresult = f.matches(v);
+                v = sourceModel()->data(sourceModel()->index(source_row, c), Qt::DisplayRole).toString();
+            localresult = f.matches(v);
         }
         if (nextcomb == Filter::And)
             result = result && localresult;

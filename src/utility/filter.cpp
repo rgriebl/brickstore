@@ -256,7 +256,7 @@ QPair<QString, Filter::Combination> Filter::Parser::matchFilterAndCombination(in
     }
     
     if (quoted) {
-        int end = str.indexOf(quote_char, pos+1);
+        int end = str.indexOf(quote_char, pos);
         
         if (end == -1) {
             // missing quote end: just take everything as filter expr
