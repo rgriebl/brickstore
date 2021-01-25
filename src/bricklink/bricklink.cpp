@@ -1591,7 +1591,7 @@ ItemType *Core::readItemTypeFromDatabase(QDataStream &dataStream, DatabaseVersio
     itt->m_has_colors        = flags & 0x02;
     itt->m_has_weight        = flags & 0x04;
     itt->m_has_year          = flags & 0x08;
-    itt->m_has_subconditions = (id == 'S'); //flags & 0x10;
+    itt->m_has_subconditions = flags & 0x10;
 
     return itt.take();
 }

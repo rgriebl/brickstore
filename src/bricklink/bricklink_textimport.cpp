@@ -253,8 +253,8 @@ void BrickLink::TextImport::readItemTypes(const QString &path)
         itt->m_picture_id        = (c == 'I') ? 'S' : c;
         itt->m_has_inventories   = false;
         itt->m_has_colors        = (c == 'P' || c == 'G');
-        itt->m_has_weight        = (c == 'B' || c == 'P' || c == 'G' || c == 'S' || c == 'I');
-        itt->m_has_year          = (c == 'B' || c == 'C' || c == 'G' || c == 'S' || c == 'I');
+        itt->m_has_weight        = (c == 'B' || c == 'P' || c == 'G' || c == 'S' || c == 'I' || c == 'M');
+        itt->m_has_year          = (c == 'B' || c == 'C' || c == 'G' || c == 'S' || c == 'I' || c == 'M');
         itt->m_has_subconditions = (c == 'S');
 
         m_item_types.insert(c, itt.take());
