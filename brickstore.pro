@@ -247,7 +247,7 @@ macos {
 
   CONFIG(release, debug|release) {
     deploy.depends += $(DESTDIR_TARGET)
-    deploy.commands += $$shell_path($$[QT_HOST_BINS]/macdeployqt) -qmldir $$PWD/extensions $$OUT_PWD/$$DESTDIR/$${TARGET}.app
+    deploy.commands += $$shell_path($$[QT_HOST_BINS]/macdeployqt) $$OUT_PWD/$$DESTDIR/$${TARGET}.app -qmldir=$$PWD/extensions
 
     installer.depends += deploy
     installer.commands += rm -rf $$OUT_PWD/dmg
