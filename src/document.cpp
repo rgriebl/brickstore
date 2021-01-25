@@ -1363,7 +1363,7 @@ QVariant Document::data(const QModelIndex &index, int role) const
         switch (role) {
         case Qt::DisplayRole      : return dataForDisplayRole(it, f, index.row());
         case Qt::DecorationRole   : return dataForDecorationRole(it, f);
-        case Qt::ToolTipRole      : return dataForToolTipRole(it, f);
+        case Qt::ToolTipRole      : return dataForToolTipRole(it, f, index.row());
         case Qt::TextAlignmentRole: return dataForTextAlignmentRole(it, f);
         case Qt::EditRole         : return dataForEditRole(it, f);
         case Qt::CheckStateRole   : return dataForCheckStateRole(it, f);
@@ -1543,7 +1543,7 @@ int Document::dataForTextAlignmentRole(Item *, Field f) const
     }
 }
 
-QString Document::dataForToolTipRole(Item *it, Field f) const
+QString Document::dataForToolTipRole(Item *it, Field f, int row) const
 {
     switch (f) {
     case Status: {
@@ -1561,7 +1561,7 @@ QString Document::dataForToolTipRole(Item *it, Field f) const
         return str;
     }
     case Picture: {
-        return dataForDisplayRole(it, PartNo) + QLatin1Char(' ') + dataForDisplayRole(it, Description);
+        return dataForDisplayRole(it, PartNo, row) + QLatin1Char(' ') + dataForDisplayRole(it, Description, row);
     }
     case Condition: {
         QString c = (it->condition() == BrickLink::Condition::New) ? tr("New") : tr("Used");
@@ -1588,7 +1588,7 @@ QString Document::dataForToolTipRole(Item *it, Field f) const
         }
     }
     default: {
-        return dataForDisplayRole(it, f);
+        return dataForDisplayRole(it, f, row);
     }
     }
     return QString();

@@ -14,6 +14,7 @@
 #include <cstdlib>
 
 #include <QString>
+#include <QStringBuilder>
 
 #include "bricklink.h"
 
@@ -353,7 +354,7 @@ BrickLink::InvItem::~InvItem()
     delete m_incomplete;
 }
 
-bool BrickLink::InvItem::mergeFrom(const InvItem &from, bool prefer_from)
+bool BrickLink::InvItem::mergeFrom(const InvItem &from, bool useCostQtyAg)
 {
     if ((&from == this) ||
         (from.isIncomplete() || isIncomplete()) ||
@@ -363,60 +364,60 @@ bool BrickLink::InvItem::mergeFrom(const InvItem &from, bool prefer_from)
         (from.subCondition() != subCondition()))
         return false;
 
-    if (!qFuzzyIsNull(from.price()) && (qFuzzyIsNull(price()) || prefer_from))
-        setPrice(from.price());
-    if (!qFuzzyIsNull(from.cost()) && (qFuzzyIsNull(cost()) || prefer_from))
+    if (useCostQtyAg) {
+        setCost((cost() * quantity() + from.cost() * from.quantity()) / (quantity() + from.quantity()));
+    } else if (!qFuzzyIsNull(from.cost()) && qFuzzyIsNull(cost())) {
         setCost(from.cost());
-    if ((from.bulkQuantity() != 1) && ((bulkQuantity() == 1) || prefer_from))
+    }
+    setQuantity(quantity() + from.quantity());
+    setOrigQuantity(origQuantity() + from.origQuantity());
+
+    if (!qFuzzyIsNull(from.price()) && qFuzzyIsNull(price()))
+        setPrice(from.price());
+    if ((from.bulkQuantity() != 1) && (bulkQuantity() == 1))
         setBulkQuantity(from.bulkQuantity());
-    if ((from.sale()) && (!(sale()) || prefer_from))
+    if ((from.sale()) && !sale())
         setSale(from.sale());
 
     for (int i = 0; i < 3; i++) {
-        if (!qFuzzyIsNull(from.tierPrice(i)) && (qFuzzyIsNull(tierPrice(i)) || prefer_from))
+        if (!qFuzzyIsNull(from.tierPrice(i)) && qFuzzyIsNull(tierPrice(i)))
             setTierPrice(i, from.tierPrice(i));
-        if ((from.tierQuantity(i)) && (!(tierQuantity(i)) || prefer_from))
+        if (from.tierQuantity(i) && !tierQuantity(i))
             setTierQuantity(i, from.tierQuantity(i));
     }
 
-    if (!from.remarks().isEmpty() && !remarks().isEmpty()) {
-        if (from.remarks() == remarks())
-            ;
-        else if (remarks().indexOf(QRegExp("\\b" + QRegExp::escape(from.remarks()) + "\\b")) != -1)
-            ;
-        else if (from.remarks().indexOf(QRegExp("\\b" + QRegExp::escape(remarks()) + "\\b")) != -1)
-            setRemarks(from.remarks());
-        else
-            setRemarks(QString(prefer_from  ? "%1 %2" : "%2 %1").arg(from.remarks(), remarks()));
-    }
-    else if (!from.remarks().isEmpty())
+    if (!from.remarks().isEmpty() && !remarks().isEmpty() && (from.remarks() != remarks())) {
+        QRegularExpression fromRe { u"\\b" % QRegularExpression::escape(from.remarks()) % u"\\b" };
+
+        if (!fromRe.match(remarks()).hasMatch()) {
+            QRegularExpression thisRe { u"\\b" % QRegularExpression::escape(remarks()) % u"\\b" };
+
+            if (thisRe.match(from.remarks()).hasMatch())
+                setRemarks(from.remarks());
+            else
+                setRemarks(remarks() % u" " % from.remarks());
+        }
+    } else if (!from.remarks().isEmpty()) {
         setRemarks(from.remarks());
-
-    if (!from.comments().isEmpty() && !comments().isEmpty()) {
-        if (from.comments() == comments())
-            ;
-        else if (comments().indexOf(QRegExp("\\b" + QRegExp::escape(from.comments()) + "\\b")) != -1)
-            ;
-        else if (from.comments().indexOf(QRegExp("\\b" + QRegExp::escape(comments()) + "\\b")) != -1)
-            setComments(from.comments());
-        else
-            setComments(QString(prefer_from  ? "%1 %2" : "%2 %1").arg(from.comments(), comments()));
     }
-    else if (!from.comments().isEmpty())
+
+    if (!from.comments().isEmpty() && !comments().isEmpty() && (from.comments() != comments())) {
+        QRegularExpression fromRe { u"\\b" % QRegularExpression::escape(from.comments()) % u"\\b" };
+
+        if (!fromRe.match(comments()).hasMatch()) {
+            QRegularExpression thisRe { u"\\b" % QRegularExpression::escape(comments()) % u"\\b" };
+
+            if (thisRe.match(from.comments()).hasMatch())
+                setComments(from.comments());
+            else
+                setComments(comments() % u" " % from.comments());
+        }
+    } else if (!from.comments().isEmpty()) {
         setComments(from.comments());
-
-    if (!from.reserved().isEmpty() && (reserved().isEmpty() || prefer_from))
-        setReserved(from.reserved());
-
-    if (prefer_from) {
-        setStatus(from.status());
-        setRetain(from.retain());
-        setStockroom(from.stockroom());
-        setLotId(from.lotId());
     }
 
-    setQuantity(quantity() + from.quantity());
-    setOrigQuantity(origQuantity() + from.origQuantity());
+    if (!from.reserved().isEmpty() && reserved().isEmpty())
+        setReserved(from.reserved());
 
     return true;
 }

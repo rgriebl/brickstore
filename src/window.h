@@ -43,12 +43,18 @@ public:
 
     enum class Consolidate {
         Not = -1,
-        ToTopSorted = 0,
-        ToBottomSorted = 1,
-        ToLowestIndex = 2,
-        ToHighestIndex = 3,
-        ToExisting = 4,
-        ToNew = 5
+        IntoTopSorted = 0,
+        IntoBottomSorted = 1,
+        IntoLowestIndex = 2,
+        IntoHighestIndex = 3,
+        IntoExisting = 4,
+        IntoNew = 5
+    };
+
+    enum class AddItemMode {
+        AddAsNew,
+        ConsolidateWithExisting,
+        ConsolidateInteractive,
     };
 
 
@@ -56,7 +62,7 @@ public:
     Document::Item *current() const              { return m_current; }
 
     uint setItems(const BrickLink::InvItemList &items, int multiply = 1);
-    int addItems(const BrickLink::InvItemList &items, int multiply = 1, Consolidate conMode = Consolidate::Not);
+    int addItems(const BrickLink::InvItemList &items, AddItemMode addItemMode = AddItemMode::AddAsNew);
     void deleteItems(const BrickLink::InvItemList &items);
 
     void consolidateItems(const Document::ItemList &items);
@@ -161,7 +167,6 @@ public slots:
 
     void on_view_column_layout_save_triggered();
     void on_view_column_layout_list_load(const QString &layoutId);
-    void addItem(BrickLink::InvItem *item, Consolidate conMode = Consolidate::Not);
 
     void setPrice(double);
 

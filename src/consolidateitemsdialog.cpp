@@ -45,12 +45,12 @@ ConsolidateItemsDialog::ConsolidateItemsDialog(const Window *win,
     bool newItems = (items.count() == 2) && win->document()->items().contains(items.at(0))
                      && !win->document()->items().contains(items.at(items.count() - 1));
 
-    Q_ASSERT(newItems == (int(mode) >= int(Window::Consolidate::ToExisting)));
+    Q_ASSERT(newItems == (int(mode) >= int(Window::Consolidate::IntoExisting)));
 
-    for (int i = int(Window::Consolidate::ToNew); i > int(Window::Consolidate::Not); --i) {
+    for (int i = int(Window::Consolidate::IntoNew); i > int(Window::Consolidate::Not); --i) {
         w_prefer_remaining->setItemData(i, QVariant::fromValue(static_cast<Window::Consolidate>(i)));
 
-        bool forNewOnly = (i >= int(Window::Consolidate::ToExisting));
+        bool forNewOnly = (i >= int(Window::Consolidate::IntoExisting));
         if (newItems != forNewOnly)
             w_prefer_remaining->removeItem(i);
     }
@@ -133,6 +133,11 @@ int ConsolidateItemsDialog::consolidateToIndex() const
 bool ConsolidateItemsDialog::repeatForAll() const
 {
     return m_forAll;
+}
+
+bool ConsolidateItemsDialog::costQuantityAverage() const
+{
+    return w_qty_avg_cost->isChecked();
 }
 
 QSize ConsolidateItemsDialog::sizeHint() const

@@ -29,6 +29,7 @@ public:
 
     int consolidateToIndex() const;
     bool repeatForAll() const;
+    bool costQuantityAverage() const;
     Window::Consolidate consolidateRemaining() const;
 
 protected:

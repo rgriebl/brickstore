@@ -420,9 +420,11 @@ QString Window::filterToolTip() const
     return m_view->filterToolTip();
 }
 
-int Window::addItems(const BrickLink::InvItemList &items, int multiply, Consolidate conMode)
+int Window::addItems(const BrickLink::InvItemList &items, AddItemMode addItemMode)
 {
-    if (items.isEmpty() || (multiply == 0))
+    // we own the items now
+
+    if (items.isEmpty())
         return 0;
 
     m_doc->beginMacro();
@@ -431,13 +433,15 @@ int Window::addItems(const BrickLink::InvItemList &items, int multiply, Consolid
     bool wasEmpty = documentItems.isEmpty();
     int addCount = 0;
     int consolidateCount = 0;
+    Consolidate conMode = Consolidate::IntoExisting;
     bool repeatForRemaining = false;
+    bool costQtyAvg = true;
 
     for (int i = 0; i < items.count(); ++i) {
         Document::Item *item = items.at(i);
         bool justAdd = true;
 
-        if (conMode != Consolidate::Not) {
+        if (addItemMode != AddItemMode::AddAsNew) {
             Document::Item *mergeItem = nullptr;
 
             for (int j = documentItems.count() - 1; j >= 0; --j) {
@@ -456,14 +460,15 @@ int Window::addItems(const BrickLink::InvItemList &items, int multiply, Consolid
             if (mergeItem) {
                 int mergeIndex = -1;
 
-                if (!repeatForRemaining) {
+                if ((addItemMode == AddItemMode::ConsolidateInteractive) && !repeatForRemaining) {
                     BrickLink::InvItemList list { mergeItem, item };
 
                     ConsolidateItemsDialog dlg(this, list,
-                                               conMode == Consolidate::ToExisting ? 0 : 1,
+                                               conMode == Consolidate::IntoExisting ? 0 : 1,
                                                conMode, i + 1, items.count(), this);
                     bool yesClicked = (dlg.exec() == QDialog::Accepted);
                     repeatForRemaining = dlg.repeatForAll();
+                    costQtyAvg = dlg.costQuantityAverage();
 
                     if (yesClicked) {
                         mergeIndex = dlg.consolidateToIndex();
@@ -472,7 +477,7 @@ int Window::addItems(const BrickLink::InvItemList &items, int multiply, Consolid
                             conMode = dlg.consolidateRemaining();
                     }
                 } else {
-                    mergeIndex = (conMode == Consolidate::ToExisting) ? 0 : 1;
+                    mergeIndex = (conMode == Consolidate::IntoExisting) ? 0 : 1;
                 }
 
                 if (mergeIndex >= 0) {
@@ -481,18 +486,13 @@ int Window::addItems(const BrickLink::InvItemList &items, int multiply, Consolid
                     if (mergeIndex == 0) {
                         // merge new into existing
                         Document::Item changedItem = *mergeItem;
-                        Document::Item tempItem = *item;
-                        if (multiply > 1)
-                            tempItem.setQuantity(tempItem.quantity() * multiply);
-                        changedItem.mergeFrom(tempItem);
+                        changedItem.mergeFrom(*item, costQtyAvg);
                         m_doc->changeItem(mergeItem, changedItem);
+                        delete item; // we own it, but we don't need it anymore
                     } else {
                         // merge existing into new, add new, remove existing
-                        auto *newItem = new Document::Item(*item);
-                        if (multiply > 1)
-                            newItem->setQuantity(newItem->quantity() * multiply);
-                        newItem->mergeFrom(*mergeItem);
-                        m_doc->appendItem(newItem);
+                        item->mergeFrom(*mergeItem, costQtyAvg);
+                        m_doc->appendItem(item); // pass on ownership
                         m_doc->removeItem(mergeItem);
                     }
 
@@ -502,10 +502,7 @@ int Window::addItems(const BrickLink::InvItemList &items, int multiply, Consolid
         }
 
         if (justAdd) {
-            auto *newItem = new Document::Item(*item);
-            if (multiply > 1)
-                newItem->setQuantity(newItem->quantity() * multiply);
-            m_doc->appendItem(newItem);
+            m_doc->appendItem(item);  // pass on ownership to the doc
             ++addCount;
         }
     }
@@ -516,13 +513,6 @@ int Window::addItems(const BrickLink::InvItemList &items, int multiply, Consolid
         w_list->selectRow(0);
 
     return items.count();
-}
-
-
-void Window::addItem(BrickLink::InvItem *item, Consolidate conMode)
-{
-    addItems({ item }, 1, conMode);
-    delete item;
 }
 
 
@@ -561,8 +551,9 @@ void Window::consolidateItems(const Document::ItemList &items)
 
     m_doc->beginMacro();
 
-    auto conMode = Consolidate::ToLowestIndex;
+    auto conMode = Consolidate::IntoLowestIndex;
     bool repeatForRemaining = false;
+    bool costQtyAvg = true;
     int consolidateCount = 0;
 
     for (int mi = 0; mi < mergeList.count(); ++mi) {
@@ -574,6 +565,7 @@ void Window::consolidateItems(const Document::ItemList &items)
                                        conMode, mi + 1, mergeList.count(), this);
             bool yesClicked = (dlg.exec() == QDialog::Accepted);
             repeatForRemaining = dlg.repeatForAll();
+            costQtyAvg = dlg.costQuantityAverage();
 
             if (yesClicked) {
                 mergeIndex = dlg.consolidateToIndex();
@@ -593,9 +585,9 @@ void Window::consolidateItems(const Document::ItemList &items)
         Document::Item newitem = *mergeItems.at(mergeIndex);
         for (int i = 0; i < mergeItems.count(); ++i) {
             if (i != mergeIndex) {
-                newitem.mergeFrom(*mergeItems.at(i));
+                newitem.mergeFrom(*mergeItems.at(i), costQtyAvg);
                 m_doc->removeItem(mergeItems.at(i));
-            }
+            }    
         }
         m_doc->changeItem(mergeItems.at(mergeIndex), newitem);
 
@@ -607,18 +599,18 @@ void Window::consolidateItems(const Document::ItemList &items)
 int Window::consolidateItemsHelper(const Document::ItemList &items, Consolidate conMode) const
 {
     switch (conMode) {
-    case Consolidate::ToTopSorted:
+    case Consolidate::IntoTopSorted:
         return 0;
-    case Consolidate::ToBottomSorted:
+    case Consolidate::IntoBottomSorted:
         return items.count() - 1;
-    case Consolidate::ToLowestIndex: {
+    case Consolidate::IntoLowestIndex: {
         const auto di = document()->items();
         auto it = std::min_element(items.cbegin(), items.cend(), [di](const auto &a, const auto &b) {
             return di.indexOf(a) < di.indexOf(b);
         });
         return std::distance(items.cbegin(), it);
     }
-    case Consolidate::ToHighestIndex: {
+    case Consolidate::IntoHighestIndex: {
         const auto di = document()->items();
         auto it = std::max_element(items.cbegin(), items.cend(), [di](const auto &a, const auto &b) {
             return di.indexOf(a) < di.indexOf(b);
@@ -696,8 +688,7 @@ void Window::on_edit_paste_triggered()
                 m_doc->removeItems(selection());
             }
         }
-        addItems(bllist, 1, Consolidate::ToExisting);
-        qDeleteAll(bllist);
+        addItems(bllist, AddItemMode::ConsolidateInteractive);
     }
 }
 

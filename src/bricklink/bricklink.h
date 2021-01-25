@@ -397,7 +397,7 @@ public:
     const Incomplete *isIncomplete() const { return m_incomplete; }
     void setIncomplete(Incomplete *inc)    { delete m_incomplete; m_incomplete = inc; }
 
-    bool mergeFrom(const InvItem &merge, bool prefer_from = false);
+    bool mergeFrom(const InvItem &merge, bool useCostQtyAg = false);
 
     QImage image() const;
 

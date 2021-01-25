@@ -666,8 +666,8 @@ void AddItemDialog::addClicked()
         m_addHistory.pop_front();
     updateHistoryText();
 
-    m_window->addItem(ii, w_merge->isChecked() ? Window::Consolidate::ToLowestIndex
-                                               : Window::Consolidate::Not);
+    m_window->addItems({ ii }, w_merge->isChecked() ? Window::AddItemMode::ConsolidateWithExisting
+                                                    : Window::AddItemMode::AddAsNew);
 }
 
 #include "moc_additemdialog.cpp"
