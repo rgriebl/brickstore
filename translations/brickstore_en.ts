@@ -59,10 +59,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Total</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>&amp;Tiered prices</source>
         <translation type="unfinished"></translation>
     </message>
@@ -102,15 +98,27 @@
         </translation>
     </message>
     <message>
-        <source>&amp;Consolidate</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Your recently added items will be listed here</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Added %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Complete</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Incomplete</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Sealed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Conso&amp;lidate</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -266,13 +274,40 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Would you like to consolidate those two lots?
+        <source>Would you like to consolidate these lots?
 Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ...) are to be preserved:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>&amp;Do the same for the remaining lots
-(Always preserve the first item&apos;s attributes)</source>
+        <source>Merge Cost field by calculating an quantity average cost</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Topmost in Sort Order</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Bottommost in Sort Order</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Lowest Index</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Highest Index</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Existing Item</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>New Item</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>If &apos;Yes to All&apos;, prefer the</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -630,6 +665,10 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>A file named %1 already exists. Are you sure you want to overwrite it?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cost</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1362,6 +1401,50 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Filter the Item List</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ctrl+L</source>
+        <comment>Edit|Consolidate Items</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cost</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ctrl+B,Ctrl+C</source>
+        <comment>Edit|Show BL Catalog Info</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ctrl+B,Ctrl+P</source>
+        <comment>Edit|Show BL Price Guide</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ctrl+B,Ctrl+L</source>
+        <comment>Edit|Show BL Lots for Sale</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ctrl+B,Ctrl+I</source>
+        <comment>Edit|Show BL my Inventory</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Restore Documents</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>It seems like BrickStore crashed while %n document(s) had unsaved modifications.</source>
+        <translation>
+            <numerusform>It seems like BrickStore crashed while one document had unsaved modifications.</numerusform>
+            <numerusform>It seems like BrickStore crashed while %n documents had unsaved modifications.</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Should these documents be restored from their last available auto-save state?</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2131,46 +2214,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Defaults</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Default values for &apos;Import BrickLink Set Inventory&apos;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Item type</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Default values for &apos;Add Items&apos;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Condition</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>New</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Used</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Default values for &apos;Set to Price Guide&apos;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Guide</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Price</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>BrickLink Login</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2196,30 +2239,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Document directory location</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Last 6 Months Sales</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Current Inventory</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Minimum</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Average</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Quantity Average</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Maximum</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2438,10 +2457,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Added %1, merged %2 items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Overwrite the currently selected items?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2579,7 +2594,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message numerus="yes">
         <source>Merged %n item(s)</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Merged one items</numerusform>
             <numerusform>Merged %n items</numerusform>
         </translation>
@@ -2831,7 +2846,7 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message numerus="yes">
         <source>Quantity multiply by %1 on %n items</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>Quantity multiply by %1 on %n item</numerusform>
             <numerusform>Quantity multiply by %1 on %n items</numerusform>
         </translation>
@@ -2868,6 +2883,47 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
             <numerusform>Clear comment on one item</numerusform>
             <numerusform>Clear comment on %n items</numerusform>
         </translation>
+    </message>
+    <message>
+        <source>Added %1, consolidated %2 items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>Consolidated %n item(s)</source>
+        <translation>
+            <numerusform>Consolidated one item</numerusform>
+            <numerusform>Consolidated %n items</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Enter the new cost for all selected items:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>Set cost on %n item(s)</source>
+        <translation>
+            <numerusform>Set cost on one item</numerusform>
+            <numerusform>Set cost on %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Cost change on %n item(s)</source>
+        <translation>
+            <numerusform>Cost change on one item</numerusform>
+            <numerusform>Cost change on %n items</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Quantity multiply by %1 on %n item(s)</source>
+        <translation>
+            <numerusform>Quantity multiply by %1 on one item</numerusform>
+            <numerusform>Quantity multiply by %1 on %n items</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>RESTORED</source>
+        <comment>Tag for document restored from autosave</comment>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

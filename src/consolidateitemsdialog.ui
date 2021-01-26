@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>944</width>
-    <height>208</height>
+    <width>928</width>
+    <height>226</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -92,22 +92,18 @@ Please also select which item's attributes (e.g. remarks, tiered prices, ...) ar
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <spacer name="horizontalSpacer_2">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
       <widget class="QLabel" name="w_label_remaining">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+         <horstretch>1</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="text">
-        <string>If 'Yes to All', prefer:</string>
+        <string>If 'Yes to All', prefer the</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
      </item>
@@ -155,7 +151,7 @@ Please also select which item's attributes (e.g. remarks, tiered prices, ...) ar
        </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>22</width>
+         <width>44</width>
          <height>20</height>
         </size>
        </property>
@@ -163,6 +159,12 @@ Please also select which item's attributes (e.g. remarks, tiered prices, ...) ar
      </item>
      <item>
       <widget class="QDialogButtonBox" name="w_buttons">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
