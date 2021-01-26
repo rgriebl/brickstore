@@ -53,7 +53,6 @@ private slots:
     void updateCaption();
     void updateCurrencyCode();
     void updateItemAndColor();
-    void showTotal();
     bool checkAddPossible();
     void addClicked();
     void checkTieredPrices();

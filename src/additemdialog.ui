@@ -109,7 +109,10 @@
         <item row="1" column="2">
          <widget class="QLabel" name="label_4">
           <property name="text">
-           <string>Total</string>
+           <string notr="true">&amp;Cost</string>
+          </property>
+          <property name="buddy">
+           <cstring>w_cost</cstring>
           </property>
          </widget>
         </item>
@@ -186,12 +189,12 @@
          </widget>
         </item>
         <item row="1" column="3">
-         <widget class="QLineEdit" name="w_total">
+         <widget class="QLineEdit" name="w_cost">
+          <property name="text">
+           <string notr="true">0</string>
+          </property>
           <property name="alignment">
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-          <property name="readOnly">
-           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -479,7 +482,7 @@
      <item>
       <widget class="QCheckBox" name="w_merge">
        <property name="text">
-        <string>&amp;Consolidate</string>
+        <string>Conso&amp;lidate</string>
        </property>
       </widget>
      </item>
@@ -555,7 +558,7 @@
   <tabstop>w_qty</tabstop>
   <tabstop>w_bulk</tabstop>
   <tabstop>w_price</tabstop>
-  <tabstop>w_total</tabstop>
+  <tabstop>w_cost</tabstop>
   <tabstop>w_tier_qty_0</tabstop>
   <tabstop>w_tier_qty_1</tabstop>
   <tabstop>w_tier_qty_2</tabstop>

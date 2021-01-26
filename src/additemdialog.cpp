@@ -104,8 +104,9 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     w_bulk->installEventFilter(this);
 
     w_price->setValidator(new SmartDoubleValidator(0, FrameWork::maxPrice, 3, 0, w_price));
-    w_price->setText("0");
     w_price->installEventFilter(this);
+    w_cost->setValidator(new SmartDoubleValidator(0, FrameWork::maxPrice, 3, 0, w_cost));
+    w_cost->installEventFilter(this);
 
     w_tier_qty [0] = w_tier_qty_0;
     w_tier_qty [1] = w_tier_qty_1;
@@ -149,9 +150,9 @@ AddItemDialog::AddItemDialog(QWidget *parent)
             w_add->animateClick();
     });
     connect(w_price, &QLineEdit::textChanged,
-            this, &AddItemDialog::showTotal);
+            this, &AddItemDialog::checkAddPossible);
     connect(w_qty, QOverload<int>::of(&QSpinBox::valueChanged),
-            this, &AddItemDialog::showTotal);
+            this, &AddItemDialog::checkAddPossible);
     connect(m_tier_type, QOverload<int>::of(&QButtonGroup::buttonClicked),
             this, &AddItemDialog::setTierType);
     connect(w_bulk, QOverload<int>::of(&QSpinBox::valueChanged),
@@ -186,7 +187,6 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     w_splitter_bottom->setStretchFactor(2, 0);
     w_splitter_bottom->setStretchFactor(3, 1);
 
-    showTotal();
     checkTieredPrices();
 
     QByteArray ba = Config::inst()->value(QLatin1String("/MainWindow/AddItemDialog/Geometry"))
@@ -445,18 +445,6 @@ void AddItemDialog::updateItemAndColor()
     checkAddPossible();
 }
 
-void AddItemDialog::showTotal()
-{
-    double tot = 0;
-
-    if (w_price->hasAcceptableInput() && w_qty->hasAcceptableInput())
-        tot = Currency::fromString(w_price->text()) * w_qty->text().toInt();
-
-    w_total->setText(Currency::toString(tot, m_currency_code));
-
-    checkAddPossible();
-}
-
 void AddItemDialog::setTierType(int type)
 {
     QValidator *valid = (type == 0) ? m_percent_validator : m_money_validator;
@@ -535,10 +523,11 @@ QByteArray AddItemDialog::saveState() const
 
     QByteArray ba;
     QDataStream ds(&ba, QIODevice::WriteOnly);
-    ds << QByteArray("AI") << qint32(1)
+    ds << QByteArray("AI") << qint32(2)
        << w_qty->value()
        << w_bulk->value()
        << Currency::fromString(w_price->text())
+       << Currency::fromString(w_cost->text())
        << tierCurrency;
 
     for (int i = 0; i < 3; ++i) {
@@ -560,12 +549,13 @@ bool AddItemDialog::restoreState(const QByteArray &ba)
     QByteArray tag;
     qint32 version;
     ds >> tag >> version;
-    if ((ds.status() != QDataStream::Ok) || (tag != "AI") || (version != 1))
+    if ((ds.status() != QDataStream::Ok) || (tag != "AI") || (version != 2))
         return false;
 
     int qty;
     int bulk;
     double price;
+    double cost;
     int tierQty[3];
     double tierPrice[3];
     bool tierCurrency;
@@ -575,7 +565,7 @@ bool AddItemDialog::restoreState(const QByteArray &ba)
     QString remarks;
     bool consolidate;
 
-    ds >> qty >> bulk >> price >> tierCurrency;
+    ds >> qty >> bulk >> price >> cost >> tierCurrency;
     for (int i = 0; i < 3; ++i)
         ds >> tierQty[i] >> tierPrice[i];
     ds >> isNew >> subConditionIndex >> comments >> remarks >> consolidate;
@@ -586,6 +576,7 @@ bool AddItemDialog::restoreState(const QByteArray &ba)
     w_qty->setValue(qty);
     w_bulk->setValue(bulk);
     w_price->setText(Currency::toString(price));
+    w_cost->setText(Currency::toString(cost));
     setTierType(tierCurrency ? 1 : 0);
     for (int i = 0; i < 3; ++i) {
         w_tier_qty[i]->setValue(tierQty[i]);
@@ -605,8 +596,10 @@ bool AddItemDialog::restoreState(const QByteArray &ba)
 bool AddItemDialog::checkAddPossible()
 {
 
-    bool acceptable = w_select_item->currentItem() &&  w_price->hasAcceptableInput()
-            && w_qty->hasAcceptableInput() && w_bulk->hasAcceptableInput();
+    bool acceptable = w_select_item->currentItem()
+            && w_price->hasAcceptableInput()
+            && w_qty->hasAcceptableInput()
+            && w_bulk->hasAcceptableInput();
 
     if (auto currentType = w_select_item->currentItemType()) {
         if (currentType->hasColors())
@@ -617,14 +610,17 @@ bool AddItemDialog::checkAddPossible()
         if (!w_tier_price [i]->isEnabled())
             break;
 
-        acceptable = acceptable && w_tier_qty[i]->hasAcceptableInput()
+        acceptable = acceptable
+                && w_tier_qty[i]->hasAcceptableInput()
                 && w_tier_price[i]->hasAcceptableInput();
 
         if (i > 0) {
-            acceptable = acceptable && (tierPriceValue(i - 1) > tierPriceValue(i))
+            acceptable = acceptable
+                    && (tierPriceValue(i - 1) > tierPriceValue(i))
                     && (w_tier_qty[i - 1]->text().toInt() < w_tier_qty[i]->text().toInt());
         } else {
-            acceptable = acceptable && (Currency::fromString(w_price->text()) > tierPriceValue(i));
+            acceptable = acceptable
+                    && (Currency::fromString(w_price->text()) > tierPriceValue(i));
         }
     }
 
@@ -649,6 +645,7 @@ void AddItemDialog::addClicked()
 
     ii->setQuantity(w_qty->text().toInt());
     ii->setPrice(Currency::fromString(w_price->text()));
+    ii->setCost(Currency::fromString(w_cost->text()));
     ii->setBulkQuantity(w_bulk->text().toInt());
     ii->setCondition(static_cast <BrickLink::Condition>(m_condition->checkedId()));
     if (ii->itemType() && ii->itemType()->hasSubConditions())
