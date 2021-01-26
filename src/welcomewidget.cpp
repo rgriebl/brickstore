@@ -114,7 +114,7 @@ WelcomeButton::WelcomeButton(QAction *a, QWidget *parent)
         setText(a->text());
         if (!a->shortcut().isEmpty()) {
             QString desc = "<i>(" + tr("Shortcut:") + " %1)</i>";
-            setDescription(desc.arg(a->shortcut().toString()));
+            setDescription(desc.arg(a->shortcut().toString(QKeySequence::NativeText)));
         }
         setToolTip(a->toolTip());
     };
