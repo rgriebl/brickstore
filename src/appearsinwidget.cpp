@@ -143,7 +143,7 @@ void AppearsInWidget::setItem(const BrickLink::Item *item, const BrickLink::Colo
     QAbstractItemModel *old_model = model();
 
     setModel(new BrickLink::AppearsInModel(item, color, this));
-    triggerColumnResize();
+    resizeColumns();
 
     delete old_model;
 }
@@ -153,19 +153,9 @@ void AppearsInWidget::setItems(const BrickLink::InvItemList &list)
     QAbstractItemModel *old_model = model();
 
     setModel(new BrickLink::AppearsInModel(list, this));
-    triggerColumnResize();
+    resizeColumns();
 
     delete old_model;
-}
-
-void AppearsInWidget::triggerColumnResize()
-{
-/*    if (model()->rowCount() > 0) {
-        d->m_resize_timer->start(100);
-    } else {
-        d->m_resize_timer->stop();*/
-        resizeColumns();
-    //}
 }
 
 void AppearsInWidget::resizeColumns()

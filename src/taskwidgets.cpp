@@ -28,6 +28,8 @@
 
 #include "taskwidgets.h"
 
+using namespace std::chrono_literals;
+
 
 TaskPriceGuideWidget::TaskPriceGuideWidget(QWidget *parent)
     : PriceGuideWidget(parent), m_win(nullptr), m_dock(nullptr)
@@ -36,7 +38,7 @@ TaskPriceGuideWidget::TaskPriceGuideWidget(QWidget *parent)
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
     m_delayTimer.setSingleShot(true);
-    m_delayTimer.setInterval(120);
+    m_delayTimer.setInterval(120ms);
 
     connect(&m_delayTimer, &QTimer::timeout, this, [this]() {
         bool ok = (m_win && (m_selection.count() == 1));
@@ -174,7 +176,7 @@ TaskInfoWidget::TaskInfoWidget(QWidget *parent)
     addWidget(m_text);
 
     m_delayTimer.setSingleShot(true);
-    m_delayTimer.setInterval(120);
+    m_delayTimer.setInterval(120ms);
 
     connect(&m_delayTimer, &QTimer::timeout, this, [this]() {
         delayedSelectionUpdate(m_selection);
@@ -300,7 +302,7 @@ TaskAppearsInWidget::TaskAppearsInWidget(QWidget *parent)
     connect(FrameWork::inst(), &FrameWork::windowActivated, this, &TaskAppearsInWidget::windowUpdate);
 
     m_delayTimer.setSingleShot(true);
-    m_delayTimer.setInterval(120);
+    m_delayTimer.setInterval(120ms);
 
     connect(&m_delayTimer, &QTimer::timeout, this, [this]() {
         if (!m_win || m_selection.isEmpty())

@@ -80,13 +80,11 @@
 #include "script.h"
 #include "exception.h"
 
+using namespace std::chrono_literals;
+
+
 enum {
     DockStateVersion = 1 // increase if you change the dock/toolbar setup
-};
-
-enum ProgressItem {
-    PGI_PriceGuide,
-    PGI_Picture
 };
 
 enum {
@@ -625,7 +623,7 @@ FrameWork::FrameWork(QWidget *parent)
 
     Currency::inst()->updateRates();
     auto *currencyUpdateTimer = new QTimer(this);
-    currencyUpdateTimer->setInterval(4 * 60 * 60 * 1000); // 4 hours
+    currencyUpdateTimer->setInterval(4h); // 4 hours
     currencyUpdateTimer->start();
     connect(currencyUpdateTimer, &QTimer::timeout,
             Currency::inst(), &Currency::updateRates);
@@ -1041,7 +1039,7 @@ bool FrameWork::setupToolBar(QToolBar *t, const QVector<QByteArray> &a_names)
                 m_filter->addAction(new QAction(QIcon(":/images/filter.png"), QString(), this),
                                     QLineEdit::LeadingPosition);
                 m_filter_delay = new QTimer(this);
-                m_filter_delay->setInterval(800);
+                m_filter_delay->setInterval(800ms);
                 m_filter_delay->setSingleShot(true);
                 connect(m_filter, &QLineEdit::textChanged, [this]() {
                     m_filter_delay->start();

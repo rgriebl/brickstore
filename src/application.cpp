@@ -58,19 +58,8 @@
 #define XSTR(a) #a
 #define STR(a) XSTR(a)
 
-enum {
-#if defined(QT_NO_DEBUG)
-    isDeveloperBuild = 0,
-#else
-    isDeveloperBuild = 1,
-#endif
-#if defined(Q_OS_UNIX) && !defined(Q_OS_MACOS)
-    isUnix = 1,
-#else
-    isUnix = 0,
-#endif
-    is64Bit = (sizeof(void *) / 8)
-};
+using namespace std::chrono_literals;
+
 
 Application *Application::s_inst = nullptr;
 
@@ -141,13 +130,9 @@ Application::Application(int &_argc, char **_argv)
     auto *netcheck = new QTimer(this);
     connect(netcheck, &QTimer::timeout,
             this, &Application::checkNetwork);
-    netcheck->start(5000);
+    netcheck->start(5s);
 
     QNetworkProxyFactory::setUseSystemConfiguration(true);
-
-//    Transfer::setDefaultUserAgent(applicationName() + QLatin1Char('/') + applicationVersion() +
-//                                  QLatin1String(" (") + systemName() + QLatin1Char(' ') + systemVersion() +
-//                                  QLatin1String("; http://") + applicationUrl() + QLatin1Char(')'));
 
     //TODO5: find out why we are blacklisted ... for now, fake the UA
     Transfer::setDefaultUserAgent("Br1ckstore" + QLatin1Char('/') + QCoreApplication::applicationVersion() +
@@ -200,6 +185,12 @@ Application::~Application()
 QStringList Application::externalResourceSearchPath(const QString &subdir) const
 {
     static QStringList baseSearchPath;
+    const bool isDeveloperBuild =
+#if defined(QT_NO_DEBUG)
+            false;
+#else
+            true;
+#endif
 
     if (baseSearchPath.isEmpty()) {
         QString appdir = QCoreApplication::applicationDirPath();

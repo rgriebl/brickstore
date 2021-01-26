@@ -48,6 +48,8 @@
 #include "humanreadabletimedelta.h"
 #include "utility.h"
 
+using namespace std::chrono_literals;
+
 
 class ValidatorSpinBox : public QSpinBox
 {
@@ -226,7 +228,7 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     w_last_added->installEventFilter(this); // dynamic tooltip
 
     m_historyTimer = new QTimer(this);
-    m_historyTimer->setInterval(30 * 1000);
+    m_historyTimer->setInterval(30s);
     connect(m_historyTimer, &QTimer::timeout, this, &AddItemDialog::updateHistoryText);
 
 

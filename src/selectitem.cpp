@@ -44,6 +44,8 @@
 #include "framework.h"
 #include "itemdetailpopup.h"
 
+using namespace std::chrono_literals;
+
 
 class SelectItemPrivate {
 public:
@@ -190,7 +192,7 @@ void SelectItem::init()
     });
 
     d->m_filter_delay = new QTimer(this);
-    d->m_filter_delay->setInterval(400);
+    d->m_filter_delay->setInterval(400ms);
     d->m_filter_delay->setSingleShot(true);
 
     d->w_viewmode = new QButtonGroup(this);

@@ -51,7 +51,6 @@ protected:
 
 private:
     const BrickLink::AppearsInItem *appearsIn() const;
-    void triggerColumnResize();
 
 private:
     QScopedPointer<AppearsInWidgetPrivate> d;

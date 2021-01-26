@@ -49,6 +49,7 @@
 #include "consolidateitemsdialog.h"
 #include "selectprintingtemplatedialog.h"
 
+using namespace std::chrono_literals;
 
 
 // should be a function, but MSVC.Net doesn't accept default
@@ -220,7 +221,7 @@ Window::Window(Document *doc, QWidget *parent)
     m_latest_row = -1;
     m_latest_timer = new QTimer(this);
     m_latest_timer->setSingleShot(true);
-    m_latest_timer->setInterval(400);
+    m_latest_timer->setInterval(400ms);
     m_current = nullptr;
 
     m_settopg_failcnt = 0;
