@@ -272,7 +272,6 @@ Document *Document::createTemporary(const BrickLink::InvItemList &list, const QV
 
 Document::Document(int /*is temporary*/)
     : m_currencycode(Config::inst()->defaultCurrencyCode())
-    , m_uuid(QUuid::createUuid())
 {
     MODELTEST_ATTACH(this)
 
@@ -280,94 +279,33 @@ Document::Document(int /*is temporary*/)
             this, &Document::pictureUpdated);
 }
 
-Document::Document()
+// the caller owns the items
+Document::Document(const BrickLink::InvItemList &items, const QString &currencyCode)
     : Document(0)
 {
+    if (!currencyCode.isEmpty())
+        m_currencycode = currencyCode;
+
     m_undo = new UndoStack(this);
     connect(m_undo, &QUndoStack::cleanChanged,
-            this, &Document::clean2Modified);
+            this, [this](bool clean) {
+        // if the gui state is modified, the overall state stays at "modified"
+        if (!m_gui_state_modified)
+            emit modificationChanged(!clean);
+    });
 
-    connect(&m_autosave_timer, &QTimer::timeout,
-            this, &Document::autosave);
-    m_autosave_timer.start(5000);
+    setBrickLinkItems(items); // the caller owns the items
 
     s_documents.append(this);
 }
 
 Document::~Document()
 {
-    m_autosave_timer.stop();
-    deleteAutosave();
-
     delete m_order;
     qDeleteAll(m_items);
 
     s_documents.removeAll(this);
 }
-
-static const char *autosavemagic = "||BRICKSTORE AUTOSAVE MAGIC||";
-
-void Document::deleteAutosave()
-{
-    QDir temp(QStandardPaths::writableLocation(QStandardPaths::TempLocation));
-    QString filename = QString("brickstore_%1.autosave").arg(m_uuid.toString());
-    temp.remove(filename);
-}
-
-void Document::autosave() const
-{
-    if (m_uuid.isNull() || !isModified())
-        return;
-
-    QDir temp(QStandardPaths::writableLocation(QStandardPaths::TempLocation));
-    QString filename = QString("brickstore_%1.autosave").arg(m_uuid.toString());
-
-    QFile f(temp.filePath(filename));
-    if (f.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-        QDataStream ds(&f);
-        ds << QByteArray(autosavemagic);
-        ds << m_items.count();
-        for (const Item *item : m_items)
-            ds << *item;
-        ds << QByteArray(autosavemagic);
-    }
-}
-
-QVector<Document::ItemList> Document::restoreAutosave()
-{
-    QVector<ItemList> restored;
-
-    QDir temp(QStandardPaths::writableLocation(QStandardPaths::TempLocation));
-    const QStringList ondisk = temp.entryList(QStringList(QLatin1String("brickstore_*.autosave")));
-
-    for (const QString &filename : ondisk) {
-        QFile f(temp.filePath(filename));
-        if (f.open(QIODevice::ReadOnly)) {
-            ItemList items;
-            QByteArray magic;
-            int count = 0;
-
-            QDataStream ds(&f);
-            ds >> magic >> count;
-
-            if (count > 0 && magic == QByteArray(autosavemagic)) {
-                for (int i = 0; i < count; ++i) {
-                    Item *item = new Item();
-                    ds >> *item;
-                    items.append(item);
-                }
-                ds >> magic;
-
-                if (magic == QByteArray(autosavemagic))
-                    restored.append(items);
-            }
-            f.close();
-            f.remove();
-        }
-    }
-    return restored;
-}
-
 
 const QVector<Document *> &Document::allDocuments()
 {
@@ -628,6 +566,14 @@ void Document::clearGuiState()
     m_gui_state.clear();
 }
 
+void Document::setGuiStateModified(bool modified)
+{
+    bool wasModified = isModified();
+    m_gui_state_modified = modified;
+    if (wasModified != isModified())
+        emit modificationChanged(!wasModified);
+}
+
 Document *Document::fileNew()
 {
     auto *doc = new Document();
@@ -669,16 +615,15 @@ Document *Document::fileImportBrickLinkInventory(const BrickLink::Item *item, in
         BrickLink::InvItemList items = item->consistsOf();
 
         if (!items.isEmpty()) {
-            auto *doc = new Document();
-
             for (BrickLink::InvItem *item : items) {
                 item->setQuantity(item->quantity() * quantity);
                 item->setCondition(condition);
             }
 
-            doc->setBrickLinkItems(items); // we own the items
-            qDeleteAll(items);
+            auto *doc = new Document(items); // we own the items
             doc->setTitle(tr("Inventory for %1").arg(item->id()));
+
+            qDeleteAll(items);
             return doc;
         } else {
             MessageBox::warning(nullptr, { }, tr("Internal error: Could not create an Inventory object for item %1").arg(CMB_BOLD(item->id())));
@@ -700,11 +645,8 @@ QVector<Document *> Document::fileImportBrickLinkOrders()
             const auto &order = *it;
 
             if (order.first && order.second) {
-                auto *doc = new Document();
-
+                auto *doc = new Document(*order.second, order.first->currencyCode()); // ImportOrderDialog owns the items
                 doc->setTitle(tr("Order #%1").arg(order.first->id()));
-                doc->m_currencycode = order.first->currencyCode();
-                doc->setBrickLinkItems(*order.second); // ImportOrderDialog owns the items
                 doc->m_order = new BrickLink::Order(*order. first);
                 docs.append(doc);
             }
@@ -720,11 +662,8 @@ Document *Document::fileImportBrickLinkStore()
     ImportBLStore import(&d);
 
     if (d.exec() == QDialog::Accepted) {
-        auto *doc = new Document();
-
+        auto *doc = new Document(import.items(), import.currencyCode()); // ImportBLStore owns the items
         doc->setTitle(tr("Store %1").arg(QDate::currentDate().toString(Qt::LocalDate)));
-        doc->m_currencycode = import.currencyCode();
-        doc->setBrickLinkItems(import.items()); // ImportBLStore owns the items
         return doc;
     }
     return nullptr;
@@ -755,10 +694,7 @@ Document *Document::fileImportBrickLinkCart()
             ImportBLCart import(shopid, cartid, &d);
 
             if (d.exec() == QDialog::Accepted) {
-                auto *doc = new Document();
-
-                doc->m_currencycode = import.currencyCode();
-                doc->setBrickLinkItems(import.items()); // ImportBLCart owns the items
+                auto *doc = new Document(import.items(), import.currencyCode()); // ImportBLCart owns the items
                 doc->setTitle(tr("Cart in Shop %1").arg(shopid));
                 return doc;
             }
@@ -865,10 +801,8 @@ Document *Document::fileLoadFrom(const QString &name, const char *type, bool imp
         }
 
         if (!result.invalidItemCount) {
-            doc = new Document();
-            doc->m_currencycode = result.currencyCode; // we own the items
+            doc = new Document(*result.items, result.currencyCode);  // we own the items
             doc->setGuiState(gui_state);
-            doc->setBrickLinkItems(*result.items);
 
             doc->setFileName(import_only ? QString() : name);
             if (!import_only)
@@ -939,8 +873,7 @@ Document *Document::fileImportLDrawModel()
         }
 
         if (!invalid_items) {
-            doc = new Document();
-            doc->setBrickLinkItems(items); // we own the items
+            doc = new Document(items); // we own the items
             doc->setTitle(tr("Import of %1").arg(QFileInfo(s).fileName()));
         }
     } else {
@@ -953,6 +886,8 @@ Document *Document::fileImportLDrawModel()
 
 void Document::setBrickLinkItems(const BrickLink::InvItemList &bllist)
 {
+    //TODO: switch to std::unique_ptr and remove this
+
     ItemList items;
     QVector<int> pos;
 
@@ -976,13 +911,20 @@ void Document::setFileName(const QString &str)
 {
     if (str != m_filename) {
         m_filename = str;
-
         emit fileNameChanged(str);
-
-        QFileInfo fi(str);
-        if (fi.exists())
-            setTitle(QDir::toNativeSeparators(fi.absoluteFilePath()));
     }
+}
+
+QString Document::fileNameOrTitle() const
+{
+    QFileInfo fi(m_filename);
+    if (fi.exists())
+        return QDir::toNativeSeparators(fi.absoluteFilePath());
+
+    if (!m_title.isEmpty())
+        return m_title;
+
+    return m_filename;
 }
 
 QString Document::title() const
@@ -992,7 +934,7 @@ QString Document::title() const
 
 void Document::setTitle(const QString &str)
 {
-    if (str != title()) {
+    if (str != m_title) {
         m_title = str;
         emit titleChanged(m_title);
     }
@@ -1000,7 +942,7 @@ void Document::setTitle(const QString &str)
 
 bool Document::isModified() const
 {
-    return !m_undo->isClean();
+    return !m_undo->isClean() || m_gui_state_modified;
 }
 
 void Document::fileSave()
@@ -1035,12 +977,7 @@ void Document::fileSaveAs()
         if (fn.right(4) != ".bsx")
             fn += ".bsx";
 
-        if (!QFile::exists(fn) ||
-            MessageBox::question(nullptr, { },
-                                 tr("A file named %1 already exists. Are you sure you want to overwrite it?").arg(CMB_BOLD(fn))
-                                 ) == MessageBox::Yes) {
-            fileSaveTo(fn, "bsx", false, items());
-        }
+        fileSaveTo(fn, "bsx", false, items());
     }
 }
 
@@ -1086,8 +1023,8 @@ bool Document::fileSaveTo(const QString &s, const char *type, bool export_only, 
 
         if (ok) {
             if (!export_only) {
-                deleteAutosave();
                 m_undo->setClean();
+                setGuiStateModified(false);
                 setFileName(s);
 
                 Config::inst()->addToRecentFiles(s);
@@ -1182,11 +1119,6 @@ void Document::fileExportBrickLinkXML(const ItemList &itemlist)
             fileSaveTo(s, "xml", true, itemlist);
         }
     }
-}
-
-void Document::clean2Modified(bool b)
-{
-    emit modificationChanged(!b);
 }
 
 quint64 Document::errorMask() const

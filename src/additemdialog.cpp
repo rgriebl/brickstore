@@ -293,7 +293,8 @@ AddItemDialog::~AddItemDialog()
 
 void AddItemDialog::updateCaption()
 {
-    setWindowTitle(m_caption_fmt.arg(m_window ? m_window->document()->title() : QString()));
+    setWindowTitle(m_caption_fmt.arg(m_window ? m_window->document()->fileNameOrTitle()
+                                              : QString { }));
 }
 
 void AddItemDialog::updateCurrencyCode()

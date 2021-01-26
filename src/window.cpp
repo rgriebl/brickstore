@@ -26,6 +26,7 @@
 #include <QPrinter>
 #include <QPrintDialog>
 #include <QProgressDialog>
+#include <QStringBuilder>
 
 #include "messagebox.h"
 #include "config.h"
@@ -208,6 +209,7 @@ private:
 
 Window::Window(Document *doc, QWidget *parent)
     : QWidget(parent)
+    , m_uuid(QUuid::createUuid())
 {
     setAttribute(Qt::WA_DeleteOnClose);
 
@@ -286,6 +288,8 @@ Window::Window(Document *doc, QWidget *parent)
 
     connect(m_doc, &Document::titleChanged,
             this, &Window::updateCaption);
+    connect(m_doc, &Document::fileNameChanged,
+            this, &Window::updateCaption);
     connect(m_doc, &Document::modificationChanged,
             this, &Window::updateCaption);
 
@@ -315,6 +319,26 @@ Window::Window(Document *doc, QWidget *parent)
     updateCaption();
 
     setFocusProxy(w_list);
+
+    connect(w_header, &QHeaderView::sectionClicked, this, [this]() {
+        document()->setGuiStateModified(true);
+    });
+    connect(w_header, &QHeaderView::sectionMoved, this, [this]() {
+        document()->setGuiStateModified(true);
+    });
+    connect(w_header, &QHeaderView::sectionResized, this, [this]() {
+        document()->setGuiStateModified(true);
+    });
+
+    connect(&m_autosave_timer, &QTimer::timeout,
+            this, &Window::autosave);
+    m_autosave_timer.start(1min); // every minute
+}
+
+Window::~Window()
+{
+    m_autosave_timer.stop();
+    deleteAutosave();
 }
 
 void Window::changeEvent(QEvent *e)
@@ -326,10 +350,7 @@ void Window::changeEvent(QEvent *e)
 
 void Window::updateCaption()
 {
-    QString cap = m_doc->title();
-
-    if (cap.isEmpty())
-        cap = m_doc->fileName();
+    QString cap = m_doc->fileNameOrTitle();
     if (cap.isEmpty())
         cap = tr("Untitled");
 
@@ -655,7 +676,7 @@ bool Window::parseGuiStateXML(const QDomElement &root)
             QString tag = n.toElement().tagName();
 
             if (tag == "DifferenceMode")
-                on_view_difference_mode_toggled(true);
+                setDifferenceMode(true);
             else if (tag == "ColumnLayout")
                 w_header->restoreLayout(QByteArray::fromBase64(n.toElement().text().toLatin1()));
         }
@@ -1881,9 +1902,7 @@ void Window::print(bool as_pdf)
         }
     }
 
-    QString doctitle = m_doc->title();
-    if (doctitle == m_doc->fileName())
-        doctitle = QFileInfo(doctitle).baseName();
+    QString doctitle = m_doc->fileNameOrTitle();
 
     QPrinter prt(QPrinter::HighResolution);
 
@@ -1952,7 +1971,7 @@ void Window::on_file_save_triggered()
     m_doc->setGuiState(createGuiStateXML());
     m_doc->fileSave();
     m_doc->clearGuiState();
-
+    deleteAutosave();
 }
 
 void Window::on_file_saveas_triggered()
@@ -1960,6 +1979,7 @@ void Window::on_file_saveas_triggered()
     m_doc->setGuiState(createGuiStateXML());
     m_doc->fileSaveAs();
     m_doc->clearGuiState();
+    deleteAutosave();
 }
 
 void Window::on_file_export_bl_xml_triggered()
@@ -2103,6 +2123,153 @@ void Window::documentItemsChanged(const Document::ItemList &items, bool grave)
             }
         }
     }
+}
+
+
+static const char *autosaveMagic = "||BRICKSTORE AUTOSAVE MAGIC||";
+static const QString autosaveTemplate = QLatin1String("brickstore_%1.autosave");
+
+void Window::deleteAutosave()
+{
+    QDir temp(QStandardPaths::writableLocation(QStandardPaths::TempLocation));
+    QString filename = autosaveTemplate.arg(m_uuid.toString());
+    temp.remove(filename);
+}
+
+class AutosaveJob : public QRunnable
+{
+public:
+    explicit AutosaveJob(const QUuid &uuid, const QByteArray &contents)
+        : QRunnable()
+        , m_uuid(uuid)
+        , m_contents(contents)
+    { }
+
+    void run() override
+    {
+        QDir temp(QStandardPaths::writableLocation(QStandardPaths::TempLocation));
+        QString fileName = autosaveTemplate.arg(m_uuid.toString());
+        QString newFileName = fileName % u".new";
+
+        { // reading is cheaper than writing, so check first
+            QFile f(temp.filePath(fileName));
+            if (f.open(QIODevice::ReadOnly)) {
+                if (f.readAll() == m_contents)
+                    return;
+            }
+        }
+
+        QFile f(temp.filePath(newFileName));
+        if (f.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+            f.write(m_contents);
+            f.flush();
+            f.close();
+
+            temp.remove(fileName);
+            if (!temp.rename(newFileName, fileName))
+                qWarning() << "Autosave rename from" << newFileName << "to" << fileName << "failed";
+        }
+    }
+
+private:
+    const QUuid m_uuid;
+    const QByteArray m_contents;
+};
+
+void Window::autosave() const
+{
+    auto doc = document();
+    auto items = document()->items();
+
+    if (m_uuid.isNull() || !doc->isModified() || items.isEmpty())
+        return;
+
+    QByteArray ba;
+    QDataStream ds(&ba, QIODevice::WriteOnly);
+    ds << QByteArray(autosaveMagic)
+       << qint32(1) // version
+       << doc->title()
+       << doc->fileName()
+       << doc->currencyCode()
+       << isDifferenceMode()
+       << currentColumnLayout()
+       << qint32(doc->items().count());
+
+    for (auto item : items)
+        ds << *item;
+
+    ds << QByteArray(autosaveMagic);
+
+    QThreadPool::globalInstance()->start(new AutosaveJob(m_uuid, ba));
+}
+
+int Window::restorableAutosaves()
+{
+    QDir temp(QStandardPaths::writableLocation(QStandardPaths::TempLocation));
+    return temp.entryList({ autosaveTemplate.arg("*") }).count();
+}
+
+const QVector<Window *> Window::restoreAutosaves()
+{
+    QVector<Window *> restored;
+
+    QDir temp(QStandardPaths::writableLocation(QStandardPaths::TempLocation));
+    const QStringList ondisk = temp.entryList({ autosaveTemplate.arg("*") });
+
+    for (const QString &filename : ondisk) {
+        QFile f(temp.filePath(filename));
+        if (f.open(QIODevice::ReadOnly)) {
+            QByteArray magic;
+            qint32 version;
+            QString savedTitle;
+            QString savedFileName;
+            QString savedCurrencyCode;
+            bool savedDifferenceMode;
+            QByteArray savedColumnLayout;
+            qint32 count = 0;
+
+            QDataStream ds(&f);
+            ds >> magic >> version >> savedTitle >> savedFileName >> savedCurrencyCode
+                    >> savedDifferenceMode >> savedColumnLayout >> count;
+
+            if ((count > 0) && (magic == QByteArray(autosaveMagic)) && (version == 1)) {
+                BrickLink::InvItemList items;
+
+                for (int i = 0; i < count; ++i) {
+                    auto *item = new BrickLink::InvItem();
+                    ds >> *item;
+                    items.append(item);
+                }
+                ds >> magic;
+
+                if (magic == QByteArray(autosaveMagic)) {
+                    QString restoredTag = tr("RESTORED", "Tag for document restored from autosave");
+
+                    auto doc = new Document(items, savedCurrencyCode);  // we own the items
+                    if (!savedFileName.isEmpty()) {
+                        QFileInfo fi(savedFileName);
+                        QString newFileName = fi.dir().filePath(restoredTag % u" " % fi.fileName());
+                        doc->setFileName(newFileName);
+                    } else {
+                        doc->setTitle(restoredTag % u" " % savedTitle);
+                    }
+                    auto win = new Window(doc);
+                    win->w_header->restoreLayout(savedColumnLayout);
+                    win->setDifferenceMode(savedDifferenceMode);
+
+                    doc->setGuiStateModified(true); // not really the UI state
+                    if (!savedFileName.isEmpty())
+                        doc->fileSave();
+
+                    restored.append(win);
+                }
+                qDeleteAll(items);
+            }
+            f.close();
+            f.remove(); // doesn't matter if we could read it or not - just delete it
+        }
+    }
+    return restored;
 }
 
 #include "window.moc"

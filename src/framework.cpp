@@ -46,6 +46,7 @@
 #include <QBuffer>
 #include <QJsonDocument>
 #include <QJsonValue>
+#include <QStringBuilder>
 #if defined(Q_OS_WINDOWS)
 #  include <QWinTaskbarButton>
 #  include <QWinTaskbarProgress>
@@ -565,9 +566,6 @@ FrameWork::FrameWork(QWidget *parent)
     connect(BrickLink::core(), &BrickLink::Core::transferJobProgress,
             this, &FrameWork::transferJobProgressUpdate);
 
-    connect(m_undogroup, &QUndoGroup::cleanChanged,
-            this, &FrameWork::modificationUpdate);
-
     bool dbok = BrickLink::core()->readDatabase();
 
     if (!dbok || BrickLink::core()->isDatabaseUpdateNeeded())
@@ -635,6 +633,8 @@ FrameWork::FrameWork(QWidget *parent)
     setupScripts();
 
     checkForUpdates(true /* silent */);
+
+    restoreWindowsFromAutosave();
 }
 
 void FrameWork::setupScripts()
@@ -1391,6 +1391,24 @@ bool FrameWork::checkBrickLinkLogin()
     }
 }
 
+void FrameWork::restoreWindowsFromAutosave()
+{
+    int restorable = Window::restorableAutosaves();
+    if (restorable > 0) {
+        if (MessageBox::question(this, tr("Restore Documents"), tr("It seems like BrickStore crashed while %n document(s) had unsaved modifications.", nullptr, restorable)
+                                 % u"<br><br>" % tr("Should these documents be restored from their last available auto-save state?"),
+                                 MessageBox::Yes | MessageBox::No, MessageBox::Yes)
+                == MessageBox::Yes) {
+            auto restoredWindows = Window::restoreAutosaves();
+            for (auto window : restoredWindows) {
+                m_undogroup->addStack(window->document()->undoStack());
+                m_workspace->addWindow(window);
+                setActiveWindow(window);
+            }
+        }
+    }
+}
+
 Window *FrameWork::createWindow(Document *doc)
 {
     if (!doc)
@@ -1572,6 +1590,8 @@ void FrameWork::connectWindow(QWidget *w)
 
         disconnect(m_current_window.data(), &Window::windowTitleChanged,
                    this, &FrameWork::titleUpdate);
+        disconnect(doc, &Document::modificationChanged,
+                   this, &FrameWork::modificationUpdate);
         disconnect(doc, &Document::statisticsChanged,
                    this, &FrameWork::statisticsUpdate);
         disconnect(m_current_window.data(), &Window::selectionChanged,
@@ -1598,6 +1618,8 @@ void FrameWork::connectWindow(QWidget *w)
 
         connect(window, &Window::windowTitleChanged,
                 this, &FrameWork::titleUpdate);
+        connect(doc, &Document::modificationChanged,
+                this, &FrameWork::modificationUpdate);
         connect(doc, &Document::statisticsChanged,
                 this, &FrameWork::statisticsUpdate);
         connect(window, &Window::selectionChanged,
@@ -1634,9 +1656,8 @@ void FrameWork::connectWindow(QWidget *w)
 
     selectionUpdate(m_current_window ? m_current_window->selection() : Document::ItemList());
     statisticsUpdate();
-    modificationUpdate();
     titleUpdate();
-    //updateCurrencyButton();
+    modificationUpdate();
 
     emit windowActivated(m_current_window);
 }
@@ -1806,12 +1827,10 @@ void FrameWork::titleUpdate()
 
 void FrameWork::modificationUpdate()
 {
-    bool modified = m_undogroup->activeStack() ? !m_undogroup->activeStack()->isClean() : false;
-
+    bool modified = m_current_window ? m_current_window->isWindowModified() : false;
+    setWindowModified(modified);
     if (QAction *a = findAction("file_save"))
         a->setEnabled(modified);
-
-    setWindowModified(modified);
 }
 
 void FrameWork::transferJobProgressUpdate(int p, int t)

@@ -37,6 +37,7 @@ class Window : public QWidget
     Q_OBJECT
 public:
     Window(Document *doc, QWidget *parent = nullptr);
+    ~Window() override;
 
     Document *document() const { return m_doc; }
     DocumentProxyModel *documentView() const { return m_view; } // for scripting
@@ -57,6 +58,8 @@ public:
         ConsolidateInteractive,
     };
 
+    static int restorableAutosaves();
+    static const QVector<Window *> restoreAutosaves();
 
     const Document::ItemList &selection() const  { return m_selection; }
     Document::Item *current() const              { return m_current; }
@@ -196,10 +199,13 @@ private slots:
     void setMatchProgress(int, int);
     void setMatchFinished(QVector<const BrickLink::Item *>);
 
+    void autosave() const;
+
 private:
     Document::ItemList exportCheck() const;
     void resizeColumnsToDefault();
     int consolidateItemsHelper(const Document::ItemList &items, Consolidate conMode) const;
+    void deleteAutosave();
 
 private:
     Document *           m_doc;
@@ -220,6 +226,9 @@ private:
     BrickLink::Time      m_settopg_time;
     BrickLink::Price     m_settopg_price;
     QMultiHash<BrickLink::PriceGuide *, Document::Item *> *m_settopg_list;
+
+    QUuid                m_uuid;  // for autosave
+    QTimer               m_autosave_timer;
 };
 
 Q_DECLARE_METATYPE(Window::Consolidate)

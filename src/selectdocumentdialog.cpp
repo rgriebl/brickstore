@@ -30,7 +30,7 @@ SelectDocumentDialog::SelectDocumentDialog(const Document *self, const QString &
 
     foreach (const Document *doc, Document::allDocuments()) {
         if (doc != self) {
-            QListWidgetItem *item = new QListWidgetItem(doc->title(), w_document_list);
+            QListWidgetItem *item = new QListWidgetItem(doc->fileNameOrTitle(), w_document_list);
             item->setData(Qt::UserRole, QVariant::fromValue(doc));
         }
     }

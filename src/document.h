@@ -135,17 +135,17 @@ public slots:
     void pictureUpdated(BrickLink::Picture *pic);
 
 public:
-    Document();
+    Document(const BrickLink::InvItemList &items = { }, const QString &currencyCode = { });
     virtual ~Document();
 
     static Document *createTemporary(const BrickLink::InvItemList &list,
                                      const QVector<int> &fakeIndexes = { });
 
     static const QVector<Document *> &allDocuments();
-    static QVector<ItemList> restoreAutosave();
 
     QString fileName() const;
     QString title() const;
+    QString fileNameOrTitle() const;
 
     const BrickLink::Order *order() const;
 
@@ -184,6 +184,8 @@ public:
     QDomElement guiState() const;
     void setGuiState(QDomElement dom);
     void clearGuiState();
+
+    void setGuiStateModified(bool modified);
 
     static Document *fileNew();
     static Document *fileOpen();
@@ -228,13 +230,8 @@ signals:
     void modificationChanged(bool);
     void currencyCodeChanged(const QString &ccode);
 
-private slots:
-    void clean2Modified(bool);
-    void autosave() const;
-
 private:
     Document(int dummy);
-    void deleteAutosave();
     static Document *fileLoadFrom(const QString &s, const char *type, bool import_only = false);
     bool fileSaveTo(const QString &s, const char *type, bool export_only, const ItemList &itemlist);
     void setBrickLinkItems(const BrickLink::InvItemList &bllist);
@@ -262,13 +259,12 @@ private:
     quint64          m_error_mask = 0;
     QString          m_filename;
     QString          m_title;
-    QUuid            m_uuid;  // for autosave
-    QTimer           m_autosave_timer;
 
     UndoStack *      m_undo = nullptr;
 
     BrickLink::Order *m_order = nullptr;
 
+    bool              m_gui_state_modified = false;
     QDomElement       m_gui_state;
 
     QElapsedTimer     m_lastEmitOfStatisticsChanged;
