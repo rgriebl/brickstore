@@ -14,30 +14,8 @@ logged in (this is a GitHub limitation).
 
 Installation
 ============
-Please note: the installers are **not** digitally signed, so both Windows and macOS will complain
-and you will have to jump through some hoops on installation (getting the necessary signing
-certificates would cost around 200 EUR/year).
-These unblocking procedures are necessary on each update you install!
 
-#### Windows
-Start the installer, then when Windows tells you that it "protected your PC", click `More info` to
-reveal the `Run anyway` button. Click that button and from there on out, it's a standard
-installation process.
-
-#### macOS
-Open the DMG image, drag the BrickStore icon to the `Applications` folder and eject the BrickStore
-image again, as you would on any other software installation.
-Then start BrickStore from your computer's `Applications` folder and macOS will tell you it "can't
-be opened", but gives you no way to remove this block directly. You have to go to your
-`System Preferences` (Apple menu), then to `Security & Privacy`, `General` and there you will find
-an `Open Anyway` button to finally unblock BrickStore.
-
-#### Linux
-Just install the package using your system's package manager, or the command line
-(`sudo dpkg -i package.deb`).
-The only package that is being built automatically right now is for Ubuntu 20.04, but adding more
-configurations to the build is possible, if there is enough demand. You can however easily build the
-software yourself using the classic Unix command: `./configure && make && sudo make install`.
+[Installation instructions](https://github.com/rgriebl/brickstore/wiki/Installation-Instructions)
 
 
 About
