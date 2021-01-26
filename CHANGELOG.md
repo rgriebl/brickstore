@@ -2,9 +2,38 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+Please read the [installation instructions](https://github.com/rgriebl/brickstore/wiki/Installation-Instructions).
+
+## [2021.1.7] - 2021-01-27
+The **Defaults** page in the settings dialog was completely removed. Instead, the affected dialogs
+will now remember their last settings, even when exiting and restarting BrickStore.
+
+### Added
+- Basic support for BrickLink's *My Cost* field was added.
+- Auto-saving is finally activated: BrickStore saves any changes you make to temporary files every
+  minute. If it crashes, it will ask on restart if you want to restore any unsaved changes.
+- Minifigs have a weight and a year-of-release now.
+- Adding or importing items is faster now by simply double-clicking the item (or color).
+- Satin colors got their own color category.
+- New shortcuts for consolidating items and quickly jumping to BrickLink web-pages.
+
+### Fixed
+- Price guide data includes VAT now, so it is a lot closer to what you would see on BrickLink's
+  web pages. It's still not perfect, but if you are interested in the details why this is so hard: 
+  #80
+- Buyer/Collector mode was not restored on restarts.
+- Reimplemented item consolidation, which was actually semi-broken for the last 15 years.
+- All column layouts should be restored correctly now.
+- Sub-conditions on sets can now be set in the add-item window and will show up correctly in the 
+  document's item list.
+- Filtering for an empty field is possible by specifying it as `""` (two quotes).
+
+Please read the [installation instructions](https://github.com/rgriebl/brickstore/wiki/Installation-Instructions).
+
 
 ## [2021.1.6] - 2021-01-22
 Fixed a crash when closing the settings dialog.
+
 
 ## [2021.1.5] - 2021-01-21
 A lot of bug-fixing all over the place, too much to mention all in here. 
@@ -107,7 +136,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
   are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.1.6...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.1.7...HEAD
+[2021.1.7]: https://github.com/rgriebl/brickstore/releases/tag/v2021.1.7
 [2021.1.6]: https://github.com/rgriebl/brickstore/releases/tag/v2021.1.6
 [2021.1.5]: https://github.com/rgriebl/brickstore/releases/tag/v2021.1.5
 [2021.1.4]: https://github.com/rgriebl/brickstore/releases/tag/v2021.1.4
