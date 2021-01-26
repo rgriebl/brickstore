@@ -254,15 +254,16 @@ quint64 Utility::physicalMemory()
 
 QString Utility::weightToString(double w, QLocale::MeasurementSystem ms, bool optimize, bool show_unit)
 {
-    static QLocale loc(QLocale::system());
+    QLocale loc;
+    loc.setNumberOptions(QLocale::OmitGroupSeparator);
 
-    int prec = 0;
+    int decimals = 0;
     const char *unit = nullptr;
 
     if (ms != QLocale::MetricSystem) {
         w *= 0.035273961949580412915675808215204;
 
-        prec = 4;
+        decimals = 3;
         unit = "oz";
 
         if (optimize && (w >= 32)) {
@@ -271,7 +272,7 @@ QString Utility::weightToString(double w, QLocale::MeasurementSystem ms, bool op
         }
     }
     else {
-        prec = 3;
+        decimals = 2;
         unit = "g";
 
         if (optimize && (w >= 1000.)) {
@@ -284,7 +285,7 @@ QString Utility::weightToString(double w, QLocale::MeasurementSystem ms, bool op
             }
         }
     }
-    QString s = loc.toString(w, 'f', prec);
+    QString s = loc.toString(w, 'f', decimals);
 
     if (show_unit) {
         s.append(QLatin1Char(' '));
@@ -295,14 +296,17 @@ QString Utility::weightToString(double w, QLocale::MeasurementSystem ms, bool op
 
 double Utility::stringToWeight(const QString &s, QLocale::MeasurementSystem ms)
 {
-    static QLocale loc(QLocale::system());
+    QLocale loc;
 
     double w = loc.toDouble(s);
+    int decimals = 2;
 
-    if (ms == QLocale::ImperialSystem)
+    if (ms == QLocale::ImperialSystem) {
         w *= 28.349523125000000000000000000164;
+        decimals = 3;
+    }
 
-    return w;
+    return roundTo(w, decimals);
 }
 
 QString Utility::localForInternationalCurrencySymbol(const QString &international_symbol)
@@ -344,4 +348,11 @@ QString Utility::sanitizeFileName(const QString &name)
         result.append(c);
     }
     return result.simplified();
+}
+
+double Utility::roundTo(double d, int n)
+{
+    Q_ASSERT((n >= 0) && (n <= 4));
+    const int f = n == 0 ? 1 : n == 1 ? 10 : n == 2 ? 100 : n == 3 ? 1000 : 10000;
+    return std::round(d * f) / f;
 }

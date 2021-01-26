@@ -1453,6 +1453,8 @@ int Document::dataForTextAlignmentRole(Item *, Field f) const
     case Stockroom   :
     case Picture     :
     case Condition   : return Qt::AlignVCenter | Qt::AlignHCenter;
+    case Index       :
+    case LotId       :
     case PriceOrig   :
     case PriceDiff   :
     case Cost        :
@@ -1609,7 +1611,7 @@ int Document::headerDataForDefaultWidthRole(Field f) const
     case Retain      : width = 8; break;
     case Stockroom   : width = 8; break;
     case Reserved    : width = 8; break;
-    case Weight      : width = 10; break;
+    case Weight      : width = 8; break;
     case YearReleased: width = 5; break;
     default          : break;
     }
