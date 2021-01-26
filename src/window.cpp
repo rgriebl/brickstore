@@ -449,7 +449,7 @@ int Window::addItems(const BrickLink::InvItemList &items, AddItemMode addItemMod
     if (items.isEmpty())
         return 0;
 
-    m_doc->beginMacro();
+    bool startedMacro = false;
 
     const auto &documentItems = document()->items();
     bool wasEmpty = documentItems.isEmpty();
@@ -505,6 +505,11 @@ int Window::addItems(const BrickLink::InvItemList &items, AddItemMode addItemMod
                 if (mergeIndex >= 0) {
                     justAdd = false;
 
+                    if (!startedMacro) {
+                        m_doc->beginMacro();
+                        startedMacro = true;
+                    }
+
                     if (mergeIndex == 0) {
                         // merge new into existing
                         Document::Item changedItem = *mergeItem;
@@ -524,12 +529,18 @@ int Window::addItems(const BrickLink::InvItemList &items, AddItemMode addItemMod
         }
 
         if (justAdd) {
+            if (!startedMacro) {
+                m_doc->beginMacro();
+                startedMacro = true;
+            }
+
             m_doc->appendItem(item);  // pass on ownership to the doc
             ++addCount;
         }
     }
 
-    m_doc->endMacro(tr("Added %1, consolidated %2 items").arg(addCount).arg(consolidateCount));
+    if (startedMacro)
+        m_doc->endMacro(tr("Added %1, consolidated %2 items").arg(addCount).arg(consolidateCount));
 
     if (wasEmpty)
         w_list->selectRow(0);
@@ -571,7 +582,7 @@ void Window::consolidateItems(const Document::ItemList &items)
     if (mergeList.isEmpty())
         return;
 
-    m_doc->beginMacro();
+    bool startedMacro = false;
 
     auto conMode = Consolidate::IntoLowestIndex;
     bool repeatForRemaining = false;
@@ -604,6 +615,11 @@ void Window::consolidateItems(const Document::ItemList &items)
             mergeIndex = consolidateItemsHelper(mergeItems, conMode);
         }
 
+        if (!startedMacro) {
+            m_doc->beginMacro();
+            startedMacro = true;
+        }
+
         Document::Item newitem = *mergeItems.at(mergeIndex);
         for (int i = 0; i < mergeItems.count(); ++i) {
             if (i != mergeIndex) {
@@ -615,7 +631,8 @@ void Window::consolidateItems(const Document::ItemList &items)
 
         ++consolidateCount;
     }
-    m_doc->endMacro(tr("Consolidated %n item(s)", nullptr, consolidateCount));
+    if (startedMacro)
+        m_doc->endMacro(tr("Consolidated %n item(s)", nullptr, consolidateCount));
 }
 
 int Window::consolidateItemsHelper(const Document::ItemList &items, Consolidate conMode) const
