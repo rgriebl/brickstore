@@ -194,7 +194,7 @@ bool SelectColor::restoreState(const QByteArray &ba)
     if (ds.status() != QDataStream::Ok)
         return false;
 
-    if (col != -1)
+    if (col != uint(-1))
         setCurrentColorAndItem(BrickLink::core()->color(col), BrickLink::core()->item(itt, itemid));
     w_filter->setCurrentIndex(filterIndex);
 

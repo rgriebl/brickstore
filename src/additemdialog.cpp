@@ -382,7 +382,7 @@ bool AddItemDialog::eventFilter(QObject *watched, QEvent *event)
             static const QString post = QLatin1String("</p>");
             QString tips;
 
-            for (const auto entry : m_addHistory)
+            for (const auto &entry : m_addHistory)
                 tips = tips % pre % historyTextFor(entry.first, entry.second) % post;
 
             QToolTip::showText(he->globalPos(), tips, w_last_added, w_last_added->geometry());

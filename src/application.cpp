@@ -200,6 +200,7 @@ QStringList Application::externalResourceSearchPath(const QString &subdir) const
         if (isDeveloperBuild)
             baseSearchPath << appdir + QLatin1String("/..");
 #elif defined(Q_OS_MACOS)
+        Q_UNUSED(isDeveloperBuild)
         baseSearchPath << appdir + QLatin1String("/../Resources");
 #elif defined(Q_OS_UNIX)
         baseSearchPath << QLatin1String(STR(INSTALL_PREFIX) "/share/brickstore");
@@ -332,7 +333,7 @@ bool Application::isClient(int timeout)
             if (client.waitForConnected(timeout / 2) || i)
                 break;
             else
-                QThread::msleep(timeout / 4);
+                QThread::msleep(static_cast<unsigned long>(timeout) / 4);
         }
 
         if (client.state() == QLocalSocket::ConnectedState) {
@@ -430,59 +431,62 @@ public:
         m_lineFmt.setFontWeight(QFont::Bold);
     }
 
-    void highlightBlock(const QString &text) override
-    {
-        ++Application::s_inst->m_logGuiLock;
-
-        int colonPos = text.indexOf(':', 1);
-        if (colonPos > 0) {
-            int atPos = text.lastIndexOf(" at ");
-            int linePos = text.lastIndexOf(", line ");
-
-            int atLen = 0;
-            int lineLen = 0;
-            bool hasLocation = (atPos > 0 && linePos > atPos);
-
-            if (hasLocation) {
-                atPos += 4;
-                atLen = linePos - atPos;
-                linePos += 7;
-                lineLen = text.length() - linePos;
-            }
-
-            static const int lvlPos = 0;
-            static const int lvlLen = 4;
-            static const int catPos = lvlPos + lvlLen + 1;
-
-            int catLen = colonPos - catPos;
-
-            int msgType = -1;
-            for (int i = 0; i < int(sizeof(msgTypeNames) / sizeof(*msgTypeNames)); ++i) {
-                if (text.midRef(lvlPos, lvlLen) == msgTypeNames[i])
-                    msgType = i;
-            }
-
-            if (msgType >= 0) {
-                int catType = qHash(text.midRef(catPos, catLen)) % 6;
-
-                setFormat(lvlPos, lvlLen, m_lvlFmt[msgType]);
-                setFormat(catPos, catLen, m_catFmt[catType]);
-            }
-
-            if (hasLocation) {
-                setFormat(linePos, lineLen, m_lineFmt);
-                setFormat(atPos, atLen, m_atFmt);
-            }
-        }
-
-        --Application::s_inst->m_logGuiLock;
-    }
+    void highlightBlock(const QString &text) override;
 private:
     QTextCharFormat m_lvlFmt[QtInfoMsg + 1];
     QTextCharFormat m_catFmt[6];
     QTextCharFormat m_atFmt;
     QTextCharFormat m_lineFmt;
 };
+
+void LogHighlighter::highlightBlock(const QString &text)
+{
+    ++Application::s_inst->m_logGuiLock;
+
+    int colonPos = text.indexOf(':', 1);
+    if (colonPos > 0) {
+        int atPos = text.lastIndexOf(" at ");
+        int linePos = text.lastIndexOf(", line ");
+
+        int atLen = 0;
+        int lineLen = 0;
+        bool hasLocation = (atPos > 0 && linePos > atPos);
+
+        if (hasLocation) {
+            atPos += 4;
+            atLen = linePos - atPos;
+            linePos += 7;
+            lineLen = text.length() - linePos;
+        }
+
+        static const int lvlPos = 0;
+        static const int lvlLen = 4;
+        static const int catPos = lvlPos + lvlLen + 1;
+
+        int catLen = colonPos - catPos;
+
+        int msgType = -1;
+        for (int i = 0; i < int(sizeof(msgTypeNames) / sizeof(*msgTypeNames)); ++i) {
+            if (text.midRef(lvlPos, lvlLen) == msgTypeNames[i])
+                msgType = i;
+        }
+
+        if (msgType >= 0) {
+            int catType = qHash(text.midRef(catPos, catLen)) % 6;
+
+            setFormat(lvlPos, lvlLen, m_lvlFmt[msgType]);
+            setFormat(catPos, catLen, m_catFmt[catType]);
+        }
+
+        if (hasLocation) {
+            setFormat(linePos, lineLen, m_lineFmt);
+            setFormat(atPos, atLen, m_atFmt);
+        }
+    }
+
+    --Application::s_inst->m_logGuiLock;
+}
+
 
 void Application::setupLogging()
 {
