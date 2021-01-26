@@ -279,10 +279,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Merge Cost field by calculating an quantity average cost</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Topmost in Sort Order</source>
         <translation type="unfinished"></translation>
     </message>
@@ -307,7 +303,11 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>If &apos;Yes to All&apos;, prefer the</source>
+        <source>Merge &amp;Cost field by calculating an quantity average cost</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>If &apos;Yes to All&apos;, &amp;prefer the</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2110,10 +2110,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>&amp;General</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Language</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2218,14 +2214,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Username:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Password:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Other...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2287,6 +2275,18 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Valid LDraw installation at:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>General</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Username</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Password</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

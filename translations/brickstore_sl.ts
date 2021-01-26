@@ -178,7 +178,7 @@
 <context>
     <name>Application</name>
     <message>
-        <location filename="../src/application.cpp" line="533"/>
+        <location filename="../src/application.cpp" line="566"/>
         <source>Could not initialize the BrickLink kernel:&lt;br /&gt;&lt;br /&gt;%1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -370,41 +370,41 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <location filename="../src/consolidateitemsdialog.ui" line="85"/>
-        <source>Merge Cost field by calculating an quantity average cost</source>
+        <source>Merge &amp;Cost field by calculating an quantity average cost</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/consolidateitemsdialog.ui" line="103"/>
-        <source>If &apos;Yes to All&apos;, prefer the</source>
+        <source>If &apos;Yes to All&apos;, &amp;prefer the</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/consolidateitemsdialog.ui" line="114"/>
+        <location filename="../src/consolidateitemsdialog.ui" line="117"/>
         <source>Topmost in Sort Order</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/consolidateitemsdialog.ui" line="119"/>
+        <location filename="../src/consolidateitemsdialog.ui" line="122"/>
         <source>Bottommost in Sort Order</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/consolidateitemsdialog.ui" line="124"/>
+        <location filename="../src/consolidateitemsdialog.ui" line="127"/>
         <source>Lowest Index</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/consolidateitemsdialog.ui" line="129"/>
+        <location filename="../src/consolidateitemsdialog.ui" line="132"/>
         <source>Highest Index</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/consolidateitemsdialog.ui" line="134"/>
+        <location filename="../src/consolidateitemsdialog.ui" line="137"/>
         <source>Existing Item</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/consolidateitemsdialog.ui" line="139"/>
+        <location filename="../src/consolidateitemsdialog.ui" line="142"/>
         <source>New Item</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2770,11 +2770,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="30"/>
-        <source>&amp;General</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../src/settingsdialog.ui" line="39"/>
         <source>Language</source>
         <translation type="unfinished">Jezik</translation>
@@ -2826,22 +2821,32 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="524"/>
+        <location filename="../src/settingsdialog.ui" line="536"/>
         <source>BrickLink database, if older than</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="661"/>
+        <location filename="../src/settingsdialog.ui" line="673"/>
         <source>BrickLink</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="714"/>
+        <location filename="../src/settingsdialog.ui" line="685"/>
+        <source>Username</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/settingsdialog.ui" line="695"/>
+        <source>Password</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/settingsdialog.ui" line="726"/>
         <source>LDraw</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="720"/>
+        <location filename="../src/settingsdialog.ui" line="732"/>
         <source>LDraw Directory</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2851,91 +2856,86 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="217"/>
+        <location filename="../src/settingsdialog.ui" line="30"/>
+        <source>General</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/settingsdialog.ui" line="220"/>
         <source>Icon size</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="225"/>
+        <location filename="../src/settingsdialog.ui" line="228"/>
         <source>System default</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="230"/>
+        <location filename="../src/settingsdialog.ui" line="233"/>
         <source>Small</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="235"/>
+        <location filename="../src/settingsdialog.ui" line="238"/>
         <source>Big</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="243"/>
+        <location filename="../src/settingsdialog.ui" line="246"/>
         <source>Font size</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="321"/>
-        <location filename="../src/settingsdialog.ui" line="418"/>
+        <location filename="../src/settingsdialog.ui" line="327"/>
+        <location filename="../src/settingsdialog.ui" line="424"/>
         <source>Reset to 100%</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="480"/>
+        <location filename="../src/settingsdialog.ui" line="492"/>
         <source>The quick brown fox jumps over the lazy dog.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="340"/>
+        <location filename="../src/settingsdialog.ui" line="346"/>
         <source>Item image size</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="510"/>
+        <location filename="../src/settingsdialog.ui" line="522"/>
         <source>Updates</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="516"/>
+        <location filename="../src/settingsdialog.ui" line="528"/>
         <source>Automatically update cached data</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="531"/>
-        <location filename="../src/settingsdialog.ui" line="554"/>
-        <location filename="../src/settingsdialog.ui" line="577"/>
+        <location filename="../src/settingsdialog.ui" line="543"/>
+        <location filename="../src/settingsdialog.ui" line="566"/>
+        <location filename="../src/settingsdialog.ui" line="589"/>
         <source> days</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="547"/>
+        <location filename="../src/settingsdialog.ui" line="559"/>
         <source>BrickLink Pictures, if older than</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="570"/>
+        <location filename="../src/settingsdialog.ui" line="582"/>
         <source>BrickLink Price Guides, if older than</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="632"/>
+        <location filename="../src/settingsdialog.ui" line="644"/>
         <source>Reset to defaults</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/settingsdialog.ui" line="667"/>
+        <location filename="../src/settingsdialog.ui" line="679"/>
         <source>BrickLink Login</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/settingsdialog.ui" line="673"/>
-        <source>Username:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/settingsdialog.ui" line="683"/>
-        <source>Password:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

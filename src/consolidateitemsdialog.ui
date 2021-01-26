@@ -82,7 +82,7 @@ Please also select which item's attributes (e.g. remarks, tiered prices, ...) ar
    <item>
     <widget class="QCheckBox" name="w_qty_avg_cost">
      <property name="text">
-      <string>Merge Cost field by calculating an quantity average cost</string>
+      <string>Merge &amp;Cost field by calculating an quantity average cost</string>
      </property>
      <property name="checked">
       <bool>true</bool>
@@ -100,10 +100,13 @@ Please also select which item's attributes (e.g. remarks, tiered prices, ...) ar
         </sizepolicy>
        </property>
        <property name="text">
-        <string>If 'Yes to All', prefer the</string>
+        <string>If 'Yes to All', &amp;prefer the</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+       <property name="buddy">
+        <cstring>w_prefer_remaining</cstring>
        </property>
       </widget>
      </item>

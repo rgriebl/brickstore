@@ -20,14 +20,14 @@
    <item>
     <widget class="QTabWidget" name="w_tabs">
      <property name="currentIndex">
-      <number>1</number>
+      <number>3</number>
      </property>
      <property name="usesScrollButtons">
       <bool>false</bool>
      </property>
      <widget class="QWidget" name="general">
       <attribute name="title">
-       <string>&amp;General</string>
+       <string>General</string>
       </attribute>
       <layout class="QFormLayout" name="formLayout_7">
        <property name="fieldGrowthPolicy">
@@ -682,7 +682,7 @@
           <item row="0" column="0">
            <widget class="QLabel" name="label_3">
             <property name="text">
-             <string>Username:</string>
+             <string>Username</string>
             </property>
            </widget>
           </item>
@@ -692,7 +692,7 @@
           <item row="1" column="0">
            <widget class="QLabel" name="label_4">
             <property name="text">
-             <string>Password:</string>
+             <string>Password</string>
             </property>
            </widget>
           </item>
