@@ -1916,6 +1916,13 @@ void FrameWork::createAddItemDialog()
         m_add_dialog = new AddItemDialog();
         m_add_dialog->setObjectName(QLatin1String("additems"));
         m_add_dialog->attach(m_current_window);
+
+        connect(m_add_dialog, &AddItemDialog::closed,
+                this, [this]() {
+            show();
+            raise();
+            activateWindow();
+        });
     }
 }
 

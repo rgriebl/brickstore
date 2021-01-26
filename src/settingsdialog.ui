@@ -211,6 +211,9 @@
        <string>Interface</string>
       </attribute>
       <layout class="QFormLayout" name="formLayout_5">
+       <property name="fieldGrowthPolicy">
+        <enum>QFormLayout::ExpandingFieldsGrow</enum>
+       </property>
        <item row="0" column="0">
         <widget class="QLabel" name="label_15">
          <property name="text">
@@ -249,6 +252,9 @@
        </item>
        <item row="1" column="1">
         <layout class="QGridLayout" name="gridLayout">
+         <property name="sizeConstraint">
+          <enum>QLayout::SetMaximumSize</enum>
+         </property>
          <property name="horizontalSpacing">
           <number>11</number>
          </property>
@@ -259,7 +265,7 @@
           <widget class="QSlider" name="w_font_size">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-             <horstretch>0</horstretch>
+             <horstretch>10</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
@@ -356,7 +362,7 @@
           <widget class="QSlider" name="w_item_image_size">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-             <horstretch>0</horstretch>
+             <horstretch>10</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
@@ -433,6 +439,12 @@
        </item>
        <item row="3" column="1">
         <widget class="QFrame" name="frame">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+           <horstretch>10</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="frameShape">
           <enum>QFrame::StyledPanel</enum>
          </property>

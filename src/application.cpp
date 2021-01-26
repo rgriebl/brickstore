@@ -38,6 +38,7 @@
 #  include <arpa/inet.h>
 #  include <SystemConfiguration/SCNetworkReachability.h>
 #  include <QVersionNumber>
+#  include <QProxyStyle>
 #elif defined(Q_OS_UNIX)
 #  include <sys/utsname.h>
 #endif
@@ -60,6 +61,29 @@
 
 using namespace std::chrono_literals;
 
+#if defined(Q_OS_MACOS)
+class MacUnderlineStyle : public QProxyStyle
+{
+public:
+    int styleHint(StyleHint hint, const QStyleOption *option = nullptr,
+                  const QWidget *widget = nullptr, QStyleHintReturn *returnData = nullptr) const override;
+    void drawItemText(QPainter *painter, const QRect &rect, int flags, const QPalette &pal, bool enabled,
+                      const QString &text, QPalette::ColorRole textRole = QPalette::NoRole) const override;
+};
+
+int MacUnderlineStyle::styleHint(QStyle::StyleHint hint, const QStyleOption *option, const QWidget *widget, QStyleHintReturn *returnData) const
+{
+    if (hint == SH_UnderlineShortcut)
+        return true;
+    return QProxyStyle::styleHint(hint, option, widget, returnData);
+}
+
+void MacUnderlineStyle::drawItemText(QPainter *painter, const QRect &rect, int flags, const QPalette &pal, bool enabled, const QString &text, QPalette::ColorRole textRole) const
+{
+    return QCommonStyle::drawItemText(painter, rect, flags, pal, enabled, text, textRole);
+}
+
+#endif
 
 Application *Application::s_inst = nullptr;
 
@@ -93,7 +117,12 @@ Application::Application(int &_argc, char **_argv)
         QGuiApplication::setWindowIcon(pix);
 #endif
 #if defined(Q_OS_MACOS)
-    QGuiApplication::setAttribute(Qt::AA_DontShowIconsInMenus);
+    QGuiApplication::setAttribute(Qt::AA_DontShowIconsInMenus); // mac style guide
+
+    // macOS style guide doesn't want shortcut keys in dialogs (Alt + underlined character)
+    qApp->setStyle(new MacUnderlineStyle());
+    void qt_set_sequence_auto_mnemonic(bool on);
+    qt_set_sequence_auto_mnemonic(true);
 
 #  if QT_VERSION <= QT_VERSION_CHECK(5, 15, 2)
     // the new default font San Francisco has rendering problems: QTBUG-88495
