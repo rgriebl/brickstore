@@ -70,8 +70,7 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
     w_font_size_percent->setFixedWidth(w_font_size_percent->width());
     w_item_image_size_percent->setFixedWidth(w_item_image_size_percent->width());
 
-    connect(w_font_size, &QAbstractSlider::valueChanged,
-            this, [this](int v) {
+    auto setFontSize = [this](int v) {
         w_font_size_percent->setText(QString("%1 %").arg(v * 10));
         QFont f = font();
         qreal defaultFontSize = qApp->property("_bs_defaultFontSize").toReal();
@@ -79,7 +78,11 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
             defaultFontSize = 10;
         f.setPointSizeF(defaultFontSize * qreal(v) / 10.);
         w_font_example->setFont(f);
-    });
+    };
+
+    connect(w_font_size, &QAbstractSlider::valueChanged,
+            this, setFontSize);
+    setFontSize(10);
 
     connect(w_font_size_reset, &QToolButton::clicked,
             this, [this]() { w_font_size->setValue(10); });

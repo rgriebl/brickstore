@@ -164,16 +164,10 @@ void BrickLink::PriceGuide::parse(const QByteArray &ba)
 
 void BrickLink::PriceGuide::parseHtml(const QByteArray &ba)
 {
-//    static const QRegularExpression re(R"(> (\d+) <.*?> (\d+) <.*?> US \$([0-9.]+) <.*?> US \$([0-9.]+) <.*?> US \$([0-9.]+) <.*?> US \$([0-9.]+) <)");
-
     static const QRegularExpression re(R"(<B>([A-Za-z-]*?): </B><.*?> (\d+) <.*?> (\d+) <.*?> US \$([0-9.]+) <.*?> US \$([0-9.]+) <.*?> US \$([0-9.]+) <.*?> US \$([0-9.]+) <)");
     QLocale c = QLocale::c();
 
     QString s = QString::fromUtf8(ba).replace("&nbsp;", " ");
-
-//    qWarning() << "===================================================";
-//    qWarning() << s.toLocal8Bit().constData();
-//    qWarning() << "===================================================";
 
     memset(m_quantities, 0, sizeof(m_quantities));
     memset(m_lots, 0, sizeof(m_lots));
@@ -186,8 +180,6 @@ void BrickLink::PriceGuide::parseHtml(const QByteArray &ba)
     bool hasCurrent = (currentPos > 0);
     int pastSixPos = s.indexOf("Past 6 Months Sales");
     bool hasPastSix = (pastSixPos > 0);
-//    QPair<int, int> currentRange;
-//    QPair<int, int> pastSixRange;
 
     if (currentPos >= 0 && currentPos > pastSixPos)
 
@@ -212,8 +204,8 @@ void BrickLink::PriceGuide::parseHtml(const QByteArray &ba)
             else if (condStr == "New")
                 ci = int(Condition::New);
 
-            qWarning() << i << ti << ci << m.capturedTexts().mid(1);
-            qWarning() << "   start:" << startPos << "match start:" << matchPos << "match end:" << matchEnd;
+//            qWarning() << i << ti << ci << m.capturedTexts().mid(1);
+//            qWarning() << "   start:" << startPos << "match start:" << matchPos << "match end:" << matchEnd;
 
             if ((ti == -1) || (ci == -1))
                 continue;
