@@ -183,20 +183,26 @@ void PictureWidget::doUpdate()
 
 void PictureWidget::showBLCatalogInfo()
 {
-    if (m_item)
-        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_CatalogInfo, m_item));
+    if (m_item) {
+        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_CatalogInfo,
+                                                         m_item, m_color));
+    }
 }
 
 void PictureWidget::showBLPriceGuideInfo()
 {
-    if (m_item && m_color)
-        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_PriceGuideInfo, m_item, m_color));
+    if (m_item && m_color) {
+        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_PriceGuideInfo,
+                                                         m_item, m_color));
+    }
 }
 
 void PictureWidget::showBLLotsForSale()
 {
-    if (m_item && m_color)
-        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_LotsForSale, m_item, m_color));
+    if (m_item && m_color) {
+        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_LotsForSale,
+                                                         m_item, m_color));
+    }
 }
 
 void PictureWidget::setItemAndColor(const BrickLink::Item *item, const BrickLink::Color *color)

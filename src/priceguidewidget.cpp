@@ -183,20 +183,26 @@ PriceGuideWidget::~PriceGuideWidget()
 
 void PriceGuideWidget::showBLCatalogInfo()
 {
-    if (d->m_pg && d->m_pg->item())
-        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_CatalogInfo, d->m_pg->item()));
+    if (d->m_pg && d->m_pg->item()) {
+        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_CatalogInfo,
+                                                         d->m_pg->item(), d->m_pg->color()));
+    }
 }
 
 void PriceGuideWidget::showBLPriceGuideInfo()
 {
-    if (d->m_pg && d->m_pg->item() && d->m_pg->color())
-        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_PriceGuideInfo, d->m_pg->item(), d->m_pg->color()));
+    if (d->m_pg && d->m_pg->item() && d->m_pg->color()) {
+        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_PriceGuideInfo,
+                                                         d->m_pg->item(), d->m_pg->color()));
+    }
 }
 
 void PriceGuideWidget::showBLLotsForSale()
 {
-    if (d->m_pg && d->m_pg->item() && d->m_pg->color())
-        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_LotsForSale, d->m_pg->item(), d->m_pg->color()));
+    if (d->m_pg && d->m_pg->item() && d->m_pg->color()) {
+        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_LotsForSale,
+                                                         d->m_pg->item(), d->m_pg->color()));
+    }
 }
 
 QSize PriceGuideWidget::sizeHint() const

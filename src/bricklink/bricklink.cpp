@@ -68,6 +68,8 @@ QUrl Core::url(UrlList u, const void *opt, const void *opt2)
             url = "https://www.bricklink.com/catalogItem.asp";
             QUrlQuery query;
             query.addQueryItem(QChar(item->itemType()->id()), item->id());
+            if (item->itemType()->hasColors() && opt2)
+                query.addQueryItem("C", QString::number(static_cast <const Color *>(opt2)->id()));
             url.setQuery(query);
         }
         break;

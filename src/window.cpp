@@ -1829,7 +1829,7 @@ void Window::closeEvent(QCloseEvent *e)
 void Window::on_edit_bl_catalog_triggered()
 {
     if (!selection().isEmpty())
-        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_CatalogInfo, (*selection().front()).item()));
+        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_CatalogInfo, (*selection().front()).item(), (*selection().front()).color()));
 }
 
 void Window::on_edit_bl_priceguide_triggered()

@@ -235,24 +235,31 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     if (QAction *a = FrameWork::inst()->findAction("edit_bl_catalog")) {
         connect(new QShortcut(a->shortcut(), this), &QShortcut::activated, this, [this]() {
             const auto item = w_select_item->currentItem();
-            if (item)
-                QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_CatalogInfo, item));
+            const auto color = w_select_color->currentColor();
+            if (item) {
+                QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_CatalogInfo,
+                                                                 item, color));
+            }
         });
     }
     if (QAction *a = FrameWork::inst()->findAction("edit_bl_priceguide")) {
         connect(new QShortcut(a->shortcut(), this), &QShortcut::activated, this, [this]() {
             const auto item = w_select_item->currentItem();
             const auto color = w_select_color->currentColor();
-            if (item && (color || !item->itemType()->hasColors()))
-                QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_PriceGuideInfo, item, color));
+            if (item && (color || !item->itemType()->hasColors())) {
+                QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_PriceGuideInfo,
+                                                                 item, color));
+            }
         });
     }
     if (QAction *a = FrameWork::inst()->findAction("edit_bl_lotsforsale")) {
         connect(new QShortcut(a->shortcut(), this), &QShortcut::activated, this, [this]() {
             const auto item = w_select_item->currentItem();
             const auto color = w_select_color->currentColor();
-            if (item && (color || !item->itemType()->hasColors()))
-                QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_LotsForSale, item, color));
+            if (item && (color || !item->itemType()->hasColors())) {
+                QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_LotsForSale,
+                                                                 item, color));
+            }
         });
     }
 
