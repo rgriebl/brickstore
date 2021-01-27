@@ -145,15 +145,15 @@ void Currency::unsetCustomRate(const QString &currencyCode)
     m_customRates.remove(currencyCode);
 }
 
-void Currency::updateRates()
+void Currency::updateRates(bool silent)
 {
     if (!m_nam) {
         m_nam = new QNetworkAccessManager(this);
         m_nam->setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
         connect(m_nam, &QNetworkAccessManager::finished,
-                this, [this](QNetworkReply *reply) {
+                this, [this, silent](QNetworkReply *reply) {
             if (reply->error() != QNetworkReply::NoError) {
-                if (Application::inst()->isOnline())
+                if (Application::inst()->isOnline() && !silent)
                     MessageBox::warning(nullptr, { }, tr("There was an error downloading the exchange rates from the ECB server:<br>%1").arg(reply->errorString()));
             } else {
                 auto r = reply->readAll();
@@ -176,12 +176,14 @@ void Currency::updateRates()
                 baseConvert(newRates);
 
                 if (reader.hasError() || newRates.isEmpty()) {
-                    QString err;
-                    if (reader.hasError())
-                        err = tr("%1 (line %2, column %3)").arg(reader.errorString()).arg(reader.lineNumber()).arg(reader.columnNumber());
-                    else
-                        err = tr("no currency data found");
-                    MessageBox::warning(nullptr, { }, tr("There was an error parsing the exchange rates from the ECB server:\n%1").arg(err));
+                    if (!silent) {
+                        QString err;
+                        if (reader.hasError())
+                            err = tr("%1 (line %2, column %3)").arg(reader.errorString()).arg(reader.lineNumber()).arg(reader.columnNumber());
+                        else
+                            err = tr("no currency data found");
+                        MessageBox::warning(nullptr, { }, tr("There was an error parsing the exchange rates from the ECB server:\n%1").arg(err));
+                    }
                 } else {
                     m_rates = newRates;
                     m_lastUpdate = QDateTime::currentDateTime();

@@ -626,7 +626,7 @@ FrameWork::FrameWork(QWidget *parent)
     currencyUpdateTimer->setInterval(4h); // 4 hours
     currencyUpdateTimer->start();
     connect(currencyUpdateTimer, &QTimer::timeout,
-            Currency::inst(), &Currency::updateRates);
+            Currency::inst(), []() { Currency::inst()->updateRates(true /*silent*/); });
 
     setupScripts();
 

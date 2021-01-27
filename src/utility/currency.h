@@ -53,7 +53,7 @@ public:
     static QString localSymbol(const QString &intSymbol);
 
 public slots:
-    void updateRates();
+    void updateRates(bool silent = false);
 
 signals:
     void ratesChanged();
