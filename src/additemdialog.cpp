@@ -133,7 +133,11 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     m_money_validator = new SmartDoubleValidator(0.001, FrameWork::maxPrice, 3, 1, this);
 
     connect(w_select_item, &SelectItem::hasColors,
-            w_select_color, &QWidget::setEnabled);
+            this, [this](bool b) {
+        w_select_color->setEnabled(b);
+        if (!b)
+            w_select_color->setCurrentColor(BrickLink::core()->color(0));
+    });
     connect(w_select_item, &SelectItem::hasSubConditions,
             w_subcondition, &QWidget::setEnabled);
     connect(w_select_item, &SelectItem::itemSelected,
