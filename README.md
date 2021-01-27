@@ -17,6 +17,12 @@ Installation
 
 [Installation instructions](https://github.com/rgriebl/brickstore/wiki/Installation-Instructions)
 
+Documentation
+=============
+
+BrickStore doesn't come with a complete documentation, but everything has tool-tips: just hover
+over an element and you'll get a short description.
+There's also a [page with tutorials](https://github.com/rgriebl/brickstore/wiki/Tutorials).
 
 About
 =====
