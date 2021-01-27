@@ -190,7 +190,7 @@ private slots:
     void updateCaption();
     void updateSelection();
     void updateCurrent();
-    void documentItemsChanged(const Document::ItemList &items, bool grave);
+    void documentItemsChanged(const Document::ItemList &items);
 
     void contextMenu(const QPoint &);
     void priceGuideUpdated(BrickLink::PriceGuide *);

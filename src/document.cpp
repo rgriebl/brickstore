@@ -445,8 +445,7 @@ void Document::changeItemDirect(int position, Item &item)
     updateErrors(olditem);
     emit statisticsChanged();
 
-    bool grave = (olditem->item() != item.item()) || (olditem->color() != item.color());
-    emit itemsChanged({ olditem }, grave);
+    emit itemsChanged({ olditem });
 }
 
 void Document::changeCurrencyDirect(const QString &ccode, qreal crate, double *&prices)
@@ -488,7 +487,7 @@ void Document::changeCurrencyDirect(const QString &ccode, qreal crate, double *&
 
         emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
         emit statisticsChanged();
-        emit itemsChanged(m_items, false);
+        emit itemsChanged(m_items);
     }
     emit currencyCodeChanged(m_currencycode);
 }
@@ -1130,7 +1129,7 @@ void Document::setErrorMask(quint64 em)
 {
     m_error_mask = em;
     emit statisticsChanged();
-    emit itemsChanged(items(), false);
+    emit itemsChanged(items());
 }
 
 quint64 Document::itemErrors(const Item *item) const

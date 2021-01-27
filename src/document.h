@@ -221,7 +221,7 @@ signals:
     void itemsAdded(const Document::ItemList &);
     void itemsAboutToBeRemoved(const Document::ItemList &);
     void itemsRemoved(const Document::ItemList &);
-    void itemsChanged(const Document::ItemList &, bool);
+    void itemsChanged(const Document::ItemList &);
 
     void errorsChanged(Document::Item *);
     void statisticsChanged();

@@ -2131,9 +2131,9 @@ void Window::setSelection(const Document::ItemList &lst)
                               | QItemSelectionModel::Current | QItemSelectionModel::Rows);
 }
 
-void Window::documentItemsChanged(const Document::ItemList &items, bool grave)
+void Window::documentItemsChanged(const Document::ItemList &items)
 {
-    if (!items.isEmpty() && grave) {
+    if (!items.isEmpty()) {
         if (items.contains(m_current))
             emit currentChanged(m_current);
         foreach (Document::Item *item, m_selection) {
