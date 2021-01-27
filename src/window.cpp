@@ -492,11 +492,15 @@ int Window::addItems(const BrickLink::InvItemList &items, AddItemMode addItemMod
                     repeatForRemaining = dlg.repeatForAll();
                     costQtyAvg = dlg.costQuantityAverage();
 
+
                     if (yesClicked) {
                         mergeIndex = dlg.consolidateToIndex();
 
                         if (repeatForRemaining)
                             conMode = dlg.consolidateRemaining();
+                    } else {
+                        if (repeatForRemaining)
+                            addItemMode = AddItemMode::AddAsNew;
                     }
                 } else {
                     mergeIndex = (conMode == Consolidate::IntoExisting) ? 0 : 1;
