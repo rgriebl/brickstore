@@ -38,6 +38,8 @@ Name: "slovenian"; MessagesFile: "compiler:Languages\Slovenian.isl"
 [Files]
 Source: "BrickStore.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "*.dll"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion
+Source: "qmldir"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion
+Source: "*.qmltypes"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion
 ; MSVC
 Source: "vc_redist.x86.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall skipifsourcedoesntexist
 Source: "vc_redist.x64.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall skipifsourcedoesntexist
