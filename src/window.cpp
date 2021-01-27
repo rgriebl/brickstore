@@ -413,7 +413,7 @@ void Window::setDifferenceMode(bool b)
 void Window::documentRowsInserted(const QModelIndex &parent, int /*start*/, int end)
 {
     if (!parent.isValid()) {
-        m_latest_row = end;
+        m_latest_row = m_view->mapFromSource(m_doc->index(end, 0)).row();
         m_latest_timer->start();
     }
 }
