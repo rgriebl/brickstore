@@ -173,7 +173,9 @@ void PrintingScriptTemplate::executePrint(QPaintDevice *pd, Window *win, bool se
         itemList << QVariant::fromValue(QmlWrapper::InvItem(item, wrappedDocView->document()));
 
     QQmlEngine *engine = m_script->qmlEngine();
-    QJSValueList args = { engine->toScriptValue(job.data()), engine->toScriptValue(itemList) };
+    QJSValueList args = { engine->toScriptValue(job.data()),
+                          engine->toScriptValue(itemList),
+                          engine->toScriptValue(wrappedDocView) };
     QJSValue result = m_printFunction.call(args);
 
     if (result.isError()) {
