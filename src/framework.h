@@ -149,6 +149,7 @@ private:
     QLabel *m_st_lots;
     QLabel *m_st_items;
     QLabel *m_st_value;
+    QLabel *m_st_cost;
     QLabel *m_st_errors;
     QToolButton *m_st_currency;
     QToolBar *m_toolbar;

@@ -142,9 +142,10 @@ bool MessageBox::getDouble(QWidget *parent, const QString &title, const QString 
     dlg.setDoubleMaximum(maxValue);
     dlg.setDoubleDecimals(decimals);
 
-    if (!unit.isEmpty()) {
-        if (auto *sp = dlg.findChild<QDoubleSpinBox *>())
+    if (auto *sp = dlg.findChild<QDoubleSpinBox *>()) {
+        if (!unit.isEmpty())
             sp->setSuffix(QLatin1Char(' ') + unit);
+        sp->setAlignment(Qt::AlignRight);
     }
     bool b = (dlg.exec() == QDialog::Accepted);
 
@@ -164,9 +165,10 @@ bool MessageBox::getInteger(QWidget *parent, const QString &title, const QString
     dlg.setIntMinimum(minValue);
     dlg.setIntMaximum(maxValue);
 
-    if (!unit.isEmpty()) {
-        if (auto *sp = dlg.findChild<QSpinBox *>())
+    if (auto *sp = dlg.findChild<QSpinBox *>()) {
+        if (!unit.isEmpty())
             sp->setSuffix(QLatin1Char(' ') + unit);
+        sp->setAlignment(Qt::AlignRight);
     }
     bool b = (dlg.exec() == QDialog::Accepted);
 

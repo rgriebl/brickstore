@@ -1104,7 +1104,6 @@ void Window::on_edit_cost_set_triggered()
         setOrToggle<double>::set(this, QT_TR_N_NOOP("Set cost on %n item(s)"),
                                  &Document::Item::cost, &Document::Item::setCost, cost);
     }
-
 }
 
 void Window::on_edit_cost_round_triggered()
@@ -1166,6 +1165,40 @@ void Window::on_edit_cost_inc_dec_triggered()
         }
 
         m_doc->endMacro(tr("Cost change on %n item(s)", nullptr, incdeccount));
+    }
+}
+
+void Window::on_edit_cost_spread_triggered()
+{
+    if (selection().size() < 2)
+        return;
+
+    double spreadAmount = 0;
+
+    if (MessageBox::getDouble(this, { }, tr("Enter the cost amount to spread over all the selected items:"),
+                              Currency::localSymbol(m_doc->currencyCode()), spreadAmount,
+                              0, FrameWork::maxPrice, 3)) {
+        uint spreadcount = 0;
+        double priceTotal = 0;
+
+        foreach (Document::Item *item, selection())
+            priceTotal += (item->price() * item->quantity());
+
+        if (qFuzzyIsNull(priceTotal))
+            return;
+        double f = spreadAmount / priceTotal;
+
+        m_doc->beginMacro();
+
+        foreach (Document::Item *item, selection()) {
+            Document::Item newItem(*item);
+            newItem.setCost(item->price() * f);
+            m_doc->changeItem(item, newItem);
+
+            spreadcount++;
+        }
+
+        m_doc->endMacro(tr("Cost spreaded over %n item(s)", nullptr, spreadcount));
     }
 }
 

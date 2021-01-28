@@ -829,6 +829,7 @@ void FrameWork::translateActions()
         { "edit_cost_round",                tr("Round to 2 Decimal Places"),          },
         { "edit_cost_set",                  tr("Set..."),                             },
         { "edit_cost_inc_dec",              tr("Inc- or Decrease..."),                },
+        { "edit_cost_spread",               tr("Spread Cost Amount..."),              },
         { "edit_bulk",                      tr("Bulk Quantity..."),                   },
         { "edit_sale",                      tr("Sale..."),                            tr("Ctrl+%", "Edit|Sale") },
         { "edit_comment",                   tr("Comment"),                            },
@@ -943,16 +944,11 @@ void FrameWork::createStatusBar()
     m_st_items = new QLabel();
     m_st_weight = new QLabel();
     m_st_value = new QLabel();
+    m_st_cost = new QLabel();
     m_st_currency = new QToolButton();
     m_st_currency->setPopupMode(QToolButton::InstantPopup);
     m_st_currency->setToolButtonStyle(Qt::ToolButtonTextOnly);
     m_st_currency->setAutoRaise(true);
-    QWidget *st_valcur = new QWidget();
-    QHBoxLayout *l = new QHBoxLayout(st_valcur);
-    l->setContentsMargins(0, 0, 0, 0);
-    l->setSpacing(6);
-    l->addWidget(m_st_value);
-    l->addWidget(m_st_currency);
 
     connect(m_st_currency, &QToolButton::triggered,
             this, &FrameWork::changeDocumentCurrency);
@@ -964,7 +960,9 @@ void FrameWork::createStatusBar()
     st->addPermanentWidget(m_st_weight, 0, margin);
     st->addPermanentWidget(m_st_lots, 0, margin);
     st->addPermanentWidget(m_st_items, 0, margin);
-    st->addPermanentWidget(st_valcur, 0, margin);
+    st->addPermanentWidget(m_st_cost, 0, margin);
+    st->addPermanentWidget(m_st_value, 0, margin);
+    st->addPermanentWidget(m_st_currency, 0, margin);
 
     statusBar()->hide();
 }
@@ -1276,6 +1274,7 @@ void FrameWork::createActions()
     m->addAction(newQAction(this, "edit_cost_set", NeedSelection(1)));
     m->addAction(newQAction(this, "edit_cost_inc_dec", NeedSelection(1)));
     m->addAction(newQAction(this, "edit_cost_round", NeedSelection(1)));
+    m->addAction(newQAction(this, "edit_cost_spread", NeedSelection(2)));
 
     (void) newQAction(this, "edit_bulk", NeedSelection(1));
     (void) newQAction(this, "edit_sale", NeedSelection(1));
@@ -1778,7 +1777,7 @@ void FrameWork::selectionUpdate(const Document::ItemList &selection)
 
 void FrameWork::statisticsUpdate()
 {
-    QString lotstr, itmstr, errstr, valstr, wgtstr, ccode;
+    QString lotstr, itmstr, errstr, valstr, coststr, wgtstr, ccode;
 
     if (m_current_window)
     {
@@ -1792,6 +1791,7 @@ void FrameWork::statisticsUpdate()
         } else {
             valstr = tr("Value: %1").arg(Currency::toString(stat.value(), ccode, Currency::NoSymbol));
         }
+        coststr = tr("Cost: %1").arg(Currency::toString(stat.cost(), ccode, Currency::NoSymbol));
 
         if (qFuzzyCompare(stat.weight(), -DBL_MIN)) {
             wgtstr = tr("Weight: -");
@@ -1819,6 +1819,7 @@ void FrameWork::statisticsUpdate()
     m_st_items->setText(itmstr);
     m_st_weight->setText(wgtstr);
     m_st_value->setText(valstr);
+    m_st_cost->setText(coststr);
     m_st_currency->setEnabled(m_current_window);
     m_st_currency->setText(ccode + QLatin1String("  "));
     m_st_errors->setText(errstr);
