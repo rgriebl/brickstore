@@ -1408,16 +1408,17 @@ void FrameWork::restoreWindowsFromAutosave()
 {
     int restorable = Window::restorableAutosaves();
     if (restorable > 0) {
-        if (MessageBox::question(this, tr("Restore Documents"), tr("It seems like BrickStore crashed while %n document(s) had unsaved modifications.", nullptr, restorable)
-                                 % u"<br><br>" % tr("Should these documents be restored from their last available auto-save state?"),
-                                 MessageBox::Yes | MessageBox::No, MessageBox::Yes)
-                == MessageBox::Yes) {
-            auto restoredWindows = Window::restoreAutosaves();
-            for (auto window : restoredWindows) {
-                m_undogroup->addStack(window->document()->undoStack());
-                m_workspace->addWindow(window);
-                setActiveWindow(window);
-            }
+        bool b = (MessageBox::question(this, tr("Restore Documents"), tr("It seems like BrickStore crashed while %n document(s) had unsaved modifications.", nullptr, restorable)
+                                       % u"<br><br>" % tr("Should these documents be restored from their last available auto-save state?"),
+                                       MessageBox::Yes | MessageBox::No, MessageBox::Yes)
+                  == MessageBox::Yes);
+
+        auto restoredWindows = Window::processAutosaves(b ? Window::AutosaveAction::Restore
+                                                          : Window::AutosaveAction::Delete);
+        for (auto window : restoredWindows) {
+            m_undogroup->addStack(window->document()->undoStack());
+            m_workspace->addWindow(window);
+            setActiveWindow(window);
         }
     }
 }

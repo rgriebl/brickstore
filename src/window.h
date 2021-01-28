@@ -59,7 +59,8 @@ public:
     };
 
     static int restorableAutosaves();
-    static const QVector<Window *> restoreAutosaves();
+    enum class AutosaveAction { Restore, Delete };
+    static const QVector<Window *> processAutosaves(AutosaveAction action);
 
     const Document::ItemList &selection() const  { return m_selection; }
     Document::Item *current() const              { return m_current; }

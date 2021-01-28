@@ -2233,7 +2233,7 @@ int Window::restorableAutosaves()
     return temp.entryList({ autosaveTemplate.arg("*") }).count();
 }
 
-const QVector<Window *> Window::restoreAutosaves()
+const QVector<Window *> Window::processAutosaves(AutosaveAction action)
 {
     QVector<Window *> restored;
 
@@ -2242,7 +2242,7 @@ const QVector<Window *> Window::restoreAutosaves()
 
     for (const QString &filename : ondisk) {
         QFile f(temp.filePath(filename));
-        if (f.open(QIODevice::ReadOnly)) {
+        if ((action == AutosaveAction::Restore) && f.open(QIODevice::ReadOnly)) {
             QByteArray magic;
             qint32 version;
             QString savedTitle;
@@ -2290,8 +2290,8 @@ const QVector<Window *> Window::restoreAutosaves()
                 qDeleteAll(items);
             }
             f.close();
-            f.remove(); // doesn't matter if we could read it or not - just delete it
         }
+        f.remove();
     }
     return restored;
 }
