@@ -644,7 +644,7 @@ Core::ParseItemListXMLResult Core::parseItemListXML(const QDomElement &root, Ite
                 else if (tag == QLatin1String("SUBCONDITION")) {
                     ii->setSubCondition(val == QLatin1String("C") ? SubCondition::Complete : \
                                         val == QLatin1String("I") ? SubCondition::Incomplete : \
-                                        val == QLatin1String("M") ? SubCondition::Sealed : SubCondition::None);
+                                        val == QLatin1String("S") ? SubCondition::Sealed : SubCondition::None);
                 }
                 else if (tag == QLatin1String("DESCRIPTION"))
                     ii->setComments(val);
@@ -734,6 +734,7 @@ Core::ParseItemListXMLResult Core::parseItemListXML(const QDomElement &root, Ite
                 else if (tag == QLatin1String("Condition"))
                     ii->setCondition(val == QLatin1String("N") ? Condition::New : Condition::Used);
                 else if (tag == QLatin1String("SubCondition")) {
+                    // 'M' for sealed is an historic artefact. BL called this 'MISB' back in the day
                     ii->setSubCondition(val == QLatin1String("C") ? SubCondition::Complete : \
                                         val == QLatin1String("I") ? SubCondition::Incomplete : \
                                         val == QLatin1String("M") ? SubCondition::Sealed : SubCondition::None);
@@ -955,6 +956,7 @@ QDomElement Core::createItemListXML(QDomDocument doc, ItemListXMLHint hint, cons
             create(u"Condition", (ii->condition() == Condition::New) ? u"N" : u"U");
 
             if (ii->subCondition() != SubCondition::None) {
+                // 'M' for sealed is an historic artefact. BL called this 'MISB' back in the day
                 const char16_t *st;
                 switch (ii->subCondition()) {
                 case SubCondition::Incomplete: st = u"I"; break;
@@ -1025,7 +1027,7 @@ QDomElement Core::createItemListXML(QDomDocument doc, ItemListXMLHint hint, cons
                 switch (ii->subCondition()) {
                     case SubCondition::Incomplete: st = u"I"; break;
                     case SubCondition::Complete  : st = u"C"; break;
-                    case SubCondition::Sealed    : st = u"M"; break;
+                    case SubCondition::Sealed    : st = u"S"; break;
                     default                      : st = u"?"; break;
                 }
                 create(u"SUBCONDITION", st);
