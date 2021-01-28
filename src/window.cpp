@@ -27,6 +27,7 @@
 #include <QPrintDialog>
 #include <QProgressDialog>
 #include <QStringBuilder>
+#include <QScrollBar>
 
 #include "messagebox.h"
 #include "config.h"
@@ -221,7 +222,7 @@ Window::Window(Document *doc, QWidget *parent)
     m_latest_row = -1;
     m_latest_timer = new QTimer(this);
     m_latest_timer->setSingleShot(true);
-    m_latest_timer->setInterval(400ms);
+    m_latest_timer->setInterval(100ms);
     m_current = nullptr;
 
     m_settopg_failcnt = 0;
@@ -421,7 +422,8 @@ void Window::documentRowsInserted(const QModelIndex &parent, int /*start*/, int 
 void Window::ensureLatestVisible()
 {
     if (m_latest_row >= 0) {
-        w_list->scrollTo(m_view->index(m_latest_row, 0));
+        int xOffset = w_list->horizontalScrollBar()->value();
+        w_list->scrollTo(m_view->index(m_latest_row, w_header->logicalIndexAt(-xOffset)));
         m_latest_row = -1;
     }
 }
