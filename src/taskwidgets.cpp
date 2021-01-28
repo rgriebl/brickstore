@@ -314,18 +314,6 @@ TaskAppearsInWidget::TaskAppearsInWidget(QWidget *parent)
     });
 }
 
-QSize TaskAppearsInWidget::minimumSizeHint() const
-{
-    const QFontMetrics &fm = fontMetrics();
-
-    return { fm.horizontalAdvance('m') * 20, fm.height() * 10 };
-}
-
-QSize TaskAppearsInWidget::sizeHint() const
-{
-    return minimumSizeHint();
-}
-
 void TaskAppearsInWidget::windowUpdate(Window *win)
 {
     if (m_win) {

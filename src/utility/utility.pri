@@ -29,6 +29,7 @@ SOURCES += \
 HEADERS += \
     $$PWD/currency.h \
     $$PWD/filter.h \
+    $$PWD/flowlayout.h \
     $$PWD/headerview.h \
     $$PWD/humanreadabletimedelta.h \
     $$PWD/messagebox.h \
@@ -42,6 +43,7 @@ HEADERS += \
 SOURCES += \
     $$PWD/currency.cpp \
     $$PWD/filter.cpp \
+    $$PWD/flowlayout.cpp \
     $$PWD/headerview.cpp \
     $$PWD/humanreadabletimedelta.cpp \
     $$PWD/messagebox.cpp \

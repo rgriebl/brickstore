@@ -130,7 +130,7 @@ QSize AppearsInWidget::minimumSizeHint() const
 {
     const QFontMetrics &fm = fontMetrics();
 
-    return { fm.horizontalAdvance(QLatin1Char('m')) * 20, fm.height() * 6 };
+    return { fm.horizontalAdvance(QLatin1Char('m')) * 20, fm.height() * 4 };
 }
 
 QSize AppearsInWidget::sizeHint() const

@@ -42,6 +42,7 @@ public:
 signals:
     void windowActivated(QWidget *);
     void windowCountChanged(int count);
+    void welcomeWidgetVisible();
 
 public slots:
     void setActiveWindow(QWidget *);

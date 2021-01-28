@@ -99,9 +99,6 @@ class TaskAppearsInWidget : public AppearsInWidget
 public:
     TaskAppearsInWidget(QWidget *parent);
 
-    virtual QSize minimumSizeHint() const;
-    virtual QSize sizeHint() const;
-
 protected slots:
     void windowUpdate(Window *win);
     void selectionUpdate(const Document::ItemList &list);

@@ -32,8 +32,8 @@
 
 namespace {
 
-static const int hborder = 10;
-static const int vborder = 6;
+static const int hborder = 8;
+static const int vborder = 3;
 
 struct cell : public QRect {
     enum cell_type {

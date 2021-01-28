@@ -226,6 +226,7 @@ Workspace::Workspace(QWidget *parent)
     connect(m_tabhome, &QToolButton::clicked,
             this, [this]() {
         m_windowStack->setCurrentWidget(welcomeWidget());
+        emit welcomeWidgetVisible();
     });
 
     auto *leftlay = new QHBoxLayout(left);
@@ -268,8 +269,10 @@ Workspace::Workspace(QWidget *parent)
     });
     connect(m_tabbar, &QTabBar::tabBarClicked,
             this, [this](int idx) {
-        if ((idx == m_tabbar->currentIndex()) && (m_windowStack->currentIndex() == 0))
+        if ((idx == m_tabbar->currentIndex()) && (m_windowStack->currentIndex() == 0)) {
             m_windowStack->setCurrentIndex(idx + 1);
+            emit windowActivated(m_windowStack->currentWidget());
+        }
     });
 
     connect(m_windowStack, &QStackedWidget::widgetRemoved,
@@ -342,10 +345,12 @@ void Workspace::setActiveWindow(QWidget *w)
 {
     int idx = m_windowStack->indexOf(w);
 
-    if ((m_windowStack->currentIndex() == 0) && (idx == (m_tabbar->currentIndex() + 1)))
+    if ((m_windowStack->currentIndex() == 0) && (idx == (m_tabbar->currentIndex() + 1))) {
         m_windowStack->setCurrentIndex(idx);
-    else
+        emit windowActivated(w);
+    } else {
         m_tabbar->setCurrentIndex(idx - 1);
+    }
 }
 
 QVector<QWidget *> Workspace::windowList() const

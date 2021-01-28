@@ -52,7 +52,7 @@ public:
 
     QStringList recentFiles() const;
 
-    static constexpr int MaxRecentFiles = 9;
+    static constexpr int MaxRecentFiles = 18;
 
     QPair<QString, QString> loginForBrickLink() const;
     QMap<QByteArray, int> updateIntervals() const;

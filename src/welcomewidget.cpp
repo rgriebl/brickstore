@@ -32,6 +32,7 @@
 #include "humanreadabletimedelta.h"
 #include "framework.h"
 #include "version.h"
+#include "flowlayout.h"
 
 // Based on QCommandLinkButton, but this one scales with font size, supports richtext and can be
 // associated with a QAction
@@ -66,6 +67,7 @@ public:
     }
 
     QSize sizeHint() const override;
+    QSize minimumSizeHint() const override;
     bool hasHeightForWidth() const override;
     int heightForWidth(int) const override;
 
@@ -136,7 +138,7 @@ WelcomeButton::WelcomeButton(const QString &text, const QString &description, QW
         setStyle(s);
     }
 
-    QSizePolicy policy(QSizePolicy::Preferred, QSizePolicy::Preferred, QSizePolicy::PushButton);
+    QSizePolicy policy(QSizePolicy::Expanding, QSizePolicy::Preferred, QSizePolicy::PushButton);
     policy.setHeightForWidth(true);
     setSizePolicy(policy);
 
@@ -192,6 +194,17 @@ QSize WelcomeButton::sizeHint() const
     size.setHeight(qMax(m_description.text().isEmpty() ? 41 : 60,
                         heightWithoutDescription + descriptionHeight(buttonWidth)));
     return size;
+}
+
+QSize WelcomeButton::minimumSizeHint() const
+{
+    QSize s = sizeHint();
+    int l = QFontMetrics(m_titleFont).averageCharWidth() * 40;
+    if (s.width() > l) {
+        s.setWidth(l);
+        s.setHeight(heightForWidth(l));
+    }
+    return s;
 }
 
 bool WelcomeButton::hasHeightForWidth() const
@@ -258,15 +271,13 @@ void WelcomeButton::paintEvent(QPaintEvent *)
         textflags |= Qt::TextHideMnemonic;
 
     p.setFont(m_titleFont);
+    QString str = p.fontMetrics().elidedText(text(), Qt::ElideRight, titleRect().width());
     p.drawItemText(titleRect().translated(hOffset, vOffset),
-                    textflags, option.palette, isEnabled(), text(), QPalette::ButtonText);
+                    textflags, option.palette, isEnabled(), str, QPalette::ButtonText);
 
     //Draw description
-    textflags |= Qt::TextWordWrap | Qt::ElideRight;
     p.setFont(font());
     p.drawStaticText(descriptionRect().translated(hOffset, vOffset).topLeft(), m_description);
-//    p.drawItemText(descriptionRect().translated(hOffset, vOffset), textflags,
-//                   option.palette, isEnabled(), description(), QPalette::ButtonText);
     p.restore();
 }
 
@@ -277,24 +288,27 @@ WelcomeWidget::WelcomeWidget(QWidget *parent)
     int spacing = style()->pixelMetric(QStyle::PM_LayoutHorizontalSpacing);
 
     auto *layout = new QGridLayout();
-    layout->setRowStretch(0, 10);
-    layout->setRowStretch(4, 10);
+    layout->setRowStretch(0, 1);
+    layout->setRowStretch(1, 0);
+    layout->setRowStretch(2, 0);
+    layout->setRowStretch(3, 5);
+    layout->setRowStretch(4, 0);
+    layout->setRowStretch(5, 1);
     layout->setColumnStretch(0, 1);
-    layout->setColumnStretch(1, 10);
-    layout->setColumnStretch(2, 10);
+    layout->setColumnStretch(1, 2);
+    layout->setColumnStretch(2, 2);
     layout->setColumnStretch(3, 1);
     layout->setSpacing(2 * spacing);
 
     // recent
 
     m_recent_frame = new QGroupBox();
-    auto recent_layout = new QVBoxLayout();
-    recent_layout->addStretch();
+    auto recent_layout = new FlowLayout();
     m_recent_frame->setLayout(recent_layout);
-    layout->addWidget(m_recent_frame, 1, 1, 2, 1);
+    layout->addWidget(m_recent_frame, 1, 1, 3, 1);
 
     auto recreateRecentGroup = [this, recent_layout]() {
-        while (recent_layout->count() > 1) {
+        while (recent_layout->count() >= 1) {
             auto li = recent_layout->takeAt(0);
             delete li->widget();
             delete li;
@@ -304,19 +318,15 @@ WelcomeWidget::WelcomeWidget(QWidget *parent)
         if (recent.isEmpty()) {
             if (!m_no_recent)
                 m_no_recent = new QLabel();
-            recent_layout->insertWidget(0, m_no_recent);
+            recent_layout->addWidget(m_no_recent);
         }
 
-        int cnt = 0;
         for (const auto &f : recent) {
             auto b = new WelcomeButton(QFileInfo(f).fileName(), f);
             b->setIcon(QIcon(":/images/brickstore_doc_icon"));
-            recent_layout->insertWidget(cnt++, b);
+            recent_layout->addWidget(b);
             connect(b, &WelcomeButton::clicked,
                     this, [b]() { FrameWork::inst()->openDocument(b->description()); });
-
-            if (cnt == 6)
-                break;
         }
     };
     recreateRecentGroup();
@@ -343,7 +353,6 @@ WelcomeWidget::WelcomeWidget(QWidget *parent)
         auto b = new WelcomeButton(FrameWork::inst()->findAction(name));
         import_layout->addWidget(b);
     }
-    import_layout->addStretch();
     m_import_frame->setLayout(import_layout);
     layout->addWidget(m_import_frame, 2, 2);
 
@@ -351,7 +360,7 @@ WelcomeWidget::WelcomeWidget(QWidget *parent)
     m_versions->setAlignment(Qt::AlignCenter);
     connect(BrickLink::core(), &BrickLink::Core::databaseDateChanged,
             this, &WelcomeWidget::updateVersionsText);
-    layout->addWidget(m_versions, 3, 1, 1, 2);
+    layout->addWidget(m_versions, 4, 1, 1, 2);
 
     languageChange();
     setLayout(layout);

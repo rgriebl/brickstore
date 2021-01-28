@@ -166,21 +166,31 @@ public:
             auto recent =  Config::inst()->recentFiles();
             for (const auto &f : recent) {
                 QString s = f;
+#if !defined(Q_OS_MACOS)
                 if (++cnt < 10)
                     s.prepend(QString("&%1   ").arg(cnt));
+#endif
                 addAction(s)->setData(f);
             }
-            if (!cnt)
+            if (!cnt) {
                 addAction(tr("No recent files"))->setEnabled(false);
+            } else {
+                addSeparator();
+                addAction(tr("Clear recent files"))->setData(QString());
+            }
         });
         connect(this, &QMenu::triggered, this, [this](QAction *a) {
-            if (a && !a->data().isNull())
-                emit openRecent(a->data().toString());
+            auto f = a->data().toString();
+            if (f.isEmpty())
+                emit clearRecent();
+            else
+                emit openRecent(f);
         });
     }
 
 signals:
     void openRecent(const QString &file);
+    void clearRecent();
 };
 
 class LoadColumnLayoutMenu : public QMenu
@@ -341,6 +351,9 @@ FrameWork::FrameWork(QWidget *parent)
 
     connect(m_workspace, &Workspace::windowCountChanged,
             this, &FrameWork::windowListChanged);
+
+    connect(m_workspace, &Workspace::welcomeWidgetVisible,
+            this, [this]() { connectWindow(nullptr); });
 
     setCentralWidget(m_workspace);
 
@@ -1148,6 +1161,8 @@ void FrameWork::createActions()
     rm->menuAction()->setObjectName("file_open_recent");
     connect(rm, &RecentMenu::openRecent,
             this, &FrameWork::openDocument);
+    connect(rm, &RecentMenu::clearRecent,
+            this, [this]() { Config::inst()->setRecentFiles({ }); });
 
     (void) newQAction(this, "file_save", NeedDocument | NeedModification);
     (void) newQAction(this, "file_saveas", NeedDocument);
