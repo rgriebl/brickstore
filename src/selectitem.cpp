@@ -818,27 +818,27 @@ QSize SelectItem::minimumSizeHint() const
 void SelectItem::showContextMenu(const QPoint &p)
 {
     if (auto *iv = qobject_cast<QAbstractItemView *>(sender())) {
+        QMenu m(this);
+        QAction *gotoItemCat = nullptr;
+        QAction *gotoAllCat = nullptr;
+
+        const BrickLink::Item *item = nullptr;
         QModelIndex idx = iv->indexAt(p);
+        if (idx.isValid())
+            item = idx.model()->data(idx, BrickLink::ItemPointerRole).value<const BrickLink::Item *>();
 
-        if (idx.isValid()) {
-            const auto *item = idx.model()->data(idx, BrickLink::ItemPointerRole).value<const BrickLink::Item *>();
+        if (item && item->category() != currentCategory())
+            gotoItemCat = m.addAction(tr("View item's category"));
 
-            QMenu m(this);
-            QAction *gotoItemCat = nullptr;
-            QAction *gotoAllCat = nullptr;
+        if (currentCategory() != BrickLink::CategoryModel::AllCategories)
+            gotoAllCat = m.addAction(tr("View the [All Items] category"));
 
-            if (item && item->category() != currentCategory())
-                gotoItemCat = m.addAction(tr("View item's category"));
-            if (currentCategory() != BrickLink::CategoryModel::AllCategories)
-                gotoAllCat = m.addAction(tr("View the [All Items] category"));
-
-            if (!m.isEmpty()) {
-                auto action = m.exec(iv->mapToGlobal(p));
-                if (action == gotoItemCat)
-                    setCurrentItem(item, true);
-                else if (action == gotoAllCat)
-                    setCurrentCategory(BrickLink::CategoryModel::AllCategories);
-            }
+        if (!m.isEmpty()) {
+            auto action = m.exec(iv->mapToGlobal(p));
+            if (action == gotoItemCat)
+                setCurrentItem(item, true);
+            else if (action == gotoAllCat)
+                setCurrentCategory(BrickLink::CategoryModel::AllCategories);
         }
     }
 }
