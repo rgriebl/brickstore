@@ -149,10 +149,6 @@ void TaskPriceGuideWidget::dockLocationChanged(Qt::DockWidgetArea area)
     bool vertical = (area ==  Qt::LeftDockWidgetArea) || (area == Qt::RightDockWidgetArea);
 
     setLayout(vertical ? PriceGuideWidget::Vertical : PriceGuideWidget::Horizontal);
-    if (vertical)
-        setMaximumSize(QWIDGETSIZE_MAX, minimumHeight());
-    else
-        setMaximumSize(minimumWidth(), QWIDGETSIZE_MAX);
 }
 
 // ----------------------------------------------------------------------
