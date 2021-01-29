@@ -158,12 +158,12 @@ void SelectItem::init()
     d->w_filter->setClearButtonEnabled(true);
 
     auto *popupMenu = new QMenu(this);
-    d->m_filterCaseSensitive = new QAction(tr("Case Sensitive"));
+    d->m_filterCaseSensitive = new QAction(tr("Case Sensitive"), this);
     d->m_filterCaseSensitive->setCheckable(true);
     connect(d->m_filterCaseSensitive, &QAction::toggled, this, &SelectItem::applyFilter);
     popupMenu->addAction(d->m_filterCaseSensitive);
 
-    d->m_filterRegularExpression = new QAction(tr("Use Regular Expression"));
+    d->m_filterRegularExpression = new QAction(tr("Use Regular Expression"), this);
     d->m_filterRegularExpression->setCheckable(true);
     connect(d->m_filterRegularExpression, &QAction::toggled, this, &SelectItem::applyFilter);
     popupMenu->addAction(d->m_filterRegularExpression);
@@ -415,7 +415,7 @@ void SelectItem::languageChange()
     auto setToolTipOnButton = [](QAbstractButton *b, const QString &text) {
         if (!b->shortcut().isEmpty()) {
             b->setToolTip(QString("%1 <span style=\"color: gray; font-size: small\">%2</span>")
-                      .arg(text).arg(b->shortcut().toString(QKeySequence::NativeText)));
+                      .arg(text, b->shortcut().toString(QKeySequence::NativeText)));
         }
     };
 

@@ -65,6 +65,7 @@ protected:
 
 SmartDoubleValidator::SmartDoubleValidator(QObject *parent)
     : QDoubleValidator(parent)
+    , m_empty(0)
 {
     DotCommaFilter::install();
 }
@@ -94,6 +95,7 @@ bool SmartDoubleValidator::event(QEvent *e)
 
 SmartIntValidator::SmartIntValidator(QObject *parent)
     : QIntValidator(parent)
+    , m_empty(0)
 { }
 
 SmartIntValidator::SmartIntValidator(int bottom, int top, int empty, QObject *parent)

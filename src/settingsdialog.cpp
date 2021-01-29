@@ -372,7 +372,7 @@ void SettingsDialog::checkLDrawDir()
     if (path.isEmpty()) {
         const auto ldrawDirs = LDraw::Core::potentialDrawDirs();
         QString ldrawDir;
-        for (auto ld : ldrawDirs) {
+        for (auto &ld : ldrawDirs) {
             if (LDraw::Core::isValidLDrawDir(ld)) {
                 ldrawDir = ld;
                 break;

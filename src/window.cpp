@@ -1903,7 +1903,7 @@ void Window::on_view_column_layout_save_triggered()
             layoutId = "user-default";
         } else {
             const auto allIds = Config::inst()->columnLayoutIds();
-            for (auto id : allIds) {
+            for (const auto &id : allIds) {
                 if (Config::inst()->columnLayoutName(id) == name) {
                     layoutId = id;
                     break;

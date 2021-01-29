@@ -16,6 +16,7 @@
 
 #include <QException>
 #include <QString>
+#include <QStringBuilder>
 #include <QByteArray>
 #include <QFile>
 
@@ -33,8 +34,7 @@ public:
     { }
 
     Exception(QFile *f, const char *message)
-        : Exception(QString::fromLatin1("%1 (%2): %3")
-                    .arg(QLatin1String(message)).arg(f->fileName()).arg(f->errorString()))
+        : Exception(QLatin1String(message) % u" (" % f->fileName() % u"): " % f->errorString())
     { }
 
     template <typename T> Exception &arg(const T &t)

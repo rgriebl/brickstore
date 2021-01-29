@@ -603,7 +603,7 @@ LDraw::Core *LDraw::Core::create(const QString &datadir, QString *errstring)
 
         if (ldrawdir.isEmpty()) {
             const auto ldawDirs = potentialDrawDirs();
-            for (auto ld : ldawDirs) {
+            for (auto &ld : ldawDirs) {
                 if (isValidLDrawDir(ld)) {
                     ldrawdir = ld;
                     break;

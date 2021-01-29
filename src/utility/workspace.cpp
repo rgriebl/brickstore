@@ -283,6 +283,8 @@ bool Workspace::eventFilter(QObject *o, QEvent *e)
             goBack = (me->button() == Qt::BackButton);
             break;
         }
+        default:
+            break;
         }
         if (goBack) {
             setActiveWindow(m_tabs->currentWidget());

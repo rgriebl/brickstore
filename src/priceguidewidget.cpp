@@ -663,7 +663,7 @@ void PriceGuideWidget::paintEvent(QPaintEvent *e)
                     str = Currency::toString(d->m_pg->price(c.m_time, c.m_condition, c.m_price) * d->m_crate, d->m_ccode);
 
                 paintCell(&p, c, c.m_text_flags, str, c.m_flag,
-                          (&c == d->m_cellUnderMouse) && d->m_pg->valid());
+                          (&c == d->m_cellUnderMouse) && d->m_pg && d->m_pg->valid());
             }
             break;
 
@@ -727,7 +727,7 @@ bool PriceGuideWidget::event(QEvent *e)
         auto *he = static_cast<QHelpEvent *>(e);
         auto c = d->cellAtPos(he->pos());
 
-        if (c && (c->m_type == cell::Price) && d->m_pg->valid())
+        if (c && (c->m_type == cell::Price) && d->m_pg && d->m_pg->valid())
             QToolTip::showText(he->globalPos(), PriceGuideWidget::tr("Double-click to set the price of the current item."), this);
         e->accept();
         return true;

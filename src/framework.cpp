@@ -874,7 +874,7 @@ void FrameWork::translateActions()
 
             if (!a->shortcut().isEmpty()) {
                 a->setToolTip(QString::fromLatin1("%1 <span style=\"color: gray; font-size: small\">%2</span>")
-                              .arg(a->text()).arg(a->shortcut().toString(QKeySequence::NativeText)));
+                              .arg(a->text(), a->shortcut().toString(QKeySequence::NativeText)));
             }
 
             QString iconName = QString::fromLatin1(iconalias.value(at.name, at.name));
@@ -1530,10 +1530,8 @@ void FrameWork::checkForUpdates(bool silent)
                 } else {
                     message = tr("A newer version than the one currently installed is available:");
                     message += QString::fromLatin1(R"(<br/><br/><strong>%1</strong> <a href="https://%2/releases/tag/v%3">%4</a><br/>)")
-                            .arg(version.toString())
-                            .arg(Application::inst()->applicationUrl())
-                            .arg(version.toString())
-                            .arg(tr("Download"));
+                            .arg(version.toString(), Application::inst()->applicationUrl(),
+                                 version.toString(), tr("Download"));
                     hasUpdate = true;
                 }
                 succeeded = true;

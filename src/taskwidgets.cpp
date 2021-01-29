@@ -13,6 +13,7 @@
 */
 
 #include <cfloat>
+#include <cmath>
 
 #include <QDockWidget>
 #include <QMainWindow>
@@ -265,13 +266,13 @@ void TaskInfoWidget::delayedSelectionUpdate(const Document::ItemList &list)
                                  "&nbsp;&nbsp;%9: %10<br><br>"
                                  "&nbsp;&nbsp;%11: %12";
 
-        QString s = QString::fromLatin1(fmt)
-                .arg(tr("Multiple lots selected"))
-                .arg(tr("Lots")).arg(stat.lots())
-                .arg(tr("Items")).arg(stat.items())
-                .arg(tr("Cost")).arg(coststr).arg(profitstr)
-                .arg(tr("Value")).arg(valstr)
-                .arg(tr("Weight")).arg(wgtstr);
+        QString s = QString::fromLatin1(fmt).arg(
+                tr("Multiple lots selected"),
+                tr("Lots"), QString::number(stat.lots()),
+                tr("Items"), QString::number(stat.items()),
+                tr("Cost"), coststr, profitstr,
+                tr("Value"), valstr,
+                tr("Weight"), wgtstr);
 
 //  if (( stat.errors ( ) > 0 ) && Config::inst ( )->showInputErrors ( ))
 //   s += QString ( "<br /><br />&nbsp;&nbsp;%1: %2" ).arg ( tr( "Errors" )).arg ( stat.errors ( ));

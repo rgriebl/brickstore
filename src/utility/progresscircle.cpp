@@ -118,8 +118,6 @@ void ProgressCircle::paintEvent(QPaintEvent *)
     QRectF r(dx, dy, s, s);
     r.adjust(1, 1, -1, -1);
 
-    const QPalette pal(palette());
-
     QColor outColor = palette().color(m_online ? QPalette::Active
                                                : QPalette::Disabled, QPalette::Text);
     int fromAngle = 0, sweepAngle = 0;

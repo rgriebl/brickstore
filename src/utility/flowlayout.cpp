@@ -31,8 +31,7 @@ FlowLayout::FlowLayout(int margin, int spacing)
 
 FlowLayout::~FlowLayout()
 {
-    while (auto *item = takeAt(0))
-        delete item;
+    qDeleteAll(m_items);
 }
 
 int FlowLayout::spacing() const

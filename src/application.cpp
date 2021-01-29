@@ -327,6 +327,8 @@ bool Application::eventFilter(QObject *o, QEvent *e)
     case QEvent::PaletteChange:
         setIconTheme();
         break;
+    default:
+        break;
     }
     return QObject::eventFilter(o, e);
 }
