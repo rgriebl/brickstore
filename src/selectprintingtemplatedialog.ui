@@ -29,8 +29,7 @@
      <item>
       <widget class="QToolButton" name="w_update">
        <property name="icon">
-        <iconset resource="../brickstore.qrc">
-         <normaloff>:/images/extras_update_database.png</normaloff>:/images/extras_update_database.png</iconset>
+        <iconset theme="view-refresh"/>
        </property>
        <property name="autoRaise">
         <bool>true</bool>
@@ -61,9 +60,7 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../brickstore.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>w_buttons</sender>

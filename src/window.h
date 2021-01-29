@@ -93,17 +93,17 @@ public slots:
 
     void on_view_difference_mode_toggled(bool);
 
-    void on_file_save_triggered();
-    void on_file_saveas_triggered();
-    void on_file_export_bl_xml_triggered();
-    void on_file_export_bl_xml_clip_triggered();
-    void on_file_export_bl_update_clip_triggered();
-    void on_file_export_bl_invreq_clip_triggered();
-    void on_file_export_bl_wantedlist_clip_triggered();
+    void on_document_save_triggered();
+    void on_document_save_as_triggered();
+    void on_document_export_bl_xml_triggered();
+    void on_document_export_bl_xml_clip_triggered();
+    void on_document_export_bl_update_clip_triggered();
+    void on_document_export_bl_invreq_clip_triggered();
+    void on_document_export_bl_wantedlist_clip_triggered();
 
-    void on_file_print_triggered();
-    void on_file_print_pdf_triggered();
-    void on_file_close_triggered();
+    void on_document_print_triggered();
+    void on_document_print_pdf_triggered();
+    void on_document_close_triggered();
 
     void on_edit_cut_triggered();
     void on_edit_copy_triggered();
@@ -165,10 +165,10 @@ public slots:
     void on_edit_comment_set_triggered();
     void on_edit_comment_clear_triggered();
 
-    void on_edit_bl_catalog_triggered();
-    void on_edit_bl_priceguide_triggered();
-    void on_edit_bl_lotsforsale_triggered();
-    void on_edit_bl_myinventory_triggered();
+    void on_bricklink_catalog_triggered();
+    void on_bricklink_priceguide_triggered();
+    void on_bricklink_lotsforsale_triggered();
+    void on_bricklink_myinventory_triggered();
 
     void on_view_column_layout_save_triggered();
     void on_view_column_layout_list_load(const QString &layoutId);

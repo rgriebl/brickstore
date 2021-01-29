@@ -100,18 +100,6 @@ WelcomeButton::WelcomeButton(QAction *a, QWidget *parent)
     if (!a)
         return;
 
-    if (!a->icon().isNull()) {
-        setIcon(a->icon());
-    } else {
-        const auto containers = a->associatedWidgets();
-        for (auto *widget : containers) {
-            if (QMenu *menu = qobject_cast<QMenu *>(widget)) {
-                if (!menu->icon().isNull())
-                    setIcon(menu->icon());
-            }
-        }
-    }
-
     auto languageChange = [this](QAction *a) {
         setText(a->text());
         if (!a->shortcut().isEmpty()) {
@@ -119,6 +107,18 @@ WelcomeButton::WelcomeButton(QAction *a, QWidget *parent)
             setDescription(desc.arg(a->shortcut().toString(QKeySequence::NativeText)));
         }
         setToolTip(a->toolTip());
+
+        if (!a->icon().isNull()) {
+            setIcon(a->icon());
+        } else {
+            const auto containers = a->associatedWidgets();
+            for (auto *widget : containers) {
+                if (QMenu *menu = qobject_cast<QMenu *>(widget)) {
+                    if (!menu->icon().isNull())
+                        setIcon(menu->icon());
+                }
+            }
+        }
     };
 
     connect(this, &WelcomeButton::clicked, a, &QAction::trigger);
@@ -143,7 +143,7 @@ WelcomeButton::WelcomeButton(const QString &text, const QString &description, QW
     setSizePolicy(policy);
 
     setIconSize({ 32, 32 });
-    setIcon(QIcon(":/images/right_arrow"));
+    setIcon(QIcon::fromTheme("go-next"));
 
     resetTitleFont();
 }
@@ -335,21 +335,21 @@ WelcomeWidget::WelcomeWidget(QWidget *parent)
 
     // document
 
-    m_file_frame = new QGroupBox();
-    auto file_layout = new QVBoxLayout();
-    for (const auto &name : { "file_new", "file_open" }) {
+    m_document_frame = new QGroupBox();
+    auto document_layout = new QVBoxLayout();
+    for (const auto &name : { "document_new", "document_open" }) {
         auto b = new WelcomeButton(FrameWork::inst()->findAction(name));
-        file_layout->addWidget(b);
+        document_layout->addWidget(b);
     }
-    m_file_frame->setLayout(file_layout);
-    layout->addWidget(m_file_frame, 1, 2);
+    m_document_frame->setLayout(document_layout);
+    layout->addWidget(m_document_frame, 1, 2);
 
     // import
 
     m_import_frame = new QGroupBox();
     auto import_layout = new QVBoxLayout();
-    for (const auto &name : { "file_import_bl_inv", "file_import_bl_xml", "file_import_bl_order",
-         "file_import_bl_store_inv" /*, "file_import_bl_cart", "file_import_ldraw_model"*/ }) {
+    for (const auto &name : { "document_import_bl_inv", "document_import_bl_xml", "document_import_bl_order",
+         "document_import_bl_store_inv" /*, "document_import_bl_cart", "document_import_ldraw_model"*/ }) {
         auto b = new WelcomeButton(FrameWork::inst()->findAction(name));
         import_layout->addWidget(b);
     }
@@ -384,7 +384,7 @@ void WelcomeWidget::updateVersionsText()
 void WelcomeWidget::languageChange()
 {
     m_recent_frame->setTitle(tr("Open recent files"));
-    m_file_frame->setTitle(tr("Document"));
+    m_document_frame->setTitle(tr("Document"));
     m_import_frame->setTitle(tr("Import items"));
 
     updateVersionsText();

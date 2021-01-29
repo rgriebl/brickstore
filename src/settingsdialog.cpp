@@ -363,8 +363,11 @@ void SettingsDialog::checkLDrawDir()
 {
     QString path = w_ldraw_dir->itemData(0).toString();
 
-    static QString iconOk = QLatin1String(R"(<table><tr><td><img src=":/images/edit_status_include.png"/></td><td>&nbsp;%1<br/><i>%2</i></td></tr></table>)");
-    static QString iconFail = QLatin1String(R"(<img src=":/images/edit_status_exclude.png"/>&nbsp;%1)");
+    auto setStatus = [this](bool ok, const QString &status, const QString &path = { }) {
+        w_ldraw_status->setText(QLatin1String("%1<br><i>%2</i>").arg(status, path));
+        auto icon = QIcon::fromTheme(ok ? "vcs-normal" : "vcs-removed");
+        w_ldraw_status_icon->setPixmap(icon.pixmap(fontMetrics().height() * 3 / 2));
+    };
 
     if (path.isEmpty()) {
         const auto ldrawDirs = LDraw::Core::potentialDrawDirs();
@@ -376,14 +379,14 @@ void SettingsDialog::checkLDrawDir()
             }
         }
         if (!ldrawDir.isEmpty())
-            w_ldraw_status->setText(iconOk.arg(tr("Auto-detected an LDraw installation at:")).arg(ldrawDir));
+            setStatus(true, tr("Auto-detected an LDraw installation at:"), ldrawDir);
         else
-            w_ldraw_status->setText(iconFail.arg(tr("No LDraw installation could be auto-detected.")));
+            setStatus(false, tr("No LDraw installation could be auto-detected."));
     } else {
         if (LDraw::Core::isValidLDrawDir(path))
-            w_ldraw_status->setText(iconOk.arg(tr("Valid LDraw installation at:")).arg(path));
+            setStatus(true, tr("Valid LDraw installation at:"), path);
         else
-            w_ldraw_status->setText(iconFail.arg(tr("Not a valid LDraw installation.")));
+            setStatus(false, tr("Not a valid LDraw installation."));
     }
 }
 

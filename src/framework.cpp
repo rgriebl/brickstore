@@ -400,28 +400,28 @@ FrameWork::FrameWork(QWidget *parent)
 
     createActions();
 
-    menuBar()->addMenu(createMenu("file", {
-                                      "file_new",
-                                      "file_open",
-                                      "file_open_recent",
+    menuBar()->addMenu(createMenu("menu_file", {
+                                      "document_new",
+                                      "document_open",
+                                      "document_open_recent",
                                       "-",
-                                      "file_save",
-                                      "file_saveas",
+                                      "document_save",
+                                      "document_save_as",
                                       "-",
-                                      "file_import",
-                                      "file_export",
+                                      "document_import",
+                                      "document_export",
                                       "-",
-                                      "file_print",
+                                      "document_print",
                                       //#if !defined(Q_OS_MACOS)
-                                      "file_print_pdf",
+                                      "document_print_pdf",
                                       //#endif
                                       "-",
-                                      "file_close",
+                                      "document_close",
                                       "-",
-                                      "file_exit"
+                                      "application_exit"
                                   }));
 
-    menuBar()->addMenu(createMenu("edit", {
+    menuBar()->addMenu(createMenu("menu_edit", {
                                       "edit_undo",
                                       "edit_redo",
                                       "-",
@@ -456,13 +456,13 @@ FrameWork::FrameWork(QWidget *parent)
                                       "edit_reset_diffs",
                                       "edit_copyremarks",
                                       "-",
-                                      "edit_bl_catalog",
-                                      "edit_bl_priceguide",
-                                      "edit_bl_lotsforsale",
-                                      "edit_bl_myinventory"
+                                      "bricklink_catalog",
+                                      "bricklink_priceguide",
+                                      "bricklink_lotsforsale",
+                                      "bricklink_myinventory"
                                   }));
 
-    menuBar()->addMenu(createMenu("view", {
+    menuBar()->addMenu(createMenu("menu_view", {
                                       "view_toolbar",
                                       "view_docks",
                                       "view_statusbar",
@@ -479,23 +479,23 @@ FrameWork::FrameWork(QWidget *parent)
                                       "view_column_layout_load"
                                   }));
 
-    menuBar()->addMenu(createMenu("extras", {
-                                      "extras_update_database",
+    menuBar()->addMenu(createMenu("menu_extras", {
+                                      "update_database",
                                       "-",
-                                      "extras_configure"
+                                      "configure"
                                   }));
 
     QMenu *m = m_workspace->windowMenu(true, this);
-    m->menuAction()->setObjectName(QLatin1String("window"));
+    m->menuAction()->setObjectName(QLatin1String("menu_window"));
     menuBar()->addMenu(m);
 
-    menuBar()->addMenu(createMenu("help", {
-                                      "help_updates",
+    menuBar()->addMenu(createMenu("menu_help", {
+                                      "check_for_updates",
                                       "-",
                                       "help_about"
                                   }));
 
-    m_contextmenu = createMenu("context", {
+    m_contextmenu = createMenu("menu_context", {
                                    "edit_cut",
                                    "edit_copy",
                                    "edit_paste",
@@ -517,19 +517,19 @@ FrameWork::FrameWork(QWidget *parent)
                                    "edit_comment",
                                    "edit_remark",
                                    "-",
-                                   "edit_bl_catalog",
-                                   "edit_bl_priceguide",
-                                   "edit_bl_lotsforsale",
-                                   "edit_bl_myinventory"
+                                   "bricklink_catalog",
+                                   "bricklink_priceguide",
+                                   "bricklink_lotsforsale",
+                                   "bricklink_myinventory"
                                });
 
     setupToolBar(m_toolbar, {
-                     "file_new",
-                     "file_open",
-                     "file_save",
+                     "document_new",
+                     "document_open",
+                     "document_save",
                      "-",
-                     "file_import",
-                     "file_export",
+                     "document_import",
+                     "document_export",
                      "-",
                      "edit_undo",
                      "edit_redo",
@@ -657,8 +657,8 @@ void FrameWork::setupScripts()
 
     const auto scripts = ScriptManager::inst()->extensionScripts();
 
-    auto extrasMenu = findChild<QAction *>("extras")->menu();
-    auto contextMenu = findChild<QAction *>("context")->menu();
+    auto extrasMenu = findChild<QAction *>("menu_extras")->menu();
+    auto contextMenu = findChild<QAction *>("menu_context")->menu();
 
     bool addedToExtras = false;
     bool addedToContext = false;
@@ -728,45 +728,45 @@ void FrameWork::languageChange()
 void FrameWork::translateActions()
 {
     struct ActionDefinition {
-        const char *m_name;
-        QString     m_text;
-        QString     m_shortcut;
-        QKeySequence::StandardKey m_standardKey;
+        const char *name;
+        QString     text;
+        QString     shortcut;
+        QKeySequence::StandardKey standardKey;
 
         ActionDefinition(const char *n, const QString &t, const QString &s)
-            : m_name(n), m_text(t), m_shortcut(s), m_standardKey(QKeySequence::UnknownKey) { }
+            : name(n), text(t), shortcut(s), standardKey(QKeySequence::UnknownKey) { }
         ActionDefinition(const char *n, const QString &t, QKeySequence::StandardKey k = QKeySequence::UnknownKey)
-            : m_name(n), m_text(t), m_standardKey(k) { }
+            : name(n), text(t), standardKey(k) { }
     };
 
     // recreating this whole table on each invocation is far from ideal, but QT_TR_NOOP doesn't
     // support the disambiguate parameter, which we need (e.g. New)
 
     const ActionDefinition actiontable[] = {
-        { "file",                           tr("&File"),                              },
-        { "file_new",                       tr("New", "File|New"),                    QKeySequence::New },
-        { "file_open",                      tr("Open..."),                            QKeySequence::Open },
-        { "file_open_recent",               tr("Open Recent"),                        },
-        { "file_save",                      tr("Save"),                               QKeySequence::Save },
-        { "file_saveas",                    tr("Save As..."),                         },
-        { "file_print",                     tr("Print..."),                           QKeySequence::Print },
-        { "file_print_pdf",                 tr("Print to PDF..."),                    },
-        { "file_import",                    tr("Import"),                             },
-        { "file_import_bl_inv",             tr("BrickLink Set Inventory..."),         tr("Ctrl+I,Ctrl+I", "File|Import BrickLink Set Inventory") },
-        { "file_import_bl_xml",             tr("BrickLink XML..."),                   tr("Ctrl+I,Ctrl+X", "File|Import BrickLink XML") },
-        { "file_import_bl_order",           tr("BrickLink Order..."),                 tr("Ctrl+I,Ctrl+O", "File|Import BrickLink Order") },
-        { "file_import_bl_store_inv",       tr("BrickLink Store Inventory..."),       tr("Ctrl+I,Ctrl+S", "File|Import BrickLink Store Inventory") },
-        { "file_import_bl_cart",            tr("BrickLink Shopping Cart..."),         tr("Ctrl+I,Ctrl+C", "File|Import BrickLink Shopping Cart") },
-        { "file_import_ldraw_model",        tr("LDraw Model..."),                     tr("Ctrl+I,Ctrl+L", "File|Import LDraw Model") },
-        { "file_export",                    tr("Export"),                             },
-        { "file_export_bl_xml",             tr("BrickLink XML..."),                         tr("Ctrl+E,Ctrl+X", "File|Import BrickLink XML") },
-        { "file_export_bl_xml_clip",        tr("BrickLink Mass-Upload XML to Clipboard"),   tr("Ctrl+E,Ctrl+U", "File|Import BrickLink Mass-Upload") },
-        { "file_export_bl_update_clip",     tr("BrickLink Mass-Update XML to Clipboard"),   tr("Ctrl+E,Ctrl+P", "File|Import BrickLink Mass-Update") },
-        { "file_export_bl_invreq_clip",     tr("BrickLink Set Inventory XML to Clipboard"), tr("Ctrl+E,Ctrl+I", "File|Import BrickLink Set Inventory") },
-        { "file_export_bl_wantedlist_clip", tr("BrickLink Wanted List XML to Clipboard"),   tr("Ctrl+E,Ctrl+W", "File|Import BrickLink Wanted List") },
-        { "file_close",                     tr("Close"),                              QKeySequence::Close },
-        { "file_exit",                      tr("Exit"),                               QKeySequence::Quit },
-        { "edit",                           tr("&Edit"),                              },
+        { "menu_file",                      tr("&File"),                              },
+        { "document_new",                   tr("New", "File|New"),                    QKeySequence::New },
+        { "document_open",                  tr("Open..."),                            QKeySequence::Open },
+        { "document_open_recent",           tr("Open Recent"),                        },
+        { "document_save",                  tr("Save"),                               QKeySequence::Save },
+        { "document_save_as",               tr("Save As..."),                         },
+        { "document_print",                 tr("Print..."),                           QKeySequence::Print },
+        { "document_print_pdf",             tr("Print to PDF..."),                    },
+        { "document_import",                tr("Import"),                             },
+        { "document_import_bl_inv",         tr("BrickLink Set Inventory..."),         tr("Ctrl+I,Ctrl+I", "File|Import BrickLink Set Inventory") },
+        { "document_import_bl_xml",         tr("BrickLink XML..."),                   tr("Ctrl+I,Ctrl+X", "File|Import BrickLink XML") },
+        { "document_import_bl_order",       tr("BrickLink Order..."),                 tr("Ctrl+I,Ctrl+O", "File|Import BrickLink Order") },
+        { "document_import_bl_store_inv",   tr("BrickLink Store Inventory..."),       tr("Ctrl+I,Ctrl+S", "File|Import BrickLink Store Inventory") },
+        { "document_import_bl_cart",        tr("BrickLink Shopping Cart..."),         tr("Ctrl+I,Ctrl+C", "File|Import BrickLink Shopping Cart") },
+        { "document_import_ldraw_model",    tr("LDraw Model..."),                     tr("Ctrl+I,Ctrl+L", "File|Import LDraw Model") },
+        { "document_export",                tr("Export"),                             },
+        { "document_export_bl_xml",         tr("BrickLink XML..."),                         tr("Ctrl+E,Ctrl+X", "File|Import BrickLink XML") },
+        { "document_export_bl_xml_clip",    tr("BrickLink Mass-Upload XML to Clipboard"),   tr("Ctrl+E,Ctrl+U", "File|Import BrickLink Mass-Upload") },
+        { "document_export_bl_update_clip", tr("BrickLink Mass-Update XML to Clipboard"),   tr("Ctrl+E,Ctrl+P", "File|Import BrickLink Mass-Update") },
+        { "document_export_bl_invreq_clip", tr("BrickLink Set Inventory XML to Clipboard"), tr("Ctrl+E,Ctrl+I", "File|Import BrickLink Set Inventory") },
+        { "document_export_bl_wantedlist_clip", tr("BrickLink Wanted List XML to Clipboard"),   tr("Ctrl+E,Ctrl+W", "File|Import BrickLink Wanted List") },
+        { "document_close",                 tr("Close"),                              QKeySequence::Close },
+        { "application_exit",               tr("Exit"),                               QKeySequence::Quit },
+        { "menu_edit",                      tr("&Edit"),                              },
         { "edit_undo",                      nullptr,                                  QKeySequence::Undo },
         { "edit_redo",                      nullptr,                                  QKeySequence::Redo },
         { "edit_cut",                       tr("Cut"),                                QKeySequence::Cut },
@@ -784,7 +784,7 @@ void FrameWork::translateActions()
         { "edit_filter_from_selection",     tr("Create a Filter from the Selection"), },
         { "edit_filter_focus",              tr("Filter the Item List"),               QKeySequence::Find },
         { "edit_select_none",               tr("Select None"),                        QKeySequence::Deselect },
-        { "view",                           tr("&View"),                              },
+        { "menu_view",                      tr("&View"),                              },
         { "view_toolbar",                   tr("View Toolbar"),                       },
         { "view_docks",                     tr("View Info Docks"),                    },
         { "view_statusbar",                 tr("View Statusbar"),                     },
@@ -795,13 +795,13 @@ void FrameWork::translateActions()
         { "view_column_layout_save",        tr("Save Column Layout..."),              },
         { "view_column_layout_manage",      tr("Manage Column Layouts..."),           },
         { "view_column_layout_load",        tr("Load Column Layout"),                 },
-        { "extras",                         tr("E&xtras"),                            },
-        { "extras_update_database",         tr("Update Database"),                    },
-        { "extras_configure",               tr("Configure..."),                       },
-        { "window",                         tr("&Windows"),                           },
-        { "help",                           tr("&Help"),                              },
+        { "menu_extras",                    tr("E&xtras"),                            },
+        { "update_database",                tr("Update Database"),                    },
+        { "configure",                      tr("Settings..."),                        },
+        { "menu_window",                    tr("&Windows"),                           },
+        { "menu_help",                      tr("&Help"),                              },
         { "help_about",                     tr("About..."),                           },
-        { "help_updates",                   tr("Check for Program Updates..."),       },
+        { "check_for_updates",              tr("Check for Program Updates..."),       },
         { "edit_status",                    tr("Status"),                             },
         { "edit_status_include",            tr("Include"),                            },
         { "edit_status_exclude",            tr("Exclude"),                            },
@@ -852,27 +852,37 @@ void FrameWork::translateActions()
         { "edit_stockroom_b",               tr("B"),                                  },
         { "edit_stockroom_c",               tr("C"),                                  },
         { "edit_reserved",                  tr("Reserved for..."),                    },
-        { "edit_bl_catalog",                tr("Show BrickLink Catalog Info..."),     tr("Ctrl+B,Ctrl+C", "Edit|Show BL Catalog Info") },
-        { "edit_bl_priceguide",             tr("Show BrickLink Price Guide Info..."), tr("Ctrl+B,Ctrl+P", "Edit|Show BL Price Guide") },
-        { "edit_bl_lotsforsale",            tr("Show Lots for Sale on BrickLink..."), tr("Ctrl+B,Ctrl+L", "Edit|Show BL Lots for Sale") },
-        { "edit_bl_myinventory",            tr("Show in my Store on BrickLink..."),   tr("Ctrl+B,Ctrl+I", "Edit|Show BL my Inventory") },
-
-        { nullptr, nullptr }
+        { "bricklink_catalog",              tr("Show BrickLink Catalog Info..."),     tr("Ctrl+B,Ctrl+C", "Edit|Show BL Catalog Info") },
+        { "bricklink_priceguide",           tr("Show BrickLink Price Guide Info..."), tr("Ctrl+B,Ctrl+P", "Edit|Show BL Price Guide") },
+        { "bricklink_lotsforsale",          tr("Show Lots for Sale on BrickLink..."), tr("Ctrl+B,Ctrl+L", "Edit|Show BL Lots for Sale") },
+        { "bricklink_myinventory",          tr("Show in my Store on BrickLink..."),   tr("Ctrl+B,Ctrl+I", "Edit|Show BL my Inventory") },
     };
 
-    for (auto atptr = actiontable; atptr->m_name; ++atptr) {
-        if (QAction *a = findAction(atptr->m_name)) {
-            if (!atptr->m_text.isNull())
-                a->setText(atptr->m_text);
-            if (atptr->m_standardKey != QKeySequence::UnknownKey)
-                a->setShortcuts(atptr->m_standardKey);
-            else if (!atptr->m_shortcut.isNull())
-                a->setShortcuts({ QKeySequence(atptr->m_shortcut) });
+    static const QMap<QByteArray, QByteArray> iconalias = {
+        { "update_database", "view_refresh" },
+        { "check_for_updates", "update_none" },
+    };
+
+    for (auto &at : actiontable) {
+        if (QAction *a = findAction(at.name)) {
+            if (!at.text.isNull())
+                a->setText(at.text);
+            if (at.standardKey != QKeySequence::UnknownKey)
+                a->setShortcuts(at.standardKey);
+            else if (!at.shortcut.isNull())
+                a->setShortcuts({ QKeySequence(at.shortcut) });
 
             if (!a->shortcut().isEmpty()) {
                 a->setToolTip(QString::fromLatin1("%1 <span style=\"color: gray; font-size: small\">%2</span>")
                               .arg(a->text()).arg(a->shortcut().toString(QKeySequence::NativeText)));
             }
+
+            QString iconName = QString::fromLatin1(iconalias.value(at.name, at.name));
+            iconName.replace("_", "-");
+
+            QIcon icon = QIcon::fromTheme(iconName);
+            if (!icon.isNull())
+                a->setIcon(icon);
         }
     }
 }
@@ -1047,7 +1057,7 @@ bool FrameWork::setupToolBar(QToolBar *t, const QVector<QByteArray> &a_names)
 
                 m_filter = new QLineEdit(this);
                 m_filter->setClearButtonEnabled(true);
-                m_filter->addAction(new QAction(QIcon(":/images/filter.png"), QString(), this),
+                m_filter->addAction(new QAction(QIcon::fromTheme("view-filter"), QString(), this),
                                     QLineEdit::LeadingPosition);
                 m_filter_delay = new QTimer(this);
                 m_filter_delay->setInterval(800ms);
@@ -1067,7 +1077,7 @@ bool FrameWork::setupToolBar(QToolBar *t, const QVector<QByteArray> &a_names)
                     continue;
                 }
                 m_progress = new ProgressCircle();
-                m_progress->setIcon(QIcon(":/images/brickstore.png"));
+                m_progress->setIcon(QIcon(":/images/brickstore_icon.png"));
                 m_progress->setColor("#4ba2d8");
                 t->addWidget(m_progress);
             }
@@ -1148,60 +1158,60 @@ void FrameWork::createActions()
     QActionGroup *g;
     QMenu *m;
 
-    (void) newQAction(this, "file_new", 0, false, this, [this]() {
+    (void) newQAction(this, "document_new", 0, false, this, [this]() {
         createWindow(Document::fileNew());
     });
-    (void) newQAction(this, "file_open", 0, false, this, [this]() {
+    (void) newQAction(this, "document_open", 0, false, this, [this]() {
         createWindow(Document::fileOpen());
     });
 
     auto rm = new RecentMenu(this);
-    rm->menuAction()->setObjectName("file_open_recent");
+    rm->menuAction()->setObjectName("document_open_recent");
     connect(rm, &RecentMenu::openRecent,
             this, &FrameWork::openDocument);
     connect(rm, &RecentMenu::clearRecent,
             this, [this]() { Config::inst()->setRecentFiles({ }); });
 
-    (void) newQAction(this, "file_save", NeedDocument | NeedModification);
-    (void) newQAction(this, "file_saveas", NeedDocument);
-    (void) newQAction(this, "file_print", NeedDocument);
-    (void) newQAction(this, "file_print_pdf", NeedDocument);
+    (void) newQAction(this, "document_save", NeedDocument | NeedModification);
+    (void) newQAction(this, "document_save_as", NeedDocument);
+    (void) newQAction(this, "document_print", NeedDocument);
+    (void) newQAction(this, "document_print_pdf", NeedDocument);
 
-    m = newQMenu(this, "file_import");
-    m->addAction(newQAction(this, "file_import_bl_inv", 0, false, this, [this]() {
+    m = newQMenu(this, "document_import");
+    m->addAction(newQAction(this, "document_import_bl_inv", 0, false, this, [this]() {
         fileImportBrickLinkInventory(nullptr);
     }));
-    m->addAction(newQAction(this, "file_import_bl_xml", 0, false, this, [this]() {
+    m->addAction(newQAction(this, "document_import_bl_xml", 0, false, this, [this]() {
         createWindow(Document::fileImportBrickLinkXML());
     }));
-    m->addAction(newQAction(this, "file_import_bl_order", NeedNetwork, false, this, [this]() {
+    m->addAction(newQAction(this, "document_import_bl_order", NeedNetwork, false, this, [this]() {
         if (checkBrickLinkLogin()) {
             foreach (Document *doc, Document::fileImportBrickLinkOrders())
                 createWindow(doc);
         }
     }));
-    m->addAction(newQAction(this, "file_import_bl_store_inv", NeedNetwork, false, this, [this]() {
+    m->addAction(newQAction(this, "document_import_bl_store_inv", NeedNetwork, false, this, [this]() {
         if (checkBrickLinkLogin())
             createWindow(Document::fileImportBrickLinkStore());
     }));
-    m->addAction(newQAction(this, "file_import_bl_cart", NeedNetwork, false, this, [this]() {
+    m->addAction(newQAction(this, "document_import_bl_cart", NeedNetwork, false, this, [this]() {
         createWindow(Document::fileImportBrickLinkCart());
     }));
-    m->addAction(newQAction(this, "file_import_ldraw_model", 0, false, this, [this]() {
+    m->addAction(newQAction(this, "document_import_ldraw_model", 0, false, this, [this]() {
         createWindow(Document::fileImportLDrawModel());
     }));
 
 
-    m = newQMenu(this, "file_export");
-    m->addAction(newQAction(this, "file_export_bl_xml", NeedDocument));
-    m->addAction(newQAction(this, "file_export_bl_xml_clip", NeedDocument));
-    m->addAction(newQAction(this, "file_export_bl_update_clip", NeedDocument));
-    m->addAction(newQAction(this, "file_export_bl_invreq_clip", NeedDocument));
-    m->addAction(newQAction(this, "file_export_bl_wantedlist_clip", NeedDocument));
+    m = newQMenu(this, "document_export");
+    m->addAction(newQAction(this, "document_export_bl_xml", NeedDocument));
+    m->addAction(newQAction(this, "document_export_bl_xml_clip", NeedDocument));
+    m->addAction(newQAction(this, "document_export_bl_update_clip", NeedDocument));
+    m->addAction(newQAction(this, "document_export_bl_invreq_clip", NeedDocument));
+    m->addAction(newQAction(this, "document_export_bl_wantedlist_clip", NeedDocument));
 
-    (void) newQAction(this, "file_close", NeedDocument);
+    (void) newQAction(this, "document_close", NeedDocument);
 
-    a = newQAction(this, "file_exit", 0, false, this, &FrameWork::close);
+    a = newQAction(this, "application_exit", 0, false, this, &FrameWork::close);
     a->setMenuRole(QAction::QuitRole);
 
     a = m_undogroup->createUndoAction(this);
@@ -1309,10 +1319,10 @@ void FrameWork::createActions()
 
     (void) newQAction(this, "edit_reserved", NeedSelection(1));
 
-    (void) newQAction(this, "edit_bl_catalog", NeedSelection(1, 1) | NeedNetwork);
-    (void) newQAction(this, "edit_bl_priceguide", NeedSelection(1, 1) | NeedNetwork);
-    (void) newQAction(this, "edit_bl_lotsforsale", NeedSelection(1, 1) | NeedNetwork);
-    (void) newQAction(this, "edit_bl_myinventory", NeedSelection(1, 1) | NeedLotId | NeedNetwork);
+    (void) newQAction(this, "bricklink_catalog", NeedSelection(1, 1) | NeedNetwork);
+    (void) newQAction(this, "bricklink_priceguide", NeedSelection(1, 1) | NeedNetwork);
+    (void) newQAction(this, "bricklink_lotsforsale", NeedSelection(1, 1) | NeedNetwork);
+    (void) newQAction(this, "bricklink_myinventory", NeedSelection(1, 1) | NeedLotId | NeedNetwork);
 
     (void) newQAction(this, "view_fullscreen", 0, true, this, [this](bool fullScreen) {
         setWindowState(windowState().setFlag(Qt::WindowFullScreen, fullScreen));
@@ -1332,12 +1342,12 @@ void FrameWork::createActions()
     (void) newQAction(this, "view_column_layout_save", NeedDocument, false);
     (void) newQAction(this, "view_column_layout_manage", 0, false, this, &FrameWork::manageLayouts);
     auto lclm = newQMenu<LoadColumnLayoutMenu>(this, "view_column_layout_load", NeedDocument);
-    lclm->menuAction()->setIcon(QIcon(":/images/viewmode_images.png"));
+    lclm->menuAction()->setIcon(QIcon::fromTheme("object-columns"));
     lclm->setObjectName("view_column_layout_list");
 
-    (void) newQAction(this, "extras_update_database", NeedNetwork, false, this, &FrameWork::updateDatabase);
+    (void) newQAction(this, "update_database", NeedNetwork, false, this, &FrameWork::updateDatabase);
 
-    a = newQAction(this, "extras_configure", 0, false, this, [this]() { configure(); });
+    a = newQAction(this, "configure", 0, false, this, [this]() { showSettings(); });
     a->setMenuRole(QAction::PreferencesRole);
 
     //(void) newQAction(this, "help_whatsthis", 0, false, this, &FrameWork::whatsThis);
@@ -1347,20 +1357,8 @@ void FrameWork::createActions()
     });
     a->setMenuRole(QAction::AboutRole);
 
-    a = newQAction(this, "help_updates", NeedNetwork, false, this, &FrameWork::checkForUpdates);
+    a = newQAction(this, "check_for_updates", NeedNetwork, false, this, &FrameWork::checkForUpdates);
     a->setMenuRole(QAction::ApplicationSpecificRole);
-
-    // set all icons that have a pixmap corresponding to name()
-
-    QList<QAction *> alist = findChildren<QAction *>();
-    foreach (QAction *act, alist) {
-        if (!act->objectName().isEmpty()) {
-            QString path = QLatin1String(":/images/") + act->objectName() + QLatin1String(".png");
-
-            if (QFile::exists(path))
-                act->setIcon(QIcon(path));
-        }
-    }
 }
 
 
@@ -1397,7 +1395,7 @@ bool FrameWork::checkBrickLinkLogin()
         if (MessageBox::question(this, { },
                                  tr("No valid BrickLink login settings found.<br /><br />Do you want to change the settings now?")
                                  ) == MessageBox::Yes)
-            configure("network");
+            showSettings("bricklink");
         else
             return false;
     }
@@ -1844,7 +1842,7 @@ void FrameWork::modificationUpdate()
 {
     bool modified = m_current_window ? m_current_window->isWindowModified() : false;
     setWindowModified(modified);
-    if (QAction *a = findAction("file_save"))
+    if (QAction *a = findAction("document_save"))
         a->setEnabled(modified);
 }
 
@@ -1859,7 +1857,7 @@ void FrameWork::transferJobProgressUpdate(int p, int t)
     }
 }
 
-void FrameWork::configure(const char *page)
+void FrameWork::showSettings(const char *page)
 {
     SettingsDialog d(page, this);
     d.exec();

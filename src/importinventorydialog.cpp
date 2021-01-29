@@ -50,21 +50,21 @@ ImportInventoryDialog::ImportInventoryDialog(QWidget *parent)
             .toByteArray();
     restoreState(ba);
 
-    if (QAction *a = FrameWork::inst()->findAction("edit_bl_catalog")) {
+    if (QAction *a = FrameWork::inst()->findAction("bricklink_catalog")) {
         connect(new QShortcut(a->shortcut(), this), &QShortcut::activated, this, [this]() {
             const auto item = w_select->currentItem();
             if (item)
                 QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_CatalogInfo, item));
         });
     }
-    if (QAction *a = FrameWork::inst()->findAction("edit_bl_priceguide")) {
+    if (QAction *a = FrameWork::inst()->findAction("bricklink_priceguide")) {
         connect(new QShortcut(a->shortcut(), this), &QShortcut::activated, this, [this]() {
             const auto item = w_select->currentItem();
             if (item && !item->itemType()->hasColors())
                 QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_PriceGuideInfo, item));
         });
     }
-    if (QAction *a = FrameWork::inst()->findAction("edit_bl_lotsforsale")) {
+    if (QAction *a = FrameWork::inst()->findAction("bricklink_lotsforsale")) {
         connect(new QShortcut(a->shortcut(), this), &QShortcut::activated, this, [this]() {
             const auto item = w_select->currentItem();
             if (item && !item->itemType()->hasColors())

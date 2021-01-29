@@ -117,7 +117,7 @@ PriceGuideWidget::PriceGuideWidget(QWidget *parent)
     QAction *a;
     a = new QAction(this);
     a->setObjectName("priceguide_reload");
-    a->setIcon(QIcon(":/images/reload.png"));
+    a->setIcon(QIcon::fromTheme("view-refresh"));
     connect(a, &QAction::triggered,
             this, &PriceGuideWidget::doUpdate);
     addAction(a);
@@ -128,19 +128,19 @@ PriceGuideWidget::PriceGuideWidget(QWidget *parent)
 
     a = new QAction(this);
     a->setObjectName("priceguide_bl_catalog");
-    a->setIcon(QIcon(":/images/edit_bl_catalog.png"));
+    a->setIcon(QIcon::fromTheme("bricklink-catalog"));
     connect(a, &QAction::triggered,
             this, &PriceGuideWidget::showBLCatalogInfo);
     addAction(a);
     a = new QAction(this);
     a->setObjectName("priceguide_bl_priceguide");
-    a->setIcon(QIcon(":/images/edit_bl_priceguide.png"));
+    a->setIcon(QIcon::fromTheme("bricklink-priceguide"));
     connect(a, &QAction::triggered,
             this, &PriceGuideWidget::showBLPriceGuideInfo);
     addAction(a);
     a = new QAction(this);
     a->setObjectName("priceguide_bl_lotsforsale");
-    a->setIcon(QIcon(":/images/edit_bl_lotsforsale.png"));
+    a->setIcon(QIcon::fromTheme("bricklink-lotsforsale"));
     connect(a, &QAction::triggered,
             this, &PriceGuideWidget::showBLLotsForSale);
     addAction(a);

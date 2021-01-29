@@ -1,0 +1,14 @@
+[Icon Theme]
+Name=brickstore-breeze-dark
+Comment=KDE Breeze-Dark icons with BrickStore extensions
+Inherits=breeze-dark,default
+Directories=svg,generated
+
+[svg]
+Size=16
+Type=Scalable
+MinSize=1
+MaxSize=256
+
+[generated]
+Size=64

@@ -374,8 +374,7 @@
      <item>
       <widget class="QToolButton" name="w_toggle_picture">
        <property name="icon">
-        <iconset resource="../brickstore.qrc">
-         <normaloff>:/images/edit_bl_catalog.png</normaloff>:/images/edit_bl_catalog.png</iconset>
+        <iconset theme="bricklink-catalog"/>
        </property>
        <property name="checkable">
         <bool>true</bool>
@@ -391,8 +390,7 @@
      <item>
       <widget class="QToolButton" name="w_toggle_appears_in">
        <property name="icon">
-        <iconset resource="../brickstore.qrc">
-         <normaloff>:/images/appearsin.png</normaloff>:/images/appearsin.png</iconset>
+        <iconset theme="bricklink-appearsin"/>
        </property>
        <property name="checkable">
         <bool>true</bool>
@@ -408,8 +406,7 @@
      <item>
       <widget class="QToolButton" name="w_toggle_price_guide">
        <property name="icon">
-        <iconset resource="../brickstore.qrc">
-         <normaloff>:/images/edit_bl_priceguide.png</normaloff>:/images/edit_bl_priceguide.png</iconset>
+        <iconset theme="bricklink-priceguide"/>
        </property>
        <property name="checkable">
         <bool>true</bool>
@@ -576,9 +573,7 @@
   <tabstop>w_toggle_appears_in</tabstop>
   <tabstop>w_toggle_price_guide</tabstop>
  </tabstops>
- <resources>
-  <include location="../brickstore.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>w_buttons</sender>

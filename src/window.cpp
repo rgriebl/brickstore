@@ -1821,7 +1821,7 @@ void Window::contextMenu(const QPoint &p)
     FrameWork::inst()->showContextMenu(true, w_list->viewport()->mapToGlobal(p));
 }
 
-void Window::on_file_close_triggered()
+void Window::on_document_close_triggered()
 {
     close();
 }
@@ -1842,7 +1842,7 @@ void Window::closeEvent(QCloseEvent *e)
 
         switch (msgBox.exec()) {
         case MessageBox::Save:
-            on_file_save_triggered();
+            on_document_save_triggered();
 
             if (!m_doc->isModified())
                 e->accept();
@@ -1865,25 +1865,25 @@ void Window::closeEvent(QCloseEvent *e)
 
 }
 
-void Window::on_edit_bl_catalog_triggered()
+void Window::on_bricklink_catalog_triggered()
 {
     if (!selection().isEmpty())
         QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_CatalogInfo, (*selection().front()).item(), (*selection().front()).color()));
 }
 
-void Window::on_edit_bl_priceguide_triggered()
+void Window::on_bricklink_priceguide_triggered()
 {
     if (!selection().isEmpty())
         QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_PriceGuideInfo, (*selection().front()).item(), (*selection().front()).color()));
 }
 
-void Window::on_edit_bl_lotsforsale_triggered()
+void Window::on_bricklink_lotsforsale_triggered()
 {
     if (!selection().isEmpty())
         QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_LotsForSale, (*selection().front()).item(), (*selection().front()).color()));
 }
 
-void Window::on_edit_bl_myinventory_triggered()
+void Window::on_bricklink_myinventory_triggered()
 {
     if (!selection().isEmpty()) {
         uint lotid = (*selection().front()).lotId();
@@ -1937,12 +1937,12 @@ void Window::on_view_difference_mode_toggled(bool b)
     setDifferenceMode(b);
 }
 
-void Window::on_file_print_triggered()
+void Window::on_document_print_triggered()
 {
     print(false);
 }
 
-void Window::on_file_print_pdf_triggered()
+void Window::on_document_print_pdf_triggered()
 {
     print(true);
 }
@@ -2025,7 +2025,7 @@ void Window::print(bool as_pdf)
     }
 }
 
-void Window::on_file_save_triggered()
+void Window::on_document_save_triggered()
 {
     m_doc->setGuiState(createGuiStateXML());
     m_doc->fileSave();
@@ -2033,7 +2033,7 @@ void Window::on_file_save_triggered()
     deleteAutosave();
 }
 
-void Window::on_file_saveas_triggered()
+void Window::on_document_save_as_triggered()
 {
     m_doc->setGuiState(createGuiStateXML());
     m_doc->fileSaveAs();
@@ -2041,7 +2041,7 @@ void Window::on_file_saveas_triggered()
     deleteAutosave();
 }
 
-void Window::on_file_export_bl_xml_triggered()
+void Window::on_document_export_bl_xml_triggered()
 {
     Document::ItemList items = exportCheck();
 
@@ -2049,7 +2049,7 @@ void Window::on_file_export_bl_xml_triggered()
         m_doc->fileExportBrickLinkXML(items);
 }
 
-void Window::on_file_export_bl_xml_clip_triggered()
+void Window::on_document_export_bl_xml_clip_triggered()
 {
     Document::ItemList items = exportCheck();
 
@@ -2057,7 +2057,7 @@ void Window::on_file_export_bl_xml_clip_triggered()
         m_doc->fileExportBrickLinkXMLClipboard(items);
 }
 
-void Window::on_file_export_bl_update_clip_triggered()
+void Window::on_document_export_bl_update_clip_triggered()
 {
     Document::ItemList items = exportCheck();
 
@@ -2065,7 +2065,7 @@ void Window::on_file_export_bl_update_clip_triggered()
         m_doc->fileExportBrickLinkUpdateClipboard(items);
 }
 
-void Window::on_file_export_bl_invreq_clip_triggered()
+void Window::on_document_export_bl_invreq_clip_triggered()
 {
     Document::ItemList items = exportCheck();
 
@@ -2073,7 +2073,7 @@ void Window::on_file_export_bl_invreq_clip_triggered()
         m_doc->fileExportBrickLinkInvReqClipboard(items);
 }
 
-void Window::on_file_export_bl_wantedlist_clip_triggered()
+void Window::on_document_export_bl_wantedlist_clip_triggered()
 {
     Document::ItemList items = exportCheck();
 

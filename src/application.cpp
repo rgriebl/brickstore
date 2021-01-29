@@ -111,6 +111,8 @@ Application::Application(int &_argc, char **_argv)
 
     qApp->installEventFilter(this);
 
+    setIconTheme();
+
 #if !defined(Q_OS_WINDOWS) && !defined(Q_OS_MACOS)
     QPixmap pix(":/images/brickstore_icon.png");
     if (!pix.isNull())
@@ -322,9 +324,11 @@ bool Application::eventFilter(QObject *o, QEvent *e)
         m_files_to_open.append(static_cast<QFileOpenEvent *>(e)->file());
         doEmitOpenDocument();
         return true;
-    default:
-        return QObject::eventFilter(o, e);
+    case QEvent::PaletteChange:
+        setIconTheme();
+        break;
     }
+    return QObject::eventFilter(o, e);
 }
 
 bool Application::isClient(int timeout)
@@ -555,6 +559,21 @@ void Application::setupLogging()
                                   Q_ARG(QString, str));
     };
     m_defaultMessageHandler = qInstallMessageHandler(msgHandler);
+}
+
+void Application::setIconTheme()
+{
+    static bool once = false;
+    if (!once) {
+        QIcon::setThemeSearchPaths({ QLatin1String(":/assets/icons") });
+        once = true;
+    }
+
+    const auto pal = QGuiApplication::palette();
+    auto winColor = pal.color(QPalette::Active, QPalette::Window);
+    bool dark = ((winColor.lightnessF() * winColor.alphaF()) < 0.5);
+
+    QIcon::setThemeName(dark ? "brickstore-breeze-dark" : "brickstore-breeze");
 }
 
 bool Application::initBrickLink()

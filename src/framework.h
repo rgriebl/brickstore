@@ -86,13 +86,13 @@ protected slots:
 private slots:
     void openDocument(const QString &);
 
-    bool updateDatabase();
+    bool updateDatabase(bool forceSync = false);
     void checkForUpdates(bool silent = false);
 
     void connectWindow(QWidget *w);
     void transferJobProgressUpdate(int p, int t);
 
-    void configure(const char *page = nullptr);
+    void showSettings(const char *page = nullptr);
 
     void cancelAllTransfers(bool force = false);
     void showAddItemDialog();

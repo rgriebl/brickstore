@@ -26,7 +26,7 @@ RestartApplications=yes
 ChangesAssociations=yes
 
 WizardImageAlphaFormat=defined
-WizardSmallImageFile={#SourcePath}\..\assets\generated-misc\windows-installer.bmp
+WizardSmallImageFile={#SourcePath}\..\assets\generated-installers\windows-installer.bmp
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"

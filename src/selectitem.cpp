@@ -170,7 +170,7 @@ void SelectItem::init()
 
     // Adding a menuAction() to a QLineEdit leads to a strange activation behvior:
     // only the right side of the icon will react to mouse clicks
-    QPixmap filterPix(":/images/filter.png");
+    QPixmap filterPix(QIcon::fromTheme("view-filter").pixmap(d->w_filter->style()->pixelMetric(QStyle::PM_SmallIconSize)));
     {
         QPainter p(&filterPix);
         QStyleOption so;
@@ -204,7 +204,7 @@ void SelectItem::init()
 
     d->w_zoomOut = new QToolButton();
     d->w_zoomOut->setShortcut(QKeySequence::ZoomOut);
-    d->w_zoomOut->setIcon(QIcon(":/images/zoom_minus"));
+    d->w_zoomOut->setIcon(QIcon::fromTheme("zoom-out"));
     d->w_zoomOut->setAutoRaise(true);
     d->w_zoomOut->setAutoRepeat(true);
     connect(d->w_zoomOut, &QToolButton::clicked, this, [this]() {
@@ -213,7 +213,7 @@ void SelectItem::init()
     d->w_zoomLevel = new QLabel();
     d->w_zoomIn = new QToolButton();
     d->w_zoomIn->setShortcut(QKeySequence::ZoomIn);
-    d->w_zoomIn->setIcon(QIcon(":/images/zoom_plus"));
+    d->w_zoomIn->setIcon(QIcon::fromTheme("zoom-in"));
     d->w_zoomIn->setAutoRaise(true);
     d->w_zoomIn->setAutoRepeat(true);
     connect(d->w_zoomIn, &QToolButton::clicked, this, [this]() {
@@ -223,14 +223,14 @@ void SelectItem::init()
     QToolButton *tb;
     tb = new QToolButton(this);
     tb->setShortcut(tr("Ctrl+1"));
-    tb->setIcon(QIcon(":/images/viewmode_list"));
+    tb->setIcon(QIcon::fromTheme("view-list-text"));
     tb->setAutoRaise(true);
     tb->setCheckable(true);
     d->w_viewmode->addButton(tb, 0);
 
     tb = new QToolButton(this);
     tb->setShortcut(tr("Ctrl+2"));
-    tb->setIcon(QIcon(":/images/viewmode_images"));
+    tb->setIcon(QIcon::fromTheme("view-list-details"));
     tb->setAutoRaise(true);
     tb->setCheckable(true);
     tb->setChecked(true);
@@ -238,7 +238,7 @@ void SelectItem::init()
 
     tb = new QToolButton(this);
     tb->setShortcut(tr("Ctrl+3"));
-    tb->setIcon(QIcon(":/images/viewmode_thumbs"));
+    tb->setIcon(QIcon::fromTheme("view-list-icons"));
     tb->setAutoRaise(true);
     tb->setCheckable(true);
     d->w_viewmode->addButton(tb, 2);

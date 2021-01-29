@@ -60,6 +60,7 @@ private slots:
 private:
     bool isClient(int timeout = 1000);
     void setupLogging();
+    void setIconTheme();
 
     bool initBrickLink();
     void exitBrickLink();

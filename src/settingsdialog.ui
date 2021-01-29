@@ -152,8 +152,7 @@
              <string>Reload</string>
             </property>
             <property name="icon">
-             <iconset resource="../brickstore.qrc">
-              <normaloff>:/images/reload.png</normaloff>:/images/reload.png</iconset>
+             <iconset theme="view-refresh"/>
             </property>
             <property name="iconSize">
              <size>
@@ -668,7 +667,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="network">
+     <widget class="QWidget" name="bricklink">
       <attribute name="title">
        <string>BrickLink</string>
       </attribute>
@@ -725,7 +724,7 @@
       <attribute name="title">
        <string>LDraw</string>
       </attribute>
-      <layout class="QFormLayout" name="formLayout_9">
+      <layout class="QFormLayout" name="formLayout_2">
        <item row="0" column="0">
         <widget class="QLabel" name="label_21">
          <property name="text">
@@ -735,6 +734,33 @@
        </item>
        <item row="0" column="1">
         <widget class="QComboBox" name="w_ldraw_dir"/>
+       </item>
+       <item row="1" column="1">
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <item>
+          <widget class="QLabel" name="w_ldraw_status_icon">
+           <property name="minimumSize">
+            <size>
+             <width>10</width>
+             <height>10</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="w_ldraw_status">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>1</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string notr="true">Status</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
        <item row="2" column="1">
         <spacer name="verticalSpacer_4">
@@ -748,13 +774,6 @@
           </size>
          </property>
         </spacer>
-       </item>
-       <item row="1" column="1">
-        <widget class="QLabel" name="w_ldraw_status">
-         <property name="text">
-          <string notr="true">Status</string>
-         </property>
-        </widget>
        </item>
       </layout>
      </widget>
@@ -772,9 +791,7 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../brickstore.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>w_buttons</sender>
