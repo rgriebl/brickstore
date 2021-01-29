@@ -580,7 +580,7 @@ FrameWork::FrameWork(QWidget *parent)
     bool dbok = BrickLink::core()->readDatabase();
 
     if (!dbok || BrickLink::core()->isDatabaseUpdateNeeded())
-        dbok = updateDatabase();
+        dbok = updateDatabase(true /* forceSync */);
 
     if (dbok) {
         Application::inst()->enableEmitOpenDocument();
@@ -1455,16 +1455,37 @@ void FrameWork::setActiveWindow(Window *window)
     window->setFocus();
 }
 
-bool FrameWork::updateDatabase()
+bool FrameWork::updateDatabase(bool forceSync)
 {
-    if (closeAllWindows()) {
+    bool noWindows = m_workspace->windowList().isEmpty();
+
+    if (!noWindows && forceSync) {
+        qWarning() << "Cannot force a DB update, if windows are open";
+        return false;
+    }
+
+    if (noWindows || closeAllWindows()) {
         delete m_add_dialog;
 
-        Transfer trans;
-        ProgressDialog d(tr("Update Database"), &trans, this);
-        UpdateDatabase update(&d);
+        auto doUpdate = [this]() -> bool {
+            if (!m_workspace->windowList().isEmpty())
+                return false;
 
-        return d.exec();
+            Transfer trans;
+            ProgressDialog d(tr("Update Database"), &trans, this);
+            UpdateDatabase update(&d);
+            return d.exec();
+        };
+
+        if (forceSync || noWindows) {
+            return doUpdate();
+        } else {
+            // the windows are WA_DeleteOnClose, but this triggers only a deleteLater:
+            // the current window doesn't change until a return to the event loop
+
+            QMetaObject::invokeMethod(this, doUpdate, Qt::QueuedConnection);
+            return true;
+        }
     }
     return false;
 }
