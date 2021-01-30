@@ -119,22 +119,45 @@ private:
     }
 };
 
+class WindowProgressHelper : public QObject
+{
+public:
+    WindowProgressHelper(QProgressDialog *pd)
+        : QObject(pd)
+    {
+        pd->installEventFilter(this);
+    }
+protected:
+    bool eventFilter(QObject *watched, QEvent *event) override
+    {
+        // eat the Escape key
+        if (event->type() == QEvent::KeyPress) {
+            if (static_cast<QKeyEvent *>(event)->matches(QKeySequence::Cancel))
+                return true;
+        }
+        return QObject::eventFilter(watched, event);
+    }
+};
+
+
 class WindowProgress
 {
 public:
     explicit WindowProgress(QWidget *w, const QString &title = QString(), int total = 0)
         : m_w(w), m_reenabled(false)
     {
-        auto *sa = qobject_cast<QScrollArea *>(w);
+        auto *sa = qobject_cast<QAbstractScrollArea *>(w);
         m_w = sa ? sa->viewport() : w;
         m_upd_enabled = m_w->updatesEnabled();
         m_w->setUpdatesEnabled(false);
         QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
         if (total) {
-            m_progress = new QProgressDialog(title, QString(), 0, total, w->window());
+            m_progress = new QProgressDialog(title, QString(), 0, total, w->window(),
+                                             Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
             m_progress->setWindowModality(Qt::WindowModal);
             m_progress->setMinimumDuration(1500);
             m_progress->setValue(0);
+            new WindowProgressHelper(m_progress);
         } else {
             m_progress = nullptr;
         }
@@ -158,8 +181,15 @@ public:
 
     void step(int d = 1)
     {
-        if (m_progress)
-            m_progress->setValue(m_progress->value() + d);
+        m_counter += d;
+
+        if (m_progress) {
+            int total = m_progress->maximum();
+            if ((m_counter == total) || ((m_counter - m_lastTick) >= (total / 100))) {
+                m_progress->setValue(m_counter);
+                m_lastTick = m_counter;
+            }
+        }
     }
 
     void setOverrideCursor()
@@ -178,6 +208,8 @@ private:
     QWidget * m_w;
     bool      m_upd_enabled : 1;
     bool      m_reenabled   : 1;
+    int       m_counter = 0;
+    int       m_lastTick = 0;
     QProgressDialog *m_progress;
 };
 
