@@ -626,7 +626,7 @@ bool DocumentDelegate::editorEvent(QEvent *e, QAbstractItemModel *model, const Q
 
 bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyleOptionViewItem &option, const QModelIndex &idx)
 {
-    bool accept = true;
+    bool accept = false;
 
     bool dblclick = (e->type() == QEvent::MouseButtonDblClick);
     bool keypress = (e->type() == QEvent::KeyPress);
@@ -656,6 +656,7 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
             Document::Item item = *it;
             item.setRetain(!it->retain());
             m_doc->changeItem(it, item);
+            accept = true;
         }
         break;
 
@@ -685,6 +686,7 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
             Document::Item item = *it;
             item.setStockroom(st);
             m_doc->changeItem(it, item);
+            accept = true;
         }
         break;
     }
@@ -704,6 +706,7 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
             Document::Item item = *it;
             item.setCondition(cond);
             m_doc->changeItem(it, item);
+            accept = true;
         }
         break;
     }
@@ -731,6 +734,7 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
             Document::Item item = *it;
             item.setStatus(st);
             m_doc->changeItem(it, item);
+            accept = true;
         }
         break;
     }
@@ -742,6 +746,7 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
             if ((me->x() > (option.rect.right() - d)) && (me->y() > (option.rect.bottom() - d))) {
                 if (auto a = FrameWork::inst()->findAction("edit_partoutitems")) {
                     a->trigger();
+                    accept = true;
                     break;
                 }
             }
@@ -763,6 +768,7 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
                 item.setItem(m_select_item->item());
                 m_doc->changeItem(it, item);
             }
+            accept = true;
         }
         break;
 
@@ -780,11 +786,8 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
                 item.setColor(m_select_color->color());
                 m_doc->changeItem(it, item);
             }
+            accept = true;
         }
-        break;
-
-    default:
-        accept = false;
         break;
     }
     return accept;

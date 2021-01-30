@@ -67,8 +67,10 @@ ConsolidateItemsDialog::ConsolidateItemsDialog(const Window *win,
 
     w_list->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     w_list->setContextMenuPolicy(Qt::NoContextMenu);
+    w_list->setTabKeyNavigation(false);
 
-    setFocusProxy(w_list);
+    //setFocusProxy(w_list);
+    w_list->setFocus();
 
     auto *view = new DocumentProxyModel(doc, this);
     w_list->setModel(view);
