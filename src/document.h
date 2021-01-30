@@ -155,7 +155,6 @@ public:
     bool clear();
 
     bool insertItems(const QVector<int> &positions, const ItemList &items);
-    bool insertItem(int position, Item *item);
     bool appendItem(Item *item);
 
     bool removeItems(const ItemList &items);

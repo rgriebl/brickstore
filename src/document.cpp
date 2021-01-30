@@ -373,11 +373,6 @@ bool Document::removeItems(const ItemList &items)
     return true;
 }
 
-bool Document::insertItem(int position, Item *item)
-{
-    return insertItems({ position }, { item });
-}
-
 bool Document::appendItem(Item *item)
 {
     return insertItems({ }, { item });
@@ -527,8 +522,7 @@ void Document::emitDataChanged(const QModelIndex &tl, const QModelIndex &br)
     if (br.column() > m_nextDataChangedEmit.second.x())
         m_nextDataChangedEmit.second.setX(br.column());
 
-    if (!m_delayedEmitOfDataChanged->isActive())
-        m_delayedEmitOfDataChanged->start();
+    m_delayedEmitOfDataChanged->start();
 }
 
 void Document::emitStatisticsChanged()
@@ -541,8 +535,7 @@ void Document::emitStatisticsChanged()
         connect(m_delayedEmitOfStatisticsChanged, &QTimer::timeout,
                 this, &Document::statisticsChanged);
     }
-    if (!m_delayedEmitOfStatisticsChanged->isActive())
-        m_delayedEmitOfStatisticsChanged->start();
+    m_delayedEmitOfStatisticsChanged->start();
 }
 
 void Document::updateErrors(Item *item)

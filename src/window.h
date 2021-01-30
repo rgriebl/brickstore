@@ -210,6 +210,7 @@ private:
     DocumentProxyModel * m_view;
     QItemSelectionModel *m_selection_model;
     Document::ItemList   m_selection;
+    QTimer *             m_delayedSelectionUpdate = nullptr;
     QTableView *         w_list;
     HeaderView *         w_header;
     bool                 m_diff_mode;
@@ -217,6 +218,7 @@ private:
 
     int                  m_latest_row;
     QTimer *             m_latest_timer;
+
 
     uint                 m_settopg_failcnt = 0;
     uint                 m_settopg_todocnt = 0;

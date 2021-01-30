@@ -2157,12 +2157,21 @@ void Window::resizeColumnsToDefault()
 
 void Window::updateSelection()
 {
-    m_selection.clear();
+    if (!m_delayedSelectionUpdate) {
+        m_delayedSelectionUpdate = new QTimer(this);
+        m_delayedSelectionUpdate->setSingleShot(true);
+        m_delayedSelectionUpdate->setInterval(100ms);
 
-    foreach (const QModelIndex &idx, m_selection_model->selectedRows())
-        m_selection.append(m_view->item(idx));
+        connect(m_delayedSelectionUpdate, &QTimer::timeout, this, [this]() {
+            m_selection.clear();
 
-    emit selectionChanged(m_selection);
+            foreach (const QModelIndex &idx, m_selection_model->selectedRows())
+                m_selection.append(m_view->item(idx));
+
+            emit selectionChanged(m_selection);
+        });
+    }
+    m_delayedSelectionUpdate->start();
 }
 
 void Window::setSelection(const Document::ItemList &lst)

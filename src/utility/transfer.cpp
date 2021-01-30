@@ -131,9 +131,6 @@ bool Transfer::retrieve(TransferJob *job, bool highPriority)
     Q_ASSERT(!job->m_transfer);
     job->m_transfer = this;
 
-    qWarning() << "RETRIEVE" << QThread::currentThreadId();
-
-
     QMetaObject::invokeMethod(m_retriever, [this, job, highPriority]() {
         m_retriever->addJob(job, highPriority);
     }, Qt::QueuedConnection);
@@ -195,8 +192,6 @@ void TransferRetriever::abortAllJobs()
 
 void TransferRetriever::schedule()
 {
-    qWarning() << "SCHEDULE" << QThread::currentThreadId();
-
     if (!m_nam) {
         m_nam = new QNetworkAccessManager(this);
         m_nam->setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
