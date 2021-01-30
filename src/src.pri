@@ -30,7 +30,6 @@ SOURCES += \
   $$PWD/documentdelegate.cpp \
   $$PWD/framework.cpp \
   $$PWD/import.cpp \
-  $$PWD/itemdetailpopup.cpp \
   $$PWD/managecolumnlayoutsdialog.cpp \
   $$PWD/picturewidget.cpp \
   $$PWD/priceguidewidget.cpp \
@@ -50,7 +49,6 @@ HEADERS += \
   $$PWD/documentdelegate.h \
   $$PWD/framework.h \
   $$PWD/import.h \
-  $$PWD/itemdetailpopup.h \
   $$PWD/managecolumnlayoutsdialog.h \
   $$PWD/picturewidget.h \
   $$PWD/priceguidewidget.h \

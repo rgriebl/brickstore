@@ -255,7 +255,6 @@ Window::Window(Document *doc, QWidget *parent)
     m_latest_timer = new QTimer(this);
     m_latest_timer->setSingleShot(true);
     m_latest_timer->setInterval(100ms);
-    m_current = nullptr;
 
     m_settopg_failcnt = 0;
     m_settopg_list = nullptr;
@@ -291,7 +290,6 @@ Window::Window(Document *doc, QWidget *parent)
     auto *dd = new DocumentDelegate(doc, m_view, w_list);
     w_list->setItemDelegate(dd);
     w_list->verticalHeader()->setDefaultSectionSize(dd->defaultItemHeight(w_list));
-    w_list->installEventFilter(this);
 
     QBoxLayout *toplay = new QVBoxLayout(this);
     toplay->setSpacing(0);
@@ -305,8 +303,6 @@ Window::Window(Document *doc, QWidget *parent)
 
     connect(m_selection_model, &QItemSelectionModel::selectionChanged,
             this, &Window::updateSelection);
-    connect(m_selection_model, &QItemSelectionModel::currentChanged,
-            this, &Window::updateCurrent);
 
     connect(BrickLink::core(), &BrickLink::Core::priceGuideUpdated,
             this, &Window::priceGuideUpdated);
@@ -2159,27 +2155,6 @@ void Window::resizeColumnsToDefault()
     w_list->sortByColumn(-1, Qt::AscendingOrder);
 }
 
-bool Window::eventFilter(QObject *o, QEvent *e)
-{
-#ifdef ENABLE_ITEM_DETAIL_POPUP
-    if (o == w_list && e->type() == QEvent::KeyPress) {
-        if (static_cast<QKeyEvent *>(e)->key() == Qt::Key_Space) {
-            FrameWork::inst()->toggleItemDetailPopup();
-            e->accept();
-            return true;
-        }
-    }
-#endif
-    return QWidget::eventFilter(o, e);
-}
-
-void Window::updateCurrent()
-{
-    QModelIndex idx = m_selection_model->currentIndex();
-    m_current = idx.isValid() ? m_view->item(idx) : nullptr;
-    emit currentChanged(m_current);
-}
-
 void Window::updateSelection()
 {
     m_selection.clear();
@@ -2204,16 +2179,10 @@ void Window::setSelection(const Document::ItemList &lst)
 
 void Window::documentItemsChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight)
 {
-    bool selectionChangedEmitted = false;
-
     for (int r = topLeft.row(); r <= bottomRight.row(); ++r) {
-        auto item = document()->itemAt(r);
-        if (item == m_current)
-            emit currentChanged(m_current);
-
-        if (!selectionChangedEmitted && m_selection.contains(item)) {
+        if (m_selection.contains(document()->itemAt(r))) {
             emit selectionChanged(m_selection);
-            selectionChangedEmitted = true;
+            break;
         }
     }
 }

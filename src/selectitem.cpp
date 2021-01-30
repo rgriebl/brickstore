@@ -42,7 +42,6 @@
 #include "selectitem.h"
 #include "messagebox.h"
 #include "framework.h"
-#include "itemdetailpopup.h"
 
 using namespace std::chrono_literals;
 
@@ -67,7 +66,6 @@ public:
     QToolButton *    w_zoomOut;
     QLabel *         w_zoomLevel;
     QButtonGroup *   w_viewmode;
-    ItemDetailPopup *m_details;
     bool             m_inv_only;
     QTimer *         m_filter_delay;
     double           m_zoom = 0;
@@ -139,8 +137,6 @@ SelectItem::~SelectItem()
 
 void SelectItem::init()
 {
-    d->m_details = nullptr;
-
     d->w_item_types_label = new QLabel(this);
     d->w_item_types = new QComboBox(this);
     d->w_item_types->setEditable(false);
@@ -252,7 +248,6 @@ void SelectItem::init()
     d->w_items->setSelectionMode(QAbstractItemView::SingleSelection);
     d->w_items->setItemDelegate(new BrickLink::ItemDelegate(this, BrickLink::ItemDelegate::AlwaysShowSelection));
     d->w_items->setContextMenuPolicy(Qt::CustomContextMenu);
-    d->w_items->viewport()->installEventFilter(this);
 
     d->w_itemthumbs = new QTreeView(this);
     d->w_itemthumbs->setAlternatingRowColors(true);
@@ -429,25 +424,6 @@ void SelectItem::languageChange()
 
 bool SelectItem::eventFilter(QObject *o, QEvent *e)
 {
-#ifdef ENABLE_ITEM_DETAIL_POPUP
-    if ((o == d->w_items->viewport() || o == d->w_itemthumbs->viewport() || o == d->w_thumbs->viewport())
-            && (e->type() == QEvent::KeyPress)) {
-        if (static_cast<QKeyEvent *>(e)->key() == Qt::Key_Space) {
-            if (!d->m_details)
-                d->m_details = new ItemDetailPopup(this);
-
-            if (!d->m_details->isVisible()) {
-                d->m_details->setItem(currentItem());
-                d->m_details->show();
-            } else {
-                d->m_details->hide();
-                d->m_details->setItem(nullptr);
-            }
-            e->accept();
-            return true;
-        }
-    }
-#endif
     if ((o == d->w_itemthumbs->viewport() || o == d->w_thumbs->viewport())
             && (e->type() == QEvent::Wheel)) {
         const auto *we = static_cast<QWheelEvent *>(e);
@@ -749,8 +725,6 @@ void SelectItem::setViewMode(int mode)
 void SelectItem::itemChanged()
 {
     emit itemSelected(currentItem(), false);
-    if (d->m_details && d->m_details->isVisible())
-        d->m_details->setItem(currentItem());
 }
 
 void SelectItem::itemConfirmed()

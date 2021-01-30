@@ -73,8 +73,6 @@ public slots:
     void fileImportBrickLinkInventory(const BrickLink::Item *item, int quantity = 1,
                                       BrickLink::Condition condition = BrickLink::Condition::New);
 
-    void toggleItemDetailPopup();
-
 signals:
     void windowActivated(Window *);
     void windowListChanged();
@@ -96,8 +94,6 @@ private slots:
 
     void cancelAllTransfers(bool force = false);
     void showAddItemDialog();
-
-    void setItemDetailHelper(Document::Item *docitem);
 
     void onlineStateChanged(bool isOnline);
 

@@ -63,7 +63,6 @@ public:
     static const QVector<Window *> processAutosaves(AutosaveAction action);
 
     const Document::ItemList &selection() const  { return m_selection; }
-    Document::Item *current() const              { return m_current; }
 
     uint setItems(const BrickLink::InvItemList &items, int multiply = 1);
     int addItems(const BrickLink::InvItemList &items, AddItemMode addItemMode = AddItemMode::AddAsNew);
@@ -177,12 +176,10 @@ public slots:
 
 signals:
     void selectionChanged(const Document::ItemList &);
-    void currentChanged(Document::Item *);
 
 protected:
     void closeEvent(QCloseEvent *e) override;
     void changeEvent(QEvent *e) override;
-    bool eventFilter(QObject *o, QEvent *e) override;
 
     void print(bool aspdf);
 
@@ -191,7 +188,6 @@ private slots:
     void documentRowsInserted(const QModelIndex &, int, int);
     void updateCaption();
     void updateSelection();
-    void updateCurrent();
     void documentItemsChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
 
     void contextMenu(const QPoint &);
@@ -214,7 +210,6 @@ private:
     DocumentProxyModel * m_view;
     QItemSelectionModel *m_selection_model;
     Document::ItemList   m_selection;
-    Document::Item *     m_current;
     QTableView *         w_list;
     HeaderView *         w_header;
     bool                 m_diff_mode;

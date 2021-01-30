@@ -67,7 +67,6 @@
 #include "utility.h"
 #include "additemdialog.h"
 #include "settingsdialog.h"
-#include "itemdetailpopup.h"
 #include "changecurrencydialog.h"
 #include "welcomewidget.h"
 #include "aboutdialog.h"
@@ -1631,11 +1630,6 @@ void FrameWork::connectWindow(QWidget *w)
                        m_current_window.data(), &Window::setFilter);
             m_filter->setText(QString());
         }
-        if (m_details) {
-            disconnect(m_current_window.data(), &Window::currentChanged,
-                       this, &FrameWork::setItemDetailHelper);
-            setItemDetailHelper(nullptr);
-        }
         m_undogroup->setActiveStack(nullptr);
 
         m_current_window = nullptr;
@@ -1659,11 +1653,6 @@ void FrameWork::connectWindow(QWidget *w)
             filterToolTip = window->filterToolTip();
             connect(this, &FrameWork::filterTextChanged,
                     window, &Window::setFilter);
-        }
-        if (m_details) {
-            setItemDetailHelper(window->current());
-            connect(window, &Window::currentChanged,
-                    this, &FrameWork::setItemDetailHelper);
         }
 
         m_undogroup->setActiveStack(doc->undoStack());
@@ -1964,44 +1953,11 @@ void FrameWork::showAddItemDialog()
 {
     createAddItemDialog();
 
-    if (m_details && m_details->isVisible())
-        toggleItemDetailPopup();
-
     if (m_add_dialog->isVisible()) {
         m_add_dialog->raise();
         m_add_dialog->activateWindow();
     } else {
         m_add_dialog->show();
-    }
-}
-
-void FrameWork::toggleItemDetailPopup()
-{
-    if (!m_details) {
-        m_details = new ItemDetailPopup(this);
-
-        if (m_current_window) {
-            connect(m_current_window.data(), &Window::currentChanged,
-                    this, &FrameWork::setItemDetailHelper);
-        }
-    }
-
-    if (!m_details->isVisible()) {
-        m_details->show();
-        setItemDetailHelper(m_current_window ? m_current_window->current() : nullptr);
-    } else {
-        m_details->hide();
-        setItemDetailHelper(nullptr);
-    }
-}
-
-void FrameWork::setItemDetailHelper(Document::Item *docitem)
-{
-    if (m_details) {
-        if (!docitem)
-            m_details->setItem(nullptr, nullptr);
-        else if (m_details->isVisible())
-            m_details->setItem(docitem->item(), docitem->color());
     }
 }
 
