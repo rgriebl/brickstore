@@ -373,8 +373,11 @@
     <layout class="QHBoxLayout">
      <item>
       <widget class="QToolButton" name="w_toggle_picture">
+       <property name="toolTip">
+        <string>Show item information</string>
+       </property>
        <property name="icon">
-        <iconset theme="bricklink-catalog"/>
+        <iconset theme="help-about"/>
        </property>
        <property name="checkable">
         <bool>true</bool>
@@ -389,8 +392,11 @@
      </item>
      <item>
       <widget class="QToolButton" name="w_toggle_appears_in">
+       <property name="toolTip">
+        <string>Show which sets the item appears in</string>
+       </property>
        <property name="icon">
-        <iconset theme="bricklink-appearsin"/>
+        <iconset theme="go-jump-definition"/>
        </property>
        <property name="checkable">
         <bool>true</bool>
@@ -405,8 +411,11 @@
      </item>
      <item>
       <widget class="QToolButton" name="w_toggle_price_guide">
+       <property name="toolTip">
+        <string>Show price guide</string>
+       </property>
        <property name="icon">
-        <iconset theme="bricklink-priceguide"/>
+        <iconset theme="taxes-finances"/>
        </property>
        <property name="checkable">
         <bool>true</bool>
@@ -478,6 +487,9 @@
      </item>
      <item>
       <widget class="QCheckBox" name="w_merge">
+       <property name="toolTip">
+        <string>Consolidate added items into document</string>
+       </property>
        <property name="text">
         <string>Conso&amp;lidate</string>
        </property>
