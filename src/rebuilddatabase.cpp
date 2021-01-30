@@ -74,8 +74,6 @@ int RebuildDatabase::error(const QString &error)
 int RebuildDatabase::exec()
 {
     m_trans = new Transfer;
-    connect(m_trans, &Transfer::finished,
-            this, &RebuildDatabase::downloadJobFinished);
 
     BrickLink::Core *bl = BrickLink::core();
     bl->setOnlineStatus(false);
@@ -101,23 +99,35 @@ int RebuildDatabase::exec()
         if (username.isEmpty() || password.isEmpty())
             printf("  > Missing BrickLink login credentials: please set $BRICKLINK_USERNAME and $BRICKLINK_PASSWORD.\n");
 
-        QNetworkAccessManager *nam = m_trans->networkAccessManager();
-        QNetworkRequest req(QUrl("https://www.bricklink.com/ajax/renovate/loginandout.ajax"));
-        req.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+        QUrl url("https://www.bricklink.com/ajax/renovate/loginandout.ajax");
         QUrlQuery q;
         q.addQueryItem("userid", username);
         q.addQueryItem("password", password);
         q.addQueryItem("keepme_loggedin", "1");
-        QByteArray form = q.query(QUrl::FullyEncoded).toLatin1();
+        url.setQuery(q);
 
-        QNetworkReply *reply = nam->post(req, form);
-        while (reply && !reply->isFinished())
+        auto job = TransferJob::post(url);
+        bool loggedIn = false;
+        QByteArray httpReply;
+        auto loginConn = connect(m_trans, &Transfer::finished, this, [this, job, &loggedIn, &httpReply](TransferJob *j) {
+            if (job == j) {
+                loggedIn = true;
+                if (j->isFailed() || (j->responseCode() != 200))
+                    httpReply = *j->data();
+            }
+        });
+
+        m_trans->retrieve(job, true);
+
+        while (!loggedIn)
             qApp->processEvents();
 
-        if ((reply->error() != QNetworkReply::NoError)
-                || (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute) != 200)) {
-            return error(QByteArray("Failed to log into BrickLink:\n") + reply->readAll());
-        }
+        disconnect(loginConn);
+        connect(m_trans, &Transfer::finished,
+                this, &RebuildDatabase::downloadJobFinished);
+
+        if (!httpReply.isEmpty())
+            return error(QByteArray("Failed to log into BrickLink:\n") + httpReply);
     }
 
     /////////////////////////////////////////////////////////////////////////////////
