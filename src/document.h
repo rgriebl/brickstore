@@ -165,7 +165,7 @@ public:
     bool changeItem(Item *item, const Item &value);
 
     int positionOf(Item *item) const;
-    const Item *itemAt(int position) const;
+    Item *itemAt(int position);
 
     void resetDifferences(const ItemList &items);
 
@@ -218,11 +218,6 @@ public:
     QUndoStack *undoStack() const;
 
 signals:
-    void itemsAdded(const Document::ItemList &);
-    void itemsAboutToBeRemoved(const Document::ItemList &);
-    void itemsRemoved(const Document::ItemList &);
-    void itemsChanged(const Document::ItemList &);
-
     void errorsChanged(Document::Item *);
     void statisticsChanged();
     void fileNameChanged(const QString &);
@@ -242,13 +237,13 @@ private:
     void changeItemDirect(int position, Item &item);
     void changeCurrencyDirect(const QString &ccode, qreal crate, double *&prices);
 
+    void emitDataChanged(const QModelIndex &tl, const QModelIndex &br);
     void emitStatisticsChanged();
+    void updateErrors(Item *);
 
     friend class AddRemoveCmd;
     friend class ChangeCmd;
     friend class CurrencyCmd;
-
-    void updateErrors(Item *);
 
 private:
     ItemList         m_items;
@@ -267,7 +262,9 @@ private:
     bool              m_gui_state_modified = false;
     QDomElement       m_gui_state;
 
-    QElapsedTimer     m_lastEmitOfStatisticsChanged;
+    QTimer *          m_delayedEmitOfStatisticsChanged = nullptr;
+    QTimer *          m_delayedEmitOfDataChanged = nullptr;
+    QPair<QPoint, QPoint> m_nextDataChangedEmit;
 
     static QVector<Document *> s_documents;
 };

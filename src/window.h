@@ -192,7 +192,7 @@ private slots:
     void updateCaption();
     void updateSelection();
     void updateCurrent();
-    void documentItemsChanged(const Document::ItemList &items);
+    void documentItemsChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
 
     void contextMenu(const QPoint &);
     void priceGuideUpdated(BrickLink::PriceGuide *);

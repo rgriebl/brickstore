@@ -45,6 +45,8 @@
 #include "document.h"
 #include "document_p.h"
 
+using namespace std::chrono_literals;
+
 
 enum {
     CID_Change,
@@ -349,7 +351,7 @@ int Document::positionOf(Item *item) const
     return m_items.indexOf(item);
 }
 
-const Document::Item *Document::itemAt(int position) const
+Document::Item *Document::itemAt(int position)
 {
     return (position >= 0 && position < m_items.count()) ? m_items.at(position) : nullptr;
 }
@@ -413,8 +415,7 @@ void Document::insertItemsDirect(ItemList &items, QVector<int> &positions)
         endInsertRows();
     }
 
-//    emit itemsAdded(items);
-    emit statisticsChanged();
+    emitStatisticsChanged();
 }
 
 void Document::removeItemsDirect(ItemList &items, QVector<int> &positions)
@@ -430,7 +431,7 @@ void Document::removeItemsDirect(ItemList &items, QVector<int> &positions)
         endRemoveRows();
     }
 
-    emit statisticsChanged();
+    emitStatisticsChanged();
 }
 
 void Document::changeItemDirect(int position, Item &item)
@@ -441,11 +442,9 @@ void Document::changeItemDirect(int position, Item &item)
     QModelIndex idx1 = index(olditem);
     QModelIndex idx2 = createIndex(idx1.row(), columnCount(idx1.parent()) - 1, idx1.internalPointer());
 
-    emit dataChanged(idx1, idx2);
+    emitDataChanged(idx1, idx2);
     updateErrors(olditem);
-    emit statisticsChanged();
-
-    emit itemsChanged({ olditem });
+    emitStatisticsChanged();
 }
 
 void Document::changeCurrencyDirect(const QString &ccode, qreal crate, double *&prices)
@@ -485,22 +484,65 @@ void Document::changeCurrencyDirect(const QString &ccode, qreal crate, double *&
             prices = nullptr;
         }
 
-        emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
-        emit statisticsChanged();
-        emit itemsChanged(m_items);
+        emitDataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
+        emitStatisticsChanged();
     }
     emit currencyCodeChanged(m_currencycode);
 }
 
+void Document::emitDataChanged(const QModelIndex &tl, const QModelIndex &br)
+{
+    if (!m_delayedEmitOfDataChanged) {
+        m_delayedEmitOfDataChanged = new QTimer(this);
+        m_delayedEmitOfDataChanged->setSingleShot(true);
+        m_delayedEmitOfDataChanged->setInterval(100ms);
+
+        static auto resetNext = [](decltype(m_nextDataChangedEmit) &next) {
+            next = {
+                QPoint(std::numeric_limits<int>::max(), std::numeric_limits<int>::max()),
+                QPoint(std::numeric_limits<int>::min(), std::numeric_limits<int>::min())
+            };
+        };
+
+        resetNext(m_nextDataChangedEmit);
+
+        connect(m_delayedEmitOfDataChanged, &QTimer::timeout,
+                this, [this]() {
+
+            emit dataChanged(index(m_nextDataChangedEmit.first.y(),
+                                   m_nextDataChangedEmit.first.x()),
+                             index(m_nextDataChangedEmit.second.y(),
+                                   m_nextDataChangedEmit.second.x()));
+
+            resetNext(m_nextDataChangedEmit);
+        });
+    }
+
+    if (tl.row() < m_nextDataChangedEmit.first.y())
+        m_nextDataChangedEmit.first.setY(tl.row());
+    if (tl.column() < m_nextDataChangedEmit.first.x())
+        m_nextDataChangedEmit.first.setX(tl.column());
+    if (br.row() > m_nextDataChangedEmit.second.y())
+        m_nextDataChangedEmit.second.setY(br.row());
+    if (br.column() > m_nextDataChangedEmit.second.x())
+        m_nextDataChangedEmit.second.setX(br.column());
+
+    if (!m_delayedEmitOfDataChanged->isActive())
+        m_delayedEmitOfDataChanged->start();
+}
+
 void Document::emitStatisticsChanged()
 {
-    if (!m_lastEmitOfStatisticsChanged.isValid()
-            || (m_lastEmitOfStatisticsChanged.elapsed() > 500)) {
-        emit statisticsChanged();
-    } else {
-        m_lastEmitOfStatisticsChanged.start();
-        QTimer::singleShot(500, this, &Document::statisticsChanged);
+    if (!m_delayedEmitOfStatisticsChanged) {
+        m_delayedEmitOfStatisticsChanged = new QTimer(this);
+        m_delayedEmitOfStatisticsChanged->setSingleShot(true);
+        m_delayedEmitOfStatisticsChanged->setInterval(100ms);
+
+        connect(m_delayedEmitOfStatisticsChanged, &QTimer::timeout,
+                this, &Document::statisticsChanged);
     }
+    if (!m_delayedEmitOfStatisticsChanged->isActive())
+        m_delayedEmitOfStatisticsChanged->start();
 }
 
 void Document::updateErrors(Item *item)
@@ -1128,8 +1170,8 @@ quint64 Document::errorMask() const
 void Document::setErrorMask(quint64 em)
 {
     m_error_mask = em;
-    emit statisticsChanged();
-    emit itemsChanged(items());
+    emitStatisticsChanged();
+    emitDataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
 }
 
 quint64 Document::itemErrors(const Item *item) const
@@ -1150,7 +1192,7 @@ void Document::setItemErrors(Item *item, quint64 errors)
             m_errors.remove(item);
 
         emit errorsChanged(item);
-        emit statisticsChanged();
+        emitStatisticsChanged();
     }
 }
 
@@ -1277,7 +1319,7 @@ bool Document::setData(const QModelIndex &index, const QVariant &value, int role
         }
         if (!(item == *itemp)) {
             changeItem(index.row(), item);
-            emit dataChanged(index, index);
+            emitDataChanged(index, index);
             return true;
         }
     }
@@ -1627,7 +1669,7 @@ void Document::pictureUpdated(BrickLink::Picture *pic)
     for (const Item *it : qAsConst(m_items)) {
         if ((pic->item() == it->item()) && (pic->color() == it->color())) {
             QModelIndex idx = index(row, Picture);
-            emit dataChanged(idx, idx);
+            emitDataChanged(idx, idx);
         }
         row++;
     }

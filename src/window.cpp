@@ -330,7 +330,7 @@ Window::Window(Document *doc, QWidget *parent)
     connect(m_doc, &QAbstractItemModel::rowsInserted,
             this, &Window::documentRowsInserted);
 
-    connect(m_doc, &Document::itemsChanged,
+    connect(m_doc, &Document::dataChanged,
             this, &Window::documentItemsChanged);
 
     // don't save the hidden status of these
@@ -2202,16 +2202,18 @@ void Window::setSelection(const Document::ItemList &lst)
                               | QItemSelectionModel::Current | QItemSelectionModel::Rows);
 }
 
-void Window::documentItemsChanged(const Document::ItemList &items)
+void Window::documentItemsChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight)
 {
-    if (!items.isEmpty()) {
-        if (items.contains(m_current))
+    bool selectionChangedEmitted = false;
+
+    for (int r = topLeft.row(); r <= bottomRight.row(); ++r) {
+        auto item = document()->itemAt(r);
+        if (item == m_current)
             emit currentChanged(m_current);
-        foreach (Document::Item *item, m_selection) {
-            if (items.contains(item)) {
-                emit selectionChanged(m_selection);
-                break;
-            }
+
+        if (!selectionChangedEmitted && m_selection.contains(item)) {
+            emit selectionChanged(m_selection);
+            selectionChangedEmitted = true;
         }
     }
 }
