@@ -1814,11 +1814,11 @@ void FrameWork::statisticsUpdate()
             wgtstr = wgtstr.arg(Utility::weightToString(weight, Config::inst()->measurementSystem(), true, true));
         }
 
-        lotstr = tr("Lots: %1").arg(stat.lots());
-        itmstr = tr("Items: %1").arg(stat.items());
+        lotstr = tr("Lots: %L1").arg(stat.lots());
+        itmstr = tr("Items: %L1").arg(stat.items());
 
         if ((stat.errors() > 0) && Config::inst()->showInputErrors())
-            errstr = tr("Errors: %1").arg(stat.errors());
+            errstr = tr("Errors: %L1").arg(stat.errors());
     }
 
     m_st_lots->setText(lotstr);
