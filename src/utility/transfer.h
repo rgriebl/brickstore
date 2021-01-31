@@ -15,11 +15,12 @@
 
 #include <QDateTime>
 #include <QUrl>
+#include <QThread>
 #include <QNetworkAccessManager>
 
 QT_FORWARD_DECLARE_CLASS(QIODevice)
 class Transfer;
-
+class TransferRetriever;
 
 class TransferJob
 {
@@ -56,9 +57,6 @@ public:
     T *userData(int tag) const       { return tag == m_user_tag ? static_cast<T *>(m_user_ptr) : 0; }
 
 private:
-    friend class Transfer;
-    friend class TransferThread;
-
     enum Status : uint {
         Inactive = 0,
         Active,
@@ -98,9 +96,35 @@ private:
     bool         m_was_not_modified : 1;
     bool         m_no_redirects     : 1;
 
-    friend class TransferEngine;
+    friend class Transfer;
+    friend class TransferRetriever;
 };
 
+class TransferRetriever : public QObject
+{
+    Q_OBJECT
+public:
+    TransferRetriever(Transfer *transfer);
+    ~TransferRetriever() override;
+
+    void addJob(TransferJob *job, bool highPriority);
+    void abortAllJobs();
+    void schedule();
+
+signals:
+    void progress(int done, int total);
+    void finished(TransferJob *job);
+    void jobProgress(TransferJob *job, int done, int total);
+
+private:
+    Transfer *m_transfer;
+    QNetworkAccessManager *m_nam = nullptr;
+    QVector<TransferJob *> m_jobs;
+    QVector<TransferJob *> m_currentJobs;
+    int                    m_maxConnections;
+    int                    m_progressDone = 0;
+    int                    m_progressTotal = 0;
+};
 
 class Transfer : public QObject
 {
@@ -109,12 +133,11 @@ public:
     Transfer();
     ~Transfer() override;
 
-    bool retrieve(TransferJob *job, bool high_priority = false);
+    bool retrieve(TransferJob *job, bool highPriority = false);
 
     void abortAllJobs();
 
     QString userAgent() const;
-    QNetworkAccessManager *networkAccessManager();
 
     static void setDefaultUserAgent(const QString &ua);
     static QString defaultUserAgent();
@@ -130,14 +153,11 @@ public slots:
     void setUserAgent(const QString &ua);
 
 private:
-    QString                m_user_agent;
-    int                    m_maxConnections;
-    QNetworkAccessManager *m_nam;
-    QVector<TransferJob *> m_jobs;
-    QVector<TransferJob *> m_currentJobs;
-    int                    m_progressDone = 0;
-    int                    m_progressTotal = 0;
+    void internalFinished(TransferJob *job);
+
+    QThread *m_retrieverThread;
+    TransferRetriever *m_retriever;
+    QString m_user_agent;
 
     static QString s_default_user_agent;
-    void schedule();
 };

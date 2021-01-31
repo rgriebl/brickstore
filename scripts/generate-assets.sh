@@ -18,18 +18,16 @@
 b="$(dirname $0)/../assets"
 which realpath >/dev/null && b="$(realpath --relative-to=. $b)"
 
-i="$b/generated-icons"
-g="$b/generated-32x32"
-x="$b/generated-misc"
-a="$b/crystal-clear-32x32/actions"
-f="$b/crystal-clear-32x32/filesystems"
-m="$b/crystal-clear-128x128/mimetypes"
-c="$b/custom-64x64"
-s=32
+cus="$b/custom"
 
-mkdir -p "$g"
-mkdir -p "$i"
-mkdir -p "$x"
+gai="$b/generated-app-icons"
+gin="$b/generated-installers"
+
+theme="brickstore-breeze"
+s=64
+
+mkdir -p "$gai"
+mkdir -p "$gin"
 
 ######################################
 # app and doc icons
@@ -37,25 +35,25 @@ mkdir -p "$x"
 echo -n "Generating app and doc icons..."
 
 # Unix icons
-convert $b/brickstore.png -resize 256 $i/brickstore.png
+convert $b/brickstore.png -resize 256 $gai/brickstore.png
 convert -size 128x128 canvas:transparent \
-        $m/spreadsheet.png -composite \
+        $cus/crystal-clear-spreadsheet.png -composite \
         $b/brickstore.png -geometry 88x88+20+4 -composite \
-        $i/brickstore_doc.png
+        $gai/brickstore_doc.png
 
 # Windows icons
-convert $i/brickstore.png -define icon:auto-resize=256,48,32,16 $i/brickstore.ico
-convert $i/brickstore_doc.png -define icon:auto-resize=128,48,32,16 $i/brickstore_doc.ico
+convert $gai/brickstore.png -define icon:auto-resize=256,48,32,16 $gai/brickstore.ico
+convert $gai/brickstore_doc.png -define icon:auto-resize=128,48,32,16 $gai/brickstore_doc.ico
 
 # macOS icons
 ## png2icns is broken for icons >= 256x256
-#png2icns $i/brickstore.icns $i/brickstore.png >/dev/null
-#png2icns $i/brickstore_doc.icns $i/brickstore_doc.png >/dev/null
+#png2icns $gai/brickstore.icns $gai/brickstore.png >/dev/null
+#png2icns $gai/brickstore_doc.icns $gai/brickstore_doc.png >/dev/null
 
 ## and makeicns is only available on macOS via brew
 if which makeicns >/dev/null; then
-  makeicns -256 $i/brickstore.png -32 $i/brickstore.png -out $i/brickstore.icns
-  makeicns -128 $i/brickstore_doc.png -32 $i/brickstore_doc.png -out $i/brickstore_doc.icns
+  makeicns -256 $gai/brickstore.png -32 $gai/brickstore.png -out $gai/brickstore.icns
+  makeicns -128 $gai/brickstore_doc.png -32 $gai/brickstore_doc.png -out $gai/brickstore_doc.icns
 fi
 
 echo "done"
@@ -65,53 +63,51 @@ echo "done"
 
 echo -n "Generating action icons..."
 
-convert $b/brickstore.png -resize $((s)) $g/brickstore.png
+tmp="$b/tmp"
+mkdir -p "$tmp"
 
-convert $c/tab_home.png -resize $((s)) $g/tab_home.png
-convert $c/tab_list.png -resize $((s)) $g/tab_list.png
+for color in "" "-dark"; do
 
-convert $c/brick_1x1.png -colorspace sRGB -scale $s $c/overlay_plus.png -scale $s -composite $g/items_add.png
-convert $c/brick_1x1.png -colorspace sRGB -scale $s $c/overlay_divide.png -scale $s -composite $g/items_divide.png
-convert $c/brick_1x1.png -colorspace sRGB -scale $s $c/overlay_multiply.png -scale $s -composite $g/items_multiply.png
-convert $c/brick_1x1.png -colorspace sRGB -scale $s $c/overlay_minus.png -scale $s -composite $g/items_subtract.png
-convert $c/brick_1x1.png -colorspace sRGB -scale $s $c/overlay_merge.png -scale $s -composite $g/items_merge.png
-convert $c/brick_1x1.png -colorspace sRGB -scale $s $c/overlay_split.png -scale $s -composite $g/items_part_out.png
+  rsvg-convert $b/custom/brick-1x1$color.svg -w $s -h $s -f png -o $tmp/brick-1x1$color.png
+  rsvg-convert $b/icons/$theme$color/svg/taxes-finances.svg -w $s -h $s -f png -o $tmp/dollar$color.png
+  rsvg-convert $b/icons/$theme$color/svg/help-about.svg -w $s -h $s -f png -o $tmp/info$color.png
 
-convert $c/dollar.png -colorspace sRGB -scale $s $c/overlay_plusminus.png -scale $s -composite $g/price_inc_dec.png
-convert $c/dollar.png -colorspace sRGB -scale $s $c/overlay_equals.png -scale $s -composite $g/price_set.png
-convert $c/dollar.png -colorspace sRGB -scale $s $c/overlay_percent.png -scale $s -composite $g/price_sale.png
+  out="$b/icons/$theme$color/generated"
+  mkdir -p "$out"
 
-convert -resize $s $c/ldraw.png $g/ldraw.png
-convert -resize $s $c/bricklink.png $g/bricklink.png
-convert -resize $s $c/status_plus.png $g/status_extra.png
-convert -resize $s $c/status_unknown.png $g/status_unknown.png
+  convert $tmp/brick-1x1$color.png -colorspace sRGB -scale $s $cus/overlay_plus.png -scale $s -composite $out/edit-additems.png
+  convert $tmp/brick-1x1$color.png -colorspace sRGB -scale $s $cus/overlay_divide.png -scale $s -composite $out/edit-qty-divide.png
+  convert $tmp/brick-1x1$color.png -colorspace sRGB -scale $s $cus/overlay_multiply.png -scale $s -composite $out/edit-qty-multiply.png
+  convert $tmp/brick-1x1$color.png -colorspace sRGB -scale $s $cus/overlay_minus.png -scale $s -composite $out/edit-subtractitems.png
+  convert $tmp/brick-1x1$color.png -colorspace sRGB -scale $s $cus/overlay_merge.png -scale $s -composite $out/edit-mergeitems.png
+  convert $tmp/brick-1x1$color.png -colorspace sRGB -scale $s $cus/overlay_split.png -scale $s -composite $out/edit-partoutitems.png
 
-convert $c/overlay_minus.png -trim -resize $s -fx '(r+g+b)/3' -brightness-contrast -10x0 $g/zoom_minus.png 
-convert $c/overlay_plus.png  -trim -resize $s -fx '(r+g+b)/3' -brightness-contrast -10x0 $g/zoom_plus.png 
+  convert $tmp/dollar$color.png -colorspace sRGB -scale $s $cus/overlay_plusminus.png -scale $s -composite $out/edit-price-inc-dec.png
+  convert $tmp/dollar$color.png -colorspace sRGB -scale $s $cus/overlay_equals.png -scale $s -composite $out/edit-price-set.png
+  convert $tmp/dollar$color.png -colorspace sRGB -scale $s $cus/overlay_percent.png -scale $s -composite $out/edit-sale.png
 
-convert -size ${s}x${s} canvas:transparent \
-        \( $a/search.png -scale $((s*3/4)) \) -geometry +$((s/8))+$((s/8)) -composite \
-        $g/filter.png
+  convert -size ${s}x${s} canvas:transparent \
+        \( $tmp/dollar$color.png -scale $s \) -geometry +0+0 -composite \
+        \( $cus/bricklink.png -scale $((s*5/8)) \) -geometry +$((s*3/8))+$((s*3/8)) -composite \
+        $out/edit-price-to-priceguide.png
 
-convert -size ${s}x${s} canvas:transparent \
-        \( $m/spreadsheet.png -scale $((s*3/4)) \) -geometry +$((s/4))+$((s/4)) -composite \
-        \( $c/overlay_import_export.png -scale $((s*3/4)) \) -geometry +0+0 -composite \
-        $g/file_import.png
-        
-convert -size ${s}x${s} canvas:transparent \
-        \( $m/spreadsheet.png -scale $((s*3/4)) \) -geometry +0+0 -composite \
-        \( $c/overlay_import_export.png -scale $((s*3/4)) \) -geometry +$((s/4))+$((s/4)) -composite \
-        $g/file_export.png
+  convert -size ${s}x${s} canvas:transparent \
+        \( $cus/bricklink.png -scale $((s*5/8)) \) -geometry +0+0 -composite \
+        \( $tmp/dollar$color.png -scale $((s*5/8)) \) -geometry +$((s*3/8))+$((s*3/8)) -composite \
+        $out/bricklink-priceguide.png
 
-convert -size ${s}x${s} canvas:transparent \
-        \( $c/dollar.png -scale $s \) -geometry +0+0 -composite \
-        \( $c/bricklink.png -scale $((s*5/8)) \) -geometry +$((s*3/8))+$((s*3/8)) -composite \
-        $g/bricklink_priceguide.png
+  convert -size ${s}x${s} canvas:transparent \
+        \( $cus/bricklink.png -scale $((s*5/8)) \) -geometry +0+0 -composite \
+        \( $tmp/info$color.png -scale $((s*5/8)) \) -geometry +$((s*3/8))+$((s*3/8)) -composite \
+        $out/bricklink-catalog.png
 
-convert -size ${s}x${s} canvas:transparent \
-        \( $a/info.png -scale $s \) -geometry +0+0 -composite \
-        \( $c/bricklink.png -scale $((s*5/8)) \) -geometry +$((s*3/8))+$((s*3/8)) -composite \
-        $g/bricklink_info.png
+  convert -size ${s}x${s} canvas:transparent \
+        \( $cus/bricklink.png -scale $((s*5/8)) \) -geometry +0+0 -composite \
+        \( $tmp/brick-1x1$color.png -scale $((s*5/8)) \) -geometry +$((s*3/8))+$((s*3/8)) -composite \
+        $out/bricklink-lotsforsale.png
+done
+
+rm -rf "$tmp"
 
 echo "done"
 
@@ -120,9 +116,10 @@ echo "done"
 
 echo "Generating images for installers..."
 
-convert $i/brickstore.png -resize 96x96 -define bmp3:alpha=true bmp3:$x/windows-installer.bmp
+convert $gai/brickstore.png -resize 96x96 -define bmp3:alpha=true bmp3:$gin/windows-installer.bmp
 
 echo "done"
+
 
 #######################################
 # optimize sizes
@@ -130,7 +127,7 @@ echo "done"
 if which zopflipng >/dev/null; then
   echo "Optimizing..."
 
-  for png in $(ls -1 $g/*.png $i/*.png $m/*.png); do
+  for png in $(ls -1 $cus/*.png $gai/*.png $gin/*.png $b/icons/$theme/generated $b/icons/${theme}-dark/generated); do
     echo -n " > ${png}... "
     zopflipng -my "$png" "$png" >/dev/null
     #optipng -o7 "$1"

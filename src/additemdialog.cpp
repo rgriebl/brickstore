@@ -236,7 +236,7 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     connect(m_historyTimer, &QTimer::timeout, this, &AddItemDialog::updateHistoryText);
 
 
-    if (QAction *a = FrameWork::inst()->findAction("edit_bl_catalog")) {
+    if (QAction *a = FrameWork::inst()->findAction("bricklink_catalog")) {
         connect(new QShortcut(a->shortcut(), this), &QShortcut::activated, this, [this]() {
             const auto item = w_select_item->currentItem();
             const auto color = w_select_color->currentColor();
@@ -246,7 +246,7 @@ AddItemDialog::AddItemDialog(QWidget *parent)
             }
         });
     }
-    if (QAction *a = FrameWork::inst()->findAction("edit_bl_priceguide")) {
+    if (QAction *a = FrameWork::inst()->findAction("bricklink_priceguide")) {
         connect(new QShortcut(a->shortcut(), this), &QShortcut::activated, this, [this]() {
             const auto item = w_select_item->currentItem();
             const auto color = w_select_color->currentColor();
@@ -256,7 +256,7 @@ AddItemDialog::AddItemDialog(QWidget *parent)
             }
         });
     }
-    if (QAction *a = FrameWork::inst()->findAction("edit_bl_lotsforsale")) {
+    if (QAction *a = FrameWork::inst()->findAction("bricklink_lotsforsale")) {
         connect(new QShortcut(a->shortcut(), this), &QShortcut::activated, this, [this]() {
             const auto item = w_select_item->currentItem();
             const auto color = w_select_color->currentColor();

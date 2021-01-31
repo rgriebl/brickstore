@@ -1474,7 +1474,7 @@ bool Core::writeDatabase(const QString &filename, DatabaseVersion version,
         }
 
         check(cw.startChunk(ChunkId('D','A','T','E'), 1));
-        ds << QDateTime::currentDateTime().toUTC();
+        ds << QDateTime::currentDateTimeUtc();
         check(cw.endChunk());
 
         check(cw.startChunk(ChunkId('C','O','L',' '), 1));

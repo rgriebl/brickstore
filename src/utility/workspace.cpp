@@ -14,6 +14,7 @@
 #include <cstdlib>
 
 #include <QLayout>
+#include <QStackedLayout>
 #include <QStackedWidget>
 #include <QTabBar>
 #include <QTabWidget>
@@ -102,197 +103,90 @@ private:
 };
 
 
-class TabBarSide : public QWidget
-{
-    Q_OBJECT
-public:
-    explicit TabBarSide(QTabBar *tabbar, QWidget *parent = nullptr)
-        : QWidget(parent), m_tabbar(tabbar)
-    { }
-
-protected:
-    void paintEvent(QPaintEvent *) override;
-
-private:
-    QTabBar *m_tabbar;
-};
-
-void TabBarSide::paintEvent(QPaintEvent *)
-{
-    QPainter p(this);
-    QStyleOptionTabBarBase option;
-    option.initFrom(this);
-    option.tabBarRect = option.rect;
-    if (m_tabbar) {
-        option.shape = m_tabbar->shape();
-        option.documentMode = m_tabbar->documentMode();
-
-        QStyleOptionTab tabOverlap;
-        tabOverlap.shape = m_tabbar->shape();
-        int overlap = m_tabbar->style()->pixelMetric(QStyle::PM_TabBarBaseOverlap, &tabOverlap, m_tabbar);
-        option.rect.setTop(option.rect.bottom() - overlap + 1);
-        option.rect.setHeight(overlap);
-    }
-    style()->drawPrimitive(QStyle::PE_FrameTabBarBase, &option, &p, this);
-}
-
-
-class TabBar : public QTabBar
-{
-    Q_OBJECT
-public:
-    TabBar(QWidget *parent = nullptr)
-        : QTabBar(parent)
-    {
-        setSelectionBehaviorOnRemove(QTabBar::SelectPreviousTab);
-    }
-
-signals:
-    void countChanged(int);
-
-protected:
-    // QTabBar's count property doesn't define a NOTIFY signals, so we have generate one ourselves
-    void tabInserted(int index) override;
-    void tabRemoved(int index) override;
-};
-
-void TabBar::tabInserted(int index)
-{
-    QTabBar::tabInserted(index);
-    emit countChanged(count());
-}
-
-void TabBar::tabRemoved(int index)
-{
-    QTabBar::tabRemoved(index);
-    emit countChanged(count());
-}
-
-
-class TabBarSideButton : public QToolButton
-{
-    Q_OBJECT
-
-public:
-    explicit TabBarSideButton(QTabBar *tabbar, QWidget *parent = nullptr)
-        : QToolButton(parent), m_tabbar(tabbar)
-    {
-        setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
-    }
-
-    QSize sizeHint() const override;
-
-private:
-    QTabBar *m_tabbar;
-};
-
-QSize TabBarSideButton::sizeHint() const
-{
-    QSize sb = QToolButton::sizeHint();
-    QSize st = m_tabbar->sizeHint();
-    return { sb.width(), st.height() };
-}
-
-
 Workspace::Workspace(QWidget *parent)
     : QWidget(parent)
 {
-    m_tabbar = new TabBar(this);
-    m_tabbar->setElideMode(Qt::ElideMiddle);
-    m_tabbar->setDocumentMode(true);
-    m_tabbar->setUsesScrollButtons(true);
-    m_tabbar->setMovable(true);
-    m_tabbar->setTabsClosable(true);
-    m_tabbar->setExpanding(false);
+    m_tabs = new QTabWidget();
+    m_tabs->setElideMode(Qt::ElideMiddle);
+    m_tabs->setDocumentMode(true);
+    m_tabs->setUsesScrollButtons(true);
+    m_tabs->setMovable(true);
+    m_tabs->setTabsClosable(true);
+    m_tabs->tabBar()->setExpanding(false);
+    m_tabs->tabBar()->setSelectionBehaviorOnRemove(QTabBar::SelectPreviousTab);
 
-    QWidget *left = new TabBarSide(m_tabbar);
-    QWidget *right = new TabBarSide(m_tabbar);
-    m_windowStack = new QStackedWidget();
-
-    m_welcomeWidget = new QWidget();
-    m_windowStack->insertWidget(0, m_welcomeWidget);
-
-    m_tablist = new TabBarSideButton(m_tabbar);
-    m_tablist->setIcon(QIcon(":/images/tab_list.png"));
+    m_tablist = new QToolButton();
+    m_tablist->setIcon(QIcon::fromTheme("tab-duplicate"));
     m_tablist->setAutoRaise(true);
     m_tablist->setPopupMode(QToolButton::InstantPopup);
     m_tablist->setToolButtonStyle(Qt::ToolButtonIconOnly);
     m_tablist->setMenu(windowMenu(false, this));
+    m_tabs->setCornerWidget(m_tablist, Qt::TopRightCorner);
 
-    m_tabhome = new TabBarSideButton(m_tabbar);
-    m_tabhome->setIcon(QIcon(":/images/tab_home.png"));
+    m_tabhome = new QToolButton();
+    m_tabhome->setIcon(QIcon::fromTheme("go-home"));
     m_tabhome->setAutoRaise(true);
     m_tabhome->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    m_tabs->setCornerWidget(m_tabhome, Qt::TopLeftCorner);
+
+    m_welcomeWidget = new QWidget();
+
+    m_tabback = new QToolButton(m_welcomeWidget);
+    m_tabback->setIcon(QIcon::fromTheme("go-previous"));
+    m_tabback->setAutoRaise(true);
+    m_tabback->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    connect(m_tabback, &QToolButton::clicked,
+            this, [this]() { setActiveWindow(m_tabs->currentWidget()); });
+
+    m_stack = new QStackedLayout(this);
+    m_stack->addWidget(m_tabs);
+    m_stack->addWidget(m_welcomeWidget);
+
     connect(m_tabhome, &QToolButton::clicked,
-            this, [this]() {
-        m_windowStack->setCurrentWidget(welcomeWidget());
-        emit welcomeWidgetVisible();
-    });
+            this, [this]() { m_stack->setCurrentWidget(m_welcomeWidget); });
 
-    auto *leftlay = new QHBoxLayout(left);
-    leftlay->setMargin(0);
-    leftlay->addWidget(m_tabhome);
-    auto *rightlay = new QHBoxLayout(right);
-    rightlay->setMargin(0);
-    rightlay->addWidget(m_tablist);
-
-    auto *tabbox = new QHBoxLayout();
-    tabbox->setMargin(0);
-    tabbox->setSpacing(0);
-    tabbox->addWidget(left);
-    tabbox->addWidget(m_tabbar, 10);
-    tabbox->addWidget(right);
-    auto *layout = new QVBoxLayout();
-    layout->setMargin(0);
-    layout->setSpacing(0);
-    layout->addLayout(tabbox);
-    layout->addWidget(m_windowStack, 10);
-    setLayout(layout);
-
-    connect(m_tabbar, &QTabBar::currentChanged,
+    connect(m_stack, &QStackedLayout::currentChanged,
             this, [this](int idx) {
-        m_windowStack->setCurrentIndex(idx + 1);
-        auto w = m_windowStack->widget(idx + 1);
-        emit windowActivated(w);
-    });
-    connect(m_tabbar, &QTabBar::tabCloseRequested,
-            this, [this](int idx) {
-        m_windowStack->widget(idx + 1)->close();
-    });
-    connect(m_tabbar, &QTabBar::tabMoved,
-            this, [this](int from, int to) {
-        m_windowStack->blockSignals(true);
-        QWidget *w = m_windowStack->widget(from + 1);
-        m_windowStack->removeWidget(w);
-        m_windowStack->insertWidget(to + 1, w);
-        m_windowStack->blockSignals(false);
-    });
-    connect(m_tabbar, &QTabBar::tabBarClicked,
-            this, [this](int idx) {
-        if ((idx == m_tabbar->currentIndex()) && (m_windowStack->currentIndex() == 0)) {
-            m_windowStack->setCurrentIndex(idx + 1);
-            emit windowActivated(m_windowStack->currentWidget());
+        m_welcomeActive = (m_stack->widget(idx) == m_welcomeWidget);
+        emit windowActivated(m_welcomeActive ? nullptr : m_tabs->currentWidget());
+        if (m_welcomeActive) {
+            m_tabback->setGeometry(m_tabhome->geometry());
+            m_tabback->setVisible(m_tabs->count() != 0);
+            emit welcomeWidgetVisible();
         }
     });
 
-    connect(m_windowStack, &QStackedWidget::widgetRemoved,
+    connect(m_tabs, &QTabWidget::currentChanged,
             this, [this](int idx) {
-        m_tabbar->removeTab(idx - 1);
-        emit windowCountChanged(windowCount());
+        emit windowActivated(m_tabs->widget(idx));
+    });
+    connect(m_tabs, &QTabWidget::tabCloseRequested,
+            this, [this](int idx) {
+        m_tabs->widget(idx)->close();
+    });
+
+    connect(m_tabs->findChild<QStackedWidget *>("qt_tabwidget_stackedwidget"), &QStackedWidget::widgetRemoved,
+            this, [this]() {
+        int c = windowCount();
+        emit windowCountChanged(c);
+        if (c == 0)
+            m_stack->setCurrentWidget(m_welcomeWidget);
     });
 
     for (int i = 0; i < 9; ++i) {
         //: Shortcut to activate window 0-9
         auto sc = new QShortcut(tr("Alt+%1").arg(i), this);
         connect(sc, &QShortcut::activated, this, [this, i]() {
-            int j = (i == 0) ? 9 : i - 1;
-            if (m_windowStack->count() > j) {
-                auto w = m_windowStack->widget(j + 1);
+            const int j = (i == 0) ? 9 : i - 1;
+            if (j < windowCount() && !m_welcomeActive) {
+                auto w = m_tabs->widget(j);
                 if (activeWindow() != w)
                     setActiveWindow(w);
             }
         });
     }
+    languageChange();
+    m_stack->setCurrentWidget(m_welcomeWidget);
 }
 
 QWidget *Workspace::welcomeWidget() const
@@ -304,19 +198,25 @@ void Workspace::setWelcomeWidget(QWidget *welcomeWidget)
 {
     if (welcomeWidget == m_welcomeWidget)
         return;
-    if (m_welcomeWidget) {
-        m_windowStack->removeWidget(m_welcomeWidget);
-        delete m_welcomeWidget;
-    }
+    bool wasActive = (m_stack->currentWidget() == m_welcomeWidget);
+    if (!welcomeWidget)
+        welcomeWidget = new QWidget();
+    if (m_welcomeWidget)
+        m_welcomeWidget->removeEventFilter(this);
+    m_tabback->setParent(welcomeWidget);
+    m_stack->removeWidget(m_welcomeWidget);
+    m_stack->insertWidget(m_stack->count(), welcomeWidget);
+    delete m_welcomeWidget;
     m_welcomeWidget = welcomeWidget;
-    m_welcomeWidget->setParent(this);
-    m_windowStack->insertWidget(0, welcomeWidget);
+    m_welcomeWidget->installEventFilter(this);
+    if (wasActive)
+        m_stack->setCurrentWidget(m_welcomeWidget);
 }
 
 QMenu *Workspace::windowMenu(bool hasShortcut, QWidget *parent)
 {
     auto *m = new WindowMenu(this, hasShortcut, parent);
-    connect(m_tabbar, &TabBar::countChanged,
+    connect(this, &Workspace::windowCountChanged,
             m, &WindowMenu::checkEnabledStatus);
     return m;
 }
@@ -326,9 +226,8 @@ void Workspace::addWindow(QWidget *w)
     if (!w)
         return;
 
-    int idx = m_windowStack->addWidget(w);
-    m_tabbar->insertTab(idx - 1, cleanWindowTitle(w));
-    m_tabbar->setTabToolTip(idx - 1, m_tabbar->tabText(idx - 1));
+    int idx = m_tabs->addTab(w, cleanWindowTitle(w));
+    m_tabs->setTabToolTip(idx, m_tabs->tabText(idx));
 
     w->installEventFilter(this);
 
@@ -339,55 +238,73 @@ void Workspace::languageChange()
 {
     m_tablist->setToolTip(tr("Show a list of all open documents"));
     m_tabhome->setToolTip(tr("Go to the Quickstart page"));
+    m_tabback->setToolTip(tr("Go back to the current document"));
 }
 
 void Workspace::setActiveWindow(QWidget *w)
 {
-    int idx = m_windowStack->indexOf(w);
-
-    if ((m_windowStack->currentIndex() == 0) && (idx == (m_tabbar->currentIndex() + 1))) {
-        m_windowStack->setCurrentIndex(idx);
-        emit windowActivated(w);
-    } else {
-        m_tabbar->setCurrentIndex(idx - 1);
-    }
+    m_stack->setCurrentWidget(m_tabs);
+    m_tabs->setCurrentWidget(w);
 }
 
 QVector<QWidget *> Workspace::windowList() const
 {
     QVector<QWidget *> res;
-    int count = m_windowStack->count();
+    int count = m_tabs->count();
     res.reserve(count);
 
-    for (int i = 1; i < count; i++)
-        res << m_windowStack->widget(i);
+    for (int i = 0; i < count; ++i)
+        res << m_tabs->widget(i);
 
     return res;
 }
 
 QWidget *Workspace::activeWindow() const
 {
-    return m_windowStack->currentWidget();
+    return (m_stack->currentWidget() == m_tabs) ? m_tabs->currentWidget() : nullptr;
 }
 
 int Workspace::windowCount() const
 {
-    return m_windowStack->count() - 1;
+    return m_tabs->count();
 }
 
 bool Workspace::eventFilter(QObject *o, QEvent *e)
 {
-    if (QWidget *w = qobject_cast<QWidget *>(o)) {
+    // handle back keys and mouse buttons
+    if ((o == m_welcomeWidget) && m_welcomeActive && (m_tabs->count())) {
+        bool goBack = false;
+
+        switch (e->type()) {
+        case QEvent::KeyPress: {
+            auto ke = static_cast<QKeyEvent *>(e);
+            goBack = (ke->key() == Qt::Key_Back) || (ke->key() == Qt::Key_Escape);
+            break;
+        }
+        case QEvent::MouseButtonPress: {
+            auto me = static_cast<QMouseEvent *>(e);
+            goBack = (me->button() == Qt::BackButton);
+            break;
+        }
+        default:
+            break;
+        }
+        if (goBack) {
+            setActiveWindow(m_tabs->currentWidget());
+            e->accept();
+            return true;
+        }
+    } else if (QWidget *w = qobject_cast<QWidget *>(o)) {
         switch (e->type()) {
         case QEvent::WindowTitleChange:
         case QEvent::ModifiedChange: {
-            int idx = m_windowStack->indexOf(w);
-            m_tabbar->setTabText(idx - 1, cleanWindowTitle(w));
-            m_tabbar->setTabToolTip(idx - 1, m_tabbar->tabText(idx - 1));
+            int idx = m_tabs->indexOf(w);
+            m_tabs->setTabText(idx, cleanWindowTitle(w));
+            m_tabs->setTabToolTip(idx, m_tabs->tabText(idx));
             break;
         }
         case QEvent::WindowIconChange:
-            m_tabbar->setTabIcon(m_windowStack->indexOf(w) - 1, w->windowIcon());
+            m_tabs->setTabIcon(m_tabs->indexOf(w), w->windowIcon());
             break;
         default:
             break;

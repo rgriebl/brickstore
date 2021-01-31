@@ -15,11 +15,10 @@
 
 #include <QWidget>
 
-class TabBar;
-class TabBarSideButton;
-QT_FORWARD_DECLARE_CLASS(QStackedWidget)
+QT_FORWARD_DECLARE_CLASS(QToolButton)
+QT_FORWARD_DECLARE_CLASS(QStackedLayout)
+QT_FORWARD_DECLARE_CLASS(QTabWidget)
 QT_FORWARD_DECLARE_CLASS(QMenu)
-QT_FORWARD_DECLARE_CLASS(QTextDocument)
 
 
 class Workspace : public QWidget
@@ -55,9 +54,12 @@ private:
     void languageChange();
 
 private:
-    TabBar *          m_tabbar;
-    TabBarSideButton *m_tabhome;
-    TabBarSideButton *m_tablist;
-    QStackedWidget *  m_windowStack;
-    QWidget *         m_welcomeWidget = nullptr;
+    QToolButton *m_tabhome;
+    QToolButton *m_tabback;
+    QToolButton *m_tablist;
+    QStackedLayout *m_stack;
+    QTabWidget *m_tabs;
+    QWidget *m_welcomeWidget;
+    bool m_welcomeActive = false;
+
 };

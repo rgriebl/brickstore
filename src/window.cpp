@@ -27,6 +27,7 @@
 #include <QPrintDialog>
 #include <QProgressDialog>
 #include <QStringBuilder>
+#include <QScrollBar>
 
 #include "messagebox.h"
 #include "config.h"
@@ -118,22 +119,45 @@ private:
     }
 };
 
+class WindowProgressHelper : public QObject
+{
+public:
+    WindowProgressHelper(QProgressDialog *pd)
+        : QObject(pd)
+    {
+        pd->installEventFilter(this);
+    }
+protected:
+    bool eventFilter(QObject *watched, QEvent *event) override
+    {
+        // eat the Escape key
+        if (event->type() == QEvent::KeyPress) {
+            if (static_cast<QKeyEvent *>(event)->matches(QKeySequence::Cancel))
+                return true;
+        }
+        return QObject::eventFilter(watched, event);
+    }
+};
+
+
 class WindowProgress
 {
 public:
     explicit WindowProgress(QWidget *w, const QString &title = QString(), int total = 0)
         : m_w(w), m_reenabled(false)
     {
-        auto *sa = qobject_cast<QScrollArea *>(w);
+        auto *sa = qobject_cast<QAbstractScrollArea *>(w);
         m_w = sa ? sa->viewport() : w;
         m_upd_enabled = m_w->updatesEnabled();
         m_w->setUpdatesEnabled(false);
         QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
         if (total) {
-            m_progress = new QProgressDialog(title, QString(), 0, total, w->window());
+            m_progress = new QProgressDialog(title, QString(), 0, total, w->window(),
+                                             Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
             m_progress->setWindowModality(Qt::WindowModal);
             m_progress->setMinimumDuration(1500);
             m_progress->setValue(0);
+            new WindowProgressHelper(m_progress);
         } else {
             m_progress = nullptr;
         }
@@ -157,8 +181,15 @@ public:
 
     void step(int d = 1)
     {
-        if (m_progress)
-            m_progress->setValue(m_progress->value() + d);
+        m_counter += d;
+
+        if (m_progress) {
+            int total = m_progress->maximum();
+            if ((m_counter == total) || ((m_counter - m_lastTick) >= (total / 100))) {
+                m_progress->setValue(m_counter);
+                m_lastTick = m_counter;
+            }
+        }
     }
 
     void setOverrideCursor()
@@ -177,6 +208,8 @@ private:
     QWidget * m_w;
     bool      m_upd_enabled : 1;
     bool      m_reenabled   : 1;
+    int       m_counter = 0;
+    int       m_lastTick = 0;
     QProgressDialog *m_progress;
 };
 
@@ -221,8 +254,7 @@ Window::Window(Document *doc, QWidget *parent)
     m_latest_row = -1;
     m_latest_timer = new QTimer(this);
     m_latest_timer->setSingleShot(true);
-    m_latest_timer->setInterval(400ms);
-    m_current = nullptr;
+    m_latest_timer->setInterval(100ms);
 
     m_settopg_failcnt = 0;
     m_settopg_list = nullptr;
@@ -255,10 +287,17 @@ Window::Window(Document *doc, QWidget *parent)
     m_selection_model = new QItemSelectionModel(m_view, this);
     w_list->setSelectionModel(m_selection_model);
 
+    // This shouldn't be needed, but we are abusing layoutChanged a bit for adding and removing
+    // items. The docs are a bit undecided if you should really do that, but it really helps
+    // performance wise. Just the selection is not updated, when the items in it are deleted.
+    connect(m_view, &DocumentProxyModel::layoutChanged,
+            m_selection_model, [this]() {
+        updateSelection();
+    });
+
     auto *dd = new DocumentDelegate(doc, m_view, w_list);
     w_list->setItemDelegate(dd);
     w_list->verticalHeader()->setDefaultSectionSize(dd->defaultItemHeight(w_list));
-    w_list->installEventFilter(this);
 
     QBoxLayout *toplay = new QVBoxLayout(this);
     toplay->setSpacing(0);
@@ -272,8 +311,6 @@ Window::Window(Document *doc, QWidget *parent)
 
     connect(m_selection_model, &QItemSelectionModel::selectionChanged,
             this, &Window::updateSelection);
-    connect(m_selection_model, &QItemSelectionModel::currentChanged,
-            this, &Window::updateCurrent);
 
     connect(BrickLink::core(), &BrickLink::Core::priceGuideUpdated,
             this, &Window::priceGuideUpdated);
@@ -294,10 +331,7 @@ Window::Window(Document *doc, QWidget *parent)
     connect(m_doc, &Document::modificationChanged,
             this, &Window::updateCaption);
 
-    connect(m_doc, &QAbstractItemModel::rowsInserted,
-            this, &Window::documentRowsInserted);
-
-    connect(m_doc, &Document::itemsChanged,
+    connect(m_doc, &Document::dataChanged,
             this, &Window::documentItemsChanged);
 
     // don't save the hidden status of these
@@ -410,22 +444,14 @@ void Window::setDifferenceMode(bool b)
     w_header->setSectionAvailable(Document::QuantityDiff, b);
 }
 
-void Window::documentRowsInserted(const QModelIndex &parent, int /*start*/, int end)
-{
-    if (!parent.isValid()) {
-        m_latest_row = m_view->mapFromSource(m_doc->index(end, 0)).row();
-        m_latest_timer->start();
-    }
-}
-
 void Window::ensureLatestVisible()
 {
     if (m_latest_row >= 0) {
-        w_list->scrollTo(m_view->index(m_latest_row, 0));
+        int xOffset = w_list->horizontalScrollBar()->value();
+        w_list->scrollTo(m_view->index(m_latest_row, w_header->logicalIndexAt(-xOffset)));
         m_latest_row = -1;
     }
 }
-
 
 void Window::setFilter(const QString &str)
 {
@@ -453,6 +479,7 @@ int Window::addItems(const BrickLink::InvItemList &items, AddItemMode addItemMod
 
     const auto &documentItems = document()->items();
     bool wasEmpty = documentItems.isEmpty();
+    Document::Item *lastAdded = nullptr;
     int addCount = 0;
     int consolidateCount = 0;
     Consolidate conMode = Consolidate::IntoExisting;
@@ -540,6 +567,7 @@ int Window::addItems(const BrickLink::InvItemList &items, AddItemMode addItemMod
 
             m_doc->appendItem(item);  // pass on ownership to the doc
             ++addCount;
+            lastAdded = item;
         }
     }
 
@@ -548,6 +576,11 @@ int Window::addItems(const BrickLink::InvItemList &items, AddItemMode addItemMod
 
     if (wasEmpty)
         w_list->selectRow(0);
+
+    if (lastAdded) {
+        m_latest_row = m_view->index(lastAdded).row();
+        m_latest_timer->start();
+    }
 
     return items.count();
 }
@@ -1102,7 +1135,6 @@ void Window::on_edit_cost_set_triggered()
         setOrToggle<double>::set(this, QT_TR_N_NOOP("Set cost on %n item(s)"),
                                  &Document::Item::cost, &Document::Item::setCost, cost);
     }
-
 }
 
 void Window::on_edit_cost_round_triggered()
@@ -1164,6 +1196,40 @@ void Window::on_edit_cost_inc_dec_triggered()
         }
 
         m_doc->endMacro(tr("Cost change on %n item(s)", nullptr, incdeccount));
+    }
+}
+
+void Window::on_edit_cost_spread_triggered()
+{
+    if (selection().size() < 2)
+        return;
+
+    double spreadAmount = 0;
+
+    if (MessageBox::getDouble(this, { }, tr("Enter the cost amount to spread over all the selected items:"),
+                              Currency::localSymbol(m_doc->currencyCode()), spreadAmount,
+                              0, FrameWork::maxPrice, 3)) {
+        uint spreadcount = 0;
+        double priceTotal = 0;
+
+        foreach (Document::Item *item, selection())
+            priceTotal += (item->price() * item->quantity());
+
+        if (qFuzzyIsNull(priceTotal))
+            return;
+        double f = spreadAmount / priceTotal;
+
+        m_doc->beginMacro();
+
+        foreach (Document::Item *item, selection()) {
+            Document::Item newItem(*item);
+            newItem.setCost(item->price() * f);
+            m_doc->changeItem(item, newItem);
+
+            spreadcount++;
+        }
+
+        m_doc->endMacro(tr("Cost spreaded over %n item(s)", nullptr, spreadcount));
     }
 }
 
@@ -1786,7 +1852,7 @@ void Window::contextMenu(const QPoint &p)
     FrameWork::inst()->showContextMenu(true, w_list->viewport()->mapToGlobal(p));
 }
 
-void Window::on_file_close_triggered()
+void Window::on_document_close_triggered()
 {
     close();
 }
@@ -1807,7 +1873,7 @@ void Window::closeEvent(QCloseEvent *e)
 
         switch (msgBox.exec()) {
         case MessageBox::Save:
-            on_file_save_triggered();
+            on_document_save_triggered();
 
             if (!m_doc->isModified())
                 e->accept();
@@ -1830,25 +1896,25 @@ void Window::closeEvent(QCloseEvent *e)
 
 }
 
-void Window::on_edit_bl_catalog_triggered()
+void Window::on_bricklink_catalog_triggered()
 {
     if (!selection().isEmpty())
         QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_CatalogInfo, (*selection().front()).item(), (*selection().front()).color()));
 }
 
-void Window::on_edit_bl_priceguide_triggered()
+void Window::on_bricklink_priceguide_triggered()
 {
     if (!selection().isEmpty())
         QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_PriceGuideInfo, (*selection().front()).item(), (*selection().front()).color()));
 }
 
-void Window::on_edit_bl_lotsforsale_triggered()
+void Window::on_bricklink_lotsforsale_triggered()
 {
     if (!selection().isEmpty())
         QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_LotsForSale, (*selection().front()).item(), (*selection().front()).color()));
 }
 
-void Window::on_edit_bl_myinventory_triggered()
+void Window::on_bricklink_myinventory_triggered()
 {
     if (!selection().isEmpty()) {
         uint lotid = (*selection().front()).lotId();
@@ -1868,7 +1934,7 @@ void Window::on_view_column_layout_save_triggered()
             layoutId = "user-default";
         } else {
             const auto allIds = Config::inst()->columnLayoutIds();
-            for (auto id : allIds) {
+            for (const auto &id : allIds) {
                 if (Config::inst()->columnLayoutName(id) == name) {
                     layoutId = id;
                     break;
@@ -1902,12 +1968,12 @@ void Window::on_view_difference_mode_toggled(bool b)
     setDifferenceMode(b);
 }
 
-void Window::on_file_print_triggered()
+void Window::on_document_print_triggered()
 {
     print(false);
 }
 
-void Window::on_file_print_pdf_triggered()
+void Window::on_document_print_pdf_triggered()
 {
     print(true);
 }
@@ -1990,7 +2056,7 @@ void Window::print(bool as_pdf)
     }
 }
 
-void Window::on_file_save_triggered()
+void Window::on_document_save_triggered()
 {
     m_doc->setGuiState(createGuiStateXML());
     m_doc->fileSave();
@@ -1998,7 +2064,7 @@ void Window::on_file_save_triggered()
     deleteAutosave();
 }
 
-void Window::on_file_saveas_triggered()
+void Window::on_document_save_as_triggered()
 {
     m_doc->setGuiState(createGuiStateXML());
     m_doc->fileSaveAs();
@@ -2006,7 +2072,7 @@ void Window::on_file_saveas_triggered()
     deleteAutosave();
 }
 
-void Window::on_file_export_bl_xml_triggered()
+void Window::on_document_export_bl_xml_triggered()
 {
     Document::ItemList items = exportCheck();
 
@@ -2014,7 +2080,7 @@ void Window::on_file_export_bl_xml_triggered()
         m_doc->fileExportBrickLinkXML(items);
 }
 
-void Window::on_file_export_bl_xml_clip_triggered()
+void Window::on_document_export_bl_xml_clip_triggered()
 {
     Document::ItemList items = exportCheck();
 
@@ -2022,7 +2088,7 @@ void Window::on_file_export_bl_xml_clip_triggered()
         m_doc->fileExportBrickLinkXMLClipboard(items);
 }
 
-void Window::on_file_export_bl_update_clip_triggered()
+void Window::on_document_export_bl_update_clip_triggered()
 {
     Document::ItemList items = exportCheck();
 
@@ -2030,7 +2096,7 @@ void Window::on_file_export_bl_update_clip_triggered()
         m_doc->fileExportBrickLinkUpdateClipboard(items);
 }
 
-void Window::on_file_export_bl_invreq_clip_triggered()
+void Window::on_document_export_bl_invreq_clip_triggered()
 {
     Document::ItemList items = exportCheck();
 
@@ -2038,7 +2104,7 @@ void Window::on_file_export_bl_invreq_clip_triggered()
         m_doc->fileExportBrickLinkInvReqClipboard(items);
 }
 
-void Window::on_file_export_bl_wantedlist_clip_triggered()
+void Window::on_document_export_bl_wantedlist_clip_triggered()
 {
     Document::ItemList items = exportCheck();
 
@@ -2092,35 +2158,26 @@ void Window::resizeColumnsToDefault()
     w_list->sortByColumn(-1, Qt::AscendingOrder);
 }
 
-bool Window::eventFilter(QObject *o, QEvent *e)
-{
-#ifdef ENABLE_ITEM_DETAIL_POPUP
-    if (o == w_list && e->type() == QEvent::KeyPress) {
-        if (static_cast<QKeyEvent *>(e)->key() == Qt::Key_Space) {
-            FrameWork::inst()->toggleItemDetailPopup();
-            e->accept();
-            return true;
-        }
-    }
-#endif
-    return QWidget::eventFilter(o, e);
-}
-
-void Window::updateCurrent()
-{
-    QModelIndex idx = m_selection_model->currentIndex();
-    m_current = idx.isValid() ? m_view->item(idx) : nullptr;
-    emit currentChanged(m_current);
-}
-
 void Window::updateSelection()
 {
-    m_selection.clear();
+    if (!m_delayedSelectionUpdate) {
+        m_delayedSelectionUpdate = new QTimer(this);
+        m_delayedSelectionUpdate->setSingleShot(true);
+        m_delayedSelectionUpdate->setInterval(0);
 
-    foreach (const QModelIndex &idx, m_selection_model->selectedRows())
-        m_selection.append(m_view->item(idx));
+        connect(m_delayedSelectionUpdate, &QTimer::timeout, this, [this]() {
+            m_selection.clear();
 
-    emit selectionChanged(m_selection);
+            foreach (const QModelIndex &idx, m_selection_model->selectedRows())
+                m_selection.append(m_view->item(idx));
+
+            emit selectionChanged(m_selection);
+
+            if (m_selection_model->currentIndex().isValid())
+                w_list->scrollTo(m_selection_model->currentIndex());
+        });
+    }
+    m_delayedSelectionUpdate->start();
 }
 
 void Window::setSelection(const Document::ItemList &lst)
@@ -2135,16 +2192,12 @@ void Window::setSelection(const Document::ItemList &lst)
                               | QItemSelectionModel::Current | QItemSelectionModel::Rows);
 }
 
-void Window::documentItemsChanged(const Document::ItemList &items)
+void Window::documentItemsChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight)
 {
-    if (!items.isEmpty()) {
-        if (items.contains(m_current))
-            emit currentChanged(m_current);
-        foreach (Document::Item *item, m_selection) {
-            if (items.contains(item)) {
-                emit selectionChanged(m_selection);
-                break;
-            }
+    for (int r = topLeft.row(); r <= bottomRight.row(); ++r) {
+        if (m_selection.contains(document()->itemAt(r))) {
+            emit selectionChanged(m_selection);
+            break;
         }
     }
 }

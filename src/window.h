@@ -63,7 +63,6 @@ public:
     static const QVector<Window *> processAutosaves(AutosaveAction action);
 
     const Document::ItemList &selection() const  { return m_selection; }
-    Document::Item *current() const              { return m_current; }
 
     uint setItems(const BrickLink::InvItemList &items, int multiply = 1);
     int addItems(const BrickLink::InvItemList &items, AddItemMode addItemMode = AddItemMode::AddAsNew);
@@ -93,17 +92,17 @@ public slots:
 
     void on_view_difference_mode_toggled(bool);
 
-    void on_file_save_triggered();
-    void on_file_saveas_triggered();
-    void on_file_export_bl_xml_triggered();
-    void on_file_export_bl_xml_clip_triggered();
-    void on_file_export_bl_update_clip_triggered();
-    void on_file_export_bl_invreq_clip_triggered();
-    void on_file_export_bl_wantedlist_clip_triggered();
+    void on_document_save_triggered();
+    void on_document_save_as_triggered();
+    void on_document_export_bl_xml_triggered();
+    void on_document_export_bl_xml_clip_triggered();
+    void on_document_export_bl_update_clip_triggered();
+    void on_document_export_bl_invreq_clip_triggered();
+    void on_document_export_bl_wantedlist_clip_triggered();
 
-    void on_file_print_triggered();
-    void on_file_print_pdf_triggered();
-    void on_file_close_triggered();
+    void on_document_print_triggered();
+    void on_document_print_pdf_triggered();
+    void on_document_close_triggered();
 
     void on_edit_cut_triggered();
     void on_edit_copy_triggered();
@@ -145,6 +144,7 @@ public slots:
     void on_edit_cost_set_triggered();
     void on_edit_cost_round_triggered();
     void on_edit_cost_inc_dec_triggered();
+    void on_edit_cost_spread_triggered();
     void on_edit_bulk_triggered();
     void on_edit_sale_triggered();
     void on_edit_retain_yes_triggered();
@@ -164,10 +164,10 @@ public slots:
     void on_edit_comment_set_triggered();
     void on_edit_comment_clear_triggered();
 
-    void on_edit_bl_catalog_triggered();
-    void on_edit_bl_priceguide_triggered();
-    void on_edit_bl_lotsforsale_triggered();
-    void on_edit_bl_myinventory_triggered();
+    void on_bricklink_catalog_triggered();
+    void on_bricklink_priceguide_triggered();
+    void on_bricklink_lotsforsale_triggered();
+    void on_bricklink_myinventory_triggered();
 
     void on_view_column_layout_save_triggered();
     void on_view_column_layout_list_load(const QString &layoutId);
@@ -176,22 +176,18 @@ public slots:
 
 signals:
     void selectionChanged(const Document::ItemList &);
-    void currentChanged(Document::Item *);
 
 protected:
     void closeEvent(QCloseEvent *e) override;
     void changeEvent(QEvent *e) override;
-    bool eventFilter(QObject *o, QEvent *e) override;
 
     void print(bool aspdf);
 
 private slots:
     void ensureLatestVisible();
-    void documentRowsInserted(const QModelIndex &, int, int);
     void updateCaption();
     void updateSelection();
-    void updateCurrent();
-    void documentItemsChanged(const Document::ItemList &items);
+    void documentItemsChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
 
     void contextMenu(const QPoint &);
     void priceGuideUpdated(BrickLink::PriceGuide *);
@@ -213,7 +209,7 @@ private:
     DocumentProxyModel * m_view;
     QItemSelectionModel *m_selection_model;
     Document::ItemList   m_selection;
-    Document::Item *     m_current;
+    QTimer *             m_delayedSelectionUpdate = nullptr;
     QTableView *         w_list;
     HeaderView *         w_header;
     bool                 m_diff_mode;
@@ -221,6 +217,7 @@ private:
 
     int                  m_latest_row;
     QTimer *             m_latest_timer;
+
 
     uint                 m_settopg_failcnt = 0;
     uint                 m_settopg_todocnt = 0;

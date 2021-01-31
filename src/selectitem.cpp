@@ -42,7 +42,6 @@
 #include "selectitem.h"
 #include "messagebox.h"
 #include "framework.h"
-#include "itemdetailpopup.h"
 
 using namespace std::chrono_literals;
 
@@ -67,7 +66,6 @@ public:
     QToolButton *    w_zoomOut;
     QLabel *         w_zoomLevel;
     QButtonGroup *   w_viewmode;
-    ItemDetailPopup *m_details;
     bool             m_inv_only;
     QTimer *         m_filter_delay;
     double           m_zoom = 0;
@@ -139,8 +137,6 @@ SelectItem::~SelectItem()
 
 void SelectItem::init()
 {
-    d->m_details = nullptr;
-
     d->w_item_types_label = new QLabel(this);
     d->w_item_types = new QComboBox(this);
     d->w_item_types->setEditable(false);
@@ -158,19 +154,19 @@ void SelectItem::init()
     d->w_filter->setClearButtonEnabled(true);
 
     auto *popupMenu = new QMenu(this);
-    d->m_filterCaseSensitive = new QAction(tr("Case Sensitive"));
+    d->m_filterCaseSensitive = new QAction(tr("Case Sensitive"), this);
     d->m_filterCaseSensitive->setCheckable(true);
     connect(d->m_filterCaseSensitive, &QAction::toggled, this, &SelectItem::applyFilter);
     popupMenu->addAction(d->m_filterCaseSensitive);
 
-    d->m_filterRegularExpression = new QAction(tr("Use Regular Expression"));
+    d->m_filterRegularExpression = new QAction(tr("Use Regular Expression"), this);
     d->m_filterRegularExpression->setCheckable(true);
     connect(d->m_filterRegularExpression, &QAction::toggled, this, &SelectItem::applyFilter);
     popupMenu->addAction(d->m_filterRegularExpression);
 
     // Adding a menuAction() to a QLineEdit leads to a strange activation behvior:
     // only the right side of the icon will react to mouse clicks
-    QPixmap filterPix(":/images/filter.png");
+    QPixmap filterPix(QIcon::fromTheme("view-filter").pixmap(d->w_filter->style()->pixelMetric(QStyle::PM_SmallIconSize)));
     {
         QPainter p(&filterPix);
         QStyleOption so;
@@ -204,7 +200,7 @@ void SelectItem::init()
 
     d->w_zoomOut = new QToolButton();
     d->w_zoomOut->setShortcut(QKeySequence::ZoomOut);
-    d->w_zoomOut->setIcon(QIcon(":/images/zoom_minus"));
+    d->w_zoomOut->setIcon(QIcon::fromTheme("zoom-out"));
     d->w_zoomOut->setAutoRaise(true);
     d->w_zoomOut->setAutoRepeat(true);
     connect(d->w_zoomOut, &QToolButton::clicked, this, [this]() {
@@ -213,7 +209,7 @@ void SelectItem::init()
     d->w_zoomLevel = new QLabel();
     d->w_zoomIn = new QToolButton();
     d->w_zoomIn->setShortcut(QKeySequence::ZoomIn);
-    d->w_zoomIn->setIcon(QIcon(":/images/zoom_plus"));
+    d->w_zoomIn->setIcon(QIcon::fromTheme("zoom-in"));
     d->w_zoomIn->setAutoRaise(true);
     d->w_zoomIn->setAutoRepeat(true);
     connect(d->w_zoomIn, &QToolButton::clicked, this, [this]() {
@@ -223,14 +219,14 @@ void SelectItem::init()
     QToolButton *tb;
     tb = new QToolButton(this);
     tb->setShortcut(tr("Ctrl+1"));
-    tb->setIcon(QIcon(":/images/viewmode_list"));
+    tb->setIcon(QIcon::fromTheme("view-list-text"));
     tb->setAutoRaise(true);
     tb->setCheckable(true);
     d->w_viewmode->addButton(tb, 0);
 
     tb = new QToolButton(this);
     tb->setShortcut(tr("Ctrl+2"));
-    tb->setIcon(QIcon(":/images/viewmode_images"));
+    tb->setIcon(QIcon::fromTheme("view-list-details"));
     tb->setAutoRaise(true);
     tb->setCheckable(true);
     tb->setChecked(true);
@@ -238,7 +234,7 @@ void SelectItem::init()
 
     tb = new QToolButton(this);
     tb->setShortcut(tr("Ctrl+3"));
-    tb->setIcon(QIcon(":/images/viewmode_thumbs"));
+    tb->setIcon(QIcon::fromTheme("view-list-icons"));
     tb->setAutoRaise(true);
     tb->setCheckable(true);
     d->w_viewmode->addButton(tb, 2);
@@ -252,7 +248,6 @@ void SelectItem::init()
     d->w_items->setSelectionMode(QAbstractItemView::SingleSelection);
     d->w_items->setItemDelegate(new BrickLink::ItemDelegate(this, BrickLink::ItemDelegate::AlwaysShowSelection));
     d->w_items->setContextMenuPolicy(Qt::CustomContextMenu);
-    d->w_items->viewport()->installEventFilter(this);
 
     d->w_itemthumbs = new QTreeView(this);
     d->w_itemthumbs->setAlternatingRowColors(true);
@@ -415,7 +410,7 @@ void SelectItem::languageChange()
     auto setToolTipOnButton = [](QAbstractButton *b, const QString &text) {
         if (!b->shortcut().isEmpty()) {
             b->setToolTip(QString("%1 <span style=\"color: gray; font-size: small\">%2</span>")
-                      .arg(text).arg(b->shortcut().toString(QKeySequence::NativeText)));
+                      .arg(text, b->shortcut().toString(QKeySequence::NativeText)));
         }
     };
 
@@ -429,25 +424,6 @@ void SelectItem::languageChange()
 
 bool SelectItem::eventFilter(QObject *o, QEvent *e)
 {
-#ifdef ENABLE_ITEM_DETAIL_POPUP
-    if ((o == d->w_items->viewport() || o == d->w_itemthumbs->viewport() || o == d->w_thumbs->viewport())
-            && (e->type() == QEvent::KeyPress)) {
-        if (static_cast<QKeyEvent *>(e)->key() == Qt::Key_Space) {
-            if (!d->m_details)
-                d->m_details = new ItemDetailPopup(this);
-
-            if (!d->m_details->isVisible()) {
-                d->m_details->setItem(currentItem());
-                d->m_details->show();
-            } else {
-                d->m_details->hide();
-                d->m_details->setItem(nullptr);
-            }
-            e->accept();
-            return true;
-        }
-    }
-#endif
     if ((o == d->w_itemthumbs->viewport() || o == d->w_thumbs->viewport())
             && (e->type() == QEvent::Wheel)) {
         const auto *we = static_cast<QWheelEvent *>(e);
@@ -749,8 +725,6 @@ void SelectItem::setViewMode(int mode)
 void SelectItem::itemChanged()
 {
     emit itemSelected(currentItem(), false);
-    if (d->m_details && d->m_details->isVisible())
-        d->m_details->setItem(currentItem());
 }
 
 void SelectItem::itemConfirmed()
@@ -818,27 +792,27 @@ QSize SelectItem::minimumSizeHint() const
 void SelectItem::showContextMenu(const QPoint &p)
 {
     if (auto *iv = qobject_cast<QAbstractItemView *>(sender())) {
+        QMenu m(this);
+        QAction *gotoItemCat = nullptr;
+        QAction *gotoAllCat = nullptr;
+
+        const BrickLink::Item *item = nullptr;
         QModelIndex idx = iv->indexAt(p);
+        if (idx.isValid())
+            item = idx.model()->data(idx, BrickLink::ItemPointerRole).value<const BrickLink::Item *>();
 
-        if (idx.isValid()) {
-            const auto *item = idx.model()->data(idx, BrickLink::ItemPointerRole).value<const BrickLink::Item *>();
+        if (item && item->category() != currentCategory())
+            gotoItemCat = m.addAction(tr("View item's category"));
 
-            QMenu m(this);
-            QAction *gotoItemCat = nullptr;
-            QAction *gotoAllCat = nullptr;
+        if (currentCategory() != BrickLink::CategoryModel::AllCategories)
+            gotoAllCat = m.addAction(tr("View the [All Items] category"));
 
-            if (item && item->category() != currentCategory())
-                gotoItemCat = m.addAction(tr("View item's category"));
-            if (currentCategory() != BrickLink::CategoryModel::AllCategories)
-                gotoAllCat = m.addAction(tr("View the [All Items] category"));
-
-            if (!m.isEmpty()) {
-                auto action = m.exec(iv->mapToGlobal(p));
-                if (action == gotoItemCat)
-                    setCurrentItem(item, true);
-                else if (action == gotoAllCat)
-                    setCurrentCategory(BrickLink::CategoryModel::AllCategories);
-            }
+        if (!m.isEmpty()) {
+            auto action = m.exec(iv->mapToGlobal(p));
+            if (action == gotoItemCat)
+                setCurrentItem(item, true);
+            else if (action == gotoAllCat)
+                setCurrentCategory(BrickLink::CategoryModel::AllCategories);
         }
     }
 }

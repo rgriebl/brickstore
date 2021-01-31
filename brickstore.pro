@@ -36,12 +36,17 @@ unix:!macos:TARGET = $$lower($$TARGET)
 
 CONFIG *= no_private_qt_headers_warning c++17
 CONFIG *= lrelease embed_translations
-# CONFIG *= modeltest
 
 sanitize:debug:unix {
   CONFIG *= sanitizer sanitize_address sanitize_undefined
   DEFINES += SANITIZER_ENABLED
 }
+
+modeltest:debug {
+  QT *= testlib
+  DEFINES += MODELTEST
+}
+
 
 DESTDIR = bin
 
@@ -69,8 +74,6 @@ OTHER_FILES += \
   unix/brickstore-mime.xml \
   windows/brickstore.iss \
 
-RESOURCES += brickstore.qrc
-
 LANGUAGES = en de fr nl sl
 
 for(l, LANGUAGES) {
@@ -80,7 +83,8 @@ for(l, LANGUAGES) {
 }
 qt_translations.base = $$[QT_INSTALL_TRANSLATIONS]
 qt_translations.prefix = i18n
-RESOURCES += qt_translations
+
+RESOURCES = brickstore.qrc qt_translations assets/icons
 
 backend-only:DEFINES *= BRICKSTORE_BACKEND_ONLY
 
@@ -90,7 +94,6 @@ include(src/bricklink/bricklink.pri)
 include(src/ldraw/ldraw.pri)
 include(src/script/script.pri)
 include(src/lzma/lzma.pri)
-modeltest:debug:include(modeltest/modeltest.pri)
 
 qtPrepareTool(LUPDATE, lupdate)
 
@@ -104,8 +107,8 @@ QMAKE_EXTRA_TARGETS += lupdate-all
 
 win32 {
   RC_ICONS = \
-    assets/generated-icons/brickstore.ico \
-    assets/generated-icons/brickstore_doc.ico \
+    assets/generated-app-icons/brickstore.ico \
+    assets/generated-app-icons/brickstore_doc.ico \
 
   # qmake uses these to generate a FILEVERSION record
   QMAKE_TARGET_COPYRIGHT   = "Copyright (c) $$COPYRIGHT"
@@ -205,9 +208,9 @@ unix:!macos {
     share_mime.path      = $$PREFIX/share/mime/packages
     share_mime.files     = unix/brickstore-mime.xml
     share_appicon.path   = $$PREFIX/share/icons/hicolor/256x256/apps
-    share_appicon.files  = assets/generated-icons/brickstore.png
+    share_appicon.files  = assets/generated-app-icons/brickstore.png
     share_mimeicon.path  = $$PREFIX/share/icons/hicolor/128x128/mimetypes
-    share_mimeicon.files = assets/generated-icons/brickstore_doc.png
+    share_mimeicon.files = assets/generated-app-icons/brickstore_doc.png
 
     INSTALLS += share_desktop share_mime share_appicon share_mimeicon
 
@@ -234,7 +237,7 @@ macos {
   QMAKE_FULL_VERSION = $$VERSION
   QMAKE_INFO_PLIST = macos/Info.plist
   bundle_icons.path = Contents/Resources
-  bundle_icons.files = $$files("assets/generated-icons/*.icns")
+  bundle_icons.files = $$files("assets/generated-app-icons/*.icns")
   bundle_locversions.path = Contents/Resources
   for(l, LANGUAGES) {
     outpath = $$OUT_PWD/.locversions/$${l}.lproj

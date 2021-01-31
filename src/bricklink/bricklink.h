@@ -781,7 +781,7 @@ private slots:
     void pictureJobFinished(TransferJob *j); //TODO5: timeout handling in brickstock updatePicturesTimeOut
     void priceGuideJobFinished(TransferJob *j);
 
-    void pictureLoaded(Picture *pic);
+    void pictureLoaded(BrickLink::Picture *pic);
 
     friend class PictureLoaderJob;
 

@@ -117,8 +117,6 @@ public:
     }
 
 private:
-    Q_DISABLE_COPY(SectionConfigDialog)
-
     HeaderView *      m_header;
     QLabel *          m_label;
     QListWidget *     m_list;

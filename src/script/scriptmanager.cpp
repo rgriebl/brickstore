@@ -36,7 +36,7 @@ public:
     QmlException(const QList<QQmlError> &errors, const char *msg)
         : Exception(msg)
     {
-        for (auto error : errors) {
+        for (auto &error : errors) {
             m_message.append("\n");
             m_message.append(error.toString());
         }
@@ -196,7 +196,7 @@ void ScriptManager::redirectQmlEngineWarnings(QQmlEngine *engine)
         if (!logQml.isWarningEnabled())
             return;
 
-        for (auto err : list) {
+        for (auto &err : list) {
             QByteArray func;
             if (err.object())
                 func = err.object()->objectName().toLocal8Bit();

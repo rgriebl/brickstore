@@ -51,7 +51,7 @@ AppearsInWidget::AppearsInWidget(QWidget *parent)
     QAction *a;
     a = new QAction(this);
     a->setObjectName(QLatin1String("appearsin_partoutitems"));
-    a->setIcon(QIcon(QLatin1String(":/images/edit_partoutitems.png")));
+    a->setIcon(QIcon::fromTheme("edit-partoutitems"));
     connect(a, &QAction::triggered,
             this, &AppearsInWidget::partOut);
     addAction(a);
@@ -62,19 +62,19 @@ AppearsInWidget::AppearsInWidget(QWidget *parent)
 
     a = new QAction(this);
     a->setObjectName(QLatin1String("appearsin_bl_catalog"));
-    a->setIcon(QIcon(QLatin1String(":/images/edit_bl_catalog.png")));
+    a->setIcon(QIcon::fromTheme("bricklink-catalog"));
     connect(a, &QAction::triggered,
             this, &AppearsInWidget::showBLCatalogInfo);
     addAction(a);
     a = new QAction(this);
     a->setObjectName(QLatin1String("appearsin_bl_priceguide"));
-    a->setIcon(QIcon(QLatin1String(":/images/edit_bl_priceguide.png")));
+    a->setIcon(QIcon::fromTheme("bricklink-priceguide"));
     connect(a, &QAction::triggered,
             this, &AppearsInWidget::showBLPriceGuideInfo);
     addAction(a);
     a = new QAction(this);
     a->setObjectName(QLatin1String("appearsin_bl_lotsforsale"));
-    a->setIcon(QIcon(QLatin1String(":/images/edit_bl_lotsforsale.png")));
+    a->setIcon(QIcon::fromTheme("bricklink-lotsforsale"));
     connect(a, &QAction::triggered,
             this, &AppearsInWidget::showBLLotsForSale);
     addAction(a);

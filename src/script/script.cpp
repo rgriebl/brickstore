@@ -28,11 +28,11 @@ static QString formatJSError(const QJSValue &error)
         return { };
 
     QString msg = QString::fromLatin1("<b>%1</b><br/>%2<br/><br/>%3, line %4<br/><br/>Stacktrace:<br/>%5")
-            .arg(error.property("name").toString())
-            .arg(error.property("message").toString())
-            .arg(error.property("fileName").toString())
-            .arg(error.property("lineNumber").toInt())
-            .arg(error.property("stack").toString());
+            .arg(error.property("name").toString(),
+                 error.property("message").toString(),
+                 error.property("fileName").toString(),
+                 error.property("lineNumber").toString(),
+                 error.property("stack").toString());
     return msg;
 }
 

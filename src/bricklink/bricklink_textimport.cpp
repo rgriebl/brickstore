@@ -441,7 +441,7 @@ bool BrickLink::TextImport::readInventory(const Item *item)
 
         if (result.items) {
             if (!result.invalidItemCount) {
-                for (const BrickLink::InvItem *ii : *result.items) {
+                for (const BrickLink::InvItem *ii : qAsConst(*result.items)) {
                     if (!ii->item() || !ii->color() || !ii->quantity())
                         continue;
 

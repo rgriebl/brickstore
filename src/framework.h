@@ -73,8 +73,6 @@ public slots:
     void fileImportBrickLinkInventory(const BrickLink::Item *item, int quantity = 1,
                                       BrickLink::Condition condition = BrickLink::Condition::New);
 
-    void toggleItemDetailPopup();
-
 signals:
     void windowActivated(Window *);
     void windowListChanged();
@@ -86,18 +84,16 @@ protected slots:
 private slots:
     void openDocument(const QString &);
 
-    bool updateDatabase();
+    bool updateDatabase(bool forceSync = false);
     void checkForUpdates(bool silent = false);
 
     void connectWindow(QWidget *w);
     void transferJobProgressUpdate(int p, int t);
 
-    void configure(const char *page = nullptr);
+    void showSettings(const char *page = nullptr);
 
     void cancelAllTransfers(bool force = false);
     void showAddItemDialog();
-
-    void setItemDetailHelper(Document::Item *docitem);
 
     void onlineStateChanged(bool isOnline);
 
@@ -149,6 +145,7 @@ private:
     QLabel *m_st_lots;
     QLabel *m_st_items;
     QLabel *m_st_value;
+    QLabel *m_st_cost;
     QLabel *m_st_errors;
     QToolButton *m_st_currency;
     QToolBar *m_toolbar;

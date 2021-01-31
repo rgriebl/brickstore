@@ -133,8 +133,7 @@
              <string>Reload</string>
             </property>
             <property name="icon">
-             <iconset resource="../brickstore.qrc">
-              <normaloff>:/images/reload.png</normaloff>:/images/reload.png</iconset>
+             <iconset theme="view-refresh"/>
             </property>
             <property name="autoRaise">
              <bool>true</bool>
@@ -258,9 +257,7 @@
   <tabstop>w_editCustom</tabstop>
   <tabstop>w_buttons</tabstop>
  </tabstops>
- <resources>
-  <include location="../brickstore.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>w_buttons</sender>

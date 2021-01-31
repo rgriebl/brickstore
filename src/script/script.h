@@ -56,7 +56,7 @@ public:
 
 signals:
     void textChanged(const QString &text);
-    void locationChanged(Location type);
+    void locationChanged(ExtensionScriptAction::Location type);
     void actionFunctionChanged(const QJSValue &actionFunction);
 
 protected:
@@ -142,7 +142,7 @@ signals:
     void nameChanged(QString name);
     void authorChanged(QString author);
     void versionChanged(QString version);
-    void typeChanged(Type type);
+    void typeChanged(Script::Type type);
 
 private:
     QString m_name;

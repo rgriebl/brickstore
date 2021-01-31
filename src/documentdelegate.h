@@ -54,9 +54,6 @@ public:
 protected:
     bool nonInlineEdit(QEvent *e, Document::Item *it, const QStyleOptionViewItem &option, const QModelIndex &idx);
 
-    QIcon::Mode iconMode(QStyle::State state) const;
-    QIcon::State iconState(QStyle::State state) const;
-
     static QColor shadeColor(int idx, qreal alpha = 0);
 
 protected:
@@ -70,7 +67,7 @@ protected:
     mutable QSet<quint64> m_elided;
 
     static QVector<QColor> s_shades;
-    static QHash<int, QIcon> s_status_icons;
+    static QCache<quint64, QPixmap> s_status_cache;
     static QCache<quint64, QPixmap> s_tag_cache;
     static QCache<int, QPixmap> s_stripe_cache;
 

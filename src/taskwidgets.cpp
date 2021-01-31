@@ -13,6 +13,7 @@
 */
 
 #include <cfloat>
+#include <cmath>
 
 #include <QDockWidget>
 #include <QMainWindow>
@@ -20,6 +21,7 @@
 #include <QDesktopServices>
 #include <QStatusTipEvent>
 #include <QApplication>
+#include <QStringBuilder>
 
 #include "bricklink.h"
 #include "utility.h"
@@ -148,10 +150,6 @@ void TaskPriceGuideWidget::dockLocationChanged(Qt::DockWidgetArea area)
     bool vertical = (area ==  Qt::LeftDockWidgetArea) || (area == Qt::RightDockWidgetArea);
 
     setLayout(vertical ? PriceGuideWidget::Vertical : PriceGuideWidget::Horizontal);
-    if (vertical)
-        setMaximumSize(QWIDGETSIZE_MAX, minimumHeight());
-    else
-        setMaximumSize(minimumWidth(), QWIDGETSIZE_MAX);
 }
 
 // ----------------------------------------------------------------------
@@ -230,7 +228,6 @@ void TaskInfoWidget::delayedSelectionUpdate(const Document::ItemList &list)
     else {
         Document::Statistics stat(m_win->document(), list);
 
-        QString s;
         QString valstr, wgtstr;
         QString ccode = m_win->document()->currencyCode();
 
@@ -241,6 +238,13 @@ void TaskInfoWidget::delayedSelectionUpdate(const Document::ItemList &list)
         } else {
             valstr = Currency::toString(stat.value(), ccode, Currency::LocalSymbol);
         }
+        QString coststr = Currency::toString(stat.cost(), ccode, Currency::LocalSymbol);
+        QString profitstr;
+        if (!qFuzzyIsNull(stat.cost())) {
+            int percent = int(std::round(stat.value() / stat.cost() * 100. - 100.));
+            profitstr = (percent > 0 ? u"( +" : u"( ") % QString::number(percent) % u" % )";
+        }
+
 
         if (qFuzzyCompare(stat.weight(), -DBL_MIN)) {
             wgtstr = "-";
@@ -255,12 +259,20 @@ void TaskInfoWidget::delayedSelectionUpdate(const Document::ItemList &list)
             wgtstr += Utility::weightToString(weight, Config::inst()->measurementSystem(), true, true);
         }
 
-        s = QString("<h3>%1</h3>&nbsp;&nbsp;%2: %3<br />&nbsp;&nbsp;%4: %5<br /><br />&nbsp;&nbsp;%6: %7<br /><br />&nbsp;&nbsp;%8: %9").
-                arg(tr("Multiple lots selected")).
-                arg(tr("Lots")).arg(stat.lots()).
-                arg(tr("Items")).arg(stat.items()).
-                arg(tr("Value")).arg(valstr).
-                arg(tr("Weight")).arg(wgtstr);
+        static const char *fmt = "<h3>%1</h3>"
+                                 "&nbsp;&nbsp;%2: %3<br>"
+                                 "&nbsp;&nbsp;%4: %5<br><br>"
+                                 "&nbsp;&nbsp;%6: %7&nbsp;&nbsp;%8<br><br>"
+                                 "&nbsp;&nbsp;%9: %10<br><br>"
+                                 "&nbsp;&nbsp;%11: %12";
+
+        QString s = QString::fromLatin1(fmt).arg(
+                tr("Multiple lots selected"),
+                tr("Lots"), QLocale().toString(stat.lots()),
+                tr("Items"), QLocale().toString(stat.items()),
+                tr("Cost"), coststr, profitstr).arg(
+                tr("Value"), valstr,
+                tr("Weight"), wgtstr);
 
 //  if (( stat.errors ( ) > 0 ) && Config::inst ( )->showInputErrors ( ))
 //   s += QString ( "<br /><br />&nbsp;&nbsp;%1: %2" ).arg ( tr( "Errors" )).arg ( stat.errors ( ));

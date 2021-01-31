@@ -85,19 +85,40 @@ TransferJob *TransferJob::create(HttpMethod method, const QUrl &url, const QDate
 QString Transfer::s_default_user_agent;
 
 Transfer::Transfer()
-    : m_maxConnections(6) // mirror the internal QNAM setting
-    , m_nam(new QNetworkAccessManager(this))
 {
-    m_nam->setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
-
     if (s_default_user_agent.isEmpty())
         s_default_user_agent = QString("%1/%2").arg(qApp->applicationName(), qApp->applicationVersion());
     m_user_agent = s_default_user_agent;
+
+
+    m_retriever = new TransferRetriever(this);
+    m_retrieverThread = QThread::create([this]() {
+        QEventLoop eventLoop;
+        int returnCode = eventLoop.exec();
+        delete m_retriever;
+        return returnCode;
+    });
+    m_retriever->moveToThread(m_retrieverThread);
+    m_retrieverThread->setParent(this);
+    m_retrieverThread->start(QThread::LowPriority);
+
+    connect(m_retriever, &TransferRetriever::finished,
+            this, [this](TransferJob *job) {
+        if (!job->isActive())
+            emit finished(job);
+        delete job;
+    }, Qt::QueuedConnection);
+    connect(m_retriever, &TransferRetriever::jobProgress,
+            this, &Transfer::jobProgress, Qt::QueuedConnection);
+    connect(m_retriever, &TransferRetriever::progress,
+            this, &Transfer::progress, Qt::QueuedConnection);
 }
 
 Transfer::~Transfer()
 {
     abortAllJobs();
+    m_retrieverThread->quit();
+    m_retrieverThread->wait();
 }
 
 void Transfer::setUserAgent(const QString &ua)
@@ -105,23 +126,63 @@ void Transfer::setUserAgent(const QString &ua)
     m_user_agent = ua;
 }
 
-bool Transfer::retrieve(TransferJob *job, bool high_priority)
+bool Transfer::retrieve(TransferJob *job, bool highPriority)
 {
     Q_ASSERT(!job->m_transfer);
     job->m_transfer = this;
 
-    if (high_priority)
-        m_jobs.prepend(job);
-    else
-        m_jobs.append(job);
-
-    emit progress(m_progressDone, ++m_progressTotal);
-
-    schedule();
+    QMetaObject::invokeMethod(m_retriever, [this, job, highPriority]() {
+        m_retriever->addJob(job, highPriority);
+    }, Qt::QueuedConnection);
     return true;
 }
 
 void Transfer::abortAllJobs()
+{
+    QMetaObject::invokeMethod(m_retriever, &TransferRetriever::abortAllJobs, Qt::QueuedConnection);
+}
+
+QString Transfer::userAgent() const
+{
+    return m_user_agent;
+}
+
+void Transfer::setDefaultUserAgent(const QString &ua)
+{
+    s_default_user_agent = ua;
+}
+
+QString Transfer::defaultUserAgent()
+{
+    return s_default_user_agent;
+}
+
+
+#include "moc_transfer.cpp"
+
+TransferRetriever::TransferRetriever(Transfer *transfer)
+    : QObject()
+    , m_transfer(transfer)
+    , m_maxConnections(6) // mirror the internal QNAM setting
+{ }
+
+TransferRetriever::~TransferRetriever()
+{
+    abortAllJobs();
+}
+
+void TransferRetriever::addJob(TransferJob *job, bool highPriority)
+{
+    if (highPriority)
+        m_jobs.prepend(job);
+    else
+        m_jobs.append(job);
+
+    emit m_transfer->progress(m_progressDone, ++m_progressTotal);
+    schedule();
+}
+
+void TransferRetriever::abortAllJobs()
 {
     qDeleteAll(m_jobs);
     m_jobs.clear();
@@ -129,8 +190,13 @@ void Transfer::abortAllJobs()
         m_currentJobs.first()->abort();
 }
 
-void Transfer::schedule()
+void TransferRetriever::schedule()
 {
+    if (!m_nam) {
+        m_nam = new QNetworkAccessManager(this);
+        m_nam->setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
+    }
+
     while ((m_currentJobs.size() <= m_maxConnections) && !m_jobs.isEmpty()) {
         auto j = m_jobs.takeFirst();
 
@@ -139,7 +205,7 @@ void Transfer::schedule()
         j->m_effective_url = url;
 
         QNetworkRequest req(url);
-        req.setHeader(QNetworkRequest::UserAgentHeader, m_user_agent);
+        req.setHeader(QNetworkRequest::UserAgentHeader, m_transfer->userAgent());
         if (j->m_no_redirects)
             req.setAttribute(QNetworkRequest::FollowRedirectsAttribute, false);
 
@@ -156,6 +222,8 @@ void Transfer::schedule()
         else {
             req.setHeader(QNetworkRequest::ContentTypeHeader, QLatin1String("application/x-www-form-urlencoded"));
             QByteArray postdata = url.query(QUrl::FullyEncoded).toLatin1();
+            url.setQuery(QUrlQuery());
+            req.setUrl(url);
             j->m_reply = m_nam->post(req, postdata);
         }
         connect(j->m_reply, &QNetworkReply::finished, this, [this, j]() {
@@ -204,13 +272,11 @@ void Transfer::schedule()
             if (m_progressDone == m_progressTotal)
                 m_progressDone = m_progressTotal = 0;
 
-            if (!j->isActive())
-                emit finished(j);
+            emit finished(j); // the thread adapter lambda in Transfer will delete the job
 
             m_currentJobs.removeAll(j);
-            delete j;
 
-            QMetaObject::invokeMethod(this, &Transfer::schedule, Qt::QueuedConnection);
+            QMetaObject::invokeMethod(this, &TransferRetriever::schedule, Qt::QueuedConnection);
 
         });
 
@@ -221,26 +287,3 @@ void Transfer::schedule()
         m_currentJobs.append(j);
     }
 }
-
-QString Transfer::userAgent() const
-{
-    return m_user_agent;
-}
-
-QNetworkAccessManager *Transfer::networkAccessManager()
-{
-    return m_nam;
-}
-
-void Transfer::setDefaultUserAgent(const QString &ua)
-{
-    s_default_user_agent = ua;
-}
-
-QString Transfer::defaultUserAgent()
-{
-    return s_default_user_agent;
-}
-
-
-#include "moc_transfer.cpp"

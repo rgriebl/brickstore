@@ -373,9 +373,11 @@
     <layout class="QHBoxLayout">
      <item>
       <widget class="QToolButton" name="w_toggle_picture">
+       <property name="toolTip">
+        <string>Show item information</string>
+       </property>
        <property name="icon">
-        <iconset resource="../brickstore.qrc">
-         <normaloff>:/images/edit_bl_catalog.png</normaloff>:/images/edit_bl_catalog.png</iconset>
+        <iconset theme="help-about"/>
        </property>
        <property name="checkable">
         <bool>true</bool>
@@ -390,9 +392,11 @@
      </item>
      <item>
       <widget class="QToolButton" name="w_toggle_appears_in">
+       <property name="toolTip">
+        <string>Show which sets the item appears in</string>
+       </property>
        <property name="icon">
-        <iconset resource="../brickstore.qrc">
-         <normaloff>:/images/appearsin.png</normaloff>:/images/appearsin.png</iconset>
+        <iconset theme="go-jump-definition"/>
        </property>
        <property name="checkable">
         <bool>true</bool>
@@ -407,9 +411,11 @@
      </item>
      <item>
       <widget class="QToolButton" name="w_toggle_price_guide">
+       <property name="toolTip">
+        <string>Show price guide</string>
+       </property>
        <property name="icon">
-        <iconset resource="../brickstore.qrc">
-         <normaloff>:/images/edit_bl_priceguide.png</normaloff>:/images/edit_bl_priceguide.png</iconset>
+        <iconset theme="taxes-finances"/>
        </property>
        <property name="checkable">
         <bool>true</bool>
@@ -481,6 +487,9 @@
      </item>
      <item>
       <widget class="QCheckBox" name="w_merge">
+       <property name="toolTip">
+        <string>Consolidate added items into document</string>
+       </property>
        <property name="text">
         <string>Conso&amp;lidate</string>
        </property>
@@ -576,9 +585,7 @@
   <tabstop>w_toggle_appears_in</tabstop>
   <tabstop>w_toggle_price_guide</tabstop>
  </tabstops>
- <resources>
-  <include location="../brickstore.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>w_buttons</sender>

@@ -13,7 +13,7 @@
 */
 #pragma once
 
-#include <QFrame>
+#include <QTreeView>
 #include <QScopedPointer>
 
 #include "currency.h"
@@ -23,7 +23,11 @@ QT_FORWARD_DECLARE_CLASS(QAction)
 class PriceGuideWidgetPrivate;
 
 
-class PriceGuideWidget : public QFrame
+// This isn't a QTreeView, let alone an item-view at all, but the Vista and macOS styles will
+// only style widgets derived from at least QTreeView correctly when it comes to hovering and
+// headers
+
+class PriceGuideWidget : public QTreeView
 {
     Q_OBJECT
 public:
@@ -73,9 +77,11 @@ protected slots:
     void languageChange();
 
 private:
-    void paintHeader(QPainter *p, const QRect &r, Qt::Alignment align, const QString &str, bool bold = false);
-    void paintCell(QPainter *p, const QRect &r, Qt::Alignment align, const QString &str, bool alternate = false);
-    QRegion nonStaticCells() const;
+    void paintHeader(QPainter *p, const QRect &r, Qt::Alignment align, const QString &str,
+                     bool bold = false, bool left = false, bool right = false);
+    void paintCell(QPainter *p, const QRect &r, Qt::Alignment align, const QString &str,
+                   bool alternate = false, bool mouseOver = false);
+    void updateNonStaticCells() const;
 
 private:
     QScopedPointer<PriceGuideWidgetPrivate> d;

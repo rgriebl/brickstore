@@ -39,7 +39,7 @@ private:
 
 private:
     QGroupBox *m_recent_frame;
-    QGroupBox *m_file_frame;
+    QGroupBox *m_document_frame;
     QGroupBox *m_import_frame;
     QPointer<QLabel> m_no_recent;
     QLabel *m_versions;

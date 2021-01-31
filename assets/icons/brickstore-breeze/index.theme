@@ -1,0 +1,14 @@
+[Icon Theme]
+Name=brickstore-breeze
+Comment=KDE Breeze icons with BrickStore extensions
+Inherits=breeze,default
+Directories=svg,generated
+
+[svg]
+Size=16
+Type=Scalable
+MinSize=1
+MaxSize=256
+
+[generated]
+Size=64

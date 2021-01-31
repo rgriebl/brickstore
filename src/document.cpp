@@ -23,9 +23,9 @@
 #include <QtMath>
 #include <QStringBuilder>
 
-#if defined( MODELTEST )
-#  include "modeltest.h"
-#  define MODELTEST_ATTACH(x)   { (void) new ModelTest(x, x); }
+#if defined(MODELTEST)
+#  include <QAbstractItemModelTester>
+#  define MODELTEST_ATTACH(x)   { (void) new QAbstractItemModelTester(x, QAbstractItemModelTester::FailureReportingMode::Warning, x); }
 #else
 #  define MODELTEST_ATTACH(x)   ;
 #endif
@@ -44,6 +44,8 @@
 #include "qparallelsort.h"
 #include "document.h"
 #include "document_p.h"
+
+using namespace std::chrono_literals;
 
 
 enum {
@@ -349,7 +351,7 @@ int Document::positionOf(Item *item) const
     return m_items.indexOf(item);
 }
 
-const Document::Item *Document::itemAt(int position) const
+Document::Item *Document::itemAt(int position)
 {
     return (position >= 0 && position < m_items.count()) ? m_items.at(position) : nullptr;
 }
@@ -371,11 +373,6 @@ bool Document::removeItems(const ItemList &items)
     return true;
 }
 
-bool Document::insertItem(int position, Item *item)
-{
-    return insertItems({ position }, { item });
-}
-
 bool Document::appendItem(Item *item)
 {
     return insertItems({ }, { item });
@@ -395,42 +392,76 @@ bool Document::changeItem(int position, const Item &value)
 void Document::insertItemsDirect(ItemList &items, QVector<int> &positions)
 {
     auto pos = positions.constBegin();
+    bool single = (items.count() == 1);
+    QModelIndexList before;
     QModelIndex root;
+
+    if (!single) {
+        emit layoutAboutToBeChanged();
+        before = persistentIndexList();
+    }
 
     for (Item *item : qAsConst(items)) {
         int rows = rowCount(root);
 
         if (pos != positions.constEnd()) {
-            beginInsertRows(root, *pos, *pos);
+            if (single)
+                beginInsertRows(root, *pos, *pos);
             m_items.insert(*pos, item);
             ++pos;
-        }
-        else {
-            beginInsertRows(root, rows, rows);
+        } else {
+            if (single)
+                beginInsertRows(root, rows, rows);
             m_items.append(item);
         }
         updateErrors(item);
-        endInsertRows();
+        if (single)
+            endInsertRows();
     }
 
-//    emit itemsAdded(items);
-    emit statisticsChanged();
+    if (!single) {
+        QModelIndexList after;
+        foreach (const QModelIndex &idx, before)
+            after.append(index(item(idx), idx.column()));
+        changePersistentIndexList(before, after);
+        emit layoutChanged();
+    }
+
+    emitStatisticsChanged();
 }
 
 void Document::removeItemsDirect(ItemList &items, QVector<int> &positions)
 {
     positions.resize(items.count());
 
+    bool single = (items.count() == 1);
+    QModelIndexList before;
+
+    if (!single) {
+        emit layoutAboutToBeChanged();
+        before = persistentIndexList();
+    }
+
     for (int i = items.count() - 1; i >= 0; --i) {
         Item *item = items[i];
         int idx = m_items.indexOf(item);
-        beginRemoveRows(QModelIndex(), idx, idx);
+        if (single)
+            beginRemoveRows(QModelIndex(), idx, idx);
         positions[i] = idx;
         m_items.removeAt(idx);
-        endRemoveRows();
+        if (single)
+            endRemoveRows();
     }
 
-    emit statisticsChanged();
+    if (!single) {
+        QModelIndexList after;
+        foreach (const QModelIndex &idx, before)
+            after.append(index(item(idx), idx.column()));
+        changePersistentIndexList(before, after);
+        emit layoutChanged();
+    }
+
+    emitStatisticsChanged();
 }
 
 void Document::changeItemDirect(int position, Item &item)
@@ -441,11 +472,9 @@ void Document::changeItemDirect(int position, Item &item)
     QModelIndex idx1 = index(olditem);
     QModelIndex idx2 = createIndex(idx1.row(), columnCount(idx1.parent()) - 1, idx1.internalPointer());
 
-    emit dataChanged(idx1, idx2);
+    emitDataChanged(idx1, idx2);
     updateErrors(olditem);
-    emit statisticsChanged();
-
-    emit itemsChanged({ olditem });
+    emitStatisticsChanged();
 }
 
 void Document::changeCurrencyDirect(const QString &ccode, qreal crate, double *&prices)
@@ -485,22 +514,63 @@ void Document::changeCurrencyDirect(const QString &ccode, qreal crate, double *&
             prices = nullptr;
         }
 
-        emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
-        emit statisticsChanged();
-        emit itemsChanged(m_items);
+        emitDataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
+        emitStatisticsChanged();
     }
     emit currencyCodeChanged(m_currencycode);
 }
 
+void Document::emitDataChanged(const QModelIndex &tl, const QModelIndex &br)
+{
+    if (!m_delayedEmitOfDataChanged) {
+        m_delayedEmitOfDataChanged = new QTimer(this);
+        m_delayedEmitOfDataChanged->setSingleShot(true);
+        m_delayedEmitOfDataChanged->setInterval(0);
+
+        static auto resetNext = [](decltype(m_nextDataChangedEmit) &next) {
+            next = {
+                QPoint(std::numeric_limits<int>::max(), std::numeric_limits<int>::max()),
+                QPoint(std::numeric_limits<int>::min(), std::numeric_limits<int>::min())
+            };
+        };
+
+        resetNext(m_nextDataChangedEmit);
+
+        connect(m_delayedEmitOfDataChanged, &QTimer::timeout,
+                this, [this]() {
+
+            emit dataChanged(index(m_nextDataChangedEmit.first.y(),
+                                   m_nextDataChangedEmit.first.x()),
+                             index(m_nextDataChangedEmit.second.y(),
+                                   m_nextDataChangedEmit.second.x()));
+
+            resetNext(m_nextDataChangedEmit);
+        });
+    }
+
+    if (tl.row() < m_nextDataChangedEmit.first.y())
+        m_nextDataChangedEmit.first.setY(tl.row());
+    if (tl.column() < m_nextDataChangedEmit.first.x())
+        m_nextDataChangedEmit.first.setX(tl.column());
+    if (br.row() > m_nextDataChangedEmit.second.y())
+        m_nextDataChangedEmit.second.setY(br.row());
+    if (br.column() > m_nextDataChangedEmit.second.x())
+        m_nextDataChangedEmit.second.setX(br.column());
+
+    m_delayedEmitOfDataChanged->start();
+}
+
 void Document::emitStatisticsChanged()
 {
-    if (!m_lastEmitOfStatisticsChanged.isValid()
-            || (m_lastEmitOfStatisticsChanged.elapsed() > 500)) {
-        emit statisticsChanged();
-    } else {
-        m_lastEmitOfStatisticsChanged.start();
-        QTimer::singleShot(500, this, &Document::statisticsChanged);
+    if (!m_delayedEmitOfStatisticsChanged) {
+        m_delayedEmitOfStatisticsChanged = new QTimer(this);
+        m_delayedEmitOfStatisticsChanged->setSingleShot(true);
+        m_delayedEmitOfStatisticsChanged->setInterval(0);
+
+        connect(m_delayedEmitOfStatisticsChanged, &QTimer::timeout,
+                this, &Document::statisticsChanged);
     }
+    m_delayedEmitOfStatisticsChanged->start();
 }
 
 void Document::updateErrors(Item *item)
@@ -1111,12 +1181,7 @@ void Document::fileExportBrickLinkXML(const ItemList &itemlist)
         if (s.right(4) != QLatin1String(".xml"))
             s += QLatin1String(".xml");
 
-        if (QFile::exists(s) &&
-            MessageBox::question(nullptr, { },
-                                 tr("A file named %1 already exists. Are you sure you want to overwrite it?").arg(CMB_BOLD(s))
-                                 ) == MessageBox::Yes) {
-            fileSaveTo(s, "xml", true, itemlist);
-        }
+        fileSaveTo(s, "xml", true, itemlist);
     }
 }
 
@@ -1128,8 +1193,8 @@ quint64 Document::errorMask() const
 void Document::setErrorMask(quint64 em)
 {
     m_error_mask = em;
-    emit statisticsChanged();
-    emit itemsChanged(items());
+    emitStatisticsChanged();
+    emitDataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
 }
 
 quint64 Document::itemErrors(const Item *item) const
@@ -1150,7 +1215,7 @@ void Document::setItemErrors(Item *item, quint64 errors)
             m_errors.remove(item);
 
         emit errorsChanged(item);
-        emit statisticsChanged();
+        emitStatisticsChanged();
     }
 }
 
@@ -1277,7 +1342,7 @@ bool Document::setData(const QModelIndex &index, const QVariant &value, int role
         }
         if (!(item == *itemp)) {
             changeItem(index.row(), item);
-            emit dataChanged(index, index);
+            emitDataChanged(index, index);
             return true;
         }
     }
@@ -1366,7 +1431,8 @@ QString Document::dataForDisplayRole(Item *it, Field f, int row) const
     case Total       : return Currency::toString(it->total(), currencyCode());
     case Sale        : return (it->sale() == 0 ? dash : QString::number(it->sale()) + QLatin1Char('%'));
     case Condition   : {
-        QString c = (it->condition() == BrickLink::Condition::New) ? tr("N", "New") : tr("U", "Used");
+        QString c = (it->condition() == BrickLink::Condition::New) ? tr("N", "List>Cond>New")
+                                                                   : tr("U", "List>Cond>Used");
         if (it->itemType() && it->itemType()->hasSubConditions()
                 && (it->subCondition() != BrickLink::SubCondition::None)) {
             c = c % u" / " % subConditionLabel(it->subCondition());
@@ -1400,10 +1466,10 @@ QVariant Document::dataForFilterRole(Item *it, Field f, int row) const
     switch (f) {
     case Status:
         switch (it->status()) {
-        case BrickLink::Status::Include: return tr("Include"); break;
-        case BrickLink::Status::Extra  : return tr("Extra"); break;
+        case BrickLink::Status::Include: return tr("I", "Filter>Status>Include"); break;
+        case BrickLink::Status::Extra  : return tr("X", "Filter>Status>Extra"); break;
         default:
-        case BrickLink::Status::Exclude: return tr("Exclude"); break;
+        case BrickLink::Status::Exclude: return tr("E", "Filter>Status>Exclude"); break;
         }
     case Stockroom:
         switch (it->stockroom()) {
@@ -1412,6 +1478,9 @@ QVariant Document::dataForFilterRole(Item *it, Field f, int row) const
         case BrickLink::Stockroom::C: return QString("C");
         default                     : return QString("-");
         }
+    case Index       : return row + 1;
+    case Retain      : return it->retain() ? tr("Y", "Filter>Retain>Yes")
+                                           : tr("N", "Filter>Retain>No");
     case Price       : return it->price();
     case PriceDiff   : return it->price() - it->origPrice();
     case Cost        : return it->cost();
@@ -1423,7 +1492,7 @@ QVariant Document::dataForFilterRole(Item *it, Field f, int row) const
         QVariant v = dataForEditRole(it, f);
         if (v.isNull())
             v = dataForDisplayRole(it, f, row);
-        return v.toString();
+        return v;
     }
     }
 }
@@ -1627,7 +1696,7 @@ void Document::pictureUpdated(BrickLink::Picture *pic)
     for (const Item *it : qAsConst(m_items)) {
         if ((pic->item() == it->item()) && (pic->color() == it->color())) {
             QModelIndex idx = index(row, Picture);
-            emit dataChanged(idx, idx);
+            emitDataChanged(idx, idx);
         }
         row++;
     }

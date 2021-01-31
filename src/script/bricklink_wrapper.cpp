@@ -356,10 +356,7 @@ Document::Document(::Document *doc)
     connect(doc, &::Document::currencyCodeChanged,
             this, &Document::currencyCodeChanged);
 
-    connect(doc, &::Document::itemsAdded, this,
-            [this]() { emit countChanged(d->rowCount()); });
-    connect(doc, &::Document::itemsRemoved, this,
-            [this]() { emit countChanged(d->rowCount()); });
+    //TODO: countChanged() signal
 }
 
 bool Document::isWrapperFor(::Document *doc) const

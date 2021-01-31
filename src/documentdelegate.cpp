@@ -41,7 +41,7 @@
 
 
 QVector<QColor>                 DocumentDelegate::s_shades;
-QHash<int, QIcon>               DocumentDelegate::s_status_icons;
+QCache<quint64, QPixmap>        DocumentDelegate::s_status_cache;
 QCache<quint64, QPixmap>        DocumentDelegate::s_tag_cache;
 QCache<int, QPixmap>            DocumentDelegate::s_stripe_cache;
 QCache<DocumentDelegate::TextLayoutCacheKey, QTextLayout> DocumentDelegate::s_textLayoutCache(5000);
@@ -98,7 +98,7 @@ void DocumentDelegate::clearCaches()
 {
     s_stripe_cache.clear();
     s_tag_cache.clear();
-    s_status_icons.clear();
+    s_status_cache.clear();
 }
 
 QColor DocumentDelegate::shadeColor(int idx, qreal alpha)
@@ -112,18 +112,6 @@ QColor DocumentDelegate::shadeColor(int idx, qreal alpha)
     if (!qFuzzyIsNull(alpha))
         c.setAlphaF(alpha);
     return c;
-}
-
-QIcon::Mode DocumentDelegate::iconMode(QStyle::State state) const
-{
-    if (!(state & QStyle::State_Enabled)) return QIcon::Disabled;
-    if (state & QStyle::State_Selected) return QIcon::Selected;
-    return QIcon::Normal;
-}
-
-QIcon::State DocumentDelegate::iconState(QStyle::State state) const
-{
-    return (state & QStyle::State_Open) ? QIcon::On : QIcon::Off;
 }
 
 int DocumentDelegate::defaultItemHeight(const QWidget *w) const
@@ -215,6 +203,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
     bool nocolor = !it->color();
     bool noitem = !it->item();
 
+    const QFontMetrics &fm = option.fontMetrics;
     QPalette::ColorGroup cg = (option.state & QStyle::State_Enabled) ? QPalette::Normal : QPalette::Disabled;
     QColor normalbg = option.palette.color(cg, (option.features & QStyleOptionViewItem::Alternate) ? QPalette::AlternateBase : QPalette::Base);
     QColor bg = normalbg;
@@ -244,7 +233,6 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
     } tag = { QColor(), QColor(), QString(), false };
 
     QImage image;
-    QIcon ico;
     QString str = idx.model()->data(idx, Qt::DisplayRole).toString();
     int checkmark = 0;
     bool selectionFrame = false;
@@ -320,16 +308,26 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
 
     switch (idx.column()) {
     case Document::Status: {
-        ico = s_status_icons[int(it->status())];
-        if (ico.isNull()) {
+        int iconSize = std::min(fm.height() * 5 / 4, h * 3 / 4);
+        union { struct { qint32 i1; quint32 i2; } s; quint64 q; } key;
+        key.s.i1 = iconSize;
+        key.s.i2 = int(it->status());
+
+        QPixmap *pix = s_status_cache[key.q];
+        if (!pix) {
+            QIcon icon;
             switch (it->status()) {
-            case BrickLink::Status::Exclude: ico = QIcon(":/images/edit_status_exclude.png"); break;
-            case BrickLink::Status::Extra  : ico = QIcon(":/images/edit_status_extra.png"); break;
+            case BrickLink::Status::Exclude: icon = QIcon::fromTheme("vcs-removed"); break;
+            case BrickLink::Status::Extra  : icon = QIcon::fromTheme("vcs-added"); break;
             default                        :
-            case BrickLink::Status::Include: ico = QIcon(":/images/edit_status_include.png"); break;
+            case BrickLink::Status::Include: icon = QIcon::fromTheme("vcs-normal"); break;
             }
-            s_status_icons.insert(int(it->status()), ico);
+            pix = new QPixmap(icon.pixmap(iconSize));
+            if (!s_tag_cache.insert(key.q, pix))
+                pix = nullptr;
         }
+        if (pix)
+            image = pix->toImage();
 
         uint altid = it->alternateId();
         bool cp = it->counterPart();
@@ -504,9 +502,6 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         w -= (delta - x);
         x = delta;
     }
-    else if (!ico.isNull()) {
-        ico.paint(p, x + margin, y, w - 2 * margin, h, align, iconMode(option.state), iconState(option.state));
-    }
 
     static const QVector<int> richTextColumns = {
         Document::Description,
@@ -521,7 +516,6 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
 
     if (!str.isEmpty()) {
         int rw = w - 2 * margin;
-        const QFontMetrics &fm = p->fontMetrics();
 
         if (!richTextColumns.contains(idx.column())) {
             p->drawText(x + margin, y, rw, h, align, str);
@@ -529,11 +523,11 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         }
 
         static const QString elide = QLatin1String("...");
-        auto key = TextLayoutCacheKey { str, QSize(rw, h), option.font.pixelSize() };
+        auto key = TextLayoutCacheKey { str, QSize(rw, h), fm.height() };
         QTextLayout *tlp = s_textLayoutCache.object(key);
 
         // an unlikely hash collision
-        if (tlp && !(tlp->text() == str && tlp->font().pixelSize() == option.font.pixelSize())) {
+        if (tlp && !(tlp->text() == str && QFontMetrics(tlp->font()).height() == fm.height())) {
             qDebug() << "TextLayoutCache: hash collision on:" << str;
             tlp = nullptr;
         }
