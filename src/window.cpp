@@ -2172,6 +2172,9 @@ void Window::updateSelection()
                 m_selection.append(m_view->item(idx));
 
             emit selectionChanged(m_selection);
+
+            if (m_selection_model->currentIndex().isValid())
+                w_list->scrollTo(m_selection_model->currentIndex());
         });
     }
     m_delayedSelectionUpdate->start();
