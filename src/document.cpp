@@ -1181,12 +1181,7 @@ void Document::fileExportBrickLinkXML(const ItemList &itemlist)
         if (s.right(4) != QLatin1String(".xml"))
             s += QLatin1String(".xml");
 
-        if (QFile::exists(s) &&
-            MessageBox::question(nullptr, { },
-                                 tr("A file named %1 already exists. Are you sure you want to overwrite it?").arg(CMB_BOLD(s))
-                                 ) == MessageBox::Yes) {
-            fileSaveTo(s, "xml", true, itemlist);
-        }
+        fileSaveTo(s, "xml", true, itemlist);
     }
 }
 
