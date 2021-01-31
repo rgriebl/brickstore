@@ -198,16 +198,19 @@ void Workspace::setWelcomeWidget(QWidget *welcomeWidget)
 {
     if (welcomeWidget == m_welcomeWidget)
         return;
+    bool wasActive = (m_stack->currentWidget() == m_welcomeWidget);
     if (!welcomeWidget)
         welcomeWidget = new QWidget();
     if (m_welcomeWidget)
         m_welcomeWidget->removeEventFilter(this);
-    m_stack->replaceWidget(m_welcomeWidget, welcomeWidget, Qt::FindDirectChildrenOnly);
     m_tabback->setParent(welcomeWidget);
+    m_stack->removeWidget(m_welcomeWidget);
+    m_stack->insertWidget(m_stack->count(), welcomeWidget);
     delete m_welcomeWidget;
     m_welcomeWidget = welcomeWidget;
-    if (m_welcomeWidget)
-        m_welcomeWidget->installEventFilter(this);
+    m_welcomeWidget->installEventFilter(this);
+    if (wasActive)
+        m_stack->setCurrentWidget(m_welcomeWidget);
 }
 
 QMenu *Workspace::windowMenu(bool hasShortcut, QWidget *parent)
