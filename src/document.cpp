@@ -1431,7 +1431,8 @@ QString Document::dataForDisplayRole(Item *it, Field f, int row) const
     case Total       : return Currency::toString(it->total(), currencyCode());
     case Sale        : return (it->sale() == 0 ? dash : QString::number(it->sale()) + QLatin1Char('%'));
     case Condition   : {
-        QString c = (it->condition() == BrickLink::Condition::New) ? tr("N", "New") : tr("U", "Used");
+        QString c = (it->condition() == BrickLink::Condition::New) ? tr("N", "List>Cond>New")
+                                                                   : tr("U", "List>Cond>Used");
         if (it->itemType() && it->itemType()->hasSubConditions()
                 && (it->subCondition() != BrickLink::SubCondition::None)) {
             c = c % u" / " % subConditionLabel(it->subCondition());
@@ -1465,10 +1466,10 @@ QVariant Document::dataForFilterRole(Item *it, Field f, int row) const
     switch (f) {
     case Status:
         switch (it->status()) {
-        case BrickLink::Status::Include: return tr("Include"); break;
-        case BrickLink::Status::Extra  : return tr("Extra"); break;
+        case BrickLink::Status::Include: return tr("I", "Filter>Status>Include"); break;
+        case BrickLink::Status::Extra  : return tr("X", "Filter>Status>Extra"); break;
         default:
-        case BrickLink::Status::Exclude: return tr("Exclude"); break;
+        case BrickLink::Status::Exclude: return tr("E", "Filter>Status>Exclude"); break;
         }
     case Stockroom:
         switch (it->stockroom()) {
@@ -1477,6 +1478,9 @@ QVariant Document::dataForFilterRole(Item *it, Field f, int row) const
         case BrickLink::Stockroom::C: return QString("C");
         default                     : return QString("-");
         }
+    case Index       : return row + 1;
+    case Retain      : return it->retain() ? tr("Y", "Filter>Retain>Yes")
+                                           : tr("N", "Filter>Retain>No");
     case Price       : return it->price();
     case PriceDiff   : return it->price() - it->origPrice();
     case Cost        : return it->cost();
@@ -1488,7 +1492,7 @@ QVariant Document::dataForFilterRole(Item *it, Field f, int row) const
         QVariant v = dataForEditRole(it, f);
         if (v.isNull())
             v = dataForDisplayRole(it, f, row);
-        return v.toString();
+        return v;
     }
     }
 }
