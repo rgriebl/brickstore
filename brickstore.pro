@@ -36,12 +36,17 @@ unix:!macos:TARGET = $$lower($$TARGET)
 
 CONFIG *= no_private_qt_headers_warning c++17
 CONFIG *= lrelease embed_translations
-# CONFIG *= modeltest
 
 sanitize:debug:unix {
   CONFIG *= sanitizer sanitize_address sanitize_undefined
   DEFINES += SANITIZER_ENABLED
 }
+
+modeltest:debug {
+  QT *= testlib
+  DEFINES += MODELTEST
+}
+
 
 DESTDIR = bin
 
@@ -89,7 +94,6 @@ include(src/bricklink/bricklink.pri)
 include(src/ldraw/ldraw.pri)
 include(src/script/script.pri)
 include(src/lzma/lzma.pri)
-modeltest:debug:include(modeltest/modeltest.pri)
 
 qtPrepareTool(LUPDATE, lupdate)
 

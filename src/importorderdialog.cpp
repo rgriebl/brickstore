@@ -25,9 +25,9 @@
 #include <QVariant>
 #include <QCache>
 
-#if defined( MODELTEST )
-#  include "modeltest.h"
-#  define MODELTEST_ATTACH(x)   { (void) new ModelTest(x, x); }
+#if defined(MODELTEST)
+#  include <QAbstractItemModelTester>
+#  define MODELTEST_ATTACH(x)   { (void) new QAbstractItemModelTester(x, QAbstractItemModelTester::FailureReportingMode::Warning, x); }
 #else
 #  define MODELTEST_ATTACH(x)   ;
 #endif
