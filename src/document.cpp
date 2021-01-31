@@ -392,22 +392,39 @@ bool Document::changeItem(int position, const Item &value)
 void Document::insertItemsDirect(ItemList &items, QVector<int> &positions)
 {
     auto pos = positions.constBegin();
+    bool single = (items.count() == 1);
+    QModelIndexList before;
     QModelIndex root;
+
+    if (!single) {
+        emit layoutAboutToBeChanged();
+        before = persistentIndexList();
+    }
 
     for (Item *item : qAsConst(items)) {
         int rows = rowCount(root);
 
         if (pos != positions.constEnd()) {
-            beginInsertRows(root, *pos, *pos);
+            if (single)
+                beginInsertRows(root, *pos, *pos);
             m_items.insert(*pos, item);
             ++pos;
-        }
-        else {
-            beginInsertRows(root, rows, rows);
+        } else {
+            if (single)
+                beginInsertRows(root, rows, rows);
             m_items.append(item);
         }
         updateErrors(item);
-        endInsertRows();
+        if (single)
+            endInsertRows();
+    }
+
+    if (!single) {
+        QModelIndexList after;
+        foreach (const QModelIndex &idx, before)
+            after.append(index(item(idx), idx.column()));
+        changePersistentIndexList(before, after);
+        emit layoutChanged();
     }
 
     emitStatisticsChanged();
@@ -417,13 +434,31 @@ void Document::removeItemsDirect(ItemList &items, QVector<int> &positions)
 {
     positions.resize(items.count());
 
+    bool single = (items.count() == 1);
+    QModelIndexList before;
+
+    if (!single) {
+        emit layoutAboutToBeChanged();
+        before = persistentIndexList();
+    }
+
     for (int i = items.count() - 1; i >= 0; --i) {
         Item *item = items[i];
         int idx = m_items.indexOf(item);
-        beginRemoveRows(QModelIndex(), idx, idx);
+        if (single)
+            beginRemoveRows(QModelIndex(), idx, idx);
         positions[i] = idx;
         m_items.removeAt(idx);
-        endRemoveRows();
+        if (single)
+            endRemoveRows();
+    }
+
+    if (!single) {
+        QModelIndexList after;
+        foreach (const QModelIndex &idx, before)
+            after.append(index(item(idx), idx.column()));
+        changePersistentIndexList(before, after);
+        emit layoutChanged();
     }
 
     emitStatisticsChanged();
@@ -490,7 +525,7 @@ void Document::emitDataChanged(const QModelIndex &tl, const QModelIndex &br)
     if (!m_delayedEmitOfDataChanged) {
         m_delayedEmitOfDataChanged = new QTimer(this);
         m_delayedEmitOfDataChanged->setSingleShot(true);
-        m_delayedEmitOfDataChanged->setInterval(100ms);
+        m_delayedEmitOfDataChanged->setInterval(0);
 
         static auto resetNext = [](decltype(m_nextDataChangedEmit) &next) {
             next = {
@@ -530,7 +565,7 @@ void Document::emitStatisticsChanged()
     if (!m_delayedEmitOfStatisticsChanged) {
         m_delayedEmitOfStatisticsChanged = new QTimer(this);
         m_delayedEmitOfStatisticsChanged->setSingleShot(true);
-        m_delayedEmitOfStatisticsChanged->setInterval(100ms);
+        m_delayedEmitOfStatisticsChanged->setInterval(0);
 
         connect(m_delayedEmitOfStatisticsChanged, &QTimer::timeout,
                 this, &Document::statisticsChanged);

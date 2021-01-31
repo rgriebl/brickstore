@@ -185,7 +185,6 @@ protected:
 
 private slots:
     void ensureLatestVisible();
-    void documentRowsInserted(const QModelIndex &, int, int);
     void updateCaption();
     void updateSelection();
     void documentItemsChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);

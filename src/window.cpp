@@ -287,6 +287,14 @@ Window::Window(Document *doc, QWidget *parent)
     m_selection_model = new QItemSelectionModel(m_view, this);
     w_list->setSelectionModel(m_selection_model);
 
+    // This shouldn't be needed, but we are abusing layoutChanged a bit for adding and removing
+    // items. The docs are a bit undecided if you should really do that, but it really helps
+    // performance wise. Just the selection is not updated, when the items in it are deleted.
+    connect(m_view, &DocumentProxyModel::layoutChanged,
+            m_selection_model, [this]() {
+        updateSelection();
+    });
+
     auto *dd = new DocumentDelegate(doc, m_view, w_list);
     w_list->setItemDelegate(dd);
     w_list->verticalHeader()->setDefaultSectionSize(dd->defaultItemHeight(w_list));
@@ -322,9 +330,6 @@ Window::Window(Document *doc, QWidget *parent)
             this, &Window::updateCaption);
     connect(m_doc, &Document::modificationChanged,
             this, &Window::updateCaption);
-
-    connect(m_doc, &QAbstractItemModel::rowsInserted,
-            this, &Window::documentRowsInserted);
 
     connect(m_doc, &Document::dataChanged,
             this, &Window::documentItemsChanged);
@@ -439,14 +444,6 @@ void Window::setDifferenceMode(bool b)
     w_header->setSectionAvailable(Document::QuantityDiff, b);
 }
 
-void Window::documentRowsInserted(const QModelIndex &parent, int /*start*/, int end)
-{
-    if (!parent.isValid()) {
-        m_latest_row = m_view->mapFromSource(m_doc->index(end, 0)).row();
-        m_latest_timer->start();
-    }
-}
-
 void Window::ensureLatestVisible()
 {
     if (m_latest_row >= 0) {
@@ -455,7 +452,6 @@ void Window::ensureLatestVisible()
         m_latest_row = -1;
     }
 }
-
 
 void Window::setFilter(const QString &str)
 {
@@ -483,6 +479,7 @@ int Window::addItems(const BrickLink::InvItemList &items, AddItemMode addItemMod
 
     const auto &documentItems = document()->items();
     bool wasEmpty = documentItems.isEmpty();
+    Document::Item *lastAdded = nullptr;
     int addCount = 0;
     int consolidateCount = 0;
     Consolidate conMode = Consolidate::IntoExisting;
@@ -570,6 +567,7 @@ int Window::addItems(const BrickLink::InvItemList &items, AddItemMode addItemMod
 
             m_doc->appendItem(item);  // pass on ownership to the doc
             ++addCount;
+            lastAdded = item;
         }
     }
 
@@ -578,6 +576,11 @@ int Window::addItems(const BrickLink::InvItemList &items, AddItemMode addItemMod
 
     if (wasEmpty)
         w_list->selectRow(0);
+
+    if (lastAdded) {
+        m_latest_row = m_view->index(lastAdded).row();
+        m_latest_timer->start();
+    }
 
     return items.count();
 }
@@ -2160,7 +2163,7 @@ void Window::updateSelection()
     if (!m_delayedSelectionUpdate) {
         m_delayedSelectionUpdate = new QTimer(this);
         m_delayedSelectionUpdate->setSingleShot(true);
-        m_delayedSelectionUpdate->setInterval(100ms);
+        m_delayedSelectionUpdate->setInterval(0);
 
         connect(m_delayedSelectionUpdate, &QTimer::timeout, this, [this]() {
             m_selection.clear();
