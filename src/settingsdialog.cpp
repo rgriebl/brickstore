@@ -364,7 +364,7 @@ void SettingsDialog::checkLDrawDir()
     QString path = w_ldraw_dir->itemData(0).toString();
 
     auto setStatus = [this](bool ok, const QString &status, const QString &path = { }) {
-        w_ldraw_status->setText(QLatin1String("%1<br><i>%2</i>").arg(status, path));
+        w_ldraw_status->setText(QString::fromLatin1("%1<br><i>%2</i>").arg(status, path));
         auto icon = QIcon::fromTheme(ok ? "vcs-normal" : "vcs-removed");
         w_ldraw_status_icon->setPixmap(icon.pixmap(fontMetrics().height() * 3 / 2));
     };

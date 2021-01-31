@@ -270,7 +270,7 @@ void TaskInfoWidget::delayedSelectionUpdate(const Document::ItemList &list)
                 tr("Multiple lots selected"),
                 tr("Lots"), QLocale().toString(stat.lots()),
                 tr("Items"), QLocale().toString(stat.items()),
-                tr("Cost"), coststr, profitstr,
+                tr("Cost"), coststr, profitstr).arg(
                 tr("Value"), valstr,
                 tr("Weight"), wgtstr);
 
