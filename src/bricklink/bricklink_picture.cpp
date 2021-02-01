@@ -141,7 +141,7 @@ QFile *BrickLink::Picture::file(QIODevice::OpenMode openMode) const
     bool large = (!m_color);
     bool hasColors = m_item->itemType()->hasColors();
 
-    return BrickLink::core()->dataFile(large ? u"large.png" : u"normal.png", openMode,
+    return BrickLink::core()->dataFile(large ? u"large.jpg" : u"normal.png", openMode,
                                        m_item, (!large && hasColors) ? m_color : nullptr);
 }
 
@@ -158,7 +158,7 @@ void BrickLink::Picture::loadFromDisk()
 
     if (f && f->isOpen()) {
         if (f->size() > 0) {
-            isValid = image.load(f.data(), "PNG");
+            isValid = image.loadFromData(f->readAll());
         } else {
             if (m_color && m_item && m_item->itemType())
                 image = BrickLink::core()->noImage(m_item->itemType()->rawPictureSize());
@@ -219,7 +219,8 @@ void BrickLink::Core::updatePicture(BrickLink::Picture *pic, bool high_priority)
     }
 
     //qDebug() << "PIC request started for" << url;
-    TransferJob *job = TransferJob::get(url);
+    QFile *f = pic->file(QIODevice::WriteOnly | QIODevice::Truncate);
+    TransferJob *job = TransferJob::get(url, f);
     job->setUserData<Picture>('P', pic);
     m_transfer->retrieve(job, high_priority);
 }
@@ -227,11 +228,9 @@ void BrickLink::Core::updatePicture(BrickLink::Picture *pic, bool high_priority)
 
 void BrickLink::Core::pictureJobFinished(TransferJob *j)
 {
-    if (!j || !j->data())
+    if (!j)
         return;
-
     auto *pic = j->userData<Picture>('P');
-
     if (!pic)
         return;
 
@@ -241,28 +240,14 @@ void BrickLink::Core::pictureJobFinished(TransferJob *j)
 
     pic->m_update_status = UpdateStatus::UpdateFailed;
 
-    if (j->isCompleted()) {
-        QImage img;
+    if (j->isCompleted() && j->file()) {
+        j->file()->close();
+        pic->loadFromDisk();
 
-        QScopedPointer<QFile> f(pic->file(QIODevice::WriteOnly | QIODevice::Truncate));
-
-        if (f && f->isOpen()) {
-            pic->m_update_status = UpdateStatus::Ok;
-
-            if ((j->effectiveUrl().path().indexOf("noimage", 0, Qt::CaseInsensitive) == -1)
-                    && !j->data()->isEmpty()
-                    && img.loadFromData(*j->data())) {
-                img.save(f.data(), "PNG");
-            } else {
-                // no image ... "write" a 0-byte file
-            }
-            f->reset();
-            pic->loadFromDisk();
-        } else {
-            qWarning("Couldn't get path to save image");
-        }
     } else if (large && (j->responseCode() == 404) && (j->url().path().endsWith(".jpg"))) {
-        // no large JPG image ->try a GIF image instead
+        // There's no large JPG image, so try a GIF image instead (mostly very old sets)
+        // We save the GIF with an JPG extension if we succeed, but Qt uses the file header on
+        // loading to do the right thing.
 
         if (!m_transfer) {
             pic->m_update_status = UpdateStatus::UpdateFailed;
@@ -272,18 +257,17 @@ void BrickLink::Core::pictureJobFinished(TransferJob *j)
         pic->m_update_status = UpdateStatus::Updating;
 
         QUrl url = j->url();
-        QString path = url.path();
-        path.chop(3);
-        path.append("gif");
-        url.setPath(path);
+        url.setPath(url.path().replace(".jpg", ".gif"));
 
-        TransferJob *job = TransferJob::get(url);
+        QFile *f = pic->file(QIODevice::WriteOnly | QIODevice::Truncate);
+        TransferJob *job = TransferJob::get(url, f);
         job->setUserData<Picture>('P', pic);
         m_transfer->retrieve(job);
         return;
-    }
-    else
+
+    } else {
         qWarning() << "Image download failed:" << j->errorString() << "(" << j->responseCode() << ")";
+    }
 
     emit pictureUpdated(pic);
     pic->release();
