@@ -635,7 +635,7 @@ bool BrickLink::ItemModel::filterAccepts(const void *pointer) const
     else if (m_inv_filter && !item->hasInventory())
         return false;
     else {
-        if (!m_text_filter.isEmpty()) {
+        if (!m_text_filter.isEmpty() || !m_text_filter_excludewords.isEmpty()) {
             if (!m_text_filter_is_regexp) {
                 const auto cs = m_text_filter_is_cs ? Qt::CaseSensitive : Qt::CaseInsensitive;
 
