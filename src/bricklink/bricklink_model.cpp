@@ -290,7 +290,7 @@ QVariant BrickLink::CategoryModel::data(const QModelIndex &index, int role) cons
     const Category *c = category(index);
 
     if (role == Qt::DisplayRole)
-        res = c != AllCategories ? c->name() : QString("[%1]").arg(tr("All Items"));
+        res = c != AllCategories ? c->name() : QString("%1").arg(tr("All Items"));
     else if (role == CategoryPointerRole)
         res.setValue(c);
     return res;

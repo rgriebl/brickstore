@@ -37,6 +37,7 @@
 #include <QContextMenuEvent>
 #include <QLineEdit>
 #include <QPainter>
+#include <QShortcut>
 
 #include "bricklink_model.h"
 #include "selectitem.h"
@@ -132,6 +133,81 @@ SelectItem::SelectItem(QWidget *parent)
     init();
 }
 
+class CategoryTreeView : public QTreeView
+{
+public:
+    CategoryTreeView(QWidget *parent)
+        : QTreeView(parent)
+    {
+        setAlternatingRowColors(true);
+        setAllColumnsShowFocus(true);
+        setUniformRowHeights(true);
+        setRootIsDecorated(false);
+        setSelectionBehavior(QAbstractItemView::SelectRows);
+        setSelectionMode(QAbstractItemView::SingleSelection);
+        setItemDelegate(new CategoryDelegate(this));
+
+
+        m_overlay = new QTreeView(this);
+        m_overlay->setFrameStyle(QFrame::NoFrame);
+        m_overlay->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        m_overlay->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        m_overlay->setHeaderHidden(true);
+
+        m_overlay->setAllColumnsShowFocus(true);
+        m_overlay->setUniformRowHeights(true);
+        m_overlay->setRootIsDecorated(false);
+        m_overlay->setSelectionBehavior(QAbstractItemView::SelectRows);
+        m_overlay->setSelectionMode(QAbstractItemView::SingleSelection);
+        m_overlay->setItemDelegate(new CategoryDelegate(this));
+
+        m_overlay->viewport()->installEventFilter(this);
+
+    }
+
+    void setModel(QAbstractItemModel *model)
+    {
+        QTreeView::setModel(model);
+        m_overlay->setModel(model);
+
+        for (int r = 1; r < model->rowCount(); ++r)
+            m_overlay->setRowHidden(r, QModelIndex(), true);
+
+        m_overlay->setSelectionModel(selectionModel());
+    }
+
+protected:
+    bool viewportEvent(QEvent *e)
+    {
+        auto result = QTreeView::viewportEvent(e);
+
+        switch (e->type()) {
+        case QEvent::Resize:
+        case QEvent::FontChange:
+        case QEvent::StyleChange:
+            if (viewport()) {
+                m_overlay->move(viewport()->mapTo(this, QPoint(0, 0)));
+                m_overlay->resize(contentsRect().width(), rowHeight(indexAt({ 0, 0 })));
+            }
+            break;
+        default:
+            break;
+        }
+        return result;
+    }
+
+    bool eventFilter(QObject *o, QEvent *e)
+    {
+        if ((e->type() == QEvent::Wheel) && (o == m_overlay->viewport()))
+            return QCoreApplication::sendEvent(viewport(), e);
+        return QTreeView::eventFilter(o, e);
+    }
+
+private:
+    QTreeView *m_overlay;
+};
+
+
 SelectItem::~SelectItem()
 { /* needed to use QScopedPointer on d */ }
 
@@ -141,14 +217,7 @@ void SelectItem::init()
     d->w_item_types = new QComboBox(this);
     d->w_item_types->setEditable(false);
 
-    d->w_categories = new QTreeView(this);
-    d->w_categories->setAlternatingRowColors(true);
-    d->w_categories->setAllColumnsShowFocus(true);
-    d->w_categories->setUniformRowHeights(true);
-    d->w_categories->setRootIsDecorated(false);
-    d->w_categories->setSelectionBehavior(QAbstractItemView::SelectRows);
-    d->w_categories->setSelectionMode(QAbstractItemView::SingleSelection);
-    d->w_categories->setItemDelegate(new CategoryDelegate(this));
+    d->w_categories = new CategoryTreeView(this);
 
     d->w_filter = new QLineEdit(this);
     d->w_filter->setClearButtonEnabled(true);
@@ -802,10 +871,13 @@ void SelectItem::showContextMenu(const QPoint &p)
             item = idx.model()->data(idx, BrickLink::ItemPointerRole).value<const BrickLink::Item *>();
 
         if (item && item->category() != currentCategory())
-            gotoItemCat = m.addAction(tr("View item's category"));
+            gotoItemCat = m.addAction(tr("Switch to the item's category"));
 
-        if (currentCategory() != BrickLink::CategoryModel::AllCategories)
-            gotoAllCat = m.addAction(tr("View the [All Items] category"));
+        if (currentCategory() != BrickLink::CategoryModel::AllCategories) {
+            QString allCatName = d->categoryModel->index(BrickLink::CategoryModel::AllCategories)
+                    .data(Qt::DisplayRole).toString();
+            gotoAllCat = m.addAction(tr("Switch to the \"%1\" category").arg(allCatName));
+        }
 
         if (!m.isEmpty()) {
             auto action = m.exec(iv->mapToGlobal(p));
