@@ -871,10 +871,8 @@ void FrameWork::translateActions()
             else if (!at.shortcut.isNull())
                 a->setShortcuts({ QKeySequence(at.shortcut) });
 
-            if (!a->shortcut().isEmpty()) {
-                a->setToolTip(QString::fromLatin1("%1 <span style=\"color: gray; font-size: small\">%2</span>")
-                              .arg(a->text(), a->shortcut().toString(QKeySequence::NativeText)));
-            }
+            if (!a->shortcut().isEmpty())
+                a->setToolTip(Utility::toolTipLabel(a->text(), a->shortcut()));
 
             QString iconName = QString::fromLatin1(iconalias.value(at.name, at.name));
             iconName.replace("_", "-");
@@ -1219,14 +1217,14 @@ void FrameWork::createActions()
     a->setObjectName("edit_redo");
 
     a = newQAction(this, "edit_cut", NeedSelection(1));
-    connect(new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Delete), this, nullptr, nullptr, Qt::WindowShortcut),
-            &QShortcut::activated, a, &QAction::trigger);
+    connect(new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Delete), this), &QShortcut::activated,
+            a, &QAction::trigger);
     a = newQAction(this, "edit_copy", NeedSelection(1));
-    connect(new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Insert), this, nullptr, nullptr, Qt::WindowShortcut),
-            &QShortcut::activated, a, &QAction::trigger);
+    connect(new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Insert), this), &QShortcut::activated,
+            a, &QAction::trigger);
     a = newQAction(this, "edit_paste", NeedDocument);
-    connect(new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Insert), this, nullptr, nullptr, Qt::WindowShortcut),
-            &QShortcut::activated, a, &QAction::trigger);
+    connect(new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Insert), this), &QShortcut::activated,
+            a, &QAction::trigger);
     (void) newQAction(this, "edit_delete", NeedSelection(1));
 
     a = newQAction(this, "edit_additems", NeedDocument, false, this, &FrameWork::showAddItemDialog);
@@ -1660,7 +1658,8 @@ void FrameWork::connectWindow(QWidget *w)
         // update per-document action states
         findAction("view_difference_mode")->setChecked(window->isDifferenceMode());
 
-        m_filter->setToolTip(findAction("edit_filter_focus")->toolTip() + filterToolTip);
+        if (auto a = findAction("edit_filter_focus"))
+            m_filter->setToolTip(Utility::toolTipLabel(a->text(), a->shortcut(), filterToolTip));
 
         m_current_window = window;
     }

@@ -39,6 +39,7 @@
 #include <QPainter>
 #include <QShortcut>
 
+#include "utility.h"
 #include "bricklink_model.h"
 #include "selectitem.h"
 #include "messagebox.h"
@@ -221,16 +222,32 @@ void SelectItem::init()
 
     d->w_filter = new QLineEdit(this);
     d->w_filter->setClearButtonEnabled(true);
+    connect(new QShortcut(QKeySequence::Find, this), &QShortcut::activated,
+            this, [this]() { d->w_filter->setFocus(); });
 
     auto *popupMenu = new QMenu(this);
-    d->m_filterCaseSensitive = new QAction(tr("Case Sensitive"), this);
+    d->m_filterCaseSensitive = new QAction(QIcon::fromTheme("case-sensitive"),
+                                           tr("Case Sensitive"), this);
     d->m_filterCaseSensitive->setCheckable(true);
-    connect(d->m_filterCaseSensitive, &QAction::toggled, this, &SelectItem::applyFilter);
+    connect(d->m_filterCaseSensitive, &QAction::toggled, this, [this](bool b) {
+        if (b)
+            d->w_filter->addAction(d->m_filterCaseSensitive, QLineEdit::LeadingPosition);
+        else
+            d->w_filter->removeAction(d->m_filterCaseSensitive);
+        applyFilter();
+    });
     popupMenu->addAction(d->m_filterCaseSensitive);
 
-    d->m_filterRegularExpression = new QAction(tr("Use Regular Expression"), this);
+    d->m_filterRegularExpression = new QAction(QIcon::fromTheme("regular-expression"),
+                                               tr("Use Regular Expression"), this);
     d->m_filterRegularExpression->setCheckable(true);
-    connect(d->m_filterRegularExpression, &QAction::toggled, this, &SelectItem::applyFilter);
+    connect(d->m_filterRegularExpression, &QAction::toggled, this, [this](bool b) {
+        if (b)
+            d->w_filter->addAction(d->m_filterRegularExpression, QLineEdit::LeadingPosition);
+        else
+            d->w_filter->removeAction(d->m_filterRegularExpression);
+        applyFilter();
+    });
     popupMenu->addAction(d->m_filterRegularExpression);
 
     // Adding a menuAction() to a QLineEdit leads to a strange activation behvior:
@@ -473,20 +490,30 @@ void SelectItem::init()
 void SelectItem::languageChange()
 {
     d->w_item_types_label->setText(tr("Item type:"));
-    d->w_filter->setToolTip(tr("Filter the list using this pattern (wildcards allowed: * ? [])"));
     d->w_filter->setPlaceholderText(tr("Filter"));
 
-    auto setToolTipOnButton = [](QAbstractButton *b, const QString &text) {
-        if (!b->shortcut().isEmpty()) {
-            b->setToolTip(QString("%1 <span style=\"color: gray; font-size: small\">%2</span>")
-                      .arg(text, b->shortcut().toString(QKeySequence::NativeText)));
-        }
-    };
+    QString tt = tr( \
+                "<p>This filter has two modes:</p><p>" \
+                "The default, simple mode, will match all items containing the entered text in " \
+                "either the name or the part number. Additionally, any word starting with '-' " \
+                "(minus) acts as a stop word and prevents an item from being matched, if this "\
+                "stop word is found in the item's name.<br>(e.g. 'brick 1 x 1 -pattern')<br><br>" \
+                "The second mode, using Regular Expressions, can be activated in the drop-down "\
+                "menu on the left. When activated, it will match all items that contain the " \
+                "entered expression in either the name or the part number.</p><p>" \
+                "In both modes the matches are done case insensitvely, but you can change that "\
+                "behavior via the menu.</p>" \
+    );
 
+    d->w_filter->setToolTip(Utility::toolTipLabel(tr("Filter the list using this pattern"),
+                                                  QKeySequence::Find, tt));
+
+    auto setToolTipOnButton = [](QAbstractButton *b, const QString &text) {
+        b->setToolTip(Utility::toolTipLabel(text, b->shortcut()));
+    };
     setToolTipOnButton(d->w_viewmode->button(0), tr("List"));
     setToolTipOnButton(d->w_viewmode->button(2), tr("Thumbnails"));
     setToolTipOnButton(d->w_viewmode->button(1), tr("List with Images"));
-
     setToolTipOnButton(d->w_zoomIn, tr("Zoom in"));
     setToolTipOnButton(d->w_zoomOut, tr("Zoom out"));
 }

@@ -171,6 +171,7 @@ private:
     QString         m_text_filter;
     bool            m_text_filter_is_cs = false;
     bool            m_text_filter_is_regexp = false;
+    QStringList     m_text_filter_stopwords;
     bool            m_inv_filter;
 
     friend class Core;

@@ -356,3 +356,17 @@ double Utility::roundTo(double d, int n)
     const int f = n == 0 ? 1 : n == 1 ? 10 : n == 2 ? 100 : n == 3 ? 1000 : 10000;
     return std::round(d * f) / f;
 }
+
+QString Utility::toolTipLabel(const QString &label, QKeySequence shortcut, const QString &extended)
+{
+    static const auto fmt = QString::fromLatin1(R"(<table><tr style="white-space: nowrap;"><td>%1</td><td align="right" valign="middle"><span style="color: %2; font-size: small;">&nbsp; &nbsp;%3</span></td></tr>%4</table>)");
+    static const auto fmtExt = QString::fromLatin1(R"(<tr><td colspan="2">%1</td></tr>)");
+
+    QColor color = gradientColor(qApp->palette().color(QPalette::Inactive, QPalette::ToolTipBase),
+                                 qApp->palette().color(QPalette::Inactive, QPalette::ToolTipText),
+                                 0.7);
+    QString extendedTable;
+    if (!extended.isEmpty())
+        extendedTable = fmtExt.arg(extended);
+    return fmt.arg(label, color.name(), shortcut.toString(QKeySequence::NativeText), extendedTable);
+}

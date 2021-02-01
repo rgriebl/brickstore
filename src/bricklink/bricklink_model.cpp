@@ -582,6 +582,20 @@ void BrickLink::ItemModel::setFilterText(const QString &str, bool caseSensitive,
     m_text_filter_is_cs = caseSensitive;
     m_text_filter_is_regexp = useRegExp;
     m_text_filter = str;
+    if (!useRegExp) {
+        m_text_filter_stopwords.clear();
+        QStringList sl = str.simplified().split(QLatin1Char(' '));
+        for (auto it = sl.begin(); it != sl.end();) {
+            if (it->startsWith(QLatin1Char('-'))) {
+                m_text_filter_stopwords << it->mid(1);
+                sl.erase(it);
+            } else {
+                ++it;
+            }
+        }
+        if (!m_text_filter_stopwords.isEmpty())
+            m_text_filter = sl.join(QLatin1Char(' '));
+    }
     invalidateFilter();
 }
 
@@ -623,12 +637,23 @@ bool BrickLink::ItemModel::filterAccepts(const void *pointer) const
     else {
         if (!m_text_filter.isEmpty()) {
             if (!m_text_filter_is_regexp) {
-                return item->id().contains(m_text_filter, m_text_filter_is_cs ? Qt::CaseSensitive : Qt::CaseInsensitive)
-                        || item->name().contains(m_text_filter,  m_text_filter_is_cs ? Qt::CaseSensitive : Qt::CaseInsensitive);
+                const auto cs = m_text_filter_is_cs ? Qt::CaseSensitive : Qt::CaseInsensitive;
+
+                const bool match = item->id().contains(m_text_filter, cs)
+                        || item->name().contains(m_text_filter, cs);
+
+                if (!match)
+                    return false;
+
+                for (auto &stop : m_text_filter_stopwords) {
+                    if (item->name().contains(stop, cs))
+                        return false;
+                }
+                return true;
             } else {
                 QRegularExpression *re = nullptr;
                 if (!regexpCache.hasLocalData()) {
-                    re = new QRegularExpression(QString(), QRegularExpression::CaseInsensitiveOption
+                    re = new QRegularExpression({ }, QRegularExpression::CaseInsensitiveOption
                                                 | QRegularExpression::UseUnicodePropertiesOption);
                     regexpCache.setLocalData(re);
                 }

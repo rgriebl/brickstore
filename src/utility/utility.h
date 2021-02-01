@@ -17,6 +17,7 @@
 #include <QColor>
 #include <QLocale>
 #include <QPair>
+#include <QKeySequence>
 
 QT_FORWARD_DECLARE_CLASS(QFontMetrics)
 QT_FORWARD_DECLARE_CLASS(QRect)
@@ -45,5 +46,7 @@ double stringToWeight(const QString &s, QLocale::MeasurementSystem ms);
 double roundTo(double f, int decimals);
 
 QString localForInternationalCurrencySymbol(const QString &international_symbol);
+
+QString toolTipLabel(const QString &label, QKeySequence shortcut = { }, const QString &extended = { });
 
 } // namespace Utility
