@@ -496,8 +496,8 @@ void SelectItem::languageChange()
                 "<p>This filter has two modes:</p><p>" \
                 "The default, simple mode, will match all items containing the entered text in " \
                 "either the name or the part number. Additionally, any word starting with '-' " \
-                "(minus) acts as a stop word and prevents an item from being matched, if this "\
-                "stop word is found in the item's name.<br>(e.g. 'brick 1 x 1 -pattern')<br><br>" \
+                "(minus) acts as an exclusion and prevents an item from being matched, if this "\
+                "word is found in the item's name.<br>(e.g. 'brick 1 x 1 -pattern')<br><br>" \
                 "The second mode, using Regular Expressions, can be activated in the drop-down "\
                 "menu on the left. When activated, it will match all items that contain the " \
                 "entered expression in either the name or the part number.</p><p>" \

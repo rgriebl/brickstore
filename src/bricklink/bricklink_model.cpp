@@ -583,17 +583,17 @@ void BrickLink::ItemModel::setFilterText(const QString &str, bool caseSensitive,
     m_text_filter_is_regexp = useRegExp;
     m_text_filter = str;
     if (!useRegExp) {
-        m_text_filter_stopwords.clear();
+        m_text_filter_excludewords.clear();
         QStringList sl = str.simplified().split(QLatin1Char(' '));
         for (auto it = sl.begin(); it != sl.end();) {
-            if (it->startsWith(QLatin1Char('-'))) {
-                m_text_filter_stopwords << it->mid(1);
-                sl.erase(it);
+            if ((it->length() > 1) && it->startsWith(QLatin1Char('-'))) {
+                m_text_filter_excludewords << it->mid(1);
+                it = sl.erase(it);
             } else {
                 ++it;
             }
         }
-        if (!m_text_filter_stopwords.isEmpty())
+        if (!m_text_filter_excludewords.isEmpty())
             m_text_filter = sl.join(QLatin1Char(' '));
     }
     invalidateFilter();
@@ -645,8 +645,8 @@ bool BrickLink::ItemModel::filterAccepts(const void *pointer) const
                 if (!match)
                     return false;
 
-                for (auto &stop : m_text_filter_stopwords) {
-                    if (item->name().contains(stop, cs))
+                for (auto &exclude : m_text_filter_excludewords) {
+                    if (item->name().contains(exclude, cs))
                         return false;
                 }
                 return true;
