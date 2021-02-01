@@ -1643,12 +1643,8 @@ void Window::copyRemarks(const BrickLink::InvItemList &items)
             if (!item || !color || !qty)
                 continue;
 
-            if ((pos->item() == item) && (pos->condition() == cond)) {
-                if (pos->color() == color)
-                    match = ii;
-                else if (!match)
-                    match = ii;
-            }
+            if ((pos->item() == item) && (pos->condition() == cond) && (pos->color() == color))
+                match = ii;
         }
 
         if (match && !match->remarks().isEmpty()) {
