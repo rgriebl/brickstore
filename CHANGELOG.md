@@ -2,6 +2,24 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+## [2021.2.0] - 2021-02-04
+### Improvements
+- Operations on a lot of rows at once have been sped up by several orders of magnitude.
+- Picture downloads are now done completely in a background thread, keeping the UI more responsive.
+
+### Added
+- New, modern icons bases on KDE's breeze theme. These icons can now adapt to dark desktop themes
+  on macOS and Linux.
+- The filter in the add-item and import-set dialogs gained the ability to handle **exclude** words:
+  e.g. `brick 1 x 2 -pattern` or `slope -33 -45`.
+- You can save your favorite filters now by pressing `Return` in an filter edit field. Recall them
+  by pressing `Cursor Down` or by clicking the filter icon on the left. The `X` in pop-up list
+  lets you delete unwanted filters.
+
+### Fixed
+A lot.
+
 Please read the [installation instructions](https://github.com/rgriebl/brickstore/wiki/Installation-Instructions).
 
 ## [2021.1.7] - 2021-01-27
@@ -27,8 +45,6 @@ will now remember their last settings, even when exiting and restarting BrickSto
 - Sub-conditions on sets can now be set in the add-item window and will show up correctly in the 
   document's item list.
 - Filtering for an empty field is possible by specifying it as `""` (two quotes).
-
-Please read the [installation instructions](https://github.com/rgriebl/brickstore/wiki/Installation-Instructions).
 
 
 ## [2021.1.6] - 2021-01-22
@@ -136,7 +152,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
   are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.1.7...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.2.0...HEAD
+[2021.2.0]: https://github.com/rgriebl/brickstore/releases/tag/v2021.2.0
 [2021.1.7]: https://github.com/rgriebl/brickstore/releases/tag/v2021.1.7
 [2021.1.6]: https://github.com/rgriebl/brickstore/releases/tag/v2021.1.6
 [2021.1.5]: https://github.com/rgriebl/brickstore/releases/tag/v2021.1.5
