@@ -329,11 +329,12 @@ bool BrickLink::CategoryModel::lessThan(const void *p1, const void *p2, int /*co
 {
     const auto *c1 = static_cast<const Category *>(p1);
     const auto *c2 = static_cast<const Category *>(p2);
+    bool asc = (sortOrder() == Qt::AscendingOrder);
 
     if (!c1 || c1 == AllCategories)
-        return true;
+        return asc;
     else if (!c2 || c2 == AllCategories)
-        return false;
+        return !asc;
     else
         return c1->name().localeAwareCompare(c2->name()) < 0;
 }

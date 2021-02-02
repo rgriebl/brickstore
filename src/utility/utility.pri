@@ -11,7 +11,6 @@ HEADERS += \
     $$PWD/chunkwriter.h \
     $$PWD/exception.h \
     $$PWD/q3cache.h \
-    $$PWD/smartvalidator.h \
     $$PWD/staticpointermodel.h \
     $$PWD/stopwatch.h \
     $$PWD/transfer.h \
@@ -19,7 +18,6 @@ HEADERS += \
 
 SOURCES += \
     $$PWD/chunkreader.cpp \
-    $$PWD/smartvalidator.cpp \
     $$PWD/staticpointermodel.cpp \
     $$PWD/transfer.cpp \
     $$PWD/utility.cpp \
@@ -36,6 +34,7 @@ HEADERS += \
     $$PWD/progresscircle.h \
     $$PWD/progressdialog.h \
     $$PWD/qparallelsort.h \
+    $$PWD/smartvalidator.h \
     $$PWD/undo.h \
     $$PWD/workspace.h \
 
@@ -49,6 +48,7 @@ SOURCES += \
     $$PWD/messagebox.cpp \
     $$PWD/progresscircle.cpp \
     $$PWD/progressdialog.cpp \
+    $$PWD/smartvalidator.cpp \
     $$PWD/undo.cpp \
     $$PWD/workspace.cpp \
 

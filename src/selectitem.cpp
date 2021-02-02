@@ -334,6 +334,7 @@ void SelectItem::init()
     d->w_items->setSelectionMode(QAbstractItemView::SingleSelection);
     d->w_items->setItemDelegate(new BrickLink::ItemDelegate(this, BrickLink::ItemDelegate::AlwaysShowSelection));
     d->w_items->setContextMenuPolicy(Qt::CustomContextMenu);
+    d->w_items->header()->setSectionsMovable(false);
 
     d->w_itemthumbs = new QTreeView(this);
     d->w_itemthumbs->setAlternatingRowColors(true);
@@ -346,6 +347,7 @@ void SelectItem::init()
     d->w_itemthumbs->setItemDelegate(new ItemThumbsDelegate(d->m_zoom, this));
     d->w_itemthumbs->setContextMenuPolicy(Qt::CustomContextMenu);
     d->w_itemthumbs->viewport()->installEventFilter(this);
+    d->w_itemthumbs->header()->setSectionsMovable(false);
 
     d->w_thumbs = new QListView(this);
     d->w_thumbs->setUniformItemSizes(true);
