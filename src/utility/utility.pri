@@ -29,6 +29,7 @@ HEADERS += \
     $$PWD/filter.h \
     $$PWD/flowlayout.h \
     $$PWD/headerview.h \
+    $$PWD/historylineedit.h \
     $$PWD/humanreadabletimedelta.h \
     $$PWD/messagebox.h \
     $$PWD/progresscircle.h \
@@ -44,6 +45,7 @@ SOURCES += \
     $$PWD/filter.cpp \
     $$PWD/flowlayout.cpp \
     $$PWD/headerview.cpp \
+    $$PWD/historylineedit.cpp \
     $$PWD/humanreadabletimedelta.cpp \
     $$PWD/messagebox.cpp \
     $$PWD/progresscircle.cpp \

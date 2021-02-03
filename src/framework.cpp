@@ -34,7 +34,6 @@
 #include <QShortcut>
 #include <QDockWidget>
 #include <QSizeGrip>
-#include <QLineEdit>
 #include <QPlainTextEdit>
 #include <QFont>
 #include <QCommandLinkButton>
@@ -74,6 +73,7 @@
 #include "framework.h"
 #include "stopwatch.h"
 #include "importinventorydialog.h"
+#include "historylineedit.h"
 
 #include "scriptmanager.h"
 #include "script.h"
@@ -631,6 +631,10 @@ FrameWork::FrameWork(QWidget *parent)
     if (ba.isEmpty() || !restoreState(ba, DockStateVersion))
         m_toolbar->show();
 
+    ba = Config::inst()->value(QLatin1String("/MainWindow/Filter")).toByteArray();
+    if (!ba.isEmpty())
+        m_filter->restoreState(ba);
+
     findAction("view_fullscreen")->setChecked(windowState() & Qt::WindowFullScreen);
 
     Currency::inst()->updateRates();
@@ -889,6 +893,7 @@ FrameWork::~FrameWork()
     Config::inst()->setValue("/MainWindow/Statusbar/Visible", statusBar()->isVisibleTo(this));
     Config::inst()->setValue("/MainWindow/Layout/State", saveState(DockStateVersion));
     Config::inst()->setValue("/MainWindow/Layout/Geometry", saveGeometry());
+    Config::inst()->setValue("/MainWindow/Filter", m_filter->saveState());
 
     delete m_add_dialog.data();
     delete m_importinventory_dialog.data();
@@ -1052,10 +1057,8 @@ bool FrameWork::setupToolBar(QToolBar *t, const QVector<QByteArray> &a_names)
                     continue;
                 }
 
-                m_filter = new QLineEdit(this);
+                m_filter = new HistoryLineEdit(this);
                 m_filter->setClearButtonEnabled(true);
-                m_filter->addAction(new QAction(QIcon::fromTheme("view-filter"), QString(), this),
-                                    QLineEdit::LeadingPosition);
                 m_filter_delay = new QTimer(this);
                 m_filter_delay->setInterval(800ms);
                 m_filter_delay->setSingleShot(true);

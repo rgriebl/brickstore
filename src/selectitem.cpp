@@ -38,8 +38,10 @@
 #include <QLineEdit>
 #include <QPainter>
 #include <QShortcut>
+#include <QTimer>
 
 #include "utility.h"
+#include "historylineedit.h"
 #include "bricklink_model.h"
 #include "selectitem.h"
 #include "messagebox.h"
@@ -47,6 +49,7 @@
 
 using namespace std::chrono_literals;
 
+class HistoryLineEdit;
 
 class SelectItemPrivate {
 public:
@@ -61,9 +64,7 @@ public:
     QTreeView *      w_items;
     QTreeView *      w_itemthumbs;
     QListView *      w_thumbs;
-    QLineEdit *      w_filter;
-    QAction *        m_filterCaseSensitive;
-    QAction *        m_filterRegularExpression;
+    HistoryLineEdit * w_filter;
     QToolButton *    w_zoomIn;
     QToolButton *    w_zoomOut;
     QLabel *         w_zoomLevel;
@@ -126,14 +127,6 @@ QSize ItemThumbsDelegate::sizeHint(const QStyleOptionViewItem &option, const QMo
 }
 
 
-SelectItem::SelectItem(QWidget *parent)
-    : QWidget(parent)
-    , d(new SelectItemPrivate())
-{
-    d->m_inv_only = false;
-    init();
-}
-
 class CategoryTreeView : public QTreeView
 {
 public:
@@ -147,7 +140,6 @@ public:
         setSelectionBehavior(QAbstractItemView::SelectRows);
         setSelectionMode(QAbstractItemView::SingleSelection);
         setItemDelegate(new CategoryDelegate(this));
-
 
         m_overlay = new QTreeView(this);
         m_overlay->setFrameStyle(QFrame::NoFrame);
@@ -163,7 +155,6 @@ public:
         m_overlay->setItemDelegate(new CategoryDelegate(this));
 
         m_overlay->viewport()->installEventFilter(this);
-
     }
 
     void setModel(QAbstractItemModel *model)
@@ -209,6 +200,14 @@ private:
 };
 
 
+SelectItem::SelectItem(QWidget *parent)
+    : QWidget(parent)
+    , d(new SelectItemPrivate())
+{
+    d->m_inv_only = false;
+    init();
+}
+
 SelectItem::~SelectItem()
 { /* needed to use QScopedPointer on d */ }
 
@@ -220,62 +219,15 @@ void SelectItem::init()
 
     d->w_categories = new CategoryTreeView(this);
 
-    d->w_filter = new QLineEdit(this);
-    d->w_filter->setClearButtonEnabled(true);
-    connect(new QShortcut(QKeySequence::Find, this), &QShortcut::activated,
-            this, [this]() { d->w_filter->setFocus(); });
-
-    auto *popupMenu = new QMenu(this);
-    d->m_filterCaseSensitive = new QAction(QIcon::fromTheme("case-sensitive"),
-                                           tr("Case Sensitive"), this);
-    d->m_filterCaseSensitive->setCheckable(true);
-    connect(d->m_filterCaseSensitive, &QAction::toggled, this, [this](bool b) {
-        if (b)
-            d->w_filter->addAction(d->m_filterCaseSensitive, QLineEdit::LeadingPosition);
-        else
-            d->w_filter->removeAction(d->m_filterCaseSensitive);
-        applyFilter();
-    });
-    popupMenu->addAction(d->m_filterCaseSensitive);
-
-    d->m_filterRegularExpression = new QAction(QIcon::fromTheme("regular-expression"),
-                                               tr("Use Regular Expression"), this);
-    d->m_filterRegularExpression->setCheckable(true);
-    connect(d->m_filterRegularExpression, &QAction::toggled, this, [this](bool b) {
-        if (b)
-            d->w_filter->addAction(d->m_filterRegularExpression, QLineEdit::LeadingPosition);
-        else
-            d->w_filter->removeAction(d->m_filterRegularExpression);
-        applyFilter();
-    });
-    popupMenu->addAction(d->m_filterRegularExpression);
-
-    // Adding a menuAction() to a QLineEdit leads to a strange activation behvior:
-    // only the right side of the icon will react to mouse clicks
-    QPixmap filterPix(QIcon::fromTheme("view-filter").pixmap(d->w_filter->style()->pixelMetric(QStyle::PM_SmallIconSize)));
-    {
-        QPainter p(&filterPix);
-        QStyleOption so;
-        so.initFrom(d->w_filter);
-        so.rect = filterPix.rect();
-        int mbi = d->w_filter->style()->pixelMetric(QStyle::PM_MenuButtonIndicator, &so, d->w_filter);
-#if defined(Q_OS_MACOS)
-        mbi += 2;
-#else
-        mbi -= 6;
-#endif
-        so.rect = QRect(0, so.rect.bottom() - mbi, mbi, mbi);
-        d->w_filter->style()->drawPrimitive(QStyle::PE_IndicatorArrowDown, &so, &p, d->w_filter);
-    }
-
-    auto *a = d->w_filter->addAction(QIcon(filterPix), QLineEdit::LeadingPosition);
-    connect(a, &QAction::triggered, this, [this, popupMenu]() {
-        popupMenu->popup(d->w_filter->mapToGlobal(d->w_filter->rect().bottomLeft()));
-    });
-
     d->m_filter_delay = new QTimer(this);
     d->m_filter_delay->setInterval(400ms);
     d->m_filter_delay->setSingleShot(true);
+
+    d->w_filter = new HistoryLineEdit(this);
+    connect(d->w_filter, &QLineEdit::textChanged,
+            this, [this]() { d->m_filter_delay->start(); });
+    connect(new QShortcut(QKeySequence::Find, this), &QShortcut::activated,
+            this, [this]() { d->w_filter->setFocus(); });
 
     d->w_viewmode = new QButtonGroup(this);
     d->w_viewmode->setExclusive(true);
@@ -408,9 +360,6 @@ void SelectItem::init()
         sortItems(section, d->w_itemthumbs->header()->sortIndicatorOrder());
     });
 
-    connect(d->w_filter, &QLineEdit::textChanged, this, [this]() {
-        d->m_filter_delay->start();
-    });
     connect(d->m_filter_delay, &QTimer::timeout,
             this, &SelectItem::applyFilter);
 
@@ -522,26 +471,29 @@ void SelectItem::languageChange()
 
 bool SelectItem::eventFilter(QObject *o, QEvent *e)
 {
-    if ((o == d->w_itemthumbs->viewport() || o == d->w_thumbs->viewport())
-            && (e->type() == QEvent::Wheel)) {
-        const auto *we = static_cast<QWheelEvent *>(e);
-        if (we->modifiers() & Qt::ControlModifier) {
-            double z = std::pow(1.001, we->angleDelta().y());
-            setZoomFactor(d->m_zoom * z);
-            e->accept();
-            return true;
+    if (d->w_itemthumbs) {
+        if ((o == d->w_itemthumbs->viewport() || o == d->w_thumbs->viewport())
+                && (e->type() == QEvent::Wheel)) {
+            const auto *we = static_cast<QWheelEvent *>(e);
+            if (we->modifiers() & Qt::ControlModifier) {
+                double z = std::pow(1.001, we->angleDelta().y());
+                setZoomFactor(d->m_zoom * z);
+                e->accept();
+                return true;
+            }
+        }
+        if ((o == d->w_itemthumbs->viewport() || o == d->w_thumbs->viewport())
+                && (e->type() == QEvent::NativeGesture)) {
+            const auto *nge = static_cast<QNativeGestureEvent *>(e);
+            if (nge->gestureType() == Qt::ZoomNativeGesture) {
+                double z = 1 + nge->value();
+                setZoomFactor(d->m_zoom * z);
+                e->accept();
+                return true;
+            }
         }
     }
-    if ((o == d->w_itemthumbs->viewport() || o == d->w_thumbs->viewport())
-            && (e->type() == QEvent::NativeGesture)) {
-        const auto *nge = static_cast<QNativeGestureEvent *>(e);
-        if (nge->gestureType() == Qt::ZoomNativeGesture) {
-            double z = 1 + nge->value();
-            setZoomFactor(d->m_zoom * z);
-            e->accept();
-            return true;
-        }
-    }
+
     return QWidget::eventFilter(o, e);
 }
 
@@ -725,13 +677,11 @@ QByteArray SelectItem::saveState() const
 
     QByteArray ba;
     QDataStream ds(&ba, QIODevice::WriteOnly);
-    ds << QByteArray("SI") << qint32(1)
+    ds << QByteArray("SI") << qint32(3)
        << qint8(itt ? itt->id() : char(-1))
        << (cat ? (cat == BrickLink::CategoryModel::AllCategories ? uint(-2) : cat->id()) : uint(-1))
        << (item ? item->id() : QString())
-       << d->w_filter->text()
-       << d->m_filterCaseSensitive->isChecked()
-       << d->m_filterRegularExpression->isChecked()
+       << d->w_filter->saveState()
        << zoomFactor()
        << d->w_viewmode->checkedId()
        << (d->w_categories->header()->sortIndicatorOrder() == Qt::AscendingOrder)
@@ -747,22 +697,21 @@ bool SelectItem::restoreState(const QByteArray &ba)
     QByteArray tag;
     qint32 version;
     ds >> tag >> version;
-    if ((ds.status() != QDataStream::Ok) || (tag != "SI") || (version != 1))
+    if ((ds.status() != QDataStream::Ok) || (tag != "SI") || (version != 3))
         return false;
 
     qint8 itt;
     uint cat;
     QString itemid;
-    QString filter;
-    bool filter_cs;
-    bool filter_use_re;
+    QByteArray filterState;
     double zoom;
     int viewMode;
     bool catSortAsc;
     bool itemSortAsc;
     int itemSortColumn;
+    QByteArray filterHistory;
 
-    ds >> itt >> cat >> itemid >> filter >> filter_cs >> filter_use_re >> zoom >> viewMode
+    ds >> itt >> cat >> itemid >> filterState >> zoom >> viewMode
             >> catSortAsc >> itemSortAsc >> itemSortColumn;
 
     if (ds.status() != QDataStream::Ok)
@@ -776,14 +725,12 @@ bool SelectItem::restoreState(const QByteArray &ba)
     }
     if (!itemid.isEmpty())
         setCurrentItem(BrickLink::core()->item(itt, itemid), false);
-    d->m_filterCaseSensitive->setChecked(filter_cs);
-    d->m_filterRegularExpression->setChecked(filter_use_re);
-    d->w_filter->setText(filter);
-    applyFilter();
     setZoomFactor(zoom);
     setViewMode(viewMode);
     d->w_categories->sortByColumn(0, catSortAsc ? Qt::AscendingOrder : Qt::DescendingOrder);
     sortItems(itemSortColumn, itemSortAsc ? Qt::AscendingOrder : Qt::DescendingOrder);
+    if (!filterState.isEmpty() && d->w_filter->restoreState(filterState))
+        applyFilter();
     return true;
 }
 
@@ -864,8 +811,7 @@ void SelectItem::applyFilter()
     const BrickLink::Item *oldItem = currentItem();
     d->w_items->clearSelection();
 
-    d->itemModel->setFilterText(d->w_filter->text(), d->m_filterCaseSensitive->isChecked(),
-                                d->m_filterRegularExpression->isChecked());
+    d->itemModel->setFilterText(d->w_filter->text(), false, false);
 
     setCurrentItem(oldItem);
     if (!currentItem() && d->itemModel->rowCount() == 1)

@@ -24,8 +24,8 @@
 
 QT_FORWARD_DECLARE_CLASS(QLabel)
 QT_FORWARD_DECLARE_CLASS(QToolButton)
-QT_FORWARD_DECLARE_CLASS(QLineEdit)
 
+class HistoryLineEdit;
 class Workspace;
 class ProgressCircle;
 class Window;
@@ -140,7 +140,7 @@ private:
     QPointer<Window> m_current_window;
 
     ProgressCircle *m_progress;
-    QLineEdit *m_filter;
+    HistoryLineEdit *m_filter;
     QLabel *m_st_weight;
     QLabel *m_st_lots;
     QLabel *m_st_items;
