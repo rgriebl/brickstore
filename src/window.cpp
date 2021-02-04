@@ -1762,12 +1762,11 @@ void Window::on_edit_partoutitems_triggered()
         if (inplace)
             m_doc->beginMacro();
 
-        WindowProgress wp(w_list, tr("Parting out items"), inplace ? selection().count() : 0);
         int partcount = 0;
 
         foreach(Document::Item *item, selection()) {
             if (inplace) {
-                if (item->item()->hasInventory()) {
+                if (item->item()->hasInventory() && item->quantity()) {
                     BrickLink::InvItemList items = item->item()->consistsOf();
                     if (!items.isEmpty()) {
                         int multiply = item->quantity();
@@ -1787,7 +1786,6 @@ void Window::on_edit_partoutitems_triggered()
             } else {
                 FrameWork::inst()->fileImportBrickLinkInventory(item->item(), item->quantity(), item->condition());
             }
-            wp.step();
         }
         if (inplace)
             m_doc->endMacro(tr("Parted out %n item(s)", nullptr, partcount));

@@ -351,7 +351,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
             tag.background = fg;
             tag.background.setAlphaF(0.3);
 
-            if (option.state & QStyle::State_MouseOver) {
+            if ((option.state & QStyle::State_MouseOver) && it->quantity()) {
                 tag.foreground = option.palette.color(QPalette::HighlightedText);
                 tag.background = option.palette.color(QPalette::Highlight);
             }
@@ -735,7 +735,8 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
 
             if ((me->x() > (option.rect.right() - d)) && (me->y() > (option.rect.bottom() - d))) {
                 if (auto a = FrameWork::inst()->findAction("edit_partoutitems")) {
-                    a->trigger();
+                    if (a->isEnabled())
+                        a->trigger();
                     break;
                 }
             }

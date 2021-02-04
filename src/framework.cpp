@@ -92,7 +92,10 @@ enum {
     NeedSubCondition = 0x04,
     NeedNetwork = 0x08,
     NeedModification = 0x10,
-    NeedDocument = 0x20
+    NeedDocument = 0x20,
+    NeedQuantity = 0x40,
+
+    // the upper 16 bits (0xffff0000) are reserved for NeedSelection()
 };
 
 
@@ -1235,7 +1238,7 @@ void FrameWork::createActions()
 
     (void) newQAction(this, "edit_subtractitems", NeedDocument);
     (void) newQAction(this, "edit_mergeitems", NeedSelection(2));
-    (void) newQAction(this, "edit_partoutitems", NeedInventory | NeedSelection(1));
+    (void) newQAction(this, "edit_partoutitems", NeedInventory | NeedSelection(1) | NeedQuantity);
     (void) newQAction(this, "edit_setmatch", NeedDocument);
     (void) newQAction(this, "edit_reset_diffs", NeedSelection(1));
     (void) newQAction(this, "edit_copyremarks", NeedDocument);
@@ -1721,6 +1724,8 @@ void FrameWork::updateActions(const Document::ItemList &selection)
                 b = b && (item->lotId() != 0);
             if (flags & NeedInventory)
                 b = b && (item->item() && item->item()->hasInventory());
+            if (flags & NeedQuantity)
+                b = b && (item->quantity() != 0);
             if (flags & NeedSubCondition)
                 b = b && (item->item() && item->itemType() && item->item()->itemType()->hasSubConditions());
 

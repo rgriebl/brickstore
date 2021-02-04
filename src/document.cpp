@@ -680,7 +680,7 @@ Document *Document::fileImportBrickLinkInventory(const BrickLink::Item *item, in
     if (item && !item->hasInventory())
         return nullptr;
 
-    if (item && (quantity > 0)) {
+    if (item && (quantity != 0)) {
         BrickLink::InvItemList items = item->consistsOf();
 
         if (!items.isEmpty()) {
