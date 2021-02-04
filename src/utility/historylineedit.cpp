@@ -61,11 +61,13 @@ void HistoryViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &o
 ///////////////////////////////////////////////////////////////////////
 
 
-HistoryLineEdit::HistoryLineEdit(QWidget *parent)
+HistoryLineEdit::HistoryLineEdit(int maximumHistorySize, QWidget *parent)
     : QLineEdit(parent)
     , m_deleteIcon(QIcon::fromTheme("window-close"))
+    , m_maximumHistorySize(maximumHistorySize)
 {
     auto *comp = new QCompleter(&m_filterModel, this);
+    comp->setMaxVisibleItems(maximumHistorySize);
 
     comp->setCaseSensitivity(Qt::CaseInsensitive);
     comp->setCompletionMode(QCompleter::PopupCompletion);
@@ -75,17 +77,8 @@ HistoryLineEdit::HistoryLineEdit(QWidget *parent)
     view->setItemDelegate(new HistoryViewDelegate(this));
     setClearButtonEnabled(true);
 
-    connect(this, &QLineEdit::returnPressed, this, [this]() {
-        QString t = text().trimmed();
-        if (t.isEmpty())
-            return;
-
-        QStringList sl = m_filterModel.stringList();
-        sl.removeAll(t);
-        sl.append(t);
-        m_filterModel.setStringList(sl);
-
-    }, Qt::QueuedConnection);
+    m_connection = connect(this, &QLineEdit::editingFinished,
+                           this, &HistoryLineEdit::appendToModel, Qt::QueuedConnection);
 
     // Adding a menuAction() to a QLineEdit leads to a strange activation behvior:
     // only the right side of the icon will react to mouse clicks
@@ -110,6 +103,37 @@ HistoryLineEdit::HistoryLineEdit(QWidget *parent)
         completer()->setCompletionPrefix(QString());
         completer()->complete();
     });
+}
+
+void HistoryLineEdit::appendToModel()
+{
+    QString t = text().trimmed();
+    if (t.isEmpty())
+        return;
+
+    QStringList sl = m_filterModel.stringList();
+    sl.removeAll(t);
+    sl.append(t);
+    while (sl.size() > m_maximumHistorySize)
+        sl.removeFirst();
+    m_filterModel.setStringList(sl);
+}
+
+bool HistoryLineEdit::isInFavoritesMode() const
+{
+    return m_favoritesMode;
+}
+
+void HistoryLineEdit::setToFavoritesMode(bool favoritesMode)
+{
+    if (favoritesMode != m_favoritesMode) {
+        m_favoritesMode = favoritesMode;
+
+        disconnect(m_connection);
+        m_connection = connect(this, favoritesMode ? &QLineEdit::returnPressed
+                                                   : &QLineEdit::editingFinished,
+                               this, &HistoryLineEdit::appendToModel, Qt::QueuedConnection);
+    }
 }
 
 QByteArray HistoryLineEdit::saveState() const

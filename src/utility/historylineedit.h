@@ -26,7 +26,10 @@ class HistoryLineEdit : public QLineEdit
     Q_OBJECT
 
 public:
-    HistoryLineEdit(QWidget *parent = nullptr);
+    HistoryLineEdit(int maximumHistorySize, QWidget *parent = nullptr);
+
+    bool isInFavoritesMode() const;
+    void setToFavoritesMode(bool favoritesMode);
 
     QByteArray saveState() const;
     bool restoreState(const QByteArray &ba);
@@ -36,8 +39,13 @@ protected:
     bool eventFilter(QObject *o, QEvent *e) override;
 
 private:
+    void appendToModel();
+
     QStringListModel m_filterModel;
     QIcon m_deleteIcon;
+    int m_maximumHistorySize;
+    bool m_favoritesMode = false;
+    QMetaObject::Connection m_connection;
 
     friend class HistoryViewDelegate;
 };

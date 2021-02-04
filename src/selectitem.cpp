@@ -46,6 +46,7 @@
 #include "selectitem.h"
 #include "messagebox.h"
 #include "framework.h"
+#include "config.h"
 
 using namespace std::chrono_literals;
 
@@ -223,11 +224,14 @@ void SelectItem::init()
     d->m_filter_delay->setInterval(400ms);
     d->m_filter_delay->setSingleShot(true);
 
-    d->w_filter = new HistoryLineEdit(this);
+    d->w_filter = new HistoryLineEdit(Config::MaxFilterHistory, this);
     connect(d->w_filter, &QLineEdit::textChanged,
             this, [this]() { d->m_filter_delay->start(); });
     connect(new QShortcut(QKeySequence::Find, this), &QShortcut::activated,
             this, [this]() { d->w_filter->setFocus(); });
+    connect(Config::inst(), &Config::filtersInFavoritesModeChanged,
+            d->w_filter, &HistoryLineEdit::setToFavoritesMode);
+    d->w_filter->setToFavoritesMode(Config::inst()->areFiltersInFavoritesMode());
 
     d->w_viewmode = new QButtonGroup(this);
     d->w_viewmode->setExclusive(true);

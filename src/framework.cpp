@@ -1060,7 +1060,7 @@ bool FrameWork::setupToolBar(QToolBar *t, const QVector<QByteArray> &a_names)
                     continue;
                 }
 
-                m_filter = new HistoryLineEdit(this);
+                m_filter = new HistoryLineEdit(Config::MaxFilterHistory, this);
                 m_filter->setClearButtonEnabled(true);
                 m_filter_delay = new QTimer(this);
                 m_filter_delay->setInterval(800ms);
@@ -1072,6 +1072,9 @@ bool FrameWork::setupToolBar(QToolBar *t, const QVector<QByteArray> &a_names)
                     if (m_filter)
                         emit filterTextChanged(m_filter->text());
                 });
+                connect(Config::inst(), &Config::filtersInFavoritesModeChanged,
+                        m_filter, &HistoryLineEdit::setToFavoritesMode);
+                m_filter->setToFavoritesMode(Config::inst()->areFiltersInFavoritesMode());
 
                 t->addWidget(m_filter);
             } else if (an == "widget_progress") {

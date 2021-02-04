@@ -36,8 +36,8 @@ public:
 
     QString language() const;
     QLocale::MeasurementSystem measurementSystem() const;
-    inline bool isMeasurementMetric()    { return measurementSystem() == QLocale::MetricSystem;   }
-    inline bool isMeasurementImperial()  { return measurementSystem() == QLocale::ImperialSystem; }
+
+    bool areFiltersInFavoritesMode() const;
 
     QString defaultCurrencyCode() const;
 
@@ -53,6 +53,7 @@ public:
     QStringList recentFiles() const;
 
     static constexpr int MaxRecentFiles = 18;
+    static constexpr int MaxFilterHistory = 20;
 
     QPair<QString, QString> loginForBrickLink() const;
     QMap<QByteArray, int> updateIntervals() const;
@@ -79,6 +80,7 @@ public:
 public slots:
     void setLanguage(const QString &lang);
     void setMeasurementSystem(QLocale::MeasurementSystem ms);
+    void setFiltersInFavoritesMode(bool b);
     void setDefaultCurrencyCode(const QString &ccode);
 
     void setCloseEmptyDocuments(bool b);
@@ -108,6 +110,7 @@ public slots:
 signals:
     void languageChanged();
     void measurementSystemChanged(QLocale::MeasurementSystem ms);
+    void filtersInFavoritesModeChanged(bool favoritesMode);
     void defaultCurrencyCodeChanged(const QString &ccode);
     void showInputErrorsChanged(bool b);
     void simpleModeChanged(bool b);
