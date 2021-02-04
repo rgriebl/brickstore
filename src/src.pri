@@ -12,11 +12,13 @@ OTHER_FILES += \
   $$PWD/version.h.in \
 
 SOURCES += \
+    $$PWD/documentio.cpp \
   $$PWD/main.cpp \
   $$PWD/rebuilddatabase.cpp \
   $$PWD/ref.cpp \
 
 HEADERS += \
+    $$PWD/documentio.h \
   $$PWD/rebuilddatabase.h \
   $$PWD/ref.h \
 
@@ -29,7 +31,6 @@ SOURCES += \
   $$PWD/document.cpp \
   $$PWD/documentdelegate.cpp \
   $$PWD/framework.cpp \
-  $$PWD/import.cpp \
   $$PWD/managecolumnlayoutsdialog.cpp \
   $$PWD/picturewidget.cpp \
   $$PWD/priceguidewidget.cpp \
@@ -48,7 +49,6 @@ HEADERS += \
   $$PWD/document_p.h \
   $$PWD/documentdelegate.h \
   $$PWD/framework.h \
-  $$PWD/import.h \
   $$PWD/managecolumnlayoutsdialog.h \
   $$PWD/picturewidget.h \
   $$PWD/priceguidewidget.h \

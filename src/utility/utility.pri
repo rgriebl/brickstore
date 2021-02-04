@@ -15,12 +15,14 @@ HEADERS += \
     $$PWD/stopwatch.h \
     $$PWD/transfer.h \
     $$PWD/utility.h \
+    $$PWD/xmlhelpers.h
 
 SOURCES += \
     $$PWD/chunkreader.cpp \
     $$PWD/staticpointermodel.cpp \
     $$PWD/transfer.cpp \
     $$PWD/utility.cpp \
+    $$PWD/xmlhelpers.cpp
 
 !backend-only {
 

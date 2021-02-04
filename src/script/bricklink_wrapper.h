@@ -304,14 +304,12 @@ class InvItem : WrapperBase<::BrickLink::InvItem>
     Q_PROPERTY(QString remarks READ remarks WRITE setRemarks)
 
     Q_PROPERTY(int quantity READ quantity WRITE setQuantity)
-    Q_PROPERTY(int origQuantity READ origQuantity WRITE setOrigQuantity)
     Q_PROPERTY(int bulkQuantity READ bulkQuantity WRITE setBulkQuantity)
     Q_PROPERTY(int tier1Quantity READ tier1Quantity WRITE setTier1Quantity)
     Q_PROPERTY(int tier2Quantity READ tier2Quantity WRITE setTier2Quantity)
     Q_PROPERTY(int tier3Quantity READ tier3Quantity WRITE setTier3Quantity)
 
     Q_PROPERTY(double price READ price WRITE setPrice)
-    Q_PROPERTY(double origPrice READ origPrice WRITE setOrigPrice)
     Q_PROPERTY(double tier1Price READ tier1Price WRITE setTier1Price)
     Q_PROPERTY(double tier2Price READ tier2Price WRITE setTier2Price)
     Q_PROPERTY(double tier3Price READ tier3Price WRITE setTier3Price)
@@ -323,7 +321,7 @@ class InvItem : WrapperBase<::BrickLink::InvItem>
     Q_PROPERTY(bool retain READ retain WRITE setRetain)
     Q_PROPERTY(BrickLink::Stockroom stockroom READ stockroom WRITE setStockroom)
 
-    Q_PROPERTY(double weight READ weight WRITE setWeight)
+    Q_PROPERTY(double totalWeight READ totalWeight WRITE setTotalWeight)
     Q_PROPERTY(QString reserved READ reserved WRITE setReserved)
     Q_PROPERTY(bool alternate READ alternate WRITE setAlternate)
     Q_PROPERTY(uint alternateId READ alternateId WRITE setAlternateId)
@@ -363,8 +361,6 @@ public:
 
     int quantity() const               { return get()->quantity(); }
     void setQuantity(int q)            { set().to()->setQuantity(q); }
-    int origQuantity() const           { return get()->origQuantity(); }
-    void setOrigQuantity(int q)        { set().to()->setOrigQuantity(q); }
     int bulkQuantity() const           { return get()->bulkQuantity(); }
     void setBulkQuantity(int q)        { set().to()->setBulkQuantity(q); }
     int tier1Quantity() const          { return get()->tierQuantity(0); }
@@ -376,8 +372,6 @@ public:
 
     double price() const               { return get()->price(); }
     void setPrice(double p)            { set().to()->setPrice(p); }
-    double origPrice() const           { return get()->origPrice(); }
-    void setOrigPrice(double p)        { set().to()->setOrigPrice(p); }
     double tier1Price() const          { return get()->tierPrice(0); }
     void setTier1Price(double p)       { set().to()->setTierPrice(0, p); }
     double tier2Price() const          { return get()->tierPrice(1); }
@@ -397,8 +391,8 @@ public:
     BrickLink::Stockroom stockroom() const     { return static_cast<BrickLink::Stockroom>(get()->stockroom()); }
     void setStockroom(BrickLink::Stockroom sr) { set().to()->setStockroom(static_cast<::BrickLink::Stockroom>(sr)); }
 
-    double weight() const              { return get()->weight(); }
-    void setWeight(double w)           { set().to()->setWeight(w); }
+    double totalWeight() const         { return get()->totalWeight(); }
+    void setTotalWeight(double w)      { set().to()->setTotalWeight(w); }
 
     QString reserved() const           { return get()->reserved(); }
     void setReserved(const QString &r) { set().to()->setReserved(r); }

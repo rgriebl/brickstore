@@ -22,55 +22,7 @@
 
 #include "bricklink.h"
 #include "exception.h"
-
-
-class ParseException : public Exception
-{
-public:
-    ParseException(const char *message)
-        : Exception(QLatin1String("Parse error: ") + QLatin1String(message))
-    { }
-
-    ParseException(const QString &path, const char *message)
-        : Exception(QString::fromLatin1("Failed to parse file %1: %2")
-                    .arg(path).arg(QLatin1String(message)))
-    { }
-};
-
-
-static QString decodeEntities(const QString &src)
-{
-    // Regular Expressions would be easier, but too slow here
-
-    QString decoded(src);
-
-    int pos = decoded.indexOf(QLatin1String("&#"));
-    if (pos < 0)
-        return decoded;
-
-    do {
-        int endpos = decoded.indexOf(QLatin1Char(';'), pos + 2);
-        if (endpos < 0) {
-            pos += 2;
-        } else {
-            int unicode = decoded.midRef(pos + 2, endpos - pos - 2).toInt();
-            if (unicode > 0) {
-                decoded.replace(pos, endpos - pos + 1, QChar(unicode));
-                pos++;
-            } else {
-                pos = endpos + 1;
-            }
-        }
-        pos = decoded.indexOf(QLatin1String("&#"), pos);
-    } while (pos >= 0);
-
-    return decoded;
-}
-
-static char firstCharInString(const QString &str)
-{
-    return (str.size() == 1) ? str.at(0).toLatin1() : 0;
-}
+#include "xmlhelpers.h"
 
 
 const BrickLink::Category *BrickLink::TextImport::findCategoryByName(const QStringRef &name) const
@@ -170,31 +122,21 @@ bool BrickLink::TextImport::import(const QString &path)
 }
 
 
-static QString elementText(QDomElement parent, const char *tagName)
-{
-    auto dnl = parent.elementsByTagName(QString::fromLatin1(tagName));
-    if (dnl.size() != 1) {
-        throw ParseException("Expected a single %1 tag, but found %2")
-                .arg(tagName).arg(dnl.size());
-    }
-    // the contents are double XML escaped. QDom unescaped once already, now have to do one more
-    return decodeEntities(dnl.at(0).toElement().text().simplified());
-}
-
 void BrickLink::TextImport::readColors(const QString &path)
 {
-    parseXML(path, "CATALOG", "ITEM", [this](QDomElement e) {
+    XmlHelpers::ParseXML p(path, "CATALOG", "ITEM");
+    p.parse([this, &p](QDomElement e) {
         QScopedPointer<Color> col(new Color);
-        uint colid = elementText(e, "COLOR").toUInt();
+        uint colid = p.elementText(e, "COLOR").toUInt();
 
         col->m_id       = colid;
-        col->m_name     = elementText(e, "COLORNAME");
-        col->m_color    = QColor(QString('#') + elementText(e, "COLORRGB"));
+        col->m_name     = p.elementText(e, "COLORNAME");
+        col->m_color    = QColor(QString('#') + p.elementText(e, "COLORRGB"));
 
         col->m_ldraw_id = -1;
         col->m_type     = Color::Type();
 
-        auto type = elementText(e, "COLORTYPE");
+        auto type = p.elementText(e, "COLORTYPE");
         if (type.contains("Transparent")) col->m_type |= Color::Transparent;
         if (type.contains("Glitter"))     col->m_type |= Color::Glitter;
         if (type.contains("Speckle"))     col->m_type |= Color::Speckle;
@@ -207,10 +149,10 @@ void BrickLink::TextImport::readColors(const QString &path)
         if (!col->m_type)
             col->m_type = Color::Solid;
 
-        int partCnt    = elementText(e, "COLORCNTPARTS").toInt();
-        int setCnt     = elementText(e, "COLORCNTSETS").toInt();
-        int wantedCnt  = elementText(e, "COLORCNTWANTED").toInt();
-        int forSaleCnt = elementText(e, "COLORCNTINV").toInt();
+        int partCnt    = p.elementText(e, "COLORCNTPARTS").toInt();
+        int setCnt     = p.elementText(e, "COLORCNTSETS").toInt();
+        int wantedCnt  = p.elementText(e, "COLORCNTWANTED").toInt();
+        int forSaleCnt = p.elementText(e, "COLORCNTINV").toInt();
 
         col->m_popularity = partCnt + setCnt + wantedCnt + forSaleCnt;
 
@@ -218,8 +160,8 @@ void BrickLink::TextImport::readColors(const QString &path)
         // mark it as raw data meanwhile:
         col->m_popularity = -col->m_popularity;
 
-        col->m_year_from = elementText(e, "COLORYEARFROM").toInt();
-        col->m_year_to   = elementText(e, "COLORYEARTO").toInt();
+        col->m_year_from = p.elementText(e, "COLORYEARFROM").toInt();
+        col->m_year_to   = p.elementText(e, "COLORYEARTO").toInt();
 
         m_colors.insert(colid, col.take());
     });
@@ -227,12 +169,13 @@ void BrickLink::TextImport::readColors(const QString &path)
 
 void BrickLink::TextImport::readCategories(const QString &path)
 {
-    parseXML(path, "CATALOG", "ITEM", [this](QDomElement e) {
+    XmlHelpers::ParseXML p(path, "CATALOG", "ITEM");
+    p.parse([this, &p](QDomElement e) {
         QScopedPointer<Category> cat(new Category);
-        uint catid = elementText(e, "CATEGORY").toUInt();
+        uint catid = p.elementText(e, "CATEGORY").toUInt();
 
         cat->m_id   = catid;
-        cat->m_name = elementText(e, "CATEGORYNAME");
+        cat->m_name = p.elementText(e, "CATEGORYNAME");
 
         m_categories.insert(catid, cat.take());
     });
@@ -240,15 +183,16 @@ void BrickLink::TextImport::readCategories(const QString &path)
 
 void BrickLink::TextImport::readItemTypes(const QString &path)
 {
-    parseXML(path, "CATALOG", "ITEM", [this](QDomElement e) {
+    XmlHelpers::ParseXML p(path, "CATALOG", "ITEM");
+    p.parse([this, &p](QDomElement e) {
         QScopedPointer<ItemType> itt(new ItemType);
-        char c = firstCharInString(elementText(e, "ITEMTYPE"));
+        char c = XmlHelpers::firstCharInString(p.elementText(e, "ITEMTYPE"));
 
         if (c == 'U')
             return;
 
         itt->m_id   = c;
-        itt->m_name = elementText(e, "ITEMTYPENAME");
+        itt->m_name = p.elementText(e, "ITEMTYPENAME");
 
         itt->m_picture_id        = (c == 'I') ? 'S' : c;
         itt->m_has_inventories   = false;
@@ -263,14 +207,15 @@ void BrickLink::TextImport::readItemTypes(const QString &path)
 
 void BrickLink::TextImport::readItems(const QString &path, const BrickLink::ItemType *itt)
 {
-    parseXML(path, "CATALOG", "ITEM", [this, itt](QDomElement e) {
+    XmlHelpers::ParseXML p(path, "CATALOG", "ITEM");
+    p.parse([this, &p, itt](QDomElement e) {
         QScopedPointer<Item> item(new Item);
-        item->m_id        = elementText(e, "ITEMID");
-        item->m_name      = elementText(e, "ITEMNAME");
+        item->m_id        = p.elementText(e, "ITEMID");
+        item->m_name      = p.elementText(e, "ITEMNAME");
         item->m_item_type = itt;
         item->m_categories.clear();
 
-        const Category *maincat = m_categories.value(elementText(e, "CATEGORY").toUInt());
+        const Category *maincat = m_categories.value(p.elementText(e, "CATEGORY").toUInt());
         if (!maincat)
             throw ParseException("item %1 has no category").arg(item->m_id);
         item->m_categories << maincat;
@@ -313,7 +258,7 @@ void BrickLink::TextImport::readItems(const QString &path, const BrickLink::Item
 #endif
 
         if (itt->hasYearReleased()) {
-            uint y = elementText(e, "ITEMYEAR").toUInt() - 1900;
+            uint y = p.elementText(e, "ITEMYEAR").toUInt() - 1900;
             item->m_year = ((y > 0) && (y < 255)) ? y : 0; // we only have 8 bits for the year
         } else {
             item->m_year = 0;
@@ -321,13 +266,13 @@ void BrickLink::TextImport::readItems(const QString &path, const BrickLink::Item
 
         if (itt->hasWeight()) {
             static QLocale c = QLocale::c();
-            item->m_weight = c.toFloat(elementText(e, "ITEMWEIGHT"));
+            item->m_weight = c.toFloat(p.elementText(e, "ITEMWEIGHT"));
         } else {
             item->m_weight = 0;
         }
 
         try {
-            item->m_color = m_colors.value(elementText(e, "IMAGECOLOR").toUInt());
+            item->m_color = m_colors.value(p.elementText(e, "IMAGECOLOR").toUInt());
         } catch (...) {
             item->m_color = nullptr;
         }
@@ -338,10 +283,11 @@ void BrickLink::TextImport::readItems(const QString &path, const BrickLink::Item
 
 void BrickLink::TextImport::readPartColorCodes(const QString &path)
 {
-    parseXML(path, "CODES", "ITEM", [this](QDomElement e) {
-        char itemTypeId = firstCharInString(elementText(e, "ITEMTYPE"));
-        const QString itemId = elementText(e, "ITEMID");
-        const QString colorId = elementText(e, "COLOR");
+    XmlHelpers::ParseXML p(path, "CODES", "ITEM");
+    p.parse([this, &p](QDomElement e) {
+        char itemTypeId = XmlHelpers::firstCharInString(p.elementText(e, "ITEMTYPE"));
+        const QString itemId = p.elementText(e, "ITEMID");
+        const QString colorId = p.elementText(e, "COLOR");
 
         if (const Item *itm = findItem(itemTypeId, itemId)) {
             bool found = false;
@@ -361,44 +307,6 @@ void BrickLink::TextImport::readPartColorCodes(const QString &path)
         }
     });
 }
-
-
-void BrickLink::TextImport::parseXML(const QString &path, const char *rootNodeName,
-                                     const char *elementNodeName,
-                                     std::function<void(QDomElement node)> callback)
-{
-    QFile f(path);
-    if (!f.open(QFile::ReadOnly))
-        throw ParseException(path, "could not open file: %1").arg(f.errorString());
-
-    QDomDocument doc;
-    QString emsg;
-    int eline = 0;
-    int ecolumn = 0;
-    if (!doc.setContent(&f, false, &emsg, &eline, &ecolumn)) {
-        throw ParseException(path, "%1 at line %2, column %3")
-                .arg(emsg).arg(eline).arg(ecolumn);
-    }
-
-    QDomElement root = doc.documentElement().toElement();
-    if (root.nodeName() != QLatin1String(rootNodeName)) {
-        throw ParseException(path, "expected root node %1, but got %2")
-                .arg(rootNodeName).arg(root.nodeName());
-    }
-
-    int nodeCount = 0;
-    for (QDomNode node = root.firstChild(); !node.isNull(); node = node.nextSibling()) {
-        ++nodeCount;
-        if (node.nodeName() == elementNodeName) {
-            try {
-                callback(node.toElement());
-            } catch (const ParseException &e) {
-                throw ParseException(path, e.what());
-            }
-        }
-    }
-}
-
 
 
 bool BrickLink::TextImport::importInventories(QVector<const Item *> &invs)
@@ -429,40 +337,55 @@ bool BrickLink::TextImport::readInventory(const Item *item)
     if (!f || !f->isOpen() || (f->fileTime(QFileDevice::FileModificationTime) < item->inventoryUpdated()))
         return false;
 
-    bool ok = false;
-    QString emsg;
-    int eline = 0, ecol = 0;
-    QDomDocument doc;
+    InvItemList invItems;
 
-    if (doc.setContent(f.data(), &emsg, &eline, &ecol)) {
-        QDomElement root = doc.documentElement();
+    try {
+        XmlHelpers::ParseXML p(f.take(), "INVENTORY", "ITEM");
+        p.parse([this, &p, item, &invItems](QDomElement e) {
+            char itemTypeId = XmlHelpers::firstCharInString(p.elementText(e, "ITEMTYPE"));
+            const QString itemId = p.elementText(e, "ITEMID");
+            uint colorId = p.elementText(e, "COLOR").toUInt();
+            int qty = p.elementText(e, "QTY").toInt();
+            bool extra = (p.elementText(e, "EXTRA") == QLatin1String("Y"));
+            bool counterPart = (p.elementText(e, "COUNTERPART") == QLatin1String("Y"));
+            bool alternate = (p.elementText(e, "ALTERNATE") == QLatin1String("Y"));
+            uint matchId = p.elementText(e, "MATCHID").toUInt();
 
-        const Core::ParseItemListXMLResult result = BrickLink::core()->parseItemListXML(doc.documentElement().toElement(), BrickLink::XMLHint_Inventory);
+            const Item *item = findItem(itemTypeId, itemId);
+            const Color *color = m_colors.value(colorId);
 
-        if (result.items) {
-            if (!result.invalidItemCount) {
-                for (const BrickLink::InvItem *ii : qAsConst(*result.items)) {
-                    if (!ii->item() || !ii->color() || !ii->quantity())
-                        continue;
+            if (!item || !color || !qty)
+                throw Exception("Unknown item- or color-id or 0 qty");
 
-                    BrickLink::AppearsInColor &vec = m_appears_in_hash[ii->item()][ii->color()];
-                    vec.append(QPair<int, const BrickLink::Item *>(ii->quantity(), item));
-                }
-                // the hash owns the items now
-                m_consists_of_hash.insert(item, *result.items);
-                ok = true;
-            }
-            delete result.items;
+            auto *ii = new InvItem(color, item);
+            ii->setQuantity(qty);
+            ii->setStatus(extra ? Status::Extra : Status::Include);
+            ii->setCounterPart(counterPart);
+            ii->setAlternate(alternate);
+            ii->setAlternateId(matchId);
+
+            invItems << ii;
+        });
+
+        for (const InvItem *ii : qAsConst(invItems)) {
+            AppearsInColor &vec = m_appears_in_hash[ii->item()][ii->color()];
+            vec.append(qMakePair(ii->quantity(), item));
         }
+        // the hash owns the items now
+        m_consists_of_hash.insert(item, invItems);
+        return true;
+
+    } catch (const Exception &) {
+        qDeleteAll(invItems);
+        return false;
     }
-    return ok;
 }
 
 void BrickLink::TextImport::readLDrawColors(const QString &path)
 {
     QFile f(path);
     if (!f.open(QFile::ReadOnly))
-        throw ParseException(path, "could not open file: %1").arg(f.errorString());
+        throw ParseException(&f, "could not open file");
 
     QTextStream in(&f);
     QString line;
@@ -508,7 +431,7 @@ void BrickLink::TextImport::readInventoryList(const QString &path)
 {
     QFile f(path);
     if (!f.open(QFile::ReadOnly))
-        throw ParseException(path, "could not open file: %1").arg(f.errorString());
+        throw ParseException(&f, "could not open file");
 
     QTextStream ts(&f);
     int line = 0;
@@ -520,13 +443,13 @@ void BrickLink::TextImport::readInventoryList(const QString &path)
         QStringList strs = line.split('\t');
 
         if (strs.count() < 2)
-            throw ParseException(path, "expected at least 2 fields in line %1").arg(line);
+            throw ParseException(&f, "expected at least 2 fields in line %1").arg(line);
 
-        char itemTypeId = firstCharInString(strs.at(0));
+        char itemTypeId = XmlHelpers::firstCharInString(strs.at(0));
         const QString itemId = strs.at(1);
 
         if (!itemTypeId || itemId.isEmpty())
-            throw ParseException(path, "expected a valid item-type and an item-id field in line %1").arg(line);
+            throw ParseException(&f, "expected a valid item-type and an item-id field in line %1").arg(line);
 
         if (const Item *itm = findItem(itemTypeId, itemId)) {
             auto t = time_t(0);   // 1.1.1970 00:00
@@ -559,7 +482,7 @@ void BrickLink::TextImport::readChangeLog(const QString &path)
 {
     QFile f(path);
     if (!f.open(QFile::ReadOnly))
-        throw ParseException(path, "could not open file: %1").arg(f.errorString());
+        throw ParseException(&f, "could not open file");
 
     QTextStream ts(&f);
     int line = 0;
@@ -571,10 +494,10 @@ void BrickLink::TextImport::readChangeLog(const QString &path)
         QStringList strs = line.split('\t');
 
         if (strs.count() < 7)
-            throw ParseException(path, "expected at least 7 fields in line %1").arg(line);
+            throw ParseException(&f, "expected at least 7 fields in line %1").arg(line);
 
         ChangeLogEntry::Type t;
-        char c =firstCharInString(strs.at(2));
+        char c = XmlHelpers::firstCharInString(strs.at(2));
 
         switch (c) {
         case 'I': t = ChangeLogEntry::ItemId; break;

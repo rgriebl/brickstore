@@ -259,8 +259,8 @@ void Application::updateTranslations()
 {
     QString locale = Config::inst()->language();
     if (locale.isEmpty())
-        locale = QLocale::system().name();
-    QLocale::setDefault(QLocale(locale));
+        locale = QLocale::system().name().left(2);
+//    QLocale::setDefault(QLocale(locale));
 
     if (m_trans_qt)
         QCoreApplication::removeTranslator(m_trans_qt.data());

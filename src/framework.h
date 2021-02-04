@@ -36,9 +36,9 @@ class TaskLinksWidget;
 class TaskAppearsInWidget;
 class Document;
 class AddItemDialog;
-class ItemDetailPopup;
 class ScriptManager;
 class ImportInventoryDialog;
+class ImportOrderDialog;
 
 
 class FrameWork : public QMainWindow
@@ -112,10 +112,6 @@ private:
     void setBrickLinkUpdateIntervals();
 
     bool checkBrickLinkLogin();
-    void createAddItemDialog();
-
-private:
-    enum { MaxRecentFiles = 9 };
 
 public:
     QAction *findAction(const char *name);
@@ -156,7 +152,7 @@ private:
     QMenu *m_contextmenu;
     QPointer<AddItemDialog> m_add_dialog;
     QPointer<ImportInventoryDialog> m_importinventory_dialog;
-    QPointer<ItemDetailPopup> m_details;
+    QPointer<ImportOrderDialog> m_importorder_dialog;
     QTimer *m_filter_delay = nullptr;
     bool m_running;
     UndoGroup *m_undogroup;

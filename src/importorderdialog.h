@@ -18,32 +18,37 @@
 #include "bricklinkfwd.h"
 #include "ui_importorderdialog.h"
 
+class Transfer;
+class TransferJob;
+class OrderModel;
+
 
 class ImportOrderDialog : public QDialog, private Ui::ImportOrderDialog
 {
     Q_OBJECT
 public:
     ImportOrderDialog(QWidget *parent = nullptr);
+    ~ImportOrderDialog() override;
 
-    QVector<QPair<BrickLink::Order *, BrickLink::InvItemList *>> orders() const;
+    void updateOrders();
 
 protected:
-    virtual void accept();
     virtual void changeEvent(QEvent *e);
+    void languageChange();
 
 protected slots:
-    void checkId();
     void checkSelected();
     void activateItem();
+    void updateStatusLabel();
 
-    void start();
-    void download();
+    void downloadFinished(TransferJob *job);
+    void importOrders();
 
 private:
-    BrickLink::OrderType orderType() const;
-
-    static bool  s_last_by_number;
-    static QDate s_last_from;
-    static QDate s_last_to;
-    static int   s_last_type;
+    Transfer *m_trans;
+    QPushButton *w_import;
+    QDateTime m_lastUpdated;
+    QVector<TransferJob *> m_currentUpdate;
+    QVector<TransferJob *> m_orderDownloads;
+    OrderModel *m_orderModel;
 };

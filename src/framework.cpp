@@ -55,6 +55,7 @@
 #include "messagebox.h"
 #include "window.h"
 #include "document.h"
+#include "documentio.h"
 #include "config.h"
 #include "currency.h"
 #include "progresscircle.h"
@@ -73,6 +74,7 @@
 #include "framework.h"
 #include "stopwatch.h"
 #include "importinventorydialog.h"
+#include "importorderdialog.h"
 #include "historylineedit.h"
 
 #include "scriptmanager.h"
@@ -87,13 +89,17 @@ enum {
 };
 
 enum {
-    NeedLotId = 0x01,
-    NeedInventory = 0x02,
-    NeedSubCondition = 0x04,
-    NeedNetwork = 0x08,
-    NeedModification = 0x10,
-    NeedDocument = 0x20,
-    NeedQuantity = 0x40,
+    NeedLotId        = 0x0001,
+    NeedInventory    = 0x0002,
+    NeedSubCondition = 0x0004,
+    NeedQuantity     = 0x0008,
+
+    NeedItemMask     = 0x000f,
+
+    NeedDocument     = 0x0010,
+    NeedModification = 0x0020,
+    NeedItems        = 0x0040,
+    NeedNetwork      = 0x0100,
 
     // the upper 16 bits (0xffff0000) are reserved for NeedSelection()
 };
@@ -455,7 +461,6 @@ FrameWork::FrameWork(QWidget *parent)
                                       "edit_stockroom",
                                       "edit_reserved",
                                       "-",
-                                      "edit_reset_diffs",
                                       "edit_copyremarks",
                                       "-",
                                       "bricklink_catalog",
@@ -473,8 +478,6 @@ FrameWork::FrameWork(QWidget *parent)
                                       "-",
                                       "view_simple_mode",
                                       "view_show_input_errors",
-                                      "-",
-                                      "view_difference_mode",
                                       "-",
                                       "view_column_layout_save",
                                       "view_column_layout_manage",
@@ -589,9 +592,6 @@ FrameWork::FrameWork(QWidget *parent)
     } else {
         MessageBox::warning(nullptr, { }, tr("Could not load the BrickLink database files.<br /><br />The program is not functional without these files."));
     }
-
-    m_add_dialog = nullptr;
-    //createAddItemDialog();
 
     m_running = true;
 
@@ -784,7 +784,6 @@ void FrameWork::translateActions()
         { "edit_mergeitems",                tr("Consolidate Items..."),               tr("Ctrl+L", "Edit|Consolidate Items") },
         { "edit_partoutitems",              tr("Part out Item..."),                   },
         { "edit_setmatch",                  tr("Match Items against Set Inventories...") },
-        { "edit_reset_diffs",               tr("Reset Differences"),                  },
         { "edit_copyremarks",               tr("Copy Remarks from Document..."),      },
         { "edit_select_all",                tr("Select All"),                         QKeySequence::SelectAll },
         { "edit_filter_from_selection",     tr("Create a Filter from the Selection"), },
@@ -797,7 +796,6 @@ void FrameWork::translateActions()
         { "view_fullscreen",                tr("Full Screen"),                        QKeySequence::FullScreen },
         { "view_simple_mode",               tr("Buyer/Collector Mode"),               },
         { "view_show_input_errors",         tr("Show Input Errors"),                  },
-        { "view_difference_mode",           tr("Difference Mode"),                    },
         { "view_column_layout_save",        tr("Save Column Layout..."),              },
         { "view_column_layout_manage",      tr("Manage Column Layouts..."),           },
         { "view_column_layout_load",        tr("Load Column Layout"),                 },
@@ -900,6 +898,7 @@ FrameWork::~FrameWork()
 
     delete m_add_dialog.data();
     delete m_importinventory_dialog.data();
+    delete m_importorder_dialog.data();
 
     delete m_workspace;
     s_inst = nullptr;
@@ -1170,10 +1169,10 @@ void FrameWork::createActions()
     QMenu *m;
 
     (void) newQAction(this, "document_new", 0, false, this, [this]() {
-        createWindow(Document::fileNew());
+        createWindow(DocumentIO::create());
     });
     (void) newQAction(this, "document_open", 0, false, this, [this]() {
-        createWindow(Document::fileOpen());
+        createWindow(DocumentIO::open());
     });
 
     auto rm = new RecentMenu(this);
@@ -1185,40 +1184,42 @@ void FrameWork::createActions()
 
     (void) newQAction(this, "document_save", NeedDocument | NeedModification);
     (void) newQAction(this, "document_save_as", NeedDocument);
-    (void) newQAction(this, "document_print", NeedDocument);
-    (void) newQAction(this, "document_print_pdf", NeedDocument);
+    (void) newQAction(this, "document_print", NeedDocument | NeedItems);
+    (void) newQAction(this, "document_print_pdf", NeedDocument | NeedItems);
 
     m = newQMenu(this, "document_import");
     m->addAction(newQAction(this, "document_import_bl_inv", 0, false, this, [this]() {
         fileImportBrickLinkInventory(nullptr);
     }));
     m->addAction(newQAction(this, "document_import_bl_xml", 0, false, this, [this]() {
-        createWindow(Document::fileImportBrickLinkXML());
+        createWindow(DocumentIO::importBrickLinkXML());
     }));
     m->addAction(newQAction(this, "document_import_bl_order", NeedNetwork, false, this, [this]() {
         if (checkBrickLinkLogin()) {
-            foreach (Document *doc, Document::fileImportBrickLinkOrders())
-                createWindow(doc);
+            if (!m_importorder_dialog)
+                m_importorder_dialog = new ImportOrderDialog(this);
+            m_importorder_dialog->exec();
         }
     }));
     m->addAction(newQAction(this, "document_import_bl_store_inv", NeedNetwork, false, this, [this]() {
         if (checkBrickLinkLogin())
-            createWindow(Document::fileImportBrickLinkStore());
+            createWindow(DocumentIO::importBrickLinkStore());
     }));
     m->addAction(newQAction(this, "document_import_bl_cart", NeedNetwork, false, this, [this]() {
-        createWindow(Document::fileImportBrickLinkCart());
+        if (checkBrickLinkLogin())
+            createWindow(DocumentIO::importBrickLinkCart());
     }));
     m->addAction(newQAction(this, "document_import_ldraw_model", 0, false, this, [this]() {
-        createWindow(Document::fileImportLDrawModel());
+        createWindow(DocumentIO::importLDrawModel());
     }));
 
 
     m = newQMenu(this, "document_export");
-    m->addAction(newQAction(this, "document_export_bl_xml", NeedDocument));
-    m->addAction(newQAction(this, "document_export_bl_xml_clip", NeedDocument));
-    m->addAction(newQAction(this, "document_export_bl_update_clip", NeedDocument));
-    m->addAction(newQAction(this, "document_export_bl_invreq_clip", NeedDocument));
-    m->addAction(newQAction(this, "document_export_bl_wantedlist_clip", NeedDocument));
+    m->addAction(newQAction(this, "document_export_bl_xml", NeedDocument | NeedItems));
+    m->addAction(newQAction(this, "document_export_bl_xml_clip", NeedDocument | NeedItems));
+    m->addAction(newQAction(this, "document_export_bl_update_clip", NeedDocument | NeedItems));
+    m->addAction(newQAction(this, "document_export_bl_invreq_clip", NeedDocument | NeedItems));
+    m->addAction(newQAction(this, "document_export_bl_wantedlist_clip", NeedDocument | NeedItems));
 
     (void) newQAction(this, "document_close", NeedDocument);
 
@@ -1248,10 +1249,10 @@ void FrameWork::createActions()
     (void) newQAction(this, "edit_mergeitems", NeedSelection(2));
     (void) newQAction(this, "edit_partoutitems", NeedInventory | NeedSelection(1) | NeedQuantity);
     (void) newQAction(this, "edit_setmatch", NeedDocument);
-    (void) newQAction(this, "edit_reset_diffs", NeedSelection(1));
-    (void) newQAction(this, "edit_copyremarks", NeedDocument);
-    (void) newQAction(this, "edit_select_all", NeedDocument);
-    (void) newQAction(this, "edit_select_none", NeedDocument);
+//    (void) newQAction(this, "edit_reset_diffs", NeedSelection(1));
+    (void) newQAction(this, "edit_copyremarks", NeedDocument | NeedItems);
+    (void) newQAction(this, "edit_select_all", NeedDocument | NeedItems);
+    (void) newQAction(this, "edit_select_none", NeedDocument | NeedItems);
     (void) newQAction(this, "edit_filter_from_selection", NeedSelection(1));
     (void) newQAction(this, "edit_filter_focus", NeedDocument, false, this, [this]() {
         m_filter->setFocus();
@@ -1349,7 +1350,6 @@ void FrameWork::createActions()
     });
     (void) newQAction(this, "view_simple_mode", 0, true, Config::inst(), &Config::setSimpleMode);
     (void) newQAction(this, "view_show_input_errors", 0, true, Config::inst(), &Config::setShowInputErrors);
-    (void) newQAction(this, "view_difference_mode", 0, true);
     (void) newQAction(this, "view_column_layout_save", NeedDocument, false);
     (void) newQAction(this, "view_column_layout_manage", 0, false, this, &FrameWork::manageLayouts);
     auto lclm = newQMenu<LoadColumnLayoutMenu>(this, "view_column_layout_load", NeedDocument);
@@ -1375,7 +1375,7 @@ void FrameWork::createActions()
 
 void FrameWork::openDocument(const QString &file)
 {
-    createWindow(Document::fileOpen(file));
+    createWindow(DocumentIO::open(file));
 }
 
 void FrameWork::fileImportBrickLinkInventory(const BrickLink::Item *item, int quantity,
@@ -1392,7 +1392,7 @@ void FrameWork::fileImportBrickLinkInventory(const BrickLink::Item *item, int qu
         }
     }
 
-    createWindow(Document::fileImportBrickLinkInventory(item, quantity, condition));
+    createWindow(DocumentIO::importBrickLinkInventory(item, quantity, condition));
 }
 
 bool FrameWork::checkBrickLinkLogin()
@@ -1633,8 +1633,6 @@ void FrameWork::connectWindow(QWidget *w)
                    this, &FrameWork::titleUpdate);
         disconnect(doc, &Document::modificationChanged,
                    this, &FrameWork::modificationUpdate);
-        disconnect(doc, &Document::statisticsChanged,
-                   this, &FrameWork::statisticsUpdate);
         disconnect(m_current_window.data(), &Window::selectionChanged,
                    this, &FrameWork::selectionUpdate);
         if (m_filter) {
@@ -1656,8 +1654,6 @@ void FrameWork::connectWindow(QWidget *w)
                 this, &FrameWork::titleUpdate);
         connect(doc, &Document::modificationChanged,
                 this, &FrameWork::modificationUpdate);
-        connect(doc, &Document::statisticsChanged,
-                this, &FrameWork::statisticsUpdate);
         connect(window, &Window::selectionChanged,
                 this, &FrameWork::selectionUpdate);
         if (m_filter) {
@@ -1669,8 +1665,6 @@ void FrameWork::connectWindow(QWidget *w)
 
         m_undogroup->setActiveStack(doc->undoStack());
 
-        // update per-document action states
-        findAction("view_difference_mode")->setChecked(window->isDifferenceMode());
 
         if (auto a = findAction("edit_filter_focus"))
             m_filter->setToolTip(Utility::toolTipLabel(a->text(), a->shortcut(),
@@ -1720,27 +1714,34 @@ void FrameWork::updateActions(const Document::ItemList &selection)
         if (flags & NeedDocument) {
             b = b && m_current_window;
 
-            quint8 minSelection = (flags >> 24) & 0xff;
-            quint8 maxSelection = (flags >> 16) & 0xff;
+            if (b) {
+                if (flags & NeedItems)
+                    b = b && (m_current_window->document()->rowCount() > 0);
 
-            if (minSelection)
-                b = b && (cnt >= minSelection);
-            if (maxSelection)
-                b = b && (cnt <= maxSelection);
+                quint8 minSelection = (flags >> 24) & 0xff;
+                quint8 maxSelection = (flags >> 16) & 0xff;
+
+                if (minSelection)
+                    b = b && (cnt >= minSelection);
+                if (maxSelection)
+                    b = b && (cnt <= maxSelection);
+            }
         }
 
-        foreach (Document::Item *item, selection) {
-            if (flags & NeedLotId)
-                b = b && (item->lotId() != 0);
-            if (flags & NeedInventory)
-                b = b && (item->item() && item->item()->hasInventory());
-            if (flags & NeedQuantity)
-                b = b && (item->quantity() != 0);
-            if (flags & NeedSubCondition)
-                b = b && (item->item() && item->itemType() && item->item()->itemType()->hasSubConditions());
+        if (flags & NeedItemMask) {
+            foreach (Document::Item *item, selection) {
+                if (flags & NeedLotId)
+                    b = b && (item->lotId() != 0);
+                if (flags & NeedInventory)
+                    b = b && (item->item() && item->item()->hasInventory());
+                if (flags & NeedQuantity)
+                    b = b && (item->quantity() != 0);
+                if (flags & NeedSubCondition)
+                    b = b && (item->item() && item->itemType() && item->item()->itemType()->hasSubConditions());
 
-            if (!b)
-                break;
+                if (!b)
+                    break;
+            }
         }
         a->setEnabled(b);
     }
@@ -1950,7 +1951,7 @@ void FrameWork::cancelAllTransfers(bool force)
     }
 }
 
-void FrameWork::createAddItemDialog()
+void FrameWork::showAddItemDialog()
 {
     if (!m_add_dialog) {
         m_add_dialog = new AddItemDialog();
@@ -1964,11 +1965,6 @@ void FrameWork::createAddItemDialog()
             activateWindow();
         });
     }
-}
-
-void FrameWork::showAddItemDialog()
-{
-    createAddItemDialog();
 
     if (m_add_dialog->isVisible()) {
         m_add_dialog->raise();

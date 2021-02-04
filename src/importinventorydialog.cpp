@@ -19,7 +19,6 @@
 
 #include "bricklink.h"
 #include "config.h"
-#include "import.h"
 #include "progressdialog.h"
 #include "framework.h"
 #include "importinventorydialog.h"

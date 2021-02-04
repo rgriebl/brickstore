@@ -35,6 +35,7 @@
 #include "utility.h"
 #include "currency.h"
 #include "document.h"
+#include "documentio.h"
 #include "window.h"
 #include "headerview.h"
 #include "documentdelegate.h"
@@ -330,7 +331,8 @@ Window::Window(Document *doc, QWidget *parent)
             this, &Window::updateCaption);
     connect(m_doc, &Document::modificationChanged,
             this, &Window::updateCaption);
-
+    connect(m_doc, &Document::differenceModeChanged,
+            this, &Window::updateDifferenceMode);
     connect(m_doc, &Document::dataChanged,
             this, &Window::documentItemsChanged);
 
@@ -340,14 +342,13 @@ Window::Window(Document *doc, QWidget *parent)
     w_header->setSectionInternal(Document::QuantityOrig, true);
     w_header->setSectionInternal(Document::QuantityDiff, true);
 
-    setDifferenceMode(false);
-
     on_view_column_layout_list_load("user-default");
 
     if (m_doc->hasGuiState()) {
         parseGuiStateXML(m_doc->guiState());
         m_doc->clearGuiState();
     }
+    updateDifferenceMode();
     setSimpleMode(Config::inst()->simpleMode());
 
     updateErrorMask();
@@ -427,21 +428,6 @@ void Window::setSimpleMode(bool b)
     }
 
     updateErrorMask();
-}
-
-bool Window::isDifferenceMode() const
-{
-    return m_diff_mode;
-}
-
-void Window::setDifferenceMode(bool b)
-{
-    m_diff_mode = b;
-
-    w_header->setSectionAvailable(Document::PriceOrig, b);
-    w_header->setSectionAvailable(Document::PriceDiff, b);
-    w_header->setSectionAvailable(Document::QuantityOrig, b);
-    w_header->setSectionAvailable(Document::QuantityDiff, b);
 }
 
 void Window::ensureLatestVisible()
@@ -708,9 +694,6 @@ QDomElement Window::createGuiStateXML()
     root.setAttribute("Application", "BrickStore");
     root.setAttribute("Version", version);
 
-    if (isDifferenceMode())
-        root.appendChild(doc.createElement("DifferenceMode"));
-
     auto cl = doc.createElement("ColumnLayout");
     cl.appendChild(doc.createCDATASection(w_header->saveLayout().toBase64()));
     root.appendChild(cl);
@@ -730,9 +713,7 @@ bool Window::parseGuiStateXML(const QDomElement &root)
                 continue;
             QString tag = n.toElement().tagName();
 
-            if (tag == "DifferenceMode")
-                setDifferenceMode(true);
-            else if (tag == "ColumnLayout")
+            if (tag == "ColumnLayout")
                 w_header->restoreLayout(QByteArray::fromBase64(n.toElement().text().toLatin1()));
         }
     }
@@ -795,14 +776,6 @@ void Window::on_edit_filter_from_selection_triggered()
         }
     }
 }
-
-void Window::on_edit_reset_diffs_triggered()
-{
-    WindowProgress wp(w_list);
-
-    m_doc->resetDifferences(selection());
-}
-
 
 void Window::on_edit_status_include_triggered()
 {
@@ -1723,7 +1696,7 @@ void Window::subtractItems(const BrickLink::InvItemList &items)
                 newitem->setItem(item);
                 newitem->setColor(color);
                 newitem->setCondition(cond);
-                newitem->setOrigQuantity(0);
+                ///////newitem->setOrigQuantity(0);
                 newitem->setQuantity(-qty);
 
                 m_doc->appendItem(newitem);
@@ -1957,11 +1930,6 @@ void Window::on_view_column_layout_list_load(const QString &layoutId)
     }
 }
 
-void Window::on_view_difference_mode_toggled(bool b)
-{
-    setDifferenceMode(b);
-}
-
 void Window::on_document_print_triggered()
 {
     print(false);
@@ -2053,7 +2021,7 @@ void Window::print(bool as_pdf)
 void Window::on_document_save_triggered()
 {
     m_doc->setGuiState(createGuiStateXML());
-    m_doc->fileSave();
+    DocumentIO::save(m_doc);
     m_doc->clearGuiState();
     deleteAutosave();
 }
@@ -2061,7 +2029,7 @@ void Window::on_document_save_triggered()
 void Window::on_document_save_as_triggered()
 {
     m_doc->setGuiState(createGuiStateXML());
-    m_doc->fileSaveAs();
+    DocumentIO::saveAs(m_doc);
     m_doc->clearGuiState();
     deleteAutosave();
 }
@@ -2071,7 +2039,7 @@ void Window::on_document_export_bl_xml_triggered()
     Document::ItemList items = exportCheck();
 
     if (!items.isEmpty())
-        m_doc->fileExportBrickLinkXML(items);
+        DocumentIO::exportBrickLinkXML(items);
 }
 
 void Window::on_document_export_bl_xml_clip_triggered()
@@ -2079,7 +2047,7 @@ void Window::on_document_export_bl_xml_clip_triggered()
     Document::ItemList items = exportCheck();
 
     if (!items.isEmpty())
-        m_doc->fileExportBrickLinkXMLClipboard(items);
+        DocumentIO::exportBrickLinkXMLClipboard(items);
 }
 
 void Window::on_document_export_bl_update_clip_triggered()
@@ -2087,7 +2055,7 @@ void Window::on_document_export_bl_update_clip_triggered()
     Document::ItemList items = exportCheck();
 
     if (!items.isEmpty())
-        m_doc->fileExportBrickLinkUpdateClipboard(items);
+        DocumentIO::exportBrickLinkUpdateClipboard(m_doc, items);
 }
 
 void Window::on_document_export_bl_invreq_clip_triggered()
@@ -2095,7 +2063,7 @@ void Window::on_document_export_bl_invreq_clip_triggered()
     Document::ItemList items = exportCheck();
 
     if (!items.isEmpty())
-        m_doc->fileExportBrickLinkInvReqClipboard(items);
+        DocumentIO::exportBrickLinkInvReqClipboard(items);
 }
 
 void Window::on_document_export_bl_wantedlist_clip_triggered()
@@ -2103,7 +2071,7 @@ void Window::on_document_export_bl_wantedlist_clip_triggered()
     Document::ItemList items = exportCheck();
 
     if (!items.isEmpty())
-        m_doc->fileExportBrickLinkWantedListClipboard(items);
+        DocumentIO::exportBrickLinkWantedListClipboard(items);
 }
 
 Document::ItemList Window::exportCheck() const
@@ -2172,6 +2140,17 @@ void Window::updateSelection()
         });
     }
     m_delayedSelectionUpdate->start();
+}
+
+void Window::updateDifferenceMode()
+{
+    bool b = document()->isDifferenceModeActive();
+    setWindowIcon(b ? QIcon::fromTheme("mode2") : QIcon());
+
+    w_header->setSectionAvailable(Document::PriceOrig, b);
+    w_header->setSectionAvailable(Document::PriceDiff, b);
+    w_header->setSectionAvailable(Document::QuantityOrig, b);
+    w_header->setSectionAvailable(Document::QuantityDiff, b);
 }
 
 void Window::setSelection(const Document::ItemList &lst)
@@ -2258,16 +2237,15 @@ void Window::autosave() const
     QByteArray ba;
     QDataStream ds(&ba, QIODevice::WriteOnly);
     ds << QByteArray(autosaveMagic)
-       << qint32(1) // version
+       << qint32(3) // version
        << doc->title()
        << doc->fileName()
        << doc->currencyCode()
-       << isDifferenceMode()
        << currentColumnLayout()
        << qint32(doc->items().count());
 
     for (auto item : items)
-        ds << *item;
+        item->save(ds);
 
     ds << QByteArray(autosaveMagic);
 
@@ -2295,28 +2273,28 @@ const QVector<Window *> Window::processAutosaves(AutosaveAction action)
             QString savedTitle;
             QString savedFileName;
             QString savedCurrencyCode;
-            bool savedDifferenceMode;
             QByteArray savedColumnLayout;
             qint32 count = 0;
 
             QDataStream ds(&f);
             ds >> magic >> version >> savedTitle >> savedFileName >> savedCurrencyCode
-                    >> savedDifferenceMode >> savedColumnLayout >> count;
+                    >> savedColumnLayout >> count;
 
-            if ((count > 0) && (magic == QByteArray(autosaveMagic)) && (version == 1)) {
+            if ((count > 0) && (magic == QByteArray(autosaveMagic)) && (version == 3)) {
                 BrickLink::InvItemList items;
 
                 for (int i = 0; i < count; ++i) {
-                    auto *item = new BrickLink::InvItem();
-                    ds >> *item;
-                    items.append(item);
+                    if (auto item = BrickLink::InvItem::restore(ds))
+                        items.append(item);
                 }
                 ds >> magic;
 
                 if (magic == QByteArray(autosaveMagic)) {
                     QString restoredTag = tr("RESTORED", "Tag for document restored from autosave");
 
-                    auto doc = new Document(items, savedCurrencyCode);  // we own the items
+                    auto doc = new Document(items, savedCurrencyCode);  // Document owns the items now
+                    items.clear();
+
                     if (!savedFileName.isEmpty()) {
                         QFileInfo fi(savedFileName);
                         QString newFileName = fi.dir().filePath(restoredTag % u" " % fi.fileName());
@@ -2326,11 +2304,10 @@ const QVector<Window *> Window::processAutosaves(AutosaveAction action)
                     }
                     auto win = new Window(doc);
                     win->w_header->restoreLayout(savedColumnLayout);
-                    win->setDifferenceMode(savedDifferenceMode);
 
                     doc->setGuiStateModified(true); // not really the UI state
                     if (!savedFileName.isEmpty())
-                        doc->fileSave();
+                        DocumentIO::save(doc);
 
                     restored.append(win);
                 }

@@ -43,8 +43,14 @@
 QVector<QColor>                 DocumentDelegate::s_shades;
 QCache<quint64, QPixmap>        DocumentDelegate::s_status_cache;
 QCache<quint64, QPixmap>        DocumentDelegate::s_tag_cache;
+QCache<quint64, QPixmap>        DocumentDelegate::s_tagicon_cache;
 QCache<int, QPixmap>            DocumentDelegate::s_stripe_cache;
 QCache<DocumentDelegate::TextLayoutCacheKey, QTextLayout> DocumentDelegate::s_textLayoutCache(5000);
+
+static const quint64 updatedWarningMask = 0ULL
+        | (1ULL << Document::PartNo)
+        | (1ULL << Document::Color)
+        | (1ULL << Document::Reserved);
 
 
 // we can't use eventFilter() from anything derived from QAbstractItemDelegate:
@@ -165,9 +171,11 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
     if (!idx.isValid())
         return;
 
-    Document::Item *it = m_view->item(idx);
+    const Document::Item *it = m_view->item(idx);
     if (!it)
         return;
+    const Document::Item *base = m_doc->differenceBaseItem(it);
+    auto itemFlags = m_doc->itemFlags(it);
 
     p->save();
     auto restorePainter = qScopeGuard([p] { p->restore(); });
@@ -226,11 +234,29 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
     int margin = 2;
 
     struct Tag {
-        QColor foreground;
-        QColor background;
+        QColor foreground { Qt::transparent };
+        QColor background { Qt::transparent };
         QString text;
-        bool bold;
-    } tag = { QColor(), QColor(), QString(), false };
+        bool bold = false;
+        QPixmap *icon = nullptr;
+    } tag;
+
+    if (itemFlags.second & (1ULL << idx.column())) {
+        bool warn = (itemFlags.second & updatedWarningMask & (1ULL << idx.column()));
+
+        qint32 s = option.fontMetrics.height() / 10 * 8;
+        quint64 key = (warn ? 1ULL << 32 : 0ULL) | s;
+
+        QPixmap *pix = s_tagicon_cache[key];
+        if (!pix) {
+            QIcon icon = warn ? QIcon::fromTheme("vcs-conflicting-small")
+                              : QIcon::fromTheme("vcs-locally-modified-small");
+            pix = new QPixmap(icon.pixmap(s, QIcon::Normal, QIcon::On));
+            if (!s_tagicon_cache.insert(key, pix))
+                pix = nullptr;
+        }
+        tag.icon = pix;
+    }
 
     QImage image;
     QString str = idx.model()->data(idx, Qt::DisplayRole).toString();
@@ -256,9 +282,9 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
             break;
 
         case Document::QuantityDiff:
-            if (it->origQuantity() < it->quantity())
+            if (base && (base->quantity() < it->quantity()))
                 bg = QColor::fromRgbF(0, 1, 0, 0.3);
-            else if (it->origQuantity() > it->quantity())
+            else if (base && (base->quantity() > it->quantity()))
                 bg = QColor::fromRgbF(1, 0, 0, 0.3);
             break;
 
@@ -267,13 +293,13 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
             fg.setAlphaF(0.5);
             break;
 
-        case Document::PriceDiff:
-            if (it->origPrice() < it->price())
+        case Document::PriceDiff: {
+            if (base && (base->price() < it->price()))
                 bg = QColor::fromRgbF(0, 1, 0, 0.3);
-            else if (it->origPrice() > it->price())
+            else if (base && (base->price() > it->price()))
                 bg = QColor::fromRgbF(1, 0, 0, 0.3);
             break;
-
+        }
         case Document::Total:
             bg = QColor::fromRgbF(1, 1, 0, 0.1);
             break;
@@ -427,7 +453,6 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         key.s.i1 = itw;
         key.s.i2 = tag.background.rgba();
 
-        QPixmap noCacheFallbackPix;
         QPixmap *pix = s_tag_cache[key.q];
         if (!pix) {
             pix = new QPixmap(itw, itw);
@@ -441,25 +466,37 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
 
             pixp.fillRect(pix->rect(), grad);
             pixp.end();
-            noCacheFallbackPix = *pix;
             if (!s_tag_cache.insert(key.q, pix))
-                pix = &noCacheFallbackPix;
+                pix = nullptr;
         }
 
-        int pw = qMin(pix->width(), option.rect.width());
-        int ph = qMin(pix->height(), option.rect.height());
+        if (pix) {
+            int pw = qMin(pix->width(), option.rect.width());
+            int ph = qMin(pix->height(), option.rect.height());
 
-        p->drawPixmap(option.rect.right() - pw + 1, option.rect.bottom() - ph + 1, *pix,
-                      pix->width() - pw, pix->height() - ph, pw, ph);
-        p->setPen(tag.foreground);
-        QFont oldfont = p->font();
-        p->setFont(font);
-        p->drawText(option.rect.adjusted(0, 0, -1, -1), Qt::AlignRight | Qt::AlignBottom, tag.text);
-        p->setFont(oldfont);
+            p->drawPixmap(option.rect.right() - pw + 1, option.rect.bottom() - ph + 1, *pix,
+                          pix->width() - pw, pix->height() - ph, pw, ph);
+        }
+        if (!tag.text.isEmpty()) {
+            p->setPen(tag.foreground);
+            QFont oldfont = p->font();
+            p->setFont(font);
+            p->drawText(option.rect.adjusted(0, 0, -1, -1), Qt::AlignRight | Qt::AlignBottom, tag.text);
+            p->setFont(oldfont);
+        }
+    }
+    if (tag.icon) {
+        int s = tag.icon->size().height();
+
+        QRect r { option.rect.topLeft(), QSize(s, s) };
+        if (align & Qt::AlignLeft)
+            r.moveRight(option.rect.right());
+        p->setOpacity(0.5);
+        p->drawPixmap(r, *tag.icon);
+        p->setOpacity(1);
     }
 
-
-    if (m_doc->itemErrors(it) & (1ULL << idx.column())) {
+    if (itemFlags.first & (1ULL << idx.column())) {
         p->setPen(QColor::fromRgbF(1, 0, 0, 0.75));
         p->drawRect(QRectF(x+.5, y+.5, w-1, h-1));
         p->setPen(QColor::fromRgbF(1, 0, 0, 0.50));
@@ -832,7 +869,8 @@ void DocumentDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionV
     editor->setGeometry(option.rect);
 }
 
-bool DocumentDelegate::helpEvent(QHelpEvent *event, QAbstractItemView *view, const QStyleOptionViewItem &option, const QModelIndex &idx)
+bool DocumentDelegate::helpEvent(QHelpEvent *event, QAbstractItemView *view,
+                                 const QStyleOptionViewItem &option, const QModelIndex &idx)
 {
     if (!event || !view || (event->type() != QEvent::ToolTip))
         return QItemDelegate::helpEvent(event, view, option, idx);
@@ -842,9 +880,35 @@ bool DocumentDelegate::helpEvent(QHelpEvent *event, QAbstractItemView *view, con
         if (it && it->item())
             BrickLink::ToolTip::inst()->show(it->item(), nullptr, event->globalPos(), view);
     } else {
+        QString updatedTip;
+        if (m_doc->isDifferenceModeActive()) {
+            Document::Item *item = m_view->item(idx);
+            auto base = m_doc->differenceBaseItem(item);
+
+            if (base && item) {
+                auto updated = m_doc->itemFlags(item).second;
+                if (updated & (1ULL << idx.column())) {
+                    updatedTip = tr("The original value of this field was:") % u"<br><b>"
+                            % m_doc->dataForDisplayRole(base, Document::Field(idx.column()), idx.row())
+                            % u"</b>";
+
+                    if (updated & updatedWarningMask & (1ULL << idx.column())) {
+                        updatedTip = updatedTip % u"<br><br>" %
+                                tr("This change cannot be applied via BrickLink's Mass-Upload mechanism!");
+                    }
+                }
+            }
+        }
+
         QString text = idx.data(Qt::DisplayRole).toString();
         QString toolTip = idx.data(Qt::ToolTipRole).toString();
         quint64 elideHash = quint64(idx.row()) << 32 | quint64(idx.column());
+        if (!updatedTip.isEmpty()) {
+            if (toolTip.isEmpty())
+                toolTip = updatedTip;
+            else
+                toolTip = toolTip % u"<br><br>" % updatedTip;
+        }
         if ((text != toolTip) || m_elided.contains(elideHash)) {
             if (!QToolTip::isVisible() || (QToolTip::text() != toolTip))
                 QToolTip::showText(event->globalPos(), toolTip, view, option.rect);

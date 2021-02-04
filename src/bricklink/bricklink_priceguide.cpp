@@ -70,7 +70,7 @@ void BrickLink::PriceGuide::saveToDisk()
 
     if (f && f->isOpen()) {
         QTextStream ts(f.data());
-        QLocale c = QLocale::c();
+        static QLocale c = QLocale::c();
 
         ts << "# Price Guide for part #" << m_item->id() << " (" << m_item->name() << "), color #" << m_color->id() << " (" << m_color->name() << ")\n";
         ts << "# last update: " << m_fetched.toString() << "\n#\n";
@@ -117,7 +117,7 @@ void BrickLink::PriceGuide::parse(const QByteArray &ba)
 
     QTextStream ts(ba);
     QString line;
-    QLocale c = QLocale::c();
+    static QLocale c = QLocale::c();
 
     while (!(line = ts.readLine()).isNull()) {
         if (line.isEmpty() || (line[0] == '#') || (line[0] == '\r'))         // skip comments fast
@@ -165,7 +165,7 @@ void BrickLink::PriceGuide::parse(const QByteArray &ba)
 void BrickLink::PriceGuide::parseHtml(const QByteArray &ba)
 {
     static const QRegularExpression re(R"(<B>([A-Za-z-]*?): </B><.*?> (\d+) <.*?> (\d+) <.*?> US \$([0-9.]+) <.*?> US \$([0-9.]+) <.*?> US \$([0-9.]+) <.*?> US \$([0-9.]+) <)");
-    QLocale c = QLocale::c();
+    static QLocale c = QLocale::c();
 
     QString s = QString::fromUtf8(ba).replace("&nbsp;", " ");
 

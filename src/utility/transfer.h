@@ -130,7 +130,7 @@ class Transfer : public QObject
 {
     Q_OBJECT
 public:
-    Transfer();
+    Transfer(QObject *parent = nullptr);
     ~Transfer() override;
 
     bool retrieve(TransferJob *job, bool highPriority = false);

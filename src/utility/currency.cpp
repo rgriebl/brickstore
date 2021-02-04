@@ -159,7 +159,7 @@ void Currency::updateRates(bool silent)
                 auto r = reply->readAll();
                 QXmlStreamReader reader(r);
                 QMap<QString, qreal> newRates;
-                QLocale c = QLocale::c();
+                static QLocale c = QLocale::c();
 
                 while (!reader.atEnd()) {
                     if (reader.readNext() == QXmlStreamReader::StartElement &&
