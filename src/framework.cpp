@@ -1065,6 +1065,11 @@ bool FrameWork::setupToolBar(QToolBar *t, const QVector<QByteArray> &a_names)
                 m_filter_delay = new QTimer(this);
                 m_filter_delay->setInterval(800ms);
                 m_filter_delay->setSingleShot(true);
+
+                // a bit of a hack, but the action needs to be "used" for the shortcut to be
+                // active, but we don't want an icon in the filter edit.
+                m_filter->QWidget::addAction(findAction("edit_filter_focus"));
+
                 connect(m_filter, &QLineEdit::textChanged, [this]() {
                     m_filter_delay->start();
                 });
