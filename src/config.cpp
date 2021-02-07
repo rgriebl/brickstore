@@ -277,15 +277,16 @@ void Config::setMeasurementSystem(QLocale::MeasurementSystem ms)
 
 bool Config::areFiltersInFavoritesMode() const
 {
-    return value("General/FilterMode", "history").toString() == "favorites";
+    return true;
+    //return value("General/FilterMode", "history").toString() == "favorites";
 }
 
-void Config::setFiltersInFavoritesMode(bool b)
+void Config::setFiltersInFavoritesMode(bool /*b*/)
 {
-    if (areFiltersInFavoritesMode() != b) {
-        setValue("General/FilterMode", b ? "favorites" : "history");
-        emit filtersInFavoritesModeChanged(b);
-    }
+//    if (areFiltersInFavoritesMode() != b) {
+//        setValue("General/FilterMode", b ? "favorites" : "history");
+//        emit filtersInFavoritesModeChanged(b);
+//    }
 }
 
 QMap<QByteArray, int> Config::updateIntervals() const

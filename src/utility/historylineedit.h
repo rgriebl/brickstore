@@ -31,15 +31,17 @@ public:
     bool isInFavoritesMode() const;
     void setToFavoritesMode(bool favoritesMode);
 
+    QString instructionToolTip() const;
+
     QByteArray saveState() const;
     bool restoreState(const QByteArray &ba);
 
 protected:
     void keyPressEvent(QKeyEvent *ke) override;
-    bool eventFilter(QObject *o, QEvent *e) override;
 
 private:
     void appendToModel();
+    void showPopup();
 
     QStringListModel m_filterModel;
     QIcon m_deleteIcon;
@@ -48,4 +50,5 @@ private:
     QMetaObject::Connection m_connection;
 
     friend class HistoryViewDelegate;
+    friend class HistoryView;
 };

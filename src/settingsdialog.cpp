@@ -259,9 +259,6 @@ void SettingsDialog::load()
     w_openbrowser->setChecked(Config::inst()->value("/General/Export/OpenBrowser", true).toBool());
     w_closeempty->setChecked(Config::inst()->closeEmptyDocuments());
 
-    w_filtermode_favorites->setChecked(Config::inst()->areFiltersInFavoritesMode());
-    w_filtermode_history->setChecked(!Config::inst()->areFiltersInFavoritesMode());
-
     QString docdir = QDir::toNativeSeparators(Config::inst()->documentDir());
     w_docdir->setItemData(0, docdir);
     w_docdir->setItemText(0, systemDirName(docdir));
@@ -314,7 +311,6 @@ void SettingsDialog::save()
         Config::inst()->setLanguage(w_language->itemData(w_language->currentIndex()).toString());
     Config::inst()->setMeasurementSystem(w_imperial->isChecked() ? QLocale::ImperialSystem : QLocale::MetricSystem);
     Config::inst()->setDefaultCurrencyCode(m_preferedCurrency);
-    Config::inst()->setFiltersInFavoritesMode(w_filtermode_favorites->isChecked());
 
     QDir dd(w_docdir->itemData(0).toString());
 

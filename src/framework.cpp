@@ -1668,7 +1668,9 @@ void FrameWork::connectWindow(QWidget *w)
         findAction("view_difference_mode")->setChecked(window->isDifferenceMode());
 
         if (auto a = findAction("edit_filter_focus"))
-            m_filter->setToolTip(Utility::toolTipLabel(a->text(), a->shortcut(), filterToolTip));
+            m_filter->setToolTip(Utility::toolTipLabel(a->text(), a->shortcut(),
+                                                       filterToolTip
+                                                       + m_filter->instructionToolTip()));
 
         m_current_window = window;
     }

@@ -21,6 +21,7 @@
 #include <QPainter>
 #include <QStyle>
 #include <QStyledItemDelegate>
+#include <QListView>
 #include <QDebug>
 
 #include "historylineedit.h"
@@ -44,7 +45,7 @@ HistoryViewDelegate::HistoryViewDelegate(HistoryLineEdit *filter)
 { }
 
 void HistoryViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
-                                  const QModelIndex &index) const
+                                const QModelIndex &index) const
 {
     QStyledItemDelegate::paint(painter, option, index);
 
@@ -54,6 +55,43 @@ void HistoryViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &o
     r.adjust(margin, margin, -margin, -margin);
     m_edit->m_deleteIcon.paint(painter, r);
 }
+
+class HistoryView : public QListView
+{
+public:
+    HistoryView(QWidget *parent)
+        : QListView(parent)
+    { }
+
+protected:
+    void paintEvent(QPaintEvent *e)
+    {
+        QListView::paintEvent(e);
+
+        if (model()->rowCount() == 0) {
+            QPainter p(viewport());
+            p.drawText(viewport()->contentsRect(), Qt::AlignCenter,
+                       tr("No favorite filters. Read the tooltip."));
+        }
+    }
+
+    void mousePressEvent(QMouseEvent *me)
+    {
+        if (me->button() == Qt::LeftButton) {
+            QModelIndex idx = indexAt(me->pos());
+
+            if (idx.isValid()) {
+                int h = visualRect(idx).height();
+                if (me->x() >= (viewport()->width() - h)) {
+                    if (auto proxy = qobject_cast<const QAbstractProxyModel *>(idx.model()))
+                        idx = proxy->mapToSource(idx);
+                    const_cast<QAbstractItemModel *>(idx.model())->removeRow(idx.row());
+                    return;
+                }
+            }
+        }
+    }
+};
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -71,9 +109,9 @@ HistoryLineEdit::HistoryLineEdit(int maximumHistorySize, QWidget *parent)
 
     comp->setCaseSensitivity(Qt::CaseInsensitive);
     comp->setCompletionMode(QCompleter::PopupCompletion);
+    comp->setPopup(new HistoryView(this));
     setCompleter(comp);
     auto view = completer()->popup();
-    view->viewport()->installEventFilter(this);
     view->setItemDelegate(new HistoryViewDelegate(this));
     setClearButtonEnabled(true);
 
@@ -99,10 +137,8 @@ HistoryLineEdit::HistoryLineEdit(int maximumHistorySize, QWidget *parent)
     }
 
     auto *a = addAction(QIcon(filterPix), QLineEdit::LeadingPosition);
-    connect(a, &QAction::triggered, this, [this]() {
-        completer()->setCompletionPrefix(QString());
-        completer()->complete();
-    });
+    connect(a, &QAction::triggered,
+            this, &HistoryLineEdit::showPopup);
 }
 
 void HistoryLineEdit::appendToModel()
@@ -134,6 +170,17 @@ void HistoryLineEdit::setToFavoritesMode(bool favoritesMode)
                                                    : &QLineEdit::editingFinished,
                                this, &HistoryLineEdit::appendToModel, Qt::QueuedConnection);
     }
+}
+
+QString HistoryLineEdit::instructionToolTip() const
+{
+    return tr("<p>" \
+              "Pressing <b>Return</b> will save the current filter expression as a favorite. " \
+              "You can recall saved filters by clicking the filter icon on the left or by " \
+              "pressing <b>Down Arrow</b> to open a drop down menu. The number of favorites is " \
+              "limited to the last %1, but you can delete saved filters from this drop down " \
+              "menu as well by clicking the <b>X</b> button on the right." \
+              "</p>").arg(m_maximumHistorySize);
 }
 
 QByteArray HistoryLineEdit::saveState() const
@@ -168,33 +215,21 @@ bool HistoryLineEdit::restoreState(const QByteArray &ba)
     return true;
 }
 
-void HistoryLineEdit::keyPressEvent(QKeyEvent *ke)
+void HistoryLineEdit::showPopup()
 {
-    if (ke->key() == Qt::Key_Down && !ke->modifiers()) {
-        if (text().isEmpty())
-            completer()->setCompletionPrefix(QString());
-        completer()->complete();
-    }
-    return QLineEdit::keyPressEvent(ke);
+    //if (text().isEmpty())
+    completer()->setCompletionPrefix(QString());
+    bool forcePopup = (m_filterModel.rowCount() == 0);
+    if (forcePopup)
+        m_filterModel.insertRow(0); // dummy row to enable popup
+    completer()->complete();
+    if (forcePopup)
+        m_filterModel.removeRow(0);
 }
 
-bool HistoryLineEdit::eventFilter(QObject *o, QEvent *e)
+void HistoryLineEdit::keyPressEvent(QKeyEvent *ke)
 {
-    auto view = completer()->popup();
-
-    if ((o == view->viewport()) && (e->type() == QEvent::MouseButtonPress)) {
-        auto me = static_cast<QMouseEvent *>(e);
-        QModelIndex idx = view->indexAt(me->pos());
-
-        if (idx.isValid()) {
-            int h = view->visualRect(idx).height();
-            if (me->x() >= (view->viewport()->width() - h)) {
-                if (auto proxy = qobject_cast<const QAbstractProxyModel *>(idx.model()))
-                    idx = proxy->mapToSource(idx);
-                m_filterModel.removeRow(idx.row());
-                return true;
-            }
-        }
-    }
-    return QLineEdit::eventFilter(o, e);
+    if (ke->key() == Qt::Key_Down && !ke->modifiers())
+        showPopup();
+    return QLineEdit::keyPressEvent(ke);
 }

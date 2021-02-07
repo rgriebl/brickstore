@@ -447,21 +447,15 @@ void SelectItem::languageChange()
     d->w_item_types_label->setText(tr("Item type:"));
     d->w_filter->setPlaceholderText(tr("Filter"));
 
-    QString tt = tr( \
-                "<p>This filter has two modes:</p><p>" \
-                "The default, simple mode, will match all items containing the entered text in " \
-                "either the name or the part number. Additionally, any word starting with '-' " \
-                "(minus) acts as an exclusion and prevents an item from being matched, if this "\
-                "word is found in the item's name.<br>(e.g. 'brick 1 x 1 -pattern')<br><br>" \
-                "The second mode, using Regular Expressions, can be activated in the drop-down "\
-                "menu on the left. When activated, it will match all items that contain the " \
-                "entered expression in either the name or the part number.</p><p>" \
-                "In both modes the matches are done case insensitvely, but you can change that "\
-                "behavior via the menu.</p>" \
-    );
+    QString filterToolTip = tr("<p>" \
+        "Only show items that contain the entered text - regardless of case - in " \
+        "either the name or the part number. Additionally, all word starting with '-' " \
+        "(minus) act as an exclusion and prevent an item from being matched, if these " \
+        "words are found in the item's name.<br>(e.g. 'brick 1 x 1 -pattern')</p>")
+            + d->w_filter->instructionToolTip();
 
-    d->w_filter->setToolTip(Utility::toolTipLabel(tr("Filter the list using this pattern"),
-                                                  QKeySequence::Find, tt));
+    d->w_filter->setToolTip(Utility::toolTipLabel(tr("Filter the list using this expression"),
+                                                  QKeySequence::Find, filterToolTip));
 
     auto setToolTipOnButton = [](QAbstractButton *b, const QString &text) {
         b->setToolTip(Utility::toolTipLabel(text, b->shortcut()));
