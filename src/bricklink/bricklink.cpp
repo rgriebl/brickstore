@@ -1839,6 +1839,43 @@ const QVector<const Color *> Item::knownColors() const
     return result;
 }
 
+int InvItem::quantitySoldLast6Months()
+{
+    if (m_quantitySoldLast6Months < 0) {
+        if (!m_priceGuide) {
+            m_priceGuide = BrickLink::core()->priceGuide(this->m_item, this->m_color);
+            QObject::connect(BrickLink::core(), &BrickLink::Core::priceGuideUpdated, [this] (BrickLink::PriceGuide *pg) {
+                if (pg->item()->id() == m_item->id()) {
+                    m_quantitySoldLast6Months = pg->quantity(Time::PastSix, Condition::New) +
+                            pg->quantity(Time::PastSix, Condition::Used);
+                    m_lotsSoldLast5Months = pg->lots(Time::PastSix, Condition::New) +
+                            pg->lots(Time::PastSix, Condition::Used);
+                }
+            });
+        }
+    }
+    return m_quantitySoldLast6Months;
+}
+
+int InvItem::lotsSoldLast5Months()
+{
+    if (m_lotsSoldLast5Months < 0) {
+        if (!m_priceGuide) {
+            m_priceGuide = BrickLink::core()->priceGuide(this->m_item, this->m_color);
+            QObject::connect(BrickLink::core(), &BrickLink::Core::priceGuideUpdated, [this] (BrickLink::PriceGuide *pg) {
+                if (pg->item()->id()== m_item->id()) {
+                    m_quantitySoldLast6Months = pg->quantity(Time::PastSix, Condition::New) +
+                            pg->quantity(Time::PastSix, Condition::Used);
+                    m_lotsSoldLast5Months = pg->lots(Time::PastSix, Condition::New) +
+                            pg->lots(Time::PastSix, Condition::Used);
+                }
+            });
+        }
+    }
+    return m_lotsSoldLast5Months;
+}
+
+
 } // namespace BrickLink
 
 #include "moc_bricklink.cpp"

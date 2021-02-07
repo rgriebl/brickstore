@@ -298,6 +298,15 @@ Document::Document(const BrickLink::InvItemList &items, const QString &currencyC
 
     setBrickLinkItems(items); // the caller owns the items
 
+    connect(BrickLink::core(), &BrickLink::Core::priceGuideUpdated, [this] (BrickLink::PriceGuide * pg) {
+        for(auto item: m_items) {
+            if (item->itemId() == pg->item()->id()) {
+                emitDataChanged(this->index(item, 0), this->index(item, columnCount()));
+                break;
+            }
+        }
+    });
+
     s_documents.append(this);
 }
 
@@ -680,7 +689,7 @@ Document *Document::fileImportBrickLinkInventory(const BrickLink::Item *item, in
     if (item && !item->hasInventory())
         return nullptr;
 
-    if (item && (quantity != 0)) {
+    if (item && (quantity > 0)) {
         BrickLink::InvItemList items = item->consistsOf();
 
         if (!items.isEmpty()) {
@@ -1457,6 +1466,10 @@ QString Document::dataForDisplayRole(Item *it, Field f, int row) const
     case Cost        : return Currency::toString(it->cost(), currencyCode());
     case QuantityOrig: return QString::number(it->origQuantity());
     case QuantityDiff: return QString::number(it->quantity() - it->origQuantity());
+    case qty_sold_6mths: return (it->quantitySoldLast6Months() < 0) ?
+                    "" : QString::number(it->quantitySoldLast6Months());
+    case lots_6mths: return (it->lotsSoldLast5Months() < 0) ?
+                    "" : QString::number(it->lotsSoldLast5Months());
     default          : return QString();
     }
 }
@@ -1615,6 +1628,8 @@ QString Document::headerDataForDisplayRole(Field f)
     case PriceDiff   : return tr("Pr.Diff");
     case Cost        : return tr("Cost");
     case Price       : return tr("Price");
+    case qty_sold_6mths: return tr("Qty Sold");
+    case lots_6mths: return tr("Lots");
     case Total       : return tr("Total");
     case Sale        : return tr("Sale");
     case Condition   : return tr("Cond.");

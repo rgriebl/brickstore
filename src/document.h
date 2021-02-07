@@ -47,6 +47,8 @@ public:
         PriceOrig,
         PriceDiff,
         Price,
+        qty_sold_6mths,
+        lots_6mths,
         Total,
         Cost,
         Bulk,

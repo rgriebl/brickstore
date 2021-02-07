@@ -156,6 +156,10 @@ void BrickLink::PriceGuide::parse(const QByteArray &ba)
             m_prices[ti][ci][int(Price::Average)]  = c.toDouble(sl[5]);
             m_prices[ti][ci][int(Price::WAverage)] = c.toDouble(sl[6]);
             m_prices[ti][ci][int(Price::Highest)]  = c.toDouble(sl[7]);
+
+            int m_quantitySoldLast6Months;
+            int m_lotsSoldLast5Months;
+
         }
     }
 

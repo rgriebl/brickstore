@@ -307,6 +307,8 @@ private:
     friend class PictureLoaderJob;
 };
 
+class PriceGuide;
+
 class InvItem
 {
 public:
@@ -385,6 +387,9 @@ public:
     bool counterPart() const           { return m_cpart; }
     void setCounterPart(bool b)        { m_cpart = b; }
 
+    int quantitySoldLast6Months();
+    int lotsSoldLast5Months();
+
     struct Incomplete {
         QString m_item_id;
         QString m_item_name;
@@ -436,6 +441,10 @@ private:
     int              m_orig_quantity;
 
     double           m_cost;
+
+    int m_quantitySoldLast6Months = -1;
+    int m_lotsSoldLast5Months = -1;
+    PriceGuide *m_priceGuide = nullptr;
 
     friend QDataStream &operator << (QDataStream &ds, const InvItem &ii);
     friend QDataStream &operator >> (QDataStream &ds, InvItem &ii);
