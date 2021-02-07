@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-## [2021.2.0] - 2021-02-04
+## [2021.2.0] - 2021-02-07
 ### Improvements
 - Operations on a lot of rows at once have been sped up by several orders of magnitude.
 - Picture downloads are now done completely in a background thread, keeping the UI more responsive.
@@ -21,6 +21,7 @@ All notable changes to this project will be documented in this file.
 A lot.
 
 Please read the [installation instructions](https://github.com/rgriebl/brickstore/wiki/Installation-Instructions).
+
 
 ## [2021.1.7] - 2021-01-27
 The **Defaults** page in the settings dialog was completely removed. Instead, the affected dialogs
