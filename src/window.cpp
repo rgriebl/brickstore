@@ -2034,9 +2034,10 @@ void Window::on_edit_setmatch_triggered()
         sm->setPartCountConstraint(100, -1);
         sm->setYearReleasedConstraint(1995, -1);
 
-        connect(sm, SIGNAL(finished(QVector<const BrickLink::Item *>)),
-                this, SLOT(setMatchFinished(QVector<const BrickLink::Item *>)));
-        connect(sm, SIGNAL(progress(int, int)), this, SLOT(setMatchProgress(int, int)));
+        connect(sm, &BrickLink::SetMatch::finished,
+                this, &Window::setMatchFinished);
+        connect(sm, &BrickLink::SetMatch::progress,
+                this, &Window::setMatchProgress);
 
         if (!sm->startMaximumPossibleSetMatch(selection().isEmpty() ? m_doc->items()
                                               : selection(), BrickLink::SetMatch::Greedy))

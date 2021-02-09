@@ -39,6 +39,7 @@ CONFIG *= lrelease embed_translations
 
 sanitize:debug:unix {
   CONFIG *= sanitizer sanitize_address sanitize_undefined
+  # CONFIG *= sanitizer sanitize_thread
   DEFINES += SANITIZER_ENABLED
 }
 

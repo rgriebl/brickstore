@@ -707,7 +707,6 @@ bool SelectItem::restoreState(const QByteArray &ba)
     bool catSortAsc;
     bool itemSortAsc;
     int itemSortColumn;
-    QByteArray filterHistory;
 
     ds >> itt >> cat >> itemid >> filterState >> zoom >> viewMode
             >> catSortAsc >> itemSortAsc >> itemSortColumn;

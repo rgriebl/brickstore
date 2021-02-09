@@ -1531,16 +1531,18 @@ void FrameWork::connectWindow(QWidget *w)
             filterToolTip = window->filterToolTip();
             connect(this, &FrameWork::filterTextChanged,
                     window, &Window::setFilter);
+
+            if (auto a = findAction("edit_filter_focus"))
+                m_filter->setToolTip(Utility::toolTipLabel(a->text(), a->shortcut(),
+                                                           filterToolTip
+                                                           + m_filter->instructionToolTip()));
         }
 
         m_undogroup->setActiveStack(doc->undoStack());
 
+        // update per-document action states
 
-        if (auto a = findAction("edit_filter_focus"))
-            m_filter->setToolTip(Utility::toolTipLabel(a->text(), a->shortcut(),
-                                                       filterToolTip
-                                                       + m_filter->instructionToolTip()));
-
+        //findAction("view_difference_mode")->setChecked(window->isDifferenceMode());
         m_current_window = window;
     }
 

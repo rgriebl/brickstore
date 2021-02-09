@@ -210,10 +210,6 @@ public:
         delete this;
     }
 
-signals:
-    void finished(int, QVector<const BrickLink::Item *> &);
-    void progress(int, int);
-
 private:
     BrickLink::SetMatch *m_sm;
     const BrickLink::InvItemList m_list;

@@ -244,7 +244,7 @@ Document *DocumentIO::importBrickLinkCart()
                                 ? BrickLink::Condition::New : BrickLink::Condition::Used;
                         int qty = cartItem["cartQty"].toInt();
                         QString priceStr = cartItem["nativePrice"].toString(); //TODO: which one?
-                        double price = priceStr.mid(4).toDouble();
+                        double price = priceStr.midRef(4).toDouble();
                         QString ccode = priceStr.left(3);
 
                         if (currencyCode.isEmpty()) {
@@ -1127,7 +1127,7 @@ DocumentIO::ParseItemListResult DocumentIO::parseBsxInventory(const QDomDocument
     { u"TP2",          [&ii](auto v) { ii->setTierPrice(1, v.toDouble()); } },
     { u"TP3",          [&ii](auto v) { ii->setTierPrice(2, v.toDouble()); } },
     { u"LotID",        [&ii](auto v) { ii->setLotId(v.toUInt()); } },
-    { u"Retain",       [&ii](auto v) { ii->setRetain(true); } },
+    { u"Retain",       [&ii](auto)   { ii->setRetain(true); } },
     { u"Reserved",     [&ii](auto v) { ii->setReserved(v); } },
     { u"TotalWeight",  [&ii](auto v) { ii->setTotalWeight(v.toDouble()); } },
     { u"Cost",         [&ii](auto v) { ii->setCost(v.toDouble()); } },
