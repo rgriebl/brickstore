@@ -20,6 +20,7 @@
 #include <QCursor>
 #include <QTableView>
 #include <QScrollArea>
+#include <QSizeGrip>
 #include <QHeaderView>
 #include <QCloseEvent>
 #include <QDesktopServices>
@@ -28,6 +29,7 @@
 #include <QProgressDialog>
 #include <QStringBuilder>
 #include <QScrollBar>
+#include <QPainter>
 
 #include "messagebox.h"
 #include "config.h"
@@ -42,6 +44,8 @@
 #include "scriptmanager.h"
 #include "script.h"
 #include "exception.h"
+#include "changecurrencydialog.h"
+
 #include "bricklink/bricklink_setmatch.h"
 
 #include "selectcolordialog.h"
@@ -219,9 +223,11 @@ class TableView : public QTableView
 {
     Q_OBJECT
 public:
-    explicit TableView(QWidget *parent)
+    explicit TableView(QWidget *parent = nullptr)
         : QTableView(parent)
-    { }
+    {
+        setCornerWidget(new QSizeGrip(this));
+    }
 
 protected:
     void keyPressEvent(QKeyEvent *e) override
@@ -239,6 +245,242 @@ protected:
 
 private:
     Q_DISABLE_COPY(TableView)
+};
+
+
+class CheckColorTabBar : QTabBar
+{
+public:
+    CheckColorTabBar()
+    {
+        addTab(" ");
+    }
+
+    QColor color() const
+    {
+        QImage image(20, 20, QImage::Format_ARGB32);
+        image.fill(palette().color(QPalette::Window));
+        QPainter p(&image);
+        QStyleOptionTab opt;
+        opt.initFrom(this);
+        initStyleOption(&opt, 0);
+        opt.rect = image.rect();
+        style()->drawControl(QStyle::CE_TabBarTab, &opt, &p, this);
+        p.end();
+        return image.pixelColor(image.rect().center());
+    }
+};
+
+class StatusBar : public QFrame
+{
+    Q_OBJECT
+public:
+    StatusBar(Window *window)
+        : QFrame(window)
+        , m_window(window)
+        , m_doc(window->document())
+    {
+        setAutoFillBackground(true);
+        setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
+
+        // hide the top and bottom frame
+        setContentsMargins(contentsMargins() + QMargins(0, -frameWidth(), 0, -frameWidth()));
+
+        m_layout = new QHBoxLayout(this);
+        m_layout->setContentsMargins(11, 4, 11, 4);
+
+        auto addSeparator = [this]() -> QWidget * {
+            auto sep = new QFrame();
+            sep->setFrameShape(QFrame::VLine);
+            sep->setFixedWidth(sep->frameWidth());
+            sep->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::MinimumExpanding);
+            m_layout->addWidget(sep);
+            return sep;
+        };
+
+        m_differenceMode = new QToolButton();
+        m_differenceMode->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+        m_differenceMode->setIcon(QIcon::fromTheme("mode2"));
+        m_differenceMode->setCheckable(true);
+        connect(m_doc, &Document::differenceModeChanged,
+                this, &StatusBar::updateDifferenceMode);
+        connect(m_doc, &Document::itemCountChanged,
+                this, [this](int count) { m_differenceMode->setEnabled(count > 0); });
+        m_differenceMode->setEnabled(m_doc->items().count() > 0);
+        connect(m_differenceMode, &QToolButton::toggled,
+                this, [this](bool b) {
+            if (b == m_doc->isDifferenceModeActive())
+                return;
+            if (b) {
+                if (!m_doc->startDifferenceMode())
+                    m_differenceMode->setChecked(false);
+            } else {
+                if (MessageBox::question(this, tr("End difference mode"), tr("Ending difference mode resets all base values used for calculating the actual differences to the current values. Restarting difference mode will therefor start with no differences at all. This operation is not undoable.<br><br>Do you really want to end difference mode now?")) == QMessageBox::Yes) {
+                    m_doc->endDifferenceMode();
+                } else {
+                    m_differenceMode->setChecked(true);
+                }
+            }
+        });
+        m_layout->addWidget(m_differenceMode);
+
+        m_layout->addStretch(1);
+
+        if (m_doc->order()) {
+            addSeparator();
+            m_order = new QToolButton();
+            m_order->setIcon(QIcon::fromTheme("help-about"));
+            m_order->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+            m_layout->addWidget(m_order);
+
+            connect(m_order, &QToolButton::clicked,
+                    this, [this]() {
+                auto order = m_doc->order();
+                MessageBox::information(m_window, tr("Order information"), order->address());
+            });
+        } else {
+            m_order = nullptr;
+        }
+
+        m_errorsSeparator = addSeparator();
+        m_errors = new QLabel();
+        connect(m_doc, &Document::statisticsChanged,
+                this, &StatusBar::updateErrors);
+
+        m_layout->addWidget(m_errors);
+
+        addSeparator();
+
+        m_currencyLabel = new QLabel();
+        m_layout->addWidget(m_currencyLabel);
+        m_currency = new QToolButton();
+        m_currency->setPopupMode(QToolButton::InstantPopup);
+        m_currency->setToolButtonStyle(Qt::ToolButtonTextOnly);
+        m_currency->setAutoRaise(true);
+
+        connect(m_currency, &QToolButton::triggered,
+                this, &StatusBar::changeDocumentCurrency);
+        connect(Currency::inst(), &Currency::ratesChanged,
+                this, &StatusBar::updateCurrencyRates);
+        connect(m_doc, &Document::currencyCodeChanged,
+                this, &StatusBar::documentCurrencyChanged);
+        updateCurrencyRates();
+        documentCurrencyChanged(m_doc->currencyCode());
+
+        m_layout->addWidget(m_currency);
+
+        paletteChange();
+        languageChange();
+    }
+
+    void updateCurrencyRates()
+    {
+        foreach (QAction *a, m_currency->actions()) {
+            m_currency->removeAction(a);
+            delete a;
+        }
+
+        foreach (const QString &c, Currency::inst()->currencyCodes())
+            m_currency->addAction(new QAction(c, m_currency));
+    }
+
+    void documentCurrencyChanged(const QString &ccode)
+    {
+        m_currency->setText(ccode + QLatin1String("  "));
+    }
+
+    void changeDocumentCurrency(QAction *a)
+    {
+        QString ccode = a->text();
+
+        ChangeCurrencyDialog d(m_doc->currencyCode(), ccode, this);
+        if (d.exec() == QDialog::Accepted) {
+            double rate = d.exchangeRate();
+
+            if (rate > 0)
+                m_doc->setCurrencyCode(ccode, rate);
+        }
+    }
+
+    void updateDifferenceMode()
+    {
+        bool b = m_doc->isDifferenceModeActive();
+        m_differenceMode->setText(m_differenceMode->property(b ? "bsTextUpdate" : "bsTextNormal").toString());
+        m_differenceMode->setChecked(b);
+    }
+
+    void updateErrors()
+    {
+        auto stat = m_doc->statistics(m_doc->items());
+        bool b = (stat.errors() > 0);
+
+        if (b && Config::inst()->showInputErrors()) {
+            m_errors->setText(tr("Errors:") %
+                              QString::fromLatin1(" <span style='background-color:%1'>&nbsp;")
+                              .arg(m_errors->property("bsColor").toString())
+                              % QLocale::system().toString(stat.errors()) % u"&nbsp;</span>");
+        }
+        m_errors->setVisible(b);
+        m_errorsSeparator->setVisible(b);
+    }
+
+
+protected:
+    void languageChange()
+    {
+        m_differenceMode->setProperty("bsTextUpdate", tr("Disable difference mode"));
+        m_differenceMode->setProperty("bsTextNormal", tr("Enable difference mode"));
+        updateDifferenceMode();
+
+        if (m_order)
+            m_order->setText(tr("Order information..."));
+        m_currencyLabel->setText(tr("Currency:"));
+        updateErrors();
+    }
+
+    void paletteChange()
+    {
+        auto pal = palette();
+        pal.setColor(QPalette::Window, CheckColorTabBar().color());
+        setPalette(pal);
+
+        auto c = Utility::gradientColor(Qt::red, palette().color(QPalette::Window), 0.6);
+        m_errors->setProperty("bsColor", c.name());
+        updateErrors();
+
+        auto checkedbg = Utility::gradientColor(Qt::green, palette().color(QPalette::Window), 0.3);
+        auto checkedborder = checkedbg.darker();
+        auto hoverbg = checkedbg.lighter();
+        auto hoverborder = hoverbg.darker();
+
+        m_differenceMode->setStyleSheet(QLatin1String(
+            "QToolButton { background-color: transparent; border: 1px solid transparent; padding: 2px; }"
+            "QToolButton:hover { background-color: %3; border: 1px solid %4 } "
+            "QToolButton:checked { background-color: %1; border: 1px solid %2; } "
+            "QToolButton:checked:hover { } "
+            "QToolButton:pressed { background-color: %1; border: 1px solid %2 } "
+        ).arg(checkedbg.name(), checkedborder.name(), hoverbg.name(), hoverborder.name()));
+    }
+
+    void changeEvent(QEvent *e) override
+    {
+        QFrame::changeEvent(e);
+        if (e->type() == QEvent::LanguageChange)
+            languageChange();
+        if (e->type() == QEvent::PaletteChange)
+            paletteChange();
+    }
+
+private:
+    Window *m_window;
+    Document *m_doc;
+    QHBoxLayout *m_layout;
+    QToolButton *m_differenceMode;
+    QToolButton *m_order;
+    QWidget *m_errorsSeparator;
+    QLabel *m_errors;
+    QLabel *m_currencyLabel;
+    QToolButton *m_currency;
 };
 
 
@@ -264,7 +506,9 @@ Window::Window(Document *doc, QWidget *parent)
     m_simple_mode = false;
     m_diff_mode = false;
 
-    w_list = new TableView(this);
+    w_statusbar = new StatusBar(this);
+
+    w_list = new TableView();
     w_header = new HeaderView(Qt::Horizontal, w_list);
     w_list->setHorizontalHeader(w_header);
     w_list->setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -303,6 +547,7 @@ Window::Window(Document *doc, QWidget *parent)
     QBoxLayout *toplay = new QVBoxLayout(this);
     toplay->setSpacing(0);
     toplay->setMargin(0);
+    toplay->addWidget(w_statusbar, 0);
     toplay->addWidget(w_list, 10);
 
     connect(m_latest_timer, &QTimer::timeout,

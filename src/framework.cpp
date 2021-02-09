@@ -21,7 +21,6 @@
 #include <QMetaMethod>
 #include <QMenuBar>
 #include <QToolBar>
-#include <QStatusBar>
 #include <QPainter>
 #include <QTimer>
 #include <QLabel>
@@ -67,7 +66,6 @@
 #include "utility.h"
 #include "additemdialog.h"
 #include "settingsdialog.h"
-#include "changecurrencydialog.h"
 #include "welcomewidget.h"
 #include "aboutdialog.h"
 #include "managecolumnlayoutsdialog.h"
@@ -103,61 +101,6 @@ enum {
 
     // the upper 16 bits (0xffff0000) are reserved for NeedSelection()
 };
-
-
-class NoFrameStatusBar : public QStatusBar
-{
-public:
-    NoFrameStatusBar(QWidget *parent = nullptr)
-        : QStatusBar(parent)
-    { }
-
-    void addPermanentWidget(QWidget *w, int stretch, int margin = 6)
-    {
-        QWidget *wrapper = new QWidget();
-        QBoxLayout *l = new QHBoxLayout(wrapper);
-        l->setContentsMargins(margin, 0, margin, 0);
-        l->setSpacing(0);
-        l->addWidget(w);
-        QStatusBar::addPermanentWidget(wrapper, stretch);
-    }
-
-protected:
-    void paintEvent(QPaintEvent *) override;
-};
-
-void NoFrameStatusBar::paintEvent(QPaintEvent *)
-{
-    // nearly the same as QStatusBar::paintEvent(), minus those ugly frames
-    QString msg = currentMessage();
-
-    QPainter p(this);
-    QStyleOption opt;
-    opt.initFrom(this);
-    style()->drawPrimitive(QStyle::PE_PanelStatusBar, &opt, &p, this);
-
-    if (!msg.isEmpty()) {
-        p.setPen(palette().windowText().color());
-        QRect msgr = rect().adjusted(6, 0, -6, 0);
-        p.drawText(msgr, Qt::AlignLeading | Qt::AlignVCenter | Qt::TextSingleLine, msg);
-    } else {
-#ifdef Q_OS_MACX
-        QColor lineColor(112, 112, 112);
-        int offset = 0;
-#else
-        QColor lineColor = palette().color(QPalette::Midlight);
-        int offset = 2;
-#endif
-        p.setPen(lineColor);
-
-        foreach (QWidget *w, findChildren<QWidget *>()) {
-            if (qobject_cast<QSizeGrip *>(w))
-                continue;
-            QRect r = w->geometry();
-            p.drawLine(r.left() - 3, offset, r.left() - 3, height() - offset - 1);
-        }
-    }
-}
 
 
 class RecentMenu : public QMenu
@@ -472,7 +415,6 @@ FrameWork::FrameWork(QWidget *parent)
     menuBar()->addMenu(createMenu("menu_view", {
                                       "view_toolbar",
                                       "view_docks",
-                                      "view_statusbar",
                                       "-",
                                       "view_fullscreen",
                                       "-",
@@ -507,6 +449,7 @@ FrameWork::FrameWork(QWidget *parent)
                                    "edit_delete",
                                    "-",
                                    "edit_select_all",
+                                   "edit_select_none",
                                    "-",
                                    "edit_filter_from_selection",
                                    "-",
@@ -561,9 +504,6 @@ FrameWork::FrameWork(QWidget *parent)
 
     addToolBar(m_toolbar);
 
-    createStatusBar();
-    findAction("view_statusbar")->setChecked(Config::inst()->value(QLatin1String("/MainWindow/Statusbar/Visible"), true).toBool());
-
     m_workspace->setWelcomeWidget(new WelcomeWidget());
 
     languageChange();
@@ -572,9 +512,6 @@ FrameWork::FrameWork(QWidget *parent)
     connect(Application::inst(), &Application::onlineStateChanged,
             this, &FrameWork::onlineStateChanged);
     onlineStateChanged(Application::inst()->isOnline());
-
-    connect(Config::inst(), &Config::measurementSystemChanged,
-            this, &FrameWork::statisticsUpdate);
 
     findAction("view_simple_mode")->setChecked(Config::inst()->simpleMode());
     findAction("view_show_input_errors")->setChecked(Config::inst()->showInputErrors());
@@ -726,8 +663,6 @@ void FrameWork::languageChange()
     }
 
     translateActions();
-
-    statisticsUpdate();
 }
 
 
@@ -786,13 +721,13 @@ void FrameWork::translateActions()
         { "edit_setmatch",                  tr("Match Items against Set Inventories...") },
         { "edit_copyremarks",               tr("Copy Remarks from Document..."),      },
         { "edit_select_all",                tr("Select All"),                         QKeySequence::SelectAll },
+        { "edit_select_none",               tr("Select None"),                        tr("Ctrl+Shift+A") },
+        //                                                   QKeySequence::Deselect is only mapped on Linux
         { "edit_filter_from_selection",     tr("Create a Filter from the Selection"), },
         { "edit_filter_focus",              tr("Filter the Item List"),               QKeySequence::Find },
-        { "edit_select_none",               tr("Select None"),                        QKeySequence::Deselect },
         { "menu_view",                      tr("&View"),                              },
         { "view_toolbar",                   tr("View Toolbar"),                       },
         { "view_docks",                     tr("View Info Docks"),                    },
-        { "view_statusbar",                 tr("View Statusbar"),                     },
         { "view_fullscreen",                tr("Full Screen"),                        QKeySequence::FullScreen },
         { "view_simple_mode",               tr("Buyer/Collector Mode"),               },
         { "view_show_input_errors",         tr("Show Input Errors"),                  },
@@ -891,7 +826,6 @@ void FrameWork::translateActions()
 
 FrameWork::~FrameWork()
 {
-    Config::inst()->setValue("/MainWindow/Statusbar/Visible", statusBar()->isVisibleTo(this));
     Config::inst()->setValue("/MainWindow/Layout/State", saveState(DockStateVersion));
     Config::inst()->setValue("/MainWindow/Layout/Geometry", saveGeometry());
     Config::inst()->setValue("/MainWindow/Filter", m_filter->saveState());
@@ -944,67 +878,6 @@ QDockWidget *FrameWork::createDock(QWidget *widget)
     dock->setWidget(widget);
     m_dock_widgets.append(dock);
     return dock;
-}
-
-void FrameWork::createStatusBar()
-{
-    NoFrameStatusBar *st = new NoFrameStatusBar(this);
-    setStatusBar(st);
-
-    int margin = 2 * st->fontMetrics().horizontalAdvance(QLatin1Char(' '));
-
-    m_st_errors = new QLabel();
-    m_st_lots = new QLabel();
-    m_st_items = new QLabel();
-    m_st_weight = new QLabel();
-    m_st_value = new QLabel();
-    m_st_cost = new QLabel();
-    m_st_currency = new QToolButton();
-    m_st_currency->setPopupMode(QToolButton::InstantPopup);
-    m_st_currency->setToolButtonStyle(Qt::ToolButtonTextOnly);
-    m_st_currency->setAutoRaise(true);
-
-    connect(m_st_currency, &QToolButton::triggered,
-            this, &FrameWork::changeDocumentCurrency);
-    connect(Currency::inst(), &Currency::ratesChanged,
-            this, &FrameWork::updateCurrencyRates);
-    updateCurrencyRates();
-
-    st->addPermanentWidget(m_st_errors, 0, margin);
-    st->addPermanentWidget(m_st_weight, 0, margin);
-    st->addPermanentWidget(m_st_lots, 0, margin);
-    st->addPermanentWidget(m_st_items, 0, margin);
-    st->addPermanentWidget(m_st_cost, 0, margin);
-    st->addPermanentWidget(m_st_value, 0, margin);
-    st->addPermanentWidget(m_st_currency, 0, margin);
-
-    statusBar()->hide();
-}
-
-void FrameWork::changeDocumentCurrency(QAction *a)
-{
-    if (m_current_window) {
-        QString ccode = a->text();
-
-        ChangeCurrencyDialog d(m_current_window->document()->currencyCode(), ccode, this);
-        if (d.exec() == QDialog::Accepted) {
-            double rate = d.exchangeRate();
-
-            if (rate > 0)
-                m_current_window->document()->setCurrencyCode(ccode, rate);
-        }
-    }
-}
-
-void FrameWork::updateCurrencyRates()
-{
-    foreach (QAction *a, m_st_currency->actions()) {
-        m_st_currency->removeAction(a);
-        delete a;
-    }
-
-    foreach (const QString &c, Currency::inst()->currencyCodes())
-        m_st_currency->addAction(new QAction(c, m_st_currency));
 }
 
 void FrameWork::manageLayouts()
@@ -1345,9 +1218,6 @@ void FrameWork::createActions()
     foreach (QDockWidget *dock, m_dock_widgets)
         m->addAction(dock->toggleViewAction());
 
-    (void) newQAction(this, "view_statusbar", 0, true, this, [this](bool visible) {
-        statusBar()->setVisible(visible);
-    });
     (void) newQAction(this, "view_simple_mode", 0, true, Config::inst(), &Config::setSimpleMode);
     (void) newQAction(this, "view_show_input_errors", 0, true, Config::inst(), &Config::setShowInputErrors);
     (void) newQAction(this, "view_column_layout_save", NeedDocument, false);
@@ -1683,7 +1553,6 @@ void FrameWork::connectWindow(QWidget *w)
     findAction("edit_additems")->setEnabled((m_current_window));
 
     selectionUpdate(m_current_window ? m_current_window->selection() : Document::ItemList());
-    statisticsUpdate();
     titleUpdate();
     modificationUpdate();
 
@@ -1797,56 +1666,6 @@ void FrameWork::selectionUpdate(const Document::ItemList &selection)
     findAction("edit_stockroom_a")->setChecked(stockroom == int(BrickLink::Stockroom::A));
     findAction("edit_stockroom_b")->setChecked(stockroom == int(BrickLink::Stockroom::B));
     findAction("edit_stockroom_c")->setChecked(stockroom == int(BrickLink::Stockroom::C));
-}
-
-void FrameWork::statisticsUpdate()
-{
-    QString lotstr, itmstr, errstr, valstr, coststr, wgtstr, ccode;
-
-    if (m_current_window)
-    {
-        Document::Statistics stat(m_current_window->document(), m_current_window->document()->items(), true);
-        ccode = m_current_window->document()->currencyCode();
-
-        if (!qFuzzyCompare(stat.value(), stat.minValue())) {
-            valstr = tr("Value: %1 (min. %2)")
-                    .arg(Currency::toString(stat.value(), ccode, Currency::NoSymbol))
-                    .arg(Currency::toString(stat.minValue(), ccode, Currency::NoSymbol));
-        } else {
-            valstr = tr("Value: %1").arg(Currency::toString(stat.value(), ccode, Currency::NoSymbol));
-        }
-        coststr = tr("Cost: %1").arg(Currency::toString(stat.cost(), ccode, Currency::NoSymbol));
-
-        if (qFuzzyCompare(stat.weight(), -DBL_MIN)) {
-            wgtstr = tr("Weight: -");
-        } else {
-            double weight = stat.weight();
-
-            if (weight < 0) {
-                weight = -weight;
-                wgtstr = tr("Weight: min. %1");
-            } else {
-                wgtstr = tr("Weight: %1");
-            }
-
-            wgtstr = wgtstr.arg(Utility::weightToString(weight, Config::inst()->measurementSystem(), true, true));
-        }
-
-        lotstr = tr("Lots: %L1").arg(stat.lots());
-        itmstr = tr("Items: %L1").arg(stat.items());
-
-        if ((stat.errors() > 0) && Config::inst()->showInputErrors())
-            errstr = tr("Errors: %L1").arg(stat.errors());
-    }
-
-    m_st_lots->setText(lotstr);
-    m_st_items->setText(itmstr);
-    m_st_weight->setText(wgtstr);
-    m_st_value->setText(valstr);
-    m_st_cost->setText(coststr);
-    m_st_currency->setEnabled(m_current_window);
-    m_st_currency->setText(ccode + QLatin1String("  "));
-    m_st_errors->setText(errstr);
 }
 
 void FrameWork::titleUpdate()

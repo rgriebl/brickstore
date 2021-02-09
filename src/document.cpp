@@ -238,7 +238,7 @@ Document::Statistics::Statistics(const Document *doc, const ItemList &list, bool
             m_incomplete++;
     }
     if (weight_missing)
-        m_weight = (m_weight == 0.) ? -DBL_MIN : -m_weight;
+        m_weight = (m_weight == 0.) ? std::numeric_limits<double>::min() : -m_weight;
     m_ccode = doc->currencyCode();
 }
 

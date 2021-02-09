@@ -78,7 +78,7 @@ protected:
     void changeEvent(QEvent *e) override;
 
 private:
-    void delayedSelectionUpdate(const Document::ItemList &list);
+    void delayedSelectionUpdate();
 
     QLabel *m_text;
     PictureWidget *m_pic;

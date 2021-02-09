@@ -26,10 +26,11 @@
 QT_FORWARD_DECLARE_CLASS(QToolButton)
 QT_FORWARD_DECLARE_CLASS(QComboBox)
 QT_FORWARD_DECLARE_CLASS(QTableView)
+QT_FORWARD_DECLARE_CLASS(QItemSelectionModel)
 class FrameWork;
 class UndoStack;
-QT_FORWARD_DECLARE_CLASS(QItemSelectionModel)
 class HeaderView;
+class StatusBar;
 
 
 class Window : public QWidget
@@ -205,6 +206,7 @@ private:
     QItemSelectionModel *m_selection_model;
     Document::ItemList   m_selection;
     QTimer *             m_delayedSelectionUpdate = nullptr;
+    StatusBar *          w_statusbar;
     QTableView *         w_list;
     HeaderView *         w_header;
     bool                 m_diff_mode;

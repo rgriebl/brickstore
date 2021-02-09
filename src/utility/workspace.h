@@ -19,6 +19,7 @@ QT_FORWARD_DECLARE_CLASS(QToolButton)
 QT_FORWARD_DECLARE_CLASS(QStackedLayout)
 QT_FORWARD_DECLARE_CLASS(QTabWidget)
 QT_FORWARD_DECLARE_CLASS(QMenu)
+QT_FORWARD_DECLARE_CLASS(QSizeGrip)
 
 
 class Workspace : public QWidget
@@ -57,6 +58,7 @@ private:
     QToolButton *m_tabhome;
     QToolButton *m_tabback;
     QToolButton *m_tablist;
+    QSizeGrip *m_sizeGrip;
     QStackedLayout *m_stack;
     QTabWidget *m_tabs;
     QWidget *m_welcomeWidget;

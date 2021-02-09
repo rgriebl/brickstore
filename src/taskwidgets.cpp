@@ -176,9 +176,8 @@ TaskInfoWidget::TaskInfoWidget(QWidget *parent)
     m_delayTimer.setSingleShot(true);
     m_delayTimer.setInterval(120ms);
 
-    connect(&m_delayTimer, &QTimer::timeout, this, [this]() {
-        delayedSelectionUpdate(m_selection);
-    });
+    connect(&m_delayTimer, &QTimer::timeout,
+            this, &TaskInfoWidget::delayedSelectionUpdate);
 
     connect(FrameWork::inst(), &FrameWork::windowActivated,
             this, &TaskInfoWidget::windowUpdate);
@@ -216,17 +215,17 @@ void TaskInfoWidget::selectionUpdate(const Document::ItemList &list)
     m_delayTimer.start();
 }
 
-void TaskInfoWidget::delayedSelectionUpdate(const Document::ItemList &list)
+void TaskInfoWidget::delayedSelectionUpdate()
 {
-    if (!m_win || (list.count() == 0)) {
+    if (!m_win) {
         m_pic->setItemAndColor(nullptr);
         setCurrentWidget(m_pic);
-    } else if (list.count() == 1) {
-        m_pic->setItemAndColor(list.front()->item(), list.front()->color());
+    } else if (m_selection.count() == 1) {
+        m_pic->setItemAndColor(m_selection.front()->item(), m_selection.front()->color());
         setCurrentWidget(m_pic);
-    }
-    else {
-        Document::Statistics stat(m_win->document(), list);
+    } else {
+        Document::Statistics stat(m_win->document(),
+                                  m_selection.isEmpty() ? m_win->document()->items() : m_selection);
 
         QString valstr, wgtstr;
         QString ccode = m_win->document()->currencyCode();
@@ -267,15 +266,12 @@ void TaskInfoWidget::delayedSelectionUpdate(const Document::ItemList &list)
                                  "&nbsp;&nbsp;%11: %12";
 
         QString s = QString::fromLatin1(fmt).arg(
-                tr("Multiple lots selected"),
+                m_selection.isEmpty() ? tr("Document statistics") : tr("Multiple lots selected"),
                 tr("Lots"), QLocale().toString(stat.lots()),
                 tr("Items"), QLocale().toString(stat.items()),
                 tr("Cost"), coststr, profitstr).arg(
                 tr("Value"), valstr,
                 tr("Weight"), wgtstr);
-
-//  if (( stat.errors ( ) > 0 ) && Config::inst ( )->showInputErrors ( ))
-//   s += QString ( "<br /><br />&nbsp;&nbsp;%1: %2" ).arg ( tr( "Errors" )).arg ( stat.errors ( ));
 
         m_pic->setItemAndColor(nullptr);
         m_text->setText(s);
