@@ -24,7 +24,7 @@
 #include <QPushButton>
 #include <QApplication>
 #include <QCursor>
-#include <QRegExp>
+#include <QStringBuilder>
 #include <QToolTip>
 #include <QTreeView>
 #include <QListView>
@@ -809,7 +809,7 @@ void SelectItem::applyFilter()
     const BrickLink::Item *oldItem = currentItem();
     d->w_items->clearSelection();
 
-    d->itemModel->setFilterText(d->w_filter->text(), false, false);
+    d->itemModel->setFilterText(d->w_filter->text());
 
     setCurrentItem(oldItem);
     if (!currentItem() && d->itemModel->rowCount() == 1)
@@ -835,30 +835,69 @@ void SelectItem::showContextMenu(const QPoint &p)
 {
     if (auto *iv = qobject_cast<QAbstractItemView *>(sender())) {
         QMenu m(this);
-        QAction *gotoItemCat = nullptr;
-        QAction *gotoAllCat = nullptr;
 
         const BrickLink::Item *item = nullptr;
         QModelIndex idx = iv->indexAt(p);
         if (idx.isValid())
             item = idx.model()->data(idx, BrickLink::ItemPointerRole).value<const BrickLink::Item *>();
 
-        if (item && item->category() != currentCategory())
-            gotoItemCat = m.addAction(tr("Switch to the item's category"));
+        if (item && item->category() != currentCategory()) {
+            connect(m.addAction(tr("Switch to the item's category")), &QAction::triggered,
+                    this, [this, item]() { setCurrentItem(item, true); });
+        }
 
         if (currentCategory() != BrickLink::CategoryModel::AllCategories) {
             QString allCatName = d->categoryModel->index(BrickLink::CategoryModel::AllCategories)
                     .data(Qt::DisplayRole).toString();
-            gotoAllCat = m.addAction(tr("Switch to the \"%1\" category").arg(allCatName));
+            connect(m.addAction(tr("Switch to the \"%1\" category").arg(allCatName)),
+                    &QAction::triggered, this, [this]() {
+                setCurrentCategory(BrickLink::CategoryModel::AllCategories);
+            });
         }
 
-        if (!m.isEmpty()) {
-            auto action = m.exec(iv->mapToGlobal(p));
-            if (action == gotoItemCat)
-                setCurrentItem(item, true);
-            else if (action == gotoAllCat)
-                setCurrentCategory(BrickLink::CategoryModel::AllCategories);
+        // mini-fig special
+        if (item && item->itemType() && (item->itemType()->id() == 'M') && item->hasInventory()) {
+            auto minifigParts = item->consistsOf();
+
+            for (const BrickLink::InvItem *part : minifigParts) {
+                if (!part || !part->item())
+                    continue;
+                auto partItem = part->item();
+                auto partColor = part->color();
+                auto partPicture = BrickLink::core()->picture(partItem, partColor, true);
+
+
+                QString filter = u"consists-of:" % partItem->id();
+                if (partItem->itemType()->hasColors() && partColor)
+                    filter = filter % u'@' % QString::number(partColor->id());
+                QIcon icon;
+                if (partPicture->valid())
+                    icon = QPixmap::fromImage(partPicture->image());
+
+                m.addSeparator();
+                QString section;
+                if (partColor && partColor->id())
+                    section = partColor->name() % u' ';
+                section = section % partItem->name() % u" [" % partItem->id() % u']';
+                m.addAction(icon, section)->setEnabled(false);
+
+                connect(m.addAction(tr("Set filter to Minifigs consisting of this part")),
+                                    &QAction::triggered, this, [this, filter]() {
+                    d->w_filter->setText(filter);
+                });
+                if (!d->w_filter->text().isEmpty()) {
+                    connect(m.addAction(tr("Narrow filter to Minifigs consisting this part")),
+                                        &QAction::triggered, this, [this, filter]() {
+                        d->w_filter->setText(d->w_filter->text() % u' ' % filter);
+                    });
+                }
+            }
+
+            qDeleteAll(minifigParts);
         }
+
+        if (!m.isEmpty())
+            m.exec(iv->mapToGlobal(p));
     }
 }
 

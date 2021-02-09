@@ -574,29 +574,88 @@ void BrickLink::ItemModel::setFilterCategory(const Category *cat)
     invalidateFilter();
 }
 
-void BrickLink::ItemModel::setFilterText(const QString &str, bool caseSensitive, bool useRegExp)
+void BrickLink::ItemModel::setFilterText(const QString &filter)
 {
-    if ((str == m_text_filter) && (m_text_filter_is_regexp == useRegExp)
-            && (m_text_filter_is_cs == caseSensitive)) {
+    if (filter == m_text_filter)
         return;
-    }
-    m_text_filter_is_cs = caseSensitive;
-    m_text_filter_is_regexp = useRegExp;
-    m_text_filter = str;
-    if (!useRegExp) {
-        m_text_filter_excludewords.clear();
-        QStringList sl = str.simplified().split(QLatin1Char(' '));
-        for (auto it = sl.begin(); it != sl.end();) {
-            if ((it->length() > 1) && it->startsWith(QLatin1Char('-'))) {
-                m_text_filter_excludewords << it->mid(1);
-                it = sl.erase(it);
+
+    m_text_filter = filter;
+    m_filter_text.clear();
+    m_filter_appearsIn.clear();
+    m_filter_consistsOf.clear();
+
+    const QStringList sl = filter.simplified().split(QChar(' '));
+
+    const QString consistsOfPrefix = tr("consists-of:", "Filter prefix");
+    const QString appearsInPrefix = tr("appears-in:", "Filter prefix");
+
+    QString quoted;
+    bool quotedNegate = false;
+
+    for (const auto &s : sl) {
+        if (s.isEmpty())
+            continue;
+
+        if (!quoted.isEmpty()) {
+            quoted.append(s);
+            if (quoted.endsWith(QChar('"'))) {
+                quoted.chop(1);
+                m_filter_text << qMakePair(quotedNegate, quoted);
+                quoted.clear();
             } else {
-                ++it;
+                quoted.append(QChar(' '));
+            }
+
+        } else if (s.length() == 1) {
+            // just a single character -> search for it literally
+            m_filter_text << qMakePair(false, s);
+
+        } else {
+            const QChar first = s.at(0);
+            const bool negate = (first == QChar('-'));
+            auto str = negate ? s.mid(1) : s;
+
+            if (str.startsWith(consistsOfPrefix)) {
+                str = str.mid(consistsOfPrefix.length());
+
+                // contains either a minifig or a part, optionally with color-id
+                const BrickLink::Color *color = nullptr;
+
+                int atPos = str.lastIndexOf(QChar('@'));
+                if (atPos != -1) {
+                    color = BrickLink::core()->color(str.mid(atPos + 1).toUInt());
+                    str = str.left(atPos);
+                }
+
+                auto item = BrickLink::core()->item('M', str);
+                if (!item)
+                    item = BrickLink::core()->item('P', str);
+                if (item)
+                    m_filter_consistsOf << qMakePair(negate, qMakePair(item, color));
+
+            } else if (str.startsWith(appearsInPrefix)) {
+                str = str.mid(appearsInPrefix.length());
+
+                // appears-in either a minifig or a set
+                auto item = BrickLink::core()->item('M', str);
+                if (!item)
+                    item = BrickLink::core()->item('S', str);
+                if (item)
+                    m_filter_appearsIn << qMakePair(negate, item);
+
+            } else {
+                const bool firstIsQuote = (str.at(0) == QChar('"'));
+
+                if (firstIsQuote) {
+                    quoted = str.mid(1) % u' ';
+                    quotedNegate = negate;
+                } else {
+                    m_filter_text << qMakePair(negate, str);
+                }
             }
         }
-        if (!m_text_filter_excludewords.isEmpty())
-            m_text_filter = sl.join(QLatin1Char(' '));
     }
+
     invalidateFilter();
 }
 
@@ -618,11 +677,6 @@ bool BrickLink::ItemModel::lessThan(const void *p1, const void *p2, int column) 
                                    (column == 2) ? i2->name() : i2->id()) < 0;
 }
 
-namespace BrickLink {
-// QRegularExpression is not thread-safe, so we need per-thread copies of the QRegularExpression object
-static QThreadStorage<QRegularExpression *> regexpCache;
-}
-
 bool BrickLink::ItemModel::filterAccepts(const void *pointer) const
 {
     const Item *item = static_cast<const Item *>(pointer);
@@ -636,43 +690,44 @@ bool BrickLink::ItemModel::filterAccepts(const void *pointer) const
     else if (m_inv_filter && !item->hasInventory())
         return false;
     else {
-        if (!m_text_filter.isEmpty() || !m_text_filter_excludewords.isEmpty()) {
-            if (!m_text_filter_is_regexp) {
-                const auto cs = m_text_filter_is_cs ? Qt::CaseSensitive : Qt::CaseInsensitive;
+        const QString matchStr = item->id() % u' ' % item->name();
 
-                const bool match = item->id().contains(m_text_filter, cs)
-                        || item->name().contains(m_text_filter, cs);
+        // .first is always "bool negate"
 
-                if (!match)
-                    return false;
+        bool match = true;
+        for (const auto &p : m_filter_text)
+            match = match && (matchStr.contains(p.second, Qt::CaseInsensitive) == !p.first); // contains() xor negate
 
-                for (auto &exclude : m_text_filter_excludewords) {
-                    if (item->name().contains(exclude, cs))
-                        return false;
+        for (const auto &a : m_filter_appearsIn) {
+            bool found = false;
+            const auto appearsvec = item->appearsIn();
+            for (const AppearsInColor &vec : appearsvec) {
+                for (const AppearsInItem &ai : vec) {
+                    if (ai.second == a.second) {
+                        found = true;
+                        break;
+                    }
                 }
-                return true;
-            } else {
-                QRegularExpression *re = nullptr;
-                if (!regexpCache.hasLocalData()) {
-                    re = new QRegularExpression({ }, QRegularExpression::CaseInsensitiveOption
-                                                | QRegularExpression::UseUnicodePropertiesOption);
-                    regexpCache.setLocalData(re);
-                }
-                re = regexpCache.localData();
-                if (re->pattern() != m_text_filter)
-                    re->setPattern(m_text_filter);
-                if ((re->patternOptions() & QRegularExpression::CaseInsensitiveOption) != (!m_text_filter_is_cs)) {
-                    if (m_text_filter_is_cs)
-                        re->setPatternOptions(re->patternOptions() & ~QRegularExpression::CaseInsensitiveOption);
-                    else
-                        re->setPatternOptions(re->patternOptions() | QRegularExpression::CaseInsensitiveOption);
-                }
-                if (!re->isValid())
-                    return false;
-                return (re->match(item->id()).hasMatch() ||
-                        re->match(item->name()).hasMatch());
+                if (found)
+                    break;
             }
+            match = match && (found == !a.first); // found xor negate
         }
+        for (const auto &c : m_filter_consistsOf) {
+            bool found = false;
+            const auto containslist = item->consistsOf();
+            for (const auto &ci : containslist) {
+                if ((ci->item() == c.second.first)
+                        && (!c.second.second || (ci->color() == c.second.second))) {
+                    found = true;
+                    break;
+                }
+            }
+            qDeleteAll(containslist);
+            match = match && (found == !c.first); // found xor negate
+        }
+
+        return match;
     }
     return true;
 }
