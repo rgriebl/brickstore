@@ -350,6 +350,11 @@ ImportOrderDialog::ImportOrderDialog(QWidget *parent)
             this, &ImportOrderDialog::checkSelected);
     connect(w_orders, &QTreeView::activated,
             this, &ImportOrderDialog::activateItem);
+    connect(m_trans, &Transfer::progress, this, [this](int done, int total) {
+        w_progress->setVisible(done != total);
+        w_progress->setMaximum(total);
+        w_progress->setValue(done);
+    });
 
     languageChange();
     update();

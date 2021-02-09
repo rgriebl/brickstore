@@ -116,6 +116,26 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
+      <widget class="QProgressBar" name="w_progress">
+       <property name="format">
+        <string>%v / %m</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
       <widget class="QDialogButtonBox" name="w_buttons">
        <property name="standardButtons">
         <set>QDialogButtonBox::Close</set>
