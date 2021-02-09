@@ -130,22 +130,22 @@ BrickLink::AppearsIn BrickLink::Item::appearsIn(const Color *only_color) const
         quint32 *ptr = m_appears_in + 2;
 
         for (quint32 i = 0; i < m_appears_in [0]; i++) {
-            auto *color_header = reinterpret_cast <appears_in_record *>(ptr);
+            const auto *color_header = reinterpret_cast <const appears_in_record *>(ptr);
             ptr++;
 
             const BrickLink::Color *color = BrickLink::core()->color(color_header->m12);
 
             if (color && (!only_color || (color == only_color))) {
-                AppearsInColor &vec = map [color];
+                AppearsInColor &vec = map[color];
 
                 for (quint32 j = 0; j < color_header->m20; j++, ptr++) {
-                    auto *color_entry = reinterpret_cast <appears_in_record *>(ptr);
+                    const auto *color_entry = reinterpret_cast <const appears_in_record *>(ptr);
 
                     int qty = color_entry->m12;    // qty
                     int index = color_entry->m20;  // item index
 
                     if (qty && (index < count))
-                        vec.append(QPair <int, const Item *> (qty, items [index]));
+                        vec.append(qMakePair(qty, items[index]));
                 }
             }
             else
@@ -194,10 +194,10 @@ BrickLink::InvItemList BrickLink::Item::consistsOf() const
     int count = BrickLink::core()->items().count();
 
     if (m_consists_of) {
-        quint64 *ptr = m_consists_of + 1;
+        const quint64 *ptr = m_consists_of + 1;
 
-        for (uint i = 0; i < uint(m_consists_of [0]); i++) {
-            auto *entry = reinterpret_cast <consists_of_record *>(ptr);
+        for (uint i = 0; i < uint(m_consists_of[0]); i++) {
+            const auto *entry = reinterpret_cast <const consists_of_record *>(ptr);
             ptr++;
 
             const BrickLink::Color *color = BrickLink::core()->color(entry->m_color);
