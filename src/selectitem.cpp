@@ -160,16 +160,33 @@ public:
 
     void setModel(QAbstractItemModel *model)
     {
+        if (m_overlay->model()) {
+            disconnect(m_overlay->model(), &QAbstractItemModel::layoutChanged,
+                       this, &CategoryTreeView::hideRowsInOverlay);
+        }
+
         QTreeView::setModel(model);
         m_overlay->setModel(model);
 
-        for (int r = 1; r < model->rowCount(); ++r)
-            m_overlay->setRowHidden(r, QModelIndex(), true);
+        if (m_overlay->model()) {
+            connect(m_overlay->model(), &QAbstractItemModel::layoutChanged,
+                    this, &CategoryTreeView::hideRowsInOverlay);
+        }
+
+        hideRowsInOverlay();
 
         m_overlay->setSelectionModel(selectionModel());
     }
 
 protected:
+    void hideRowsInOverlay()
+    {
+        if (m_overlay->model()) {
+            for (int r = 1; r < m_overlay->model()->rowCount(); ++r)
+                m_overlay->setRowHidden(r, QModelIndex(), true);
+        }
+    }
+
     bool viewportEvent(QEvent *e)
     {
         auto result = QTreeView::viewportEvent(e);
