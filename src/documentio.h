@@ -59,6 +59,7 @@ private:
         bool differenceModeActive = false;
         bool differenceModeBroken = false;
         bool differenceModeMigrated = false;
+        bool xmlParseError = false;
 
         int invalidItemCount = 0;
 

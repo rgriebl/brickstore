@@ -29,6 +29,7 @@
 #include <QProgressDialog>
 #include <QStringBuilder>
 #include <QScrollBar>
+#include <QMenu>
 #include <QPainter>
 
 #include "messagebox.h"
@@ -375,13 +376,26 @@ public:
 
     void updateCurrencyRates()
     {
-        foreach (QAction *a, m_currency->actions()) {
-            m_currency->removeAction(a);
-            delete a;
+        delete m_currency->menu();
+        auto m = new QMenu();
+
+        QString defCurrency = Config::inst()->defaultCurrencyCode();
+
+        if (!defCurrency.isEmpty()) {
+            auto a = new QAction(tr("Default currency (%1)").arg(defCurrency));
+            a->setObjectName(defCurrency);
+            m->addAction(a);
+            m->addSeparator();
         }
 
-        foreach (const QString &c, Currency::inst()->currencyCodes())
-            m_currency->addAction(new QAction(c, m_currency));
+        foreach (const QString &c, Currency::inst()->currencyCodes()) {
+            auto a = new QAction(c);
+            a->setObjectName(c);
+            if (c == m_doc->currencyCode())
+                a->setEnabled(false);
+            m->addAction(a);
+        }
+        m_currency->setMenu(m);
     }
 
     void documentCurrencyChanged(const QString &ccode)
@@ -391,14 +405,16 @@ public:
 
     void changeDocumentCurrency(QAction *a)
     {
-        QString ccode = a->text();
+        QString ccode = a->objectName();
 
-        ChangeCurrencyDialog d(m_doc->currencyCode(), ccode, this);
-        if (d.exec() == QDialog::Accepted) {
-            double rate = d.exchangeRate();
+        if (ccode != m_doc->currencyCode()) {
+            ChangeCurrencyDialog d(m_doc->currencyCode(), ccode, m_doc->legacyCurrencyCode(), this);
+            if (d.exec() == QDialog::Accepted) {
+                double rate = d.exchangeRate();
 
-            if (rate > 0)
-                m_doc->setCurrencyCode(ccode, rate);
+                if (rate > 0)
+                    m_doc->setCurrencyCode(ccode, rate);
+            }
         }
     }
 

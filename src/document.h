@@ -135,7 +135,9 @@ public slots:
     void pictureUpdated(BrickLink::Picture *pic);
 
 public:
-    Document(const BrickLink::InvItemList &items = { }, const QString &currencyCode = { });
+    Document();
+    Document(const BrickLink::InvItemList &items);
+    Document(const BrickLink::InvItemList &items, const QString &currencyCode);
     virtual ~Document();
 
     static Document *createTemporary(const BrickLink::InvItemList &list,
@@ -174,6 +176,7 @@ public:
 
     QPair<quint64, quint64> itemFlags(const Item *item) const;
 
+    bool legacyCurrencyCode() const;
     QString currencyCode() const;
     void setCurrencyCode(const QString &code, qreal crate = qreal(1));
 
@@ -239,6 +242,7 @@ private:
     QHash<const Item *, Item> m_differenceBase;
     bool m_differenceModeActive = false;
 
+    bool             m_implicitUSD = false;
     QString          m_currencycode;
     quint64          m_error_mask = 0;
     QString          m_filename;

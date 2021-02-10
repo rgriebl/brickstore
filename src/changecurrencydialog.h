@@ -22,7 +22,8 @@ class ChangeCurrencyDialog : public QDialog, private Ui::ChangeCurrencyDialog
 {
     Q_OBJECT
 public:
-    explicit ChangeCurrencyDialog(const QString &from, const QString &to, QWidget *parent = nullptr);
+    explicit ChangeCurrencyDialog(const QString &from, const QString &to, bool wasLegacy = false,
+                                  QWidget *parent = nullptr);
 
     double exchangeRate() const;
 
@@ -40,6 +41,7 @@ private:
 private:
     QString m_from;
     QString m_to;
+    bool m_wasLegacy;
     double m_rate;
     QString m_labelEcbFormat;
     QString m_labelCustomFormat;

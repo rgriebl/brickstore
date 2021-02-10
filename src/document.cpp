@@ -276,14 +276,9 @@ Document::Document(int /*is temporary*/)
 }
 
 // the caller owns the items
-Document::Document(const BrickLink::InvItemList &items, const QString &currencyCode)
+Document::Document()
     : Document(0)
 {
-    // we take ownership of the items
-
-    if (!currencyCode.isEmpty())
-        m_currencycode = currencyCode;
-
     m_undo = new UndoStack(this);
     connect(m_undo, &QUndoStack::cleanChanged,
             this, [this](bool clean) {
@@ -292,9 +287,22 @@ Document::Document(const BrickLink::InvItemList &items, const QString &currencyC
             emit modificationChanged(!clean);
     });
 
-    setBrickLinkItems(items); // setBrickLinkItems owns the items now
-
     s_documents.append(this);
+}
+
+// the caller owns the items
+Document::Document(const BrickLink::InvItemList &items)
+    : Document()
+{
+    // we take ownership of the items
+    setBrickLinkItems(items); // setBrickLinkItems owns the items now
+}
+
+// the caller owns the items
+Document::Document(const BrickLink::InvItemList &items, const QString &currencyCode)
+    : Document(items)
+{
+    m_currencycode = currencyCode;
 }
 
 Document::~Document()
@@ -520,7 +528,7 @@ void Document::changeCurrencyDirect(const QString &ccode, qreal crate, double *&
         emitDataChanged();
         emitStatisticsChanged();
     }
-    emit currencyCodeChanged(m_currencycode);
+    emit currencyCodeChanged(currencyCode());
 }
 
 void Document::emitDataChanged(const QModelIndex &tl, const QModelIndex &br)
@@ -687,14 +695,19 @@ const Document::Item *Document::differenceBaseItem(const Document::Item *item) c
     return (it != m_differenceBase.end()) ? &(*it) : nullptr;
 }
 
+bool Document::legacyCurrencyCode() const
+{
+    return m_currencycode.isEmpty();
+}
+
 QString Document::currencyCode() const
 {
-    return m_currencycode;
+    return m_currencycode.isEmpty() ? QString::fromLatin1("USD") : m_currencycode;
 }
 
 void Document::setCurrencyCode(const QString &ccode, qreal crate)
 {
-    if (ccode != m_currencycode)
+    if (ccode != currencyCode())
         m_undo->push(new CurrencyCmd(this, ccode, crate));
 }
 

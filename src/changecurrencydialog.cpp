@@ -3,15 +3,36 @@
 #include <QLineEdit>
 #include <QValidator>
 #include <QButtonGroup>
+#include <QMouseEvent>
 
 #include "currency.h"
+#include "config.h"
 #include "smartvalidator.h"
 #include "changecurrencydialog.h"
 
-ChangeCurrencyDialog::ChangeCurrencyDialog(const QString &from, const QString &to, QWidget *parent)
-    : QDialog(parent), m_from(from), m_to(to)
+
+ChangeCurrencyDialog::ChangeCurrencyDialog(const QString &from, const QString &to,
+                                           bool wasLegacy, QWidget *parent)
+    : QDialog(parent)
+    , m_from(from)
+    , m_to(to)
+    , m_wasLegacy(wasLegacy)
 {
     setupUi(this);
+
+    if (m_from != QLatin1String("USD"))
+        m_wasLegacy = false;
+    if (m_wasLegacy) {
+        auto legacy = Config::inst()->legacyCurrencyCodeAndRate();
+        if (!legacy.first.isEmpty() && !qFuzzyIsNull(legacy.second) && (m_to == legacy.first)) {
+            w_labelLegacy->setText(w_labelLegacy->text().arg(legacy.first,
+                                                             Currency::toString(legacy.second)));
+            w_labelEcb->installEventFilter(this);
+        } else {
+            w_widgetLegacy->hide();
+            m_wasLegacy = false;
+        }
+    }
 
     w_oldCurrency->setText(w_oldCurrency->text().arg(from));
 
@@ -29,10 +50,15 @@ ChangeCurrencyDialog::ChangeCurrencyDialog(const QString &from, const QString &t
     grp->addButton(w_radioEcb);
     grp->addButton(w_radioCustom);
 
-    w_radioEcb->setChecked(true);
-
     w_labelEcb->installEventFilter(this);
     w_labelCustom->installEventFilter(this);
+
+    if (m_wasLegacy) {
+        grp->addButton(w_radioLegacy);
+        w_radioLegacy->setChecked(true);
+    } else {
+        w_radioEcb->setChecked(true);
+    }
 
     w_editCustom->setValidator(new SmartDoubleValidator(0, 100000, 3, 1, w_editCustom));
     w_editCustom->setText(Currency::toString(1));
@@ -42,10 +68,15 @@ ChangeCurrencyDialog::ChangeCurrencyDialog(const QString &from, const QString &t
 
 bool ChangeCurrencyDialog::eventFilter(QObject *o, QEvent *e)
 {
-    if (o == w_labelEcb && e->type() == QEvent::MouseButtonPress)
-        w_radioEcb->setChecked(true);
-    else if (o == w_labelCustom && e->type() == QEvent::MouseButtonPress)
-        w_radioCustom->setChecked(true);
+    if ((e->type() == QEvent::MouseButtonPress)
+            && (static_cast<QMouseEvent *>(e)->button() == Qt::LeftButton)) {
+        if (o == w_labelEcb)
+            w_radioEcb->setChecked(true);
+        else if (o == w_labelCustom)
+            w_radioCustom->setChecked(true);
+        else if (o == w_labelLegacy)
+            w_radioLegacy->setChecked(true);
+    }
 
     return QDialog::eventFilter(o, e);
 }

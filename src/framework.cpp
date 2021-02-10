@@ -1319,6 +1319,13 @@ Window *FrameWork::createWindow(Document *doc)
         m_undogroup->addStack(doc->undoStack());
         window = new Window(doc, nullptr);
         m_workspace->addWindow(window);
+
+        if (doc->legacyCurrencyCode()
+                && (Config::inst()->defaultCurrencyCode() != QLatin1String("USD"))) {
+            QMetaObject::invokeMethod(this, []() {
+                MessageBox::information(nullptr, { }, tr("You have loaded an old style document that does not have any currency information attached. You can convert this document to include this information by using the currency code selector in the top right corner."));
+            }, Qt::QueuedConnection);
+        }
     }
 
     setActiveWindow(window);

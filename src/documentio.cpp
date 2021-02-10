@@ -350,6 +350,11 @@ Document *DocumentIO::loadFrom(const QString &name)
 
     QApplication::restoreOverrideCursor();
 
+    if (result.xmlParseError) {
+        MessageBox::warning(nullptr, { }, tr("This XML document is not a BrickStoreXML file."));
+        return nullptr;
+    }
+
     if (result.differenceModeBroken) {
         MessageBox::warning(nullptr, { }, tr("This document was saved with difference mode enabled, but the original base values could not be restored."));
     }
@@ -1069,8 +1074,14 @@ DocumentIO::ParseItemListResult DocumentIO::parseBsxInventory(const QDomDocument
     ParseItemListResult result;
 
     QDomElement domRoot = domDoc.documentElement();
-    if (domRoot.tagName() != qL1S("BrickStoreXML"))
+
+    static const QVector<QString> knownDocTypes { qL1S("BrickStoreXML"), qL1S("BrickStockXML") };
+
+    if (!knownDocTypes.contains(domDoc.doctype().name())
+            || !knownDocTypes.contains(domRoot.tagName())) {
+        result.xmlParseError = true;
         return result;
+    }
 
     QDomElement domInventory;
     QDomElement domDifferenceMode;
@@ -1109,8 +1120,6 @@ DocumentIO::ParseItemListResult DocumentIO::parseBsxInventory(const QDomDocument
     }
 
     result.currencyCode = domInventory.attribute(qL1S("Currency"));
-    if (result.currencyCode.isEmpty())
-        result.currencyCode = qL1S("USD");
 
     // no throw beyond this point - otherwise we'd be leaking the domGuiState node clone
     result.domGuiState = domGuiState.cloneNode(true).toElement();
