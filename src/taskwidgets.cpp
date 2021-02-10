@@ -227,50 +227,52 @@ void TaskInfoWidget::delayedSelectionUpdate()
         Document::Statistics stat(m_win->document(),
                                   m_selection.isEmpty() ? m_win->document()->items() : m_selection);
 
-        QString valstr, wgtstr;
+        QLocale loc;
         QString ccode = m_win->document()->currencyCode();
+        QString wgtstr;
+        QString minvalstr;
+        QString valstr = loc.toString(stat.value(), 'f', 3);
 
         if (!qFuzzyCompare(stat.value(), stat.minValue())) {
-            valstr = QString("%1 (%2 %3)").arg(Currency::toString(stat.value(), ccode, Currency::LocalSymbol),
-                                               tr("min."),
-                                               Currency::toString(stat.minValue(), ccode, Currency::LocalSymbol));
-        } else {
-            valstr = Currency::toString(stat.value(), ccode, Currency::LocalSymbol);
+            minvalstr = u'(' % tr("min.") % u' ' % ccode % u' '
+                    % loc.toString(stat.minValue(), 'f', 3) % u')';
         }
-        QString coststr = Currency::toString(stat.cost(), ccode, Currency::LocalSymbol);
+        QString coststr = loc.toString(stat.cost(), 'f', 3);
         QString profitstr;
         if (!qFuzzyIsNull(stat.cost())) {
             int percent = int(std::round(stat.value() / stat.cost() * 100. - 100.));
-            profitstr = (percent > 0 ? u"( +" : u"( ") % QString::number(percent) % u" % )";
+            profitstr = (percent > 0 ? u"(+" : u"(") % loc.toString(percent) % u" %)";
         }
 
 
-        if (qFuzzyCompare(stat.weight(), -DBL_MIN)) {
+        if (qFuzzyCompare(stat.weight(), -std::numeric_limits<double>::min())) {
             wgtstr = "-";
         } else {
             double weight = stat.weight();
 
             if (weight < 0) {
                 weight = -weight;
-                wgtstr = tr("min.") + " ";
+                wgtstr = tr("min.") % u' ';
             }
 
             wgtstr += Utility::weightToString(weight, Config::inst()->measurementSystem(), true, true);
         }
 
-        static const char *fmt = "<h3>%1</h3>"
-                                 "&nbsp;&nbsp;%2: %3<br>"
-                                 "&nbsp;&nbsp;%4: %5<br><br>"
-                                 "&nbsp;&nbsp;%6: %7&nbsp;&nbsp;%8<br><br>"
-                                 "&nbsp;&nbsp;%9: %10<br><br>"
-                                 "&nbsp;&nbsp;%11: %12";
+        static const char *fmt =
+                "<h3>%1</h3><table cellspacing=6>"
+                "<tr><td>&nbsp;&nbsp;%2: </td><td colspan=2 align=right>&nbsp;&nbsp;%3</td></tr>"
+                "<tr><td>&nbsp;&nbsp;%4: </td><td colspan=2 align=right>&nbsp;&nbsp;%5</td></tr><tr></tr>"
+                "<tr><td>&nbsp;&nbsp;%6: </td><td>&nbsp;&nbsp;%7</td><td align=right>%8</td><td>&nbsp;&nbsp;%9</td></tr><tr></tr>"
+                "<tr><td>&nbsp;&nbsp;%10:</td><td>&nbsp;&nbsp;%11</td><td align=right>%12</td><td>&nbsp;&nbsp;%13</td></tr><tr></tr>"
+                "<tr><td>&nbsp;&nbsp;%14:</td><td colspan=2 align=right>&nbsp;&nbsp;%15</td></tr>"
+                "</table>";
 
         QString s = QString::fromLatin1(fmt).arg(
                 m_selection.isEmpty() ? tr("Document statistics") : tr("Multiple lots selected"),
-                tr("Lots"), QLocale().toString(stat.lots()),
-                tr("Items"), QLocale().toString(stat.items()),
-                tr("Cost"), coststr, profitstr).arg(
-                tr("Value"), valstr,
+                tr("Lots"), loc.toString(stat.lots()),
+                tr("Items"), loc.toString(stat.items()),
+                tr("Cost"), ccode, coststr, profitstr).arg(
+                tr("Value"), ccode, valstr, minvalstr,
                 tr("Weight"), wgtstr);
 
         m_pic->setItemAndColor(nullptr);

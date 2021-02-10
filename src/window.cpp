@@ -1154,8 +1154,7 @@ void Window::on_edit_price_set_triggered()
     double price = selection().front()->price();
 
     if (MessageBox::getDouble(this, { }, tr("Enter the new price for all selected items:"),
-                              Currency::localSymbol(m_doc->currencyCode()), price, 0,
-                              FrameWork::maxPrice, 3)) {
+                              m_doc->currencyCode(), price, 0, FrameWork::maxPrice, 3)) {
         setOrToggle<double>::set(this, QT_TR_N_NOOP("Set price on %n item(s)"),
                                  &Document::Item::price, &Document::Item::setPrice, price);
     }
@@ -1348,8 +1347,7 @@ void Window::on_edit_cost_set_triggered()
     double cost = selection().front()->cost();
 
     if (MessageBox::getDouble(this, { }, tr("Enter the new cost for all selected items:"),
-                              Currency::localSymbol(m_doc->currencyCode()), cost, 0,
-                              FrameWork::maxPrice, 3)) {
+                              m_doc->currencyCode(), cost, 0, FrameWork::maxPrice, 3)) {
         setOrToggle<double>::set(this, QT_TR_N_NOOP("Set cost on %n item(s)"),
                                  &Document::Item::cost, &Document::Item::setCost, cost);
     }
@@ -1425,8 +1423,7 @@ void Window::on_edit_cost_spread_triggered()
     double spreadAmount = 0;
 
     if (MessageBox::getDouble(this, { }, tr("Enter the cost amount to spread over all the selected items:"),
-                              Currency::localSymbol(m_doc->currencyCode()), spreadAmount,
-                              0, FrameWork::maxPrice, 3)) {
+                              m_doc->currencyCode(), spreadAmount, 0, FrameWork::maxPrice, 3)) {
         uint spreadcount = 0;
         double priceTotal = 0;
 

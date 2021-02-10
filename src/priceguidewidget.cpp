@@ -300,7 +300,7 @@ void PriceGuideWidget::recalcLayoutNormal(const QSize &s, const QFontMetrics &fm
     for (const auto &cond : d->m_str_cond)
         cw[1] = qMax(cw[1], fm.horizontalAdvance(cond));
     cw[2] = qMax(fm.horizontalAdvance(d->m_str_qty), fm.horizontalAdvance("0000000 (00000)"));
-    cw[3] = fm.horizontalAdvance(Currency::toString(9000, d->m_ccode, Currency::LocalSymbol));
+    cw[3] = fm.horizontalAdvance(Currency::toString(9000));
     for (const auto &price : d->m_str_price)
         cw[3] = qMax(cw[3], fm.horizontalAdvance(price));
 
@@ -393,7 +393,7 @@ void PriceGuideWidget::recalcLayoutHorizontal(const QSize &s, const QFontMetrics
     for (const auto &cond : d->m_str_cond)
         cw[1] = qMax(cw[1], fm.horizontalAdvance(cond));
     cw[2] = qMax(fm.horizontalAdvance(d->m_str_qty), fm.horizontalAdvance("0000000 (00000)"));
-    cw[3] = fm.horizontalAdvance(Currency::toString(9000, d->m_ccode, Currency::NoSymbol));
+    cw[3] = fm.horizontalAdvance(Currency::toString(9000));
     for (const auto &price : d->m_str_price)
         cw[3] = qMax(cw[3], fm.horizontalAdvance(price));
 
@@ -478,7 +478,7 @@ void PriceGuideWidget::recalcLayoutVertical(const QSize &s, const QFontMetrics &
         cw[0] = qMax(cw[0], fm.horizontalAdvance(price));
     cw[0] += 2 * hborder;
 
-    cw[1] = qMax(fm.horizontalAdvance(Currency::toString(9000, d->m_ccode, Currency::NoSymbol)),
+    cw[1] = qMax(fm.horizontalAdvance(Currency::toString(9000)),
                   fm.horizontalAdvance("0000000 (00000)"));
     for (const auto &cond : d->m_str_cond)
         cw[1] = qMax(cw[1], fm.horizontalAdvance(cond));
@@ -644,7 +644,7 @@ void PriceGuideWidget::paintEvent(QPaintEvent *e)
             bool left = (c.left() == 0);
             bool right = (c.right() == (viewport()->width() - 1));
 
-            paintHeader(&p, c, c.m_text_flags, c.m_text == "$$$" ? Currency::localSymbol(d->m_ccode)
+            paintHeader(&p, c, c.m_text_flags, c.m_text == "$$$" ? d->m_ccode
                                                                  : c.m_text, c.m_flag, left, right);
             break;
         }
@@ -660,7 +660,7 @@ void PriceGuideWidget::paintEvent(QPaintEvent *e)
         case cell::Price:
             if (!is_updating) {
                 if (valid)
-                    str = Currency::toString(d->m_pg->price(c.m_time, c.m_condition, c.m_price) * d->m_crate, d->m_ccode);
+                    str = Currency::toString(d->m_pg->price(c.m_time, c.m_condition, c.m_price) * d->m_crate);
 
                 paintCell(&p, c, c.m_text_flags, str, c.m_flag,
                           (&c == d->m_cellUnderMouse) && d->m_pg && d->m_pg->valid());

@@ -41,16 +41,8 @@ public:
 
     QDateTime lastUpdate() const;
 
-    enum Symbol {
-        NoSymbol = 0,
-        LocalSymbol,
-        InternationalSymbol
-    };
-
-    static QString toString(double value, const QString &intSymbol = QLatin1String("USD"), Symbol cs = NoSymbol, int precision = 3);
+    static QString toString(double value, const QString &intSymbol = { }, int precision = 3);
     static double fromString(const QString &str);
-
-    static QString localSymbol(const QString &intSymbol);
 
 public slots:
     void updateRates(bool silent = false);

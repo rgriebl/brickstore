@@ -27,7 +27,7 @@ IncDecPricesDialog::IncDecPricesDialog(bool showTiers, const QString &currencyco
     w_apply_to_tiers->setVisible(showTiers);
 
     w_value->setText(QLatin1String("0"));
-    w_fixed->setText(Currency::localSymbol(currencycode));
+    w_fixed->setText(currencycode);
 
     m_pos_percent_validator = new SmartDoubleValidator(0., 1000., 2, 0, this);
     m_neg_percent_validator = new SmartDoubleValidator(0., 99.99, 2, 0, this);
@@ -58,7 +58,7 @@ void IncDecPricesDialog::updateValidators()
         w_value->setText(QLatin1String("0"));
     } else {
         w_value->setValidator(m_fixed_validator);
-        w_value->setText(Currency::toString(0, m_currencycode));
+        w_value->setText(Currency::toString(0));
     }
     checkValue();
 }

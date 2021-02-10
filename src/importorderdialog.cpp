@@ -136,8 +136,7 @@ public:
                 }
                 return order->otherParty();
             }
-            case 6: return Currency::toString(order->grandTotal(), order->currencyCode(),
-                                              Currency::InternationalSymbol, 2);
+            case 6: return Currency::toString(order->grandTotal(), order->currencyCode(), 2);
             }
         } else if (role == Qt::DecorationRole) {
             switch (col) {

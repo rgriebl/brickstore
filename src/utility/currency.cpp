@@ -26,6 +26,7 @@
 #include <QNetworkReply>
 #include <QBuffer>
 #include <QXmlStreamReader>
+#include <QStringBuilder>
 
 #include "application.h"
 #include "config.h"
@@ -203,33 +204,22 @@ QDateTime Currency::lastUpdate() const
     return m_lastUpdate;
 }
 
-QString Currency::toString(double value, const QString &currencyCode, Symbol cs, int precision)
+QString Currency::toString(double value, const QString &currencyCode, int precision)
 {
     QLocale loc;
     loc.setNumberOptions(QLocale::OmitGroupSeparator);
-    QString s = loc.toString(value, 'f', precision);
-
-    if (cs == LocalSymbol)
-        return localSymbol(currencyCode) + QLatin1Char(' ') + s;
-    else if (cs == InternationalSymbol)
-        return currencyCode + QLatin1Char(' ') + s;
+    if (currencyCode.isEmpty())
+        return loc.toString(value, 'f', precision);
     else
-        return s;
+        return currencyCode % u' ' % loc.toString(value, 'f', precision);
 }
 
 double Currency::fromString(const QString &str)
 {
     QString s = str.trimmed();
-
     if (s.isEmpty())
         return 0;
     return QLocale().toDouble(s);
 }
-
-QString Currency::localSymbol(const QString &intSymbol)
-{
-    return Utility::localForInternationalCurrencySymbol(intSymbol);
-}
-
 
 #include "moc_currency.cpp"

@@ -238,7 +238,7 @@ Document::Statistics::Statistics(const Document *doc, const ItemList &list, bool
             m_incomplete++;
     }
     if (weight_missing)
-        m_weight = (m_weight == 0.) ? std::numeric_limits<double>::min() : -m_weight;
+        m_weight = qFuzzyIsNull(m_weight) ? -std::numeric_limits<double>::min() : -m_weight;
     m_ccode = doc->currencyCode();
 }
 
@@ -484,7 +484,7 @@ void Document::changeCurrencyDirect(const QString &ccode, qreal crate, double *&
 {
     m_currencycode = ccode;
 
-    if (!qFuzzyCompare(crate, qreal(1))) {
+    if (!qFuzzyCompare(crate, qreal(1)) || (ccode != m_currencycode)) {
         bool createPrices = (prices == nullptr);
         if (createPrices)
             prices = new double[5 * m_items.count()];
@@ -1001,21 +1001,21 @@ QVariant Document::dataForEditRole(const Item *it, Field f) const
     case TierQ1      : return it->tierQuantity(0);
     case TierQ2      : return it->tierQuantity(1);
     case TierQ3      : return it->tierQuantity(2);
-    case TierP1      : return Currency::toString(it->tierPrice(0), currencyCode());
-    case TierP2      : return Currency::toString(it->tierPrice(1), currencyCode());
-    case TierP3      : return Currency::toString(it->tierPrice(2), currencyCode());
+    case TierP1      : return Currency::toString(it->tierPrice(0));
+    case TierP2      : return Currency::toString(it->tierPrice(1));
+    case TierP3      : return Currency::toString(it->tierPrice(2));
     case Weight      : return Utility::weightToString(it->totalWeight(), Config::inst()->measurementSystem(), false);
     case Quantity    : return it->quantity();
     case QuantityDiff:  {
         auto base = differenceBaseItem(it);
         return base ? it->quantity() - base->quantity() : 0;
     }
-    case Price       : return Currency::toString(it->price(), currencyCode());
+    case Price       : return Currency::toString(it->price());
     case PriceDiff   : {
         auto base = differenceBaseItem(it);
-        return Currency::toString(base ? it->price() - base->price() : 0, currencyCode());
+        return Currency::toString(base ? it->price() - base->price() : 0);
     }
-    case Cost        : return Currency::toString(it->cost(), currencyCode());
+    case Cost        : return Currency::toString(it->cost());
     default          : return QString();
     }
 }
@@ -1039,8 +1039,8 @@ QString Document::dataForDisplayRole(const Item *it, Field f, int row) const
     case Remarks     : return it->remarks();
     case Quantity    : return QString::number(it->quantity());
     case Bulk        : return (it->bulkQuantity() == 1 ? dash : QString::number(it->bulkQuantity()));
-    case Price       : return Currency::toString(it->price(), currencyCode());
-    case Total       : return Currency::toString(it->total(), currencyCode());
+    case Price       : return Currency::toString(it->price());
+    case Total       : return Currency::toString(it->total());
     case Sale        : return (it->sale() == 0 ? dash : QString::number(it->sale()) + QLatin1Char('%'));
     case Condition   : {
         QString c = (it->condition() == BrickLink::Condition::New) ? tr("N", "List>Cond>New")
@@ -1057,22 +1057,22 @@ QString Document::dataForDisplayRole(const Item *it, Field f, int row) const
     case TierQ1      : return (it->tierQuantity(0) == 0 ? dash : QString::number(it->tierQuantity(0)));
     case TierQ2      : return (it->tierQuantity(1) == 0 ? dash : QString::number(it->tierQuantity(1)));
     case TierQ3      : return (it->tierQuantity(2) == 0 ? dash : QString::number(it->tierQuantity(2)));
-    case TierP1      : return Currency::toString(it->tierPrice(0), currencyCode());
-    case TierP2      : return Currency::toString(it->tierPrice(1), currencyCode());
-    case TierP3      : return Currency::toString(it->tierPrice(2), currencyCode());
+    case TierP1      : return Currency::toString(it->tierPrice(0));
+    case TierP2      : return Currency::toString(it->tierPrice(1));
+    case TierP3      : return Currency::toString(it->tierPrice(2));
     case Reserved    : return it->reserved();
     case Weight      : return qFuzzyIsNull(it->totalWeight()) ? dash : Utility::weightToString(it->totalWeight(), Config::inst()->measurementSystem(), true, true);
     case YearReleased: return (it->itemYearReleased() == 0) ? dash : QString::number(it->itemYearReleased());
 
     case PriceOrig   : {
         auto base = differenceBaseItem(it);
-        return Currency::toString(base ? base->price() : 0, currencyCode());
+        return Currency::toString(base ? base->price() : 0);
     }
     case PriceDiff   : {
         auto base = differenceBaseItem(it);
-        return Currency::toString(base ? it->price() - base->price() : 0, currencyCode());
+        return Currency::toString(base ? it->price() - base->price() : 0);
     }
-    case Cost        : return Currency::toString(it->cost(), currencyCode());
+    case Cost        : return Currency::toString(it->cost());
     case QuantityOrig: {
         auto base = differenceBaseItem(it);
         return QString::number(base ? base->quantity() : 0);
