@@ -12,13 +12,11 @@ OTHER_FILES += \
   $$PWD/version.h.in \
 
 SOURCES += \
-    $$PWD/documentio.cpp \
   $$PWD/main.cpp \
   $$PWD/rebuilddatabase.cpp \
   $$PWD/ref.cpp \
 
 HEADERS += \
-    $$PWD/documentio.h \
   $$PWD/rebuilddatabase.h \
   $$PWD/ref.h \
 
@@ -29,6 +27,7 @@ SOURCES += \
   $$PWD/application.cpp \
   $$PWD/config.cpp \
   $$PWD/document.cpp \
+  $$PWD/documentio.cpp \
   $$PWD/documentdelegate.cpp \
   $$PWD/framework.cpp \
   $$PWD/managecolumnlayoutsdialog.cpp \
@@ -47,6 +46,7 @@ HEADERS += \
   $$PWD/config.h \
   $$PWD/document.h \
   $$PWD/document_p.h \
+  $$PWD/documentio.h \
   $$PWD/documentdelegate.h \
   $$PWD/framework.h \
   $$PWD/managecolumnlayoutsdialog.h \

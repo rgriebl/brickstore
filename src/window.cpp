@@ -453,7 +453,7 @@ protected:
         auto hoverbg = checkedbg.lighter();
         auto hoverborder = hoverbg.darker();
 
-        m_differenceMode->setStyleSheet(QLatin1String(
+        m_differenceMode->setStyleSheet(QString::fromLatin1(
             "QToolButton { background-color: transparent; border: 1px solid transparent; padding: 2px; }"
             "QToolButton:hover { background-color: %3; border: 1px solid %4 } "
             "QToolButton:checked { background-color: %1; border: 1px solid %2; } "

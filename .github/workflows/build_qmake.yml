@@ -55,7 +55,6 @@ jobs:
         modules: 'qtsvg qttools'
         arch: ${{ matrix.config.qt_arch }}
         tools: ${{ matrix.config.qt_tools }}
-        mirror: 'http://mirrors.ocf.berkeley.edu/qt/'
 
     - name: Install Qt on Linux (native)
       if: startsWith(matrix.config.os, 'ubuntu') && !matrix.config.debian_container
