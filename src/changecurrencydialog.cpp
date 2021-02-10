@@ -97,7 +97,7 @@ double ChangeCurrencyDialog::exchangeRate() const
 {
     double rate = m_rate;
     if (w_radioCustom->isChecked())
-        rate = w_editCustom->text().toDouble();
+        rate = Currency::fromString(w_editCustom->text());
     return rate;
 }
 
