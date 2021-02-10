@@ -737,13 +737,30 @@ void DocumentIO::exportBrickLinkUpdateClipboard(const Document *doc,
         return;
     }
 
+    bool withoutLotId = false;
+    bool duplicateLotId = false;
+    QSet<uint> lotIds;
     for (const BrickLink::InvItem *item : itemlist) {
-        if (!item->lotId()) {
-            if (MessageBox::warning(nullptr, { }, tr("This list contains items without a BrickLink Lot-ID.<br /><br />Do you really want to export this list?"), MessageBox::Yes, MessageBox::No) != MessageBox::Yes)
-                return;
+        const uint lotId = item->lotId();
+        if (!lotId) {
+            withoutLotId = true;
+        } else {
+            if (lotIds.contains(lotId))
+                duplicateLotId = true;
             else
-                break;
+                lotIds.insert(lotId);
         }
+    }
+
+    if (withoutLotId) {
+        if (MessageBox::question(nullptr, { }, tr("This list contains items without a BrickLink Lot-ID.<br /><br />Do you really want to export this list?"))
+                != MessageBox::Yes)
+            return;
+    }
+    if (duplicateLotId) {
+        if (MessageBox::question(nullptr, { }, tr("This list contains items with duplicate BrickLink Lot-IDs.<br /><br />Do you really want to export this list?"))
+                != MessageBox::Yes)
+            return;
     }
 
     static QLocale c = QLocale::c();

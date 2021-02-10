@@ -354,11 +354,6 @@ Document::Item *Document::itemAt(int position)
 
 bool Document::insertItems(const QVector<int> &positions, const ItemList &items)
 {
-    if (isDifferenceModeActive()) {
-        qDeleteAll(items);
-        return false;
-    }
-
     m_undo->push(new AddRemoveCmd(AddRemoveCmd::Add, this, positions, items /*, true*/));
     return true;
 }
@@ -370,9 +365,6 @@ bool Document::removeItem(Item *item)
 
 bool Document::removeItems(const ItemList &items)
 {
-    if (isDifferenceModeActive())
-        return false;
-
     m_undo->push(new AddRemoveCmd(AddRemoveCmd::Remove, this, QVector<int>(), items /*, true*/));
     return true;
 }
@@ -395,8 +387,6 @@ bool Document::changeItem(int position, const Item &value)
 
 void Document::insertItemsDirect(const ItemList &items, QVector<int> &positions)
 {
-    Q_ASSERT(!isDifferenceModeActive());
-
     auto pos = positions.constBegin();
     bool single = (items.count() == 1);
     QModelIndexList before;
@@ -420,6 +410,11 @@ void Document::insertItemsDirect(const ItemList &items, QVector<int> &positions)
                 beginInsertRows(root, rows, rows);
             m_items.append(item);
         }
+
+        // this is really a new item, not just a redo - start with no differences
+        if (!m_differenceBase.contains(item))
+            m_differenceBase.insert(item, *item);
+
         updateItemFlags(item);
         if (single)
             endInsertRows();
@@ -439,8 +434,6 @@ void Document::insertItemsDirect(const ItemList &items, QVector<int> &positions)
 
 void Document::removeItemsDirect(ItemList &items, QVector<int> &positions)
 {
-    Q_ASSERT(!isDifferenceModeActive());
-
     positions.resize(items.count());
 
     bool single = (items.count() == 1);
@@ -801,6 +794,13 @@ bool Document::isModified() const
 void Document::unsetModified()
 {
     m_undo->setClean();
+
+    // at this point, we can cleanup the diff mode base
+    QSet goneItems = m_differenceBase.keys().toSet();
+    for (const auto &item : qAsConst(m_items))
+        goneItems.remove(item);
+    for (const auto &item : qAsConst(goneItems))
+        m_differenceBase.remove(item);
 }
 
 quint64 Document::errorMask() const

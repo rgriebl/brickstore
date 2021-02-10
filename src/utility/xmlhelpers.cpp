@@ -147,7 +147,6 @@ void XmlHelpers::CreateXML::createElement()
 
 void XmlHelpers::CreateXML::createText(const char *tagName, QStringView value)
 {
-    qWarning() << "CREATE" << tagName << value;
     m_domItem.appendChild(m_domDoc.createElement(QLatin1String(tagName))
                           .appendChild(m_domDoc.createTextNode(value.toString())).parentNode());
 }
