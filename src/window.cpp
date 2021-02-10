@@ -316,7 +316,7 @@ public:
                 if (!m_doc->startDifferenceMode())
                     m_differenceMode->setChecked(false);
             } else {
-                if (MessageBox::question(this, tr("End difference mode"), tr("Ending difference mode resets all base values used for calculating the actual differences to the current values. Restarting difference mode will therefor start with no differences at all. This operation is not undoable.<br><br>Do you really want to end difference mode now?")) == QMessageBox::Yes) {
+                if (MessageBox::question(this, tr("End difference mode"), tr("Ending difference mode resets all base values used for calculating the actual differences to the current values.<br>This operation is not undoable.<br>Do you still want to continue?")) == QMessageBox::Yes) {
                     m_doc->endDifferenceMode();
                 } else {
                     m_differenceMode->setChecked(true);

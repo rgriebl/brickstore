@@ -757,14 +757,18 @@ void DocumentIO::exportBrickLinkUpdateClipboard(const Document *doc,
         }
     }
 
-    if (withoutLotId) {
-        if (MessageBox::question(nullptr, { }, tr("This list contains items without a BrickLink Lot-ID.<br /><br />Do you really want to export this list?"))
-                != MessageBox::Yes)
-            return;
-    }
-    if (duplicateLotId) {
-        if (MessageBox::question(nullptr, { }, tr("This list contains items with duplicate BrickLink Lot-IDs.<br /><br />Do you really want to export this list?"))
-                != MessageBox::Yes)
+    QStringList warnings;
+
+    if (withoutLotId)
+        warnings << tr("This list contains items without a BrickLink Lot-ID.");
+    if (duplicateLotId)
+        warnings << tr("This list contains items with duplicate BrickLink Lot-IDs.");
+
+    if (!warnings.isEmpty()) {
+        QString s = u"<ul><li>" % warnings.join(u"</li><li>") % u"</li></ul>";
+        s = tr("There are problems: %1Do you really want to export this list?").arg(s);
+
+        if (MessageBox::question(nullptr, { }, s) != MessageBox::Yes)
             return;
     }
 
@@ -773,8 +777,7 @@ void DocumentIO::exportBrickLinkUpdateClipboard(const Document *doc,
 
     for (const BrickLink::InvItem *item : itemlist) {
         if (item->isIncomplete()
-                || (item->status() == BrickLink::Status::Exclude)
-                || !item->lotId()) {
+                || (item->status() == BrickLink::Status::Exclude)) {
             continue;
         }
         auto *base = doc->differenceBaseItem(item);
