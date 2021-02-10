@@ -36,14 +36,14 @@ echo -n "Generating app and doc icons..."
 
 # Unix icons
 convert $b/brickstore.png -resize 256 $gai/brickstore.png
-convert -size 128x128 canvas:transparent \
-        $cus/crystal-clear-spreadsheet.png -composite \
-        $b/brickstore.png -geometry 88x88+20+4 -composite \
+convert -size 256x256 canvas:transparent \
+        $cus/oxygen-x-office-spreadsheet.png -composite \
+        $b/brickstore.png -geometry 172x172+40+8 -composite \
         $gai/brickstore_doc.png
 
 # Windows icons
-convert $gai/brickstore.png -define icon:auto-resize=256,48,32,16 $gai/brickstore.ico
-convert $gai/brickstore_doc.png -define icon:auto-resize=128,48,32,16 $gai/brickstore_doc.ico
+convert $gai/brickstore.png -define icon:auto-resize=256,96,48,32,16 $gai/brickstore.ico
+convert $gai/brickstore_doc.png -define icon:auto-resize=256,96,48,32,16 $gai/brickstore_doc.ico
 
 # macOS icons
 ## png2icns is broken for icons >= 256x256
@@ -53,7 +53,7 @@ convert $gai/brickstore_doc.png -define icon:auto-resize=128,48,32,16 $gai/brick
 ## and makeicns is only available on macOS via brew
 if which makeicns >/dev/null; then
   makeicns -256 $gai/brickstore.png -32 $gai/brickstore.png -out $gai/brickstore.icns
-  makeicns -128 $gai/brickstore_doc.png -32 $gai/brickstore_doc.png -out $gai/brickstore_doc.icns
+  makeicns -256 $gai/brickstore_doc.png -32 $gai/brickstore_doc.png -out $gai/brickstore_doc.icns
 fi
 
 echo "done"
@@ -127,7 +127,7 @@ echo "done"
 if which zopflipng >/dev/null; then
   echo "Optimizing..."
 
-  for png in $(ls -1 $cus/*.png $gai/*.png $gin/*.png $b/icons/$theme/generated $b/icons/${theme}-dark/generated); do
+  for png in $(ls -1 $cus/*.png $gai/*.png $b/icons/$theme/generated $b/icons/${theme}-dark/generated); do
     echo -n " > ${png}... "
     zopflipng -my "$png" "$png" >/dev/null
     #optipng -o7 "$1"

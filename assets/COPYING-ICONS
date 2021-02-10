@@ -1,4 +1,7 @@
-The Breeze Icon Theme in icons/
+The Breeze Icon Theme in icons/ as well as various derived icons (overlay*)
+and the spreadsheet icon in custom/ are from the KDE project and are licensed
+under the LGPL.
+This is a copy of the Breeze Icon Theme's COPYING file:
 
     Copyright (C) 2014 Uri Herrera <uri_herrera@nitrux.in> and others
 
