@@ -11,6 +11,8 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
+#include <cmath>
+
 #include <QLayout>
 #include <QLabel>
 #include <QApplication>
@@ -478,7 +480,7 @@ public:
         b = !qFuzzyIsNull(stat.cost());
         if (b) {
             int percent = int(std::round(stat.value() / stat.cost() * 100. - 100.));
-            QString profitstr = (percent > 0 ? u"(+" : u"(-") % loc.toString(percent) % u" %)";
+            QString profitstr = (percent > 0 ? u"(+" : u"(") % loc.toString(percent) % u" %)";
             m_profit->setText(profitstr);
         }
         m_profit->setVisible(b);
