@@ -83,7 +83,8 @@ enum UrlList {
     URL_ItemChangeLog,
     URL_LotsForSale,
     URL_AppearsInSets,
-    URL_StoreItemDetail
+    URL_StoreItemDetail,
+    URL_StoreItemSearch,
 };
 
 enum ModelRoles {

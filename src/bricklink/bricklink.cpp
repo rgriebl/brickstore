@@ -61,36 +61,33 @@ QUrl Core::url(UrlList u, const void *opt, const void *opt2)
         url = "https://www.bricklink.com/invXML.asp#update";
         break;
 
-    case URL_CatalogInfo:
-        if (opt) {
-            const Item *item = static_cast <const Item *>(opt);
-
+    case URL_CatalogInfo: {
+        auto item = static_cast<const Item *>(opt);
+        if (item && item->itemType()) {
             url = "https://www.bricklink.com/catalogItem.asp";
             QUrlQuery query;
             query.addQueryItem(QChar(item->itemType()->id()), item->id());
             if (item->itemType()->hasColors() && opt2)
-                query.addQueryItem("C", QString::number(static_cast <const Color *>(opt2)->id()));
+                query.addQueryItem("C", QString::number(static_cast<const Color *>(opt2)->id()));
             url.setQuery(query);
         }
         break;
-
-    case URL_PriceGuideInfo:
-        if (opt) {
-            const Item *item = static_cast <const Item *>(opt);
-
+    }
+    case URL_PriceGuideInfo: {
+        auto *item = static_cast<const Item *>(opt);
+        if (item && item->itemType()) {
             url = "https://www.bricklink.com/catalogPG.asp";
             QUrlQuery query;
             query.addQueryItem(QChar(item->itemType()->id()), item->id());
             if (item->itemType()->hasColors() && opt2)
-                query.addQueryItem("colorID", QString::number(static_cast <const Color *>(opt2)->id()));
+                query.addQueryItem("colorID", QString::number(static_cast<const Color *>(opt2)->id()));
             url.setQuery(query);
         }
         break;
-
-    case URL_LotsForSale:
-        if (opt) {
-            const Item *item = static_cast <const Item *>(opt);
-
+    }
+    case URL_LotsForSale: {
+        auto item = static_cast<const Item *>(opt);
+        if (item && item->itemType()) {
             url = "https://www.bricklink.com/search.asp";
             QUrlQuery query;
             query.addQueryItem("viewFrom", "sa");
@@ -108,26 +105,25 @@ QUrl Core::url(UrlList u, const void *opt, const void *opt2)
             query.addQueryItem("q", id);
 
             if (item->itemType()->hasColors() && opt2)
-                query.addQueryItem("colorID", QString::number(static_cast <const Color *>(opt2)->id()));
+                query.addQueryItem("colorID", QString::number(static_cast<const Color *>(opt2)->id()));
             url.setQuery(query);
         }
         break;
-
-    case URL_AppearsInSets:
-        if (opt) {
-            const Item *item = static_cast <const Item *>(opt);
-
+    }
+    case URL_AppearsInSets: {
+        auto item = static_cast<const Item *>(opt);
+        if (item && item->itemType()) {
             url = "https://www.bricklink.com/catalogItemIn.asp";
             QUrlQuery query;
             query.addQueryItem(QChar(item->itemType()->id()), item->id());
             query.addQueryItem("in", "S");
 
             if (item->itemType()->hasColors() && opt2)
-                query.addQueryItem("colorID", QString::number(static_cast <const Color *>(opt2)->id()));
+                query.addQueryItem("colorID", QString::number(static_cast<const Color *>(opt2)->id()));
             url.setQuery(query);
         }
         break;
-
+    }
     case URL_ColorChangeLog:
         url = "https://www.bricklink.com/catalogReqList.asp?pg=1&chgUserID=&viewActionType=R";
         break;
@@ -136,15 +132,28 @@ QUrl Core::url(UrlList u, const void *opt, const void *opt2)
         url = "https://www.bricklink.com/catalogReqList.asp?pg=1&chgUserID=&viewActionType=I";
         QUrlQuery query;
         if (opt)
-            query.addQueryItem("q", static_cast <const char *>(opt));
+            query.addQueryItem("q", static_cast<const char *>(opt));
         url.setQuery(query);
         break;
     }
     case URL_StoreItemDetail: {
-        if (opt) {
+        auto lotId = static_cast<const unsigned int *>(opt);
+        if (lotId && *lotId) {
             url = "https://www.bricklink.com/inventory_detail.asp";
             QUrlQuery query;
-            query.addQueryItem("invID", QString::number(*static_cast <const unsigned int *>(opt)));
+            query.addQueryItem("invID", QString::number(*lotId));
+            url.setQuery(query);
+        }
+        break;
+    }
+    case URL_StoreItemSearch: {
+        const Item *item = static_cast<const Item *>(opt);
+        const Color *color = static_cast<const Color *>(opt2);
+        if (item && item->itemType() && color) {
+            url = "https://www.bricklink.com/inventory_detail.asp?";
+            QUrlQuery query;
+            query.addQueryItem("catType", QChar(item->itemType()->id()));
+            query.addQueryItem("q", color->name() % u' ' % item->id());
             url.setQuery(query);
         }
         break;

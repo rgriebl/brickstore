@@ -1210,7 +1210,7 @@ void FrameWork::createActions()
     (void) newQAction(this, "bricklink_catalog", NeedSelection(1, 1) | NeedNetwork);
     (void) newQAction(this, "bricklink_priceguide", NeedSelection(1, 1) | NeedNetwork);
     (void) newQAction(this, "bricklink_lotsforsale", NeedSelection(1, 1) | NeedNetwork);
-    (void) newQAction(this, "bricklink_myinventory", NeedSelection(1, 1) | NeedLotId | NeedNetwork);
+    (void) newQAction(this, "bricklink_myinventory", NeedSelection(1, 1) | NeedNetwork);
 
     (void) newQAction(this, "view_fullscreen", 0, true, this, [this](bool fullScreen) {
         setWindowState(windowState().setFlag(Qt::WindowFullScreen, fullScreen));

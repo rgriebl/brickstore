@@ -2183,7 +2183,10 @@ void Window::on_bricklink_myinventory_triggered()
 {
     if (!selection().isEmpty()) {
         uint lotid = (*selection().front()).lotId();
-        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_StoreItemDetail, &lotid));
+        if (lotid)
+            QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_StoreItemDetail, &lotid));
+        else
+            QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_StoreItemSearch, (*selection().front()).item(), (*selection().front()).color()));
     }
 }
 
