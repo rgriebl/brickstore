@@ -765,7 +765,7 @@ void DocumentIO::exportBrickLinkUpdateClipboard(const Document *doc,
         warnings << tr("This list contains items with duplicate BrickLink Lot-IDs.");
 
     if (!warnings.isEmpty()) {
-        QString s = u"<ul><li>" % warnings.join(u"</li><li>") % u"</li></ul>";
+        QString s = u"<ul><li>" % warnings.join(qL1S("</li><li>")) % u"</li></ul>";
         s = tr("There are problems: %1Do you really want to export this list?").arg(s);
 
         if (MessageBox::question(nullptr, { }, s) != MessageBox::Yes)

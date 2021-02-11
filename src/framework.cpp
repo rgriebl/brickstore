@@ -800,6 +800,9 @@ void FrameWork::translateActions()
     static const QMap<QByteArray, QByteArray> iconalias = {
         { "update_database", "view_refresh" },
         { "check_for_updates", "update_none" },
+        { "edit_status_include", "vcs-normal" },
+        { "edit_status_exclude", "vcs-removed" },
+        { "edit_status_extra", "vcs-added" },
     };
 
     for (auto &at : actiontable) {

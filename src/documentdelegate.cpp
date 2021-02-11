@@ -745,19 +745,20 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
 
         if (dblclick || (keypress && (editkey || includeKey || excludeKey || extraKey))) {
             BrickLink::Status st = it->status();
-            if (includeKey)
+            if (includeKey) {
                 st = BrickLink::Status::Include;
-            else if (excludeKey)
+            } else if (excludeKey) {
                 st = BrickLink::Status::Exclude;
-            else if (extraKey)
+            } else if (extraKey) {
                 st = BrickLink::Status::Extra;
-            else
+            } else {
                 switch (st) {
-                        case BrickLink::Status::Include: st = BrickLink::Status::Exclude; break;
-                        case BrickLink::Status::Exclude:
-                        case BrickLink::Status::Extra  :
-                        default                        : st = BrickLink::Status::Include; break;
+                case BrickLink::Status::Include: st = BrickLink::Status::Exclude; break;
+                case BrickLink::Status::Exclude: st = BrickLink::Status::Extra; break;
+                case BrickLink::Status::Extra  :
+                default                        : st = BrickLink::Status::Include; break;
                 }
+            }
 
             Document::Item item = *it;
             item.setStatus(st);
