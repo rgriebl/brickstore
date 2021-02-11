@@ -396,26 +396,17 @@ bool Document::changeItem(int position, const Item &value)
 void Document::insertItemsDirect(const ItemList &items, QVector<int> &positions)
 {
     auto pos = positions.constBegin();
-    bool single = (items.count() == 1);
-    QModelIndexList before;
-    QModelIndex root;
-
-    if (!single) {
-        emit layoutAboutToBeChanged();
-        before = persistentIndexList();
-    }
+    const QModelIndex root;
 
     for (Item *item : qAsConst(items)) {
         int rows = rowCount(root);
 
         if (pos != positions.constEnd()) {
-            if (single)
-                beginInsertRows(root, *pos, *pos);
+            beginInsertRows(root, *pos, *pos);
             m_items.insert(*pos, item);
             ++pos;
         } else {
-            if (single)
-                beginInsertRows(root, rows, rows);
+            beginInsertRows(root, rows, rows);
             m_items.append(item);
         }
 
@@ -424,16 +415,7 @@ void Document::insertItemsDirect(const ItemList &items, QVector<int> &positions)
             m_differenceBase.insert(item, *item);
 
         updateItemFlags(item);
-        if (single)
-            endInsertRows();
-    }
-
-    if (!single) {
-        QModelIndexList after;
-        foreach (const QModelIndex &idx, before)
-            after.append(index(item(idx), idx.column()));
-        changePersistentIndexList(before, after);
-        emit layoutChanged();
+        endInsertRows();
     }
 
     emit itemCountChanged(m_items.count());
@@ -443,32 +425,15 @@ void Document::insertItemsDirect(const ItemList &items, QVector<int> &positions)
 void Document::removeItemsDirect(ItemList &items, QVector<int> &positions)
 {
     positions.resize(items.count());
-
-    bool single = (items.count() == 1);
-    QModelIndexList before;
-
-    if (!single) {
-        emit layoutAboutToBeChanged();
-        before = persistentIndexList();
-    }
+    const QModelIndex root;
 
     for (int i = items.count() - 1; i >= 0; --i) {
         Item *item = items[i];
         int idx = m_items.indexOf(item);
-        if (single)
-            beginRemoveRows(QModelIndex(), idx, idx);
+        beginRemoveRows(root, idx, idx);
         positions[i] = idx;
         m_items.removeAt(idx);
-        if (single)
-            endRemoveRows();
-    }
-
-    if (!single) {
-        QModelIndexList after;
-        foreach (const QModelIndex &idx, before)
-            after.append(index(item(idx), idx.column()));
-        changePersistentIndexList(before, after);
-        emit layoutChanged();
+        endRemoveRows();
     }
 
     emit itemCountChanged(m_items.count());

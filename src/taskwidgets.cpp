@@ -190,6 +190,8 @@ void TaskInfoWidget::windowUpdate(Window *win)
     if (m_win) {
         disconnect(m_win.data(), &Window::selectionChanged,
                    this, &TaskInfoWidget::selectionUpdate);
+        disconnect(m_win->document(), &Document::statisticsChanged,
+                   this, &TaskInfoWidget::statisticsUpdate);
         disconnect(m_win->document(), &Document::currencyCodeChanged,
                    this, &TaskInfoWidget::currencyUpdate);
     }
@@ -197,6 +199,8 @@ void TaskInfoWidget::windowUpdate(Window *win)
     if (m_win) {
         connect(m_win.data(), &Window::selectionChanged,
                 this, &TaskInfoWidget::selectionUpdate);
+        connect(m_win->document(), &Document::statisticsChanged,
+                this, &TaskInfoWidget::statisticsUpdate);
         connect(m_win->document(), &Document::currencyCodeChanged,
                 this, &TaskInfoWidget::currencyUpdate);
     }
@@ -207,6 +211,13 @@ void TaskInfoWidget::windowUpdate(Window *win)
 void TaskInfoWidget::currencyUpdate()
 {
     selectionUpdate(m_win ? m_win->selection() : Document::ItemList());
+}
+
+void TaskInfoWidget::statisticsUpdate()
+{
+    // only relevant, if we are showing the current document info
+    if (m_selection.isEmpty())
+        selectionUpdate(m_selection);
 }
 
 void TaskInfoWidget::selectionUpdate(const Document::ItemList &list)

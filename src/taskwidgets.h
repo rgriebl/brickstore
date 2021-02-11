@@ -69,6 +69,7 @@ public:
 protected slots:
     void windowUpdate(Window *win);
     void selectionUpdate(const Document::ItemList &list);
+    void statisticsUpdate();
     void currencyUpdate();
 
     void languageChange();

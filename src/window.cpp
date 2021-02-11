@@ -548,14 +548,6 @@ Window::Window(Document *doc, QWidget *parent)
     m_selection_model = new QItemSelectionModel(m_view, this);
     w_list->setSelectionModel(m_selection_model);
 
-    // This shouldn't be needed, but we are abusing layoutChanged a bit for adding and removing
-    // items. The docs are a bit undecided if you should really do that, but it really helps
-    // performance wise. Just the selection is not updated, when the items in it are deleted.
-    connect(m_view, &DocumentProxyModel::layoutChanged,
-            m_selection_model, [this]() {
-        updateSelection();
-    });
-
     auto *dd = new DocumentDelegate(doc, m_view, w_list);
     w_list->setItemDelegate(dd);
     w_list->verticalHeader()->setDefaultSectionSize(dd->defaultItemHeight(w_list));
