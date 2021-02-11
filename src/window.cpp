@@ -325,13 +325,12 @@ public:
         });
         m_layout->addWidget(m_differenceMode);
 
-        m_layout->addStretch(1);
-
         if (m_doc->order()) {
             addSeparator();
             m_order = new QToolButton();
             m_order->setIcon(QIcon::fromTheme("help-about"));
             m_order->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+            m_order->setAutoRaise(true);
             m_layout->addWidget(m_order);
 
             connect(m_order, &QToolButton::clicked,
@@ -342,22 +341,34 @@ public:
         } else {
             m_order = nullptr;
         }
+        m_layout->addStretch(1);
 
         m_errorsSeparator = addSeparator();
         m_errors = new QLabel();
-        connect(m_doc, &Document::statisticsChanged,
-                this, &StatusBar::updateErrors);
-
         m_layout->addWidget(m_errors);
 
         addSeparator();
+        m_count = new QLabel();
+        m_layout->addWidget(m_count);
 
-        m_currencyLabel = new QLabel();
-        m_layout->addWidget(m_currencyLabel);
+        addSeparator();
+        m_weight = new QLabel();
+        m_layout->addWidget(m_weight);
+
+        addSeparator();
+
+        QHBoxLayout *currencyLayout = new QHBoxLayout();
+        currencyLayout->setSpacing(0);
+        m_value = new QLabel();
+        currencyLayout->addWidget(m_value);
         m_currency = new QToolButton();
         m_currency->setPopupMode(QToolButton::InstantPopup);
         m_currency->setToolButtonStyle(Qt::ToolButtonTextOnly);
         m_currency->setAutoRaise(true);
+        currencyLayout->addWidget(m_currency);
+        m_layout->addLayout(currencyLayout);
+        m_profit = new QLabel();
+        m_layout->addWidget(m_profit);
 
         connect(m_currency, &QToolButton::triggered,
                 this, &StatusBar::changeDocumentCurrency);
@@ -365,10 +376,11 @@ public:
                 this, &StatusBar::updateCurrencyRates);
         connect(m_doc, &Document::currencyCodeChanged,
                 this, &StatusBar::documentCurrencyChanged);
+        connect(m_doc, &Document::statisticsChanged,
+                this, &StatusBar::updateStatistics);
+
         updateCurrencyRates();
         documentCurrencyChanged(m_doc->currencyCode());
-
-        m_layout->addWidget(m_currency);
 
         paletteChange();
         languageChange();
@@ -401,6 +413,8 @@ public:
     void documentCurrencyChanged(const QString &ccode)
     {
         m_currency->setText(ccode + QLatin1String("  "));
+        // the menu might still be open right now, so we need to delay deleting the actions
+        QMetaObject::invokeMethod(this, &StatusBar::updateCurrencyRates, Qt::QueuedConnection);
     }
 
     void changeDocumentCurrency(QAction *a)
@@ -425,11 +439,12 @@ public:
         m_differenceMode->setChecked(b);
     }
 
-    void updateErrors()
+    void updateStatistics()
     {
+        static QLocale loc;
         auto stat = m_doc->statistics(m_doc->items());
-        bool b = (stat.errors() > 0);
 
+        bool b = (stat.errors() > 0);
         if (b && Config::inst()->showInputErrors()) {
             m_errors->setText(tr("Errors:") %
                               QString::fromLatin1(" <span style='background-color:%1'>&nbsp;")
@@ -438,6 +453,35 @@ public:
         }
         m_errors->setVisible(b);
         m_errorsSeparator->setVisible(b);
+
+        QString cntstr = tr("Items") % u": " % loc.toString(stat.items())
+                                     % u" (" % loc.toString(stat.lots()) % u")";
+        m_count->setText(cntstr);
+
+        QString wgtstr;
+        if (qFuzzyCompare(stat.weight(), -std::numeric_limits<double>::min())) {
+            wgtstr = QStringLiteral("-");
+        } else {
+            wgtstr = Utility::weightToString(std::abs(stat.weight()),
+                                             Config::inst()->measurementSystem(),
+                                             true /*optimize*/, true /*add unit*/);
+            if (stat.weight() < 0)
+                wgtstr.prepend(QStringLiteral(u"\u2265 "));
+        }
+        m_weight->setText(wgtstr);
+
+        QString valstr = loc.toString(stat.value(), 'f', 3);
+        if (stat.minValue() < stat.value())
+            valstr.prepend(QStringLiteral(u"\u2264 "));
+        m_value->setText(valstr);
+
+        b = !qFuzzyIsNull(stat.cost());
+        if (b) {
+            int percent = int(std::round(stat.value() / stat.cost() * 100. - 100.));
+            QString profitstr = (percent > 0 ? u"(+" : u"(-") % loc.toString(percent) % u" %)";
+            m_profit->setText(profitstr);
+        }
+        m_profit->setVisible(b);
     }
 
 
@@ -450,8 +494,8 @@ protected:
 
         if (m_order)
             m_order->setText(tr("Order information..."));
-        m_currencyLabel->setText(tr("Currency:"));
-        updateErrors();
+        m_value->setText(tr("Currency:"));
+        updateStatistics();
     }
 
     void paletteChange()
@@ -462,7 +506,7 @@ protected:
 
         auto c = Utility::gradientColor(Qt::red, palette().color(QPalette::Window), 0.6);
         m_errors->setProperty("bsColor", c.name());
-        updateErrors();
+        updateStatistics();
 
         auto checkedbg = Utility::gradientColor(Qt::green, palette().color(QPalette::Window), 0.3);
         auto checkedborder = checkedbg.darker();
@@ -470,7 +514,7 @@ protected:
         auto hoverborder = hoverbg.darker();
 
         m_differenceMode->setStyleSheet(QString::fromLatin1(
-            "QToolButton { background-color: transparent; border: 1px solid transparent; padding: 2px; }"
+            "QToolButton { background-color: transparent; border: 1px solid transparent; padding: 1px; }"
             "QToolButton:hover { background-color: %3; border: 1px solid %4 } "
             "QToolButton:checked { background-color: %1; border: 1px solid %2; } "
             "QToolButton:checked:hover { } "
@@ -495,7 +539,10 @@ private:
     QToolButton *m_order;
     QWidget *m_errorsSeparator;
     QLabel *m_errors;
-    QLabel *m_currencyLabel;
+    QLabel *m_weight;
+    QLabel *m_count;
+    QLabel *m_value;
+    QLabel *m_profit;
     QToolButton *m_currency;
 };
 

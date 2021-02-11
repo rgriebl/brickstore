@@ -20,20 +20,6 @@ ChangeCurrencyDialog::ChangeCurrencyDialog(const QString &from, const QString &t
 {
     setupUi(this);
 
-    if (m_from != QLatin1String("USD"))
-        m_wasLegacy = false;
-    if (m_wasLegacy) {
-        auto legacy = Config::inst()->legacyCurrencyCodeAndRate();
-        if (!legacy.first.isEmpty() && !qFuzzyIsNull(legacy.second) && (m_to == legacy.first)) {
-            w_labelLegacy->setText(w_labelLegacy->text().arg(legacy.first,
-                                                             Currency::toString(legacy.second)));
-            w_labelEcb->installEventFilter(this);
-        } else {
-            w_widgetLegacy->hide();
-            m_wasLegacy = false;
-        }
-    }
-
     w_oldCurrency->setText(w_oldCurrency->text().arg(from));
 
     m_labelEcbFormat = w_labelEcb->text().arg(from);
@@ -53,10 +39,24 @@ ChangeCurrencyDialog::ChangeCurrencyDialog(const QString &from, const QString &t
     w_labelEcb->installEventFilter(this);
     w_labelCustom->installEventFilter(this);
 
+    if (m_from != QLatin1String("USD"))
+        m_wasLegacy = false;
+
+    if (m_wasLegacy) {
+        auto legacy = Config::inst()->legacyCurrencyCodeAndRate();
+        if (!legacy.first.isEmpty() && !qFuzzyIsNull(legacy.second) && (m_to == legacy.first)) {
+            w_labelLegacy->setText(w_labelLegacy->text().arg(legacy.first,
+                                                             Currency::toString(legacy.second)));
+            w_labelLegacy->installEventFilter(this);
+        } else {
+            m_wasLegacy = false;
+        }
+    }
     if (m_wasLegacy) {
         grp->addButton(w_radioLegacy);
         w_radioLegacy->setChecked(true);
     } else {
+        w_widgetLegacy->hide();
         w_radioEcb->setChecked(true);
     }
 
