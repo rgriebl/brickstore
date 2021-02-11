@@ -436,34 +436,40 @@ bool Core::onlineStatus() const
 }
 
 
-const QHash<uint, const Color *> &Core::colors() const
+const std::vector<const Color *> &Core::colors() const
 {
     return m_colors;
 }
 
-const QHash<uint, const Category *> &Core::categories() const
+const std::vector<const Category *> &Core::categories() const
 {
     return m_categories;
 }
 
-const QHash<char, const ItemType *> &Core::itemTypes() const
+const std::vector<const ItemType *> &Core::itemTypes() const
 {
     return m_item_types;
 }
 
-const QVector<const Item *> &Core::items() const
+const std::vector<const Item *> &Core::items() const
 {
     return m_items;
 }
 
 const Category *Core::category(uint id) const
 {
-    return m_categories.value(id);
+    auto it = std::lower_bound(m_categories.cbegin(), m_categories.cend(), id, &Category::lowerBound);
+    if ((it != m_categories.cend()) && ((*it)->id() == id))
+        return *it;
+    return nullptr;
 }
 
 const Color *Core::color(uint id) const
 {
-    return m_colors.value(id);
+    auto it = std::lower_bound(m_colors.cbegin(), m_colors.cend(), id, &Color::lowerBound);
+    if ((it != m_colors.cend()) && ((*it)->id() == id))
+        return *it;
+    return nullptr;
 }
 
 const Color *Core::colorFromName(const QString &name) const
@@ -471,43 +477,48 @@ const Color *Core::colorFromName(const QString &name) const
     if (name.isEmpty())
         return nullptr;
 
-    for (const Color *col : m_colors) {
-        if (!col->name().compare(name, Qt::CaseInsensitive))
-            return col;
-    }
+    auto it = std::find_if(m_colors.cbegin(), m_colors.cend(), [name](const auto &color) {
+        return !color->name().compare(name, Qt::CaseInsensitive);
+    });
+    if (it != m_colors.cend())
+        return *it;
     return nullptr;
 }
 
 
-const Color *Core::colorFromLDrawId(int ldraw_id) const
+const Color *Core::colorFromLDrawId(int ldrawId) const
 {
-    for (const Color *col : m_colors) {
-        if (col->ldrawId() == ldraw_id)
-            return col;
-    }
+    auto it = std::find_if(m_colors.cbegin(), m_colors.cend(), [ldrawId](const auto &color) {
+        return (color->ldrawId() == ldrawId);
+    });
+    if (it != m_colors.cend())
+        return *it;
     return nullptr;
 }
 
 
 const ItemType *Core::itemType(char id) const
 {
-    return m_item_types.value(id);
+    auto it = std::lower_bound(m_item_types.cbegin(), m_item_types.cend(), id, &ItemType::lowerBound);
+    if ((it != m_item_types.cend()) && ((*it)->id() == id))
+        return *it;
+    return nullptr;
 }
 
 const Item *Core::item(char tid, const QString &id) const
 {
-    Item key;
-    key.m_item_type = itemType(tid);
-    key.m_id = id;
-
-    if (!key.m_item_type || key.m_id.isEmpty())
-        return nullptr;
-
-    // Finds the lower bound in at most log(last - first) + 1 comparisons
-    auto it = std::lower_bound(m_items.constBegin(), m_items.constEnd(), &key, Item::lessThan);
-    if (it != m_items.constEnd() && !Item::lessThan(&key, *it))
+    auto needle = std::make_pair(tid, id);
+    auto it = std::lower_bound(m_items.cbegin(), m_items.cend(), needle, Item::lowerBound);
+    if ((it != m_items.cend()) && ((*it)->itemType()->id() == tid) && ((*it)->id() == id))
         return *it;
+    return nullptr;
+}
 
+const PartColorCode *Core::partColorCode(uint id)
+{
+    auto it = std::lower_bound(m_pccs.cbegin(), m_pccs.cend(), id, &PartColorCode::lowerBound);
+    if ((it != m_pccs.cend()) && ((*it)->id() == id))
+        return *it;
     return nullptr;
 }
 
@@ -558,11 +569,13 @@ void Core::clear()
     qDeleteAll(m_item_types);
     qDeleteAll(m_categories);
     qDeleteAll(m_items);
+    qDeleteAll(m_pccs);
 
     m_colors.clear();
     m_item_types.clear();
     m_categories.clear();
     m_items.clear();
+    m_pccs.clear();
     m_changelog.clear();
 }
 
@@ -610,7 +623,7 @@ bool Core::readDatabase(QString *infoText, const QString &filename)
         }
 
         bool gotColors = false, gotCategories = false, gotItemTypes = false, gotItems = false;
-        bool gotChangeLog = false;
+        bool gotChangeLog = false, gotPccs = false;
 
         auto check = [&ds, &f]() {
             if (ds.status() != QDataStream::Ok)
@@ -636,7 +649,7 @@ bool Core::readDatabase(QString *infoText, const QString &filename)
                 for (quint32 i = colc; i; i--) {
                     auto *col = readColorFromDatabase(ds, DatabaseVersion::Latest);
                     check();
-                    m_colors.insert(col->id(), col);
+                    m_colors.emplace_back(col);
                 }
                 gotColors = true;
                 break;
@@ -649,7 +662,7 @@ bool Core::readDatabase(QString *infoText, const QString &filename)
                 for (quint32 i = catc; i; i--) {
                     auto *cat = readCategoryFromDatabase(ds, DatabaseVersion::Latest);
                     check();
-                    m_categories.insert(cat->id(), cat);
+                    m_categories.emplace_back(cat);
                 }
                 gotCategories = true;
                 break;
@@ -662,7 +675,7 @@ bool Core::readDatabase(QString *infoText, const QString &filename)
                 for (quint32 i = ittc; i; i--) {
                     auto *itt = readItemTypeFromDatabase(ds, DatabaseVersion::Latest);
                     check();
-                    m_item_types.insert(itt->id(), itt);
+                    m_item_types.emplace_back(itt);
                 }
                 gotItemTypes = true;
                 break;
@@ -676,7 +689,7 @@ bool Core::readDatabase(QString *infoText, const QString &filename)
                 for (quint32 i = itc; i; i--) {
                     auto *item = readItemFromDatabase(ds, DatabaseVersion::Latest);
                     check();
-                    m_items.append(item);
+                    m_items.emplace_back(item);
                 }
                 gotItems = true;
                 break;
@@ -691,9 +704,26 @@ bool Core::readDatabase(QString *infoText, const QString &filename)
                     QByteArray entry;
                     ds >> entry;
                     check();
-                    m_changelog.append(entry);
+                    m_changelog.emplace_back(entry);
                 }
                 gotChangeLog = true;
+                break;
+            }
+            case ChunkId('P','C','C',' ') | 1ULL << 32: {
+                if (!gotItems || !gotColors)
+                    throw Exception("found a 'PCC ' chunk before the 'ITEM' and 'COL ' chunks");
+
+                quint32 pccc = 0;
+                ds >> pccc;
+                check();
+
+                m_pccs.reserve(int(pccc));
+                for (quint32 i = pccc; i; i--) {
+                    auto *pcc = readPCCFromDatabase(ds, DatabaseVersion::Latest);
+                    check();
+                    m_pccs.emplace_back(pcc);
+                }
+                gotPccs = true;
                 break;
             }
             default: {
@@ -714,17 +744,18 @@ bool Core::readDatabase(QString *infoText, const QString &filename)
 
         delete sw;
 
-        if (!gotColors || !gotCategories || !gotItemTypes || !gotItems || !gotChangeLog) {
+        if (!gotColors || !gotCategories || !gotItemTypes || !gotItems || !gotChangeLog || !gotPccs) {
             throw Exception("not all required data chunks were found in the database (%1)")
                 .arg(f.fileName());
         }
 
         qDebug() << "Loaded database from" << f.fileName() << endl
                  << "  Generated at:" << generationDate << endl
-                 << "  Colors      :" << m_colors.count() << endl
-                 << "  Item Types  :" << m_item_types.count() << endl
-                 << "  Categories  :" << m_categories.count() << endl
-                 << "  Items       :" << m_items.count();
+                 << "  Colors      :" << m_colors.size() << endl
+                 << "  Item Types  :" << m_item_types.size() << endl
+                 << "  Categories  :" << m_categories.size() << endl
+                 << "  Items       :" << m_items.size() << endl
+                 << "  PCCs        :" << m_pccs.size();
 
         m_databaseDate = generationDate;
         emit databaseDateChanged(generationDate);
@@ -780,34 +811,42 @@ bool Core::writeDatabase(const QString &filename, DatabaseVersion version,
         check(cw.endChunk());
 
         check(cw.startChunk(ChunkId('C','O','L',' '), 1));
-        ds << quint32(m_colors.count());
+        ds << quint32(m_colors.size());
         for (const Color *col : m_colors)
             writeColorToDatabase(col, ds, version);
         check(cw.endChunk());
 
         check(cw.startChunk(ChunkId('C','A','T',' '), 1));
-        ds << quint32(m_categories.count());
+        ds << quint32(m_categories.size());
         for (const Category *cat : m_categories)
             writeCategoryToDatabase(cat, ds, version);
         check(cw.endChunk());
 
         check(cw.startChunk(ChunkId('T','Y','P','E'), 1));
-        ds << quint32(m_item_types.count());
+        ds << quint32(m_item_types.size());
         for (const ItemType *itt : m_item_types)
             writeItemTypeToDatabase(itt, ds, version);
         check(cw.endChunk());
 
         check(cw.startChunk(ChunkId('I','T','E','M'), 1));
-        ds << quint32(m_items.count());
+        ds << quint32(m_items.size());
         for (const Item *item : m_items)
             writeItemToDatabase(item, ds, version);
         check(cw.endChunk());
 
         check(cw.startChunk(ChunkId('C','H','G','L'), 1));
-        ds << quint32(m_changelog.count());
+        ds << quint32(m_changelog.size());
         for (const QByteArray &cl : m_changelog)
             ds << cl;
         check(cw.endChunk());
+
+        if (version >= DatabaseVersion::Version_3) {
+            check(cw.startChunk(ChunkId('P','C','C',' '), 1));
+            ds << quint32(m_pccs.size());
+            for (const PartColorCode *pcc : m_pccs)
+                writePCCToDatabase(pcc, ds, version);
+            check(cw.endChunk());
+        }
 
         check(cw.endChunk()); // BSDB root chunk
 
@@ -919,27 +958,20 @@ void Core::writeItemTypeToDatabase(const ItemType *itt, QDataStream &dataStream,
 }
 
 
-Item *Core::readItemFromDatabase(QDataStream &dataStream, DatabaseVersion v)
+Item *Core::readItemFromDatabase(QDataStream &dataStream, DatabaseVersion)
 {
     QScopedPointer<Item> item(new Item);
 
     qint8 ittid = 0;
-    quint32 catcount = 0;
+    quint32 catid = 0;
     QByteArray id;
     QByteArray name;
 
-    dataStream >> id >> name >> ittid >> catcount;
+    dataStream >> id >> name >> ittid >> catid;
     item->m_id = QString::fromUtf8(id);
     item->m_name = QString::fromUtf8(name);
     item->m_item_type = BrickLink::core()->itemType(ittid);
-
-    item->m_categories.resize(int(catcount));
-
-    for (int i = 0; i < int(catcount); i++) {
-        quint32 catid = 0;
-        dataStream >> catid;
-        item->m_categories[i] = BrickLink::core()->category(catid);
-    }
+    item->m_category = BrickLink::core()->category(catid);
 
     quint32 colorid = 0;
     quint32 index = 0, year = 0;
@@ -983,16 +1015,14 @@ Item *Core::readItemFromDatabase(QDataStream &dataStream, DatabaseVersion v)
     else
         item->m_consists_of = nullptr;
 
-    if (v >= DatabaseVersion::Version_2) {
-        quint32 known_colors_count;
-        dataStream >> known_colors_count;
-        item->m_known_colors.resize(int(known_colors_count));
+    quint32 known_colors_count;
+    dataStream >> known_colors_count;
+    item->m_known_colors.resize(int(known_colors_count));
 
-        for (int i = 0; i < int(known_colors_count); i++) {
-            quint32 colid = 0;
-            dataStream >> colid;
-            item->m_known_colors[i] = colid;
-        }
+    for (int i = 0; i < int(known_colors_count); i++) {
+        quint32 colid = 0;
+        dataStream >> colid;
+        item->m_known_colors[i] = colid;
     }
 
     return item.take();
@@ -1002,9 +1032,9 @@ void Core::writeItemToDatabase(const Item *item, QDataStream &dataStream, Databa
 {
     dataStream << item->m_id.toUtf8() << item->m_name.toUtf8() << qint8(item->m_item_type->id());
 
-    dataStream << quint32(item->m_categories.size());
-    for (const BrickLink::Category *cat : item->m_categories)
-        dataStream << quint32(cat->id());
+    if (v <= DatabaseVersion::Version_2)
+        dataStream << quint32(1); // this used to be a list of category ids
+    dataStream << quint32(item->category()->id());
 
     quint32 colorid = item->m_color ? item->m_color->id() : quint32(-1);
     dataStream << colorid << qint64(item->m_last_inv_update) << item->m_weight
@@ -1037,6 +1067,28 @@ void Core::writeItemToDatabase(const Item *item, QDataStream &dataStream, Databa
     }
 }
 
+PartColorCode *Core::readPCCFromDatabase(QDataStream &dataStream, Core::DatabaseVersion) const
+{
+    QScopedPointer<PartColorCode> pcc(new PartColorCode);
+
+    qint8 itemTypeId;
+    QString itemId;
+    uint colorId;
+
+    dataStream >> pcc->m_id >> itemTypeId >> itemId >> colorId;
+
+    pcc->m_item = item(itemTypeId, itemId);
+    pcc->m_color = color(colorId);
+    return pcc.take();
+}
+
+void Core::writePCCToDatabase(const PartColorCode *pcc,
+                              QDataStream &dataStream, Core::DatabaseVersion)
+{
+    dataStream << pcc->id() << qint8(pcc->item()->itemType()->id()) << pcc->item()->id()
+               << pcc->color()->id();
+}
+
 
 bool Core::applyChangeLogToItem(InvItem *item)
 {
@@ -1054,7 +1106,7 @@ bool Core::applyChangeLogToItem(InvItem *item)
     if (itemtypeid.isEmpty() && !incpl->m_itemtype_name.isEmpty())
         itemtypeid = incpl->m_itemtype_name.at(0).toUpper();
 
-    for (int i = m_changelog.count() - 1; i >= 0 && !(fixed_color && fixed_item); --i) {
+    for (int i = int(m_changelog.size()) - 1; i >= 0 && !(fixed_color && fixed_item); --i) {
         const ChangeLogEntry &cl = ChangeLogEntry(m_changelog.at(i));
 
         if (!fixed_item) {

@@ -1178,22 +1178,6 @@ QString Document::dataForToolTipRole(const Item *it, Field f, int row) const
         }
         return c;
     }
-    case Category: {
-        if (!it->item())
-            break;
-
-        const auto allcats = it->item()->allCategories();
-
-        if (allcats.size() == 1) {
-            return allcats[0]->name();
-        }
-        else {
-            QString str = QLatin1String("<b>") + allcats[0]->name() + QLatin1String("</b>");
-            for (int i = 1; i < allcats.size(); ++i)
-                str = str + QLatin1String("<br />") + allcats[i]->name();
-            return str;
-        }
-    }
     default: {
         return dataForDisplayRole(it, f, row);
     }

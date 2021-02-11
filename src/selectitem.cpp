@@ -66,6 +66,7 @@ public:
     QTreeView *      w_itemthumbs;
     QListView *      w_thumbs;
     HistoryLineEdit * w_filter;
+    QToolButton *    w_pcc;
     QToolButton *    w_zoomIn;
     QToolButton *    w_zoomOut;
     QLabel *         w_zoomLevel;
@@ -257,6 +258,24 @@ void SelectItem::init()
         setViewMode(d->w_viewmode->checkedId());
     });
 
+    d->w_pcc = new QToolButton();
+    d->w_pcc->setIcon(QIcon::fromTheme("edit-find"));
+    d->w_pcc->setShortcut(tr("Ctrl+E", "Shortcut for entering PCC"));
+    d->w_pcc->setAutoRaise(true);
+    connect(d->w_pcc, &QToolButton::clicked, this, [this]() {
+        QRect r = { d->w_pcc->mapToGlobal(QPoint()), d->w_pcc->size() };
+        QString code;
+        if (MessageBox::getString(this, tr("Find element number"),
+                                  tr("Enter a 7-digit Lego element number, also known as Part-Color-Code (PCC)"),
+                                  code, r)) {
+            if (auto *pcc = BrickLink::core()->partColorCode(code.toUInt())) {
+                setCurrentItem(pcc->item(), true);
+                if (pcc->color())
+                    emit showInColor(pcc->color());
+            }
+        }
+    });
+
     d->w_zoomOut = new QToolButton();
     d->w_zoomOut->setShortcut(QKeySequence::ZoomOut);
     d->w_zoomOut->setIcon(QIcon::fromTheme("zoom-out"));
@@ -427,12 +446,15 @@ void SelectItem::init()
     auto *viewlay = new QHBoxLayout();
     viewlay->setMargin(0);
     viewlay->setSpacing(0);
+    viewlay->addSpacing(5);
+    viewlay->addWidget(d->w_pcc);
+    viewlay->addSpacing(11);
     viewlay->addWidget(d->w_zoomOut);
     viewlay->addSpacing(6);
     viewlay->addWidget(d->w_zoomLevel);
     viewlay->addSpacing(6);
     viewlay->addWidget(d->w_zoomIn);
-    viewlay->addSpacing(6);
+    viewlay->addSpacing(11);
     viewlay->addWidget(d->w_viewmode->button(0));
     viewlay->addWidget(d->w_viewmode->button(1));
     viewlay->addWidget(d->w_viewmode->button(2));
@@ -465,11 +487,15 @@ void SelectItem::languageChange()
     d->w_filter->setPlaceholderText(tr("Filter"));
 
     QString filterToolTip = tr("<p>" \
-        "Only show items that contain the entered text - regardless of case - in " \
-        "either the name or the part number. Additionally, all word starting with '-' " \
-        "(minus) act as an exclusion and prevent an item from being matched, if these " \
-        "words are found in the item's name.<br>(e.g. 'brick 1 x 1 -pattern')</p>")
-            + d->w_filter->instructionToolTip();
+        "Only show items that contain all the entered words - regardless of case - in " \
+        "either the name or the part number. This works much like a web search engine:<ul>" \
+        "<li>to exclude words, prefix them with <tt>-</tt>. (e.g. <tt>-pattern</tt>)</li>" \
+        "<li>to match on a phrase, put it inside quotes. (e.g. <tt>\"1 x 1\"</tt>)</li>" \
+        "<li>to filter parts appearing in a specific set, put <tt>appears-in:</tt> in front" \
+        " of the set name. (e.g. <tt>appears-in:8868-1</tt>)</li>" \
+        "<li>to filter sets or minifigs consisting of a specific part, put <tt>consists-of:</tt>" \
+        " in front of the part id. (e.g. <tt>consists-of:3001</tt>)</li>" \
+        "</ul></p>") + d->w_filter->instructionToolTip();
 
     d->w_filter->setToolTip(Utility::toolTipLabel(tr("Filter the list using this expression"),
                                                   QKeySequence::Find, filterToolTip));
@@ -477,6 +503,7 @@ void SelectItem::languageChange()
     auto setToolTipOnButton = [](QAbstractButton *b, const QString &text) {
         b->setToolTip(Utility::toolTipLabel(text, b->shortcut()));
     };
+    setToolTipOnButton(d->w_pcc, tr("Find a 7-digit Lego element number"));
     setToolTipOnButton(d->w_viewmode->button(0), tr("List"));
     setToolTipOnButton(d->w_viewmode->button(2), tr("Thumbnails"));
     setToolTipOnButton(d->w_viewmode->button(1), tr("List with Images"));
@@ -902,7 +929,7 @@ void SelectItem::showContextMenu(const QPoint &p)
                     d->w_filter->setText(filter);
                 });
                 if (!d->w_filter->text().isEmpty()) {
-                    connect(m.addAction(tr("Narrow filter to Minifigs consisting this part")),
+                    connect(m.addAction(tr("Narrow filter to Minifigs consisting of this part")),
                                         &QAction::triggered, this, [this, filter]() {
                         d->w_filter->setText(d->w_filter->text() % u' ' % filter);
                     });

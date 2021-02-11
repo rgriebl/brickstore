@@ -57,21 +57,20 @@ int BrickLink::ColorModel::columnCount(const QModelIndex &parent) const
 
 int BrickLink::ColorModel::pointerCount() const
 {
-    return core()->colors().count();
+    return int(core()->colors().size());
 }
 
 const void *BrickLink::ColorModel::pointerAt(int index) const
 {
-    return *(core()->colors().constBegin() + index);
+    return core()->colors()[index];
 }
 
 int BrickLink::ColorModel::pointerIndexOf(const void *pointer) const
 {
-    int index = 0;
-    for (auto it = core()->colors().constBegin(); it != core()->colors().constEnd(); ++it, ++index) {
-        if (*it == static_cast<const Color *>(pointer))
-            return index;
-    }
+    const auto &colors = core()->colors();
+    auto it = std::find(colors.cbegin(), colors.cend(), static_cast<const Color *>(pointer));
+    if (it != colors.cend())
+        return std::distance(colors.cbegin(), it);
     return -1;
 }
 
@@ -249,12 +248,12 @@ int BrickLink::CategoryModel::columnCount(const QModelIndex &parent) const
 
 int BrickLink::CategoryModel::pointerCount() const
 {
-    return core()->categories().count() + 1;
+    return int(core()->categories().size() + 1);
 }
 
 const void *BrickLink::CategoryModel::pointerAt(int index) const
 {
-    return index == 0 ? AllCategories : *(core()->categories().constBegin() + index - 1);
+    return (index == 0) ? AllCategories : core()->categories()[index - 1];
 }
 
 int BrickLink::CategoryModel::pointerIndexOf(const void *pointer) const
@@ -262,11 +261,10 @@ int BrickLink::CategoryModel::pointerIndexOf(const void *pointer) const
     if (pointer == AllCategories) {
         return 0;
     } else {
-        int index = 1;
-        for (auto it = core()->categories().constBegin(); it != core()->categories().constEnd(); ++it, ++index) {
-            if (*it == static_cast<const Category *>(pointer))
-                return index;
-        }
+        const auto &cats = core()->categories();
+        auto it = std::find(cats.cbegin(), cats.cend(), static_cast<const Category *>(pointer));
+        if (it != cats.cend())
+            return std::distance(cats.cbegin(), it) + 1;
     }
     return -1;
 }
@@ -372,21 +370,20 @@ int BrickLink::ItemTypeModel::columnCount(const QModelIndex &parent) const
 
 int BrickLink::ItemTypeModel::pointerCount() const
 {
-    return core()->itemTypes().count();
+    return int(core()->itemTypes().size());
 }
 
 const void *BrickLink::ItemTypeModel::pointerAt(int index) const
 {
-    return *(core()->itemTypes().constBegin() + index);
+    return core()->itemTypes()[index];
 }
 
 int BrickLink::ItemTypeModel::pointerIndexOf(const void *pointer) const
 {
-    int index = 0;
-    for (auto it = core()->itemTypes().constBegin(); it != core()->itemTypes().constEnd(); ++it, ++index) {
-        if (*it == static_cast<const ItemType *>(pointer))
-            return index;
-    }
+    const auto &itts = core()->itemTypes();
+    auto it = std::find(itts.cbegin(), itts.cend(), static_cast<const ItemType *>(pointer));
+    if (it != itts.cend())
+        return std::distance(itts.cbegin(), it);
     return -1;
 }
 
@@ -473,7 +470,7 @@ int BrickLink::ItemModel::columnCount(const QModelIndex &parent) const
 
 int BrickLink::ItemModel::pointerCount() const
 {
-    return core()->items().count();
+    return int(core()->items().size());
 }
 
 const void *BrickLink::ItemModel::pointerAt(int index) const
@@ -483,7 +480,9 @@ const void *BrickLink::ItemModel::pointerAt(int index) const
 
 int BrickLink::ItemModel::pointerIndexOf(const void *pointer) const
 {
-    return core()->items().indexOf(static_cast<const Item *>(pointer));
+    const auto &items = core()->items();
+    auto it = std::find(items.cbegin(), items.cend(), static_cast<const Item *>(pointer));
+    return it != items.cend() ? std::distance(items.cbegin(), it): -1;
 }
 
 const BrickLink::Item *BrickLink::ItemModel::item(const QModelIndex &index) const
@@ -685,7 +684,7 @@ bool BrickLink::ItemModel::filterAccepts(const void *pointer) const
         return false;
     else if (m_itemtype_filter && item->itemType() != m_itemtype_filter)
         return false;
-    else if (m_category_filter && (m_category_filter != BrickLink::CategoryModel::AllCategories) && !item->hasCategory(m_category_filter))
+    else if (m_category_filter && (m_category_filter != BrickLink::CategoryModel::AllCategories) && (item->category() != m_category_filter))
         return false;
     else if (m_inv_filter && !item->hasInventory())
         return false;

@@ -61,20 +61,11 @@ BrickLink::Item::~Item()
     delete [] m_consists_of;
 }
 
-bool BrickLink::Item::hasCategory(const BrickLink::Category *cat) const
+bool BrickLink::Item::lowerBound(const Item *item, const std::pair<char, QString> &ids)
 {
-    for (const Category *c: m_categories) {
-        if (c == cat)
-            return true;
-    }
-    return false;
-}
+    int d = (item->m_item_type->id() - ids.first);
 
-bool BrickLink::Item::lessThan(const BrickLink::Item *a, const BrickLink::Item *b)
-{
-    int d = (a->m_item_type->id() - b->m_item_type->id());
-
-    return d == 0 ? (a->m_id.compare(b->m_id) < 0) : (d < 0);
+    return d == 0 ? (item->m_id.compare(ids.second) < 0) : (d < 0);
 }
 
 extern int _dwords_for_appears;
@@ -124,7 +115,7 @@ BrickLink::AppearsIn BrickLink::Item::appearsIn(const Color *only_color) const
     AppearsIn map;
 
     const BrickLink::Item * const *items = BrickLink::core()->items().data();
-    int count = BrickLink::core()->items().count();
+    auto count = BrickLink::core()->items().size();
 
     if (m_appears_in) {
         quint32 *ptr = m_appears_in + 2;
@@ -191,7 +182,7 @@ BrickLink::InvItemList BrickLink::Item::consistsOf() const
     InvItemList list;
 
     const BrickLink::Item * const *items = BrickLink::core()->items().data();
-    int count = BrickLink::core()->items().count();
+    auto count = BrickLink::core()->items().size();
 
     if (m_consists_of) {
         const quint64 *ptr = m_consists_of + 1;

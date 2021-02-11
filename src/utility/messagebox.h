@@ -48,13 +48,15 @@ public:
                                    StandardButton defaultButton = NoButton);
 
     static bool getString(QWidget *parent, const QString &title, const QString &text,
-                          QString &value);
+                          QString &value, const QRect &positionRelativeToRect = { });
     static bool getDouble(QWidget *parent, const QString &title, const QString &text,
                           const QString &unit, double &value, double minValue = -2147483647,
-                          double maxValue = 2147483647, int decimals = 1);
+                          double maxValue = 2147483647, int decimals = 1,
+                          const QRect &positionRelativeToRect = { });
     static bool getInteger(QWidget *parent, const QString &title, const QString &text,
                            const QString &unit, int &value,
-                           int minValue = -2147483647, int maxValue = 2147483647);
+                           int minValue = -2147483647, int maxValue = 2147483647,
+                           const QRect &positionRelativeToRect = { });
 
 private:
     MessageBox();

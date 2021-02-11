@@ -25,6 +25,7 @@ class Color;
 class Category;
 class ItemType;
 class Item;
+class PartColorCode;
 
 class Picture;
 class PriceGuide;
