@@ -388,7 +388,7 @@ public:
     void setCounterPart(bool b)        { m_cpart = b; }
 
     int quantitySoldLast6Months();
-    int lotsSoldLast5Months();
+    int lotsSoldLast6Months();
 
     struct Incomplete {
         QString m_item_id;
@@ -443,8 +443,8 @@ private:
     double           m_cost;
 
     int m_quantitySoldLast6Months = -1;
-    int m_lotsSoldLast5Months = -1;
-    PriceGuide *m_priceGuide = nullptr;
+    int m_lotsSoldLast6Months = -1;
+    bool m_priceGuideRequested = false;
 
     friend QDataStream &operator << (QDataStream &ds, const InvItem &ii);
     friend QDataStream &operator >> (QDataStream &ds, InvItem &ii);

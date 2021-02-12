@@ -1468,8 +1468,8 @@ QString Document::dataForDisplayRole(Item *it, Field f, int row) const
     case QuantityDiff: return QString::number(it->quantity() - it->origQuantity());
     case qty_sold_6mths: return (it->quantitySoldLast6Months() < 0) ?
                     "" : QString::number(it->quantitySoldLast6Months());
-    case lots_6mths: return (it->lotsSoldLast5Months() < 0) ?
-                    "" : QString::number(it->lotsSoldLast5Months());
+    case lots_6mths: return (it->lotsSoldLast6Months() < 0) ?
+                    "" : QString::number(it->lotsSoldLast6Months());
     default          : return QString();
     }
 }
