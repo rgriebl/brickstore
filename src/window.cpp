@@ -597,8 +597,6 @@ Window::Window(Document *doc, QWidget *parent)
 
     connect(w_header, &QHeaderView::sectionClicked,
             this, [this](int section) {
-        //TODO-CMD: SortCmd
-
         w_list->sortByColumn(section, w_header->sortIndicatorOrder());
         w_list->scrollTo(m_selection_model->currentIndex());
     });

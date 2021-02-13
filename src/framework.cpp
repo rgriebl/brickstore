@@ -485,6 +485,7 @@ FrameWork::FrameWork(QWidget *parent)
                      "edit_cut",
                      "edit_copy",
                      "edit_paste",
+                     "edit_delete",
                      "-",
                      "edit_additems",
                      "edit_subtractitems",
