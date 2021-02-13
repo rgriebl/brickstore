@@ -176,9 +176,8 @@ TaskInfoWidget::TaskInfoWidget(QWidget *parent)
     m_delayTimer.setSingleShot(true);
     m_delayTimer.setInterval(120ms);
 
-    connect(&m_delayTimer, &QTimer::timeout, this, [this]() {
-        delayedSelectionUpdate(m_selection);
-    });
+    connect(&m_delayTimer, &QTimer::timeout,
+            this, &TaskInfoWidget::delayedSelectionUpdate);
 
     connect(FrameWork::inst(), &FrameWork::windowActivated,
             this, &TaskInfoWidget::windowUpdate);
@@ -191,6 +190,8 @@ void TaskInfoWidget::windowUpdate(Window *win)
     if (m_win) {
         disconnect(m_win.data(), &Window::selectionChanged,
                    this, &TaskInfoWidget::selectionUpdate);
+        disconnect(m_win->document(), &Document::statisticsChanged,
+                   this, &TaskInfoWidget::statisticsUpdate);
         disconnect(m_win->document(), &Document::currencyCodeChanged,
                    this, &TaskInfoWidget::currencyUpdate);
     }
@@ -198,6 +199,8 @@ void TaskInfoWidget::windowUpdate(Window *win)
     if (m_win) {
         connect(m_win.data(), &Window::selectionChanged,
                 this, &TaskInfoWidget::selectionUpdate);
+        connect(m_win->document(), &Document::statisticsChanged,
+                this, &TaskInfoWidget::statisticsUpdate);
         connect(m_win->document(), &Document::currencyCodeChanged,
                 this, &TaskInfoWidget::currencyUpdate);
     }
@@ -210,72 +213,78 @@ void TaskInfoWidget::currencyUpdate()
     selectionUpdate(m_win ? m_win->selection() : Document::ItemList());
 }
 
+void TaskInfoWidget::statisticsUpdate()
+{
+    // only relevant, if we are showing the current document info
+    if (m_selection.isEmpty())
+        selectionUpdate(m_selection);
+}
+
 void TaskInfoWidget::selectionUpdate(const Document::ItemList &list)
 {
     m_selection = list;
     m_delayTimer.start();
 }
 
-void TaskInfoWidget::delayedSelectionUpdate(const Document::ItemList &list)
+void TaskInfoWidget::delayedSelectionUpdate()
 {
-    if (!m_win || (list.count() == 0)) {
+    if (!m_win) {
         m_pic->setItemAndColor(nullptr);
         setCurrentWidget(m_pic);
-    } else if (list.count() == 1) {
-        m_pic->setItemAndColor(list.front()->item(), list.front()->color());
+    } else if (m_selection.count() == 1) {
+        m_pic->setItemAndColor(m_selection.front()->item(), m_selection.front()->color());
         setCurrentWidget(m_pic);
-    }
-    else {
-        Document::Statistics stat(m_win->document(), list);
+    } else {
+        Document::Statistics stat(m_win->document(),
+                                  m_selection.isEmpty() ? m_win->document()->items() : m_selection);
 
-        QString valstr, wgtstr;
+        QLocale loc;
         QString ccode = m_win->document()->currencyCode();
+        QString wgtstr;
+        QString minvalstr;
+        QString valstr = loc.toString(stat.value(), 'f', 3);
 
         if (!qFuzzyCompare(stat.value(), stat.minValue())) {
-            valstr = QString("%1 (%2 %3)").arg(Currency::toString(stat.value(), ccode, Currency::LocalSymbol),
-                                               tr("min."),
-                                               Currency::toString(stat.minValue(), ccode, Currency::LocalSymbol));
-        } else {
-            valstr = Currency::toString(stat.value(), ccode, Currency::LocalSymbol);
+            minvalstr = u'(' % tr("min.") % u' ' % ccode % u' '
+                    % loc.toString(stat.minValue(), 'f', 3) % u')';
         }
-        QString coststr = Currency::toString(stat.cost(), ccode, Currency::LocalSymbol);
+        QString coststr = loc.toString(stat.cost(), 'f', 3);
         QString profitstr;
         if (!qFuzzyIsNull(stat.cost())) {
             int percent = int(std::round(stat.value() / stat.cost() * 100. - 100.));
-            profitstr = (percent > 0 ? u"( +" : u"( ") % QString::number(percent) % u" % )";
+            profitstr = (percent > 0 ? u"(+" : u"(") % loc.toString(percent) % u" %)";
         }
 
 
-        if (qFuzzyCompare(stat.weight(), -DBL_MIN)) {
+        if (qFuzzyCompare(stat.weight(), -std::numeric_limits<double>::min())) {
             wgtstr = "-";
         } else {
             double weight = stat.weight();
 
             if (weight < 0) {
                 weight = -weight;
-                wgtstr = tr("min.") + " ";
+                wgtstr = tr("min.") % u' ';
             }
 
             wgtstr += Utility::weightToString(weight, Config::inst()->measurementSystem(), true, true);
         }
 
-        static const char *fmt = "<h3>%1</h3>"
-                                 "&nbsp;&nbsp;%2: %3<br>"
-                                 "&nbsp;&nbsp;%4: %5<br><br>"
-                                 "&nbsp;&nbsp;%6: %7&nbsp;&nbsp;%8<br><br>"
-                                 "&nbsp;&nbsp;%9: %10<br><br>"
-                                 "&nbsp;&nbsp;%11: %12";
+        static const char *fmt =
+                "<h3>%1</h3><table cellspacing=6>"
+                "<tr><td>&nbsp;&nbsp;%2: </td><td colspan=2 align=right>&nbsp;&nbsp;%3</td></tr>"
+                "<tr><td>&nbsp;&nbsp;%4: </td><td colspan=2 align=right>&nbsp;&nbsp;%5</td></tr><tr></tr>"
+                "<tr><td>&nbsp;&nbsp;%6: </td><td>&nbsp;&nbsp;%7</td><td align=right>%8</td><td>&nbsp;&nbsp;%9</td></tr><tr></tr>"
+                "<tr><td>&nbsp;&nbsp;%10:</td><td>&nbsp;&nbsp;%11</td><td align=right>%12</td><td>&nbsp;&nbsp;%13</td></tr><tr></tr>"
+                "<tr><td>&nbsp;&nbsp;%14:</td><td colspan=2 align=right>&nbsp;&nbsp;%15</td></tr>"
+                "</table>";
 
         QString s = QString::fromLatin1(fmt).arg(
-                tr("Multiple lots selected"),
-                tr("Lots"), QLocale().toString(stat.lots()),
-                tr("Items"), QLocale().toString(stat.items()),
-                tr("Cost"), coststr, profitstr).arg(
-                tr("Value"), valstr,
+                m_selection.isEmpty() ? tr("Document statistics") : tr("Multiple lots selected"),
+                tr("Lots"), loc.toString(stat.lots()),
+                tr("Items"), loc.toString(stat.items()),
+                tr("Cost"), ccode, coststr, profitstr).arg(
+                tr("Value"), ccode, valstr, minvalstr,
                 tr("Weight"), wgtstr);
-
-//  if (( stat.errors ( ) > 0 ) && Config::inst ( )->showInputErrors ( ))
-//   s += QString ( "<br /><br />&nbsp;&nbsp;%1: %2" ).arg ( tr( "Errors" )).arg ( stat.errors ( ));
 
         m_pic->setItemAndColor(nullptr);
         m_text->setText(s);

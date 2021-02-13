@@ -26,10 +26,11 @@
 QT_FORWARD_DECLARE_CLASS(QToolButton)
 QT_FORWARD_DECLARE_CLASS(QComboBox)
 QT_FORWARD_DECLARE_CLASS(QTableView)
+QT_FORWARD_DECLARE_CLASS(QItemSelectionModel)
 class FrameWork;
 class UndoStack;
-QT_FORWARD_DECLARE_CLASS(QItemSelectionModel)
 class HeaderView;
+class StatusBar;
 
 
 class Window : public QWidget
@@ -79,18 +80,14 @@ public:
     QDomElement createGuiStateXML();
     bool parseGuiStateXML(const QDomElement &root);
 
-    bool isDifferenceMode() const;
     bool isSimpleMode() const;
 
     QByteArray currentColumnLayout() const;
 
 public slots:
     void setFilter(const QString &str);
-    void setDifferenceMode(bool b);
     void setSimpleMode(bool b);
     void setSelection(const Document::ItemList &);
-
-    void on_view_difference_mode_toggled(bool);
 
     void on_document_save_triggered();
     void on_document_save_as_triggered();
@@ -114,8 +111,6 @@ public slots:
     void on_edit_mergeitems_triggered();
     void on_edit_partoutitems_triggered();
     void on_edit_setmatch_triggered();
-
-    void on_edit_reset_diffs_triggered();
 
     void on_edit_select_all_triggered();
     void on_edit_select_none_triggered();
@@ -187,6 +182,7 @@ private slots:
     void ensureLatestVisible();
     void updateCaption();
     void updateSelection();
+    void updateDifferenceMode();
     void documentItemsChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
 
     void contextMenu(const QPoint &);
@@ -210,6 +206,7 @@ private:
     QItemSelectionModel *m_selection_model;
     Document::ItemList   m_selection;
     QTimer *             m_delayedSelectionUpdate = nullptr;
+    StatusBar *          w_statusbar;
     QTableView *         w_list;
     HeaderView *         w_header;
     bool                 m_diff_mode;

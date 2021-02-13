@@ -61,36 +61,33 @@ QUrl Core::url(UrlList u, const void *opt, const void *opt2)
         url = "https://www.bricklink.com/invXML.asp#update";
         break;
 
-    case URL_CatalogInfo:
-        if (opt) {
-            const Item *item = static_cast <const Item *>(opt);
-
+    case URL_CatalogInfo: {
+        auto item = static_cast<const Item *>(opt);
+        if (item && item->itemType()) {
             url = "https://www.bricklink.com/catalogItem.asp";
             QUrlQuery query;
             query.addQueryItem(QChar(item->itemType()->id()), item->id());
             if (item->itemType()->hasColors() && opt2)
-                query.addQueryItem("C", QString::number(static_cast <const Color *>(opt2)->id()));
+                query.addQueryItem("C", QString::number(static_cast<const Color *>(opt2)->id()));
             url.setQuery(query);
         }
         break;
-
-    case URL_PriceGuideInfo:
-        if (opt) {
-            const Item *item = static_cast <const Item *>(opt);
-
+    }
+    case URL_PriceGuideInfo: {
+        auto *item = static_cast<const Item *>(opt);
+        if (item && item->itemType()) {
             url = "https://www.bricklink.com/catalogPG.asp";
             QUrlQuery query;
             query.addQueryItem(QChar(item->itemType()->id()), item->id());
             if (item->itemType()->hasColors() && opt2)
-                query.addQueryItem("colorID", QString::number(static_cast <const Color *>(opt2)->id()));
+                query.addQueryItem("colorID", QString::number(static_cast<const Color *>(opt2)->id()));
             url.setQuery(query);
         }
         break;
-
-    case URL_LotsForSale:
-        if (opt) {
-            const Item *item = static_cast <const Item *>(opt);
-
+    }
+    case URL_LotsForSale: {
+        auto item = static_cast<const Item *>(opt);
+        if (item && item->itemType()) {
             url = "https://www.bricklink.com/search.asp";
             QUrlQuery query;
             query.addQueryItem("viewFrom", "sa");
@@ -108,26 +105,25 @@ QUrl Core::url(UrlList u, const void *opt, const void *opt2)
             query.addQueryItem("q", id);
 
             if (item->itemType()->hasColors() && opt2)
-                query.addQueryItem("colorID", QString::number(static_cast <const Color *>(opt2)->id()));
+                query.addQueryItem("colorID", QString::number(static_cast<const Color *>(opt2)->id()));
             url.setQuery(query);
         }
         break;
-
-    case URL_AppearsInSets:
-        if (opt) {
-            const Item *item = static_cast <const Item *>(opt);
-
+    }
+    case URL_AppearsInSets: {
+        auto item = static_cast<const Item *>(opt);
+        if (item && item->itemType()) {
             url = "https://www.bricklink.com/catalogItemIn.asp";
             QUrlQuery query;
             query.addQueryItem(QChar(item->itemType()->id()), item->id());
             query.addQueryItem("in", "S");
 
             if (item->itemType()->hasColors() && opt2)
-                query.addQueryItem("colorID", QString::number(static_cast <const Color *>(opt2)->id()));
+                query.addQueryItem("colorID", QString::number(static_cast<const Color *>(opt2)->id()));
             url.setQuery(query);
         }
         break;
-
+    }
     case URL_ColorChangeLog:
         url = "https://www.bricklink.com/catalogReqList.asp?pg=1&chgUserID=&viewActionType=R";
         break;
@@ -136,15 +132,28 @@ QUrl Core::url(UrlList u, const void *opt, const void *opt2)
         url = "https://www.bricklink.com/catalogReqList.asp?pg=1&chgUserID=&viewActionType=I";
         QUrlQuery query;
         if (opt)
-            query.addQueryItem("q", static_cast <const char *>(opt));
+            query.addQueryItem("q", static_cast<const char *>(opt));
         url.setQuery(query);
         break;
     }
     case URL_StoreItemDetail: {
-        if (opt) {
+        auto lotId = static_cast<const unsigned int *>(opt);
+        if (lotId && *lotId) {
             url = "https://www.bricklink.com/inventory_detail.asp";
             QUrlQuery query;
-            query.addQueryItem("invID", QString::number(*static_cast <const unsigned int *>(opt)));
+            query.addQueryItem("invID", QString::number(*lotId));
+            url.setQuery(query);
+        }
+        break;
+    }
+    case URL_StoreItemSearch: {
+        const Item *item = static_cast<const Item *>(opt);
+        const Color *color = static_cast<const Color *>(opt2);
+        if (item && item->itemType() && color) {
+            url = "https://www.bricklink.com/inventory_detail.asp?";
+            QUrlQuery query;
+            query.addQueryItem("catType", QChar(item->itemType()->id()));
+            query.addQueryItem("q", color->name() % u' ' % item->id());
             url.setQuery(query);
         }
         break;
@@ -436,34 +445,40 @@ bool Core::onlineStatus() const
 }
 
 
-const QHash<uint, const Color *> &Core::colors() const
+const std::vector<const Color *> &Core::colors() const
 {
     return m_colors;
 }
 
-const QHash<uint, const Category *> &Core::categories() const
+const std::vector<const Category *> &Core::categories() const
 {
     return m_categories;
 }
 
-const QHash<char, const ItemType *> &Core::itemTypes() const
+const std::vector<const ItemType *> &Core::itemTypes() const
 {
     return m_item_types;
 }
 
-const QVector<const Item *> &Core::items() const
+const std::vector<const Item *> &Core::items() const
 {
     return m_items;
 }
 
 const Category *Core::category(uint id) const
 {
-    return m_categories.value(id);
+    auto it = std::lower_bound(m_categories.cbegin(), m_categories.cend(), id, &Category::lowerBound);
+    if ((it != m_categories.cend()) && ((*it)->id() == id))
+        return *it;
+    return nullptr;
 }
 
 const Color *Core::color(uint id) const
 {
-    return m_colors.value(id);
+    auto it = std::lower_bound(m_colors.cbegin(), m_colors.cend(), id, &Color::lowerBound);
+    if ((it != m_colors.cend()) && ((*it)->id() == id))
+        return *it;
+    return nullptr;
 }
 
 const Color *Core::colorFromName(const QString &name) const
@@ -471,43 +486,48 @@ const Color *Core::colorFromName(const QString &name) const
     if (name.isEmpty())
         return nullptr;
 
-    for (const Color *col : m_colors) {
-        if (!col->name().compare(name, Qt::CaseInsensitive))
-            return col;
-    }
+    auto it = std::find_if(m_colors.cbegin(), m_colors.cend(), [name](const auto &color) {
+        return !color->name().compare(name, Qt::CaseInsensitive);
+    });
+    if (it != m_colors.cend())
+        return *it;
     return nullptr;
 }
 
 
-const Color *Core::colorFromLDrawId(int ldraw_id) const
+const Color *Core::colorFromLDrawId(int ldrawId) const
 {
-    for (const Color *col : m_colors) {
-        if (col->ldrawId() == ldraw_id)
-            return col;
-    }
+    auto it = std::find_if(m_colors.cbegin(), m_colors.cend(), [ldrawId](const auto &color) {
+        return (color->ldrawId() == ldrawId);
+    });
+    if (it != m_colors.cend())
+        return *it;
     return nullptr;
 }
 
 
 const ItemType *Core::itemType(char id) const
 {
-    return m_item_types.value(id);
+    auto it = std::lower_bound(m_item_types.cbegin(), m_item_types.cend(), id, &ItemType::lowerBound);
+    if ((it != m_item_types.cend()) && ((*it)->id() == id))
+        return *it;
+    return nullptr;
 }
 
 const Item *Core::item(char tid, const QString &id) const
 {
-    Item key;
-    key.m_item_type = itemType(tid);
-    key.m_id = id;
-
-    if (!key.m_item_type || key.m_id.isEmpty())
-        return nullptr;
-
-    // Finds the lower bound in at most log(last - first) + 1 comparisons
-    auto it = std::lower_bound(m_items.constBegin(), m_items.constEnd(), &key, Item::lessThan);
-    if (it != m_items.constEnd() && !Item::lessThan(&key, *it))
+    auto needle = std::make_pair(tid, id);
+    auto it = std::lower_bound(m_items.cbegin(), m_items.cend(), needle, Item::lowerBound);
+    if ((it != m_items.cend()) && ((*it)->itemType()->id() == tid) && ((*it)->id() == id))
         return *it;
+    return nullptr;
+}
 
+const PartColorCode *Core::partColorCode(uint id)
+{
+    auto it = std::lower_bound(m_pccs.cbegin(), m_pccs.cend(), id, &PartColorCode::lowerBound);
+    if ((it != m_pccs.cend()) && ((*it)->id() == id))
+        return *it;
     return nullptr;
 }
 
@@ -558,710 +578,14 @@ void Core::clear()
     qDeleteAll(m_item_types);
     qDeleteAll(m_categories);
     qDeleteAll(m_items);
+    qDeleteAll(m_pccs);
 
     m_colors.clear();
     m_item_types.clear();
     m_categories.clear();
     m_items.clear();
+    m_pccs.clear();
     m_changelog.clear();
-}
-
-
-
-Core::ParseItemListXMLResult Core::parseItemListXML(const QDomElement &root, ItemListXMLHint hint)
-{
-    ParseItemListXMLResult result;
-    QString roottag, itemtag;
-
-    switch (hint) {
-    case XMLHint_Order     : roottag = QLatin1String("ORDER"); itemtag = QLatin1String("ITEM"); break;
-    case XMLHint_MassUpload:
-    case XMLHint_MassUpdate:
-    case XMLHint_WantedList:
-    case XMLHint_Inventory : roottag = QLatin1String("INVENTORY"); itemtag = QLatin1String("ITEM"); break;
-    case XMLHint_BrickStore: roottag = QLatin1String("Inventory"); itemtag = QLatin1String("Item"); break;
-    }
-
-    if (root.nodeName() != roottag)
-        return result;
-
-    if (hint == XMLHint_BrickStore)
-        result.currencyCode = root.attribute(QLatin1String("Currency"));
-    if (result.currencyCode.isEmpty())
-        result.currencyCode = QLatin1String("USD");
-
-    result.items = new InvItemList;
-    bool multicurrency = false;
-    QLocale c = QLocale::c();
-
-    for (QDomNode itemn = root.firstChild(); !itemn.isNull(); itemn = itemn.nextSibling()) {
-        if (itemn.nodeName() != itemtag)
-            continue;
-
-        auto *ii = new InvItem();
-
-        QString itemid, itemname;
-        QString itemtypeid, itemtypename;
-        QString colorid, colorname;
-        QString categoryid, categoryname;
-
-        bool has_orig_price = false;
-        bool has_orig_qty = false;
-
-        for (QDomNode n = itemn.firstChild(); !n.isNull(); n = n.nextSibling()) {
-            if (!n.isElement())
-                continue;
-            QString tag = n.toElement().tagName();
-            QString val = n.toElement().text();
-
-
-            // ### BrickLink XML ###
-            if (hint != XMLHint_BrickStore) {
-                if (tag == QLatin1String("ITEMID"))
-                    itemid = val;
-                else if (tag == QLatin1String("COLOR"))
-                    colorid = val;
-                else if (tag == QLatin1String("CATEGORY"))
-                    categoryid = val;
-                else if (tag == QLatin1String("ITEMTYPE"))
-                    itemtypeid = val;
-                else if (tag == QLatin1String("BASECURRENCYCODE")) {
-                    if (result.items->isEmpty())
-                        result.currencyCode = val;
-                    else if (val != result.currencyCode)
-                        multicurrency = true;
-                }
-                else if (tag == QLatin1String("PRICE"))
-                    ii->setPrice(c.toDouble(val));
-                else if (tag == QLatin1String( "BULK"))
-                    ii->setBulkQuantity(c.toInt(val));
-                else if (tag == QLatin1String( "QTY"))
-                    ii->setQuantity(c.toInt(val));
-                else if (tag == QLatin1String("SALE"))
-                    ii->setSale(c.toInt(val));
-                else if (tag == QLatin1String("CONDITION"))
-                    ii->setCondition(val == QLatin1String("N") ? Condition::New : Condition::Used);
-                else if (tag == QLatin1String("SUBCONDITION")) {
-                    ii->setSubCondition(val == QLatin1String("C") ? SubCondition::Complete : \
-                                        val == QLatin1String("I") ? SubCondition::Incomplete : \
-                                        val == QLatin1String("S") ? SubCondition::Sealed : SubCondition::None);
-                }
-                else if (tag == QLatin1String("DESCRIPTION"))
-                    ii->setComments(val);
-                else if (tag == QLatin1String("REMARKS"))
-                    ii->setRemarks(val);
-                else if (tag == QLatin1String("TQ1"))
-                    ii->setTierQuantity(0, c.toInt(val));
-                else if (tag == QLatin1String("TQ2"))
-                    ii->setTierQuantity(1, c.toInt(val));
-                else if (tag == QLatin1String("TQ3"))
-                    ii->setTierQuantity(2, c.toInt(val));
-                else if (tag == QLatin1String("TP1"))
-                    ii->setTierPrice(0, c.toDouble(val));
-                else if (tag == QLatin1String("TP2"))
-                    ii->setTierPrice(1, c.toDouble(val));
-                else if (tag == QLatin1String("TP3"))
-                    ii->setTierPrice(2, c.toDouble(val));
-                else if (tag == QLatin1String("LOTID"))
-                    ii->setLotId(c.toUInt(val));
-                else if (tag == QLatin1String("RETAIN"))
-                    ii->setRetain(val == QLatin1String("Y"));
-                else if (tag == QLatin1String("STOCKROOM")) {
-                    if (ii->stockroom() == Stockroom::None)
-                        ii->setStockroom(val == QLatin1String("Y") ? Stockroom::A : Stockroom::None);
-                } else if (tag == QLatin1String("STOCKROOMID")) {
-                    ii->setStockroom(val == "A" ? Stockroom::A : \
-                                     val == "B" ? Stockroom::B : \
-                                     val == "C" ? Stockroom::C : Stockroom::None);
-                } else if (tag == QLatin1String("BUYERUSERNAME"))
-                    ii->setReserved(val);
-                else if (tag == QLatin1String("MYCOST"))
-                    ii->setCost(c.toDouble(val));
-            }
-
-            // ### BrickLink Order (workaround for broken BL script) ###
-            if (hint == XMLHint_Order) {
-                // The remove(',') stuff is a workaround for the
-                // broken Order XML generator: the XML contains , as
-                // thousands-separator: 1,752 instead of 1752
-
-                if (tag == QLatin1String("QTY"))
-                    ii->setQuantity(val.remove(QLatin1Char(',')).toInt());
-            }
-
-            // ### Inventory Request ###
-            else if (hint == XMLHint_Inventory) {
-                if ((tag == QLatin1String("EXTRA")) && (val == QLatin1String("Y")))
-                    ii->setStatus(Status::Extra);
-                else if (tag == QLatin1String("COUNTERPART"))
-                     ii->setCounterPart((val == QLatin1String("Y")));
-                else if (tag == QLatin1String("ALTERNATE"))
-                     ii->setAlternate((val == QLatin1String("Y")));
-                else if (tag == QLatin1String("MATCHID"))
-                     ii->setAlternateId(c.toUInt(val));
-                else if (tag == QLatin1String("ITEMNAME"))    // BrickStore extension for Peeron inventories
-                    itemname = val;
-                else if (tag == QLatin1String("COLORNAME"))   // BrickStore extension for Peeron inventories
-                    colorname = val;
-            }
-
-            // ### BrickStore BSX ###
-            else if (hint == XMLHint_BrickStore) {
-                if (tag == QLatin1String("ItemID"))
-                    itemid = val;
-                else if (tag == QLatin1String("ColorID"))
-                    colorid = val;
-                else if (tag == QLatin1String("CategoryID"))
-                    categoryid = val;
-                else if (tag == QLatin1String("ItemTypeID"))
-                    itemtypeid = val;
-                else if (tag == QLatin1String("ItemName"))
-                    itemname = val;
-                else if (tag == QLatin1String("ColorName"))
-                    colorname = val;
-                else if (tag == QLatin1String("CategoryName"))
-                    categoryname = val;
-                else if (tag == QLatin1String("ItemTypeName"))
-                    itemtypename = val;
-                else if (tag == QLatin1String("Price"))
-                    ii->setPrice(c.toDouble(val));
-                else if (tag == QLatin1String("Bulk"))
-                    ii->setBulkQuantity(c.toInt(val));
-                else if (tag == QLatin1String("Qty"))
-                    ii->setQuantity(c.toInt(val));
-                else if (tag == QLatin1String("Sale"))
-                    ii->setSale(c.toInt(val));
-                else if (tag == QLatin1String("Condition"))
-                    ii->setCondition(val == QLatin1String("N") ? Condition::New : Condition::Used);
-                else if (tag == QLatin1String("SubCondition")) {
-                    // 'M' for sealed is an historic artefact. BL called this 'MISB' back in the day
-                    ii->setSubCondition(val == QLatin1String("C") ? SubCondition::Complete : \
-                                        val == QLatin1String("I") ? SubCondition::Incomplete : \
-                                        val == QLatin1String("M") ? SubCondition::Sealed : SubCondition::None);
-                }
-                else if (tag == QLatin1String("Comments"))
-                    ii->setComments(val);
-                else if (tag == QLatin1String("Remarks"))
-                    ii->setRemarks(val);
-                else if (tag == QLatin1String("TQ1"))
-                    ii->setTierQuantity(0, c.toInt(val));
-                else if (tag == QLatin1String("TQ2"))
-                    ii->setTierQuantity(1, c.toInt(val));
-                else if (tag == QLatin1String("TQ3"))
-                    ii->setTierQuantity(2, c.toInt(val));
-                else if (tag == QLatin1String("TP1"))
-                    ii->setTierPrice(0, c.toDouble(val));
-                else if (tag == QLatin1String("TP2"))
-                    ii->setTierPrice(1, c.toDouble(val));
-                else if (tag == QLatin1String("TP3"))
-                    ii->setTierPrice(2, c.toDouble(val));
-                else if (tag == QLatin1String("Status")) {
-                    Status st = Status::Include;
-
-                    if (val == QLatin1String("X"))
-                        st = Status::Exclude;
-                    else if (val == QLatin1String("I"))
-                        st = Status::Include;
-                    else if (val == QLatin1String("E"))
-                        st = Status::Extra;
-                    else if (val == QLatin1String("?"))
-                        st = Status::Unknown;
-
-                    ii->setStatus(st);
-                }
-                else if (tag == QLatin1String("LotID"))
-                    ii->setLotId(c.toUInt(val));
-                else if (tag == QLatin1String("Retain"))
-                    ii->setRetain(true);
-                else if (tag == QLatin1String("Stockroom")) {
-                    Stockroom st = Stockroom::None;
-                    if (val.isEmpty() || val == "A")
-                        st = Stockroom::A;
-                    else if (val == "B")
-                        st = Stockroom::B;
-                    else if (val == "C")
-                        st = Stockroom::C;
-                    ii->setStockroom(st);
-                } else if (tag == QLatin1String("Reserved"))
-                    ii->setReserved(val);
-                else if (tag == QLatin1String("TotalWeight"))
-                    ii->setWeight(c.toDouble(val));
-                else if (tag == QLatin1String("OrigPrice")) {
-                    ii->setOrigPrice(c.toDouble(val));
-                    has_orig_price = true;
-                }
-                else if (tag == QLatin1String("OrigQty")) {
-                    ii->setOrigQuantity(c.toInt(val));
-                    has_orig_qty = true;
-                } else if (tag == QLatin1String("Cost")) {
-                    ii->setCost(c.toDouble(val));
-                }
-            }
-        }
-
-        bool ok = true;
-
-        //qDebug ( "item (id=%s, color=%s, type=%s, cat=%s", itemid.latin1 ( ), colorid.latin1 ( ), itemtypeid.latin1 ( ), categoryid.latin1 ( ));
-
-        if (!has_orig_price)
-            ii->setOrigPrice(ii->price());
-        if (!has_orig_qty)
-            ii->setOrigQuantity(ii->quantity());
-
-        if (!colorid.isEmpty() && !itemid.isEmpty() && !itemtypeid.isEmpty()) {
-            ii->setItem(item(itemtypeid [0].toLatin1(), itemid.toLatin1()));
-
-            if (!ii->item()) {
-                qWarning() << "failed: invalid itemid (" << itemid << ") and/or itemtypeid (" << itemtypeid [0] << ")";
-                ok = false;
-            }
-
-            ii->setColor(color(colorid.toUInt()));
-
-            if (!ii->color()) {
-                qWarning() << "failed: invalid color (" << colorid << ")";
-                ok = false;
-            }
-        }
-        else
-            ok = false;
-
-        if (!ok) {
-            qWarning() << "failed: insufficient data (item=" << itemid << ", itemtype=" << itemtypeid [0] << ", category=" << categoryid << ", color=" << colorid << ")";
-
-            auto *inc = new InvItem::Incomplete;
-
-            if (!ii->item()) {
-                inc->m_item_id = itemid.toLatin1();
-                inc->m_item_name = itemname.toLatin1();
-                inc->m_itemtype_id = itemtypeid;
-                inc->m_itemtype_name = itemtypename;
-                inc->m_category_name = (categoryname.isEmpty() ? categoryid : categoryname).toLatin1();
-            }
-            if (!ii->color())
-                inc->m_color_name = (colorname.isEmpty() ? colorid : colorname).toLatin1();
-
-            ii->setIncomplete(inc);
-
-            ok = true;
-            result.invalidItemCount++;
-        }
-
-        if (ok)
-            result.items->append(ii);
-        else
-            delete ii;
-    }
-
-    if (result.invalidItemCount)
-        qWarning() << "Parse XML (hint=" << int(hint) << "): " << result.invalidItemCount << " items have incomplete records";
-    if (multicurrency)
-        qWarning() << "Parse XML (hint=" << int(hint) << "): Multiple currencies within one XML file are not supported - everything will be parsed as " << result.currencyCode;
-
-    return result;
-}
-
-
-
-QDomElement Core::createItemListXML(QDomDocument doc, ItemListXMLHint hint, const InvItemList &items, const QString &currencyCode, QMap <QString, QString> *extra)
-{
-    QString roottag, itemtag;
-
-    switch (hint) {
-    case XMLHint_MassUpload:
-    case XMLHint_MassUpdate:
-    case XMLHint_WantedList:
-    case XMLHint_Inventory : roottag = QLatin1String("INVENTORY"); itemtag = QLatin1String("ITEM"); break;
-    case XMLHint_BrickStore: roottag = QLatin1String("Inventory"); itemtag = QLatin1String("Item"); break;
-    case XMLHint_Order     : break;
-    }
-
-    QDomElement root = doc.createElement(roottag);
-
-    if (root.isNull() || roottag.isNull() || itemtag.isEmpty() || items.isEmpty())
-        return root;
-
-    if (hint == XMLHint_BrickStore)
-        root.setAttribute(QLatin1String("Currency"), currencyCode);
-
-    for (const InvItem *ii : items) {
-        if (ii->isIncomplete())
-            continue;
-
-        if ((ii->status() == Status::Exclude) && (hint != XMLHint_BrickStore))
-            continue;
-
-        if (hint == XMLHint_MassUpdate) {
-            bool diffs = ((ii->quantity() != ii->origQuantity()) || !qFuzzyCompare(ii->price(), ii->origPrice()));
-
-            if (!ii->lotId() || !diffs)
-                continue;
-        }
-
-        QDomElement item = doc.createElement(itemtag);
-        root.appendChild(item);
-        QLocale c = QLocale::c();
-
-        auto create = [&item, &doc](QStringView tagName, QStringView value) {
-            item.appendChild(doc.createElement(tagName.toString())
-                             .appendChild(doc.createTextNode(value.toString())).parentNode());
-        };
-        auto createEmpty = [&item, &doc](QStringView tagName) {
-            item.appendChild(doc.createElement(tagName.toString()));
-        };
-
-        // ### MASS UPDATE ###
-        if (hint == XMLHint_MassUpdate) {
-            create(u"LOTID", c.toString(ii->lotId()));
-
-            int qdiff = ii->quantity() - ii->origQuantity();
-            double pdiff = ii->price() - ii->origPrice();
-
-            if (!qFuzzyIsNull(pdiff))
-                create(u"PRICE", c.toCurrencyString(ii->price(), {}, 3));
-            if (qdiff && (ii->quantity() > 0))
-                create(u"QTY", c.toString(qdiff).prepend(qdiff > 0 ? "+" : ""));
-            else if (qdiff && (ii->quantity() <= 0))
-                createEmpty(u"DELETE");
-        }
-
-        // ### BrickStore BSX ###
-        else if (hint == XMLHint_BrickStore) {
-            create(u"ItemID", ii->item()->id());
-            create(u"ItemTypeID", QString(ii->itemType()->id()));
-            create(u"ColorID", c.toString(ii->color()->id()));
-
-            // this extra information is useful, if the e.g.the color- or item-id
-            // are no longer available after a database update
-            create(u"ItemName", ii->item()->name());
-            create(u"ItemTypeName", ii->itemType()->name());
-            create(u"ColorName", ii->color()->name());
-            create(u"CategoryID", c.toString(ii->category()->id()));
-            create(u"CategoryName", ii->category()->name());
-
-            {
-                const char16_t *st;
-                switch (ii->status()) {
-                default             :
-                case Status::Unknown: st = u"?"; break;
-                case Status::Extra  : st = u"E"; break;
-                case Status::Exclude: st = u"X"; break;
-                case Status::Include: st = u"I"; break;
-                }
-                create(u"Status", st);
-            }
-
-            create(u"Qty", c.toString(ii->quantity()));
-            create(u"Price", c.toCurrencyString(ii->price(), { }, 3));
-            create(u"Condition", (ii->condition() == Condition::New) ? u"N" : u"U");
-
-            if (ii->subCondition() != SubCondition::None) {
-                // 'M' for sealed is an historic artefact. BL called this 'MISB' back in the day
-                const char16_t *st;
-                switch (ii->subCondition()) {
-                case SubCondition::Incomplete: st = u"I"; break;
-                case SubCondition::Complete  : st = u"C"; break;
-                case SubCondition::Sealed    : st = u"M"; break;
-                default                      : st = u"?"; break;
-                }
-                create(u"SubCondition", st);
-            }
-
-            if (ii->bulkQuantity() != 1)
-                create(u"Bulk", c.toString(ii->bulkQuantity()));
-            if (ii->sale())
-                create(u"Sale", c.toString(ii->sale()));
-            if (!ii->comments().isEmpty())
-                create(u"Comments", ii->comments());
-            if (!ii->remarks().isEmpty())
-                create(u"Remarks", ii->remarks());
-            if (ii->retain())
-                createEmpty(u"Retain");
-            if (ii->stockroom() != Stockroom::None) {
-                const char16_t *st;
-                switch (ii->stockroom()) {
-                case Stockroom::A: st = u"A"; break;
-                case Stockroom::B: st = u"B"; break;
-                case Stockroom::C: st = u"C"; break;
-                default          : st = u""; break;
-                }
-                create(u"Stockroom", st);
-            }
-            if (!ii->reserved().isEmpty())
-                create(u"Reserved", ii->reserved());
-            if (ii->lotId())
-                create(u"LotID", c.toString(ii->lotId()));
-
-            if (ii->tierQuantity(0)) {
-                create(u"TQ1", c.toString(ii->tierQuantity(0)));
-                create(u"TP1", c.toCurrencyString(ii->tierPrice(0), { }, 3));
-                create(u"TQ2", c.toString(ii->tierQuantity(1)));
-                create(u"TP2", c.toCurrencyString(ii->tierPrice(1), { }, 3));
-                create(u"TQ3", c.toString(ii->tierQuantity(2)));
-                create(u"TP3", c.toCurrencyString(ii->tierPrice(2), { }, 3));
-            }
-
-            if (ii->m_weight > 0)
-                create(u"TotalWeight", c.toString(ii->weight(), 'f', 4));
-            if (!qFuzzyCompare(ii->origPrice(), ii->price()))
-                create(u"OrigPrice", c.toCurrencyString(ii->origPrice(), { }, 3));
-            if (ii->origQuantity() != ii->quantity())
-                create(u"OrigQty", c.toString(ii->origQuantity()));
-            if (!qFuzzyIsNull(ii->cost()))
-                create(u"Cost", c.toCurrencyString(ii->cost(), { }, 3));
-        }
-
-        // ### MASS UPLOAD ###
-        else if (hint == XMLHint_MassUpload) {
-            create(u"ITEMID", ii->item()->id());
-            create(u"COLOR", c.toString(ii->color()->id()));
-            create(u"CATEGORY", c.toString(ii->category()->id()));
-            create(u"ITEMTYPE", QString(ii->itemType()->id()));
-
-            create(u"QTY", c.toString(ii->quantity()));
-            create(u"PRICE", c.toCurrencyString(ii->price(), { }, 3));
-            create(u"CONDITION", (ii->condition() == Condition::New) ? u"N" : u"U");
-
-            if (ii->subCondition() != SubCondition::None) {
-                const char16_t *st;
-                switch (ii->subCondition()) {
-                    case SubCondition::Incomplete: st = u"I"; break;
-                    case SubCondition::Complete  : st = u"C"; break;
-                    case SubCondition::Sealed    : st = u"S"; break;
-                    default                      : st = u"?"; break;
-                }
-                create(u"SUBCONDITION", st);
-            }
-
-            if (ii->bulkQuantity() != 1)
-                create(u"BULK", c.toString(ii->bulkQuantity()));
-            if (ii->sale())
-                create(u"SALE", c.toString(ii->sale()));
-            if (!ii->comments().isEmpty())
-                create(u"DESCRIPTION", ii->comments());
-            if (!ii->remarks().isEmpty())
-                create(u"REMARKS", ii->remarks());
-            if (ii->retain())
-                create(u"RETAIN", u"Y");
-            if (ii->stockroom() != Stockroom::None) {
-                const char16_t *st;
-                switch (ii->stockroom()) {
-                case Stockroom::A: st = u"A"; break;
-                case Stockroom::B: st = u"B"; break;
-                case Stockroom::C: st = u"C"; break;
-                default          : st = nullptr; break;
-                }
-                create(u"STOCKROOM", u"Y");
-                if (st)
-                    create(u"STOCKROOMID", st);
-            }
-            if (!ii->reserved().isEmpty())
-                create(u"BUYERUSERNAME", ii->reserved());
-
-            if (ii->tierQuantity(0)) {
-                create(u"TQ1", c.toString(ii->tierQuantity(0)));
-                create(u"TP1", c.toCurrencyString(ii->tierPrice(0), { }, 3));
-                create(u"TQ2", c.toString(ii->tierQuantity(1)));
-                create(u"TP2", c.toCurrencyString(ii->tierPrice(1), { }, 3));
-                create(u"TQ3", c.toString(ii->tierQuantity(2)));
-                create(u"TP3", c.toCurrencyString(ii->tierPrice(2), { }, 3));
-            }
-
-            if (!qFuzzyIsNull(ii->cost()))
-                create(u"MYCOST", c.toCurrencyString(ii->cost(), { }, 3));
-        }
-
-        // ### WANTED LIST ###
-        else if (hint == XMLHint_WantedList) {
-            create(u"ITEMID", ii->item()->id());
-            create(u"ITEMTYPE", QString(ii->itemType()->id()));
-            create(u"COLOR", c.toString(ii->color()->id()));
-
-            if (ii->quantity())
-                create(u"MINQTY", c.toString(ii->quantity()));
-            if (!qFuzzyIsNull(ii->price()))
-                create(u"MAXPRICE", c.toCurrencyString(ii->price(), { }, 3));
-            if (!ii->remarks().isEmpty())
-                create(u"REMARKS", ii->remarks());
-            if (ii->condition() == Condition::New)
-                create(u"CONDITION", u"N");
-        }
-
-        // ### INVENTORY REQUEST ###
-        else if (hint == XMLHint_Inventory) {
-            create(u"ITEMID", ii->item()->id());
-            create(u"ITEMTYPE", QString(ii->itemType()->id()));
-            create(u"COLOR", c.toString(ii->color()->id()));
-            create(u"QTY", c.toString(ii->quantity()));
-
-            if (ii->status() == Status::Extra)
-                create(u"EXTRA", u"Y");
-        }
-
-        // optional: additonal tags
-        if (extra) {
-            for (QMap <QString, QString>::iterator it = extra->begin(); it != extra->end(); ++it)
-                create(it.key(), it.value());
-        }
-    }
-
-    return root;
-}
-
-
-
-bool Core::parseLDrawModel(QFile &f, InvItemList &items, uint *invalid_items)
-{
-    QHash<QString, InvItem *> mergehash;
-    QStringList recursion_detection;
-
-    return parseLDrawModelInternal(f, QString(), items, invalid_items, mergehash, recursion_detection);
-}
-
-bool Core::parseLDrawModelInternal(QFile &f, const QString &model_name, InvItemList &items, uint *invalid_items, QHash<QString, InvItem *> &mergehash, QStringList &recursion_detection)
-{
-    if (recursion_detection.contains(model_name))
-        return false;
-    recursion_detection.append(model_name);
-
-    QStringList searchpath;
-    uint invalid = 0;
-    int linecount = 0;
-
-    bool is_mpd = false;
-    int current_mpd_index = -1;
-    QString current_mpd_model;
-    bool is_mpd_model_found = false;
-
-
-    searchpath.append(QFileInfo(f).dir().absolutePath());
-    if (!m_ldraw_datadir.isEmpty()) {
-        searchpath.append(m_ldraw_datadir + QLatin1String("/models"));
-    }
-
-    if (f.isOpen()) {
-        QTextStream in(&f);
-        QString line;
-
-        while (!(line = in.readLine()).isNull()) {
-            linecount++;
-
-            if (!line.isEmpty() && line [0] == QLatin1Char('0')) {
-                QStringList sl = line.simplified().split(' ');
-
-                if ((sl.count() >= 2) && (sl [1] == QLatin1String("FILE"))) {
-                    is_mpd = true;
-                    sl.removeFirst();
-                    sl.removeFirst();
-                    current_mpd_model = sl.join(QLatin1String(" ")).toLower();
-                    current_mpd_index++;
-
-                    if (is_mpd_model_found)
-                        break;
-
-                    if ((current_mpd_model == model_name.toLower()) || (model_name.isEmpty() && (current_mpd_index == 0)))
-                        is_mpd_model_found = true;
-
-                    if (f.isSequential())
-                        return false; // we need to seek!
-                }
-            }
-            else if (!line.isEmpty() && line [0] == QLatin1Char('1')) {
-                if (is_mpd && !is_mpd_model_found)
-                    continue;
-
-                QStringList sl = line.simplified().split(QLatin1Char(' '));
-
-                if (sl.count() >= 15) {
-                    int colid = sl [1].toInt();
-                    QString partname = sl [14].toLower();
-                    for (int i = 15; i < sl.count(); ++i) {
-                        partname.append(QLatin1Char(' '));
-                        partname.append(sl [i].toLower());
-                    }
-
-                    QString partid = partname;
-                    partid.truncate(partid.lastIndexOf(QLatin1Char('.')));
-
-                    const Color *colp = colorFromLDrawId(colid);
-                    const Item *itemp = item('P', partid.toLatin1());
-
-
-                    if (!itemp) {
-                        bool got_subfile = false;
-
-                        if (is_mpd) {
-                            uint sub_invalid_items = 0;
-
-                            qint64 oldpos = f.pos();
-                            f.seek(0);
-
-                            got_subfile = parseLDrawModelInternal(f, partname, items, &sub_invalid_items, mergehash, recursion_detection);
-
-                            invalid += sub_invalid_items;
-                            f.seek(oldpos);
-                        }
-
-                        if (!got_subfile) {
-                            for (const auto &path : qAsConst(searchpath)) {
-                                QFile subf(path + QDir::separator() + partname);
-
-                                if (subf.open(QIODevice::ReadOnly)) {
-                                    uint sub_invalid_items = 0;
-
-                                    (void) parseLDrawModelInternal(subf, partname, items, &sub_invalid_items, mergehash, recursion_detection);
-
-                                    invalid += sub_invalid_items;
-                                    got_subfile = true;
-                                    break;
-                                }
-                            }
-                        }
-                        if (got_subfile)
-                            continue;
-                    }
-
-                    QString key = QString("%1@%2").arg(partid).arg(colid);
-
-                    InvItem *ii = mergehash.value(key);
-
-                    if (ii) {
-                        ii->m_quantity++;
-                    }
-                    else {
-                        ii = new InvItem(colp, itemp);
-                        ii->m_quantity = 1;
-
-                        if (!colp || !itemp) {
-                            auto *inc = new InvItem::Incomplete;
-
-                            if (!itemp) {
-                                inc->m_item_id = partid.toLatin1();
-                                inc->m_item_name = QByteArray();
-                                inc->m_itemtype_id = "P";
-                                inc->m_itemtype_name = "Part";
-                            }
-                            if (!colp) {
-                                inc->m_color_name = "LDraw #" + QByteArray::number(colid);
-                            }
-                            ii->setIncomplete(inc);
-                            invalid++;
-                        }
-
-                        items.append(ii);
-                        mergehash.insert(key, ii);
-                    }
-                }
-            }
-        }
-    }
-
-    if (invalid_items)
-        *invalid_items = invalid;
-
-    recursion_detection.removeLast();
-
-    return is_mpd ? is_mpd_model_found : true;
 }
 
 
@@ -1308,7 +632,7 @@ bool Core::readDatabase(QString *infoText, const QString &filename)
         }
 
         bool gotColors = false, gotCategories = false, gotItemTypes = false, gotItems = false;
-        bool gotChangeLog = false;
+        bool gotChangeLog = false, gotPccs = false;
 
         auto check = [&ds, &f]() {
             if (ds.status() != QDataStream::Ok)
@@ -1334,7 +658,7 @@ bool Core::readDatabase(QString *infoText, const QString &filename)
                 for (quint32 i = colc; i; i--) {
                     auto *col = readColorFromDatabase(ds, DatabaseVersion::Latest);
                     check();
-                    m_colors.insert(col->id(), col);
+                    m_colors.emplace_back(col);
                 }
                 gotColors = true;
                 break;
@@ -1347,7 +671,7 @@ bool Core::readDatabase(QString *infoText, const QString &filename)
                 for (quint32 i = catc; i; i--) {
                     auto *cat = readCategoryFromDatabase(ds, DatabaseVersion::Latest);
                     check();
-                    m_categories.insert(cat->id(), cat);
+                    m_categories.emplace_back(cat);
                 }
                 gotCategories = true;
                 break;
@@ -1360,7 +684,7 @@ bool Core::readDatabase(QString *infoText, const QString &filename)
                 for (quint32 i = ittc; i; i--) {
                     auto *itt = readItemTypeFromDatabase(ds, DatabaseVersion::Latest);
                     check();
-                    m_item_types.insert(itt->id(), itt);
+                    m_item_types.emplace_back(itt);
                 }
                 gotItemTypes = true;
                 break;
@@ -1374,7 +698,7 @@ bool Core::readDatabase(QString *infoText, const QString &filename)
                 for (quint32 i = itc; i; i--) {
                     auto *item = readItemFromDatabase(ds, DatabaseVersion::Latest);
                     check();
-                    m_items.append(item);
+                    m_items.emplace_back(item);
                 }
                 gotItems = true;
                 break;
@@ -1389,9 +713,26 @@ bool Core::readDatabase(QString *infoText, const QString &filename)
                     QByteArray entry;
                     ds >> entry;
                     check();
-                    m_changelog.append(entry);
+                    m_changelog.emplace_back(entry);
                 }
                 gotChangeLog = true;
+                break;
+            }
+            case ChunkId('P','C','C',' ') | 1ULL << 32: {
+                if (!gotItems || !gotColors)
+                    throw Exception("found a 'PCC ' chunk before the 'ITEM' and 'COL ' chunks");
+
+                quint32 pccc = 0;
+                ds >> pccc;
+                check();
+
+                m_pccs.reserve(int(pccc));
+                for (quint32 i = pccc; i; i--) {
+                    auto *pcc = readPCCFromDatabase(ds, DatabaseVersion::Latest);
+                    check();
+                    m_pccs.emplace_back(pcc);
+                }
+                gotPccs = true;
                 break;
             }
             default: {
@@ -1412,17 +753,18 @@ bool Core::readDatabase(QString *infoText, const QString &filename)
 
         delete sw;
 
-        if (!gotColors || !gotCategories || !gotItemTypes || !gotItems || !gotChangeLog) {
+        if (!gotColors || !gotCategories || !gotItemTypes || !gotItems || !gotChangeLog || !gotPccs) {
             throw Exception("not all required data chunks were found in the database (%1)")
                 .arg(f.fileName());
         }
 
         qDebug() << "Loaded database from" << f.fileName() << endl
                  << "  Generated at:" << generationDate << endl
-                 << "  Colors      :" << m_colors.count() << endl
-                 << "  Item Types  :" << m_item_types.count() << endl
-                 << "  Categories  :" << m_categories.count() << endl
-                 << "  Items       :" << m_items.count();
+                 << "  Colors      :" << m_colors.size() << endl
+                 << "  Item Types  :" << m_item_types.size() << endl
+                 << "  Categories  :" << m_categories.size() << endl
+                 << "  Items       :" << m_items.size() << endl
+                 << "  PCCs        :" << m_pccs.size();
 
         m_databaseDate = generationDate;
         emit databaseDateChanged(generationDate);
@@ -1478,34 +820,42 @@ bool Core::writeDatabase(const QString &filename, DatabaseVersion version,
         check(cw.endChunk());
 
         check(cw.startChunk(ChunkId('C','O','L',' '), 1));
-        ds << quint32(m_colors.count());
+        ds << quint32(m_colors.size());
         for (const Color *col : m_colors)
             writeColorToDatabase(col, ds, version);
         check(cw.endChunk());
 
         check(cw.startChunk(ChunkId('C','A','T',' '), 1));
-        ds << quint32(m_categories.count());
+        ds << quint32(m_categories.size());
         for (const Category *cat : m_categories)
             writeCategoryToDatabase(cat, ds, version);
         check(cw.endChunk());
 
         check(cw.startChunk(ChunkId('T','Y','P','E'), 1));
-        ds << quint32(m_item_types.count());
+        ds << quint32(m_item_types.size());
         for (const ItemType *itt : m_item_types)
             writeItemTypeToDatabase(itt, ds, version);
         check(cw.endChunk());
 
         check(cw.startChunk(ChunkId('I','T','E','M'), 1));
-        ds << quint32(m_items.count());
+        ds << quint32(m_items.size());
         for (const Item *item : m_items)
             writeItemToDatabase(item, ds, version);
         check(cw.endChunk());
 
         check(cw.startChunk(ChunkId('C','H','G','L'), 1));
-        ds << quint32(m_changelog.count());
+        ds << quint32(m_changelog.size());
         for (const QByteArray &cl : m_changelog)
             ds << cl;
         check(cw.endChunk());
+
+        if (version >= DatabaseVersion::Version_3) {
+            check(cw.startChunk(ChunkId('P','C','C',' '), 1));
+            ds << quint32(m_pccs.size());
+            for (const PartColorCode *pcc : m_pccs)
+                writePCCToDatabase(pcc, ds, version);
+            check(cw.endChunk());
+        }
 
         check(cw.endChunk()); // BSDB root chunk
 
@@ -1617,27 +967,20 @@ void Core::writeItemTypeToDatabase(const ItemType *itt, QDataStream &dataStream,
 }
 
 
-Item *Core::readItemFromDatabase(QDataStream &dataStream, DatabaseVersion v)
+Item *Core::readItemFromDatabase(QDataStream &dataStream, DatabaseVersion)
 {
     QScopedPointer<Item> item(new Item);
 
     qint8 ittid = 0;
-    quint32 catcount = 0;
+    quint32 catid = 0;
     QByteArray id;
     QByteArray name;
 
-    dataStream >> id >> name >> ittid >> catcount;
+    dataStream >> id >> name >> ittid >> catid;
     item->m_id = QString::fromUtf8(id);
     item->m_name = QString::fromUtf8(name);
     item->m_item_type = BrickLink::core()->itemType(ittid);
-
-    item->m_categories.resize(int(catcount));
-
-    for (int i = 0; i < int(catcount); i++) {
-        quint32 catid = 0;
-        dataStream >> catid;
-        item->m_categories[i] = BrickLink::core()->category(catid);
-    }
+    item->m_category = BrickLink::core()->category(catid);
 
     quint32 colorid = 0;
     quint32 index = 0, year = 0;
@@ -1681,16 +1024,14 @@ Item *Core::readItemFromDatabase(QDataStream &dataStream, DatabaseVersion v)
     else
         item->m_consists_of = nullptr;
 
-    if (v >= DatabaseVersion::Version_2) {
-        quint32 known_colors_count;
-        dataStream >> known_colors_count;
-        item->m_known_colors.resize(int(known_colors_count));
+    quint32 known_colors_count;
+    dataStream >> known_colors_count;
+    item->m_known_colors.resize(int(known_colors_count));
 
-        for (int i = 0; i < int(known_colors_count); i++) {
-            quint32 colid = 0;
-            dataStream >> colid;
-            item->m_known_colors[i] = colid;
-        }
+    for (int i = 0; i < int(known_colors_count); i++) {
+        quint32 colid = 0;
+        dataStream >> colid;
+        item->m_known_colors[i] = colid;
     }
 
     return item.take();
@@ -1700,9 +1041,9 @@ void Core::writeItemToDatabase(const Item *item, QDataStream &dataStream, Databa
 {
     dataStream << item->m_id.toUtf8() << item->m_name.toUtf8() << qint8(item->m_item_type->id());
 
-    dataStream << quint32(item->m_categories.size());
-    for (const BrickLink::Category *cat : item->m_categories)
-        dataStream << quint32(cat->id());
+    if (v <= DatabaseVersion::Version_2)
+        dataStream << quint32(1); // this used to be a list of category ids
+    dataStream << quint32(item->category()->id());
 
     quint32 colorid = item->m_color ? item->m_color->id() : quint32(-1);
     dataStream << colorid << qint64(item->m_last_inv_update) << item->m_weight
@@ -1735,67 +1076,86 @@ void Core::writeItemToDatabase(const Item *item, QDataStream &dataStream, Databa
     }
 }
 
-
-int Core::applyChangeLogToItems(InvItemList &bllist)
+PartColorCode *Core::readPCCFromDatabase(QDataStream &dataStream, Core::DatabaseVersion) const
 {
-    int count = 0;
+    QScopedPointer<PartColorCode> pcc(new PartColorCode);
 
-    for (InvItem *blitem : qAsConst(bllist)) {
-        const InvItem::Incomplete *incpl = blitem->isIncomplete();
-        if (incpl) {
-            const Item *fixed_item = blitem->item();
-            const Color *fixed_color = blitem->color();
+    qint8 itemTypeId;
+    QString itemId;
+    uint colorId;
 
-            QString itemtypeid = incpl->m_itemtype_id;
-            QString itemid     = incpl->m_item_id;
-            QString colorid    = incpl->m_color_name;
+    dataStream >> pcc->m_id >> itemTypeId >> itemId >> colorId;
 
-            if (itemtypeid.isEmpty() && !incpl->m_itemtype_name.isEmpty())
-                itemtypeid = incpl->m_itemtype_name.at(0).toUpper();
+    pcc->m_item = item(itemTypeId, itemId);
+    pcc->m_color = color(colorId);
+    return pcc.take();
+}
 
-            for (int i = m_changelog.count() - 1; i >= 0 && !(fixed_color && fixed_item); --i) {
-                const ChangeLogEntry &cl = ChangeLogEntry(m_changelog.at(i));
+void Core::writePCCToDatabase(const PartColorCode *pcc,
+                              QDataStream &dataStream, Core::DatabaseVersion)
+{
+    dataStream << pcc->id() << qint8(pcc->item()->itemType()->id()) << pcc->item()->id()
+               << pcc->color()->id();
+}
 
-                if (!fixed_item) {
-                    if ((cl.type() == ChangeLogEntry::ItemId) ||
-                        (cl.type() == ChangeLogEntry::ItemMerge) ||
-                        (cl.type() == ChangeLogEntry::ItemType)) {
-                        if ((itemtypeid == QLatin1String(cl.from(0))) &&
-                            (itemid == QLatin1String(cl.from(1)))) {
-                            itemtypeid = QLatin1String(cl.to(0));
-                            itemid = QLatin1String(cl.to(1));
 
-                            if (itemtypeid.length() == 1 && !itemid.isEmpty())
-                                fixed_item = core()->item(itemtypeid[0].toLatin1(), itemid.toLatin1().constData());
-                        }
-                    }
-                }
-                if (!fixed_color) {
-                    if (cl.type() == ChangeLogEntry::ColorMerge) {
-                        if (colorid == QLatin1String(cl.from(0))) {
-                            colorid = QLatin1String(cl.to(0));
+bool Core::applyChangeLogToItem(InvItem *item)
+{
+    const InvItem::Incomplete *incpl = item->isIncomplete();
+    if (!incpl)
+        return false;
 
-                            bool ok;
-                            uint cid = colorid.toUInt(&ok);
-                            if (ok)
-                                fixed_color = core()->color(cid);
-                        }
-                    }
+    const Item *fixed_item = item->item();
+    const Color *fixed_color = item->color();
+
+    QString itemtypeid = incpl->m_itemtype_id;
+    QString itemid     = incpl->m_item_id;
+    QString colorid    = incpl->m_color_name;
+
+    if (itemtypeid.isEmpty() && !incpl->m_itemtype_name.isEmpty())
+        itemtypeid = incpl->m_itemtype_name.at(0).toUpper();
+
+    for (int i = int(m_changelog.size()) - 1; i >= 0 && !(fixed_color && fixed_item); --i) {
+        const ChangeLogEntry &cl = ChangeLogEntry(m_changelog.at(i));
+
+        if (!fixed_item) {
+            if ((cl.type() == ChangeLogEntry::ItemId) ||
+                    (cl.type() == ChangeLogEntry::ItemMerge) ||
+                    (cl.type() == ChangeLogEntry::ItemType)) {
+                if ((itemtypeid == QLatin1String(cl.from(0))) &&
+                        (itemid == QLatin1String(cl.from(1)))) {
+                    itemtypeid = QLatin1String(cl.to(0));
+                    itemid = QLatin1String(cl.to(1));
+
+                    if (itemtypeid.length() == 1 && !itemid.isEmpty())
+                        fixed_item = core()->item(itemtypeid[0].toLatin1(), itemid.toLatin1().constData());
                 }
             }
+        }
+        if (!fixed_color) {
+            if (cl.type() == ChangeLogEntry::ColorMerge) {
+                if (colorid == QLatin1String(cl.from(0))) {
+                    colorid = QLatin1String(cl.to(0));
 
-            if (fixed_item && !blitem->item())
-                blitem->setItem(fixed_item);
-            if (fixed_color && !blitem->color())
-                blitem->setColor(fixed_color);
-
-            if (fixed_item && fixed_color) {
-                blitem->setIncomplete(nullptr);
-                count++;
+                    bool ok;
+                    uint cid = colorid.toUInt(&ok);
+                    if (ok)
+                        fixed_color = core()->color(cid);
+                }
             }
         }
     }
-    return count;
+
+    if (fixed_item && !item->item())
+        item->setItem(fixed_item);
+    if (fixed_color && !item->color())
+        item->setColor(fixed_color);
+
+    if (fixed_item && fixed_color) {
+        item->setIncomplete(nullptr);
+        return true;
+    }
+    return false;
 }
 
 qreal Core::itemImageScaleFactor() const

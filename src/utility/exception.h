@@ -60,3 +60,25 @@ private:
     mutable QByteArray whatBuffer;
 
 };
+
+class ParseException : public Exception
+{
+public:
+    ParseException(const char *message)
+        : Exception(QLatin1String("Parse error: ") + QLatin1String(message))
+    { }
+
+    ParseException(QIODevice *dev, const char *message)
+        : Exception(QString::fromLatin1("Parse error%1: %2")
+                    .arg(fileName(dev)).arg(QLatin1String(message)))
+    { }
+
+private:
+    static QString fileName(QIODevice *dev)
+    {
+        if (auto file = qobject_cast<QFile *>(dev))
+            return u" in file " % file->fileName();
+        return { };
+    }
+};
+

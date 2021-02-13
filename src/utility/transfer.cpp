@@ -84,7 +84,8 @@ TransferJob *TransferJob::create(HttpMethod method, const QUrl &url, const QDate
 
 QString Transfer::s_default_user_agent;
 
-Transfer::Transfer()
+Transfer::Transfer(QObject *parent)
+    : QObject(parent)
 {
     if (s_default_user_agent.isEmpty())
         s_default_user_agent = QString("%1/%2").arg(qApp->applicationName(), qApp->applicationVersion());

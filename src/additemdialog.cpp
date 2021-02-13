@@ -147,6 +147,11 @@ AddItemDialog::AddItemDialog(QWidget *parent)
         if (confirmed)
             w_add->animateClick();
     });
+    connect(w_select_item, &SelectItem::showInColor,
+            this, [this](const BrickLink::Color *color) {
+        w_select_color->setCurrentColor(color);
+    });
+
     connect(w_select_color, &SelectColor::colorSelected,
             this, [this](const BrickLink::Color *, bool confirmed) {
         updateItemAndColor();
@@ -168,7 +173,7 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     connect(w_price_guide, &PriceGuideWidget::priceDoubleClicked,
             this, [this](double p) {
         p *= Currency::inst()->rate(m_currency_code);
-        w_price->setText(Currency::toString(p, m_currency_code));
+        w_price->setText(Currency::toString(p));
         checkAddPossible();
     });
 
@@ -316,11 +321,8 @@ void AddItemDialog::updateCurrencyCode()
 
     w_price_guide->setCurrencyCode(m_currency_code);
 
-    QString local = Currency::localSymbol(m_currency_code);
-
-    w_label_currency->setText(m_price_label_fmt.arg(local));
-    w_radio_currency->setText(local);
-    //w_price->setText(Currency::toString(0, m_currencycode));
+    w_label_currency->setText(m_price_label_fmt.arg(m_currency_code));
+    w_radio_currency->setText(m_currency_code);
 }
 
 void AddItemDialog::attach(Window *w)
@@ -459,7 +461,7 @@ void AddItemDialog::updateItemAndColor()
 void AddItemDialog::setTierType(int type)
 {
     QValidator *valid = (type == 0) ? m_percent_validator : m_money_validator;
-    QString text = (type == 0) ? QString("0") : Currency::toString(0, m_currency_code);
+    QString text = (type == 0) ? QString("0") : Currency::toString(0);
 
     (type == 0 ? w_radio_percent : w_radio_currency)->setChecked(true);
 

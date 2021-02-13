@@ -31,6 +31,7 @@
 #include <QPaintEvent>
 #include <QTextDocument>
 #include <QShortcut>
+#include <QSizeGrip>
 #include <QDebug>
 
 #include "workspace.h"
@@ -138,6 +139,8 @@ Workspace::Workspace(QWidget *parent)
     connect(m_tabback, &QToolButton::clicked,
             this, [this]() { setActiveWindow(m_tabs->currentWidget()); });
 
+    m_sizeGrip = new QSizeGrip(m_welcomeWidget);
+
     m_stack = new QStackedLayout(this);
     m_stack->addWidget(m_tabs);
     m_stack->addWidget(m_welcomeWidget);
@@ -204,6 +207,7 @@ void Workspace::setWelcomeWidget(QWidget *welcomeWidget)
     if (m_welcomeWidget)
         m_welcomeWidget->removeEventFilter(this);
     m_tabback->setParent(welcomeWidget);
+    m_sizeGrip->setParent(welcomeWidget);
     m_stack->removeWidget(m_welcomeWidget);
     m_stack->insertWidget(m_stack->count(), welcomeWidget);
     delete m_welcomeWidget;
@@ -226,7 +230,7 @@ void Workspace::addWindow(QWidget *w)
     if (!w)
         return;
 
-    int idx = m_tabs->addTab(w, cleanWindowTitle(w));
+    int idx = m_tabs->addTab(w, w->windowIcon(), cleanWindowTitle(w));
     m_tabs->setTabToolTip(idx, m_tabs->tabText(idx));
 
     w->installEventFilter(this);
@@ -271,8 +275,10 @@ int Workspace::windowCount() const
 
 bool Workspace::eventFilter(QObject *o, QEvent *e)
 {
-    // handle back keys and mouse buttons
-    if ((o == m_welcomeWidget) && m_welcomeActive && (m_tabs->count())) {
+    if ((o == m_welcomeWidget) && (e->type() == QEvent::Resize)) {
+        m_sizeGrip->move(width() - m_sizeGrip->width(), height() - m_sizeGrip->height());
+    } else if ((o == m_welcomeWidget) && m_welcomeActive && (m_tabs->count())) {
+        // handle back keys and mouse buttons
         bool goBack = false;
 
         switch (e->type()) {

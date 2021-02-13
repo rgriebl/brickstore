@@ -39,6 +39,7 @@ public:
 
     bool areFiltersInFavoritesMode() const;
 
+    QPair<QString, double> legacyCurrencyCodeAndRate() const;
     QString defaultCurrencyCode() const;
 
     bool closeEmptyDocuments() const;

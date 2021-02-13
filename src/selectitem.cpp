@@ -24,7 +24,7 @@
 #include <QPushButton>
 #include <QApplication>
 #include <QCursor>
-#include <QRegExp>
+#include <QStringBuilder>
 #include <QToolTip>
 #include <QTreeView>
 #include <QListView>
@@ -66,6 +66,7 @@ public:
     QTreeView *      w_itemthumbs;
     QListView *      w_thumbs;
     HistoryLineEdit * w_filter;
+    QToolButton *    w_pcc;
     QToolButton *    w_zoomIn;
     QToolButton *    w_zoomOut;
     QLabel *         w_zoomLevel;
@@ -160,16 +161,33 @@ public:
 
     void setModel(QAbstractItemModel *model)
     {
+        if (m_overlay->model()) {
+            disconnect(m_overlay->model(), &QAbstractItemModel::layoutChanged,
+                       this, &CategoryTreeView::hideRowsInOverlay);
+        }
+
         QTreeView::setModel(model);
         m_overlay->setModel(model);
 
-        for (int r = 1; r < model->rowCount(); ++r)
-            m_overlay->setRowHidden(r, QModelIndex(), true);
+        if (m_overlay->model()) {
+            connect(m_overlay->model(), &QAbstractItemModel::layoutChanged,
+                    this, &CategoryTreeView::hideRowsInOverlay);
+        }
+
+        hideRowsInOverlay();
 
         m_overlay->setSelectionModel(selectionModel());
     }
 
 protected:
+    void hideRowsInOverlay()
+    {
+        if (m_overlay->model()) {
+            for (int r = 1; r < m_overlay->model()->rowCount(); ++r)
+                m_overlay->setRowHidden(r, QModelIndex(), true);
+        }
+    }
+
     bool viewportEvent(QEvent *e)
     {
         auto result = QTreeView::viewportEvent(e);
@@ -238,6 +256,24 @@ void SelectItem::init()
     connect(d->w_viewmode, QOverload<int>::of(&QButtonGroup::buttonClicked),
             this, [this]() {
         setViewMode(d->w_viewmode->checkedId());
+    });
+
+    d->w_pcc = new QToolButton();
+    d->w_pcc->setIcon(QIcon::fromTheme("edit-find"));
+    d->w_pcc->setShortcut(tr("Ctrl+E", "Shortcut for entering PCC"));
+    d->w_pcc->setAutoRaise(true);
+    connect(d->w_pcc, &QToolButton::clicked, this, [this]() {
+        QRect r = { d->w_pcc->mapToGlobal(QPoint()), d->w_pcc->size() };
+        QString code;
+        if (MessageBox::getString(this, tr("Find element number"),
+                                  tr("Enter a 7-digit Lego element number, also known as Part-Color-Code (PCC)"),
+                                  code, r)) {
+            if (auto *pcc = BrickLink::core()->partColorCode(code.toUInt())) {
+                setCurrentItem(pcc->item(), true);
+                if (pcc->color())
+                    emit showInColor(pcc->color());
+            }
+        }
     });
 
     d->w_zoomOut = new QToolButton();
@@ -410,12 +446,15 @@ void SelectItem::init()
     auto *viewlay = new QHBoxLayout();
     viewlay->setMargin(0);
     viewlay->setSpacing(0);
+    viewlay->addSpacing(5);
+    viewlay->addWidget(d->w_pcc);
+    viewlay->addSpacing(11);
     viewlay->addWidget(d->w_zoomOut);
     viewlay->addSpacing(6);
     viewlay->addWidget(d->w_zoomLevel);
     viewlay->addSpacing(6);
     viewlay->addWidget(d->w_zoomIn);
-    viewlay->addSpacing(6);
+    viewlay->addSpacing(11);
     viewlay->addWidget(d->w_viewmode->button(0));
     viewlay->addWidget(d->w_viewmode->button(1));
     viewlay->addWidget(d->w_viewmode->button(2));
@@ -448,11 +487,15 @@ void SelectItem::languageChange()
     d->w_filter->setPlaceholderText(tr("Filter"));
 
     QString filterToolTip = tr("<p>" \
-        "Only show items that contain the entered text - regardless of case - in " \
-        "either the name or the part number. Additionally, all word starting with '-' " \
-        "(minus) act as an exclusion and prevent an item from being matched, if these " \
-        "words are found in the item's name.<br>(e.g. 'brick 1 x 1 -pattern')</p>")
-            + d->w_filter->instructionToolTip();
+        "Only show items that contain all the entered words - regardless of case - in " \
+        "either the name or the part number. This works much like a web search engine:<ul>" \
+        "<li>to exclude words, prefix them with <tt>-</tt>. (e.g. <tt>-pattern</tt>)</li>" \
+        "<li>to match on a phrase, put it inside quotes. (e.g. <tt>\"1 x 1\"</tt>)</li>" \
+        "<li>to filter parts appearing in a specific set, put <tt>appears-in:</tt> in front" \
+        " of the set name. (e.g. <tt>appears-in:8868-1</tt>)</li>" \
+        "<li>to filter sets or minifigs consisting of a specific part, put <tt>consists-of:</tt>" \
+        " in front of the part id. (e.g. <tt>consists-of:3001</tt>)</li>" \
+        "</ul></p>") + d->w_filter->instructionToolTip();
 
     d->w_filter->setToolTip(Utility::toolTipLabel(tr("Filter the list using this expression"),
                                                   QKeySequence::Find, filterToolTip));
@@ -460,6 +503,7 @@ void SelectItem::languageChange()
     auto setToolTipOnButton = [](QAbstractButton *b, const QString &text) {
         b->setToolTip(Utility::toolTipLabel(text, b->shortcut()));
     };
+    setToolTipOnButton(d->w_pcc, tr("Find a 7-digit Lego element number"));
     setToolTipOnButton(d->w_viewmode->button(0), tr("List"));
     setToolTipOnButton(d->w_viewmode->button(2), tr("Thumbnails"));
     setToolTipOnButton(d->w_viewmode->button(1), tr("List with Images"));
@@ -707,7 +751,6 @@ bool SelectItem::restoreState(const QByteArray &ba)
     bool catSortAsc;
     bool itemSortAsc;
     int itemSortColumn;
-    QByteArray filterHistory;
 
     ds >> itt >> cat >> itemid >> filterState >> zoom >> viewMode
             >> catSortAsc >> itemSortAsc >> itemSortColumn;
@@ -809,7 +852,7 @@ void SelectItem::applyFilter()
     const BrickLink::Item *oldItem = currentItem();
     d->w_items->clearSelection();
 
-    d->itemModel->setFilterText(d->w_filter->text(), false, false);
+    d->itemModel->setFilterText(d->w_filter->text());
 
     setCurrentItem(oldItem);
     if (!currentItem() && d->itemModel->rowCount() == 1)
@@ -835,30 +878,69 @@ void SelectItem::showContextMenu(const QPoint &p)
 {
     if (auto *iv = qobject_cast<QAbstractItemView *>(sender())) {
         QMenu m(this);
-        QAction *gotoItemCat = nullptr;
-        QAction *gotoAllCat = nullptr;
 
         const BrickLink::Item *item = nullptr;
         QModelIndex idx = iv->indexAt(p);
         if (idx.isValid())
             item = idx.model()->data(idx, BrickLink::ItemPointerRole).value<const BrickLink::Item *>();
 
-        if (item && item->category() != currentCategory())
-            gotoItemCat = m.addAction(tr("Switch to the item's category"));
+        if (item && item->category() != currentCategory()) {
+            connect(m.addAction(tr("Switch to the item's category")), &QAction::triggered,
+                    this, [this, item]() { setCurrentItem(item, true); });
+        }
 
         if (currentCategory() != BrickLink::CategoryModel::AllCategories) {
             QString allCatName = d->categoryModel->index(BrickLink::CategoryModel::AllCategories)
                     .data(Qt::DisplayRole).toString();
-            gotoAllCat = m.addAction(tr("Switch to the \"%1\" category").arg(allCatName));
+            connect(m.addAction(tr("Switch to the \"%1\" category").arg(allCatName)),
+                    &QAction::triggered, this, [this]() {
+                setCurrentCategory(BrickLink::CategoryModel::AllCategories);
+            });
         }
 
-        if (!m.isEmpty()) {
-            auto action = m.exec(iv->mapToGlobal(p));
-            if (action == gotoItemCat)
-                setCurrentItem(item, true);
-            else if (action == gotoAllCat)
-                setCurrentCategory(BrickLink::CategoryModel::AllCategories);
+        // mini-fig special
+        if (item && item->itemType() && (item->itemType()->id() == 'M') && item->hasInventory()) {
+            auto minifigParts = item->consistsOf();
+
+            for (const BrickLink::InvItem *part : minifigParts) {
+                if (!part || !part->item())
+                    continue;
+                auto partItem = part->item();
+                auto partColor = part->color();
+                auto partPicture = BrickLink::core()->picture(partItem, partColor, true);
+
+
+                QString filter = u"consists-of:" % partItem->id();
+                if (partItem->itemType()->hasColors() && partColor)
+                    filter = filter % u'@' % QString::number(partColor->id());
+                QIcon icon;
+                if (partPicture->valid())
+                    icon = QPixmap::fromImage(partPicture->image());
+
+                m.addSeparator();
+                QString section;
+                if (partColor && partColor->id())
+                    section = partColor->name() % u' ';
+                section = section % partItem->name() % u" [" % partItem->id() % u']';
+                m.addAction(icon, section)->setEnabled(false);
+
+                connect(m.addAction(tr("Set filter to Minifigs consisting of this part")),
+                                    &QAction::triggered, this, [this, filter]() {
+                    d->w_filter->setText(filter);
+                });
+                if (!d->w_filter->text().isEmpty()) {
+                    connect(m.addAction(tr("Narrow filter to Minifigs consisting of this part")),
+                                        &QAction::triggered, this, [this, filter]() {
+                        d->w_filter->setText(d->w_filter->text() % u' ' % filter);
+                    });
+                }
+            }
+
+            qDeleteAll(minifigParts);
         }
+
+        if (!m.isEmpty())
+            m.exec(iv->mapToGlobal(p));
     }
 }
 

@@ -36,9 +36,9 @@ class TaskLinksWidget;
 class TaskAppearsInWidget;
 class Document;
 class AddItemDialog;
-class ItemDetailPopup;
 class ScriptManager;
 class ImportInventoryDialog;
+class ImportOrderDialog;
 
 
 class FrameWork : public QMainWindow
@@ -64,7 +64,6 @@ public:
 
 public slots:
     void selectionUpdate(const Document::ItemList &selection);
-    void statisticsUpdate();
     void modificationUpdate();
     void titleUpdate();
     void showContextMenu(bool onitem, const QPoint &pos);
@@ -96,10 +95,6 @@ private slots:
     void showAddItemDialog();
 
     void onlineStateChanged(bool isOnline);
-
-    void changeDocumentCurrency(QAction *a);
-    void updateCurrencyRates();
-
     void manageLayouts();
 
 protected:
@@ -112,10 +107,6 @@ private:
     void setBrickLinkUpdateIntervals();
 
     bool checkBrickLinkLogin();
-    void createAddItemDialog();
-
-private:
-    enum { MaxRecentFiles = 9 };
 
 public:
     QAction *findAction(const char *name);
@@ -132,7 +123,6 @@ private:
     QMenu *createMenu(const QByteArray &, const QVector<QByteArray> &);
     bool setupToolBar(QToolBar *, const QVector<QByteArray> &);
     QDockWidget *createDock(QWidget *widget);
-    void createStatusBar();
     QMap<QAction *, bool (Window::*)() const> m_toggle_updates;
 
     Workspace *m_workspace;
@@ -141,13 +131,6 @@ private:
 
     ProgressCircle *m_progress;
     HistoryLineEdit *m_filter;
-    QLabel *m_st_weight;
-    QLabel *m_st_lots;
-    QLabel *m_st_items;
-    QLabel *m_st_value;
-    QLabel *m_st_cost;
-    QLabel *m_st_errors;
-    QToolButton *m_st_currency;
     QToolBar *m_toolbar;
     QVector<QDockWidget *> m_dock_widgets;
     TaskInfoWidget *m_task_info;
@@ -156,7 +139,7 @@ private:
     QMenu *m_contextmenu;
     QPointer<AddItemDialog> m_add_dialog;
     QPointer<ImportInventoryDialog> m_importinventory_dialog;
-    QPointer<ItemDetailPopup> m_details;
+    QPointer<ImportOrderDialog> m_importorder_dialog;
     QTimer *m_filter_delay = nullptr;
     bool m_running;
     UndoGroup *m_undogroup;

@@ -121,6 +121,22 @@
         <source>Conso&amp;lidate</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Show item information</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show which sets the item appears in</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show price guide</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Consolidate added items into document</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>AppearsInWidget</name>
@@ -356,120 +372,10 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message numerus="yes">
         <source>This file contains %n unknown item(s).&lt;br /&gt;&lt;br /&gt;Do you still want to open this file?</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>This file contains one unknown item.&lt;br /&gt;&lt;br /&gt;Do you still want to open this file?</numerusform>
             <numerusform>This file contains %n unknown items.&lt;br /&gt;&lt;br /&gt;Do you still want to open this file?</numerusform>
         </translation>
-    </message>
-    <message>
-        <source>Untitled</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>BrickStore XML Data</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>All Files</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Open File</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Inventory for %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Internal error: Could not create an Inventory object for item %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Order #%1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Store %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Enter the URL of your current BrickLink shopping cart:&lt;br /&gt;&lt;br /&gt;Right-click on the &lt;b&gt;View Cart&lt;/b&gt; button in your browser and copy the URL to the clipboard by choosing &lt;b&gt;Copy Link Location&lt;/b&gt; (Firefox), &lt;b&gt;Copy Link&lt;/b&gt; (Safari) or &lt;b&gt;Copy Shortcut&lt;/b&gt; (Internet Explorer).&lt;br /&gt;&lt;br /&gt;&lt;em&gt;Super-lots and custom items are &lt;b&gt;not&lt;/b&gt; supported&lt;/em&gt;.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Cart in Shop %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>BrickLink XML File</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Import File</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Import of %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Could not open file %1 for reading.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Could not parse the XML data in file %1:&lt;br /&gt;&lt;i&gt;Line %2, column %3: %4&lt;/i&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Could not parse the XML data in file %1.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>LDraw Models</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Could not parse the LDraw model in file %1.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Save File as</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Failed to save data in file %1.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Failed to open file %1 for writing.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Enter the ID number of Wanted List (leave blank for the default Wanted List)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>This list contains items without a BrickLink Lot-ID.&lt;br /&gt;&lt;br /&gt;Do you really want to export this list?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Export File</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Reset differences</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>N</source>
-        <comment>New</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>U</source>
-        <comment>Used</comment>
-        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Exclude</source>
@@ -642,33 +548,52 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message numerus="yes">
         <source>While loading, the item and color ids of %n item(s) have been adjusted automatically according to the current BrickLink catalog change log.</source>
-        <translation>
+        <translation type="vanished">
             <numerusform>While loading, the item and color ids of one item has been adjusted automatically according to the current BrickLink catalog change log.</numerusform>
             <numerusform>While loading, the item and color ids of %n items have been adjusted automatically according to the current BrickLink catalog change log.</numerusform>
         </translation>
-    </message>
-    <message>
-        <source>Do you want to save these changes now?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Import BrickLink Store Inventory</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Import BrickLink Shopping Cart</source>
-        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Index</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>A file named %1 already exists. Are you sure you want to overwrite it?</source>
+        <source>Cost</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Cost</source>
+        <source>N</source>
+        <comment>List&gt;Cond&gt;New</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>U</source>
+        <comment>List&gt;Cond&gt;Used</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>I</source>
+        <comment>Filter&gt;Status&gt;Include</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>X</source>
+        <comment>Filter&gt;Status&gt;Extra</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>E</source>
+        <comment>Filter&gt;Status&gt;Exclude</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Y</source>
+        <comment>Filter&gt;Retain&gt;Yes</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>N</source>
+        <comment>Filter&gt;Retain&gt;No</comment>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -714,6 +639,171 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     <message>
         <source>X</source>
         <comment>set status to extra</comment>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>DocumentIO</name>
+    <message>
+        <source>Untitled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>BrickStore XML Data</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>All Files</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Open File</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Inventory for %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Internal error: Could not create an Inventory object for item %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Order #%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Import BrickLink Store Inventory</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Importing BrickLink Store</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Download: %p</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Failed to download the store inventory.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Either your username or password are incorrect.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Store %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Failed to import store inventory</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Copy &amp; paste the URL of the BrickLink shopping cart your are viewing in your browser:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Import BrickLink Shopping Cart</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Importing BrickLink Shopping Cart</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1 lots of your Shopping Cart could not be imported.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not parse the Shopping Cart contents</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cart in store %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>BrickLink XML File</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Import File</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Import of %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not parse the XML data.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not open file %1 for reading.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not parse the XML data in file %1:&lt;br /&gt;&lt;i&gt;Line %2, column %3: %4&lt;/i&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>This file contains %n unknown item(s).&lt;br /&gt;&lt;br /&gt;Do you still want to open this file?</source>
+        <translation type="unfinished">
+            <numerusform>This file contains one unknown item.&lt;br /&gt;&lt;br /&gt;Do you still want to open this file?</numerusform>
+            <numerusform>This file contains %n unknown items.&lt;br /&gt;&lt;br /&gt;Do you still want to open this file?</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>While loading, the item and color ids of %n item(s) have been adjusted automatically according to the current BrickLink catalog change log.</source>
+        <translation type="unfinished">
+            <numerusform>While loading, the item and color ids of one item has been adjusted automatically according to the current BrickLink catalog change log.</numerusform>
+            <numerusform>While loading, the item and color ids of %n items have been adjusted automatically according to the current BrickLink catalog change log.</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Do you want to save these changes now?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not parse the XML data in file %1.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>LDraw Models</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not parse the LDraw model in file %1.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Save File as</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Failed to save data to file %1.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Failed to open file %1 for writing.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enter the ID number of Wanted List (leave blank for the default Wanted List)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This document is not in update mode.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This list contains items without a BrickLink Lot-ID.&lt;br /&gt;&lt;br /&gt;Do you really want to export this list?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Export File</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -973,10 +1063,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Reset Differences</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Copy Remarks from Document...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1013,19 +1099,11 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Difference Mode</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>E&amp;xtras</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Update Database</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Configure...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1210,18 +1288,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Weight: %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Lots: %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Items: %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Errors: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1447,6 +1513,34 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <source>Should these documents be restored from their last available auto-save state?</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Update Mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Settings...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Spread Cost Amount...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cost: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Lots: %L1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Items: %L1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Errors: %L1</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>HeaderView</name>
@@ -1517,25 +1611,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
 </context>
 <context>
-    <name>ImportBLCart</name>
-    <message>
-        <source>Importing BrickLink Shopping Cart</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Download: %p</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1 lots of your Shopping Cart could not be imported.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Could not parse the Shopping Cart contents.</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>ImportBLOrder</name>
     <message>
         <source>Importing BrickLink Order</source>
@@ -1547,29 +1622,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Importing address records</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>ImportBLStore</name>
-    <message>
-        <source>Importing BrickLink Store</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Download: %p</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Could not parse the XML data for the store inventory.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Either your username or password are incorrect.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Could not parse the XML data for the store inventory:&lt;br /&gt;&lt;i&gt;Line %1, column %2: %3&lt;/i&gt;</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1699,29 +1751,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Also apply this change to tier prices</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>ItemDetailPopup</name>
-    <message>
-        <source>Close 3D view</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Start animation</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Stop animation</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Reset 3D camera</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Please wait... updating</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1911,6 +1940,10 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <source>No recent files</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Clear recent files</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ScriptManager</name>
@@ -1982,10 +2015,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Filter the list using this pattern (wildcards allowed: * ? [])</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Filter</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1999,22 +2028,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Thumbnails</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>View item&apos;s category</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Case Sensitive</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Use Regular Expression</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>View the [All Items] category</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2035,6 +2048,22 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Zoom out</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;This filter has two modes:&lt;/p&gt;&lt;p&gt;The default, simple mode, will match all items containing the entered text in either the name or the part number. Additionally, any word starting with &apos;-&apos; (minus) acts as an exclusion and prevents an item from being matched, if this word is found in the item&apos;s name.&lt;br&gt;(e.g. &apos;brick 1 x 1 -pattern&apos;)&lt;br&gt;&lt;br&gt;The second mode, using Regular Expressions, can be activated in the drop-down menu on the left. When activated, it will match all items that contain the entered expression in either the name or the part number.&lt;/p&gt;&lt;p&gt;In both modes the matches are done case insensitvely, but you can change that behavior via the menu.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Filter the list using this pattern</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Switch to the item&apos;s category</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Switch to the &quot;%1&quot; category</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2289,6 +2318,18 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <source>Password</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Keep an automatic history of the last 20 filter terms</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Only store favorite filter terms, when Return is pressed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Filters</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>TaskInfoWidget</name>
@@ -2314,6 +2355,10 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Weight</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cost</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2562,10 +2607,6 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Should the selected items be parted out into the current document, replacing the selected items?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Parting out items</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2925,6 +2966,21 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
         <comment>Tag for document restored from autosave</comment>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Enter the cost amount to spread over all the selected items:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>Cost spreaded over %n item(s)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Could not enabled update mode. Make sure all items have a Lot Id.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>Workspace</name>
@@ -2939,6 +2995,10 @@ Please also select which item&apos;s attributes (e.g. remarks, tiered prices, ..
     </message>
     <message>
         <source>Go to the Quickstart page</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Go back to the current document</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

@@ -11,19 +11,16 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <QLineEdit>
-#include <QValidator>
 #include <QPushButton>
-#include <QDateTimeEdit>
-#include <QStackedWidget>
-#include <QLabel>
-#include <QComboBox>
 #include <QHeaderView>
 #include <QAbstractTableModel>
 #include <QStyledItemDelegate>
 #include <QPalette>
 #include <QVariant>
 #include <QCache>
+#include <QBuffer>
+#include <QUrl>
+#include <QUrlQuery>
 
 #if defined(MODELTEST)
 #  include <QAbstractItemModelTester>
@@ -33,99 +30,119 @@
 #endif
 
 #include "bricklink.h"
-#include "import.h"
-#include "progressdialog.h"
-#include "config.h"
 #include "transfer.h"
+#include "messagebox.h"
+#include "xmlhelpers.h"
+#include "exception.h"
+#include "config.h"
+#include "framework.h"
+#include "documentio.h"
+#include "humanreadabletimedelta.h"
 
 #include "importorderdialog.h"
 
-Q_DECLARE_METATYPE(BrickLink::Order *)
-Q_DECLARE_METATYPE(BrickLink::InvItemList *)
+Q_DECLARE_METATYPE(const BrickLink::Order *)
+
+using namespace std::chrono_literals;
+
 
 enum {
-    OrderPointerRole = 0x0560ec9b,
-    ItemListPointerRole
+    OrderPointerRole = Qt::UserRole + 1,
 };
 
 
-class OrderListModel : public QAbstractTableModel
+static QDate mdy2date(const QString &mdy)
+{
+    QDate d;
+    QStringList sl = mdy.split(QLatin1Char('/'));
+    d.setDate(sl[2].toInt(), sl[0].toInt(), sl[1].toInt());
+    return d;
+}
+
+
+class OrderModel : public QAbstractTableModel
 {
     Q_OBJECT
 public:
-    explicit OrderListModel(QObject *parent)
+    explicit OrderModel(QObject *parent)
         : QAbstractTableModel(parent)
     {
         MODELTEST_ATTACH(this)
 
-        m_trans = new Transfer;
+        m_trans = new Transfer(this);
         connect(m_trans, &Transfer::finished,
-                this, &OrderListModel::flagReceived);
+                this, &OrderModel::flagReceived);
     }
 
-    ~OrderListModel() override
+    ~OrderModel() override
     {
-        setOrderList(QVector<QPair<BrickLink::Order *, BrickLink::InvItemList *>>());
-        delete m_trans;
+        qDeleteAll(m_orders);
     }
 
-    void setOrderList(const QVector<QPair<BrickLink::Order *, BrickLink::InvItemList *>> &orderlist)
+    void setOrders(const QVector<BrickLink::Order *> &orders, BrickLink::OrderType type)
     {
         beginResetModel();
-        for (auto &order : qAsConst(m_orderlist)) {
-            delete order.first;
-            if (order.second)
-                qDeleteAll(*order.second);
-            delete order.second;
+        for (auto it = m_orders.begin(); it != m_orders.end(); ) {
+            if ((*it)->type() == type) {
+                delete *it;
+                it = m_orders.erase(it);
+            } else {
+                ++it;
+            }
         }
-        m_orderlist = orderlist;
+        m_orders.append(orders);
+        sort(m_sortSection, m_sortOrder);
         endResetModel();
     }
 
-    int rowCount(const QModelIndex &parent) const override
+    void updateOrder(BrickLink::Order *order)
     {
-        return parent.isValid() ? 0 : m_orderlist.size();
+        int r = m_orders.indexOf(order);
+        if (r >= 0)
+            emit dataChanged(index(r, 0), index(r, columnCount() - 1));
     }
 
-    int columnCount(const QModelIndex &parent) const override
+    int rowCount(const QModelIndex &parent = { }) const override
     {
-        return parent.isValid() ? 0 : 5;
+        return parent.isValid() ? 0 : m_orders.size();
     }
 
-    bool isReceived(const QPair<BrickLink::Order *, BrickLink::InvItemList *> &order) const
+    int columnCount(const QModelIndex &parent = { }) const override
     {
-        return (order.first->type() == BrickLink::OrderType::Received);
+        return parent.isValid() ? 0 : 7;
     }
 
     QVariant data(const QModelIndex &index, int role) const override
     {
-        if (!index.isValid())
+        if (!index.isValid() || (index.row() < 0) || (index.row() >= m_orders.size()))
             return QVariant();
 
-        QVariant res;
-        const QPair<BrickLink::Order *, BrickLink::InvItemList *> &order = m_orderlist [index.row()];
+        const BrickLink::Order *order = m_orders.at(index.row());
         int col = index.column();
 
         if (role == Qt::DisplayRole) {
             switch (col) {
-            case 0: res = isReceived(order) ? ImportOrderDialog::tr("Received") : ImportOrderDialog::tr("Placed"); break;
-            case 1: res = order.first->id(); break;
-            case 2: res = QLocale().toString(order.first->date().date(), QLocale::ShortFormat); break;
-            case 3: {
-                int firstline = order.first->address().indexOf('\n');
-
-                if (firstline <= 0)
-                    return order.first->other();
-                else
-                    return QString("%1 (%2)").arg(order.first->address().left(firstline), order.first->other());
+            case 0: return (order->type() == BrickLink::OrderType::Received)
+                        ? ImportOrderDialog::tr("Received") : ImportOrderDialog::tr("Placed");
+            case 1: return order->id();
+            case 2: return QLocale::system().toString(order->date(), QLocale::ShortFormat);
+            case 3: return QLocale::system().toString(order->itemCount());
+            case 4: return QLocale::system().toString(order->lotCount());
+            case 5: {
+                int firstline = order->address().indexOf('\n');
+                if (firstline > 0) {
+                    return QString::fromLatin1("%2 (%1)")
+                            .arg(order->address().left(firstline), order->otherParty());
+                }
+                return order->otherParty();
             }
-            case 4: res = Currency::toString(order.first->grandTotal(), order.first->currencyCode(), Currency::InternationalSymbol, 2); break;
+            case 6: return Currency::toString(order->grandTotal(), order->currencyCode(), 2);
             }
         } else if (role == Qt::DecorationRole) {
             switch (col) {
-            case 3:
+            case 5:
                 QImage *flag = nullptr;
-                QString cc = order.first->countryCode();
+                QString cc = order->countryCode();
                 if (cc.length() == 2)
                     flag = m_flags[cc];
                 if (!flag) {
@@ -137,73 +154,74 @@ public:
                     m_trans->retrieve(job);
                 }
                 if (flag)
-                    res = *flag;
+                    return *flag;
                 break;
             }
         } else if (role == Qt::TextAlignmentRole) {
-            res = (col == 4) ? Qt::AlignRight : Qt::AlignLeft;
+            return (col == 6) ? Qt::AlignRight : Qt::AlignLeft;
         }
         else if (role == Qt::BackgroundRole) {
             if (col == 0) {
-                QColor c = isReceived(order) ? Qt::green : Qt::blue;
+                QColor c((order->type() == BrickLink::OrderType::Received) ? Qt::green : Qt::blue);
                 c.setAlphaF(0.2);
-                res = c;
+                return c;
             }
         }
         else if (role == Qt::ToolTipRole) {
             QString tt = data(index, Qt::DisplayRole).toString();
 
-            if (!order.first->address().isEmpty())
-                tt = tt + QLatin1String("\n\n") + order.first->address();
-            res = tt;
+            if (!order->address().isEmpty())
+                tt = tt + QLatin1String("\n\n") + order->address();
+            return tt;
         }
         else if (role == OrderPointerRole) {
-            res.setValue(order.first);
-        }
-        else if (role == ItemListPointerRole) {
-            res.setValue(order.second);
+            return QVariant::fromValue(order);
         }
 
-        return res;
+        return { };
     }
 
     QVariant headerData(int section, Qt::Orientation orient, int role) const override
     {
-        QVariant res;
-
         if (orient == Qt::Horizontal) {
             if (role == Qt::DisplayRole) {
                 switch (section) {
-                case  0: res = ImportOrderDialog::tr("Type"); break;
-                case  1: res = ImportOrderDialog::tr("Order #"); break;
-                case  2: res = ImportOrderDialog::tr("Date"); break;
-                case  3: res = ImportOrderDialog::tr("Buyer/Seller"); break;
-                case  4: res = ImportOrderDialog::tr("Total"); break;
+                case  0: return ImportOrderDialog::tr("Type");
+                case  1: return ImportOrderDialog::tr("Order #");
+                case  2: return ImportOrderDialog::tr("Date");
+                case  3: return ImportOrderDialog::tr("Items");
+                case  4: return ImportOrderDialog::tr("Lots");
+                case  5: return ImportOrderDialog::tr("Buyer/Seller");
+                case  6: return ImportOrderDialog::tr("Total");
                 }
             }
             else if (role == Qt::TextAlignmentRole) {
-                res = (section == 4) ? Qt::AlignRight : Qt::AlignLeft;
+                return (section == 6) ? Qt::AlignRight : Qt::AlignLeft;
             }
         }
-        return res;
+        return { };
     }
 
     void sort(int section, Qt::SortOrder so) override
     {
         emit layoutAboutToBeChanged();
+        m_sortSection = section;
+        m_sortOrder = so;
 
-        std::sort(m_orderlist.begin(), m_orderlist.end(), [section, so](const auto &op1, const auto &op2) {
+        std::sort(m_orders.begin(), m_orders.end(), [section, so](const auto &op1, const auto &op2) {
             int d = 0;
 
-            BrickLink::Order *o1 = op1.first;
-            BrickLink::Order *o2 = op2.first;
+            BrickLink::Order *o1 = op1;
+            BrickLink::Order *o2 = op2;
 
             switch (section) {
             case  0: d = int(o1->type()) - int(o2->type()); break;
             case  1: d = o1->id().compare(o2->id()); break;
-            case  2: d = o1->date().secsTo(o2->date()); break;
-            case  3: d = o1->other().compare(o2->other(), Qt::CaseInsensitive); break;
-            case  4: d = qFuzzyCompare(o1->grandTotal(), o2->grandTotal())
+            case  2: d = o1->date().daysTo(o2->date()); break;
+            case  3: d = o1->itemCount() - o2->itemCount(); break;
+            case  4: d = o1->lotCount() - o2->lotCount(); break;
+            case  5: d = o1->otherParty().compare(o2->otherParty(), Qt::CaseInsensitive); break;
+            case  6: d = qFuzzyCompare(o1->grandTotal(), o2->grandTotal())
                         ? 0
                         : ((o1->grandTotal() < o2->grandTotal()) ? -1 : 1); break;
             }
@@ -234,12 +252,11 @@ private slots:
         if (img->loadFromData(*j->data())) {
             m_flags.insert(cc, img);
 
-            for (int r = 0; r < rowCount(QModelIndex()); ++r) {
-                QModelIndex idx = index(r, 3, QModelIndex());
-                auto *order = qvariant_cast<BrickLink::Order *>(data(idx, OrderPointerRole));
-
-                if (order->countryCode() == cc)
+            for (int r = 0; r < m_orders.size(); ++r) {
+                if (m_orders.at(r)->countryCode() == cc) {
+                    QModelIndex idx = index(r, 5, { });
                     emit dataChanged(idx, idx);
+                }
             }
         } else {
             delete img;
@@ -247,9 +264,11 @@ private slots:
     }
 
 private:
-    QVector<QPair<BrickLink::Order *, BrickLink::InvItemList *> > m_orderlist;
+    QVector<BrickLink::Order *> m_orders;
     QCache<QString, QImage> m_flags;
     Transfer *m_trans;
+    int m_sortSection = 0;
+    Qt::SortOrder m_sortOrder = Qt::AscendingOrder;
 };
 
 
@@ -291,183 +310,312 @@ public:
 
         QStyledItemDelegate::paint(painter, option, index);
     }
+
+    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override
+    {
+        auto s = QStyledItemDelegate::sizeHint(option, index);
+        s.rwidth() += option.fontMetrics.height() * 1;
+        return s;
+    }
 };
 
 
-bool  ImportOrderDialog::s_last_by_number = false;
-QDate ImportOrderDialog::s_last_from      = QDate::currentDate().addDays(-7);
-QDate ImportOrderDialog::s_last_to        = QDate::currentDate();
-int   ImportOrderDialog::s_last_type      = 1;
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
 
 
 ImportOrderDialog::ImportOrderDialog(QWidget *parent)
     : QDialog(parent)
+    , m_trans(new Transfer(this))
 {
     setupUi(this);
 
-    w_order_number->setValidator(new QIntValidator(1, 99999999, w_order_number));
-    w_order_list->setModel(new OrderListModel(this));
-    w_order_list->setItemDelegate(new TransHighlightDelegate(this));
+    m_orderModel = new OrderModel(this);
+    w_orders->header()->setStretchLastSection(false);
+    w_orders->setModel(m_orderModel);
+    w_orders->header()->setSectionResizeMode(5, QHeaderView::Stretch);
+    w_orders->setItemDelegate(new TransHighlightDelegate(this));
 
-    connect(w_order_number, &QLineEdit::textChanged,
-            this, &ImportOrderDialog::checkId);
-    connect(w_by_number, &QAbstractButton::toggled,
-            this, &ImportOrderDialog::checkId);
-    connect(w_order_from, &QDateTimeEdit::dateChanged,
-            this, &ImportOrderDialog::checkId);
-    connect(w_order_to, &QDateTimeEdit::dateChanged,
-            this, &ImportOrderDialog::checkId);
+    w_import = new QPushButton();
+    w_import->setDefault(true);
+    w_buttons->addButton(w_import, QDialogButtonBox::ActionRole);
+    connect(w_import, &QAbstractButton::clicked,
+            this, &ImportOrderDialog::importOrders);
 
-    connect(w_order_list->selectionModel(), &QItemSelectionModel::selectionChanged,
+    connect(w_update, &QToolButton::clicked,
+            this, &ImportOrderDialog::updateOrders);
+    connect(w_orders->selectionModel(), &QItemSelectionModel::selectionChanged,
             this, &ImportOrderDialog::checkSelected);
+    connect(w_orders, &QTreeView::activated,
+            this, &ImportOrderDialog::activateItem);
+    connect(m_trans, &Transfer::progress, this, [this](int done, int total) {
+        w_progress->setVisible(done != total);
+        w_progress->setMaximum(total);
+        w_progress->setValue(done);
+    });
 
-    connect(w_next, &QAbstractButton::clicked,
-            this, &ImportOrderDialog::download);
-    connect(w_back, &QAbstractButton::clicked,
-            this, &ImportOrderDialog::start);
+    languageChange();
+    update();
 
-    w_order_from->setDate(s_last_from);
-    w_order_to->setDate(s_last_to);
-    w_order_type->setCurrentIndex(s_last_type);
-    w_by_number->setChecked(s_last_by_number);
+    auto t = new QTimer(this);
+    t->setInterval(30s);
+    connect(t, &QTimer::timeout, this,
+            &ImportOrderDialog::updateStatusLabel);
 
-    start();
-    //resize(sizeHint());
+    connect(m_trans, &Transfer::finished,
+            this, &ImportOrderDialog::downloadFinished);
 
-#if defined(Q_OS_WINDOWS)
-    // Qt bug: the sizeHint() is a little bit too small with the popup enabled
-    w_order_from->setMinimumSize(w_order_from->minimumSizeHint() + QSize(fontMetrics().horizontalAdvance('x') * 2, 0));
-    w_order_to->setMinimumSize(w_order_to->minimumSizeHint() + QSize(fontMetrics().horizontalAdvance('x') * 2, 0));
-#endif
+    QMetaObject::invokeMethod(this, &ImportOrderDialog::updateOrders, Qt::QueuedConnection);
+
+    QByteArray ba = Config::inst()->value(QLatin1String("/MainWindow/ImportOrderDialog/Geometry"))
+            .toByteArray();
+    if (!ba.isEmpty())
+        restoreGeometry(ba);
+    int daysBack = Config::inst()->value("/MainWindow/ImportOrderDialog/DaysBack", -1).toInt();
+    if (daysBack > 0)
+        w_daysBack->setValue(daysBack);
+}
+
+ImportOrderDialog::~ImportOrderDialog()
+{
+    Config::inst()->setValue("/MainWindow/ImportOrderDialog/Geometry", saveGeometry());
+    Config::inst()->setValue("/MainWindow/ImportOrderDialog/DaysBack", w_daysBack->value());
 }
 
 void ImportOrderDialog::changeEvent(QEvent *e)
 {
     if (e->type() == QEvent::LanguageChange)
-        retranslateUi(this);
+        languageChange();
     QDialog::changeEvent(e);
 }
 
-void ImportOrderDialog::accept()
+void ImportOrderDialog::languageChange()
 {
-    s_last_by_number = w_by_number->isChecked();
-    s_last_from      = w_order_from->date();
-    s_last_to        = w_order_to->date();
-    s_last_type      = w_order_type->currentIndex();
+    retranslateUi(this);
 
-    QDialog::accept();
+    w_import->setText(tr("Import"));
 }
 
-void ImportOrderDialog::start()
+void ImportOrderDialog::updateOrders()
 {
-    w_stack->setCurrentIndex(0);
+    if (!m_currentUpdate.isEmpty())
+        return;
+    w_update->setEnabled(false);
+    w_import->setEnabled(false);
+    w_orders->setEnabled(false);
 
-    if (w_by_number->isChecked())
-        w_order_number->setFocus();
-    else
-        w_order_from->setFocus();
+    QDate today = QDate::currentDate();
+    QDate fromDate = today.addDays(-w_daysBack->value());
 
-    w_ok->hide();
-    w_back->hide();
-    w_next->show();
-    w_next->setDefault(true);
+    static const char *types[] = { "received", "placed" };
+    for (auto &type : types) {
+        QUrl url("https://www.bricklink.com/orderExcelFinal.asp");
+        QUrlQuery query;
+        query.addQueryItem("action",        "save");
+        query.addQueryItem("orderType",     type);
+        query.addQueryItem("viewType",      "X");    // XML - this has to go last, otherwise we get HTML
+        query.addQueryItem("getOrders",     "date");
+        query.addQueryItem("fMM",           QString::number(fromDate.month()));
+        query.addQueryItem("fDD",           QString::number(fromDate.day()));
+        query.addQueryItem("fYY",           QString::number(fromDate.year()));
+        query.addQueryItem("tMM",           QString::number(today.month()));
+        query.addQueryItem("tDD",           QString::number(today.day()));
+        query.addQueryItem("tYY",           QString::number(today.year()));
+        query.addQueryItem("getStatusSel",  "I");
+        query.addQueryItem("getDateFormat", "0");    // MM/DD/YYYY
+        query.addQueryItem("frmUsername",   Config::inst()->loginForBrickLink().first);
+        query.addQueryItem("frmPassword",   Config::inst()->loginForBrickLink().second);
+        url.setQuery(query);
 
-    checkId();
+        auto job = TransferJob::post(url, nullptr, true /* no redirects */);
+        job->setUserData<void>(type[0], nullptr);
+        m_currentUpdate << job;
+
+        m_trans->retrieve(job);
+    }
+    updateStatusLabel();
 }
 
-void ImportOrderDialog::download()
+void ImportOrderDialog::downloadFinished(TransferJob *job)
 {
-    Transfer trans;
-    ProgressDialog progress(tr("Import BrickLink Order"), &trans, this);
-    ImportBLOrder *import;
+    int type = job->userData<void>().first; // r_eceived, p_laced, a_ddress
 
-    if (w_by_number->isChecked())
-        import = new ImportBLOrder(w_order_number->text(), orderType(), &progress);
-    else
-        import = new ImportBLOrder(w_order_from->date(), w_order_to->date(), orderType(), &progress);
+    switch (type) {
+    case 'a': {
+        auto order = job->userData<BrickLink::Order>('a');
 
-    bool ok = (progress.exec() == QDialog::Accepted);
+        if (!job->data()->isEmpty()) {
+            QString s = QString::fromUtf8(*job->data());
+            QString a;
 
-    if (ok && !import->orders().isEmpty()) {
-        w_stack->setCurrentIndex(2);
+            QRegularExpression regExp(R"(<TD WIDTH="25%" VALIGN="TOP">&nbsp;Name & Address:</TD>\s*<TD WIDTH="75%">(.*?)</TD>)");
+            auto matches = regExp.globalMatch(s);
+            if (matches.hasNext()) {
+                matches.next();
+                if (matches.hasNext()) { // skip our own address
+                    QRegularExpressionMatch match = matches.next();
+                    a = match.captured(1);
+                    a.replace(QRegularExpression(R"(<[bB][rR] ?/?>)"), QLatin1String("\n"));
+                    order->setAddress(a);
+                    m_orderModel->updateOrder(order);
+                }
+            }
+        }
+        break;
+    }
+    case 'r':
+    case 'p': {
+        QVector<BrickLink::Order *> orders;
 
-        static_cast<OrderListModel *>(w_order_list->model())->setOrderList(import->orders());
-        w_order_list->sortByColumn(2, Qt::AscendingOrder);
+        if (!job->data()->isEmpty() && (job->responseCode() == 200)) {
+            auto buf = new QBuffer(job->data());
+            buf->open(QIODevice::ReadOnly);
+            try {
+                XmlHelpers::ParseXML p(buf, "ORDERS", "ORDER");
+                p.parse([this, &p, &type, &orders](QDomElement e) {
+                    auto id = p.elementText(e, "ORDERID");
 
-        w_order_list->selectionModel()->select(w_order_list->model()->index(0, 0), QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
-        w_order_list->scrollTo(w_order_list->model()->index(0, 0));
-        w_order_list->header()->resizeSections(QHeaderView::ResizeToContents);
-        w_order_list->setFocus();
+                    if (id.isEmpty())
+                        throw("Order without ORDERID");
 
-        w_ok->show();
-        w_ok->setDefault(true);
-        w_next->hide();
-        w_back->show();
+                    auto order = new BrickLink::Order(id, (type == 'r')
+                                                      ? BrickLink::OrderType::Received
+                                                      : BrickLink::OrderType::Placed);
+
+                    order->setDate(mdy2date(p.elementText(e, "ORDERDATE")));
+                    order->setStatusChange(mdy2date(p.elementText(e, "ORDERSTATUSCHANGED")));
+                    order->setOtherParty(p.elementText(e, (type == 'r') ? "BUYER" : "SELLER"));
+                    order->setShipping(p.elementText(e, "ORDERSHIPPING").toDouble());
+                    order->setInsurance(p.elementText(e, "ORDERINSURANCE").toDouble());
+                    order->setAdditionalCharges1(p.elementText(e, "ORDERADDCHRG1").toDouble());
+                    order->setAdditionalCharges2(p.elementText(e, "ORDERADDCHRG2").toDouble());
+                    order->setCredit(p.elementText(e, "ORDERCREDIT", "0").toDouble());
+                    order->setCreditCoupon(p.elementText(e, "ORDERCREDITCOUPON", "0").toDouble());
+                    order->setOrderTotal(p.elementText(e, "ORDERTOTAL").toDouble());
+                    order->setSalesTax(p.elementText(e, "ORDERSALESTAX", "0").toDouble());
+                    order->setGrandTotal(p.elementText(e, "BASEGRANDTOTAL").toDouble());
+                    order->setVatCharges(p.elementText(e, "VATCHARGES", "0").toDouble());
+                    order->setCurrencyCode(p.elementText(e, "BASECURRENCYCODE"));
+                    order->setPaymentCurrencyCode(p.elementText(e, "PAYCURRENCYCODE"));
+                    order->setItemCount(p.elementText(e, "ORDERITEMS").toInt());
+                    order->setLotCount(p.elementText(e, "ORDERLOTS").toInt());
+                    order->setStatus(p.elementText(e, "ORDERSTATUS"));
+                    order->setPaymentType(p.elementText(e, "PAYMENTTYPE", ""));
+                    order->setTrackingNumber(p.elementText(e, "ORDERTRACKNO", ""));
+                    auto location = p.elementText(e, "LOCATION");
+                    if (!location.isEmpty())
+                        order->setCountryName(location.section(QLatin1String(", "), 0, 0));
+
+                    QUrl addressUrl("https://www.bricklink.com/orderDetail.asp");
+                    QUrlQuery query;
+                    query.addQueryItem("ID", id);
+                    addressUrl.setQuery(query);
+
+                    auto addressJob = TransferJob::get(addressUrl);
+                    addressJob->setUserData('a', order);
+                    m_currentUpdate << addressJob;
+
+                    m_trans->retrieve(addressJob);
+
+                    orders << order;
+                });
+            } catch (const Exception &e) {
+                MessageBox::warning(this, { },
+                                    tr("Could not parse the receive order XML data") % u"<br><br>" %  e.error());
+            }
+        }
+
+        m_orderModel->setOrders(orders, type == 'r' ? BrickLink::OrderType::Received
+                                                    : BrickLink::OrderType::Placed);
+
+        break;
+    }
+    case 'o': {
+        auto order = job->userData<BrickLink::Order>('o');
+
+        if (auto doc = DocumentIO::importBrickLinkOrder(order, *job->data()))
+            FrameWork::inst()->createWindow(doc);
+
+        m_orderDownloads.removeOne(job);
+    }
+    default:
+        break;
+    }
+
+    m_currentUpdate.removeOne(job);
+    if (m_currentUpdate.isEmpty()) {
+        m_lastUpdated = QDateTime::currentDateTime();
+
+        w_update->setEnabled(true);
+        w_orders->setEnabled(true);
+
+        updateStatusLabel();
+
+        if (m_orderModel->rowCount()) {
+            auto tl = w_orders->model()->index(0, 0);
+            w_orders->selectionModel()->select(tl, QItemSelectionModel::SelectCurrent
+                                               | QItemSelectionModel::Rows);
+            w_orders->scrollTo(tl);
+        }
+        w_orders->header()->resizeSections(QHeaderView::ResizeToContents);
+        w_orders->setFocus();
 
         checkSelected();
     }
-    else {
-        w_message->setText(tr("There was a problem downloading the data for the specified order(s). This could have been caused by three things:<ul><li>a network error occured.</li><li>the order number and/or type you entered is invalid.</li><li>there are no orders of the specified type in the given time period.</li></ul>"));
-        w_stack->setCurrentIndex(1);
-
-        w_ok->hide();
-        w_next->hide();
-        w_back->show();
-        w_back->setDefault(true);
-    }
-
-    delete import;
 }
 
-QVector<QPair<BrickLink::Order *, BrickLink::InvItemList *> > ImportOrderDialog::orders() const
+void ImportOrderDialog::importOrders()
 {
-    QVector<QPair<BrickLink::Order *, BrickLink::InvItemList *>> list;
+    const auto selection = w_orders->selectionModel()->selectedRows();
+    for (auto idx : selection) {
+        auto order = m_orderModel->data(idx, OrderPointerRole).value<const BrickLink::Order *>();
 
-    foreach (const QModelIndex &idx, w_order_list->selectionModel()->selectedRows()) {
-        QPair<BrickLink::Order *, BrickLink::InvItemList *> pair;
-        pair.first = qvariant_cast<BrickLink::Order *>(w_order_list->model()->data(idx, OrderPointerRole));
-        pair.second = qvariant_cast<BrickLink::InvItemList *>(w_order_list->model()->data(idx, ItemListPointerRole));
+        QUrl url("https://www.bricklink.com/orderExcelFinal.asp");
+        QUrlQuery query;
+        query.addQueryItem("action",        "save");
+        query.addQueryItem("orderType",     (order->type() == BrickLink::OrderType::Received)
+                           ? "received" : "placed");
+        query.addQueryItem("viewType",      "X");    // XML - this has to go last, otherwise we get HTML
+        query.addQueryItem("getOrders",     "");
+        query.addQueryItem("getStatusSel",  "I");
+        query.addQueryItem("getDetail",     "y");
+        query.addQueryItem("orderID",       order->id());
+        query.addQueryItem("getDateFormat", "0");    // MM/DD/YYYY
+        query.addQueryItem("frmUsername",   Config::inst()->loginForBrickLink().first);
+        query.addQueryItem("frmPassword",   Config::inst()->loginForBrickLink().second);
+        url.setQuery(query);
 
-        if (pair.first && pair.second)
-            list << pair;
-    }
+        auto job = TransferJob::post(url, nullptr, true /* no redirects */);
 
-    return list;
-}
+        job->setUserData('o', new BrickLink::Order(*order));
+        m_orderDownloads << job;
 
-BrickLink::OrderType ImportOrderDialog::orderType() const
-{
-    // Any doesn't work at the moment, because the BrickLink XML API reports an
-    // error if no orders are available instead of sending an empty list
-
-    switch (w_order_type->currentIndex()) {
-    case 1 : return BrickLink::OrderType::Placed;
-    case 0 :
-    default: return BrickLink::OrderType::Received;
+        m_trans->retrieve(job);
     }
 }
 
-void ImportOrderDialog::checkId()
-{
-    bool ok = true;
-
-    if (w_by_number->isChecked())
-        ok = w_order_number->hasAcceptableInput() && (w_order_number->text().length() >= 6) && (w_order_number->text().length() <= 8);
-    else
-        ok = (w_order_from->date() <= w_order_to->date()) && (w_order_to->date() <= QDate::currentDate());
-
-    w_next->setEnabled(ok);
-}
 
 void ImportOrderDialog::checkSelected()
 {
-    w_ok->setEnabled(w_order_list->selectionModel()->hasSelection());
+    w_import->setEnabled(w_orders->selectionModel()->hasSelection());
 }
 
 void ImportOrderDialog::activateItem()
 {
     checkSelected();
-    w_ok->animateClick();
+    w_import->animateClick();
+}
+
+void ImportOrderDialog::updateStatusLabel()
+{
+    if (m_currentUpdate.isEmpty()) {
+        w_lastUpdated->setText(tr("Last updated %1").arg(
+                                   HumanReadableTimeDelta::toString(m_lastUpdated,
+                                                                    QDateTime::currentDateTime())));
+    } else {
+        w_lastUpdated->setText(tr("Currently updating orders"));
+    }
 }
 
 #include "importorderdialog.moc"

@@ -17,6 +17,7 @@
 
 #include "framework.h"
 #include "window.h"
+#include "documentio.h"
 
 #include "bricklink_wrapper.h"
 
@@ -517,7 +518,7 @@ DocumentView *BrickStore::newDocument(const QString &title)
     if (isReadOnly(this))
         return nullptr;
 
-    return setupDocumentView(::Document::fileNew(), title);
+    return setupDocumentView(::DocumentIO::create(), title);
 }
 
 DocumentView *BrickStore::openDocument(const QString &fileName)
@@ -525,7 +526,7 @@ DocumentView *BrickStore::openDocument(const QString &fileName)
     if (isReadOnly(this))
         return nullptr;
 
-    return setupDocumentView(::Document::fileOpen(fileName));
+    return setupDocumentView(::DocumentIO::open(fileName));
 }
 
 DocumentView *BrickStore::importBrickLinkStore(const QString &title)
@@ -533,7 +534,7 @@ DocumentView *BrickStore::importBrickLinkStore(const QString &title)
     if (isReadOnly(this))
         return nullptr;
 
-    return setupDocumentView(::Document::fileImportBrickLinkStore(), title);
+    return setupDocumentView(::DocumentIO::importBrickLinkStore(), title);
 }
 
 void BrickStore::classBegin()

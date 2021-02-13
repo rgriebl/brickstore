@@ -69,6 +69,7 @@ protected:
     static QVector<QColor> s_shades;
     static QCache<quint64, QPixmap> s_status_cache;
     static QCache<quint64, QPixmap> s_tag_cache;
+    static QCache<quint64, QPixmap> s_tagicon_cache;
     static QCache<int, QPixmap> s_stripe_cache;
 
     struct TextLayoutCacheKey {

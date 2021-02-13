@@ -26,7 +26,36 @@
 #include <QInputDialog>
 #include <QDoubleSpinBox>
 
+#include "utility.h"
 #include "messagebox.h"
+
+
+class InputDialog : public QInputDialog
+{
+public:
+    InputDialog(QWidget *parent = nullptr, Qt::WindowFlags flags = Qt::WindowFlags())
+        : QInputDialog(parent, flags)
+    { }
+
+    void positionRelativeTo(const QRect &pos)
+    {
+        m_pos = pos;
+    }
+
+protected:
+    void showEvent(QShowEvent *e) override
+    {
+        QDialog::showEvent(e);
+
+        if (m_pos.isValid()) {
+            Utility::setPopupPos(this, m_pos);
+            m_pos = { };
+        }
+    }
+
+private:
+    QRect m_pos;
+};
 
 
 QPointer<QWidget> MessageBox::s_defaultParent;
@@ -113,9 +142,11 @@ QMessageBox::StandardButton MessageBox::critical(QWidget *parent, const QString 
     return msgbox(parent, title, text, Critical, buttons, defaultButton);
 }
 
-bool MessageBox::getString(QWidget *parent, const QString &title, const QString &text, QString &value)
+bool MessageBox::getString(QWidget *parent, const QString &title, const QString &text,
+                           QString &value, const QRect &positionRelativeToRect)
 {
-    QInputDialog dlg(parent ? parent : defaultParent(), Qt::Sheet);
+    InputDialog dlg(parent ? parent : defaultParent(), Qt::Sheet);
+    dlg.positionRelativeTo(positionRelativeToRect);
     dlg.setWindowTitle(!title.isEmpty() ? title : defaultTitle());
     dlg.setWindowModality(Qt::WindowModal);
     dlg.setInputMode(QInputDialog::TextInput);
@@ -130,9 +161,10 @@ bool MessageBox::getString(QWidget *parent, const QString &title, const QString 
 
 bool MessageBox::getDouble(QWidget *parent, const QString &title, const QString &text,
                            const QString &unit, double &value, double minValue, double maxValue,
-                           int decimals)
+                           int decimals, const QRect &positionRelativeToRect)
 {
-    QInputDialog dlg(parent ? parent : defaultParent(), Qt::Sheet);
+    InputDialog dlg(parent ? parent : defaultParent(), Qt::Sheet);
+    dlg.positionRelativeTo(positionRelativeToRect);
     dlg.setWindowTitle(!title.isEmpty() ? title : defaultTitle());
     dlg.setWindowModality(Qt::WindowModal);
     dlg.setInputMode(QInputDialog::DoubleInput);
@@ -154,9 +186,11 @@ bool MessageBox::getDouble(QWidget *parent, const QString &title, const QString 
 }
 
 bool MessageBox::getInteger(QWidget *parent, const QString &title, const QString &text,
-                            const QString &unit, int &value, int minValue, int maxValue)
+                            const QString &unit, int &value, int minValue, int maxValue,
+                            const QRect &positionRelativeToRect)
 {
-    QInputDialog dlg(parent ? parent : defaultParent(), Qt::Sheet);
+    InputDialog dlg(parent ? parent : defaultParent(), Qt::Sheet);
+    dlg.positionRelativeTo(positionRelativeToRect);
     dlg.setWindowTitle(!title.isEmpty() ? title : defaultTitle());
     dlg.setWindowModality(Qt::WindowModal);
     dlg.setInputMode(QInputDialog::IntInput);

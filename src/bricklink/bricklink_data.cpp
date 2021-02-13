@@ -61,20 +61,11 @@ BrickLink::Item::~Item()
     delete [] m_consists_of;
 }
 
-bool BrickLink::Item::hasCategory(const BrickLink::Category *cat) const
+bool BrickLink::Item::lowerBound(const Item *item, const std::pair<char, QString> &ids)
 {
-    for (const Category *c: m_categories) {
-        if (c == cat)
-            return true;
-    }
-    return false;
-}
+    int d = (item->m_item_type->id() - ids.first);
 
-bool BrickLink::Item::lessThan(const BrickLink::Item *a, const BrickLink::Item *b)
-{
-    int d = (a->m_item_type->id() - b->m_item_type->id());
-
-    return d == 0 ? (a->m_id.compare(b->m_id) < 0) : (d < 0);
+    return d == 0 ? (item->m_id.compare(ids.second) < 0) : (d < 0);
 }
 
 extern int _dwords_for_appears;
@@ -124,28 +115,28 @@ BrickLink::AppearsIn BrickLink::Item::appearsIn(const Color *only_color) const
     AppearsIn map;
 
     const BrickLink::Item * const *items = BrickLink::core()->items().data();
-    int count = BrickLink::core()->items().count();
+    auto count = BrickLink::core()->items().size();
 
     if (m_appears_in) {
         quint32 *ptr = m_appears_in + 2;
 
         for (quint32 i = 0; i < m_appears_in [0]; i++) {
-            auto *color_header = reinterpret_cast <appears_in_record *>(ptr);
+            const auto *color_header = reinterpret_cast <const appears_in_record *>(ptr);
             ptr++;
 
             const BrickLink::Color *color = BrickLink::core()->color(color_header->m12);
 
             if (color && (!only_color || (color == only_color))) {
-                AppearsInColor &vec = map [color];
+                AppearsInColor &vec = map[color];
 
                 for (quint32 j = 0; j < color_header->m20; j++, ptr++) {
-                    auto *color_entry = reinterpret_cast <appears_in_record *>(ptr);
+                    const auto *color_entry = reinterpret_cast <const appears_in_record *>(ptr);
 
                     int qty = color_entry->m12;    // qty
                     int index = color_entry->m20;  // item index
 
                     if (qty && (index < count))
-                        vec.append(QPair <int, const Item *> (qty, items [index]));
+                        vec.append(qMakePair(qty, items[index]));
                 }
             }
             else
@@ -191,13 +182,13 @@ BrickLink::InvItemList BrickLink::Item::consistsOf() const
     InvItemList list;
 
     const BrickLink::Item * const *items = BrickLink::core()->items().data();
-    int count = BrickLink::core()->items().count();
+    auto count = BrickLink::core()->items().size();
 
     if (m_consists_of) {
-        quint64 *ptr = m_consists_of + 1;
+        const quint64 *ptr = m_consists_of + 1;
 
-        for (uint i = 0; i < uint(m_consists_of [0]); i++) {
-            auto *entry = reinterpret_cast <consists_of_record *>(ptr);
+        for (uint i = 0; i < uint(m_consists_of[0]); i++) {
+            const auto *entry = reinterpret_cast <const consists_of_record *>(ptr);
             ptr++;
 
             const BrickLink::Color *color = BrickLink::core()->color(entry->m_color);
@@ -225,6 +216,8 @@ BrickLink::InvItem::InvItem(const Color *color, const Item *item)
 {
     m_item = item;
     m_color = color;
+
+    //TODO: replace with member initializers when switching to c++20
     m_status = Status::Include;
     m_condition = Condition::New;
     m_scondition = SubCondition::None;
@@ -233,79 +226,47 @@ BrickLink::InvItem::InvItem(const Color *color, const Item *item)
     m_alternate = false;
     m_alt_id = 0;
     m_cpart = false;
-    m_xreserved = 0;
-    m_weight = 0;
-
-    m_quantity = m_orig_quantity = 0;
-    m_bulk_quantity = 1;
-    m_price = m_orig_price = .0;
-    m_sale = 0;
-
-
-    for (int i = 0; i < 3; i++) {
-        m_tier_quantity [i] = 0;
-        m_tier_price [i] = .0;
-    }
-
-    m_incomplete = nullptr;
-    m_lot_id = 0;
-
-    m_cost = 0;
 }
 
 BrickLink::InvItem::InvItem(const BrickLink::InvItem &copy)
 {
-    m_incomplete = nullptr;
     *this = copy;
 }
 
-BrickLink::InvItem &BrickLink::InvItem::operator = (const InvItem &copy)
+BrickLink::InvItem &BrickLink::InvItem::operator=(const InvItem &copy)
 {
     if (this == &copy)
         return *this;
 
-    delete m_incomplete;
-    m_incomplete = nullptr;
+    m_item                = copy.m_item;
+    m_color               = copy.m_color;
 
-    m_item           = copy.m_item;
-    m_color          = copy.m_color;
-    m_status         = copy.m_status;
-    m_condition      = copy.m_condition;
-    m_scondition     = copy.m_scondition;
-    m_retain         = copy.m_retain;
-    m_stockroom      = copy.m_stockroom;
-    m_xreserved      = copy.m_xreserved;
-    m_alternate      = copy.m_alternate;
-    m_alt_id         = copy.m_alt_id;
-    m_cpart          = copy.m_cpart;
-    m_comments       = copy.m_comments;
-    m_remarks        = copy.m_remarks;
-    m_reserved       = copy.m_reserved;
-    m_quantity       = copy.m_quantity;
-    m_bulk_quantity  = copy.m_bulk_quantity;
-    m_tier_quantity [0] = copy.m_tier_quantity [0];
-    m_tier_quantity [1] = copy.m_tier_quantity [1];
-    m_tier_quantity [2] = copy.m_tier_quantity [2];
-    m_sale           = copy.m_sale;
-    m_price          = copy.m_price;
-    m_tier_price [0] = copy.m_tier_price [0];
-    m_tier_price [1] = copy.m_tier_price [1];
-    m_tier_price [2] = copy.m_tier_price [2];
-    m_weight         = copy.m_weight;
-    m_lot_id         = copy.m_lot_id;
-    m_orig_price     = copy.m_orig_price;
-    m_orig_quantity  = copy.m_orig_quantity;
-    m_cost           = copy.m_cost;
+    m_incomplete.reset(copy.m_incomplete ? new Incomplete(*copy.m_incomplete.get()) : nullptr);
 
-    if (copy.m_incomplete) {
-        m_incomplete = new Incomplete;
-
-        m_incomplete->m_item_id       = copy.m_incomplete->m_item_id;
-        m_incomplete->m_item_name     = copy.m_incomplete->m_item_name;
-        m_incomplete->m_itemtype_id   = copy.m_incomplete->m_itemtype_id;
-        m_incomplete->m_category_name = copy.m_incomplete->m_category_name;
-        m_incomplete->m_color_name    = copy.m_incomplete->m_color_name;
-    }
+    m_status              = copy.m_status;
+    m_condition           = copy.m_condition;
+    m_scondition          = copy.m_scondition;
+    m_retain              = copy.m_retain;
+    m_stockroom           = copy.m_stockroom;
+    m_alternate           = copy.m_alternate;
+    m_alt_id              = copy.m_alt_id;
+    m_cpart               = copy.m_cpart;
+    m_lot_id              = copy.m_lot_id;
+    m_reserved            = copy.m_reserved;
+    m_comments            = copy.m_comments;
+    m_remarks             = copy.m_remarks;
+    m_quantity            = copy.m_quantity;
+    m_bulk_quantity       = copy.m_bulk_quantity;
+    m_tier_quantity[0]    = copy.m_tier_quantity[0];
+    m_tier_quantity[1]    = copy.m_tier_quantity[1];
+    m_tier_quantity[2]    = copy.m_tier_quantity[2];
+    m_sale                = copy.m_sale;
+    m_price               = copy.m_price;
+    m_cost                = copy.m_cost;
+    m_tier_price[0]       = copy.m_tier_price[0];
+    m_tier_price[1]       = copy.m_tier_price[1];
+    m_tier_price[2]       = copy.m_tier_price[2];
+    m_weight              = copy.m_weight;
 
     return *this;
 }
@@ -315,44 +276,36 @@ bool BrickLink::InvItem::operator!=(const InvItem &cmp) const
     return !operator==(cmp);
 }
 
-bool BrickLink::InvItem::operator == (const InvItem &cmp) const
+bool BrickLink::InvItem::operator==(const InvItem &cmp) const
 {
-    bool same = true;
-
-    same = same && (m_incomplete         == cmp.m_incomplete);
-    same = same && (m_item               == cmp.m_item);
-    same = same && (m_color              == cmp.m_color);
-    same = same && (m_status             == cmp.m_status);
-    same = same && (m_condition          == cmp.m_condition);
-    same = same && (m_scondition         == cmp.m_scondition);
-    same = same && (m_retain             == cmp.m_retain);
-    same = same && (m_stockroom          == cmp.m_stockroom);
-    same = same && (m_comments           == cmp.m_comments);
-    same = same && (m_remarks            == cmp.m_remarks);
-    same = same && (m_reserved           == cmp.m_reserved);
-    same = same && (m_quantity           == cmp.m_quantity);
-    same = same && (m_bulk_quantity      == cmp.m_bulk_quantity);
-    same = same && (m_tier_quantity [0]  == cmp.m_tier_quantity [0]);
-    same = same && (m_tier_quantity [1]  == cmp.m_tier_quantity [1]);
-    same = same && (m_tier_quantity [2]  == cmp.m_tier_quantity [2]);
-    same = same && (m_sale               == cmp.m_sale);
-    same = same && qFuzzyCompare(m_price,          cmp.m_price);
-    same = same && qFuzzyCompare(m_tier_price [0], cmp.m_tier_price [0]);
-    same = same && qFuzzyCompare(m_tier_price [1], cmp.m_tier_price [1]);
-    same = same && qFuzzyCompare(m_tier_price [2], cmp.m_tier_price [2]);
-    same = same && qFuzzyCompare(m_weight,         cmp.m_weight);
-    same = same && (m_lot_id             == cmp.m_lot_id);
-    same = same && qFuzzyCompare(m_orig_price,     cmp.m_orig_price);
-    same = same && (m_orig_quantity      == cmp.m_orig_quantity);
-    same = same && (m_cost               == cmp.m_cost);
-
-    return same;
+    return (!m_incomplete && !cmp.m_incomplete)
+            && (m_item             == cmp.m_item)
+            && (m_color            == cmp.m_color)
+            && (m_status           == cmp.m_status)
+            && (m_condition        == cmp.m_condition)
+            && (m_scondition       == cmp.m_scondition)
+            && (m_retain           == cmp.m_retain)
+            && (m_stockroom        == cmp.m_stockroom)
+            && (m_lot_id           == cmp.m_lot_id)
+            && (m_reserved         == cmp.m_reserved)
+            && (m_comments         == cmp.m_comments)
+            && (m_remarks          == cmp.m_remarks)
+            && (m_quantity         == cmp.m_quantity)
+            && (m_bulk_quantity    == cmp.m_bulk_quantity)
+            && (m_tier_quantity[0] == cmp.m_tier_quantity[0])
+            && (m_tier_quantity[1] == cmp.m_tier_quantity[1])
+            && (m_tier_quantity[2] == cmp.m_tier_quantity[2])
+            && (m_sale             == cmp.m_sale)
+            && qFuzzyCompare(m_price,         cmp.m_price)
+            && qFuzzyCompare(m_cost,          cmp.m_cost)
+            && qFuzzyCompare(m_tier_price[0], cmp.m_tier_price[0])
+            && qFuzzyCompare(m_tier_price[1], cmp.m_tier_price[1])
+            && qFuzzyCompare(m_tier_price[2], cmp.m_tier_price[2])
+            && qFuzzyCompare(m_weight,        cmp.m_weight);
 }
 
 BrickLink::InvItem::~InvItem()
-{
-    delete m_incomplete;
-}
+{ }
 
 bool BrickLink::InvItem::mergeFrom(const InvItem &from, bool useCostQtyAg)
 {
@@ -370,7 +323,6 @@ bool BrickLink::InvItem::mergeFrom(const InvItem &from, bool useCostQtyAg)
         setCost(from.cost());
     }
     setQuantity(quantity() + from.quantity());
-    setOrigQuantity(origQuantity() + from.origQuantity());
 
     if (!qFuzzyIsNull(from.price()) && qFuzzyIsNull(price()))
         setPrice(from.price());
@@ -434,69 +386,79 @@ QImage BrickLink::InvItem::image() const
     }
 }
 
-namespace BrickLink {
-
-QDataStream &operator << (QDataStream &ds, const BrickLink::InvItem &ii)
+void BrickLink::InvItem::save(QDataStream &ds) const
 {
-    ds << ii.itemId().toUtf8();
-    ds << qint8(ii.itemType() ? ii.itemType()->id() : -1);
-    ds << qint32(ii.color() ? ii.color()->id() : 0xffffffff);
-
-    ds << qint32(ii.status()) << qint32(ii.condition()) << ii.comments() << ii.remarks()
-       << ii.quantity() << ii.bulkQuantity() << ii.tierQuantity(0) << ii.tierQuantity(1) << ii.tierQuantity(2)
-       << ii.price() << ii.tierPrice(0) << ii.tierPrice(1) << ii.tierPrice(2) << ii.sale()
-       << qint8(ii.retain() ? 1 : 0) << qint8(ii.stockroom()) << ii.m_reserved << quint32(ii.m_lot_id)
-       << ii.origQuantity() << ii.origPrice() << qint32(ii.subCondition()) << ii.cost();
-    return ds;
+    ds << QByteArray("II") << qint32(2)
+       << itemId()
+       << qint8(itemType() ? itemType()->id() : char(-1))
+       << uint(color() ? color()->id() : uint(0xffffffff))
+       << qint8(m_status) << qint8(m_condition) << qint8(m_scondition) << qint8(m_retain ? 1 : 0)
+       << qint8(m_stockroom) << m_lot_id << m_reserved << m_comments << m_remarks
+       << m_quantity << m_bulk_quantity
+       << m_tier_quantity[0] << m_tier_quantity[1] << m_tier_quantity[2]
+       << m_sale << m_price << m_cost
+       << m_tier_price[0] << m_tier_price[1] << m_tier_price[2]
+       << m_weight;
 }
 
-QDataStream &operator >> (QDataStream &ds, BrickLink::InvItem &ii)
+BrickLink::InvItem *BrickLink::InvItem::restore(QDataStream &ds)
 {
-    QByteArray itemid;
-    quint32 colorid = 0;
+    QScopedPointer<InvItem> ii;
+
+    QByteArray tag;
+    qint32 version;
+    ds >> tag >> version;
+    if ((ds.status() != QDataStream::Ok) || (tag != "II") || (version != 2))
+        return nullptr;
+
+    QString itemid;
+    uint colorid = 0;
     qint8 itemtypeid = 0;
-    qint8 retain = 0, stockroom = 0;
 
-    ds >> itemid;
-    ds >> itemtypeid;
-    ds >> colorid;
+    ds >> itemid >> itemtypeid >> colorid;
 
-    const BrickLink::Item *item = BrickLink::core()->item(itemtypeid, QString::fromUtf8(itemid));
-    const BrickLink::Color *color = BrickLink::core()->color(colorid);
+    if (ds.status() != QDataStream::Ok)
+        return nullptr;
 
-    ii.setItem(item);
-    ii.setColor(color);
+    auto item = BrickLink::core()->item(itemtypeid, itemid);
+    auto color = BrickLink::core()->color(colorid);
 
-    BrickLink::InvItem::Incomplete *inc = nullptr;
+    ii.reset(new BrickLink::InvItem(color, item));
+
     if (!item || !color) {
-        inc = new BrickLink::InvItem::Incomplete;
+        ii->m_incomplete.reset(new BrickLink::InvItem::Incomplete);
         if (!item) {
-            inc->m_item_id = itemid;
-            inc->m_itemtype_id = QLatin1Char(itemtypeid);
+            ii->m_incomplete->m_item_id = itemid;
+            ii->m_incomplete->m_itemtype_id = QLatin1Char(itemtypeid);
         }
         if (!color)
-            inc->m_color_name = QString::number(colorid);
+            ii->m_incomplete->m_color_name = QString::number(colorid);
+
+        BrickLink::core()->applyChangeLogToItem(ii.get());
     }
-    ii.setIncomplete(inc);
 
-    qint32 status = 0, cond = 0, scond = 0;
+    // alternate, cpart and altid are left out on purpose!
 
-    ds >> status >> cond >> ii.m_comments >> ii.m_remarks
-       >> ii.m_quantity >> ii.m_bulk_quantity >> ii.m_tier_quantity [0] >> ii.m_tier_quantity [1] >> ii.m_tier_quantity [2]
-       >> ii.m_price >> ii.m_tier_price [0] >> ii.m_tier_price [1] >> ii.m_tier_price [2] >> ii.m_sale
-       >> retain >> stockroom >> ii.m_reserved >> ii.m_lot_id
-       >> ii.m_orig_quantity >> ii.m_orig_price >> scond >> ii.m_cost;
+    qint8 status = 0, cond = 0, scond = 0, retain = 0, stockroom = 0;
+    ds >> status >> cond >> scond >> retain >> stockroom
+            >> ii->m_lot_id >> ii->m_reserved >> ii->m_comments >> ii->m_remarks
+            >> ii->m_quantity >> ii->m_bulk_quantity
+            >> ii->m_tier_quantity[0] >> ii->m_tier_quantity[1] >> ii->m_tier_quantity[2]
+            >> ii->m_sale >> ii->m_price >> ii->m_cost
+            >> ii->m_tier_price[0] >> ii->m_tier_price[1] >> ii->m_tier_price[2]
+            >> ii->m_weight;
 
-    ii.m_status = static_cast<BrickLink::Status>(status);
-    ii.m_condition = static_cast<BrickLink::Condition>(cond);
-    ii.m_scondition = static_cast<BrickLink::SubCondition>(scond);
-    ii.m_retain = (retain);
-    ii.m_stockroom = static_cast<BrickLink::Stockroom>(stockroom);
+    if (ds.status() != QDataStream::Ok)
+        return nullptr;
 
-    return ds;
+    ii->m_status = static_cast<BrickLink::Status>(status);
+    ii->m_condition = static_cast<BrickLink::Condition>(cond);
+    ii->m_scondition = static_cast<BrickLink::SubCondition>(scond);
+    ii->m_retain = (retain);
+    ii->m_stockroom = static_cast<BrickLink::Stockroom>(stockroom);
+
+    return ii.take();
 }
-
-} // namespace BrickLink
 
 const char *BrickLink::InvItemMimeData::s_mimetype = "application/x-bricklink-invitems";
 
@@ -513,9 +475,9 @@ void BrickLink::InvItemMimeData::setItems(const InvItemList &items)
 
     QDataStream ds(&data, QIODevice::WriteOnly);
 
-    ds << items.count();
+    ds << quint32(items.count());
     for (const InvItem *ii : items) {
-        ds << *ii;
+        ii->save(ds);
         if (!text.isEmpty())
             text.append("\n");
         text.append(ii->itemId());
@@ -537,9 +499,8 @@ BrickLink::InvItemList BrickLink::InvItemMimeData::items(const QMimeData *md)
             ds >> count;
 
             for (; count && !ds.atEnd(); count--) {
-                auto *ii = new InvItem();
-                ds >> *ii;
-                items.append(ii);
+                if (auto item = BrickLink::InvItem::restore(ds))
+                    items.append(item);
             }
         }
     }
@@ -562,12 +523,9 @@ bool BrickLink::InvItemMimeData::hasFormat(const QString &mimeType) const
 }
 
 BrickLink::Order::Order(const QString &id, OrderType type)
-    : m_id(id), m_type(type), m_shipping(0), m_insurance(0),
-      m_delivery(0), m_credit(0), m_grand_total(0)
-{
-    m_countryCode[0] = QLatin1Char('U');
-    m_countryCode[1] = QLatin1Char('S');
-}
+    : m_id(id)
+    , m_type(type)
+{ }
 
 // BrickLink doesn't use the standard ISO country names...
 static const char *countryList[] = {

@@ -149,7 +149,7 @@ int RebuildDatabase::exec()
     /////////////////////////////////////////////////////////////////////////////////
     printf("\nSTEP 4: Parsing inventories (part I)...\n");
 
-    QVector<const BrickLink::Item *> invs = blti.items();
+    auto invs = blti.items();
     blti.importInventories(invs);
 
     /////////////////////////////////////////////////////////////////////////////////
@@ -163,7 +163,7 @@ int RebuildDatabase::exec()
 
     blti.importInventories(invs);
 
-    if ((invs.size() - invs.count(nullptr)) > (blti.items().count() / 50))             // more than 2% have failed
+    if ((invs.size() - std::count(invs.cbegin(), invs.cend(), nullptr)) > (blti.items().size() / 50))             // more than 2% have failed
         return error("more than 2% of all inventories had errors.");
 
     /////////////////////////////////////////////////////////////////////////////////
@@ -402,7 +402,7 @@ void RebuildDatabase::downloadJobFinished(TransferJob *job)
 }
 
 
-bool RebuildDatabase::downloadInventories(QVector<const BrickLink::Item *> &invs)
+bool RebuildDatabase::downloadInventories(const std::vector<const BrickLink::Item *> &invs)
 {
     bool failed = false;
     m_downloads_in_progress = 0;
@@ -410,10 +410,7 @@ bool RebuildDatabase::downloadInventories(QVector<const BrickLink::Item *> &invs
 
     QUrl url("https://www.bricklink.com/catalogDownload.asp");
 
-    const BrickLink::Item **itemp = invs.data();
-    for (int i = 0; i < invs.count(); i++) {
-        const BrickLink::Item *&item = itemp [i];
-
+    for (const auto &item : invs) {
         if (item) {
             QFile *f = BrickLink::core()->dataFile(u"inventory.xml.new", QIODevice::WriteOnly, item);
 

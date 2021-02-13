@@ -11,6 +11,8 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
+#include <cmath>
+
 #include <QLayout>
 #include <QLabel>
 #include <QApplication>
@@ -20,6 +22,7 @@
 #include <QCursor>
 #include <QTableView>
 #include <QScrollArea>
+#include <QSizeGrip>
 #include <QHeaderView>
 #include <QCloseEvent>
 #include <QDesktopServices>
@@ -28,6 +31,8 @@
 #include <QProgressDialog>
 #include <QStringBuilder>
 #include <QScrollBar>
+#include <QMenu>
+#include <QPainter>
 
 #include "messagebox.h"
 #include "config.h"
@@ -35,12 +40,15 @@
 #include "utility.h"
 #include "currency.h"
 #include "document.h"
+#include "documentio.h"
 #include "window.h"
 #include "headerview.h"
 #include "documentdelegate.h"
 #include "scriptmanager.h"
 #include "script.h"
 #include "exception.h"
+#include "changecurrencydialog.h"
+
 #include "bricklink/bricklink_setmatch.h"
 
 #include "selectcolordialog.h"
@@ -218,9 +226,11 @@ class TableView : public QTableView
 {
     Q_OBJECT
 public:
-    explicit TableView(QWidget *parent)
+    explicit TableView(QWidget *parent = nullptr)
         : QTableView(parent)
-    { }
+    {
+        setCornerWidget(new QSizeGrip(this));
+    }
 
 protected:
     void keyPressEvent(QKeyEvent *e) override
@@ -238,6 +248,304 @@ protected:
 
 private:
     Q_DISABLE_COPY(TableView)
+};
+
+
+class CheckColorTabBar : QTabBar
+{
+public:
+    CheckColorTabBar()
+    {
+        addTab(" ");
+    }
+
+    QColor color() const
+    {
+        QImage image(20, 20, QImage::Format_ARGB32);
+        image.fill(palette().color(QPalette::Window));
+        QPainter p(&image);
+        QStyleOptionTab opt;
+        opt.initFrom(this);
+        initStyleOption(&opt, 0);
+        opt.rect = image.rect();
+        style()->drawControl(QStyle::CE_TabBarTab, &opt, &p, this);
+        p.end();
+        return image.pixelColor(image.rect().center());
+    }
+};
+
+class StatusBar : public QFrame
+{
+    Q_OBJECT
+public:
+    StatusBar(Window *window)
+        : QFrame(window)
+        , m_window(window)
+        , m_doc(window->document())
+    {
+        setAutoFillBackground(true);
+        setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
+
+        // hide the top and bottom frame
+        setContentsMargins(contentsMargins() + QMargins(0, -frameWidth(), 0, -frameWidth()));
+
+        m_layout = new QHBoxLayout(this);
+        m_layout->setContentsMargins(11, 4, 11, 4);
+
+        auto addSeparator = [this]() -> QWidget * {
+            auto sep = new QFrame();
+            sep->setFrameShape(QFrame::VLine);
+            sep->setFixedWidth(sep->frameWidth());
+            sep->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::MinimumExpanding);
+            m_layout->addWidget(sep);
+            return sep;
+        };
+
+        m_differenceMode = new QToolButton();
+        m_differenceMode->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+        m_differenceMode->setIcon(QIcon::fromTheme("mode2"));
+        m_differenceMode->setCheckable(true);
+        connect(m_doc, &Document::differenceModeChanged,
+                this, &StatusBar::updateDifferenceMode);
+        connect(m_doc, &Document::itemCountChanged,
+                this, [this](int count) { m_differenceMode->setEnabled(count > 0); });
+        m_differenceMode->setEnabled(m_doc->items().count() > 0);
+        connect(m_differenceMode, &QToolButton::toggled,
+                this, [this](bool b) {
+            if (b == m_doc->isDifferenceModeActive())
+                return;
+            if (b) {
+                if (!m_doc->startDifferenceMode())
+                    m_differenceMode->setChecked(false);
+            } else {
+                if (MessageBox::question(this, tr("End difference mode"), tr("Ending difference mode resets all base values used for calculating the actual differences to the current values.<br>This operation is not undoable.<br>Do you still want to continue?")) == QMessageBox::Yes) {
+                    m_doc->endDifferenceMode();
+                } else {
+                    m_differenceMode->setChecked(true);
+                }
+            }
+        });
+        m_layout->addWidget(m_differenceMode);
+
+        if (m_doc->order()) {
+            addSeparator();
+            m_order = new QToolButton();
+            m_order->setIcon(QIcon::fromTheme("help-about"));
+            m_order->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+            m_order->setAutoRaise(true);
+            m_layout->addWidget(m_order);
+
+            connect(m_order, &QToolButton::clicked,
+                    this, [this]() {
+                auto order = m_doc->order();
+                MessageBox::information(m_window, tr("Order information"), order->address());
+            });
+        } else {
+            m_order = nullptr;
+        }
+        m_layout->addStretch(1);
+
+        m_errorsSeparator = addSeparator();
+        m_errors = new QLabel();
+        m_layout->addWidget(m_errors);
+
+        addSeparator();
+        m_count = new QLabel();
+        m_layout->addWidget(m_count);
+
+        addSeparator();
+        m_weight = new QLabel();
+        m_layout->addWidget(m_weight);
+
+        addSeparator();
+
+        QHBoxLayout *currencyLayout = new QHBoxLayout();
+        currencyLayout->setSpacing(0);
+        m_value = new QLabel();
+        currencyLayout->addWidget(m_value);
+        m_currency = new QToolButton();
+        m_currency->setPopupMode(QToolButton::InstantPopup);
+        m_currency->setToolButtonStyle(Qt::ToolButtonTextOnly);
+        m_currency->setAutoRaise(true);
+        currencyLayout->addWidget(m_currency);
+        m_layout->addLayout(currencyLayout);
+        m_profit = new QLabel();
+        m_layout->addWidget(m_profit);
+
+        connect(m_currency, &QToolButton::triggered,
+                this, &StatusBar::changeDocumentCurrency);
+        connect(Currency::inst(), &Currency::ratesChanged,
+                this, &StatusBar::updateCurrencyRates);
+        connect(m_doc, &Document::currencyCodeChanged,
+                this, &StatusBar::documentCurrencyChanged);
+        connect(m_doc, &Document::statisticsChanged,
+                this, &StatusBar::updateStatistics);
+
+        updateCurrencyRates();
+        documentCurrencyChanged(m_doc->currencyCode());
+
+        paletteChange();
+        languageChange();
+    }
+
+    void updateCurrencyRates()
+    {
+        delete m_currency->menu();
+        auto m = new QMenu();
+
+        QString defCurrency = Config::inst()->defaultCurrencyCode();
+
+        if (!defCurrency.isEmpty()) {
+            auto a = new QAction(tr("Default currency (%1)").arg(defCurrency));
+            a->setObjectName(defCurrency);
+            m->addAction(a);
+            m->addSeparator();
+        }
+
+        foreach (const QString &c, Currency::inst()->currencyCodes()) {
+            auto a = new QAction(c);
+            a->setObjectName(c);
+            if (c == m_doc->currencyCode())
+                a->setEnabled(false);
+            m->addAction(a);
+        }
+        m_currency->setMenu(m);
+    }
+
+    void documentCurrencyChanged(const QString &ccode)
+    {
+        m_currency->setText(ccode + QLatin1String("  "));
+        // the menu might still be open right now, so we need to delay deleting the actions
+        QMetaObject::invokeMethod(this, &StatusBar::updateCurrencyRates, Qt::QueuedConnection);
+    }
+
+    void changeDocumentCurrency(QAction *a)
+    {
+        QString ccode = a->objectName();
+
+        if (ccode != m_doc->currencyCode()) {
+            ChangeCurrencyDialog d(m_doc->currencyCode(), ccode, m_doc->legacyCurrencyCode(), this);
+            if (d.exec() == QDialog::Accepted) {
+                double rate = d.exchangeRate();
+
+                if (rate > 0)
+                    m_doc->setCurrencyCode(ccode, rate);
+            }
+        }
+    }
+
+    void updateDifferenceMode()
+    {
+        bool b = m_doc->isDifferenceModeActive();
+        m_differenceMode->setText(m_differenceMode->property(b ? "bsTextUpdate" : "bsTextNormal").toString());
+        m_differenceMode->setChecked(b);
+    }
+
+    void updateStatistics()
+    {
+        static QLocale loc;
+        auto stat = m_doc->statistics(m_doc->items());
+
+        bool b = (stat.errors() > 0);
+        if (b && Config::inst()->showInputErrors()) {
+            m_errors->setText(tr("Errors:") %
+                              QString::fromLatin1(" <span style='background-color:%1'>&nbsp;")
+                              .arg(m_errors->property("bsColor").toString())
+                              % QLocale::system().toString(stat.errors()) % u"&nbsp;</span>");
+        }
+        m_errors->setVisible(b);
+        m_errorsSeparator->setVisible(b);
+
+        QString cntstr = tr("Items") % u": " % loc.toString(stat.items())
+                                     % u" (" % loc.toString(stat.lots()) % u")";
+        m_count->setText(cntstr);
+
+        QString wgtstr;
+        if (qFuzzyCompare(stat.weight(), -std::numeric_limits<double>::min())) {
+            wgtstr = QStringLiteral("-");
+        } else {
+            wgtstr = Utility::weightToString(std::abs(stat.weight()),
+                                             Config::inst()->measurementSystem(),
+                                             true /*optimize*/, true /*add unit*/);
+            if (stat.weight() < 0)
+                wgtstr.prepend(QStringLiteral(u"\u2265 "));
+        }
+        m_weight->setText(wgtstr);
+
+        QString valstr = loc.toString(stat.value(), 'f', 3);
+        if (stat.minValue() < stat.value())
+            valstr.prepend(QStringLiteral(u"\u2264 "));
+        m_value->setText(valstr);
+
+        b = !qFuzzyIsNull(stat.cost());
+        if (b) {
+            int percent = int(std::round(stat.value() / stat.cost() * 100. - 100.));
+            QString profitstr = (percent > 0 ? u"(+" : u"(") % loc.toString(percent) % u" %)";
+            m_profit->setText(profitstr);
+        }
+        m_profit->setVisible(b);
+    }
+
+
+protected:
+    void languageChange()
+    {
+        m_differenceMode->setProperty("bsTextUpdate", tr("Disable difference mode"));
+        m_differenceMode->setProperty("bsTextNormal", tr("Enable difference mode"));
+        updateDifferenceMode();
+
+        if (m_order)
+            m_order->setText(tr("Order information..."));
+        m_value->setText(tr("Currency:"));
+        updateStatistics();
+    }
+
+    void paletteChange()
+    {
+        auto pal = palette();
+        pal.setColor(QPalette::Window, CheckColorTabBar().color());
+        setPalette(pal);
+
+        auto c = Utility::gradientColor(Qt::red, palette().color(QPalette::Window), 0.6);
+        m_errors->setProperty("bsColor", c.name());
+        updateStatistics();
+
+        auto checkedbg = Utility::gradientColor(Qt::green, palette().color(QPalette::Window), 0.3);
+        auto checkedborder = checkedbg.darker();
+        auto hoverbg = checkedbg.lighter();
+        auto hoverborder = hoverbg.darker();
+
+        m_differenceMode->setStyleSheet(QString::fromLatin1(
+            "QToolButton { background-color: transparent; border: 1px solid transparent; padding: 1px; }"
+            "QToolButton:hover { background-color: %3; border: 1px solid %4 } "
+            "QToolButton:checked { background-color: %1; border: 1px solid %2; } "
+            "QToolButton:checked:hover { } "
+            "QToolButton:pressed { background-color: %1; border: 1px solid %2 } "
+        ).arg(checkedbg.name(), checkedborder.name(), hoverbg.name(), hoverborder.name()));
+    }
+
+    void changeEvent(QEvent *e) override
+    {
+        QFrame::changeEvent(e);
+        if (e->type() == QEvent::LanguageChange)
+            languageChange();
+        if (e->type() == QEvent::PaletteChange)
+            paletteChange();
+    }
+
+private:
+    Window *m_window;
+    Document *m_doc;
+    QHBoxLayout *m_layout;
+    QToolButton *m_differenceMode;
+    QToolButton *m_order;
+    QWidget *m_errorsSeparator;
+    QLabel *m_errors;
+    QLabel *m_weight;
+    QLabel *m_count;
+    QLabel *m_value;
+    QLabel *m_profit;
+    QToolButton *m_currency;
 };
 
 
@@ -263,7 +571,9 @@ Window::Window(Document *doc, QWidget *parent)
     m_simple_mode = false;
     m_diff_mode = false;
 
-    w_list = new TableView(this);
+    w_statusbar = new StatusBar(this);
+
+    w_list = new TableView();
     w_header = new HeaderView(Qt::Horizontal, w_list);
     w_list->setHorizontalHeader(w_header);
     w_list->setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -287,14 +597,6 @@ Window::Window(Document *doc, QWidget *parent)
     m_selection_model = new QItemSelectionModel(m_view, this);
     w_list->setSelectionModel(m_selection_model);
 
-    // This shouldn't be needed, but we are abusing layoutChanged a bit for adding and removing
-    // items. The docs are a bit undecided if you should really do that, but it really helps
-    // performance wise. Just the selection is not updated, when the items in it are deleted.
-    connect(m_view, &DocumentProxyModel::layoutChanged,
-            m_selection_model, [this]() {
-        updateSelection();
-    });
-
     auto *dd = new DocumentDelegate(doc, m_view, w_list);
     w_list->setItemDelegate(dd);
     w_list->verticalHeader()->setDefaultSectionSize(dd->defaultItemHeight(w_list));
@@ -302,6 +604,7 @@ Window::Window(Document *doc, QWidget *parent)
     QBoxLayout *toplay = new QVBoxLayout(this);
     toplay->setSpacing(0);
     toplay->setMargin(0);
+    toplay->addWidget(w_statusbar, 0);
     toplay->addWidget(w_list, 10);
 
     connect(m_latest_timer, &QTimer::timeout,
@@ -330,7 +633,8 @@ Window::Window(Document *doc, QWidget *parent)
             this, &Window::updateCaption);
     connect(m_doc, &Document::modificationChanged,
             this, &Window::updateCaption);
-
+    connect(m_doc, &Document::differenceModeChanged,
+            this, &Window::updateDifferenceMode);
     connect(m_doc, &Document::dataChanged,
             this, &Window::documentItemsChanged);
 
@@ -340,14 +644,13 @@ Window::Window(Document *doc, QWidget *parent)
     w_header->setSectionInternal(Document::QuantityOrig, true);
     w_header->setSectionInternal(Document::QuantityDiff, true);
 
-    setDifferenceMode(false);
-
     on_view_column_layout_list_load("user-default");
 
     if (m_doc->hasGuiState()) {
         parseGuiStateXML(m_doc->guiState());
         m_doc->clearGuiState();
     }
+    updateDifferenceMode();
     setSimpleMode(Config::inst()->simpleMode());
 
     updateErrorMask();
@@ -427,21 +730,6 @@ void Window::setSimpleMode(bool b)
     }
 
     updateErrorMask();
-}
-
-bool Window::isDifferenceMode() const
-{
-    return m_diff_mode;
-}
-
-void Window::setDifferenceMode(bool b)
-{
-    m_diff_mode = b;
-
-    w_header->setSectionAvailable(Document::PriceOrig, b);
-    w_header->setSectionAvailable(Document::PriceDiff, b);
-    w_header->setSectionAvailable(Document::QuantityOrig, b);
-    w_header->setSectionAvailable(Document::QuantityDiff, b);
 }
 
 void Window::ensureLatestVisible()
@@ -708,9 +996,6 @@ QDomElement Window::createGuiStateXML()
     root.setAttribute("Application", "BrickStore");
     root.setAttribute("Version", version);
 
-    if (isDifferenceMode())
-        root.appendChild(doc.createElement("DifferenceMode"));
-
     auto cl = doc.createElement("ColumnLayout");
     cl.appendChild(doc.createCDATASection(w_header->saveLayout().toBase64()));
     root.appendChild(cl);
@@ -730,9 +1015,7 @@ bool Window::parseGuiStateXML(const QDomElement &root)
                 continue;
             QString tag = n.toElement().tagName();
 
-            if (tag == "DifferenceMode")
-                setDifferenceMode(true);
-            else if (tag == "ColumnLayout")
+            if (tag == "ColumnLayout")
                 w_header->restoreLayout(QByteArray::fromBase64(n.toElement().text().toLatin1()));
         }
     }
@@ -795,14 +1078,6 @@ void Window::on_edit_filter_from_selection_triggered()
         }
     }
 }
-
-void Window::on_edit_reset_diffs_triggered()
-{
-    WindowProgress wp(w_list);
-
-    m_doc->resetDifferences(selection());
-}
-
 
 void Window::on_edit_status_include_triggered()
 {
@@ -936,8 +1211,7 @@ void Window::on_edit_price_set_triggered()
     double price = selection().front()->price();
 
     if (MessageBox::getDouble(this, { }, tr("Enter the new price for all selected items:"),
-                              Currency::localSymbol(m_doc->currencyCode()), price, 0,
-                              FrameWork::maxPrice, 3)) {
+                              m_doc->currencyCode(), price, 0, FrameWork::maxPrice, 3)) {
         setOrToggle<double>::set(this, QT_TR_N_NOOP("Set price on %n item(s)"),
                                  &Document::Item::price, &Document::Item::setPrice, price);
     }
@@ -1130,8 +1404,7 @@ void Window::on_edit_cost_set_triggered()
     double cost = selection().front()->cost();
 
     if (MessageBox::getDouble(this, { }, tr("Enter the new cost for all selected items:"),
-                              Currency::localSymbol(m_doc->currencyCode()), cost, 0,
-                              FrameWork::maxPrice, 3)) {
+                              m_doc->currencyCode(), cost, 0, FrameWork::maxPrice, 3)) {
         setOrToggle<double>::set(this, QT_TR_N_NOOP("Set cost on %n item(s)"),
                                  &Document::Item::cost, &Document::Item::setCost, cost);
     }
@@ -1207,8 +1480,7 @@ void Window::on_edit_cost_spread_triggered()
     double spreadAmount = 0;
 
     if (MessageBox::getDouble(this, { }, tr("Enter the cost amount to spread over all the selected items:"),
-                              Currency::localSymbol(m_doc->currencyCode()), spreadAmount,
-                              0, FrameWork::maxPrice, 3)) {
+                              m_doc->currencyCode(), spreadAmount, 0, FrameWork::maxPrice, 3)) {
         uint spreadcount = 0;
         double priceTotal = 0;
 
@@ -1723,7 +1995,7 @@ void Window::subtractItems(const BrickLink::InvItemList &items)
                 newitem->setItem(item);
                 newitem->setColor(color);
                 newitem->setCondition(cond);
-                newitem->setOrigQuantity(0);
+                ///////newitem->setOrigQuantity(0);
                 newitem->setQuantity(-qty);
 
                 m_doc->appendItem(newitem);
@@ -1816,9 +2088,10 @@ void Window::on_edit_setmatch_triggered()
         sm->setPartCountConstraint(100, -1);
         sm->setYearReleasedConstraint(1995, -1);
 
-        connect(sm, SIGNAL(finished(QVector<const BrickLink::Item *>)),
-                this, SLOT(setMatchFinished(QVector<const BrickLink::Item *>)));
-        connect(sm, SIGNAL(progress(int, int)), this, SLOT(setMatchProgress(int, int)));
+        connect(sm, &BrickLink::SetMatch::finished,
+                this, &Window::setMatchFinished);
+        connect(sm, &BrickLink::SetMatch::progress,
+                this, &Window::setMatchProgress);
 
         if (!sm->startMaximumPossibleSetMatch(selection().isEmpty() ? m_doc->items()
                                               : selection(), BrickLink::SetMatch::Greedy))
@@ -1912,7 +2185,10 @@ void Window::on_bricklink_myinventory_triggered()
 {
     if (!selection().isEmpty()) {
         uint lotid = (*selection().front()).lotId();
-        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_StoreItemDetail, &lotid));
+        if (lotid)
+            QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_StoreItemDetail, &lotid));
+        else
+            QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_StoreItemSearch, (*selection().front()).item(), (*selection().front()).color()));
     }
 }
 
@@ -1955,11 +2231,6 @@ void Window::on_view_column_layout_list_load(const QString &layoutId)
         else if (layoutId == "user-default")
             resizeColumnsToDefault();
     }
-}
-
-void Window::on_view_difference_mode_toggled(bool b)
-{
-    setDifferenceMode(b);
 }
 
 void Window::on_document_print_triggered()
@@ -2053,7 +2324,7 @@ void Window::print(bool as_pdf)
 void Window::on_document_save_triggered()
 {
     m_doc->setGuiState(createGuiStateXML());
-    m_doc->fileSave();
+    DocumentIO::save(m_doc);
     m_doc->clearGuiState();
     deleteAutosave();
 }
@@ -2061,7 +2332,7 @@ void Window::on_document_save_triggered()
 void Window::on_document_save_as_triggered()
 {
     m_doc->setGuiState(createGuiStateXML());
-    m_doc->fileSaveAs();
+    DocumentIO::saveAs(m_doc);
     m_doc->clearGuiState();
     deleteAutosave();
 }
@@ -2071,7 +2342,7 @@ void Window::on_document_export_bl_xml_triggered()
     Document::ItemList items = exportCheck();
 
     if (!items.isEmpty())
-        m_doc->fileExportBrickLinkXML(items);
+        DocumentIO::exportBrickLinkXML(items);
 }
 
 void Window::on_document_export_bl_xml_clip_triggered()
@@ -2079,7 +2350,7 @@ void Window::on_document_export_bl_xml_clip_triggered()
     Document::ItemList items = exportCheck();
 
     if (!items.isEmpty())
-        m_doc->fileExportBrickLinkXMLClipboard(items);
+        DocumentIO::exportBrickLinkXMLClipboard(items);
 }
 
 void Window::on_document_export_bl_update_clip_triggered()
@@ -2087,7 +2358,7 @@ void Window::on_document_export_bl_update_clip_triggered()
     Document::ItemList items = exportCheck();
 
     if (!items.isEmpty())
-        m_doc->fileExportBrickLinkUpdateClipboard(items);
+        DocumentIO::exportBrickLinkUpdateClipboard(m_doc, items);
 }
 
 void Window::on_document_export_bl_invreq_clip_triggered()
@@ -2095,7 +2366,7 @@ void Window::on_document_export_bl_invreq_clip_triggered()
     Document::ItemList items = exportCheck();
 
     if (!items.isEmpty())
-        m_doc->fileExportBrickLinkInvReqClipboard(items);
+        DocumentIO::exportBrickLinkInvReqClipboard(items);
 }
 
 void Window::on_document_export_bl_wantedlist_clip_triggered()
@@ -2103,7 +2374,7 @@ void Window::on_document_export_bl_wantedlist_clip_triggered()
     Document::ItemList items = exportCheck();
 
     if (!items.isEmpty())
-        m_doc->fileExportBrickLinkWantedListClipboard(items);
+        DocumentIO::exportBrickLinkWantedListClipboard(items);
 }
 
 Document::ItemList Window::exportCheck() const
@@ -2172,6 +2443,17 @@ void Window::updateSelection()
         });
     }
     m_delayedSelectionUpdate->start();
+}
+
+void Window::updateDifferenceMode()
+{
+    bool b = document()->isDifferenceModeActive();
+    setWindowIcon(b ? QIcon::fromTheme("mode2") : QIcon());
+
+    w_header->setSectionAvailable(Document::PriceOrig, b);
+    w_header->setSectionAvailable(Document::PriceDiff, b);
+    w_header->setSectionAvailable(Document::QuantityOrig, b);
+    w_header->setSectionAvailable(Document::QuantityDiff, b);
 }
 
 void Window::setSelection(const Document::ItemList &lst)
@@ -2258,16 +2540,15 @@ void Window::autosave() const
     QByteArray ba;
     QDataStream ds(&ba, QIODevice::WriteOnly);
     ds << QByteArray(autosaveMagic)
-       << qint32(1) // version
+       << qint32(3) // version
        << doc->title()
        << doc->fileName()
        << doc->currencyCode()
-       << isDifferenceMode()
        << currentColumnLayout()
        << qint32(doc->items().count());
 
     for (auto item : items)
-        ds << *item;
+        item->save(ds);
 
     ds << QByteArray(autosaveMagic);
 
@@ -2295,28 +2576,28 @@ const QVector<Window *> Window::processAutosaves(AutosaveAction action)
             QString savedTitle;
             QString savedFileName;
             QString savedCurrencyCode;
-            bool savedDifferenceMode;
             QByteArray savedColumnLayout;
             qint32 count = 0;
 
             QDataStream ds(&f);
             ds >> magic >> version >> savedTitle >> savedFileName >> savedCurrencyCode
-                    >> savedDifferenceMode >> savedColumnLayout >> count;
+                    >> savedColumnLayout >> count;
 
-            if ((count > 0) && (magic == QByteArray(autosaveMagic)) && (version == 1)) {
+            if ((count > 0) && (magic == QByteArray(autosaveMagic)) && (version == 3)) {
                 BrickLink::InvItemList items;
 
                 for (int i = 0; i < count; ++i) {
-                    auto *item = new BrickLink::InvItem();
-                    ds >> *item;
-                    items.append(item);
+                    if (auto item = BrickLink::InvItem::restore(ds))
+                        items.append(item);
                 }
                 ds >> magic;
 
                 if (magic == QByteArray(autosaveMagic)) {
                     QString restoredTag = tr("RESTORED", "Tag for document restored from autosave");
 
-                    auto doc = new Document(items, savedCurrencyCode);  // we own the items
+                    auto doc = new Document(items, savedCurrencyCode);  // Document owns the items now
+                    items.clear();
+
                     if (!savedFileName.isEmpty()) {
                         QFileInfo fi(savedFileName);
                         QString newFileName = fi.dir().filePath(restoredTag % u" " % fi.fileName());
@@ -2326,11 +2607,10 @@ const QVector<Window *> Window::processAutosaves(AutosaveAction action)
                     }
                     auto win = new Window(doc);
                     win->w_header->restoreLayout(savedColumnLayout);
-                    win->setDifferenceMode(savedDifferenceMode);
 
                     doc->setGuiStateModified(true); // not really the UI state
                     if (!savedFileName.isEmpty())
-                        doc->fileSave();
+                        DocumentIO::save(doc);
 
                     restored.append(win);
                 }

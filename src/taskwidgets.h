@@ -69,6 +69,7 @@ public:
 protected slots:
     void windowUpdate(Window *win);
     void selectionUpdate(const Document::ItemList &list);
+    void statisticsUpdate();
     void currencyUpdate();
 
     void languageChange();
@@ -78,7 +79,7 @@ protected:
     void changeEvent(QEvent *e) override;
 
 private:
-    void delayedSelectionUpdate(const Document::ItemList &list);
+    void delayedSelectionUpdate();
 
     QLabel *m_text;
     PictureWidget *m_pic;

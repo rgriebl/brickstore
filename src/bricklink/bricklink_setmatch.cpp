@@ -210,10 +210,6 @@ public:
         delete this;
     }
 
-signals:
-    void finished(int, QVector<const BrickLink::Item *> &);
-    void progress(int, int);
-
 private:
     BrickLink::SetMatch *m_sm;
     const BrickLink::InvItemList m_list;
@@ -321,7 +317,7 @@ QPair<int, QVector<const BrickLink::Item *>> BrickLink::SetMatch::set_match_gree
 void BrickLink::SetMatch::create_inventory_list()
 {
     clear_inventory_list();
-    const QVector<const Item *> &items = core()->items();
+    const auto &items = core()->items();
 
     for (auto item : items) {
         bool ok = true;
@@ -332,11 +328,8 @@ void BrickLink::SetMatch::create_inventory_list()
 
         ok = ok && (m_itemtypes.isEmpty() || m_itemtypes.contains(item->itemType()));
 
-        if (ok && !m_categories.isEmpty()) {
-            ok = false;
-            for (auto cat_it = m_categories.constBegin(); !ok && cat_it != m_categories.constEnd(); ++cat_it)
-                ok = item->hasCategory(*cat_it);
-        }
+        ok = ok && (m_categories.isEmpty() || m_categories.contains(item->category()));
+
         if (ok) {
             InvMatchList iml(item->consistsOf());
             ok = ok && !iml.isEmpty();

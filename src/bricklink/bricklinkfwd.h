@@ -25,6 +25,7 @@ class Color;
 class Category;
 class ItemType;
 class Item;
+class PartColorCode;
 
 class Picture;
 class PriceGuide;
@@ -47,9 +48,6 @@ typedef QVector<InvItem *>                    InvItemList;
 typedef QPair<int, const Item *>              AppearsInItem;
 typedef QVector<AppearsInItem>                AppearsInColor;
 typedef QHash<const Color *, AppearsInColor>  AppearsIn;
-
-QDataStream &operator << (QDataStream &ds, const InvItem &ii);
-QDataStream &operator >> (QDataStream &ds, InvItem &ii);
 
 QDataStream &operator << (QDataStream &ds, const Item *item);
 QDataStream &operator >> (QDataStream &ds, Item *item);
@@ -85,16 +83,8 @@ enum UrlList {
     URL_ItemChangeLog,
     URL_LotsForSale,
     URL_AppearsInSets,
-    URL_StoreItemDetail
-};
-
-enum ItemListXMLHint {
-    XMLHint_MassUpload,
-    XMLHint_MassUpdate,
-    XMLHint_Inventory,
-    XMLHint_Order,
-    XMLHint_WantedList,
-    XMLHint_BrickStore
+    URL_StoreItemDetail,
+    URL_StoreItemSearch,
 };
 
 enum ModelRoles {

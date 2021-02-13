@@ -11,16 +11,11 @@
 **
 ** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
 */
-#include <cfloat>
 
 #include <QApplication>
 #include <QCursor>
-#include <QFileDialog>
-#include <QClipboard>
-#include <QRegExp>
-#include <QDesktopServices>
-#include <QStandardPaths>
-#include <QtMath>
+#include <QFileInfo>
+#include <QDir>
 #include <QStringBuilder>
 
 #if defined(MODELTEST)
@@ -32,14 +27,7 @@
 
 #include "utility.h"
 #include "config.h"
-#include "framework.h"
-#include "messagebox.h"
 #include "undo.h"
-#include "progressdialog.h"
-
-#include "importorderdialog.h"
-
-#include "import.h"
 #include "currency.h"
 #include "qparallelsort.h"
 #include "document.h"
@@ -234,12 +222,12 @@ Document::Statistics::Statistics(const Document *doc, const ItemList &list, bool
         m_minval += (qty * price * (1.0 - double(item->sale()) / 100.0));
         m_items += qty;
 
-        if (item->weight() > 0)
-            m_weight += item->weight();
+        if (item->totalWeight() > 0)
+            m_weight += item->totalWeight();
         else
             weight_missing = true;
 
-        if (quint64 errors = doc->itemErrors(item)) {
+        if (quint64 errors = doc->itemFlags(item).first) {
             for (quint64 i = 1ULL << (FieldCount - 1); i;  i >>= 1) {
                 if (errors & i)
                     m_errors++;
@@ -250,7 +238,7 @@ Document::Statistics::Statistics(const Document *doc, const ItemList &list, bool
             m_incomplete++;
     }
     if (weight_missing)
-        m_weight = (m_weight == 0.) ? -DBL_MIN : -m_weight;
+        m_weight = qFuzzyIsNull(m_weight) ? -std::numeric_limits<double>::min() : -m_weight;
     m_ccode = doc->currencyCode();
 }
 
@@ -267,7 +255,13 @@ QVector<Document *> Document::s_documents;
 Document *Document::createTemporary(const BrickLink::InvItemList &list, const QVector<int> &fakeIndexes)
 {
     auto *doc = new Document(1 /*dummy*/);
-    doc->setBrickLinkItems(list); // the caller owns the items
+    ItemList items;
+
+    // the caller owns the items, so we have to copy here
+    for (const BrickLink::InvItem *item : list)
+        items.append(new Item(*item));
+
+    doc->setBrickLinkItems(items); // setBrickLinkItems owns the items now
     doc->setFakeIndexes(fakeIndexes);
     return doc;
 }
@@ -282,12 +276,9 @@ Document::Document(int /*is temporary*/)
 }
 
 // the caller owns the items
-Document::Document(const BrickLink::InvItemList &items, const QString &currencyCode)
+Document::Document()
     : Document(0)
 {
-    if (!currencyCode.isEmpty())
-        m_currencycode = currencyCode;
-
     m_undo = new UndoStack(this);
     connect(m_undo, &QUndoStack::cleanChanged,
             this, [this](bool clean) {
@@ -306,8 +297,22 @@ Document::Document(const BrickLink::InvItemList &items, const QString &currencyC
             }
         }
     });
-
     s_documents.append(this);
+}
+
+// the caller owns the items
+Document::Document(const BrickLink::InvItemList &items)
+    : Document()
+{
+    // we take ownership of the items
+    setBrickLinkItems(items); // setBrickLinkItems owns the items now
+}
+
+// the caller owns the items
+Document::Document(const BrickLink::InvItemList &items, const QString &currencyCode)
+    : Document(items)
+{
+    m_currencycode = currencyCode;
 }
 
 Document::~Document()
@@ -398,78 +403,50 @@ bool Document::changeItem(int position, const Item &value)
     return true;
 }
 
-void Document::insertItemsDirect(ItemList &items, QVector<int> &positions)
+void Document::insertItemsDirect(const ItemList &items, QVector<int> &positions)
 {
     auto pos = positions.constBegin();
-    bool single = (items.count() == 1);
-    QModelIndexList before;
-    QModelIndex root;
-
-    if (!single) {
-        emit layoutAboutToBeChanged();
-        before = persistentIndexList();
-    }
+    const QModelIndex root;
 
     for (Item *item : qAsConst(items)) {
         int rows = rowCount(root);
 
         if (pos != positions.constEnd()) {
-            if (single)
-                beginInsertRows(root, *pos, *pos);
+            beginInsertRows(root, *pos, *pos);
             m_items.insert(*pos, item);
             ++pos;
         } else {
-            if (single)
-                beginInsertRows(root, rows, rows);
+            beginInsertRows(root, rows, rows);
             m_items.append(item);
         }
-        updateErrors(item);
-        if (single)
-            endInsertRows();
+
+        // this is really a new item, not just a redo - start with no differences
+        if (!m_differenceBase.contains(item))
+            m_differenceBase.insert(item, *item);
+
+        updateItemFlags(item);
+        endInsertRows();
     }
 
-    if (!single) {
-        QModelIndexList after;
-        foreach (const QModelIndex &idx, before)
-            after.append(index(item(idx), idx.column()));
-        changePersistentIndexList(before, after);
-        emit layoutChanged();
-    }
-
+    emit itemCountChanged(m_items.count());
     emitStatisticsChanged();
 }
 
 void Document::removeItemsDirect(ItemList &items, QVector<int> &positions)
 {
     positions.resize(items.count());
-
-    bool single = (items.count() == 1);
-    QModelIndexList before;
-
-    if (!single) {
-        emit layoutAboutToBeChanged();
-        before = persistentIndexList();
-    }
+    const QModelIndex root;
 
     for (int i = items.count() - 1; i >= 0; --i) {
         Item *item = items[i];
         int idx = m_items.indexOf(item);
-        if (single)
-            beginRemoveRows(QModelIndex(), idx, idx);
+        beginRemoveRows(root, idx, idx);
         positions[i] = idx;
         m_items.removeAt(idx);
-        if (single)
-            endRemoveRows();
+        endRemoveRows();
     }
 
-    if (!single) {
-        QModelIndexList after;
-        foreach (const QModelIndex &idx, before)
-            after.append(index(item(idx), idx.column()));
-        changePersistentIndexList(before, after);
-        emit layoutChanged();
-    }
-
+    emit itemCountChanged(m_items.count());
     emitStatisticsChanged();
 }
 
@@ -482,7 +459,7 @@ void Document::changeItemDirect(int position, Item &item)
     QModelIndex idx2 = createIndex(idx1.row(), columnCount(idx1.parent()) - 1, idx1.internalPointer());
 
     emitDataChanged(idx1, idx2);
-    updateErrors(olditem);
+    updateItemFlags(olditem);
     emitStatisticsChanged();
 }
 
@@ -490,7 +467,7 @@ void Document::changeCurrencyDirect(const QString &ccode, qreal crate, double *&
 {
     m_currencycode = ccode;
 
-    if (!qFuzzyCompare(crate, qreal(1))) {
+    if (!qFuzzyCompare(crate, qreal(1)) || (ccode != m_currencycode)) {
         bool createPrices = (prices == nullptr);
         if (createPrices)
             prices = new double[5 * m_items.count()];
@@ -498,19 +475,19 @@ void Document::changeCurrencyDirect(const QString &ccode, qreal crate, double *&
         for (int i = 0; i < m_items.count(); ++i) {
             Item *item = m_items[i];
             if (createPrices) {
-                prices[i * 5] = item->origPrice();
+                prices[i * 5] = item->cost();
                 prices[i * 5 + 1] = item->price();
                 prices[i * 5 + 2] = item->tierPrice(0);
                 prices[i * 5 + 3] = item->tierPrice(1);
                 prices[i * 5 + 4] = item->tierPrice(2);
 
-                item->setOrigPrice(prices[i * 5] * crate);
+                item->setCost(prices[i * 5] * crate);
                 item->setPrice(prices[i * 5 + 1] * crate);
                 item->setTierPrice(0, prices[i * 5 + 2] * crate);
                 item->setTierPrice(1, prices[i * 5 + 3] * crate);
                 item->setTierPrice(2, prices[i * 5 + 4] * crate);
             } else {
-                item->setOrigPrice(prices[i * 5]);
+                item->setCost(prices[i * 5]);
                 item->setPrice(prices[i * 5 + 1]);
                 item->setTierPrice(0, prices[i * 5 + 2]);
                 item->setTierPrice(1, prices[i * 5 + 3]);
@@ -523,10 +500,10 @@ void Document::changeCurrencyDirect(const QString &ccode, qreal crate, double *&
             prices = nullptr;
         }
 
-        emitDataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
+        emitDataChanged();
         emitStatisticsChanged();
     }
-    emit currencyCodeChanged(m_currencycode);
+    emit currencyCodeChanged(currencyCode());
 }
 
 void Document::emitDataChanged(const QModelIndex &tl, const QModelIndex &br)
@@ -557,14 +534,17 @@ void Document::emitDataChanged(const QModelIndex &tl, const QModelIndex &br)
         });
     }
 
-    if (tl.row() < m_nextDataChangedEmit.first.y())
-        m_nextDataChangedEmit.first.setY(tl.row());
-    if (tl.column() < m_nextDataChangedEmit.first.x())
-        m_nextDataChangedEmit.first.setX(tl.column());
-    if (br.row() > m_nextDataChangedEmit.second.y())
-        m_nextDataChangedEmit.second.setY(br.row());
-    if (br.column() > m_nextDataChangedEmit.second.x())
-        m_nextDataChangedEmit.second.setX(br.column());
+    QModelIndex xtl = tl.isValid() ? tl : index(0, 0);
+    QModelIndex xbr = br.isValid() ? br : index(rowCount() - 1, columnCount() - 1);
+
+    if (xtl.row() < m_nextDataChangedEmit.first.y())
+        m_nextDataChangedEmit.first.setY(xtl.row());
+    if (xtl.column() < m_nextDataChangedEmit.first.x())
+        m_nextDataChangedEmit.first.setX(xtl.column());
+    if (xbr.row() > m_nextDataChangedEmit.second.y())
+        m_nextDataChangedEmit.second.setY(xbr.row());
+    if (xbr.column() > m_nextDataChangedEmit.second.x())
+        m_nextDataChangedEmit.second.setX(xbr.column());
 
     m_delayedEmitOfDataChanged->start();
 }
@@ -582,45 +562,128 @@ void Document::emitStatisticsChanged()
     m_delayedEmitOfStatisticsChanged->start();
 }
 
-void Document::updateErrors(Item *item)
+void Document::updateItemFlags(const Item *item)
 {
     quint64 errors = 0;
+    quint64 updated = 0;
 
     if (item->price() <= 0)
         errors |= (1ULL << Price);
-
     if (item->quantity() <= 0)
         errors |= (1ULL << Quantity);
-
     if (item->color() && item->itemType() && ((item->color()->id() != 0) && !item->itemType()->hasColors()))
         errors |= (1ULL << Color);
-
     if (item->tierQuantity(0) && ((item->tierPrice(0) <= 0) || (item->tierPrice(0) >= item->price())))
         errors |= (1ULL << TierP1);
-
     if (item->tierQuantity(1) && ((item->tierPrice(1) <= 0) || (item->tierPrice(1) >= item->tierPrice(0))))
         errors |= (1ULL << TierP2);
-
     if (item->tierQuantity(1) && (item->tierQuantity(1) <= item->tierQuantity(0)))
         errors |= (1ULL << TierQ2);
-
     if (item->tierQuantity(2) && ((item->tierPrice(2) <= 0) || (item->tierPrice(2) >= item->tierPrice(1))))
         errors |= (1ULL << TierP3);
-
     if (item->tierQuantity(2) && (item->tierQuantity(2) <= item->tierQuantity(1)))
         errors |= (1ULL << TierQ3);
 
-    setItemErrors(item, errors);
+    if (isDifferenceModeActive()) {
+        if (auto base = differenceBaseItem(item)) {
+            static const quint64 ignoreMask = 0ULL
+                    | (1ULL << Index)
+                    | (1ULL << Status)
+                    | (1ULL << Picture)
+                    | (1ULL << Description)
+                    | (1ULL << QuantityOrig)
+                    | (1ULL << QuantityDiff)
+                    | (1ULL << PriceOrig)
+                    | (1ULL << PriceDiff)
+                    | (1ULL << Total)
+                    | (1ULL << Category)
+                    | (1ULL << ItemType)
+                    | (1ULL << LotId)
+                    | (1ULL << Weight)
+                    | (1ULL << YearReleased);
+
+            for (Field f = Index; f != FieldCount; f = Field(f + 1)) {
+                quint64 fmask = (1ULL << f);
+                if (fmask & ignoreMask)
+                    continue;
+                if (dataForFilterRole(item, f, -1) != dataForFilterRole(base, f, -1))
+                    updated |= fmask;
+            }
+        }
+    }
+
+    setItemFlags(item, errors, updated);
+}
+
+bool Document::isDifferenceModeActive() const
+{
+    return m_differenceModeActive;
+}
+
+bool Document::startDifferenceModeInternal(const QHash<const Item *, Item> &updateBase)
+{
+    m_differenceBase = updateBase;
+    m_differenceModeActive = true;
+
+    for (const BrickLink::InvItem *i : qAsConst(m_items))
+        updateItemFlags(i);
+
+    emit differenceModeChanged(true);
+    emitDataChanged();
+    return true;
+}
+
+bool Document::startDifferenceMode()
+{
+    if (m_differenceModeActive || m_items.isEmpty())
+        return false;
+
+    m_differenceBase.clear();
+    decltype(m_differenceBase) base;
+
+    for (const BrickLink::InvItem *i : qAsConst(m_items))
+        base.insert(i, *i);
+
+    return startDifferenceModeInternal(base);
+}
+
+void Document::endDifferenceMode()
+{
+    if (m_differenceModeActive) {
+        m_differenceBase.clear();
+        m_differenceModeActive = false;
+
+        for (const BrickLink::InvItem *i : qAsConst(m_items))
+            updateItemFlags(i);
+
+        emit differenceModeChanged(false);
+        emitDataChanged();
+    }
+}
+
+const Document::Item *Document::differenceBaseItem(const Document::Item *item) const
+{
+    if (!item || !isDifferenceModeActive())
+        return nullptr;
+
+
+    auto it = m_differenceBase.constFind(item);
+    return (it != m_differenceBase.end()) ? &(*it) : nullptr;
+}
+
+bool Document::legacyCurrencyCode() const
+{
+    return m_currencycode.isEmpty();
 }
 
 QString Document::currencyCode() const
 {
-    return m_currencycode;
+    return m_currencycode.isEmpty() ? QString::fromLatin1("USD") : m_currencycode;
 }
 
 void Document::setCurrencyCode(const QString &ccode, qreal crate)
 {
-    if (ccode != m_currencycode)
+    if (ccode != currencyCode())
         m_undo->push(new CurrencyCmd(this, ccode, crate));
 }
 
@@ -652,326 +715,20 @@ void Document::setGuiStateModified(bool modified)
         emit modificationChanged(!wasModified);
 }
 
-Document *Document::fileNew()
+void Document::setOrder(BrickLink::Order *order)
 {
-    auto *doc = new Document();
-    doc->setTitle(tr("Untitled"));
-    return doc;
+    if (m_order)
+        delete m_order;
+    m_order = order;
 }
 
-Document *Document::fileOpen()
-{
-    QStringList filters;
-    filters << tr("BrickStore XML Data") + " (*.bsx)";
-    filters << tr("All Files") + "(*.*)";
 
-    return fileOpen(QFileDialog::getOpenFileName(FrameWork::inst(), tr("Open File"), Config::inst()->documentDir(), filters.join(";;")));
-}
-
-Document *Document::fileOpen(const QString &s)
-{
-    if (s.isEmpty())
-        return nullptr;
-
-    QString abs_s = QFileInfo(s).absoluteFilePath();
-
-    for (Document *doc : qAsConst(s_documents)) {
-        if (QFileInfo(doc->fileName()).absoluteFilePath() == abs_s)
-            return doc;
-    }
-
-    return fileLoadFrom(s, "bsx");
-}
-
-Document *Document::fileImportBrickLinkInventory(const BrickLink::Item *item, int quantity,
-                                                 BrickLink::Condition condition)
-{
-    if (item && !item->hasInventory())
-        return nullptr;
-
-    if (item && (quantity > 0)) {
-        BrickLink::InvItemList items = item->consistsOf();
-
-        if (!items.isEmpty()) {
-            for (BrickLink::InvItem *item : items) {
-                item->setQuantity(item->quantity() * quantity);
-                item->setCondition(condition);
-            }
-
-            auto *doc = new Document(items); // we own the items
-            doc->setTitle(tr("Inventory for %1").arg(item->id()));
-
-            qDeleteAll(items);
-            return doc;
-        } else {
-            MessageBox::warning(nullptr, { }, tr("Internal error: Could not create an Inventory object for item %1").arg(CMB_BOLD(item->id())));
-        }
-    }
-    return nullptr;
-}
-
-QVector<Document *> Document::fileImportBrickLinkOrders()
-{
-    QVector<Document *> docs;
-
-    ImportOrderDialog dlg(FrameWork::inst());
-
-    if (dlg.exec() == QDialog::Accepted) {
-        QVector<QPair<BrickLink::Order *, BrickLink::InvItemList *> > orders = dlg.orders();
-
-        for (auto it = orders.constBegin(); it != orders.constEnd(); ++it) {
-            const auto &order = *it;
-
-            if (order.first && order.second) {
-                auto *doc = new Document(*order.second, order.first->currencyCode()); // ImportOrderDialog owns the items
-                doc->setTitle(tr("Order #%1").arg(order.first->id()));
-                doc->m_order = new BrickLink::Order(*order. first);
-                docs.append(doc);
-            }
-        }
-    }
-    return docs;
-}
-
-Document *Document::fileImportBrickLinkStore()
-{
-    Transfer trans;
-    ProgressDialog d(tr("Import BrickLink Store Inventory"), &trans, FrameWork::inst());
-    ImportBLStore import(&d);
-
-    if (d.exec() == QDialog::Accepted) {
-        auto *doc = new Document(import.items(), import.currencyCode()); // ImportBLStore owns the items
-        doc->setTitle(tr("Store %1").arg(QDate::currentDate().toString(Qt::LocalDate)));
-        return doc;
-    }
-    return nullptr;
-}
-
-Document *Document::fileImportBrickLinkCart()
-{
-    QString url = QApplication::clipboard()->text(QClipboard::Clipboard);
-    QRegExp rx_valid(QLatin1String(R"(https://www\.bricklink\.com/storeCart\.asp\?h=[0-9]+&b=[-0-9]+)"));
-
-    if (!rx_valid.exactMatch(url))
-        url = QLatin1String("https://www.bricklink.com/storeCart.asp?h=______&b=______");
-
-    if (MessageBox::getString(nullptr, { }, tr("Enter the URL of your current BrickLink shopping cart:"
-                               "<br /><br />Right-click on the <b>View Cart</b> button "
-                               "in your browser and copy the URL to the clipboard by choosing "
-                               "<b>Copy Link Location</b> (Firefox), <b>Copy Link</b> (Safari) "
-                               "or <b>Copy Shortcut</b> (Internet Explorer).<br /><br />"
-                               "<em>Super-lots and custom items are <b>not</b> supported</em>."), url)) {
-        QRegExp rx(QLatin1String("\\?h=([0-9]+)&b=([-0-9]+)"));
-        (void) rx.indexIn(url);
-        int shopid = rx.cap(1).toInt();
-        int cartid = rx.cap(2).toInt();
-
-        if (shopid && cartid) {
-            Transfer trans;
-            ProgressDialog d(tr("Import BrickLink Shopping Cart"), &trans, FrameWork::inst());
-            ImportBLCart import(shopid, cartid, &d);
-
-            if (d.exec() == QDialog::Accepted) {
-                auto *doc = new Document(import.items(), import.currencyCode()); // ImportBLCart owns the items
-                doc->setTitle(tr("Cart in Shop %1").arg(shopid));
-                return doc;
-            }
-        }
-        else
-            QApplication::beep();
-    }
-    return nullptr;
-}
-
-Document *Document::fileImportBrickLinkXML()
-{
-    QStringList filters;
-    filters << tr("BrickLink XML File") + " (*.xml)";
-    filters << tr("All Files") + "(*.*)";
-
-    QString s = QFileDialog::getOpenFileName(FrameWork::inst(), tr("Import File"), Config::inst()->documentDir(), filters.join(";;"));
-
-    if (!s.isEmpty()) {
-        Document *doc = fileLoadFrom(s, "xml", true);
-
-        if (doc)
-            doc->setTitle(tr("Import of %1").arg(QFileInfo(s).fileName()));
-        return doc;
-    }
-    else
-        return nullptr;
-}
-
-Document *Document::fileLoadFrom(const QString &name, const char *type, bool import_only)
-{
-    BrickLink::ItemListXMLHint hint;
-
-    if (qstrcmp(type, "bsx") == 0)
-        hint = BrickLink::XMLHint_BrickStore;
-    else if (qstrcmp(type, "xml") == 0)
-        hint = BrickLink::XMLHint_MassUpload;
-    else
-        return nullptr;
-
-
-    QFile f(name);
-
-    if (!f.open(QIODevice::ReadOnly)) {
-        MessageBox::warning(nullptr, { }, tr("Could not open file %1 for reading.").arg(CMB_BOLD(name)));
-        return nullptr;
-    }
-
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
-    BrickLink::Core::ParseItemListXMLResult result;
-
-    QString emsg;
-    int eline = 0, ecol = 0;
-    QDomDocument domdoc;
-    QDomElement gui_state;
-
-    if (domdoc.setContent(&f, &emsg, &eline, &ecol)) {
-        QDomElement root = domdoc.documentElement();
-        QDomElement item_elem;
-
-        if (hint == BrickLink::XMLHint_BrickStore) {
-            for (QDomNode n = root.firstChild(); !n.isNull(); n = n.nextSibling()) {
-                if (!n.isElement())
-                    continue;
-
-                if (n.nodeName() == QLatin1String("Inventory"))
-                    item_elem = n.toElement();
-                else if (n.nodeName() == QLatin1String("GuiState"))
-                    gui_state = n.cloneNode(true).toElement();
-            }
-        }
-        else {
-            item_elem = root;
-        }
-
-        result = BrickLink::core()->parseItemListXML(item_elem, hint); // we own the items now
-    }
-    else {
-        MessageBox::warning(nullptr, { }, tr("Could not parse the XML data in file %1:<br /><i>Line %2, column %3: %4</i>").arg(CMB_BOLD(name)).arg(eline).arg(ecol).arg(emsg));
-        QApplication::restoreOverrideCursor();
-        return nullptr;
-    }
-
-    QApplication::restoreOverrideCursor();
-
-    Document *doc = nullptr;
-
-    if (result.items) {
-        uint fixedCount = 0;
-
-        if (result.invalidItemCount) {
-            fixedCount = uint(BrickLink::core()->applyChangeLogToItems(*result.items));
-            result.invalidItemCount -= fixedCount;
-
-            if (result.invalidItemCount) {
-                if (MessageBox::information(nullptr, { },
-                                            tr("This file contains %n unknown item(s).<br /><br />Do you still want to open this file?",
-                                               nullptr, result.invalidItemCount),
-                                            QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
-                    result.invalidItemCount = 0;
-                }
-            }
-        }
-
-        if (!result.invalidItemCount) {
-            doc = new Document(*result.items, result.currencyCode);  // we own the items
-            doc->setGuiState(gui_state);
-
-            doc->setFileName(import_only ? QString() : name);
-            if (!import_only)
-                Config::inst()->addToRecentFiles(name);
-
-            if (fixedCount) {
-                QString fixedMsg = tr("While loading, the item and color ids of %n item(s) have been adjusted automatically according to the current BrickLink catalog change log.",
-                                      nullptr, fixedCount);
-
-                if (!import_only) {
-                    if (MessageBox::question(nullptr, { },
-                                             fixedMsg + "<br><br>" + tr("Do you want to save these changes now?")
-                                             ) == MessageBox::Yes) {
-                        doc->fileSaveTo(name, type, true, *result.items);
-                    }
-                } else {
-                    MessageBox::information(nullptr, { }, fixedMsg);
-
-                }
-            }
-        }
-
-        qDeleteAll(*result.items);
-        delete result.items;
-    } else {
-        MessageBox::warning(nullptr, { }, tr("Could not parse the XML data in file %1.").arg(CMB_BOLD(name)));
-    }
-
-    return doc;
-}
-
-Document *Document::fileImportLDrawModel()
-{
-    QStringList filters;
-    filters << tr("LDraw Models") + " (*.dat;*.ldr;*.mpd)";
-    filters << tr("All Files") + "(*.*)";
-
-    QString s = QFileDialog::getOpenFileName(FrameWork::inst(), tr("Import File"), Config::inst()->documentDir(), filters.join(";;"));
-
-    if (s.isEmpty())
-        return nullptr;
-
-    QFile f(s);
-
-    if (!f.open(QIODevice::ReadOnly)) {
-        MessageBox::warning(nullptr, { }, tr("Could not open file %1 for reading.").arg(CMB_BOLD(s)));
-        return nullptr;
-    }
-
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
-    uint invalid_items = 0;
-    BrickLink::InvItemList items; // we own the items
-
-    bool b = BrickLink::core()->parseLDrawModel(f, items, &invalid_items);
-    Document *doc = nullptr;
-
-    QApplication::restoreOverrideCursor();
-
-    if (b && !items.isEmpty()) {
-        if (invalid_items) {
-            if (MessageBox::information(nullptr, { },
-                                        tr("This file contains %n unknown item(s).<br /><br />Do you still want to open this file?",
-                                           nullptr, invalid_items),
-                                        QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
-                invalid_items = 0;
-            }
-        }
-
-        if (!invalid_items) {
-            doc = new Document(items); // we own the items
-            doc->setTitle(tr("Import of %1").arg(QFileInfo(s).fileName()));
-        }
-    } else {
-        MessageBox::warning(nullptr, { }, tr("Could not parse the LDraw model in file %1.").arg(CMB_BOLD(s)));
-    }
-
-    qDeleteAll(items);
-    return doc;
-}
-
-void Document::setBrickLinkItems(const BrickLink::InvItemList &bllist)
+void Document::setBrickLinkItems(const BrickLink::InvItemList &items)
 {
     //TODO: switch to std::unique_ptr and remove this
 
-    ItemList items;
+    // we take ownership of the items
     QVector<int> pos;
-
-    for (const BrickLink::InvItem *blitem : bllist)
-        items.append(new Item(*blitem));
-
     insertItemsDirect(items, pos);
 }
 
@@ -1023,175 +780,16 @@ bool Document::isModified() const
     return !m_undo->isClean() || m_gui_state_modified;
 }
 
-void Document::fileSave()
+void Document::unsetModified()
 {
-    if (fileName().isEmpty())
-        fileSaveAs();
-    else if (isModified())
-        fileSaveTo(fileName(), "bsx", false, items());
-}
+    m_undo->setClean();
 
-
-void Document::fileSaveAs()
-{
-    QStringList filters;
-    filters << tr("BrickStore XML Data") + " (*.bsx)";
-
-    QString fn = fileName();
-
-    if (fn.isEmpty() && !title().isEmpty()) {
-        QDir d(Config::inst()->documentDir());
-        if (d.exists()) {
-            QString t = Utility::sanitizeFileName(title());
-            fn = d.filePath(t);
-        }
-    }
-    if (fn.right(4) == ".xml")
-        fn.truncate(fn.length() - 4);
-
-    fn = QFileDialog::getSaveFileName(FrameWork::inst(), tr("Save File as"), fn, filters.join(";;"));
-
-    if (!fn.isNull()) {
-        if (fn.right(4) != ".bsx")
-            fn += ".bsx";
-
-        fileSaveTo(fn, "bsx", false, items());
-    }
-}
-
-
-bool Document::fileSaveTo(const QString &s, const char *type, bool export_only, const ItemList &itemlist)
-{
-    BrickLink::ItemListXMLHint hint;
-
-    if (qstrcmp(type, "bsx") == 0)
-        hint = BrickLink::XMLHint_BrickStore;
-    else if (qstrcmp(type, "xml") == 0)
-        hint = BrickLink::XMLHint_MassUpload;
-    else
-        return false;
-
-
-    QFile f(s);
-    if (f.open(QIODevice::WriteOnly)) {
-        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
-        QDomDocument doc((hint == BrickLink::XMLHint_BrickStore) ? QString("BrickStoreXML") : QString());
-        doc.appendChild(doc.createProcessingInstruction("xml", R"(version="1.0" encoding="UTF-8")"));
-
-        QDomElement item_elem = BrickLink::core()->createItemListXML(doc, hint, itemlist, m_currencycode);
-
-        if (hint == BrickLink::XMLHint_BrickStore) {
-            QDomElement root = doc.createElement("BrickStoreXML");
-            root.appendChild(item_elem);
-
-            if (hasGuiState())
-                root.appendChild(guiState());
-
-            doc.appendChild(root);
-        }
-        else {
-            doc.appendChild(item_elem);
-        }
-
-        QByteArray output = doc.toByteArray();
-        bool ok = (f.write(output.data(), output.size()) == qint64(output.size()));
-
-        QApplication::restoreOverrideCursor();
-
-        if (ok) {
-            if (!export_only) {
-                m_undo->setClean();
-                setGuiStateModified(false);
-                setFileName(s);
-
-                Config::inst()->addToRecentFiles(s);
-            }
-            return true;
-        }
-        else
-            MessageBox::warning(nullptr, { }, tr("Failed to save data in file %1.").arg(CMB_BOLD(s)));
-    }
-    else
-        MessageBox::warning(nullptr, { }, tr("Failed to open file %1 for writing.").arg(CMB_BOLD(s)));
-
-    return false;
-}
-
-void Document::fileExportBrickLinkInvReqClipboard(const ItemList &itemlist)
-{
-    QDomDocument doc(QString {});
-    doc.appendChild(BrickLink::core()->createItemListXML(doc, BrickLink::XMLHint_Inventory, itemlist, m_currencycode));
-
-    QApplication::clipboard()->setText(doc.toString(), QClipboard::Clipboard);
-
-    if (Config::inst()->value("/General/Export/OpenBrowser", true).toBool())
-        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_InventoryRequest));
-}
-
-void Document::fileExportBrickLinkWantedListClipboard(const ItemList &itemlist)
-{
-    QString wantedlist;
-
-    if (MessageBox::getString(nullptr, { }, tr("Enter the ID number of Wanted List (leave blank for the default Wanted List)"), wantedlist)) {
-        QMap <QString, QString> extra;
-        if (!wantedlist.isEmpty())
-            extra.insert("WANTEDLISTID", wantedlist);
-
-        QDomDocument doc(QString {});
-        doc.appendChild(BrickLink::core()->createItemListXML(doc, BrickLink::XMLHint_WantedList, itemlist, m_currencycode, extra.isEmpty() ? nullptr : &extra));
-
-        QApplication::clipboard()->setText(doc.toString(), QClipboard::Clipboard);
-
-        if (Config::inst()->value("/General/Export/OpenBrowser", true).toBool())
-            QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_WantedListUpload));
-    }
-}
-
-void Document::fileExportBrickLinkXMLClipboard(const ItemList &itemlist)
-{
-    QDomDocument doc(QString {});
-    doc.appendChild(BrickLink::core()->createItemListXML(doc, BrickLink::XMLHint_MassUpload, itemlist, m_currencycode));
-
-    QApplication::clipboard()->setText(doc.toString(), QClipboard::Clipboard);
-
-    if (Config::inst()->value("/General/Export/OpenBrowser", true).toBool())
-        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_InventoryUpload));
-}
-
-void Document::fileExportBrickLinkUpdateClipboard(const ItemList &itemlist)
-{
-    for (const Item *item : itemlist) {
-        if (!item->lotId()) {
-            if (MessageBox::warning(nullptr, { }, tr("This list contains items without a BrickLink Lot-ID.<br /><br />Do you really want to export this list?"), MessageBox::Yes, MessageBox::No) != MessageBox::Yes)
-                return;
-            else
-                break;
-        }
-    }
-
-    QDomDocument doc(QString {});
-    doc.appendChild(BrickLink::core()->createItemListXML(doc, BrickLink::XMLHint_MassUpdate, itemlist, m_currencycode));
-
-    QApplication::clipboard()->setText(doc.toString(), QClipboard::Clipboard);
-
-    if (Config::inst()->value(QLatin1String("/General/Export/OpenBrowser"), true).toBool())
-        QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_InventoryUpdate));
-}
-
-void Document::fileExportBrickLinkXML(const ItemList &itemlist)
-{
-    QStringList filters;
-    filters << tr("BrickLink XML File") + " (*.xml)";
-
-    QString s = QFileDialog::getSaveFileName(FrameWork::inst(), tr("Export File"), Config::inst()->documentDir(), filters.join(";;"));
-
-    if (!s.isNull()) {
-        if (s.right(4) != QLatin1String(".xml"))
-            s += QLatin1String(".xml");
-
-        fileSaveTo(s, "xml", true, itemlist);
-    }
+    // at this point, we can cleanup the diff mode base
+    QSet goneItems = m_differenceBase.keys().toSet();
+    for (const auto &item : qAsConst(m_items))
+        goneItems.remove(item);
+    for (const auto &item : qAsConst(goneItems))
+        m_differenceBase.remove(item);
 }
 
 quint64 Document::errorMask() const
@@ -1203,27 +801,29 @@ void Document::setErrorMask(quint64 em)
 {
     m_error_mask = em;
     emitStatisticsChanged();
-    emitDataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
+    emitDataChanged();
 }
 
-quint64 Document::itemErrors(const Item *item) const
+QPair<quint64, quint64> Document::itemFlags(const Item *item) const
 {
-    return m_errors.value(item, 0) & m_error_mask;
+    auto flags = m_itemFlags.value(item, { });
+    flags.first &= m_error_mask;
+    return flags;
 }
 
-void Document::setItemErrors(Item *item, quint64 errors)
+void Document::setItemFlags(const Item *item, quint64 errors, quint64 updated)
 {
     if (!item)
         return;
 
-    quint64 oldErrors = m_errors.value(item, 0);
-    if (oldErrors != errors) {
-        if (errors)
-            m_errors.insert(item, errors);
+    auto oldFlags = m_itemFlags.value(item, { });
+    if (oldFlags.first != errors || oldFlags.second != updated) {
+        if (errors || updated)
+            m_itemFlags.insert(item, qMakePair(errors, updated));
         else
-            m_errors.remove(item);
+            m_itemFlags.remove(item);
 
-        emit errorsChanged(item);
+        emit itemFlagsChanged(item);
         emitStatisticsChanged();
     }
 }
@@ -1233,29 +833,6 @@ const BrickLink::Order *Document::order() const
     return m_order;
 }
 
-void Document::resetDifferences(const ItemList &items)
-{
-    beginMacro(tr("Reset differences"));
-
-    for (Item *pos : items) {
-        if ((pos->origQuantity() != pos->quantity()) ||
-                (!qFuzzyCompare(pos->origPrice(), pos->price()))) {
-            Item item = *pos;
-
-            item.setOrigQuantity(item.quantity());
-            item.setOrigPrice(item.price());
-            changeItem(pos, item);
-        }
-    }
-    endMacro();
-}
-
-
-
-
-
-
-
 
 ////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////
@@ -1264,6 +841,7 @@ void Document::resetDifferences(const ItemList &items)
 ////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////
+
 
 QModelIndex Document::index(int row, int column, const QModelIndex &parent) const
 {
@@ -1341,15 +919,23 @@ bool Document::setData(const QModelIndex &index, const QVariant &value, int role
         case TierP1      : item.setTierPrice(0, Currency::fromString(value.toString())); break;
         case TierP2      : item.setTierPrice(1, Currency::fromString(value.toString())); break;
         case TierP3      : item.setTierPrice(2, Currency::fromString(value.toString())); break;
-        case Weight      : item.setWeight(Utility::stringToWeight(value.toString(), Config::inst()->measurementSystem())); break;
+        case Weight      : item.setTotalWeight(Utility::stringToWeight(value.toString(), Config::inst()->measurementSystem())); break;
         case Quantity    : item.setQuantity(value.toInt()); break;
-        case QuantityDiff: item.setQuantity(itemp->origQuantity() + value.toInt()); break;
+        case QuantityDiff: {
+            if (auto base = differenceBaseItem(itemp))
+                item.setQuantity(base->quantity() + value.toInt());
+            break;
+        }
         case Price       : item.setPrice(Currency::fromString(value.toString())); break;
-        case PriceDiff   : item.setPrice(itemp->origPrice() + Currency::fromString(value.toString())); break;
+        case PriceDiff   :  {
+            if (auto base = differenceBaseItem(itemp))
+                item.setPrice(base->price() + Currency::fromString(value.toString()));
+            break;
+        }
         case Cost        : item.setCost(Currency::fromString(value.toString())); break;
         default          : break;
         }
-        if (!(item == *itemp)) {
+        if (item != *itemp) {
             changeItem(index.row(), item);
             emitDataChanged(index, index);
             return true;
@@ -1392,7 +978,7 @@ QVariant Document::headerData(int section, Qt::Orientation orientation, int role
     return QVariant();
 }
 
-QVariant Document::dataForEditRole(Item *it, Field f) const
+QVariant Document::dataForEditRole(const Item *it, Field f) const
 {
     switch (f) {
     case PartNo      : return it->itemId();
@@ -1404,20 +990,26 @@ QVariant Document::dataForEditRole(Item *it, Field f) const
     case TierQ1      : return it->tierQuantity(0);
     case TierQ2      : return it->tierQuantity(1);
     case TierQ3      : return it->tierQuantity(2);
-    case TierP1      : return Currency::toString(!qFuzzyIsNull(it->tierPrice(0)) ? it->tierPrice(0) : it->price(),      currencyCode());
-    case TierP2      : return Currency::toString(!qFuzzyIsNull(it->tierPrice(1)) ? it->tierPrice(1) : it->tierPrice(0), currencyCode());
-    case TierP3      : return Currency::toString(!qFuzzyIsNull(it->tierPrice(2)) ? it->tierPrice(2) : it->tierPrice(1), currencyCode());
-    case Weight      : return Utility::weightToString(it->weight(), Config::inst()->measurementSystem(), false);
+    case TierP1      : return Currency::toString(it->tierPrice(0));
+    case TierP2      : return Currency::toString(it->tierPrice(1));
+    case TierP3      : return Currency::toString(it->tierPrice(2));
+    case Weight      : return Utility::weightToString(it->totalWeight(), Config::inst()->measurementSystem(), false);
     case Quantity    : return it->quantity();
-    case QuantityDiff: return it->quantity() - it->origQuantity();
-    case Price       : return Currency::toString(it->price(), currencyCode());
-    case PriceDiff   : return Currency::toString(it->price() - it->origPrice(), currencyCode());
-    case Cost        : return Currency::toString(it->cost(), currencyCode());
+    case QuantityDiff:  {
+        auto base = differenceBaseItem(it);
+        return base ? it->quantity() - base->quantity() : 0;
+    }
+    case Price       : return Currency::toString(it->price());
+    case PriceDiff   : {
+        auto base = differenceBaseItem(it);
+        return Currency::toString(base ? it->price() - base->price() : 0);
+    }
+    case Cost        : return Currency::toString(it->cost());
     default          : return QString();
     }
 }
 
-QString Document::dataForDisplayRole(Item *it, Field f, int row) const
+QString Document::dataForDisplayRole(const Item *it, Field f, int row) const
 {
     QString dash = QLatin1String("-");
 
@@ -1436,8 +1028,8 @@ QString Document::dataForDisplayRole(Item *it, Field f, int row) const
     case Remarks     : return it->remarks();
     case Quantity    : return QString::number(it->quantity());
     case Bulk        : return (it->bulkQuantity() == 1 ? dash : QString::number(it->bulkQuantity()));
-    case Price       : return Currency::toString(it->price(), currencyCode());
-    case Total       : return Currency::toString(it->total(), currencyCode());
+    case Price       : return Currency::toString(it->price());
+    case Total       : return Currency::toString(it->total());
     case Sale        : return (it->sale() == 0 ? dash : QString::number(it->sale()) + QLatin1Char('%'));
     case Condition   : {
         QString c = (it->condition() == BrickLink::Condition::New) ? tr("N", "List>Cond>New")
@@ -1454,27 +1046,40 @@ QString Document::dataForDisplayRole(Item *it, Field f, int row) const
     case TierQ1      : return (it->tierQuantity(0) == 0 ? dash : QString::number(it->tierQuantity(0)));
     case TierQ2      : return (it->tierQuantity(1) == 0 ? dash : QString::number(it->tierQuantity(1)));
     case TierQ3      : return (it->tierQuantity(2) == 0 ? dash : QString::number(it->tierQuantity(2)));
-    case TierP1      : return Currency::toString(it->tierPrice(0), currencyCode());
-    case TierP2      : return Currency::toString(it->tierPrice(1), currencyCode());
-    case TierP3      : return Currency::toString(it->tierPrice(2), currencyCode());
+    case TierP1      : return Currency::toString(it->tierPrice(0));
+    case TierP2      : return Currency::toString(it->tierPrice(1));
+    case TierP3      : return Currency::toString(it->tierPrice(2));
     case Reserved    : return it->reserved();
-    case Weight      : return qFuzzyIsNull(it->weight()) ? dash : Utility::weightToString(it->weight(), Config::inst()->measurementSystem(), true, true);
+    case Weight      : return qFuzzyIsNull(it->totalWeight()) ? dash : Utility::weightToString(it->totalWeight(), Config::inst()->measurementSystem(), true, true);
     case YearReleased: return (it->itemYearReleased() == 0) ? dash : QString::number(it->itemYearReleased());
 
-    case PriceOrig   : return Currency::toString(it->origPrice(), currencyCode());
-    case PriceDiff   : return Currency::toString(it->price() - it->origPrice(), currencyCode());
-    case Cost        : return Currency::toString(it->cost(), currencyCode());
-    case QuantityOrig: return QString::number(it->origQuantity());
-    case QuantityDiff: return QString::number(it->quantity() - it->origQuantity());
+    case PriceOrig   : {
+        auto base = differenceBaseItem(it);
+        return Currency::toString(base ? base->price() : 0);
+    }
+    case PriceDiff   : {
+        auto base = differenceBaseItem(it);
+        return Currency::toString(base ? it->price() - base->price() : 0);
+    }
+    case Cost        : return Currency::toString(it->cost());
+    case QuantityOrig: {
+        auto base = differenceBaseItem(it);
+        return QString::number(base ? base->quantity() : 0);
+    }
+    case QuantityDiff: {
+        auto base = differenceBaseItem(it);
+        return QString::number(base ? it->quantity() - base->quantity() : 0);
+    }
     case qty_sold_6mths: return (it->quantitySoldLast6Months() < 0) ?
                     "" : QString::number(it->quantitySoldLast6Months());
     case lots_6mths: return (it->lotsSoldLast6Months() < 0) ?
                     "" : QString::number(it->lotsSoldLast6Months());
+
     default          : return QString();
     }
 }
 
-QVariant Document::dataForFilterRole(Item *it, Field f, int row) const
+QVariant Document::dataForFilterRole(const Item *it, Field f, int row) const
 {
     switch (f) {
     case Status:
@@ -1495,11 +1100,14 @@ QVariant Document::dataForFilterRole(Item *it, Field f, int row) const
     case Retain      : return it->retain() ? tr("Y", "Filter>Retain>Yes")
                                            : tr("N", "Filter>Retain>No");
     case Price       : return it->price();
-    case PriceDiff   : return it->price() - it->origPrice();
+    case PriceDiff   :  {
+        auto base = differenceBaseItem(it);
+        return base ? it->price() - base->price() : 0;
+    }
     case Cost        : return it->cost();
-    case TierP1      : return !qFuzzyIsNull(it->tierPrice(0)) ? it->tierPrice(0) : it->price();
-    case TierP2      : return !qFuzzyIsNull(it->tierPrice(1)) ? it->tierPrice(1) : it->tierPrice(0);
-    case TierP3      : return !qFuzzyIsNull(it->tierPrice(2)) ? it->tierPrice(2) : it->tierPrice(1);
+    case TierP1      : return it->tierPrice(0);
+    case TierP2      : return it->tierPrice(1);
+    case TierP3      : return it->tierPrice(2);
 
     default: {
         QVariant v = dataForEditRole(it, f);
@@ -1510,7 +1118,7 @@ QVariant Document::dataForFilterRole(Item *it, Field f, int row) const
     }
 }
 
-QVariant Document::dataForDecorationRole(Item *it, Field f) const
+QVariant Document::dataForDecorationRole(const Item *it, Field f) const
 {
     switch (f) {
     case Picture: return it->image();
@@ -1518,7 +1126,7 @@ QVariant Document::dataForDecorationRole(Item *it, Field f) const
     }
 }
 
-Qt::CheckState Document::dataForCheckStateRole(Item *it, Field f) const
+Qt::CheckState Document::dataForCheckStateRole(const Item *it, Field f) const
 {
     switch (f) {
     case Retain   : return it->retain() ? Qt::Checked : Qt::Unchecked;
@@ -1526,7 +1134,7 @@ Qt::CheckState Document::dataForCheckStateRole(Item *it, Field f) const
     }
 }
 
-int Document::dataForTextAlignmentRole(Item *, Field f) const
+int Document::dataForTextAlignmentRole(const Item *, Field f) const
 {
     switch (f) {
     case Status      :
@@ -1558,7 +1166,7 @@ int Document::dataForTextAlignmentRole(Item *, Field f) const
     }
 }
 
-QString Document::dataForToolTipRole(Item *it, Field f, int row) const
+QString Document::dataForToolTipRole(const Item *it, Field f, int row) const
 {
     switch (f) {
     case Status: {
@@ -1585,22 +1193,6 @@ QString Document::dataForToolTipRole(Item *it, Field f, int row) const
             c = c % u" / " % subConditionLabel(it->subCondition());
         }
         return c;
-    }
-    case Category: {
-        if (!it->item())
-            break;
-
-        const auto allcats = it->item()->allCategories();
-
-        if (allcats.size() == 1) {
-            return allcats[0]->name();
-        }
-        else {
-            QString str = QLatin1String("<b>") + allcats[0]->name() + QLatin1String("</b>");
-            for (int i = 1; i < allcats.size(); ++i)
-                str = str + QLatin1String("<br />") + allcats[i]->name();
-            return str;
-        }
     }
     default: {
         return dataForDisplayRole(it, f, row);
@@ -1936,14 +1528,33 @@ int DocumentProxyModel::compare(const Document::Item *i1, const Document::Item *
     case Document::Retain      : return boolCompare(i1->retain(), i2->retain());
     case Document::Stockroom   : return int(i1->stockroom()) - int(i2->stockroom());
     case Document::Reserved    : return i1->reserved().compare(i2->reserved());
-    case Document::Weight      : return doubleCompare(i1->weight(), i2->weight());
+    case Document::Weight      : return doubleCompare(i1->totalWeight(), i2->totalWeight());
     case Document::YearReleased: return i1->itemYearReleased() - i2->itemYearReleased();
-    case Document::PriceOrig   : return doubleCompare(i1->origPrice(), i2->origPrice());
-    case Document::PriceDiff   : return doubleCompare((i1->price() - i1->origPrice()), (i2->price() - i2->origPrice()));
-    case Document::QuantityOrig: return i1->origQuantity() - i2->origQuantity();
-    case Document::QuantityDiff: return (i1->quantity() - i1->origQuantity()) - (i2->quantity() - i2->origQuantity());
+    case Document::PriceOrig   : {
+        auto base1 = static_cast<Document *>(sourceModel())->differenceBaseItem(i1);
+        auto base2 = static_cast<Document *>(sourceModel())->differenceBaseItem(i2);
+        return doubleCompare(base1 ? base1->price() : 0, base2 ? base2->price() : 0);
     }
-    return false;
+    case Document::PriceDiff   : {
+        auto base1 = static_cast<Document *>(sourceModel())->differenceBaseItem(i1);
+        auto base2 = static_cast<Document *>(sourceModel())->differenceBaseItem(i2);
+        return doubleCompare(base1 ? i1->price() - base1->price() : 0,
+                             base2 ? i2->price() - base2->price() : 0);
+    }
+    case Document::QuantityOrig: {
+        auto base1 = static_cast<Document *>(sourceModel())->differenceBaseItem(i1);
+        auto base2 = static_cast<Document *>(sourceModel())->differenceBaseItem(i2);
+        return (base1 ? base1->quantity() : 0) - (base2 ? base2->quantity() : 0);
+    }
+
+    case Document::QuantityDiff:  {
+        auto base1 = static_cast<Document *>(sourceModel())->differenceBaseItem(i1);
+        auto base2 = static_cast<Document *>(sourceModel())->differenceBaseItem(i2);
+        return (base1 ? i1->quantity() - base1->quantity() : 0)
+                - (base2 ? i2->quantity() - base2->quantity() : 0);
+    }
+    }
+    return 0;
 }
 
 Document::ItemList DocumentProxyModel::sortItemList(const Document::ItemList &list) const

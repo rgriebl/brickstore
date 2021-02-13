@@ -120,13 +120,13 @@ public:
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const;
     Qt::ItemFlags flags(const QModelIndex&) const;
     bool setData(const QModelIndex&, const QVariant&, int);
-    QVariant dataForEditRole(Item *it, Field f) const;
-    QString dataForDisplayRole(Item *it, Field f, int row) const;
-    QVariant dataForFilterRole(Item *it, Field f, int row) const;
-    QVariant dataForDecorationRole(Item *it, Field f) const;
-    Qt::CheckState dataForCheckStateRole(Item *it, Field f) const;
-    int dataForTextAlignmentRole(Item *it, Field f) const;
-    QString dataForToolTipRole(Item *it, Field f, int row) const;
+    QVariant dataForEditRole(const Item *it, Field f) const;
+    QString dataForDisplayRole(const Item *it, Field f, int row) const;
+    QVariant dataForFilterRole(const Item *it, Field f, int row) const;
+    QVariant dataForDecorationRole(const Item *it, Field f) const;
+    Qt::CheckState dataForCheckStateRole(const Item *it, Field f) const;
+    int dataForTextAlignmentRole(const Item *it, Field f) const;
+    QString dataForToolTipRole(const Item *it, Field f, int row) const;
     static QString headerDataForDisplayRole(Field f);
     int headerDataForTextAlignmentRole(Field f) const;
     int headerDataForDefaultWidthRole(Field f) const;
@@ -137,7 +137,9 @@ public slots:
     void pictureUpdated(BrickLink::Picture *pic);
 
 public:
-    Document(const BrickLink::InvItemList &items = { }, const QString &currencyCode = { });
+    Document();
+    Document(const BrickLink::InvItemList &items);
+    Document(const BrickLink::InvItemList &items, const QString &currencyCode);
     virtual ~Document();
 
     static Document *createTemporary(const BrickLink::InvItemList &list,
@@ -152,6 +154,7 @@ public:
     const BrickLink::Order *order() const;
 
     bool isModified() const;
+    void unsetModified(); // only for DocumentIO::fileSaveTo
 
     const ItemList &items() const;
     bool clear();
@@ -168,16 +171,14 @@ public:
     int positionOf(Item *item) const;
     Item *itemAt(int position);
 
-    void resetDifferences(const ItemList &items);
-
     Statistics statistics(const ItemList &list) const;
 
     quint64 errorMask() const;
     void setErrorMask(quint64);
 
-    quint64 itemErrors(const Item *item) const;
-    void setItemErrors(Item *item, quint64 errors);
+    QPair<quint64, quint64> itemFlags(const Item *item) const;
 
+    bool legacyCurrencyCode() const;
     QString currencyCode() const;
     void setCurrencyCode(const QString &code, qreal crate = qreal(1));
 
@@ -185,32 +186,14 @@ public:
     QDomElement guiState() const;
     void setGuiState(QDomElement dom);
     void clearGuiState();
-
     void setGuiStateModified(bool modified);
 
-    static Document *fileNew();
-    static Document *fileOpen();
-    static Document *fileOpen(const QString &name);
-    static Document *fileImportBrickLinkInventory(const BrickLink::Item *preselect = nullptr,
-                                                  int quantity = 1,
-                                                  BrickLink::Condition condition = BrickLink::Condition::New);
-    static QVector<Document *> fileImportBrickLinkOrders();
-    static Document *fileImportBrickLinkStore();
-    static Document *fileImportBrickLinkCart();
-    static Document *fileImportBrickLinkXML();
-    static Document *fileImportLDrawModel();
+    void setOrder(BrickLink::Order *order);
 
 public slots:
     void setFileName(const QString &str);
     void setTitle(const QString &title);
 
-    void fileSave();
-    void fileSaveAs();
-    void fileExportBrickLinkXML(const Document::ItemList &itemlist);
-    void fileExportBrickLinkXMLClipboard(const Document::ItemList &itemlist);
-    void fileExportBrickLinkUpdateClipboard(const Document::ItemList &itemlist);
-    void fileExportBrickLinkInvReqClipboard(const Document::ItemList &itemlist);
-    void fileExportBrickLinkWantedListClipboard(const Document::ItemList &itemlist);
 
 public:
     void beginMacro(const QString &label = QString());
@@ -218,29 +201,36 @@ public:
 
     QUndoStack *undoStack() const;
 
+    bool isDifferenceModeActive() const;
+    bool startDifferenceModeInternal(const QHash<const Item *, Item> &updateBase); // only for DocumentIO
+    bool startDifferenceMode();
+    void endDifferenceMode();
+    const Item *differenceBaseItem(const Item *item) const;
+
 signals:
-    void errorsChanged(Document::Item *);
+    void itemFlagsChanged(const Document::Item *);
     void statisticsChanged();
     void fileNameChanged(const QString &);
     void titleChanged(const QString &);
     void modificationChanged(bool);
     void currencyCodeChanged(const QString &ccode);
+    void differenceModeChanged(bool differenceMode);
+    void itemCountChanged(int itemCount);
 
 private:
     Document(int dummy);
-    static Document *fileLoadFrom(const QString &s, const char *type, bool import_only = false);
-    bool fileSaveTo(const QString &s, const char *type, bool export_only, const ItemList &itemlist);
-    void setBrickLinkItems(const BrickLink::InvItemList &bllist);
+    void setBrickLinkItems(const BrickLink::InvItemList &items);
     void setFakeIndexes(const QVector<int> &fakeIndexes);
 
-    void insertItemsDirect(ItemList &items, QVector<int> &positions);
+    void insertItemsDirect(const ItemList &items, QVector<int> &positions);
     void removeItemsDirect(ItemList &items, QVector<int> &positions);
     void changeItemDirect(int position, Item &item);
     void changeCurrencyDirect(const QString &ccode, qreal crate, double *&prices);
 
-    void emitDataChanged(const QModelIndex &tl, const QModelIndex &br);
+    void emitDataChanged(const QModelIndex &tl = { }, const QModelIndex &br = { });
     void emitStatisticsChanged();
-    void updateErrors(Item *);
+    void updateItemFlags(const Item *item);
+    void setItemFlags(const Item *item, quint64 errors, quint64 updated);
 
     friend class AddRemoveCmd;
     friend class ChangeCmd;
@@ -249,8 +239,12 @@ private:
 private:
     ItemList         m_items;
     QVector<int>     m_fakeIndexes; // for the consolidate dialogs
-    QHash<const Item *, quint64> m_errors;
+    QHash<const Item *, QPair<quint64, quint64>> m_itemFlags;
 
+    QHash<const Item *, Item> m_differenceBase;
+    bool m_differenceModeActive = false;
+
+    bool             m_implicitUSD = false;
     QString          m_currencycode;
     quint64          m_error_mask = 0;
     QString          m_filename;
@@ -282,6 +276,8 @@ public:
     inline Document::Item *item(const QModelIndex &idx) const  { return static_cast<Document *>(sourceModel())->item(mapToSource(idx)); }
     inline QModelIndex index(const Document::Item *i) const  { return mapFromSource(static_cast<Document *>(sourceModel())->index(i)); }
     using QSortFilterProxyModel::index;
+
+    inline Document::Item *baseItem(const QModelIndex &idx) const;
 
     Document::ItemList sortItemList(const Document::ItemList &list) const;
 

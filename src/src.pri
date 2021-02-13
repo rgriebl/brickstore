@@ -27,9 +27,9 @@ SOURCES += \
   $$PWD/application.cpp \
   $$PWD/config.cpp \
   $$PWD/document.cpp \
+  $$PWD/documentio.cpp \
   $$PWD/documentdelegate.cpp \
   $$PWD/framework.cpp \
-  $$PWD/import.cpp \
   $$PWD/managecolumnlayoutsdialog.cpp \
   $$PWD/picturewidget.cpp \
   $$PWD/priceguidewidget.cpp \
@@ -46,9 +46,9 @@ HEADERS += \
   $$PWD/config.h \
   $$PWD/document.h \
   $$PWD/document_p.h \
+  $$PWD/documentio.h \
   $$PWD/documentdelegate.h \
   $$PWD/framework.h \
-  $$PWD/import.h \
   $$PWD/managecolumnlayoutsdialog.h \
   $$PWD/picturewidget.h \
   $$PWD/priceguidewidget.h \

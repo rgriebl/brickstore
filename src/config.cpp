@@ -88,6 +88,23 @@ QString Config::scramble(const QString &str)
     return result;
 }
 
+QPair<QString, double> Config::legacyCurrencyCodeAndRate() const
+{
+    const QString localCCode = QLocale::system().currencySymbol(QLocale::CurrencyIsoCode);
+
+    QSettings old_v12x(organization_v12x, application_v12x);
+    bool localized = old_v12x.value("/General/Money/Localized", false).toBool();
+    if (localized) {
+        return qMakePair(localCCode, old_v12x.value("/General/Money/Factor", 1).toDouble());
+    } else {
+        QSettings old_v11x(organization_v11x, application_v11x);
+        localized = old_v11x.value("/General/Money/Localized", false).toBool();
+        if (localized)
+            return qMakePair(localCCode, old_v11x.value("/General/Money/Factor", 1).toDouble());
+    }
+    return qMakePair(QString(), 0);
+}
+
 void Config::upgrade(int vmajor, int vminor)
 {
     QStringList sl;

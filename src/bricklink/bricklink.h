@@ -85,11 +85,10 @@ private:
 
 private:
     ItemType() = default;
+    static bool lowerBound(const ItemType *itt, char id) { return itt->m_id < id; }
 
     friend class Core;
     friend class TextImport;
-    friend QDataStream &operator << (QDataStream &ds, const ItemType *itt);
-    friend QDataStream &operator >> (QDataStream &ds, ItemType *itt);
 };
 
 
@@ -107,11 +106,10 @@ private:
 
 private:
     Category() = default;
+    static bool lowerBound(const Category *cat, uint id) { return cat->m_id < id; }
 
     friend class Core;
     friend class TextImport;
-    friend QDataStream &operator << (QDataStream &ds, const Category *cat);
-    friend QDataStream &operator >> (QDataStream &ds, Category *cat);
 };
 
 class Color
@@ -169,6 +167,7 @@ private:
     quint16 m_year_to = 0;
 
 private:
+    static bool lowerBound(const Color *color, uint id) { return color->m_id < id; }
     Color() = default;
 
     friend class Core;
@@ -182,9 +181,7 @@ public:
     QString id() const                     { return m_id; }
     QString name() const                   { return m_name; }
     const ItemType *itemType() const       { return m_item_type; }
-    const Category *category() const       { return m_categories.isEmpty() ? nullptr : m_categories.constFirst(); }
-    const QVector<const Category *> allCategories() const  { return m_categories; }
-    bool hasCategory(const Category *cat) const;
+    const Category *category() const       { return m_category; }
     bool hasInventory() const              { return (m_last_inv_update >= 0); }
     QDateTime inventoryUpdated() const     { QDateTime dt; if (m_last_inv_update >= 0) dt.setTime_t(uint(m_last_inv_update)); return dt; }
     const Color *defaultColor() const      { return m_color; }
@@ -206,7 +203,7 @@ private:
     QString           m_name;
     QString           m_id;
     const ItemType *  m_item_type = nullptr;
-    QVector<const Category *> m_categories;
+    const Category *  m_category = nullptr;
     const Color *     m_color = nullptr;
     time_t            m_last_inv_update = -1;
     float             m_weight = 0;
@@ -257,12 +254,33 @@ private:
     };
 
     static int compare(const Item **a, const Item **b);
-    static bool lessThan(const Item *a, const Item *b);
+    static bool lowerBound(const Item *item, const std::pair<char, QString> &ids);
 
     friend class Core;
     friend class TextImport;
     friend QDataStream &operator<<(QDataStream &ds, const Item *item);
     friend QDataStream &operator>>(QDataStream &ds, Item *item);
+};
+
+
+class PartColorCode
+{
+public:
+    uint id() const             { return m_id; }
+    const Item *item() const    { return m_item; }
+    const Color *color() const  { return m_color; }
+
+private:
+    uint         m_id = 0;
+    const Item * m_item = nullptr;
+    const Color *m_color = nullptr;
+
+private:
+    PartColorCode() = default;
+    static bool lowerBound(const PartColorCode *pcc, uint id) { return pcc->m_id < id; }
+
+    friend class Core;
+    friend class TextImport;
 };
 
 
@@ -316,12 +334,12 @@ public:
     InvItem(const InvItem &copy);
     ~InvItem();
 
-    InvItem &operator = (const InvItem &copy);
-    bool operator == (const InvItem &cmp) const;
-    bool operator != (const InvItem &cmp) const;
+    InvItem &operator=(const InvItem &copy);
+    bool operator==(const InvItem &cmp) const;
+    bool operator!=(const InvItem &cmp) const;
 
     const Item *item() const           { return m_item; }
-    void setItem(const Item *i)        { /*can be 0*/ m_item = i; }
+    void setItem(const Item *i)        { m_item = i; }
     const Category *category() const   { return m_item ? m_item->category() : nullptr; }
     const ItemType *itemType() const   { return m_item ? m_item->itemType() : nullptr; }
     const Color *color() const         { return m_color; }
@@ -347,16 +365,12 @@ public:
 
     int quantity() const               { return m_quantity; }
     void setQuantity(int q)            { m_quantity = q; }
-    int origQuantity() const           { return m_orig_quantity; }
-    void setOrigQuantity(int q)        { m_orig_quantity = q; }
     int bulkQuantity() const           { return m_bulk_quantity; }
     void setBulkQuantity(int q)        { m_bulk_quantity = qMax(1, q); }
     int tierQuantity(int i) const      { return m_tier_quantity [qBound(0, i, 2)]; }
     void setTierQuantity(int i, int q) { m_tier_quantity [qBound(0, i, 2)] = q; }
     double price() const               { return m_price; }
     void setPrice(double p)            { m_price = p; }
-    double origPrice() const           { return m_orig_price; }
-    void setOrigPrice(double p)        { m_orig_price = p; }
     double tierPrice(int i) const      { return m_tier_price [qBound(0, i, 2)]; }
     bool setTierPrice(int i, double p) { if (p < 0) return false; m_tier_price [qBound(0, i, 2)] = p; return true; }
     int sale() const                   { return m_sale; }
@@ -373,8 +387,11 @@ public:
     Stockroom stockroom() const        { return m_stockroom; }
     void setStockroom(Stockroom sr)    { m_stockroom = sr; }
 
-    double weight() const              { return !qFuzzyIsNull(m_weight) ? m_weight : (m_item ? m_item->weight() * m_quantity : 0); }
-    void setWeight(double w)           { m_weight = w; }
+    bool hasCustomWeight() const       { return (m_weight > 0); }
+    double weight() const              { return hasCustomWeight() ? m_weight : (m_item ? m_item->weight() : 0); }
+    double totalWeight() const         { return weight() * quantity(); }
+    void setWeight(double w)           { m_weight = (w <= 0) ? 0 : w; }
+    void setTotalWeight(double w)      { m_weight = (w <= 0) ? 0 : (w / (m_quantity ? qAbs(m_quantity) : 1)); }
 
     QString reserved() const           { return m_reserved; }
     void setReserved(const QString &r) { m_reserved = r; }
@@ -399,52 +416,50 @@ public:
         QString m_category_name;
     };
 
-    const Incomplete *isIncomplete() const { return m_incomplete; }
-    void setIncomplete(Incomplete *inc)    { delete m_incomplete; m_incomplete = inc; }
+    const Incomplete *isIncomplete() const { return m_incomplete.data(); }
+    void setIncomplete(Incomplete *inc)    { m_incomplete.reset(inc); }
 
     bool mergeFrom(const InvItem &merge, bool useCostQtyAg = false);
 
     QImage image() const;
 
+    void save(QDataStream &ds) const;
+    static InvItem *restore(QDataStream &ds);
+
 private:
     const Item *     m_item;
     const Color *    m_color;
 
-    Incomplete *     m_incomplete;
+    QScopedPointer<Incomplete> m_incomplete;
 
     Status           m_status    : 3;
     Condition        m_condition : 2;
     SubCondition     m_scondition: 3;
-    bool             m_alternate : 1;
-    bool             m_cpart     : 1;
-    uint             m_alt_id    : 6;
     bool             m_retain    : 1;
     Stockroom        m_stockroom : 5;
-    int              m_xreserved : 10;
+    bool             m_alternate : 1;
+    uint             m_alt_id    : 6;
+    bool             m_cpart     : 1;
+
+    uint             m_lot_id = 0;
+    QString          m_reserved;
 
     QString          m_comments;
     QString          m_remarks;
-    QString          m_reserved;
 
-    int              m_quantity;
-    int              m_bulk_quantity;
-    int              m_tier_quantity[3];
-    int              m_sale;
+    int              m_quantity = 0;
+    int              m_bulk_quantity = 1;
+    int              m_tier_quantity[3] = { 0, 0, 0 };
+    int              m_sale = 0;
 
-    double           m_price;
-    double           m_tier_price[3];
-
-    double           m_weight;
-    uint             m_lot_id;
-
-    double           m_orig_price;
-    int              m_orig_quantity;
-
-    double           m_cost;
+    double           m_price = 0;
+    double           m_cost = 0;
+    double           m_tier_price[3] = { 0, 0, 0 };
 
     int m_quantitySoldLast6Months = -1;
     int m_lotsSoldLast6Months = -1;
     bool m_priceGuideRequested = false;
+    double           m_weight = 0;
 
     friend QDataStream &operator << (QDataStream &ds, const InvItem &ii);
     friend QDataStream &operator >> (QDataStream &ds, InvItem &ii);
@@ -473,61 +488,86 @@ class Order
 public:
     Order(const QString &id, OrderType type);
 
-    QString id() const          { return m_id; }
-    OrderType type() const      { return m_type; }
-    QDateTime date() const      { return m_date; }
-    QDateTime statusChange() const  { return m_status_change; }
-    //QString buyer() const     { return m_type == OrderType::Received ? m_other : QString(); }
-    //QString seller() const    { return m_type == OrderType::Placed ? m_other : QString(); }
-    QString other() const       { return m_other; }
-    double shipping() const     { return m_shipping; }
-    double insurance() const    { return m_insurance; }
-    double delivery() const     { return m_delivery; }
-    double credit() const       { return m_credit; }
-    double grandTotal() const   { return m_grand_total; }
-    QString status() const      { return m_status; }
-    QString payment() const     { return m_payment; }
-    QString remarks() const     { return m_remarks; }
-    QString address() const     { return m_address; }
+    QString id() const                { return m_id; }
+    OrderType type() const            { return m_type; }
+    QDate date() const                { return m_date.date(); }
+    QDate statusChange() const        { return m_status_change.date(); }
+    QString otherParty() const        { return m_other_party; }
+
+    double shipping() const           { return m_shipping; }
+    double insurance() const          { return m_insurance; }
+    double additionalCharges1() const { return m_add_charges_1; }
+    double additionalCharges2() const { return m_add_charges_2; }
+    double credit() const             { return m_credit; }
+    double creditCoupon() const       { return m_credit_coupon; }
+    double orderTotal() const         { return m_order_total; }
+    double salesTax() const           { return m_sales_tax; }
+    double grandTotal() const         { return m_grand_total; }
+    double vatCharges() const         { return m_vat_charges; }
+    QString currencyCode() const      { return m_currencycode; }
+    QString paymentCurrencyCode() const { return m_payment_currencycode; }
+
+    int itemCount() const             { return m_items; }
+    int lotCount() const              { return m_lots; }
+    QString status() const            { return m_status; }
+    QString paymentType() const       { return m_payment_type; }
+    QString trackingNumber() const    { return m_tracking_number; }
+    QString address() const           { return m_address; }
     QString countryName() const;
     QString countryCode() const;
-    QString currencyCode() const { return m_currencycode; }
 
     void setId(const QString &id)             { m_id = id; }
-    void setDate(const QDateTime &dt)         { m_date = dt; }
-    void setStatusChange(const QDateTime &dt) { m_status_change = dt; }
-    void setBuyer(const QString &str)         { m_other = str; m_type = OrderType::Received; }
-    void setSeller(const QString &str)        { m_other = str; m_type = OrderType::Placed; }
+    void setDate(const QDate &dt)             { m_date.setDate(dt); }
+    void setStatusChange(const QDate &dt    ) { m_status_change.setDate(dt); }
+    void setOtherParty(const QString &str)    { m_other_party = str; }
+
     void setShipping(double m)                { m_shipping = m; }
     void setInsurance(double m)               { m_insurance = m; }
-    void setDelivery(double m)                { m_delivery = m; }
+    void setAdditionalCharges1(double m)      { m_add_charges_1 = m; }
+    void setAdditionalCharges2(double m)      { m_add_charges_2 = m; }
     void setCredit(double m)                  { m_credit = m; }
+    void setCreditCoupon(double m)            { m_credit_coupon = m; }
+    void setOrderTotal(double m)              { m_order_total = m; }
+    void setSalesTax(double m)                { m_sales_tax = m; }
     void setGrandTotal(double m)              { m_grand_total = m; }
+    void setVatCharges(double m)              { m_vat_charges = m; }
+    void setCurrencyCode(const QString &str)  { m_currencycode = str; }
+    void setPaymentCurrencyCode(const QString &str)  { m_payment_currencycode = str; }
+
+    void setItemCount(int i)                  { m_items = i; }
+    void setLotCount(int i)                   { m_lots = i; }
     void setStatus(const QString &str)        { m_status = str; }
-    void setPayment(const QString &str)       { m_payment = str; }
-    void setRemarks(const QString &str)       { m_remarks = str; }
+    void setPaymentType(const QString &str)   { m_payment_type = str; }
+    void setTrackingNumber(const QString &str){ m_tracking_number = str; }
     void setAddress(const QString &str)       { m_address = str; }
     void setCountryName(const QString &str);
     void setCountryCode(const QString &str);
-    void setCurrencyCode(const QString &str)  { m_currencycode = str; }
 
 private:
     QString   m_id;
     OrderType m_type;
     QDateTime m_date;
     QDateTime m_status_change;
-    QString   m_other;
-    double    m_shipping;
-    double    m_insurance;
-    double    m_delivery;
-    double    m_credit;
-    double    m_grand_total;
-    QString   m_status;
-    QString   m_payment;
-    QString   m_remarks;
-    QString   m_address;
+    QString   m_other_party;
+    double    m_shipping = 0;
+    double    m_insurance = 0;
+    double    m_add_charges_1 = 0;
+    double    m_add_charges_2 = 0;
+    double    m_credit = 0;
+    double    m_credit_coupon = 0;
+    double    m_order_total = 0;
+    double    m_sales_tax = 0;
+    double    m_grand_total = 0;
+    double    m_vat_charges = 0;
     QString   m_currencycode;
-    QChar     m_countryCode[2];
+    QString   m_payment_currencycode;
+    int       m_items = 0;
+    int       m_lots = 0;
+    QString   m_status;
+    QString   m_payment_type;
+    QString   m_tracking_number;
+    QString   m_address;
+    QChar     m_countryCode[2] = { 'U', 'S' };
 };
 
 class PriceGuide : public Ref
@@ -617,13 +657,10 @@ public:
     bool import(const QString &path);
     void exportTo(Core *);
 
-    bool importInventories(QVector<const Item *> &items);
+    bool importInventories(std::vector<const Item *> &items);
     void exportInventoriesTo(Core *);
 
-    const QHash<uint, const Color *>    &colors() const     { return m_colors; }
-    const QHash<uint, const Category *> &categories() const { return m_categories; }
-    const QHash<char, const ItemType *> &itemTypes() const  { return m_item_types; }
-    const QVector<const Item *>       &items() const        { return m_items; }
+    const std::vector<const Item *> &items() const { return m_items; }
 
 private:
     void readColors(const QString &path);
@@ -636,23 +673,21 @@ private:
     void readInventoryList(const QString &path);
     void readChangeLog(const QString &path);
 
-    const Category *findCategoryByName(const QStringRef &name) const;
-    const Item *findItem(char type, const QString &id);
-
-    void parseXML(const QString &path, const char *rootNodeName, const char *elementNodeName,
-                  std::function<void (QDomElement)> callback);
+    const Item *findItem(char type, const QString &id) const;
+    const Color *findColor(uint id) const;
+    const BrickLink::Category *findCategory(uint id) const;
 
     void calculateColorPopularity();
 
 private:
-    QHash<uint, const Color *>    m_colors;
-    QHash<char, const ItemType *> m_item_types;
-    QHash<uint, const Category *> m_categories;
-    QVector<const Item *>         m_items;
-
-    QHash<const Item *, AppearsIn>   m_appears_in_hash;
-    QHash<const Item *, InvItemList> m_consists_of_hash;
-    QVector<QByteArray>              m_changelog;
+    std::vector<const Color *>         m_colors;
+    std::vector<const ItemType *>      m_item_types;
+    std::vector<const Category *>      m_categories;
+    std::vector<const Item *>          m_items;
+    std::vector<QByteArray>            m_changelog;
+    std::vector<const PartColorCode *> m_pccs;
+    QHash<const Item *, AppearsIn>     m_appears_in_hash;
+    QHash<const Item *, InvItemList>   m_consists_of_hash;
 
 };
 
@@ -671,8 +706,9 @@ public:
         Invalid,
         Version_1,
         Version_2,
+        Version_3,
 
-        Latest = Version_2
+        Latest = Version_3
     };
 
     QString defaultDatabaseName(DatabaseVersion version = DatabaseVersion::Latest) const;
@@ -683,10 +719,10 @@ public:
     QFile *dataFile(QStringView fileName, QIODevice::OpenMode openMode, const Item *item,
                     const Color *color = nullptr) const;
 
-    const QHash<uint, const Color *>    &colors() const;
-    const QHash<uint, const Category *> &categories() const;
-    const QHash<char, const ItemType *> &itemTypes() const;
-    const QVector<const Item *>         &items() const;
+    const std::vector<const Color *> &colors() const;
+    const std::vector<const Category *> &categories() const;
+    const std::vector<const ItemType *> &itemTypes() const;
+    const std::vector<const Item *> &items() const;
 
     const QImage noImage(const QSize &s) const;
 
@@ -694,10 +730,12 @@ public:
 
     const Color *color(uint id) const;
     const Color *colorFromName(const QString &name) const;
-    const Color *colorFromLDrawId(int ldraw_id) const;
+    const Color *colorFromLDrawId(int ldrawId) const;
     const Category *category(uint id) const;
     const ItemType *itemType(char id) const;
     const Item *item(char tid, const QString &id) const;
+
+    const PartColorCode *partColorCode(uint id);
 
     PriceGuide *priceGuide(const Item *item, const Color *color, bool high_priority = false);
     void flushPriceGuidesToUpdate(); //TODO5: brickstock has this
@@ -713,22 +751,7 @@ public:
     QString ldrawDataPath() const;
     void setLDrawDataPath(const QString &ldrawDataPath);
 
-    struct ParseItemListXMLResult
-    {
-        ParseItemListXMLResult() = default;
-
-        InvItemList *items = nullptr;
-        uint invalidItemCount = 0;
-        QString currencyCode;
-        bool multipleCurrencies = false;
-    };
-
-    ParseItemListXMLResult parseItemListXML(const QDomElement &root, ItemListXMLHint hint);
-    QDomElement createItemListXML(QDomDocument doc, ItemListXMLHint hint, const InvItemList &items, const QString &currencyCode = QString(), QMap<QString, QString> *extra = nullptr);
-
-    bool parseLDrawModel(QFile &file, InvItemList &items, uint *invalid_items = nullptr);
-
-    int applyChangeLogToItems(BrickLink::InvItemList &bllist);
+    bool applyChangeLogToItem(BrickLink::InvItem *item);
 
     bool onlineStatus() const;
 
@@ -772,7 +795,6 @@ private:
     friend void Picture::update(bool);
 
     static bool updateNeeded(bool valid, const QDateTime &last, int iv);
-    bool parseLDrawModelInternal(QFile &file, const QString &model_name, InvItemList &items, uint *invalid_items, QHash<QString, InvItem *> &mergehash, QStringList &recursion_detection);
 
     static Color *readColorFromDatabase(QDataStream &dataStream, DatabaseVersion v);
     static void writeColorToDatabase(const Color *color, QDataStream &dataStream, DatabaseVersion v);
@@ -785,6 +807,9 @@ private:
 
     static Item *readItemFromDatabase(QDataStream &dataStream, DatabaseVersion v);
     static void writeItemToDatabase(const Item *item, QDataStream &dataStream, DatabaseVersion v);
+
+    PartColorCode *readPCCFromDatabase(QDataStream &dataStream, Core::DatabaseVersion v) const;
+    static void writePCCToDatabase(const PartColorCode *pcc, QDataStream &dataStream, DatabaseVersion v);
 
 private slots:
     void pictureJobFinished(TransferJob *j); //TODO5: timeout handling in brickstock updatePicturesTimeOut
@@ -805,11 +830,12 @@ private:
     mutable QHash<QString, QImage>  m_noimages;
     mutable QHash<QString, QImage>  m_colimages;
 
-    QHash<uint, const Color *>      m_colors;      // id ->Color *
-    QHash<uint, const Category *>   m_categories;  // id ->Category *
-    QHash<char, const ItemType *>   m_item_types;  // id ->ItemType *
-    QVector<const Item *>           m_items;       // sorted array of Item *
-    QVector<QByteArray>             m_changelog;
+    std::vector<const Color *>      m_colors;      // id ->Color *
+    std::vector<const Category *>   m_categories;  // id ->Category *
+    std::vector<const ItemType *>   m_item_types;  // id ->ItemType *
+    std::vector<const Item *>       m_items;       // sorted array of Item *
+    std::vector<QByteArray>         m_changelog;
+    std::vector<const PartColorCode *> m_pccs;
 
     QPointer<Transfer>  m_transfer = nullptr;
 
