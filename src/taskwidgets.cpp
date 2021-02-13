@@ -243,11 +243,11 @@ void TaskInfoWidget::delayedSelectionUpdate()
         QString wgtstr;
         QString minvalstr;
         QString valstr = loc.toString(stat.value(), 'f', 3);
+        bool hasMinValue = !qFuzzyCompare(stat.value(), stat.minValue());
 
-        if (!qFuzzyCompare(stat.value(), stat.minValue())) {
-            minvalstr = u'(' % tr("min.") % u' ' % ccode % u' '
-                    % loc.toString(stat.minValue(), 'f', 3) % u')';
-        }
+        if (hasMinValue)
+            minvalstr = loc.toString(stat.minValue(), 'f', 3);
+
         QString coststr = loc.toString(stat.cost(), 'f', 3);
         QString profitstr;
         if (!qFuzzyIsNull(stat.cost())) {
@@ -271,20 +271,24 @@ void TaskInfoWidget::delayedSelectionUpdate()
 
         static const char *fmt =
                 "<h3>%1</h3><table cellspacing=6>"
-                "<tr><td>&nbsp;&nbsp;%2: </td><td colspan=2 align=right>&nbsp;&nbsp;%3</td></tr>"
-                "<tr><td>&nbsp;&nbsp;%4: </td><td colspan=2 align=right>&nbsp;&nbsp;%5</td></tr><tr></tr>"
-                "<tr><td>&nbsp;&nbsp;%6: </td><td>&nbsp;&nbsp;%7</td><td align=right>%8</td><td>&nbsp;&nbsp;%9</td></tr><tr></tr>"
-                "<tr><td>&nbsp;&nbsp;%10:</td><td>&nbsp;&nbsp;%11</td><td align=right>%12</td><td>&nbsp;&nbsp;%13</td></tr><tr></tr>"
-                "<tr><td>&nbsp;&nbsp;%14:</td><td colspan=2 align=right>&nbsp;&nbsp;%15</td></tr>"
+                "<tr><td>&nbsp;&nbsp;%2 </td><td colspan=2 align=right>&nbsp;&nbsp;%3</td></tr>"
+                "<tr><td>&nbsp;&nbsp;%4 </td><td colspan=2 align=right>&nbsp;&nbsp;%5</td></tr>"
+                "<tr></tr>"
+                "<tr><td>&nbsp;&nbsp;%6 </td><td>&nbsp;&nbsp;%7</td><td align=right>%8</td></tr>"
+                "<tr><td>&nbsp;&nbsp;%9 </td><td>&nbsp;&nbsp;%10</td><td align=right>%11</td></tr>"
+                "<tr><td>&nbsp;&nbsp;%12 </td><td>&nbsp;&nbsp;%13</td><td align=right>%14</td><td>&nbsp;&nbsp;%15</td></tr>"
+                "<tr></tr>"
+                "<tr><td>&nbsp;&nbsp;%16 </td><td colspan=2 align=right>&nbsp;&nbsp;%17</td></tr>"
                 "</table>";
 
         QString s = QString::fromLatin1(fmt).arg(
                 m_selection.isEmpty() ? tr("Document statistics") : tr("Multiple lots selected"),
-                tr("Lots"), loc.toString(stat.lots()),
-                tr("Items"), loc.toString(stat.items()),
-                tr("Cost"), ccode, coststr, profitstr).arg(
-                tr("Value"), ccode, valstr, minvalstr,
-                tr("Weight"), wgtstr);
+                tr("Lots:"), loc.toString(stat.lots()),
+                tr("Items:"), loc.toString(stat.items()),
+                tr("Value:"), ccode, valstr).arg(
+                hasMinValue ? tr("Value (min.):") : QString(), hasMinValue ? ccode : QString(), minvalstr,
+                tr("Cost:"), ccode, coststr, profitstr,
+                tr("Weight:"), wgtstr);
 
         m_pic->setItemAndColor(nullptr);
         m_text->setText(s);
