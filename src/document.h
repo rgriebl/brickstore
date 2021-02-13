@@ -168,16 +168,14 @@ public:
     const ItemList &items() const;
     bool clear();
 
-    bool insertItems(const QVector<int> &positions, const ItemList &items);
-    bool appendItem(Item *item);
+    void appendItem(Item *item);
+    void insertItemsAfter(Item *afterItem, const BrickLink::InvItemList &items);
 
-    bool removeItems(const ItemList &items);
-    bool removeItem(Item *item);
+    void removeItems(const ItemList &items);
+    void removeItem(Item *item);
 
-    bool changeItem(int position, const Item &value);
-    bool changeItem(Item *item, const Item &value);
+    void changeItem(Item *item, const Item &value);
 
-    int positionOf(Item *item) const;
     Item *itemAt(int position);
 
     Statistics statistics(const ItemList &list) const;
@@ -241,7 +239,7 @@ private:
     void setItemsDirect(const ItemList &items);
     void insertItemsDirect(const ItemList &items, QVector<int> &positions, QVector<int> &viewPositions);
     void removeItemsDirect(ItemList &items, QVector<int> &positions, QVector<int> &viewPositions);
-    void changeItemDirect(int position, Item &item);
+    void changeItemDirect(BrickLink::InvItem *item, Item &value);
     void changeCurrencyDirect(const QString &ccode, qreal crate, double *&prices);
     void setDifferenceModeActiveDirect(bool active);
     void sortFilterDirect(int column, Qt::SortOrder order, const QString &filterString,

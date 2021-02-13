@@ -2047,15 +2047,13 @@ void Window::on_edit_partoutitems_triggered()
                     BrickLink::InvItemList items = item->item()->consistsOf();
                     if (!items.isEmpty()) {
                         int multiply = item->quantity();
-                        int startpos = m_doc->positionOf(item);
-                        QVector<int> positions(items.size());
+
                         for (int i = 0; i < items.size(); ++i) {
-                            positions[i] = startpos + i;
                             if (multiply != 1)
                                 items[i]->setQuantity(items[i]->quantity() * multiply);
                             items[i]->setCondition(item->condition());
                         }
-                        m_doc->insertItems(positions, Document::ItemList(items));
+                        m_doc->insertItemsAfter(item, Document::ItemList(items));
                         m_doc->removeItem(item);
                         partcount++;
                     }

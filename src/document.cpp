@@ -84,8 +84,11 @@ void CurrencyCmd::undo()
 }
 
 
-ChangeCmd::ChangeCmd(Document *doc, int pos, const Document::Item &item, bool merge_allowed)
-    : QUndoCommand(qApp->translate("ChangeCmd", "Modified item")), m_doc(doc), m_position(pos), m_item(item), m_merge_allowed(merge_allowed)
+ChangeCmd::ChangeCmd(Document *doc, Document::Item *item, const Document::Item &value)
+    : QUndoCommand(qApp->translate("ChangeCmd", "Modified item"))
+    , m_doc(doc)
+    , m_item(item)
+    , m_value(value)
 { }
 
 int ChangeCmd::id() const
@@ -95,7 +98,7 @@ int ChangeCmd::id() const
 
 void ChangeCmd::redo()
 {
-    m_doc->changeItemDirect(m_position, m_item);
+    m_doc->changeItemDirect(m_item, m_value);
 }
 
 void ChangeCmd::undo()
@@ -103,29 +106,15 @@ void ChangeCmd::undo()
     redo();
 }
 
-bool ChangeCmd::mergeWith(const QUndoCommand *other)
-{
-#if 0 // untested
-    const ChangeCmd *that = static_cast <const ChangeCmd *>(other);
 
-    if ((m_merge_allowed && that->m_merge_allowed) &&
-        (m_doc == that->m_doc) &&
-        (m_position == that->m_position))
-    {
-        m_item = that->m_item;
-        return true;
-    }
-#else
-    Q_UNUSED(other)
-    Q_UNUSED(m_merge_allowed)
-#endif
-    return false;
-}
-
-
-AddRemoveCmd::AddRemoveCmd(Type t, Document *doc, const QVector<int> &positions, const Document::ItemList &items, bool merge_allowed)
-    : QUndoCommand(genDesc(t == Add, qMax(items.count(), positions.count()))),
-      m_doc(doc), m_positions(positions), m_items(items), m_type(t), m_merge_allowed(merge_allowed)
+AddRemoveCmd::AddRemoveCmd(Type t, Document *doc, const QVector<int> &positions,
+                           const QVector<int> &viewPositions, const Document::ItemList &items)
+    : QUndoCommand(genDesc(t == Add, qMax(items.count(), positions.count())))
+    , m_doc(doc)
+    , m_positions(positions)
+    , m_viewPositions(viewPositions)
+    , m_items(items)
+    , m_type(t)
 {
     // for add: specify items and optionally also positions
     // for remove: specify items only
@@ -149,6 +138,7 @@ void AddRemoveCmd::redo()
         // m_(view)positions (or append them to the document in case m_(view)positions is empty)
         m_doc->insertItemsDirect(m_items, m_positions, m_viewPositions);
         m_positions.clear();
+        m_viewPositions.clear();
         m_type = Remove;
     }
     else {
@@ -162,24 +152,6 @@ void AddRemoveCmd::redo()
 void AddRemoveCmd::undo()
 {
     redo();
-}
-
-bool AddRemoveCmd::mergeWith(const QUndoCommand *other)
-{
-    const auto *that = static_cast <const AddRemoveCmd *>(other);
-
-    if ((m_merge_allowed && that->m_merge_allowed) &&
-        (m_doc == that->m_doc) &&
-        (m_type == that->m_type)) {
-        m_items     += that->m_items;
-        m_positions += that->m_positions;
-        setText(genDesc(m_type == Remove, qMax(m_items.count(), m_positions.count())));
-
-        const_cast<AddRemoveCmd *>(that)->m_items.clear();
-        const_cast<AddRemoveCmd *>(that)->m_positions.clear();
-        return true;
-    }
-    return false;
 }
 
 QString AddRemoveCmd::genDesc(bool is_add, int count)
@@ -350,13 +322,8 @@ QUndoStack *Document::undoStack() const
 
 bool Document::clear()
 {
-    m_undo->push(new AddRemoveCmd(AddRemoveCmd::Remove, this, QVector<int>(), m_items));
+    removeItems(m_items);
     return true;
-}
-
-int Document::positionOf(Item *item) const
-{
-    return m_items.indexOf(item);
 }
 
 Document::Item *Document::itemAt(int position)
@@ -364,37 +331,44 @@ Document::Item *Document::itemAt(int position)
     return (position >= 0 && position < m_items.count()) ? m_items.at(position) : nullptr;
 }
 
-bool Document::insertItems(const QVector<int> &positions, const ItemList &items)
+void Document::appendItem(Item *item)
 {
-    m_undo->push(new AddRemoveCmd(AddRemoveCmd::Add, this, positions, items /*, true*/));
-    return true;
+    m_undo->push(new AddRemoveCmd(AddRemoveCmd::Add, this, { }, { }, { item }));
 }
 
-bool Document::removeItem(Item *item)
+void Document::insertItemsAfter(Item *afterItem, const BrickLink::InvItemList &items)
+{
+    if (items.isEmpty())
+        return;
+
+    int afterPos = m_items.indexOf(afterItem) + 1;
+    int afterViewPos = m_viewItems.indexOf(afterItem) + 1;
+
+    Q_ASSERT(afterPos > 0);
+    if (afterViewPos == 0)
+        afterViewPos = m_viewItems.size();
+
+    QVector<int> positions(items.size());
+    std::iota(positions.begin(), positions.end(), afterPos);
+    QVector<int> viewPositions(items.size());
+    std::iota(viewPositions.begin(), viewPositions.end(), afterViewPos);
+
+    m_undo->push(new AddRemoveCmd(AddRemoveCmd::Add, this, positions, viewPositions, items));
+}
+
+void Document::removeItem(Item *item)
 {
     return removeItems({ item });
 }
 
-bool Document::removeItems(const ItemList &items)
+void Document::removeItems(const ItemList &items)
 {
-    m_undo->push(new AddRemoveCmd(AddRemoveCmd::Remove, this, QVector<int>(), items /*, true*/));
-    return true;
+    m_undo->push(new AddRemoveCmd(AddRemoveCmd::Remove, this, { }, { }, items));
 }
 
-bool Document::appendItem(Item *item)
+void Document::changeItem(Item *item, const Item &value)
 {
-    return insertItems({ }, { item });
-}
-
-bool Document::changeItem(Item *item, const Item &value)
-{
-    return changeItem(positionOf(item), value);
-}
-
-bool Document::changeItem(int position, const Item &value)
-{
-    m_undo->push(new ChangeCmd(this, position, value /*, true*/));
-    return true;
+    m_undo->push(new ChangeCmd(this, item, value));
 }
 
 void Document::setItemsDirect(const Document::ItemList &items)
@@ -460,16 +434,15 @@ void Document::removeItemsDirect(ItemList &items, QVector<int> &positions, QVect
     emitStatisticsChanged();
 }
 
-void Document::changeItemDirect(int position, Item &item)
+void Document::changeItemDirect(BrickLink::InvItem *item, Item &value)
 {
-    Item *olditem = m_items[position];
-    std::swap(*olditem, item);
+    std::swap(*item, value);
 
-    QModelIndex idx1 = index(olditem);
-    QModelIndex idx2 = createIndex(idx1.row(), columnCount(idx1.parent()) - 1, idx1.internalPointer());
+    QModelIndex idx1 = index(item, 0);
+    QModelIndex idx2 = idx1.siblingAtColumn(columnCount() - 1);
 
     emitDataChanged(idx1, idx2);
-    updateItemFlags(olditem);
+    updateItemFlags(item);
     emitStatisticsChanged();
 }
 
@@ -894,7 +867,7 @@ Qt::ItemFlags Document::flags(const QModelIndex &index) const
 bool Document::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     if (index.isValid() && role == Qt::EditRole) {
-        const Item *itemp = item(index);
+        Item *itemp = this->item(index);
         Item item = *itemp;
         auto f = static_cast<Field>(index.column());
 
@@ -934,7 +907,7 @@ bool Document::setData(const QModelIndex &index, const QVariant &value, int role
         default          : break;
         }
         if (item != *itemp) {
-            changeItem(index.row(), item);
+            changeItem(itemp, item);
             return true;
         }
     }

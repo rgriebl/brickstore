@@ -23,14 +23,12 @@ public:
     enum Type { Add, Remove };
 
     AddRemoveCmd(Type t, Document *doc, const QVector<int> &positions,
-                 const Document::ItemList &items, bool merge_allowed = false);
+                 const QVector<int> &viewPositions, const Document::ItemList &items);
     ~AddRemoveCmd() override;
-
     int id() const override;
 
     void redo() override;
     void undo() override;
-    bool mergeWith(const QUndoCommand *other) override;
 
     static QString genDesc(bool is_add, int count);
 
@@ -40,25 +38,21 @@ private:
     QVector<int>       m_viewPositions;
     Document::ItemList m_items;
     Type               m_type;
-    bool               m_merge_allowed;
 };
 
 class ChangeCmd : public QUndoCommand
 {
 public:
-    ChangeCmd(Document *doc, int position, const Document::Item &item, bool merge_allowed = false);
-
+    ChangeCmd(Document *doc, Document::Item *item, const Document::Item &value);
     int id() const override;
 
     void redo() override;
     void undo() override;
-    bool mergeWith(const QUndoCommand *other) override;
 
 private:
     Document *      m_doc;
-    int             m_position;
-    Document::Item  m_item;
-    bool            m_merge_allowed;
+    Document::Item *m_item;
+    Document::Item  m_value;
 };
 
 class CurrencyCmd : public QUndoCommand

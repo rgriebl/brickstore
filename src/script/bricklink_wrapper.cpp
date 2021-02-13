@@ -379,7 +379,8 @@ bool Document::changeItem(InvItem *from, ::BrickLink::InvItem &to)
         return false;
     if (this != from->doc)
         return false;
-    return d->changeItem(from->wrapped, to);
+    d->changeItem(from->wrapped, to);
+    return true;
 }
 
 int Document::count() const
