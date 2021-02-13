@@ -163,6 +163,7 @@ public slots:
     void on_view_column_layout_list_load(const QString &layoutId);
 
     void setPrice(double);
+    void gotoNextError();
 
 signals:
     void selectionChanged(const Document::ItemList &);

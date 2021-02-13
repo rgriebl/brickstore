@@ -345,7 +345,13 @@ public:
         m_layout->addStretch(1);
 
         m_errorsSeparator = addSeparator();
-        m_errors = new QLabel();
+        m_errors = new QToolButton();
+        m_errors->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+        m_errors->setIcon(QIcon::fromTheme("edit-find"));
+        m_errors->setShortcut(tr("F6"));
+        m_errors->setAutoRaise(true);
+        connect(m_errors, &QToolButton::clicked,
+                m_window, &Window::gotoNextError);
         m_layout->addWidget(m_errors);
 
         addSeparator();
@@ -447,10 +453,9 @@ public:
 
         bool b = (stat.errors() > 0);
         if (b && Config::inst()->showInputErrors()) {
-            m_errors->setText(tr("Errors:") %
-                              QString::fromLatin1(" <span style='background-color:%1'>&nbsp;")
-                              .arg(m_errors->property("bsColor").toString())
-                              % QLocale::system().toString(stat.errors()) % u"&nbsp;</span>");
+            auto oldShortcut = m_errors->shortcut();
+            m_errors->setText(tr("%n Error(s)", nullptr, stat.errors()));
+            m_errors->setShortcut(oldShortcut);
         }
         m_errors->setVisible(b);
         m_errorsSeparator->setVisible(b);
@@ -493,6 +498,8 @@ protected:
         m_differenceMode->setProperty("bsTextNormal", tr("Enable difference mode"));
         updateDifferenceMode();
 
+        m_errors->setToolTip(Utility::toolTipLabel(tr("Go to the next error"), m_errors->shortcut()));
+
         if (m_order)
             m_order->setText(tr("Order information..."));
         m_value->setText(tr("Currency:"));
@@ -505,22 +512,28 @@ protected:
         pal.setColor(QPalette::Window, CheckColorTabBar().color());
         setPalette(pal);
 
-        auto c = Utility::gradientColor(Qt::red, palette().color(QPalette::Window), 0.6);
-        m_errors->setProperty("bsColor", c.name());
         updateStatistics();
 
-        auto checkedbg = Utility::gradientColor(Qt::green, palette().color(QPalette::Window), 0.3);
-        auto checkedborder = checkedbg.darker();
-        auto hoverbg = checkedbg.lighter();
-        auto hoverborder = hoverbg.darker();
+        auto coloredToolButton = [this](QToolButton *tb, const QColor &baseColor, bool checkable) {
+            auto winbg = palette().color(QPalette::Window);
 
-        m_differenceMode->setStyleSheet(QString::fromLatin1(
-            "QToolButton { background-color: transparent; border: 1px solid transparent; padding: 1px; }"
-            "QToolButton:hover { background-color: %3; border: 1px solid %4 } "
-            "QToolButton:checked { background-color: %1; border: 1px solid %2; } "
-            "QToolButton:checked:hover { } "
-            "QToolButton:pressed { background-color: %1; border: 1px solid %2 } "
-        ).arg(checkedbg.name(), checkedborder.name(), hoverbg.name(), hoverborder.name()));
+            auto downbg = Utility::gradientColor(baseColor, winbg, 0.4);
+            auto border = downbg.darker();
+            auto hoverbg = downbg.lighter();
+            auto bgName = checkable ? QString::fromLatin1("transparent")
+                                    : hoverbg.name();
+
+            tb->setStyleSheet(QString::fromLatin1(
+                "QToolButton         { background-color: %1; border: 1px solid transparent; padding: 1px; }"
+                "QToolButton:hover   { background-color: %3; border: 1px solid %4 } "
+                "QToolButton:checked { background-color: %2; border: 1px solid %4; } "
+                "QToolButton:checked:hover { } "
+                "QToolButton:pressed { background-color: %2; border: 1px solid %4 } "
+            ).arg(bgName, downbg.name(), hoverbg.name(), border.name()));
+        };
+
+        coloredToolButton(m_differenceMode, Qt::green, true);
+        coloredToolButton(m_errors, Qt::red, false);
     }
 
     void changeEvent(QEvent *e) override
@@ -539,7 +552,7 @@ private:
     QToolButton *m_differenceMode;
     QToolButton *m_order;
     QWidget *m_errorsSeparator;
-    QLabel *m_errors;
+    QToolButton *m_errors;
     QLabel *m_weight;
     QLabel *m_count;
     QLabel *m_value;
@@ -2115,6 +2128,49 @@ void Window::setPrice(double d)
     }
     else
         QApplication::beep();
+}
+
+void Window::gotoNextError()
+{
+    auto startIdx = m_selection_model->currentIndex();
+    if (!startIdx.isValid())
+        startIdx = m_doc->index(0, 0);
+    bool skipFirst = (startIdx.row() != 0) || (startIdx.column() != 0);
+
+    bool wrapped = false;
+    int startCol = startIdx.column();
+
+    for (int row = startIdx.row(); row < m_doc->rowCount(); ) {
+        if (wrapped && (row > startIdx.row()))
+            return;
+
+        auto error = m_doc->itemFlags(m_doc->item(m_doc->index(row, 0))).first;
+        if (error) {
+            for (int col = startCol; col < m_doc->columnCount(); ++col) {
+                if (wrapped && (row == startIdx.row()) && (col > startIdx.column()))
+                    return;
+
+                if (error & (1ULL << col)) {
+                    if (skipFirst) {
+                        skipFirst = false;
+                    } else {
+                        auto gotoIdx = m_doc->index(row, col);
+                        m_selection_model->setCurrentIndex(gotoIdx, QItemSelectionModel::SelectCurrent
+                                                           | QItemSelectionModel::Rows);
+                        w_list->scrollTo(gotoIdx, QAbstractItemView::PositionAtCenter);
+                        return;
+                    }
+                }
+            }
+        }
+        startCol = 0;
+
+        ++row;
+        if (row >= m_doc->rowCount()) { // wrap around
+            row = 0;
+            wrapped = true;
+        }
+    }
 }
 
 void Window::contextMenu(const QPoint &p)
