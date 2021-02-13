@@ -233,7 +233,7 @@ Document::Statistics::Statistics(const Document *doc, const ItemList &list, bool
             weight_missing = true;
 
         if (quint64 errors = doc->itemFlags(item).first)
-            m_errors = qPopulationCount(errors);
+            m_errors += qPopulationCount(errors);
 
         if (item->isIncomplete())
             m_incomplete++;

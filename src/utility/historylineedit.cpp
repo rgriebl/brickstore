@@ -90,6 +90,7 @@ protected:
                 }
             }
         }
+        QListView::mousePressEvent(me);
     }
 };
 
