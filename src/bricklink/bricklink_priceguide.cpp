@@ -181,8 +181,6 @@ void BrickLink::PriceGuide::parseHtml(const QByteArray &ba)
     int pastSixPos = s.indexOf("Past 6 Months Sales");
     bool hasPastSix = (pastSixPos > 0);
 
-    if (currentPos >= 0 && currentPos > pastSixPos)
-
     for (int i = 0; i < 4; ++i) {
         auto m = re.match(s, startPos);
         if (m.hasMatch()) {
