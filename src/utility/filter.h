@@ -17,6 +17,7 @@
 #include <QMultiMap>
 #include <QVector>
 #include <QPair>
+#include <QRegularExpression>
 #include <QCoreApplication>
 
 
@@ -51,6 +52,14 @@ public:
 
     Filter();
     
+    bool operator==(const Filter &other) const
+    {
+        return (m_field == other.m_field)
+                && (m_comparison == other.m_comparison)
+                && (m_combination == other.m_combination)
+                && (m_expression == other.m_expression);
+    }
+
     inline int field() const                { return m_field; }
     inline QString expression() const       { return m_expression; }
     inline Comparison comparison() const    { return m_comparison; }
@@ -93,10 +102,16 @@ public:
     };
     
 private:
-    int         m_field;
-    Comparison  m_comparison;
-    Combination m_combination;
+    int         m_field = -1;
+    Comparison  m_comparison = Matches;
+    Combination m_combination = And;
     QString     m_expression;
+    bool        m_isInt    : 1;
+    bool        m_isDouble : 1;
+    bool        m_isRegExp : 1;
+    int         m_asInt = 0;
+    double      m_asDouble = 0;
+    QRegularExpression m_asRegExp;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(Filter::Comparisons)

@@ -21,7 +21,8 @@
 
 
 Filter::Filter()
-    : m_field(-1), m_comparison(Matches), m_combination(And)
+    : m_isInt(false)
+    , m_isDouble(false)
 { }
 
 void Filter::setField(int field)
@@ -31,6 +32,20 @@ void Filter::setField(int field)
 void Filter::setExpression(const QString &expr)
 {
     m_expression = expr;
+
+    QLocale loc;
+    bool isInt = false;
+    m_asInt = loc.toInt(expr, &isInt);
+    m_isInt = isInt;
+    bool isDouble = false;
+    m_asDouble = loc.toDouble(expr, &isDouble);
+    m_isDouble = isDouble;
+
+    if (expr.contains('*') || expr.contains('*') || expr.contains('[')) {
+        m_isRegExp = true;
+        m_asRegExp.setPattern(QRegularExpression::wildcardToRegularExpression(expr));
+        m_asRegExp.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
+    }
 }
 
 void Filter::setComparison(Comparison cmp)
@@ -45,7 +60,7 @@ void Filter::setCombination(Combination cmb)
 
 bool Filter::matches(const QVariant &v) const
 {
-    bool isint = false, isdbl = false;
+    bool isInt = false, isDbl = false;
     int i1 = 0, i2 = 0;
     double d1 = 0, d2 = 0;
     QString s1, s2;
@@ -55,21 +70,19 @@ bool Filter::matches(const QVariant &v) const
     case QVariant::UInt:
     case QVariant::LongLong:
     case QVariant::ULongLong: {
-        bool ok = false;        
-        i1 = m_expression.toInt(&ok);
-        if (!ok)
+        if (!m_isInt)
             return false; // data is int, but expression is not
+        i1 = m_asInt;
         i2 = v.toInt();
-        isint = true;
+        isInt = true;
         break;
     }   
     case QVariant::Double: {
-        bool ok = false;
-        d1 = m_expression.toDouble(&ok);
-        if (!ok)
+        if (!m_isDouble)
             return false;
+        d1 = m_asDouble;
         d2 = v.toDouble();
-        isdbl = true;
+        isDbl = true;
         break;
     }    
     default:
@@ -80,34 +93,38 @@ bool Filter::matches(const QVariant &v) const
 
     switch (comparison()) {
     case Is:
-        return isint ? i2 == i1 : isdbl ? qFuzzyCompare(d2, d1) : s2.compare(s1, Qt::CaseInsensitive) == 0;
+        return isInt ? i2 == i1 : isDbl ? qFuzzyCompare(d2, d1) : s2.compare(s1, Qt::CaseInsensitive) == 0;
     case IsNot:
-        return isint ? i2 != i1 : isdbl ? !qFuzzyCompare(d2, d1) : s2.compare(s1, Qt::CaseInsensitive) != 0;
+        return isInt ? i2 != i1 : isDbl ? !qFuzzyCompare(d2, d1) : s2.compare(s1, Qt::CaseInsensitive) != 0;
     case Less:
-        return isint ? i2 < i1 : isdbl ? d2 < d1 : false;
+        return isInt ? i2 < i1 : isDbl ? d2 < d1 : false;
     case LessEqual:
-        return isint ? i2 <= i1 : isdbl ? d2 <= d1 : false;
+        return isInt ? i2 <= i1 : isDbl ? d2 <= d1 : false;
     case Greater:
-        return isint ? i2 > i1 : isdbl ? d2 > d1 : false;
+        return isInt ? i2 > i1 : isDbl ? d2 > d1 : false;
     case GreaterEqual:
-        return isint ? i2 >= i1 : isdbl ? d2 >= d1 : false;
+        return isInt ? i2 >= i1 : isDbl ? d2 >= d1 : false;
     case StartsWith:
-        return isint || isdbl ? false : s2.startsWith(s1, Qt::CaseInsensitive);
+        return isInt || isDbl ? false : s2.startsWith(s1, Qt::CaseInsensitive);
     case DoesNotStartWith:
-        return isint || isdbl ? false : !s2.startsWith(s1, Qt::CaseInsensitive);
+        return isInt || isDbl ? false : !s2.startsWith(s1, Qt::CaseInsensitive);
     case EndsWith:
-        return isint || isdbl ? false : s2.endsWith(s1, Qt::CaseInsensitive);
+        return isInt || isDbl ? false : s2.endsWith(s1, Qt::CaseInsensitive);
     case DoesNotEndWith:
-        return isint || isdbl ? false : !s2.endsWith(s1, Qt::CaseInsensitive);
+        return isInt || isDbl ? false : !s2.endsWith(s1, Qt::CaseInsensitive);
     case Matches:
     case DoesNotMatch: {
-        if (isint || isdbl) {
-            s1 = m_expression;
-            s2 = v.toString();
+        if (m_isRegExp) {
+            // We are using QRegularExpressions in multiple threads here, although the class is not
+            // marked thread-safe. We are relying on the const match() function to be thread-safe,
+            // which it currently is up to Qt 6.0.
+
+            bool res = m_asRegExp.match(v.toString()).hasMatch();
+            return (comparison() == Matches) ? res : !res;
+        } else {
+            bool res = v.toString().contains(m_expression, Qt::CaseInsensitive);
+            return (comparison() == Matches) ? res : !res;
         }
-        bool res = s2.contains(QRegExp(s1, Qt::CaseInsensitive));
-    
-        return (comparison() == Matches) ? res : !res;
     }
     }
     return false;

@@ -17,6 +17,8 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QStringBuilder>
+#include <QtConcurrentFilter>
+#include <QtAlgorithms>
 
 #if defined(MODELTEST)
 #  include <QAbstractItemModelTester>
@@ -230,12 +232,8 @@ Document::Statistics::Statistics(const Document *doc, const ItemList &list, bool
         else
             weight_missing = true;
 
-        if (quint64 errors = doc->itemFlags(item).first) {
-            for (quint64 i = 1ULL << (FieldCount - 1); i;  i >>= 1) {
-                if (errors & i)
-                    m_errors++;
-            }
-        }
+        if (quint64 errors = doc->itemFlags(item).first)
+            m_errors = qPopulationCount(errors);
 
         if (item->isIncomplete())
             m_incomplete++;

@@ -36,7 +36,7 @@ QModelIndex StaticPointerModel::index(int row, int column, const QModelIndex &pa
 {
     if (!parent.isValid() && row >= 0 && column >= 0 && row < rowCount() && column < columnCount()) {
         const void *pointer = pointerAt(isFiltered() ? filtered.at(row) : sorted.at(row));
-        return parent.isValid() ? QModelIndex() : createIndex(row, column, const_cast<void *>(pointer));
+        return createIndex(row, column, const_cast<void *>(pointer));
     }
     return {};
 }

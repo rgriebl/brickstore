@@ -377,8 +377,8 @@ void SelectItem::init()
     d->w_categories->header()->setSortIndicatorShown(true);
     d->w_categories->header()->setSectionsClickable(true);
 
-    QObject::connect(d->w_categories->header(), &QHeaderView::sectionClicked,
-                     this, [this](int section) {
+    connect(d->w_categories->header(), &QHeaderView::sectionClicked,
+            this, [this](int section) {
         d->w_categories->sortByColumn(section, d->w_categories->header()->sortIndicatorOrder());
         d->w_categories->scrollTo(d->w_categories->currentIndex());
     });
@@ -386,7 +386,7 @@ void SelectItem::init()
     d->w_items->header()->setSortIndicatorShown(true);
     d->w_items->header()->setSectionsClickable(true);
 
-    QObject::connect(d->w_items->header(), &QHeaderView::sectionClicked,
+    connect(d->w_items->header(), &QHeaderView::sectionClicked,
                      this, [this](int section) {
         sortItems(section, d->w_items->header()->sortIndicatorOrder());
     });
@@ -395,7 +395,7 @@ void SelectItem::init()
     d->w_itemthumbs->header()->setSortIndicatorShown(true);
     d->w_itemthumbs->header()->setSectionsClickable(true);
 
-    QObject::connect(d->w_itemthumbs->header(), &QHeaderView::sectionClicked,
+    connect(d->w_itemthumbs->header(), &QHeaderView::sectionClicked,
                      this, [this](int section) {
         sortItems(section, d->w_itemthumbs->header()->sortIndicatorOrder());
     });
