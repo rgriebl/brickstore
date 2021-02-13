@@ -611,6 +611,13 @@ Window::Window(Document *doc, QWidget *parent)
         w_header->setSortIndicator(m_doc->sortColumn(), order);
     });
 
+    // This shouldn't be needed, but we are abusing layoutChanged a bit for adding and removing
+    // items. The docs are a bit undecided if you should really do that, but it really helps
+    // performance wise. Just the selection is not updated, when the items in it are deleted.
+    connect(m_doc, &Document::layoutChanged,
+            m_selection_model, [this]() {
+        updateSelection();
+    });
 
     auto *dd = new DocumentDelegate(doc, w_list);
     w_list->setItemDelegate(dd);
