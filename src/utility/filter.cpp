@@ -15,6 +15,7 @@
 #include <QStringList>
 #include <QCoreApplication>
 #include <QVariant>
+#include <QRegularExpression>
 #include <QtDebug>
 
 #include "filter.h"
@@ -189,7 +190,7 @@ QVector<Filter> Filter::Parser::parse(const QString &str_)
 
 bool Filter::Parser::eatWhiteSpace(int &pos, const QString &str)
 {
-    int len = str.length();
+    int len = int(str.length());
 
     // eat ws
     while (pos < len && str[pos].isSpace())
@@ -202,16 +203,13 @@ bool Filter::Parser::eatWhiteSpace(int &pos, const QString &str)
 template<typename T>
 T Filter::Parser::matchTokens(int &pos, const QString &str, const QMultiMap<T, QString> &tokens, const T defaultresult, int *start_of_token)
 {
-    int len = str.length();
+    int len = int(str.length());
 
     T found_field = defaultresult;
     int found_len = -1;
     int found_pos = -1;
   
-    QMapIterator<T, QString> it(tokens);
-    while (it.hasNext()) {
-        it.next();
-
+    for (auto it = tokens.cbegin(); it != tokens.cend(); ++it) {
         int flen = it.value().length();
         
         if (len - pos >= flen) {    
@@ -263,7 +261,7 @@ QPair<QString, Filter::Combination> Filter::Parser::matchFilterAndCombination(in
     QPair<QString, Filter::Combination> res;
     res.second = Filter::And;
     
-    int len = str.length();
+    int len = int(str.length());
     QChar quote_char = str[pos];
     bool quoted = false;
     

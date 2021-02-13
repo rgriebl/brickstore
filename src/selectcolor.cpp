@@ -87,7 +87,7 @@ SelectColor::SelectColor(QWidget *parent)
             this, &SelectColor::updateColorFilter);
 
     auto *lay = new QGridLayout(this);
-    lay->setMargin(0);
+    lay->setContentsMargins(0, 0, 0, 0);
     lay->setRowStretch(0, 0);
     lay->setRowStretch(1, 1);
     lay->addWidget(w_filter, 0, 0);

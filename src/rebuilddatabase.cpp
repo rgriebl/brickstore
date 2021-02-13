@@ -109,7 +109,7 @@ int RebuildDatabase::exec()
         auto job = TransferJob::post(url);
         bool loggedIn = false;
         QByteArray httpReply;
-        auto loginConn = connect(m_trans, &Transfer::finished, this, [this, job, &loggedIn, &httpReply](TransferJob *j) {
+        auto loginConn = connect(m_trans, &Transfer::finished, this, [job, &loggedIn, &httpReply](TransferJob *j) {
             if (job == j) {
                 loggedIn = true;
                 if (j->isFailed() || (j->responseCode() != 200))

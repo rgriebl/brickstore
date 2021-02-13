@@ -622,7 +622,7 @@ void BrickLink::ItemModel::setFilterText(const QString &filter)
 
                 int atPos = str.lastIndexOf(QChar('@'));
                 if (atPos != -1) {
-                    color = BrickLink::core()->color(str.midRef(atPos + 1).toUInt());
+                    color = BrickLink::core()->color(str.mid(atPos + 1).toUInt());
                     str = str.left(atPos);
                 }
 

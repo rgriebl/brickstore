@@ -1063,7 +1063,7 @@ void FrameWork::createActions()
     connect(rm, &RecentMenu::openRecent,
             this, &FrameWork::openDocument);
     connect(rm, &RecentMenu::clearRecent,
-            this, [this]() { Config::inst()->setRecentFiles({ }); });
+            this, []() { Config::inst()->setRecentFiles({ }); });
 
     (void) newQAction(this, "document_save", NeedDocument | NeedModification);
     (void) newQAction(this, "document_save_as", NeedDocument);
@@ -1115,13 +1115,13 @@ void FrameWork::createActions()
     a->setObjectName("edit_redo");
 
     a = newQAction(this, "edit_cut", NeedSelection(1));
-    connect(new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Delete), this), &QShortcut::activated,
+    connect(new QShortcut(QKeySequence(Qt::ShiftModifier + Qt::Key_Delete), this), &QShortcut::activated,
             a, &QAction::trigger);
     a = newQAction(this, "edit_copy", NeedSelection(1));
-    connect(new QShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Insert), this), &QShortcut::activated,
+    connect(new QShortcut(QKeySequence(Qt::ShiftModifier + Qt::Key_Insert), this), &QShortcut::activated,
             a, &QAction::trigger);
     a = newQAction(this, "edit_paste", NeedDocument);
-    connect(new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Insert), this), &QShortcut::activated,
+    connect(new QShortcut(QKeySequence(Qt::ShiftModifier + Qt::Key_Insert), this), &QShortcut::activated,
             a, &QAction::trigger);
     (void) newQAction(this, "edit_delete", NeedSelection(1));
 
@@ -1701,9 +1701,7 @@ void FrameWork::titleUpdate()
     QString file;
 
     if (m_current_window) {
-        QChar separator[] = { 0x0020, 0x2014, 0x0020 };
-
-        title = m_current_window->windowTitle() + QString(separator, 3) + title;
+        title = m_current_window->windowTitle() % u" \u2014 " % title;
         file = m_current_window->document()->fileName();
     }
     setWindowTitle(title);

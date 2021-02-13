@@ -27,6 +27,10 @@
 #include <QSyntaxHighlighter>
 #include <QStringBuilder>
 
+#include <QToolBar>
+#include <QToolButton>
+#include <QStyleFactory>
+
 #if defined(Q_OS_WINDOWS)
 #  include <windows.h>
 #  ifdef MessageBox
@@ -39,8 +43,6 @@
 #  include <SystemConfiguration/SCNetworkReachability.h>
 #  include <QVersionNumber>
 #  include <QProxyStyle>
-#elif defined(Q_OS_UNIX)
-#  include <sys/utsname.h>
 #endif
 
 #include "progressdialog.h"
@@ -96,10 +98,11 @@ Application::Application(int &_argc, char **_argv)
     QCoreApplication::setApplicationVersion(QLatin1String(BRICKSTORE_VERSION));
     QGuiApplication::setApplicationDisplayName(QCoreApplication::applicationName());
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QCoreApplication::setAttribute(Qt::AA_DisableWindowContextHelpButton);
+#endif
 
 #if !defined(Q_OS_WINDOWS) // HighDPI work fine, but only without this setting
-    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #  if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
 #  endif
@@ -478,10 +481,10 @@ void LogHighlighter::highlightBlock(const QString &text)
 {
     ++Application::s_inst->m_logGuiLock;
 
-    int colonPos = text.indexOf(':', 1);
+    int colonPos = int(text.indexOf(':', 1));
     if (colonPos > 0) {
-        int atPos = text.lastIndexOf(" at ");
-        int linePos = text.lastIndexOf(", line ");
+        int atPos = int(text.lastIndexOf(" at "));
+        int linePos = int(text.lastIndexOf(", line "));
 
         int atLen = 0;
         int lineLen = 0;
@@ -491,7 +494,7 @@ void LogHighlighter::highlightBlock(const QString &text)
             atPos += 4;
             atLen = linePos - atPos;
             linePos += 7;
-            lineLen = text.length() - linePos;
+            lineLen = int(text.length()) - linePos;
         }
 
         static const int lvlPos = 0;
@@ -502,12 +505,12 @@ void LogHighlighter::highlightBlock(const QString &text)
 
         int msgType = -1;
         for (int i = 0; i < int(sizeof(msgTypeNames) / sizeof(*msgTypeNames)); ++i) {
-            if (text.midRef(lvlPos, lvlLen) == msgTypeNames[i])
+            if (text.mid(lvlPos, lvlLen) == msgTypeNames[i])
                 msgType = i;
         }
 
         if (msgType >= 0) {
-            int catType = qHash(text.midRef(catPos, catLen)) % 6;
+            int catType = qHash(text.mid(catPos, catLen)) % 6;
 
             setFormat(lvlPos, lvlLen, m_lvlFmt[msgType]);
             setFormat(catPos, catLen, m_catFmt[catType]);
@@ -547,7 +550,7 @@ void Application::setupLogging()
             pos = filename.lastIndexOf('\\');
 #endif
             if (pos < 0)
-                pos = filename.lastIndexOf('/');
+                pos = int(filename.lastIndexOf('/'));
             filename = filename.mid(pos + 1);
         }
 
@@ -660,5 +663,3 @@ bool Application::isOnline() const
 {
     return m_online;
 }
-
-#include "moc_application.cpp"

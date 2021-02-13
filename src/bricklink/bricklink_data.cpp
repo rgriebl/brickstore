@@ -115,7 +115,7 @@ BrickLink::AppearsIn BrickLink::Item::appearsIn(const Color *only_color) const
     AppearsIn map;
 
     const BrickLink::Item * const *items = BrickLink::core()->items().data();
-    auto count = BrickLink::core()->items().size();
+    int count = int(BrickLink::core()->items().size());
 
     if (m_appears_in) {
         quint32 *ptr = m_appears_in + 2;

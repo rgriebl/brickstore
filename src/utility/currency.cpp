@@ -18,7 +18,6 @@
 #include <QApplication>
 #include <QLocale>
 #include <QValidator>
-#include <QRegExp>
 #include <QLineEdit>
 #include <QKeyEvent>
 #include <QDataStream>

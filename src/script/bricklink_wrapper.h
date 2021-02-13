@@ -128,7 +128,7 @@ class Category : public WrapperBase<const ::BrickLink::Category>
     Q_GADGET
     Q_PROPERTY(bool isNull READ isNull)
 
-    Q_PRIVATE_PROPERTY(wrappedObject(), QString id READ id CONSTANT)
+    Q_PRIVATE_PROPERTY(wrappedObject(), int id READ id CONSTANT)
     Q_PRIVATE_PROPERTY(wrappedObject(), QString name READ name CONSTANT)
 
 public:
@@ -143,7 +143,7 @@ class ItemType : public WrapperBase<const ::BrickLink::ItemType>
     Q_GADGET
     Q_PROPERTY(bool isNull READ isNull)
 
-    Q_PRIVATE_PROPERTY(wrappedObject(), QString id READ id CONSTANT)
+    Q_PRIVATE_PROPERTY(wrappedObject(), int id READ id CONSTANT)
     Q_PRIVATE_PROPERTY(wrappedObject(), QString name READ name CONSTANT)
     Q_PROPERTY(QVariantList categories READ categories CONSTANT)
     Q_PRIVATE_PROPERTY(wrappedObject(), bool hasInventories READ hasInventories CONSTANT)

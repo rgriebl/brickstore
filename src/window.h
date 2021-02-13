@@ -14,7 +14,6 @@
 #pragma once
 
 #include <QWidget>
-#include <QRegExp>
 #include <QHash>
 #include <qdom.h>
 

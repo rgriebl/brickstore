@@ -1,7 +1,7 @@
 #include <QApplication>
 #include <QFileDialog>
 #include <QClipboard>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QDesktopServices>
 #include <QStandardPaths>
 #include <QStringBuilder>
@@ -162,7 +162,7 @@ Document *DocumentIO::importBrickLinkStore()
         try {
             auto result = fromBrickLinkXML(xml);
             auto *doc = new Document(result.first, result.second); // Document owns the items now
-            doc->setTitle(tr("Store %1").arg(QDate::currentDate().toString(Qt::LocalDate)));
+            doc->setTitle(tr("Store %1").arg(QLocale().toString(QDate::currentDate(), QLocale::ShortFormat)));
             return doc;
 
         } catch (const Exception &e) {
@@ -234,7 +234,7 @@ Document *DocumentIO::importBrickLinkCart()
                 auto json = QJsonDocument::fromJson(*data, &err);
                 if (!json.isNull()) {
                     const QJsonArray cartItems = json["cart"].toObject()["items"].toArray();
-                    for (const QJsonValue &v : cartItems) {
+                    for (auto &&v : cartItems) {
                         const QJsonObject cartItem = v.toObject();
 
                         QString itemId = cartItem["itemNo"].toString();
@@ -244,7 +244,7 @@ Document *DocumentIO::importBrickLinkCart()
                                 ? BrickLink::Condition::New : BrickLink::Condition::Used;
                         int qty = cartItem["cartQty"].toInt();
                         QString priceStr = cartItem["nativePrice"].toString(); //TODO: which one?
-                        double price = priceStr.midRef(4).toDouble();
+                        double price = priceStr.mid(4).toDouble();
                         QString ccode = priceStr.left(3);
 
                         if (currencyCode.isEmpty()) {

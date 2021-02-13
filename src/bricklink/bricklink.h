@@ -161,7 +161,7 @@ private:
     uint    m_id = 0;
     int     m_ldraw_id = 0;
     QColor  m_color;
-    Type    m_type = 0;
+    Type    m_type = {};
     qreal   m_popularity = 0;
     quint16 m_year_from = 0;
     quint16 m_year_to = 0;
@@ -183,7 +183,7 @@ public:
     const ItemType *itemType() const       { return m_item_type; }
     const Category *category() const       { return m_category; }
     bool hasInventory() const              { return (m_last_inv_update >= 0); }
-    QDateTime inventoryUpdated() const     { QDateTime dt; if (m_last_inv_update >= 0) dt.setTime_t(uint(m_last_inv_update)); return dt; }
+    QDateTime inventoryUpdated() const     { QDateTime dt; if (m_last_inv_update >= 0) dt.setSecsSinceEpoch(uint(m_last_inv_update)); return dt; }
     const Color *defaultColor() const      { return m_color; }
     double weight() const                  { return double(m_weight); }
     int yearReleased() const               { return m_year ? m_year + 1900 : 0; }
@@ -258,8 +258,6 @@ private:
 
     friend class Core;
     friend class TextImport;
-    friend QDataStream &operator<<(QDataStream &ds, const Item *item);
-    friend QDataStream &operator>>(QDataStream &ds, Item *item);
 };
 
 

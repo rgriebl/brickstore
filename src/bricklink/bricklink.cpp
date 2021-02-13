@@ -20,7 +20,6 @@
 #include <QDir>
 #include <QTextStream>
 #include <QtXml/QDomDocument>
-#include <QRegExp>
 #include <QPixmap>
 #include <QPainter>
 #include <QPainterPath>
@@ -758,13 +757,13 @@ bool Core::readDatabase(QString *infoText, const QString &filename)
                 .arg(f.fileName());
         }
 
-        qDebug() << "Loaded database from" << f.fileName() << endl
-                 << "  Generated at:" << generationDate << endl
-                 << "  Colors      :" << m_colors.size() << endl
-                 << "  Item Types  :" << m_item_types.size() << endl
-                 << "  Categories  :" << m_categories.size() << endl
-                 << "  Items       :" << m_items.size() << endl
-                 << "  PCCs        :" << m_pccs.size();
+        qDebug() << "Loaded database from" << f.fileName()
+                 << "\n  Generated at:" << generationDate
+                 << "\n  Colors      :" << m_colors.size()
+                 << "\n  Item Types  :" << m_item_types.size()
+                 << "\n  Categories  :" << m_categories.size()
+                 << "\n  Items       :" << m_items.size()
+                 << "\n  PCCs        :" << m_pccs.size();
 
         m_databaseDate = generationDate;
         emit databaseDateChanged(generationDate);

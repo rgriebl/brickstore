@@ -265,7 +265,7 @@ QWidget *UndoAction::createWidget(QWidget *parent)
             const auto fm = m_label->fontMetrics();
             m_label->setMinimumWidth(std::max(fm.horizontalAdvance(listLabel(1)),
                                               fm.horizontalAdvance(listLabel(100000)))
-                                     + 2 * m_label->style()->pixelMetric(QStyle::PM_DefaultLayoutSpacing));
+                                     + 2 * m_label->style()->pixelMetric(QStyle::PM_LayoutHorizontalSpacing));
         });
 
         return button;

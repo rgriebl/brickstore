@@ -246,7 +246,7 @@ QVector<const BrickLink::Item *> BrickLink::SetMatch::allPossibleSetMatch(const 
 {
     InvMatchList parts(list);
     QVector<const Item *> result;
-    int p = 0, pmax = m_inventories.count(), pstep = pmax / 100;
+    int p = 0, pmax = int(m_inventories.count()), pstep = pmax / 100;
 
     for (auto it = m_inventories.constBegin(); it != m_inventories.constEnd(); ++it) {
         InvMatchList parts_copy = parts;
@@ -284,7 +284,7 @@ QVector<const BrickLink::Item *> BrickLink::SetMatch::maximumPossibleSetMatch(co
 QPair<int, QVector<const BrickLink::Item *>> BrickLink::SetMatch::set_match_greedy(InvMatchList &parts)
 {
     QVector<const Item *> result;
-    int p = 0, pmax = m_inventories.count() * 2, pstep = pmax / 100;
+    int p = 0, pmax = int(m_inventories.count()) * 2, pstep = pmax / 100;
 
     // pass == 0: try to match one of each set
     // pass == 1: fill up with as many copies as possible
@@ -350,7 +350,7 @@ void BrickLink::SetMatch::create_inventory_list()
 
         });
     }
-    qWarning("InvMatchList has %d entries", m_inventories.count());
+    qWarning("InvMatchList has %d entries", int(m_inventories.count()));
 }
 
 

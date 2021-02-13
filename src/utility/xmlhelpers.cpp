@@ -37,7 +37,7 @@ QString XmlHelpers::decodeEntities(const QString &src)
         if (endpos < 0) {
             pos += 2;
         } else {
-            int unicode = decoded.midRef(pos + 2, endpos - pos - 2).toInt();
+            int unicode = decoded.mid(pos + 2, endpos - pos - 2).toInt();
             if (unicode > 0) {
                 decoded.replace(pos, endpos - pos + 1, QChar(unicode));
                 pos++;

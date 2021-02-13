@@ -33,7 +33,7 @@ public:
     void updateOrders();
 
 protected:
-    virtual void changeEvent(QEvent *e);
+    virtual void changeEvent(QEvent *e) override;
     void languageChange();
 
 protected slots:

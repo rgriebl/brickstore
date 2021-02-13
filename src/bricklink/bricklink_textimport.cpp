@@ -323,7 +323,7 @@ bool BrickLink::TextImport::readInventory(const Item *item)
 
     try {
         XmlHelpers::ParseXML p(f.take(), "INVENTORY", "ITEM");
-        p.parse([this, &p, item, &invItems](QDomElement e) {
+        p.parse([this, &p, &invItems](QDomElement e) {
             char itemTypeId = XmlHelpers::firstCharInString(p.elementText(e, "ITEMTYPE"));
             const QString itemId = p.elementText(e, "ITEMID");
             uint colorId = p.elementText(e, "COLOR").toUInt();
@@ -446,7 +446,7 @@ void BrickLink::TextImport::readInventoryList(const QString &path)
                     dt.setTimeZone(tzEST);
                     dt = dt.toUTC();
 #endif
-                    t = dt.toTime_t();
+                    t = dt.toSecsSinceEpoch();
                 }
             }
             const_cast <Item *>(itm)->m_last_inv_update = t;

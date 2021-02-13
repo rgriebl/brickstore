@@ -33,6 +33,8 @@
 #include <QScrollBar>
 #include <QMenu>
 #include <QPainter>
+#include <QStandardPaths>
+#include <QRegularExpression>
 
 #include "messagebox.h"
 #include "config.h"
@@ -636,7 +638,7 @@ Window::Window(Document *doc, QWidget *parent)
 
     QBoxLayout *toplay = new QVBoxLayout(this);
     toplay->setSpacing(0);
-    toplay->setMargin(0);
+    toplay->setContentsMargins(0, 0, 0, 0);
     toplay->addWidget(w_statusbar, 0);
     toplay->addWidget(w_list, 10);
 
@@ -1703,7 +1705,7 @@ void Window::on_edit_remark_add_triggered()
         uint remarkcount = 0;
         m_doc->beginMacro();
 
-        QRegExp regexp("\\b" + QRegExp::escape(addremarks) + "\\b");
+        QRegularExpression regexp("\\b" + QRegularExpression::escape(addremarks) + "\\b");
 
         WindowProgress wp(w_list, tr("Changing remarks"), selection().count());
 
@@ -1714,7 +1716,7 @@ void Window::on_edit_remark_add_triggered()
                 str = addremarks;
             else if (str.indexOf(regexp) != -1)
                 ;
-            else if (addremarks.indexOf(QRegExp("\\b" + QRegExp::escape(str) + "\\b")) != -1)
+            else if (addremarks.indexOf(QRegularExpression("\\b" + QRegularExpression::escape(str) + "\\b")) != -1)
                 str = addremarks;
             else
                 str = str + " " + addremarks;
@@ -1745,7 +1747,7 @@ void Window::on_edit_remark_rem_triggered()
         uint remarkcount = 0;
         m_doc->beginMacro();
 
-        QRegExp regexp("\\b" + QRegExp::escape(remremarks) + "\\b");
+        QRegularExpression regexp("\\b" + QRegularExpression::escape(remremarks) + "\\b");
 
         WindowProgress wp(w_list, tr("Changing remarks"), selection().count());
 
@@ -1804,7 +1806,7 @@ void Window::on_edit_comment_add_triggered()
         uint commentcount = 0;
         m_doc->beginMacro();
 
-        QRegExp regexp("\\b" + QRegExp::escape(addcomments) + "\\b");
+        QRegularExpression regexp("\\b" + QRegularExpression::escape(addcomments) + "\\b");
 
         WindowProgress wp(w_list, tr("Changing comments"), selection().count());
 
@@ -1815,7 +1817,7 @@ void Window::on_edit_comment_add_triggered()
                 str = addcomments;
             else if (str.indexOf(regexp) != -1)
                 ;
-            else if (addcomments.indexOf(QRegExp("\\b" + QRegExp::escape(str) + "\\b")) != -1)
+            else if (addcomments.indexOf(QRegularExpression("\\b" + QRegularExpression::escape(str) + "\\b")) != -1)
                 str = addcomments;
             else
                 str = str + " " + addcomments;
@@ -1846,7 +1848,7 @@ void Window::on_edit_comment_rem_triggered()
         uint commentcount = 0;
         m_doc->beginMacro();
 
-        QRegExp regexp("\\b" + QRegExp::escape(remcomments) + "\\b");
+        QRegularExpression regexp("\\b" + QRegularExpression::escape(remcomments) + "\\b");
 
         WindowProgress wp(w_list, tr("Changing comments"), selection().count());
 
@@ -2344,12 +2346,12 @@ void Window::print(bool as_pdf)
     else {
         QPrintDialog pd(&prt, FrameWork::inst());
 
-        pd.addEnabledOption(QAbstractPrintDialog::PrintToFile);
-        pd.addEnabledOption(QAbstractPrintDialog::PrintCollateCopies);
-        pd.addEnabledOption(QAbstractPrintDialog::PrintShowPageSize);
+        pd.setOption(QAbstractPrintDialog::PrintToFile);
+        pd.setOption(QAbstractPrintDialog::PrintCollateCopies);
+        pd.setOption(QAbstractPrintDialog::PrintShowPageSize);
 
         if (!selection().isEmpty())
-            pd.addEnabledOption(QAbstractPrintDialog::PrintSelection);
+            pd.setOption(QAbstractPrintDialog::PrintSelection);
 
         //pd.setPrintRange(m_doc->selection().isEmpty() ? QAbstractPrintDialog::AllPages : QAbstractPrintDialog::Selection);
 

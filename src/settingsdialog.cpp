@@ -45,7 +45,7 @@ static QString systemDirName(const QString &path)
         QStandardPaths::PicturesLocation,
         QStandardPaths::TempLocation,
         QStandardPaths::HomeLocation,
-        QStandardPaths::DataLocation,
+        QStandardPaths::AppLocalDataLocation,
         QStandardPaths::CacheLocation
     };
 

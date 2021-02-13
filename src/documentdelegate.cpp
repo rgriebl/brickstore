@@ -23,7 +23,7 @@
 #include <QTableView>
 #include <QHeaderView>
 #include <QItemDelegate>
-#include <QStyleOptionFrameV2>
+#include <QStyleOptionFrame>
 #include <QStyle>
 #include <QApplication>
 #include <QScrollBar>
@@ -67,15 +67,19 @@ public:
     }
 
 protected:
-    bool eventFilter(QObject *o, QEvent *e) override
-    {
-        if (e->type() == QEvent::LanguageChange)
-            m_dd->languageChange();
-        return QObject::eventFilter(o, e);
-    }
+    bool eventFilter(QObject *o, QEvent *e) override;
+
 private:
     DocumentDelegate *m_dd;
 };
+
+bool LanguageChangeHelper::eventFilter(QObject *o, QEvent *e)
+{
+    if (e->type() == QEvent::LanguageChange)
+        m_dd->languageChange();
+    return QObject::eventFilter(o, e);
+}
+
 
 DocumentDelegate::DocumentDelegate(Document *doc, QTableView *table)
     : QItemDelegate(table)
@@ -184,7 +188,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
     if (idx.column() == Document::Index) {
         QStyle *style = option.widget ? option.widget->style() : QApplication::style();
         QStyleOptionHeader headerOption;
-        headerOption.init(option.widget);
+        headerOption.initFrom(option.widget);
         headerOption.text = idx.data().toString();
         headerOption.state = option.state;
         headerOption.textAlignment = align;
@@ -336,7 +340,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         int iconSize = std::min(fm.height() * 5 / 4, h * 3 / 4);
         union { struct { qint32 i1; quint32 i2; } s; quint64 q; } key;
         key.s.i1 = iconSize;
-        key.s.i2 = int(it->status());
+        key.s.i2 = quint32(it->status());
 
         QPixmap *pix = s_status_cache[key.q];
         if (!pix) {
@@ -391,7 +395,8 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         break;
     }
     case Document::Color: {
-        image = BrickLink::core()->colorImage(it->color(), option.decorationSize.width() * 1.5, option.rect.height());
+        image = BrickLink::core()->colorImage(it->color(), option.decorationSize.width() * 3 / 2,
+                                              option.rect.height());
         break;
     }
     case Document::Retain:
@@ -554,7 +559,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         int rw = w - 2 * margin;
 
         if (!richTextColumns.contains(idx.column())) {
-            p->drawText(x + margin, y, rw, h, align, str);
+            p->drawText(x + margin, y, rw, h, int(align), str);
             return;
         }
 
@@ -600,7 +605,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
 
         if (tlp && tlp->lineCount()) {
             const auto lastLine = tlp->lineAt(tlp->lineCount() - 1);
-            int height = tlp->lineCount() * (fm.leading() + lastLine.height());
+            int height = tlp->lineCount() * (fm.leading() + int(lastLine.height()));
 
             quint64 elideHash = quint64(idx.row()) << 32 | quint64(idx.column());
 
@@ -770,7 +775,8 @@ bool DocumentDelegate::nonInlineEdit(QEvent *e, Document::Item *it, const QStyle
             auto me = static_cast<QMouseEvent *>(e);
             int d = option.rect.height() / 2;
 
-            if ((me->x() > (option.rect.right() - d)) && (me->y() > (option.rect.bottom() - d))) {
+            if ((me->pos().x() > (option.rect.right() - d))
+                    && (me->pos().y() > (option.rect.bottom() - d))) {
                 if (auto a = FrameWork::inst()->findAction("edit_partoutitems")) {
                     if (a->isEnabled())
                         a->trigger();

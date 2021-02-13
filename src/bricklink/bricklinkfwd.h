@@ -49,18 +49,6 @@ typedef QPair<int, const Item *>              AppearsInItem;
 typedef QVector<AppearsInItem>                AppearsInColor;
 typedef QHash<const Color *, AppearsInColor>  AppearsIn;
 
-QDataStream &operator << (QDataStream &ds, const Item *item);
-QDataStream &operator >> (QDataStream &ds, Item *item);
-
-QDataStream &operator << (QDataStream &ds, const ItemType *itt);
-QDataStream &operator >> (QDataStream &ds, ItemType *itt);
-
-QDataStream &operator << (QDataStream &ds, const Category *cat);
-QDataStream &operator >> (QDataStream &ds, Category *cat);
-
-QDataStream &operator << (QDataStream &ds, const Color *col);
-QDataStream &operator >> (QDataStream &ds, Color *col);
-
 enum class Time      { PastSix, Current, Count };
 enum class Price     { Lowest, Average, WAverage, Highest, Count };
 enum class Condition { New, Used, Count };

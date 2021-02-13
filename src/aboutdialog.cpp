@@ -44,7 +44,7 @@ AboutDialog::AboutDialog(QWidget *parent)
         ldraw_icon->setPartAndColor(part, 321);
         ldraw_icon->startAnimation();
         auto layout = new QHBoxLayout(w_icon);
-        layout->setMargin(0);
+        layout->setContentsMargins(0, 0, 0, 0);
         layout->addWidget(ldraw_icon);
         w_icon->setPixmap(QPixmap());
     }

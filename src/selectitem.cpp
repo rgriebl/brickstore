@@ -430,7 +430,7 @@ void SelectItem::init()
             this, &SelectItem::showContextMenu);
 
     auto *lay = new QGridLayout(this);
-    lay->setMargin(0);
+    lay->setContentsMargins(0, 0, 0, 0);
     lay->setColumnStretch(1, 25);
     lay->setColumnStretch(2, 75);
     lay->setRowStretch(0, 0);
@@ -444,7 +444,7 @@ void SelectItem::init()
     lay->addWidget(d->w_filter, 0, 2);
 
     auto *viewlay = new QHBoxLayout();
-    viewlay->setMargin(0);
+    viewlay->setContentsMargins(0, 0, 0, 0);
     viewlay->setSpacing(0);
     viewlay->addSpacing(5);
     viewlay->addWidget(d->w_pcc);

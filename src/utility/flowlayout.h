@@ -24,9 +24,9 @@ class FlowLayout : public QLayout
 public:
     explicit FlowLayout(QWidget *parent, int margin = -1, int spacing = -1);
     explicit FlowLayout(int margin = -1, int spacing = -1);
-    ~FlowLayout();
+    ~FlowLayout() override;
 
-    int spacing() const;
+    int spacing() const; //Qt6 override;
 
     int count() const override;
     QLayoutItem *itemAt(int index) const override;

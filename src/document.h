@@ -276,7 +276,6 @@ private:
 
     bool m_differenceModeActive = false;
 
-    bool             m_implicitUSD = false;
     QString          m_currencycode;
     quint64          m_error_mask = 0;
     QString          m_filename;
