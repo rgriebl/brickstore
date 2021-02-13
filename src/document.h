@@ -105,31 +105,42 @@ public:
         QString m_ccode;
     };
 
-
-
     // Itemviews API
-    Item *item(const QModelIndex &idx) const;
-    QModelIndex index(const Item *i, int column = 0) const;
+    BrickLink::InvItem *item(const QModelIndex &idx) const;
+    QModelIndex index(const BrickLink::InvItem *i, int column = 0) const;
     QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
 
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
     virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
     virtual QVariant data(const QModelIndex &index, int role) const;
-    virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const;
+    virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
     Qt::ItemFlags flags(const QModelIndex&) const;
     bool setData(const QModelIndex&, const QVariant&, int);
     QVariant dataForEditRole(const Item *it, Field f) const;
-    QString dataForDisplayRole(const Item *it, Field f, int row) const;
-    QVariant dataForFilterRole(const Item *it, Field f, int row) const;
+    QString dataForDisplayRole(const BrickLink::InvItem *it, Field f) const;
+    QVariant dataForFilterRole(const Item *it, Field f) const;
     QVariant dataForDecorationRole(const Item *it, Field f) const;
     Qt::CheckState dataForCheckStateRole(const Item *it, Field f) const;
     int dataForTextAlignmentRole(const Item *it, Field f) const;
-    QString dataForToolTipRole(const Item *it, Field f, int row) const;
+    QString dataForToolTipRole(const Item *it, Field f) const;
     static QString headerDataForDisplayRole(Field f);
     int headerDataForTextAlignmentRole(Field f) const;
     int headerDataForDefaultWidthRole(Field f) const;
 
     QString subConditionLabel(BrickLink::SubCondition sc) const;
+
+    bool isSorted() const;
+    int sortColumn() const;
+    Qt::SortOrder sortOrder() const;
+    void sort(int column, Qt::SortOrder order) override;
+
+    bool isFiltered() const;
+    QString filter() const;
+    void setFilter(const QString &filter);
+
+    BrickLink::InvItemList sortItemList(const BrickLink::InvItemList &list) const;
+
+    QString filterToolTip() const;
 
 public slots:
     void pictureUpdated(BrickLink::Picture *pic);
@@ -200,10 +211,10 @@ public:
     QUndoStack *undoStack() const;
 
     bool isDifferenceModeActive() const;
-    bool startDifferenceModeInternal(const QHash<const Item *, Item> &updateBase); // only for DocumentIO
-    bool startDifferenceMode();
-    void endDifferenceMode();
+    void setDifferenceModeActive(bool active);
     const Item *differenceBaseItem(const Item *item) const;
+
+    void activateDifferenceModeInternal(const QHash<const Item *, Item> &updateBase); // only for DocumentIO
 
 signals:
     void itemFlagsChanged(const Document::Item *);
@@ -214,32 +225,57 @@ signals:
     void currencyCodeChanged(const QString &ccode);
     void differenceModeChanged(bool differenceMode);
     void itemCountChanged(int itemCount);
+    void filterChanged(const QString &filter);
+    void sortOrderChanged(Qt::SortOrder order);
+    void sortColumnChanged(int column);
+
+protected:
+    bool event(QEvent *e) override;
+    virtual bool filterAcceptsItem(const BrickLink::InvItem *item) const;
 
 private:
     Document(int dummy);
-    void setBrickLinkItems(const BrickLink::InvItemList &items);
+
     void setFakeIndexes(const QVector<int> &fakeIndexes);
 
-    void insertItemsDirect(const ItemList &items, QVector<int> &positions);
-    void removeItemsDirect(ItemList &items, QVector<int> &positions);
+    void setItemsDirect(const ItemList &items);
+    void insertItemsDirect(const ItemList &items, QVector<int> &positions, QVector<int> &viewPositions);
+    void removeItemsDirect(ItemList &items, QVector<int> &positions, QVector<int> &viewPositions);
     void changeItemDirect(int position, Item &item);
     void changeCurrencyDirect(const QString &ccode, qreal crate, double *&prices);
+    void setDifferenceModeActiveDirect(bool active);
+    void sortFilterDirect(int column, Qt::SortOrder order, const QString &filterString,
+                          const QVector<Filter> &filterList, BrickLink::InvItemList &unsorted);
 
     void emitDataChanged(const QModelIndex &tl = { }, const QModelIndex &br = { });
     void emitStatisticsChanged();
     void updateItemFlags(const Item *item);
     void setItemFlags(const Item *item, quint64 errors, quint64 updated);
 
+    void invalidateFilterInternal();
+    int compare(const BrickLink::InvItem *i1, const BrickLink::InvItem *i2, int sortColumn) const;
+    void languageChange();
+
     friend class AddRemoveCmd;
     friend class ChangeCmd;
     friend class CurrencyCmd;
+    friend class SortFilterCmd;
+    friend class DifferenceModeCmd;
 
 private:
-    ItemList         m_items;
+    QVector<BrickLink::InvItem *> m_items;
+    QHash<const Item *, Item> m_differenceBase;
     QVector<int>     m_fakeIndexes; // for the consolidate dialogs
     QHash<const Item *, QPair<quint64, quint64>> m_itemFlags;
 
-    QHash<const Item *, Item> m_differenceBase;
+    QVector<BrickLink::InvItem *> m_viewItems;
+
+    int m_sortColumn = -1;
+    Qt::SortOrder m_sortOrder = Qt::AscendingOrder;
+    QScopedPointer<Filter::Parser> m_filterParser;
+    QString m_filterString;
+    QVector<Filter> m_filterList;
+
     bool m_differenceModeActive = false;
 
     bool             m_implicitUSD = false;
@@ -260,53 +296,6 @@ private:
     QPair<QPoint, QPoint> m_nextDataChangedEmit;
 
     static QVector<Document *> s_documents;
-};
-
-
-class DocumentProxyModel : public QSortFilterProxyModel
-{
-    Q_OBJECT
-
-public:
-    DocumentProxyModel(Document *model, QObject *parent = nullptr);
-    ~DocumentProxyModel();
-
-    inline Document::Item *item(const QModelIndex &idx) const  { return static_cast<Document *>(sourceModel())->item(mapToSource(idx)); }
-    inline QModelIndex index(const Document::Item *i) const  { return mapFromSource(static_cast<Document *>(sourceModel())->index(i)); }
-    using QSortFilterProxyModel::index;
-
-    inline Document::Item *baseItem(const QModelIndex &idx) const;
-
-    Document::ItemList sortItemList(const Document::ItemList &list) const;
-
-    void setFilterExpression(const QString &filter);
-    QString filterExpression() const;
-    QString filterToolTip() const;
-
-    void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
-
-signals:
-    void titleChanged(const QString &title);
-    void fileNameChanged(const QString &fileName);
-    void filterExpressionChanged(const QString &filterExpression);
-
-protected:
-    bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
-    bool filterAcceptsColumn(int source_column, const QModelIndex &source_parent) const override;
-    bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const override;
-    bool event(QEvent *e) override;
-
-private:
-    void languageChange();
-    int compare(const Document::Item *i1, const Document::Item *i2, int sortColumn) const;
-
-    QString         m_filter_expression;
-    Filter::Parser *m_parser;
-    QVector<Filter> m_filter;
-
-    int             m_lastSortColumn[2];
-
-    friend class SortItemListCompare;
 };
 
 Q_DECLARE_METATYPE(Document *)

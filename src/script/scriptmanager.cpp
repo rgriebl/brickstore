@@ -108,8 +108,6 @@ bool ScriptManager::initialize(::BrickLink::Core *core)
 
     qmlRegisterUncreatableType<QmlWrapper::Document>("BrickStore", 1, 0, "Document",
                                                      cannotCreate.arg("Document"));
-    qmlRegisterUncreatableType<QmlWrapper::DocumentView>("BrickStore", 1, 0, "DocumentView",
-                                                         cannotCreate.arg("DocumentView"));
 
     qmlRegisterUncreatableType<QmlWrapper::PrintJob>("BrickStore", 1, 0, "PrintJob",
                                                          cannotCreate.arg("PrintJob"));

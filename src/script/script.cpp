@@ -161,21 +161,21 @@ void PrintingScriptTemplate::executePrint(QPaintDevice *pd, Window *win, bool se
     if (!m_printFunction.isCallable())
         throw Exception(tr("The printing script does not define a 'printFunction'."));
 
-    auto wrappedDocView = m_script->brickStoreWrapper()->documentViewForWindow(win);
+    auto wrappedDoc = m_script->brickStoreWrapper()->documentForWindow(win);
 
-    if (!wrappedDocView)
+    if (!wrappedDoc)
         throw Exception(tr("Cannot print without a document."));
 
-    const auto items = win->documentView()->sortItemList(selectionOnly ? win->selection()
-                                                                       : win->document()->items());
+    const auto items = win->document()->sortItemList(selectionOnly ? win->selection()
+                                                                   : win->document()->items());
     QVariantList itemList;
     for (auto item : items)
-        itemList << QVariant::fromValue(QmlWrapper::InvItem(item, wrappedDocView->document()));
+        itemList << QVariant::fromValue(QmlWrapper::InvItem(item, wrappedDoc));
 
     QQmlEngine *engine = m_script->qmlEngine();
     QJSValueList args = { engine->toScriptValue(job.data()),
                           engine->toScriptValue(itemList),
-                          engine->toScriptValue(wrappedDocView) };
+                          engine->toScriptValue(wrappedDoc) };
     QJSValue result = m_printFunction.call(args);
 
     if (result.isError()) {

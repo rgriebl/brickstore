@@ -652,7 +652,7 @@ void FrameWork::languageChange()
         QMetaObject::invokeMethod(this, [this]() {
             QString tt = findAction("edit_filter_focus")->toolTip();
             if (m_current_window)
-                tt.append(m_current_window->filterToolTip());
+                tt.append(m_current_window->document()->filterToolTip());
             m_filter->setToolTip(tt);
         }, Qt::QueuedConnection);
     }
@@ -1517,7 +1517,7 @@ void FrameWork::connectWindow(QWidget *w)
                    this, &FrameWork::selectionUpdate);
         if (m_filter) {
             disconnect(this, &FrameWork::filterTextChanged,
-                       m_current_window.data(), &Window::setFilter);
+                       doc, &Document::setFilter);
             m_filter->setText(QString());
         }
         m_undogroup->setActiveStack(nullptr);
@@ -1537,10 +1537,10 @@ void FrameWork::connectWindow(QWidget *w)
         connect(window, &Window::selectionChanged,
                 this, &FrameWork::selectionUpdate);
         if (m_filter) {
-            m_filter->setText(window->filter());
-            filterToolTip = window->filterToolTip();
+            m_filter->setText(doc->filter());
+            filterToolTip = doc->filterToolTip();
             connect(this, &FrameWork::filterTextChanged,
-                    window, &Window::setFilter);
+                    doc, &Document::setFilter);
 
             if (auto a = findAction("edit_filter_focus"))
                 m_filter->setToolTip(Utility::toolTipLabel(a->text(), a->shortcut(),

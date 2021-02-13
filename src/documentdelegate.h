@@ -35,7 +35,7 @@ class DocumentDelegate : public QItemDelegate
 {
     Q_OBJECT
 public:
-    DocumentDelegate(Document *doc, DocumentProxyModel *view, QTableView *table);
+    DocumentDelegate(Document *doc, QTableView *table);
 
     void setReadOnly(bool ro);
     bool isReadOnly() const;
@@ -58,7 +58,6 @@ protected:
 
 protected:
     Document *m_doc;
-    DocumentProxyModel *m_view;
     QTableView *m_table;
     QPointer<SelectItemDialog> m_select_item;
     QPointer<SelectColorDialog> m_select_color;

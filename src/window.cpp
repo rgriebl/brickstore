@@ -315,11 +315,10 @@ public:
             if (b == m_doc->isDifferenceModeActive())
                 return;
             if (b) {
-                if (!m_doc->startDifferenceMode())
-                    m_differenceMode->setChecked(false);
+                m_doc->setDifferenceModeActive(true);
             } else {
                 if (MessageBox::question(this, tr("End difference mode"), tr("Ending difference mode resets all base values used for calculating the actual differences to the current values.<br>This operation is not undoable.<br>Do you still want to continue?")) == QMessageBox::Yes) {
-                    m_doc->endDifferenceMode();
+                    m_doc->setDifferenceModeActive(false);
                 } else {
                     m_differenceMode->setChecked(true);
                 }
@@ -558,7 +557,6 @@ Window::Window(Document *doc, QWidget *parent)
     m_doc = doc;
     m_doc->setParent(this);
 
-    m_view = new DocumentProxyModel(doc, this);
     m_latest_row = -1;
     m_latest_timer = new QTimer(this);
     m_latest_timer->setSingleShot(true);
@@ -575,12 +573,13 @@ Window::Window(Document *doc, QWidget *parent)
 
     w_list = new TableView();
     w_header = new HeaderView(Qt::Horizontal, w_list);
+    w_header->setSectionsClickable(true);
+    w_header->setSectionsMovable(true);
+    w_header->setHighlightSections(false);
     w_list->setHorizontalHeader(w_header);
+    w_header->setSortIndicatorShown(true);
     w_list->setSelectionMode(QAbstractItemView::ExtendedSelection);
     w_list->setSelectionBehavior(QAbstractItemView::SelectRows);
-    w_list->setSortingEnabled(true);
-    w_list->horizontalHeader()->setSectionsClickable(true);
-    w_list->horizontalHeader()->setSectionsMovable(true);
     w_list->setAlternatingRowColors(true);
     w_list->setAutoFillBackground(false);
     w_list->setTabKeyNavigation(true);
@@ -589,15 +588,31 @@ Window::Window(Document *doc, QWidget *parent)
     w_list->setContextMenuPolicy(Qt::CustomContextMenu);
     w_list->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     w_list->verticalHeader()->hide();
-    w_list->horizontalHeader()->setHighlightSections(false);
     w_list->setEditTriggers(QAbstractItemView::DoubleClicked | QAbstractItemView::EditKeyPressed | QAbstractItemView::AnyKeyPressed);
     setFocusProxy(w_list);
 
-    w_list->setModel(m_view);
-    m_selection_model = new QItemSelectionModel(m_view, this);
+    w_list->setModel(m_doc);
+    m_selection_model = new QItemSelectionModel(m_doc, this);
     w_list->setSelectionModel(m_selection_model);
 
-    auto *dd = new DocumentDelegate(doc, m_view, w_list);
+    connect(w_header, &QHeaderView::sectionClicked,
+            this, [this](int section) {
+        //TODO-CMD: SortCmd
+
+        w_list->sortByColumn(section, w_header->sortIndicatorOrder());
+        w_list->scrollTo(m_selection_model->currentIndex());
+    });
+    connect(doc, &Document::sortColumnChanged,
+            w_header, [this](int column) {
+        w_header->setSortIndicator(column, m_doc->sortOrder());
+    });
+    connect(doc, &Document::sortOrderChanged,
+            w_header, [this](Qt::SortOrder order) {
+        w_header->setSortIndicator(m_doc->sortColumn(), order);
+    });
+
+
+    auto *dd = new DocumentDelegate(doc, w_list);
     w_list->setItemDelegate(dd);
     w_list->verticalHeader()->setDefaultSectionSize(dd->defaultItemHeight(w_list));
 
@@ -736,24 +751,9 @@ void Window::ensureLatestVisible()
 {
     if (m_latest_row >= 0) {
         int xOffset = w_list->horizontalScrollBar()->value();
-        w_list->scrollTo(m_view->index(m_latest_row, w_header->logicalIndexAt(-xOffset)));
+        w_list->scrollTo(m_doc->index(m_latest_row, w_header->logicalIndexAt(-xOffset)));
         m_latest_row = -1;
     }
-}
-
-void Window::setFilter(const QString &str)
-{
-    m_view->setFilterExpression(str);
-}
-
-QString Window::filter() const
-{
-    return m_view->filterExpression();
-}
-
-QString Window::filterToolTip() const
-{
-    return m_view->filterToolTip();
 }
 
 int Window::addItems(const BrickLink::InvItemList &items, AddItemMode addItemMode)
@@ -866,7 +866,7 @@ int Window::addItems(const BrickLink::InvItemList &items, AddItemMode addItemMod
         w_list->selectRow(0);
 
     if (lastAdded) {
-        m_latest_row = m_view->index(lastAdded).row();
+        m_latest_row = m_doc->index(lastAdded).row();
         m_latest_timer->start();
     }
 
@@ -1072,9 +1072,9 @@ void Window::on_edit_filter_from_selection_triggered()
     if (selection().count() == 1) {
         auto idx = m_selection_model->currentIndex();
         if (idx.isValid() && idx.column() >= 0) {
-            FrameWork::inst()->setFilter(m_view->headerData(idx.column(), Qt::Horizontal).toString()
+            FrameWork::inst()->setFilter(m_doc->headerData(idx.column(), Qt::Horizontal).toString()
                                          + QLatin1String(" == ")
-                                         + m_view->data(idx, Document::FilterRole).toString());
+                                         + m_doc->data(idx, Document::FilterRole).toString());
         }
     }
 }
@@ -2400,7 +2400,7 @@ Document::ItemList Window::exportCheck() const
         }
     }
 
-    return m_view->sortItemList(items);
+    return m_doc->sortItemList(items);
 }
 
 void Window::resizeColumnsToDefault()
@@ -2434,7 +2434,7 @@ void Window::updateSelection()
             m_selection.clear();
 
             foreach (const QModelIndex &idx, m_selection_model->selectedRows())
-                m_selection.append(m_view->item(idx));
+                m_selection.append(m_doc->item(idx));
 
             emit selectionChanged(m_selection);
 
@@ -2461,7 +2461,7 @@ void Window::setSelection(const Document::ItemList &lst)
     QItemSelection idxs;
 
     foreach (const Document::Item *item, lst) {
-        QModelIndex idx(m_view->index(item));
+        QModelIndex idx(m_doc->index(item));
         idxs.select(idx, idx);
     }
     m_selection_model->select(idxs, QItemSelectionModel::Clear | QItemSelectionModel::Select

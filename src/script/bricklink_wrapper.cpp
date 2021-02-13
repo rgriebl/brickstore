@@ -357,7 +357,15 @@ Document::Document(::Document *doc)
     connect(doc, &::Document::currencyCodeChanged,
             this, &Document::currencyCodeChanged);
 
-    //TODO: countChanged() signal
+    connect(doc, &::Document::filterChanged,
+            this, &Document::filterChanged);
+
+    connect(doc, &QAbstractItemModel::rowsInserted,
+            this, [this]() { emit countChanged(d->rowCount()); });
+    connect(doc, &QAbstractItemModel::rowsRemoved,
+            this, [this]() { emit countChanged(d->rowCount()); });
+    connect(doc, &QAbstractItemModel::layoutChanged,
+            this, [this]() { emit countChanged(d->rowCount()); });
 }
 
 bool Document::isWrapperFor(::Document *doc) const
@@ -413,59 +421,13 @@ InvItem Document::addInvItem(Item item, Color color)
 ///////////////////////////////////////////////////////////////////////
 
 
-DocumentView::DocumentView(Document *wrappedDoc, ::DocumentProxyModel *view)
-    : m_wrappedDoc(wrappedDoc)
-    , m_view(view)
-{
-    m_wrappedDoc->setParent(this);
-
-    connect(m_view, &::DocumentProxyModel::filterExpressionChanged,
-            this, &DocumentView::filterExpressionChanged);
-
-    connect(m_view, &QAbstractItemModel::rowsInserted,
-            this, [this]() { emit countChanged(m_view->rowCount()); });
-    connect(m_view, &QAbstractItemModel::rowsInserted,
-            this, [this]() { emit countChanged(m_view->rowCount()); });
-}
-
-bool DocumentView::isWrapperFor(DocumentProxyModel *view) const
-{
-    return (view == m_view);
-}
-
-int DocumentView::toDocumentIndex(int viewIndex) const
-{
-    return m_view->mapToSource(m_view->index(viewIndex, 0)).row();
-}
-
-int DocumentView::toViewIndex(int documentIndex) const
-{
-    return m_view->mapFromSource(m_view->sourceModel()->index(documentIndex, 0)).row();
-}
-
-int DocumentView::count() const
-{
-    return m_view->rowCount();
-}
-
-Document *DocumentView::document() const
-{
-    return m_wrappedDoc;
-}
-
-
-///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-
-
 BrickStore::BrickStore()
 {
     auto checkActiveWindow = [this](Window *win) {
-        DocumentView *view = documentViewForWindow(win);
-        if (view != m_currentDocumentView) {
-            m_currentDocumentView = view;
-            emit currentDocumentViewChanged(view);
+        Document *doc = documentForWindow(win);
+        if (doc != m_currentDocument) {
+            m_currentDocument = doc;
+            emit currentDocumentChanged(doc);
         }
     };
 
@@ -474,26 +436,26 @@ BrickStore::BrickStore()
 
     connect(FrameWork::inst(), &FrameWork::windowListChanged,
             this, [this, checkActiveWindow]() {
-        QVector<DocumentView *> newViews;
-        QVector<DocumentView *> oldViews = m_documentViews;
+        QVector<Document *> newDocs;
+        QVector<Document *> oldDocs = m_documents;
         const auto allWindows = FrameWork::inst()->allWindows();
         for (auto win : allWindows) {
-            auto view = documentViewForWindow(win);
-            if (view) {
-                oldViews.removeOne(view);
-                newViews.append(view);
+            auto doc = documentForWindow(win);
+            if (doc) {
+                oldDocs.removeOne(doc);
+                newDocs.append(doc);
             } else {
-                view = new DocumentView(new Document(win->document()), win->documentView());
-                QQmlEngine::setObjectOwnership(view, QQmlEngine::CppOwnership);
-                newViews.append(view);
+                doc = new Document(win->document());
+                QQmlEngine::setObjectOwnership(doc, QQmlEngine::CppOwnership);
+                newDocs.append(doc);
             }
         }
-        while (!oldViews.isEmpty()) {
-            delete oldViews.takeLast();
+        while (!oldDocs.isEmpty()) {
+            delete oldDocs.takeLast();
         }
-        if (newViews != m_documentViews) {
-            m_documentViews = newViews;
-            emit documentViewsChanged(m_documentViews);
+        if (newDocs != m_documents) {
+            m_documents = newDocs;
+            emit documentsChanged(m_documents);
         }
 
         // the windowActivated signal for new documents is sent way too early
@@ -503,38 +465,38 @@ BrickStore::BrickStore()
 }
 
 
-QVector<DocumentView *> BrickStore::documentViews() const
+QVector<Document *> BrickStore::documents() const
 {
-    return m_documentViews;
+    return m_documents;
 }
 
-DocumentView *BrickStore::currentDocumentView() const
+Document *BrickStore::currentDocument() const
 {
-    return m_currentDocumentView;
+    return m_currentDocument;
 }
 
-DocumentView *BrickStore::newDocument(const QString &title)
+Document *BrickStore::newDocument(const QString &title)
 {
     if (isReadOnly(this))
         return nullptr;
 
-    return setupDocumentView(::DocumentIO::create(), title);
+    return setupDocument(::DocumentIO::create(), title);
 }
 
-DocumentView *BrickStore::openDocument(const QString &fileName)
+Document *BrickStore::openDocument(const QString &fileName)
 {
     if (isReadOnly(this))
         return nullptr;
 
-    return setupDocumentView(::DocumentIO::open(fileName));
+    return setupDocument(::DocumentIO::open(fileName));
 }
 
-DocumentView *BrickStore::importBrickLinkStore(const QString &title)
+Document *BrickStore::importBrickLinkStore(const QString &title)
 {
     if (isReadOnly(this))
         return nullptr;
 
-    return setupDocumentView(::DocumentIO::importBrickLinkStore(), title);
+    return setupDocument(::DocumentIO::importBrickLinkStore(), title);
 }
 
 void BrickStore::classBegin()
@@ -543,28 +505,28 @@ void BrickStore::classBegin()
 void BrickStore::componentComplete()
 { }
 
-DocumentView *BrickStore::documentViewForWindow(Window *win) const
+Document *BrickStore::documentForWindow(Window *win) const
 {
     if (win) {
-        for (auto view : m_documentViews) {
-            if (view->isWrapperFor(win->documentView()))
-                return view;
+        for (auto doc : m_documents) {
+            if (doc->isWrapperFor(win->document()))
+                return doc;
         }
     }
     return nullptr;
 }
 
-DocumentView *BrickStore::setupDocumentView(::Document *doc, const QString &title)
+Document *BrickStore::setupDocument(::Document *doc, const QString &title)
 {
     if (doc) {
         auto win = FrameWork::inst()->createWindow(doc);
         if (!title.isEmpty())
             doc->setTitle(title);
 
-        Q_ASSERT(currentDocumentView());
-        Q_ASSERT(currentDocumentView()->isWrapperFor(win->documentView()));
+        Q_ASSERT(currentDocument());
+        Q_ASSERT(currentDocument()->isWrapperFor(win->document()));
 
-        return currentDocumentView();
+        return currentDocument();
     }
     return nullptr;
 }

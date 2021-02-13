@@ -438,6 +438,7 @@ class Document : public QObject
     Q_PRIVATE_PROPERTY(d, QString fileName READ fileName WRITE setFileName NOTIFY fileNameChanged)
     Q_PROPERTY(int count READ count NOTIFY countChanged)
     Q_PRIVATE_PROPERTY(d, QString currencyCode READ currencyCode NOTIFY currencyCodeChanged)
+    Q_PRIVATE_PROPERTY(d, QString filter READ filter NOTIFY filterChanged)
 
     //TODO: missing: statistics & order
 
@@ -465,37 +466,10 @@ signals:
     void fileNameChanged(const QString &fileName);
     void countChanged(int count);
     void currencyCodeChanged(const QString &currencyCode);
+    void filterChanged(const QString &filter);
 
 private:
     ::Document *d;
-};
-
-class DocumentView : public QObject
-{
-    Q_OBJECT
-    Q_PRIVATE_PROPERTY(m_view, QString filter READ filterExpression NOTIFY filterExpressionChanged)
-    Q_PROPERTY(int count READ count NOTIFY countChanged)
-    Q_PROPERTY(Document *document READ document CONSTANT)
-
-    //TODO: missing: selection handling (and statistics for selection)
-
-public:
-    DocumentView(Document *wrappedDoc, ::DocumentProxyModel *view);
-    bool isWrapperFor(::DocumentProxyModel *view) const;
-
-    Q_INVOKABLE int toDocumentIndex(int viewIndex) const;
-    Q_INVOKABLE int toViewIndex(int documentIndex) const;
-
-    int count() const;
-    Document *document() const;
-
-signals:
-    void filterExpressionChanged(const QString &filterExpression);
-    void countChanged(int count);
-
-private:
-    Document *m_wrappedDoc;
-    ::DocumentProxyModel *m_view;
 };
 
 
@@ -503,35 +477,35 @@ class BrickStore : public QObject, public QQmlParserStatus
 {
     Q_OBJECT
     Q_INTERFACES(QQmlParserStatus)
-    Q_PROPERTY(QVector<DocumentView *> documentViews READ documentViews NOTIFY documentViewsChanged)
-    Q_PROPERTY(DocumentView *currentDocumentView READ currentDocumentView NOTIFY currentDocumentViewChanged)
+    Q_PROPERTY(QVector<Document *> documents READ documents NOTIFY documentsChanged)
+    Q_PROPERTY(Document *currentDocument READ currentDocument NOTIFY currentDocumentChanged)
 
 public:
     BrickStore();
 
-    QVector<DocumentView *> documentViews() const;
-    DocumentView *currentDocumentView() const;
+    QVector<Document *> documents() const;
+    Document *currentDocument() const;
 
-    DocumentView *documentViewForWindow(Window *win) const;
+    Document *documentForWindow(Window *win) const;
 
     // the QmlWrapper:: prefix is needed, otherwise moc/qml get the return type wrong
-    Q_INVOKABLE QmlWrapper::DocumentView *newDocument(const QString &title);
-    Q_INVOKABLE QmlWrapper::DocumentView *openDocument(const QString &fileName);
-    Q_INVOKABLE QmlWrapper::DocumentView *importBrickLinkStore(const QString &title = { });
+    Q_INVOKABLE QmlWrapper::Document *newDocument(const QString &title);
+    Q_INVOKABLE QmlWrapper::Document *openDocument(const QString &fileName);
+    Q_INVOKABLE QmlWrapper::Document *importBrickLinkStore(const QString &title = { });
 
 signals:
-    void documentViewsChanged(QVector<DocumentView *> documents);
-    void currentDocumentViewChanged(DocumentView *currentDocument);
+    void documentsChanged(QVector<Document *> documents);
+    void currentDocumentChanged(Document *currentDocument);
 
 protected:
     void classBegin() override;
     void componentComplete() override;
 
 private:
-    DocumentView *setupDocumentView(::Document *doc, const QString &title = { });
+    Document *setupDocument(::Document *doc, const QString &title = { });
 
-    QVector<DocumentView *> m_documentViews;
-    DocumentView *m_currentDocumentView = nullptr;
+    QVector<Document *> m_documents;
+    Document *m_currentDocument = nullptr;
 };
 
 } // namespace QmlWrapper
@@ -552,4 +526,3 @@ Q_DECLARE_METATYPE(QmlWrapper::BrickLink::UpdateStatus)
 Q_DECLARE_METATYPE(QmlWrapper::BrickLink::OrderType)
 Q_DECLARE_METATYPE(QmlWrapper::BrickLink *)
 Q_DECLARE_METATYPE(QmlWrapper::Document *)
-Q_DECLARE_METATYPE(QmlWrapper::DocumentView *)

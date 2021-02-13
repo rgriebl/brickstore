@@ -70,10 +70,9 @@ ConsolidateItemsDialog::ConsolidateItemsDialog(const Window *win,
 
     setFocusProxy(w_list);
 
-    auto *view = new DocumentProxyModel(doc, this);
-    w_list->setModel(view);
+    w_list->setModel(doc);
 
-    auto *dd = new DocumentDelegate(doc, view, w_list);
+    auto *dd = new DocumentDelegate(doc, w_list);
     dd->setReadOnly(true);
     w_list->setItemDelegate(dd);
     w_list->verticalHeader()->setDefaultSectionSize(dd->defaultItemHeight(w_list));
@@ -86,7 +85,7 @@ ConsolidateItemsDialog::ConsolidateItemsDialog(const Window *win,
                              w_list->verticalHeader()->length() +
                              w_list->style()->pixelMetric(QStyle::PM_ScrollBarExtent));
 
-    w_list->selectionModel()->setCurrentIndex(view->index(preselectedIndex, 0),
+    w_list->selectionModel()->setCurrentIndex(doc->index(preselectedIndex, 0),
                                               QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
 
     if (current == total) {

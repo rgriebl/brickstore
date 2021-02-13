@@ -37,6 +37,7 @@ public:
 private:
     Document *         m_doc;
     QVector<int>       m_positions;
+    QVector<int>       m_viewPositions;
     Document::ItemList m_items;
     Type               m_type;
     bool               m_merge_allowed;
@@ -66,7 +67,7 @@ public:
     CurrencyCmd(Document *doc, const QString &ccode, qreal crate);
     ~CurrencyCmd() override;
 
-    virtual int id() const override;
+    int id() const override;
 
     void redo() override;
     void undo() override;
@@ -76,4 +77,41 @@ private:
     QString    m_ccode;
     qreal      m_crate;
     double *   m_prices; // m_items.count() * 5 (price, origPrice, tierPrice * 3)
+};
+
+class DifferenceModeCmd : public QUndoCommand
+{
+public:
+    DifferenceModeCmd(Document *doc, bool active);
+    int id() const override;
+
+    void redo() override;
+    void undo() override;
+
+private:
+    Document *m_doc;
+    bool m_active;
+};
+
+
+class SortFilterCmd : public QUndoCommand
+{
+public:
+    SortFilterCmd(Document *doc, int column, Qt::SortOrder order,
+                  const QString &filterString, const QVector<Filter> &filterList);
+    int id() const override;
+    bool mergeWith(const QUndoCommand *other) override;
+
+    void redo() override;
+    void undo() override;
+
+private:
+    Document *m_doc;
+    QDateTime m_created;
+    int m_column;
+    Qt::SortOrder m_order;
+    QString m_filterString;
+    QVector<Filter> m_filterList;
+
+    QVector<BrickLink::InvItem *> m_unsorted;
 };

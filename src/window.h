@@ -41,7 +41,6 @@ public:
     ~Window() override;
 
     Document *document() const { return m_doc; }
-    DocumentProxyModel *documentView() const { return m_view; } // for scripting
 
     enum class Consolidate {
         Not = -1,
@@ -74,9 +73,6 @@ public:
     void subtractItems(const BrickLink::InvItemList &items);
     void copyRemarks(const BrickLink::InvItemList &items);
 
-    QString filter() const;
-    QString filterToolTip() const;
-
     QDomElement createGuiStateXML();
     bool parseGuiStateXML(const QDomElement &root);
 
@@ -85,7 +81,6 @@ public:
     QByteArray currentColumnLayout() const;
 
 public slots:
-    void setFilter(const QString &str);
     void setSimpleMode(bool b);
     void setSelection(const Document::ItemList &);
 
@@ -202,7 +197,6 @@ private:
 
 private:
     Document *           m_doc;
-    DocumentProxyModel * m_view;
     QItemSelectionModel *m_selection_model;
     Document::ItemList   m_selection;
     QTimer *             m_delayedSelectionUpdate = nullptr;

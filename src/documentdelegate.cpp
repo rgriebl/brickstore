@@ -77,10 +77,9 @@ private:
     DocumentDelegate *m_dd;
 };
 
-DocumentDelegate::DocumentDelegate(Document *doc, DocumentProxyModel *view, QTableView *table)
-    : QItemDelegate(view)
+DocumentDelegate::DocumentDelegate(Document *doc, QTableView *table)
+    : QItemDelegate(table)
     , m_doc(doc)
-    , m_view(view)
     , m_table(table)
 {
     m_table->viewport()->setAttribute(Qt::WA_Hover);
@@ -171,7 +170,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
     if (!idx.isValid())
         return;
 
-    const Document::Item *it = m_view->item(idx);
+    const Document::Item *it = m_doc->item(idx);
     if (!it)
         return;
     const Document::Item *base = m_doc->differenceBaseItem(it);
@@ -638,7 +637,7 @@ bool DocumentDelegate::editorEvent(QEvent *e, QAbstractItemModel *model, const Q
     if (!e || !model || !idx.isValid())
         return false;
 
-    Document::Item *it = m_view->item(idx);
+    Document::Item *it = m_doc->item(idx);
     if (!it)
         return false;
 
@@ -828,7 +827,7 @@ QWidget *DocumentDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
     if (m_read_only)
         return nullptr;
 
-    Document::Item *it = m_view->item(idx);
+    Document::Item *it = m_doc->item(idx);
     if (!it)
         return nullptr;
 
@@ -877,20 +876,20 @@ bool DocumentDelegate::helpEvent(QHelpEvent *event, QAbstractItemView *view,
         return QItemDelegate::helpEvent(event, view, option, idx);
 
     if (idx.isValid() && (idx.column() == Document::Picture)) {
-        Document::Item *it = m_view->item(idx);
+        Document::Item *it = m_doc->item(idx);
         if (it && it->item())
             BrickLink::ToolTip::inst()->show(it->item(), nullptr, event->globalPos(), view);
     } else {
         QString updatedTip;
         if (m_doc->isDifferenceModeActive()) {
-            Document::Item *item = m_view->item(idx);
+            Document::Item *item = m_doc->item(idx);
             auto base = m_doc->differenceBaseItem(item);
 
             if (base && item) {
                 auto updated = m_doc->itemFlags(item).second;
                 if (updated & (1ULL << idx.column())) {
                     updatedTip = tr("The original value of this field was:") % u"<br><b>"
-                            % m_doc->dataForDisplayRole(base, Document::Field(idx.column()), idx.row())
+                            % m_doc->dataForDisplayRole(base, Document::Field(idx.column()))
                             % u"</b>";
 
                     if (updated & updatedWarningMask & (1ULL << idx.column())) {

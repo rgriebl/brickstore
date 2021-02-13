@@ -379,7 +379,7 @@ Document *DocumentIO::loadFrom(const QString &name)
     doc->setGuiState(result.domGuiState);
     doc->setFileName(name);
     if (result.differenceModeActive)
-        doc->startDifferenceModeInternal(result.differenceModeBase);
+        doc->activateDifferenceModeInternal(result.differenceModeBase);
     Config::inst()->addToRecentFiles(name);
 
     return doc;
