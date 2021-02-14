@@ -1061,7 +1061,6 @@ QVariant Document::dataForFilterRole(const Item *it, Field f) const
         case BrickLink::Stockroom::C: return QString("C");
         default                     : return QString("-");
         }
-    case Index       : return m_items.indexOf(const_cast<BrickLink::InvItem *>(it) + 1);
     case Retain      : return it->retain() ? tr("Y", "Filter>Retain>Yes")
                                            : tr("N", "Filter>Retain>No");
     case Price       : return it->price();
