@@ -75,7 +75,7 @@ public slots:
 signals:
     void windowActivated(Window *);
     void windowListChanged();
-    void filterTextChanged(const QString &filter);
+    void filterChanged(const QString &filter);
 
 protected slots:
     void languageChange();

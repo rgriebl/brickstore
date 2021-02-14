@@ -951,7 +951,7 @@ bool FrameWork::setupToolBar(QToolBar *t, const QVector<QByteArray> &a_names)
                 });
                 connect(m_filter_delay, &QTimer::timeout, [this]() {
                     if (m_filter)
-                        emit filterTextChanged(m_filter->text());
+                        emit filterChanged(m_filter->text());
                 });
                 connect(Config::inst(), &Config::filtersInFavoritesModeChanged,
                         m_filter, &HistoryLineEdit::setToFavoritesMode);
@@ -1517,8 +1517,11 @@ void FrameWork::connectWindow(QWidget *w)
         disconnect(m_current_window.data(), &Window::selectionChanged,
                    this, &FrameWork::selectionUpdate);
         if (m_filter) {
-            disconnect(this, &FrameWork::filterTextChanged,
+            disconnect(this, &FrameWork::filterChanged,
                        doc, &Document::setFilter);
+            disconnect(doc, &Document::filterChanged,
+                       this, &FrameWork::setFilter);
+
             m_filter->setText(QString());
         }
         m_undogroup->setActiveStack(nullptr);
@@ -1537,11 +1540,14 @@ void FrameWork::connectWindow(QWidget *w)
                 this, &FrameWork::modificationUpdate);
         connect(window, &Window::selectionChanged,
                 this, &FrameWork::selectionUpdate);
+
         if (m_filter) {
             m_filter->setText(doc->filter());
             filterToolTip = doc->filterToolTip();
-            connect(this, &FrameWork::filterTextChanged,
+            connect(this, &FrameWork::filterChanged,
                     doc, &Document::setFilter);
+            connect(doc, &Document::filterChanged,
+                    this, &FrameWork::setFilter);
 
             if (auto a = findAction("edit_filter_focus"))
                 m_filter->setToolTip(Utility::toolTipLabel(a->text(), a->shortcut(),
@@ -1740,9 +1746,9 @@ void FrameWork::showContextMenu(bool /*onitem*/, const QPoint &pos)
     m_contextmenu->popup(pos);
 }
 
-void FrameWork::setFilter(const QString &filterText)
+void FrameWork::setFilter(const QString &filter)
 {
-    m_filter->setText(filterText);
+    m_filter->setText(filter);
 }
 
 void FrameWork::closeEvent(QCloseEvent *e)
