@@ -1352,9 +1352,10 @@ void Document::sortFilterDirect(int column, Qt::SortOrder order, const QString &
         if (column >= 0) {
             qParallelSort(m_viewItems.begin(), m_viewItems.end(),
                           [column, order, this](const auto *item1, const auto *item2) {
-                int d = compare(item1, item2, column);
-                return order == (Qt::AscendingOrder) ? (d < 0) : (d > 0);
+                return compare(item1, item2, column) < 0;
             });
+            if (order == Qt::DescendingOrder)
+                std::reverse(m_viewItems.begin(), m_viewItems.end());
 
             // c++17 alternatives, but not supported everywhere yet:
             //std::stable_sort(std::execution::par_unseq, sorted.begin(), sorted.end(), sorter);
