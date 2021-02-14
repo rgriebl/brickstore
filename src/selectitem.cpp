@@ -20,8 +20,8 @@
 #include <QLineEdit>
 #include <QLayout>
 #include <QLabel>
-#include <QToolButton>
 #include <QPushButton>
+#include <QToolButton>
 #include <QApplication>
 #include <QCursor>
 #include <QStringBuilder>
@@ -69,7 +69,7 @@ public:
     QToolButton *    w_pcc;
     QToolButton *    w_zoomIn;
     QToolButton *    w_zoomOut;
-    QLabel *         w_zoomLevel;
+    QToolButton *    w_zoomLevel;
     QButtonGroup *   w_viewmode;
     bool             m_inv_only;
     QTimer *         m_filter_delay;
@@ -286,16 +286,20 @@ void SelectItem::init()
     d->w_zoomOut->setAutoRaise(true);
     d->w_zoomOut->setAutoRepeat(true);
     connect(d->w_zoomOut, &QToolButton::clicked, this, [this]() {
-        setZoomFactor(d->m_zoom * std::pow(1.001, -120));
+        setZoomFactor((int(std::round(d->m_zoom * 4)) - 1) / 4.); // 25% steps
     });
-    d->w_zoomLevel = new QLabel();
+    d->w_zoomLevel = new QToolButton();
+    d->w_zoomLevel->setToolButtonStyle(Qt::ToolButtonTextOnly);
+    d->w_zoomLevel->setAutoRaise(true);
+    connect(d->w_zoomLevel, &QToolButton::clicked,
+            this, [this]() { setZoomFactor(2); });
     d->w_zoomIn = new QToolButton();
     d->w_zoomIn->setShortcut(QKeySequence::ZoomIn);
     d->w_zoomIn->setIcon(QIcon::fromTheme("zoom-in"));
     d->w_zoomIn->setAutoRaise(true);
     d->w_zoomIn->setAutoRepeat(true);
     connect(d->w_zoomIn, &QToolButton::clicked, this, [this]() {
-        setZoomFactor(d->m_zoom * std::pow(1.001, 120));
+        setZoomFactor((int(std::round(d->m_zoom * 4)) + 1) / 4.); // 25% steps
     });
 
     QToolButton *tb;
@@ -454,9 +458,7 @@ void SelectItem::init()
     viewlay->addWidget(d->w_pcc);
     viewlay->addSpacing(11);
     viewlay->addWidget(d->w_zoomOut);
-    viewlay->addSpacing(6);
     viewlay->addWidget(d->w_zoomLevel);
-    viewlay->addSpacing(6);
     viewlay->addWidget(d->w_zoomIn);
     viewlay->addSpacing(11);
     viewlay->addWidget(d->w_viewmode->button(0));
@@ -710,7 +712,7 @@ void SelectItem::setZoomFactor(double zoom)
         emit d1->sizeHintChanged(d->itemModel->index(0, 0));
         emit d2->sizeHintChanged(d->itemModel->index(0, 0));
         
-        d->w_zoomLevel->setText(QString::fromLatin1("%1 %").arg(int(zoom * 100)));
+        d->w_zoomLevel->setText(QString::fromLatin1("%1 %").arg(int(zoom * 100), 3));
         d->w_itemthumbs->resizeColumnToContents(0);
     }
 }
