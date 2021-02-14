@@ -572,9 +572,15 @@ FrameWork::FrameWork(QWidget *parent)
     if (ba.isEmpty() || !restoreState(ba, DockStateVersion))
         m_toolbar->show();
 
-    ba = Config::inst()->value(QLatin1String("/MainWindow/Filter")).toByteArray();
-    if (!ba.isEmpty())
-        m_filter->restoreState(ba);
+    if (m_filter) {
+        ba = Config::inst()->value(QLatin1String("/MainWindow/Filter")).toByteArray();
+        if (!ba.isEmpty()) {
+            m_filter->restoreState(ba);
+            m_filter->setText({ });
+        }
+        m_filter->setEnabled(false);
+    }
+
 
     findAction("view_fullscreen")->setChecked(windowState() & Qt::WindowFullScreen);
 
@@ -1523,6 +1529,7 @@ void FrameWork::connectWindow(QWidget *w)
                        this, &FrameWork::setFilter);
 
             m_filter->setText(QString());
+            m_filter->setEnabled(false);
         }
         m_undogroup->setActiveStack(nullptr);
 
@@ -1553,6 +1560,7 @@ void FrameWork::connectWindow(QWidget *w)
                 m_filter->setToolTip(Utility::toolTipLabel(a->text(), a->shortcut(),
                                                            filterToolTip
                                                            + m_filter->instructionToolTip()));
+            m_filter->setEnabled(true);
         }
 
         m_undogroup->setActiveStack(doc->undoStack());
@@ -1748,7 +1756,8 @@ void FrameWork::showContextMenu(bool /*onitem*/, const QPoint &pos)
 
 void FrameWork::setFilter(const QString &filter)
 {
-    m_filter->setText(filter);
+    if (m_filter)
+        m_filter->setText(filter);
 }
 
 void FrameWork::closeEvent(QCloseEvent *e)
