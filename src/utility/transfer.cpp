@@ -207,9 +207,10 @@ void TransferRetriever::schedule()
 
         QNetworkRequest req(url);
         req.setHeader(QNetworkRequest::UserAgentHeader, m_transfer->userAgent());
-        if (j->m_no_redirects)
-            req.setAttribute(QNetworkRequest::FollowRedirectsAttribute, false);
-
+        if (j->m_no_redirects) {
+            req.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
+                             QNetworkRequest::ManualRedirectPolicy);
+        }
         j->setStatus(TransferJob::Active);
         if (isget) {
             if (j->m_only_if_newer.isValid())
@@ -230,7 +231,7 @@ void TransferRetriever::schedule()
         connect(j->m_reply, &QNetworkReply::finished, this, [this, j]() {
             auto error = j->m_reply->error();
 
-            j->m_respcode = j->m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+            j->m_respcode = j->m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toUInt();
             j->m_effective_url = j->m_reply->url();
 
             if (error != QNetworkReply::NoError) {

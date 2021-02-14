@@ -25,7 +25,7 @@ class RebuildDatabase : public QObject
     Q_OBJECT
 public:
     RebuildDatabase(bool skipDownload = false);
-    ~RebuildDatabase();
+    ~RebuildDatabase() override;
 
     int exec();
 

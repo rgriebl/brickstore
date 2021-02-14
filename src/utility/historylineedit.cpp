@@ -64,35 +64,39 @@ public:
     { }
 
 protected:
-    void paintEvent(QPaintEvent *e)
-    {
-        QListView::paintEvent(e);
+    void paintEvent(QPaintEvent *e) override;
+    void mousePressEvent(QMouseEvent *me) override;
+};
 
-        if (model()->rowCount() == 0) {
-            QPainter p(viewport());
-            p.drawText(viewport()->contentsRect(), Qt::AlignCenter,
-                       tr("No favorite filters. Read the tooltip."));
-        }
+
+void HistoryView::paintEvent(QPaintEvent *e)
+{
+    QListView::paintEvent(e);
+
+    if (model()->rowCount() == 0) {
+        QPainter p(viewport());
+        p.drawText(viewport()->contentsRect(), Qt::AlignCenter,
+                   tr("No favorite filters. Read the tooltip."));
     }
+}
 
-    void mousePressEvent(QMouseEvent *me)
-    {
-        if (me->button() == Qt::LeftButton) {
-            QModelIndex idx = indexAt(me->pos());
+void HistoryView::mousePressEvent(QMouseEvent *me)
+{
+    if (me->button() == Qt::LeftButton) {
+        QModelIndex idx = indexAt(me->pos());
 
-            if (idx.isValid()) {
-                int h = visualRect(idx).height();
-                if (me->x() >= (viewport()->width() - h)) {
-                    if (auto proxy = qobject_cast<const QAbstractProxyModel *>(idx.model()))
-                        idx = proxy->mapToSource(idx);
-                    const_cast<QAbstractItemModel *>(idx.model())->removeRow(idx.row());
-                    return;
-                }
+        if (idx.isValid()) {
+            int h = visualRect(idx).height();
+            if (me->x() >= (viewport()->width() - h)) {
+                if (auto proxy = qobject_cast<const QAbstractProxyModel *>(idx.model()))
+                    idx = proxy->mapToSource(idx);
+                const_cast<QAbstractItemModel *>(idx.model())->removeRow(idx.row());
+                return;
             }
         }
-        QListView::mousePressEvent(me);
     }
-};
+    QListView::mousePressEvent(me);
+}
 
 
 ///////////////////////////////////////////////////////////////////////

@@ -1,3 +1,16 @@
+/* Copyright (C) 2004-2021 Robert Griebl. All rights reserved.
+**
+** This file is part of BrickStore.
+**
+** This file may be distributed and/or modified under the terms of the GNU
+** General Public License version 2 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
+*/
 #include <QApplication>
 #include <QFileDialog>
 #include <QClipboard>
@@ -405,7 +418,7 @@ Document *DocumentIO::importLDrawModel()
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    uint invalid_items = 0;
+    int invalid_items = 0;
     BrickLink::InvItemList items; // we own the items
 
     bool b = DocumentIO::parseLDrawModel(f, items, &invalid_items);
@@ -436,7 +449,7 @@ Document *DocumentIO::importLDrawModel()
     return doc;
 }
 
-bool DocumentIO::parseLDrawModel(QFile &f, BrickLink::InvItemList &items, uint *invalid_items)
+bool DocumentIO::parseLDrawModel(QFile &f, BrickLink::InvItemList &items, int *invalid_items)
 {
     QHash<QString, BrickLink::InvItem *> mergehash;
     QStringList recursion_detection;
@@ -446,7 +459,7 @@ bool DocumentIO::parseLDrawModel(QFile &f, BrickLink::InvItemList &items, uint *
 }
 
 bool DocumentIO::parseLDrawModelInternal(QFile &f, const QString &model_name, BrickLink::InvItemList &items,
-                                         uint *invalid_items, QHash<QString, BrickLink::InvItem *> &mergehash,
+                                         int *invalid_items, QHash<QString, BrickLink::InvItem *> &mergehash,
                                          QStringList &recursion_detection)
 {
     if (recursion_detection.contains(model_name))
@@ -454,7 +467,7 @@ bool DocumentIO::parseLDrawModelInternal(QFile &f, const QString &model_name, Br
     recursion_detection.append(model_name);
 
     QStringList searchpath;
-    uint invalid = 0;
+    int invalid = 0;
     int linecount = 0;
 
     bool is_mpd = false;
@@ -519,7 +532,7 @@ bool DocumentIO::parseLDrawModelInternal(QFile &f, const QString &model_name, Br
                         bool got_subfile = false;
 
                         if (is_mpd) {
-                            uint sub_invalid_items = 0;
+                            int sub_invalid_items = 0;
 
                             qint64 oldpos = f.pos();
                             f.seek(0);
@@ -535,7 +548,7 @@ bool DocumentIO::parseLDrawModelInternal(QFile &f, const QString &model_name, Br
                                 QFile subf(path + QDir::separator() + partname);
 
                                 if (subf.open(QIODevice::ReadOnly)) {
-                                    uint sub_invalid_items = 0;
+                                    int sub_invalid_items = 0;
 
                                     (void) parseLDrawModelInternal(subf, partname, items, &sub_invalid_items, mergehash, recursion_detection);
 

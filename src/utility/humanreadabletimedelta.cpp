@@ -41,6 +41,6 @@ QString HumanReadableTimeDelta::toString(const QDateTime &from, const QDateTime 
         }
         d /= p.first;
     }
-    return ((delta < 0) ? tr("%1 ago") : tr("in %1")).arg(tr(s, nullptr, d));
+    return ((delta < 0) ? tr("%1 ago") : tr("in %1")).arg(tr(s, nullptr, int(d)));
 }
 

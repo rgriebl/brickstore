@@ -59,7 +59,7 @@ Color BrickLink::noColor() const
 
 Color BrickLink::color(int id) const
 {
-    return d->color(id);
+    return d->color(uint(id));
 }
 
 Color BrickLink::colorFromName(const QString &name) const
@@ -74,7 +74,7 @@ Color BrickLink::colorFromLDrawId(int ldrawId) const
 
 Category BrickLink::category(int id) const
 {
-    return d->category(id);
+    return d->category(uint(id));
 }
 
 ItemType BrickLink::itemType(const QString &itemTypeId) const

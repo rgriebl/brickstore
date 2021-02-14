@@ -343,7 +343,7 @@ QFile *Core::dataFile(QStringView fileName, QIODevice::OpenMode openMode,
             % fileName;
 
     if (openMode != QIODevice::ReadOnly) {
-        if (!QDir(fileName.isEmpty() ? p : p.left(p.size() - fileName.size())).mkpath("."))
+        if (!QDir(fileName.isEmpty() ? p : p.left(p.size() - int(fileName.size()))).mkpath("."))
             return nullptr;
     }
     auto f = new QFile(p);
@@ -693,7 +693,7 @@ bool Core::readDatabase(QString *infoText, const QString &filename)
                 ds >> itc;
                 check();
 
-                m_items.reserve(int(itc));
+                m_items.reserve(itc);
                 for (quint32 i = itc; i; i--) {
                     auto *item = readItemFromDatabase(ds, DatabaseVersion::Latest);
                     check();
@@ -707,7 +707,7 @@ bool Core::readDatabase(QString *infoText, const QString &filename)
                 ds >> clc;
                 check();
 
-                m_changelog.reserve(int(clc));
+                m_changelog.reserve(clc);
                 for (quint32 i = clc; i; i--) {
                     QByteArray entry;
                     ds >> entry;
@@ -725,7 +725,7 @@ bool Core::readDatabase(QString *infoText, const QString &filename)
                 ds >> pccc;
                 check();
 
-                m_pccs.reserve(int(pccc));
+                m_pccs.reserve(pccc);
                 for (quint32 i = pccc; i; i--) {
                     auto *pcc = readPCCFromDatabase(ds, DatabaseVersion::Latest);
                     check();
@@ -806,7 +806,7 @@ bool Core::writeDatabase(const QString &filename, DatabaseVersion version,
                     .arg(f.fileName()).arg(f.pos());
         };
 
-        check(cw.startChunk(ChunkId('B','S','D','B'), int(version)));
+        check(cw.startChunk(ChunkId('B','S','D','B'), uint(version)));
 
         if (!infoText.isEmpty()) {
             check(cw.startChunk(ChunkId('I','N','F','O'), 1));
@@ -1115,7 +1115,7 @@ bool Core::applyChangeLogToItem(InvItem *item)
         itemtypeid = incpl->m_itemtype_name.at(0).toUpper();
 
     for (int i = int(m_changelog.size()) - 1; i >= 0 && !(fixed_color && fixed_item); --i) {
-        const ChangeLogEntry &cl = ChangeLogEntry(m_changelog.at(i));
+        const ChangeLogEntry &cl = ChangeLogEntry(m_changelog.at(size_t(i)));
 
         if (!fixed_item) {
             if ((cl.type() == ChangeLogEntry::ItemId) ||

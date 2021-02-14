@@ -179,7 +179,7 @@ int WelcomeButton::descriptionHeight(int widgetWidth) const
     int lineWidth = widgetWidth - textOffset() - m_margin;
     QStaticText copy(m_description);
     copy.setTextWidth(lineWidth);
-    return copy.size().height();
+    return int(copy.size().height());
 }
 
 QSize WelcomeButton::sizeHint() const

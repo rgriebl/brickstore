@@ -86,13 +86,13 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     w_add->setDefault(true);
     w_buttons->addButton(w_add, QDialogButtonBox::ActionRole);
 
-    w_picture->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
+    w_picture->setFrameStyle(int(QFrame::StyledPanel) | int(QFrame::Sunken));
     w_picture->setLineWidth(2);
 
-    w_price_guide->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
+    w_price_guide->setFrameStyle(int(QFrame::StyledPanel) | int(QFrame::Sunken));
     w_price_guide->setLineWidth(2);
 
-    w_appears_in->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
+    w_appears_in->setFrameStyle(int(QFrame::StyledPanel) | int(QFrame::Sunken));
     w_appears_in->setLineWidth(2);
 
     ValidatorSpinBox::setValidator(w_qty, new SmartIntValidator(1, FrameWork::maxQuantity, 1, w_qty));

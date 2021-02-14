@@ -15,7 +15,6 @@
 
 #include <QUndoStack>
 #include <QAction>
-#include <QDesktopWidget>
 #include <QCloseEvent>
 #include <QMetaObject>
 #include <QMetaMethod>
@@ -561,13 +560,8 @@ FrameWork::FrameWork(QWidget *parent)
     QByteArray ba;
 
     ba = Config::inst()->value(QLatin1String("/MainWindow/Layout/Geometry")).toByteArray();
-    if (ba.isEmpty() || !restoreGeometry(ba)) {
-        float dw = qApp->desktop()->width() / 10.f;
-        float dh = qApp->desktop()->height() / 10.f;
+    restoreGeometry(ba);
 
-        setGeometry(int(dw), int(dh), int (8 * dw), int(8 * dh));
-        setWindowState(Qt::WindowMaximized);
-    }
     ba = Config::inst()->value(QLatin1String("/MainWindow/Layout/State")).toByteArray();
     if (ba.isEmpty() || !restoreState(ba, DockStateVersion))
         m_toolbar->show();
@@ -576,7 +570,7 @@ FrameWork::FrameWork(QWidget *parent)
         ba = Config::inst()->value(QLatin1String("/MainWindow/Filter")).toByteArray();
         if (!ba.isEmpty()) {
             m_filter->restoreState(ba);
-            m_filter->setText({ });
+            m_filter->clear();
         }
         m_filter->setEnabled(false);
     }
@@ -1115,14 +1109,14 @@ void FrameWork::createActions()
     a->setObjectName("edit_redo");
 
     a = newQAction(this, "edit_cut", NeedSelection(1));
-    connect(new QShortcut(QKeySequence(Qt::ShiftModifier + Qt::Key_Delete), this), &QShortcut::activated,
-            a, &QAction::trigger);
+    connect(new QShortcut(QKeySequence(int(Qt::ShiftModifier) + int(Qt::Key_Delete)), this),
+            &QShortcut::activated, a, &QAction::trigger);
     a = newQAction(this, "edit_copy", NeedSelection(1));
-    connect(new QShortcut(QKeySequence(Qt::ShiftModifier + Qt::Key_Insert), this), &QShortcut::activated,
-            a, &QAction::trigger);
+    connect(new QShortcut(QKeySequence(int(Qt::ShiftModifier) + int(Qt::Key_Insert)), this),
+            &QShortcut::activated, a, &QAction::trigger);
     a = newQAction(this, "edit_paste", NeedDocument);
-    connect(new QShortcut(QKeySequence(Qt::ShiftModifier + Qt::Key_Insert), this), &QShortcut::activated,
-            a, &QAction::trigger);
+    connect(new QShortcut(QKeySequence(int(Qt::ShiftModifier) + int(Qt::Key_Insert)), this),
+            &QShortcut::activated, a, &QAction::trigger);
     (void) newQAction(this, "edit_delete", NeedSelection(1));
 
     a = newQAction(this, "edit_additems", NeedDocument, false, this, &FrameWork::showAddItemDialog);

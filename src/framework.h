@@ -49,7 +49,7 @@ private:
     static FrameWork *s_inst;
 
 public:
-    ~FrameWork();
+    ~FrameWork() override;
     static FrameWork *inst();
 
     bool closeAllWindows();

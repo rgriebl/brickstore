@@ -85,7 +85,7 @@ void BrickLink::Item::setAppearsIn(const AppearsIn &map) const
 
     _dwords_for_appears += s;
 
-    auto *ptr = new quint32 [s];
+    auto *ptr = new quint32 [size_t(s)];
     m_appears_in = ptr;
 
     *ptr++ = quint32(map.size());   // how many colors
@@ -153,7 +153,7 @@ void BrickLink::Item::setConsistsOf(const InvItemList &items) const
 
     _qwords_for_consists += (items.count() + 1);
 
-    auto *ptr = new quint64 [items.count() + 1];
+    auto *ptr = new quint64 [size_t(items.count()) + 1];
     m_consists_of = ptr;
 
     *ptr++ = quint32(items.count());     // how many entries

@@ -27,7 +27,7 @@ class SelectDocumentDialog : public QDialog, private Ui::SelectDocumentDialog
 public:
     SelectDocumentDialog(const Document *self, const QString &headertext,
                          QWidget *parent = nullptr);
-    ~SelectDocumentDialog();
+    ~SelectDocumentDialog() override;
 
     BrickLink::InvItemList items() const;
 

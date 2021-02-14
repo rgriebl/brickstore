@@ -48,11 +48,7 @@ public:
         return m_message;
     }
 
-    const char *what() const noexcept override
-    {
-        whatBuffer = m_message.toLocal8Bit();
-        return whatBuffer.constData();
-    }
+    const char *what() const noexcept override;
 
 protected:
     QString m_message;
@@ -81,4 +77,6 @@ private:
         return { };
     }
 };
+
+
 

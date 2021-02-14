@@ -153,7 +153,7 @@ signals:
 
 public:
     PrintJob(QPaintDevice *pd);
-    ~PrintJob();
+    ~PrintJob() override;
 
     QPaintDevice *paintDevice() const;
 

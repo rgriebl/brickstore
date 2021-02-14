@@ -1,3 +1,16 @@
+/* Copyright (C) 2004-2021 Robert Griebl. All rights reserved.
+**
+** This file is part of BrickStore.
+**
+** This file may be distributed and/or modified under the terms of the GNU
+** General Public License version 2 as published by the Free Software Foundation
+** and appearing in the file LICENSE.GPL included in the packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://fsf.org/licensing/licenses/gpl.html for GPL licensing information.
+*/
 #pragma once
 
 #include <QCoreApplication>
@@ -32,7 +45,7 @@ public:
     static void exportBrickLinkXML(const BrickLink::InvItemList &itemlist);
     static void exportBrickLinkXMLClipboard(const BrickLink::InvItemList &itemlist);
     static void exportBrickLinkUpdateClipboard(const Document *doc,
-                                               const Document::ItemList &itemlist);
+                                               const BrickLink::InvItemList &itemlist);
     static void exportBrickLinkInvReqClipboard(const BrickLink::InvItemList &itemlist);
     static void exportBrickLinkWantedListClipboard(const BrickLink::InvItemList &itemlist);
 
@@ -43,10 +56,10 @@ private:
     static QString toBrickLinkXML(const BrickLink::InvItemList &itemlist);
     static QPair<BrickLink::InvItemList, QString> fromBrickLinkXML(const QByteArray &xml);
 
-    static bool parseLDrawModel(QFile &f, BrickLink::InvItemList &items, uint *invalid_items);
+    static bool parseLDrawModel(QFile &f, BrickLink::InvItemList &items, int *invalid_items);
     static bool parseLDrawModelInternal(QFile &f, const QString &model_name,
                                         BrickLink::InvItemList &items,
-                                        uint *invalid_items,
+                                        int *invalid_items,
                                         QHash<QString, BrickLink::InvItem *> &mergehash,
                                         QStringList &recursion_detection);
 

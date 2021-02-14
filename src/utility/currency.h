@@ -13,6 +13,7 @@
 */
 #pragma once
 
+#include <QObject>
 #include <QString>
 #include <QMap>
 #include <QDateTime>
@@ -28,7 +29,7 @@ class Currency : public QObject
 
 public:
     static Currency *inst();
-    ~Currency();
+    ~Currency() override;
 
     QMap<QString, qreal> rates() const;
     QMap<QString, qreal> customRates() const;

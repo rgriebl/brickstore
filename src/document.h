@@ -108,14 +108,15 @@ public:
     // Itemviews API
     BrickLink::InvItem *item(const QModelIndex &idx) const;
     QModelIndex index(const BrickLink::InvItem *i, int column = 0) const;
-    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
+    QModelIndex index(int row, int column, const QModelIndex &parent = { }) const override;
 
-    virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
-    virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
-    virtual QVariant data(const QModelIndex &index, int role) const;
-    virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
-    Qt::ItemFlags flags(const QModelIndex&) const;
-    bool setData(const QModelIndex&, const QVariant&, int);
+    virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+    virtual QVariant data(const QModelIndex &index, int role) const override;
+    virtual QVariant headerData(int section, Qt::Orientation orientation,
+                                int role = Qt::DisplayRole) const override;
+    Qt::ItemFlags flags(const QModelIndex&) const override;
+    bool setData(const QModelIndex&, const QVariant&, int) override;
     QVariant dataForEditRole(const Item *it, Field f) const;
     QString dataForDisplayRole(const BrickLink::InvItem *it, Field f) const;
     QVariant dataForFilterRole(const Item *it, Field f) const;
@@ -149,7 +150,7 @@ public:
     Document();
     Document(const BrickLink::InvItemList &items);
     Document(const BrickLink::InvItemList &items, const QString &currencyCode);
-    virtual ~Document();
+    virtual ~Document() override;
 
     static Document *createTemporary(const BrickLink::InvItemList &list,
                                      const QVector<int> &fakeIndexes = { });

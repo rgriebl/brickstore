@@ -151,8 +151,8 @@ void BrickLink::TextImport::readColors(const QString &path)
         // mark it as raw data meanwhile:
         col->m_popularity = -col->m_popularity;
 
-        col->m_year_from = p.elementText(e, "COLORYEARFROM").toInt();
-        col->m_year_to   = p.elementText(e, "COLORYEARTO").toInt();
+        col->m_year_from = p.elementText(e, "COLORYEARFROM").toUShort();
+        col->m_year_to   = p.elementText(e, "COLORYEARTO").toUShort();
 
         m_colors.emplace_back(col.take());
     });

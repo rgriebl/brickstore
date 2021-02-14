@@ -35,32 +35,34 @@ private:
     { }
 
 protected:
-    bool eventFilter(QObject *o, QEvent *e) override
-    {
-        if (((e->type() == QEvent::KeyPress) || (e->type() == QEvent::KeyRelease)) && qobject_cast<QLineEdit *>(o)) {
-            const auto *val = qobject_cast<const SmartDoubleValidator *>(static_cast<QLineEdit *>(o)->validator());
-
-            if (val) {
-                auto *ke = static_cast<QKeyEvent *>(e);
-
-                QString text = ke->text();
-                bool fixed = false;
-
-                for (int i = 0; i < text.length(); ++i) {
-                    QCharRef ir = text[i];
-                    if (ir == QLatin1Char('.') || ir == QLatin1Char(',')) {
-                        ir = val->locale().decimalPoint();
-                        fixed = true;
-                    }
-                }
-
-                if (fixed)
-                    *ke = QKeyEvent(ke->type(), ke->key(), ke->modifiers(), text, ke->isAutoRepeat(), ushort(ke->count()));
-            }
-        }
-        return false;
-    }
+    bool eventFilter(QObject *o, QEvent *e) override;
 };
+
+bool DotCommaFilter::eventFilter(QObject *o, QEvent *e)
+{
+    if (((e->type() == QEvent::KeyPress) || (e->type() == QEvent::KeyRelease)) && qobject_cast<QLineEdit *>(o)) {
+        const auto *val = qobject_cast<const SmartDoubleValidator *>(static_cast<QLineEdit *>(o)->validator());
+
+        if (val) {
+            auto *ke = static_cast<QKeyEvent *>(e);
+
+            QString text = ke->text();
+            bool fixed = false;
+
+            for (int i = 0; i < text.length(); ++i) {
+                QCharRef ir = text[i];
+                if (ir == QLatin1Char('.') || ir == QLatin1Char(',')) {
+                    ir = val->locale().decimalPoint();
+                    fixed = true;
+                }
+            }
+
+            if (fixed)
+                *ke = QKeyEvent(ke->type(), ke->key(), ke->modifiers(), text, ke->isAutoRepeat(), ushort(ke->count()));
+        }
+    }
+    return false;
+}
 
 
 SmartDoubleValidator::SmartDoubleValidator(QObject *parent)

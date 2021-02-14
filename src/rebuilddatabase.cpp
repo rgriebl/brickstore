@@ -163,7 +163,7 @@ int RebuildDatabase::exec()
 
     blti.importInventories(invs);
 
-    if ((invs.size() - std::count(invs.cbegin(), invs.cend(), nullptr)) > (blti.items().size() / 50))             // more than 2% have failed
+    if ((invs.size() - size_t(std::count(invs.cbegin(), invs.cend(), nullptr))) > (blti.items().size() / 50))             // more than 2% have failed
         return error("more than 2% of all inventories had errors.");
 
     /////////////////////////////////////////////////////////////////////////////////

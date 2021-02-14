@@ -538,6 +538,7 @@ void ImportOrderDialog::downloadFinished(TransferJob *job)
             FrameWork::inst()->createWindow(doc);
 
         m_orderDownloads.removeOne(job);
+        break;
     }
     default:
         break;

@@ -14,6 +14,7 @@
 #pragma once
 
 #include <QDialog>
+#include <QDateTime>
 
 #include "bricklinkfwd.h"
 #include "ui_importorderdialog.h"

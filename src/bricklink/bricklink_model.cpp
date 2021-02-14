@@ -23,7 +23,8 @@
 #include <QRegularExpression>
 #include <QToolTip>
 #include <QLabel>
-#include <QDesktopWidget>
+#include <QScreen>
+#include <QWindow>
 #include <QBuffer>
 #include <QStringBuilder>
 
@@ -62,7 +63,7 @@ int BrickLink::ColorModel::pointerCount() const
 
 const void *BrickLink::ColorModel::pointerAt(int index) const
 {
-    return core()->colors()[index];
+    return core()->colors()[size_t(index)];
 }
 
 int BrickLink::ColorModel::pointerIndexOf(const void *pointer) const
@@ -70,7 +71,7 @@ int BrickLink::ColorModel::pointerIndexOf(const void *pointer) const
     const auto &colors = core()->colors();
     auto it = std::find(colors.cbegin(), colors.cend(), static_cast<const Color *>(pointer));
     if (it != colors.cend())
-        return std::distance(colors.cbegin(), it);
+        return int(std::distance(colors.cbegin(), it));
     return -1;
 }
 
@@ -253,7 +254,7 @@ int BrickLink::CategoryModel::pointerCount() const
 
 const void *BrickLink::CategoryModel::pointerAt(int index) const
 {
-    return (index == 0) ? AllCategories : core()->categories()[index - 1];
+    return (index == 0) ? AllCategories : core()->categories()[size_t(index) - 1];
 }
 
 int BrickLink::CategoryModel::pointerIndexOf(const void *pointer) const
@@ -264,7 +265,7 @@ int BrickLink::CategoryModel::pointerIndexOf(const void *pointer) const
         const auto &cats = core()->categories();
         auto it = std::find(cats.cbegin(), cats.cend(), static_cast<const Category *>(pointer));
         if (it != cats.cend())
-            return std::distance(cats.cbegin(), it) + 1;
+            return int(std::distance(cats.cbegin(), it)) + 1;
     }
     return -1;
 }
@@ -375,7 +376,7 @@ int BrickLink::ItemTypeModel::pointerCount() const
 
 const void *BrickLink::ItemTypeModel::pointerAt(int index) const
 {
-    return core()->itemTypes()[index];
+    return core()->itemTypes()[size_t(index)];
 }
 
 int BrickLink::ItemTypeModel::pointerIndexOf(const void *pointer) const
@@ -383,7 +384,7 @@ int BrickLink::ItemTypeModel::pointerIndexOf(const void *pointer) const
     const auto &itts = core()->itemTypes();
     auto it = std::find(itts.cbegin(), itts.cend(), static_cast<const ItemType *>(pointer));
     if (it != itts.cend())
-        return std::distance(itts.cbegin(), it);
+        return int(std::distance(itts.cbegin(), it));
     return -1;
 }
 
@@ -475,14 +476,14 @@ int BrickLink::ItemModel::pointerCount() const
 
 const void *BrickLink::ItemModel::pointerAt(int index) const
 {
-    return core()->items().at(index);
+    return core()->items().at(size_t(index));
 }
 
 int BrickLink::ItemModel::pointerIndexOf(const void *pointer) const
 {
     const auto &items = core()->items();
     auto it = std::find(items.cbegin(), items.cend(), static_cast<const Item *>(pointer));
-    return it != items.cend() ? std::distance(items.cbegin(), it): -1;
+    return it != items.cend() ? int(std::distance(items.cbegin(), it)): -1;
 }
 
 const BrickLink::Item *BrickLink::ItemModel::item(const QModelIndex &index) const
@@ -728,7 +729,6 @@ bool BrickLink::ItemModel::filterAccepts(const void *pointer) const
 
         return match;
     }
-    return true;
 }
 
 
@@ -1067,7 +1067,8 @@ void BrickLink::ToolTip::pictureUpdated(BrickLink::Picture *pic)
                 qobject_cast<QLabel *>(w)->setText(createToolTip(pic->item(), pic));
 
                 QRect r(w->pos(), w->sizeHint());
-                QRect desktop = QApplication::desktop()->screenGeometry(w);
+                QRect desktop = w->window()->windowHandle()->screen()->availableGeometry();
+
                 r.translate(r.right() > desktop.right() ? desktop.right() - r.right() : 0,
                             r.bottom() > desktop.bottom() ? desktop.bottom() - r.bottom() : 0);
                 w->setGeometry(r);

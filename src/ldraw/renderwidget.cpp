@@ -106,7 +106,7 @@ int LDraw::GLRenderer::color() const
 }
 
 
-void LDraw::GLRenderer::setXRotation(qreal r)
+void LDraw::GLRenderer::setXRotation(float r)
 {
     if (!qFuzzyCompare(m_rx, r)) {
         m_rx = r;
@@ -115,7 +115,7 @@ void LDraw::GLRenderer::setXRotation(qreal r)
     }
 }
 
-void LDraw::GLRenderer::setYRotation(qreal r)
+void LDraw::GLRenderer::setYRotation(float r)
 {
     if (!qFuzzyCompare(m_ry, r)) {
         m_ry = r;
@@ -124,7 +124,7 @@ void LDraw::GLRenderer::setYRotation(qreal r)
     }
 }
 
-void LDraw::GLRenderer::setZRotation(qreal r)
+void LDraw::GLRenderer::setZRotation(float r)
 {
     if (!qFuzzyCompare(m_rz, r)) {
         m_rz = r;
@@ -133,7 +133,7 @@ void LDraw::GLRenderer::setZRotation(qreal r)
     }
 }
 
-void LDraw::GLRenderer::setXTranslation(qreal t)
+void LDraw::GLRenderer::setXTranslation(float t)
 {
     if (!qFuzzyCompare(m_tx, t)) {
         m_tx = t;
@@ -142,7 +142,7 @@ void LDraw::GLRenderer::setXTranslation(qreal t)
     }
 }
 
-void LDraw::GLRenderer::setYTranslation(qreal t)
+void LDraw::GLRenderer::setYTranslation(float t)
 {
     if (!qFuzzyCompare(m_ty, t)) {
         m_ty = t;
@@ -151,7 +151,7 @@ void LDraw::GLRenderer::setYTranslation(qreal t)
     }
 }
 
-void LDraw::GLRenderer::setZTranslation(qreal t)
+void LDraw::GLRenderer::setZTranslation(float t)
 {
     if (!qFuzzyCompare(m_tz, t)) {
         m_tz = t;
@@ -160,7 +160,7 @@ void LDraw::GLRenderer::setZTranslation(qreal t)
     }
 }
 
-void LDraw::GLRenderer::setZoom(qreal z)
+void LDraw::GLRenderer::setZoom(float z)
 {
     if (!qFuzzyCompare(m_zoom, z)) {
         m_zoom = z;
@@ -171,11 +171,11 @@ void LDraw::GLRenderer::setZoom(qreal z)
 
 void LDraw::GLRenderer::updateProjectionMatrix()
 {
-    qreal w = m_viewport.width();
-    qreal h = m_viewport.height();
+    int w = m_viewport.width();
+    int h = m_viewport.height();
 
-    qreal ax = (h < w && h) ? w / h : 1;
-    qreal ay = (w < h && w) ? h / w : 1;
+    float ax = (h < w && h) ? float(w) / float(h) : 1;
+    float ay = (w < h && w) ? float(h) / float(w) : 1;
 
     m_proj.setToIdentity();
     m_proj.ortho((m_center.x() - m_radius) * ax, (m_center.x() + m_radius) * ax,
@@ -243,7 +243,7 @@ void LDraw::GLRenderer::initializeGL(QOpenGLContext *context)
 
 void LDraw::GLRenderer::resizeGL(QOpenGLContext *context, int w, int h)
 {
-    Q_UNUSED(context);
+    Q_UNUSED(context)
 
     m_viewport.setRect(0, 0, w, h);
     glViewport(m_viewport.x(), m_viewport.y(), m_viewport.width(), m_viewport.height());
@@ -254,7 +254,7 @@ void LDraw::GLRenderer::resizeGL(QOpenGLContext *context, int w, int h)
 
 void LDraw::GLRenderer::paintGL(QOpenGLContext *context)
 {
-    Q_UNUSED(context);
+    Q_UNUSED(context)
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -329,7 +329,7 @@ void LDraw::GLRenderer::recreateVBOs()
             m_vboSizes[i] = int(buffer[i].size()) / VBO_Stride;
 
             m_vbos[i].bind();
-            m_vbos[i].allocate(buffer[i].data(), int(buffer[i].size()) * sizeof(GLfloat));
+            m_vbos[i].allocate(buffer[i].data(), int(buffer[i].size() * sizeof(GLfloat)));
             m_vbos[i].release();
         }
     }
@@ -511,9 +511,9 @@ bool LDraw::GLRenderer::isAnimationActive() const
 
 void LDraw::GLRenderer::animationStep()
 {
-    setXRotation(xRotation() + 0.5 / 4);
-    setYRotation(yRotation() + 0.375 / 4);
-    setZRotation(zRotation() + 0.25 / 4);
+    setXRotation(xRotation() + 0.5f / 4);
+    setYRotation(yRotation() + 0.375f / 4);
+    setZRotation(zRotation() + 0.25f / 4);
 }
 
 
@@ -571,8 +571,8 @@ void LDraw::RenderWidget::mouseReleaseEvent(QMouseEvent *)
 
 void LDraw::RenderWidget::mouseMoveEvent(QMouseEvent *e)
 {
-    qreal dx = e->x() - m_last_pos.x();
-    qreal dy = e->y() - m_last_pos.y();
+    auto dx = float(e->x() - m_last_pos.x());
+    auto dy = float(e->y() - m_last_pos.y());
 
     if ((e->buttons() & Qt::LeftButton) && (e->modifiers() == Qt::NoModifier)) {
         m_renderer->setXRotation(m_renderer->xRotation() + dy / 2);
@@ -587,14 +587,14 @@ void LDraw::RenderWidget::mouseMoveEvent(QMouseEvent *e)
         m_renderer->setYTranslation(m_renderer->yTranslation() - dy);
     }
     else if ((e->buttons() & Qt::LeftButton) && (e->modifiers() == Qt::AltModifier)) {
-        m_renderer->setZoom(m_renderer->zoom() * (dy < 0 ? 0.9 : 1.1));
+        m_renderer->setZoom(m_renderer->zoom() * (dy < 0 ? 0.9f : 1.1f));
     }
     m_last_pos = e->pos();
 }
 
 void LDraw::RenderWidget::wheelEvent(QWheelEvent *e)
 {
-    qreal d = 1.0 + (e->delta() / 1200.0);
+    float d = 1.0f + (float(e->angleDelta().y()) / 1200.0f);
     m_renderer->setZoom(m_renderer->zoom() * d);
 }
 

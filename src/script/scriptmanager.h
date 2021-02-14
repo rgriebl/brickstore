@@ -38,7 +38,7 @@ private:
     static ScriptManager *s_inst;
 
 public:
-    ~ScriptManager();
+    ~ScriptManager() override;
     static ScriptManager *inst();
 
     bool initialize(::BrickLink::Core *core);

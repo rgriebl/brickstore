@@ -92,7 +92,7 @@ private:
 
         //DisableUpdates wp ( w_list );
         doc->beginMacro();
-        uint count = 0;
+        int count = 0;
 
         foreach (Document::Item *pos, w->selection()) {
             if (toggle) {
@@ -138,16 +138,18 @@ public:
         pd->installEventFilter(this);
     }
 protected:
-    bool eventFilter(QObject *watched, QEvent *event) override
-    {
-        // eat the Escape key
-        if (event->type() == QEvent::KeyPress) {
-            if (static_cast<QKeyEvent *>(event)->matches(QKeySequence::Cancel))
-                return true;
-        }
-        return QObject::eventFilter(watched, event);
-    }
+    bool eventFilter(QObject *watched, QEvent *event) override;
 };
+
+bool WindowProgressHelper::eventFilter(QObject *watched, QEvent *event)
+{
+    // eat the Escape key
+    if (event->type() == QEvent::KeyPress) {
+        if (static_cast<QKeyEvent *>(event)->matches(QKeySequence::Cancel))
+            return true;
+    }
+    return QObject::eventFilter(watched, event);
+}
 
 
 class WindowProgress
@@ -286,7 +288,7 @@ public:
         , m_doc(window->document())
     {
         setAutoFillBackground(true);
-        setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
+        setFrameStyle(int(QFrame::StyledPanel) | int(QFrame::Sunken));
 
         // hide the top and bottom frame
         setContentsMargins(contentsMargins() + QMargins(0, -frameWidth(), 0, -frameWidth()));
@@ -538,14 +540,7 @@ protected:
         coloredToolButton(m_errors, Qt::red, false);
     }
 
-    void changeEvent(QEvent *e) override
-    {
-        QFrame::changeEvent(e);
-        if (e->type() == QEvent::LanguageChange)
-            languageChange();
-        if (e->type() == QEvent::PaletteChange)
-            paletteChange();
-    }
+    void changeEvent(QEvent *e) override;
 
 private:
     Window *m_window;
@@ -561,6 +556,15 @@ private:
     QLabel *m_profit;
     QToolButton *m_currency;
 };
+
+void StatusBar::changeEvent(QEvent *e)
+{
+    QFrame::changeEvent(e);
+    if (e->type() == QEvent::LanguageChange)
+        languageChange();
+    if (e->type() == QEvent::PaletteChange)
+        paletteChange();
+}
 
 
 Window::Window(Document *doc, QWidget *parent)
@@ -992,14 +996,14 @@ int Window::consolidateItemsHelper(const Document::ItemList &items, Consolidate 
         auto it = std::min_element(items.cbegin(), items.cend(), [di](const auto &a, const auto &b) {
             return di.indexOf(a) < di.indexOf(b);
         });
-        return std::distance(items.cbegin(), it);
+        return int(std::distance(items.cbegin(), it));
     }
     case Consolidate::IntoHighestIndex: {
         const auto di = document()->items();
         auto it = std::max_element(items.cbegin(), items.cend(), [di](const auto &a, const auto &b) {
             return di.indexOf(a) < di.indexOf(b);
         });
-        return std::distance(items.cbegin(), it);
+        return int(std::distance(items.cbegin(), it));
     }
     default:
         break;
@@ -1242,7 +1246,7 @@ void Window::on_edit_price_round_triggered()
     if (selection().isEmpty())
         return;
 
-    uint roundcount = 0;
+    int roundcount = 0;
     m_doc->beginMacro();
 
     WindowProgress wp(w_list);
@@ -1378,7 +1382,7 @@ void Window::on_edit_price_inc_dec_triggered()
         double percent   = dlg.percent();
         double factor    = (1.+ percent / 100.);
         bool tiers       = dlg.applyToTiers();
-        uint incdeccount = 0;
+        int incdeccount = 0;
 
         m_doc->beginMacro();
 
@@ -1435,7 +1439,7 @@ void Window::on_edit_cost_round_triggered()
     if (selection().isEmpty())
         return;
 
-    uint roundcount = 0;
+    int roundcount = 0;
     m_doc->beginMacro();
 
     WindowProgress wp(w_list);
@@ -1466,7 +1470,7 @@ void Window::on_edit_cost_inc_dec_triggered()
         double fixed     = dlg.fixed();
         double percent   = dlg.percent();
         double factor    = (1.+ percent / 100.);
-        uint incdeccount = 0;
+        int incdeccount = 0;
 
         m_doc->beginMacro();
 
@@ -1501,7 +1505,7 @@ void Window::on_edit_cost_spread_triggered()
 
     if (MessageBox::getDouble(this, { }, tr("Enter the cost amount to spread over all the selected items:"),
                               m_doc->currencyCode(), spreadAmount, 0, FrameWork::maxPrice, 3)) {
-        uint spreadcount = 0;
+        int spreadcount = 0;
         double priceTotal = 0;
 
         foreach (Document::Item *item, selection())
@@ -1549,7 +1553,7 @@ void Window::on_edit_qty_divide_triggered()
                                            nullptr, lots_with_errors).arg(divisor));
             }
             else {
-                uint divcount = 0;
+                int divcount = 0;
                 m_doc->beginMacro();
 
                 WindowProgress wp(w_list);
@@ -1591,7 +1595,7 @@ void Window::on_edit_qty_multiply_triggered()
                                         tr("The quantities of %n lot(s) will exceed the maximum allowed value (%2) when multiplied by %1.<br /><br />Nothing has been modified.",
                                            nullptr, lots_with_errors).arg(factor).arg(FrameWork::maxQuantity));
             } else {
-                uint mulcount = 0;
+                int mulcount = 0;
                 m_doc->beginMacro();
 
                 WindowProgress wp(w_list);
@@ -1702,7 +1706,7 @@ void Window::on_edit_remark_add_triggered()
 
     if (MessageBox::getString(this, { }, tr("Enter the text, that should be added to the remarks of all selected items:"),
                               addremarks)) {
-        uint remarkcount = 0;
+        int remarkcount = 0;
         m_doc->beginMacro();
 
         QRegularExpression regexp("\\b" + QRegularExpression::escape(addremarks) + "\\b");
@@ -1744,7 +1748,7 @@ void Window::on_edit_remark_rem_triggered()
 
     if (MessageBox::getString(this, { }, tr("Enter the text, that should be removed from the remarks of all selected items:"),
                               remremarks)) {
-        uint remarkcount = 0;
+        int remarkcount = 0;
         m_doc->beginMacro();
 
         QRegularExpression regexp("\\b" + QRegularExpression::escape(remremarks) + "\\b");
@@ -1803,7 +1807,7 @@ void Window::on_edit_comment_add_triggered()
 
     if (MessageBox::getString(this, { }, tr("Enter the text, that should be added to the comments of all selected items:"),
                               addcomments)) {
-        uint commentcount = 0;
+        int commentcount = 0;
         m_doc->beginMacro();
 
         QRegularExpression regexp("\\b" + QRegularExpression::escape(addcomments) + "\\b");
@@ -1845,7 +1849,7 @@ void Window::on_edit_comment_rem_triggered()
 
     if (MessageBox::getString(this, { }, tr("Enter the text, that should be removed from the comments of all selected items:"),
                               remcomments)) {
-        uint commentcount = 0;
+        int commentcount = 0;
         m_doc->beginMacro();
 
         QRegularExpression regexp("\\b" + QRegularExpression::escape(remcomments) + "\\b");
@@ -2559,36 +2563,38 @@ public:
         , m_contents(contents)
     { }
 
-    void run() override
-    {
-        QDir temp(QStandardPaths::writableLocation(QStandardPaths::TempLocation));
-        QString fileName = autosaveTemplate.arg(m_uuid.toString());
-        QString newFileName = fileName % u".new";
-
-        { // reading is cheaper than writing, so check first
-            QFile f(temp.filePath(fileName));
-            if (f.open(QIODevice::ReadOnly)) {
-                if (f.readAll() == m_contents)
-                    return;
-            }
-        }
-
-        QFile f(temp.filePath(newFileName));
-        if (f.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-            f.write(m_contents);
-            f.flush();
-            f.close();
-
-            temp.remove(fileName);
-            if (!temp.rename(newFileName, fileName))
-                qWarning() << "Autosave rename from" << newFileName << "to" << fileName << "failed";
-        }
-    }
-
+    void run() override;
 private:
     const QUuid m_uuid;
     const QByteArray m_contents;
 };
+
+void AutosaveJob::run()
+{
+    QDir temp(QStandardPaths::writableLocation(QStandardPaths::TempLocation));
+    QString fileName = autosaveTemplate.arg(m_uuid.toString());
+    QString newFileName = fileName % u".new";
+
+    { // reading is cheaper than writing, so check first
+        QFile f(temp.filePath(fileName));
+        if (f.open(QIODevice::ReadOnly)) {
+            if (f.readAll() == m_contents)
+                return;
+        }
+    }
+
+    QFile f(temp.filePath(newFileName));
+    if (f.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+        f.write(m_contents);
+        f.flush();
+        f.close();
+
+        temp.remove(fileName);
+        if (!temp.rename(newFileName, fileName))
+            qWarning() << "Autosave rename from" << newFileName << "to" << fileName << "failed";
+    }
+}
+
 
 void Window::autosave() const
 {

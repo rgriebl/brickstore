@@ -36,7 +36,7 @@ using namespace std::chrono_literals;
 TaskPriceGuideWidget::TaskPriceGuideWidget(QWidget *parent)
     : PriceGuideWidget(parent), m_win(nullptr), m_dock(nullptr)
 {
-    setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
+    setFrameStyle(int(QFrame::StyledPanel) | int(QFrame::Sunken));
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
     m_delayTimer.setSingleShot(true);
@@ -159,7 +159,7 @@ void TaskPriceGuideWidget::dockLocationChanged(Qt::DockWidgetArea area)
 TaskInfoWidget::TaskInfoWidget(QWidget *parent)
     : QStackedWidget(parent), m_win(nullptr)
 {
-    setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
+    setFrameStyle(int(QFrame::StyledPanel) | int(QFrame::Sunken));
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
     m_pic = new PictureWidget(this);

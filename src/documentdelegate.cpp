@@ -247,8 +247,8 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
     if (itemFlags.second & (1ULL << idx.column())) {
         bool warn = (itemFlags.second & updatedWarningMask & (1ULL << idx.column()));
 
-        qint32 s = option.fontMetrics.height() / 10 * 8;
-        quint64 key = (warn ? 1ULL << 32 : 0ULL) | s;
+        int s = option.fontMetrics.height() / 10 * 8;
+        quint64 key = (warn ? 1ULL << 32 : 0ULL) | quint32(s);
 
         QPixmap *pix = s_tagicon_cache[key];
         if (!pix) {

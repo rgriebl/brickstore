@@ -159,7 +159,7 @@ public:
         m_overlay->viewport()->installEventFilter(this);
     }
 
-    void setModel(QAbstractItemModel *model)
+    void setModel(QAbstractItemModel *model) override
     {
         if (m_overlay->model()) {
             disconnect(m_overlay->model(), &QAbstractItemModel::layoutChanged,
@@ -188,35 +188,39 @@ protected:
         }
     }
 
-    bool viewportEvent(QEvent *e)
-    {
-        auto result = QTreeView::viewportEvent(e);
-
-        switch (e->type()) {
-        case QEvent::Resize:
-        case QEvent::FontChange:
-        case QEvent::StyleChange:
-            if (viewport()) {
-                m_overlay->move(viewport()->mapTo(this, QPoint(0, 0)));
-                m_overlay->resize(contentsRect().width(), rowHeight(indexAt({ 0, 0 })));
-            }
-            break;
-        default:
-            break;
-        }
-        return result;
-    }
-
-    bool eventFilter(QObject *o, QEvent *e)
-    {
-        if ((e->type() == QEvent::Wheel) && (o == m_overlay->viewport()))
-            return QCoreApplication::sendEvent(viewport(), e);
-        return QTreeView::eventFilter(o, e);
-    }
+    bool viewportEvent(QEvent *e) override;
+    bool eventFilter(QObject *o, QEvent *e) override;
 
 private:
     QTreeView *m_overlay;
 };
+
+
+bool CategoryTreeView::viewportEvent(QEvent *e)
+{
+    auto result = QTreeView::viewportEvent(e);
+
+    switch (e->type()) {
+    case QEvent::Resize:
+    case QEvent::FontChange:
+    case QEvent::StyleChange:
+        if (viewport()) {
+            m_overlay->move(viewport()->mapTo(this, QPoint(0, 0)));
+            m_overlay->resize(contentsRect().width(), rowHeight(indexAt({ 0, 0 })));
+        }
+        break;
+    default:
+        break;
+    }
+    return result;
+}
+
+bool CategoryTreeView::eventFilter(QObject *o, QEvent *e)
+{
+    if ((e->type() == QEvent::Wheel) && (o == m_overlay->viewport()))
+        return QCoreApplication::sendEvent(viewport(), e);
+    return QTreeView::eventFilter(o, e);
+}
 
 
 SelectItem::SelectItem(QWidget *parent)

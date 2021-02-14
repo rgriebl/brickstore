@@ -17,6 +17,8 @@
 #include "currency.h"
 #include "ui_incdecpricesdialog.h"
 
+QT_FORWARD_DECLARE_CLASS(QDoubleValidator)
+
 
 class IncDecPricesDialog : public QDialog, private Ui::IncDecPricesDialog
 {

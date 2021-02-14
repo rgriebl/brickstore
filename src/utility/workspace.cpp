@@ -22,7 +22,7 @@
 #include <QAction>
 #include <QMenu>
 #include <QApplication>
-#include <QDesktopWidget>
+#include <QScreen>
 #include <QToolButton>
 #include <QPixmap>
 #include <QPainter>

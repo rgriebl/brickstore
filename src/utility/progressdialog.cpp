@@ -21,9 +21,8 @@
 #include <QLayout>
 #include <QApplication>
 
-//#include "config.h"
-
 #include "progressdialog.h"
+
 
 ProgressDialog::ProgressDialog(const QString &title, Transfer *trans, QWidget *parent)
     : QDialog(parent)
@@ -51,7 +50,7 @@ ProgressDialog::ProgressDialog(const QString &title, Transfer *trans, QWidget *p
     lay->addWidget(m_header);
 
     QFrame *frame = new QFrame(this);
-    frame->setFrameStyle(QFrame::HLine | QFrame::Sunken);
+    frame->setFrameStyle(int(QFrame::HLine) | int(QFrame::Sunken));
     frame->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
     lay->addWidget(frame);
 
@@ -73,7 +72,7 @@ ProgressDialog::ProgressDialog(const QString &title, Transfer *trans, QWidget *p
     play->addSpacing(20);
 
     frame = new QFrame(this);
-    frame->setFrameStyle(QFrame::HLine | QFrame::Sunken);
+    frame->setFrameStyle(int(QFrame::HLine) | int(QFrame::Sunken));
     frame->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
     lay->addWidget(frame);
 

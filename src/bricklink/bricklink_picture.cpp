@@ -136,6 +136,9 @@ int BrickLink::Picture::cost() const
         return 640*480*4;      // ~ 640*480 32bpp
 }
 
+BrickLink::Picture::~Picture()
+{ }
+
 QFile *BrickLink::Picture::file(QIODevice::OpenMode openMode) const
 {
     bool large = (!m_color);

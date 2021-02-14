@@ -45,7 +45,7 @@ class GLRenderer : public QObject, protected QOpenGLFunctions
     Q_OBJECT
 public:
     GLRenderer(QObject *parent = nullptr);
-    virtual ~GLRenderer();
+    virtual ~GLRenderer() override;
 
     void cleanup();
 
@@ -54,25 +54,25 @@ public:
     void setPartAndColor(Part *part, int basecolor);
     void setPartAndColor(Part *part, const QColor &color);
 
-    void setXTranslation(qreal t);
-    void setYTranslation(qreal t);
-    void setZTranslation(qreal t);
+    void setXTranslation(float t);
+    void setYTranslation(float t);
+    void setZTranslation(float t);
 
-    void setXRotation(qreal r);
-    void setYRotation(qreal r);
-    void setZRotation(qreal r);
+    void setXRotation(float r);
+    void setYRotation(float r);
+    void setZRotation(float r);
 
-    void setZoom(qreal r);
+    void setZoom(float r);
 
-    qreal xTranslation() const  { return m_tx; }
-    qreal yTranslation() const  { return m_ty; }
-    qreal zTranslation() const  { return m_tz; }
+    float xTranslation() const  { return m_tx; }
+    float yTranslation() const  { return m_ty; }
+    float zTranslation() const  { return m_tz; }
 
-    qreal xRotation() const     { return m_rx; }
-    qreal yRotation() const     { return m_ry; }
-    qreal zRotation() const     { return m_rz; }
+    float xRotation() const     { return m_rx; }
+    float yRotation() const     { return m_ry; }
+    float zRotation() const     { return m_rz; }
 
-    qreal zoom() const          { return m_zoom; }
+    float zoom() const          { return m_zoom; }
 
     bool isAnimationActive() const;
 
@@ -128,11 +128,11 @@ private:
     QColor m_baseColor;
     QColor m_edgeColor;
 
-    qreal m_rx = 0, m_ry = 0, m_rz = 0;
-    qreal m_tx = 0, m_ty = 0, m_tz = 0;
-    qreal m_zoom = 1;
+    float m_rx = 0, m_ry = 0, m_rz = 0;
+    float m_tx = 0, m_ty = 0, m_tz = 0;
+    float m_zoom = 1;
     QVector3D m_center;
-    qreal m_radius = 0;
+    float m_radius = 0;
     QRect m_viewport;
     QMatrix4x4 m_proj;
     QMatrix4x4 m_view;

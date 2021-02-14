@@ -294,13 +294,12 @@ public:
     bool valid() const                { return m_valid; }
     UpdateStatus updateStatus() const { return m_update_status; }
 
-    //static int maximumSize()
-
     const QImage image() const;
 
     int cost() const;
 
     Picture(std::nullptr_t) : Picture(nullptr, nullptr) { } // for scripting only!
+    ~Picture() override;
 
 private:
     const Item *  m_item;
@@ -685,7 +684,7 @@ class Core : public QObject
     Q_PROPERTY(QDateTime databaseDate READ databaseDate NOTIFY databaseDateChanged)
 
 public:
-    ~Core();
+    ~Core() override;
 
     QUrl url(UrlList u, const void *opt = nullptr, const void *opt2 = nullptr);
 

@@ -90,8 +90,8 @@ private:
     QDateTime    m_last_modified;
     QNetworkReply *m_reply = nullptr;
 
-    int          m_respcode         : 16;
-    int          m_status           : 4;
+    uint         m_respcode         : 16;
+    uint         m_status           : 4;
     uint         m_http_method      : 1;
     bool         m_was_not_modified : 1;
     bool         m_no_redirects     : 1;

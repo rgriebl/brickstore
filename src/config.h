@@ -29,7 +29,7 @@ private:
     static QString scramble(const QString &);
 
 public:
-    ~Config();
+    ~Config() override;
     static Config *inst();
 
     void upgrade(int vmajor, int vminor);

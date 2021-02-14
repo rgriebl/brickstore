@@ -240,8 +240,8 @@ Document *Document::createTemporary(const BrickLink::InvItemList &list, const QV
 }
 
 Document::Document(int /*is temporary*/)
-    : m_currencycode(Config::inst()->defaultCurrencyCode())
-    , m_filterParser(new Filter::Parser())
+    : m_filterParser(new Filter::Parser())
+    , m_currencycode(Config::inst()->defaultCurrencyCode())
 {
     MODELTEST_ATTACH(this)
 
@@ -756,9 +756,9 @@ void Document::unsetModified()
     m_undo->setClean();
 
     // at this point, we can cleanup the diff mode base
-    QSet goneItems = m_differenceBase.keys().toSet();
+    auto goneItems = m_differenceBase.keys();
     for (const auto &item : qAsConst(m_items))
-        goneItems.remove(item);
+        goneItems.removeOne(item);
     for (const auto &item : qAsConst(goneItems))
         m_differenceBase.remove(item);
 }
@@ -1049,10 +1049,10 @@ QVariant Document::dataForFilterRole(const Item *it, Field f) const
     switch (f) {
     case Status:
         switch (it->status()) {
-        case BrickLink::Status::Include: return tr("I", "Filter>Status>Include"); break;
-        case BrickLink::Status::Extra  : return tr("X", "Filter>Status>Extra"); break;
+        case BrickLink::Status::Include: return tr("I", "Filter>Status>Include");
+        case BrickLink::Status::Extra  : return tr("X", "Filter>Status>Extra");
         default:
-        case BrickLink::Status::Exclude: return tr("E", "Filter>Status>Exclude"); break;
+        case BrickLink::Status::Exclude: return tr("E", "Filter>Status>Exclude");
         }
     case Stockroom:
         switch (it->stockroom()) {
@@ -1162,7 +1162,6 @@ QString Document::dataForToolTipRole(const Item *it, Field f) const
         return dataForDisplayRole(it, f);
     }
     }
-    return QString();
 }
 
 
@@ -1585,11 +1584,11 @@ SortFilterCmd::SortFilterCmd(Document *doc, int column, Qt::SortOrder order,
                              const QString &filterString, const QVector<Filter> &filterList)
     : QUndoCommand(qApp->translate("SortCmd", "Sorted/filtered the view"))
     , m_doc(doc)
+    , m_created(QDateTime::currentDateTime())
     , m_column(column)
     , m_order(order)
     , m_filterString(filterString)
     , m_filterList(filterList)
-    , m_created(QDateTime::currentDateTime())
 { }
 
 int SortFilterCmd::id() const

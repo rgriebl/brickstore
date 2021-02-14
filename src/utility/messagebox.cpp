@@ -43,19 +43,21 @@ public:
     }
 
 protected:
-    void showEvent(QShowEvent *e) override
-    {
-        QDialog::showEvent(e);
-
-        if (m_pos.isValid()) {
-            Utility::setPopupPos(this, m_pos);
-            m_pos = { };
-        }
-    }
+    void showEvent(QShowEvent *e) override;
 
 private:
     QRect m_pos;
 };
+
+void InputDialog::showEvent(QShowEvent *e)
+{
+    QDialog::showEvent(e);
+
+    if (m_pos.isValid()) {
+        Utility::setPopupPos(this, m_pos);
+        m_pos = { };
+    }
+}
 
 
 QPointer<QWidget> MessageBox::s_defaultParent;
