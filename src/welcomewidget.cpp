@@ -349,7 +349,7 @@ WelcomeWidget::WelcomeWidget(QWidget *parent)
     m_import_frame = new QGroupBox();
     auto import_layout = new QVBoxLayout();
     for (const auto &name : { "document_import_bl_inv", "document_import_bl_xml", "document_import_bl_order",
-         "document_import_bl_store_inv" /*, "document_import_bl_cart", "document_import_ldraw_model"*/ }) {
+         "document_import_bl_store_inv", "document_import_bl_cart" /*, "document_import_ldraw_model"*/ }) {
         auto b = new WelcomeButton(FrameWork::inst()->findAction(name));
         import_layout->addWidget(b);
     }
