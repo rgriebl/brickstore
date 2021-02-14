@@ -2287,14 +2287,17 @@ void Window::on_view_column_layout_list_load(const QString &layoutId)
 {
     if (layoutId == "default") {
         resizeColumnsToDefault();
+        w_list->sortByColumn(0, Qt::AscendingOrder);
     } else if (layoutId == "auto-resize") {
         w_list->resizeColumnsToContents();
     } else {
         auto layout = Config::inst()->columnLayout(layoutId);
-        if (!layout.isEmpty())
+        if (!layout.isEmpty()) {
             w_header->restoreLayout(layout);
-        else if (layoutId == "user-default")
-            resizeColumnsToDefault();
+            w_list->sortByColumn(w_header->sortIndicatorSection(), w_header->sortIndicatorOrder());
+        } else if (layoutId == "user-default") {
+            on_view_column_layout_list_load(QLatin1String("default"));
+        }
     }
 }
 
