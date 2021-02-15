@@ -1039,8 +1039,10 @@ bool Window::parseGuiStateXML(const QDomElement &root)
                 continue;
             QString tag = n.toElement().tagName();
 
-            if (tag == "ColumnLayout")
+            if (tag == "ColumnLayout") {
                 w_header->restoreLayout(QByteArray::fromBase64(n.toElement().text().toLatin1()));
+                w_list->sortByColumn(w_header->sortIndicatorSection(), w_header->sortIndicatorOrder());
+            }
         }
     }
     return ok;
@@ -2677,6 +2679,8 @@ const QVector<Window *> Window::processAutosaves(AutosaveAction action)
                     }
                     auto win = new Window(doc);
                     win->w_header->restoreLayout(savedColumnLayout);
+                    win->w_list->sortByColumn(win->w_header->sortIndicatorSection(),
+                                              win->w_header->sortIndicatorOrder());
 
                     doc->setGuiStateModified(true); // not really the UI state
                     if (!savedFileName.isEmpty())
