@@ -112,7 +112,7 @@ public:
             case 1: return QLocale::system().toString(cart->lastUpdated(), QLocale::ShortFormat);
             case 2: return QLocale::system().toString(cart->itemCount());
             case 3: return QLocale::system().toString(cart->lotCount());
-            case 4: return cart->storeName() % u" (" % cart->sellerName() % u")";
+            case 4: return QString(cart->storeName() % u" (" % cart->sellerName() % u")");
             case 5: return Currency::toString(cart->cartTotal(), cart->currencyCode(), 2);
             }
         } else if (role == Qt::DecorationRole) {
