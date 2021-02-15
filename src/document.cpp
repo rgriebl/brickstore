@@ -326,11 +326,6 @@ bool Document::clear()
     return true;
 }
 
-Document::Item *Document::itemAt(int position)
-{
-    return (position >= 0 && position < m_items.count()) ? m_items.at(position) : nullptr;
-}
-
 void Document::appendItem(Item *item)
 {
     m_undo->push(new AddRemoveCmd(AddRemoveCmd::Add, this, { }, { }, { item }));
@@ -1300,7 +1295,12 @@ void Document::sort(int column, Qt::SortOrder order)
     if ((column == -1) || ((column == m_sortColumn) && (order == m_sortOrder)))
         return;
 
-    m_undo->push(new SortFilterCmd(this, column, order, m_filterString, m_filterList));
+    if (m_undo) {
+        m_undo->push(new SortFilterCmd(this, column, order, m_filterString, m_filterList));
+    } else {
+        BrickLink::InvItemList dummy;
+        sortFilterDirect(column, order, m_filterString, m_filterList, dummy);
+    }
 }
 
 bool Document::isFiltered() const

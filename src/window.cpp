@@ -2541,7 +2541,8 @@ void Window::setSelection(const Document::ItemList &lst)
 void Window::documentItemsChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight)
 {
     for (int r = topLeft.row(); r <= bottomRight.row(); ++r) {
-        if (m_selection.contains(document()->itemAt(r))) {
+        auto item = m_doc->item(topLeft.siblingAtRow(r));
+        if (m_selection.contains(item)) {
             emit selectionChanged(m_selection);
             break;
         }

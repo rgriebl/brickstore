@@ -177,8 +177,6 @@ public:
 
     void changeItem(Item *item, const Item &value);
 
-    Item *itemAt(int position);
-
     Statistics statistics(const ItemList &list) const;
 
     quint64 errorMask() const;
