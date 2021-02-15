@@ -65,6 +65,7 @@ FORMS = \
   $$PWD/changecurrencydialog.ui \
   $$PWD/consolidateitemsdialog.ui \
   $$PWD/importinventorydialog.ui \
+  $$PWD/importcartdialog.ui \
   $$PWD/importorderdialog.ui \
   $$PWD/incdecpricesdialog.ui \
   $$PWD/selectcolordialog.ui \

@@ -72,6 +72,7 @@
 #include "stopwatch.h"
 #include "importinventorydialog.h"
 #include "importorderdialog.h"
+#include "importcartdialog.h"
 #include "historylineedit.h"
 
 #include "scriptmanager.h"
@@ -837,6 +838,7 @@ FrameWork::~FrameWork()
     delete m_add_dialog.data();
     delete m_importinventory_dialog.data();
     delete m_importorder_dialog.data();
+    delete m_importcart_dialog.data();
 
     delete m_workspace;
     s_inst = nullptr;
@@ -1083,8 +1085,11 @@ void FrameWork::createActions()
             createWindow(DocumentIO::importBrickLinkStore());
     }));
     m->addAction(newQAction(this, "document_import_bl_cart", NeedNetwork, false, this, [this]() {
-        if (checkBrickLinkLogin())
-            createWindow(DocumentIO::importBrickLinkCart());
+        if (checkBrickLinkLogin()) {
+            if (!m_importcart_dialog)
+                m_importcart_dialog = new ImportCartDialog(this);
+            m_importcart_dialog->exec();
+        }
     }));
     m->addAction(newQAction(this, "document_import_ldraw_model", 0, false, this, [this]() {
         createWindow(DocumentIO::importLDrawModel());

@@ -36,7 +36,7 @@ public:
                                               BrickLink::Condition condition = BrickLink::Condition::New);
     static Document *importBrickLinkOrder(BrickLink::Order *order, const QByteArray &orderXml);
     static Document *importBrickLinkStore();
-    static Document *importBrickLinkCart();
+    static Document *importBrickLinkCart(BrickLink::Cart *cart, const BrickLink::InvItemList &itemlist);
     static Document *importBrickLinkXML();
     static Document *importLDrawModel();
 

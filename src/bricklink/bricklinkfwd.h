@@ -31,6 +31,7 @@ class Picture;
 class PriceGuide;
 class InvItem;
 class Order;
+class Cart;
 class Core;
 class TextImport;
 class InvItemMimeData;

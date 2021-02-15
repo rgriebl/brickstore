@@ -527,6 +527,10 @@ BrickLink::Order::Order(const QString &id, OrderType type)
     , m_type(type)
 { }
 
+BrickLink::Cart::Cart()
+{ }
+
+
 // BrickLink doesn't use the standard ISO country names...
 static const char *countryList[] = {
     "AF Afghanistan",
@@ -779,6 +783,28 @@ static const char *countryList[] = {
     "ZW Zimbabwe"
 };
 
+static QString countryForCode(const QString &code)
+{
+    for (const auto &country : countryList) {
+        QString istr = QString::fromLatin1(country);
+        if (istr[0] == code[0] && istr[1] == code[1])
+            return istr.mid(3);
+    }
+    return QString();
+}
+
+static QString codeForCountry(const QString &country)
+{
+    if (!country.isEmpty()) {
+        for (const auto &i : countryList) {
+            QString istr = QString::fromLatin1(i);
+            if (istr.mid(3) == country)
+                return istr.left(2);
+        }
+    }
+    return { };
+}
+
 
 void BrickLink::Order::setCountryCode(const QString &str)
 {
@@ -790,15 +816,7 @@ void BrickLink::Order::setCountryCode(const QString &str)
 
 void BrickLink::Order::setCountryName(const QString &str)
 {
-    if (str.isEmpty())
-        return;
-    for (const auto &i : countryList) {
-        QString istr = QString::fromLatin1(i);
-        if (istr.mid(3) == str) {
-            setCountryCode(istr.left(2));
-            break;
-        }
-    }
+    setCountryCode(codeForCountry(str));
 }
 
 QString BrickLink::Order::countryCode() const
@@ -808,10 +826,28 @@ QString BrickLink::Order::countryCode() const
 
 QString BrickLink::Order::countryName() const
 {
-    for (const auto &country : countryList) {
-        QString istr = QString::fromLatin1(country);
-        if (istr[0] == m_countryCode[0] && istr[1] == m_countryCode[1])
-            return istr.mid(3);
+    return countryForCode(countryCode());
+}
+
+void BrickLink::Cart::setCountryCode(const QString &str)
+{
+    if (str.length() == 2) {
+        m_countryCode[0] = str[0];
+        m_countryCode[1] = str[1];
     }
-    return QString();
+}
+
+void BrickLink::Cart::setCountryName(const QString &str)
+{
+    setCountryCode(codeForCountry(str));
+}
+
+QString BrickLink::Cart::countryCode() const
+{
+    return QString(m_countryCode, 2);
+}
+
+QString BrickLink::Cart::countryName() const
+{
+    return countryForCode(countryCode());
 }

@@ -504,7 +504,7 @@ public:
 
     void setId(const QString &id)             { m_id = id; }
     void setDate(const QDate &dt)             { m_date.setDate(dt); }
-    void setStatusChange(const QDate &dt    ) { m_status_change.setDate(dt); }
+    void setStatusChange(const QDate &dt)     { m_status_change.setDate(dt); }
     void setOtherParty(const QString &str)    { m_other_party = str; }
 
     void setShipping(double m)                { m_shipping = m; }
@@ -555,6 +555,52 @@ private:
     QString   m_address;
     QChar     m_countryCode[2] = { 'U', 'S' };
 };
+
+
+class Cart
+{
+public:
+    Cart();
+
+    bool domestic() const             { return m_domestic; }
+    int sellerId() const              { return m_sellerId; }
+    QString sellerName() const        { return m_sellerName; }
+    QString storeName() const         { return m_storeName; }
+    QDate lastUpdated() const         { return m_lastUpdated.date(); }
+    double cartTotal() const          { return m_cartTotal; }
+    QString currencyCode() const      { return m_currencycode; }
+
+    int itemCount() const             { return m_items; }
+    int lotCount() const              { return m_lots; }
+    QString countryName() const;
+    QString countryCode() const;
+
+    void setDomestic(bool domestic)           { m_domestic = domestic; }
+    void setSellerId(int id)                  { m_sellerId = id; }
+    void setSellerName(const QString &name)   { m_sellerName = name; }
+    void setStoreName(const QString &name)    { m_storeName = name; }
+    void setLastUpdated(const QDate &dt)      { m_lastUpdated.setDate(dt); }
+    void setCartTotal(double m)               { m_cartTotal = m; }
+    void setCurrencyCode(const QString &str)  { m_currencycode = str; }
+
+    void setItemCount(int i)                  { m_items = i; }
+    void setLotCount(int i)                   { m_lots = i; }
+    void setCountryName(const QString &str);
+    void setCountryCode(const QString &str);
+
+private:
+    bool      m_domestic = false;
+    int       m_sellerId;
+    QString   m_sellerName;
+    QString   m_storeName;
+    QDateTime m_lastUpdated;
+    double    m_cartTotal = 0;
+    QString   m_currencycode;
+    int       m_items = 0;
+    int       m_lots = 0;
+    QChar     m_countryCode[2] = { 'U', 'S' };
+};
+
 
 class PriceGuide : public Ref
 {
@@ -854,6 +900,8 @@ Q_DECLARE_METATYPE(const BrickLink::Category *)
 Q_DECLARE_METATYPE(const BrickLink::ItemType *)
 Q_DECLARE_METATYPE(const BrickLink::Item *)
 Q_DECLARE_METATYPE(const BrickLink::AppearsInItem *)
+Q_DECLARE_METATYPE(const BrickLink::Order *)
+Q_DECLARE_METATYPE(const BrickLink::Cart *)
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(BrickLink::Color::Type)
 

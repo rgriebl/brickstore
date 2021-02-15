@@ -39,6 +39,7 @@ class AddItemDialog;
 class ScriptManager;
 class ImportInventoryDialog;
 class ImportOrderDialog;
+class ImportCartDialog;
 
 
 class FrameWork : public QMainWindow
@@ -140,6 +141,7 @@ private:
     QPointer<AddItemDialog> m_add_dialog;
     QPointer<ImportInventoryDialog> m_importinventory_dialog;
     QPointer<ImportOrderDialog> m_importorder_dialog;
+    QPointer<ImportCartDialog> m_importcart_dialog;
     QTimer *m_filter_delay = nullptr;
     bool m_running;
     UndoGroup *m_undogroup;

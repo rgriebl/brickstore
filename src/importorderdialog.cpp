@@ -41,7 +41,6 @@
 
 #include "importorderdialog.h"
 
-Q_DECLARE_METATYPE(const BrickLink::Order *)
 
 using namespace std::chrono_literals;
 
@@ -356,7 +355,6 @@ ImportOrderDialog::ImportOrderDialog(QWidget *parent)
     });
 
     languageChange();
-    update();
 
     auto t = new QTimer(this);
     t->setInterval(30s);
