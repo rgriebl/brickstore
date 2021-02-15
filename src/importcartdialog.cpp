@@ -381,24 +381,29 @@ void ImportCartDialog::downloadFinished(TransferJob *job)
                 if (json.isNull())
                     throw Exception("Invalid JSON: %1 at %2").arg(err.errorString()).arg(err.offset);
 
-                const QJsonArray jsonCarts = json["domestic"].toObject()["stores"].toArray()
-                        + json["international"].toObject()["stores"].toArray();
-                for (auto &&v : jsonCarts) {
-                    const QJsonObject jsonCart = v.toObject();
+                const QJsonArray domesticCarts = json["domestic"].toObject()["stores"].toArray();
+                const QJsonArray internationalCarts = json["international"].toObject()["stores"].toArray();
+                QVector<QJsonObject> jsonCarts;
+                for (auto &&v : domesticCarts)
+                    jsonCarts << v.toObject();
+                for (auto &&v : internationalCarts)
+                    jsonCarts << v.toObject();
 
+                for (auto &&jsonCart : jsonCarts) {
                     int sellerId = jsonCart["sellerID"].toInt();
                     int lots = jsonCart["totalLots"].toInt();
                     int items = jsonCart["totalItems"].toInt();
                     QString totalPrice = jsonCart["totalPriceNative"].toString();
-
-                    qWarning() << sellerId << totalPrice << lots << items;
 
                     if (sellerId && !totalPrice.isEmpty() && lots && items) {
                         auto cart = new BrickLink::Cart;
                         cart->setSellerId(sellerId);
                         cart->setLotCount(lots);
                         cart->setItemCount(items);
-                        cart->setCurrencyCode(totalPrice.left(3));
+                        if (totalPrice.mid(2, 2) == " $") // why does if have to be different?
+                            cart->setCurrencyCode(totalPrice.left(2) + QChar('D'));
+                        else
+                            cart->setCurrencyCode(totalPrice.left(3));
                         cart->setCartTotal(totalPrice.mid(4).toDouble());
                         cart->setDomestic(jsonCart["type"].toString() == QLatin1String("domestic"));
                         cart->setLastUpdated(QDate::fromString(jsonCart["lastUpdated"].toString(),
@@ -420,10 +425,10 @@ void ImportCartDialog::downloadFinished(TransferJob *job)
     }
     case 'c': {
         auto cart = job->userData<BrickLink::Cart>('c');
+        QLocale en_US("en_US");
 
         if (!job->data()->isEmpty() && (job->responseCode() == 200)) {
             BrickLink::InvItemList items;
-            QString currencyCode;
 
             try {
                 int invalidCount = 0;
@@ -437,30 +442,36 @@ void ImportCartDialog::downloadFinished(TransferJob *job)
                     const QJsonObject cartItem = v.toObject();
 
                     QString itemId = cartItem["itemNo"].toString();
+                    int itemSeq = cartItem["itemSeq"].toInt();
                     char itemTypeId = XmlHelpers::firstCharInString(cartItem["itemType"].toString());
                     uint colorId = cartItem["colorID"].toVariant().toUInt();
                     auto cond = (cartItem["invNew"].toString() == QLatin1String("New"))
                             ? BrickLink::Condition::New : BrickLink::Condition::Used;
                     int qty = cartItem["cartQty"].toInt();
                     QString priceStr = cartItem["nativePrice"].toString(); //TODO: which one?
-                    double price = priceStr.mid(4).toDouble();
-                    QString ccode = priceStr.left(3);
+                    double price = en_US.toDouble(priceStr.mid(4));
 
-                    if (currencyCode.isEmpty()) {
-                        currencyCode = ccode;
-                    } else if (currencyCode != ccode) {
-                        ++invalidCount;
-                        continue;
-                    }
+                    if (itemSeq)
+                        itemId = itemId % u'-' % QString::number(itemSeq);
 
                     auto item = BrickLink::core()->item(itemTypeId, itemId);
                     auto color = BrickLink::core()->color(colorId);
-
                     if (!item || !color) {
                         ++invalidCount;
                     } else {
                         auto *ii = new BrickLink::InvItem(color, item);
                         ii->setCondition(cond);
+
+                        if (ii->itemType()->hasSubConditions()) {
+                            QString scond = cartItem["invComplete"].toString();
+                            if (scond == QLatin1String("Complete"))
+                                ii->setSubCondition(BrickLink::SubCondition::Complete);
+                            if (scond == QLatin1String("Incomplete"))
+                                ii->setSubCondition(BrickLink::SubCondition::Incomplete);
+                            if (scond == QLatin1String("Sealed"))
+                                ii->setSubCondition(BrickLink::SubCondition::Sealed);
+                        }
+
                         ii->setQuantity(qty);
                         ii->setPrice(price);
 
