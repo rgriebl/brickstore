@@ -377,19 +377,17 @@ void Document::insertItemsDirect(const ItemList &items, QVector<int> &positions,
 {
     auto pos = positions.constBegin();
     auto viewPos = viewPositions.constBegin();
-    const QModelIndex root;
+
+    emit layoutAboutToBeChanged();
+    QModelIndexList before = persistentIndexList();
 
     for (Item *item : qAsConst(items)) {
-        int rows = rowCount(root);
-
         if (viewPos != viewPositions.constEnd()) {
-            beginInsertRows(root, *viewPos, *viewPos);
             m_items.insert(*pos, item);
             m_viewItems.insert(*viewPos, item);
             ++pos;
             ++viewPos;
         } else {
-            beginInsertRows(root, rows, rows);
             m_items.append(item);
             m_viewItems.append(item);
         }
@@ -399,8 +397,13 @@ void Document::insertItemsDirect(const ItemList &items, QVector<int> &positions,
             m_differenceBase.insert(item, *item);
 
         updateItemFlags(item);
-        endInsertRows();
     }
+
+    QModelIndexList after;
+    foreach (const QModelIndex &idx, before)
+        after.append(index(item(idx), idx.column()));
+    changePersistentIndexList(before, after);
+    emit layoutChanged();
 
     emit itemCountChanged(m_items.count());
     emitStatisticsChanged();
@@ -410,20 +413,26 @@ void Document::removeItemsDirect(ItemList &items, QVector<int> &positions, QVect
 {
     positions.resize(items.count());
     viewPositions.resize(items.count());
-    const QModelIndex root;
+
+    emit layoutAboutToBeChanged();
+    QModelIndexList before = persistentIndexList();
 
     for (int i = items.count() - 1; i >= 0; --i) {
         Item *item = items.at(i);
         int idx = m_items.indexOf(item);
         int viewIdx = m_viewItems.indexOf(item);
         Q_ASSERT(idx >= 0 && viewIdx >= 0);
-        beginRemoveRows(root, viewIdx, viewIdx);
         positions[i] = idx;
         viewPositions[i] = viewIdx;
         m_items.removeAt(idx);
         m_viewItems.removeAt(viewIdx);
-        endRemoveRows();
     }
+
+    QModelIndexList after;
+    foreach (const QModelIndex &idx, before)
+        after.append(index(item(idx), idx.column()));
+    changePersistentIndexList(before, after);
+    emit layoutChanged();
 
     emit itemCountChanged(m_items.count());
     emitStatisticsChanged();
@@ -598,9 +607,16 @@ bool Document::isDifferenceModeActive() const
     return m_differenceModeActive;
 }
 
-void Document::activateDifferenceModeInternal(const QHash<const Item *, Item> &updateBase)
+void Document::activateDifferenceModeInternal(const QHash<const Item *, Item> &differenceBase)
 {
-    m_differenceBase = updateBase;
+    m_differenceBase = differenceBase;
+    if (m_differenceBase.size() != m_items.size()) {
+        for (const auto &item : qAsConst(m_items)) {
+            if (!m_differenceBase.contains(item))
+                m_differenceBase.insert(item, *item);
+        }
+    }
+
     m_differenceModeActive = true;
 
     for (const BrickLink::InvItem *i : qAsConst(m_items))

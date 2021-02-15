@@ -213,7 +213,7 @@ public:
     void setDifferenceModeActive(bool active);
     const Item *differenceBaseItem(const Item *item) const;
 
-    void activateDifferenceModeInternal(const QHash<const Item *, Item> &updateBase); // only for DocumentIO
+    void activateDifferenceModeInternal(const QHash<const Item *, Item> &differenceBase = { }); // only for DocumentIO
 
     QByteArray saveSortFilterState() const;
     bool restoreSortFilterState(const QByteArray &ba);

@@ -176,6 +176,7 @@ Document *DocumentIO::importBrickLinkStore()
             auto result = fromBrickLinkXML(xml);
             auto *doc = new Document(result.first, result.second); // Document owns the items now
             doc->setTitle(tr("Store %1").arg(QLocale().toString(QDate::currentDate(), QLocale::ShortFormat)));
+            doc->activateDifferenceModeInternal();
             return doc;
 
         } catch (const Exception &e) {
@@ -635,11 +636,6 @@ void DocumentIO::exportBrickLinkWantedListClipboard(const BrickLink::InvItemList
 void DocumentIO::exportBrickLinkUpdateClipboard(const Document *doc,
                                                 const BrickLink::InvItemList &itemlist)
 {
-    if (!doc->isDifferenceModeActive()) {
-        MessageBox::warning(nullptr, { }, tr("This document is not in difference mode."));
-        return;
-    }
-
     bool withoutLotId = false;
     bool duplicateLotId = false;
     QSet<uint> lotIds;
@@ -657,6 +653,8 @@ void DocumentIO::exportBrickLinkUpdateClipboard(const Document *doc,
 
     QStringList warnings;
 
+    if (!doc->isDifferenceModeActive())
+        warnings << tr("This document is not in difference mode.");
     if (withoutLotId)
         warnings << tr("This list contains items without a BrickLink Lot-ID.");
     if (duplicateLotId)
