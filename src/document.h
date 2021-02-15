@@ -177,7 +177,7 @@ public:
 
     void changeItem(Item *item, const Item &value);
 
-    Statistics statistics(const ItemList &list) const;
+    Statistics statistics(const ItemList &list, bool ignoreExcluded = false) const;
 
     quint64 errorMask() const;
     void setErrorMask(quint64);

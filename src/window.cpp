@@ -453,7 +453,7 @@ public:
     void updateStatistics()
     {
         static QLocale loc;
-        auto stat = m_doc->statistics(m_doc->items());
+        auto stat = m_doc->statistics(m_doc->items(), true /* ignoreExcluded */);
 
         bool b = (stat.errors() > 0);
         if (b && Config::inst()->showInputErrors()) {

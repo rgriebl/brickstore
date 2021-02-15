@@ -299,9 +299,9 @@ const Document::ItemList &Document::items() const
     return m_items;
 }
 
-Document::Statistics Document::statistics(const ItemList &list) const
+Document::Statistics Document::statistics(const ItemList &list, bool ignoreExcluded) const
 {
-    return Statistics(this, list);
+    return Statistics(this, list, ignoreExcluded);
 }
 
 void Document::beginMacro(const QString &label)
