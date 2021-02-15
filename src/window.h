@@ -73,7 +73,7 @@ public:
     void copyRemarks(const BrickLink::InvItemList &items);
 
     QDomElement createGuiStateXML();
-    bool parseGuiStateXML(const QDomElement &root);
+    void applyGuiStateXML(const QDomElement &root, bool &changedColumns, bool &changedSortFilter);
 
     bool isSimpleMode() const;
 

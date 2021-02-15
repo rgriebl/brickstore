@@ -1295,11 +1295,12 @@ void Document::sort(int column, Qt::SortOrder order)
     if ((column == -1) || ((column == m_sortColumn) && (order == m_sortOrder)))
         return;
 
-    if (m_undo) {
+    if (m_undo && !m_nextSortFilterIsDirect) {
         m_undo->push(new SortFilterCmd(this, column, order, m_filterString, m_filterList));
     } else {
         BrickLink::InvItemList dummy;
         sortFilterDirect(column, order, m_filterString, m_filterList, dummy);
+        m_nextSortFilterIsDirect = false;
     }
 }
 
@@ -1321,7 +1322,18 @@ void Document::setFilter(const QString &filter)
     if (filterList == m_filterList)
         return;
 
-    m_undo->push(new SortFilterCmd(this, m_sortColumn, m_sortOrder, filter, filterList));
+    if (m_undo && !m_nextSortFilterIsDirect) {
+        m_undo->push(new SortFilterCmd(this, m_sortColumn, m_sortOrder, filter, filterList));
+    } else {
+        BrickLink::InvItemList dummy;
+        sortFilterDirect(m_sortColumn, m_sortOrder, filter, filterList, dummy);
+        m_nextSortFilterIsDirect = false;
+    }
+}
+
+void Document::nextSortFilterIsDirect()
+{
+    m_nextSortFilterIsDirect = true;
 }
 
 void Document::sortFilterDirect(int column, Qt::SortOrder order, const QString &filterString,
@@ -1380,6 +1392,57 @@ void Document::sortFilterDirect(int column, Qt::SortOrder order, const QString &
     if (emitSortOrderChanged)
         emit sortOrderChanged(order);
 }
+
+QByteArray Document::saveSortFilterState() const
+{
+    QByteArray ba;
+    QDataStream ds(&ba, QIODevice::WriteOnly);
+    ds << QByteArray("SFST") << qint32(1);
+
+    ds << qint8(m_sortColumn) << qint8(m_sortOrder) << m_filterString;
+
+    ds << qint32(m_viewItems.size());
+    for (int i = 0; i < m_viewItems.size(); ++i)
+        ds << qint32(m_items.indexOf(m_viewItems.at(i)));
+
+    return ba;
+}
+
+bool Document::restoreSortFilterState(const QByteArray &ba)
+{
+    QDataStream ds(ba);
+    QByteArray tag;
+    qint32 version;
+    ds >> tag >> version;
+    if ((ds.status() != QDataStream::Ok) || (tag != "SFST") || (version != 1))
+        return false;
+    qint8 sortColumn, sortOrder;
+    QString filterString;
+    qint32 viewSize;
+
+    ds >> sortColumn >> sortOrder >> filterString >> viewSize;
+    if ((ds.status() != QDataStream::Ok) || (viewSize < 0) || (viewSize > m_items.size()))
+        return false;
+
+    BrickLink::InvItemList viewItems;
+    int itemsSize = m_items.size();
+    while (viewSize--) {
+        qint32 pos;
+        ds >> pos;
+        if ((pos < 0) || (pos >= itemsSize))
+            return false;
+        viewItems << m_items.at(pos);
+    }
+
+    if (ds.status() != QDataStream::Ok)
+        return false;
+
+    auto filterList = m_filterParser->parse(filterString);
+
+    sortFilterDirect(sortColumn, Qt::SortOrder(sortOrder), filterString, filterList, viewItems);
+    return true;
+}
+
 
 QString Document::filterToolTip() const
 {

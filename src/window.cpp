@@ -683,12 +683,28 @@ Window::Window(Document *doc, QWidget *parent)
     w_header->setSectionInternal(Document::QuantityOrig, true);
     w_header->setSectionInternal(Document::QuantityDiff, true);
 
-    on_view_column_layout_list_load("user-default");
+    bool columnsSet = false;
+    bool sortFilterSet = false;
 
     if (m_doc->hasGuiState()) {
-        parseGuiStateXML(m_doc->guiState());
+        applyGuiStateXML(m_doc->guiState(), columnsSet, sortFilterSet);
         m_doc->clearGuiState();
     }
+
+    if (!columnsSet) {
+        auto layout = Config::inst()->columnLayout("user-default");
+        if (!w_header->restoreLayout(layout)) {
+            resizeColumnsToDefault();
+            w_header->setSortIndicator(0, Qt::AscendingOrder);
+        }
+        columnsSet = true;
+    }
+    if (columnsSet && !sortFilterSet) {
+        // ugly hack for older files without sort order to prevent an unclean undo stack
+        m_doc->nextSortFilterIsDirect();
+        w_list->sortByColumn(w_header->sortIndicatorSection(), w_header->sortIndicatorOrder());
+    }
+
     updateDifferenceMode();
     setSimpleMode(Config::inst()->simpleMode());
 
@@ -1021,33 +1037,43 @@ QDomElement Window::createGuiStateXML()
     root.setAttribute("Version", version);
 
     auto cl = doc.createElement("ColumnLayout");
-    cl.appendChild(doc.createCDATASection(w_header->saveLayout().toBase64()));
+    cl.setAttribute("Compressed", 1);
+    cl.appendChild(doc.createCDATASection(qCompress(w_header->saveLayout()).toBase64()));
     root.appendChild(cl);
+
+    auto sf = doc.createElement("SortFilterState");
+    sf.setAttribute("Compressed", 1);
+    sf.appendChild(doc.createCDATASection(qCompress(m_doc->saveSortFilterState()).toBase64()));
+    root.appendChild(sf);
 
     return root.cloneNode(true).toElement();
 }
 
-bool Window::parseGuiStateXML(const QDomElement &root)
+void Window::applyGuiStateXML(const QDomElement &root, bool &changedColumns, bool &changedSortFilter)
 {
-    bool ok = true;
+    changedColumns = changedSortFilter = false;
 
     if ((root.nodeName() == "GuiState") &&
         (root.attribute("Application") == "BrickStore") &&
         (root.attribute("Version").toInt() == 2)) {
-        for (QDomNode n = root.firstChild(); !n.isNull(); n = n.nextSibling()) {
-            if (!n.isElement())
-                continue;
-            QString tag = n.toElement().tagName();
 
-            if (tag == "ColumnLayout") {
-                w_header->restoreLayout(QByteArray::fromBase64(n.toElement().text().toLatin1()));
-                w_list->sortByColumn(w_header->sortIndicatorSection(), w_header->sortIndicatorOrder());
-            }
+        auto cl = root.firstChildElement("ColumnLayout");
+        if (!cl.isNull()) {
+            auto ba = QByteArray::fromBase64(cl.text().toLatin1());
+            if (cl.attribute("Compressed").toInt() == 1)
+                ba = qUncompress(ba);
+            changedColumns = w_header->restoreLayout(ba);
+        }
+
+        auto sf = root.firstChildElement("SortFilterState");
+        if (!sf.isNull()) {
+            auto ba = QByteArray::fromBase64(sf.text().toLatin1());
+            if (sf.attribute("Compressed").toInt() == 1)
+                ba = qUncompress(ba);
+            changedSortFilter = m_doc->restoreSortFilterState(ba);
         }
     }
-    return ok;
 }
-
 
 void Window::on_edit_cut_triggered()
 {
@@ -2488,9 +2514,6 @@ void Window::resizeColumnsToDefault()
         if (width)
             w_header->resizeSection(i, width);
     }
-
-    // start with the physical document sort order
-    w_list->sortByColumn(-1, Qt::AscendingOrder);
 }
 
 void Window::updateSelection()
@@ -2613,11 +2636,12 @@ void Window::autosave() const
     QByteArray ba;
     QDataStream ds(&ba, QIODevice::WriteOnly);
     ds << QByteArray(autosaveMagic)
-       << qint32(3) // version
+       << qint32(4) // version
        << doc->title()
        << doc->fileName()
        << doc->currencyCode()
        << currentColumnLayout()
+       << doc->saveSortFilterState()
        << qint32(doc->items().count());
 
     for (auto item : items)
@@ -2650,13 +2674,14 @@ const QVector<Window *> Window::processAutosaves(AutosaveAction action)
             QString savedFileName;
             QString savedCurrencyCode;
             QByteArray savedColumnLayout;
+            QByteArray savedSortFilterState;
             qint32 count = 0;
 
             QDataStream ds(&f);
             ds >> magic >> version >> savedTitle >> savedFileName >> savedCurrencyCode
-                    >> savedColumnLayout >> count;
+                    >> savedColumnLayout >> savedSortFilterState >> count;
 
-            if ((count > 0) && (magic == QByteArray(autosaveMagic)) && (version == 3)) {
+            if ((count > 0) && (magic == QByteArray(autosaveMagic)) && (version == 4)) {
                 BrickLink::InvItemList items;
 
                 for (int i = 0; i < count; ++i) {
@@ -2680,8 +2705,7 @@ const QVector<Window *> Window::processAutosaves(AutosaveAction action)
                     }
                     auto win = new Window(doc);
                     win->w_header->restoreLayout(savedColumnLayout);
-                    win->w_list->sortByColumn(win->w_header->sortIndicatorSection(),
-                                              win->w_header->sortIndicatorOrder());
+                    doc->restoreSortFilterState(savedSortFilterState);
 
                     doc->setGuiStateModified(true); // not really the UI state
                     if (!savedFileName.isEmpty())

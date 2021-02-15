@@ -139,6 +139,8 @@ public:
     QString filter() const;
     void setFilter(const QString &filter);
 
+    void nextSortFilterIsDirect(); // hack for the Window c'tor ... find something better
+
     BrickLink::InvItemList sortItemList(const BrickLink::InvItemList &list) const;
 
     QString filterToolTip() const;
@@ -213,6 +215,9 @@ public:
 
     void activateDifferenceModeInternal(const QHash<const Item *, Item> &updateBase); // only for DocumentIO
 
+    QByteArray saveSortFilterState() const;
+    bool restoreSortFilterState(const QByteArray &ba);
+
 signals:
     void itemFlagsChanged(const Document::Item *);
     void statisticsChanged();
@@ -269,6 +274,7 @@ private:
 
     int m_sortColumn = -1;
     Qt::SortOrder m_sortOrder = Qt::AscendingOrder;
+    bool m_nextSortFilterIsDirect = false;
     QScopedPointer<Filter::Parser> m_filterParser;
     QString m_filterString;
     QVector<Filter> m_filterList;
