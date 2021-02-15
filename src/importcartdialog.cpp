@@ -14,15 +14,17 @@
 #include <QPushButton>
 #include <QHeaderView>
 #include <QAbstractTableModel>
+#include <QSortFilterProxyModel>
 #include <QStyledItemDelegate>
 #include <QPalette>
 #include <QVariant>
-#include <QCache>
+#include <QHash>
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QUrl>
 #include <QUrlQuery>
+#include <QShortcut>
 
 #if defined(MODELTEST)
 #  include <QAbstractItemModelTester>
@@ -40,6 +42,7 @@
 #include "framework.h"
 #include "documentio.h"
 #include "humanreadabletimedelta.h"
+#include "utility.h"
 
 #include "importcartdialog.h"
 
@@ -49,6 +52,7 @@ using namespace std::chrono_literals;
 
 enum {
     CartPointerRole = Qt::UserRole + 1,
+    CartFilterRole,
 };
 
 
@@ -60,10 +64,6 @@ public:
         : QAbstractTableModel(parent)
     {
         MODELTEST_ATTACH(this)
-
-        m_trans = new Transfer(this);
-        connect(m_trans, &Transfer::finished,
-                this, &CartModel::flagReceived);
     }
 
     ~CartModel() override
@@ -107,45 +107,47 @@ public:
 
         if (role == Qt::DisplayRole) {
             switch (col) {
-            case 0: return (cart->domestic())
+            case 0: return QLocale::system().toString(cart->lastUpdated(), QLocale::ShortFormat);
+            case 1: return (cart->domestic())
                         ? ImportCartDialog::tr("Domestic") : ImportCartDialog::tr("International");
-            case 1: return QLocale::system().toString(cart->lastUpdated(), QLocale::ShortFormat);
-            case 2: return QLocale::system().toString(cart->itemCount());
-            case 3: return QLocale::system().toString(cart->lotCount());
-            case 4: return QString(cart->storeName() % u" (" % cart->sellerName() % u")");
+            case 2: return QString(cart->storeName() % u" (" % cart->sellerName() % u")");
+            case 3: return QLocale::system().toString(cart->itemCount());
+            case 4: return QLocale::system().toString(cart->lotCount());
             case 5: return Currency::toString(cart->cartTotal(), cart->currencyCode(), 2);
             }
         } else if (role == Qt::DecorationRole) {
             switch (col) {
-            case 4:
-                QImage *flag = nullptr;
+            case 2: {
+                QIcon flag;
                 QString cc = cart->countryCode();
-                if (cc.length() == 2)
-                    flag = m_flags[cc];
-                if (!flag) {
-                    QString url = QString::fromLatin1("https://www.bricklink.com/images/flagsS/%1.gif").arg(cc);
-
-                    TransferJob *job = TransferJob::get(url);
-                    int userData = cc[0].unicode() | (cc[1].unicode() << 16);
-                    job->setUserData<void>(userData, nullptr);
-                    m_trans->retrieve(job);
+                flag = m_flags.value(cc);
+                if (flag.isNull()) {
+                    flag.addFile(":/assets/flags/" + cc, { }, QIcon::Normal);
+                    flag.addFile(":/assets/flags/" + cc, { }, QIcon::Selected);
+                    m_flags.insert(cc, flag);
                 }
-                if (flag)
-                    return *flag;
-                break;
+                return flag;
+            }
             }
         } else if (role == Qt::TextAlignmentRole) {
             return (col == 5) ? Qt::AlignRight : Qt::AlignLeft;
-        }
-        else if (role == Qt::BackgroundRole) {
-            if (col == 0) {
+        } else if (role == Qt::BackgroundRole) {
+            if (col == 1) {
                 QColor c(cart->domestic() ? Qt::green : Qt::blue);
-                c.setAlphaF(0.2);
+                c.setAlphaF(0.1);
                 return c;
             }
-        }
-        else if (role == CartPointerRole) {
+        } else if (role == CartPointerRole) {
             return QVariant::fromValue(cart);
+        } else if (role == CartFilterRole) {
+            switch (col) {
+            case  0: return cart->lastUpdated();
+            case  1: return cart->domestic() ? 1 : 0;
+            case  2: return cart->storeName();
+            case  3: return cart->itemCount();
+            case  4: return cart->lotCount();
+            case  5: return cart->cartTotal();
+            }
         }
 
         return { };
@@ -156,11 +158,11 @@ public:
         if (orient == Qt::Horizontal) {
             if (role == Qt::DisplayRole) {
                 switch (section) {
-                case  0: return ImportCartDialog::tr("Type");
-                case  1: return ImportCartDialog::tr("Last Update");
-                case  2: return ImportCartDialog::tr("Items");
-                case  3: return ImportCartDialog::tr("Lots");
-                case  4: return ImportCartDialog::tr("Seller");
+                case  0: return ImportCartDialog::tr("Last Update");
+                case  1: return ImportCartDialog::tr("Type");
+                case  2: return ImportCartDialog::tr("Seller");
+                case  3: return ImportCartDialog::tr("Items");
+                case  4: return ImportCartDialog::tr("Lots");
                 case  5: return ImportCartDialog::tr("Total");
                 }
             }
@@ -171,72 +173,32 @@ public:
         return { };
     }
 
-    void sort(int section, Qt::SortOrder so) override
-    {
-        emit layoutAboutToBeChanged();
-        m_sortSection = section;
-        m_sortOrder = so;
-
-        std::sort(m_carts.begin(), m_carts.end(), [section, so](const auto &cp1, const auto &cp2) {
-            int d = 0;
-
-            BrickLink::Cart *c1 = cp1;
-            BrickLink::Cart *c2 = cp2;
-
-            switch (section) {
-            case  0: d = int(c1->domestic()) - int(c2->domestic()); break;
-            case  1: d = c1->lastUpdated().daysTo(c2->lastUpdated()); break;
-            case  2: d = c1->itemCount() - c2->itemCount(); break;
-            case  3: d = c1->lotCount() - c2->lotCount(); break;
-            case  4: d = c1->storeName().compare(c2->storeName(), Qt::CaseInsensitive); break;
-            case  5: d = qFuzzyCompare(c1->cartTotal(), c2->cartTotal())
-                        ? 0
-                        : ((c1->cartTotal() < c2->cartTotal()) ? -1 : 1); break;
-            }
-
-            // this predicate needs to establish a strict weak cart:
-            // if you return true for (c1, c2), you are not allowed to also return true for (c2, c1)
-
-            if (d == 0)
-                return false;
-            else
-                return (so == Qt::AscendingOrder) ? (d < 0) : (d > 0);
-        });
-        emit layoutChanged();
-    }
-
-private slots:
-    void flagReceived(TransferJob *j)
-    {
-        if (!j || !j->data())
-            return;
-
-        QPair<int, void *> ud = j->userData<void>();
-        QString cc;
-        cc.append(QChar(ud.first & 0x0000ffff));
-        cc.append(QChar(ud.first >> 16));
-
-        auto *img = new QImage;
-        if (img->loadFromData(*j->data())) {
-            m_flags.insert(cc, img);
-
-            for (int r = 0; r < m_carts.size(); ++r) {
-                if (m_carts.at(r)->countryCode() == cc) {
-                    QModelIndex idx = index(r, 4, { });
-                    emit dataChanged(idx, idx);
-                }
-            }
-        } else {
-            delete img;
-        }
-    }
-
 private:
     QVector<BrickLink::Cart *> m_carts;
-    QCache<QString, QImage> m_flags;
-    Transfer *m_trans;
+    mutable QHash<QString, QIcon> m_flags;
     int m_sortSection = 0;
     Qt::SortOrder m_sortOrder = Qt::AscendingOrder;
+};
+
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+
+class CartDelegate : public QStyledItemDelegate
+{
+    Q_OBJECT
+public:
+    CartDelegate(QObject *parent = nullptr)
+        : QStyledItemDelegate(parent)
+    { }
+
+    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override
+    {
+        return QStyledItemDelegate::sizeHint(option, index)
+                + QSize { option.fontMetrics.height(), 0 };
+    }
 };
 
 
@@ -253,8 +215,21 @@ ImportCartDialog::ImportCartDialog(QWidget *parent)
 
     m_cartModel = new CartModel(this);
     w_carts->header()->setStretchLastSection(false);
-    w_carts->setModel(m_cartModel);
-    w_carts->header()->setSectionResizeMode(4, QHeaderView::Stretch);
+    auto proxyModel = new QSortFilterProxyModel(m_cartModel);
+    proxyModel->setSortCaseSensitivity(Qt::CaseInsensitive);
+    proxyModel->setSortLocaleAware(true);
+    proxyModel->setSortRole(CartFilterRole);
+    proxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    proxyModel->setFilterKeyColumn(-1);
+    proxyModel->setSourceModel(m_cartModel);
+    w_carts->setModel(proxyModel);
+    w_carts->header()->setSectionResizeMode(2, QHeaderView::Stretch);
+    w_carts->setItemDelegate(new CartDelegate(w_carts));
+
+    connect(w_filter, &HistoryLineEdit::textChanged,
+            proxyModel, &QSortFilterProxyModel::setFilterFixedString);
+    connect(new QShortcut(QKeySequence::Find, this), &QShortcut::activated,
+            this, [this]() { w_filter->setFocus(); });
 
     w_import = new QPushButton();
     w_import->setDefault(true);
@@ -290,11 +265,17 @@ ImportCartDialog::ImportCartDialog(QWidget *parent)
             .toByteArray();
     if (!ba.isEmpty())
         restoreGeometry(ba);
+    ba = Config::inst()->value(QLatin1String("/MainWindow/ImportCartDialog/Filter")).toByteArray();
+    if (!ba.isEmpty())
+        w_filter->restoreState(ba);
+
+    setFocusProxy(w_filter);
 }
 
 ImportCartDialog::~ImportCartDialog()
 {
     Config::inst()->setValue("/MainWindow/ImportCartDialog/Geometry", saveGeometry());
+    Config::inst()->setValue("/MainWindow/ImportCartDialog/Filter", w_filter->saveState());
 }
 
 void ImportCartDialog::changeEvent(QEvent *e)
@@ -309,6 +290,8 @@ void ImportCartDialog::languageChange()
     retranslateUi(this);
 
     w_import->setText(tr("Import"));
+    w_filter->setToolTip(Utility::toolTipLabel(tr("Filter the list for lines containing these words"),
+                                               QKeySequence::Find, w_filter->instructionToolTip()));
 }
 
 void ImportCartDialog::login()

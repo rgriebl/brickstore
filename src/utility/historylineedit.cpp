@@ -104,6 +104,10 @@ void HistoryView::mousePressEvent(QMouseEvent *me)
 ///////////////////////////////////////////////////////////////////////
 
 
+HistoryLineEdit::HistoryLineEdit(QWidget *parent)
+    : HistoryLineEdit(10, parent)
+{ }
+
 HistoryLineEdit::HistoryLineEdit(int maximumHistorySize, QWidget *parent)
     : QLineEdit(parent)
     , m_deleteIcon(QIcon::fromTheme("window-close"))

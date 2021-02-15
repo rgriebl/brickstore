@@ -17,10 +17,11 @@
 #include <QStyledItemDelegate>
 #include <QPalette>
 #include <QVariant>
-#include <QCache>
+#include <QHash>
 #include <QBuffer>
 #include <QUrl>
 #include <QUrlQuery>
+#include <QShortcut>
 
 #if defined(MODELTEST)
 #  include <QAbstractItemModelTester>
@@ -38,6 +39,7 @@
 #include "framework.h"
 #include "documentio.h"
 #include "humanreadabletimedelta.h"
+#include "utility.h"
 
 #include "importorderdialog.h"
 
@@ -47,6 +49,7 @@ using namespace std::chrono_literals;
 
 enum {
     OrderPointerRole = Qt::UserRole + 1,
+    OrderFilterRole,
 };
 
 
@@ -67,10 +70,6 @@ public:
         : QAbstractTableModel(parent)
     {
         MODELTEST_ATTACH(this)
-
-        m_trans = new Transfer(this);
-        connect(m_trans, &Transfer::finished,
-                this, &OrderModel::flagReceived);
     }
 
     ~OrderModel() override
@@ -121,13 +120,11 @@ public:
 
         if (role == Qt::DisplayRole) {
             switch (col) {
-            case 0: return (order->type() == BrickLink::OrderType::Received)
+            case 0: return QLocale::system().toString(order->date(), QLocale::ShortFormat);
+            case 1: return (order->type() == BrickLink::OrderType::Received)
                         ? ImportOrderDialog::tr("Received") : ImportOrderDialog::tr("Placed");
-            case 1: return order->id();
-            case 2: return QLocale::system().toString(order->date(), QLocale::ShortFormat);
-            case 3: return QLocale::system().toString(order->itemCount());
-            case 4: return QLocale::system().toString(order->lotCount());
-            case 5: {
+            case 2: return order->id();
+            case 3: {
                 int firstline = order->address().indexOf('\n');
                 if (firstline > 0) {
                     return QString::fromLatin1("%2 (%1)")
@@ -135,46 +132,50 @@ public:
                 }
                 return order->otherParty();
             }
+            case 4: return QLocale::system().toString(order->itemCount());
+            case 5: return QLocale::system().toString(order->lotCount());
             case 6: return Currency::toString(order->grandTotal(), order->currencyCode(), 2);
             }
         } else if (role == Qt::DecorationRole) {
             switch (col) {
-            case 5:
-                QImage *flag = nullptr;
+            case 3: {
+                QIcon flag;
                 QString cc = order->countryCode();
-                if (cc.length() == 2)
-                    flag = m_flags[cc];
-                if (!flag) {
-                    QString url = QString::fromLatin1("https://www.bricklink.com/images/flagsS/%1.gif").arg(cc);
-
-                    TransferJob *job = TransferJob::get(url);
-                    int userData = cc[0].unicode() | (cc[1].unicode() << 16);
-                    job->setUserData<void>(userData, nullptr);
-                    m_trans->retrieve(job);
+                flag = m_flags.value(cc);
+                if (flag.isNull()) {
+                    flag.addFile(":/assets/flags/" + cc, { }, QIcon::Normal);
+                    flag.addFile(":/assets/flags/" + cc, { }, QIcon::Selected);
+                    m_flags.insert(cc, flag);
                 }
-                if (flag)
-                    return *flag;
-                break;
+                return flag;
+            }
             }
         } else if (role == Qt::TextAlignmentRole) {
             return (col == 6) ? Qt::AlignRight : Qt::AlignLeft;
-        }
-        else if (role == Qt::BackgroundRole) {
-            if (col == 0) {
+        } else if (role == Qt::BackgroundRole) {
+            if (col == 1) {
                 QColor c((order->type() == BrickLink::OrderType::Received) ? Qt::green : Qt::blue);
-                c.setAlphaF(0.2);
+                c.setAlphaF(0.1);
                 return c;
             }
-        }
-        else if (role == Qt::ToolTipRole) {
+        } else if (role == Qt::ToolTipRole) {
             QString tt = data(index, Qt::DisplayRole).toString();
 
             if (!order->address().isEmpty())
                 tt = tt + QLatin1String("\n\n") + order->address();
             return tt;
-        }
-        else if (role == OrderPointerRole) {
+        } else if (role == OrderPointerRole) {
             return QVariant::fromValue(order);
+        } else if (role == OrderFilterRole) {
+            switch (col) {
+            case  0: return order->date();
+            case  1: return int(order->type());
+            case  2: return order->id();
+            case  3: return order->otherParty();
+            case  4: return order->itemCount();
+            case  5: return order->lotCount();
+            case  6: return order->grandTotal();
+            }
         }
 
         return { };
@@ -185,12 +186,12 @@ public:
         if (orient == Qt::Horizontal) {
             if (role == Qt::DisplayRole) {
                 switch (section) {
-                case  0: return ImportOrderDialog::tr("Type");
-                case  1: return ImportOrderDialog::tr("Order #");
-                case  2: return ImportOrderDialog::tr("Date");
-                case  3: return ImportOrderDialog::tr("Items");
-                case  4: return ImportOrderDialog::tr("Lots");
-                case  5: return ImportOrderDialog::tr("Buyer/Seller");
+                case  0: return ImportOrderDialog::tr("Date");
+                case  1: return ImportOrderDialog::tr("Type");
+                case  2: return ImportOrderDialog::tr("Order ID");
+                case  3: return ImportOrderDialog::tr("Buyer/Seller");
+                case  4: return ImportOrderDialog::tr("Items");
+                case  5: return ImportOrderDialog::tr("Lots");
                 case  6: return ImportOrderDialog::tr("Total");
                 }
             }
@@ -201,120 +202,31 @@ public:
         return { };
     }
 
-    void sort(int section, Qt::SortOrder so) override
-    {
-        emit layoutAboutToBeChanged();
-        m_sortSection = section;
-        m_sortOrder = so;
-
-        std::sort(m_orders.begin(), m_orders.end(), [section, so](const auto &op1, const auto &op2) {
-            int d = 0;
-
-            BrickLink::Order *o1 = op1;
-            BrickLink::Order *o2 = op2;
-
-            switch (section) {
-            case  0: d = int(o1->type()) - int(o2->type()); break;
-            case  1: d = o1->id().compare(o2->id()); break;
-            case  2: d = o1->date().daysTo(o2->date()); break;
-            case  3: d = o1->itemCount() - o2->itemCount(); break;
-            case  4: d = o1->lotCount() - o2->lotCount(); break;
-            case  5: d = o1->otherParty().compare(o2->otherParty(), Qt::CaseInsensitive); break;
-            case  6: d = qFuzzyCompare(o1->grandTotal(), o2->grandTotal())
-                        ? 0
-                        : ((o1->grandTotal() < o2->grandTotal()) ? -1 : 1); break;
-            }
-
-            // this predicate needs to establish a strict weak order:
-            // if you return true for (o1, o2), you are not allowed to also return true for (o2, o1)
-
-            if (d == 0)
-                return false;
-            else
-                return (so == Qt::DescendingOrder) ? (d > 0) : (d < 0);
-        });
-        emit layoutChanged();
-    }
-
-private slots:
-    void flagReceived(TransferJob *j)
-    {
-        if (!j || !j->data())
-            return;
-
-        QPair<int, void *> ud = j->userData<void>();
-        QString cc;
-        cc.append(QChar(ud.first & 0x0000ffff));
-        cc.append(QChar(ud.first >> 16));
-
-        auto *img = new QImage;
-        if (img->loadFromData(*j->data())) {
-            m_flags.insert(cc, img);
-
-            for (int r = 0; r < m_orders.size(); ++r) {
-                if (m_orders.at(r)->countryCode() == cc) {
-                    QModelIndex idx = index(r, 5, { });
-                    emit dataChanged(idx, idx);
-                }
-            }
-        } else {
-            delete img;
-        }
-    }
-
 private:
     QVector<BrickLink::Order *> m_orders;
-    QCache<QString, QImage> m_flags;
-    Transfer *m_trans;
+    mutable QHash<QString, QIcon> m_flags;
     int m_sortSection = 0;
     Qt::SortOrder m_sortOrder = Qt::AscendingOrder;
 };
 
 
-class TransHighlightDelegate : public QStyledItemDelegate
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+
+class OrderDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
 public:
-    TransHighlightDelegate(QObject *parent = nullptr)
+    OrderDelegate(QObject *parent = nullptr)
         : QStyledItemDelegate(parent)
     { }
 
-    void makeTrans(QPalette &pal, QPalette::ColorGroup cg, QPalette::ColorRole cr, const QColor &bg, qreal factor) const
-    {
-        QColor hl = pal.color(cg, cr);
-        QColor th;
-        th.setRgbF(hl.redF()   * (1.0 - factor) + bg.redF()   * factor,
-                   hl.greenF() * (1.0 - factor) + bg.greenF() * factor,
-                   hl.blueF()  * (1.0 - factor) + bg.blueF()  * factor);
-
-        pal.setColor(cg, cr, th);
-    }
-
-    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override
-    {
-        if (option.state & QStyle::State_Selected) {
-            QVariant v = index.data(Qt::BackgroundRole);
-            QColor c = qvariant_cast<QColor> (v);
-            if (v.isValid() && c.isValid()) {
-                QStyleOptionViewItem myoption(option);
-
-                makeTrans(myoption.palette, QPalette::Active,   QPalette::Highlight, c, 0.2);
-                makeTrans(myoption.palette, QPalette::Inactive, QPalette::Highlight, c, 0.2);
-                makeTrans(myoption.palette, QPalette::Disabled, QPalette::Highlight, c, 0.2);
-
-                QStyledItemDelegate::paint(painter, myoption, index);
-                return;
-            }
-        }
-
-        QStyledItemDelegate::paint(painter, option, index);
-    }
-
     QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override
     {
-        auto s = QStyledItemDelegate::sizeHint(option, index);
-        s.rwidth() += option.fontMetrics.height() * 1;
-        return s;
+        return QStyledItemDelegate::sizeHint(option, index)
+                + QSize { option.fontMetrics.height(), 0 };
     }
 };
 
@@ -332,9 +244,21 @@ ImportOrderDialog::ImportOrderDialog(QWidget *parent)
 
     m_orderModel = new OrderModel(this);
     w_orders->header()->setStretchLastSection(false);
-    w_orders->setModel(m_orderModel);
-    w_orders->header()->setSectionResizeMode(5, QHeaderView::Stretch);
-    w_orders->setItemDelegate(new TransHighlightDelegate(this));
+    auto proxyModel = new QSortFilterProxyModel(m_orderModel);
+    proxyModel->setSortCaseSensitivity(Qt::CaseInsensitive);
+    proxyModel->setSortLocaleAware(true);
+    proxyModel->setSortRole(OrderFilterRole);
+    proxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    proxyModel->setFilterKeyColumn(-1);
+    proxyModel->setSourceModel(m_orderModel);
+    w_orders->setModel(proxyModel);
+    w_orders->header()->setSectionResizeMode(3, QHeaderView::Stretch);
+    w_orders->setItemDelegate(new OrderDelegate(w_orders));
+
+    connect(w_filter, &HistoryLineEdit::textChanged,
+            proxyModel, &QSortFilterProxyModel::setFilterFixedString);
+    connect(new QShortcut(QKeySequence::Find, this), &QShortcut::activated,
+            this, [this]() { w_filter->setFocus(); });
 
     w_import = new QPushButton();
     w_import->setDefault(true);
@@ -373,12 +297,18 @@ ImportOrderDialog::ImportOrderDialog(QWidget *parent)
     int daysBack = Config::inst()->value("/MainWindow/ImportOrderDialog/DaysBack", -1).toInt();
     if (daysBack > 0)
         w_daysBack->setValue(daysBack);
+    ba = Config::inst()->value(QLatin1String("/MainWindow/ImportOrderDialog/Filter")).toByteArray();
+    if (!ba.isEmpty())
+        w_filter->restoreState(ba);
+
+    setFocusProxy(w_filter);
 }
 
 ImportOrderDialog::~ImportOrderDialog()
 {
     Config::inst()->setValue("/MainWindow/ImportOrderDialog/Geometry", saveGeometry());
     Config::inst()->setValue("/MainWindow/ImportOrderDialog/DaysBack", w_daysBack->value());
+    Config::inst()->setValue("/MainWindow/ImportOrderDialog/Filter", w_filter->saveState());
 }
 
 void ImportOrderDialog::changeEvent(QEvent *e)
@@ -393,6 +323,8 @@ void ImportOrderDialog::languageChange()
     retranslateUi(this);
 
     w_import->setText(tr("Import"));
+    w_filter->setToolTip(Utility::toolTipLabel(tr("Filter the list for lines containing these words"),
+                                               QKeySequence::Find, w_filter->instructionToolTip()));
 }
 
 void ImportOrderDialog::updateOrders()

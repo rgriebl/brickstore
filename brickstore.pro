@@ -85,7 +85,7 @@ for(l, LANGUAGES) {
 qt_translations.base = $$[QT_INSTALL_TRANSLATIONS]
 qt_translations.prefix = i18n
 
-RESOURCES = brickstore.qrc qt_translations assets/icons
+RESOURCES = brickstore.qrc qt_translations assets/icons assets/flags
 
 backend-only:DEFINES *= BRICKSTORE_BACKEND_ONLY
 

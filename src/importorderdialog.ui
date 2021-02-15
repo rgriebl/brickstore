@@ -20,9 +20,38 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
+      <widget class="HistoryLineEdit" name="w_filter">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>1</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="placeholderText">
+        <string>Filter</string>
+       </property>
+       <property name="clearButtonEnabled">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>11</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>Synchronize the orders of the last </string>
+        <string>Synchronize the orders of the last</string>
        </property>
       </widget>
      </item>
@@ -56,7 +85,7 @@
        </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>40</width>
+         <width>11</width>
          <height>20</height>
         </size>
        </property>
@@ -150,6 +179,19 @@
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>HistoryLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>historylineedit.h</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>w_filter</tabstop>
+  <tabstop>w_daysBack</tabstop>
+  <tabstop>w_update</tabstop>
+  <tabstop>w_orders</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

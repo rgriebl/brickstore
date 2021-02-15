@@ -26,6 +26,7 @@ class HistoryLineEdit : public QLineEdit
     Q_OBJECT
 
 public:
+    HistoryLineEdit(QWidget *parent = nullptr);
     HistoryLineEdit(int maximumHistorySize, QWidget *parent = nullptr);
 
     bool isInFavoritesMode() const;
