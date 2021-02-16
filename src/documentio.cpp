@@ -72,7 +72,9 @@ Document *DocumentIO::open(const QString &s)
 }
 
 Document *DocumentIO::importBrickLinkInventory(const BrickLink::Item *item, int quantity,
-                                               BrickLink::Condition condition)
+                                               BrickLink::Condition condition,
+                                               BrickLink::Status extraParts,
+                                               bool includeInstructions)
 {
     if (item && !item->hasInventory())
         return nullptr;
@@ -84,6 +86,17 @@ Document *DocumentIO::importBrickLinkInventory(const BrickLink::Item *item, int 
             for (BrickLink::InvItem *item : items) {
                 item->setQuantity(item->quantity() * quantity);
                 item->setCondition(condition);
+
+                if (item->status() == BrickLink::Status::Extra)
+                    item->setStatus(extraParts);
+            }
+            if (includeInstructions) {
+                if (const auto *instructions = BrickLink::core()->item('I', item->id())) {
+                    auto *ii =  new BrickLink::InvItem(BrickLink::core()->color(0), instructions);
+                    ii->setQuantity(quantity);
+                    ii->setCondition(condition);
+                    items << ii;
+                }
             }
 
             auto *doc = new Document(items); // Document own the items now

@@ -29,6 +29,8 @@ public:
     const BrickLink::Item *item() const;
     int quantity() const;
     BrickLink::Condition condition() const;
+    BrickLink::Status extraParts() const;
+    bool includeInstructions() const;
 
 protected:
     void showEvent(QShowEvent *) override;

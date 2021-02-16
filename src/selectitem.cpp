@@ -412,12 +412,12 @@ void SelectItem::init()
             this, &SelectItem::applyFilter);
 
     connect(d->w_item_types, QOverload<int>::of(&QComboBox::currentIndexChanged),
-            this, &SelectItem::itemTypeChanged);
+            this, &SelectItem::itemTypeUpdated);
     connect(d->w_categories->selectionModel(), &QItemSelectionModel::selectionChanged,
-            this, &SelectItem::categoryChanged);
+            this, &SelectItem::categoryUpdated);
 
     connect(d->w_items->selectionModel(), &QItemSelectionModel::selectionChanged,
-            this, &SelectItem::itemChanged);
+            this, &SelectItem::itemUpdated);
     connect(d->w_items, &QAbstractItemView::doubleClicked,
             this, &SelectItem::itemConfirmed);
     connect(d->w_itemthumbs, &QAbstractItemView::doubleClicked,
@@ -592,7 +592,7 @@ void SelectItem::setExcludeWithoutInventoryFilter(bool b)
     }
 }
 
-void SelectItem::itemTypeChanged()
+void SelectItem::itemTypeUpdated()
 {
     const BrickLink::ItemType *itemtype = currentItemType();
 
@@ -609,6 +609,7 @@ void SelectItem::itemTypeChanged()
 
     d->w_itemthumbs->resizeColumnToContents(0);
 
+    emit currentItemTypeChanged(itemtype);
     emit hasColors(itemtype ? itemtype->hasColors() : false);
     emit hasSubConditions(itemtype ? itemtype->hasSubConditions() : false);
 }
@@ -631,7 +632,7 @@ bool SelectItem::setCurrentItemType(const BrickLink::ItemType *it)
 }
 
 
-void SelectItem::categoryChanged()
+void SelectItem::categoryUpdated()
 {
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     const BrickLink::Item *oldItem = currentItem();
@@ -814,7 +815,7 @@ void SelectItem::setViewMode(int mode)
 }
 
 
-void SelectItem::itemChanged()
+void SelectItem::itemUpdated()
 {
     emit itemSelected(currentItem(), false);
 }

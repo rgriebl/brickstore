@@ -57,11 +57,12 @@ signals:
     void hasSubConditions(bool);
     void itemSelected(const BrickLink::Item *, bool confirmed);
     void showInColor(const BrickLink::Color *color);
+    void currentItemTypeChanged(const BrickLink::ItemType *itemType);
 
 public slots:
-    void itemTypeChanged();
-    void categoryChanged();
-    void itemChanged();
+    void itemTypeUpdated();
+    void categoryUpdated();
+    void itemUpdated();
 
     void itemConfirmed();
 

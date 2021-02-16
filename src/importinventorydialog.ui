@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1310</width>
-    <height>653</height>
+    <width>1166</width>
+    <height>741</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,7 +16,7 @@
   <property name="sizeGripEnabled">
    <bool>true</bool>
   </property>
-  <layout class="QVBoxLayout">
+  <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="SelectItem" name="w_select" native="true">
      <property name="sizePolicy">
@@ -34,12 +34,9 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout">
-     <property name="spacing">
-      <number>9</number>
-     </property>
-     <item>
-      <widget class="QLabel" name="label">
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <item alignment="Qt::AlignVCenter">
+      <widget class="QLabel" name="label_7">
        <property name="text">
         <string>&amp;Quantity:</string>
        </property>
@@ -51,7 +48,7 @@
        </property>
       </widget>
      </item>
-     <item>
+     <item alignment="Qt::AlignVCenter">
       <widget class="QSpinBox" name="w_qty">
        <property name="buttonSymbols">
         <enum>QAbstractSpinBox::PlusMinus</enum>
@@ -68,7 +65,7 @@
       </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer">
+      <spacer name="horizontalSpacer_2">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -77,20 +74,23 @@
        </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>9</width>
-         <height>1</height>
+         <width>11</width>
+         <height>20</height>
         </size>
        </property>
       </spacer>
      </item>
-     <item>
-      <widget class="QLabel" name="label_2">
+     <item alignment="Qt::AlignVCenter">
+      <widget class="QLabel" name="label_6">
        <property name="text">
         <string>Condition:</string>
        </property>
+       <property name="buddy">
+        <cstring>w_condition_new</cstring>
+       </property>
       </widget>
      </item>
-     <item>
+     <item alignment="Qt::AlignVCenter">
       <widget class="QRadioButton" name="w_condition_new">
        <property name="text">
         <string>&amp;New</string>
@@ -100,7 +100,7 @@
        </property>
       </widget>
      </item>
-     <item>
+     <item alignment="Qt::AlignVCenter">
       <widget class="QRadioButton" name="w_condition_used">
        <property name="text">
         <string>&amp;Used</string>
@@ -108,13 +108,96 @@
       </widget>
      </item>
      <item>
-      <spacer>
+      <spacer name="horizontalSpacer_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>11</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item alignment="Qt::AlignVCenter">
+      <widget class="QLabel" name="label_8">
+       <property name="text">
+        <string>E&amp;xtra parts</string>
+       </property>
+       <property name="buddy">
+        <cstring>w_extra</cstring>
+       </property>
+      </widget>
+     </item>
+     <item alignment="Qt::AlignVCenter">
+      <widget class="QComboBox" name="w_extra">
+       <property name="currentIndex">
+        <number>2</number>
+       </property>
+       <item>
+        <property name="text">
+         <string>Include</string>
+        </property>
+        <property name="icon">
+         <iconset theme="vcs-normal">
+          <normaloff>.</normaloff>.</iconset>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Exclude</string>
+        </property>
+        <property name="icon">
+         <iconset theme="vcs-removed">
+          <normaloff>.</normaloff>.</iconset>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Extra</string>
+        </property>
+        <property name="icon">
+         <iconset theme="vcs-added">
+          <normaloff>.</normaloff>.</iconset>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_4">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>11</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item alignment="Qt::AlignVCenter">
+      <widget class="QCheckBox" name="w_instructions">
+       <property name="text">
+        <string>&amp;Include instructions</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>40</width>
+         <width>412</width>
          <height>20</height>
         </size>
        </property>
@@ -139,11 +222,6 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <tabstops>
-  <tabstop>w_qty</tabstop>
-  <tabstop>w_condition_new</tabstop>
-  <tabstop>w_condition_used</tabstop>
- </tabstops>
  <resources/>
  <connections>
   <connection>

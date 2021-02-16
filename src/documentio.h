@@ -33,7 +33,9 @@ public:
     static Document *open(const QString &name);
     static Document *importBrickLinkInventory(const BrickLink::Item *preselect = nullptr,
                                               int quantity = 1,
-                                              BrickLink::Condition condition = BrickLink::Condition::New);
+                                              BrickLink::Condition condition = BrickLink::Condition::New,
+                                              BrickLink::Status extraParts = BrickLink::Status::Extra,
+                                              bool includeInstructions = false);
     static Document *importBrickLinkOrder(BrickLink::Order *order, const QByteArray &orderXml);
     static Document *importBrickLinkStore();
     static Document *importBrickLinkCart(BrickLink::Cart *cart, const BrickLink::InvItemList &itemlist);

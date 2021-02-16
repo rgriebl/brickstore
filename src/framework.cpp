@@ -1260,6 +1260,9 @@ void FrameWork::openDocument(const QString &file)
 void FrameWork::fileImportBrickLinkInventory(const BrickLink::Item *item, int quantity,
                                              BrickLink::Condition condition)
 {
+    bool instructions = false;
+    BrickLink::Status extraParts = BrickLink::Status::Extra;
+
     if (!item) {
         if (!m_importinventory_dialog)
             m_importinventory_dialog = new ImportInventoryDialog(this);
@@ -1268,10 +1271,13 @@ void FrameWork::fileImportBrickLinkInventory(const BrickLink::Item *item, int qu
             item = m_importinventory_dialog->item();
             quantity = m_importinventory_dialog->quantity();
             condition = m_importinventory_dialog->condition();
+            instructions = m_importinventory_dialog->includeInstructions();
+            extraParts = m_importinventory_dialog->extraParts();
         }
     }
 
-    createWindow(DocumentIO::importBrickLinkInventory(item, quantity, condition));
+    createWindow(DocumentIO::importBrickLinkInventory(item, quantity, condition, extraParts,
+                                                      instructions));
 }
 
 bool FrameWork::checkBrickLinkLogin()

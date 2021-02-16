@@ -32,6 +32,10 @@ ImportInventoryDialog::ImportInventoryDialog(QWidget *parent)
     w_select->setExcludeWithoutInventoryFilter(true);
     connect(w_select, &SelectItem::itemSelected,
             this, &ImportInventoryDialog::checkItem);
+    connect(w_select, &SelectItem::currentItemTypeChanged,
+            this, [this](const BrickLink::ItemType *itt) {
+        w_instructions->setVisible(itt && (itt->id() == 'S'));
+    });
     w_buttons->button(QDialogButtonBox::Ok)->setEnabled(false);
 
     QByteArray ba = Config::inst()->value(QLatin1String("/MainWindow/ImportInventoryDialog/Geometry")).toByteArray();
@@ -70,6 +74,7 @@ ImportInventoryDialog::ImportInventoryDialog(QWidget *parent)
                 QDesktopServices::openUrl(BrickLink::core()->url(BrickLink::URL_LotsForSale, item));
         });
     }
+    checkItem(nullptr, false);
 }
 
 ImportInventoryDialog::~ImportInventoryDialog()
@@ -99,6 +104,18 @@ BrickLink::Condition ImportInventoryDialog::condition() const
     return w_condition_used->isChecked() ? BrickLink::Condition::Used : BrickLink::Condition::New;
 }
 
+BrickLink::Status ImportInventoryDialog::extraParts() const
+{
+    return static_cast<BrickLink::Status>(w_extra->currentIndex());
+}
+
+bool ImportInventoryDialog::includeInstructions() const
+{
+    return !w_instructions->isHidden()
+            && w_instructions->isEnabled()
+            && w_instructions->isChecked();
+}
+
 void ImportInventoryDialog::showEvent(QShowEvent *e)
 {
     QDialog::showEvent(e);
@@ -116,9 +133,11 @@ QByteArray ImportInventoryDialog::saveState() const
 {
     QByteArray ba;
     QDataStream ds(&ba, QIODevice::WriteOnly);
-    ds << QByteArray("II") << qint32(1)
+    ds << QByteArray("II") << qint32(2)
        << w_condition_new->isChecked()
-       << w_qty->value();
+       << qint32(w_qty->value())
+       << qint32(w_extra->currentIndex())
+       << w_instructions->isChecked();
     return ba;
 }
 
@@ -128,11 +147,11 @@ bool ImportInventoryDialog::restoreState(const QByteArray &ba)
     QByteArray tag;
     qint32 version;
     ds >> tag >> version;
-    if ((ds.status() != QDataStream::Ok) || (tag != "II") || (version != 1))
+    if ((ds.status() != QDataStream::Ok) || (tag != "II") || (version < 1) || (version > 2))
         return false;
 
     bool isNew;
-    int qty;
+    qint32 qty;
 
     ds >> isNew >> qty;
 
@@ -142,16 +161,33 @@ bool ImportInventoryDialog::restoreState(const QByteArray &ba)
     w_condition_new->setChecked(isNew);
     w_condition_used->setChecked(!isNew);
     w_qty->setValue(qty);
+
+    if (version >= 2) {
+        qint32 extras;
+        bool instructions;
+
+        ds >> extras >> instructions;
+
+        if (ds.status() != QDataStream::Ok)
+            return false;
+
+        w_instructions->setChecked(instructions);
+        w_extra->setCurrentIndex(extras);
+    }
+
     return true;
 }
 
 void ImportInventoryDialog::checkItem(const BrickLink::Item *it, bool ok)
 {
-    bool b = (it) && (w_select->hasExcludeWithoutInventoryFilter() ? it->hasInventory() : true);
+    w_buttons->button(QDialogButtonBox::Ok)->setEnabled((it));
 
-    w_buttons->button(QDialogButtonBox::Ok)->setEnabled(b);
+    if (it && it->itemType() && (it->itemType()->id() == 'S')) {
+        bool hasInstructions = (BrickLink::core()->item('I', it->id()));
+        w_instructions->setEnabled(hasInstructions);
+    }
 
-    if (b && ok)
+    if ((it) && ok)
         w_buttons->button(QDialogButtonBox::Ok)->animateClick();
 }
 
