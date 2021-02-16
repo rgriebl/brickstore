@@ -3,6 +3,28 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2021.2.1] - 2021-02-17
+### Improvements
+- Complete overhaul of BrickLink cart and order importing.
+- Sorting and filtering are undoable operations now just like in Excel. Also both are really 
+  one-time actions now: adding or removing items will not dynamically re-apply the sorting and
+  filtering. There's reapply button to do it manually when you want to have the list resorted.
+
+### Added
+- BrickLink Mass **Update** works on all supported fields now. The document you want to export has
+  to be in **Difference Mode**, but this is activated automatically when importing your store
+  inventory.
+- Clicking the **Error** label (or pressing `F6`) will jump to the next field that has erroneous 
+  input.
+- The filter in the add-item and import-set dialogs gained even more functionality: have a look at
+  the tool-tip label to learn about it.
+- Right-clicking on Minifigs gives you the option to quickly and easily filter for similar body
+  parts, head gear, etc.
+- Added support for finding parts using part-color-codes (element numbers) in the add-item dialog.
+
+### Fixed
+A lot.
+
 ## [2021.2.0] - 2021-02-07
 ### Improvements
 - Operations on a lot of rows at once have been sped up by several orders of magnitude.
@@ -153,7 +175,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
   are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.2.0...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2021.2.1...HEAD
+[2021.2.1]: https://github.com/rgriebl/brickstore/releases/tag/v2021.2.1
 [2021.2.0]: https://github.com/rgriebl/brickstore/releases/tag/v2021.2.0
 [2021.1.7]: https://github.com/rgriebl/brickstore/releases/tag/v2021.1.7
 [2021.1.6]: https://github.com/rgriebl/brickstore/releases/tag/v2021.1.6
